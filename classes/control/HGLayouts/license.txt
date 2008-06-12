@@ -1,0 +1,31 @@
+----------------------------------------------------------------------------
+Handle Graphics Layout Engine License File
+----------------------------------------------------------------------------
+
+Definitions :
+
+* The Package - All files contained within the directory heirarchy defined
+  by the directory in which this license file resides and all subdirectories of it.
+
+* Brad Phelan - The original author of these works
+
+----------------------------------------------------------------------------
+
+The code contained in this directory is Copyright 2005 Brad Phelan. You may
+modify, enhance or create derivatives of the programs in this package as long
+as you follow these conditions.
+
+1. You notify Brad Phelan ( bradphelan@xtargets.com ) of the changes you make
+   to the package.
+2. If you distribute the package in an original, modified or
+   derived form then you must include this license file with your distribution. 
+
+The package is supplied as is and no warranty to its use is
+implied. Brad Phelan is not responsible for the use or
+misuse of the package.
+
+Brad Phelan
+bradphelan@xtargets.com
+http://xtargets.com
+
+

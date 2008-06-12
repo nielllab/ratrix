@@ -1,0 +1,13 @@
+/subject.m -text
+/setProtocolAndStep.m -text
+/setStepNum.m -text
+/changeProtocolStep.m -text
+/display.m -text
+/doTrial.m -text
+/decache.m -text
+/getProtocolVersion.m -text
+/getBirthDate.m -text
+/getLitterID.m -text
+/getID.m -text
+/getProtocolAndStep.m -text
+/getAcquisitionDate.m -text

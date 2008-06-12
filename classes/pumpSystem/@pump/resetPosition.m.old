@@ -1,0 +1,2 @@
+[durs t p]=resetPosition(p)
+fprintf('reseting position\n')

@@ -1,0 +1,2 @@
+function id = rnetcommandident(varargin)
+

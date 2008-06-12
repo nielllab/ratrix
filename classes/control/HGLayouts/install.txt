@@ -1,0 +1,16 @@
+Installation
+------------
+
+Add the directory in which this file resides to your matlab path. Then type
+
+help xtargets_borderlayout
+help xtargets_springgridlayout
+
+or run the demos
+
+test_borderlayout
+test_springlayout
+
+Brad Phelan
+http://xtargets.com
+

@@ -1,0 +1,2 @@
+%function fillRez(z,valveState)
+%lptwritebit(z.parallelPortAddress,z.fillRezValveBit,valveState);

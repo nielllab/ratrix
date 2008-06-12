@@ -1,0 +1,2 @@
+checkForUpdate('client');
+%quit();

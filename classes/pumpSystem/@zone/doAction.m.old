@@ -1,0 +1,7 @@
+%function [durs pump] = doAction(z,action,valve,pump,vol)
+%     lptwritebit(z.parallelPortAddress,valve,z.const.valveOn);
+%     WaitSecs(z.valveDelay);
+%     [durs t pump]=doAction(pump,vol,action);
+%     %WaitSecs(z.equalizeDelay);
+%     lptwritebit(z.parallelPortAddress,valve,z.const.valveOff);
+%     WaitSecs(z.valveDelay);

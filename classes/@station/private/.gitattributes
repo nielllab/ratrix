@@ -1,0 +1,9 @@
+/lptread.c -text
+/lptread.mexw32 -text
+/lptwrite.c -text
+/portTest.m -text
+/pt_ioctl.c -text
+/getLPT1addr.mexw32 -text
+/lptwrite.mexw32 -text
+/getLPT1addr.c -text
+/PortTalk_IOCTL.h -text

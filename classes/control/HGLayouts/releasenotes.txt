@@ -1,0 +1,15 @@
+Changes For Version 1.2
+-----------------------
+Added min and max lengths for columns and rows in Spring Grid Layout
+
+Cleaned up and commented the code. Not so many nested scoped variables used now.
+
+
+Changes For Version 1.1
+-----------------------
+
+bugs fixed
+----------
+xtargets_springgridlayout had a bug that caused it to crash when just one element was in the layout.
+
+xtargets_springgridlayout had a bug that caused non pixel units UI's to render incorrectly.

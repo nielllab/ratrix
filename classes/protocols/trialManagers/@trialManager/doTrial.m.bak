@@ -1,0 +1,242 @@
+function [trialManager updateTM newSM updateSM stopEarly trialRecords]=doTrial(trialManager,station,stimManager,subject,r,window,ifi,trialRecords)
+verbose=1;
+
+stopEarly=0;
+
+if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') && isa(subject,'subject')
+    if stationOKForTrialManager(trialManager,station)
+
+        [trialManager.soundMgr updateTM]=cacheSounds(trialManager.soundMgr);
+
+        if isempty(trialRecords)
+            trialRecords = getTrialRecordsForSubjectID(r,getID(subject));
+        end
+        trialRecords
+        class(trialRecords)
+        trialInd=length(trialRecords)+1;
+
+        [p t]=getProtocolAndStep(subject);
+        ts = getTrainingStep(p,t);
+
+        if isa(stimManager,'stimManager')
+
+            trialRecords(trialInd).date = datevec(now);
+            trialRecords(trialInd).box = struct(getBoxFromID(r,getBoxIDForSubjectID(r,getID(subject))));
+            trialRecords(trialInd).station = struct(station);
+            trialRecords(trialInd).protocolName = getName(p);
+            trialRecords(trialInd).trainingStepNum = t;
+            trialRecords(trialInd).numStepsInProtocol = getNumTrainingSteps(p);
+
+            stns=getStationsForBoxID(r,getBoxIDForSubjectID(r,getID(subject)));
+            for stNum=1:length(stns)
+                trialRecords(trialInd).stationIDsInBox{stNum} = getID(stns(stNum));
+            end
+
+            trialRecords(trialInd).subjectsInBox = getSubjectIDsForBoxID(r,getBoxIDForSubjectID(r,getID(subject)));
+
+            trialRecords(trialInd).trialManager = structize(decache(trialManager));
+            trialRecords(trialInd).stimManagerClass = class(stimManager);
+            trialRecords(trialInd).trialManagerClass = class(trialManager);
+
+            trialRecords(trialInd).scheduler = structize(getScheduler(ts));
+            trialRecords(trialInd).criterion = structize(getCriterion(ts));
+            trialRecords(trialInd).schedulerClass = class(trialRecords(trialInd).scheduler);
+            trialRecords(trialInd).criterionClass = class(trialRecords(trialInd).criterion);
+
+            [newSM, ...
+                updateSM, ...
+                stim, ...                %trialRecords(trialInd).stim, ...
+                LUT, ...
+                trialRecords(trialInd).scaleFactor, ...
+                trialRecords(trialInd).type, ...
+                trialRecords(trialInd).targetPorts, ...
+                trialRecords(trialInd).distractorPorts, ...
+                stimulusDetails, ...
+                trialRecords(trialInd).interTrialLuminance]= ...
+                calcStim(stimManager, ...
+                class(trialManager), ...
+                1/ifi, ...
+                getResponsePorts(trialManager,getNumPorts(station)), ...
+                getNumPorts(station), ...
+                getWidth(station), ...
+                getHeight(station), ...
+                trialRecords(1:end-1));
+
+            %trialRecords(trialInd).stimManager = structize(newSM); %edf: removed 11.04.06 -- the timedFrame stim manager is too large (it has a cache).  could call a decache() method...
+            if isa(stimulusDetails,'structable')
+                trialRecords(trialInd).stimDetails = structize(stimulusDetails);
+            elseif isobject(stimulusDetails)
+                trialRecords(trialInd).stimDetails = struct(stimulusDetails);
+            elseif isstruct(stimulusDetails)
+                trialRecords(trialInd).stimDetails = stimulusDetails;
+            else
+                error('stim manager returned a stimulusDetails that was neither a structure nor an object')
+            end
+
+            manualOn=0;
+            if length(trialRecords)>1
+                if ~(trialRecords(trialInd-1).leftWithManualPokingOn)
+                    manualOn=0;
+                elseif trialRecords(trialInd-1).containedManualPokes
+                    manualOn=1;
+                else
+                    error('should never happen')
+                end
+            end
+
+            drawnow;
+
+            switch getDisplayMethod(station)
+                case 'ptb'
+
+                    if window>=-1 && ifi>0
+                        [trialRecords(trialInd).response,...
+                            trialRecords(trialInd).responseDetails,...
+                            trialRecords(trialInd).containedManualPokes,...
+                            trialRecords(trialInd).leftWithManualPokingOn,...
+                            trialRecords(trialInd).containedAPause,...
+                            trialRecords(trialInd).containedForcedRewards]= ...
+                            stimOGL( ...
+                            trialManager, ...
+                            stim, ...
+                            LUT, ...
+                            trialRecords(trialInd).type, ...    % 'loop', ... %trialRecords(trialInd).type, ...
+                            trialRecords(trialInd).scaleFactor, ...
+                            window, ...
+                            ifi, ...
+                            union(trialRecords(trialInd).targetPorts, trialRecords(trialInd).distractorPorts), ...
+                            getRequestPorts(trialManager, getNumPorts(station)), ...
+                            trialRecords(trialInd).interTrialLuminance, ...
+                            station, ...
+                            manualOn, ...
+                            1, ...
+                            .1, ... % 10% should be ~1 ms of acceptable frametime error
+                            0); 
+
+                    else
+                        error('bad window or ifi')
+                    end
+                case 'imagesc'
+                    switch trialRecords(trialInd).type
+                        case 'static'   %static 1-frame stimulus
+                            %imagesc(trialRecords(trialInd).stim)
+                            imagesc(stim)
+                            startTime=clock;
+                            axis equal
+                            trialManager.soundMgr=playSound(trialManager.soundMgr,'keepGoingSound',.5,station);
+
+                            [trialRecords(trialInd).response trialRecords(trialInd).responseDetails]= ...
+                                getResponse( ...
+                                trialManager, ...
+                                union(trialRecords(trialInd).targetPorts, trialRecords(trialInd).distractorPorts), ...
+                                getRequestPorts(trialManager, getNumPorts(station)), ...
+                                getResponseMethod(station), ...
+                                startTime,...
+                                station);
+
+                            close all
+
+                        case 'cache'    %dynamic n-frame stimulus (play once)
+                            error('imagesc cache type not yet implemented')
+                        case 'loop'     %dynamic n-frame stimulus (loop)
+                            error('imagesc loop type not yet implemented')
+                        case 'dynamic'  %call moreStim() if more frames desired
+                            error('imagesc dynamic type not yet implemented')
+                        otherwise
+                            error('unrecognized stim type')
+                    end
+
+                otherwise
+                    error('station has unknown displayMethod')
+            end
+
+            resp=find(trialRecords(trialInd).response);
+            if ~ischar(trialRecords(trialInd).response) && length(resp)==1
+
+                trialRecords(trialInd).correct = ismember(resp,trialRecords(trialInd).targetPorts);
+            else
+                trialRecords(trialInd).correct = 0;
+            end
+
+            if trialRecords(trialInd).correct
+                trialManager.soundMgr=playSound(trialManager.soundMgr,'correctSound',trialManager.msRewardSoundDuration/1000.0,station);
+                rewardValves=zeros(1,getNumPorts(station));
+                rewardValves(resp)=1;
+                
+                %OPEN VALVE
+                %setValves(station, rewardValves)
+                expectedValveState=zeros(1,getNumPorts(station));
+                [lastValveState trialRecords(trialInd).responseDetails.valveErrorDetails]=...
+                    setAndCheckValves(station,rewardValves,expectedValveState,...
+                    trialRecords(trialInd).responseDetails.valveErrorDetails,...
+                    trialRecords(trialInd).responseDetails.startTime,'correct reward open');
+                valveStart=GetSecs();
+                
+                WaitSecs(trialManager.msRewardDuration/1000); %%pause(trialManager.msRewardDuration/1000)
+                
+                %CLOSE VALVE
+                %setValves(station,zeros(1,getNumPorts(station)));
+                expectedValveState=rewardValves;
+                 [lastValveState trialRecords(trialInd).responseDetails.valveErrorDetails]=...
+                    setAndCheckValves(station,zeros(1,getNumPorts(station)),expectedValveState,...
+                    trialRecords(trialInd).responseDetails.valveErrorDetails,...
+                    trialRecords(trialInd).responseDetails.startTime,'correct reward close');
+                trialRecords(trialInd).actualRewardDuration = GetSecs()-valveStart;
+
+                if verbose
+                    trialRecords(trialInd).actualRewardDuration
+                end
+                pctRewardOff=abs(1.0-(trialRecords(trialInd).actualRewardDuration/(trialManager.msRewardDuration/1000.0)));
+                if pctRewardOff>.05
+                    warning('reward duration was off by %g',pctRewardOff)
+                end
+
+            elseif ~ischar(trialRecords(trialInd).response)
+                trialManager.soundMgr=playSound(trialManager.soundMgr,'wrongSound',trialManager.msPenalty/1000,station);
+                numErrorFrames=ceil((trialManager.msPenalty/1000)/ifi);
+                [errStim errorScale] = errorStim(stimManager,numErrorFrames);
+
+                stimOGL( ...
+                    trialManager, ...
+                    errStim, ...
+                    LUT, ...
+                    'cache', ...
+                    errorScale, ...
+                    window, ...
+                    ifi, ...
+                    [], ...
+                    [], ...
+                    trialRecords(trialInd).interTrialLuminance, ...
+                    station,0,0,.5,1);
+            else
+                trialRecords(trialInd).response
+                stopEarly=1;
+            end
+
+            updateTrialRecordsForSubjectID(r,getID(subject),trialRecords);
+
+            if verbose
+                trialRecords(trialInd)
+                trialRecords(trialInd).stimDetails
+                trialRecords(trialInd).responseDetails
+            end
+
+        else
+            error('need a stimManager')
+        end
+    else
+        error('station not ok for trialManager')
+    end
+else
+    
+    sca
+    isa(station,'station')
+    isa(stimManager,'stimManager')
+    isa(subject,'subject')
+    isa(r,'ratrix')
+    stimManager
+    isa(stimManager,'stimManager')
+    isa(stimManager,'ifFeatureGoRightWithTwoFlank')
+    
+    error('need station, stimManager, subject, and ratrix objects')
+end

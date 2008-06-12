@@ -1,0 +1,2 @@
+checkForUpdate('server');
+%quit();

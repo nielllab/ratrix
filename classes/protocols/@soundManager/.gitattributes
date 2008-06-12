@@ -1,0 +1,11 @@
+/addSound.m -text
+/cacheSounds.m -text
+/decache.m -text
+/playLoop.m -text
+/initializeSound.m -text
+/display.m -text
+/getSoundNames.m -text
+/getSound.m -text
+/playSound.m -text
+/close.m -text
+/soundManager.m -text

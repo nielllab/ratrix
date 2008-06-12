@@ -1,0 +1,42 @@
+% %        serPortAddr mmDiam mlPerHr doVolChks   motorRunningBit infTooFarBit  wdrTooFarBit  mlMaxSinglePump pPortAddr mlMaxPos mlOpportunisticRefill mlAntiRock)
+% p = pump('COM1',     9.65,  500,    logical(0), int8(12),       int8(10),     int8(15),     1.0,            'B888',   1.0,     0.1,                  0.05);
+% 
+% pportAddr='0378';
+% eqDelay=0.3; %seems to be lowest that will work
+% valveDelay=0.02;
+% %         pportAddr     rezSensorBit reservoirValveBit toStationsValveBit fillRezValveBit valveDelay      equalizeDelay
+% zLow=zone(pportAddr,    int8(13),    int8(17),         int8(5),           int8(8),        valveDelay,     eqDelay);
+% zMid=zone(pportAddr,    int8(12),    int8(4),          int8(16),          int8(7),        valveDelay,     eqDelay);
+% zHi =zone(pportAddr,    int8(11),    int8(9),          int8(3),           int8(6),        valveDelay,     eqDelay);
+
+
+% ZONE		MEANING		SERVER PIN	REG BIT     INV     SENSE                   BOMB	LINE
+% 
+% input (status):
+% pump		wdr too far	pin 15		st bit 3            bit 5 goes hi           top     middle lickometer		
+% bottom	full		pin 13		st bit 4            bit 4 goes hi           bottom  left lickometer
+% pump		running		pin 12(pprt2)st bit 5           bit 3 goes hi		
+% middle	full		pin 12		st bit 5            bit 3 goes hi           bottom  right lickometer 
+% pump		inf too far	pin 10		st bit 6            bit 2 goes hi           top     left lickometer
+% top 		full		pin 11		st bit 7	inv     bit 1 goes lo           bottom  center lickometer
+% 
+% 
+% output (data):
+% pump		cond		pin 2(pprt2)data bit 0          bit 8
+% top       out         pin 3		data bit 1          set bit 7 hi to open	top     valve 4
+% middle	draw		pin 4		data bit 2          set bit 6 hi to open	top     valve 5
+% bottom	out         pin 5		data bit 3          set bit 5 hi to open	top     valve 3
+% top       fill		pin 6		data bit 4          set bit 4 hi to open	bottom  valve 1
+% middle    fill		pin 7		data bit 5          set bit 3 hi to open	bottom  valve 2
+% bottom	fill		pin 8		data bit 6          set bit 2 hi to open	bottom  valve 3
+% top       draw		pin 9		data bit 7          set bit 1 hi to open	bottom  valve 4
+% 
+% 
+% bidir: in (ctrl)
+%                       pin 14		ct bit1		inv     bit 7 - CTRL PORT NOT WORKING AS INPUT
+% 
+% bidir: out (ctrl)
+% valve		blank		pin 1		ct bit0		inv     set bit 8 hi to close	bottom  valve 5
+% middle	out         pin 16		ct bit2             set bit 6 hi to open	top     valve 2
+% bottom	draw		pin 17		ct bit3		inv     set bit 5 hi to
+% close	top     valve 1

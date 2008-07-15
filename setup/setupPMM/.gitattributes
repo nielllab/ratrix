@@ -12,3 +12,5 @@
 /generateProtocolName.m -text
 /makeFreeDrinksTM.m -text
 /makeMiniDatabase.m -text
+/runRatTest.m -text
+/setupPMM.m -text

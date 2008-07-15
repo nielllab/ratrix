@@ -1,8 +1,5 @@
-/setupPMM.m -text
 /addRatsForRack.m -text
 /getRatLayout.m -text
-/runRatTest.m -text
-/setupMaleRoom.m -text
 /reportSettings.m -text
 /firstMakeRatrix.m -text
 /createRatrixWithDefaultStations.m -text
@@ -10,3 +7,4 @@
 setupEDF/setProtocolEDF.m -text
 /setProtocolDEMO.m -text
 /createRatrixWithStationsForRack.m -text
+setupMaleRoom/setupMaleRoom.m -text

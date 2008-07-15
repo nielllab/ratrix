@@ -26,16 +26,7 @@ if exist(f) == 2
 
 
         svnPath = GetSubversionPath;
-        if isempty(targetRevision)
-            targetSVNversion = repositorySVNversion;
-        elseif isinteger(targetRevision) && targetRevision>0 && isscalar(targetRevision)
-            targetSVNversion = targetRevision;
-        elseif ischar(targetRevision)
-            targetSVNversion = targetRevision;
-        else
-            targetRevision
-            error('bad update command file')
-        end
+        targetSVNversion=checkTargetRevision(targetRevision);
 
         rPath=getRatrixPath;
         if rPath(end)==filesep
@@ -94,7 +85,7 @@ if exist(f) == 2
             else
                 if strcmp(targetSVNversion,url)
                     delete(f);
-                    fprintf('Ratrix code changed to different repository/directory successfully\n');
+                    fprintf('Ratrix code changed to different branch successfully\n');
                 else
                     targetSVNversion
                     url

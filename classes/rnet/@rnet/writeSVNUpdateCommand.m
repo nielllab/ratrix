@@ -10,6 +10,7 @@ function writeSVNUpdateCommand(r,targetRevision)
 % update=[svnPath 'svn update '  targetRevision '"' rPath '"'  ]; 
 
 if ~exist('targetRevision')
+    error('disallowing empty args to svn update command')
      targetRevision = '';
 end
 

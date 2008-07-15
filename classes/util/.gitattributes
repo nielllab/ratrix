@@ -46,3 +46,4 @@
 /updatePsychtoolboxIfNecessary.m -text
 /assignPorts.m -text
 /createSubjectsFromDB.m -text
+/checkTargetRevision.m -text

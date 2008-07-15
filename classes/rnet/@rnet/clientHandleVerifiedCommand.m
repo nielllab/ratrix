@@ -78,6 +78,7 @@ switch cmd
         if stat==constants.statuses.NO_RATRIX
             [runningSVNversion repositorySVNversion url]=getSVNRevisionFromXML(getRatrixPath);
             if isempty(args)
+                error('disallowing empty args to svn update command')
                 if runningSVNversion~=repositorySVNversion
                     writeSVNUpdateCommand(r);
                     quit=true;
@@ -90,14 +91,11 @@ switch cmd
                         quit = true;
                     elseif repositorySVNversion~=runningSVNversion
                         writeSVNUpdateCommand(r,repositorySVNversion); %temporary fix -- always go to head of that tag
-                        %this looks wrong -- revNumber is a string that is
-                        %not our url, yet we are simply going to the head
-                        %of our url?
                         quit = true;
                     end
-                elseif isinteger(revNumber)
+                elseif isinteger(revNumber) || isNearInteger(revNumber) %isNearInteger needed cuz of http://132.239.158.177/trac/rlab_hardware/ticket/102
                     if revNumber~=runningSVNversion
-                        writeSVNUpdateCommand(r,revNumber);
+                        writeSVNUpdateCommand(r,revNumber); %what does this do if that rev number is not on the branch we're currently on?
                         quit = true;
                     end
                 else

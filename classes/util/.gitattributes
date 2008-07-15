@@ -39,3 +39,10 @@
 /hasAllFieldsInThatOrder.m -text
 /getTrialRecordFiles.m -text
 /isDirRemote.m -text
+/fixSystemTime.m -text
+/isNearInteger.m -text
+/setRes.m -text
+/getRackIDFromIP.m -text
+/updatePsychtoolboxIfNecessary.m -text
+/assignPorts.m -text
+/createSubjectsFromDB.m -text

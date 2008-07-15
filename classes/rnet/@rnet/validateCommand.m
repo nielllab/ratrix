@@ -125,10 +125,17 @@ switch r.type
                             sendError(r,c,constants.errors.BAD_ARGS,'paths should be strings');
                             good=false;
                         else
-                            d=remoteDir(args{1}{i});
-                            d
-                            if isempty(d) %even an empty dir has 2 entires -- '.' and '..'
-                                'd was empty'
+%                             d=remoteDir(args{1}{i});
+%                             d
+%                             if isempty(d) %even an empty dir has 2 entires -- '.' and '..'
+%                                 'd was empty'
+%                                 sendError(r,c,constants.errors.BAD_ARGS,['can''t find path: ' args{1}{i}]);
+%                                 good=false;
+%                             end
+                            
+                            if ~isDirRemote(args{1}{i}) %not safe due to windows networking/filesharing bug -- if this causes lots of crashes (will bring down whole server/rack), consider not checking at all (or just checking for char vector), rely on the replication function doing the check
+                                'cant see dir'
+                                args{1}{i}
                                 sendError(r,c,constants.errors.BAD_ARGS,['can''t find path: ' args{1}{i}]);
                                 good=false;
                             end

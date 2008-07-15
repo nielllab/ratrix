@@ -1,7 +1,7 @@
 function setupMaleRoom()
 
 rackID=1;
-addStationsForRack(rackID);
+createRatrixWithStationsForRack(rackID);
 r=addRatsForRack(rackID,'pmm');
 setPermanentStorePath(r,getSubDirForRack(rackID));
 

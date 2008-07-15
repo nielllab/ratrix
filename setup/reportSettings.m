@@ -1,16 +1,8 @@
 function reportSettings
 clc
-%p=pwd;
-%addpath(fullfile(p,'..','bootstrap'))
 
+dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
 
-warning('off','MATLAB:dispatcher:nameConflict')
-addpath(RemoveSVNPaths(removeSecretBackups(genpath(getRatrixPath))));
-addpath('\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\ratrixAdmin\');
-warning('on','MATLAB:dispatcher:nameConflict')
-
-%dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
-dataPath=fullfile('C:\Documents and Settings\rlab\Desktop\','ratrixData');
 r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
 
 ids=getSubjectIDs(r);
@@ -46,9 +38,11 @@ if ~isempty(ids)
                         [p t]=getProtocolAndStep(s);
                         if ~isempty(p)
                             tm=getTrialManager(getTrainingStep(p,t));
-                            fprintf('\tstep: %d\treinforcement: %s\tclass:%s\n',t,shortDisp(getReinforcementManager(tm)),class(tm));
+                            sm=getStimManager(getTrainingStep(p,t));
+                            fprintf('\tstep: %d\treinforcement: %s\tclass:%s\n',t,class(getReinforcementManager(tm)),class(tm));
+                            fprintf('%g\n',getPenalty(getReinforcementManager(tm)))
                         else
-                            fprintf('\t has no protocol\n',ratID);
+                            fprintf('\t %s has no protocol\n',ratID);
                         end
 
                     end

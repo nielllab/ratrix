@@ -6,3 +6,4 @@ for i=1:nAttempts
         return
     end
 end
+warning('failure does not guarantee path is not valid')

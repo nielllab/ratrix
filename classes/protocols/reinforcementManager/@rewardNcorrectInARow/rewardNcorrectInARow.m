@@ -17,6 +17,7 @@ switch nargin
         else
             error('Input argument is not a rewardNcorrectInARow object')
         end
+
     case 5
 
         if all(varargin{1})>=0

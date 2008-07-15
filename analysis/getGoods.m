@@ -1,5 +1,8 @@
-function goods=getGoods(d,type)
+function goods=getGoods(d,type,removeHuman)
 
+if ~exist('removeHuman','var')
+    removeHuman=true;
+end
 
 if ~exist('type', 'var'); type=[]; end
 if isempty(type)
@@ -55,13 +58,13 @@ afterError=[0 d.correct(1:end-1)==0];
 
 switch type
  case 'basic'
-        goods=(~CTs  & ~manualKill & ~dualResponse & ~nonRandom & ~tooFast & ~didStochasticResponse & ~containedForcedRewards & ~didHumanResponse); %including afterError in goods
+        goods=(~CTs  & ~manualKill & ~dualResponse & ~nonRandom & ~tooFast & ~didStochasticResponse & ~containedForcedRewards); %including afterError in goods
     case 'withoutAfterError'
-        goods=(~CTs  & ~manualKill & ~dualResponse & ~nonRandom & ~tooFast & ~didStochasticResponse & ~containedForcedRewards & ~didHumanResponse & ~afterError);
+        goods=(~CTs  & ~manualKill & ~dualResponse & ~nonRandom & ~tooFast & ~didStochasticResponse & ~containedForcedRewards& ~afterError);
     case 'justAfterError' %without correctionTrials
-        goods=(~CTs  & ~manualKill & ~dualResponse & ~nonRandom & ~tooFast & ~didStochasticResponse & ~containedForcedRewards & ~didHumanResponse & afterError);
+        goods=(~CTs  & ~manualKill & ~dualResponse & ~nonRandom & ~tooFast & ~didStochasticResponse & ~containedForcedRewards & afterError);
     case 'justCorrectionTrials'
-        goods=CTs & ~manualKill & ~dualResponse & ~tooFast & ~didStochasticResponse & ~containedForcedRewards & ~didHumanResponse; %
+        goods=CTs & ~manualKill & ~dualResponse & ~tooFast & ~didStochasticResponse & ~containedForcedRewards; %
     case 'forBias'
         centerResponses = d.response==2;
         %this is to ignore center responses in free drinks, if you want
@@ -69,7 +72,11 @@ switch type
         %updated, rigth now numRight+numLeft=total.  Another type of
         %bias would have a harder time analyzing trials that are of
         %BOTH 2AFC and all three ports equal...
-        goods=(~manualKill & ~dualResponse & ~centerResponses & ~tooFast & ~didStochasticResponse & ~containedForcedRewards & ~didHumanResponse);
+        goods=(~manualKill & ~dualResponse & ~centerResponses & ~tooFast & ~didStochasticResponse & ~containedForcedRewards);
     otherwise
         error('wrong type')
+end
+
+if removeHuman
+    goods=goods&~didHumanResponse;
 end

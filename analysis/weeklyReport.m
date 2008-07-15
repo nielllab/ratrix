@@ -66,7 +66,8 @@ for j=1:size(subjects,2)
             %filePathAndName=fullfile(dataStoragePath,subject,'smallData'); load(filePathAndName,'smallData'); d=smallData;
 
             d=getSmalls(subject,[now-7 now],[],0);
-            if ~isempty(d)
+            
+            if ~isempty(d) && ismember('date',fields(d)) 
                 %choose good trials:
                 goods=getGoods(d);
                 %get trialsPerDay:
@@ -84,7 +85,11 @@ for j=1:size(subjects,2)
                 [performance colors]=calculateSmoothedPerformances(d.correct(goods)',smoothingWidthUsed,'boxcar','powerlawBW');
                 performance=performance(~isnan(performance));
                 %get h20 consumption:
-                secondsH20=round(sum(d.actualRewardDuration( ~isnan(d.actualRewardDuration))));
+                if ismember('actualRewardDuration',fields(d))
+                    secondsH20=round(sum(d.actualRewardDuration( ~isnan(d.actualRewardDuration))));
+                else
+                    secondsH20=nan;
+                end
                 %get step
                 step=max(d.step); stepStr=num2str(step,'%0.2d');
                 daysThisStep=num2str(ceil(now)-ceil(min(d.date(d.step==step))));

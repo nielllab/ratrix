@@ -1,14 +1,15 @@
-function smallData=sortSmallData(smallData);
-%sort in chronological order, apply to all fields but 'info'
-
+function smallData=sortSmallData(smallData,inds);
+%sort in order if inds; default is chronological order, apply to all fields but 'info'
 
 
 if ~isempty(smallData)
     if any(strcmp(fields(smallData),'date'))
-        if any(diff(smallData.date)<0)  % only sort if its needed
+        if any(diff(smallData.date)<0)  | exist('inds','var')  % only sort if its needed
 
-            disp('putting in chronological order')
-            [junk inds] = sort(smallData.date,2,'ascend');
+            if ~exist('inds','var')
+                disp('putting in chronological order')
+                [junk inds] = sort(smallData.date,2,'ascend');
+            end
 
 
             %determine which fields to process

@@ -1,6 +1,6 @@
-function [quit response responseDetails didManual manual didAPause didValves didHumanResponse didStochasticResponse]=  stimOGL(tm, ...
+function [quit response responseDetails didManual manual didAPause didValves didHumanResponse didStochasticResponse eyeData gaze station]=  stimOGL(tm, ...
     stim, audioStim, LUT, type, metaPixelSize, window, ifi, ...
-    responseOptions, requestOptions, finalScreenLuminance, station, manual,allowQPM,timingCheckPct,noPulses,isCorrection,rn,subID,stimID)
+    responseOptions, requestOptions, finalScreenLuminance, station, manual,allowQPM,timingCheckPct,noPulses,isCorrection,rn,subID,stimID,eyeTracker,doAirpuff)
 
 %note: add a phase which is a movie during which the rat must lick the
 %center port to earn n more frames of movie, and the movie has to end in
@@ -181,6 +181,7 @@ function [quit response responseDetails didManual manual didAPause didValves did
 
 %logwrite('entered stimOGL');
 
+
 if window<0
     error('window must be >=0')
 end
@@ -193,12 +194,6 @@ quit=false;
 %need to move this stuff into stimManager or trialManager
 toggleStim=1;
 numFramesUntilStopSavingMisses=1000;
-
-if isempty(responseOptions)
-    if strcmp(type,'loop')
-        error('can''t loop with no response ports -- would have no way out')
-    end
-end
 
 originalPriority=Priority;
 
@@ -217,6 +212,12 @@ try
     dontclear = 0;              %2 saves time by not reinitializing -- safe for us cuz we're redrawing everything -- but gives blue flashing?
     %some stimulus types set dontclear to 1
 
+
+    if length(size(stim))>3
+        error('stim must be 2 or 3 dims')
+    end
+
+
     loop=0;
     trigger=0;
     frameIndexed=0; % Whether the stim is indexed with a list of frames
@@ -230,20 +231,26 @@ try
         switch type{1}
             case 'indexedFrames'
                 frameIndexed = 1;
-                strategy = 'textureCache';
                 loop=1;
                 trigger=0;
                 indexedFrames = type{2};
+                if isNearInteger(indexedFrames) && isvector(indexedFrames) && all(indexedFrames>0) && all(indexedFrames<=size(stim,3))
+                    strategy = 'textureCache';
+                else
+                    class(indexedFrames)
+                    size(indexedFrames)
+                    indexedFrames
+                    size(stim,3)
+                    error('bad vector for indexedFrames type: must be a vector of integer indices into the stim frames (btw 1 and stim dim 3)')
+                end
             case 'timedFrames'
                 timeIndexed = 1;
                 timedFrames = type{2};
-                if isinteger(timedFrames)
-                    if isvector(timedFrames) && size(stim,3)==size(timedFrames,2) && all(timedFrames(1:end-1)>=1) && timedFrames(end)>=0 % the timedFrames type
-                        strategy = 'textureCache';
-                        %dontclear = 1;  %good for saving time, but breaks on lame graphics cards
-                    else
-                        error('bad vector for timedFrame type: must be a vector of length equal to stim dim 3 of integers > 0 (number or refreshes to display each frame). A zero in the final entry means hold display of last frame.')
-                    end
+                if isinteger(timedFrames) && isvector(timedFrames) && size(stim,3)==length(timedFrames) && all(timedFrames(1:end-1)>=1) && timedFrames(end)>=0 % the timedFrames type
+                    strategy = 'textureCache';
+                    %dontclear = 1;  %good for saving time, but breaks on lame graphics cards
+                else
+                    error('bad vector for timedFrames type: must be a vector of length equal to stim dim 3 of integers > 0 (number or refreshes to display each frame). A zero in the final entry means hold display of last frame.')
                 end
             otherwise
                 error('Unsupported stim type using a cell, either indexedFrames or timedFrames')
@@ -252,6 +259,9 @@ try
         switch type
             case 'static'   %static 1-frame stimulus
                 strategy = 'textureCache';
+                if size(stim,3)~=1
+                    error('static type must have stim with exactly 1 frame')
+                end
             case 'trigger'   %2 static frames -- if request, show frame 1; else show frame 2
                 strategy = 'textureCache';
                 loop = 0;
@@ -267,10 +277,17 @@ try
                 loop = 1;
             case 'dynamic'  %call moreStim() if more frames desired
                 strategy = 'dynamicDots';
-                error('dynamic ptb not yet implemented')
+                error('dynamic type not yet implemented')
+            case 'expert' %callback moreStim() to call ptb drawing methods, but leave frame labels and 'drawingfinished' to stimOGL
+                error('expert type not yet implemented')
             otherwise
-                error('unrecognized stim type, must be ''static'',''cache'' or ''loop'' or ''dynamic'' or, for timedFrame, a vector of length equal to stim dim 3 of integers > 0 (number or refreshes to display each frame). A zero in the final entry means hold display of last frame.')
+                error('unrecognized stim type, must be ''static'', ''cache'', ''loop'', ''dynamic'', ''expert'', {''indexedFrames'' [frameIndices]}, or {''timedFrames'' [frameTimes]}')
         end
+    end
+
+
+    if isempty(responseOptions) && (trigger || loop || (timeIndexed && timedFrames(end)==0) || frameIndexed)
+        error('can''t loop with no response ports -- would have no way out')
     end
 
 
@@ -287,17 +304,23 @@ try
 
     if metaPixelSize == 0
         scaleFactor = [scrHeight scrWidth]./[size(stim,1) size(stim,2)];
-    elseif length(metaPixelSize)==2
+    elseif length(metaPixelSize)==2 && all(metaPixelSize)>0
         scaleFactor = metaPixelSize;
     else
         error('bad metaPixelSize argument')
     end
     if any(scaleFactor.*[size(stim,1) size(stim,2)]>[scrHeight scrWidth])
+        scaleFactor.*[size(stim,1) size(stim,2)]
+        scaleFactor
+        size(stim)
+        [scrHeight scrWidth]
         error('metaPixelSize argument too big')
     end
 
+    [oldCLUT, dacbits, reallutsize] = Screen('ReadNormalizedGammaTable', window);
+
     %LOAD COLOR LOOK UP TABLE (if it is the right size)
-    if size(LUT,1)>1 && size(LUT,2)==3
+    if isreal(LUT) && all(size(LUT)==[reallutsize 3])
         if any(LUT(:)>1) || any(LUT(:)<0)
             error('LUT values must be normalized values between 0 and 1')
         end
@@ -316,9 +339,11 @@ try
             currentCLUT-LUT %error
             error('the LUT is not what you think it is')
         end
+    else
+        reallutsize
+        error('LUT must be real reallutsize X 3 matrix')
     end
 
-    currentCLUT = Screen('ReadNormalizedGammaTable', window);
     maxV=max(currentCLUT(:))
     minV=min(currentCLUT(:))
 
@@ -350,47 +375,23 @@ try
         disp(sprintf('stim class is %s',class(stim)));
     end
 
-    %clampcolors=1;
     floatprecision=0;
-    if isreal(stim) && strcmp(class(stim),class(finalScreenLuminance))
+    if isreal(stim) && strcmp(class(stim),class(finalScreenLuminance)) && isscalar(finalScreenLuminance)
         switch class(stim)
             case {'double','single'}
-                %A maximumvalue of 1.0 will enable PTB to pass color values in OpenGL's native floating point color range of 0.0 to 1.0:
-                if finalScreenLuminance>1 || finalScreenLuminance<0
-                    error('finalScreenLuminance <0 or >1 -- setting to zero') %changed to error pmm
-                    %finalScreenLuminance = minV + finalScreenLuminance*(maxV-minV);
-                    finalScreenLuminance=0;
-                end
-                %Screen('ColorRange', window,1.0,clampcolors); %colorrange doesn't work for textures!  see %http://tech.groups.yahoo.com/group/psychtoolbox/message/6663
-                if any(stim(:)>1) || any(stim(:)<0)
-                    error('stim had elements <0 or >1 ')
+                if any([finalScreenLuminance; stim(:)]>1) || any([finalScreenLuminance; stim(:)]<0)
+                    error('stimor finalScreenLuminance had elements <0 or >1 ')
                 else
-                    %stim=round(double(intmax('uint8'))*stim);
                     floatprecision=1;%will tell maketexture to use 0.0-1.0 format with 16bpc precision (2 would do 32bpc)
-                    finalScreenLuminance=round(finalScreenLuminance*intmax('uint8'));
+                    % finalScreenLuminance=round(finalScreenLuminance*intmax('uint8')); what was point of this?
                 end
             case 'uint8'
-                %Screen('ColorRange', window,double(intmax('uint8')),1);%colorrange doesn't work for textures!  see %http://tech.groups.yahoo.com/group/psychtoolbox/message/6663
-                %finalScreenLuminance=finalScreenLuminance*intmax('uint8');
-                if finalScreenLuminance>intmax('uint8') || finalScreenLuminance<0
-                    error('finalScreenLuminance <0 or >intMax')
-                end
-                if verbose
-                    disp('Screen is matched for 8 bit rendering')
-                    %switch to uint16 if if grafix card supports it
-                end
+                %do nothing
             case 'uint16'
-                %Screen('ColorRange', window,double(intmax('uint16')),1);
-                %finalScreenLuminance=finalScreenLuminance*intmax('uint16');
-                if finalScreenLuminance>intmax('uint16') || finalScreenLuminance<0
-                    error('finalScreenLuminance <0 or >intMax')
-                end
-                if verbose
-                    'Screen is matched for 16 bit rendering - only if grafix card supports it'
-                    %will the LUT specified as 8 bit still work fine?
-                end
+                stim=single(stim)/intmax('uint16');
+                finalScreenLuminance=single(finalScreenLuminance)/intmax('uint16');
+                floatprecision=1;
             case 'logical'
-                %Screen('ColorRange', window,double(intmax('uint8')),clampcolors);%colorrange doesn't work for textures!  see %http://tech.groups.yahoo.com/group/psychtoolbox/message/6663
                 stim=uint8(stim)*intmax('uint8'); %force to 8 bit
                 finalScreenLuminance=finalScreenLuminance*intmax('uint8');
             otherwise
@@ -401,7 +402,7 @@ try
         finalScreenLuminance
         class(stim)
         class(finalScreenLuminance)
-        error('stim must be real, and type must match interTrialLuminance')
+        error('stim must be real, and type must match interTrialLuminance, and interTrialLuminance must be scalar')
     end
 
 
@@ -462,7 +463,7 @@ try
     end
 
     if window>=0
-        textures(size(stim,3)+1)=Screen('MakeTexture', window, finalScreenLuminance);
+        textures(size(stim,3)+1)=Screen('MakeTexture', window, finalScreenLuminance,0,0,floatprecision);
         [resident texidresident] = Screen('PreloadTextures', window);
 
         if resident ~= 1
@@ -477,7 +478,7 @@ try
     if ~isempty(rn)
         constants = getConstants(rn);
     end
-    
+
     if strcmp(getRewardMethod(station),'serverPump')
         if isempty(rn) || ~isa(rn,'rnet')
             error('need an rnet for station with rewardMethod of serverPump')
@@ -488,9 +489,9 @@ try
     done=0;
     i=0;
     frameIndex=0;
-    
-    response='none'; %initialize 
-    
+
+    response='none'; %initialize
+
     responseDetails.numMisses=0;
     responseDetails.misses=[];
     responseDetails.afterMissTimes=[];
@@ -525,7 +526,13 @@ try
     didPulse=0;
     didValves=0;
     didManual=0;
-    requestFrame=0;  %used for timed frames stimuli
+
+    %used for timed frames stimuli
+    if isempty(requestOptions)
+        requestFrame=1;
+    else
+        requestFrame=0;
+    end
 
     currentValveState=verifyValvesClosed(station);
     valveErrorDetails=[];
@@ -535,12 +542,12 @@ try
     requestRewardPorts=0*readPorts(station);
     requestRewardDurLogged=false;
     requestRewardOpenCmdDone=false;
-    serverValveChange=false;  
+    serverValveChange=false;
     potentialStochasticResponse=false;
-    didStochasticResponse=false; 
+    didStochasticResponse=false;
     didHumanResponse=false;
     requestRewardStartLogged=false;
-    
+
     isRequesting=0;
     stimToggledOn=0;
     
@@ -551,7 +558,7 @@ try
     xTextPos = xSubjectTextPos+250;
     yTextPos = 20;
     standardFontSize=15; %big was 25
-    subjectFontSize=35; 
+    subjectFontSize=35;
 
 
     % For the Windows version of Priority (and Rush), the priority levels set
@@ -582,7 +589,7 @@ try
     end
 
     if window >= 0
-        oldFontSize = Screen('TextSize',window,standardFontSize); 
+        oldFontSize = Screen('TextSize',window,standardFontSize);
         Screen('Preference', 'TextRenderer', 0);  % consider moving to PTB setup
 
         Screen('DrawTexture', window, textures(size(stim,3)+1),[],destRect,[],filtMode); %should replace this with new stim architecture
@@ -646,7 +653,7 @@ try
                                     % Turn off audio
                                     tm.soundMgr = playLoop(tm.soundMgr,'',station,0);
                                     audioStimPlaying = false;
-                                end                                
+                                end
                                 i=2;
                             end
 
@@ -681,7 +688,7 @@ try
 
                         %draw to buffer
                         if window>=0
-                            if i>0
+                            if i>0 && i <= size(stim,3)
                                 if ~(i==lastI) || (dontclear==0) %only draw if texture different from last one, or if every flip is redrawn
                                     Screen('DrawTexture', window, textures(i),[],destRect,[],filtMode);
                                 else
@@ -725,9 +732,9 @@ try
 
             if window>=0
                 if labelFrames
-                    %junkSize = Screen('TextSize',window,subjectFontSize); 
+                    %junkSize = Screen('TextSize',window,subjectFontSize);
                     [garbage,yTextPosUnused] = Screen('DrawText',window,['ID:' subID ],xSubjectTextPos,yTextPos,100*ones(1,3));
-                    %junkSize = Screen('TextSize',window,standardFontSize); 
+                    %junkSize = Screen('TextSize',window,standardFontSize);
                     [garbage,yNewTextPos] = Screen('DrawText',window,['trialManager:' class(tm) ' stimManager:' stimID],xTextPos,yNewTextPos,100*ones(1,3));
                 end
                 [normBoundsRect, offsetBoundsRect]= Screen('TextBounds', window, 'TEST');
@@ -1002,8 +1009,8 @@ try
                 else
                     potentialStochasticResponse=0;
                 end
-            end      
-            
+            end
+
             %subject gave a well defined response
             if any(ports(responseOptions)) && stimStarted
                 done=1;
@@ -1012,7 +1019,7 @@ try
                 stopListening=1;
                 responseDetails.durs{attempt+1}=0;
                 if potentialStochasticResponse
-                   didStochasticResponse=1; 
+                    didStochasticResponse=1;
                 end
             end
 

@@ -52,7 +52,7 @@ if s~=0
 end
   
 % Update psychtoolbox
-UpdatePsychtoolbox
+updatePsychtoolboxIfNecessary
 
 % Reload java classes
 addJavaComponents();

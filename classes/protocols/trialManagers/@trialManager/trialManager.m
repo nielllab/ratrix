@@ -1,6 +1,6 @@
 function t=trialManager(varargin)
 % TRIALMANAGER  class constructor.  ABSTRACT CLASS-- DO NOT INSTANTIATE
-% t=trialManager(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,soundManager,reinforcementManager,customDescription)
+% t=trialManager(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,soundManager,reinforcementManager,eyeTracker,eyeController,customDescription)
 
 requiredSoundNames = {'correctSound','keepGoingSound','trySomethingElseSound','wrongSound'};
 
@@ -10,8 +10,8 @@ requiredSoundNames = {'correctSound','keepGoingSound','trySomethingElseSound','w
         t.soundMgr=soundManager();
         t.reinforcementManager=reinforcementManager();
         t.description='';
-        t.eyepuffMS=0;
-
+        t.eyeTracker=[];
+        t.eyeController=[];
 switch nargin
     case 0
         % if no input arguments, create a default object
@@ -24,7 +24,7 @@ switch nargin
         else
             error('Input argument is not a trialManager object')
         end
-    case 6
+    case 8
         if varargin{1}>=0
             t.msFlushDuration=varargin{1};
         else
@@ -55,12 +55,25 @@ switch nargin
             error('must be a reinforcementManager')
         end
 
-        if ischar(varargin{6})
+        if isa(varargin{6},'eyeTracker')
+            t.eyeTracker=varargin{6};
+        else
+            error('must be an eyeTracker')
+        end
+        
+        if isempty(varargin{7})
+            t.eyeController=varargin{7};
+        else
+            error('must be a empty -- until we actually have controllers...then maybe its an controller object or a parameter pair list;  example:  {''driftCorrect'',{param1, param2}}')
+        end
+
+        
+        if ischar(varargin{8})
             t.description=sprintf(['%s\n'...
                                    '\t\t\tmsFlushDuration:\t%d\n'...
                                    '\t\t\tmsMinimumPokeDuration:\t%d\n'...
                                    '\t\t\tmsMinimumClearDuration:\t%d'], ...
-                varargin{6},t.msFlushDuration,t.msMinimumPokeDuration,t.msMinimumClearDuration);
+                varargin{8},t.msFlushDuration,t.msMinimumPokeDuration,t.msMinimumClearDuration);
         else
             error('not a string')
         end
@@ -69,6 +82,7 @@ switch nargin
 
 
     otherwise
+        nargin
         error('Wrong number of input arguments')
 end
 

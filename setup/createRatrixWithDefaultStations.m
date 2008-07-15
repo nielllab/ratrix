@@ -1,4 +1,4 @@
-function r=createRatrixWithDefaultStations(machines,dataPath,servePump)
+function r=createRatrixWithDefaultStations(machines,dataPath,servePump,localMultiDisplaySetup)
 
 if servePump
     rewardMethod='serverPump';
@@ -9,9 +9,7 @@ end
 serverDataPath = fullfile(dataPath, 'ServerData');
 r=ratrix(serverDataPath,1);
 
-
-multiDisplaySetup=true;
-if multiDisplaySetup
+if localMultiDisplaySetup
     warning('you are running with local multidisplay -- timing will be bad!')
     Screen('Preference', 'SkipSyncTests',1)
 end
@@ -22,7 +20,7 @@ for i=1:length(machines)
     width=1024;
     height=768;
     path=fullfile(dataPath, 'Stations',sprintf('station%s',id));
-    if multiDisplaySetup
+    if localMultiDisplaySetup
         screenNum=int8(max(Screen('Screens')));
     else
         screenNum=int8(0);
@@ -38,7 +36,7 @@ for i=1:length(machines)
             path,...        %path
             screenNum,...   %screenNum
             true,...       %soundOn
-            'localTimed',...%rewardMethod
+            rewardMethod,...%rewardMethod
             macAddr,...     %MACaddress
             macLoc,...      %physicalLocation([rackID shelf position] -- upperleft is 1,1)
             int8(3));             %numPorts
@@ -54,7 +52,7 @@ for i=1:length(machines)
             rewardMethod,...%rewardMethod
             macAddr,...     %MACaddress
             macLoc,...      %physicalLocation([rackID shelf position] -- upperleft is 1,1)
-            'B888',...      %parallelPortAddress
+            '0378',...      %parallelPortAddress
             'parallelPort',...%responseMethod
             int8([6,7,8]),... %valveOpenCodes
             int8([4,2,3]),... %portCodes

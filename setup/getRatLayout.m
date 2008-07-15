@@ -1,6 +1,6 @@
 function [heatOrder stations subjects]=getRatLayout
-conn=dbConn('132.239.158.177','1521','dparks','pac3111');
-rack = 3;
+conn=dbConn;
+rack = getRackIDFromIP;
 
 heatOrder={};
 

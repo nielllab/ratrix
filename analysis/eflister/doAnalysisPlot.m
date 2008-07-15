@@ -23,7 +23,7 @@
 %         requiredFields={'response'};
 %     case 'plotRatePerDay' %skips data after the first 2 hours following the first trial of a given date
 %         requiredFields={'date'};
-function doAnalysisPlot(compiledFileDir,subjectID,type,filter,filterVal,filterParam)
+function doAnalysisPlot(compiledFileDir,subjectID,type,filter,filterVal,filterParam,includeKeyboard)
 storageMethod='vector'; %'structArray' 
 
 
@@ -33,7 +33,7 @@ if strcmp(type,'weight')
     plotBodyWeights({subjectID},lastNdays);
     
     %old:
-%     conn=dbConn('132.239.158.177','1521','dparks','pac3111');
+%     conn=dbConn;
 %     [weights dates thresholds] = getBodyWeightHistory(conn,subjectID);
 %     closeConn(conn);
 %     plot(dates,[weights thresholds]);
@@ -135,16 +135,16 @@ end
                 error('unrecognized storage method')
         end
         processedRecords.info.subject={subjectID};
-
+        
         switch type
             case 'trials per day'
-                doPlot('plotTrialsPerDay',processedRecords);
+                doPlot('plotTrialsPerDay',processedRecords,[],[],[],[],[],~includeKeyboard);
             case 'performance'
-                doPlot('percentCorrect',processedRecords);
+                doPlot('percentCorrect',processedRecords,[],[],[],[],[],~includeKeyboard);
             case 'bias'
-                doPlot('plotBias',processedRecords);
+                doPlot('plotBias',processedRecords,[],[],[],[],[],~includeKeyboard);
             case 'trial rate'
-                doPlot('plotRatePerDay',processedRecords);
+                doPlot('plotRatePerDay',processedRecords,[],[],[],[],[],~includeKeyboard);
             case 'all'
                 warning('not implemented')
             otherwise

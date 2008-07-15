@@ -1,0 +1,77 @@
+% stimManager.calcStim()
+% override this method to specify the visual stimulus and correct/incorrect reponses for a trial
+% define your stimManager subclass to contain any necessary state
+% calcStim output is interpreted by a trialManager, this document describes the interpretation by nAFC, freeDrinks, and their subclasses.
+%
+% INPUTS
+%   stimulus            this images stimManager object (contains your custom state)
+%   trialManagerClass   the trialManager class for the running training step
+%   frameRate           the detected refresh rate of the running monitor (in hz)
+%   responsePorts       vector of available response port indices on the running station (determined by trial manager)
+%   totalPorts          total number of available ports on this station (useful for positioning stimuli)
+%   width               pixel width of this station (currently hardcoded in station constructor, future design is to ask calcStim to choose from available resolutions)
+%   height              pixel height of this staiton (see above)
+%   trialRecords        a struct array of trialRecords from previous trials (all trials from this session included)
+%                       on Nth trial of this session, M-N+1 trials from previous sessions are included
+%                       M currently hardcoded in station.doTrials to 100
+% OUTPUTS
+%   stimulus            this images stimManager object
+%   updateSM            boolean flag indicating whether you've changed state (field values) in this object that you'd like to persist for future reference
+%   out                 monochrome stimulus frames.  logical, real (0<=x<=1) [double single], or [uint8 uint16].  2 or 3 dimensional array (y,x,frame)
+%                       uint8 values will be mapped to 8-bit clut indices
+%                       uint16 are converted to singles and treated as float
+%                       float (double, single) values will be processed at 16 bits until finally rendered through a potentially higher dynamic range clut
+%   LUT                 the color look up (gamma/linearization) table to pass to the gfx card
+%                       n X 3 array, 0<=x<=1, n is system dependent, but typically 256 (future design: pass in n=reallutsize from screen('ReadNormalizedGammaTable'))
+%                       on windows, table subject to unpublished constraints vaguely resembling monotonic increasing
+%   scaleFactor         (potentially non-integer) factors by which to scale stim when mapping onto pixels
+%                       [height width]>0, special case scalar zero means scale to full screen
+%   type                see below
+%   targetPorts         vector subset of responsePorts that will count as correct responses 
+%   distractorPorts     vector subset of responsePorts (disjoint with targetPorts) that will count as incorrect responses (remainder will be dead ports)
+%                       if union(targetPorts distractorPorts) is empty, the trial ends when the stimulus ends, rather than waiting for a response
+%                       for stimuli with no "end," union must not be empty, or there would be no way for the trial to end
+%   details             a structure of your design including parameters you choose in this method that will be saved with the trialRecord 
+%   interTrialLuminance a scalar value that matches type and scale of out
+%                       full field luminance at this value will be shown until the first request
+%                       also held after this trial ends until the beginning of the next trial
+%                       if requestPorts (determined by the trialManager) is empty, the stimulus you provide (out) starts immediately
+%   isCorrection        boolean flag indicating whether this is a correction trial
+%
+% values for 'type,' their semantics, and restrictions 
+% note that these options grew organically as they were needed scientifically
+% they are not intended to be an elegant covering of the space of possibilities
+% if creative use of these does not meet your needs, implement a new type!
+% 
+% type='static'             show one single frame
+% 
+% type='trigger'            show frame 1, except during requests, show frame 2
+%	for nosepokes, requests are coextensive with beambreaks (for now, hardcode 'toggleStim' in stimOGL to false)
+%	for lickometers, the request state toggles with each beambreak (hardcode 'toggleStim' in stimOGL to true)
+%	future design: pass toggleStim in from calcStim
+%	union(targetPorts distractorPorts) must not be empty
+% 
+% type='cache'              play through the frames in order, once
+% 
+% type='loop'               play through the frames in order, looping.
+% 	union(targetPorts distractorPorts) must not be empty
+% 
+% type={'timedFrames' [frameTimes]}        show frames in order, each for the specified number of screen refreshes
+%	frameTimes is: 
+%       a vector of length equal to number of frames (size(stim,3)))
+%       all integers > 0 representing the number or refreshes to display each frame
+%       a zero in the final entry means hold display of last frame (in which case union(targetPorts distractorPorts) must not be empty)
+% 
+% type={'indexedFrames' [frameIndices]}     show frames in some order, useful if frames would otherwise be redundant
+% 	loops over frameIndices vector until response (union(targetPorts distractorPorts) must not be empty)
+%	frameIndices is:
+%       a vector of frame indices
+%       all integers btw 1 and the number of frames (size(stim,3)))
+% 
+% type='dynamic'            will call frames=stimManager.moreStim(usefulState) to request additional frames whenever it runs out
+%   not yet implemented 
+%
+% type='expert'            will call stimManager.moreStim(usefulState) before each frame
+%   user calls ptb drawing functions directly
+%   leave frame text stamps and screen('drawingfinished') to stimOGL
+%   not yet implemented 

@@ -13,17 +13,13 @@ diary([fullfile(dataPath,'diaries') filesep datestr(now,30) '.txt'])
 
 try
 
-    %serverAddress = '132.239.158.169';
     [success id]=getMACaddress();
 
     if ~success
         error('couldn''t get mac address')
     end
-    
-    %info=getRatrixStationInfo(id);
-    %
 
-    conn=dbConn('132.239.158.177','1521','dparks','pac3111');
+    conn=dbConn;
     info=getStationFromMac(conn,id);
     closeConn(conn);
     if isempty(info)
@@ -61,7 +57,8 @@ try
         if exist('r') && ~isempty(r)
             tries=0;
             % Update system time upon reconnect
-            system('w32tm /resync /nowait');
+            fixSystemTime;
+            setRes;
             clearTemporaryFiles(r);
             
             quit=false;

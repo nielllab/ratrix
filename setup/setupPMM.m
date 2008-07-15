@@ -3,8 +3,8 @@ function setupPMM(firstTime)
 
 %%
 
-cd ('C:\Documents and Settings\rlab\Desktop\Ratrix\bootstrap')
-setupEnvironment
+%cd ('C:\Documents and Settings\rlab\Desktop\Ratrix\bootstrap')
+%setupEnvironment
 
 auth='pmm';
 
@@ -14,7 +14,7 @@ end
 
 if firstTime
     rackID=1;
-    r=addStationsForRack(rackID);
+    r=createRatrixWithStationsForRack(rackID);
     r=addRatsForRack(rackID,auth);
     %numTestRats=3;
     %r=addTestRats(numTestRats,auth);

@@ -9,6 +9,10 @@ function [wcRev,repRev,url] = getSVNRevisionFromXML(svnDir)
 % wcRev - The revision of the working copy
 % repRev - The revision of the repository
 
+%%% note http://tech.groups.yahoo.com/group/psychtoolbox/message/8379
+%why are our svn:// commands still working?  only an issue for checkout?
+%might need to switch to https in future
+
 % Trying java xpath pars
 import javax.xml.xpath.*;
 import javax.xml.parsers.*;
@@ -30,6 +34,9 @@ svnCommand = [GetSubversionPath sprintf('svn info --xml')];
   [s w] = system(svnCommand);
 % end
 if s ~= 0
+    pwd
+    svnCommand
+    s
     w
   error('Unable to execute svn command');
 end
@@ -63,6 +70,10 @@ svnCommand = [GetSubversionPath sprintf('svn info --xml %s',url)];
   [s w] = system(svnCommand);
 % end
 if s ~= 0
+    pwd
+    url
+    svnCommand
+    s
     w
   error('Unable to execute svn command');
 end

@@ -492,13 +492,21 @@ end
 
 
 if plotFlankerAnalysis
-    figure(handles(10)); hold on
+    figure(handles(10));  subplot(subplotParams.y, subplotParams.x, subplotParams.index); hold on
+    title(d.info.subject{1})
     if ismember('flankerContrast',fields(d))
 
-        filter='colin-other';
+        filter='colin+3';%'colin-other';
         haveFlanks=d.flankerContrast>0;
         [condition names ind colors]=getFlankerConditionInds(d,goods & haveFlanks,filter);
         %this works if you don't want to be contrast sensitive; otherwise use flankerAnalysis  (commented out below)
+        
+        %deal with the fact that come rats choose right for "yes" and some choose left for "yes"
+        presentVal=unique(d.response(d.correct==1 & d.targetContrast>0));
+        absentVal=unique(d.response(d.correct==1 & d.targetContrast==0));
+        if length(absentVal)>1 | length(presentVal)>1
+            error('this rat learned more than one detection rule; if feature go right VS go left')
+        end
         
         if length(ind)>0
         for i=ind
@@ -510,8 +518,7 @@ if plotFlankerAnalysis
                 violations=find(~x)
                 error('violates correct response is left; should never happen, regardless of trial manager rules')
             end
-
-            [allDpr b]=dprime(some.response(getGoods(some)),correctAnswerID(getGoods(some)))
+            [allDpr b]=dprime(some.response(getGoods(some)),correctAnswerID(getGoods(some)),'presentVal',presentVal,'absentVal',absentVal);
             s.hits(i)=b.hits;
             s.correctRejects(i)=b.correctRejects;
             s.misses(i)=b.misses;
@@ -544,16 +551,25 @@ if plotFlankerAnalysis
         %
         % %the trick to understanding the non-reduced plot is to color it appropriately
         % colors=jet(size(s.hits(:),1));
-
-        doPlotPercentCorrect(d,[],[],[],[],[],[],[],[],[],[],[],{condition,colors})
+        
+        doInset=0;
+        if doInset
+            doPlotPercentCorrect(d,[],[],[],[],[],[],[],[],[],[],[],{condition,colors})
+            pctCorrectYfraction=0.25;
+        else
+            plot([0 1], [0 1],'k');
+            pctCorrectYfraction=1;
+        end
 
         %params
         %fs=15;
         ciwidth=4;
         alpha=0.05;
-        pctCorrectYfraction=0.25;
+        
         yLim=[0 1/pctCorrectYfraction];
         xLim=get(gca,'XLim');
+
+        
         
         % Get Confidence Interval
         [hitRate, hitPci] = binofit(s.hits(:),s.misses(:)+s.hits(:),alpha);
@@ -578,11 +594,19 @@ if plotFlankerAnalysis
         faRate=faRate*diff(xLim);
         faPci=faPci*diff(xLim);
 
-        axis square;
+        
         %set(gca, 'FontSize', [fs])
         set(gca,'YTickLabel',[0 .5 1])
         set(gca,'YTick',[0  yLim(2)/2 yLim(2)])
         ylabel('Hit Rate'); xlabel('False Alarm Rate');
+        
+        %indicate if "yes" response is left or right side
+        switch presentVal
+            case 3
+               text(.7*diff(xLim),.6*diff(yLim),'Y=R')
+            case 1
+               text(.7*diff(xLim),.6*diff(yLim),'Y=L')
+        end
 
         for i=1:length(ind)
             hci=plot([faPci(ind(i),1) faPci(ind(i),2)],[hitRate(ind(i)) hitRate(ind(i))],'color',colors(ind(i),:)); %horizontal error bar
@@ -629,6 +653,7 @@ if plotFlankerAnalysis
             set(gca,'YTickLabel',[])
             set(gca,'XTickLabel',[])
     end
+    axis square;
 end
 
 

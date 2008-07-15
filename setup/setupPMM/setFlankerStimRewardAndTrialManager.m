@@ -26,10 +26,16 @@ switch tmClass
             p.requestRewardSizeULorMS,p.percentCorrectionTrials,p.msResponseTimeLimit,p.pokeToRequestStim,...
             p.maintainPokeToMaintainStim,p.msMaximumStimPresentationDuration,p.maximumNumberStimPresentations,p.doMask,increasingReward);
     case 'promptedNAFC'
+        
+        %p.eyeTracker=geometricTracker(getDefaults(geometricTracker));
+        p.eyeTracker=geometricTracker('simple', 2, 3, 12, 0, int16([1280,1024]), [42,28], int16([1024,768]), [400,290], 300, -25, 0, 45, 0);
+        p.eyeController=[];
+
+        
         tm=promptedNAFC(p.msFlushDuration,p.msMinimumPokeDuration,p.msMinimumClearDuration,p.sndManager,...
             p.requestRewardSizeULorMS,p.percentCorrectionTrials,p.msResponseTimeLimit,p.pokeToRequestStim,...
             p.maintainPokeToMaintainStim,p.msMaximumStimPresentationDuration,p.maximumNumberStimPresentations,p.doMask,increasingReward,...
-            p.delayMeanMs, p.delayStdMs, p.delayStim, p.promptStim);
+            p.delayMeanMs, p.delayStdMs, p.delayStim, p.promptStim,p.eyeTracker,p.eyeController);
 end
 step= trainingStep(tm, stim, p.graduation, p.scheduler); %it would be nice to add the nameOfShapingStep
 

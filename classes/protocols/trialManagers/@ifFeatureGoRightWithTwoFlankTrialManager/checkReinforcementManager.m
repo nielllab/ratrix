@@ -6,12 +6,12 @@ function pass=checkReinforcementManager(tm,rmStructure)
 f=fields(rmStructure);
 
 allowedFields = {'type',...
-    %'fractionOpenTimeSoundIsOn',...
-    %'fractionPenaltySoundIsOn',... %moved to super class -pmm 
+    'fractionOpenTimeSoundIsOn',... %moved to super class, but still checked -pmm 
+    'fractionPenaltySoundIsOn',...  %moved to super class, but still checked -pmm 
     'rewardNthCorrect',...
     'msPenalty',...
-    'scalar');
-%     'scalarStartsCached'};
+    'scalar'};
+%     'scalarStartsCached'}; %deleted
 
 pass=0;
 if hasAllFieldsAndNoMore(f,allowedFields)

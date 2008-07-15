@@ -42,31 +42,39 @@ for i=1:length(d)
 end
 
 if ~isempty(smallData)
+    %filter date range
     if exist('dateRange','var') && ~isempty(dateRange)
         smallData=removeSomeSmalls(smallData, ~(smallData.date>dateRange(1) & smallData.date<dateRange(2)));
     end
+
+    %remove all fields that have no content
+    f=fields(smallData);
+    remove=[];
+    for i=1:length(f)
+        if all(isnan(smallData.(f{i}))) 
+            remove=[remove i];
+        end
+    end
+    smallData=rmfield(smallData,f(remove));
+
+    if verbose & ~isempty(remove)
+        disp(sprintf('removing %d fields that are full of NaNs',length(remove)))
+        fprintf('done-time elapsed since start: %g\n',GetSecs-t)
+    end
+
+    %add name
+    if strcmp(class(subjectID),'char')
+        smallData.info.subject={subjectID};
+    end
+
+
+%     if all(size(smallData.date)==[1 0])
+%         smallData=[]; % %if there are no trials d turns into an empty set
+%     end
+
 else
-    disp('empty data!')
+    disp(sprintf('%s: empty data!',subjectID))
     subject
 end
 
-%remove all fields that have no content
-f=fields(smallData);
-remove=[];
-for i=1:length(f)
-    if all(isnan(smallData.(f{i})))
-        remove=[remove i];
-    end
-end
-smallData=rmfield(smallData,f(remove));
-
-if verbose & ~isempty(remove)
-    disp(sprintf('removing %d fields that are full of NaNs',length(remove)))
-    fprintf('done-time elapsed since start: %g\n',GetSecs-t)
-end
-
-%add name
-if strcmp(class(subjectID),'char')
-    smallData.info.subject={subjectID};
-end
 

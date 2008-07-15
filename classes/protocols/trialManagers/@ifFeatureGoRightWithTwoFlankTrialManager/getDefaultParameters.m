@@ -92,11 +92,11 @@ s.interTrialLuminance     =0.5;
        
 
 super.msFlushDuration         =1000;
-super.msRewardDuration        =150; %todo: ? get rid of because the reward manager has it
+super.rewardSizeULorMS        =150; %todo: ? get rid of because the reward manager has it
 super.msMinimumClearDuration  =10;
 super.msMinimumPokeDuration   =10;
 super.msPenalty               =4000; %todo: ? get rid of because the reward manager has it
-super.msRewardSoundDuration   =super.msRewardDuration;
+super.msRewardSoundDuration   =super.rewardSizeULorMS;
 
 super.msRequestRewardDuration             =0; %todo: this should move the reward manager
 super.percentCorrectionTrials             =.5; %todo: this should move the "correlation manager"
@@ -123,10 +123,10 @@ super.description='basicTrialManager';
 
 % parameters for reinforcement manager
 rm.type='rewardNcorrectInARow';
-rm.fractionOpenTimeSoundIsOn=0.6;
-rm.fractionPenaltySoundIsOn=1;
-rm.msRewardNthCorrect=2*[20,80,100,150,250];
+rm.fractionOpenTimeSoundIsOn=0.6; %super rm
+rm.fractionPenaltySoundIsOn=1; %super rm
+rm.rewardNthCorrect=2*[20,80,100,150,250];
 rm.msPenalty=15000;  %is this in reinforcement manager?
 rm.scalar=1;
-rm.scalarStartsCached=0;
+%rm.scalarStartsCached=0;
 parameterStructure.rm=rm;

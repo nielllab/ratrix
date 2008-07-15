@@ -1,7 +1,7 @@
 function r=standAloneTestPMM()
 
 %setupEnvironment;
-subID='test1';
+subID='test';
 sub = subject(subID, 'rat', 'long-evans', 'male', '05/10/2005', '01/01/2006', 'unknown', 'wild caught');
 auth='pmm';
 machines={{'99A','000000000000',[1 1 1]}};
@@ -14,9 +14,9 @@ r=setPermanentStorePath(r,'C:\Documents and Settings\rlab\Desktop\standAloneData
 
 r = addSubject(r,sub,auth);
 
-r = setShapingPMM(r,{subID}, 'goToLeftDetection', '1_9');
-%r= setShapingPMM(r,{subID}, 'tiltDiscrim', '2_0')
-
+%r = setShapingPMM(r,{subID}, 'goToLeftDetection', '1_9');
+r= setShapingPMM(r,{subID}, 'tiltDiscrim', '2_0')
+%r = setHeadFixProtocol(r,{subID})
      
 
 bIDs = getBoxIDs(r);

@@ -2,7 +2,7 @@ function [t updateTM stimDetails stimSpec targetPorts details] = calcStimBeta(t,
 
 if ~stimIsCached(t)
     t=inflate(t);
-    setSeed(stimulus, 'seedFromClock');
+    setSeed(t, 'seedFromClock');
     updateTM=1;
 else
     updateTM=0;
@@ -193,7 +193,7 @@ end
         stimDetails.framesFlankerOnOff=t.framesFlankerOnOff;
         stimDetails.stdGaussMask=t.stdGaussMask;
         stimDetails.pixPerCycs=t.pixPerCycs;
-        stimDetails.gratingType=gratingType;
+        stimDetails.gratingType=t.gratingType;
 
         %some computation required
         stimDetails.deviation = devY;    %fractional devitation

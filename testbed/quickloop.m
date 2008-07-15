@@ -6,21 +6,23 @@ if 1
     clc; format short g
 end
 
-rootPath='C:\pmeier\Ratrix\';
+cd ('C:\Documents and Settings\rlab\Desktop\merge20080324\bootstrap')
+setupEnvironment
+ListenChar(1)
+rootPath=getRatrixPath;
+addpath(genpath([fullfile(rootPath,'advancedCalibration')]))
 
 soundOn = 1;
 
 %% addPaths
-warning('off','MATLAB:dispatcher:nameConflict')
-
-addpath(genpath([fullfile(rootPath,'classes')]))
-addpath(genpath([fullfile(rootPath,'advancedCalibration')]))
+%warning('off','MATLAB:dispatcher:nameConflict')
+%addpath(genpath([fullfile(rootPath,'classes')]))
 %pathSep='\'; %old
 %addpath(genpath([rootPath 'Server' pathSep]))% Everything in the ratrix 
 %addpath(genpath(['C:\pmeier\newStimTest\']))% A few extra things in this project
-warning('on','MATLAB:dispatcher:nameConflict')
+%warning('on','MATLAB:dispatcher:nameConflict')
 
-[parameterStructure, super] = getdefaultParameters(ifFeatureGoRightWithTwoFlankTrialManager);
+[parameterStructure, super] = getDefaultParameters(ifFeatureGoRightWithTwoFlankTrialManager);
 
 trialManager =  ifFeatureGoRightWithTwoFlankTrialManager(parameterStructure,super);
 
@@ -84,8 +86,9 @@ if testLoop
             startTrialTime = now;
             for frame = 1:numFrames
                 timeSinceTrial = now - startTrialTime;
-                [stimDetails frameRecords]=doDynamicPTBFrame(t,phase,stimDetails,frame,timeSinceTrial,eyeRecords, RFestimate, w);
-
+                %[stimDetails frameRecords]=doDynamicPTBFrame(t,phase,stimDetails,frame,timeSinceTrial,eyeRecords, RFestimate, w);
+                 [stimDetails frameRecords]=doUniqueRepeatDriftFrame(t,phase,stimDetails,frame,timeSinceTrial,eyeRecords, RFestimate, w);
+                
                 vbl(frame,trial) = Screen('Flip', w);
             end
         end

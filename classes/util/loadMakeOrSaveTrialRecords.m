@@ -12,7 +12,12 @@ if length(varargin)>=1
 end
 
 if length(varargin)==1
-    fs=remoteDir(subPath);
+    if isempty(findstr('\\',subPath))
+        fs=dir(subPath);
+    else
+        subPath
+        error('not allowed to work on remote dirs due to windows networking/filesharing bug')
+    end
 
     if ismember(fileName,{fs.name})
         in=load(fullfile(subPath, fileName),'trialRecords');

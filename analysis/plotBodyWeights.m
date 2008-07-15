@@ -160,7 +160,11 @@ for which =1:numSubjects
         averageWeight=max(s{i}.thresh(dateFilter))/thresholdInDataBase;  %this is the expected weight of a healthy animal for the most recent sample
         labeledY2= unique(sort([s{i}.weights(end),max(s{i}.thresh(~isnan(s{i}.thresh)))]));
         labeledY2val=labeledY2/averageWeight;
-        labeledY2str={num2str(labeledY2val(1),2),num2str(labeledY2val(2),2)};
+        if length(labeledY2)==2
+            labeledY2str={num2str(labeledY2val(1),2),num2str(labeledY2val(2),2)};
+        else %must only be one... happens ocassionaly from the unique
+            labeledY2str={num2str(labeledY2val(1),2)};
+        end
         set(a2(i),'XTick',[])
         set(a2(i),'YTick',labeledY2)
         set(a2(i),'YTickLabel',labeledY2str)
@@ -306,8 +310,12 @@ for which =1:numSubjects
         %set the right axis
         averageWeight=max(s{i}.thresh(dateFilter))/thresholdInDataBase;  %this is the expected weight of a healthy animal for the most recent sample
         labeledY2= unique(sort([s{i}.weights(end),max(s{i}.thresh(~isnan(s{i}.thresh)))]));
-        labeledY2val=labeledY2/averageWeight;
-        labeledY2str={num2str(labeledY2val(1),2),num2str(labeledY2val(2),2)};
+        labeledY2val=labeledY2/averageWeight;   
+        if length(labeledY2)==2
+            labeledY2str={num2str(labeledY2val(1),2),num2str(labeledY2val(2),2)};
+        else %must only be one... happens ocassionaly from the unique
+            labeledY2str={num2str(labeledY2val(1),2)};
+        end        
         set(a2(i),'XTick',[])
         set(a2(i),'YTick',labeledY2)
         set(a2(i),'YTickLabel',labeledY2str)

@@ -16,18 +16,20 @@ format long g
 
 if ~isdeployed
 warning('off','MATLAB:dispatcher:nameConflict')
-addpath(RemoveSVNPaths(removeSecretBackups(genpath(getRatrixPath))));
-%addpath('\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\ratrixAdmin\');
+addpath(RemoveSVNPaths(genpath(getRatrixPath)));
 warning('on','MATLAB:dispatcher:nameConflict')
 end
 
 if isdeployed
     javaaddpath('analysis_mcr/Documents and Settings/rlab/Desktop/ratrix/db/classes12_g.jar')
 end
-conn=dbConn('132.239.158.177','1521','dparks','pac3111');
+conn=dbConn;
 
-rack_ids=[1 2];
+%rack_ids=[1 2];
 
+stations=getStations(conn);
+stations=[stations{:}];
+rack_ids=unique([stations.rack_id]);
 
 rackStrs={};
 defaultRackStrIndex=1;
@@ -69,7 +71,7 @@ numRows=0;
 numCols=0;
 getStationInfo
     function getStationInfo
-        conn=dbConn('132.239.158.177','1521','dparks','pac3111');
+        conn=dbConn;
         %s=getStations(conn)
         s=getStationsOnRack(conn,selection.rack);
         stationStrs={'all stations'};
@@ -199,7 +201,7 @@ plotB=uicontrol(f,'Style','pushbutton','String','plot','Units','pixels','Positio
             figure(fs(i))
             close(fs(i));
         end
-        fs=analysisPlotter(selection,apath);
+        fs=analysisPlotter(selection,apath,false);
     end
 
 
@@ -245,7 +247,7 @@ end
     end
 
 function selection=calcplot(selection,heatStrs,numRows,numCols,s)
-conn=dbConn('132.239.158.177','1521','dparks','pac3111');
+conn=dbConn;
 
 selection.subjects={};
 selection.titles={};

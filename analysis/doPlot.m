@@ -1,4 +1,4 @@
-function doPlot(plotType,d,figureHandle,subplotX,subplotY,subplotInd)
+function doPlot(plotType,d,figureHandle,subplotX,subplotY,subplotInd,goodType,removeHuman)
 % doPlot(plotType,d,figureHandle,subplotX,subplotY,subplotInd)
 % plots ratrix data intelligently
 %
@@ -60,11 +60,18 @@ confirmDataMembers(d,plotType);
 subject=d.info.subject{1};
 
 %determine good trials
-goods=getGoods(d);
+if ~exist('goodType','var')
+    goodType=[];
+end
+if ~exist('removeHuman','var')
+    removeHuman=true;
+end
+goods=getGoods(d,goodType,removeHuman);
 
 %redefine goods for bias -- no center allowed!
 if any(strcmp(plotType,{'plotBias','plotBiasScatter'}))
-    goods=getGoods(d,'forBias');
+
+        goods=getGoods(d,'forBias',removeHuman);
 
     side=double(d.response(goods)==3); %right=1 left=0
     check=size(side,2)==sum(d.response(goods)==1)+sum(d.response(goods)==3);
@@ -82,10 +89,17 @@ end
 
 
 %plot where it belongs
-if exist('figureHandle','var')
+if exist('figureHandle','var') && ~isempty(figureHandle)
     figure(figureHandle);
-    if exist('subplotX','var') & exist('subplotY','var') & exist('subplotInd','var')
-        subplot(subplotX, subplotY, subplotInd);
+    if exist('subplotX','var') && exist('subplotY','var') && exist('subplotInd','var')
+        empties=cellfun(@isempty,{subplotX subplotY subplotInd});
+        if any(empties)
+            if ~all(empties)
+                error('can''t have some empty subplot inds and some not empty')
+            end
+        else
+            subplot(subplotX, subplotY, subplotInd);
+        end
     end
 else
     figureHandle=[];
@@ -113,8 +127,12 @@ switch plotType
             CTsPerDay=makeDailyRaster(d.correct,d.date,CTs);
 
             %combine
-            allTypes=[goodTrialsPerDay; CTsPerDay; computerTrialsPerDay; humanTrialsPerDay ];
+            allTypes=[goodTrialsPerDay; CTsPerDay; computerTrialsPerDay ];
 
+            if removeHuman
+                allTypes=[allTypes; humanTrialsPerDay];
+            end
+            
         else
             %define types
             CTs=d.correctionTrial==1;

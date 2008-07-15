@@ -83,3 +83,9 @@ pmm/exploreDPrime.m -text
 /peekAtData.m -text
 /getRatrixFilesFromStation.m -text
 /plotBodyWeights.m -text
+pmm/bigLick.m -text
+pmm/getDprMesh.m -text
+pmm/analyzePerContextualState.m -text
+pmm/megaTrials.m -text
+pmm/analyze117.m -text
+/analyzeGaze.m -text

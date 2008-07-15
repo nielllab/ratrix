@@ -6,3 +6,5 @@
 /getName.m -text
 /getTrainingStep.m -text
 /sampleStimFrame.m -text
+/calibrateEyeTracker.m -text
+/stopEyeTracking.m -text

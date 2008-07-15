@@ -1,3 +1,4 @@
+
 function out=computeGabors(params,mean,width,height,waveform,normalizeMethod,cornerMarkerOn)
 
 % params = [.3 16 0 pi/6 1 0.001 1/2 1/2 ];
@@ -45,6 +46,7 @@ xPosPct=params(:,7);
 yPosPct=params(:,8);
 
 if any(pixPerCyc<2)
+    pixPerCyc
     error('pixPerCyc must be >= 2.0')
 end
 
@@ -88,6 +90,9 @@ oldMethod=0;
             %                               -the management
             sqPhase = phase(i) + (ceil(abs(phase(i)/(2*pi)))+1)*2*pi;
 
+            % POSSIBLE Error!!!!! Do we need this? It has never been used
+            % -pmm 080714
+            % sqPixPerCycs=pixPerCyc*2;
             line = rem(([0:biggest*2]+sqPhase*pixPerCyc(i)/(2*pi)+pixPerCyc(i)/2)/pixPerCyc(i),1)>=.5;
             line=line-.5;
 

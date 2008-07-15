@@ -190,7 +190,7 @@ for i=1:length(subjectFiles)
 
 
                 %factor out trial range check
-                theseTrials=[1:length(newTrialRecs)];
+                theseTrials=int32([1:length(newTrialRecs)]);
                 shouldBe=ranges{i}(1,j)+theseTrials-1 <= ranges{i}(2,j);
                 if ~all(shouldBe)
                     shouldBe

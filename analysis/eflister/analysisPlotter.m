@@ -1,4 +1,4 @@
-function fs=analysisPlotter(selection,compiledFileDir)
+function fs=analysisPlotter(selection,compiledFileDir,includeKeyboard)
 
 
 % if ~isdeployed
@@ -29,7 +29,7 @@ for i=1:size(selection.subjects,1)
             if ~isempty(selection.subjects{i,j,k})
                 subplot(numRows,numCols,(j-1)*numCols+k)
                 title(selection.subjects{i,j,k})
-                doAnalysisPlot(compiledFileDir,selection.subjects{i,j,k},selection.type, selection.filter, selection.filterVal, selection.filterParam);
+                doAnalysisPlot(compiledFileDir,selection.subjects{i,j,k},selection.type, selection.filter, selection.filterVal, selection.filterParam,includeKeyboard);
             end
         end
     end

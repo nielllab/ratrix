@@ -1,3 +1,7 @@
 /preprocess.m -text
 /checkImages.m -text
 /prepareImages.m -text
+/getImageNames.m -text
+/getDist.m -text
+/validateImages.m -text
+/loadRemoteImage.m -text

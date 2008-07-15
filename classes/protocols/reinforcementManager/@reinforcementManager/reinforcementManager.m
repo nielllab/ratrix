@@ -39,6 +39,7 @@ switch nargin
         if varargin{2}>=0 && varargin{2}<=1
             r.fractionPenaltySoundIsOn=varargin{2};
         else
+            varargin{2}
             error('fractionPenaltySoundIsOn must be >=0 and <=1')
         end
         

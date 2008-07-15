@@ -10,7 +10,6 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             constants = getConstants(rn);
         end
 
-
         %if isempty(trialRecords)
         trialRecords = getTrialRecordsForSubjectID(r,getID(subject));
         %end
@@ -81,6 +80,8 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
         end
 
 
+        %the doTrial that matters in eyeDev is the one in promptedNAFC
+
         if isa(stimManager,'stimManager')
             trialRecords(trialInd).sessionNumber = sessionNumber;
             trialRecords(trialInd).date = datevec(now);
@@ -90,9 +91,9 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             trialRecords(trialInd).trainingStepNum = t;
             trialRecords(trialInd).numStepsInProtocol = getNumTrainingSteps(p);
             trialRecords(trialInd).protocolVersion = getProtocolVersion(subject);
-            
+
             % Initializing
-            trialRecords(trialInd).correct = []; 
+            trialRecords(trialInd).correct = [];
             trialRecords(trialInd).reinforcementManager = [];
             trialRecords(trialInd).proposedRewardSizeULorMS=[];
             trialRecords(trialInd).proposedMsPenalty=[];
@@ -161,6 +162,21 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 end
             end
 
+            if (isempty(trialRecords(trialInd).targetPorts) || isvector(trialRecords(trialInd).targetPorts))...
+                    && (isempty(trialRecords(trialInd).distractorPorts) || isvector(trialRecords(trialInd).distractorPorts))
+                portUnion=[trialRecords(trialInd).targetPorts trialRecords(trialInd).distractorPorts];
+                if length(unique(portUnion))~=length(portUnion) ||...
+                        any(~ismember(portUnion, getResponsePorts(trialManager,getNumPorts(station))))
+
+                    error('targetPorts and distractorPorts must be disjoint, contain no duplicates, and subsets of responsePorts')
+                end
+            else
+                trialRecords(trialInd).targetPorts 
+                trialRecords(trialInd).distractorPorts
+                error('targetPorts and distractorPorts must be row vectors')
+            end
+
+
             audioStimulus = [];
             if ismethod(newSM,'getAudioStimulus');
                 audioStim = getAudioStimulus(newSM);
@@ -173,7 +189,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             end
 
             % Wait to cache sounds until here because you might get new ones
-            [trialManager.soundMgr updateSndM]=cacheSounds(trialManager.soundMgr);  %update of soundManager was overwritting update of stimulus manager. now fixed pmm 2008/05/02 
+            [trialManager.soundMgr updateSndM]=cacheSounds(trialManager.soundMgr);  %update of soundManager was overwritting update of stimulus manager. now fixed pmm 2008/05/02
             updateTM = updateTM || updateSndM;  %
 
 
@@ -227,7 +243,9 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                     trialRecords(trialInd).containedAPause,...
                     trialRecords(trialInd).containedForcedRewards, ... %pmm added 4/3/08
                     trialRecords(trialInd).didHumanResponse, ... %pmm added 4/18/08
-                    trialRecords(trialInd).didStochasticResponse, ...
+                    trialRecords(trialInd).didStochasticResponse,...
+                    eyeData,...
+                    gaze,...
                     station]= ...
                     stimOGL( ...
                     trialManager, ...
@@ -245,7 +263,15 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                     manualOn, ...
                     1, ...
                     .1, ... % 10% should be ~1 ms of acceptable frametime error
-                    0,isCorrection,rn,getID(subject),trialRecords(trialInd).stimManagerClass,false);
+                    0,isCorrection,rn,getID(subject),trialRecords(trialInd).stimManagerClass,eyeTracker,false);
+
+                
+                
+                if ~isempty(eyeTracker)
+                    [junk junk eyeDataVarNames]=getSample(eyeTracker); %throws out a sample in order to get variable names... dirty
+                    saveEyeData(eyeTracker,eyeData,eyeDataVarNames,gaze,trialRecords(trialInd).trialNumber)
+                end
+
 
                 if stopEarly
                     'got stopEarly 1'
@@ -439,8 +465,10 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                         errorRecords(trialInd).leftWithManualPokingOn,...
                         errorRecords(trialInd).containedAPause,...
                         errorRecords(trialInd).containedForcedRewards, ...
-                        errorRecords(trialInd).didHumanResponse, ... 
+                        errorRecords(trialInd).didHumanResponse, ...
                         errorRecords(trialInd).didStochasticResponse, ...
+                        xxEyeData,...
+                        xxGaze,...
                         station] ...
                         =stimOGL( ...
                         trialManager, ...
@@ -454,7 +482,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                         [], ...
                         [], ...
                         trialRecords(trialInd).interTrialLuminance, ...
-                        station,0,0,.5,1,0,rn,getID(subject),trialRecords(trialInd).stimManagerClass,hasAirpuff(station));
+                        station,0,0,.5,1,0,rn,getID(subject),trialRecords(trialInd).stimManagerClass,eyeTracker,hasAirpuff(station));
 
                     trialRecords(trialInd).errorRecords=errorRecords(trialInd);
 
@@ -549,7 +577,7 @@ else
 
     sca
 
-'****'
+    '****'
     isa(station,'station')
     isa(stimManager,'stimManager')
     isa(subject,'subject')
@@ -560,7 +588,7 @@ else
     isa(stimManager,'ifFeatureGoRightWithTwoFlank')
     rn
     getRewardMethod(station)
-'****'
-    
+    '****'
+
     error('need station, stimManager, subject, ratrix, and rnet objects')
 end

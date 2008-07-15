@@ -19,7 +19,18 @@ end
 quit=false;
 constants = getConstants(r);
 
-ratrixDataPath='C:\Documents and Settings\rlab\Desktop\testdata\'; %figure out where to store this
+ratrixDataPath=fullfile(fileparts(fileparts(getRatrixPath)),'testdata',filesep);
+%ratrixDataPath='C:\Documents and Settings\rlab\Desktop\testdata\'; 
+%figure out where to store this
+%actually, this is an ok place -- there's nothing persistent
+%that the client/bootstrap can use to know where it sticks ratrices
+%the server could tell it where to stick them, but it's cooler
+%that it can decide whatever it wants.  the thing is that
+%box/station directories make themselves according to their own paths, 
+%which under the old way of thinking could be remote, but in reality
+%are always local.  this make for counterintuitive behavior when
+%miniratrices passed over an rnet implant themselves and have separate
+%server and data directories.
 
 switch cmd
     %commands that require status=NO_RATRIX
@@ -79,6 +90,9 @@ switch cmd
                         quit = true;
                     elseif repositorySVNversion~=runningSVNversion
                         writeSVNUpdateCommand(r,repositorySVNversion); %temporary fix -- always go to head of that tag
+                        %this looks wrong -- revNumber is a string that is
+                        %not our url, yet we are simply going to the head
+                        %of our url?
                         quit = true;
                     end
                 elseif isinteger(revNumber)

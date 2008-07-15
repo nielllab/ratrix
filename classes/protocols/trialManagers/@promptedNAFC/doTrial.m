@@ -29,6 +29,24 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             trialRecords(trialInd).trialNumber=1;
         end
 
+
+        eyeTracker=getEyeTracker(trialManager);
+        if ~isempty(eyeTracker)
+            if isa(eyeTracker,'eyeTracker')
+                if isTracking(eyeTracker)
+                    checkRecording(eyeTracker); % check if recording eye data each trial
+                else
+                    %start recording eye data
+                    eyeTracker=initialize(eyeTracker,getID(subject),window);
+                    eyeTracker=start(eyeTracker,trialRecords(trialInd).trialNumber);
+                    trialManager=setEyeTracker(trialManager,eyeTracker);
+                    updateTM=true;
+                end
+            else
+                error('not an eyeTracker')
+            end
+        end
+        
         if isa(stimManager,'stimManager')
             trialRecords(trialInd).sessionNumber = sessionNumber;
             trialRecords(trialInd).date = datevec(now);
@@ -266,14 +284,16 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 %                 %%%%%%%%%%%%%%%%%%%%%%%%% end promptNewLines
 
 
-                [stopEarly trialRecords(trialInd).response,...
+                 [stopEarly trialRecords(trialInd).response,...
                     trialRecords(trialInd).responseDetails,...
                     trialRecords(trialInd).containedManualPokes,...
                     trialRecords(trialInd).leftWithManualPokingOn,...
                     trialRecords(trialInd).containedAPause,...
                     trialRecords(trialInd).containedForcedRewards, ... %pmm added 4/3/08
                     trialRecords(trialInd).didHumanResponse, ... %pmm added 4/18/08
-                    trialRecords(trialInd).didStochasticResponse]= ...
+                    trialRecords(trialInd).didStochasticResponse,...
+                    eyeData,...
+                    gaze]= ...
                     stimOGL( ...
                     trialManager, ...
                     stim, ...
@@ -290,7 +310,13 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                     manualOn, ...
                     1, ...
                     .1, ... % 10% should be ~1 ms of acceptable frametime error
-                    0,isCorrection,rn,getID(subject),trialRecords(trialInd).stimManagerClass);
+                    0,isCorrection,rn,getID(subject),trialRecords(trialInd).stimManagerClass,eyeTracker);
+
+                if ~isempty(eyeTracker)
+                    [junk junk eyeDataVarNames]=getSample(eyeTracker); %throws out a sample in order to get variable names... dirty
+                    saveEyeData(eyeTracker,eyeData,eyeDataVarNames,gaze,trialRecords(trialInd).trialNumber)
+                    %not currently saving data from any other phase besides disciminandum
+                end
 
                 if stopEarly
                     'got stopEarly 1'
@@ -492,7 +518,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                         [], ...
                         [], ...
                         trialRecords(trialInd).interTrialLuminance, ...
-                        station,0,0,.5,1,0,rn,getID(subject),trialRecords(trialInd).stimManagerClass);
+                        station,0,0,.5,1,0,rn,getID(subject),trialRecords(trialInd).stimManagerClass,eyeTracker);
 
                     trialRecords(trialInd).errorRecords=errorRecords(trialInd);
 

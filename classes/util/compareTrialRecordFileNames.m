@@ -1,7 +1,4 @@
 function success=compareTrialRecordFileNames(permanentStorePath)
-%permanentStorePath=
-%'\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\behavior\pmeierTrialRecords\subjects'; 
-%'\\132.239.158.181\rlab\Rodent-Data\ratrixAdmin\subjects';
 
 subDirs = dir(permanentStorePath);
 
@@ -20,9 +17,10 @@ for i=1:length(subDirs)
         warning('Skipping directory, does not exist in subject list');
         continue
     end
-    
-    dbFileNames=getTrialRecordFiles(conn,subName);
-    
+
+    %dbFileNames=getTrialRecordFiles(conn,subName);
+
+    fprintf('checking %s\n',subName)
     fsFileNames={};
     [verifiedHistoryFiles ranges]=getTrialRecordFiles(fullfile(permanentStorePath,subName));
     for fn=1:length(verifiedHistoryFiles)
@@ -30,19 +28,22 @@ for i=1:length(subDirs)
         fsFileNames{end+1}=[nme ext];
     end
     fsFileNames=fsFileNames';
-    
+
     %subPath = fullfile(permanentStorePath,subDirs(i).name,'trialRecords_*-*_*-*.mat');
     %recFiles = dir(subPath);
     %fsFileNames = {recFiles.name};
-    
-    intersectFileNames = intersect(dbFileNames,fsFileNames);
-    if length(intersectFileNames) == length(dbFileNames) && length(dbFileNames) == length(fsFileNames)
+
+
+
+    %intersectFileNames = intersect(dbFileNames,fsFileNames);
+    %if length(intersectFileNames) == length(dbFileNames) && length(dbFileNames) == length(fsFileNames)
+    if compareTrialRecordFileNames(conn,subName,fsFileNames)
         fprintf('%s ok\n',subName)
     else
-        warning('Filesystem and DB File table do not match!')
-        subName
-        dbFileNames
-        fsFileNames
+        %         warning('Filesystem and DB File table do not match!')
+        %         subName
+        %         dbFileNames
+        %         fsFileNames
         %closeConn(conn);
         %error('Out of synch')
         success=false;

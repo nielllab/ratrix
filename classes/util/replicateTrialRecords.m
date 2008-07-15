@@ -32,7 +32,27 @@ for f=1:length(subDirs)
     fileName=subDirs(f).file;
 
     [fp,fn,fe,fv]=fileparts(fileName);
-    tr=load(fullfile(filePath,fileName));
+    try
+        tr=load(fullfile(filePath,fileName)); %this is safe cuz it's local
+    catch loaderror
+        if strcmp(loaderror.identifier,'MATLAB:load:unableToReadMatFile')
+            fullfile(filePath,fileName)
+            loaderror.message
+            warning('can''t load file, renaming')
+            tr.trialRecords=[];
+            [sMV msgMV idMV]=movefile(fullfile(filePath,fileName),fullfile(filePath,['corrupt.' fileName '.' datestr(now,30) '.corrupt']));
+            if ~sMV
+                ple
+                msgMV
+                idMV
+                error('error trying to rename unreadable trialrecords file')
+            end
+        else
+            ple
+            error('unknown load problem')
+        end
+    end
+
     if ~isempty(tr.trialRecords)
         trialNums=[tr.trialRecords.trialNumber];
         if ~all(diff(trialNums)==1)
@@ -46,7 +66,7 @@ for f=1:length(subDirs)
         for j=1:length(paths)
             [success(j) message messageID]=mkdir(fullfile(paths{j},subjectName));
             if success(j) %ignore warning if directory exists
-                d=remoteDir(fullfile(paths{j},subjectName));
+                d=dir(fullfile(paths{j},subjectName)); %not safe cuz of windows networking/filesharing bug -- but will just result in overwriting existing trialRecord file in case of name collision, should never happen -- ultimately just compare against filenames in oracle
                 for i=1:length(d)
                     if strcmp(d(i).name,newFileName)
                         if ~d(i).isdir

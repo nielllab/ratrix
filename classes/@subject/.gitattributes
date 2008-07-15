@@ -16,3 +16,5 @@
 /getMiniDatabase.m -text
 /getDatabaseFact.m -text
 /changeAllReinforcementManagers.m -text
+/stopEyeTracking.m -text
+/calibrateEyeTracker.m -text

@@ -1,130 +1,76 @@
-function [s updateSM out]=checkImages(s,n,dups,backgroundcolor)
-try
-    d=dir(fullfile(s.directory,'*.png'));
-catch
-    error('can''t load that directory')
+function [s updateSM out]=checkImages(s,ind,backgroundcolor, pctScreenFill, normalizeHistograms)
+
+if ~exist('pctScreenFill','var')
+    pctScreenFill=0.9;
 end
 
-prefix='';
-theExt='';
-digits={};
-ims={};
-alphas={};
-
-tic
-for i=1:length(d)
-    if ~d(i).isdir
-        [pathstr,name,ext,ver] = fileparts(d(i).name);
-        try
-            [im m alpha]=imread(fullfile(s.directory,[name ext]));  %,'BackgroundColor',zeros(1,3)); this would composite against black and return empty alpha
-            size(im)
-            if ~strcmp(class(im),'uint8') || ~ismember(length(size(im)),[2 3]) || (length(size(im))==3 && size(im,3)~=3) || isempty(alpha) || ~isempty(m)
-                size(im)
-                error('images must be png with alpha channel - unexpected image format for %s: %s',fullfile(s.directory,[name ext]),class(im))
-            end
-            
-            if length(size(im))==3
-                im=uint8(floor(sum(im,3)/3)); %convert to greyscale
-            end
-        catch
-            fullfile(s.directory,[name ext])
-            error('non-image file in directory')
-        end
-        digs=isstrprop(name,'digit');
-        if any(diff(int8(digs))<0)
-            name
-            error('digits found mid-name')
-        end
-        if isempty(prefix)
-            prefix=name(~digs);
-            theExt=ext;
-        elseif ~strcmp(prefix,name(~digs))
-            prefix
-            name(~digs)
-            error('more than one prefix in directory')
-        elseif ~strcmp(theExt,ext)
-            theExt
-            ext
-            error('extensions don''t match')
-        end
-        digits{end+1}=name(digs);
-        ims{end+1}=im;
-        alphas{end+1}=alpha;
-    end
+if ~exist('normalizeHistograms','var')
+    normalizeHistograms=true;
 end
 
-cacheFresh=true;
-if isempty(s.cache)
-    cacheFresh=false;
+if isscalar(ind) && isinteger(ind) && ind>0 && ind<=length(s.trialDistribution)
+    fileNames=s.trialDistribution{ind}{1};
 else
-    if length(s.cache.digits)==length(digits) && strcmp(s.cache.prefix,prefix) && all(ismember(digits,s.cache.digits)) && s.cache.n==n
-        for i=1:length(s.cache.digits)
-            ind=find(strcmp(s.cache.digits{i},digits));
-            if ~isscalar(ind)
-                digits
-                s.cache.digits
-                error('dupe digits found')
-            end
-            if ~(all(s.cache.ims{i}(:)==ims{ind}(:)) && all(s.cache.alphas{i}(:)==alphas{ind}(:)))
-                cacheFresh=false;
-                break
+    error('bad ind')
+end
+
+if false %had to disable cache checking on every trial, cuz of trac issue 98
+%load image data
+[ims alphas names ext n]=validateImages(s);
+
+if ~isempty(s.cache)
+    if all(ismember({'ims' 'alphas' 'names' 'ext'},fields(s.cache)))
+        if length(ims)~=length(s.cache.ims)
+            s.cache=[];
+        else
+            for i=1:length(ims)
+                if ~all(ims{i}(:)==s.cache.ims{i}(:)) || ~all(alphas{i}(:)==s.cache.alphas{i}(:)) || ~all(strcmp(s.cache.names{i},names{i})) || ~strcmp(ext,s.cache.ext)
+                    s.cache=[];
+                end
             end
         end
     else
-        cacheFresh=false;
+        s.cache=[];
     end
 end
-updateSM=~cacheFresh;
+end
 
-disp(sprintf('\nwasted %g secs checking %d images\n',toc,i))
+updateSM=false;
+if isempty(s.cache) %without the above, we won't see changes to the files once we are created, must regenerate stimManager to refresh cache
+    [ims alphas names ext n]=validateImages(s);
+    
+    s.cache.names = names;
+    s.cache.alphas = alphas;
+    s.cache.ims = ims;
+    s.cache.ext = ext;
 
-if ~cacheFresh
-    
-    s.cache=[];
-    
-    s.cache.prefix=prefix;
-    s.cache.ims=ims;
-    s.cache.alphas=alphas;
-    s.cache.digits=digits;
-    s.cache.n=n;
-    
-    [allIms s.cache.deltas]=prepareImages(ims,alphas,[getMaxHeight(s) floor(length(digits)*getMaxWidth(s)/n)],.95,.9, backgroundcolor);
+    %scale images, set in background, normalize areas and histograms
+    [allIms s.cache.deltas]=prepareImages(ims,alphas,[getMaxHeight(s) floor(length(s.cache.names)*getMaxWidth(s)/n)],.95,pctScreenFill, backgroundcolor, normalizeHistograms);
 
     imWidth=size(allIms,2)/length(ims);
     for i=1:length(ims)
         colRange=(1:imWidth)+(i-1)*imWidth;
         s.cache.preparedIms{i}=allIms(:,colRange);
     end
+
+    updateSM=true;
 end
 
-clear('digits','ims','alphas')
+clear('ims','alphas','names','ext')
 
-%choose n image indices
-if n>length(s.cache.digits)
-    error('n must be <= num images')
-end
-if dups
-    inds=ceil(rand(1,n)*length(s.cache.digits));
-else
-    [garbage ord]=sort(rand(1,length(s.cache.digits)));
-    inds=ord(1:n);
+%find indices for the file names for this trial
+[checks inds]=ismember(fileNames,s.cache.names);
+
+if ~all(checks)
+    error('request for file name not in distribution')
 end
 
-%sort indices according to corresponding digits
-digs=[];
 for i=1:length(inds)
-    digs(i)=str2num(s.cache.digits{inds(i)});
-end
-[digs order]=sort(digs);
-inds=inds(order);
-
-for i=1:n
     out{i,1}=s.cache.preparedIms{inds(i)};
-    
+
     rec.directory=s.directory;
-    rec.prefix=prefix;
-    rec.digits=s.cache.digits{inds(i)};
-    rec.ext=ext;
+    rec.name=s.cache.names{inds(i)};
+    rec.ext=s.cache.ext;
     rec.delta=s.cache.deltas{inds(i)};
     out{i,2}=rec;
 end

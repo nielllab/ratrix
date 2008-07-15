@@ -1,6 +1,6 @@
-function [quit response responseDetails didManual manual didAPause didValves didHumanResponse didStochasticResponse]=  stimOGL(tm, ...
+function [quit response responseDetails didManual manual didAPause didValves didHumanResponse didStochasticResponse eyeData gaze]=  stimOGL(tm, ...
     stim, audioStim, LUT, type, metaPixelSize, window, ifi, ...
-    responseOptions, requestOptions, finalScreenLuminance, station, manual,allowQPM,timingCheckPct,noPulses,isCorrection,rn,subID,stimID)
+    responseOptions, requestOptions, finalScreenLuminance, station, manual,allowQPM,timingCheckPct,noPulses,isCorrection,rn,subID,stimID,eyeTracker)
 
 %this is a duplicate copy of the main private verison (mergeCode svn version 1116; Jun.06,2008)
 %a couple of changes --- search on 'changedPromptVerion'
@@ -191,6 +191,27 @@ function [quit response responseDetails didManual manual didAPause didValves did
 %     verbose = 1;
 
 %logwrite('entered stimOGL');
+
+%%
+if ~isempty(eyeTracker)
+    perTrialSyncing=false; %pass this in
+    if perTrialSyncing && isa(eyeTracker,'eyeLinkTracker')
+        status=Eyelink('message','SYNCTIME');
+        if status~=0
+            error('message error, status: ',status)
+        end
+    end
+
+    framesPerAllocationChunk=10000;
+
+    if isa(eyeTracker,'eyeLinkTracker')
+        eyeData=nan(framesPerAllocationChunk,40);
+        gaze=nan(framesPerAllocationChunk,2);
+    else
+        error('no other methods')
+    end
+end
+%%
 
 
 if window<0
@@ -817,9 +838,25 @@ try
                 framePulse(station);
             end
         end
+%%
+        if ~isempty(eyeTracker)
+            if ~checkRecording(eyeTracker)
+                sca
+                error('lost tracker connection!')
+            end
 
+            if frameNum>length(eyeData)
+                %  allocateMore
+                newEnd=length(eyeData)+ framesPerAllocationChunk;
+                disp(sprintf('did allocation to eyeTrack data; up to %d samples enabled',newEnd))
+                eyeData(end+1:newEnd,:)=nan;
+                gaze(end+1:newEnd,:)=nan;
+            end
 
+            [gaze(frameNum,:) eyeData(frameNum,:)]=getSample(eyeTracker);
 
+        end
+%%            
         %save facts about missed frames
         if missed>0 && frameNum<responseDetails.numFramesUntilStopSavingMisses
             disp(sprintf('warning: missed frame num %d',frameNum));
@@ -1285,6 +1322,8 @@ try
         Screen('Close'); %leaving off second argument closes all textures but leaves windows open
     end
 
+
+    
     Priority(originalPriority);
 
 catch
@@ -1294,11 +1333,12 @@ catch
     ers.stack.name
     ers.stack.line
 
-
+    
     Screen('CloseAll');
     Priority(originalPriority);
     ShowCursor(0);
     ListenChar(0);
+    cleanUp(eyeTracker)
     rethrow(lasterror);
     response=sprintf('error_in_StimOGL: %s',ers.message);
 

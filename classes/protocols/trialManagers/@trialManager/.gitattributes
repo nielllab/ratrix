@@ -16,3 +16,8 @@
 /getRewardSizeULorMS.m -text
 /setReinforcementManager.m -text
 /getReinforcementManager.m -text
+/setEyeTracker.m -text
+/setSeed.m -text
+/calibrateEyeTracker.m -text
+/stopEyeTracking.m -text
+/getEyeTracker.m -text

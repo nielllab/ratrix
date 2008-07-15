@@ -13,3 +13,5 @@
 /sampleStimFrame.m -text
 /setTrialManager.m -text
 /setStimManager.m -text
+/stopEyeTracking.m -text
+/calibrateEyeTracker.m -text

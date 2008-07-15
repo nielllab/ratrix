@@ -84,7 +84,7 @@ if ~isempty(d1) & ~isempty(d2) %this only happens if there is data to combine
         for i=1:length(f2)
             if ~any(strcmp(f1,f2{i}))
                 if verbose
-                disp(sprintf('found a new field in d2 that is not present in d1: %s',f2{i}))
+                    disp(sprintf('found a new field in d2 that is not present in d1: %s',f2{i}))
                 end
                 %add nans for undefined field in the past (the past is d1)
                 command=sprintf('d1.%s=nan(size(d1.date));',f2{i});
@@ -98,18 +98,18 @@ if ~isempty(d1) & ~isempty(d2) %this only happens if there is data to combine
                 end
             end
         end
-        
+
         %redo for safety, because new terms may have been added.... but I doubt it
         f1=fields(d1);
         if any(strcmp(f1,'info'))
             f1(find(strcmp(f1,'info')))=[];
         end
-        
-                %if there are new fields in d1 then fill them in d2
+
+        %if there are new fields in d1 then fill them in d2
         for i=1:length(f1)
             if ~any(strcmp(f2,f1{i}))
                 if verbose
-                disp(sprintf('found a new field in d1 that is not present in d2: %s',f1{i}))
+                    disp(sprintf('found a new field in d1 that is not present in d2: %s',f1{i}))
                 end
                 %add nans for undefined field in the future (the future is d1)
                 command=sprintf('d2.%s=nan(size(d2.date));',f1{i});
@@ -123,7 +123,7 @@ if ~isempty(d1) & ~isempty(d2) %this only happens if there is data to combine
                 end
             end
         end
-   
+
         f2=fields(d2); %redo because new terms may have been added....
         if any(strcmp(f2,'info'))
             f2(find(strcmp(f2,'info')))=[];
@@ -137,20 +137,22 @@ if ~isempty(d1) & ~isempty(d2) %this only happens if there is data to combine
             try
                 eval(command)
             catch
-                disp(command); 
-                e=lasterr; 
+                disp(command);
+                e=lasterr;
                 e
                 error('problem with this command')
             end
         end
 
         %actually both should have info in them and should get joined...
-        combined.info.sessionIDs= unique([d1.info.sessionIDs d2.info.sessionIDs]);
         combined.info.subject=unique([d1.info.subject d2.info.subject]);
-        combined.info.station=unique([d1.info.station d2.info.station]);
-        combined.info.trialManagerClass=unique([d1.info.trialManagerClass d2.info.trialManagerClass]);
-        combined.info.stimManagerClass=unique([d1.info.stimManagerClass d2.info.stimManagerClass]);
-        %combined.info.numTrials=size(combined.date,2); %this is redundant and easy to recompute...PMM
+        if any(ismember({'sessionIDs','trialManagerClass','stimManagerClass','station'},fields(combined.info))) %could switch any to all
+            combined.info.sessionIDs= unique([d1.info.sessionIDs d2.info.sessionIDs]);
+            combined.info.station=unique([d1.info.station d2.info.station]);
+            combined.info.trialManagerClass=unique([d1.info.trialManagerClass d2.info.trialManagerClass]);
+            combined.info.stimManagerClass=unique([d1.info.stimManagerClass d2.info.stimManagerClass]);
+            %combined.info.numTrials=size(combined.date,2); %this is redundant and easy to recompute...PMM
+        end
 
         if strcmp(d1.info.subject, d2.info.subject)
             combined.info.subject=d1.info.subject;
@@ -162,7 +164,7 @@ if ~isempty(d1) & ~isempty(d2) %this only happens if there is data to combine
 
                 case 'char'
             end
-            error('trying to combine smallData from two different subjects')
+            %error('trying to combine smallData from two different subjects')
         end
     end
 end

@@ -3,7 +3,7 @@ function [subjects heatStrs stationStrs]=getCurrentSubjects(rack);
 
 %rack=1;
 
-conn=dbConn('132.239.158.177','1521','dparks','pac3111');
+conn=dbConn;
 heats=getHeats(conn);
 
 heatStrs= {};

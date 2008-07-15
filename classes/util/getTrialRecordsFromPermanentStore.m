@@ -12,7 +12,7 @@ end
 
 % Make the directory all the way down to the subject
 subjPath = fullfile(permanentStorePath,subjectID);
-if ~isDirRemote(subjPath)
+if ~isdir(subjPath) %not a problem if this fails due to windows filesharing/networking bug, cuz mkdir just noops with warning if dir exists
     [succ msg msgid]=mkdir(fullfile(permanentStorePath,subjectID));
     if ~succ
         msg
@@ -62,23 +62,23 @@ end
 
 goodRecs=getRangesFromTrialRecordFileNames(fileNames);
 
-if ~isempty(goodRecs)
-    [garbage sortIndices]=sort([goodRecs.trialStart],2);
-    sortedRecs = goodRecs(sortIndices);
-    if ~all([sortedRecs.trialStart]-[0 sortedRecs(1:end-1).trialStop])
-        [sortedRecs.trialStart; sortedRecs.trialStop]
-        error('ranges don''t follow consecutively')
-    end
-
-    if sortedRecs(1).trialStart ~= 1
-        [sortedRecs.trialStart; sortedRecs.trialStop]
-        error('first verifiedHistoryFile doesn''t start at 1')
-    end
-    if max(max([sortedRecs.trialStart]),max([sortedRecs.trialStop])) ~= sortedRecs(end).trialStop
-        [sortedRecs.trialStart; sortedRecs.trialStop]
-        error('didn''t find max at bottom right corner of ranges')
-    end
-end
+% if ~isempty(goodRecs)
+%     [garbage sortIndices]=sort([goodRecs.trialStart],2);
+%     sortedRecs = goodRecs(sortIndices);
+%     if ~all([sortedRecs.trialStart]-[0 sortedRecs(1:end-1).trialStop])
+%         [sortedRecs.trialStart; sortedRecs.trialStop]
+%         error('ranges don''t follow consecutively')
+%     end
+% 
+%     if sortedRecs(1).trialStart ~= 1
+%         [sortedRecs.trialStart; sortedRecs.trialStop]
+%         error('first verifiedHistoryFile doesn''t start at 1')
+%     end
+%     if max(max([sortedRecs.trialStart]),max([sortedRecs.trialStop])) ~= sortedRecs(end).trialStop
+%         [sortedRecs.trialStart; sortedRecs.trialStop]
+%         error('didn''t find max at bottom right corner of ranges')
+%     end
+% end
 
 if ~exist('filter') ||  isempty(filter)
     filter = {'all'};

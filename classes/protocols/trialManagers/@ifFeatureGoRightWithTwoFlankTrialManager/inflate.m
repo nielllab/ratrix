@@ -44,7 +44,8 @@ extraParams.mean=t.mean;
 
 stimTypes=3; %exclude mask
 %mask=getFeaturePatchStim(t,patchX,patchY,'variableOrientationAndPhase',0,0,[radius 1000 0 0 1 t.thresh 1/2 1/2]);
-mask=computeGabors([radius -99 0 0 2 t.thresh 1/2 1/2],0,patchX,patchY,'none',t.gaborNormalizeMethod,0);  %range from 0 to 1
+
+mask=computeGabors([radius 999 0 0 2 t.thresh 1/2 1/2],0,patchX,patchY,'none',t.gaborNormalizeMethod,0);  %range from 0 to 1
 
 goRightStim=getFeaturePatchStim(t,patchX,patchY,'variableOrientationAndPhase',t.goRightOrientations,t.phase,staticParams, setContrastScaleForOrientations(t,extraParams,t.goRightOrientations,aa));
 goLeftStim= getFeaturePatchStim(t,patchX,patchY,'variableOrientationAndPhase',t.goLeftOrientations,t.phase,staticParams, setContrastScaleForOrientations(t,extraParams,t.goLeftOrientations,aa));
@@ -111,7 +112,7 @@ switch t.renderMode
 
             integerType='uint8';
             t.cache.mask = cast(double(intmax(integerType))*(mask),integerType);
-                          
+           
                           
             cache{1}.features=cast(double(intmax(integerType))*(goRightStim), integerType);
             cache{2}.features=cast(double(intmax(integerType))*(goLeftStim), integerType);
@@ -129,11 +130,19 @@ switch t.renderMode
                     end
                 end
             end
-            
 
+            t.cache.maskTexture = screen('makeTexture',w,t.cache.mask);
             t.cache.orientationPhaseTextures=textures;
        
-
+            uniqueRepeatDrift=1;
+            if uniqueRepeatDrift
+            %%add some more for a test
+            t.cache.A=cast(double(intmax(integerType))*(rand(1,256)),integerType);
+            t.cache.B=cast(double(intmax(integerType))*(0.5+(sin([1:256]*2*pi/6)/2)),integerType);
+            t.cache.ATex = screen('makeTexture',w,t.cache.A);
+            t.cache.BTex = screen('makeTexture',w,t.cache.B);
+            end
+            
         catch
             sca
             ShowCursor;
@@ -143,6 +152,7 @@ switch t.renderMode
             err.stack.file
             rethrow(lasterror);
         end
+        
 end
 
 function extraParams=setContrastScaleForOrientations(t,extraParams,orientations,applyContrastDampingToPatch)

@@ -1,12 +1,7 @@
 /makePumpSystem.m -text
-/server.m -text
 /bootstrap.vbs -text
-/removeSecretBackups.m -text
-/standAloneTest.m -text
-/makeRatrix.m -text
 /server.vbs -text
 /getRatrixPath.m -text
-/makeDotRatrix.m -text
 /serverCheckForUpdate.m -text
 /ratrixServer.m -text
 /initRatrixPorts.m -text

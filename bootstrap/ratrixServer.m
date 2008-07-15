@@ -68,10 +68,10 @@ heatUpSinceTStr='';
 buttonT='start';
 
 
-rackNum=1;
+rackNum=getRackIDFromIP;
 %[heats,garbage]=getRatrixHeatInfo(rackNum);
 
-conn=dbConn('132.239.158.177','1521','dparks','pac3111');
+conn=dbConn;
 hts=getHeats(conn);
 for i=1:length(hts)
     heats{i,1}={hts{i}.name [hts{i}.red hts{i}.green hts{i}.blue]};
@@ -187,7 +187,7 @@ cycleB=uicontrol(f,'Style','togglebutton','String',buttonT,'Units','pixels','Pos
     end
 
     function run
-
+        fixSystemTime;
         [r sys rx]=startServer(servePump,dataPath);
         % Dan is initializing er to 0 032908
         er=0;
@@ -201,7 +201,7 @@ cycleB=uicontrol(f,'Style','togglebutton','String',buttonT,'Units','pixels','Pos
         [r rx sys]=stopServer(r,rx,servePump,sys,er,subjects);
         rp=getRatrixPath;
         rp=fullfile(rp,'analysis','eflister');
-        cmdStr=sprintf('matlab -automation -r "cd(''%s'');compileTrialRecords(%d);quit" &',rp,rackNum);
+        cmdStr=sprintf('matlab -automation -r "cd(''%s'');setupEnvironment;cd(''%s'');compileTrialRecords(%d);quit" &',fullfile(getRatrixPath,'bootstrap'),rp,rackNum);
         system(cmdStr);
         
         %whos
@@ -241,7 +241,7 @@ function makeMini(subjects,rackNum,miniSz,ha,heatCol)
 
 
 
-conn=dbConn('132.239.158.177','1521','dparks','pac3111');
+conn=dbConn;
 stationInfo=getStationsOnRack(conn,rackNum);
 closeConn(conn);
 

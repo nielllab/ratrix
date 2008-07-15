@@ -26,6 +26,8 @@ if ~isempty(strfind(types,'colin'))
         fpas=unique(d.flankerPosAngle);
         fpas(find(fpas==0 | fpas==99))=[]; %allowed to remove these
         if ~(length(fpas)==2 && diff(sign(fpas))==2)
+            fpas
+            d.info.subject{1}
             error('violates conditions for analysis: must have two positions, one CW and one CCW')
         end
         TFangleDiff=abs(d.targetOrientation-d.flankerOrientation); %target-flanker angle
@@ -124,6 +126,12 @@ switch types
         conditionInds(i+3,:)=popTargetInconsistent;
         conditionInds(i+4,:)=parallel;
 
+        
+           colors=[1 ,0 ,0;%colinear=red
+            0,1,1; %cyan
+            0,1,1; %cyan
+            0,0,0]; %black
+        
         i=i+4;
         %names = [names, {'colin','popTC','popTI', 'para'}]
         names = [names, {'---','|-|','-|-', '|||'}];

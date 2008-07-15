@@ -4,7 +4,7 @@ function t=promptedNAFC(varargin)
 % t=promptedNAFC(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,soundManager,...
 %                requestRewardSizeULorMS,percentCorrectionTrials,msResponseTimeLimit,pokeToRequestStim,...
 %                maintainPokeToMaintainStim,msMaximumStimPresentationDuration,maximumNumberStimPresentations,doMask, rewardManager,...
-%                delayMeanMs, delayStdMs, delayStim, promptStim)
+%                delayMeanMs, delayStdMs, delayStim, promptStim,eyeTracker,eyeController)
 % msResponseTimeLimit=0 means unlimited response time
 % msMaximumStimPresentationDuration=0 means unlimited stim presentation duration
 % maximumNumberStimPresentations=0 means unlimited presentations
@@ -30,7 +30,7 @@ switch nargin
         else
             error('Input argument is not a promptedNAFC object')
         end
-    case 17
+    case 19
 
         if varargin{14}>=0
             t.delayMeanMs=varargin{14};
@@ -56,7 +56,7 @@ switch nargin
             error('promptStim must a single luminance value 0 to 1 for now...maybe one day a movie...better yet: stimManager.calcStim(''delayPhase'')')
         end
 
-        a=nAFC(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6},varargin{7},varargin{8},varargin{9},varargin{10},varargin{11},varargin{12},varargin{13});
+        a=nAFC(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6},varargin{7},varargin{8},varargin{9},varargin{10},varargin{11},varargin{12},varargin{13},varargin{18},varargin{19});
         t = class(t,'promptedNAFC',a);
         
     otherwise

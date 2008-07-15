@@ -19,7 +19,12 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
         trialNum=0;
 
         if n>=0
-
+          
+            
+            subject = calibrateEyeTracker(subject);
+            %some calibration requires GUi's &  must happen before PTB
+            
+            
 
             if strcmp(s.rewardMethod,'localPump')
                 if ~ s.localPumpInited
@@ -62,6 +67,7 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
 
                 if n>0 && trialNum>=n
                     keepWorking=0;
+                    
                 end
             end
 
@@ -71,10 +77,10 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
             %box?
 
 
-
             stopPTB(s);
 
-
+            stopEyeTracking(subject); 
+            
 
             if strcmp(s.rewardMethod,'localPump')
                 if s.localPumpInited

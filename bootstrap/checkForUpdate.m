@@ -48,7 +48,11 @@ if exist(f) == 2
             'bad svn cleanup of ratrix code'
         end
 
-        [status result]=system([svnPath 'svn cleanup ' '"' PsychtoolboxRoot '"']);
+        ptbr=psychtoolboxroot;
+        if ptbr(end)==filesep
+        ptbr=ptbr(1:end-1); %windows svn requires no trailing slash
+        end
+        [status result]=system([svnPath 'svn cleanup ' '"' ptbr '"']);
         if status~=0
             result
             'bad svn cleanup of psychtoolbox code'
@@ -64,13 +68,13 @@ if exist(f) == 2
         % Must remove the directories from Matlab's path, so they can be
         % deleted if needed
         rPath=getRatrixPath; % Store it so it is not forgotten
-        rmpath(RemoveSVNPaths(removeSecretBackups(genpath(rPath))));
+        rmpath(RemoveSVNPaths(genpath(rPath)));
         
         [status result]=system(update);
         
         addPath(fullfile(rPath,'bootstrap')); % So basic functions can be used
         % Generate a new list of directories
-        addpath(RemoveSVNPaths(removeSecretBackups(genpath(rPath))));
+        addpath(RemoveSVNPaths(genpath(rPath)));
         
         if status~=0 %|| any(strfind(result,'skip'))
             result
@@ -101,7 +105,7 @@ if exist(f) == 2
 
         
         % Update psychtoolbox
-        UpdatePsychtoolbox
+        updatePsychtoolboxIfNecessary
         % Remove the update mat
 
     catch

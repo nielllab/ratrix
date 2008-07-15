@@ -47,3 +47,4 @@
 /getAmplitudeFromFlum.m -text
 /makeContrastStruct.m -text
 /getNumFramesNextCalibrationBatch.m -text
+/doUniqueRepeatDriftFrame.m -text

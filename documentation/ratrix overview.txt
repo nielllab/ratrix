@@ -1,0 +1,128 @@
+we use object oriented matlab.  if you need a refresher on object oriented
+programming, check:
+http://www.mathworks.com/access/helpdesk/help/techdoc/matlab_oop/ug_intropage.html
+
+start at standAloneRun (in the bootstrap directory).  read the comments at the top.
+
+%standAloneRun([ratrixPath],[setupFile],[subjectID],[recordInOracle])
+%
+% ratrixPath (optional, string path to preexisting ratrix 'db.mat' file)
+% defaults to checking for db.mat in ...\<ratrix install directory>\..\ratrixData\ServerData\
+% if none present, makes new ratrix located there, with a dummy subject
+%
+% setupFile (optional, name of a setProtocol file on the path, typically in the setup directory)
+% defaults to 'setProtocolDEMO'
+% if subject already exists in ratrix and has a protocol, default is no action
+%
+% subjectID (optional, must be string id of subject -- will add to ratrix if not already present)
+% default is some unspecified subject in ratrix (you can't depend on which
+% one unless there is only one)
+%
+% recordInOracle (optional, must be logical, default false)
+% if true, subject must be in oracle database and history file name loading from
+% database will be exercised.
+
+
+standAloneRun is designed to be a zero-hassle way to immediately test 
+out basic ratrix functions with no set up.  by default, it will create a sibling directory to your ratrix code directory, where it will keep a ratrix, and also store acquied behavior data.
+
+once the ratrix is running, you can simulate licks/pokes using the keyboard:
+k+1, k+2, k+3 simulate left, center, and right pokes, respectively.
+also hold down "ctrl" with one of the above, and that will open the corresponding valve.
+k+q will quit.
+
+data will be collected into .mat files stored in individual subject subdirectories of the ratrixData directory.  there is one trialRecords.mat for each session, but the most impotant data from these is compiled into a single "compiledData" file for each subject, which contains their entire history.  most analysis runs from compiled files, and you can load either these or the individual session files into matlab and play with the data yourself.
+
+a ratrix is a persisted
+object that stores what subjects there are, what stations there are, and
+what training protocol each subject is running.  every time you change a
+ratrix, those changes are stored locally on disk.  you could change the
+ratrix (add a subject or change a subject's protocol), turn off the
+computer, and reload in the ratrix -- your changes would still be there.
+
+note that, by default, standAloneRun uses the file setProtocolDEMO (in the setup directory) to define the protocol.  you will typically write similar functions to define protocols for your subjects.
+
+a training protocol is a sequence of training steps, where each step consists
+of a trialManager, stimManager, scheudler, and graduationCriteria.  the
+scheduler decides if now is a good time to run trials (you might only allow
+trials at certain times of day, or enforce a 2 hour break after every 500
+trials, or whatever).  the graduationCriteria are checked after every trial in
+order to decide whether to move on to the next step -- they compute some
+function over the trialRecords (history of previous trials).  the trialManager
+determines the logic of the trial -- we really only have 2.  "freeDrinks" is
+what rats do on their first day -- anywhere they lick, they get a drink.  it
+also has a mode we call "stochastic" where it actually just drips water for
+free to get them interested in the ports.  they typically figure out how to
+trigger the ports and get water after 45 minutes.  after that they are on the
+nAFC ("n alternative forced choice") trialManager for the rest of their lives.
+in this trial manager, you lick in the center to request the stimulus, some
+behavior is defined for repeated center licks (toggle on/off, etc), there is
+auditory feedback, and you have to respond left or right.  only one choice is
+correct, which is rewarded, the other is penalized.
+
+the correct choice and specific stimulus is chosen on each trial by the
+stimManager.  this is the only class that most new experiments have to
+implement, and they only have to override a single method -- calcStim().
+calcStim takes in the current trialHistory, computes the new stimulus and
+returns it as a 3-d array (movie frames), and indicates which answer is
+correct.  the system handles everything else from there, including
+rendering that stimulus using psychtoolbox, the digital i/o talking to the
+lick sensors and water valves (and now syringe pump and eyepuff!), and
+saving the data.
+
+to actually run trials, you tell the ratrix to put a subject into a box, and
+add one or more stations to that box (although we aren't going to do this
+anytime soon, we were planning to have group housing in a single box with
+multiple stations attached, and detect which subject was running at each
+station using RFID).  once a subject is in a box with a station, you can call
+doTrials(subject), which figures out what station that subject is on and what
+his current training step is, and then calls that step's trialManager and
+stimManager to actually run the trial.  scheduling and graduating are also
+handled.
+
+the networked version of the code is a bit more complex.  the "bootstrap"
+program runs on the clients, which spins in a loop looking for a ratrix
+server. the server runs "ratrixServer," and has a locally persisted ratrix
+object with many subjects and protocols that we've set up.  it also has a
+GUI which allows the operator to choose which heat of subjects to run.
+the server listens for clients to connect.  when a client connects, the
+server asks it for its MAC address, and looks up what subject is assigned
+to that mac address for the selected heat in a database
+(http://132.239.158.177:8080/apex/f?p=101:1).
+
+once it has identified the proper subject, it looks in its big local ratrix to
+find the subject and their protocol.  it then packages these together into a
+mini-ratrix that has just that subject and protocol, leaving out all the
+others.  it sends this mini ratrix object over the network to the client, who
+receives it and starts running trials as described above for standAloneTest.
+the client continues to listen for instructions from the server, such as "stop
+running trials" or "send your trial records to the shared file server," etc.
+
+that's it!
+
+
+
+to download the code:
+
+first you need our revision control system, svn ("subversion").  here's
+the svn page:
+http://subversion.tigris.org/project_packages.html
+
+you may or may not also want a nice GUI -- we use tortoise on windows and
+it's really useful:
+http://tortoisesvn.tigris.org/
+
+you need to be on the campus network (or VPN'd to it) to see into our
+repository:
+http://www-ono.ucsd.edu/documentation/vpn/
+
+look here for the latest released version:
+svn://132.239.158.177/projects/ratrix/tags
+
+there's an online o'riley book about svn if you want to get up to speed on
+version control systems:
+http://svnbook.red-bean.com/
+
+you also need svn to download psychtoolbox, which is what we use to make
+our stimuli:
+http://psychtoolbox.org/wikka.php?wakka=PsychtoolboxDownload

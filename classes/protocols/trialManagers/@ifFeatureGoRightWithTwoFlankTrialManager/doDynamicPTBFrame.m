@@ -23,17 +23,21 @@ try
     oInd = [];
     pInd = [];
 
-    %this first version of the code slavishly reproduces the method used in the
-    %ratrixGeneral renderMode...in the future could be used to validate a
-    %version where Gaussian Mask are stored seperate from grating and
-    %orientations is handled by PTB and phase is handled by choice of
-    %sourceRect
 
     switch phase
         case 'discriminandum'
 
+
+version=1;
+switch version
+    case 1
+            %this first version of the code slavishly reproduces the method used in the
+            %ratrixGeneral renderMode...in the future could be used to validate a
+            %version where Gaussian Mask are stored seperate from grating and
+            %orientations is handled by PTB and phase is handled by choice of
+            %sourceRect
+
             %set up target
-            %Todo: add in distractor
             if (frame>=t.framesTargetOnOff(1) & frame<t.framesTargetOnOff(2))
                 %choose indices
                 texNum=texNum+1; %target
@@ -47,7 +51,7 @@ try
                 pInd(texNum)= find(t.phase==stimDetails.flankerPhase);
                 globalAlpha(texNum) = stimDetails.targetContrast;
                 destinationRect(texNum,:)=stimDetails.PTBStimRects(1,:); %target is 1, top is 2, bottom is 3
-                
+
                 if t.displayTargetAndDistractor
                     texNum=texNum+1; %distractor
                     if stimDetails.correctResponseIsLeft==1
@@ -58,8 +62,8 @@ try
                             typeInd(texNum)=4; %distractor
                             oInd(texNum)= find(t.distractorOrientations==stimDetails.distractorOrientation);
                         end
-                    elseif stimDetails.correctResponseIsLeft==-1                
-                         if t.distractorYokedToTarget
+                    elseif stimDetails.correctResponseIsLeft==-1
+                        if t.distractorYokedToTarget
                             typeInd(texNum)=1; %right
                             oInd(texNum)= find(t.goRightOrientations==stimDetails.targetOrientation);
                         else
@@ -74,7 +78,6 @@ try
             end
 
             %set up flanker
-            %Todo: add in flankerDistractor
             if (frame>=t.framesFlankerOnOff(1) & frame<t.framesFlankerOnOff(2))
                 %choose indices
                 if t.topYokedToBottomFlankerOrientation & t.topYokedToBottomFlankerContrast
@@ -119,6 +122,12 @@ try
                 end
 
             end
+    case 2
+        %use the mask?
+        
+    otherwise
+        error('bad version)
+end
         case 'penalty'
             error('not coded yet');
         case 'reward'
@@ -143,9 +152,6 @@ try
 
     %draw the patches
     for n=1:size(oInd,2)
-        
-        
-        
         screen('drawTexture',w,t.cache.orientationPhaseTextures(typeInd(n),oInd(n),pInd(n)),[],destinationRect(n,:),[],filterMode,globalAlpha(n),modulateColor,textureShader)
         %Screen('DrawTexture', windowPointer, texturePointer [,sourceRect] [,destinationRect] [,rotationAngle] [, filterMode] [, globalAlpha] [, modulateColor] [, textureShader]);
     end

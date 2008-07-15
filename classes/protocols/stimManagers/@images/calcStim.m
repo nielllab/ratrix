@@ -1,81 +1,62 @@
 function [stimulus updateSM out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance isCorrection] =...
     calcStim(stimulus,trialManagerClass,frameRate,responsePorts,totalPorts,width,height,trialRecords)
+% see ratrixPath\documentation\stimManager.calcStim.txt for argument specification (applies to calcStims of all stimManagers)
 
 bits=8;
 ramp=linspace(0,1,2^bits);
-LUT= [ramp;ramp;ramp]';
+LUT= repmat(ramp',1,3);
 
-updateSM=0;
-isCorrection=0;
+type='static';
 
 scaleFactor = getScaleFactor(stimulus);
-interTrialLuminance = uint8(intmax('uint8')*getInterTrialLuminance(stimulus));%uint8(getInterTrialLuminance(stimulus));
+interTrialLuminance = uint8(intmax('uint8')*getInterTrialLuminance(stimulus));
 
-type='trigger';
+%from PR: how to get this passed to calcstim as user defined param?
+%response from edf: add fields to the class (in its constructor)
+normalizeHistograms=false;
+pctScreenFill=0.75;
+backgroundcolor=uint8(intmax('uint8')*stimulus.background);
+ind=min(find(rand<cumsum(getDist(stimulus)))); %draw from trialDistribution
+[stimulus updateSM ims]=checkImages(stimulus,uint8(ind),backgroundcolor, pctScreenFill, normalizeHistograms);
 
-%edf: 11.25.06: copied correction trial logic from hack addition to cuedGoToFeatureWithTwoFlank
-%edf: 11.15.06 realized we didn't have correction trials!
-%changing below...
+%ims comes back as a nX2 cell array, where n is number of images specified in the trialDistribution entry we requested
+%ims{:,1} is the image data, ims{:,2} are details (like the file name)
+
+if strcmp(trialManagerClass,'freeDrinks') && size(ims,1)==length(responsePorts)-1
+    responsePorts=responsePorts(1:end-1); %free drinks trial will have one extra response port
+end
+if size(ims,1)~=length(responsePorts)
+    trialManagerClass
+    size(ims)
+    responsePorts
+    size(trialRecords)
+    error('stim distribution specifies an entry that has different number of images than length of responsePorts')
+end
+
 
 details.pctCorrectionTrials=.5; % need to change this to be passed in from trial manager
-
 if ~isempty(trialRecords)
-    lastResponse=find(trialRecords(end).response);
-    lastCorrect=trialRecords(end).correct;
-    lastWasCorrection=trialRecords(end).stimDetails.correctionTrial;
-    if length(lastResponse)>1
-        lastResponse=lastResponse(1);
-    end
+    lastRec=trialRecords(end);
 else
-    lastResponse=[];
-    lastCorrect=[];
-    lastWasCorrection=0;
+    lastRec=[];
+end
+[targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts);
+isCorrection=details.correctionTrial;
+
+%assign the correct answer to the target port (defined to be first file listed in the trialDistribution entry)
+pics=cell(totalPorts,2);
+pics(targetPorts,:)={ims{1,:}}; %note the ROUND parens -- ugly!
+
+%randomly assign distractors
+inds=2:length(responsePorts);
+[garbage order]=sort(rand(1,length(responsePorts)-1));
+inds=inds(order);
+
+for i=1:length(distractorPorts)
+    dp=distractorPorts(i);
+    pics(dp,:)={ims{inds(end),:}};
+    inds=inds(1:end-1);
 end
 
-%note that this implementation will not show the exact same
-%stimulus for a correction trial, but just have the same side
-%correct.  may want to change...
-if ~isempty(lastCorrect) && ~isempty(lastResponse) && ~lastCorrect && (lastWasCorrection || rand<details.pctCorrectionTrials)
-    details.correctionTrial=1;
-    'correction trial!'
-    targetPorts=trialRecords(end).targetPorts;
-    isCorrection=1;
-else
-    details.correctionTrial=0;
-    targetPorts=responsePorts(ceil(rand*length(responsePorts)));
-end
-
-distractorPorts=setdiff(responsePorts,targetPorts);
-targetPorts
-
-dups=false;
-backgroundcolor=uint8(intmax('uint8')*stimulus.background);
-[stimulus updateSM ims]=checkImages(stimulus,length(responsePorts),dups,backgroundcolor);
-
-if length(targetPorts)==1 %correct response is to go to lowest numbered image -- distractors randomly assigned after that
-    pics=cell(totalPorts,3);
-    pics(targetPorts,:)={ims{1,:}}; %note the ROUND parens -- ugly!
-
-    inds=2:length(responsePorts);
-    [garbage order]=sort(rand(1,length(responsePorts)-1));
-    inds=inds(order);
-
-    for i=1:length(distractorPorts)
-        dp=distractorPorts(i);
-        pics(dp,:)={ims{inds(end),:}};
-        inds=inds(1:end-1);
-    end
-else
-    error('images stimManger only works for singleton target ports')
-end
-
+out = [pics{:,1}];
 details.imageDetails={pics{:,2}};
-
-out(:,:,1) = [pics{:,1}];
-
-%EDF: 02.08.07 -- i think this is only supposed to be for nafc but not
-%sure...
-%was causing free drinks stim to only show up for first frame...
-if strcmp(trialManagerClass,'nAFC')%pmm also suggests this:  && strcmp(type,'trigger')
-    out(:,:,2)=backgroundcolor; % affects the stim shown between toggles of stimulus
-end

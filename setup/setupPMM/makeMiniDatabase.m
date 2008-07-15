@@ -19,6 +19,12 @@ i=0;
 
 %% test sample
 
+i=i+1;
+database.subject{i}.subjectID='test';
+database.subject{i}.stepNumber=5;
+database.subject{i}.rewardScalar=.1;
+database.subject{i}.msPenalty=1001;
+%database.subject{i}.currentShapedValue = 0.01; %test wierd values
 
 i=i+1;
 database.subject{i}.subjectID='test1';
@@ -50,7 +56,7 @@ database.subject{i}.msPenalty=1000;
 
 i=i+1;
 database.subject{i}.subjectID='l';
-database.subject{i}.stepNumber=9;
+database.subject{i}.stepNumber=5;
 database.subject{i}.rewardScalar=.1;
 database.subject{i}.msPenalty=1001;
 database.subject{i}.currentShapedValue = 0.1;

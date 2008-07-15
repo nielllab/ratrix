@@ -9,8 +9,9 @@ else
     numSubjects=length(subjects)
 end
 
-conn=dbConn('132.239.158.177','1521','dparks','pac3111');
+conn=dbConn;
 s=getSubjects(conn,{'r'}); % make this the test object one day!
+closeConn(conn);
 
 dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
 r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file

@@ -37,7 +37,13 @@ if exist(f) == 2
         rPath=getRatrixPath; % Store it so it is not forgotten
         rmpath(RemoveSVNPaths(genpath(rPath)));
 
-        [status result]=system([svnPath 'svn switch "' targetSVNurl '"@' num2str(targetRevNum) ' "' rPath '" && ' svnPath 'svn cleanup "' rPath '"']);
+        if isempty(targetRevNum)
+            revNumStr='HEAD';
+        else
+            revNumStr=num2str(targetRevNum);
+        end
+        cmdStr=[svnPath 'svn switch "' targetSVNurl '"@' revNumStr ' "' rPath '" && ' svnPath 'svn cleanup "' rPath '"']
+        [status result]=system(cmdStr);
 
         % Generate a new list of directories
         addpath(RemoveSVNPaths(genpath(rPath)));

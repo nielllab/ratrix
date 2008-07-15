@@ -168,16 +168,11 @@ switch r.type
             case constants.serverToStationCommands.S_GET_PENDING_COMMANDS_CMD
             case constants.serverToStationCommands.S_CLEAR_COMMAND_CMD
             case constants.serverToStationCommands.S_UPDATE_SOFTWARE_CMD
-                
                 try
-                    targetSVNversion=checkTargetRevision(args{1});
+                    checkTargetRevision(args);
                 catch
-                    args=[];
-                end
-                
-                if length(args) ~= 1
                     good=false;
-                    sendError(r,c,constants.errors.BAD_ARGS,'usage: S_UPDATE_SOFTWARE_CMD(integer revision_number|svn url(ex: ''svn://132.239.158.177/projects/ratrix/tags/v0.6'') (see util\checkTargetRevision for more restrictions))');
+                    sendError(r,c,constants.errors.BAD_ARGS,'usage: S_UPDATE_SOFTWARE_CMD(svn url(ex: ''svn://132.239.158.177/projects/ratrix/tags/v0.6'') [,integer revision_number]) (see util\checkTargetRevision for more restrictions)');
                 end
             case constants.serverToStationCommands.S_REWARD_COMPLETE_CMD
             case constants.serverToStationCommands.S_GET_MAC_CMD

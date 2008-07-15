@@ -77,31 +77,13 @@ switch cmd
     case constants.serverToStationCommands.S_UPDATE_SOFTWARE_CMD
         if stat==constants.statuses.NO_RATRIX
             [runningSVNversion repositorySVNversion url]=getSVNRevisionFromXML(getRatrixPath);
-            if isempty(args)
-                error('disallowing empty args to svn update command')
-                if runningSVNversion~=repositorySVNversion
-                    writeSVNUpdateCommand(r);
-                    quit=true;
-                end
-            else
-                revNumber = args{1};
-                if ischar(revNumber)
-                    if ~strcmp(revNumber,url)
-                        writeSVNUpdateCommand(r,revNumber);
-                        quit = true;
-                    elseif repositorySVNversion~=runningSVNversion
-                        writeSVNUpdateCommand(r,repositorySVNversion); %temporary fix -- always go to head of that tag
-                        quit = true;
-                    end
-                elseif isinteger(revNumber) || isNearInteger(revNumber) %isNearInteger needed cuz of http://132.239.158.177/trac/rlab_hardware/ticket/102
-                    if revNumber~=runningSVNversion
-                        writeSVNUpdateCommand(r,revNumber); %what does this do if that rev number is not on the branch we're currently on?
-                        quit = true;
-                    end
-                else
-                    error('Revision number has unexpected type')
-                end
+            [targetSVNurl targetRevNum] =checkTargetRevision(args);
+            
+            if ~strcmp(url,targetSVNurl) || ((isempty(targetRevNum) && runningSVNversion~=repositorySVNversion) || targetRevNum~=runningSVNversion)
+                writeSVNUpdateCommand(r,targetSVNurl,targetRevNum);
+                quit=true;
             end
+
             quitOnError=sendToServer(r,getClientId(r),constants.priorities.IMMEDIATE_PRIORITY,constants.stationToServerCommands.C_RECV_UPDATING_SOFTWARE_CMD,{quit});
             if quitOnError || quit
                 quit=true;

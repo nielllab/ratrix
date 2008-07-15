@@ -16,17 +16,10 @@ if exist(f) == 2
 
         [runningSVNversion repositorySVNversion url]=getSVNRevisionFromXML(getRatrixPath);
 
-        load(f,'targetRevision');
-        % Run svn update command
-        %         if IsWin
-        %             s = dos(update);
-        %         else
-        %             s = system(update);
-        %         end
-
+        target=load(f);
+        [targetSVNurl targetRevNum] =checkTargetRevision({target.targetURL,target.targetRevNum});
 
         svnPath = GetSubversionPath;
-        targetSVNversion=checkTargetRevision(targetRevision);
 
         rPath=getRatrixPath;
         if rPath(end)==filesep
@@ -39,65 +32,35 @@ if exist(f) == 2
             'bad svn cleanup of ratrix code'
         end
 
-        ptbr=psychtoolboxroot;
-        if ptbr(end)==filesep
-        ptbr=ptbr(1:end-1); %windows svn requires no trailing slash
-        end
-        [status result]=system([svnPath 'svn cleanup ' '"' ptbr '"']);
-        if status~=0
-            result
-            'bad svn cleanup of psychtoolbox code'
-        end
-        
-        if ischar(targetRevision)
-            % Here targetRevision is a repository location
-            update=[svnPath 'svn switch "'  targetRevision '" "' rPath '" && svn cleanup'  ];
-        else
-            update=[svnPath 'svn update '  num2str(targetRevision) ' "' rPath '"'  ];
-        end
-
         % Must remove the directories from Matlab's path, so they can be
         % deleted if needed
         rPath=getRatrixPath; % Store it so it is not forgotten
         rmpath(RemoveSVNPaths(genpath(rPath)));
-        
-        [status result]=system(update);
-        
-        addPath(fullfile(rPath,'bootstrap')); % So basic functions can be used
+
+        [status result]=system([svnPath 'svn switch "' targetSVNurl '"@' num2str(targetRevNum) ' "' rPath '" && ' svnPath 'svn cleanup "' rPath '"']);
+
         % Generate a new list of directories
         addpath(RemoveSVNPaths(genpath(rPath)));
-        
+
         if status~=0 %|| any(strfind(result,'skip'))
             result
             'error updating ratrix code'
         else
             result
             [runningSVNversion repositorySVNversion url]=getSVNRevisionFromXML(getRatrixPath);
-            if ~ischar(targetSVNversion)
-                if runningSVNversion==targetSVNversion
-                    delete(f);
-                    fprintf('Ratrix code update appeared to succeed\n');
-                else
-                    runningSVNversion
-                    repositorySVNversion
-                    'failed svn update -- leaving update file'
-                end
+            if runningSVNversion==targetRevNum && strcmp(url,targetSVNurl)
+                delete(f);
+                fprintf('Ratrix code update appeared to succeed\n');
             else
-                if strcmp(targetSVNversion,url)
-                    delete(f);
-                    fprintf('Ratrix code changed to different branch successfully\n');
-                else
-                    targetSVNversion
-                    url
-                    'failed to svn switch -- leaving update file'
-                end
+                runningSVNversion
+                targetRevNum
+                url
+                targetSVNurl
+                'failed svn update -- leaving update file'
             end
         end
 
-        
-        % Update psychtoolbox
         updatePsychtoolboxIfNecessary
-        % Remove the update mat
 
     catch
         x=lasterror

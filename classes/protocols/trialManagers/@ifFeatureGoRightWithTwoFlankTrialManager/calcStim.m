@@ -3,8 +3,9 @@ function [trialManager updateTM out LUT scaleFactor type targetPorts distractorP
 %this is a discrimination paradigm
 %a detection paradigm follows if the left stims have 0 contrast
 %flankers above and below target, total of three stims
-stimulus=trialManager;
 
+stimulus=trialManager;
+% setSeed(stimulus, fromClock); this never gets called! use calStimBeta
 updateTM=0;
    
     details.toggleStim=stimulus.toggleStim; 
@@ -71,16 +72,16 @@ switch trialManagerClass
             targetPorts=trialRecords(end).targetPorts;
         else
             details.correctionTrial=0;
-            
-            [targetPorts hadToResample]=getSameLimitedResponsePort(responsePorts,stimulus.maxCorrectOnSameSide,trialRecords)
-            details.maxCorrectForceSwitch=hadToResample;
-            %targetPorts=responsePorts(ceil(rand*length(responsePorts)));
+            % correlations should be handled outside of calcStim
+            %[targetPorts hadToResample]=getSameLimitedResponsePort(responsePorts,stimulus.maxCorrectOnSameSide,trialRecords);
+            %details.maxCorrectForceSwitch=hadToResample;
+            targetPorts=responsePorts(ceil(rand*length(responsePorts)));
             %old random selection is now inside helper function -pmm  
         end
         
         
         distractorPorts=setdiff(responsePorts,targetPorts);
-        targetPorts
+%         targetPorts
     otherwise
         error('unknown trial manager class')
 end
@@ -104,9 +105,8 @@ end
     %cueLoc=ctr-[0 round(cueIsLeft*stimulus.eccentricity/2*stimulus.cuePercentTargetEcc*width)];
     %cueRect=[cueLoc(1)-stimulus.cueSize cueLoc(1)+stimulus.cueSize cueLoc(2)-stimulus.cueSize cueLoc(2)+stimulus.cueSize];
     %details.cueIsLeft=cueIsLeft;
-    
-    calibStim=logical(trialManager.calib.calibrationModeOn);
-    calibStim
+        calibStim=logical(trialManager.calib.calibrationModeOn);
+%     calibStim
     if ~calibStim
         %set variables for random selections
         a=Randi(size(stimulus.goRightOrientations,2));
@@ -118,10 +118,11 @@ end
         f=Randi(size(stimulus.flankerContrast,2));
         h=Randi(size(stimulus.flankerOffset,2));
         p=Randi(size(stimulus.phase,2));
+% note: lacks the parameters that calcStimBeta has
 
     else %calibrationModeOn
         %use frame to set values a-h , p
-        [a b c d e f g h p] = selectStimulusParameters(trialManager);
+            [a b c z d e f g h p pD pF] = selectStimulusParameters(trialManager);
  
         %override side corrrect
         responseIsLeft=-1; % on the right
@@ -165,7 +166,10 @@ end
         details.flankerPhase = stimulus.phase(p);
         details.targetPhase = stimulus.phase(p);  
     else
-        error('currently undefined; flankerYokedToTargetPhase must be 1');
+        details.targetPhase = stimulus.phase(p);
+        details.flankerPhase = stimulus.phase(pF);
+        warning('this only works for calibrationMode');
+        % will be okay in calcStimBeta or beyond
     end
     %SPATIAL PARAMS
     %ecc=stimulus.eccentricity/2;
@@ -190,7 +194,7 @@ end
     details.stdGaussMaskPix=stimulus.stdGaussMask*ceil(trialManager.maxHeight);
     radius=stimulus.stdGaussMask;
     details.pixPerCycs=stimulus.pixPerCycs;
-    details.phase=rand*2*pi;  %all phases yoked together
+    %details.phase= rand*2*pi;  %all phases yoked together
     
     
     
@@ -210,7 +214,7 @@ end
 
       numPatchesInserted=3; 
       szY=size(trialManager.cache.goRightStim,1);
-      szX=size(trialManager.cache.goRightStim,2)
+      szX=size(trialManager.cache.goRightStim,2);
     
       pos=round...
       ...%yPosPct                      yPosPct                    xPosPct                   xPosPct

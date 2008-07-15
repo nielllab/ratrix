@@ -1,16 +1,14 @@
 function t=trialManager(varargin)
 % TRIALMANAGER  class constructor.  ABSTRACT CLASS-- DO NOT INSTANTIATE
-% t=trialManager(msFlushDuration,rewardSizeULorMS,msMinimumPokeDuration,msMinimumClearDuration,soundManager,msPenalty,msRewardSoundDuration,customDescription,eyepuffMS)
+% t=trialManager(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,soundManager,reinforcementManager,customDescription)
 
 requiredSoundNames = {'correctSound','keepGoingSound','trySomethingElseSound','wrongSound'};
 
         t.msFlushDuration=0;
-        t.rewardSizeULorMS=0;
         t.msMinimumPokeDuration=0;
         t.msMinimumClearDuration=0;
         t.soundMgr=soundManager();
-        t.msPenalty=0;
-        t.msRewardSoundDuration=0;
+        t.reinforcementManager=reinforcementManager();
         t.description='';
         t.eyepuffMS=0;
 
@@ -26,65 +24,43 @@ switch nargin
         else
             error('Input argument is not a trialManager object')
         end
-    case 9
+    case 6
         if varargin{1}>=0
             t.msFlushDuration=varargin{1};
         else
             error('msFlushDuration must be >=0')
         end
 
-        if varargin{2}>=0
-            t.rewardSizeULorMS=varargin{2};
-        else
-            error('rewardSizeULorMS must be >=0')
-        end
-        
-                
-        if varargin{9}>=0 && isscalar(varargin{9})
-            t.eyepuffMS=varargin{9};
-        else
-            error('eyepuffMS must be >=0')
-        end
-        
-        if varargin{3}>0
-            t.msMinimumPokeDuration=varargin{3};
+        if varargin{2}>0
+            t.msMinimumPokeDuration=varargin{2};
         else
             error('msMinimumPokeDuration must be > 0')
         end
 
-        if varargin{4}>=0
-            t.msMinimumClearDuration=varargin{4};
+        if varargin{3}>=0
+            t.msMinimumClearDuration=varargin{3};
         else
             error('msMinimumClearDuration must be >=0')
         end
 
-        if isa(varargin{5},'soundManager') && all(ismember(requiredSoundNames, getSoundNames(varargin{5})))
-            t.soundMgr=varargin{5};
+        if isa(varargin{4},'soundManager') && all(ismember(requiredSoundNames, getSoundNames(varargin{4})))
+            t.soundMgr=varargin{4};
         else
             error(['not a soundManager object, or doesn''t contain required sounds ' printAsList(requiredSoundNames)])
         end
 
-        if varargin{6}>=0
-            t.msPenalty=varargin{6};
+        if isa(varargin{5},'reinforcementManager')
+            t.reinforcementManager=varargin{5};
         else
-            error('msPenalty must be >= 0')
+            error('must be a reinforcementManager')
         end
 
-        if varargin{7}>=0
-            t.msRewardSoundDuration=varargin{7};
-        else
-            error('msRewardSoundDuration must be >= 0')
-        end
-
-        if ischar(varargin{8})
+        if ischar(varargin{6})
             t.description=sprintf(['%s\n'...
                                    '\t\t\tmsFlushDuration:\t%d\n'...
-                                   '\t\t\trewardSizeULorMS:\t%d\n'...
                                    '\t\t\tmsMinimumPokeDuration:\t%d\n'...
-                                   '\t\t\tmsMinimumClearDuration:\t%d\n'...
-                                   '\t\t\tmsPenalty:\t%d\n'...
-                                   '\t\t\tmsRewardSoundDuration:\t%d'], ...
-                varargin{8},t.msFlushDuration,t.rewardSizeULorMS,t.msMinimumPokeDuration,t.msMinimumClearDuration,t.msPenalty,t.msRewardSoundDuration);
+                                   '\t\t\tmsMinimumClearDuration:\t%d'], ...
+                varargin{6},t.msFlushDuration,t.msMinimumPokeDuration,t.msMinimumClearDuration);
         else
             error('not a string')
         end

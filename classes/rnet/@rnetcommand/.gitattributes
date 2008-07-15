@@ -7,3 +7,5 @@
 /getCommand.m -text
 /getArguments.m -text
 /getPriority.m -text
+/getReceivingNode.m -text
+/getSendingNode.m -text

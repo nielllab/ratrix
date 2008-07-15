@@ -37,3 +37,13 @@
 /getOrientation.m -text
 /getCalibrationSettings.m -text
 /getLUT.m -text
+/acceptableNumberOfFramesPerBatch.m -text
+/setSeed.m -text
+/addToLumStruct.m -text
+/getAnalysisFields.m -text
+/getCalibration.m -text
+/getDefaultParameters.m -text
+/getNumCalibrationBatches.m -text
+/getAmplitudeFromFlum.m -text
+/makeContrastStruct.m -text
+/getNumFramesNextCalibrationBatch.m -text

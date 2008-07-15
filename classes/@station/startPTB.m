@@ -17,7 +17,7 @@ if s.screenNum > -1
     try
         AssertOpenGL;
         %Screen('Preference','Backgrounding',0);  %mac only?
-        % HideCursor;
+        HideCursor;
 
         if ~doPrudentChecks
             oldEnableFlag=Screen('Preference', 'SkipSyncTests', 1);

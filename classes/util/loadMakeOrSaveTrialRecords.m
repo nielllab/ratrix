@@ -12,7 +12,7 @@ if length(varargin)>=1
 end
 
 if length(varargin)==1
-    fs=dir(subPath);
+    fs=remoteDir(subPath);
 
     if ismember(fileName,{fs.name})
         in=load(fullfile(subPath, fileName),'trialRecords');

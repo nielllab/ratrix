@@ -1,6 +1,6 @@
 function addJavaComponents()
-jarPath = getRatrixJarPath;
+jarPath = getRlabJarPath;
 matches = strfind(javaclasspath,jarPath);
 if isempty(strcat(matches{:,:},[]))
-    javaaddpath(getRatrixJarPath);
+    javaaddpath(getRlabJarPath);
 end

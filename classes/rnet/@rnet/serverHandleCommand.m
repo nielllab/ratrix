@@ -1,8 +1,8 @@
 function [sys r rx]=serverHandleCommand(r,com,sys,rx,subjects)
 
-%fprintf('Server recieved: %s remaining %d\n', toString(com),commandsAvailable(r,{},getClientIdent(com)));
+%fprintf('Server recieved: %s remaining %d\n', toString(com),commandsAvailable(r,{},getSendingNodeId(com)));
 constants = getConstants(r);
-client = getClientIdent(com);
+client = getSendingNode(com);
 [good cmd args] = validateCommand(r,com);
 
 if good
@@ -40,8 +40,6 @@ if good
             end
         case constants.stationToServerCommands.C_VALVES_SET_CMD
             error('unexpected C_VALVES_SET_CMD')
-        case constants.stationToServerCommands.C_DISCONNECT_CMD
-            error('unexpected C_DISCONNECT_CMD')
         case constants.stationToServerCommands.C_UPDATE_SOFTWARE_ON_TARGETS_CMD
             % Update software on all stations
             clients = listClients(r);

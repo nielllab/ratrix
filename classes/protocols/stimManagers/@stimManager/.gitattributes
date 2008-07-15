@@ -5,3 +5,6 @@
 /getScaleFactor.m -text
 /stimManager.m -text
 /getInterTrialLuminance.m -text
+/decache.m -text
+/sampleStimFrame.m -text
+/getCurrentShapedValue.m -text

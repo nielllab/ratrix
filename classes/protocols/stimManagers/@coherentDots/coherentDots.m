@@ -1,10 +1,7 @@
 function s=coherentDots(varargin)
-% ORIENTEDGABORS  class constructor.
-% s = orientedGabors([pixPerCycs],[targetOrientations],[distractorOrientations],mean,radius,contrast,thresh,yPositionPercent,maxWidth,maxHeight,scaleFactor,interTrialLuminance) 
-% orientations in radians
-% mean, contrast, yPositionPercent normalized (0 <= value <= 1)
-% radius is the std dev of the enveloping gaussian, in normalized units of the diagonal of the stim region
-% thresh is in normalized luminance units, the value below which the stim should not appear
+% COHERENTDOTS  class constructor.
+% ex: coherentDots(stimulus,junk,junk,junk,junk,maxWidth,maxHeight,junk,150, 100, 100, .85, 1, 3, 10, 85, [6 6]);
+
 
 eps = 0.0000001;
 switch nargin
@@ -24,6 +21,8 @@ s.screen_width = 100;         % for matrix
 s.screen_height = 100;        % for matrix
 s.num_dots = 100;             % Number of dots to display
 s.coherence = .8;             % Percent of dots to move in a specified direction
+s.min_coherence = .8;
+s.max_coherence = 1;
 s.speed = 1;                  % How fast do our little dots move
 s.dot_size = 9;              % Width of dots in pixels
 s.movie_duration = 2;         % in seconds
@@ -60,16 +59,33 @@ case 17
         error('num_dots must be an integer')
     end
     
-    if (isfloat(varargin{12}) && varargin{12} >= 0 && varargin{12} <= 1)
-        s.coherence = varargin{12};
+    if (isfloat(varargin{12}))
+        s.coherence = 1;
+        if (length(varargin{12}) == 1)
+            if (varargin{12} >= 0 && varargin{12} <= 1)
+                s.min_coherence = varargin{12}
+                s.max_coherence = varargin{12}
+            else
+                error('Coherence must be between 0 and 1')
+            end
+        elseif (length(varargin{12}) == 2)
+            if (varargin{12}(1) >= 0 && varargin{12}(1) <= 1 && varargin{12}(2) >= 0 && varargin{12}(2) <= 1 && (varargin{12}(2) - varargin{12}(1) > 0))
+                s.min_coherence = varargin{12}(1);
+                s.max_coherence = varargin{12}(2);
+            else
+                error('Coherence must be between 0 and 1, with max > min')
+            end
+        else
+            error ('Coherence must be either a 1x2 or 1x1 set of floats')
+        end
     else
-        error('coherence must be a double between 0 and 1')
+        error('Coherence level must be a 1x1 or 1x2 array between 0 and 1')
     end
     
     if (isfloat(varargin{13}))
         s.speed = varargin{13};
     else
-        error('speed must be a double')
+        error('speed (pixels/frame) must be a double')
     end
     
     if (floor(varargin{14}) - varargin{14} < eps)
@@ -90,7 +106,7 @@ case 17
         error('fps must be an integer')
     end
     
-    if (length(varargin{17}) == 2 && isnumeric(varargin{16}))
+    if (length(varargin{17}) == 2 && isnumeric(varargin{17}))
         screen_zoom = varargin{17};
     else
         error('screen_zoom must be a 1x2 array with integer values')
@@ -105,7 +121,7 @@ case 17
 % s.fps = 85; 
 
     % maxWidth, maxHeight, scale factor, intertrial luminance
-    s = class(s,'coherentDots',stimManager(varargin{6},varargin{7},[6 6],uint8(1)));   
+    s = class(s,'coherentDots',stimManager(varargin{6},varargin{7},screen_zoom,uint8(0)));   
 otherwise
     nargin
     error('Wrong number of input arguments')

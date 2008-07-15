@@ -8,3 +8,5 @@ else
     error('need ratrix object')
 end
 disp(sprintf('done loading records for %s: %g s elapsed',sID,GetSecs()-startTime))
+
+

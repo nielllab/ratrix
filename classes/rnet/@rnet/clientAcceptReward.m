@@ -26,7 +26,7 @@ if length(requestedValveState) == getNumPorts(station)
         'got into do reward'
         [currentValveState valveErrorDetails]=setAndCheckValves(station,requestedValveState,currentValveState,valveErrorDetails,refTime,'opening valves');
         latencyToOpenValves=GetSecs()-refTime;
-        quit = sendToServer(rn,getClientIdent(rn),constants.priorities.IMMEDIATE_PRIORITY,constants.stationToServerCommands.C_VALVES_SET_CMD,{currentValveState,latencyToOpenValves});
+        quit = sendToServer(rn,getClientId(rn),constants.priorities.IMMEDIATE_PRIORITY,constants.stationToServerCommands.C_VALVES_SET_CMD,{currentValveState,latencyToOpenValves});
         if ~quit
             [quit closeValveCom closeValveCmd closeValveCmdArgs]=waitForSpecificCommand(rn,[],constants.serverToStationCommands.S_SET_VALVES_CMD,timeout,'waiting for server close valve S_SET_VALVES_CMD',constants.statuses.MID_TRIAL);
         end
@@ -56,7 +56,7 @@ if length(requestedValveState) == getNumPorts(station)
                         [currentValveState valveErrorDetails]=setAndCheckValves(station,requestedValveState,currentValveState,valveErrorDetails,refTime,'closing valves');
                         latencyToCloseValves=GetSecs()-refTime;
                         actualRewardDuration = latencyToCloseValves-latencyToOpenValves;
-                        quit=sendToServer(rn,getClientIdent(rn),constants.priorities.IMMEDIATE_PRIORITY,constants.stationToServerCommands.C_VALVES_SET_CMD,{currentValveState,actualRewardDuration});
+                        quit=sendToServer(rn,getClientId(rn),constants.priorities.IMMEDIATE_PRIORITY,constants.stationToServerCommands.C_VALVES_SET_CMD,{currentValveState,actualRewardDuration});
                         if ~isPrime
                             'got to lowest level not prime'
                             if ~quit

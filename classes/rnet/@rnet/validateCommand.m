@@ -21,7 +21,7 @@ good = true;
 switch r.type
     case r.constants.nodeTypes.SERVER_TYPE
 
-        client = getClientIdent(c);
+        client = getSendingNode(c);
 
         [tf loc]=clientIsRegistered(r,client);
         if tf
@@ -32,9 +32,6 @@ switch r.type
 
 
         switch cmd
-            case constants.stationToServerCommands.C_CONNECT_CMD
-            case constants.stationToServerCommands.C_DISCONNECT_CMD
-            case constants.stationToServerCommands.C_SERVER_RESET_CMD
             case constants.stationToServerCommands.C_CMD_ACK
                 if length(args) ~= 1 || ~isscalar(args{1}) || args{1}<=0 || ~isnumeric(args{1}) %|| ~isinteger(args{1}) %should really check that it's an integer, but packageArguments hasn't been fixed yet to preserve numeric types properly...
                     good=false;
@@ -128,7 +125,7 @@ switch r.type
                             sendError(r,c,constants.errors.BAD_ARGS,'paths should be strings');
                             good=false;
                         else
-                            d=dir(args{1}{i});
+                            d=remoteDir(args{1}{i});
                             d
                             if isempty(d) %even an empty dir has 2 entires -- '.' and '..'
                                 'd was empty'

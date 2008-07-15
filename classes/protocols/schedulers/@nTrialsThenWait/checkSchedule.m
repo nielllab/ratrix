@@ -1,4 +1,4 @@
-function [keepWorking secsRemainingTilStateFlip updateScheduler scheduler] = checkSchedule (scheduler, subject, trainingStep)
+function [keepWorking secsRemainingTilStateFlip updateScheduler scheduler] = checkSchedule (scheduler, subject, trainingStep, trialRecords, sessionNumber)
 
 % scheduler=nTrialsThenWait([200,300,500],[1/3,1/3,1/3],[5],[1])
 % a=now;
@@ -10,41 +10,46 @@ function [keepWorking secsRemainingTilStateFlip updateScheduler scheduler] = che
 % [keepWorking secsRemainingTilStateFlip updateScheduler scheduler] = checkSchedule(scheduler,1,sessionStartStops,[],[])
 
 
-if isa(trainingStep,'trainingStep')
-    
-    %GET FROM THE TRAININGSTEP!
-    [sessionRecords ]=getSessionRecords(trainingStep);
-    if size(sessionRecords,1)>0
-        sessionStarts=sessionRecords(:,1);  
-        sessionStops=sessionRecords(:,2);  
-        trialsCompleted=sessionRecords(end,3);  % so far this session
-    else
-        sessionStarts=now;
-        sessionStops=0;
-        trialsCompleted=0;
-    end
-else
-    error('must be a training step')
-end
+% if isa(trainingStep,'trainingStep')
+%     
+%     %GET FROM THE TRAININGSTEP!
+%     [sessionRecords ]=getSessionRecords(trainingStep);
+%     if size(sessionRecords,1)>0
+%         sessionStarts=sessionRecords(:,1);  
+%         sessionStops=sessionRecords(:,2);  
+%     else
+%         sessionStarts=now;
+%         sessionStops=0;
+%         trialsCompleted=0;
+%     end
+% else
+%     error('must be a training step')
+% end
 
-if isa(subject,'subject')
-    %good
-else
-    error('must be a training step')
-end
+
+ if size(trialRecords,1)>0
+        trialsThisSession=[trialRecords.sessionNumber]==sessionNumber;
+        trialsCompleted=sum(trialsThisStep);    
+ else
+        trialsCompleted=0;
+        scheduler.isOn=1;  % start out on if there are no trials in history
+ end
+
+ 
+ %why calculate this at all if we can save it in the state of the scheduler
+ %calulate if scheduler isOn only if not first session & trial
+% if ~isempty(sessionStops)
+%     scheduler.isOn=(0>sessionStops(end)-sessionStarts(end))    %if there is no stop time, its 0, so stop-start is negative when scheduler is on
+% end
 
 %initialize
-updateScheduler=1;
+updateScheduler=0;
 %in the long run, its okay to update the the scheuler alot, b/c it won't be
 %the whole ratrix, but just the training step. Thus its safe to be able to
 %save the scheduler after every trial (not just after session start stops)
 %If set to 0, this script still has extra calls to updateScheduler that enforces
 %session-only changes.   
 
-%calulate if scheduler isOn only if not first session & trial
-if ~isempty(sessionStops)
-    scheduler.isOn=(0>sessionStops(end)-sessionStarts(end))    %if there is no stop time, its 0, so stop-start is negative when scheduler is on
-end
 
 %if the first session and the scheduler is off, need a reference time point
 if scheduler.lastCompletedSessionEndTime==0 && ~scheduler.isOn

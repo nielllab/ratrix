@@ -109,7 +109,7 @@ switch nargin
         % These are displaced trial manager fields in the default
         % constructor
         super.msFlushDuration=0;
-        super.msRewardDuration=0;
+        super.rewardSizeULorMS=0;
         super.msMinimumPokeDuration=0;
         super.msMinimumClearDuration=0;
         super.soundMgr=soundManager();
@@ -119,7 +119,7 @@ switch nargin
         super.description='';
 
         % These are the old nAFC fields
-        super.msRequestRewardDuration=0;
+        super.requestRewardSizeULorMS=0;
         %         t.percentCorrectionTrials=0;
         super.msResponseTimeLimit=0;
         super.pokeToRequestStim=0;
@@ -281,7 +281,7 @@ switch nargin
         parameterStructure = rmfield(parameterStructure, 'rm')
         switch rm.type
             case 'rewardNcorrectInARow'
-                reinforcementMgr=rewardNcorrectInARow(rm.msRewardNthCorrect, rm.msPenalty, rm.fractionOpenTimeSoundIsOn, rm.fractionPenaltySoundIsOn, rm.scalar, rm.scalarStartsCached);
+                reinforcementMgr=rewardNcorrectInARow(rm.rewardNthCorrect, rm.msPenalty, rm.fractionOpenTimeSoundIsOn, rm.fractionPenaltySoundIsOn, rm.scalar);
             otherwise
                 error ('Not an allowed reinforment manager type')
         end
@@ -301,7 +301,7 @@ switch nargin
 
         t = class(parameterStructure,'ifFeatureGoRightWithTwoFlankTrialManager',trialManager(...
         super.msFlushDuration,...
-        super.msRewardDuration,...
+        super.rewardSizeULorMS,...
         super.msMinimumPokeDuration,...
         super.msMinimumClearDuration,...
         super.soundMgr,...

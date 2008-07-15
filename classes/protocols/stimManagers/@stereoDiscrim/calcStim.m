@@ -45,21 +45,41 @@ switch trialManagerClass
         %edf: 11.15.06 realized we didn't have correction trials!
         %changing below...
 
-        % dfp: 12.07.07: correction trial code removed from here.  Thought
-        % to be handled outside of calcStim eventually per Erik
+        details.pctCorrectionTrials=.5; % need to change this to be passed in from trial manager
+        
+        if ~isempty(trialRecords)
+            lastResponse=find(trialRecords(end).response);
+            lastCorrect=trialRecords(end).correct;
+            if any(strcmp(fields(trialRecords(end).stimDetails),'correctionTrial'))
+                lastWasCorrection=trialRecords(end).stimDetails.correctionTrial;
+            else
+                lastWasCorrection=0;
+            end
+            if length(lastResponse)>1
+                lastResponse=lastResponse(1);
+            end
+        else
+            lastResponse=[];
+            lastCorrect=[];
+            lastWasCorrection=0;
+        end
 
-        lastResponse=[];
-        lastCorrect=[];
-        lastWasCorrection=0;
-        details.correctionTrial=0;
-        targetPorts=responsePorts(ceil(rand*length(responsePorts)));
+        %note that this implementation will not show the exact same
+        %stimulus for a correction trial, but just have the same side
+        %correct.  may want to change...
+        if ~isempty(lastCorrect) && ~isempty(lastResponse) && ~lastCorrect && (lastWasCorrection || rand<details.pctCorrectionTrials)
+            details.correctionTrial=1;
+            'correction trial!'
+            targetPorts=trialRecords(end).targetPorts;
+            isCorrection=1;
+        else
+            details.correctionTrial=0;
+            targetPorts=responsePorts(ceil(rand*length(responsePorts)));
+        end
+
 
         distractorPorts=setdiff(responsePorts,targetPorts);
         targetPorts
-
-        %edf: 11.25.06: original:
-        %targetPorts=responsePorts(ceil(rand*length(responsePorts)));
-        %distractorPorts=setdiff(responsePorts,targetPorts);
 
     otherwise
         error('unknown trial manager class')

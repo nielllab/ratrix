@@ -1,6 +1,6 @@
-function [trialManager updateTM newSM updateSM stopEarly station]=doTrial(trialManager,station,stimManager,subject,r,window,ifi,rn)
+function [trialManager updateTM newSM updateSM stopEarly trialRecords station]=doTrial(trialManager,station,stimManager,subject,r,window,ifi,rn,trialRecords,sessionNumber)
 verbose=1;
-
+updateTM=false;
 stopEarly=0;
 
 if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') && isa(subject,'subject') && ((isempty(rn) && ismember(getRewardMethod(station),{'localTimed','localPump'})) || isa(rn,'rnet'))
@@ -17,11 +17,10 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
         trialRecords
         class(trialRecords)
         trialInd=length(trialRecords)+1;
-
         [p t]=getProtocolAndStep(subject);
         ts = getTrainingStep(p,t);
 
-
+        % Get the trial number from the passed in trial records
         if trialInd>1
             trialRecords(trialInd).trialNumber=trialRecords(trialInd-1).trialNumber+1;
         else
@@ -83,7 +82,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
 
 
         if isa(stimManager,'stimManager')
-
+            trialRecords(trialInd).sessionNumber = sessionNumber;
             trialRecords(trialInd).date = datevec(now);
             trialRecords(trialInd).box = struct(getBoxFromID(r,getBoxIDForSubjectID(r,getID(subject))));
             trialRecords(trialInd).station = struct(station);
@@ -91,10 +90,34 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             trialRecords(trialInd).trainingStepNum = t;
             trialRecords(trialInd).numStepsInProtocol = getNumTrainingSteps(p);
             trialRecords(trialInd).protocolVersion = getProtocolVersion(subject);
+            
+            % Initializing
+            trialRecords(trialInd).correct = []; 
+            trialRecords(trialInd).reinforcementManager = [];
+            trialRecords(trialInd).proposedRewardSizeULorMS=[];
+            trialRecords(trialInd).proposedMsPenalty=[];
+            trialRecords(trialInd).proposedMsRewardSound=[];
+            trialRecords(trialInd).proposedMsPenaltySound=[];
+            trialRecords(trialInd).errorRecords=[];
+            trialRecords(trialInd).actualRewardDuration=[];
+
+            % More Initializing
+            trialRecords(trialInd).valveErrorDetails=[];
+            trialRecords(trialInd).latencyToOpenValves=[];
+            trialRecords(trialInd).latencyToCloseValveRecd=[];
+            trialRecords(trialInd).latencyToCloseValves=[];
+            trialRecords(trialInd).actualRewardDuration=[];
+            trialRecords(trialInd).latencyToRewardCompleted=[];
+            trialRecords(trialInd).latencyToRewardCompletelyDone=[];
+            trialRecords(trialInd).primingValveErrorDetails=[];
+            trialRecords(trialInd).latencyToOpenPrimingValves=[];
+            trialRecords(trialInd).latencyToClosePrimingValveRecd=[];
+            trialRecords(trialInd).latencyToClosePrimingValves=[];
+            trialRecords(trialInd).actualPrimingDuration=[];
 
             stns=getStationsForBoxID(r,getBoxIDForSubjectID(r,getID(subject)));
             for stNum=1:length(stns)
-                trialRecords(trialInd).stationIDsInBox{stNum} = getID(stns(stNum));
+                stationIDsInBox{stNum} = getID(stns(stNum));
             end
 
             trialRecords(trialInd).subjectsInBox = getSubjectIDsForBoxID(r,getBoxIDForSubjectID(r,getID(subject)));
@@ -102,7 +125,6 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             trialRecords(trialInd).trialManager = structize(decache(trialManager));
             trialRecords(trialInd).stimManagerClass = class(stimManager);
             trialRecords(trialInd).trialManagerClass = class(trialManager);
-
             trialRecords(trialInd).scheduler = structize(getScheduler(ts));
             trialRecords(trialInd).criterion = structize(getCriterion(ts));
             trialRecords(trialInd).schedulerClass = class(trialRecords(trialInd).scheduler);
@@ -139,10 +161,32 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 end
             end
 
-            % Wait to cache sounds until here because you might get new
-            % ones
-            [trialManager.soundMgr updateTM]=cacheSounds(trialManager.soundMgr);
-            
+            audioStimulus = [];
+            if ismethod(newSM,'getAudioStimulus');
+                audioStim = getAudioStimulus(newSM);
+                if ~isempty(audioStim)
+                    audioStimulus=getName(audioStim);
+                    % Add/replace the stimulus sound clip to the list of clips in
+                    % the sound manager
+                    trialManager.soundMgr = addSound(trialManager.soundMgr,audioStim);
+                end
+            end
+
+            % Wait to cache sounds until here because you might get new ones
+            [trialManager.soundMgr updateSndM]=cacheSounds(trialManager.soundMgr);  %update of soundManager was overwritting update of stimulus manager. now fixed pmm 2008/05/02 
+            updateTM = updateTM || updateSndM;  %
+
+
+
+            %so that we can display the sessionUpTime - pmm 20080207
+            % trialsThisSession=trialRecords(trialRecords.sessionID==trialRecords.sessionID(end));
+            trialsThisSession=trialRecords;
+            if size(trialsThisSession,2)>1
+                sessionStartTime=datenum(trialsThisSession(1).date);
+            else
+                sessionStartTime=now;
+            end
+
 
             %trialRecords(trialInd).stimManager = structize(newSM); %edf: removed 11.04.06 -- the timedFrame stim manager is too large (it has a cache).  could call a decache() method...
             if isa(stimulusDetails,'structable')
@@ -166,6 +210,9 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 end
             end
 
+            [rm updateRM] =cache(getReinforcementManager(trialManager),trialRecords, subject);
+            updateTM = updateTM || updateRM;
+
             drawnow;
 
             currentValveStates=verifyValvesClosed(station);
@@ -178,7 +225,9 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                     trialRecords(trialInd).containedManualPokes,...
                     trialRecords(trialInd).leftWithManualPokingOn,...
                     trialRecords(trialInd).containedAPause,...
-                    trialRecords(trialInd).containedForcedRewards,...
+                    trialRecords(trialInd).containedForcedRewards, ... %pmm added 4/3/08
+                    trialRecords(trialInd).didHumanResponse, ... %pmm added 4/18/08
+                    trialRecords(trialInd).didStochasticResponse, ...
                     station]= ...
                     stimOGL( ...
                     trialManager, ...
@@ -208,7 +257,6 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 error('bad window or ifi')
             end
 
-
             resp=find(trialRecords(trialInd).response);
             if ~ischar(trialRecords(trialInd).response) && length(resp)==1
 
@@ -216,6 +264,24 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             else
                 trialRecords(trialInd).correct = 0;
             end
+
+
+            %UPDATE REWARDS AND PENALTIES BASED ON REWARD MANAGER - pmm 070525
+            %rewardManager happens to live in trialManager for now... getting it for use
+            [rm rewardSizeULorMS msPenalty msRewardSound msPenaltySound updateRM] =calcReinforcement(getReinforcementManager(trialManager),trialRecords, subject);
+            updateTM = updateTM || updateRM;
+
+            if updateRM
+                trialManager = setReinforcementManager(trialManager, rm);
+            end
+
+            %if slow rewards check, here or the calc reinforcement are likely implicated
+            trialRecords(trialInd).reinforcementManager = trialManager.reinforcementManager;
+            trialRecords(trialInd).reinforcementManagerClass = class(trialManager.reinforcementManager);
+            trialRecords(trialInd).proposedRewardSizeULorMS=rewardSizeULorMS;
+            trialRecords(trialInd).proposedMsPenalty=msPenalty;
+            trialRecords(trialInd).proposedMsRewardSound=msRewardSound;
+            trialRecords(trialInd).proposedMsPenaltySound=msPenaltySound;
 
             if ~stopEarly
 
@@ -235,7 +301,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                             trialRecords(trialInd).actualRewardDuration = GetSecs()-valveStart;
                             
                         case 'localTimed'
-                            trialManager.soundMgr=playSound(trialManager.soundMgr,'correctSound',trialManager.msRewardSoundDuration/1000.0,station);
+                            trialManager.soundMgr=playSound(trialManager.soundMgr,'correctSound',msRewardSound/1000.0,station);
 
                             %OPEN VALVE
                             %setValves(station, rewardValves)
@@ -246,7 +312,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                                 trialRecords(trialInd).responseDetails.startTime,'correct reward open');
                             valveStart=GetSecs();
 
-                            WaitSecs(trialManager.rewardSizeULorMS/1000); %%pause(trialManager.msRewardDuration/1000)
+                            WaitSecs(rewardSizeULorMS/1000); %%pause(rewardSizeULorMS/1000)
 
                             %CLOSE VALVE
                             %setValves(station,zeros(1,getNumPorts(station)));
@@ -260,7 +326,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                             if verbose
                                 trialRecords(trialInd).actualRewardDuration
                             end
-                            pctRewardOff=abs(1.0-(trialRecords(trialInd).actualRewardDuration/(trialManager.rewardSizeULorMS/1000.0)));
+                            pctRewardOff=abs(1.0-(trialRecords(trialInd).actualRewardDuration/(rewardSizeULorMS/1000.0)));
                             if pctRewardOff>.05
                                 warning('reward duration was off by %g',pctRewardOff)
                             end
@@ -272,7 +338,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
 
                             sprintf('*****should be no output between here *****')
 
-                            stopEarly=sendToServer(rn,getClientIdent(rn),constants.priorities.IMMEDIATE_PRIORITY,constants.stationToServerCommands.C_REWARD_CMD,{trialManager.rewardSizeULorMS,logical(rewardValves)});
+                            stopEarly=sendToServer(rn,getClientId(rn),constants.priorities.IMMEDIATE_PRIORITY,constants.stationToServerCommands.C_REWARD_CMD,{rewardSizeULorMS,logical(rewardValves)});
                             rewardDone=false;
                             if ~stopEarly
                                 trialRecords(trialInd).primingValveErrorDetails=[];
@@ -361,15 +427,22 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                     end
 
                 elseif ~ischar(trialRecords(trialInd).response)
-                    trialManager.soundMgr=playSound(trialManager.soundMgr,'wrongSound',trialManager.msPenalty/1000,station);
-                    numErrorFrames=ceil((trialManager.msPenalty/1000)/ifi);
+                    trialManager.soundMgr=playSound(trialManager.soundMgr,'wrongSound',msPenaltySound/1000,station);
+                    numErrorFrames=ceil((msPenalty/1000)/ifi);
                     [errStim errorScale] = errorStim(stimManager,numErrorFrames);
                     errAudioStim = [];
-                    
+
                     [stopEarly,...
-                        garbage, garbage, garbage, garbage, garbage, garbage,...
-                        station]= ...
-                        stimOGL( ...
+                        errorRecords(trialInd).response,...
+                        errorRecords(trialInd).responseDetails,...
+                        errorRecords(trialInd).containedManualPokes,...
+                        errorRecords(trialInd).leftWithManualPokingOn,...
+                        errorRecords(trialInd).containedAPause,...
+                        errorRecords(trialInd).containedForcedRewards, ...
+                        errorRecords(trialInd).didHumanResponse, ... 
+                        errorRecords(trialInd).didStochasticResponse, ...
+                        station] ...
+                        =stimOGL( ...
                         trialManager, ...
                         errStim, ...
                         errAudioStim, ...
@@ -382,6 +455,8 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                         [], ...
                         trialRecords(trialInd).interTrialLuminance, ...
                         station,0,0,.5,1,0,rn,getID(subject),trialRecords(trialInd).stimManagerClass,hasAirpuff(station));
+
+                    trialRecords(trialInd).errorRecords=errorRecords(trialInd);
 
                     if stopEarly
                         'got stopEarly 6'
@@ -397,7 +472,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             end
 
             currentValveStates=verifyValvesClosed(station);
-            
+
             while ~isempty(rn) && commandsAvailable(rn,constants.priorities.AFTER_TRIAL_PRIORITY) && ~stopEarly
                 if ~isConnected(r)
                     stopEarly=true;
@@ -413,6 +488,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                                 if isPrime
 
                                     timeout=-5;
+
 
                                     [stopEarly trialRecords(trialInd).primingValveErrorDetails(end+1),...
                                         trialRecords(trialInd).latencyToOpenPrimingValves(end+1),...
@@ -448,11 +524,13 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                         end
                     end
                 end
+
+
             end
 
             currentValveStates=verifyValvesClosed(station);
 
-            updateTrialRecordsForSubjectID(r,getID(subject),trialRecords);
+
 
             if verbose
                 trialRecords(trialInd)
@@ -470,7 +548,8 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
 else
 
     sca
-    'hi'
+
+'****'
     isa(station,'station')
     isa(stimManager,'stimManager')
     isa(subject,'subject')
@@ -479,6 +558,9 @@ else
     stimManager
     isa(stimManager,'stimManager')
     isa(stimManager,'ifFeatureGoRightWithTwoFlank')
-'there'
+    rn
+    getRewardMethod(station)
+'****'
+    
     error('need station, stimManager, subject, ratrix, and rnet objects')
 end

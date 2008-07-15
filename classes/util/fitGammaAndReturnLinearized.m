@@ -1,5 +1,5 @@
 
-function [linearizedCLUT g]=fitGammaAndReturnLinearized(sent, measured, l_range ,colorMapSize,plotOn)
+function [linearizedCLUT g]=fitGammaAndReturnLinearized(sent, measured, l_range, sensorRange, gamutRange, colorMapSize,plotOn)
 %[linearizedCLUT g]=fitGamma(sent, measured, [0.02 0.2] ,256)
 % Finds the best fitting gamma function and then creates a colormap [1 x colorMapSize]
 % that produces a linear range of values between l_range min and max where
@@ -28,8 +28,8 @@ end
     
 maxSent=max(sent);
 maxMeasured=max(measured);
-sent=sent/maxSent;
-measured=measured/maxMeasured;
+sent = (sent-gamutRange(1))/abs(gamutRange(2) - gamutRange(1));
+measured= (measured-sensorRange(1))/abs(sensorRange(2) - sensorRange(1));
 
 %get the best fitting gamma function
 %NOTE:  psychtoolbox has a function fit gamma with more options and uses fminuc
@@ -49,7 +49,7 @@ if g(3) > l_range(1)
 end
 
 %the range of luminance values desired
-Y_desired=linspace(l_range(1), l_range(2), 256);   %desired device Output
+Y_desired=linspace(l_range(1), l_range(2), colorMapSize);   %desired device Output
 
 %calculate inverse Gamma
 iGamma=@(x)((x-g(3))/g(1)).^(1/g(2));
@@ -71,9 +71,10 @@ end
 Y_test=g(1)*(send_required.^g(2))+g(3);
 MSError=sum((Y_test-Y_desired).^2);
 if MSError > 10^-20
-    error('There is a problem with the inverse mapping of Gamma');
     Y_test(end)
     Y_desired(end)
+    error('There is a problem with the inverse mapping of Gamma');
+   
 end
 
 linearizedCLUT=send_required;

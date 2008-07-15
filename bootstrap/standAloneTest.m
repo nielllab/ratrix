@@ -1,8 +1,10 @@
 function standAloneTest
+
+% TO DO: optional argument specifies your setupFile / default value
+
 setupEnvironment;
 
 dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
-%rx=crossModalMakeRatrix(dataPath,true,'localTimed');
 makeRatrix(dataPath,true,'localPump');
 
 rx=ratrix(fullfile(dataPath, 'ServerData'),0); %test loading in from disk

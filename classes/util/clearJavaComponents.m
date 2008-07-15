@@ -6,5 +6,5 @@ function clearJavaComponents()
 java.lang.System.gc();
 clear java;
 warning('off','MATLAB:GENERAL:JAVARMPATH:NotFoundInPath')
-javarmpath(getRatrixJarPath);
+javarmpath(getRlabJarPath);
 warning('on','MATLAB:GENERAL:JAVARMPATH:NotFoundInPath')

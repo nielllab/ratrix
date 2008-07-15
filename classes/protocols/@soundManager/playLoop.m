@@ -92,9 +92,9 @@ if isa(station,'station')
             if sm.playerType == sm.AUDIO_PLAYER
                 if ~isempty(sm.records(i).player)
                     if ~isp
-                        logwrite('playLoop: about to call audioplayer.play');
+                        %logwrite('playLoop: about to call audioplayer.play');
                         play(sm.records(i).player); %THIS CALL IS PROBLEMATIC ON OSX
-                        logwrite('playLoop: successfully called audioplayer.play');
+                        %logwrite('playLoop: successfully called audioplayer.play');
                     end
                 else
                     error('sound manager error -- lost its player')

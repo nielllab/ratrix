@@ -9,12 +9,14 @@ bid=getBoxIDForStationID(r,id);
 'this box'
 bid
 out.boxes={getBoxFromID(r,bid)};
+out.creationDate = getCreationDate(r);
 out.subjects=getSubjectsForStationID(r,id);
 subIDs=getSubjectIDsForStationID(r,id);
 if isempty(subIDs)
     out=[];
 else
-out.assignments{bid}={{getStationByID(r,id),stationIDsRunning(r,id)}, subIDs};
+out.assignments{bid}={{getStationByID(r,id),stationIDsRunning(r,{id})}, subIDs};
+out.permanentStorePath =r.permanentStorePath;
 end
 % 
 % display(out.boxes)

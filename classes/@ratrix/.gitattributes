@@ -42,3 +42,9 @@
 /commandBoxIDStationIDs.m -text
 /isGoodNonpersistedSingleStationRatrix.m -text
 /display.m -text
+/mergeMiniIntoRatrix.m -text
+/getPermanentStorePath.m -text
+/getCreationDate.m -text
+/viewStim.m -text
+/setPermanentStorePath.m -text
+/getBasicFacts.m -text

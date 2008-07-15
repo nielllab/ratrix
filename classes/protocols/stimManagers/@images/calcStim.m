@@ -9,8 +9,7 @@ updateSM=0;
 isCorrection=0;
 
 scaleFactor = getScaleFactor(stimulus);
-interTrialLuminance = uint8(getInterTrialLuminance(stimulus));
-
+interTrialLuminance = uint8(intmax('uint8')*getInterTrialLuminance(stimulus));%uint8(getInterTrialLuminance(stimulus));
 
 type='trigger';
 
@@ -46,24 +45,12 @@ else
     targetPorts=responsePorts(ceil(rand*length(responsePorts)));
 end
 
-
 distractorPorts=setdiff(responsePorts,targetPorts);
 targetPorts
 
-%edf: 11.25.06: original:
-%targetPorts=responsePorts(ceil(rand*length(responsePorts)));
-%distractorPorts=setdiff(responsePorts,targetPorts);
-
-
 dups=false;
-ims=checkImages(stimulus,length(responsePorts),dups);
-
-
-for i=1:size(ims,1)
-    if length(size(ims{i,1}))==3
-        ims{i,1}=uint8(floor(sum(ims{i,1},3)/3)); %convert to greyscale
-    end
-end
+backgroundcolor=uint8(intmax('uint8')*stimulus.background);
+[stimulus updateSM ims]=checkImages(stimulus,length(responsePorts),dups,backgroundcolor);
 
 if length(targetPorts)==1 %correct response is to go to lowest numbered image -- distractors randomly assigned after that
     pics=cell(totalPorts,3);
@@ -82,12 +69,13 @@ else
     error('images stimManger only works for singleton target ports')
 end
 
-details.images={pics{:,2}};
+details.imageDetails={pics{:,2}};
 
-[out(:,:,1) details.deltas]=prepareImages({pics{:,1}},{pics{:,3}},[getMaxHeight(stimulus) getMaxWidth(stimulus)],.95,.9);
+out(:,:,1) = [pics{:,1}];
 
-%EDF: 02.08.07 -- i think this is only supposed to be for nafc but not sure...
+%EDF: 02.08.07 -- i think this is only supposed to be for nafc but not
+%sure...
 %was causing free drinks stim to only show up for first frame...
 if strcmp(trialManagerClass,'nAFC')%pmm also suggests this:  && strcmp(type,'trigger')
-    out(:,:,2)=stimulus.background;
+    out(:,:,2)=backgroundcolor; % affects the stim shown between toggles of stimulus
 end

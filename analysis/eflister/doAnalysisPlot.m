@@ -23,14 +23,21 @@
 %         requiredFields={'response'};
 %     case 'plotRatePerDay' %skips data after the first 2 hours following the first trial of a given date
 %         requiredFields={'date'};
-function doAnalysisPlot(compiledFileDir,subjectID,type)
+function doAnalysisPlot(compiledFileDir,subjectID,type,filter,filterVal,filterParam)
 storageMethod='vector'; %'structArray' 
 
+
 if strcmp(type,'weight')
-    conn=dbConn('132.239.158.177','1521','dparks','pac3111');
-    [weights dates thresholds] = getBodyWeightHistory(conn,subjectID);
-    closeConn(conn);
-    plot(dates,[weights thresholds]);
+
+    lastNdays = 60;
+    plotBodyWeights({subjectID},lastNdays);
+    
+    %old:
+%     conn=dbConn('132.239.158.177','1521','dparks','pac3111');
+%     [weights dates thresholds] = getBodyWeightHistory(conn,subjectID);
+%     closeConn(conn);
+%     plot(dates,[weights thresholds]);
+        
 else
 if ~isdeployed
 %    addpath('C:\Documents and Settings\rlab\Desktop\phil analysys');
@@ -95,9 +102,35 @@ end
                 fprintf('\ttime elapsed: %g\n\n',GetSecs-t)
 
             case 'vector'
-
-                processedRecords=records;
                 
+        %do filtering:
+            switch filter
+                case 'all'
+                processedRecords=records;
+                case 'last'
+                    switch filterParam
+                        case 'days'
+                            processedRecords=removeSomeSmalls(records, records.date<now-filterVal);
+                        case 'trials'
+                            processedRecords=removeSomeSmalls(records, records.trialNumber<records.trialNumber(end)-filterVal+1);
+                        otherwise
+                            error('bad filterParams')
+                    end
+                case 'first'
+                     switch filterParam
+                        case 'days'
+                            processedRecords=removeSomeSmalls(records, records.date>records.date(1)+filterVal);
+                        case 'trials'
+                            processedRecords=removeSomeSmalls(records, records.trialNumber>filterVal);
+                        otherwise
+                            error('bad filterParams')
+                     end
+                otherwise
+                    filter
+                    error ('bad filter type')
+            end
+            
+            
             otherwise
                 error('unrecognized storage method')
         end
@@ -121,6 +154,10 @@ end
 
 
     else
+        if isempty(d)
+            dir(compiledFileDir)
+            fprintf('can''t seem to dir %s\nyou should make sure you can see this directory\ntry to open it in your file system-- you may be prompted for authentication, which may solve this problem\n',compiledFileDir)
+        end
         d.name
         warning('didn''t find any records')
     end

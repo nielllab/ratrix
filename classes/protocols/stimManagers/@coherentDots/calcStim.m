@@ -107,6 +107,17 @@ dots_movie = uint8(zeros(s.screen_height, s.screen_width, num_frames));
 % Make a square shape
 shape = ones(s.dot_size);
 
+if (s.max_coherence == s.min_coherence)
+    'Min and max the same!!'
+    s.coherence = s.max_coherence;
+else
+    'Min and max different!!'
+    s.min_coherence
+    s.max_coherence
+    '...'
+    s.coherence = s.min_coherence + rand(1)*(s.max_coherence - s.min_coherence)
+end
+
 %% Draw those dots!
 
 frame = zeros(s.screen_height,s.screen_width);
@@ -159,3 +170,6 @@ out = dots_movie;
 details.stimStruct = structize(stimulus);
 details.dotDirection = dotDirection;
 details.dotxy = alldotsxy;
+details.max_coherence = s.max_coherence;
+details.min_coherence = s.min_coherence;
+details.coherence = s.coherence;

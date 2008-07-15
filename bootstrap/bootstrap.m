@@ -1,7 +1,8 @@
 function bootstrap
 
 setupEnvironment;
-
+addJavaComponents();  %might conflict with dbconn        
+            
 dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
 
 diary off
@@ -19,9 +20,17 @@ try
         error('couldn''t get mac address')
     end
     
-    info=getRatrixStationInfo(id);
-    serverAddress=info.server;
+    %info=getRatrixStationInfo(id);
+    %
 
+    conn=dbConn('132.239.158.177','1521','dparks','pac3111');
+    info=getStationFromMac(conn,id);
+    closeConn(conn);
+    if isempty(info)
+        error('No station is defined for this MAC, is this a known station?')
+    end
+    serverAddress=info.server;
+    
     tries=0;
     while true
         'looping over svn code update, then rnet creation, then commands'
@@ -30,7 +39,7 @@ try
         try
             clearJavaComponents();
             clientCheckForUpdate
-            addJavaComponents();
+            addJavaComponents();  %        move to top of file. so that above dbConn
             % If r is already setup, just try and reconnect
 %             if exist('r') && ~isempty(r)
 %                 reconnect(r);
@@ -51,6 +60,8 @@ try
         end
         if exist('r') && ~isempty(r)
             tries=0;
+            % Update system time upon reconnect
+            system('w32tm /resync /nowait');
             clearTemporaryFiles(r);
             
             quit=false;

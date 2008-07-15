@@ -1,20 +1,31 @@
-clear all; clear classes; close all; clc; format long g
+function ratSubjectSession(subjectID)
+%ratSubjectSession('test')
+%choose which rat: 'test','rat_107', 'edf' ,'rat_v' , 'rat_114-115'
 
-%kqk212222223222222222232222222222222222212223223kkkkkkkkkkkkqk2322222k2122
-%2kqk32kq232k2k222kqkqk2k2222222222222222222222222kqqqqqk22223kkkkkkk22221k
-%22222kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkq
-%k2kkkkkkkkkkkkkkkk22222222kq12221222k2kqqqqqqqk2k2222222222222kq
-%kqkkkkkqkkkkqkqkqk22222122222222322222122223222221222222222212232212232121
+if ~exist('subjectID','var')
+subjectID='test'
+end
 
-%user params
-subjectID='test';   %choose which rat: 'test','rat_107', 'edf' ,'rat_v'
+ifStartInit=0;
+if ifStartInit
+    RatSubjectInit
+end
 
-rootPath='C:\pmeier\Ratrix\'; pathSep='\';
+
+%% getPaths
+rootPath='C:\pmeier\Ratrix\'; 
 warning('off','MATLAB:dispatcher:nameConflict')
-addpath(genpath([rootPath 'Server' pathSep]));
+%addpath(genpath([rootPath 'Server' pathSep]));  pathSep='\';
+addpath(genpath(fullfile(rootPath,'classes')));
+addpath(genpath(fullfile(rootPath,'analysis')));
+rmpath(fullfile(rootPath,'analysis','miniDatabase'));  %makeMiniDatabase must come from remote!
 warning('on','MATLAB:dispatcher:nameConflict')
 %r=ratrix([rootPath 'ServerData' pathSep],0); possibleIDs=getSubjectIDs(r)
 
+%remove all others already in...only allows one at at time
+removeSubjectFromPmeierRatrix
+
+%% runIt
 numTrialsPerLoop=1000; %maximum trials, scheduler will choose less
 numLoops=99;  %set to high and wait for kq to break it
 
@@ -22,26 +33,36 @@ loop=0;
 while loop<numLoops
     %setup
     loop=loop+1
-    r=ratrix([rootPath 'ServerData' pathSep],0);
+    r=ratrix(fullfile(rootPath, 'ServerData',filesep),0);
     
     s=getSubjectFromID(r,subjectID);
     b=getBoxIDForSubjectID(r,getID(s));
-    r=putSubjectInBox(r,subjectID,1,'pmm');
+
+   
+%FOR DEBUGGING bad stimManagers 
+%     ifFeatureGoRightWithTwoFlank
+%     [p step]=getProtocolAndStep(s);
+%     stim=getStimManager(getTrainingStep(p, step))
+%     class(stim)
+
+    r=putSubjectInBox(r,subjectID,1,'pmm'); %force box1
     b=getBoxIDForSubjectID(r,getID(s))
     st=getStationsForBoxID(r,b)
     
     r=doTrials(st,r,numTrialsPerLoop); %run
     r=removeSubjectFromBox(r,subjectID,b,'no comment','pmm')
     
-    data=loadRatrixData([rootPath 'Boxes\box1\'],{subjectID},1);
+    %error('now')
+    
+    data=loadRatrixData([rootPath 'Boxes\box1\'],{subjectID},'lastNfiles',int8(1)); %load this rats data to check last trial
+    clearSubjectDataDir(getBoxFromID(r,1)); %clear subjectData directory from box1 to shrink trial records
     if strcmp(data{1}.trialRecords(end).response,'manual kill')
+        %quit force
         numToAnalyze=loop;
         loop=numLoops
-    else %restart the ratrix to shrink trial records
-        RatSubjectInit 
-    end   
+    end
+    %loop=numLoops+1 %for debugging loop
     
-    %loop=numLoops+1 %for debugging
 end
 
 
@@ -55,11 +76,11 @@ end
 %
 % doFlush(st,1)
 
-if 1
+if 0
     path=[rootPath 'Boxes\box1\'];
     subjects={subjectID};%{'test','rat_w'}; %set subjects=[] for all
-    lastN=numToAnalyze;
-    data=loadRatrixData(path,subjects,lastN);
+    lastN=int8(numToAnalyze);
+    data=loadRatrixData(path,subjects,'lastNFiles',lastN);
     ratrixAnalysis(data);
 end
 

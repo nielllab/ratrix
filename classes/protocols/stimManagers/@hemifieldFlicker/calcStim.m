@@ -17,7 +17,7 @@ interTrialLuminance = getInterTrialLuminance(stimulus);
 
 switch trialManagerClass
     case 'freeDrinks'
-        type='loop';%int32([10 10]); % This is 'timedFrames'
+        type={'indexedFrames',[]};%int32([10 10]); % This is 'timedFrames'
         if ~isempty(trialRecords)
             lastResponse=find(trialRecords(end).response);
             if length(lastResponse)>1
@@ -31,34 +31,52 @@ switch trialManagerClass
         distractorPorts=[];
 
     case 'nAFC'
-        type='loop';%int32([10 10]); % This is 'timedFrames'
-
+        type={'indexedFrames',[]};%int32([10 10]); % This is 'timedFrames'
+        
         %edf: 11.25.06: copied correction trial logic from hack addition to cuedGoToFeatureWithTwoFlank
         %edf: 11.15.06 realized we didn't have correction trials!
         %changing below...
 
-        % dfp: 12.07.07: correction trial code removed from here.  Thought
-        % to be handled outside of calcStim eventually per Erik
 
-        lastResponse=[];
-        lastCorrect=[];
-        lastWasCorrection=0;
-        details.correctionTrial=0;
-        targetPorts=responsePorts(ceil(rand*length(responsePorts)));
+        details.pctCorrectionTrials=.5; % need to change this to be passed in from trial manager
+        
+        if ~isempty(trialRecords)
+            lastResponse=find(trialRecords(end).response);
+            lastCorrect=trialRecords(end).correct;
+            if any(strcmp(fields(trialRecords(end).stimDetails),'correctionTrial'))
+                lastWasCorrection=trialRecords(end).stimDetails.correctionTrial;
+            else
+                lastWasCorrection=0;
+            end
+            if length(lastResponse)>1
+                lastResponse=lastResponse(1);
+            end
+        else
+            lastResponse=[];
+            lastCorrect=[];
+            lastWasCorrection=0;
+        end
 
+        %note that this implementation will not show the exact same
+        %stimulus for a correction trial, but just have the same side
+        %correct.  may want to change...
+        if ~isempty(lastCorrect) && ~isempty(lastResponse) && ~lastCorrect && (lastWasCorrection || rand<details.pctCorrectionTrials)
+            details.correctionTrial=1;
+            'correction trial!'
+            targetPorts=trialRecords(end).targetPorts;
+            isCorrection=1;
+        else
+            details.correctionTrial=0;
+            targetPorts=responsePorts(ceil(rand*length(responsePorts)));
+        end
+        
         distractorPorts=setdiff(responsePorts,targetPorts);
         targetPorts
 
-        %edf: 11.25.06: original:
-        %targetPorts=responsePorts(ceil(rand*length(responsePorts)));
-        %distractorPorts=setdiff(responsePorts,targetPorts);
 
     otherwise
         error('unknown trial manager class')
 end
-
-numFreqs=length(stimulus.pixPerCycs);
-details.pixPerCyc=stimulus.pixPerCycs(ceil(rand*numFreqs));
 
 numTargs=length(stimulus.targetContrasts);
 details.contrasts = stimulus.targetContrasts(ceil(rand(length(targetPorts),1)*numTargs));
@@ -72,14 +90,15 @@ else
     numFields=length(targetPorts);
     distractorLocs=[];
 end
-
+% Set the randomly calculated frame indices
+type{2} = round(rand(stimulus.numCalcIndices,1)*(2^numFields-1)+1); 
 
 xPosPcts = [linspace(0,1,totalPorts+2)]';
 xPosPcts = xPosPcts(2:end-1);
 details.xPosPcts = xPosPcts([targetPorts'; distractorLocs']);
 
-params = [repmat([stimulus.fieldWidthPct stimulus.fieldHeightPct details.pixPerCyc],numFields,1) details.contrasts repmat([stimulus.thresh],numFields,1) details.xPosPcts repmat([stimulus.yPosPct],numFields,1)];
-out(:,:,1:2)=computeFlickerFields(params,stimulus.flickerType,stimulus.mean,min(width,getMaxWidth(stimulus)),min(height,getMaxHeight(stimulus)),0);
+params = [repmat([stimulus.fieldWidthPct stimulus.fieldHeightPct],numFields,1) details.contrasts repmat([stimulus.thresh],numFields,1) details.xPosPcts repmat([stimulus.yPosPct],numFields,1)];
+out(:,:,1:2^numFields)=computeFlickerFields(params,stimulus.flickerType,stimulus.mean,min(width,getMaxWidth(stimulus)),min(height,getMaxHeight(stimulus)),0);
 
 %EDF: 02.08.07 -- i think this is only supposed to be for nafc but not sure...
 %was causing free drinks stim to only show up for first frame...

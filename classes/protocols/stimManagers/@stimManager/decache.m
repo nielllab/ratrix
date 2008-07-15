@@ -1,0 +1,2 @@
+function s=decache(s)
+  

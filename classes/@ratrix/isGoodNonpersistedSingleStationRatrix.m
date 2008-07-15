@@ -36,10 +36,10 @@ end
 
 %there is only one station and it is not running
 st=getStationsForBoxID(r,bids(1));
-out = out && length(st)==1 && ~stationIDsRunning(r,getID(st));
+out = out && length(st)==1 && ~stationIDsRunning(r,{getID(st)});
 if ~out
     length(st)
-    stationIDsRunning(r,getID(st))
+    stationIDsRunning(r,{getID(st)})
     warning('more than one station or station is running')
 end
 

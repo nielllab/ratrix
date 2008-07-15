@@ -35,6 +35,9 @@ details.LUT=LUT;  % in future, consider saving a LUT id?
 
 details.pctCorrectionTrials=0.5; % need to change this to be passed in from trial manager
 
+details.maxCorrectForceSwitch=0;  % make sure this gets defined even if no trial records or free drinks
+
+
 if ~isempty(trialRecords)
     lastResponse=find(trialRecords(end).response);
     lastCorrect=trialRecords(end).correct;
@@ -61,11 +64,15 @@ switch trialManagerClass
         %correct.  may want to change...
         if ~isempty(lastCorrect) && ~isempty(lastResponse) && ~lastCorrect && (lastWasCorrection || rand<details.pctCorrectionTrials)
             details.correctionTrial=1;
+            details.maxCorrectForceSwitch=0;
             'correction trial!'
             targetPorts=trialRecords(end).targetPorts;
         else
             details.correctionTrial=0;
-            targetPorts=responsePorts(ceil(rand*length(responsePorts)));
+            [targetPorts hadToResample]=getSameLimitedResponsePort(responsePorts,stimulus.maxCorrectOnSameSide,trialRecords)
+            details.maxCorrectForceSwitch=hadToResample;
+            %targetPorts=responsePorts(ceil(rand*length(responsePorts)));
+            %old random selection is now inside helper function -pmm  
         end
         
         

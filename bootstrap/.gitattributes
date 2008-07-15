@@ -8,9 +8,7 @@
 /getRatrixPath.m -text
 /makeDotRatrix.m -text
 /serverCheckForUpdate.m -text
-/testSound.m -text
 /ratrixServer.m -text
-/crossModalMakeRatrix.m -text
 /initRatrixPorts.m -text
 /clientCheckForUpdate.m -text
 /runRatrixServer.m -text
@@ -18,3 +16,4 @@
 /checkForUpdate.m -text
 /bootstrap.m -text
 /setupEnvironment.m -text
+/standAloneRun.m -text

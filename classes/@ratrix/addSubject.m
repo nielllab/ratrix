@@ -1,7 +1,8 @@
 function r = addSubject(r,s,author)
 if isa(s,'subject')
-    [member index]=ismember(getID(s),getSubjectIDs(r));
+    [member index]=ismember(lower(getID(s)),lower(getSubjectIDs(r)));
     if index>0
+        getID(s)
         error('ratrix already contains a subject with that id')
 
     else

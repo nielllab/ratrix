@@ -1,8 +1,8 @@
 function t=nAFC(varargin)
 % NAFC  class constructor.
-% t=nAFC(msFlushDuration,rewardSizeULorMS,msMinimumPokeDuration,msMinimumClearDuration,soundManager,...
-%                msPenalty,requestRewardSizeULorMS,percentCorrectionTrials,msResponseTimeLimit,pokeToRequestStim,...
-%                maintainPokeToMaintainStim,msMaximumStimPresentationDuration,maximumNumberStimPresentations,doMask,msRewardSoundDuration,eyepuffMS)
+% t=nAFC(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,soundManager,...
+%                requestRewardSizeULorMS,percentCorrectionTrials,msResponseTimeLimit,pokeToRequestStim,...
+%                maintainPokeToMaintainStim,msMaximumStimPresentationDuration,maximumNumberStimPresentations,doMask, rewardManager)
 % msResponseTimeLimit=0 means unlimited response time
 % msMaximumStimPresentationDuration=0 means unlimited stim presentation duration
 % maximumNumberStimPresentations=0 means unlimited presentations
@@ -30,55 +30,55 @@ switch nargin
         else
             error('Input argument is not a nAFC object')
         end
-    case 16
+    case 13
 
 
 
 
-        if varargin{7}>=0
-            t.requestRewardSizeULorMS=varargin{7};
+        if varargin{5}>=0
+            t.requestRewardSizeULorMS=varargin{5};
         else
             error('requestRewardSizeULorMS must be >= 0')
         end
 
-        if varargin{8}>=0 && varargin{8}<=1
-            t.percentCorrectionTrials=varargin{8};
+        if varargin{6}>=0 && varargin{6}<=1
+            t.percentCorrectionTrials=varargin{6};
         else
             error('1 >= percentCorrectionTrials >= 0')
         end
 
-        if varargin{9}>=0
-            t.msResponseTimeLimit=varargin{9};
+        if varargin{7}>=0
+            t.msResponseTimeLimit=varargin{7};
         else
             error('msResponseTimeLimit must be >= 0')
         end
 
-        if varargin{10}==0 || varargin{10}==1
-            t.pokeToRequestStim=varargin{10};
+        if varargin{8}==0 || varargin{8}==1
+            t.pokeToRequestStim=varargin{8};
         else
             error('pokeToRequestStim must be logical')
         end
 
-        if varargin{11}==0 || varargin{11}==1
-            t.maintainPokeToMaintainStim=varargin{11};
+        if varargin{9}==0 || varargin{9}==1
+            t.maintainPokeToMaintainStim=varargin{9};
         else
             error('maintainPokeToMaintainStim must be logical')
         end
 
-        if varargin{12}>=0
-            t.msMaximumStimPresentationDuration=varargin{12};
+        if varargin{10}>=0
+            t.msMaximumStimPresentationDuration=varargin{10};
         else
             error('msMaximumStimPresentationDuration must be >= 0')
         end
 
-        if varargin{13}>=0
-            t.maximumNumberStimPresentations=varargin{13};
+        if varargin{11}>=0
+            t.maximumNumberStimPresentations=varargin{11};
         else
             error('maximumNumberStimPresentations must be >= 0')
         end
 
-        if varargin{14}==0 || varargin{14}==1
-            t.doMask=varargin{14};
+        if varargin{12}==0 || varargin{12}==1
+            t.doMask=varargin{12};
         else
             error('doMask must be logical')
         end
@@ -114,10 +114,11 @@ switch nargin
             t.pokeToRequestStim,t.maintainPokeToMaintainStim,maxStimPresDurStr,...
             maxNumStimPresStr,t.doMask);
 
-        a=trialManager(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6},varargin{15},d,varargin{16});
+        a=trialManager(varargin{1},varargin{2},varargin{3},varargin{4},varargin{13},d);
         t = class(t,'nAFC',a);
         
     otherwise
+        nargin
         error('Wrong number of input arguments')
 end
 

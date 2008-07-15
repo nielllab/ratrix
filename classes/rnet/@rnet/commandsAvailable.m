@@ -1,6 +1,6 @@
 function numCommands = commandsAvailable(r,priority,client)
 
-import ratrix.net.*;
+import rlab.net.*;
 
 
 if ~exist('priority','var') || isempty(priority)
@@ -24,7 +24,7 @@ if ~exist('priority','var') || isempty(priority)
                 numCommands = r.server.incomingCommandsAvailable(client);
             end
         case r.constants.nodeTypes.CLIENT_TYPE
-            numCommands = r.client.commandsAvailable();
+            numCommands = r.client.incomingCommandsAvailable();
         otherwise
             error('Unknown rnet.type value');
     end
@@ -51,7 +51,7 @@ else
                 numCommands = r.server.incomingCommandsAvailable(client,priority);
             end
         case r.constants.nodeTypes.CLIENT_TYPE
-            numCommands = r.client.commandsAvailable(priority);
+            numCommands = r.client.incomingCommandsAvailable(priority);
         otherwise
             error('Unknown rnet.type value');
     end

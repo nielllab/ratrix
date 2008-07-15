@@ -10,6 +10,10 @@ end
 %bug that fileparts assumes the last piece is a file if it doesn't terminate with a filesep
 %should check that it's an actual file or actual directory.
 
+if replaceExistingDB && isempty(r.creationDate)
+    r.creationDate = now; % Set the date of creation if we are initializing the db and it has not been set yet
+end
+
 
 if ~isempty(pathstr) && isempty(name)
     fileStr = 'db.mat';
@@ -31,6 +35,7 @@ if ~isempty(pathstr) && isempty(name)
             %save(fileStr,'r');
             saveDB(r,1); %used to be saveDB(r,0)
             else
+                disp(r.dbpath)
                 error('no db at that location')
             end
         elseif length(found)==1

@@ -1,5 +1,7 @@
-function quit=sendFileToServer(r,clientIdent,priority,command,arguments,files)
-  % Go through the list of files and send them over the filesystem
+function quit=sendFileToServer(r,clientId,priority,command,arguments,files)
+
+error('sendFileToServer(): This should never be used')
+% Go through the list of files and send them over the filesystem
   driveLetter = 'z';
   serverAddress = '132.239.158.169';
   % The share name used on the server
@@ -33,4 +35,4 @@ function quit=sendFileToServer(r,clientIdent,priority,command,arguments,files)
   end  
   dos(sprintf('net use %s: /delete',driveLetter));
   % Send the command to the server
-  quit=sendToServer(r,clientIdent,priority,command,arguments)
+  quit=sendToServer(r,clientId,priority,command,arguments)

@@ -64,7 +64,9 @@ case 0
     s.framesStimOn=0; 
     s.thresh = 0;
     s.targetYPosPct = 0; 
- 
+
+    
+
 % edf: you must not change definition of object.  these belong on parent, not you.    
     %extra non input values
 %    s.maxWidth=1;
@@ -212,29 +214,33 @@ case 24
     patchX=ceil(maxHeight*s.stdGaussMask);  %stdGaussMask control patch size which control the radius due to wierd geometric sixing in gabors
     patchY=patchX;
     
-    %PRECACHE PATCHES
+    %PRECACHE PATCHES  - wow this is old.   replace it with cache method.
+    %%see ifFeatureGoRightWithTwoFlank for example of s=inflate(s);
     s.targetStim =zeros(patchX,patchY,length(s.targetOrientations));
     for i=1:length(s.targetOrientations)
             %params= radius   pix/cyc  phase    orientation              contrast   thresh    xPosPct yPosPct
             params = [5  s.pixPerCycs  s.phase  s.targetOrientations(i)     1       s.thresh  1/2     1/2   ];
             %params =[5  pixPerCycs  phase  targetOrientations(i)  targetContrast(i)  thresh  1/2     1/2   ]
             %patch=computeGabors(params,'square',mean,patchX,patchY);
-            s.targetStim(:,:,i)=computeGabors(params,'square',s.mean,patchX,patchY);
+            s.targetStim(:,:,i)=computeGabors(params,s.mean,patchX,patchY,'square','normalizeVertical',0);
     end
             
     s.distractorStim =zeros(patchX,patchY,length(s.distractorOrientations));
     for i=1:length(s.distractorOrientations)
             params = [5  s.pixPerCycs  s.phase  s.distractorOrientations(i)  1      s.thresh  1/2     1/2   ];
-            s.distractorStim(:,:,i)=computeGabors(params,'square',s.mean,patchX,patchY);
+            s.distractorStim(:,:,i)=computeGabors(params,s.mean,patchX,patchY,'square','normalizeVertical',0);
     end
     
     s.flankerStim =zeros(patchX,patchY,length(s.flankerOrientations));
     for i=1:length(s.flankerOrientations)
             params = [5  s.pixPerCycs  s.phase  s.flankerOrientations(i)     1      s.thresh  1/2     1/2   ];
-            s.flankerStim(:,:,i)=computeGabors(params,'square',s.mean,patchX,patchY);
+            s.flankerStim(:,:,i)=computeGabors(params,s.mean,patchX,patchY,'square','normalizeVertical',0);
     end
 
+    
+    
     s = class(s,'cuedGoToFeatureWithTwoFlank',stimManager(varargin{21},varargin{22},varargin{23},varargin{24}));   
+    
     
 otherwise
     error('Wrong number of input arguments')

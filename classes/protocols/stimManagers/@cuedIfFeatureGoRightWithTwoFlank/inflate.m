@@ -30,11 +30,12 @@ function s=inflate(s)
     %make patches
     %     params= radius   pix/cyc      phase orientation ontrast thresh xPosPct yPosPct
     staticParams=[radius  s.pixPerCycs  s.phase    0        1    s.thresh  1/2     1/2   ];
+    unusedParam=[];
     extraParams.normalizeMethod=normalizeMethod;
     extraParams.mean=s.mean;
-    s.goRightStim=getFeaturePatchStim(patchX,patchY,'squareGrating-variableOrientation',s.goRightOrientations,staticParams,extraParams);
-    s.goLeftStim= getFeaturePatchStim(patchX,patchY,'squareGrating-variableOrientation',s.goLeftOrientations, staticParams,extraParams);
-    s.flankerStim=getFeaturePatchStim(patchX,patchY,'squareGrating-variableOrientation',s.flankerOrientations,staticParams,extraParams);
+    s.goRightStim=getFeaturePatchStim(patchX,patchY,'squareGrating-variableOrientation',s.goRightOrientations,unusedParam,staticParams,extraParams);
+    s.goLeftStim= getFeaturePatchStim(patchX,patchY,'squareGrating-variableOrientation',s.goLeftOrientations, unusedParam,staticParams,extraParams);
+    s.flankerStim=getFeaturePatchStim(patchX,patchY,'squareGrating-variableOrientation',s.flankerOrientations,unusedParam,staticParams,extraParams);
     
     %%store these as int8 for more space... (consider int16 if better CLUT exists) 
     %%calcStim preserves class type of stim, and stim OGL accepts without rescaling

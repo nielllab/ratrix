@@ -4,5 +4,7 @@ function s=deflate(s)
 s.goRightStim=[];
 s.goLeftStim= [];
 s.flankerStim=[];
-
+s.distractorStim=[];
+s.distractorFlankerStim=[];
+s.mask=[];
     

@@ -40,7 +40,7 @@
 
 function ratrixServer
 setupEnvironment;
-
+addJavaComponents();
 dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
 
 diary off
@@ -68,9 +68,20 @@ heatUpSinceTStr='';
 buttonT='start';
 
 
-rackNum=2;
+rackNum=1;
+%[heats,garbage]=getRatrixHeatInfo(rackNum);
 
-[heats,garbage]=getRatrixHeatInfo(rackNum);
+conn=dbConn('132.239.158.177','1521','dparks','pac3111');
+hts=getHeats(conn);
+for i=1:length(hts)
+    heats{i,1}={hts{i}.name [hts{i}.red hts{i}.green hts{i}.blue]};
+    assignments=getAssignments(conn,rackNum,hts{i}.name);
+    for j=1:length(assignments)
+        stn=getStation(conn,rackNum,assignments{j}.station_id);
+        heats{i,2}{j}={assignments{j}.subject_id {[stn.row stn.col] stn.mac} assignments{j}.owner assignments{j}.experiment};
+    end
+end
+closeConn(conn);   
 
 subjects={};
 heatStrs={};
@@ -100,7 +111,7 @@ f = figure('Visible','off','MenuBar','none','Name',sprintf('ratrix control: rack
                 ShowCursor(0)
 
                 closereq;
-exit
+                exit
                 return
             end
         elseif running
@@ -178,9 +189,9 @@ cycleB=uicontrol(f,'Style','togglebutton','String',buttonT,'Units','pixels','Pos
     function run
 
         [r sys rx]=startServer(servePump,dataPath);
-
-        autoUpdateInterval=0.01; %this will limit how fast you handle rnet commands and/or refill the pump (max 1 per cycle)
-                                 %10ms (0.01) uses about 13% of one core on a pentium D
+        % Dan is initializing er to 0 032908
+        er=0;
+        autoUpdateInterval=.3;
         while ~doDelete && running && ~quit %get(cycleB,'Value')
             updateUI();
             [quit r rx sys er]=doAServerIteration(r,rx,servePump,sys,subjects);
@@ -188,6 +199,11 @@ cycleB=uicontrol(f,'Style','togglebutton','String',buttonT,'Units','pixels','Pos
         end
         updateUI();
         [r rx sys]=stopServer(r,rx,servePump,sys,er,subjects);
+        rp=getRatrixPath;
+        rp=fullfile(rp,'analysis','eflister');
+        cmdStr=sprintf('matlab -automation -r "cd(''%s'');compileTrialRecords(%d);quit" &',rp,rackNum);
+        system(cmdStr);
+        
         %whos
         doClears();
         if er
@@ -215,13 +231,29 @@ end
 
 function makeMini(subjects,rackNum,miniSz,ha,heatCol)
 
-stationInfo=getRatrixStationInfo(rackNum);
+% stationInfo=getRatrixStationInfo(rackNum);
+% theseStations=[];
+% stationNames={};
+% for i=1:length(stationInfo)
+%     theseStations(end+1,:)=stationInfo{i}{2}{1};
+%     stationNames{end+1}=stationInfo{i}{1};
+% end
+
+
+
+conn=dbConn('132.239.158.177','1521','dparks','pac3111');
+stationInfo=getStationsOnRack(conn,rackNum);
+closeConn(conn);
+
 theseStations=[];
 stationNames={};
 for i=1:length(stationInfo)
-    theseStations(end+1,:)=stationInfo{i}{2}{1};
-    stationNames{end+1}=stationInfo{i}{1};
+    theseStations(end+1,:)=[stationInfo{i}.row stationInfo{i}.col];
+    %theseStations(end+1,:)=[stationInfo.row stationInfo.col];
+    stationNames{end+1}=[num2str(stationInfo{i}.rack_id) stationInfo{i}.station_id];
 end
+
+
 
 % stationLocs=[];
 % for i=1:r(1)
@@ -276,7 +308,7 @@ end
 
 
 for i=1:length(stationNames)
-    text('Parent',ha,'Position',[columnBoundaries(theseStations(i,2))+margin rowBoundaries(theseStations(i,1)) ],'String',[num2str(rackNum) stationNames{i}],'Color',[0 0 0],'FontSize',30,'FontWeight','bold','VerticalAlignment','top','HorizontalAlignment','left');
+    text('Parent',ha,'Position',[columnBoundaries(theseStations(i,2))+margin rowBoundaries(theseStations(i,1)) ],'String',[stationNames{i}],'Color',[0 0 0],'FontSize',30,'FontWeight','bold','VerticalAlignment','top','HorizontalAlignment','left');
 end
 
 end
@@ -295,7 +327,7 @@ end
 
 
 
-addJavaComponents; %would like to have this in the rnet constructor, but doesn't work
+%addJavaComponents; %would like to have this in the rnet constructor, but doesn't work
 %     the caller has to call it before constructing an
 %     rnet for some reason.  can't figure out why, but if you don't do it, even
 %     though the dynamic path is updated correctly, the import appears to
@@ -393,7 +425,7 @@ try
 
             else
 
-                [quit com]=sendToClient(r,connectedClients{i},constants.priorities.IMMEDIATE_PRIORITY,constants.serverToStationCommands.S_UPDATE_SOFTWARE_CMD,{'svn://132.239.158.177/projects/eflister/Ratrix/tags/v0.5'}); %'svn://132.239.158.177/projects/eflister/Ratrix/tags/v0.5'  'svn://132.239.158.177/projects/eflister/Ratrix/trunk'
+                [quit com]=sendToClient(r,connectedClients{i},constants.priorities.IMMEDIATE_PRIORITY,constants.serverToStationCommands.S_UPDATE_SOFTWARE_CMD,{'svn://132.239.158.177/projects/eflister/Ratrix/branches/merge20080324'});
                 if ~quit
                     timeout=10.0;
                     [quit updateConfirm updateConfirmCmd updateConfirmArgs]=waitForSpecificCommand(r,connectedClients{i},constants.stationToServerCommands.C_RECV_UPDATING_SOFTWARE_CMD,timeout,'waiting for client response to S_UPDATE_SOFTWARE_CMD',[]);
@@ -411,7 +443,7 @@ try
                     tossClient(r,connectedClients{i});
                 else
                     
-                    quit=replicateClientTrialRecords(r,connectedClients{i});
+                    quit=replicateClientTrialRecords(r,connectedClients{i},{getPermanentStorePath(rx)});
 
                     z=[];
                     if ~quit                    
@@ -422,18 +454,8 @@ try
                     if ~isempty(z)
                         [r rx tf]=registerClient(r,connectedClients{i},mac,z,rx,subjects);
 
-                        [quit com]=sendToClient(r,connectedClients{i},constants.priorities.IMMEDIATE_PRIORITY,constants.serverToStationCommands.S_GET_RATRIX_CMD,{});
-
-                        if ~quit
-                            timeout=10.0;
-                            [quit rxCmd rxCom rxArgs]=waitForSpecificCommand(r,connectedClients{i},constants.stationToServerCommands.C_RECV_RATRIX_CMD,timeout,'waiting for client response to S_GET_RATRIX_CMD',[]);
-                            com=[];
-                            rxCmd=[];
-
-                            if ~isempty(rxArgs{1})
-                                %merge backup to rx %may be for totally different subject!
-                            end
-                        end
+                        [rx quit]=updateRatrixFromClientRatrix(r,rx,connectedClients{i});
+                        
                         if ~quit && tf
 
                             nonPersistedRatrix=makeNonpersistedRatrixForStationMAC(rx,mac);
@@ -574,12 +596,17 @@ end
 
 function doClears
 
-clear classes
+debug=1;
+if ~debug
+    clear classes
+    clearJavaComponents();
+end
+
 % java.lang.System.gc();
 % clear java
 % WaitSecs(.5)
 % clear classes
 % clear java
 % java.lang.System.gc();
-clearJavaComponents();
+
 end

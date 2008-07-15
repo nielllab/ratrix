@@ -1,13 +1,30 @@
 function out=computeGabors(params,mean,width,height,waveform,normalizeMethod,cornerMarkerOn)
 
-% params = [1 16 0 pi 1 0.001 1/2 1/2 ];
+% params = [.3 16 0 pi/6 1 0.001 1/2 1/2 ];
 % grating=computeGabors(params,0.5,200,200,'square','normalizeVertical',1);
 
 %change log
 %070403 fixed rounding problem with square grating
+%070403 added ability to skip mask, when radius==Inf pmm
+%080216 noticed problem in upper left corner when no mask (this exists in all versions)-- unfixed pmm
+% 
+% params=[Inf,4, 0,-99,1, 0.001,0.5,0.5];
+% orients=[0:pi/20:pi];
+% for i=1:length(orients)
+%     params(4)=orients(i)
+%     grating=computeGabors(params,0.5,100,100,'square','normalizeVertical',1);
+%     figure; imagesc(grating)
+% end
+
+%%080218 added waveform = 'none' pmm
+%080218 confirmed in-sync with svnErik ratrix pmm
+%080419  got rid of oldMethod that uses imrotate, we now have no aliasing   pmm
+%   phases defined from center of mask 
+%   emperically everything is fine with integer pixPerCyc. Non-integer looks bad.(Especialy weird wrapping effect for horizontal or vertical)
+%   2ppc looks okay (Didn't see rounding problems). Negative phases appear okay. (No thorough test/animation) 
 
 if ~exist('waveform','var')
-    cornerMarkerOn='sine';
+    waveform='sine';
 end
 
 if ~exist('normalizeMethod','var')
@@ -15,7 +32,7 @@ if ~exist('normalizeMethod','var')
 end
 
 if ~exist('cornerMarkerOn','var')
-    waveform=1;
+    cornerMarkerOn=0;
 end
 
 radius=params(:,1);
@@ -27,7 +44,7 @@ thresh=params(:,6);
 xPosPct=params(:,7);
 yPosPct=params(:,8);
 
-if any(pixPerCyc<2.0)
+if any(pixPerCyc<2)
     error('pixPerCyc must be >= 2.0')
 end
 
@@ -55,10 +72,11 @@ end
 
 for i=1:numGabors
 
+oldMethod=0;
+    if oldMethod
+    
     %tiny=10^(-10); % with this value, its safe with biggest<166,000 but not biggest>167,000
     %line=contrast(i)*sin(phase(i)-tiny + (0:biggest*2)*(2*pi)/pixPerCyc(i))/2;
-
-
     switch waveform
         case 'sine'
             line = sin(phase(i)  + (0:biggest*2)*(2*pi)/pixPerCyc(i))/2;
@@ -79,8 +97,8 @@ for i=1:numGabors
             % a=2*a-1;
             % b=sin(phase  + (0:len)*(2*pi)/pixPerCyc);
             % plot([a;b]')
-
-
+        case 'none'
+            line=ones(1,(biggest*2)+1); 
         otherwise
             error('waveform must be ''sine'' or ''square''');
     end
@@ -121,7 +139,6 @@ for i=1:numGabors
 
     grating=repmat(line',1,biggest*2);
     %grating=repmat(line',1,xSize*2);
-
     %pmm hates calling imrotate which is slow, even though the fuction
     %says it shouldn't be for 90 deg rotations...
     if abs(orientation(i)) <0.00001  %check if vertical
@@ -136,16 +153,97 @@ for i=1:numGabors
     yStart = ceil(.25*ySize);
     rotated = rotated(xStart:xStart+xSize-1,yStart:yStart+ySize-1);
 
-    mask=zeros(ySize,xSize);
-    mask(1:xSize*ySize)=mvnpdf([reshape(repmat((-ySize/2:(-ySize/2 + ySize -1))',1,xSize),xSize*ySize,1) reshape(repmat(-xSize/2:(-xSize/2+xSize-1),ySize,1),xSize*ySize,1)],[yPosPct(i)*ySize-ySize/2 xPosPct(i)*xSize-xSize/2],(radius(i)*diag([normalizedLength normalizedLength])).^2);
+    %     subplot(131); imagesc(sin(xChange))
+%     subplot(132); imagesc(sin(yChange))
+%     subplot(133); imagesc(r2)
+%     
+%     figure
+%     diff=rotated-r2;
+%     max(max(r2))
+%     max(max(rotated))
+%     max(max(diff))
+%     subplot(131); imagesc(r2)
+%     subplot(132); imagesc(rotated)
+%     subplot(133); imagesc(diff)
+%     
+%     figure
+%     subplot(121); plot(rotated(end,:),'r'); hold on; plot(r2(end,:))
+%     subplot(122); plot(rotated(:,end),'r'); hold on; plot(r2(:,end))
 
-    %THIS IS AN OLD LINE OF CODE  - used to send sigma as co-std rather than co-variance
-    %mask(1:xSize*ySize)=mvnpdf([reshape(repmat((-ySize/2:(-ySize/2 +
-    %ySize -1))',1,xSize),xSize*ySize,1) reshape(repmat(-xSize/2:(-xSize/2+xSize-1),ySize,1),xSize*ySize,1)],[yPosPct(i)*ySize-ySize/2 xPosPct(i)*xSize-xSize/2],(radius(i)*diag([normalizedLength normalizedLength])));
+    
+    
+    
+    else %currentMethod
+        
+        
 
-    mask=mask/max(max(mask));
+%%
 
-    masked = rotated'.*mask;
+    %calculate the effective frequency in the vertical and horizontal directions
+    %instead of frequency use pixPerCyc
+    xPPC=pixPerCyc(i)/cos(orientation(i));
+    yPPC=pixPerCyc(i)/sin(orientation(i));
+    xChange=repmat(([1:width] -(.5+xPosPct(i)*width))  *(2*pi)/xPPC,height,1);
+    yChange=repmat(([1:height]-(.5+yPosPct(i)*height))'*(2*pi)/yPPC,1, width);
+    phases=(xChange+yChange+phase(i))';
+
+
+    switch waveform
+        case 'sine'
+            rotated=sin(phases)/2;
+        case 'square'
+            %this may not right but really close
+            rotated=sign(sin(phases))/2;
+
+            %Emperically the remainder method may not be needed
+            % b=-min([0 min(phases(:))]); %add this to get rid of negative phases
+            %b=ceil(b/(2*pi))*(2*pi);  %b should end up being larger than the min value but also mulitiple of 2pi
+            %     r2=sign(sin(phases+b))/2;
+            %
+            %     r3=(rem(phases+b,2*pi)>=pi)-.5;
+            %
+            %     dif=r1-r3;
+            %     subplot(131); imagesc(r1)
+            %     subplot(132); imagesc(r3)
+            %     subplot(133); imagesc(dif)
+            %     sum(dif(:))
+            %     phases(find(dif~=0))'
+        case 'none'
+            rotated=ones(size(phases)); %Could be sped up by not calculating phases
+        otherwise
+            error('waveform must be ''sine'' or ''square'' or ''none''');
+    end
+    rotated = contrast(i)*rotated;
+    end
+
+%% 
+    
+    
+    if radius(i)~=Inf  %only compute gaussian mask if you need to
+        mask=zeros(ySize,xSize);
+        mask(1:xSize*ySize)=mvnpdf([reshape(repmat((-ySize/2:(-ySize/2 + ySize -1))',1,xSize),xSize*ySize,1) reshape(repmat(-xSize/2:(-xSize/2+xSize-1),ySize,1),xSize*ySize,1)],[yPosPct(i)*ySize-ySize/2 xPosPct(i)*xSize-xSize/2],(radius(i)*diag([normalizedLength normalizedLength])).^2);
+
+        %THIS IS AN OLD LINE OF CODE  - used to send sigma as co-std rather than co-variance
+        %mask(1:xSize*ySize)=mvnpdf([reshape(repmat((-ySize/2:(-ySize/2 +
+        %ySize -1))',1,xSize),xSize*ySize,1) reshape(repmat(-xSize/2:(-xSize/2+xSize-1),ySize,1),xSize*ySize,1)],[yPosPct(i)*ySize-ySize/2 xPosPct(i)*xSize-xSize/2],(radius(i)*diag([normalizedLength normalizedLength])));
+
+        mask=mask/max(max(mask));
+
+        masked = rotated'.*mask;
+    else
+        masked = rotated';
+    end
+
+    %     mask=zeros(ySize,xSize);
+%     mask(1:xSize*ySize)=mvnpdf([reshape(repmat((-ySize/2:(-ySize/2 + ySize -1))',1,xSize),xSize*ySize,1) reshape(repmat(-xSize/2:(-xSize/2+xSize-1),ySize,1),xSize*ySize,1)],[yPosPct(i)*ySize-ySize/2 xPosPct(i)*xSize-xSize/2],(radius(i)*diag([normalizedLength normalizedLength])).^2);
+% 
+%     %THIS IS AN OLD LINE OF CODE  - used to send sigma as co-std rather than co-variance
+%     %mask(1:xSize*ySize)=mvnpdf([reshape(repmat((-ySize/2:(-ySize/2 +
+%     %ySize -1))',1,xSize),xSize*ySize,1) reshape(repmat(-xSize/2:(-xSize/2+xSize-1),ySize,1),xSize*ySize,1)],[yPosPct(i)*ySize-ySize/2 xPosPct(i)*xSize-xSize/2],(radius(i)*diag([normalizedLength normalizedLength])));
+% 
+%     mask=mask/max(max(mask));
+% 
+%     masked = rotated'.*mask;
 
     masked(abs(masked)<thresh(i))=0;
     img(i,:,:)=masked;

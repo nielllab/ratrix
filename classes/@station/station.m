@@ -150,10 +150,19 @@ if needToInit
     s.MACaddress=varargin{8};
     s.physicalLocation=varargin{9};
 
-    if s.id>0 && isscalar(s.id) && isinteger(s.id)
-        %pass
+    if strcmp(class(s.id),'char') 
+        parse = textscan(s.id, '%d%s','expChars','');
+        if iscell(parse) && all(size(parse)==[1 2]) && ~isempty(parse{1}) && ~isempty(parse{2}) 
+            %pass
+        else
+            s.id
+            class(s.id)
+            error('textscan failed on id')
+        end
     else
-        error('id must be positive scalar integer')
+        class(s.id)
+        s.id
+        error('id must be a string of format <rack num><rack letter>, example ''2C''')
     end
 
     if s.width>0 && s.height>0
@@ -210,6 +219,7 @@ if needToInit
     if isvector(s.physicalLocation) && isinteger(s.physicalLocation) && length(s.physicalLocation)==3 && all(s.physicalLocation>0)
         %pass
     else
+        s.physicalLocation
         error('location must be vector of 3 integers [rackID shelf position], upper left is 1,1')
     end
 

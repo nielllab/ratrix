@@ -2,6 +2,7 @@ function out=getStimPatch(s,patchType,showIm)
 %out=getStimPatch(s,patchType,showIm)
 %im=getStimPatch(s,'right',1) where patchType is: 'right','left' or 'flanker'
 
+
 switch patchType
     case 'right'
         out=s.goRightStim;

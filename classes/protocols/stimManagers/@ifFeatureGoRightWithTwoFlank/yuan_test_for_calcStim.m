@@ -1,0 +1,9 @@
+function stimulus = yuan_test_for_calcStim()
+manager = ifFeatureGoRightWithTwoFlank();
+trialManagerClass=class(manager);
+frameRate = 1000;
+responsePorts = [];
+totalPorts = [];
+[width, height]=Screen('WindowSize', 0);
+trialRecords = [];
+stimulus = calcStim(manager,trialManagerClass,frameRate,responsePorts,totalPorts,width,height,trialRecords)

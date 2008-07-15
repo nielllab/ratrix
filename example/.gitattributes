@@ -8,3 +8,12 @@
 /RatSubjectInit.m -text
 /CalibratePorts.m -text
 /ExampleInit.m -text
+/flushPorts.m -text
+/drawstim.m -text
+/countLicks.m -text
+/removeSubjectFromPmeierRatrix.m -text
+/setCoherentDotSteps.m -text
+/masterShaping.m -text
+/run.m -text
+/miniCalcStim.m -text
+/freeDrinksOnlytInit.m -text

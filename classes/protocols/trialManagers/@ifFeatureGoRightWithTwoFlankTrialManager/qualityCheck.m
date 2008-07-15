@@ -1,8 +1,8 @@
-function goodEnough = qualityCheck(trialManager, luminanceData, calibrationPhase)
+function goodEnough = qualityCheck(trialManager, luminanceData, calibrationPhase, batch)
 
 haveData=find(sum(~isnan(luminanceData)));
 numRecordedSoFar = length(haveData);
-numRecordedSoFar
+% numRecordedSoFar
 
 goodEnough = 0;
 
@@ -12,14 +12,15 @@ switch calibrationPhase
     case 'patterenedIntensity'
 
         %using number of repetitions to limit
-        maxAllowed = 9;
+        maxAllowed = 2;
         if numRecordedSoFar >= maxAllowed-1
             goodEnough = 1;
         end
 
         %alternately stop if sufficient SNR
         contrastMethod='std';
-        [amplitude, SNR] = getAmplitudeOfLuminanceData(trialManager, luminanceData(:,haveData), contrastMethod, 1)
+        plotOn = 0;
+        [amplitude, SNR] = getAmplitudeOfLuminanceData(trialManager, luminanceData(:,haveData), contrastMethod, batch, plotOn)
         requiredSNR=60;
         if all(SNR>requiredSNR)
             goodEnough = 1;

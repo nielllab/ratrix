@@ -5,6 +5,8 @@ if isa(tm,'trialManager')
             out=1;
         case 'nAFC'
             out=1;
+        case 'promptedNAFC'
+            out=1;
         otherwise
             out=0;
     end

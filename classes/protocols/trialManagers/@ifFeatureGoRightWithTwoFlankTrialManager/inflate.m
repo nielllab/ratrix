@@ -1,4 +1,4 @@
-function t=inflate(t)
+function t=inflate(t, applyContrastDampingToPatch)
 %method to inflate stim patches into cache
 
 %determine patch size
@@ -28,28 +28,40 @@ else
     oneStdInPix=diff(oneSTDboundary)/2
 end
 
-%make patches
+%%
+if ~exist('applyContrastDampingToPatch','var')
+    aa=0;
+else
+    aa=applyContrastDampingToPatch;
+end
+
+
+%% make patches
 %     params= radius   pix/cyc      phase orientation ontrast thresh % xPosPct yPosPct
 staticParams =[radius  t.pixPerCycs  -99    -99        1    t.thresh  1/2     1/2   ];
+extraParams.normalizeMethod=normalizeMethod;
+extraParams.mean=t.mean;
 
 stimTypes=3; %exclude mask
-mask=getFeaturePatchStim(t,patchX,patchY,'variableOrientationAndPhase',t.flankerOrientations,0,[radius 1000 0 0 1 t.thresh 1/2 1/2]);
-goRightStim=getFeaturePatchStim(t,patchX,patchY,'variableOrientationAndPhase',t.goRightOrientations,t.phase,staticParams);
-goLeftStim= getFeaturePatchStim(t,patchX,patchY,'variableOrientationAndPhase',t.goLeftOrientations,t.phase,staticParams);
-flankerStim=getFeaturePatchStim(t,patchX,patchY,'variableOrientationAndPhase',t.flankerOrientations,t.phase,staticParams);
+%mask=getFeaturePatchStim(t,patchX,patchY,'variableOrientationAndPhase',0,0,[radius 1000 0 0 1 t.thresh 1/2 1/2]);
+mask=computeGabors([radius -99 0 0 2 t.thresh 1/2 1/2],0,patchX,patchY,'none',t.gaborNormalizeMethod,0);  %range from 0 to 1
+
+goRightStim=getFeaturePatchStim(t,patchX,patchY,'variableOrientationAndPhase',t.goRightOrientations,t.phase,staticParams, setContrastScaleForOrientations(t,extraParams,t.goRightOrientations,aa));
+goLeftStim= getFeaturePatchStim(t,patchX,patchY,'variableOrientationAndPhase',t.goLeftOrientations,t.phase,staticParams, setContrastScaleForOrientations(t,extraParams,t.goLeftOrientations,aa));
+flankerStim=getFeaturePatchStim(t,patchX,patchY,'variableOrientationAndPhase',t.flankerOrientations,t.phase,staticParams, setContrastScaleForOrientations(t,extraParams,t.flankerOrientations,aa));
 
 
 if t.displayTargetAndDistractor
     %only bother rendering if you need to display the distractor and
     %distractorFlanker are unique from target & flanker
     if ~t.distractorYokedToTarget
-        distractorStim=getFeaturePatchStim(t,patchX,patchY,'variableOrientationAndPhase',t.distractorOrientations,t.phase,staticParams);
+        distractorStim=getFeaturePatchStim(t,patchX,patchY,'variableOrientationAndPhase',t.distractorOrientations,t.phase,staticParams, setContrastScaleForOrientations(t,extraParams,t.distractorOrientations,aa));
         stimTypes=stimTypes+1;
     else
         distractorStim=[];
     end
     if ~t.distractorFlankerYokedToTargetFlanker
-        distractorFlankerStim =getFeaturePatchStim(t,patchX,patchY,'variableOrientationAndPhase',t.flankerOrientations,t.phase,staticParams);
+        distractorFlankerStim =getFeaturePatchStim(t,patchX,patchY,'variableOrientationAndPhase',t.flankerOrientations,t.phase,staticParams, setContrastScaleForOrientations(t,extraParams,t.flankerOrientations,aa));
         stimTypes=stimTypes+1;
     else
         distractorFlankerStim=[];
@@ -132,3 +144,27 @@ switch t.renderMode
             rethrow(lasterror);
         end
 end
+
+function extraParams=setContrastScaleForOrientations(t,extraParams,orientations,applyContrastDampingToPatch)
+%puts the right contrast scale for each orientation
+
+if isempty(t.calib.contrastScale)
+    t.calib.contrastScale=ones(length(orientations));
+end
+
+if applyContrastDampingToPatch
+    usedScale=t.calib.contrastScale
+else
+    usedScale=ones(size(orientations));
+end
+
+for i=1:length(orientations)
+    contrastScaleIndex=find(orientations(i)==t.calib.orientations);
+    if isempty(contrastScaleIndex)
+        t.calib.orientations
+        orientations
+        error('an orientation present in flanker or goLeft or goRight is not present in t.calib.orientations; calibration breaks')
+    end
+    contrastScale(i)=usedScale(contrastScaleIndex);
+end
+extraParams.contrastScale=contrastScale;

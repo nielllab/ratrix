@@ -11,3 +11,8 @@
 /getID.m -text
 /getProtocolAndStep.m -text
 /getAcquisitionDate.m -text
+/setProtocolVersion.m -text
+/sampleStimFrame.m -text
+/getMiniDatabase.m -text
+/getDatabaseFact.m -text
+/changeAllReinforcementManagers.m -text

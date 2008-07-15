@@ -1,4 +1,4 @@
-% compile with mcc -m -I 'C:\Documents and Settings\rlab\Desktop\ratrix\db' -I 'C:\Documents and Settings\rlab\Desktop\phil analysys' -d standalone analysis.m
+% compile with mcc -a 'C:\Documents and Settings\rlab\Desktop\ratrix\db\classes12_g.jar' -m -I 'C:\Documents and Settings\rlab\Desktop\ratrix\db' analysis.m
 
 function analysis
 if ~isdeployed
@@ -17,7 +17,7 @@ format long g
 if ~isdeployed
 warning('off','MATLAB:dispatcher:nameConflict')
 addpath(RemoveSVNPaths(removeSecretBackups(genpath(getRatrixPath))));
-addpath('\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\ratrixAdmin\');
+%addpath('\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\ratrixAdmin\');
 warning('on','MATLAB:dispatcher:nameConflict')
 end
 
@@ -26,15 +26,20 @@ if isdeployed
 end
 conn=dbConn('132.239.158.177','1521','dparks','pac3111');
 
-rack_ids=[2];
+rack_ids=[1 2];
+
+
 rackStrs={};
+defaultRackStrIndex=1;
 for i=1:length(rack_ids)
     rackStrs{end+1}=['rack ' num2str(rack_ids(i))];
 end
-selection.rack=rack_ids(1);
-selection.filterVal=10;
-selection.filter='all';
-selection.filterParam='days';
+
+
+
+selection.rack=rack_ids(defaultRackStrIndex);
+apath=getCompiledDirForRack(selection.rack);
+lastRack=-1;
 fs=[];
 
 heats=getHeats(conn);
@@ -45,28 +50,47 @@ for i=1:length(heats)
     end
 end
 selection.heat=heatStrs{1};
-
-%s=getStations(conn)
-s=getStationsOnRack(conn,selection.rack);
-stationStrs={'all stations'};
-stationIds=stationStrs;
-numRows=0;
-numCols=0;
-for i=1:length(s)
-    %s{i}
-    stationStrs{end+1}=['station ' num2str(selection.rack) s{i}.station_id ' (' s{i}.mac ')'];
-    stationIds{end+1}=s{i}.station_id;
-    numRows=max(numRows,s{i}.row);
-    numCols=max(numCols,s{i}.col);
-    %station=getStation(conn,s{i}.rack_id,s{i}.station_id)
-    %station=getStationFromMac(conn,s{i}.mac)
-end
-selection.station=stationIds{1};
-
 closeConn(conn);
 
+
 typeStrs={'all','performance','trials per day','trial rate','weight','bias'};
-selection.type=typeStrs{1};
+filterTypeIndex=2;
+selection.type=typeStrs{filterTypeIndex};
+selection.filterVal=10;
+selection.filter='all';
+selection.filterParam='days';
+
+
+
+selection.station='';
+stationStrs={};
+stationIds={};
+numRows=0;
+numCols=0;
+getStationInfo
+    function getStationInfo
+        conn=dbConn('132.239.158.177','1521','dparks','pac3111');
+        %s=getStations(conn)
+        s=getStationsOnRack(conn,selection.rack);
+        stationStrs={'all stations'};
+        stationIds=stationStrs;
+        numRows=0;
+        numCols=0;
+        for i=1:length(s)
+            %s{i}
+            stationStrs{end+1}=['station ' num2str(selection.rack) s{i}.station_id ' (' s{i}.mac ')'];
+            stationIds{end+1}=s{i}.station_id;
+            numRows=max(numRows,s{i}.row);
+            numCols=max(numCols,s{i}.col);
+            %station=getStation(conn,s{i}.rack_id,s{i}.station_id)
+            %station=getStationFromMac(conn,s{i}.mac)
+        end
+        selection.station=stationIds{1};
+        closeConn(conn);
+    end
+
+
+
 
 oneRowHeight=25;
 margin=10;
@@ -81,10 +105,18 @@ f = figure('Visible','off','MenuBar','none','Name','ratrix analysis','NumberTitl
 
 rackM = uicontrol(f,'Style','popupmenu',...
     'String',rackStrs,...
-    'Enable','off',...
-    'Value',1,'Units','pixels','Position',[margin margin ddWidth oneRowHeight],'Callback',@rackC);
+    'Enable','on',...
+    'Value',defaultRackStrIndex,'Units','pixels','Position',[margin margin ddWidth oneRowHeight],'Callback',@rackC);
     function rackC(source,eventdata)
         selection.rack=rack_ids(get(rackM,'Value'));
+        if selection.rack~=lastRack
+            getStationInfo
+            set(stationM ,'String',stationStrs,'Value',1)
+            apath=getCompiledDirForRack(selection.rack);
+
+            lastRack=selection.rack;
+        end
+
         selection=calcplot(selection,heatStrs,numRows,numCols,s);
     end
 
@@ -115,7 +147,7 @@ stationM = uicontrol(f,'Style','popupmenu',...
 
 typeM = uicontrol(f,'Style','popupmenu',...
     'String',typeStrs,...
-    'Value',1,'Units','pixels','Position',[4*margin+3*ddWidth margin ddWidth oneRowHeight],'Callback',@typeC);
+    'Value',filterTypeIndex,'Units','pixels','Position',[4*margin+3*ddWidth margin ddWidth oneRowHeight],'Callback',@typeC);
     function typeC(source,eventdata)
         selection.type=typeStrs{get(typeM,'Value')};
         selection=calcplot(selection,heatStrs,numRows,numCols,s);
@@ -167,7 +199,7 @@ plotB=uicontrol(f,'Style','pushbutton','String','plot','Units','pixels','Positio
             figure(fs(i))
             close(fs(i));
         end
-        fs=analysisPlotter(selection);
+        fs=analysisPlotter(selection,apath);
     end
 
 

@@ -2,7 +2,8 @@ clear all
 close all
 clc
 warning('off','MATLAB:dispatcher:nameConflict')
-addpath(genpath('C:\pmeier\Ratrix\Server\'));
+%addpath(genpath('C:\pmeier\Ratrix\Server\'));
+addpath(genpath('C:\pmeier\Ratrix\classes\'));
 warning('on','MATLAB:dispatcher:nameConflict')
 
 r=ratrix('C:\pmeier\Ratrix\ServerData\',0);
@@ -12,8 +13,8 @@ st=getStationsForBoxID(r,boxID);
 %set bag pressure to just below letters that say "PRESSURE"
 
 numSquirts=2;
-squirtDuration = [0.2 0.2 0.2];
-ifi = .2;
+squirtDuration = [0.1 0.1 0.1];
+ifi = .1;
 i=1;
 
 testValves=0;

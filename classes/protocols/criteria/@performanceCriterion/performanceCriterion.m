@@ -1,6 +1,11 @@
 function s=performanceCriterion(varargin)
 % PERFORMANCECRITERION  class constructor.  
 % s=performanceCriterion(pctCorrect,consecutiveTrials)
+%percent correct is a vector of possible graduation points, the first one
+%that is reached will cause a graduation. For example: 
+%performanceCriterion([.95, .85], [20,200]);
+%will graduate a subject if he is 95% correct after 20 consecutive trials
+%or if he is at least 85% correct after 200 consecutive trials
 
 switch nargin
     case 0
@@ -14,13 +19,16 @@ switch nargin
             s = varargin{1};
         else
             error('Input argument is not a performanceCriterion object')
-        end
+        end  
     case 2
-        if varargin{1}>=0 && varargin{1}<=1 && varargin{2}>=0
+        if size(varargin{1})~=size(varargin{2})
+            error('size of percent correct must be the same as the size of consecutive trials')
+        end    
+        if all(varargin{1}>=0 & varargin{1}<=1) && isinteger(varargin{2}) && all(varargin{2}>=1)
             s.pctCorrect=varargin{1};
             s.consecutiveTrials=varargin{2};
         else
-            error('0<=pctCorrect<=1 and consecutiveTrials must be >= 0')
+            error('0<=pctCorrect<=1 and consecutiveTrials must be an integer >= 1')
         end
         s = class(s,'performanceCriterion',criterion());
     otherwise

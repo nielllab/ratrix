@@ -2,10 +2,16 @@ function [t updateTM stimDetails stimSpec targetPorts details] = calcStimBeta(t,
 
 if ~stimIsCached(t)
     t=inflate(t);
+    setSeed(stimulus, 'seedFromClock');
     updateTM=1;
 else
     updateTM=0;
 end
+
+a=rand('seed');
+b=randn('seed');
+details.randomMethod='seedFromClock';
+details.randomSeed=[a(end) b(end)]; %if using twister method, this single number is pretty meaningless
 
 %% choose ratrix standard verse PTB method
 %this should be passed in during the dynamic mode
@@ -43,7 +49,7 @@ if firstTimeThisTrial
 %% Shaped Params
 
 if ~isempty(t.shapedParameter)
-   [parameterChanged newTM]  = shapeParameter(t, trialRecords)
+   [parameterChanged t]  = shapeParameter(t, trialRecords)
    if parameterChanged
         updateTM = 1;
    end
@@ -187,6 +193,7 @@ end
         stimDetails.framesFlankerOnOff=t.framesFlankerOnOff;
         stimDetails.stdGaussMask=t.stdGaussMask;
         stimDetails.pixPerCycs=t.pixPerCycs;
+        stimDetails.gratingType=gratingType;
 
         %some computation required
         stimDetails.deviation = devY;    %fractional devitation
@@ -336,6 +343,7 @@ else
 
 empty=stimDetails.meanColor(ones(height,width,'uint8')); %the unit8 just makes it faster, it does not influence the clas of stim, rather the class of details determines that
 insertMethod='matrixInsertion';
+stimDetails.insertMethod=insertMethod;
 
 flankersOnly=empty;
 flankersOnly(:,:)=insertPatch(insertMethod,flankersOnly(:,:),pos(2,:),t.cache.flankerStim,t.flankerOrientations, t.phase, stimDetails.flankerOrientation, stimDetails.flankerPhase, stimDetails.meanColor,stimDetails.flankerContrast);

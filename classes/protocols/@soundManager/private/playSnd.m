@@ -8,10 +8,15 @@ if isa(station,'station')
                 size(clip)
                 if duration>=0
                     durationSamps = max(1,ceil(sampleRate*duration)); %if don't have at least 1, audioplayer complains
-                    if durationSamps>length(clip)
-                        clip=repmat(clip,1,floor(durationSamps/length(clip))+1);
+                    if durationSamps>size(clip,2)
+                        clear newClip;
+                        for i=1:size(clip,1)
+                            newClip(i,:)=repmat(clip(i,:),1,floor(durationSamps/size(clip,2))+1);
+                        end
+                    else
+                        newClip = clip;
                     end
-                    clip=clip(1:durationSamps);
+                    clip=newClip(:,1:durationSamps);
                 end
 
                 try
@@ -21,7 +26,7 @@ if isa(station,'station')
                     % If mono sound, send same signal to both channels
                     if(size(clip,1) == 1)
                         clip(2,:) = clip(1,:);
-                    elseif(size(cip,1) ~= 2)
+                    elseif(size(clip,1) ~= 2)
                         error('Stereo or mono sound expected');
                     end
                     if sm.playerType == sm.AUDIO_PLAYER

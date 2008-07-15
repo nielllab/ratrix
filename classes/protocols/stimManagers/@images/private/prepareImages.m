@@ -1,4 +1,16 @@
-function [image deltas]=prepareImages(ims,alphas,screenSize,threshPct,pctScreenFill)
+function [image deltas]=prepareImages(ims,alphas,screenSize,threshPct,pctScreenFill,backgroundcolor)
+%[image deltas]=prepareImages(ims,screenSize,threshPct,pctScreenFill,[backgroundcolor])
+% ims is cell array of images (probably? in uint8 encoding)
+% screenSize
+% threshPct
+% pctScreenFill
+% backgroundcolor = uint8 color on which images drawn, defaults to black (PR 080627)
+
+if ~exist('backgroundcolor','var')
+    backgroundcolor=uint8(0); 
+elseif ~isa(backgroundcolor,'uint8')
+    error('backgroundcolor must be uint8')
+end
 
 maxPixel=0;
 for i=1:length(ims)
@@ -6,7 +18,7 @@ for i=1:length(ims)
 
 
         ims{i}=double(ims{i});
-        if all(size(alphas{i})==size(ims{i})) && isinteger(alphas{i}) && all(alphas{i}(:)>=0) && all(alphas{i}(:)<=intmax('uint8')) && max(alphas{i}(:))>200
+        if all(size(alphas{i})==size(ims{i})) && isinteger(alphas{i}) && all(alphas{i}(:)>=0) && all(alphas{i}(:)<=intmax('uint8')) % && max(alphas{i}(:))>200 %why did i think i needed this?
             ims{i}=(double(alphas{i})/double(intmax('uint8'))).*ims{i}; %essentially composites alpha against a black background
         else
             size(alphas{i})
@@ -52,7 +64,7 @@ equalized=equalizeHistograms(equalized,maxPixel);
 %discriminable
 
 %original=alignImages(subjects,screenSize,0,0);
-image=alignImages(equalized,screenSize,0,0);
+image=alignImages(equalized,screenSize,backgroundcolor,backgroundcolor);
 %figure
 %imshow(image)
 %figure
@@ -70,10 +82,10 @@ function [images deltas alphas]=equalizeAreas(images,alphas,areas,bgColor,thresh
 method='ratio';
 maxLoops=30;
 deltas=cell(1,length(images));
-target=min(areas);
+target=min(areas(~cellfun(@isempty,images)));
 for i=1:length(images)
     if ~isempty(images{i})
-        if areas(i)>min(areas) %had to switch to shrinking rather than growing, cuz otherwise can exceed screen size.  this is cuz images typically already cropped and zoomed to max size for screen, any increase due to an area adjustment can easily exceed this.
+        if areas(i)>target %had to switch to shrinking rather than growing, cuz otherwise can exceed screen size.  this is cuz images typically already cropped and zoomed to max size for screen, any increase due to an area adjustment can easily exceed this.
 
             %images{i}(isnan(images{i}))=bgColor; %may still be necessary for pixel method?
             switch method
@@ -115,6 +127,10 @@ for i=1:length(images)
                     while abs(delta)>tolerance && m<maxLoops
                         factor=mean(factorRange);
 
+                        factorRange
+                        target
+                        areas
+                        
                         temp=uint8(images{i});%sets nans to zeros, plus imresize exceeds dynamic range on double input, and is much slower
                         temp=imresize(temp,factor);
                         tempAlpha=imresize(alphas{i},size(temp));
@@ -174,6 +190,8 @@ for i=1:length(images)
                 otherwise
                     error('bad method')
             end
+        elseif areas(i)<target
+            error('found a non-empty image with area less than the target, but target should be smallest non-empty area')
         end
     end
 end
@@ -190,7 +208,7 @@ topAndBottom=sum(crop');
 subject=subject(min(find(topAndBottom)):max(find(topAndBottom)),min(find(sides)):max(find(sides)));
 alpha=    alpha(min(find(topAndBottom)):max(find(topAndBottom)),min(find(sides)):max(find(sides)));
 
-if exist('targetDims')
+if exist('targetDims','var') && ~isempty(subject)
     if isvector(targetDims) && length(targetDims)==2 && isinteger(targetDims) && all(targetDims>0)
         %subject(isnan(subject))=0;
         subject=uint8(subject); %will turn nans to zeros, should check bit depth is 8, seems to be necessary to not have doubles or imresize goes outside dynamic range
@@ -255,7 +273,6 @@ else %for some reason this is causing the area equalization to get bigger than t
 end
 image(background)=nan;
 end
-
 
 
 function doHists(images,maxPixel,desc)

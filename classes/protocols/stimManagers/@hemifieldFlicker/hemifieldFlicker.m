@@ -18,7 +18,7 @@ function s=hemifieldFlicker(varargin)
 switch nargin
 case 0 
 % if no input arguments, create a default object
-    s.pixPerCycs = [];
+    s.numCalcIndices = [];
     s.targetContrasts = []; 
     s.distractorContrasts = []; 
     s.fieldWidthPct = 0;
@@ -39,9 +39,9 @@ case 1
 case 14
 % create object using specified values        
     if all(varargin{1})>0
-        s.pixPerCycs=varargin{1};
+        s.numCalcIndices=varargin{1};
     else
-        error('pixPerCycs must all be > 0')
+        error('numCalcIndices must be > 0')
     end
     
     if all(isnumeric(varargin{2})) && all(isnumeric(varargin{3}))
@@ -58,7 +58,7 @@ case 14
     end
     
     if varargin{5} >= 0 && varargin{5}<=1
-        s.fieldHeightPct=varargin{4};
+        s.fieldHeightPct=varargin{5};
     else
         error('fieldHeightPct must be >= 0')
     end    

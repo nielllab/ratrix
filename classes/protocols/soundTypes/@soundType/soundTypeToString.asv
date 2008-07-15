@@ -1,0 +1,15 @@
+function string=soundType(varargin)
+% writes info about this soundType to a string output 
+
+
+if nargin == 0
+    st.name = ''; %name of the sound clip as a string
+    st.duration = 1; % duration of sound to play in milliseconds (ms)
+else
+    st.name = varargin{1};
+    st.duration = varargin{2};
+end
+    
+st = class(st, 'soundType', structable());
+
+st = setSuper(st, st.structable);

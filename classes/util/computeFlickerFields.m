@@ -5,15 +5,12 @@ function out=computeFlickerFields(params,type,mean,width,height,cornerMarkOn)
 
 fieldWidthPct=params(:,1);
 fieldHeightPct=params(:,2);
-pixPerCyc=params(:,3);
-contrasts=params(:,4);
-thresh=params(:,5);
-xPosPct=params(:,6);
-yPosPct=params(:,7);
+contrasts=params(:,3);
+thresh=params(:,4);
+xPosPct=params(:,5);
+yPosPct=params(:,6);
 
-if any(pixPerCyc<2.0)
-    error('pixPerCyc must be >= 2.0')
-end
+
 
 numFields = size(params,1);
 
@@ -34,8 +31,8 @@ switch(type)
             xStop = ceil((xPosPct(i)+fieldWidthPct(i)/2)*xSize);
             field=zeros(ySize,xSize);
             invField=zeros(ySize,xSize);
-            % Create a random binary field of flicker
-            signMap = sign(rand(length(yStart:yStop),length(xStart:xStop))-0.5);
+            % Create a positive binary field of flicker
+            signMap = sign(ones(length(yStart:yStop),length(xStart:xStop))-0.5);
             field(yStart:yStop,xStart:xStop)=signMap*contrasts(i)/2;
             invField(yStart:yStop,xStart:xStop)=signMap*-1*contrasts(i)/2;
             % If any values are below threshold, set them to zero
@@ -71,11 +68,22 @@ switch(type)
         error('Unkown flicker field type')
 end
 
-% Compress all of the fields into a single frame with specified mean
-firstOut=mean+squeeze(sum(img,1));
-secondOut=mean+squeeze(sum(invImg,1));
-out(:,:,1)=firstOut;
-out(:,:,2)=secondOut;
+% Compress all of the fields into a single set of frames with specified mean
+calcImg = zeros(numFields,ySize,xSize);
+for i=1:2^numFields
+    for j=1:numFields
+        if bitget(i-1,j)
+            calcImg(j,:,:) = img(j,:,:);
+        else
+            calcImg(j,:,:) = invImg(j,:,:);
+        end
+    end
+    out(:,:,i)=mean+squeeze(sum(calcImg,1));
+end
+%firstOut=mean+squeeze(sum(img,1));
+%secondOut=mean+squeeze(sum(invImg,1));
+%out(:,:,1)=firstOut;
+%out(:,:,2)=secondOut;
 
 % Normalize all values so that all are 0<=val<=1
 out(out<0)=0;

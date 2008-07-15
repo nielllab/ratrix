@@ -2,3 +2,6 @@
 /orientedGabors.m -text
 /display.m -text
 /stimMgrOKForTrialMgr.m -text
+/getLUT.m -text
+/fillLUT.m -text
+/flushLUT.m -text

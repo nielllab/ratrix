@@ -1,9 +1,8 @@
 function out=getBoxIDForSubjectID(r,s)
-
+out = 0;
 [member index]=ismember(s,getSubjectIDs(r));
 
 if index>0
-    out=0;
     foundSubj=0;
     boxIDs=getBoxIDs(r);
     for i=1:length(boxIDs)
@@ -17,6 +16,10 @@ if index>0
                 end
             end
         end
+    end
+    if ~foundSubj || isempty(out)
+        disp(s)     
+        warning('no box for given subject')
     end
 else
     error('no such subject id')

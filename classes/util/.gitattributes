@@ -1,4 +1,3 @@
-/getRatrixJarPath.m -text
 /computeGabors.m -text
 /doubleSlashes.m -text
 /addJavaComponents.m -text
@@ -23,3 +22,20 @@
 /computeFlickerFields.m -text
 /isMACaddress.m -text
 /calcStimExposureTime.m -text
+/getRangesFromTrialRecordFileNames.m -text
+/compareTrialRecordFileNames.m -text
+/structize.m -text
+/fillMissingFields.m -text
+/hasAllFieldsAndNoMore.m -text
+/getTrialRecordsFromPermanentStore.m -text
+/getSameLimitedResponsePort.m -text
+/setRequestReward.m -text
+/remoteDir.m -text
+/getRlabJarPath.m -text
+/aboveThresholdPerformance.m -text
+/replicateTrialRecords.m -text
+/upize.m -text
+/getLastTrainingStep.m -text
+/hasAllFieldsInThatOrder.m -text
+/getTrialRecordFiles.m -text
+/isDirRemote.m -text

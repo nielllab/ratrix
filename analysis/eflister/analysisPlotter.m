@@ -1,15 +1,11 @@
-function fs=analysisPlotter(selection)
-compiledFileDir='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\ratrixAdmin\compiledRecords\';
+function fs=analysisPlotter(selection,compiledFileDir)
 
 
-[pathstr, name, ext, versn] = fileparts(mfilename('fullpath'));
+% if ~isdeployed
+% addpath('C:\Documents and Settings\rlab\Desktop\phil analysys');
+% end
 
-if ~isdeployed
-%addpath('C:\Documents and Settings\rlab\Desktop\phil analysys');
-fullfile(pathstr,'..','pmeier')
-end
-
-compileTrialRecords
+%compileTrialRecords
 
 fs=[];
 for i=1:size(selection.subjects,1)
@@ -33,7 +29,7 @@ for i=1:size(selection.subjects,1)
             if ~isempty(selection.subjects{i,j,k})
                 subplot(numRows,numCols,(j-1)*numCols+k)
                 title(selection.subjects{i,j,k})
-                doAnalysisPlot(compiledFileDir,selection.subjects{i,j,k},selection.type);
+                doAnalysisPlot(compiledFileDir,selection.subjects{i,j,k},selection.type, selection.filter, selection.filterVal, selection.filterParam);
             end
         end
     end

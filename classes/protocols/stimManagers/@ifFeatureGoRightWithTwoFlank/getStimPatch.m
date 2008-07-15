@@ -1,6 +1,7 @@
 function out=getStimPatch(s,patchType,showIm)
 %out=getStimPatch(s,patchType,showIm)
 %im=getStimPatch(s,'right',1) where patchType is: 'right','left' or 'flanker'
+%imagesc(reshape(patch(:,:,1,1),size(patch,1),size(patch,2)))
 
 switch patchType
     case 'right'
@@ -18,5 +19,5 @@ if ~exist('showIm','var')
 end
 
 if showIm
-    imshow(out(:,:,1))
+    imshow(out(:,:,1,1))
 end

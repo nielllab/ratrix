@@ -1,5 +1,5 @@
 function st=initRatrixPorts(mac)
-id=int8(1);
+id='99Z';
 width=1280;
 height=1024;
 path=fullfile('Stations','DefaultStation');

@@ -37,6 +37,8 @@ function s=cuedIfFeatureGoRightWithTwoFlank(varargin)
 % typeOfLUT= 'useThisMonitorsUncorrectedGamma';
 % rangeOfMonitorLinearized=[0 1];
 %
+% maxCorrectOnSameSide = int8(4)
+%
 % orientations in radians , these a distributions of possible orientations
 % mean, cueLum, cueSize, contrast, yPositionPercent, xPositionPercent normalized (0 <= value <= 1)
 % stdGaussMask is the std dev of the enveloping gaussian, in normalized  units of the vertical height of the stimulus image
@@ -76,6 +78,7 @@ case 0
     s.toggleStim = 0;
     s.typeOfLUT = [];
     s.rangeOfMonitorLinearized=[];
+    s.maxCorrectOnSameSide=0;
     
 % edf: you must not change definition of object.  these belong on parent, not you.    
     %extra non input values
@@ -108,7 +111,7 @@ case 1
     else
         error('Input argument is not a goToFeatureWithTwoFlank object')
     end
-case 28
+case 29
 % create object using specified values    
     
     if all(varargin{1})>0
@@ -248,6 +251,11 @@ case 28
         error('rangeOfMonitorLinearized must be greater than or =0 and less than or =1')
     end
  
+     if (0<varargin{25}| varargin{25}==-1 )& isinteger(varargin{25})
+        s.maxCorrectOnSameSide=varargin{25};
+    else
+        error('maxCorrectOnSameSide must be an integer greater than 0, or be equal to -1 in order to not limit at all')
+    end
     
     s.phase=0; %no longer randomized;   would need movie for that (hieght x width x orientations x phase)
     maxHeight=varargin{26};
@@ -303,7 +311,7 @@ case 28
 %     end
     
 
-    s = class(s,'cuedIfFeatureGoRightWithTwoFlank',stimManager(varargin{25},varargin{26},varargin{27},varargin{28})); 
+    s = class(s,'cuedIfFeatureGoRightWithTwoFlank',stimManager(varargin{26},varargin{27},varargin{28},varargin{29})); 
     
     s=inflate(s);
     s=deflate(s);

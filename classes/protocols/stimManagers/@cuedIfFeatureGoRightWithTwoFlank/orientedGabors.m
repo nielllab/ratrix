@@ -19,6 +19,8 @@ case 0
     s.thresh = 0;
     s.yPosPct = 0; 
     
+    s.LUT =[];
+    
     s = class(s,'orientedGabors',stimManager());   
     
 case 1
@@ -74,10 +76,16 @@ case 12
         error('yPositionPercent must be numeric')
     end
     
+    s.LUT =[];
+    
     s = class(s,'orientedGabors',stimManager(varargin{9},varargin{10},varargin{11},varargin{12}));   
     
 otherwise
     error('Wrong number of input arguments')
 end
 
+
+s.LUT=fillLUT(s,'useThisMonitorsUncorrectedGamma',[0 1]);
+
 s=setSuper(s,s.stimManager);
+

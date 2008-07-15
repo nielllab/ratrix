@@ -58,3 +58,5 @@
 /sendToServer.m -text
 /checkForSpecificPriority.m -text
 /packageArguments.m -text
+/updateRatrixFromClientRatrix.m -text
+/waitForCommands.m -text

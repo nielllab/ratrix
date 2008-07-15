@@ -1,8 +1,8 @@
-function [quit com] = sendToServer(r,clientIdent,priority,command,arguments)
-  import ratrix.net.*;  
+function [quit com] = sendToServer(r,clientId,priority,command,arguments)
+  import rlab.net.*;  
   quit=false;
-  if ~isa(clientIdent,'RatrixNetworkClientIdent')
-    error('<clientIdent> argument must be a RatrixNetworkClientIdent object');
+  if ~isa(clientId,'RlabNetworkNodeIdent')
+    error('<clientId> argument must be a RlabNetworkNodeIdent object');
   end
   if ~exist('arguments','var')
       arguments = {};
@@ -10,11 +10,11 @@ function [quit com] = sendToServer(r,clientIdent,priority,command,arguments)
   if ~iscell(arguments)
     error('<arguments> argument must be a cell array');
   end
-  jCom = RatrixNetworkCommand(r.client.getNextCommandUID(),clientIdent,priority,command);
+  jCom = RlabNetworkCommand(r.client.getNextCommandUID(),clientId,r.client.getRemoteNodeId(),priority,command);
   % Convert the matlab arguments into something java can understand
   jCom = packageArguments(r,jCom,arguments);
   try
-      r.client.sendCommandToServer(jCom);
+      r.client.sendImmediately(jCom);
       com = rnetcommand(jCom);
   catch
       quit=true;

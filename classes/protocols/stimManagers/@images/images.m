@@ -1,17 +1,16 @@
 function s=images(varargin)
 % IMAGES  class constructor.
 % s = images(directory,yPositionPercent,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance)
-% orientations in radians
-% mean, contrast, yPositionPercent normalized (0 <= value <= 1)
-% radius is the std dev of the enveloping gaussian, in normalized units of the diagonal of the stim region
-% thresh is in normalized luminance units, the value below which the stim should not appear
+% yPositionPercent (0 <= value <= 1), in normalized units of the diagonal of the stim region
+
+s.directory = '';
+s.background=0;
+s.yPositionPercent=0;
+s.cache=[];
+
 switch nargin
     case 0
         % if no input arguments, create a default object
-
-        s.directory = '';
-        s.background=0;
-        s.yPositionPercent=0;
 
         s = class(s,'images',stimManager());
 
@@ -28,7 +27,7 @@ switch nargin
         if ischar(varargin{1})
             s.directory=varargin{1};
             try
-                d=dir(s.directory);
+                d=remoteDir(s.directory);
             catch
                 error('can''t load that directory')
             end

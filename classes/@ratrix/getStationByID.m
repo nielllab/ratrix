@@ -5,7 +5,7 @@ s=[];
 for bx=1:length(r.assignments)
     if ~isempty(r.assignments{bx})
         for st=1:size(r.assignments{bx}{1},1)
-            if getID(r.assignments{bx}{1}{st,1})==id
+            if strcmp(getID(r.assignments{bx}{1}{st,1}),id) %changed from sid's being ints and checking w/==
                 if found
                     error('found multiple stations with that id')
                 else

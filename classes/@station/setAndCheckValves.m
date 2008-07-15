@@ -29,7 +29,12 @@ if strcmp(station.responseMethod,'parallelPort')
     %If getValves is slow we could assume they are as requested
     endValveState=getValves(station); 
     if any(endValveState~=requestedValves)
+        endValveState=endValveState
+        requestedValves=requestedValves
         error('valve setting failed')
+        %it might be porttalk isn't installed
+        %follw instructions: http://tech.groups.yahoo.com/group/psychtoolbox/message/4825
+        %download from here: http://www.beyondlogic.org/porttalk/porttalk.htm
     end
     
 

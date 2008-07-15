@@ -1,6 +1,6 @@
-function [quit response responseDetails didManual manual didAPause didValves station]=  stimOGL(tm, ...
+function [quit response responseDetails didManual manual didAPause didValves didHumanResponse didStochasticResponse]=  stimOGL(tm, ...
     stim, audioStim, LUT, type, metaPixelSize, window, ifi, ...
-    responseOptions, requestOptions, finalScreenLuminance, station, manual,allowQPM,timingCheckPct,noPulses,isCorrection,rn,subID,stimID,doAirpuff);
+    responseOptions, requestOptions, finalScreenLuminance, station, manual,allowQPM,timingCheckPct,noPulses,isCorrection,rn,subID,stimID)
 
 %note: add a phase which is a movie during which the rat must lick the
 %center port to earn n more frames of movie, and the movie has to end in
@@ -22,7 +22,8 @@ function [quit response responseDetails didManual manual didAPause didValves sta
 % trialManager.timingCheckPct       %percent of allowable frametime error before apparently dropped frame is reported
 % trialManager.numFrameDropReports  %number of frame drops to keep detailed records of for this trial
 % trialManager.percentCorrectionTrials      %probability that if this trial is incorrect that it will be repeated until correct
-%                                            note this needs to be moved here from wherever it currently is
+%                                            note this needs to be moved
+%                                            here from wherever it currently is
 
 
 %trialManger.stimDetails: a set of parameters stored on the trial manager that specifies everything about this trial
@@ -178,7 +179,7 @@ function [quit response responseDetails didManual manual didAPause didValves sta
 %
 %     verbose = 1;
 
-logwrite('entered stimOGL');
+%logwrite('entered stimOGL');
 
 if window<0
     error('window must be >=0')
@@ -218,14 +219,34 @@ try
 
     loop=0;
     trigger=0;
-
+    frameIndexed=0; % Whether the stim is indexed with a list of frames
+    timeIndexed=0; % Whether the stim is timed with a list of frames
+    indexedFrames = []; % List of indices referencing the frames
     %edf:  SWITCH expression must be a scalar or string constant.
-    if isinteger(type)
-        if isvector(type) && size(stim,3)==size(type,2) && all(type(1:end-1)>=1) && type(end)>=0 % the timedFrames type
-            strategy = 'textureCache';
-            %dontclear = 1;  %good for saving time, but breaks on lame graphics cards
-        else
-            error('bad vector for timedFrame type: must be a vector of length equal to stim dim 3 of integers > 0 (number or refreshes to display each frame). A zero in the final entry means hold display of last frame.')
+    if iscell(type)
+        if length(type)~=2
+            error('Stim type of cell should be of length 2')
+        end
+        switch type{1}
+            case 'indexedFrames'
+                frameIndexed = 1;
+                strategy = 'textureCache';
+                loop=1;
+                trigger=0;
+                indexedFrames = type{2};
+            case 'timedFrames'
+                timeIndexed = 1;
+                timedFrames = type{2};
+                if isinteger(timedFrames)
+                    if isvector(timedFrames) && size(stim,3)==size(timedFrames,2) && all(timedFrames(1:end-1)>=1) && timedFrames(end)>=0 % the timedFrames type
+                        strategy = 'textureCache';
+                        %dontclear = 1;  %good for saving time, but breaks on lame graphics cards
+                    else
+                        error('bad vector for timedFrame type: must be a vector of length equal to stim dim 3 of integers > 0 (number or refreshes to display each frame). A zero in the final entry means hold display of last frame.')
+                    end
+                end
+            otherwise
+                error('Unsupported stim type using a cell, either indexedFrames or timedFrames')
         end
     else
         switch type
@@ -319,11 +340,7 @@ try
     %         disp(sprintf('clut has a min of %d and a max of %d',minV,maxV));
     %     end
 
-    if finalScreenLuminance>1 || finalScreenLuminance<0
-        error('finalScreenLuminance <0 or >1 -- setting to zero') %changed to error pmm
-        %finalScreenLuminance = minV + finalScreenLuminance*(maxV-minV);
-        finalScreenLuminance=0;
-    end
+
 
     %SPECIFY COLOR RANGE
     %tell screen what type of textures we will send
@@ -339,7 +356,11 @@ try
         switch class(stim)
             case {'double','single'}
                 %A maximumvalue of 1.0 will enable PTB to pass color values in OpenGL's native floating point color range of 0.0 to 1.0:
-
+                if finalScreenLuminance>1 || finalScreenLuminance<0
+                    error('finalScreenLuminance <0 or >1 -- setting to zero') %changed to error pmm
+                    %finalScreenLuminance = minV + finalScreenLuminance*(maxV-minV);
+                    finalScreenLuminance=0;
+                end
                 %Screen('ColorRange', window,1.0,clampcolors); %colorrange doesn't work for textures!  see %http://tech.groups.yahoo.com/group/psychtoolbox/message/6663
                 if any(stim(:)>1) || any(stim(:)<0)
                     error('stim had elements <0 or >1 ')
@@ -350,14 +371,20 @@ try
                 end
             case 'uint8'
                 %Screen('ColorRange', window,double(intmax('uint8')),1);%colorrange doesn't work for textures!  see %http://tech.groups.yahoo.com/group/psychtoolbox/message/6663
-                finalScreenLuminance=finalScreenLuminance*intmax('uint8');
+                %finalScreenLuminance=finalScreenLuminance*intmax('uint8');
+                if finalScreenLuminance>intmax('uint8') || finalScreenLuminance<0
+                    error('finalScreenLuminance <0 or >intMax')
+                end
                 if verbose
                     disp('Screen is matched for 8 bit rendering')
                     %switch to uint16 if if grafix card supports it
                 end
             case 'uint16'
                 %Screen('ColorRange', window,double(intmax('uint16')),1);
-                finalScreenLuminance=finalScreenLuminance*intmax('uint16');
+                %finalScreenLuminance=finalScreenLuminance*intmax('uint16');
+                if finalScreenLuminance>intmax('uint16') || finalScreenLuminance<0
+                    error('finalScreenLuminance <0 or >intMax')
+                end
                 if verbose
                     'Screen is matched for 16 bit rendering - only if grafix card supports it'
                     %will the LUT specified as 8 bit still work fine?
@@ -460,7 +487,8 @@ try
     attempt=0;
     done=0;
     i=0;
-
+    frameIndex=0;
+    
     response='none'; %initialize 
     
     responseDetails.numMisses=0;
@@ -507,16 +535,24 @@ try
     requestRewardPorts=0*readPorts(station);
     requestRewardDurLogged=false;
     requestRewardOpenCmdDone=false;
-    serverValveChange=false;
-
+    serverValveChange=false;  
+    potentialStochasticResponse=false;
+    didStochasticResponse=false; 
+    didHumanResponse=false;
+    requestRewardStartLogged=false;
+    
     isRequesting=0;
     stimToggledOn=0;
     
     puffStarted=0;
     puffDone=false;
 
-    xTextPos = 25;
-    yTextPos = 100;
+    xSubjectTextPos = 25;
+    xTextPos = xSubjectTextPos+250;
+    yTextPos = 20;
+    standardFontSize=15; %big was 25
+    subjectFontSize=35; 
+
 
     % For the Windows version of Priority (and Rush), the priority levels set
     % are  "process priority levels". There are 3 priority levels available,
@@ -546,7 +582,8 @@ try
     end
 
     if window >= 0
-        oldFontSize = Screen('TextSize',window,25);
+        oldFontSize = Screen('TextSize',window,standardFontSize); 
+        Screen('Preference', 'TextRenderer', 0);  % consider moving to PTB setup
 
         Screen('DrawTexture', window, textures(size(stim,3)+1),[],destRect,[],filtMode); %should replace this with new stim architecture
         Screen('DrawingFinished',window,dontclear);
@@ -559,7 +596,7 @@ try
     end
 
 
-    logwrite('about to enter stimOGL loop');
+    %logwrite('about to enter stimOGL loop');
 
     %any stimulus onset synched actions
 
@@ -569,7 +606,7 @@ try
 
     %show stim -- be careful in this realtime loop!
     while ~done && ~quit;
-        logwrite('top of stimOGL loop');
+        %logwrite('top of stimOGL loop');
 
         yNewTextPos=yTextPos;
 
@@ -587,7 +624,14 @@ try
                 doFramePulse=~noPulses;
                 switch strategy
                     case 'textureCache'
-                        if loop
+                        if frameIndexed
+                            if loop
+                                frameIndex = mod(frameIndex,length(indexedFrames)-1)+1;
+                            else
+                                frameIndex = min(length(indexedFrames),frameIndex+1);
+                            end
+                            i = indexedFrames(frameIndex);
+                        elseif loop
                             i = mod(i,size(stim,3)-1)+1;
                         elseif trigger
                             if isRequesting
@@ -606,36 +650,34 @@ try
                                 i=2;
                             end
 
-                        else
-                            if isinteger(type) %ok, this is where we do the timedFrames type
+                        elseif timeIndexed %ok, this is where we do the timedFrames type
 
-                                %Function 'cumsum' is not defined for values of class 'int8'.
-                                if requestFrame~=0
-                                    i=min(find((frameNum-requestFrame)<=cumsum(double(type))));  %find the stim frame number for the number of frames since the request
-                                end
-
-                                if isempty(i)  %if we have passed the last stim frame
-                                    i=length(type);  %hold the last frame if the last frame duration specified was zero
-                                    if type(end)
-                                        i=i+1;      %otherwise move on to the finalScreenLuminance blank screen
-                                    end
-                                end
-
-                            else
-
-                                i=min(i+1,size(stim,3));
-
-                                if isempty(responseOptions) && i==size(stim,3)
-                                    done=1;
-                                end
-
-                                if i==size(stim,3) && didPulse
-                                    doFramePulse=0;
-                                end
-                                didPulse=1;
+                            %Function 'cumsum' is not defined for values of class 'int8'.
+                            if requestFrame~=0
+                                i=min(find((frameNum-requestFrame)<=cumsum(double(timedFrames))));  %find the stim frame number for the number of frames since the request
                             end
 
+                            if isempty(i)  %if we have passed the last stim frame
+                                i=length(timedFrames);  %hold the last frame if the last frame duration specified was zero
+                                if timedFrames(end)
+                                    i=i+1;      %otherwise move on to the finalScreenLuminance blank screen
+                                end
+                            end
+
+                        else
+
+                            i=min(i+1,size(stim,3));
+
+                            if isempty(responseOptions) && i==size(stim,3)
+                                done=1;
+                            end
+
+                            if i==size(stim,3) && didPulse
+                                doFramePulse=0;
+                            end
+                            didPulse=1;
                         end
+
 
                         %draw to buffer
                         if window>=0
@@ -677,13 +719,16 @@ try
                 end
             end
 
-            logwrite(sprintf('stim is started, i is calculated: %d',i));
+            %logwrite(sprintf('stim is started, i is calculated: %d',i));
 
             %text commands are supposed to be last for performance reasons
 
             if window>=0
                 if labelFrames
-                    [garbage,yNewTextPos] = Screen('DrawText',window,['subject:' subID ' trialManager:' class(tm) ' stimManager:' stimID],xTextPos,yNewTextPos,100*ones(1,3));
+                    %junkSize = Screen('TextSize',window,subjectFontSize); 
+                    [garbage,yTextPosUnused] = Screen('DrawText',window,['ID:' subID ],xSubjectTextPos,yTextPos,100*ones(1,3));
+                    %junkSize = Screen('TextSize',window,standardFontSize); 
+                    [garbage,yNewTextPos] = Screen('DrawText',window,['trialManager:' class(tm) ' stimManager:' stimID],xTextPos,yNewTextPos,100*ones(1,3));
                 end
                 [normBoundsRect, offsetBoundsRect]= Screen('TextBounds', window, 'TEST');
                 yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
@@ -731,7 +776,7 @@ try
             framePulse(station);
         end
 
-        logwrite('frame calculated, waiting for flip');
+        %logwrite('frame calculated, waiting for flip');
 
         %wait for next frame, flip buffer
         if window>=0
@@ -748,7 +793,7 @@ try
             missed=0;
         end
 
-        logwrite('just flipped');
+        %logwrite('just flipped');
 
         if ~paused
             if doFramePulse
@@ -788,7 +833,7 @@ try
             responseDetails.numUnsavedMisses=responseDetails.numUnsavedMisses+1;
         end
 
-        logwrite('entering trial logic');
+        %logwrite('entering trial logic');
 
         %all trial logic here
 
@@ -815,7 +860,7 @@ try
 
         [keyIsDown,secs,keyCode]=KbCheck;
         if keyIsDown
-            logwrite(sprintf('keys are down:',num2str(find(keyCode))));
+            %logwrite(sprintf('keys are down:',num2str(find(keyCode))));
 
             asciiOne=49;
 
@@ -867,6 +912,7 @@ try
                             didValves=true;
                         else
                             ports(keyName(1)-asciiOne+1)=1;
+                            didHumanResponse=true;
                         end
                     elseif strcmp(keyName,'m')
                         mThisLoop=1;
@@ -888,7 +934,7 @@ try
             end
         end
 
-        logwrite('calculating state');
+        %logwrite('calculating state');
 
         if ~paused
             if verbose && any(lastPorts) && any(ports~=lastPorts)
@@ -952,10 +998,12 @@ try
                     %ports(ceil(rand*length(responseOptions)))=1; %whoops -- bug
                     ports(ceil(rand*getNumPorts(station)))=1;
                     'FREE LICK AT PORT AS FOLLOWS -- NEED TO OFFICIALLY RECORD THIS'
-                    ports
+                    potentialStochasticResponse=1; %might not be a viable response option, so don't log didStocasticResponse yet
+                else
+                    potentialStochasticResponse=0;
                 end
-            end
-
+            end      
+            
             %subject gave a well defined response
             if any(ports(responseOptions)) && stimStarted
                 done=1;
@@ -963,6 +1011,9 @@ try
                 logIt=1;
                 stopListening=1;
                 responseDetails.durs{attempt+1}=0;
+                if potentialStochasticResponse
+                   didStochasticResponse=1; 
+                end
             end
 
             %subject gave a response that is neither a stimulus request nor a well defined response
@@ -991,7 +1042,7 @@ try
 
             lastPorts=ports;
             frameNum=frameNum+1;
-            logwrite(sprintf('advancing to frame: %d',frameNum));
+            %logwrite(sprintf('advancing to frame: %d',frameNum));
         end
 
         switch  getRewardMethod(station)
@@ -1015,18 +1066,18 @@ try
 
                     serverValveStates=currentValveState;
 
+            while commandsAvailable(rn,constants.priorities.IMMEDIATE_PRIORITY) && ~done && ~quit
+                %logwrite('handling IMMEDIATE priority command in stimOGL');
+                if ~isConnected(rn)
+                    done=true;
+                end
+                com=getNextCommand(rn,constants.priorities.IMMEDIATE_PRIORITY);
+                if ~isempty(com)
+                    [good cmd args]=validateCommand(rn,com);
+                    %logwrite(sprintf('command is %d',cmd));
+                    if good
+                        switch cmd
 
-                    while commandsAvailable(rn,constants.priorities.IMMEDIATE_PRIORITY) && ~done && ~quit
-                        logwrite('handling IMMEDIATE priority command in stimOGL');
-                        if ~isConnected(rn)
-                            done=true;
-                        end
-                        com=getNextCommand(rn,constants.priorities.IMMEDIATE_PRIORITY);
-                        if ~isempty(com)
-                            [good cmd args]=validateCommand(rn,com);
-                            logwrite(sprintf('command is %d',cmd));
-                            if good
-                                switch cmd
 
 
                                     case constants.serverToStationCommands.S_SET_VALVES_CMD
@@ -1125,13 +1176,13 @@ try
         [currentValveState valveErrorDetails]=setAndCheckValves(station,newValveState,currentValveState,valveErrorDetails,startTime,'frame cycle valve update');
 
         if serverValveChange
-            quit=sendToServer(rn,getClientIdent(rn),constants.priorities.IMMEDIATE_PRIORITY,constants.stationToServerCommands.C_VALVES_SET_CMD,{currentValveState});
+            quit=sendToServer(rn,getClientId(rn),constants.priorities.IMMEDIATE_PRIORITY,constants.stationToServerCommands.C_VALVES_SET_CMD,{currentValveState});
             serverValveChange=false;
         end
 
         if requestRewardStarted && ~requestRewardStartLogged
             if strcmp(getRewardMethod(station),'serverPump')
-                quit=sendToServer(rn,getClientIdent(rn),constants.priorities.IMMEDIATE_PRIORITY,constants.stationToServerCommands.C_REWARD_CMD,{getRequestRewardSizeULorMS(tm),logical(requestRewardPorts)});
+                quit=sendToServer(rn,getClientId(rn),constants.priorities.IMMEDIATE_PRIORITY,constants.stationToServerCommands.C_REWARD_CMD,{getRequestRewardSizeULorMS(tm),logical(requestRewardPorts)});
             end
             responseDetails.requestRewardStartTime=GetSecs();
             'request reward!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
@@ -1149,9 +1200,9 @@ try
         %requests.  right now there is a bug if the response occurs before
         %the request reward is over.
 
-        logwrite('end of stimOGL loop');
+        %logwrite('end of stimOGL loop');
     end
-    logwrite('stimOGL loop complete');
+    %logwrite('stimOGL loop complete');
     currentValveState=verifyValvesClosed(station);
 
     audioStimPlaying=false;

@@ -5,3 +5,4 @@
 /getNumTrainingSteps.m -text
 /getName.m -text
 /getTrainingStep.m -text
+/sampleStimFrame.m -text

@@ -1,3 +1,4 @@
 /getFreeDrinkLikelihood.m -text
 /freeDrinks.m -text
 /stationOKForTrialManager.m -text
+/getPctStochasticReward.m -text

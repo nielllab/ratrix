@@ -1,14 +1,4 @@
 function [stimulus updateSM out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance isCorrection] = calcStim(stimulus,trialManagerClass,frameRate,responsePorts,totalPorts,width,height,trialRecords)
-
-%LUT = Screen('LoadCLUT', 0);
-%LUT=LUT/max(LUT(:));
-
-LUTBitDepth=8;
-numColors=2^LUTBitDepth; maxColorID=numColors-1; fraction=1/(maxColorID);
-ramp=[0:fraction:1];
-LUT= [ramp;ramp;ramp]';
-
-
 updateSM=0;
 isCorrection=0;
 
@@ -103,11 +93,13 @@ xPosPcts = [linspace(0,1,totalPorts+2)]';
 xPosPcts = xPosPcts(2:end-1);
 details.xPosPcts = xPosPcts([targetPorts'; distractorLocs']);
 
+
 params = [repmat([stimulus.radius details.pixPerCyc],numGabors,1) details.phases details.orientations repmat([stimulus.contrast stimulus.thresh],numGabors,1) details.xPosPcts repmat([stimulus.yPosPct],numGabors,1)];
-out(:,:,1)=computeGabors(params,stimulus.mean,min(width,getMaxWidth(stimulus)),min(height,getMaxHeight(stimulus)),'square','normalizeDiagonal',0);
+out(:,:,1)=computeGabors(params,stimulus.mean,min(width,getMaxWidth(stimulus)),min(height,getMaxHeight(stimulus)),stimulus.waveform, stimulus.normalizedSizeMethod,0);
 
 %EDF: 02.08.07 -- i think this is only supposed to be for nafc but not sure...
 %was causing free drinks stim to only show up for first frame...
 if strcmp(trialManagerClass,'nAFC')%pmm also suggests this:  && strcmp(type,'trigger')
     out(:,:,2)=stimulus.mean;
 end
+LUT=getLUT(stimulus);

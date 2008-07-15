@@ -1,0 +1,11 @@
+/setupPMM.m -text
+/addRatsForRack.m -text
+/getRatLayout.m -text
+/addStationsForRack.m -text
+/setProtocolEDF.m -text
+/runRatTest.m -text
+/setupMaleRoom.m -text
+/reportSettings.m -text
+/firstMakeRatrix.m -text
+/createRatrixWithDefaultStations.m -text
+/addTestRats.m -text

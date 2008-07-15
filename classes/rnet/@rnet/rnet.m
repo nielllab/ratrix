@@ -20,9 +20,6 @@ r.constants.serverToStationCommands.S_GET_VALVE_STATES_CMD = 17;
 r.constants.serverToStationCommands.S_REPLICATE_TRIAL_RECORDS_CMD = 18;
 
 % Station to Server
-r.constants.stationToServerCommands.C_CONNECT_CMD = -1;
-r.constants.stationToServerCommands.C_DISCONNECT_CMD = -2;
-r.constants.stationToServerCommands.C_SERVER_RESET_CMD = -3;
 r.constants.stationToServerCommands.C_CMD_ACK = 101;
 r.constants.stationToServerCommands.C_CMD_ERR = 102;
 %r.constants.stationToServerCommands.C_RECV_TRIAL_RECORDS_CMD = 103;
@@ -73,7 +70,7 @@ r.constants.nodeTypes.CLIENT_TYPE = 2;
 %     rnet for some reason.  can't figure out why, but if you don't do it, even
 %     though the dynamic path is updated correctly, the import appears to
 %     fail.
-import ratrix.net.*; %lame that import isn't global -- can't call in lower function
+import rlab.net.*; %lame that import isn't global -- can't call in lower function
 
 r.type = 0;
 r.server = [];
@@ -100,17 +97,18 @@ elseif ischar(varargin{1})
                 if nargin==2
                     if isnumeric(varargin{2}) %should be a stricter test?  positive integer?
                         r.port = varargin{2};
-                        r.server = RatrixNetworkServer(r.port);
+                        r.server = RlabNetworkServer(r.port);
                     else
                         error('Server second argument should be port number');
                     end
                 else
-                    r.port = RatrixNetworkServer.SERVER_PORT;
-                    r.server = RatrixNetworkServer();
+                    r.port = RlabNetworkServer.SERVER_PORT;
+                    r.server = RlabNetworkServer();
                 end
 
                 r.server.setTemporaryPath(java.lang.String(matlabroot));
                 thread = java.lang.Thread(r.server);
+                thread.start();
             else
                 error('Only server type can have one or two arguments');
             end
@@ -136,15 +134,28 @@ elseif ischar(varargin{1})
                         error('Client should provide a number port number');
                     end
                 else
-                    r.port = RatrixNetworkServer.SERVER_PORT;
+                    r.port = RlabNetworkServer.SERVER_PORT;
                 end
 
                 r.type = r.constants.nodeTypes.CLIENT_TYPE;
                 'a'
-                r.client = RatrixNetworkClient(java.lang.String(r.id),java.lang.String(r.host),r.port);
-                'b'
+                r.client = RlabNetworkClient(java.lang.String(r.id),java.lang.String(r.host),r.port);
                 r.client.setTemporaryPath(java.lang.String(matlabroot));
-                thread = java.lang.Thread(r.client);
+
+                % Need to determine if the connect command was acked by the server, and by that if this
+                % connection is fully established
+                startTime = GetSecs();
+                timeout = 5.0;
+                while ~r.client.connectionEstablished()
+                  if GetSecs() > startTime+timeout
+                    r.client.shutdown();
+                    r.client=[ ];
+                    error('Client timed out waiting to establish connection');
+                  end
+                  WaitSecs(0.1);
+                end
+                
+                'b'
             else
                 error('Only client can have three or four arguments');
             end
@@ -153,7 +164,6 @@ elseif ischar(varargin{1})
             errror('Invalid number of arguments to rnet');
     end
     
-    thread.start();
     r = class(r,'rnet');
 else
     error('First argument to rnet should be type');

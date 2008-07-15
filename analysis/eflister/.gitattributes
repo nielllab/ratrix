@@ -1,7 +1,9 @@
-/getTrialRecordFiles.m -text
 /checkTestDirs.m -text
 /doAnalysisPlot.m -text
 /fixData.m -text
 /compileTrialRecords.m -text
 /analysis.m -text
 /analysisPlotter.m -text
+/loadCompiledTrialRecords.m -text
+/getCompiledDirForRack.m -text
+/getSubDirForRack.m -text

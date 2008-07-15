@@ -319,7 +319,7 @@ else
         error ('cache must be empty')
     end
     
-    if ~isempty(shapingValues) %only check values if a method is selected
+    if ~isempty(t.shapingValues) %only check values if a method is selected
      if ~(checkShapingValues(tm,t.shapingMethod,t.shapingValues))
         error ('wrong fields in shapingValues')
      end

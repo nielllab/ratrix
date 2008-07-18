@@ -6,10 +6,8 @@ switch nargin
     case 0
         % if no input arguments, create a default object
         r.rewardNthCorrect=[0]; %this is a vector of the rewardSizeULorMSs for the Nth trial correct in a row
-        r.msPenalty=0;
-        r.scalar = 0;
-        
-        r = class(r,'rewardNcorrectInARow',reinforcementManager());  
+
+        r = class(r,'rewardNcorrectInARow',reinforcementManager());
     case 1
         % if single argument of this class type, return it
         if (isa(varargin{1},'rewardNcorrectInARow'))
@@ -25,26 +23,11 @@ switch nargin
         else
             error('all the rewardSizeULorMSs must be >=0')
         end
-        
-        if varargin{2}>=0
-            r.msPenalty=varargin{2};
-        else
-            error('msPenalty must be >=0')
-        end
-        
-      
-        if varargin{5}>=0 && varargin{5}<=100
-            r.scalar=varargin{5};            
-        else
-            error('scalar must be >=0 and <=100')
-        end
-     
-        r = class(r,'rewardNcorrectInARow',reinforcementManager(varargin{3}, varargin{4}));
+
+        r = class(r,'rewardNcorrectInARow',reinforcementManager(varargin{2},varargin{5},varargin{3}, varargin{4}));
 
     otherwise
         error('Wrong number of input arguments')
 end
 
 r=setSuper(r,r.reinforcementManager);
-
-

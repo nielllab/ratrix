@@ -1,4 +1,4 @@
-function [r rewardSizeULorMS msPenalty msRewardSound msPenaltySound updateTM] = calcReinforcement(r,trialRecords, subject)
+function [r rewardSizeULorMS msPenalty msPuff msRewardSound msPenaltySound updateTM] = calcReinforcement(r,trialRecords, subject)
 verbose=1;
 
 %default
@@ -58,6 +58,7 @@ updateTM=0;
 
 rewardSizeULorMS= r.scalar * r.rewardNthCorrect(n);
 msPenalty=r.msPenalty;
+msPuff=r.msPuff;
 msRewardSound=rewardSizeULorMS*getFractionOpenTimeSoundIsOn(r.reinforcementManager);
 msPenaltySound=r.msPenalty*getFractionPenaltySoundIsOn(r.reinforcementManager);
 

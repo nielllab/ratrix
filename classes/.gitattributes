@@ -66,7 +66,6 @@ protocols/reinforcementManager/@constantReinforcement/setScalar.m -text
 protocols/reinforcementManager/@constantReinforcement/setPenalty.m -text
 protocols/reinforcementManager/@constantReinforcement/calcReinforcement.m -text
 protocols/reinforcementManager/@constantReinforcement/getScalar.m -text
-protocols/reinforcementManager/@reinforcementManager/setScalar.m -text
 protocols/reinforcementManager/@reinforcementManager/cache.m -text
 protocols/reinforcementManager/@reinforcementManager/reinforcementManager.m -text
 protocols/reinforcementManager/@reinforcementManager/getImmutable.m -text

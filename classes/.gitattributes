@@ -127,6 +127,7 @@ protocols/eyeTrackers/@eyeTracker/saveEyeData.m -text
 protocols/eyeTrackers/@eyeTracker/getSessionFileName.m -text
 protocols/trialManagers/@promptedNAFC/calibrateEyeTracker.m -text
 protocols/reinforcementManager/@constantReinforcement/shortDisp.m -text
+protocols/reinforcementManager/@reinforcementManager/private/calcCommonValues.m -text
 protocols/reinforcementManager/@reinforcementManager/setPenalty.m -text
 protocols/reinforcementManager/@reinforcementManager/getScalar.m -text
 protocols/reinforcementManager/@reinforcementManager/getPenalty.m -text

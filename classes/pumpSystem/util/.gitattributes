@@ -1,10 +1,2 @@
-/lptReadBit.m -text
-/isBitSpec.m -text
 /notMember.m -text
-/lptwrite.mexw32 -text
-/goodPins.m -text
-/lptWriteBit.m -text
 /closeAllSerials.m -text
-/getBitSpecForPinNum.m -text
-/getDirForPinNum.m -text
-/lptread.mexw32 -text

@@ -59,3 +59,9 @@ parallelPort/lptread.mexw32 -text
 parallelPort/lptread.c -text
 parallelPort/lptWriteBits.m -text
 parallelPort/getLPT1addr.c -text
+parallelPort/isBitSpec.m -text
+parallelPort/getBitSpecForPinNum.m -text
+parallelPort/lptWriteBit.m -text
+parallelPort/getDirForPinNum.m -text
+parallelPort/lptReadBit.m -text
+parallelPort/goodPins.m -text

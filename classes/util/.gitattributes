@@ -49,3 +49,13 @@
 /fastBin2Dec.m -text
 /makeStandardLUT.m -text
 /chooseLargestResForHzAndDepth.m -text
+parallelPort/lptwrite.mexw32 -text
+parallelPort/pt_ioctl.c -text
+parallelPort/portTest.m -text
+parallelPort/PortTalk_IOCTL.h -text
+parallelPort/lptwrite.c -text
+parallelPort/getLPT1addr.mexw32 -text
+parallelPort/lptread.mexw32 -text
+parallelPort/lptread.c -text
+parallelPort/lptWriteBits.m -text
+parallelPort/getLPT1addr.c -text

@@ -1,7 +1,8 @@
 function setPuff(s,state )
-if ~isempty(s.eyepuffPin)
+if ~isempty(s.eyePuffPins)
     if islogical(state)
-        lptWriteBit(s.parallelPortAddress,s.eyepuffPin,state);
+        state(s.eyePuffPins.invs)=~state(s.eyePuffPins.invs);
+        lptWriteBit(s.eyePuffPins.decAddr,s.eyepuffPins.bitLocs,state);
     else
         error('state must be logical');
     end

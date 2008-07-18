@@ -9,7 +9,7 @@ function s=station(varargin)
 % stationSpec.rewardMethod        (one of 'localPump','serverPump', or 'localTimed')
 % stationSpec.MACaddress
 % stationSpec.physicalLocation    ([rackID shelf position] -- upperleft is 1,1)
-% stationSpec.portSpec            
+% stationSpec.portSpec
 %   if not using parallel port, a scalar integer number of ports
 %   if using parallel port for responses/rewards, portSpec should be:
 %       portSpec.parallelPortAddress
@@ -44,8 +44,8 @@ s.localPumpInited=false;
 needToInit=false;
 usingPport=false;
 
-    s.ifi=[];
-    s.window=[];
+s.ifi=[];
+s.window=[];
 
 switch nargin
     case 0
@@ -130,12 +130,22 @@ if usingPport
     elseif strcmp(s.responseMethod,'parallelPort') && (length(s.valvePins)==length(s.sensorPins) || isempty(s.valvePins)) && length(s.sensorPins)>0
         s.numPorts=length(s.sensorPins);
         s.sensorPins=assignPins(s.sensorPins,'read',s.decPPortAddr,[]);
+
+        if all(s.sensorPins(1).decAddr==[s.sensorPins.decAddr])
+            sensorRec.decAddr=s.sensorPins(1).decAddr;
+            sensorRec.pinNums=[s.sensorPins.pin];
+            sensorRec.invs=[s.sensorPins.inv];
+            sensorRec.bitLocs=[s.sensorPins.bitLoc];
+            s.sensorPins=sensorRec;
+        else
+            error('sensor pins must all be on the same parallel port register')
+        end
     else
         error('if responseMethod is parallelPort, sensorPins and valvePins must be same length and have at least one element (or valvePins can be empty).  if responseMethod is not parallelPort, sensorPins must be scalar integer >0 that is number of ports.')
     end
 
-    s.valvePins=assignPins(s.valvePins,'write',s.decPPortAddr,[s.sensorPins.pin]);
-    
+    s.valvePins=assignPins(s.valvePins,'write',s.decPPortAddr,s.sensorPins.pinNums);
+
     if all(s.valvePins(1).decAddr==[s.valvePins.decAddr])
         valveRec.decAddr=s.valvePins(1).decAddr;
         valveRec.pinNums=[s.valvePins.pin];
@@ -146,9 +156,29 @@ if usingPport
         error('valve pins must be all on the same parallel port register')
     end
 
-    s.framePulsePins=assignPins(s.framePulsePins,'write',s.decPPortAddr,[[s.sensorPins.pin] s.valvePins.pinNums]);
+    s.framePulsePins=assignPins(s.framePulsePins,'write',s.decPPortAddr,[s.sensorPins.pinNums s.valvePins.pinNums]);
 
-    s.eyePuffPins=assignPins(s.eyePuffPins,'write',s.decPPortAddr,[[s.sensorPins.pin] s.valvePins.pinNums [s.framePulsePins.pin]]);
+    if all(s.framePulsePins(1).decAddr==[s.framePulsePins.decAddr])
+        pulseRec.decAddr=s.framePulsePins(1).decAddr;
+        pulseRec.pinNums=[s.framePulsePins.pin];
+        pulseRec.invs=[s.framePulsePins.inv];
+        pulseRec.bitLocs=[s.framePulsePins.bitLoc];
+        s.framePulsePins=pulseRec;
+    else
+        error('framepulse pins must be all on the same parallel port register')
+    end
+
+    s.eyePuffPins=assignPins(s.eyePuffPins,'write',s.decPPortAddr,[s.sensorPins.pinNums s.valvePins.pinNums s.framePulsePins.pinNums]);
+
+    if all(s.eyePuffPins(1).decAddr==[s.eyePuffPins.decAddr])
+        puffRec.decAddr=s.eyePuffPins(1).decAddr;
+        puffRec.pinNums=[s.eyePuffPins.pin];
+        puffRec.invs=[s.eyePuffPins.inv];
+        puffRec.bitLocs=[s.eyePuffPins.bitLoc];
+        s.eyePuffPins=puffRec;
+    else
+        error('eyepuff pins must be all on the same parallel port register')
+    end
 
 end
 
@@ -230,21 +260,6 @@ if needToInit
 
     s = class(s,'station');
 end
-
-[s.sensorPins.pin]
-[s.sensorPins.decAddr]
-[s.sensorPins.inv]
-[s.sensorPins.bitLoc]
-
-[s.framePulsePins.pin]
-[s.framePulsePins.decAddr]
-[s.framePulsePins.inv]
-[s.framePulsePins.bitLoc]
-
-[s.eyePuffPins.pin]
-[s.eyePuffPins.decAddr]
-[s.eyePuffPins.inv]
-[s.eyePuffPins.bitLoc]
 
 function out=assignPins(pins,dir,baseAddr,dontMatch)
 out=[];

@@ -1,25 +1,26 @@
 function st=initRatrixPorts(mac)
-id='99Z';
-width=1280;
-height=1024;
-path=fullfile('Stations','DefaultStation');
-screenNum=int8(0);
-macAddr=mac;
-macLoc=int8([1 1 1]); % [rackID shelf position]
-st=station(...
-            id,...          %id
-            width,...       %width
-            height,...      %height
-            path,...        %path
-            screenNum,...   %screenNum
-            true,...       %soundOn
-            'localTimed',...%rewardMethod
-            macAddr,...     %MACaddress
-            macLoc,...      %physicalLocation([rackID shelf position] -- upperleft is 1,1)
-... %           int8(3));             %numPorts   %wrong constructor!
-            '0378',...      %parallelPortAddress
-            'parallelPort',...%responseMethod
-            int8([6,7,8]),... %valveOpenCodes
-            int8([4,2,3]),... %portCodes
-            int8(1));       %framePulseCodes
+
+stationSpec.id                                = '99Z';
+stationSpec.path                              = fullfile('Stations','DefaultStation');
+stationSpec.MACaddress                        = mac;
+stationSpec.physicalLocation                  = int8([1 1 1]);
+stationSpec.screenNum                         = int8(0);
+stationSpec.soundOn                           = true;
+stationSpec.rewardMethod                      = 'localTimed';
+stationSpec.portSpec.parallelPortAddress      = '0378';
+stationSpec.portSpec.valvePins                = int8([4,3,2]);
+stationSpec.portSpec.sensorPins               = int8([13,10,12]);
+stationSpec.portSpec.framePulsePins           = int8(9);
+stationSpec.portSpec.eyePuffPins              = int8(6);
+
+if ismac
+    stationSpec.portSpec = int8(3);
+elseif ispc
+    %do nothing
+else
+    error('unknown OS')
+end
+
+st=station(stationSpec);
+
 currentValveStates=verifyValvesClosed(st)

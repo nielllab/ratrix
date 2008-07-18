@@ -58,7 +58,6 @@ try
             tries=0;
             % Update system time upon reconnect
             fixSystemTime;
-            setRes;
             clearTemporaryFiles(r);
             
             quit=false;

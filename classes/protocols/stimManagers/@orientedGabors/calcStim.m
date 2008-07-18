@@ -1,6 +1,9 @@
-function [stimulus updateSM out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance isCorrection] = calcStim(stimulus,trialManagerClass,frameRate,responsePorts,totalPorts,width,height,trialRecords)
-updateSM=0;
-isCorrection=0;
+function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text] =...
+    calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
+% see ratrixPath\documentation\stimManager.calcStim.txt for argument specification (applies to calcStims of all stimManagers)
+
+[LUT stimulus updateSM]=getLUT(stimulus,LUTbits);
+[resolutionIndex height width]=chooseLargestResForHzAndDepth(resolutions,[60 100],32);
 
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);
@@ -23,50 +26,13 @@ switch trialManagerClass
     case 'nAFC'
         type='trigger';
 
-        %edf: 11.25.06: copied correction trial logic from hack addition to cuedGoToFeatureWithTwoFlank
-        %edf: 11.15.06 realized we didn't have correction trials!
-        %changing below...
-
         details.pctCorrectionTrials=.5; % need to change this to be passed in from trial manager
-
         if ~isempty(trialRecords)
-            lastResponse=find(trialRecords(end).response);
-            lastCorrect=trialRecords(end).correct;
-            if any(strcmp(fields(trialRecords(end).stimDetails),'correctionTrial'))
-                lastWasCorrection=trialRecords(end).stimDetails.correctionTrial;
-            else
-                lastWasCorrection=0;
-            end
-            if length(lastResponse)>1
-                lastResponse=lastResponse(1);
-            end
+            lastRec=trialRecords(end);
         else
-            lastResponse=[];
-            lastCorrect=[];
-            lastWasCorrection=0;
+            lastRec=[];
         end
-
-        %note that this implementation will not show the exact same
-        %stimulus for a correction trial, but just have the same side
-        %correct.  may want to change...
-        if ~isempty(lastCorrect) && ~isempty(lastResponse) && ~lastCorrect && (lastWasCorrection || rand<details.pctCorrectionTrials)
-            details.correctionTrial=1;
-            'correction trial!'
-            targetPorts=trialRecords(end).targetPorts;
-            isCorrection=1;
-        else
-            details.correctionTrial=0;
-            targetPorts=responsePorts(ceil(rand*length(responsePorts)));
-        end
-
-
-        distractorPorts=setdiff(responsePorts,targetPorts);
-        targetPorts
-
-        %edf: 11.25.06: original:
-        %targetPorts=responsePorts(ceil(rand*length(responsePorts)));
-        %distractorPorts=setdiff(responsePorts,targetPorts);
-
+        [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts);
     otherwise
         error('unknown trial manager class')
 end
@@ -93,13 +59,14 @@ xPosPcts = [linspace(0,1,totalPorts+2)]';
 xPosPcts = xPosPcts(2:end-1);
 details.xPosPcts = xPosPcts([targetPorts'; distractorLocs']);
 
-
 params = [repmat([stimulus.radius details.pixPerCyc],numGabors,1) details.phases details.orientations repmat([stimulus.contrast stimulus.thresh],numGabors,1) details.xPosPcts repmat([stimulus.yPosPct],numGabors,1)];
 out(:,:,1)=computeGabors(params,stimulus.mean,min(width,getMaxWidth(stimulus)),min(height,getMaxHeight(stimulus)),stimulus.waveform, stimulus.normalizedSizeMethod,0);
-
-%EDF: 02.08.07 -- i think this is only supposed to be for nafc but not sure...
-%was causing free drinks stim to only show up for first frame...
-if strcmp(trialManagerClass,'nAFC')%pmm also suggests this:  && strcmp(type,'trigger')
+if strcmp(type,'trigger')
     out(:,:,2)=stimulus.mean;
 end
-LUT=getLUT(stimulus);
+
+if details.correctionTrial;
+    text='correction trial!';
+else
+    text=sprintf('pixPerCyc: %g',details.pixPerCyc);
+end

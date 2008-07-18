@@ -1,13 +1,28 @@
 function s=station(varargin)
 % STATION  class constructor.
-% s = station(id,width,height,path,screenNum,,soundOn,rewardMethod,MACaddress,physicalLocation([rackID shelf position] -- upperleft is 1,1),numPorts)
-% if using parallel port for responses/rewards, replace 'numports' above with arguments: (parallelPortAddress,responseMethod,valvePins,sensorPins,framePulsePins,eyePuffPins)
-% if set rewardMethod to 'localPump', valvePins should be
-% {int8([valvePins]),localPump object}
+% s = station(stationSpec)
+%
+% stationSpec.id
+% stationSpec.path
+% stationSpec.screenNum
+% stationSpec.soundOn
+% stationSpec.rewardMethod        (one of 'localPump','serverPump', or 'localTimed')
+% stationSpec.MACaddress
+% stationSpec.physicalLocation    ([rackID shelf position] -- upperleft is 1,1)
+% stationSpec.portSpec            
+%   if not using parallel port, a scalar integer number of ports
+%   if using parallel port for responses/rewards, portSpec should be:
+%       portSpec.parallelPortAddress
+%       portSpec.valveSpec
+%           if stationSpec.rewardMethod in {'serverPump' 'localTimed'} an integer vector of valvePins,
+%           if stationSpec.rewardMethod=='localPump', valveSpec should be:
+%               valveSpec.valvePins
+%               valveSpec.pumpObject
+%       portSpec.sensorPins
+%       portSpec.framePulsePins
+%       portSpec.eyePuffPins
 
 s.id=0;
-s.width=0;
-s.height=0;
 s.path='';
 s.screenNum=0;
 s.soundOn=0;
@@ -16,14 +31,7 @@ s.MACaddress='';
 s.physicalLocation=[];
 s.numPorts=0;
 
-%s.parallelPortAddress='';
 s.responseMethod='';
-%s.valveOpenCodes=[];
-%s.portCodes=[];
-%s.framePulseCodes=[];
-%s.eyepuffPin=[];
-
-%new fast way
 s.decPPortAddr='';
 s.valvePins=[];
 s.sensorPins=[];
@@ -36,78 +44,73 @@ s.localPumpInited=false;
 needToInit=false;
 usingPport=false;
 
-
+    s.ifi=[];
+    s.window=[];
 
 switch nargin
     case 0
         % if no input arguments, create a default object
-
         s = class(s,'station');
     case 1
         % if single argument of this class type, return it
-        if (isa(varargin{1},'station'))
+        if isa(varargin{1},'station')
             s = varargin{1};
+        elseif isstruct(varargin{1}) && all(ismember({'id','path','screenNum','soundOn','rewardMethod','MACaddress','physicalLocation','portSpec'},fields(varargin{1})))
+            in=varargin{1};
+            if isscalar(in.portSpec) && isinteger(in.portSpec)&& in.portSpec>0 %no parallel port
+                s.responseMethod='keyboard';
+                s.numPorts=in.portSpec;
+                needToInit=true;
+            elseif isstruct(in.portSpec) && all(ismember({'parallelPortAddress','valveSpec','sensorPins','framePulsePins','eyePuffPins'},fields(in.portSpec))) %with parallel port
+                s.responseMethod='parallelPort';
+                s.decPPortAddr=hex2dec(in.portSpec.parallelPortAddress);
+
+                if isstruct(in.portSpec.valveSpec) && all(ismember({'valvePins','pumpObject'},fileds(in.portSpec.valveSpec))) && ((isvector(in.portSpec.valveSpec.valvePins) && isinteger(in.portSpec.valveSpec.valvePins)) || isempty(in.portSpec.valveSpec.valvePins)) && isa(in.portSpec.valveSpec.pumpObject,'localPump')
+                    s.valvePins=in.portSpec.valveSpec.valvePins;
+                    s.localPump=in.portSpec.valveSpec.pumpObject;
+                elseif (isvector(in.portSpec.valveSpec) && isinteger(in.portSpec.valveSpec)) || isempty(in.portSpec.valveSpec)
+                    s.valvePins=in.portSpec.valveSpec;
+                else
+                    error('valveSpec must be vector of integers or struct with fields valvePins (vector of integers) and pumpObject (a localPump object)')
+                end
+
+                if isvector(in.portSpec.sensorPins) && isinteger(in.portSpec.sensorPins)
+                    s.sensorPins=in.portSpec.sensorPins;
+                else
+                    error('sensorPins must be vector of integers')
+                end
+
+                if isvector(in.portSpec.framePulsePins) && isinteger(in.portSpec.framePulsePins)
+                    s.framePulsePins=in.portSpec.framePulsePins;
+                else
+                    error('framePulsePins must be vector of integers')
+                end
+
+                if isvector(in.portSpec.eyePuffPins) && isinteger(in.portSpec.eyePuffPins)
+                    s.eyePuffPins=in.portSpec.eyePuffPins;
+                else
+                    error('eyePuffPins must be vector of integers')
+                end
+
+                usingPport=true;
+                needToInit=true;
+
+            else
+                in.portSpec
+                class(in.portSpec)
+                if isstruct(in.portSpec)
+                    fields(in.portSpec)
+                end
+                error('portSpec must be scalar integer >0 or a parallel port struct')
+            end
         else
-            error('Input argument is not a station object')
+            error('Input argument is not a station object or struct')
         end
-
-    case 10 %no parallel port
-        s.responseMethod='keyboard';
-        s.numPorts=varargin{10};
-
-        if isinteger(s.numPorts) && isscalar(s.numPorts) && s.numPorts>0
-            %pass
-        else
-            error('numPorts must be scalar integer >0')
-        end
-
-        needToInit=true;
-
-    case 15 %with parallel port
-        s.decPPortAddr=hex2dec(varargin{10});
-        s.responseMethod=varargin{11};
-
-        if iscell(varargin{12}) && isvector(varargin{12}) && length(varargin{12})==2 && ((isvector(varargin{12}{1}) && isinteger(varargin{12}{1})) || isempty(varargin{12}{1}))
-            s.valvePins=varargin{12}{1};
-            s.localPump=varargin{12}{2};
-        elseif (isvector(varargin{12}) && isinteger(varargin{12})) || isempty(varargin{12})
-            s.valvePins=varargin{12};
-        else
-            error('valvePins malformed')
-        end
-
-        if isvector(varargin{13}) && isinteger(varargin{13})
-            s.sensorPins=varargin{13};
-        else
-            error('sensorPins must be vector of integers')
-        end
-
-        if isvector(varargin{14}) && isinteger(varargin{14})
-            s.framePulsePins=varargin{14};
-        else
-            error('framePulsePins must be vector of integers')
-        end
-
-        if isvector(varargin{15}) && isinteger(varargin{15})
-            s.eyePuffPins=varargin{15};
-        else
-            error('eyePuffPins must be vector of integers')
-        end
-
-        usingPport=true;
-        needToInit=true;
-
     otherwise
         error('Wrong number of input arguments')
 end
 
 if usingPport
-    if strcmp(s.responseMethod,'keyboard') || strcmp(s.responseMethod,'parallelPort')
-        %pass
-    else
-        error('responseMethod must be keyboard or parallelPort')
-    end
-
     if ismember(s.decPPortAddr,hex2dec({'B888','0378','FFF8'}))
         %pass
     else
@@ -132,27 +135,35 @@ if usingPport
     end
 
     s.valvePins=assignPins(s.valvePins,'write',s.decPPortAddr,[s.sensorPins.pin]);
+    
+    if all(s.valvePins(1).decAddr==[s.valvePins.decAddr])
+        valveRec.decAddr=s.valvePins(1).decAddr;
+        valveRec.pinNums=[s.valvePins.pin];
+        valveRec.invs=[s.valvePins.inv];
+        valveRec.bitLocs=[s.valvePins.bitLoc];
+        s.valvePins=valveRec;
+    else
+        error('valve pins must be all on the same parallel port register')
+    end
 
-    s.framePulsePins=assignPins(s.framePulsePins,'write',s.decPPortAddr,[[s.sensorPins.pin] [s.valvePins.pin]]);
+    s.framePulsePins=assignPins(s.framePulsePins,'write',s.decPPortAddr,[[s.sensorPins.pin] s.valvePins.pinNums]);
 
-    s.eyePuffPins=assignPins(s.eyePuffPins,'write',s.decPPortAddr,[[s.sensorPins.pin] [s.valvePins.pin] [s.framePulsePins.pin]]);
+    s.eyePuffPins=assignPins(s.eyePuffPins,'write',s.decPPortAddr,[[s.sensorPins.pin] s.valvePins.pinNums [s.framePulsePins.pin]]);
 
 end
 
 if needToInit
-    s.id=varargin{1};
-    s.width=varargin{2};
-    s.height=varargin{3};
-    s.path=varargin{4};
-    s.screenNum=varargin{5};
-    s.soundOn=varargin{6};
-    s.rewardMethod=varargin{7};
-    s.MACaddress=varargin{8};
-    s.physicalLocation=varargin{9};
+    s.id=in.id;
+    s.path=in.path;
+    s.screenNum=in.screenNum;
+    s.soundOn=in.soundOn;
+    s.rewardMethod=in.rewardMethod;
+    s.MACaddress=in.MACaddress;
+    s.physicalLocation=in.physicalLocation;
 
-    if strcmp(class(s.id),'char') 
+    if strcmp(class(s.id),'char')
         parse = textscan(s.id, '%d%s','expChars','');
-        if iscell(parse) && all(size(parse)==[1 2]) && ~isempty(parse{1}) && ~isempty(parse{2}) 
+        if iscell(parse) && all(size(parse)==[1 2]) && ~isempty(parse{1}) && ~isempty(parse{2})
             %pass
         else
             s.id
@@ -163,12 +174,6 @@ if needToInit
         class(s.id)
         s.id
         error('id must be a string of format <rack num><rack letter>, example ''2C''')
-    end
-
-    if s.width>0 && s.height>0
-        %pass
-    else
-        error('width and height must be greater than zero')
     end
 
     if checkPath(s.path)
@@ -226,11 +231,6 @@ if needToInit
     s = class(s,'station');
 end
 
-[s.valvePins.pin]
-[s.valvePins.decAddr]
-[s.valvePins.inv]
-[s.valvePins.bitLoc]
-
 [s.sensorPins.pin]
 [s.sensorPins.decAddr]
 [s.sensorPins.inv]
@@ -262,7 +262,7 @@ if all(goodPins(checks)) && length(unique(pins))==length(pins)
             out(cNum).pin=pins(cNum);
             out(cNum).decAddr=baseAddr+double(spec(2));
             out(cNum).bitLoc=spec(1);
-            out(cNum).inv=spec(3);
+            out(cNum).inv=logical(spec(3));
         else
             error('pin not available for that dir')
         end

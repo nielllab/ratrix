@@ -1,11 +1,11 @@
-function [valves status valveCodes] =getValves(s)
+function valves =getValves(s)
 if strcmp(s.responseMethod,'parallelPort')
 
-    status=dec2bin(lptread(hex2dec(s.parallelPortAddress)),8); 
+    status=dec2bin(lptread(s.valvePins.decAddr),8);
 
-    valves=status(s.valveOpenCodes)=='1'; %need to set parity in station, assumes NC valves
-    valveCodes=s.valveOpenCodes;
+    valves=status(s.valvePins.bitLocs)=='1'; %need to set parity in station, assumes normally closed valves
+    valves(s.valvePins.invs)=~valves(s.valvePins.invs);
 else
     warning('can''t read ports without parallel port')
-    valves=zeros*s.valveOpenCodes;
+    valves=zeros*s.valvePins.bitLocs;
 end

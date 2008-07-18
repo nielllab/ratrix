@@ -2,7 +2,7 @@ function t=nAFC(varargin)
 % NAFC  class constructor.
 % t=nAFC(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,soundManager,...
 %                requestRewardSizeULorMS,percentCorrectionTrials,msResponseTimeLimit,pokeToRequestStim,...
-%                maintainPokeToMaintainStim,msMaximumStimPresentationDuration,maximumNumberStimPresentations,doMask, rewardManager,eyeTracker,eyeController)
+%                maintainPokeToMaintainStim,msMaximumStimPresentationDuration,maximumNumberStimPresentations,doMask, rewardManager, [eyeTracker,eyeController])
 % msResponseTimeLimit=0 means unlimited response time
 % msMaximumStimPresentationDuration=0 means unlimited stim presentation duration
 % maximumNumberStimPresentations=0 means unlimited presentations
@@ -30,7 +30,7 @@ switch nargin
         else
             error('Input argument is not a nAFC object')
         end
-    case 15
+    case {13 15}
 
 
 
@@ -114,7 +114,14 @@ switch nargin
             t.pokeToRequestStim,t.maintainPokeToMaintainStim,maxStimPresDurStr,...
             maxNumStimPresStr,t.doMask);
 
-        a=trialManager(varargin{1},varargin{2},varargin{3},varargin{4},varargin{13},varargin{14},varargin{15},d);
+        if nargin==13
+            a=trialManager(varargin{1},varargin{2},varargin{3},varargin{4},varargin{13},d);
+        elseif nargin==15
+            a=trialManager(varargin{1},varargin{2},varargin{3},varargin{4},varargin{13},varargin{14},varargin{15},d);
+        else
+            error('should never happen')
+        end
+        
         t = class(t,'nAFC',a);
         
     otherwise

@@ -1,6 +1,6 @@
 function [quit response responseDetails didManual manual didAPause didValves didHumanResponse didStochasticResponse eyeData gaze station]=  stimOGL(tm, ...
-    stim, audioStim, LUT, type, metaPixelSize, window, ifi, ...
-    responseOptions, requestOptions, finalScreenLuminance, station, manual,allowQPM,timingCheckPct,noPulses,isCorrection,rn,subID,stimID,eyeTracker,doAirpuff)
+    stim, audioStim, LUT, type, metaPixelSize, ...
+    responseOptions, requestOptions, finalScreenLuminance, station, manual,allowQPM,timingCheckPct,noPulses,textLabel,rn,subID,stimID,protocolStr,sessionNumber,trialInd,eyeTracker,doAirpuff)
 
 %note: add a phase which is a movie during which the rat must lick the
 %center port to earn n more frames of movie, and the movie has to end in
@@ -181,6 +181,8 @@ function [quit response responseDetails didManual manual didAPause didValves did
 
 %logwrite('entered stimOGL');
 
+window=getPTBWindow(station);
+ifi=getIFI(station);
 
 if window<0
     error('window must be >=0')
@@ -735,13 +737,18 @@ try
                     %junkSize = Screen('TextSize',window,subjectFontSize);
                     [garbage,yTextPosUnused] = Screen('DrawText',window,['ID:' subID ],xSubjectTextPos,yTextPos,100*ones(1,3));
                     %junkSize = Screen('TextSize',window,standardFontSize);
-                    [garbage,yNewTextPos] = Screen('DrawText',window,['trialManager:' class(tm) ' stimManager:' stimID],xTextPos,yNewTextPos,100*ones(1,3));
+                    [garbage,yNewTextPos] = Screen('DrawText',window,['protocol:' protocolStr ' trialManager:' class(tm) ' stimManager:' stimID],xTextPos,yNewTextPos,100*ones(1,3));
                 end
                 [normBoundsRect, offsetBoundsRect]= Screen('TextBounds', window, 'TEST');
                 yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
 
                 if labelFrames
-                    [garbage,yNewTextPos] = Screen('DrawText',window,['priority:' num2str(Priority()) ' stim ind:' num2str(i) ' frame ind:' num2str(frameNum) ' isCorrection:' num2str(isCorrection)],xTextPos,yNewTextPos,100*ones(1,3));
+                    if iscell(textLabel)
+                        txtLabel=textLabel{i};
+                    else
+                        txtLabel=textLabel;
+                    end
+                    [garbage,yNewTextPos] = Screen('DrawText',window,['priority:' num2str(Priority()) ' session:' num2str(sessionNumber) ' trial:' num2str(trialInd) ' stim ind:' num2str(i) ' frame ind:' num2str(frameNum) ' calcStim:' txtLabel],xTextPos,yNewTextPos,100*ones(1,3));
                     yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
                 end
 

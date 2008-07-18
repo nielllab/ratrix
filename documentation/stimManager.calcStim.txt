@@ -6,26 +6,28 @@
 % INPUTS
 %   stimulus            this images stimManager object (contains your custom state)
 %   trialManagerClass   the trialManager class for the running training step
-%   frameRate           the detected refresh rate of the running monitor (in hz)
+%   resolutions         struct array of available resolutions
+%   displaySize         physical dimensions of the display in mm (see discusion in help for screen('displaysize'))
+%   LUTbits             number of bits in the color look up (gamma/linearization) table
 %   responsePorts       vector of available response port indices on the running station (determined by trial manager)
 %   totalPorts          total number of available ports on this station (useful for positioning stimuli)
-%   width               pixel width of this station (currently hardcoded in station constructor, future design is to ask calcStim to choose from available resolutions)
-%   height              pixel height of this staiton (see above)
 %   trialRecords        a struct array of trialRecords from previous trials (all trials from this session included)
 %                       on Nth trial of this session, M-N+1 trials from previous sessions are included
 %                       M currently hardcoded in station.doTrials to 100
 % OUTPUTS
 %   stimulus            this images stimManager object
 %   updateSM            boolean flag indicating whether you've changed state (field values) in this object that you'd like to persist for future reference
+%   resolutionIndex     index from the resolutions input that you want to set
 %   out                 monochrome stimulus frames.  logical, real (0<=x<=1) [double single], or [uint8 uint16].  2 or 3 dimensional array (y,x,frame)
 %                       uint8 values will be mapped to 8-bit clut indices
 %                       uint16 are converted to singles and treated as float
 %                       float (double, single) values will be processed at 16 bits until finally rendered through a potentially higher dynamic range clut
 %   LUT                 the color look up (gamma/linearization) table to pass to the gfx card
-%                       n X 3 array, 0<=x<=1, n is system dependent, but typically 256 (future design: pass in n=reallutsize from screen('ReadNormalizedGammaTable'))
+%                       n X 3 array, 0<=x<=1, n is system dependent, but typically 256 (n=dacbits=log2(reallutsize) from screen('ReadNormalizedGammaTable'))
 %                       on windows, table subject to unpublished constraints vaguely resembling monotonic increasing
 %   scaleFactor         (potentially non-integer) factors by which to scale stim when mapping onto pixels
 %                       [height width]>0, special case scalar zero means scale to full screen
+%                       scaleFactor.*[y x] (dimensions of out array) must not exceed the resolution you specify
 %   type                see below
 %   targetPorts         vector subset of responsePorts that will count as correct responses 
 %   distractorPorts     vector subset of responsePorts (disjoint with targetPorts) that will count as incorrect responses (remainder will be dead ports)
@@ -36,7 +38,7 @@
 %                       full field luminance at this value will be shown until the first request
 %                       also held after this trial ends until the beginning of the next trial
 %                       if requestPorts (determined by the trialManager) is empty, the stimulus you provide (out) starts immediately
-%   isCorrection        boolean flag indicating whether this is a correction trial
+%   text                message to add to text label on each frame (can be single string or cell vector of length numFrames)
 %
 % values for 'type,' their semantics, and restrictions 
 % note that these options grew organically as they were needed scientifically

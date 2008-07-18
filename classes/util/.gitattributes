@@ -41,9 +41,11 @@
 /isDirRemote.m -text
 /fixSystemTime.m -text
 /isNearInteger.m -text
-/setRes.m -text
 /getRackIDFromIP.m -text
 /updatePsychtoolboxIfNecessary.m -text
 /assignPorts.m -text
 /createSubjectsFromDB.m -text
 /checkTargetRevision.m -text
+/fastBin2Dec.m -text
+/makeStandardLUT.m -text
+/chooseLargestResForHzAndDepth.m -text

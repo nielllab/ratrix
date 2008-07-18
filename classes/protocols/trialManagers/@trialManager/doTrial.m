@@ -1,4 +1,4 @@
-function [trialManager updateTM newSM updateSM stopEarly trialRecords station]=doTrial(trialManager,station,stimManager,subject,r,window,ifi,rn,trialRecords,sessionNumber)
+function [trialManager updateTM newSM updateSM stopEarly trialRecords station]=doTrial(trialManager,station,stimManager,subject,r,rn,trialRecords,sessionNumber)
 verbose=1;
 updateTM=false;
 stopEarly=0;
@@ -10,11 +10,12 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             constants = getConstants(rn);
         end
 
-        %if isempty(trialRecords)
-        trialRecords = getTrialRecordsForSubjectID(r,getID(subject));
-        %end
-        trialRecords
-        class(trialRecords)
+        %         %if isempty(trialRecords)
+        %         trialRecords = getTrialRecordsForSubjectID(r,getID(subject));
+        %         %end
+        %         trialRecords
+        %         class(trialRecords)
+
         trialInd=length(trialRecords)+1;
         [p t]=getProtocolAndStep(subject);
         ts = getTrainingStep(p,t);
@@ -23,60 +24,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
         if trialInd>1
             trialRecords(trialInd).trialNumber=trialRecords(trialInd-1).trialNumber+1;
         else
-            permanentStore=fullfile('\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\ratrixAdmin\test\subjects\',getID(subject));
-            [succ msg msgid]=mkdir(permanentStore);
-            if ~succ
-                msg
-                msgid
-                permanentStore
-                error('couldn''t access permanent store')
-            end
-            historyFiles=dir(permanentStore);
-            verifiedHistoryFiles={};
-            ranges=[];
-            if length(historyFiles)>0
-                for i=1:length(historyFiles)
-                    if ~ismember(historyFiles(i).name,{'..','.'})
-                        [rng num er]=sscanf(historyFiles(i).name,'trialRecords.%d-%d.mat',2);
-                        if num~=2
-                            historyFiles(i).name
-                            er
-                        else
-                            verifiedHistoryFiles{end+1}=fullfile(permanentStore,historyFiles(i).name);
-                            ranges(:,end+1)=rng;
-                        end
-                    end
-                end
-            else
-                error('couldn''t dir permanent store but could mkdir it')
-            end
-
-            verifiedHistoryFiles
-            if ~isempty(verifiedHistoryFiles)
-                [sorted order]=sort(ranges(1,:));
-                ranges=ranges(:,order);
-                for i=1:size(ranges,2)
-                    if i==1
-                        if ranges(1,i)~=1
-                            ranges
-                            error('first verifiedHistoryFile doesn''t start at 1')
-                        end
-                    else
-                        if ranges(1,i)~=ranges(2,i-1)+1
-                            ranges
-                            error('ranges don''t follow consecutively')
-                        end
-                    end
-                end
-                if max(ranges(:)) ~= ranges(2,end)
-                    ranges
-                    error('didn''t find max at bottom right corner of ranges')
-                else
-                    trialRecords(trialInd).trialNumber=ranges(2,end)+1;
-                end
-            else
-                trialRecords(trialInd).trialNumber=1;
-            end
+            trialRecords(trialInd).trialNumber=1;
         end
 
 
@@ -86,7 +34,6 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             trialRecords(trialInd).sessionNumber = sessionNumber;
             trialRecords(trialInd).date = datevec(now);
             trialRecords(trialInd).box = struct(getBoxFromID(r,getBoxIDForSubjectID(r,getID(subject))));
-            trialRecords(trialInd).station = struct(station);
             trialRecords(trialInd).protocolName = getName(p);
             trialRecords(trialInd).trainingStepNum = t;
             trialRecords(trialInd).numStepsInProtocol = getNumTrainingSteps(p);
@@ -131,36 +78,39 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             trialRecords(trialInd).schedulerClass = class(trialRecords(trialInd).scheduler);
             trialRecords(trialInd).criterionClass = class(trialRecords(trialInd).criterion);
 
+            resolutions=getResolutions(station);
+            
             [newSM, ...
                 updateSM, ...
-                stim, ...                %trialRecords(trialInd).stim, ...
-                LUT, ...
+                resInd, ...
+                stim, ...           %not recorded in trial record
+                LUT, ...            %not recorded in trial record
                 trialRecords(trialInd).scaleFactor, ...
                 trialRecords(trialInd).type, ...
                 trialRecords(trialInd).targetPorts, ...
                 trialRecords(trialInd).distractorPorts, ...
                 stimulusDetails, ...
                 trialRecords(trialInd).interTrialLuminance, ...
-                isCorrection]= ...
+                text]= ...
                 calcStim(stimManager, ...
                 class(trialManager), ...
-                1/ifi, ...
+                resolutions, ...
+                getDisplaySize(station), ...
+                getLUTbits(station), ...
                 getResponsePorts(trialManager,getNumPorts(station)), ...
                 getNumPorts(station), ...
-                getWidth(station), ...
-                getHeight(station), ...
                 trialRecords(1:end-1));
-            
-            audioStimulus = [];
-            if ismethod(newSM,'getAudioStimulus');
-                audioStim = getAudioStimulus(newSM);
-                if ~isempty(audioStim)
-                    audioStimulus=getName(audioStim);
-                    % Add/replace the stimulus sound clip to the list of clips in
-                    % the sound manager
-                    trialManager.soundMgr = addSound(trialManager.soundMgr,audioStim);
+
+            if isvector(text)
+                if ~((iscell(text) && length(text)==size(stim,3) && all(cellfun(@ischar,text))) || ischar(text))
+                    error('frame label must be cell vector with same length as size(stim,3), or a char vector')
                 end
+            else
+                error('frame label must be vector')
             end
+            
+            [station trialRecords(trialInd).resolution]=setResolution(station,resolutions(resInd));
+            trialRecords(trialInd).station = struct(station); %wait til now to record, so we get an updated ifi measurement in the station object
 
             if (isempty(trialRecords(trialInd).targetPorts) || isvector(trialRecords(trialInd).targetPorts))...
                     && (isempty(trialRecords(trialInd).distractorPorts) || isvector(trialRecords(trialInd).distractorPorts))
@@ -171,7 +121,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                     error('targetPorts and distractorPorts must be disjoint, contain no duplicates, and subsets of responsePorts')
                 end
             else
-                trialRecords(trialInd).targetPorts 
+                trialRecords(trialInd).targetPorts
                 trialRecords(trialInd).distractorPorts
                 error('targetPorts and distractorPorts must be row vectors')
             end
@@ -233,55 +183,48 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
 
             currentValveStates=verifyValvesClosed(station);
 
+            pStr=[trialRecords(trialInd).protocolName '(' num2str(trialRecords(trialInd).protocolVersion.manualVersion) ':' num2str(trialRecords(trialInd).protocolVersion.autoVersion) ')' ' step:' num2str(trialRecords(trialInd).trainingStepNum) '/' num2str(trialRecords(trialInd).numStepsInProtocol) ];
 
+            [stopEarly trialRecords(trialInd).response,...
+                trialRecords(trialInd).responseDetails,...
+                trialRecords(trialInd).containedManualPokes,...
+                trialRecords(trialInd).leftWithManualPokingOn,...
+                trialRecords(trialInd).containedAPause,...
+                trialRecords(trialInd).containedForcedRewards, ... %pmm added 4/3/08
+                trialRecords(trialInd).didHumanResponse, ... %pmm added 4/18/08
+                trialRecords(trialInd).didStochasticResponse,...
+                eyeData,...
+                gaze,...
+                station]= ...
+                stimOGL( ...
+                trialManager, ...
+                stim, ...
+                audioStimulus, ...
+                LUT, ...
+                trialRecords(trialInd).type, ...    % 'loop', ... %trialRecords(trialInd).type, ...
+                trialRecords(trialInd).scaleFactor, ...
+                union(trialRecords(trialInd).targetPorts, trialRecords(trialInd).distractorPorts), ...
+                getRequestPorts(trialManager, getNumPorts(station)), ...
+                trialRecords(trialInd).interTrialLuminance, ...
+                station, ...
+                manualOn, ...
+                1, ...
+                .1, ... % 10% should be ~1 ms of acceptable frametime error
+                0,text,rn,getID(subject),trialRecords(trialInd).stimManagerClass,pStr,sessionNumber,trialInd,eyeTracker,false);
 
-            if window>=0 && ifi>0
-                [stopEarly trialRecords(trialInd).response,...
-                    trialRecords(trialInd).responseDetails,...
-                    trialRecords(trialInd).containedManualPokes,...
-                    trialRecords(trialInd).leftWithManualPokingOn,...
-                    trialRecords(trialInd).containedAPause,...
-                    trialRecords(trialInd).containedForcedRewards, ... %pmm added 4/3/08
-                    trialRecords(trialInd).didHumanResponse, ... %pmm added 4/18/08
-                    trialRecords(trialInd).didStochasticResponse,...
-                    eyeData,...
-                    gaze,...
-                    station]= ...
-                    stimOGL( ...
-                    trialManager, ...
-                    stim, ...
-                    audioStimulus, ...
-                    LUT, ...
-                    trialRecords(trialInd).type, ...    % 'loop', ... %trialRecords(trialInd).type, ...
-                    trialRecords(trialInd).scaleFactor, ...
-                    window, ...
-                    ifi, ...
-                    union(trialRecords(trialInd).targetPorts, trialRecords(trialInd).distractorPorts), ...
-                    getRequestPorts(trialManager, getNumPorts(station)), ...
-                    trialRecords(trialInd).interTrialLuminance, ...
-                    station, ...
-                    manualOn, ...
-                    1, ...
-                    .1, ... % 10% should be ~1 ms of acceptable frametime error
-                    0,isCorrection,rn,getID(subject),trialRecords(trialInd).stimManagerClass,eyeTracker,false);
-
-                
-                
-                if ~isempty(eyeTracker)
-                    [junk junk eyeDataVarNames]=getSample(eyeTracker); %throws out a sample in order to get variable names... dirty
-                    saveEyeData(eyeTracker,eyeData,eyeDataVarNames,gaze,trialRecords(trialInd).trialNumber)
-                end
-
-
-                if stopEarly
-                    'got stopEarly 1'
-                end
-
-                currentValveStates=verifyValvesClosed(station);
-
-            else
-                error('bad window or ifi')
+            if ~isempty(eyeTracker)
+                [junk junk eyeDataVarNames]=getSample(eyeTracker); %throws out a sample in order to get variable names... dirty
+                saveEyeData(eyeTracker,eyeData,eyeDataVarNames,gaze,trialRecords(trialInd).trialNumber)
             end
+
+
+            if stopEarly
+                'got stopEarly 1'
+            end
+
+            currentValveStates=verifyValvesClosed(station);
+
+
 
             resp=find(trialRecords(trialInd).response);
             if ~ischar(trialRecords(trialInd).response) && length(resp)==1
@@ -321,11 +264,11 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                     switch getRewardMethod(station)
 
                         case 'localPump'
-                        
-                             valveStart=GetSecs();
+
+                            valveStart=GetSecs();
                             station=doReward(station,trialManager.rewardSizeULorMS/1000,rewardValves);
                             trialRecords(trialInd).actualRewardDuration = GetSecs()-valveStart;
-                            
+
                         case 'localTimed'
                             trialManager.soundMgr=playSound(trialManager.soundMgr,'correctSound',msRewardSound/1000.0,station);
 
@@ -454,7 +397,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
 
                 elseif ~ischar(trialRecords(trialInd).response)
                     trialManager.soundMgr=playSound(trialManager.soundMgr,'wrongSound',msPenaltySound/1000,station);
-                    numErrorFrames=ceil((msPenalty/1000)/ifi);
+                    numErrorFrames=ceil((msPenalty/1000)/getIFI(station));
                     [errStim errorScale] = errorStim(stimManager,numErrorFrames);
                     errAudioStim = [];
 
@@ -477,12 +420,10 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                         LUT, ...
                         'cache', ...
                         errorScale, ...
-                        window, ...
-                        ifi, ...
                         [], ...
                         [], ...
                         trialRecords(trialInd).interTrialLuminance, ...
-                        station,0,0,.5,1,0,rn,getID(subject),trialRecords(trialInd).stimManagerClass,eyeTracker,hasAirpuff(station));
+                        station,0,0,.5,1,'incorrect',rn,getID(subject),trialRecords(trialInd).stimManagerClass,pStr,sessionNumber,trialInd,eyeTracker,hasAirpuff(station));
 
                     trialRecords(trialInd).errorRecords=errorRecords(trialInd);
 

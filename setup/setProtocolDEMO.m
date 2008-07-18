@@ -62,14 +62,14 @@ distractorOrientations=[0];
 discrimStim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 
-imageDir='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\PriyaV\other stimuli sets\paintbrushMORPHflashlightEDF';
+imageDir='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\PriyaV\other stimuli sets\paintbrush_flashlight';%'\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\PriyaV\other stimuli sets\paintbrushMORPHflashlightEDF';
 background=0;
 ypos=0;
 ims=dir(fullfile(imageDir,'*.png'));
 trialDistribution={};
 for i=1:floor(length(ims)/2)
     [junk n1 junk junk]=fileparts(ims(i).name);
-    [junk n2 junk junk]=fileparts(ims(length(ims)-(i+1)).name);
+    [junk n2 junk junk]=fileparts(ims(length(ims)-(i-1)).name);
     trialDistribution{end+1}={{n1 n2} 1};
 end
 imageStim = images(imageDir,ypos,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,trialDistribution);
@@ -81,7 +81,7 @@ ts4 = trainingStep(vh, discrimStim, repeatIndefinitely(), noTimeOff());%orientat
 ts5 = trainingStep(vh, imageStim,  repeatIndefinitely(), noTimeOff());%morph discrim
 
 p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5});
-stepNum=5;
+stepNum=4;
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

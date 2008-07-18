@@ -1,4 +1,4 @@
-function [s updateSM out]=checkImages(s,ind,backgroundcolor, pctScreenFill, normalizeHistograms)
+function [s updateSM out]=checkImages(s,ind,backgroundcolor, pctScreenFill, normalizeHistograms,width,height)
 
 if ~exist('pctScreenFill','var')
     pctScreenFill=0.9;
@@ -15,37 +15,39 @@ else
 end
 
 if false %had to disable cache checking on every trial, cuz of trac issue 98
-%load image data
-[ims alphas names ext n]=validateImages(s);
+    %load image data
+    [ims alphas names ext n]=validateImages(s);
 
-if ~isempty(s.cache)
-    if all(ismember({'ims' 'alphas' 'names' 'ext'},fields(s.cache)))
-        if length(ims)~=length(s.cache.ims)
-            s.cache=[];
-        else
-            for i=1:length(ims)
-                if ~all(ims{i}(:)==s.cache.ims{i}(:)) || ~all(alphas{i}(:)==s.cache.alphas{i}(:)) || ~all(strcmp(s.cache.names{i},names{i})) || ~strcmp(ext,s.cache.ext)
-                    s.cache=[];
+    if ~isempty(s.cache)
+        if all(ismember({'ims' 'alphas' 'names' 'ext'},fields(s.cache)))
+            if length(ims)~=length(s.cache.ims)
+                s.cache=[];
+            else
+                for i=1:length(ims)
+                    if ~all(ims{i}(:)==s.cache.ims{i}(:)) || ~all(alphas{i}(:)==s.cache.alphas{i}(:)) || ~all(strcmp(s.cache.names{i},names{i})) || ~strcmp(ext,s.cache.ext)
+                        s.cache=[];
+                    end
                 end
             end
+        else
+            s.cache=[];
         end
-    else
-        s.cache=[];
     end
-end
 end
 
 updateSM=false;
 if isempty(s.cache) %without the above, we won't see changes to the files once we are created, must regenerate stimManager to refresh cache
     [ims alphas names ext n]=validateImages(s);
-    
+
     s.cache.names = names;
     s.cache.alphas = alphas;
     s.cache.ims = ims;
     s.cache.ext = ext;
 
     %scale images, set in background, normalize areas and histograms
-    [allIms s.cache.deltas]=prepareImages(ims,alphas,[getMaxHeight(s) floor(length(s.cache.names)*getMaxWidth(s)/n)],.95,pctScreenFill, backgroundcolor, normalizeHistograms);
+    width=min(width,getMaxWidth(s));
+    height=min(height,getMaxHeight(s));
+    [allIms s.cache.deltas]=prepareImages(ims,alphas,[height floor(length(s.cache.names)*width/n)],.95,pctScreenFill, backgroundcolor, normalizeHistograms);
 
     imWidth=size(allIms,2)/length(ims);
     for i=1:length(ims)

@@ -1,6 +1,6 @@
 function t=trialManager(varargin)
 % TRIALMANAGER  class constructor.  ABSTRACT CLASS-- DO NOT INSTANTIATE
-% t=trialManager(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,soundManager,reinforcementManager,eyeTracker,eyeController,customDescription)
+% t=trialManager(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,soundManager,reinforcementManager,[eyeTracker,eyeController],customDescription)
 
 requiredSoundNames = {'correctSound','keepGoingSound','trySomethingElseSound','wrongSound'};
 
@@ -24,7 +24,7 @@ switch nargin
         else
             error('Input argument is not a trialManager object')
         end
-    case 8
+    case {6 8}
         if varargin{1}>=0
             t.msFlushDuration=varargin{1};
         else
@@ -54,26 +54,38 @@ switch nargin
         else
             error('must be a reinforcementManager')
         end
-
-        if isa(varargin{6},'eyeTracker')
+        
+        if nargin==6
+            t.eyeTracker=[];
+            t.eyeController=[];
+            t.customDescription=varargin{6};
+        elseif nargin==8
             t.eyeTracker=varargin{6};
+            t.eyeController=varargin{7};
+            t.customDescription=varargin{8};
         else
-            error('must be an eyeTracker')
+            error('should never happen')
         end
         
-        if isempty(varargin{7})
-            t.eyeController=varargin{7};
+        if isa(t.eyeTracker,'eyeTracker') || isempty(t.eyeTracker)
+            %pass
+        else
+            error('must be an eyeTracker or empty')
+        end
+        
+        if isempty(t.eyeController)
+            %pass
         else
             error('must be a empty -- until we actually have controllers...then maybe its an controller object or a parameter pair list;  example:  {''driftCorrect'',{param1, param2}}')
         end
 
         
-        if ischar(varargin{8})
+        if ischar(t.customDescription)
             t.description=sprintf(['%s\n'...
                                    '\t\t\tmsFlushDuration:\t%d\n'...
                                    '\t\t\tmsMinimumPokeDuration:\t%d\n'...
                                    '\t\t\tmsMinimumClearDuration:\t%d'], ...
-                varargin{8},t.msFlushDuration,t.msMinimumPokeDuration,t.msMinimumClearDuration);
+                t.customDescription,t.msFlushDuration,t.msMinimumPokeDuration,t.msMinimumClearDuration);
         else
             error('not a string')
         end

@@ -1,4 +1,4 @@
-function [graduate keepWorking secsRemainingTilStateFlip subject r trialRecords station]=doTrial(ts,station,subject,r,window,ifi,rn,trialRecords,sessionNumber)
+function [graduate keepWorking secsRemainingTilStateFlip subject r trialRecords station]=doTrial(ts,station,subject,r,rn,trialRecords,sessionNumber)
 
 
 try
@@ -66,7 +66,7 @@ try
 
         if keepDoingTrials
 
-            [newTM updateTM newSM updateSM stopEarly trialRecords station]=doTrial(ts.trialManager,station,ts.stimManager,subject,r,window,ifi,rn,trialRecords,sessionNumber);
+            [newTM updateTM newSM updateSM stopEarly trialRecords station]=doTrial(ts.trialManager,station,ts.stimManager,subject,r,rn,trialRecords,sessionNumber);
             keepWorking=~stopEarly;
             
             graduate = checkCriterion(ts.criterion,subject,ts, trialRecords);
@@ -98,7 +98,7 @@ try
 
         else
             disp('*************************INTERTRIAL PERIOD STARTS!*****************************')
-            stopEarly = doInterSession(ts, rn, window); % note: we have no records of this
+            stopEarly = doInterSession(ts, rn, getPTBWindow(station)); % note: we have no records of this
             keepWorking=~stopEarly;
             disp('*************************INTERTRIAL PERIOD ENDS!*****************************')
         end

@@ -26,3 +26,9 @@
 /hasAirpuff.m -text
 /checkPath.m -text
 /setPuff.m -text
+/getResolutions.m -text
+/getLUTbits.m -text
+/setResolution.m -text
+/getIFI.m -text
+/getDisplaySize.m -text
+/getPTBWindow.m -text

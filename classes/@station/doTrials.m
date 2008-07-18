@@ -35,7 +35,7 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
                 end
             end
 
-            [window ifi]=startPTB(s);
+            s=startPTB(s);
             
             %make sure valves are in a known state: closed - pmm 080621
             setValves(s, 0*getValves(s))
@@ -51,8 +51,8 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
         
             while keepWorking
                 trialNum=trialNum+1;
-                [subject r keepWorking secsRemainingTilStateFlip trialRecords]= ...
-                    doTrial(subject,r,s,window,ifi,rn,trialRecords,sessionNumber);
+                [subject r keepWorking secsRemainingTilStateFlip trialRecords s]= ...
+                    doTrial(subject,r,s,rn,trialRecords,sessionNumber);
                 % Cut off a trial record as we increment trials, IFF we
                 % still have remote records (because we need to keep all
                 % local records to properly save the local .mat)
@@ -77,7 +77,7 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
             %box?
 
 
-            stopPTB(s);
+            s=stopPTB(s);
 
             stopEyeTracking(subject); 
             

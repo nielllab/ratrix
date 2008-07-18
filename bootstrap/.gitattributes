@@ -7,7 +7,6 @@
 /initRatrixPorts.m -text
 /clientCheckForUpdate.m -text
 /runRatrixServer.m -text
-/newStationConstructor.m -text
 /checkForUpdate.m -text
 /bootstrap.m -text
 /setupEnvironment.m -text

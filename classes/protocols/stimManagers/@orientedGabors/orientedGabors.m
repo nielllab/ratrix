@@ -17,6 +17,7 @@ s.thresh = 0;
 s.yPosPct = 0;
 
 s.LUT =[];
+s.LUTbits=0;
 s.waveform='square';
 s.normalizedSizeMethod='normalizeDiagonal';
 
@@ -107,8 +108,5 @@ end
 
 
 s=setSuper(s,s.stimManager);
-
-s=fillLUT(s,'useThisMonitorsUncorrectedGamma',[0 1]);
-
 
 

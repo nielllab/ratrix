@@ -1,12 +1,15 @@
 function setValves(s, valves)
 if strcmp(s.responseMethod,'parallelPort')
-    %codeStr='00000000';
-    codeStr=dec2bin(lptread(hex2dec(s.parallelPortAddress)),8); 
+    
+    codeStr=dec2bin(lptread(s.valvePins.decAddr),8); 
 
     if length(valves)==s.numPorts
+        valves=logical(valves);
+        valves(s.valvePins.invs)=~valves(s.valvePins.invs);
 
-        codeStr(s.valveOpenCodes)=char('0'*ones(size(valves)) + valves*['1' - '0']);
-        lptwrite(hex2dec(s.parallelPortAddress), bin2dec(codeStr));
+        codeStr(s.valvePins.bitLocs)=char('0'*ones(size(valves)) + valves*['1' - '0']);
+
+        lptwrite(s.valvePins.decAddr, fastBin2Dec(codeStr));
     else
         error('valves must be a vector of length numValves')
     end

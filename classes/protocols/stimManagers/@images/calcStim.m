@@ -1,10 +1,9 @@
-function [stimulus updateSM out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance isCorrection] =...
-    calcStim(stimulus,trialManagerClass,frameRate,responsePorts,totalPorts,width,height,trialRecords)
+function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text] =... 
+    calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % see ratrixPath\documentation\stimManager.calcStim.txt for argument specification (applies to calcStims of all stimManagers)
 
-bits=8;
-ramp=linspace(0,1,2^bits);
-LUT= repmat(ramp',1,3);
+LUT=makeStandardLUT(LUTbits);
+[resolutionIndex height width]=chooseLargestResForHzAndDepth(resolutions,[60 100],32);
 
 type='static';
 
@@ -17,7 +16,7 @@ normalizeHistograms=false;
 pctScreenFill=0.75;
 backgroundcolor=uint8(intmax('uint8')*stimulus.background);
 ind=min(find(rand<cumsum(getDist(stimulus)))); %draw from trialDistribution
-[stimulus updateSM ims]=checkImages(stimulus,uint8(ind),backgroundcolor, pctScreenFill, normalizeHistograms);
+[stimulus updateSM ims]=checkImages(stimulus,uint8(ind),backgroundcolor, pctScreenFill, normalizeHistograms,width,height);
 
 %ims comes back as a nX2 cell array, where n is number of images specified in the trialDistribution entry we requested
 %ims{:,1} is the image data, ims{:,2} are details (like the file name)
@@ -41,11 +40,11 @@ else
     lastRec=[];
 end
 [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts);
-isCorrection=details.correctionTrial;
 
 %assign the correct answer to the target port (defined to be first file listed in the trialDistribution entry)
 pics=cell(totalPorts,2);
 pics(targetPorts,:)={ims{1,:}}; %note the ROUND parens -- ugly!
+
 
 %randomly assign distractors
 inds=2:length(responsePorts);
@@ -60,3 +59,17 @@ end
 
 out = [pics{:,1}];
 details.imageDetails={pics{:,2}};
+
+fileNames='';
+for i=1:length(details.imageDetails)
+    if ~isempty(details.imageDetails{i})
+        fileNames=[fileNames details.imageDetails{i}.name ' '];
+    end
+end
+
+if details.correctionTrial;
+    text='correction trial!';
+else
+    d=getDist(stimulus);
+    text=sprintf('trial type %d (%g%%) (%s)',ind,round(100*d(ind)),fileNames);
+end

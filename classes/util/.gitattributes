@@ -66,3 +66,6 @@ parallelPort/getDirForPinNum.m -text
 parallelPort/lptReadBit.m -text
 parallelPort/goodPins.m -text
 /makeDefaultStation.m -text
+/recordLight.m -text
+/initRatrixPorts.m -text
+/makePumpSystem.m -text

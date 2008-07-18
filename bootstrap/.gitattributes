@@ -1,14 +1,11 @@
-/makePumpSystem.m -text
 /bootstrap.vbs -text
 /server.vbs -text
 /getRatrixPath.m -text
 /serverCheckForUpdate.m -text
 /ratrixServer.m -text
-/initRatrixPorts.m -text
 /clientCheckForUpdate.m -text
 /runRatrixServer.m -text
 /checkForUpdate.m -text
 /bootstrap.m -text
 /setupEnvironment.m -text
 /standAloneRun.m -text
-/recordLight.m -text

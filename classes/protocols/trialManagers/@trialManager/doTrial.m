@@ -210,11 +210,11 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 manualOn, ...
                 1, ...
                 .1, ... % 10% should be ~1 ms of acceptable frametime error
-                0,text,rn,getID(subject),trialRecords(trialInd).stimManagerClass,pStr,sessionNumber,trialInd,eyeTracker,false);
+                0,text,rn,getID(subject),trialRecords(trialInd).stimManagerClass,pStr,sessionNumber,trialInd,trialManager.eyeTracker,false);
 
-            if ~isempty(eyeTracker)
-                [junk junk eyeDataVarNames]=getSample(eyeTracker); %throws out a sample in order to get variable names... dirty
-                saveEyeData(eyeTracker,eyeData,eyeDataVarNames,gaze,trialRecords(trialInd).trialNumber)
+            if ~isempty(trialManager.eyeTracker)
+                [junk junk eyeDataVarNames]=getSample(trialManager.eyeTracker); %throws out a sample in order to get variable names... dirty
+                saveEyeData(trialManager.eyeTracker,eyeData,eyeDataVarNames,gaze,trialRecords(trialInd).trialNumber)
             end
 
 
@@ -423,7 +423,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                         [], ...
                         [], ...
                         trialRecords(trialInd).interTrialLuminance, ...
-                        station,0,0,.5,1,'incorrect',rn,getID(subject),trialRecords(trialInd).stimManagerClass,pStr,sessionNumber,trialInd,eyeTracker,hasAirpuff(station));
+                        station,0,0,.5,1,'incorrect',rn,getID(subject),trialRecords(trialInd).stimManagerClass,pStr,sessionNumber,trialInd,trialManager.eyeTracker,hasAirpuff(station));
 
                     trialRecords(trialInd).errorRecords=errorRecords(trialInd);
 

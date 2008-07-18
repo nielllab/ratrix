@@ -1,2 +1,2 @@
 function out= hasAirpuff( s )
-out=~isempty(s.eyepuffPins);
+out=~isempty(s.eyePuffPins);

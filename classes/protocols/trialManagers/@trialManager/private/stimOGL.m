@@ -181,6 +181,9 @@ function [quit response responseDetails didManual manual didAPause didValves did
 
 %logwrite('entered stimOGL');
 
+eyeData=[];
+gaze=[];
+
 window=getPTBWindow(station);
 ifi=getIFI(station);
 

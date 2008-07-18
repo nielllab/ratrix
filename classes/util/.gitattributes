@@ -65,3 +65,4 @@ parallelPort/lptWriteBit.m -text
 parallelPort/getDirForPinNum.m -text
 parallelPort/lptReadBit.m -text
 parallelPort/goodPins.m -text
+/makeDefaultStation.m -text

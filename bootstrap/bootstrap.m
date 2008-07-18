@@ -31,7 +31,7 @@ try
     while true
         'looping over svn code update, then rnet creation, then commands'
         'erik was here 4'
-        initRatrixPorts(id);
+        initRatrixPorts;
         try
             clearJavaComponents();
             clientCheckForUpdate

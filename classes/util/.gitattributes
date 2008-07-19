@@ -1,7 +1,5 @@
-/computeGabors.m -text
 /doubleSlashes.m -text
 /isVectorOfType.m -text
-/computeSquareGrating.m -text
 /combineStructs.m -text
 /loadMakeOrSaveTrialRecords.m -text
 /logwrite.m -text
@@ -9,13 +7,10 @@
 /getMACaddress.m -text
 /fitGammaAndReturnLinearized.m -text
 /findResponsePatterns.m -text
-/clearJavaComponents.m -text
 /getSVNRevisionFromXML.m -text
 /getFeaturePatchStim.m -text
 /printAsList.m -text
-/doSubjectFlankerAnalysis.m -text
 /removeStr.m -text
-/computeFlickerFields.m -text
 /isMACaddress.m -text
 /getRangesFromTrialRecordFileNames.m -text
 /compareTrialRecordFileNames.m -text
@@ -36,12 +31,8 @@
 /fixSystemTime.m -text
 /isNearInteger.m -text
 /getRackIDFromIP.m -text
-/updatePsychtoolboxIfNecessary.m -text
-/assignPorts.m -text
-/createSubjectsFromDB.m -text
 /fastBin2Dec.m -text
 /makeStandardLUT.m -text
-/chooseLargestResForHzAndDepth.m -text
 parallelPort/lptwrite.mexw32 -text
 parallelPort/pt_ioctl.c -text
 parallelPort/portTest.m -text
@@ -69,3 +60,12 @@ infrastructure/valveStateMatch.m -text
 analysis/aboveThresholdPerformance.m -text
 analysis/calculateSmoothedPerformances.m -text
 analysis/calcStimExposureTime.m -text
+stimHelpers/computeSquareGrating.m -text
+stimHelpers/assignPorts.m -text
+stimHelpers/computeFlickerFields.m -text
+stimHelpers/computeGabors.m -text
+stimHelpers/chooseLargestResForHzAndDepth.m -text
+infrastructure/createSubjectsFromDB.m -text
+infrastructure/clearJavaComponents.m -text
+infrastructure/updatePsychtoolboxIfNecessary.m -text
+analysis/doSubjectFlankerAnalysis.m -text

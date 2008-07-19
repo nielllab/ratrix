@@ -1,4 +1,5 @@
-
+%this is a little tool used for inputing h20 calibration amounts and
+%inspecting the bias
 
 
 %100 times at 100 msec, mmHg ~260, in grams

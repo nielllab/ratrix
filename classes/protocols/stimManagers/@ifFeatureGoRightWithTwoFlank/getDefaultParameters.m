@@ -103,7 +103,9 @@ switch defaultSettings
         default.msPenalty=1000; %May.30,2008
         default.scheduler=minutesPerSession(90,3); %May.30,2008
         default.graduation = repeatIndefinitely(); %May.30,2008
-
+        
+        default.msPuff=0; %July.18,2008
+            
     otherwise
         error ('unknown default settings date')
 
@@ -365,6 +367,7 @@ switch protocolVersion
 
             otherwise
                 protocolVersion=protocolVersion
+                protocolType=protocolType
                 error('unknown type of protocol for this version')
         end
 
@@ -440,7 +443,7 @@ switch protocolVersion
                 protocolVersion=protocolVersion
                 error('unknown type of protocol for this version')
         end
-          case '1_9' % only 2 orients and they are -15, 15   fixed and first used on Jun.04,2008
+          case {'1_9', '2_1', '2_2'} % only 2 orients and they are -15, 15   fixed and first used on Jun.04,2008
                 switch protocolType
             case 'goToRightDetection'  
                 default.goRightContrast = [1];    %choose a random contrast from this list each trial
@@ -500,6 +503,9 @@ switch protocolVersion
                 protocolVersion=protocolVersion
                 error('unknown type of protocol for this version')
         end
+        
+   
+
     otherwise
         error ('unknown version')
 end

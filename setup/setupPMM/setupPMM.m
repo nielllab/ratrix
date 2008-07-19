@@ -57,9 +57,14 @@ if 1
      r=setShapingPMM(r,{'102','127'}, 'goToRightDetection', '1_3'); 
      r=setShapingPMM(r,{'227','228','231','232'}, 'goToLeftDetection', '1_9'); %removed '235','236','214','219' 
      r=setShapingPMM(r,{'229','230','233','234','237','238'}, 'goToRightDetection', '1_9');
+     
+     r=setShapingPMM(r,{'271','272'}, 'goToLeftDetection', '2_1');
+     r=setShapingPMM(r,{'275','277'}, 'goToRightDetection', '2_1');
+     
+     r=setShapingPMM(r,{'273','274'}, 'goToLeftDetection', '2_2');
+     r=setShapingPMM(r,{'276','278'}, 'goToRightDetection', '2_2');
 
-     
-     
+
 %     r=setShapingPMM(r,{'213','215'}, 'goToLeftDetection', '1_1'); r=setShapingPMM(r,{'216'}, 'goToRightDetection', '1_1');  r=setCoherentDotSteps(r,{'195'}); r=setShapingPMM(r,{'144'}, 'tiltDiscrim', '1_1');
 %     r=setShapingPMM(r,{'214','219','217'}, 'goToLeftDetection', '1_1'); r=setShapingPMM(r,{'218','220'}, 'goToRightDetection', '1_1');  %r=setShapingPMM(r,{'145','146','147','148','129'}, 'tiltDiscrim', '1_2')
 %     r=setShapingPMM(r,{'221'}, 'goToLeftDetection', '1_1'); r=setShapingPMM(r,{'222'}, 'goToRightDetection', '1_1'); r=setShapingPMM(r,{'106','102'}, 'goToRightDetection', '1_3'); r=setCoherentDotSteps(r,{'196'}); %r=setShapingPMM(r,{'112','126','102','106'}, 'goToRightDetection', '1_3');

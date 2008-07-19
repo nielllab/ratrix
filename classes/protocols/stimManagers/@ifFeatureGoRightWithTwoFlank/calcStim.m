@@ -1,10 +1,56 @@
-function [stimulus updateSM out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance isCorrection] = calcStim(stimulus,trialManagerClass,frameRate,responsePorts,totalPorts,width,height,trialRecords)
+function [stimulus,updateSM,resInd,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance, text]=calcStim(stimulus, trialManagerClass,resolutions,screenDisplaySize,LUTbits,responsePorts,totalPorts,trialRecords);
+%[stimulus updateSM out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance isCorrection] = calcStim(stimulus,trialManagerClass,frameRate,responsePorts,totalPorts,trialRecords)
+
+
 %this makes a target that has feature to go right or left
 %this is a discrimination paradigm
 %a detection paradigm follows if the left stims have 0 contrast
 %flankers above and below target, total of three stims
 
+text='myStim';
+details.screenDisplaySize=screenDisplaySize;
 
+
+desiredWidth=getMaxWidth(stimulus);
+desiredHeight=getMaxHeight(stimulus);
+desiredHertz=100;
+ratrixEnforcedColor=32;
+appropriateSize=([resolutions.height]==desiredHeight) & ([resolutions.width]==desiredWidth) & ([resolutions.pixelSize]==ratrixEnforcedColor);
+if sum(appropriateSize)>0
+    hz=[resolutions.hz]
+    maxHz=max(hz(appropriateSize));
+    if maxHz==75
+        selectedHz=60; %this enforces that some LCD's won't fail sync tests, but shouldn't influence any NEC CRT's
+    else
+        selectedHz=maxHz;
+    end
+    appropriateSizeAndRefresh=appropriateSize & ([resolutions.hz]==selectedHz)
+    resInd=find(appropriateSizeAndRefresh);
+
+%     if sum(appropriateSizeAndRefresh)==1
+%         resInd=find(appropriateSizeAndRefresh);
+%     elseif sum(appropriateSizeAndRefresh)>1
+%         pixelSize=[resolutions.pixelSize];
+%         selectedSize=min(pixelSize(appropriateSizeAndRefresh));
+%         resInd=find(appropriateSizeAndRefresh & pixelSize==selectedSize);       
+%     end
+else 
+    error ('can''t find appropriate resolution');
+    end
+
+
+
+details.width=resolutions(resInd).width
+details.height=resolutions(resInd).height
+details.pixelSize=resolutions(resInd).pixelSize
+details.hz=resolutions(resInd).hz
+
+width=details.width
+height=details.height
+
+details.LUTbits=LUTbits
+
+%if resInd is different, updateSM
 
 %record keeping
 details.protocolType=stimulus.protocolType;
@@ -707,7 +753,7 @@ switch insertMethod
         error ('unknown calculation method for inserting stim patches')
 end
 
-    
+
 
 %   function stim=insertPatch(stim,pos,featureVideo,featureOptions,chosenFeature,mean,contrast)
 %     featureInd=find(featureOptions==chosenFeature);

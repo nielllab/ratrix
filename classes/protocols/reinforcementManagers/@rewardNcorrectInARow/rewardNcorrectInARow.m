@@ -27,6 +27,7 @@ switch nargin
         r = class(r,'rewardNcorrectInARow',reinforcementManager(varargin{2},varargin{6},varargin{5},varargin{3}, varargin{4}));
 
     otherwise
+        nargin
         error('Wrong number of input arguments')
 end
 

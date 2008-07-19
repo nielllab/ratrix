@@ -28,7 +28,7 @@ database.subject{i}.msPenalty=1001;
 
 i=i+1;
 database.subject{i}.subjectID='test1';
-database.subject{i}.stepNumber=9;
+database.subject{i}.stepNumber=5;
 database.subject{i}.rewardScalar=.1;
 database.subject{i}.msPenalty=1001;
 database.subject{i}.currentShapedValue = 0.01; %test wierd values
@@ -514,6 +514,57 @@ database.subject{i}.msPenalty=6000;
 % database.subject{i}.stepNumber=5;
 % database.subject{i}.rewardScalar=1;
 % database.subject{i}.msPenalty=6000;
+
+
+i=i+1;
+database.subject{i}.subjectID='271';
+database.subject{i}.stepNumber=2;
+database.subject{i}.rewardScalar=1;
+database.subject{i}.msPenalty=1000;
+
+i=i+1;
+database.subject{i}.subjectID='272';
+database.subject{i}.stepNumber=2;
+database.subject{i}.rewardScalar=1;
+database.subject{i}.msPenalty=1000;
+
+i=i+1;
+database.subject{i}.subjectID='273';
+database.subject{i}.stepNumber=2;
+database.subject{i}.rewardScalar=1;
+database.subject{i}.msPenalty=1000;
+
+i=i+1;
+database.subject{i}.subjectID='274';
+database.subject{i}.stepNumber=2;
+database.subject{i}.rewardScalar=1;
+database.subject{i}.msPenalty=1000;
+
+i=i+1;
+database.subject{i}.subjectID='275';
+database.subject{i}.stepNumber=2;
+database.subject{i}.rewardScalar=1;
+database.subject{i}.msPenalty=1000;
+
+i=i+1;
+database.subject{i}.subjectID='276';
+database.subject{i}.stepNumber=2;
+database.subject{i}.rewardScalar=1;
+database.subject{i}.msPenalty=1000;
+
+i=i+1;
+database.subject{i}.subjectID='277';
+database.subject{i}.stepNumber=2;
+database.subject{i}.rewardScalar=1;
+database.subject{i}.msPenalty=1000;
+
+i=i+1;
+database.subject{i}.subjectID='278';
+database.subject{i}.stepNumber=2;
+database.subject{i}.rewardScalar=1;
+database.subject{i}.msPenalty=1000;
+
+
 
 %% reloadStepsFromRatrix
 %make sure to get the current steps with getStepNumFromRemoteRatrix or

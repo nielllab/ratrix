@@ -69,7 +69,14 @@ switch protocolType
     otherwise
         parameters.msPenalty=10000;
 end
-parameters.graduation = performanceCriterion([0.85, 0.8],int16([200, 500]));
+
+switch protocolVersion
+    case '2_1' %easier graduation
+        parameters.graduation = performanceCriterion([0.83,0.8],int16([100,200])); %lower bound CI: ~0.74
+    otherwise
+        parameters.graduation = performanceCriterion([0.85, 0.8],int16([200, 500]));
+end
+
 %parameters.graduation = performanceCriterion([0.85, 0.8],int16([10, 500])); % just for testing
 [stringent previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 
@@ -376,28 +383,20 @@ end
 nameOfProtocol=generateProtocolName(nameOfShapingStep,protocolVersion,defaultSettingsDate)
 
 switch protocolVersion
-    case '1_0'
-        p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,smaller,dimFlankers,fullFlankers,flanksToggleToo,varyPosition})
-    case '1_1'
+    case {'1_0', '1_1'}
         p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,smaller,dimFlankers,fullFlankers,flanksToggleToo,varyPosition})
     case '1_2'
         p=protocol(nameOfProtocol,{fd1,fd2,fd3,easyHint,stringent,linearized,thinner,smaller,dimFlankers,fullFlankers,flanksToggleToo,varyPosition})
-    case '1_3'
-        p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,smaller,dimFlankers,fullFlankers,flanksToggleToo,varyPosition,vvVH,vvPhases,vvOffsets,vvPhasesOffset,vvVHOffsets})
-    case '1_4'
+    case {'1_3', '1_4'}
         p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,smaller,dimFlankers,fullFlankers,flanksToggleToo,varyPosition,vvVH,vvPhases,vvOffsets,vvPhasesOffset,vvVHOffsets})
     case '1_5' %used by adam, no distractors, includes a hint
         p=protocol(nameOfProtocol,{fd1,fd2,fd3,easyHint,stringent,linearized,thinner,smaller})
-    case '1_6'
+    case {'1_6','1_7', '1_8', '1_9', '2_1'}
         p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,smaller,dimFlankers,dimmerTarget,strongerFlanker,fullFlankers,flanksToggleToo,varyPosition,vvVH,vvPhases,vvOffsets,vvPhasesOffset,vvVHOffsets})
-    case '1_7'
-        p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,smaller,dimFlankers,dimmerTarget,strongerFlanker,fullFlankers,flanksToggleToo,varyPosition,vvVH,vvPhases,vvOffsets,vvPhasesOffset,vvVHOffsets})
-    case '1_8'
-        p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,smaller,dimFlankers,dimmerTarget,strongerFlanker,fullFlankers,flanksToggleToo,varyPosition,vvVH,vvPhases,vvOffsets,vvPhasesOffset,vvVHOffsets})
-    case '1_9'
-        p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,smaller,dimFlankers,dimmerTarget,strongerFlanker,fullFlankers,flanksToggleToo,varyPosition,vvVH,vvPhases,vvOffsets,vvPhasesOffset,vvVHOffsets})
-     case '2_0'
+    case '2_0'
         p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,shrinking,varyTargetPos})
+    case '2_2' %detection first learn on linearized small thin target
+        p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,smaller,dimFlankers,dimmerTarget,strongerFlanker,fullFlankers,flanksToggleToo,varyPosition,vvVH,vvPhases,vvOffsets,vvPhasesOffset,vvVHOffsets})
     otherwise
         error('bad protocol type')
 end

@@ -740,7 +740,7 @@ try
                     %junkSize = Screen('TextSize',window,subjectFontSize);
                     [garbage,yTextPosUnused] = Screen('DrawText',window,['ID:' subID ],xSubjectTextPos,yTextPos,100*ones(1,3));
                     %junkSize = Screen('TextSize',window,standardFontSize);
-                    [garbage,yNewTextPos] = Screen('DrawText',window,['protocol:' protocolStr ' trialManager:' class(tm) ' stimManager:' stimID],xTextPos,yNewTextPos,100*ones(1,3));
+                    [garbage,yNewTextPos] = Screen('DrawText',window,['trialManager:' class(tm) ' stimManager:' stimID  ' protocol:' protocolStr ],xTextPos,yNewTextPos,100*ones(1,3));
                 end
                 [normBoundsRect, offsetBoundsRect]= Screen('TextBounds', window, 'TEST');
                 yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);

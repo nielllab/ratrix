@@ -3,9 +3,11 @@ if isa(tm,'trialManager')
     switch class(tm)
         case 'freeDrinks'
             out=1;
-        case 'nAFC'
+        case 'nAFC' %old standard
             out=1;
-        case 'promptedNAFC'
+        case 'promptedNAFC' %fans addition, new format, but same idea as NAFC
+            out=1;
+        case 'phasednAFC' %used for eyeDevelopment
             out=1;
         otherwise
             out=0;

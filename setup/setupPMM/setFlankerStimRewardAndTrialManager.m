@@ -18,7 +18,7 @@ stim = ifFeatureGoRightWithTwoFlank([p.pixPerCycs],[p.goRightOrientations],[p.go
     p.flankerPosAngle,...
     p.maxWidth,p.maxHeight,p.scaleFactor,p.interTrialLuminance);
 
-increasingReward=rewardNcorrectInARow(p.rewardNthCorrect,p.msPenalty,p.fractionOpenTimeSoundIsOn,p.fractionPenaltySoundIsOn, p.scalar);
+increasingReward=rewardNcorrectInARow(p.rewardNthCorrect,p.msPenalty,p.fractionOpenTimeSoundIsOn,p.fractionPenaltySoundIsOn, p.scalar, p.msPuff);
 
 switch tmClass
     case 'nAFC'
@@ -36,6 +36,9 @@ switch tmClass
             p.requestRewardSizeULorMS,p.percentCorrectionTrials,p.msResponseTimeLimit,p.pokeToRequestStim,...
             p.maintainPokeToMaintainStim,p.msMaximumStimPresentationDuration,p.maximumNumberStimPresentations,p.doMask,increasingReward,...
             p.delayMeanMs, p.delayStdMs, p.delayStim, p.promptStim,p.eyeTracker,p.eyeController);
+         case 'phasedNAFC'
+        t=trialManager(p.msFlushDuration,p.msMinimumPokeDuration,p.msMinimumClearDuration,p.sndManager,increasingReward,eyeTracker,eyeController)
+
 end
 step= trainingStep(tm, stim, p.graduation, p.scheduler); %it would be nice to add the nameOfShapingStep
 

@@ -15,7 +15,8 @@ msPenalty               =1;
 fractionOpenTimeSoundIsOn=1;
 fractionPenaltySoundIsOn=1;
 scalar=1;
-rewardManager=constantReinforcement(rewardSizeULorMS,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar)
+msPuff=0;
+rewardManager=constantReinforcement(rewardSizeULorMS,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msPuff)
 
 sndManager            =soundManager({soundClip('correctSound','allOctaves',[400],20000), ...
     soundClip('keepGoingSound','allOctaves',[300],20000), ...

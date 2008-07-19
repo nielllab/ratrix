@@ -1,21 +1,22 @@
 function r=standAloneTestPMM()
 
 %setupEnvironment;
-subID='test';
+subID='test1';
 sub = subject(subID, 'rat', 'long-evans', 'male', '05/10/2005', '01/01/2006', 'unknown', 'wild caught');
 auth='pmm';
 machines={{'99A','000000000000',[1 1 1]}};
 dataPath = fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
 % serverDataPath = fullfile(dataPath, 'ServerData');
 servePump = 0;
+localMultiDisplaySetup=true;
 
-r = createRatrixWithDefaultStations(machines, dataPath,servePump);
+r = createRatrixWithDefaultStations(machines, dataPath,servePump,localMultiDisplaySetup);
 r=setPermanentStorePath(r,'C:\Documents and Settings\rlab\Desktop\standAloneData');
 
 r = addSubject(r,sub,auth);
 
 %r = setShapingPMM(r,{subID}, 'goToLeftDetection', '1_9');
-r= setShapingPMM(r,{subID}, 'tiltDiscrim', '2_0')
+r= setShapingPMM(r,{subID}, 'goToLeftDetection', '2_1')
 %r = setHeadFixProtocol(r,{subID})
      
 

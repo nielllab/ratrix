@@ -7,7 +7,7 @@ tm=getTrialManager(ts);
 rm = getReinforcementManager(tm);
 
 currentShapedValue = getCurrentShapedValue(stim);
-currentMsPenalty = getPenalty(rm);
+currentMsPenalty = getMsPenalty(rm);
 currentScalar = getScalar(rm);
 % there are two plausible reasons for the currentShapedValue to be empty:
 % 1. the stimulus is not shaping anything
@@ -35,7 +35,7 @@ end
 valueInDatabase = getMiniDatabaseFact(s,'msPenalty');
 if currentMsPenalty~=valueInDatabase
     if ~isempty(valueInDatabase)
-        rm = setPenalty(rm, valueInDatabase);
+        rm = setMsPenalty(rm, valueInDatabase);
         updateRM=1;
         newMsPenalty = valueInDatabase;
     else

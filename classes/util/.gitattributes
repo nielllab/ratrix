@@ -63,9 +63,14 @@ matlaby/remoteDir.m -text
 matlaby/doubleSlashes.m -text
 matlaby/hasAllFieldsInThatOrder.m -text
 matlaby/removeStr.m -text
-trialRecordProcessing/getTrialRecordsFromPermanentStore.m -text
+analysis/sortSmallData.m -text
+analysis/removeFieldsFromCompiled.m -text
+analysis/setSmallDataFromListOfVariableNames.m -text
+analysis/xferDataToServer.m -text
 trialRecordProcessing/getRangesFromTrialRecordFileNames.m -text
 trialRecordProcessing/replicateTrialRecords.m -text
-trialRecordProcessing/getTrialRecordFiles.m -text
 trialRecordProcessing/loadMakeOrSaveTrialRecords.m -text
+trialRecordProcessing/getTrialRecordsFromPermanentStore.m -text
+trialRecordProcessing/getTrialRecordFiles.m -text
 trialRecordProcessing/compareTrialRecordFileNames.m -text
+matlaby/datenumFor30.m -text

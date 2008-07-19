@@ -1,4 +1,7 @@
 function success=xferDataToServer(distalSourcePath,dataStoragePath,dataStorageIP,sourceIP,subject,loadMethod,loadMethodParams,subjectFoldersInsideDataFolder, verbose)
+%this method is not actively used, but simply an example... in current
+%version, prefered method is: replicateTrialRecords
+
 
 switch loadMethod
     case 'singleSession'

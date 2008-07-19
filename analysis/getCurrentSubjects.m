@@ -27,8 +27,7 @@ for i=1:size(subjects,1)
     stationStrs{i}=[num2str(rack) char(((i)+double('A')-1)')];
 end
 
-
-
+%example output :
 % % HEAT       %1        %2       %3        %4     %overnight
 % subjects={'rat_213','rat_215','rat_216','rat_195','rat_144';... %3  upper-left
 %           'rat_214','rat_219','rat_217','rat_218','rat_220';... %11 upper-right
@@ -36,18 +35,3 @@ end
 %           'rat_115','rat_116','rat_117','rat_130','rat_114';... %9  middle-right
 %           'rat_132','rat_133','rat_138','rat_139','rat_128';... %2  lower-left
 %           'rat_134','rat_135','rat_136','rat_137','rat_131'};   %4  lower-right
-
-% % HEAT       %1        %2       %3        %4     %overnight
-% subjects={'rat_140','rat_141','rat_142','rat_195','rat_144';... %3  upper-left
-%           'rat_145','rat_146','rat_147','rat_148','rat_129';... %11 upper-right
-%           'rat_112','rat_126','rat_102','rat_106','rat_196';... %1  middle-left
-%           'rat_115','rat_116','rat_117','rat_130','rat_114';... %9  middle-right
-%           'rat_132','rat_133','rat_138','rat_139','rat_128';... %2  lower-left
-%           'rat_134','rat_135','rat_136','rat_137','rat_131'};   %4  lower-right
-
-% subjects={'rat_140','rat_141','rat_142','rat_143','rat_144';... %3  upper-left
-%         'rat_145','rat_146','rat_147','rat_148','rat_129';... %11 upper-right
-%         'rat_112','rat_126','rat_102','rat_106','rat_127';... %1  middle-left
-%         'rat_115','rat_116','rat_117','rat_130','rat_114';... %9  middle-right
-%         'rat_132','rat_133','rat_138','rat_139','rat_128';... %2  lower-left
-%         'rat_134','rat_135','rat_136','rat_137','rat_131'};   %4  lower-right

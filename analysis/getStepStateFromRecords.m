@@ -1,9 +1,5 @@
 function out = getStepStateFromRecords(subjects)
-%
-% rootPath='C:\pmeier';
-% warning('off','MATLAB:dispatcher:nameConflict')
-% addpath(genpath(fullfile(rootPath, 'Ratrix','classes')));
-% warning('on','MATLAB:dispatcher:nameConflict')
+
 
 if ~exist('subjects','var')
     subjects = getCurrentSubjects;

@@ -1,6 +1,5 @@
 /computeGabors.m -text
 /doubleSlashes.m -text
-/addJavaComponents.m -text
 /isVectorOfType.m -text
 /computeSquareGrating.m -text
 /checkPath.m -text
@@ -69,3 +68,4 @@ parallelPort/goodPins.m -text
 /recordLight.m -text
 /initRatrixPorts.m -text
 /makePumpSystem.m -text
+infrastructure/addJavaComponents.m -text

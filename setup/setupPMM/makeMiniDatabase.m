@@ -139,7 +139,7 @@ database.subject{i}.msPenalty=10000;
 
 i=i+1;
 database.subject{i}.subjectID='117';
-database.subject{i}.stepNumber=6;
+database.subject{i}.stepNumber=7;
 database.subject{i}.rewardScalar=2;
 database.subject{i}.msPenalty=10000;
 
@@ -179,7 +179,7 @@ database.subject{i}.msPenalty=10000;
 
 i=i+1;
 database.subject{i}.subjectID='130';
-database.subject{i}.stepNumber=7;
+database.subject{i}.stepNumber=8;
 database.subject{i}.rewardScalar=1;
 database.subject{i}.msPenalty=10000;
 
@@ -221,10 +221,10 @@ database.subject{i}.msPenalty=10000;
 
 i=i+1;
 database.subject{i}.subjectID='136';
-database.subject{i}.stepNumber=9;
+database.subject{i}.stepNumber=10;
 database.subject{i}.rewardScalar=1;
 database.subject{i}.msPenalty=8000;
-database.subject{i}.currentShapedValue = 0.4; %was at 0.5 once
+database.subject{i}.currentShapedValue = 0.8; %was at 0.5 once
 
 i=i+1;
 database.subject{i}.subjectID='137';
@@ -235,13 +235,13 @@ database.subject{i}.currentShapedValue = 0.7+eps/2; %was at 0.5 once
 
 i=i+1;
 database.subject{i}.subjectID='138';
-database.subject{i}.stepNumber=8; 
+database.subject{i}.stepNumber=9; 
 database.subject{i}.rewardScalar=1;
 database.subject{i}.msPenalty=6000;
 
 i=i+1;
 database.subject{i}.subjectID='139';
-database.subject{i}.stepNumber=8;
+database.subject{i}.stepNumber=9;
 database.subject{i}.rewardScalar=1;
 database.subject{i}.msPenalty=6000;
 
@@ -427,10 +427,10 @@ database.subject{i}.currentShapedValue = 0.4;
 
 i=i+1;
 database.subject{i}.subjectID='229';
-database.subject{i}.stepNumber=9;
+database.subject{i}.stepNumber=10;
 database.subject{i}.rewardScalar=1;
 database.subject{i}.msPenalty=1000;
-database.subject{i}.currentShapedValue = 0.3+eps/4;
+database.subject{i}.currentShapedValue = 0.8;
 
 i=i+1;
 database.subject{i}.subjectID='230';
@@ -441,7 +441,7 @@ database.subject{i}.currentShapedValue = 0.4; %was at 0.3 once
 
 i=i+1;
 database.subject{i}.subjectID='231';
-database.subject{i}.stepNumber=8;
+database.subject{i}.stepNumber=10;
 database.subject{i}.rewardScalar=1;
 database.subject{i}.msPenalty=6000;
 
@@ -454,7 +454,7 @@ database.subject{i}.currentShapedValue = 0.8;
 
 i=i+1;
 database.subject{i}.subjectID='233';
-database.subject{i}.stepNumber=8;
+database.subject{i}.stepNumber=9;
 database.subject{i}.rewardScalar=.6;
 database.subject{i}.msPenalty=1000;
 
@@ -480,7 +480,7 @@ database.subject{i}.msPenalty=1000;
 
 i=i+1;
 database.subject{i}.subjectID='237';
-database.subject{i}.stepNumber=5;
+database.subject{i}.stepNumber=6;
 database.subject{i}.rewardScalar=1;
 database.subject{i}.msPenalty=6000;
 
@@ -525,7 +525,7 @@ shapingValuesChanged = 0;
 if reloadStepsFromRatrix
     %steps=getStepNumFromRemoteRatrix;
     serverPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData','ServerData',filesep);
-    %load([serverPath 'db.mat'])
+    load([serverPath 'db.mat'])
     state=getBasicFacts(r,0);
     %state2=getStepStateFromRecords;  %uses smallData...
 %     error('confirm that currentShapedValue change detector actually works');

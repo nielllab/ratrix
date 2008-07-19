@@ -121,7 +121,6 @@ protocols/reinforcementManagers/@constantReinforcement/display.m -text
 protocols/reinforcementManagers/@constantReinforcement/calcReinforcement.m -text
 protocols/reinforcementManagers/@constantReinforcement/constantReinforcement.m -text
 protocols/reinforcementManagers/@constantReinforcement/shortDisp.m -text
-protocols/reinforcementManagers/@reinforcementManager/private/calcCommonValues.m -text
 protocols/reinforcementManagers/@reinforcementManager/getMsPuff.m -text
 protocols/reinforcementManagers/@reinforcementManager/setScalar.m -text
 protocols/reinforcementManagers/@reinforcementManager/cache.m -text
@@ -133,3 +132,4 @@ protocols/reinforcementManagers/@reinforcementManager/display.m -text
 protocols/reinforcementManagers/@reinforcementManager/getFractionPenaltySoundIsOn.m -text
 protocols/reinforcementManagers/@reinforcementManager/getFractionOpenTimeSoundIsOn.m -text
 protocols/reinforcementManagers/@reinforcementManager/getMsPenalty.m -text
+protocols/reinforcementManagers/@reinforcementManager/calcCommonValues.m -text

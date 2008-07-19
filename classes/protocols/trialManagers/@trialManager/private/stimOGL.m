@@ -1,6 +1,6 @@
 function [quit response responseDetails didManual manual didAPause didValves didHumanResponse didStochasticResponse eyeData gaze station]=  stimOGL(tm, ...
     stim, audioStim, LUT, type, metaPixelSize, ...
-    responseOptions, requestOptions, finalScreenLuminance, station, manual,allowQPM,timingCheckPct,noPulses,textLabel,rn,subID,stimID,protocolStr,sessionNumber,trialInd,eyeTracker,doAirpuff)
+    responseOptions, requestOptions, finalScreenLuminance, station, manual,allowQPM,timingCheckPct,noPulses,textLabel,rn,subID,stimID,protocolStr,sessionNumber,trialInd,eyeTracker,msAirpuff)
 
 %note: add a phase which is a movie during which the rat must lick the
 %center port to earn n more frames of movie, and the movie has to end in
@@ -855,7 +855,7 @@ try
         %all trial logic here
 
 
-        if doAirpuff && ~puffDone && (puffStarted==0 || GetSecs-puffStarted<=getEyepuffMS(tm)/1000)
+        if msAirpuff>0 && ~puffDone && (puffStarted==0 || GetSecs-puffStarted<=msAirpuff/1000)
             
             setPuff(station,true);
             if puffStarted==0

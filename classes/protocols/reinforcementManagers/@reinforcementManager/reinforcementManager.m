@@ -23,7 +23,7 @@ switch nargin
         else
             error('Input argument is not a reinforcementManager object')
         end
-    case 4
+    case 5
         r.msPenalty=varargin{1};
         r.msPuff=varargin{2};
         r.scalar=varargin{3};

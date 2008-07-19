@@ -2,9 +2,7 @@
 /doubleSlashes.m -text
 /isVectorOfType.m -text
 /computeSquareGrating.m -text
-/checkPath.m -text
 /combineStructs.m -text
-/calculateSmoothedPerformances.m -text
 /loadMakeOrSaveTrialRecords.m -text
 /logwrite.m -text
 /prettyCat.m -text
@@ -12,7 +10,6 @@
 /fitGammaAndReturnLinearized.m -text
 /findResponsePatterns.m -text
 /clearJavaComponents.m -text
-/valveStateMatch.m -text
 /getSVNRevisionFromXML.m -text
 /getFeaturePatchStim.m -text
 /printAsList.m -text
@@ -20,7 +17,6 @@
 /removeStr.m -text
 /computeFlickerFields.m -text
 /isMACaddress.m -text
-/calcStimExposureTime.m -text
 /getRangesFromTrialRecordFileNames.m -text
 /compareTrialRecordFileNames.m -text
 /structize.m -text
@@ -31,7 +27,6 @@
 /setRequestReward.m -text
 /remoteDir.m -text
 /getRlabJarPath.m -text
-/aboveThresholdPerformance.m -text
 /replicateTrialRecords.m -text
 /upize.m -text
 /getLastTrainingStep.m -text
@@ -44,7 +39,6 @@
 /updatePsychtoolboxIfNecessary.m -text
 /assignPorts.m -text
 /createSubjectsFromDB.m -text
-/checkTargetRevision.m -text
 /fastBin2Dec.m -text
 /makeStandardLUT.m -text
 /chooseLargestResForHzAndDepth.m -text
@@ -69,3 +63,9 @@ parallelPort/goodPins.m -text
 /initRatrixPorts.m -text
 /makePumpSystem.m -text
 infrastructure/addJavaComponents.m -text
+infrastructure/checkPath.m -text
+infrastructure/checkTargetRevision.m -text
+infrastructure/valveStateMatch.m -text
+analysis/aboveThresholdPerformance.m -text
+analysis/calculateSmoothedPerformances.m -text
+analysis/calcStimExposureTime.m -text

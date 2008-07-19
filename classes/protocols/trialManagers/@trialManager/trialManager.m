@@ -58,11 +58,11 @@ switch nargin
         if nargin==6
             t.eyeTracker=[];
             t.eyeController=[];
-            t.customDescription=varargin{6};
+            customDescription=varargin{6};
         elseif nargin==8
             t.eyeTracker=varargin{6};
             t.eyeController=varargin{7};
-            t.customDescription=varargin{8};
+            customDescription=varargin{8};
         else
             error('should never happen')
         end
@@ -80,12 +80,12 @@ switch nargin
         end
 
         
-        if ischar(t.customDescription)
+        if ischar(customDescription)
             t.description=sprintf(['%s\n'...
                                    '\t\t\tmsFlushDuration:\t%d\n'...
                                    '\t\t\tmsMinimumPokeDuration:\t%d\n'...
                                    '\t\t\tmsMinimumClearDuration:\t%d'], ...
-                t.customDescription,t.msFlushDuration,t.msMinimumPokeDuration,t.msMinimumClearDuration);
+                customDescription,t.msFlushDuration,t.msMinimumPokeDuration,t.msMinimumClearDuration);
         else
             error('not a string')
         end

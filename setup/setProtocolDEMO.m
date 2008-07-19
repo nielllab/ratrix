@@ -82,7 +82,7 @@ ts4 = trainingStep(vh, discrimStim, repeatIndefinitely(), noTimeOff());%orientat
 ts5 = trainingStep(vh, imageStim,  repeatIndefinitely(), noTimeOff());%morph discrim
 
 p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5});
-stepNum=4;
+stepNum=5;
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

@@ -2,5 +2,5 @@ function [rewardSizeULorMS msPenalty msPuff msRewardSound msPenaltySound] = calc
 rewardSizeULorMS= getScalar(r) * base;
 msPenalty=getMsPenalty(r);
 msPuff=getMsPuff(r);
-msRewardSound=rewardSizeULorMS*getFractionOpenTimeSoundIsOn(r.reinforcementManager);
-msPenaltySound=getMsPenalty(r)*getFractionPenaltySoundIsOn(r.reinforcementManager);
+msRewardSound=rewardSizeULorMS*r.fractionOpenTimeSoundIsOn;
+msPenaltySound=getMsPenalty(r)*r.fractionPenaltySoundIsOn;

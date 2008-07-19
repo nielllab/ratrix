@@ -1,11 +1,12 @@
 function r=reinforcementManager(varargin)
 % REINFORCEMENTMANAGER  class constructor.  ABSTRACT CLASS-- DO NOT INSTANTIATE
-% r=rewardManager(msPenalty, scalar, fractionOpenTimeSoundIsOn, fractionPenaltySoundIsOn)
+% r=rewardManager(msPenalty, msPuff, scalar, fractionOpenTimeSoundIsOn, fractionPenaltySoundIsOn)
 
 r.msPenalty=0;
 r.fractionOpenTimeSoundIsOn=0;
 r.fractionPenaltySoundIsOn=0;
 r.scalar=1;
+r.msPuff=0;
 
 r.rewardStrategy='msOpenTime';
 r.unloggedRewardConvention='reset to 250mmHg';
@@ -24,14 +25,21 @@ switch nargin
         end
     case 4
         r.msPenalty=varargin{1};
-        r.scalar=varargin{2};
-        r.fractionOpenTimeSoundIsOn=varargin{3};
-        r.fractionPenaltySoundIsOn=varargin{4};
+        r.msPuff=varargin{2};
+        r.scalar=varargin{3};
+        r.fractionOpenTimeSoundIsOn=varargin{4};
+        r.fractionPenaltySoundIsOn=varargin{5};
         
         if r.msPenalty>=0
             %pass
         else
             error('msPenalty must be >=0')
+        end
+        
+        if isreal(r.msPuff) && isscalar(r.msPuff) && r.msPuff>=0
+            %pass
+        else
+            error('msPuff must be scalar real >=0')
         end
 
         if r.scalar>=0 && r.scalar<=100

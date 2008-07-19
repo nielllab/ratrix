@@ -132,3 +132,4 @@ protocols/reinforcementManager/@reinforcementManager/getScalar.m -text
 protocols/reinforcementManager/@reinforcementManager/setScalar.m -text
 protocols/reinforcementManager/@reinforcementManager/setMsPenalty.m -text
 protocols/reinforcementManager/@reinforcementManager/getMsPenalty.m -text
+protocols/reinforcementManager/@reinforcementManager/getMsPuff.m -text

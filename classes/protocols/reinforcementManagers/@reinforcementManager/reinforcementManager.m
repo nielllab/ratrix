@@ -36,10 +36,10 @@ switch nargin
             error('msPenalty must be >=0')
         end
         
-        if isreal(r.msPuff) && isscalar(r.msPuff) && r.msPuff>=0
+        if isreal(r.msPuff) && isscalar(r.msPuff) && r.msPuff>=0 && r.msPuff<=r.msPenalty
             %pass
         else
-            error('msPuff must be scalar real >=0')
+            error('msPuff must be scalar real 0<= val <=msPenalty')
         end
 
         if r.scalar>=0 && r.scalar<=100

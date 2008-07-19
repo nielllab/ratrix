@@ -18,8 +18,9 @@ msPenalty               =1000;
 fractionOpenTimeSoundIsOn=1;
 fractionPenaltySoundIsOn=1;
 scalar=1;
+msAirpuff=msPenalty;
 
-constantRewards=constantReinforcement(rewardSizeULorMS,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar);
+constantRewards=constantReinforcement(rewardSizeULorMS,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 
 msFlushDuration         =1000;
 msMinimumPokeDuration   =10;

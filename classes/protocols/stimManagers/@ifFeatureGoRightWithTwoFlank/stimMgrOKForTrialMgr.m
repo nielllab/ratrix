@@ -5,9 +5,9 @@ if isa(tm,'trialManager')
             out=1;
         case 'nAFC' %old standard
             out=1;
-        case 'promptedNAFC' %fans addition, new format, but same idea as NAFC
+        case 'promptedNAFC' %used for eyeDevelopment
             out=1;
-        case 'phasednAFC' %used for eyeDevelopment
+        case 'phasednAFC' %fans addition, new format, but same idea as NAFC
             out=1;
         otherwise
             out=0;

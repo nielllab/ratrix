@@ -14,6 +14,7 @@ if ~exist('subjectsOrRack','var')
 end
 
 if isnumeric(subjectsOrRack)
+    rackID=subjectsOrRack;
     [subjects heatName]=getCurrentSubjects(subjectsOrRack);
 else
     subjects=subjectsOrRack;
@@ -33,8 +34,11 @@ end
 
 
 smoothingWidth=500;
-desktopPath='C:\Documents and Settings\rlab\Desktop';
-archivePath='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\behavior\rats\6trixLogs';
+
+desktopPath=fileparts(fileparts(getRatrixPath));
+if exist('rackID','var')
+    archivePath=fullfile(  fileparts(getSubDirForRack(rackID)) ,'weeklyReports')
+end
 
 wholeReport='';
 for j=1:size(subjects,2)
@@ -124,7 +128,7 @@ if saveToDesktop
 end
 
 saveForPosterity=1;
-if saveForPosterity
+if saveForPosterity & exist('rackID','var')
     reportName=sprintf('%s_weeklyReport.txt',datestr(now,30));
     fid = fopen([archivePath '\' reportName],'wt');
     fprintf(fid,'%s',sprintf (wholeReport));

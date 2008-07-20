@@ -108,10 +108,11 @@ for i=1:numRats
     i
     inspectRatResponses(char(subjects{i}),'noPathUsed',whichPlots,handles,subplotParams,d);
 end
-where='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\behavior\rats\6trixPlots\';
+
+%save local and remote graph
+whereOnServer=fullfile((fileparts(getSubDirForRack(rackID))),'graphs')
 savePlotsToPNG(whichPlots,handles,who,where);
-%another copy to desktop
-where='C:\Documents and Settings\rlab\Desktop\graphs\'
+local=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData','graphs');
 savePlotsToPNG(whichPlots,handles,who,where);
 
 

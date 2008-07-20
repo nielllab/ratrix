@@ -1,8 +1,8 @@
 function [success] = moveLargeDataAndAddExplicitTrialNumbers(source, destination, subjects)
-
+%this function was used to move from the old location to a new one
 
 if ~exist('source', 'var')
-    source = '\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\behavior\rats';
+    source = '\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\behavior\rats'; %where old files used to be before the move
 end
 
 if ~exist('destination', 'var')

@@ -7,7 +7,7 @@ function [stimulus,updateSM,resInd,out,LUT,scaleFactor,type,targetPorts,distract
 %a detection paradigm follows if the left stims have 0 contrast
 %flankers above and below target, total of three stims
 
-text='myStim';
+text='pmmStim';
 details.screenDisplaySize=screenDisplaySize;
 
 
@@ -120,18 +120,18 @@ details.pctCorrectionTrials=0.5; % need to change this to be passed in from tria
 
 details.maxCorrectForceSwitch=0;  % make sure this gets defined even if no trial records or free drinks
 
-if isempty(trialRecords) || ~any(strcmp('correctionTrial',fields(trialRecords(end).stimDetails)))
-    lastResponse=[];
-    lastCorrect=[];
-    lastWasCorrection=0;
-  else  
-    lastResponse=find(trialRecords(end).response);
-    lastCorrect=trialRecords(end).correct;
-    lastWasCorrection=trialRecords(end).stimDetails.correctionTrial;
-    if length(lastResponse)>1
-        lastResponse=lastResponse(1); % could be a value or 2 or 3 which influence freedrinks rewards, but not nAFC
-    end
-end
+% if isempty(trialRecords) || ~any(strcmp('correctionTrial',fields(trialRecords(end).stimDetails)))
+%     lastResponse=[];
+%     lastCorrect=[];
+%     lastWasCorrection=0;
+%   else  
+%     lastResponse=find(trialRecords(end).response);
+%     lastCorrect=trialRecords(end).correct;
+%     lastWasCorrection=trialRecords(end).stimDetails.correctionTrial;
+%     if length(lastResponse)>1
+%         lastResponse=lastResponse(1); % could be a value or 2 or 3 which influence freedrinks rewards, but not nAFC
+%     end
+% end
 
 switch trialManagerClass
     case 'freeDrinks'
@@ -141,24 +141,39 @@ switch trialManagerClass
 
     case {'nAFC','promptedNAFC'}
 
-
+        if ~isempty(trialRecords)
+            lastRec=trialRecords(end);
+        else
+            lastRec=[];
+        end
+        [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts);
+        
         %note that this implementation will not show the exact same
         %stimulus for a correction trial, but just have the same side
         %correct.  may want to change...
-        if ~isempty(lastCorrect) && ~isempty(lastResponse) && ~lastCorrect && (lastWasCorrection || rand<details.pctCorrectionTrials)
-            details.correctionTrial=1;
+        if details.correctionTrial
             details.maxCorrectForceSwitch=0;
-            'correction trial!'
-            targetPorts=trialRecords(end).targetPorts;
         else
-            details.correctionTrial=0;
-
-            [targetPorts hadToResample]=getSameLimitedResponsePort(responsePorts,stimulus.maxCorrectOnSameSide,trialRecords);
+            [targetPorts hadToResample]=getSameLimitedResponsePort(responsePorts,stimulus.maxCorrectOnSameSide,trialRecords);  % add this to assignPorts
             details.maxCorrectForceSwitch=hadToResample;
-            %targetPorts=responsePorts(ceil(rand*length(responsePorts)));
-            %old random selection is now inside helper function -pmm
         end
-        isCorrection = details.correctionTrial;
+        
+        
+%         if ~isempty(lastCorrect) && ~isempty(lastResponse) && ~lastCorrect && (lastWasCorrection || rand<details.pctCorrectionTrials)
+%             details.correctionTrial=1;
+%             details.maxCorrectForceSwitch=0;
+%             'correction trial!'
+%             targetPorts=trialRecords(end).targetPorts;
+%         else
+%             details.correctionTrial=0;
+% 
+%             [targetPorts hadToResample]=getSameLimitedResponsePort(responsePorts,stimulus.maxCorrectOnSameSide,trialRecords);
+%             details.maxCorrectForceSwitch=hadToResample;
+%             %targetPorts=responsePorts(ceil(rand*length(responsePorts)));
+%             %old random selection is now inside helper function -pmm
+%         end
+
+        %isCorrection = details.correctionTrial;
 
         distractorPorts=setdiff(responsePorts,targetPorts);
         targetPorts
@@ -595,18 +610,42 @@ try
         if cornerMarkerOn
             stim(1)=0; stim(2)=255;
         end
-
+        
         details.persistFlankersDuringToggle=stimulus.persistFlankersDuringToggle;
-        if strcmp(type,'trigger') && details.toggleStim==1
-            %only send 2 frames if in toggle stim mode
-            out=stim(:,:,end-1:end);
-            if details.persistFlankersDuringToggle
-                out(:,:,end)=stim(:,:,1);  %alternate with a prestim that has flankers, so only target flashes
-            end
-        else
-            %send all frames if in normal mode
-            out=stim;
+
+
+        switch trialManagerClass
+            case 'phasedNAFC'
+                %set to design specs
+
+                
+                % Initialization of stimSpecs and soundTypes - also decide how many progressive subphases you have here
+                numProgressivePhases = 3; % NUMBER OF PROGRESSIVE SUBPHASES
+                stimSpecs = cell(1, length(phases) + numProgressivePhases); % preallocate stimSpecs to be length of phases
+                soundTypes = cell(1, length(phases) + numProgressivePhases); % preallocate soundTypes
+                lengthOfStims = 0; % initialize lengthOfStims
+                scaleFactors = cell(1,length(phases)+numProgressivePhases); % preallocate scaleFactors
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                
+                %...hmm the signature to calc stim has changed since fan wrote it...
+                
+                
+            otherwise %nAFC or freedrinks
+
+                if strcmp(type,'trigger') && details.toggleStim==1
+                    %only send 2 frames if in toggle stim mode
+                    out=stim(:,:,end-1:end);
+                    if details.persistFlankersDuringToggle
+                        out(:,:,end)=stim(:,:,1);  %alternate with a prestim that has flankers, so only target flashes
+                    end
+                else
+                    %send all frames if in normal mode
+                    out=stim;
+                end
+
         end
+
+
 
         %grayscale sweep for viewing purposes
         drawColorBar=0;  %**add as a parameter in stimManager object
@@ -752,8 +791,6 @@ switch insertMethod
         
         error ('unknown calculation method for inserting stim patches')
 end
-
-
 
 %   function stim=insertPatch(stim,pos,featureVideo,featureOptions,chosenFeature,mean,contrast)
 %     featureInd=find(featureOptions==chosenFeature);

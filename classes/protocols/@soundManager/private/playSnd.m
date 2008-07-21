@@ -5,7 +5,7 @@ if isa(station,'station')
             if duration==-1 || duration>=0
 
                 [clip sampleRate sm updateSMCache]=getSound(sm,soundName);
-                size(clip)
+                %size(clip)
                 if duration>=0
                     durationSamps = max(1,ceil(sampleRate*duration)); %if don't have at least 1, audioplayer complains
                     if durationSamps>size(clip,2)
@@ -22,7 +22,7 @@ if isa(station,'station')
                 try
                     newRecs=struct([]);
                     numRecs=0;
-                    length(sm.records)
+                    %length(sm.records)
                     % If mono sound, send same signal to both channels
                     if(size(clip,1) == 1)
                         clip(2,:) = clip(1,:);

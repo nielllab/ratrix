@@ -33,7 +33,7 @@ if isa(station,'station')
 
         if isempty(newSound) && ~keepPlaying
             %'Stopping all loops'
-            length(sm.records)
+            %length(sm.records)
             newRecs=struct([]);
             numRecs=0;
             for i = 1:length(sm.records)

@@ -1,7 +1,7 @@
 function kbTest
 ListenChar(2);
 
-openwindow=false; %if true, keys are typed through
+openwindow=true; %if true, keys are typed through on vista
 
 if openwindow
     w =Screen('OpenWindow',max(Screen('Screens')));

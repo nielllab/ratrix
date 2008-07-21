@@ -8,6 +8,8 @@ KbName('UnifyKeyNames');
 FlushEvents('keyDown');%undoes listenchar(2)!
 KbCheck;
 
+Screen('Resolution',0,1024,768,100,32);
+
 dontclear=0;
 Screen('Preference', 'SkipSyncTests', 0);
 Screen('Preference', 'VisualDebugLevel', 6);
@@ -16,10 +18,6 @@ Screen('Preference', 'Verbosity', 10); %4 is highest useful for end users
 Screen('Preference', 'VBLTimestampingMode', 2); %see help beampositionqueries
 
 w =Screen('OpenWindow',max(Screen('Screens')));
-
-t=floor(255*rand(400));
-n=Screen('MakeTexture', w, t);
-Screen('PreloadTextures', w);
 
 frameNum=0;
 drops=0;
@@ -36,6 +34,9 @@ lastVbl=vbl;
 startTime=vbl;
 while ~quit
     frameNum=1+frameNum;
+    
+    t=floor(255*rand(20));
+    n=Screen('MakeTexture', w, t);
     Screen('DrawTexture', w, n);
     Screen('DrawText',w,sprintf('priority:%g',Priority),100,100);
     Screen('DrawingFinished',w,dontclear);
@@ -46,6 +47,8 @@ while ~quit
         dropNums(drops)=frameNum;
         disp(sprintf('drop %d: frame %d at %g',drops,frameNum,GetSecs-startTime));
     end
+    
+    Screen('Close',n);
 
     errorPcts(frameNum,1) = ((vbl-lastVbl)/ifi)-1;
     lastVbl=vbl;

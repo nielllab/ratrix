@@ -75,3 +75,4 @@ trialRecordProcessing/compareTrialRecordFileNames.m -text
 matlaby/datenumFor30.m -text
 stimHelpers/chooseLargestResForHzsDepthRatio.m -text
 matlaby/fastDec2Bin.m -text
+infrastructure/screenTimingTest.m -text

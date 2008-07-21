@@ -22,7 +22,7 @@ if isa(station,'station')
             if sm.playerType == sm.AUDIO_PLAYER
                 isp=isplaying(sm.records(match).player); %prevent subtle bug from state changes to player during this call
             elseif sm.playerType == sm.PSYCH_PORT_AUDIO
-                status = PsychPortAudio('GetStatus', sm.records(match).player)
+                status = PsychPortAudio('GetStatus', sm.records(match).player);
                 isp=status.Active; %prevent subtle bug from state changes to player during this call
             else
                 error('Unkown sound player type')
@@ -32,7 +32,7 @@ if isa(station,'station')
         end
 
         if isempty(newSound) && ~keepPlaying
-            'Stopping all loops'
+            %'Stopping all loops'
             length(sm.records)
             newRecs=struct([]);
             numRecs=0;

@@ -212,7 +212,7 @@ try
 
     labelFrames = 1;            %print a frame ID on each frame (makes frame calculation slow!)
 
-    verbose = 1;
+    verbose = false;
 
     dontclear = 0;              %2 saves time by not reinitializing -- safe for us cuz we're redrawing everything -- but gives blue flashing?
     %some stimulus types set dontclear to 1
@@ -489,7 +489,7 @@ try
             error('need an rnet for station with rewardMethod of serverPump')
         end
     end
-    
+
     attempt=0;
     done=0;
     i=0;
@@ -555,12 +555,12 @@ try
 
     isRequesting=0;
     stimToggledOn=0;
-    
+
     puffStarted=0;
     puffDone=false;
 
     xSubjectTextPos = 25;
-    xTextPos = xSubjectTextPos+250;
+    xTextPos = xSubjectTextPos+75;
     yTextPos = 20;
     standardFontSize=15; %big was 25
     subjectFontSize=35;
@@ -751,7 +751,8 @@ try
                     else
                         txtLabel=textLabel;
                     end
-                    [garbage,yNewTextPos] = Screen('DrawText',window,['priority:' num2str(Priority()) ' session:' num2str(sessionNumber) ' trial:' num2str(trialInd) ' stim ind:' num2str(i) ' frame ind:' num2str(frameNum) ' calcStim:' txtLabel],xTextPos,yNewTextPos,100*ones(1,3));
+                    [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('priority:%g session:%d trial:%d stimInd:%d  frame:%d stim:%s',Priority(),sessionNumber,trialInd,i,frameNum,txtLabel),xTextPos,yNewTextPos,100*ones(1,3));
+                    %[garbage,yNewTextPos] = Screen('DrawText',window,['priority:' num2str(Priority()) ' session:' num2str(sessionNumber) ' trial:' num2str(trialInd) ' stim ind:' num2str(i) ' frame ind:' num2str(frameNum) ' calcStim:' txtLabel],xTextPos,yNewTextPos,100*ones(1,3));
                     yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
                 end
 
@@ -856,7 +857,7 @@ try
 
 
         if msAirpuff>0 && ~puffDone && (puffStarted==0 || GetSecs-puffStarted<=msAirpuff/1000)
-            
+
             setPuff(station,true);
             if puffStarted==0
                 puffStarted=GetSecs;
@@ -865,7 +866,7 @@ try
             setPuff(station,false);
             puffDone=true;
         end
-        
+
         if ~paused
             ports=readPorts(station);
         end
@@ -1014,7 +1015,7 @@ try
                 if rand<getFreeDrinkLikelihood(tm)
                     %ports(ceil(rand*length(responseOptions)))=1; %whoops -- bug
                     ports(ceil(rand*getNumPorts(station)))=1;
-                    'FREE LICK AT PORT AS FOLLOWS -- NEED TO OFFICIALLY RECORD THIS'
+                    %'FREE LICK AT PORT AS FOLLOWS -- NEED TO OFFICIALLY RECORD THIS'
                     potentialStochasticResponse=1; %might not be a viable response option, so don't log didStocasticResponse yet
                 else
                     potentialStochasticResponse=0;
@@ -1083,17 +1084,17 @@ try
 
                     serverValveStates=currentValveState;
 
-            while commandsAvailable(rn,constants.priorities.IMMEDIATE_PRIORITY) && ~done && ~quit
-                %logwrite('handling IMMEDIATE priority command in stimOGL');
-                if ~isConnected(rn)
-                    done=true;
-                end
-                com=getNextCommand(rn,constants.priorities.IMMEDIATE_PRIORITY);
-                if ~isempty(com)
-                    [good cmd args]=validateCommand(rn,com);
-                    %logwrite(sprintf('command is %d',cmd));
-                    if good
-                        switch cmd
+                    while commandsAvailable(rn,constants.priorities.IMMEDIATE_PRIORITY) && ~done && ~quit
+                        %logwrite('handling IMMEDIATE priority command in stimOGL');
+                        if ~isConnected(rn)
+                            done=true;
+                        end
+                        com=getNextCommand(rn,constants.priorities.IMMEDIATE_PRIORITY);
+                        if ~isempty(com)
+                            [good cmd args]=validateCommand(rn,com);
+                            %logwrite(sprintf('command is %d',cmd));
+                            if good
+                                switch cmd
 
 
 
@@ -1169,19 +1170,19 @@ try
                 else
                     error('need a rnet for serverPump')
                 end
-                
+
             case 'localPump'
-                
+
                 if requestRewardStarted && ~requestRewardDone && requestRewardStartLogged
                     station=doReward(station,getRequestRewardSizeULorMS(tm)/1000,requestRewardPorts);
                     requestRewardDone=true;
                 end
-                
+
                 if any(doValves)
                     primeMLsPerSec=1.0;
                     station=doReward(station,primeMLsPerSec*ifi,doValves);
                 end
-                
+
                 newValveState=0*doValves;
             otherwise
                 error('unrecognized rewardmethod')
@@ -1202,13 +1203,13 @@ try
                 quit=sendToServer(rn,getClientId(rn),constants.priorities.IMMEDIATE_PRIORITY,constants.stationToServerCommands.C_REWARD_CMD,{getRequestRewardSizeULorMS(tm),logical(requestRewardPorts)});
             end
             responseDetails.requestRewardStartTime=GetSecs();
-            'request reward!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+            %'request reward!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
             requestRewardStartLogged=true;
         end
 
         if  requestRewardDone && ~requestRewardDurLogged
             responseDetails.requestRewardDurationActual=GetSecs()-responseDetails.requestRewardStartTime;
-            'request reward stopped!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+            %'request reward stopped!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
             requestRewardDurLogged=true;
         end
 
@@ -1236,14 +1237,14 @@ try
         [vbl sos ft missed]=Screen('Flip',window,when,dontclear);
         Screen('Close'); %leaving off second argument closes all textures but leaves windows open
     end
-    
+
     if hasAirpuff(station)
         setPuff(station,false);
     end
 
     Priority(originalPriority);
     ListenChar(0);
-    
+
 catch
     ers=lasterror
     ers.message

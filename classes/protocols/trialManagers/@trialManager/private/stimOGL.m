@@ -559,8 +559,7 @@ try
     puffStarted=0;
     puffDone=false;
 
-    xSubjectTextPos = 25;
-    xTextPos = xSubjectTextPos+75;
+    xTextPos = 10;
     yTextPos = 20;
     standardFontSize=15; %big was 25
     subjectFontSize=35;
@@ -738,9 +737,10 @@ try
             if window>=0
                 if labelFrames
                     %junkSize = Screen('TextSize',window,subjectFontSize);
-                    [garbage,yTextPosUnused] = Screen('DrawText',window,['ID:' subID ],xSubjectTextPos,yTextPos,100*ones(1,3));
+                    [xTextPos,yTextPosUnused] = Screen('DrawText',window,['ID:' subID ],xTextPos,yTextPos,100*ones(1,3));
+                    xTextPos=xTextPos+25;
                     %junkSize = Screen('TextSize',window,standardFontSize);
-                    [garbage,yNewTextPos] = Screen('DrawText',window,['trialManager:' class(tm) ' stimManager:' stimID  ' protocol:' protocolStr ],xTextPos,yNewTextPos,100*ones(1,3));
+                    [garbage,yNewTextPos] = Screen('DrawText',window,['trlMgr:' class(tm) ' stmMgr:' stimID  ' prtcl:' protocolStr ],xTextPos,yNewTextPos,100*ones(1,3));
                 end
                 [normBoundsRect, offsetBoundsRect]= Screen('TextBounds', window, 'TEST');
                 yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
@@ -751,7 +751,7 @@ try
                     else
                         txtLabel=textLabel;
                     end
-                    [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('priority:%g session:%d trial:%d stimInd:%d  frame:%d stim:%s',Priority(),sessionNumber,trialInd,i,frameNum,txtLabel),xTextPos,yNewTextPos,100*ones(1,3));
+                    [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('priority:%g session:%d trial:%d stimInd:%d frame:%d stim:%s',Priority(),sessionNumber,trialInd,i,frameNum,txtLabel),xTextPos,yNewTextPos,100*ones(1,3));
                     %[garbage,yNewTextPos] = Screen('DrawText',window,['priority:' num2str(Priority()) ' session:' num2str(sessionNumber) ' trial:' num2str(trialInd) ' stim ind:' num2str(i) ' frame ind:' num2str(frameNum) ' calcStim:' txtLabel],xTextPos,yNewTextPos,100*ones(1,3));
                     yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
                 end

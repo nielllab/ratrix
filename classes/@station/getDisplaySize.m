@@ -1,2 +1,3 @@
 function out=getDisplaySize(s)
-out=Screen('DisplaySize',s.screenNum);
+[a b]=Screen('DisplaySize',s.screenNum);
+out=[a b];

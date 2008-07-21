@@ -329,7 +329,15 @@ try
         if any(LUT(:)>1) || any(LUT(:)<0)
             error('LUT values must be normalized values between 0 and 1')
         end
-        oldCLUT = Screen('LoadNormalizedGammaTable', window, LUT,0);
+        try
+            oldCLUT = Screen('LoadNormalizedGammaTable', window, LUT,0); %apparently it's ok to use a window ptr instead of a screen ptr, despite the docs
+        catch e
+            %if the above fails, we lose our window :(
+            %window=Screen('OpenWindow',max(Screen('Screens')));
+            e.message
+            %warning('failed to load clut and had to reopen the window, everything is probably screwed')
+            error('couldnt set clut')
+        end
         currentCLUT = Screen('ReadNormalizedGammaTable', window);
         %test clut values
         if all(all(currentCLUT-LUT<0.00001))
@@ -451,7 +459,7 @@ try
             textures=zeros(1,size(stim,3));
             for i=1:size(stim,3)
                 if window>=0
-                    textures(i)=Screen('MakeTexture', window, squeeze(stim(:,:,i)),0,0,floatprecision);
+                    textures(i)=Screen('MakeTexture', window, squeeze(stim(:,:,i)),0,0,floatprecision); %ned floatprecision=0 for remotedesktop
                 end
             end
 

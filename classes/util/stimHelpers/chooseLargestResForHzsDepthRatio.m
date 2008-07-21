@@ -17,5 +17,9 @@ for i=1:length(hzs)
         return    
     end
 end
-
-error('no match')
+ind=nan;
+x=Screen('Resolution',max(Screen('Screens'))); %error -- this may not be the screen, but we don't have a handle to it...
+height=x.height;
+width=x.width;
+hz=x.hz;
+warning('no match')

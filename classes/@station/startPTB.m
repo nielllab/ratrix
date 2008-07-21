@@ -44,7 +44,9 @@ try
     s.ifi = Screen('GetFlipInterval',s.window);%,200); %numSamples
 
     if abs((s.ifi/(1/res.hz))-1)>.1
-        error('screen(resolution) reporting framerate off by more than 10% of measured ifi')
+        s.ifi
+        1/res.hz
+        error('screen(resolution) reporting framerate off by more than 10% of measured ifi') %needs to be warning to work with remotedesktop
     end
     
     texture=Screen('MakeTexture', s.window, BlackIndex(s.window));

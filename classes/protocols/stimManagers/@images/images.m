@@ -78,6 +78,8 @@ switch nargin
                 error('cell entries in trialDistribution must be 1x2 cells of format {imagePrefixN imagePrefixP} prob}')
             end
         else
+            varargin{8}
+            size(varargin{8})
             error('trialDistribution must be nonempty vector cell array')
         end
 

@@ -1,4 +1,4 @@
-function [ind height width]=chooseLargestResForHzAndDepth(resolutions,hzs,depth)
+function [ind height width]=chooseLargestResForHzsDepthRatio(resolutions,hzs,depth,ratio)
 hzs=sort(hzs,'descend');
 
 for i=1:length(hzs)

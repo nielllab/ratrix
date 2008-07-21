@@ -183,7 +183,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
 
             currentValveStates=verifyValvesClosed(station);
 
-            pStr=[trialRecords(trialInd).protocolName '(' num2str(trialRecords(trialInd).protocolVersion.manualVersion) ':' num2str(trialRecords(trialInd).protocolVersion.autoVersion) ')' ' step:' num2str(trialRecords(trialInd).trainingStepNum) '/' num2str(trialRecords(trialInd).numStepsInProtocol) ];
+            pStr=[trialRecords(trialInd).protocolName '(' num2str(trialRecords(trialInd).protocolVersion.manualVersion) 'm:' num2str(trialRecords(trialInd).protocolVersion.autoVersion) 'a)' ' step:' num2str(trialRecords(trialInd).trainingStepNum) '/' num2str(trialRecords(trialInd).numStepsInProtocol) ];
 
             [stopEarly trialRecords(trialInd).response,...
                 trialRecords(trialInd).responseDetails,...

@@ -559,7 +559,7 @@ try
     puffStarted=0;
     puffDone=false;
 
-    xTextPos = 10;
+    xOrigTextPos = 10;
     yTextPos = 20;
     standardFontSize=15; %big was 25
     subjectFontSize=35;
@@ -737,8 +737,8 @@ try
             if window>=0
                 if labelFrames
                     %junkSize = Screen('TextSize',window,subjectFontSize);
-                    [xTextPos,yTextPosUnused] = Screen('DrawText',window,['ID:' subID ],xTextPos,yTextPos,100*ones(1,3));
-                    xTextPos=xTextPos+25;
+                    [xTextPos,yTextPosUnused] = Screen('DrawText',window,['ID:' subID ],xOrigTextPos,yTextPos,100*ones(1,3));
+                    xTextPos=xTextPos+50;
                     %junkSize = Screen('TextSize',window,standardFontSize);
                     [garbage,yNewTextPos] = Screen('DrawText',window,['trlMgr:' class(tm) ' stmMgr:' stimID  ' prtcl:' protocolStr ],xTextPos,yNewTextPos,100*ones(1,3));
                 end

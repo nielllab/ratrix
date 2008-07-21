@@ -1,9 +1,11 @@
-function [ind height width]=chooseLargestResForHzsDepthRatio(resolutions,hzs,depth,ratio)
+function [ind height width hz]=chooseLargestResForHzsDepthRatio(resolutions,hzs,depth,maxWidth,maxHeight)
+
+ratio=maxWidth/maxHeight;
 hzs=sort(hzs,'descend');
 
 for i=1:length(hzs)
-    hz=hzs(i);
-    inds=find([[resolutions.hz]==hz & [resolutions.pixelSize]==depth]);
+    hz=hzs(i);    
+    inds=find([[resolutions.hz]==hz & [resolutions.pixelSize]==depth] & ([resolutions.width]./[resolutions.height])==ratio & [resolutions.width]<=maxWidth & [resolutions.height]<=maxHeight);
     pix=[resolutions(inds).height] .* [resolutions(inds).width];
     ind=find(pix==max(pix));
     ind=inds(ind);
@@ -16,4 +18,4 @@ for i=1:length(hzs)
     end
 end
 
-error('should never get here')
+error('no match')

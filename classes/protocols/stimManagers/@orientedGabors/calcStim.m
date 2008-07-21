@@ -3,7 +3,7 @@ function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts
 % see ratrixPath\documentation\stimManager.calcStim.txt for argument specification (applies to calcStims of all stimManagers)
 
 [LUT stimulus updateSM]=getLUT(stimulus,LUTbits);
-[resolutionIndex height width]=chooseLargestResForHzAndDepth(resolutions,[60 100],32);
+[resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60],32,getMaxWidth(stimulus),getMaxHeight(stimulus));
 
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);

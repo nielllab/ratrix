@@ -52,6 +52,7 @@ radius                  =.04;
 contrast                =1;
 thresh                  =.00005;
 yPosPct                 =.65;
+%screen('resolutions') returns values too high for our NEC MultiSync FE992's -- it must just consult graphics card
 maxWidth                =800;
 maxHeight               =600;
 scaleFactor             =[1 1];

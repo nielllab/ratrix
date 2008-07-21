@@ -14,7 +14,7 @@ sm=soundManager({soundClip('correctSound','allOctaves',[400],20000), ...
     soundClip('wrongSound','tritones',[300 400],20000)});
 
 rewardSizeULorMS        =50;
-msPenalty               =1000;
+msPenalty               =100000;
 fractionOpenTimeSoundIsOn=1;
 fractionPenaltySoundIsOn=1;
 scalar=1;
@@ -53,8 +53,8 @@ contrast                =1;
 thresh                  =.00005;
 yPosPct                 =.65;
 %screen('resolutions') returns values too high for our NEC MultiSync FE992's -- it must just consult graphics card
-maxWidth                =800;
-maxHeight               =600;
+maxWidth                =1024;
+maxHeight               =768;
 scaleFactor             =[1 1];
 interTrialLuminance     =.5;
 freeStim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
@@ -83,7 +83,7 @@ ts4 = trainingStep(vh, discrimStim, repeatIndefinitely(), noTimeOff());%orientat
 ts5 = trainingStep(vh, imageStim,  repeatIndefinitely(), noTimeOff());%morph discrim
 
 p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5});
-stepNum=5;
+stepNum=4;
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

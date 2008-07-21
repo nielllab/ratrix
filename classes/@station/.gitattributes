@@ -14,8 +14,6 @@
 /setSoundOn.m -text
 /getPhysicalLocation.m -text
 /getMACaddress.m -text
-/getWidth.m -text
-/getHeight.m -text
 /getSoundOn.m -text
 /getResponseMethod.m -text
 /setAndCheckValves.m -text

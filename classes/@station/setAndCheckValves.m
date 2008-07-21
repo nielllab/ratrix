@@ -13,7 +13,7 @@ if strcmp(station.responseMethod,'parallelPort')
     if ~all(beforeValveState==expectedValveState)
         disp('VALVE ERROR: LOGGING IT')
         errNum=size(valveErrorDetails,2)+1;
-        valveErrorDetails(errNum).timeSinceTrial=getSecs()-startTime;
+        valveErrorDetails(errNum).timeSinceTrial=GetSecs()-startTime;
         valveErrorDetails(errNum).expected=expectedValveState;
         valveErrorDetails(errNum).found=beforeValveState;
         valveErrorDetails(errNum).description=description;

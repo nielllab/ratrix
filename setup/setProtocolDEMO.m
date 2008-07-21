@@ -14,7 +14,7 @@ sm=soundManager({soundClip('correctSound','allOctaves',[400],20000), ...
     soundClip('wrongSound','tritones',[300 400],20000)});
 
 rewardSizeULorMS        =50;
-msPenalty               =100000;
+msPenalty               =1000;
 fractionOpenTimeSoundIsOn=1;
 fractionPenaltySoundIsOn=1;
 scalar=1;

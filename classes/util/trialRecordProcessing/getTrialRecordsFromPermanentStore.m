@@ -43,7 +43,7 @@ else
     fullFileNames=getTrialRecordFiles(fullfile(permanentStorePath,subjectID));
     if ~isempty(fullFileNames)
         for i=1:length(fullFileNames)
-            [filePath fileName fileExt]=fileParts(fullFileNames{i});
+            [filePath fileName fileExt]=fileparts(fullFileNames{i});
             fileNames{i,1}=[fileName fileExt];
         end %fileNames are chronological if using OS, but not necessarily if using conn to db... think it's okay because they're sorted in a few lines - pmm 08/06/26
     else

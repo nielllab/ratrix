@@ -1,10 +1,12 @@
 function screenTimingTest
 clc
+close all
+
 HideCursor;
 ListenChar(2);
-FlushEvents('keyDown');
-KbCheck;
 KbName('UnifyKeyNames');
+FlushEvents('keyDown');%undoes listenchar(2)!
+KbCheck;
 
 dontclear=0;
 Screen('Preference', 'SkipSyncTests', 0);
@@ -21,6 +23,7 @@ Screen('PreloadTextures', w);
 
 frameNum=0;
 drops=0;
+dropNums=zeros(1,200);
 quit=false;
 errorPcts=zeros(999999,3);
 
@@ -40,6 +43,7 @@ while ~quit
 
     if missed>0
         drops=drops+1;
+        dropNums(drops)=frameNum;
         disp(sprintf('drop %d: frame %d at %g',drops,frameNum,GetSecs-startTime));
     end
 
@@ -64,4 +68,10 @@ Priority(0);
 ShowCursor
 ListenChar(0)
 errorPcts(:,3)=[(diff(errorPcts(:,3))/ifi)-1 ; 0];
-plot(errorPcts(1:frameNum-1,:));
+errorPcts=errorPcts(1:frameNum-1,:);
+plot(errorPcts);
+hold on
+dropNums=dropNums(dropNums~=0);
+for i = 1:length(dropNums)
+    plot(dropNums(i)*ones(1,2),[-1 1]*max(abs(errorPcts(:))),'k')
+end

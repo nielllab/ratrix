@@ -34,10 +34,10 @@ pixPerCycs              =[40];
 targetOrientations      =[pi/2];
 distractorOrientations  =[];
 mean                    =.5;
-radius                  =.12;
+radius                  =.07;
 contrast                =1;
 thresh                  =.00005;
-yPosPct                 =.3;
+yPosPct                 =.66;
 maxWidth                =800;
 maxHeight               =600;
 scaleFactor             =[1 1];
@@ -80,6 +80,9 @@ if istest
 else 
     gc=performanceCriterion([.95, .85], int8([20,200]));
 end
+
+radius                  =.12;
+freeStim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 ts3=trainingStep(gts, freeStim, gc, noTimeOff(),svnRev);
 

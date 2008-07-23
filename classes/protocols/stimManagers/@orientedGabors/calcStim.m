@@ -70,7 +70,7 @@ if strcmp(type,'trigger')
     out(:,:,2)=stimulus.mean;
 end
 
-if details.correctionTrial;
+if strcmp(trialManagerClass,'nAFC') && details.correctionTrial
     text='correction trial!';
 else
     text=sprintf('pixPerCyc: %g',details.pixPerCyc);

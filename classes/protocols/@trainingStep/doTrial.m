@@ -3,10 +3,10 @@ graduate=0;
 
 
 if ~isempty(rn)
-    if ~isempty(t.svnRevNum)
-        args={t.svnRevURL t.svnRevNum};
+    if ~isempty(ts.svnRevNum)
+        args={ts.svnRevURL ts.svnRevNum};
     else
-        args={t.svnRevURL};
+        args={ts.svnRevURL};
     end
     doQuit=updateRatrixRevisionIfNecessary(args);
     if doQuit

@@ -574,7 +574,7 @@ try
 
     xOrigTextPos = 10;
     yTextPos = 20;
-    standardFontSize=8; %big was 25
+    standardFontSize=11; %big was 25
     subjectFontSize=35;
 
 
@@ -768,7 +768,7 @@ try
                     %[garbage,yNewTextPos] = Screen('DrawText',window,['priority:' num2str(Priority()) ' session:' num2str(sessionNumber) ' trial:' num2str(trialInd) ' stim ind:' num2str(i) ' frame ind:' num2str(frameNum) ' calcStim:' txtLabel],xTextPos,yNewTextPos,100*ones(1,3));
                     yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
                     
-                    [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('ptb ver:%s \t\t ratrix ver:%s',ptbVersion,ratrixVersion),xTextPos,yNewTextPos,100*ones(1,3));
+                    [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('ptb ver:%s \t\n ratrix ver:%s',ptbVersion,ratrixVersion),xTextPos,yNewTextPos,100*ones(1,3));
                     yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
                 end
 

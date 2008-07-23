@@ -8,16 +8,16 @@ if exist(f) == 2
     try
         fprintf('Attempting to update ratrix code\n');
 
-        [runningSVNversion repositorySVNversion url]=getSVNRevisionFromXML(getRatrixPath);
+        rPath=getRatrixPath
+        [runningSVNversion repositorySVNversion url]=getSVNRevisionFromXML(rPath)
 
         target=load(f);
-        [targetSVNurl targetRevNum] =checkTargetRevision({target.targetURL,target.targetRevNum});
+        [targetSVNurl targetRevNum] =checkTargetRevision({target.targetURL,target.targetRevNum})
 
         svnPath = GetSubversionPath;
 
-        rPath=getRatrixPath;
         if rPath(end)==filesep
-            rPath=rPath(1:end-1); %windows svn requires no trailing slash
+            rPath=rPath(1:end-1) %windows svn requires no trailing slash
         end
 
         [status result]=system([svnPath 'svn cleanup ' '"' rPath '"']);
@@ -25,6 +25,8 @@ if exist(f) == 2
             result
             'bad svn cleanup of ratrix code'
         end
+        
+        rPath
 
         % Must remove the directories from Matlab's path, so they can be
         % deleted if needed
@@ -36,8 +38,9 @@ if exist(f) == 2
         else
             revNumStr=num2str(targetRevNum);
         end
-        cmdStr=[svnPath 'svn switch "' targetSVNurl '"@' revNumStr ' "' rPath '" && ' svnPath 'svn cleanup "' rPath '"']
-        %cmdStr=[svnPath 'svn switch "' targetSVNurl '" -r ' revNumStr ' "' rPath '" && ' svnPath 'svn cleanup "' rPath '"']
+        rPath
+        %cmdStr=[svnPath 'svn switch "' targetSVNurl '"@' revNumStr ' "' rPath '" && ' svnPath 'svn cleanup "' rPath '"']
+        cmdStr=[svnPath 'svn switch "' targetSVNurl '" -r ' revNumStr ' "' rPath '" && ' svnPath 'svn cleanup "' rPath '"']
         [status result]=system(cmdStr);
 
         % Generate a new list of directories
@@ -49,7 +52,8 @@ if exist(f) == 2
         else
             result
             [runningSVNversion repositorySVNversion url]=getSVNRevisionFromXML(getRatrixPath);
-            if runningSVNversion==targetRevNum && strcmp(url,targetSVNurl)
+            if ((isempty(targetRevNum)&& repositorySVNversion==runningSVNversion)||...
+                    (~isempty(targetRevNum)&&runningSVNversion==targetRevNum)) && strcmp(url,targetSVNurl)
                 delete(f);
                 fprintf('Ratrix code update appeared to succeed\n');
             else

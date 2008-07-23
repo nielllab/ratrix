@@ -43,15 +43,18 @@ try
                 r = rnet('client',id,serverAddress);
                 'yo3'
 %             end
-        catch ex
-            if any(strfind(ex.message,'Unable to open I/O streams on server socket in client thread'))% says can't find server
+        catch ex %doesn't get message below, instead gets Unable to establish socket in RlabNetworkClient constructor  java.net.ConnectException: Connection timed out: connect
+            errStr='Unable to establish socket in RlabNetworkClient constructor';
+%             x=lasterror
+%             x.message
+%             [x y]=lasterr
+            if  any(strfind(ex.message,errStr)) || any(strfind(ex.message,'Unable to open I/O streams on server socket in client thread'))% says can't find server
                 r=[];
                 tries=tries+1;
                 fprintf('try %d: no server found at %s, trying again in a sec\n',tries, serverAddress)
                 WaitSecs(1);
             else
-                ex
-                ple
+                ple(ex)
                 error('bootstrap problem')
             end
         end
@@ -82,7 +85,8 @@ try
     end
 
 catch ex
-    ple
+
+    ple(ex)
 
     fprintf('shutting down client due to error\n')
     cleanup(r);

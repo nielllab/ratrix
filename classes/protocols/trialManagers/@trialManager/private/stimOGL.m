@@ -574,7 +574,7 @@ try
 
     xOrigTextPos = 10;
     yTextPos = 20;
-    standardFontSize=15; %big was 25
+    standardFontSize=8; %big was 25
     subjectFontSize=35;
 
 

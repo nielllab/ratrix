@@ -4,7 +4,6 @@
 /commandsAvailable.m -text
 /rewardClient.m -text
 /startPrime.m -text
-/writeSVNUpdateCommand.m -text
 /getServer.m -text
 /parsetest.m -text
 /clearTemporaryFiles.m -text

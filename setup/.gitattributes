@@ -10,5 +10,5 @@ setupMaleRoom/setupMaleRoom.m -text
 setupEDF/getEDFids.m -text
 setupEDF/setProtocolDFP.rack2backup.m -text
 setupEDF/makeProtocol.m -text
-setupEDF/setProtocolEDF.oldm -text
 setupEDF/setProtocolEDF.m -text
+setupEDF/setProtocolEDF.old.m -text

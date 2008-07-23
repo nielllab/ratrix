@@ -45,7 +45,7 @@ for i=1:length(subIDs)
                 stepNum=1;
             case {'Testing'}
                 p=makeProtocol(asgns(ind).experiment,true);
-                stepNum=1;
+                stepNum=2;
             case 'Cross Modal'
                 skip=true;
                 warning('cross modal not built yet')

@@ -4,11 +4,11 @@
 /firstMakeRatrix.m -text
 /createRatrixWithDefaultStations.m -text
 /addTestRats.m -text
-setupEDF/setProtocolEDF.m -text
 /setProtocolDEMO.m -text
 /createRatrixWithStationsForRack.m -text
 setupMaleRoom/setupMaleRoom.m -text
-setupEDF/setProtocolEDF.new.m -text
 setupEDF/getEDFids.m -text
 setupEDF/setProtocolDFP.rack2backup.m -text
 setupEDF/makeProtocol.m -text
+setupEDF/setProtocolEDF.oldm -text
+setupEDF/setProtocolEDF.m -text

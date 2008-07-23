@@ -28,7 +28,7 @@ if exist(f) == 2
 
         % Must remove the directories from Matlab's path, so they can be
         % deleted if needed
-        rPath=getRatrixPath; % Store it so it is not forgotten
+        %rPath=getRatrixPath; % Store it so it is not forgotten
         rmpath(RemoveSVNPaths(genpath(rPath)));
 
         if isempty(targetRevNum)
@@ -37,6 +37,7 @@ if exist(f) == 2
             revNumStr=num2str(targetRevNum);
         end
         cmdStr=[svnPath 'svn switch "' targetSVNurl '"@' revNumStr ' "' rPath '" && ' svnPath 'svn cleanup "' rPath '"']
+        %cmdStr=[svnPath 'svn switch "' targetSVNurl '" -r ' revNumStr ' "' rPath '" && ' svnPath 'svn cleanup "' rPath '"']
         [status result]=system(cmdStr);
 
         % Generate a new list of directories

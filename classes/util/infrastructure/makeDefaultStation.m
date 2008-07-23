@@ -52,7 +52,8 @@ if strcmp(stationSpec.id,'3A')
     eqDelay=0.3; %seems to be lowest that will work
     valveDelay=0.02;
 
-    pmp = pump('COM1',...             %serPortAddr
+    pmp =localPump(...
+        pump('COM1',...             %serPortAddr
         9.65,...                    %mmDiam
         500,...                     %mlPerHr
         false,...                   %doVolChks
@@ -62,7 +63,8 @@ if strcmp(stationSpec.id,'3A')
         1.0,...                     %mlMaxSinglePump
         1.0,...                     %mlMaxPos
         0.1,...                     %mlOpportunisticRefill
-        0.05);                      %mlAntiRock
+        0.05),...                   %mlAntiRock
+        rezValvePin,eqDelay,valveDelay);
 
     stationSpec.rewardMethod='localPump';
     stationSpec.portSpec.valveSpec.valvePins=stationSpec.portSpec.valveSpec;

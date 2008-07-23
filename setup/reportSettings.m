@@ -23,7 +23,7 @@ if ~isempty(ids)
                 fprintf('\theat: %s',[heats{h} repmat(' ',1,maxLen-length(heats{h}))])
                 sub=subjects{rowNum,colNum,h};
 
-                fprintf('\tsubject: %s',sub)
+                fprintf('\tsub: %s',sub)
 
                 found=false;
                 for i=1:length(ids)
@@ -39,10 +39,10 @@ if ~isempty(ids)
                         if ~isempty(p)
                             tm=getTrialManager(getTrainingStep(p,t));
                             sm=getStimManager(getTrainingStep(p,t));
-                            fprintf('\tstep: %d\treinforcement: %s\tclass:%s\n',t,class(getReinforcementManager(tm)),class(tm));
-                            fprintf('%g\n',getPenalty(getReinforcementManager(tm)))
+                                fprintf('\t%s(%d/%d)\ttrlMgr:%s\t',getName(p),t,getNumTrainingSteps(p),class(tm));
+                            fprintf('pnlty:%g\n',getMsPenalty(getReinforcementManager(tm)))
                         else
-                            fprintf('\t %s has no protocol\n',ratID);
+                            fprintf('\t\t\t%s has no protocol\n',ratID);
                         end
 
                     end

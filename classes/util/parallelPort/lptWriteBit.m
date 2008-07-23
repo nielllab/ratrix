@@ -1,5 +1,5 @@
 function lptWriteBit(parPortAddress,pin,val)
-error('deprecated - slow')
+warning('deprecated - slow')
 bit=getBitSpecForPinNum(pin);
 if isBitSpec(bit) && ismember(val,[1 0]) && getDirForPinNum(pin,'write')
     parPortAddress=hex2dec(parPortAddress)+double(bit(2));

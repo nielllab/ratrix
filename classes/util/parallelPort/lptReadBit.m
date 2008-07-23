@@ -1,5 +1,5 @@
 function out=lptReadBit(parPortAddress,pin)
-error('deprecated - slow')
+warning('deprecated - slow')
 bit=getBitSpecForPinNum(pin);
 if isBitSpec(bit)
     %bit

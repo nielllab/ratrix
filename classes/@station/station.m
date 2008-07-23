@@ -65,7 +65,7 @@ switch nargin
                 s.responseMethod='parallelPort';
                 s.decPPortAddr=hex2dec(in.portSpec.parallelPortAddress);
 
-                if isstruct(in.portSpec.valveSpec) && all(ismember({'valvePins','pumpObject'},fileds(in.portSpec.valveSpec))) && ((isvector(in.portSpec.valveSpec.valvePins) && isinteger(in.portSpec.valveSpec.valvePins)) || isempty(in.portSpec.valveSpec.valvePins)) && isa(in.portSpec.valveSpec.pumpObject,'localPump')
+                if isstruct(in.portSpec.valveSpec) && all(ismember({'valvePins','pumpObject'},fields(in.portSpec.valveSpec))) && ((isvector(in.portSpec.valveSpec.valvePins) && isinteger(in.portSpec.valveSpec.valvePins)) || isempty(in.portSpec.valveSpec.valvePins)) && isa(in.portSpec.valveSpec.pumpObject,'localPump')
                     s.valvePins=in.portSpec.valveSpec.valvePins;
                     s.localPump=in.portSpec.valveSpec.pumpObject;
                 elseif (isvector(in.portSpec.valveSpec) && isinteger(in.portSpec.valveSpec)) || isempty(in.portSpec.valveSpec)

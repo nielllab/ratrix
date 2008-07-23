@@ -6,13 +6,10 @@
 /getResponse.m -text
 /decache.m -text
 /trialManager.m -text
-/getPenalty.m -text
 /getRequestPorts.m -text
 /getSoundManager.m -text
-/getReward.m -text
 /structize.m -text
 /setReinforcementDetails.m -text
-/getRewardSizeULorMS.m -text
 /setReinforcementManager.m -text
 /getReinforcementManager.m -text
 /setEyeTracker.m -text

@@ -103,7 +103,7 @@ switch nargin
         error('Wrong number of input arguments')
 end
 
-ensurePumpStopped(p);
+%ensurePumpStopped(p);
 % 
 % while 1
 %     [infTooFar(p) wdrTooFar(p)]

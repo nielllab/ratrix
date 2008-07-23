@@ -1,2 +1,2 @@
-function out=getPenalty(r)
+function out=getScalar(r)
    out=r.scalar;

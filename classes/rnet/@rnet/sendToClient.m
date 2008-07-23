@@ -19,7 +19,7 @@ function [quit com] = sendToClient(r,clientId,priority,command,arguments)
   try
       r.server.sendImmediately(jCom);
       com = rnetcommand(jCom);
-  catch
+  catch ex
       quit=true;
       
       'got a quit in sendToClient on command'
@@ -27,17 +27,14 @@ function [quit com] = sendToClient(r,clientId,priority,command,arguments)
       'to client'
       clientId
       
-      lasterr
-      x=lasterror;
-      x.stack.file
-      x.stack.line
+        ple
       
       try
           f=fopen('SocketErrorLog.txt','a');
           fprintf(f,'%s: sendToClient in server socket error\n',datestr(now));
-          fprintf(f,['\t' lasterr '\n']);
-          fprintf(f,['\t' x.stack.file '\n']);
-          fprintf(f,['\t' x.stack.line '\n']);
+          fprintf(f,['\t' ex.message '\n']);
+          fprintf(f,['\t' ex.stack.file '\n']);
+          fprintf(f,['\t' ex.stack.line '\n']);
           fclose(f);
       catch
       end

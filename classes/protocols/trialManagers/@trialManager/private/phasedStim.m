@@ -199,20 +199,15 @@ try
     logwrite('done with all phases')
 
     tm.soundMgr = playLoop(tm.soundMgr,'',station,0);
-catch
+catch ex
     cleanup(originalPriority,oldCLUT,tm.window);
 
-    ers=lasterror
-    ers.message
-    ers.stack.file
-    ers.stack.name
-    ers.stack.line
-
+    ple
 
     Screen('CloseAll');
     ShowCursor(0);
     ListenChar(0);
-    rethrow(lasterror);
+    rethrow(ex);
 end
 cleanup(originalPriority,oldCLUT,tm.window);
 end

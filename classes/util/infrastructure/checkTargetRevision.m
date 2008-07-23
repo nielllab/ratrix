@@ -4,7 +4,7 @@ if isempty(args)
     error('disallowing emtpy svn update command')
 end
 
-if iscell(args) && isvector(args) && length(args)<=2
+if iscell(args) && isvector(args) && length(args)<=2 && length(args)>0
     if ischar(args{1}) && isvector(args{1}) && strmatch('svn://132.239.158.177/projects/ratrix/',args{1})
         %how also check that this is a valid top-level ratrix path -- ie, one that directly contains the bootstrap directory?
         targetSVNurl=args{1};
@@ -12,7 +12,8 @@ if iscell(args) && isvector(args) && length(args)<=2
         revNum=uint32([]);
 
         if length(args)==2
-            minRev=1300;%the lowest revision that knows how to update to the newest revisions
+            minRev=1363;%the lowest revision that knows how to update to newer revisions
+            
             if (isinteger(args{2}) || isNearInteger(args{2})) && args{2}>minRev && isscalar(args{2})
                 %isNearInteger needed cuz of http://132.239.158.177/trac/rlab_hardware/ticket/102
                 revNum = uint32(args{2});

@@ -76,13 +76,7 @@ switch cmd
         end
     case constants.serverToStationCommands.S_UPDATE_SOFTWARE_CMD
         if stat==constants.statuses.NO_RATRIX
-            [runningSVNversion repositorySVNversion url]=getSVNRevisionFromXML(getRatrixPath);
-            [targetSVNurl targetRevNum] =checkTargetRevision(args);
-            
-            if ~strcmp(url,targetSVNurl) || ((isempty(targetRevNum) && runningSVNversion~=repositorySVNversion) || targetRevNum~=runningSVNversion)
-                writeSVNUpdateCommand(targetSVNurl,targetRevNum);
-                quit=true;
-            end
+            quit=updateRatrixRevisionIfNecessary(args);
 
             quitOnError=sendToServer(r,getClientId(r),constants.priorities.IMMEDIATE_PRIORITY,constants.stationToServerCommands.C_RECV_UPDATING_SOFTWARE_CMD,{quit});
             if quitOnError || quit
@@ -177,19 +171,18 @@ end
 function quit=sendRatrixToServer(ratrixDataPath,r,constants)
 try
     rx=ratrix(fullfile(ratrixDataPath, 'ServerData'),0); %load from file
-catch
+catch ex
     noDBstr='no db at that location';
-    x=lasterror;
-    if ~isempty(findstr(x.message,noDBstr))
+    if ~isempty(findstr(ex.message,noDBstr))
         rx=[];
     else
-        [':' x.message ':']
+        [':' ex.message ':']
         [':' noDBstr ':']
-        class(x.message)
-        length(x.message)
+        class(ex.message)
+        length(ex.message)
         length(noDBstr)
-        x.message==noDBstr
-        rethrow(lasterror);
+        ex.message==noDBstr
+        rethrow(ex);
     end
 end
 

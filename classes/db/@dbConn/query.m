@@ -35,18 +35,18 @@ try
             end
         end
         rs.close();
-    catch
+    catch ex
         rs.close();
-        lasterr
+        ex
         failed = true;
     end
     stmt.close();
-catch
+catch ex
     stmt.close();
-    lasterr
+    ex
     failed = true;
 end
 % Make sure the statement and recordset are closed, now we can error if needed
 if failed
-    rethrow(lasterr)
+    rethrow(ex)
 end

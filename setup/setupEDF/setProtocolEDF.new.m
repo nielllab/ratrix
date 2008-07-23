@@ -1,51 +1,18 @@
-%rack 2 (cockpits) %all on free drinks, then easiest possible go to side (some grating, some image, some dots), then tilt discrim
-% A     B     C          D     E     F
-{      '180' '161'                     } %red
-%       im     im
+function r = setProtocolEDF(r,subjIDs)
 
-{      '160' '163'                     } %orange
-%       im    im
+if ~isa(r,'ratrix')
+    error('need a ratrix')
+end
 
-{      '186' '202'                     } %yellow
-%       d     d
+if ~exist('subjIDs','var') || isempty(subjIDs)
+    subjIDs=getEDFids;
+end
 
-{      '162' '203'                     } %green
-%       g(i)  g
-
-{'159' '164' '204'                     } %blue
-% g     g(i)  g
-
-{'185' '179'                           } %violet
-% d     d
-
-
-%rack 3 (boxes)
-% A     B     C          D     E     F           G     H     I
-{'263' '189' '190'      '191' '192' '181'       '182' '187' '188'} %orange
-%       rb    rb         rb    rb(i) rc          rc    rc    rc
-
-{'264' '165' '166'      '167' '168' '177'       '178' '183' '184'} %yellow
-%       f     f          f     f     bt          bt    bt    bt
-
-{'265' '173' '174'      '175' '176' '169'       '170' '171' '172'} %green
-%       xm    xm         xm    xm
-
-{'266' '193' '194'      '249' '250' '251'       '252' '253' '254'} %blue
-
-
-{'159' '255' '256'      '257' '258' '259'       '260' '261' '262'} %violet
-
-
-note need to add rack 2 test rats
-
-
-
-
+if ~all(ismember(subjIDs,getSubjectIDs(r)))
+    error('not all those subject IDs are in that ratrix')
+end
 
 rackNum=getRackIDFromIP;
-
-
-rackNum=2;
 asgns=[];
 conn=dbConn;
 heats=getHeats(conn);
@@ -65,24 +32,16 @@ asgns=asgns(ismember({asgns.owner},{'eflister' 'bsriram' 'pmeier'})); %162, 164 
 
 for i=1:length(subIDs)
     ind=find(strcmp(subIDs{i},{asgns.subject_id}));
-    if length(ind)==1
+    if length(ind)==1 && ismember(asgns(ind).subject_id,getEDFids)
         switch asgns(ind).experiment
-            case 'Box Transfer'
-                'bt'
+            case {'goToSide' 'Flicker' 'Rel Cue' 'Rel Block' 'Box Transfer' 'Tube Transfer' 'Tube Physiology'}
+                p=makeProtocol(asgns(ind).experiment,false);
+                stepNum=1;
+            case {'Testing'}
+                p=makeProtocol(asgns(ind).experiment,true);
+                stepNum=1;   
             case 'Cross Modal'
-                'cm'
-            case 'Flicker'
-                'f'
-            case 'Rel Block'
-                'rb'
-            case 'Rel Cue'
-                'rc'
-            case 'Testing'
-                't'
-            case 'Tube Physiology'
-                'tp'
-            case 'Tube Transfer'
-                'tt'
+                error('cross modal not built yet')
             otherwise
                 subIDs{i}
                 asgns(ind).experiment
@@ -91,6 +50,10 @@ for i=1:length(subIDs)
     else
         subIDs{i}
         ind
-        error('didn''t find unique subject id in db assignments for this rack')
+        error('didn''t find unique subject id in db assignments for this rack or edf rat ids')
     end
+
+    subj=getSubjectFromID(r,subjIDs{i});
+    [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolEDF','edf');
+    clear('p','stepNum')
 end

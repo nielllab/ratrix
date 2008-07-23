@@ -1,9 +1,24 @@
 function [graduate keepWorking secsRemainingTilStateFlip subject r trialRecords station]=doTrial(ts,station,subject,r,rn,trialRecords,sessionNumber)
+graduate=0;
 
+
+if ~isempty(rn)
+    if ~isempty(t.svnRevNum)
+        args={t.svnRevURL t.svnRevNum};
+    else
+        args={t.svnRevURL};
+    end
+    doQuit=updateRatrixRevisionIfNecessary(args);
+    if doQuit
+        keepWorking=false;
+        secsRemainingTilStateFlip=0;
+        return
+    end
+end
 
 try
 
-    graduate=0;
+
     if isa(station,'station') && isa(r,'ratrix') && isa(subject,'subject') && (isempty(rn) || isa(rn,'rnet'))
         if isa(ts,'trainingStep')
             if isa(ts.stimManager,'stimManager')
@@ -68,7 +83,7 @@ try
 
             [newTM updateTM newSM updateSM stopEarly trialRecords station]=doTrial(ts.trialManager,station,ts.stimManager,subject,r,rn,trialRecords,sessionNumber);
             keepWorking=~stopEarly;
-            
+
             graduate = checkCriterion(ts.criterion,subject,ts, trialRecords);
             %END SESSION BY GRADUATION
             if graduate
@@ -107,19 +122,15 @@ try
         isa(station,'station')
         isa(r,'ratrix')
         isa(subject,'subject')
-        
+
 
         error('need station and ratrix and subject and rnet objects')
     end
 
-catch
+catch ex
     display(ts)
 
-    ers=lasterror
-    ers.message
-    ers.stack.file
-    ers.stack.name
-    ers.stack.line
+    ple
     Screen('CloseAll');
-    rethrow(lasterror)
+    rethrow(ex)
 end

@@ -76,11 +76,13 @@ for i=1:floor(length(ims)/2)
 end
 imageStim = images(imageDir,ypos,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,trialDistribution);
 
-ts1 = trainingStep(fd, freeStim, repeatIndefinitely(), noTimeOff());   %stochastic free drinks
-ts2 = trainingStep(fd2, freeStim, repeatIndefinitely(), noTimeOff());  %free drinks
-ts3 = trainingStep(vh, freeStim, repeatIndefinitely(), noTimeOff());   %go to stim
-ts4 = trainingStep(vh, discrimStim, repeatIndefinitely(), noTimeOff());%orientation discrim
-ts5 = trainingStep(vh, imageStim,  repeatIndefinitely(), noTimeOff());%morph discrim
+svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
+
+ts1 = trainingStep(fd, freeStim, repeatIndefinitely(), noTimeOff(), svnRev);   %stochastic free drinks
+ts2 = trainingStep(fd2, freeStim, repeatIndefinitely(), noTimeOff(), svnRev);  %free drinks
+ts3 = trainingStep(vh, freeStim, repeatIndefinitely(), noTimeOff(), svnRev);   %go to stim
+ts4 = trainingStep(vh, discrimStim, repeatIndefinitely(), noTimeOff(), svnRev);%orientation discrim
+ts5 = trainingStep(vh, imageStim,  repeatIndefinitely(), noTimeOff(), svnRev); %morph discrim
 
 p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5});
 stepNum=4;

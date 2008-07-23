@@ -18,14 +18,15 @@ if p.pumpOpen
                     else
                         successfulSend=true;
                     end
-                catch
-                    err=lasterror
+                catch ex
+                    ex
+                    ple
                     warning('pump failure on read!  cycling pump!')
                     p=closePump(p);
                     p=openPump(p);
                 end
-            catch
-                err=lasterror
+            catch ex
+                ple
                 warning('pump failure on write!  cycling pump!')
                 p=closePump(p);
                 p=openPump(p);

@@ -5,7 +5,7 @@ stmt = conn.conn.createStatement();
 try
     rowCount = stmt.executeUpdate(execString);
     stmt.close();
-catch
+catch ex
     stmt.close();
-    lasterr
+    rethrow(ex)
 end

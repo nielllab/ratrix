@@ -42,10 +42,10 @@ if ~p.pumpOpen
         fopen(p.serialPort);
         p.pumpOpen=1;
         [p durs]=sendCommands(p,pumpProgram);
-    catch
+    catch ex
         fprintf('closing serial port due to error\n');
         fclose(p.serialPort);
-        rethrow(lasterror)
+        rethrow(ex)
     end
 else
     error('pump already open')

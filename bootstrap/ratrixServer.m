@@ -160,11 +160,9 @@ swapM = uicontrol(f,'Style','popupmenu',...
         %         for i=1:length(subjects)
         %             subjects{i}{2}{1}
         %         end
-        catch
-            x=lasterror
-            x.stack.file
-            x.stack.line
-            y=errordlg(['call dan erik or philip before closing this box.  quitting due to error: ' x.message],'ratrix error','modal')
+        catch ex
+            ple
+            y=errordlg(['call erik or philip before closing this box.  quitting due to error: ' ex.message],'ratrix error','modal')
             uiwait(y)
             cleanup
         end
@@ -209,9 +207,6 @@ cycleB=uicontrol(f,'Style','togglebutton','String',buttonT,'Units','pixels','Pos
         if er
             rethrow(lasterror)
         end
-
-        %did this get added in from svn merging?  looks redundant
-        %system('matlab -automation -r "cd(''C:\Documents and Settings\rlab\Desktop\ratrix\analysis\eflister'');compileTrialRecords;quit" &');
     end
 
 
@@ -427,23 +422,24 @@ try
 
             else
 
-                [quit com]=sendToClient(r,connectedClients{i},constants.priorities.IMMEDIATE_PRIORITY,constants.serverToStationCommands.S_UPDATE_SOFTWARE_CMD,{'svn://132.239.158.177/projects/ratrix/trunk'});
-                if ~quit
-                    timeout=10.0;
-                    [quit updateConfirm updateConfirmCmd updateConfirmArgs]=waitForSpecificCommand(r,connectedClients{i},constants.stationToServerCommands.C_RECV_UPDATING_SOFTWARE_CMD,timeout,'waiting for client response to S_UPDATE_SOFTWARE_CMD',[]);
-                    if isempty(updateConfirm) || isempty(updateConfirmCmd)
-                        error('appeared to get error from client -- waitForSpecificCommand should know to also check for sendErrors() that have to do with that specific command (it''s objectID, not just its type)')
-                    end
-                    com=[]; %should this be something else?
-                    updateConfirm=[];
-                end
-                if quit
-                    fprintf('Client is no longer connected %s\n',mac);
-                    tossClient(r,connectedClients{i});
-                elseif updateConfirmArgs{1}
-                    fprintf('Updating software on %s\n',mac);
-                    tossClient(r,connectedClients{i});
-                else
+                
+%                 [quit com]=sendToClient(r,connectedClients{i},constants.priorities.IMMEDIATE_PRIORITY,constants.serverToStationCommands.S_UPDATE_SOFTWARE_CMD,{'svn://132.239.158.177/projects/ratrix/trunk'});
+%                 if ~quit
+%                     timeout=10.0;
+%                     [quit updateConfirm updateConfirmCmd updateConfirmArgs]=waitForSpecificCommand(r,connectedClients{i},constants.stationToServerCommands.C_RECV_UPDATING_SOFTWARE_CMD,timeout,'waiting for client response to S_UPDATE_SOFTWARE_CMD',[]);
+%                     if isempty(updateConfirm) || isempty(updateConfirmCmd)
+%                         error('appeared to get error from client -- waitForSpecificCommand should know to also check for sendErrors() that have to do with that specific command (it''s objectID, not just its type)')
+%                     end
+%                     com=[]; %should this be something else?
+%                     updateConfirm=[];
+%                 end
+%                 if quit
+%                     fprintf('Client is no longer connected %s\n',mac);
+%                     tossClient(r,connectedClients{i});
+%                 elseif updateConfirmArgs{1}
+%                     fprintf('Updating software on %s\n',mac);
+%                     tossClient(r,connectedClients{i});
+%                 else
                     
                     quit=replicateClientTrialRecords(r,connectedClients{i},{getPermanentStorePath(rx)});
 
@@ -485,7 +481,7 @@ try
                         tossClient(r,connectedClients{i});
 
                     end
-                end
+%                 end
             end
         end
     end
@@ -527,10 +523,7 @@ catch
 
 
     fprintf('shutting down rnet and pump system due to error\n')
-    lasterr
-    x=lasterror
-    x.stack.file
-    x.stack.line
+    ple
 
     %if call ListenChar(0) to undo the ListenChar(2) before this point, seems to replace useful errors with 'Undefined function or variable GetCharJava_1_4_2_09.'
 
@@ -566,10 +559,7 @@ if servePump
         sys=closePumpSystem(sys);
     catch
         fprintf('error shutting down pump\n')
-        lasterr
-        x=lasterror
-        x.stack.file
-        x.stack.line
+        ple
     end
 end
 
@@ -577,10 +567,7 @@ try
     [r rx]=shutdown(r,rx,subjects);
 catch
     fprintf('error shutting down rnet\n')
-    lasterr
-    x=lasterror
-    x.stack.file
-    x.stack.line
+    ple
 end
 
 [rx ids]=emptyAllBoxes(rx,'ratrixServer cleanup','ratrix');

@@ -152,8 +152,9 @@ for i=1:length(files)
         nAttempts = nAttempts+1;
         try
             tmpFile='C:\temp.mat';
-            success=copyfile(fullfile(subjPath,files(i).name),tmpFile);
+            [success message messageid]=copyfile(fullfile(subjPath,files(i).name),tmpFile);
             if ~success
+                message
                 error('Unable to copy trial records from remote store to local drive')
             end
             tr=load(tmpFile);

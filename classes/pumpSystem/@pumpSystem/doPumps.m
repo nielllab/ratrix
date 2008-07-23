@@ -51,10 +51,10 @@ try
     s.pump=closePump(s.pump);
     durs=ensureAllRezFilled(s);
     closeAllValves(s);
-catch
+catch ex
     %ListenChar(1) %this is needed to undo the ListenChar(2) above, but seems to replace useful errors with 'Undefined function or variable 'GetCharJava_1_4_2_09'.'
     closeAllValves(s);
     fprintf('closing pump due to error\n');
     s.pump=closePump(s.pump);
-    rethrow(lasterror)
+    rethrow(ex)
 end

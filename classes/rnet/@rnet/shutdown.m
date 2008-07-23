@@ -14,21 +14,15 @@ switch r.type
         for i=1:length(clients)
             try
                 [r rx]=remoteClientShutdown(r,clients(i),rx,subjects);
-            catch
-                firstErr=lasterror
-                lasterr
-                x=lasterror
-                x.stack.file
-                x.stack.line
+            catch ex
+                firstErr=ex
+                ple
             end
             try
                 cList=disconnectClient(r,clients(i));
                 cList=[]; % Ignore leftover commands
-            catch
-                lasterr
-                x=lasterror
-                x.stack.file
-                x.stack.line
+            catch ex
+                ple
             end
         end
         %         catch
@@ -52,11 +46,8 @@ switch r.type
             end
 
             r.server=[];
-        catch
-            lasterr
-            x=lasterror
-            x.stack.file
-            x.stack.line
+        catch ex
+            ple
             %rethrow(lasterror);
         end
         if ~isempty(firstErr)

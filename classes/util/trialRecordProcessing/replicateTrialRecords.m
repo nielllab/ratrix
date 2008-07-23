@@ -140,10 +140,7 @@ for f=1:length(subDirs)
             end
         end
         if ~all(success)
-            x=lasterror
-            x.message
-            x.identifier
-            x.stack
+            ple
             'BAD DB FILE COPY ISSUE!!!!!!!!!'
             lastwarn
         end

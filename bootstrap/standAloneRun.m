@@ -144,10 +144,10 @@ try
     compileTrialRecords([],[],[],[],getPermanentStorePath(rx),compilePath);
     subjectAnalysis(compilePath);
     cleanup;
-catch
+catch ex
     ple
     cleanup;
-    rethrow(lasterror)
+    rethrow(ex)
 end
 
 function cleanup

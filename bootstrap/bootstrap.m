@@ -43,15 +43,16 @@ try
                 r = rnet('client',id,serverAddress);
                 'yo3'
 %             end
-        catch
-            [x y]=lasterr;
-            if any(strfind(x,'Unable to open I/O streams on server socket in client thread'))% says can't find server
+        catch ex
+            if any(strfind(ex.message,'Unable to open I/O streams on server socket in client thread'))% says can't find server
                 r=[];
                 tries=tries+1;
                 fprintf('try %d: no server found at %s, trying again in a sec\n',tries, serverAddress)
                 WaitSecs(1);
             else
-                x
+                ex
+                ple
+                error('bootstrap problem')
             end
         end
         if exist('r') && ~isempty(r)
@@ -80,18 +81,13 @@ try
         end
     end
 
-catch
-
-    x=lasterror;
-    x.stack.file
-    x.stack.line
-
-    x.message
+catch ex
+    ple
 
     fprintf('shutting down client due to error\n')
     cleanup(r);
 
-    rethrow(lasterror)
+    rethrow(ex)
 end
 
 

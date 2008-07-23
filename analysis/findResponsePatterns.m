@@ -3,6 +3,11 @@ function [count patternType uniques]=findResponsePatterns(responses,lengthHistor
 %out=responsePattern(responses,lengthHistory,numResponseTypes,plotOn)
 %out=responsePattern(rand(1,500)>0.5,3,2,1)
 
+if isinteger(lengthHistory)
+    lengthHistory=int32(lengthHistory);
+    %to avoid errors with x(end-n) construction for n>intmax
+end
+
 [a b c]=unique(responses);
 numResponseTypesInData=size(b,2);
 

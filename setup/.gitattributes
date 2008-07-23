@@ -9,3 +9,6 @@ setupEDF/setProtocolEDF.m -text
 /createRatrixWithStationsForRack.m -text
 setupMaleRoom/setupMaleRoom.m -text
 setupEDF/setProtocolEDF.new.m -text
+setupEDF/getEDFids.m -text
+setupEDF/setProtocolDFP.rack2backup.m -text
+setupEDF/makeProtocol.m -text

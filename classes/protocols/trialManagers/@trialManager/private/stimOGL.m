@@ -1261,12 +1261,8 @@ try
     Priority(originalPriority);
     ListenChar(0);
 
-catch
-    ers=lasterror
-    ers.message
-    ers.stack.file
-    ers.stack.name
-    ers.stack.line
+catch ex
+    ple
 
 
     Screen('CloseAll');
@@ -1280,7 +1276,7 @@ catch
 
     response=sprintf('error_in_StimOGL: %s',ers.message);
 
-    rethrow(lasterror);
+    rethrow(ex);
 
 
 end

@@ -16,18 +16,16 @@ function [quit com] = sendToServer(r,clientId,priority,command,arguments)
   try
       r.client.sendImmediately(jCom);
       com = rnetcommand(jCom);
-  catch
+  catch ex
       quit=true;
-      lasterr
-      x=lasterror;
-      x.stack.file
-      x.stack.line
+
+      ple
       try
           f=fopen('SocketErrorLog.txt','a');
           fprintf(f,'%s: sendToServer from %s in client socket error\n',datestr(now),r.id);
-          fprintf(f,['\t' lasterr '\n']);
-          fprintf(f,['\t' x.stack.file '\n']);
-          fprintf(f,['\t' x.stack.line '\n']);
+          fprintf(f,['\t' ex.message '\n']);
+          fprintf(f,['\t' ex.stack.file '\n']);
+          fprintf(f,['\t' ex.stack.line '\n']);
           fclose(f);
       catch
       end

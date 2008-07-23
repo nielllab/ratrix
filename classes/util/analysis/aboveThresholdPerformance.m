@@ -4,7 +4,7 @@ function [aboveThresh whichCriteria correct]=aboveThresholdPerformance(confidenc
 
 
 if isinteger(confidenceParameter) & all(confidenceParameter>0)
-    consecutiveTrials=confidenceParameter;
+    consecutiveTrials=int32(confidenceParameter);  %use int32 to avoid errors with x(end-n) calls for n>intmax
 elseif all(confidenceParameter>=1) & all(confidenceParameter<=0)
     alpha=confidenceParameter;
     error('this method not used yet; code must be adjusted to switch on method') %pmm0802

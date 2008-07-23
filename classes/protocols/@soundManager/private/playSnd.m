@@ -66,15 +66,9 @@ if isa(station,'station')
                     else
                         error('Unkown sound player type')
                     end
-                catch
-                    ers=lasterror
-                    ers.message
-                    ers.stack.file
-                    ers.stack.name
-                    ers.stack.line
-                    
-
-                    error(ers)
+                catch ex
+                    ple
+                    rethrow(ex)
                 end
             else
                 error('duration must be >=0')

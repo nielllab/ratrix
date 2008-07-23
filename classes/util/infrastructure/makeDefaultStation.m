@@ -10,7 +10,7 @@ function st=makeDefaultStation(id,path,mac,physicalLocation,screenNum,rewardMeth
 % 5   data              i/o	localPump rezervoir valve (cooldrive valve 4)
 % 6   data              i/o eyePuff valve (cooldrive valve 5)
 % 7   data              i/o	localPump direction control
-% 8   data              i/o  
+% 8   data              i/o
 % 9   data              i/o framePulse
 % 10  status            i   center lick sensor
 % 11  status    inv     i	localPump motorRunning
@@ -34,19 +34,39 @@ stationSpec.portSpec.sensorPins               = int8([13,10,12]);
 stationSpec.portSpec.framePulsePins           = int8(9);
 stationSpec.portSpec.eyePuffPins              = int8(6);
 
-%if you have a local pump:
-infTooFarPin=int8(1);
-wdrTooFarPin=int8(14);
-motorRunningPin= int8(11);
-%dirPin = int8(7); %not used
-rezValvePin = int8(5);  %valve 4
-
 if ismac
     stationSpec.portSpec = int8(3);
 elseif ispc
     %do nothing
 else
     error('unknown OS')
+end
+
+if strcmp(stationSpec.id,'3A')
+
+    infTooFarPin=int8(1);
+    wdrTooFarPin=int8(14);
+    motorRunningPin= int8(11);
+    %dirPin = int8(7); %not used
+    rezValvePin = int8(5);  %valve 4
+    eqDelay=0.3; %seems to be lowest that will work
+    valveDelay=0.02;
+
+    pmp = pump('COM1',...             %serPortAddr
+        9.65,...                    %mmDiam
+        500,...                     %mlPerHr
+        false,...                   %doVolChks
+        {stationSpec.portSpec.parallelPortAddress,motorRunningPin},... %motorRunningBit
+        {stationSpec.portSpec.parallelPortAddress,infTooFarPin},... %infTooFarBit
+        {stationSpec.portSpec.parallelPortAddress,wdrTooFarPin},... %wdrTooFarBit
+        1.0,...                     %mlMaxSinglePump
+        1.0,...                     %mlMaxPos
+        0.1,...                     %mlOpportunisticRefill
+        0.05);                      %mlAntiRock
+
+    stationSpec.rewardMethod='localPump';
+    stationSpec.portSpec.valveSpec.valvePins=stationSpec.portSpec.valveSpec;
+    stationSpec.portSpec.valveSpec.pumpObject=pmp;
 end
 
 st=station(stationSpec);

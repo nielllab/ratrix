@@ -202,6 +202,11 @@ numFramesUntilStopSavingMisses=1000;
 
 originalPriority=Priority;
 
+[garbage ptbVer]=PsychtoolboxVersion;
+ptbVersion=sprintf('%d.%d.%d(%s %s)',ptbVer.major,ptbVer.minor,ptbVer.point,ptbVer.flavor,ptbVer.revstring);
+[runningSVNversion repositorySVNversion url]=getSVNRevisionFromXML(getRatrixPath);
+ratrixVersion=sprintf('%s (%d of %d)',url,runningSVNversion,repositorySVNversion);
+
 try
 
 
@@ -761,6 +766,9 @@ try
                     end
                     [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('priority:%g session:%d trial:%d stimInd:%d frame:%d stim:%s',Priority(),sessionNumber,trialInd,i,frameNum,txtLabel),xTextPos,yNewTextPos,100*ones(1,3));
                     %[garbage,yNewTextPos] = Screen('DrawText',window,['priority:' num2str(Priority()) ' session:' num2str(sessionNumber) ' trial:' num2str(trialInd) ' stim ind:' num2str(i) ' frame ind:' num2str(frameNum) ' calcStim:' txtLabel],xTextPos,yNewTextPos,100*ones(1,3));
+                    yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
+                    
+                    [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('ptb ver:%s \t\t ratrix ver:%s',ptbVersion,ratrixVersion),xTextPos,yNewTextPos,100*ones(1,3));
                     yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
                 end
 

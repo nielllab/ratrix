@@ -80,7 +80,7 @@ switch cmd
             [targetSVNurl targetRevNum] =checkTargetRevision(args);
             
             if ~strcmp(url,targetSVNurl) || ((isempty(targetRevNum) && runningSVNversion~=repositorySVNversion) || targetRevNum~=runningSVNversion)
-                writeSVNUpdateCommand(r,targetSVNurl,targetRevNum);
+                writeSVNUpdateCommand(targetSVNurl,targetRevNum);
                 quit=true;
             end
 

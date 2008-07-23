@@ -1,4 +1,7 @@
 function [verifiedHistoryFiles ranges]=getTrialRecordFiles(permanentStore)
+if ~isempty(findstr('\\',permanentStore))
+    warning('this function is dangerous when used remotely -- dir can silently fail or return a subset of existing files')
+end
 
 historyFiles=dir(fullfile(permanentStore,'trialRecords_*.mat'));
 

@@ -1,2 +1,0 @@
-checkForUpdate('server');
-%quit();

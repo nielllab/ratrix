@@ -8,3 +8,4 @@ setupEDF/setProtocolEDF.m -text
 /setProtocolDEMO.m -text
 /createRatrixWithStationsForRack.m -text
 setupMaleRoom/setupMaleRoom.m -text
+setupEDF/setProtocolEDF.new.m -text

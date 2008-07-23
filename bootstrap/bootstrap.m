@@ -34,7 +34,7 @@ try
         initRatrixPorts;
         try
             clearJavaComponents();
-            clientCheckForUpdate
+            checkForUpdate;
             addJavaComponents();  %        move to top of file. so that above dbConn
             % If r is already setup, just try and reconnect
 %             if exist('r') && ~isempty(r)

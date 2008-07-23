@@ -1,13 +1,7 @@
-function s=checkForUpdate(type)
+function s=checkForUpdate
 
-switch type
-    case 'server'
-        f = [getRatrixPath 'updateServer.mat'];
-    case 'client'
-        f = [getRatrixPath 'updateClient.mat'];
-    otherwise
-        error('checkForUpdate(): Unkown node type');
-end
+f = [getRatrixPath 'update.mat'];
+
 
 % If the file exists run the update
 if exist(f) == 2
@@ -69,10 +63,7 @@ if exist(f) == 2
         updatePsychtoolboxIfNecessary
 
     catch
-        x=lasterror
-        x.stack.file
-        x.stack.line
-        x.message
+        ple
         error('failure in checkForUpdate')
     end
     WaitSecs(3);

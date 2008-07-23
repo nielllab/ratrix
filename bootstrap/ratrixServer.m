@@ -209,7 +209,9 @@ cycleB=uicontrol(f,'Style','togglebutton','String',buttonT,'Units','pixels','Pos
         if er
             rethrow(lasterror)
         end
-        system('matlab -automation -r "cd(''C:\Documents and Settings\rlab\Desktop\ratrix\analysis\eflister'');compileTrialRecords;quit" &');
+
+        %did this get added in from svn merging?  looks redundant
+        %system('matlab -automation -r "cd(''C:\Documents and Settings\rlab\Desktop\ratrix\analysis\eflister'');compileTrialRecords;quit" &');
     end
 
 

@@ -1,2 +1,0 @@
-checkForUpdate('client');
-%quit();

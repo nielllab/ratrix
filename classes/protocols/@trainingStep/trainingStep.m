@@ -1,6 +1,6 @@
 function t=trainingStep(varargin)
 % TRAININGSTEP  class constructor. 
-% t = trainingStep(trialManager,stimManager,criterion,scheduler) 
+% t = trainingStep(trialManager,stimManager,criterion,scheduler,svnRevision) 
 
 switch nargin
 case 0 
@@ -9,6 +9,7 @@ case 0
     t.stimManager = stimManager();
     t.criterion = criterion();
     t.scheduler = scheduler();
+    t.svnRevision = [];
     
     t.previousSchedulerState=0;
     t.trialNum=0;
@@ -25,13 +26,14 @@ case 1
     else
         error('Input argument is not a trainingStep object')
     end
-case 4
+case 5
 % create object using specified values    
-    if isa(varargin{1},'trialManager') && isa(varargin{2},'stimManager') && isa(varargin{3},'criterion') && isa(varargin{4},'scheduler')
+    if isa(varargin{1},'trialManager') && isa(varargin{2},'stimManager') && isa(varargin{3},'criterion') && isa(varargin{4},'scheduler') && isRevision(varargin{5})
         t.trialManager = varargin{1};
         t.stimManager = varargin{2};
         t.criterion = varargin{3};
         t.scheduler = varargin{4};
+        t.svnRevision = varargin{5};
         
         t.previousSchedulerState=0;
         t.trialNum=0;
@@ -51,7 +53,8 @@ case 4
         isa(varargin{2},'stimManager')
         isa(varargin{3},'criterion')
         isa(varargin{4},'scheduler')
-        error('must pass in a trialManager, stimManager, criterion, and scheduler')
+        isRevision(varargin{5})
+        error('must pass in a trialManager, stimManager, criterion, scheduler, and svnRevision')
     end
 otherwise
     error('Wrong number of input arguments')

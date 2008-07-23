@@ -72,9 +72,10 @@ if ~exist('fieldNames','var') || isempty(fieldNames)
 
     %'stimDetails'};  can't fit 200,000 trials worth of these, out of MEMORY
     %pmm recommends switching on class, call method to find out which fields to add in
-    %edf likes the idea that these go into another file, maybe supplimentary records, which are upkept by the experimenter
-    %agreed to add fields only if they exist and are defined for that trial, NaNs elsewhere 080424
-
+    %temporary solution: add fields only if they exist and are defined for that trial, NaNs elsewhere 080424
+    %final resolution: http://132.239.158.177/trac/rlab_hardware/ticket/11
+    
+    
     %THESE ARE ALL GENERAL FIELDS WHICH COULD BE ADDED B/C ALL RECORDS HAVE THEM
     %     'totalFrames',{'responseDetails','totalFrames'};
     %     'startTime',{'responseDetails','startTime'};
@@ -117,7 +118,8 @@ storageMethod='vector'; %'structArray'
 subjectFiles={};
 ranges={};
 names={};
-d=dir(subjectDirectory);
+d=dir(subjectDirectory); %unreliable if remote (this function doesn't want to rely on oracle, and it is low-impact to miss some subjects)
+d=d([d.isdir] & ~ismember({d.name},{'.','..'}));
 
 if strcmp(subjectIDs, 'all')
     %use all of them
@@ -125,19 +127,22 @@ if strcmp(subjectIDs, 'all')
     %usefull if you want to process one subject, not all of them
     which=ismember({d.name},subjectIDs)
     d=d(which)
+    if any(~ismember(subjectIDs,{d.name}))
+        subjectIDs
+        {d.name}
+        error('didn''t recognize all those subject names')
+    end
 end
 
 for i=1:length(d)
-    if d(i).isdir && ~ismember(d(i).name,{'.','..'})
-        [subjectFiles{end+1} ranges{end+1}]=getTrialRecordFiles(fullfile(subjectDirectory,d(i).name));
+        [subjectFiles{end+1} ranges{end+1}]=getTrialRecordFiles(fullfile(subjectDirectory,d(i).name)); %unreliable if remote
         names{end+1}=d(i).name;
-    end
 end
 
 
 
 for i=1:length(subjectFiles)
-    d=dir(fullfile(compiledRecordsDirectory,[names{i} '.compiledTrialRecords.*.mat']));
+    d=dir(fullfile(compiledRecordsDirectory,[names{i} '.compiledTrialRecords.*.mat'])); %unreliable if remote
     compiledFile=[];
     compiledRange=zeros(2,1);
     for k=1:length(d)
@@ -147,6 +152,7 @@ for i=1:length(subjectFiles)
             if num~=2
                 d(k).name
                 er
+                error('couldnt parse')
             else
                 %d(k).name
                 if ~done
@@ -160,6 +166,9 @@ for i=1:length(subjectFiles)
                     error('found multiple compiledTrialRecord files')
                 end
             end
+        else
+            d(k).name
+            error('bad dir name')
         end
     end
 

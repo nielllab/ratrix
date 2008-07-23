@@ -109,9 +109,9 @@ end
 
 if exist('setupFile','var') && ~isempty(setupFile)
     x=what(fileparts(which(setupFile)));
-    if isempty(x) || isempty({x.m}) || ~any(ismember({setupFile,[setupFile '.m']},x.m))
+    if isempty(x) || isempty({x.m}) || ~any(ismember(lower({setupFile,[setupFile '.m']}),lower(x.m)))
         setupFile
-        error('if setupFile supplied, it must be the name of a setProtocol file on the path (typically in the setup directory')
+        error('if setupFile supplied, it must be the name of a setProtocol file on the path (typically in the setup directory)')
     end
 
     su=str2func(setupFile); %weird, str2func does not check for existence!

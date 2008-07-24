@@ -20,7 +20,7 @@ edfRatIDs=...
     '159' '179' '204'                       ... %blue
 ...% g/tp  g/tt  g/gts
 ...%
-    '162' '164' '192'                       ... %violet
+...%'162' '164' '192'                       ... %violet  (duc didn't want them run)
 ...%(i)gts(i)gts(i)gts
 ...%
 'rack2test1' 'rack2test2' 'rack2test3' 'rack2test4' 'rack2test5' 'rack2test6' ... %test

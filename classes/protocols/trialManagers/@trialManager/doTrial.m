@@ -267,7 +267,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                         case 'localPump'
 
                             valveStart=GetSecs();
-                            station=doReward(station,trialManager.rewardSizeULorMS/1000,rewardValves);
+                            station=doReward(station,rewardSizeULorMS/1000,rewardValves);
                             trialRecords(trialInd).actualRewardDuration = GetSecs()-valveStart;
 
                         case 'localTimed'

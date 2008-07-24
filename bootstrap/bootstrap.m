@@ -47,7 +47,8 @@ try
             % says can't find server
             errStrs={'Unable to establish socket in RlabNetworkClient constructor',...
                 'Unable to open input streams',...
-                'Unable to open I/O streams on server socket in client thread'};
+                'Unable to open I/O streams on server socket in client thread',...
+                'While waiting for connect acknowledgment, client is no longer connected'};
 
             %             x=lasterror
             %             x.message

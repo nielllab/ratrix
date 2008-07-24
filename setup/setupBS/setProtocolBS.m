@@ -18,25 +18,25 @@ if ~all(ismember(subIDs,getSubjectIDs(r)))
     error('not all those subject IDs are in that ratrix')
 end
 
-% find the rack
-% rackNum=getRackIDFromIP;
-% asgns=[];
-
-% this might not be relevant for me
-% conn=dbConn;
-% heats=getHeats(conn);
-% for i=1:length(heats)
-%     assignments=getAssignments(conn,rackNum,heats{i}.name);
-%     for j=1:length(assignments)
-%         if isempty(asgns)
-%             asgns=assignments{j};
-%         else
-%             asgns(end+1)=assignments{j};
-%         end
-%     end
-% end
-% closeConn(conn);
-% 
+% This might be necesary later....
+% % find the rack
+%  rackNum=getRackIDFromIP;
+%  asgns=[];
+% % this might not be relevant for me
+%  conn=dbConn;
+%  heats=getHeats(conn);
+%  for i=1:length(heats)
+%      assignments=getAssignments(conn,rackNum,heats{i}.name);
+%      for j=1:length(assignments)
+%          if isempty(asgns)
+%              asgns=assignments{j};
+%          else
+%              asgns(end+1)=assignments{j};
+%          end
+%      end
+%  end
+%  closeConn(conn);
+%  
 % asgns=asgns(ismember({asgns.owner},{'eflister' 'bsriram' 'pmeier'})); %162, 164 curently pmeier, 173-176 bsriram
 
 for i=1:length(subIDs)
@@ -79,8 +79,8 @@ for i=1:length(subIDs)
 %
     
     subj=getSubjectFromID(r,subIDs{i});
-    [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolEDF','edf');
-    fprintf('set %s on step %d of %s\n',subIDs{i},stepNum,'gotoSide')
+    [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolBS','bs');
+    fprintf('set %s on step %d of %s\n',subIDs{i},stepNum,'gotoSidewPuff')
     %fprintf('skipping %s on %s\n',subIDs{i},asgns(ind).experiment)
     clear('p','stepNum')
 end

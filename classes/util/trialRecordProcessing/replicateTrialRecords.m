@@ -42,13 +42,13 @@ for f=1:length(subDirs)
             tr.trialRecords=[];
             [sMV msgMV idMV]=movefile(fullfile(filePath,fileName),fullfile(filePath,['corrupt.' fileName '.' datestr(now,30) '.corrupt']));
             if ~sMV
-                ple
+                ple(loaderror)
                 msgMV
                 idMV
                 error('error trying to rename unreadable trialrecords file')
             end
         else
-            ple
+            ple(loaderror)
             error('unknown load problem')
         end
     end
@@ -102,7 +102,8 @@ for f=1:length(subDirs)
                                 successC = true;
                             end
                             closeConn(conn);
-                        catch
+                        catch ex
+                            ple(ex)
                             successC = false;
                         end
                     else

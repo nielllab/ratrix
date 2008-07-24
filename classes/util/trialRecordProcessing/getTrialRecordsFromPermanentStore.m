@@ -159,7 +159,7 @@ for i=1:length(files)
             end
             tr=load(tmpFile);
             completed=true;
-        catch
+        catch ex
             % Why are we doing this?  Because we don't want all of the
             % computers to load the file from the remote store at the same
             % time.  To cut down on the chance of this, we are
@@ -179,8 +179,8 @@ for i=1:length(files)
 
     end
     if ~completed
-        lasterror
-        rethrow(lasterror)
+        ple(ex)
+        rethrow(ex)
     end
     '******'
 

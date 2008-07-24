@@ -202,7 +202,7 @@ try
 catch ex
     cleanup(originalPriority,oldCLUT,tm.window);
 
-    ple
+    ple(ex)
 
     Screen('CloseAll');
     ShowCursor(0);

@@ -16,13 +16,13 @@ switch r.type
                 [r rx]=remoteClientShutdown(r,clients(i),rx,subjects);
             catch ex
                 firstErr=ex
-                ple
+                ple(ex)
             end
             try
                 cList=disconnectClient(r,clients(i));
                 cList=[]; % Ignore leftover commands
             catch ex
-                ple
+                ple(ex)
             end
         end
         %         catch
@@ -47,7 +47,7 @@ switch r.type
 
             r.server=[];
         catch ex
-            ple
+            ple(ex)
             %rethrow(lasterror);
         end
         if ~isempty(firstErr)

@@ -67,8 +67,8 @@ if exist(f) == 2
 
         updatePsychtoolboxIfNecessary
 
-    catch
-        ple
+    catch ex
+        ple(ex)
         error('failure in checkForUpdate')
     end
     WaitSecs(3);

@@ -19,7 +19,7 @@ function [quit com] = sendToServer(r,clientId,priority,command,arguments)
   catch ex
       quit=true;
 
-      ple
+      ple(ex)
       try
           f=fopen('SocketErrorLog.txt','a');
           fprintf(f,'%s: sendToServer from %s in client socket error\n',datestr(now),r.id);
@@ -27,7 +27,8 @@ function [quit com] = sendToServer(r,clientId,priority,command,arguments)
           fprintf(f,['\t' ex.stack.file '\n']);
           fprintf(f,['\t' ex.stack.line '\n']);
           fclose(f);
-      catch
+      catch ex
+          ple(ex)
       end
       com=[];
   end

@@ -130,7 +130,7 @@ try
 catch ex
     display(ts)
 
-    ple
+    ple(ex)
     Screen('CloseAll');
     rethrow(ex)
 end

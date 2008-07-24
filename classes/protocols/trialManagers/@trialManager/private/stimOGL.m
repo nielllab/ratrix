@@ -1265,7 +1265,7 @@ try
     ListenChar(0);
 
 catch ex
-    ple
+    ple(ex)
 
 
     Screen('CloseAll');

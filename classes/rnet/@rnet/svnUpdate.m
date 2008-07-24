@@ -75,7 +75,7 @@ while ~successful
     successful = true;
   catch ex
     successful = false;
-    ple
+    ple(ex)
     pause(1.0);
     fprintf('Attempting to reconnect in svnUpdate()\n');
   end

@@ -18,7 +18,8 @@ if ~isempty(trialRecords)
     %eval the comand that gets the parameter value
     try
         eval(command);
-    catch
+    catch ex
+        ple(ex)
         disp(command);
         error('bad command in check criterion')
     end

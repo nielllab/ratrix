@@ -7,6 +7,7 @@ try
     frewind(fd);
     load(fd,'tmp');
     fclose(fd);
-catch
+catch ex
+    ple(ex)
     error('Unable to handle given argument %s',class(arguments{i}));
 end

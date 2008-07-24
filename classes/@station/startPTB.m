@@ -70,6 +70,6 @@ catch ex
     Screen('CloseAll');
     Priority(0);
     ShowCursor;
-    ple
+    ple(ex)
     rethrow(ex);
 end

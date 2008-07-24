@@ -145,7 +145,7 @@ try
     subjectAnalysis(compilePath);
     cleanup;
 catch ex
-    ple
+    ple(ex)
     cleanup;
     rethrow(ex)
 end

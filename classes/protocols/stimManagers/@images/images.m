@@ -36,7 +36,8 @@ switch nargin
             s.directory=varargin{1};
             try
                 d=isdir(s.directory); % may fail due to windows networking/filesharing bug, but unlikely at construction time
-            catch
+            catch ex
+                ple(ex)
                 error('can''t load that directory')
             end
         else

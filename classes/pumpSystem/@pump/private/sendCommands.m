@@ -19,14 +19,13 @@ if p.pumpOpen
                         successfulSend=true;
                     end
                 catch ex
-                    ex
-                    ple
+                    ple(ex)
                     warning('pump failure on read!  cycling pump!')
                     p=closePump(p);
                     p=openPump(p);
                 end
             catch ex
-                ple
+                ple(ex)
                 warning('pump failure on write!  cycling pump!')
                 p=closePump(p);
                 p=openPump(p);

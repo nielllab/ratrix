@@ -6,6 +6,7 @@ try
     fpath = fullfile(matlabroot,fname);
     save(fpath,'tmp');
     newArg=java.io.File(java.lang.String(fpath));
-catch
+catch ex
+    ple(ex)
     error('Unable to handle given argument %s',class(arg));
 end

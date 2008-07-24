@@ -67,7 +67,7 @@ if isa(station,'station')
                         error('Unkown sound player type')
                     end
                 catch ex
-                    ple
+                    ple(ex)
                     rethrow(ex)
                 end
             else

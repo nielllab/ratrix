@@ -49,7 +49,8 @@ switch r.type
       f=fopen('SocketErrorLog.txt','a');
       fprintf(f,'%s: waitForSpecificCommand from %s server unexpectedly no longer connected to this client\n',datestr(now),mac);
       fclose(f);
-    catch
+    catch ex
+        ple(ex)
     end
     'waitForSpecificCommand: Client no longer connected'
     client.id

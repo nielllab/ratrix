@@ -1,10 +1,4 @@
-function r=createRatrixWithDefaultStations(machines,dataPath,servePump,localMultiDisplaySetup)
-
-if servePump
-    rewardMethod='serverPump';
-else
-    rewardMethod='localTimed';
-end
+function r=createRatrixWithDefaultStations(machines,dataPath,rewardMethod,localMultiDisplaySetup)
 
 serverDataPath = fullfile(dataPath, 'ServerData');
 r=ratrix(serverDataPath,1);

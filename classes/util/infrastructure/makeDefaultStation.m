@@ -42,7 +42,7 @@ else
     error('unknown OS')
 end
 
-if strcmp(stationSpec.id,'3A')
+if strcmp(stationSpec.id,'3A') || strcmp(rewardMethod,'localPump')
 
     infTooFarPin=int8(1);
     wdrTooFarPin=int8(14);

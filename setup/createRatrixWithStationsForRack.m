@@ -4,8 +4,6 @@ conn=dbConn;
 stations=getStationsOnRack(conn,rackID);
 closeConn(conn);
 
-servePump=false;
-standalone=false;
 dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
 
 machines={};
@@ -19,4 +17,4 @@ for i=1:length(stations)
 end
 
 
-r=createRatrixWithDefaultStations(machines,dataPath,servePump,false);
+r=createRatrixWithDefaultStations(machines,dataPath,rewardMethod,false);

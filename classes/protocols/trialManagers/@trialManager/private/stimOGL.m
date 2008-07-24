@@ -767,7 +767,7 @@ try
                     [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('priority:%g session:%d trial:%d stimInd:%d frame:%d stim:%s',Priority(),sessionNumber,trialInd,i,frameNum,txtLabel),xTextPos,yNewTextPos,100*ones(1,3));
                     %[garbage,yNewTextPos] = Screen('DrawText',window,['priority:' num2str(Priority()) ' session:' num2str(sessionNumber) ' trial:' num2str(trialInd) ' stim ind:' num2str(i) ' frame ind:' num2str(frameNum) ' calcStim:' txtLabel],xTextPos,yNewTextPos,100*ones(1,3));
                     yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
-                    
+
                     [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('ptb:%s',ptbVersion),xTextPos,yNewTextPos,100*ones(1,3));
                     yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
 
@@ -1082,130 +1082,127 @@ try
             %logwrite(sprintf('advancing to frame: %d',frameNum));
         end
 
-        switch  getRewardMethod(station)
-            case 'localTimed'
-                if requestRewardStarted && requestRewardStartLogged && ~requestRewardDone
-                    if 1000*(GetSecs()-responseDetails.requestRewardStartTime) >= getRequestRewardSizeULorMS(tm)
-                        requestRewardPorts=0*requestRewardPorts;
-                        requestRewardDone=true;
-                    end
-                end
-                newValveState=doValves|requestRewardPorts;
-
-            case 'serverPump'
-
-                if ~isempty(rn)
-
-                    if ~isConnected(rn)
-                        done=true;
-                    end
-
-
-                    serverValveStates=currentValveState;
-
-                    while commandsAvailable(rn,constants.priorities.IMMEDIATE_PRIORITY) && ~done && ~quit
-                        %logwrite('handling IMMEDIATE priority command in stimOGL');
-                        if ~isConnected(rn)
-                            done=true;
-                        end
-                        com=getNextCommand(rn,constants.priorities.IMMEDIATE_PRIORITY);
-                        if ~isempty(com)
-                            [good cmd args]=validateCommand(rn,com);
-                            %logwrite(sprintf('command is %d',cmd));
-                            if good
-                                switch cmd
-
-
-
-                                    case constants.serverToStationCommands.S_SET_VALVES_CMD
-                                        isPrime=args{2};
-                                        if isPrime
-                                            if requestRewardStarted && ~requestRewardDone
-                                                quit=sendError(rn,com,constants.errors.BAD_STATE_FOR_COMMAND,'stimOGL received priming S_SET_VALVES_CMD while a non-priming request reward was unfinished');
-                                            else
-                                                timeout=-1;
-                                                [quit valveErrorDetails(end+1)]=clientAcceptReward(rn,...
-                                                    com,...
-                                                    station,...
-                                                    timeout,...
-                                                    valveStart,...
-                                                    requestedValveState,...
-                                                    [],...
-                                                    isPrime);
-                                                if quit
-                                                    done=true;
-                                                end
-                                            end
-                                        else
-                                            if all(size(ports)==size(args{1}))
-
-                                                serverValveStates=args{1};
-                                                serverValveChange=true;
-
-                                                if requestRewardStarted && requestRewardStartLogged && ~requestRewardDone
-                                                    if requestRewardOpenCmdDone
-                                                        if all(~serverValveStates)
-                                                            requestRewardDone=true;
-                                                        else
-                                                            quit=sendError(rn,com,constants.errors.CORRUPT_STATE_SENT,'stimOGL received S_SET_VALVES_CMD for closing request reward but not all valves were indicated to be closed');
-                                                        end
-                                                    else
-                                                        if all(serverValveStates==requestRewardPorts)
-                                                            requestRewardOpenCmdDone=true;
-                                                        else
-                                                            quit=sendError(rn,com,constants.errors.CORRUPT_STATE_SENT,'stimOGL received S_SET_VALVES_CMD for opening request reward but wrong valves were indicated to be opened');
-                                                        end
-                                                    end
-                                                else
-                                                    quit=sendError(rn,com,constants.errors.BAD_STATE_FOR_COMMAND,'stimOGL received unexpected non-priming S_SET_VALVES_CMD');
-                                                end
-                                            else
-                                                quit=sendError(rn,com,constants.errors.CORRUPT_STATE_SENT,'stimOGL received inappropriately sized S_SET_VALVES_CMD arg');
-                                            end
-                                        end
-
-
-                                    case constants.serverToStationCommands.S_REWARD_COMPLETE_CMD
-                                        if requestRewardDone
-                                            quit=sendAcknowledge(rn,com);
-                                        else
-                                            if requestRewardStarted
-                                                quit=sendError(rn,com,constants.errors.BAD_STATE_FOR_COMMAND,'client received S_REWARD_COMPLETE_CMD apparently not preceeded by open and close S_SET_VALVES_CMD''s');
-                                            else
-                                                quit=sendError(rn,com,constants.errors.BAD_STATE_FOR_COMMAND,'client received S_REWARD_COMPLETE_CMD not preceeded by C_REWARD_CMD (MID_TRIAL)');
-                                            end
-                                        end
-                                    otherwise
-                                        done=clientHandleVerifiedCommand(rn,com,cmd,args,constants.statuses.MID_TRIAL);
-                                        if done
-                                            response='server kill';
-                                        end
-                                end
-                            end
-                        end
-                    end
-                    newValveState=doValves|serverValveStates;
-
-                else
-                    error('need a rnet for serverPump')
-                end
-
-            case 'localPump'
-
-                if requestRewardStarted && ~requestRewardDone && requestRewardStartLogged
-                    station=doReward(station,getRequestRewardSizeULorMS(tm)/1000,requestRewardPorts);
+        if strcmp(getRewardMethod(station),'localTimed')
+            if requestRewardStarted && requestRewardStartLogged && ~requestRewardDone
+                if 1000*(GetSecs()-responseDetails.requestRewardStartTime) >= getRequestRewardSizeULorMS(tm)
+                    requestRewardPorts=0*requestRewardPorts;
                     requestRewardDone=true;
                 end
+            end
+            newValveState=doValves|requestRewardPorts;
+        elseif strcmp(getRewardMethod(station),'localPump')
 
-                if any(doValves)
-                    primeMLsPerSec=1.0;
-                    station=doReward(station,primeMLsPerSec*ifi,doValves);
-                end
+            if requestRewardStarted && ~requestRewardDone && requestRewardStartLogged
+                station=doReward(station,getRequestRewardSizeULorMS(tm)/1000,requestRewardPorts);
+                requestRewardDone=true;
+            end
 
-                newValveState=0*doValves;
-            otherwise
-                error('unrecognized rewardmethod')
+            if any(doValves)
+                primeMLsPerSec=1.0;
+                station=doReward(station,primeMLsPerSec*ifi,doValves);
+            end
+
+            newValveState=0*doValves;
         end
+
+        if ~isempty(rn) || strcmp(getRewardMethod(station),'serverPump')
+
+            if ~isConnected(rn)
+                done=true;
+            end
+
+
+            serverValveStates=currentValveState;
+
+            while commandsAvailable(rn,constants.priorities.IMMEDIATE_PRIORITY) && ~done && ~quit
+                %logwrite('handling IMMEDIATE priority command in stimOGL');
+                if ~isConnected(rn)
+                    done=true;
+                end
+                com=getNextCommand(rn,constants.priorities.IMMEDIATE_PRIORITY);
+                if ~isempty(com)
+                    [good cmd args]=validateCommand(rn,com);
+                    %logwrite(sprintf('command is %d',cmd));
+                    if good
+                        switch cmd
+
+
+
+                            case constants.serverToStationCommands.S_SET_VALVES_CMD
+                                isPrime=args{2};
+                                if isPrime
+                                    if requestRewardStarted && ~requestRewardDone
+                                        quit=sendError(rn,com,constants.errors.BAD_STATE_FOR_COMMAND,'stimOGL received priming S_SET_VALVES_CMD while a non-priming request reward was unfinished');
+                                    else
+                                        timeout=-1;
+                                        [quit valveErrorDetails(end+1)]=clientAcceptReward(rn,...
+                                            com,...
+                                            station,...
+                                            timeout,...
+                                            valveStart,...
+                                            requestedValveState,...
+                                            [],...
+                                            isPrime);
+                                        if quit
+                                            done=true;
+                                        end
+                                    end
+                                else
+                                    if all(size(ports)==size(args{1}))
+
+                                        serverValveStates=args{1};
+                                        serverValveChange=true;
+
+                                        if requestRewardStarted && requestRewardStartLogged && ~requestRewardDone
+                                            if requestRewardOpenCmdDone
+                                                if all(~serverValveStates)
+                                                    requestRewardDone=true;
+                                                else
+                                                    quit=sendError(rn,com,constants.errors.CORRUPT_STATE_SENT,'stimOGL received S_SET_VALVES_CMD for closing request reward but not all valves were indicated to be closed');
+                                                end
+                                            else
+                                                if all(serverValveStates==requestRewardPorts)
+                                                    requestRewardOpenCmdDone=true;
+                                                else
+                                                    quit=sendError(rn,com,constants.errors.CORRUPT_STATE_SENT,'stimOGL received S_SET_VALVES_CMD for opening request reward but wrong valves were indicated to be opened');
+                                                end
+                                            end
+                                        else
+                                            quit=sendError(rn,com,constants.errors.BAD_STATE_FOR_COMMAND,'stimOGL received unexpected non-priming S_SET_VALVES_CMD');
+                                        end
+                                    else
+                                        quit=sendError(rn,com,constants.errors.CORRUPT_STATE_SENT,'stimOGL received inappropriately sized S_SET_VALVES_CMD arg');
+                                    end
+                                end
+
+
+                            case constants.serverToStationCommands.S_REWARD_COMPLETE_CMD
+                                if requestRewardDone
+                                    quit=sendAcknowledge(rn,com);
+                                else
+                                    if requestRewardStarted
+                                        quit=sendError(rn,com,constants.errors.BAD_STATE_FOR_COMMAND,'client received S_REWARD_COMPLETE_CMD apparently not preceeded by open and close S_SET_VALVES_CMD''s');
+                                    else
+                                        quit=sendError(rn,com,constants.errors.BAD_STATE_FOR_COMMAND,'client received S_REWARD_COMPLETE_CMD not preceeded by C_REWARD_CMD (MID_TRIAL)');
+                                    end
+                                end
+                            otherwise
+                                done=clientHandleVerifiedCommand(rn,com,cmd,args,constants.statuses.MID_TRIAL);
+                                if done
+                                    response='server kill';
+                                end
+                        end
+                    end
+                end
+            end
+            newValveState=doValves|serverValveStates;
+
+        elseif isempty(rn) && strcmp(getRewardMethod(station),'serverPump')
+            error('need a rnet for serverPump')
+        end
+
+
+
 
 
 

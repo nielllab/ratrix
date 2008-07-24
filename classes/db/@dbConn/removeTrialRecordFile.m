@@ -1,7 +1,7 @@
 function removeTrialRecordFile(conn,subject_id,file_name)
 
 % Get the hidden subject uin for this id
-subjectquery=sprintf('select subjects.uin from subjects where display_uin=UPPER(''%s'') ',subject_id);
+subjectquery=sprintf('select subjects.uin from subjects where UPPER(display_uin)=UPPER(''%s'') ',subject_id);
 subjectdata=query(conn,subjectquery);
 if isempty(subjectdata)
     subject_id

@@ -24,7 +24,7 @@ for i=1:length(subDirs)
     fsFileNames={};
     [verifiedHistoryFiles ranges]=getTrialRecordFiles(fullfile(permanentStorePath,subName));
     for fn=1:length(verifiedHistoryFiles)
-        [pth,nme,ext,ver]=fileParts(verifiedHistoryFiles{fn});
+        [pth,nme,ext,ver]=fileparts(verifiedHistoryFiles{fn});
         fsFileNames{end+1}=[nme ext];
     end
     fsFileNames=fsFileNames';

@@ -577,7 +577,6 @@ try
     standardFontSize=11; %big was 25
     subjectFontSize=35;
 
-
     % For the Windows version of Priority (and Rush), the priority levels set
     % are  "process priority levels". There are 3 priority levels available,
     % levels 0, 1, and 2. Level 0 is "normal priority level", level 1 is "high
@@ -874,24 +873,13 @@ try
 
         %all trial logic here
 
-
-        if msAirpuff>0 && ~puffDone && (puffStarted==0 || GetSecs-puffStarted<=msAirpuff/1000)
-
-            setPuff(station,true);
-            if puffStarted==0
-                puffStarted=GetSecs;
-            end
-        else
-            setPuff(station,false);
-            puffDone=true;
-        end
-
         if ~paused
             ports=readPorts(station);
         end
 
         doValves=0*ports;
-
+        doPuff=false;
+        
         mThisLoop=0;
         pThisLoop=0;
 
@@ -959,6 +947,8 @@ try
                             manual=~manual;
                             pressingM=1;
                         end
+                    elseif strcmp(keyName,'a') % check for airpuff 
+                        doPuff=true;
                     end
                 end
             end
@@ -1234,6 +1224,22 @@ try
         %requests.  right now there is a bug if the response occurs before
         %the request reward is over.
 
+        if msAirpuff>0 && ~puffDone && (puffStarted==0 || GetSecs-puffStarted<=msAirpuff/1000)
+
+            setPuff(station,true);
+            if puffStarted==0
+                puffStarted=GetSecs;
+            end
+        elseif ~doPuff
+            setPuff(station,false);
+            puffDone=true;
+        else
+            setPuff(station,true);
+        end
+        
+        
+        
+        
         %logwrite('end of stimOGL loop');
     end
     %logwrite('stimOGL loop complete');

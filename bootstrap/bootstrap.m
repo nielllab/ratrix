@@ -1,8 +1,8 @@
 function bootstrap
 
 setupEnvironment;
-addJavaComponents();  %might conflict with dbconn        
-            
+addJavaComponents();  %might conflict with dbconn
+
 dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
 
 diary off
@@ -26,7 +26,7 @@ try
         error('No station is defined for this MAC, is this a known station?')
     end
     serverAddress=info.server;
-    
+
     tries=0;
     while true
         'looping over svn code update, then rnet creation, then commands'
@@ -37,28 +37,31 @@ try
             checkForUpdate;
             addJavaComponents();  %        move to top of file. so that above dbConn
             % If r is already setup, just try and reconnect
-%             if exist('r') && ~isempty(r)
-%                 reconnect(r);
-%             else
-                r = rnet('client',id,serverAddress);
-                'yo3'
-%             end
-        catch ex 
+            %             if exist('r') && ~isempty(r)
+            %                 reconnect(r);
+            %             else
+            r = rnet('client',id,serverAddress);
+            'yo3'
+            %             end
+        catch ex
             % says can't find server
             errStrs={'Unable to establish socket in RlabNetworkClient constructor',...
                 'Unable to open input streams',...
                 'Unable to open I/O streams on server socket in client thread'};
-            
-%             x=lasterror
-%             x.message
-%             [x y]=lasterr
-            if  any(~cellfun(@isempty,strfind(errStrs,ex.message)))
+
+            %             x=lasterror
+            %             x.message
+            %             [x y]=lasterr
+            tmp={};
+            for ind=1:length(errStrs)
+                tmp{ind}=ex.message;
+            end
+            if  any(~cellfun(@isempty,cellfun(@findstr,errStrs,tmp,'UniformOutput',false)))
                 r=[];
                 tries=tries+1;
                 fprintf('try %d: no server found at %s, trying again in a sec\n',tries, serverAddress)
                 WaitSecs(1);
             else
-                strfind(errStrs,ex.message)
                 errStrs
                 ex.message
                 ple(ex)
@@ -70,7 +73,7 @@ try
             % Update system time upon reconnect
             fixSystemTime;
             clearTemporaryFiles(r);
-            
+
             quit=false;
             timing.temp = '';
             constants=getConstants(r);

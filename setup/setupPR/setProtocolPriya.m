@@ -39,6 +39,7 @@ rewardSizeULorMS        =50;
 fractionSoundOn        = 1;
 fractionPenaltySoundOn = 1;
 rewardScalar =1;
+msPuff=0;
 
 %params of freedrinks trial manager only
 msPenaltyFD              =0; %no penalty during free drinks
@@ -56,6 +57,8 @@ distractorOrientations  =[]; % if empty, no distractor
 radius                  =.10;
 thresh                  =.00005; %what is this?
 yPosPct                 =.65;
+
+svnRevision={'svn://132.239.158.177/projects/ratrix/tags/v0.6'};
 
 %path containing ALL the stimuli
 imdir='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\PriyaV\TMPPriyaImageSet'
@@ -118,7 +121,7 @@ scheduler=noTimeOff(); %runs trials until rat logged off
 %TS1 = stochastic free drinks
 %create reinforcement manager object
 reinfmanager = constantReinforcement(rewardSizeULorMS,msPenaltyFD,...
-    fractionSoundOn, fractionPenaltySoundOn,rewardScalar);
+    fractionSoundOn, fractionPenaltySoundOn,rewardScalar,msPuff);
 %create free drinks object (trial manager)
 fd = freeDrinks(msFlushDuration, msMinimumPokeDuration,...
     msMinimumClearDuration,smSTOCH, stoch_freeDrinkLikelihood, reinfmanager);
@@ -130,7 +133,7 @@ if istest, FDcriter = rateCriterion(3,1); % quick test mode 3 trialspermin 1 min
 else FDcriter = rateCriterion(1,10); % for real training 1 trialpermin 10min
 end
 
-ts1 = trainingStep(fd, freeStim, FDcriter, scheduler);  
+ts1 = trainingStep(fd, freeStim, FDcriter, scheduler,svnRevision);  
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -144,13 +147,13 @@ fd2 = freeDrinks(msFlushDuration,msMinimumPokeDuration,...
 if istest, FDcriter = rateCriterion(3,1); % quick test mode 3 trialspermin 1 min
 else FDcriter = rateCriterion(3,10); % for real training  3 trialpermin 10min
 end
-ts2 = trainingStep(fd2, freeStim, FDcriter, scheduler); 
+ts2 = trainingStep(fd2, freeStim, FDcriter, scheduler,svnRevision); 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %TS3=gotostim, natural objects NORMALIZED, TRAINING set NO DISTRACTOR
 %create reinforcement manager object for all training steps
 reinfmanager = constantReinforcement(rewardSizeULorMS,msPenaltyNAFC,... %different penalty duration
-    fractionSoundOn, fractionPenaltySoundOn,rewardScalar);
+    fractionSoundOn, fractionPenaltySoundOn,rewardScalar,msPuff);
 %create nAFC object (trial manager)
 gotostim=nAFC(msFlushDuration,msMinimumPokeDuration,...
     msMinimumClearDuration,sm,requestRewardSizeULorMS,...
@@ -163,7 +166,7 @@ discrimStim3 = images(imdir,ypos_nAFC, background_nAFC,...
     maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts3);
 %note hardwired in images() is definition of errorstim as black screen.
 %define the associated training step
-ts3 = trainingStep(gotostim, discrimStim3, graduationCriterion, scheduler);
+ts3 = trainingStep(gotostim, discrimStim3, graduationCriterion, scheduler,svnRevision);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %TS4=gotos+ ignore s-, natural objects NORMALIZED, TRAINING set 
@@ -173,7 +176,7 @@ ts3 = trainingStep(gotostim, discrimStim3, graduationCriterion, scheduler);
 discrimStim4 = images(imdir,ypos_nAFC,background_nAFC,...
     maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts4);
 %define the associated training step
-ts4 = trainingStep(gotostim, discrimStim4, graduationCriterion, scheduler);
+ts4 = trainingStep(gotostim, discrimStim4, graduationCriterion, scheduler,svnRevision);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %TS5=gotoS+, ignore S-, natural objects normalized, TEST set
@@ -183,10 +186,10 @@ ts4 = trainingStep(gotostim, discrimStim4, graduationCriterion, scheduler);
 % A and B reverse which is the S+ for different rats
 discrimStim5A = images(imdir,ypos_nAFC,background_nAFC,...
     maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts5A);
-ts5A = trainingStep(gotostim, discrimStim5A, graduationCriterion, scheduler);
+ts5A = trainingStep(gotostim, discrimStim5A, graduationCriterion, scheduler,svnRevision);
 discrimStim5B = images(imdir,ypos_nAFC,background_nAFC,...
     maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts5B);
-ts5B = trainingStep(gotostim, discrimStim5B, graduationCriterion, scheduler);
+ts5B = trainingStep(gotostim, discrimStim5B, graduationCriterion, scheduler,svnRevision);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %TS6=gotosS+ ignore S-, natural obj TEST set, mix in intermediate morphs
@@ -195,17 +198,17 @@ ts5B = trainingStep(gotostim, discrimStim5B, graduationCriterion, scheduler);
 % DESIRED: designate specific target/distractor pairs
 discrimStim6A = images(imdir,ypos_nAFC,background_nAFC,...
     maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts6A);
-ts6A = trainingStep(gotostim, discrimStim6A,graduationCriterion, scheduler); %
+ts6A = trainingStep(gotostim, discrimStim6A,graduationCriterion, scheduler,svnRevision); %
 
 discrimStim6B = images(imdir,ypos_nAFC,background_nAFC,...
     maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts6B);
-ts6B = trainingStep(gotostim, discrimStim6B, graduationCriterion, scheduler); %
+ts6B = trainingStep(gotostim, discrimStim6B, graduationCriterion, scheduler,svnRevision); %
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %TS7=graduate, but keep doing TS6 trials forever
  
-ts7A = trainingStep(gotostim, discrimStim6A,laststep_crit , scheduler);  
-ts7B = trainingStep(gotostim, discrimStim6B, laststep_crit, scheduler);  
+ts7A = trainingStep(gotostim, discrimStim6A,laststep_crit , scheduler,svnRevision);  
+ts7B = trainingStep(gotostim, discrimStim6B, laststep_crit, scheduler,svnRevision);  
 
 
 % HERE's THE PROTOCOL! two versions which differ in which is the target

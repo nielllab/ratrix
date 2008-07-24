@@ -73,3 +73,14 @@ r = setProtocolPriya(r,subjIDs); %  run 7/22/08  at 10pm PR
 
 
 
+%07.24.08
+%edf added msPuff=0 to your reinforcement managers and 
+%svnRevision={'svn://132.239.158.177/projects/ratrix/tags/v0.6'}
+%to your trainingSteps in setProtocolPriya in order to get you on board
+%with the merge.  ran the following:
+cd('C:\Documents and Settings\rlab\Desktop\Ratrix\bootstrap')
+setupEnvironment
+dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
+r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
+subjIDs={'279'; '280'; '281'; '282'};
+r = setProtocolPriya(r,subjIDs); 

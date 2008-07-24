@@ -5,7 +5,8 @@ function p=makeProtocol(name,istest)
 svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
 
 if istest
-    gc = rateCriterion(3,1); 
+    %gc = rateCriterion(3,1);
+    gc = repeatIndefinitely();
 else
     gc = rateCriterion(3,5);
 end
@@ -24,9 +25,9 @@ silentTryClip        =soundClip('trySomethingElseSound','allOctaves',[],1);
 silentWrongClip      =soundClip('wrongSound','allOctaves',[],1);
 sm=soundManager({correctClip,keepGoingClip,silentTryClip,silentWrongClip});
 
-msFlushDuration         =1000; 
-msMinimumPokeDuration   =10; 
-msMinimumClearDuration  =10; 
+msFlushDuration         =1000;
+msMinimumPokeDuration   =10;
+msMinimumClearDuration  =10;
 freeDrinkLikelihood     =0.006;
 fd = freeDrinks(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,freeDrinkLikelihood,rm);
 
@@ -75,11 +76,12 @@ doMask                              =false;
 gts=nAFC(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,requestRewardSizeULorMS,percentCorrectionTrials,...
     msResponseTimeLimit,pokeToRequestStim,maintainPokeToMaintainStim,msMaximumStimPresentationDuration,maximumNumberStimPresentations,doMask,rm);
 
-if istest
-    gc=performanceCriterion([.8], int8([10]));
-else 
-    gc=performanceCriterion([.95, .85], int8([20,200]));
-end
+% if istest
+%     gc=performanceCriterion([.8], int8([10]));
+% else
+%     gc=performanceCriterion([.95, .85], int8([20,200]));
+% end
+gc = repeatIndefinitely();
 
 radius                  =.12;
 freeStim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);

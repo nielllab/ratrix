@@ -299,7 +299,8 @@ for i=1:length(subjects)
     owner=subjects{i}{3};
     exp=subjects{i}{4};
     %note axis ij, so row/col flipped!
-    text('Parent',ha,'Position',[colCenters(loc(2)) rowCenters(loc(1)) ],'String',name,'Color',heatCol,'FontSize',30,'FontWeight','bold','VerticalAlignment','middle','HorizontalAlignment','center');
+    fontsize=ceil(.875*(mean(diff(columnBoundaries)))/length(name));
+    text('Parent',ha,'Position',[colCenters(loc(2)) rowCenters(loc(1)) ],'String',name,'Color',heatCol,'FontSize',fontsize,'FontWeight','bold','VerticalAlignment','middle','HorizontalAlignment','center');
     text('Parent',ha,'Position',[columnBoundaries(loc(2))+margin rowBoundaries(loc(1)+1) ],'String',sprintf('owner: %s\nexp: %s',owner,exp),'Color',[0 0 0],'FontSize',10,'FontWeight','normal','VerticalAlignment','bottom','HorizontalAlignment','left');
 end
 

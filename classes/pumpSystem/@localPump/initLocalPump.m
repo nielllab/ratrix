@@ -10,7 +10,7 @@ else
     error('need a station')
 end
 
-if ischar(pportaddr) && strcmp(pportaddr,'0378')
+if ischar(pportaddr) && hex2dec(pportaddr)==hex2dec('0378')
     %pass
 else
     error('local pump only works for parallel port address 0378')

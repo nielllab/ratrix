@@ -28,7 +28,7 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
 
             if strcmp(s.rewardMethod,'localPump')
                 if ~ s.localPumpInited
-                    s.localPump=initLocalPump(s.localPump,s,s.parallelPortAddress);
+                    s.localPump=initLocalPump(s.localPump,s,dec2hex(s.decPPortAddr));
                     s.localPumpInited=true;
                 else
                     error('localPump already inited')

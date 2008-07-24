@@ -62,7 +62,7 @@ imdir='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\PriyaV\TMPPriyaImageSet'
 % '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\PriyaV\PriyaImageSet'; 
 % execute separate file containing the lists for each trainingstep
 % TMP enforces erik's naming scheme, for use with his checkImages 
-imlist=PriyaImageSets; % populate struct, each training step has a field for its list
+imlist=TMPPriyaImageSets; % struct, each training step has a field for its list
 % each list is a cell array of cell arrays, passed to images
 
 % params for all the NAFC trial managers
@@ -93,9 +93,6 @@ else % real training
     %will graduate a subject if he is 95% correct after 20 consecutive trials
     %or if he is at least 85% correct after 200 consecutive trials
 end
-
-laststep_crit=repeatIndefinitely();
-
  
 %create sound manager object used by stochastic free drinks only
 % no hissing sound when water clogs ports
@@ -195,31 +192,23 @@ ts5B = trainingStep(gotostim, discrimStim5B, graduationCriterion, scheduler);
 % DESIRED: designate specific target/distractor pairs
 discrimStim6A = images(imdir,ypos_nAFC,background_nAFC,...
     maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts6A);
-ts6A = trainingStep(gotostim, discrimStim6A,graduationCriterion, scheduler); %
-
+ts6A = trainingStep(gotostim, discrimStim6A, graduationCriterion, scheduler);
 discrimStim6B = images(imdir,ypos_nAFC,background_nAFC,...
     maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts6B);
-ts6B = trainingStep(gotostim, discrimStim6B, graduationCriterion, scheduler); %
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%TS7=graduate, but keep doing TS6 trials forever
- 
-ts7A = trainingStep(gotostim, discrimStim6A,laststep_crit , scheduler);  
-ts7B = trainingStep(gotostim, discrimStim6B, laststep_crit, scheduler);  
+ts6B = trainingStep(gotostim, discrimStim6A, graduationCriterion, scheduler);
 
 
 % HERE's THE PROTOCOL! two versions which differ in which is the target
-% DO NOT CHANGE the training step list here, use setprotocolandstep to
-% change step! 7/22/08 PR
-pA=protocol('object rec', {ts1 ts2 ts3 ts4 ts5A ts6A ts7A}); %Grp A paintbrush is target
-pB=protocol('object rec', {ts1 ts2 ts3 ts4 ts5B ts6B ts7B}); %Grp B flashlight is target
+% code for A vs B is not working - valences don't switch.
+pA=protocol('object rec', {ts3 ts4 ts5A ts6A}); %Grp A paintbrush is target  ts1 ts2  .. 
+pB=protocol('object rec', {ts3 ts4 ts5B ts6B}); %Grp B flashlight is target ts1 ts2    .. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% % demote two subjs to free drinks on Friday 
-% NOTE I should have set back the step, not made a new protocol with
-% different steps!
-% NOTE it looks like I set two subjects to protocol A one of which should
-% have been protocol B! luckily the two protocols are the same up to the
-% step used so far.
+%added by edf/pv 08.16.08
+pDemoted=protocol('object rec', {ts1 ts2 ts3 ts4});
+%%%%
+
+% % demote two subjs to free drinks
 % for i=1:length(subjIDs),
 %     subj=getSubjectFromID(r,subjIDs{i}); %extract the subject object
 %     if ismember(subjIDs{i}, {'279'; '280'}),
@@ -229,36 +218,21 @@ pB=protocol('object rec', {ts1 ts2 ts3 ts4 ts5B ts6B ts7B}); %Grp B flashlight i
 %         error('this rat is not assigned to any group. edit setProtocolPriya to assign.')
 %     end
 % end
-%%%%%%%%%%%%
 
-% 080722 MODIFIED to add the paintbrush flashlight tasks (ts 5, 6 and 7)
-% restore all steps to the protocols and use the step index to set step
-% instead of deleting the steps already graduated.
-% so many confusing/unlogged changes before this,
-% save everything this once to document status.
-thisIsANewProtocol=1; % typically 1
-thisIsANewTrainingStep=1; % typically 0
-thisIsANewStepNum=1;  %  typically 1
+% MODIFIED on saturday by Pam but not called in PriyaHistory on rack3 yet
+% purpose, add in the flashlight and paintbrush (NEEDS TESTING FIRST!)
+% put all subjects on  ts3?
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i}); %extract the subject object
-    % set the current step index here
-    switch subjIDs{i},
-        case '279', stepind=3; % 279 continue at step 3
-        case '280', stepind=4; % 280 continue at step 4 (already graduated but has been out of practice)
-        case '281', stepind=4; % 281 continue at step 4 (almost ready to grad)
-        case '282', stepind=2; % 282 continue at step 2  
-        case 'demo1', stepind=6; %demo test step
-    end
-    % assign to groups THIS CODE SHOULD NOT CHANGE!   
-    if ismember(subjIDs{i}, {'279'; '281'}), % GROUP A (279, 281)
-                [subj r]=setProtocolAndStep(subj,pA,thisIsANewProtocol,thisIsANewTrainingStep,thisIsANewStepNum,stepind,r,date,'pr');
-    elseif ismember(subjIDs{i}, {'280'; '282'; 'demo1'}),% GROUP B (280,282)
-                [subj r]=setProtocolAndStep(subj,pB,thisIsANewProtocol,thisIsANewTrainingStep,thisIsANewStepNum,stepind,r,date,'pr');
+    if ismember(subjIDs{i},{'279','282'})
+    	[subj r]=setProtocolAndStep(subj,pDemoted,1,0,1,1,r,date,'edf'); % half are A
+%     if ismember(subjIDs{i}, {'279'; '281'}),
+%         [subj r]=setProtocolAndStep(subj,pA,1,0,1,1,r,date,'pr'); % half are A
+%     elseif ismember(subjIDs{i}, {'280'; '282'; 'demo1'}),
+%         [subj r]=setProtocolAndStep(subj,pB,1,0,1,1,r,date,'pr'); % evens are B
     else
         sprintf('unknown subject %s\n', subjIDs{i}') % echo to screen
         error('this rat is not assigned to any group. edit setProtocolPriya to assign.')
     end
 end
-
-
 

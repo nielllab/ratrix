@@ -60,16 +60,11 @@ subjIDs={'279'; '280'};
 r = setProtocolPriya(r,subjIDs); %  run at 12:10pm on fri jul 11
 
 
-%update protocols to include the paintbrush/flashlight tasks
-% note two groups, different targets
-% note each rat beginning at a different training step
-% but now all trainingsteps remain defined, so step index = ts#
+%edf/pv demoting two subjects to stochastic free drinks 08.16.08%
 cd('C:\Documents and Settings\rlab\Desktop\Ratrix\bootstrap')
 setupEnvironment
 dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
 r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
-subjIDs={'279'; '280'; '281'; '282'};
-r = setProtocolPriya(r,subjIDs); %  run 7/22/08  at 10pm PR
-
-
+subjIDs={'279'; '282'};
+r = setProtocolPriya(r,subjIDs); %  run at 9am on wed jul 16
 

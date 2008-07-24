@@ -58,6 +58,9 @@ try
                 fprintf('try %d: no server found at %s, trying again in a sec\n',tries, serverAddress)
                 WaitSecs(1);
             else
+                strfind(errStrs,ex.message)
+                errStrs
+                ex.message
                 ple(ex)
                 error('bootstrap problem')
             end

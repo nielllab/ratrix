@@ -20,6 +20,7 @@ if p.pumpOpen
                     end
                 catch ex
                     ple(ex)
+                    in
                     warning('pump failure on read!  cycling pump!')
                     p=closePump(p);
                     p=openPump(p);

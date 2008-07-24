@@ -23,6 +23,8 @@ edfRatIDs=...
     '162' '164' '192'                       ... %violet
 ...%(i)gts(i)gts(i)gts
 ...%
+'rack2test1' 'rack2test2' 'rack2test3' 'rack2test4' 'rack2test5' 'rack2test6' ... %test
+...%
 ...%
 ...%rack 3 (boxes)
 ...% A     B     C          D     E     F           G     H     I

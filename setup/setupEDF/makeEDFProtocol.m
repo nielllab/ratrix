@@ -1,4 +1,4 @@
-function p=makeProtocol(name,istest)
+function p=makeEDFProtocol(name,istest)
 
 %%%%%%%%%% stochastic free drinks
 

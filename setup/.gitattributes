@@ -9,10 +9,10 @@
 setupMaleRoom/setupMaleRoom.m -text
 setupEDF/getEDFids.m -text
 setupEDF/setProtocolDFP.rack2backup.m -text
-setupEDF/makeProtocol.m -text
 setupEDF/setProtocolEDF.m -text
 setupEDF/setProtocolEDF.old.m -text
 setupBS/getPuffMS.m -text
 setupBS/makeProtocol.m -text
 setupBS/setProtocolBS.m -text
 setupBS/getBSids.m -text
+setupEDF/makeEDFProtocol.m -text

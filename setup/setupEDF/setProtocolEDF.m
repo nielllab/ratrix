@@ -46,10 +46,10 @@ for i=1:length(subIDs)
         skip=false;
         switch asgns(ind).experiment
             case {'goToSide' 'Flicker' 'Rel Cue' 'Rel Block' 'Box Transfer' 'Tube Transfer' 'Tube Physiology'}
-                p=makeProtocol(asgns(ind).experiment,false);
+                p=makeEDFProtocol(asgns(ind).experiment,false);
                 stepNum=1;
             case {'Testing'}
-                p=makeProtocol(asgns(ind).experiment,true);
+                p=makeEDFProtocol(asgns(ind).experiment,true);
                 stepNum=1;
             case 'Cross Modal'
                 skip=true;

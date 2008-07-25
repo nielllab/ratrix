@@ -1,7 +1,7 @@
 function msPuff = getPuffMS(subID)
 switch subID
     case {'267','268'}
-        msPuff = 0;
+        msPuff = 100;
     case {'269','270'}
         msPuff = 0;
     otherwise

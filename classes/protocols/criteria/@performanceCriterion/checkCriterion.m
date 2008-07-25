@@ -2,37 +2,49 @@ function [graduate details] = checkCriterion(c,subject,trainingStep,trialRecords
 
 fieldNames = fields(trialRecords);
 
-% Old version is guaranteed to have this information. Do I check for this
-% too?
 trialsThisStep=[trialRecords.trainingStepNum]==trialRecords(end).trainingStepNum;
-
 
 forcedRewards = 0;
 stochastic = 0;
 humanResponse = 0;
+
 warnStatus = false;
-% looks ugly
-if any(ismember(fieldNames,{'containedForcedRewards'}))
+
+if ismember({'containedForcedRewards'},fieldNames)
+    ind = find(cellfun(@isempty,{trialRecords.containedForcedRewards}));
+    for i = 1:length(ind)
+        trialRecords(ind(i)).containedForcedRewards = 1;
+    end
     forcedRewards = [trialRecords.containedForcedRewards]==1;
 else 
-    warnStatus = warnStatus | true;
+    warnStatus = true;
 end
-if any(ismember(fieldNames,{'didStochasticResponse'}))
+if ismember({'didStochasticResponse'},fieldNames)
+    ind = find(cellfun(@isempty,{trialRecords.didStochasticResponse}));
+    for i = 1:length(ind)
+        trialRecords(ind(i)).didStochasticResponse = 1;
+    end
     stochastic = [trialRecords.didStochasticResponse];
 else 
-    warnStatus = warnStatus | true;
+    warnStatus = true;
 end
-if any(ismember(fieldNames,{'didHumanResponse'}))
+if ismember({'didHumanResponse'},fieldNames)
+    ind = find(cellfun(@isempty,{trialRecords.didHumanResponse}));
+    for i = 1:length(ind)
+        trialRecords(ind(i)).didHumanResponse = 1;
+    end
     humanResponse = [trialRecords.didHumanResponse];
 else 
-    warnStatus = warnStatus | true;
+    warnStatus = true;
 end
 
 if warnStatus
-    warning('checkCriterion found trialRecords of the older format. some necessary fields are missing and have been assigned arbitrarily.');
+    warning(['checkCriterion found trialRecords of the older format. some necessary fields are missing. ensure presence of ' ...
+    '''containedForcedRewards'',''didStochasticResponse'' and ''didHumanResponse'' in trialRecords to remove this warning']);
 end
 
 which= trialsThisStep & ~stochastic & ~humanResponse & ~forcedRewards;
+
 [graduate whichCriteria correct]=aboveThresholdPerformance(c.consecutiveTrials,c.pctCorrect,trialRecords(which));
 
 %play graduation tone

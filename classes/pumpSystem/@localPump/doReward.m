@@ -43,7 +43,7 @@ if ~isempty(find(valves))
         setValves(s.station, 0*valves);
         WaitSecs(s.valveDelay);
 
-        %s=resetPosition(s);
+        s=resetPosition(s);
     end
 else
     error('valves must have a nonzero entry')

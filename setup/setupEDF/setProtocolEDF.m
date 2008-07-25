@@ -13,6 +13,11 @@ if ~exist('subIDs','var') || isempty(subIDs)
     subIDs=intersect(getEDFids,getSubjectIDs(r));
 end
 
+if strcmpi(subIDs,'test')
+    subIDs=getEDFids;
+    subIDs={subIDs{~cellfun(@isempty,strfind(lower(subIDs),sprintf('rack%dtest',getRackIDFromIP)))}};
+end
+
 if ~all(ismember(subIDs,getSubjectIDs(r)))
     error('not all those subject IDs are in that ratrix')
 end
@@ -45,7 +50,7 @@ for i=1:length(subIDs)
                 stepNum=1;
             case {'Testing'}
                 p=makeProtocol(asgns(ind).experiment,true);
-                stepNum=2;
+                stepNum=1;
             case 'Cross Modal'
                 skip=true;
                 warning('cross modal not built yet')

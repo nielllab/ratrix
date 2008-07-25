@@ -2,7 +2,7 @@ function [graduate keepWorking secsRemainingTilStateFlip subject r trialRecords 
 graduate=0;
 
 
-if ~isempty(rn)
+if ~isempty(rn) %need to be in bootstrap context cuz updating involves a matlab quit/expects daemon to restart it -- actually probably not necessary, but what if stand alone user has files open in editor that get svn updated?
     if ~isempty(ts.svnRevNum)
         args={ts.svnRevURL ts.svnRevNum};
     else

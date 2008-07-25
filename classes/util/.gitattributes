@@ -79,3 +79,4 @@ infrastructure/screenTimingTest.m -text
 infrastructure/kbTest.m -text
 infrastructure/updateRatrixRevisionIfNecessary.m -text
 infrastructure/writeSVNUpdateCommand.m -text
+infrastructure/readRFID.m -text

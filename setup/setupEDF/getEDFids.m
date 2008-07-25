@@ -40,8 +40,8 @@ edfRatIDs=...
     '266' '193' '194'      '249' '250' '251'       '252' '253' '254' ... %blue
 ...% rc    rc    rc         rc    rc    rc          rc    rc    rc
 ...%
-    '159' '255' '256'      '257' '258' '259'       '260' '261' '262' ... %violet
-...% rb    rb    rb         rb    rb    rb          rb    rb    rb
+          '255' '256'      '257' '258' '259'       '260' '261' '262' ... %violet  (originally had 159 on A, was i thinking of someone else?)
+...%       rb    rb         rb    rb    rb          rb    rb    rb
 ...%
 'rack3test1' 'rack3test2' 'rack3test3' 'rack3test4' 'rack3test5' 'rack3test6' 'rack3test7' 'rack3test8' 'rack3test9' ... %test
 };

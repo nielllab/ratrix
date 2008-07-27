@@ -1089,7 +1089,7 @@ try
 
             if any(doValves)
                 primeMLsPerSec=1.0;
-                station=doReward(station,primeMLsPerSec*ifi,doValves);
+                station=doReward(station,primeMLsPerSec*ifi,doValves,true);
             end
 
             newValveState=0*doValves;

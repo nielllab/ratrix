@@ -1,4 +1,4 @@
-function s=doReward(s,mlVol,valves)
+function s=doReward(s,mlVol,valves,dontReset)
 
 if ~s.inited
     error('localPump not inited')
@@ -43,7 +43,9 @@ if ~isempty(find(valves))
         setValves(s.station, 0*valves);
         WaitSecs(s.valveDelay);
 
-        s=resetPosition(s);
+        if ~dontReset
+            s=resetPosition(s);
+        end
     end
 else
     error('valves must have a nonzero entry')

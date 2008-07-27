@@ -1280,7 +1280,7 @@ catch ex
         setPuff(station,false);
     end
 
-    response=sprintf('error_in_StimOGL: %s',ers.message);
+    response=sprintf('error_in_StimOGL: %s',ex.message);
 
     rethrow(ex);
 

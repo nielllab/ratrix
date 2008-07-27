@@ -2,6 +2,8 @@ function [r rx]=unregisterClient(r,c,rx,subjects)
 % IMPORTANT! Here is the higher level program acknowledging a disconnection
 [tf loc]=clientIsRegistered(r,c);
 if ~tf
+    c
+    
     warning('that client doesn''t exist in the register')
 else
     [quit mac]=getClientMACaddress(r,c);

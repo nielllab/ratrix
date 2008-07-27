@@ -57,7 +57,7 @@ if good
         case constants.stationToServerCommands.C_RECV_UPDATING_SOFTWARE_CMD
             error('unexpected C_RECV_UPDATING_SOFTWARE_CMD')
         case r.constants.stationToServerCommands.C_STOPPED_TRIALS
-            warning('unexpected C_STOPPED_TRIALS - client has chosen to change svn revision or has a serious problem')
+            warning('unexpected C_STOPPED_TRIALS - client has chosen to change svn revision, graduated, or has a serious problem')
             %args{1} %possible issue -- we get the rx here, but would
             %rather ask again in shutdown, but if that fails we lost a good chance to get it.  possibly merge here? 
             [r rx]=remoteClientShutdown(r,client,rx,subjects); %handles merge,replication,unregister,disconnect

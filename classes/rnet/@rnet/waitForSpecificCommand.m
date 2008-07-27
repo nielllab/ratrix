@@ -101,6 +101,7 @@ if ~isempty(cmd)
 end
 fprintf('Number of commands available %d\n',commandsAvailable(r));
 if isempty(cmd)
+    client
   warning(['timed out: ' errStr])
   
   

@@ -24,24 +24,32 @@
 %     case 'plotRatePerDay' %skips data after the first 2 hours following the first trial of a given date
 %         requiredFields={'date'};
 function doAnalysisPlot(compiledFileDir,subjectID,type,filter,filterVal,filterParam,includeKeyboard)
-storageMethod='vector'; %'structArray' 
+storageMethod='vector'; %'structArray'
 
 
 if strcmp(type,'weight')
 
-    lastNdays = 60;
-    plotBodyWeights({subjectID},lastNdays);
-    
-    %old:
-%     conn=dbConn;
-%     [weights dates thresholds] = getBodyWeightHistory(conn,subjectID);
-%     closeConn(conn);
-%     plot(dates,[weights thresholds]);
-        
+    %this breaks subplotting -- would have to pass in, but don't want to have to know
+    %     lastNdays = 60;
+    %     plotBodyWeights({subjectID},lastNdays);
+
+    %reinstated old:
+    conn=dbConn;
+    [weights dates thresholds] = getBodyWeightHistory(conn,subjectID)
+    closeConn(conn);
+    if ~all(size(weights)==size(thresholds)) || length(weights)~=length(dates)
+        size(weights)
+        size(dates)
+        size(thresholds)
+        warning('why is getbodyweighthistory returning unequally sized things?')
+    else
+        plot(dates,[weights thresholds]);
+    end
+
 else
-if ~isdeployed
-%    addpath('C:\Documents and Settings\rlab\Desktop\phil analysys');
-end
+    if ~isdeployed
+        %    addpath('C:\Documents and Settings\rlab\Desktop\phil analysys');
+    end
 
     compiledFile=fullfile(compiledFileDir,[subjectID '.compiledTrialRecords.*.mat']);
     d=dir(compiledFile);
@@ -102,40 +110,40 @@ end
                 fprintf('\ttime elapsed: %g\n\n',GetSecs-t)
 
             case 'vector'
-                
-        %do filtering:
-            switch filter
-                case 'all'
-                processedRecords=records;
-                case 'last'
-                    switch filterParam
-                        case 'days'
-                            processedRecords=removeSomeSmalls(records, records.date<now-filterVal);
-                        case 'trials'
-                            processedRecords=removeSomeSmalls(records, records.trialNumber<records.trialNumber(end)-filterVal+1);
-                        otherwise
-                            error('bad filterParams')
-                    end
-                case 'first'
-                     switch filterParam
-                        case 'days'
-                            processedRecords=removeSomeSmalls(records, records.date>records.date(1)+filterVal);
-                        case 'trials'
-                            processedRecords=removeSomeSmalls(records, records.trialNumber>filterVal);
-                        otherwise
-                            error('bad filterParams')
-                     end
-                otherwise
-                    filter
-                    error ('bad filter type')
-            end
-            
-            
+
+                %do filtering:
+                switch filter
+                    case 'all'
+                        processedRecords=records;
+                    case 'last'
+                        switch filterParam
+                            case 'days'
+                                processedRecords=removeSomeSmalls(records, records.date<now-filterVal);
+                            case 'trials'
+                                processedRecords=removeSomeSmalls(records, records.trialNumber<records.trialNumber(end)-filterVal+1);
+                            otherwise
+                                error('bad filterParams')
+                        end
+                    case 'first'
+                        switch filterParam
+                            case 'days'
+                                processedRecords=removeSomeSmalls(records, records.date>records.date(1)+filterVal);
+                            case 'trials'
+                                processedRecords=removeSomeSmalls(records, records.trialNumber>filterVal);
+                            otherwise
+                                error('bad filterParams')
+                        end
+                    otherwise
+                        filter
+                        error ('bad filter type')
+                end
+
+
             otherwise
                 error('unrecognized storage method')
         end
         processedRecords.info.subject={subjectID};
-        
+
         switch type
             case 'trials per day'
                 doPlot('plotTrialsPerDay',processedRecords,[],[],[],[],[],~includeKeyboard);

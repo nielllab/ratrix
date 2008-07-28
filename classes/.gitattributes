@@ -133,3 +133,4 @@ protocols/reinforcementManagers/@reinforcementManager/getFractionPenaltySoundIsO
 protocols/reinforcementManagers/@reinforcementManager/getFractionOpenTimeSoundIsOn.m -text
 protocols/reinforcementManagers/@reinforcementManager/getMsPenalty.m -text
 protocols/reinforcementManagers/@reinforcementManager/calcCommonValues.m -text
+db/@dbConn/getBodyWeightHistory.m.new -text

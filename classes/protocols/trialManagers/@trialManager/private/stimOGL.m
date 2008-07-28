@@ -561,6 +561,7 @@ try
     requestRewardDurLogged=false;
     requestRewardOpenCmdDone=false;
     serverValveChange=false;
+    serverValveStates=false;
     potentialStochasticResponse=false;
     didStochasticResponse=false;
     didHumanResponse=false;
@@ -879,7 +880,7 @@ try
 
         doValves=0*ports;
         doPuff=false;
-        
+
         mThisLoop=0;
         pThisLoop=0;
 
@@ -947,7 +948,7 @@ try
                             manual=~manual;
                             pressingM=1;
                         end
-                    elseif strcmp(keyName,'a') % check for airpuff 
+                    elseif strcmp(keyName,'a') % check for airpuff
                         doPuff=true;
                     end
                 end
@@ -1098,16 +1099,17 @@ try
         if ~isempty(rn) || strcmp(getRewardMethod(station),'serverPump')
 
             if ~isConnected(rn)
-                done=true;
+                done=true; %should this also set quit?
             end
 
 
-            serverValveStates=currentValveState;
-
+            %serverValveStates=currentValveState; %what was the purpose of this line?  serverValveStates should only be changed by SET_VALVES_CMD
+            %needed to remove, cuz was causing keyboard control to make valves stick open
+            
             while commandsAvailable(rn,constants.priorities.IMMEDIATE_PRIORITY) && ~done && ~quit
                 %logwrite('handling IMMEDIATE priority command in stimOGL');
                 if ~isConnected(rn)
-                    done=true;
+                    done=true;%should this also set quit?
                 end
                 com=getNextCommand(rn,constants.priorities.IMMEDIATE_PRIORITY);
                 if ~isempty(com)
@@ -1177,8 +1179,9 @@ try
                                     end
                                 end
                             otherwise
-                                done=clientHandleVerifiedCommand(rn,com,cmd,args,constants.statuses.MID_TRIAL);
-                                if done
+                                %the following lines referred to 'done' rather than 'quit' -- this is the bug that leads to the 'i am the king' bug?
+                                quit=clientHandleVerifiedCommand(rn,com,cmd,args,constants.statuses.MID_TRIAL);
+                                if quit
                                     response='server kill';
                                 end
                         end
@@ -1236,10 +1239,10 @@ try
         else
             setPuff(station,true);
         end
-        
-        
-        
-        
+
+
+
+
         %logwrite('end of stimOGL loop');
     end
     %logwrite('stimOGL loop complete');

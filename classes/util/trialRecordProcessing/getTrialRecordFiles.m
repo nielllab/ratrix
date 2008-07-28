@@ -5,7 +5,12 @@ end
 
 historyFiles=dir(fullfile(permanentStore,'trialRecords_*.mat'));
 
+try
 fileRecs=getRangesFromTrialRecordFileNames({historyFiles.name});
+catch ex
+    permanentStore
+    rethrow(ex)
+end
 
 if ~isempty(fileRecs)
     ranges=[[fileRecs.trialStart];[fileRecs.trialStop]];

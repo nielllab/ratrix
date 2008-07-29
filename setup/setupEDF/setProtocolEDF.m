@@ -1,5 +1,9 @@
 function r = setProtocolEDF(r,subIDs)
 
+[pathstr, name, ext, versn] = fileparts(mfilename('fullpath'));
+addpath(fullfile(fileparts(fileparts(pathstr)),'bootstrap'))
+setupEnvironment;
+
 if ~exist('r','var') || isempty(r)
     dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
     r=ratrix(fullfile(dataPath, 'ServerData'),0);
@@ -78,3 +82,5 @@ for i=1:length(subIDs)
 
     clear('p','stepNum','skip')
 end
+
+reportSettings

@@ -35,7 +35,7 @@ if strcmp(type,'weight')
 
     %reinstated old:
     conn=dbConn;
-    [weights dates thresholds] = getBodyWeightHistory(conn,subjectID)
+    [weights dates thresholds] = getBodyWeightHistory(conn,subjectID);
     closeConn(conn);
     if ~all(size(weights)==size(thresholds)) || length(weights)~=length(dates)
         size(weights)

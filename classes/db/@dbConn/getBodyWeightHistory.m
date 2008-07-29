@@ -25,9 +25,9 @@ if usethresholds
     % This is the SQL query where all the real work is done
     
     %dan changed this to the following, but it breaks:
-    queryStr=sprintf('select         observation_date,                  to_number(value), to_number(threshold) from combinedthreshold where ((threshold_date,uin) in (select max(threshold_date),uin from combinedthreshold where threshold_date <= observation_date group by uin) or threshold_date is null) and subject_uin= %d and observationtype_uin=1 ORDER BY observation_date',subject_uin);
-    queryStr=sprintf('select to_char(observation_date,''DD-MON-YYYY''), to_number(value), to_number(threshold) from combinedthreshold where ((threshold_date,uin) in (select max(threshold_date),uin from combinedthreshold where threshold_date <= observation_date group by uin) or threshold_date is null) and subject_uin= %d and observationtype_uin=1 ORDER BY observation_date',subject_uin);
-    %however, the original (2nd one above) now returns weights, dates, and thresholds of diffrent lenghts :(
+%    queryStr=sprintf('select         observation_date,                  to_number(value), to_number(threshold) from combinedthreshold where ((threshold_date,uin) in (select max(threshold_date),uin from combinedthreshold where threshold_date <= observation_date group by uin) or threshold_date is null) and subject_uin= %d and observationtype_uin=1 ORDER BY observation_date',subject_uin);
+    queryStr=sprintf('select to_char(observation_date,''DD-MON-YYYY''), to_number(value), to_number(threshold) from combinedthreshold where ((threshold_date,uin) in (select max(threshold_date),uin from combinedthreshold where threshold_date <= observation_date group by uin) or threshold_date is null) and subject_uin= %d and observationtype_uin=1 and value is not null ORDER BY observation_date',subject_uin);
+
         
     data = query(conn,queryStr);
     if ~isempty(data)
@@ -40,9 +40,9 @@ else
     % This is the SQL query where all the real work is done
 
     %dan changed this to the following, but it breaks:    
-    queryStr=sprintf('select         observation_date,                  to_number(value) from observations where subject_uin= %d and observationtype_uin=1 ORDER BY observation_date',subject_uin);
-    queryStr=sprintf('select to_char(observation_date,''DD-MON-YYYY''), to_number(value) from observations where subject_uin= %d and observationtype_uin=1 ORDER BY observation_date',subject_uin);
-    %however, the original (2nd one above) now returns weights, dates, and thresholds of diffrent lenghts :(
+%    queryStr=sprintf('select         observation_date,                  to_number(value) from observations where subject_uin= %d and observationtype_uin=1 ORDER BY observation_date',subject_uin);
+    queryStr=sprintf('select to_char(observation_date,''DD-MON-YYYY''), to_number(value) from observations where subject_uin= %d and observationtype_uin=1 and value is not null ORDER BY observation_date',subject_uin);
+
 
     
     data = query(conn,queryStr);
@@ -52,7 +52,7 @@ else
     end
 end
 
-%dates=cell2mat(dates); dan's new file uses this, but it breaks
+%dates=cell2mat(dates); %dan's new file uses this, but it breaks
 dates=datenum(dates); % Turn the dates into datenums, this produces a mat
 weights=cell2mat(weights);
 thresholds=cell2mat(thresholds);

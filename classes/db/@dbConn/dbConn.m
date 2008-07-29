@@ -9,7 +9,7 @@ function conn=dbConn%(host,port,user,password)
 % in case we change addr/acct info
 
 conn.host = '132.239.158.177'; % Default Oracle DB Server address
-conn.port = '1521' % Default Oracle DB Port
+conn.port = '1521'; % Default Oracle DB Port
 conn.user = 'dparks';
 conn.password = 'pac3111';
 conn.driver='oracle.jdbc.driver.OracleDriver';

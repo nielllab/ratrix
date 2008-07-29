@@ -36,8 +36,6 @@
 %
 % MATLAB:err_parse_cannot_run_m_file
 
-
-
 function ratrixServer
 setupEnvironment;
 addJavaComponents();
@@ -50,10 +48,7 @@ warning('on','MATLAB:MKDIR:DirectoryExists')
 diary([fullfile(dataPath,'diaries') filesep datestr(now,30) '.txt'])
 
 servePump=false;
-
 quit=false;
-
-
 
 margin=5;
 oneRowHeight=23;
@@ -62,14 +57,11 @@ ddWidth=150;
 bWidth=75;
 miniSz=400;
 
-
 started=[];
 heatUpSinceTStr='';
 buttonT='start';
 
-
 rackNum=getRackIDFromIP;
-%[heats,garbage]=getRatrixHeatInfo(rackNum);
 
 conn=dbConn;
 hts=getHeats(conn);
@@ -81,7 +73,7 @@ for i=1:length(hts)
         heats{i,2}{j}={assignments{j}.subject_id {[stn.row stn.col] stn.mac} assignments{j}.owner assignments{j}.experiment};
     end
 end
-closeConn(conn);   
+closeConn(conn);
 
 subjects={};
 heatStrs={};
@@ -106,7 +98,6 @@ f = figure('Visible','off','MenuBar','none','Name',sprintf('ratrix control: rack
                 errordlg('must stop running before closing','error','modal')
                 doDelete=false;
             else
-                'turning off listenchar'
                 ListenChar(0) %'called listenchar(0) -- why doesn''t keyboard work?'
                 ShowCursor(0)
 
@@ -134,32 +125,23 @@ f = figure('Visible','off','MenuBar','none','Name',sprintf('ratrix control: rack
         drawnow;
     end
 
-
-
-
 swapM = uicontrol(f,'Style','popupmenu',...
     'String',heatStrs,...
     'Value',1,'Units','pixels','Position',[margin 2*margin+miniSz ddWidth oneRowHeight],'Callback',@swapC);
     function swapC(source,eventdata)
-
-
         setHeat;
-
     end
 
     function setHeat
         try
-        heat=heatStrs{get(swapM,'Value')};
-        for i=1:size(heats,1)
-            if strcmp(heats{i,1}{1},heat)
-                subjects=heats{i,2};
-                heatCol=heats{i,1}{2};
+            heat=heatStrs{get(swapM,'Value')};
+            for i=1:size(heats,1)
+                if strcmp(heats{i,1}{1},heat)
+                    subjects=heats{i,2};
+                    heatCol=heats{i,1}{2};
+                end
             end
-        end
-        makeMini(subjects,rackNum,miniSz,ha,heatCol);
-        %         for i=1:length(subjects)
-        %             subjects{i}{2}{1}
-        %         end
+            makeMini(subjects,rackNum,miniSz,ha,heatCol);
         catch ex
             ple(ex)
             y=errordlg(['call erik or philip before closing this box.  quitting due to error: ' ex.message],'ratrix error','modal')
@@ -175,11 +157,9 @@ cycleB=uicontrol(f,'Style','togglebutton','String',buttonT,'Units','pixels','Pos
         if get(cycleB,'Value')
             started=datevec(now);
             running=true;
-
             run();
         else
             running=false;
-
         end
         updateUI;
     end
@@ -187,10 +167,10 @@ cycleB=uicontrol(f,'Style','togglebutton','String',buttonT,'Units','pixels','Pos
     function run
         fixSystemTime;
         [r sys rx]=startServer(servePump,dataPath);
-        % Dan is initializing er to 0 032908
+
         er=0;
         autoUpdateInterval=.3;
-        while ~doDelete && running && ~quit %get(cycleB,'Value')
+        while ~doDelete && running && ~quit
             updateUI();
             [quit r rx sys er]=doAServerIteration(r,rx,servePump,sys,subjects);
             WaitSecs(autoUpdateInterval);
@@ -201,43 +181,25 @@ cycleB=uicontrol(f,'Style','togglebutton','String',buttonT,'Units','pixels','Pos
         rp=fullfile(rp,'analysis','eflister');
         cmdStr=sprintf('matlab -automation -r "cd(''%s'');setupEnvironment;cd(''%s'');compileTrialRecords(%d);quit" &',fullfile(getRatrixPath,'bootstrap'),rp,rackNum);
         system(cmdStr);
-        
-        %whos
+
         doClears();
         if er
             rethrow(lasterror)
         end
     end
 
-
 align([swapM heatUpSinceT cycleB],'Fixed',margin,'Middle');
-
 
 ha = axes('Parent',f,'Visible','off','Units','pixels','Position',[round((fWidth-miniSz)/2),margin,miniSz,miniSz]);
 axis(ha,'ij');
 axis(ha,'equal')
-
 
 setHeat;
 set(f,'Visible','on')
 updateUI;
 end
 
-
-
-
 function makeMini(subjects,rackNum,miniSz,ha,heatCol)
-
-% stationInfo=getRatrixStationInfo(rackNum);
-% theseStations=[];
-% stationNames={};
-% for i=1:length(stationInfo)
-%     theseStations(end+1,:)=stationInfo{i}{2}{1};
-%     stationNames{end+1}=stationInfo{i}{1};
-% end
-
-
-
 conn=dbConn;
 stationInfo=getStationsOnRack(conn,rackNum);
 closeConn(conn);
@@ -246,20 +208,8 @@ theseStations=[];
 stationNames={};
 for i=1:length(stationInfo)
     theseStations(end+1,:)=[stationInfo{i}.row stationInfo{i}.col];
-    %theseStations(end+1,:)=[stationInfo.row stationInfo.col];
     stationNames{end+1}=[num2str(stationInfo{i}.rack_id) stationInfo{i}.station_id];
 end
-
-
-
-% stationLocs=[];
-% for i=1:r(1)
-%     for j=1:r(2)
-%         stationLocs(end+1,:)=[rackNum i j];
-%     end
-% end
-
-%theseStations=stationLocs(stationLocs(:,1)==rackNum,2:3);
 
 numRows=max(theseStations(:,1));
 numCols=max(theseStations(:,2));
@@ -275,7 +225,6 @@ rackPix(:,columnBoundaries,:)=borderColor;
 rackPix(rowBoundaries,:,:)=borderColor;
 
 for j=1:size(theseStations,1)
-
     row=theseStations(j,1);
     column=theseStations(j,2);
 
@@ -283,7 +232,6 @@ for j=1:size(theseStations,1)
     columns=(columnBoundaries(column)+1):(columnBoundaries(column+1)-1);
 
     rackPix(rows,columns,:)=repmat(reshape(col,[1 1 3]),[length(rows) length(columns) 1]);
-
 end
 
 image('Parent',ha,'CData',rackPix);
@@ -304,17 +252,10 @@ for i=1:length(subjects)
     text('Parent',ha,'Position',[columnBoundaries(loc(2))+margin rowBoundaries(loc(1)+1) ],'String',sprintf('owner: %s\nexp: %s',owner,exp),'Color',[0 0 0],'FontSize',10,'FontWeight','normal','VerticalAlignment','bottom','HorizontalAlignment','left');
 end
 
-
 for i=1:length(stationNames)
     text('Parent',ha,'Position',[columnBoundaries(theseStations(i,2))+margin rowBoundaries(theseStations(i,1)) ],'String',[stationNames{i}],'Color',[0 0 0],'FontSize',30,'FontWeight','bold','VerticalAlignment','top','HorizontalAlignment','left');
 end
-
 end
-
-
-
-
-
 
 function [r sys rx]=startServer(servePump,dataPath)
 if servePump
@@ -322,8 +263,6 @@ if servePump
 else
     sys=[];
 end
-
-
 
 %addJavaComponents; %would like to have this in the rnet constructor, but doesn't work
 %     the caller has to call it before constructing an
@@ -333,8 +272,7 @@ end
 r = rnet('server');
 clearTemporaryFiles(r);
 
-fprintf('server running')
-
+fprintf('%s: server running...\n',datestr(now))
 
 rx=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
 
@@ -343,43 +281,24 @@ if length(ids)>0
     ids
     warning('found subjects in boxes at ratrixServer startup')
 end
-
-
 end
 
-
-
-
-
-
-
-
-
 function [r rx sys]=stopServer(r,rx,servePump,sys,er,subjects)
-fprintf('quitting\n')
-
+fprintf('%s: quitting ratrix server\n',datestr(now))
 [sys,r,rx]=cleanup(servePump,sys,r,rx,subjects);
 end
 
-
-
-
-
-
-
-
-
 function [quit r rx sys er]=doAServerIteration(r,rx,servePump,sys,subjects)
 try
-%     while CharAvail() %note have to hit ctrl-c once for this to ever succeed!
-%         %this gives us ascii value 3, which is   ETX  ^C 		End of Text
-%         k=GetChar(0);
-% 
-%         if double(k)==3
-%             'trapped ctrl-c!'
-%             ListenChar(2)
-%         end
-%     end
+    %     while CharAvail() %note have to hit ctrl-c once for this to ever succeed!
+    %         %this gives us ascii value 3, which is   ETX  ^C 		End of Text
+    %         k=GetChar(0);
+    %
+    %         if double(k)==3
+    %             'trapped ctrl-c!'
+    %             ListenChar(2)
+    %         end
+    %     end
 
     quit=false;
     er=false;
@@ -402,7 +321,7 @@ try
         end
     end
 
-    clients=[];
+    clients=[]; %release references to java objects
     for i=1:length(connectedClients) %this needs to happen after disconnections have been removed to prevent fast reconnects from confusing me!
         reregistered = clientReregistered(r,connectedClients{i});
         if reregistered
@@ -414,79 +333,69 @@ try
         if ~clientIsRegistered(r,connectedClients{i}) || reregistered
             [quit mac]=getClientMACaddress(r,connectedClients{i});
 
-            %ask client for its type -- if monitor vs if
-            %station
+            %ask client for its type -- if monitor vs station
 
             if quit
                 fprintf('Client is no longer connected\n');
                 tossClient(r,connectedClients{i});
-
             else
 
-                
-%                 [quit com]=sendToClient(r,connectedClients{i},constants.priorities.IMMEDIATE_PRIORITY,constants.serverToStationCommands.S_UPDATE_SOFTWARE_CMD,{'svn://132.239.158.177/projects/ratrix/trunk'});
-%                 if ~quit
-%                     timeout=10.0;
-%                     [quit updateConfirm updateConfirmCmd updateConfirmArgs]=waitForSpecificCommand(r,connectedClients{i},constants.stationToServerCommands.C_RECV_UPDATING_SOFTWARE_CMD,timeout,'waiting for client response to S_UPDATE_SOFTWARE_CMD',[]);
-%                     if isempty(updateConfirm) || isempty(updateConfirmCmd)
-%                         error('appeared to get error from client -- waitForSpecificCommand should know to also check for sendErrors() that have to do with that specific command (it''s objectID, not just its type)')
-%                     end
-%                     com=[]; %should this be something else?
-%                     updateConfirm=[];
-%                 end
-%                 if quit
-%                     fprintf('Client is no longer connected %s\n',mac);
-%                     tossClient(r,connectedClients{i});
-%                 elseif updateConfirmArgs{1}
-%                     fprintf('Updating software on %s\n',mac);
-%                     tossClient(r,connectedClients{i});
-%                 else
-                    
-                    quit=replicateClientTrialRecords(r,connectedClients{i},{getPermanentStorePath(rx)});
+                %                 [quit com]=sendToClient(r,connectedClients{i},constants.priorities.IMMEDIATE_PRIORITY,constants.serverToStationCommands.S_UPDATE_SOFTWARE_CMD,{'svn://132.239.158.177/projects/ratrix/trunk'});
+                %                 if ~quit
+                %                     timeout=10.0;
+                %                     [quit updateConfirm updateConfirmCmd updateConfirmArgs]=waitForSpecificCommand(r,connectedClients{i},constants.stationToServerCommands.C_RECV_UPDATING_SOFTWARE_CMD,timeout,'waiting for client response to S_UPDATE_SOFTWARE_CMD',[]);
+                %                     if isempty(updateConfirm) || isempty(updateConfirmCmd)
+                %                         error('appeared to get error from client -- waitForSpecificCommand should know to also check for sendErrors() that have to do with that specific command (it''s objectID, not just its type)')
+                %                     end
+                %                     com=[]; %should this be something else?
+                %                     updateConfirm=[];
+                %                 end
+                %                 if quit
+                %                     fprintf('Client is no longer connected %s\n',mac);
+                %                     tossClient(r,connectedClients{i});
+                %                 elseif updateConfirmArgs{1}
+                %                     fprintf('Updating software on %s\n',mac);
+                %                     tossClient(r,connectedClients{i});
+                %                 else
 
-                    z=[];
-                    if ~quit                    
-                        z=getZoneForStationMAC(rx,mac);
-                    end
-                    
-                    gotGoodRatrix=false;
-                    if ~isempty(z)
-                        [r rx tf]=registerClient(r,connectedClients{i},mac,z,rx,subjects);
+                quit=replicateClientTrialRecords(r,connectedClients{i},{getPermanentStorePath(rx)});
 
-                        [rx quit]=updateRatrixFromClientRatrix(r,rx,connectedClients{i});
-                        
-                        if ~quit && tf
+                z=[];
+                if ~quit
+                    z=getZoneForStationMAC(rx,mac);
+                end
 
-                            nonPersistedRatrix=makeNonpersistedRatrixForStationMAC(rx,mac);
-                            if ~isempty(nonPersistedRatrix)
-                                gotGoodRatrix=true;
-                                [quit com]=sendToClient(r,connectedClients{i},constants.priorities.IMMEDIATE_PRIORITY,constants.serverToStationCommands.S_START_TRIALS_CMD,{nonPersistedRatrix});
-                                if ~quit
-                                    nonPersistedRatrix=[];
-                                    fprintf('\nsent ratrix to %s\n',mac)
-                                    timeout=5.0;
-                                    quit=waitForAck(r,com,timeout,'waiting for ack from sent ratrix');
-                                end
+                gotGoodRatrix=false;
+                if ~isempty(z)
+                    [r rx tf]=registerClient(r,connectedClients{i},mac,z,rx,subjects);
 
-                                com=[];
+                    [rx quit]=updateRatrixFromClientRatrix(r,rx,connectedClients{i});
+
+                    if ~quit && tf
+                        nonPersistedRatrix=makeNonpersistedRatrixForStationMAC(rx,mac);
+                        if ~isempty(nonPersistedRatrix)
+                            gotGoodRatrix=true;
+                            [quit com]=sendToClient(r,connectedClients{i},constants.priorities.IMMEDIATE_PRIORITY,constants.serverToStationCommands.S_START_TRIALS_CMD,{nonPersistedRatrix});
+                            if ~quit
+                                nonPersistedRatrix=[];
+                                fprintf('\nsent ratrix to %s\n',mac)
+                                timeout=5.0;
+                                quit=waitForAck(r,com,timeout,'waiting for ack from sent ratrix');
                             end
+
+                            com=[]; %release references to java objects
                         end
                     end
-                    if isempty(z) || ~tf || quit || ~gotGoodRatrix
-
-
-                        fprintf('shutting down client -- no entry for that mac or lost connection %s\n',mac);                        
-
-                        [r rx]=remoteClientShutdown(r,connectedClients{i},rx,subjects); %will handle unregistering
-
-                        tossClient(r,connectedClients{i});
-
-                    end
-%                 end
+                end
+                if isempty(z) || ~tf || quit || ~gotGoodRatrix
+                    fprintf('shutting down client -- no entry for that mac or lost connection %s\n',mac);
+                    [r rx]=remoteClientShutdown(r,connectedClients{i},rx,subjects); %will handle unregistering
+                    tossClient(r,connectedClients{i});
+                end
             end
         end
     end
-    connectedClients={};
+    connectedClients={}; %release references to java objects
 
     if length(listClients(r)) >= 1
 
@@ -516,45 +425,30 @@ try
             end
         end
     end
-    clients={};
+    clients={};  %release references to java objects
 catch ex
     quit=true;
     er=true;
 
-
-
-    fprintf('shutting down rnet and pump system due to error\n')
+    fprintf('%s: shutting down rnet and pump system due to error\n',datestr(now))
     ple(ex)
 
     %if call ListenChar(0) to undo the ListenChar(2) before this point, seems to replace useful errors with 'Undefined function or variable GetCharJava_1_4_2_09.'
 
+    %release references to java objects
     com=[];
     clients=[];
-
-
 end
 end
-
-
-
-
-
-
 
 function tossClient(r,c)
 commandsWaitingFromClient=disconnectClient(r,c);
+fprintf('tossed client with the following commands waiting and left unhandled\n')
+commandsWaitingFromClient
 commandsWaitingFromClient=[]; % i'll ignore leftover commands for now
 end
 
-
-
-
-
-
-
 function [sys,r,rx]=cleanup(servePump,sys,r,rx,subjects)
-
-
 if servePump
     try
         sys=closePumpSystem(sys);
@@ -579,10 +473,6 @@ end
 
 rx=[];
 end
-
-
-
-
 
 function doClears
 

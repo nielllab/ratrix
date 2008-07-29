@@ -1,5 +1,5 @@
 function fixSystemTime
-if iswin
+if IsWin
             [a b]=dos('w32tm /resync /nowait');
             if a~=0
                 b

@@ -1,4 +1,4 @@
-function r=createRatrixWithStationsForRack(rackID)
+function r=createRatrixWithStationsForRack(rackID,rewardMethod)
 
 conn=dbConn;
 stations=getStationsOnRack(conn,rackID);

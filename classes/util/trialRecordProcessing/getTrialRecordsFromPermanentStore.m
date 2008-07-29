@@ -80,7 +80,7 @@ goodRecs=getRangesFromTrialRecordFileNames(fileNames);
 %     end
 % end
 
-if ~exist('filter') ||  isempty(filter)
+if ~exist('filter','var') ||  isempty(filter)
     filter = {'all'};
 else
     if ~iscell(filter) || ~isvector(filter)

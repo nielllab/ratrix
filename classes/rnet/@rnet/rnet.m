@@ -138,7 +138,6 @@ elseif ischar(varargin{1})
                 end
 
                 r.type = r.constants.nodeTypes.CLIENT_TYPE;
-                'a'
                 r.client = RlabNetworkClient(java.lang.String(r.id),java.lang.String(r.host),r.port);
                 r.client.setTemporaryPath(java.lang.String(matlabroot));
 
@@ -154,8 +153,6 @@ elseif ischar(varargin{1})
                   end
                   WaitSecs(0.1);
                 end
-                
-                'b'
             else
                 error('Only client can have three or four arguments');
             end

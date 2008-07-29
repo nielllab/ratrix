@@ -1,6 +1,6 @@
 function step = getLastTrainingStep(subjectID, permanentStorePath)
 
-conn = dbconn();
+conn = dbConn();
 files=getTrialRecordFiles(conn,subjectID);
 closeConn(conn);
 if isempty(files)

@@ -10,16 +10,17 @@ cpathFile = 'cpath.jar';
 [dbPath, name, ext, versn] = fileparts(mfilename('fullpath'));
 jdbcPath = fullfile(dbPath,jdbcFile);
 cpathPath = fullfile(dbPath,cpathFile);
+
 if ~any(strcmp(javaclasspath('-all'),jdbcPath))
     javaaddpath(jdbcPath);
 else
-    'Oracle JDBC classes12_g.jar file already present'
+    fprintf('Oracle JDBC classes12_g.jar file already present\n')
 end
 
 if ~any(strcmp(javaclasspath('-all'),cpathPath))
     javaaddpath(cpathPath);
 else
-    'Class Path Hacker cpath.jar file already present'
+    fprintf('Class Path Hacker cpath.jar file already present\n')
 end
 
 finalizeDBPaths(jdbcPath);

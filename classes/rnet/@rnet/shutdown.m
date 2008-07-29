@@ -68,7 +68,7 @@ switch r.type
     otherwise
         error('Unknown rnet type in shutdown');
 end
-'threads should be exited'
+fprintf('threads should be exited\n')
 %struct(r)
 clearTemporaryFiles(r);
 

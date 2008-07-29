@@ -1,6 +1,5 @@
 function setupEnvironment
 
-
 clear classes
 clear java
 clear mex

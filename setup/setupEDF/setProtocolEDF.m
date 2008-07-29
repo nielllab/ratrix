@@ -47,10 +47,10 @@ for i=1:length(subIDs)
         switch asgns(ind).experiment
             case {'goToSide' 'Flicker' 'Rel Cue' 'Rel Block' 'Box Transfer' 'Tube Transfer' 'Tube Physiology'}
                 p=makeEDFProtocol(asgns(ind).experiment,false);
-                stepNum=1;
+                stepNum = getLastTrainingStep(subIDs{i},getPermanentStorePath(r));
             case {'Testing'}
                 p=makeEDFProtocol(asgns(ind).experiment,true);
-                stepNum=1;
+                stepNum=2;
             case 'Cross Modal'
                 skip=true;
                 warning('cross modal not built yet')
@@ -59,18 +59,22 @@ for i=1:length(subIDs)
                 asgns(ind).experiment
                 error('didn''t recognize experiment for subject')
         end
+
+        if ~skip
+            subj=getSubjectFromID(r,subIDs{i});
+            [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolEDF','edf');
+            fprintf('set %s on step %d of %s\n',subIDs{i},stepNum,asgns(ind).experiment)
+        else
+            fprintf('skipping %s on %s\n',subIDs{i},asgns(ind).experiment)
+        end
+
     else
+        {asgns.subject_id}
+        subIDs
         subIDs{i}
         ind
-        error('didn''t find unique subject id in db assignments for this rack or edf rat ids')
+        warning('didn''t find unique subject id in db assignments for this rack or edf rat ids')
     end
 
-    if ~skip
-        subj=getSubjectFromID(r,subIDs{i});
-        [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolEDF','edf');
-        fprintf('set %s on step %d of %s\n',subIDs{i},stepNum,asgns(ind).experiment)
-    else
-        fprintf('skipping %s on %s\n',subIDs{i},asgns(ind).experiment)
-    end
     clear('p','stepNum','skip')
 end

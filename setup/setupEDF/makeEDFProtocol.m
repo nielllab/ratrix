@@ -8,10 +8,10 @@ if istest
     %gc = rateCriterion(3,1);
     gc = repeatIndefinitely();
 else
-    gc = rateCriterion(3,5);
+    gc = rateCriterion(3,3);
 end
 
-rewardSizeULorMS       =75;
+rewardSizeULorMS       =50;
 msPenalty              =0;
 fractionSoundOn        =1;
 fractionPenaltySoundOn =1;
@@ -28,7 +28,7 @@ sm=soundManager({correctClip,keepGoingClip,silentTryClip,silentWrongClip});
 msFlushDuration         =1000;
 msMinimumPokeDuration   =10;
 msMinimumClearDuration  =10;
-freeDrinkLikelihood     =0.006;
+freeDrinkLikelihood     =0.003;
 fd = freeDrinks(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,freeDrinkLikelihood,rm);
 
 pixPerCycs              =[40];

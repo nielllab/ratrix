@@ -4,7 +4,7 @@ function analysis
 if ~isdeployed
 [pathstr, name, ext, versn] = fileparts(mfilename('fullpath'));
 addpath(fullfile(fileparts(fileparts(pathstr)),'bootstrap'))
-addpath('C:\Documents and Settings\rlab\Desktop\phil analysys')
+%addpath('C:\Documents and Settings\rlab\Desktop\phil analysys')
 end
 
 clc
@@ -177,7 +177,7 @@ filterM = uicontrol(f,'Style','popupmenu',...
 filterE = uicontrol(f,'Style','edit','String',num2str(selection.filterVal),'Units','pixels','Enable','off','Position',[6*margin+5*ddWidth margin eWidth oneRowHeight],'Callback',@startC);
     function startC(source,eventdata)
         newFilterVal=str2num(get(filterE,'String'));
-        if ~isempty(newFilterVal) && newFilterVal-round(newFilterVal)<.001 && newFilterVal>0
+        if ~isempty(newFilterVal) && isNearInteger(newFilterVal) && newFilterVal>0
             selection.filterVal=uint32(newFilterVal);
         else
             set(filterE,'String',selection.filterVal);

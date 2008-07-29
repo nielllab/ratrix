@@ -3,5 +3,5 @@ if isinteger(x)
     out=true;
 else
     y=x-round(x);
-    out = all(abs(y(:)))<.000001;
+    out = all(abs(y(:))<.000001);
 end

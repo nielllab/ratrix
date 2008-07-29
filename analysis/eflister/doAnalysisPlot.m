@@ -1,76 +1,69 @@
-% string info.subject
-% datenum date
-% int response
-% logical correct
-% logical correctionTrial
-% double actualRewardDuration
-% int step
-% double responseTime
-% int numRequestLicks
-%
-% switch plotType
-%     case 'allTypes'
-%         requiredFields={'date','info'};
-%     case 'plotTrialsPerDay'
-%         requiredFields={'response','correctionTrial','correct'};
-%     case 'percentCorrect'
-%         requiredFields={'correct','step','correctionTrial'};
-%     case 'plotTheBodyWeights'
-%         requiredFields={'date'};
-%     case 'plotBiasScatter'
-%         requiredFields={'response'};
-%     case 'plotBias'
-%         requiredFields={'response'};
-%     case 'plotRatePerDay' %skips data after the first 2 hours following the first trial of a given date
-%         requiredFields={'date'};
 function doAnalysisPlot(compiledFileDir,subjectID,type,filter,filterVal,filterParam,includeKeyboard)
-storageMethod='vector'; %'structArray'
 
+compiledFile=fullfile(compiledFileDir,[subjectID '.compiledTrialRecords.*.mat']);
+d=dir(compiledFile);
+records=[];
+for i=1:length(d)
+    if ~d(i).isdir
+        [rng num er]=sscanf(d(i).name,[subjectID '.compiledTrialRecords.%d-%d.mat'],2);
+        if num~=2
+            d(i).name
+            er
+        else
+            fprintf('loading file')
+            t=GetSecs();
+            ctr=load(fullfile(compiledFileDir,d(i).name));
+            fprintf('\ttime elapsed: %g\n',GetSecs-t)
+            records=ctr.compiledTrialRecords;
+        end
+    end
+end
+% 
+% switch filter
+%     case 'all'
+%     case 'first'
+%     case 'last'
+%     otherwise
+%         error('bad filter')
+% end
+% 
+% switch filterParam
+%     case 'days'
+%     case 'trials'
+%     case 'all'
+%     otherwise
+%         error('bad filterParam')
+% end
 
 if strcmp(type,'weight')
 
-    %this breaks subplotting -- would have to pass in, but don't want to have to know
-    %     lastNdays = 60;
-    %     plotBodyWeights({subjectID},lastNdays);
-
-    %reinstated old:
-    conn=dbConn;
-    [weights dates thresholds] = getBodyWeightHistory(conn,subjectID);
-    closeConn(conn);
-    if ~all(size(weights)==size(thresholds)) || length(weights)~=length(dates)
-        size(weights)
-        size(dates)
-        size(thresholds)
-        warning('why is getbodyweighthistory returning unequally sized things?')
-    else
-        plot(dates,[weights thresholds]);
-    end
-
-else
-    if ~isdeployed
-        %    addpath('C:\Documents and Settings\rlab\Desktop\phil analysys');
-    end
-
-    compiledFile=fullfile(compiledFileDir,[subjectID '.compiledTrialRecords.*.mat']);
-    d=dir(compiledFile);
-    records=[];
-    for i=1:length(d)
-        if ~d(i).isdir
-            [rng num er]=sscanf(d(i).name,[subjectID '.compiledTrialRecords.%d-%d.mat'],2);
-            if num~=2
-                d(i).name
-                er
-            else
-                fprintf('loading file')
-                t=GetSecs();
-                ctr=load(fullfile(compiledFileDir,d(i).name));
-                fprintf('\ttime elapsed: %g\n',GetSecs-t)
-                records=ctr.compiledTrialRecords;
-            end
+    gotConn=false;
+    while ~gotConn
+        try
+            conn=dbConn; %calling this too rapidly throws connection exception: ORA-12516, TNS:listener could not find available handler with matching protocol stack
+            gotConn=true;
+        catch ex
+            ple(ex)
         end
     end
+    %[weights dates] = getBodyWeightHistory(conn,subjectID); %this is fast
+    [weights dates thresholds] = getBodyWeightHistory(conn,subjectID); %need a faster solution, see: http://132.239.158.177/trac/rlab_hardware/ticket/129
+    closeConn(conn);
+    plot(dates,[weights thresholds]);
+    if range(dates)>50
+        set(gca,'XTick',fliplr([ceil(max(dates)):-30:floor(min(dates))]));
+    elseif range(dates)>8
+        set(gca,'XTick',fliplr([ceil(max(dates)):-7:floor(min(dates))]));
+    else
+        set(gca,'XTick',fliplr([ceil(max(dates)):-1:floor(min(dates))]));
+    end
+    xlim([floor(min(dates)) ceil(max(dates))]);
+    datetick('x','mm/dd','keeplimits','keepticks')
+
+else
 
     if ~isempty(records)
+        storageMethod='vector'; %'structArray'
 
         switch storageMethod
             case 'structArray'
@@ -138,7 +131,6 @@ else
                         error ('bad filter type')
                 end
 
-
             otherwise
                 error('unrecognized storage method')
         end
@@ -159,10 +151,11 @@ else
                 error('bad type')
         end
 
-
-
     else
+        subjectID
         if isempty(d)
+            compiledFile
+            dir(compiledFile)
             dir(compiledFileDir)
             fprintf('can''t seem to dir %s\nyou should make sure you can see this directory\ntry to open it in your file system-- you may be prompted for authentication, which may solve this problem\n',compiledFileDir)
         end

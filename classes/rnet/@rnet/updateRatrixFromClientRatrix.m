@@ -19,8 +19,8 @@ if ~quit
                 error('C_RECV_RATRIX_CMD sent an argument that was not a ratrix')
             end
         else
-            rxArgs
-            warning('Ratrix was not sent to the server as a part of the the C_RECV_RATRIX_CMD')
+%             rxArgs
+%             warning('Ratrix was not sent to the server as a part of the the C_RECV_RATRIX_CMD')
         end
     end
 end

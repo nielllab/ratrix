@@ -443,9 +443,12 @@ end
 
 function tossClient(r,c)
 commandsWaitingFromClient=disconnectClient(r,c);
-fprintf('tossed client with the following commands waiting and left unhandled\n')
-commandsWaitingFromClient
-commandsWaitingFromClient=[]; % i'll ignore leftover commands for now
+fprintf('tossed client\n')
+if ~isempty(commandsWaitingFromClient)
+    fprintf('\tfound the following commands left unhandled for that client!\n')
+    commandsWaitingFromClient
+    commandsWaitingFromClient=[]; % i'll ignore leftover commands for now
+end
 end
 
 function [sys,r,rx]=cleanup(servePump,sys,r,rx,subjects)

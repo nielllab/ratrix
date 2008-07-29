@@ -58,7 +58,7 @@ if ~isempty(c.arguments)
         elseif isa(arg,'java.io.File')
             str = arg.getPath();
             fpath = str.toCharArray();
-            fprintf('Reading .mat file in\n');
+            fprintf('Reading command argument .mat file in\n');
             load(fpath,'tmp');
             arg = tmp;
         else

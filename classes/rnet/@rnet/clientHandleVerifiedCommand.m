@@ -62,7 +62,7 @@ switch cmd
             quit=sendError(r,com,constants.errors.BAD_STATE_FOR_COMMAND,'client status is not NO_RATRIX - must call S_STOP_TRIALS_CMD before S_START_TRIALS_CMD');
         end
     case constants.serverToStationCommands.S_SHUTDOWN_STATION_CMD
-        'got shutdown from server'
+        fprintf('handling shutdown from server\n')
         if stat==constants.statuses.NO_RATRIX
             if ~commandsAvailable(r)
                 quit=true;
@@ -99,7 +99,7 @@ switch cmd
             %C_RECV_REPORT_CMD
         end
     case constants.serverToStationCommands.S_STOP_TRIALS_CMD
-        'got stop trials from server'
+        fprintf('handling stop trials from server\n')
         if stat==constants.statuses.NO_RATRIX
             quit=sendError(r,com,constants.errors.BAD_STATE_FOR_COMMAND,'client status is NO_RATRIX - must call S_START_TRIALS_CMD(ratrix) before S_STOP_TRIALS_CMD');
         else
@@ -136,18 +136,16 @@ switch cmd
         deleteOnSuccess=args{2};
         recordInOracle=1; %pmm -08/06/26
         replicateTrialRecords(paths,deleteOnSuccess, recordInOracle);
-        'sending ack'
         sendAcknowledge(r,com);
-        'sent ack'
     case constants.serverToStationCommands.S_GET_RATRIX_BACKUPS_CMD
         %C_RECV_RATRIX_BACKUPS_CMD
     case constants.serverToStationCommands.S_CLEAR_RATRIX_BACKUPS_CMD
         %ack?
     case constants.serverToStationCommands.S_GET_STATUS_CMD
-        'got get status from server'
+        fprintf('handling get status from server\n')
         quit=sendToServer(r,getClientId(r),constants.priorities.IMMEDIATE_PRIORITY,constants.stationToServerCommands.C_RECV_STATUS_CMD,{stat});
     case constants.serverToStationCommands.S_GET_MAC_CMD
-        'got mac req'
+        fprintf('handling mac req\n')
         [success mac]=getMACaddress();
         if ~success
             mac
@@ -176,20 +174,9 @@ catch ex
     if ~isempty(findstr(ex.message,noDBstr))
         rx=[];
     else
-        [':' ex.message ':']
-        [':' noDBstr ':']
-        class(ex.message)
-        length(ex.message)
-        length(noDBstr)
-        ex.message==noDBstr
+        ple(ex)
         rethrow(ex);
     end
 end
 
 quit=sendToServer(r,getClientId(r),constants.priorities.IMMEDIATE_PRIORITY,constants.stationToServerCommands.C_RECV_RATRIX_CMD,{rx});
-
-%         if stat==constants.statuses.NO_RATRIX
-%             quit=sendError(r,com,constants.errors.BAD_STATE_FOR_COMMAND,'client status is NO_RATRIX - must call S_START_TRIALS_CMD(ratrix) before S_GET_RATRIX_CMD');
-%         else
-%             %C_RECV_RATRIX_CMD
-%         end

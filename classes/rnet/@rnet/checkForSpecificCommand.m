@@ -37,6 +37,6 @@ end
 
 if ~isempty(cmd)
     % Turn the command into a matlab object command
-    'Got a valid command converting to rnetcommand()'
+    %'Got a valid command converting to rnetcommand()'
     cmd = rnetcommand(cmd);
 end

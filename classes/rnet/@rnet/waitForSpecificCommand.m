@@ -39,75 +39,82 @@ ps=getSortedPrioritiesHighestFirst(r);
 lowestPriority = ps(end);
 priorities = [repmat(r.constants.priorities.IMMEDIATE_PRIORITY,1,length(highPriorityCommands)),lowestPriority];
 
-% Wait for commands to appear
-cmd=waitForCommands(r,client,commandsToWaitFor,priorities,timeout);
-
-switch r.type
- case r.constants.nodeTypes.SERVER_TYPE
-  if ~isConnected(r,client) || isClientReregistered(r,client)
-    try
-      f=fopen('SocketErrorLog.txt','a');
-      fprintf(f,'%s: waitForSpecificCommand from %s server unexpectedly no longer connected to this client\n',datestr(now),mac);
-      fclose(f);
-    catch ex
-        ple(ex)
-    end
-    'waitForSpecificCommand: Client no longer connected'
-    client.id
-    isConnected(r,client)
-    isClientReregistered(r,client)
-    quit=true;
-  end
- case r.constants.nodeTypes.CLIENT_TYPE
-  if ~isConnected(r)
-    quit=true;
-  end
+if timeout>0
+    endTime=GetSecs+timeout;
+else
+    endTime=[];
 end
-if ~isempty(cmd)
 
-  f=fopen('cmdLog.txt','a');
-  fprintf(f,'%s: waitForSpecificCommand from %s: %s, got match or lightweight/emergency after %g\n',datestr(now), mac, errStr, GetSecs()-startTime);
-  fclose(f);
-  
-  
-  [good com args]=validateCommand(r,cmd);
-  if ~good
-    cmd=[];
-  end
-  
-  if command~=com
-    'handling unexpected command!'
-    
+while isempty(cmd) && (isempty(endTime) || GetSecs<endTime) && ~quit
+    if ~isempty(endTime)
+        timeout=endTime-GetSecs;
+    end
+
+    % Wait for commands to appear
+    cmd=waitForCommands(r,client,commandsToWaitFor,priorities,timeout);
+
     switch r.type
-     case r.constants.nodeTypes.SERVER_TYPE
-      serverHandleCommand(r,cmd,[],[],[]);
-      quit=true; %hack for now, cuz only emergency commands are errors
-     case r.constants.nodeTypes.CLIENT_TYPE
-      quit=clientHandleVerifiedCommand(r,cmd,com,args,stat);
+        case r.constants.nodeTypes.SERVER_TYPE
+            if ~isConnected(r,client) || isClientReregistered(r,client)
+                try
+                    f=fopen('SocketErrorLog.txt','a');
+                    fprintf(f,'%s: waitForSpecificCommand from %s server unexpectedly no longer connected to this client\n',datestr(now),mac);
+                    fclose(f);
+                catch ex
+                    ple(ex)
+                end
+                fprintf('waitForSpecificCommand: Client unexpectedly disconnected\n')
+                client.id
+                isConnected(r,client)
+                isClientReregistered(r,client)
+                quit=true;
+            end
+        case r.constants.nodeTypes.CLIENT_TYPE
+            if ~isConnected(r)
+                quit=true;
+            end
     end
-    
-    
-    
-    if quit
-      'got an unexpected quit!'
-    elseif ismember(com,lightweightCommands)
-      cmd=[];
+    if ~isempty(cmd)
+
+        f=fopen('cmdLog.txt','a');
+        fprintf(f,'%s: waitForSpecificCommand from %s: %s, got a command after %g\n',datestr(now), mac, errStr, GetSecs()-startTime);
+        fclose(f);
+
+        [good com args]=validateCommand(r,cmd);
+        if ~good
+            cmd=[];
+            fprintf('%s: waitForSpecificCommand got a command that failed validation!\n',datestr(now))
+        else
+            fprintf('%s: waitForSpecificCommand received command %d (%s) (%d commands available)\n',datestr(now),getCommand(cmd),getCommandStr(r,getCommand(cmd)),commandsAvailable(r));
+        end
+
+        if command~=com
+            switch r.type
+                case r.constants.nodeTypes.SERVER_TYPE
+                    serverHandleCommand(r,cmd,[],[],[]);
+                    quit=true; %hack for now, cuz only emergency commands are errors
+                case r.constants.nodeTypes.CLIENT_TYPE
+                    quit=clientHandleVerifiedCommand(r,cmd,com,args,stat);
+            end
+
+            if quit
+                fprintf('waitForSpecificCommand got an unexpected quit!\n')
+            end
+            if ismember(com,lightweightCommands)
+                cmd=[];
+                fprintf('\twaitForSpecificCommand handling unexpected lightweight command (will return to original wait loop)!\n');
+            else
+                fprintf('\twaitForSpecificCommand handling unexpected emergency command (will break original wait loop)!\n');
+            end
+        end
     end
-  end
 end
 
-if ~isempty(cmd)
-  fprintf('Received command %d\n',getCommand(cmd));
-end
-fprintf('Number of commands available %d\n',commandsAvailable(r));
 if isempty(cmd)
     client
-  warning(['timed out: ' errStr])
-  
-  
-  f=fopen('cmdLog.txt','a');
-  fprintf(f,'%s: timed out of: %s, ignored %d commands in queue\n',datestr(now), errStr, commandsAvailable(r));
-  fclose(f);
-  
+    warning(['timed out: ' errStr])
 
+    f=fopen('cmdLog.txt','a');
+    fprintf(f,'%s: timed out of: %s, ignored %d commands in queue\n',datestr(now), errStr, commandsAvailable(r));
+    fclose(f);
 end

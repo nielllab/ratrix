@@ -32,7 +32,7 @@ end
 
 if ~isempty(jCmd)
     % Turn the command into a matlab object command
-    'Got a valid command converting to rnetcommand()'
+    %'Got a valid command converting to rnetcommand()'
     cmd = rnetcommand(jCmd);
 else
     cmd = [];

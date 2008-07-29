@@ -5,7 +5,6 @@ constants=r.constants;
 fprintf('\nshutting down %s\n',c.id.toCharArray()) %need a matlab wrapper around RatrixNetworkNodeIdent to expose this
 timeout=10.0;
 
-
 [quit com]=sendToClient(r,c,constants.priorities.IMMEDIATE_PRIORITY,constants.serverToStationCommands.S_GET_STATUS_CMD,{});
 if ~quit
     [quit statCom statCmd statCmdArgs]=waitForSpecificCommand(r,c,constants.stationToServerCommands.C_RECV_STATUS_CMD,timeout,'waiting for client response to S_GET_STATUS_CMD',[]);
@@ -27,19 +26,23 @@ if ~quit
                 if ~quit
                     [quit stopCom stopCmd stopArgs]=waitForSpecificCommand(r,c,constants.stationToServerCommands.C_STOPPED_TRIALS,timeout,'waiting for client response (with ratrix) to already acked S_STOP_TRIALS_CMD (C_STOPPED_TRIALS)',[]);
                     %get ratrix, merge
-                    if ~quit
+                    if ~quit && ~isempty(rx)
                         [rx quit] = updateRatrixFromClientRatrix(r,rx,c);
                     end
                 end
 
             case constants.statuses.NO_RATRIX
-                %get ratrix, merge (could pass in)
-                [rx quit] = updateRatrixFromClientRatrix(r,rx,c);
+                if ~isempty(rx)
+                    %get ratrix, merge (could pass in)
+                    [rx quit] = updateRatrixFromClientRatrix(r,rx,c);
+                end
             otherwise
                 error('bad status')
         end
         if ~quit
-            quit=replicateClientTrialRecords(r,c,{getPermanentStorePath(rx)});
+            if ~isempty(rx)
+                quit=replicateClientTrialRecords(r,c,{getPermanentStorePath(rx)});
+            end
 
             [quit com]=sendToClient(r,c,constants.priorities.IMMEDIATE_PRIORITY,constants.serverToStationCommands.S_SHUTDOWN_STATION_CMD,{});
 
@@ -55,9 +58,7 @@ if quit
     warning('Got a quit in remote client shutdown')
 end
 
-
 if clientIsRegistered(r,c)
     [r rx]=unregisterClient(r,c,rx,subjects);
     disconnectClient(r,c);
 end
-

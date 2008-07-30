@@ -84,3 +84,13 @@ dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
 r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
 subjIDs={'279'; '280'; '281'; '282'};
 r = setProtocolPriya(r,subjIDs); 
+
+
+%update protocols to change performanc criteria and demote rats
+cd('C:\Documents and Settings\rlab\Desktop\Ratrix\bootstrap')
+setupEnvironment
+dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
+r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
+subjIDs={'279'; '280'; '281'; '282'};
+r = setProtocolPriya(r,subjIDs); %  run 7/29/08  PR
+

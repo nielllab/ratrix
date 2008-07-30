@@ -91,8 +91,9 @@ ypos_nAFC=0; %location of image stimuli is near ports
 if istest,
     graduationCriterion=performanceCriterion([.8], int8([10])); %note performanceCriterion should check that these are ints!
 else % real training
-    %performanceCriterion is a subclass of class 'criteria'
-    graduationCriterion=performanceCriterion([.95, .85], int8([20,200])); %note performanceCriterion should check that these are ints!
+       %performanceCriterion is a subclass of class 'criteria'
+    % CHANGED by PR as per Bob's request on 7/29/08
+    graduationCriterion=performanceCriterion([0.85], int8([400])); %([.95, .85], int8([20,200])); 
     %will graduate a subject if he is 95% correct after 20 consecutive trials
     %or if he is at least 85% correct after 200 consecutive trials
 end
@@ -234,11 +235,39 @@ pB=protocol('object rec', {ts1 ts2 ts3 ts4 ts5B ts6B ts7B}); %Grp B flashlight i
 % end
 %%%%%%%%%%%%
 
-% 080722 MODIFIED to add the paintbrush flashlight tasks (ts 5, 6 and 7)
-% restore all steps to the protocols and use the step index to set step
-% instead of deleting the steps already graduated.
-% so many confusing/unlogged changes before this,
-% save everything this once to document status.
+% % 080722 MODIFIED to add the paintbrush flashlight tasks (ts 5, 6 and 7)
+% % restore all steps to the protocols and use the step index to set step
+% % instead of deleting the steps already graduated.
+% % so many confusing/unlogged changes before this,
+% % save everything this once to document status.
+% thisIsANewProtocol=1; % typically 1
+% thisIsANewTrainingStep=1; % typically 0
+% thisIsANewStepNum=1;  %  typically 1
+% for i=1:length(subjIDs),
+%     subj=getSubjectFromID(r,subjIDs{i}); %extract the subject object
+%     % set the current step index here
+%     switch subjIDs{i},
+%         case '279', stepind=3; % 279 continue at step 3
+%         case '280', stepind=4; % 280 continue at step 4 (already graduated but has been out of practice)
+%         case '281', stepind=4; % 281 continue at step 4 (almost ready to grad)
+%         case '282', stepind=2; % 282 continue at step 2  
+%         case 'demo1', stepind=6; %demo test step
+%     end
+%     % assign to groups THIS CODE SHOULD NOT CHANGE!   
+%     if ismember(subjIDs{i}, {'279'; '281'}), % GROUP A (279, 281)
+%                 [subj r]=setProtocolAndStep(subj,pA,thisIsANewProtocol,thisIsANewTrainingStep,thisIsANewStepNum,stepind,r,date,'pr');
+%     elseif ismember(subjIDs{i}, {'280'; '282'; 'demo1'}),% GROUP B (280,282)
+%                 [subj r]=setProtocolAndStep(subj,pB,thisIsANewProtocol,thisIsANewTrainingStep,thisIsANewStepNum,stepind,r,date,'pr');
+%     else
+%         sprintf('unknown subject %s\n', subjIDs{i}') % echo to screen
+%         error('this rat is not assigned to any group. edit setProtocolPriya to assign.')
+%     end
+% end
+
+
+% 080729 MODIFIED PR
+% change graduation criterion to 85% correct 400 in a row
+% demote some rats due to premature graduation
 thisIsANewProtocol=1; % typically 1
 thisIsANewTrainingStep=1; % typically 0
 thisIsANewStepNum=1;  %  typically 1
@@ -246,12 +275,13 @@ for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i}); %extract the subject object
     % set the current step index here
     switch subjIDs{i},
-        case '279', stepind=3; % 279 continue at step 3
-        case '280', stepind=4; % 280 continue at step 4 (already graduated but has been out of practice)
-        case '281', stepind=4; % 281 continue at step 4 (almost ready to grad)
-        case '282', stepind=2; % 282 continue at step 2  
+        case '279', stepind=2; % 279 DEMOTE to step 2 from 3 (not doing any trials)
+        case '280', stepind=4; % 280 DEMOTE to step 4  from 5 (premature grad)
+        case '281', stepind=7; % 281 continue at step 7 (doing well)
+        case '282', stepind=3; % 282 DEMOTE to step 3  (premature grad)
         case 'demo1', stepind=6; %demo test step
     end
+    
     % assign to groups THIS CODE SHOULD NOT CHANGE!   
     if ismember(subjIDs{i}, {'279'; '281'}), % GROUP A (279, 281)
                 [subj r]=setProtocolAndStep(subj,pA,thisIsANewProtocol,thisIsANewTrainingStep,thisIsANewStepNum,stepind,r,date,'pr');
@@ -262,6 +292,3 @@ for i=1:length(subjIDs),
         error('this rat is not assigned to any group. edit setProtocolPriya to assign.')
     end
 end
-
-
-

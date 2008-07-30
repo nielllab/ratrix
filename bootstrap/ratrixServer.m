@@ -180,7 +180,7 @@ cycleB=uicontrol(f,'Style','togglebutton','String',buttonT,'Units','pixels','Pos
         rp=getRatrixPath;
         rp=fullfile(rp,'analysis','eflister');
         cmdStr=sprintf('matlab -automation -r "cd(''%s'');setupEnvironment;cd(''%s'');compileTrialRecords(%d);quit" &',fullfile(getRatrixPath,'bootstrap'),rp,rackNum);
-        system(cmdStr);
+        %system(cmdStr); %testing only
 
         doClears();
         if er

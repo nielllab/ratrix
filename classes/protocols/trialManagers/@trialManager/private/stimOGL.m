@@ -1,6 +1,6 @@
 function [quit response responseDetails didManual manual didAPause didValves didHumanResponse didStochasticResponse eyeData gaze station]=  stimOGL(tm, ...
     stim, audioStim, LUT, type, metaPixelSize, ...
-    responseOptions, requestOptions, finalScreenLuminance, station, manual,allowQPM,timingCheckPct,noPulses,textLabel,rn,subID,stimID,protocolStr,sessionNumber,trialInd,eyeTracker,msAirpuff)
+    responseOptions, requestOptions, finalScreenLuminance, station, manual,allowQPM,timingCheckPct,noPulses,textLabel,rn,subID,stimID,protocolStr,trialLabel,eyeTracker,msAirpuff)
 
 %note: add a phase which is a movie during which the rat must lick the
 %center port to earn n more frames of movie, and the movie has to end in
@@ -764,8 +764,7 @@ try
                     else
                         txtLabel=textLabel;
                     end
-                    [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('priority:%g session:%d trial:%d stimInd:%d frame:%d stim:%s',Priority(),sessionNumber,trialInd,i,frameNum,txtLabel),xTextPos,yNewTextPos,100*ones(1,3));
-                    %[garbage,yNewTextPos] = Screen('DrawText',window,['priority:' num2str(Priority()) ' session:' num2str(sessionNumber) ' trial:' num2str(trialInd) ' stim ind:' num2str(i) ' frame ind:' num2str(frameNum) ' calcStim:' txtLabel],xTextPos,yNewTextPos,100*ones(1,3));
+                    [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('priority:%g %s stimInd:%d frame:%d stim:%s',Priority(),trialLabel,i,frameNum,txtLabel),xTextPos,yNewTextPos,100*ones(1,3));
                     yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
 
                     [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('ptb:%s',ptbVersion),xTextPos,yNewTextPos,100*ones(1,3));

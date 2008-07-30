@@ -17,7 +17,7 @@ elseif isMACaddress(mac) && isinteger(zone) && zone>0
         end
 
         if tf
-            r.serverRegister{size(r.serverRegister,1)+1,1}=c;
+            r.serverRegister{size(r.serverRegister,1)+1,1}=c; %holding on to these might be what's keeping java from clearing
             r.serverRegister{size(r.serverRegister,1),2}=mac;
             r.serverRegister{size(r.serverRegister,1),3}=zone;
             r.serverRegister{size(r.serverRegister,1),4}=[]; %reward waits

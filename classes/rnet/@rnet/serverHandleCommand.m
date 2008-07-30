@@ -12,7 +12,7 @@ if good
         case constants.stationToServerCommands.C_CMD_ERR
             errType = args{1};
             errString = args{2};
-            fprintf('Error Recived from %s: [%d] %s',toString(com),errType,errString);
+            fprintf('Error Received from %s: [%d]\n\t%s\n',toString(com),errType,errString);
             error('client sent an error')
 %         case constants.stationToServerCommands.C_RECV_TRIAL_RECORDS_CMD
 %             error('unexpected C_RECV_TRIAL_RECORDS_CMD')

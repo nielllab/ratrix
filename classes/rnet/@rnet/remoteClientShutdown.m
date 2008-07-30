@@ -2,7 +2,7 @@ function [r rx]=remoteClientShutdown(r,c,rx,subjects)
 
 constants=r.constants;
 
-fprintf('\nshutting down %s\n',c.id.toCharArray()) %need a matlab wrapper around RatrixNetworkNodeIdent to expose this
+fprintf('shutting down %s\n',c.id.toCharArray()) %need a matlab wrapper around RatrixNetworkNodeIdent to expose this
 timeout=10.0;
 
 [quit com]=sendToClient(r,c,constants.priorities.IMMEDIATE_PRIORITY,constants.serverToStationCommands.S_GET_STATUS_CMD,{});

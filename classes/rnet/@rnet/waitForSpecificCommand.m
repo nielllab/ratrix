@@ -85,7 +85,7 @@ while isempty(cmd) && (isempty(endTime) || GetSecs<endTime) && ~quit
             cmd=[];
             fprintf('%s: waitForSpecificCommand got a command that failed validation!\n',datestr(now))
         else
-            fprintf('%s: waitForSpecificCommand received command %d (%s) (%d commands available)\n',datestr(now),getCommand(cmd),getCommandStr(r,getCommand(cmd)),commandsAvailable(r));
+            fprintf('%s: waitForSpecificCommand received from %s command %d (%s) (%d commands available)\n',datestr(now),mac,getCommand(cmd),getCommandStr(r,getCommand(cmd)),commandsAvailable(r));
         end
 
         if command~=com

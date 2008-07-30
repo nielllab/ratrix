@@ -15,7 +15,7 @@ switch r.type
             try
                 [r rx]=remoteClientShutdown(r,clients(i),rx,subjects);
             catch ex
-                firstErr=ex
+                firstErr=ex;
                 ple(ex)
             end
             try

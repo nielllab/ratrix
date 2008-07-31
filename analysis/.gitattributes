@@ -78,3 +78,5 @@ pmm/doSubjectFlankerAnalysis.m -text
 pmm/getPlotParameters.m -text
 pmm/makeSfnSummary.m -text
 pmm/allToSmall.m -text
+bsriram/doAnalysis.m -text
+bsriram/doAnalysis.asv -text

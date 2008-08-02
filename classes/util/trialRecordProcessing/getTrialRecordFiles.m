@@ -1,12 +1,17 @@
-function [verifiedHistoryFiles ranges]=getTrialRecordFiles(permanentStore)
-if ~isempty(findstr('\\',permanentStore))
+function [verifiedHistoryFiles ranges]=getTrialRecordFiles(permanentStore, doWarn)
+
+if ~exist('doWarn','var') || isempty(doWarn)
+    doWarn = true;
+end
+
+if ~isempty(findstr('\\',permanentStore)) && doWarn
     warning('this function is dangerous when used remotely -- dir can silently fail or return a subset of existing files')
 end
 
 historyFiles=dir(fullfile(permanentStore,'trialRecords_*.mat'));
 
 try
-fileRecs=getRangesFromTrialRecordFileNames({historyFiles.name});
+fileRecs=getRangesFromTrialRecordFileNames({historyFiles.name},true);
 catch ex
     permanentStore
     rethrow(ex)

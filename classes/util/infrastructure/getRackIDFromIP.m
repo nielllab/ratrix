@@ -41,7 +41,7 @@ end
 if isempty(rackID)
     b
 
-    rackID=3; %testing only
+    %rackID=3; %testing only
     %error('couldn''t find server by matching ip on this machine')
 
 end

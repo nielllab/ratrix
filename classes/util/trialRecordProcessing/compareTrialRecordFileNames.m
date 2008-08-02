@@ -7,6 +7,9 @@ if ~exist('verbose','var') || isempty(verbose)
     verbose = true;
 end
 
+if ~isempty(findstr('\\',permanentStorePath))
+    warning('this function is dangerous when used remotely -- dir can silently fail or return a subset of directory contents, and it loops over reconcileTrialRecordFileNames which suppresses this warning from getTrialRecordFiles(permStore)')
+end
 
 subDirs = dir(permanentStorePath);
 
@@ -18,8 +21,8 @@ for i=1:length(subDirs)
     end
     subName = subDirs(i).name;
 
-    reconcileTrialRecordFileNames(conn, subName, fullfile(permanentStorePath,subDirs(i).name), doUpdate, verbose)
-    
+    reconcileTrialRecordFileNames(conn, subName, fullfile(permanentStorePath,subDirs(i).name), doUpdate, verbose,false);
+    fprintf('\n')
 end
     closeConn(conn);
 end

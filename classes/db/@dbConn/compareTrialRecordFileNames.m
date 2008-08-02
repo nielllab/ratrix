@@ -1,4 +1,5 @@
 function success=compareTrialRecordFileNames(conn,subject_id,fsFileNames)
+error('do not use this method, use reconcileTrialRecordFileNames instead')
 
 dbFileNames=getTrialRecordFiles(conn,subject_id);
 

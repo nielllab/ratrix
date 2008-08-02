@@ -1,4 +1,4 @@
-function reconcileTrialRecordFileNames(conn, subID, permStore, doUpdate, verbose)
+function success=reconcileTrialRecordFileNames(conn, subID, permStore, doUpdate, verbose, doWarn)
 
 if ~exist('subID','var') || isempty(subID)
     error('please enter valid subID');
@@ -18,14 +18,8 @@ if ~exist('doUpdate','var') || isempty(doUpdate)
     doUpdate = false;
 end
 
-%permStore = fullfile(getSubDirForRack(rackNum),subID);
-doWarn = false;
-[vHF ranges] = getTrialRecordFiles(permStore,doWarn);
-
-inFS = {};
-for j = 1:length(vHF)
-    [subdir name ext] = fileparts(vHF{j});
-    inFS{end+1} = [name ext];
+if ~exist('doWarn','var') || isempty(doWarn)
+    doWarn = true;
 end
 
 resp=getSubject(conn,subID);
@@ -37,40 +31,59 @@ end
 
 inDB = getTrialRecordFiles(conn, subID);
 
+
+[vHF ranges] = getTrialRecordFiles(permStore,doWarn);
+
+inFS = {};
+for j = 1:length(vHF)
+    [subdir name ext] = fileparts(vHF{j});
+    inFS{end+1} = [name ext];
+end
+
 inDBNotInFS = setdiff(inDB,inFS);
 inFSNotInDB = setdiff(inFS,inDB);
-if doUpdate
-    if ~isempty(inDBNotInFS)
-        if verbose
-            display(['deleting files from DB to adhere to FS for subject ' subID]);
-        end
-        for j = 1:length(inDBNotInFS)
-            if verbose
-                display(['     removing file named ' inDBNotInFS{j}]);
-            end
-            removeTrialRecordFile(conn,subID,inDBNotInFS{j});
-        end
-    end
+matches = length(inDB)-length(inDBNotInFS);
 
-    if ~isempty(inFSNotInDB)
-        if verbose
-            display(['adding files in FS to DB for subject ' subID]);
-        end
-        for j = 1:length(inFSNotInDB)
-            if verbose
-                display(['     adding file named ' inFSNotInDB{j}]);
-            end
-            addTrialRecordFile(conn,subID,inFSNotInDB{j});
-        end
+fprintf('checking subject %s: ',subID);
+
+if matches~=length(inFS)-length(inFSNotInDB)
+    error('bad set math')
+end
+
+fprintf('%d good matches\n',matches);
+
+for j = 1:length(inDBNotInFS)
+    if doUpdate
+        removeTrialRecordFile(conn,subID,inDBNotInFS{j});
+        str=' (removed from DB)';
+    else
+        str='';
+    end
+    if verbose
+        fprintf('\tin DB but not FS: %s%s\n',inDBNotInFS{j},str);
     end
 end
 
-success = compareTrialRecordFileNames(conn, subID, inFS);
+for j = 1:length(inFSNotInDB)
+    if doUpdate
+        addTrialRecordFile(conn,subID,inFSNotInDB{j});
+        str=' (added to DB)';
+    else
+        str='';
+    end
+    if verbose
+        fprintf('\tin FS but not DB: %s%s\n',inFSNotInDB{j},str);
+    end
+end
 
-if doUpdate && ~success
-    error('failed to reconcile. coming out of loop');
+if isempty(inDBNotInFS) && isempty(inFSNotInDB)
+    success=true;
+elseif doUpdate
+    success=reconcileTrialRecordFileNames(conn, subID, permStore, false, verbose, doWarn);
+    if ~success
+        error('failed to reconcile');
+    end
+else
+    success=false;
 end
 end
-
-    
-        

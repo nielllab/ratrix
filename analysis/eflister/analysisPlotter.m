@@ -31,6 +31,10 @@ for i=1:size(selection.subjects,1)
                 title(selection.subjects{i,j,k})
                 hold on
                 doAnalysisPlot(compiledFileDir,selection.subjects{i,j,k},selection.type, selection.filter, selection.filterVal, selection.filterParam,includeKeyboard);
+                % mod to ensure only one legend.
+                if (j-numRows) || (k-numCols)
+                    legend(gca,'off');
+                end
             end
         end
     end

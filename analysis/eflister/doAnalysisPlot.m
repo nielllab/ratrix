@@ -48,6 +48,7 @@ if strcmp(type,'weight')
     end
     %[weights dates] = getBodyWeightHistory(conn,subjectID); %this is fast
     [weights dates thresholds] = getBodyWeightHistory(conn,subjectID); %need a faster solution, see: http://132.239.158.177/trac/rlab_hardware/ticket/129
+    %thresholds=.85*thresholds;
     closeConn(conn);
     plot(dates,[weights thresholds]);
     if range(dates)>50
@@ -138,7 +139,7 @@ else
 
         switch type
             case 'trials per day'
-                doPlot('plotTrialsPerDay',processedRecords,[],[],[],[],[],~includeKeyboard);
+                doPlot('plotTrialsPerDay',processedRecords,[],[],[],[],[],~includeKeyboard,true);
             case 'performance'
                 doPlot('percentCorrect',processedRecords,[],[],[],[],[],~includeKeyboard);
             case 'bias'

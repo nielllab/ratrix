@@ -328,6 +328,7 @@ for i=1:length(subjectFiles)
                 end
             end
         elseif needToAdd || any(ranges{i}(:,j)>compiledRange(2,end))
+            compiledFile
             ranges{i}
             subjectFiles{i}
             compiledRange

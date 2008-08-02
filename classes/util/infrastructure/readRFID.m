@@ -33,12 +33,19 @@ FlushEvents('keyDown');
 s = serial('COM1','BaudRate',2400,'Timeout',.5); %had to hunt to figure out our avid reader only works with 2400 baud
 fopen(s);
 done=false;
+clearBuffer(s);
 fprintf('scan a tag, or hit a key to quit\n')
 while ~done
     warning('off','MATLAB:serial:fscanf:unsuccessfulRead');
     t=strtrim(fscanf(s));
     warning('on','MATLAB:serial:fscanf:unsuccessfulRead');
-    if strmatch('AVID',t)
+    
+    [nums len]=textscan(t,'AVID%*1[*]%3u8%*1[*]%3u8%*1[*]%3u8'); %matches format AVID*013*604*432
+    
+    if ~isempty(findstr('READY',t))
+        fprintf('\t%s\n',t);
+        fprintf('\nscan a tag, or hit a key to quit\n')
+    elseif length(t)==16 && len==16 && all(size(nums)==[1 3]) && all(~cellfun(@isempty,nums)) %strmatch('AVID',t)
         fprintf('\tgot tag %s\t',t);
 
         match={recs{find(strcmp(t,{recs{:,1}})),2}};
@@ -58,7 +65,7 @@ while ~done
                 match
                 error('corrupt database')
         end
-
+        clearBuffer(s);
         fprintf('\nscan a tag, or hit a key to quit\n')
     elseif isempty(t)
         done=CharAvail;
@@ -79,5 +86,14 @@ alreadies=instrfind;
 if ~isempty(alreadies)
     fclose(alreadies)
     delete(alreadies)
+end
+end
+
+function clearBuffer(s)
+t='hi';
+while ~isempty(t)
+    warning('off','MATLAB:serial:fscanf:unsuccessfulRead');
+    t=strtrim(fscanf(s));
+    warning('on','MATLAB:serial:fscanf:unsuccessfulRead');
 end
 end

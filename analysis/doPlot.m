@@ -1,4 +1,4 @@
-function doPlot(plotType,d,figureHandle,subplotX,subplotY,subplotInd,goodType,removeHuman,showLegend)
+function doPlot(plotType,d,figureHandle,subplotX,subplotY,subplotInd,goodType,removeHuman)
 % doPlot(plotType,d,figureHandle,subplotX,subplotY,subplotInd)
 % plots ratrix data intelligently
 %
@@ -28,10 +28,6 @@ function doPlot(plotType,d,figureHandle,subplotX,subplotY,subplotInd,goodType,re
 % d=getSmalls('195');
 % figure; doPlot('percentCorrect',d)
 % figure; doPlot('plotBias',d)
-
-if ~exist('showLegend','var') || isempty(showLegend)
-    showLegend=false;
-end
 
 %confirm has data
 hasData=0;
@@ -118,7 +114,6 @@ switch plotType
 
         totalTrialsPerDay=makeDailyRaster(d.correct,d.date)  %in terms of ALL trials correction and kills, RETURN trialsPerDay
         goodTrialsPerDay=makeDailyRaster(d.correct,d.date,goods);
-        legendStrs={};
         
         if ismember('didHumanResponse',fields(d)) & ismember('containedForcedRewards',fields(d)) & ismember('didStochasticResponse',fields(d))
             %define types
@@ -137,7 +132,7 @@ switch plotType
             if removeHuman
                 allTypes=[allTypes; humanTrialsPerDay];
             end
-            legendStrs={'good trials' 'correction trials' 'stochastic reward' 'keyboard response' 'unaccounted for'};
+
         else
             %define types
             CTs=d.correctionTrial==1;
@@ -159,9 +154,18 @@ switch plotType
         %datestr(max(d.date),6)])
 
         axis([0.5 size(goodTrialsPerDay,2)+0.5 0 1000])
-        if showLegend && ~isempty(legendStrs)
+        
+        % legend handling
+        typesPlotted = get(gcf,'UserData');
+        if ~any(ismember(typesPlotted,plotType))
+            legendStrs={'good trials' 'correction trials' 'stochastic reward' 'keyboard response' 'unaccounted for'};
             legend(legendStrs, 'Location','NorthWest');
-        end
+            typesPlotted{end+1}=plotType;
+            set(gcf,'UserData',typesPlotted);
+        end            
+%         if showLegend && ~isempty(legendStrs)
+%             legend(legendStrs, 'Location','NorthWest');
+%         end
 
     case 'plotRewardTime'
 
@@ -204,6 +208,15 @@ switch plotType
 
         set(gca,'XTick',[0 totalTrials])
         set(gca,'XTickLabel',[num2str(0) '|' num2str(totalTrials)])
+        
+        %legend Handling
+        typesPlotted = get(gcf,'UserData');
+        if ~any(ismember(typesPlotted,plotType))
+            legendStrs={'goodTrials' 'correctionTrials' 'afterCorrectionTrials'};
+            legend(legendStrs, 'Location','NorthWest');
+            typesPlotted{end+1}=plotType;
+            set(gcf,'UserData',typesPlotted);
+        end    
 
     case 'plotLickAndRT'
 

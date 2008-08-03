@@ -139,7 +139,7 @@ else
 
         switch type
             case 'trials per day'
-                doPlot('plotTrialsPerDay',processedRecords,[],[],[],[],[],~includeKeyboard,true);
+                doPlot('plotTrialsPerDay',processedRecords,[],[],[],[],[],~includeKeyboard);
             case 'performance'
                 doPlot('percentCorrect',processedRecords,[],[],[],[],[],~includeKeyboard);
             case 'bias'

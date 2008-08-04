@@ -163,9 +163,6 @@ switch plotType
             typesPlotted{end+1}=plotType;
             set(gcf,'UserData',typesPlotted);
         end            
-%         if showLegend && ~isempty(legendStrs)
-%             legend(legendStrs, 'Location','NorthWest');
-%         end
 
     case 'plotRewardTime'
 
@@ -212,7 +209,7 @@ switch plotType
         %legend Handling
         typesPlotted = get(gcf,'UserData');
         if ~any(ismember(typesPlotted,plotType))
-            legendStrs={'goodTrials' 'correctionTrials' 'afterCorrectionTrials'};
+            legendStrs={ 'correctionTrials' 'afterErrors' 'goodTrials'};
             legend(legendStrs, 'Location','NorthWest');
             typesPlotted{end+1}=plotType;
             set(gcf,'UserData',typesPlotted);

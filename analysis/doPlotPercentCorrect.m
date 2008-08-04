@@ -151,17 +151,6 @@ if addSteps
     end
 end
 
-%add on day transitions
-if dayTransitionsOn
-    [trialsPerDay]=makeDailyRaster(d.correct,d.date);  %in terms of ALL trials correction and kills, RETURN trialsPerDay
-    trialsCompletedBy=cumsum(trialsPerDay);
-    for i=1:length(trialsPerDay)
-        plot([trialsCompletedBy(i),trialsCompletedBy(i)], [stepYTop,axMax],'color',[.9,.9,.9])
-    end
-end
-
-% add on threshold
-plot([0,totalTrials], [threshold,threshold],'color',[.8,.8,.8])
 
 if plotCorrectionTrialsToo
     %plot correction trial correct
@@ -181,6 +170,18 @@ end
 %plot MAIN good performance
 [performanceOnGood colors]=calculateSmoothedPerformances(d.correct(which)',smoothingWidth,'boxcar','powerlawBW');
 plot(find(which),performanceOnGood,'color',[0,0,0], 'linewidth', 2)
+
+%add on day transitions
+if dayTransitionsOn
+    [trialsPerDay]=makeDailyRaster(d.correct,d.date);  %in terms of ALL trials correction and kills, RETURN trialsPerDay
+    trialsCompletedBy=cumsum(trialsPerDay);
+    for i=1:length(trialsPerDay)
+        plot([trialsCompletedBy(i),trialsCompletedBy(i)], [stepYTop,axMax],'color',[.9,.9,.9])
+    end
+end
+
+% add on threshold
+plot([0,totalTrials], [threshold,threshold],'color',[.8,.8,.8])
 
 
 if plotByCondition

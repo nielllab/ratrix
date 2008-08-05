@@ -12,27 +12,30 @@ warnStatus = false;
 
 if ismember({'containedForcedRewards'},fieldNames)
     ind = find(cellfun(@isempty,{trialRecords.containedForcedRewards}));
-    for i = 1:length(ind)
-        trialRecords(ind(i)).containedForcedRewards = 1;
+    if ~isempty(ind)
+        warning('using pessimistic values for containedForcedRewards');
     end
+    trialRecords(ind).containedForcedRewards = 1;
     forcedRewards = [trialRecords.containedForcedRewards]==1;
 else 
     warnStatus = true;
 end
 if ismember({'didStochasticResponse'},fieldNames)
     ind = find(cellfun(@isempty,{trialRecords.didStochasticResponse}));
-    for i = 1:length(ind)
-        trialRecords(ind(i)).didStochasticResponse = 1;
+    if ~isempty(ind)
+        warning('using pessimistic values for didStochasticResponse');
     end
+    trialRecords(ind).didStochasticResponse = 1;
     stochastic = [trialRecords.didStochasticResponse];
 else 
     warnStatus = true;
 end
 if ismember({'didHumanResponse'},fieldNames)
     ind = find(cellfun(@isempty,{trialRecords.didHumanResponse}));
-    for i = 1:length(ind)
-        trialRecords(ind(i)).didHumanResponse = 1;
+    if ~isempty(ind)
+        warning('using pessimistic values for didHumanResponse');
     end
+    trialRecords(ind).didHumanResponse = 1;
     humanResponse = [trialRecords.didHumanResponse];
 else 
     warnStatus = true;

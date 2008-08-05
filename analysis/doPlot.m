@@ -114,7 +114,7 @@ switch plotType
 
         totalTrialsPerDay=makeDailyRaster(d.correct,d.date)  %in terms of ALL trials correction and kills, RETURN trialsPerDay
         goodTrialsPerDay=makeDailyRaster(d.correct,d.date,goods);
-        
+        legendStrs = {};
         if ismember('didHumanResponse',fields(d)) & ismember('containedForcedRewards',fields(d)) & ismember('didStochasticResponse',fields(d))
             %define types
             humanModified=d.containedForcedRewards==1 | d.didHumanResponse==1;
@@ -128,9 +128,11 @@ switch plotType
 
             %combine
             allTypes=[goodTrialsPerDay; CTsPerDay; computerTrialsPerDay ];
+            legendStrs = {'good trials','correction trials','stochastic reward'};
 
             if removeHuman
                 allTypes=[allTypes; humanTrialsPerDay];
+                legendStrs{end+1} = 'keyboard response';
             end
 
         else
@@ -140,6 +142,7 @@ switch plotType
             CTsPerDay=makeDailyRaster(d.correct,d.date,CTs);
             %combine
             allTypes=[goodTrialsPerDay; CTsPerDay];
+            legendStrs = {'good trials','correction trials'};
         end
 
         %check
@@ -149,6 +152,7 @@ switch plotType
         end
 
         bar([allTypes; remainder]','stacked'), colormap(bone)
+        legendStrs{end+1} = 'unaccounted for';
         set(gca,'FontSize',7);
         %title([subject '; ' datestr(min(d.date),6) '-'
         %datestr(max(d.date),6)])
@@ -158,7 +162,6 @@ switch plotType
         % legend handling
         typesPlotted = get(gcf,'UserData');
         if ~any(ismember(typesPlotted,plotType))
-            legendStrs={'good trials' 'correction trials' 'stochastic reward' 'keyboard response' 'unaccounted for'};
             legend(legendStrs, 'Location','NorthWest');
             typesPlotted{end+1}=plotType;
             set(gcf,'UserData',typesPlotted);
@@ -193,6 +196,14 @@ switch plotType
         markTrialsToThreshold=0;
         addManualChangeMarker=1;
         doPlotPercentCorrect(d,goods,smoothingWidth,threshold,axMin,axMax,dayTransitionsOn,addSteps,plotCorrectionTrialsToo,plotAfterErrorsToo,markTrialsToThreshold,addManualChangeMarker)
+        legendStrs = {};
+        if plotCorrectionTrialsToo
+            legendStrs{end+1}='correctionTrials'; 
+        end
+        if plotAfterErrorsToo
+            legendStrs{end+1}='afterErrors';
+        end
+        legendStrs{end+1} = 'goodTrials';
 
         axis( [1 max([totalTrials 2]) axMin axMax])
 
@@ -209,7 +220,6 @@ switch plotType
         %legend Handling
         typesPlotted = get(gcf,'UserData');
         if ~any(ismember(typesPlotted,plotType))
-            legendStrs={ 'correctionTrials' 'afterErrors' 'goodTrials'};
             legend(legendStrs, 'Location','NorthWest');
             typesPlotted{end+1}=plotType;
             set(gcf,'UserData',typesPlotted);

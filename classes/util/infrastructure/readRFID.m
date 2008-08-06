@@ -40,7 +40,9 @@ while ~done
     t=strtrim(fscanf(s));
     warning('on','MATLAB:serial:fscanf:unsuccessfulRead');
     
-    [nums len]=textscan(t,'AVID%*1[*]%3u8%*1[*]%3u8%*1[*]%3u8'); %matches format AVID*013*604*432
+    if ~isempty(t)
+        [nums len]=textscan(t,'AVID%*1[*]%3u8%*1[*]%3u8%*1[*]%3u8'); %matches format AVID*013*604*432
+    end
     
     if ~isempty(findstr('READY',t))
         fprintf('\t%s\n',t);

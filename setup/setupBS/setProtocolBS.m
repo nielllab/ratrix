@@ -55,10 +55,10 @@ for i=1:length(subIDs)
     if length(ind)==1 && ismember(asgns(ind).subject_id,getBSids)
         switch asgns(ind).experiment
             case {'goToSide' 'goToSidewPuff'}
-                p=makeProtocol(asgns(ind).experiment,false);
+                p=makeProtocol(asgns(ind).experiment,subIDs{i},false);
                 stepNum=getStepNum(asgns(ind).subject_id);
             case {'Testing'}
-                p=makeProtocol(asgns(ind).experiment,true);
+                p=makeProtocol(asgns(ind).experiment,subIDs{i},true);
                 stepNum=1;
             otherwise
                 subIDs{i}

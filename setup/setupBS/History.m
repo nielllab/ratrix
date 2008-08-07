@@ -14,5 +14,8 @@ cd('C:\Documents and Settings\rlab\Desktop\Ratrix\bootstrap')
 setupEnvironment;
 dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
 r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
-subIDs={'267';'268';'269';'270';'159';'161';'180';'186';'181';'182';'187';'188'};
-r = setProtocolBS(r,subIDs); 
+subIDs={'267';'268';'269';'270';'181';'182';'187';'188'};
+    r = setProtocolBS(r,subIDs); 
+
+
+%still to be added: '159';'161';'180';'186';

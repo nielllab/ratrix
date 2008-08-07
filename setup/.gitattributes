@@ -16,3 +16,4 @@ setupBS/makeProtocol.m -text
 setupBS/setProtocolBS.m -text
 setupBS/getBSids.m -text
 setupEDF/makeEDFProtocol.m -text
+/setProtocolTEST.m -text

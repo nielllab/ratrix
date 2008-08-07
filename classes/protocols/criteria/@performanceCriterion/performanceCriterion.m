@@ -21,8 +21,8 @@ switch nargin
             error('Input argument is not a performanceCriterion object')
         end  
     case 2
-        if size(varargin{1})~=size(varargin{2})
-            error('size of percent correct must be the same as the size of consecutive trials')
+        if length(varargin{1})~=length(varargin{2}) || ~isvector(varargin{1}) || ~isvector(varargin{2})
+            error('size of percent correct must be the same as the size of consecutive trials and both must be vectors')
         end    
         if all(varargin{1}>=0 & varargin{1}<=1) && isinteger(varargin{2}) && all(varargin{2}>=1)
             s.pctCorrect=varargin{1};

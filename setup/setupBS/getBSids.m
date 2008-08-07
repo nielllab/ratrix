@@ -5,19 +5,19 @@ function RatIDs=getBSids
 RatIDs=...
 ...%rack 2 (cockpits) %all on free drinks, then easiest possible go to side (some grating, some image, some dots), then tilt discrim
 ...% A     B     C          D     E     F
-{    '267'                                  ... %red
+{    '267'                  '161' '181'     ... %red
 ...%       
 ...%
-     '268'                                  ... %orange
+     '268'                  '160' '182'     ... %orange
 ...%       
 ...%
-     '269'                                  ... %yellow
+     '269'                  '186' '187'     ... %yellow
 ...%       
 ...%
-     '270'                                  ... %green
+     '270'                        '188'     ... %green
 ...%       
 ...%
-                                            ... %blue
+     '159'                                  ... %blue
 ...% 
 ...%
                                             ... %violet

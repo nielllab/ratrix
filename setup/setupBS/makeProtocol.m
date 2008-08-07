@@ -9,7 +9,7 @@ else
     gc = rateCriterion(3,5);
 end
 
-rewardSizeULorMS       =75;
+rewardSizeULorMS       =50;
 msPenalty              =0;
 fractionSoundOn        =1;
 fractionPenaltySoundOn =1;

@@ -109,4 +109,4 @@ setupEnvironment
 dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
 r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
 subjIDs={'283'};
-r = setProtocolPriya(r,subjIDs); %  run 8/8/08  PR
+r = setProtocolPriya(r,subjIDs); %  run 8/8/08  PV

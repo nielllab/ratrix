@@ -94,3 +94,11 @@ r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
 subjIDs={'279'; '280'; '281'; '282'};
 r = setProtocolPriya(r,subjIDs); %  run 7/29/08  PR
 
+%demote rat 282 to step 4 and disable automatic graduation from step 4
+% due to suspicious premature graduation
+cd('C:\Documents and Settings\rlab\Desktop\Ratrix\bootstrap')
+setupEnvironment
+dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
+r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
+subjIDs={'282'};
+r = setProtocolPriya(r,subjIDs); %  run 8/8/08  PR

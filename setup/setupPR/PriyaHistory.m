@@ -102,3 +102,11 @@ dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
 r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
 subjIDs={'282'};
 r = setProtocolPriya(r,subjIDs); %  run 8/8/08  PR
+
+%add rat 283 to protocol
+cd('C:\Documents and Settings\rlab\Desktop\Ratrix\bootstrap')
+setupEnvironment
+dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
+r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
+subjIDs={'283'};
+r = setProtocolPriya(r,subjIDs); %  run 8/8/08  PR

@@ -88,15 +88,17 @@ background_nAFC=0; % range 0-1; bg for images (should differ from error screen) 
 ypos_nAFC=0; %location of image stimuli is near ports
 
 %create graduation criterion object for nAFC trial managers
-if istest,
-    graduationCriterion=performanceCriterion([.8], int8([10])); %note performanceCriterion should check that these are ints!
-else % real training
-       %performanceCriterion is a subclass of class 'criteria'
-    % CHANGED by PR as per Bob's request on 7/29/08
-    graduationCriterion=performanceCriterion([0.85], int8([400])); %([.95, .85], int8([20,200])); 
-    %will graduate a subject if he is 95% correct after 20 consecutive trials
-    %or if he is at least 85% correct after 200 consecutive trials
-end
+% if istest,
+%     graduationCriterion=performanceCriterion([.8], int8([10])); %note performanceCriterion should check that these are ints!
+% else % real training
+%performanceCriterion is a subclass of class 'criteria'
+% CHANGED by PR as per Bob's request on 7/29/08
+graduationCriterion=performanceCriterion([0.85], int8([400])); 
+
+%([.95, .85], int8([20,200]));
+%will graduate a subject if he is 95% correct after 20 consecutive trials
+%or if he is at least 85% correct after 200 consecutive trials
+% end
 
 laststep_crit=repeatIndefinitely();
 
@@ -177,7 +179,10 @@ ts3 = trainingStep(gotostim, discrimStim3, graduationCriterion, scheduler,svnRev
 discrimStim4 = images(imdir,ypos_nAFC,background_nAFC,...
     maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts4);
 %define the associated training step
-ts4 = trainingStep(gotostim, discrimStim4, graduationCriterion, scheduler,svnRevision);
+ts4 = trainingStep(gotostim, discrimStim4, laststep_crit, scheduler,svnRevision);
+%graduationCriterion, changed to laststep_crit 8/6/08 because of suspcions
+%about graduation not working properly
+% should only affect rat 282
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %TS5=gotoS+, ignore S-, natural objects normalized, TEST set
@@ -265,20 +270,49 @@ pB=protocol('object rec', {ts1 ts2 ts3 ts4 ts5B ts6B ts7B}); %Grp B flashlight i
 % end
 
 
-% 080729 MODIFIED PR
-% change graduation criterion to 85% correct 400 in a row
-% demote some rats due to premature graduation
+% % 080729 MODIFIED PR
+% % change graduation criterion to 85% correct 400 in a row
+% % demote some rats due to premature graduation
+% thisIsANewProtocol=1; % typically 1
+% thisIsANewTrainingStep=1; % typically 0
+% thisIsANewStepNum=1;  %  typically 1
+% for i=1:length(subjIDs),
+%     subj=getSubjectFromID(r,subjIDs{i}); %extract the subject object
+%     % set the current step index here
+%     switch subjIDs{i},
+%         case '279', stepind=2; % 279 DEMOTE to step 2 from 3 (not doing any trials)
+%         case '280', stepind=4; % 280 DEMOTE to step 4  from 5 (premature grad)
+%         case '281', stepind=7; % 281 continue at step 7 (doing well)
+%         case '282', stepind=3; % 282 DEMOTE to step 3  (premature grad)
+%         case 'demo1', stepind=6; %demo test step
+%     end
+%     
+%     % assign to groups THIS CODE SHOULD NOT CHANGE!   
+%     if ismember(subjIDs{i}, {'279'; '281'}), % GROUP A (279, 281)
+%                 [subj r]=setProtocolAndStep(subj,pA,thisIsANewProtocol,thisIsANewTrainingStep,thisIsANewStepNum,stepind,r,date,'pr');
+%     elseif ismember(subjIDs{i}, {'280'; '282'; 'demo1'}),% GROUP B (280,282)
+%                 [subj r]=setProtocolAndStep(subj,pB,thisIsANewProtocol,thisIsANewTrainingStep,thisIsANewStepNum,stepind,r,date,'pr');
+%     else
+%         sprintf('unknown subject %s\n', subjIDs{i}') % echo to screen
+%         error('this rat is not assigned to any group. edit setProtocolPriya to assign.')
+%     end
+% end
+
+
+% 080808 MODIFIED PR
+% don't trust grad criterion - change ts4 criterion to repeatindefinitely, and demote 282 to 4
+
 thisIsANewProtocol=1; % typically 1
 thisIsANewTrainingStep=1; % typically 0
 thisIsANewStepNum=1;  %  typically 1
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i}); %extract the subject object
     % set the current step index here
-    switch subjIDs{i},
-        case '279', stepind=2; % 279 DEMOTE to step 2 from 3 (not doing any trials)
-        case '280', stepind=4; % 280 DEMOTE to step 4  from 5 (premature grad)
-        case '281', stepind=7; % 281 continue at step 7 (doing well)
-        case '282', stepind=3; % 282 DEMOTE to step 3  (premature grad)
+    switch subjIDs{i}, % only 282 will be called this time
+       % case '279', stepind=2; %  
+       % case '280', stepind=4; %  
+       % case '281', stepind=7; % 
+        case '282', stepind=4; % 282 DEMOTE to step 4  (premature grad)
         case 'demo1', stepind=6; %demo test step
     end
     

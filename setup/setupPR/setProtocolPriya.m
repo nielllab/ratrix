@@ -308,7 +308,7 @@ thisIsANewStepNum=1;  %  typically 1
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i}); %extract the subject object
     % set the current step index here
-    switch subjIDs{i}, % only 282 will be called this time
+    switch subjIDs{i}, % only 283 will be called this time
          case '283', stepind=1; %new rat 283 added  
        % case '280', stepind=4; %  
        % case '281', stepind=7; % 

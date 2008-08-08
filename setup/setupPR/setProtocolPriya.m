@@ -309,15 +309,15 @@ for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i}); %extract the subject object
     % set the current step index here
     switch subjIDs{i}, % only 282 will be called this time
-       % case '279', stepind=2; %  
+         case '283', stepind=1; %new rat 283 added  
        % case '280', stepind=4; %  
        % case '281', stepind=7; % 
-        case '282', stepind=4; % 282 DEMOTE to step 4  (premature grad)
+       % case '282', stepind=4; % 282 DEMOTE to step 4  (premature grad)
         case 'demo1', stepind=6; %demo test step
     end
     
     % assign to groups THIS CODE SHOULD NOT CHANGE!   
-    if ismember(subjIDs{i}, {'279'; '281'}), % GROUP A (279, 281)
+    if ismember(subjIDs{i}, {'283'; '281'}), % GROUP A (283, 281)
                 [subj r]=setProtocolAndStep(subj,pA,thisIsANewProtocol,thisIsANewTrainingStep,thisIsANewStepNum,stepind,r,date,'pr');
     elseif ismember(subjIDs{i}, {'280'; '282'; 'demo1'}),% GROUP B (280,282)
                 [subj r]=setProtocolAndStep(subj,pB,thisIsANewProtocol,thisIsANewTrainingStep,thisIsANewStepNum,stepind,r,date,'pr');

@@ -81,3 +81,4 @@ infrastructure/updateRatrixRevisionIfNecessary.m -text
 infrastructure/writeSVNUpdateCommand.m -text
 infrastructure/readRFID.m -text
 matlaby/ple.m -text
+infrastructure/parallaxRead.m -text

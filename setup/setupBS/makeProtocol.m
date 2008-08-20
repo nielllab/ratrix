@@ -9,7 +9,7 @@ else
     gc = rateCriterion(3,5);
 end
 
-rewardSizeULorMS       =30;
+rewardSizeULorMS       =getRewardDuration(subIDs);
 msPenalty              =0;
 fractionSoundOn        =1;
 fractionPenaltySoundOn =1;
@@ -48,7 +48,7 @@ ts1=trainingStep(fd, freeStim, gc, noTimeOff(),svnRev);
 
 %%%%%%%%%% nonstochastic free drinks
 
-msPenalty              =2000;
+msPenalty              =getMSPenalty(subIDs);
 rm = constantReinforcement(rewardSizeULorMS,msPenalty,fractionSoundOn,fractionPenaltySoundOn,rewardScalar,msPuff);
 
 trySomethingElseClip =soundClip('trySomethingElseSound','gaussianWhiteNoise');

@@ -20,10 +20,19 @@ subIDs={'267';'268';'269';'270';'181';'182';'187';'188'};
 
 %still to be added: '159';'161';'180';'186';
 
-% doe to make reward durarion 30 muL
+% done to make reward durarion 30 muL
 cd('C:\Documents and Settings\rlab\Desktop\Ratrix\bootstrap')
 setupEnvironment;
 dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
 r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
 subIDs={'267';'268';'269';'270';'181';'182';'187';'188'};
     r = setProtocolBS(r,subIDs); 
+    
+% penalty duration increased to 5 s for 181-187; 267-270 demoted to
+% stepNum=1
+cd('C:\Documents and Settings\rlab\Desktop\Ratrix\bootstrap')
+setupEnvironment;
+dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
+r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
+subIDs={'267';'268';'269';'270';'181';'182';'187';'188'};
+r = setProtocolBS(r,subIDs); 

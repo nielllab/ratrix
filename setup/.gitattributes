@@ -19,3 +19,5 @@ setupEDF/makeEDFProtocol.m -text
 setupBS/getStepNum.m -text
 setupBS/History.m -text
 /setProtocolTEST.m -text
+setupBS/getRewardDuration.m -text
+setupBS/getMSPenalty.m -text

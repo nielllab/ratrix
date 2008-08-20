@@ -110,3 +110,19 @@ dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
 r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
 subjIDs={'283'};
 r = setProtocolPriya(r,subjIDs); %  run 8/8/08  PV
+
+%increase time out to 8000ms and decrease reward size to 40ms for rat 282
+cd('C:\Documents and Settings\rlab\Desktop\Ratrix\bootstrap')
+setupEnvironment
+dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
+r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
+subjIDs={'282'};
+r = setProtocolPriya(r,subjIDs); %  run 8/15/08  PV
+
+%increase time out to 16000ms, standard reward size rat 282
+cd('C:\Documents and Settings\rlab\Desktop\Ratrix\bootstrap')
+setupEnvironment
+dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
+r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
+subjIDs={'282'};
+r = setProtocolPriya(r,subjIDs); %  run 8/15/08  PV

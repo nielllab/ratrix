@@ -83,6 +83,6 @@ else
     gc=performanceCriterion([.95, .85], int8([20,200]));
 end
 
-ts3=trainingStep(gts, freeStim, gc, noTimeOff(),svnRev);
+ts3=trainingStep(gts, freeStim, repeatIndefinitely(), noTimeOff(),svnRev);
 
 p=protocol(name,{ts1, ts2, ts3});

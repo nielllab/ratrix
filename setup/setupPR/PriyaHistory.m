@@ -134,3 +134,27 @@ dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
 r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
 subjIDs={'283'};
 r = setProtocolPriya(r,subjIDs); %  run 8/25/08  PV
+
+%increase time out to 20000ms, rat 282
+cd('C:\Documents and Settings\rlab\Desktop\Ratrix\bootstrap')
+setupEnvironment
+dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
+r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
+subjIDs={'282'};
+r = setProtocolPriya(r,subjIDs); %  run 8/26/08  PV
+
+%promote rat 283 to step 5
+cd('C:\Documents and Settings\rlab\Desktop\Ratrix\bootstrap')
+setupEnvironment
+dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
+r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
+subjIDs={'283'};
+r = setProtocolPriya(r,subjIDs); %  run 8/27/08  PV
+
+%increase time out to 4000ms, rat 283
+cd('C:\Documents and Settings\rlab\Desktop\Ratrix\bootstrap')
+setupEnvironment
+dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
+r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
+subjIDs={'283'};
+r = setProtocolPriya(r,subjIDs); %  run 9/4/08  PV

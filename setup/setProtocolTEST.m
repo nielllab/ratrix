@@ -265,9 +265,11 @@ ts22 = trainingStep(nAFC_increasing_rewards, imageStim,  graduateQuickly, noTime
 
 % ====================================================================================================================
 % protocol and rest of setup stuff
-p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8, ts9, ts10, ts11, ts12, ts13, ts14, ts15, ts16, ts17, ...
-    ts18, ts19, ts20, ts21, ts22});
-stepNum=21;
+% p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8, ts9, ts10, ts11, ts12, ts13, ts14, ts15, ts16, ts17, ...
+%     ts18, ts19, ts20, ts21, ts22});
+% stepNum=21;
+p=protocol('gabor test', {ts4, ts3});
+stepNum=1;
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

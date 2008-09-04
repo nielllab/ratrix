@@ -135,12 +135,12 @@ protocols/reinforcementManagers/@reinforcementManager/getMsPenalty.m -text
 protocols/reinforcementManagers/@reinforcementManager/calcCommonValues.m -text
 db/@dbConn/getBodyWeightHistory.m.new -text
 db/@dbConn/reconcileTrialRecordFileNames.m -text
-db/@dbConn/getStationsByRoom.m -text
-db/@dbConn/getStationsOnServer.m -text
 db/@dbConn/getAllServerUINs.m -text
-db/@dbConn/getSubjectIDsFromServer.m -text
+db/@dbConn/getStationsOnServer.m -text
 db/@dbConn/getRacksAndRoomsFromServerUIN.m -text
 db/@dbConn/getAssignmentsForServer.m -text
 db/@dbConn/getCoachAssignmentsForServer.m -text
-db/@dbConn/getAssignmentsNotOnServer.m -text
 db/@dbConn/getAllRackIDs.m -text
+db/@dbConn/getStationsByRoom.m -text
+db/@dbConn/getSubjectIDsFromServer.m -text
+db/@dbConn/getAssignmentsNotOnServer.m -text

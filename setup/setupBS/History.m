@@ -36,3 +36,19 @@ dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
 r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
 subIDs={'267';'268';'269';'270';'181';'182';'187';'188'};
 r = setProtocolBS(r,subIDs); 
+
+% penalty changed. allowed repeatIndefinitely(). 
+cd('C:\Documents and Settings\rlab\Desktop\Ratrix\bootstrap')
+setupEnvironment;
+dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
+r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
+subIDs={'267';'268';'269';'270';'181';'182';'187';'188';'159'};
+r = setProtocolBS(r,subIDs); 
+
+%increased the reward from 30 to 50 muL
+cd('C:\Documents and Settings\rlab\Desktop\Ratrix\bootstrap')
+setupEnvironment;
+dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
+r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
+subIDs={'267';'268';'269';'270';'181';'182';'187';'188';'159'};
+r = setProtocolBS(r,subIDs); 

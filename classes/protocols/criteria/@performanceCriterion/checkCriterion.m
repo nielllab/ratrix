@@ -48,6 +48,9 @@ end
 
 which= trialsThisStep & ~stochastic & ~humanResponse & ~forcedRewards;
 
+% modified to allow human responses to count towards graduation (performanceCriterion)
+% which= trialsThisStep & ~stochastic & ~forcedRewards;
+
 [graduate whichCriteria correct]=aboveThresholdPerformance(c.consecutiveTrials,c.pctCorrect,trialRecords(which));
 
 %play graduation tone

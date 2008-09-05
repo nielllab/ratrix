@@ -82,3 +82,4 @@ infrastructure/writeSVNUpdateCommand.m -text
 infrastructure/readRFID.m -text
 matlaby/ple.m -text
 infrastructure/parallaxRead.m -text
+infrastructure/getServerUINFromIP.m -text

@@ -158,3 +158,11 @@ dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
 r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
 subjIDs={'283'};
 r = setProtocolPriya(r,subjIDs); %  run 9/4/08  PV
+
+%graduate rat 282 to step 5 (paintbrush/flashlight)
+cd('C:\Documents and Settings\rlab\Desktop\Ratrix\bootstrap')
+setupEnvironment
+dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
+r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
+subjIDs={'282'};
+r = setProtocolPriya(r,subjIDs); %  run 9/5/08  PV

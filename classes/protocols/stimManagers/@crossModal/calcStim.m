@@ -35,7 +35,7 @@ end
 if needToSwitch
     stimulus.modalityTimeStarted = now;
     stimulus.trialNum = 1;
-    if isempty(stimulus.currentModality) || strcmp(stimulus.modalitySwitchMethod,'Random') == 0
+    if isempty(stimulus.currentModality) || strcmp(stimulus.modalitySwitchMethod,'Random') == 0  %edf: this looks like a bug -- why testing against zero?  expect 'Random' to alternate each day...
         stimulus.currentModality = round(rand());
     else
         stimulus.currentModality = setDiff([0 1],stimulus.currentModality);

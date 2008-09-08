@@ -50,7 +50,18 @@ if strcmp(type,'weight')
     [weights dates thresholds] = getBodyWeightHistory(conn,subjectID); %need a faster solution, see: http://132.239.158.177/trac/rlab_hardware/ticket/129
     %thresholds=.85*thresholds;
     closeConn(conn);
-    plot(dates,[weights thresholds]);
+    try
+        plot(dates,[weights thresholds]);
+    catch
+        plot(0)
+        dates
+        weights
+        thresholds
+        size(dates)
+        size(weights)
+        size(thresholds)
+        warning('weights, dates, and thresholds have different sizes')
+    end
     if range(dates)>50
         set(gca,'XTick',fliplr([ceil(max(dates)):-30:floor(min(dates))]));
     elseif range(dates)>8

@@ -144,3 +144,4 @@ db/@dbConn/getAllRackIDs.m -text
 db/@dbConn/getStationsByRoom.m -text
 db/@dbConn/getSubjectIDsFromServer.m -text
 db/@dbConn/getAssignmentsNotOnServer.m -text
+protocols/stimManagers/@crossModal/extractDetailFields.m -text

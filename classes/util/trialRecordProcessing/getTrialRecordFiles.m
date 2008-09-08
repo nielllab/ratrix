@@ -8,6 +8,9 @@ if ~isempty(findstr('\\',permanentStore)) && doWarn
     warning('this function is dangerous when used remotely -- dir can silently fail or return a subset of existing files')
 end
 
+%this needs to trust the FS in standalone conditions, but consider relying
+%solely on oracle for this listing when possible
+%consider merging with getTrialRecordsFromPermanentStore (using the trustOsRecordFiles flag)
 historyFiles=dir(fullfile(permanentStore,'trialRecords_*.mat'));
 
 try

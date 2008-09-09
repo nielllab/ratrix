@@ -65,36 +65,38 @@ for i=1:length(ids)
         end
 
         for c=1:size(classes,2)
-            %no way to guarantee that a stim manager's calcStim will make a stimDetails
-            %that includes all info its super class would have, so cannot call this
-            %method on every anscestor class.  must leave calling super class's
-            %extractDetailFields up to the sub class.
-            newRecs=extractDetailFields(classes{2,c},colsFromAllFields(newBasicRecs,classes{3,c}),tr(classes{3,c}));
+            if length(classes(3,c))>0 %prevent subtle bug that is easy to write into extractDetailFields -- if you send zero trials to them, they may try to look deeper than the top level of fields, but they won't exist ('MATLAB:nonStrucReference') -- see example in crossModal.extractDetailFields()
+                %no way to guarantee that a stim manager's calcStim will make a stimDetails
+                %that includes all info its super class would have, so cannot call this
+                %method on every anscestor class.  must leave calling super class's
+                %extractDetailFields up to the sub class.
+                newRecs=extractDetailFields(classes{2,c},colsFromAllFields(newBasicRecs,classes{3,c}),tr(classes{3,c}));
 
-            verifyAllFieldsNCols(newRecs,length(classes{3,c}));
-            bailed=isempty(fieldnames(newRecs)); %extractDetailFields bailed for some reason (eg unimplemented or missing fields from old records)
+                verifyAllFieldsNCols(newRecs,length(classes{3,c}));
+                bailed=isempty(fieldnames(newRecs)); %extractDetailFields bailed for some reason (eg unimplemented or missing fields from old records)
 
-            if length(compiledDetails)<c
-                compiledDetails(c).className=classes{1,c};
-                if bailed
-                    compiledDetails(c).records=[];
+                if length(compiledDetails)<c
+                    compiledDetails(c).className=classes{1,c};
+                    if bailed
+                        compiledDetails(c).records=[];
+                    else
+                        compiledDetails(c).records=newRecs;
+                    end
+                    compiledDetails(c).trialNums=[];
+                    compiledDetails(c).bailedTrialNums=[];
+                elseif strcmp(compiledDetails(c).className,classes{1,c})
+                    if ~bailed
+                        compiledDetails(c).records=concatAllFields(compiledDetails(c).records,newRecs);
+                    end
                 else
-                    compiledDetails(c).records=newRecs;
+                    error('class name doesn''t match')
                 end
-                compiledDetails(c).trialNums=[];
-                compiledDetails(c).bailedTrialNums=[];
-            elseif strcmp(compiledDetails(c).className,classes{1,c})
-                if ~bailed
-                    compiledDetails(c).records=concatAllFields(compiledDetails(c).records,newRecs);
+                tmp=colsFromAllFields(newBasicRecs,classes{3,c});
+                if bailed
+                    compiledDetails(c).bailedTrialNums(end+1:end+length(classes{3,c}))=tmp.trialNumber;
+                else
+                    compiledDetails(c).trialNums(end+1:end+length(classes{3,c}))=tmp.trialNumber;
                 end
-            else
-                error('class name doesn''t match')
-            end
-            tmp=colsFromAllFields(newBasicRecs,classes{3,c});
-            if bailed
-                compiledDetails(c).bailedTrialNums(end+1:end+length(classes{3,c}))=tmp.trialNumber;
-            else
-                compiledDetails(c).trialNums(end+1:end+length(classes{3,c}))=tmp.trialNumber;
             end
         end
     end
@@ -103,7 +105,8 @@ for i=1:length(ids)
 
     tmp=[];
     for c=1:length(compiledDetails)
-        tmp=[tmp [compiledDetails(c).trialNums;repmat(c,1,length(compiledDetails(c).trialNums))]];
+        newNums=[compiledDetails(c).trialNums compiledDetails(c).bailedTrialNums];
+        tmp=[tmp [newNums;repmat(c,1,length(newNums))]];
     end
     [a b]=sort(tmp(1,:));
     if any(a~=1:length(a))

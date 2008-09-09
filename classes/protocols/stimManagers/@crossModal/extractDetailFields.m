@@ -94,6 +94,8 @@ catch ex
     class(ex)
     if ismember(ex.identifier,{'MATLAB:nonExistentField','MATLAB:catenate:structFieldBad'}) %dan's early crossModal records just looked like pure audio or pure video without information on the unattended stimulus -- field names were different and change between audio and visual ones within a session+step without warning
         out=struct; %official way to bail
+    elseif ismember(ex.identifier,{'MATLAB:nonStrucReference'}) %this occurs if we are sent zero trials in the input when we try to look past the first struct level down (which doesn't exist) -- eg   [stimDetails.HFdetails]
+        out=struct; %bail again
     else
         rethrow(ex);
     end

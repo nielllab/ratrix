@@ -85,3 +85,5 @@ infrastructure/parallaxRead.m -text
 infrastructure/getServerUINFromIP.m -text
 matlaby/ensureEqualLengthVects.m -text
 matlaby/ensureScalar.m -text
+matlaby/verifyAllFieldsNCols.m -text
+matlaby/ensureTypedVector.m -text

@@ -2,6 +2,10 @@ function analysis(sm,detailRecords,subjectID)
 if all(detailRecords.HFdetailsPctCorrectionTrials==.5) && all(detailRecords.SDdetailsPctCorrectionTrials==.5) && all(strcmp(detailRecords.modalitySwitchMethod,'Random')) && all(strcmp(detailRecords.modalitySwitchType,'ByNumberOfHoursRun'))
     %pass
 else
+    unique(detailRecords.HFdetailsPctCorrectionTrials==.5) 
+    unique(detailRecords.SDdetailsPctCorrectionTrials==.5) 
+    unique(detailRecords.modalitySwitchMethod)
+    unique(detailRecords.modalitySwitchType)
     warning('standard crossModal config violated')
 end
 
@@ -23,7 +27,7 @@ if any(agrees & conflicts) || any(~agrees & ~conflicts)
     error('can''t agree and conflict or do neither')
 end
 
-alpha=.95;
+alpha=.05;
 
 visual.agree.perf.phat=[];
 visual.agree.perf.pci=[];
@@ -126,6 +130,8 @@ for i=1:max(sessionNum)
         else
             error('found isBlocking or currentModality changing state during session')
         end
+    else
+        fprintf('skipping a %d session\n',sum(trials))
     end
 end
 fprintf('included %d clumped of %d good trials (%g%%)\n',trialsIncluded,sum(goods),round(100*trialsIncluded/sum(goods)));

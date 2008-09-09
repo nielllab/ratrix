@@ -1,7 +1,6 @@
 %should replace compileTrialRecords, but of course will break lots of graphing -- will need to update graphing code
 function compileDetailedRecords(ids,pth,outPth)
-%ids={'225','226','239','241'};
-ids={'239','241'};
+ids={'225','226','239','241'};
 pth='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\behavior\pmeierTrialRecords\subjects';
 outPth='C:\Documents and Settings\rlab\Desktop\detailedRecords';
 

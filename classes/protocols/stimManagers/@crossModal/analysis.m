@@ -1,23 +1,25 @@
 function analysis(sm,detailRecords,subjectID)
-if all(detailRecords.HFdetailsPctCorrectionTrials==.5) && all(detailRecords.SDdetailsPctCorrectionTrials==.5) && all(strcmp(detailRecords.modalitySwitchMethod,'Random')) && all(strcmp(detailRecords.modalitySwitchMethod,'ByNumberOfHoursRun'))
+if all(detailRecords.HFdetailsPctCorrectionTrials==.5) && all(detailRecords.SDdetailsPctCorrectionTrials==.5) && all(strcmp(detailRecords.modalitySwitchMethod,'Random')) && all(strcmp(detailRecords.modalitySwitchType,'ByNumberOfHoursRun'))
     %pass
 else
     warning('standard crossModal config violated')
 end
 
+options=cellfun(@union,detailRecords.targetPorts,detailRecords.distractorPorts,'UniformOutput',false);
+
 goods=detailRecords.isCorrection==0 ...
-    & ismember(detailRecords.response,union(detailRecords.targetPort,detailRecords.distractorPort)) ...
+    & cellfun(@ismember,num2cell(detailRecords.response),options) ...
     & ~detailRecords.containedManualPokes ...
     & ~detailRecords.didHumanResponse ...
     & ~detailRecords.containedForcedRewards ...
     & ~detailRecords.didStochasticResponse;
 
 %any time isBlocking or currentModality changes state, increment session number.  also when trial is more than an hour since previous trial.
-sessionNum=cumsum([1    sign(     (24*diff(detailRecords.date))>1    +   abs(diff(detailRecords.isBlocking))   +   abs(diff(detailRecords.currentModality))   )   ]);
+sessionNum=cumsum([1    sign(    double((24*diff(detailRecords.date))>1)    +   abs(diff(detailRecords.isBlocking))   +   abs(diff(detailRecords.currentModality))   )   ]);
 
 agrees=detailRecords.HFtargetPorts==detailRecords.SDtargetPorts;
 conflicts=detailRecords.HFtargetPorts~=detailRecords.SDtargetPorts;
-if any(agrees & conflicts) || any(~agree & ~conflict)
+if any(agrees & conflicts) || any(~agrees & ~conflicts)
     error('can''t agree and conflict or do neither')
 end
 
@@ -41,11 +43,14 @@ visual.sessions.alone=[];
 
 audio=visual;
 
+trialsIncluded=0;
 minTrials=25; %if higher than blockingLength, will miss alones
 for i=1:max(sessionNum)
     trials=sessionNum==i & goods;
 
     if sum(trials)>=minTrials
+        trialsIncluded=trialsIncluded+sum(trials);
+
         isBlocking=unique(detailRecords.isBlocking(trials));
         modality=unique(detailRecords.currentModality(trials));
 
@@ -100,7 +105,7 @@ for i=1:max(sessionNum)
                     type.alone.perf.phat(end+1)=phat(ind);
                     type.alone.perf.pci(end+1,:)=pci(ind,:);
 
-                    ind2;
+                    ind=2;
                     type.alone.bias.phat(end+1)=phat(ind);
                     type.alone.bias.pci(end+1,:)=pci(ind,:);
 
@@ -109,12 +114,21 @@ for i=1:max(sessionNum)
             else
                 error('pci''s came back descending')
             end
+
+            switch modality
+                case 0
+                    visual=type;
+                case 1
+                    audio=type;
+                otherwise
+                    error('bad modality')
+            end
         else
             error('found isBlocking or currentModality changing state during session')
         end
     end
 end
-
+fprintf('included %d clumped of %d good trials (%g%%)\n',trialsIncluded,sum(goods),round(100*trialsIncluded/sum(goods)));
 
 figure('Name',sprintf('%s: crossModal performance and bias',subjectID))
 c={'r' 'k'};
@@ -142,6 +156,8 @@ xlabel('session')
 subplot(3,2,6)
 makePerfBiasPlot(audio.sessions.crossModal,audio.conflict,c);
 xlabel('session')
+pth='C:\Documents and Settings\rlab\Desktop\detailedRecords';
+saveas(gcf,fullfile(pth,subjectID),'png');
 
 doParams=true;
 if doParams
@@ -151,7 +167,7 @@ if doParams
     title('HF Contrasts')
 
     subplot(6,1,2)
-    plot(detailRecords.XPosPcts(:,goods)');
+    plot(detailRecords.HFdetailsXPosPcts(:,goods)');
     title('HF X Pos')
 
     subplot(6,1,3)

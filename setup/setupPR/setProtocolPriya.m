@@ -71,7 +71,7 @@ imlist=PriyaImageSets; % populate struct, each training step has a field for its
 % params for all the NAFC trial managers
 %NB LUT is set in CALCSTIM; image method uses ramp not linearized
 %NB error stim set in ERRORSTIM; image method set to BLACK screen
-msPenaltyNAFC          =2000;  
+msPenaltyNAFC          =16000;  %rat283 9.9.08
 requestRewardSizeULorMS=0;
 percentCorrectionTrials=.5;
 msResponseTimeLimit=0; %not used?
@@ -309,10 +309,10 @@ for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i}); %extract the subject object
     % set the current step index here
     switch subjIDs{i}, % only 283 will be called this time
-       % case '283', stepind=5; %increase timeout 
+        case '283', stepind=5; %increase timeout 
        % case '280', stepind=4; %  
        % case '281', stepind=7; % 
-         case '282', stepind=5; % 282 graduation after timeout series was implemented and successful 
+       %  case '282', stepind=5; % 282 graduation after timeout series was implemented and successful 
         case 'demo1', stepind=6; %demo test step
     end
     

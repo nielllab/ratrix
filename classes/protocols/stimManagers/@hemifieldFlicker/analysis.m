@@ -15,9 +15,9 @@ goods=detailRecords.isCorrection==0 ...
     & ~detailRecords.containedForcedRewards ...
     & ~detailRecords.didStochasticResponse;
 
-contrasts=detailRecords.contrast;
-xPosPcts=detailRecords.xPosPct;
-if all(contrasts(:)>=0) && all(xPosPcts(:)>=0)
+contrasts=detailRecords.contrasts;
+xPosPcts=detailRecords.xPosPcts;
+if ~any(contrasts(:)<0) && ~any(xPosPcts(:)<0) %nan<0 gives 0
     contrasts(isnan(contrasts))=-1;
     xPosPcts(isnan(xPosPcts))=-1;
 
@@ -99,7 +99,7 @@ end
 xlim([1 max(sessions)])
 title('contrasts')
 
-subplot(3,1,2)
+subplot(3,1,3)
 for i=1:length(sessions)
 plot(sessions(i),sessionXPosPcts{i},'k*','MarkerSize',10)
 hold on

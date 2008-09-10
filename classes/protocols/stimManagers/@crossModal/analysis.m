@@ -165,7 +165,7 @@ xlabel('session')
 pth='C:\Documents and Settings\rlab\Desktop\detailedRecords';
 saveas(gcf,fullfile(pth,[subjectID '_crossModal']),'png');
 
-doParams=true;
+doParams=false;
 if doParams
     figure('Name',sprintf('%s: crossModal params',subjectID))
     subplot(6,1,1)

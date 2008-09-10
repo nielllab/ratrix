@@ -15,10 +15,10 @@ goods=detailRecords.isCorrection==0 ...
     & ~detailRecords.containedForcedRewards ...
     & ~detailRecords.didStochasticResponse;
 
-amps=sort([detailRecords.leftAmplitude;rightAmplitude]);
+amps=sort([detailRecords.leftAmplitude;detailRecords.rightAmplitude]);
 
-    %any time amplitdues change, increment session number.  also when trial is more than an hour since previous trial.
-    sessionNum=cumsum([1    sign(    double((24*diff(detailRecords.date))>1)    +   sum(abs(diff(amps')'))    )   ]);
+%any time amplitdues change, increment session number.  also when trial is more than an hour since previous trial.
+sessionNum=cumsum([1    sign(    double((24*diff(detailRecords.date))>1)    +   sum(abs(diff(amps')'))    )   ]);
 
 
 alpha=.05;
@@ -42,7 +42,7 @@ for i=1:max(sessionNum)
         if size(a,1)~=1
             error('found multiple amplitudes within a session')
         end
-        amplitdues(end+1,:)=a;
+        amplitudes(end+1,:)=a;
 
         total=sum(trials);
         correct=sum(trials & detailRecords.correct);
@@ -78,8 +78,8 @@ title(figName);
 
 subplot(2,1,2)
 for i=1:length(sessions)
-plot(sessions(i),amplitudes(i,:),'k*','MarkerSize',10)
-hold on
+    plot(sessions(i),amplitudes(i,:),'k*','MarkerSize',10)
+    hold on
 end
 xlim([1 max(sessions)])
 title('amplitudes')

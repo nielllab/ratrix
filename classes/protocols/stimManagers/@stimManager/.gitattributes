@@ -11,3 +11,4 @@
 /extractDetailFields.m -text
 /extractBasicFields.m -text
 /handleExtractDetailFieldsException.m -text
+/analysis.m -text

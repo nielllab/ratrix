@@ -23,9 +23,9 @@ if ~any(contrasts(:)<0) && ~any(xPosPcts(:)<0) %nan<0 gives 0
 
     contrasts=sort(contrasts);
     xPosPcts=sort(xPosPcts);
-
-    %any time flickers change location or contrast, increment session number.  also when trial is more than an hour since previous trial.
-    sessionNum=cumsum([1    sign(    double((24*diff(detailRecords.date))>1)    +   sum(abs(diff(contrasts')'))   +  sum(abs(diff(xPosPcts')'))   )   ]);
+    
+    %any time flickers change location or contrast, increment session number (location change doesn't count if singleton).  also when trial is more than an hour since previous trial.
+    sessionNum=cumsum([1    sign(    double((24*diff(detailRecords.date))>1)    +   sum(abs(diff(contrasts')'))   +  (sum(abs(diff(xPosPcts')'))>0 & sum(xPosPcts(:,2:end)~=-1)~=1)  )   ]);
 else
     error('found contrasts or xPosPcts less than zero')
 end
@@ -50,7 +50,7 @@ for i=1:max(sessionNum)
 
         sessionContrasts{end+1}=unique(contrasts(:,trials)','rows');
         sessionXPosPcts{end+1}=unique(xPosPcts(:,trials)','rows');
-        if size(sessionContrasts{end},1)~=1 || size(sessionXPosPcts{end},1)~=1
+        if size(sessionContrasts{end},1)~=1 || (size(sessionXPosPcts{end},1)~=1 && ~all(sum((sessionXPosPcts{end}~=-1)')==1))
             error('found multiple contrasts or positions within a session')
         end
         sessionContrasts{end}=sessionContrasts{end}(sessionContrasts{end}~=-1);

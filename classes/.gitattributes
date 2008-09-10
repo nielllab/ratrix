@@ -146,3 +146,4 @@ db/@dbConn/getSubjectIDsFromServer.m -text
 db/@dbConn/getAssignmentsNotOnServer.m -text
 protocols/stimManagers/@crossModal/extractDetailFields.m -text
 protocols/stimManagers/@crossModal/analysis.m -text
+protocols/stimManagers/@crossModal/testAnalysis.m -text

@@ -82,6 +82,7 @@ for i=1:length(sessions)
     hold on
 end
 xlim([1 max(sessions)])
+ylim([min(amplitudes(:)) max(amplitudes(:))]+[-1 1]*range(amplitudes(:))*.1)
 title('amplitudes')
 xlabel('session')
 

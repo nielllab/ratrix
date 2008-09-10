@@ -55,6 +55,7 @@ for i=1:max(sessionNum)
         end
         sessionContrasts{end}=sessionContrasts{end}(sessionContrasts{end}~=-1);
         sessionXPosPcts{end}=sessionXPosPcts{end}(sessionXPosPcts{end}~=-1);
+        sessionXPosPcts{end}=sessionXPosPcts{end}(:)';
         
         total=sum(trials);
         correct=sum(trials & detailRecords.correct);
@@ -97,6 +98,7 @@ plot(sessions(i),sessionContrasts{i},'k*','MarkerSize',10)
 hold on
 end
 xlim([1 max(sessions)])
+ylim([min([sessionContrasts{:}]) max([sessionContrasts{:}])]+[-1 1]*range([sessionContrasts{:}])*.1)
 title('contrasts')
 
 subplot(3,1,3)
@@ -105,6 +107,7 @@ plot(sessions(i),sessionXPosPcts{i},'k*','MarkerSize',10)
 hold on
 end
 xlim([1 max(sessions)])
+ylim([min([sessionXPosPcts{:}]) max([sessionXPosPcts{:}])]+[-1 1]*range([sessionXPosPcts{:}])*.1)
 title('x positions')
 xlabel('session')
 

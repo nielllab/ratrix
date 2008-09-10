@@ -9,5 +9,5 @@
 /getSubDirForRack.m -text
 /subjectAnalysis.m -text
 /compileDetailedRecords.m -text
-/crossModalAnalysis.m -text
 /makePerfBiasPlot.m -text
+/detailAnalysis.m -text

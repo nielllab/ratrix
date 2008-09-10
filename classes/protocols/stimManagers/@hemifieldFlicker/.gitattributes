@@ -2,3 +2,6 @@
 /stimMgrOKForTrialMgr.m -text
 /display.m -text
 /hemifieldFlicker.m -text
+/analysis.m -text
+/extractDetailFields.m -text
+/checkTargets.m -text

@@ -29,39 +29,9 @@ try
     out.HFdistractorPorts=ensureScalar({stimDetails.HFdistractorPorts});
     out.SDdistractorPorts=ensureScalar({stimDetails.SDdistractorPorts});
 
-    if size(out.HFdetailsXPosPcts,1)==size(out.HFdetailsContrasts,1)
-        if size(out.HFdetailsContrasts,1)>1
-            [junk inds]=sort(out.HFdetailsXPosPcts);
-            sz=size(out.HFdetailsContrasts);
-            inds=sub2ind(sz,inds,repmat(1:sz(2),sz(1),1));
-            temp=out.HFdetailsContrasts(inds);
-            [junk inds]=max(temp);
-            [answers cols]=find(repmat(max(temp),size(temp,1),1)==temp);
-            targetIsRight=logical(answers-1);
-            if ~all(cols==1:size(temp,2))
-                error('nonunique answer')
-            end
-        else
-            if ~any(out.HFdetailsXPosPcts==.5)
-                targetIsRight=out.HFdetailsXPosPcts>.5;
-            else
-                error('XPosPct at .5')
-            end
-        end
-    else
-        size(out.HFdetailsXPosPcts,1)
-        size(out.HFdetailsContrasts,1)
-        error('dims of HFdetailsContrasts and HFdetailsXPosPcts don''t match')
-    end
-    checkTargs(targetIsRight,out.HFtargetPorts,out.HFdistractorPorts,basicRecords.numPorts);
-
-    if ~any(out.SDdetailsLeftAmplitude==out.SDdetailsRightAmplitude)
-        targetIsRight=out.SDdetailsLeftAmplitude<out.SDdetailsRightAmplitude;
-    else
-        error('left and right amplitude are equal')
-    end
-    checkTargs(targetIsRight,out.SDtargetPorts,out.SDdistractorPorts,basicRecords.numPorts);
-
+    checkTargets(sm.hemifieldFlicker,out.HFdetailsXPosPcts,out.HFdetailsContrasts,num2cell(out.HFtargetPorts),num2cell(out.HFdistractorPorts),basicRecords.numPorts);
+    checkTargets(sm.stereoDiscrim,out.SDdetailsLeftAmplitude,out.SDdetailsRightAmplitude,num2cell(out.SDtargetPorts),num2cell(out.SDdistractorPorts),basicRecords.numPorts);
+    
     out.HFisCorrection=ensureScalar({stimDetails.HFisCorrection});
     out.SDisCorrection=ensureScalar({stimDetails.SDisCorrection});
 
@@ -90,15 +60,7 @@ try
     out.modalitySwitchMethod=ensureTypedVector({stimDetails.modalitySwitchMethod},'char');
     out.modalitySwitchType=ensureTypedVector({stimDetails.modalitySwitchType},'char');
 catch ex
-    ex
-    class(ex)
-    if ismember(ex.identifier,{'MATLAB:nonExistentField','MATLAB:catenate:structFieldBad'}) %dan's early crossModal records just looked like pure audio or pure video without information on the unattended stimulus -- field names were different and change between audio and visual ones within a session+step without warning
-        out=struct; %official way to bail
-    elseif ismember(ex.identifier,{'MATLAB:nonStrucReference'}) %this occurs if we are sent zero trials in the input when we try to look past the first struct level down (which doesn't exist) -- eg   [stimDetails.HFdetails]
-        out=struct; %bail again
-    else
-        rethrow(ex);
-    end
+    out=handleExtractDetailFieldsException(sm,ex,trialRecords);
 end
 
 verifyAllFieldsNCols(out,length(trialRecords));
@@ -129,22 +91,4 @@ switch modality
         error('unrecognized modality')
 end
 out=true;
-end
-
-function checkTargs(targetIsRight,targetPorts,distractorPorts,numPorts)
-%assumes left port is lowest num, right is highest.  how verify this or make it dynamic?
-if numPorts<2
-    error('requires at least 2 ports')
-end
-
-targets(targetIsRight)=max(1:numPorts);
-targets(~targetIsRight)=min(1:numPorts);
-if ~all(targets==targetPorts)
-    error('bad targets')
-end
-distractors(targetIsRight)=min(1:numPorts);
-distractors(~targetIsRight)=max(1:numPorts);
-if ~all(distractors==distractorPorts)
-    error('bad distractors')
-end
 end

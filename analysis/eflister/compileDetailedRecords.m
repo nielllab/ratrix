@@ -1,6 +1,7 @@
 %should replace compileTrialRecords, but of course will break lots of graphing -- will need to update graphing code
 function compileDetailedRecords(ids,pth,outPth)
 ids={'225','226','239','241'};
+ids={'239'};
 pth='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\behavior\pmeierTrialRecords\subjects';
 outPth='C:\Documents and Settings\rlab\Desktop\detailedRecords';
 
@@ -64,7 +65,7 @@ for i=1:length(ids)
         end
 
         for c=1:size(classes,2)
-            if length(classes(3,c))>0 %prevent subtle bug that is easy to write into extractDetailFields -- if you send zero trials to them, they may try to look deeper than the top level of fields, but they won't exist ('MATLAB:nonStrucReference') -- see example in crossModal.extractDetailFields()
+            if length(classes{3,c})>0 %prevent subtle bug that is easy to write into extractDetailFields -- if you send zero trials to them, they may try to look deeper than the top level of fields, but they won't exist ('MATLAB:nonStrucReference') -- see example in crossModal.extractDetailFields()
                 %no way to guarantee that a stim manager's calcStim will make a stimDetails
                 %that includes all info its super class would have, so cannot call this
                 %method on every anscestor class.  must leave calling super class's

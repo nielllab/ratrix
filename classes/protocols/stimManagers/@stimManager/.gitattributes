@@ -10,3 +10,4 @@
 /getCurrentShapedValue.m -text
 /extractDetailFields.m -text
 /extractBasicFields.m -text
+/handleExtractDetailFieldsException.m -text

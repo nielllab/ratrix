@@ -1,5 +1,5 @@
-function crossModalAnalysis
-ids={'225','226','239','241'};
+function detailAnalysis
+ids={'225','226','241'};
 pth='C:\Documents and Settings\rlab\Desktop\detailedRecords';
 sm=crossModal;
 for i=1:length(ids)

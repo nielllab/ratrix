@@ -2,8 +2,8 @@ function analysis(sm,detailRecords,subjectID)
 if all(detailRecords.HFdetailsPctCorrectionTrials==.5) && all(detailRecords.SDdetailsPctCorrectionTrials==.5) && all(strcmp(detailRecords.modalitySwitchMethod,'Random')) && all(strcmp(detailRecords.modalitySwitchType,'ByNumberOfHoursRun'))
     %pass
 else
-    unique(detailRecords.HFdetailsPctCorrectionTrials==.5) 
-    unique(detailRecords.SDdetailsPctCorrectionTrials==.5) 
+    unique(detailRecords.HFdetailsPctCorrectionTrials) 
+    unique(detailRecords.SDdetailsPctCorrectionTrials) 
     unique(detailRecords.modalitySwitchMethod)
     unique(detailRecords.modalitySwitchType)
     warning('standard crossModal config violated')
@@ -163,7 +163,7 @@ subplot(3,2,6)
 makePerfBiasPlot(audio.sessions.crossModal,audio.conflict,c);
 xlabel('session')
 pth='C:\Documents and Settings\rlab\Desktop\detailedRecords';
-saveas(gcf,fullfile(pth,subjectID),'png');
+saveas(gcf,fullfile(pth,[subjectID '_crossModal']),'png');
 
 doParams=true;
 if doParams
@@ -194,23 +194,4 @@ if doParams
     plot(days);
     title('day')
 end
-end
-
-function makePerfBiasPlot(x,data,c)
-chance=.5;
-plot([1 max(x)],chance*ones(1,2),'k');
-hold on
-makeConfPlot(x,data.bias,c{2});
-makeConfPlot(x,data.perf,c{1});
-ylim([0 1]);
-xlim([1 max(x)]);
-end
-
-function makeConfPlot(x,d,c)
-transparency=.2;
-
-fill([x x(length(x):-1:1)],[d.pci(:,2)' d.pci(length(x):-1:1,1)'],c,'FaceAlpha',transparency,'LineStyle','none');
-hold on
-plot(x,d.phat,c);
-errorbar(x,d.phat,d.phat-d.pci(:,1)',d.pci(:,2)'-d.phat,c);
 end

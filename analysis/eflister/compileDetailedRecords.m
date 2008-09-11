@@ -1,8 +1,17 @@
 %should replace compileTrialRecords, but of course will break lots of graphing -- will need to update graphing code
 function compileDetailedRecords(ids,pth,outPth)
-ids={'225','226','239','241'};
-ids={'239'};
-pth='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\behavior\pmeierTrialRecords\subjects';
+type='images';
+
+switch type
+    case 'crossModal'
+        ids={'225','226','239','241'};
+        pth='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\behavior\pmeierTrialRecords\subjects';
+    case 'images'
+        ids={'280','281','283'};
+        pth='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\ratrixAdmin\rack3\subjects';
+    otherwise
+        error('unrecognized type')
+end
 outPth='C:\Documents and Settings\rlab\Desktop\detailedRecords';
 
 subjectFiles={};

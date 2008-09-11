@@ -1,5 +1,6 @@
 function detailAnalysis
-ids={'225','226','239','241'};
+ids={'225','226','239','241'}; %cross modal
+ids={'280','281','283'}; %images 
 pth='C:\Documents and Settings\rlab\Desktop\detailedRecords';
 
 for i=1:length(ids)

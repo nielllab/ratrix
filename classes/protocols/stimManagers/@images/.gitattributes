@@ -3,3 +3,5 @@
 /calcStim.m -text
 /errorStim.m -text
 /stimMgrOKForTrialMgr.m -text
+/extractDetailFields.m -text
+/analysis.m -text

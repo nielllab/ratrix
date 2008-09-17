@@ -192,10 +192,18 @@ r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
 subjIDs={'283'};
 r = setProtocolPriya(r,subjIDs); %  run 9/11/08  PV
 
-%increase time out to 4000ms, rat 283
+%increase time out to 4000ms, rat 282
 cd('C:\Documents and Settings\rlab\Desktop\Ratrix\bootstrap')
 setupEnvironment
 dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
 r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
 subjIDs={'282'};
+
+%increase time out to 8000ms, rat 282
+cd('C:\Documents and Settings\rlab\Desktop\Ratrix\bootstrap')
+setupEnvironment
+dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
+r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
+subjIDs={'282'};
+r = setProtocolPriya(r,subjIDs); %  run 9/16/08  PV 3:22PM
 r = setProtocolPriya(r,subjIDs); %  run 9/16/08  PV 3:22PM

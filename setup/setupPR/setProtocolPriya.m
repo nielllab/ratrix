@@ -71,7 +71,7 @@ imlist=PriyaImageSets; % populate struct, each training step has a field for its
 % params for all the NAFC trial managers
 %NB LUT is set in CALCSTIM; image method uses ramp not linearized
 %NB error stim set in ERRORSTIM; image method set to BLACK screen
-msPenaltyNAFC          =4000;  %rat282 9.16.08
+msPenaltyNAFC          =8000;  %rat282 9.17.08
 requestRewardSizeULorMS=0;
 percentCorrectionTrials=.5;
 msResponseTimeLimit=0; %not used?

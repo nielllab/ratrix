@@ -181,6 +181,9 @@ for i=1:length(files)
             if exist('tr','var')
                 tr
             else
+                permanentStorePath
+                subjectSpecificPermStore
+                subjectID
                 'I don''t have a tr'
             end
         end

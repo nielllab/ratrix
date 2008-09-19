@@ -115,7 +115,7 @@ switch r.type
 %                     sendError(r,c,constants.errors.BAD_ARGS,'usage: S_CLEAR_TRIAL_RECORDS_CMD(void)');
 %                 end
             case constants.serverToStationCommands.S_REPLICATE_TRIAL_RECORDS_CMD
-                if length(args)==2 && iscell(args{1}) && isvector(args{1}) && ~isempty(args{1}) && isscalar(args{2}) && islogical(args{2})
+                if length(args)==2 && iscell(args{1}) && (isempty(args{1}) || isvector(args{1})) && isscalar(args{2}) && islogical(args{2})
                     for i=1:length(args{1})
                         if ~ischar(args{1}{i})
                             'not char'

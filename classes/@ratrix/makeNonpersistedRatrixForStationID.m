@@ -16,7 +16,10 @@ if isempty(subIDs)
     out=[];
 else
 out.assignments{bid}={{getStationByID(r,id),stationIDsRunning(r,{id})}, subIDs};
-out.permanentStorePath =r.permanentStorePath;
+if ~isempty(r.standAlonePath)
+    error('this standAlonePath should be empty b/c we should not be in standalone mode');
+end
+out.standAlonePath =r.standAlonePath;
 end
 % 
 % display(out.boxes)

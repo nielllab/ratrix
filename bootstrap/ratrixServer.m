@@ -36,7 +36,7 @@
 %
 % MATLAB:err_parse_cannot_run_m_file
 
-function ratrixServer
+function ratrixUITest
 setupEnvironment;
 addJavaComponents();
 dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
@@ -55,24 +55,113 @@ oneRowHeight=23;
 longTWidth=200;
 ddWidth=150;
 bWidth=75;
-miniSz=400;
+miniSz=360;
 
 started=[];
 heatUpSinceTStr='';
 buttonT='start';
 
-rackNum=getRackIDFromIP;
+% ===========================================================================================
+% These variables control who gets affected by the 'run' function - important!
+% rackNum=getRackIDFromIP;
+rackNum=1; %garbage variable now (gets reset later)
+server_name=getServerNameFromIP; %this needs to be determined by a function getServerNameFromIP (based on what this machine's IP is)
+if isempty(server_name)
+%     server_name='rack3-edf'; %only for testing
+    error('could not retreive server uin based on this machines IP');
+end
+
+
+% ===========================================================================================
 
 conn=dbConn;
 hts=getHeats(conn);
+% ===========================================================================================
+% SERVER SUBJECTS
+% let this loop get the subjects we care about
 for i=1:length(hts)
     heats{i,1}={hts{i}.name [hts{i}.red hts{i}.green hts{i}.blue]};
-    assignments=getAssignments(conn,rackNum,hts{i}.name);
+%     hts{i}.name
+    assignments=getAssignmentsForServer(conn,server_name,hts{i}.name);
+    coaches = getCoachAssignmentsForServer(conn,server_name,hts{i}.name);
     for j=1:length(assignments)
-        stn=getStation(conn,rackNum,assignments{j}.station_id);
-        heats{i,2}{j}={assignments{j}.subject_id {[stn.row stn.col] stn.mac} assignments{j}.owner assignments{j}.experiment};
+        stn=getStation(conn,assignments{j}.rack_id,assignments{j}.station_id);
+        heats{i,2}{j}={assignments{j}.subject_id ...
+            {[stn.row stn.col] stn.mac stn.rack_id} assignments{j}.owner assignments{j}.experiment coaches{j}.coach};
     end
 end
+% ===========================================================================================
+% % loop again through all 3 racks to get greyed-out subjects
+
+% initialize others
+other_assignments={};
+other_heats={};
+
+% ==========================================================================================
+% INCLUDE OTHER SUBJECTS FROM ALL RACKS
+
+% get all server_uins from db that are on 
+% uins = cell2mat(getAllServerUINs(conn));
+% uins = find(uins~=server_uin); % all OTHER servers (not including THIS one)
+% 
+% for k=1:length(uins)
+%     % for each server, retreive assignments and heats
+%     for i=1:length(hts)
+%         tempheats{i,1}={hts{i}.name [hts{i}.red hts{i}.green hts{i}.blue]};
+%         tempassignments=getAssignmentsForServer(conn,uins(k),hts{i}.name);
+%         for j=1:length(tempassignments)
+%             stn=getStation(conn,tempassignments{j}.rack_id,tempassignments{j}.station_id);
+%             tempheats{i,2}{j}={tempassignments{j}.subject_id {[stn.row stn.col] stn.mac stn.rack_id} tempassignments{j}.owner tempassignments{j}.experiment};
+%         end
+%     end
+%     
+%     % vertcat the heats and assignments for this rack
+%     other_assignments = vertcat(other_assignments, tempassignments);
+%     if size(heats,2) == 2 % if we have assignments for this physical rack, then cat them
+%         other_heats = vertcat(other_heats, tempheats); % this is what we want
+%     end
+%     
+% end
+
+% ==========================================================================================
+% ONLY INCLUDE OTHER SUBJECTS FROM RACKS BEING USED BY CURRENT SERVER
+% get all assignments on any rack being used for heats
+rrs = getRacksAndRoomsFromServerName(conn,server_name);
+racks_used = zeros(1, size(rrs,1));
+rooms_used = cell(1, size(rrs,1));
+for i=1:size(rrs,1)
+    racks_used(i) = rrs{i}.rackID; % get racks used
+    rooms_used{i} = rrs{i}.room; % get rooms used
+end
+% racks_used = unique(racks_used)
+% rooms_used = unique(rooms_used)
+% racks_used
+% rooms_used
+
+% for each of these racks, get subjects that do not belong to this server
+% for k=1:length(racks_used)
+%     for i=1:length(hts)
+%         tempheats{i,1}={hts{i}.name [hts{i}.red hts{i}.green hts{i}.blue]};
+%         tempassignments=getAssignmentsNotOnServer(conn,racks_used(k), hts{i}.name, server_uin);
+%         for j=1:length(tempassignments)
+%             stn=getStation(conn,tempassignments{j}.rack_id,tempassignments{j}.station_id);
+%             tempheats{i,2}{j}={tempassignments{j}.subject_id {[stn.row stn.col] stn.mac stn.rack_id} tempassignments{j}.owner tempassignments{j}.experiment};
+%         end
+%     end
+%     
+%     % vertcat the heats and assignments for this rack
+%     other_assignments = vertcat(other_assignments, tempassignments);
+%     if size(tempheats,2) == 2 % if we have assignments for this physical rack, then cat them
+%         other_heats = vertcat(other_heats, tempheats); % this is what we want
+%     end
+%     
+% end
+
+% ==========================================================================================
+    
+% other_heats
+% size(other_heats)
+        
 closeConn(conn);
 
 subjects={};
@@ -84,8 +173,14 @@ end
 doDelete=false;
 running=false;
 
+roomBorderWidth = 25;
 fWidth=margin+ddWidth+margin+longTWidth+margin+bWidth+margin;
-fHeight=margin+oneRowHeight+margin+miniSz+margin;
+fWidth2=margin+margin+margin+margin+miniSz*length(racks_used)+roomBorderWidth*2*length(unique(rooms_used));
+
+fWidth=max(fWidth,fWidth2);
+
+fHeight=margin+oneRowHeight+margin+miniSz+margin+roomBorderWidth;
+% fHeight=fHeight*2;
 f = figure('Visible','off','MenuBar','none','Name',sprintf('ratrix control: rack %d',rackNum),'NumberTitle','off','Resize','off','CloseRequestFcn',@cleanup,'Units','pixels','Position',[50 50 fWidth fHeight]);
     function cleanup(src,evt)
         doDelete=true;
@@ -127,7 +222,7 @@ f = figure('Visible','off','MenuBar','none','Name',sprintf('ratrix control: rack
 
 swapM = uicontrol(f,'Style','popupmenu',...
     'String',heatStrs,...
-    'Value',1,'Units','pixels','Position',[margin 2*margin+miniSz ddWidth oneRowHeight],'Callback',@swapC);
+    'Value',1,'Units','pixels','Position',[margin 2*margin+miniSz+2*roomBorderWidth ddWidth oneRowHeight],'Callback',@swapC);
     function swapC(source,eventdata)
         setHeat;
     end
@@ -135,13 +230,35 @@ swapM = uicontrol(f,'Style','popupmenu',...
     function setHeat
         try
             heat=heatStrs{get(swapM,'Value')};
+            
+            % ===========================================================
+            % SERVER SUBJECTS
             for i=1:size(heats,1)
                 if strcmp(heats{i,1}{1},heat)
-                    subjects=heats{i,2};
+                    subjects=heats{i,2}; % server subjects
+                    % add coach to each subject cell array
+                    
                     heatCol=heats{i,1}{2};
                 end
             end
-            makeMini(subjects,rackNum,miniSz,ha,heatCol);
+            % ===========================================================
+            % OTHER SUBJECTS
+%             size(other_heats,1)
+%             other_heats
+            all_other_subjects = {};
+            for i=1:size(other_heats,1)
+                if strcmp(other_heats{i,1}{1},heat) && size(other_heats, 2) > 1
+                    other_subjects=other_heats{i,2}; % other subjects
+                    all_other_subjects = horzcat(all_other_subjects, other_subjects);
+                    heatCol=other_heats{i,1}{2};
+                end
+            end            
+            % ===========================================================
+%             other_subjects
+%             size(other_subjects)
+%             all_other_subjects
+%             size(all_other_subjects)
+            makeMini(subjects,all_other_subjects,racks_used,rooms_used,miniSz,f,heatCol,roomBorderWidth);
         catch ex
             ple(ex)
             y=errordlg(['call erik or philip before closing this box.  quitting due to error: ' ex.message],'ratrix error','modal')
@@ -179,8 +296,20 @@ cycleB=uicontrol(f,'Style','togglebutton','String',buttonT,'Units','pixels','Pos
         [r rx sys]=stopServer(r,rx,servePump,sys,er,subjects);
         rp=getRatrixPath;
         rp=fullfile(rp,'analysis','eflister');
-        cmdStr=sprintf('matlab -automation -r "cd(''%s'');setupEnvironment;cd(''%s'');compileTrialRecords(%d);quit" &',fullfile(getRatrixPath,'bootstrap'),rp,rackNum);
+        
+        % ==============================================================================================================
+        % FIX THIS PART TO ONLY COMPILE SUBJECTS OWNED BY THIS SERVER
+        % we need to compile records for every rack used here
+        cmdStr=sprintf('matlab -automation -r "cd(''%s'');setupEnvironment;cd(''%s'');compileTrialRecords(%d);quit" &',fullfile(getRatrixPath,'bootstrap'),rp,server_name);
         system(cmdStr); %testing only
+%         for i=1:length(racks_used)
+%             rackNum = racks_used(i);
+%             cmdStr=sprintf('matlab -automation -r "cd(''%s'');setupEnvironment;cd(''%s'');compileTrialRecords(%d);quit" &',fullfile(getRatrixPath,'bootstrap'),rp,rackNum);
+%             system(cmdStr); %testing only
+%         end
+                    
+        % END EDITS
+        % ==============================================================================================================
 
         doClears();
         if er
@@ -190,72 +319,272 @@ cycleB=uicontrol(f,'Style','togglebutton','String',buttonT,'Units','pixels','Pos
 
 align([swapM heatUpSinceT cycleB],'Fixed',margin,'Middle');
 
-ha = axes('Parent',f,'Visible','off','Units','pixels','Position',[round((fWidth-miniSz)/2),margin,miniSz,miniSz]);
-axis(ha,'ij');
-axis(ha,'equal')
+% ha = axes('Parent',f,'Visible','off','Units','pixels','Position',[round((fWidth-miniSz)/2),margin,miniSz,miniSz]);
+% ha = axes('Parent',f,'Visible','on','Units','pixels','Position', ...
+%     [margin,margin,miniSz*length(racks_used)+roomBorderWidth*length(unique(rooms_used)),miniSz+roomBorderWidth]);
+% %     [margin,margin,miniSz*length(racks_used)+roomBorderWidth*length(unique(rooms_used)),miniSz+roomBorderWidth]);
+% axis(ha,'ij');
+% axis(ha,'equal')
 
 setHeat;
 set(f,'Visible','on')
 updateUI;
 end
 
-function makeMini(subjects,rackNum,miniSz,ha,heatCol)
+% End ratrixUITest
+% ===========================================================================================
+
+% Helper functions
+
+function makeMini(subjects,other_subjects,racks_used,rooms_used,miniSz,f,heatCol,roomBorderWidth)
+
+% ===========================================================================================
+% this needs to be for all racks
+% Draw grey background in for each cell (all racks)
+
+
+
 conn=dbConn;
-stationInfo=getStationsOnRack(conn,rackNum);
+% get rackIDs
+% rackIDs = cell2mat(getAllRackIDs(conn));
+
+% for each room, do this loop independently
+% for uniqInd=1:1
+for uniqInd=1:length(unique(rooms_used)) % MAIN LOOP PER ROOM
+    
+    racks_in_this_room = [];
+    all_stationInfo = {};
+    
+    % loop through all racks in this room
+    for roomInd=1:length(rooms_used)
+        if strcmp(rooms_used{roomInd}, rooms_used{uniqInd})
+            rackNum=racks_used(roomInd);
+            racks_in_this_room = horzcat(racks_in_this_room, rackNum);
+            stationInfo=getStationsOnRack(conn,rackNum);
+            all_stationInfo = vertcat(all_stationInfo, stationInfo);
+        end
+    end
+    % END LOOP
+
+    theseStations=[];
+    stationNames={};
+    for i=1:length(all_stationInfo)
+        theseStations(end+1,:)=[all_stationInfo{i}.row all_stationInfo{i}.col];
+        stationNames{end+1}=[num2str(all_stationInfo{i}.rack_id) all_stationInfo{i}.station_id];
+    end
+
+    % all_stationInfo
+    % all_stationInfo{1,1}
+%     theseStations
+%     stationNames
+
+    numRows=max(theseStations(:,1));
+    numCols=max(theseStations(:,2))*length(racks_in_this_room);
+
+    rackPix=zeros(miniSz,miniSz,3);
+    columnBoundaries=floor(linspace(1,miniSz*length(racks_in_this_room),numCols+1)); % 3 racks
+    rowBoundaries=floor(linspace(1,miniSz,numRows+1));
+
+    % boundaries between racks
+    % rackBoundaries = floor(linspace(1,miniSz*length(racks_used),length(racks_used)+1));
+    % rackBoundaries = rackBoundaries(2:end-1)
+    % rackBorderColor = 1;
+    % given these rack boundaries, modify columnBoundaries accordingly
+    % for ind=1:length(rackBoundaries)
+    %     for innerind=1:length(columnBoundaries)
+    %         if columnBoundaries(innerind) >= rackBoundaries(ind)
+    %             columnBoundaries(innerind) = columnBoundaries(innerind) + 10;
+    %         end
+    %     end
+    % end
+
+    % columnBoundaries
+
+
+    borderColor=1;
+    col=.5*ones(1,3);
+
+    rackPix(:,columnBoundaries,:)=borderColor;
+
+    passedCounter = 0;
+    prevrow = 0;
+    prevcol = 0;
+    % for each station
+    for j=1:size(theseStations,1)
+        row=theseStations(j,1);
+        if (row < prevrow) || (row==prevrow && column<prevcol)
+            passedCounter = passedCounter+1;
+        end
+        column=theseStations(j,2);
+        prevrow = row;
+        prevcol = column;
+        column = column+ 3*passedCounter; % have to do this moving after setting prevcol
+
+
+        rows=(rowBoundaries(row)+1):(rowBoundaries(row+1)-1);
+        columns=(columnBoundaries(column)+1):(columnBoundaries(column+1)-1);
+        rackPix(rows,columns,:)=repmat(reshape(col,[1 1 3]),[length(rows) length(columns) 1]);
+    end
+
+    size(rackPix)
+    
+    % draw left border
+    ha = axes('Parent',f,'Visible','off','Units','pixels','Position', ...
+        [5+(roomBorderWidth*2+miniSz)*(uniqInd-1), 5, roomBorderWidth,miniSz+roomBorderWidth]);
+    axis(ha,'ij');
+    axis(ha,'equal')
+    borderPix = zeros(roomBorderWidth+miniSz,roomBorderWidth,3);
+    borderPix(:,:,:) = 0.80;
+    borderPix(:,end-10:end,:) = 0;
+    image('Parent',ha,'CData',borderPix);
+
+    newPosition = get(ha, 'Position');
+    % draw each station in this room
+    ha = axes('Parent',f,'Visible','off','Units','pixels','Position', ...
+        [newPosition(1)+roomBorderWidth, newPosition(2), miniSz*length(racks_in_this_room),miniSz]);
+    axis(ha,'ij');
+    axis(ha,'equal')
+    image('Parent',ha,'CData',rackPix);
+
+    rowCenters=rowBoundaries(1:end-1)+diff(rowBoundaries)/2;
+    colCenters=columnBoundaries(1:end-1)+diff(columnBoundaries)/2;
+    margin=5;
+    
+
+%     
+%     % reset ha
+%     ha = axes('Parent',f,'Visible','on','Units','pixels','Position', ...
+%         [5+miniSz*(uniqInd-1), 5, miniSz,miniSz]);
+%     axis(ha,'ij');
+%     axis(ha,'equal')
+
+
+
+
+    % ===========================================================================================
+    % SERVER SUBJECTS
+    % change from all subjects that belong to this server to all subjects that are in the current room on this server
+%     subjects
+%     racks_in_this_room
+    
+    % write subject, owner, and experiment text
+    for i=1:length(subjects)
+        
+        loc=subjects{i}{2}{1};
+        rack=subjects{i}{2}{3};
+        if find(racks_in_this_room==rack)
+            row = loc(1);
+            col = loc(2);
+        
+%         % find right place to put this subject
+%         loc=subjects{i}{2}{1};
+%         rack=subjects{i}{2}{3};
+            racks_on_ui=find(racks_in_this_room==rack);
+            col = col + 3*(racks_on_ui-1); % move the subject over to the correct rack
+
+            name=subjects{i}{1};
+            name(name=='_')=' ';
+            owner=subjects{i}{3};
+            exp=subjects{i}{4};
+            coach=subjects{i}{5};
+            %note axis ij, so row/col flipped!
+            fontsize=ceil(.775*(mean(diff(columnBoundaries)))/length(name));
+            text('Parent',ha,'Position',[colCenters(col) rowCenters(row)-margin ],'String',name,'Color',heatCol,'FontSize',fontsize,'FontWeight','bold','VerticalAlignment','middle','HorizontalAlignment','center');
+            text('Parent',ha,'Position',[columnBoundaries(col)+margin rowBoundaries(row+1) ],'String',sprintf('owner: %s\nexp: %s\ncoach: %s',owner,exp,coach),'Color',[0 0 0],'FontSize',8,'FontWeight','normal','VerticalAlignment','bottom','HorizontalAlignment','left');
+        end
+        
+    end
+    % ===========================================================================================
+
+    % ===========================================================================================
+    % OTHER SUBJECTS
+    % write subject, owner, and experiment text IN GREY
+    % for i=1:length(other_subjects)
+    %     % find right place to put this subject
+    %     loc=other_subjects{i}{2}{1};
+    %     rack=other_subjects{i}{2}{3};
+    %     racks_on_ui=find(racks_used==rack);
+    %     row = loc(1);
+    %     col = loc(2);
+    %     col = col + 3*(racks_on_ui-1); % move the subject over to the correct rack
+    %     
+    %     
+    %     name=other_subjects{i}{1};
+    %     name(name=='_')=' ';
+    %     owner=other_subjects{i}{3};
+    %     exp=other_subjects{i}{4};
+    %     %note axis ij, so row/col flipped!
+    %     fontsize=ceil(.875*(mean(diff(columnBoundaries)))/length(name));
+    %     text('Parent',ha,'Position',[colCenters(col) rowCenters(row) ],'String',name,'Color',[0.75 0.75 0.75],'FontSize',fontsize,'FontWeight','bold','VerticalAlignment','middle','HorizontalAlignment','center');
+    %     text('Parent',ha,'Position',[columnBoundaries(col)+margin rowBoundaries(row+1) ],'String',sprintf('owner: %s\nexp: %s',owner,exp),'Color',[0.75 0.75 0.75],'FontSize',8,'FontWeight','normal','VerticalAlignment','bottom','HorizontalAlignment','left');
+    % end
+
+    % ===========================================================================================
+    % this is for all 3 racks
+    % write stationName
+    prevrow = 0;
+    prevcol=0;
+    passedCounter = 0;
+    for i=1:length(stationNames)
+        virtual_col = theseStations(i,2);
+        virtual_row = theseStations(i,1);
+        if (virtual_row < prevrow) || (virtual_row==prevrow && virtual_col<prevcol)
+            passedCounter = passedCounter+1;
+        end
+        prevrow = virtual_row;
+        prevcol = virtual_col;
+
+        actual_row = virtual_row;
+        actual_col = virtual_col + 3*passedCounter; % have to do the col moving after setting prevcol
+
+    %     text('Parent',ha,'Position',[columnBoundaries(theseStations(i,2))+margin rowBoundaries(theseStations(i,1)) ],'String',[stationNames{i}],'Color',[0 0 0],'FontSize',30,'FontWeight','bold','VerticalAlignment','top','HorizontalAlignment','left');
+
+        text('Parent',ha,'Position',[columnBoundaries(actual_col)+ ...
+            margin rowBoundaries(actual_row) ], ...
+            'String',[stationNames{i}],'Color',[0 0 0],'FontSize',25,'FontWeight','bold','VerticalAlignment','top','HorizontalAlignment','left');
+
+
+    end
+    
+    
+    % ===========================================================================================
+    % now draw room border
+    % horizontal (top)
+    newPosition = get(ha, 'Position');
+    ha = axes('Visible','off','Units','pixels','Position', ...
+        [newPosition(1), newPosition(2)+miniSz, newPosition(3), roomBorderWidth]);
+    axis(ha,'ij');
+    axis(ha,'equal')
+    
+    borderPix=zeros(roomBorderWidth, miniSz*length(racks_in_this_room), 3);
+%     borderPix(1:10,:,:)=0.80;
+%     size(borderPix)
+    image('Parent',ha,'CData',borderPix);
+    text('Parent',ha,'Position',[newPosition(3)/2, 0],'String',sprintf('Room: %s',rooms_used{uniqInd}),'Color',[1 1 1], ...
+        'FontSize',15,'FontWeight','bold','VerticalAlignment','top','HorizontalAlignment','center');
+    
+    % vertical
+    ha = axes('Visible','off','Units','pixels','Position', ...
+        [newPosition(1)+miniSz*length(racks_in_this_room), newPosition(2), roomBorderWidth, newPosition(4)+roomBorderWidth]);
+    axis(ha,'ij');
+    axis(ha,'equal')
+    
+    borderPix=zeros(miniSz+roomBorderWidth, roomBorderWidth, 3);
+    borderPix(:,:,:) = 0.80;
+    borderPix(:,1:10,:) = 0;
+%     if uniqInd ~= length(unique(rooms_used))
+%         borderPix(11:end,end-10:end,:) = 0;
+%     end
+%     size(borderPix)
+    image('Parent',ha,'CData',borderPix);
+
+
+% ===========================================================================================
+end % end unique room loop
+
 closeConn(conn);
 
-theseStations=[];
-stationNames={};
-for i=1:length(stationInfo)
-    theseStations(end+1,:)=[stationInfo{i}.row stationInfo{i}.col];
-    stationNames{end+1}=[num2str(stationInfo{i}.rack_id) stationInfo{i}.station_id];
-end
-
-numRows=max(theseStations(:,1));
-numCols=max(theseStations(:,2));
-
-rackPix=zeros(miniSz,miniSz,3);
-columnBoundaries=floor(linspace(1,miniSz,numCols+1));
-rowBoundaries=floor(linspace(1,miniSz,numRows+1));
-
-borderColor=1;
-col=.5*ones(1,3);
-
-rackPix(:,columnBoundaries,:)=borderColor;
-rackPix(rowBoundaries,:,:)=borderColor;
-
-for j=1:size(theseStations,1)
-    row=theseStations(j,1);
-    column=theseStations(j,2);
-
-    rows=(rowBoundaries(row)+1):(rowBoundaries(row+1)-1);
-    columns=(columnBoundaries(column)+1):(columnBoundaries(column+1)-1);
-
-    rackPix(rows,columns,:)=repmat(reshape(col,[1 1 3]),[length(rows) length(columns) 1]);
-end
-
-image('Parent',ha,'CData',rackPix);
-
-rowCenters=rowBoundaries(1:end-1)+diff(rowBoundaries)/2;
-colCenters=columnBoundaries(1:end-1)+diff(columnBoundaries)/2;
-margin=5;
-
-for i=1:length(subjects)
-    loc=subjects{i}{2}{1};
-    name=subjects{i}{1};
-    name(name=='_')=' ';
-    owner=subjects{i}{3};
-    exp=subjects{i}{4};
-    %note axis ij, so row/col flipped!
-    fontsize=ceil(.875*(mean(diff(columnBoundaries)))/length(name));
-    text('Parent',ha,'Position',[colCenters(loc(2)) rowCenters(loc(1)) ],'String',name,'Color',heatCol,'FontSize',fontsize,'FontWeight','bold','VerticalAlignment','middle','HorizontalAlignment','center');
-    text('Parent',ha,'Position',[columnBoundaries(loc(2))+margin rowBoundaries(loc(1)+1) ],'String',sprintf('owner: %s\nexp: %s',owner,exp),'Color',[0 0 0],'FontSize',10,'FontWeight','normal','VerticalAlignment','bottom','HorizontalAlignment','left');
-end
-
-for i=1:length(stationNames)
-    text('Parent',ha,'Position',[columnBoundaries(theseStations(i,2))+margin rowBoundaries(theseStations(i,1)) ],'String',[stationNames{i}],'Color',[0 0 0],'FontSize',30,'FontWeight','bold','VerticalAlignment','top','HorizontalAlignment','left');
-end
-end
+end % end function
 
 function [r sys rx]=startServer(servePump,dataPath)
 if servePump
@@ -358,7 +687,7 @@ try
                 %                     tossClient(r,connectedClients{i});
                 %                 else
 
-                quit=replicateClientTrialRecords(r,connectedClients{i},{getPermanentStorePath(rx)});
+                quit=replicateClientTrialRecords(r,connectedClients{i},[]);
 
                 z=[];
                 if ~quit

@@ -32,17 +32,32 @@ else
 end
 
 remoteTrialRecords=[];
-subjPermStorePath = getPermanentStorePath(r);
+% 9/17/08 - fixed to do subject-specific trialRecords
+% ========================
+% subjPermStorePath = getPermanentStorePath(r);
+
+subjectSpecificPermStore = false;
+subjPermStorePath = getStandAlonePath(r);
+
+if isempty(subjPermStorePath)
+    conn = dbConn();
+    subjPermStorePath = getPermanentStorePathBySubject(conn, sID);
+    closeConn(dbConn());
+    subjPermStorePath = subjPermStorePath{1};
+    subjectSpecificPermStore = true;
+end
+% ========================
 
 if numTrials>0 
     if numTrials-length(localTrialRecords) > 0
         remoteNumTrials = numTrials-length(localTrialRecords);
         % Get only the remaining N trials from the remote store
-        remoteTrialRecords=getTrialRecordsFromPermanentStore(subjPermStorePath,sID,{filterType,int32(remoteNumTrials)}, trustOsRecordFiles);
+        remoteTrialRecords=getTrialRecordsFromPermanentStore(subjPermStorePath,sID,...
+            {filterType,int32(remoteNumTrials)}, trustOsRecordFiles,subjectSpecificPermStore);
     end    
 else
     % Get all of the remote records
-    remoteTrialRecords=getTrialRecordsFromPermanentStore(subjPermStorePath,sID,filter, trustOsRecordFiles);
+    remoteTrialRecords=getTrialRecordsFromPermanentStore(subjPermStorePath,sID,filter, trustOsRecordFiles,subjectSpecificPermStore);
 end
 % Get from permanent store
 localIndex = length(remoteTrialRecords)+1;

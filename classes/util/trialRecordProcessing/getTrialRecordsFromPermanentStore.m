@@ -1,4 +1,4 @@
-function trialRecords = getTrialRecordsFromPermanentStore(permanentStorePath, subjectID, filter, trustOsRecordFiles)
+function trialRecords = getTrialRecordsFromPermanentStore(permanentStorePath, subjectID, filter, trustOsRecordFiles, subjectSpecificPermStore)
 % r,sID, {filterType filterParameters}
 % {'dateRange',<dateFromInclusive dateToInclusive>} -- valid input for date num and length==2
 % {'lastNTrials', numTrials}
@@ -11,9 +11,13 @@ if isempty(permanentStorePath)
 end
 
 % Make the directory all the way down to the subject
-subjPath = fullfile(permanentStorePath,subjectID);
+if subjectSpecificPermStore
+    subjPath = permanentStorePath;
+else
+    subjPath = fullfile(permanentStorePath,subjectID);
+end
 if ~isdir(subjPath) %not a problem if this fails due to windows filesharing/networking bug, cuz mkdir just noops with warning if dir exists
-    [succ msg msgid]=mkdir(fullfile(permanentStorePath,subjectID));
+    [succ msg msgid]=mkdir(fullfile(permanentStorePath,subjectID)); %9/17/08 - dont need to depend on subjectSpecificPermStore flag cuz it wont happen in that case
     if ~succ
         msg
         msgid
@@ -40,7 +44,11 @@ if ~trustOsRecordFiles
 else
     %getTrialRecordFiles from the Os... less reliable if server is taxed...
     %but okay on local computer and has less dependency on the oracle db
-    fullFileNames=getTrialRecordFiles(fullfile(permanentStorePath,subjectID));
+    if subjectSpecificPermStore
+        fullFileNames=getTrialRecordFiles(permanentStorePath);
+    else
+        fullFileNames=getTrialRecordFiles(fullfile(permanentStorePath,subjectID));
+    end
     if ~isempty(fullFileNames)
         for i=1:length(fullFileNames)
             [filePath fileName fileExt]=fileparts(fullFileNames{i});

@@ -2,6 +2,10 @@ function replicateTrialRecords(paths,deleteOnSuccess, recordInOracle)
 % Copy the trial records stored in the ratrixData directory to the
 % set of paths given in paths.
 
+% erase or keep?
+input_paths = paths;
+% ======
+
 subDirs=struct([]);
 boxDirs=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData','Boxes');
 boxDirsToCheck=dir(boxDirs);
@@ -63,8 +67,31 @@ for f=1:length(subDirs)
         newFileName=[fn '_' num2str(trialNums(1)) '-' num2str(trialNums(end)) '_' ...
             datestr(tr.trialRecords(1).date,30) '-' datestr(tr.trialRecords(end).date,30) fe];
 
+        % =======================================================================
+        % 9/16/08 - change here to get paths from oracle db (specific for each subject)
+        % - if oracle has a path for this subject that is not null, use it; otherwise use ratrix default path
+        conn = dbConn();
+        gotPathFromOracle = 0;
+        if isempty (input_paths) % if path not provided as input, get from oracle, otherwise use provided (for standAloneRun)
+            possible_path = getPermanentStorePathBySubject(conn, subjectName);
+            if ~isempty(possible_path{1})
+                paths = possible_path;
+                gotPathFromOracle = 1; %used to set paths appropriately at the last step (move files to perm store)
+            end
+        end
+        closeConn(conn);
+        % =======================================================================
+        
         for j=1:length(paths)
-            [success(j) message messageID]=mkdir(fullfile(paths{j},subjectName));
+            % edited to switch on whether or not we are using subject-specific paths
+            if gotPathFromOracle
+                [success(j) message messageID]=mkdir(paths{j});
+                sprintf('made directory %s', paths{j})
+            else
+                [success(j) message messageID]=mkdir(fullfile(paths{j},subjectName));
+                sprintf('made directory %s', fullfile(paths{j},subjectName))
+            end
+            
             if success(j) %ignore warning if directory exists
                 d=dir(fullfile(paths{j},subjectName)); %not safe cuz of windows networking/filesharing bug -- but will just result in overwriting existing trialRecord file in case of name collision, should never happen -- ultimately just compare against filenames in oracle
                 for i=1:length(d)
@@ -86,6 +113,12 @@ for f=1:length(subDirs)
                     end
                 end
                 if success(j)
+                    
+                    % if didn't get paths from oracle, then append subjectName to paths{j}
+                    if ~gotPathFromOracle
+                        paths{j} = fullfile(paths{j},subjectName);
+                    end
+                    
                     if recordInOracle
 
                         % Attempt to do both the copy of the file and the db add
@@ -96,7 +129,7 @@ for f=1:length(subDirs)
                             % Only if the subject is not a test rat should we
                             % add the file to the permanent store
                             if ~s.test
-                                successC = copyAndAddTrialRecordFile(conn,subjectName,newFileName,fullfile(filePath,fileName),fullfile(paths{j},subjectName,newFileName));
+                                successC = copyAndAddTrialRecordFile(conn,subjectName,newFileName,fullfile(filePath,fileName),fullfile(paths{j},newFileName));
                             else
                                 % Don't add the trial records for this test subject
                                 successC = true;
@@ -108,7 +141,12 @@ for f=1:length(subDirs)
                         end
                     else
                         %only do the copy; don't do the db add 
-                        [successC messageC messageIDC]=copyfile(fullfile(filePath,fileName),fullfile(paths{j},subjectName,newFileName));
+%                         filePath
+%                         fileName
+%                         paths{j}
+%                         subjectName
+%                         newFileName
+                        [successC messageC messageIDC]=copyfile(fullfile(filePath,fileName),fullfile(paths{j},newFileName));
                         if ~successC
                             messageC
                             messageIDC

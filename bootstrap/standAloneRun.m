@@ -55,7 +55,7 @@ else
         rx=createRatrixWithDefaultStations(machines,dataPath,'localTimed',false);
         permStorePath=fullfile(dataPath,'PermanentTrialRecordStore');
         mkdir(permStorePath);
-        rx=setPermanentStorePath(rx,permStorePath);
+        rx=setStandAlonePath(rx,permStorePath);
         'created new ratrix'
     end
 end
@@ -125,7 +125,7 @@ end
 try
     deleteOnSuccess = true;
 
-    replicateTrialRecords({getPermanentStorePath(rx)},deleteOnSuccess, recordInOracle);
+    replicateTrialRecords({getStandAlonePath(rx)},deleteOnSuccess, recordInOracle);
 
     s=getSubjectFromID(rx,subjectID);
 
@@ -137,11 +137,11 @@ try
     rx=doTrials(st(1),rx,0,[],~recordInOracle); %0 means keep running trials til something stops you (quit, error, etc)
     [rx ids] = emptyAllBoxes(rx,'done running trials in standAloneRun',auth);
 
-    replicateTrialRecords({getPermanentStorePath(rx)},deleteOnSuccess, recordInOracle);
+    replicateTrialRecords({getStandAlonePath(rx)},deleteOnSuccess, recordInOracle);
 
-    compilePath=fullfile(fileparts(getPermanentStorePath(rx)),'CompiledTrialRecords');
+    compilePath=fullfile(fileparts(getStandAlonePath(rx)),'CompiledTrialRecords');
     mkdir(compilePath);
-    compileTrialRecords([],[],[],[],getPermanentStorePath(rx),compilePath);
+    compileTrialRecords([],[],[],{subjectID},getStandAlonePath(rx),compilePath);
     subjectAnalysis(compilePath);
     cleanup;
 catch ex

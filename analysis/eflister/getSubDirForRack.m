@@ -1,6 +1,6 @@
 function out=getSubDirForRack(rackNum)
 
-
+error('should now call getSubDirForServer()')
 switch rackNum
     case 1 %male room 
         out='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\behavior\pmeierTrialRecords\subjects';

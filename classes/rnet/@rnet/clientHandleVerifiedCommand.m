@@ -132,10 +132,10 @@ switch cmd
         %         go clear all records
         %         sendAcknowledge(r,com);
     case constants.serverToStationCommands.S_REPLICATE_TRIAL_RECORDS_CMD
-        paths=args{1};
+%         paths=args{1};
         deleteOnSuccess=args{2};
         recordInOracle=1; %pmm -08/06/26
-        replicateTrialRecords(paths,deleteOnSuccess, recordInOracle);
+        replicateTrialRecords([],deleteOnSuccess, recordInOracle); %9/17/2008 - fli
         sendAcknowledge(r,com);
     case constants.serverToStationCommands.S_GET_RATRIX_BACKUPS_CMD
         %C_RECV_RATRIX_BACKUPS_CMD

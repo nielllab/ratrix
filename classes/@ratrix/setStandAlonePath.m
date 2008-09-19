@@ -1,8 +1,6 @@
-function r=setPermanentStorePath(r,path)
-error('deprecated - use subject specific permanent storage or setStandAlonePath if in standalone mode');
-
+function r=setStandAlonePath(r,path)
 if isdir(path) %can fail due to windows networking/filesharing bug, but unlikely at construction time
-    r.permanentStorePath = path;
+    r.standAlonePath = path;
     saveDB(r,0);  %alsoReplaceSubjectData = false
 else
     path

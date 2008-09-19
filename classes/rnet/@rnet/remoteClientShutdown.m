@@ -41,7 +41,7 @@ if ~quit
         end
         if ~quit
             if ~isempty(rx)
-                quit=replicateClientTrialRecords(r,c,{getPermanentStorePath(rx)});
+                quit=replicateClientTrialRecords(r,c,[]);
             end
 
             [quit com]=sendToClient(r,c,constants.priorities.IMMEDIATE_PRIORITY,constants.serverToStationCommands.S_SHUTDOWN_STATION_CMD,{});

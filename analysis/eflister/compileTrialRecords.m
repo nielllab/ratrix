@@ -1,4 +1,4 @@
-function compileTrialRecords(rackNum,fieldNames,recompile,subjectIDs,source,destination)
+function compileTrialRecords(server_name,fieldNames,recompile,subjectIDs,source,destination)
 %
 % example: automatic compiling (servers do this; humans don't unless the can confirm no-collisions possible) 
 % compileTrialRecords(rackNum)
@@ -14,22 +14,34 @@ function compileTrialRecords(rackNum,fieldNames,recompile,subjectIDs,source,dest
 %(then rapidly manually transfer files and svn update the servers compileTrialRecords)
 %compileTrialRecords(rackNum,[],1,[],getSubDirForRack(rackNum),'C:\Documents and Settings\rlab\Desktop\test')
 
-if ~exist('subjectIDs','var') || isempty(subjectIDs)
-    subjectIDs='all'; 
+
+% =============================
+% this field (subjectIDs) needs to be given now b/c this is retreived from ratrix object that we don't have access to here
+% if ~exist('subjectIDs','var') || isempty(subjectIDs)
+%     subjectIDs='all'; 
+% end
+% =============================
+
+if (~exist('server_name','var') || isempty(server_name)) && (~exist('subjectIDs','var') || isempty(subjectIDs))
+    error('we need a server_name to know which subjects to compile, or need a list of subjectIDs passed in')
 end
 
-if ~exist('source', 'var') || isempty(source)
-    subjectDirectory=getSubDirForRack(rackNum);
-else
-    subjectDirectory=source;    
-end
+% =============================
+% REMOVE THIS PART - superceded by subject-specific paths
+% if ~exist('source', 'var') || isempty(source)
+%     subjectDirectory=getSubDirForServer(server_name); % probably not used - overriden by subject-specific paths
+% else
+%     subjectDirectory=source;    
+% end
+% =============================
 
 if ~exist('destination', 'var') || isempty(destination)
-    compiledRecordsDirectory=getCompiledDirForRack(rackNum);
+    compiledRecordsDirectory=getCompiledDirForServer(server_name);
 else
     compiledRecordsDirectory=destination;    
 end
 
+% compiledRecordsDirectory
 
 if ~exist('recompile','var') || isempty(recompile)
     recompile = false;
@@ -118,29 +130,53 @@ storageMethod='vector'; %'structArray'
 subjectFiles={};
 ranges={};
 names={};
-d=dir(subjectDirectory); %unreliable if remote (this function doesn't want to rely on oracle, and it is low-impact to miss some subjects)
-d=d([d.isdir] & ~ismember({d.name},{'.','..'}));
 
-if strcmp(subjectIDs, 'all')
-    %use all of them
+% 
+% d=dir(subjectDirectory); %unreliable if remote (this function doesn't want to rely on oracle, and it is low-impact to miss some subjects)
+% d=d([d.isdir] & ~ismember({d.name},{'.','..'}));
+% 
+% if strcmp(subjectIDs, 'all')
+%     %use all of them
+%     else
+%     %usefull if you want to process one subject, not all of them
+%     which=ismember({d.name},subjectIDs)
+%     d=d(which)
+%     if any(~ismember(subjectIDs,{d.name}))
+%         subjectIDs
+%         {d.name}
+%         error('didn''t recognize all those subject names')
+%     end
+% end
+% 
+% for i=1:length(d)
+%         [subjectFiles{end+1} ranges{end+1}]=getTrialRecordFiles(fullfile(subjectDirectory,d(i).name)); %unreliable if remote
+%         names{end+1}=d(i).name;
+% end
+
+% REPLACE WITH SUBJECT-SPECIFIC
+% get subjectIDs based on the server_name - ignore this other crap
+conn = dbConn();
+if ~exist('subjectIDs','var') || isempty(subjectIDs) % if subjectIDs not given as input, retrieve from oracle
+    subjectIDs = getSubjectIDsFromServer(conn, server_name);
+end
+
+% now for each subject, retrieve the trialRecords
+for i=1:length(subjectIDs)
+    names{end+1} = subjectIDs{i}; % why this is repeated i dont know
+    % if we have standAlonePath, don't overwrite it!
+    if ~exist('source','var') || isempty(source)
+        store_path = getPermanentStorePathBySubject(conn, subjectIDs{i});
+        store_path = store_path{1}; % b/c this gets returned by the query as a 1x1 cell array holding the char array
     else
-    %usefull if you want to process one subject, not all of them
-    which=ismember({d.name},subjectIDs)
-    d=d(which)
-    if any(~ismember(subjectIDs,{d.name}))
-        subjectIDs
-        {d.name}
-        error('didn''t recognize all those subject names')
+        store_path = fullfile(source, subjectIDs{i});
+%         source
     end
-end
+    [subjectFiles{end+1} ranges{end+1}] = getTrialRecordFiles(store_path);
+end    
+closeConn(conn);
 
-for i=1:length(d)
-        [subjectFiles{end+1} ranges{end+1}]=getTrialRecordFiles(fullfile(subjectDirectory,d(i).name)); %unreliable if remote
-        names{end+1}=d(i).name;
-end
-
-
-
+% ====================================================================================================
+    
 for i=1:length(subjectFiles)
     d=dir(fullfile(compiledRecordsDirectory,[names{i} '.compiledTrialRecords.*.mat'])); %unreliable if remote
     compiledFile=[];

@@ -1,7 +1,7 @@
-function rrs=getRacksAndRoomsFromServerUIN(conn, server_uin)
+function rrs=getRacksAndRoomsFromServerName(conn, server_name)
 rrs = {};
 selectRackIDQuery = ...
-    sprintf('SELECT DISTINCT rack_id, room from RACKS, STATIONS where racks.uin=stations.rack_uin AND stations.server_uin=%d order by rack_id', server_uin); 
+    sprintf('SELECT DISTINCT rack_id, room from RACKS, STATIONS, RATRIXSERVERS where racks.uin=stations.rack_uin AND stations.server_uin=ratrixservers.uin AND ratrixservers.name=''%s'' order by rack_id', server_name); 
 
 results=query(conn,selectRackIDQuery);
 

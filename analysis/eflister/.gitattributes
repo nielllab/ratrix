@@ -12,3 +12,5 @@
 /makePerfBiasPlot.m -text
 /detailAnalysis.m -text
 /makeConfPlot.m -text
+/getCompiledDirForServer.m -text
+/getSubDirForServer.m -text

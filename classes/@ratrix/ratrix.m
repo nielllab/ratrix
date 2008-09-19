@@ -1,13 +1,13 @@
 function r=ratrix(varargin)
 % RATRIX  class constructor.
-% r = ratrix('path to database directory',replaceExistingDB,[permanentStorePath])
+% r = ratrix('path to database directory',replaceExistingDB,[standAlonePath])
 
 r.serverDataPath = ''; % The path of the serverData folder
 r.dbpath = ''; % Where the ratrix db.mat is stored locally
 r.subjects = {}; % List of subjects
 r.boxes = {};
 r.assignments = {}; %this will have an entry at i for each box id i, whose value is:
-r.permanentStorePath = ''; % Where to permanently store trial records
+r.standAlonePath = ''; % Where to permanently store trial records (ONLY FOR STANDALONE MODE)
 r.creationDate = ''; % The date the ratrix db was initially created
 % {{stationRecs} {subjectIDs}}
 %stationRecs is numStations by 2, col 1 is stations, col 2 is running
@@ -103,7 +103,7 @@ switch nargin
 
     case 3
          r = establishDB(r,varargin{1},varargin{2});
-         r = setPermanentStorePath(r,varargin{3});
+         r = setStandAlonePath(r,varargin{3});
         
     otherwise
         error('Wrong number of input arguments')

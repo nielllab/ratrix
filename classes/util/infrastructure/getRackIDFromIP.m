@@ -1,5 +1,5 @@
 function rackID=getRackIDFromIP
-
+error('should call getServerNameFromIP instead')
 rackID=[];
 if IsWin
     [a b]=dos('ipconfig');
@@ -42,6 +42,6 @@ if isempty(rackID)
     b
 
     %rackID=3; %testing only
-    %error('couldn''t find server by matching ip on this machine')
+    error('couldn''t find server by matching ip on this machine')
 
 end

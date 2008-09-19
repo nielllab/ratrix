@@ -82,7 +82,6 @@ infrastructure/writeSVNUpdateCommand.m -text
 infrastructure/readRFID.m -text
 matlaby/ple.m -text
 infrastructure/parallaxRead.m -text
-infrastructure/getServerUINFromIP.m -text
 matlaby/ensureEqualLengthVects.m -text
 matlaby/ensureScalar.m -text
 matlaby/verifyAllFieldsNCols.m -text
@@ -90,3 +89,4 @@ matlaby/ensureTypedVector.m -text
 matlaby/mergeStructs.m -text
 matlaby/colsFromAllFields.m -text
 trialRecordProcessing/checkNafcTargets.m -text
+infrastructure/getServerNameFromIP.m -text

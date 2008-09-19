@@ -48,3 +48,6 @@
 /viewStim.m -text
 /setPermanentStorePath.m -text
 /getBasicFacts.m -text
+/setStandAlonePath.m -text
+/updateRatrix.m -text
+/getStandAlonePath.m -text

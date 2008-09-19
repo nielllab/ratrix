@@ -1,6 +1,6 @@
-function serverUIN=getServerUINFromIP
+function serverName=getServerNameFromIP
 
-serverUIN=[];
+serverName=[];
 if IsWin
     [a b]=dos('ipconfig');
     if a==0
@@ -15,6 +15,7 @@ if IsWin
                 a = [];
                 a.server_uin = results{i,1};
                 a.address = results{i,2};
+                a.server_name = results{i,3};
                 servers{i} = a;
             end
         end
@@ -26,7 +27,7 @@ if IsWin
         for i=1:length(servers)
             toSearch = servers{i}.address
             if ~isempty(findstr(toSearch,b))
-                serverUIN = servers{i}.server_uin;
+                serverName = servers{i}.server_name;
             end
         end
         
@@ -61,10 +62,10 @@ else
     error('only works on windows')
 end
 
-if isempty(serverUIN)
+if isempty(serverName)
     b
 
     %rackID=3; %testing only
-    %error('couldn''t find server by matching ip on this machine')
+    error('couldn''t find server by matching ip on this machine')
 
 end

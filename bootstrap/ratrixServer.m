@@ -687,7 +687,7 @@ try
                 %                     tossClient(r,connectedClients{i});
                 %                 else
 
-                quit=replicateClientTrialRecords(r,connectedClients{i},[]);
+                quit=replicateClientTrialRecords(r,connectedClients{i},{});
 
                 z=[];
                 if ~quit

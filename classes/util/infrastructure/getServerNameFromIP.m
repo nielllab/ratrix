@@ -1,6 +1,7 @@
-function serverName=getServerNameFromIP
+function [serverName ip] = getServerNameFromIP
 
-serverName=[];
+serverName='';
+ip='';
 if IsWin
     [a b]=dos('ipconfig');
     if a==0
@@ -25,9 +26,10 @@ if IsWin
         closeConn(conn);
         
         for i=1:length(servers)
-            toSearch = servers{i}.address
+            toSearch = servers{i}.address;
             if ~isempty(findstr(toSearch,b))
                 serverName = servers{i}.server_name;
+                ip = toSearch;
             end
         end
         
@@ -66,6 +68,6 @@ if isempty(serverName)
     b
 
     %rackID=3; %testing only
-    error('couldn''t find server by matching ip on this machine')
+%     error('couldn''t find server by matching ip on this machine')
 
 end

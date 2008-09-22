@@ -16,14 +16,23 @@ elseif isMACaddress(mac) && isinteger(zone) && zone>0
             end
         end
 
-        if tf
-            r.serverRegister{size(r.serverRegister,1)+1,1}=c; %holding on to these might be what's keeping java from clearing
-            r.serverRegister{size(r.serverRegister,1),2}=mac;
-            r.serverRegister{size(r.serverRegister,1),3}=zone;
-            r.serverRegister{size(r.serverRegister,1),4}=[]; %reward waits
-            r.serverRegister{size(r.serverRegister,1),5}=[]; %reward durs
-        else
-            warning('no subject for that mac')
+        % 9/22/08 - changed to register clients regardless of tf
+%         if tf
+%             r.serverRegister{size(r.serverRegister,1)+1,1}=c; %holding on to these might be what's keeping java from clearing
+%             r.serverRegister{size(r.serverRegister,1),2}=mac;
+%             r.serverRegister{size(r.serverRegister,1),3}=zone;
+%             r.serverRegister{size(r.serverRegister,1),4}=[]; %reward waits
+%             r.serverRegister{size(r.serverRegister,1),5}=[]; %reward durs
+%         else
+%             warning('no subject for that mac')
+%         end
+        r.serverRegister{size(r.serverRegister,1)+1,1}=c; %holding on to these might be what's keeping java from clearing
+        r.serverRegister{size(r.serverRegister,1),2}=mac;
+        r.serverRegister{size(r.serverRegister,1),3}=zone;
+        r.serverRegister{size(r.serverRegister,1),4}=[]; %reward waits
+        r.serverRegister{size(r.serverRegister,1),5}=[]; %reward durs
+        if ~tf
+            warning('no subject for that mac, but registered anyways')
         end
 
     else

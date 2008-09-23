@@ -19,12 +19,15 @@ if ~all(ismember(subIDs,getSubjectIDs(r)))
 end
 
 
- rackNum=getRackIDFromIP;
+%  rackNum=getRackIDFromIP;
+% server_name = getServerNameFromIP;
+server_name = 'server-02-female-pmm-156';
  asgns=[];
  conn=dbConn;
  heats=getHeats(conn);
  for i=1:length(heats)
-     assignments=getAssignments(conn,rackNum,heats{i}.name);
+%      assignments=getAssignments(conn,rackNum,heats{i}.name);
+     assignments=getAssignmentsForServer(conn, server_name, heats{i}.name);
      for j=1:length(assignments)
          if isempty(asgns)
              asgns=assignments{j};

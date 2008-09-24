@@ -39,6 +39,7 @@
 function ratrixServer
 setupEnvironment;
 addJavaComponents();
+checkCurrentRevision; % 9/24/08 - check current code version
 dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
 
 diary off

@@ -90,3 +90,6 @@ matlaby/mergeStructs.m -text
 matlaby/colsFromAllFields.m -text
 trialRecordProcessing/checkNafcTargets.m -text
 infrastructure/getServerNameFromIP.m -text
+infrastructure/checkCurrentRevision.m -text
+infrastructure/getSVNPropertiesForPath.m -text
+infrastructure/checkSVNPath.m -text

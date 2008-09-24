@@ -34,6 +34,7 @@ try
         try
             clearJavaComponents();
             checkForUpdate;
+            checkCurrentRevision; % 9/24/08 - even if no code update, check that current version is okay
             addJavaComponents();  %        move to top of file. so that above dbConn
             % If r is already setup, just try and reconnect
             %             if exist('r','var') && ~isempty(r)

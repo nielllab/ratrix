@@ -1,5 +1,8 @@
 function [targetSVNurl revNum] =checkTargetRevision(args)
 
+targetSVNurl = '';
+revNum = [];
+
 if isempty(args)
     error('disallowing emtpy svn update command')
 end

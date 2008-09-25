@@ -286,7 +286,7 @@ cycleB=uicontrol(f,'Style','togglebutton','String',buttonT,'Units','pixels','Pos
     function run
         fixSystemTime;
         [r sys rx]=startServer(servePump,dataPath);
-
+        
         er=0;
         autoUpdateInterval=.3;
         while ~doDelete && running && ~quit
@@ -302,7 +302,7 @@ cycleB=uicontrol(f,'Style','togglebutton','String',buttonT,'Units','pixels','Pos
         % ==============================================================================================================
         % FIX THIS PART TO ONLY COMPILE SUBJECTS OWNED BY THIS SERVER
         % we need to compile records for every rack used here
-        cmdStr=sprintf('matlab -automation -r "cd(''%s'');setupEnvironment;cd(''%s'');compileTrialRecords(%d);quit" &',fullfile(getRatrixPath,'bootstrap'),rp,server_name);
+        cmdStr=sprintf('matlab -automation -r "cd(''%s'');setupEnvironment;cd(''%s'');compileTrialRecords(''%s'');quit" &',fullfile(getRatrixPath,'bootstrap'),rp,server_name);
         system(cmdStr); %testing only
 %         for i=1:length(racks_used)
 %             rackNum = racks_used(i);

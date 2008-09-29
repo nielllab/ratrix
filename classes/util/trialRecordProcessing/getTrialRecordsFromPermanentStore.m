@@ -159,7 +159,10 @@ for i=1:length(files)
     while ~completed
         nAttempts = nAttempts+1;
         try
-            tmpFile='C:\temp.mat';
+%             tmpFile='C:\temp.mat';
+            % 9/29/08 - changed to be cross-platform; use top-level ratrixData folder for temp.mat
+            tmpDataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
+            tmpFile = fullfile(tmpDataPath, 'temp.mat');
             [success message messageid]=copyfile(fullfile(subjPath,files(i).name),tmpFile);
             if ~success
                 message

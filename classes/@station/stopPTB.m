@@ -7,7 +7,7 @@ Priority(0);
 ShowCursor;
 
 
-Screen('Resolution',0,1920,1200,0,32)
+% Screen('Resolution',0,1920,1200,0,32) - 9/29/08 - THIS CRASHES WINDOWS-BASED MACHINES? - discuss
 % following not true on osx:
 % Psychtoolbox will automatically restore the systems display resolution to the
 % system settings made via the display control panel as soon as either your script

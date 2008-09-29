@@ -1,20 +1,26 @@
 function [ind height width hz]=chooseLargestResForHzsDepthRatio(resolutions,hzs,depth,maxWidth,maxHeight)
 
 ratio=maxWidth/maxHeight;
+hzs=union(hzs,0); %have to add zero for osx, cuz screen('resolutions') returns all hz as 0
 hzs=sort(hzs,'descend');
 
 for i=1:length(hzs)
-    hz=hzs(i);    
+    hz=hzs(i);
     inds=find([[resolutions.hz]==hz & [resolutions.pixelSize]==depth] & ([resolutions.width]./[resolutions.height])==ratio & [resolutions.width]<=maxWidth & [resolutions.height]<=maxHeight);
     pix=[resolutions(inds).height] .* [resolutions(inds).width];
     ind=find(pix==max(pix));
     ind=inds(ind);
     if length(ind)>1
-        error('didn''t find unique ind')
-    elseif length(ind)==1
+        warning('didn''t find unique ind')
+        ind=inds(1);
+    end
+    if length(ind)==1
         height = resolutions(ind).height;
         width = resolutions(ind).width;
-        return    
+        if hz==0
+            warning('resorting to hz=0 (screen(resolutions) reports 0 hz in osx)')
+        end
+        return
     end
 end
 ind=nan;

@@ -63,11 +63,22 @@ pixPerCycs=[20 10];
 distractorOrientations=[0];
 discrimStim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
+ims=fullfile('Rodent-Data','PriyaV','other stimuli sets','paintbrush_flashlight'); %'\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\PriyaV\other stimuli sets\paintbrushMORPHflashlightEDF';
+if ispc
+    imageDir=fullfile('\\Reinagel-lab.ad.ucsd.edu','rlab',ims);
+elseif ismac
+    imageDir=fullfile('/Volumes','RLAB',ims);
+else
+    error('only works on windows and mac')
+end
 
-imageDir='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\PriyaV\other stimuli sets\paintbrush_flashlight';%'\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\PriyaV\other stimuli sets\paintbrushMORPHflashlightEDF';
 background=0;
 ypos=0;
 ims=dir(fullfile(imageDir,'*.png'));
+if isempty(ims)
+    error('couldn''t find image directory')
+end
+
 trialDistribution={};
 for i=1:floor(length(ims)/2)
     [junk n1 junk junk]=fileparts(ims(i).name);
@@ -85,7 +96,7 @@ ts4 = trainingStep(vh, discrimStim, repeatIndefinitely(), noTimeOff(), svnRev);%
 ts5 = trainingStep(vh, imageStim,  repeatIndefinitely(), noTimeOff(), svnRev); %morph discrim
 
 p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5});
-stepNum=4;
+stepNum=5;
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

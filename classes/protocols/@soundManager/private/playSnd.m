@@ -1,4 +1,5 @@
 function sm=playSnd(sm,soundName,duration,station,isLoop)
+
 if isa(station,'station')
     if getSoundOn(station)
         if ischar(soundName)
@@ -41,6 +42,9 @@ if isa(station,'station')
                             end
                         end
 
+                        if size(clip,1)==2
+                            clip=clip'; %on osx, audioplayer constructor requires this
+                        end
                         newRecs(end+1).player=audioplayer(clip, sampleRate);
                         newRecs(end).name=soundName;
                         newRecs(end).isLoop=isLoop;

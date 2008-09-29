@@ -7,5 +7,5 @@ if strcmp(s.responseMethod,'parallelPort')
     valves(s.valvePins.invs)=~valves(s.valvePins.invs);
 else
     warning('can''t read ports without parallel port')
-    valves=zeros*s.valvePins.bitLocs;
+    valves=zeros(1,s.numPorts);%*s.valvePins.bitLocs;
 end

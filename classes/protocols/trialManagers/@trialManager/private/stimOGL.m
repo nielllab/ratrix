@@ -330,7 +330,7 @@ try
     [oldCLUT, dacbits, reallutsize] = Screen('ReadNormalizedGammaTable', window);
 
     %LOAD COLOR LOOK UP TABLE (if it is the right size)
-    if isreal(LUT) && all(size(LUT)==[reallutsize 3])
+    if isreal(LUT) && all(size(LUT)==[256 3])
         if any(LUT(:)>1) || any(LUT(:)<0)
             error('LUT values must be normalized values between 0 and 1')
         end
@@ -359,7 +359,7 @@ try
         end
     else
         reallutsize
-        error('LUT must be real reallutsize X 3 matrix')
+        error('LUT must be real 256 X 3 matrix, even if reallutsize>256 -- docs for screen(loadnormalizedgammatable) specify this, and trying to load a 1024 row LUT does not change LUT on osx (altho it also doesn''t error), even though it returns dacbits=10 and reallutsize=1024')
     end
 
     maxV=max(currentCLUT(:))

@@ -145,3 +145,5 @@ protocols/stimManagers/@crossModal/analysis.m -text
 protocols/stimManagers/@crossModal/testAnalysis.m -text
 db/@dbConn/getRacksAndRoomsFromServerName.m -text
 db/@dbConn/getPermanentStorePathBySubject.m -text
+protocols/stimManagers/@flicker/hateren.m -text
+protocols/stimManagers/@filteredNoise/grainedNoise.m -text

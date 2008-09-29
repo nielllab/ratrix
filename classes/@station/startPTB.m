@@ -43,10 +43,16 @@ try
     
     s.ifi = Screen('GetFlipInterval',s.window);%,200); %numSamples
 
+    if res.hz~=0
     if abs((s.ifi/(1/res.hz))-1)>.1
         s.ifi
         1/res.hz
         error('screen(resolution) reporting framerate off by more than 10% of measured ifi') %needs to be warning to work with remotedesktop
+    end
+    else
+        x=Screen('Resolutions',s.screenNum);
+        [x.hz]
+        warning('screen(resolution) reporting 0 hz -- calcStims must take this into account (this happens on osx)')
     end
     
     texture=Screen('MakeTexture', s.window, BlackIndex(s.window));

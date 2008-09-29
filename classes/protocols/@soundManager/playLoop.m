@@ -4,7 +4,7 @@
 %hack design: you can only have one loop by a given name at a time
 
 function sm=playLoop(sm,newSound,station,keepPlaying)
-if isa(station,'station')
+if isa(station,'station')    
     if getSoundOn(station)
         secsBtwChecks=1;
 

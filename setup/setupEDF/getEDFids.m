@@ -44,4 +44,6 @@ edfRatIDs=...
 ...%       rb    rb         rb    rb    rb          rb    rb    rb
 ...%
 'rack3test1' 'rack3test2' 'rack3test3' 'rack3test4' 'rack3test5' 'rack3test6' 'rack3test7' 'rack3test8' 'rack3test9' ... %test
+...%
+'rack101test1' %test
 };

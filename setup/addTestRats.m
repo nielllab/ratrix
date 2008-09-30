@@ -1,5 +1,5 @@
 function r=addTestRats(subjects,auth)
-
+error('edf thinks this is old code not to be used')
 if isnumeric(subjects) && all(size(subjects))==[1 1]
     numSubjects=subjects;
     for j=1:numSubjects

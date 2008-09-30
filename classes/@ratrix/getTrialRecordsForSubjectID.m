@@ -47,17 +47,19 @@ if isempty(subjPermStorePath)
     subjectSpecificPermStore = true;
 end
 % ========================
+% 9/30/08 - added serverDataPath argument to getTrialRecordsFromPermanentStore call for location of temp.mat file
+serverDataPath = getServerDataPath(r);
 
 if numTrials>0 
     if numTrials-length(localTrialRecords) > 0
         remoteNumTrials = numTrials-length(localTrialRecords);
         % Get only the remaining N trials from the remote store
         remoteTrialRecords=getTrialRecordsFromPermanentStore(subjPermStorePath,sID,...
-            {filterType,int32(remoteNumTrials)}, trustOsRecordFiles,subjectSpecificPermStore);
+            {filterType,int32(remoteNumTrials)}, trustOsRecordFiles,subjectSpecificPermStore,serverDataPath);
     end    
 else
     % Get all of the remote records
-    remoteTrialRecords=getTrialRecordsFromPermanentStore(subjPermStorePath,sID,filter, trustOsRecordFiles,subjectSpecificPermStore);
+    remoteTrialRecords=getTrialRecordsFromPermanentStore(subjPermStorePath,sID,filter, trustOsRecordFiles,subjectSpecificPermStore,serverDataPath);
 end
 % Get from permanent store
 localIndex = length(remoteTrialRecords)+1;

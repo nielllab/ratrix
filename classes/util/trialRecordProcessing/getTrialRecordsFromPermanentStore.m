@@ -1,9 +1,12 @@
-function trialRecords = getTrialRecordsFromPermanentStore(permanentStorePath, subjectID, filter, trustOsRecordFiles, subjectSpecificPermStore)
+function trialRecords = getTrialRecordsFromPermanentStore(permanentStorePath, subjectID, filter, trustOsRecordFiles, subjectSpecificPermStore, serverDataPath)
 % r,sID, {filterType filterParameters}
 % {'dateRange',<dateFromInclusive dateToInclusive>} -- valid input for date num and length==2
 % {'lastNTrials', numTrials}
 % {'all'}
 %
+% 9/30/08 - added serverDataPath argument to getTrialRecordsFromPermanentStore call for location of temp.mat file
+
+
 trialRecords = [];
 
 if isempty(permanentStorePath)
@@ -161,8 +164,7 @@ for i=1:length(files)
         try
 %             tmpFile='C:\temp.mat';
             % 9/29/08 - changed to be cross-platform; use top-level ratrixData folder for temp.mat
-            tmpDataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
-            tmpFile = fullfile(tmpDataPath, 'temp.mat');
+            tmpFile = fullfile(fileparts(serverDataPath), 'temp.mat');
             [success message messageid]=copyfile(fullfile(subjPath,files(i).name),tmpFile);
             if ~success
                 message

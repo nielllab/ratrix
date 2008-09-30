@@ -1,4 +1,10 @@
 function s=checkForUpdate
+% This function performs all svn-related code updating/maintenance on both server and client side
+% This should only be called in ratrixServer and bootstrap
+% If there is an update.mat file, then check the arguments there and update code as necessary
+% If there is no update file, then check that the current revision/path is valid
+% In both cases, we use the function checkTargetRevision (which holds the minRev and path constraints)
+% getSVNRevisionForPath and getSVNPropertiesFromXML are used in checkTargetRevision
 
 f = [getRatrixPath 'update.mat'];
 
@@ -74,5 +80,10 @@ if exist(f) == 2
     WaitSecs(3);
     quit
 else
-    fprintf('Not updating ratrix code\n');
+    % no update file, check current revision
+    fprintf('Not updating ratrix code - checking current revision\n');
+    svnProperties = getSVNPropertiesForPath('', {'revision', 'url'});
+    [targetSVNurl targetRevNum] = checkTargetRevision({svnProperties.url, svnProperties.revision});
+%     targetSVNurl
+%     targetRevNum
 end

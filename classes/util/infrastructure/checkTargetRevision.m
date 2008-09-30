@@ -61,7 +61,7 @@ function pathIsOkay = checkSVNPath(url)
 pathIsOkay = false;
 
 
-if strmatch(url, 'svn://132.239.158.177/projects/ratrix/trunk')
+if strmatch(url, 'svn://132.239.158.177/projects/ratrix/trunk') || strmatch(url, 'svn://132.239.158.177/projects/ratrix/trunk/bootstrap')
     % check against trunk
     pathIsOkay = true;
 else

@@ -155,9 +155,11 @@ names={};
 
 % REPLACE WITH SUBJECT-SPECIFIC
 % get subjectIDs based on the server_name - ignore this other crap
-conn = dbConn();
+
 if ~exist('subjectIDs','var') || isempty(subjectIDs) % if subjectIDs not given as input, retrieve from oracle
+    conn = dbConn();
     subjectIDs = getSubjectIDsFromServer(conn, server_name);
+    closeConn(conn);
 end
 
 % now for each subject, retrieve the trialRecords
@@ -165,15 +167,17 @@ for i=1:length(subjectIDs)
     names{end+1} = subjectIDs{i}; % why this is repeated i dont know
     % if we have standAlonePath, don't overwrite it!
     if ~exist('source','var') || isempty(source)
+            conn = dbConn();
         store_path = getPermanentStorePathBySubject(conn, subjectIDs{i});
         store_path = store_path{1}; % b/c this gets returned by the query as a 1x1 cell array holding the char array
+            closeConn(conn);
     else
         store_path = fullfile(source, subjectIDs{i});
 %         source
     end
     [subjectFiles{end+1} ranges{end+1}] = getTrialRecordFiles(store_path);
 end    
-closeConn(conn);
+
 
 % ====================================================================================================
     

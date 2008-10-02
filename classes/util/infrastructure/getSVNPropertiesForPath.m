@@ -24,18 +24,26 @@ if s ~= 0
     svnCommand
     s
     w
-  error('Unable to execute svn command');
+
+    if ~isempty(strfind(w,'No route to host')) || ~isempty(strfind(w,'Can''t connect to host'))
+        error('can''t see svn server')
+        %return empty in this case and try to move on?
+        SVNproperties=[];
+        return
+    else
+        error('Unable to execute svn command');
+    end
 end
 
 jStr = java.lang.String(w);
 % Create an input stream from the string
-is = ByteArrayInputStream( jStr.getBytes() ); 
+is = ByteArrayInputStream( jStr.getBytes() );
 % Parse the XML - loop for each tag in tags
 doc = builder.parse(is);
 
 for i=1:length(properties)
     property = properties{i};
-    
+
     % switch statement on the tag - handle differently depending on each tag
     switch(property)
         case 'revision'
@@ -47,7 +55,7 @@ for i=1:length(properties)
             enMap = entryNode.getAttributes();
             entryRevItem = enMap.getNamedItem('revision');
             SVNproperties.revision = int64(sscanf(entryRevItem.getTextContent.toCharArray(),'%d'));
-            
+
         case 'url'
             % Get repository info
             urlNodeList=doc.getElementsByTagName('url');
@@ -57,7 +65,7 @@ for i=1:length(properties)
             urlNode = urlNodeList.item(0);
             url = urlNode.getTextContent().toCharArray();
             SVNproperties.url = url'; % Stored in wrong format
-        
+
         case 'commit'
             commitNodeList=doc.getElementsByTagName('commit');
             if commitNodeList.length ~= 1
@@ -67,11 +75,11 @@ for i=1:length(properties)
             commitMap = commitNode.getAttributes();
             commitRevItem = commitMap.getNamedItem('revision');
             SVNproperties.commit = int64(sscanf(commitRevItem.getTextContent.toCharArray(),'%d'));
-            
+
         otherwise
             error('unsupported property - must be from {wcRev, url}');
     end
-    
+
 end % end loop
 
 

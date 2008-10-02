@@ -63,6 +63,7 @@ pixPerCycs=[20 10];
 distractorOrientations=[0];
 discrimStim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
+if false
 ims=fullfile('Rodent-Data','PriyaV','other stimuli sets','paintbrush_flashlight'); %'\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\PriyaV\other stimuli sets\paintbrushMORPHflashlightEDF';
 if ispc
     imageDir=fullfile('\\Reinagel-lab.ad.ucsd.edu','rlab',ims);
@@ -86,6 +87,27 @@ for i=1:floor(length(ims)/2)
     trialDistribution{end+1}={{n1 n2} 1};
 end
 imageStim = images(imageDir,ypos,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,trialDistribution);
+end
+
+noiseSpec.orientations           = {-pi/4 [] pi/4};
+noiseSpec.locationDistributions  = {1 [] 1};
+noiseSpec.background             = .5;
+noiseSpec.contrast               = 1;
+noiseSpec.maskRadius             = .022;
+noiseSpec.patchHeight            = .4;
+noiseSpec.patchWidth             = .4;
+noiseSpec.kernelSize             = .5;
+noiseSpec.kernelDuration         = .2;
+noiseSpec.loopDuration           = 1;
+noiseSpec.ratio                  = 1/3;
+noiseSpec.filterStrength         = 1;
+noiseSpec.bound                  = .99;
+noiseSpec.maxWidth               = 800;
+noiseSpec.maxHeight              = 600;
+noiseSpec.scaleFactor            = scaleFactor;
+noiseSpec.interTrialLuminance    = interTrialLuminance;
+
+noiseStim=filteredNoise(noiseSpec);
 
 svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
 
@@ -93,9 +115,10 @@ ts1 = trainingStep(fd, freeStim, repeatIndefinitely(), noTimeOff(), svnRev);   %
 ts2 = trainingStep(fd2, freeStim, repeatIndefinitely(), noTimeOff(), svnRev);  %free drinks
 ts3 = trainingStep(vh, freeStim, repeatIndefinitely(), noTimeOff(), svnRev);   %go to stim
 ts4 = trainingStep(vh, discrimStim, repeatIndefinitely(), noTimeOff(), svnRev);%orientation discrim
-ts5 = trainingStep(vh, imageStim,  repeatIndefinitely(), noTimeOff(), svnRev); %morph discrim
+%ts5 = trainingStep(vh, imageStim,  repeatIndefinitely(), noTimeOff(), svnRev); %morph discrim
+ts6 = trainingStep(vh, noiseStim,  repeatIndefinitely(), noTimeOff(), svnRev); %filteredNoise discrim
 
-p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5});
+p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts6});
 stepNum=5;
 
 for i=1:length(subjIDs),

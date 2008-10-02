@@ -25,6 +25,15 @@ elseif 2==exist([fileName '.txt'],'file')
     tic
     sig=load([fileName '.txt']);
     fprintf('load took %g secs\n',toc)
+    
+    %textscan is slightly slower
+%     tic
+%     fid = fopen([fileName '.txt']);
+%     C = textscan(fid, '%d');
+%     fclose(fid);
+%     fprintf('textscan took %g secs\n',toc)
+%       sig=C{1};
+
     save([fileName '.mat'],'sig');
 else
     error('can''t find file')

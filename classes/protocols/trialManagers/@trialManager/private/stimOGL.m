@@ -204,8 +204,13 @@ originalPriority=Priority;
 
 [garbage ptbVer]=PsychtoolboxVersion;
 ptbVersion=sprintf('%d.%d.%d(%s %s)',ptbVer.major,ptbVer.minor,ptbVer.point,ptbVer.flavor,ptbVer.revstring);
+try
 [runningSVNversion repositorySVNversion url]=getSVNRevisionFromXML(getRatrixPath);
 ratrixVersion=sprintf('%s (%d of %d)',url,runningSVNversion,repositorySVNversion);
+catch ex
+    ex
+ratrixVersion='no network connection';
+end
 
 try
 

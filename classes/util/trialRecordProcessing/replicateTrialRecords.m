@@ -70,16 +70,18 @@ for f=1:length(subDirs)
         % =======================================================================
         % 9/16/08 - change here to get paths from oracle db (specific for each subject)
         % - if oracle has a path for this subject that is not null, use it; otherwise use ratrix default path
-        conn = dbConn();
+
         gotPathFromOracle = 0;
         if isempty (input_paths) % if path not provided as input, get from oracle, otherwise use provided (for standAloneRun)
+                    conn = dbConn();
             possible_path = getPermanentStorePathBySubject(conn, subjectName);
+                    closeConn(conn);
             if ~isempty(possible_path{1})
                 paths = possible_path;
                 gotPathFromOracle = 1; %used to set paths appropriately at the last step (move files to perm store)
             end
         end
-        closeConn(conn);
+
         % =======================================================================
         
         for j=1:length(paths)

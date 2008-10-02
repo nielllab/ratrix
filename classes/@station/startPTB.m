@@ -40,21 +40,24 @@ try
     disp(sprintf('took %g to call screen(openwindow)',GetSecs()-preScreen))
 
     res=Screen('Resolution', s.screenNum);
-    
+
     s.ifi = Screen('GetFlipInterval',s.window);%,200); %numSamples
 
     if res.hz~=0
-    if abs((s.ifi/(1/res.hz))-1)>.1
-        s.ifi
-        1/res.hz
-        error('screen(resolution) reporting framerate off by more than 10% of measured ifi') %needs to be warning to work with remotedesktop
-    end
+        if abs((s.ifi/(1/res.hz))-1)>.1
+            s.ifi
+            1/res.hz
+            error('screen(resolution) reporting framerate off by more than 10% of measured ifi') %needs to be warning to work with remotedesktop
+        end
     else
+        if ~ismac
+            error('screen(resolution) reporting 0 hz, but not on mac')
+        end
         x=Screen('Resolutions',s.screenNum);
         [x.hz]
         warning('screen(resolution) reporting 0 hz -- calcStims must take this into account (this happens on osx)')
     end
-    
+
     texture=Screen('MakeTexture', s.window, BlackIndex(s.window));
     [resident texidresident] = Screen('PreloadTextures', s.window);
 

@@ -1,7 +1,9 @@
 function [ind height width hz]=chooseLargestResForHzsDepthRatio(resolutions,hzs,depth,maxWidth,maxHeight)
 
 ratio=maxWidth/maxHeight;
-hzs=union(hzs,0); %have to add zero for osx, cuz screen('resolutions') returns all hz as 0
+if ismac
+    hzs=union(hzs,0); %have to add zero for osx, cuz screen('resolutions') returns all hz as 0
+end
 hzs=sort(hzs,'descend');
 
 for i=1:length(hzs)

@@ -37,7 +37,13 @@ switch nargin
             t.criterion = varargin{3};
             t.scheduler = varargin{4};
 
+            try
             [t.svnRevURL t.svnRevNum]=checkTargetRevision(varargin{5});
+            catch ex
+                ex
+                t.svnRevURL='';
+                t.svnRevNum=0;
+            end
             
             t.previousSchedulerState=0;
             t.trialNum=0;

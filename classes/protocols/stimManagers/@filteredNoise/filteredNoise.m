@@ -9,6 +9,7 @@ function s=filteredNoise(varargin)
 % in.contrast                   std dev in normalized luminance units (just counting patch, before mask application), values will saturate
 % in.maskRadius                 std dev of the enveloping gaussian, normalized to diagonal of stim area
 %
+% in.patchDims                  [height width]
 % in.patchHeight                0-1, normalized to diagonal of stim area
 % in.patchWidth                 0-1, normalized to diagonal of stim area
 % in.kernelSize                 0-1, normalized to diagonal of patch
@@ -23,7 +24,7 @@ function s=filteredNoise(varargin)
 % in.scaleFactor
 % in.interTrialLuminance
 
-fieldNames={'orientations','locationDistributions','background','contrast','maskRadius','patchHeight','patchWidth','kernelSize','kernelDuration','loopDuration','ratio','filterStrength','bound'};
+fieldNames={'orientations','locationDistributions','background','contrast','maskRadius','patchDims','patchHeight','patchWidth','kernelSize','kernelDuration','loopDuration','ratio','filterStrength','bound'};
 for i=1:length(fieldNames)
     s.(fieldNames{i})=[];
 end
@@ -68,6 +69,12 @@ switch nargin
                     %pass
                 else
                     error('orientations and locationDistributions must have same empty locations')
+                end
+                
+                if all(size(in.patchDims)==[1 2]) && all(in.patchDims)>0 && strcmp(class(in.patchDims),'uint16')
+                    %pass
+                else
+                    error('patchDims should be [height width] uint16 > 0')
                 end
                 
                 norms={in.background in.patchHeight in.patchWidth in.kernelSize in.ratio};

@@ -49,7 +49,7 @@ end
 details.orientation=stimulus.orientations{targetPorts};
 details.location=computeLocation(stimulus);
 
-detailFields={'background','contrast','maskRadius','patchHeight','patchWidth','kernelSize','kernelDuration','loopDuration','ratio','filterStrength','bound'};
+detailFields={'background','contrast','maskRadius','patchHeight','patchDims','patchWidth','kernelSize','kernelDuration','loopDuration','ratio','filterStrength','bound'};
 for i=1:length(detailFields)
     details.(detailFields{i})=stimulus.(detailFields{i});
 end
@@ -57,19 +57,10 @@ end
 details.startFrame=ceil(rand*size(pre,3));
 pre=pre(:,:,[details.startFrame:size(pre,3) 1:details.startFrame-1]);
 
-%width=80;
-%height=60;
-%stimulus.maskRadius=.03;
-%details.location=[.75 2/3];
-
 d=sqrt(sum([height width].^2));
 [a b]=meshgrid(1:width,1:height);
 mask=reshape(mvnpdf([a(:) b(:)],[width height].*details.location,(stimulus.maskRadius*d)^2*eye(2)),height,width);
 mask=mask/max(mask(:));
-
-%stimulus.patchHeight=.3;
-%stimulus.patchWidth=.2;
-%pre=rand(9,4,4);
 
 h=size(pre,1);
 w=size(pre,2);
@@ -80,41 +71,12 @@ rbad = rinds<=0 | rinds > size(out,1);
 cbad = cinds<=0 | cinds > size(out,2);
 
 out(rinds(~rbad),cinds(~cbad),:)=pre(~rbad,~cbad,:);
-size(out)
-height
-width
 out=imresize(out,[height width],'nearest');
 
 out=stimulus.contrast*out.*mask(:,:,ones(1,size(pre,3)))+stimulus.background;
 out(out<0)=0;
 out(out>1)=1;
 %out=uint8(double(intmax('uint8'))*out);
-% 
-% close all
-% for i=1:size(pre,3)
-%     figure
-%     imagesc(out(:,:,i))
-%     axis image
-% end
-
-
-% in.orientations               cell of orientations, one for each correct answer port, in radians, 0 is vertical, positive is clockwise  ex: {-pi/4 [] pi/4}
-% in.locationDistributions      cell of 2-d densities, one for each correct answer port, will be normalized to stim area  ex: {[2d] [] [2d]}
-%
-% in.background                 0-1, normalized
-% in.contrast                   std dev in normalized luminance units (just counting patch, before mask application), values will saturate
-% in.maskRadius                 std dev of the enveloping gaussian, normalized to diagonal of stim area
-%
-% in.patchHeight                0-1, normalized to diagonal of stim area
-% in.patchWidth                 0-1, normalized to diagonal of stim area
-% in.kernelSize                 0-1, normalized to diagonal of patch
-% in.kernelDuration             in seconds (will be rounded to nearest multiple of frame duration)
-% in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration)
-% in.ratio                      ratio of short to long axis of gaussian kernel (1 means circular, no effective orientation)
-% in.filterStrength             0 means no filtering (kernel is all zeros, except 1 in center), 1 means pure mvgaussian kernel (center not special), >1 means surrounding pixels more important
-% in.bound
-%
-% in.cache
 
 if details.correctionTrial;
     text='correction trial!';

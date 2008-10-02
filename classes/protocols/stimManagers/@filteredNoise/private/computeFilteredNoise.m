@@ -1,27 +1,6 @@
 function stimulus=computeFilteredNoise(stimulus,hz)
 
-% in.orientations               cell of orientations, one for each correct answer port, in radians, 0 is vertical, positive is clockwise  ex: {-pi/4 [] pi/4}
-% in.locationDistributions      cell of 2-d densities, one for each correct answer port, will be normalized to stim area  ex: {[2d] [] [2d]}
-%
-% in.background                 0-1, normalized
-% in.contrast                   std dev in normalized luminance units (just counting patch, before mask application), values will saturate
-% in.maskRadius                 std dev of the enveloping gaussian, normalized to diagonal of stim area
-%
-% in.patchHeight                0-1, normalized to diagonal of stim area
-% in.patchWidth                 0-1, normalized to diagonal of stim area
-% in.kernelSize                 0-1, normalized to diagonal of patch
-% in.kernelDuration             in seconds (will be rounded to nearest multiple of frame duration)
-% in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration)
-% in.ratio                      ratio of short to long axis of gaussian kernel (1 means circular, no effective orientation)
-% in.filterStrength             0 means no filtering (kernel is all zeros, except 1 in center), 1 means pure mvgaussian kernel (center not special), >1 means surrounding pixels more important
-% in.bound                      .5-1 edge percentile for long axis of kernel when parallel to window
-%
-% in.maxWidth
-% in.maxHeight
-% in.scaleFactor
-% in.interTrialLuminance
-
-sz=[50 50]; %height, width
+sz=stimulus.patchDims; %[height, width]
 
 scale=floor(stimulus.kernelSize*sqrt(sum(sz.^2)));
 if rem(scale,2)==0
@@ -47,34 +26,41 @@ for i=1:length(stimulus.orientations)
         kernel=stimulus.filterStrength*kernel/max(kernel(:));
 
         kernel(ceil(scale/2),ceil(scale/2))=1; %so filterStrength=0 means identity
-        kernel=kernel/sqrt(sum(kernel(:).^2));  %to preserve contrast
-        %filtering effectively summed a bunch of independent gaussians with variances determined by the kernel entries
-        %if X ~ N(0,a) and Y ~ N(0,b), then X+Y ~ N(0,a+b) and cX ~ N(0,ac^2)
-        %must be a deep reason this is same as pythagorean
 
-        %stim=stim/sqrt(sum(kernel(:).^2)); %alternative to above, but cooler to have self correcting kernel operator
-
-        frames=round(stimulus.loopDuration*hz);
         dur=round(stimulus.kernelDuration*hz);
-
-        noise=randn([sz frames]);
         t=normpdf(linspace(-bound,bound,dur),0,1);
 
         for j=1:dur
             k(:,:,j)=kernel*t(j);
         end
 
-        k=k/sqrt(sum(k(:).^2));
-        %stim=convn(noise,k,'same'); %slower than imfilter
+        k=k/sqrt(sum(k(:).^2));  %to preserve contrast
+        %filtering effectively summed a bunch of independent gaussians with variances determined by the kernel entries
+        %if X ~ N(0,a) and Y ~ N(0,b), then X+Y ~ N(0,a+b) and cX ~ N(0,ac^2)
+        %must be a deep reason this is same as pythagorean
+
+        frames=round(stimulus.loopDuration*hz);
+        noise=randn([sz frames]);
+
+        %         [a b] = hist(noise(:),100);
+        %         std(noise(:))
+
         tic
+        %stim=convn(noise,k,'same'); %slower than imfilter
         stim=imfilter(noise,k,'circular'); %allows looping, does it keep edges nice?
         toc
 
+        %         c = hist(stim(:),b);
+        %         std(stim(:))
+        %
+        %         figure
+        %         plot(b,[a' c']);
+
         stimulus.cache{i}=stim;
-        
-%         i
-%         stimulus.orientations{i}
-%         size(stim)
-%         imagesc(stim(:,:,round(size(stim,3)/2)))
+
+        %         i
+        %         stimulus.orientations{i}
+        %         size(stim)
+        %         imagesc(stim(:,:,round(size(stim,3)/2)))
     end
 end

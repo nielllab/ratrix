@@ -57,11 +57,6 @@ end
 details.startFrame=ceil(rand*size(pre,3));
 pre=pre(:,:,[details.startFrame:size(pre,3) 1:details.startFrame-1]);
 
-d=sqrt(sum([height width].^2));
-[a b]=meshgrid(1:width,1:height);
-mask=reshape(mvnpdf([a(:) b(:)],[width height].*details.location,(stimulus.maskRadius*d)^2*eye(2)),height,width);
-mask=mask/max(mask(:));
-
 h=size(pre,1);
 w=size(pre,2);
 out=zeros(round(h/stimulus.patchHeight),round(w/stimulus.patchWidth),size(pre,3));
@@ -71,7 +66,15 @@ rbad = rinds<=0 | rinds > size(out,1);
 cbad = cinds<=0 | cinds > size(out,2);
 
 out(rinds(~rbad),cinds(~cbad),:)=pre(~rbad,~cbad,:);
-out=imresize(out,[height width],'nearest');
+
+width=size(out,2);
+height=size(out,1);
+d=sqrt(sum([height width].^2));
+[a b]=meshgrid(1:width,1:height);
+mask=reshape(mvnpdf([a(:) b(:)],[width height].*details.location,(stimulus.maskRadius*d)^2*eye(2)),height,width);
+mask=mask/max(mask(:));
+
+%out=imresize(out,[height width],'nearest');
 
 out=stimulus.contrast*out.*mask(:,:,ones(1,size(pre,3)))+stimulus.background;
 out(out<0)=0;

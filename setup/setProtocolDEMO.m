@@ -87,8 +87,14 @@ for i=1:floor(length(ims)/2)
 end
 imageStim = images(imageDir,ypos,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,trialDistribution);
 
+
+d=2; %decrease to broaden
+gran=100;
+x=linspace(-d,d,gran);
+[a b]=meshgrid(x);
+
 noiseSpec.orientations           = {-pi/4 [] pi/4};
-noiseSpec.locationDistributions  = {1 [] 1};
+noiseSpec.locationDistributions  = {reshape(mvnpdf([a(:) b(:)],[-d/2 d/2]),gran,gran) [] reshape(mvnpdf([a(:) b(:)],[d/2 d/2]),gran,gran)};
 noiseSpec.background             = .5;
 noiseSpec.contrast               = pickContrast(.5,.01);
 noiseSpec.maskRadius             = .045;

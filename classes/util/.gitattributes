@@ -92,3 +92,4 @@ trialRecordProcessing/checkNafcTargets.m -text
 infrastructure/getServerNameFromIP.m -text
 infrastructure/getSVNPropertiesForPath.m -text
 stimHelpers/pickContrast.m -text
+stimHelpers/drawFrom2Ddist.m -text

@@ -56,27 +56,29 @@ switch nargin
                 if isvector(in.locationDistributions) && iscell(in.locationDistributions) && length(in.locationDistributions) == length(in.orientations)
                     pass=true;
                     for i=1:length(in.locationDistributions)
-                        pass=pass && length(size(in.locationDistributions{i}))==2 && isreal(in.locationDistributions{i}) && all(in.locationDistributions{i}(:)>=0);
+                        if ~isempty(in.locationDistributions{i})
+                            pass=pass && length(size(in.locationDistributions{i}))==2 && isreal(in.locationDistributions{i}) && all(in.locationDistributions{i}(:)>=0) && sum(in.locationDistributions{i}(:))>0;
+                        end
                     end
                     if ~pass
-                        error('each locationDistribution must be 2d real and >=0')
+                        error('each locationDistribution must be 2d real and >=0 with at least one nonzero entry')
                     end
                 else
                     error('locationDistributions must be cell vector of same length as orientations')
                 end
-                
+
                 if all(cellfun(@isempty,in.orientations)==cellfun(@isempty,in.locationDistributions)) %will barf if these vectors don't have same orientaiton :(
                     %pass
                 else
                     error('orientations and locationDistributions must have same empty locations')
                 end
-                
+
                 if all(size(in.patchDims)==[1 2]) && all(in.patchDims)>0 && strcmp(class(in.patchDims),'uint16')
                     %pass
                 else
                     error('patchDims should be [height width] uint16 > 0')
                 end
-                
+
                 norms={in.background in.patchHeight in.patchWidth in.kernelSize in.ratio};
                 for i=1:length(norms)
                     if isscalar(norms{i}) && isreal(norms{i}) && norms{i}>=0 && norms{i}<=1
@@ -94,7 +96,7 @@ switch nargin
                         error('contrast, maskRadius, kernelDuration, loopDuration and filterStrength must be real scalars >=0')
                     end
                 end
-                
+
                 if ~isreal(in.bound) || ~isscalar(in.bound) || in.bound<=.5 || in.bound>=1
                     error('bound must be real scalar .5<x<1')
                 end
@@ -102,7 +104,7 @@ switch nargin
                 for i=1:length(fieldNames)
                     s.(fieldNames{i})=in.(fieldNames{i});
                 end
-                
+
                 s = class(s,'filteredNoise',stimManager(in.maxWidth,in.maxHeight,in.scaleFactor,in.interTrialLuminance));
             else
                 reqNames

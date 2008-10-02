@@ -148,7 +148,6 @@ db/@dbConn/getPermanentStorePathBySubject.m -text
 protocols/stimManagers/@flicker/hateren.m -text
 protocols/stimManagers/@filteredNoise/private/computeFilteredNoise.m -text
 protocols/stimManagers/@filteredNoise/private/grainedNoise.m -text
-protocols/stimManagers/@filteredNoise/private/computeLocation.m -text
 protocols/stimManagers/@filteredNoise/filteredNoise.m -text
 protocols/stimManagers/@filteredNoise/calcStim.m -text
 protocols/stimManagers/@filteredNoise/stimMgrOKForTrialMgr.m -text

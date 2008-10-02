@@ -47,7 +47,7 @@ else
 end
 
 details.orientation=stimulus.orientations{targetPorts};
-details.location=computeLocation(stimulus);
+details.location=drawFrom2Ddist(stimulus.locationDistributions{targetPorts});
 
 detailFields={'background','contrast','maskRadius','patchHeight','patchDims','patchWidth','kernelSize','kernelDuration','loopDuration','ratio','filterStrength','bound'};
 for i=1:length(detailFields)

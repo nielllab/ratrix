@@ -5,16 +5,19 @@ function s=filteredNoise(varargin)
 % in.orientations               cell of orientations, one for each correct answer port, in radians, 0 is vertical, positive is clockwise  ex: {-pi/4 [] pi/4}
 % in.locationDistributions      cell of 2-d densities, one for each correct answer port, will be normalized to stim area  ex: {[2d] [] [2d]}
 %
+% in.distribution               'gaussian', 'binary', 'uniform', or a path to a file name (either .txt or .mat, extension omitted, .txt loadable via load(), and containing a single vector of numbers named 'noise')
+% in.origHz                     only used if distribution is a file name, indicating sampling rate of filed
+%
 % in.background                 0-1, normalized
 % in.contrast                   std dev in normalized luminance units (just counting patch, before mask application), values will saturate
 % in.maskRadius                 std dev of the enveloping gaussian, normalized to diagonal of stim area
 %
 % in.patchDims                  [height width]
-% in.patchHeight                0-1, normalized to diagonal of stim area
-% in.patchWidth                 0-1, normalized to diagonal of stim area
+% in.patchHeight                0-1, normalized to stim area height
+% in.patchWidth                 0-1, normalized to stim area width
 % in.kernelSize                 0-1, normalized to diagonal of patch
 % in.kernelDuration             in seconds (will be rounded to nearest multiple of frame duration)
-% in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration)
+% in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file instead of a random subset)
 % in.ratio                      ratio of short to long axis of gaussian kernel (1 means circular, no effective orientation)
 % in.filterStrength             0 means no filtering (kernel is all zeros, except 1 in center), 1 means pure mvgaussian kernel (center not special), >1 means surrounding pixels more important
 % in.bound                      .5-1 edge percentile for long axis of kernel when parallel to window
@@ -24,11 +27,15 @@ function s=filteredNoise(varargin)
 % in.scaleFactor
 % in.interTrialLuminance
 
-fieldNames={'orientations','locationDistributions','background','contrast','maskRadius','patchDims','patchHeight','patchWidth','kernelSize','kernelDuration','loopDuration','ratio','filterStrength','bound'};
+fieldNames={'orientations','locationDistributions','distribution','origHz','background','contrast','maskRadius','patchDims','patchHeight','patchWidth','kernelSize','kernelDuration','loopDuration','ratio','filterStrength','bound'};
 for i=1:length(fieldNames)
     s.(fieldNames{i})=[];
 end
 s.cache=[];
+s.seed={};
+s.sha1=[];
+s.hz=[];
+s.inds=[];
 reqNames=union(fieldNames,{'maxWidth','maxHeight','scaleFactor','interTrialLuminance'});
 
 switch nargin
@@ -42,29 +49,41 @@ switch nargin
                 in=varargin{1};
 
                 if isvector(in.orientations) && iscell(in.orientations)
-                    pass=true;
                     for i=1:length(in.orientations)
-                        pass = pass && isreal(in.orientations{i}) && (isscalar(in.orientations{i}) || isempty(in.orientations{i}));
-                    end
-                    if ~pass
-                        error('each orientation must be real scalar or empty')
+                        if isreal(in.orientations{i}) && (isscalar(in.orientations{i}) || isempty(in.orientations{i}));
+                            %pass
+                        else
+                            error('each orientation must be real scalar or empty')
+                        end
                     end
                 else
                     error('orientations must be a cell vector')
                 end
 
                 if isvector(in.locationDistributions) && iscell(in.locationDistributions) && length(in.locationDistributions) == length(in.orientations)
-                    pass=true;
                     for i=1:length(in.locationDistributions)
                         if ~isempty(in.locationDistributions{i})
-                            pass=pass && length(size(in.locationDistributions{i}))==2 && isreal(in.locationDistributions{i}) && all(in.locationDistributions{i}(:)>=0) && sum(in.locationDistributions{i}(:))>0;
+                            if length(size(in.locationDistributions{i}))==2 && isreal(in.locationDistributions{i}) && all(in.locationDistributions{i}(:)>=0) && sum(in.locationDistributions{i}(:))>0;
+                                %pass
+                            else
+                                error('each locationDistribution must be 2d real and >=0 with at least one nonzero entry')
+                            end
                         end
-                    end
-                    if ~pass
-                        error('each locationDistribution must be 2d real and >=0 with at least one nonzero entry')
                     end
                 else
                     error('locationDistributions must be cell vector of same length as orientations')
+                end
+
+                if ismember(in.distribution,{'uniform','gaussian','binary'})
+                    %pass
+                elseif isvector(in.distribution) && ischar(in.distribution) && any([exist([in.distribution '.txt'],'file') exist([in.distribution '.mat'],'file')]==2)
+                    if isscalar(in.origHz) && in.origHz>0 && isreal(in.origHz)
+                        %pass
+                    else
+                        error('if distribution is file, origHz must be real scalar > 0')
+                    end
+                else
+                    error('distribution must be one of gaussian, uniform, binary, or a string containing a file name (either .txt or .mat, extension omitted, .txt loadable via load())');
                 end
 
                 if all(cellfun(@isempty,in.orientations)==cellfun(@isempty,in.locationDistributions)) %will barf if these vectors don't have same orientaiton :(
@@ -81,10 +100,16 @@ switch nargin
 
                 norms={in.background in.patchHeight in.patchWidth in.kernelSize in.ratio};
                 for i=1:length(norms)
-                    if isscalar(norms{i}) && isreal(norms{i}) && norms{i}>=0 && norms{i}<=1
+                    if isscalar(norms{i}) && isreal(norms{i}) && norms{i}>0 && norms{i}<=1
                         %pass
                     else
-                        error('background, patchHeight, patchWidth, kernelSize, and ratio must be 0<=x<=1, real scalars') %all but background really want to be strictly >0
+                        if i==1 && in.background==0
+                            %pass
+                        elseif i==4 && in.kernelSize==0
+                            %pass
+                        else
+                            error('background, patchHeight, patchWidth, kernelSize, and ratio must be 0<x<=1, real scalars (exception: background and kernelSize can be 0, zero kernelSize means no spatial extent beyond 1 pixel (may still have kernelDuration>0))')
+                        end
                     end
                 end
 
@@ -93,7 +118,7 @@ switch nargin
                     if isscalar(pos{i}) && isreal(pos{i}) && pos{i}>=0
                         %pass
                     else
-                        error('contrast, maskRadius, kernelDuration, loopDuration and filterStrength must be real scalars >=0')
+                        error('contrast, maskRadius, kernelDuration, loopDuration and filterStrength must be real scalars >=0 (zero loopDuration means 1 static looped frame, except for file stims, where it means play the whole file instead of a subset)')
                     end
                 end
 

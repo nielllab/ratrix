@@ -33,7 +33,7 @@ if empties(targetPorts)
     error('targetPorts includes members that have no entry')
 end
 
-if isempty(stimulus.cache)
+if isempty(stimulus.cache) || isempty(stimulus.hz) || stimulus.hz~=hz
     stimulus=computeFilteredNoise(stimulus,hz);
     updateSM=true;
 else
@@ -49,7 +49,7 @@ end
 details.orientation=stimulus.orientations{targetPorts};
 details.location=drawFrom2Ddist(stimulus.locationDistributions{targetPorts});
 
-detailFields={'background','contrast','maskRadius','patchHeight','patchDims','patchWidth','kernelSize','kernelDuration','loopDuration','ratio','filterStrength','bound'};
+detailFields={'hz','background','contrast','distribution','inds','maskRadius','patchHeight','patchDims','patchWidth','kernelSize','kernelDuration','loopDuration','ratio','filterStrength','bound','seed','sha1'};
 for i=1:length(detailFields)
     details.(detailFields{i})=stimulus.(detailFields{i});
 end
@@ -59,6 +59,14 @@ pre=pre(:,:,[details.startFrame:size(pre,3) 1:details.startFrame-1]);
 
 h=size(pre,1);
 w=size(pre,2);
+
+maxPositionalError=.01;
+if any([h/stimulus.patchHeight w/stimulus.patchWidth] < 1/maxPositionalError) %if pre's size is too small or the patch size is too large, positioning/sizing will be too coarse
+    pre=imresize(pre,[stimulus.patchHeight stimulus.patchWidth]/maxPositionalError,'nearest');
+    h=size(pre,1);
+    w=size(pre,2);
+end
+
 out=zeros(round(h/stimulus.patchHeight),round(w/stimulus.patchWidth),size(pre,3));
 rinds=ceil(size(out,1)*details.location(2)+[1:h]-(h+1)/2);
 cinds=ceil(size(out,2)*details.location(1)+[1:w]-(w+1)/2);
@@ -73,8 +81,6 @@ d=sqrt(sum([height width].^2));
 [a b]=meshgrid(1:width,1:height);
 mask=reshape(mvnpdf([a(:) b(:)],[width height].*details.location,(stimulus.maskRadius*d)^2*eye(2)),height,width);
 mask=mask/max(mask(:));
-
-%out=imresize(out,[height width],'nearest');
 
 out=stimulus.contrast*out.*mask(:,:,ones(1,size(pre,3)))+stimulus.background;
 out(out<0)=0;

@@ -25,7 +25,7 @@ if s ~= 0
     s
     w
 
-    if ~isempty(strfind(w,'No route to host')) || ~isempty(strfind(w,'Can''t connect to host'))
+    if ~isempty(findstr(w,'No route to host')) || ~isempty(findstr(w,'Can''t connect to host'))
         error('can''t see svn server')
         %return empty in this case and try to move on?
         SVNproperties=[];

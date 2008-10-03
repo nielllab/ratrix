@@ -95,6 +95,8 @@ x=linspace(-d,d,gran);
 
 noiseSpec.orientations           = {-pi/4 [] pi/4};
 noiseSpec.locationDistributions  = {reshape(mvnpdf([a(:) b(:)],[-d/2 d/2]),gran,gran) [] reshape(mvnpdf([a(:) b(:)],[d/2 d/2]),gran,gran)};
+noiseSpec.distribution           = 'gaussian';
+noiseSpec.origHz                 = 0;
 noiseSpec.background             = .5;
 noiseSpec.contrast               = pickContrast(.5,.01);
 noiseSpec.maskRadius             = .045;
@@ -114,6 +116,41 @@ noiseSpec.interTrialLuminance    = interTrialLuminance;
 
 noiseStim=filteredNoise(noiseSpec);
 
+
+noiseSpec.orientations           = {0 [] 0};
+noiseSpec.locationDistributions  = {[0 0;1 0] [] [0 0;0 1]};
+noiseSpec.distribution           = 'binary';
+noiseSpec.contrast               = 1;
+noiseSpec.maskRadius             = 100;
+noiseSpec.kernelSize             = 0;
+noiseSpec.kernelDuration         = 0;
+noiseSpec.loopDuration           = 1;
+noiseSpec.ratio                  = 1;
+noiseSpec.filterStrength         = 0;
+noiseSpec.patchDims              = uint16([2 2]);
+noiseSpec.patchHeight            = .1;
+noiseSpec.patchWidth             = .1;
+
+unfilteredNoise=filteredNoise(noiseSpec);
+
+
+noiseSpec.distribution           = '/Users/eflister/Desktop/ratrix trunk/classes/protocols/stimManagers/@flicker/ts001';
+noiseSpec.origHz                 = 1200;
+noiseSpec.loopDuration           = 30;
+
+hateren=filteredNoise(noiseSpec);
+
+
+noiseSpec.locationDistributions  = {1 [] 1};
+noiseSpec.distribution           = 'gaussian';
+noiseSpec.contrast               = pickContrast(.5,.01);
+noiseSpec.patchDims              = uint16([1 1]);
+noiseSpec.patchHeight            = .5;
+noiseSpec.patchWidth             = .5;
+
+fullfieldFlicker=filteredNoise(noiseSpec);
+
+
 svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
 
 ts1 = trainingStep(fd, freeStim, repeatIndefinitely(), noTimeOff(), svnRev);   %stochastic free drinks
@@ -122,9 +159,12 @@ ts3 = trainingStep(vh, freeStim, repeatIndefinitely(), noTimeOff(), svnRev);   %
 ts4 = trainingStep(vh, discrimStim, repeatIndefinitely(), noTimeOff(), svnRev);%orientation discrim
 ts5 = trainingStep(vh, imageStim,  repeatIndefinitely(), noTimeOff(), svnRev); %morph discrim
 ts6 = trainingStep(vh, noiseStim,  repeatIndefinitely(), noTimeOff(), svnRev); %filteredNoise discrim
+ts7 = trainingStep(vh, unfilteredNoise,  repeatIndefinitely(), noTimeOff(), svnRev); %unfiltered goToSide
+ts8 = trainingStep(vh, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svnRev); %fullfieldFlicker
+ts9 = trainingStep(vh, hateren,  repeatIndefinitely(), noTimeOff(), svnRev); %hateren
 
-p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5, ts6});
-stepNum=6;
+p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8, ts9});
+stepNum=9;
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

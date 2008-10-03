@@ -1,5 +1,5 @@
 function [weights dates thresholds] = getBodyWeightHistory(idstring,server_ip,port)
-warning('this function is deprecated -- see http://132.239.158.177/trac/rlab_hardware/ticket/79 -- use getBodyWeightHistory(dbConn) instead')
+error('this function is deprecated -- see http://132.239.158.177/trac/rlab_hardware/ticket/79 -- use getBodyWeightHistory(dbConn) instead')
 
 weights={};
 thresholds={};

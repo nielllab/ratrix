@@ -152,3 +152,6 @@ protocols/stimManagers/@filteredNoise/filteredNoise.m -text
 protocols/stimManagers/@filteredNoise/calcStim.m -text
 protocols/stimManagers/@filteredNoise/stimMgrOKForTrialMgr.m -text
 protocols/stimManagers/@filteredNoise/private/loadStimFile.m -text
+db/@dbConn/getStationsForServer.m -text
+db/@dbConn/getAllSubjects.m -text
+db/@dbConn/getServers.m -text

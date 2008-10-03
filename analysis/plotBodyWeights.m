@@ -66,16 +66,17 @@ if useBodyWeightCache
     % this won't get new body weights, but loads a local copy
     load(fullfile('tempVariables', 'BWs'),'s');
 else
-
+    conn=dbConn;
     for i=1:numSubjects
         disp(['getting bodyweights for ' subjects{i}])
-        [weights BWdates thresh] = getBodyWeightHistory(subjects{i});
+        [weights BWdates thresh] = getBodyWeightHistory(conn,subjects{i});
 
         s{i}.ID=subjects{i};
         s{i}.weights=weights;
         s{i}.BWdates=BWdates;
         s{i}.thresh=thresh;
     end
+    closeConn(conn);
     %save(fullfile('tempVariables', 'BWs'),'s');
     % because we have commented out the line above, there is no more cache
     % the last cache is way out of date, generated on Mar 10, 2008

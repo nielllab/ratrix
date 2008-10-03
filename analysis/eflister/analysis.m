@@ -29,20 +29,38 @@ conn=dbConn;
 
 stations=getStations(conn);
 stations=[stations{:}];
-rack_ids=unique([stations.rack_id]);
-
-rackStrs={};
-defaultRackStrIndex=1;
-for i=1:length(rack_ids)
-    rackStrs{end+1}=['rack ' num2str(rack_ids(i))];
+servers = getServers(conn);
+server_ips = {};
+serverStrs = {};
+for i=1:length(servers)
+    server_ips{end+1} = servers{i}.address;
+    serverStrs{end+1} = servers{i}.server_name;
 end
+serverStrs{end+1} = 'by subject'; % added to allow by subject analysis
+bySubjectIndex = length(serverStrs); % this holds the value of the serverM button that points to "by subject"
 
-
-
-selection.rack=rack_ids(defaultRackStrIndex);
-apath=getCompiledDirForRack(selection.rack);
-lastRack=-1;
+defaultServerStrIndex = 3;
+selection.server=serverStrs{defaultServerStrIndex};
+apath=getCompiledDirForServer(selection.server);
+lastServer='server-03-female-edf-157';
 fs=[];
+
+% populate subjectStrs
+subjectStrs = {};
+subjectUINs = {};
+subjects = getAllSubjects(conn);
+for i=1:length(subjects)
+    subjectStrs{end+1}=subjects{i}.subjectID;
+    subjectUINs{end+1}=subjects{i}.subject_uin;
+end
+% flag for skipping calcplot stuff - if by subject, we already have our assignment picked out
+bySubject = false;
+% choices for compilePath (apath) - used only if bySubject (because we don't know where the compiled records are stored)
+pathStrs = {'\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\ratrixAdmin\rack3\compiledTrialRecords\', ...
+    '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\behavior\rig1TrialRecords\compiled', ...
+    '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\behavior\pmeierTrialRecords\compiled', ...
+    '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\ratrixAdmin\compiledRecords'};
+
 
 heats=getHeats(conn);
 heatStrs={'all heats'};
@@ -73,14 +91,31 @@ getStationInfo
     function getStationInfo
         conn=dbConn;
         %s=getStations(conn)
-        s=getStationsOnRack(conn,selection.rack);
+        class(selection.server)
+        selection.server
+        s=getStationsForServer(conn,selection.server);
+        % ====================================
+        % 10/3/08 - do some processing here on s, so that we make the row field independent of the rack (for erik's server, we just put the rows one after another)
+        rack_used = s{1}.rack_id;
+%         max_row_so_far = s{1}.row;
+        for i=1:length(s)
+            if s{i}.rack_id ~= rack_used % if this is not the first rack
+                % add something to the row field
+%                 max_row_so_far = max(max_row_so_far, s{i}.row);
+                s{i}.row = s{i}.row + 1;
+            end
+        end
+%         for i=1:length(s)
+%             row = s{i}.row
+%         end
+        % ====================================
         stationStrs={'all stations'};
         stationIds=stationStrs;
         numRows=0;
         numCols=0;
         for i=1:length(s)
             %s{i}
-            stationStrs{end+1}=['station ' num2str(selection.rack) s{i}.station_id ' (' s{i}.mac ')'];
+            stationStrs{end+1}=['station ' num2str(s{i}.rack_id) s{i}.station_id ' (' s{i}.mac ')'];
             stationIds{end+1}=s{i}.station_id;
             numRows=max(numRows,s{i}.row);
             numCols=max(numCols,s{i}.col);
@@ -105,21 +140,47 @@ fWidth=9*margin+6*ddWidth+eWidth+bWidth;
 fHeight=margin+oneRowHeight+margin;
 f = figure('Visible','off','MenuBar','none','Name','ratrix analysis','NumberTitle','off','Resize','off','Units','pixels','Position',[50 50 fWidth fHeight]);
 
-rackM = uicontrol(f,'Style','popupmenu',...
-    'String',rackStrs,...
+serverM = uicontrol(f,'Style','popupmenu',...
+    'String',serverStrs,...
     'Enable','on',...
-    'Value',defaultRackStrIndex,'Units','pixels','Position',[margin margin ddWidth oneRowHeight],'Callback',@rackC);
-    function rackC(source,eventdata)
-        selection.rack=rack_ids(get(rackM,'Value'));
-        if selection.rack~=lastRack
-            getStationInfo
-            set(stationM ,'String',stationStrs,'Value',1)
-            apath=getCompiledDirForRack(selection.rack);
+    'Value',defaultServerStrIndex,'Units','pixels','Position',[margin margin ddWidth oneRowHeight],'Callback',@serverC);
+    function serverC(source,eventdata)
+        
+        % if this is a server, not "by subject"
+        if get(serverM,'Value') ~= bySubjectIndex
+            % disable and hide by subject dropdown, enable heatM and stationM
+            set(subjectM,'Enable','off','Visible','off');
+            set(compilePathM,'Enable','off','Visible','off');
+            set(heatM,'Enable','on','Visible','on');
+            set(stationM,'Enable','on','Visible','on');
+            set(typeM,'Enable','on');
+            bySubject = false;
+            
+            selection.server=serverStrs{get(serverM,'Value')};
+    %         if selection.server~=lastServer
+            if ~strcmp(selection.server, lastServer)
+                getStationInfo
+                set(stationM ,'String',stationStrs,'Value',1)
+                apath=getCompiledDirForServer(selection.server);
 
-            lastRack=selection.rack;
+                lastServer=selection.server;
+            end
+            
+        else
+            % this is "by subject"
+            % update UI to show subject dropdown
+            set(subjectM,'Enable','on','Visible','on');
+            set(compilePathM,'Enable','on','Visible','on');
+            set(heatM,'Enable','off','Visible','off');
+            set(stationM,'Enable','off','Visible','off');
+            % set type='all', bySubject (to prevent calcplot from running), and disable the typeM button
+            selection.type='all';
+            set(typeM,'Value',1);
+            set(typeM,'Enable','off');
+            bySubject = true;
         end
-
-        selection=calcplot(selection,heatStrs,numRows,numCols,s);
+        
+        selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject);
     end
 
 heatM = uicontrol(f,'Style','popupmenu',...
@@ -127,7 +188,7 @@ heatM = uicontrol(f,'Style','popupmenu',...
     'Value',1,'Units','pixels','Position',[2*margin+ddWidth margin ddWidth oneRowHeight],'Callback',@heatC);
     function heatC(source,eventdata)
         selection.heat=heatStrs{get(heatM,'Value')};
-        selection=calcplot(selection,heatStrs,numRows,numCols,s);
+        selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject);
     end
 
 stationM = uicontrol(f,'Style','popupmenu',...
@@ -135,7 +196,7 @@ stationM = uicontrol(f,'Style','popupmenu',...
     'Value',1,'Units','pixels','Position',[3*margin+2*ddWidth margin ddWidth oneRowHeight],'Callback',@stationC);
     function stationC(source,eventdata)
         selection.station=stationIds{get(stationM,'Value')};
-        selection=calcplot(selection,heatStrs,numRows,numCols,s);
+        selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject);
     end
 
 % subjectM = uicontrol(f,'Style','popupmenu',...
@@ -143,6 +204,26 @@ stationM = uicontrol(f,'Style','popupmenu',...
 %     'Value',1,'Units','pixels','Position',[4*margin+3*ddWidth margin ddWidth oneRowHeight],'Callback',@subjectC);
 %     function subjectC(source,eventdata)
 %     end
+
+% ========================================================================================
+% added 10/3/08
+subjectM = uicontrol(f,'Style','popupmenu',...
+    'String',subjectStrs,'Enable','off','Visible','off',...
+    'Value',1,'Units','pixels','Position',[2*margin+ddWidth margin ddWidth oneRowHeight],'Callback',@subjectC);
+    function subjectC(source,eventdata)
+        % update selection.subjects to include this one subject
+        selection.subjects={};
+        selection.subjects{1,1,1}=subjectStrs{get(subjectM,'Value')};
+    end
+
+compilePathM = uicontrol(f,'Style','popupmenu',...
+    'String',pathStrs,'Enable','off','Visible','off',...
+    'Value',1,'Units','pixels','Position',[3*margin+2*ddWidth margin ddWidth oneRowHeight],'Callback',@compilePathC);
+    function compilePathC(source,eventdata)
+        % choose the correct server and assign to apath
+        apath=pathStrs{get(compilePathM,'Value')};
+    end
+% ========================================================================================
 
 
 
@@ -152,7 +233,7 @@ typeM = uicontrol(f,'Style','popupmenu',...
     'Value',filterTypeIndex,'Units','pixels','Position',[4*margin+3*ddWidth margin ddWidth oneRowHeight],'Callback',@typeC);
     function typeC(source,eventdata)
         selection.type=typeStrs{get(typeM,'Value')};
-        selection=calcplot(selection,heatStrs,numRows,numCols,s);
+        selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject);
     end
 
 filterM = uicontrol(f,'Style','popupmenu',...
@@ -171,7 +252,7 @@ filterM = uicontrol(f,'Style','popupmenu',...
             otherwise
                 error('weird')
         end
-        selection=calcplot(selection,heatStrs,numRows,numCols,s);
+        selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject);
     end
 
 filterE = uicontrol(f,'Style','edit','String',num2str(selection.filterVal),'Units','pixels','Enable','off','Position',[6*margin+5*ddWidth margin eWidth oneRowHeight],'Callback',@startC);
@@ -182,7 +263,7 @@ filterE = uicontrol(f,'Style','edit','String',num2str(selection.filterVal),'Unit
         else
             set(filterE,'String',selection.filterVal);
         end
-        selection=calcplot(selection,heatStrs,numRows,numCols,s);
+        selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject);
     end
 
 filterParamM = uicontrol(f,'Style','popupmenu',...
@@ -191,7 +272,7 @@ filterParamM = uicontrol(f,'Style','popupmenu',...
     function filterParamC(source,eventdata)
         strs=get(filterParamM,'String');
         selection.filterParam=strs{get(filterParamM,'Value')};
-        selection=calcplot(selection,heatStrs,numRows,numCols,s);
+        selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject);
     end
 
 
@@ -208,15 +289,17 @@ plotB=uicontrol(f,'Style','pushbutton','String','plot','Units','pixels','Positio
 
 %align([rackM heatM stationM subjectM typeM plotB],'Fixed',margin,'Middle');
 set(f,'Visible','on')
-selection=calcplot(selection,heatStrs,numRows,numCols,s);
+selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject);
 end
 
     function out=getRow(s,assign)
 
         done=false;
         for i=1:length(s)
-            if strcmp(s{i}.station_id,assign.station_id)
+            if strcmp(s{i}.station_id,assign.station_id) && s{i}.rack_id == assign.rack_id
                 if done
+                    s{i}
+                    assign
                     error('found multiple stations for that id')
                 end
                 out=s{i}.row;
@@ -233,7 +316,7 @@ end
 
         done=false;
         for i=1:length(s)
-            if strcmp(s{i}.station_id,assign.station_id)
+            if strcmp(s{i}.station_id,assign.station_id) && s{i}.rack_id == assign.rack_id
                 if done
                     error('found multiple stations for that id')
                 end
@@ -246,82 +329,91 @@ end
         end
     end
 
-function selection=calcplot(selection,heatStrs,numRows,numCols,s)
+function selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject)
 conn=dbConn;
 
-selection.subjects={};
-selection.titles={};
 
-if strcmp(selection.heat,'all heats')
+% if by subject, all you need to do is assign the title (subjects is already assigned)
+if bySubject
+    selection.titles = {[selection.subjects{1,1,1}]};
+else
+% not by subject - do the usual
 
-    if strcmp(selection.station,'all stations')
+    selection.subjects={};
+    selection.titles={};
+    if strcmp(selection.heat,'all heats')
 
-        for k=1:length(heatStrs)-1
-            for i=1:numRows
-                for j=1:numCols
-                    selection.subjects{k,i,j}={};
+        if strcmp(selection.station,'all stations')
+
+            for k=1:length(heatStrs)-1
+                for i=1:numRows
+                    for j=1:numCols
+                        selection.subjects{k,i,j}={};
+                    end
+                end
+            end
+        else
+            selection.titles={['station ' selection.station ': all heats']};
+            for i=1:ceil(sqrt(length(heatStrs)-1))
+                for j=1:ceil((length(heatStrs)-1)/ceil(sqrt(length(heatStrs)-1)))
+                    selection.subjects{1,i,j}={};
                 end
             end
         end
-    else
-        selection.titles={['station ' num2str(selection.rack) selection.station ': all heats']};
-        for i=1:ceil(sqrt(length(heatStrs)-1))
-            for j=1:ceil((length(heatStrs)-1)/ceil(sqrt(length(heatStrs)-1)))
-                selection.subjects{1,i,j}={};
-            end
-        end
-    end
 
-    for i=1:length(heatStrs)
-        if ~strcmp(heatStrs{i},'all heats')
-            if strcmp(selection.station,'all stations')
-                selection.titles{end+1}=[heatStrs{i} ' heat'];
-            end
-            assignments=getAssignments(conn,selection.rack,heatStrs{i});
-            for j=1:length(assignments)
-                if strcmp(selection.station,'all stations') %all heats, all stations
-                    selection.subjects{i-1,getRow(s,assignments{j}),getCol(s,assignments{j})}=assignments{j}.subject_id;
-                    %fprintf('%s %s %d %d\n',heatStrs{i},assignments{j}.subject_id,getRow(s,assignments{j}),getCol(s,assignments{j}))
-                else %specific station, all heats
-                    if strcmp(assignments{j}.station_id,selection.station)
-                        selection.subjects{i-1}=assignments{j}.subject_id;
+        for i=1:length(heatStrs)
+            if ~strcmp(heatStrs{i},'all heats')
+                if strcmp(selection.station,'all stations')
+                    selection.titles{end+1}=[heatStrs{i} ' heat'];
+                end
+                assignments=getAssignmentsForServer(conn,selection.server,heatStrs{i});
+                for j=1:length(assignments)
+                    if strcmp(selection.station,'all stations') %all heats, all stations
+                        selection.subjects{i-1,getRow(s,assignments{j}),getCol(s,assignments{j})}=assignments{j}.subject_id;
+                        %fprintf('%s %s %d %d\n',heatStrs{i},assignments{j}.subject_id,getRow(s,assignments{j}),getCol(s,assignments{j}))
+                    else %specific station, all heats
+                        if strcmp(assignments{j}.station_id,selection.station)
+                            selection.subjects{i-1}=assignments{j}.subject_id;
+                        end
                     end
                 end
             end
         end
-    end
-else
-    assignments=getAssignments(conn,selection.rack,selection.heat);
+    else
+        assignments=getAssignmentsForServer(conn,selection.server,selection.heat);
 
-    if strcmp(selection.station,'all stations') %specific heat, all stations
-        %selection.subjects={};
-        selection.titles={[selection.heat ' heat: all stations']};
-        for j=1:length(assignments)
-            selection.subjects{1,getRow(s,assignments{j}),getCol(s,assignments{j})}=assignments{j}.subject_id;
-        end
-
-    else %specific heat, specific station
-
-        done=false;
-        selection.titles={['station ' num2str(selection.rack) selection.station ': ' selection.heat ' heat']};
-        for j=1:length(assignments)
-
-            if strcmp(assignments{j}.station_id,selection.station)
-                if done
-                    error('found multiple subjects for that station and heat')
-                end
-                selection.subjects{1,1,1}=assignments{j}.subject_id;
-                done=true;
+        if strcmp(selection.station,'all stations') %specific heat, all stations
+            %selection.subjects={};
+            selection.titles={[selection.heat ' heat: all stations']};
+            for j=1:length(assignments)
+                selection.subjects{1,getRow(s,assignments{j}),getCol(s,assignments{j})}=assignments{j}.subject_id;
             end
-        end
-        if ~done
-            warning('couldn''t find subject for that station and heat')
-        end
 
+        else %specific heat, specific station
+
+            done=false;
+            selection.titles={['station ' selection.station ': ' selection.heat ' heat']};
+            for j=1:length(assignments)
+
+                if strcmp(assignments{j}.station_id,selection.station)
+                    if done
+                        error('found multiple subjects for that station and heat')
+                    end
+                    selection.subjects{1,1,1}=assignments{j}.subject_id;
+                    done=true;
+                end
+            end
+            if ~done
+                warning('couldn''t find subject for that station and heat')
+            end
+
+        end
     end
+
+    closeConn(conn);
+    selection
+    permute(selection.subjects,[2 3 1])
+
 end
 
-closeConn(conn);
-selection
-permute(selection.subjects,[2 3 1])
-end
+end % end function

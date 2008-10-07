@@ -2,10 +2,10 @@ function out=stimMgrOKForTrialMgr(sm,tm)
 if isa(tm,'trialManager')
     switch class(tm)
         case 'freeDrinks'
-            out=1;
+            out=0;
         case 'nAFC'
-            out=1;
-        case 'phasednAFC'
+            out=0;
+        case 'phasedTrialManager'
             out=1;
         otherwise
             out=0;

@@ -41,7 +41,9 @@ bySubjectIndex = length(serverStrs); % this holds the value of the serverM butto
 
 defaultServerStrIndex = 3;
 selection.server=serverStrs{defaultServerStrIndex};
-apath=getCompiledDirForServer(selection.server);
+% 10.3.08 - apath is now subject specific, so initialize to null
+apath = '';
+% apath=getCompiledDirForServer(selection.server);
 lastServer='server-03-female-edf-157';
 fs=[];
 
@@ -55,11 +57,7 @@ for i=1:length(subjects)
 end
 % flag for skipping calcplot stuff - if by subject, we already have our assignment picked out
 bySubject = false;
-% choices for compilePath (apath) - used only if bySubject (because we don't know where the compiled records are stored)
-pathStrs = {'\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\ratrixAdmin\rack3\compiledTrialRecords\', ...
-    '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\behavior\rig1TrialRecords\compiled', ...
-    '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\behavior\pmeierTrialRecords\compiled', ...
-    '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\ratrixAdmin\compiledRecords'};
+
 
 
 heats=getHeats(conn);
@@ -150,7 +148,6 @@ serverM = uicontrol(f,'Style','popupmenu',...
         if get(serverM,'Value') ~= bySubjectIndex
             % disable and hide by subject dropdown, enable heatM and stationM
             set(subjectM,'Enable','off','Visible','off');
-            set(compilePathM,'Enable','off','Visible','off');
             set(heatM,'Enable','on','Visible','on');
             set(stationM,'Enable','on','Visible','on');
             set(typeM,'Enable','on');
@@ -161,7 +158,7 @@ serverM = uicontrol(f,'Style','popupmenu',...
             if ~strcmp(selection.server, lastServer)
                 getStationInfo
                 set(stationM ,'String',stationStrs,'Value',1)
-                apath=getCompiledDirForServer(selection.server);
+%                 apath=getCompiledDirForServer(selection.server); %10/3/08 - apath is now subject-specific, so useless to set here
 
                 lastServer=selection.server;
             end
@@ -170,7 +167,6 @@ serverM = uicontrol(f,'Style','popupmenu',...
             % this is "by subject"
             % update UI to show subject dropdown
             set(subjectM,'Enable','on','Visible','on');
-            set(compilePathM,'Enable','on','Visible','on');
             set(heatM,'Enable','off','Visible','off');
             set(stationM,'Enable','off','Visible','off');
             % set type='all', bySubject (to prevent calcplot from running), and disable the typeM button
@@ -216,13 +212,6 @@ subjectM = uicontrol(f,'Style','popupmenu',...
         selection.subjects{1,1,1}=subjectStrs{get(subjectM,'Value')};
     end
 
-compilePathM = uicontrol(f,'Style','popupmenu',...
-    'String',pathStrs,'Enable','off','Visible','off',...
-    'Value',1,'Units','pixels','Position',[3*margin+2*ddWidth margin ddWidth oneRowHeight],'Callback',@compilePathC);
-    function compilePathC(source,eventdata)
-        % choose the correct server and assign to apath
-        apath=pathStrs{get(compilePathM,'Value')};
-    end
 % ========================================================================================
 
 

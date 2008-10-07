@@ -155,3 +155,11 @@ protocols/stimManagers/@filteredNoise/private/loadStimFile.m -text
 db/@dbConn/getStationsForServer.m -text
 db/@dbConn/getAllSubjects.m -text
 db/@dbConn/getServers.m -text
+protocols/trialManagers/@phasedTrialManager/stationOKForTrialManager.m -text
+protocols/trialManagers/@phasedTrialManager/validateStimSpecs.m -text
+protocols/trialManagers/@phasedTrialManager/runRealTimeLoop.m -text
+protocols/trialManagers/@phasedTrialManager/stimOGL_OLD.m -text
+protocols/trialManagers/@phasedTrialManager/handlePhasedTrialLogic.m -text
+protocols/stimManagers/@examplePhased/getPhaseCriteria.m -text
+protocols/stimManagers/@examplePhased/getPhases.m -text
+db/@dbConn/getCompilePathBySubject.m -text

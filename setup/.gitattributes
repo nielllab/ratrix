@@ -21,3 +21,4 @@ setupBS/History.m -text
 /setProtocolTEST.m -text
 setupBS/getRewardDuration.m -text
 setupBS/getMSPenalty.m -text
+/setProtocolPhased.m -text

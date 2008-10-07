@@ -6,7 +6,7 @@ getPathQuery = sprintf('select store_path from subjects where display_uin=''%s''
 
 path=query(conn,getPathQuery);
 if isempty(path{1})
-    error('could not find permanent store path for this subject %s', subjectName);
+    error('could not find permanent store path for this subject %s', subjectID);
 end
 
 

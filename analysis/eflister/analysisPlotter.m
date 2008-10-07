@@ -18,6 +18,11 @@ if strcmp(selection.type,'all')
         toBePlotted = {'performance','trials per day','bias','weight'};
         [numRows numCols] = getArrangement(length(toBePlotted));
         for i = 1:length(subIDs)
+            % added 10/3/08 - get compiledFileDir from subID, subject-specific
+            conn = dbConn();
+            compiledFileDir = getCompilePathBySubject(conn, subIDs{1});
+            compiledFileDir = compiledFileDir{1}
+            closeConn(conn);
             fs(end+1) = figure('Name', char(subIDs(i)),'NumberTitle','off');
             for j = 1:numRows
                 for k = 1:numCols
@@ -54,6 +59,11 @@ else
                 if ~isempty(selection.subjects{i,j,k})
                     subplot(numRows,numCols,(j-1)*numCols+k)
                     title(selection.subjects{i,j,k})
+                    % added 10/3/08 - get compiledFileDir from subID, subject-specific
+                    conn = dbConn();
+                    compiledFileDir = getCompilePathBySubject(conn, selection.subjects{i,j,k});
+                    compiledFileDir = compiledFileDir{1}
+                    closeConn(conn);
                     hold on
                     doAnalysisPlot(compiledFileDir,selection.subjects{i,j,k},selection.type, selection.filter, selection.filterVal, selection.filterParam,includeKeyboard);
                 end

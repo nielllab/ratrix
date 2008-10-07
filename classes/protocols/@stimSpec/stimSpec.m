@@ -23,7 +23,8 @@ spec.stimType = 'loop';
 spec.rewardType = [];
 spec.rewardDuration = 100;
 spec.framesUntilTransition = [];
-spec.stochasticDistribution = []; % for now the "distribution" is a unit random criterion between 0 and 1
+spec.stochasticDistribution = []; % the distribution is a cell array of paired key-values {key1, value1, key2, value2, ...} 
+                                    % where the key is the probability (0<=p<=1) and the value is the phase to transition to
 
 
 switch nargin
@@ -83,7 +84,7 @@ switch nargin
         end
         
         % stimType
-        if ischar(varargin{3}) && (strcmp(varargin{3}, 'toggle') || strcmp(varargin{3}, 'loop') || ...
+        if ischar(varargin{3}) && (strcmp(varargin{3}, 'trigger') || strcmp(varargin{3}, 'loop') || ...
                 strcmp(varargin{3}, 'once')) % handle single char arrays
             % error-check that if we want toggle mode, only a 2-frame movie
             if strcmp(varargin{3}, 'toggle') && size(spec.stimulus,3) ~= 2

@@ -35,11 +35,7 @@ end
 % end
 % =============================
 
-if ~exist('destination', 'var') || isempty(destination)
-    compiledRecordsDirectory=getCompiledDirForServer(server_name);
-else
-    compiledRecordsDirectory=destination;    
-end
+
 
 % compiledRecordsDirectory
 
@@ -127,9 +123,7 @@ storageMethod='vector'; %'structArray'
 
 
 
-subjectFiles={};
-ranges={};
-names={};
+
 
 % 
 % d=dir(subjectDirectory); %unreliable if remote (this function doesn't want to rely on oracle, and it is low-impact to miss some subjects)
@@ -155,33 +149,60 @@ names={};
 
 % REPLACE WITH SUBJECT-SPECIFIC
 % get subjectIDs based on the server_name - ignore this other crap
+names={};
+subjectFiles={};
+ranges={};
 
 if ~exist('subjectIDs','var') || isempty(subjectIDs) % if subjectIDs not given as input, retrieve from oracle
     conn = dbConn();
     subjectIDs = getSubjectIDsFromServer(conn, server_name);
     closeConn(conn);
+    if isempty(subjectIDs)
+        error('could not find any subjects for this server: %s', server_name);
+    end
 end
 
 % now for each subject, retrieve the trialRecords
-for i=1:length(subjectIDs)
-    names{end+1} = subjectIDs{i}; % why this is repeated i dont know
+for k=1:length(subjectIDs)
+
+    names{end+1} = subjectIDs{k}; % why this is repeated i dont know
     % if we have standAlonePath, don't overwrite it!
     if ~exist('source','var') || isempty(source)
             conn = dbConn();
-        store_path = getPermanentStorePathBySubject(conn, subjectIDs{i});
+        store_path = getPermanentStorePathBySubject(conn, subjectIDs{k});
         store_path = store_path{1}; % b/c this gets returned by the query as a 1x1 cell array holding the char array
             closeConn(conn);
     else
-        store_path = fullfile(source, subjectIDs{i});
+        store_path = fullfile(source, subjectIDs{k});
 %         source
     end
     [subjectFiles{end+1} ranges{end+1}] = getTrialRecordFiles(store_path);
-end    
 
+end
 
 % ====================================================================================================
-    
+% subjectFiles
+% size(subjectFiles)
+% subjectIDs
+% names
+% conn=dbConn();
+% for i=1:length(subjectFiles)
+%     compiledRecordsDirectory=getCompilePathBySubject(conn, names{i})
+% end
+% closeConn(conn);
+% error('stop here');
+
 for i=1:length(subjectFiles)
+    % 10/3/08 - subject specific compile paths
+    if ~exist('destination', 'var') || isempty(destination)
+        conn=dbConn();
+        compiledRecordsDirectory=getCompilePathBySubject(conn, names{i});
+        compiledRecordsDirectory = compiledRecordsDirectory{1};
+        closeConn(conn);
+    else
+        compiledRecordsDirectory=destination;    
+    end
+
     d=dir(fullfile(compiledRecordsDirectory,[names{i} '.compiledTrialRecords.*.mat'])); %unreliable if remote
     compiledFile=[];
     compiledRange=zeros(2,1);
@@ -221,9 +242,9 @@ for i=1:length(subjectFiles)
             if ~needToAdd && ~isempty(compiledFile)
                 %load them
                 compiledTrialRecords=loadCompiledTrialRecords(compiledFile,compiledRange,{fieldNames{:,1}});
-                
-           
-     
+
+
+
             end
             needToAdd=true;
             compiledRange(:,end+1)=ranges{i}(:,j);
@@ -298,7 +319,7 @@ for i=1:length(subjectFiles)
                                             compiledTrialRecords.flankerOrientation(ranges{i}(1,j)+tr-1)=newTrialRecs(tr).stimDetails.flankerOrientation(1);
                                         end
                                     end
-                                    
+
                              case 'flankerPosAngle'
                                     compiledTrialRecords.flankerPosAngle(ranges{i}(1,j):ranges{i}(2,j))=nan;
                                     %use the first flankerPosAngle
@@ -323,7 +344,7 @@ for i=1:length(subjectFiles)
 
                                         end
                                     end
-                                    
+
                                 case {'maxCorrectForceSwitch','actualRewardDuration', 'manualVersion','autoVersion','didStochasticResponse','containedForcedRewards', 'didHumanResponse',...
                                         'totalFrames', 'startTime', 'numMisses',...
                                         'correctResponseIsLeft', 'targetContrast','targetOrientation', 'flankerContrast',...
@@ -334,7 +355,7 @@ for i=1:length(subjectFiles)
                                     end
 
                                 otherwise
-                                    
+
                                     error(sprintf('no converter for field: %s',fieldNames{m,1}))
                             end
 
@@ -432,6 +453,7 @@ for i=1:length(subjectFiles)
         fprintf('nothing to do for %s\n\n',names{i})
     end
 end
+    
 
 
 

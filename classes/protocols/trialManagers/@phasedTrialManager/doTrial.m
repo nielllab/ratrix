@@ -1,7 +1,11 @@
-function [trialManager updateTM newSM updateSM stopEarly trialRecords]=doTrial(trialManager,station,stimManager,subject,r,window,ifi,rn,trialRecords,sessionNumber)
+function [trialManager updateTM newSM updateSM stopEarly trialRecords station]=doTrial(trialManager,station,stimManager,subject,r,rn,trialRecords,sessionNumber)
 verbose=1;
 updateTM=false;
 stopEarly=0;
+
+if ~isempty(rn)
+    error('rn in phasedTrialManager/doTrial is not empty anymore');
+end
 
 % List of variables used: 
     % verbose - flag for verbose output
@@ -91,19 +95,15 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 isCorrection]= ...
                 calcStim(stimManager, ... 
                 class(trialManager), ...
-                getPhases(trialManager), ... %added the cell array of phases in the given TM
-				getPhaseCriteria(trialManager), ... %added the cell array of graduation criteria in the given TM
-                1/ifi, ...
                 getResponsePorts(trialManager,getNumPorts(station)), ...
                 getNumPorts(station), ...
-                getWidth(station), ...
-                getHeight(station), ...
+                getLUTbits(station), ...
                 trialRecords(1:end-1));
             
             % we have called calcStim() to successfully return our cell
             % array of stimSpec objects along with target, distractor, and
             % request ports, and other information
-			
+            
 			% NEED TO VALIDATE STIMSPECS HERE
 			validateStimSpecs(stimSpecs);
             
@@ -121,12 +121,16 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                     audioStimulus=getName(audioStim);
                     % Add/replace the stimulus sound clip to the list of clips in
                     % the sound manager
-                    trialManager.soundMgr = addSound(trialManager.soundMgr,audioStim);
+%                     trialManager.soundMgr = addSound(trialManager.soundMgr,audioStim);
+                    tempSoundMgr = addSound(getSoundManager(trialManager), audioStim); % 8/12/08 - changed to use setter and getter for tm.soundMgr to support new stimOGL/doTrial architecture
+                    trialManager = setSoundManager(trialManager, tempSoundMgr);
                 end
             end
 
             % Wait to cache sounds until here because you might get new ones
-            [trialManager.soundMgr updateSndM]=cacheSounds(trialManager.soundMgr);  %update of soundManager was overwritting update of stimulus manager. now fixed pmm 2008/05/02 
+            [tempSoundMgr updateSndM] = cacheSounds(getSoundManager(trialManager)); % 8/12/08 - changed to use setter and getter for tm.soundMgr to support new stimOGL/doTrial architecture
+            trialManager = setSoundManager(trialManager, tempSoundMgr);
+%             [trialManager.soundMgr updateSndM]=cacheSounds(getSoundManager(trialManager));  %update of soundManager was overwritting update of stimulus manager. now fixed pmm 2008/05/02 
             updateTM = updateTM || updateSndM;  %
 
             % Create soundType objects for stimOGL
@@ -179,72 +183,58 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             end
             
             % need a variable finalPhase for stimOGL (know when end trial)
-            finalPhase = length(getPhases(trialManager));
+            finalPhase = length(getPhases(newSM));
 
             % finished setting up variables and stuff, now we call stimOGL
             % will deal with trialRecords recordkeeping later - just let it
             % record whatever it does for now
                %         audioStimulus, ... %no longer need this since we have stimSpecs
             % replace all the trialRecord stuff with an array (possibly) of phaseRecords
-            if window>=0 && ifi>0
-                [stopEarly  response ...
-                    trialRecords(trialInd).leftWithManualPokingOn ...
-                    trialRecords(trialInd).containedManualPokes ...
-                    trialRecords(trialInd).actualRewardDurationMSorUL ...
-                    trialRecords(trialInd).proposedRewardDurationMSorUL ...
-                    trialRecords(trialInd).phaseRecords]= ...
-                    stimOGL( ...
-                    trialManager, ...
-                    stimSpecs,  ...  %changed stim to stimSpecs (stimOGL needs to handle a cell array of stimSpecs for this trial)
-                    finalPhase, ... %added this field to know when to end trial
-                    soundTypes, ... %added this field to make use of soundTypes
-                    LUT, ...
-                    scaleFactors, ...
-                    window, ...
-                    ifi, ...
-                    trialRecords(trialInd).targetPorts, ...
-                    trialRecords(trialInd).distractorPorts, ...
-                    getRequestPorts(trialManager, getNumPorts(station)), ...
-                    station, ...
-                    manualOn, ...
-                    1, ...
-                    .1, ... % 10% should be ~1 ms of acceptable frametime error
-                    0,isCorrection,rn,getID(subject),trialRecords(trialInd).stimManagerClass);
+            pStr=[trialRecords(trialInd).protocolName '(' num2str(trialRecords(trialInd).protocolVersion.manualVersion) 'm:' num2str(trialRecords(trialInd).protocolVersion.autoVersion) 'a)' ' step:' num2str(trialRecords(trialInd).trainingStepNum) '/' num2str(trialRecords(trialInd).numStepsInProtocol) ];
 
-                if stopEarly
-                    'got stopEarly 1'
-                end
-
-                currentValveStates=verifyValvesClosed(station);
-
-            else
-                error('bad window or ifi')
+            trialLabel=sprintf('session:%d trial:%d (%d)',sessionNumber,sum(trialRecords(trialInd).sessionNumber == [trialRecords.sessionNumber]),trialRecords(trialInd).trialNumber);            
+            
+                [stopEarly  trialRecords(trialInd).response ...
+                trialRecords(trialInd).leftWithManualPokingOn ...
+                trialRecords(trialInd).containedManualPokes ...
+                trialRecords(trialInd).actualRewardDurationMSorUL ...
+                trialRecords(trialInd).proposedRewardDurationMSorUL ...
+                eyeData...
+                gaze...
+                station ...
+                trialRecords(trialInd).phaseRecords]= ...
+                stimOGL( ...
+                trialManager, ...
+                stimSpecs,  ...  %changed stim to stimSpecs (stimOGL needs to handle a cell array of stimSpecs for this trial)
+                finalPhase, ... %added this field to know when to end trial
+                soundTypes, ... %added this field to make use of soundTypes
+                LUT, ...
+                scaleFactors, ...
+                trialRecords(trialInd).targetPorts, ...
+                trialRecords(trialInd).distractorPorts, ...
+                getRequestPorts(trialManager, getNumPorts(station)), ...
+                station, ...
+                manualOn, ...
+                1, ...
+                .1, ... % 10% should be ~1 ms of acceptable frametime error
+                0,isCorrection,rn,getID(subject),trialRecords(trialInd).stimManagerClass,pStr,trialLabel,getEyeTracker(trialManager),0);
+            
+            if stopEarly
+                'got stopEarly 1'
             end
 
-%             error('totalRewardDuration was %d', trialRecords(trialInd).actualRewardDurationMSorUL);
-            % set trialRecords(trialInd).correct according to the response from stimOGL
-            if strcmp(response, 'correct')
-                trialRecords(trialInd).correct = 1;
+            currentValveStates=verifyValvesClosed(station);
+
+            resp=find(trialRecords(trialInd).response);
+            if ~ischar(trialRecords(trialInd).response) && length(resp)==1
+
+                trialRecords(trialInd).correct = ismember(resp,trialRecords(trialInd).targetPorts);
             else
                 trialRecords(trialInd).correct = 0;
+                trialRecords(trialInd).response
+                'setting stopEarly'
+                stopEarly = 1;
             end
-            
-            % check response to determine stopEarly
-            trialRecords(trialInd).response = response;
-            if strcmp(response, 'correct') || strcmp(response, 'wrong')
-                stopEarly = false;
-            else
-                stopEarly = true;
-                
-            end
-          %  error(response);
-%             resp=find(trialRecords(trialInd).response);
-%             if ~ischar(trialRecords(trialInd).response) && length(resp)==1
-%                 trialRecords(trialInd).correct = ismember(resp,trialRecords(trialInd).targetPorts);
-%             else
-%                 trialRecords(trialInd).correct = 0;
-%             end
-
 
 %             %UPDATE REWARDS AND PENALTIES BASED ON REWARD MANAGER - pmm 070525
 %             %rewardManager happens to live in trialManager for now... getting it for use
@@ -535,10 +525,28 @@ else
     isa(r,'ratrix')
     stimManager
     isa(stimManager,'stimManager')
-    isa(stimManager,'ifFeatureGoRightWithTwoFlank')
+    isa(stimManager,'examplePhased')
     rn
     getRewardMethod(station)
 '****'
+    if ~isa(station,'station') 
+        error('no station')
+    end
+    if ~isa(stimManager, 'stimManager') 
+        error('no stimManager')
+    end
+    if ~isa(subject, 'subject') 
+        error('no subject')     
+    end
+    if ~isa(r, 'ratrix')    
+        error('no ratrix')
+    end
+    if ~isa(rn, 'rnet') && isempty(rn)
+        error('no rnet %s', getRewardMethod(station))
+    end
+    if ~isa(rn, 'rnet')
+        error('non-empty rnet %s', getRewardMethod(station))
+    end
     
     error('need station, stimManager, subject, ratrix, and rnet objects')
 end

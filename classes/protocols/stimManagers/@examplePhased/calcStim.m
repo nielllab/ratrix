@@ -1,4 +1,4 @@
-function [stimManager updateSM stimSpecs soundTypes LUT details scaleFactors targetPorts distractorPorts isCorrection] = calcStim(stimManager,trialManagerClass,phases,criteria,frameRate,responsePorts,totalPorts,width,height,trialRecords)
+function [stimManager updateSM stimSpecs soundTypes LUT details scaleFactors targetPorts distractorPorts isCorrection] = calcStim(stimManager,trialManagerClass,responsePorts,totalPorts, LUTbits, trialRecords)
 % calcStim() for the phasedStim stimulus manager
 % test run with minimal options
 % just draw a box or something useless....
@@ -11,12 +11,14 @@ rewardDuration = 100; %maybe have this as a field to phasedStim constructor
 %finalPhase = length(phases); %finalPhase is just the location of the last phase in the stimSpec array (not counting progressives at the end)
                                 % moved to doTrial
 
+phases = stimManager.phases;
+criteria = stimManager.phaseCriteria;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % calculate details, type, targetPorts, distractorPorts, isCorrection
 % only handle the phasedStim trialManager class for now
 switch trialManagerClass
-    case 'phasednAFC'
+    case 'phasedTrialManager'
         %type='trigger';
         % insert pctCorrectionTrials=.5 into each stimSpec
         details.pctCorrectionTrials=.5; % need to change this to be passed in from trial manager
@@ -70,26 +72,25 @@ end
 % Some parameters for the visual stimuli
 params=[0.5,4, 0,-99,1, 0.001,0.5,0.5]; % some random parameters here
 orients=[0:pi/10:pi]; % we need 2 orientations for each phase; total of 10 orientations
-stim = zeros(100,100,2); % preallocate stim
+stim = zeros(250,250,2); % preallocate stim
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Initialization of stimSpecs and soundTypes - also decide how many progressive subphases you have here
-numProgressivePhases = 3; % NUMBER OF PROGRESSIVE SUBPHASES
-stimSpecs = cell(1, length(phases) + numProgressivePhases); % preallocate stimSpecs to be length of phases
-soundTypes = cell(1, length(phases) + numProgressivePhases); % preallocate soundTypes
+% Initialization of stimSpecs and soundTypes 
+stimSpecs = cell(1, length(phases)); % preallocate stimSpecs to be length of phases
+soundTypes = cell(1, length(phases)); % preallocate soundTypes
 lengthOfStims = 0; % initialize lengthOfStims
-scaleFactors = cell(1,length(phases)+numProgressivePhases); % preallocate scaleFactors
+scaleFactors = cell(1,length(phases)); % preallocate scaleFactors
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % for each phase, give it two frames of computeGabors into a stimSpec
 for i=1:length(phases)
 %for i=1:1
     for j=1:2
         params(4)=orients(2*(i-1)+mod(j,10)+1);
-        stim(:,:,j) = computeGabors(params,0.5,100,100,'square','normalizeVertical',1);
+        stim(:,:,j) = computeGabors(params,0.5,250,250,'square','normalizeVertical',1);
         lengthOfStims = lengthOfStims + 1; %increment total length of stims for this phase
  %       figure; imagesc(stim(:,:,j));
     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % now create a stimSpec object from the stim for this phase and the associated graduation criterion (passed in from doTrial and stored in the TM)
+    % now create a stimSpec object from the stim for this phase and the associated graduation criterion
 	% first need to convert from the criterion {'any', nextPhase} to be specified as {[1,2,3], nextPhase} 
 	criterion = criteria{i};
 	for k=1:2:length(criterion)-1
@@ -118,39 +119,20 @@ for i=1:length(phases)
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % handle non-progressive cases
         case 1
-            % if we have progressive phases, wait phase needs to point to first progressive phase
-            if numProgressivePhases > 0
-                criterion{2} = length(phases) + 1;
-            end
-            stimSpecs{i} = stimSpec(stim,criterion,'loop',[],rewardDuration,2000,{0.999, setdiff([1:totalPorts], responsePorts)});
+%             spec=stimSpec(stimulus,criterion,stimType,rewardType,rewardDuration,framesUntilGrad,stochasticDistribution)
+            stimSpecs{i} = stimSpec(stim,criterion,'loop',[],rewardDuration,2000,{0.001, setdiff([1:totalPorts], responsePorts)});
             soundTypes{i} = {responseWait(), requestWait()};
-        %    soundTypes{i} = {responseWait()};
+        case 2
+            stimSpecs{i} = stimSpec(stim,criterion,'trigger','reward',rewardDuration,[],[]); % construct discrim stimSpec
+            soundTypes{i} = {requestWait()};
         case 3
-            stimSpecs{i} = stimSpec(stim,criterion,'toggle','reward',rewardDuration,75,[]);
+            stimSpecs{i} = stimSpec(stim,criterion,'trigger','reward',rewardDuration,75,[]);
             soundTypes{i} = {startCorrect()};
         case 4
-            stimSpecs{i} = stimSpec(stim,criterion,'toggle',[],rewardDuration,75,[]);
+            stimSpecs{i} = stimSpec(stim,criterion,'trigger',[],rewardDuration,75,[]);
             soundTypes{i} = {startWrong()};
         case 5
             stimSpecs{i} = stimSpec(stim,criterion,'loop',[],rewardDuration,150,[]);
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % progressive case
-        case 2
-            % generate progressive subphases at end of stimSpecs cell array
-            storedCr = criterion;
-            for progressiveCounter=1:numProgressivePhases
-                if progressiveCounter ~= numProgressivePhases
-                    criterion = {setdiff([1:totalPorts], responsePorts), progressiveCounter+length(phases)+1}; % this progressive subphase points to the next one
-                else
-                    criterion = {setdiff([1:totalPorts], responsePorts), i}; % this progressive subphase points to the discrim phase
-                end
-                stimSpecs{progressiveCounter+length(phases)} = stimSpec(stim,criterion,'loop','reward',25,[],[]); %shorter reward duration, no autorequest
-                soundTypes{progressiveCounter+length(phases)} = {requestWait()};
-                scaleFactors{length(phases)+progressiveCounter} = getScaleFactor(stimManager); %temporary for now
-            end
-            % now generate the discrim phase
-            stimSpecs{i} = stimSpec(stim,storedCr,'loop','reward',rewardDuration,[],[]); % construct discrim stimSpec
-            %soundTypes{i} = {requestWait()};
         otherwise
             error('should not be here');
     end
@@ -161,6 +143,5 @@ for i=1:length(phases)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
 
-
 % set LUT
-LUT=getLUT(stimManager);
+[LUT stimManager updateSM]=getLUT(stimManager,LUTbits);

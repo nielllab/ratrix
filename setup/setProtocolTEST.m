@@ -229,13 +229,13 @@ cDots6 = coherentDots(stimulus,trialManagerClass,frameRate,responsePorts,totalPo
 svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
 % set up graduationCriterion
 graduateQuickly = performanceCriterion([.9, .5], [uint8(10), uint8(20)]); %cannot use this for freeDrinks b/c no "correct" answer
-
+repeatIndef = repeatIndefinitely();
 
 % DEMO
 ts1 = trainingStep(fd_sto, freeStim, graduateQuickly, noTimeOff(), svnRev);   %stochastic free drinks
 ts2 = trainingStep(fd, freeStim, graduateQuickly, noTimeOff(), svnRev);  %free drinks
 ts3 = trainingStep(vh, freeStim, graduateQuickly, noTimeOff(), svnRev);   %go to stim - orientedGabors w/ nAFC
-ts4 = trainingStep(vh, discrimStim, graduateQuickly, noTimeOff(), svnRev);%orientation discrim - orientedGabors w/ nAFC
+ts4 = trainingStep(vh, discrimStim, repeatIndef, noTimeOff(), svnRev);%orientation discrim - orientedGabors w/ nAFC
 ts5 = trainingStep(vh, imageStim,  graduateQuickly, noTimeOff(), svnRev); %morph discrim - images w/ nAFC
 
 % Balaji

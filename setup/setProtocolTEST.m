@@ -232,8 +232,8 @@ graduateQuickly = performanceCriterion([.9, .5], [uint8(10), uint8(20)]); %canno
 repeatIndef = repeatIndefinitely();
 
 % DEMO
-ts1 = trainingStep(fd_sto, freeStim, graduateQuickly, noTimeOff(), svnRev);   %stochastic free drinks
-ts2 = trainingStep(fd, freeStim, graduateQuickly, noTimeOff(), svnRev);  %free drinks
+ts1 = trainingStep(fd_sto, freeStim, repeatIndef, noTimeOff(), svnRev);   %stochastic free drinks
+ts2 = trainingStep(fd, freeStim, repeatIndef, noTimeOff(), svnRev);  %free drinks
 ts3 = trainingStep(vh, freeStim, graduateQuickly, noTimeOff(), svnRev);   %go to stim - orientedGabors w/ nAFC
 ts4 = trainingStep(vh, discrimStim, repeatIndef, noTimeOff(), svnRev);%orientation discrim - orientedGabors w/ nAFC
 ts5 = trainingStep(vh, imageStim,  graduateQuickly, noTimeOff(), svnRev); %morph discrim - images w/ nAFC
@@ -268,7 +268,7 @@ ts22 = trainingStep(nAFC_increasing_rewards, imageStim,  graduateQuickly, noTime
 % p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8, ts9, ts10, ts11, ts12, ts13, ts14, ts15, ts16, ts17, ...
 %     ts18, ts19, ts20, ts21, ts22});
 % stepNum=21;
-p=protocol('gabor test', {ts4, ts3});
+p=protocol('gabor test', {ts1, ts3});
 stepNum=1;
 
 for i=1:length(subjIDs),

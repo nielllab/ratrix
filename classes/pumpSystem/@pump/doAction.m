@@ -39,12 +39,13 @@ if mlVol<=p.mlMaxSinglePump && mlVol>=0 %|| override
             case 'infuse'
                 if mlVol>0
                     if infTooFar(p)
-                        warning('infuse request while sensor indicates infused too far -- probably flickering sensor with flag right at beam -- trying tiny hysteretic infuse')
-                        [p durs]= sendCommands(p,{'PHN 1' sprintf('VOL %.4g',p.volumeScaler*p.mlAntiRock) 'RUN 1'});
-                        p.currentPosition=p.currentPosition+p.mlAntiRock;
-                        if infTooFar(p)
-                            error('hysteretic infuse failed')
-                        end
+                        %                         warning('infuse request while sensor indicates infused too far -- probably flickering sensor with flag right at beam -- trying tiny hysteretic infuse')
+                        %                         [p durs]= sendCommands(p,{'PHN 1' sprintf('VOL %.4g',p.volumeScaler*p.mlAntiRock) 'RUN 1'});
+                        %                         p.currentPosition=p.currentPosition+p.mlAntiRock;
+                        %                         if infTooFar(p)
+                        %                             error('hysteretic infuse failed')
+                        %                         end
+                        error('infuse request while sensor indicates infused too far')
                     end
                     fprintf('infusing\n')
                     [p durs]= sendCommands(p,{'PHN 1' sprintf('VOL %.4g',p.volumeScaler*mlVol) 'RUN 1'});
@@ -53,12 +54,13 @@ if mlVol<=p.mlMaxSinglePump && mlVol>=0 %|| override
             case 'withdrawl'
                 if mlVol>0
                     if wdrTooFar(p)
-                        warning('withdrawl request while sensor indicates withdrawn too far -- probably flickering sensor with flag right at beam -- trying tiny hysteretic withdrawl')
-                        [p durs]= sendCommands(p,{'PHN 3' sprintf('VOL %.4g',p.volumeScaler*p.mlAntiRock) 'RUN 3'});
-                        p.currentPosition=p.currentPosition-p.mlAntiRock;
-                        if wdrTooFar(p)
-                            error('hysteretic withdrawl failed')
-                        end
+                        %                         warning('withdrawl request while sensor indicates withdrawn too far -- probably flickering sensor with flag right at beam -- trying tiny hysteretic withdrawl')
+                        %                         [p durs]= sendCommands(p,{'PHN 3' sprintf('VOL %.4g',p.volumeScaler*p.mlAntiRock) 'RUN 3'});
+                        %                         p.currentPosition=p.currentPosition-p.mlAntiRock;
+                        %                         if wdrTooFar(p)
+                        %                             error('hysteretic withdrawl failed')
+                        %                         end
+                        error('withdrawl reqeust while sensor indicates withdrawn too far')
                     end
                     fprintf('withdrawing\n')
                     [p durs]= sendCommands(p,{'PHN 3' sprintf('VOL %.4g',p.volumeScaler*mlVol) 'RUN 3'});
@@ -75,7 +77,15 @@ if mlVol<=p.mlMaxSinglePump && mlVol>=0 %|| override
                     [durs t p]=doAction(p,getMlOpportunisticRefill(p),'infuse');
                 end
                 while ~wdrTooFar(p)
-                    [durs t p]=doAction(p,getMlOpportunisticRefill(p),'withdrawl');
+                    try
+                        [durs t p]=doAction(p,getMlOpportunisticRefill(p),'withdrawl');
+                    catch ex
+                        if strcmp(ex.message,'withdrawl reqeust while sensor indicates withdrawn too far')
+                            break %lack of hysteresis on sensor -- it told us that wdrTooFar was false, but then, without moving, decided wdrTooFar was true -- happens when flag is just breaking the beam
+                        else
+                            rethrow(ex)
+                        end
+                    end
                 end
                 [durs t p]=doAction(p,getMlOpportunisticRefill(p),'infuse');
                 while wdrTooFar(p) %added this to avoid the issue of lots of repeated infuse/withdrawl cycles when initing pump

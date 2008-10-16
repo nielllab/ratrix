@@ -16,10 +16,10 @@ lastCommitVersion = properties.commit;
 if ~strcmp(url,targetSVNurl) || ...
         ((isempty(targetRevNum) && runningSVNversion~=repositorySVNversion && runningSVNversion<lastCommitVersion) || ...
             (~isempty(targetRevNum) && targetRevNum~=runningSVNversion))
-%     writeSVNUpdateCommand(targetSVNurl,targetRevNum);
-    fprintf('we need to update\n');
+    writeSVNUpdateCommand(targetSVNurl,targetRevNum);
+%     fprintf('we need to update\n');
 
     quit=true;
-else
-    fprintf('no need to update\n');
+% else
+%     fprintf('no need to update\n');
 end

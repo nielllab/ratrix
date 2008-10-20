@@ -48,7 +48,7 @@ if strcmp(type,'weight')
     end
     %[weights dates] = getBodyWeightHistory(conn,subjectID); %this is fast
     [weights dates thresholds] = getBodyWeightHistory(conn,subjectID); %need a faster solution, see: http://132.239.158.177/trac/rlab_hardware/ticket/129
-    thresholds=.85*thresholds;
+%     thresholds=.85*thresholds; % 10/20/08 - the thresholds from getBodyWeightHistory are already scaled to 85%
     closeConn(conn);
     try
         plot(dates,[weights thresholds]);

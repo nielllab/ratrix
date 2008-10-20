@@ -1,4 +1,6 @@
 function [weights dates thresholds] = getBodyWeightHistory(conn,subject_id)
+% 10/20/08 - the thresholds returned are from the weightthreshold table in oracle, and are already scaled to 85% of mean weights
+% DO NOT RESCALE THEM in analysis
 weights={};
 thresholds={};
 dates={};

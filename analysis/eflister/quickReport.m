@@ -175,7 +175,7 @@ numPlots=3;
 conn=dbConn;
 for i=1:length(ids)
     [weights dates thresholds] = getBodyWeightHistory(conn,ids{i});
-    thresholds=.85*thresholds;
+    %thresholds=.85*thresholds;
     figure(i)
     subplot(2,numPlots,1+[0 1]*numPlots)
     plot(dates,[weights thresholds]);

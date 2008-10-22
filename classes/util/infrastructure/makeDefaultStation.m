@@ -1,4 +1,4 @@
-function st=makeDefaultStation(id,path,mac,physicalLocation,screenNum,rewardMethod)
+function st=makeDefaultStation(id,path,mac,physicalLocation,screenNum,rewardMethod,pportaddr)
 
 % our standard parallel port pin assignments
 % pin register	invert	dir	purpose
@@ -21,6 +21,10 @@ function st=makeDefaultStation(id,path,mac,physicalLocation,screenNum,rewardMeth
 % 16  control           i/o
 % 17  control	inv     i/o
 
+if ~exist('pportaddr','var') || isempty(pportaddr)
+   pportaddr= '0378'
+end
+
 stationSpec.id                                = id;
 stationSpec.path                              = path;
 stationSpec.MACaddress                        = mac;
@@ -28,7 +32,7 @@ stationSpec.physicalLocation                  = physicalLocation;
 stationSpec.screenNum                         = screenNum;
 stationSpec.soundOn                           = true;
 stationSpec.rewardMethod                      = rewardMethod;
-stationSpec.portSpec.parallelPortAddress      = '0378';
+stationSpec.portSpec.parallelPortAddress      = pportaddr;
 stationSpec.portSpec.valveSpec                = int8([4,3,2]);
 stationSpec.portSpec.sensorPins               = int8([13,10,12]);
 stationSpec.portSpec.framePulsePins           = int8(9);

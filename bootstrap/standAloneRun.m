@@ -52,7 +52,7 @@ else
         end
 
         machines={{'1U',mac,[1 1 1]}};
-        rx=createRatrixWithDefaultStations(machines,dataPath,'localTimed',false);
+        rx=createRatrixWithDefaultStations(machines,dataPath,'localTimed',true);
         permStorePath=fullfile(dataPath,'PermanentTrialRecordStore');
         mkdir(permStorePath);
         rx=setStandAlonePath(rx,permStorePath);

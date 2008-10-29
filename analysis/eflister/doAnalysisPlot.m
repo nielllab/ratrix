@@ -52,6 +52,14 @@ if strcmp(type,'weight')
     closeConn(conn);
     try
         plot(dates,[weights thresholds]);
+        % 10/22/08 - added legend
+        alreadyPlotted = get(gcf,'UserData')
+        if isempty(alreadyPlotted) || (~isempty(alreadyPlotted) && ~any(ismember(alreadyPlotted,'weight')))
+            legendStrs = {'observed weights','85% thresholds'};
+            legend(legendStrs, 'Location','NorthWest');
+            alreadyPlotted{end+1}='weight';
+            set(gcf,'UserData',alreadyPlotted);
+        end  
     catch
         plot(0)
         dates

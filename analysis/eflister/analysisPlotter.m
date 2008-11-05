@@ -27,7 +27,7 @@ if strcmp(selection.type,'all')
             for j = 1:numRows
                 for k = 1:numCols
                     subplot(numRows,numCols,(j-1)*numCols+k);
-                    title(char(toBePlotted((j-1)*numCols+k)));
+                    title(sprintf('%s - %s',char(toBePlotted((j-1)*numCols+k)), char(subIDs(i))));
                     hold on
                     doAnalysisPlot(compiledFileDir, subIDs{i}, char(toBePlotted((j-1)*numCols+k)), selection.filter, selection.filterVal, selection.filterParam,includeKeyboard);
                 end

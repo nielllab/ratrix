@@ -1,16 +1,17 @@
-function [weights dates thresholds] = getBodyWeightHistory(conn,subject_id)
+function [weights dates thresholds thresholds_90pct] = getBodyWeightHistory(conn,subject_id)
 % 10/20/08 - the thresholds returned are from the weightthreshold table in oracle, and are already scaled to 85% of mean weights
 % DO NOT RESCALE THEM in analysis
 weights={};
 thresholds={};
 dates={};
-
+thresholds_90pct={};
 
 if nargout<3
     usethresholds=false;
 else
     usethresholds=true;
 end
+
 
 % Get the hidden subject uin for this id and species
 subjectquery=sprintf('select subjects.uin from subjects where display_uin=''%s'' ',subject_id);
@@ -51,18 +52,21 @@ if usethresholds
         ages= datenum(dates) - dob;
     end
     % we have dates/values - now get thresholds
-    queryStr = sprintf('select age, weight from weightthreshold where strain_uin=%d AND gender=''%s'' order by age', strain_uin, gender);
+    queryStr = sprintf('select age, weight, threshold_90pct from weightthreshold where strain_uin=%d AND gender=''%s'' order by age', strain_uin, gender);
     data = query(conn, queryStr);
     if ~isempty(data)
         % get thresholds
         all_threshold_ages = cell2mat(data(:,1));
         all_thresholds=cell2mat(data(:,2));
+        all_thresholds_90pct=cell2mat(data(:,3));
     end
 
     % now align all_thresholds with the provided ages according to all_threshold_ages
     thresholds = zeros(length(ages),1);
+    thresholds_90pct = zeros(length(ages),1);
     for i=1:length(ages)
         thresholds(i) = all_thresholds(find(all_threshold_ages == ages(i)));
+        thresholds_90pct(i) = all_thresholds_90pct(find(all_threshold_ages == ages(i)));
     end
 
 % =========================================================================================================

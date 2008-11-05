@@ -94,15 +94,58 @@ getStationInfo
         s=getStationsForServer(conn,selection.server);
         % ====================================
         % 10/3/08 - do some processing here on s, so that we make the row field independent of the rack (for erik's server, we just put the rows one after another)
-        rack_used = s{1}.rack_id;
+%         racks_used = s{1}.rack_id;
+%         rows_in_this_rack = s{1}.row;
+%         row_counter = 1;
+% %         max_row_so_far = s{1}.row;
+%         for i=1:length(s)
+%             if ~find(racks_used == s{i}.rack_id) % if this rack hasnt been used yet
+%                 racks_used(end+1) = s{i}.rack_id; 
+%                 rows_in_this_rack = [];
+%             else
+%                 % this rack is already in racks_used
+%                 if ~find(rows_in_this_rack == s{i}.row) % if this row hasnt been seen in this rack, increment row_counter
+%                     rows_in_this_rack(end+1) = s{i}.row;
+%                     row_counter = row_counter+1;
+%                 end
+%             end
+%             % now that we have row_counter set properly, assign it
+%             s{i}.row = row_counter;
+%             
+%         end
+        
+        % ====================================
+        % 10/3/08 - do some processing here on s, so that we make the row field independent of the rack (for erik's server, we just put the rows one after another)
+        racks_used = s{1}.rack_id;
+        rows_in_this_rack = s{1}.row;
+        row_counter = 1;
 %         max_row_so_far = s{1}.row;
         for i=1:length(s)
-            if s{i}.rack_id ~= rack_used % if this is not the first rack
-                % add something to the row field
-%                 max_row_so_far = max(max_row_so_far, s{i}.row);
-                s{i}.row = s{i}.row + 1;
+%             racks_used
+%             s{i}.rack_id
+            if isempty(find(racks_used == s{i}.rack_id)) % if this rack hasnt been used yet
+%                 fprintf('found new rack %d\n', s{i}.rack_id)
+                racks_used(end+1) = s{i}.rack_id; 
+                rows_in_this_rack(1) = s{i}.row;
+                row_counter = row_counter + 1;
+            else
+                % this rack is already in racks_used
+                if isempty(find(rows_in_this_rack == s{i}.row)) % if this row hasnt been seen in this rack, increment row_counter
+                    rows_in_this_rack(end+1) = s{i}.row;
+%                     fprintf('found a new row %d\n', s{i}.row)
+                    row_counter = row_counter+1;
+                else
+%                     fprintf('row %d already in rack %d\n', s{i}.row, s{i}.rack_id)
+                end
             end
+            % now that we have row_counter set properly, assign it
+            s{i}.row = row_counter;
+            
         end
+        
+        % ====================================
+        
+        
 %         for i=1:length(s)
 %             row = s{i}.row
 %         end
@@ -123,8 +166,6 @@ getStationInfo
         selection.station=stationIds{1};
         closeConn(conn);
     end
-
-
 
 
 oneRowHeight=25;
@@ -150,7 +191,7 @@ serverM = uicontrol(f,'Style','popupmenu',...
             set(subjectM,'Enable','off','Visible','off');
             set(heatM,'Enable','on','Visible','on');
             set(stationM,'Enable','on','Visible','on');
-            set(typeM,'Enable','on');
+%             set(typeM,'Enable','on');
             bySubject = false;
             
             selection.server=serverStrs{get(serverM,'Value')};
@@ -172,7 +213,7 @@ serverM = uicontrol(f,'Style','popupmenu',...
             % set type='all', bySubject (to prevent calcplot from running), and disable the typeM button
             selection.type='all';
             set(typeM,'Value',1);
-            set(typeM,'Enable','off');
+%             set(typeM,'Enable','off');
             bySubject = true;
         end
         
@@ -320,7 +361,6 @@ end
 
 function selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject)
 conn=dbConn;
-
 
 % if by subject, all you need to do is assign the title (subjects is already assigned)
 if bySubject

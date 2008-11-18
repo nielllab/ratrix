@@ -63,6 +63,12 @@ if strcmp(type,'weight')
         elseif strcmp(free_water_units{i}, 'ml')
             free_water_mls(end+1) = free_water_amounts(i);
             free_water_mls_dates(end+1) = free_water_dates(i);
+        elseif strcmp(free_water_units{i}, 'hr')
+            free_water_minutes(end+1) = free_water_amounts(i)*60;
+            free_water_minutes_dates(end+1) = free_water_dates(i);
+        elseif strcmp(free_water_units{i}, 'day')
+            free_water_minutes(end+1) = free_water_amounts(i)*1440;
+            free_water_minutes_dates(end+1) = free_water_dates(i);
         else
             error('unsupported free water unit');
         end
@@ -70,19 +76,41 @@ if strcmp(type,'weight')
     
     closeConn(conn);
     try
-        [AX H1 H2] = plotyy(free_water_minutes_dates,free_water_minutes, ...
-            dates,[weights thresholds thresholds_90pct]);
+        if ~isempty(free_water_minutes)
+            [AX H1 H2] = plotyy(free_water_minutes_dates,free_water_minutes, ...
+                dates,[weights thresholds thresholds_90pct]);
+            set(AX(1), 'YAxisLocation', 'right');
+            set(AX(1),'XTick',[]);
+            set(AX(1),'YColor','black');
+            set(AX(1),'XColor','black');
+            set(H1,'LineStyle','none');
+            set(H1,'Marker','x');
+            set(H1,'MarkerSize',10);
+            set(H1,'Color',[0.6 0 0]);
+            ylabel(AX(1), 'free water (min/mL)');
+            xlim(AX(1),[floor(min(dates)) ceil(max(dates))]);
+        else
+            H2 = plot(dates, [weights thresholds thresholds_90pct]);
+            AX(2)=gca;
+        end
         H3 = plot(free_water_mls_dates,free_water_mls, 'xb');
         % 11/4/08 - added plotting of free water on top of weights
         % 10/22/08 - added legend
-        alreadyPlotted = get(gcf,'UserData')
+        alreadyPlotted = get(gcf,'UserData');
         if isempty(alreadyPlotted) || (~isempty(alreadyPlotted) && ~any(ismember(alreadyPlotted,'weight')))
-            legendStrs = {'observed weights','85% thresholds', '90% thresholds', 'free water (min)', 'free water (mL)'};
-            legend([H2;H1;H3], legendStrs, 'Location','NorthWest','Color','white');
+            if ~isempty(free_water_minutes)
+                legendStrs = {'observed weights','85% thresholds', '90% thresholds', 'free water (min)', 'free water (mL)'};
+                legend([H2;H1;H3], legendStrs, 'Location','NorthWest','Color','white');
+            else
+                legendStrs = {'observed weights','85% thresholds', '90% thresholds', 'free water (mL)'};
+                legend([H2;H3], legendStrs, 'Location','NorthWest','Color','white');
+            end
             alreadyPlotted{end+1}='weight';
             set(gcf,'UserData',alreadyPlotted);
         end  
-    catch
+    catch ex
+        ple
+        rethrow(ex)
 %         plot(0)
 %         dates
 %         weights
@@ -95,13 +123,7 @@ if strcmp(type,'weight')
         warning('weights, dates, and thresholds have different sizes')
     end
     % 11/4/08 - set axes/plot properties with new plotyy architecture
-    set(AX(1),'XTick',[]);
-    set(AX(1),'YColor','black');
-    set(AX(1),'XColor','black');
-    set(H1,'LineStyle','none');
-    set(H1,'Marker','x');
-    set(H1,'MarkerSize',10);
-    set(H1,'Color',[0.6 0 0]);
+
     set(H2(1), 'Color', 'blue');
     set(H2(2), 'Color', 'red');
     set(H2(3), 'Color', [0 0.6 0]);
@@ -109,10 +131,10 @@ if strcmp(type,'weight')
     set(H3,'Marker','x');
     set(H3,'MarkerSize',10);
     set(H3,'Color',[0 0.6 0]);
-    set(AX(1), 'YAxisLocation', 'right');
+    
     set(AX(2), 'YAxisLocation', 'left');
     ylabel(AX(2), 'weight (g)');
-    ylabel(AX(1), 'free water (min/mL)');
+    
     if range(dates)>50
         set(AX(2),'XTick',fliplr([ceil(max(dates)):-30:floor(min(dates))]));
     elseif range(dates)>8
@@ -120,10 +142,15 @@ if strcmp(type,'weight')
     else
         set(AX(2),'XTick',fliplr([ceil(max(dates)):-1:floor(min(dates))]));
     end
-    xlim(AX(1),[floor(min(dates)) ceil(max(dates))]);
+    
     xlim(AX(2),[floor(min(dates)) ceil(max(dates))]);
     if ~(isempty(free_water_minutes) && isempty(free_water_mls))
         yLimits = [floor(min([free_water_minutes free_water_mls])) ceil(max([free_water_minutes free_water_mls]))];
+        % 11/6/08 - if rat has only one free_water value, then set limits to be 30 above and below the single value
+        if yLimits(1) == yLimits(2)
+            yLimits(1) = min(0, yLimits(1)-30);
+            yLimits(2) = yLimits(2)+30;
+        end
         ylim(AX(1),[yLimits(1) yLimits(2)]);
         set(AX(1),'YTick', linspace(yLimits(1),yLimits(2),4));
     end

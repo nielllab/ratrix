@@ -64,9 +64,16 @@ if usethresholds
     % now align all_thresholds with the provided ages according to all_threshold_ages
     thresholds = zeros(length(ages),1);
     thresholds_90pct = zeros(length(ages),1);
+    % 11/6/08 - changed to return threshold of 0 if rat is so old that there is no threshold data available
     for i=1:length(ages)
-        thresholds(i) = all_thresholds(find(all_threshold_ages == ages(i)));
-        thresholds_90pct(i) = all_thresholds_90pct(find(all_threshold_ages == ages(i)));
+        all_thresholds_index = find(all_threshold_ages == ages(i));
+        if ~isempty(all_thresholds_index)
+            thresholds(i) = all_thresholds(all_thresholds_index);
+            thresholds_90pct(i) = all_thresholds_90pct(all_thresholds_index);
+        else
+            thresholds(i) = 0;
+            thresholds_90pct(i) = 0;
+        end
     end
 
 % =========================================================================================================

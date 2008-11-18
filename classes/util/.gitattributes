@@ -94,3 +94,4 @@ infrastructure/getSVNPropertiesForPath.m -text
 stimHelpers/pickContrast.m -text
 stimHelpers/drawFrom2Ddist.m -text
 matlaby/hash.m -text
+trialRecordProcessing/modifyTrialRecords.m -text

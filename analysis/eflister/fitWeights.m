@@ -48,62 +48,101 @@ end
 plot(male_day,male,'bo');
 hold on
 plot(female_day,female,'ro');
-
-% a=curve
-% b=scale
-% c=y offset
-% d=x offset
-
-logMod = 'c+(b*log(x-d)/log(a))';
-rootMod = 'c+(b*(abs(x-d))^(1/a))';
-
-logF = fittype(logMod)
-rootF= fittype(rootMod)
-
-targetNames={'a' 'b' 'c' 'd'}';
-if ~all(strcmp(coeffnames(logF),targetNames)) || ~all(strcmp(coeffnames(rootF),targetNames))
-    error('unexpected ordering of names -- will misinterpret up lower/upper vectors')
-end
-
-logOpts=fitoptions(logMod)
-rootOpts=fitoptions(rootMod)
-
-logOpts.Lower=[1 0];
-rootOpts.Lower=[1 0];
-
-[logMale,gof,output] = fit(male_day,male,logF,logOpts)
-[rootMale,gof,output] = fit(male_day,male,rootF,rootOpts)
-
-% exclude=logical([0 0 0 0 0 1 1]');
-% exclude=[];
-%logOpts.Exclude=exclude;
-%rootOpts.Exclude=exclude;
-[logFemale,gof,output] = fit(female_day,female,logF,logOpts)
-[rootFemale,gof,output] = fit(female_day,female,rootF,rootOpts)
-
 xlim([0 600])
-
-plot(logMale,'b-')
-plot(rootMale,'b--')
-plot(logFemale,'r-')
-plot(rootFemale,'r--')
-
-
 
 ylabel('grams')
 xlabel('day')
 
-t=.85;
-c=dbconn;
-ids={'106','177'};
-[maleW maleD maleT] = getBodyWeightHistory(c,ids{1});
-[femaleW femaleD femaleT] = getBodyWeightHistory(c,ids{2});
-s=getSubjects(c,ids);
-closeconn(c);
-if s(1).gender=='M' && s(2).gender=='F'
-    plot(maleD-s(1).dob,[maleW maleT/t],'bx')
-    hold on
-    plot(femaleD-s(2).dob,[femaleW femaleT/t],'rx')
-else
-    error('bad genders')
+plotOracle=true;
+if plotOracle
+    t=.85;
+    c=dbconn;
+    ids={'106','177'};
+    [maleW maleD maleT] = getBodyWeightHistory(c,ids{1});
+    [femaleW femaleD femaleT] = getBodyWeightHistory(c,ids{2});
+    s=getSubjects(c,ids);
+    closeconn(c);
+    if s(1).gender=='M' && s(2).gender=='F'
+        plot(maleD-s(1).dob,[maleW maleT/t],'bx')
+        hold on
+        plot(femaleD-s(2).dob,[femaleW femaleT/t],'rx')
+    else
+        error('bad genders')
+    end
+end
+
+% a=curve
+% b=scale
+% c=y offset
+% d=location
+
+mods={...
+    'log'       'c+(b*log(x-d)/log(a))'     {'a' 'b' 'c' 'd'}   [1 0]   '-'    {[] []};...
+    'root'      'c+(b*(abs(x-d))^(1/a))'    {'a' 'b' 'c' 'd'}   [1 0]   '--'   {[] []};...
+
+    'logNorm'   'c+(b*logncdf(x,d,a))'      {'a' 'b' 'c' 'd'}   [0]      '+' {[0.7759 467.9 -12.32 4.036] [0.6011 242.8 13.21  3.798]};...
+    'gauss'     'c+(b*normcdf(x,d,a))'      {'a' 'b' 'c' 'd'}   [0 0]      'o' {[77.3834647674482 1648.77075229918 -1235.11038096151 -35.4854723926335]  [46.1687313615877 603.042351484134 -357.985060210495 2.98819459316451]};...
+
+    'atan'      'c+(b*atan(x-d))'           {'b' 'c' 'd'}       []      'x' {[64147.2790884138 -100037.152240227 -70.550853890521] [6725 -1.027e+004 -2.296]};...
+    'sig'       'c+(b/(1+exp(a*(d-x))))'        {'a' 'b' 'c' 'd'}       [0 .75*max(female)]      '*' {[] []};...
+
+    %e is a "scale parameter" and may be redundant with b (choose e to be 1, the default)
+    'wbl'       'c+(b*wblcdf(x-d,e,a))'     {'a' 'b' 'c' 'd' 'e'} [0 -inf -inf -inf 0] '-.' {[0.867145410886847 457.96805958187 55.4593110159781 28.1607492830005 70.5208590545724] [1.14150787475503 210.345141355582 42.1940257499687 22.62263879965 35.286474278694]};...
+    };
+
+for i=1:size(mods,1)
+    f=fittype(mods{i,2});
+
+    if ~all(strcmp(coeffnames(f),mods{i,3}'))
+        error('unexpected ordering of names -- will misinterpret up lower/upper vectors')
+    end
+
+    opts=fitoptions(mods{i,2});
+
+    opts.MaxFunEvals=10000;
+    opts.MaxIter=10000;
+
+    if ~isempty(mods{i,4})
+        opts.Lower=mods{i,4};
+    end
+
+    if ~isempty(mods{i,6}{1})
+        opts.StartPoint=mods{i,6}{1};
+    end
+
+    doFit(male_day,male,f,opts,[mods{i,1} ' male'],['b' mods{i,5}]);
+
+    if ~isempty(mods{i,6}{2})
+        opts.StartPoint=mods{i,6}{2};
+    else
+        opts.StartPoint=[];
+    end
+    doFit(female_day,female,f,opts,[mods{i,1} ' female'],['r' mods{i,5}]);
+end
+end
+
+
+function doFit(day,data,f,opts,name,pStr)
+done=false;
+
+try
+    warning('off','curvefit:fit:noStartPoint')
+    [theFit,gof,output] = fit(day,data,f,opts);
+    warning('on','curvefit:fit:noStartPoint')
+    done=true;
+catch e
+    e
+    name
+    error('got a nan, you need to set bounds')
+end
+fprintf([name ':\n'])
+z=struct(theFit);
+disp([z.coeffValues{:}])
+if output.exitflag<=0
+    output.exitflag
+    warning('no converge')
+    pause
+end
+
+plot(theFit,pStr)
 end

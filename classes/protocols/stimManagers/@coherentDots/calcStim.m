@@ -1,4 +1,5 @@
-function [stimulus updateSM out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance isCorrection] = calcStim(stimulus,trialManagerClass,frameRate,responsePorts,totalPorts,width,height,trialRecords)
+function [stimulus updateSM resolutionIndex out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance text] = ...
+    calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 
 s = stimulus;
 
@@ -13,9 +14,15 @@ numColors=2^LUTBitDepth; maxColorID=numColors-1; fraction=1/(maxColorID);
 ramp=[0:fraction:1];
 LUT= [ramp;ramp;ramp]';
 
+[resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60],32,getMaxWidth(stimulus),getMaxHeight(stimulus));
+
+if isnan(resolutionIndex)
+    resolutionIndex=1;
+end
+
 
 updateSM=0;     % For intertrial dependencies
-isCorrection=0;     % For correction trials to force to switch sides
+% isCorrection=0;     % For correction trials to force to switch sides
 
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);
@@ -67,7 +74,7 @@ switch trialManagerClass
             details.correctionTrial=1;
             'correction trial!'
             targetPorts=trialRecords(end).targetPorts;
-            isCorrection=1;
+%             isCorrection=1;
         else
             details.correctionTrial=0;
             targetPorts=responsePorts(ceil(rand*length(responsePorts)));
@@ -95,7 +102,7 @@ else
     error('Zah?  This should never happen!')
 end
 
-num_frames = s.fps * s.movie_duration;
+num_frames = hz * s.movie_duration;
 
 alldotsxy = [rand(s.num_dots,1)*(s.screen_width-1)+1 ...
               rand(s.num_dots,1)*(s.screen_height-1)+1];
@@ -103,20 +110,41 @@ dot_history = zeros(s.num_dots,2,num_frames);
 
 dots_movie = uint8(zeros(s.screen_height, s.screen_width, num_frames));
 
+% ===================================================================================
+% 11/20/08 - fli
+% do all random picking here (from coherence, size, contrast, speed as necessary)
+%   s.coherence -> selectedCoherence
+%   s.dot_size -> selectedDotSize
+%   s.contrast -> selectedContrast
+%   s.speed -> selectedSpeed
+% coherence
+if length(s.coherence)==2
+    selectedCoherence = s.coherence(1) + rand(1)*(s.coherence(2)-s.coherence(1));
+else
+    selectedCoherence = s.coherence;
+end
+% dot_size
+if length(s.dot_size)==2
+    selectedDotSize = round(s.dot_size(1) + rand(1)*(s.dot_size(2)-s.dot_size(1)));
+else
+    selectedDotSize = s.dot_size;
+end
+% contrast
+if length(s.contrast)==2
+    selectedContrast = s.contrast(1) + rand(1)*(s.contrast(2)-s.contrast(1));
+else
+    selectedContrast = s.contrast;
+end
+% speed
+if length(s.speed)==2
+    selectedSpeed = s.speed(1) + rand(1)*(s.speed(2)-s.speed(1));
+else
+    selectedSpeed = s.speed;
+end
+% ===================================================================================
 %shape = zeros(dot_size,2);
 % Make a square shape
-shape = ones(s.dot_size);
-
-if (s.max_coherence == s.min_coherence)
-    'Min and max the same!!'
-    s.coherence = s.max_coherence;
-else
-    'Min and max different!!'
-    s.min_coherence
-    s.max_coherence
-    '...'
-    s.coherence = s.min_coherence + rand(1)*(s.max_coherence - s.min_coherence)
-end
+shape = ones(selectedDotSize);
 
 %% Draw those dots!
 
@@ -129,8 +157,8 @@ dots_movie(:,:,1) = uint8(frame);
 % alldotsxy(:,1);
 % alldotsxy(:,2);
 
-vx = s.speed*cos(dotDirection);
-vy = s.speed*sin(dotDirection);
+vx = selectedSpeed*cos(dotDirection);
+vy = selectedSpeed*sin(dotDirection);
 
 for i=1:num_frames
     frame = zeros(s.screen_height,s.screen_width);
@@ -141,7 +169,7 @@ for i=1:num_frames
     dot_history(:,:,i) = alldotsxy;
     
     % Randomly find who's going to be coherent and who isn't
-    move_coher = rand(s.num_dots,1) < s.coherence;
+    move_coher = rand(s.num_dots,1) < selectedCoherence;
     move_randomly = ~move_coher;
 
     num_out = sum(move_randomly);
@@ -165,11 +193,23 @@ for i=1:num_frames
 
 end;
 
-out = dots_movie;
+out = dots_movie*selectedContrast;
 
 details.stimStruct = structize(stimulus);
 details.dotDirection = dotDirection;
 details.dotxy = alldotsxy;
-details.max_coherence = s.max_coherence;
-details.min_coherence = s.min_coherence;
 details.coherence = s.coherence;
+details.dot_size = s.dot_size;
+details.contrast = s.contrast;
+details.speed = s.speed;
+
+details.selectedCoherence = selectedCoherence;
+details.selectedDotSize = selectedDotSize;
+details.selectedContrast = selectedContrast;
+details.selectedSpeed = selectedSpeed;
+
+if strcmp(trialManagerClass,'nAFC') && details.correctionTrial
+    text='correction trial!';
+else
+    text=sprintf('coherence: %g dot_size: %g contrast: %g speed: %g',selectedCoherence,selectedDotSize,selectedContrast,selectedSpeed);
+end

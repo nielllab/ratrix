@@ -199,31 +199,22 @@ soundAmp = [0 0.4]; % For now bias completely in one direction
 crossModalStim = crossModal(switchType,switchParameter,switchMethod,blockingLength,currentModality,pixPerCycs,targetContrasts,distractorContrasts,fieldWidthPct,fieldHeightPct,mean,stddev,thresh,flickerType,yPosPct,soundFreq,soundAmp,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 % Pam - coherentDots
-stimulus = coherentDots;
+screen_width=100;
+screen_height=100;
+num_dots=100;
+coherence=.85;
+speed=1;
+contrast=[0.5 1];
+dot_size=[3 4];
+movie_duration=2;
+screen_zoom=[6 6];
 
-trialManagerClass='nAFC';
-frameRate=100;
-responsePorts=[1,3];
-totalPorts=3;
-width=1024;
-height=768;
+maxWidth=1024;
+maxHeight=768;
 
-maxWidth = 100;
-maxHeight = 100;
 
-cDots = coherentDots(stimulus,trialManagerClass,frameRate,responsePorts,totalPorts,maxWidth,maxHeight,[],...
-    150, 100, 100, .85, 1, 3, 10, 85, [6 6]);
-cDots2 = coherentDots(stimulus,trialManagerClass,frameRate,responsePorts,totalPorts,maxWidth,maxHeight,[],...
-    150, 100, 100, [.65 .9], 1, 3, 2, 100, [6 6]);
-cDots3 = coherentDots(stimulus,trialManagerClass,frameRate,responsePorts,totalPorts,maxWidth,maxHeight,[],...
-    150, 100, 100, [.45 .9], 1, 3, 2, 100, [6 6]);
-cDots4 = coherentDots(stimulus,trialManagerClass,frameRate,responsePorts,totalPorts,maxWidth,maxHeight,[],...
-    150, 100, 100, [.25 .9], 1, 3, 2, 100, [6 6]);
-cDots5 = coherentDots(stimulus,trialManagerClass,frameRate,responsePorts,totalPorts,maxWidth,maxHeight,[],...
-    150, 100, 100, [.15 .45], 1, 3, 2, 100, [6 6]);
-cDots6 = coherentDots(stimulus,trialManagerClass,frameRate,responsePorts,totalPorts,maxWidth,maxHeight,[],...
-    150, 100, 100, [.0001 1], 1, 3, 2, 100, [6 6]);
-
+cDots=coherentDots(screen_width,screen_height,num_dots,coherence,speed,contrast,dot_size,movie_duration,screen_zoom,...
+     maxWidth,maxHeight);
 % ====================================================================================================================
 % training steps
 svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
@@ -250,11 +241,11 @@ ts11 = trainingStep(vh, crossModalStim, graduateQuickly, noTimeOff(), svnRev); %
 
 % Pam
 ts12 = trainingStep(vh, cDots, graduateQuickly, noTimeOff(), svnRev); % coherentDots w/ nAFC
-ts13 = trainingStep(vh, cDots2, graduateQuickly, noTimeOff(), svnRev); % coherentDots w/ nAFC
-ts14 = trainingStep(vh, cDots3, graduateQuickly, noTimeOff(), svnRev); % coherentDots w/ nAFC
-ts15 = trainingStep(vh, cDots4, graduateQuickly, noTimeOff(), svnRev); % coherentDots w/ nAFC
-ts16 = trainingStep(vh, cDots5, graduateQuickly, noTimeOff(), svnRev); % coherentDots w/ nAFC
-ts17 = trainingStep(vh, cDots6, graduateQuickly, noTimeOff(), svnRev); % coherentDots w/ nAFC
+% ts13 = trainingStep(vh, cDots2, graduateQuickly, noTimeOff(), svnRev); % coherentDots w/ nAFC
+% ts14 = trainingStep(vh, cDots3, graduateQuickly, noTimeOff(), svnRev); % coherentDots w/ nAFC
+% ts15 = trainingStep(vh, cDots4, graduateQuickly, noTimeOff(), svnRev); % coherentDots w/ nAFC
+% ts16 = trainingStep(vh, cDots5, graduateQuickly, noTimeOff(), svnRev); % coherentDots w/ nAFC
+% ts17 = trainingStep(vh, cDots6, graduateQuickly, noTimeOff(), svnRev); % coherentDots w/ nAFC
 
 % DEMO - with NcorrectInARow reinforcement manager instead of constantReinforcement
 ts18 = trainingStep(fd_sto_increasing_rewards, freeStim, graduateQuickly, noTimeOff(), svnRev); %stochastic free drinks
@@ -268,7 +259,7 @@ ts22 = trainingStep(nAFC_increasing_rewards, imageStim,  graduateQuickly, noTime
 % p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8, ts9, ts10, ts11, ts12, ts13, ts14, ts15, ts16, ts17, ...
 %     ts18, ts19, ts20, ts21, ts22});
 % stepNum=21;
-p=protocol('gabor test', {ts2, ts3});
+p=protocol('gabor test', {ts12, ts3});
 stepNum=1;
 
 for i=1:length(subjIDs),

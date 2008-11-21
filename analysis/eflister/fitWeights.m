@@ -81,8 +81,29 @@ rootOpts.Lower=[1 0];
 [logFemale,gof,output] = fit(female_day,female,logF,logOpts)
 [rootFemale,gof,output] = fit(female_day,female,rootF,rootOpts)
 
+xlim([0 600])
+
 plot(logMale,'b-')
 plot(rootMale,'b--')
 plot(logFemale,'r-')
 plot(rootFemale,'r--')
-ylim([0 600])
+
+
+
+ylabel('grams')
+xlabel('day')
+
+t=.85;
+c=dbconn;
+ids={'106','177'};
+[maleW maleD maleT] = getBodyWeightHistory(c,ids{1});
+[femaleW femaleD femaleT] = getBodyWeightHistory(c,ids{2});
+s=getSubjects(c,ids);
+closeconn(c);
+if s(1).gender=='M' && s(2).gender=='F'
+    plot(maleD-s(1).dob,[maleW maleT/t],'bx')
+    hold on
+    plot(femaleD-s(2).dob,[femaleW femaleT/t],'rx')
+else
+    error('bad genders')
+end

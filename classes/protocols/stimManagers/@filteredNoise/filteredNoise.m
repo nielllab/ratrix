@@ -1,31 +1,30 @@
 function s=filteredNoise(varargin)
 % FILTEREDNOISE  class constructor.
-% s = filteredNoise(in)
+% s = filteredNoise(in,maxWidth, maxHeight, scaleFactor, interTrialLuminance)
 %
-% in.orientations               cell of orientations, one for each correct answer port, in radians, 0 is vertical, positive is clockwise  ex: {-pi/4 [] pi/4}
-% in.locationDistributions      cell of 2-d densities, one for each correct answer port, will be normalized to stim area  ex: {[2d] [] [2d]}
+% in is a struct array with one entry for each correct answer port:
 %
+% stim properties:
 % in.distribution               'gaussian', 'binary', 'uniform', or a path to a file name (either .txt or .mat, extension omitted, .txt loadable via load(), and containing a single vector of numbers named 'noise')
-% in.origHz                     only used if distribution is a file name, indicating sampling rate of filed
-%
-% in.background                 0-1, normalized
+% in.origHz                     only used if distribution is a file name, indicating sampling rate of file
 % in.contrast                   std dev in normalized luminance units (just counting patch, before mask application), values will saturate
-% in.maskRadius                 std dev of the enveloping gaussian, normalized to diagonal of stim area
+% in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file instead of a random subset)
 %
+% patch properties:
+% in.locationDistributions      2-d density, will be normalized to stim area
+% in.maskRadius                 std dev of the enveloping gaussian, normalized to diagonal of stim area (values <=0 mean no mask)
 % in.patchDims                  [height width]
 % in.patchHeight                0-1, normalized to stim area height
 % in.patchWidth                 0-1, normalized to stim area width
+% in.background                 0-1, normalized
+%
+% filter properties:
+% in.orientations               filter orientation in radians, 0 is vertical, positive is clockwise
 % in.kernelSize                 0-1, normalized to diagonal of patch
 % in.kernelDuration             in seconds (will be rounded to nearest multiple of frame duration)
-% in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file instead of a random subset)
 % in.ratio                      ratio of short to long axis of gaussian kernel (1 means circular, no effective orientation)
 % in.filterStrength             0 means no filtering (kernel is all zeros, except 1 in center), 1 means pure mvgaussian kernel (center not special), >1 means surrounding pixels more important
 % in.bound                      .5-1 edge percentile for long axis of kernel when parallel to window
-%
-% in.maxWidth
-% in.maxHeight
-% in.scaleFactor
-% in.interTrialLuminance
 
 fieldNames={'orientations','locationDistributions','distribution','origHz','background','contrast','maskRadius','patchDims','patchHeight','patchWidth','kernelSize','kernelDuration','loopDuration','ratio','filterStrength','bound'};
 for i=1:length(fieldNames)

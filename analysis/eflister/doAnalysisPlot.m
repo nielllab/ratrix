@@ -60,7 +60,7 @@ if strcmp(type,'weight')
         if strcmp(free_water_units{i}, 'min')
             free_water_minutes(end+1) = free_water_amounts(i);
             free_water_minutes_dates(end+1) = free_water_dates(i);
-        elseif strcmp(free_water_units{i}, 'ml')
+        elseif strcmp(free_water_units{i}, 'mL')
             free_water_mls(end+1) = free_water_amounts(i);
             free_water_mls_dates(end+1) = free_water_dates(i);
         elseif strcmp(free_water_units{i}, 'hr')
@@ -70,6 +70,7 @@ if strcmp(type,'weight')
             free_water_minutes(end+1) = free_water_amounts(i)*1440;
             free_water_minutes_dates(end+1) = free_water_dates(i);
         else
+            free_water_units{i}
             error('unsupported free water unit');
         end
     end

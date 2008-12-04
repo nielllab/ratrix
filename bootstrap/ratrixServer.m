@@ -68,8 +68,8 @@ buttonT='start';
 rackNum=1; %garbage variable now (gets reset later)
 [server_name myIP] = getServerNameFromIP; %this needs to be determined by a function getServerNameFromIP (based on what this machine's IP is)
 if isempty(server_name)
-%     server_name='server-02-female-pmm-156'; %only for testing
-%     myIP = '132.239.158.156'; % only for testing
+%     server_name='test'; %only for testing
+%     myIP = '192.168.0.130'; % only for testing
     error('could not retreive server uin based on this machines IP');
 end
 
@@ -285,6 +285,12 @@ cycleB=uicontrol(f,'Style','togglebutton','String',buttonT,'Units','pixels','Pos
 
     function run
         fixSystemTime;
+        % 12/3/08 - write start time of this heat to oracle table for logging
+        conn=dbConn();
+        execStr=sprintf('insert into heat_start_events values (''%s'',sysdate,''start'',''%s'')',heatStrs{get(swapM,'Value')},server_name);
+        count=exec(conn,execStr);
+        closeConn(conn);
+        % finished writing start time of this heat to oracle
         [r sys rx]=startServer(servePump,dataPath);
         
         er=0;
@@ -294,7 +300,14 @@ cycleB=uicontrol(f,'Style','togglebutton','String',buttonT,'Units','pixels','Pos
             [quit r rx sys er]=doAServerIteration(r,rx,servePump,sys,subjects);
             WaitSecs(autoUpdateInterval);
         end
+        pause(4); % testing only -remove
         updateUI();
+        % 12/3/08 - write stop time of this heat to oracle table for logging
+        conn=dbConn();
+        execStr=sprintf('insert into heat_start_events values (''%s'',sysdate,''stop'',''%s'')',heatStrs{get(swapM,'Value')},server_name);
+        count=exec(conn,execStr);
+        closeConn(conn);
+        % finished writing stop time of this heat to oracle
         [r rx sys]=stopServer(r,rx,servePump,sys,er,subjects);
         rp=getRatrixPath;
         rp=fullfile(rp,'analysis','eflister');
@@ -303,13 +316,7 @@ cycleB=uicontrol(f,'Style','togglebutton','String',buttonT,'Units','pixels','Pos
         % FIX THIS PART TO ONLY COMPILE SUBJECTS OWNED BY THIS SERVER
         % we need to compile records for every rack used here
         cmdStr=sprintf('matlab -automation -r "cd(''%s'');setupEnvironment;cd(''%s'');compileTrialRecords(''%s'');quit" &',fullfile(getRatrixPath,'bootstrap'),rp,server_name);
-        system(cmdStr); %testing only
-%         for i=1:length(racks_used)
-%             rackNum = racks_used(i);
-%             cmdStr=sprintf('matlab -automation -r "cd(''%s'');setupEnvironment;cd(''%s'');compileTrialRecords(%d);quit" &',fullfile(getRatrixPath,'bootstrap'),rp,rackNum);
-%             system(cmdStr); %testing only
-%         end
-                    
+        system(cmdStr); %testing only       
         % END EDITS
         % ==============================================================================================================
 

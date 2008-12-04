@@ -57,7 +57,8 @@ for i=1:length(subjects)
 end
 % flag for skipping calcplot stuff - if by subject, we already have our assignment picked out
 bySubject = false;
-
+% flag for showing test subjects
+show_test_subjects=1;
 
 
 heats=getHeats(conn);
@@ -175,7 +176,7 @@ bWidth=50;
 eWidth=50;
 
 
-fWidth=9*margin+6*ddWidth+eWidth+bWidth;
+fWidth=10*margin+7*ddWidth+eWidth+bWidth;
 fHeight=margin+oneRowHeight+margin;
 f = figure('Visible','off','MenuBar','none','Name','ratrix analysis','NumberTitle','off','Resize','off','Units','pixels','Position',[50 50 fWidth fHeight]);
 
@@ -191,6 +192,7 @@ serverM = uicontrol(f,'Style','popupmenu',...
             set(subjectM,'Enable','off','Visible','off');
             set(heatM,'Enable','on','Visible','on');
             set(stationM,'Enable','on','Visible','on');
+            set(testM,'Enable','on','Visible','on');
 %             set(typeM,'Enable','on');
             bySubject = false;
             
@@ -210,6 +212,7 @@ serverM = uicontrol(f,'Style','popupmenu',...
             set(subjectM,'Enable','on','Visible','on');
             set(heatM,'Enable','off','Visible','off');
             set(stationM,'Enable','off','Visible','off');
+            set(testM,'Enable','off','Visible','off');
             % set type='all', bySubject (to prevent calcplot from running), and disable the typeM button
             selection.type='all';
             set(typeM,'Value',1);
@@ -217,7 +220,7 @@ serverM = uicontrol(f,'Style','popupmenu',...
             bySubject = true;
         end
         
-        selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject);
+        selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject,show_test_subjects);
     end
 
 heatM = uicontrol(f,'Style','popupmenu',...
@@ -225,7 +228,7 @@ heatM = uicontrol(f,'Style','popupmenu',...
     'Value',1,'Units','pixels','Position',[2*margin+ddWidth margin ddWidth oneRowHeight],'Callback',@heatC);
     function heatC(source,eventdata)
         selection.heat=heatStrs{get(heatM,'Value')};
-        selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject);
+        selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject,show_test_subjects);
     end
 
 stationM = uicontrol(f,'Style','popupmenu',...
@@ -233,7 +236,7 @@ stationM = uicontrol(f,'Style','popupmenu',...
     'Value',1,'Units','pixels','Position',[3*margin+2*ddWidth margin ddWidth oneRowHeight],'Callback',@stationC);
     function stationC(source,eventdata)
         selection.station=stationIds{get(stationM,'Value')};
-        selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject);
+        selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject,show_test_subjects);
     end
 
 % subjectM = uicontrol(f,'Style','popupmenu',...
@@ -254,21 +257,29 @@ subjectM = uicontrol(f,'Style','popupmenu',...
     end
 
 % ========================================================================================
+% added 12/4/08
+% whether or not to show test subjects
+testM = uicontrol(f,'Style','checkbox',...
+    'String','show test rats','Enable','on','Visible','on',...
+    'Value',1,'Units','pixels','Position',[4*margin+3*ddWidth margin ddWidth oneRowHeight],'Callback',@testC);
+    function testC(source,eventdata)
+        show_test_subjects=get(testM,'Value');
+        selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject,show_test_subjects);
+    end
 
-
-
+% ========================================================================================
 
 typeM = uicontrol(f,'Style','popupmenu',...
     'String',typeStrs,...
-    'Value',filterTypeIndex,'Units','pixels','Position',[4*margin+3*ddWidth margin ddWidth oneRowHeight],'Callback',@typeC);
+    'Value',filterTypeIndex,'Units','pixels','Position',[5*margin+4*ddWidth margin ddWidth oneRowHeight],'Callback',@typeC);
     function typeC(source,eventdata)
         selection.type=typeStrs{get(typeM,'Value')};
-        selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject);
+        selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject,show_test_subjects);
     end
 
 filterM = uicontrol(f,'Style','popupmenu',...
     'String',{'all','first','last'},...
-    'Value',1,'Units','pixels','Position',[5*margin+4*ddWidth margin ddWidth oneRowHeight],'Callback',@filterC);
+    'Value',1,'Units','pixels','Position',[6*margin+5*ddWidth margin ddWidth oneRowHeight],'Callback',@filterC);
     function filterC(source,eventdata)
         strs=get(filterM,'String');
         selection.filter=strs{get(filterM,'Value')};
@@ -282,10 +293,10 @@ filterM = uicontrol(f,'Style','popupmenu',...
             otherwise
                 error('weird')
         end
-        selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject);
+        selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject,show_test_subjects);
     end
 
-filterE = uicontrol(f,'Style','edit','String',num2str(selection.filterVal),'Units','pixels','Enable','off','Position',[6*margin+5*ddWidth margin eWidth oneRowHeight],'Callback',@startC);
+filterE = uicontrol(f,'Style','edit','String',num2str(selection.filterVal),'Units','pixels','Enable','off','Position',[7*margin+6*ddWidth margin eWidth oneRowHeight],'Callback',@startC);
     function startC(source,eventdata)
         newFilterVal=str2num(get(filterE,'String'));
         if ~isempty(newFilterVal) && isNearInteger(newFilterVal) && newFilterVal>0
@@ -293,20 +304,20 @@ filterE = uicontrol(f,'Style','edit','String',num2str(selection.filterVal),'Unit
         else
             set(filterE,'String',selection.filterVal);
         end
-        selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject);
+        selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject,show_test_subjects);
     end
 
 filterParamM = uicontrol(f,'Style','popupmenu',...
     'String',{'days','trials'},...
-    'Value',1,'Units','pixels','Enable','off','Position',[7*margin+5*ddWidth+eWidth margin ddWidth oneRowHeight],'Callback',@filterParamC);
+    'Value',1,'Units','pixels','Enable','off','Position',[8*margin+6*ddWidth+eWidth margin ddWidth oneRowHeight],'Callback',@filterParamC);
     function filterParamC(source,eventdata)
         strs=get(filterParamM,'String');
         selection.filterParam=strs{get(filterParamM,'Value')};
-        selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject);
+        selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject,show_test_subjects);
     end
 
 
-plotB=uicontrol(f,'Style','pushbutton','String','plot','Units','pixels','Position',[8*margin+6*ddWidth+eWidth margin bWidth oneRowHeight],'Callback',@buttonC);
+plotB=uicontrol(f,'Style','pushbutton','String','plot','Units','pixels','Position',[9*margin+7*ddWidth+eWidth margin bWidth oneRowHeight],'Callback',@buttonC);
     function buttonC(source,eventdata)
         for i=1:length(fs)
             figure(fs(i))
@@ -319,7 +330,7 @@ plotB=uicontrol(f,'Style','pushbutton','String','plot','Units','pixels','Positio
 
 %align([rackM heatM stationM subjectM typeM plotB],'Fixed',margin,'Middle');
 set(f,'Visible','on')
-selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject);
+selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject,show_test_subjects);
 end
 
     function out=getRow(s,assign)
@@ -359,7 +370,7 @@ end
         end
     end
 
-function selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject)
+function selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject,show_test_subjects)
 conn=dbConn;
 
 % if by subject, all you need to do is assign the title (subjects is already assigned)
@@ -395,7 +406,7 @@ else
                 if strcmp(selection.station,'all stations')
                     selection.titles{end+1}=[heatStrs{i} ' heat'];
                 end
-                assignments=getAssignmentsForServer(conn,selection.server,heatStrs{i});
+                assignments=getAssignmentsForServer(conn,selection.server,heatStrs{i},show_test_subjects);
                 for j=1:length(assignments)
                     if strcmp(selection.station,'all stations') %all heats, all stations
                         selection.subjects{i-1,getRow(s,assignments{j}),getCol(s,assignments{j})}=assignments{j}.subject_id;
@@ -409,7 +420,7 @@ else
             end
         end
     else
-        assignments=getAssignmentsForServer(conn,selection.server,selection.heat);
+        assignments=getAssignmentsForServer(conn,selection.server,selection.heat,show_test_subjects);
 
         if strcmp(selection.station,'all stations') %specific heat, all stations
             %selection.subjects={};

@@ -1,7 +1,14 @@
-function assignments=getAssignmentsForServer(conn,server_name,heat_name)
+function assignments=getAssignmentsForServer(conn,server_name,heat_name,include_test_rats)
+
+% 12/4/08
+% include_test_rats allows analysis to exclude test rats
+if ~exist('include_test_rats','var')
+    include_test_rats=1; % default is to include test rats (used in other ratrix code)
+end
+
 assignments = {};
 selectAssignmentQuery = ...
-    sprintf('SELECT LOWER(subjects.display_uin), rack_id, station_id, heats.name, researchers.username, experiments.name FROM heat_assignments,subjects,racks,stations,heats,researchers,experiments,ratrixservers WHERE heat_assignments.subject_uin=subjects.uin AND heat_assignments.station_uin=stations.uin AND subjects.owner_uin=researchers.uin(+) AND stations.rack_uin=racks.uin AND heat_assignments.experiment_uin=experiments.uin(+) AND heat_assignments.heat_uin=heats.uin AND stations.server_uin=ratrixservers.uin AND ratrixservers.name=''%s'' AND heats.name=''%s''ORDER BY rack_id,station_id',server_name,heat_name);
+    sprintf('SELECT LOWER(subjects.display_uin), rack_id, station_id, heats.name, researchers.username, experiments.name FROM heat_assignments,subjects,racks,stations,heats,researchers,experiments,ratrixservers WHERE heat_assignments.subject_uin=subjects.uin AND heat_assignments.station_uin=stations.uin AND subjects.owner_uin=researchers.uin(+) AND stations.rack_uin=racks.uin AND heat_assignments.experiment_uin=experiments.uin(+) AND heat_assignments.heat_uin=heats.uin AND stations.server_uin=ratrixservers.uin AND ratrixservers.name=''%s'' AND heats.name=''%s'' AND (subjects.test_subject=%d OR subjects.test_subject is null OR subjects.test_subject=0) ORDER BY rack_id,station_id',server_name,heat_name,include_test_rats);
 
 results=query(conn,selectAssignmentQuery);
 

@@ -22,7 +22,15 @@ function st=makeDefaultStation(id,path,mac,physicalLocation,screenNum,rewardMeth
 % 17  control	inv     i/o
 
 if ~exist('pportaddr','var') || isempty(pportaddr)
-   pportaddr= '0378'
+   pportaddr= '0378';
+end
+
+if ~exist('rewardMethod','var') || isempty(rewardMethod)
+   rewardMethod= 'localTimed';
+end
+
+if ~exist('screenNum','var') || isempty(screeNum)
+   screenNum=int8(0);
 end
 
 stationSpec.id                                = id;
@@ -46,7 +54,7 @@ else
     error('unknown OS')
 end
 
-if strcmp(stationSpec.id,'3A') || strcmp(rewardMethod,'localPump')
+if ismember(stationSpec.id,{'3A','3B','3C','3D','3E','3F'}) || strcmp(rewardMethod,'localPump')
 
     infTooFarPin=int8(1);
     wdrTooFarPin=int8(14);

@@ -52,3 +52,4 @@
 /updateRatrix.m -text
 /getStandAlonePath.m -text
 /getServerDataPath.m -text
+/replaceStationForBox.m -text

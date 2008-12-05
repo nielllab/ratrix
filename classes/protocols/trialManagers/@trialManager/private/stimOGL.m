@@ -954,6 +954,8 @@ try
                         end
                     elseif strcmp(keyName,'a') % check for airpuff
                         doPuff=true;
+                    elseif strcmp(keyName,'r') && strcmp(getRewardMethod(station),'localPump')
+                        doPrime(station);
                     end
                 end
             end

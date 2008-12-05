@@ -29,7 +29,7 @@ if ~exist('rewardMethod','var') || isempty(rewardMethod)
    rewardMethod= 'localTimed';
 end
 
-if ~exist('screenNum','var') || isempty(screeNum)
+if ~exist('screenNum','var') || isempty(screenNum)
    screenNum=int8(0);
 end
 

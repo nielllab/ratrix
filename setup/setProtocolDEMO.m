@@ -134,7 +134,7 @@ noiseSpec.patchWidth             = .1;
 unfilteredNoise=filteredNoise(noiseSpec);
 
 
-noiseSpec.distribution           = '/Users/eflister/Desktop/ratrix trunk/classes/protocols/stimManagers/@flicker/ts001';
+noiseSpec.distribution           ='\\Reinagel-lab.AD.ucsd.edu\RLAB\Rodent-Data\hateren\ts001';% '/Users/eflister/Desktop/ratrix trunk/classes/protocols/stimManagers/@flicker/ts001';
 noiseSpec.origHz                 = 1200;
 noiseSpec.loopDuration           = 30;
 

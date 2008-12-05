@@ -17,14 +17,8 @@ switch nargin
         end
     case 6
 
-        if varargin{1}>=0
-            r.rewardSizeULorMS=varargin{1};
-        else
-            error('rewardSizeULorMS must be >=0')
-        end
-
         r = class(r,'constantReinforcement',reinforcementManager(varargin{2},varargin{6},varargin{5},varargin{3},varargin{4}));
-
+        setRewardSizeULorMS(r,varargin{1});
     otherwise
         error('Wrong number of input arguments')
 end

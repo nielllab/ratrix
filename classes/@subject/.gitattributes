@@ -18,3 +18,4 @@
 /changeAllReinforcementManagers.m -text
 /stopEyeTracking.m -text
 /calibrateEyeTracker.m -text
+/setAllReinforcementManagerRewards.m -text

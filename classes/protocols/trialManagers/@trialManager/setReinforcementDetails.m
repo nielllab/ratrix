@@ -1,5 +1,5 @@
 function t=setReinforcementDetails(t,details)
-
+error('edf thinks this should never be called')
 %to be general set all the details that exist...
 
 %right now just doing all the ones that get extracted by

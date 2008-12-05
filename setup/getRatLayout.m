@@ -1,6 +1,6 @@
-function [heatOrder stations subjects]=getRatLayout
+function [heatOrder stations subjects]=getRatLayout(rack)
 conn=dbConn;
-rack = getRackIDFromIP;
+
 
 heatOrder={};
 

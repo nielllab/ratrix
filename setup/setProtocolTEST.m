@@ -126,16 +126,16 @@ interTrialLuminance     =.5;
 
 
 
-imageDir='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\PriyaV\other stimuli sets\paintbrush_flashlight';%'\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\PriyaV\other stimuli sets\paintbrushMORPHflashlightEDF';
-background=0;
-ypos=0;
-ims=dir(fullfile(imageDir,'*.png'));
-trialDistribution={};
-for i=1:floor(length(ims)/2)
-    [junk n1 junk junk]=fileparts(ims(i).name);
-    [junk n2 junk junk]=fileparts(ims(length(ims)-(i-1)).name);
-    trialDistribution{end+1}={{n1 n2} 1};
-end
+% imageDir='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\PriyaV\other stimuli sets\paintbrush_flashlight';%'\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\PriyaV\other stimuli sets\paintbrushMORPHflashlightEDF';
+% background=0;
+% ypos=0;
+% ims=dir(fullfile(imageDir,'*.png'));
+% trialDistribution={};
+% for i=1:floor(length(ims)/2)
+%     [junk n1 junk junk]=fileparts(ims(i).name);
+%     [junk n2 junk junk]=fileparts(ims(length(ims)-(i-1)).name);
+%     trialDistribution{end+1}={{n1 n2} 1};
+% end
 
 % ====================================================================================================================
 % stimManager
@@ -145,7 +145,7 @@ pixPerCycs=[20 10];
 distractorOrientations=[0];
 discrimStim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
-imageStim = images(imageDir,ypos,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,trialDistribution);
+% imageStim = images(imageDir,ypos,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,trialDistribution);
 
 % for Phil's stim managers
 pixPerCycs              =[20];
@@ -227,7 +227,7 @@ ts1 = trainingStep(fd_sto, freeStim, repeatIndef, noTimeOff(), svnRev);   %stoch
 ts2 = trainingStep(fd, freeStim, repeatIndef, noTimeOff(), svnRev);  %free drinks
 ts3 = trainingStep(vh, freeStim, graduateQuickly, noTimeOff(), svnRev);   %go to stim - orientedGabors w/ nAFC
 ts4 = trainingStep(vh, discrimStim, repeatIndef, noTimeOff(), svnRev);%orientation discrim - orientedGabors w/ nAFC
-ts5 = trainingStep(vh, imageStim,  graduateQuickly, noTimeOff(), svnRev); %morph discrim - images w/ nAFC
+% ts5 = trainingStep(vh, imageStim,  graduateQuickly, noTimeOff(), svnRev); %morph discrim - images w/ nAFC
 
 % Balaji
 ts6 = trainingStep(gts, freeStim, graduateQuickly, noTimeOff(), svnRev);  % go to stim
@@ -252,14 +252,49 @@ ts18 = trainingStep(fd_sto_increasing_rewards, freeStim, graduateQuickly, noTime
 ts19 = trainingStep(fd_increasing_rewards, freeStim, graduateQuickly, noTimeOff(), svnRev);  %free drinks
 ts20 = trainingStep(nAFC_increasing_rewards, freeStim, graduateQuickly, noTimeOff(), svnRev);   %go to stim - orientedGabors w/ nAFC
 ts21 = trainingStep(nAFC_increasing_rewards, discrimStim, graduateQuickly, noTimeOff(), svnRev);%orientation discrim - orientedGabors w/ nAFC
-ts22 = trainingStep(nAFC_increasing_rewards, imageStim,  graduateQuickly, noTimeOff(), svnRev); %morph discrim - images w/ nAFC
+% ts22 = trainingStep(nAFC_increasing_rewards, imageStim,  graduateQuickly, noTimeOff(), svnRev); %morph discrim - images w/ nAFC
+
+% images
+%path containing ALL the stimuli
+imdir='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\PriyaV\TMPPriyaImageSet';
+% '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\PriyaV\PriyaImageSet'; 
+% execute separate file containing the lists for each trainingstep
+% TMP enforces erik's naming scheme, for use with his checkImages 
+imlist=PriyaImageSets; % populate struct, each training step has a field for its list
+% each list is a cell array of cell arrays, passed to images
+%CAR/BOX
+interTrialLuminance_nAFC = 0.3; %extremely brief during stim calculation
+background_nAFC=0; % range 0-1; bg for images (should differ from error screen) **CHANGED 080707**
+% note this is also the color of screen between toggles but does NOT
+% determine pre-requst color.
+ypos_nAFC=0; %location of image stimuli is near ports
+maxWidth                =1024; % of the screen
+maxHeight               =768; % of the screen
+scaleFactor             =[1 1]; %show image at full size
+
+% testing for new images list
+imlist=[];
+imlist.ts5A={...
+   {  {'paintbrush_flashlight01'  'paintbrush_flashlight30'} 1} ... % pure exemplars
+   {  {'paintbrush_flashlight15'  'paintbrush_flashlight16'  'paintbrush_flashlight29'  'paintbrush_flashlight02'} 1} ... % nearly identical
+};
+
+
+discrimStim5A = images(imdir,ypos_nAFC,background_nAFC,...
+    maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts5A,[.25 1],false,[0 90],'expert');
+% discrimStim6A = images(imdir,ypos_nAFC,background_nAFC,...
+%     maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts6A,[.5 .75],true,[0 90]);
+
+
+ts24 = trainingStep(vh, discrimStim5A,graduateQuickly,noTimeOff(),svnRev);
+% ts25 = trainingStep(vh, discrimStim6A,graduateQuickly,noTimeOff(),svnRev);
 
 % ====================================================================================================================
 % protocol and rest of setup stuff
 % p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8, ts9, ts10, ts11, ts12, ts13, ts14, ts15, ts16, ts17, ...
 %     ts18, ts19, ts20, ts21, ts22});
 % stepNum=21;
-p=protocol('gabor test', {ts12, ts3});
+p=protocol('gabor test2', {ts24, ts3});
 stepNum=1;
 
 for i=1:length(subjIDs),

@@ -34,7 +34,7 @@ switch nargin
 
 
 
-
+%       this gets set by the setRequestReward method now - 12/10/08
         if varargin{5}>=0
             t.requestRewardSizeULorMS=varargin{5};
         else
@@ -123,6 +123,8 @@ switch nargin
         end
         
         t = class(t,'nAFC',a);
+        % setRequestRewardSizeULorMS
+        t=setRequestReward(t,varargin{5},true);
         
     otherwise
         nargin

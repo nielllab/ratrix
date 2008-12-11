@@ -6,8 +6,7 @@ switch param
         try
             rm=setRewardSizeULorMS(rm,val);
         catch ex
-            if ismember(ex.message,{'Input argument "val" is undefined.',...
-                    'Undefined function or method ''setRewardULorMS'' for input arguments of type ''reinforcementManager''.'})
+            if strcmp(ex.identifier,'MATLAB:UndefinedFunction')
                 class(rm)
                 warning('can''t set rewardULorMS for reinforcementManager of this class')
             else

@@ -5,6 +5,6 @@ if ischar(ids)
 elseif iscell(ids)
     ids={ids{:}};
     for i=1:length(ids)
-        s(end+1)=getSubjectFromID(r,ids{i});
+        s{end+1}=getSubjectFromID(r,ids{i});
     end
 end

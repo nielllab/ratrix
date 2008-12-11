@@ -4,7 +4,7 @@ switch param
         rm=setMsPenalty(rm,val);
     case 'rewardULorMS'
         try
-            rm=setRewardULorMS(rm,val);
+            rm=setRewardSizeULorMS(rm,val);
         catch ex
             if ismember(ex.message,{'Input argument "val" is undefined.',...
                     'Undefined function or method ''setRewardULorMS'' for input arguments of type ''reinforcementManager''.'})

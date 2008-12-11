@@ -165,3 +165,4 @@ protocols/stimManagers/@examplePhased/getPhases.m -text
 db/@dbConn/getCompilePathBySubject.m -text
 db/@dbConn/getFreeWaterHistory.m -text
 protocols/reinforcementManagers/@constantReinforcement/setRewardSizeULorMS.m -text
+protocols/reinforcementManagers/@reinforcementManager/setReinforcementParam.m -text

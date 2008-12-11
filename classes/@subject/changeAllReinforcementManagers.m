@@ -1,5 +1,5 @@
 function [subject r]=changeAllReinforcementManagers(subject,rm,r,comment,auth)
-   
+error('edf 12.11.08: call setup/util/setReinforcementParam instead')   
 if isa(rm,'reinforcementManager') && isa(r,'ratrix') && ~isempty(getSubjectFromID(r,subject.id))
           
             for i=1:getNumTrainingSteps(subject.protocol)

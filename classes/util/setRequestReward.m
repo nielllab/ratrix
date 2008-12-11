@@ -1,4 +1,5 @@
 function r=setRequestReward(r,subjectIDs,value,verbose)
+error('edf 12.11.08: this is poorly coded -- should be a class method, should not hardcode author/comment, should not recreate protocol, should not test tm methods, etc.  please rewrite in style of setup/util/setReinforcementParam')
 %setRequestReward(r,subjectIDs,value)
 %setRequestReward(r,{'127'},30)
 

@@ -1,5 +1,5 @@
 function tm=setRequestReward(tm,value,verbose)
-
+error('error check on value is inadequate (should check real numeric scalar) and redundant with constructor''s error check, please rewrite and route constructor through this method')
 if ~exist('verbose','var')
     verbose=0;
 end

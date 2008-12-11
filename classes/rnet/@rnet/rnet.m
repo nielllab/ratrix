@@ -18,6 +18,7 @@ r.constants.serverToStationCommands.S_REWARD_COMPLETE_CMD = 15;
 r.constants.serverToStationCommands.S_GET_MAC_CMD = 16;
 r.constants.serverToStationCommands.S_GET_VALVE_STATES_CMD = 17;
 r.constants.serverToStationCommands.S_REPLICATE_TRIAL_RECORDS_CMD = 18;
+r.constants.serverToStationCommands.S_RECEIVE_DATA_CMD = 99; %for testing only
 
 % Station to Server
 r.constants.stationToServerCommands.C_CMD_ACK = 101;
@@ -35,6 +36,7 @@ r.constants.stationToServerCommands.C_UPDATE_SOFTWARE_ON_TARGETS_CMD = 112;
 r.constants.stationToServerCommands.C_RECV_MAC_CMD = 113;
 r.constants.stationToServerCommands.C_RECV_UPDATING_SOFTWARE_CMD = 114;
 r.constants.stationToServerCommands.C_STOPPED_TRIALS = 115;
+r.constants.stationToServerCommands.C_RECEIVE_DATA_CMD = 199; %for testing only
 
 % Monitoring Client to Server
 r.constants.monitorClientCommands.M_ISSUE_COMMAND_CMD = 201;

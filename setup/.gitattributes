@@ -1,11 +1,4 @@
-/addRatsForRack.m -text
-/getRatLayout.m -text
-/reportSettings.m -text
-/firstMakeRatrix.m -text
-/createRatrixWithDefaultStations.m -text
-/addTestRats.m -text
 /setProtocolDEMO.m -text
-/createRatrixWithStationsForRack.m -text
 setupMaleRoom/setupMaleRoom.m -text
 setupEDF/getEDFids.m -text
 setupEDF/setProtocolDFP.rack2backup.m -text
@@ -26,3 +19,15 @@ setupPhysRig1/setProtocolPhys.m -text
 setupEDF/setProtocolEDFtemp.m -text
 setupEDF/pumpify.m -text
 setupEDF/setPumpRewards.m -text
+runOnce/firstMakeRatrix.m -text
+runOnce/addTestRats.m -text
+runOnce/addRatsForRack.m -text
+runOnce/createRatrixWithStationsForRack.m -text
+runOnce/createRatrixWithDefaultStations.m -text
+util/setRewardULorMS.m -text
+util/reportSettings.m -text
+util/getRatLayout.m -text
+util/setReinforcementParam.m -text
+util/setStepNum.m -text
+util/init.m -text
+util/setPenaltyMS.m -text

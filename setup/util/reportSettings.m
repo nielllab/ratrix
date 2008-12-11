@@ -1,9 +1,7 @@
 function reportSettings
 clc
 
-dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
-
-r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
+r=init;
 
 ids=getSubjectIDs(r);
 

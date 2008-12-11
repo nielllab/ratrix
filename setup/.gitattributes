@@ -25,3 +25,4 @@ setupBS/getMSPenalty.m -text
 setupPhysRig1/setProtocolPhys.m -text
 setupEDF/setProtocolEDFtemp.m -text
 setupEDF/pumpify.m -text
+setupEDF/setPumpRewards.m -text

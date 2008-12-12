@@ -7,6 +7,7 @@ function s=filteredNoise(varargin)
 %
 % stim properties:
 % in.distribution               'gaussian', 'binary', 'uniform', or a path to a file name (either .txt or .mat, extension omitted, .txt loadable via load(), and containing a single vector of numbers named 'noise')
+%                               distribution can also be cell array of following form: {'sinusoidalFlicker',[temporalFreqs],[contrasts],gapSecs} - each freq x contrast combo will be shown for equal time in random order, total time including gaps will be in.loopDuration
 % in.origHz                     only used if distribution is a file name, indicating sampling rate of file
 % in.contrast                   std dev in normalized luminance units (just counting patch, before mask application), values will saturate
 % in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file instead of a random subset)
@@ -74,8 +75,20 @@ switch nargin
                     else
                         error('if distribution is file, origHz must be real scalar > 0')
                     end
+                elseif iscell(in.distribution) && all(size(in.distribution)==[1 4]) && strcmp(in.distribution{1},'sinusoidalFlicker')
+                    tmp.special=in.distribution{1};
+                    tmp.freqs=in.distribution{2};
+                    tmp.contrasts=in.distribution{3};
+                    tmp.gapSecs=in.distribution{4};
+                    if isvector(freqs) && isreal(freqs) && isnumeric(freqs) && all(freqs>=0) && ...
+                            isvector(contrasts) && isreal(contrasts) && isnumeric(contrasts) && all(contrasts>=0) && all(contrasts<=1) && ...
+                            isscalar(gapSecs) && isreal(gapSecs) && isnumeric(gapSecs) && gapSecs>=0
+                        in.distribution=tmp;
+                    else
+                        error('temporalFreqs and contrasts must be real numeric vectors >=0, contrasts must be <=1, gapSecs must be real numeric scalar >=0')
+                    end
                 else
-                    error('distribution must be one of gaussian, uniform, binary, or a string containing a file name (either .txt or .mat, extension omitted, .txt loadable via load())');
+                    error('distribution must be one of gaussian, uniform, binary, or a string containing a file name (either .txt or .mat, extension omitted, .txt loadable via load()), or  {''sinusoidalFlicker'',[temporalFreqs],[contrasts],gapSecs}');
                 end
 
 

@@ -164,7 +164,7 @@ end
 crf_trf=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 
-[noiseSpec.distribution]         =deal({'sinusoidalFlicker',[1 5 10 20 30 50 100],[.1 .25 .5 .75 1],.1}); %temporal freqs, contrasts, %gaps at intertrialluminance
+[noiseSpec.distribution]         =deal({'sinusoidalFlicker',[1 5 10 20 30 50 100],[.1 .25 .5 .75 1],.1}); %temporal freqs, contrasts, gapSecs
 [noiseSpec.origHz]               =deal(0);
 [noiseSpec.loopDuration]         =deal(60);
 

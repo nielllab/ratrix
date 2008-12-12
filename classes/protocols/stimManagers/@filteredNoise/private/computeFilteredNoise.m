@@ -49,26 +49,40 @@ for i=1:length(stimulus.port)
     s=GetSecs;
     stimulus.seed{i}=round((s-floor(s))*maxSeed);
     stimulus.inds{i}=[];
-    switch stimulus.distribution{i}
-        case 'gaussian'
-            randn('state',stimulus.seed{i});
-            noise=randn([sz frames]);
-        case {'binary','uniform'}
-            rand('twister',stimulus.seed{i});
-            noise=rand([sz frames]);
-            if strcmp(stimulus.distribution{i},'binary')
-                noise=(noise>.5);
-            end
-            noise=noise-.5;
-        otherwise
-            [noise stimulus.inds{i}]=loadStimFile(stimulus.distribution{i},stimulus.origHz{i},hz,stimulus.loopDuration{i});
-            noise=noise-.5;
-            if size(noise,1)>1
-                noise=noise';
-            end
-            %noise=-.5:.01:.5;
-            noise=permute(noise,[3 1 2]);
-            repmat(noise,[sz 1]);
+    if isstruct(stimulus.distribution{i}) && strcmp(stimulus.distribution{i}.special,'sinusoidalFlicker')
+        stimulus.distribution{i}.conditions=getShuffledCross({stimulus.distribution{i}.contrasts,stimulus.distribution{i}.freqs});
+        noise=[];
+        dur=(stimulus.loopDuration{i}/length(stimulus.distribution{i}.conditions))-stimulus.distribution{i}.gapSecs;
+        for j=1:length(stimulus.distribution{i}.conditions)
+            noise=[noise stimulus.distribution{i}.conditions{j}{1}*makeSinusoid(hz,stimulus.distribution{i}.conditions{j}{2},dur) zeros(1,round(stimulus.distribution{i}.gapSecs*hz))];
+        end
+        plot(noise)
+        error('hi')
+    elseif ischar(stimulus.distribution{i})
+        switch stimulus.distribution{i}
+            case 'gaussian'
+                randn('state',stimulus.seed{i});
+                noise=randn([sz frames]);
+            case {'binary','uniform'}
+                rand('twister',stimulus.seed{i});
+                noise=rand([sz frames]);
+                if strcmp(stimulus.distribution{i},'binary')
+                    noise=(noise>.5);
+                end
+                noise=noise-.5;
+            otherwise
+                [noise stimulus.inds{i}]=loadStimFile(stimulus.distribution{i},stimulus.origHz{i},hz,stimulus.loopDuration{i});
+                noise=noise-.5;
+                if size(noise,1)>1
+                    noise=noise';
+                end
+                %noise=-.5:.01:.5;
+                noise=permute(noise,[3 1 2]);
+                repmat(noise,[sz 1]);
+        end
+    else
+        stimulus.distribution{i}
+        error('bad distribution')
     end
 
     try

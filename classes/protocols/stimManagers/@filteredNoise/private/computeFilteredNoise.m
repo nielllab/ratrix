@@ -81,7 +81,9 @@ for i=1:length(stimulus.port)
                 repmat(noise,[sz 1]);
         end
     else
+        '***'
         stimulus.distribution{i}
+        '***'
         error('bad distribution')
     end
 

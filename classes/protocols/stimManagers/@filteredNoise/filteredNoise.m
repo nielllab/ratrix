@@ -85,7 +85,7 @@ switch nargin
                     if isvector(tmp.freqs) && isreal(tmp.freqs) && isnumeric(tmp.freqs) && all(tmp.freqs>=0) && ...
                             isvector(tmp.contrasts) && isreal(tmp.contrasts) && isnumeric(tmp.contrasts) && all(tmp.contrasts>=0) && all(tmp.contrasts<=1) && ...
                             isscalar(tmp.gapSecs) && isreal(tmp.gapSecs) && isnumeric(tmp.gapSecs) && tmp.gapSecs>=0
-                        in.distribution=tmp;
+                        varargin{1}(j).distribution=tmp;
                     else
                         error('temporalFreqs and contrasts must be real numeric vectors >=0, contrasts must be <=1, gapSecs must be real numeric scalar >=0')
                     end

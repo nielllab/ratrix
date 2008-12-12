@@ -194,7 +194,7 @@ ts8 = trainingStep(vh, crf_trf,  repeatIndefinitely(), noTimeOff(), svnRev); %cr
 ts9 = trainingStep(vh, crf_trf_better,  repeatIndefinitely(), noTimeOff(), svnRev); %crf_trf (dynamic)
 
 p=protocol('practice phys',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8, ts9});
-stepNum=6;
+stepNum=9;
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

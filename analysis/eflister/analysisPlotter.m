@@ -19,6 +19,7 @@ if strcmp(selection.type,'all')
         [numRows numCols] = getArrangement(length(toBePlotted));
         for i = 1:length(subIDs)
             % added 10/3/08 - get compiledFileDir from subID, subject-specific
+            %edf: 12.12.08: needs to work in standalone mode and no network access!
             conn = dbConn();
             compiledFileDir = getCompilePathBySubject(conn, subIDs{1});
             compiledFileDir = compiledFileDir{1}
@@ -60,6 +61,7 @@ else
                     subplot(numRows,numCols,(j-1)*numCols+k)
                     title(sprintf('%s - %s: %s',selection.type,selection.subjects{i,j,k},datestr(now,0)))
                     % added 10/3/08 - get compiledFileDir from subID, subject-specific
+                    %edf: 12.12.08: needs to work in standalone mode and no network access!
                     conn = dbConn();
                     compiledFileDir = getCompilePathBySubject(conn, selection.subjects{i,j,k});
                     compiledFileDir = compiledFileDir{1}

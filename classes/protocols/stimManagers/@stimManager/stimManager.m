@@ -8,7 +8,7 @@ switch nargin
         s.maxHeight=0;
         s.scaleFactor=[];
         s.interTrialLuminance=0;
-        s = class(s,'stimManager',structable());
+        s = class(s,'stimManager');
     case 1
         % if single argument of this class type, return it
         if (isa(varargin{1},'stimManager'))
@@ -37,9 +37,7 @@ switch nargin
             error('interTrailLuminance must be >=0 and <=1')
         end
         
-        s = class(s,'stimManager',structable());
+        s = class(s,'stimManager');
     otherwise
         error('Wrong number of input arguments')
 end
-
-        s=setSuper(s,s.structable);

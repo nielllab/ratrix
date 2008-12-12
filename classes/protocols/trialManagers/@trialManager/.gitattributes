@@ -8,7 +8,6 @@
 /trialManager.m -text
 /getRequestPorts.m -text
 /getSoundManager.m -text
-/structize.m -text
 /setReinforcementDetails.m -text
 /setReinforcementManager.m -text
 /getReinforcementManager.m -text

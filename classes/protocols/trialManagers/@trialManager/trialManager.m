@@ -16,7 +16,7 @@ switch nargin
     case 0
         % if no input arguments, create a default object
 
-        t = class(t,'trialManager',structable());
+        t = class(t,'trialManager');
     case 1
         % if single argument of this class type, return it
         if (isa(varargin{1},'trialManager'))
@@ -90,12 +90,10 @@ switch nargin
             error('not a string')
         end
 
-        t = class(t,'trialManager',structable());
+        t = class(t,'trialManager');
 
 
     otherwise
         nargin
         error('Wrong number of input arguments')
 end
-
-        t=setSuper(t,t.structable);

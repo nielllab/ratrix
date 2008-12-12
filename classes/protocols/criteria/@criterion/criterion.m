@@ -6,7 +6,7 @@ switch nargin
     case 0
         % if no input arguments, create a default object
         s=struct([]);
-        s = class(s,'criterion',structable());
+        s = class(s,'criterion');
     case 1
         % if single argument of this class type, return it
         if (isa(varargin{1},'criterion'))
@@ -18,5 +18,3 @@ switch nargin
     otherwise
         error('Wrong number of input arguments')
 end
-
-        s=setSuper(s,s.structable);

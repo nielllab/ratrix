@@ -33,7 +33,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
         if isa(stimManager,'stimManager')
             trialRecords(trialInd).sessionNumber = sessionNumber;
             trialRecords(trialInd).date = datevec(now);
-            trialRecords(trialInd).box = struct(getBoxFromID(r,getBoxIDForSubjectID(r,getID(subject))));
+            trialRecords(trialInd).box = structize(getBoxFromID(r,getBoxIDForSubjectID(r,getID(subject))));
             trialRecords(trialInd).protocolName = getName(p);
             trialRecords(trialInd).trainingStepNum = t;
             trialRecords(trialInd).numStepsInProtocol = getNumTrainingSteps(p);
@@ -75,8 +75,8 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             trialRecords(trialInd).trialManagerClass = class(trialManager);
             trialRecords(trialInd).scheduler = structize(getScheduler(ts));
             trialRecords(trialInd).criterion = structize(getCriterion(ts));
-            trialRecords(trialInd).schedulerClass = class(trialRecords(trialInd).scheduler);
-            trialRecords(trialInd).criterionClass = class(trialRecords(trialInd).criterion);
+            trialRecords(trialInd).schedulerClass = class(getScheduler(ts));
+            trialRecords(trialInd).criterionClass = class(getCriterion(ts));
 
             resolutions=getResolutions(station);
             
@@ -110,7 +110,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             end
             
             [station trialRecords(trialInd).resolution]=setResolution(station,resolutions(resInd));
-            trialRecords(trialInd).station = struct(station); %wait til now to record, so we get an updated ifi measurement in the station object
+            trialRecords(trialInd).station = structize(station); %wait til now to record, so we get an updated ifi measurement in the station object
 
             if (isempty(trialRecords(trialInd).targetPorts) || isvector(trialRecords(trialInd).targetPorts))...
                     && (isempty(trialRecords(trialInd).distractorPorts) || isvector(trialRecords(trialInd).distractorPorts))
@@ -154,16 +154,8 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             end
 
 
-            %trialRecords(trialInd).stimManager = structize(newSM); %edf: removed 11.04.06 -- the timedFrame stim manager is too large (it has a cache).  could call a decache() method...
-            if isa(stimulusDetails,'structable')
-                trialRecords(trialInd).stimDetails = structize(stimulusDetails);
-            elseif isobject(stimulusDetails)
-                trialRecords(trialInd).stimDetails = struct(stimulusDetails);
-            elseif isstruct(stimulusDetails)
-                trialRecords(trialInd).stimDetails = stimulusDetails;
-            else
-                error('stim manager returned a stimulusDetails that was neither a structure nor an object')
-            end
+            trialRecords(trialInd).stimManager = structize(decache(newSM));
+            trialRecords(trialInd).stimDetails = structize(stimulusDetails);
 
             manualOn=0;
             if length(trialRecords)>1
@@ -247,7 +239,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             end
 
             %if slow rewards check, here or the calc reinforcement are likely implicated
-            trialRecords(trialInd).reinforcementManager = trialManager.reinforcementManager;
+            trialRecords(trialInd).reinforcementManager = structize(trialManager.reinforcementManager);
             trialRecords(trialInd).reinforcementManagerClass = class(trialManager.reinforcementManager);
             trialRecords(trialInd).proposedRewardSizeULorMS=rewardSizeULorMS;
             trialRecords(trialInd).proposedMsPenalty=msPenalty;
@@ -428,7 +420,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                         trialRecords(trialInd).interTrialLuminance, ...
                         station,0,0,.5,1,'incorrect',rn,getID(subject),trialRecords(trialInd).stimManagerClass,pStr,trialLabel,trialManager.eyeTracker,msPuff);
 
-                    trialRecords(trialInd).errorRecords=errorRecords(trialInd);
+                    trialRecords(trialInd).errorRecords=structize(errorRecords(trialInd));
 
                     if stopEarly
                         'got stopEarly 6'

@@ -15,7 +15,7 @@ switch nargin
     case 0
         % if no input arguments, create a default object
 
-        r = class(r,'reinforcementManager',structable());
+        r = class(r,'reinforcementManager');
     case 1
         % if single argument of this class type, return it
         if (isa(varargin{1},'reinforcementManager'))
@@ -60,10 +60,8 @@ switch nargin
             error('fractionPenaltySoundIsOn must be >=0 and <=1')
         end
 
-        r = class(r,'reinforcementManager',structable());
+        r = class(r,'reinforcementManager');
 
     otherwise
         error('Wrong number of input arguments')
 end
-
-r=setSuper(r,r.structable);

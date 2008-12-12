@@ -130,5 +130,3 @@ switch nargin
         nargin
         error('Wrong number of input arguments')
 end
-
-        t=setSuper(t,t.trialManager);

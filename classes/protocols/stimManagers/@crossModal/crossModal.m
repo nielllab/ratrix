@@ -84,5 +84,3 @@ case 21
 otherwise
     error('Wrong number of input arguments')
 end
-
-s=setSuper(s,s.stimManager);

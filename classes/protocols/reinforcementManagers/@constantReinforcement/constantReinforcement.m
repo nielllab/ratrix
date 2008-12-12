@@ -23,5 +23,3 @@ switch nargin
     otherwise
         error('Wrong number of input arguments')
 end
-
-r=setSuper(r,r.reinforcementManager);

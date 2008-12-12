@@ -127,5 +127,3 @@ otherwise
     nargin
     error('Wrong number of input arguments')
 end
-
-s=setSuper(s,s.stimManager);

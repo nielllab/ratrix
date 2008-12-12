@@ -4,7 +4,10 @@ function t=soundManager(varargin)
 
 t.AUDIO_PLAYER = 1;
 t.PSYCH_PORT_AUDIO = 2;
+t.AUDIO_PLAYER_CACHED = 3;
+
 t.clips={};
+t.players={};
 t.records=struct([]);
 t.pahandle = [];
 t.latbias = 0;
@@ -45,11 +48,13 @@ switch nargin
                 t.playerType = t.AUDIO_PLAYER;
             elseif strcmp(varargin{2},'psychportaudio')
                 t.playerType = t.PSYCH_PORT_AUDIO;
+            elseif strcmp(varargin{2},'audioplayerCached')
+                t.playerType = t.AUDIO_PLAYER_CACHED
             else
-                error('Second argument to soundManager constructor should be sound player type as a string (audioplayer or psychportaudio)')
+                error('Second argument to soundManager constructor should be sound player type as a string (audioplayer or psychportaudio or audioplayerCached)')
             end
         else
-            error('Second argument to soundManager constructor should be sound player type as a string (audioplayer or psychportaudio)')
+            error('Second argument to soundManager constructor should be sound player type as a string (audioplayer or psychportaudio or audioplayerCached)')
         end
     otherwise
         error('Wrong number of input arguments')

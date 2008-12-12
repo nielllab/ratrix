@@ -134,6 +134,7 @@ try
     rx=putSubjectInBox(rx,subjectID,boxIDs(1),auth);    
     b=getBoxIDForSubjectID(rx,getID(s));
     st=getStationsForBoxID(rx,b);
+    struct(st(1))
     rx=doTrials(st(1),rx,0,[],~recordInOracle); %0 means keep running trials til something stops you (quit, error, etc)
     [rx ids] = emptyAllBoxes(rx,'done running trials in standAloneRun',auth);
 

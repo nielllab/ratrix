@@ -3,6 +3,7 @@ function s=filteredNoise(varargin)
 % s = filteredNoise(in,maxWidth, maxHeight, scaleFactor, interTrialLuminance)
 %
 % in is a struct array with one entry for each correct answer port:
+% in.port                       1x1 integer denoting correct port for the parameters specified in this entry ("column") in the struct array
 %
 % stim properties:
 % in.distribution               'gaussian', 'binary', 'uniform', or a path to a file name (either .txt or .mat, extension omitted, .txt loadable via load(), and containing a single vector of numbers named 'noise')
@@ -11,7 +12,7 @@ function s=filteredNoise(varargin)
 % in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file instead of a random subset)
 %
 % patch properties:
-% in.locationDistributions      2-d density, will be normalized to stim area
+% in.locationDistribution       2-d density, will be normalized to stim area
 % in.maskRadius                 std dev of the enveloping gaussian, normalized to diagonal of stim area (values <=0 mean no mask)
 % in.patchDims                  [height width]
 % in.patchHeight                0-1, normalized to stim area height
@@ -19,23 +20,22 @@ function s=filteredNoise(varargin)
 % in.background                 0-1, normalized
 %
 % filter properties:
-% in.orientations               filter orientation in radians, 0 is vertical, positive is clockwise
+% in.orientation                filter orientation in radians, 0 is vertical, positive is clockwise
 % in.kernelSize                 0-1, normalized to diagonal of patch
 % in.kernelDuration             in seconds (will be rounded to nearest multiple of frame duration)
 % in.ratio                      ratio of short to long axis of gaussian kernel (1 means circular, no effective orientation)
 % in.filterStrength             0 means no filtering (kernel is all zeros, except 1 in center), 1 means pure mvgaussian kernel (center not special), >1 means surrounding pixels more important
 % in.bound                      .5-1 edge percentile for long axis of kernel when parallel to window
 
-fieldNames={'orientations','locationDistributions','distribution','origHz','background','contrast','maskRadius','patchDims','patchHeight','patchWidth','kernelSize','kernelDuration','loopDuration','ratio','filterStrength','bound'};
+fieldNames={'port','distribution','origHz','contrast','loopDuration','locationDistribution','maskRadius','patchDims','patchHeight','patchWidth','background','orientation','kernelSize','kernelDuration','ratio','filterStrength','bound'};
 for i=1:length(fieldNames)
     s.(fieldNames{i})=[];
 end
-s.cache=[];
+s.cache={};
 s.seed={};
-s.sha1=[];
+s.sha1={};
 s.hz=[];
-s.inds=[];
-reqNames=union(fieldNames,{'maxWidth','maxHeight','scaleFactor','interTrialLuminance'});
+s.inds={};
 
 switch nargin
     case 0  % if no input arguments, create a default object
@@ -43,35 +43,28 @@ switch nargin
     case 1
         if (isa(varargin{1},'filteredNoise'))	% if single argument of this class type, return it
             s = varargin{1};
-        elseif isstruct(varargin{1})    % create object using specified values
-            if all(ismember(reqNames,fields(varargin{1})))
-                in=varargin{1};
+        else
+            error('Input argument is not a filteredNoise object')
+        end
+    case 5
+        if isstruct(varargin{1})  &&   all(ismember(fieldNames,fields(varargin{1})))  % create object using specified values
 
-                if isvector(in.orientations) && iscell(in.orientations)
-                    for i=1:length(in.orientations)
-                        if isreal(in.orientations{i}) && (isscalar(in.orientations{i}) || isempty(in.orientations{i}));
-                            %pass
-                        else
-                            error('each orientation must be real scalar or empty')
-                        end
-                    end
+            for j=1:length(varargin{1})
+                in=varargin{1}(j);
+
+                if isinteger(in.port) && in.port>0 && isscalar(in.port)
+                    %pass
                 else
-                    error('orientations must be a cell vector')
+                    error('port must be scalar positive integer')
                 end
 
-                if isvector(in.locationDistributions) && iscell(in.locationDistributions) && length(in.locationDistributions) == length(in.orientations)
-                    for i=1:length(in.locationDistributions)
-                        if ~isempty(in.locationDistributions{i})
-                            if length(size(in.locationDistributions{i}))==2 && isreal(in.locationDistributions{i}) && all(in.locationDistributions{i}(:)>=0) && sum(in.locationDistributions{i}(:))>0;
-                                %pass
-                            else
-                                error('each locationDistribution must be 2d real and >=0 with at least one nonzero entry')
-                            end
-                        end
-                    end
+
+                if isreal(in.orientation) && isscalar(in.orientation)
+                    %pass
                 else
-                    error('locationDistributions must be cell vector of same length as orientations')
+                    error('orientation must be real scalar')
                 end
+
 
                 if ismember(in.distribution,{'uniform','gaussian','binary'})
                     %pass
@@ -85,17 +78,16 @@ switch nargin
                     error('distribution must be one of gaussian, uniform, binary, or a string containing a file name (either .txt or .mat, extension omitted, .txt loadable via load())');
                 end
 
-                if all(cellfun(@isempty,in.orientations)==cellfun(@isempty,in.locationDistributions)) %will barf if these vectors don't have same orientaiton :(
-                    %pass
-                else
-                    error('orientations and locationDistributions must have same empty locations')
+
+                pos={in.contrast in.maskRadius in.kernelDuration in.loopDuration in.filterStrength};
+                for i=1:length(pos)
+                    if isscalar(pos{i}) && isreal(pos{i}) && pos{i}>=0
+                        %pass
+                    else
+                        error('contrast, maskRadius, kernelDuration, loopDuration and filterStrength must be real scalars >=0 (zero loopDuration means 1 static looped frame, except for file stims, where it means play the whole file instead of a subset)')
+                    end
                 end
 
-                if all(size(in.patchDims)==[1 2]) && all(in.patchDims)>0 && strcmp(class(in.patchDims),'uint16')
-                    %pass
-                else
-                    error('patchDims should be [height width] uint16 > 0')
-                end
 
                 norms={in.background in.patchHeight in.patchWidth in.kernelSize in.ratio};
                 for i=1:length(norms)
@@ -112,30 +104,39 @@ switch nargin
                     end
                 end
 
-                pos={in.contrast in.maskRadius in.kernelDuration in.loopDuration in.filterStrength};
-                for i=1:length(pos)
-                    if isscalar(pos{i}) && isreal(pos{i}) && pos{i}>=0
-                        %pass
-                    else
-                        error('contrast, maskRadius, kernelDuration, loopDuration and filterStrength must be real scalars >=0 (zero loopDuration means 1 static looped frame, except for file stims, where it means play the whole file instead of a subset)')
-                    end
+
+                if length(size(in.locationDistribution))==2 && isreal(in.locationDistribution) && all(in.locationDistribution(:)>=0) && sum(in.locationDistribution(:))>0
+                    %pass
+                else
+                    error('locationDistribution must be 2d real and >=0 with at least one nonzero entry')
                 end
+
+
+                if all(size(in.patchDims)==[1 2]) && all(in.patchDims)>0 && strcmp(class(in.patchDims),'uint16')
+                    %pass
+                else
+                    error('patchDims should be [height width] uint16 > 0')
+                end
+
 
                 if ~isreal(in.bound) || ~isscalar(in.bound) || in.bound<=.5 || in.bound>=1
                     error('bound must be real scalar .5<x<1')
                 end
 
-                for i=1:length(fieldNames)
-                    s.(fieldNames{i})=in.(fieldNames{i});
-                end
 
-                s = class(s,'filteredNoise',stimManager(in.maxWidth,in.maxHeight,in.scaleFactor,in.interTrialLuminance));
-            else
-                reqNames
-                error('input must be struct with all of the above fields')
             end
+
+            in=varargin{1};
+
+            for i=1:length(fieldNames)
+                s.(fieldNames{i})={in.(fieldNames{i})};
+            end
+
+            s = class(s,'filteredNoise',stimManager(varargin{2},varargin{3},varargin{4},varargin{5}));
         else
-            error('Input argument is not a filteredNoise object or struct')
+            fieldNames
+            error('input must be struct with all of the above fields')
+
         end
     otherwise
         error('Wrong number of input arguments')

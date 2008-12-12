@@ -65,70 +65,120 @@ discrimStim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientation
 
 
 
-noiseSpec.orientations           = {-pi/4 [] pi/4};
-noiseSpec.locationDistributions  = {1 [] 1};
-noiseSpec.distribution           = 'gaussian';
-noiseSpec.origHz                 = 0;
-noiseSpec.background             = .5;
-noiseSpec.contrast               = pickContrast(.5,.01);
-noiseSpec.maskRadius             = 10;
-noiseSpec.patchDims              = uint16([50 50]);
-noiseSpec.patchHeight            = 1;
-noiseSpec.patchWidth             = 1;
-noiseSpec.kernelSize             = .5;
-noiseSpec.kernelDuration         = .1;
-noiseSpec.loopDuration           = 1;
-noiseSpec.ratio                  = 1/3;
-noiseSpec.filterStrength         = 1;
-noiseSpec.bound                  = .99;
-noiseSpec.maxWidth               = 800;
-noiseSpec.maxHeight              = 600;
-noiseSpec.scaleFactor            = 0;
-noiseSpec.interTrialLuminance    = interTrialLuminance;
-
-noiseStim=filteredNoise(noiseSpec);
 
 
-noiseSpec.orientations           = {0 [] 0};
-noiseSpec.locationDistributions  = {1 [] 1};
-noiseSpec.distribution           = 'binary';
-noiseSpec.contrast               = 1;
-noiseSpec.maskRadius             = 100;
-noiseSpec.kernelSize             = 0;
-noiseSpec.kernelDuration         = 0;
-noiseSpec.loopDuration           = 1;
-noiseSpec.ratio                  = 1;
-noiseSpec.filterStrength         = 0;
-noiseSpec.patchDims              = uint16([100 100]);
-noiseSpec.patchHeight            = 1;
-noiseSpec.patchWidth             = 1;
+ports=cellfun(@uint8,{1 3},'UniformOutput',false);
+[noiseSpec(1:length(ports)).port]=deal(ports{:});
 
-unfilteredNoise=filteredNoise(noiseSpec);
+% stim properties:
+% in.distribution               'gaussian', 'binary', 'uniform', or a path to a file name (either .txt or .mat, extension omitted, .txt loadable via load(), and containing a single vector of numbers named 'noise')
+% in.origHz                     only used if distribution is a file name, indicating sampling rate of file
+% in.contrast                   std dev in normalized luminance units (just counting patch, before mask application), values will saturate
+% in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file instead of a random subset)
+
+[noiseSpec.distribution]         =deal('gaussian');
+[noiseSpec.origHz]               =deal(0);
+[noiseSpec.contrast]             =deal(pickContrast(.5,.01));
+[noiseSpec.loopDuration]         =deal(1);
+
+% patch properties:
+% in.locationDistribution       2-d density, will be normalized to stim area
+% in.maskRadius                 std dev of the enveloping gaussian, normalized to diagonal of stim area (values <=0 mean no mask)
+% in.patchDims                  [height width]
+% in.patchHeight                0-1, normalized to stim area height
+% in.patchWidth                 0-1, normalized to stim area width
+% in.background                 0-1, normalized
+
+[noiseSpec.locationDistribution] =deal(1);
+[noiseSpec.maskRadius]           =deal(10);
+[noiseSpec.patchDims]            =deal(uint16([50 50]));
+[noiseSpec.patchHeight]          =deal(1);
+[noiseSpec.patchWidth]           =deal(1);
+[noiseSpec.background]           =deal(.5);
+
+% filter properties:
+% in.orientation                filter orientation in radians, 0 is vertical, positive is clockwise
+% in.kernelSize                 0-1, normalized to diagonal of patch
+% in.kernelDuration             in seconds (will be rounded to nearest multiple of frame duration)
+% in.ratio                      ratio of short to long axis of gaussian kernel (1 means circular, no effective orientation)
+% in.filterStrength             0 means no filtering (kernel is all zeros, except 1 in center), 1 means pure mvgaussian kernel (center not special), >1 means surrounding pixels more important
+% in.bound                      .5-1 edge percentile for long axis of kernel when parallel to window
+
+[noiseSpec.orientation]          =deal(-pi/4,pi/4);
+[noiseSpec.kernelSize]           =deal(.5);
+[noiseSpec.kernelDuration]       =deal(.1);
+[noiseSpec.ratio]                =deal(1/3);
+[noiseSpec.filterStrength]       =deal(1);
+[noiseSpec.bound]                =deal(.99);
+
+maxWidth               = 800;
+maxHeight              = 600;
+scaleFactor            = 0;
+
+noiseStim=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 
-noiseSpec.distribution           = '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\hateren\ts001';
-noiseSpec.origHz                 = 1200;
-noiseSpec.loopDuration           = 30;
-
-hateren=filteredNoise(noiseSpec);
 
 
-noiseSpec.distribution           = '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\pmeier\stimSequence\TRF_CRF_v3';
-noiseSpec.origHz                 = 100;
-noiseSpec.loopDuration           = 10;
 
-crf_trf=filteredNoise(noiseSpec);
+[noiseSpec.orientation]          =deal(0);
+[noiseSpec.distribution]         =deal('binary');
+[noiseSpec.contrast]             =deal(1);
+[noiseSpec.maskRadius]           =deal(100);
+[noiseSpec.kernelSize]           =deal(0);
+[noiseSpec.kernelDuration]       =deal(0);
+[noiseSpec.ratio]                =deal(1);
+[noiseSpec.filterStrength]       =deal(0);
+[noiseSpec.patchDims]            =deal(uint16([100 100]));
+
+unfilteredNoise=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 
-noiseSpec.locationDistributions  = {1 [] 1};
-noiseSpec.distribution           = 'gaussian';
-noiseSpec.contrast               = pickContrast(.5,.01);
-noiseSpec.patchDims              = uint16([1 1]);
-noiseSpec.patchHeight            = 1;
-noiseSpec.patchWidth             = 1;
-noiseSpec.loopDuration           = 5*60;
 
-fullfieldFlicker=filteredNoise(noiseSpec);
+
+if ismac
+    ts001 = '/Users/eflister/Desktop/ratrix trunk/classes/protocols/stimManagers/@flicker/ts001';
+else
+    ts001 = '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\hateren\ts001';
+end
+
+[noiseSpec.distribution]         =deal(ts001);
+[noiseSpec.origHz]               =deal(1200);
+[noiseSpec.loopDuration]         =deal(30);
+
+hateren=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
+
+
+if ismac
+    TRF_CRF = '/Volumes/RLAB/Rodent-Data/pmeier/stimSequence/TRF_CRF_v3';
+else
+    TRF_CRF = '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\pmeier\stimSequence\TRF_CRF_v3';
+end
+
+[noiseSpec.distribution]         =deal(TRF_CRF);
+[noiseSpec.origHz]               =deal(100);
+[noiseSpec.loopDuration]         =deal(10);
+[noiseSpec.patchDims]            =deal(uint16([1 1]));
+
+crf_trf=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
+
+[noiseSpec.distribution]         =deal({'sinusoidalFlicker',[1 5 10 20 30 50 100],[.1 .25 .5 .75 1],.1}); %temporal freqs, contrasts, %gaps at intertrialluminance
+[noiseSpec.origHz]               =deal(0);
+[noiseSpec.loopDuration]         =deal(60);
+
+crf_trf_better=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
+
+[noiseSpec.distribution]         =deal('gaussian');
+[noiseSpec.contrast]             =deal(pickContrast(.5,.01));
+[noiseSpec.loopDuration]         =deal(5*60);
+
+fullfieldFlicker=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
+
+
 
 svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
 
@@ -140,9 +190,10 @@ ts4 = trainingStep(vh, noiseStim,  repeatIndefinitely(), noTimeOff(), svnRev); %
 ts5 = trainingStep(vh, unfilteredNoise,  repeatIndefinitely(), noTimeOff(), svnRev); %unfilteredNoise discrim
 ts6 = trainingStep(vh, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svnRev); %fullfieldFlicker
 ts7 = trainingStep(vh, hateren,  repeatIndefinitely(), noTimeOff(), svnRev); %hateren
-ts8 = trainingStep(vh, hateren,  repeatIndefinitely(), noTimeOff(), svnRev); %hateren
+ts8 = trainingStep(vh, crf_trf,  repeatIndefinitely(), noTimeOff(), svnRev); %crf_trf (from file)
+ts9 = trainingStep(vh, crf_trf_better,  repeatIndefinitely(), noTimeOff(), svnRev); %crf_trf (dynamic)
 
-p=protocol('practice phys',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8});
+p=protocol('practice phys',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8, ts9});
 stepNum=6;
 
 for i=1:length(subjIDs),

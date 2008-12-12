@@ -181,6 +181,19 @@ function [quit response responseDetails didManual manual didAPause didValves did
 
 %logwrite('entered stimOGL');
 
+frameDropCorner.size=[.05 .05];
+frameDropCorner.loc=[1 0]
+frameDropCorner.seq=[1 .5];
+frameDropCorner.on=true;
+frameDropCorner.ind=1;
+
+doLED=false;
+if doLED
+    [ao bits]=openNidaqForAnalogOutput(sampRate,range);
+    putdata(ao,data);
+    start(ao);
+end
+
 eyeData=[];
 gaze=[];
 
@@ -205,11 +218,11 @@ originalPriority=Priority;
 [garbage ptbVer]=PsychtoolboxVersion;
 ptbVersion=sprintf('%d.%d.%d(%s %s)',ptbVer.major,ptbVer.minor,ptbVer.point,ptbVer.flavor,ptbVer.revstring);
 try
-[runningSVNversion repositorySVNversion url]=getSVNRevisionFromXML(getRatrixPath);
-ratrixVersion=sprintf('%s (%d of %d)',url,runningSVNversion,repositorySVNversion);
+    [runningSVNversion repositorySVNversion url]=getSVNRevisionFromXML(getRatrixPath);
+    ratrixVersion=sprintf('%s (%d of %d)',url,runningSVNversion,repositorySVNversion);
 catch ex
     ex
-ratrixVersion='no network connection';
+    ratrixVersion='no network connection';
 end
 
 try
@@ -362,6 +375,8 @@ try
             currentCLUT-LUT %error
             error('the LUT is not what you think it is')
         end
+
+        frameDropCorner.seq=linspace(1,0,size(currentCLUT,1));
     else
         reallutsize
         error('LUT must be real 256 X 3 matrix, even if reallutsize>256 -- docs for screen(loadnormalizedgammatable) specify this, and trying to load a 1024 row LUT does not change LUT on osx (altho it also doesn''t error), even though it returns dacbits=10 and reallutsize=1024')
@@ -452,6 +467,8 @@ try
         scrTop = scrRect(2);
         scrRight = scrRect(3);
         scrBottom = scrRect(4);
+        scrWidth= scrRight-scrLeft;
+        scrHeight=scrBottom-scrTop;
     else
         scrLeft = 0;
         scrTop = 0;
@@ -459,7 +476,13 @@ try
         scrBottom = scrHeight;
     end
 
-    destRect = round([((scrRight-scrLeft)/2)-(width/2) ((scrBottom-scrTop)/2)-(height/2) ((scrRight-scrLeft)/2)+(width/2) ((scrBottom-scrTop)/2)+(height/2)]); %[left top right bottom]
+    destRect = round([(scrWidth/2)-(width/2) (scrHeight/2)-(height/2) (scrWidth/2)+(width/2) (scrHeight/2)+(height/2)]); %[left top right bottom]
+
+    frameDropCorner.left  =scrLeft               + scrWidth *(frameDropCorner.loc(2) - frameDropCorner.size(2)/2);
+    frameDropCorner.right =frameDropCorner.left  + scrWidth *frameDropCorner.size(2);
+    frameDropCorner.top   =scrTop                + scrHeight*(frameDropCorner.loc(1) - frameDropCorner.size(1)/2);
+    frameDropCorner.bottom=frameDropCorner.top   + scrHeight*frameDropCorner.size(1);
+    frameDropCorner.rect=[frameDropCorner.left frameDropCorner.top frameDropCorner.right frameDropCorner.bottom];
 
     tic
     switch strategy
@@ -804,6 +827,15 @@ try
             end
         end
 
+        if frameDropCorner.on
+            Screen('FillRect', window, round(size(currentCLUT,1)*frameDropCorner.seq(frameDropCorner.ind)), frameDropCorner.rect);
+
+            frameDropCorner.ind=frameDropCorner.ind+1;
+            if frameDropCorner.ind>length(frameDropCorner.seq)
+                frameDropCorner.ind=1;
+            end
+        end
+
         %indicate finished (enhances performance)
         if window>=0
             Screen('DrawingFinished',window,dontclear);
@@ -1111,7 +1143,7 @@ try
 
             %serverValveStates=currentValveState; %what was the purpose of this line?  serverValveStates should only be changed by SET_VALVES_CMD
             %needed to remove, cuz was causing keyboard control to make valves stick open
-            
+
             while commandsAvailable(rn,constants.priorities.IMMEDIATE_PRIORITY) && ~done && ~quit
                 %logwrite('handling IMMEDIATE priority command in stimOGL');
                 if ~isConnected(rn)

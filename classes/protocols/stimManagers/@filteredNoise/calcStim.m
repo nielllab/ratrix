@@ -2,6 +2,10 @@ function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts
     calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % see ratrixPath\documentation\stimManager.calcStim.txt for argument specification (applies to calcStims of all stimManagers)
 
+if ~all(ismember([stimulus.port{:}],responsePorts))
+    error('not all the expected correct response ports were available in responsePorts')
+end
+
 LUT=makeStandardLUT(LUTbits);
 [resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60],32,getMaxWidth(stimulus),getMaxHeight(stimulus));
 
@@ -26,11 +30,11 @@ else
 end
 [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts);
 
-empties=cellfun(@isempty,stimulus.orientations);
-if empties(targetPorts)
-    targetPorts
-    stimulus.orientations
-    error('targetPorts includes members that have no entry')
+typeInd=find([stimulus.port{:}]==targetPorts);
+if length(typeInd)==0
+    error('no matching target port')
+elseif length(typeInd)>1
+    typeInd=typeInd(ceil(rand*length(typeInd))); %choose random type with matching port for this trial
 end
 
 if isempty(stimulus.cache) || isempty(stimulus.hz) || stimulus.hz~=hz
@@ -40,18 +44,15 @@ else
     updateSM=false;
 end
 
-if isscalar(targetPorts)
-    pre=stimulus.cache{targetPorts};
-else
-    error('targetPorts not scalar')
-end
 
-details.orientation=stimulus.orientations{targetPorts};
-details.location=drawFrom2Ddist(stimulus.locationDistributions{targetPorts});
+pre=stimulus.cache{typeInd};
 
-detailFields={'hz','background','contrast','distribution','inds','maskRadius','patchHeight','patchDims','patchWidth','kernelSize','kernelDuration','loopDuration','ratio','filterStrength','bound','seed','sha1'};
+details.hz=stimulus.hz;
+details.location=drawFrom2Ddist(stimulus.locationDistribution{typeInd});
+
+detailFields={'distribution','contrast','loopDuration','maskRadius','patchDims','patchHeight','patchWidth','background','orientation','kernelSize','kernelDuration','ratio','filterStrength','bound','inds','seed','sha1'};
 for i=1:length(detailFields)
-    details.(detailFields{i})=stimulus.(detailFields{i});
+        details.(detailFields{i})=stimulus.(detailFields{i}){typeInd};
 end
 
 details.startFrame=ceil(rand*size(pre,3));
@@ -63,16 +64,16 @@ w=size(pre,2);
 maxPositionalError=.01;
 
 size(pre)
-[stimulus.patchHeight stimulus.patchWidth]/maxPositionalError
+[details.patchHeight details.patchWidth]/maxPositionalError
 if false %out of memory for long stims
-if any([h/stimulus.patchHeight w/stimulus.patchWidth] < 1/maxPositionalError) %if pre's size is too small or the patch size is too large, positioning/sizing will be too coarse
-    pre=imresize(pre,[stimulus.patchHeight stimulus.patchWidth]/maxPositionalError,'nearest');
-    h=size(pre,1);
-    w=size(pre,2);
-end
+    if any([h/details.patchHeight w/details.patchWidth] < 1/maxPositionalError) %if pre's size is too small or the patch size is too large, positioning/sizing will be too coarse
+        pre=imresize(pre,[details.patchHeight details.patchWidth]/maxPositionalError,'nearest');
+        h=size(pre,1);
+        w=size(pre,2);
+    end
 end
 
-out=zeros(round(h/stimulus.patchHeight),round(w/stimulus.patchWidth),size(pre,3));
+out=zeros(round(h/details.patchHeight),round(w/details.patchWidth),size(pre,3));
 rinds=ceil(size(out,1)*details.location(2)+[1:h]-(h+1)/2);
 cinds=ceil(size(out,2)*details.location(1)+[1:w]-(w+1)/2);
 rbad = rinds<=0 | rinds > size(out,1);
@@ -84,10 +85,10 @@ width=size(out,2);
 height=size(out,1);
 d=sqrt(sum([height width].^2));
 [a b]=meshgrid(1:width,1:height);
-mask=reshape(mvnpdf([a(:) b(:)],[width height].*details.location,(stimulus.maskRadius*d)^2*eye(2)),height,width);
+mask=reshape(mvnpdf([a(:) b(:)],[width height].*details.location,(details.maskRadius*d)^2*eye(2)),height,width);
 mask=mask/max(mask(:));
 
-out=stimulus.contrast*out.*mask(:,:,ones(1,size(pre,3)))+stimulus.background;
+out=details.contrast*out.*mask(:,:,ones(1,size(pre,3)))+details.background;
 out(out<0)=0;
 out(out>1)=1;
 %out=uint8(double(intmax('uint8'))*out);

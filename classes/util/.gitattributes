@@ -96,3 +96,4 @@ stimHelpers/drawFrom2Ddist.m -text
 matlaby/hash.m -text
 trialRecordProcessing/modifyTrialRecords.m -text
 /AM2300Control.m -text
+nidaq/openNidaqForAnalogOutput.m -text

@@ -1,4 +1,5 @@
 function grainedNoise
+error('this is just old scratch work')
 close all
 clc
 

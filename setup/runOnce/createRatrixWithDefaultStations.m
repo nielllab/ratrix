@@ -4,6 +4,9 @@ serverDataPath = fullfile(dataPath, 'ServerData');
 r=ratrix(serverDataPath,1);
 
 if localMultiDisplaySetup
+    if ismac
+        error('you probably don''t really mean localMultiDisplaySetup on mac')
+    end
     warning('you are running with local multidisplay -- timing will be bad!')
     Screen('Preference', 'SkipSyncTests',1)
     %screenNum=int8(max(Screen('Screens')));

@@ -1,4 +1,4 @@
-function [noise inds]=loadStimFile(fileName,oldHz,newHz,duration)
+function [noise outInds]=loadStimFile(fileName,oldHz,newHz,duration,startFrame)
 
 if 2==exist([fileName '.mat'],'file')
     noise=load([fileName '.mat']);
@@ -46,12 +46,19 @@ if ~(isvector(noise) && isreal(noise) && isnumeric(noise))
     error('file contents not real numeric vector')
 end
 
-inds=[];
+outInds=[];
 if duration>0
     lastAvailable=length(noise)-duration*oldHz+1;
-    start=ceil(rand*lastAvailable);
+    if strcmp(startFrame,'randomize')
+        start=ceil(rand*lastAvailable);
+    elseif startFrame>0 && startFrame<=lastAvailable
+        start=double(startFrame);
+    else
+        error('startFrame is too large and would require wrapping around to beginning of file')
+    end
     inds=start:start+duration*oldHz-1;
     noise=noise(inds);
+    outInds=[inds(1) inds(end)];
 end
 
 noise=double(noise);

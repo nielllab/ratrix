@@ -10,7 +10,9 @@ function s=filteredNoise(varargin)
 %                               distribution can also be cell array of following form: {'sinusoidalFlicker',[temporalFreqs],[contrasts],gapSecs} - each freq x contrast combo will be shown for equal time in random order, total time including gaps will be in.loopDuration
 % in.origHz                     only used if distribution is a file name, indicating sampling rate of file
 % in.contrast                   std dev in normalized luminance units (just counting patch, before mask application), values will saturate
-% in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file instead of a random subset)
+% in.startFrame                 'randomize' or integer indicating fixed frame number to start with
+% in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file)
+%                               to make uniques and repeats, pass {numRepeatsPerUnique numCycles cycleDurSeconds} - a cycle is a whole set of repeats and one unique - distribution cannot be sinusoidalFlicker 
 %
 % patch properties:
 % in.locationDistribution       2-d density, will be normalized to stim area
@@ -28,7 +30,7 @@ function s=filteredNoise(varargin)
 % in.filterStrength             0 means no filtering (kernel is all zeros, except 1 in center), 1 means pure mvgaussian kernel (center not special), >1 means surrounding pixels more important
 % in.bound                      .5-1 edge percentile for long axis of kernel when parallel to window
 
-fieldNames={'port','distribution','origHz','contrast','loopDuration','locationDistribution','maskRadius','patchDims','patchHeight','patchWidth','background','orientation','kernelSize','kernelDuration','ratio','filterStrength','bound'};
+fieldNames={'port','distribution','origHz','contrast','startFrame','loopDuration','locationDistribution','maskRadius','patchDims','patchHeight','patchWidth','background','orientation','kernelSize','kernelDuration','ratio','filterStrength','bound'};
 for i=1:length(fieldNames)
     s.(fieldNames{i})=[];
 end
@@ -66,7 +68,13 @@ switch nargin
                     error('orientation must be real scalar')
                 end
 
-
+                if (isscalar(in.startFrame) && isinteger(in.startFrame) && in.startFrame>0) || strcmp(in.startFrame,'randomize')
+                    %pass
+                else
+                    error('start frame must be scalar integer >0 or ''randomize''')
+                end
+                
+                isSinusoidalFlicker=false;
                 if isvector(in.distribution) && ischar(in.distribution)
                     if ismember(in.distribution,{'uniform','gaussian','binary'})
                         %pass
@@ -86,6 +94,7 @@ switch nargin
                             isvector(tmp.contrasts) && isreal(tmp.contrasts) && isnumeric(tmp.contrasts) && all(tmp.contrasts>=0) && all(tmp.contrasts<=1) && ...
                             isscalar(tmp.gapSecs) && isreal(tmp.gapSecs) && isnumeric(tmp.gapSecs) && tmp.gapSecs>=0
                         varargin{1}(j).distribution=tmp;
+                        isSinusoidalFlicker=true;
                     else
                         error('temporalFreqs and contrasts must be real numeric vectors >=0, contrasts must be <=1, gapSecs must be real numeric scalar >=0')
                     end
@@ -93,13 +102,31 @@ switch nargin
                     error('distribution must be one of gaussian, uniform, binary, or a string containing a file name (either .txt or .mat, extension omitted, .txt loadable via load()), or  {''sinusoidalFlicker'',[temporalFreqs],[contrasts],gapSecs}');
                 end
 
-
-                pos={in.contrast in.maskRadius in.kernelDuration in.loopDuration in.filterStrength};
+                
+                
+                if isscalar(in.loopDuration) && isreal(in.loopDuration) && in.loopDuration>=0
+                    %pass
+                elseif iscell(in.loopDuration) && isvector(in.loopDuration) && all(size(in.loopDuration)==[1 3]) && ~isSinusoidalFlicker
+                    tmp.numRepeatsPerUnique = in.loopDuration{1};
+                    tmp.numCycles =  in.loopDuration{2};
+                    tmp.cycleDurSeconds =  in.loopDuration{3};
+                    if isscalar(tmp.numRepeatsPerUnique) && isinteger(tmp.numRepeatsPerUnique) && tmp.numRepeatsPerUnique>=0 && ...
+                            isscalar(tmp.numCycles) && isinteger(tmp.numCycles) && tmp.numCycles>0 && ...
+                            isscalar(tmp.cycleDurSeconds) && isreal(tmp.cycleDurSeconds) && isnumeric(tmp.cycleDurSeconds) && tmp.cycleDurSeconds>0
+                        varargin{1}(j).loopDuration=tmp;
+                    else
+                        error('numRepeatsPerUnique must be scalar integer >=0, numCycles must be scalar integer >0, and cycleDurSeconds must be scalar numeric real >0')
+                    end
+                else
+                    error('loopDuration must be real scalar >=0, zero loopDuration means 1 static looped frame, except for file stims, where it means play the whole file instead of a subset.  to make uniques and repeats, pass {numRepeatsPerUnique numCycles cycleDurSeconds} - a cycle is a whole set of repeats and one unique - distribution cannot be sinusoidalFlicker')
+                end
+                
+                pos={in.contrast in.maskRadius in.kernelDuration in.filterStrength};
                 for i=1:length(pos)
                     if isscalar(pos{i}) && isreal(pos{i}) && pos{i}>=0
                         %pass
                     else
-                        error('contrast, maskRadius, kernelDuration, loopDuration and filterStrength must be real scalars >=0 (zero loopDuration means 1 static looped frame, except for file stims, where it means play the whole file instead of a subset)')
+                        error('contrast, maskRadius, kernelDuration, and filterStrength must be real scalars >=0')
                     end
                 end
 

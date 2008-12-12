@@ -50,13 +50,23 @@ pre=stimulus.cache{typeInd};
 details.hz=stimulus.hz;
 details.location=drawFrom2Ddist(stimulus.locationDistribution{typeInd});
 
-detailFields={'distribution','contrast','loopDuration','maskRadius','patchDims','patchHeight','patchWidth','background','orientation','kernelSize','kernelDuration','ratio','filterStrength','bound','inds','seed','sha1'};
+detailFields={'distribution','startFrame','contrast','loopDuration','maskRadius','patchDims','patchHeight','patchWidth','background','orientation','kernelSize','kernelDuration','ratio','filterStrength','bound','inds','seed','sha1'};
 for i=1:length(detailFields)
         details.(detailFields{i})=stimulus.(detailFields{i}){typeInd};
 end
 
-details.startFrame=ceil(rand*size(pre,3));
-pre=pre(:,:,[details.startFrame:size(pre,3) 1:details.startFrame-1]);
+if ~isstruct(details.loopDuration)
+    if strcmp(details.startFrame,'randomize')
+        details.startFrame=ceil(rand*size(pre,3));
+    end
+
+    if details.startFrame>size(pre,3)
+        details.startFrame
+        size(pre)
+        error('startFrame was too large')
+    end
+    pre=pre(:,:,[details.startFrame:size(pre,3) 1:details.startFrame-1]);
+end
 
 h=size(pre,1);
 w=size(pre,2);

@@ -101,11 +101,14 @@ ports=cellfun(@uint8,{1 3},'UniformOutput',false);
 % in.distribution               'gaussian', 'binary', 'uniform', or a path to a file name (either .txt or .mat, extension omitted, .txt loadable via load(), and containing a single vector of numbers named 'noise')
 % in.origHz                     only used if distribution is a file name, indicating sampling rate of file
 % in.contrast                   std dev in normalized luminance units (just counting patch, before mask application), values will saturate
-% in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file instead of a random subset)
+% in.startFrame                 'randomize' or integer indicating fixed frame number to start with
+% in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file)
+%                               to make uniques and repeats, pass {numRepeatsPerUnique numCycles cycleDurSeconds} - a cycle is a whole set of repeats and one unique - distribution cannot be sinusoidalFlicker 
 
 [noiseSpec.distribution]         =deal('gaussian');
 [noiseSpec.origHz]               =deal(0);
 [noiseSpec.contrast]             =deal(pickContrast(.5,.01));
+[noiseSpec.startFrame]           =deal('randomize');
 [noiseSpec.loopDuration]         =deal(1);
 
 % patch properties:

@@ -74,11 +74,14 @@ ports=cellfun(@uint8,{1 3},'UniformOutput',false);
 % in.distribution               'gaussian', 'binary', 'uniform', or a path to a file name (either .txt or .mat, extension omitted, .txt loadable via load(), and containing a single vector of numbers named 'noise')
 % in.origHz                     only used if distribution is a file name, indicating sampling rate of file
 % in.contrast                   std dev in normalized luminance units (just counting patch, before mask application), values will saturate
-% in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file instead of a random subset)
+% in.startFrame                 'randomize' or integer indicating fixed frame number to start with
+% in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file)
+%                               to make uniques and repeats, pass {numRepeatsPerUnique numCycles cycleDurSeconds} - a cycle is a whole set of repeats and one unique - distribution cannot be sinusoidalFlicker 
 
 [noiseSpec.distribution]         =deal('gaussian');
 [noiseSpec.origHz]               =deal(0);
 [noiseSpec.contrast]             =deal(pickContrast(.5,.01));
+[noiseSpec.startFrame]           =deal('randomize');
 [noiseSpec.loopDuration]         =deal(1);
 
 % patch properties:
@@ -178,6 +181,13 @@ crf_trf_better=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrial
 fullfieldFlicker=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 
+[noiseSpec.distribution]         =deal(ts001);
+[noiseSpec.origHz]               =deal(1200);
+[noiseSpec.loopDuration]         =deal({uint8(4),uint8(3),40}); %{numRepeatsPerUnique numCycles cycleDurSeconds}
+[noiseSpec.contrast]             =deal(1);
+[noiseSpec.startFrame]           =deal(uint8(1));
+
+rptUnq=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 
 svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
@@ -192,9 +202,10 @@ ts6 = trainingStep(vh, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svn
 ts7 = trainingStep(vh, hateren,  repeatIndefinitely(), noTimeOff(), svnRev); %hateren
 ts8 = trainingStep(vh, crf_trf,  repeatIndefinitely(), noTimeOff(), svnRev); %crf_trf (from file)
 ts9 = trainingStep(vh, crf_trf_better,  repeatIndefinitely(), noTimeOff(), svnRev); %crf_trf (dynamic)
+ts10= trainingStep(vh, rptUnq,  repeatIndefinitely(), noTimeOff(), svnRev); %rpt/unq
 
-p=protocol('practice phys',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8, ts9});
-stepNum=9;
+p=protocol('practice phys',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8, ts9, ts10});
+stepNum=10;
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

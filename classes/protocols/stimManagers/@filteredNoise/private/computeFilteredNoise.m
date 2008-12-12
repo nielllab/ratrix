@@ -43,7 +43,13 @@ for i=1:length(stimulus.port)
     %if X ~ N(0,a) and Y ~ N(0,b), then X+Y ~ N(0,a+b) and cX ~ N(0,ac^2)
     %must be a deep reason this is same as pythagorean
 
-    frames=max(1,round(stimulus.loopDuration{i}*hz));
+    if isstruct(stimulus.loopDuration{i})
+        chunkSize=round(hz*stimulus.loopDuration{i}.cycleDurSeconds/(1+double(stimulus.loopDuration{i}.numRepeatsPerUnique))); %number of frames in a single repeat or unique
+        frames=chunkSize*(1+double(stimulus.loopDuration{i}.numCycles)); %the number of raw frames we need, before making the repeats/uniques
+        totalFrames=double(stimulus.loopDuration{i}.numCycles)*chunkSize*(1+double(stimulus.loopDuration{i}.numRepeatsPerUnique));
+    else
+        frames=max(1,round(stimulus.loopDuration{i}*hz));
+    end
 
     maxSeed=2^32-1;
     s=GetSecs;
@@ -56,8 +62,9 @@ for i=1:length(stimulus.port)
         for j=1:length(stimulus.distribution{i}.conditions)
             noise=[noise stimulus.distribution{i}.conditions{j}{1}*makeSinusoid(hz,stimulus.distribution{i}.conditions{j}{2},dur) zeros(1,round(stimulus.distribution{i}.gapSecs*hz))];
         end
-        plot(noise)
-        error('hi')
+        noise=noise-.5;
+        noise=permute(noise,[3 1 2]);
+        repmat(noise,[sz 1]);
     elseif ischar(stimulus.distribution{i})
         switch stimulus.distribution{i}
             case 'gaussian'
@@ -71,7 +78,10 @@ for i=1:length(stimulus.port)
                 end
                 noise=noise-.5;
             otherwise
-                [noise stimulus.inds{i}]=loadStimFile(stimulus.distribution{i},stimulus.origHz{i},hz,stimulus.loopDuration{i});
+                if ~isstruct(stimulus.loopDuration{i}) && stimulus.loopDuration{i}==0
+                    frames=0;
+                end
+                [noise stimulus.inds{i}]=loadStimFile(stimulus.distribution{i},stimulus.origHz{i},hz,frames/hz,stimulus.startFrame{i});
                 noise=noise-.5;
                 if size(noise,1)>1
                     noise=noise';
@@ -79,6 +89,28 @@ for i=1:length(stimulus.port)
                 %noise=-.5:.01:.5;
                 noise=permute(noise,[3 1 2]);
                 repmat(noise,[sz 1]);
+        end
+        if isstruct(stimulus.loopDuration{i})
+            new=nan*zeros(size(noise,1),size(noise,2),totalFrames);
+            rpt=noise(:,:,1:chunkSize);
+            start=1;
+            unqPos=chunkSize+1;
+            for c=1:stimulus.loopDuration{i}.numCycles
+                for r=1:stimulus.loopDuration{i}.numRepeatsPerUnique
+                    new(:,:,start:start+chunkSize-1)=rpt;
+                    start=start+chunkSize;
+                end
+                new(:,:,start:start+chunkSize-1)=noise(:,:,unqPos:unqPos+chunkSize-1);
+                start=start+chunkSize;
+                unqPos=unqPos+chunkSize;
+            end
+            if any(isnan(new(:)))
+                error('miss!')
+            end
+            if unqPos~=1+size(noise,3)
+                error('miss!')
+            end
+            noise=new;
         end
     else
         '***'

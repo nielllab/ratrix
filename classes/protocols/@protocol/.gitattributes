@@ -8,3 +8,4 @@
 /sampleStimFrame.m -text
 /calibrateEyeTracker.m -text
 /stopEyeTracking.m -text
+/changeStep.m -text

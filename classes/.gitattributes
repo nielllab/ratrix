@@ -166,3 +166,4 @@ db/@dbConn/getCompilePathBySubject.m -text
 db/@dbConn/getFreeWaterHistory.m -text
 protocols/reinforcementManagers/@constantReinforcement/setRewardSizeULorMS.m -text
 protocols/reinforcementManagers/@reinforcementManager/setReinforcementParam.m -text
+protocols/stimManagers/@filteredNoise/decache.m -text

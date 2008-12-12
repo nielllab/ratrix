@@ -67,13 +67,15 @@ switch nargin
                 end
 
 
-                if ismember(in.distribution,{'uniform','gaussian','binary'})
-                    %pass
-                elseif isvector(in.distribution) && ischar(in.distribution) && any([exist([in.distribution '.txt'],'file') exist([in.distribution '.mat'],'file')]==2)
-                    if isscalar(in.origHz) && in.origHz>0 && isreal(in.origHz)
+                if isvector(in.distribution) && ischar(in.distribution)
+                    if ismember(in.distribution,{'uniform','gaussian','binary'})
                         %pass
-                    else
-                        error('if distribution is file, origHz must be real scalar > 0')
+                    elseif any([exist([in.distribution '.txt'],'file') exist([in.distribution '.mat'],'file')]==2)
+                        if isscalar(in.origHz) && in.origHz>0 && isreal(in.origHz)
+                            %pass
+                        else
+                            error('if distribution is file, origHz must be real scalar > 0')
+                        end
                     end
                 elseif iscell(in.distribution) && all(size(in.distribution)==[1 4]) && strcmp(in.distribution{1},'sinusoidalFlicker')
                     tmp.special=in.distribution{1};

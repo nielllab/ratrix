@@ -4,12 +4,12 @@ if isa(r,'ratrix') && ~isempty(getSubjectFromID(r,subject.id))
 
     switch stepNums
         case 'all'
-            steps=1:getNumTrainingSteps(subject.protocol);
+            steps=uint8(1:getNumTrainingSteps(subject.protocol));
         case 'current'
             steps=subject.trainingStepNum;
         otherwise
-            if isvector(stepNums) && isinteger(stepNums) && all(stepNums>0 & stepNums<=getNumTrainingSteps(subject.protocol))
-                steps=stepNums;
+            if isvector(stepNums) && isNearInteger(stepNums) && all(stepNums>0 & stepNums<=getNumTrainingSteps(subject.protocol))
+                steps=uint8(stepNums);
             else
                 error('stepNums must be ''all'', ''current'', or an integer vector of stepnumbers between 1 and numSteps')
             end

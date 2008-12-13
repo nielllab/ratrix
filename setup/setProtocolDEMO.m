@@ -203,7 +203,7 @@ ts8 = trainingStep(vh, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svn
 ts9 = trainingStep(vh, hateren,  repeatIndefinitely(), noTimeOff(), svnRev); %hateren
 
 p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8, ts9});
-stepNum=6;
+stepNum=uint8(6);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

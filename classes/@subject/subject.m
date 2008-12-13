@@ -11,7 +11,7 @@ s.receivedDate=[];
 s.litterID='';
 s.supplier='';
 s.protocol=[];
-s.trainingStepNum=0;
+s.trainingStepNum=uint8(0);
 s.protocolVersion.manualVersion=0;
 
 switch nargin

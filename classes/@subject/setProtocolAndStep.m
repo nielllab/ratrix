@@ -21,7 +21,7 @@ if isa(p,'protocol') && isa(r,'ratrix') && ~isempty(getSubjectFromID(r,s.id)) &&
 %     i
 %     getNumTrainingSteps(p)
     
-    if i<=getNumTrainingSteps(p) && i>=0
+    if i<=getNumTrainingSteps(p) && i>=0 && isscalar(i) && isinteger(i)
         if authorCheck(r,auth)
             s.protocol=p;
             s.trainingStepNum=i;
@@ -41,7 +41,7 @@ if isa(p,'protocol') && isa(r,'ratrix') && ~isempty(getSubjectFromID(r,s.id)) &&
             error('author failed authentication')
         end
     else
-        error('need a valid step number')
+        error('need a valid integer step number')
     end
 else
     isa(p,'protocol')

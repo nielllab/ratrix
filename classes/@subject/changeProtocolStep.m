@@ -5,7 +5,7 @@ if ~exist('stepNum','var')||isempty(stepNum)
 end
 
 if isa(ts,'trainingStep') && isa(r,'ratrix') && ~isempty(getSubjectFromID(r,subject.id))
-    if ~isempty(subject.protocol) && stepNum>0 && stepNum<=getNumTrainingSteps(subject.protocol)
+    if ~isempty(subject.protocol) && isscalar(stepNum) && isinteger(stepNum) && stepNum>0 && stepNum<=getNumTrainingSteps(subject.protocol)
        
         
         if authorCheck(r,auth)

@@ -11,5 +11,7 @@ if strcmp(s.responseMethod,'parallelPort')
         warning('no airpuff on this station')
     end
 else
+    if ~ismac
     warning('can''t set puff without parallel port')
+    end
 end

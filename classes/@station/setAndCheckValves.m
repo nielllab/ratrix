@@ -39,7 +39,9 @@ if strcmp(station.responseMethod,'parallelPort')
     
 
 else
+    if ~ismac
     warning('can''t check and set valves without parallel port')
+    end
     endValveState=zeros(1,station.numPorts);
 end
 

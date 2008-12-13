@@ -8,7 +8,7 @@ if localMultiDisplaySetup
         error('you probably don''t really mean localMultiDisplaySetup on mac')
     end
     warning('you are running with local multidisplay -- timing will be bad!')
-    Screen('Preference', 'SkipSyncTests',1)
+    Screen('Preference', 'SkipSyncTests',1) %hmm, i think startPTB will undo this
     %screenNum=int8(max(Screen('Screens')));
     screenNum=int8(1);
     pportaddr='B888';

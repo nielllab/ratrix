@@ -8,5 +8,7 @@ if strcmp(s.responseMethod,'parallelPort')
         error('valves must be a vector of length numValves')
     end
 else
+    if ~ismac
     warning('can''t set valves without parallel port')
+    end
 end

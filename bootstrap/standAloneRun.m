@@ -42,13 +42,10 @@ else
         rx=ratrix(defaultLoc,0);
         'loaded ratrix from default location'
     else
-        if IsWin
-            macidcom = [PsychtoolboxRoot 'PsychContributed\macid '];
-            [rc mac] = system(macidcom);
-            mac=strtrim(mac);
-        end
-        if ~IsWin || rc~=0 || ~isMACaddress(mac)
-            mac='000000000000';
+        try
+            [success mac]=getMACaddress();
+        catch
+            mac='00000000';
         end
 
         machines={{'1U',mac,[1 1 1]}};

@@ -2,7 +2,7 @@ function r = mergeMiniIntoRatrix(r,newR)
 % Take the 'newR' that has a subset of information present in 'r'
 % and merge the objects into 'r', only if the version number
 
-% Go through all of the subjects in the new ratrix, and 
+% Go through all of the subjects in the new ratrix, and
 newSubjectIDs = getSubjectIDs(newR);
 for i=1:length(newSubjectIDs)
     [member index]=ismember(newSubjectIDs{i},getSubjectIDs(r));
@@ -48,13 +48,14 @@ for i=1:length(newSubjectIDs)
                 % This is odd, the manual version is newer on the client
                 error('The manualVersion of the new mini ratrix should never be newer than the current ratrix')
             end
+
+        elseif creationDate > newCreationDate
+            warning('The creation date of the ratrix is newer on the server, will NOT update the server copy with the client update');
         else
-            newSubjectIDs{i}
-            warning('This subject id is not in the current server side ratrix, but is in the client side ratrix');
+            error('The creation date of the current server ratrix should never be older than that of the client update');
         end
-    elseif creationDate > newCreationDate
-        warning('The creation date of the ratrix has changed on the server, will NOT update the server copy with the client update');
     else
-        error('The creation date of the current server ratrix should never be newer than the server copy on the client update');
+        newSubjectIDs{i}
+        warning('This subject id is not in the current server side ratrix, but is in the client side ratrix');
     end
 end

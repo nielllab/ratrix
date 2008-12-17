@@ -13,7 +13,7 @@ if isa(station,'station')
             if isempty(newSound) && ~keepPlaying
                 for i = 1:length(sm.players)
                     if isplaying(sm.players{i})
-                        stop(sm.players{i}); %this seems to take a long time and causes frame drops :(
+                        stop(sm.players{i}); %this seems to take a long time (average 250ms!) and causes frame drops, at least on osx :(
                     end
                 end
             else
@@ -35,7 +35,7 @@ if isa(station,'station')
                 if ~keepPlaying && isp
                     stop(sm.players{match});
                 elseif keepPlaying && ~isp
-                    play(sm.players{match});
+                    play(sm.players{match}); %this averages almost 10ms on osx :(
                 end
             end
         else

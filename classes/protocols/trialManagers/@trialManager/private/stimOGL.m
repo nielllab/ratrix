@@ -956,6 +956,7 @@ try
             thisIFI=vbl-lastFrameTime;
             thisIFIErrorPct = abs(1-thisIFI/ifi);
             if  thisIFIErrorPct > timingCheckPct
+                %seems to happen when thisIFI/ifi is near a whole number
                 disp(sprintf('warning: flip missed a timing and appeared not to notice: frame num %d, ifi error: %g, pct: %g%% (when=%.15g at %.15g, lastLoopEnd=%.15g)',frameNum,thisIFIErrorPct,100*thisIFI/ifi,when,whenTime,lastLoopEnd));
                 responseDetails.numApparentMisses=responseDetails.numApparentMisses+1;
                 responseDetails.apparentMisses(responseDetails.numApparentMisses)=frameNum;
@@ -994,7 +995,7 @@ try
         [keyIsDown,secs,keyCode]=KbCheck;
         %keyCode(30)=1;
         %keyCode(14)=1;
-        keyIsDown=true;
+        %keyIsDown=true;
         if keyIsDown
             %logwrite(sprintf('keys are down:',num2str(find(keyCode))));
 
@@ -1080,6 +1081,7 @@ try
                 lookForChange=0;
 
                 tm.soundMgr = playLoop(tm.soundMgr,'',station,0);
+                fprintf('off\n')
             end
 
             if ~toggleStim
@@ -1162,6 +1164,7 @@ try
             stopListening=0;
 
             if logIt
+                disp(ports)
                 if verbose
                     ports
                 end

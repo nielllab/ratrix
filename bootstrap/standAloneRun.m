@@ -44,8 +44,11 @@ else
     else
         try
             [success mac]=getMACaddress();
+            if ~success
+                mac='000000000000';
+            end
         catch
-            mac='00000000';
+            mac='000000000000';
         end
 
         machines={{'1U',mac,[1 1 1]}};

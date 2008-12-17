@@ -635,7 +635,8 @@ try
     Screen('Screens');
 
     KbName('UnifyKeyNames');
-    allKeys=lower(KbName('KeyNamesOSX'));
+    allKeys=KbName('KeyNames');%'KeyNamesOSX')); unify does not seem to choose keynamesosx for windows
+    allKeys=lower(cellfun(@char,allKeys,'UniformOutput',false));
     controlKeys=find(cellfun(@(x) ~isempty(x),strfind(allKeys,'control')));
     shiftKeys=find(cellfun(@(x) ~isempty(x),strfind(allKeys,'shift')));
     kKey=KbName('k');

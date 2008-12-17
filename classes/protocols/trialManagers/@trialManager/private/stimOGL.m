@@ -234,7 +234,16 @@ try
     framesPerUpdate = 1;        %set number of monitor refreshes for each one of your refreshes
 
     labelFrames = 1;            %print a frame ID on each frame (makes frame calculation slow!)
+    if ismac
+        %http://psychtoolbox.org/wikka.php?wakka=FaqPerformanceTuning1
+        %Screen('DrawText'): This is fast and low-quality on MS-Windows and beautiful but slow on OS/X.
 
+        %Screen('Preference', 'TextAntiAliasing', 0); %not good enough
+        %DrawFormattedText() won't be any faster cuz it loops over calls to Screen('DrawText'), tho it would clean this code up a bit.
+        labelFrames=0;
+    end
+    
+    
     verbose = false;
 
     dontclear = 0;              %2 saves time by not reinitializing -- safe for us cuz we're redrawing everything -- but gives blue flashing?
@@ -783,7 +792,7 @@ try
                     %junkSize = Screen('TextSize',window,standardFontSize);
                     [garbage,yNewTextPos] = Screen('DrawText',window,['trlMgr:' class(tm) ' stmMgr:' stimID  ' prtcl:' protocolStr ],xTextPos,yNewTextPos,100*ones(1,3));
                 end
-                [normBoundsRect, offsetBoundsRect]= Screen('TextBounds', window, 'TEST');
+                [normBoundsRect, offsetBoundsRect]= Screen('TextBounds', window, 'TEST'); %should be fast, but need not be computed in the realtime loop (just after font is set up)...
                 yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
 
                 if labelFrames

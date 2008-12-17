@@ -234,7 +234,7 @@ try
     framesPerUpdate = 1;        %set number of monitor refreshes for each one of your refreshes
 
     labelFrames = 1;            %print a frame ID on each frame (makes frame calculation slow!)
-    if ismac || true
+    if ismac
         %also not good enough on beige computer w/8600
         %http://psychtoolbox.org/wikka.php?wakka=FaqPerformanceTuning1
         %Screen('DrawText'): This is fast and low-quality on MS-Windows and beautiful but slow on OS/X.

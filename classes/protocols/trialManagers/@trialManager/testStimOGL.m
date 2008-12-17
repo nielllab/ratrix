@@ -137,7 +137,7 @@ end
 stationSpec.MACaddress                        = '000000000000';
 stationSpec.physicalLocation                  = uint8([1 1 1]);
 stationSpec.screenNum                         = int8(0);
-stationSpec.soundOn                           = false;
+stationSpec.soundOn                           = true;
 stationSpec.rewardMethod                      = 'localTimed';
 stationSpec.portSpec.parallelPortAddress      = '0378';
 stationSpec.portSpec.valveSpec                = int8([4,3,2]);

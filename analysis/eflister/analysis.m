@@ -23,151 +23,205 @@ end
 if isdeployed
     javaaddpath('analysis_mcr/Documents and Settings/rlab/Desktop/ratrix/db/classes12_g.jar')
 end
-conn=dbConn;
 
-%rack_ids=[1 2];
 
-stations=getStations(conn);
-stations=[stations{:}];
-servers = getServers(conn);
-server_ips = {};
-serverStrs = {};
-for i=1:length(servers)
-    server_ips{end+1} = servers{i}.address;
-    serverStrs{end+1} = servers{i}.server_name;
-end
-serverStrs{end+1} = 'by subject'; % added to allow by subject analysis
-bySubjectIndex = length(serverStrs); % this holds the value of the serverM button that points to "by subject"
-
-defaultServerStrIndex = 3;
-selection.server=serverStrs{defaultServerStrIndex};
-% 10.3.08 - apath is now subject specific, so initialize to null
-apath = '';
-% apath=getCompiledDirForServer(selection.server);
-lastServer='server-03-female-edf-157';
-fs=[];
-
-% populate subjectStrs
-subjectStrs = {};
-subjectUINs = {};
-subjects = getAllSubjects(conn);
-for i=1:length(subjects)
-    subjectStrs{end+1}=subjects{i}.subjectID;
-    subjectUINs{end+1}=subjects{i}.subject_uin;
-end
+% =============================================================
 % flag for skipping calcplot stuff - if by subject, we already have our assignment picked out
 bySubject = false;
 % flag for showing test subjects
 show_test_subjects=1;
 
+% =============================================================
+% set apath to be empty if we have an oracle connection, otherwise use the default standalone path
 
-heats=getHeats(conn);
+% 10.3.08 - apath is now subject specific, so initialize to null
+apath = fullfile(fileparts(fileparts(getRatrixPath())),'ratrixData','compiledTrialRecords',filesep);
+% 12/15/08 - set apath to be the local compiled directory if in standalone mode
+% but this will never work here, because we need a dbConn() to do the rest of analysis below....
+% hmm...
+standAlone = false;
+try
+    conn=dbConn();
+    closeConn(conn);
+catch
+    disp('no network connection detected - using local compiled directory only');
+    apath = fullfile(fileparts(fileparts(getRatrixPath())),'ratrixData','compiledTrialRecords',filesep);
+    standAlone = true;
+    bySubject = true;
+end
+
+% =============================================================
+% in-line function that is called to initialize data, and also when server is changed
+% will not get called in standalone mode
+function getStationInfo
+    conn=dbConn;
+    %s=getStations(conn)
+    class(selection.server)
+    selection.server
+    s=getStationsForServer(conn,selection.server);
+
+    % ====================================
+    % 10/3/08 - do some processing here on s, so that we make the row field independent of the rack (for erik's server, we just put the rows one after another)
+    racks_used = s{1}.rack_id;
+    rows_in_this_rack = s{1}.row;
+    row_counter = 1;
+%         max_row_so_far = s{1}.row;
+    for i=1:length(s)
+%             racks_used
+%             s{i}.rack_id
+        if isempty(find(racks_used == s{i}.rack_id)) % if this rack hasnt been used yet
+%                 fprintf('found new rack %d\n', s{i}.rack_id)
+            racks_used(end+1) = s{i}.rack_id; 
+            rows_in_this_rack(1) = s{i}.row;
+            row_counter = row_counter + 1;
+        else
+            % this rack is already in racks_used
+            if isempty(find(rows_in_this_rack == s{i}.row)) % if this row hasnt been seen in this rack, increment row_counter
+                rows_in_this_rack(end+1) = s{i}.row;
+%                     fprintf('found a new row %d\n', s{i}.row)
+                row_counter = row_counter+1;
+            else
+%                     fprintf('row %d already in rack %d\n', s{i}.row, s{i}.rack_id)
+            end
+        end
+        % now that we have row_counter set properly, assign it
+        s{i}.row = row_counter;
+
+    end
+
+    % ====================================
+
+
+%         for i=1:length(s)
+%             row = s{i}.row
+%         end
+    % ====================================
+    stationStrs={'all stations'};
+    stationIds=stationStrs;
+    numRows=0;
+    numCols=0;
+    for i=1:length(s)
+        %s{i}
+        stationStrs{end+1}=['station ' num2str(s{i}.rack_id) s{i}.station_id ' (' s{i}.mac ')'];
+        stationIds{end+1}=s{i}.station_id;
+        numRows=max(numRows,s{i}.row);
+        numCols=max(numCols,s{i}.col);
+        %station=getStation(conn,s{i}.rack_id,s{i}.station_id)
+        %station=getStationFromMac(conn,s{i}.mac)
+    end
+    selection.station=stationIds{1};
+    closeConn(conn);
+end
+
+
+% =============================================================
+% setup UI variables
+serverStrs = {};
+subjectStrs = {};
+remoteSubjectStrs={};
+localSubjectStrs={};
+s=[];
+fs=[];
+numRows=0;
+numCols=0;
 heatStrs={'all heats'};
-for i=1:length(heats)
-    if ~ismember(heats{i}.name,{'Test','Black'})
-        heatStrs{end+1}=heats{i}.name;
+stationStrs={'all stations'};
+%     selection.type='performance';
+%     typeStrs={'performance','trials per day','trial rate','bias'};
+%     set(typeM,'Value',1);
+if ~standAlone
+    typeStrs={'all','performance','trials per day','trial rate','weight','bias'};
+else
+    typeStrs={'performance','trials per day','trial rate','bias'};
+end
+defaultServerStrIndex = 1;
+% gather information from oracle if not in standalone mode
+if ~standAlone
+    conn=dbConn;
+    %rack_ids=[1 2];
+    stations=getStations(conn);
+    stations=[stations{:}];
+    servers = getServers(conn);
+    server_ips = {};
+    for i=1:length(servers)
+        server_ips{end+1} = servers{i}.address;
+        serverStrs{end+1} = servers{i}.server_name;
+    end
+    serverStrs{end+1} = 'by subject'; % added to allow by subject analysis
+    bySubjectIndex = length(serverStrs); % this holds the value of the serverM button that points to "by subject"
+    selection.server=serverStrs{defaultServerStrIndex};
+    lastServer=selection.server;
+
+
+    % populate subjectStrs
+    subjectUINs = {};
+    subjects = getAllSubjects(conn);
+    for i=1:length(subjects)
+        remoteSubjectStrs{end+1}=subjects{i}.subjectID;
+        subjectUINs{end+1}=subjects{i}.subject_uin;
+    end
+
+
+
+    heats=getHeats(conn);
+    for i=1:length(heats)
+        if ~ismember(heats{i}.name,{'Test','Black'})
+            heatStrs{end+1}=heats{i}.name;
+        end
+    end
+    selection.heat=heatStrs{1};
+    closeConn(conn);
+
+
+
+    selection.station='';
+    stationStrs={};
+    stationIds={};
+    getStationInfo
+    subjectStrs=remoteSubjectStrs;
+end
+
+% also get info from local ratrixData
+serverStrs{end+1}='local';
+if isempty(heatStrs)
+    heatStrs{end+1}='n/a';
+end
+if isempty(stationStrs)
+    stationStrs{end+1}='n/a';
+end
+% get subjectStrs from apath
+d=dir(apath);
+for ind=1:length(d)
+    [matches tokens] = regexpi(d(ind).name,'(.*)\.compiledTrialRecords\.\d+-\d+\.mat','match','tokens');
+    if ~isempty(matches) && length(tokens{1})==1
+        % we found a compiledTrialRecord
+        localSubjectStrs{end+1}=tokens{1}{1};
     end
 end
-selection.heat=heatStrs{1};
-closeConn(conn);
-
-
-typeStrs={'all','performance','trials per day','trial rate','weight','bias'};
-filterTypeIndex=2;
+% set defaults
+if standAlone
+    % in standalone mode, set subjectStrs to be local subjects
+    subjectStrs=localSubjectStrs;
+else
+    % reset apath to be empty (after we've used it to initialize localSubjectStrs)
+    apath='';
+end
+bySubjectIndex=length(serverStrs)-1;
+localIndex=length(serverStrs);
+filterTypeIndex=1;
 selection.type=typeStrs{filterTypeIndex};
 selection.filterVal=10;
 selection.filter='all';
 selection.filterParam='days';
+if ~isempty(subjectStrs)
+    selection.subjects{1,1,1}=subjectStrs{1}; % default to first subject in list
+else
+    selection.subjects={};
+end
 
 
-
-selection.station='';
-stationStrs={};
-stationIds={};
-numRows=0;
-numCols=0;
-getStationInfo
-    function getStationInfo
-        conn=dbConn;
-        %s=getStations(conn)
-        class(selection.server)
-        selection.server
-        s=getStationsForServer(conn,selection.server);
-        % ====================================
-        % 10/3/08 - do some processing here on s, so that we make the row field independent of the rack (for erik's server, we just put the rows one after another)
-%         racks_used = s{1}.rack_id;
-%         rows_in_this_rack = s{1}.row;
-%         row_counter = 1;
-% %         max_row_so_far = s{1}.row;
-%         for i=1:length(s)
-%             if ~find(racks_used == s{i}.rack_id) % if this rack hasnt been used yet
-%                 racks_used(end+1) = s{i}.rack_id; 
-%                 rows_in_this_rack = [];
-%             else
-%                 % this rack is already in racks_used
-%                 if ~find(rows_in_this_rack == s{i}.row) % if this row hasnt been seen in this rack, increment row_counter
-%                     rows_in_this_rack(end+1) = s{i}.row;
-%                     row_counter = row_counter+1;
-%                 end
-%             end
-%             % now that we have row_counter set properly, assign it
-%             s{i}.row = row_counter;
-%             
-%         end
-        
-        % ====================================
-        % 10/3/08 - do some processing here on s, so that we make the row field independent of the rack (for erik's server, we just put the rows one after another)
-        racks_used = s{1}.rack_id;
-        rows_in_this_rack = s{1}.row;
-        row_counter = 1;
-%         max_row_so_far = s{1}.row;
-        for i=1:length(s)
-%             racks_used
-%             s{i}.rack_id
-            if isempty(find(racks_used == s{i}.rack_id)) % if this rack hasnt been used yet
-%                 fprintf('found new rack %d\n', s{i}.rack_id)
-                racks_used(end+1) = s{i}.rack_id; 
-                rows_in_this_rack(1) = s{i}.row;
-                row_counter = row_counter + 1;
-            else
-                % this rack is already in racks_used
-                if isempty(find(rows_in_this_rack == s{i}.row)) % if this row hasnt been seen in this rack, increment row_counter
-                    rows_in_this_rack(end+1) = s{i}.row;
-%                     fprintf('found a new row %d\n', s{i}.row)
-                    row_counter = row_counter+1;
-                else
-%                     fprintf('row %d already in rack %d\n', s{i}.row, s{i}.rack_id)
-                end
-            end
-            % now that we have row_counter set properly, assign it
-            s{i}.row = row_counter;
-            
-        end
-        
-        % ====================================
-        
-        
-%         for i=1:length(s)
-%             row = s{i}.row
-%         end
-        % ====================================
-        stationStrs={'all stations'};
-        stationIds=stationStrs;
-        numRows=0;
-        numCols=0;
-        for i=1:length(s)
-            %s{i}
-            stationStrs{end+1}=['station ' num2str(s{i}.rack_id) s{i}.station_id ' (' s{i}.mac ')'];
-            stationIds{end+1}=s{i}.station_id;
-            numRows=max(numRows,s{i}.row);
-            numCols=max(numCols,s{i}.col);
-            %station=getStation(conn,s{i}.rack_id,s{i}.station_id)
-            %station=getStationFromMac(conn,s{i}.mac)
-        end
-        selection.station=stationIds{1};
-        closeConn(conn);
-    end
-
+% =============================================================
+% start drawing UI
 
 oneRowHeight=25;
 margin=10;
@@ -187,7 +241,7 @@ serverM = uicontrol(f,'Style','popupmenu',...
     function serverC(source,eventdata)
         
         % if this is a server, not "by subject"
-        if get(serverM,'Value') ~= bySubjectIndex
+        if get(serverM,'Value')~=bySubjectIndex && get(serverM,'Value')~=localIndex
             % disable and hide by subject dropdown, enable heatM and stationM
             set(subjectM,'Enable','off','Visible','off');
             set(heatM,'Enable','on','Visible','on');
@@ -206,6 +260,8 @@ serverM = uicontrol(f,'Style','popupmenu',...
                 lastServer=selection.server;
             end
             
+            % reset apath to be empty (so retrieve from oracle)
+            apath='';
         else
             % this is "by subject"
             % update UI to show subject dropdown
@@ -213,13 +269,28 @@ serverM = uicontrol(f,'Style','popupmenu',...
             set(heatM,'Enable','off','Visible','off');
             set(stationM,'Enable','off','Visible','off');
             set(testM,'Enable','off','Visible','off');
-            % set type='all', bySubject (to prevent calcplot from running), and disable the typeM button
-            selection.type='all';
+            numRows=0;
+            numCols=0;
             set(typeM,'Value',1);
-%             set(typeM,'Enable','off');
             bySubject = true;
+            set(subjectM,'Value',1);
+            
+            % if this is bySubject
+            if get(serverM,'Value')==bySubjectIndex
+                typeStrs={'all','performance','trials per day','trial rate','weight','bias'};
+                set(subjectM,'String',remoteSubjectStrs);
+                apath='';
+            else % this is local
+                typeStrs={'performance','trials per day','trial rate','bias'};
+                set(subjectM,'String',localSubjectStrs);
+                selection.subjects={};
+                selection.subjects{1,1,1}=localSubjectStrs{get(subjectM,'Value')};
+                apath=fullfile(fileparts(fileparts(getRatrixPath())),'ratrixData','compiledTrialRecords',filesep);
+            end
+            set(typeM,'String',typeStrs);
+            set(typeM,'Value',1);
+            selection.type=typeStrs{get(typeM,'Value')};
         end
-        
         selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject,show_test_subjects);
     end
 
@@ -326,6 +397,14 @@ plotB=uicontrol(f,'Style','pushbutton','String','plot','Units','pixels','Positio
         fs=analysisPlotter(selection,apath,false);
     end
 
+% 12/17/08 - setup UI properly if in standalone mode (disable heat/station selection, enable subject selection)
+if standAlone
+    set(subjectM,'Enable','on','Visible','on');
+    set(heatM,'Enable','off','Visible','off');
+    set(stationM,'Enable','off','Visible','off');
+    set(testM,'Enable','off','Visible','off');
+    bySubject = true;
+end
 
 
 %align([rackM heatM stationM subjectM typeM plotB],'Fixed',margin,'Middle');
@@ -371,14 +450,14 @@ end
     end
 
 function selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject,show_test_subjects)
-conn=dbConn;
+
 
 % if by subject, all you need to do is assign the title (subjects is already assigned)
 if bySubject
     selection.titles = {[selection.subjects{1,1,1}]};
 else
 % not by subject - do the usual
-
+    conn=dbConn;
     selection.subjects={};
     selection.titles={};
     if strcmp(selection.heat,'all heats')
@@ -457,3 +536,7 @@ else
 end
 
 end % end function
+
+
+
+

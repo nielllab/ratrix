@@ -19,11 +19,12 @@ if strcmp(selection.type,'all')
         [numRows numCols] = getArrangement(length(toBePlotted));
         for i = 1:length(subIDs)
             % added 10/3/08 - get compiledFileDir from subID, subject-specific
-            %edf: 12.12.08: needs to work in standalone mode and no network access!
-            conn = dbConn();
-            compiledFileDir = getCompilePathBySubject(conn, subIDs{1});
-            compiledFileDir = compiledFileDir{1}
-            closeConn(conn);
+            if isempty(compiledFileDir)
+                conn = dbConn();
+                compiledFileDir = getCompilePathBySubject(conn, subIDs{1});
+                compiledFileDir = compiledFileDir{1};
+                closeConn(conn);
+            end
             fs(end+1) = figure('Name', char(subIDs(i)),'NumberTitle','off');
             for j = 1:numRows
                 for k = 1:numCols
@@ -61,11 +62,12 @@ else
                     subplot(numRows,numCols,(j-1)*numCols+k)
                     title(sprintf('%s - %s: %s',selection.type,selection.subjects{i,j,k},datestr(now,0)))
                     % added 10/3/08 - get compiledFileDir from subID, subject-specific
-                    %edf: 12.12.08: needs to work in standalone mode and no network access!
-                    conn = dbConn();
-                    compiledFileDir = getCompilePathBySubject(conn, selection.subjects{i,j,k});
-                    compiledFileDir = compiledFileDir{1}
-                    closeConn(conn);
+                    if isempty(compiledFileDir)
+                        conn = dbConn();
+                        compiledFileDir = getCompilePathBySubject(conn, selection.subjects{i,j,k});
+                        compiledFileDir = compiledFileDir{1}
+                        closeConn(conn);
+                    end
                     hold on
                     doAnalysisPlot(compiledFileDir,selection.subjects{i,j,k},selection.type, selection.filter, selection.filterVal, selection.filterParam,includeKeyboard);
                 end

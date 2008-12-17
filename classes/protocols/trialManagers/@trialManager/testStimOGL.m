@@ -129,7 +129,11 @@ stimManager=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLum
 
 function st=makeDummyStation()
 stationSpec.id                                = '1U';
+if ismac
 stationSpec.path                              = '/Users/eflister/Desktop/dummyStation';
+else
+stationSpec.path                              = 'C:\Documents and Settings\rlab\Desktop\dummyStation';
+end
 stationSpec.MACaddress                        = '000000000000';
 stationSpec.physicalLocation                  = uint8([1 1 1]);
 stationSpec.screenNum                         = int8(0);

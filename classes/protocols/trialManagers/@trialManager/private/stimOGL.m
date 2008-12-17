@@ -182,7 +182,7 @@ function [quit response responseDetails didManual manual didAPause didValves did
 %logwrite('entered stimOGL');
 
 frameDropCorner.size=[.05 .05];
-frameDropCorner.loc=[1 0]
+frameDropCorner.loc=[1 0];
 frameDropCorner.seq=[1 .5];
 frameDropCorner.on=true;
 frameDropCorner.ind=1;
@@ -242,8 +242,8 @@ try
         %DrawFormattedText() won't be any faster cuz it loops over calls to Screen('DrawText'), tho it would clean this code up a bit.
         labelFrames=0;
     end
-    
-    
+
+
     verbose = false;
 
     dontclear = 0;              %2 saves time by not reinitializing -- safe for us cuz we're redrawing everything -- but gives blue flashing?
@@ -391,8 +391,8 @@ try
         error('LUT must be real 256 X 3 matrix, even if reallutsize>256 -- docs for screen(loadnormalizedgammatable) specify this, and trying to load a 1024 row LUT does not change LUT on osx (altho it also doesn''t error), even though it returns dacbits=10 and reallutsize=1024')
     end
 
-    maxV=max(currentCLUT(:))
-    minV=min(currentCLUT(:))
+    maxV=max(currentCLUT(:));
+    minV=min(currentCLUT(:));
 
     if verbose && (minV ~= 0 || maxV ~= 1)
         disp(sprintf('clut has a min of %4.6f and a max of %4.6f',minV,maxV));
@@ -561,6 +561,13 @@ try
 
     responseDetails.toggleStim=toggleStim;
 
+    responseDetails.requestRewardPorts=[];
+    responseDetails.tries={};
+    responseDetails.times={};
+    responseDetails.durs={};
+    responseDetails.requestRewardStartTime=[];
+    responseDetails.requestRewardDurationActual=[];
+
     frameNum=1;
 
     stimStarted=isempty(requestOptions);
@@ -611,6 +618,7 @@ try
     puffDone=false;
 
     xOrigTextPos = 10;
+    xTextPos=xOrigTextPos;
     yTextPos = 20;
     standardFontSize=11; %big was 25
     subjectFontSize=35;
@@ -625,6 +633,23 @@ try
     KbCheck; %load mex files into ram
     GetSecs;
     Screen('Screens');
+
+    KbName('UnifyKeyNames');
+    allKeys=lower(KbName('KeyNamesOSX'));
+    controlKeys=find(cellfun(@(x) ~isempty(x),strfind(allKeys,'control')));
+    shiftKeys=find(cellfun(@(x) ~isempty(x),strfind(allKeys,'shift')));
+    kKey=KbName('k');
+    pKey=KbName('p');
+    qKey=KbName('q');
+    mKey=KbName('m');
+    aKey=KbName('a');
+    rKey=KbName('r');
+    atKeys=find(cellfun(@(x) ~isempty(x),strfind(allKeys,'@')));
+    asciiOne=double('1');
+    portKeys={};
+    for i=1:length(ports)
+        portKeys{i}=find(strncmp(char(asciiOne+i-1),allKeys,1));
+    end
 
     preSMCacheTime=GetSecs();
     [newSM updateSMCache]=cacheSounds(tm.soundMgr);
@@ -642,33 +667,52 @@ try
         disp(sprintf('running at priority %d',priorityLevel));
     end
 
-    if window >= 0
-        oldFontSize = Screen('TextSize',window,standardFontSize);
-        Screen('Preference', 'TextRenderer', 0);  % consider moving to PTB setup
-
-        Screen('DrawTexture', window, textures(size(stim,3)+1),[],destRect,[],filtMode); %should replace this with new stim architecture
-        Screen('DrawingFinished',window,dontclear);
-        [vbl sos ft]=Screen('Flip',window);
-        lastFrameTime=ft;
-        lastI=size(stim,3)+1;
-    else
-        vbl=GetSecs();
-        lastFrameTime=vbl;
-    end
-
+    audioStimPlaying = false;
+    lastI=size(stim,3)+1;
+    lastFrameTime=0;
+    lastLoopEnd=0;
+    startTime=0;
+    vbl=0;
+    sos=0;
+    yNewTextPos=0;
+    txtLabel='';
+    manTxt='';
+    when=0;
+    whenTime=0;
+    ft=0;
+    missed=0;
+    time1=0;
+    time2=0;
+    time3=0;
+    time4=0;
+    time5=0;
+    time6=0;
+    time7=0;
 
     %logwrite('about to enter stimOGL loop');
 
     %any stimulus onset synched actions
 
-    startTime=GetSecs();
+    if window >= 0
+        oldFontSize = Screen('TextSize',window,standardFontSize);
+        Screen('Preference', 'TextRenderer', 0);  % consider moving to PTB setup
+        [normBoundsRect, offsetBoundsRect]= Screen('TextBounds', window, 'TEST');
+        Screen('DrawTexture', window, textures(size(stim,3)+1),[],destRect,[],filtMode); %should replace this with new stim architecture
+        Screen('DrawingFinished',window,dontclear);
+        [vbl sos startTime]=Screen('Flip',window);  %make sure everything after this point is preallocated
+    else
+        vbl=GetSecs();
+        startTime=vbl;
+    end
 
-    audioStimPlaying = false;
+    lastFrameTime=vbl;
+    lastLoopEnd=startTime;
 
     %show stim -- be careful in this realtime loop!
     while ~done && ~quit;
         %logwrite('top of stimOGL loop');
 
+        time1=GetSecs;
         yNewTextPos=yTextPos;
 
         if ~paused
@@ -715,7 +759,7 @@ try
 
                             %Function 'cumsum' is not defined for values of class 'int8'.
                             if requestFrame~=0
-                                i=min(find((frameNum-requestFrame)<=cumsum(double(timedFrames))));  %find the stim frame number for the number of frames since the request
+                                i=find((frameNum-requestFrame)<=cumsum(double(timedFrames)), 1 );  %find the stim frame number for the number of frames since the request
                             end
 
                             if isempty(i)  %if we have passed the last stim frame
@@ -747,7 +791,7 @@ try
                                     Screen('DrawTexture', window, textures(i),[],destRect,[],filtMode);
                                 else
                                     if labelFrames
-                                        thisMsg=sprintf('This frame stim index (%d) is staying here without drawing new textures %d',i,frameNum);
+                                        thisMsg=sprintf('This frame stim index (%d) is staying here without drawing new textures %d',i,frameNum); %may need to preallocate outside the loop
                                         Screen('DrawText',window,thisMsg,xTextPos,yNewTextPos-20,100*ones(1,3));
                                     end
                                 end
@@ -775,9 +819,11 @@ try
                         error('unrecognized strategy')
                 end
             else
+                time2=GetSecs;
                 if window>=0
                     Screen('DrawTexture', window, textures(size(stim,3)+1),[],destRect,[],filtMode); %should replace this with new stim architecture
                 end
+                time3=GetSecs;
             end
 
             %logwrite(sprintf('stim is started, i is calculated: %d',i));
@@ -785,14 +831,15 @@ try
             %text commands are supposed to be last for performance reasons
 
             if window>=0
+                xTextPos=xOrigTextPos;
                 if labelFrames
                     %junkSize = Screen('TextSize',window,subjectFontSize);
-                    [xTextPos,yTextPosUnused] = Screen('DrawText',window,['ID:' subID ],xOrigTextPos,yTextPos,100*ones(1,3));
+                    [xTextPos] = Screen('DrawText',window,['ID:' subID ],xTextPos,yTextPos,100*ones(1,3));
                     xTextPos=xTextPos+50;
                     %junkSize = Screen('TextSize',window,standardFontSize);
                     [garbage,yNewTextPos] = Screen('DrawText',window,['trlMgr:' class(tm) ' stmMgr:' stimID  ' prtcl:' protocolStr ],xTextPos,yNewTextPos,100*ones(1,3));
                 end
-                [normBoundsRect, offsetBoundsRect]= Screen('TextBounds', window, 'TEST'); %should be fast, but need not be computed in the realtime loop (just after font is set up)...
+
                 yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
 
                 if labelFrames
@@ -827,6 +874,7 @@ try
                     yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
                 end
             end
+            time4=GetSecs;
 
         else
             %do i need to copy previous screen?
@@ -845,26 +893,31 @@ try
             end
         end
 
+        time5=GetSecs;
         %indicate finished (enhances performance)
         if window>=0
             Screen('DrawingFinished',window,dontclear);
             lastI=i;
         end
 
+        time6=GetSecs;
         when=vbl+(framesPerUpdate-0.5)*ifi;
+        whenTime=GetSecs;
 
         if ~paused && doFramePulse
             framePulse(station);
             framePulse(station);
         end
-
+        time7=GetSecs;
         %logwrite('frame calculated, waiting for flip');
 
         %wait for next frame, flip buffer
         if window>=0
-            [vbl sos ft missed]=Screen('Flip',window,when,dontclear); %vbl=vertical blanking time, when flip starts executing
-            %sos=stimulus onset time -- doc doesn't clarify what this is
-            %ft=timestamp from the end of flip's execution
+            [vbl sos ft missed]=Screen('Flip',window,when,dontclear);
+            %http://psychtoolbox.org/wikka.php?wakka=FaqFlipTimestamps
+            %vbl=vertical blanking time, when bufferswap occurs (corrected by beampos logic if available/reliable)
+            %sos=stimulus onset time -- vbl + a computed constant corresponding to the duration of the vertical blanking (a delay in when, after vbl, that the swap actually happens, depends on a lot of guts)
+            %ft=timestamp from the end of flip's execution --  using this for 'apparent misses' is probably wrong since i think this might be significantly later than the swap and more jitter prone than vbl!
         else
             waitTime=GetSecs()-when;
             if waitTime>0
@@ -877,6 +930,11 @@ try
 
         %logwrite('just flipped');
 
+        if ft-vbl>.3*ifi
+            %this occurs when my osx laptop runs on battery power
+            fprintf('long delay inside flip after the swap-- ft-vbl:%.15g%% of ifi, now-vbl:%.15g\n',(ft-vbl)/ifi,GetSecs-vbl)
+        end
+
         if ~paused
             if doFramePulse
                 framePulse(station);
@@ -887,22 +945,26 @@ try
 
         %save facts about missed frames
         if missed>0 && frameNum<responseDetails.numFramesUntilStopSavingMisses
-            disp(sprintf('warning: missed frame num %d',frameNum));
+            disp(sprintf('warning: missed frame num %d (when=%.15g at %.15g, lastLoopEnd=%.15g, when-last=%.15g [%.15g %.15g %.15g %.15g %.15g %.15g %.15g])',frameNum,when,whenTime,lastLoopEnd,when-lastFrameTime,time1-lastLoopEnd,time2-time1,time3-time2,time4-time3,time5-time4,time6-time5,time7-time6));
             responseDetails.numMisses=responseDetails.numMisses+1;
             responseDetails.misses(responseDetails.numMisses)=frameNum;
             responseDetails.afterMissTimes(responseDetails.numMisses)=GetSecs();
+            if frameNum>2
+                %error('it')
+            end
         else
-            thisIFI=ft-lastFrameTime;
+            thisIFI=vbl-lastFrameTime;
             thisIFIErrorPct = abs(1-thisIFI/ifi);
             if  thisIFIErrorPct > timingCheckPct
-                disp(sprintf('warning: flip missed a timing and appeared not to notice: frame num %d, ifi error: %g',frameNum,thisIFIErrorPct));
+                disp(sprintf('warning: flip missed a timing and appeared not to notice: frame num %d, ifi error: %g, pct: %g%% (when=%.15g at %.15g, lastLoopEnd=%.15g)',frameNum,thisIFIErrorPct,100*thisIFI/ifi,when,whenTime,lastLoopEnd));
                 responseDetails.numApparentMisses=responseDetails.numApparentMisses+1;
                 responseDetails.apparentMisses(responseDetails.numApparentMisses)=frameNum;
                 responseDetails.afterApparentMissTimes(responseDetails.numApparentMisses)=GetSecs();
                 responseDetails.apparentMissIFIs(responseDetails.numApparentMisses)=thisIFI;
+                %error('it2')
             end
         end
-        lastFrameTime=ft;
+        lastFrameTime=vbl;
 
         %stop saving miss frame statistics after the relevant period -
         %prevent trial history from getting too big
@@ -930,74 +992,70 @@ try
         pThisLoop=0;
 
         [keyIsDown,secs,keyCode]=KbCheck;
+        %keyCode(30)=1;
+        %keyCode(14)=1;
+        keyIsDown=true;
         if keyIsDown
             %logwrite(sprintf('keys are down:',num2str(find(keyCode))));
 
-            asciiOne=49;
-
-            keys=find(keyCode);
-            ctrlDown=0; %these don't get reset if keyIsDown fails!
-            shiftDown=0;
-            kDown=0;
-            for keyNum=1:length(keys)
-                shiftDown = shiftDown || strcmp(KbName(keys(keyNum)),'shift');
-                ctrlDown = ctrlDown || strcmp(KbName(keys(keyNum)),'control');
-                kDown= kDown || strcmp(KbName(keys(keyNum)),'k');
+            shiftDown=any(keyCode(shiftKeys));
+            ctrlDown=any(keyCode(controlKeys));
+            atDown=any(keyCode(atKeys));
+            kDown=any(keyCode(kKey));
+            portsDown=false(1,length(portKeys));
+            for pNum=1:length(portKeys)
+                portsDown(pNum)=any(keyCode(portKeys{pNum}));
             end
 
             if kDown
-                for keyNum=1:length(keys)
-                    keyName=KbName(keys(keyNum));
+                if any(keyCode(pKey))
+                    pThisLoop=1;
 
-                    if strcmp(keyName,'p')
-                        pThisLoop=1;
+                    if ~pressingP && allowQPM
 
-                        if ~pressingP && allowQPM
+                        didAPause=1;
+                        paused=~paused;
 
-                            didAPause=1;
-                            paused=~paused;
-
-                            if paused
-                                Priority(originalPriority);
-                            else
-                                Priority(priorityLevel);
-                            end
-
-                            pressingP=1;
-                        end
-                    elseif strcmp(keyName,'q') && ~paused && allowQPM
-                        done=1;
-                        response='manual kill';
-
-                    elseif ~isempty(keyName) && ismember(keyName(1),char(asciiOne:asciiOne+length(ports)-1))
-                        if shiftDown
-                            if keyName(1)-asciiOne+1 == 2
-                                'WARNING!!!  you just hit shift-2 ("@"), which mario declared a synonym to sca (screen(''closeall'')) -- everything is going to break now'
-                                'quitting'
-                                done=1;
-                                response='shift-2 kill';
-                            end
-                        end
-                        if ctrlDown
-                            doValves(keyName(1)-asciiOne+1)=1;
-                            didValves=true;
+                        if paused
+                            Priority(originalPriority);
                         else
-                            ports(keyName(1)-asciiOne+1)=1;
-                            didHumanResponse=true;
+                            Priority(priorityLevel);
                         end
-                    elseif strcmp(keyName,'m')
-                        mThisLoop=1;
 
-                        if ~pressingM && ~paused && allowQPM
-
-                            manual=~manual;
-                            pressingM=1;
-                        end
-                    elseif strcmp(keyName,'a') % check for airpuff
-                        doPuff=true;
-                    elseif strcmp(keyName,'r') && strcmp(getRewardMethod(station),'localPump')
-                        doPrime(station);
+                        pressingP=1;
                     end
+                elseif any(keyCode(qKey)) && ~paused && allowQPM
+                    done=1;
+                    response='manual kill';
+                elseif any(portsDown)
+                    if shiftDown
+                        if atDown && portsDown(2)
+                            %note that this misses shift-2 without 'k'...  :(
+                            'WARNING!!!  you just hit shift-2 ("@"), which mario declared a synonym to sca (screen(''closeall'')) -- everything is going to break now'
+                            'quitting'
+                            done=1;
+                            response='shift-2 kill';
+                        end
+                    end
+                    if ctrlDown
+                        doValves(portsDown)=1;
+                        didValves=true;
+                    else
+                        ports(portsDown)=1;
+                        didHumanResponse=true;
+                    end
+                elseif any(keyCode(mKey))
+                    mThisLoop=1;
+
+                    if ~pressingM && ~paused && allowQPM
+
+                        manual=~manual;
+                        pressingM=1;
+                    end
+                elseif any(keyCode(aKey))
+                    doPuff=true;
+                elseif any(keyCode(rKey)) && strcmp(getRewardMethod(station),'localPump')
+                    doPrime(station);
                 end
             end
 
@@ -1287,7 +1345,7 @@ try
             setPuff(station,true);
         end
 
-
+        lastLoopEnd=GetSecs;
 
 
         %logwrite('end of stimOGL loop');

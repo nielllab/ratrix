@@ -38,13 +38,14 @@ if isa(station,'station')
             %argh!  can only have one of these on windows with enhanced dll.  gar!
             %try getting asio card
             
-            %non-enhanced dll works with windows but artifacts...
-            %fastest ppa('close') on windows is 10ms (black/dell), 20ms (beige), 25ms (osx, but once got a session down to 2, don't know how) 
+            %non-enhanced dll works with windows but artifacts...  (need large buffer, but that slows down starting/stopping)
+            %fastest ppa('close') on windows is 10ms (black/dell -- including ips(1)w/enhanced dll on xfi card), 20ms (beige), 25ms (osx, but once got a session down to 2, don't know how) 
             %cannot eliminate framedrops on beige or dell, can on black at 100Hz (nosound), osx(nosound/notext) at 60Hz
             
             
             %on beige: audioplayer fastest start is 20ms, stop is 15ms.
-            %both dells, both ~2ms!
+            %osx start is 2ms, but stop is 60ms!
+            %both blacks/dells, both ~2ms!  add this option back...
             
             PsychPortAudio('FillBuffer', sm.players{i}, clip);
             PsychPortAudio('GetStatus', sm.players{i})

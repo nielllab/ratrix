@@ -502,6 +502,9 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 trialRecords(trialInd).responseDetails
             end
 
+            if stopEarly
+                uninit(trialManager.soundMgr);
+            end
 
         else
             error('need a stimManager')

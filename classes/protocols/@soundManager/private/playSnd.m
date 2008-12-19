@@ -1,4 +1,5 @@
 function sm=playSnd(sm,soundName,duration,station,isLoop)
+error('deprecated')
 
 if isa(station,'station')
     if getSoundOn(station)

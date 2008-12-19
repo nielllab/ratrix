@@ -273,7 +273,6 @@ try
                 trigger=0;
                 indexedFrames = type{2};
                 if isNearInteger(indexedFrames) && isvector(indexedFrames) && all(indexedFrames>0) && all(indexedFrames<=size(stim,3))
-                    strategy = 'textureCache';
                 else
                     class(indexedFrames)
                     size(indexedFrames)
@@ -285,7 +284,6 @@ try
                 timeIndexed = 1;
                 timedFrames = type{2};
                 if isinteger(timedFrames) && isvector(timedFrames) && size(stim,3)==length(timedFrames) && all(timedFrames(1:end-1)>=1) && timedFrames(end)>=0 % the timedFrames type
-                    strategy = 'textureCache';
                     %dontclear = 1;  %good for saving time, but breaks on lame graphics cards
                 else
                     error('bad vector for timedFrames type: must be a vector of length equal to stim dim 3 of integers > 0 (number or refreshes to display each frame). A zero in the final entry means hold display of last frame.')
@@ -296,12 +294,10 @@ try
     else
         switch type
             case 'static'   %static 1-frame stimulus
-                strategy = 'textureCache';
                 if size(stim,3)~=1
                     error('static type must have stim with exactly 1 frame')
                 end
             case 'trigger'   %2 static frames -- if request, show frame 1; else show frame 2
-                strategy = 'textureCache';
                 loop = 0;
                 trigger = 1;
                 %dontclear = 1; %good for saving time, but breaks on lame graphics cards
@@ -309,12 +305,10 @@ try
                     error('trigger type must have stim with exactly 2 frames')
                 end
             case 'cache'    %dynamic n-frame stimulus (play once)
-                strategy = 'textureCache';
+                %pass
             case 'loop'     %dynamic n-frame stimulus (loop)
-                strategy = 'textureCache';
                 loop = 1;
             case 'dynamic'  %call moreStim() if more frames desired
-                strategy = 'dynamicDots';
                 error('dynamic type not yet implemented')
             case 'expert' %callback moreStim() to call ptb drawing methods, but leave frame labels and 'drawingfinished' to stimOGL
                 error('expert type not yet implemented')
@@ -495,28 +489,17 @@ try
     frameDropCorner.rect=[frameDropCorner.left frameDropCorner.top frameDropCorner.right frameDropCorner.bottom];
 
     tic
-    switch strategy
-        case 'textureCache'
-            %load all frame caches into VRAM
 
-            textures=zeros(1,size(stim,3));
-            for i=1:size(stim,3)
-                if window>=0
-                    textures(i)=Screen('MakeTexture', window, squeeze(stim(:,:,i)),0,0,floatprecision); %ned floatprecision=0 for remotedesktop
-                end
-            end
+    %load all frame caches into VRAM
 
-        case 'dynamicDots'
-
-            numDots = size(stim,1)*size(stim,2);
-            [dotX dotY] = meshgrid(1:size(stim,1),1:size(stim,2));
-            dotLocs = [dotX(1:numDots);dotY(1:numDots)];
-            dotSize = 1;
-            dotCtr = [destRect(3)-destRect(1) destRect(4)-destRect(2)]/2;
-
-        otherwise
-            error('unrecognized strategy')
+    textures=zeros(1,size(stim,3));
+    for i=1:size(stim,3)
+        if window>=0
+            textures(i)=Screen('MakeTexture', window, squeeze(stim(:,:,i)),0,0,floatprecision); %ned floatprecision=0 for remotedesktop
+        end
     end
+
+
 
     if window>=0
         textures(size(stim,3)+1)=Screen('MakeTexture', window, finalScreenLuminance,0,0,floatprecision);
@@ -631,12 +614,12 @@ try
     % with
 
     %Priority(9);
-    KbCheck; %load mex files into ram
+    [keyIsDown,secs,keyCode]=KbCheck; %load mex files into ram + preallocate return vars
     GetSecs;
     Screen('Screens');
 
-    KbName('UnifyKeyNames');
-    allKeys=KbName('KeyNames');%'KeyNamesOSX')); unify does not seem to choose keynamesosx for windows
+    %KbName('UnifyKeyNames'); %does not appear to choose keynamesosx on windows - KbName('KeyNamesOSX') comes back wrong
+    allKeys=KbName('KeyNames');
     allKeys=lower(cellfun(@char,allKeys,'UniformOutput',false));
     controlKeys=find(cellfun(@(x) ~isempty(x),strfind(allKeys,'control')));
     shiftKeys=find(cellfun(@(x) ~isempty(x),strfind(allKeys,'shift')));
@@ -652,15 +635,6 @@ try
     for i=1:length(ports)
         portKeys{i}=find(strncmp(char(asciiOne+i-1),allKeys,1));
     end
-
-    preSMCacheTime=GetSecs();
-    [newSM updateSMCache]=cacheSounds(tm.soundMgr);
-    disp(sprintf('took %g secs to cache sounds',GetSecs()-preSMCacheTime))
-    if updateSMCache
-        tm.soundMgr=newSM; %hmmm, how does this cache get persisted, we don't return tm...
-    end
-    %tm.soundMgr=playSound(tm.soundMgr,'keepGoingSound',.001,station); %get audioplayer into memory (java?)
-    %tm.soundMgr=playSound(tm.soundMgr,'trySomethingElseSound',.001,station); %get all the clips we'll use cached up
 
     priorityLevel=MaxPriority(window,'GetSecs','KbCheck');
 
@@ -683,6 +657,24 @@ try
     whenTime=0;
     ft=0;
     missed=0;
+    thisIFI=0;
+    thisIFIErrorPct = 0;
+
+    doValves=0*ports;
+    newValveState=doValves;
+    doPuff=false;
+    mThisLoop=0;
+    pThisLoop=0;
+
+
+    shiftDown=false;
+    ctrlDown=false;
+    atDown=false;
+    kDown=false;
+    portsDown=false(1,length(ports));
+    pNum=0;
+
+
     time1=0;
     time2=0;
     time3=0;
@@ -690,6 +682,13 @@ try
     time5=0;
     time6=0;
     time7=0;
+    soundTime=0;
+    maxSoundTime=0.002;
+    soundName='';
+    somethingElseOn=false;
+    keepGoingOn=false;
+
+    barebones=true;
 
     %logwrite('about to enter stimOGL loop');
 
@@ -729,97 +728,85 @@ try
                     end
                 end
                 doFramePulse=~noPulses;
-                switch strategy
-                    case 'textureCache'
-                        if frameIndexed
-                            if loop
-                                frameIndex = mod(frameIndex,length(indexedFrames)-1)+1;
-                            else
-                                frameIndex = min(length(indexedFrames),frameIndex+1);
-                            end
-                            i = indexedFrames(frameIndex);
-                        elseif loop
-                            i = mod(i,size(stim,3)-1)+1;
-                        elseif trigger
-                            if isRequesting
-                                if ~audioStimPlaying && ~isempty(audioStim)
-                                    % Play audio
-                                    tm.soundMgr = playLoop(tm.soundMgr,audioStim,station,1);
-                                    audioStimPlaying = true;
-                                end
-                                i=1;
-                            else
-                                if audioStimPlaying
-                                    % Turn off audio
-                                    tm.soundMgr = playLoop(tm.soundMgr,'',station,0);
-                                    audioStimPlaying = false;
-                                end
-                                i=2;
-                            end
 
-                        elseif timeIndexed %ok, this is where we do the timedFrames type
-
-                            %Function 'cumsum' is not defined for values of class 'int8'.
-                            if requestFrame~=0
-                                i=find((frameNum-requestFrame)<=cumsum(double(timedFrames)), 1 );  %find the stim frame number for the number of frames since the request
-                            end
-
-                            if isempty(i)  %if we have passed the last stim frame
-                                i=length(timedFrames);  %hold the last frame if the last frame duration specified was zero
-                                if timedFrames(end)
-                                    i=i+1;      %otherwise move on to the finalScreenLuminance blank screen
-                                end
-                            end
-
-                        else
-
-                            i=min(i+1,size(stim,3));
-
-                            if isempty(responseOptions) && i==size(stim,3)
-                                done=1;
-                            end
-
-                            if i==size(stim,3) && didPulse
-                                doFramePulse=0;
-                            end
-                            didPulse=1;
+                if frameIndexed
+                    if loop
+                        frameIndex = mod(frameIndex,length(indexedFrames)-1)+1;
+                    else
+                        frameIndex = min(length(indexedFrames),frameIndex+1);
+                    end
+                    i = indexedFrames(frameIndex);
+                elseif loop
+                    i = mod(i,size(stim,3)-1)+1;
+                elseif trigger
+                    if isRequesting
+                        if ~audioStimPlaying && ~isempty(audioStim)
+                            % Play audio
+                            tm.soundMgr = playLoop(tm.soundMgr,audioStim,station,1);
+                            audioStimPlaying = true;
                         end
-
-
-                        %draw to buffer
-                        if window>=0
-                            if i>0 && i <= size(stim,3)
-                                if ~(i==lastI) || (dontclear==0) %only draw if texture different from last one, or if every flip is redrawn
-                                    Screen('DrawTexture', window, textures(i),[],destRect,[],filtMode);
-                                else
-                                    if labelFrames
-                                        thisMsg=sprintf('This frame stim index (%d) is staying here without drawing new textures %d',i,frameNum); %may need to preallocate outside the loop
-                                        Screen('DrawText',window,thisMsg,xTextPos,yNewTextPos-20,100*ones(1,3));
-                                    end
-                                end
-                            else
-                                if size(stim,3)==0
-                                    %'stim had zeros frames, probably an penalty stim with zero duration'
-                                else
-                                    i
-                                    sprintf('size(stim,3): %d',size(stim,3))
-                                    error('request for an unknown frame')
-                                end
-                            end
+                        i=1;
+                    else
+                        if audioStimPlaying
+                            % Turn off audio
+                            tm.soundMgr = playLoop(tm.soundMgr,'',station,0);
+                            audioStimPlaying = false;
                         end
+                        i=2;
+                    end
 
+                elseif timeIndexed %ok, this is where we do the timedFrames type
 
-                    case 'dynamicDots'
-                        i=i+1;
+                    %Function 'cumsum' is not defined for values of class 'int8'.
+                    if requestFrame~=0
+                        i=find((frameNum-requestFrame)<=cumsum(double(timedFrames)), 1 );  %find the stim frame number for the number of frames since the request
+                    end
 
-                        %draw to buffer
-                        [dynFrame doFramePulse] =getDynFrame(stim,i); %any advantage to preallocating dynFrame?  would require a stim method to ask how big it will be...
-                        if window>=0
-                            Screen('DrawDots', window, dotLocs, dotSize ,repmat(dynFrame(1:numDots),3,1), dotCtr,0);
+                    if isempty(i)  %if we have passed the last stim frame
+                        i=length(timedFrames);  %hold the last frame if the last frame duration specified was zero
+                        if timedFrames(end)
+                            i=i+1;      %otherwise move on to the finalScreenLuminance blank screen
                         end
-                    otherwise
-                        error('unrecognized strategy')
+                    end
+
+                else
+
+                    i=min(i+1,size(stim,3));
+
+                    if isempty(responseOptions) && i==size(stim,3)
+                        done=1;
+                    end
+
+                    if i==size(stim,3) && didPulse
+                        doFramePulse=0;
+                    end
+                    didPulse=1;
                 end
+
+
+                %draw to buffer
+                if window>=0
+                    if i>0 && i <= size(stim,3)
+                        if ~(i==lastI) || (dontclear==0) %only draw if texture different from last one, or if every flip is redrawn
+                            Screen('DrawTexture', window, textures(i),[],destRect,[],filtMode);
+                        else
+                            if labelFrames
+                                thisMsg=sprintf('This frame stim index (%d) is staying here without drawing new textures %d',i,frameNum); %may need to preallocate outside the loop
+                                Screen('DrawText',window,thisMsg,xTextPos,yNewTextPos-20,100*ones(1,3));
+                            end
+                        end
+                    else
+                        if size(stim,3)==0
+                            %'stim had zeros frames, probably an penalty stim with zero duration'
+                        else
+                            i
+                            sprintf('size(stim,3): %d',size(stim,3))
+                            error('request for an unknown frame')
+                        end
+                    end
+                end
+
+
             else
                 time2=GetSecs;
                 if window>=0
@@ -829,6 +816,15 @@ try
             end
 
             %logwrite(sprintf('stim is started, i is calculated: %d',i));
+
+            if frameDropCorner.on
+                Screen('FillRect', window, round(size(currentCLUT,1)*frameDropCorner.seq(frameDropCorner.ind)), frameDropCorner.rect);
+
+                frameDropCorner.ind=frameDropCorner.ind+1;
+                if frameDropCorner.ind>length(frameDropCorner.seq)
+                    frameDropCorner.ind=1;
+                end
+            end
 
             %text commands are supposed to be last for performance reasons
 
@@ -886,15 +882,6 @@ try
             end
         end
 
-        if frameDropCorner.on
-            Screen('FillRect', window, round(size(currentCLUT,1)*frameDropCorner.seq(frameDropCorner.ind)), frameDropCorner.rect);
-
-            frameDropCorner.ind=frameDropCorner.ind+1;
-            if frameDropCorner.ind>length(frameDropCorner.seq)
-                frameDropCorner.ind=1;
-            end
-        end
-
         time5=GetSecs;
         %indicate finished (enhances performance)
         if window>=0
@@ -903,7 +890,7 @@ try
         end
 
         time6=GetSecs;
-        when=vbl+(framesPerUpdate-0.5)*ifi;
+        when=vbl+(framesPerUpdate-0.8)*ifi;
         whenTime=GetSecs;
 
         if ~paused && doFramePulse
@@ -948,9 +935,11 @@ try
         %save facts about missed frames
         if missed>0 && frameNum<responseDetails.numFramesUntilStopSavingMisses
             disp(sprintf('warning: missed frame num %d (when=%.15g at %.15g, lastLoopEnd=%.15g, when-last=%.15g [%.15g %.15g %.15g %.15g %.15g %.15g %.15g])',frameNum,when,whenTime,lastLoopEnd,when-lastFrameTime,time1-lastLoopEnd,time2-time1,time3-time2,time4-time3,time5-time4,time6-time5,time7-time6));
-            responseDetails.numMisses=responseDetails.numMisses+1;
-            responseDetails.misses(responseDetails.numMisses)=frameNum;
-            responseDetails.afterMissTimes(responseDetails.numMisses)=GetSecs();
+            if ~barebones
+                responseDetails.numMisses=responseDetails.numMisses+1;
+                responseDetails.misses(responseDetails.numMisses)=frameNum;
+                responseDetails.afterMissTimes(responseDetails.numMisses)=GetSecs();
+            end
             if frameNum>2
                 %error('it')
             end
@@ -960,24 +949,28 @@ try
             if  thisIFIErrorPct > timingCheckPct
                 %seems to happen when thisIFI/ifi is near a whole number
                 disp(sprintf('warning: flip missed a timing and appeared not to notice: frame num %d, ifi error: %g, pct: %g%% (when=%.15g at %.15g, lastLoopEnd=%.15g)',frameNum,thisIFIErrorPct,100*thisIFI/ifi,when,whenTime,lastLoopEnd));
-                responseDetails.numApparentMisses=responseDetails.numApparentMisses+1;
-                responseDetails.apparentMisses(responseDetails.numApparentMisses)=frameNum;
-                responseDetails.afterApparentMissTimes(responseDetails.numApparentMisses)=GetSecs();
-                responseDetails.apparentMissIFIs(responseDetails.numApparentMisses)=thisIFI;
+                if ~barebones
+                    responseDetails.numApparentMisses=responseDetails.numApparentMisses+1;
+                    responseDetails.apparentMisses(responseDetails.numApparentMisses)=frameNum;
+                    responseDetails.afterApparentMissTimes(responseDetails.numApparentMisses)=GetSecs();
+                    responseDetails.apparentMissIFIs(responseDetails.numApparentMisses)=thisIFI;
+                end
                 %error('it2')
             end
         end
         lastFrameTime=vbl;
 
-        %stop saving miss frame statistics after the relevant period -
-        %prevent trial history from getting too big
-        %1 day is about 1-2 million misses is about 25 MB
-        %consider integers if you want to save more
-        %reasonableMaxSize=ones(1,intmax('uint16'),'uint16');%
+        if ~barebones
+            %stop saving miss frame statistics after the relevant period -
+            %prevent trial history from getting too big
+            %1 day is about 1-2 million misses is about 25 MB
+            %consider integers if you want to save more
+            %reasonableMaxSize=ones(1,intmax('uint16'),'uint16');%
 
-        if missed>0 && frameNum>=responseDetails.numFramesUntilStopSavingMisses
-            responseDetails.numMisses=responseDetails.numMisses+1;
-            responseDetails.numUnsavedMisses=responseDetails.numUnsavedMisses+1;
+            if missed>0 && frameNum>=responseDetails.numFramesUntilStopSavingMisses
+                responseDetails.numMisses=responseDetails.numMisses+1;
+                responseDetails.numUnsavedMisses=responseDetails.numUnsavedMisses+1;
+            end
         end
 
         %logwrite('entering trial logic');
@@ -995,9 +988,6 @@ try
         pThisLoop=0;
 
         [keyIsDown,secs,keyCode]=KbCheck;
-        %keyCode(30)=1;
-        %keyCode(14)=1;
-        %keyIsDown=true;
         if keyIsDown
             %logwrite(sprintf('keys are down:',num2str(find(keyCode))));
 
@@ -1079,11 +1069,29 @@ try
 
             %subject is finishing up an attempt -- record the end time
             if lookForChange && any(ports~=lastPorts)
-                responseDetails.durs{attempt}=GetSecs()-respStart;
+                if ~barebones
+                    responseDetails.durs{attempt}=GetSecs()-respStart;
+                end
                 lookForChange=0;
 
-                tm.soundMgr = playLoop(tm.soundMgr,'',station,0);
                 fprintf('off\n')
+
+                if somethingElseOn
+                    soundName='trySomethingElseSound';
+                    somethingElseOn=false;
+                elseif keepGoingOn
+                    soundName='keepGoingSound';
+                    keepGoingOn=false;
+                else
+                    error('has to be one or the other')
+                end
+                
+                soundTime=GetSecs;
+                tm.soundMgr = playLoop(tm.soundMgr,soundName,station,0);
+                soundTime=GetSecs-soundTime;
+                if soundTime>maxSoundTime
+                    fprintf('%g to end playloop\n',soundTime)
+                end
             end
 
             if ~toggleStim
@@ -1095,7 +1103,9 @@ try
 
                 if ~requestRewardStarted && isa(tm,'nAFC') && getRequestRewardSizeULorMS(tm)>0
                     requestRewardPorts=ports & requestOptions;
-                    responseDetails.requestRewardPorts=requestRewardPorts;
+                    if ~barebones
+                        responseDetails.requestRewardPorts=requestRewardPorts;
+                    end
                     requestRewardStarted=true;
                 end
 
@@ -1120,7 +1130,13 @@ try
 
                 % Only play if there is no audio stimulus
                 if isempty(audioStim)
+                                        keepGoingOn=true;
+                    soundTime=GetSecs;
                     tm.soundMgr = playLoop(tm.soundMgr,'keepGoingSound',station,1);
+                    soundTime=GetSecs-soundTime;
+                    if soundTime>maxSoundTime
+                        fprintf('%g to call playloop\n',soundTime)
+                    end
                 end
 
                 if ~lookForChange
@@ -1147,7 +1163,9 @@ try
                 response = ports;
                 logIt=1;
                 stopListening=1;
-                responseDetails.durs{attempt+1}=0;
+                if ~barebones
+                    responseDetails.durs{attempt+1}=0;
+                end
                 if potentialStochasticResponse
                     didStochasticResponse=1;
                 end
@@ -1156,7 +1174,13 @@ try
             %subject gave a response that is neither a stimulus request nor a well defined response
             if any(ports) && ~stopListening
                 if isempty(audioStim)
+                    somethingElseOn=true;
+                    soundTime=GetSecs;
                     tm.soundMgr = playLoop(tm.soundMgr,'trySomethingElseSound',station,1);
+                    soundTime=GetSecs-soundTime;
+                    if soundTime>maxSoundTime
+                        fprintf('%g to call playloop\n',soundTime)
+                    end
                 end
 
                 if (attempt==0 || any(ports~=lastPorts))
@@ -1170,10 +1194,13 @@ try
                 if verbose
                     ports
                 end
-                respStart=GetSecs();
                 attempt=attempt+1;
-                responseDetails.tries{attempt}=ports;
-                responseDetails.times{attempt}=GetSecs()-startTime;
+                if ~barebones
+                    respStart=GetSecs();
+
+                    responseDetails.tries{attempt}=ports;
+                    responseDetails.times{attempt}=GetSecs()-startTime;
+                end
                 lookForChange=1;
                 logIt=0;
             end
@@ -1206,7 +1233,7 @@ try
             newValveState=0*doValves;
         end
 
-        if ~isempty(rn) || strcmp(getRewardMethod(station),'serverPump')
+        if ~barebones && (~isempty(rn) || strcmp(getRewardMethod(station),'serverPump'))
 
             if ~isConnected(rn)
                 done=true; %should this also set quit?
@@ -1310,7 +1337,7 @@ try
 
 
 
-        [currentValveState valveErrorDetails]=setAndCheckValves(station,newValveState,currentValveState,valveErrorDetails,startTime,'frame cycle valve update');
+        [currentValveState valveErrorDetails]=setAndCheckValves(station,newValveState,currentValveState,valveErrorDetails,startTime,'frame cycle valve update',barebones);
 
         if serverValveChange
             quit=sendToServer(rn,getClientId(rn),constants.priorities.IMMEDIATE_PRIORITY,constants.stationToServerCommands.C_VALVES_SET_CMD,{currentValveState});
@@ -1321,13 +1348,17 @@ try
             if strcmp(getRewardMethod(station),'serverPump')
                 quit=sendToServer(rn,getClientId(rn),constants.priorities.IMMEDIATE_PRIORITY,constants.stationToServerCommands.C_REWARD_CMD,{getRequestRewardSizeULorMS(tm),logical(requestRewardPorts)});
             end
+
             responseDetails.requestRewardStartTime=GetSecs();
+
             %'request reward!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
             requestRewardStartLogged=true;
         end
 
         if  requestRewardDone && ~requestRewardDurLogged
-            responseDetails.requestRewardDurationActual=GetSecs()-responseDetails.requestRewardStartTime;
+            if ~barebones
+                responseDetails.requestRewardDurationActual=GetSecs()-responseDetails.requestRewardStartTime;
+            end
             %'request reward stopped!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
             requestRewardDurLogged=true;
         end

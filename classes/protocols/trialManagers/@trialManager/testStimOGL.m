@@ -1,5 +1,13 @@
-function testStimOGL(trialManager) %laboratory for finding and fixing framedrops - call like testStimOGL(trialManager())
-setupEnvironment
+function testStimOGL(trialManager) %laboratory for finding and fixing framedrops - call like testStimOGL(trialManager)
+
+%any of the following will cause frame drops (just on entering new code blocks) on the first subsequent run, but not runs thereafter:
+%clear java, clear classes, clear all, clear mex (NOT clear Screen)
+%each of these causes the code to be reinterpreted
+%note that this is what setupenvironment does!
+
+%setupEnvironment
+clear Screen
+clc
 
 try
     [stimManager trialManager station] = setupObjects();
@@ -65,8 +73,7 @@ station=makeDummyStation();
 sm=soundManager({soundClip('correctSound','allOctaves',[400],20000), ...
     soundClip('keepGoingSound','allOctaves',[300],20000), ...
     soundClip('trySomethingElseSound','gaussianWhiteNoise'), ...
-    soundClip('wrongSound','tritones',[300 400],20000)}, ...
-    'audioplayerCached');
+    soundClip('wrongSound','tritones',[300 400],20000)});
 
 rewardSizeULorMS        =50;
 msPenalty               =1000;

@@ -1,25 +1,34 @@
 function [sm updateCache]=cacheSounds(sm)
-updateCache=0;
-sm = initializeSound(sm);
-soundNames = getSoundNames(sm);
+updateCache=false;
 
-for i=1:length(soundNames)
-    [clip sampleRate sm updateSMCache] = getSound(sm,soundNames{i});
+if length(sm.players)~=length(sm.clips)
+    fprintf('recaching sounds, this is expensive\n')
+    
+    sm=uninit(sm); %need to clean up any existing buffers
+    InitializePsychSound(1); %we need special low latency, or ppa('close') takse 25ms on osx!
+    updateCache=true;
 
-    if sm.playerType == sm.AUDIO_PLAYER_CACHED
-        % If mono sound, send same signal to both channels
-        if(size(clip,1) == 1)
-            clip(2,:) = clip(1,:);
-        elseif(size(clip,1) ~= 2)
-            error('Stereo or mono sound expected');
+    soundNames = getSoundNames(sm);
+
+    for i=1:length(soundNames)
+        [clip sampleRate sm updateSMCache] = getSound(sm,soundNames{i});
+
+        if size(clip,1)>2
+            clip=clip'; %psychportaudio requires channels to be rows
         end
-        if size(clip,1)==2
-            clip=clip'; %on osx, audioplayer constructor requires this
+        switch size(clip,1)
+            case 1
+                clip(2,:) = clip(1,:);
+            case 2
+                %pass
+            otherwise
+                error('max 2 channels')
         end
-        sm.players{i}=audioplayer(clip, sampleRate);
-    end
 
-    if updateSMCache
-        updateCache=1;
+        sm.players{i}= PsychPortAudio('Open',[],[],4,sampleRate,2); %we need special low latency, or ppa('close') takse 25ms on osx!
+        PsychPortAudio('FillBuffer', sm.players{i}, clip); 
+        PsychPortAudio('GetStatus', sm.players{i})
+
+        sm.clipDurs(i)=size(clip,2)/sampleRate;
     end
 end

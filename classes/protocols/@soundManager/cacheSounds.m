@@ -30,6 +30,7 @@ if isa(station,'station')
             latclass=4;
             sm.players{i}= PsychPortAudio('Open',[],[],latclass,sampleRate,2); %we need special low latency, or ppa('close') takse 25ms on osx!
             %argh!  can only have one of these on windows.  gar!
+            %works with black computers on plain dll!  but artifacts...
             PsychPortAudio('FillBuffer', sm.players{i}, clip);
             PsychPortAudio('GetStatus', sm.players{i})
 

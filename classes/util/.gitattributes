@@ -99,3 +99,4 @@ trialRecordProcessing/modifyTrialRecords.m -text
 nidaq/openNidaqForAnalogOutput.m -text
 matlaby/makeSinusoid.m -text
 matlaby/getShuffledCross.m -text
+test/testStimOGL.m -text

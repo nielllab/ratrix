@@ -181,6 +181,8 @@ function [quit response responseDetails didManual manual didAPause didValves did
 
 %logwrite('entered stimOGL');
 
+mlock;
+
 frameDropCorner.size=[.05 .05];
 frameDropCorner.loc=[1 0];
 frameDropCorner.seq=[1 .5];

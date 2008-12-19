@@ -1,4 +1,4 @@
-function testStimOGL(trialManager) %laboratory for finding and fixing framedrops - call like testStimOGL(trialManager)
+function testStimOGL() %laboratory for finding and fixing framedrops
 
 %any of the following will cause frame drops (just on entering new code blocks) on the first subsequent run, but not runs thereafter:
 %clear java, clear classes, clear all, clear mex (NOT clear Screen)

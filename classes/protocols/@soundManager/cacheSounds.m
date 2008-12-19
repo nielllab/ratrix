@@ -29,8 +29,17 @@ if isa(station,'station')
 
             latclass=4;
             sm.players{i}= PsychPortAudio('Open',[],[],latclass,sampleRate,2); %we need special low latency, or ppa('close') takse 25ms on osx!
-            %argh!  can only have one of these on windows.  gar!
-            %works with black computers on plain dll!  but artifacts...
+            %argh!  can only have one of these on windows with enhanced dll.  gar!
+            %try getting asio card
+            
+            %non-enhanced dll works with black+beige computers but artifacts...
+            %fastest ppa('close') on windows is 10ms (black), 20ms (beige), 25ms (osx, but once got a session down to 2, don't know how) 
+            %cannot eliminate framedrops on beige, can on black at 100Hz (nosound), osx(nosound/notext) at 60Hz
+            
+            %dell: audio? drops?
+            
+            %on beige: audioplayer fastest start is 20ms, stop is 15ms
+            
             PsychPortAudio('FillBuffer', sm.players{i}, clip);
             PsychPortAudio('GetStatus', sm.players{i})
 

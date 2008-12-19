@@ -181,6 +181,11 @@ function [quit response responseDetails didManual manual didAPause didValves did
 
 %logwrite('entered stimOGL');
 
+%any of the following will cause frame drops (just on entering new code blocks) on the first subsequent run, but not runs thereafter:
+%clear java, clear classes, clear all, clear mex (NOT clear Screen)
+%each of these causes the code to be reinterpreted
+%note that this is what setupenvironment does!
+%mlock protects a file from all of these except clear classes (and sometimes clear functions?) -- but you have to unlock it to read in changes!
 mlock;
 
 frameDropCorner.size=[.05 .05];

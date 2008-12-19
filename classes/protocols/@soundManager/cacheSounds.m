@@ -27,11 +27,7 @@ if isa(station,'station')
                     error('max 2 channels')
             end
 
-            if ismac
-                latclass=4;
-            else
-                latclass=1;
-            end
+            latclass=4;
             sm.players{i}= PsychPortAudio('Open',[],[],latclass,sampleRate,2); %we need special low latency, or ppa('close') takse 25ms on osx!
             %argh!  can only have one of these on windows.  gar!
             PsychPortAudio('FillBuffer', sm.players{i}, clip);

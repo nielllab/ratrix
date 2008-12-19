@@ -5,7 +5,7 @@ function sm=playSound(sm,soundName,duration,station)
 if isa(station,'station')
     if getSoundOn(station)
         match=getClipInd(sm,soundName);
-        sm=cacheSounds(sm);
+        sm=cacheSounds(sm,station);
         reps=1;
 
         if duration>0

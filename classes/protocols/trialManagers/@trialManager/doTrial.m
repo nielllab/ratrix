@@ -79,7 +79,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             trialRecords(trialInd).criterionClass = class(getCriterion(ts));
 
             resolutions=getResolutions(station);
-            
+
             [newSM, ...
                 updateSM, ...
                 resInd, ...
@@ -108,7 +108,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             else
                 error('frame label must be vector')
             end
-            
+
             [station trialRecords(trialInd).resolution]=setResolution(station,resolutions(resInd));
             trialRecords(trialInd).station = structize(station); %wait til now to record, so we get an updated ifi measurement in the station object
 
@@ -126,20 +126,23 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 error('targetPorts and distractorPorts must be row vectors')
             end
 
-
-            audioStimulus = [];
-            if ismethod(newSM,'getAudioStimulus');
-                audioStim = getAudioStimulus(newSM);
-                if ~isempty(audioStim)
-                    audioStimulus=getName(audioStim);
-                    % Add/replace the stimulus sound clip to the list of clips in
-                    % the sound manager
-                    trialManager.soundMgr = addSound(trialManager.soundMgr,audioStim);
+            updateSndM=false;
+            if getSoundOn(station)
+                audioStimulus = [];
+                if ismethod(newSM,'getAudioStimulus');
+                    audioStim = getAudioStimulus(newSM);
+                    if ~isempty(audioStim)
+                        audioStimulus=getName(audioStim);
+                        % Add/replace the stimulus sound clip to the list of clips in
+                        % the sound manager
+                        trialManager.soundMgr = addSound(trialManager.soundMgr,audioStim,station);
+                    end
                 end
-            end
 
-            % Wait to cache sounds until here because you might get new ones
-            [trialManager.soundMgr updateSndM]=cacheSounds(trialManager.soundMgr);  %update of soundManager was overwritting update of stimulus manager. now fixed pmm 2008/05/02
+                % Wait to cache sounds until here because you might get new ones
+
+                [trialManager.soundMgr updateSndM]=cacheSounds(trialManager.soundMgr,station);  %update of soundManager was overwritting update of stimulus manager. now fixed pmm 2008/05/02
+            end
             updateTM = updateTM || updateSndM;  %
 
 
@@ -177,8 +180,8 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
 
             pStr=[trialRecords(trialInd).protocolName '(' num2str(trialRecords(trialInd).protocolVersion.manualVersion) 'm:' num2str(trialRecords(trialInd).protocolVersion.autoVersion) 'a)' ' step:' num2str(trialRecords(trialInd).trainingStepNum) '/' num2str(trialRecords(trialInd).numStepsInProtocol) ];
 
-            trialLabel=sprintf('session:%d trial:%d (%d)',sessionNumber,sum(trialRecords(trialInd).sessionNumber == [trialRecords.sessionNumber]),trialRecords(trialInd).trialNumber);            
-            
+            trialLabel=sprintf('session:%d trial:%d (%d)',sessionNumber,sum(trialRecords(trialInd).sessionNumber == [trialRecords.sessionNumber]),trialRecords(trialInd).trialNumber);
+
             [stopEarly trialRecords(trialInd).response,...
                 trialRecords(trialInd).responseDetails,...
                 trialRecords(trialInd).containedManualPokes,...
@@ -503,7 +506,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             end
 
             if stopEarly
-                uninit(trialManager.soundMgr);
+                uninit(trialManager.soundMgr,station);
             end
 
         else

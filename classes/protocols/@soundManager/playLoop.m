@@ -27,7 +27,7 @@ if isa(station,'station')
                     sm.playingLoop(match)=false;
                 end
             elseif keepPlaying && ~sm.playingLoop(match)
-                sm=cacheSounds(sm);
+                sm=cacheSounds(sm,station);
 
                 if sm.playingNonLoop(match)
 

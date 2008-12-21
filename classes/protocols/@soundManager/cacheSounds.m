@@ -4,13 +4,27 @@ if isa(station,'station')
     updateCache=false;
 
     if getSoundOn(station) && length(sm.players)~=length(sm.clips)
-        fprintf('recaching sounds, this is expensive\n')
+        warning('recaching sounds, this is expensive\n')
 
-        sm=uninit(sm,station); %need to clean up any existing buffers
-        InitializePsychSound(1); %we need special low latency, or ppa('close') takse 25ms on osx!
         updateCache=true;
 
         soundNames = getSoundNames(sm);
+
+        sm=uninit(sm,station); %need to clean up any existing buffers
+
+        dllPath=fullfile(PsychtoolboxRoot, 'portaudio_x86.dll');
+        if iswin && exist(dllPath,'file') && length(soundNames)>1
+            warning('found enhanced asio driver -- disabling because this only allows us to make one buffer')
+            [status,message,messageid]=movefile(dllPath,fullfile(PsychtoolboxRoot, 'disabled.portaudio_x86.dll'));
+            if ~status || exist(dllPath,'file')
+                message
+                messageid
+                error('couldn''t disable enhanced psychportaudio dll')
+            end
+        end
+
+        InitializePsychSound(1);
+
 
         for i=1:length(soundNames)
             [clip sampleRate sm updateSMCache] = getSound(sm,soundNames{i});
@@ -26,26 +40,26 @@ if isa(station,'station')
                 otherwise
                     error('max 2 channels')
             end
-            
-           if ispc 
-            latclass=4; %2ok?
-            buffsize=4096; %max -- otherwise crackles
-           else
-                latclass=[];
+
+            latclass=4; %2 ok?
+            if iswin
+                buffsize=4096; %max -- otherwise crackles if using asio4all (should detect if have native asio card and not do this)
+            else
                 buffsize=[];
-        end
-            sm.players{i}= PsychPortAudio('Open',[],[],latclass,sampleRate,2,buffsize); %we need special low latency, or ppa('close') takse 25ms on osx!
-            %argh!  can only have one of these on windows with enhanced dll.  gar!
-            %try getting asio card
-            
-            %non-enhanced dll works with windows but artifacts...  (need large buffer, but that slows down starting/stopping)
-            %fastest ppa('close') on windows is 10ms (black/dell -- including ips(1)w/enhanced dll on xfi card), 20ms (beige), 25ms (osx, but once got a session down to 2, don't know how) 
-            %cannot eliminate framedrops on beige or dell, can on black at 100Hz (nosound), osx(nosound/notext) at 60Hz
-            
-            
+            end
+            sm.players{i}= PsychPortAudio('Open',[],[],latclass,sampleRate,latclass,buffsize);
+            %still need to verify we got the requested sample rate...
+
+            %only way to get ppa('stop') to return in <1ms rather tha >10ms is to have asio card.
+            %otherwise, fastest ppa('stop') on windows is 10ms (black/dell)
+            %others: 20ms (beige), 25ms (osx, but once got a session down to 2, don't know how)
+
             %on beige: audioplayer fastest start is 20ms, stop is 15ms.
             %osx start is 2ms, but stop is 60ms!
             %both blacks/dells, both ~2ms!  add this option back...
+            
+            %without audioplayer or asio card,
+            %cannot eliminate framedrops on beige or dell, can on black at 100Hz (nosound), osx(nosound/notext) at 60Hz            
             
             PsychPortAudio('FillBuffer', sm.players{i}, clip);
             PsychPortAudio('GetStatus', sm.players{i})

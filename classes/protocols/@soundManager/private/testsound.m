@@ -6,12 +6,12 @@ p=maxpriority('getsecs');
 priority(p);
 initializepsychsound(1);
 try
-    x=psychportaudio('open',[],[],4); %doesn't work with asio4all + enhanced dll
+    x=psychportaudio('open',[],[],4,[],[],4096); %reqclass 4 doesn't work with asio4all + enhanced dll
 catch ex
     ple(ex)
-    x=psychportaudio('open');
+    x=psychportaudio('open',[],[],2,[],[],4096);
 end
-psychportaudio('fillbuffer',x,rand(2,40000)-.5);
+psychportaudio('fillbuffer',x,rand(2,400000)-.5);
 getsecs;
 psychportaudio('start',x);
 psychportaudio('stop',x);
@@ -29,7 +29,9 @@ end
 
 psychportaudio('close')
 
-x=audioplayer(rand(2,40000)-.5,44100);
+x=audioplayer(rand(2,400000)-.5,44100);
+play(x);
+stop(x);
 for i=1:10
     y=getsecs;
     play(x);

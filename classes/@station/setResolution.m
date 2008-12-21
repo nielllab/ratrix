@@ -42,5 +42,5 @@ if oldRes.width~=res.width || oldRes.height~=res.height || oldRes.hz ~=res.hz ||
     end
 
 else
-    newRes=oldRes;
+    newRes=oldRes
 end

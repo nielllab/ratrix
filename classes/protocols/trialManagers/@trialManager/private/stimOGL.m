@@ -695,6 +695,8 @@ try
     somethingElseOn=false;
     keepGoingOn=false;
 
+    numDrops=0;
+    numApparentDrops=0;
     barebones=true;
 
     %logwrite('about to enter stimOGL loop');
@@ -853,7 +855,7 @@ try
                     else
                         txtLabel=textLabel;
                     end
-                    [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('priority:%g %s stimInd:%d frame:%d stim:%s',Priority(),trialLabel,i,frameNum,txtLabel),xTextPos,yNewTextPos,100*ones(1,3));
+                    [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('priority:%g %s stimInd:%d frame:%d drops:%d(%d) stim:%s',Priority(),trialLabel,i,frameNum,numDrops,numApparentDrops,txtLabel),xTextPos,yNewTextPos,100*ones(1,3));
                     yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
 
                     [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('ptb:%s',ptbVersion),xTextPos,yNewTextPos,100*ones(1,3));
@@ -942,6 +944,7 @@ try
         %save facts about missed frames
         if missed>0 && frameNum<responseDetails.numFramesUntilStopSavingMisses
             disp(sprintf('warning: missed frame num %d (when=%.15g at %.15g, lastLoopEnd=%.15g, when-last=%.15g [%.15g %.15g %.15g %.15g %.15g %.15g %.15g])',frameNum,when,whenTime,lastLoopEnd,when-lastFrameTime,time1-lastLoopEnd,time2-time1,time3-time2,time4-time3,time5-time4,time6-time5,time7-time6));
+            numDrops=numDrops+1;
             if ~barebones
                 responseDetails.numMisses=responseDetails.numMisses+1;
                 responseDetails.misses(responseDetails.numMisses)=frameNum;
@@ -956,6 +959,7 @@ try
             if  thisIFIErrorPct > timingCheckPct
                 %seems to happen when thisIFI/ifi is near a whole number
                 disp(sprintf('warning: flip missed a timing and appeared not to notice: frame num %d, ifi error: %g, pct: %g%% (when=%.15g at %.15g, lastLoopEnd=%.15g)',frameNum,thisIFIErrorPct,100*thisIFI/ifi,when,whenTime,lastLoopEnd));
+                numApparentDrops=numApparentDrops+1;
                 if ~barebones
                     responseDetails.numApparentMisses=responseDetails.numApparentMisses+1;
                     responseDetails.apparentMisses(responseDetails.numApparentMisses)=frameNum;

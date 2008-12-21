@@ -50,7 +50,7 @@ if isa(station,'station')
             sm.players{i}= PsychPortAudio('Open',[],[],latclass,sampleRate,2,buffsize);
             %still need to verify we got the requested sample rate...
 
-            %only way to get ppa('stop') to return in <1ms rather tha >10ms is to have asio card.
+            %only way to get ppa('stop') to return in <1ms rather tha >10ms is to have asio card AND enhanced dll.
             %otherwise, fastest ppa('stop') on windows is 10ms (black/dell)
             %others: 20ms (beige), 25ms (osx, but once got a session down to 2, don't know how)
 
@@ -58,8 +58,8 @@ if isa(station,'station')
             %osx start is 2ms, but stop is 60ms!
             %both blacks/dells, both ~2ms!  add this option back...
             
-            %without audioplayer or asio card,
-            %cannot eliminate framedrops on beige or dell, can on black at 100Hz (nosound), osx(nosound/notext) at 60Hz            
+            %without audioplayer or asio card+enhanced dll,
+            %cannot eliminate framedrops on beige or dell(ati), can on black/dell(nvidia) at 100Hz (nosound), osx(nosound/notext) at 60Hz            
             
             PsychPortAudio('FillBuffer', sm.players{i}, clip);
             PsychPortAudio('GetStatus', sm.players{i})

@@ -185,7 +185,9 @@ function [quit response responseDetails didManual manual didAPause didValves did
 %clear java, clear classes, clear all, clear mex (NOT clear Screen)
 %each of these causes the code to be reinterpreted
 %note that this is what setupenvironment does!
-%mlock protects a file from all of these except clear classes (and sometimes clear functions?) -- but you have to unlock it to read in changes!
+%mlock protects a file from all of these 
+% should protect from any clear, but for some reason i wrote: except clear classes (and sometimes clear functions?) -- why? 
+%you have to unlock it to read in changes without restarting matlab!
 mlock; %to pick up changes without restarting matlab, call munlock('trialmanager/private/stimogl'),clear functions
 
 frameDropCorner.size=[.05 .05];

@@ -136,29 +136,29 @@ interTrialLuminance     =.5;
 stimManager=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 function st=makeDummyStation()
-stationSpec.id                                = '1U';
-if ismac
-stationSpec.path                              = '/Users/eflister/Desktop/dummyStation';
-else
-stationSpec.path                              = 'C:\Documents and Settings\rlab\Desktop\dummyStation';
-end
-stationSpec.MACaddress                        = '000000000000';
-stationSpec.physicalLocation                  = uint8([1 1 1]);
-stationSpec.screenNum                         = int8(0);
-stationSpec.soundOn                           = false;
-stationSpec.rewardMethod                      = 'localTimed';
-stationSpec.portSpec.parallelPortAddress      = '0378';
-stationSpec.portSpec.valveSpec                = int8([4,3,2]);
-stationSpec.portSpec.sensorPins               = int8([13,10,12]);
-stationSpec.portSpec.framePulsePins           = int8(9);
-stationSpec.portSpec.eyePuffPins              = int8(6);
-
-if ismac
-    stationSpec.portSpec = int8(3);
-elseif ispc
-    %do nothing
-else
-    error('unknown OS')
-end
-
-st=station(stationSpec);
+% stationSpec.id                                = '1U';
+% if ismac
+% stationSpec.path                              = '/Users/eflister/Desktop/dummyStation';
+% else
+% stationSpec.path                              = 'C:\Documents and Settings\rlab\Desktop\dummyStation';
+% end
+% stationSpec.MACaddress                        = '000000000000';
+% stationSpec.physicalLocation                  = uint8([1 1 1]);
+% stationSpec.screenNum                         = uint8(max(Screen('Screens')));
+% stationSpec.soundOn                           = false;
+% stationSpec.rewardMethod                      = 'localTimed';
+% stationSpec.portSpec.parallelPortAddress      = '0378';
+% stationSpec.portSpec.valveSpec                = int8([4,3,2]);
+% stationSpec.portSpec.sensorPins               = int8([13,10,12]);
+% stationSpec.portSpec.framePulsePins           = int8(9);
+% stationSpec.portSpec.eyePuffPins              = int8(6);
+%
+% if ismac
+%     stationSpec.portSpec = int8(3);
+% elseif ispc
+%     %do nothing
+% else
+%     error('unknown OS')
+% end
+%st=station(stationSpec);
+st=makeDefaultStation(stationSpec.id,stationSpec.path,stationSpec.MACaddress,stationSpec.physicalLocation);

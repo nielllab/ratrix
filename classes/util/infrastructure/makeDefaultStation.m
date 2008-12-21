@@ -1,4 +1,4 @@
-function st=makeDefaultStation(id,path,mac,physicalLocation,screenNum,rewardMethod,pportaddr)
+function st=makeDefaultStation(id,path,mac,physicalLocation,screenNum,rewardMethod,pportaddr,soundOn)
 
 % our standard parallel port pin assignments
 % pin register	invert	dir	purpose
@@ -41,7 +41,11 @@ if ~exist('rewardMethod','var') || isempty(rewardMethod)
 end
 
 if ~exist('screenNum','var') || isempty(screenNum)
-    screenNum=int8(0);
+    screenNum=int8(max(Screen('Screens')));
+end
+
+if ~exist('soundOn','var') || isempty(soundOn)
+    soundOn=true;
 end
 
 stationSpec.id                                = id;
@@ -49,7 +53,7 @@ stationSpec.path                              = path;
 stationSpec.MACaddress                        = mac;
 stationSpec.physicalLocation                  = physicalLocation;
 stationSpec.screenNum                         = screenNum;
-stationSpec.soundOn                           = true;
+stationSpec.soundOn                           = soundOn;
 stationSpec.rewardMethod                      = rewardMethod;
 stationSpec.portSpec.parallelPortAddress      = pportaddr;
 stationSpec.portSpec.valveSpec                = int8([4,3,2]);

@@ -47,7 +47,7 @@ if isa(station,'station')
             else
                 buffsize=[];
             end
-            sm.players{i}= PsychPortAudio('Open',[],[],latclass,sampleRate,latclass,buffsize);
+            sm.players{i}= PsychPortAudio('Open',[],[],latclass,sampleRate,2,buffsize);
             %still need to verify we got the requested sample rate...
 
             %only way to get ppa('stop') to return in <1ms rather tha >10ms is to have asio card.

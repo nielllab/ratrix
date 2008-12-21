@@ -8,7 +8,7 @@ if isa(station,'station')
             for i = 1:length(sm.players)
                 %sm=stopPlayer(sm,i); %note: takes too long to copy the cached clips inside sm, have to cut and paste it in...
                 if sm.playingNonLoop(i) ||  sm.playingLoop(i)
-                    PsychPortAudio('Stop', sm.players{i});
+                    PsychPortAudio('Stop', sm.players{i},2);
 
                     sm.playingNonLoop(i)=false;
                     sm.playingLoop(i)=false;
@@ -21,7 +21,7 @@ if isa(station,'station')
 
                 %sm=stopPlayer(sm,match); %note: takes too long to copy the cached clips inside sm, have to cut and paste it in...
                 if sm.playingNonLoop(match) ||  sm.playingLoop(match)
-                    PsychPortAudio('Stop', sm.players{match});
+                    PsychPortAudio('Stop', sm.players{match},2);
 
                     sm.playingNonLoop(match)=false;
                     sm.playingLoop(match)=false;
@@ -33,7 +33,7 @@ if isa(station,'station')
 
                     %sm=stopPlayer(sm,match); %required!  %note: takes too long to copy the cached clips inside sm, have to cut and paste it in...
                     if sm.playingNonLoop(match) ||  sm.playingLoop(match)
-                        PsychPortAudio('Stop', sm.players{match});
+                        PsychPortAudio('Stop', sm.players{match},2);
 
                         sm.playingNonLoop(match)=false;
                         sm.playingLoop(match)=false;

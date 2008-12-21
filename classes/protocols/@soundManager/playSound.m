@@ -14,7 +14,7 @@ if isa(station,'station')
 
         %sm=stopPlayer(sm,match); %required!  %note: takes too long to copy the cached clips inside sm, have to cut and paste it in...
         if sm.playingNonLoop(match) ||  sm.playingLoop(match)
-            PsychPortAudio('Stop', sm.players{match});
+            PsychPortAudio('Stop', sm.players{match},2);
 
             sm.playingNonLoop(match)=false;
             sm.playingLoop(match)=false;

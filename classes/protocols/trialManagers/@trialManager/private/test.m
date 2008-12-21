@@ -213,7 +213,7 @@ try
 
             if playing
                 soundTime=GetSecs;
-                PsychPortAudio('Stop', player);
+                PsychPortAudio('Stop', player,2);
                 soundTime=GetSecs-soundTime;
                 if soundTime>maxSoundTime
                     fprintf('%g to ppa(stop)\n',soundTime)

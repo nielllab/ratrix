@@ -29,7 +29,7 @@ end
 
 psychportaudio('close')
 
-x=audioplayer(rand(2,400000)-.5,44100);
+x=audioplayer(rand(400000,2)-.5,44100);
 play(x);
 stop(x);
 for i=1:10

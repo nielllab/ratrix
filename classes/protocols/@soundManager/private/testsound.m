@@ -5,7 +5,12 @@ clear psychportaudio
 p=maxpriority('getsecs');
 priority(p);
 initializepsychsound(1);
-x=psychportaudio('open',[],[],4);
+try
+    x=psychportaudio('open',[],[],4); %doesn't work with asio4all + enhanced dll
+catch ex
+    ple(ex)
+    x=psychportaudio('open');
+end
 psychportaudio('fillbuffer',x,rand(2,40000)-.5);
 getsecs;
 psychportaudio('start',x);

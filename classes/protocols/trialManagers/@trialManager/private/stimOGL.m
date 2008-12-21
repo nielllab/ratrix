@@ -186,7 +186,7 @@ function [quit response responseDetails didManual manual didAPause didValves did
 %each of these causes the code to be reinterpreted
 %note that this is what setupenvironment does!
 %mlock protects a file from all of these except clear classes (and sometimes clear functions?) -- but you have to unlock it to read in changes!
-mlock;
+mlock; %to pick up changes without restarting matlab, call munlock('trialmanager/private/stimogl')
 
 frameDropCorner.size=[.05 .05];
 frameDropCorner.loc=[1 0];

@@ -11,11 +11,32 @@ catch ex
     ple(ex)
     x=psychportaudio('open',[],[],2,[],[],4096);
 end
+s=psychportaudio('getstatus',x);
+s.SampleRate
 psychportaudio('fillbuffer',x,rand(2,400000)-.5);
 getsecs;
 psychportaudio('start',x);
 psychportaudio('stop',x);
 
+val=true;
+for i=1:10
+    val=~val;
+    y=getsecs;
+    psychportaudio('fillbuffer',x,val*rand(2,round(2*44100*i/10))-.5);
+    t=getsecs-y;
+    if val
+        fprintf('yes:')
+    else
+        fprintf('no:')
+    end
+    fprintf('\t%g\n',t)
+end
+y=getsecs;
+psychportaudio('start',x);
+psychportaudio('stop',x,1);
+t=getsecs-y;
+fprintf('%g\n',t)
+pause
 for i=1:10
     y=getsecs;
     psychportaudio('start',x);

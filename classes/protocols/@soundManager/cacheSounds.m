@@ -48,7 +48,14 @@ if isa(station,'station')
                 buffsize=[];
             end
             sm.players{i}= PsychPortAudio('Open',[],[],latclass,sampleRate,2,buffsize);
-            %still need to verify we got the requested sample rate...
+
+            s=PsychPortAudio('GetStatus',sm.players{i});
+
+            if s.SampleRate~=sampleRate
+                sampleRate
+                s.SampleRate
+                error('didn''t get requested sample rate')
+            end
 
             %only way to get ppa('stop') to return in <1ms rather tha >10ms is to have asio card AND enhanced dll.
             %otherwise, fastest ppa('stop') on windows is 10ms (black/dell)

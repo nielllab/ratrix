@@ -30,8 +30,16 @@ if isa(station,'station')
                 warning('your sound was rounded to the nearest integer number of repetitions of the original clip you constructed -- if possible, construct the clip with a duration that will factor the durations you plan to call it with, see http://tech.groups.yahoo.com/group/psychtoolbox/message/8941')
             end
 
-            PsychPortAudio('Start', sm.players{match}, reps);
-
+            try
+                PsychPortAudio('Start', sm.players{match}, reps);
+            catch ex 
+                ple(ex)
+                sm.playingNonLoop(match)
+                sm.playingLoop(match)
+                PsychPortAudio('GetStatus', sm.players{match})
+                error('we are getting ''Device already started.'' as if we failed to stop above...')
+            end
+            
             sm.playingNonLoop(match)=true;
             sm.playingLoop(match)=false;
         end

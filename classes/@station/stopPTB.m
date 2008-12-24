@@ -7,7 +7,15 @@ Priority(0);
 ShowCursor;
 
 if ismac
-    Screen('Resolution',0,1920,1200,0,32) %- 9/29/08 - THIS CRASHES WINDOWS-BASED MACHINES? - discuss
+    x=Screen('Resolutions',s.screenNum);
+    x=x([x.pixelSize]==max([x.pixelSize]) & [x.hz]==max([x.hz]) & [x.width].*[x.height]==max([x.height].*[x.width]));
+    if length(x)>1
+        x=x(1);
+    elseif length(x)<1
+        error('can''t maximize depth, hz, and width x height simultaneously')
+    end
+    Screen('Resolution',s.screenNum,x.width,x.height,x.hz,x.pixelSize);
+    %Screen('Resolution',0,1920,1200,0,32) %- 9/29/08 - THIS CRASHES WINDOWS-BASED MACHINES? - discuss
 
     % following not true on osx:
     % Psychtoolbox will automatically restore the systems display resolution to the

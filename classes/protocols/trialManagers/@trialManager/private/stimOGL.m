@@ -188,7 +188,7 @@ function [quit response responseDetails didManual manual didAPause didValves did
 %mlock protects a file from all of these 
 % should protect from any clear, but for some reason i wrote: except clear classes (and sometimes clear functions?) -- why? 
 %you have to unlock it to read in changes without restarting matlab!
-mlock; %to pick up changes without restarting matlab, call munlock('trialmanager/private/stimogl'),clear functions
+%mlock; %to pick up changes without restarting matlab, call munlock('trialmanager/private/stimogl'),clear functions
 
 frameDropCorner.size=[.05 .05];
 frameDropCorner.loc=[1 0];
@@ -254,7 +254,7 @@ try
     end
 
 
-    verbose = false;
+    verbose = true;
 
     dontclear = 0;              %2 saves time by not reinitializing -- safe for us cuz we're redrawing everything -- but gives blue flashing?
     %some stimulus types set dontclear to 1
@@ -427,14 +427,20 @@ try
     end
 
     floatprecision=0;
+    force8=true;
     if isreal(stim) && strcmp(class(stim),class(finalScreenLuminance)) && isscalar(finalScreenLuminance)
         switch class(stim)
             case {'double','single'}
                 if any([finalScreenLuminance; stim(:)]>1) || any([finalScreenLuminance; stim(:)]<0)
                     error('stimor finalScreenLuminance had elements <0 or >1 ')
                 else
-                    floatprecision=1;%will tell maketexture to use 0.0-1.0 format with 16bpc precision (2 would do 32bpc)
-                    % finalScreenLuminance=round(finalScreenLuminance*intmax('uint8')); what was point of this?
+                    if force8
+                        finalScreenLuminance=round(finalScreenLuminance*double(intmax('uint8')));
+                        stim=round(stim*double(intmax('uint8')));
+                    else
+                        floatprecision=1;%will tell maketexture to use 0.0-1.0 format with 16bpc precision (2 would do 32bpc)
+                        % finalScreenLuminance=round(finalScreenLuminance*intmax('uint8')); what was point of this?
+                    end
                 end
             case 'uint8'
                 %do nothing
@@ -456,7 +462,9 @@ try
         error('stim must be real, and type must match interTrialLuminance, and interTrialLuminance must be scalar')
     end
 
-
+if verbose
+    'stim scaled'
+end
 
     % squareSize = 1*[1 1];       %width and height of squares in terms of pixels
     %                             %fastest to make 1x1 squares and scale in the DrawTexture call
@@ -501,6 +509,10 @@ try
 
     %load all frame caches into VRAM
 
+    if verbose
+        'making textures'
+    end
+    
     textures=zeros(1,size(stim,3));
     for i=1:size(stim,3)
         if window>=0
@@ -703,6 +715,10 @@ try
 
     %logwrite('about to enter stimOGL loop');
 
+    if verbose
+        'starting loop'
+    end
+    
     %any stimulus onset synched actions
 
     if window >= 0
@@ -1424,10 +1440,8 @@ try
     Priority(originalPriority);
     ListenChar(0);
 
-catch ex
-    ple(ex)
-
-
+catch %ex
+    
     Screen('CloseAll');
     Priority(originalPriority);
     ShowCursor(0);
@@ -1437,9 +1451,11 @@ catch ex
         setPuff(station,false);
     end
 
+    ple
+    
     response=sprintf('error_in_StimOGL: %s',ex.message);
+    
+    ple(ex)
 
     rethrow(ex);
-
-
 end

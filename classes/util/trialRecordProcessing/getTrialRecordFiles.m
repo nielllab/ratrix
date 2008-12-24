@@ -13,14 +13,9 @@ end
 %consider merging with getTrialRecordsFromPermanentStore (using the trustOsRecordFiles flag)
 historyFiles=dir(fullfile(permanentStore,'trialRecords_*.mat'));
 
-permanentStore
-historyFiles
-
 try
-    fileRecs=getRangesFromTrialRecordFileNames({historyFiles.name},true);
-catch %ex
-    ple
-    
+fileRecs=getRangesFromTrialRecordFileNames({historyFiles.name},true);
+catch ex
     permanentStore
     rethrow(ex)
 end

@@ -145,10 +145,7 @@ try
     compileTrialRecords([],[],[],{subjectID},getStandAlonePath(rx),compilePath);
     subjectAnalysis(compilePath);
     cleanup;
-catch %ex
-    cleanup
-    ple
-    
+catch ex
     ple(ex)
     cleanup;
     rethrow(ex)

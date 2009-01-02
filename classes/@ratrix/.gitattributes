@@ -54,3 +54,4 @@
 /getServerDataPath.m -text
 /replaceStationForBox.m -text
 /getSubjectsFromIDs.m -text
+/setStationMACaddress.m -text

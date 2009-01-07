@@ -22,7 +22,7 @@ assignments = {};
 for j=1:length(heat_names)
     heat_name=heat_names{j};
     selectAssignmentQuery = ...
-        sprintf('SELECT LOWER(subjects.display_uin), rack_id, station_id, heats.name, researchers.username, experiments.name FROM heat_assignments,subjects,racks,stations,heats,researchers,experiments,ratrixservers WHERE heat_assignments.subject_uin=subjects.uin AND heat_assignments.station_uin=stations.uin AND subjects.owner_uin=researchers.uin(+) AND stations.rack_uin=racks.uin AND heat_assignments.experiment_uin=experiments.uin(+) AND heat_assignments.heat_uin=heats.uin AND stations.server_uin=ratrixservers.uin AND ratrixservers.name=''%s'' AND heats.name=''%s'' AND (subjects.test_subject=%d OR subjects.test_subject is null OR subjects.test_subject=0) ORDER BY rack_id,station_id',server_name,heat_name,include_test_rats);
+        sprintf('SELECT LOWER(subjects.display_uin), rack_id, station_id, heats.name, researchers.username, experiments.name, heat_assignments.note FROM heat_assignments,subjects,racks,stations,heats,researchers,experiments,ratrixservers WHERE heat_assignments.subject_uin=subjects.uin AND heat_assignments.station_uin=stations.uin AND subjects.owner_uin=researchers.uin(+) AND stations.rack_uin=racks.uin AND heat_assignments.experiment_uin=experiments.uin(+) AND heat_assignments.heat_uin=heats.uin AND stations.server_uin=ratrixservers.uin AND ratrixservers.name=''%s'' AND heats.name=''%s'' AND (subjects.test_subject=%d OR subjects.test_subject is null OR subjects.test_subject=0) ORDER BY rack_id,station_id',server_name,heat_name,include_test_rats);
 
     results=query(conn,selectAssignmentQuery);
 
@@ -36,6 +36,7 @@ for j=1:length(heat_names)
             a.heat = results{i,4};
             a.owner = results{i,5};
             a.experiment = results{i,6};
+            a.note = results{i,7};
             assignments{end+1} = a;
         end
     end

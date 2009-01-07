@@ -89,7 +89,7 @@ for i=1:length(hts)
     for j=1:length(assignments)
         stn=getStation(conn,assignments{j}.rack_id,assignments{j}.station_id);
         heats{i,2}{j}={assignments{j}.subject_id ...
-            {[stn.row stn.col] stn.mac stn.rack_id} assignments{j}.owner assignments{j}.experiment coaches{j}.coach};
+            {[stn.row stn.col] stn.mac stn.rack_id} assignments{j}.owner assignments{j}.experiment coaches{j}.coach assignments{j}.note};
     end
 end
 % ===========================================================================================
@@ -507,6 +507,7 @@ for uniqInd=1:length(unique(rooms_used)) % MAIN LOOP PER ROOM
                 owner=subjects{i}{3};
                 exp=subjects{i}{4};
                 coach=subjects{i}{5};
+                note=subjects{i}{6};
 
 
 
@@ -517,7 +518,7 @@ for uniqInd=1:length(unique(rooms_used)) % MAIN LOOP PER ROOM
                     places_with_subjects(row, col) = 1;
 %                     warning('found row col %d %d with subject %s', row, col, name);
                     text('Parent',ha,'Position',[colCenters(col) rowCenters(row)-margin ],'String',name,'Color',heatCol,'FontSize',fontsize,'FontWeight','bold','VerticalAlignment','middle','HorizontalAlignment','center');
-                    text('Parent',ha,'Position',[columnBoundaries(col)+margin rowBoundaries(row+1) ],'String',sprintf('owner: %s\nexp: %s\ncoach: %s',owner,exp,coach),'Color',[0 0 0],'FontSize',8,'FontWeight','normal','VerticalAlignment','bottom','HorizontalAlignment','left');
+                    text('Parent',ha,'Position',[columnBoundaries(col)+margin rowBoundaries(row+1) ],'String',sprintf('owner: %s\nexp: %s\ncoach: %s\nnote: %s',owner,exp,coach,note),'Color',[0 0 0],'FontSize',8,'FontWeight','normal','VerticalAlignment','bottom','HorizontalAlignment','left');
                 end
             end
 

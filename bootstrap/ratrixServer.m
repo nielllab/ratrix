@@ -315,7 +315,7 @@ cycleB=uicontrol(f,'Style','togglebutton','String',buttonT,'Units','pixels','Pos
         % ==============================================================================================================
         % FIX THIS PART TO ONLY COMPILE SUBJECTS OWNED BY THIS SERVER
         % we need to compile records for every rack used here
-        cmdStr=sprintf('matlab -automation -r "cd(''%s'');setupEnvironment;cd(''%s'');compileTrialRecords(''%s'');quit" &',fullfile(getRatrixPath,'bootstrap'),rp,server_name);
+        cmdStr=sprintf('matlab -automation -r "cd(''%s'');setupEnvironment;cd(''%s'');compileDetailedRecords(''%s'');quit" &',fullfile(getRatrixPath,'bootstrap'),rp,server_name);
         system(cmdStr); %testing only       
         % END EDITS
         % ==============================================================================================================

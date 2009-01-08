@@ -16,3 +16,4 @@
 /stopEyeTracking.m -text
 /calibrateEyeTracker.m -text
 /setReinforcementParam.m -text
+/generateStepName.m -text

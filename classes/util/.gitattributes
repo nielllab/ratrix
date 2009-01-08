@@ -99,3 +99,5 @@ trialRecordProcessing/modifyTrialRecords.m -text
 nidaq/openNidaqForAnalogOutput.m -text
 matlaby/makeSinusoid.m -text
 matlaby/getShuffledCross.m -text
+infrastructure/LUTlookup.m -text
+trialRecordProcessing/addOrFindInLUT.m -text

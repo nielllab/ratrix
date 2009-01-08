@@ -1,5 +1,5 @@
-function [image deltas]=prepareImages(ims,alphas,screenSize,threshPct,pctScreenFill,backgroundcolor, normalizeHistograms)
-%[image deltas]=prepareImages(ims,alphas,screenSize,threshPct,pctScreenFill,[backgroundcolor],[normalizeHistograms])
+function [image deltas]=prepareImages(ims,alphas,screenSize,threshPct,pctScreenFill,backgroundcolor, normalizeHistograms,selectedSizes,selectedRotation)
+%[image deltas]=prepareImages(ims,alphas,screenSize,threshPct,pctScreenFill,[backgroundcolor],[normalizeHistograms],[selectedSizes],[selectedRotation])
 %INPUTS
 % ims                   cell array of image matrices, any real numeric type, no restrictions on values
 % screenSize
@@ -10,6 +10,8 @@ function [image deltas]=prepareImages(ims,alphas,screenSize,threshPct,pctScreenF
 %OUTPUTS
 % image                 cell array of prepared images, can be horizontally concatenated
 % deltas                ratio errors in area normalization (imresize does not work sub-pixel)
+%
+% 12/15/08 - fli added static-mode rotation/scaling
 
 if ~exist('backgroundcolor','var')
     backgroundcolor=uint8(0);
@@ -20,7 +22,20 @@ end
 if ~exist('normalizeHistograms','var')
     normalizeHistograms=true;
 end
+if ~exist('selectedSizes','var')
+    selectedSizes=ones(1,length(ims));
+end
+if ~exist('selectedRotation','var')
+    selectedRotation=0;
+end
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+% 12/15/08 - do imrotate
+for i=1:length(ims)
+    ims{i} = imrotate(ims{i},-selectedRotation); % negative of selectedRotation because PTB uses clockwise orientation, whereas imrotate uses CCW
+    alphas{i} = imrotate(alphas{i},-selectedRotation);
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 maxPixel=0;
@@ -52,8 +67,11 @@ for i=1:length(ims)
     end
 end
 
+
 'equalizing areas'
 [equalized deltas alphas]=equalizeAreas(subjects,alphas,areas,maxPixel,threshPct);
+
+
 
 for i=1:length(equalized)
     size(equalized{i})

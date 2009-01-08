@@ -125,7 +125,7 @@ switch plotType
             humanTrialsPerDay=makeDailyRaster(d.correct,d.date,humanModified);
             computerTrialsPerDay=makeDailyRaster(d.correct,d.date,computermodified);
             CTsPerDay=makeDailyRaster(d.correct,d.date,CTs);
-
+            
             %combine
             allTypes=[goodTrialsPerDay; CTsPerDay; computerTrialsPerDay ];
             legendStrs = {'good trials','correction trials','stochastic reward'};
@@ -134,7 +134,7 @@ switch plotType
                 allTypes=[allTypes; humanTrialsPerDay];
                 legendStrs{end+1} = 'keyboard response';
             end
-
+            
         else
             %define types
             CTs=d.correctionTrial==1;
@@ -150,7 +150,15 @@ switch plotType
         if any(remainder<0)
             error('something fishy .. overlapping types!')
         end
-
+        
+        % 1/6/09 - if allTypes only has one column, this plot gets messed up for some reason
+        % fix by inserting a column of zeros into allTypes and remainder
+        if size(allTypes,2)==1
+            allTypes=[allTypes,zeros(size(allTypes,1),1)];
+            remainder(end+1)=0;
+        end
+            
+        keyboard;
         bar([allTypes; remainder]','stacked'), colormap(bone)
         legendStrs{end+1} = 'unaccounted for';
         set(gca,'FontSize',7);
@@ -165,8 +173,8 @@ switch plotType
             legend(legendStrs, 'Location','NorthWest');
             typesPlotted{end+1}=plotType;
             set(gcf,'UserData',typesPlotted);
-        end            
-
+        end  
+        
     case 'plotRewardTime'
 
         [d.correctInRow runEnds d.numSwitchesThisRun]=calcAmountCorrectInRow(d.correct,d.response);

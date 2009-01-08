@@ -13,3 +13,6 @@
 /handleExtractDetailFieldsException.m -text
 /analysis.m -text
 /getSoundsToPlay.m -text
+/stationOKForStimManager.m -text
+/getNameFragment.m -text
+/boxOKForStimManager.m -text

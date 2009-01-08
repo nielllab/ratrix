@@ -142,7 +142,8 @@ try
 
     compilePath=fullfile(fileparts(getStandAlonePath(rx)),'CompiledTrialRecords');
     mkdir(compilePath);
-    compileTrialRecords([],[],[],{subjectID},getStandAlonePath(rx),compilePath);
+%     compileTrialRecords([],[],[],{subjectID},getStandAlonePath(rx),compilePath);
+    compileDetailedRecords([],{subjectID},[],getStandAlonePath(rx),compilePath);
     subjectAnalysis(compilePath);
     cleanup;
 catch ex

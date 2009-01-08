@@ -1,6 +1,7 @@
 function s=images(varargin)
 % IMAGES  class constructor.
-% s = images(directory,yPositionPercent,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,trialDistribution)
+% s = images(directory,yPositionPercent,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,...
+%   trialDistribution,size,sizeyoked,rotation[,drawingMode])
 % yPositionPercent (0 <= value <= 1), in normalized units of the diagonal of the stim region
 % trialDistribution in format { { {imagePrefixN imagePrefixP} .1}...
 %                               { {imagePrefixP imagePrefixM} .9}...
@@ -9,12 +10,27 @@ function s=images(varargin)
 % trial chosen according to probabilities provided (will be normalized)
 % image names should not include path or extension
 % images must reside in directory indicated and be .png's with alpha channels
+% drawingMode is an optional argument that specifies drawing in 'expert' mode instead of 'static' (default)
 
 s.directory = '';
 s.background=0;
 s.yPositionPercent=0;
 s.cache=[];
 s.trialDistribution={};
+
+% added 12/8/08 - size and rotation parameters
+s.size=[];
+% uniformly select on this range each trial,
+% and scale the size of image by this factor 
+s.rotation=[];
+s.sizeyoked=[];
+% if 1, the size of distractor is scaled by
+% the same amount as the target; if 0,
+% independently draw a scale factor for the distractor 
+s.selectedSizes=[]; % not user-defined; this gets set by calcStim as the randomly drawn value from the size range
+s.selectedRotation=[]; % not user-defined; this gets set by calcStim as the randomly drawn value from the rotation range
+s.images=[]; % used for expert mode
+s.drawingMode='static';
 
 switch nargin
     case 0
@@ -29,7 +45,7 @@ switch nargin
         else
             error('Input argument is not an images object')
         end
-    case 8
+    case {11 12}
         % create object using specified values
 
         if ischar(varargin{1})
@@ -82,6 +98,37 @@ switch nargin
             varargin{8}
             size(varargin{8})
             error('trialDistribution must be nonempty vector cell array')
+        end
+        
+        %size
+        if isvector(varargin{9}) && length(varargin{9})==2 && isnumeric(varargin{9}) && ...
+                all(varargin{9}>0) && all(varargin{9}<=1) && varargin{9}(2)>=varargin{9}(1)
+            s.size=varargin{9};
+        else
+            error('size must be a 2-element vector between 0 and 1');
+        end
+                
+        %sizeyoked
+        if islogical(varargin{10})
+            s.sizeyoked=varargin{10};
+        else
+            error('sizeyoked must be a logical');
+        end
+        
+        %rotation
+        if isvector(varargin{11}) && length(varargin{11})==2 && isnumeric(varargin{11})
+            s.rotation=varargin{11};
+        else
+            error('rotation must be a 2-element vector');
+        end
+        
+        %mode
+        if nargin==12
+            if ischar(varargin{12}) && (strcmp(varargin{12},'expert') || strcmp(varargin{12},'static'))
+                s.drawingMode=varargin{12};
+            else
+                error('drawingMode must be ''expert'' or ''static''');
+            end
         end
 
         s = class(s,'images',stimManager(varargin{4},varargin{5},varargin{6},varargin{7}));

@@ -527,6 +527,6 @@ switch nargin
         error('Wrong number of input arguments')
 end
 
-s=setSuper(s,s.stimManager);
+% s=setSuper(s,s.stimManager);
 
 

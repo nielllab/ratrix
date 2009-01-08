@@ -5,3 +5,4 @@
 /getLUT.m -text
 /fillLUT.m -text
 /flushLUT.m -text
+/extractDetailFields.m -text

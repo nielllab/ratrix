@@ -5,3 +5,6 @@
 /stimMgrOKForTrialMgr.m -text
 /extractDetailFields.m -text
 /analysis.m -text
+/moreStim.m -text
+/decache.m -text
+/stationOKForStimManager.m -text

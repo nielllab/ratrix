@@ -276,12 +276,12 @@ scaleFactor             =[1 1]; %show image at full size
 imlist=[];
 imlist.ts5A={...
    {  {'paintbrush_flashlight01'  'paintbrush_flashlight30'} 1} ... % pure exemplars
-   {  {'paintbrush_flashlight15'  'paintbrush_flashlight16'  'paintbrush_flashlight29'  'paintbrush_flashlight02'} 1} ... % nearly identical
+   {  {'paintbrush_flashlight15'  'paintbrush_flashlight16'  'paintbrush_flashlight29'} 1} ... % nearly identical
 };
 
 
 discrimStim5A = images(imdir,ypos_nAFC,background_nAFC,...
-    maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts5A,[.25 1],false,[0 90],'expert');
+    maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts5A,[.15 .15],false,[0 0],'expert');
 % discrimStim6A = images(imdir,ypos_nAFC,background_nAFC,...
 %     maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts6A,[.5 .75],true,[0 90]);
 
@@ -295,7 +295,7 @@ ts24 = trainingStep(vh, discrimStim5A,graduateQuickly,noTimeOff(),svnRev);
 %     ts18, ts19, ts20, ts21, ts22});
 % stepNum=21;
 p=protocol('gabor test2', {ts24, ts3, ts4});
-stepNum=1;
+stepNum=uint8(3);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

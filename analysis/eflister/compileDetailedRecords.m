@@ -1,43 +1,179 @@
 %should replace compileTrialRecords, but of course will break lots of graphing -- will need to update graphing code
-function compileDetailedRecords(ids,pth,outPth)
-type='images';
+function compileDetailedRecords(server_name,ids,recompile,source,destination)
 
-switch type
-    case 'crossModal'
-        ids={'225','226','239','241'};
-        pth='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\behavior\pmeierTrialRecords\subjects';
-    case 'images'
-        ids={'280','281','283'};
-        pth='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\ratrixAdmin\rack3\subjects';
-    otherwise
-        error('unrecognized type')
+
+%compileDetailedRecords({'demo1'},'C:\Documents and Settings\rlab\Desktop\ratrixData\PermanentTrialRecordStore','C:\Documents and Settings\rlab\Desktop\ratrixData\CompiledTrialRecords');
+
+% switch type
+%     case 'crossModal'
+%         ids={'225','226','239','241'};
+%         source='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\behavior\pmeierTrialRecords\subjects';
+%     case 'images'
+%         ids={'280','281','283'};
+%         source='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\ratrixAdmin\rack3\subjects';
+%     otherwise
+%         error('unrecognized type')
+% end
+% destination='C:\Documents and Settings\rlab\Desktop\detailedRecords';
+
+% ==============================================================================================
+% set up parameters if not passed in
+if (~exist('server_name','var') || isempty(server_name)) && (~exist('ids','var') || isempty(ids))
+    error('we need a server_name to know which subjects to compile, or need a list of ids passed in')
 end
-outPth='C:\Documents and Settings\rlab\Desktop\detailedRecords';
+if ~exist('recompile','var') || isempty(recompile)
+    recompile = false;
+end
+if ~exist('ids','var') || isempty(ids) % if ids not given as input, retrieve from oracle
+    conn = dbConn();
+    ids = getSubjectIDsFromServer(conn, server_name);
+    closeConn(conn);
+    if isempty(ids)
+        error('could not find any subjects for this server: %s', server_name);
+    end
+end
 
+% ==============================================================================================
+% get trialRecord files
 subjectFiles={};
 ranges={};
 for i=1:length(ids)
-    [subjectFiles{end+1} ranges{end+1}]=getTrialRecordFiles(fullfile(pth,ids{i})); %unreliable if remote
+    % if we have source, don't overwrite it!
+    if ~exist('source','var') || isempty(source)
+        conn = dbConn();
+        store_path = getPermanentStorePathBySubject(conn, ids{i});
+        store_path = store_path{1}; % b/c this gets returned by the query as a 1x1 cell array holding the char array
+        closeConn(conn);
+    else
+        store_path = fullfile(source, ids{i});
+        %         source
+    end
+    [subjectFiles{end+1} ranges{end+1}]=getTrialRecordFiles(store_path); %unreliable if remote
 end
 
 %this will recompile from scratch every time -- add feature to only compile new data by default
+% 12/12/08 - added parameter 'recompile'; if false will try to load existing compiledRecords
 
 sm=stimManager;
-classes={};
 for i=1:length(ids)
     fprintf('\ndoing %s\n',ids{i});
     compiledDetails=[];
-    basicRecs=[];
+    compiledTrialRecords=[]; % used to be called basicRecs, but we want to keep same syntax as compileTrialRecords
+    compiledLUT={};
     expectedTrialNumber=1;
+    classes={};
+    if ~exist('destination', 'var') || isempty(destination)
+        conn=dbConn();
+        compiledRecordsDirectory=getCompilePathBySubject(conn, names{i});
+        compiledRecordsDirectory = compiledRecordsDirectory{1};
+        closeConn(conn);
+    else
+        compiledRecordsDirectory=destination;
+    end
+    
+    % 12/12/08 - need to load old compiledTrialRecords and compiledDetails (if they exist in destination), also set expectedTrialNumber and classes appropriately
+    % get compiledFile and compiledRange for this subjectID
+    d=dir(fullfile(compiledRecordsDirectory,[ids{i} '.compiledTrialRecords.*.mat'])); %unreliable if remote
+    compiledFile=[];
+    compiledRange=zeros(2,1);
+    done=false;
+    addedRecords=false;
+    for k=1:length(d)
+        if ~d(k).isdir
+            [rng num er]=sscanf(d(k).name,[ids{i} '.compiledTrialRecords.%d-%d.mat'],2);
+            if num~=2
+                d(k).name
+                er
+                error('couldnt parse')
+            else
+                %d(k).name
+                if ~done
+                    compiledFile=fullfile(compiledRecordsDirectory,d(k).name);
+                    if ~recompile
+                        compiledRange=rng;
+                        done=true;
+                    end
+                else
+                    d.name
+                    error('found multiple compiledTrialRecords files')
+                end
+            end
+        else
+            d(k).name
+            error('bad dir name')
+        end
+    end
+    % load from existing compile record if it exists
+    if ~isempty(compiledFile) && ~recompile
+        fieldNames={  'trialNumber',...
+            'sessionNumber',...
+            'date',...
+            'soundOn',...
+            'physicalLocation',...
+            'numPorts',...
+            'step',...
+            'trainingStepName',...
+            'protocolName',...
+            'numStepsInProtocol',...
+            'manualVersion',...
+            'autoVersion',...
+            'protocolDate',...
+            'correct',...
+            'trialManagerClass',...
+            'stimManagerClass',...
+            'schedulerClass',...
+            'criterionClass',...
+            'reinforcementManagerClass',...
+            'scaleFactor',...
+            'type',...
+            'targetPorts',...
+            'distractorPorts',...
+            'response',...
+            'containedManualPokes',...
+            'didHumanResponse',...
+            'containedForcedRewards',...
+            'didStochasticResponse'};
+        [compiledTrialRecords compiledDetails compiledLUT]=loadDetailedTrialRecords(compiledFile,compiledRange,fieldNames);
+        % set expectedTrialNumber
+        expectedTrialNumber = compiledTrialRecords.trialNumber(end) + 1;
+        % set classes
+        for k=1:length(compiledDetails)
+            classes{1,k} = compiledDetails(k).className;
+            classes{2,k} = eval(compiledDetails(k).className);
+            classes{3,k} = sort([compiledDetails(k).trialNums compiledDetails(k).bailedTrialNums]);
+        end
+    end % end load from existing compile record
+    
     for j=1:length(subjectFiles{i})
+        % why do this?
         for k=1:size(classes,2)
             classes{3,k}=[];
+        end      
+        [matches tokens] = regexpi(subjectFiles{i}{j}, 'trialRecords_(\d+)-(\d+).*\.mat', 'match', 'tokens');
+        rng=[str2num(tokens{1}{1}) str2num(tokens{1}{2})];
+        if expectedTrialNumber ~= rng(1)
+%             dispStr=sprintf('skipping %d-%d',rng(1),rng(2));
+%             disp(dispStr);
+            continue;
         end
+        addedRecords=true; % if we ever got passed the skip, then we added records and thus can delete compiledFile
         fprintf('\tdoing %s of %d\n',subjectFiles{i}{j},ranges{i}(2,end));
         warning('off','MATLAB:elementsNowStruc'); %expect some class defs to be out of date, will get structs instead of objects (shouldn't keep objects in records anyway)
         tr=load(subjectFiles{i}{j});
         warning('on','MATLAB:elementsNowStruc');
+        try
+            sessionLUT=tr.sessionLUT;
+            fieldsInLUT=tr.fieldsInLUT;
+        catch
+            % no LUT in this trialRecords.mat file
+            warning('no LUT found for this trialRecords file');
+            sessionLUT=[];
+            fieldsInLUT=[];
+        end
         tr=tr.trialRecords;
+        % 12/17/08 - also handle sessionLUT and fieldsInLUT (each trialRecords session has its own LUT)
+        % compile these together, and set values appropriately
+
         for k=1:length(tr)
             if tr(k).trialNumber ~= expectedTrialNumber
                 tr(k).trialNumber
@@ -47,7 +183,7 @@ for i=1:length(ids)
                 expectedTrialNumber=expectedTrialNumber+1;
             end
             if ~isempty(classes)
-                ind=find(strcmp(tr(k).stimManagerClass,classes(1,:)));
+                ind=find(strcmp(LUTlookup(sessionLUT,tr(k).stimManagerClass),classes(1,:)));
             else
                 ind=[];
             end
@@ -56,31 +192,65 @@ for i=1:length(ids)
             elseif length(ind)>1
                 error('found more than one cached default stim manager class match')
             else
-                fprintf('\t\tmaking first %s\n',tr(k).stimManagerClass)
-                classes{1,end+1}=tr(k).stimManagerClass;
-                classes{2,end}=eval(tr(k).stimManagerClass); %construct default stimManager of correct type, to fake static method call
+                fprintf('\t\tmaking first %s\n',LUTlookup(sessionLUT,tr(k).stimManagerClass))
+                classes{1,end+1}=LUTlookup(sessionLUT,tr(k).stimManagerClass);
+                classes{2,end}=eval(LUTlookup(sessionLUT,tr(k).stimManagerClass)); %construct default stimManager of correct type, to fake static method call
                 classes{3,end}=[];
                 ind=size(classes,2);
             end
             classes{3,ind}(end+1)=k;
         end
 
-        newBasicRecs=extractBasicFields(sm,tr);
+        % it is very important that this function keep the same fieldNames in newBasicRecs as they were in trialRecords
+        % because otherwise we don't know which fields are using the sessionLUT
+        [newBasicRecs compiledLUT]=extractBasicFields(sm,tr,compiledLUT);
         verifyAllFieldsNCols(newBasicRecs,length(tr));
-        if isempty(basicRecs)
-            basicRecs=newBasicRecs;
-        else
-            basicRecs=concatAllFields(basicRecs,newBasicRecs);
-        end
 
+        % 12/18/08 - now update newBasicRecs as appropriate (shift LUT indices by the length of compiledLUT)
+        % then add sessionLUT to compiledLUT
+        for n=1:length(fieldsInLUT)
+            % for each field in newBasicRecs that uses the sessionLUT
+            try
+                % 1/2/09 - need to do something about fieldsInLUT to avoid this error?
+                % Warning: 'trialManager.trialManager.reinforcementManager.reinforcementManager.rewardStrategy'
+                % exceeds MATLAB's maximum name length of 63 characters and has been truncated to
+                % 'trialManager.trialManager.reinforcementManager.reinforcementMan'.
+                % - maybe separate each element of fieldsInLUT (a fieldPath) into each step, and then build thisFieldValue from that
+                thisFieldValues = sessionLUT(newBasicRecs.(fieldsInLUT{n}));
+            catch
+                warningStr=sprintf('could not find %s in newBasicRecs - skipping',fieldsInLUT{n});
+%                 warning(warningStr);
+                continue;
+            end
+            [indices compiledLUT] = addOrFindInLUT(compiledLUT, thisFieldValues);
+            newBasicRecs.(fieldsInLUT{n}) = indices; % set new indices based on integrated LUT
+        end
+        
+        
+        if isempty(compiledTrialRecords)
+            compiledTrialRecords=newBasicRecs;
+        else
+            compiledTrialRecords=concatAllFields(compiledTrialRecords,newBasicRecs);
+        end
+        
         for c=1:size(classes,2)
+
             if length(classes{3,c})>0 %prevent subtle bug that is easy to write into extractDetailFields -- if you send zero trials to them, they may try to look deeper than the top level of fields, but they won't exist ('MATLAB:nonStrucReference') -- see example in crossModal.extractDetailFields()
                 %no way to guarantee that a stim manager's calcStim will make a stimDetails
                 %that includes all info its super class would have, so cannot call this
                 %method on every anscestor class.  must leave calling super class's
                 %extractDetailFields up to the sub class.
-                newRecs=extractDetailFields(classes{2,c},colsFromAllFields(newBasicRecs,classes{3,c}),tr(classes{3,c}));
+                LUTparams=[];
+                LUTparams.lastIndex=length(compiledLUT);
+                LUTparams.compiledLUT=compiledLUT;
+                [newRecs newLUT]=extractDetailFields(classes{2,c},colsFromAllFields(newBasicRecs,classes{3,c}),tr(classes{3,c}),LUTparams);
+                % if extractDetailFields returns a stim-specific LUT, add it to our main compiledLUT
+                if ~isempty(newLUT)
+                    compiledLUT = [compiledLUT newLUT];
+                end
+                
 
+                
                 verifyAllFieldsNCols(newRecs,length(classes{3,c}));
                 bailed=isempty(fieldnames(newRecs)); %extractDetailFields bailed for some reason (eg unimplemented or missing fields from old records)
 
@@ -109,8 +279,15 @@ for i=1:length(ids)
             end
         end
     end
-    save(fullfile(outPth,sprintf('compiledDetails.%s.%d-%d.mat',ids{i},ranges{i}(1,1),ranges{i}(2,end))),'compiledDetails','basicRecs');
-
+    % delete old compiledDetails file if we added records
+    if addedRecords
+        delete(compiledFile);
+    else
+        dispStr=sprintf('nothing to do for %s',ids{i});
+        disp(dispStr);
+    end
+    % save
+    save(fullfile(compiledRecordsDirectory,sprintf('%s.compiledTrialRecords.%d-%d.mat',ids{i},ranges{i}(1,1),ranges{i}(2,end))),'compiledDetails','compiledTrialRecords','compiledLUT');
 
     tmp=[];
     for c=1:length(compiledDetails)
@@ -121,14 +298,14 @@ for i=1:length(ids)
     if any(a~=1:length(a))
         error('missing trials')
     end
-    doPlot=true;
-    if doPlot
-        figure
-        tmp=tmp(:,b);
-        plot(tmp(1,:),tmp(2,:))
-    end
-end
-end
+%     doPlot=true;
+%     if doPlot
+%         figure
+%         tmp=tmp(:,b);
+%         plot(tmp(1,:),tmp(2,:))
+%     end
+end % end for each subject loop
+end % end function
 
 function a=concatAllFields(a,b)
 if isempty(a) && isscalar(b) && isstruct(b)

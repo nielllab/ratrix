@@ -1,6 +1,9 @@
-function [quit response responseDetails didManual manual didAPause didValves didHumanResponse didStochasticResponse eyeData gaze station]=  stimOGL(tm, ...
+function [quit response responseDetails didManual manual didAPause didValves didHumanResponse didStochasticResponse...
+    eyeData gaze station ratrixSVNInfo ptbSVNInfo]= ...
+    stimOGL(tm, ...
     stim, audioStim, LUT, type, metaPixelSize, ...
-    responseOptions, requestOptions, finalScreenLuminance, station, manual,allowQPM,timingCheckPct,noPulses,textLabel,rn,subID,stimID,protocolStr,trialLabel,eyeTracker,msAirpuff)
+    responseOptions, requestOptions, finalScreenLuminance, station, manual,allowQPM,timingCheckPct,...
+    noPulses,textLabel,rn,subID,stimManager,protocolStr,trialLabel,eyeTracker,msAirpuff)
 
 %note: add a phase which is a movie during which the rat must lick the
 %center port to earn n more frames of movie, and the movie has to end in
@@ -181,6 +184,7 @@ function [quit response responseDetails didManual manual didAPause didValves did
 
 %logwrite('entered stimOGL');
 
+stimID=class(stimManager);
 %any of the following will cause frame drops (just on entering new code blocks) on the first subsequent run, but not runs thereafter:
 %clear java, clear classes, clear all, clear mex (NOT clear Screen)
 %each of these causes the code to be reinterpreted
@@ -224,11 +228,17 @@ numFramesUntilStopSavingMisses=1000;
 
 originalPriority=Priority;
 
+% 12/10/08 - return ratrix and ptb svn version info for trainingStepName
+ratrixSVNInfo ='';
+ptbSVNInfo = '';
+
 [garbage ptbVer]=PsychtoolboxVersion;
 ptbVersion=sprintf('%d.%d.%d(%s %s)',ptbVer.major,ptbVer.minor,ptbVer.point,ptbVer.flavor,ptbVer.revstring);
+ptbSVNInfo=sprintf('%d.%d.%d%s at %d',ptbVer.major,ptbVer.minor,ptbVer.point,ptbVer.flavor,ptbVer.revision);
 try
     [runningSVNversion repositorySVNversion url]=getSVNRevisionFromXML(getRatrixPath);
     ratrixVersion=sprintf('%s (%d of %d)',url,runningSVNversion,repositorySVNversion);
+    ratrixSVNInfo=sprintf('%s@%d',url,runningSVNversion);
 catch ex
     ex
     ratrixVersion='no network connection';
@@ -282,6 +292,7 @@ try
                 trigger=0;
                 indexedFrames = type{2};
                 if isNearInteger(indexedFrames) && isvector(indexedFrames) && all(indexedFrames>0) && all(indexedFrames<=size(stim,3))
+                    strategy = 'textureCache';
                 else
                     class(indexedFrames)
                     size(indexedFrames)
@@ -293,6 +304,7 @@ try
                 timeIndexed = 1;
                 timedFrames = type{2};
                 if isinteger(timedFrames) && isvector(timedFrames) && size(stim,3)==length(timedFrames) && all(timedFrames(1:end-1)>=1) && timedFrames(end)>=0 % the timedFrames type
+                    strategy = 'textureCache';
                     %dontclear = 1;  %good for saving time, but breaks on lame graphics cards
                 else
                     error('bad vector for timedFrames type: must be a vector of length equal to stim dim 3 of integers > 0 (number or refreshes to display each frame). A zero in the final entry means hold display of last frame.')
@@ -303,10 +315,12 @@ try
     else
         switch type
             case 'static'   %static 1-frame stimulus
+                strategy = 'textureCache';
                 if size(stim,3)~=1
                     error('static type must have stim with exactly 1 frame')
                 end
             case 'trigger'   %2 static frames -- if request, show frame 1; else show frame 2
+                strategy = 'textureCache';
                 loop = 0;
                 trigger = 1;
                 %dontclear = 1; %good for saving time, but breaks on lame graphics cards
@@ -314,13 +328,17 @@ try
                     error('trigger type must have stim with exactly 2 frames')
                 end
             case 'cache'    %dynamic n-frame stimulus (play once)
+                strategy = 'textureCache';
                 %pass
             case 'loop'     %dynamic n-frame stimulus (loop)
+                strategy = 'textureCache';
                 loop = 1;
             case 'dynamic'  %call moreStim() if more frames desired
+                strategy = 'dynamicDots';
                 error('dynamic type not yet implemented')
             case 'expert' %callback moreStim() to call ptb drawing methods, but leave frame labels and 'drawingfinished' to stimOGL
-                error('expert type not yet implemented')
+                strategy='expert';
+%                 error('expert type not yet implemented')
             otherwise
                 error('unrecognized stim type, must be ''static'', ''cache'', ''loop'', ''dynamic'', ''expert'', {''indexedFrames'' [frameIndices]}, or {''timedFrames'' [frameTimes]}')
         end
@@ -498,17 +516,31 @@ try
     frameDropCorner.rect=[frameDropCorner.left frameDropCorner.top frameDropCorner.right frameDropCorner.bottom];
 
     tic
+    switch strategy
+        case 'textureCache'
+            %load all frame caches into VRAM
 
-    %load all frame caches into VRAM
+            textures=zeros(1,size(stim,3));
+            for i=1:size(stim,3)
+                if window>=0
+                    textures(i)=Screen('MakeTexture', window, squeeze(stim(:,:,i)),0,0,floatprecision); %ned floatprecision=0 for remotedesktop
+                end
+            end
 
-    textures=zeros(1,size(stim,3));
-    for i=1:size(stim,3)
-        if window>=0
-            textures(i)=Screen('MakeTexture', window, squeeze(stim(:,:,i)),0,0,floatprecision); %ned floatprecision=0 for remotedesktop
-        end
+        case 'dynamicDots'
+
+            numDots = size(stim,1)*size(stim,2);
+            [dotX dotY] = meshgrid(1:size(stim,1),1:size(stim,2));
+            dotLocs = [dotX(1:numDots);dotY(1:numDots)];
+            dotSize = 1;
+            dotCtr = [destRect(3)-destRect(1) destRect(4)-destRect(2)]/2;
+
+        case 'expert'
+            % expert mode - no caching needed b/c direct PTB calls
+            disp('expert mode - no caching needed');
+        otherwise
+            error('unrecognized strategy')
     end
-
-
 
     if window>=0
         textures(size(stim,3)+1)=Screen('MakeTexture', window, finalScreenLuminance,0,0,floatprecision);
@@ -739,85 +771,108 @@ try
                     end
                 end
                 doFramePulse=~noPulses;
+                switch strategy
+                    case 'textureCache'
+                        if frameIndexed
+                            if loop
+                                frameIndex = mod(frameIndex,length(indexedFrames)-1)+1;
+                            else
+                                frameIndex = min(length(indexedFrames),frameIndex+1);
+                            end
+                            i = indexedFrames(frameIndex);
+                        elseif loop
+                            i = mod(i,size(stim,3)-1)+1;
+                        elseif trigger
+                            if isRequesting
+                                if ~audioStimPlaying && ~isempty(audioStim)
+                                    % Play audio
+                                    tm.soundMgr = playLoop(tm.soundMgr,audioStim,station,1);
+                                    audioStimPlaying = true;
+                                end
+                                i=1;
+                            else
+                                if audioStimPlaying
+                                    % Turn off audio
+                                    tm.soundMgr = playLoop(tm.soundMgr,'',station,0);
+                                    audioStimPlaying = false;
+                                end
+                                i=2;
+                            end
 
-                if frameIndexed
-                    if loop
-                        frameIndex = mod(frameIndex,length(indexedFrames)-1)+1;
-                    else
-                        frameIndex = min(length(indexedFrames),frameIndex+1);
-                    end
-                    i = indexedFrames(frameIndex);
-                elseif loop
-                    i = mod(i,size(stim,3)-1)+1;
-                elseif trigger
-                    if isRequesting
-                        if ~audioStimPlaying && ~isempty(audioStim)
-                            % Play audio
-                            tm.soundMgr = playLoop(tm.soundMgr,audioStim,station,1);
-                            audioStimPlaying = true;
-                        end
-                        i=1;
-                    else
-                        if audioStimPlaying
-                            % Turn off audio
-                            tm.soundMgr = playLoop(tm.soundMgr,'',station,0);
-                            audioStimPlaying = false;
-                        end
-                        i=2;
-                    end
+                        elseif timeIndexed %ok, this is where we do the timedFrames type
 
-                elseif timeIndexed %ok, this is where we do the timedFrames type
+                            %Function 'cumsum' is not defined for values of class 'int8'.
+                            if requestFrame~=0
+                                i=min(find((frameNum-requestFrame)<=cumsum(double(timedFrames))));  %find the stim frame number for the number of frames since the request
+                            end
 
-                    %Function 'cumsum' is not defined for values of class 'int8'.
-                    if requestFrame~=0
-                        i=find((frameNum-requestFrame)<=cumsum(double(timedFrames)), 1 );  %find the stim frame number for the number of frames since the request
-                    end
+                            if isempty(i)  %if we have passed the last stim frame
+                                i=length(timedFrames);  %hold the last frame if the last frame duration specified was zero
+                                if timedFrames(end)
+                                    i=i+1;      %otherwise move on to the finalScreenLuminance blank screen
+                                end
+                            end
 
-                    if isempty(i)  %if we have passed the last stim frame
-                        i=length(timedFrames);  %hold the last frame if the last frame duration specified was zero
-                        if timedFrames(end)
-                            i=i+1;      %otherwise move on to the finalScreenLuminance blank screen
-                        end
-                    end
-
-                else
-
-                    i=min(i+1,size(stim,3));
-
-                    if isempty(responseOptions) && i==size(stim,3)
-                        done=1;
-                    end
-
-                    if i==size(stim,3) && didPulse
-                        doFramePulse=0;
-                    end
-                    didPulse=1;
-                end
-
-
-                %draw to buffer
-                if window>=0
-                    if i>0 && i <= size(stim,3)
-                        if ~(i==lastI) || (dontclear==0) %only draw if texture different from last one, or if every flip is redrawn
-                            Screen('DrawTexture', window, textures(i),[],destRect,[],filtMode);
                         else
-                            if labelFrames
-                                thisMsg=sprintf('This frame stim index (%d) is staying here without drawing new textures %d',i,frameNum); %may need to preallocate outside the loop
-                                Screen('DrawText',window,thisMsg,xTextPos,yNewTextPos-20,100*ones(1,3));
+
+                            i=min(i+1,size(stim,3));
+
+                            if isempty(responseOptions) && i==size(stim,3)
+                                done=1;
+                            end
+
+                            if i==size(stim,3) && didPulse
+                                doFramePulse=0;
+                            end
+                            didPulse=1;
+                        end
+
+
+                        %draw to buffer
+                        if window>=0
+                            if i>0 && i <= size(stim,3)
+                                if ~(i==lastI) || (dontclear==0) %only draw if texture different from last one, or if every flip is redrawn
+                                    Screen('DrawTexture', window, textures(i),[],destRect,[],filtMode);
+                                else
+                                    if labelFrames
+                                        thisMsg=sprintf('This frame stim index (%d) is staying here without drawing new textures %d',i,frameNum);
+                                        Screen('DrawText',window,thisMsg,xTextPos,yNewTextPos-20,100*ones(1,3));
+                                    end
+                                end
+                            else
+                                if size(stim,3)==0
+                                    %'stim had zeros frames, probably an penalty stim with zero duration'
+                                else
+                                    i
+                                    sprintf('size(stim,3): %d',size(stim,3))
+                                    error('request for an unknown frame')
+                                end
                             end
                         end
-                    else
-                        if size(stim,3)==0
-                            %'stim had zeros frames, probably an penalty stim with zero duration'
-                        else
-                            i
-                            sprintf('size(stim,3): %d',size(stim,3))
-                            error('request for an unknown frame')
+
+
+                    case 'dynamicDots'
+                        i=i+1;
+
+                        %draw to buffer
+                        [dynFrame doFramePulse] =getDynFrame(stim,i); %any advantage to preallocating dynFrame?  would require a stim method to ask how big it will be...
+                        if window>=0
+                            Screen('DrawDots', window, dotLocs, dotSize ,repmat(dynFrame(1:numDots),3,1), dotCtr,0);
                         end
-                    end
+                    case 'expert'
+                        % do expert mode stuff
+                        % 12/8/08 - implementing expert mode
+                        % here is where the work gets done
+                        state=[]; % nothing needed yet
+                        state.destRect=destRect;
+                        state.floatprecision=floatprecision;
+                        state.filtMode=filtMode;
+                        state.window=window;
+                        state.img=stim;
+                        moreStim(stimManager,state);
+                    otherwise
+                        error('unrecognized strategy')
                 end
-
-
             else
                 time2=GetSecs;
                 if window>=0

@@ -148,7 +148,11 @@ for subNum=1:length(uniqueNames)
             height=600;
             trialRecords=[];
             
-            [stimulus updateSM out scaleFactor type targetPorts distractorPorts details interTrialLuminance] = calcStim(stimulus,trialManagerClass,frameRate,responsePorts,totalPorts,width,height,trialRecords);
+            displaySize=[];
+            LUTbits=[];
+            resolutions=Screen('Resolutions');
+            [stimulus updateSM resInd out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance text] = ...
+                calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords);
             imagesc(out(:,:,2))
             imwrite(uint8(out(:,:,2)*255),'stimExample.jpg')  
         end

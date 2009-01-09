@@ -112,7 +112,7 @@ switch plotType
     case 'plotTrialsPerDay'
 
 
-        totalTrialsPerDay=makeDailyRaster(d.correct,d.date)  %in terms of ALL trials correction and kills, RETURN trialsPerDay
+        totalTrialsPerDay=makeDailyRaster(d.correct,d.date);  %in terms of ALL trials correction and kills, RETURN trialsPerDay
         goodTrialsPerDay=makeDailyRaster(d.correct,d.date,goods);
         legendStrs = {};
         if ismember('didHumanResponse',fields(d)) & ismember('containedForcedRewards',fields(d)) & ismember('didStochasticResponse',fields(d))
@@ -158,7 +158,6 @@ switch plotType
             remainder(end+1)=0;
         end
             
-        keyboard;
         bar([allTypes; remainder]','stacked'), colormap(bone)
         legendStrs{end+1} = 'unaccounted for';
         set(gca,'FontSize',7);
@@ -203,7 +202,7 @@ switch plotType
         plotAfterErrorsToo=1;% this could be turned off for the basic plot and moved to "diagnostic performance"
         markTrialsToThreshold=0;
         addManualChangeMarker=1;
-        doPlotPercentCorrect(d,goods,smoothingWidth,threshold,axMin,axMax,dayTransitionsOn,addSteps,plotCorrectionTrialsToo,plotAfterErrorsToo,markTrialsToThreshold,addManualChangeMarker)
+        doPlotPercentCorrect(d,goods,smoothingWidth,threshold,axMin,axMax,dayTransitionsOn,addSteps,plotCorrectionTrialsToo,plotAfterErrorsToo,markTrialsToThreshold,addManualChangeMarker);
         legendStrs = {};
         if plotCorrectionTrialsToo
             legendStrs{end+1}='correctionTrials'; 

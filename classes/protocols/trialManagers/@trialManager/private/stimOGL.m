@@ -613,6 +613,7 @@ try
     didPulse=0;
     didValves=0;
     didManual=0;
+    arrowKeyDown=false; %1/9/09 - for phil's stuff
 
     %used for timed frames stimuli
     if isempty(requestOptions)
@@ -1064,10 +1065,37 @@ try
             atDown=any(keyCode(atKeys));
             kDown=any(keyCode(kKey));
             portsDown=false(1,length(portKeys));
+%             arrowKeyDown=false; % initialize this variable
+            % 1/9/09 - phil to add stuff about arrowKeyDown
             for pNum=1:length(portKeys)
                 portsDown(pNum)=any(keyCode(portKeys{pNum}));
+%                 arrowKeyDown=arrowKeyDown || any(strcmp(KbName(keys(keyNum)),{'left','down','right'}));
             end
-
+            
+           %map a 1-key shortcut left center right reponse - this 
+%            if arrowKeyDown
+%                 for keyNum=1:length(keys)
+%                     keyName=KbName(keys(keyNum));
+%                     if strcmp(keyName,'left')
+%                         %doValves(1)=1;
+%                         ports(1)=1;
+%                         didHumanResponse=true;
+%                     end
+%                     if strcmp(keyName,'down')
+%                         %doValves(2)=1;
+%                         ports(2)=1;
+%                         didHumanResponse=true;
+%                     end
+%                     if  strcmp(keyName,'right')
+%                         %doValves(3)=1;
+%                         ports(3)=1;
+%                         didHumanResponse=true;
+%                     end
+%                 end              
+%            end
+            
+            
+            
             if kDown
                 if any(keyCode(pKey))
                     pThisLoop=1;

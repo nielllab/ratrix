@@ -1,4 +1,5 @@
-function [stimulus updateSM out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance isCorrection] = calcStim(stimulus,trialManagerClass,frameRate,responsePorts,totalPorts,width,height,trialRecords)
+function [stimulus updateSM resInd out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance isCorrection text] = ...
+    calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 
 updateSM = true; % This is always true, because the audio stimulus is always set
 
@@ -49,10 +50,11 @@ else
     stimulus.isBlocking = true;
 end
 
+[stimulus.hemifieldFlicker HFupdateSM HFresInd HFout HFLUT HFscaleFactor HFtype HFtargetPorts HFdistractorPorts HFdetails HFinterTrialLuminance HFisCorrection text] = ...
+    calcStim(stimulus.hemifieldFlicker,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords);
 
-[stimulus.hemifieldFlicker HFupdateSM HFout HFLUT HFscaleFactor HFtype HFtargetPorts HFdistractorPorts HFdetails HFinterTrialLuminance HFisCorrection] = calcStim(stimulus.hemifieldFlicker,trialManagerClass,frameRate,responsePorts,totalPorts,width,height,trialRecords);
-
-[stimulus.stereoDiscrim SDupdateSM SDout SDLUT SDscaleFactor SDtype SDtargetPorts SDdistractorPorts SDdetails SDinterTrialLuminance SDisCorrection] = calcStim(stimulus.stereoDiscrim,trialManagerClass,frameRate,responsePorts,totalPorts,width,height,trialRecords);
+[stimulus.stereoDiscrim SDupdateSM SDresInd SDout SDLUT SDscaleFactor SDtype SDtargetPorts SDdistractorPorts SDdetails SDinterTrialLuminance SDisCorrection text] = ...
+    calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords);
 
 % Update the stim manager if either of the component stim managers needed
 % updating
@@ -64,6 +66,7 @@ if stimulus.isBlocking
         % Visual modality, block sound
         out = HFout;
         LUT = HFLUT;
+        resInd = HFresInd;
         scaleFactor = HFscaleFactor;
         type = HFtype;
         stimulus.audioStimulus = [];
@@ -71,6 +74,7 @@ if stimulus.isBlocking
         % Sound modality, block vision
         out = SDout;
         LUT = SDLUT;
+        resInd = SDresInd;
         scaleFactor = SDscaleFactor;
         type = SDtype;
         stimulus.audioStimulus = getAudioStimulus(stimulus.stereoDiscrim);

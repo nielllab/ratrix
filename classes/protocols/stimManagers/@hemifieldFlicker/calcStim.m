@@ -1,14 +1,16 @@
-function [stimulus updateSM out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance isCorrection] = calcStim(stimulus,trialManagerClass,frameRate,responsePorts,totalPorts,width,height,trialRecords)
+function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text] =... 
+    calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 
 %LUT = Screen('LoadCLUT', 0);
 %LUT=LUT/max(LUT(:));
+[resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60],32,getMaxWidth(stimulus),getMaxHeight(stimulus));
 
 LUTBitDepth=8;
 numColors=2^LUTBitDepth; maxColorID=numColors-1; fraction=1/(maxColorID);
 ramp=[0:fraction:1];
 LUT= [ramp;ramp;ramp]';
 
-
+text='hemifield';
 updateSM=0;
 isCorrection=0;
 
@@ -80,6 +82,7 @@ end
 
 numTargs=length(stimulus.targetContrasts);
 details.contrasts = stimulus.targetContrasts(ceil(rand(length(targetPorts),1)*numTargs));
+details.isCorrection=isCorrection;
 
 numDistrs=length(stimulus.distractorContrasts);
 if numDistrs>0

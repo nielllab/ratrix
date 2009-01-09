@@ -1,4 +1,5 @@
-function [stimulus updateSM out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance isCorrection] = calcStim(stimulus,trialManagerClass,frameRate,responsePorts,totalPorts,width,height,trialRecords)
+function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text] =... 
+    calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 
 %LUT = Screen('LoadCLUT', 0);
 %LUT=LUT/max(LUT(:));
@@ -8,9 +9,11 @@ numColors=2^LUTBitDepth; maxColorID=numColors-1; fraction=1/(maxColorID);
 ramp=[0:fraction:1];
 LUT= [ramp;ramp;ramp]';
 
+[resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60],32,getMaxWidth(stimulus),getMaxHeight(stimulus));
 
 updateSM=0;
-isCorrection=0;
+details.isCorrection=0;
+text='stereoDiscrim';
 
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);
@@ -71,7 +74,7 @@ switch trialManagerClass
             details.correctionTrial=1;
             'correction trial!'
             targetPorts=trialRecords(end).targetPorts;
-            isCorrection=1;
+            details.isCorrection=1;
         else
             details.correctionTrial=0;
             targetPorts=responsePorts(ceil(rand*length(responsePorts)));

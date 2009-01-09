@@ -9,6 +9,12 @@ rm = getReinforcementManager(tm);
 currentShapedValue = getCurrentShapedValue(stim);
 currentMsPenalty = getMsPenalty(rm);
 currentScalar = getScalar(rm);
+currentPctCTs=getPercentCorrectionTrials(stim); %only check current, trust this to be the same on all steps
+
+if isnan(currentPctCTs)
+    currentPctCTs=0.5;  %default is always .5 when starting from oriented gabors free drinks
+end
+
 % there are two plausible reasons for the currentShapedValue to be empty:
 % 1. the stimulus is not shaping anything
 % 2. the stimulus is shaping something but currentShapedValue is [], this should
@@ -19,6 +25,7 @@ currentScalar = getScalar(rm);
 
 updateRM=0;
 updateSM=0;
+updatePctCTsAllSM=0;
 
 if ~isempty(currentShapedValue) % some steps have no shaping, so don't get database fact, and replace value
     valueInDatabase = getMiniDatabaseFact(s,'currentShapedValue'); %this is if you have to reinit...
@@ -42,7 +49,7 @@ if currentMsPenalty~=valueInDatabase
         doMiniDatabaseError(s, stepNum, valueInDatabase, currentMsPenalty, 'msPenalty');
     end
 else
-    disp('no change b/c they matched')
+    disp('no change b/c they matched or database value is empty')
     newMsPenalty = currentMsPenalty;
 end
 
@@ -56,8 +63,21 @@ if currentScalar~=valueInDatabase
         doMiniDatabaseError(s, stepNum, valueInDatabase, currentScalar, 'rewardScalar');
     end
 else
-    disp('no change b/c they matched')
+    disp('no change b/c they matched or database value is empty')
     newScalar = currentScalar;
+end
+
+valueInDatabase = getMiniDatabaseFact(s,'pctCTs')
+if currentPctCTs~=valueInDatabase
+    if ~isempty(valueInDatabase)
+        updatePctCTsAllSM=1;
+        newPctCTs = valueInDatabase;
+    else
+        doMiniDatabaseError(s, stepNum, valueInDatabase, currentPctCTs, 'pctCTs');
+    end
+else
+    disp('no change b/c they matched or database value is empty')
+    newPctCTs = currentPctCTs;
 end
 
 if updateSM
@@ -76,12 +96,11 @@ end
 
 if updateRM   
     [s r]=changeAllReinforcementManagers(s,rm,r,sprintf('reinforcement set; penalty: %d, scalar: %d',newMsPenalty,newScalar),'pmm');
-
     
     %serverDataPath = fullfile(dataPath, 'ServerData');
     dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
-r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
-s=getSubjectFromID(r,getID(s));
+    r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
+    s=getSubjectFromID(r,getID(s));
 
     [p,step]=getProtocolAndStep(s);
     ts=getTrainingStep(p,step);
@@ -96,9 +115,29 @@ s=getSubjectFromID(r,getID(s));
     end
 end
 
+if updatePctCTsAllSM
+    [s r]=changeAllPercentCorrectionTrials(s,newPctCTs,r,sprintf('percentCorrectionTrials set: %d',newPctCTs),'pmm') 
+    
+    %check it
+    dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
+    r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
+    s=getSubjectFromID(r,getID(s));
+    
+    [p stepNum]=getProtocolAndStep(s);
+    ts = getTrainingStep(p,stepNum);
+    stim = getStimManager(ts);
+    currentPctCTs=getPercentCorrectionTrials(stim);
+    if currentPctCTs~=newPctCTs
+        currentPctCTs=currentPctCTs
+        desiredPctCTs=newPctCTs
+        error('percent correction trials did not update!')
+    end
+        
+end
+
 function  doMiniDatabaseError(s, stepNum, valueInDatabase, currentValue, factType)
 getID(s)
 stepNum = stepNum
 valueInDatabase = valueInDatabase
-currentShapedValue = currentShapedValue
+currentValue = currentValue
 error(sprintf('must have %s defined in database', factType))

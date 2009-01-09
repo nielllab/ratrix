@@ -22,16 +22,16 @@ plot([1:length(d.date)],d.targetOrientation,'g.')
 conditionType='fourFlankers';
 plotType='performancePerContrastPerCondition'; %performancePerContrastPerCondition, performancePerDeviationPerCondition
 performanceMeasure = 'pctCor';
-stepUsed = [];
+filterType='none'; %stepUsed = [];
 verbose = 0;
-figure; flankerAnalysis(removeSomeSmalls(d,d.step~=12),  conditionType, plotType,performanceMeasure, stepUsed, verbose)
+figure; flankerAnalysis(removeSomeSmalls(d,d.step~=12),  conditionType, plotType,performanceMeasure, filterType, verbose)
 title('all 12')
 
-figure; flankerAnalysis(removeSomeSmalls(d,~only2Contrast),  conditionType, plotType,performanceMeasure, stepUsed, verbose)
+figure; flankerAnalysis(removeSomeSmalls(d,~only2Contrast),  conditionType, plotType,performanceMeasure, filterType, verbose)
 title('only2Contrast')
 
 conditionType='twoFlankers';
-figure; flankerAnalysis(removeSomeSmalls(d,~only1Orientation), conditionType, plotType,performanceMeasure, stepUsed, verbose)
+figure; flankerAnalysis(removeSomeSmalls(d,~only1Orientation), conditionType, plotType,performanceMeasure, filterType, verbose)
 title('only1Orientation')
 
 
@@ -53,7 +53,7 @@ conditionType='twoFlankers';
 plotType='performancePerDeviationPerCondition'; %performancePerContrastPerCondition, performancePerDeviationPerCondition
 performanceMeasures={'correctRejections','hitRate','pctCor'}
 for i=1:length(performanceMeasures)
-   f=figure; flankerAnalysis(removeSomeSmalls(d,d.step~=12),  conditionType, plotType,performanceMeasures{i}, stepUsed, verbose)
+   f=figure; flankerAnalysis(removeSomeSmalls(d,d.step~=12),  conditionType, plotType,performanceMeasures{i}, filterType, verbose)
    axis([.15 0.35 0.45 0.7 ])
    xlabel('distance from target to flanker')
    set(gca,'XTickLabel',[2.5,3,3.5,5])
@@ -62,20 +62,23 @@ for i=1:length(performanceMeasures)
    set(gca,'YTick',[.5:.05:.7])
    title('')
    legend('')
-   cleanUpFigure(f)
+   %cleanUpFigure(f)
 end
 
-performanceMeasure = 'pctRightward';
-f=figure; flankerAnalysis(removeSomeSmalls(d,d.step~=12),  conditionType, plotType,performanceMeasure,  stepUsed, verbose)
+
+%%
+performanceMeasure = 'pctYes';
+f=figure; flankerAnalysis(removeSomeSmalls(d,d.step~=12),  conditionType, plotType,performanceMeasure,  filterType, verbose)
+   cleanUpFigure(f)
    xlabel('distance from target to flanker')
-   axis([.15 0.35 0.35 0.6 ])
+   axis([.15 0.35 0.4 0.6 ])
    set(gca,'XTickLabel',[2.5,3,3.5,5])
    set(gca,'XTick',[2.5,3,3.5,5]/16)
    set(gca,'YTickLabel',[.35:.05:.6])
    set(gca,'YTick',[.35:.05:.6])
    title('bias')
    legend('')
-   cleanUpFigure(f)
+
    
 %% analysis conditioned upon after only correct trials
 
@@ -89,7 +92,7 @@ doPlot('percentCorrect', d);
 conditionType='twoFlankers';
 plotType='performancePerDeviationPerCondition'; %performancePerDeviationPerCondition, performancePerContrastPerCondition, phaseEffect
 performanceMeasure = 'pctRightward'; %pctCor, pctRightward, hitRate, correctRejections
-stepUsed = [];
+stepUsed = []; filterType='none';
 verbose = 0;
 
 [context sideName correctName] =getSideCorrectContext(d)
@@ -100,7 +103,7 @@ for i = 1:numSides
     for j = 1:numCorrect
         index=(i-1)*numCorrect + j;
         subplot(numSides, numCorrect,index )
-        flankerAnalysis(removeSomeSmalls(d, ~context(index,:)),  conditionType, plotType,performanceMeasure, stepUsed, verbose)
+        flankerAnalysis(removeSomeSmalls(d, ~context(index,:)),  conditionType, plotType,performanceMeasure, filterType, verbose)
 %         doPlot('plotBias', removeSomeSmalls(d, ~context(index,:)), 2, numSides, numCorrect, index);
         if j == 1
             ylabel(sideName{i})
@@ -111,8 +114,8 @@ for i = 1:numSides
     end
 end
 afterCorrects=context(2,:) | context(4,:);
-figure;         flankerAnalysis(d,  conditionType, plotType,performanceMeasure, stepUsed, verbose)
-figure;         flankerAnalysis(removeSomeSmalls(d,~afterCorrects),  conditionType, plotType,performanceMeasure, stepUsed, verbose)
+figure;         flankerAnalysis(d,  conditionType, plotType,performanceMeasure, filterType, verbose)
+figure;         flankerAnalysis(removeSomeSmalls(d,~afterCorrects),  conditionType, plotType,performanceMeasure, filterType, verbose)
 
 
 subplotParams.index=1; subplotParams.x=1; subplotParams.y=1;
@@ -169,10 +172,11 @@ plot(localInd,0.4,'g^','markerSize',10)
 
 %%  same as above
 conditionType='twoFlankers';
+whichOnes=d.trialNumber>278000 & d.trialNumber<282678;
 plotType='performancePerDeviationPerCondition'; %performancePerContrastPerCondition, performancePerDeviationPerCondition
 performanceMeasures={'correctRejections','hitRate','pctCor'}
 for i=1:length(performanceMeasures)
-   f=figure; flankerAnalysis(removeSomeSmalls(d,d.step~=12),  conditionType, plotType,performanceMeasures{i}, stepUsed, verbose)
+   f=figure; flankerAnalysis(removeSomeSmalls(d,~whichOnes),  conditionType, plotType,performanceMeasures{i}, filterType, verbose)
     axis([.15 0.35 0.3 1 ])
    xlabel('distance from target to flanker')
    set(gca,'XTickLabel',[2.5,3,3.5,5])
@@ -184,8 +188,8 @@ for i=1:length(performanceMeasures)
    cleanUpFigure(f)
 end
 
-performanceMeasure = 'pctRightward';
-f=figure; flankerAnalysis(removeSomeSmalls(d,d.step~=12),  conditionType, plotType,performanceMeasure,  stepUsed, verbose)
+performanceMeasure = 'pctYes';
+f=figure; flankerAnalysis(removeSomeSmalls(d,~whichOnes),  conditionType, plotType,performanceMeasure,  filterType, verbose)
    xlabel('distance from target to flanker')
    axis([.15 0.35 0.2 0.7 ])
    set(gca,'XTickLabel',[2.5,3,3.5,5])
@@ -198,7 +202,7 @@ f=figure; flankerAnalysis(removeSomeSmalls(d,d.step~=12),  conditionType, plotTy
    
    
    performanceMeasure = 'dpr';
-f=figure; flankerAnalysis(removeSomeSmalls(d,d.step~=12),  conditionType, plotType,performanceMeasure,  stepUsed, verbose)
+f=figure; flankerAnalysis(removeSomeSmalls(d,~whichOnes),  conditionType, plotType,performanceMeasure,  filterType, verbose)
    xlabel('distance from target to flanker')
    axis([.15 0.35 0.2 0.7 ])
    set(gca,'XTickLabel',[2.5,3,3.5,5])
@@ -216,7 +220,7 @@ f=figure; flankerAnalysis(removeSomeSmalls(d,d.step~=12),  conditionType, plotTy
 conditionType='fourFlankers';
 plotType='performancePerDeviationPerCondition'; %performancePerContrastPerCondition
 performanceMeasure = 'pctCor'; %pctCor pctRightward
-stepUsed = [];
+stepUsed = []; filterType='none';
 verbose = 0;
 
 subjects = {'rat_132','rat_133','rat_134','rat_135'};
@@ -238,14 +242,14 @@ which=[step10start<d.date & min(datenum('Dec.12,2007'),step12start)>d.date];
 
 
 subplot(2,2,i)
-flankerAnalysis(removeSomeSmalls(d,~which),  conditionType, plotType,performanceMeasure, stepUsed, verbose)
+flankerAnalysis(removeSomeSmalls(d,~which),  conditionType, plotType,performanceMeasure, filterType, verbose)
 axis([.18 .2 .5 1])
    set(gca,'XTickLabel',[])
    set(gca,'XTick',[])
       legend('')
        xlabel('condition')
 title(subjects{i}(5:7))
-%figure; flankerAnalysis(removeSomeSmalls(d,d.step~=10),  conditionType, plotType,performanceMeasure, stepUsed, verbose)
+%figure; flankerAnalysis(removeSomeSmalls(d,d.step~=10),  conditionType, plotType,performanceMeasure, filterType, verbose)
 end
 cleanUpFigure(f)
 

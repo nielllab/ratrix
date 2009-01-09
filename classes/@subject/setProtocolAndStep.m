@@ -21,10 +21,10 @@ if isa(p,'protocol') && isa(r,'ratrix') && ~isempty(getSubjectFromID(r,s.id)) &&
 %     i
 %     getNumTrainingSteps(p)
     
-    if i<=getNumTrainingSteps(p) && i>=0 && isscalar(i) && isinteger(i)
+    if i<=getNumTrainingSteps(p) && i>=0 && isscalar(i) && mod(i,1)==0 %mod(i,1)==0 checks that i is an integer (even as a double type)
         if authorCheck(r,auth)
             s.protocol=p;
-            s.trainingStepNum=i;
+            s.trainingStepNum=uint8(i); % 1/9/09 - force to uint8 to pass isinteger tests down the line
 
             if strcmp(auth,'ratrix')
                 s.protocolVersion.autoVersion=s.protocolVersion.autoVersion+1;

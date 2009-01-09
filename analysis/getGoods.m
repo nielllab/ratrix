@@ -65,6 +65,9 @@ switch type
         goods=(~CTs  & ~manualKill & ~dualResponse & ~nonRandom & ~tooFast & ~didStochasticResponse & ~containedForcedRewards & afterError);
     case 'justCorrectionTrials'
         goods=CTs & ~manualKill & ~dualResponse & ~tooFast & ~didStochasticResponse & ~containedForcedRewards; %
+    case 'humanPsych'
+        goods=(~CTs  & ~manualKill & ~dualResponse & ~nonRandom & ~didStochasticResponse & ~containedForcedRewards); %including afterError in goods
+        removeHuman=false;
     case 'forBias'
         centerResponses = d.response==2;
         %this is to ignore center responses in free drinks, if you want

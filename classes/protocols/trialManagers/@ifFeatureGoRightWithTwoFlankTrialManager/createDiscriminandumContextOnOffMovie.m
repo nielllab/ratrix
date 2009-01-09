@@ -5,7 +5,6 @@ function [stim frameTimes]=createDiscriminandumContextOnOffMovie(t,empty,targetO
 
 [height width]=size(empty);
 
-
 if targetOnOff(2)==contextOnOff(2)
     %okay because they both turn off at the same time
 else

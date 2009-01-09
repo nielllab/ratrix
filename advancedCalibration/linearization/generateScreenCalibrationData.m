@@ -57,6 +57,8 @@
 % generateScreenCalibrationData([],[],[0 0 .3 .3],int8(10),int8(10),repmat(linspace(0,1,2^8)',1,3),uint8(ceil((2^8)*rand(5,10,3,100))),uint8(round(2^8/2)*ones(1,1,3)),uint8(ceil(rand(1000)*2^8)),'B888',int8(1),true,false);
 % generateScreenCalibrationData([],[],[],[],[],[],[],[],[],'B888',[],false,false);
 % vals=generateScreenCalibrationData([],[],[],int8(10),int8(0),[],[],[],[],'B888',[],true,false);
+% [spyderData daqData, ifi]=generateScreenCalibrationData(0,'CRT',[],int8(10),int8(2),repmat(linspace(0,1,2^8)',1,3),[],[], [],[],'B888',[],true,false, [], [], false)
+
 function [spyderData daqData, ifi]=generateScreenCalibrationData(screenNum,screenType,patchRect,numFramesPerValue,numInterValueFrames,clut,stim,positionFrame, interValueRGB,background,parallelPortAddress,framePulseCode,useSpyder,doDaq, daqPath, daqPlot, skipSyncTest)
 % framePulseCode
 % parallelPortAddress
@@ -165,6 +167,9 @@ try
     if length(size(background))<=2 && allClutIndices(background(:),size(clut,1))
         bg=Screen('MakeTexture',window,background);
     else
+        sca
+        background
+        keyboard
         error('background must be at most 2-dims and 1 <= int values <= size(clut)')
     end
 
@@ -352,7 +357,8 @@ beep;beep
             daqData = intensity;
     end
 catch
-%     showcursor;       
+%     showcursor; 
+    sca
     x=lasterror;
     x.message
     x.stack.file

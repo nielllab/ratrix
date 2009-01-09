@@ -16,3 +16,6 @@
 /stationOKForStimManager.m -text
 /getNameFragment.m -text
 /boxOKForStimManager.m -text
+/canForceStimDetails.m -text
+/hasUpdatablePercentCorrectionTrial.m -text
+/getPercentCorrectionTrials.m -text

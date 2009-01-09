@@ -1,5 +1,5 @@
 function [r rewardSizeULorMS msPenalty msPuff msRewardSound msPenaltySound updateTM] = calcReinforcement(r,trialRecords, subject)
-verbose=1;
+verbose=0;
 
 correct=0;
 

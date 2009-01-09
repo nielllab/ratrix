@@ -55,3 +55,4 @@
 /replaceStationForBox.m -text
 /getSubjectsFromIDs.m -text
 /setStationMACaddress.m -text
+/replaceAllStructProtocolsWithTempProtocol.m -text

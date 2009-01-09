@@ -1,5 +1,18 @@
 function [default t]=getDefaultParameters(t, protocolType,protocolVersion,defaultSettings);
 
+
+if ~exist('protocolType','var') || isempty(protocolType)
+    protocolType='goToRightDetection';
+end
+
+if ~exist('protocolVersion','var') || isempty(protocolVersion)
+    protocolVersion='2_3';
+end
+
+if ~exist('defaultSettings','var') || isempty(defaultSettings)
+    defaultSettings='Oct.09,2007';
+end
+    
 switch defaultSettings
     case 'Oct.09,2007'
 
@@ -64,9 +77,20 @@ switch defaultSettings
 
         default.xPositionPercent = 0.5;  %target position in percent ScreenWidth
         default.cuePercentTargetEcc=0.6; %fraction of distance from center to target  % NOT USED IN cuedGoToFeatureWithTwoFlank
-
-        default.framesJustFlanker=int8(2);
+       
+        
+        % these were never used due to toggleStim ==1 
+        % they were defined up to Jan 2, 2009: 
         default.framesTargetOn=int8(50);
+        default.framesJustFlanker=int8(2);   
+        % but then replaced by functionality and not name
+        % at this point all rats still have toggleStim ==1 , but humans use toggleStim ==0
+        default.framesTargetOn=int8([0 5]);  % aka stimulus.framesStimOn; bad name
+        default.framesJustFlanker=int8([0 5]);    
+        %in order to be replaced evantually by framesTargetOnOff & framesFlankerOnOff
+        default.framesTargetOnOff= int8([0 5]);
+        default.framesFlankerOnOff=int8([0 5]);
+        
         default.thresh = 0.001;
         default.yPositionPercent = 0.5;
         default.toggleStim = 1;
@@ -84,7 +108,7 @@ switch defaultSettings
         %default.msRewardSoundDuration   =0; %not used! but still defined in nAFC.  Eventually remove. pmm
 
         default.requestRewardSizeULorMS             =0;
-        default.percentCorrectionTrials             =.5;
+        default.percentCorrectionTrials             =.5; % starts being used on 09-Oct-2008 (always .5 before that)
         default.msResponseTimeLimit                 =0;
         default.pokeToRequestStim                   =1;
         default.maintainPokeToMaintainStim          =1;
@@ -95,7 +119,7 @@ switch defaultSettings
         % constant parameters for reinforcement manager
         default.fractionOpenTimeSoundIsOn=0.6;
         default.fractionPenaltySoundIsOn=1;
-        
+
         % software additions that explicitely state previously undefined defaults
         default.flankerPosAngle=0; %May.30,2008
 
@@ -103,9 +127,15 @@ switch defaultSettings
         default.msPenalty=1000; %May.30,2008
         default.scheduler=minutesPerSession(90,3); %May.30,2008
         default.graduation = repeatIndefinitely(); %May.30,2008
-        
+
         default.msPuff=0; %July.18,2008
-            
+
+        %default set to nan, which is same as before Nov.12,2008
+        %can be overwritten to get relative values
+        default.fpaRelativeTargetOrientation=nan;
+        default.fpaRelativeFlankerOrientation=nan;
+        default.svnRev={'svn://132.239.158.177/projects/ratrix/trunk'}; %1/8/09 - added to support trunk version of trainingStep
+
     otherwise
         error ('unknown default settings date')
 
@@ -404,13 +434,13 @@ switch protocolVersion
                 error('unknown type of protocol for this version')
         end
 
-    case '1_8' % only 2 orients and they are -15, 15 
+    case '1_8' % only 2 orients and they are -15, 15
         %!!!!MISTAKE version, not germline, used for only 2 days, lacks flankerPosAngle
         %no real problem--could be construed as an unnessesary shaping step that eases from
-        %vertical to tipped flankerPositions 
-        
+        %vertical to tipped flankerPositions
+
         switch protocolType
-            case 'goToRightDetection'  
+            case 'goToRightDetection'
                 default.goRightContrast = [1];    %choose a random contrast from this list each trial
                 default.goLeftContrast =  [0];
                 default.flankerContrast = [0];
@@ -430,7 +460,7 @@ switch protocolVersion
                 default.flankerContrast = [0];
 
                 orients=[-pi/8,pi/8]; %%-15, 15
-                default.goRightOrientations = orients; 
+                default.goRightOrientations = orients;
                 default.goLeftOrientations =  orients;
                 default.flankerOrientations = orients;
 
@@ -443,9 +473,9 @@ switch protocolVersion
                 protocolVersion=protocolVersion
                 error('unknown type of protocol for this version')
         end
-          case {'1_9', '2_1', '2_2'} % only 2 orients and they are -15, 15   fixed and first used on Jun.04,2008
-                switch protocolType
-            case 'goToRightDetection'  
+    case {'1_9', '2_1', '2_2','2_3'} % only 2 orients and they are -15, 15   fixed and first used on Jun.04,2008 sadly, not the same angle L vs R
+        switch protocolType
+            case 'goToRightDetection'
                 default.goRightContrast = [1];    %choose a random contrast from this list each trial
                 default.goLeftContrast =  [0];
                 default.flankerContrast = [0];
@@ -459,15 +489,16 @@ switch protocolVersion
                 default.positionalHint=0;
                 default.displayTargetAndDistractor=0;
                 default.phase=[0 pi];
-                default.flankerPosAngle=orients; 
-                
+                default.flankerPosAngle=orients;
+
             case 'goToLeftDetection'  % has four orientations
                 default.goRightContrast = [0];    %choose a random contrast from this list each trial
                 default.goLeftContrast =  [1];
                 default.flankerContrast = [0];
 
-                orients=[-pi/8,pi/8]; %%-15, 15
-                default.goRightOrientations = orients; 
+                orients=[-pi/8,pi/8]; %%-22.5, 22.5  % MISTAKE!! this is a different angle for left rats! should be 15deg= pi/12 instead is 22.5 deg..
+                %leaving it incorrect b/c thats what it is for these rats!
+                default.goRightOrientations = orients;
                 default.goLeftOrientations =  orients;
                 default.flankerOrientations = orients;
 
@@ -476,21 +507,59 @@ switch protocolVersion
                 default.displayTargetAndDistractor=0;
 
                 default.phase=[0 pi];
-                default.flankerPosAngle=orients; 
-                                
+                default.flankerPosAngle=orients;
+
             otherwise
                 protocolVersion=protocolVersion
                 error('unknown type of protocol for this version')
-                end
+        end
+    case {'2_4'} %like 2_3 but with fixed orientations for left
+        switch protocolType
+            case 'goToRightDetection'
+                default.goRightContrast = [1];    %choose a random contrast from this list each trial
+                default.goLeftContrast =  [0];
+                default.flankerContrast = [0];
 
-        case '2_0'
+                orients=[-pi/12,pi/12];%%-15, 15
+                default.goRightOrientations = orients;
+                default.goLeftOrientations =  orients;
+                default.flankerOrientations = orients;
+
+                default.stdGaussMask = 1/5;
+                default.positionalHint=0;
+                default.displayTargetAndDistractor=0;
+                default.phase=[0 pi];
+                default.flankerPosAngle=orients;
+
+            case 'goToLeftDetection'  
+                default.goRightContrast = [0];    %choose a random contrast from this list each trial
+                default.goLeftContrast =  [1];
+                default.flankerContrast = [0];
+
+                orients=[-pi/12,pi/12]; %fixed, now -15, 15
+                default.goRightOrientations = orients;
+                default.goLeftOrientations =  orients;
+                default.flankerOrientations = orients;
+
+                default.stdGaussMask = 1/5;
+                default.positionalHint=0;
+                default.displayTargetAndDistractor=0;
+
+                default.phase=[0 pi];
+                default.flankerPosAngle=orients;
+
+            otherwise
+                protocolVersion=protocolVersion
+                error('unknown type of protocol for this version')
+        end
+    case '2_0'
         switch protocolType
             case 'tiltDiscrim' %like 1_0, but protocol has auto shaping smaller targets
 
                 default.goRightContrast = [1];    %choose a random contrast from this list each trial
                 default.goLeftContrast =  [1];
                 default.flankerContrast = [0];
-                
+
                 default.goRightOrientations = [pi/6];
                 default.goLeftOrientations =  [-pi/6];
                 default.flankerOrientations = 0; %[pi/6,0,-pi/6]; %choose a random orientation from this list
@@ -503,8 +572,8 @@ switch protocolVersion
                 protocolVersion=protocolVersion
                 error('unknown type of protocol for this version')
         end
-        
-   
+
+
 
     otherwise
         error ('unknown version')

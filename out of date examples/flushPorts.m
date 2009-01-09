@@ -29,7 +29,8 @@ numPorts=getNumPorts(st);
 if all(size(dursSec)==1)
     squirtDuration = dursSec*ones(1,3);
 else
-    squirtDuration=durMs;
+%     squirtDuration=durMs;
+    squirtDuration=dursSec;
     if length(dursSec) ~= getNumPorts(st)
         %check that there are only as many args as available ports;
         error('durMs bust be length of num ports')

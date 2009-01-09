@@ -1,19 +1,19 @@
 function r=setShapingPMM(r,subjects, protocolType, protocolVersion, defaultSettingsDate, persistTrainingSteps)
 %master shaping template for detection, goTo, or tilt discrimination tasks
 
-if ~exist('subjects', 'var')
+if ~exist('subjects', 'var')  || isempty(subjects)
     subjects={'test','test2'}
 end
 
-if ~exist('protocolType', 'var')
+if ~exist('protocolType', 'var')  || isempty(protocolType)
     protocolType='goToSide'
 end
 
-if ~exist('protocolVersion', 'var')
+if ~exist('protocolVersion', 'var') || isempty(protocolVersion)
     protocolVersion='1_0'
 end
 
-if ~exist('defaultSettingsDate', 'var')
+if ~exist('defaultSettingsDate', 'var') || isempty(defaultSettingsDate)
     defaultSettingsDate='Oct.09,2007'  %datestr(now,22)
 end
 
@@ -190,40 +190,95 @@ parameters.graduation = parameterThresholdCriterion('.stimDetails.currentShapedV
 [dimmerTarget previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 
 
-nameOfShapingStep{end+1} = sprintf('Step 3c: Stronger flanker %s, stringent', protocolType);
-parameters=previousParameters;
-parameters.flankerContrast = [ 0.4]; %miniDatabase overwrites this (for rats on this step) if rebuilding ratrix
-parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, .3);  % **this is the best they learned in the previous step
+switch protocolVersion
+    case {'2_3','2_4'} %some skip full contrast flankers, and move right to toggle then sweep
+           
+        nameOfShapingStep{end+1} = sprintf('Step 3e: Flankers also toggle %s, stringent', protocolType);
+        parameters=previousParameters;
+        parameters.shapedParameter=[];
+        parameters.shapingMethod=[];
+        parameters.shapingValues=[];
+        targetContrast=[.75]; %reasonably easy after the lowering, 
+        
+        parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
+        
+        %Remove correlation for experiments
+        parameters.maxCorrectOnSameSide=int8(-1);
+        parameters.percentCorrectionTrials=0;  %beware this is overpowered by the minidatabase setting!
+        
+        parameters.persistFlankersDuringToggle = 0; %
+        %parameters.graduation = timeCriterion(32);
+        %parameters.graduation = experimenterControlled([16,28,32],[0,0,0]);
+        parameters.graduation = performanceCriterion([0.99],int16([9999]));
+        [flanksToggleToo previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 
-parameters.shapedParameter='flankerContrast';
-parameters.shapingMethod='linearChangeAtCriteria';
-parameters.shapingValues.numSteps=int8(6);
-parameters.shapingValues.startValue=parameters.flankerContrast;
-parameters.shapingValues.currentValue=parameters.flankerContrast;
-parameters.shapingValues.goalValue=1;
-parameters.graduation = parameterThresholdCriterion('.stimDetails.flankerContrast','>=',0.99);
+        
+        nameOfShapingStep{end+1} = sprintf('Expt 1: contrast sweep', protocolType);
+        parameters=previousParameters;
+        %targetContrast= [0.6 0.8]; %a guess for thresh!
+        %[0.015625 0.5 0.75 1 ] 1/log2 idea: 2.^[-6,-2,-1,0]
+        targetContrast=[.25 0.5 0.75 1]; % starting sweep (rational: match acuity, but if at chance on .25 don't swamp more than you need, if above chance then add in something smaller, also easier ones will keep up moral )
+        parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
+        
+       
 
-[strongerFlanker previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+       
+        [sweepContrast previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+        
+        nameOfShapingStep{end+1} = sprintf('Expt 2: position sweep', protocolType);
+        targetContrast=[.75]; %reasonably easy , garaunteed contrast sensitive
+        parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
+        parameters.flankerOffset = [2.5 3 3.5 5];
+        [sweepFlankerPosition]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+        
+        nameOfShapingStep{end+1} = sprintf('Expt 3: flanker orientation sweep', protocolType);
+        parameters.flankerOffset=3;
+        parameters.fpaRelativeTargetOrientation=0;  % always align to fpa
+        %rfo=[-pi/2 -pi/4 -pi/8 -pi/16 0 0 pi/16 pi/8 pi/4 pi/2];  % 9 best with more samples at 0
+        rfo=[-pi/2 -pi/6 -pi/12 -pi/24 0 0 pi/24 pi/12 pi/6 pi/2];  % 9 best with more samples at 0
+        parameters.fpaRelativeFlankerOrientation=rfo;
+        required=repmat(rfo,size(parameters.flankerPosAngle,2),1)-repmat(parameters.flankerPosAngle',1,size(rfo,2));
+        parameters.flankerOrientations=unique(required(:)); % find what you need
+        parameters.phase=0;
+        [sweepFlankerOrientation ]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+    otherwise
+        nameOfShapingStep{end+1} = sprintf('Step 3c: Stronger flanker %s, stringent', protocolType);
+        parameters=previousParameters;
+        parameters.flankerContrast = [ 0.4]; %miniDatabase overwrites this (for rats on this step) if rebuilding ratrix
+        parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, .3);  % **this is the best they learned in the previous step
+
+        parameters.shapedParameter='flankerContrast';
+        parameters.shapingMethod='linearChangeAtCriteria';
+        parameters.shapingValues.numSteps=int8(6);
+        parameters.shapingValues.startValue=parameters.flankerContrast;
+        parameters.shapingValues.currentValue=parameters.flankerContrast;
+        parameters.shapingValues.goalValue=1;
+        parameters.graduation = parameterThresholdCriterion('.stimDetails.flankerContrast','>=',0.99);
+
+        [strongerFlanker previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+        
+
+        nameOfShapingStep{end+1} = sprintf('Step 3d: Full contrast flankers %s, stringent', protocolType);
+        parameters=previousParameters;
+        parameters.shapedParameter=[];
+        parameters.shapingMethod=[];
+        parameters.shapingValues=[];
+        parameters.flankerContrast = [1];
+        parameters.graduation = performanceCriterion([0.85, 0.8],int16([200,500]));
+        [fullFlankers previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+
+        nameOfShapingStep{end+1} = sprintf('Step 3e: Flankers also toggle %s, stringent', protocolType);
+        parameters=previousParameters;
+        parameters.persistFlankersDuringToggle = 0; %
+        [flanksToggleToo previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+end
 
 
 
-nameOfShapingStep{end+1} = sprintf('Step 3d: Full contrast flankers %s, stringent', protocolType);
-parameters=previousParameters;
-parameters.shapedParameter=[];
-parameters.shapingMethod=[];
-parameters.shapingValues=[];
-parameters.flankerContrast = [1];
-parameters.graduation = performanceCriterion([0.85, 0.8],int16([200,500]));
-[fullFlankers previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
-
-nameOfShapingStep{end+1} = sprintf('Step 3e: Flankers also toggle %s, stringent', protocolType);
-parameters=previousParameters;
-parameters.persistFlankersDuringToggle = 0; %
-[flanksToggleToo previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 
 nameOfShapingStep{end+1} = sprintf('Step 3f: Flankers change positions %s, stringent', protocolType);
 parameters=previousParameters;
-parameters.flankerOffset = [2.5 3 3.5 5]; % **!! confirm this!
+parameters.flankerOffset = [2.5 3 3.5 5]; %
 [varyPosition previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 
 
@@ -244,7 +299,7 @@ parameters.flankerOffset = [3];
 
 %Remove correlation for experiments
 parameters.maxCorrectOnSameSide=int8(-1);
-parameters.percentCorrectionTrials=0;  %doTo: not used yet!
+parameters.percentCorrectionTrials=0;  
 
 %And then the 'default' parameters (which would not need to be set if testing steps are added to the end of the protocol)
 %     parameters.goRightOrientations = [0];
@@ -391,12 +446,14 @@ switch protocolVersion
         p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,smaller,dimFlankers,fullFlankers,flanksToggleToo,varyPosition,vvVH,vvPhases,vvOffsets,vvPhasesOffset,vvVHOffsets})
     case '1_5' %used by adam, no distractors, includes a hint
         p=protocol(nameOfProtocol,{fd1,fd2,fd3,easyHint,stringent,linearized,thinner,smaller})
-    case {'1_6','1_7', '1_8', '1_9', '2_1'}
-        p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,smaller,dimFlankers,dimmerTarget,strongerFlanker,fullFlankers,flanksToggleToo,varyPosition,vvVH,vvPhases,vvOffsets,vvPhasesOffset,vvVHOffsets})
+    case {'1_6','1_7', '1_8', '1_9', '2_1'} 
+        p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,smaller,dimFlankers,dimmerTarget,strongerFlanker,fullFlankers,flanksToggleToo,varyPosition}) 
     case '2_0'
         p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,shrinking,varyTargetPos})
     case '2_2' %detection first learn on linearized small thin target
-        p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,smaller,dimFlankers,dimmerTarget,strongerFlanker,fullFlankers,flanksToggleToo,varyPosition,vvVH,vvPhases,vvOffsets,vvPhasesOffset,vvVHOffsets})
+        p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,smaller,dimFlankers,dimmerTarget,flanksToggleToo,varyPosition}) %
+    case {'2_3','2_4'} %sweep contrast as first expt, then position, then orientation; manual graduations don't control order
+        p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,smaller,dimFlankers,dimmerTarget,flanksToggleToo,sweepContrast,sweepFlankerPosition,sweepFlankerOrientation})
     otherwise
         error('bad protocol type')
 end
@@ -408,9 +465,10 @@ for i=1:size(subjects,2)
     if ~any(strcmp(subjects{i}, getSubjectIDs(r)))
         allIDs = getSubjectIDs(r)
         thisID = subjects{i}
-        error('rats should already be there')
-        %         s = subject(char(subjects(i)), 'rat', 'long-evans', 'male', '01/01/2005', '01/02/2005', 'unknown', 'Jackson Laboratories');
-        %         r=addSubject(r,s,'pmm');
+        %error('rats should already be there')
+        warndlg(sprintf('adding rat %s',subjects{i}),'rats should already be there')
+        s = subject(char(subjects(i)), 'rat', 'long-evans', 'male', '01/01/2005', '01/02/2005', 'unknown', 'Jackson Laboratories');
+        r=addSubject(r,s,'pmm');
     else
         s = getSubjectFromID(r, subjects{i});
     end
@@ -424,8 +482,8 @@ for i=1:size(subjects,2)
         stepNum=1;
     end
 
-%     stepNum
-%     subjects(i)
+     stepNum
+     subjects(i)
     [s  r]=setProtocolAndStep(s ,p,1,0,1,stepNum,r,'from pmm master Shaping','pmm');
     if persistTrainingSteps
         r=setValuesFromMiniDatabase(s,r,miniDatabasePath);
@@ -462,7 +520,11 @@ if stimTest
     trialRecords = [];
 
     stimManager=getStimManager(thinner)
-    [stimManager junk2 im a b c d e details] = calcStim(stimManager,trialManagerClass,frameRate,responsePorts,totalPorts,width,height,trialRecords);
+    resolutions=[];
+    displaySize=[];
+    LUTbits=[];
+    [stimManager junk2 resInd im a b c d e details interTrialLuminance text] =...
+        calcStim(stimManager,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords);
     details
     subplot(1, 2, 1); imagesc(im(:,:,1))
     subplot(1, 2, 2); imagesc(im(:,:,2))

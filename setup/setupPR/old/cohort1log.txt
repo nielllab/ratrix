@@ -1,0 +1,16 @@
+04-Dec-2008 19:21:25 finished setting 285 to step 3 of p2
+04-Dec-2008 19:21:30 finished setting 287 to step 3 of p2
+04-Dec-2008 19:21:34 finished setting 290 to step 1 of p2
+06-Dec-2008 09:35:58 finished setting 290 to step 2 of p2
+11-Dec-2008 09:38:44 finished setting 285 to step 7 of p2
+11-Dec-2008 09:38:48 finished setting 287 to step 7 of p2
+11-Dec-2008 09:48:54 finished setting 285 to step 7 of p2
+11-Dec-2008 09:49:00 finished setting 287 to step 7 of p2
+11-Dec-2008 09:59:57 finished setting 285 to step 3 of p2
+11-Dec-2008 10:00:01 finished setting 287 to step 3 of p2
+12-Dec-2008 23:10:32 finished setting 285 to step 7 of p2
+12-Dec-2008 23:10:37 finished setting 287 to step 7 of p2
+13-Dec-2008 09:25:44 finished setting 285 to step 7 of p2
+13-Dec-2008 09:25:49 finished setting 287 to step 7 of p2
+13-Dec-2008 09:44:51 finished setting 285 to step 1 of p3
+13-Dec-2008 09:44:55 finished setting 287 to step 1 of p3

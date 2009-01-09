@@ -75,3 +75,5 @@ if strcmp(trialManagerClass,'nAFC') && details.correctionTrial
 else
     text=sprintf('pixPerCyc: %g',details.pixPerCyc);
 end
+
+end % end function

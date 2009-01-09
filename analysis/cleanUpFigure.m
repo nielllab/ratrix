@@ -1,36 +1,57 @@
-function cleanUpFigure(f,turnOffTics)
+function cleanUpFigure(f,settings)
 
-if ~exist('turnOffTics','var')
-   turnOffTics=0;
+
+if ~exist('settings','var') || isempty(settings)
+   settings.default=1;
+end
+
+if ~ismember('turnOffLines',fields(settings)) 
+   settings.turnOffLines=0;
+end
+
+if ~ismember('turnOffTics',fields(settings)) 
+    settings.turnOffTics=0;
+end
+
+if ~ismember('LineWidth',fields(settings)) 
+    settings.LineWidth=1.5;
 end
 
 
+if ~ismember('AxisLineWidth',fields(settings)) 
+    settings.AxisLineWidth=2;
+end
+
+if ~ismember('fontSize',fields(settings)) 
+    settings.fontSize=14;
+end
+
 for i=1:length(f)
     if strcmp(get(f(i),'type'), 'figure')
-    get(f(i))
+    %get(f(i))
     set(f(i),'Color',[1 1 1])
-    children=get(f(i), 'Children')
-    doClassSpecificAction(children,turnOffTics)
+    children=get(f(i), 'Children');
+    doClassSpecificAction(children,settings)
     end
 end
 
 
-function doClassSpecificAction(children,turnOffTics)
+function doClassSpecificAction(children,settings)
 % childrenTypes=get(children,'type')
 for j=1:length(children)
 %     childrenTypes(j)
 %     class(childrenTypes(j))
-    childType=get(children(j),'type')
-
+    childType=get(children(j),'type');
+    sprintf(childType);
     switch childType
         case 'axes'
-            succ=cleanUpThisAxis(children(j),turnOffTics);
+            succ=cleanUpThisAxis(children(j),settings);
         case 'line'
-            succ=cleanUpThisLine(children(j));
+            succ=cleanUpThisLine(children(j),settings);
         case 'text'
-            succ=cleanUpThisText(children(j));
+            succ=cleanUpThisText(children(j),settings);
         case 'hggroup'
-            succ=cleanUpThisHgGroup(children(j));
+            succ=cleanUpThisHgGroup(children(j),settings);
         otherwise
             disp(sprintf('Not doing anything to %s', childType))
     end
@@ -38,36 +59,42 @@ for j=1:length(children)
 end
 
 
-function succ=cleanUpThisAxis(a,turnOffTics)
+function succ=cleanUpThisAxis(a,settings)
 % get(a)
 set(a,'FontName', 'Helvetica')
-set(a,'FontSize', 30)
-set(a,'LineWidth', 2)
-if turnOffTics
+set(a,'FontSize', settings.fontSize)
+set(a,'LineWidth', settings.AxisLineWidth)
+if settings.turnOffTics
     set(a,'TickLength', [0.001 0])
 end
-%set(a,'TickLength', [0.01 0.025])
 set(a,'TickDir', 'out')
-%set(gca,'fontSize', 14)
-children=get(a, 'Children')
-doClassSpecificAction(children)
+set(gca,'fontSize', settings.fontSize)
+children=get(a, 'Children');
+doClassSpecificAction(children,settings)
 succ=1;
 
 
-function succ=cleanUpThisLine(h)
+function succ=cleanUpThisLine(h,settings)
 % get(h)
-set(h,'LineWidth', 2.0) %change back to 1.5
-% set(h,'MarkerSize', 4)
+if ~settings.turnOffLines
+    set(h,'LineWidth', settings.LineWidth) 
+    % set(h,'MarkerSize', 4)
+end
 succ=1;
 
-function succ=cleanUpThisText(t)
+function succ=cleanUpThisText(t,settings)
 % get(t)
-%set(t,'fontSize',14)
+set(t,'fontSize',settings.fontSize)
 succ=1;
 
 
-function succ=cleanUpThisHgGroup(h)
-get(h)
-set(h,'LineWidth', 2.0) %change back to 1.5 later
+function succ=cleanUpThisHgGroup(h,settings)
+%get(h)
+children=get(h, 'Children');
+doClassSpecificAction(children,settings)
+if ~settings.turnOffLines
+    set(h,'LineWidth',settings.LineWidth) %%once upon a time it errored on:
+    % f=figure; flankerAnalysis(removeSomeSmalls(getSmalls('102'),d.step~=12),  'twoFlankers', 'performancePerDeviationPerCondition','pctYes',  'none', false); cleanUpFigure(f)
+end
 succ=1;
 

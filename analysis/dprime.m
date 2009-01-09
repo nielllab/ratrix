@@ -22,7 +22,7 @@ function [dpr,anal] = dprime(responses,answers,varargin);
 %   was absent/was reported as absent. Default = 1.
 %
 %   'presentVal',[value]: value in responses/answers which reflects
-%   stimulus was present/was reported as present. Default = 2.
+%   stimulus was present/was reported as present. Default = 3.
 %%   'silent': Don't print out the results of analysis in the command
 %   window.%
 % This only analyzes responses for those trials in which the subject

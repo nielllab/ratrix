@@ -1,0 +1,47 @@
+# BAYESIAN SIGNAL DETECTION THEORY 
+# V2 FOR MULTIPLE DATA SETS
+#
+# INPUT VARIABLES
+# H[i], F[i], M[i], C[i] are the hit, false alarm, miss and correct rejection signal detection counts per dataset
+# NDATASETS is the number of datasets
+#
+# OUTPUT VARIABLES
+# d[i] is discriminability per dataset
+# h[i], f[i] are the hit and false-alarm rates per dataset
+# c[i], k[i], b[i] are measures of bias per dataset
+
+model	{
+
+   for (i in 1:NDATASETS){
+      # Relating observed counts to underlying Hit and False Alarm rates
+      # Number of Signal Trials is sum of Hit and Miss counts
+      S[i] <- H[i]+M[i]
+      # Number of Noise Trials is sum of False Alarm and Correct Rejection counts
+      N[i] <- F[i]+C[i]
+      # Hit counts are Binomial
+      H[i] ~ dbin(h[i],S[i])
+      # False alarm counts are Binomial
+      F[i] ~ dbin(f[i],N[i])
+   }
+
+   # Reparameterization, converting Hit and False Alarm rates
+   #   to Discriminability and Bias indices
+   #   Using Equal-variance Gaussian Signal Detection Theory Model
+   for (i in 1:NDATASETS){
+      h[i] <- phi(d[i]/2-c[i])
+      f[i] <- phi(-d[i]/2-c[i])
+      k[i] <- d[i]/2+c[i]
+      b[i] <- d[i]*c[i]
+   }
+   
+   # These priors over Discriminability and Bias correspond 
+   #   to uniform priors over the Hit and False Alarm rates
+   MEAND <- 0
+   MEANC <- 0
+   LAMBDAD <- 1/2
+   LAMBDAC <- 2
+   for (i in 1:NDATASETS){
+      c[i] ~ dnorm(MEANC,LAMBDAC)
+      d[i] ~ dnorm(MEAND,LAMBDAD)
+   }
+}

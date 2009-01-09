@@ -18,18 +18,33 @@ function compileDetailedRecords(server_name,ids,recompile,source,destination)
 
 % ==============================================================================================
 % set up parameters if not passed in
-if (~exist('server_name','var') || isempty(server_name)) && (~exist('ids','var') || isempty(ids))
-    error('we need a server_name to know which subjects to compile, or need a list of ids passed in')
+if (~exist('server_name','var') || isempty(server_name)) && (~exist('ids','var') || isempty(ids)) ...
+        && (~exist('source','var') || isempty(source))
+    error('we need a server_name to know which subjects to compile, or need a list of ids passed in, or at least a source to look in')
 end
 if ~exist('recompile','var') || isempty(recompile)
     recompile = false;
 end
-if ~exist('ids','var') || isempty(ids) % if ids not given as input, retrieve from oracle
-    conn = dbConn();
-    ids = getSubjectIDsFromServer(conn, server_name);
-    closeConn(conn);
-    if isempty(ids)
-        error('could not find any subjects for this server: %s', server_name);
+if ~exist('ids','var') || isempty(ids) % if ids not given as input, retrieve from oracle or from source
+    if exist('server_name','var') && ~isempty(server_name)
+        % get from oracle b/c server_name is provided
+        conn = dbConn();
+        ids = getSubjectIDsFromServer(conn, server_name);
+        closeConn(conn);
+        if isempty(ids)
+            error('could not find any subjects for this server: %s', server_name);
+        end
+    elseif exist('source','var') && ~isempty(source)
+        % get from source directory b/c server_name is not provided
+        ids={};
+        d=dir(source);
+        for i=1:length(d)
+            if d(i).isdir
+                ids{end+1} = d(i).name;
+            end
+        end
+    else
+        error('should not be here - must either have a server_name or a source if no subjectIDs are given');
     end
 end
 

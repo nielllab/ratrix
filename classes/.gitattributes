@@ -38,14 +38,6 @@ protocols/trialManagers/@phasednAFC/stationOKForTrialManager.m -text
 protocols/trialManagers/@phasednAFC/getResponsePorts.m -text
 protocols/trialManagers/@phasednAFC/getPhaseCriteria.m -text
 protocols/trialManagers/@phasednAFC/phasednAFC.m -text
-protocols/stimManagers/@examplePhased/stimMgrOKForTrialMgr.m -text
-protocols/stimManagers/@examplePhased/fillLUT.m -text
-protocols/stimManagers/@examplePhased/getLUT.m -text
-protocols/stimManagers/@examplePhased/setScaleFactor.m -text
-protocols/stimManagers/@examplePhased/calcStim.asv -text
-protocols/stimManagers/@examplePhased/flushLUT.m -text
-protocols/stimManagers/@examplePhased/examplePhased.m -text
-protocols/stimManagers/@examplePhased/calcStim.m -text
 protocols/stimManagers/@crossModal/crossModal.m -text
 protocols/stimManagers/@crossModal/display.m -text
 protocols/stimManagers/@crossModal/calcStim.m -text
@@ -160,8 +152,6 @@ protocols/trialManagers/@phasedTrialManager/validateStimSpecs.m -text
 protocols/trialManagers/@phasedTrialManager/runRealTimeLoop.m -text
 protocols/trialManagers/@phasedTrialManager/stimOGL_OLD.m -text
 protocols/trialManagers/@phasedTrialManager/handlePhasedTrialLogic.m -text
-protocols/stimManagers/@examplePhased/getPhaseCriteria.m -text
-protocols/stimManagers/@examplePhased/getPhases.m -text
 db/@dbConn/getCompilePathBySubject.m -text
 db/@dbConn/getFreeWaterHistory.m -text
 protocols/reinforcementManagers/@constantReinforcement/setRewardSizeULorMS.m -text

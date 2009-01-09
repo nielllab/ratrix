@@ -19,3 +19,4 @@
 /stopEyeTracking.m -text
 /calibrateEyeTracker.m -text
 /setReinforcementParam.m -text
+/changeAllPercentCorrectionTrials.m -text

@@ -375,35 +375,54 @@ if plotDPrime || plotCombinedDetails
     end
 
 
-    conditionInds=getFlankerConditionInds(d,goods);
+    [conditionInds names haveData colors]=getFlankerConditionInds(d,goods,'colin+3');
 
-    %make fake data of the same size (eventually rand shuffle or monte carlo)
-    fakeData.correctResponseIsLeft=int8(rand(1,totalTrials)>0.5);
-    fakeData.correctResponseIsLeft(find(fakeData.correctResponseIsLeft==0))=-1;
-    fakeData.response=uint8(rand(1,totalTrials)>0.5);
-    fakeData.response(find(fakeData.response==1))=3; %set lefts
-    fakeData.response(find(fakeData.response==0))=1; %set rights
-    %shuffleData.correctResponseIsLeft=
-    %randperm(totalTrials) OR randperm(sum(goods))
+    %make fake data of the same size 
+    %fakeData.correctResponseIsLeft=int8(rand(1,totalTrials)>0.5);
+    %fakeData.correctResponseIsLeft(find(fakeData.correctResponseIsLeft==0))=-1;
+    %fakeData.response=uint8(rand(1,totalTrials)>0.5);
+    %fakeData.response(find(fakeData.response==1))=3; %set lefts
+    %fakeData.response(find(fakeData.response==0))=1; %set rights
+    
+    shuffleData=d;
+    %shuffle data has animal responses scambled, but the computers definition of
+    %correct side is held constant, current method the shuffle is blind to
+    %"goods" vs. CTs, or other trials
+    
+    %shuffleData.correctResponseIsLeft= randperm(totalTrials) OR randperm(sum(goods)) %but better to permute the animals responses, not the given trials!
 
-    %d-prime calcs per day
-    [fakeDpr]=dprimePerConditonPerDay(trialsCompletedBy,conditionInds,goods,fakeData);
-    [dpr more]=dprimePerConditonPerDay(trialsCompletedBy,conditionInds,goods,d);
+    %d-prime calcs per chunk
+    chunkSize=10000;
+    trialsPerChunk=repmat(chunkSize,1,floor(totalTrials/chunkSize)) ; %ignore the last partial-chunk if less than chunk size
+    %trialsPerChunk=trialsPerDay;
+    trialsCompletedBy=cumsum(trialsPerChunk);
+    trialsCompletedBefore=[0 trialsCompletedBy(1:end-1)];
+    for i=1:length(trialsPerChunk)
+        shuffledInds=trialsCompletedBefore(i)+randperm(trialsPerChunk(i)); %shuffled within day
+        shuffleData.response(trialsCompletedBefore(i)+1:trialsCompletedBy(i))=d.response(shuffledInds);
+    end
+        
+    [dpr more]  =dprimePerConditonPerDay(trialsCompletedBy,conditionInds,goods,d);
+    %[fakeDpr]   =dprimePerConditonPerDay(trialsCompletedBy,conditionInds,goods,fakeData);
+    [shuffleDpr]=dprimePerConditonPerDay(trialsCompletedBy,conditionInds,goods,shuffleData);
+    
     %all days
-    [dprAll]=    dprimePerConditonPerDay(totalTrials,conditionInds,goods,d);
-    [fakeDprAll]=dprimePerConditonPerDay(totalTrials,conditionInds,goods,fakeData);
-
-    plot(ones(size(fakeDprAll(1:5,:))),fakeDprAll(1:5,:)','co','MarkerSize',10)
-    plot(ones(size(    dprAll(1:5,:))),    dprAll(1:5,:)','ko','MarkerSize',10)
-    plot(1                     ,    dprAll(  2,:)','ro','MarkerSize',10)
-    plot(1                     ,    dprAll(  6,:)','go','MarkerSize',10)
-    plot(1                     ,    dprAll(  7,:)','bo','MarkerSize',10)
-
-    plot(repmat(trialsCompletedBy,7,1)',fakeDpr(1:7,:)','c.')
-    plot(repmat(trialsCompletedBy,7,1)',dpr(1:7,:)','k.')
-    plot(repmat(trialsCompletedBy,1,1)',dpr(  2,:)','r.')
-    plot(repmat(trialsCompletedBy,1,1)',dpr(  6,:)','g.')
-    plot(repmat(trialsCompletedBy,1,1)',dpr(  7,:)','b.')
+    [dprAll]       =dprimePerConditonPerDay(totalTrials,conditionInds,goods,d);
+    %[fakeDprAll]   =dprimePerConditonPerDay(totalTrials,conditionInds,goods,fakeData);
+    [shuffleDprAll]=dprimePerConditonPerDay(totalTrials,conditionInds,goods,shuffleData);
+    
+    %plot(ones(size(dprAll)),fakeDprAll'   ,'o', 'MarkerSize',10,'color',[.8,.8,.8])
+    plot(ones(size(dprAll)),shuffleDprAll','o', 'MarkerSize',10,'color',[.6,.7,.8])
+    plot(ones(size(dprAll)),dprAll'       ,'ko','MarkerSize',10)
+    %plot(repmat(trialsCompletedBy, size(dpr,1),1)',fakeDpr',   '.','color',[.8,.8,.8])
+    plot(repmat(trialsCompletedBy, size(dpr,1),1)',shuffleDpr','.','color',[.6,.7,.8])
+    plot(repmat(trialsCompletedBy, size(dpr,1),1)',dpr','k.')
+    
+    for i=haveData
+        plot(1,dprAll(  i,:)','o','MarkerSize',10,'color',colors(i,:))
+        plot(trialsCompletedBy',dpr( i,:)','.','color',colors(i,:))
+    end 
+    
     axis( [1 max([totalTrials 2]) -.5 max([max(dpr(~isinf(dpr(:)))) 1])   ])
     ylabel('dprime')
 end
@@ -723,68 +742,208 @@ end
 
 
 if plotLocallyNormalizedEffect
-    [conditionInds names hasData]=getFlankerConditionInds(d,goods);
-    conditionInds=conditionInds(hasData,:);
-    names=names(hasData);
-    effectType='usePctCorrect';
-    switch effectType
-        case 'useDpr'
-            smoothingWidth=500;
-
-
-            %Some coding work needs to be done here!!!**!!!*
-            segments=[smoothingWidth:smoothingWidth:(floor(totalTrials/smoothingWidth))*smoothingWidth];
-            blockEnds=[segments totalTrials];
-            [dpr dprStats]=dprimePerConditonPerDay(blockEnds,conditionInds,goods,d);
-
-
-            normDpr=log(dpr(2:end,:)./repmat(dpr(1,:),6,1)); %d prime log ratio\
-            normEffect=normDpr;
-            edges=[-1:0.1:1]; %need to choose a better range for log ratio in subsequent histogram
-        case 'usePctCorrect'
-            smoothingWindow=100;
-            lastGoodTrial= cumsum(conditionInds,2);
-            ignoreBefore=max(sum(lastGoodTrial'==0))+1;
-            lastGoodTrial(lastGoodTrial==0)=1;
-            lastPerformance=zeros(size(conditionInds));
-            for i=1:size(conditionInds,1)
-                [performance ]=calculateSmoothedPerformances(d.correct(goods & conditionInds(i,:))',smoothingWindow,'boxcar','powerlawBW');
-                lastPerformance(i,:)=performance(lastGoodTrial(i,:));
-
-            end
-            %this evaluates the extent to which a particular condition is
-            %larger than all combined conditions.  Each value (particular and combined)
-            %is based on N values, where N is the size of the smoothing
-            %window
-            betterThanOthers=lastPerformance(2:end,ignoreBefore:end)-repmat(lastPerformance(1,ignoreBefore:end),size(conditionInds,1)-1,1);
-            normEffect=betterThanOthers;
-            edges=[-0.3:0.01:0.3];%+/-30 percentCorrect
-        otherwise
-            error('unknown feature for normalized effect')
-    end
-
-
-    if (subplotParams.x==1) && (subplotParams.y==1)
-        figure(handles(12));
-
-        title(sprintf ('Normalized Effect %s ', subject));
-        ylabel('A'); xlabel('B');
-        n=size(normEffect,1);
-        for i=1:n
-            count=histc(normEffect(i,:),edges);
-            subplot(n,1,i)
-            bar(edges,count,'histc')
+  
+        [conditionInds names haveData colors]=getFlankerConditionInds(d,goods,'colin+3');
+         shuffleData=d;
+    
+        %effect normalized per chunk
+        chunkSize=6000;
+        trialsPerChunk=repmat(chunkSize,1,floor(totalTrials/chunkSize)) ; %ignore the last partial-chunk if less than chunk size
+        trialsCompletedBy=cumsum(trialsPerChunk);
+        trialsCompletedBefore=[0 trialsCompletedBy(1:end-1)];
+        for i=1:length(trialsPerChunk)
+            shuffledInds=trialsCompletedBefore(i)+randperm(trialsPerChunk(i)); %shuffled within day
+            shuffleData.response(trialsCompletedBefore(i)+1:trialsCompletedBy(i))=d.response(shuffledInds);
         end
-        %why is there a dip in the histograms?
-        %consider adding a vertical slash for the mean of the distribution
-        %consider color coding better
-        %don't forget to add a noise distribution for statistical significance
+        
+        [pct more]  =performancePerConditionPerDay(trialsCompletedBy,conditionInds,goods,d);
+        [shufflePct shuffleMore]=performancePerConditionPerDay(trialsCompletedBy,conditionInds,goods,shuffleData);
+        [delta CI]=collinearVsOtherCI(more,names);
+        [shuffleDelta shuffleCI]=collinearVsOtherCI(shuffleMore,names); %generalized alternate: compareAtoBbinofit
+        
+        %all days
+        [pctAll pctAllMore]              =performancePerConditionPerDay(totalTrials,conditionInds,goods,d);
+        [shufflePctAll shufflePctAllMore]=performancePerConditionPerDay(totalTrials,conditionInds,goods,shuffleData);
+        [deltaAll CIAll]=collinearVsOtherCI(pctAllMore,names);
+        [shuffleDeltaAll shuffleCIAll]=collinearVsOtherCI(shufflePctAllMore,names); %generalized alternate: compareAtoBbinofit
+        
+        
+        if (subplotParams.x==1) && (subplotParams.y==1)
+            figure(handles(12));
+            subplot(122); hold on
+            title(who)
+            effect=pct(1,:)-mean(pct(2:4,:));
+            %outliers=abs(effect)>20;
+            outliers=zeros(size(effect))
+            %errorbar(1:length(delta),delta,delta-CI(1,:),CI(2,:)-delta)
+            plot([repmat(1:length(delta),2,1)],[delta; CI(2,:)],'color',[1 0 0])
+            plot([1:length(delta)],[delta],'ro')
+            plot(0,deltaAll,'o','MarkerSize',10,'color',[1 0 0]) %all of them combined
+            plot([repmat(0,2,1)],[deltaAll; CIAll(2,:)],'color',[1 0 0],'LineWidth',5)
+            plot(effect,'r.','MarkerSize',10)
+            plot(get(gca,'XLim'),[0 0],'k')
+            plot(get(gca,'XLim'),[deltaAll deltaAll],'--','color',[1,0,0])
+            axis([get(gca,'XLim') -0.1 0.1])
 
-        %axis([0 1 0 1])
-    else
-        figure(handles(12)); subplot(subplotParams.y, subplotParams.x, subplotParams.index)
+            subplot(121); hold on
+            title('shuffle control')
+            effect=shufflePct(1,:)-mean(shufflePct(2:4,:));
+            %outliers=abs(effect)>20;
+            outliers=zeros(size(effect))
+            plot([repmat(1:length(shuffleDelta),2,1)],[shuffleDelta; shuffleCI(2,:)],'color',[.6,.7,.8])
+            plot([1:length(shuffleDelta)],[shuffleDelta],'o','color',[.6,.7,.8])
+            plot(0,shuffleDeltaAll,'o','MarkerSize',10,'color',[.6,.7,.8]) %all of them combined
+            plot([repmat(0,2,1)],[shuffleDeltaAll; shuffleCIAll(2,:)],'color',[1 0 0],'LineWidth',5)
+            plot(effect,'.','MarkerSize',10,'color',[.6,.7,.8])
+            plot(get(gca,'XLim'),[0 0],'k')
+            plot(get(gca,'XLim'),[shuffleDeltaAll shuffleDeltaAll],'--','color',[.6,.7,.8])
+            axis([get(gca,'XLim') -0.1 0.1])
+            ylabel('difference in pctCorrect (colinear-avg other conditions)')
+            xlabel('chunk of trials')
 
-    end
+        else
+            figure(handles(12)); subplot(subplotParams.y, subplotParams.x, subplotParams.index)
+            title(subject);
+            effect=pct(1,:)-mean(pct(2:4,:));
+            hold on;
+            %errorbar(1:length(delta),delta,delta-CI(1,:),CI(2,:)-delta)
+            plot([repmat(1:length(delta),2,1)],[delta; CI(2,:)],'color',[1 0 0])
+            plot([1:length(delta)],[delta],'ro')
+            plot(0,deltaAll,'o','MarkerSize',10,'color',[1 0 0]) %all of them combined
+            plot([repmat(0,2,1)],[deltaAll; CIAll(2,:)],'color',[1 0 0],'LineWidth',5)
+            plot(effect,'r.','MarkerSize',10)
+            plot(get(gca,'XLim'),[0 0],'k')
+            plot(get(gca,'XLim'),[deltaAll deltaAll],'--','color',[1,0,0])
+            axis([get(gca,'XLim') -0.1 0.1])
+        end
+       
+        
+        if 0 %raw performance unnormalized
+            figure
+            plot(ones(size(pctAll)),shufflePctAll','o', 'MarkerSize',10,'color',[.6,.7,.8])
+            plot(ones(size(pctAll)),pctAll'       ,'ko','MarkerSize',10)
+            plot(repmat(trialsCompletedBy, size(pct,1),1)',shufflePct','.','color',[.6,.7,.8])
+            plot(repmat(trialsCompletedBy, size(pct,1),1)',pct','k.')
+
+            for i=haveData
+                plot(1,pctAll(  i,:)','o','MarkerSize',10,'color',colors(i,:))
+                plot(trialsCompletedBy',pct( i,:)','.','color',colors(i,:))
+            end
+            %axis( [1 max([totalTrials 2]) -.5 max([max(dpr(~isinf(dpr(:)))) 1])   ])
+            axis([get(gca,'XLim') 0 1])
+            ylabel('pct Correct')
+        end
+
+
+         %dpr - good but no CI
+        % [dpr]  =dprimePerConditonPerDay(trialsCompletedBy,conditionInds,goods,d);
+        % [shuffleDpr]=dprimePerConditonPerDay(trialsCompletedBy,conditionInds,goods,shuffleData);
+        % [dprAll]       =dprimePerConditonPerDay(totalTrials,conditionInds,goods,d);
+        % [shuffleDprAll]=dprimePerConditonPerDay(totalTrials,conditionInds,goods,shuffleData);
+        % plot(ones(size(dprAll)),shuffleDprAll','o', 'MarkerSize',10,'color',[.6,.7,.8])
+        % plot(ones(size(dprAll)),dprAll'       ,'ko','MarkerSize',10)
+        % plot(repmat(trialsCompletedBy, size(dpr,1),1)',shuffleDpr','.','color',[.6,.7,.8])
+        % plot(repmat(trialsCompletedBy, size(dpr,1),1)',dpr','k.')
+        % for i=haveData
+        %     plot(1,dprAll(  i,:)','o','MarkerSize',10,'color',colors(i,:))
+        %     plot(trialsCompletedBy',dpr( i,:)','.','color',colors(i,:))
+        % end
+        % %axis( [1 max([totalTrials 2]) -.5 max([max(dpr(~isinf(dpr(:)))) 1])   ])
+        % axis([get(gca,'XLim') -2 2])
+        % ylabel('dprime')
+        %
+        % figure(gcf+1) %dpr
+        % subplot(122); hold on
+        % title(who)
+        % effect=dpr(1,:)-mean(dpr);
+        % outliers=abs(effect)>20;
+        % plot(effect,'r.','MarkerSize',10)
+        % plot(get(gca,'XLim'),[0 0],'k')
+        % plot(get(gca,'XLim'),[mean(effect(~outliers)) mean(effect(~outliers))],'--','color',[1,0,0])
+        % axis([get(gca,'XLim') -0.5 0.5])
+        % 
+        % subplot(121); hold on
+        % title('shuffle control')
+        % effect=shuffleDpr(1,:)-mean(shuffleDpr);
+        % outliers=abs(effect)>20;
+        % plot(effect,'.','MarkerSize',10,'color',[.6,.7,.8])
+        % plot(get(gca,'XLim'),[0 0],'k')
+        % plot(get(gca,'XLim'),[mean(effect(~outliers)) mean(effect(~outliers))],'--','color',[.6,.7,.8])
+        % axis([get(gca,'XLim') -0.5 0.5])
+        % ylabel('difference in dprime (colinear-avg other conditions)')
+        % xlabel('chunk of trials')
+
+        
+        
+ 
+        
+        
+        %OLD OLD NORMALIZED STUFF - not independent samples!
+  
+        
+        
+%     [conditionInds names hasData]=getFlankerConditionInds(d,goods);
+%     conditionInds=conditionInds(hasData,:);
+%     names=names(hasData);
+%     effectType='usePctCorrect';
+%     switch effectType
+%         case 'useDpr'
+%             smoothingWidth=500;
+% 
+% 
+%             %Some coding work needs to be done here!!!**!!!*
+%             segments=[smoothingWidth:smoothingWidth:(floor(totalTrials/smoothingWidth))*smoothingWidth];
+%             blockEnds=[segments totalTrials];
+%             [dpr dprStats]=dprimePerConditonPerDay(blockEnds,conditionInds,goods,d);
+% 
+% 
+%             normDpr=log(dpr(2:end,:)./repmat(dpr(1,:),6,1)); %d prime log ratio\
+%             normEffect=normDpr;
+%             edges=[-1:0.1:1]; %need to choose a better range for log ratio in subsequent histogram
+%         case 'usePctCorrect'
+%             smoothingWindow=100;
+%             lastGoodTrial= cumsum(conditionInds,2);
+%             ignoreBefore=max(sum(lastGoodTrial'==0))+1;
+%             lastGoodTrial(lastGoodTrial==0)=1;
+%             lastPerformance=zeros(size(conditionInds));
+%             for i=1:size(conditionInds,1)
+%                 [performance ]=calculateSmoothedPerformances(d.correct(goods & conditionInds(i,:))',smoothingWindow,'boxcar','powerlawBW');
+%                 lastPerformance(i,:)=performance(lastGoodTrial(i,:));
+% 
+%             end
+%             %this evaluates the extent to which a particular condition is
+%             %larger than all combined conditions.  Each value (particular and combined)
+%             %is based on N values, where N is the size of the smoothing
+%             %window
+%             betterThanOthers=lastPerformance(2:end,ignoreBefore:end)-repmat(lastPerformance(1,ignoreBefore:end),size(conditionInds,1)-1,1);
+%             normEffect=betterThanOthers;
+%             edges=[-0.3:0.01:0.3];%+/-30 percentCorrect
+%         otherwise
+%             error('unknown feature for normalized effect')
+%     end
+% 
+% 
+%     if (subplotParams.x==1) && (subplotParams.y==1)
+%         figure(handles(12));
+% 
+%         title(sprintf ('Normalized Effect %s ', subject));
+%         ylabel('A'); xlabel('B');
+%         n=size(normEffect,1);
+%         for i=1:n
+%             count=histc(normEffect(i,:),edges);
+%             subplot(n,1,i)
+%             bar(edges,count,'histc')
+%         end
+%         %why is there a dip in the histograms?
+%         %consider adding a vertical slash for the mean of the distribution
+%         %consider color coding better
+%         %don't forget to add a noise distribution for statistical significance
+% 
+%         %axis([0 1 0 1])
+%     else
+%         figure(handles(12)); subplot(subplotParams.y, subplotParams.x, subplotParams.index)
+% 
+%     end
 end
 
 
@@ -1039,8 +1198,6 @@ end
 %saveas(responseRasterFig,[savePath '/graphs/' subject '-ResponseRaster-' datestr(max(date),29) '.png'],'png');
 %saveas(rgbImFig,[savePath '/graphs/' subject '-ResponseDensity-' datestr(max(date),29) '.png'],'png');
 %end
-
-
 
 % temp=diff(find(d.correctionTrial==0))-1;
 % runLenghthCT=temp(find(temp~=0));

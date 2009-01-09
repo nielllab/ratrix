@@ -1,0 +1,40 @@
+# BAYESIAN SIGNAL DETECTION THEORY 
+# V1 FOR SINGLE DATA SET
+#
+# INPUT VARIABLES
+# H, F, M, C are the hit, false alarm, miss and correct rejection signal detection counts
+#
+# OUTPUT VARIABLES
+# d, k are discriminability and criterion
+# h, f are the hit and false-alarm rates
+# c, b are measures of bias 
+
+model	{
+
+   # Relating observed counts to underlying Hit and False Alarm rates
+   # Number of Signal Trials is sum of Hit and Miss counts
+   S <- H+M
+   # Number of Noise Trials is sum of False Alarm and Correct Rejection counts
+   N <- F+C
+   # Hit counts are Binomial
+   H ~ dbin(h,S)
+   # False alarm counts are Binomial
+   F ~ dbin(f,N)
+
+   # Reparameterization, converting Hit and False Alarm rates
+   #   to Discriminability and Bias indices
+   h <- phi(d/2-c)
+   f <- phi(-d/2-c)
+   k <- d/2+c
+   b <- d*c
+   
+   # These priors over Discriminability and Bias correspond 
+   #   to uniform priors over the Hit and False Alarm rates
+   MEAND <- 0
+   MEANC <- 0
+   LAMBDAD <- 1/2
+   LAMBDAC <- 2
+   c ~ dnorm(MEANC,LAMBDAC)
+   d ~ dnorm(MEAND,LAMBDAD)
+
+}

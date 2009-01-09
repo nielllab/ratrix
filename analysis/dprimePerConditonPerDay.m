@@ -19,10 +19,10 @@ for day=1:days
     for c=1:conditions
         
         %select indices
-        which=trialRange & conditionInds(c,:);
+        which=trialRange & conditionInds(c,:) & goods;
         
         %choose trials with no signal
-        whichNoSig=trialRange & conditionInds(c,:) & (smallData.correctResponseIsLeft==1);
+        whichNoSig=trialRange & conditionInds(c,:) & goods & smallData.targetContrast==0;  %(smallData.correctResponseIsLeft==1); % can't do this without knowing stim manager was left or right
 
         restrictSampleOfNoSig=0;   %if =0 then dprime will sample more (accoss "what contrast would have been") to get a better estimate of the no signal case
         if restrictSampleOfNoSig
@@ -52,10 +52,11 @@ for day=1:days
             %do analysis
              [dpr(c,day) anal]=dprime(smallData.response(which | whichNoSig),smallData.correctAnswerID(which | whichNoSig),flag);
              more{c,day}=anal;
+             
         else
             disp(sprintf('day %d, condition %d -- no responses',day,c))
             beep
-            dpr(c,day)=-99;
+            dpr(c,day)=nan;
             more{c,day}=[];
         end
         

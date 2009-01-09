@@ -1,4 +1,4 @@
-function  doPlotPercentCorrect(d,which,smoothingWidth,threshold,axMin,axMax,dayTransitionsOn,addSteps,plotCorrectionTrialsToo,plotAfterErrorsToo, markTrialsToThreshold,addManualChangeMarker,conditionInds)
+function  performanceOutput=doPlotPercentCorrect(d,which,smoothingWidth,threshold,axMin,axMax,dayTransitionsOn,addSteps,plotCorrectionTrialsToo,plotAfterErrorsToo, markTrialsToThreshold,addManualChangeMarker,conditionInds)
 %d is the smallData
 %which is a logical of whats plotted, typically filtered for "good trials"
 %smoothing width is length of a boxcar filter
@@ -170,6 +170,7 @@ end
 %plot MAIN good performance
 [performanceOnGood colors]=calculateSmoothedPerformances(d.correct(which)',smoothingWidth,'boxcar','powerlawBW');
 plot(find(which),performanceOnGood,'color',[0,0,0], 'linewidth', 2)
+performanceOutput=performanceOnGood;
 
 %add on day transitions
 if dayTransitionsOn

@@ -1,11 +1,15 @@
 function s=ifFeatureGoRightWithTwoFlank(varargin)
 % ||ifFeatureGoRightWithTwoFlank||  class constructor.
 %derived from cuedGoToFeatureWithTwoFlank
-% s = ifFeatureGoRightWithTwoFlank([pixPerCycs],[goRightOrientations],[goLeftOrientations],[flankerOrientations],topYokedToBottomFlankerOrientation,topYokedToBottomFlankerContrast,[goRightContrast],[goLeftContrast],[flankerContrast],mean,cueLum,cueSize,xPositionPercent,cuePercentTargetEcc,stdGaussMask,flankerOffset,framesJustFlanker,framesTargetOn,thresh,yPositionPercent,toggleStim,typeOfLUT,rangeOfMonitorLinearized,maxCorrectOnSameSide,positionalHint,xPosNoise,yPosNoise,displayTargetAndDistractor,phase,persistFlankersDuringToggle,maxWidth,maxHeight,scaleFactor,interTrialLuminance)
+%function calls below are out of date; use getDefaultParameters; see setFlankerStimRewardAndTrialManager for signature
+% s = ifFeatureGoRightWithTwoFlank([pixPerCycs],[goRightOrientations],[goLeftOrientations],[flankerOrientations],topYokedToBottomFlankerOrientation,topYokedToBottomFlankerContrast,[goRightContrast],[goLeftContrast],[flankerContrast],mean,cueLum,cueSize,xPositionPercent,cuePercentTargetEcc,stdGaussMask,flankerOffset,framesJustFlanker,framesTargetOn,thresh,yPositionPercent,toggleStim,typeOfLUT,rangeOfMonitorLinearized,maxCorrectOnSameSide,positionalHint,xPosNoise,yPosNoise,displayTargetAndDistractor,phase,persistFlankersDuringToggle,maxWidth,maxHeight,scaleFactor,interTrialLuminance,percentCorrectionTrials)
 % s = ifFeatureGoRightWithTwoFlank([32],[pi/2],[pi/2],[0],1,1,[0.5],[0.5],[0.5],0.5,0,1,0.5,0,1/16,3,int8(8),int8(0),0.001,0.5,1,'useThisMonitorsUncorrectedGamma',[0 1],int8(-1),0,0,0,600,800,0,0.5)
 % s = ifFeatureGoRightWithTwoFlank([32],[0],[pi/2],[0],1,1,[0.5],[0.5],[0.5],0.5,0,1,0.5,0,1/16,3,int8(8),int8(0),0.001,0.5,1,4,1280,1024,0,0.5)
-% [stimulus updateSM out scaleFactor type targetPorts distractorPorts details interTrialLuminance] = calcStim(s,'nAFC',100,3,[1 1 1],1280,1024,[]);
-% imagesc(out(:,:,1))
+%
+% p=getDefaultParameters(ifFeatureGoRightWithTwoFlank,'goToRightDetection', '1_9','Oct.09,2007');
+% sm=getStimManager(setFlankerStimRewardAndTrialManager(p, 'test'));
+% [sm updateSM out scaleFactor type targetPorts distractorPorts details interTrialLuminance] = calcStim(sm,'nAFC',100,3,[1 1 1],1280,1024,[]);
+% imagesc(out(:,:,1)); colormap(gray)
 
 
 
@@ -35,7 +39,9 @@ function s=ifFeatureGoRightWithTwoFlank(varargin)
 % thresh = 0.001;
 % yPositionPercent = 0.5;
 %
-%Might be missing some arguments here:toggleStim,typeOfLUT,rangeOfMonitorLinearized,maxCorrectOnSameSide
+%Might be missing some arguments
+%here:toggleStim,typeOfLUT,rangeOfMonitorLinearized,maxCorrectOnSameSide,
+%and more, see getDefaultParams, or setFlankerStimRewardAndTrialManager
 % toggleStim = 1;
 % typeOfLUT= 'useThisMonitorsUncorrectedGamma';
 % rangeOfMonitorLinearized=[0 1];
@@ -125,9 +131,11 @@ switch nargin
         s.protocolSettings = [];
 
         s.flankerPosAngle = [];
+        s.percentCorrectionTrials = [];
 
+        s.fpaRelativeTargetOrientation=[]; 
+        s.fpaRelativeFlankerOrientation=[];
         
-
         % edf: you must not change definition of object.  these belong on parent, not you.
         %extra non input values
         %    s.maxWidth=1;
@@ -162,7 +170,7 @@ switch nargin
         else
             error('Input argument is not a goToFeatureWithTwoFlank object')
         end
-    case 53
+    case 56
         % create object using specified values
 
         if all(varargin{1})>0
@@ -258,16 +266,16 @@ switch nargin
             error('0 <= flankerOffset < something with a center that fits on the screen')
         end
 
-        if varargin{17} >= 0 && isinteger(varargin{17})
+        if all(varargin{17} >= 0) && isinteger(varargin{17}) && size(varargin{17},2)==2 && varargin{17}(1)<varargin{17}(2)
             s.framesJustCue=varargin{17};
         else
-            error('0 <= framesJustCue; must be an integer')
+            error('0 <= framesJustCue; must be two increasing integers...this will become framesFlankerOnOff')
         end
 
-        if varargin{18} >= 0 && isinteger(varargin{17})
+        if all(varargin{18} >= 0) && isinteger(varargin{18}) && size(varargin{18},2)==2 && varargin{18}(1)<varargin{18}(2)
             s.framesStimOn=varargin{18};
         else
-            error('0 <= framesStimOn; must be an integer')
+            error('0 <= framesStimOn; must be two increasing integers...this will become framesTargetOnOff')
         end
 
 
@@ -283,7 +291,7 @@ switch nargin
             error('yPositionPercent must be numeric')
         end
 
-        if isnumeric(varargin{21})
+        if (isnumeric(varargin{21}) && (varargin{21}==1 || varargin{21}==1)) || islogical(varargin{21})
             s.toggleStim=varargin{21};
         else
             error('toggleStim must be logical')
@@ -428,7 +436,7 @@ switch nargin
         else
             error('framesPerMotionStim must be a single number')
         end
-
+        
         if  any(strcmp(varargin{46},{'goToRightDetection', 'goToLeftDetection','tiltDiscrim','goToSide'}))
             s.protocolType=varargin{46};
         else
@@ -440,19 +448,68 @@ switch nargin
         else
             error('protocolVersion must be very specific')
         end
-        
+
         if  any(strcmp(varargin{48},{'Oct.09,2007'}))
             s.protocolSettings=varargin{48};
         else
             error('protocolSettings must be very specific string')
         end
-        
+
         if  isnumeric(varargin{49}) && all(size(varargin{49},1)==1)
             s.flankerPosAngle=varargin{49};
         else
             error('flankerPosAngle must be a numeric vector, for now size 1, maybe matrix one day')
         end
 
+
+        if  varargin{50} >= 0 && varargin{50}<=1 && all(size(varargin{50})==1)
+            s.percentCorrectionTrials=varargin{50};
+        else
+            error('percentCorrectionTrials must be a single numer between 0 and 1')
+        end
+
+        if  isnan(varargin{51}) | (isnumeric(varargin{51}) && size(varargin{51},1)==1)
+
+            if ~isnan(varargin{51})
+                %error check that the right targets are there
+                relatives=varargin{51};
+                fpas=s.flankerPosAngle;
+                required=repmat(relatives,size(fpas,2),1)-repmat(fpas',1,size(relatives,2));
+                if all(ismember(required(:),s.goRightOrientations)) && all(ismember(required(:),s.goLeftOrientations));
+                    %good
+                else
+                    unique(required(:))
+                    s.goRightOrientations
+                    s.goLeftOrientations
+                    error('both goLeft and goRight must have target orientations required for this fpaRelativeTargetOrientation' )
+                end
+            end
+            s.fpaRelativeTargetOrientation=varargin{51};
+        else
+            error('fpaRelativeTargetOrientation must be a vectors of numbers or NaN')
+        end
+
+        if  isnan(varargin{52}) | (isnumeric(varargin{52}) && size(varargin{52},1)==1)
+
+            if ~isnan(varargin{52})
+                %error check that the right flankers are there
+                relatives=varargin{52};
+                fpas=s.flankerPosAngle;
+                required=repmat(relatives,size(fpas,2),1)-repmat(fpas',1,size(relatives,2));
+                if all(ismember(required(:),s.flankerOrientations))
+                    %good
+                else
+                    unique(required(:))
+                    s.flankerOrientations
+                    error('flankerOrientations must have flanker orientations required for this fpaRelativeFlankerOrientation' )
+                end
+            end
+            s.fpaRelativeFlankerOrientation=varargin{52};
+
+        else
+            error('fpaRelativeTargetOrientation must be a vectors of numbers or NaN')
+        end
+                
         %s.phase=0; %no longer randomized;   would need movie for that (hieght x width x orientations x phase)
         %maxHeight=varargin{22**old val};
 

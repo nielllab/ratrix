@@ -127,6 +127,9 @@ responsePorts=[1 3];
 totalPorts=[]%3;
 width=maxWidth ;
 height=maxHeight;
+displaySize=[]; % to fix 1/8/09
+LUTbits=[]; % to fix 1/8/09
+resolutions=[]; % to fix 1/8/09
 trialRecords= [];
 
 %this should update, add:
@@ -145,7 +148,8 @@ calibrationMovie = zeros(height, width, 3 , totalFrames, 'uint8');
 %%%%%%% FOR CREATING 'calibrationMovie' %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 for i=1:1:totalFrames
     trialManager = setCalibrationFrame(trialManager,i);
-    [trialManager updateTM out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance] = calcStim(trialManager,trialManagerClass,frameRate,responsePorts,totalPorts,width,height,trialRecords);
+    [trialManager updateTM resInd out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance text] =...
+            calcStim(trialManager,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords);
     calibrationMovie(:, :, :,i)=repmat( out(:, :, 2), [1, 1, 3]);
 end
 blackWhite =1;

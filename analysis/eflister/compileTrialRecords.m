@@ -1,6 +1,6 @@
 function compileTrialRecords(server_name,fieldNames,recompile,subjectIDs,source,destination)
 %
-% example: automatic compiling (servers do this; humans don't unless the can confirm no-collisions possible) 
+% example: automatic compiling (servers do this; humans don't unless the can confirm no-collisions possible)
 % compileTrialRecords(rackNum)
 %
 % example: a rare manual rebuilding; making a temporary back-up is suggested before this
@@ -10,10 +10,16 @@ function compileTrialRecords(server_name,fieldNames,recompile,subjectIDs,source,
 %compileTrialRecords(rackNum,{'totalFrames',{'responseDetails','totalFrames'}; 'numMisses',{'responseDetails','numMisses'}},1,{'229'},getSubDirForRack(rackNum),'C:\Documents and Settings\rlab\Desktop\test')
 %compileTrialRecords(rackNum,[],1,{'233'},getSubDirForRack(rackNum),'C:\Documents and Settings\rlab\Desktop\test')
 
-%example: recompile everything to a temp directory without interupting ongoing analysis, etc 
+%example: recompile everything to a temp directory without interupting ongoing analysis, etc
 %(then rapidly manually transfer files and svn update the servers compileTrialRecords)
 %compileTrialRecords(rackNum,[],1,[],getSubDirForRack(rackNum),'C:\Documents and Settings\rlab\Desktop\test')
 
+%compile enhanced files for rack 1
+%compileTrialRecords([],fieldNames,false,{'138','139','227','228','231','232','229','230','233','234','237','274','278'},getSubDirForRack(1),getCompiledDirForRack(-1))
+
+% if ~exist('subjectIDs','var') || isempty(subjectIDs)
+%     subjectIDs='all';
+% end
 
 % =============================
 % this field (subjectIDs) needs to be given now b/c this is retreived from ratrix object that we don't have access to here
@@ -22,8 +28,9 @@ function compileTrialRecords(server_name,fieldNames,recompile,subjectIDs,source,
 % end
 % =============================
 
-if (~exist('server_name','var') || isempty(server_name)) && (~exist('subjectIDs','var') || isempty(subjectIDs))
-    error('we need a server_name to know which subjects to compile, or need a list of subjectIDs passed in')
+if (~exist('server_name','var') || isempty(server_name)) && (~exist('subjectIDs','var') || isempty(subjectIDs)) ...
+        && (~exist('source','var') || isempty(source))
+    error('we need a server_name to know which subjects to compile, or need a list of subjectIDs passed in, or at least a source to look in')
 end
 
 % =============================
@@ -57,7 +64,7 @@ if ~exist('fieldNames','var') || isempty(fieldNames)
         'responseTime',{''};...
         'actualRewardDuration',{'actualRewardDuration'};...
         'manualVersion',{'protocolVersion','manualVersion'};...
-        'autoVersion',{'protocolVersion','autoVersion'};... 
+        'autoVersion',{'protocolVersion','autoVersion'};...
         'didStochasticResponse',{'didStochasticResponse'};...
         'containedForcedRewards',{'containedForcedRewards'};...
         'didHumanResponse',{'didHumanResponse'};...
@@ -77,7 +84,9 @@ if ~exist('fieldNames','var') || isempty(fieldNames)
         'stdGaussMask',{'stimDetails','stdGaussMask'};...
         'flankerPosAngle',{'stimDetails','flankerPosAngle'};...
         };
-
+        %'numRequestLicks',{''};...
+        %'firstILI',{''};...
+        
     %'stimDetails'};  can't fit 200,000 trials worth of these, out of MEMORY
     %pmm recommends switching on class, call method to find out which fields to add in
     %temporary solution: add fields only if they exist and are defined for that trial, NaNs elsewhere 080424
@@ -91,6 +100,7 @@ if ~exist('fieldNames','var') || isempty(fieldNames)
     %    proposedSizeULorMS',
     %proposedMsPenalty
     %numRequestLicks
+    %firstILI
     %autoVersion     protocolVersion.autoVersion
 else
     %force the addition of required fields
@@ -153,12 +163,26 @@ names={};
 subjectFiles={};
 ranges={};
 
-if ~exist('subjectIDs','var') || isempty(subjectIDs) % if subjectIDs not given as input, retrieve from oracle
-    conn = dbConn();
-    subjectIDs = getSubjectIDsFromServer(conn, server_name);
-    closeConn(conn);
-    if isempty(subjectIDs)
-        error('could not find any subjects for this server: %s', server_name);
+if ~exist('subjectIDs','var') || isempty(subjectIDs) % if subjectIDs not given as input, retrieve from oracle or from source
+    % get from oracle if server_name is provided
+    if exist('server_name','var') && ~isempty(server_name)
+        conn = dbConn();
+        subjectIDs = getSubjectIDsFromServer(conn, server_name);
+        closeConn(conn);
+        if isempty(subjectIDs)
+            error('could not find any subjects for this server: %s', server_name);
+        end
+    elseif exist('source','var') && ~isempty(source)
+        % get from source directory (no server_name provided)
+        d=dir(source);
+        subjectIDs={};
+        for i=1:length(d)
+            if d(i).isdir
+                subjectIDs{end+1} = d(i).name;
+            end
+        end
+    else
+        error('should not be here - must either have a server_name or a source if no subjectIDs are given');
     end
 end
 
@@ -241,9 +265,41 @@ for i=1:length(subjectFiles)
         if ranges{i}(1,j)==compiledRange(2,end)+1
             if ~needToAdd && ~isempty(compiledFile)
                 %load them
-                compiledTrialRecords=loadCompiledTrialRecords(compiledFile,compiledRange,{fieldNames{:,1}});
-
-
+                % 12/9/08 - compile keeps producing corrupt files - for now, just skip corrupt files and email fan
+                % should be fixed by going to new architecture on trunk
+                goodLoad = false;
+                numTries = 1;
+                while ~goodLoad && numTries<=5
+                    try
+                        compiledTrialRecords=loadCompiledTrialRecords(compiledFile,compiledRange,{fieldNames{:,1}});
+                        goodLoad = true;
+                    catch 
+                        ex=lasterror
+                        dispStr=sprintf('failed to load compiledTrialRecord for subject %s',names{i});
+                        disp(dispStr);
+                        dispStr=sprintf('Retry #%d...',numTries);
+                        disp(dispStr);
+                        numTries=numTries+1;
+                        goodLoad = false;
+                    end
+                end
+                % if after 5 retries, still unsuccessful, email fan and skip to next subject
+                if ~goodLoad
+                    dispStr=sprintf('could not load compiledTrialRecord for subject %s after %d tries...skipping',names{i},numTries);
+                    disp(dispStr);
+                    setpref('Internet','SMTP_Server','smtp.ucsd.edu')
+                    setpref('Internet','E_mail','ratrix@ucsd.edu')
+                    emailStr=sprintf('RATRIX: Corrupt compiledRecords subject %s', names{i});
+                    % in older version of PTB, the ptb sendmail function
+                    % supercedes the matlab i/o sendmail function, which is
+                    % why we need to cd to correct path
+                    % the PTB function sucks - hardcoded!
+                    oldDir=pwd;
+                    cd([matlabroot filesep 'toolbox' filesep 'matlab' filesep 'iofun' filesep ]);
+                    sendmail('fanli.ucsd@gmail.com',emailStr,'See title');
+                    cd(oldDir);
+                    continue;
+                end
 
             end
             needToAdd=true;
@@ -320,7 +376,7 @@ for i=1:length(subjectFiles)
                                         end
                                     end
 
-                             case 'flankerPosAngle'
+                                case 'flankerPosAngle'
                                     compiledTrialRecords.flankerPosAngle(ranges{i}(1,j):ranges{i}(2,j))=nan;
                                     %use the first flankerPosAngle
                                     for tr=1:length(newTrialRecs)
@@ -328,8 +384,23 @@ for i=1:length(subjectFiles)
                                             compiledTrialRecords.flankerPosAngle(ranges{i}(1,j)+tr-1)=newTrialRecs(tr).stimDetails.flankerPosAngles(1);
                                         end
                                     end
-
-                               case 'devPix' %devPix has and X and Y now
+                                case 'numRequestLicks'
+                                    compiledTrialRecords.numRequestLicks(ranges{i}(1,j):ranges{i}(2,j))=nan;
+                                    %use size of the number of tries
+                                    for tr=1:length(newTrialRecs)
+                                        if ismember('responseDetails',fields(newTrialRecs(tr))) && ismember('tries',fields(newTrialRecs(tr).responseDetails)) && ~isempty(newTrialRecs(tr).responseDetails.tries)% if the field exists
+                                            compiledTrialRecords.numRequestLicks(ranges{i}(1,j)+tr-1)=size(newTrialRecs(tr).responseDetails.tries,2)-1;
+                                        end
+                                    end
+                               case 'firstILI'
+                                   compiledTrialRecords.firstILI(ranges{i}(1,j):ranges{i}(2,j))=nan;
+                                   %use the difference between the first two lick times if both there
+                                   for tr=1:length(newTrialRecs)
+                                       if ismember('responseDetails',fields(newTrialRecs(tr))) && ismember('times',fields(newTrialRecs(tr).responseDetails)) && ~isempty(newTrialRecs(tr).responseDetails.times) && size(newTrialRecs(tr).responseDetails.times,2)-1>=2;% if the field exists
+                                           compiledTrialRecords.numRequestLicks(ranges{i}(1,j)+tr-1)=diff(cell2mat(newTrialRecs(tr).responseDetails.times(1:2)));
+                                       end
+                                   end
+                                case 'devPix' %devPix has and X and Y now
                                     error('not used')
                                 case 'redLUT'
                                     compiledTrialRecords.redLUT(ranges{i}(1,j):ranges{i}(2,j))=nan;
@@ -348,7 +419,7 @@ for i=1:length(subjectFiles)
                                 case {'maxCorrectForceSwitch','actualRewardDuration', 'manualVersion','autoVersion','didStochasticResponse','containedForcedRewards', 'didHumanResponse',...
                                         'totalFrames', 'startTime', 'numMisses',...
                                         'correctResponseIsLeft', 'targetContrast','targetOrientation', 'flankerContrast',...
-                                        'deviation','targetPhase','flankerPhase','currentShapedValue','pixPerCycs','stdGaussMask'}
+                                        'deviation','targetPhase','flankerPhase','currentShapedValue','pixPerCycs','stdGaussMask','xPosNoisePix'}
 
                                     for tr=1:length(newTrialRecs)
                                         compiledTrialRecords.(fieldNames{m,1})(ranges{i}(1,j)+tr-1)=isThereAndNotEmpty(newTrialRecs(tr),fieldNames{m,2});
@@ -412,13 +483,13 @@ for i=1:length(subjectFiles)
         dts=[compiledTrialRecords.date];
         if any(diff(dts)<0)
             warning('dates aren''t monotonic increasing for subject %s',names{i});
-%             figure
-%             plot(dts)
-%             hold on
-%             prob=find(diff(dts)<0);
-%             plot(prob,dts(prob),'rx')
-%             text(prob+.05*length(dts),dts(prob),datestr(dts(prob)))
-%             title(sprintf('dates aren''t monotonic increasing for subject %s',names{i}))
+            %             figure
+            %             plot(dts)
+            %             hold on
+            %             prob=find(diff(dts)<0);
+            %             plot(prob,dts(prob),'rx')
+            %             text(prob+.05*length(dts),dts(prob),datestr(dts(prob)))
+            %             title(sprintf('dates aren''t monotonic increasing for subject %s',names{i}))
         end
 
         %         for m=2:length(compiledTrialRecords)
@@ -459,9 +530,9 @@ end
 
 
 
-                
-                
-function [value]=isThereAndNotEmpty(trial,fieldPath) 
+
+
+function [value]=isThereAndNotEmpty(trial,fieldPath)
 %only works for doubles or things that cast into doubles
 %gets the value from the trial at the field path; if empty or not there returns NaN
 %  compiledTrialRecords.(fieldNames{m

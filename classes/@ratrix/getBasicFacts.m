@@ -3,7 +3,7 @@ function [out type]=getBasicFacts(r,displayOn)
 %penalty for all rats
 
 if ~exist('displayOn','var')
-    displayOn=1;
+    displayOn=0;
 end
 
 type={'subj', 'step', 'reward','scalar', 'penalty'};
@@ -23,7 +23,14 @@ for i=1:size(subjectIDs,2)
         ts=getTrainingStep(p,step);
         tm=getTrialManager(ts);
         sm=getStimManager(ts);
-        rm=getReinforcementManager(tm);
+        if isa(tm,'trialManager')
+            rm=getReinforcementManager(tm);
+        elseif isa(tm,'struct')
+            rm=getReinforcementManager(tm.trialManager);
+        else
+            error('bad tm')
+        end
+            
         %calculate the reward the rat would get after 100 corrects
         [trialRecords(1:100).correct]=deal(true);
         [rm rewardSizeULorMS msPenalty] = calcReinforcement(rm,trialRecords, s);

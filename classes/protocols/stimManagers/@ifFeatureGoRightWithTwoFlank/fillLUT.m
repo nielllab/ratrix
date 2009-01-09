@@ -17,9 +17,7 @@ switch method
         error('that method for getting a LUT is not defined');
     case 'linearizedDefault'
         
-        %WARNING:  need to get gamma from measurements of ratrix workstation with NEC monitor and new graphics card 
-
-        
+        %WARNING:  need to get gamma from measurements of ratrix workstation with NEC monitor and new graphics card    
         LUTBitDepth=8;
         
         %sample from lower left of triniton, pmm 070106

@@ -736,3 +736,129 @@ eventLog{eventNum}.issuedBy ='pmm';
 eventLog{eventNum}.comment ='240 and 234 were switched with each other in the violate heat of 6/11/08, alee mistake'; 
 eventLog{eventNum}.details.from =''; 
 eventLog{eventNum}.details.to   =''; 
+
+
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Oct.10,2008');%datestr(now,21)
+eventLog{eventNum}.eventName ={'manualStepChange'};
+eventLog{eventNum}.subject ={'231','233'};
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='contrastSweep to try to get threshold effect, force graduation to step 12 v2_3, includes flanksToggleToo, [0.2,0.4,0.6.,0.8,1], 231 was on step 10.7, had. 1.0 rewards whole life; 233 was on step 9.4,  had. 0.6 rewards many months'; 
+eventLog{eventNum}.details.from =[10 9]; 
+eventLog{eventNum}.details.to   =[12 12]; 
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Oct.10,2008');%datestr(now,21)
+eventLog{eventNum}.eventName ={'removeCTs'};
+eventLog{eventNum}.subject ={'138','139','227','228'};
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='see if they improve task performance w/o CT exploitation'; 
+eventLog{eventNum}.details.from =''; 
+eventLog{eventNum}.details.to   =''; 
+
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Oct.25,2008');%datestr(now,21)
+eventLog{eventNum}.eventName ={'increasedPenalty'};
+eventLog{eventNum}.subject ={'227','228','229','234','237','274'};
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='see if they improve task performance'; 
+eventLog{eventNum}.details.from = [1000 1000 1000 1000 6000 1000]; 
+eventLog{eventNum}.details.to   = [10000 10000 10000 10000 10000 10000];
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Nov.14,2008');%datestr(now,21)
+eventLog{eventNum}.eventName ={'flunked'};
+eventLog{eventNum}.subject ={'102'};
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='veryify that he still tries, commonly his eyes are closed, task is easy'; 
+eventLog{eventNum}.details.from = [12]; %varyPosition
+eventLog{eventNum}.details.to   = [8];  %no flankers, small, full contrast
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Nov.14,2008');%datestr(now,21)
+eventLog{eventNum}.eventName ={'rewardIncrease'};
+eventLog{eventNum}.subject ={'102'};
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='bodyweight has been steadily dropping, off charts: too old to know what thresh is'; 
+eventLog{eventNum}.details.from = [1]; 
+eventLog{eventNum}.details.to   = [2];  
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Nov.14,2008');%datestr(now,21)
+eventLog{eventNum}.eventName ={'manualStepChange'};
+eventLog{eventNum}.subject ={'231','234','274',  '138','139','228','232','233',  '227','229','230','237','229'};
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='data collection mode, noCTs, noMaxCorrectSide, noToggleTargetOnly, 14= orientSweep, 13=positionSweep, 11=0.4flanks&0.75target'; 
+eventLog{eventNum}.details.from = [12 7  10 10 9  9  10 12 9  10 11 10 9 ]; % rat 234 was rapid, step 7==10, all others standard, some came from contrast sweep==2
+eventLog{eventNum}.details.to   = [14 14 14 13 13 13 13 13 11 11 11 11 11];
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Nov.14,2008');%datestr(now,21)
+eventLog{eventNum}.eventName ={'removeCTs'};
+eventLog{eventNum}.subject ={'137'};
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment =''; 
+eventLog{eventNum}.details.from = [0.5]; 
+eventLog{eventNum}.details.to   = [0];  
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Nov.14,2008');%datestr(now,21)
+eventLog{eventNum}.eventName ={'rewardIncrease'};
+eventLog{eventNum}.subject ={'137','228'};
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='bodyweight trending low, sarah''s observation'; 
+eventLog{eventNum}.details.from = [1]; 
+eventLog{eventNum}.details.to   = [1.5];  
+
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Dec.1,2008');%datestr(now,21)
+eventLog{eventNum}.eventName ={'manualStepChange'};
+eventLog{eventNum}.subject ={'304','306'};
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';  % daniel's help
+eventLog{eventNum}.comment ='304 stuck on step 3 for 2 days, 100''s of trials. 306 did some trial on step 2 for 4 days and then spent a whole day without triggering'; 
+eventLog{eventNum}.details.from = [3 2]; 
+eventLog{eventNum}.details.to   = [4 3];  
+
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Nov.29,2008');%datestr(now,21)
+eventLog{eventNum}.eventName ={'station started'};
+eventLog{eventNum}.subject ={'285','225','227','229','231','233'};
+eventLog{eventNum}.stationID ={'1A'}; 
+eventLog{eventNum}.issuedBy ='pmm';  % daniel's help
+eventLog{eventNum}.comment ='left port leaks in the back, rats have bias to right'; 
+eventLog{eventNum}.details.from = []; 
+eventLog{eventNum}.details.to   = [];  
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Dec.01,2008');%datestr(now,21)
+eventLog{eventNum}.eventName ={'station bias fixed'};
+eventLog{eventNum}.subject ={'285','225','227','229','231','233'};
+eventLog{eventNum}.stationID ={'1A'}; 
+eventLog{eventNum}.issuedBy ='pmm';  % daniel's help
+eventLog{eventNum}.comment ='clog was fixed, but might come back if needle is loose'; 
+eventLog{eventNum}.details.from = []; 
+eventLog{eventNum}.details.to   = [];  
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Dec.10,2008');%datestr(now,21)  % attempted change at 'Dec.02,2008', but failed to impliment it till now
+eventLog{eventNum}.eventName ={'rewardIncrease'};
+eventLog{eventNum}.subject ={'274'};
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';  % sarah's help
+eventLog{eventNum}.comment ='grumpy rat at chance, sarah thinks its dehydration'; 
+eventLog{eventNum}.details.from = [1]; 
+eventLog{eventNum}.details.to   = [2];  
+

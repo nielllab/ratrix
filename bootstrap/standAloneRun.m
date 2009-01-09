@@ -35,7 +35,6 @@ if exist('ratrixPath','var') && ~isempty(ratrixPath)
 else
     dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
     defaultLoc=fullfile(dataPath, 'ServerData');
-
     d=dir(fullfile(defaultLoc, 'db.mat'));
 
     if length(d)==1
@@ -75,8 +74,9 @@ else
     subjectID=lower(subjectID);
     try
         isSubjectInRatrix=getSubjectFromID(rx,subjectID);
-    catch e
-        if strcmp(e.message,'request for subject id not contained in ratrix')
+    catch
+        e=lasterror;
+        if ~isempty(strfind(e.message,'request for subject id not contained in ratrix'))
             if recordInOracle
                 sub =createSubjectsFromDB({subjectID});
                 if isempty(sub)

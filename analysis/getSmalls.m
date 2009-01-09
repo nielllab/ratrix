@@ -26,7 +26,7 @@ for i=1:length(d)
             er
         else
             if verbose
-                fprintf('loading file')
+                fprintf(sprintf('loading file for %s',subjectID))
                 t=GetSecs();
             end
             ctr=load(fullfile(getCompiledDirForRack(rack),d(i).name));
@@ -57,16 +57,23 @@ if ~isempty(smallData)
     end
     smallData=rmfield(smallData,f(remove));
 
-    if verbose & ~isempty(remove)
-        disp(sprintf('removing %d fields that are full of NaNs',length(remove)))
-        fprintf('done-time elapsed since start: %g\n',GetSecs-t)
-    end
-
     %add name
     if strcmp(class(subjectID),'char')
         smallData.info.subject={subjectID};
     end
-
+    
+    %add yes response if detection
+    %can't for all, some rats have problems still unsolved.  138-9
+%     if ismember('targetContrast',fields(smallData)) && any(smallData.targetContrast==0)
+%         [smallData sideType]=addYesResponse(smallData);
+%         smallData.info.sideType=sideType;
+%     end
+    
+    
+    if verbose & ~isempty(remove)
+        disp(sprintf('removing %d fields that are full of NaNs',length(remove)))
+        fprintf('done-time elapsed since start: %g\n',GetSecs-t)
+    end
 
 %     if all(size(smallData.date)==[1 0])
 %         smallData=[]; % %if there are no trials d turns into an empty set

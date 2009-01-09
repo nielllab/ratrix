@@ -1,25 +1,24 @@
-function [stats plotParams]=flankerAnalysis(smallData, conditionType, plotType, performanceMeasure, stepUsed, verbose)
-%assumes detection!  assumes goRightDetection (could be made more general) use correctResponseIsLeft?
+function [stats plotParams]=flankerAnalysis(smallData, conditionType, plotType, performanceMeasure, filterType, goodsType,verbose)
+%[stats plotParams]=flankerAnalysis(smallData, conditionType, plotType, performanceMeasure, filterType, goodsType,verbose)
+%[stats plotParams]=flankerAnalysis(d,'colin+3','performancePerContrastPerCondition', 'pctCor', filterType,'human', verbose)
+%assumes detection! 
 %NEVER USE FOR DISCRIMINATION, including goToSide (unless you change all of the stats to be appropiate)
+
+
+
 isDetection=1;
 
-
-
-
 format short g
-
-
-
 %load smallData
 
 if ~exist('conditionType', 'var'); conditionType=[];end
 if isempty(conditionType)
-    conditionType='fourFlankers'; %'everything','fourFlankers','onlyTarget','allOrientations','allPixPerCycs'
+    conditionType='colin+3'; %'everything','fourFlankers','onlyTarget','allOrientations','allPixPerCycs'
 end
 
 if ~exist('plotType', 'var'); plotType=[];end
 if isempty(plotType)
-    plotType='performancePerContrastPerCondition'; %performancePerContrastPerCondition, surfFlankerContrast, surfTargetContrast, phaseEffect
+    plotType='performancePerContrastPerCondition'; %performancePerContrastPerCondition, performancePerDeviationPerCondition, surfFlankerContrast, surfTargetContrast, phaseEffect
 end
 
 if ~exist('performanceMeasure', 'var'); performanceMeasure=[];end
@@ -27,24 +26,30 @@ if isempty(performanceMeasure)
     performanceMeasure = 'pctCor'; % pctCor, dpr, eb
 end
 
+if ~exist('goodsType', 'var'); goodsType=[];end
+if isempty(goodsType)
+    goodsType = 'withoutAfterError'; 
+end
+
+
 if ~exist('verbose', 'var'); verbose=[];end
 if isempty(verbose)
     verbose=0;
 end
 
+
 subject=char(smallData.info.subject);
 
 %timeFilter=smallData.date>max(smallData.date)-daysBack;
-if ~exist('stepUsed', 'var'); stepUsed=[]; end
-if isempty(stepUsed)
-    trialFilter=ones(size(smallData.date));
-else
-    trialFilter=(smallData.step==stepUsed);
+if ~exist('filterType', 'var') || isempty(filterType)
+    filterType='none';
 end
 
-contrasts=unique(smallData.targetContrast(trialFilter & ~isnan(smallData.targetContrast)));
-devs =unique(smallData.deviation(trialFilter & ~isnan(smallData.deviation)));
-flankerContrasts=unique(smallData.flankerContrast(trialFilter & ~isnan(smallData.flankerContrast)));
+smallData=filterFlankerData(smallData,filterType);
+
+contrasts=unique(smallData.targetContrast(~isnan(smallData.targetContrast)));
+devs =unique(smallData.deviation(~isnan(smallData.deviation)));
+flankerContrasts=unique(smallData.flankerContrast(~isnan(smallData.flankerContrast)));
 
 if isDetection
     if ~contrasts(1)==0
@@ -54,6 +59,9 @@ if isDetection
         contrasts(contrasts==0)=[];  %remove the no contrast condition ,  
 
     end
+    
+    [smallData sideType]=addYesResponse(smallData);
+    
     mergeWithSameTypeZeroContrast=1;
     if length(contrasts)==2
         restrictSampleOfNoSig=0;
@@ -70,6 +78,9 @@ end
 %     restrictSampleOfNoSig=0;
 % end
 
+
+
+
 %reconstructs the keypress that would be correct (could return this directly)
 %this is used by the dprime calulation
 smallData.correctAnswerID=(smallData.correctResponseIsLeft);
@@ -77,13 +88,19 @@ smallData.correctAnswerID(smallData.correctAnswerID==-1)=3;
 
 %define conditions as subset of trials
 %tempFilter = smallData.pixPerCycs==4;
-goods = trialFilter & getGoods(smallData,'withoutAfterError');% & tempFilter;
-[conditionInds conditionNames]=getFlankerConditionInds(smallData,goods,conditionType);
+goods = getGoods(smallData,goodsType);% & tempFilter;
+[conditionInds conditionNames j1 j2 smallData goods]=getFlankerConditionInds(smallData,goods,conditionType);
+
+
+%check that goods are really good
+if any(isnan(smallData.yes(goods & sum(conditionInds))))
+    error('goods should determine that all analyzed conditions should have a defined yes / no, else corrupts pctYes stats')
+end
 
 %initialize
 numCorrect=zeros(size(contrasts,2), size(conditionInds,1), size(devs,2), size(flankerContrasts,2)); 
 numAttempted=numCorrect; 
-numResponseRightward = numCorrect;
+numResponseYes = numCorrect;
 dpr=nan(size(numCorrect)); 
 
 emptyAnalysis.hits=0; % we need to sum across these so, empty and NaNs get in the way,
@@ -163,7 +180,7 @@ for i=1:size(contrasts,2)         %for all target contrasts
                         % for pctCorrect
                         numCorrect(i,j,k,m) =sum(smallData.correct(which | reducedWhichNoSig));
                         numAttempted(i,j,k,m)=sum(which | reducedWhichNoSig);
-                        numResponseRightward(i,j,k,m)=sum(smallData.response(which | reducedWhichNoSig)==3);
+                        numResponseYes(i,j,k,m)=sum(smallData.yes(which | reducedWhichNoSig));
                         %assumes 2afc for bias to make sense 50/50%
                         
                         %for hitRate
@@ -176,7 +193,7 @@ for i=1:size(contrasts,2)         %for all target contrasts
                     else
                         numCorrect(i,j,k,m) =sum(smallData.correct(which));
                         numAttempted(i,j,k,m)=sum(which);
-                        numResponseRightward(i,j,k,m)=sum(smallData.response(which)==3);
+                        numResponseYes(i,j,k,m)=sum(smallData.yes(which));
                         reducedWhichNoSig=zeros(size(smallData.correct));
                     end
                     
@@ -187,7 +204,15 @@ for i=1:size(contrasts,2)         %for all target contrasts
                         flag='silent';
                     end
 
-                    [dpr(i,j,k,m) anal]=dprime(smallData.response(which | reducedWhichNoSig),smallData.correctAnswerID(which | reducedWhichNoSig),flag);
+                    switch sideType
+                        case 'rightMeansYes'
+                            [dpr(i,j,k,m) anal]=dprime(smallData.response(which | reducedWhichNoSig),smallData.correctAnswerID(which | reducedWhichNoSig),flag,...
+                                'presentVal',3,'absentVal',1);
+                        case 'leftMeansYes'
+                            [dpr(i,j,k,m) anal]=dprime(smallData.response(which | reducedWhichNoSig),smallData.correctAnswerID(which | reducedWhichNoSig),flag,...
+                                'presentVal',1,'absentVal',3);
+                    end
+
                     analysis{i,j,k,m}=anal;
                 else
                     
@@ -204,7 +229,7 @@ end
 
     stats.numCorrect=numCorrect;
     stats.numAttempted=numAttempted;
-    stats.numResponseRightward=numResponseRightward;
+    stats.numResponseYes=numResponseYes;
 
     %stats.dprAnalysis=analysis  %don't add the cell because it's the wrong format
     
@@ -220,10 +245,10 @@ end
 switch performanceMeasure
     case 'pctCor'
         perf = numCorrect./numAttempted;
-    case 'pctRightward'
-        bias= numResponseRightward./numAttempted;
+    case 'pctYes'
+        bias= numResponseYes./numAttempted;
     case 'hitRate'
-        numCorrect=stats.hits;  %total correct with no signal
+        numCorrect=stats.hits;  %total correct with signal
         numAttempted=stats.misses+stats.hits; %total attempted with signal
     case 'correctRejections'
         numCorrect=stats.correctRejects; %total correct with no signal
@@ -233,6 +258,7 @@ switch performanceMeasure
     case 'eb'
         error('eb does not exist yet')
     otherwise
+        performanceMeasure
         error('bad performanceMeasure')
 end
 
@@ -243,7 +269,7 @@ end
 %     case 'pctCor'
 %         perf = numCorrect./numAttempted;
 %     case 'pctRightward'
-%         bias= numResponseRightward./numAttempted;
+%         bias= numResponseYes./numAttempted;
 %     case 'hitRate'
 %         numCorrect=numHits;
 %         numAttempted=numSigsPresent;
@@ -281,30 +307,48 @@ highFlankerContrastInd=find(flankerContrasts==highFlankerContrast);
 %which flanker contrast is used for this?!
 %% performance per value
 
-        plotParams=getPlotParameters(conditionType,conditionNames)
+        plotParams=getPlotParameters(smallData,goods,conditionType);
         plotParams.featureVals.contrasts=contrasts;
         plotParams.featureVals.devs=devs;
         plotParams.featureVals.flankerContrasts=flankerContrasts;
-        title(subject)
+        
+        
+        if 1  %remove conditions with no trials- only strange empty conditions require this
+            has=numAttempted>0;
+            for i=1:size(has,2)
+                unstringable=has(:,i,:,:);
+                hasCond(i)=any(unstringable(:));
+            end
+
+            numCorrect=numCorrect(:,hasCond,:,:);
+            numAttempted=numAttempted(:,hasCond,:,:);
+            numResponseYes=numResponseYes(:,hasCond,:,:);
+            plotParams.conditionNames=plotParams.conditionNames(hasCond);
+            plotParams.colors=plotParams.colors(hasCond,:);
+            plotParams.smallDisplacement=plotParams.smallDisplacement(hasCond);
+            plotParams.someConditions=[1:sum(hasCond)];
+            title(subject)
+        end
+        
         
 switch plotType
     case 'performancePerContrastPerCondition'
 
         plotMethod='mostFrequentDevAndFlankerContrast' %'all devs and flankerContrasts';
         valueName = 'contrasts';
-        plotPerformancePerValuePerCondition(numCorrect, numAttempted, numResponseRightward, performanceMeasure, valueName, plotMethod, plotParams)
+        plotPerformancePerValuePerCondition(numCorrect, numAttempted, numResponseYes, performanceMeasure, valueName, plotMethod, plotParams)
 
     case 'performancePerDeviationPerCondition'
 
         plotMethod='allTargetAndFlankerContrasts'
         valueName = 'devs';
-        plotPerformancePerValuePerCondition(numCorrect, numAttempted, numResponseRightward,performanceMeasure, valueName, plotMethod, plotParams)
+        plotPerformancePerValuePerCondition(numCorrect, numAttempted, numResponseYes,performanceMeasure, valueName, plotMethod, plotParams)
 
     case 'biasPerDeviationPerCondition'
 
         plotMethod='allTargetAndFlankerContrasts'
         valueName = 'devs';
-        plotPerformancePerValuePerCondition(numCorrect, numAttempted, numResponseRightward,performanceMeasure, valueName, plotMethod, plotParams)
+        plotPerformancePerValuePerCondition(numCorrect, numAttempted, numResponseYes,performanceMeasure, valueName, plotMethod, plotParams)
 
     case 'surfFlankerContrast'
         if ~size(devs,2)>1; error('more deviations needed'); end
@@ -367,9 +411,9 @@ switch plotType
             for k=1:numDevs      %for all deviations
 
                 dev=devs(k);
-                samePhaseIndices=(samePhase & conditionInds(j,:) & trialFilter & smallData.deviation==dev);
-                antiPhaseIndices=(antiPhase & conditionInds(j,:) & trialFilter & smallData.deviation==dev);
-                otherPhaseIndices=(otherPhase & conditionInds(j,:) & trialFilter & smallData.deviation==dev);
+                samePhaseIndices=(samePhase & conditionInds(j,:) & smallData.deviation==dev);
+                antiPhaseIndices=(antiPhase & conditionInds(j,:) & smallData.deviation==dev);
+                otherPhaseIndices=(otherPhase & conditionInds(j,:) & smallData.deviation==dev);
 
 
                 samePhaseResponses=(smallData.correct(samePhaseIndices));
@@ -397,7 +441,7 @@ switch plotType
                 text(min(find(samePhaseIndices)), .9,sprintf('Dev=%0.2g, %s', devs(k)*16, conditionNames{j}))
 
                 if j==1 && k==1 %b/c we can't title subplots well
-                    text(min(find(samePhaseIndices)),0.7,sprintf('%s Step: %d',subject, stepUsed))
+                    text(min(find(samePhaseIndices)),0.7,sprintf('%s trialFilter: %d',subject, filterType))
                 end
 
                 figure(f2); subplot(numDevs,numConditions,(j-1)*(numDevs)+k); hold on;
@@ -405,7 +449,7 @@ switch plotType
                 errorbar([1:length(P)], P, P-PCI(1,:), PCI(2,:)-P)
                 axis([0,length(P)+1,.3,1])
                 if j==1 && k==1  %b/c we can't title subplots well
-                    text(min(find(samePhaseIndices)),0.7,sprintf('%s Step: %d',subject, stepUsed))
+                    text(min(find(samePhaseIndices)),0.7,sprintf('%s trialFilter: %d',subject, filterType))
                 end
             end
             %[d.targetPhase(otherPhase); d.flankerPhase(otherPhase)]

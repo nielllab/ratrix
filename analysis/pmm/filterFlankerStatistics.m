@@ -46,7 +46,7 @@ for i=1:numStats
                     flankerContrastCount=sum(sum(sum(numAttempted,3),2),1);
                     flankerContrastInd=find(flankerContrastCount==max(flankerContrastCount));
                     vals.flankerContrast=vals.flankerContrasts(flankerContrastInd);
-
+                    %keyboard
                     % for the selected flankerContrast,  find the most frequent deviation
                     devCount=sum(sum(numAttempted(:,:,:,flankerContrastInd),2),1);
                     devInd=find(devCount==max(devCount));
@@ -62,7 +62,8 @@ for i=1:numStats
                     vals.contrasts=vals.contrasts(availableContrasts);
                     vals.conditionNames
                     availableConditions
-                    vals.conditionNames=vals.conditionNames(availableConditions);
+                    vals.conditionNames=vals.conditionNames(availableConditions)
+
 
                     % set the number correct and attempted
                     numAttempted=numAttempted(availableContrasts,availableConditions);
@@ -70,6 +71,24 @@ for i=1:numStats
 
                     %contrastCount=sum(sum(sum(numAttempted,4),3),2); %sum across what you check
                     %find(contrastCount==max(contrastCount))
+
+                case 'allTargetAndFlankerContrasts'
+
+                    numAttempted=sum(sum(numAttempted,1),4);
+
+                    stats.(f{i})=sum(sum(stats.(f{i}),1),4);  %sum over all but what you use
+                    %         size(numAttempted)
+
+
+
+                    % You have to reshape in order to reduce the dimensions because sum over
+                    % the first dimension does not reduce the dimension size.
+                    % Also, transpose is needed because "value" (= devs) has to be in the first
+                    % dimension of the matrix.
+
+
+                    numAttempted = reshape(numAttempted, numConditions,numDevs)';
+                    stats.(f{i}) = reshape(stats.(f{i}), numConditions, numDevs)';
 
                 otherwise
                     method
@@ -89,13 +108,10 @@ for i=1:numStats
 
 
 
-
                     % You have to reshape in order to reduce the dimensions because sum over
                     % the first dimension does not reduce the dimension size.
                     % Also, transpose is needed because "value" (= devs) has to be in the first
                     % dimension of the matrix.
-
-
 
 
                     numAttempted = reshape(numAttempted, numConditions,numDevs)';

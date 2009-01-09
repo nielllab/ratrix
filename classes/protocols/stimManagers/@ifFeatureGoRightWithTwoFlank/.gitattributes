@@ -31,3 +31,10 @@
 /shapeParameter.m -text
 /yuan_test_for_calcStim.m -text
 /setTargetContrast.m -text
+/getPercentCorrectionTrials.m -text
+/testLUT.m -text
+/canForceStimDetails.m -text
+/setBlockedDetails.m -text
+/createDiscriminandumContextOnOffMovie.m -text
+/hasUpdatablePercentCorrectionTrial.m -text
+/setPercentCorrectionTrials.m -text

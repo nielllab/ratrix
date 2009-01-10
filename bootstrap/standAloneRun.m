@@ -146,7 +146,8 @@ try
     compileDetailedRecords([],{subjectID},[],getStandAlonePath(rx),compilePath);
     subjectAnalysis(compilePath);
     cleanup;
-catch ex
+catch 
+   ex=lasterror
     ple(ex)
     cleanup;
     rethrow(ex)

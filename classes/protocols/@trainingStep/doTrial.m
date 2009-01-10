@@ -127,7 +127,8 @@ try
         error('need station and ratrix and subject and rnet objects')
     end
 
-catch ex
+catch
+    ex=lasterror
     display(ts)
 
     ple(ex)

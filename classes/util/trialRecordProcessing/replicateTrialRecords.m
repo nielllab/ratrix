@@ -38,7 +38,8 @@ for f=1:length(subDirs)
     [fp,fn,fe,fv]=fileparts(fileName);
     try
         tr=load(fullfile(filePath,fileName)); %this is safe cuz it's local
-    catch loaderror
+    catch 
+        loaderror=lasterror
         if strcmp(loaderror.identifier,'MATLAB:load:unableToReadMatFile')
             fullfile(filePath,fileName)
             loaderror.message
@@ -137,7 +138,8 @@ for f=1:length(subDirs)
                                 successC = true;
                             end
                             closeConn(conn);
-                        catch ex
+                        catch
+                             ex=lasterror
                             ple(ex)
                             successC = false;
                         end

@@ -73,7 +73,8 @@ try
 
     Screen('Close'); %leaving off second argument closes all textures
 
-catch ex
+catch 
+    ex=lasterror
     s.ifi=[];
     s.window=[];
     Screen('CloseAll');

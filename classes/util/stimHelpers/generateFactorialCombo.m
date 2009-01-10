@@ -91,6 +91,7 @@ end % end error checking statement
 if ~exist('mode','var') || isempty(mode)
     warning('using default mode of ''ordered''');
     mode={'ordered'};
+    type='ordered'; %pmm fixed 01/10/09
 elseif iscell(mode)
     % check that mode is a valid mode - so far just {'ordered'}
     if length(mode)==1 && strcmp(mode{1}, 'ordered')
@@ -115,8 +116,12 @@ if isstruct(params)
     newParams={};
     for i=1:length(selection)
         newParams{end+1}=params.(selection{i});
+%         newSelection(i)=i; %find(strcmp(selection{i},fieldnames(params)));
+        %     also converts selection to a numerical index rather than a field -
+        %     pmm 1/10/09
     end
     params=newParams;
+%     selection=newSelection;
 end
 
 % ======================================================================

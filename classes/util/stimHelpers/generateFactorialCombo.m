@@ -116,12 +116,15 @@ if isstruct(params)
     newParams={};
     for i=1:length(selection)
         newParams{end+1}=params.(selection{i});
-%         newSelection(i)=i; %find(strcmp(selection{i},fieldnames(params)));
-        %     also converts selection to a numerical index rather than a field -
-        %     pmm 1/10/09
+    end
+    % build new toReturn based on finding members of toReturn in selection (since params is now only those in selection)
+    [tf newToReturn] = ismember(toReturn,selection);
+    if any(newToReturn==0)
+        error('found elements of newToReturn==0; this shouldnt have happened!');
     end
     params=newParams;
-%     selection=newSelection;
+    selection=1:length(params); % reset selection to be indices into all elements of the new params
+    toReturn=newToReturn;
 end
 
 % ======================================================================

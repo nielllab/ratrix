@@ -37,3 +37,9 @@
 /hasUpdatablePercentCorrectionTrial.m -text
 /setPercentCorrectionTrials.m -text
 /extractDetailFields.m -text
+/doDynamicPTBFrame.m -text
+/checkFitRF.m -text
+/generateFlankerFactorialCombo.m -text
+/checkBlocking.m -text
+/removedLard.m -text
+/checkDynamicSweep.m -text

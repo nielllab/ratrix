@@ -116,3 +116,5 @@ analysis/getCycPerDeg.m -text
 analysis/fitPriors.m -text
 matlaby/dsxy2figxy.m -text
 matlaby/arrow.m -text
+analysis/fitElipseToBinaryImage.m -text
+matlaby/iswholenumber.m -text

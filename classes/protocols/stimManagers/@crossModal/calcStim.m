@@ -1,4 +1,4 @@
-function [stimulus updateSM resInd out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance isCorrection text] = ...
+function [stimulus updateSM resInd out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance text] = ...
     calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 
 updateSM = true; % This is always true, because the audio stimulus is always set
@@ -50,10 +50,10 @@ else
     stimulus.isBlocking = true;
 end
 
-[stimulus.hemifieldFlicker HFupdateSM HFresInd HFout HFLUT HFscaleFactor HFtype HFtargetPorts HFdistractorPorts HFdetails HFinterTrialLuminance HFisCorrection text] = ...
+[stimulus.hemifieldFlicker HFupdateSM HFresInd HFout HFLUT HFscaleFactor HFtype HFtargetPorts HFdistractorPorts HFdetails HFinterTrialLuminance text] = ...
     calcStim(stimulus.hemifieldFlicker,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords);
 
-[stimulus.stereoDiscrim SDupdateSM SDresInd SDout SDLUT SDscaleFactor SDtype SDtargetPorts SDdistractorPorts SDdetails SDinterTrialLuminance SDisCorrection text] = ...
+[stimulus.stereoDiscrim SDupdateSM SDresInd SDout SDLUT SDscaleFactor SDtype SDtargetPorts SDdistractorPorts SDdetails SDinterTrialLuminance text] = ...
     calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords);
 
 % Update the stim manager if either of the component stim managers needed
@@ -95,13 +95,13 @@ if stimulus.currentModality == 0
     targetPorts = HFtargetPorts;
     distractorPorts = HFdistractorPorts;
     interTrialLuminance = HFinterTrialLuminance;
-    isCorrection = HFisCorrection;
+    details.correctionTrial = HFdetails.correctionTrial;
 else
     % Sound modality is relevant
     targetPorts = SDtargetPorts;
     distractorPorts = SDdistractorPorts;
     interTrialLuminance = SDinterTrialLuminance;
-    isCorrection = SDisCorrection;
+    details.correctionTrial = SDdetails.correctionTrial;
 end
 
 details.HFdetails = HFdetails;
@@ -110,8 +110,8 @@ details.HFtargetPorts = HFtargetPorts;
 details.SDtargetPorts = SDtargetPorts;
 details.HFdistractorPorts = HFdistractorPorts;
 details.SDdistractorPorts = SDdistractorPorts;
-details.HFisCorrection = HFisCorrection;
-details.SDisCorrection = SDisCorrection;
+details.HFcorrectionTrial = HFdetails.correctionTrial;
+details.SDcorrectionTrial = SDdetails.correctionTrial;
 details.currentModality = stimulus.currentModality;
 details.blockingLength = stimulus.blockingLength;
 details.isBlocking = stimulus.isBlocking;

@@ -12,7 +12,7 @@ LUT= [ramp;ramp;ramp]';
 
 text='hemifield';
 updateSM=0;
-isCorrection=0;
+correctionTrial=0;
 
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);
@@ -66,7 +66,7 @@ switch trialManagerClass
             details.correctionTrial=1;
             'correction trial!'
             targetPorts=trialRecords(end).targetPorts;
-            isCorrection=1;
+            correctionTrial=1;
         else
             details.correctionTrial=0;
             targetPorts=responsePorts(ceil(rand*length(responsePorts)));
@@ -82,7 +82,7 @@ end
 
 numTargs=length(stimulus.targetContrasts);
 details.contrasts = stimulus.targetContrasts(ceil(rand(length(targetPorts),1)*numTargs));
-details.isCorrection=isCorrection;
+details.correctionTrial=correctionTrial;
 
 numDistrs=length(stimulus.distractorContrasts);
 if numDistrs>0

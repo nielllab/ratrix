@@ -12,7 +12,7 @@ LUT= [ramp;ramp;ramp]';
 [resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60],32,getMaxWidth(stimulus),getMaxHeight(stimulus));
 
 updateSM=0;
-details.isCorrection=0;
+details.correctionTrial=0;
 text='stereoDiscrim';
 
 scaleFactor = getScaleFactor(stimulus);
@@ -74,7 +74,7 @@ switch trialManagerClass
             details.correctionTrial=1;
             'correction trial!'
             targetPorts=trialRecords(end).targetPorts;
-            details.isCorrection=1;
+            details.correctionTrial=1;
         else
             details.correctionTrial=0;
             targetPorts=responsePorts(ceil(rand*length(responsePorts)));

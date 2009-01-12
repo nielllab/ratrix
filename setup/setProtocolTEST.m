@@ -294,7 +294,7 @@ ts24 = trainingStep(vh, discrimStim5A,graduateQuickly,noTimeOff(),svnRev);
 % p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8, ts9, ts10, ts11, ts12, ts13, ts14, ts15, ts16, ts17, ...
 %     ts18, ts19, ts20, ts21, ts22});
 % stepNum=21;
-p=protocol('gabor test2', {ts24, ts3, ts4, ts1, ts2, ts12, ts8});
+p=protocol('gabor test2', {ts24, ts3, ts4, ts1, ts2, ts12, ts8, ts11,ts9,ts10});
 stepNum=uint8(7);
 
 for i=1:length(subjIDs),

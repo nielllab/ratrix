@@ -1,4 +1,4 @@
-function out=extractDetailFields(sm,basicRecords,trialRecords)
+function out=extractDetailFields(sm,basicRecords,trialRecords,LUTparams)
 
 %ok, trialRecords could just be the stimDetails, determined by this class's
 %calcStim.  but you might want to do some processing that is sensitive to
@@ -32,12 +32,12 @@ try
     checkTargets(sm.hemifieldFlicker,out.HFdetailsXPosPcts,out.HFdetailsContrasts,num2cell(out.HFtargetPorts),num2cell(out.HFdistractorPorts),basicRecords.numPorts);
     checkTargets(sm.stereoDiscrim,out.SDdetailsLeftAmplitude,out.SDdetailsRightAmplitude,num2cell(out.SDtargetPorts),num2cell(out.SDdistractorPorts),basicRecords.numPorts);
     
-    out.HFisCorrection=ensureScalar({stimDetails.HFisCorrection});
-    out.SDisCorrection=ensureScalar({stimDetails.SDisCorrection});
+    out.HFcorrectionTrial=ensureScalar({stimDetails.HFcorrectionTrial});
+    out.SDcorrectionTrial=ensureScalar({stimDetails.SDcorrectionTrial});
 
-    if ~all(out.HFisCorrection==out.HFdetailsCorrectionTrial) ||...
-            ~all(out.SDisCorrection==out.SDdetailsCorrectionTrial)
-        error('SD or HF isCorrection doesn''t match detailsCorrectionTrial')
+    if ~all(out.HFcorrectionTrial==out.HFdetailsCorrectionTrial) ||...
+            ~all(out.SDcorrectionTrial==out.SDdetailsCorrectionTrial)
+        error('SD or HF correctionTrial doesn''t match detailsCorrectionTrial')
     end
 
     out.currentModality=ensureScalar({stimDetails.currentModality});
@@ -46,11 +46,11 @@ try
         error('inconsistent record')
     end
 
-    out.isCorrection=nan*ones(1,length(trialRecords));
-    out.isCorrection(out.currentModality==0)=out.HFisCorrection(out.currentModality==0);
-    out.isCorrection(out.currentModality==1)=out.SDisCorrection(out.currentModality==1);
-    if any(isnan(out.isCorrection))
-        error('not all isCorrections assigned')
+    out.correctionTrial=nan*ones(1,length(trialRecords));
+    out.correctionTrial(out.currentModality==0)=out.HFcorrectionTrial(out.currentModality==0);
+    out.correctionTrial(out.currentModality==1)=out.SDcorrectionTrial(out.currentModality==1);
+    if any(isnan(out.correctionTrial))
+        error('not all correctionTrial assigned')
     end
 
     out.blockingLength=ensureScalar({stimDetails.blockingLength});

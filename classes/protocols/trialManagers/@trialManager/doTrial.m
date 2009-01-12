@@ -118,6 +118,9 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 if length(unique(portUnion))~=length(portUnion) ||...
                         any(~ismember(portUnion, getResponsePorts(trialManager,getNumPorts(station))))
 
+                    trialRecords(trialInd).targetPorts
+                    trialRecords(trialInd).distractorPorts
+                    getResponsePorts(trialManager,getNumPorts(station))
                     error('targetPorts and distractorPorts must be disjoint, contain no duplicates, and subsets of responsePorts')
                 end
             else

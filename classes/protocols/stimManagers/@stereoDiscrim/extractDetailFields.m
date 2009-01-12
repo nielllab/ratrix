@@ -1,4 +1,4 @@
-function out=extractDetailFields(sm,basicRecords,trialRecords)
+function out=extractDetailFields(sm,basicRecords,trialRecords,LUTparams)
 
 if ~all(strcmp({trialRecords.trialManagerClass},'nAFC'))
     warning('only works for nAFC trial manager')
@@ -8,7 +8,7 @@ else
     try
         stimDetails=[trialRecords.stimDetails];
 
-        out.isCorrection=ensureScalar({stimDetails.correctionTrial});
+        out.correctionTrial=ensureScalar({stimDetails.correctionTrial});
         out.pctCorrectionTrials=ensureScalar({stimDetails.pctCorrectionTrials});
         out.leftAmplitude=ensureEqualLengthVects({stimDetails.leftAmplitude});
         out.rightAmplitude=ensureEqualLengthVects({stimDetails.rightAmplitude});

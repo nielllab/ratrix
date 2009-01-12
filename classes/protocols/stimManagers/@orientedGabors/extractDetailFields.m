@@ -9,7 +9,7 @@ else
 
     try
         stimDetails=[trialRecords.stimDetails];
-        out.isCorrection=ensureScalar({stimDetails.correctionTrial});
+        out.correctionTrial=ensureScalar({stimDetails.correctionTrial});
         out.pctCorrectionTrials=ensureScalar({stimDetails.pctCorrectionTrials});
         out.pixPerCyc=ensureScalar({stimDetails.pixPerCyc});
         out.orientations=[stimDetails.orientations];

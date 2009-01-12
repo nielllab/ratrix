@@ -73,7 +73,8 @@ while ~successful
       error('In svnUpdate(): Unknown node type');
     end
     successful = true;
-  catch ex
+  catch
+      ex=lasterror;
     successful = false;
     ple(ex)
     pause(1.0);

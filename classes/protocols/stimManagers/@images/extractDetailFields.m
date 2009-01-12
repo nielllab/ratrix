@@ -18,7 +18,8 @@ else
         out.leftIm=ensureTypedVector(cellfun(@(x)x{1}.name,ims,'UniformOutput',false),'char');
         out.rightIm=ensureTypedVector(cellfun(@(x)x{3}.name,ims,'UniformOutput',false),'char');
         out.suffices=nan*zeros(2,length(trialRecords)); %for some reason these are turning into zeros in the compiled file...  why?
-    catch ex
+    catch
+        ex=lasterror;
         out=handleExtractDetailFieldsException(sm,ex,trialRecords);
         verifyAllFieldsNCols(out,length(trialRecords));
         return

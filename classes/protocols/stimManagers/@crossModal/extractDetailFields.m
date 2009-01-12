@@ -59,7 +59,8 @@ try
 
     out.modalitySwitchMethod=ensureTypedVector({stimDetails.modalitySwitchMethod},'char');
     out.modalitySwitchType=ensureTypedVector({stimDetails.modalitySwitchType},'char');
-catch ex
+catch
+    ex=lasterror;
     out=handleExtractDetailFieldsException(sm,ex,trialRecords);
 end
 

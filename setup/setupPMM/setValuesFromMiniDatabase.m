@@ -5,6 +5,8 @@ ts = getTrainingStep(p,stepNum);
 stim = getStimManager(ts);
 tm=getTrialManager(ts);
 rm = getReinforcementManager(tm);
+subID=getID(s);
+
 
 currentShapedValue = getCurrentShapedValue(stim);
 currentMsPenalty = getMsPenalty(rm);
@@ -42,7 +44,8 @@ end
 valueInDatabase = getMiniDatabaseFact(s,'msPenalty');
 if currentMsPenalty~=valueInDatabase
     if ~isempty(valueInDatabase)
-        rm = setMsPenalty(rm, valueInDatabase);
+        %rm = setMsPenalty(rm, valueInDatabase); % use util setter
+        setReinforcementParam('penaltyMS',{subID},valueInDatabase,'all','from miniDB','pmm');
         updateRM=1;
         newMsPenalty = valueInDatabase;
     else
@@ -56,7 +59,8 @@ end
 valueInDatabase = getMiniDatabaseFact(s,'rewardScalar');
 if currentScalar~=valueInDatabase
     if ~isempty(valueInDatabase)
-        rm = setScalar(rm, valueInDatabase);
+        %rm = setScalar(rm, valueInDatabase);
+        setReinforcementParam('scalar',{subID},valueInDatabase,'all','from miniDB','pmm');
         updateRM=1;
         newScalar = valueInDatabase;
     else
@@ -94,24 +98,24 @@ if updateSM
     end
 end
 
-if updateRM   
-    [s r]=changeAllReinforcementManagers(s,rm,r,sprintf('reinforcement set; penalty: %d, scalar: %d',newMsPenalty,newScalar),'pmm');
+if updateRM   %'update' is really just a check now
+    %[s r]=changeAllReinforcementManagers(s,rm,r,sprintf('reinforcement set; penalty: %d, scalar: %d',newMsPenalty,newScalar),'pmm');
     
-    %serverDataPath = fullfile(dataPath, 'ServerData');
-    dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
-    r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
+    r=getRatrix;
     s=getSubjectFromID(r,getID(s));
 
     [p,step]=getProtocolAndStep(s);
     ts=getTrainingStep(p,step);
     tm=getTrialManager(ts);
     currentRm =getReinforcementManager(tm);
-    if ~all(display(currentRm)==display(rm))
+    if all(display(currentRm)==display(rm))
         display(currentRm)
         display(rm)
-        error('change didn''t work!')
-        %first make the error actually work!
-        %eventually make change error sensitive to getImmuatble(rm)
+        keyboard
+        newScalar=newScalar
+        newMsPenalty=newMsPenalty
+        error('change didn''t work! these two should be different')
+        %fails to check if one of the changes worked, but the other didn't
     end
 end
 
@@ -119,8 +123,7 @@ if updatePctCTsAllSM
     [s r]=changeAllPercentCorrectionTrials(s,newPctCTs,r,sprintf('percentCorrectionTrials set: %d',newPctCTs),'pmm') 
     
     %check it
-    dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
-    r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
+    r=getRatrix;
     s=getSubjectFromID(r,getID(s));
     
     [p stepNum]=getProtocolAndStep(s);

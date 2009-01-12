@@ -4,8 +4,7 @@ function [out newLUT]=extractDetailFields(sm,basicRecords,trialRecords,LUTparams
 % quick init test after load in a trialRecord.mat
 %   LUTparams.compiledLUT='nAFC';
 %   basicRecords.trialManagerClass=1;
-%   extractDetailFields(ifFeatureGoRightWithTwoFlank,basicRecords,trialReco
-%   rds,LUTparams)
+%   extractDetailFields(ifFeatureGoRightWithTwoFlank,basicRecords,trialRecords,LUTparams)
 
 newLUT={};
 
@@ -38,7 +37,12 @@ else
         out.flankerOrientation=getDetail(trialRecords,'flankerOrientation',1);
         out.flankerPosAngle=getDetail(trialRecords,'flankerPosAngles',1);
         out.redLUT=getDetail(trialRecords,'LUT',256);
-
+        
+        %if anything is defined
+        out.fitRF=isDefined(trialRecords, 'fitRF');
+        out.blocking=isDefined(trialRecords, 'blocking');
+        out.dynamicSweep=isDefined(trialRecords, 'dynamicSweep');
+        
         %     if 0 % FROM old COMPILED
         %         % 12/16/08 - first 3 entries might be common to many stims
         %         % should correctionTrial be here in compiledDetails (whereas it was originally in compiledTrialRecords)
@@ -125,8 +129,20 @@ end
 verifyAllFieldsNCols(out,length(trialRecords));
 
 
+function out=isDefined(trialRecords, field)
+%returns a one if the field is there and contain anything
 
-function out=getDetail(trialRecords,field,nthValue)
+stimDetails=[trialRecords.stimDetails];
+f=fields(stimDetails);
+if ~strcmp(field,f)
+    %if the field is missing, it's not there (false=0)
+    out=zeros(size(trialRecords));
+else
+    cellValues={stimDetails.(field)};
+    out = cell2mat(cellfun('isempty',cellValues, 'UniformOutput',false));
+end
+    
+function out=getDetail(trialRecords,field,nthValue,ifNotEmpty)
 %helper function puts in a single double per trial, a nan if the field is
 %missing, or a single value from a matrix if there are mutliple values
 %perTrial

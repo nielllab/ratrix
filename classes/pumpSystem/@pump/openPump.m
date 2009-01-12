@@ -42,7 +42,8 @@ if ~p.pumpOpen
         fopen(p.serialPort);
         p.pumpOpen=1;
         [p durs]=sendCommands(p,pumpProgram);
-    catch ex
+    catch
+        ex=lasterror;
         fprintf('closing serial port due to error\n');
         fclose(p.serialPort);
         rethrow(ex)

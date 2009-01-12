@@ -60,7 +60,8 @@ while isempty(cmd) && (isempty(endTime) || GetSecs<endTime) && ~quit
                     f=fopen('SocketErrorLog.txt','a');
                     fprintf(f,'%s: waitForSpecificCommand from %s server unexpectedly no longer connected to this client\n',datestr(now),mac);
                     fclose(f);
-                catch ex
+                catch
+                    ex=lasterror;
                     ple(ex)
                 end
                 fprintf('waitForSpecificCommand: Client unexpectedly disconnected\n')

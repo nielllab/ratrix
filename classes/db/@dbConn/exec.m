@@ -5,7 +5,8 @@ stmt = conn.conn.createStatement();
 try
     rowCount = stmt.executeUpdate(execString);
     stmt.close();
-catch ex
+catch 
+    ex=lasterror;
     stmt.close();
     rethrow(ex)
 end

@@ -19,7 +19,8 @@ jCom = packageArguments(r,jCom,arguments);
 try
     r.server.sendImmediately(jCom);
     com = rnetcommand(jCom);
-catch ex
+catch
+    ex=lasterror;
     quit=true;
 
     'got a quit in sendToClient on command'
@@ -36,7 +37,8 @@ catch ex
         fprintf(f,['\t' ex.stack.file '\n']);
         fprintf(f,['\t' ex.stack.line '\n']);
         fclose(f);
-    catch ex
+    catch
+        ex=lasterror;
         ple(ex)
     end
     com=[];

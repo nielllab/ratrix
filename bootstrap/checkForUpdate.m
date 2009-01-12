@@ -73,8 +73,8 @@ if exist(f) == 2
 
         updatePsychtoolboxIfNecessary
 
-    catch ex
-        ple(ex)
+    catch
+        ple(lasterror)
         error('failure in checkForUpdate')
     end
     WaitSecs(3);

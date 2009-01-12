@@ -113,7 +113,8 @@ if isa(station,'station')
                         else
                             error('Unkown sound player type')
                         end
-                    catch ex
+                    catch
+                        ex=lasterror;
                         ple(ex)
                         rethrow(ex)
                     end

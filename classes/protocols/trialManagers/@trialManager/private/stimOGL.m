@@ -239,8 +239,8 @@ try
     [runningSVNversion repositorySVNversion url]=getSVNRevisionFromXML(getRatrixPath);
     ratrixVersion=sprintf('%s (%d of %d)',url,runningSVNversion,repositorySVNversion);
     ratrixSVNInfo=sprintf('%s@%d',url,runningSVNversion);
-catch ex
-    ex
+catch 
+    ex=lastError
     ratrixVersion='no network connection';
 end
 
@@ -385,7 +385,8 @@ try
         end
         try
             oldCLUT = Screen('LoadNormalizedGammaTable', window, LUT,0); %apparently it's ok to use a window ptr instead of a screen ptr, despite the docs
-        catch e
+        catch
+            e=lasterror
             %if the above fails, we lose our window :(
             %window=Screen('OpenWindow',max(Screen('Screens')));
             e.message
@@ -1507,7 +1508,8 @@ try
     Priority(originalPriority);
     ListenChar(0);
 
-catch ex
+catch
+    ex=lasterror;
     ple(ex)
 
 

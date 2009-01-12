@@ -7,7 +7,8 @@ function [im m alpha]=loadRemoteImage(s,name,ext)
         try
             [im m alpha]=imread(fullfile(s.directory,[name ext]));  %,'BackgroundColor',zeros(1,3)); this would composite against black and return empty alpha
             completed=true;
-        catch ex%expect remote reads to fail cuz of windows networking/file sharing bug
+        catch
+            ex=lasterror; %expect remote reads to fail cuz of windows networking/file sharing bug
             pauseDur = rand+nAttempts-1; %linearly increase, but be nondeterministic
             fprintf('attempt %d: failed to read %s, trying again in %g secs\n',nAttempts,fullfile(s.directory,[name ext]),pauseDur)
             ple(ex)

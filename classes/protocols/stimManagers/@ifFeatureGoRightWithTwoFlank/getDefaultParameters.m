@@ -136,6 +136,11 @@ switch defaultSettings
         default.fpaRelativeFlankerOrientation=nan;
         default.svnRev={'svn://132.239.158.177/projects/ratrix/trunk'}; %1/8/09 - added to support trunk version of trainingStep
 
+        default.blocking=[];
+        default.fitRF=[];
+        default.dynamicSweep=[];
+        
+        
     otherwise
         error ('unknown default settings date')
 
@@ -513,7 +518,7 @@ switch protocolVersion
                 protocolVersion=protocolVersion
                 error('unknown type of protocol for this version')
         end
-    case {'2_4'} %like 2_3 but with fixed orientations for left
+    case {'2_4','2_5validate'} %like 2_3 but with fixed orientations for left
         switch protocolType
             case 'goToRightDetection'
                 default.goRightContrast = [1];    %choose a random contrast from this list each trial

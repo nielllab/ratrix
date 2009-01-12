@@ -42,8 +42,8 @@ if strcmp(type,'weight')
         try
             conn=dbConn; %calling this too rapidly throws connection exception: ORA-12516, TNS:listener could not find available handler with matching protocol stack
             gotConn=true;
-        catch ex
-            ple(ex)
+        catch
+            ple(lasterror)
         end
     end
     %[weights dates] = getBodyWeightHistory(conn,subjectID); %this is fast
@@ -109,9 +109,9 @@ if strcmp(type,'weight')
             alreadyPlotted{end+1}='weight';
             set(gcf,'UserData',alreadyPlotted);
         end  
-    catch ex
+    catch
         ple
-        rethrow(ex)
+        rethrow(lasterror)
 %         plot(0)
 %         dates
 %         weights

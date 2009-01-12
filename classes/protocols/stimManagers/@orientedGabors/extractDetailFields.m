@@ -20,7 +20,8 @@ else
         % should correctionTrial be here in compiledDetails (whereas it was originally in compiledTrialRecords)
         % or should extractBasicRecs be allowed to access stimDetails to get correctionTrial?
         
-    catch ex
+    catch 
+        ex=lasterror;
         out=handleExtractDetailFieldsException(sm,ex,trialRecords);
         verifyAllFieldsNCols(out,length(trialRecords));
         return

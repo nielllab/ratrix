@@ -35,13 +35,15 @@ try
             end
         end
         rs.close();
-    catch ex
+    catch 
+        ex=lasterror;
         rs.close();
         ex
         failed = true;
     end
     stmt.close();
-catch ex
+catch 
+    ex=lasterror;
     stmt.close();
     ex
     failed = true;

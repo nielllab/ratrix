@@ -121,7 +121,7 @@ switch nargin
 
         s.gratingType='square';
 
-        
+
         s.framesMotionDelay = [];
         s.numMotionStimFrames = [];
         s.framesPerMotionStim = [];
@@ -133,9 +133,13 @@ switch nargin
         s.flankerPosAngle = [];
         s.percentCorrectionTrials = [];
 
-        s.fpaRelativeTargetOrientation=[]; 
+        s.fpaRelativeTargetOrientation=[];
         s.fpaRelativeFlankerOrientation=[];
-        
+
+        s.blocking=[];
+        s.fitRF=[];
+        s.dynamicSweep=[];
+
         % edf: you must not change definition of object.  these belong on parent, not you.
         %extra non input values
         %    s.maxWidth=1;
@@ -170,7 +174,7 @@ switch nargin
         else
             error('Input argument is not a goToFeatureWithTwoFlank object')
         end
-    case 56
+    case 59
         % create object using specified values
 
         if all(varargin{1})>0
@@ -436,14 +440,14 @@ switch nargin
         else
             error('framesPerMotionStim must be a single number')
         end
-        
+
         if  any(strcmp(varargin{46},{'goToRightDetection', 'goToLeftDetection','tiltDiscrim','goToSide'}))
             s.protocolType=varargin{46};
         else
             error('protocolType must be goToRightDetection or goToLeftDetection or tiltDiscrim or goToSide')
         end
 
-        if  any(strcmp(varargin{47},{'1_0','1_1','1_2','1_3','1_4','1_5','1_6','1_7','1_8','1_9','2_0','2_1','2_2','2_3','2_4','2_5'}))
+        if  any(strcmp(varargin{47},{'1_0','1_1','1_2','1_3','1_4','1_5','1_6','1_7','1_8','1_9','2_0','2_1','2_2','2_3','2_4', '2_5validate','2_5'}))
             s.protocolVersion=varargin{47};
         else
             error('protocolVersion must be very specific')
@@ -509,7 +513,26 @@ switch nargin
         else
             error('fpaRelativeTargetOrientation must be a vectors of numbers or NaN')
         end
-                
+
+        if (checkBlocking(ifFeatureGoRightWithTwoFlank(),varargin{53}))
+            s.blocking=varargin{53};
+        else
+            error ('wrong fields in blocking')
+        end
+
+        if (checkFitRF(ifFeatureGoRightWithTwoFlank(),varargin{54}))
+            s.fitRF=varargin{54};
+        else
+            error ('wrong fields in dynamic')
+        end
+
+        if (checkDynamicSweep(ifFeatureGoRightWithTwoFlank(),varargin{55}))
+            s.dynamicSweep=varargin{55};
+        else
+            error ('wrong fields in fitRF')
+        end
+
+
         %s.phase=0; %no longer randomized;   would need movie for that (hieght x width x orientations x phase)
         %maxHeight=varargin{22**old val};
 
@@ -526,45 +549,14 @@ switch nargin
 
         s.LUT=[];
 
-
-        %%%moved functions to util****
-        %     function out=getFeaturePatchStim(patchX,patchY,type,variableParams,staticParams,extraParams)
-        %     switch type
-        %         case 'squareGrating-variableOrientation'
-        %             featurePatchStim=zeros(patchX,patchY,length(variableParams));
-        %             params=staticParams;
-        %             %params= radius   pix/cyc  phase orientation ontrast thresh xPosPct yPosPct
-        %              for i=1:length(variableParams)
-        %                 params(4)=variableParams(i);  %4th parameter is orientation
-        %                 featurePatchStim(:,:,i)=computeGabors(params,extraParams.mean,patchX,patchY,'square',extraParams.normalizeMethod,1);
-        %             end
-        %
-        %         otherwise
-        %             error(sprintf('%s is not a defined type of feature',type))
-        %     end
-        %     out=featurePatchStim;
-
-        %%%this now gets called in the inflate
-        %     s.goRightStim =zeros(patchX,patchY,length(s.goRightOrientations));
-        %     for i=1:length(s.goRightOrientations)
-        %             %params= radius   pix/cyc       phase    orientation              contrast   thresh    xPosPct yPosPct
-        %             params = [radius  s.pixPerCycs  s.phase  s.goRightOrientations(i)     1       s.thresh  1/2     1/2   ];
-        %             %params =[5  pixPerCycs  phase  goRightOrientations(i)  goRightContrast(i)  thresh  1/2     1/2   ]
-        %             %patch=computeGabors(params,'square',mean,patchX,patchY);
-        %             s.goRightStim(:,:,i)=computeGabors(params,s.mean,patchX,patchY,'square',normalizeMethod,1);
-        %     end
-        %
-        %     s.goLeftStim =zeros(patchX,patchY,length(s.goLeftOrientations));
-        %     for i=1:length(s.goLeftOrientations)
-        %             params = [radius  s.pixPerCycs  s.phase  s.goLeftOrientations(i)  1      s.thresh  1/2     1/2   ];
-        %             s.goLeftStim(:,:,i)=computeGabors(params,s.mean,patchX,patchY,'square',normalizeMethod,1);
-        %     end
-        %
-        %     s.flankerStim =zeros(patchX,patchY,length(s.flankerOrientations));
-        %     for i=1:length(s.flankerOrientations)
-        %             params = [radius  s.pixPerCycs  s.phase  s.flankerOrientations(i)     1      s.thresh  1/2     1/2   ];
-        %             s.flankerStim(:,:,i)=computeGabors(params,s.mean,patchX,patchY,'square',normalizeMethod,1);
-        %     end
+        %error checks
+        if ~isempty(s.blocking) && (any(~isnan(s.fpaRelativeFlankerOrientation)) || any(~isnan(s.fpaRelativeTargetOrientation)))
+            frfo=s.fpaRelativeFlankerOrientation
+            frto=s.fpaRelativeTargetOrientation
+            s.blocking
+            warning('blocking interferes with fpa relative methods')
+            %maybe make sure relative value is being blockwd
+        end
 
         firstSuper=nargin-3;
         s = class(s,'ifFeatureGoRightWithTwoFlank',stimManager(varargin{firstSuper},varargin{firstSuper+1},varargin{firstSuper+2},varargin{firstSuper+3}));
@@ -572,8 +564,8 @@ switch nargin
         %s=inflate(s);
         %s=deflate(s);
         %s=inflate(s);
-        if ~strcmp(s.typeOfLUT, 'useThisMonitorsUncorrectedGamma')        
-        disp(sprintf('at start up will be linearizing monitor in range from %s to %s', num2str(s.rangeOfMonitorLinearized(1)), num2str(s.rangeOfMonitorLinearized(2))))
+        if ~strcmp(s.typeOfLUT, 'useThisMonitorsUncorrectedGamma')
+            disp(sprintf('at start up will be linearizing monitor in range from %s to %s', num2str(s.rangeOfMonitorLinearized(1)), num2str(s.rangeOfMonitorLinearized(2))))
         end
         %s=fillLUT(s,s.typeOfLUT,s.rangeOfMonitorLinearized,0);
 

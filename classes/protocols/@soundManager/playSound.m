@@ -32,7 +32,8 @@ if isa(station,'station')
 
             try
                 PsychPortAudio('Start', sm.players{match}, reps);
-            catch ex 
+            catch
+                ex=lasterror;
                 ple(ex)
                 sm.playingNonLoop(match)
                 sm.playingLoop(match)

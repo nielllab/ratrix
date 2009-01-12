@@ -261,7 +261,8 @@ swapM = uicontrol(f,'Style','popupmenu',...
 %             all_other_subjects
 %             size(all_other_subjects)
             makeMini(subjects,all_other_subjects,racks_used,rooms_used,miniSz,f,heatCol,roomBorderWidth);
-        catch ex
+        catch
+            ex=lasterror;
             ple(ex)
             y=errordlg(['call erik or philip before closing this box.  quitting due to error: ' ex.message],'ratrix error','modal')
             uiwait(y)
@@ -807,7 +808,8 @@ try
         end
     end
     clients={};  %release references to java objects
-catch ex
+catch 
+    ex=lasterror;
     quit=true;
     er=true;
 
@@ -836,7 +838,8 @@ function [sys,r,rx]=cleanup(servePump,sys,r,rx,subjects)
 if servePump
     try
         sys=closePumpSystem(sys);
-    catch ex
+    catch
+        ex=lasterror;
         fprintf('error shutting down pump\n')
         ple(ex)
     end
@@ -844,7 +847,8 @@ end
 
 try
     [r rx]=shutdown(r,rx,subjects);
-catch ex
+catch 
+    ex=lasterror;
     fprintf('error shutting down rnet\n')
     ple(ex)
 end

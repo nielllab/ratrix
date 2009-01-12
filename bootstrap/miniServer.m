@@ -49,7 +49,8 @@ fprintf('quitting\n')
 
 try
     r=shutdown(r,[],[]);
-catch ex
+catch
+    ex=lasterror;
     fprintf('error shutting down rnet\n')
     ple(ex)
 end
@@ -91,7 +92,8 @@ try
         end
     end
     connectedClients={};
-catch ex
+catch
+    ex=lasterror;
     quit=true;
     er=true;
 

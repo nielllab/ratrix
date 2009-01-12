@@ -14,7 +14,8 @@ else
         out.xPosPcts=ensureEqualLengthVects({stimDetails.xPosPcts});
 
         checkTargets(sm,out.xPosPcts,out.contrasts,basicRecords.targetPorts,basicRecords.distractorPorts,basicRecords.numPorts);
-    catch ex
+    catch
+        ex=lasterror;
         if strcmp(ex.message,'not all same length')
             warning('bailing: found trials with varying numbers of flickers -- happens rarely in some of dan''s early data')
             out=struct;

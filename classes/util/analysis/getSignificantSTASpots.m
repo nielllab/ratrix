@@ -16,6 +16,10 @@ end
 
 if ~exist('medianFilter','var') || isempty(medianFilter)
     medianFilter=logical(ones(3));
+else
+    if all(size(medianFilter)~=[3 3])
+        error('must be defined by local 2D neighborhood')
+    end
 end
 
 if ~exist('alpha','var') || isempty(alpha)
@@ -36,14 +40,20 @@ significant = zscore > (1 - alpha/2);
 
 midpoint=ceil(length(medianFilter(:))/2);
 sigSpots3D=nan(size(sta));
+filtered=nan(size(sta));
 T=size(sta,3);
 for t=1:T
-    filtered = ordfilt2(significant(:,:,t),midpoint,medianFilter);
-    [sigSpots3D(:,:,t) numSpots] = bwlabel(filtered,8); % use 8-connected (count diagonal connections)
+    filtered(:,:,t) = ordfilt2(significant(:,:,t),midpoint,medianFilter);
+    [sigSpots3D numSpots] = bwlabel(filtered(:,:,t),8); % use 8-connected (count 2D diagonal connections)
 end
+
+% connect in 3D
+%[sigSpots3D numSpots] =bwlabeln(filtered,26); % use 26-connected (count 3D diagonal connections)
+% bigSpots = bwareaopen(BW,atLeastNpixels)
 
 %num significant pixels per time step
 sigPixels=reshape(sum(sum(sigSpots3D,1), 2),T,[]); 
+
 
 %push to 2D
 %only earliest time if there is a tie for the max number of significant pixels

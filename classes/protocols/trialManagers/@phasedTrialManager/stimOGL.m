@@ -95,7 +95,8 @@ try
     originalPriority, verbose);
       
       
-catch ex
+catch
+    ex=lasterror;
     ple(ex)
 
 

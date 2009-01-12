@@ -1,43 +1,24 @@
-
-
-%%
-%init this test
-clear all
-trialRecords=[];
-details.a=9;
-details.b=9;
-%%
-%basic setup
-stimulus.blocking.type='nTrials'
-stimulus.blocking.ntrials=3; %100
-stimulus.blocking.parameters={'a','c','h'};
-stimulus.blocking.values=[1 2 3 4;
-                          1 0 1 0];
-
-%stimulus.blocking.type='daily'
-%stimulus.blocking.anchorDay=floor(now-5); %100
+function [details setValues]=setBlockedDetails(stimulus,trialRecords,details)    
 
 if ~isempty(stimulus.blocking)
     blocking=stimulus.blocking;
-    %details=setBlockedDetails(details,stimulus.blocking,trialRecords)
-    %function details=setBlockedDetails(details,blocking,trialRecords)
+
     %error check
-    
-    numBlocks=size(stimulus.blocking.values,2);
-    numParameters=size(blocking.values,1);
-    if length(blocking.parameters)~=numParameters
+    numBlocks=size(stimulus.blocking.sweptValues,2);
+    numParameters=size(blocking.sweptValues,1);
+    if length(blocking.sweptParameters)~=numParameters
         numParameters=numParameters
-        size(blocking.values)
+        size(blocking.sweptValues)
         error('wrong number of parameters, value should be M x N == numParams x numBlocks')
     end
-        
-    isThere=ismember(blocking.parameters,fields(details));
-    if ~all(isThere)
-        stimulus.blocking.parameters{~isThere}
-        warning(sprintf('found a request for "%s"', [stimulus.blocking.parameters{~isThere}] ))
-        error('it is expected that all details have previously been intialized and defined in calcStim, and the blocking method is merely overwriting the randomly selected values... no new values can be set! double check your assumptions')
-    end
     
+
+    isThere=ismember(blocking.sweptParameters,[fields(stimulus); {'targetContrast','targetOrientations'}']);
+    if ~all(isThere)
+        stimulus.blocking.sweptParameters{~isThere}
+        warning(sprintf('found a request for "%s"', [stimulus.blocking.sweptParameters{~isThere}] ))
+        error('it is expected that all blocked parameters are either fields on the stimulus manager or specially approved')
+    end
     
     if size(trialRecords,2)>0
         thisTrial=trialRecords(end).trialNum+1
@@ -46,14 +27,14 @@ if ~isempty(stimulus.blocking)
     end
 
     
-    switch stimulus.blocking.type
+    switch stimulus.blocking.blockingMethod
         case 'daily'
             details.blockID=rem(ceil(now-blocking.anchorDay),numBlocks)
         case 'nTrials'  
-            details.blockID=rem(floor(thisTrial/blocking.ntrials),numBlocks)     
+            details.blockID=rem(floor(thisTrial/blocking.nTrials),numBlocks)     
         otherwise
-            stimulus.blocking.type
-            error('bad blocking type')
+            stimulus.blocking.blockingMethod
+            error('bad blocking method')
     end
 
     if details.blockID==0
@@ -71,10 +52,11 @@ if ~isempty(stimulus.blocking)
     
     %set values for this block
     for i=1:numParameters
-        details.(stimulus.blocking.parameters{i})=stimulus.blocking.values(i,details.blockID)
+        %don't set directly in details
+        %details.(stimulus.blocking.sweptParameters{i})=stimulus.blocking.sweptValues(i,details.blockID) 
+        
+        %rather trace out the value so selectStimulusParameters can find the ID
+        setValues(i)=stimulus.blocking.sweptValues(i,details.blockID);             
     end
 end
 
-trialRecords(thisTrial).stimDetails=details
-trialRecords(thisTrial).trialNum=thisTrial
-details

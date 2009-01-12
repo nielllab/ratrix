@@ -16,7 +16,8 @@ function [quit com] = sendToServer(r,clientId,priority,command,arguments)
   try
       r.client.sendImmediately(jCom);
       com = rnetcommand(jCom);
-  catch ex
+  catch
+      ex=lasterror;
       quit=true;
 
       ple(ex)
@@ -27,7 +28,8 @@ function [quit com] = sendToServer(r,clientId,priority,command,arguments)
           fprintf(f,['\t' ex.stack.file '\n']);
           fprintf(f,['\t' ex.stack.line '\n']);
           fclose(f);
-      catch ex
+      catch
+          ex=lasterror;
           ple(ex)
       end
       com=[];

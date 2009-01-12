@@ -41,21 +41,44 @@ parameters.scheduler=minutesPerSession(90,3);
 parameters.graduation = rateCriterion(5,5);
 [easy previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 
-if strcmp (protocolVersion,'1_2');
-    %optional step overrides easy but lacks weening off of ms request reward duration
-    nameOfShapingStep{1} = sprintf('Step 2x: Easy %s, with Hint', protocolType);
-    parameters=default;
-    parameters.requestRewardSizeULorMS=30; % make this go down?
-    parameters.msPenalty=4000;
-    parameters.positionalHint=0.2;
-    parameters.scheduler=minutesPerSession(90,3);
-    parameters.graduation = performanceCriterion([0.85, 0.8],int16([200, 500])); %this could become a criteria that weens rats off of hint
-    %parameters.graduation = performanceCriterion([0.95,0.9,0.85, 0.8],int16([50,100,200, 500]));
-    [easyHint previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
-    parameters=previousParameters;
-    parameters.positionalHint=0;
-else
-    parameters=previousParameters;
+switch protocolVersion
+    case '1_2'
+        %optional step overrides easy but lacks weening off of ms request reward duration
+        nameOfShapingStep{1} = sprintf('Step 2x: Easy %s, with Hint', protocolType);
+        parameters=default;
+        parameters.requestRewardSizeULorMS=30; % make this go down?
+        parameters.msPenalty=4000;
+        parameters.positionalHint=0.2;
+        parameters.scheduler=minutesPerSession(90,3);
+        parameters.graduation = performanceCriterion([0.85, 0.8],int16([200, 500])); %this could become a criteria that weens rats off of hint
+        %parameters.graduation = performanceCriterion([0.95,0.9,0.85, 0.8],int16([50,100,200, 500]));
+        [easyHint previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+        parameters=previousParameters;
+        parameters.positionalHint=0;
+    case '2_5validate'
+        parameters=previousParameters;
+
+%         dynamicSweep.sweepMode={'ordered'};
+%         dynamicSweep.sweptValues=[];
+%         dynamicSweep.sweptParameters={'targetOrientation', 'flankerOrientation'};
+%         dynamicSweep.ISI=10;
+%         dynamicSweep.ISMean=0.5;
+% 
+%         fitRF.fitMethod='elipse';
+%         fitRF.which='last';
+%         fitRF.medianFilter=logical(ones(3));
+%         fitRF.alpha=0.05;
+%         fitRF.numSpotsPerSTA=1;
+%         fitRF.spotSizeInSTA=10;
+
+        %basic setup
+        parameters.blocking.blockingMethod='nTrials';
+        parameters.blocking.nTrials=3; %100
+        parameters.blocking.sweptParameters={'targetOrientations','flankerOrientations'};
+        parameters.blocking.sweptValues=generateFlankerFactorialCombo(ifFeatureGoRightWithTwoFlank, parameters.blocking.sweptParameters, {'ordered'}, parameters);
+
+    otherwise
+        parameters=previousParameters;
 end
 
 nameOfShapingStep{end+1} = sprintf('Step 2b: Easy %s, stringent', protocolType);
@@ -99,50 +122,50 @@ parameters.stdGaussMask = 1/16;
 
 
 %optional alternate for some protocols
-    nameOfShapingStep{end+1} = sprintf('Step 2f: Shrinking %s, stringent', protocolType);
-    parameters=previousParameters;
-    if parameters.stdGaussMask>=1/5;
-        %we always expect this to shrink the mask for tilters
-        parameters.stdGaussMask = 1/5;
+nameOfShapingStep{end+1} = sprintf('Step 2f: Shrinking %s, stringent', protocolType);
+parameters=previousParameters;
+if parameters.stdGaussMask>=1/5;
+    %we always expect this to shrink the mask for tilters
+    parameters.stdGaussMask = 1/5;
+else
+    %sometimes we started out with something smaller (go to side)
+    %but this does not rely on the size shinking yet
+    %but it would be okay, it
+    if default.stdGaussMask<1/5 && ismember(protocolType,{'goToSide','tiltDiscrim'})
+        %started out that small, okay in all goToSide and some
+        %tiltDiscrim with positional hint (1/8)
+        %will just start shrinking form its previous size
     else
-        %sometimes we started out with something smaller (go to side)
-        %but this does not rely on the size shinking yet
-        %but it would be okay, it 
-        if default.stdGaussMask<1/5 && ismember(protocolType,{'goToSide','tiltDiscrim'})
-           %started out that small, okay in all goToSide and some
-           %tiltDiscrim with positional hint (1/8)
-           %will just start shrinking form its previous size
-        else
-            error('don''t make it bigger!  only goToSide is expected to be smaller as of now')
-        end
-
+        error('don''t make it bigger!  only goToSide is expected to be smaller as of now')
     end
 
-    parameters.shapedParameter='stdGaussMask';
-    parameters.shapingMethod='linearChangeAtCriteria';
-    parameters.shapingValues.numSteps=int8(9);
-    parameters.shapingValues.performanceLevel= [0.9,0.85,0.82,0.8];   %using conf at ~.78;   for confidence at .85: [0.95,0.9,0.85,0.8];
-    parameters.shapingValues.numTrials=int16([50,100,200,500]); %*** return the 3 to 50, 3*!*
-    parameters.shapingValues.startValue=parameters.stdGaussMask;
-    parameters.shapingValues.currentValue=parameters.stdGaussMask;
-    parameters.shapingValues.goalValue=1/32;
-    parameters.graduation = parameterThresholdCriterion('.stimDetails.stdGaussMask','<=',1/32);
+end
 
-    [shrinking branchParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
-    
-    nameOfShapingStep{end+1} = sprintf('Step 2g: varyingTargetPosition %s, stringent', protocolType);
-    parameters=branchParameters;
-    parameters.stdGaussMask = 1/16;
-         
-    parameters.shapedParameter='xPosNoise';
-    parameters.shapingMethod='linearChangeAtCriteria';
-    parameters.shapingValues.numSteps=int8(5);
-    parameters.shapingValues.startValue=0.01;
-    parameters.shapingValues.currentValue=0.01;
-    parameters.shapingValues.goalValue=.1;
-    parameters.graduation = parameterThresholdCriterion('.stimDetails.xPosNoiseStd','>=',.1);
-    
-    [varyTargetPos unUsed]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+parameters.shapedParameter='stdGaussMask';
+parameters.shapingMethod='linearChangeAtCriteria';
+parameters.shapingValues.numSteps=int8(9);
+parameters.shapingValues.performanceLevel= [0.9,0.85,0.82,0.8];   %using conf at ~.78;   for confidence at .85: [0.95,0.9,0.85,0.8];
+parameters.shapingValues.numTrials=int16([50,100,200,500]); %*** return the 3 to 50, 3*!*
+parameters.shapingValues.startValue=parameters.stdGaussMask;
+parameters.shapingValues.currentValue=parameters.stdGaussMask;
+parameters.shapingValues.goalValue=1/32;
+parameters.graduation = parameterThresholdCriterion('.stimDetails.stdGaussMask','<=',1/32);
+
+[shrinking branchParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+
+nameOfShapingStep{end+1} = sprintf('Step 2g: varyingTargetPosition %s, stringent', protocolType);
+parameters=branchParameters;
+parameters.stdGaussMask = 1/16;
+
+parameters.shapedParameter='xPosNoise';
+parameters.shapingMethod='linearChangeAtCriteria';
+parameters.shapingValues.numSteps=int8(5);
+parameters.shapingValues.startValue=0.01;
+parameters.shapingValues.currentValue=0.01;
+parameters.shapingValues.goalValue=.1;
+parameters.graduation = parameterThresholdCriterion('.stimDetails.xPosNoiseStd','>=',.1);
+
+[varyTargetPos unUsed]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 % end optional
 
 
@@ -176,8 +199,8 @@ end
 
 nameOfShapingStep{end+1} = sprintf('Step 3b: Dimmer target %s, stringent', protocolType);
 parameters=previousParameters;
-parameters.flankerContrast = [ 0.4]; 
-parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, .8);  % **skip .9 ; miniDatabase overwrites this (for rats on this step)  if rebuilding ratrix 
+parameters.flankerContrast = [ 0.4];
+parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, .8);  % **skip .9 ; miniDatabase overwrites this (for rats on this step)  if rebuilding ratrix
 
 parameters.shapedParameter='targetContrast';
 parameters.shapingMethod='linearChangeAtCriteria';
@@ -191,58 +214,8 @@ parameters.graduation = parameterThresholdCriterion('.stimDetails.currentShapedV
 
 
 switch protocolVersion
-    case {'2_3','2_4'} %some skip full contrast flankers, and move right to toggle then sweep
-           
-        nameOfShapingStep{end+1} = sprintf('Step 3e: Flankers also toggle %s, stringent', protocolType);
-        parameters=previousParameters;
-        parameters.shapedParameter=[];
-        parameters.shapingMethod=[];
-        parameters.shapingValues=[];
-        targetContrast=[.75]; %reasonably easy after the lowering, 
-        
-        parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
-        
-        %Remove correlation for experiments
-        parameters.maxCorrectOnSameSide=int8(-1);
-        parameters.percentCorrectionTrials=0;  %beware this is overpowered by the minidatabase setting!
-        
-        parameters.persistFlankersDuringToggle = 0; %
-        %parameters.graduation = timeCriterion(32);
-        %parameters.graduation = experimenterControlled([16,28,32],[0,0,0]);
-        parameters.graduation = performanceCriterion([0.99],int16([9999]));
-        [flanksToggleToo previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
-
-        
-        nameOfShapingStep{end+1} = sprintf('Expt 1: contrast sweep', protocolType);
-        parameters=previousParameters;
-        %targetContrast= [0.6 0.8]; %a guess for thresh!
-        %[0.015625 0.5 0.75 1 ] 1/log2 idea: 2.^[-6,-2,-1,0]
-        targetContrast=[.25 0.5 0.75 1]; % starting sweep (rational: match acuity, but if at chance on .25 don't swamp more than you need, if above chance then add in something smaller, also easier ones will keep up moral )
-        parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
-        
-       
-
-       
-        [sweepContrast previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
-        
-        nameOfShapingStep{end+1} = sprintf('Expt 2: position sweep', protocolType);
-        targetContrast=[.75]; %reasonably easy , garaunteed contrast sensitive
-        parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
-        parameters.flankerOffset = [2.5 3 3.5 5];
-        [sweepFlankerPosition]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
-        
-        nameOfShapingStep{end+1} = sprintf('Expt 3: flanker orientation sweep', protocolType);
-        parameters.flankerOffset=3;
-        parameters.fpaRelativeTargetOrientation=0;  % always align to fpa
-        %rfo=[-pi/2 -pi/4 -pi/8 -pi/16 0 0 pi/16 pi/8 pi/4 pi/2];  % 9 best with more samples at 0
-        rfo=[-pi/2 -pi/6 -pi/12 -pi/24 0 0 pi/24 pi/12 pi/6 pi/2];  % 9 best with more samples at 0
-        parameters.fpaRelativeFlankerOrientation=rfo;
-        required=repmat(rfo,size(parameters.flankerPosAngle,2),1)-repmat(parameters.flankerPosAngle',1,size(rfo,2));
-        parameters.flankerOrientations=unique(required(:)); % find what you need
-        parameters.phase=0;
-        [sweepFlankerOrientation ]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
-    otherwise
-        nameOfShapingStep{end+1} = sprintf('Step 3c: Stronger flanker %s, stringent', protocolType);
+    case {'1_0','1_1','1_2','1_3','1_4','1_5','1_6','1_7','1_8','1_9','2_0','2_1','2_2'}
+           nameOfShapingStep{end+1} = sprintf('Step 3c: Stronger flanker %s, stringent', protocolType);
         parameters=previousParameters;
         parameters.flankerContrast = [ 0.4]; %miniDatabase overwrites this (for rats on this step) if rebuilding ratrix
         parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, .3);  % **this is the best they learned in the previous step
@@ -256,7 +229,7 @@ switch protocolVersion
         parameters.graduation = parameterThresholdCriterion('.stimDetails.flankerContrast','>=',0.99);
 
         [strongerFlanker previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
-        
+
 
         nameOfShapingStep{end+1} = sprintf('Step 3d: Full contrast flankers %s, stringent', protocolType);
         parameters=previousParameters;
@@ -271,6 +244,57 @@ switch protocolVersion
         parameters=previousParameters;
         parameters.persistFlankersDuringToggle = 0; %
         [flanksToggleToo previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+    otherwise %{'2_3','2_4'} and onwards %some skip full contrast flankers, and move right to toggle then sweep
+
+        nameOfShapingStep{end+1} = sprintf('Step 3e: Flankers also toggle %s, stringent', protocolType);
+        parameters=previousParameters;
+        parameters.shapedParameter=[];
+        parameters.shapingMethod=[];
+        parameters.shapingValues=[];
+        targetContrast=[.75]; %reasonably easy after the lowering,
+
+        parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
+
+        %Remove correlation for experiments
+        parameters.maxCorrectOnSameSide=int8(-1);
+        parameters.percentCorrectionTrials=0;  %beware this is overpowered by the minidatabase setting!
+
+        parameters.persistFlankersDuringToggle = 0; %
+        %parameters.graduation = timeCriterion(32);
+        %parameters.graduation = experimenterControlled([16,28,32],[0,0,0]);
+        parameters.graduation = performanceCriterion([0.99],int16([9999]));
+        [flanksToggleToo previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+
+
+        nameOfShapingStep{end+1} = sprintf('Expt 1: contrast sweep', protocolType);
+        parameters=previousParameters;
+        %targetContrast= [0.6 0.8]; %a guess for thresh!
+        %[0.015625 0.5 0.75 1 ] 1/log2 idea: 2.^[-6,-2,-1,0]
+        targetContrast=[.25 0.5 0.75 1]; % starting sweep (rational: match acuity, but if at chance on .25 don't swamp more than you need, if above chance then add in something smaller, also easier ones will keep up moral )
+        parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
+
+
+
+
+        [sweepContrast previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+
+        nameOfShapingStep{end+1} = sprintf('Expt 2: position sweep', protocolType);
+        targetContrast=[.75]; %reasonably easy , garaunteed contrast sensitive
+        parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
+        parameters.flankerOffset = [2.5 3 3.5 5];
+        [sweepFlankerPosition]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+
+        nameOfShapingStep{end+1} = sprintf('Expt 3: flanker orientation sweep', protocolType);
+        parameters.flankerOffset=3;
+        parameters.fpaRelativeTargetOrientation=0;  % always align to fpa
+        %rfo=[-pi/2 -pi/4 -pi/8 -pi/16 0 0 pi/16 pi/8 pi/4 pi/2];  % 9 best with more samples at 0
+        rfo=[-pi/2 -pi/6 -pi/12 -pi/24 0 0 pi/24 pi/12 pi/6 pi/2];  % 9 best with more samples at 0
+        parameters.fpaRelativeFlankerOrientation=rfo;
+        required=repmat(rfo,size(parameters.flankerPosAngle,2),1)-repmat(parameters.flankerPosAngle',1,size(rfo,2));
+        parameters.flankerOrientations=unique(required(:)); % find what you need
+        parameters.phase=0;
+        [sweepFlankerOrientation ]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+     
 end
 
 
@@ -299,7 +323,7 @@ parameters.flankerOffset = [3];
 
 %Remove correlation for experiments
 parameters.maxCorrectOnSameSide=int8(-1);
-parameters.percentCorrectionTrials=0;  
+parameters.percentCorrectionTrials=0;
 
 %And then the 'default' parameters (which would not need to be set if testing steps are added to the end of the protocol)
 %     parameters.goRightOrientations = [0];
@@ -322,7 +346,7 @@ parameters.graduation = performanceCriterion([0.99],int16([9999]));
 % -->16 days
 nameOfShapingStep{end+1} = sprintf('Expt 2: VV phases', protocolType);
 parameters.flankerOrientations = [0];
-targetContrast= [1]; %warning: you would expect this to be the same thresh as above, but flunk for 135 
+targetContrast= [1]; %warning: you would expect this to be the same thresh as above, but flunk for 135
 parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
 %parameters.graduation = timeCriterion(16);
 %parameters.graduation = experimenterControlled([8,12,16],[0,0,0]);
@@ -370,9 +394,6 @@ parameters.graduation = performanceCriterion([0.99],int16([9999]));
 [vvVHOffsets previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 
 
-
-
-
 fd1TM = makeFreeDrinksTM(0.01); %juicy
 fd2TM = makeFreeDrinksTM(0.001); % some
 [fd3TM, SM] = makeFreeDrinksTM(0); % none
@@ -383,9 +404,9 @@ grad2 = rateCriterion(5,2); % how likely is it that false positives trigger a gr
 grad3 = rateCriterion(6,3); % rateCriterion(10,3) % (20,1)? (5,20)?
 
 
-fd1 = trainingStep(fd1TM, SM, grad1, minutesPerSession(90,3)); %nTrialsThenWait([1000],[1],[0.001],[1])
-fd2 = trainingStep(fd2TM, SM, grad2, minutesPerSession(90,3));
-fd3 = trainingStep(fd3TM, SM, grad3, minutesPerSession(90,3));
+fd1 = trainingStep(fd1TM, SM, grad1, minutesPerSession(90,3), parameters.svnRev); %nTrialsThenWait([1000],[1],[0.001],[1])
+fd2 = trainingStep(fd2TM, SM, grad2, minutesPerSession(90,3), parameters.svnRev);
+fd3 = trainingStep(fd3TM, SM, grad3, minutesPerSession(90,3), parameters.svnRev);
 %fdSteps=protocol('contrasty gabor free drinks weening',{fd1, fd2, fd3});
 
 
@@ -446,13 +467,13 @@ switch protocolVersion
         p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,smaller,dimFlankers,fullFlankers,flanksToggleToo,varyPosition,vvVH,vvPhases,vvOffsets,vvPhasesOffset,vvVHOffsets})
     case '1_5' %used by adam, no distractors, includes a hint
         p=protocol(nameOfProtocol,{fd1,fd2,fd3,easyHint,stringent,linearized,thinner,smaller})
-    case {'1_6','1_7', '1_8', '1_9', '2_1'} 
-        p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,smaller,dimFlankers,dimmerTarget,strongerFlanker,fullFlankers,flanksToggleToo,varyPosition}) 
+    case {'1_6','1_7', '1_8', '1_9', '2_1'}
+        p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,smaller,dimFlankers,dimmerTarget,strongerFlanker,fullFlankers,flanksToggleToo,varyPosition})
     case '2_0'
         p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,shrinking,varyTargetPos})
     case '2_2' %detection first learn on linearized small thin target
         p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,smaller,dimFlankers,dimmerTarget,flanksToggleToo,varyPosition}) %
-    case {'2_3','2_4'} %sweep contrast as first expt, then position, then orientation; manual graduations don't control order
+    case {'2_3','2_4','2_5validate'} %sweep contrast as first expt, then position, then orientation; manual graduations don't control order
         p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,smaller,dimFlankers,dimmerTarget,flanksToggleToo,sweepContrast,sweepFlankerPosition,sweepFlankerOrientation})
     otherwise
         error('bad protocol type')
@@ -477,13 +498,13 @@ for i=1:size(subjects,2)
     %miniDatabaseFile = fullfile(getRatrixPath, 'setup','setupPMM','miniDatabase.mat')
     if persistTrainingSteps;
         stepNum=getMiniDatabaseFact(getSubjectFromID(r,subjects{i}),'stepNumber',miniDatabasePath); %this is if you have to reinit...
-        %    stepNum = getLastTrainingStep(ratID,getPermanentStorePath(r)); %persist previous step but can't flunk or advance 
+        %    stepNum = getLastTrainingStep(ratID,getPermanentStorePath(r)); %persist previous step but can't flunk or advance
     else
         stepNum=1;
     end
 
-     stepNum
-     subjects(i)
+    stepNum
+    subjects(i)
     [s  r]=setProtocolAndStep(s ,p,1,0,1,stepNum,r,'from pmm master Shaping','pmm');
     if persistTrainingSteps
         r=setValuesFromMiniDatabase(s,r,miniDatabasePath);
@@ -508,7 +529,7 @@ end
 
 %% stim test
 
-stimTest=0;
+stimTest=1;
 if stimTest
     clc
     trialManagerClass = class(getTrialManager(thinner));

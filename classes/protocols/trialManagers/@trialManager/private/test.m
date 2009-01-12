@@ -289,7 +289,8 @@ try
     Screen('CloseAll');
     PsychPortAudio('Close');
     Priority(0);
-catch ex
+catch 
+    ex=lasterror;
     ListenChar(0);
     Screen('CloseAll');
     PsychPortAudio('Close');

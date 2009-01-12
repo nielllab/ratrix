@@ -58,7 +58,8 @@ if isreal(LUT) && all(size(LUT)==[256 3])
     end
     try
         oldCLUT = Screen('LoadNormalizedGammaTable', window, LUT,0); %apparently it's ok to use a window ptr instead of a screen ptr, despite the docs
-    catch e
+    catch 
+        e=lasterror;
         %if the above fails, we lose our window :(
         %window=Screen('OpenWindow',max(Screen('Screens')));
         e.message

@@ -91,8 +91,8 @@ ptbVersion=sprintf('%d.%d.%d(%s %s)',ptbVer.major,ptbVer.minor,ptbVer.point,ptbV
 try
 [runningSVNversion repositorySVNversion url]=getSVNRevisionFromXML(getRatrixPath);
 ratrixVersion=sprintf('%s (%d of %d)',url,runningSVNversion,repositorySVNversion);
-catch ex
-    ex
+catch 
+    ex=lasterror;
 ratrixVersion='no network connection';
 end
 

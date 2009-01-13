@@ -9,8 +9,16 @@ t=GetSecs;
 ctr=load(compiledFile);
 fprintf('elapsed time: %g\n',GetSecs-t)
 compiledTrialRecords=ctr.compiledTrialRecords;
-compiledDetails=ctr.compiledDetails;
-compiledLUT=ctr.compiledLUT;
+if isfield(ctr,'compiledDetails')
+    compiledDetails=ctr.compiledDetails;
+else
+    compiledDetails={};
+end
+if isfield(ctr,'compiledLUT')
+    compiledLUT=ctr.compiledLUT;
+else
+    compiledLUT={};
+end
 trialNums=[compiledTrialRecords.trialNumber];
 
 if ~all(trialNums==compiledRange(1):compiledRange(2)) || compiledRange(1)~=1

@@ -39,7 +39,7 @@ if ~exist('ids','var') || isempty(ids) % if ids not given as input, retrieve fro
         ids={};
         d=dir(source);
         for i=1:length(d)
-            if d(i).isdir
+            if d(i).isdir && ~strcmp(d(i).name,'.') && ~strcmp(d(i).name,'..')
                 ids{end+1} = d(i).name;
             end
         end
@@ -148,7 +148,14 @@ for i=1:length(ids)
             'didHumanResponse',...
             'containedForcedRewards',...
             'didStochasticResponse'};
-        [compiledTrialRecords compiledDetails compiledLUT]=loadDetailedTrialRecords(compiledFile,compiledRange,fieldNames);
+        try
+            [compiledTrialRecords compiledDetails compiledLUT]=loadDetailedTrialRecords(compiledFile,compiledRange,fieldNames);
+        catch ex
+            % if loadDetailedTrialRecords throws an error, then skip this subject and try to compile the next one
+            % typically this means that old-style compiledRecords exist for this subject
+            warning('error loading compiledRecord for %s, most likely because the compiled file is old-style for this subject - skipping!',ids{i});
+            continue;
+        end            
         % set expectedTrialNumber
         expectedTrialNumber = compiledTrialRecords.trialNumber(end) + 1;
         % set classes

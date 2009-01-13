@@ -204,7 +204,7 @@ switch plotType
         addManualChangeMarker=1;
         doPlotPercentCorrect(d,goods,smoothingWidth,threshold,axMin,axMax,dayTransitionsOn,addSteps,plotCorrectionTrialsToo,plotAfterErrorsToo,markTrialsToThreshold,addManualChangeMarker);
         legendStrs = {};
-        if plotCorrectionTrialsToo
+        if plotCorrectionTrialsToo & any(d.correctionTrial)
             legendStrs{end+1}='correctionTrials'; 
         end
         if plotAfterErrorsToo

@@ -60,6 +60,31 @@ bloat=false;
 [out.targetPorts compiledLUT]                                =extractFieldAndEnsure(trialRecords,{'targetPorts'},{'typedVector','index'},compiledLUT);
 [out.distractorPorts compiledLUT]                            =extractFieldAndEnsure(trialRecords,{'distractorPorts'},{'typedVector','index'},compiledLUT);
 out.response                                                 =ensureScalar(cellfun(@encodeResponse,{trialRecords.response},out.targetPorts,out.distractorPorts,num2cell(out.correct),'UniformOutput',false));
+  
+        'numRequestLicks'
+        'firstILI'
+        warning('add these fields')      
+%source code from compiledTrialRecords.m
+%         case 'numRequestLicks'
+%             compiledTrialRecords.numRequestLicks(ranges{i}(1,j):ranges{i}(2,j))=nan;
+%             %use size of the number of tries
+%             for tr=1:length(newTrialRecs)
+%                 if ismember('responseDetails',fields(newTrialRecs(tr))) && ismember('tries',fields(newTrialRecs(tr).responseDetails)) && ~isempty(newTrialRecs(tr).responseDetails.tries)% if the field exists
+%                     compiledTrialRecords.numRequestLicks(ranges{i}(1,j)+tr-1)=size(newTrialRecs(tr).responseDetails.tries,2)-1;
+%                 end
+%             end
+%             case 'firstILI'
+%                 compiledTrialRecords.firstILI(ranges{i}(1,j):ranges{i}(2,j))=nan;
+%                 %use the difference between the first two lick times if both there
+%                 for tr=1:length(newTrialRecs)
+%                     if ismember('responseDetails',fields(newTrialRecs(tr))) && ismember('times',fields(newTrialRecs(tr).responseDetails)) && ~isempty(newTrialRecs(tr).responseDetails.times) && size(newTrialRecs(tr).responseDetails.times,2)-1>=2;% if the field exists
+%                         compiledTrialRecords.numRequestLicks(ranges{i}(1,j)+tr-1)=diff(cell2mat(newTrialRecs(tr).responseDetails.times(1:2)));
+%                     end
+%                 end
+        
+
+
+
 if any(out.response==0)
     error('got zero response')
 end

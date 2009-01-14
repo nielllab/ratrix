@@ -60,31 +60,6 @@ bloat=false;
 [out.targetPorts compiledLUT]                                =extractFieldAndEnsure(trialRecords,{'targetPorts'},{'typedVector','index'},compiledLUT);
 [out.distractorPorts compiledLUT]                            =extractFieldAndEnsure(trialRecords,{'distractorPorts'},{'typedVector','index'},compiledLUT);
 out.response                                                 =ensureScalar(cellfun(@encodeResponse,{trialRecords.response},out.targetPorts,out.distractorPorts,num2cell(out.correct),'UniformOutput',false));
-  
-        'numRequestLicks'
-        'firstILI'
-        warning('add these fields')      
-%source code from compiledTrialRecords.m
-%         case 'numRequestLicks'
-%             compiledTrialRecords.numRequestLicks(ranges{i}(1,j):ranges{i}(2,j))=nan;
-%             %use size of the number of tries
-%             for tr=1:length(newTrialRecs)
-%                 if ismember('responseDetails',fields(newTrialRecs(tr))) && ismember('tries',fields(newTrialRecs(tr).responseDetails)) && ~isempty(newTrialRecs(tr).responseDetails.tries)% if the field exists
-%                     compiledTrialRecords.numRequestLicks(ranges{i}(1,j)+tr-1)=size(newTrialRecs(tr).responseDetails.tries,2)-1;
-%                 end
-%             end
-%             case 'firstILI'
-%                 compiledTrialRecords.firstILI(ranges{i}(1,j):ranges{i}(2,j))=nan;
-%                 %use the difference between the first two lick times if both there
-%                 for tr=1:length(newTrialRecs)
-%                     if ismember('responseDetails',fields(newTrialRecs(tr))) && ismember('times',fields(newTrialRecs(tr).responseDetails)) && ~isempty(newTrialRecs(tr).responseDetails.times) && size(newTrialRecs(tr).responseDetails.times,2)-1>=2;% if the field exists
-%                         compiledTrialRecords.numRequestLicks(ranges{i}(1,j)+tr-1)=diff(cell2mat(newTrialRecs(tr).responseDetails.times(1:2)));
-%                     end
-%                 end
-        
-
-
-
 if any(out.response==0)
     error('got zero response')
 end
@@ -94,6 +69,21 @@ end
 [out.didStochasticResponse compiledLUT]                      =extractFieldAndEnsure(trialRecords,{'didStochasticResponse'},'scalar',compiledLUT);
 % 1/13/09 - need to peek into stimDetails to get correctionTrial (otherwise analysis defaults correctionTrial=0)
 [out.correctionTrial compiledLUT]                            =extractFieldAndEnsure(trialRecords,{'stimDetails','correctionTrial'},'scalar',compiledLUT);
+% 1/14/09 - added numRequestLicks and firstILI
+out.numRequestLicks=ones(1,length(trialRecords))*nan;
+for i=1:length(trialRecords)
+    if isfield(trialRecords(i),'responseDetails') && isfield(trialRecords(i).responseDetails,'tries') && ...
+            ~isempty(trialRecords(i).responseDetails.tries) % if this field exists, overwrite the nan
+        out.numRequestLicks(i)=size(trialRecords(i).responseDetails.tries,2)-1;
+    end
+end
+out.firstILI=ones(1,length(trialRecords))*nan;
+for i=1:length(trialRecords)
+    if isfield(trialRecords(i),'responseDetails') && isfield(trialRecords(i).responseDetails,'times') && ...
+            ~isempty(trialRecords(i).responseDetails.times) && size(trialRecords(i).responseDetails.times,2)-1>=2
+        out.firstILI(i)=diff(cell2mat(trialRecords(i).responseDetails.times(1:2)));
+    end
+end
 
 % ==============================================================================================
 % old-style extraction - to be commented out 1/8/09

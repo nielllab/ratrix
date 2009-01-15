@@ -21,7 +21,7 @@ if ~isempty(stimulus.blocking)
     end
     
     if size(trialRecords,2)>0
-        thisTrial=trialRecords(end).trialNum+1
+        thisTrial=trialRecords(end).trialNumber+1
     else
         thisTrial=1;
     end
@@ -42,7 +42,7 @@ if ~isempty(stimulus.blocking)
         details.blockID=numBlocks;
     end
     
-    if thisTrial==1 || trialRecords(end).stimDetails.blockID~=details.blockID;
+    if thisTrial==1 || ~ismember('blockID',fields(trialRecords(end).stimDetails)) || trialRecords(end).stimDetails.blockID~=details.blockID;
         %start or reset
         details.trialThisBlock=1;
     else

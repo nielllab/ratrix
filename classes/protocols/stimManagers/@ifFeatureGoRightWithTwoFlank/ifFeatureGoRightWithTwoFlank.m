@@ -85,8 +85,8 @@ switch nargin
         s.stdGaussMask = 0;
         s.flankerOffset = 0;
 
-        s.framesJustCue=8;
-        s.framesStimOn=0;
+        s.flankerOnOff=8;
+        s.targetOnOff=0;
         s.thresh = 0;
         s.targetYPosPct = 0;
         s.toggleStim = 0;
@@ -271,13 +271,13 @@ switch nargin
         end
 
         if all(varargin{17} >= 0) && isinteger(varargin{17}) && size(varargin{17},2)==2 && varargin{17}(1)<varargin{17}(2)
-            s.framesJustCue=varargin{17};
+            s.flankerOnOff=varargin{17};
         else
             error('0 <= framesJustCue; must be two increasing integers...this will become framesFlankerOnOff')
         end
 
         if all(varargin{18} >= 0) && isinteger(varargin{18}) && size(varargin{18},2)==2 && varargin{18}(1)<varargin{18}(2)
-            s.framesStimOn=varargin{18};
+            s.targetOnOff=varargin{18};
         else
             error('0 <= framesStimOn; must be two increasing integers...this will become framesTargetOnOff')
         end

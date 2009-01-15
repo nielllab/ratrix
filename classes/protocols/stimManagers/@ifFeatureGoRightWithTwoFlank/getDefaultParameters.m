@@ -81,15 +81,17 @@ switch defaultSettings
         
         % these were never used due to toggleStim ==1 
         % they were defined up to Jan 2, 2009: 
-        default.framesTargetOn=int8(50);
-        default.framesJustFlanker=int8(2);   
+        %      default.framesTargetOn=int8(50);
+        %      default.framesJustFlanker=int8(2);   
         % but then replaced by functionality and not name
-        % at this point all rats still have toggleStim ==1 , but humans use toggleStim ==0
-        default.framesTargetOn=int8([0 5]);  % aka stimulus.framesStimOn; bad name
-        default.framesJustFlanker=int8([0 5]);    
-        %in order to be replaced evantually by framesTargetOnOff & framesFlankerOnOff
-        default.framesTargetOnOff= int8([0 5]);
-        default.framesFlankerOnOff=int8([0 5]);
+        % at that point all rats still havd toggleStim ==1 , but humans used toggleStim ==0
+        %       default.framesTargetOn=int8([0 5]);  % aka stimulus.framesStimOn; bad name
+        %       default.framesJustFlanker=int8([0 5]);    
+        % in order to be replaced evantually by framesTargetOnOff & framesFlankerOnOff
+        % in code that was written on jan 12, 2009 on the trunk
+        % but only took over rack1 temp when merge happened
+        default.targetOnOff= int8([0 10]);
+        default.flankerOnOff=int8([0 10]);
         
         default.thresh = 0.001;
         default.yPositionPercent = 0.5;

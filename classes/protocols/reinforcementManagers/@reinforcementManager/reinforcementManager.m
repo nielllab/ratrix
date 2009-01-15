@@ -8,9 +8,6 @@ r.fractionPenaltySoundIsOn=0;
 r.scalar=1;
 r.msPuff=0;
 
-r.rewardStrategy='msOpenTime';
-r.unloggedRewardConvention='reset to 250mmHg';
-
 switch nargin
     case 0
         % if no input arguments, create a default object

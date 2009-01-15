@@ -28,9 +28,11 @@ if ~isempty(stimulus.blocking)
                 switch stimulus.protocolType
                     case {'goToRightDetection'}
                         a=find(stimulus.goRightOrientations==setValues(i));
-                        %b=allow random it's 0 contrast
+                        b=find(stimulus.goLeftOrientations==setValues(i));
+                        %USED TO b=allow random it's 0 contrast
                     case 'goToLeftDetection'
                         %a=allow random it's 0 contrast
+                        a=find(stimulus.goRightOrientations==setValues(i));
                         b=find(stimulus.goLeftOrientations==setValues(i));
                     case {'goToSide'}
                         a=find(stimulus.goRightOrientations==setValues(i));

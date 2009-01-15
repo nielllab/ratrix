@@ -74,14 +74,14 @@ out.numRequestLicks=ones(1,length(trialRecords))*nan;
 for i=1:length(trialRecords)
     if isfield(trialRecords(i),'responseDetails') && isfield(trialRecords(i).responseDetails,'tries') && ...
             ~isempty(trialRecords(i).responseDetails.tries) % if this field exists, overwrite the nan
-        out.numRequestLicks(i)=size(trialRecords(i).responseDetails.tries,2)-1;
+        out.numRequests(i)=size(trialRecords(i).responseDetails.tries,2)-1;
     end
 end
 out.firstILI=ones(1,length(trialRecords))*nan;
 for i=1:length(trialRecords)
     if isfield(trialRecords(i),'responseDetails') && isfield(trialRecords(i).responseDetails,'times') && ...
             ~isempty(trialRecords(i).responseDetails.times) && size(trialRecords(i).responseDetails.times,2)-1>=2
-        out.firstILI(i)=diff(cell2mat(trialRecords(i).responseDetails.times(1:2)));
+        out.firstIRI(i)=diff(cell2mat(trialRecords(i).responseDetails.times(1:2)));
     end
 end
 

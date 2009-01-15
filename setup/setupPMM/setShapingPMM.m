@@ -58,23 +58,23 @@ switch protocolVersion
     case '2_5validate'
         parameters=previousParameters;
 
-%         dynamicSweep.sweepMode={'ordered'};
-%         dynamicSweep.sweptValues=[];
-%         dynamicSweep.sweptParameters={'targetOrientation', 'flankerOrientation'};
-%         dynamicSweep.ISI=10;
-%         dynamicSweep.ISMean=0.5;
-% 
-%         fitRF.fitMethod='elipse';
-%         fitRF.which='last';
-%         fitRF.medianFilter=logical(ones(3));
-%         fitRF.alpha=0.05;
-%         fitRF.numSpotsPerSTA=1;
-%         fitRF.spotSizeInSTA=10;
+        %         dynamicSweep.sweepMode={'ordered'};
+        %         dynamicSweep.sweptValues=[];
+        %         dynamicSweep.sweptParameters={'targetOrientation', 'flankerOrientation'};
+        %         dynamicSweep.ISI=10;
+        %         dynamicSweep.ISMean=0.5;
+        %
+        %         fitRF.fitMethod='elipse';
+        %         fitRF.which='last';
+        %         fitRF.medianFilter=logical(ones(3));
+        %         fitRF.alpha=0.05;
+        %         fitRF.numSpotsPerSTA=1;
+        %         fitRF.spotSizeInSTA=10;
 
         %basic setup
         parameters.blocking.blockingMethod='nTrials';
-        parameters.blocking.nTrials=3; %100
-        parameters.blocking.sweptParameters={'targetOrientations','flankerOrientations'};
+        parameters.blocking.nTrials=10; %100
+        parameters.blocking.sweptParameters={'targetOrientations','flankerOrientations','flankerPosAngle'};
         parameters.blocking.sweptValues=generateFlankerFactorialCombo(ifFeatureGoRightWithTwoFlank, parameters.blocking.sweptParameters, {'ordered'}, parameters);
 
     otherwise
@@ -168,7 +168,6 @@ parameters.graduation = parameterThresholdCriterion('.stimDetails.xPosNoiseStd',
 [varyTargetPos unUsed]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 % end optional
 
-
 nameOfShapingStep{end+1} = sprintf('Step 3a: Dim flankers %s, stringent', protocolType);
 parameters=smallParameters;
 parameters.fractionNoFlanks=.05;
@@ -215,7 +214,7 @@ parameters.graduation = parameterThresholdCriterion('.stimDetails.currentShapedV
 
 switch protocolVersion
     case {'1_0','1_1','1_2','1_3','1_4','1_5','1_6','1_7','1_8','1_9','2_0','2_1','2_2'}
-           nameOfShapingStep{end+1} = sprintf('Step 3c: Stronger flanker %s, stringent', protocolType);
+        nameOfShapingStep{end+1} = sprintf('Step 3c: Stronger flanker %s, stringent', protocolType);
         parameters=previousParameters;
         parameters.flankerContrast = [ 0.4]; %miniDatabase overwrites this (for rats on this step) if rebuilding ratrix
         parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, .3);  % **this is the best they learned in the previous step
@@ -294,10 +293,8 @@ switch protocolVersion
         parameters.flankerOrientations=unique(required(:)); % find what you need
         parameters.phase=0;
         [sweepFlankerOrientation ]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
-     
+
 end
-
-
 
 
 nameOfShapingStep{end+1} = sprintf('Step 3f: Flankers change positions %s, stringent', protocolType);
@@ -305,94 +302,94 @@ parameters=previousParameters;
 parameters.flankerOffset = [2.5 3 3.5 5]; %
 [varyPosition previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 
+switch protocolVersion
+    case {'1_3', '1_4'}
+        %% experiment mode for early versions
 
-%% experiment mode
+        % expt 1:
+        % 2* contrasts, 4 relative phases, 2 flanker contexts (VV and VH), 1
+        % spatial offset (==3)
+        % goal: compare VV to VH, don't bias a particular phase for expt 2
+        % -->32 days
 
-% expt 1:
-% 2* contrasts, 4 relative phases, 2 flanker contexts (VV and VH), 1
-% spatial offset (==3)
-% goal: compare VV to VH, don't bias a particular phase for expt 2
-% -->32 days
+        nameOfShapingStep{end+1} = sprintf('Expt 1: VV-VH', protocolType);
+        targetContrast= [0.6 0.8]; %a guess for thresh!
+        parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
 
-nameOfShapingStep{end+1} = sprintf('Expt 1: VV-VH', protocolType);
-targetContrast= [0.6 0.8]; %a guess for thresh!
-parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
+        numPhase = 4; parameters.phase= 2*pi * [0: numPhase-1]/numPhase;
+        parameters.flankerOffset = [3];
 
-numPhase = 4; parameters.phase= 2*pi * [0: numPhase-1]/numPhase;
-parameters.flankerOffset = [3];
+        %Remove correlation for experiments
+        parameters.maxCorrectOnSameSide=int8(-1);
+        parameters.percentCorrectionTrials=0;
 
-%Remove correlation for experiments
-parameters.maxCorrectOnSameSide=int8(-1);
-parameters.percentCorrectionTrials=0;
+        %And then the 'default' parameters (which would not need to be set if testing steps are added to the end of the protocol)
+        %     parameters.goRightOrientations = [0];
+        %     parameters.goLeftOrientations =  [0];
+        %     parameters.flankerOrientations = [0,pi/2]; %choose a random orientation from this list\
+        %
+        %     parameters.stdGaussMask = 1/16;
+        %     parameters.positionalHint=0;
+        %     parameters.displayTargetAndDistractor=1;
+        %end default parameters
 
-%And then the 'default' parameters (which would not need to be set if testing steps are added to the end of the protocol)
-%     parameters.goRightOrientations = [0];
-%     parameters.goLeftOrientations =  [0];
-%     parameters.flankerOrientations = [0,pi/2]; %choose a random orientation from this list\
-%
-%     parameters.stdGaussMask = 1/16;
-%     parameters.positionalHint=0;
-%     parameters.displayTargetAndDistractor=1;
-%end default parameters
+        %parameters.graduation = timeCriterion(32);
+        %parameters.graduation = experimenterControlled([16,28,32],[0,0,0]);
+        parameters.graduation = performanceCriterion([0.99],int16([9999]));
+        [vvVH previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 
-%parameters.graduation = timeCriterion(32);
-%parameters.graduation = experimenterControlled([16,28,32],[0,0,0]);
-parameters.graduation = performanceCriterion([0.99],int16([9999]));
-[vvVH previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
-
-% expt 2:
-% 2* contrasts, 4 relative phases, 1 flanker contexts (VV), 1 spatial offset (==3)
-% goal:  compare effect of relative phase
-% -->16 days
-nameOfShapingStep{end+1} = sprintf('Expt 2: VV phases', protocolType);
-parameters.flankerOrientations = [0];
-targetContrast= [1]; %warning: you would expect this to be the same thresh as above, but flunk for 135
-parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
-%parameters.graduation = timeCriterion(16);
-%parameters.graduation = experimenterControlled([8,12,16],[0,0,0]);
-parameters.graduation = performanceCriterion([0.99],int16([9999]));
-[vvPhases previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
-
-
-% expt 3:
-% 2* contrasts, 1 "aligned" phase, 1 flanker contexts (VV), 5 spatial
-% offset (i.e. 2 2.5 3 3.5 4)
-% goal:  compare effect at a range of distances
-nameOfShapingStep{end+1} = sprintf('Expt 3: VV offsets', protocolType);
-parameters.flankerYokedToTargetPhase =0;
-parameters.flankerOffset = [2 2.5 3 3.5 4];
-%parameters.flankerOffset = [2.5 3 3.5 5]; % **!! confirm this!
-%parameters.graduation = timeCriterion(40);
-%parameters.graduation = experimenterControlled([20,35,40],[0,0,0]);
-parameters.graduation = performanceCriterion([0.99],int16([9999]));
-[vvOffsets previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+        % expt 2:
+        % 2* contrasts, 4 relative phases, 1 flanker contexts (VV), 1 spatial offset (==3)
+        % goal:  compare effect of relative phase
+        % -->16 days
+        nameOfShapingStep{end+1} = sprintf('Expt 2: VV phases', protocolType);
+        parameters.flankerOrientations = [0];
+        targetContrast= [1]; %warning: you would expect this to be the same thresh as above, but flunk for 135
+        parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
+        %parameters.graduation = timeCriterion(16);
+        %parameters.graduation = experimenterControlled([8,12,16],[0,0,0]);
+        parameters.graduation = performanceCriterion([0.99],int16([9999]));
+        [vvPhases previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 
 
-% expt 4-5  combine spatial offset with phase or orientation... only if
-% you have an effect
-% goal:  view the differential effects on performance at different
-% distances...as in literature
-nameOfShapingStep{end+1} = sprintf('Expt 4: VV phasesOffset', protocolType);
-parameters.flankerYokedToTargetPhase =1;
-%parameters.graduation = timeCriterion(50);
-%parameters.graduation = experimenterControlled([10,30,50],[0,0,0]);
-parameters.graduation = performanceCriterion([0.99],int16([9999]));
-[vvPhasesOffset previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+        % expt 3:
+        % 2* contrasts, 1 "aligned" phase, 1 flanker contexts (VV), 5 spatial
+        % offset (i.e. 2 2.5 3 3.5 4)
+        % goal:  compare effect at a range of distances
+        nameOfShapingStep{end+1} = sprintf('Expt 3: VV offsets', protocolType);
+        parameters.flankerYokedToTargetPhase =0;
+        parameters.flankerOffset = [2 2.5 3 3.5 4];
+        %parameters.flankerOffset = [2.5 3 3.5 5]; % **!! confirm this!
+        %parameters.graduation = timeCriterion(40);
+        %parameters.graduation = experimenterControlled([20,35,40],[0,0,0]);
+        parameters.graduation = performanceCriterion([0.99],int16([9999]));
+        [vvOffsets previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 
-nameOfShapingStep{end+1} = sprintf('Expt 5: VV-VH offsets', protocolType);
-parameters.flankerYokedToTargetPhase =1;
-%parameters.graduation = timeCriterion(50);
-%parameters.graduation = experimenterControlled([10,30,50],[0,0,0]);
-parameters.graduation = performanceCriterion([0.99],int16([9999]));
-[vvVHOffsets previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+        % expt 4-5  combine spatial offset with phase or orientation... only if
+        % you have an effect
+        % goal:  view the differential effects on performance at different
+        % distances...as in literature
+        nameOfShapingStep{end+1} = sprintf('Expt 4: VV phasesOffset', protocolType);
+        parameters.flankerYokedToTargetPhase =1;
+        %parameters.graduation = timeCriterion(50);
+        %parameters.graduation = experimenterControlled([10,30,50],[0,0,0]);
+        parameters.graduation = performanceCriterion([0.99],int16([9999]));
+        [vvPhasesOffset previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+
+        nameOfShapingStep{end+1} = sprintf('Expt 5: VV-VH offsets', protocolType);
+        parameters.flankerYokedToTargetPhase =1;
+        %parameters.graduation = timeCriterion(50);
+        %parameters.graduation = experimenterControlled([10,30,50],[0,0,0]);
+        parameters.graduation = performanceCriterion([0.99],int16([9999]));
+        [vvVHOffsets previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 
 
-parameters.flankerYokedToTargetPhase =1;
-%parameters.graduation = timeCriterion(50);
-%parameters.graduation = experimenterControlled([10,30,50],[0,0,0]);
-parameters.graduation = performanceCriterion([0.99],int16([9999]));
-[vvVHOffsets previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
-
+        parameters.flankerYokedToTargetPhase =1;
+        %parameters.graduation = timeCriterion(50);
+        %parameters.graduation = experimenterControlled([10,30,50],[0,0,0]);
+        parameters.graduation = performanceCriterion([0.99],int16([9999]));
+        [vvVHOffsets previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+end
 
 fd1TM = makeFreeDrinksTM(0.01); %juicy
 fd2TM = makeFreeDrinksTM(0.001); % some

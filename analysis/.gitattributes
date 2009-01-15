@@ -128,3 +128,4 @@ pmm/compareConditionGrouping.m -text
 pmm/diffOfBino.m -text
 pmm/flankerComparisonCI.m -text
 /humanInspect.m -text
+/convertCTR2vectors.m -text

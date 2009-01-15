@@ -1,5 +1,5 @@
 function [stimulus,updateSM,resInd,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance, text]=...
-    calcStim(stimulus, trialManagerClass,resolutions,screenDisplaySize,LUTbits,responsePorts,totalPorts,trialRecords);
+    calcStim(stimulus, trialManagerClass,resolutions,screenDisplaySize,LUTbits,responsePorts,totalPorts,trialRecords,forceStimDetails);
 %[stimulus updateSM out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance isCorrection] = calcStim(stimulus,trialManagerClass,frameRate,responsePorts,totalPorts,trialRecords)
 %
 %this makes a target that has feature to go right or left
@@ -556,6 +556,8 @@ try
         if details.persistFlankersDuringToggle
             out(:,:,end)=stim(:,:,1);  %alternate with a prestim that has flankers, so only target flashes
         end
+        details.targetOnOff=nan;
+        details.flankerOnOff=nan;
     else
         %OLD: sent all frames if in normal mode out=stim;
         %NEW: (relies on)
@@ -563,8 +565,8 @@ try
         %   targetOnly=targetOnly; saved a copy above...
         %   flankersOnly=stim(:,:,1)
         %   targetAndFlankers=stim(:,:,2)
-        details.targetOnOff=stimulus.framesStimOn;
-        details.flankerOnOff=stimulus.framesJustCue;
+        details.targetOnOff=stimulus.targetOnOff;
+        details.flankerOnOff=stimulus.flankerOnOff;
         [out frameTimes]=createDiscriminandumContextOnOffMovie(stimulus,stim(:,:,3),targetOnly,stim(:,:,1),stim(:,:,2),details.targetOnOff,details.flankerOnOff);
         type={'timedFrames',frameTimes}; % 040108 dfp changed format to cell array
     end

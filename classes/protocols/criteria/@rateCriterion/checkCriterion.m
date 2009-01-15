@@ -26,7 +26,7 @@ if ~isempty(trialRecords)
             for i=1:numTrialsAnalyzed
                 trialInd=i;
                 f=fields(trialsUsed(trialInd).responseDetails);
-                if any(strcmp(f,'times'))
+                if any(strcmp(f,'times')) && ~isempty(trialsUsed(trialInd).responseDetails.times)         
                     firstLick(i)=cell2mat(trialsUsed(trialInd).responseDetails.times(1));
                 else
                     firstLick(i)=-1;  % this will make it filtered by "tooFast" and not count towards the rate

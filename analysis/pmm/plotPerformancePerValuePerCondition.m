@@ -1,4 +1,4 @@
-function plotPerformancePerValuePerCondition(numCorrect, numAttempted, numRightward,performanceMeasure, valueName, method, params)
+function plotPerformancePerValuePerCondition(numCorrect, numAttempted, numYes,performanceMeasure, valueName, method, params)
 %this functions assumes input of the type (targetContrast, condition, deviation, flankerContrast)
 
 
@@ -13,15 +13,14 @@ vals.contrasts=params.featureVals.contrasts;
 vals.devs=params.featureVals.devs;
 vals.flankerContrasts=params.featureVals.flankerContrasts;
 
-%[numAttempted numRightward numCorrect]=filterFlankerStatistics(valueName, method, numAttempted, numRightward,numCorrect);
-stats.numRightward=numRightward;
+stats.numYes=numYes;
 stats.numCorrect=numCorrect;
 [stats numAttempted]=filterFlankerStatistics(valueName, method, numAttempted, stats,vals);
-numRightward=stats.numRightward;
+numYes=stats.numYes;
 numCorrect=stats.numCorrect;
 
 pctCor=numCorrect./numAttempted;
-pctRightward=numRightward./numAttempted;
+pctYes=numYes./numAttempted;
 
 
 someConditions=intersect(someConditions,availableConditions);
@@ -48,16 +47,21 @@ switch performanceMeasure
             hold on;  xlabel(valueName)  %when Signal Present and Absent
             for condition=availableConditions; %someConditions
                 [performance, pci] = binofit(numCorrect(:,condition),numAttempted(:,condition),alpha);
-                errorbar(values+smallDisplacement(condition),performance,performance-pci(:,1),pci(:,2)-performance,'color',colors(condition,:))
+                %errorbar(values+smallDisplacement(condition),performance,performance-pci(:,1),pci(:,2)-performance,'color',colors(condition,:))
+                for i=1:length(values)
+                    plot([values(i)+smallDisplacement(condition)]*[1 1],[pci(i,1) pci(i,2)],'color',colors(condition,:))
+                end
             end
             for condition=someConditions
                 h(condition)=plot(values+smallDisplacement(condition),perf(:,condition),'.','MarkerSize',20,'color',colors(condition,:));
             end
-            legend(h(fliplr(someConditions)),vals.conditionNames(fliplr(someConditions)),'Location','NorthEastOutside')
+            %legend(h(fliplr(someConditions)),vals.conditionNames(fliplr(someConditions)),'Location','NorthEast')%NorthEastOutside
             hold off
         catch
             numCorrect
             numAttempted
+            mfilename
+            edit(mfilename)
             keyboard
         end
 
@@ -73,22 +77,26 @@ switch performanceMeasure
         % end
         % legend(h(fliplr(someConditions)),conditionNames(fliplr(someConditions)),'Location','NorthEastOutside')
         % hold off
-    case 'pctRightward'
+    case 'pctYes'
         %okay
-        perf=pctRightward;
+        perf=pctYes;
 
         title(sprintf('performance per condition per %s', valueName))
 
-        hold on; ylabel('Percent Rightward'); xlabel(valueName)  %when Signal Present and Absent
+        hold on; ylabel(performanceMeasure); xlabel(valueName)  %when Signal Present and Absent
         
         for condition=availableConditions; %someConditions
-            [performance, pci] = binofit(numRightward(:,condition),numAttempted(:,condition),alpha);
-            errorbar(values+smallDisplacement(condition),performance,performance-pci(:,1),pci(:,2)-performance,'color',colors(condition,:))
+            [performance, pci] = binofit(numYes(:,condition),numAttempted(:,condition),alpha);
+            %errorbar(values+smallDisplacement(condition),performance,performance-pci(:,1),pci(:,2)-performance,'color',colors(condition,:))
+            for i=1:length(values)
+                plot([values(i)+smallDisplacement(condition)]*[1 1],[pci(i,1) pci(i,2)],'color',colors(condition,:))
+            end
+
         end
         for condition=someConditions
             h(condition)=plot(values+smallDisplacement(condition),perf(:,condition),'.','MarkerSize',20,'color',colors(condition,:));
         end
-        legend(h(fliplr(someConditions)),vals.conditionNames(fliplr(someConditions)),'Location','NorthEastOutside')
+        legend(h(fliplr(someConditions)),vals.conditionNames(fliplr(someConditions)),'Location','NorthEast')%NorthEastOutside
         hold off
 
     otherwise

@@ -5,19 +5,18 @@
 
 %%
 %relevantRatrix='\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\pmeier\xfer\db081013.mat';
-relevantRatrix='\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\pmeier\xfer\db081130.mat';
+%relevantRatrix='\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\pmeier\xfer\db081130.mat';
+%load(relevantRatrix)
 
-load(relevantRatrix)
-
-
+r=getRatrix
 
 
 %% timeline
-f{1}.subject='234'
+subject='234'
 %f{1}.dateRange=[datenum('21-Jun-2008') datenum('19-Oct-2008')]
 h(1)=figure;
 subplot(2,1,1)
-d=getSmalls(f{1}.subject)
+d=getSmalls(subject)
 d=removeSomeSmalls(d,~ismember(d.step,[5 6 7 8 9]))
 d=removeSomeSmalls(d,d.currentShapedValue >0.32)
 dayBoundary=false;
@@ -51,10 +50,10 @@ steps=[5 6 7 8 9 10];
 %rtemp=setShapingPMM(rtemp,{'test'}, 'goToRightDetection', '2_3',[],false)
 p=getProtocolAndStep(getSubjectFromID(r,'231'));
 
-desiredX=500;
-desiredY=800;
-sx=1280;
-sy=1024;
+desiredX=600%500;
+desiredY=600%800;
+sx=1024;%1280;
+sy=768;%1024;
 padX=(sx-desiredX)/2; padY=(sy-desiredY)/2;
 images=nan(desiredY,desiredX,1,length(steps));
 for i=1:length(steps)
@@ -668,12 +667,13 @@ mnPerf=reshape( mean(stats(:,[1 2],:)) ,[2 length(timeRanges)] );
 maxT=max(timeRanges(:));
 mnTime=mean(timeRanges);
 figure
-subplot(2,1,1); plot(mnTime,mnPerf); axis([0 maxT .5 .75]); ylabel('% correct'); xlabel('responseTime');
-hold on; plot([timeRanges(:,1)],[.55 .55],'k')
-subplot(2,1,2); plot(mnTime,effect); hold on; plot([0 maxT],[0 0],'k'); axis([0 maxT -10 10]);  ylabel('% effect');
+subplot(2,1,1); plot(mnTime,mnPerf(1,:),'color',[1 0 0]); hold on; plot(mnTime,mnPerf(2,:),'color',[0 1 1]);
+axis([0 maxT .5 .75]); ylabel('% correct'); xlabel('responseTime');legend({'colin','pop1'})
+plot([timeRanges(:,1)],[.55 .55],'k')
+subplot(2,1,2); plot(mnTime,effect,'r'); hold on; plot([0 maxT],[0 0],'k'); axis([0 maxT -10 10]);  ylabel('% effect');
 for i=1:length(timeRanges)
     subplot(2,1,2);
-    plot([mnTime(i) mnTime(i)],[CI(1,1,1,i) CI(1,1,2,i)],'b') % CI
+    plot([mnTime(i) mnTime(i)],[CI(1,1,1,i) CI(1,1,2,i)],'r') % CI
     plot(repmat(mnTime(i),[1 length(subjects)]),reshape(deltas(1,1,:,i),[1 length(subjects)]),'k.') % CI
 end
 
@@ -698,7 +698,8 @@ mnPerf=reshape( mean(stats(:,[1 3],:)) ,[2 length(timeRanges)] );
 maxT=max(timeRanges(:));
 mnTime=mean(timeRanges);
 figure
-subplot(2,1,1); plot(mnTime,mnPerf); axis([0 maxT .5 .75]); ylabel('% correct'); xlabel('responseTime Percentile');
+subplot(2,1,1); plot(mnTime,mnPerf(1,:),'color',[1 0 0]); hold on; plot(mnTime,mnPerf(2,:),'color',[0 1 1]);
+ylabel('% correct'); xlabel('responseTime Percentile'); legend({'colin','pop1'})
 hold on; plot([timeRanges(:,1)],[.55 .55],'k')
 subplot(2,1,2); plot(mnTime,effect); hold on; plot([0 maxT],[0 0],'k'); axis([0 maxT -10 10]);  ylabel('% effect');
 for i=1:length(timeRanges)
@@ -729,3 +730,79 @@ filter{2}.parameters.range=[0 .5]; %percentile
 % next: don;t know why this errors, something wrong about CI size maybe?
 doHitFAScatter(stats,CI,names,params)
  
+%% SIDE BY SIDE COMPARE INFLUENCE OF FILTER
+
+diffEdges=[-6:6];
+cMatrix={[9],[10]};
+
+figure
+subplot(1,3,1)
+filter{1}.type='9.4';
+filter{2}.type='responseSpeedPercentile';
+filter{2}.parameters.range=[0 1]; %percentile
+[stats CI names params] =getFlankerStats(subjects,'8flanks+',{'pctCorrect'},filter,[1 now]);
+ [delta CI deltas CIs]=viewFlankerComparison(names,params,cMatrix,[],[],diffEdges,[],false)
+title('all trials')
+
+
+ subplot(1,3,2)
+ hold off
+filter{1}.type='9.4';
+filter{2}.type='responseSpeedPercentile';
+filter{2}.parameters.range=[0 .75]; %percentile
+[stats CI names params] =getFlankerStats(subjects,'8flanks+',{'pctCorrect'},filter,[1 now]);
+ [delta CI deltas CIs]=viewFlankerComparison(names,params,cMatrix,[],[],diffEdges,[],false)
+ title('remove %25 slowest')
+ 
+subplot(1,3,3)
+filter{1}.type='9.4';
+filter{2}.type='responseSpeedPercentile';
+filter{2}.parameters.range=[0 .5]; %percentile
+[stats CI names params] =getFlankerStats(subjects,'8flanks+',{'pctCorrect'},filter,[1 now]);
+ [delta CI deltas CIs]=viewFlankerComparison(names,params,cMatrix,[],[],diffEdges,[],false)
+ title('remove %50 slowest')
+ 
+
+%% check it for the position sweeping rats!
+% not enough data for a resolvable effect jan13,2009
+subjects={'232','233','138','228','139'};%     
+diffEdges=[-6:6];
+cMatrix={[3],[4]};
+
+filter{1}.type='13';
+filter{2}.type='responseSpeedPercentile';
+filter{2}.parameters.range=[0 .5];%whats justified?
+[stats CI names params] =getFlankerStats(subjects,'colin+1&devs',{'pctCorrect','hits','CRs'},filter,[1 now]);
+ [delta CI deltas CIs]=viewFlankerComparison(names,params,cMatrix)
+ 
+%%  check percentiles over time for position variable rats (only analyze the same distance=3 lambda)
+% if anything the opposite effect...?
+% that is slow responding colinear is WORSE with more time, (unlike before when it got better with more time...)
+
+subjects={'232','233','138','228','139'};
+filter{1}.type='13';
+filter{2}.type='responseSpeedPercentile';
+    
+dur=.3; %  actually percentile width
+timeRanges=[0:.05:1-dur]; % these are not times anymore...
+timeRanges(2,:)=timeRanges+dur;
+deltas=[]; CI=[]; stats=[]; effect=[];
+for i=1:length(timeRanges)
+    filter{2}.parameters.range=timeRanges(:,i); %percentile
+    [stats(:,:,i) pCI(:,:,:,i) names params]=getFlankerStats(subjects,'colin+1&devs',{'pctCorrect'},filter,[1 now]);
+    [effect(i) CI(:,:,:,i) deltas(:,:,:,i) CIs(:,:,:,:,i)]=viewFlankerComparison(names,params,{[3],[4]});
+end
+mnPerf=reshape( mean(stats(:,[3 4],:)) ,[2 length(timeRanges)] );
+
+maxT=max(timeRanges(:));
+mnTime=mean(timeRanges);
+figure
+subplot(2,1,1); plot(mnTime,mnPerf(1,:),'color',[1 0 0]); hold on; plot(mnTime,mnPerf(2,:),'color',[0 1 1]);
+ylabel('% correct'); xlabel('responseTime Percentile'); legend({'colin','pop1'})
+hold on; plot([timeRanges(:,1)],[.55 .55],'k')
+subplot(2,1,2); plot(mnTime,effect); hold on; plot([0 maxT],[0 0],'k'); axis([0 maxT -10 10]);  ylabel('% effect');
+for i=1:length(timeRanges)
+    subplot(2,1,2);
+    plot([mnTime(i) mnTime(i)],[CI(1,1,1,i) CI(1,1,2,i)],'b') % CI
+    plot(repmat(mnTime(i),[1 length(subjects)]),reshape(deltas(1,1,:,i),[1 length(subjects)]),'k.') % CI
+end

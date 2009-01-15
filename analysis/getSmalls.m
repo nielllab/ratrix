@@ -42,6 +42,21 @@ for i=1:length(d)
 end
 
 if ~isempty(smallData)
+    
+    %if LUT and other exists then convert it to the desired format
+    if ismember('compiledDetails',fields(ctr))
+        if verbose
+            t=GetSecs();
+            fprintf(sprintf('converting to double format\n'))
+        end
+       
+        smallData=convertCTR2vectors(ctr.compiledTrialRecords,ctr.compiledLUT,ctr.compiledDetails);
+        
+        if verbose
+            fprintf('done converting to double format \ttime elapsed: %g\n',GetSecs-t)
+        end
+    end
+
     %filter date range
     if exist('dateRange','var') && ~isempty(dateRange)
         smallData=removeSomeSmalls(smallData, ~(smallData.date>dateRange(1) & smallData.date<dateRange(2)));
@@ -49,6 +64,7 @@ if ~isempty(smallData)
 
     %remove all fields that have no content
     f=fields(smallData);
+    f(strcmp('info',f))=[];
     remove=[];
     for i=1:length(f)
         if all(isnan(smallData.(f{i}))) 

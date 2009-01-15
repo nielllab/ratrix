@@ -33,15 +33,21 @@ else
         out.xPosNoisePix=getDetail(trialRecords,'xPosNoisePix');
         out.yPosNoisePix=getDetail(trialRecords,'yPosNoisePix');
 
+        out.blockID=getDetail(trialRecords,'blockID');
+        
+       
         % take part of the vector
         out.flankerOrientation=getDetail(trialRecords,'flankerOrientation',1);
         out.flankerPosAngle=getDetail(trialRecords,'flankerPosAngles',1);
+        out.flankerOff=getDetail(trialRecords,'flankerOnOff',2);
         out.redLUT=getDetail(trialRecords,'LUT',256);
         
         %if anything is defined
         out.fitRF=isDefined(trialRecords, 'fitRF');
         out.blocking=isDefined(trialRecords, 'blocking');
         out.dynamicSweep=isDefined(trialRecords, 'dynamicSweep');
+        
+        
         
         %     if 0 % FROM old COMPILED
         %         % 12/16/08 - first 3 entries might be common to many stims

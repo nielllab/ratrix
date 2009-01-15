@@ -25,7 +25,6 @@ end
 % because the field was never defined, this should never happen and if it
 % did, see 2. above
 
-updateRM=0;
 updateSM=0;
 updatePctCTsAllSM=0;
 
@@ -44,31 +43,31 @@ end
 valueInDatabase = getMiniDatabaseFact(s,'msPenalty');
 if currentMsPenalty~=valueInDatabase
     if ~isempty(valueInDatabase)
-        %rm = setMsPenalty(rm, valueInDatabase); % use util setter
         setReinforcementParam('penaltyMS',{subID},valueInDatabase,'all','from miniDB','pmm');
-        updateRM=1;
-        newMsPenalty = valueInDatabase;
+        if getMsPenalty(getCurrentRM(s))==getMsPenalty(rm)
+            error('failed to update')
+        end
+
     else
         doMiniDatabaseError(s, stepNum, valueInDatabase, currentMsPenalty, 'msPenalty');
     end
 else
     disp('no change b/c they matched or database value is empty')
-    newMsPenalty = currentMsPenalty;
 end
 
 valueInDatabase = getMiniDatabaseFact(s,'rewardScalar');
 if currentScalar~=valueInDatabase
     if ~isempty(valueInDatabase)
-        %rm = setScalar(rm, valueInDatabase);
-        setReinforcementParam('scalar',{subID},valueInDatabase,'all','from miniDB','pmm');
-        updateRM=1;
-        newScalar = valueInDatabase;
+        setReinforcementParam('scalar',{subID},valueInDatabase,'all','from miniDB','pmm')
+        if getScalar(getCurrentRM(s))==getScalar(rm)
+            error('failed to update')
+        end
     else
         doMiniDatabaseError(s, stepNum, valueInDatabase, currentScalar, 'rewardScalar');
     end
 else
     disp('no change b/c they matched or database value is empty')
-    newScalar = currentScalar;
+
 end
 
 valueInDatabase = getMiniDatabaseFact(s,'pctCTs')
@@ -98,27 +97,6 @@ if updateSM
     end
 end
 
-if updateRM   %'update' is really just a check now
-    %[s r]=changeAllReinforcementManagers(s,rm,r,sprintf('reinforcement set; penalty: %d, scalar: %d',newMsPenalty,newScalar),'pmm');
-    
-    r=getRatrix;
-    s=getSubjectFromID(r,getID(s));
-
-    [p,step]=getProtocolAndStep(s);
-    ts=getTrainingStep(p,step);
-    tm=getTrialManager(ts);
-    currentRm =getReinforcementManager(tm);
-    if all(display(currentRm)==display(rm))
-        display(currentRm)
-        display(rm)
-        keyboard
-        newScalar=newScalar
-        newMsPenalty=newMsPenalty
-        error('change didn''t work! these two should be different')
-        %fails to check if one of the changes worked, but the other didn't
-    end
-end
-
 if updatePctCTsAllSM
     [s r]=changeAllPercentCorrectionTrials(s,newPctCTs,r,sprintf('percentCorrectionTrials set: %d',newPctCTs),'pmm') 
     
@@ -144,3 +122,11 @@ stepNum = stepNum
 valueInDatabase = valueInDatabase
 currentValue = currentValue
 error(sprintf('must have %s defined in database', factType))
+
+function currentRm=getCurrentRM(s)
+    r=getRatrix;
+    s=getSubjectFromID(r,getID(s));
+    [p,step]=getProtocolAndStep(s);
+    ts=getTrainingStep(p,step);
+    tm=getTrialManager(ts);
+    currentRm =getReinforcementManager(tm);

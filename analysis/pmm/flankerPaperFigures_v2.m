@@ -23,7 +23,11 @@ disp(sprintf('pop-colin log ratio dprime: p= %5.5f  sign rank test',p))
 subjects={'228', '227','138','139','230','233','234'}; %left and right, removed 229 274 231 232 too little data for 9.4., 237 maybe enough data, almost 5kTrials, outlier
 subjects={'228', '227','230','233','234','139','138'};%sorted for amount of data
 labeledNames={'r7','r6','r5','r4','r3','r2','r1'};
-[stats CI names params]=getFlankerStats(subjects,'8flanks+',{'pctCorrect','CRs','hits','dprimeMCMC','yes'},'9.4')
+filter{1}.type='9.4';
+filter{2}.type='responseSpeedPercentile';
+filter{2}.parameters.range=[0 .5];%whats justified?
+filter{2}=[];
+[stats CI names params]=getFlankerStats(subjects,'8flanks+',{'pctCorrect','CRs','hits','dprimeMCMC','yes'},filter)
 
 %%
 
@@ -115,10 +119,13 @@ ylabel('count')
 %% figure 2  hit v fa scatter and stats
 
 figure
-subplot(2,1,1)
+%subplot(2,1,1)
+none=zeros(size(stats,1),size(stats,2));
 doCurve=zeros(size(stats,1),size(stats,2));  doCurve([find(ismember(names.subjects,{'230'}))],[find(ismember(names.conditions,{'colin','changeFlank'}))])=1;
 %doHitFAScatter(stats,CI,names,params,{'228','230','138'},{'colin','changeFlank'},false,doCurve,doCurve,doCurve,false);
-doHitFAScatter(stats,CI,names,params,[],{'colin','changeFlank'},false,doCurve,doCurve,doCurve,false,3,{'changeFlank','colin'});
+%doHitFAScatter(stats,CI,names,params,{'230'},{'colin','changeFlank'},false,doCurve,doCurve,doCurve,false,3,{'changeFlank','colin'}); axis([.46 .55 .7 .79])
+doHitFAScatter(stats,CI,names,params,[],{'colin','changeFlank'},false,none
+%,none,doCurve,false,3,{'changeFlank','colin'});
 title('ROC space, influence of collinear')
 
 
@@ -154,30 +161,31 @@ ylabel('count')
 subjects={'231','234'};%,[now-1 now]); % 231','234','274 % orientationSweep;  '274' removed b/c bad performance
 filter{1}.type='14';
 [stats CI names params]=getFlankerStats(subjects,'allRelativeTFOrientationMag',{'hits','CRs','yes','pctCorrect'},filter,[1 now]);
-%[stats CI names params]=getFlankerStats(subjects,'allRelativeTFOrientationMag',{'hits','CRs','yes','pctCorrect','criterionMCMC','biasMCMC','dprimeMCMC'},filter,[1 now]);
+[stats CI names params]=getFlankerStats(subjects,'allRelativeTFOrientationMag',{'hits','CRs','yes','pctCorrect','criterionMCMC','biasMCMC','dprimeMCMC'},filter,[1 now]);
 params.colors=[1 0 0; .9 .2 .8; .7 .4 .9; 0 1 1; 0 .2 .8];
 values = cellfun(@(x) str2num(x), names.conditions);
 
+%%
 figure(1)
-w=3; %w=5;
+w=3; w=2;
 for i=1:length(subjects)
-   subplot(length(subjects),w,(i-1)*w+1); hold on
-   statInd=find(strcmp('pctCorrect',names.stats));
-   plot([-10 100],[.5 .5],'k--');
-   plot(values,stats(i,:,statInd),'k');
-   for j=1:length(values)
-       eb=plot([values(j) values(j)],[CI(i,j,statInd,1) CI(i,j,statInd,2)],'color',params.colors(j,:),'LineWidth',2);
-   end
-   axis([-5 95 .45 .7]);
-   set(gca,'xTick',[0 30 90])
-   set(gca,'xTickLabel',[0 30 90])
-   set(gca,'yTick',[.5 .6 .7])
-   set(gca,'yTickLabel',[.5 .6 .7])
-   xlabel('flanker orientation')
-   ylabel('p(correct)')
-   axis square
+%    subplot(length(subjects),w,(i-1)*w+1); hold on
+%    statInd=find(strcmp('pctCorrect',names.stats));
+%    plot([-10 100],[.5 .5],'k--');
+%    plot(values,stats(i,:,statInd),'k');
+%    for j=1:length(values)
+%        eb=plot([values(j) values(j)],[CI(i,j,statInd,1) CI(i,j,statInd,2)],'color',params.colors(j,:),'LineWidth',2);
+%    end
+%    axis([-5 95 .45 .7]);
+%    set(gca,'xTick',[0 30 90])
+%    set(gca,'xTickLabel',[0 30 90])
+%    set(gca,'yTick',[.5 .6 .7])
+%    set(gca,'yTickLabel',[.5 .6 .7])
+%    xlabel('flanker orientation')
+%    ylabel('p(correct)')
+%    axis square
    
-   subplot(length(subjects),w,(i-1)*w+2);  hold on
+   subplot(length(subjects),w,(i-1)*w+1);  hold on
    statInd=find(strcmp('yes',names.stats));
    plot(values,stats(i,:,statInd),'k');
    for j=1:length(values)
@@ -192,10 +200,10 @@ for i=1:length(subjects)
    ylabel('p(yes)')
    axis square
    
-   subplot(length(subjects),w,(i-1)*w+3);
-   doHitFAScatter(stats,CI,names,params,subjects(i),[],false,0,0,0,1,3);
-   %doHitFAScatter(stats,CI,names,params,[],{'colin','changeFlank'},false,doCurve,doCurve,doCurve,false,3,{'changeFlank','colin'});
-   
+%    subplot(length(subjects),w,(i-1)*w+3);
+%    doHitFAScatter(stats,CI,names,params,subjects(i),[],false,0,0,0,1,3);
+%    %doHitFAScatter(stats,CI,names,params,[],{'colin','changeFlank'},false,doCurve,doCurve,doCurve,false,3,{'changeFlank','colin'});
+%    
 %      subplot(length(subjects),w,(i-1)*w+4);  hold on
 %    statInd=find(strcmp('dprimeMCMC',names.stats));
 %    plot(values,stats(i,:,statInd),'k');
@@ -211,21 +219,21 @@ for i=1:length(subjects)
 %    ylabel('d-prime')
 %    axis square
 %    
-%    
-%    subplot(length(subjects),w,(i-1)*w+5);  hold on
-%    statInd=find(strcmp('criterionMCMC',names.stats));
-%    plot(values,stats(i,:,statInd),'k');
-%    for j=1:length(values)
-%        eb=plot([values(j) values(j)],[CI(i,j,statInd,1) CI(i,j,statInd,2)],'color',params.colors(j,:),'LineWidth',2);
-%    end
-%    axis([-5 95 -.5 1.5]);
-%    set(gca,'xTick',[0 30 90])
-%    set(gca,'xTickLabel',[0 30 90])
-%    set(gca,'yTick',[0 .5 1])
-%    set(gca,'yTickLabel',[0 .5 1])
-%    xlabel('flanker orientation')
-%    ylabel('criterion')
-%    axis square
+   
+   subplot(length(subjects),w,(i-1)*w+2);  hold on
+   statInd=find(strcmp('criterionMCMC',names.stats));
+   plot(values,-stats(i,:,statInd),'k');
+   for j=1:length(values)
+       eb=plot([values(j) values(j)],-[CI(i,j,statInd,1) CI(i,j,statInd,2)],'color',params.colors(j,:),'LineWidth',2);
+   end
+   axis([-5 95 -1.5 .5]); %axis([-5 95 -.5 1.5]);
+   set(gca,'xTick',[0 30 90])
+   set(gca,'xTickLabel',[0 30 90])
+   set(gca,'yTick',[-1 -.5 0])
+   set(gca,'yTickLabel',[-1 .5 0])
+   xlabel('flanker orientation')
+   ylabel('-criterion')
+   axis square
 end
 settings.turnOffLines=1;
 cleanUpFigure(gcf,settings)
@@ -234,17 +242,27 @@ cleanUpFigure(gcf,settings)
 %% flanker distance
 %setup basic- no flanker conditions, just distance
 subjects={'233','138','232'};%     '228','139'
-subjects={'228','139'};%     
+%subjects={'228','139'};%     
 subjects={'232','233','138','228','139'};%     
-
+subjects={'232','138'};%     
 
 filter{1}.type='13';
+filter{2}.type='responseSpeedPercentile';
+filter{2}.parameters.range=[0 .9];%whats justified?
+filter{2}=[]; %remove it
 [stats CI names params]=getFlankerStats(subjects,'allDevs',{'hits','CRs','yes','pctCorrect'},filter,[1 now]);
 values = cellfun(@(x) str2num(x(5:end)), names.conditions); 
 arrows=[];
 curveAndBias=1;
+
 %% alternate setup
 % compare colinear to popout
+subjects={'232','138'};%     
+subjects={'232','233','138','228','139'};%     
+%subjects={'232'};%     
+filter{2}.type='responseSpeedPercentile';
+filter{2}.parameters.range=[0 0.7];%whats justified?
+filter{2}=[]; %remove it
     [stats CI names params]=getFlankerStats(subjects,'colin+1&devs',{'hits','CRs','yes','pctCorrect'},filter,[1 now]);
     values = cellfun(@(x) str2num(x(5:end)), names.conditions); 
     small=0.1; values=values+repmat([-1 1]*small,1,4);  %offset for viewing
@@ -253,6 +271,7 @@ curveAndBias=1;
     %values([3 4 7 8 11 12 15 16])=-1; %hack to cut off some kinds
 arrows={'l-l 2.50','--- 2.50'; 'l-l 3.00','--- 3.00';'l-l 3.50','--- 3.50';'l-l 5.00','--- 5.00'};
 curveAndBias=0;
+[delta CI deltas CIs]=viewFlankerComparison(names,params,[],{'yes'},[],[-10 10],[],[],false,false,true)
 %%
 figure(4)
 w=3; %w=5;

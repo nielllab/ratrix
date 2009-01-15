@@ -49,8 +49,8 @@ interTrialLuminance     =0.5;
 % maxHeight               =600;
 % scaleFactor             =[1 1];
 
-maxWidth                =120;
-maxHeight               =100;
+maxWidth                =800;
+maxHeight               =600;
 scaleFactor             =[0];
 
 TM = freeDrinks(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sndManager,pctStochasticReward,rewardManager);

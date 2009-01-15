@@ -387,10 +387,11 @@ filter{1}.type='11';
 % filter{2}=[]; %turn off filter 2
 
 filter{2}.type='responseSpeedPercentile';
-filter{2}.parameters.range=[0 .8];%whats justified?
+filter{2}.parameters.range=[0 .9];%whats justified?
+filter{2}=[];%whats justified?
 
-[stats CI names params]=getFlankerStats(subjects,'8flanks+&nfMix',{'pctCorrect','yes'},filter,[1 now]);
-
+%[stats CI names params]=getFlankerStats(subjects,'8flanks+&nfMix',{'pctCorrect','yes'},filter,[1 now]);
+[stats CI names params]=getFlankerStats(subjects,'8flanks+',{'pctCorrect','yes'},filter,[1 now]);
 viewFlankerComparison(names,params)
 
 %% check stats for abstract

@@ -50,6 +50,8 @@ if doSave
         % if type is cell, then use LUT and replace with an array of indices
 
         fields = fieldnames(trialRecords(1));
+        % do not process the 'response' field
+        fields(find(strcmp(fields,'response')))=[];
         [sessionLUT fieldsInLUT trialRecords] = processFields(fields,sessionLUT,fieldsInLUT,trialRecords);
     end
     

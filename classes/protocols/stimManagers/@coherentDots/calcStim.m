@@ -195,7 +195,7 @@ end;
 
 out = dots_movie*selectedContrast;
 
-details.stimStruct = structize(stimulus);
+% details.stimStruct = structize(stimulus);
 details.dotDirection = dotDirection;
 details.dotxy = alldotsxy;
 details.coherence = s.coherence;

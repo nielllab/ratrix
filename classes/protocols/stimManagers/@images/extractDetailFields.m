@@ -18,6 +18,10 @@ else
         out.leftIm=ensureTypedVector(cellfun(@(x)x{1}.name,ims,'UniformOutput',false),'char');
         out.rightIm=ensureTypedVector(cellfun(@(x)x{3}.name,ims,'UniformOutput',false),'char');
         out.suffices=nan*zeros(2,length(trialRecords)); %for some reason these are turning into zeros in the compiled file...  why?
+        % maybe add deck stuff here - might be added to stimDetails (as in v0.8)
+        % out.cardSelected
+        % out.cardsRemaining
+        % out.decksFinished
     catch
         ex=lasterror;
         out=handleExtractDetailFieldsException(sm,ex,trialRecords);

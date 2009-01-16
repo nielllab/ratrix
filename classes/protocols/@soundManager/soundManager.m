@@ -5,6 +5,7 @@ function t=soundManager(varargin)
 
 t.clips={};
 t.players={};
+t.usePsychPortAudio=false;
 
 switch nargin
     case 0

@@ -129,8 +129,8 @@ ports=cellfun(@uint8,{1 3},'UniformOutput',false);
 [noiseSpec.filterStrength]       =deal(1);
 [noiseSpec.bound]                =deal(.99);
 
-maxWidth               = 800;
-maxHeight              = 600;
+maxWidth               = 1024; %osx has timing problems at 800x600 (red flash at open window)
+maxHeight              = 768;
 scaleFactor            = 0;
 interTrialLuminance     =.5;
 
@@ -146,7 +146,7 @@ end
 stationSpec.MACaddress                        = '000000000000';
 stationSpec.physicalLocation                  = uint8([1 1 1]);
 % stationSpec.screenNum                         = uint8(max(Screen('Screens')));
-stationSpec.soundOn                           = true;
+stationSpec.soundOn                           = false;
 % stationSpec.rewardMethod                      = 'localTimed';
 % stationSpec.portSpec.parallelPortAddress      = '0378';
 % stationSpec.portSpec.valveSpec                = int8([4,3,2]);

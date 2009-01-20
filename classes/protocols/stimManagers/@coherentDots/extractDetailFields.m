@@ -9,20 +9,19 @@ else
 
     try
         stimDetails=[trialRecords.stimDetails];
-        out.correctionTrial=ensureScalar({stimDetails.correctionTrial});
-        out.pctCorrectionTrials=ensureScalar({stimDetails.pctCorrectionTrials});
-        out.dotDirection=ensureScalar({stimDetails.dotDirection});
-%         out.dotxy=ensureTypedVector({stimDetails.dotxy},'numeric'); % this is a matrix - so don't include in compiled
-        out.coherence=ensureEqualLengthVects({stimDetails.coherence});
-        out.dot_size=ensureEqualLengthVects({stimDetails.dot_size});
-        out.contrast=ensureEqualLengthVects({stimDetails.contrast});
-        out.speed=ensureEqualLengthVects({stimDetails.speed});
+        [out.correctionTrial newLUT] = extractFieldAndEnsure(stimDetails,{'correctionTrial'},'scalar',newLUT);
+        [out.pctCorrectionTrials newLUT] = extractFieldAndEnsure(stimDetails,{'pctCorrectionTrials'},'scalar',newLUT);
+        [out.dotDirection newLUT] = extractFieldAndEnsure(stimDetails,{'dotDirection'},'scalar',newLUT);
+        [out.coherence newLUT] = extractFieldAndEnsure(stimDetails,{'coherence'},'equalLengthVects',newLUT);
+        [out.dot_size newLUT] = extractFieldAndEnsure(stimDetails,{'dot_size'},'equalLengthVects',newLUT);
+        [out.contrast newLUT] = extractFieldAndEnsure(stimDetails,{'contrast'},'equalLengthVects',newLUT);
+        [out.speed newLUT] = extractFieldAndEnsure(stimDetails,{'speed'},'equalLengthVects',newLUT);
         
-        out.selectedCoherence=ensureScalar({stimDetails.selectedCoherence});
-        out.selectedDotSize=ensureScalar({stimDetails.selectedDotSize});
-        out.selectedContrast=ensureScalar({stimDetails.selectedContrast});
-        out.selectedSpeed=ensureScalar({stimDetails.selectedSpeed});
-        
+        [out.selectedCoherence newLUT] = extractFieldAndEnsure(stimDetails,{'selectedCoherence'},'scalar',newLUT);
+        [out.selectedDotSize newLUT] = extractFieldAndEnsure(stimDetails,{'selectedDotSize'},'scalar',newLUT);
+        [out.selectedContrast newLUT] = extractFieldAndEnsure(stimDetails,{'selectedContrast'},'scalar',newLUT);
+        [out.selectedSpeed newLUT] = extractFieldAndEnsure(stimDetails,{'selectedSpeed'},'scalar',newLUT);
+                
         % 12/16/08 - this stuff might be common to many stims
         % should correctionTrial be here in compiledDetails (whereas it was originally in compiledTrialRecords)
         % or should extractBasicRecs be allowed to access stimDetails to get correctionTrial?

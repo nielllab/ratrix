@@ -1,5 +1,7 @@
-function out=extractDetailFields(sm,basicRecords,trialRecords,LUTparams)
+function [out newLUT]=extractDetailFields(sm,basicRecords,trialRecords,LUTparams)
 
+
+newLUT={};
 if ~all(strcmp({trialRecords.trialManagerClass},'nAFC'))
     warning('only works for nAFC trial manager')
     out=struct;
@@ -8,10 +10,15 @@ else
     try
         stimDetails=[trialRecords.stimDetails];
 
-        out.correctionTrial=ensureScalar({stimDetails.correctionTrial});
-        out.pctCorrectionTrials=ensureScalar({stimDetails.pctCorrectionTrials});
-        out.contrasts=ensureEqualLengthVects({stimDetails.contrasts});
-        out.xPosPcts=ensureEqualLengthVects({stimDetails.xPosPcts});
+        
+        [out.correctionTrial newLUT] = extractFieldAndEnsure(stimDetails,{'correctionTrial'},'scalar',newLUT);
+        [out.pctCorrectionTrials newLUT] = extractFieldAndEnsure(stimDetails,{'pctCorrectionTrials'},'scalar',newLUT);
+        [out.contrasts newLUT] = extractFieldAndEnsure(stimDetails,{'contrasts'},'equalLengthVects',newLUT);
+        [out.xPosPcts newLUT] = extractFieldAndEnsure(stimDetails,{'xPosPcts'},'equalLengthVects',newLUT);
+%         out.correctionTrial=ensureScalar({stimDetails.correctionTrial});
+%         out.pctCorrectionTrials=ensureScalar({stimDetails.pctCorrectionTrials});
+%         out.contrasts=ensureEqualLengthVects({stimDetails.contrasts});
+%         out.xPosPcts=ensureEqualLengthVects({stimDetails.xPosPcts});
 
         checkTargets(sm,out.xPosPcts,out.contrasts,basicRecords.targetPorts,basicRecords.distractorPorts,basicRecords.numPorts);
     catch

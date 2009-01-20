@@ -25,6 +25,7 @@ end
 
 manualKill=(d.response==0);
 dualResponse=(d.response==-1);
+otherBadResponses=(d.response<-1);
 if ismember('maxCorrectForceSwitch', fields(d))
     nonRandom=(d.maxCorrectForceSwitch==1);
 else
@@ -75,7 +76,7 @@ switch type
         %updated, rigth now numRight+numLeft=total.  Another type of
         %bias would have a harder time analyzing trials that are of
         %BOTH 2AFC and all three ports equal...
-        goods=(~manualKill & ~dualResponse & ~centerResponses & ~tooFast & ~didStochasticResponse & ~containedForcedRewards);
+        goods=(~manualKill & ~dualResponse & ~centerResponses & ~tooFast & ~didStochasticResponse & ~containedForcedRewards & ~otherBadResponses);
     otherwise
         error('wrong type')
 end

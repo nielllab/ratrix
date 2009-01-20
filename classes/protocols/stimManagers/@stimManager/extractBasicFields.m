@@ -70,14 +70,14 @@ end
 % 1/13/09 - need to peek into stimDetails to get correctionTrial (otherwise analysis defaults correctionTrial=0)
 [out.correctionTrial compiledLUT]                            =extractFieldAndEnsure(trialRecords,{'stimDetails','correctionTrial'},'scalar',compiledLUT);
 % 1/14/09 - added numRequestLicks and firstILI
-out.numRequestLicks=ones(1,length(trialRecords))*nan;
+out.numRequests=ones(1,length(trialRecords))*nan;
 for i=1:length(trialRecords)
     if isfield(trialRecords(i),'responseDetails') && isfield(trialRecords(i).responseDetails,'tries') && ...
             ~isempty(trialRecords(i).responseDetails.tries) % if this field exists, overwrite the nan
         out.numRequests(i)=size(trialRecords(i).responseDetails.tries,2)-1;
     end
 end
-out.firstILI=ones(1,length(trialRecords))*nan;
+out.firstIRI=ones(1,length(trialRecords))*nan;
 for i=1:length(trialRecords)
     if isfield(trialRecords(i),'responseDetails') && isfield(trialRecords(i).responseDetails,'times') && ...
             ~isempty(trialRecords(i).responseDetails.times) && size(trialRecords(i).responseDetails.times,2)-1>=2
@@ -198,53 +198,5 @@ end
 
 end % end function
 
-function [out LUT] = extractFieldAndEnsure(trialRecords,fieldPath,ensureMode,LUT)
-% this function extracts the given field from trialRecords using the provided fieldPath and ensureMode
-%   ensureMode is one of {'scalar','scalarLUT','equalLengthVects',{'typedVector',type},'datenum'} where type specifies the type of vector
 
-% grab the mode if cell array, and set ensureType=type
-if iscell(ensureMode) && length(ensureMode)==2
-    ensureType=ensureMode{2};
-    ensureMode=ensureMode{1};
-end
-
-% if fieldPath isnt a single element cell array, then follow it down to the last element
-for i=1:length(fieldPath)-1
-    if ismember(fieldPath{i},fields(trialRecords))
-        trialRecords=[trialRecords.(fieldPath{i})];
-    else
-        out=nan*ones(1,length(trialRecords));
-        return
-    end
-end
-% now reset fieldPath to be only the last element
-fieldPath=fieldPath{end}; % fieldPath is now just a string
-
-try
-    switch ensureMode
-        case 'scalar'
-            out=ensureScalar({trialRecords.(fieldPath)});
-        case 'scalarLUT'
-            try
-                out=ensureScalar({trialRecords.(fieldPath)});
-            catch
-                ensureTypedVector({trialRecords.(fieldPath)},'char'); % ensure is char otherwise no reason to use LUT
-                [out LUT]=addOrFindInLUT(LUT, {trialRecords.(fieldPath)});
-            end
-        case 'equalLengthVects'
-            out=ensureEqualLengthVects({trialRecords.(fieldPath)});
-        case 'typedVector'
-            out=ensureTypedVector({trialRecords.(fieldPath)},ensureType);
-        case 'datenum'
-            out=datenum(reshape([trialRecords.(fieldPath)],6,length(trialRecords))')';
-        otherwise
-            ensureMode
-            error('unsupported ensureMode');
-    end
-catch
-    % if this field doesn't exist, fill with nans
-    out=nan*ones(1,length(trialRecords));
-end
-
-end % end function
 

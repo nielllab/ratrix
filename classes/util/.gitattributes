@@ -118,3 +118,4 @@ matlaby/dsxy2figxy.m -text
 matlaby/arrow.m -text
 analysis/fitElipseToBinaryImage.m -text
 matlaby/iswholenumber.m -text
+trialRecordProcessing/extractFieldAndEnsure.m -text

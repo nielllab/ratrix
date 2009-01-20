@@ -9,12 +9,12 @@ else
 
     try
         stimDetails=[trialRecords.stimDetails];
-        out.correctionTrial=ensureScalar({stimDetails.correctionTrial});
-        out.pctCorrectionTrials=ensureScalar({stimDetails.pctCorrectionTrials});
-        out.pixPerCyc=ensureScalar({stimDetails.pixPerCyc});
-        out.orientations=[stimDetails.orientations];
-        out.phases=[stimDetails.phases];
-        out.xPosPcts=[stimDetails.xPosPcts];
+        [out.correctionTrial newLUT] = extractFieldAndEnsure(stimDetails,{'correctionTrial'},'scalar',newLUT);
+        [out.pctCorrectionTrials newLUT] = extractFieldAndEnsure(stimDetails,{'pctCorrectionTrials'},'scalar',newLUT);
+        [out.pixPerCyc newLUT] = extractFieldAndEnsure(stimDetails,{'pixPerCyc'},'none',newLUT);
+        [out.orientations newLUT] = extractFieldAndEnsure(stimDetails,{'orientations'},'none',newLUT);
+        [out.phases newLUT] = extractFieldAndEnsure(stimDetails,{'phases'},'none',newLUT);
+        [out.xPosPcts newLUT] = extractFieldAndEnsure(stimDetails,{'xPosPcts'},'none',newLUT);
         
         % 12/16/08 - this stuff might be common to many stims
         % should correctionTrial be here in compiledDetails (whereas it was originally in compiledTrialRecords)

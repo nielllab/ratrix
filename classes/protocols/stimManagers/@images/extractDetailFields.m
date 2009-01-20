@@ -9,14 +9,14 @@ else
 
     try
         stimDetails=[trialRecords.stimDetails];
-
-        out.correctionTrial=ensureScalar({stimDetails.correctionTrial});
-        out.pctCorrectionTrials=ensureScalar({stimDetails.pctCorrectionTrials});
+        [out.correctionTrial newLUT] = extractFieldAndEnsure(stimDetails,{'correctionTrial'},'scalar',newLUT);
+        [out.pctCorrectionTrials newLUT] = extractFieldAndEnsure(stimDetails,{'pctCorrectionTrials'},'scalar',newLUT);
 
         ims={stimDetails.imageDetails};
-%         [indices compiledLUT] = addOrFindInLUT(compiledLUT,newRecs.(fn));
-        out.leftIm=ensureTypedVector(cellfun(@(x)x{1}.name,ims,'UniformOutput',false),'char');
-        out.rightIm=ensureTypedVector(cellfun(@(x)x{3}.name,ims,'UniformOutput',false),'char');
+        [out.leftIm newLUT] = extractFieldAndEnsure(cellfun(@(x)x{1},ims,'UniformOutput',true),{'name'},{'typedVector','char'},newLUT);
+        [out.rightIm newLUT] = extractFieldAndEnsure(cellfun(@(x)x{3},ims,'UniformOutput',true),{'name'},{'typedVector','char'},newLUT);
+%         out.leftIm=ensureTypedVector(cellfun(@(x)x{1}.name,ims,'UniformOutput',false),'char');
+%         out.rightIm=ensureTypedVector(cellfun(@(x)x{3}.name,ims,'UniformOutput',false),'char');
         out.suffices=nan*zeros(2,length(trialRecords)); %for some reason these are turning into zeros in the compiled file...  why?
         % maybe add deck stuff here - might be added to stimDetails (as in v0.8)
         % out.cardSelected

@@ -45,7 +45,7 @@ try
     closeConn(conn);
 catch
     disp('no network connection detected - using local compiled directory only');
-    apath = fullfile(fileparts(fileparts(getRatrixPath())),'ratrixData','compiledTrialRecords',filesep);
+    apath = fullfile(fileparts(fileparts(getRatrixPath())),'ratrixData','compiledTrialRecords');
     standAlone = true;
     bySubject = true;
 end
@@ -285,7 +285,7 @@ serverM = uicontrol(f,'Style','popupmenu',...
                 set(subjectM,'String',localSubjectStrs);
                 selection.subjects={};
                 selection.subjects{1,1,1}=localSubjectStrs{get(subjectM,'Value')};
-                apath=fullfile(fileparts(fileparts(getRatrixPath())),'ratrixData','compiledTrialRecords',filesep);
+                apath=fullfile(fileparts(fileparts(getRatrixPath())),'ratrixData','compiledTrialRecords');
             end
             set(typeM,'String',typeStrs);
             set(typeM,'Value',1);
@@ -324,7 +324,13 @@ subjectM = uicontrol(f,'Style','popupmenu',...
     function subjectC(source,eventdata)
         % update selection.subjects to include this one subject
         selection.subjects={};
-        selection.subjects{1,1,1}=subjectStrs{get(subjectM,'Value')};
+        if get(serverM,'Value')==localIndex
+            selection.subjects{1,1,1}=localSubjectStrs{get(subjectM,'Value')};
+            selection.titles{1,1,1}=localSubjectStrs{get(subjectM,'Value')};
+        else
+            selection.subjects{1,1,1}=subjectStrs{get(subjectM,'Value')};
+            selection.titles{1,1,1}=subjectStrs{get(subjectM,'Value')};
+        end
     end
 
 % ========================================================================================

@@ -216,6 +216,72 @@ maxHeight=768;
 cDots=coherentDots(screen_width,screen_height,num_dots,coherence,speed,contrast,dot_size,movie_duration,screen_zoom,...
      maxWidth,maxHeight);
 % ====================================================================================================================
+% ifFeatureGoRightWithTwoFlank
+%% default for all of pmeier stims
+protocolType='goToRightDetection';
+protocolVersion='2_4';
+defaultSettingsDate='Oct.09,2007'; %datestr(now,22)
+
+default=getDefaultParameters(ifFeatureGoRightWithTwoFlank,protocolType,protocolVersion,defaultSettingsDate);
+parameters=default;
+parameters.requestRewardSizeULorMS  =30;
+parameters.msPenalty=1000;
+parameters.scheduler=minutesPerSession(90,3);
+%parameters.scheduler = nTrialsThenWait([1000],[1],[0.01],[1]);
+%%noTimeOff()
+
+parameters.mean = 0.5;
+parameters.typeOfLUT= 'linearizedDefault';
+parameters.rangeOfMonitorLinearized=[0.0 0.5];
+
+%match stim of rats, 3.3=3 cpd at 215cm
+parameters.pixPerCycs =32;  %could go to 12
+parameters.stdGaussMask = 1/16; %could go to 3/128
+
+%achieves 8.9=9cpd at 215cm, like sagi
+parameters.pixPerCycs =12;
+parameters.stdGaussMask = 3/128;
+
+parameters.fractionNoFlanks=.05;
+parameters.flankerContrast = [0.4]; % **!! miniDatabase overwrites this (for rats on this step)  if within-step shaping rebuilding ratrix
+parameters.flankerOffset = 3;
+parameters.toggleStim=false;
+
+%targetContrast= 2.^[-6,-7]; %a guess for thresh!
+%[0.015625 0.5 0.75 1 ] 1/log2 idea: 2.^[-8,-7,-6,-2,-1]
+targetContrast=2.^[-8,-7,-6]%-8,-7,-6,-2,-1]; %[.25 0.5 0.75 1]; % starting sweep (rational: match acuity, but if at chance on .25 don't swamp more than you need, if above chance then add in something smaller, also easier ones will keep up moral )
+parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
+
+parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);  % **skip .9 ; miniDatabase overwrites this (for rats on this step)  if rebuilding ratrix
+parameters.persistFlankersDuringToggle = 0; %
+
+
+% parameters.shapedParameter='targetContrast';
+% parameters.shapingMethod='linearChangeAtCriteria';
+% parameters.shapingValues.numSteps=int8(6);
+% parameters.shapingValues.startValue=.8;
+% parameters.shapingValues.currentValue=.8;
+% parameters.shapingValues.goalValue=0.2;
+% parameters.graduation = parameterThresholdCriterion('.stimDetails.currentShapedValue','<',0.29);
+
+
+%for all stimuli with displayTargetAndDistractor = 0, these will not matter
+parameters.distractorYokedToTarget=1;
+parameters.distractorFlankerYokedToTargetFlanker = 1;
+parameters.distractorContrast = 0;
+
+
+%Remove correlation for experiments
+parameters.maxCorrectOnSameSide=int8(-1); %%%
+parameters.percentCorrectionTrials=0;  %beware this is overpowered by the minidatabase setting!
+
+
+nameOfShapingStep=repmat({'junkStep'},1,11);  % skip the first 11 of training...
+
+
+nameOfShapingStep{end+1} = sprintf('Expt 1: contrast sweep', protocolType);
+[sweepContrast previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+% ====================================================================================================================
 % training steps
 svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
 % set up graduationCriterion
@@ -294,7 +360,7 @@ ts24 = trainingStep(vh, discrimStim5A,graduateQuickly,noTimeOff(),svnRev);
 % p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8, ts9, ts10, ts11, ts12, ts13, ts14, ts15, ts16, ts17, ...
 %     ts18, ts19, ts20, ts21, ts22});
 % stepNum=21;
-p=protocol('gabor test2', {ts24, ts3, ts4, ts1, ts2, ts12, ts8, ts11,ts9,ts10});
+p=protocol('gabor test2', {ts24, ts3, ts4, ts1, ts2, ts12, ts8, ts11,ts9,ts10,sweepContrast});
 stepNum=uint8(1);
 
 for i=1:length(subjIDs),

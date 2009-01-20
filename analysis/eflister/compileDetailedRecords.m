@@ -149,8 +149,8 @@ for i=1:length(ids)
             'containedForcedRewards',...
             'didStochasticResponse',...
             'correctionTrial',...
-            'numRequestLicks',...
-            'firstILI'};
+            'numRequests',...
+            'firstIRI'};
         try
             [compiledTrialRecords compiledDetails compiledLUT]=loadDetailedTrialRecords(compiledFile,compiledRange,fieldNames);
         catch
@@ -242,14 +242,25 @@ for i=1:length(ids)
                 % exceeds MATLAB's maximum name length of 63 characters and has been truncated to
                 % 'trialManager.trialManager.reinforcementManager.reinforcementMan'.
                 % - maybe separate each element of fieldsInLUT (a fieldPath) into each step, and then build thisFieldValue from that
-                thisFieldValues = sessionLUT(newBasicRecs.(fieldsInLUT{n}));
+                
+                % 1/20/09 - split fieldsInLUT using \. as the delimiter, and then loop through each "step" in the path
+                pathToThisField = regexp(fieldsInLUT{n},'\.','split');
+                thisField=newBasicRecs;
+                for nn=1:length(pathToThisField)
+                    thisField=thisField.(pathToThisField{nn});
+                end
+                thisFieldValues = sessionLUT(thisField);
             catch
                 warningStr=sprintf('could not find %s in newBasicRecs - skipping',fieldsInLUT{n});
 %                 warning(warningStr);
                 continue;
             end
             [indices compiledLUT] = addOrFindInLUT(compiledLUT, thisFieldValues);
-            newBasicRecs.(fieldsInLUT{n}) = indices; % set new indices based on integrated LUT
+            for nn=1:length(indices)
+                evalStr=sprintf('newBasicRecs.%s(nn) = indices(nn);',fieldsInLUT{n});
+                eval(evalStr); % set new indices
+            end
+%             newBasicRecs.(fieldsInLUT{n}) = indices; % set new indices based on integrated LUT
         end
         
         
@@ -258,7 +269,6 @@ for i=1:length(ids)
         else
             compiledTrialRecords=concatAllFields(compiledTrialRecords,newBasicRecs);
         end
-        
         for c=1:size(classes,2)
 
             if length(classes{3,c})>0 %prevent subtle bug that is easy to write into extractDetailFields -- if you send zero trials to them, they may try to look deeper than the top level of fields, but they won't exist ('MATLAB:nonStrucReference') -- see example in crossModal.extractDetailFields()

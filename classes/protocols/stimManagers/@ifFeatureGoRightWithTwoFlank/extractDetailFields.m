@@ -16,36 +16,58 @@ else
 
     try
         stimDetails=[trialRecords.stimDetails];
-        out.correctionTrial=ensureScalar({stimDetails.correctionTrial});  %why did erik change correctionTrial to isCorrection in stim details?
-        out.pctCorrectionTrials=ensureScalar({stimDetails.pctCorrectionTrials});
+        [out.correctionTrial newLUT] = extractFieldAndEnsure(stimDetails,{'correctionTrial'},'scalar',newLUT);
+        [out.pctCorrectionTrials newLUT] = extractFieldAndEnsure(stimDetails,{'pctCorrectionTrials'},'scalar',newLUT);
+%         out.correctionTrial=ensureScalar({stimDetails.correctionTrial});  %why did erik change correctionTrial to isCorrection in stim details?
+%         out.pctCorrectionTrials=ensureScalar({stimDetails.pctCorrectionTrials});
 
-        out.correctResponseIsLeft=getDetail(trialRecords,'correctResponseIsLeft');
-        out.targetContrast=getDetail(trialRecords,'targetContrast');
-        out.targetOrientation=getDetail(trialRecords,'targetOrientation');
-        out.flankerContrast=getDetail(trialRecords,'flankerContrast');
+        [out.correctResponseIsLeft newLUT] = extractFieldAndEnsure(stimDetails,{'correctResponseIsLeft'},'scalar',newLUT);
+        [out.targetContrast newLUT] = extractFieldAndEnsure(stimDetails,{'targetContrast'},'scalar',newLUT);
+        [out.targetOrientation newLUT] = extractFieldAndEnsure(stimDetails,{'targetOrientation'},'scalar',newLUT);
+        [out.flankerContrast newLUT] = extractFieldAndEnsure(stimDetails,{'flankerContrast'},'scalar',newLUT);
+%         out.correctResponseIsLeft=getDetail(trialRecords,'correctResponseIsLeft');
+%         out.targetContrast=getDetail(trialRecords,'targetContrast');
+%         out.targetOrientation=getDetail(trialRecords,'targetOrientation');
+%         out.flankerContrast=getDetail(trialRecords,'flankerContrast');
 
-        out.deviation=getDetail(trialRecords,'deviation');
-        out.targetPhase=getDetail(trialRecords,'targetPhase');
-        out.flankerPhase=getDetail(trialRecords,'flankerPhase');
-        out.currentShapedValue=getDetail(trialRecords,'currentShapedValue');
-        out.pixPerCycs=getDetail(trialRecords,'pixPerCycs');
-        out.stdGaussMask=getDetail(trialRecords,'stdGaussMask');
-        out.xPosNoisePix=getDetail(trialRecords,'xPosNoisePix');
-        out.yPosNoisePix=getDetail(trialRecords,'yPosNoisePix');
+        [out.deviation newLUT] = extractFieldAndEnsure(stimDetails,{'deviation'},'scalar',newLUT);
+        [out.targetPhase newLUT] = extractFieldAndEnsure(stimDetails,{'targetPhase'},'scalar',newLUT);
+        [out.flankerPhase newLUT] = extractFieldAndEnsure(stimDetails,{'flankerPhase'},'scalar',newLUT);
+        [out.currentShapedValue newLUT] = extractFieldAndEnsure(stimDetails,{'currentShapedValue'},'scalar',newLUT);
+        [out.pixPerCycs newLUT] = extractFieldAndEnsure(stimDetails,{'pixPerCycs'},'scalar',newLUT);
+        [out.stdGaussMask newLUT] = extractFieldAndEnsure(stimDetails,{'stdGaussMask'},'scalar',newLUT);
+        [out.xPosNoisePix newLUT] = extractFieldAndEnsure(stimDetails,{'xPosNoisePix'},'scalar',newLUT);
+        [out.yPosNoisePix newLUT] = extractFieldAndEnsure(stimDetails,{'yPosNoisePix'},'scalar',newLUT);
+%         out.deviation=getDetail(trialRecords,'deviation');
+%         out.targetPhase=getDetail(trialRecords,'targetPhase');
+%         out.flankerPhase=getDetail(trialRecords,'flankerPhase');
+%         out.currentShapedValue=getDetail(trialRecords,'currentShapedValue');
+%         out.pixPerCycs=getDetail(trialRecords,'pixPerCycs');
+%         out.stdGaussMask=getDetail(trialRecords,'stdGaussMask');
+%         out.xPosNoisePix=getDetail(trialRecords,'xPosNoisePix');
+%         out.yPosNoisePix=getDetail(trialRecords,'yPosNoisePix');
 
-        out.blockID=getDetail(trialRecords,'blockID');
+        [out.blockID newLUT] = extractFieldAndEnsure(stimDetails,{'blockID'},'scalar',newLUT);
+%         out.blockID=getDetail(trialRecords,'blockID');
         
        
         % take part of the vector
-        out.flankerOrientation=getDetail(trialRecords,'flankerOrientation',1);
-        out.flankerPosAngle=getDetail(trialRecords,'flankerPosAngles',1);
-        out.flankerOff=getDetail(trialRecords,'flankerOnOff',2);
-        out.redLUT=getDetail(trialRecords,'LUT',256);
+        [out.flankerOrientation newLUT] = extractFieldAndEnsure(stimDetails,{'flankerOrientation'},{'NthValue',1},newLUT);
+        [out.flankerPosAngle newLUT] = extractFieldAndEnsure(stimDetails,{'flankerPosAngles'},{'NthValue',1},newLUT);
+        [out.flankerOff newLUT] = extractFieldAndEnsure(stimDetails,{'flankerOnOff'},{'NthValue',2},newLUT);
+        [out.redLUT newLUT] = extractFieldAndEnsure(stimDetails,{'LUT'},{'NthValue',256},newLUT);
+%         out.flankerOrientation=getDetail(trialRecords,'flankerOrientation',1);
+%         out.flankerPosAngle=getDetail(trialRecords,'flankerPosAngles',1);
+%         out.flankerOff=getDetail(trialRecords,'flankerOnOff',2);
+%         out.redLUT=getDetail(trialRecords,'LUT',256);
         
         %if anything is defined
-        out.fitRF=isDefined(trialRecords, 'fitRF');
-        out.blocking=isDefined(trialRecords, 'blocking');
-        out.dynamicSweep=isDefined(trialRecords, 'dynamicSweep');
+        [out.fitRF newLUT] = extractFieldAndEnsure(stimDetails,{'fitRF'},'isNotEmpty',newLUT);
+        [out.blocking newLUT] = extractFieldAndEnsure(stimDetails,{'blocking'},'isNotEmpty',newLUT);
+        [out.dynamicSweep newLUT] = extractFieldAndEnsure(stimDetails,{'dynamicSweep'},'isNotEmpty',newLUT);
+%         out.fitRF=isDefined(trialRecords, 'fitRF');
+%         out.blocking=isDefined(trialRecords, 'blocking');
+%         out.dynamicSweep=isDefined(trialRecords, 'dynamicSweep');
         
         
         
@@ -135,56 +157,56 @@ end
 verifyAllFieldsNCols(out,length(trialRecords));
 
 
-function out=isDefined(trialRecords, field)
-%returns a one if the field is there and contain anything
-
-stimDetails=[trialRecords.stimDetails];
-f=fields(stimDetails);
-if ~strcmp(field,f)
-    %if the field is missing, it's not there (false=0)
-    out=zeros(size(trialRecords));
-else
-    cellValues={stimDetails.(field)};
-    out = cell2mat(cellfun('isempty',cellValues, 'UniformOutput',false));
-end
-    
-function out=getDetail(trialRecords,field,nthValue,ifNotEmpty)
-%helper function puts in a single double per trial, a nan if the field is
-%missing, or a single value from a matrix if there are mutliple values
-%perTrial
-
-if ~exist('nthValue','var')
-    nthValue=[];
-end
-
-stimDetails=[trialRecords.stimDetails];
-f=fields(stimDetails);
-if ~strcmp(field,f)
-    %missing field, put nans
-    fprintf('%s: \t inserted nan [1,(%d:%d)] <-- %s \n ',char(trialRecords(1).subjectsInBox),trialRecords(1).trialNumber,trialRecords(end).trialNumber,field)
-    out=nan(size(trialRecords));
-else
-    if size([stimDetails.(field)])==size(trialRecords)
-        %get basic double
-        out=[stimDetails.(field)]; 
-    else
-        if ~isempty(nthValue)
-            %get nth value of matrix
-            cellValues={stimDetails.(field)};
-            cellNth=repmat({nthValue},1,(length(trialRecords)));
-            out = cell2mat(cellfun(@takeNthValue,cellValues ,cellNth, 'UniformOutput',false));
-            if size(out)~=size(trialRecords)
-                cellValues
-                out
-                size(out)
-                size(trialRecords)
-                error('should have one value per trial! failed!  maybe nans emptys in values?')
-            end
-        else
-            error('should have one value per trial! failed! and nthValue is undefined')
-        end
-    end
-end
-
-function out=takeNthValue(values,N)
-out=values(N);
+% function out=isDefined(trialRecords, field)
+% %returns a one if the field is there and contain anything
+% 
+% stimDetails=[trialRecords.stimDetails];
+% f=fields(stimDetails);
+% if ~strcmp(field,f)
+%     %if the field is missing, it's not there (false=0)
+%     out=zeros(size(trialRecords));
+% else
+%     cellValues={stimDetails.(field)};
+%     out = cell2mat(cellfun('isempty',cellValues, 'UniformOutput',false));
+% end
+%     
+% function out=getDetail(trialRecords,field,nthValue,ifNotEmpty)
+% %helper function puts in a single double per trial, a nan if the field is
+% %missing, or a single value from a matrix if there are mutliple values
+% %perTrial
+% 
+% if ~exist('nthValue','var')
+%     nthValue=[];
+% end
+% 
+% stimDetails=[trialRecords.stimDetails];
+% f=fields(stimDetails);
+% if ~strcmp(field,f)
+%     %missing field, put nans
+%     fprintf('%s: \t inserted nan [1,(%d:%d)] <-- %s \n ',char(trialRecords(1).subjectsInBox),trialRecords(1).trialNumber,trialRecords(end).trialNumber,field)
+%     out=nan(size(trialRecords));
+% else
+%     if size([stimDetails.(field)])==size(trialRecords)
+%         %get basic double
+%         out=[stimDetails.(field)]; 
+%     else
+%         if ~isempty(nthValue)
+%             %get nth value of matrix
+%             cellValues={stimDetails.(field)};
+%             cellNth=repmat({nthValue},1,(length(trialRecords)));
+%             out = cell2mat(cellfun(@takeNthValue,cellValues ,cellNth, 'UniformOutput',false));
+%             if size(out)~=size(trialRecords)
+%                 cellValues
+%                 out
+%                 size(out)
+%                 size(trialRecords)
+%                 error('should have one value per trial! failed!  maybe nans emptys in values?')
+%             end
+%         else
+%             error('should have one value per trial! failed! and nthValue is undefined')
+%         end
+%     end
+% end
+% 
+% function out=takeNthValue(values,N)
+% out=values(N);

@@ -1,9 +1,9 @@
 function [textures, numDots, dotX, dotY, dotLocs, dotSize, dotCtr] ...
-  = cacheTextures(tm, strategy, stim, window, floatprecision, finalScreenLuminance, verbose)
+  = cacheTextures(tm, strategy, stim, window, floatprecision, verbose)
 % This function precaches all textures for the given stimulus using Screen('MakeTexture') and Screen('PreloadTextures').
 % Note that if finalScreenLuminance is blank (ie for phased stim), then it does not get loaded as a texture
 % Part of stimOGL rewrite.
-% INPUT: strategy, stim, window, floatprecision, finalScreenLuminance, verbose
+% INPUT: strategy, stim, window, floatprecision, verbose
 % OUTPUT: textures, numDots, dotX, dotY, dotLocs, dotSize, dotCtr
 
 numDots = [];
@@ -12,6 +12,7 @@ dotY = [];
 dotLocs = [];
 dotSize = [];
 dotCtr = [];
+textures=[];
 
 tic
 switch strategy
@@ -25,22 +26,23 @@ switch strategy
             end
         end
 
-    case 'dynamicDots'
-
-        numDots = size(stim,1)*size(stim,2);
-        [dotX dotY] = meshgrid(1:size(stim,1),1:size(stim,2));
-        dotLocs = [dotX(1:numDots);dotY(1:numDots)];
-        dotSize = 1;
-        dotCtr = [destRect(3)-destRect(1) destRect(4)-destRect(2)]/2;
+    case 'expert'
+        % 10/31/08 - in our implementation of dynamic mode, 'stim' should have all parameters necessary to do on-the-fly drawing
+        % no caching of textures should happen
+%         numDots = size(stim,1)*size(stim,2);
+%         [dotX dotY] = meshgrid(1:size(stim,1),1:size(stim,2));
+%         dotLocs = [dotX(1:numDots);dotY(1:numDots)];
+%         dotSize = 1;
+%         dotCtr = [destRect(3)-destRect(1) destRect(4)-destRect(2)]/2;
 
     otherwise
         error('unrecognized strategy')
 end
 
 if window>=0
-    if ~isempty(finalScreenLuminance)  % only add finalScreenLuminance if it is nonempty
-        textures(size(stim,3)+1)=Screen('MakeTexture', window, finalScreenLuminance,0,0,floatprecision);
-    end
+%     if ~isempty(finalScreenLuminance)  % only add finalScreenLuminance if it is nonempty
+%         textures(size(stim,3)+1)=Screen('MakeTexture', window, finalScreenLuminance,0,0,floatprecision);
+%     end
     [resident texidresident] = Screen('PreloadTextures', window);
 
     if resident ~= 1

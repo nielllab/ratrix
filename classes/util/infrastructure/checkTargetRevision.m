@@ -66,6 +66,8 @@ if strmatch(url, 'svn://132.239.158.177/projects/ratrix/trunk')
     pathIsOkay = true;
 elseif strmatch(url, 'svn://132.239.158.177/projects/ratrix/trunk/bootstrap')
     pathIsOkay = true;
+elseif strcmp(url,'svn://132.239.158.177/projects/ratrix/branches/fan') || strcmp(url,'svn://132.239.158.177/projects/ratrix/branches/fan/bootstrap')
+    pathIsOkay=true;
 else
     % check against tags
     [matches tokens] = regexpi(url, '/tags/v(\d+\.\d+)', 'match', 'tokens');

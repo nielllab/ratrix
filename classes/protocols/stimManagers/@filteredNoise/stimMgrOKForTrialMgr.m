@@ -3,6 +3,8 @@ if isa(tm,'trialManager')
     switch class(tm)
         case {'nAFC'}
             out=true;
+        case ('autopilot')
+            out=true;
         otherwise
             out=false;
     end

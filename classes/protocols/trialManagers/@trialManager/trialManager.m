@@ -1,6 +1,9 @@
 function t=trialManager(varargin)
 % TRIALMANAGER  class constructor.  ABSTRACT CLASS-- DO NOT INSTANTIATE
-% t=trialManager(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,soundManager,reinforcementManager,[eyeTracker,eyeController],customDescription)
+% t=trialManager(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,soundManager,reinforcementManager,
+%   [eyeTracker,eyeController],customDescription,[datanet])
+
+% 10/8/08 - this is the new integrated trialManager that handles all stims in a phased way - uses phased doTrial and stimOGL
 
 requiredSoundNames = {'correctSound','keepGoingSound','trySomethingElseSound','wrongSound'};
 
@@ -12,6 +15,7 @@ requiredSoundNames = {'correctSound','keepGoingSound','trySomethingElseSound','w
         t.description='';
         t.eyeTracker=[];
         t.eyeController=[];
+        t.datanet=[];
 switch nargin
     case 0
         % if no input arguments, create a default object
@@ -24,7 +28,7 @@ switch nargin
         else
             error('Input argument is not a trialManager object')
         end
-    case {6 8}
+    case {6 7 8 9}
         if varargin{1}>=0
             t.msFlushDuration=varargin{1};
         else
@@ -59,10 +63,18 @@ switch nargin
             t.eyeTracker=[];
             t.eyeController=[];
             customDescription=varargin{6};
+        elseif nargin==7
+            customDescription=varargin{6};
+            t.datanet=varargin{7};
         elseif nargin==8
             t.eyeTracker=varargin{6};
             t.eyeController=varargin{7};
             customDescription=varargin{8};
+        elseif nargin==9
+            t.eyeTracker=varargin{6};
+            t.eyeController=varargin{7};
+            customDescription=varargin{8};
+            t.datanet=varargin{9};
         else
             error('should never happen')
         end

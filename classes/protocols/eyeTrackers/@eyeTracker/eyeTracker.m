@@ -1,6 +1,6 @@
 function et=eyeTracker(varargin)
 % EYETRACKER claess constructor. ABSTRACT CLASS -- DO NOT INSTANTIATE
-% et = eyeTracker(requiresCalibration, isCalibrated, isTracking)
+% et = eyeTracker(requiresCalibration,[framesPerAllocationChunk], isCalibrated, isTracking)
 switch nargin
     case 0
         % if no input arguments, create a default object
@@ -9,8 +9,9 @@ switch nargin
         et.isTracking=[];
         et.eyeDataPath=[];
         et.sessionFileName=[];
-        et = class(et,'eyeTracker',structable());
-    case 1
+        et.framesPerAllocationChunk=10000; % default setting
+        et = class(et,'eyeTracker');
+    case {1 2}
         % if single argument of this class type, return it
         if (isa(varargin{1},'eyeTracker'))
             et = varargin{1};
@@ -25,11 +26,14 @@ switch nargin
             else
                 et.isCalibrated=true;
             end
-
+            
+            if nargin==2 && isscalar(varargin{2})
+                et.framesPerAllocationChunk=varargin{2};
+            end
             et.isTracking=false;
             et.eyeDataPath=[];     %this is set at run-time by initialize
             et.sessionFileName=[]; %this is set at run-time by start
-            et = class(et,'eyeTracker',structable());
+            et = class(et,'eyeTracker');
         else
             error('Input argument is not a eyeTracker object')
         end
@@ -39,5 +43,3 @@ switch nargin
     otherwise
         error('Wrong number of input arguments')
 end
-
-et=setSuper(et,et.structable);

@@ -1,11 +1,11 @@
 function [done quit valveErrorDetail serverValveStates serverValveChange response newValveState requestRewardDone requestRewardOpenCmdDone] ...
    = handleServerCommands(tm, rn, done, quit, requestRewardStarted, requestRewardStartLogged, requestRewardOpenCmdDone, ...
-   requestRewardDone, station, ports, serverValveStates, doValves, response, newValveState)
+   requestRewardDone, station, ports, serverValveStates, doValves, response)
 
 % This function handles server (rnet) commands that can override automatic trials.
 % Part of stimOGL rewrite.
 % INPUT: rn, constants, done, quit, requestRewardStarted, requestRewardStartLogged, requestRewardOpenCmdDone, 
-%           requestRewardDone, station, ports, serverValveStates, doValves, response, newValveState
+%           requestRewardDone, station, ports, serverValveStates, doValves, response
 % OUTPUT: done, quit, valveErrorDetail, serverValveStates, serverValveChange, response, newValveState, requestRewardDone, requestRewardOpenCmdDone
 
 valveErrorDetail=[];

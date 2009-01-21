@@ -1,12 +1,12 @@
-function [tm frameIndex i audioStimPlaying done doFramePulse didPulse] = updateFrameIndexUsingTextureCache(tm, ...
-    frameIndexed, loop, trigger, timeIndexed, frameIndex, indexedFrames, stimSize, isRequesting, audioStimPlaying, audioStim, ...
-    station, i, requestFrame, frameNum, timedFrames, responseOptions, done, doFramePulse, didPulse)
+function [tm frameIndex i done doFramePulse didPulse] = updateFrameIndexUsingTextureCache(tm, ...
+    frameIndexed, loop, trigger, timeIndexed, frameIndex, indexedFrames, stimSize, isRequesting, ...
+    i, requestFrame, frameNum, timedFrames, responseOptions, done, doFramePulse, didPulse)
 
 % This function calculates the correct frame index (which frame of the movie to play at the given loop) and also triggers sound as necessary
 % Part of stimOGL rewrite.
-% INPUT: tm, frameIndexed, loop, trigger, timeIndexed, frameIndex, indexedFrames, stimSize, isRequesting, audioStimPlaying, audioStim,
-%   station, i, requestFrame, frameNum, timedFrames, responseOptions, done, doFramePulse, didPulse
-% OUTPUT: tm frameIndex i audioStimPlaying done doFramePulse didPulse
+% INPUT: tm, frameIndexed, loop, trigger, timeIndexed, frameIndex, indexedFrames, stimSize, isRequesting,
+%   i, requestFrame, frameNum, timedFrames, responseOptions, done, doFramePulse, didPulse
+% OUTPUT: tm frameIndex i done doFramePulse didPulse
 
 if frameIndexed
     if loop
@@ -29,27 +29,18 @@ elseif loop
 
 elseif trigger
     if isRequesting
-        if ~audioStimPlaying && ~isempty(audioStim)
-            % Play audio
-            tm.soundMgr = playLoop(tm.soundMgr,audioStim,station,1);
-            audioStimPlaying = true;
-        end
         i=1;
     else
-        if audioStimPlaying
-            % Turn off audio
-            tm.soundMgr = playLoop(tm.soundMgr,'',station,0);
-            audioStimPlaying = false;
-        end
         i=2;
     end
 
 elseif timeIndexed %ok, this is where we do the timedFrames type
-
+ 
     %Function 'cumsum' is not defined for values of class 'int8'.
-    if requestFrame~=0
-        i=min(find((frameNum-requestFrame)<=cumsum(double(timedFrames))));  %find the stim frame number for the number of frames since the request
-    end
+%     if requestFrame~=0
+        i=min(find(frameNum<=cumsum(double(timedFrames)))); 
+%         i=min(find((frameNum-requestFrame)<=cumsum(double(timedFrames))));  %find the stim frame number for the number of frames since the request
+%     end
 
     if isempty(i)  %if we have passed the last stim frame
         i=length(timedFrames);  %hold the last frame if the last frame duration specified was zero

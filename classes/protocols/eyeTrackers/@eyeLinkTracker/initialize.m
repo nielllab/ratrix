@@ -83,6 +83,7 @@ end
 %b=getBoxFromID(getBoxIDForStationID(r,s.id));
 %eyeDataPath=fullfile(getBoxPathForSubjectID(b,subjectID,r),?subjectID?,'') %store by subject or by box?
 
-eyeDataPath= fullfile(fileParts(fileParts(getRatrixPath)),'ratrixData','eyeData',subjectID); 
+% eyeDataPath= fullfile(fileParts(fileParts(getRatrixPath)),'ratrixData','eyeData',subjectID); 
+eyeDataPath = fullfile('\\Reinagel-lab.AD.ucsd.edu\RLAB\Rodent-Data\Fan\datanet', subjectID, 'eyeRecords'); % 10/23/08 - to be replaced by oracle lookup
 mkdir(eyeDataPath);
 et=setEyeDataPath(et,eyeDataPath);

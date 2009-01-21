@@ -16,6 +16,9 @@ function standAloneRun(ratrixPath,setupFile,subjectID,recordInOracle)
 % recordInOracle (optional, must be logical, default false)
 % if true, subject must be in oracle database and history file name loading from
 % database will be exercised.
+%
+% recordNeuralData (optional, must be logical, default false)
+% if true, will start datanet for nidaq recording
 
 setupEnvironment;
 

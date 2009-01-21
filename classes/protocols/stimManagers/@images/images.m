@@ -125,10 +125,10 @@ switch nargin
         
         %mode
         if nargin==12
-            if ischar(varargin{12}) && (strcmp(varargin{12},'expert') || strcmp(varargin{12},'static'))
+            if ischar(varargin{12}) && (strcmp(varargin{12},'expert') || strcmp(varargin{12},'cache'))
                 s.drawingMode=varargin{12};
             else
-                error('drawingMode must be ''expert'' or ''static''');
+                error('drawingMode must be ''expert'' or ''cache''');
             end
         end
 

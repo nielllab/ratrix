@@ -121,3 +121,7 @@ matlaby/iswholenumber.m -text
 trialRecordProcessing/extractFieldAndEnsure.m -text
 infrastructure/waitForStop.m -text
 matlaby/audioplayerRepeater.m -text
+stimHelpers/checkStim.m -text
+infrastructure/getIPAddress.m -text
+analysis/getSpikesFromNeuralData.m -text
+analysis/cleanUpStimRecords.m -text

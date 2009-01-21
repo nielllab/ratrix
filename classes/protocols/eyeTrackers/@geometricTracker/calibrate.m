@@ -113,4 +113,4 @@ switch method
 end
 
 
-et.eyeTracker=calibrate(et.eyeTracker);
+et.eyeLinkTracker=calibrate(et.eyeLinkTracker); % updated 10/19/08 according to pmm version

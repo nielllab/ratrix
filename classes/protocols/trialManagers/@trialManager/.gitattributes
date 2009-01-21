@@ -40,3 +40,9 @@
 /setReinforcementParam.m -text
 /testStimOGL.m -text
 /getNameFragment.m -text
+/stationOKForTrialManager.m -text
+/runRealTimeLoop.m -text
+/phaseify.m -text
+/setUpOrStopDatanet.m -text
+/handlePhasedTrialLogic.m -text
+/validateStimSpecs.m -text

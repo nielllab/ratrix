@@ -38,6 +38,12 @@ switch trialManagerClass
             lastRec=[];
         end
         [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts);
+    
+    case 'autopilot'
+        type='static';
+        details.pctCorrectionTrials=0;
+        targetPorts=[1];
+        distractorPorts=[3];
     otherwise
         error('unknown trial manager class')
 end
@@ -57,7 +63,6 @@ else
     numGabors=length(targetPorts);
     distractorLocs=[];
 end
-
 details.phases=rand(numGabors,1)*2*pi;
 
 xPosPcts = [linspace(0,1,totalPorts+2)]';

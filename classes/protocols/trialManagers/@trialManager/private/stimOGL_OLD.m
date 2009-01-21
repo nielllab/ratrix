@@ -1,8 +1,15 @@
+function [quit response manual containedManualPokes actualRewardDurationMSorUL proposedRewardDurationMSorUL ...
+    eyeData gaze station phaseRecords]=  ...
+    stimOGL(tm, stimSpecs, soundTypes, LUT, scaleFactors, targetOptions, distractorOptions, requestOptions, ...
+    station, manual,allowQPM,timingCheckPct, ...
+    noPulses,textLabel,rn,subID,stimID,protocolStr,trialLabel,eyeTracker,msAirpuff)
 
+% function [quit response manual containedManualPokes actualRewardDurationMSorUL proposedRewardDurationMSorUL phaseRecords] = ...
+% stimOGL(tm,stimSpecs,finalPhase,soundTypes,LUT,scaleFactors,targetOptions,distractorOptions,requestOptions, ...
+%                station, manual,allowQPM,timingCheckPct,noPulses,isCorrection,rn,subID,stimID)
 
-function [quit response manual containedManualPokes actualRewardDurationMSorUL proposedRewardDurationMSorUL phaseRecords] = ...
-stimOGL(tm,stimSpecs,finalPhase,soundTypes,LUT,scaleFactors,targetOptions,distractorOptions,requestOptions, ...
-               station, manual,allowQPM,timingCheckPct,noPulses,isCorrection,rn,subID,stimID)
+eyeData=[];
+gaze=[];
 
 % old trialRecords variables - move to phaseRecords per phase
 % response responseDetails didManual manual didAPause didValves didHumanResponse didStochasticResponse
@@ -52,8 +59,8 @@ ptbVersion=sprintf('%d.%d.%d(%s %s)',ptbVer.major,ptbVer.minor,ptbVer.point,ptbV
 try
 [runningSVNversion repositorySVNversion url]=getSVNRevisionFromXML(getRatrixPath);
 ratrixVersion=sprintf('%s (%d of %d)',url,runningSVNversion,repositorySVNversion);
-catch 
-    ex=lasterror
+catch ex
+    ex
 ratrixVersion='no network connection';
 end
 % ===================================================
@@ -214,8 +221,8 @@ try
 	        scrBottom = scrHeight;
 	    end
 
-	   % destRect = round([((scrRight-scrLeft)/2)-(width/2) ((scrBottom-scrTop)/2)-(height/2) ((scrRight-scrLeft)/2)+(width/2) ((scrBottom-scrTop)/2)+(height/2)]); %[left top right bottom]
-        destRect = round([((scrRight-scrLeft)/2)-(width/4) ((scrBottom-scrTop)/2)-(height/4) ((scrRight-scrLeft)/2)+(width/4) ((scrBottom-scrTop)/2)+(height/4)]);
+	   destRect = round([((scrRight-scrLeft)/2)-(width/2) ((scrBottom-scrTop)/2)-(height/2) ((scrRight-scrLeft)/2)+(width/2) ((scrBottom-scrTop)/2)+(height/2)]); %[left top right bottom]
+%         destRect = round([((scrRight-scrLeft)/2)-(width/4) ((scrBottom-scrTop)/2)-(height/4) ((scrRight-scrLeft)/2)+(width/4) ((scrBottom-scrTop)/2)+(height/4)]);
         
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		% Make stimulus textures and load into VRAM using Screen('MakeTexture')
@@ -332,6 +339,7 @@ try
             % phase transition
 			transitionCriterion = getCriterion(spec);
             framesUntilTransition = getFramesUntilTransition(spec);
+            isFinalPhase = getIsFinalPhase(spec);
             % flag for graduation by time (port was autoselected due to graduation by time)
             transitionedByTimeFlag = 0;
             transitionedByPortFlag = 0;
@@ -498,7 +506,7 @@ try
             % if not paused, draw textures
             
             for repeat=1:1
-                msg = sprintf('we are in phase %d and selected port %d at frame %d with transition at %d and finalPhase %d', specInd, port, stepsInPhase, framesUntilTransition, finalPhase);
+                msg = sprintf('we are in phase %d and selected port %d at frame %d with transition at %d', specInd, port, stepsInPhase, framesUntilTransition);
                 Screen('DrawTexture',window,textures(stimInd),[],destRect,[],filtMode);
              %       Screen('DrawTexture',window,textures(stimInd));
                 Screen('DrawText', window,msg,xTextPos,yTextPos,100*ones(1,3));
@@ -648,7 +656,9 @@ try
                 switch stimType
                     case 'loop'
                         stimInd = mod(stimInd, size(stim,3)) + 1;
-                    case 'toggle'
+                    case 'cache'
+                        stimInd = stimInd + 1;
+                    case 'trigger'
                         % for now, switch toggle (stimInd) whenever you have any response (port)
                         if port
                             if stimInd == 1
@@ -696,7 +706,7 @@ try
                 %port = transitionCriterion{1}(1);
                 newSpecInd = transitionCriterion{2};
                 updatePhase = 1;
-                if specInd == finalPhase %if final phase, we are done
+                if isFinalPhase %if final phase, we are done
                     done = 1;
                 end
                 %error('transitioned by time in phase %d', specInd);
@@ -747,7 +757,7 @@ try
                 if ~isempty(transitionCriterion{gcInd}) && any(find(transitionCriterion{gcInd} == port))
                     % we found port in this port set
                     % first check if we are done with this trial, in which case we do nothing except set done to 1
-                    if specInd == finalPhase
+                    if isFinalPhase
                         done = 1;
                         updatePhase = 1;
           %              'we are done with this trial'

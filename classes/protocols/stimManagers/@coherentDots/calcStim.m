@@ -48,41 +48,49 @@ switch trialManagerClass
         %edf: 11.25.06: copied correction trial logic from hack addition to cuedGoToFeatureWithTwoFlank
         %edf: 11.15.06 realized we didn't have correction trials!
         %changing below...
-
         details.pctCorrectionTrials=.5; % need to change this to be passed in from trial manager
-
-        %length(trialRecords)
-       % trialRecords(end).stimDetails
-        
         if ~isempty(trialRecords)
-            lastResponse=find(trialRecords(end).response);
-            lastCorrect=trialRecords(end).correct;
-            lastWasCorrection=trialRecords(end).stimDetails.correctionTrial;
-            if length(lastResponse)>1
-                lastResponse=lastResponse(1);
-            end
+            lastRec=trialRecords(end);
         else
-            lastResponse=[];
-            lastCorrect=[];
-            lastWasCorrection=0;
+            lastRec=[];
         end
-
-        %note that this implementation will not show the exact same
-        %stimulus for a correction trial, but just have the same side
-        %correct.  may want to change...
-        if ~isempty(lastCorrect) && ~isempty(lastResponse) && ~lastCorrect && (lastWasCorrection || rand<details.pctCorrectionTrials)
-            details.correctionTrial=1;
-            'correction trial!'
-            targetPorts=trialRecords(end).targetPorts;
-%             isCorrection=1;
-        else
-            details.correctionTrial=0;
-            targetPorts=responsePorts(ceil(rand*length(responsePorts)));
-        end
-
-
-        distractorPorts=setdiff(responsePorts,targetPorts);
-        targetPorts
+        [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts);
+        
+%         
+%         details.pctCorrectionTrials=.5; % need to change this to be passed in from trial manager
+% 
+%         %length(trialRecords)
+%        % trialRecords(end).stimDetails
+%         
+%         if ~isempty(trialRecords)
+%             lastResponse=find(trialRecords(end).response);
+%             lastCorrect=trialRecords(end).correct;
+%             lastWasCorrection=trialRecords(end).stimDetails.correctionTrial;
+%             if length(lastResponse)>1
+%                 lastResponse=lastResponse(1);
+%             end
+%         else
+%             lastResponse=[];
+%             lastCorrect=[];
+%             lastWasCorrection=0;
+%         end
+% 
+%         %note that this implementation will not show the exact same
+%         %stimulus for a correction trial, but just have the same side
+%         %correct.  may want to change...
+%         if ~isempty(lastCorrect) && ~isempty(lastResponse) && ~lastCorrect && (lastWasCorrection || rand<details.pctCorrectionTrials)
+%             details.correctionTrial=1;
+%             'correction trial!'
+%             targetPorts=trialRecords(end).targetPorts;
+% %             isCorrection=1;
+%         else
+%             details.correctionTrial=0;
+%             targetPorts=responsePorts(ceil(rand*length(responsePorts)));
+%         end
+% 
+% 
+%         distractorPorts=setdiff(responsePorts,targetPorts);
+%         targetPorts
 
         %edf: 11.25.06: original:
         %targetPorts=responsePorts(ceil(rand*length(responsePorts)));

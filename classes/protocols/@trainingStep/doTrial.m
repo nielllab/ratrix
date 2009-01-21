@@ -1,4 +1,5 @@
-function [graduate keepWorking secsRemainingTilStateFlip subject r trialRecords station]=doTrial(ts,station,subject,r,rn,trialRecords,sessionNumber)
+function [graduate keepWorking secsRemainingTilStateFlip subject r trialRecords station] ...
+    =doTrial(ts,station,subject,r,rn,trialRecords,sessionNumber)
 graduate=0;
 
 
@@ -81,7 +82,8 @@ try
 
         if keepDoingTrials
 
-            [newTM updateTM newSM updateSM stopEarly trialRecords station]=doTrial(ts.trialManager,station,ts.stimManager,subject,r,rn,trialRecords,sessionNumber);
+            [newTM updateTM newSM updateSM stopEarly trialRecords station]=...
+                doTrial(ts.trialManager,station,ts.stimManager,subject,r,rn,trialRecords,sessionNumber);
             keepWorking=~stopEarly;
 
             graduate = checkCriterion(ts.criterion,subject,ts, trialRecords);

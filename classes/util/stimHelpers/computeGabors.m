@@ -1,5 +1,5 @@
 
-function out=computeGabors(params,mean,width,height,waveform,normalizeMethod,cornerMarkerOn)
+function out=computeGabors(params,mean,width,height,waveform,normalizeMethod,cornerMarkerOn,normalize)
 
 % params = [.3 16 0 pi/6 1 0.001 1/2 1/2 ];
 % grating=computeGabors(params,0.5,200,200,'square','normalizeVertical',1);
@@ -34,6 +34,10 @@ end
 
 if ~exist('cornerMarkerOn','var')
     cornerMarkerOn=0;
+end
+
+if ~exist('normalize','var')
+    normalize=true;
 end
 
 radius=params(:,1);
@@ -233,7 +237,6 @@ oldMethod=0;
         %ySize -1))',1,xSize),xSize*ySize,1) reshape(repmat(-xSize/2:(-xSize/2+xSize-1),ySize,1),xSize*ySize,1)],[yPosPct(i)*ySize-ySize/2 xPosPct(i)*xSize-xSize/2],(radius(i)*diag([normalizedLength normalizedLength])));
 
         mask=mask/max(max(mask));
-
         masked = rotated'.*mask;
     else
         masked = rotated';
@@ -256,8 +259,10 @@ end
 
 out=mean+squeeze(sum(img,1));
 
-out(out<0)=0;
-out(out>1)=1;
+if normalize
+    out(out<0)=0;
+    out(out>1)=1;
+end
 
 if cornerMarkerOn
     out(1)=0;

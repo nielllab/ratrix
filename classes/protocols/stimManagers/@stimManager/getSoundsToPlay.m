@@ -35,6 +35,8 @@ elseif strcmp(trialManagerClass, 'freeDrinks')
     if phase == 2 && stepsInPhase <= 0
         playSoundSounds{end+1} = {'correctSound', msRewardSound};
     end
+elseif strcmp(trialManagerClass, 'autopilot')
+    % do nothing because we don't play any sounds in this case
 else
     error('default getSoundsToPlay should only be for non-phased cases');
 end

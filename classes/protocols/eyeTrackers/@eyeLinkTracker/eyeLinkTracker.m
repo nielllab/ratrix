@@ -26,5 +26,3 @@ switch nargin
     otherwise
         error('Wrong number of input arguments')
 end
-
-et=setSuper(et,et.eyeTracker);

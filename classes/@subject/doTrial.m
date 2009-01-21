@@ -1,11 +1,13 @@
-function [subject r keepWorking secsRemainingTilStateFlip trialRecords station]=doTrial(subject,r,station,rn,trialRecords,sessionNumber)
+function [subject r keepWorking secsRemainingTilStateFlip trialRecords station] ...
+    =doTrial(subject,r,station,rn,trialRecords,sessionNumber)
 
 if isa(r,'ratrix') && isa(station,'station') && (isempty(rn) || isa(rn,'rnet'))
     [p t]=getProtocolAndStep(subject);
     if t>0
         ts=getTrainingStep(p,t);
 
-        [graduate keepWorking secsRemainingTilStateFlip subject r trialRecords station]=doTrial(ts,station,subject,r,rn,trialRecords,sessionNumber);
+        [graduate keepWorking secsRemainingTilStateFlip subject r trialRecords station] ...
+            =doTrial(ts,station,subject,r,rn,trialRecords,sessionNumber);
         'subject'
 %         newTrialRecords
         

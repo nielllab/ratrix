@@ -1,4 +1,4 @@
-function r = setProtocolDEMO(r,subjIDs)
+function r = setProtocolTEST(r,subjIDs)
 
 % ====================================================================================================================
 % Complete list of reinforcement, stim, and trial managers tested:
@@ -97,6 +97,17 @@ vh=nAFC(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,requestR
     percentCorrectionTrials,msResponseTimeLimit,pokeToRequestStim,maintainPokeToMaintainStim,msMaximumStimPresentationDuration,...
     maximumNumberStimPresentations,doMask,constantRewards);
 
+ai_parameters=[];
+ai_parameters.numChans=3;
+ai_parameters.sampRate=50000;
+ai_parameters.inputRanges=repmat([-1 6],ai_parameters.numChans,1);
+
+vh_datanet=nAFC(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,requestRewardSizeULorMS,...
+    percentCorrectionTrials,msResponseTimeLimit,pokeToRequestStim,maintainPokeToMaintainStim,msMaximumStimPresentationDuration,...
+    maximumNumberStimPresentations,doMask,constantRewards,...
+    datanet('stim','localhost','132.239.158.179','\\132.239.158.179\datanet_storage',ai_parameters));
+
+
 % uses rewardNcorrectInARow reinforcementManager, but same nAFC otherwise
 nAFC_increasing_rewards =nAFC(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,requestRewardSizeULorMS,...
     percentCorrectionTrials,msResponseTimeLimit,pokeToRequestStim,maintainPokeToMaintainStim,msMaximumStimPresentationDuration,...
@@ -106,7 +117,10 @@ nAFC_increasing_rewards =nAFC(msFlushDuration,msMinimumPokeDuration,msMinimumCle
 gts = nAFC(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,requestRewardSizeULorMS,percentCorrectionTrials,...
     msResponseTimeLimit,pokeToRequestStim,maintainPokeToMaintainStim,msMaximumStimPresentationDuration,maximumNumberStimPresentations,doMask,constantRewards);
 
-
+% autopilot trialManager (for gratings currently) - 11/12/08 fli
+aP = autopilot(percentCorrectionTrials,msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,constantRewards);
+aP_datanet = autopilot(percentCorrectionTrials,msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,constantRewards, ...
+    datanet('stim','localhost','132.239.158.179','\\132.239.158.179\datanet_storage',ai_parameters));
 
 % ====================================================================================================================
 % variables for stim managers
@@ -126,16 +140,16 @@ interTrialLuminance     =.5;
 
 
 
-% imageDir='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\PriyaV\other stimuli sets\paintbrush_flashlight';%'\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\PriyaV\other stimuli sets\paintbrushMORPHflashlightEDF';
-% background=0;
-% ypos=0;
-% ims=dir(fullfile(imageDir,'*.png'));
-% trialDistribution={};
-% for i=1:floor(length(ims)/2)
-%     [junk n1 junk junk]=fileparts(ims(i).name);
-%     [junk n2 junk junk]=fileparts(ims(length(ims)-(i-1)).name);
-%     trialDistribution{end+1}={{n1 n2} 1};
-% end
+imageDir='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\PriyaV\other stimuli sets\paintbrush_flashlight';%'\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\PriyaV\other stimuli sets\paintbrushMORPHflashlightEDF';
+background=0;
+ypos=0;
+ims=dir(fullfile(imageDir,'*.png'));
+trialDistribution={};
+for i=1:floor(length(ims)/2)
+    [junk n1 junk junk]=fileparts(ims(i).name);
+    [junk n2 junk junk]=fileparts(ims(length(ims)-(i-1)).name);
+    trialDistribution{end+1}={{n1 n2} 1};
+end
 
 % ====================================================================================================================
 % stimManager
@@ -145,7 +159,30 @@ pixPerCycs=[20 10];
 distractorOrientations=[0];
 discrimStim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
-% imageStim = images(imageDir,ypos,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,trialDistribution);
+% gratings
+pixPerCycs=[20 50]; %freq
+driftfrequencies=[1]; % in cycles per second
+orientations=[pi/3]; % in radians
+phases=[0]; % initial phase
+contrasts=[1]; % contrast of the grating
+durations=[1];
+radius=.08; % radius of the gaussian mask
+location=[0.25 0.75];
+waveform='square';
+normalizationMethod='normalizeDiagonal';
+mean=0.5;
+thresh=.00005;
+maxWidth                =1024;
+maxHeight               =768;
+scaleFactor             =0;
+interTrialLuminance     =.5;
+gratingStim = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,location,...
+    waveform,normalizationMethod,mean,thresh,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
+imageSize=[1 1];
+imageRotation=[0 0];
+imageYoked=false;
+imageStim = images(imageDir,ypos,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,trialDistribution,imageSize,imageYoked,imageRotation);
 
 % for Phil's stim managers
 pixPerCycs              =[20];
@@ -222,6 +259,44 @@ protocolType='goToRightDetection';
 protocolVersion='2_4';
 defaultSettingsDate='Oct.09,2007'; %datestr(now,22)
 
+% whiteNoise
+% gray = 127.5;
+gray=0.5;
+mean=gray;
+std=gray*(2/3);
+searchSubspace=[1];
+background=gray;
+method='texOnPartOfScreen';
+stixelSize = [20,16];
+stimLocation=[0,0,1280,1024];
+numFrames=100;   %100 to test; 5*60*100=30000 for experiment
+% s = whiteNoise(meanLuminance,std,background,method,requestedStimLocation,stixelSize,searchSubspace,numFrames,
+%       maxWidth,maxHeight,scaleFactor,interTrialLuminance)
+
+wn = whiteNoise(mean,std,background,method,stimLocation,stixelSize,searchSubspace,numFrames,1280,1024,0,.5);
+
+% bipartiteField
+receptiveFieldLocation = [0.25 0.5];
+frequencies = [12 60 200];
+duration = 2;
+repetitions=2;
+maxWidth=1280;
+maxHeight=1024;
+scaleFactor=0;
+interTrialLuminance=0.5;
+biField = bipartiteField(receptiveFieldLocation,frequencies,duration,repetitions,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
+% fullField
+contrast = 1.0;
+frequencies = [2 30 100];
+duration = 3;
+repetitions=1;
+maxWidth=1280;
+maxHeight=1024;
+scaleFactor=0;
+interTrialLuminance=0.5;
+fF = fullField(contrast,frequencies,duration,repetitions,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
 default=getDefaultParameters(ifFeatureGoRightWithTwoFlank,protocolType,protocolVersion,defaultSettingsDate);
 parameters=default;
 parameters.requestRewardSizeULorMS  =30;
@@ -283,7 +358,7 @@ nameOfShapingStep{end+1} = sprintf('Expt 1: contrast sweep', protocolType);
 [sweepContrast previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 % ====================================================================================================================
 % training steps
-svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
+svnRev={'svn://132.239.158.177/projects/ratrix/branches/fan'};
 % set up graduationCriterion
 graduateQuickly = performanceCriterion([.9, .5], [uint8(10), uint8(20)]); %cannot use this for freeDrinks b/c no "correct" answer
 repeatIndef = repeatIndefinitely();
@@ -293,7 +368,7 @@ ts1 = trainingStep(fd_sto, freeStim, repeatIndef, noTimeOff(), svnRev);   %stoch
 ts2 = trainingStep(fd, freeStim, repeatIndef, noTimeOff(), svnRev);  %free drinks
 ts3 = trainingStep(vh, freeStim, graduateQuickly, noTimeOff(), svnRev);   %go to stim - orientedGabors w/ nAFC
 ts4 = trainingStep(vh, discrimStim, repeatIndef, noTimeOff(), svnRev);%orientation discrim - orientedGabors w/ nAFC
-% ts5 = trainingStep(vh, imageStim,  graduateQuickly, noTimeOff(), svnRev); %morph discrim - images w/ nAFC
+ts5 = trainingStep(vh, imageStim,  graduateQuickly, noTimeOff(), svnRev); %morph discrim - images w/ nAFC
 
 % Balaji
 ts6 = trainingStep(gts, freeStim, graduateQuickly, noTimeOff(), svnRev);  % go to stim
@@ -313,12 +388,109 @@ ts12 = trainingStep(vh, cDots, graduateQuickly, noTimeOff(), svnRev); % coherent
 % ts16 = trainingStep(vh, cDots5, graduateQuickly, noTimeOff(), svnRev); % coherentDots w/ nAFC
 % ts17 = trainingStep(vh, cDots6, graduateQuickly, noTimeOff(), svnRev); % coherentDots w/ nAFC
 
+
+% %erik 
+% noiseSpec.orientations           = {-pi/4 [] pi/4};
+% noiseSpec.locationDistributions  = {1 [] 1};
+% noiseSpec.distribution           = 'gaussian';
+% noiseSpec.origHz                 = 0;
+% noiseSpec.background             = .5;
+% noiseSpec.contrast               = pickContrast(.5,.01);
+% noiseSpec.maskRadius             = 10;
+% noiseSpec.patchDims              = uint16([50 50]);
+% noiseSpec.patchHeight            = 1;
+% noiseSpec.patchWidth             = 1;
+% noiseSpec.kernelSize             = .5;
+% noiseSpec.kernelDuration         = .1;
+% noiseSpec.loopDuration           = 1;
+% noiseSpec.ratio                  = 1/3;
+% noiseSpec.filterStrength         = 1;
+% noiseSpec.bound                  = .99;
+% noiseSpec.maxWidth               = 800;
+% noiseSpec.maxHeight              = 600;
+% noiseSpec.scaleFactor            = 0;
+% noiseSpec.interTrialLuminance    = interTrialLuminance;
+% 
+% noiseStim=filteredNoise(noiseSpec);
+% 
+% 
+% noiseSpec.orientations           = {0 [] 0};
+% noiseSpec.locationDistributions  = {1 [] 1};
+% noiseSpec.distribution           = 'binary';
+% noiseSpec.contrast               = 1;
+% noiseSpec.maskRadius             = 100;
+% noiseSpec.kernelSize             = 0;
+% noiseSpec.kernelDuration         = 0;
+% noiseSpec.loopDuration           = 1;
+% noiseSpec.ratio                  = 1;
+% noiseSpec.filterStrength         = 0;
+% noiseSpec.patchDims              = uint16([100 100]);
+% noiseSpec.patchHeight            = 1;
+% noiseSpec.patchWidth             = 1;
+% 
+% unfilteredNoise=filteredNoise(noiseSpec);
+% 
+% 
+% noiseSpec.distribution           = '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\hateren\ts001';
+% noiseSpec.origHz                 = 1200;
+% noiseSpec.loopDuration           = 30;
+% 
+% hateren=filteredNoise(noiseSpec);
+% 
+% 
+% noiseSpec.distribution           = '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\pmeier\stimSequence\TRF_CRF_v3';
+% noiseSpec.origHz                 = 100;
+% noiseSpec.loopDuration           = 10;
+% 
+% crf_trf=filteredNoise(noiseSpec);
+% 
+% noiseSpec.locationDistributions  = {1 [] 1};
+% noiseSpec.distribution           = 'gaussian';
+% noiseSpec.contrast               = pickContrast(.5,.01);
+% noiseSpec.patchDims              = uint16([1 1]);
+% noiseSpec.patchHeight            = 1;
+% noiseSpec.patchWidth             = 1;
+% noiseSpec.loopDuration           = 2;
+% 
+% fullfieldFlicker=filteredNoise(noiseSpec);
+% 
+% ts31 = trainingStep(aP, noiseStim,  repeatIndefinitely(), noTimeOff(), svnRev); %filteredNoise discrim
+% ts32 = trainingStep(aP, unfilteredNoise,  repeatIndefinitely(), noTimeOff(), svnRev); %unfilteredNoise discrim
+% ts33 = trainingStep(aP, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svnRev); %fullfieldFlicker
+% ts34 = trainingStep(aP, hateren,  repeatIndefinitely(), noTimeOff(), svnRev); %hateren
+% ts35 = trainingStep(aP, crf_trf,  repeatIndefinitely(), noTimeOff(), svnRev); %crf_trf
+
+
+
 % DEMO - with NcorrectInARow reinforcement manager instead of constantReinforcement
 ts18 = trainingStep(fd_sto_increasing_rewards, freeStim, graduateQuickly, noTimeOff(), svnRev); %stochastic free drinks
 ts19 = trainingStep(fd_increasing_rewards, freeStim, graduateQuickly, noTimeOff(), svnRev);  %free drinks
 ts20 = trainingStep(nAFC_increasing_rewards, freeStim, graduateQuickly, noTimeOff(), svnRev);   %go to stim - orientedGabors w/ nAFC
 ts21 = trainingStep(nAFC_increasing_rewards, discrimStim, graduateQuickly, noTimeOff(), svnRev);%orientation discrim - orientedGabors w/ nAFC
 % ts22 = trainingStep(nAFC_increasing_rewards, imageStim,  graduateQuickly, noTimeOff(), svnRev); %morph discrim - images w/ nAFC
+
+% whiteNoise
+% numTrialsDoneCriterion
+doFiveTimes = numTrialsDoneCriterion(5);
+ts23 = trainingStep(vh, wn, repeatIndef, noTimeOff(), svnRev); % whiteNoise stim
+
+% bipartiteField
+ts24 = trainingStep(aP,biField,repeatIndef,noTimeOff(),svnRev);
+
+% gratings
+ts25 = trainingStep(aP,gratingStim,repeatIndef,noTimeOff(),svnRev);
+
+% regular nAFC orientedGabors with no datanet
+ts26 = trainingStep(vh, discrimStim, repeatIndef, noTimeOff(), svnRev);%orientation discrim - orientedGabors w/ nAFC
+
+% fullField
+ts27=trainingStep(vh,fF,repeatIndef,noTimeOff(),svnRev);
+
+% fullField with datanet
+ts28=trainingStep(vh_datanet,fF,repeatIndef,noTimeOff(),svnRev);
+
+% whiteNoise no datanet
+ts29=trainingStep(aP,wn,repeatIndef,noTimeOff(),svnRev);
 
 % images
 %path containing ALL the stimuli
@@ -347,12 +519,12 @@ imlist.ts5A={...
 
 
 discrimStim5A = images(imdir,ypos_nAFC,background_nAFC,...
-    maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts5A,[.15 .15],false,[0 0],'expert');
+    maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts5A,[.15 .15],false,[0 0],'cache');
 % discrimStim6A = images(imdir,ypos_nAFC,background_nAFC,...
 %     maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts6A,[.5 .75],true,[0 90]);
 
 
-ts24 = trainingStep(vh, discrimStim5A,graduateQuickly,noTimeOff(),svnRev);
+ts30 = trainingStep(vh, discrimStim5A,graduateQuickly,noTimeOff(),svnRev);
 % ts25 = trainingStep(vh, discrimStim6A,graduateQuickly,noTimeOff(),svnRev);
 
 % ====================================================================================================================
@@ -360,8 +532,8 @@ ts24 = trainingStep(vh, discrimStim5A,graduateQuickly,noTimeOff(),svnRev);
 % p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8, ts9, ts10, ts11, ts12, ts13, ts14, ts15, ts16, ts17, ...
 %     ts18, ts19, ts20, ts21, ts22});
 % stepNum=21;
-p=protocol('gabor test2', {ts24, ts3, ts4, ts1, ts2, ts12, ts8, ts11,ts9,ts10,sweepContrast});
-stepNum=uint8(1);
+p=protocol('gabor test2', {ts25, ts1, ts4, ts12, ts2, ts12, ts8, ts11,ts9,ts10,sweepContrast,ts23,ts24,ts27,ts30});
+stepNum=uint8(15);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

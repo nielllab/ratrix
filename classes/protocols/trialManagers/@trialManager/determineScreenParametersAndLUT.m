@@ -1,9 +1,9 @@
-function [scrWidth scrHeight scaleFactor height width scrRect scrLeft scrTop scrRight scrBottom destRect] ...
-    = determineScreenParametersAndLUT(tm, window, station, metaPixelSize, stim, LUT, verbose)
+function [scrWidth scrHeight scaleFactor height width scrRect scrLeft scrTop scrRight scrBottom destRect currentCLUT frameDropCorner] ...
+    = determineScreenParametersAndLUT(tm, window, station, metaPixelSize, stim, LUT, verbose, strategy, frameDropCorner)
 % This function determines the scaleFactor and LUT of the Screen window.
 % Part of stimOGL rewrite.
-% INPUT: window, station, metaPixelSize, stim, LUT
-% OUTPUT: scrWidth scrHeight scaleFactor
+% INPUT: window, station, metaPixelSize, stim, LUT, verbose, strategy
+% OUTPUT: scrWidth scrHeight scaleFactor height width scrRect scrLeft scrTop scrRight scrBottom destRect
 
 if window>=0
     [scrWidth scrHeight]=Screen('WindowSize', window);
@@ -12,24 +12,32 @@ else
     scrHeight=getHeight(station);
 end
 
-if metaPixelSize == 0
-    scaleFactor = [scrHeight scrWidth]./[size(stim,1) size(stim,2)];
-elseif length(metaPixelSize)==2 && all(metaPixelSize)>0
-    scaleFactor = metaPixelSize;
-else
-    error('bad metaPixelSize argument')
-end
-if any(scaleFactor.*[size(stim,1) size(stim,2)]>[scrHeight scrWidth])
-    scaleFactor.*[size(stim,1) size(stim,2)]
-    scaleFactor
-    size(stim)
-    [scrHeight scrWidth]
-    error('metaPixelSize argument too big')
-end
+% 10/31/08 - implement handling of expert mode (if expert, height and width should be fields of stim)
+if ~isempty(strategy) && strcmp(strategy, 'expert')
+    stim
+    height = stim.height;
+    width = stim.width;
+    scaleFactor = metaPixelSize; % unused in this case (height and width are already set)
+else % non dynamic mode - calculate based on size of stim
+    if metaPixelSize == 0
+        scaleFactor = [scrHeight scrWidth]./[size(stim,1) size(stim,2)];
+    elseif length(metaPixelSize)==2 && all(metaPixelSize)>0
+        scaleFactor = metaPixelSize;
+    else
+        error('bad metaPixelSize argument')
+    end
+    if any(scaleFactor.*[size(stim,1) size(stim,2)]>[scrHeight scrWidth])
+        scaleFactor.*[size(stim,1) size(stim,2)]
+        scaleFactor
+        size(stim)
+        [scrHeight scrWidth]
+        error('metaPixelSize argument too big')
+    end
 
 
-height = scaleFactor(1)*size(stim,1);
-width = scaleFactor(2)*size(stim,2);
+    height = scaleFactor(1)*size(stim,1);
+    width = scaleFactor(2)*size(stim,2);
+end
 
 if window>=0
     scrRect = Screen('Rect', window);
@@ -37,6 +45,8 @@ if window>=0
     scrTop = scrRect(2);
     scrRight = scrRect(3);
     scrBottom = scrRect(4);
+    scrWidth= scrRight-scrLeft;
+    scrHeight=scrBottom-scrTop;
 else
     scrLeft = 0;
     scrTop = 0;
@@ -44,9 +54,23 @@ else
     scrBottom = scrHeight;
 end
 
-destRect = round([((scrRight-scrLeft)/2)-(width/2) ((scrBottom-scrTop)/2)-(height/2) ((scrRight-scrLeft)/2)+(width/2) ((scrBottom-scrTop)/2)+(height/2)]); %[left top right bottom]
+destRect = round([(scrWidth/2)-(width/2) (scrHeight/2)-(height/2) (scrWidth/2)+(width/2) (scrHeight/2)+(height/2)]); %[left top right bottom]
 
+frameDropCorner.left  =scrLeft               + scrWidth *(frameDropCorner.loc(2) - frameDropCorner.size(2)/2);
+frameDropCorner.right =frameDropCorner.left  + scrWidth *frameDropCorner.size(2);
+frameDropCorner.top   =scrTop                + scrHeight*(frameDropCorner.loc(1) - frameDropCorner.size(1)/2);
+frameDropCorner.bottom=frameDropCorner.top   + scrHeight*frameDropCorner.size(1);
+frameDropCorner.rect=[frameDropCorner.left frameDropCorner.top frameDropCorner.right frameDropCorner.bottom];
 
+% destRect
+% height
+% width
+% scrRight
+% scrLeft
+% scrBottom
+% scrTop
+% scaleFactor
+% error('stop')
 
 
 [oldCLUT, dacbits, reallutsize] = Screen('ReadNormalizedGammaTable', window);
@@ -80,13 +104,15 @@ if isreal(LUT) && all(size(LUT)==[256 3])
         currentCLUT-LUT %error
         error('the LUT is not what you think it is')
     end
+    
+    frameDropCorner.seq=linspace(1,0,size(currentCLUT,1));
 else
     reallutsize
     error('LUT must be real 256 X 3 matrix')
 end
 
-maxV=max(currentCLUT(:))
-minV=min(currentCLUT(:))
+maxV=max(currentCLUT(:));
+minV=min(currentCLUT(:));
 
 if verbose && (minV ~= 0 || maxV ~= 1)
     disp(sprintf('clut has a min of %4.6f and a max of %4.6f',minV,maxV));

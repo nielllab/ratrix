@@ -1,15 +1,17 @@
 function [quit response didManualInTrial manual actualReinforcementDurationMSorUL proposedReinforcementDurationMSorUL ... 
-      phaseRecords] ...
-    = runRealTimeLoop(tm, window, ifi, stimSpecs, phaseData, finalPhase, soundTypes, ...
+      phaseRecords eyeData gaze frameDropCorner] ...
+    = runRealTimeLoop(tm, window, ifi, stimSpecs, phaseData, stimManager, msRewardSound, msPenaltySound, ...
     targetOptions, distractorOptions, requestOptions, ...
-    station, manual,allowQPM,timingCheckPct,noPulses,textLabel,rn,subID,stimID,protocolStr,trialLabel,msAirpuff, ...
-    originalPriority, verbose)
+    station, manual,allowQPM,timingCheckPct,noPulses,textLabel,rn,subID,stimID,protocolStr,ptbVersion,ratrixVersion,trialLabel,msAirpuff, ...
+    originalPriority, verbose, eyeTracker, frameDropCorner)
 
   
 % need actual versus proposed reward duration (save in phaseRecords per phase)
 actualReinforcementDurationMSorUL = 0;
 proposedReinforcementDurationMSorUL = 0;
 didManualInTrial=false;
+eyeData=[];
+gaze=[];
 
 % We will break this main function into smaller functions also in the trialManager class
 % =====================================================================================================================
@@ -24,6 +26,17 @@ framesPerUpdate = 1;        %set number of monitor refreshes for each one of you
 
 labelFrames = 1;            %print a frame ID on each frame (makes frame calculation slow!)
 dontclear= 0;
+masktex=[];
+ports=0*readPorts(station);
+if ismac
+    %also not good enough on beige computer w/8600
+    %http://psychtoolbox.org/wikka.php?wakka=FaqPerformanceTuning1
+    %Screen('DrawText'): This is fast and low-quality on MS-Windows and beautiful but slow on OS/X.
+
+    %Screen('Preference', 'TextAntiAliasing', 0); %not good enough
+    %DrawFormattedText() won't be any faster cuz it loops over calls to Screen('DrawText'), tho it would clean this code up a bit.
+    labelFrames=0;
+end
 
 
 quit=false;
@@ -48,6 +61,13 @@ responseDetails.numFramesUntilStopSavingMisses=numFramesUntilStopSavingMisses;
 responseDetails.numUnsavedMisses=0;
 responseDetails.nominalIFI=ifi;
 responseDetails.toggleStim=toggleStim;
+responseDetails.tries={};
+responseDetails.times={};
+responseDetails.requestRewardPorts=[];
+responseDetails.durs={};
+responseDetails.requestRewardStartTime=[];
+responseDetails.requestRewardDurationActual=[];
+
 
 [phaseRecords(1:length(stimSpecs)).responseDetails]= deal(responseDetails);
 [phaseRecords(1:length(stimSpecs)).response]=deal('none');
@@ -66,7 +86,6 @@ responseDetails.toggleStim=toggleStim;
 [phaseRecords(1:length(stimSpecs)).stochasticProbability] = deal([]);
 [phaseRecords(1:length(stimSpecs)).timeoutLengthInFrames] = deal([]);
 
-%    phaseRecords(specInd).proposedSounds = soundTypesToCellArray(soundTypesInPhase); % a cell array of strings
 % pump stuff
 [phaseRecords(1:length(stimSpecs)).valveErrorDetails]=deal([]);
 [phaseRecords(1:length(stimSpecs)).latencyToOpenValves]= deal([]);
@@ -83,18 +102,6 @@ responseDetails.toggleStim=toggleStim;
 % manual poking stuff
 [phaseRecords(1:length(stimSpecs)).containedManualPokes]= deal([]);
 [phaseRecords(1:length(stimSpecs)).leftWithManualPokingOn]= deal([]);
-
-
-
-[garbage ptbVer]=PsychtoolboxVersion;
-ptbVersion=sprintf('%d.%d.%d(%s %s)',ptbVer.major,ptbVer.minor,ptbVer.point,ptbVer.flavor,ptbVer.revstring);
-try
-[runningSVNversion repositorySVNversion url]=getSVNRevisionFromXML(getRatrixPath);
-ratrixVersion=sprintf('%s (%d of %d)',url,runningSVNversion,repositorySVNversion);
-catch 
-    ex=lasterror;
-ratrixVersion='no network connection';
-end
 
 % =====================================================================================================================
 % check for constands and rewardMethod
@@ -114,6 +121,9 @@ done=0;
 rewardCurrentlyOn=false;
 msRewardOwed=0;
 lastRewardTime=[];
+msAirpuffOwed=0;
+airpuffOn=false;
+lastAirpuffTime=[];
 
 
 % =====================================================================================================================
@@ -126,7 +136,7 @@ lastRewardTime=[];
 % with
 
 %Priority(9);
-KbCheck; %load mex files into ram
+[keyIsDown,secs,keyCode]=KbCheck; %load mex files into ram + preallocate return vars
 GetSecs;
 Screen('Screens');
 
@@ -135,16 +145,25 @@ standardFontSize=11; %big was 25
 subjectFontSize=35;
 oldFontSize = Screen('TextSize',window,standardFontSize);
 Screen('Preference', 'TextRenderer', 0);  % consider moving to PTB setup
+[normBoundsRect, offsetBoundsRect]= Screen('TextBounds', window, 'TEST');
 
-preSMCacheTime=GetSecs();
-[newSM updateSMCache]=cacheSounds(getSoundManager(tm)); % 8/12/08 -8/12/08 - changed to use setter and getter for tm.soundMgr to support new stimOGL/doTrial architecture
-disp(sprintf('took %g secs to cache sounds',GetSecs()-preSMCacheTime))
-if updateSMCache
-    tm = setSoundManager(tm, newSM); % 8/12/08 - changed to use setter and getter for tm.soundMgr to support new stimOGL/doTrial architecture
-%    tm.soundMgr=newSM; %hmmm, how does this cache get persisted, we don't return tm...
+%KbName('UnifyKeyNames'); %does not appear to choose keynamesosx on windows - KbName('KeyNamesOSX') comes back wrong
+KbConstants.allKeys=KbName('KeyNames');
+KbConstants.allKeys=lower(cellfun(@char,KbConstants.allKeys,'UniformOutput',false));
+KbConstants.controlKeys=find(cellfun(@(x) ~isempty(x),strfind(KbConstants.allKeys,'control')));
+KbConstants.shiftKeys=find(cellfun(@(x) ~isempty(x),strfind(KbConstants.allKeys,'shift')));
+KbConstants.kKey=KbName('k');
+KbConstants.pKey=KbName('p');
+KbConstants.qKey=KbName('q');
+KbConstants.mKey=KbName('m');
+KbConstants.aKey=KbName('a');
+KbConstants.rKey=KbName('r');
+KbConstants.atKeys=find(cellfun(@(x) ~isempty(x),strfind(KbConstants.allKeys,'@')));
+KbConstants.asciiOne=double('1');
+KbConstants.portKeys={};
+for i=1:length(ports)
+    KbConstants.portKeys{i}=find(strncmp(char(KbConstants.asciiOne+i-1),KbConstants.allKeys,1));
 end
-%tm.soundMgr=playSound(tm.soundMgr,'keepGoingSound',.001,station); %get audioplayer into memory (java?)
-%tm.soundMgr=playSound(tm.soundMgr,'trySomethingElseSound',.001,station); %get all the clips we'll use cached up
 
 priorityLevel=MaxPriority(window,'GetSecs','KbCheck');
 
@@ -153,7 +172,27 @@ if verbose
     disp(sprintf('running at priority %d',priorityLevel));
 end
 
+% =====================================================================================================================
+% 10/19/08 - initialize eyeTracker
+if ~isempty(eyeTracker)
+   perTrialSyncing=false; %could pass this in if we ever decide to use it; now we don't
+   if perTrialSyncing && isa(eyeTracker,'eyeLinkTracker')
+       status=Eyelink('message','SYNCTIME');
+       if status~=0
+           error('message error, status: ',status)
+       end
+   end
 
+   framesPerAllocationChunk=getFramesPerAllocationChunk(eyeTracker);
+
+   if isa(eyeTracker,'eyeLinkTracker')
+       eyeData=nan(framesPerAllocationChunk,40);
+       gaze=nan(framesPerAllocationChunk,2);
+   else
+       error('no other methods')
+   end
+end
+% =====================================================================================================================
 
 % END pre-loop initialization
 
@@ -170,8 +209,54 @@ sos = 0;
 ft = 0;
 lastFrameTime = 0;
 framesSinceKbInput = 0;
+lastSoundsPlayed={};
+totalFrameNum=1;
+doFramePulse=1;
+
+audioStimPlaying = false;
+lastLoopEnd=0;
+startTime=0;
+yNewTextPos=0;
+txtLabel='';
+manTxt='';
+when=0;
+whenTime=0;
+ft=0;
+missed=0;
+thisIFI=0;
+thisIFIErrorPct = 0;
+
+doValves=0*ports;
+newValveState=doValves;
+doPuff=false;
+mThisLoop=0;
+pThisLoop=0;
 
 
+shiftDown=false;
+ctrlDown=false;
+atDown=false;
+kDown=false;
+portsDown=false(1,length(ports));
+pNum=0;
+
+
+time1=0;
+time2=0;
+time3=0;
+time4=0;
+time5=0;
+time6=0;
+time7=0;
+soundTime=0;
+maxSoundTime=0.002;
+soundName='';
+somethingElseOn=false;
+keepGoingOn=false;
+
+numDrops=0;
+numApparentDrops=0;
+barebones=false;
 
 % phaseRecords = [];
 
@@ -187,6 +272,14 @@ framesSinceKbInput = 0;
 
 %logwrite('about to enter stimOGL loop');
 
+doLED=false;
+if doLED
+    [ao bits]=openNidaqForAnalogOutput(sampRate,range);
+    putdata(ao,data);
+    start(ao);
+end
+
+
 %any stimulus onset synched actions
 
 startTime=GetSecs();
@@ -195,9 +288,25 @@ respStart = 0; % initialize respStart to zero - it won't get set until we get a 
 audioStimPlaying = false;
 response='none'; %initialize
 
+[vbl sos startTime]=Screen('Flip',window);  %make sure everything after this point is preallocated
+
+if ~isempty(tm.datanet)
+    % 10/17/08 - start of a datanet trial - timestamp
+    datanet_constants = getConstants(tm.datanet);
+    commands = [];
+    commands.cmd = datanet_constants.stimToDataCommands.S_TIMESTAMP_CMD;
+    [trialData, gotAck] = sendCommandAndWaitForAck(tm.datanet, getCon(tm.datanet), commands);
+end
+
 %show stim -- be careful in this realtime loop!
 while ~done && ~quit;
     %logwrite('top of stimOGL loop');
+    time1=GetSecs;
+    % moved from inside if updatePhase to every time this loop runs (b/c we moved from function to inside runRealTimeLoop)
+    xOrigTextPos = 10;
+    xTextPos=xOrigTextPos;
+    yTextPos = 20;
+    yNewTextPos=yTextPos;
     
     % =====================================================================================================================
     % if we are entering a new phase, re-initialize variables
@@ -205,30 +314,30 @@ while ~done && ~quit;
         
         i=0;
         frameIndex=0;
-        attempt=0;
+%         attempt=0;
 
         frameNum=1;
 
-        stimStarted=isempty(requestOptions); % no use in phased version
-        logIt=0;
-        stopListening=0;
-        lookForChange=0;
-        player=[];
-        currSound='';
 
-        ports=0*readPorts(station);
-        lastPorts=0*readPorts(station);
+%         logIt=0;
+%         stopListening=0;
+%         lookForChange=0;
+%         player=[];
+%         currSound='';
+
+
+%         lastPorts=0*readPorts(station);
         pressingM=0;
         pressingP=0;
         didAPause=0;
         paused=0;
-        doFramePulse=0;
         didPulse=0;
         didValves=0;
         didManual=false; %initialize
+        arrowKeyDown=false; %1/9/09 - for phil's stuff
         
-        puffStarted=0;
-        puffDone=false;
+%         puffStarted=0;
+%         puffDone=false;
         
         %used for timed frames stimuli
         if isempty(requestOptions)
@@ -238,7 +347,7 @@ while ~done && ~quit;
         end
 
         currentValveState=verifyValvesClosed(station);
-        valveErrorDetails=[];
+%         valveErrorDetails=[];
         requestRewardStarted=false;
         requestRewardStartLogged=false;
         requestRewardDone=false;
@@ -247,19 +356,14 @@ while ~done && ~quit;
         requestRewardOpenCmdDone=false;
         serverValveChange=false;
         serverValveStates=false;
-        potentialStochasticResponse=false;
+%         potentialStochasticResponse=false;
         didStochasticResponse=false;
         didHumanResponse=false;
 
         isRequesting=0;
-        stimToggledOn=0;
+%         stimToggledOn=0;
 
 
-
-        xOrigTextPos = 10;
-        yTextPos = 20;
-        yNewTextPos=yTextPos;
-        
         
         % load stimSpec and phaseData
         spec = stimSpecs{specInd};
@@ -268,8 +372,8 @@ while ~done && ~quit;
         transitionCriterion = getCriterion(spec);
         framesUntilTransition = getFramesUntilTransition(spec);
         % flag for graduation by time (port was autoselected due to graduation by time)
-        transitionedByTimeFlag = false;
-        transitionedByPortFlag = false;
+%         transitionedByTimeFlag = false;
+%         transitionedByPortFlag = false;
         % reinforcement
         rewardType = getRewardType(spec);
         rewardDuration = getRewardDuration(spec);
@@ -280,17 +384,14 @@ while ~done && ~quit;
             requestRewardPorts = rewardPorts;
             proposedReinforcementDurationMSorUL = proposedReinforcementDurationMSorUL + rewardDuration;
             msRewardOwed = msRewardOwed + rewardDuration;
-%         elseif ~isempty(rewardType) && strcmp(rewardType, 'airpuff')
-%             msAirpuffOwed = msAirpuffOwed + rewardDuration;
+        elseif ~isempty(rewardType) && strcmp(rewardType, 'airpuff')
+            msAirpuffOwed = msAirpuffOwed + rewardDuration;
 %             doPuff = true;
-%             proposedReinforcementDurationMSorUL = proposedReinforcementDurationMSorUL + rewardDuration;
+            proposedReinforcementDurationMSorUL = proposedReinforcementDurationMSorUL + rewardDuration;
         end
         
-        % soundTypes
-        soundTypesInPhase = soundTypes{specInd};
-        numST = length(soundTypesInPhase);
         stepsInPhase = 0;
-        isFinalPhase = finalPhase == specInd; % we set the isFinalPhase flag to true if we are on the last phase
+        isFinalPhase = getIsFinalPhase(spec); % we set the isFinalPhase flag to true if we are on the last phase
         stochasticDistribution = getStochasticDistribution(spec);
         
         phase = phaseData{specInd};
@@ -304,6 +405,11 @@ while ~done && ~quit;
         timedFrames = phase.timedFrames;
         
         strategy = phase.strategy;
+        % 11/9/08 - if dynamic strategy, then create a big field
+%         if strcmp(strategy, 'dynamic')
+%             numDynamicFrames = length(stim.seedValues);
+% %             phaseRecords(specInd).big=zeros(stim.height,stim.width,numDynamicFrames);
+%         end
         destRect = phase.destRect;
         
         textures = phase.textures;
@@ -314,6 +420,7 @@ while ~done && ~quit;
         dotSize = phase.dotSize;
         dotCtr = phase.dotCtr;
         
+        currentCLUT = phase.CLUT;
         
         % Initialize this phaseRecord
 %         phaseRecords(specInd).response='none';
@@ -334,9 +441,7 @@ while ~done && ~quit;
         % Initialize this phaseRecord
         phaseRecords(specInd).proposedReinforcementSizeULorMS = rewardDuration;
         phaseRecords(specInd).proposedReinforcementType = rewardType;
-        for stInd=1:length(soundTypesInPhase)
-            phaseRecords(specInd).proposedSounds{stInd} = soundTypeToString(soundTypesInPhase{stInd});
-        end
+        
         % added 8/18/08 - strategy (loop, static, trigger, cache, dynamic, expert, timeIndexed, or frameIndexed)
         phaseRecords(specInd).loop = loop;
         phaseRecords(specInd).trigger = trigger;
@@ -344,7 +449,6 @@ while ~done && ~quit;
         phaseRecords(specInd).stochasticProbability = stochasticDistribution;
         phaseRecords(specInd).timeoutLengthInFrames = framesUntilTransition;
 %         
-%     %    phaseRecords(specInd).proposedSounds = soundTypesToCellArray(soundTypesInPhase); % a cell array of strings
 %         % pump stuff
 %         phaseRecords(specInd).valveErrorDetails=[];
 %         phaseRecords(specInd).latencyToOpenValves=[];
@@ -369,16 +473,6 @@ while ~done && ~quit;
 
     if ~paused
 
-        % THIS PART IS NOT USED IN PHASES - NO CONCEPT OF "STARTING AUDIO"
-%         % If it's not triggered, the audio can just be started
-%         if ~trigger
-%             if ~isempty(audioStim)
-%                 % Play audio
-%                 tempSoundMgr = playLoop(getSoundManager(tm),audioStim,station,1); % 8/12/08 - changed to use setter and getter for tm.soundMgr to support new stimOGL/doTrial architecture
-%                 tm = setSoundManager(tm, tempSoundMgr);
-%                 audioStimPlaying = true;
-%             end
-%         end
         doFramePulse=~noPulses;
         switch strategy
 
@@ -388,38 +482,139 @@ while ~done && ~quit;
 
             case 'textureCache'
 
-                % function [tm frameIndex i audioStimPlaying done doFramePulse didPulse] = updateFrameIndexUsingTextureCache(tm, 
-                %   frameIndexed, loop, trigger, timeIndexed, frameIndex, indexedFrames, stimSize, isRequesting, audioStimPlaying, audioStim,
-                %   station, i, requestFrame, frameNum, timedFrames, responseOptions, done, doFramePulse, didPulse)
-                [tm frameIndex i audioStimPlaying done doFramePulse didPulse] = updateFrameIndexUsingTextureCache(tm, ...
-                frameIndexed, loop, trigger, timeIndexed, frameIndex, indexedFrames, size(stim,3), isRequesting, audioStimPlaying, audioStim, ...
-                station, i, requestFrame, frameNum, timedFrames, responseOptions, done, doFramePulse, didPulse);
+                % function [tm frameIndex i done doFramePulse didPulse] = updateFrameIndexUsingTextureCache(tm, 
+                %   frameIndexed, loop, trigger, timeIndexed, frameIndex, indexedFrames, stimSize, isRequesting,
+                %   i, requestFrame, frameNum, timedFrames, responseOptions, done, doFramePulse, didPulse)
+                [tm frameIndex i done doFramePulse didPulse] = updateFrameIndexUsingTextureCache(tm, ...
+                frameIndexed, loop, trigger, timeIndexed, frameIndex, indexedFrames, size(stim,3), isRequesting, ...
+                i, requestFrame, frameNum, timedFrames, responseOptions, done, doFramePulse, didPulse);
 
+%             stimSize = size(stim,3);
+%             if frameIndexed
+%                 if loop
+%                     frameIndex = mod(frameIndex,length(indexedFrames)-1)+1;
+%                 else
+%                     frameIndex = min(length(indexedFrames),frameIndex+1);
+%                 end
+%                 i = indexedFrames(frameIndex);
+%             elseif loop
+%             %     i = mod(i,stimSize-1)+1; %this is not correct if stimSize is number of frames and i is the index
+%                 % 8/16/08 - changed to index correctly
+%             %     i
+%                 i = mod(i+1,stimSize);
+%                 if i == 0
+%                     i = stimSize;
+%                 end
+%                 % end changed version 8/16/08
+%             %     stimSize
+%             %     i
+% 
+%             elseif trigger
+%                 if isRequesting
+%                     if ~audioStimPlaying && ~isempty(audioStim)
+%                         % Play audio
+%                         tm.soundMgr = playLoop(tm.soundMgr,audioStim,station,1);
+%                         audioStimPlaying = true;
+%                     end
+%                     i=1;
+%                 else
+%                     if audioStimPlaying
+%                         % Turn off audio
+%                         tm.soundMgr = playLoop(tm.soundMgr,'',station,0);
+%                         audioStimPlaying = false;
+%                     end
+%                     i=2;
+%                 end
+% 
+%             elseif timeIndexed %ok, this is where we do the timedFrames type
+% 
+%                 %Function 'cumsum' is not defined for values of class 'int8'.
+%                 if requestFrame~=0
+%                     i=min(find((frameNum-requestFrame)<=cumsum(double(timedFrames))));  %find the stim frame number for the number of frames since the request
+%                 end
+% 
+%                 if isempty(i)  %if we have passed the last stim frame
+%                     i=length(timedFrames);  %hold the last frame if the last frame duration specified was zero
+%                     if timedFrames(end)
+%                         i=i+1;      %otherwise move on to the finalScreenLuminance blank screen
+%                     end
+%                 end
+% 
+%             else
+% 
+%                 i=min(i+1,stimSize);
+% 
+%                 if isempty(responseOptions) && i==stimSize
+%                     done=1;
+%                 end
+% 
+%                 if i==stimSize && didPulse
+%                     doFramePulse=0;
+%                 end
+%                 didPulse=1;
+%             end
+            
             % =====================================================================================================================
             % function to draw the appropriate texture using the textureCache strategy
 
+            time2=GetSecs;
+%             function drawFrameUsingTextureCache(tm, window, i, frameNum, stimSize, lastI, dontclear, texture, destRect, 
+%             filtMode, labelFrames, xOrigTextPos, yNewTextPos)
+            drawFrameUsingTextureCache(tm, window, i, frameNum, size(stim,3), lastI, dontclear, textures(i), destRect, ... 
+                filtMode, labelFrames, xOrigTextPos, yNewTextPos);
 
-                % function drawFrameUsingTextureCache(tm, window, i, frameNum, stimSize, lastI, dontclear, texture, destRect, 
-                % filtMode, labelFrames, xOrigTextPos, yNewTextPos)
-                drawFrameUsingTextureCache(tm, window, i, frameNum, size(stim,3), lastI, dontclear, textures(i), destRect, ... 
-                    filtMode, labelFrames, xOrigTextPos, yNewTextPos);
+%             if window>=0
+%                 if i>0 && i <= size(stim,3)
+%                     if ~(i==lastI) || (dontclear==0) %only draw if texture different from last one, or if every flip is redrawn
+%                         Screen('DrawTexture', window, textures(i),[],destRect,[],filtMode);
+%                     else
+%                         if labelFrames
+%                             thisMsg=sprintf('This frame stim index (%d) is staying here without drawing new textures %d',i,frameNum);
+%                             Screen('DrawText',window,thisMsg,xOrigTextPos,yNewTextPos-20,100*ones(1,3));
+%                         end
+%                     end
+%                 else
+%                     if size(stim,3)==0
+%                         'stim had zeros frames, probably an penalty stim with zero duration'
+%                     else
+%                         i
+%                         sprintf('stimSize: %d',size(stim,3))
+%                         error('request for an unknown frame')
+%                     end
+%                 end
+%             end
 
             % =====================================================================================================================
 
-            case 'dynamicDots'
-                i=i+1;
+            case 'expert'
+                % 10/31/08 - implementing expert mode
+                % call a method of the given stimManager that draws the expert frame
+                i=i+1; % 11/7/08 - this needs to happen first because i starts at 0
+                [doFramePulse masktex] = drawExpertFrame(stimManager,stim,i,window,floatprecision,destRect,filtMode,masktex); 
+                %11/7/08 - pass in stim as a struct of parameters
 
-                %draw to buffer
-                [dynFrame doFramePulse] =getDynFrame(stim,i); %any advantage to preallocating dynFrame?  would require a stim method to ask how big it will be...
-                if window>=0
-                    Screen('DrawDots', window, dotLocs, dotSize ,repmat(dynFrame(1:numDots),3,1), dotCtr,0);
-                end
+                % 11/9/08 - save window image to phaseRecords(specInd).big
+%                  phaseRecords(specInd).big(:,:,i) = Screen('GetImage',window,destRect,[],floatprecision,1);
+%                 %draw to buffer
+%                 [dynFrame doFramePulse] =getDynFrame(stim,i); %any advantage to preallocating dynFrame?  would require a stim method to ask how big it will be...
+%                 if window>=0
+%                     Screen('DrawDots', window, dotLocs, dotSize ,repmat(dynFrame(1:numDots),3,1), dotCtr,0);
+%                 end
             otherwise
                 error('unrecognized strategy')
         end
 
-
+        time3=GetSecs;
         %logwrite(sprintf('stim is started, i is calculated: %d',i));
+        
+        if frameDropCorner.on
+            Screen('FillRect', window, round(size(currentCLUT,1)*frameDropCorner.seq(frameDropCorner.ind)), frameDropCorner.rect);
+
+            frameDropCorner.ind=frameDropCorner.ind+1;
+            if frameDropCorner.ind>length(frameDropCorner.seq)
+                frameDropCorner.ind=1;
+            end
+        end
 
         %text commands are supposed to be last for performance reasons
 
@@ -427,10 +622,62 @@ while ~done && ~quit;
         % function for drawing text
         % function [xTextPos didManual] = drawText(tm, window, labelFrames, subID, xOrigTextPos, yTextPos, yNewTextPos, stimID, protocolStr, 
         %   textLabel, trialLabel, i, frameNum, manual, didManual, didAPause, ptbVersion, ratrixVersion)
+        if manual
+            didManual=1;
+        end
         
+        % =====================
+        % 12/1/08 - this drawText function call is causing frame drops in rig room testing
+        % REMOVED for now
+        if window>=0
+            xTextPos = drawText(tm, window, labelFrames, subID, xOrigTextPos, yTextPos, yNewTextPos, normBoundsRect, stimID, protocolStr, ...
+              textLabel, trialLabel, i, frameNum, manual, didAPause, ptbVersion, ratrixVersion);
+        end
+        time4=GetSecs;
+        % =====================
+
 %         if window>=0
-%             [xTextPos didManual] = drawText(tm, window, labelFrames, subID, xOrigTextPos, yTextPos, yNewTextPos, stimID, protocolStr, ...
-%               textLabel, trialLabel, i, frameNum, manual, didManual, didAPause, ptbVersion, ratrixVersion);
+%             if labelFrames
+%                 %junkSize = Screen('TextSize',window,subjectFontSize);
+%                 [xTextPos,yTextPosUnused] = Screen('DrawText',window,['ID:' subID ],xOrigTextPos,yTextPos,100*ones(1,3));
+%                 xTextPos=xTextPos+50;
+%                 %junkSize = Screen('TextSize',window,standardFontSize);
+%                 [garbage,yNewTextPos] = Screen('DrawText',window,['trlMgr:' class(tm) ' stmMgr:' stimID  ' prtcl:' protocolStr ],xTextPos,yNewTextPos,100*ones(1,3));
+%             end
+%             [normBoundsRect, offsetBoundsRect]= Screen('TextBounds', window, 'TEST');
+%             yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
+% 
+%             if labelFrames
+%                 if iscell(textLabel)
+%                     txtLabel=textLabel{i};
+%                 else
+%                     txtLabel=textLabel;
+%                 end
+%                 [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('priority:%g %s stimInd:%d frame:%d stim:%s',Priority(),trialLabel,i,frameNum,txtLabel),xTextPos,yNewTextPos,100*ones(1,3));
+%                 yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
+% 
+% %                 [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('ptb:%s',ptbVersion),xTextPos,yNewTextPos,100*ones(1,3));
+% %                 yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
+% % 
+% %                 [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('ratrix:%s',ratrixVersion),xTextPos,yNewTextPos,100*ones(1,3));
+% %                 yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
+%             end
+% 
+%             if manual
+%                 didManual=1;
+%                 manTxt='on';
+%             else
+%                 manTxt='off';
+%             end
+%             if didManual
+%                 [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('trial record will indicate manual poking on this trial (k+m to toggle for next trial: %s)',manTxt),xTextPos,yNewTextPos,100*ones(1,3));
+%                 yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
+%             end
+% 
+%             if didAPause
+%                 [garbage,yNewTextPos] = Screen('DrawText',window,'trial record will indicate a pause occurred on this trial',xTextPos,yNewTextPos,100*ones(1,3));
+%                 yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
+%             end
 %         end
         
         % =====================================================================================================================
@@ -446,26 +693,227 @@ while ~done && ~quit;
     
     % =====================================================================================================================
     % function here to do flip and other Screen stuff
+    time5=GetSecs;
+%     function [lastI when vbl sos ft missed] = flipFrameAndDoPulse(tm, window, dontclear, i, vbl, framesPerUpdate, ifi, paused, doFramePulse,station) 
+    [lastI when vbl sos ft missed time6 time7 whenTime] = ...
+        flipFrameAndDoPulse(tm, window, dontclear, i, vbl, framesPerUpdate, ifi, paused, doFramePulse,station); 
     
-    % function [lastI when vbl sos ft missed] = flipFrameAndDoPulse(tm, window, dontclear, i, vbl, framesPerUpdate, ifi, paused, doFramePulse,station) 
-    [lastI when vbl sos ft missed] = flipFrameAndDoPulse(tm, window, dontclear, i, vbl, framesPerUpdate, ifi, paused, doFramePulse,station); 
+
+%     %indicate finished (enhances performance)
+%     if window>=0
+%         Screen('DrawingFinished',window,dontclear);
+%         lastI=i;
+%     end
+% 
+%     when=vbl+(framesPerUpdate-0.5)*ifi;
+% 
+% %     if ~paused && doFramePulse
+% %         framePulse(station);
+% %         framePulse(station);
+% %     end
+% 
+%     %logwrite('frame calculated, waiting for flip');
+% 
+%     %wait for next frame, flip buffer
+%     if window>=0
+%         [vbl sos ft missed]=Screen('Flip',window,when,dontclear); %vbl=vertical blanking time, when flip starts executing
+%         %sos=stimulus onset time -- doc doesn't clarify what this is
+%         %ft=timestamp from the end of flip's execution
+%     else
+%         waitTime=GetSecs()-when;
+%         if waitTime>0
+%             WaitSecs(waitTime);
+%         end
+%         ft=when;
+%         vbl=ft;
+%         missed=0;
+%     end
+% 
+%     %logwrite('just flipped');
+% 
+%     if ~paused
+%         if doFramePulse
+%             framePulse(station);
+%         end
+%     end
+%     
     
     % =====================================================================================================================
     % function here to save information about missed frames
 
     % function [responseDetails lastFrameTime] = saveMissedFrameData(tm, responseDetails, missed, frameNum, ft, timingCheckPct, lastFrameTime, ifi)
-    [phaseRecords(specInd).responseDetails lastFrameTime] = saveMissedFrameData(tm, phaseRecords(specInd).responseDetails, missed, frameNum, ft, timingCheckPct, lastFrameTime, ifi);
+    [phaseRecords(specInd).responseDetails lastFrameTime numDrops numApparentDrops] = ...
+        saveMissedFrameData(tm, phaseRecords(specInd).responseDetails, missed, frameNum, ft, timingCheckPct, lastFrameTime, ifi, numDrops,numApparentDrops,...
+        when,whenTime,lastLoopEnd,time1,time2,time3,time4,time5,time6,time7,barebones,vbl);
+    
+%     %save facts about missed frames
+%     if missed>0 && frameNum<phaseRecords(specInd).responseDetails.numFramesUntilStopSavingMisses
+%         disp(sprintf('warning: missed frame num %d',frameNum));
+%         phaseRecords(specInd).responseDetails.numMisses=phaseRecords(specInd).responseDetails.numMisses+1;
+%         phaseRecords(specInd).responseDetails.misses(phaseRecords(specInd).responseDetails.numMisses)=frameNum;
+%         phaseRecords(specInd).responseDetails.afterMissTimes(phaseRecords(specInd).responseDetails.numMisses)=GetSecs();
+%     else
+%         thisIFI=ft-lastFrameTime;
+%         thisIFIErrorPct = abs(1-thisIFI/ifi);
+%         if  thisIFIErrorPct > timingCheckPct
+%             disp(sprintf('warning: flip missed a timing and appeared not to notice: frame num %d, ifi error: %g',frameNum,thisIFIErrorPct));
+%             phaseRecords(specInd).responseDetails.numApparentMisses=responseDetails.numApparentMisses+1;
+%             phaseRecords(specInd).responseDetails.apparentMisses(phaseRecords(specInd).responseDetails.numApparentMisses)=frameNum;
+%             phaseRecords(specInd).responseDetails.afterApparentMissTimes(phaseRecords(specInd).responseDetails.numApparentMisses)=GetSecs();
+%             phaseRecords(specInd).responseDetails.apparentMissIFIs(phaseRecords(specInd).responseDetails.numApparentMisses)=thisIFI;
+%         end
+%     end
+%     lastFrameTime=ft;
+% 
+%     %stop saving miss frame statistics after the relevant period -
+%     %prevent trial history from getting too big
+%     %1 day is about 1-2 million misses is about 25 MB
+%     %consider integers if you want to save more
+%     %reasonableMaxSize=ones(1,intmax('uint16'),'uint16');%
+% 
+%     if missed>0 && frameNum>=phaseRecords(specInd).responseDetails.numFramesUntilStopSavingMisses
+%         phaseRecords(specInd).responseDetails.numMisses=phaseRecords(specInd).responseDetails.numMisses+1;
+%         phaseRecords(specInd).responseDetails.numUnsavedMisses=phaseRecords(specInd).responseDetails.numUnsavedMisses+1;
+%     end
+    
     
     % =====================================================================================================================
     
     
+    % =====================================================================================================================
+    % 10/19/08 - get eyeTracker sample
+    % immediately after the frame pulse is ideal, not before the frame pulse (which is more important)
+
+    if ~isempty(eyeTracker)
+       if ~checkRecording(eyeTracker)
+           sca
+           error('lost tracker connection!')
+       end
+
+       if totalFrameNum>length(eyeData)
+           %  allocateMore
+           newEnd=length(eyeData)+ framesPerAllocationChunk;
+           disp(sprintf('did allocation to eyeTrack data; up to %d samples enabled',newEnd))
+           eyeData(end+1:newEnd,:)=nan;
+           gaze(end+1:newEnd,:)=nan;
+       end
+
+       [gaze(totalFrameNum,:) eyeData(totalFrameNum,:)]=getSample(eyeTracker);
+
+     end
+
+     % =====================================================================================================================
     %logwrite('entering trial logic');
 
     %all trial logic here
 
     if ~paused
         ports=readPorts(station);
-        % 8/18/08 - added stochastic port hits
+    end
+    doValves=0*ports;
+    doPuff=false;
+    
+    % =====================================================================================================================
+    % function to handle keyboard input
+    %     mThisLoop=0;
+    %     pThisLoop=0;
+    [keyIsDown,secs,keyCode]=KbCheck; % do this check outside of function to save function call overhead
+    
+    % function [didAPause paused done response doValves ports didValves didHumanResponse manual doPuff pressingM pressingP] = 
+    %   handleKeyboard(tm, keyCode, didAPause, paused, done, response, doValves, ports, didValves, didHumanResponse,
+    %   manual, doPuff, pressingM, pressingP, allowQPM, originalPriority, priorityLevel)
+    if keyIsDown && framesSinceKbInput > -1
+         [didAPause paused done phaseRecords(specInd).response doValves ports didValves didHumanResponse manual doPuff pressingM pressingP] = ...
+         handleKeyboard(tm, keyCode, didAPause, paused, done, phaseRecords(specInd).response, doValves, ports, didValves, didHumanResponse, ...
+         manual, doPuff, pressingM, pressingP, allowQPM, originalPriority, priorityLevel, KbConstants);
+        framesSinceKbInput=0;
+    end
+        %logwrite(sprintf('keys are down:',num2str(find(keyCode))));
+%     if keyIsDown && framesSinceKbInput > 5
+%         mThisLoop = 0;
+%         pThisLoop = 0;
+%         asciiOne=49;
+% 
+%         keys=find(keyCode);
+%         ctrlDown=0; %these don't get reset if keyIsDown fails!
+%         shiftDown=0;
+%         kDown=0;
+%         for keyNum=1:length(keys)
+%             shiftDown = shiftDown || strcmp(KbName(keys(keyNum)),'shift');
+%             ctrlDown = ctrlDown || strcmp(KbName(keys(keyNum)),'control');
+%             kDown= kDown || strcmp(KbName(keys(keyNum)),'k');
+%         end
+% 
+%         if kDown
+%             for keyNum=1:length(keys)
+%                 keyName=KbName(keys(keyNum));
+% 
+%                 if strcmp(keyName,'p')
+%                     pThisLoop=1;
+% 
+%                     if ~pressingP && allowQPM
+% 
+%                         didAPause=1;
+%                         paused=~paused;
+% 
+%                         if paused
+%                             Priority(originalPriority);
+%                         else
+%                             Priority(priorityLevel);
+%                         end
+% 
+%                         pressingP=1;
+%                     end
+%                 elseif strcmp(keyName,'q') && ~paused && allowQPM
+%                     done=1;
+%                     phaseRecords(specInd).response='manual kill';
+% 
+%                 elseif ~isempty(keyName) && ismember(keyName(1),char(asciiOne:asciiOne+length(ports)-1))
+%                     if shiftDown
+%                         if keyName(1)-asciiOne+1 == 2
+%                             'WARNING!!!  you just hit shift-2 ("@"), which mario declared a synonym to sca (screen(''closeall'')) -- everything is going to break now'
+%                             'quitting'
+%                             done=1;
+%                             phaseRecords(specInd).response='shift-2 kill';
+%                         end
+%                     end
+%                     if ctrlDown
+%                         doValves(keyName(1)-asciiOne+1)=1;
+%                         didValves=true;
+%                     else
+%                         ports(keyName(1)-asciiOne+1)=1;
+%                         didHumanResponse=true;
+%                     end
+%                 elseif strcmp(keyName,'m')
+%                     mThisLoop=1;
+% 
+%                     if ~pressingM && ~paused && allowQPM
+% 
+%                         manual=~manual;
+%                         pressingM=1;
+%                     end
+%                 elseif strcmp(keyName,'a') % check for airpuff
+%                     doPuff=true;
+%                 end
+%             end
+%         end
+% 
+%         if ~mThisLoop && pressingM
+%             pressingM=0;
+%         end
+%         if ~pThisLoop && pressingP
+%             pressingP=0;
+%         end
+%         framesSinceKbInput=0;
+%     end
+% 
+
+
+    % =====================================================================================================================
+    
+    % Handle stochastic port hits (has to be after keyboard so that wont happen if another port already triggered)
+    % 8/18/08 - added stochastic port hits
+    if ~paused
         if ~isempty(stochasticDistribution) && isempty(find(ports))
             for j=1:2:length(stochasticDistribution)
                 if rand<stochasticDistribution{j} % if we meet this probability - go to the corresponding port
@@ -476,28 +924,12 @@ while ~done && ~quit;
             didStochasticResponse=true;
         end
     end
-
-    doValves=0*ports;
-    doPuff=false;
-
-
-
-    % =====================================================================================================================
-    % function to handle keyboard input
-    %     mThisLoop=0;
-    %     pThisLoop=0;
-    [keyIsDown,secs,keyCode]=KbCheck; % do this check outside of function to save function call overhead
     
-    % function [didAPause paused done response doValves ports didValves didHumanResponse manual doPuff pressingM pressingP] = 
-    %   handleKeyboard(tm, keyCode, didAPause, paused, done, response, doValves, ports, didValves, didHumanResponse,
-    %   manual, doPuff, pressingM, pressingP, allowQPM, originalPriority, priorityLevel)
-    if keyIsDown && framesSinceKbInput > 10
-         [didAPause paused done phaseRecords(specInd).response doValves ports didValves didHumanResponse manual doPuff pressingM pressingP] = ...
-         handleKeyboard(tm, keyCode, didAPause, paused, done, phaseRecords(specInd).response, doValves, ports, didValves, didHumanResponse, ...
-         manual, doPuff, pressingM, pressingP, allowQPM, originalPriority, priorityLevel);
-        framesSinceKbInput=0;
+    % 1/21/09 - how should we handle tries? - do we count attempts that occur during a phase w/ no port transitions (ie timeout only)?
+    if any(ports)
+        phaseRecords(specInd).responseDetails.tries{end+1} = ports;
+        phaseRecords(specInd).responseDetails.times{end+1} = GetSecs() - startTime;
     end
-%         %logwrite(sprintf('keys are down:',num2str(find(keyCode))));
     
     % =====================================================================================================================
     % large function here that handles trial logic (what state are we in - did we have a request, response, should we give reward, etc)
@@ -518,12 +950,43 @@ while ~done && ~quit;
         response = phaseRecords(specInd).response;
     end
     
-    [tm phaseRecords(specInd).responseDetails done newSpecInd specInd updatePhase transitionedByTimeFlag ...
-        transitionedByPortFlag stepsInPhase phaseRecords(specInd).response response isRequesting] = ... 
-        handlePhasedTrialLogic(tm, phaseRecords(specInd).responseDetails, done, ...
-        ports, station, specInd, updatePhase, transitionCriterion, framesUntilTransition, stepsInPhase, isFinalPhase, ... 
+    % =====================================================================================================================
+    [tm done newSpecInd specInd updatePhase transitionedByTimeFlag ...
+        transitionedByPortFlag phaseRecords(specInd).response response isRequesting lastSoundsPlayed] = ... 
+        handlePhasedTrialLogic(tm, done, ...
+        ports, station, specInd, transitionCriterion, framesUntilTransition, stepsInPhase, isFinalPhase, ... 
         phaseRecords(specInd).response, response, ...
-        soundTypesInPhase, targetOptions, distractorOptions, requestOptions, isRequesting);
+        stimManager, msRewardSound, msPenaltySound, targetOptions, distractorOptions, requestOptions, isRequesting, lastSoundsPlayed);
+    
+    stepsInPhase = stepsInPhase + 1; %10/16/08 - moved from handlePhasedTrialLogic to prevent COW
+
+    
+    % =====================================================================================================================
+    % Handle sounds by port-triggered mode
+%     if usePortTriggeredSoundMode
+%         if isa(tm, 'nAFC')
+%             if stimStarted && any(ports(requestOptions))
+%                 % if we are showing stim and get a request - play the keepGoing sound
+%                 tm.soundMgr = playLoop(tm.soundMgr,'keepGoingSound',station,1);
+%             elseif ~stimStarted && any(ports(responseOptions))
+%                 % if we waiting for a request and get response - play white noise
+%                 tm.soundMgr = playLoop(tm.soundMgr,'trySomethingElseSound',station,1);
+%             else
+%                 tm.soundMgr = playLoop(tm.soundMgr,'',station,0);
+%             end
+%         elseif isa(tm, 'freeDrinks')
+%             if any(ports(requestOptions))
+%                 tm.soundMgr = playLoop(tm.soundMgr,'trySomethingElseSound',station,1);
+%             else
+%                 tm.soundMgr = playLoop(tm.soundMgr,'',station,0);
+%             end
+%         end
+%     end
+
+    
+    % =====================================================================================================================
+
+    
     
 %     [tm responseDetails lookForChange respStart isRequesting requestRewardPorts requestRewardStarted requestFrame ...
 %       stimStarted stimToggledOn lastPorts frameNum potentialStochasticResponse didStochasticResponse attempt done response stopListening] = ... 
@@ -757,7 +1220,7 @@ while ~done && ~quit;
         [done quit phaseRecords(specInd).valveErrorDetails(end+1) serverValveStates serverValveChange ...
             response newValveState requestRewardDone requestRewardOpenCmdDone] ...
          = handleServerCommands(tm, rn, done, quit, requestRewardStarted, requestRewardStartLogged, requestRewardOpenCmdDone, ...
-              requestRewardDone, station, ports, serverValveStates, doValves, response, newValveState);
+              requestRewardDone, station, ports, serverValveStates, doValves, response);
     elseif isempty(rn) && strcmp(getRewardMethod(station),'serverPump')
         error('need a rnet for serverPump')
     end
@@ -770,20 +1233,38 @@ while ~done && ~quit;
     %that the valves will be closed.  this includes server reward
     %requests.  right now there is a bug if the response occurs before
     %the request reward is over.
+% do airpuff stuff
+%     if msAirpuff>0 && ~puffDone && (puffStarted==0 || GetSecs-puffStarted<=msAirpuff/1000)
 % 
-    if msAirpuff>0 && ~puffDone && (puffStarted==0 || GetSecs-puffStarted<=msAirpuff/1000)
-
-        setPuff(station,true);
-        if puffStarted==0
-            puffStarted=GetSecs;
-        end
-    elseif ~doPuff
-        setPuff(station,false);
-        puffDone=true;
-    else
-        setPuff(station,true);
+%         setPuff(station,true);
+%         if puffStarted==0
+%             puffStarted=GetSecs;
+%         end
+%     elseif ~doPuff
+%         setPuff(station,false);
+%         puffDone=true;
+%     else
+%         setPuff(station,true);
+%     end
+    
+    if ~isempty(lastAirpuffTime) && airpuffOn
+        % if airpuff was on from last loop, then subtract from debt
+        elapsedTime = GetSecs() - lastAirpuffTime;
+        msAirpuffOwed = msAirpuffOwed - elapsedTime*1000.0;
+        actualReinforcementDurationMSorUL = actualReinforcementDurationMSorUL + elapsedTime*1000.0;
     end
-
+    
+    start = msAirpuffOwed > 0 && ~airpuffOn;
+    stop = msAirpuffOwed <= 0 && airpuffOn;
+    if start || doPuff
+        setPuff(station, true);
+        airpuffOn = true;
+    elseif stop
+        doPuff = false;
+        airpuffOn = false;
+        setPuff(station, false);
+    end
+    lastAirpuffTime = GetSecs();
 
     % record some information to phaseRecords if we are transitioning to a new phase
     if updatePhase
@@ -800,13 +1281,23 @@ while ~done && ~quit;
     % increment counters as necessary
     specInd = newSpecInd; % update specInd if necessary
     frameNum = frameNum + 1;
+    totalFrameNum = totalFrameNum + 1; % 10/19/08 - for eyeTracker indexing
     framesSinceKbInput = framesSinceKbInput + 1;
 
+    lastLoopEnd=GetSecs;
     %logwrite('end of stimOGL loop');
 end
 
 % =====================================================================================================================
 % function here to do closing stuff after real time loop
+
+% 10/28/08 - add three more frame pulses (to determine end of last frame)
+if doFramePulse
+    % do 3 pulses b/c the analysis expects a 2-pulse signal followed by a single-pulse signal
+    framePulse(station);
+    framePulse(station);
+    framePulse(station);
+end
 
 Screen('Close'); %leaving off second argument closes all textures but leaves windows open
 Priority(originalPriority);

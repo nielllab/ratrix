@@ -6,7 +6,7 @@ function r=doTrials(s,r,n,rn,trustOsRecordFiles)
 %the server is taxed. The ratrix downstairs does not trust them. But you
 %are free of oracle dependency. It is not recommended to trustOsRecordFiles
 %unless your permanentStore is local, then it might be okay.
-
+%recordNeuralData is a flag to decide whether or not to start datanet for NIDAQ recording
 if ~exist('trustOsRecordFiles','var')
     trustOsRecordFiles=false;
 end 
@@ -22,9 +22,7 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
           
             
             subject = calibrateEyeTracker(subject);
-            %some calibration requires GUi's &  must happen before PTB
-            
-            
+            %some calibration requires GUi's &  must happen before PTB       
 
             if strcmp(s.rewardMethod,'localPump')
                 if ~ s.localPumpInited
@@ -36,6 +34,20 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
             end
 
             s=startPTB(s);
+            
+            % 10/17/08 - start datanet (for neural data recording)
+            % ==========================================================================
+            % this has to be done at the trialManager level, because the datanet is owned by the trialManager
+            % so we need to tunnel down and pass back subject->protocol->trainingStep->trialManager
+            params = Screen('Resolution', s.screenNum);
+            parameters = [];
+            parameters.refreshRate = params.hz;
+            parameters.subjectID = getID(subject);
+            subject = setUpOrStopDatanet(subject,'setup',parameters); % replace datanet_path with oracle lookup (hard coded for now in setup(datanet))
+            
+            % 10/29/08 - send a command to data listener to store local variables (resolution, refreshRate)
+            % ==========================================================================
+            
             
             %make sure valves are in a known state: closed - pmm 080621
             setValves(s, 0*getValves(s))
@@ -81,6 +93,10 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
 
             stopEyeTracking(subject); 
             
+            % 10/17/08 - stop datanet
+            % ==========================================================================
+            subject = setUpOrStopDatanet(subject,'stop',[]);
+            % ==========================================================================
 
             if strcmp(s.rewardMethod,'localPump')
                 if s.localPumpInited

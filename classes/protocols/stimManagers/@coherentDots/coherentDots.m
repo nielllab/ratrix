@@ -121,7 +121,12 @@ case {11 12}
     if nargin==11
         s = class(s,'coherentDots',stimManager(varargin{10},varargin{11},screen_zoom,uint8(0)));   
     else
-        s = class(s,'coherentDots',stimManager(varargin{10},varargin{11},screen_zoom,varargin{12}));
+        % check intertrial luminance
+        if varargin{12} >=0 && varargin{12} <= 1
+            s = class(s,'coherentDots',stimManager(varargin{10},varargin{11},screen_zoom,uint8(varargin{12}*intmax('uint8'))));
+        else
+            error('interTrialLuminance must be <=1 and >=0 - will be converted to a uint8 0-255');
+        end
     end
 otherwise
     nargin

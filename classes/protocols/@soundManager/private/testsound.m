@@ -16,6 +16,9 @@ s=psychportaudio('getstatus',x);
 s.SampleRate
 psychportaudio('fillbuffer',x,rand(2,400000)-.5);
 getsecs;
+
+PsychPortAudio('RunMode', x, 1);
+
 psychportaudio('start',x);
 psychportaudio('stop',x);
 
@@ -34,17 +37,31 @@ for i=1:10
 end
 y=getsecs;
 psychportaudio('start',x);
-psychportaudio('stop',x,1);
+psychportaudio('stop',x,2,0);
 t=getsecs-y;
 fprintf('%g\n',t)
 pause
 for i=1:10
+    waitForStop(x);
     y=getsecs;
     psychportaudio('start',x);
     s=getsecs-y;
     pause(.5);
     y=getsecs;
-    psychportaudio('stop',x,2);
+    psychportaudio('stop',x,2,0);
+    t=getsecs-y;
+    fprintf('%g\t%g\n',s,t)
+end
+
+pause
+for i=1:10
+    waitForStop(x);
+    y=getsecs;
+    psychportaudio('start',x);
+    s=getsecs-y;
+    pause(.5);
+    y=getsecs;
+    psychportaudio('stop',x,0,0);
     t=getsecs-y;
     fprintf('%g\t%g\n',s,t)
 end

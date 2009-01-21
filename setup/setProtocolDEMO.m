@@ -85,7 +85,7 @@ for i=1:floor(length(ims)/2)
     [junk n2 junk junk]=fileparts(ims(length(ims)-(i-1)).name);
     trialDistribution{end+1}={{n1 n2} 1};
 end
-imageStim = images(imageDir,ypos,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,trialDistribution);
+imageStim = discrimStim;%tmp images(imageDir,ypos,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,trialDistribution);
 
 
 d=2; %decrease to broaden

@@ -16,6 +16,8 @@ if isa(station,'station')
             dllPath=fullfile(PsychtoolboxRoot, 'portaudio_x86.dll');
             if iswin && exist(dllPath,'file') && length(soundNames)>1
                 warning('found enhanced asio driver -- disabling because this only allows us to make one buffer')
+                %note that we could instead just select a non-asio device (i
+                %think MME is next most preferred)
                 [status,message,messageid]=movefile(dllPath,fullfile(PsychtoolboxRoot, 'disabled.portaudio_x86.dll'));
                 if ~status || exist(dllPath,'file')
                     message
@@ -49,6 +51,15 @@ if isa(station,'station')
                 else
                     buffsize=[];
                 end
+                
+                %see  http://tech.groups.yahoo.com/group/psychtoolbox/message/9012
+                %note this is not exactly supported usage -- we're opening
+                %a buffer for every sound.  mario imposes a limit of 10
+                %because each additioanl one degrades system performance,
+                %and in asio only one is allowed (see above disabling of
+                %the enhanced driver).  should use the new playlists
+                %feature, but then can't layer sounds (not a big deal for us)...
+                %for now since we have only 4 sounds we just do this.
                 sm.players{i}= PsychPortAudio('Open',[],[],latclass,sampleRate,2,buffsize);
                 
                 s=PsychPortAudio('GetStatus',sm.players{i});
@@ -68,8 +79,12 @@ if isa(station,'station')
                 PsychPortAudio('FillBuffer', sm.players{i}, clip);
                 PsychPortAudio('GetStatus', sm.players{i})
                 
+                PsychPortAudio('RunMode', sm.players{i}, 1);
+                
             else
                 sm.players{i}=audioplayer(clip',sampleRate); %audioplayer requires channels to be columns
+                sm.players{i}.StopFcn=@audioplayerRepeater;
+                sm.players{i}.UserData=0;
                 s=sm.players{i}.SampleRate;
             end
             

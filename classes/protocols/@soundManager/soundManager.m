@@ -5,7 +5,7 @@ function t=soundManager(varargin)
 
 t.clips={};
 t.players={};
-t.usePsychPortAudio=false;
+t.usePsychPortAudio=true; %expect bad things if this is false.  should always be true now.
 
 switch nargin
     case 0

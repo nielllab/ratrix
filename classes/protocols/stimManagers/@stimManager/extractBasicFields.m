@@ -144,6 +144,12 @@ verifyAllFieldsNCols(out,length(trialRecords));
 end
 
 function out=encodeResponse(resp,targs,dstrs,correct)
+
+if isa(resp,'double') && all(resp==1 | resp==0)
+    warning('edf sees double rather than logical response on osx 01.21.09 -- why?')
+    resp=logical(resp);
+end
+
 if islogical(resp)
     if isscalar(find(resp))
         out=find(resp);

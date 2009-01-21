@@ -213,7 +213,7 @@ try
 
             if playing
                 soundTime=GetSecs;
-                PsychPortAudio('Stop', player,2);
+                PsychPortAudio('Stop', player,2,0);
                 soundTime=GetSecs-soundTime;
                 if soundTime>maxSoundTime
                     fprintf('%g to ppa(stop)\n',soundTime)
@@ -230,6 +230,7 @@ try
             stimStarted=1;
 
             if ~playing
+                waitForStop(player);
                 soundTime=GetSecs;
                 PsychPortAudio('Start', player, 0);
                 soundTime=GetSecs-soundTime;
@@ -256,6 +257,7 @@ try
         if any(ports) && ~stopListening
 
             if ~playing
+                waitForStop(player);
                 soundTime=GetSecs;
                 PsychPortAudio('Start', player, 0);
                 soundTime=GetSecs-soundTime;

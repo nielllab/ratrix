@@ -20,7 +20,7 @@ if isa(station,'station')
                 if s.Active
                     s.RequestedStopTime
                     s.EstimatedStopTime
-                    error('failed to stop -- may need to loop to wait for it to stop?')
+                    %error('failed to stop -- may need to loop to wait for it to stop?')
                 end
             else
                 m.players{match}.UserData=0;

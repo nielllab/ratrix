@@ -7,7 +7,7 @@ if sm.playingNonLoop(i) ||  sm.playingLoop(i)
         if s.Active
             s.RequestedStopTime
             s.EstimatedStopTime
-            error('failed to stop -- may need to loop to wait for it to stop?')
+            %error('failed to stop -- may need to loop to wait for it to stop?')
         end
     else
         m.players{i}.UserData=0;

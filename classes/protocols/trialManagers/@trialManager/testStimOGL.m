@@ -129,8 +129,8 @@ ports=cellfun(@uint8,{1 3},'UniformOutput',false);
 [noiseSpec.filterStrength]       =deal(1);
 [noiseSpec.bound]                =deal(.99);
 
-maxWidth               = 800; %osx has timing problems at 800x600 (red flash at open window)
-maxHeight              = 600;
+maxWidth               = 1920; %osx has timing problems at 800x600 (red flash at open window)
+maxHeight              = 1200;
 scaleFactor            = 0;
 interTrialLuminance     =.5;
 

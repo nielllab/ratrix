@@ -119,3 +119,5 @@ matlaby/arrow.m -text
 analysis/fitElipseToBinaryImage.m -text
 matlaby/iswholenumber.m -text
 trialRecordProcessing/extractFieldAndEnsure.m -text
+infrastructure/waitForStop.m -text
+matlaby/audioplayerRepeater.m -text

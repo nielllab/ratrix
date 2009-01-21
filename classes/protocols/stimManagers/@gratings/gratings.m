@@ -1,7 +1,7 @@
 function s=gratings(varargin)
 % GRATINGS  class constructor.
 % s = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,location,waveform,normalizationMethod,mean,thresh,
-%       maxWidth,maxHeight,scaleFactor,interTrialLuminance)
+%       maxWidth,maxHeight,scaleFactor,interTrialLuminance[,doCombos])
 % Each of the following arguments is a 1xN vector, one element for each of N gratings
 % pixPerCycs - specified as in orientedGabors
 % driftfrequency - specified in cycles per second for now; the rate at which the grating moves across the screen
@@ -18,6 +18,11 @@ function s=gratings(varargin)
 % normalizationMethod - 'normalizeDiagonal' (default), 'normalizeHorizontal', 'normalizeVertical', or 'none'
 % mean - must be between 0 and 1
 % thresh - must be greater than 0; in normalized luminance units, the value below which the stim should not appear
+% doCombos - a flag that determines whether or not to take the factorialCombo of all parameters (default is true)
+%   does the combinations in the following order:
+%   pixPerCycs > driftfrequencies > orientations > contrasts > phases > durations
+%   - if false, then takes unique selection of these parameters (they all have to be same length)
+%   - in future, handle a cell array for this flag that customizes the combo selection process
 
 s.pixPerCycs = [];
 s.driftfrequencies = [];
@@ -36,6 +41,7 @@ s.thresh = 0;
 s.LUT =[];
 s.LUTbits=0;
 
+s.doCombos=true;
 
 switch nargin
     case 0
@@ -48,8 +54,12 @@ switch nargin
         else
             error('Input argument is not a gratings object')
         end
-    case 16
+    case {16 17}
         % create object using specified values
+        % check for doCombos argument first (it decides other error checking)
+        if nargin==17 && islogical(varargin{17})
+            s.doCombos=varargin{17};
+        end
         % pixPerCycs
         if isvector(varargin{1}) && isnumeric(varargin{1})
             s.pixPerCycs=varargin{1};
@@ -86,6 +96,15 @@ switch nargin
         else
             error('all durations must be >0');
         end
+        % check that if doCombos is false, then all parameters must be same length
+        if ~s.doCombos
+            paramLength = length(s.pixPerCycs);
+            if paramLength~=length(s.driftfrequencies) || paramLength~=length(s.orientations) || paramLength~=length(s.contrasts) ...
+                    || paramLength~=length(s.phases) || paramLength~=length(s.durations)
+                error('if doCombos is false, then all parameters (pixPerCycs, driftfrequencies, orientations, contrasts, phases, durations) must be same length');
+            end
+        end           
+        
         % radius
         if isscalar(varargin{7})
             s.radius=varargin{7};
@@ -97,31 +116,7 @@ switch nargin
             s.location=varargin{8};
         else
             error('all location must be >= 0 and <= 1');
-        end
-
-        % check that all these 1xN and 2xN arrays are same length
-        % pixPerCycs must be numGratings long, but everything else can be a single element (same value for all gratings)
-        NLength = length(s.pixPerCycs);
-        if ~((length(s.driftfrequencies)==NLength || length(s.driftfrequencies)==1) && ...
-                (length(s.orientations)==NLength || length(s.orientations)==1) && ...
-                (length(s.phases)==NLength || length(s.phases)==1))
-            error('pixPerCycs, driftfrequencies, orientations, and phases must contain the same number of gratings');
-        end
-        
-        % check that durations is one of the following:
-        %   - [1x1]: for all frequencies and contrasts
-        %   - [1xN]: one per frequency
-        %   - [Mx1]: one per contrast
-        %   - [MxN]: one per contrast-frequency pair
-        MLength = length(s.contrasts);
-        if ~(length(s.durations) == 1 || all(size(s.durations) == [1 NLength]) || ...
-                all(size(s.durations) == [MLength 1]) || all(size(s.durations) == [MLength NLength]))
-            size(s.durations)
-            MLength
-            NLength
-            error('durations must be [1x1], [1xN], [Mx1], or [MxN]');
-        end
-        
+        end        
         % waveform
         if ischar(varargin{9})
             if ismember(varargin{9},{'sine', 'square', 'none'})

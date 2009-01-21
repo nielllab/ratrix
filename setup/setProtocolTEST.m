@@ -161,10 +161,10 @@ discrimStim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientation
 
 % gratings
 pixPerCycs=[20 50]; %freq
-driftfrequencies=[1]; % in cycles per second
-orientations=[pi/3]; % in radians
+driftfrequencies=[1 6]; % in cycles per second
+orientations=[pi/3 pi/4 pi/6]; % in radians
 phases=[0]; % initial phase
-contrasts=[1]; % contrast of the grating
+contrasts=[1 0.5]; % contrast of the grating
 durations=[1];
 radius=.08; % radius of the gaussian mask
 location=[0.25 0.75];
@@ -533,7 +533,7 @@ ts30 = trainingStep(vh, discrimStim5A,graduateQuickly,noTimeOff(),svnRev);
 %     ts18, ts19, ts20, ts21, ts22});
 % stepNum=21;
 p=protocol('gabor test2', {ts25, ts1, ts4, ts12, ts2, ts12, ts8, ts11,ts9,ts10,sweepContrast,ts23,ts24,ts27,ts30});
-stepNum=uint8(15);
+stepNum=uint8(1);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

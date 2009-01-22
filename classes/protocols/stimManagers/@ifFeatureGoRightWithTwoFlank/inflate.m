@@ -87,7 +87,7 @@ switch s.renderMode
          %save the Mask and a single,oversized, unphased grating for each orientation
          s.cache.orientValues=unique([s.goRightOrientations s.goLeftOrientations s.flankerOrientations s.distractorOrientations s.distractorFlankerOrientations]);          
          orientations=getFeaturePatchStim(s,2*patchX,2*patchY,'variableOrientationAndPhase',{s.cache.orientValues,[0],staticParams,normalizeMethod,contrastScale});
-         sz=size(gratings);
+         sz=size(orientations);
          s.cache.orientations= reshape(orientations,sz([1 2 4])); %keep as float
          keyboard
     case 'dynamic-onePatchPerPhase'

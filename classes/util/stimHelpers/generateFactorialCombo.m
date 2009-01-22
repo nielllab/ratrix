@@ -45,8 +45,6 @@ if iscell(params)
         error('toReturn cannot contain a value < 1');
     elseif max(toReturn)>length(params)
         error('toReturn cannot contain a value greater than the number of params');
-    elseif any(~ismember(toReturn,selection))
-        error('toReturn cannot contain a value that is not in selection');
     end
 elseif isstruct(params)
     % check that selection is a cell array of fieldnames
@@ -73,8 +71,8 @@ elseif isstruct(params)
             error('some elements of toReturn are not found in params');
         end
     elseif isvector(toReturn)
-        if min(toReturn)<1 || max(toReturn)>length(selection)
-            error('toReturn cannot contain indices that exceed the number of fields in selection');
+        if min(toReturn)<1 || max(toReturn)>length(fieldnames(params))
+            error('toReturn cannot contain indices that exceed the number of fields in params');
         end
     else
         error('toReturn must be a cell array of fieldnames or a vector of indices into selection');
@@ -109,6 +107,9 @@ else
 end
 % DONE ERROR CHECKING
 
+% selection should include anything in toReturn that is not already in the selection
+% we can do this because we will filter out based on toReturn later
+selection=union(selection,toReturn);
 % ======================================================================
 % now if params was a struct, convert params to the selected fields so that we dont have a long switch statement
 % this means that in the case of a struct, we essentially force selection to be all the fields in params (since we are resetting params)
@@ -119,14 +120,13 @@ if isstruct(params)
     end
     % build new toReturn based on finding members of toReturn in selection (since params is now only those in selection)
     [tf newToReturn] = ismember(toReturn,selection);
-    if any(newToReturn==0)
-        error('found elements of newToReturn==0; this shouldnt have happened!');
-    end
     params=newParams;
     selection=1:length(params); % reset selection to be indices into all elements of the new params
     toReturn=newToReturn;
+else
+    % renumber toReturn based on selection
+    [tf toReturn] = ismember(toReturn,selection);
 end
-
 % ======================================================================
 % now generate combination in cell array mode
 % retval will be a MxY matrix, where M is the number of params selected (rows), and Y is the number of combinations
@@ -136,7 +136,8 @@ numCombinations=1;
 for i=1:length(selection)
     numCombinations=numCombinations*length(params{selection(i)});
 end
-ir=length(selection):-1:1;
+% ir=length(selection):-1:1;
+ir=selection(end:-1:1);
 
 [retval{ir}] = ndgrid(params{ir}) ;
 % concatenate

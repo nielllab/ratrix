@@ -172,7 +172,8 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             % =====================================================================================================
             
             % phase-ify if necessary (if trialRecords(trialInd).type is 'phased')
-            % - this means we need stimSpecs, soundTypes, scaleFactors, and stimulusDetails to be phase-specific
+            % - this means we need stimSpecs, soundTypes, scaleFactors, and
+            % stimulusDetails to be phase-specific
             if ischar(trialRecords(trialInd).type) && ~isempty(strmatch(trialRecords(trialInd).type, 'phased'))
                 stimSpecs = stim.stimSpecs;
 %                 soundTypes = stim.soundTypes;
@@ -245,8 +246,10 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             % 10/23/08 - changed to only put stimulusDetails in trialRecords if 'big' field isnt defined
             % the physiology stim manager's calcStim will define this field!
 
+            
+            stimulusDetails=structize(stimulusDetails); %now its factored so it happens only once
             trialRecords(trialInd).stimManager = structize(decache(newSM));
-            trialRecords(trialInd).stimDetails = structize(stimulusDetails);
+            trialRecords(trialInd).stimDetails = stimulusDetails;
                 
             manualOn=0;
             if length(trialRecords)>1
@@ -379,33 +382,45 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 stopEarly = 1;
             end
             
+            
             % 11/9/08 - moved here from after calcStim - save 'big' if necessary and remove from stimDetails
             % gives stimOGL a chance to store dynamic mode stuff in phaseRecords
-            if isstruct(stimulusDetails) && isfield(stimulusDetails, 'big')
-                % save this stim details 'big' to subject-specific place (with neural and eye data)
-                % example: large random noise movie 
-                if isempty(trialManager.datanet) % if no datanet, then hard-code to be the .179 computer's path
-                    stim_path = fullfile('\\132.239.158.179\datanet_storage', getID(subject), 'stimRecords');
-                else
-                    stim_path = fullfile(getStorePath(trialManager.datanet), 'stimRecords');
-                end
+            % rewrote so saving bigs is only if datanet is defined -pmm
+            
+            if ~isempty(trialManager.datanet) % only use data net if its there
+                
+                % save this stim details to subject-specific place (with neural and eye data)
+                % this includes all normal details as well as big stuff, example: large random noise movie 
+                stim_path = fullfile(getStorePath(trialManager.datanet), 'stimRecords');
                 stim_filename = fullfile(stim_path, sprintf('stimRecords_%d-%s',trialRecords(trialInd).trialNumber,datestr(trialRecords(trialInd).date, 30)));
                 
-                % also look for phaseRecords.big - if it exists, replace the big from stimDetails for now (maybe change to not replace?)
-                for phaseInd=1:length(trialRecords(trialInd).phaseRecords)
-                    if isfield(trialRecords(trialInd).phaseRecords(phaseInd), 'big')
-                        stimulusDetails.big = trialRecords(trialInd).phaseRecords(phaseInd).big;
-                    end
-                end
+                %also maybe include something from the phased records?
+                % maybe if ~isempty(phaseRecords{i}.responseDetails.expertDetails)
+                %for phaseInd=1:length(trialRecords(trialInd).phaseRecords)
+                %    if isfield(trialRecords(trialInd).phaseRecords(phaseInd),'responseDetails' ..etc) 
+                %        stimulusDetails.dynRecords{phaseInd}=phaseRecords{i}.responseDetails.expertDetails
+                %    end
+                %end   
+                
+                %save class as well
+                stimManagerClass=trialRecords(trialInd).stimManagerClass;
+                
                 try
-%                     save(stim_filename, 'stimulusDetails');
+                    save(stim_filename, 'stimulusDetails','stimManagerClass');
                 catch
                     warningStr('unable to save to %s',stim_path);
-                    warning(warningStr);
-                end
-                stimulusDetails = rmfield(stimulusDetails, 'big'); % remove 'big' from stimDetails (so we don't overwhelm trialRecords)
+                    error(warningStr);
+                end     
             end
             
+            if isstruct(stimulusDetails) && isfield(stimulusDetails, 'big')
+                % remove 'big' from stimDetails (so we don't overwhelm trialRecords)
+                %the only way these can be accessed is if a datanet saved
+                %them per-trial
+                 stimulusDetails = rmfield(stimulusDetails, 'big');  
+                 %also, maybe one day these exist and need removing: 
+                 % phaseRecords{i}.responseDetails.expertDetails.big
+            end
             
             % =====================================================================================================
             % 10/19/08 - get eyeTracker data after trial run

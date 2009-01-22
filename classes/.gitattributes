@@ -16,12 +16,6 @@ protocols/@stimSpec/stimSpec.asv -text
 protocols/@stimSpec/getCriterion.m -text
 protocols/@stimSpec/getStochasticDistribution.m -text
 protocols/@stimSpec/getStimType.m -text
-protocols/trialManagers/@promptedNAFC/promptedNAFC.m -text
-protocols/trialManagers/@promptedNAFC/stimOGL.m -text
-protocols/trialManagers/@promptedNAFC/doTrial.m -text
-protocols/trialManagers/@promptedNAFC/stationOKForTrialManager.m -text
-protocols/trialManagers/@promptedNAFC/getRequestPorts.m -text
-protocols/trialManagers/@promptedNAFC/getPromptLikelihood.m -text
 protocols/trialManagers/@phasednAFC/getRequestRewardSizeULorMS.m -text
 protocols/trialManagers/@phasednAFC/getRequestPorts.m -text
 protocols/trialManagers/@phasednAFC/phasednAFC.asv -text
@@ -97,7 +91,6 @@ protocols/eyeTrackers/@eyeTracker/isTracking.m -text
 protocols/eyeTrackers/@eyeTracker/setEyeDataPath.m -text
 protocols/eyeTrackers/@eyeTracker/saveEyeData.m -text
 protocols/eyeTrackers/@eyeTracker/getSessionFileName.m -text
-protocols/trialManagers/@promptedNAFC/calibrateEyeTracker.m -text
 protocols/reinforcementManagers/@rewardNcorrectInARow/rewardNcorrectInARow.m -text
 protocols/reinforcementManagers/@rewardNcorrectInARow/display.m -text
 protocols/reinforcementManagers/@rewardNcorrectInARow/calcReinforcement.m -text

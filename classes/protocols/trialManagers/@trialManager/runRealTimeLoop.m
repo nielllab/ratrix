@@ -26,7 +26,7 @@ framesPerUpdate = 1;        %set number of monitor refreshes for each one of you
 
 labelFrames = 1;            %print a frame ID on each frame (makes frame calculation slow!)
 dontclear= 0;
-masktex=[];
+expertCache=[];
 ports=0*readPorts(station);
 if ismac
     %also not good enough on beige computer w/8600
@@ -317,6 +317,7 @@ while ~done && ~quit;
 %         attempt=0;
 
         frameNum=1;
+        phaseStartTime=GetSecs;
 
 
 %         logIt=0;
@@ -436,6 +437,7 @@ while ~done && ~quit;
 %         phaseRecords(specInd).responseDetails.numUnsavedMisses=0;
 %         phaseRecords(specInd).responseDetails.nominalIFI=ifi;
 % 
+        phaseRecords(specInd).dynamicDetails={};
         phaseRecords(specInd).responseDetails.toggleStim=toggleStim;
 %         
         % Initialize this phaseRecord
@@ -590,16 +592,11 @@ while ~done && ~quit;
                 % 10/31/08 - implementing expert mode
                 % call a method of the given stimManager that draws the expert frame
                 i=i+1; % 11/7/08 - this needs to happen first because i starts at 0
-                [doFramePulse masktex] = drawExpertFrame(stimManager,stim,i,window,floatprecision,destRect,filtMode,masktex); 
-                %11/7/08 - pass in stim as a struct of parameters
-
-                % 11/9/08 - save window image to phaseRecords(specInd).big
-%                  phaseRecords(specInd).big(:,:,i) = Screen('GetImage',window,destRect,[],floatprecision,1);
-%                 %draw to buffer
-%                 [dynFrame doFramePulse] =getDynFrame(stim,i); %any advantage to preallocating dynFrame?  would require a stim method to ask how big it will be...
-%                 if window>=0
-%                     Screen('DrawDots', window, dotLocs, dotSize ,repmat(dynFrame(1:numDots),3,1), dotCtr,0);
-%                 end
+                [doFramePulse expertCache dynamicDetails textLabel] = ...
+                    drawExpertFrame(stimManager,stim,i,phaseStartTime,window,textLabel,floatprecision,destRect,filtMode,expertCache);
+                if ~isempty(dynamicDetails)
+                    phaseRecords(specInd).dynamicDetails{end+1}=dynamicDetails; % dynamicDetails better specify what frame it is b/c the record will not save empty details
+                end
             otherwise
                 error('unrecognized strategy')
         end
@@ -620,7 +617,7 @@ while ~done && ~quit;
 
         % =====================================================================================================================
         % function for drawing text
-        % function [xTextPos didManual] = drawText(tm, window, labelFrames, subID, xOrigTextPos, yTextPos, yNewTextPos, stimID, protocolStr, 
+        % function [xTextPos] = drawText(tm, window, labelFrames, subID, xOrigTextPos, yTextPos, yNewTextPos, stimID, protocolStr, 
         %   textLabel, trialLabel, i, frameNum, manual, didManual, didAPause, ptbVersion, ratrixVersion)
         if manual
             didManual=1;
@@ -1276,6 +1273,14 @@ while ~done && ~quit;
             didManualInTrial=true;
         end
         phaseRecords(specInd).didStochasticResponse = didStochasticResponse;
+        
+        % how do we only clear the textures from THIS phase (since all textures for all phases are precached....)
+        % close all textures from this phase if in non-expert mode
+%         if ~strcmp(strategy,'expert')
+%             Screen('Close');
+%         else
+%             expertCleanUp(stimManager);
+%         end
     end
 
     % increment counters as necessary

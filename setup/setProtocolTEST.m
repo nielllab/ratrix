@@ -166,7 +166,8 @@ orientations=[pi/3 pi/4 pi/6]; % in radians
 phases=[0]; % initial phase
 contrasts=[1 0.5]; % contrast of the grating
 durations=[1];
-radius=.08; % radius of the gaussian mask
+radii=[.08 0.04]; % radius of the gaussian mask
+annuli=[0.01 0.02]; % radius of inner annuli
 location=[0.25 0.75];
 waveform='square';
 normalizationMethod='normalizeDiagonal';
@@ -176,7 +177,7 @@ maxWidth                =1024;
 maxHeight               =768;
 scaleFactor             =0;
 interTrialLuminance     =.5;
-gratingStim = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,location,...
+gratingStim = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radii,annuli,location,...
     waveform,normalizationMethod,mean,thresh,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 imageSize=[1 1];
@@ -533,7 +534,7 @@ ts30 = trainingStep(vh, discrimStim5A,graduateQuickly,noTimeOff(),svnRev);
 %     ts18, ts19, ts20, ts21, ts22});
 % stepNum=21;
 p=protocol('gabor test2', {ts25, ts1, ts4, ts12, ts2, ts12, ts8, ts11,ts9,ts10,sweepContrast,ts23,ts24,ts27,ts30});
-stepNum=uint8(1);
+stepNum=uint8(4);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

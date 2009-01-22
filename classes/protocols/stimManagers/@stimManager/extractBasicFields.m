@@ -70,20 +70,22 @@ end
 % 1/13/09 - need to peek into stimDetails to get correctionTrial (otherwise analysis defaults correctionTrial=0)
 [out.correctionTrial compiledLUT]                            =extractFieldAndEnsure(trialRecords,{'stimDetails','correctionTrial'},'scalar',compiledLUT);
 % 1/14/09 - added numRequestLicks and firstILI
-out.numRequests=ones(1,length(trialRecords))*nan;
-for i=1:length(trialRecords)
-    if isfield(trialRecords(i),'responseDetails') && isfield(trialRecords(i).responseDetails,'tries') && ...
-            ~isempty(trialRecords(i).responseDetails.tries) % if this field exists, overwrite the nan
-        out.numRequests(i)=size(trialRecords(i).responseDetails.tries,2)-1;
-    end
-end
-out.firstIRI=ones(1,length(trialRecords))*nan;
-for i=1:length(trialRecords)
-    if isfield(trialRecords(i),'responseDetails') && isfield(trialRecords(i).responseDetails,'times') && ...
-            ~isempty(trialRecords(i).responseDetails.times) && size(trialRecords(i).responseDetails.times,2)-1>=2
-        out.firstIRI(i)=diff(cell2mat(trialRecords(i).responseDetails.times(1:2)));
-    end
-end
+[out.numRequests compiledLUT]                                =extractFieldAndEnsure(trialRecords,{},'numRequests',compiledLUT);
+[out.firstIRI compiledLUT]                                   =extractFieldAndEnsure(trialRecords,{},'firstIRI',compiledLUT);
+% out.numRequests=ones(1,length(trialRecords))*nan;
+% for i=1:length(trialRecords)
+%     if isfield(trialRecords(i),'responseDetails') && isfield(trialRecords(i).responseDetails,'tries') && ...
+%             ~isempty(trialRecords(i).responseDetails.tries) % if this field exists, overwrite the nan
+%         out.numRequests(i)=size(trialRecords(i).responseDetails.tries,2)-1;
+%     end
+% end
+% out.firstIRI=ones(1,length(trialRecords))*nan;
+% for i=1:length(trialRecords)
+%     if isfield(trialRecords(i),'responseDetails') && isfield(trialRecords(i).responseDetails,'times') && ...
+%             ~isempty(trialRecords(i).responseDetails.times) && size(trialRecords(i).responseDetails.times,2)-1>=2
+%         out.firstIRI(i)=diff(cell2mat(trialRecords(i).responseDetails.times(1:2)));
+%     end
+% end
 
 % ==============================================================================================
 % old-style extraction - to be commented out 1/8/09

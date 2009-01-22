@@ -45,6 +45,7 @@ switch trialManagerClass
         [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts);
     case 'autopilot'
         details.pctCorrectionTrials=0;
+        details.correctionTrial=0;
         targetPorts=[1];
         distractorPorts=[];
     otherwise
@@ -64,7 +65,8 @@ details.phases=stimulus.phases;
 details.contrasts=stimulus.contrasts;
 details.location=stimulus.location;
 details.durations=stimulus.durations;
-details.radius=stimulus.radius;
+details.radii=stimulus.radii;
+details.annuli=stimulus.annuli;
 details.doCombos=stimulus.doCombos;
 
 % NOTE: all fields in details should be MxN now
@@ -93,13 +95,15 @@ stim.location=details.location;
 if stimulus.doCombos
     % do combos here
     comboMatrix = generateFactorialCombo({details.spatialFrequencies,details.driftfrequencies,details.orientations,...
-        details.contrasts,details.phases,details.durations});
+        details.contrasts,details.phases,details.durations,details.radii,details.annuli});
     stim.pixPerCycs=comboMatrix(1,:);
     stim.driftfrequencies=comboMatrix(2,:);
     stim.orientations=comboMatrix(3,:);
     stim.contrasts=comboMatrix(4,:); %starting phases in radians
     stim.phases=comboMatrix(5,:);
     stim.durations=round(comboMatrix(6,:)*hz); % CONVERTED FROM seconds to frames
+    stim.radii=comboMatrix(7,:);
+    stim.annuli=comboMatrix(8,:);
 else
     stim.pixPerCycs=details.spatialFrequencies;
     stim.driftfrequencies=details.driftfrequencies;
@@ -107,21 +111,54 @@ else
     stim.contrasts=details.contrasts;
     stim.phases=details.phases;
     stim.durations=round(details.durations*hz); % CONVERTED FROM seconds to frames    
+    stim.radii=details.radii;
+    stim.annuli=details.annuli;
+end
+% convert from radii=[0.8 0.8 0.6 1.2 0.7] to [1 1 2 3 4] (stupid unique automatically sorts when we dont want to)
+[a b] = unique(fliplr(stim.radii)); 
+unsortedUniques=stim.radii(sort(length(stim.radii)+1 - b));
+[garbage stim.maskInds]=ismember(stim.radii,unsortedUniques);
+
+% now make our cell array of masks and the maskInd vector that indexes into the masks for each combination of params
+% compute mask only once if radius is not infinite
+stim.masks=cell(1,length(unsortedUniques));
+for i=1:length(unsortedUniques)
+    if unsortedUniques(i)==Inf
+        stim.masks{i}=[];
+    else
+        mask=[];
+        maskParams=[unsortedUniques(i) 999 0 0 ...
+        1.0 stimulus.thresh details.location(1) details.location(2)]; %11/12/08 - for some reason mask contrast must be 2.0 to get correct result
+        % now calculate mask for this grating - we need to pass a mean of 0 to correctly make a mask
+        mask(:,:,1)=ones(height,width,1)*stimulus.mean;
+        mask(:,:,2)=computeGabors(maskParams,0,width,height,...
+            'none', stimulus.normalizationMethod,0,0);
+
+        % necessary to make use of PTB alpha blending
+        mask(:,:,2) = 1 - mask(:,:,2); % 0 = transparent, 255=opaque (opposite of our mask)
+        stim.masks{i}=mask;
+    end
 end
 
-% compute mask only once if radius is not infinite
-if details.radius==Inf
-    stim.mask=[];
-else
-    maskParams=[details.radius 999 0 0 ...
-    1.0 stimulus.thresh details.location(1) details.location(2)]; %11/12/08 - for some reason mask contrast must be 2.0 to get correct result
-    % now calculate mask for this grating - we need to pass a mean of 0 to correctly make a mask
-    stim.mask(:,:,1)=ones(height,width,1)*stimulus.mean;
-    stim.mask(:,:,2)=computeGabors(maskParams,0,width,height,...
-        'none', stimulus.normalizationMethod,0,0);
-
-    % necessary to make use of PTB alpha blending
-    stim.mask(:,:,2) = 1 - stim.mask(:,:,2); % 0 = transparent, 255=opaque (opposite of our mask)
+% convert from annuli=[0.8 0.8 0.6 1.2 0.7] to [1 1 2 3 4] (stupid unique automatically sorts when we dont want to)
+[a b] = unique(fliplr(stim.annuli)); 
+unsortedUniques=stim.annuli(sort(length(stim.annuli)+1 - b));
+[garbage stim.annuliInds]=ismember(stim.annuli,unsortedUniques);
+% annuli array
+annulusCenter=stim.location;
+stim.annuliMatrices=cell(1,length(unsortedUniques));
+for i=1:length(unsortedUniques)
+    annulus=[];
+    annulusRadius=unsortedUniques(i);
+    annulusRadiusInPixels=sqrt((height/2)^2 + (width/2)^2)*annulusRadius;
+    annulusCenterInPixels=[width height].*annulusCenter; % measured from top left corner; % result is [x y]
+    % center=[256 712];
+    %     center=[50 75];
+    [x,y]=meshgrid(-width/2:width/2,-height/2:height/2);
+    annulus(:,:,1)=ones(height,width,1)*stimulus.mean;
+    bool=(x+width/2-annulusCenterInPixels(1)).^2+(y+height/2-annulusCenterInPixels(2)).^2 < (annulusRadiusInPixels+0.5).^2;
+    annulus(:,:,2)=bool(1:height,1:width);
+    stim.annuliMatrices{i}=annulus;
 end
 
 % now create stimSpecs

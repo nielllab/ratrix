@@ -10,6 +10,7 @@ function [out LUT] = extractFieldAndEnsure(trialRecords,fieldPath,ensureMode,LUT
 % datenum - each trialRecord has a datevec at this field, and is converted to a datenum in a specific format
 % isNotEmpty - each trialRecord may or may not have this field, and this will return 1 if it does, 0 if it doesnt (on a per-trial basis)
 % NthValue = each trialRecord has a vector/matrix at this field, and we grab the N-th value of this vector for each trial
+% numRequests - accesses trialRecords->phaseRecords->responseDetails->tries; returns size of this - 1 per trial
 % none - just grab this field for each trial
 
 % grab the mode if cell array, and set ensureType=type
@@ -28,7 +29,9 @@ for i=1:length(fieldPath)-1
     end
 end
 % now reset fieldPath to be only the last element
-fieldPath=fieldPath{end}; % fieldPath is now just a string
+if ~isempty(fieldPath) % fieldPath should only be empty in the 'numRequests' and 'firstIRI' cases because these require exact fields and special handling
+    fieldPath=fieldPath{end}; % fieldPath is now just a string
+end
 
 try
     switch ensureMode
@@ -71,6 +74,26 @@ try
             else
                 error('should have one value per trial! failed! and nthValue is undefined')
             end
+        case 'numRequests'
+            if isfield(trialRecords,'phaseRecords')
+                phaseRecords={trialRecords.phaseRecords}; % this has to be a cell array b/c phaseRecords aren't always the same across trials
+            else
+                error('failed to find phaseRecords during numRequests handling');
+            end
+            % now cellfun phaseRecords, getting all tries for each phase
+            out = cellfun(@getTimes,phaseRecords,'UniformOutput',false);
+            % now convert from a cell array of cell arrays to a vector of length-1's
+            out = cellfun('length',out) - 1;
+        case 'firstIRI'
+            if isfield(trialRecords,'phaseRecords')
+                phaseRecords={trialRecords.phaseRecords}; % this has to be a cell array b/c phaseRecords aren't always the same across trials
+            else
+                error('failed to find phaseRecords during numRequests handling');
+            end
+            % now cellfun phaseRecords, getting all tries for each phase
+            out = cellfun(@getTimes,phaseRecords,'UniformOutput',false);
+            % now convert from a cell array of cell arrays to a vector of length-1's
+            out = cell2mat(cellfun(@diffFirstTwo,out,'UniformOutput',false));
         case 'none'
             out=[trialRecords.(fieldPath)];
         otherwise
@@ -87,3 +110,16 @@ end % end function
 function out=takeNthValue(values,N)
 out=values(N);
 end
+
+function out=getTimes(phaseRecord)
+thisTrialResponseDetails=[phaseRecord.responseDetails];
+out=[thisTrialResponseDetails.times];
+end
+
+function out=diffFirstTwo(cellIn)
+out=nan;
+if length(cellIn)>=3 % if more than 2 responses
+    out=cellIn{2}-cellIn{1};
+end
+end
+    

@@ -4,10 +4,10 @@ verbose=0;
 correct=0;
 
 if ~isempty(trialRecords)
-    if any(strcmp(fields(trialRecords),'correct'))
+    if any(strcmp(fields(trialRecords),'correct')) && ~isempty([trialRecords.correct])
         correct=[trialRecords.correct];
     else
-        warning('**trialRecords does not have the ''correct'' field yet')
+        warning('**trialRecords does not have the ''correct'' field yet or is empty')
     end
 else
     warning('**trialRecords has size too small')

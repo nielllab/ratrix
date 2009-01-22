@@ -58,11 +58,10 @@ switch protocolVersion
     case '2_5validate'
         parameters=previousParameters;
 
-        %         dynamicSweep.sweepMode={'ordered'};
-        %         dynamicSweep.sweptValues=[];
-        %         dynamicSweep.sweptParameters={'targetOrientation', 'flankerOrientation'};
-        %         dynamicSweep.ISI=10;
-        %         dynamicSweep.ISMean=0.5;
+        parameters.dynamicSweep.sweepMode={'ordered'};
+        parameters.dynamicSweep.sweptValues=[];
+        parameters.dynamicSweep.sweptParameters={'targetOrientations','flankerOffset'}% 'flankerOrientations'}%,'flankerOffset','flankerPosAngle'};
+
         %
         %         fitRF.fitMethod='elipse';
         %         fitRF.which='last';
@@ -71,12 +70,19 @@ switch protocolVersion
         %         fitRF.numSpotsPerSTA=1;
         %         fitRF.spotSizeInSTA=10;
 
+       
+        
+                
         %basic setup
         parameters.blocking.blockingMethod='nTrials';
         parameters.blocking.nTrials=10; %100
         parameters.blocking.sweptParameters={'targetOrientations','flankerOrientations','flankerPosAngle'};
         parameters.blocking.sweptValues=generateFlankerFactorialCombo(ifFeatureGoRightWithTwoFlank, parameters.blocking.sweptParameters, {'ordered'}, parameters);
-
+        
+        parameters.renderMode='dynamic-precachedInsertion'; %'ratrixGeneral-maskTimesGrating', 'ratrixGeneral-precachedInsertion','dynamic-precachedInsertion','dynamic-maskTimesGrating','dynamic-onePatch'
+            %error if dynamic and toddle is on
+            parameters.targetOnOff=int16([1 200]);
+            parameters.flankerOnOff=int16([100 800]);
     otherwise
         parameters=previousParameters;
 end
@@ -526,7 +532,7 @@ end
 
 %% stim test
 
-stimTest=1;
+stimTest=0;
 if stimTest
     clc
     trialManagerClass = class(getTrialManager(thinner));

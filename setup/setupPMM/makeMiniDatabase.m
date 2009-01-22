@@ -82,7 +82,7 @@ database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 i=i+1;
 database.subject{i}.subjectID='test_r1';
-database.subject{i}.stepNumber=8;
+database.subject{i}.stepNumber=13; %5 8 11 %
 database.subject{i}.rewardScalar=2;
 database.subject{i}.msPenalty=10;
 database.subject{i}.pctCTs=[]; %if not empty overrides all steps

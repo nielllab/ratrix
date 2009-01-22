@@ -862,3 +862,22 @@ eventLog{eventNum}.comment ='grumpy rat at chance, sarah thinks its dehydration'
 eventLog{eventNum}.details.from = [1]; 
 eventLog{eventNum}.details.to   = [2];  
 
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('July.10,2008');%datestr(now,21)  % attempted change at 'Dec.02,2008', 
+eventLog{eventNum}.eventName ={'cockPitChange'};
+eventLog{eventNum}.subject ={}; %102, 117, etc...
+eventLog{eventNum}.stationID ={'1C'}; 
+eventLog{eventNum}.issuedBy ='pmm';  % sarah's help
+eventLog{eventNum}.comment ='discovered Jan. 16 2009, eyehole may have changed half a year ago'; 
+eventLog{eventNum}.details.from = 'hasEyeHole'; 
+eventLog{eventNum}.details.to   = 'standard';  
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('July.10,2008');%datestr(now,21)  % attempted change at 'Dec.02,2008', 
+eventLog{eventNum}.eventName ={'switchStation'};
+eventLog{eventNum}.subject ={}; %102, 117, etc...
+eventLog{eventNum}.stationID ={'1C'}; 
+eventLog{eventNum}.issuedBy ='pmm';  % sarah's help
+eventLog{eventNum}.comment ='1C is down, rats moved to 1D, keeping same cockpit'; 
+eventLog{eventNum}.details.from = '1C'; 
+eventLog{eventNum}.details.to   = '1D';  

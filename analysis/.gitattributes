@@ -131,3 +131,4 @@ pmm/flankerComparisonCI.m -text
 /convertCTR2vectors.m -text
 spike[!!-~]sorting/analysisManager.m -text
 spike[!!-~]sorting/postProcessSpikeClusters.m -text
+pmm/doHitFAScatter.m -text

@@ -142,6 +142,7 @@ switch defaultSettings
         default.fitRF=[];
         default.dynamicSweep=[];
         
+        default.renderMode='ratrixGeneral-maskTimesGrating';
         
     otherwise
         error ('unknown default settings date')

@@ -43,3 +43,11 @@
 /checkBlocking.m -text
 /removedLard.m -text
 /checkDynamicSweep.m -text
+/getPatchSize.m -text
+/getFeaturePatchStim.m -text
+/setDynamicDetails.m -text
+/texsCorrespondToThisWindow.m -text
+/expertPostTrialCleanUp.m -text
+/isTargetFlankerOn.m -text
+/computeSpatialDetails.m -text
+/setFloatPrecision.m -text

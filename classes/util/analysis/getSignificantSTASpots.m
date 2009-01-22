@@ -1,5 +1,5 @@
-function [sigSpots2D sigSpots3D]=getSignificantSTASpots(sta,spikeCount,contrast,medianFilter,alpha);
-%     getSignificantSTASpots(sta,spikeCount,contrast=1,medianFilter=logical(ones(3)),alpha=.05);
+function [sigSpots2D sigSpots3D]=getSignificantSTASpots(sta,spikeCount,stimMean,contrast,medianFilter,alpha);
+%     getSignificantSTASpots(sta,spikeCount,stimMean=empiricMean, contrast=1,medianFilter=logical(ones(3)),alpha=.05);
 % sigSpots2D labels of the spots that are siginifcant in the time slice.  
 % 0= not signifcant
 % 1= belongs to group 1
@@ -26,8 +26,13 @@ if ~exist('alpha','var') || isempty(alpha)
     alpha=.05;
 end
 
+if ~exist('stimMean','var') || isempty(stimMean)
+    stimMean=mean(sta(:));
+    warning('the empiric mean is only a crude estimate, it will be wrong if there is an asymetric-luminance receptive field present')
+end
+
 nullStd=sqrt(spikeCount)*contrast; % double check this
-zscore = erf(abs(sta/nullStd));
+zscore = erf(abs((sta-stimMean)/nullStd));
 significant = zscore > (1 - alpha/2);
 
 % do the calculation now

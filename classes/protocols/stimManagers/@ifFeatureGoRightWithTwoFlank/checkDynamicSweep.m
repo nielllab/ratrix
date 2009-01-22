@@ -20,19 +20,22 @@ if ~isempty(dynamicSweep)
             dynamicSweep.sweepMode{1}
             error('bad sweep mode');
     end
-    if ~(all(ismember(dynamicSweep.sweptParameters,fields(sm))))
-        error('sweptParameters must be a cell array of fields on the sm')
+    if ~(all(ismember(dynamicSweep.sweptParameters,[fields(sm); {'targetOrientations', 'targetContrast'}'])))
+        dynamicSweep.sweptParameters
+        
+        error('sweptParameters must be a cell array of fields on the sm or belong to an acceptable list')
     end
     if ~isempty(dynamicSweep.sweptValues) & ~strcmp('manual',dynamicSweep.sweepMode{1})
         error('sweptValues must be empty if in any mode but manual')
     end
-    if ~(isnumeric(dynamicSweep.ISI) & dynamicSweep.ISI>=0)
-        error('ISI must be a number >=0')
-    end
-    if ~(isnumeric(dynamicSweep.ISMean) & dynamicSweep.ISMean>=0 & dynamicSweep.ISMean<=1)
-        error('ISMean must be a number between or equal to 0 and 1')
-    end
-    
+    %not used
+%     if ~(isnumeric(dynamicSweep.ISI) & dynamicSweep.ISI>=0)
+%         error('ISI must be a number >=0')
+%     end
+%     if ~(isnumeric(dynamicSweep.ISMean) & dynamicSweep.ISMean>=0 & dynamicSweep.ISMean<=1)
+%         error('ISMean must be a number between or equal to 0 and 1')
+%     end
+%     
 end
 
 pass=1;

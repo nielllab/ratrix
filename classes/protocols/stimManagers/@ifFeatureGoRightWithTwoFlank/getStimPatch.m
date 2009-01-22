@@ -5,19 +5,19 @@ function out=getStimPatch(s,patchType,showIm)
 
 switch patchType
     case 'right'
-        out=s.goRightStim;
+        out=s.cache.goRightStim;
     case 'left'
-        out=s.goLeftStim;
+        out=s.cache.goLeftStim;
     case 'flanker'
-        out=s.flankerStim;
+        out=s.cache.flankerStim;
     otherwise
         error('patch type must be right, left or flanker ')
 end
 
 if ~exist('showIm','var')
-    showIm=0
+    showIm=0;
 end
 
 if showIm
-    imshow(out(:,:,1,1))
+    imshow(out(:,:,1,1));
 end

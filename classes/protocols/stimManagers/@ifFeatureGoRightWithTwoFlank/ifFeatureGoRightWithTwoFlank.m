@@ -139,27 +139,22 @@ switch nargin
         s.blocking=[];
         s.fitRF=[];
         s.dynamicSweep=[];
-
-        % edf: you must not change definition of object.  these belong on parent, not you.
-        %extra non input values
-        %    s.maxWidth=1;
-        %    s.maxHeight=1;
-        %    s.scaleFactor=0;
-        %    s.interTrialLuminance=0;
-
-
+        
+        s.renderMode=[];
+        
+        
         s.stdsPerPatch=0;
 
-        %could inflatable for faster drawing one day
-        s.mask =[];
-        s.goRightStim =[];
-        s.goLeftStim =[];
-        s.flankerStim =[];
-        s.distractorStim = [];
-        s.distractorFlankerStim= [];
+        %start deflated
+        s.cache.mask =[];
+        s.cache.goRightStim=[];
+        s.cache.goLeftStim=[];
+        s.cache.flankerStim=[];
+        s.cache.distractorStim = [];
+        s.cache.distractorFlankerStim= [];
 
         s.LUT=[];
-
+        
 
         %     s.goRightStim =zeros(2,2,1);
         %     s.goLeftStim = zeros(2,2,1);
@@ -169,12 +164,28 @@ switch nargin
 
     case 1
         % if single argument of this class type, return it
-        if (isa(varargin{1},'cuedGoToFeatureWithTwoFlank'))
-            s = varargin{1};
-        else
-            error('Input argument is not a goToFeatureWithTwoFlank object')
+        switch class(varargin{1})
+            case 'ifFeatureGoRightWithTwoFlank'
+                s = varargin{1};
+            case 'char'
+                switch varargin{1}
+                    case 'def'
+                        p=getDefaultParameters(ifFeatureGoRightWithTwoFlank);
+                        s=getStimManager(setFlankerStimRewardAndTrialManager(p));
+                    case '10'
+                        p=getDefaultParameters(ifFeatureGoRightWithTwoFlank);
+                        p.renderMode='ratrixGeneral-precachedInsertion';
+                        p.mean=0.5;
+                        s=getStimManager(setFlankerStimRewardAndTrialManager(p));
+                    otherwise
+                        varargin{1}
+                        error('Single input argument is bad')
+                end
+            otherwise
+                class(varargin{1})
+                error('Single input argument is bad')
         end
-    case 59
+    case 60
         % create object using specified values
 
         if all(varargin{1})>0
@@ -532,6 +543,12 @@ switch nargin
             error ('wrong fields in fitRF')
         end
 
+        if  any(strcmp(varargin{56},{'ratrixGeneral-maskTimesGrating', 'ratrixGeneral-precachedInsertion','dynamic-precachedInsertion','dynamic-maskTimesGrating','dynamic-onePatchPerPhase','dynamic-onePatch'}))
+            s.renderMode=varargin{56};   
+        else
+            error('renderMode must be ratrixGeneral-maskTimesGrating, ratrixGeneral-precachedInsertion,dynamic-precachedInsertion, dynamic-maskTimesGrating, dynamic-onePatchPerPhase,or dynamic-onePatch')
+        end
+
 
         %s.phase=0; %no longer randomized;   would need movie for that (hieght x width x orientations x phase)
         %maxHeight=varargin{22**old val};
@@ -540,12 +557,12 @@ switch nargin
         s.stdsPerPatch=4; %this is an even number that is very reasonable fill of square
 
         %start deflated
-        s.mask =[];
-        s.goRightStim=[];
-        s.goLeftStim=[];
-        s.flankerStim=[];
-        s.distractorStim = [];
-        s.distractorFlankerStim= [];
+        s.cache.mask =[];
+        s.cache.goRightStim=[];
+        s.cache.goLeftStim=[];
+        s.cache.flankerStim=[];
+        s.cache.distractorStim = [];
+        s.cache.distractorFlankerStim= [];
 
         s.LUT=[];
 

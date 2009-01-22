@@ -33,7 +33,6 @@ infrastructure/updatePsychtoolboxIfNecessary.m -text
 analysis/doSubjectFlankerAnalysis.m -text
 stimHelpers/fitGammaAndReturnLinearized.m -text
 stimHelpers/makeStandardLUT.m -text
-stimHelpers/getFeaturePatchStim.m -text
 infrastructure/makePumpSystem.m -text
 infrastructure/logwrite.m -text
 infrastructure/makeDefaultStation.m -text
@@ -125,3 +124,5 @@ stimHelpers/checkStim.m -text
 infrastructure/getIPAddress.m -text
 analysis/getSpikesFromNeuralData.m -text
 analysis/cleanUpStimRecords.m -text
+analysis/fitGaussianEnvelopeToImage.m -text
+dragon/exportVariables.m -text

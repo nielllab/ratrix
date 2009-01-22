@@ -26,14 +26,14 @@ if isempty(resolutions)
 else
     appropriateSize=([resolutions.height]==desiredHeight) & ([resolutions.width]==desiredWidth) & ([resolutions.pixelSize]==ratrixEnforcedColor);
     if sum(appropriateSize)>0
-        hz=[resolutions.hz]
+        hz=[resolutions.hz];
         maxHz=max(hz(appropriateSize));
         if maxHz==75
             selectedHz=60; %this enforces that some LCD's won't fail sync tests, but shouldn't influence any NEC CRT's
         else
             selectedHz=maxHz;
         end
-        appropriateSizeAndRefresh=appropriateSize & ([resolutions.hz]==selectedHz)
+        appropriateSizeAndRefresh=appropriateSize & ([resolutions.hz]==selectedHz);
         resInd=find(appropriateSizeAndRefresh);
 
         %     if sum(appropriateSizeAndRefresh)==1
@@ -47,10 +47,10 @@ else
         error ('can''t find appropriate resolution');
     end
 
-    details.width=resolutions(resInd).width
-    details.height=resolutions(resInd).height
-    details.pixelSize=resolutions(resInd).pixelSize
-    details.hz=resolutions(resInd).hz
+    details.width=resolutions(resInd).width;
+    details.height=resolutions(resInd).height;
+    details.pixelSize=resolutions(resInd).pixelSize;
+    details.hz=resolutions(resInd).hz;
 end
 
 width=details.width;
@@ -78,37 +78,6 @@ b=randn('seed');
 details.randomMethod='seedFromClock';
 details.randomSeed=[a(end) b(end)]; %if using twister method, this single number is pretty meaningless
 
-fitRF=0;
-if fitRF
-    dataPath='\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\Fan\datanet\demo2';
-    % subjectID=
-    % analysisPath=fullfile(c.dataRecordsPath, getID(subject), 'analysis');
-    RFData=getNeuralAnalysis(dataPath,'last','RFEstimate');
-    stimulus.fitRF.medianFilter=logical(ones(3));
-    stimulus.fitRF.alpha=.05;
-
-
-
-    sigSpots=getSignificantSTASpots(RFData.STA,sum(RFData.cumulativeSpikeCount),RFData.contrast,stimulus.fitRF.medianFilter,stimulus.fitRF.alpha);
-    if ~length(union(unique(sigSpots),[0 1]))==2
-        error('more than one RF spot!')
-    end
-
-    %fake it for code
-    %%
-    params = [.3 10 0 pi/6 1 0.001 1/2 1/2 ];
-    STA=computeGabors(params,0.5,64,64,'square','normalizeVertical',0)-.48+ 0.05*randn(64,64);
-    sigSpots=abs(STA)>0.4;
-    imagesc(sigSpots)
-
-
-    %%
-    [bw params] =fitElipseToBinaryImage(sigSpots)
-
-    %%
-
-end
-
 if ~isempty(stimulus.shapedParameter)
     [parameterChanged, stimulus]  = shapeParameter(stimulus, trialRecords); %will CopyOnWrite help?
     %else 'checkShape' and 'doShape' are different functions...
@@ -129,7 +98,7 @@ details.toggleStim=stimulus.toggleStim;
 %scaleFactor = getScaleFactor(stimulus);
 scaleFactor = 0; %makes it full screen
 
-interTrialLuminance = intmax(class(stimulus.flankerStim))*getInterTrialLuminance(stimulus);
+interTrialLuminance = intmax(class(stimulus.cache.flankerStim))*getInterTrialLuminance(stimulus);
 
 LUT=getLUT(stimulus);
 details.LUT=LUT;  % in future, consider saving a LUT id?
@@ -233,6 +202,7 @@ if size(stimulus.flankerPosAngle,1)==1
     %opposite side
     % if changed, see switch on case 'flankerPosAngle' for forceStimDetails
     %also search for references to 'flankerPosAngles(1)'
+    %and search hard coded reference to the field ''flankerPosAngles'' for example in setDynamicDetails(s,sweptID)
 else
     error ('only two flankers supported');
 end
@@ -356,104 +326,92 @@ if exist('forceStimDetails','var')
 end
 
 
-%SPATIAL PARAMS
-xPosPct=stimulus.xPositionPercent; % original line
-dev = stimulus.flankerOffset(h)*stimulus.stdGaussMask;
-devY = dev.*cos(details.flankerPosAngles(1)); %caluate from details
-devX = dev.*sin(details.flankerPosAngles(1));
-nDevX= devX* (height/width); %normalized by the height:width ratio, so that when screen width is multiplied by the fraction x value, the linear displacement is appropriate
-radius=details.stdGaussMask;
-szY=size(stimulus.mask,1);
-szX=size(stimulus.mask,2);
-fracSizeX=szX/width;
-fracSizeY=szY/height;
-
-%compute and save some details too
-details.deviation = dev;    %fractional devitation
-details.devPix=[devY*getMaxHeight(stimulus) devX*getMaxHeight(stimulus) ];  %pixel deviation, note: horizontal is still normalized to screen vertical, which is okay in square pixel world
-details.patchX1=ceil(getMaxHeight(stimulus)*stimulus.stdGaussMask*stimulus.stdsPerPatch);
-details.patchX2=size(stimulus.goLeftStim,2);
-details.xPositionPercent=stimulus.xPositionPercent; %stored
-details.yPositionPercent=stimulus.targetYPosPct; %stored
-details.stdGaussMaskPix=stimulus.stdGaussMask*ceil(getMaxHeight(stimulus));
+%SPATIAL DETAILS
+details.flankerOffset=stimulus.flankerOffset(h);
 details.gratingType=stimulus.gratingType;
+details.positionalHint=stimulus.positionalHint;
+details.xPosNoiseStd = stimulus.xPosNoise;
+details.yPosNoiseStd = stimulus.yPosNoise;
+fitRF=0;
+if fitRF
+    dataPath='\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\Fan\datanet\demo2';
+    % subjectID=
+    % analysisPath=fullfile(c.dataRecordsPath, getID(subject), 'analysis');
+    RFData=getNeuralAnalysis(dataPath,'last','RFEstimate');
+    stimulus.fitRF.medianFilter=logical(ones(3));
+    stimulus.fitRF.alpha=.05;
 
-stimFit = 0;
-resampleCounter = 0;
-while stimFit == 0
-    %CREATE CENTERS
-    if stimulus.displayTargetAndDistractor ==0
-        numPatchesInserted=3;
-        centers =...
-            ...%yPosPct                      yPosPct                     xPosPct                   xPosPct
-            [ stimulus.targetYPosPct       stimulus.targetYPosPct        xPosPct                   xPosPct;...                   %target
-            stimulus.targetYPosPct+devY   stimulus.targetYPosPct+devY    xPosPct-nDevX             xPosPct-nDevX;...             %top  (firstFlanker, on top if flankerPosAngle == 0)
-            stimulus.targetYPosPct-devY   stimulus.targetYPosPct-devY    xPosPct+nDevX             xPosPct+nDevX];               %bottom (secondFlanker, on bottom if flankerPosAngle == 0)
 
-    elseif stimulus.displayTargetAndDistractor== 1
-        numPatchesInserted=6;
-        centers =...
-            ...%yPosPct                         yPosPct                       xPosPct              xPosPct
-            [ stimulus.targetYPosPct        stimulus.targetYPosPct          xPosPct                xPosPct;...                   %target
-            stimulus.targetYPosPct+devY     stimulus.targetYPosPct+devY     xPosPct-nDevX          xPosPct-nDevX;...             %top
-            stimulus.targetYPosPct-devY     stimulus.targetYPosPct-devY     xPosPct+nDevX          xPosPct+nDevX ;...            %bottom
-            stimulus.targetYPosPct          stimulus.targetYPosPct          xPosPct                xPosPct;...                   %distractor
-            stimulus.targetYPosPct+devY     stimulus.targetYPosPct+devY     xPosPct-nDevX          xPosPct-nDevX;...             %top
-            stimulus.targetYPosPct-devY     stimulus.targetYPosPct-devY     xPosPct+nDevX          xPosPct+nDevX ];              %bottom
-    else
-        error('must be 0 or 1');
+
+    sigSpots=getSignificantSTASpots(RFData.STA,sum(RFData.cumulativeSpikeCount),RFData.mean,RFData.contrast,stimulus.fitRF.medianFilter,stimulus.fitRF.alpha);
+    if ~length(union(unique(sigSpots),[0 1]))==2
+        error('more than one RF spot!')
     end
 
-    %DETERMINE SCREEN POSITIONS IN PIXELS
-    pos = round(centers.* repmat([ height, height, width, width],numPatchesInserted,1)...          %convert to pixel vals
-        -  repmat([ floor(szY/2), -(ceil(szY/2)-1 ), floor(szX/2) -(ceil(szX/2)-1)],numPatchesInserted,1)); %account for patch size
-    xPixHint = round(stimulus.positionalHint * width)*sign(-details.correctResponseIsLeft); % x shift value in pixels caused by hint
-    detail.xPixShiftHint = xPixHint;
-    if stimulus.displayTargetAndDistractor ==0
-        hintOffSet= repmat([0, 0, xPixHint, xPixHint], numPatchesInserted, 1);
-    else
-        %first half move one direction, second half move the other
-        hintOffSet= [repmat([0, 0,  xPixHint,  xPixHint], numPatchesInserted/2, 1);...
-            repmat([0, 0, -xPixHint, -xPixHint], numPatchesInserted/2, 1)];
-    end
-    pos = pos + hintOffSet;
+    %fake it for code
+%%   
+    stimParams = [ rand/3 4 0 pi/6 1 0.001 rand rand ];
+    %STA=computeGabors(params,0.5,64,64,'square','normalizeVertical',0)-.48+ 0.05*randn(64,64);
+    %sigSpots=abs(STA)>0.4;
+    STA=computeGabors(stimParams,0.5,64,64,'square','normalizeVertical',0)+ 0.09*(randn(64,64) + 0.1);
+    sigSpots=getSignificantSTASpots(STA,500,[],0.005);  
+    
+    %fit a guassian to the binary image -- conservative
+    [sigEnvelope sigConservativeParams] =fitGaussianEnvelopeToImage(sigSpots,0.05,[],false,false);
+    
+    %use the conservative field to narrow a better seach of the STA
+    [STAenvelope STAparams] =fitGaussianEnvelopeToImage(STA,0.05,sigEnvelope,false,false);
+    
+    mixIm=zeros([size(STA) 3]);
+    
+    mixIm(:,:,1)=1-sigSpots;
+    mixIm(:,:,2)=(STA-min(STA(:)))/range(STA(:));
+    mixIm(:,:,3)=1-STAenvelope;
+    %mixIm(:,:,3)=1-sigEnvelope;
+    image(mixIm)
 
-    % CHECK ERROR WITHOUT NOISE
-    if any(any((pos(:,1:2)<1) | (pos(:,1:2)>height) | (pos(:,3:4)<1) | (pos(:,3:4)>width)))
-        width
-        height
-        xPixHint
-        szY
-        centers
-        pos
-        error('At least one image patch is going to be off the screen.  Make patches smaller or closer together or check the size of xPosHint.')
-    end
+    
+    details.stdGaussMask=STAparams(4)*3;
+    details.xPositionPercent=STAparams(1);
+    details.yPositionPercent=STAparams(2);
+    
+    
+    stimParams = [details.stdGaussMask 4 0 pi/6 1 0.001 STAparams(1:2) ]; % stim
+    stim=computeGabors(stimParams,0.5,64,64,'square','normalizeVertical',0)+ 0.09*(randn(64,64) + 0.1);
+    
+    subplot(2,2,1); imagesc(STA)
+    subplot(2,2,2); image(mixIm)
+    subplot(2,2,3); image(mixIm)
+    subplot(2,2,4); imagesc(stim-STAenvelope)
+%% 
+    %[bw params] =fitElipseToBinaryImage(sigSpots)
 
-    % ADD NOISE TERMS TO PIXEL POSITIONS
-    xPixShift = round(stimulus.xPosNoise * randn * width); % x shift value in pixels caused by noise
-    yPixShift = round(stimulus.yPosNoise * randn * height); % y shift value in pixels caused by noise
-    details.xPosNoisePix = xPixShift;
-    details.yPosNoisePix = yPixShift;
-    details.xPosNoiseSample = xPixShift/width;
-    details.yPosNoiseSample = yPixShift/height;
-    details.xPosNoiseStd = stimulus.xPosNoise;
-    details.yPosNoiseStd = stimulus.yPosNoise;
+    %%
+    details.stdGaussMask=a
+    details.xPositionPercent=STAparams(1);
+    details.yPositionPercent=STAparams(2);
+else
+    details.stdGaussMask=stimulus.stdGaussMask;
+    details.xPositionPercent=stimulus.xPositionPercent;
+    details.yPositionPercent=stimulus.targetYPosPct;
+end    
 
-    pos = pos + repmat([yPixShift, yPixShift, xPixShift, xPixShift], numPatchesInserted, 1);
 
-    %ERROR CHECK WITHOUT NOISE
-    if any(any((pos(:,1:2)<1) | (pos(:,1:2)>height) | (pos(:,3:4)<1) | (pos(:,3:4)>width)))
-        resampleCounter = resampleCounter+1;
-        display(sprintf('stimulus off screen because of noise, number of resamples = %d', resampleCounter));
-        if resampleCounter > 10
-            error('too many resamples, reconsider the size of the noise');
-        end
-    else
-        stimFit = 1;
-        details.stimRects = pos;
-    end
+details=computeSpatialDetails(stimulus,details);
+
+details.targetOnOff=stimulus.targetOnOff;
+details.flankerOnOff=stimulus.flankerOnOff;
+                
+if isinteger(stimulus.cache.flankerStim)
+    details.mean=stimulus.mean*intmax(class(stimulus.cache.flankerStim));
+elseif isfloat(stimulus.cache.flankerStim)
+    details.mean=stimulus.mean; %keep as float
+else
+    error('stim patches must be floats or integers')
 end
-
+%stim class is inherited from flankstim patch
+%just check flankerStim, assume others are same
+            
 
 
 %OLD WAY ON THE FLY
@@ -472,118 +430,113 @@ end
 % VERY OLD EXAMPLE params = [repmat([stimulus.radius details.pixPerCyc],numGabors,1) details.phases details.orientations repmat([stimulus.contrast stimulus.thresh],numGabors,1) details.xPosPcts repmat([stimulus.yPosPct],numGabors,1)];
 
 
-try
-    %stim class is inherited from flankstim patch
-    %just check flankerStim, assume others are same
-    if isinteger(stimulus.flankerStim)
-        details.mean=stimulus.mean*intmax(class(stimulus.flankerStim));
-    elseif isfloat(stimulus.flankerStim)
-        details.mean=stimulus.mean; %keep as float
-    else
-        error('stim patches must be floats or integers')
-    end
-    stim=details.mean(ones(height,width,3,'uint8')); %the unit8 just makes it faster, it does not influence the clas of stim, rather the class of details determines that
+details.renderMode=stimulus.renderMode;
+switch details.renderMode
+    case {'dynamic-precachedInsertion','dynamic-maskTimesGrating','dynamic-onePatchPerPhase','dynamic-onePatch'}
+        details.backgroundColor=details.mean;
+         type='expert'; %'dynamic';
+         out=details;
+    case {'ratrixGeneral-maskTimesGrating', 'ratrixGeneral-precachedInsertion'}
+        try
 
-    insertMethod='maskTimesGrating';
-    details.insertMethod=insertMethod;
+            stim=details.mean(ones(height,width,3,'uint8')); %the unit8 just makes it faster, it does not influence the clas of stim, rather the class of details determines that
+            %details.insertMethod='maskTimesGrating'; %old name, now the same as 'ratrixGeneral-maskTimesGrating'
 
+            %PRESTIM  - flankers first
+            if details.flankerContrast > 0
+                stim(:,:,1)=insertPatch(stimulus,details.renderMode,stim(:,:,1),details.stimRects(2,:),stimulus.cache.mask,stimulus.cache.flankerStim,stimulus.flankerOrientations, stimulus.phase, details.flankerOrientation, details.flankerPhase,  details.pixPerCycs,details.mean,details.flankerContrast);
+                stim(:,:,1)=insertPatch(stimulus,details.renderMode,stim(:,:,1),details.stimRects(3,:),stimulus.cache.mask,stimulus.cache.flankerStim,stimulus.flankerOrientations, stimulus.phase, details.flankerOrientation, details.flankerPhase,  details.pixPerCycs,details.mean,details.flankerContrast);
 
-    %PRESTIM  - flankers first
-    if details.flankerContrast > 0
-        stim(:,:,1)=insertPatch(stimulus,insertMethod,stim(:,:,1),pos(2,:),stimulus.mask,stimulus.flankerStim,stimulus.flankerOrientations, stimulus.phase, details.flankerOrientation, details.flankerPhase,  details.pixPerCycs,details.mean,details.flankerContrast);
-        stim(:,:,1)=insertPatch(stimulus,insertMethod,stim(:,:,1),pos(3,:),stimulus.mask,stimulus.flankerStim,stimulus.flankerOrientations, stimulus.phase, details.flankerOrientation, details.flankerPhase,  details.pixPerCycs,details.mean,details.flankerContrast);
-
-        if stimulus.displayTargetAndDistractor == 1 % add distractor flankers on the opposite side y.z
-            stim(:,:,1)=insertPatch(stimulus,insertMethod,stim(:,:,1),pos(5,:),stimulus.mask,stimulus.flankerStim,stimulus.flankerOrientations, stimulus.phase, details.distractorFlankerOrientation, details.distractorFlankerPhase,  details.pixPerCycs,details.mean,details.distractorFlankerContrast);
-            stim(:,:,1)=insertPatch(stimulus,insertMethod,stim(:,:,1),pos(6,:),stimulus.mask,stimulus.flankerStim,stimulus.flankerOrientations, stimulus.phase, details.distractorFlankerOrientation, details.distractorFlankerPhase,  details.pixPerCycs,details.mean,details.distractorFlankerContrast);
-        end
-    end
-
-    %MAIN STIM this could be a for loop except variables are stored
-    %as named types...
-    if details.correctResponseIsLeft==1       % choose TARGET stim patch from LEFT candidates
-        stim(:,:,2)=insertPatch(stimulus,insertMethod,stim(:,:,2),pos(1,:),stimulus.mask,stimulus.goLeftStim, stimulus.goLeftOrientations, stimulus.phase, details.targetOrientation, details.targetPhase,  details.pixPerCycs,details.mean,details.targetContrast);
-        if stimulus.displayTargetAndDistractor == 1 % add distractor stimulus to the opposite side of the target y.z
-            if stimulus.distractorYokedToTarget
-                stim(:,:,2)=insertPatch(stimulus,insertMethod,stim(:,:,2),pos(4,:),stimulus.mask,stimulus.goLeftStim, stimulus.goLeftOrientations, stimulus.phase, details.targetOrientation, details.targetPhase,  details.pixPerCycs,details.mean,details.distractorContrast);
-            else
-                stim(:,:,2)=insertPatch(stimulus,insertMethod,stim(:,:,2),pos(4,:),stimulus.mask,stimulus.distractorStim, stimulus.distractorOrientations, stimulus.phase, details.distractorOrientation, details.distractorPhase,  details.pixPerCycs,details.mean,details.distractorContrast);
+                if stimulus.displayTargetAndDistractor == 1 % add distractor flankers on the opposite side y.z
+                    stim(:,:,1)=insertPatch(stimulus,details.renderMode,stim(:,:,1),details.stimRects(5,:),stimulus.cache.mask,stimulus.cache.flankerStim,stimulus.flankerOrientations, stimulus.phase, details.distractorFlankerOrientation, details.distractorFlankerPhase,  details.pixPerCycs,details.mean,details.distractorFlankerContrast);
+                    stim(:,:,1)=insertPatch(stimulus,details.renderMode,stim(:,:,1),details.stimRects(6,:),stimulus.cache.mask,stimulus.cache.flankerStim,stimulus.flankerOrientations, stimulus.phase, details.distractorFlankerOrientation, details.distractorFlankerPhase,  details.pixPerCycs,details.mean,details.distractorFlankerContrast);
+                end
             end
-        end
-    elseif details.correctResponseIsLeft==-1 %% choose TARGET stim patch from RIGHT candidates
-        stim(:,:,2)=insertPatch(stimulus,insertMethod,stim(:,:,2),pos(1,:),stimulus.mask,stimulus.goRightStim,stimulus.goRightOrientations,stimulus.phase, details.targetOrientation, details.targetPhase,  details.pixPerCycs,details.mean,details.targetContrast);
-        if stimulus.displayTargetAndDistractor == 1 % add distractor stimulus to the opposite side of the target y.z
-            if stimulus.distractorYokedToTarget
-                stim(:,:,2)=insertPatch(stimulus,insertMethod,stim(:,:,2),pos(4,:),stimulus.mask,stimulus.goRightStim, stimulus.goRightOrientations, stimulus.phase, details.targetOrientation, details.targetPhase,  details.pixPerCycs,details.mean,details.distractorContrast);
+
+            %MAIN STIM this could be a for loop except variables are stored
+            %as named types...
+            if details.correctResponseIsLeft==1       % choose TARGET stim patch from LEFT candidates
+                stim(:,:,2)=insertPatch(stimulus,details.renderMode,stim(:,:,2),details.stimRects(1,:),stimulus.cache.mask,stimulus.cache.goLeftStim, stimulus.goLeftOrientations, stimulus.phase, details.targetOrientation, details.targetPhase,  details.pixPerCycs,details.mean,details.targetContrast);
+                if stimulus.displayTargetAndDistractor == 1 % add distractor stimulus to the opposite side of the target y.z
+                    if stimulus.distractorYokedToTarget
+                        stim(:,:,2)=insertPatch(stimulus,details.renderMode,stim(:,:,2),details.stimRects(4,:),stimulus.cache.mask,stimulus.cache.goLeftStim, stimulus.goLeftOrientations, stimulus.phase, details.targetOrientation, details.targetPhase,  details.pixPerCycs,details.mean,details.distractorContrast);
+                    else
+                        stim(:,:,2)=insertPatch(stimulus,details.renderMode,stim(:,:,2),details.stimRects(4,:),stimulus.cache.mask,stimulus.cache.distractorStim, stimulus.distractorOrientations, stimulus.phase, details.distractorOrientation, details.distractorPhase,  details.pixPerCycs,details.mean,details.distractorContrast);
+                    end
+                end
+            elseif details.correctResponseIsLeft==-1 %% choose TARGET stim patch from RIGHT candidates
+                stim(:,:,2)=insertPatch(stimulus,details.renderMode,stim(:,:,2),details.stimRects(1,:),stimulus.cache.mask,stimulus.cache.goRightStim,stimulus.goRightOrientations,stimulus.phase, details.targetOrientation, details.targetPhase,  details.pixPerCycs,details.mean,details.targetContrast);
+                if stimulus.displayTargetAndDistractor == 1 % add distractor stimulus to the opposite side of the target y.z
+                    if stimulus.distractorYokedToTarget
+                        stim(:,:,2)=insertPatch(stimulus,details.renderMode,stim(:,:,2),details.stimRects(4,:),stimulus.cache.mask,stimulus.cache.goRightStim, stimulus.goRightOrientations, stimulus.phase, details.targetOrientation, details.targetPhase,  details.pixPerCycs,details.mean,details.distractorContrast);
+                    else
+                        stim(:,:,2)=insertPatch(stimulus,details.renderMode,stim(:,:,2),details.stimRects(4,:),stimulus.cache.mask,stimulus.cache.distractorStim, stimulus.distractorOrientations, stimulus.phase, details.distractorOrientation, details.distractorPhase,  details.pixPerCycs,details.mean,details.distractorContrast);
+                    end
+                end
             else
-                stim(:,:,2)=insertPatch(stimulus,insertMethod,stim(:,:,2),pos(4,:),stimulus.mask,stimulus.distractorStim, stimulus.distractorOrientations, stimulus.phase, details.distractorOrientation, details.distractorPhase,  details.pixPerCycs,details.mean,details.distractorContrast);
+                error('Invalid response side value. details.correctResponseIsLeft must be -1 or 1.')
             end
+
+            targetOnly=stim(:,:,2); % save a copy w/o flankers for the non-toggle movie creation mode
+
+            %and flankers
+            if details.flankerContrast > 0
+                stim(:,:,2)=insertPatch(stimulus,details.renderMode,stim(:,:,2),details.stimRects(2,:),stimulus.cache.mask,stimulus.cache.flankerStim,stimulus.flankerOrientations, stimulus.phase, details.flankerOrientation, details.flankerPhase,  details.pixPerCycs,details.mean,details.flankerContrast);
+                stim(:,:,2)=insertPatch(stimulus,details.renderMode,stim(:,:,2),details.stimRects(3,:),stimulus.cache.mask,stimulus.cache.flankerStim,stimulus.flankerOrientations, stimulus.phase, details.flankerOrientation, details.flankerPhase,  details.pixPerCycs,details.mean,details.flankerContrast);
+                if stimulus.displayTargetAndDistractor == 1
+                    stim(:,:,2)=insertPatch(stimulus,details.renderMode,stim(:,:,2),details.stimRects(5,:),stimulus.cache.mask,stimulus.cache.flankerStim,stimulus.flankerOrientations, stimulus.phase, details.distractorFlankerOrientation, details.distractorFlankerPhase,  details.pixPerCycs,details.mean,details.distractorFlankerContrast);
+                    stim(:,:,2)=insertPatch(stimulus,details.renderMode,stim(:,:,2),details.stimRects(6,:),stimulus.cache.mask,stimulus.cache.flankerStim,stimulus.flankerOrientations, stimulus.phase, details.distractorFlankerOrientation, details.distractorFlankerPhase, details.pixPerCycs,details.mean,details.distractorFlankerContrast);
+                end
+            end
+
+            %RENDER CUE - side cue not used, only fixation dot
+            %stim(cueRect(1)-stimulus.cueSize:cueRect(2)+stimulus.cueSize,cueRect(3)-stimulus.cueSize:cueRect(4)+stimulus.cueSize,1:3)=1-stimulus.cueLum; %edf added to make cue bigger and more contrasty
+            %stim(cueRect(1):cueRect(2),cueRect(3):cueRect(4),1:3)=stimulus.cueLum;
+            if ~isempty(stimulus.cueLum)
+                stim(height/2-stimulus.cueSize:height/2+stimulus.cueSize,width/2-stimulus.cueSize:width/2+stimulus.cueSize)=stimulus.cueLum*intmax(class(stim));
+            end
+            %BW pix in corners for imagesc
+            cornerMarkerOn=1;
+            if cornerMarkerOn
+                stim(1)=0; stim(2)=255;
+            end
+
+            details.persistFlankersDuringToggle=stimulus.persistFlankersDuringToggle;
+            if  details.toggleStim==1 % when strcmp(type,'trigger')
+                type='trigger';
+                frameTimes=[]; % saved to details
+                %only send 2 frames if in toggle stim mode
+                out=stim(:,:,end-1:end);
+                if details.persistFlankersDuringToggle
+                    out(:,:,end)=stim(:,:,1);  %alternate with a prestim that has flankers, so only target flashes
+                end
+                details.targetOnOff=nan;  % don't get used, so nan 'em to indicate it
+                details.flankerOnOff=nan;
+            else
+                %OLD: sent all frames if in normal mode out=stim;
+                %NEW: (relies on)
+                %   empty=stim(:,:,3)
+                %   targetOnly=targetOnly; saved a copy above...
+                %   flankersOnly=stim(:,:,1)
+                %   targetAndFlankers=stim(:,:,2)
+                [out frameTimes]=createDiscriminandumContextOnOffMovie(stimulus,stim(:,:,3),targetOnly,stim(:,:,1),stim(:,:,2),details.targetOnOff,details.flankerOnOff);
+                type={'timedFrames',frameTimes}; % 040108 dfp changed format to cell array
+            end
+
+            %TEMPORAL PARAMS
+            details.requestedNumberStimframes=frameTimes;
+
+        catch
+            sca
+            ShowCursor;
+            err=lasterror
+            err.stack.line
+            err.stack.name
+            err.stack.file
+            rethrow(lasterror);
         end
-    else
-        error('Invalid response side value. details.correctResponseIsLeft must be -1 or 1.')
-    end
 
-    targetOnly=stim(:,:,2); % save a copy w/o flankers for the non-toggle movie creation mode
-
-    %and flankers
-    if details.flankerContrast > 0
-        stim(:,:,2)=insertPatch(stimulus,insertMethod,stim(:,:,2),pos(2,:),stimulus.mask,stimulus.flankerStim,stimulus.flankerOrientations, stimulus.phase, details.flankerOrientation, details.flankerPhase,  details.pixPerCycs,details.mean,details.flankerContrast);
-        stim(:,:,2)=insertPatch(stimulus,insertMethod,stim(:,:,2),pos(3,:),stimulus.mask,stimulus.flankerStim,stimulus.flankerOrientations, stimulus.phase, details.flankerOrientation, details.flankerPhase,  details.pixPerCycs,details.mean,details.flankerContrast);
-        if stimulus.displayTargetAndDistractor == 1
-            stim(:,:,2)=insertPatch(stimulus,insertMethod,stim(:,:,2),pos(5,:),stimulus.mask,stimulus.flankerStim,stimulus.flankerOrientations, stimulus.phase, details.distractorFlankerOrientation, details.distractorFlankerPhase,  details.pixPerCycs,details.mean,details.distractorFlankerContrast);
-            stim(:,:,2)=insertPatch(stimulus,insertMethod,stim(:,:,2),pos(6,:),stimulus.mask,stimulus.flankerStim,stimulus.flankerOrientations, stimulus.phase, details.distractorFlankerOrientation, details.distractorFlankerPhase, details.pixPerCycs,details.mean,details.distractorFlankerContrast);
-        end
-    end
-
-    %RENDER CUE - side cue not used, only fixation dot
-    %stim(cueRect(1)-stimulus.cueSize:cueRect(2)+stimulus.cueSize,cueRect(3)-stimulus.cueSize:cueRect(4)+stimulus.cueSize,1:3)=1-stimulus.cueLum; %edf added to make cue bigger and more contrasty
-    %stim(cueRect(1):cueRect(2),cueRect(3):cueRect(4),1:3)=stimulus.cueLum;
-    if ~isempty(stimulus.cueLum)
-        stim(height/2-stimulus.cueSize:height/2+stimulus.cueSize,width/2-stimulus.cueSize:width/2+stimulus.cueSize)=stimulus.cueLum*intmax(class(stim));
-    end
-    %BW pix in corners for imagesc
-    cornerMarkerOn=1;
-    if cornerMarkerOn
-        stim(1)=0; stim(2)=255;
-    end
-
-    details.persistFlankersDuringToggle=stimulus.persistFlankersDuringToggle;
-    if  details.toggleStim==1 % when strcmp(type,'trigger')
-        type='trigger';
-        frameTimes=[]; % saved to details
-        %only send 2 frames if in toggle stim mode
-        out=stim(:,:,end-1:end);
-        if details.persistFlankersDuringToggle
-            out(:,:,end)=stim(:,:,1);  %alternate with a prestim that has flankers, so only target flashes
-        end
-        details.targetOnOff=nan;
-        details.flankerOnOff=nan;
-    else
-        %OLD: sent all frames if in normal mode out=stim;
-        %NEW: (relies on)
-        %   empty=stim(:,:,3)
-        %   targetOnly=targetOnly; saved a copy above...
-        %   flankersOnly=stim(:,:,1)
-        %   targetAndFlankers=stim(:,:,2)
-        details.targetOnOff=stimulus.targetOnOff;
-        details.flankerOnOff=stimulus.flankerOnOff;
-        [out frameTimes]=createDiscriminandumContextOnOffMovie(stimulus,stim(:,:,3),targetOnly,stim(:,:,1),stim(:,:,2),details.targetOnOff,details.flankerOnOff);
-        type={'timedFrames',frameTimes}; % 040108 dfp changed format to cell array
-    end
-
-    %TEMPORAL PARAMS
-    details.requestedNumberStimframes=frameTimes;
-
-catch
-    sca
-    ShowCursor;
-    err=lasterror
-    err.stack.line
-    err.stack.name
-    err.stack.file
-    rethrow(lasterror);
 end
-
 
 function stim=insertPatch(s,insertMethod,stim,pos,maskVideo,featureVideo,featureOptions1, featureOptions2,chosenFeature1, chosenFeature2 ,chosenFeature3,mean,contrast)
 %   size (featureOptions1)
@@ -601,9 +554,9 @@ function stim=insertPatch(s,insertMethod,stim,pos,maskVideo,featureVideo,feature
 %   featureInd2 = find(featureOptions2 == chosenFeature2)
 %   size(featureVideo)
 switch insertMethod
-    case 'directPTB'
-        error('not yet defined')
-    case 'matrixInsertion'
+    case {'directPTB',{}}
+        error('insertion happens in dynamic code!')
+    case 'ratrixGeneral-precachedInsertion'
         %insert in stim
         featureInd1 = find(featureOptions1 == chosenFeature1);
         featureInd2 = find(featureOptions2 == chosenFeature2);
@@ -619,12 +572,11 @@ switch insertMethod
             below(sign(patch)==-1)=(-patch(sign(patch)==-1));
             stim(pos(1):pos(2),pos(3):pos(4))=stim(pos(1):pos(2),pos(3):pos(4))+above-below;
         end
-    case 'maskTimesGrating'
+    case 'ratrixGeneral-maskTimesGrating'
         %featureVideo is simply the mask at different sizes, must be a structure{}
         %maskInd = find(maskInd == chosenMask);
         maskInd = 1;
-        patchX=ceil(getMaxHeight(s)*s.stdGaussMask(maskInd)*s.stdsPerPatch);  %stdGaussMask control patch size which control the radius
-        patchY=patchX;
+        [patchX patchY]=getPatchSize(s);
 
         %       %radius      pixPerCyc      phase          %orientation
         params= [Inf      chosenFeature3  chosenFeature2   chosenFeature1     1    s.thresh  1/2     1/2   ];

@@ -195,3 +195,4 @@ protocols/stimManagers/@whiteNoise/drawExpertFrame.m -text
 protocols/stimManagers/@whiteNoise/stimMgrOKForTrialMgr.m -text
 protocols/stimManagers/@whiteNoise/physAnalysis.m -text
 protocols/stimManagers/@whiteNoise/getLUT.m -text
+protocols/@stimSpec/setStim.m -text

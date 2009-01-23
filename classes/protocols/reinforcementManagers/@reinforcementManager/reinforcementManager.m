@@ -27,10 +27,10 @@ switch nargin
         r.fractionOpenTimeSoundIsOn=varargin{4};
         r.fractionPenaltySoundIsOn=varargin{5};
         
-        if r.msPenalty>=0
+        if r.msPenalty>=0 && isreal(r.msPenalty) && isscalar(r.msPenalty)
             %pass
         else
-            error('msPenalty must be >=0')
+            error('msPenalty must a single real number be >=0')
         end
         
         if isreal(r.msPuff) && isscalar(r.msPuff) && r.msPuff>=0 && r.msPuff<=r.msPenalty
@@ -39,19 +39,19 @@ switch nargin
             error('msPuff must be scalar real 0<= val <=msPenalty')
         end
 
-        if r.scalar>=0 && r.scalar<=100
+        if isreal(r.scalar) && isscalar(r.scalar) && r.scalar>=0 && r.scalar<=100 
             %pass
         else
             error('scalar must be >=0 and <=100')
         end
 
-        if r.fractionOpenTimeSoundIsOn>=0 && r.fractionOpenTimeSoundIsOn<=1
+        if isreal(r.fractionOpenTimeSoundIsOn) && isscalar(r.fractionOpenTimeSoundIsOn) &&  r.fractionOpenTimeSoundIsOn>=0 && r.fractionOpenTimeSoundIsOn<=1
             %pass
         else
             error('fractionOpenTimeSoundIsOn must be >=0 and <=1')
         end
 
-        if r.fractionPenaltySoundIsOn>=0 && r.fractionPenaltySoundIsOn<=1
+        if isreal(r.fractionPenaltySoundIsOn) && isscalar(r.fractionPenaltySoundIsOn) && r.fractionPenaltySoundIsOn>=0 && r.fractionPenaltySoundIsOn<=1
             %pass
         else
             error('fractionPenaltySoundIsOn must be >=0 and <=1')

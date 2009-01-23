@@ -41,6 +41,7 @@ switch trialManagerClass
         [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts);
     case 'autopilot'
         details.pctCorrectionTrials=0;
+        details.correctionTrial=0;
         targetPorts=[1];
         distractorPorts=[];
     otherwise
@@ -130,9 +131,13 @@ out.stimSpecs{2} = stimSpec(interTrialLuminance,{[] 1},'loop',[],1,1,[],1);
 out.scaleFactors{2} = 0;
 
 % return out.stimSpecs, out.scaleFactors for each phase (only one phase for now?)
-details.big = stim; % store in 'big' so it gets written to file
-details.stimManagerClass = class(stimulus);
-details.trialManagerClass = trialManagerClass;
+details.frequencies=frequencies;
+details.duration=duration;
+details.repetitions=repetitions;
+details.partition=partition;
+details.numLeftPixels=numLeftPixels;
+details.numRightPixels=numRightPixels;
+details.stim=stim;
 
 % ================================================================================
 if strcmp(trialManagerClass,'nAFC') && details.correctionTrial

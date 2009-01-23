@@ -42,6 +42,7 @@ switch trialManagerClass
         [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts);
     case 'autopilot'
         details.pctCorrectionTrials=0;
+        details.correctionTrial=0;
         targetPorts=[1];
         distractorPorts=[];
     otherwise
@@ -91,19 +92,6 @@ if length(frames) ~= numFramesToMake
     error('uh oh');
 end
 
-% stim.frames(1,:) = framesL(:);
-% stim.frames(2,:) = framesR(:);
-
-% 11/7/08 - dynamic mode stim is a struct of parameters
-% stim = [];
-% stim.height = height;
-% stim.width = width;
-% stim.floatprecision = 1;
-% stim.frames(1,:) = framesL(:);
-% stim.frames(2,:) = framesR(:);
-% stim.numLeftPixels = numLeftPixels;
-% stim.numRightPixels = numRightPixels;
-
 stim=zeros(1,1,length(frames));
 for i=1:length(frames)
     stim(1,1,i) = frames(i);
@@ -118,9 +106,10 @@ out.stimSpecs{2} = stimSpec(interTrialLuminance,{[] 1},'loop',[],1,1,[],1);
 out.scaleFactors{2} = 0;
 
 % return out.stimSpecs, out.scaleFactors for each phase (only one phase for now?)
-details.big = stim; % store in 'big' so it gets written to file
-details.stimManagerClass = class(stimulus);
-details.trialManagerClass = trialManagerClass;
+details.stim = stim; % store in 'big' so it gets written to file
+details.frequencies=frequencies;
+details.duration=duration;
+details.repetitions=repetitions;
 
 % ================================================================================
 if strcmp(trialManagerClass,'nAFC') && details.correctionTrial

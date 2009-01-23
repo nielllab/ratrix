@@ -190,3 +190,6 @@ protocols/stimManagers/@whiteNoise/physAnalysis.m -text
 protocols/stimManagers/@whiteNoise/getLUT.m -text
 protocols/@stimSpec/setStim.m -text
 protocols/stimManagers/@gratings/extractDetailFields.m -text
+protocols/stimManagers/@fullField/extractDetailFields.m -text
+protocols/stimManagers/@bipartiteField/extractDetailFields.m -text
+protocols/stimManagers/@whiteNoise/extractDetailFields.m -text

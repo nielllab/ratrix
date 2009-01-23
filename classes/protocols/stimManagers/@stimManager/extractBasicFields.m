@@ -68,7 +68,14 @@ end
 [out.containedForcedRewards compiledLUT]                     =extractFieldAndEnsure(trialRecords,{'containedForcedRewards'},'scalar',compiledLUT);
 [out.didStochasticResponse compiledLUT]                      =extractFieldAndEnsure(trialRecords,{'didStochasticResponse'},'scalar',compiledLUT);
 % 1/13/09 - need to peek into stimDetails to get correctionTrial (otherwise analysis defaults correctionTrial=0)
-[out.correctionTrial compiledLUT]                            =extractFieldAndEnsure(trialRecords,{'stimDetails','correctionTrial'},'scalar',compiledLUT);
+% need a try-catch here because this is potentially dangerous (stimDetails may not be the same for all trials, in which case this will error
+% from the vector indexing
+try
+    [out.correctionTrial compiledLUT]                            =extractFieldAndEnsure(trialRecords,{'stimDetails','correctionTrial'},'scalar',compiledLUT);
+catch
+    ple
+    out.correctionTrial=ones(1,length(trialRecords))*nan;
+end    
 % 1/14/09 - added numRequestLicks and firstILI
 [out.numRequests compiledLUT]                                =extractFieldAndEnsure(trialRecords,{},'numRequests',compiledLUT);
 [out.firstIRI compiledLUT]                                   =extractFieldAndEnsure(trialRecords,{},'firstIRI',compiledLUT);
@@ -169,9 +176,15 @@ elseif ischar(resp)
         case 'server kill'
             out=-5;
         otherwise
-            out=-6;
-            resp
-            warning('unrecognized response')
+            % 1/22/09 - if the response is 'manual training step %d'
+            match=regexp(resp,'manual training step \d+','match');
+            if match
+                out=-7; % manually set training step
+            else
+                out=-6;
+                resp
+                warning('unrecognized response')
+            end
     end
 else
     resp

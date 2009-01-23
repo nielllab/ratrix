@@ -19,12 +19,17 @@ shiftDown=any(keyCode(KbConstants.shiftKeys));
 ctrlDown=any(keyCode(KbConstants.controlKeys));
 atDown=any(keyCode(KbConstants.atKeys));
 kDown=any(keyCode(KbConstants.kKey));
+tDown=any(keyCode(KbConstants.tKey));
 portsDown=false(1,length(KbConstants.portKeys));
+numsDown=false(1,length(KbConstants.numKeys));
 %             arrowKeyDown=false; % initialize this variable
 % 1/9/09 - phil to add stuff about arrowKeyDown
 for pNum=1:length(KbConstants.portKeys)
     portsDown(pNum)=any(keyCode(KbConstants.portKeys{pNum}));
     %                 arrowKeyDown=arrowKeyDown || any(strcmp(KbName(keys(keyNum)),{'left','down','right'}));
+end
+for nNum=1:length(KbConstants.numKeys)
+    numsDown(nNum)=any(keyCode(KbConstants.numKeys{nNum}));
 end
             
 %map a 1-key shortcut left center right reponse - this 
@@ -69,6 +74,11 @@ if kDown
     elseif any(keyCode(KbConstants.qKey)) && ~paused && allowQPM
         done=1;
         response='manual kill';
+    elseif tDown && any(numsDown)
+        % k+t+numKeys, set a manual training step
+        newTsNum=find(numsDown,1,'first');
+        done=1;
+        response=sprintf('manual training step %d',newTsNum);
     elseif any(portsDown)
         if shiftDown
             if atDown && portsDown(2)

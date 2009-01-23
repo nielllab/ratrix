@@ -113,6 +113,16 @@ end
 stimulus.images=pics;
 % details.images=stimulus.images; % dont store full image - takes up too much space
 
+% 1/22/09 - expert mode
+if strcmp(type,'expert')
+    stim=details;
+    stim.height=height;
+    stim.width=width;
+    stim.floatprecision=0;
+end
+
+out=stim;
+
 if details.correctionTrial;
     text='correction trial!';
 else

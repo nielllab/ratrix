@@ -6,10 +6,20 @@ if isa(r,'ratrix') && isa(station,'station') && (isempty(rn) || isa(rn,'rnet'))
     if t>0
         ts=getTrainingStep(p,t);
 
-        [graduate keepWorking secsRemainingTilStateFlip subject r trialRecords station] ...
+        [graduate keepWorking secsRemainingTilStateFlip subject r trialRecords station newTsNum] ...
             =doTrial(ts,station,subject,r,rn,trialRecords,sessionNumber);
         'subject'
 %         newTrialRecords
+
+        % 1/22/09 - if newTsNum is not empty, this means we want to manually move the trainingstep (not graduate)
+        if ~isempty(newTsNum)
+            if getNumTrainingSteps(p)>=newTsNum
+                [subject r]=setStepNum(subject,newTsNum,r,sprintf('manually setting to %s',newTsNum),'ratrix');
+            else
+                [subject r]=setStepNum(subject,t,r,'invalid trainingStep specified - ignoring!','ratrix');
+            end
+            keepWorking=1;
+        end
         
         if graduate
             if getNumTrainingSteps(p)>=t+1

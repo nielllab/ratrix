@@ -1,8 +1,8 @@
-function [graduate keepWorking secsRemainingTilStateFlip subject r trialRecords station] ...
+function [graduate keepWorking secsRemainingTilStateFlip subject r trialRecords station newTsNum] ...
     =doTrial(ts,station,subject,r,rn,trialRecords,sessionNumber)
 graduate=0;
 
-
+newTsNum=[];
 if ~isempty(rn) %need to be in bootstrap context cuz updating involves a matlab quit/expects daemon to restart it -- actually probably not necessary, but what if stand alone user has files open in editor that get svn updated?
     if ~isempty(ts.svnRevNum)
         args={ts.svnRevURL ts.svnRevNum};
@@ -86,6 +86,17 @@ try
                 doTrial(ts.trialManager,station,ts.stimManager,subject,r,rn,trialRecords,sessionNumber);
             keepWorking=~stopEarly;
 
+            % 1/22/09 - check to see if we want to dynamically change trainingStep (look in trialRecords(end).response, if stopEarly is set)
+            if stopEarly
+                if isfield(trialRecords(end),'response') && ischar(trialRecords(end).response)
+                    [match tokens]=regexp(trialRecords(end).response,'manual training step (\d+)','match','tokens');
+                    if ~isempty(match)
+                        % manually update trainingstep
+                        newTsNum=uint8(str2double(tokens{1}{1}));
+                    end
+                end
+            end
+            
             graduate = checkCriterion(ts.criterion,subject,ts, trialRecords);
             %END SESSION BY GRADUATION
             if graduate

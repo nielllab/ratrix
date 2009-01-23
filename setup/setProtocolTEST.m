@@ -520,7 +520,7 @@ imlist.ts5A={...
 
 
 discrimStim5A = images(imdir,ypos_nAFC,background_nAFC,...
-    maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts5A,[.15 .15],false,[0 0],'cache');
+    maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts5A,[.15 1],false,[0 180],'expert');
 % discrimStim6A = images(imdir,ypos_nAFC,background_nAFC,...
 %     maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts6A,[.5 .75],true,[0 90]);
 
@@ -534,7 +534,7 @@ ts30 = trainingStep(vh, discrimStim5A,graduateQuickly,noTimeOff(),svnRev);
 %     ts18, ts19, ts20, ts21, ts22});
 % stepNum=21;
 p=protocol('gabor test2', {ts25, ts1, ts4, ts12, ts2, ts12, ts8, ts11,ts9,ts10,sweepContrast,ts23,ts24,ts27,ts30});
-stepNum=uint8(4);
+stepNum=uint8(15);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

@@ -170,7 +170,6 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 trialManager = setReinforcementManager(trialManager, rm);
             end
             % =====================================================================================================
-            
             % phase-ify if necessary (if trialRecords(trialInd).type is 'phased')
             % - this means we need stimSpecs, soundTypes, scaleFactors, and
             % stimulusDetails to be phase-specific
@@ -191,7 +190,6 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                     trialRecords(trialInd).targetPorts,trialRecords(trialInd).distractorPorts,trialRecords(trialInd).scaleFactor,...
                     rewardSizeULorMS,msPenalty,getIFI(station));
             end
-            
             
             % we have called calcStim() to successfully return our cell
             % array of stimSpec objects along with target, distractor, and

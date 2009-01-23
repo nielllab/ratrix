@@ -158,11 +158,16 @@ KbConstants.qKey=KbName('q');
 KbConstants.mKey=KbName('m');
 KbConstants.aKey=KbName('a');
 KbConstants.rKey=KbName('r');
+KbConstants.tKey=KbName('t');
 KbConstants.atKeys=find(cellfun(@(x) ~isempty(x),strfind(KbConstants.allKeys,'@')));
 KbConstants.asciiOne=double('1');
 KbConstants.portKeys={};
 for i=1:length(ports)
     KbConstants.portKeys{i}=find(strncmp(char(KbConstants.asciiOne+i-1),KbConstants.allKeys,1));
+end
+KbConstants.numKeys={};
+for i=1:10
+    KbConstants.numKeys{i}=find(strncmp(char(KbConstants.asciiOne+i-1),KbConstants.allKeys,1));
 end
 
 priorityLevel=MaxPriority(window,'GetSecs','KbCheck');

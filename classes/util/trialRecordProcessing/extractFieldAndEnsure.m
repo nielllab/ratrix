@@ -102,6 +102,7 @@ try
     end
 catch
     % if this field doesn't exist, fill with nans
+%     ple
     out=nan*ones(1,length(trialRecords));
 end
 

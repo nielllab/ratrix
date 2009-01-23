@@ -78,7 +78,7 @@ try
         stim = getStim(spec);
         type = getStimType(spec);
         metaPixelSize = scaleFactors{i};
-        
+
         % =====================================================================================================================
         % function [loop trigger frameIndexed timeIndexed indexedFrames strategy] = determineStrategy(tm, stim, type, responseOptions)
         [phaseData{i}.loop phaseData{i}.trigger phaseData{i}.frameIndexed phaseData{i}.timeIndexed ...

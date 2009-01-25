@@ -132,3 +132,5 @@ pmm/flankerComparisonCI.m -text
 spike[!!-~]sorting/analysisManager.m -text
 spike[!!-~]sorting/postProcessSpikeClusters.m -text
 pmm/doHitFAScatter.m -text
+spike[!!-~]sorting/spikeSortFiddler.m -text
+pmm/isHumanSubjectID.m -text

@@ -247,12 +247,14 @@ switch performanceMeasure
         perf = numCorrect./numAttempted;
     case 'pctYes'
         bias= numResponseYes./numAttempted;
-    case 'hitRate'
+    case {'hitRate','hit','hits'}
         numCorrect=stats.hits;  %total correct with signal
         numAttempted=stats.misses+stats.hits; %total attempted with signal
-    case 'correctRejections'
+        performanceMeasure='hitRate';
+    case {'correctRejections','CR','CRs'}
         numCorrect=stats.correctRejects; %total correct with no signal
         numAttempted=stats.correctRejects+stats.falseAlarms; %totally attempted with no signal
+        performanceMeasure='correctRejections';
     case 'dpr'
         perf = dpr;
     case 'eb'

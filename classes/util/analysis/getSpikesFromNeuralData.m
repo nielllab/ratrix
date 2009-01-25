@@ -130,21 +130,23 @@ switch upper(spikeDetectionMethod)
 end
 
 % plotting to show results (for testing)
-spikePoints=ones(1,length(spikeTimestamps));
-subplot(2,1,1)
-plot(neuralDataTimes,neuralData);
-title('rawSignal and spikes');
-hold on
-size(spikes)
-size(neuralData)
-plot(neuralDataTimes,spikes.*neuralData,'.r');
-hold off
-subplot(2,1,2)
-plot(neuralDataTimes,filteredSignal);
-title('filteredSignal and spikes');
-hold on
-plot(neuralDataTimes,spikes.*filteredSignal,'.r');
-hold off
+if 0
+    spikePoints=ones(1,length(spikeTimestamps));
+    subplot(2,1,1)
+    plot(neuralDataTimes,neuralData);
+    title('rawSignal and spikes');
+    hold on
+    size(spikes)
+    size(neuralData)
+    plot(neuralDataTimes,spikes.*neuralData,'.r');
+    hold off
+    subplot(2,1,2)
+    plot(neuralDataTimes,filteredSignal);
+    title('filteredSignal and spikes');
+    hold on
+    plot(neuralDataTimes,spikes.*filteredSignal,'.r');
+    hold off
+end
 
 % output of spike detection should be spikeTimestamps and spikeWaveforms
 % END SPIKE DETECTION
@@ -276,7 +278,8 @@ switch upper(spikeSortingMethod)
         %   splitEvery - (optional) (default 50) Test to see if any clusters should be split every n steps. 0 means don't split.
         %   maxPossibleClusters - (optional) (default 100) Cluster splitting can produce no more than this many clusters.
         %   useAllFeatures - (optional) (default 1) 1 = use all features (all datapoints of each waveform)
-        %                                           2 = use first 10 principal components
+        %                                           2 = use first 10
+        %                                           principal components
         
         % check params
         % minClusters
@@ -370,11 +373,91 @@ switch upper(spikeSortingMethod)
         % change back to original directory
         cd(currentDir);
     otherwise
+        spikeSortingMethod
         error('unsupported spike sorting method');
 end
 
 % output of spike sorting should be assignedCluster and rankedClusters
 % assignedCluster is a 1xN vector, which is the assigned cluster number for each spike (numbers are arbitrary)
+
+
+if 1 % view plots (for testing)
+    
+    size(spikes)
+    
+    
+    whichSpikes=find(assignedClusters~=999);
+    whichNoise=find(assignedClusters==999);
+    candTimes=find(spikes);
+    spikeTimes=candTimes(whichSpikes);
+    noiseTimes=candTimes(whichNoise);
+    
+    
+    %choose y range for raw, crop extremes is more than N std
+    dataMinMax=1.1*minmax(neuralData');
+    stdRange=6*(std(neuralData'));
+    if range(dataMinMax)<stdRange*2
+        yRange=dataMinMax;
+    else
+        yRange=mean(neuralData')+[-stdRange stdRange ];
+    end
+        
+    %should do same for filt if functionized, but its not needed
+    yRangeFilt= 1.1*minmax(filteredSignal');
+    
+    
+    % a smart way to choose a zoom center on a spike
+    % this should be able to be a user selected spike (click on main timeline nearest x-val  AND  key combo for prev / next spike)
+    % but for now its the last one
+    zoomWidth=40000*0.05;  % 50msec default, key board zoom steps by a factor of 2
+    lastSpikeTimePad=min([max(spikeTimes)+200 size(neuralData,1)]);
+    zoomInds=[max(lastSpikeTimePad-zoomWidth,1):lastSpikeTimePad ];
+    
+    figure
+    subplot(1,3,3)
+    plot(spikeWaveforms(whichNoise,:)','color',[.7 .7 .7])
+    hold on;
+    plot(spikeWaveforms(whichSpikes,:)','r')
+    axis([ 1 size(spikeWaveforms,2)  1.1*minmax(spikeWaveforms(:)') ])
+     
+    
+    % a button should allow selection between filtered or non-filtered (only show one kind)
+    subplot(2,3,1)
+    title('rawSignal and spikes');
+    plot(neuralDataTimes,neuralData,'k');
+    hold on
+    plot(neuralDataTimes(noiseTimes),neuralData(noiseTimes),'.b');
+    plot(neuralDataTimes(spikeTimes),neuralData(spikeTimes),'.r');
+     axis([ minmax(neuralDataTimes')   yRange ])
+        
+    subplot(2,3,2)
+    title('rawSignal zoom');
+    plot(neuralDataTimes(zoomInds),neuralData(zoomInds),'k');
+    hold on
+    someNoiseTimes=noiseTimes(ismember(noiseTimes,zoomInds));
+    someSpikeTimes=spikeTimes(ismember(spikeTimes,zoomInds));
+    plot(neuralDataTimes(someNoiseTimes),neuralData(someNoiseTimes),'.b');
+    plot(neuralDataTimes(someSpikeTimes),neuralData(someSpikeTimes),'.r');
+    axis([ minmax(neuralDataTimes(zoomInds)')   yRange ])
+    
+    subplot(2,3,4)
+    title('filtSignal and spikes');
+    plot(neuralDataTimes,filteredSignal,'k');
+    hold on
+    plot(neuralDataTimes(noiseTimes),filteredSignal(noiseTimes),'.b');
+    plot(neuralDataTimes(spikeTimes),filteredSignal(spikeTimes),'.r');
+    axis([ minmax(neuralDataTimes')   1.1*minmax(filteredSignal') ])
+        
+    subplot(2,3,5)
+    title('filtSignal zoom');
+    plot(neuralDataTimes(zoomInds),filteredSignal(zoomInds),'k');
+    hold on
+        plot(neuralDataTimes(someNoiseTimes),filteredSignal(someNoiseTimes),'.b');
+    plot(neuralDataTimes(someSpikeTimes),filteredSignal(someSpikeTimes),'.r');
+    axis([ minmax(neuralDataTimes(zoomInds)')   1.1*minmax(filteredSignal(zoomInds)') ])
+    %%
+end
+
 % END SPIKE SORTING
 % =====================================================================================================================
 

@@ -1,9 +1,13 @@
 function smallData=getSmalls(subjectID,dateRange,rack,verbose)
 
 if ~exist('rack','var') | isempty(rack)
-    % rack=getRackForSubject ...
-    %it might be better to pass in from analysisPlotter rather than keep hitting the oracleDB
-    rack=1;
+    if isHumanSubjectID(subjectID)
+        rack=103;
+    else  
+        % rack=getRackForSubject ...
+        %it might be better to pass in from analysisPlotter rather than keep hitting the oracleDB
+        rack=1;
+    end
 end
 
 if ~exist('verbose','var') | isempty(verbose)

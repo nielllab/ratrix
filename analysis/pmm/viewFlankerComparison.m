@@ -14,7 +14,7 @@ function [delta CI deltas CIs]=viewFlankerComparison(names,params,cMatrix,statTy
 % deltas- the differences for each rat
 % CIs   - confidence intervals for each rat
 %
-%example: [delta CI]=viewFlankerComparison(params,names)
+%example: [delta CI]=viewFlankerComparison(names,params)
 
 
 

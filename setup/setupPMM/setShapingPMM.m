@@ -1,3 +1,4 @@
+
 function r=setShapingPMM(r,subjects, protocolType, protocolVersion, defaultSettingsDate, persistTrainingSteps)
 %master shaping template for detection, goTo, or tilt discrimination tasks
 
@@ -62,16 +63,12 @@ switch protocolVersion
         parameters.dynamicSweep.sweptValues=[];
         parameters.dynamicSweep.sweptParameters={'targetOrientations','flankerOffset'}% 'flankerOrientations'}%,'flankerOffset','flankerPosAngle'};
 
-        %
         %         fitRF.fitMethod='elipse';
         %         fitRF.which='last';
         %         fitRF.medianFilter=logical(ones(3));
         %         fitRF.alpha=0.05;
         %         fitRF.numSpotsPerSTA=1;
         %         fitRF.spotSizeInSTA=10;
-
-       
-        
                 
         %basic setup
         parameters.blocking.blockingMethod='nTrials';
@@ -80,7 +77,7 @@ switch protocolVersion
         parameters.blocking.sweptValues=generateFlankerFactorialCombo(ifFeatureGoRightWithTwoFlank, parameters.blocking.sweptParameters, {'ordered'}, parameters);
         
         parameters.renderMode='dynamic-precachedInsertion'; %'ratrixGeneral-maskTimesGrating', 'ratrixGeneral-precachedInsertion','dynamic-precachedInsertion','dynamic-maskTimesGrating','dynamic-onePatch'
-            %error if dynamic and toddle is on
+            %error if dynamic and toggle is on
             parameters.targetOnOff=int16([1 200]);
             parameters.flankerOnOff=int16([100 800]);
     otherwise

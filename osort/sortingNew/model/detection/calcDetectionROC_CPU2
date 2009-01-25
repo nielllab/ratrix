@@ -1,0 +1,20 @@
+
+for j=1:3
+simNr=j;
+levels=1:4;
+thresholds=2:.5:6;
+
+detectionMethod=4;
+all=[];
+TPall=[];
+FPall=[];
+for i=1:length(levels)
+    levelNr=levels(i);    
+    [allTmp, TPallTmp, FPallTmp] = calcDetectionROC_perLevel(simNr, levelNr, thresholds, detectionMethod);
+    all{i}=allTmp;
+    TPall{i}=TPallTmp;
+    FPall{i}=FPallTmp;
+end
+
+save(['/home/urut/tmpSim' num2str(j) '_D' num2str(detectionMethod) '.mat']);
+end

@@ -158,7 +158,8 @@ details.stixelSize = stixelSize;
 details.std = stimulus.std;
 details.meanLuminance = meanLuminance;
 details.numFrames=numFrames;
-% details.seedValues = stim.seedValues;
+details.height=stim.height;
+details.width=stim.width;
 % =============================
 
 % ================================================================================

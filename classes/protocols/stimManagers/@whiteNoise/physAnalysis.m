@@ -1,10 +1,50 @@
-function [analysisdata] = physAnalysis(stimManager,spikeData,stimData,plotParameters,parameters,analysisdata)
+function [analysisdata] = physAnalysis(stimManager,spikeData,stimulusDetails,plotParameters,parameters,analysisdata)
 % stimManager is the stimulus manager
 % spikes is a logical vector of size (number of neural data samples), where 1 represents a spike happening
 % frameIndices is an nx2 array of frame start and stop indices - [start stop], n = number of frames
-% stimData is the entire movie shown for this trial
+% stimulusDetails are the stimDetails from calcStim (hopefully they contain all the information needed to reconstruct stimData)
 % photoDiode - currently not used
 % plotParameters - currently not used
+
+% stimData is the entire movie shown for this trial
+% removed 1/26/09 and replaced with stimulusDetails
+% reconstruct stimData from stimulusDetails - stimManager specific method
+if strcmp(stimulusDetails.strategy,'expert')
+    seeds=stimulusDetails.seedValues;
+    spatialDim = stimulusDetails.spatialDim;
+    std = stimulusDetails.std;
+    meanLuminance = stimulusDetails.meanLuminance;
+    height=stimulusDetails.height;
+    width=stimulusDetails.width;
+    factor = width/spatialDim(1);
+
+    %                     stimData=zeros(height,width,length(seeds)); % method 1
+    stimData=zeros(spatialDim(1),spatialDim(2),length(seeds)); % method 2
+    for frameNum=1:length(seeds)
+        randn('state',seeds(frameNum));
+        stixels = randn(spatialDim)*255*std+meanLuminance;
+
+        % =======================================================
+        % method 1 - resize the movie frame to full pixel size
+        % for each stixel row, expand it to a full pixel row
+        %                         for stRow=1:size(stixels,1)
+        %                             pxRow=[];
+        %                             for stCol=1:size(stixels,2) % for each column stixel, repmat it to width/spatialDim
+        %                                 pxRow(end+1:end+factor) = repmat(stixels(stRow,stCol), [1 factor]);
+        %                             end
+        %                             % now repmat pxRow vertically in stimData
+        %                             stimData(factor*(stRow-1)+1:factor*stRow,:,frameNum) = repmat(pxRow, [factor 1]);
+        %                         end
+        %                         % reset variables
+        %                         pxRow=[];
+        % =======================================================
+        % method 2 - leave stimData in stixel size
+        stimData(:,:,frameNum) = stixels;
+
+
+        % =======================================================
+    end
+end
 
 
 % refreshRate - try to retrieve from neuralRecord (passed from stim computer)

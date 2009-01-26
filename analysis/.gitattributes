@@ -134,3 +134,5 @@ spike[!!-~]sorting/postProcessSpikeClusters.m -text
 pmm/doHitFAScatter.m -text
 spike[!!-~]sorting/spikeSortFiddler.m -text
 pmm/isHumanSubjectID.m -text
+spike[!!-~]sorting/flushPhysAnalysisRecords.m -text
+spike[!!-~]sorting/flushSpikeRecords.m -text

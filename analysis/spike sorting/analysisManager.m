@@ -97,7 +97,7 @@ while ~quit
             if ~isdir(analysisPath)
                 mkdir(analysisPath);
             end
-            analysisLocation = fullfile(analysisPath, sprintf('analysis_%d-%s.mat',goodFiles(i).trialNum,goodFiles(i).timestamp));
+            analysisLocation = fullfile(analysisPath, sprintf('physAnalysis_%d-%s.mat',goodFiles(i).trialNum,goodFiles(i).timestamp));
             
             % =================================================================================
             % if there is no spikeRecord corresponding to the current neuralRecord, run spike analysis on it
@@ -116,7 +116,8 @@ while ~quit
                 warningBound = 0.01;
                 errorBound = 0.05;
                 spikeDetails=[];
-                [frameIndices frameTimes passedQualityTest] = getFrameTimes(neuralData(:,1),neuralDataTimes,samplingRate,warningBound,errorBound); % pass in the pulse channel
+                [frameIndices frameTimes frameLengths passedQualityTest] = ...
+                    getFrameTimes(neuralData(:,1),neuralDataTimes,samplingRate,warningBound,errorBound); % pass in the pulse channel
                 if usePhotoDiodeSpikes
                     [spikes photoDiode]=getSpikesFromPhotodiode(neuralData(:,2),neuralDataTimes, frameIndices);
                     spikeTimestamps = neuralDataTimes(spikes==1);
@@ -156,11 +157,11 @@ while ~quit
                 
                 %save spike-related data
                 save(spikeRecordLocation,'spikes','spikeWaveforms','spikeTimestamps','assignedClusters','spikeDetails',...
-                    'frameIndices','frameTimes','photoDiode','passedQualityTest');
+                    'frameIndices','frameTimes','frameLengths','photoDiode','passedQualityTest');
                 disp('saved spike data');
             else
                 % already have a spikeRecord for this neuralRecord, just load it
-                load(spikeRecordLocation);
+                load(spikeRecordLocation); % this also populates passedQualityTest (to check if we should do analysis)
                 disp('loaded spikeRecord');
             end
             
@@ -172,57 +173,22 @@ while ~quit
             % =================================================================================
             % now run analysis on spikeRecords and stimRecords
             % try to get location of analysis file
-            
-            % 10/29/08 - skip analysis if fail quality test set in frameTime calc
-            doAnalysis= (~exist(analysisLocation,'file') || overwriteAll) && passedQualityTest;
+            quality.passedQualityTest=passedQualityTest;
+            quality.frameIndices=frameIndices;
+            quality.frameTimes=frameTimes;
+            quality.frameLengths=frameLengths;
+            quality.samplingRate=samplingRate; % from neuralRecord
+            % load stimRecords
+            stimRecordLocation
+            load(stimRecordLocation);
+            evalStr = sprintf('sm = %s();',stimManagerClass);
+            eval(evalStr);
+            % 1/26/09 - skip analysis if not worth sorting spikes
+            doAnalysis= (~exist(analysisLocation,'file') || overwriteAll) && worthSpikeSorting(sm,quality);
             % if we need to do analysis (either no analysis file exists or
             % we want to overwrite)
             
-            if doAnalysis
-                % load stimRecords and use spike data from above
-                stimRecordLocation
-                load(stimRecordLocation);      % has stimulusDetails (which has big, stimManagerClass, trialManagerClass)
-                if 0 % belongs in method of sm
-                    %stimData = stimulusDetails.big;
-                    % 11/9/08 - if stimulusDetails.big is a cell, then it was dynamic mode calc - generated movie frames from seeds
-                    if iscell(stimData) && length(stimData) == 2 && strcmp(stimData{1},'dynamic')
-                        seeds=stimData{2};
-                        spatialDim = stimulusDetails.spatialDim;
-                        std = stimulusDetails.std;
-                        meanLuminance = stimulusDetails.meanLuminance;
-                        height=stimulusDetails.height;
-                        width=stimulusDetails.width;
-                        factor = width/spatialDim(1);
-                        
-                        %                     stimData=zeros(height,width,length(seeds)); % method 1
-                        stimData=zeros(spatialDim(1),spatialDim(2),length(seeds)); % method 2
-                        for frameNum=1:length(seeds)
-                            randn('state',seeds(frameNum));
-                            stixels = randn(spatialDim)*255*std+meanLuminance;
-                            
-                            % =======================================================
-                            % method 1 - resize the movie frame to full pixel size
-                            % for each stixel row, expand it to a full pixel row
-                            %                         for stRow=1:size(stixels,1)
-                            %                             pxRow=[];
-                            %                             for stCol=1:size(stixels,2) % for each column stixel, repmat it to width/spatialDim
-                            %                                 pxRow(end+1:end+factor) = repmat(stixels(stRow,stCol), [1 factor]);
-                            %                             end
-                            %                             % now repmat pxRow vertically in stimData
-                            %                             stimData(factor*(stRow-1)+1:factor*stRow,:,frameNum) = repmat(pxRow, [factor 1]);
-                            %                         end
-                            %                         % reset variables
-                            %                         pxRow=[];
-                            % =======================================================
-                            % method 2 - leave stimData in stixel size
-                            stimData(:,:,frameNum) = stixels;
-                            
-                            
-                            % =======================================================
-                        end
-                    end
-                end
-                
+            if doAnalysis                
                 % do something with loaded information
                 if ~exist('parameters','var')
                     parameters=[];
@@ -242,8 +208,6 @@ while ~quit
                 % stuff to class type the analysis method
                 % stimManagerClass = stimulusDetails.stimManagerClass;
                 % already its own variable in stimRecords
-                evalStr = sprintf('sm = %s();',stimManagerClass);
-                eval(evalStr);
                 [analysisdata] = physAnalysis(sm,spikeData,stimulusDetails,plotParameters,parameters,analysisdata);
                 % parameters is from neuralRecord
                 % we pass in the analysisdata because it contains cumulative information that is specific to the analysis method
@@ -277,7 +241,7 @@ end % end loop
 end % end main function
 % ===============================================================================================
 
-function [frameIndices frameTimes passedQualityTest] = getFrameTimes(pulseData, pulseDataTimes, sampleRate, warningBound, errorBound)
+function [frameIndices frameTimes frameLengths passedQualityTest] = getFrameTimes(pulseData, pulseDataTimes, sampleRate, warningBound, errorBound)
 % calculate pulses and frameTimes based on pulseData
 % frameIndices - the exact sample index for each pulse
 % frameTimes - the time value retrieved from the index of a corresponding pulse (not unique!)

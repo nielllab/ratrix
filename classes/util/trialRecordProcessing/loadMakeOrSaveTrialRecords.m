@@ -44,7 +44,7 @@ end
 if doSave
     sessionLUT={};
     fieldsInLUT={};
-    if length(varargin)==2
+    if length(varargin)==2 && ~isempty(trialRecords) %1/26/09 - dont do all this if no records yet
         %12/17/08 - put LUT processing here?
         %12/11/08 - newRecs is a struct, each field is an array/matrix of values
         % if type is cell, then use LUT and replace with an array of indices

@@ -3,20 +3,22 @@ function r=createRatrixWithDefaultStations(machines,dataPath,rewardMethod,localM
 serverDataPath = fullfile(dataPath, 'ServerData');
 r=ratrix(serverDataPath,1);
 
+    screenNum=int8(0);
+pportaddr=[];
+
 if localMultiDisplaySetup
     if ismac
         error('you probably don''t really mean localMultiDisplaySetup on mac')
     end
     warning('you are running with local multidisplay -- timing will be bad!')
     Screen('Preference', 'SkipSyncTests',1) %hmm, i think startPTB will undo this
-    %screenNum=int8(max(Screen('Screens')));
-    screenNum=int8(1);
-    pportaddr='B888';
-else
-    pportaddr=[];
-    screenNum=int8(0);
+    
+    screenNum=int8(max(Screen('Screens')));
+    
+    %screenNum=int8(1);
+    %pportaddr='B888';
 end
-
+    
 for i=1:length(machines)
     id=machines{i}{1};
     path=fullfile(dataPath, 'Stations',sprintf('station%s',id));

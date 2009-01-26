@@ -79,7 +79,7 @@ for i=1:length(ids)
     classes={};
     if ~exist('destination', 'var') || isempty(destination)
         conn=dbConn();
-        compiledRecordsDirectory=getCompilePathBySubject(conn, names{i});
+        compiledRecordsDirectory=getCompilePathBySubject(conn, ids{i});
         compiledRecordsDirectory = compiledRecordsDirectory{1};
         closeConn(conn);
     else

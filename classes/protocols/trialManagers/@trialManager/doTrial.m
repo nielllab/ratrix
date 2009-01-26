@@ -4,9 +4,9 @@ verbose=1;
 updateTM=false;
 stopEarly=0;
 
-if ~isempty(rn)
-    error('rn in phasedTrialManager/doTrial is not empty anymore');
-end
+% if ~isempty(rn)
+%     error('rn in phasedTrialManager/doTrial is not empty anymore');
+% end
 
 % List of variables used: 
     % verbose - flag for verbose output

@@ -4,9 +4,9 @@ function et=geometricTracker(varargin)
 % for more information about method see work by John Stahl 
 %         method='simple';         % 'simple' involves less noise, 'yCorrected' better in principle for more accurate for non-tangetial vertical eye positions. but may have noise from yEstimate      
 %         Rp=2;                    % in mm distance from pupil center to corneal surface see Stahl 2002 for methods of measuring it 
-%         Rcornea=3;              % radius of the cornea in mm
+%         Rcornea=3;               % radius of the cornea in mm
 %         alpha=12;                % degrees vertical angular elevation above camera of CR light source
-%         beta=0;                 % degrees horizontal angular elevation above camera of CR light source
+%         beta=0;                  % degrees horizontal angular elevation above camera of CR light source
 %         CameraImSizePixs=int16([1280,1024]);     % x pixels, y pixels,  Sol says: [1280,1024]
 %         CameraImSizeMm=[42,28];       % measured to 0.5 mm acc on 061122
 %         MonitorImSizePixs=int16([1024,768]);    % x pixels, y pixels  [1024,768];
@@ -16,7 +16,7 @@ function et=geometricTracker(varargin)
 %         eyeRightOfMonitorCenterMm=0;     % always zero (less than 1mm) in our rig;  user must center eye before recording
 %         degreesCameraIsClockwiseOfMonitorCenter=45;  %roughly if camera is at right of monitor; to be entered by user
 %         degreesCameraIsAboveEye=0;      %always zero (less than 3deg) in our rig;  user must center eye before recording
-% et = geometricTracker(method, Rp, Rcornea, alpha, beta, CameraImSizePixs, CameraImSizeMm, MonitorImSizePixs, MonitorImSizeMn, eyeToMoinitorTangentMm, eyeAboveMonitorCenterMm, eyeRightOfMonitorCenterMm, degreesCameraIsClockwiseOfMonitorCenter, degreesCameraIsAboveEye)
+% et = geometricTracker(method, Rp, Rcornea, alpha, beta, CameraImSizePixs, CameraImSizeMm, MonitorImSizePixs, MonitorImSizeMn, eyeToMoinitorTangentMm, eyeAboveMonitorCenterMm, eyeRightOfMonitorCenterMm, degreesCameraIsClockwiseOfMonitorCenter, degreesCameraIsAboveEye,framesPerAllocationChunk)
 % et = geometricTracker('simple', 2, 3, 12, 0, int16([1280,1024]), [42,28], int16([1024,768]), [400,290], 300, -25, 0, 45, 0)
 % future idea:  et =geometricTracker(getDefaults(geometricTracker))
 
@@ -41,7 +41,7 @@ switch nargin
         et.degreesCameraIsAboveEye=[];      %always zero (less than 3deg) in our rig;  user must center eye before recording
         et.humanConfirmation=false;         %this is set each session at run time.
         requiresCalibration = true;
-        et = class(et,'geometricTracker',eyeLinkTracker(requiresCalibration));
+        et = class(et,'geometricTracker',eyeLinkTracker(requiresCalibration,10000));
         
 %       et.hackScaleFactor=[];    % should be 1 for normal function.  Increases "camera resolution."  Acts like 1/Rp.
     case 1
@@ -52,7 +52,7 @@ switch nargin
             error('Input argument is not a geometricTracker object')
         end
         
-    case 14
+    case 15
         if ismember(varargin{1}, {'simple', 'yCorrected'})
             et.method=varargin{1};
         else
@@ -129,7 +129,7 @@ switch nargin
             error('eyeRightOfMonitorCenterMm must a single number in mm and must be >0');
         end
 
-        if varargin{13}>0 && varargin{13}<180
+        if varargin{13}>=0 && varargin{13}<=180
             et.degreesCameraIsClockwiseOfMonitorCenter=varargin{13};
         else
             error('degreesCameraIsClockwiseOfMonitorCenter must be a sensible measure (0 - 180) in clockwise degrees of angle between camera axis and monitor');
@@ -145,9 +145,9 @@ switch nargin
         et.humanConfirmation=false;
         
         requiresCalibration = true;
-        et = class(et,'geometricTracker',eyeLinkTracker(requiresCalibration));
+        et = class(et,'geometricTracker',eyeLinkTracker(requiresCalibration,varargin{15}));
     otherwise
         error('Wrong number of input arguments')
 end
 
-et=setSuper(et,et.eyeLinkTracker);
+%et=setSuper(et,et.eyeLinkTracker); %no more supers -pmm 090122

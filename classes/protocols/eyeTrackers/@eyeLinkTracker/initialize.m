@@ -1,6 +1,17 @@
 function et=initialize(et,subjectID,window)
 % this should initialize eyelink and set the data path.  If you can't
-%initialize, maybe you have not installed  the eyeLink software
+% initialize, check the following:
+
+% 1. Are you on a station that has an eyetracker on it? if not, you can't
+% run  a protocol that defines an eyetracker.  Leave that field empty in
+% the trial manager. 
+
+% 2. is the eye tracker turned on?  power the camera, and enter the command
+% "t" on the command line of the eyeTracker computer.  Its okay if it says
+% "offline - link closed" in the green box as long as the eyeLink software 
+% is up and running.
+%
+% 3.  maybe you have not installed  the eyeLink software
 % developers kit.  Here is how to set things up the first time:
 %
 % download and install lastest sdk from here:
@@ -84,6 +95,7 @@ end
 %eyeDataPath=fullfile(getBoxPathForSubjectID(b,subjectID,r),?subjectID?,'') %store by subject or by box?
 
 % eyeDataPath= fullfile(fileParts(fileParts(getRatrixPath)),'ratrixData','eyeData',subjectID); 
-eyeDataPath = fullfile('\\Reinagel-lab.AD.ucsd.edu\RLAB\Rodent-Data\Fan\datanet', subjectID, 'eyeRecords'); % 10/23/08 - to be replaced by oracle lookup
+% eyeDataPath = fullfile('\\Reinagel-lab.AD.ucsd.edu\RLAB\Rodent-Data\Fan\datanet', subjectID, 'eyeRecords'); % 10/23/08 - to be replaced by oracle lookup
+eyeDataPath = fullfile('132.239.158.179','\\132.239.158.179\datanet_storage', subjectID, 'eyeRecords');  %should be where the neural data is, how do we get this is EyeTracker is on but datanet is not...
 mkdir(eyeDataPath);
 et=setEyeDataPath(et,eyeDataPath);

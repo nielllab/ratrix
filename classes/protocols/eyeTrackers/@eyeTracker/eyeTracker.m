@@ -6,10 +6,11 @@ switch nargin
         % if no input arguments, create a default object
         et.requiresCalibration=[];
         et.isCalibrated=[];
+        et.framesPerAllocationChunk=0; 
         et.isTracking=[];
         et.eyeDataPath=[];
         et.sessionFileName=[];
-        et.framesPerAllocationChunk=10000; % default setting
+
         et = class(et,'eyeTracker');
     case {1 2}
         % if single argument of this class type, return it

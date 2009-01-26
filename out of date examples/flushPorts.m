@@ -1,9 +1,5 @@
 function times=flushPorts(dursSec,numSquirts,ifi,st)
 
-warning('off','MATLAB:dispatcher:nameConflict')
-addpath(genpath('C:\pmeier\Ratrix\classes\'));
-warning('on','MATLAB:dispatcher:nameConflict')
-
 if ~exist('dursSec','var')
     dursSec=2;  
 end
@@ -18,7 +14,7 @@ if ~exist('ifi','var')
 end
 
 if ~exist('st','var')
-    r=ratrix('C:\Documents and Settings\rlab\Desktop\testdata\ServerData\',0);
+ r = getRatrix;
  bids=getBoxIDs(r);
     boxID=bids(1);
     st=getStationsForBoxID(r,boxID);

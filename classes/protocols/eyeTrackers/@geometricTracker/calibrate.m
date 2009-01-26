@@ -94,8 +94,7 @@ switch method
 
             else
                 confirmedCorrect=1;
-                struct(et)
-                keyboard
+                struct(et);
             end
         end
 

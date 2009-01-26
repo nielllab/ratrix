@@ -168,19 +168,31 @@ switch nargin
             case 'ifFeatureGoRightWithTwoFlank'
                 s = varargin{1};
             case 'char'
+                p=getDefaultParameters(ifFeatureGoRightWithTwoFlank);
                 switch varargin{1}
                     case 'def'
-                        p=getDefaultParameters(ifFeatureGoRightWithTwoFlank);
-                        s=getStimManager(setFlankerStimRewardAndTrialManager(p));
+                        %do nothing
+                    case 'phys' % not fixed
+                        p.flankerOffset=3;
+                        p.renderMode='dynamic-precachedInsertion'; % dynamic-maskTimesGrating, dynamic-onePatchPerPhase,or dynamic-onePatch
+                        
+                        p.dynamicSweep.sweepMode={'ordered'};
+                        p.dynamicSweep.sweptValues=[];
+                        p.dynamicSweep.sweptParameters={'targetOrientations','flankerOffset'}% 'flankerOrientations'}%,'flankerOffset','flankerPosAngle'};
+                        %         p.fitRF.fitMethod='elipse';
+                        %         p.fitRF.which='last';
+                        %         p.fitRF.medianFilter=logical(ones(3));
+                        %         p.fitRF.alpha=0.05;
+                        %         p.fitRF.numSpotsPerSTA=1;
+                        %         p.fitRF.spotSizeInSTA=10;
                     case '10'
-                        p=getDefaultParameters(ifFeatureGoRightWithTwoFlank);
                         p.renderMode='ratrixGeneral-precachedInsertion';
                         p.mean=0.5;
-                        s=getStimManager(setFlankerStimRewardAndTrialManager(p));
                     otherwise
                         varargin{1}
                         error('Single input argument is bad')
                 end
+                 s=getStimManager(setFlankerStimRewardAndTrialManager(p));
             otherwise
                 class(varargin{1})
                 error('Single input argument is bad')

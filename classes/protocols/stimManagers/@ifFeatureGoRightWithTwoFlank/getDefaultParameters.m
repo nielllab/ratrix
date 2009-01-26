@@ -6,7 +6,7 @@ if ~exist('protocolType','var') || isempty(protocolType)
 end
 
 if ~exist('protocolVersion','var') || isempty(protocolVersion)
-    protocolVersion='2_3';
+    protocolVersion='2_4'; % 2_3 had a left error
 end
 
 if ~exist('defaultSettings','var') || isempty(defaultSettings)

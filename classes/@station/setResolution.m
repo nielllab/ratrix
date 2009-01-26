@@ -39,6 +39,11 @@ if oldRes.width~=res.width || oldRes.height~=res.height || oldRes.hz ~=res.hz ||
     
     newRes=Screen('Resolution', s.screenNum)
     if ~all([newRes.width==res.width newRes.height==res.height newRes.pixelSize==res.pixelSize newRes.hz==res.hz])
+        requestRes=res
+        newRes=newRes
+        warning('failed to get desired res') 
+        sca
+        keyboard
         error('failed to get desired res') %needs to be warning to work with remotedesktop
     end
 

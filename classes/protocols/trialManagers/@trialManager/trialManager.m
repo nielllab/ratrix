@@ -88,10 +88,10 @@ switch nargin
         if isempty(t.eyeController)
             %pass
         else
+            ec=t.eyeController
             error('must be a empty -- until we actually have controllers...then maybe its an controller object or a parameter pair list;  example:  {''driftCorrect'',{param1, param2}}')
         end
-
-        
+ 
         if ischar(customDescription)
             t.description=sprintf(['%s\n'...
                                    '\t\t\tmsFlushDuration:\t%d\n'...

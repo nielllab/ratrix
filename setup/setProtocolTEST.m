@@ -359,7 +359,7 @@ nameOfShapingStep{end+1} = sprintf('Expt 1: contrast sweep', protocolType);
 [sweepContrast previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 % ====================================================================================================================
 % training steps
-svnRev={'svn://132.239.158.177/projects/ratrix/branches/fan'};
+svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
 % set up graduationCriterion
 graduateQuickly = performanceCriterion([.9, .5], [uint8(10), uint8(20)]); %cannot use this for freeDrinks b/c no "correct" answer
 repeatIndef = repeatIndefinitely();
@@ -382,7 +382,7 @@ ts10 = trainingStep(vh, discrimVisualStim, graduateQuickly, noTimeOff(), svnRev)
 ts11 = trainingStep(vh, crossModalStim, graduateQuickly, noTimeOff(), svnRev); % crossModel w/ nAFC
 
 % Pam
-ts12 = trainingStep(vh, cDots, graduateQuickly, noTimeOff(), svnRev); % coherentDots w/ nAFC
+ts12 = trainingStep(vh, cDots, repeatIndef, noTimeOff(), svnRev); % coherentDots w/ nAFC
 % ts13 = trainingStep(vh, cDots2, graduateQuickly, noTimeOff(), svnRev); % coherentDots w/ nAFC
 % ts14 = trainingStep(vh, cDots3, graduateQuickly, noTimeOff(), svnRev); % coherentDots w/ nAFC
 % ts15 = trainingStep(vh, cDots4, graduateQuickly, noTimeOff(), svnRev); % coherentDots w/ nAFC
@@ -525,7 +525,8 @@ discrimStim5A = images(imdir,ypos_nAFC,background_nAFC,...
 %     maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts6A,[.5 .75],true,[0 90]);
 
 
-ts30 = trainingStep(vh, discrimStim5A,graduateQuickly,noTimeOff(),svnRev);
+ts30 = trainingStep(vh, discrimStim5A,repeatIndef,noTimeOff(),svnRev);
+% ts31 = trainingStep(vh, sweepContrast,repeatIndef,noTimeOff(),svnRev);
 % ts25 = trainingStep(vh, discrimStim6A,graduateQuickly,noTimeOff(),svnRev);
 
 % ====================================================================================================================
@@ -533,10 +534,37 @@ ts30 = trainingStep(vh, discrimStim5A,graduateQuickly,noTimeOff(),svnRev);
 % p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8, ts9, ts10, ts11, ts12, ts13, ts14, ts15, ts16, ts17, ...
 %     ts18, ts19, ts20, ts21, ts22});
 % stepNum=21;
-p=protocol('gabor test2', {ts29, ts1, ts4, ts12, ts2, ts12, ts8, ts11,ts9,ts10,sweepContrast,ts23,ts24,ts27,ts30});
+% p=protocol('gabor test2', {ts29, ts1, ts4, ts12, ts2, ts12, ts8, ts11,ts9,ts10,sweepContrast,ts23,ts24,ts27,ts30});
 stepNum=uint8(1);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});
+    switch subjIDs{i}
+%         case 'rack2test1' % do stochastic freeDrinks, orientedGabors
+%             p=protocol('stofD,orientedGabors', {ts1});
+%         case 'rack2test2' % do freeDrinks, orientedGabors
+%             p=protocol('fD,orientedGabors', {ts2});
+%         case 'rack2test3' % nAFC, orientedGabors
+%             p=protocol('nAFC,orientedGabors',{ts4});
+        case 'rack2test1' % nAFC, coherentDots
+            p=protocol('nAFC,coherentDots',{ts12});
+        case 'rack2test2' % nAFC, images
+            p=protocol('nAFC,images',{ts30});
+        case 'rack2test3' % nAFC, hemifield
+            p=protocol('nAFC,hemifield',{ts10});
+%         case 'rack3test1' % nAFC, coherentDots
+%             p=protocol('nAFC,coherentDots',{ts12});
+%         case 'rack3test2' % nAFC, images
+%             p=protocol('nAFC,images',{ts30});
+%         case 'rack3test3' % nAFC, hemifield
+%             p=protocol('nAFC,hemifield',{ts10});
+%         case 'rack3test3' % nAFC, ifFeature
+%             p=protocol('nAFC,ifFeature',{sweepContrast});
+%         case {'rack3test4','rack3test5','rack3test6'} % nAFC, orientedGabors
+%             p=protocol('nAFC,orientedGabors',{ts4});
+        otherwise
+            error('unknown subject');
+    end
+    
     [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolDEMO','edf');
 end

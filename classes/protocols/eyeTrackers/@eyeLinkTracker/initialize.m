@@ -1,4 +1,4 @@
-function et=initialize(et,subjectID,window)
+function et=initialize(et,eyeDataPath,window)
 % this should initialize eyelink and set the data path.  If you can't
 % initialize, check the following:
 
@@ -96,6 +96,11 @@ end
 
 % eyeDataPath= fullfile(fileParts(fileParts(getRatrixPath)),'ratrixData','eyeData',subjectID); 
 % eyeDataPath = fullfile('\\Reinagel-lab.AD.ucsd.edu\RLAB\Rodent-Data\Fan\datanet', subjectID, 'eyeRecords'); % 10/23/08 - to be replaced by oracle lookup
-eyeDataPath = fullfile('132.239.158.179','\\132.239.158.179\datanet_storage', subjectID, 'eyeRecords');  %should be where the neural data is, how do we get this is EyeTracker is on but datanet is not...
-mkdir(eyeDataPath);
-et=setEyeDataPath(et,eyeDataPath);
+% eyeDataPath = fullfile('\\132.239.158.179','datanet_storage', subjectID, 'eyeRecords');  %should be where the neural data is, how do we get this is EyeTracker is on but datanet is not...
+[suc msg]=mkdir(eyeDataPath);
+if ~suc
+    eyeDataPath
+    error(sprintf('path failed for eye tracker: %s',msg))
+else
+    et=setEyeDataPath(et,eyeDataPath);
+end

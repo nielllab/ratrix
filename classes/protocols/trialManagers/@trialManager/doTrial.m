@@ -284,8 +284,16 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                    if isTracking(eyeTracker)
                        checkRecording(eyeTracker); % check if recording eye data each trial
                    else
+                       %figure out where to save eyeTracker data
+                       if ~isempty(trialManager.datanet) % only use data net if its there
+                           eyeDataPath = fullfile(getStorePath(trialManager.datanet), 'eyeRecords');
+                       else
+                           %right now its hard coded when no data net is there
+                           %maybe put it with trial records in the permanent store?
+                           eyeDataPath = fullfile('\\132.239.158.179','datanet_storage', getID(subject), 'eyeRecords');
+                       end
                        %start recording eye data
-                       eyeTracker=initialize(eyeTracker,getID(subject),window);
+                       eyeTracker=initialize(eyeTracker,eyeDataPath)%,%station.window);
                        eyeTracker=start(eyeTracker,trialRecords(trialInd).trialNumber);
                        trialManager=setEyeTracker(trialManager,eyeTracker);
                        updateTM=true;

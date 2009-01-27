@@ -57,6 +57,7 @@ end
 % [startrecording_error =] Eyelink('StartRecording' [,file_samples, file_events, link_samples, link_events] )
 startrecording_error = Eyelink('StartRecording');
 if startrecording_error~=0
+    startrecording_error=startrecording_error
     error(sprintf('problem starting eyelink recording: %s',startrecording_error))
 end
 

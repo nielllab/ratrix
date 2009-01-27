@@ -105,7 +105,7 @@ switch nargin
             error('radii must be >= 0');
         end
         % annuli
-        if isnumeric(varargin{8}) && all(varargin{8}>0)
+        if isnumeric(varargin{8}) && all(varargin{8}>=0)
             s.annuli=varargin{8};
         else
             error('all annuli must be >= 0');

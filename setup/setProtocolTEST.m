@@ -547,7 +547,7 @@ for i=1:length(subjIDs),
 %         case 'rack2test3' % nAFC, orientedGabors
 %             p=protocol('nAFC,orientedGabors',{ts4});
         case 'rack2test1' % nAFC, coherentDots
-            p=protocol('nAFC,coherentDots',{ts12});
+            p=protocol('nAFC,coherentDots',{ts12,ts4});
         case 'rack2test2' % nAFC, images
             p=protocol('nAFC,images',{ts30});
         case 'rack2test3' % nAFC, hemifield

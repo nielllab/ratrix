@@ -159,6 +159,7 @@ KbConstants.mKey=KbName('m');
 KbConstants.aKey=KbName('a');
 KbConstants.rKey=KbName('r');
 KbConstants.tKey=KbName('t');
+KbConstants.fKey=KbName('f');
 KbConstants.atKeys=find(cellfun(@(x) ~isempty(x),strfind(KbConstants.allKeys,'@')));
 KbConstants.asciiOne=double('1');
 KbConstants.portKeys={};
@@ -1052,7 +1053,7 @@ while ~done && ~quit;
     
     if start || stop
         % get current state of valves and what to change
-        currentValveStates=verifyValvesClosed(station);
+        currentValveStates=getValves(station);
         rewardValves=zeros(1,getNumPorts(station));
         % we give the reward at whatever port is specified by the current phase (weird...fix later?)
         % the default if the current phase does not have a criterion port is the requestOptions (input to stimOGL)

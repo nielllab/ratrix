@@ -175,10 +175,12 @@ elseif ischar(resp)
             out=-4;
         case 'server kill'
             out=-5;
+        case 'manual flushPorts'
+            out=-8;
         otherwise
             % 1/22/09 - if the response is 'manual training step %d'
             match=regexp(resp,'manual training step \d+','match');
-            if match
+            if ~isempty(match)
                 out=-7; % manually set training step
             else
                 out=-6;

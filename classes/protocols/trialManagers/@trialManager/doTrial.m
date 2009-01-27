@@ -381,6 +381,11 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             elseif ischar(trialRecords(trialInd).response) && strcmp(trialRecords(trialInd).response, 'none')
                 % temporarily continue doing trials if response = 'none'
                 trialRecords(trialInd).correct = 0;
+            elseif ischar(trialRecords(trialInd).response) && strcmp(trialRecords(trialInd).response, 'manual flushPorts')
+                trialRecords(trialInd).correct = 0;
+                % call flushPorts here
+                flushPorts(.05,5,.5,station);
+                stopEarly=false; % reset stopEarly/quit to be false, so continue doing trials
             else
                 trialRecords(trialInd).correct = 0;
                 trialRecords(trialInd).response

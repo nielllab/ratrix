@@ -20,6 +20,7 @@ ctrlDown=any(keyCode(KbConstants.controlKeys));
 atDown=any(keyCode(KbConstants.atKeys));
 kDown=any(keyCode(KbConstants.kKey));
 tDown=any(keyCode(KbConstants.tKey));
+fDown=any(keyCode(KbConstants.fKey));
 portsDown=false(1,length(KbConstants.portKeys));
 numsDown=false(1,length(KbConstants.numKeys));
 %             arrowKeyDown=false; % initialize this variable
@@ -79,6 +80,11 @@ if kDown
         newTsNum=find(numsDown,1,'first');
         done=1;
         response=sprintf('manual training step %d',newTsNum);
+    elseif fDown
+        % k+f, do flushPorts
+        response=sprintf('manual flushPorts');
+        didHumanResponse=true;
+        done=1;
     elseif any(portsDown)
         if shiftDown
             if atDown && portsDown(2)

@@ -388,7 +388,8 @@ while ~done && ~quit;
         % if there is a reinforcement, then set up for functions that follow trial logic
         if ~isempty(rewardType) && strcmp(rewardType, 'reward')
             requestRewardStarted = true;
-            requestRewardPorts = rewardPorts;
+            requestRewardPorts=zeros(1,getNumPorts(station));
+            requestRewardPorts(rewardPorts) = 1;
             proposedReinforcementDurationMSorUL = proposedReinforcementDurationMSorUL + rewardDuration;
             msRewardOwed = msRewardOwed + rewardDuration;
         elseif ~isempty(rewardType) && strcmp(rewardType, 'airpuff')

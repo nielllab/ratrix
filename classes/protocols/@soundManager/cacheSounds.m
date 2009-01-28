@@ -45,9 +45,12 @@ if isa(station,'station')
             end
             
             if sm.usePsychPortAudio
-                latclass=4; %2 ok?
+                %tested systems:
+                % 1) erik's osx macbook pro
+                % 2) gigabyte mobo w/integrated realtek audio, xp sp3, 2GB, core 2 duo 6850 3GHz/2GHz, 8600 GTS (balaji's machine)
+                latclass=1; %4 is max, higher means less latency + stricter checks.  lowering may reduce system load if having frame drops.  1 seems ok on system 2.
                 if iswin
-                    buffsize=4096; %max -- otherwise crackles if using asio4all (should detect if have native asio card and not do this)
+                    buffsize=1250; %max is 4096 i think.  the larger this is, the larger the audio latency, but if too small, sound is distorted, and system load increases (could cause frame drops).  1250 is good on system 2.
                 else
                     buffsize=[];
                 end
@@ -80,6 +83,7 @@ if isa(station,'station')
                 PsychPortAudio('GetStatus', sm.players{i})
                 
                 PsychPortAudio('RunMode', sm.players{i}, 1);
+                PsychPortAudio('Verbosity' ,1); %otherwise it types crap out when we try to start, must think it's still running even after .Active is false, try to reproduce!
                 
             else
                 sm.players{i}=audioplayer(clip',sampleRate); %audioplayer requires channels to be columns
@@ -95,6 +99,9 @@ if isa(station,'station')
             end
             
             sm.clipDurs(i)=size(clip,2)/sampleRate;
+        end
+        for i=1:length(sm.clips)
+            sm.clips{i}=decache(sm.clips{i});
         end
     end
 else

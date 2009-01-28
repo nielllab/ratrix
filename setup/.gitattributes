@@ -33,3 +33,4 @@ util/init.m -text
 util/setPenaltyMS.m -text
 runOnce/createRatrixWithStationsForServer.m -text
 setupPhysRig1/setProtocolPhys2.m -text
+runOnce/addRatsForServer.m -text

@@ -75,6 +75,8 @@ if length(intersect(fieldnames(remoteTrialRecords),fieldnames(localTrialRecords)
 else
     warning('local and remote trialRecords have different formats - throwing out remote records!');
     trialRecords = localTrialRecords;
+    % also reset localIndex
+    localIndex = localIndex - length(remoteTrialRecords);
 end
 if ~isempty(trialRecords)
 trialNums = [trialRecords.trialNumber];

@@ -9,12 +9,16 @@ end
 constants = getConstants(datanet);
 
 % connect to data computer
-stimcon=pnet('tcpconnect',hostname,8888); % stim=client, connect to 8888 (data)
+stimcon=-1;
+while stimcon==-1
+    disp('trying tcpconnect');
+    stimcon=pnet('tcpconnect',hostname,8888); % stim=client, connect to 8888 (data)
+end
 
 % tell data computer to start listener and send ack
 gotAck = false;
-pnet(stimcon,'setwritetimeout',10);
-pnet(stimcon,'setreadtimeout',10);
+pnet(stimcon,'setwritetimeout',5);
+pnet(stimcon,'setreadtimeout',5);
 pnet(stimcon,'write', constants.startConnectionCommands.S_START_DATA_LISTENER_CMD);
 
 % wait until we get ack from data listener
@@ -22,6 +26,8 @@ while ~gotAck
     received_msg = pnet(stimcon,'read',MAX_SIZE,'double');
     if ~isempty(received_msg) && received_msg == constants.startConnectionCommands.D_LISTENER_STARTED
         gotAck = true;
+    else
+        disp('failed to get LISTENER_STARTED ack - most likely the data side pnet object is created, but listener is not started');
     end
 end
 

@@ -23,8 +23,8 @@ end
 parameters=[];
 
 % now we have a connection from client
-pnet(datacon,'setreadtimeout', 10); % set timeout to (hopefully) affect pnet_getvar
-pnet(datacon,'setwritetimeout', 10);
+pnet(datacon,'setreadtimeout', 5); % set timeout to (hopefully) affect pnet_getvar
+pnet(datacon,'setwritetimeout', 5);
 while ~quit
     success = false;
     received = pnet(datacon,'read',CMDSIZE,'double','noblock');

@@ -67,7 +67,15 @@ localIndex = length(remoteTrialRecords)+1;
 localIndex
 length(localTrialRecords)
 length(remoteTrialRecords)
-trialRecords = [remoteTrialRecords localTrialRecords];
+% 1/28/09 - if remoteTrialRecords and localTrialRecords have different fields, give a warning and dont concat them
+% this will happen if the current session is the first of a new trialRecord format - should be rare enough that we can live with 
+% the consequences of losing some history temporarily
+if length(intersect(fieldnames(remoteTrialRecords),fieldnames(localTrialRecords)))==length(fieldnames(localTrialRecords))
+    trialRecords = [remoteTrialRecords localTrialRecords];
+else
+    warning('local and remote trialRecords have different formats - throwing out remote records!');
+    trialRecords = localTrialRecords;
+end
 if ~isempty(trialRecords)
 trialNums = [trialRecords.trialNumber];
 else

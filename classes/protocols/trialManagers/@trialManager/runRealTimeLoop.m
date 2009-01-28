@@ -478,123 +478,27 @@ while ~done && ~quit;
         updatePhase = 0;
         
     end
+    
     % =====================================================================================================================
-
     if ~paused
 
         doFramePulse=~noPulses;
         switch strategy
 
-            % =====================================================================================================================
-            % function to determine the frame index using the textureCache strategy
-
-
+            % ====================================================================================================================
             case 'textureCache'
-
-                % function [tm frameIndex i done doFramePulse didPulse] = updateFrameIndexUsingTextureCache(tm, 
-                %   frameIndexed, loop, trigger, timeIndexed, frameIndex, indexedFrames, stimSize, isRequesting,
-                %   i, requestFrame, frameNum, timedFrames, responseOptions, done, doFramePulse, didPulse)
+                % function to determine the frame index using the textureCache strategy
                 [tm frameIndex i done doFramePulse didPulse] = updateFrameIndexUsingTextureCache(tm, ...
                 frameIndexed, loop, trigger, timeIndexed, frameIndex, indexedFrames, size(stim,3), isRequesting, ...
                 i, requestFrame, frameNum, timedFrames, responseOptions, done, doFramePulse, didPulse);
-
-%             stimSize = size(stim,3);
-%             if frameIndexed
-%                 if loop
-%                     frameIndex = mod(frameIndex,length(indexedFrames)-1)+1;
-%                 else
-%                     frameIndex = min(length(indexedFrames),frameIndex+1);
-%                 end
-%                 i = indexedFrames(frameIndex);
-%             elseif loop
-%             %     i = mod(i,stimSize-1)+1; %this is not correct if stimSize is number of frames and i is the index
-%                 % 8/16/08 - changed to index correctly
-%             %     i
-%                 i = mod(i+1,stimSize);
-%                 if i == 0
-%                     i = stimSize;
-%                 end
-%                 % end changed version 8/16/08
-%             %     stimSize
-%             %     i
-% 
-%             elseif trigger
-%                 if isRequesting
-%                     if ~audioStimPlaying && ~isempty(audioStim)
-%                         % Play audio
-%                         tm.soundMgr = playLoop(tm.soundMgr,audioStim,station,1);
-%                         audioStimPlaying = true;
-%                     end
-%                     i=1;
-%                 else
-%                     if audioStimPlaying
-%                         % Turn off audio
-%                         tm.soundMgr = playLoop(tm.soundMgr,'',station,0);
-%                         audioStimPlaying = false;
-%                     end
-%                     i=2;
-%                 end
-% 
-%             elseif timeIndexed %ok, this is where we do the timedFrames type
-% 
-%                 %Function 'cumsum' is not defined for values of class 'int8'.
-%                 if requestFrame~=0
-%                     i=min(find((frameNum-requestFrame)<=cumsum(double(timedFrames))));  %find the stim frame number for the number of frames since the request
-%                 end
-% 
-%                 if isempty(i)  %if we have passed the last stim frame
-%                     i=length(timedFrames);  %hold the last frame if the last frame duration specified was zero
-%                     if timedFrames(end)
-%                         i=i+1;      %otherwise move on to the finalScreenLuminance blank screen
-%                     end
-%                 end
-% 
-%             else
-% 
-%                 i=min(i+1,stimSize);
-% 
-%                 if isempty(responseOptions) && i==stimSize
-%                     done=1;
-%                 end
-% 
-%                 if i==stimSize && didPulse
-%                     doFramePulse=0;
-%                 end
-%                 didPulse=1;
-%             end
             
+                % =====================================================================================================================
+                % function to draw the appropriate texture using the textureCache strategy
+                time2=GetSecs;
+                drawFrameUsingTextureCache(tm, window, i, frameNum, size(stim,3), lastI, dontclear, textures(i), destRect, ...
+                    filtMode, labelFrames, xOrigTextPos, yNewTextPos);
+                
             % =====================================================================================================================
-            % function to draw the appropriate texture using the textureCache strategy
-
-            time2=GetSecs;
-%             function drawFrameUsingTextureCache(tm, window, i, frameNum, stimSize, lastI, dontclear, texture, destRect, 
-%             filtMode, labelFrames, xOrigTextPos, yNewTextPos)
-            drawFrameUsingTextureCache(tm, window, i, frameNum, size(stim,3), lastI, dontclear, textures(i), destRect, ... 
-                filtMode, labelFrames, xOrigTextPos, yNewTextPos);
-
-%             if window>=0
-%                 if i>0 && i <= size(stim,3)
-%                     if ~(i==lastI) || (dontclear==0) %only draw if texture different from last one, or if every flip is redrawn
-%                         Screen('DrawTexture', window, textures(i),[],destRect,[],filtMode);
-%                     else
-%                         if labelFrames
-%                             thisMsg=sprintf('This frame stim index (%d) is staying here without drawing new textures %d',i,frameNum);
-%                             Screen('DrawText',window,thisMsg,xOrigTextPos,yNewTextPos-20,100*ones(1,3));
-%                         end
-%                     end
-%                 else
-%                     if size(stim,3)==0
-%                         'stim had zeros frames, probably an penalty stim with zero duration'
-%                     else
-%                         i
-%                         sprintf('stimSize: %d',size(stim,3))
-%                         error('request for an unknown frame')
-%                     end
-%                 end
-%             end
-
-            % =====================================================================================================================
-
             case 'expert'
                 % 10/31/08 - implementing expert mode
                 % call a method of the given stimManager that draws the expert frame
@@ -624,68 +528,16 @@ while ~done && ~quit;
 
         % =====================================================================================================================
         % function for drawing text
-        % function [xTextPos] = drawText(tm, window, labelFrames, subID, xOrigTextPos, yTextPos, yNewTextPos, stimID, protocolStr, 
-        %   textLabel, trialLabel, i, frameNum, manual, didManual, didAPause, ptbVersion, ratrixVersion)
         if manual
             didManual=1;
         end
-        
-        % =====================
-        % 12/1/08 - this drawText function call is causing frame drops in rig room testing
-        % REMOVED for now
         if window>=0
             xTextPos = drawText(tm, window, labelFrames, subID, xOrigTextPos, yTextPos, yNewTextPos, normBoundsRect, stimID, protocolStr, ...
               textLabel, trialLabel, i, frameNum, manual, didAPause, ptbVersion, ratrixVersion);
         end
         time4=GetSecs;
-        % =====================
-
-%         if window>=0
-%             if labelFrames
-%                 %junkSize = Screen('TextSize',window,subjectFontSize);
-%                 [xTextPos,yTextPosUnused] = Screen('DrawText',window,['ID:' subID ],xOrigTextPos,yTextPos,100*ones(1,3));
-%                 xTextPos=xTextPos+50;
-%                 %junkSize = Screen('TextSize',window,standardFontSize);
-%                 [garbage,yNewTextPos] = Screen('DrawText',window,['trlMgr:' class(tm) ' stmMgr:' stimID  ' prtcl:' protocolStr ],xTextPos,yNewTextPos,100*ones(1,3));
-%             end
-%             [normBoundsRect, offsetBoundsRect]= Screen('TextBounds', window, 'TEST');
-%             yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
-% 
-%             if labelFrames
-%                 if iscell(textLabel)
-%                     txtLabel=textLabel{i};
-%                 else
-%                     txtLabel=textLabel;
-%                 end
-%                 [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('priority:%g %s stimInd:%d frame:%d stim:%s',Priority(),trialLabel,i,frameNum,txtLabel),xTextPos,yNewTextPos,100*ones(1,3));
-%                 yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
-% 
-% %                 [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('ptb:%s',ptbVersion),xTextPos,yNewTextPos,100*ones(1,3));
-% %                 yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
-% % 
-% %                 [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('ratrix:%s',ratrixVersion),xTextPos,yNewTextPos,100*ones(1,3));
-% %                 yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
-%             end
-% 
-%             if manual
-%                 didManual=1;
-%                 manTxt='on';
-%             else
-%                 manTxt='off';
-%             end
-%             if didManual
-%                 [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('trial record will indicate manual poking on this trial (k+m to toggle for next trial: %s)',manTxt),xTextPos,yNewTextPos,100*ones(1,3));
-%                 yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
-%             end
-% 
-%             if didAPause
-%                 [garbage,yNewTextPos] = Screen('DrawText',window,'trial record will indicate a pause occurred on this trial',xTextPos,yNewTextPos,100*ones(1,3));
-%                 yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
-%             end
-%         end
         
         % =====================================================================================================================
-
     else
         %do i need to copy previous screen?
         %Screen('CopyWindow', window, window);
@@ -694,100 +546,22 @@ while ~done && ~quit;
         end
     end
 
-    
     % =====================================================================================================================
     % function here to do flip and other Screen stuff
     time5=GetSecs;
-%     function [lastI when vbl sos ft missed] = flipFrameAndDoPulse(tm, window, dontclear, i, vbl, framesPerUpdate, ifi, paused, doFramePulse,station) 
     [lastI when vbl sos ft missed time6 time7 whenTime] = ...
         flipFrameAndDoPulse(tm, window, dontclear, i, vbl, framesPerUpdate, ifi, paused, doFramePulse,station); 
     
-
-%     %indicate finished (enhances performance)
-%     if window>=0
-%         Screen('DrawingFinished',window,dontclear);
-%         lastI=i;
-%     end
-% 
-%     when=vbl+(framesPerUpdate-0.5)*ifi;
-% 
-% %     if ~paused && doFramePulse
-% %         framePulse(station);
-% %         framePulse(station);
-% %     end
-% 
-%     %logwrite('frame calculated, waiting for flip');
-% 
-%     %wait for next frame, flip buffer
-%     if window>=0
-%         [vbl sos ft missed]=Screen('Flip',window,when,dontclear); %vbl=vertical blanking time, when flip starts executing
-%         %sos=stimulus onset time -- doc doesn't clarify what this is
-%         %ft=timestamp from the end of flip's execution
-%     else
-%         waitTime=GetSecs()-when;
-%         if waitTime>0
-%             WaitSecs(waitTime);
-%         end
-%         ft=when;
-%         vbl=ft;
-%         missed=0;
-%     end
-% 
-%     %logwrite('just flipped');
-% 
-%     if ~paused
-%         if doFramePulse
-%             framePulse(station);
-%         end
-%     end
-%     
-    
     % =====================================================================================================================
     % function here to save information about missed frames
-
-    % function [responseDetails lastFrameTime] = saveMissedFrameData(tm, responseDetails, missed, frameNum, ft, timingCheckPct, lastFrameTime, ifi)
     [phaseRecords(specInd).responseDetails lastFrameTime numDrops numApparentDrops] = ...
         saveMissedFrameData(tm, phaseRecords(specInd).responseDetails, missed, frameNum, ft, timingCheckPct, lastFrameTime, ifi, numDrops,numApparentDrops,...
         when,whenTime,lastLoopEnd,time1,time2,time3,time4,time5,time6,time7,barebones,vbl);
     
-%     %save facts about missed frames
-%     if missed>0 && frameNum<phaseRecords(specInd).responseDetails.numFramesUntilStopSavingMisses
-%         disp(sprintf('warning: missed frame num %d',frameNum));
-%         phaseRecords(specInd).responseDetails.numMisses=phaseRecords(specInd).responseDetails.numMisses+1;
-%         phaseRecords(specInd).responseDetails.misses(phaseRecords(specInd).responseDetails.numMisses)=frameNum;
-%         phaseRecords(specInd).responseDetails.afterMissTimes(phaseRecords(specInd).responseDetails.numMisses)=GetSecs();
-%     else
-%         thisIFI=ft-lastFrameTime;
-%         thisIFIErrorPct = abs(1-thisIFI/ifi);
-%         if  thisIFIErrorPct > timingCheckPct
-%             disp(sprintf('warning: flip missed a timing and appeared not to notice: frame num %d, ifi error: %g',frameNum,thisIFIErrorPct));
-%             phaseRecords(specInd).responseDetails.numApparentMisses=responseDetails.numApparentMisses+1;
-%             phaseRecords(specInd).responseDetails.apparentMisses(phaseRecords(specInd).responseDetails.numApparentMisses)=frameNum;
-%             phaseRecords(specInd).responseDetails.afterApparentMissTimes(phaseRecords(specInd).responseDetails.numApparentMisses)=GetSecs();
-%             phaseRecords(specInd).responseDetails.apparentMissIFIs(phaseRecords(specInd).responseDetails.numApparentMisses)=thisIFI;
-%         end
-%     end
-%     lastFrameTime=ft;
-% 
-%     %stop saving miss frame statistics after the relevant period -
-%     %prevent trial history from getting too big
-%     %1 day is about 1-2 million misses is about 25 MB
-%     %consider integers if you want to save more
-%     %reasonableMaxSize=ones(1,intmax('uint16'),'uint16');%
-% 
-%     if missed>0 && frameNum>=phaseRecords(specInd).responseDetails.numFramesUntilStopSavingMisses
-%         phaseRecords(specInd).responseDetails.numMisses=phaseRecords(specInd).responseDetails.numMisses+1;
-%         phaseRecords(specInd).responseDetails.numUnsavedMisses=phaseRecords(specInd).responseDetails.numUnsavedMisses+1;
-%     end
-    
-    
     % =====================================================================================================================
-    
-    
     % =====================================================================================================================
     % 10/19/08 - get eyeTracker sample
     % immediately after the frame pulse is ideal, not before the frame pulse (which is more important)
-
     if ~isempty(eyeTracker)
        if ~checkRecording(eyeTracker)
            sca
@@ -804,13 +578,11 @@ while ~done && ~quit;
 
        [gaze(totalFrameNum,:) eyeData(totalFrameNum,:)]=getSample(eyeTracker);
 
-     end
+    end
 
-     % =====================================================================================================================
+    % =====================================================================================================================
     %logwrite('entering trial logic');
-
     %all trial logic here
-
     if ~paused
         ports=readPorts(station);
     end
@@ -822,99 +594,14 @@ while ~done && ~quit;
     %     mThisLoop=0;
     %     pThisLoop=0;
     [keyIsDown,secs,keyCode]=KbCheck; % do this check outside of function to save function call overhead
-    
-    % function [didAPause paused done response doValves ports didValves didHumanResponse manual doPuff pressingM pressingP] = 
-    %   handleKeyboard(tm, keyCode, didAPause, paused, done, response, doValves, ports, didValves, didHumanResponse,
-    %   manual, doPuff, pressingM, pressingP, allowQPM, originalPriority, priorityLevel)
     if keyIsDown && framesSinceKbInput > -1
          [didAPause paused done phaseRecords(specInd).response doValves ports didValves didHumanResponse manual doPuff pressingM pressingP] = ...
          handleKeyboard(tm, keyCode, didAPause, paused, done, phaseRecords(specInd).response, doValves, ports, didValves, didHumanResponse, ...
          manual, doPuff, pressingM, pressingP, allowQPM, originalPriority, priorityLevel, KbConstants);
         framesSinceKbInput=0;
     end
-        %logwrite(sprintf('keys are down:',num2str(find(keyCode))));
-%     if keyIsDown && framesSinceKbInput > 5
-%         mThisLoop = 0;
-%         pThisLoop = 0;
-%         asciiOne=49;
-% 
-%         keys=find(keyCode);
-%         ctrlDown=0; %these don't get reset if keyIsDown fails!
-%         shiftDown=0;
-%         kDown=0;
-%         for keyNum=1:length(keys)
-%             shiftDown = shiftDown || strcmp(KbName(keys(keyNum)),'shift');
-%             ctrlDown = ctrlDown || strcmp(KbName(keys(keyNum)),'control');
-%             kDown= kDown || strcmp(KbName(keys(keyNum)),'k');
-%         end
-% 
-%         if kDown
-%             for keyNum=1:length(keys)
-%                 keyName=KbName(keys(keyNum));
-% 
-%                 if strcmp(keyName,'p')
-%                     pThisLoop=1;
-% 
-%                     if ~pressingP && allowQPM
-% 
-%                         didAPause=1;
-%                         paused=~paused;
-% 
-%                         if paused
-%                             Priority(originalPriority);
-%                         else
-%                             Priority(priorityLevel);
-%                         end
-% 
-%                         pressingP=1;
-%                     end
-%                 elseif strcmp(keyName,'q') && ~paused && allowQPM
-%                     done=1;
-%                     phaseRecords(specInd).response='manual kill';
-% 
-%                 elseif ~isempty(keyName) && ismember(keyName(1),char(asciiOne:asciiOne+length(ports)-1))
-%                     if shiftDown
-%                         if keyName(1)-asciiOne+1 == 2
-%                             'WARNING!!!  you just hit shift-2 ("@"), which mario declared a synonym to sca (screen(''closeall'')) -- everything is going to break now'
-%                             'quitting'
-%                             done=1;
-%                             phaseRecords(specInd).response='shift-2 kill';
-%                         end
-%                     end
-%                     if ctrlDown
-%                         doValves(keyName(1)-asciiOne+1)=1;
-%                         didValves=true;
-%                     else
-%                         ports(keyName(1)-asciiOne+1)=1;
-%                         didHumanResponse=true;
-%                     end
-%                 elseif strcmp(keyName,'m')
-%                     mThisLoop=1;
-% 
-%                     if ~pressingM && ~paused && allowQPM
-% 
-%                         manual=~manual;
-%                         pressingM=1;
-%                     end
-%                 elseif strcmp(keyName,'a') % check for airpuff
-%                     doPuff=true;
-%                 end
-%             end
-%         end
-% 
-%         if ~mThisLoop && pressingM
-%             pressingM=0;
-%         end
-%         if ~pThisLoop && pressingP
-%             pressingP=0;
-%         end
-%         framesSinceKbInput=0;
-%     end
-% 
-
 
     % =====================================================================================================================
-    
     % Handle stochastic port hits (has to be after keyboard so that wont happen if another port already triggered)
     % 8/18/08 - added stochastic port hits
     if ~paused
@@ -937,24 +624,11 @@ while ~done && ~quit;
     
     % =====================================================================================================================
     % large function here that handles trial logic (what state are we in - did we have a request, response, should we give reward, etc)
-    
-    % function [tm responseDetails lookForChange respStart isRequesting requestRewardPorts requestRewardStarted requestFrame
-    %   stimStarted stimToggledOn lastPorts frameNum didStochasticResponse attempt stopListening] = 
-    %   handleTrialLogic(tm, responseDetails, paused, verbose, lastPorts,
-    %   ports, lookForChange, respStart, isRequesting, station, toggleStim, stimToggledOn, requestOptions, responseOptions,
-    %   requestRewardPorts, requestRewardStarted, stimStarted, frameNum, didStochasticResponse, audioStim, startTime, attempt, done,
-    %   response, stopListening, logIt)
-    
-   % error('got to trial logic in phased runRealTimeLoop');
-    
-    % rewrite trial logic for phased
-
     % if phaseRecords(specInd).response got set by keyboard, duplicate response on trial level
     if ~strcmp('none', phaseRecords(specInd).response)
         response = phaseRecords(specInd).response;
     end
     
-    % =====================================================================================================================
     [tm done newSpecInd specInd updatePhase transitionedByTimeFlag ...
         transitionedByPortFlag phaseRecords(specInd).response response isRequesting lastSoundsPlayed] = ... 
         handlePhasedTrialLogic(tm, done, ...
@@ -963,86 +637,20 @@ while ~done && ~quit;
         stimManager, msRewardSound, msPenaltySound, targetOptions, distractorOptions, requestOptions, isRequesting, lastSoundsPlayed);
     
     stepsInPhase = stepsInPhase + 1; %10/16/08 - moved from handlePhasedTrialLogic to prevent COW
-
-    
-    % =====================================================================================================================
-    % Handle sounds by port-triggered mode
-%     if usePortTriggeredSoundMode
-%         if isa(tm, 'nAFC')
-%             if stimStarted && any(ports(requestOptions))
-%                 % if we are showing stim and get a request - play the keepGoing sound
-%                 tm.soundMgr = playLoop(tm.soundMgr,'keepGoingSound',station,1);
-%             elseif ~stimStarted && any(ports(responseOptions))
-%                 % if we waiting for a request and get response - play white noise
-%                 tm.soundMgr = playLoop(tm.soundMgr,'trySomethingElseSound',station,1);
-%             else
-%                 tm.soundMgr = playLoop(tm.soundMgr,'',station,0);
-%             end
-%         elseif isa(tm, 'freeDrinks')
-%             if any(ports(requestOptions))
-%                 tm.soundMgr = playLoop(tm.soundMgr,'trySomethingElseSound',station,1);
-%             else
-%                 tm.soundMgr = playLoop(tm.soundMgr,'',station,0);
-%             end
-%         end
-%     end
-
-    
-    % =====================================================================================================================
-
-    
-    
-%     [tm responseDetails lookForChange respStart isRequesting requestRewardPorts requestRewardStarted requestFrame ...
-%       stimStarted stimToggledOn lastPorts frameNum potentialStochasticResponse didStochasticResponse attempt done response stopListening] = ... 
-%       handleTrialLogic(tm, responseDetails, paused, verbose, lastPorts, ...
-%       ports, lookForChange, respStart, isRequesting, station, toggleStim, stimToggledOn, requestOptions, responseOptions, ...
-%       requestRewardPorts, requestRewardStarted, requestFrame, stimStarted, frameNum, potentialStochasticResponse, didStochasticResponse, ...
-%       audioStim, startTime, attempt, done, response, stopListening, logIt); 
-% 
-%     %logwrite('calculating state');
-%     
-    % =====================================================================================================================
-    % function here to handle localTimed and localPump reward methods
-    
-%     % function [requestRewardPorts requestRewardDone newValveState station] = setupLocalTimedAndLocalPumpRewards(tm, requestRewardStarted,
-%     %   requestRewardStartLogged, requestRewardDone, responseDetails, requestRewardPorts, doValves,
-%     %   station, ifi)
-%     
-%     [requestRewardPorts requestRewardDone newValveState station] = setupLocalTimedAndLocalPumpRewards(tm, requestRewardStarted, ...
-%       requestRewardStartLogged, requestRewardDone, phaseRecords(specInd).responseDetails, requestRewardPorts, doValves, ...
-%       station, ifi);
-  
-%     if strcmp(getRewardMethod(station),'localTimed')       
-%         if requestRewardStarted && requestRewardStartLogged && ~requestRewardDone
-%             if 1000*(GetSecs()-phaseRecords(specInd).responseDetails.requestRewardStartTime) >= rewardDuration
-%                 requestRewardPorts=0*requestRewardPorts;
-%                 requestRewardDone=true;
-%             end
-%         end
-%         newValveState=doValves|requestRewardPorts;
-%     elseif strcmp(getRewardMethod(station),'localPump')
-% 
-%         if requestRewardStarted && ~requestRewardDone && requestRewardStartLogged
-%             station=doReward(station,rewardDuration/1000,requestRewardPorts);
-%             requestRewardDone=true;
-%         end
-% 
-%         if any(doValves)
-%             primeMLsPerSec=1.0;
-%             station=doReward(station,primeMLsPerSec*ifi,doValves,true);
-%         end
-% 
-%         newValveState=0*doValves;
-%     end
-
+ 
     % =====================================================================================================================
     % reward stuff copied from old phased stimOGL
     % update reward owed and elapsed time
     if ~isempty(lastRewardTime) && rewardCurrentlyOn
         elapsedTime = getSecs() - lastRewardTime;
-        msRewardOwed = msRewardOwed - elapsedTime*1000.0;
+        if strcmp(getRewardMethod(station),'localTimed')
+            msRewardOwed = msRewardOwed - elapsedTime*1000.0;
        % error('elapsed time was %d and msRewardOwed is now %d', elapsedTime, msRewardOwed);
-        actualReinforcementDurationMSorUL = actualReinforcementDurationMSorUL + elapsedTime*1000.0;
+            actualReinforcementDurationMSorUL = actualReinforcementDurationMSorUL + elapsedTime*1000.0;
+        elseif strcmp(getRewardMethod(station),'localPump')
+            % in localPump mode, msRewardOwed gets zeroed out after the call to station/doReward
+            % no need to update here
+        end
     end
     lastRewardTime = getSecs();
 
@@ -1096,8 +704,13 @@ while ~done && ~quit;
                 % localPump method copied from merge stimOGL (non-phased)
                 if start
                     'turning on localPump reward'
+                    rewardCurrentlyOn=true;
                     station=doReward(station,msRewardOwed/1000,requestRewardPorts);
+                    actualReinforcementDurationMSorUL = actualReinforcementDurationMSorUL + msRewardOwed;
+                    msRewardOwed=0;
                     requestRewardDone=true;
+                elseif stop
+                    rewardCurrentlyOn=false;
                 end
                 % there is nothing to do in the stop case, because the doReward method is already timed to msRewardOwed
                 if any(doValves)
@@ -1111,12 +724,6 @@ while ~done && ~quit;
                 
                 % =====================================================================================================================
                 % function here to handle serverValveChange and set up serverPump reward method
-
-                % function [currentValveState valveErrorDetails quit serverValveChange responseDetails requestRewardStartLogged requestRewardDurLogged] = 
-                %   setupServerPumpRewards(tm, rn, station, newValveState, currentValveState, valveErrorDetails, startTime, serverValveChange,
-                %   requestRewardStarted, requestRewardStartLogged, requestRewardPorts, requestRewardDone, requestRewardDurLogged, responseDetails,
-                %   quit)
-
                 [currentValveState phaseRecords(specInd).valveErrorDetails quit serverValveChange phaseRecords(specInd).responseDetails ...
                     requestRewardStartLogged requestRewardDurLogged] = ...
                  setupServerPumpRewards(tm, rn, station, newValveState, currentValveState, phaseRecords(specInd).valveErrorDetails, ...
@@ -1213,13 +820,8 @@ while ~done && ~quit;
     end
     % end reward stuff
     % =====================================================================================================================
-  
-
     % =====================================================================================================================
     % make function to handle server stuff
-    % function [done quit valveErrorDetail serverValveStates serverValveChange response newValveState requestRewardDone requestRewardOpenCmdDone] ...
-    %   = handleServerCommands(tm, rn, constants, done, quit, requestRewardStarted, requestRewardStartLogged, requestRewardOpenCmdDone
-    %       requestRewardDone, station, ports, serverValveStates, doValves, response, newValveState)
     if ~isempty(rn) || strcmp(getRewardMethod(station),'serverPump')
         [done quit phaseRecords(specInd).valveErrorDetails serverValveStates serverValveChange ...
             response newValveState requestRewardDone requestRewardOpenCmdDone] ...
@@ -1229,28 +831,13 @@ while ~done && ~quit;
         error('need a rnet for serverPump')
     end
     
-
-
     % =====================================================================================================================
-    
     %before can end, must make sure any request rewards are done so
     %that the valves will be closed.  this includes server reward
     %requests.  right now there is a bug if the response occurs before
     %the request reward is over.
-% do airpuff stuff
-%     if msAirpuff>0 && ~puffDone && (puffStarted==0 || GetSecs-puffStarted<=msAirpuff/1000)
-% 
-%         setPuff(station,true);
-%         if puffStarted==0
-%             puffStarted=GetSecs;
-%         end
-%     elseif ~doPuff
-%         setPuff(station,false);
-%         puffDone=true;
-%     else
-%         setPuff(station,true);
-%     end
-    
+
+    % airpuff stuff
     if ~isempty(lastAirpuffTime) && airpuffOn
         % if airpuff was on from last loop, then subtract from debt
         elapsedTime = GetSecs() - lastAirpuffTime;

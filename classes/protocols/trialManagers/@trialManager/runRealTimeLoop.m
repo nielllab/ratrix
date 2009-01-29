@@ -353,7 +353,7 @@ while ~done && ~quit;
             requestFrame=0;
         end
 
-        currentValveState=verifyValvesClosed(station);
+        currentValveState=getValves(station); % cant do verifyClosed here because it might be open from a reward from previous phase
 %         valveErrorDetails=[];
         requestRewardStarted=false;
         requestRewardStartLogged=false;
@@ -666,11 +666,13 @@ while ~done && ~quit;
         rewardValves=zeros(1,getNumPorts(station));
         % we give the reward at whatever port is specified by the current phase (weird...fix later?)
         % the default if the current phase does not have a criterion port is the requestOptions (input to stimOGL)
-        if isempty(rewardPorts)
-            rewardValves(requestOptions) = 1;
-        else
-            rewardValves(rewardPorts)=1;
-        end
+        % 1/29/09 - fix, but for now rewardValves is jsut wahtever the current port triggered is (this works for now..)
+        rewardValves(ports)=1;
+%         if isempty(rewardPorts)
+%             rewardValves(requestOptions) = 1;
+%         else
+%             rewardValves(rewardPorts)=1;
+%         end
         rewardValves=logical(rewardValves);
 
         if length(rewardValves) ~= 3
@@ -688,6 +690,9 @@ while ~done && ~quit;
                     setAndCheckValves(station,rewardValves,currentValveStates,...
                         phaseRecords(specInd).valveErrorDetails,...
                         lastRewardTime,'correct reward open');
+                    rewardValves
+                    disp('opening valves')
+                    GetSecs
                 elseif stop
                     'turning off reward'
                     rewardCurrentlyOn = false;
@@ -697,6 +702,8 @@ while ~done && ~quit;
                         phaseRecords(specInd).valveErrorDetails,...
                         lastRewardTime,'correct reward close');
                     newValveState=doValves|requestRewardPorts;
+                    disp('closing valves')
+                    GetSecs
                 else
                     error('has to be either start or stop - should not be here');
                 end

@@ -658,174 +658,187 @@ while ~done && ~quit;
     % start/stop as necessary
     start = msRewardOwed > 0.0 && ~rewardCurrentlyOn;
     stop = msRewardOwed <= 0.0 && rewardCurrentlyOn;
+    currentValveStates=getValves(station);         % get current state of valves and what to change
     
+    % if any doValves, override this stuff
+    % newValveState will be used to keep track of doValves stuff - figure out server-based use later
+    if any(doValves~=newValveState)
+        newValveState
+        [newValveState phaseRecords(specInd).valveErrorDetails]=...
+            setAndCheckValves(station,doValves,currentValveStates,...
+            phaseRecords(specInd).valveErrorDetails,...
+            GetSecs,'doValves');
+        doValves
+        disp('set doValves')
+        GetSecs
+                    
+    else
     
-    if start || stop
-        % get current state of valves and what to change
-        currentValveStates=getValves(station);
-        rewardValves=zeros(1,getNumPorts(station));
-        % we give the reward at whatever port is specified by the current phase (weird...fix later?)
-        % the default if the current phase does not have a criterion port is the requestOptions (input to stimOGL)
-        % 1/29/09 - fix, but for now rewardValves is jsut wahtever the current port triggered is (this works for now..)
-        rewardValves(ports)=1;
-%         if isempty(rewardPorts)
-%             rewardValves(requestOptions) = 1;
-%         else
-%             rewardValves(rewardPorts)=1;
-%         end
-        rewardValves=logical(rewardValves);
+        if start || stop        
+            rewardValves=zeros(1,getNumPorts(station));
+            % we give the reward at whatever port is specified by the current phase (weird...fix later?)
+            % the default if the current phase does not have a criterion port is the requestOptions (input to stimOGL)
+            % 1/29/09 - fix, but for now rewardValves is jsut wahtever the current port triggered is (this works for now..)
+            rewardValves(ports)=1;
+    %         if isempty(rewardPorts)
+    %             rewardValves(requestOptions) = 1;
+    %         else
+    %             rewardValves(rewardPorts)=1;
+    %         end
+            rewardValves=logical(rewardValves);
 
-        if length(rewardValves) ~= 3
-            error('rewardValves has %d and currentValveStates has %d with port = %d', length(rewardValves), length(currentValveStates), port);
-        end
+            if length(rewardValves) ~= 3
+                error('rewardValves has %d and currentValveStates has %d with port = %d', length(rewardValves), length(currentValveStates), port);
+            end
 
-        switch getRewardMethod(station)
-            case 'localTimed'
-                % handle start and stop cases
-                if start
-                    'turning on localTimed reward'
-                    rewardCurrentlyOn = true;
-                    %OPEN VALVE
-                    [currentValveStates phaseRecords(specInd).valveErrorDetails]=...
-                    setAndCheckValves(station,rewardValves,currentValveStates,...
-                        phaseRecords(specInd).valveErrorDetails,...
-                        lastRewardTime,'correct reward open');
-                    rewardValves
-                    disp('opening valves')
-                    GetSecs
-                elseif stop
-                    'turning off reward'
-                    rewardCurrentlyOn = false;
-                    %CLOSE VALVE
-                    currentValveStates
-                    [currentValveStates phaseRecords(specInd).valveErrorDetails]=...
-                    setAndCheckValves(station,zeros(1,getNumPorts(station)),currentValveStates,...
-                        phaseRecords(specInd).valveErrorDetails,...
-                        lastRewardTime,'correct reward close');
-                    newValveState=doValves|requestRewardPorts;
-                    disp('closing valves')
-                    GetSecs
-                else
-                    error('has to be either start or stop - should not be here');
-                end
-            case 'localPump'
-                % localPump method copied from merge stimOGL (non-phased)
-                if start
-                    'turning on localPump reward'
-                    rewardCurrentlyOn=true;
-                    station=doReward(station,msRewardOwed/1000,requestRewardPorts);
-                    actualReinforcementDurationMSorUL = actualReinforcementDurationMSorUL + msRewardOwed;
-                    msRewardOwed=0;
-                    requestRewardDone=true;
-                elseif stop
-                    rewardCurrentlyOn=false;
-                end
-                % there is nothing to do in the stop case, because the doReward method is already timed to msRewardOwed
-                if any(doValves)
-                    primeMLsPerSec=1.0;
-                    station=doReward(station,primeMLsPerSec*ifi,doValves,true);
-                end
-                newValveState=0*doValves;
-            case 'serverPump'
-                % handle serverPump method
-                
-                
-                % =====================================================================================================================
-                % function here to handle serverValveChange and set up serverPump reward method
-                [currentValveState phaseRecords(specInd).valveErrorDetails quit serverValveChange phaseRecords(specInd).responseDetails ...
-                    requestRewardStartLogged requestRewardDurLogged] = ...
-                 setupServerPumpRewards(tm, rn, station, newValveState, currentValveState, phaseRecords(specInd).valveErrorDetails, ...
-                 startTime, serverValveChange, requestRewardStarted, requestRewardStartLogged, requestRewardPorts, requestRewardDone, ...
-                 requestRewardDurLogged, phaseRecords(specInd).responseDetails, quit);
-                
-                % =====================================================================================================================
-                % actually carry out serverPump rewards
-                % copied from merge code doTrial
-                valveStart=GetSecs();
-                timeout=-5.0;
-               % trialManager.soundMgr = playLoop(trialManager.soundMgr,'correctSound',station,1); % dont need to play sound (handled by phases)
-
-                sprintf('*****should be no output between here *****')
-
-                stopEarly=sendToServer(rn,getClientId(rn),constants.priorities.IMMEDIATE_PRIORITY,constants.stationToServerCommands.C_REWARD_CMD,{rewardSizeULorMS,logical(rewardValves)});
-                rewardDone=false;
-                while ~rewardDone && ~stopEarly
-                    [stopEarly openValveCom openValveCmd openValveCmdArgs]=waitForSpecificCommand(rn,[],constants.serverToStationCommands.S_SET_VALVES_CMD,timeout,'waiting for server open valve response to C_REWARD_CMD',constants.statuses.MID_TRIAL);
-
-
-                    if stopEarly
-                        'got stopEarly 2'
+            switch getRewardMethod(station)
+                case 'localTimed'
+                    % handle start and stop cases
+                    if start
+                        'turning on localTimed reward'
+                        rewardCurrentlyOn = true;
+                        %OPEN VALVE
+                        [currentValveStates phaseRecords(specInd).valveErrorDetails]=...
+                        setAndCheckValves(station,rewardValves,currentValveStates,...
+                            phaseRecords(specInd).valveErrorDetails,...
+                            lastRewardTime,'correct reward open');
+                        rewardValves
+                        disp('opening valves')
+                        GetSecs
+                    elseif stop
+                        'turning off reward'
+                        rewardCurrentlyOn = false;
+                        %CLOSE VALVE
+                        [currentValveStates phaseRecords(specInd).valveErrorDetails]=...
+                        setAndCheckValves(station,zeros(1,getNumPorts(station)),currentValveStates,...
+                            phaseRecords(specInd).valveErrorDetails,...
+                            lastRewardTime,'correct reward close');
+    %                     newValveState=doValves|requestRewardPorts; % this shouldnt be used for now...figure out later...
+                        disp('closing valves')
+                        GetSecs
+                    else
+                        error('has to be either start or stop - should not be here');
                     end
+                case 'localPump'
+                    % localPump method copied from merge stimOGL (non-phased)
+                    if start
+                        'turning on localPump reward'
+                        rewardCurrentlyOn=true;
+                        station=doReward(station,msRewardOwed/1000,requestRewardPorts);
+                        actualReinforcementDurationMSorUL = actualReinforcementDurationMSorUL + msRewardOwed;
+                        msRewardOwed=0;
+                        requestRewardDone=true;
+                    elseif stop
+                        rewardCurrentlyOn=false;
+                    end
+                    % there is nothing to do in the stop case, because the doReward method is already timed to msRewardOwed
+                    if any(doValves)
+                        primeMLsPerSec=1.0;
+                        station=doReward(station,primeMLsPerSec*ifi,doValves,true);
+                    end
+                    newValveState=0*doValves;
+                case 'serverPump'
+                    % handle serverPump method
 
 
-                    if ~stopEarly
+                    % =====================================================================================================================
+                    % function here to handle serverValveChange and set up serverPump reward method
+                    [currentValveState phaseRecords(specInd).valveErrorDetails quit serverValveChange phaseRecords(specInd).responseDetails ...
+                        requestRewardStartLogged requestRewardDurLogged] = ...
+                     setupServerPumpRewards(tm, rn, station, newValveState, currentValveState, phaseRecords(specInd).valveErrorDetails, ...
+                     startTime, serverValveChange, requestRewardStarted, requestRewardStartLogged, requestRewardPorts, requestRewardDone, ...
+                     requestRewardDurLogged, phaseRecords(specInd).responseDetails, quit);
 
-                        if any([isempty(openValveCom) isempty(openValveCmd) isempty(openValveCmdArgs)])
-                            error('waitforspecificcommand acted like it got a stop early even though it says it didn''t')
+                    % =====================================================================================================================
+                    % actually carry out serverPump rewards
+                    % copied from merge code doTrial
+                    valveStart=GetSecs();
+                    timeout=-5.0;
+                   % trialManager.soundMgr = playLoop(trialManager.soundMgr,'correctSound',station,1); % dont need to play sound (handled by phases)
+
+                    sprintf('*****should be no output between here *****')
+
+                    stopEarly=sendToServer(rn,getClientId(rn),constants.priorities.IMMEDIATE_PRIORITY,constants.stationToServerCommands.C_REWARD_CMD,{rewardSizeULorMS,logical(rewardValves)});
+                    rewardDone=false;
+                    while ~rewardDone && ~stopEarly
+                        [stopEarly openValveCom openValveCmd openValveCmdArgs]=waitForSpecificCommand(rn,[],constants.serverToStationCommands.S_SET_VALVES_CMD,timeout,'waiting for server open valve response to C_REWARD_CMD',constants.statuses.MID_TRIAL);
+
+
+                        if stopEarly
+                            'got stopEarly 2'
                         end
 
-                        requestedValveState=openValveCmdArgs{1};
-                        isPrime=openValveCmdArgs{2};
 
+                        if ~stopEarly
 
-
-                        if ~isPrime
-                            rewardDone=true;
-                            phaseRecords(specInd).latencyToOpenValveRecd=GetSecs()-valveStart;
-
-                            [stopEarly phaseRecords(specInd).valveErrorDetails,...
-                                phaseRecords(specInd).latencyToOpenValves,...
-                                phaseRecords(specInd).latencyToCloseValveRecd,...
-                                phaseRecords(specInd).latencyToCloseValves,...
-                                phaseRecords(specInd).actualRewardDuration,...
-                                phaseRecords(specInd).latencyToRewardCompleted,...
-                                phaseRecords(specInd).latencyToRewardCompletelyDone]...
-                                =clientAcceptReward(...
-                                rn,...
-                                openValveCom,...
-                                station,...
-                                timeout,...
-                                valveStart,...
-                                requestedValveState,...
-                                rewardValves,...
-                                isPrime);
-
-                            if stopEarly
-                                'got stopEarly 3'
+                            if any([isempty(openValveCom) isempty(openValveCmd) isempty(openValveCmdArgs)])
+                                error('waitforspecificcommand acted like it got a stop early even though it says it didn''t')
                             end
 
-                        else
+                            requestedValveState=openValveCmdArgs{1};
+                            isPrime=openValveCmdArgs{2};
 
-                            [stopEarly phaseRecords(specInd).primingValveErrorDetails(end+1),...
-                                phaseRecords(specInd).latencyToOpenPrimingValves(end+1),...
-                                phaseRecords(specInd).latencyToClosePrimingValveRecd(end+1),...
-                                phaseRecords(specInd).latencyToClosePrimingValves(end+1),...
-                                phaseRecords(specInd).actualPrimingDuration(end+1),...
-                                garbage,...
-                                garbage]...
-                                =clientAcceptReward(...
-                                rn,...
-                                openValveCom,...
-                                station,...
-                                timeout,...
-                                valveStart,...
-                                requestedValveState,...
-                                [],...
-                                isPrime);
 
-                            if stopEarly
-                                'got stopEarly 4'
+
+                            if ~isPrime
+                                rewardDone=true;
+                                phaseRecords(specInd).latencyToOpenValveRecd=GetSecs()-valveStart;
+
+                                [stopEarly phaseRecords(specInd).valveErrorDetails,...
+                                    phaseRecords(specInd).latencyToOpenValves,...
+                                    phaseRecords(specInd).latencyToCloseValveRecd,...
+                                    phaseRecords(specInd).latencyToCloseValves,...
+                                    phaseRecords(specInd).actualRewardDuration,...
+                                    phaseRecords(specInd).latencyToRewardCompleted,...
+                                    phaseRecords(specInd).latencyToRewardCompletelyDone]...
+                                    =clientAcceptReward(...
+                                    rn,...
+                                    openValveCom,...
+                                    station,...
+                                    timeout,...
+                                    valveStart,...
+                                    requestedValveState,...
+                                    rewardValves,...
+                                    isPrime);
+
+                                if stopEarly
+                                    'got stopEarly 3'
+                                end
+
+                            else
+
+                                [stopEarly phaseRecords(specInd).primingValveErrorDetails(end+1),...
+                                    phaseRecords(specInd).latencyToOpenPrimingValves(end+1),...
+                                    phaseRecords(specInd).latencyToClosePrimingValveRecd(end+1),...
+                                    phaseRecords(specInd).latencyToClosePrimingValves(end+1),...
+                                    phaseRecords(specInd).actualPrimingDuration(end+1),...
+                                    garbage,...
+                                    garbage]...
+                                    =clientAcceptReward(...
+                                    rn,...
+                                    openValveCom,...
+                                    station,...
+                                    timeout,...
+                                    valveStart,...
+                                    requestedValveState,...
+                                    [],...
+                                    isPrime);
+
+                                if stopEarly
+                                    'got stopEarly 4'
+                                end
                             end
                         end
+
                     end
 
-                end
-
-                sprintf('*****and here *****')
-            otherwise
-                error('unsupported rewardMethod');
+                    sprintf('*****and here *****')
+                otherwise
+                    error('unsupported rewardMethod');
+            end
         end
-    end
+    
+    end % end if not doValves
     % end reward stuff
     % =====================================================================================================================
     % =====================================================================================================================

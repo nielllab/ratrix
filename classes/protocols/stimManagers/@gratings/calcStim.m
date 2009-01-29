@@ -134,12 +134,11 @@ for i=1:length(unsortedUniques)
         mask(:,:,2)=computeGabors(maskParams,0,width,height,...
             'none', stimulus.normalizationMethod,0,0);
 
-        % necessary to make use of PTB alpha blending
+        % necessary to make use of PTB alpha blending: 1 - 
         mask(:,:,2) = 1 - mask(:,:,2); % 0 = transparent, 255=opaque (opposite of our mask)
         stim.masks{i}=mask;
     end
 end
-
 % convert from annuli=[0.8 0.8 0.6 1.2 0.7] to [1 1 2 3 4] (stupid unique automatically sorts when we dont want to)
 [a b] = unique(fliplr(stim.annuli)); 
 unsortedUniques=stim.annuli(sort(length(stim.annuli)+1 - b));

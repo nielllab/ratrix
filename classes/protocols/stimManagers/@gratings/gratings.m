@@ -151,7 +151,7 @@ switch nargin
         end
         % thres
         if varargin{13} >= 0
-            s.thresh=varargin{12};
+            s.thresh=varargin{13};
         else
             error('thresh must be >= 0')
         end

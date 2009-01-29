@@ -107,7 +107,8 @@ switch nargin
             error('stimType must be trigger, loop, once, cache, timedFrames, indexedFrames, or expert');
         end
         % rewardType
-        if ischar(varargin{4}) && (strcmp(varargin{4}, 'reward') || strcmp(varargin{4}, 'airpuff'))
+        if ischar(varargin{4}) && (strcmp(varargin{4}, 'reward') || strcmp(varargin{4}, 'airpuff') || ...
+                strcmp(varargin{4},'rewardSizeMSorUL') || strcmp(varargin{4},'msPuff')) % 1/29/09 - also allow these flags to get value from reinforcementMgr
             spec.rewardType = varargin{4};
 		elseif isempty(varargin{4})
 			spec.rewardType = []; % no reward/airpuff here
@@ -122,6 +123,8 @@ switch nargin
         end
         % framesUntilTransition
         if isscalar(varargin{6}) && varargin{6} > 0
+            spec.framesUntilTransition = varargin{6};
+        elseif ischar(varargin{6}) && strcmp(varargin{6},'msPenalty') % also allow this flag to get value from reinforcementMgr
             spec.framesUntilTransition = varargin{6};
         elseif isempty(varargin{6})
             spec.framesUntilTransition = [];

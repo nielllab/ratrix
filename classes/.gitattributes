@@ -193,3 +193,6 @@ protocols/stimManagers/@gratings/extractDetailFields.m -text
 protocols/stimManagers/@fullField/extractDetailFields.m -text
 protocols/stimManagers/@bipartiteField/extractDetailFields.m -text
 protocols/stimManagers/@whiteNoise/extractDetailFields.m -text
+protocols/@stimSpec/setRewardTypeAndDuration.m -text
+protocols/@stimSpec/setRewardType.m -text
+protocols/@stimSpec/setRewardDuration.m -text

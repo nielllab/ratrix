@@ -160,17 +160,18 @@ distractorOrientations=[0];
 discrimStim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 % gratings
-pixPerCycs=[20 50]; %freq
+pixPerCycs=[100 20 50]; %freq
 driftfrequencies=[1 6]; % in cycles per second
 orientations=[pi/3 pi/4 pi/6]; % in radians
 phases=[0]; % initial phase
-contrasts=[1 0.5]; % contrast of the grating
-durations=[1];
+contrasts=[1 0.01]; % contrast of the grating
+durations=[2];
 radii=[.08 0.04]; % radius of the gaussian mask
-annuli=[0.01 0.02]; % radius of inner annuli
+annuli=[0.01]; % radius of inner annuli
 location=[0.25 0.75];
 waveform='square';
 normalizationMethod='normalizeDiagonal';
+imageSelectionMode='normal';
 mean=0.5;
 thresh=.00005;
 maxWidth                =1024;
@@ -183,7 +184,8 @@ gratingStim = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts
 imageSize=[1 1];
 imageRotation=[0 0];
 imageYoked=false;
-imageStim = images(imageDir,ypos,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,trialDistribution,imageSize,imageYoked,imageRotation);
+imageStim = images(imageDir,ypos,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,trialDistribution,imageSelectionMode,...
+    imageSize,imageYoked,imageRotation);
 
 % for Phil's stim managers
 pixPerCycs              =[20];
@@ -520,7 +522,7 @@ imlist.ts5A={...
 
 
 discrimStim5A = images(imdir,ypos_nAFC,background_nAFC,...
-    maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts5A,[.15 1],false,[0 180],'expert');
+    maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts5A,imageSelectionMode,[.15 1],false,[0 180],'expert');
 % discrimStim6A = images(imdir,ypos_nAFC,background_nAFC,...
 %     maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts6A,[.5 .75],true,[0 90]);
 
@@ -563,7 +565,8 @@ for i=1:length(subjIDs),
 %         case {'rack3test4','rack3test5','rack3test6'} % nAFC, orientedGabors
 %             p=protocol('nAFC,orientedGabors',{ts4});
         otherwise
-            error('unknown subject');
+            p=protocol('demo',{ts25});
+%             error('unknown subject');
     end
     
     [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolDEMO','edf');

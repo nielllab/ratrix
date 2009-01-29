@@ -9,7 +9,8 @@ function [analysisdata] = physAnalysis(stimManager,spikeData,stimulusDetails,plo
 % stimData is the entire movie shown for this trial
 % removed 1/26/09 and replaced with stimulusDetails
 % reconstruct stimData from stimulusDetails - stimManager specific method
-if strcmp(stimulusDetails.strategy,'expert')
+if (ischar(stimulusDetails.strategy) && strcmp(stimulusDetails.strategy,'expert')) || ...
+        (exist('fieldsInLUT','var') && ismember('stimDetails.strategy',fieldsInLUT) && strcmp(LUTlookup(sessionLUT,stimulusDetails.strategy),'expert'))
     seeds=stimulusDetails.seedValues;
     spatialDim = stimulusDetails.spatialDim;
     std = stimulusDetails.std;

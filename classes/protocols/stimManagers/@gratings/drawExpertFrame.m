@@ -41,7 +41,7 @@ offset = 2*pi*cycsPerFrameVel*i;
 % Create a 1D vector x based on the frequency pixPerCycs
 % make the grating twice the normal width (to cover entire screen if rotated)
 x = (1:stim.width*2)*2*pi/stim.pixPerCycs(gratingToDraw);
-grating=stim.contrasts(gratingToDraw)*cos(x + offset+stim.phases(gratingToDraw)); % grating is the cos curve, with our calculated phase offset (based on driftfrequency) and initial phase
+grating=stim.contrasts(gratingToDraw)*cos(x + offset+stim.phases(gratingToDraw))+stimulus.mean; % grating is the cos curve, with our calculated phase offset (based on driftfrequency) and initial phase
 % grating=repmat(grating, [1 2]); 
 % Make grating texture
 gratingtex=Screen('MakeTexture',window,grating,0,0,floatprecision);

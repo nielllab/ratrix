@@ -126,7 +126,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 getLUTbits(station), ...
                 getResponsePorts(trialManager,getNumPorts(station)), ...
                 getNumPorts(station), ...
-                trialRecords(1:end-1));
+                trialRecords(1:end-1)); % change to trialRecords(1:end) - to support images/calcStim deck handling
             
             % =====================================================================================================
             % use old signature (non-phased), but stuff all phase data into the stim field
@@ -189,6 +189,20 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 [stimSpecs scaleFactors] = phaseify(trialManager,stim,stimManager,trialRecords(trialInd).type,...
                     trialRecords(trialInd).targetPorts,trialRecords(trialInd).distractorPorts,trialRecords(trialInd).scaleFactor,...
                     rewardSizeULorMS,msPenalty,getIFI(station));
+            end
+            
+            % 1/29/09 - go through all stimSpecs and insert any values from rm as flagged
+            for i=1:length(stimSpecs)
+                % set reward type and duration
+                if strcmp(getRewardType(stimSpecs{i}),'rewardSizeULorMS')
+                    stimSpecs{i}=setRewardTypeAndDuration(stimSpecs{i},'reward',rewardSizeULorMS);
+                elseif strcmp(getRewardType(stimSpecs{i}),'msPuff')
+                    stimSpecs{i}=setRewardTypeAndDuration(stimSpecs{i},'airpuff',msPuff);
+                end
+                % set time-out (msPenalty)
+                if ischar(getFramesUntilTransition(stimSpecs{i})) && strcmp(getFramesUntilTransition(stimSpecs{i}),'msPenalty')
+                    stimSpecs{i}=setFramesUntilTransition(stimSpecs{i},ceil((msPenalty/1000)/getIFI(station)));
+                end
             end
             
             % we have called calcStim() to successfully return our cell

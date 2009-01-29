@@ -762,10 +762,18 @@ database.subject{i}.currentShapedValue = 0.4; %+ eps/ 4;
 database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 
+% i=i+1;  % probably never used - false appendage
+% database.subject{i}.subjectID='297';
+% database.subject{i}.stepNumber=2;
+% database.subject{i}.rewardScalar=1;
+% database.subject{i}.msPenalty=1000;
+% % database.subject{i}.currentShapedValue = 0.4; %+ eps/ 4;
+% database.subject{i}.pctCTs=[]; %if not empty overrides all steps
+
 i=i+1;
-database.subject{i}.subjectID='297';
-database.subject{i}.stepNumber=2;
-database.subject{i}.rewardScalar=1;
+database.subject{i}.subjectID='296';
+database.subject{i}.stepNumber=8;
+database.subject{i}.rewardScalar=.2;
 database.subject{i}.msPenalty=1000;
 % database.subject{i}.currentShapedValue = 0.4; %+ eps/ 4;
 database.subject{i}.pctCTs=[]; %if not empty overrides all steps
@@ -773,32 +781,32 @@ database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 i=i+1;
 database.subject{i}.subjectID='303';
-database.subject{i}.stepNumber=2;
-database.subject{i}.rewardScalar=1;
+database.subject{i}.stepNumber=5;
+database.subject{i}.rewardScalar=0.2;
 database.subject{i}.msPenalty=1000;
 % database.subject{i}.currentShapedValue = 0.4; %+ eps/ 4;
 database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 i=i+1;
 database.subject{i}.subjectID='304';
-database.subject{i}.stepNumber=2;
-database.subject{i}.rewardScalar=1;
+database.subject{i}.stepNumber=5;
+database.subject{i}.rewardScalar=.2;
 database.subject{i}.msPenalty=1000;
 % database.subject{i}.currentShapedValue = 0.4; %+ eps/ 4;
 database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 i=i+1;
 database.subject{i}.subjectID='305';
-database.subject{i}.stepNumber=2;
-database.subject{i}.rewardScalar=1;
+database.subject{i}.stepNumber=5;
+database.subject{i}.rewardScalar=.2;
 database.subject{i}.msPenalty=1000;
 % database.subject{i}.currentShapedValue = 0.4; %+ eps/ 4;
 database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 i=i+1;
 database.subject{i}.subjectID='306';
-database.subject{i}.stepNumber=2;
-database.subject{i}.rewardScalar=1;
+database.subject{i}.stepNumber=6;
+database.subject{i}.rewardScalar=.2;
 database.subject{i}.msPenalty=1000;
 % database.subject{i}.currentShapedValue = 0.4; %+ eps/ 4;
 database.subject{i}.pctCTs=[]; %if not empty overrides all steps

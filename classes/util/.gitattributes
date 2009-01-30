@@ -126,3 +126,4 @@ analysis/getSpikesFromNeuralData.m -text
 analysis/cleanUpStimRecords.m -text
 analysis/fitGaussianEnvelopeToImage.m -text
 dragon/exportVariables.m -text
+infrastructure/calibrateLocal.m -text

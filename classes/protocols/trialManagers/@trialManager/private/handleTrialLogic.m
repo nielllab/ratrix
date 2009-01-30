@@ -14,6 +14,7 @@ function [tm responseDetails lookForChange respStart isRequesting requestRewardP
 % OUTPUT: tm, responseDetails, lookForChange, respStart, isRequesting, requestRewardPorts, requestRewardStarted, requestFrame, 
 %   stimStarted, stimToggledOn, lastPorts, frameNum, potentialStochasticResponse, didStochasticResponse, attempt, done, response, stopListening
 
+error('no one calls')
 
 if ~paused
     if verbose && any(lastPorts) && any(ports~=lastPorts)

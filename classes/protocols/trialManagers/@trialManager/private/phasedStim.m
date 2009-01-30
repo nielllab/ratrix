@@ -9,6 +9,8 @@ function [responseDetails... %structure containing record of events that occurre
     stimID...                %string stimID, for writing to screen
     )
 
+error('no one calls')
+
 %trialManager data members that this method depends on:
 % trialManager.station      %the station where this trial is running
 % trialManager.window       %pointer to target PTB window (should already be open)

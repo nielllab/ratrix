@@ -2,6 +2,8 @@ function [requestRewardPorts requestRewardDone newValveState station] = setupLoc
   requestRewardStartLogged, requestRewardDone, responseDetails, requestRewardPorts, doValves, ...
   station, ifi)
   
+error('no one calls')
+
   % This function handles the localTimed and localPump reward methods.
   % Part of stimOGL rewrite.
   % INPUT: tm, requestRewardStarted, requestRewardStartLogged, requestRewardDone, responseDetails, 

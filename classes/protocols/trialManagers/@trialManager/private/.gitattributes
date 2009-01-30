@@ -15,11 +15,9 @@
 /handleServerCommands.m -text
 /flipFrameAndDoPulse.m -text
 /handleKeyboard.m -text
-/setSeed.m -text
 /drawText.m -text
 /getSoundManager.m -text
 /cacheTextures.m -text
-/stopEyeTracking.m -text
 /updateFrameIndexUsingTextureCache.m -text
 /handlePhasedTrialLogic.m -text
 /phaseify.m -text

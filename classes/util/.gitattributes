@@ -128,3 +128,6 @@ dragon/exportVariables.m -text
 infrastructure/calibrateLocal.m -text
 misc/goodies.m -text
 misc/AM2300Control.m -text
+nidaq/openNidaqForAnalogRecording.m -text
+nidaq/closeAllDaqDevices.m -text
+nidaq/findDevicesOfTypeWithConstructor.m -text

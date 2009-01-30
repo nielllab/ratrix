@@ -26,7 +26,6 @@
 /setupServerPumpRewards.m -text
 /determineStrategy.m -text
 /saveMissedFrameData.m -text
-/setUpOrStopDatanet.m -text
 /determineColorPrecision.m -text
 /drawFrameUsingTextureCache.m -text
 /drawFirstFrame.m -text

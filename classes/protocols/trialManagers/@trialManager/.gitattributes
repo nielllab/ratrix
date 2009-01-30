@@ -15,6 +15,7 @@
 /setReinforcementParam.m -text
 /getNameFragment.m -text
 /stationOKForTrialManager.m -text
+/setUpOrStopDatanet.m -text
 /getRequestPorts.m -text
 /calibrateEyeTracker.m -text
 /getResponsePorts.m -text

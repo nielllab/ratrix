@@ -28,7 +28,9 @@ for i=1:length(subjectIDs)
         case '127'
             r=setShapingPMM(r,subjectIDs(i), 'goToRightDetection', '1_3');
             requestRewardSizeMs=50;
-            r=setRequestReward(r,subjectIDs(i),requestRewardSizeMs,1);
+            setSteps=[999:1000]; % these should be the steps that are all relevant nAFC, excluding free drinks
+            %r=setRequestReward(r,subjectIDs(i),requestRewardSizeMs,1);
+            setReinforcementParam('requestReward',{'127'},requestRewardSizeMs,setSteps,'on headfix setup','pmm')
         otherwise
             subjectIDs{i}
             s = getSubjectFromID(r, subjectIDs{i});

@@ -63,10 +63,10 @@ else
 end
 % Get from permanent store
 localIndex = length(remoteTrialRecords)+1;
-'this is local index'
-localIndex
-length(localTrialRecords)
-length(remoteTrialRecords)
+% 'this is local index'
+% localIndex
+% length(localTrialRecords)
+% length(remoteTrialRecords)
 % 1/28/09 - if remoteTrialRecords and localTrialRecords have different fields, give a warning and dont concat them
 % this will happen if the current session is the first of a new trialRecord format - should be rare enough that we can live with 
 % the consequences of losing some history temporarily

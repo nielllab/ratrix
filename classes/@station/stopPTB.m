@@ -16,7 +16,7 @@ if ismac
     end
     Screen('Resolution',s.screenNum,x.width,x.height,x.hz,x.pixelSize);
     %Screen('Resolution',0,1920,1200,0,32) %- 9/29/08 - THIS CRASHES WINDOWS-BASED MACHINES? - discuss
-
+    
     % following not true on osx:
     % Psychtoolbox will automatically restore the systems display resolution to the
     % system settings made via the display control panel as soon as either your script

@@ -5,8 +5,8 @@ if strcmp(s.responseMethod,'parallelPort')
     ports(s.sensorPins.invs)=~ports(s.sensorPins.invs);
 else
     if ~ismac
-    s.responseMethod
-    warning('can''t read ports without parallel port')
+        %s.responseMethod
+        warning('can''t read ports without parallel port')
     end
-    ports=zeros(1,s.numPorts);
+    ports=false(1,s.numPorts);
 end

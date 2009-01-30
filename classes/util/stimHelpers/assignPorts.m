@@ -22,7 +22,7 @@ end
 % determine correct port
 if ~isempty(lastCorrect) && ~isempty(lastResponse) && ~lastCorrect && length(lastTrialRec.targetPorts)==1 && (lastWasCorrection || rand<details.pctCorrectionTrials)
     details.correctionTrial=1;
-    'correction trial!'
+    %'correction trial!'
     targetPorts=lastTrialRec.targetPorts; % same ports are correct
 else
     details.correctionTrial=0;

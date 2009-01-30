@@ -37,7 +37,7 @@ if oldRes.width~=res.width || oldRes.height~=res.height || oldRes.hz ~=res.hz ||
     Screen('Resolution', s.screenNum, res.width, res.height, res.hz, res.pixelSize);
     s=startPTB(s);
     
-    newRes=Screen('Resolution', s.screenNum)
+    newRes=Screen('Resolution', s.screenNum);
     if ~all([newRes.width==res.width newRes.height==res.height newRes.pixelSize==res.pixelSize newRes.hz==res.hz])
         requestRes=res
         newRes=newRes
@@ -48,5 +48,5 @@ if oldRes.width~=res.width || oldRes.height~=res.height || oldRes.hz ~=res.hz ||
     end
 
 else
-    newRes=oldRes
+    newRes=oldRes;
 end

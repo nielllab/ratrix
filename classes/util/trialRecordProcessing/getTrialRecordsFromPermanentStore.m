@@ -156,7 +156,7 @@ files = files(sortIndices);
 
 
 for i=1:length(files)
-    '*****'
+    %'*****'
     completed=false;
     nAttempts=0;
     while ~completed
@@ -199,7 +199,7 @@ for i=1:length(files)
         ple(ex)
         rethrow(ex)
     end
-    '******'
+    %'******'
 
     switch(filterType)
         case 'dateRange'

@@ -98,9 +98,9 @@ for ii=1:length(fields)
             % this is a struct - recursively call processFields on all fields of the struct
             thisStructFields = fieldnames((trialRecords(1).(fn)));
             % now call processFields recursively - pass in fn as a prefix (so we know how to store to fieldsinLUT)
-            trialRecords
-            fn
-            fieldPath
+%             trialRecords
+%             fn
+%             fieldPath
             [sessionLUT fieldsInLUT theseStructs] = processFields(thisStructFields,sessionLUT,fieldsInLUT,[trialRecords.(fn)],fieldPath);
             % we have to return a temporary 'theseStructs' and then manually reassign in trialRecords unless can figure out correct indexing
     %         size(theseStructs)

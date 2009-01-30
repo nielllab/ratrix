@@ -26,10 +26,10 @@ if strcmp(station.responseMethod,'parallelPort')
             %valveErrorDetails=valveErrorDetails;
         end
     end
-
+    
     % DO IT
     setValves(station, requestedValves);
-
+    
     if ~barebones
         %return the end state of the valves
         %If getValves is slow we could assume they are as requested
@@ -45,11 +45,11 @@ if strcmp(station.responseMethod,'parallelPort')
     else
         endValveState=requestedValves;
     end
-
-
+    
+    
 else
     if ~ismac
         warning('can''t check and set valves without parallel port')
     end
-    endValveState=zeros(1,station.numPorts);
+    endValveState=false(1,station.numPorts);
 end

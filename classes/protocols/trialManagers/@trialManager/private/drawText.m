@@ -1,5 +1,5 @@
 function xTextPos = drawText(tm, window, labelFrames, subID, xOrigTextPos, yTextPos, yNewTextPos, normBoundsRect, stimID, protocolStr, ...
-  textLabel, trialLabel, i, frameNum, manual, didAPause, ptbVersion, ratrixVersion)
+    textLabel, trialLabel, i, frameNum, manual, didAPause, ptbVersion, ratrixVersion, numDrops, numApparentDrops, phaseInd, phaseType)
 
 % This function draws display text for each stim frame.
 % Part of stimOGL rewrite.
@@ -23,12 +23,12 @@ if labelFrames
     else
         txtLabel=textLabel;
     end
-    [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('priority:%g %s stimInd:%d frame:%d stim:%s',Priority(),trialLabel,i,frameNum,txtLabel),xTextPos,yNewTextPos,100*ones(1,3));
+    [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('priority:%g %s stimInd:%d frame:%d drops:%d(%d) stim:%s, phaseInd:%d phaseType:%s',Priority(),trialLabel,i,frameNum,numDrops,numApparentDrops,txtLabel,phaseInd,phaseType),xTextPos,yNewTextPos,100*ones(1,3));
     yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
-
+    
     [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('ptb:%s',ptbVersion),xTextPos,yNewTextPos,100*ones(1,3));
     yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
-
+    
     [garbage,yNewTextPos] = Screen('DrawText',window,sprintf('ratrix:%s',ratrixVersion),xTextPos,yNewTextPos,100*ones(1,3));
     yNewTextPos=yNewTextPos+1.5*normBoundsRect(4);
 end

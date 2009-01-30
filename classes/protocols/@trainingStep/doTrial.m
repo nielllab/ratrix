@@ -43,9 +43,7 @@ try
             error('it''s not a trainingStep')
         end
 
-
-        'boohoo'
-        class(ts.scheduler)
+        %class(ts.scheduler)
         [keepDoingTrials secsRemainingTilStateFlip  updateScheduler newScheduler] = checkSchedule(ts.scheduler,subject,ts,trialRecords,sessionNumber);
 
         %UPDATE SESSION RECORDS

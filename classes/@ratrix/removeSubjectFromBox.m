@@ -24,7 +24,7 @@ else
 %     class(b)
 %     s
 %     b
-     sprintf('%s: removed subject %s from box %d',comment,s,b)
+     fprintf('%s: removed subject %s from box %d\n',comment,s,b)
 %     author
     recordInLog(r,sub,sprintf('%s: removed subject %s from box %d',comment,s,b),author);
 

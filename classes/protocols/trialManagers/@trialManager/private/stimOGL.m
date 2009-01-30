@@ -42,7 +42,9 @@ FlushEvents('keyDown');
 %mlock protects a file from all of these 
 % should protect from any clear, but for some reason i wrote: except clear classes (and sometimes clear functions?) -- why? 
 %you have to unlock it to read in changes without restarting matlab!
-mlock; %to pick up changes without restarting matlab, call munlock('trialmanager/private/stimogl'),clear functions
+%mlock; %to pick up changes without restarting matlab, call munlock('trialmanager/private/stimogl'),clear functions
+%i don't think mlock will do much unless called on all subfunctions as well
+%consider calling pcode on everything...  tho didn't make any difference when i tried it...
 
 frameDropCorner.size=[.05 .05];
 frameDropCorner.loc=[1 0];
@@ -66,8 +68,7 @@ try
         [runningSVNversion repositorySVNversion url]=getSVNRevisionFromXML(getRatrixPath);
         ratrixVersion=sprintf('%s (%d of %d)',url,runningSVNversion,repositorySVNversion);
         ratrixSVNInfo=sprintf('%s@%d',url,runningSVNversion);
-    catch
-        ex=lastError
+    catch ex
         ratrixVersion='no network connection';
     end
 

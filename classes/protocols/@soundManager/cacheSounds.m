@@ -4,7 +4,7 @@ if isa(station,'station')
     updateCache=false;
     
     if getSoundOn(station) && length(sm.players)~=length(sm.clips)
-        warning('recaching sounds, this is expensive\n')
+        warning('recaching sounds, this is expensive')
         
         updateCache=true;
         
@@ -14,7 +14,7 @@ if isa(station,'station')
         
         if sm.usePsychPortAudio
             dllPath=fullfile(PsychtoolboxRoot, 'portaudio_x86.dll');
-            if iswin && exist(dllPath,'file') && length(soundNames)>1
+            if IsWin && exist(dllPath,'file') && length(soundNames)>1
                 warning('found enhanced asio driver -- disabling because this only allows us to make one buffer')
                 %note that we could instead just select a non-asio device (i
                 %think MME is next most preferred)
@@ -48,9 +48,11 @@ if isa(station,'station')
                 %tested systems:
                 % 1) erik's osx macbook pro
                 % 2) gigabyte mobo w/integrated realtek audio, xp sp3, 2GB, core 2 duo 6850 3GHz/2GHz, 8600 GTS (balaji's machine)
-                latclass=1; %4 is max, higher means less latency + stricter checks.  lowering may reduce system load if having frame drops.  1 seems ok on system 2.
-                if iswin
-                    buffsize=1250; %max is 4096 i think.  the larger this is, the larger the audio latency, but if too small, sound is distorted, and system load increases (could cause frame drops).  1250 is good on system 2.
+                % 3) rig dell w/ati card
+                % 4) rig dell w/nvidia + audigy cards, settings below don't work as well, consider moving to asio (need to use new playlist functionality in psychportaudio for this)
+                latclass=1; %4 is max, higher means less latency + stricter checks.  lowering may reduce system load if having frame drops.  1 seems ok on systems 1-3.
+                if IsWin
+                    buffsize=1250; %max is 4096 i think.  the larger this is, the larger the audio latency, but if too small, sound is distorted, and system load increases (could cause frame drops).  1250 is good on systems 1-3.
                 else
                     buffsize=[];
                 end
@@ -80,7 +82,7 @@ if isa(station,'station')
                 %cannot eliminate framedrops on beige or dell(ati), can on black/dell(nvidia) at 100Hz (nosound), osx(nosound/notext) at 60Hz
                 
                 PsychPortAudio('FillBuffer', sm.players{i}, clip);
-                PsychPortAudio('GetStatus', sm.players{i})
+                %PsychPortAudio('GetStatus', sm.players{i})
                 
                 PsychPortAudio('RunMode', sm.players{i}, 1);
                 PsychPortAudio('Verbosity' ,1); %otherwise it types crap out when we try to start, must think it's still running even after .Active is false, try to reproduce!

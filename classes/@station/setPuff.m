@@ -12,6 +12,6 @@ if strcmp(s.responseMethod,'parallelPort')
     end
 else
     if ~ismac
-    warning('can''t set puff without parallel port')
+        warning('can''t set puff without parallel port')
     end
 end

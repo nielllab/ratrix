@@ -805,12 +805,12 @@ try
 
             % update reward owed and elapsed time
             if ~isempty(lastRewardTime) && rewardCurrentlyOn
-                elapsedTime = getSecs() - lastRewardTime;
+                elapsedTime = GetSecs() - lastRewardTime;
                 msRewardOwed = msRewardOwed - elapsedTime*1000.0;
                % error('elapsed time was %d and msRewardOwed is now %d', elapsedTime, msRewardOwed);
                 actualRewardDurationMSorUL = actualRewardDurationMSorUL + elapsedTime*1000.0;
             end
-            lastRewardTime = getSecs();
+            lastRewardTime = GetSecs();
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % start/stop as necessary

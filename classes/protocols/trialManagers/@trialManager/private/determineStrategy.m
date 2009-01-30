@@ -69,18 +69,18 @@ else
         case 'loop'     %dynamic n-frame stimulus (loop)
             strategy = 'textureCache';
             loop = 1;
-        case 'dynamic' 
-%             strategy = 'dynamic'; % 10/31/08 - implementing dynamic mode
+        case 'dynamic'
+            %             strategy = 'dynamic'; % 10/31/08 - implementing dynamic mode
             error('dynamic type not yet implemented') % 1/20/09 - dynamic is not the same as expert (expert is what we want)
         case 'expert' %callback moreStim() to call ptb drawing methods, but leave frame labels and 'drawingfinished' to stimOGL
             strategy='expert';
-%             error('expert type not yet implemented')
+            %             error('expert type not yet implemented')
         otherwise
             error('unrecognized stim type, must be ''static'', ''cache'', ''loop'', ''dynamic'', ''expert'', {''indexedFrames'' [frameIndices]}, or {''timedFrames'' [frameTimes]}')
     end
 end
 
-strategy
+% strategy
 if isempty(responseOptions) && (trigger || loop || (timeIndexed && timedFrames(end)==0) || frameIndexed)
     error('can''t loop with no response ports -- would have no way out')
 end

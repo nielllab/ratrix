@@ -6,10 +6,6 @@ function d=display(t)
 %    display(t.criterion)
 %    display(t.scheduler)
 
-display(t.trialManager)
-display(t.stimManager)
-display(t.criterion)
-display(t.scheduler)
 d='';
 %following line causes 'can't find path specified' error?
 %d=['\t\ttrialManager: ' display(t.trialManager) '\n\t\tstimManager: '

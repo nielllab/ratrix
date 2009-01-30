@@ -1,9 +1,13 @@
 function [ind height width hz]=chooseLargestResForHzsDepthRatio(resolutions,hzs,depth,maxWidth,maxHeight)
 
-ratio=maxWidth/maxHeight;
 if ismac
     hzs=union(hzs,0); %have to add zero for osx, cuz screen('resolutions') returns all hz as 0
+    maxWidth=1920; %erik's macbook pro has timing problems (red flashing exclamation point) at 800x600
+    maxHeight=1200;
 end
+
+ratio=maxWidth/maxHeight;
+
 hzs=sort(hzs,'descend');
 
 for i=1:length(hzs)

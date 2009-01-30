@@ -145,7 +145,7 @@ for i=1:length(stimulus.port)
         tic
         %stim=convn(noise,k,'same'); %slower than imfilter
         stim=imfilter(noise,k,'circular'); %allows looping, does it keep edges nice?
-        toc
+        fprintf('took %g to filter noise\n',toc)
     end
 
     %         c = hist(stim(:),b);

@@ -1,53 +1,72 @@
-function [responseDetails lastFrameTime numDrops numApparentDrops] = ...
-    saveMissedFrameData(tm, responseDetails, missed, frameNum, ft, timingCheckPct, lastFrameTime, ifi, numDrops,numApparentDrops,...
-    when,whenTime,lastLoopEnd,time1,time2,time3,time4,time5,time6,time7,barebones,vbl)
-
-% This function saves data about missed frames into responseDetails.
-% Part of stimOGL rewrite.
-% INPUT: responseDetails, missed, frameNum, ft, timingCheckPct, lastFrameTime, ifi
-% OUTPUT: responseDetails, lastFrameTime
+function [responseDetails lastFrameTime timestamps] = ...
+    saveMissedFrameData(tm, responseDetails, missed, frameNum, timingCheckPct, lastFrameTime, ifi,...
+    timestamps,vbl,ft)
 
 %save facts about missed frames
-if missed>0 && frameNum<responseDetails.numFramesUntilStopSavingMisses
-    disp(sprintf('warning: missed frame num %d (when=%.15g at %.15g, lastLoopEnd=%.15g, when-last=%.15g [%.15g %.15g %.15g %.15g %.15g %.15g %.15g])',frameNum,when,whenTime,lastLoopEnd,when-lastFrameTime,time1-lastLoopEnd,time2-time1,time3-time2,time4-time3,time5-time4,time6-time5,time7-time6));
-    numDrops=numDrops+1;
-    if ~barebones
-        responseDetails.numMisses=responseDetails.numMisses+1;
+
+type='';
+thisIFI=vbl-lastFrameTime;
+
+if missed>0
+    type='caught';
+    responseDetails.numMisses=responseDetails.numMisses+1;
+    
+    if  responseDetails.numMisses<responseDetails.numDetailedDrops
+        
         responseDetails.misses(responseDetails.numMisses)=frameNum;
         responseDetails.afterMissTimes(responseDetails.numMisses)=GetSecs();
+        responseDetails.missIFIs(responseDetails.numMisses)=thisIFI;
+        %responseDetails.missTimestamps(responseDetails.numMisses)=timestamps; %need to figure out: Error: Subscripted assignment between dissimilar structures
+    else
+        responseDetails.numUnsavedMisses=responseDetails.numUnsavedMisses+1;
     end
-    if frameNum>2
-        %error('it')
-    end
+    
 else
-    thisIFI=vbl-lastFrameTime;
     thisIFIErrorPct = abs(1-thisIFI/ifi);
     if  thisIFIErrorPct > timingCheckPct
-        %seems to happen when thisIFI/ifi is near a whole number
-        disp(sprintf('warning: flip missed a timing and appeared not to notice: frame num %d, ifi error: %g, pct: %g%% (when=%.15g at %.15g, lastLoopEnd=%.15g)',frameNum,thisIFIErrorPct,100*thisIFI/ifi,when,whenTime,lastLoopEnd));
-        numApparentDrops=numApparentDrops+1;
-        if ~barebones
-            responseDetails.numApparentMisses=responseDetails.numApparentMisses+1;
+        type='unnoticed';
+        
+        responseDetails.numApparentMisses=responseDetails.numApparentMisses+1;
+        
+        if responseDetails.numApparentMisses<responseDetails.numDetailedDrops
             responseDetails.apparentMisses(responseDetails.numApparentMisses)=frameNum;
             responseDetails.afterApparentMissTimes(responseDetails.numApparentMisses)=GetSecs();
             responseDetails.apparentMissIFIs(responseDetails.numApparentMisses)=thisIFI;
+            %responseDetails.apparentMissTimestamps(responseDetails.numApparentMisses)=timestamps; %need to figure out: Error: Subscripted assignment between dissimilar structures
+        else
+            responseDetails.numUnsavedApparentMisses=responseDetails.numUnsavedApparentMisses+1;
         end
-        %error('it2')
+        
     end
 end
+
+if ~strcmp(type,'')
+    fprintf('missed frameNum: %d, ifi: %g (%g%% late): %s\n',frameNum,thisIFI,100*((thisIFI/ifi)-1),type)
+    fprintf('\tlast misses recorded:\t\t%g\n',  1000*(timestamps.missesRecorded-timestamps.prevPostFlipPulse))
+    fprintf('\tlast eyetracker done:\t\t%g\n',  1000*(timestamps.eyeTrackerDone-timestamps.missesRecorded))
+    fprintf('\tlast kbCheck done:\t\t%g\n',     1000*(timestamps.kbCheckDone-timestamps.eyeTrackerDone))
+    fprintf('\tlast handle kbd done:\t\t%g\n',  1000*(timestamps.keyboardDone-timestamps.kbCheckDone))
+    fprintf('\tlast into phase logic:\t\t%g\n', 1000*(timestamps.enteringPhaseLogic-timestamps.keyboardDone))
+    fprintf('\tlast phase logic done:\t\t%g\n', 1000*(timestamps.phaseLogicDone-timestamps.enteringPhaseLogic))
+    fprintf('\tlast reward done:\t\t%g\n',      1000*(timestamps.rewardDone-timestamps.phaseLogicDone))
+    fprintf('\tlast server comm done:\t\t%g\n', 1000*(timestamps.serverCommDone-timestamps.rewardDone))
+    fprintf('\tlast phase records done:\t%g\n', 1000*(timestamps.phaseRecordsDone-timestamps.serverCommDone))
+    fprintf('\tlast loop done:\t\t\t%g\n',      1000*(timestamps.loopEnd-timestamps.phaseRecordsDone))
+    fprintf('\tlast time to cycle:\t\t%g\n',    1000*(timestamps.loopStart-timestamps.loopEnd))
+    fprintf('\tphase update:\t\t\t%g\n',        1000*(timestamps.phaseUpdated-timestamps.loopStart))
+    fprintf('\tframe draw:\t\t\t%g\n',          1000*(timestamps.frameDrawn-timestamps.phaseUpdated))
+    fprintf('\tframe drop corner drawn:\t%g\n', 1000*(timestamps.frameDropCornerDrawn-timestamps.frameDrawn))
+    fprintf('\ttext drawn:\t\t\t%g\n',          1000*(timestamps.textDrawn-timestamps.frameDropCornerDrawn))
+    fprintf('\tdrawing finished:\t\t%g\n',      1000*(timestamps.drawingFinished-timestamps.textDrawn))
+    fprintf('\tprepulses done:\t\t\t%g\n',      1000*(timestamps.prePulses-timestamps.drawingFinished))
+    
+    fprintf('\tvbl done:\t\t\t%g\n',            1000*(vbl-timestamps.prePulses))    
+    fprintf('\tflip returned:\t\t\t%g\n',       1000*(ft-vbl))    
+    
+    fprintf('\tpost flip pulse:\t\t%g\n',       1000*(timestamps.postFlipPulse-ft)) 
+end
+
 lastFrameTime=vbl;
-
-if ~barebones
-    %stop saving miss frame statistics after the relevant period -
-    %prevent trial history from getting too big
-    %1 day is about 1-2 million misses is about 25 MB
-    %consider integers if you want to save more
-    %reasonableMaxSize=ones(1,intmax('uint16'),'uint16');%
-
-    if missed>0 && frameNum>=responseDetails.numFramesUntilStopSavingMisses
-        responseDetails.numMisses=responseDetails.numMisses+1;
-        responseDetails.numUnsavedMisses=responseDetails.numUnsavedMisses+1;
-    end
-end
+timestamps.prevPostFlipPulse=timestamps.postFlipPulse;
 
 end % end function

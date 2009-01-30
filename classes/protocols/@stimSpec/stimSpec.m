@@ -85,9 +85,9 @@ switch nargin
         end
         
         % stimType
-        varargin{3}
-        ischar(varargin(3))
-        strcmp(varargin(3),'trigger')
+        %varargin{3}
+        %ischar(varargin(3))
+        %strcmp(varargin(3),'trigger')
         if ischar(varargin{3}) && (strcmp(varargin{3}, 'trigger') || strcmp(varargin{3}, 'loop') || ...
                 strcmp(varargin{3}, 'once') || strcmp(varargin{3}, 'cache') || strcmp(varargin{3},'expert')) % handle single char arrays
             % error-check that if we want toggle mode, only a 2-frame movie

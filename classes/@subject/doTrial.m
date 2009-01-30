@@ -8,7 +8,7 @@ if isa(r,'ratrix') && isa(station,'station') && (isempty(rn) || isa(rn,'rnet'))
 
         [graduate keepWorking secsRemainingTilStateFlip subject r trialRecords station newTsNum] ...
             =doTrial(ts,station,subject,r,rn,trialRecords,sessionNumber);
-        'subject'
+        %'subject'
 %         newTrialRecords
 
         % 1/22/09 - if newTsNum is not empty, this means we want to manually move the trainingstep (not graduate)

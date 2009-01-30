@@ -2,7 +2,7 @@ function r=updateSubjectProtocol(r,s,comment,auth,listProtocol,listTrainingStep,
 [member index]=ismember(getID(s),getSubjectIDs(r));
 if isa(s,'subject') && member && index>0 && ~subjectIDRunning(r,getID(s))
     if authorCheck(r,auth)
-
+        
         r.subjects{index}=s;
 
         [p i]=getProtocolAndStep(s);

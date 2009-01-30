@@ -73,8 +73,8 @@ w=size(pre,2);
 
 maxPositionalError=.01;
 
-size(pre)
-[details.patchHeight details.patchWidth]/maxPositionalError
+%size(pre)
+%[details.patchHeight details.patchWidth]/maxPositionalError
 if false %out of memory for long stims
     if any([h/details.patchHeight w/details.patchWidth] < 1/maxPositionalError) %if pre's size is too small or the patch size is too large, positioning/sizing will be too coarse
         pre=imresize(pre,[details.patchHeight details.patchWidth]/maxPositionalError,'nearest');

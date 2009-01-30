@@ -247,7 +247,13 @@ for i=1:length(ids)
                 pathToThisField = regexp(fieldsInLUT{n},'\.','split');
                 thisField=newBasicRecs;
                 for nn=1:length(pathToThisField)
-                    thisField=thisField.(pathToThisField{nn});
+                    try
+                        thisField=thisField.(pathToThisField{nn}); 
+                    catch ex
+                        ple(ex)
+                        keyboard
+                        %on osx edf sees 'Reference to non-existent field 'stimDetails'.' here.  (running filteredNoise, )
+                    end
                 end
                 thisFieldValues = sessionLUT(thisField);
             catch

@@ -42,7 +42,7 @@ else
 
     if length(d)==1
         rx=ratrix(defaultLoc,0);
-        'loaded ratrix from default location'
+        fprintf('loaded ratrix from default location\n')
     else
         try
             [success mac]=getMACaddress();
@@ -54,11 +54,11 @@ else
         end
 
         machines={{'1U',mac,[1 1 1]}};
-        rx=createRatrixWithDefaultStations(machines,dataPath,'localTimed',true); %last argument is localMultiDisplaySetup flag - false if single monitor, true only if dual displays
+        rx=createRatrixWithDefaultStations(machines,dataPath,'localTimed',false); %last argument is localMultiDisplaySetup flag - false if single monitor, true only if dual displays
         permStorePath=fullfile(dataPath,'PermanentTrialRecordStore');
         mkdir(permStorePath);
         rx=setStandAlonePath(rx,permStorePath);
-        'created new ratrix'
+        fprintf('created new ratrix\n')
     end
 end
 
@@ -137,7 +137,7 @@ try
     rx=putSubjectInBox(rx,subjectID,boxIDs(1),auth);    
     b=getBoxIDForSubjectID(rx,getID(s));
     st=getStationsForBoxID(rx,b);
-    struct(st(1))
+    %struct(st(1))
     rx=doTrials(st(1),rx,0,[],~recordInOracle); %0 means keep running trials til something stops you (quit, error, etc)
     [rx ids] = emptyAllBoxes(rx,'done running trials in standAloneRun',auth);
 

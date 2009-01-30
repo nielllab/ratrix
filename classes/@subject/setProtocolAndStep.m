@@ -2,9 +2,9 @@ function [s r]=setProtocolAndStep(s,p,thisIsANewProtocol,thisIsANewTrainingStep,
 % INPUTS
 %   s                       subject object
 %   p                       protocol (eg from setProtocol)
-%   thisIsANewProtocol  	if FALSE, does not rewrite protocol descr to log 
+%   thisIsANewProtocol  	if FALSE, does not rewrite protocol descr to log
 %   thisIsANewTrainingStep  if FALSE, does not rewrite trainingstep descr to log
-%   thisIsANewStepNum       if FALSE, does not log setting of new step number 
+%   thisIsANewStepNum       if FALSE, does not log setting of new step number
 %   i                       index of training step
 %   r                       ratrix object
 %   comment                 string that will be saved to log file
@@ -18,14 +18,14 @@ function [s r]=setProtocolAndStep(s,p,thisIsANewProtocol,thisIsANewTrainingStep,
 %     [subj r]=setProtocolAndStep(subj,p,1,0,1,1,r,'first try','edf');
 
 if isa(p,'protocol') && isa(r,'ratrix') && ~isempty(getSubjectFromID(r,s.id)) && ~subjectIDRunning(r,s.id)
-%     i
-%     getNumTrainingSteps(p)
+    %     i
+    %     getNumTrainingSteps(p)
     
     if i<=getNumTrainingSteps(p) && i>=0 && isscalar(i) && mod(i,1)==0 %mod(i,1)==0 checks that i is an integer (even as a double type)
         if authorCheck(r,auth)
             s.protocol=p;
             s.trainingStepNum=uint8(i); % 1/9/09 - force to uint8 to pass isinteger tests down the line
-
+            
             if strcmp(auth,'ratrix')
                 s.protocolVersion.autoVersion=s.protocolVersion.autoVersion+1;
             else
@@ -34,9 +34,9 @@ if isa(p,'protocol') && isa(r,'ratrix') && ~isempty(getSubjectFromID(r,s.id)) &&
             end
             s.protocolVersion.date=datevec(now);
             s.protocolVersion.author=auth;
-
+            
             r=updateSubjectProtocol(r,s,comment,auth,thisIsANewProtocol,thisIsANewTrainingStep,thisIsANewStepNum);
-
+            
         else
             error('author failed authentication')
         end

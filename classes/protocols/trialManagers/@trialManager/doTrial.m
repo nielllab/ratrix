@@ -138,6 +138,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             else
                 error('frame label must be vector')
             end
+            
             [station trialRecords(trialInd).resolution]=setResolution(station,resolutions(resInd));
             trialRecords(trialInd).station = structize(station); %wait til now to record, so we get an updated ifi measurement in the station object
 
@@ -389,9 +390,12 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             currentValveStates=verifyValvesClosed(station);
 
             resp=find(trialRecords(trialInd).response);
-            if ~ischar(trialRecords(trialInd).response) && length(resp)==1
-
-                trialRecords(trialInd).correct = ismember(resp,trialRecords(trialInd).targetPorts);
+            if ~ischar(trialRecords(trialInd).response)
+                if length(resp)==1
+                    trialRecords(trialInd).correct = ismember(resp,trialRecords(trialInd).targetPorts);
+                else
+                    trialRecords(trialInd).correct = 0;                   
+                end
             elseif ischar(trialRecords(trialInd).response) && strcmp(trialRecords(trialInd).response, 'none')
                 % temporarily continue doing trials if response = 'none'
                 trialRecords(trialInd).correct = 0;
@@ -403,7 +407,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             else
                 trialRecords(trialInd).correct = 0;
                 trialRecords(trialInd).response
-                'setting stopEarly'
+                fprintf('setting stopEarly\n')
                 stopEarly = 1;
             end
             

@@ -79,13 +79,13 @@ for i=1:length(d)
         if ~d(i).isdir && ismember(scanned(1),trials)
             
             desiredFiles{end+1}=d(i).name;
-            startLoad=getSecs;
+            startLoad=GetSecs;
             e=load(fullfile(getEyeDataPath(eyeTracker),desiredFiles{end}));
-            loadTimes(end+1)=getSecs-startLoad;
+            loadTimes(end+1)=GetSecs-startLoad;
 
-            startLoad=getSecs;
+            startLoad=GetSecs;
             e2=load(fullfile(getEyeDataPath(eyeTracker),desiredFiles{end}),'gaze');
-            loadMiniTimes(end+1)=getSecs-startLoad;
+            loadMiniTimes(end+1)=GetSecs-startLoad;
             
         end
     end

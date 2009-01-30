@@ -89,10 +89,10 @@ for f=1:length(subDirs)
             % edited to switch on whether or not we are using subject-specific paths
             if gotPathFromOracle
                 [success(j) message messageID]=mkdir(paths{j});
-                sprintf('made directory %s', paths{j})
+                fprintf('made directory %s\n', paths{j})
             else
                 [success(j) message messageID]=mkdir(fullfile(paths{j},subjectName));
-                sprintf('made directory %s', fullfile(paths{j},subjectName))
+                fprintf('made directory %s\n', fullfile(paths{j},subjectName))
             end
             
             if success(j) %ignore warning if directory exists
@@ -173,9 +173,8 @@ for f=1:length(subDirs)
                 message
                 messageID
             end
-            'Moving old local trial records file'
-            filePath
-            fileName
+            fprintf('Moving old local trial records file:\n')
+            fprintf('\t%s\t%s\n',filePath, fileName)
             [successM messageM messageIDM]=movefile(fullfile(filePath,fileName),fullfile(filePath,'backups',newFileName));
             if ~successM
                 messageM

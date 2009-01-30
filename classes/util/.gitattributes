@@ -126,8 +126,8 @@ analysis/cleanUpStimRecords.m -text
 analysis/fitGaussianEnvelopeToImage.m -text
 dragon/exportVariables.m -text
 infrastructure/calibrateLocal.m -text
-misc/goodies.m -text
 misc/AM2300Control.m -text
+misc/goodies.m -text
 nidaq/openNidaqForAnalogRecording.m -text
 nidaq/closeAllDaqDevices.m -text
 nidaq/findDevicesOfTypeWithConstructor.m -text

@@ -716,13 +716,24 @@ while ~done && ~quit;
     % newValveState will be used to keep track of doValves stuff - figure out server-based use later
     if any(doValves~=newValveState)
         %newValveState
-        [newValveState phaseRecords(specInd).valveErrorDetails]=...
-            setAndCheckValves(station,doValves,currentValveStates,...
-            phaseRecords(specInd).valveErrorDetails,...
-            GetSecs,'doValves');
-        %doValves
-        %disp('set doValves')
-        %GetSecs
+        switch getRewardMethod(station)
+            case 'localTimed'
+                [newValveState phaseRecords(specInd).valveErrorDetails]=...
+                    setAndCheckValves(station,doValves,currentValveStates,...
+                    phaseRecords(specInd).valveErrorDetails,...
+                    GetSecs,'doValves');
+                %doValves
+                %disp('set doValves')
+                %GetSecs
+            case 'localPump'
+                if any(doValves)
+                    primeMLsPerSec=1.0;
+                    station=doReward(station,primeMLsPerSec*ifi,doValves,true);
+                end
+                newValveState=0*doValves; % set newValveStates to 0 because localPump locks the loop while calling doReward
+            otherwise
+                error('unsupported rewardMethod');
+        end
         
     else
         
@@ -789,11 +800,6 @@ while ~done && ~quit;
                         rewardCurrentlyOn=false;
                     end
                     % there is nothing to do in the stop case, because the doReward method is already timed to msRewardOwed
-                    if any(doValves)
-                        primeMLsPerSec=1.0;
-                        station=doReward(station,primeMLsPerSec*ifi,doValves,true);
-                    end
-                    newValveState=0*doValves;
                 case 'serverPump'
                     % handle serverPump method
                     

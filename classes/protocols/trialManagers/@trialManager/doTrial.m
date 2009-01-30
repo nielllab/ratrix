@@ -393,6 +393,12 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             if ~ischar(trialRecords(trialInd).response)
                 if length(resp)==1
                     trialRecords(trialInd).correct = ismember(resp,trialRecords(trialInd).targetPorts);
+                elseif length(resp)>1
+                    % triggered two or more ports at same time
+                    trialRecords(trialInd).response
+                    trialRecords(trialInd).correct=0;
+                    fprintf('setting stopEarly because multiple ports blocked\n')
+                    stopEarly=1;
                 else
                     trialRecords(trialInd).correct = 0;                   
                 end

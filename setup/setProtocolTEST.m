@@ -392,75 +392,111 @@ ts12 = trainingStep(vh, cDots, repeatIndef, noTimeOff(), svnRev); % coherentDots
 % ts17 = trainingStep(vh, cDots6, graduateQuickly, noTimeOff(), svnRev); % coherentDots w/ nAFC
 
 
-% %erik 
-% noiseSpec.orientations           = {-pi/4 [] pi/4};
-% noiseSpec.locationDistributions  = {1 [] 1};
-% noiseSpec.distribution           = 'gaussian';
-% noiseSpec.origHz                 = 0;
-% noiseSpec.background             = .5;
-% noiseSpec.contrast               = pickContrast(.5,.01);
-% noiseSpec.maskRadius             = 10;
-% noiseSpec.patchDims              = uint16([50 50]);
-% noiseSpec.patchHeight            = 1;
-% noiseSpec.patchWidth             = 1;
-% noiseSpec.kernelSize             = .5;
-% noiseSpec.kernelDuration         = .1;
-% noiseSpec.loopDuration           = 1;
-% noiseSpec.ratio                  = 1/3;
-% noiseSpec.filterStrength         = 1;
-% noiseSpec.bound                  = .99;
-% noiseSpec.maxWidth               = 800;
-% noiseSpec.maxHeight              = 600;
-% noiseSpec.scaleFactor            = 0;
-% noiseSpec.interTrialLuminance    = interTrialLuminance;
-% 
-% noiseStim=filteredNoise(noiseSpec);
-% 
-% 
-% noiseSpec.orientations           = {0 [] 0};
-% noiseSpec.locationDistributions  = {1 [] 1};
-% noiseSpec.distribution           = 'binary';
-% noiseSpec.contrast               = 1;
-% noiseSpec.maskRadius             = 100;
-% noiseSpec.kernelSize             = 0;
-% noiseSpec.kernelDuration         = 0;
-% noiseSpec.loopDuration           = 1;
-% noiseSpec.ratio                  = 1;
-% noiseSpec.filterStrength         = 0;
-% noiseSpec.patchDims              = uint16([100 100]);
-% noiseSpec.patchHeight            = 1;
-% noiseSpec.patchWidth             = 1;
-% 
-% unfilteredNoise=filteredNoise(noiseSpec);
-% 
-% 
-% noiseSpec.distribution           = '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\hateren\ts001';
-% noiseSpec.origHz                 = 1200;
-% noiseSpec.loopDuration           = 30;
-% 
-% hateren=filteredNoise(noiseSpec);
-% 
-% 
-% noiseSpec.distribution           = '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\pmeier\stimSequence\TRF_CRF_v3';
-% noiseSpec.origHz                 = 100;
-% noiseSpec.loopDuration           = 10;
-% 
-% crf_trf=filteredNoise(noiseSpec);
-% 
-% noiseSpec.locationDistributions  = {1 [] 1};
-% noiseSpec.distribution           = 'gaussian';
-% noiseSpec.contrast               = pickContrast(.5,.01);
-% noiseSpec.patchDims              = uint16([1 1]);
-% noiseSpec.patchHeight            = 1;
-% noiseSpec.patchWidth             = 1;
-% noiseSpec.loopDuration           = 2;
-% 
-% fullfieldFlicker=filteredNoise(noiseSpec);
-% 
-% ts31 = trainingStep(aP, noiseStim,  repeatIndefinitely(), noTimeOff(), svnRev); %filteredNoise discrim
-% ts32 = trainingStep(aP, unfilteredNoise,  repeatIndefinitely(), noTimeOff(), svnRev); %unfilteredNoise discrim
-% ts33 = trainingStep(aP, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svnRev); %fullfieldFlicker
-% ts34 = trainingStep(aP, hateren,  repeatIndefinitely(), noTimeOff(), svnRev); %hateren
+%erik 
+d=2; %decrease to broaden
+gran=100;
+x=linspace(-d,d,gran);
+[a b]=meshgrid(x);
+
+ports=cellfun(@uint8,{1 3},'UniformOutput',false);
+[noiseSpec(1:length(ports)).port]=deal(ports{:});
+
+% stim properties:
+% in.distribution               'gaussian', 'binary', 'uniform', or a path to a file name (either .txt or .mat, extension omitted, .txt loadable via load(), and containing a single vector of numbers named 'noise')
+% in.origHz                     only used if distribution is a file name, indicating sampling rate of file
+% in.contrast                   std dev in normalized luminance units (just counting patch, before mask application), values will saturate
+% in.startFrame                 'randomize' or integer indicating fixed frame number to start with
+% in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file)
+%                               to make uniques and repeats, pass {numRepeatsPerUnique numCycles cycleDurSeconds} - a cycle is a whole set of repeats and one unique - distribution cannot be sinusoidalFlicker 
+
+[noiseSpec.distribution]         =deal('gaussian');
+[noiseSpec.origHz]               =deal(0);
+[noiseSpec.contrast]             =deal(pickContrast(.5,.01));
+[noiseSpec.startFrame]           =deal('randomize');
+[noiseSpec.loopDuration]         =deal(1);
+
+% patch properties:
+% in.locationDistribution       2-d density, will be normalized to stim area
+% in.maskRadius                 std dev of the enveloping gaussian, normalized to diagonal of stim area (values <=0 mean no mask)
+% in.patchDims                  [height width]
+% in.patchHeight                0-1, normalized to stim area height
+% in.patchWidth                 0-1, normalized to stim area width
+% in.background                 0-1, normalized
+
+[noiseSpec.locationDistribution]=deal(reshape(mvnpdf([a(:) b(:)],[-d/2 d/2]),gran,gran),reshape(mvnpdf([a(:) b(:)],[d/2 d/2]),gran,gran));
+[noiseSpec.maskRadius]           =deal(.045);
+[noiseSpec.patchDims]            =deal(uint16([50 50]));
+[noiseSpec.patchHeight]          =deal(.4);
+[noiseSpec.patchWidth]           =deal(.4);
+[noiseSpec.background]           =deal(.5);
+
+% filter properties:
+% in.orientation                filter orientation in radians, 0 is vertical, positive is clockwise
+% in.kernelSize                 0-1, normalized to diagonal of patch
+% in.kernelDuration             in seconds (will be rounded to nearest multiple of frame duration)
+% in.ratio                      ratio of short to long axis of gaussian kernel (1 means circular, no effective orientation)
+% in.filterStrength             0 means no filtering (kernel is all zeros, except 1 in center), 1 means pure mvgaussian kernel (center not special), >1 means surrounding pixels more important
+% in.bound                      .5-1 edge percentile for long axis of kernel when parallel to window
+
+[noiseSpec.orientation]         =deal(-pi/4,pi/4);
+[noiseSpec.kernelSize]           =deal(.5);
+[noiseSpec.kernelDuration]       =deal(.2);
+[noiseSpec.ratio]                =deal(1/3);
+[noiseSpec.filterStrength]       =deal(1);
+[noiseSpec.bound]                =deal(.99);
+
+maxWidth               = 800;
+maxHeight              = 600;
+scaleFactor            = 0;
+
+noiseStim=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
+
+
+[noiseSpec.orientation]         =deal(0);
+[noiseSpec.locationDistribution]=deal([0 0;1 0], [0 0;0 1]);
+[noiseSpec.distribution]         =deal('binary');
+[noiseSpec.contrast]             =deal(1);
+[noiseSpec.maskRadius]           =deal(100);
+[noiseSpec.kernelSize]           =deal(0);
+[noiseSpec.kernelDuration]       =deal(0);
+[noiseSpec.ratio]                =deal(1);
+[noiseSpec.filterStrength]       =deal(0);
+[noiseSpec.patchDims]            =deal(uint16([2 2]));
+[noiseSpec.patchHeight]          =deal(.1);
+[noiseSpec.patchWidth]           =deal(.1);
+
+unfilteredNoise=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
+
+
+if ismac
+    ts001 = '/Users/eflister/Desktop/ratrix trunk/classes/protocols/stimManagers/@flicker/ts001';
+else
+    ts001 = '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\hateren\ts001';
+end
+
+[noiseSpec.distribution]         =deal(ts001);
+[noiseSpec.origHz]               =deal(1200);
+[noiseSpec.loopDuration]         =deal(30);
+
+hateren=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
+
+
+[noiseSpec.locationDistribution]=deal(1);
+[noiseSpec.distribution]         =deal('gaussian');
+[noiseSpec.contrast]             =deal(pickContrast(.5,.01));
+[noiseSpec.patchDims]            =deal(uint16([1 1]));
+[noiseSpec.patchHeight]          =deal(.5);
+[noiseSpec.patchWidth]           =deal(.5);
+
+fullfieldFlicker=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
+ts31 = trainingStep(aP, noiseStim,  repeatIndefinitely(), noTimeOff(), svnRev); %filteredNoise discrim
+ts32 = trainingStep(aP, unfilteredNoise,  repeatIndefinitely(), noTimeOff(), svnRev); %unfilteredNoise discrim
+ts33 = trainingStep(aP, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svnRev); %fullfieldFlicker
+ts34 = trainingStep(aP, hateren,  repeatIndefinitely(), noTimeOff(), svnRev); %hateren
 % ts35 = trainingStep(aP, crf_trf,  repeatIndefinitely(), noTimeOff(), svnRev); %crf_trf
 
 
@@ -565,7 +601,7 @@ for i=1:length(subjIDs),
 %         case {'rack3test4','rack3test5','rack3test6'} % nAFC, orientedGabors
 %             p=protocol('nAFC,orientedGabors',{ts4});
         otherwise
-            p=protocol('demo',{ts25});
+            p=protocol('demo',{ts4});
 %             error('unknown subject');
     end
     

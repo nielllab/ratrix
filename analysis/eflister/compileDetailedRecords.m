@@ -234,7 +234,8 @@ for i=1:length(ids)
 
         % 12/18/08 - now update newBasicRecs as appropriate (shift LUT indices by the length of compiledLUT)
         % then add sessionLUT to compiledLUT
-        for n=1:length(fieldsInLUT)
+        newBasicRecsToUpdate=intersect(fieldsInLUT,fields(newBasicRecs));
+        for n=1:length(newBasicRecsToUpdate)
             % for each field in newBasicRecs that uses the sessionLUT
             try
                 % 1/2/09 - need to do something about fieldsInLUT to avoid this error?
@@ -244,26 +245,20 @@ for i=1:length(ids)
                 % - maybe separate each element of fieldsInLUT (a fieldPath) into each step, and then build thisFieldValue from that
                 
                 % 1/20/09 - split fieldsInLUT using \. as the delimiter, and then loop through each "step" in the path
-                pathToThisField = regexp(fieldsInLUT{n},'\.','split');
+                pathToThisField = regexp(newBasicRecsToUpdate{n},'\.','split');
                 thisField=newBasicRecs;
                 for nn=1:length(pathToThisField)
-                    try
-                        thisField=thisField.(pathToThisField{nn}); 
-                    catch ex
-                        ple(ex)
-                        keyboard
-                        %on osx edf sees 'Reference to non-existent field 'stimDetails'.' here.  (running filteredNoise, )
-                    end
+                    thisField=thisField.(pathToThisField{nn});
                 end
                 thisFieldValues = sessionLUT(thisField);
             catch
-                warningStr=sprintf('could not find %s in newBasicRecs - skipping',fieldsInLUT{n});
+                warningStr=sprintf('could not find %s in newBasicRecs - skipping',newBasicRecsToUpdate{n});
 %                 warning(warningStr);
                 continue;
             end
             [indices compiledLUT] = addOrFindInLUT(compiledLUT, thisFieldValues);
             for nn=1:length(indices)
-                evalStr=sprintf('newBasicRecs.%s(nn) = indices(nn);',fieldsInLUT{n});
+                evalStr=sprintf('newBasicRecs.%s(nn) = indices(nn);',newBasicRecsToUpdate{n});
                 eval(evalStr); % set new indices
             end
 %             newBasicRecs.(fieldsInLUT{n}) = indices; % set new indices based on integrated LUT

@@ -1,16 +1,11 @@
 /stimOGL.m -text
-/phasedStim.m -text
-/doPhase.m -text
 /test.m -text
 /stimOGL_OLD.m -text
-/closeRealTimeLoop.m -text
 /validateStimSpecs.m -text
 /determineScreenParametersAndLUT.m -text
-/setupLocalTimedAndLocalPumpRewards.m -text
 /testStimOGL.m -text
 /runRealTimeLoop.m -text
 /getEyeTracker.m -text
-/handleTrialLogic.m -text
 /getResponse.m -text
 /handleServerCommands.m -text
 /flipFrameAndDoPulse.m -text
@@ -26,4 +21,3 @@
 /saveMissedFrameData.m -text
 /determineColorPrecision.m -text
 /drawFrameUsingTextureCache.m -text
-/drawFirstFrame.m -text

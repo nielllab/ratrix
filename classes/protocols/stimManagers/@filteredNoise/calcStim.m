@@ -1,6 +1,7 @@
 function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text] =...
     calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % see ratrixPath\documentation\stimManager.calcStim.txt for argument specification (applies to calcStims of all stimManagers)
+% 1/3/0/09 - trialRecords now includes THIS trial
 
 if ~all(ismember([stimulus.port{:}],responsePorts))
     error('not all the expected correct response ports were available in responsePorts')
@@ -23,8 +24,8 @@ scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);
 
 details.pctCorrectionTrials=.5; % need to change this to be passed in from trial manager
-if ~isempty(trialRecords)
-    lastRec=trialRecords(end);
+if ~isempty(trialRecords) && length(trialRecords)>=2
+    lastRec=trialRecords(end-1);
 else
     lastRec=[];
 end

@@ -9,6 +9,86 @@ LUT=makeStandardLUT(LUTbits);
 % type='expert';
 type = stimulus.drawingMode; % 12/9/08 - user can specify to use 'static' (default) or 'expert' mode (optional)
 
+% ====================================================================================
+% if we are in deck mode, do card selection and checking
+% else, just assign ind randomly based on the trialDistribution
+if strcmp(stimulus.imageSelectionMode,'deck')
+    numImages = length(getDist(stimulus));
+    % 1/28/09 - fixed to correctly reset decksFinished counter at the start of a new trainingStep, because
+    % this assumes that calcStim now receives ALL trialRecords instead of up to trialRecords(end-1)
+    if length(trialRecords)>1
+        if trialRecords(end).trainingStepNum ~= trialRecords(end-1).trainingStepNum % if this is the first trial of a new step
+            % reset decksFinished to 0, cardsRemaining should be empty
+            details.decksFinished=0;
+            details.cardsRemaining=[];
+        else % same step
+            if isfield(trialRecords(end-1),'stimDetails') && isfield(trialRecords(end-1).stimDetails,'decksFinished') ...
+                    && isfield(trialRecords(end-1).stimDetails,'cardsRemaining')
+                details.decksFinished=trialRecords(end-1).stimDetails.decksFinished;
+                details.cardsRemaining=trialRecords(end-1).stimDetails.cardsRemaining;
+            else
+                details.decksFinished=0;
+                details.cardsRemaining=[];
+            end
+        end
+    else
+        % this is the first trial
+        details.decksFinished=0;
+        details.cardsRemaining=[];
+    end
+
+    % if cardsRemaining is empty, then generate a new deck - this only happens once during initialization
+    if isempty(details.cardsRemaining)
+        details.cardsRemaining=randperm(numImages);
+    elseif length(details.cardsRemaining) == 1
+        % because we remove the last card, and then check and increment decksFinished
+        % - now, we will draw the last card from a deck in trial N, and move on to trial N+1 without incrementing decksFinished
+        % when we get to trial N+1, this will catch that the deck only has one card and then increment decksFinished and reshuffle a new deck
+        % if only card left is the exemplar
+        details.cardsRemaining = randperm(numImages);
+        % this means we finished a deck - store this in details
+        details.decksFinished = details.decksFinished + 1; % - we can use this to check graduation criteria
+
+        %     finishedADeck = true;
+        %     break
+    end
+
+    % how to draw from distribution? - two step process
+    % first draw from full trialDistribution to decide exemplar/morph
+    % then, if morph - if morph card still remaining, use it, otherwise select a random morph card from deck
+    indFromTrialDistribution=min(find(rand<cumsum(getDist(stimulus)))); %draw from trialDistribution
+    if indFromTrialDistribution ~= 1 % if this is not exemplar
+        % check if morph card remains
+        if ~isempty(find(details.cardsRemaining == indFromTrialDistribution))
+            indOfCardsLeft = find(details.cardsRemaining == indFromTrialDistribution);
+        else
+            % morph card already used, pick a random one - MAKE SURE YOU DONT PICK EXEMPLAR
+            exemplarIndex = find(details.cardsRemaining == 1);
+            indOfCardsLeft = exemplarIndex;
+            while (indOfCardsLeft == exemplarIndex || indOfCardsLeft == 0) % keep picking randomly until you hit a morph
+                indOfCardsLeft=round(rand*length(details.cardsRemaining));
+            end
+        end
+        % pick the correct element from cardsLeft, and remove it from the stim manager
+        ind = details.cardsRemaining(indOfCardsLeft);
+        details.cardsRemaining(indOfCardsLeft) = []; % delete the element that got selected
+    else
+        % this is exemplar
+        ind = indFromTrialDistribution;
+    end
+
+    % pickedIndices(end+1) = ind;
+    details.cardSelected = ind;
+    % details.cardsRemaining = details.cardsRemaining;
+
+    % finished doing deck handling
+else
+    % 'normal' mode
+    ind=min(find(rand<cumsum(getDist(stimulus)))); %draw from trialDistribution
+end
+
+% ====================================================================================
+% do image preparation
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = uint8(intmax('uint8')*getInterTrialLuminance(stimulus));
 
@@ -31,7 +111,6 @@ stimulus.selectedRotation = round(stimulus.rotation(1) + rand(1)*(stimulus.rotat
 normalizeHistograms=false;
 pctScreenFill=0.75;
 backgroundcolor=uint8(intmax('uint8')*stimulus.background);
-ind=min(find(rand<cumsum(getDist(stimulus)))); %draw from trialDistribution
 [stimulus updateSM ims]=checkImages(stimulus,uint8(ind),backgroundcolor, pctScreenFill, normalizeHistograms,width,height);
 
 %ims comes back as a nX2 cell array, where n is number of images specified in the trialDistribution entry we requested
@@ -40,19 +119,10 @@ ind=min(find(rand<cumsum(getDist(stimulus)))); %draw from trialDistribution
 if strcmp(trialManagerClass,'freeDrinks') && size(ims,1)==length(responsePorts)-1
     responsePorts=responsePorts(1:end-1); %free drinks trial will have one extra response port
 end
-%12/9/08 - remove this error check to allow selection of random images for each distractor
-% if size(ims,1)~=length(responsePorts)
-%     trialManagerClass
-%     size(ims)
-%     responsePorts
-%     size(trialRecords)
-%     error('stim distribution specifies an entry that has different number of images than length of responsePorts')
-% end
-
 
 details.pctCorrectionTrials=.5; % need to change this to be passed in from trial manager
-if ~isempty(trialRecords)
-    lastRec=trialRecords(end);
+if ~isempty(trialRecords) && length(trialRecords)>1 % added length check because now we get trialRecords(end) (includes this trial)
+    lastRec=trialRecords(end-1);
 else
     lastRec=[];
 end

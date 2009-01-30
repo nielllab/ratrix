@@ -1,6 +1,6 @@
 function [stimulus updateSM resInd out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance text] = ...
     calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
-
+% 1/3/0/09 - trialRecords now includes THIS trial
 updateSM = true; % This is always true, because the audio stimulus is always set
 
 % Determine if the modality should switch

@@ -1,6 +1,6 @@
 function [stimulus updateSM resolutionIndex out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance text] = ...
     calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
-
+% 1/30/09 - trialRecords now includes THIS trial
 s = stimulus;
 
 %LUT = Screen('LoadCLUT', 0);
@@ -49,8 +49,8 @@ switch trialManagerClass
         %edf: 11.15.06 realized we didn't have correction trials!
         %changing below...
         details.pctCorrectionTrials=.5; % need to change this to be passed in from trial manager
-        if ~isempty(trialRecords)
-            lastRec=trialRecords(end);
+        if ~isempty(trialRecords) && length(trialRecords)>=2
+            lastRec=trialRecords(end-1);
         else
             lastRec=[];
         end

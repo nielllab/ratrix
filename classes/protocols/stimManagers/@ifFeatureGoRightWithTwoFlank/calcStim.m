@@ -6,6 +6,7 @@ function [stimulus,updateSM,resInd,out,LUT,scaleFactor,type,targetPorts,distract
 %this is a discrimination paradigm
 %a detection paradigm follows if the left stims have 0 contrast
 %flankers above and below target, total of three stims
+% 1/3/0/09 - trialRecords now includes THIS trial
 
 text='pmmStim';
 details.screenDisplaySize=screenDisplaySize;
@@ -79,7 +80,7 @@ details.randomMethod='seedFromClock';
 details.randomSeed=[a(end) b(end)]; %if using twister method, this single number is pretty meaningless
 
 if ~isempty(stimulus.shapedParameter)
-    [parameterChanged, stimulus]  = shapeParameter(stimulus, trialRecords); %will CopyOnWrite help?
+    [parameterChanged, stimulus]  = shapeParameter(stimulus, trialRecords(1:end-1)); %will CopyOnWrite help?
     %else 'checkShape' and 'doShape' are different functions...
     if parameterChanged
         updateSM=true;
@@ -129,8 +130,8 @@ switch trialManagerClass
 
     case {'nAFC','promptedNAFC'}
 
-        if ~isempty(trialRecords)
-            lastRec=trialRecords(end);
+        if ~isempty(trialRecords) && length(trialRecords)>=2
+            lastRec=trialRecords(end-1);
         else
             lastRec=[];
         end
@@ -142,7 +143,7 @@ switch trialManagerClass
         if details.correctionTrial
             details.maxCorrectForceSwitch=0;
         else
-            [targetPorts hadToResample]=getSameLimitedResponsePort(responsePorts,stimulus.maxCorrectOnSameSide,trialRecords);  % add this to assignPorts
+            [targetPorts hadToResample]=getSameLimitedResponsePort(responsePorts,stimulus.maxCorrectOnSameSide,trialRecords(1:end-1));  % add this to assignPorts
             details.maxCorrectForceSwitch=hadToResample;
         end
 
@@ -190,7 +191,7 @@ ctr=[height/2 width/2 ];
 %details.cueIsLeft=cueIsLeft;
 
 %choose random or block if requested
-[details a b c z d e f g h p pD pF m x fpa frto frfo] = selectStimulusParameters(stimulus,trialRecords,details);
+[details a b c z d e f g h p pD pF m x fpa frto frfo] = selectStimulusParameters(stimulus,trialRecords(1:end-1),details);
 
 
 %ASSUMPTIONS

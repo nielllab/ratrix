@@ -1,6 +1,7 @@
 function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text] =...
     calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % see ratrixPath\documentation\stimManager.calcStim.txt for argument specification (applies to calcStims of all stimManagers)
+% 1/3/0/09 - trialRecords now includes THIS trial
 LUTbits
 displaySize
 [LUT stimulus updateSM]=getLUT(stimulus,LUTbits);
@@ -21,8 +22,8 @@ dynamicMode = true; % do things dynamically as in driftdemo2
 switch trialManagerClass
     case 'freeDrinks'
 %         type='static';
-        if ~isempty(trialRecords)
-            lastResponse=find(trialRecords(end).response);
+        if ~isempty(trialRecords) && length(trialRecords)>=2
+            lastResponse=find(trialRecords(end-1).response);
             if length(lastResponse)>1
                 lastResponse=lastResponse(1);
             end
@@ -37,8 +38,8 @@ switch trialManagerClass
 %         type='trigger';
 
         details.pctCorrectionTrials=.5; % need to change this to be passed in from trial manager
-        if ~isempty(trialRecords)
-            lastRec=trialRecords(end);
+        if ~isempty(trialRecords) && length(trialRecords)>=2
+            lastRec=trialRecords(end-1);
         else
             lastRec=[];
         end

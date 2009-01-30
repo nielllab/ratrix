@@ -1,6 +1,6 @@
 function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text] =... 
     calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
-
+% 1/3/0/09 - trialRecords now includes THIS trial
 %LUT = Screen('LoadCLUT', 0);
 %LUT=LUT/max(LUT(:));
 
@@ -22,8 +22,8 @@ switch trialManagerClass
     case 'freeDrinks'
         type='static';
         % Determine what the last response was
-        if ~isempty(trialRecords)
-            lastResponse=find(trialRecords(end).response);
+        if ~isempty(trialRecords) && length(trialRecords)>=2
+            lastResponse=find(trialRecords(end-1).response);
             if length(lastResponse)>1
                 lastResponse=lastResponse(1);
             end
@@ -50,11 +50,11 @@ switch trialManagerClass
 
         details.pctCorrectionTrials=.5; % need to change this to be passed in from trial manager
         
-        if ~isempty(trialRecords)
-            lastResponse=find(trialRecords(end).response);
-            lastCorrect=trialRecords(end).correct;
-            if any(strcmp(fields(trialRecords(end).stimDetails),'correctionTrial'))
-                lastWasCorrection=trialRecords(end).stimDetails.correctionTrial;
+        if ~isempty(trialRecords) && length(trialRecords)>=2
+            lastResponse=find(trialRecords(end-1).response);
+            lastCorrect=trialRecords(end-1).correct;
+            if any(strcmp(fields(trialRecords(end-1).stimDetails),'correctionTrial'))
+                lastWasCorrection=trialRecords(end-1).stimDetails.correctionTrial;
             else
                 lastWasCorrection=0;
             end
@@ -73,7 +73,7 @@ switch trialManagerClass
         if ~isempty(lastCorrect) && ~isempty(lastResponse) && ~lastCorrect && (lastWasCorrection || rand<details.pctCorrectionTrials)
             details.correctionTrial=1;
             'correction trial!'
-            targetPorts=trialRecords(end).targetPorts;
+            targetPorts=trialRecords(end-1).targetPorts;
             details.correctionTrial=1;
         else
             details.correctionTrial=0;

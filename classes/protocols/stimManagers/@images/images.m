@@ -1,7 +1,7 @@
 function s=images(varargin)
 % IMAGES  class constructor.
 % s = images(directory,yPositionPercent,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,...
-%   trialDistribution,size,sizeyoked,rotation[,drawingMode])
+%   trialDistribution,imageSelectionMode,size,sizeyoked,rotation[,drawingMode])
 % yPositionPercent (0 <= value <= 1), in normalized units of the diagonal of the stim region
 % trialDistribution in format { { {imagePrefixN imagePrefixP} .1}...
 %                               { {imagePrefixP imagePrefixM} .9}...
@@ -11,6 +11,7 @@ function s=images(varargin)
 % image names should not include path or extension
 % images must reside in directory indicated and be .png's with alpha channels
 % drawingMode is an optional argument that specifies drawing in 'expert' mode instead of 'static' (default)
+% imageSelection mode is either 'normal' or 'deck' (deck means we make use of the deck-style card selection used in v0.8)
 
 s.directory = '';
 s.background=0;
@@ -30,7 +31,8 @@ s.sizeyoked=[];
 s.selectedSizes=[]; % not user-defined; this gets set by calcStim as the randomly drawn value from the size range
 s.selectedRotation=[]; % not user-defined; this gets set by calcStim as the randomly drawn value from the rotation range
 s.images=[]; % used for expert mode
-s.drawingMode='static';
+s.drawingMode='expert';
+
 
 switch nargin
     case 0
@@ -45,7 +47,7 @@ switch nargin
         else
             error('Input argument is not an images object')
         end
-    case {11 12}
+    case {12 13}
         % create object using specified values
 
         if ischar(varargin{1})
@@ -101,32 +103,39 @@ switch nargin
             error('trialDistribution must be nonempty vector cell array')
         end
         
+        %imageSelectionMode
+        if ischar(varargin{9}) && (strcmp(varargin{9},'normal') || strcmp(varargin{9},'deck'))
+            s.imageSelectionMode=varargin{9};
+        else
+            error('imageSelectionMode must be either ''normal'' or ''deck''');
+        end
+        
         %size
-        if isvector(varargin{9}) && length(varargin{9})==2 && isnumeric(varargin{9}) && ...
-                all(varargin{9}>0) && all(varargin{9}<=1) && varargin{9}(2)>=varargin{9}(1)
-            s.size=varargin{9};
+        if isvector(varargin{10}) && length(varargin{10})==2 && isnumeric(varargin{10}) && ...
+                all(varargin{10}>0) && all(varargin{10}<=1) && varargin{10}(2)>=varargin{10}(1)
+            s.size=varargin{10};
         else
             error('size must be a 2-element vector between 0 and 1');
         end
                 
         %sizeyoked
-        if islogical(varargin{10})
-            s.sizeyoked=varargin{10};
+        if islogical(varargin{11})
+            s.sizeyoked=varargin{11};
         else
             error('sizeyoked must be a logical');
         end
         
         %rotation
-        if isvector(varargin{11}) && length(varargin{11})==2 && isnumeric(varargin{11})
-            s.rotation=varargin{11};
+        if isvector(varargin{12}) && length(varargin{12})==2 && isnumeric(varargin{12})
+            s.rotation=varargin{12};
         else
             error('rotation must be a 2-element vector');
         end
         
         %mode
-        if nargin==12
-            if ischar(varargin{12}) && (strcmp(varargin{12},'expert') || strcmp(varargin{12},'cache'))
-                s.drawingMode=varargin{12};
+        if nargin==13
+            if ischar(varargin{13}) && (strcmp(varargin{13},'expert') || strcmp(varargin{13},'cache'))
+                s.drawingMode=varargin{13};
             else
                 error('drawingMode must be ''expert'' or ''cache''');
             end

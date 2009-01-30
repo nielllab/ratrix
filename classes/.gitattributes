@@ -1,4 +1,3 @@
-/goodies.m -text
 protocols/schedulers/@minutesPerSession/display.m -text
 protocols/schedulers/@minutesPerSession/minutesPerSession.m -text
 protocols/schedulers/@minutesPerSession/getCurrentHoursBetweenSession.m -text

@@ -94,7 +94,6 @@ stimHelpers/pickContrast.m -text
 stimHelpers/drawFrom2Ddist.m -text
 matlaby/hash.m -text
 trialRecordProcessing/modifyTrialRecords.m -text
-/AM2300Control.m -text
 nidaq/openNidaqForAnalogOutput.m -text
 matlaby/makeSinusoid.m -text
 matlaby/getShuffledCross.m -text
@@ -127,3 +126,5 @@ analysis/cleanUpStimRecords.m -text
 analysis/fitGaussianEnvelopeToImage.m -text
 dragon/exportVariables.m -text
 infrastructure/calibrateLocal.m -text
+misc/goodies.m -text
+misc/AM2300Control.m -text

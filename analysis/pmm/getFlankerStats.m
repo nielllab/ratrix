@@ -208,7 +208,7 @@ for i=1:numSubjects
                     params.factors.targetOrientation(i,j)=d.targetOrientation(firstInd);
                     params.factors.flankerOrientation(i,j)=d.flankerOrientation(firstInd);
                     params.factors.flankerPosAngle(i,j)=d.flankerPosAngle(firstInd);
-                case {'colin+3','colin-other'}
+                case {'colin+3','colin-other','colin+3&nfMix'}
                     params.factors.targetOrientation(i,j)=d.targetOrientation(firstInd);
                     params.factors.flankerOrientation(i,j)=d.flankerOrientation(firstInd);
                     params.factors.flankerPosAngle(i,j)=d.flankerPosAngle(firstInd);

@@ -881,3 +881,13 @@ eventLog{eventNum}.issuedBy ='pmm';  % sarah's help
 eventLog{eventNum}.comment ='1C is down, rats moved to 1D, keeping same cockpit'; 
 eventLog{eventNum}.details.from = '1C'; 
 eventLog{eventNum}.details.to   = '1D';  
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('July.28,2008');%datestr(now,21)  % attempted change at 'Dec.02,2008', 
+eventLog{eventNum}.eventName ={'stationBias'};
+eventLog{eventNum}.subject ={'230','232'}; %102, 117, etc...
+eventLog{eventNum}.stationID ={'1B'}; 
+eventLog{eventNum}.issuedBy ='pmm';  % yuli's help
+eventLog{eventNum}.comment ='problem started this day and fixed this day; see email from yuli'; 
+eventLog{eventNum}.details.from = 'normal'; 
+eventLog{eventNum}.details.to   = 'left side unplugged';  

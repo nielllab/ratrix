@@ -23,8 +23,8 @@ for i=1:length(filter)
                 % all steps where flankers are 0.4 (usually 9 and 10)
                 % some rats have a different number of steps (this includes the functionally equialent 6 and 7)
                 d=removeSomeSmalls(d,d.flankerContrast~=0.4);
-            %case 'X.4.6' %used by 137 136
-            %    d=removeSomeSmalls(d,~(d.flankerContrast==0.4 & abs(d.targetContrast-0.5)<10^-9)); 
+                %case 'X.4.6' %used by 137 136
+                %    d=removeSomeSmalls(d,~(d.flankerContrast==0.4 & abs(d.targetContrast-0.5)<10^-9));
             case {'11','12','13','14'}
                 step=str2num(filter{i}.type);
                 d=removeSomeSmalls(d,d.step~=step);
@@ -32,9 +32,11 @@ for i=1:length(filter)
                 d=removeSomeSmalls(d,d.flankerContrast~=0);  %pre-flanker test
             case 'none'
                 %don't filter; keep all
-            case 'responseSpeed'
+            case 'responseSpeed'               
                 range=filter{i}.parameters.range;
-                d=removeSomeSmalls(d,~(d.responseTime>range(1) & d.responseTime<range(2)));  
+                d=removeSomeSmalls(d,~(d.responseTime>range(1) & d.responseTime<range(2)));
+            case 'manualVersion'
+               d=removeSomeSmalls(d,~(ismember(d.manualVersion,filter{i}.includedVersions)));      
             case 'responseSpeedPercentile'
                 try
                 range=filter{i}.parameters.range;

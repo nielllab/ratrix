@@ -1,8 +1,7 @@
 function et=calibrate(et)
 %gets the calibration values from the user
 
-method='prompt';
-switch method
+switch et.settingMethod
     case 'none'
         %do nothing
     case 'mfile'
@@ -23,7 +22,7 @@ switch method
         %         et.eyeRightOfMonitorCenterMm=[];    %always zero (less than 1mm) in our rig;  user must center eye before recording
         %         et.degreesCameraIsClockwiseOfMonitorCenter=[];  %roughly if camera is at right of monitor; to be entered by user
         %         et.degreesCameraIsAboveEye=[];      %always zero (less than 3deg) in our rig;  user must center eye before recording
-    case 'prompt'
+    case 'guiPrompt'
         prompt={'enter based ruler measurement in mm:', 'degreesCameraIsClockwiseOfMonitorCenter:', 'eyeAboveMonitorCenterMm:', 'eyeRightOfMonitorCenterMm:(please center eye and confirm it is 0 mm)', 'degreesCameraIsAboveEye:(please move camera until eye is centered, enter 0)', 'human confirmation that values are good:'};
         name='Geometric Calibration User Specified Parameters';
         numlines=1;
@@ -107,7 +106,7 @@ switch method
 
 
     otherwise
-        method
+        et.settingMethod
         error ('bad method');
 end
 

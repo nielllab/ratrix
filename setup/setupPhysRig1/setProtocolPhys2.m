@@ -223,8 +223,9 @@ end
 
 if eyeTrackerOn
    alpha=12; %deg above...really?
-   beta=0; %deg to side... really?
-   eyeTracker=geometricTracker('simple', 2, 3, alpha, beta, int16([1280,1024]), [42,28], int16([maxWidth,maxHeight]), [400,290], 300, 0, 0, 0, 0,10000); % changing calibration params we be updated by user on startup
+   beta=0;   %deg to side... really?
+   settingMethod='none';  % will run with these defaults without consulting user, else 'guiPrompt'
+   eyeTracker=geometricTracker('simple', 2, 3, alpha, beta, int16([1280,1024]), [42,28], int16([maxWidth,maxHeight]), [400,290], 300, -55, 0, 45, 0,settingMethod,10000); % changing calibration params we be updated by user on startup
 else
    eyeTracker=[];
 end

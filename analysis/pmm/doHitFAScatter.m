@@ -70,19 +70,19 @@ crInd=find(strcmp('CRs',names.stats));
 
 %make settings per subject per condition
 if size(doCurve)==[1 1];
-    doCurve=doCurve*ones(length(names.subjects),length(conditions))
+    doCurve=doCurve*ones(length(names.subjects),length(names.conditions))
 else
     doCurve=doCurve;
 end
 
 if size(doYesLine)==[1 1];
-    doYesLine=doYesLine*ones(length(names.subjects),length(conditions));
+    doYesLine=doYesLine*ones(length(names.subjects),length(names.conditions));
 else
     doYesLine=doYesLine;
 end
 
 if size(doCorrectLine)==[1 1];
-    doCorrectLine=doCorrectLine*ones(length(names.subjects),length(conditions));
+    doCorrectLine=doCorrectLine*ones(length(names.subjects),length(names.conditions));
 else
     doCorrectLine=doCurve;
 end
@@ -91,6 +91,7 @@ if drawDiag
     plot([0 1], [0 1],'k')
 end
 hold on;
+axis([0 1 0 1])
 axis square;
 
 %draw context lines
@@ -98,6 +99,8 @@ for i=1:length(subjects)
     subInd=find(strcmp(subjects(i),names.subjects));
     for j=1:length(conditions)
         condInd=find(strcmp(conditions(j),names.conditions));
+        [subInd,condInd,hitInd]
+        size(stats)
         hitRate= stats(subInd,condInd,hitInd);
         faRate=1-stats(subInd,condInd,crInd);
         if doCurve(subInd,condInd)
@@ -108,12 +111,12 @@ for i=1:length(subjects)
             set(hh, 'LineColor', colors(condInd,:));
         end
         if doYesLine(subInd,condInd)
-            plot([faRate (hitRate+faRate)./2], [hitRate (hitRate+faRate)./2],'-','color', colors(j,:)); % %yes diagonal line
+            plot([faRate (hitRate+faRate)./2], [hitRate (hitRate+faRate)./2],'-','color', colors(condInd,:)); % %yes diagonal line
         end
         if doCorrectLine(subInd,condInd)
-            plot([0 1-hitRate+faRate], [hitRate-faRate 1],'-','color',colors(j,:)); % %correct diagonal line
-            plot([faRate 0], [hitRate hitRate],'-','color',colors(j,:)); % %hit line
-            plot([faRate faRate], [hitRate 0],'-','color',colors(j,:)); % %FA line
+            plot([0 1-hitRate+faRate], [hitRate-faRate 1],'-','color',colors(condInd,:)); % %correct diagonal line
+            plot([faRate 0], [hitRate hitRate],'-','color',colors(condInd,:)); % %hit line
+            plot([faRate faRate], [hitRate 0],'-','color',colors(condInd,:)); % %FA line
         end
     end
 end
@@ -136,23 +139,23 @@ for i=1:length(subjects)
                 %nothing
             case 1
                 %errorBars
-                hci(j)=plot([faPci(1) faPci(2)],[hitRate hitRate],'color',colors(j,:)); %horizontal error bar
-                vci=plot([faRate faRate],[hitPci(1) hitPci(2)],'color',colors(j,:)); %vert error bar
+                hci(j)=plot([faPci(1) faPci(2)],[hitRate hitRate],'color',colors(condInd,:)); %horizontal error bar
+                vci=plot([faRate faRate],[hitPci(1) hitPci(2)],'color',colors(condInd,:)); %vert error bar
                 set(hci, 'LineWidth',ciwidth)
                 set(vci, 'LineWidth',ciwidth)
             case 2
                 %plot dot
-                pt(j)=plot(faRate, hitRate,'.','MarkerSize',20,'color',colors(j,:));
+                pt(j)=plot(faRate, hitRate,'.','MarkerSize',20,'color',colors(condInd,:));
             case 3
                 %ellipse
                 ellipse = fncmb(fncmb(rsmak('circle'),[diff(faPci)/2 0;0 diff(hitPci)/2]),[faRate;hitRate]);
 
-                %switch num2str(colors(j,:))
+                %switch num2str(colors(condInd,:))
                 %case num2str([1 0 0])
-                if colors(j,1)>colors(j,2) & colors(j,1)>colors(j,3) & colors(j,2)==colors(j,3)
+                if colors(condInd,1)>colors(condInd,2) & colors(condInd,1)>colors(condInd,3) & colors(condInd,2)==colors(condInd,3)
                     colorString='r';
                     %case num2str([0 1 1])
-                elseif colors(j,2)>colors(j,1) & colors(j,3)>colors(j,1) & colors(j,2)==colors(j,3)
+                elseif colors(condInd,2)>colors(condInd,1) & colors(condInd,3)>colors(condInd,1) & colors(condInd,2)==colors(condInd,3)
                     colorString='c';
                     %otherwise
                 else

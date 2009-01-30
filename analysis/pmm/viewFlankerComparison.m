@@ -95,6 +95,10 @@ if ~exist('cMatrix','var') || isempty(cMatrix)
                 [1],[4];
                 [1],[2,3,4];
                 [2],[3];};
+        case 'colin+3&nfMix'
+            cMatrix={[1],[2];
+                [1],[4];
+                [1],[5]};
         case '8flanks'
             cMatrix={[1 8],[2 7];
                 [1 8],[3 6];

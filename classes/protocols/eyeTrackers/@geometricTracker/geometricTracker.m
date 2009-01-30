@@ -16,10 +16,12 @@ function et=geometricTracker(varargin)
 %         eyeRightOfMonitorCenterMm=0;     % always zero (less than 1mm) in our rig;  user must center eye before recording
 %         degreesCameraIsClockwiseOfMonitorCenter=45;  %roughly if camera is at right of monitor; to be entered by user
 %         degreesCameraIsAboveEye=0;      %always zero (less than 3deg) in our rig;  user must center eye before recording
-% et = geometricTracker(method, Rp, Rcornea, alpha, beta, CameraImSizePixs, CameraImSizeMm, MonitorImSizePixs, MonitorImSizeMn, eyeToMoinitorTangentMm, eyeAboveMonitorCenterMm, eyeRightOfMonitorCenterMm, degreesCameraIsClockwiseOfMonitorCenter, degreesCameraIsAboveEye,framesPerAllocationChunk)
+%         settingMethod='guiPrompt';    % will allow human to update and/or confirm settings.  alternatelt, you can use 'none', in which case
+%                                       % the settings are not updated each time, and considered unconfirmed to be true
+% et = geometricTracker(method, Rp, Rcornea, alpha, beta, CameraImSizePixs, CameraImSizeMm, MonitorImSizePixs, MonitorImSizeMn, eyeToMoinitorTangentMm, eyeAboveMonitorCenterMm, eyeRightOfMonitorCenterMm, degreesCameraIsClockwiseOfMonitorCenter, degreesCameraIsAboveEye,settingMethod,framesPerAllocationChunk)
 % et = geometricTracker('simple', 2, 3, 12, 0, int16([1280,1024]), [42,28], int16([1024,768]), [400,290], 300, -25, 0, 45, 0)
 % future idea:  et =geometricTracker(getDefaults(geometricTracker))
-
+            
 switch nargin
     case 0
         % if no input arguments, create a default object
@@ -39,7 +41,9 @@ switch nargin
         et.eyeRightOfMonitorCenterMm=[];    %always zero (less than 1mm) in our rig;  user must center eye before recording
         et.degreesCameraIsClockwiseOfMonitorCenter=[];  %roughly if camera is at right of monitor; to be entered by user
         et.degreesCameraIsAboveEye=[];      %always zero (less than 3deg) in our rig;  user must center eye before recording
+        et.settingMethod='none';
         et.humanConfirmation=false;         %this is set each session at run time.
+         
         requiresCalibration = true;
         et = class(et,'geometricTracker',eyeLinkTracker(requiresCalibration,10000));
         
@@ -52,7 +56,7 @@ switch nargin
             error('Input argument is not a geometricTracker object')
         end
         
-    case 15
+    case 16
         if ismember(varargin{1}, {'simple', 'yCorrected'})
             et.method=varargin{1};
         else
@@ -142,10 +146,16 @@ switch nargin
             %error('degreesCameraIsAboveEye should be zero, but code tolerates (-3 - 3) in vertical degrees of angle between camera axis and the eye');
         end
         
+        if ismember(varargin{15},{'guiPrompt','none'})
+            et.settingMethod=varargin{15};
+        else
+            error('eyeAboveMonitorCenterMm must a single number in mm and the absolute value must be less than 300');
+        end
+        
         et.humanConfirmation=false;
         
         requiresCalibration = true;
-        et = class(et,'geometricTracker',eyeLinkTracker(requiresCalibration,varargin{15}));
+        et = class(et,'geometricTracker',eyeLinkTracker(requiresCalibration,varargin{end}));
     otherwise
         error('Wrong number of input arguments')
 end

@@ -12,13 +12,11 @@ protocols/@stimSpec/getRewardType.m -text
 protocols/@stimSpec/getRewardDuration.m -text
 protocols/@stimSpec/getStim.m -text
 protocols/@stimSpec/stimSpec.m -text
-protocols/@stimSpec/stimSpec.asv -text
 protocols/@stimSpec/getCriterion.m -text
 protocols/@stimSpec/getStochasticDistribution.m -text
 protocols/@stimSpec/getStimType.m -text
 protocols/trialManagers/@phasednAFC/getRequestRewardSizeULorMS.m -text
 protocols/trialManagers/@phasednAFC/getRequestPorts.m -text
-protocols/trialManagers/@phasednAFC/phasednAFC.asv -text
 protocols/trialManagers/@phasednAFC/getPhases.m -text
 protocols/trialManagers/@phasednAFC/stationOKForTrialManager.m -text
 protocols/trialManagers/@phasednAFC/getResponsePorts.m -text
@@ -35,9 +33,7 @@ protocols/soundTypes/@responseWait/shouldWePlay.m -text
 protocols/soundTypes/@responseWait/responseWait.m -text
 protocols/soundTypes/@soundType/getName.m -text
 protocols/soundTypes/@soundType/soundType.m -text
-protocols/soundTypes/@soundType/soundTypeToString.asv -text
 protocols/soundTypes/@soundType/getDuration.m -text
-protocols/soundTypes/@soundType/soundType.asv -text
 protocols/soundTypes/@soundType/soundTypesToCellArray.m -text
 protocols/soundTypes/@soundType/soundTypeToString.m -text
 protocols/soundTypes/@soundType/setDuration.m -text

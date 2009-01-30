@@ -173,7 +173,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             % phase-ify if necessary (if trialRecords(trialInd).type is 'phased')
             % - this means we need stimSpecs, soundTypes, scaleFactors, and
             % stimulusDetails to be phase-specific
-            if ischar(trialRecords(trialInd).type) && ~isempty(strmatch(trialRecords(trialInd).type, 'phased'))
+            if ischar(trialRecords(trialInd).type) && strcmp(trialRecords(trialInd).type,'phased')
                 stimSpecs = stim.stimSpecs;
 %                 soundTypes = stim.soundTypes;
                 scaleFactors = stim.scaleFactors;

@@ -26,6 +26,7 @@ if ~exist('pportaddr','var') || isempty(pportaddr)
     [a b]=getMACaddress;
     if a
         switch b
+            %some rig stations have special pport setups
             case '0014225E4685'
                 pportaddr='FFF8'; %the pcmcia add on card
             case '00095B8E6171' %this is what psychtoolbox's macid returns, but it happens to be the pci netgear 302T we added, not the main nvidia builtin connection (001372708179)

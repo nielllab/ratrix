@@ -6,7 +6,6 @@
 /display.m -text
 /decache.m -text
 /getScheduler.m -text
-/doTrial.m.bak -text
 /getStimManager.m -text
 /boxOKForTrainingStep.m -text
 /doInterSession.m -text

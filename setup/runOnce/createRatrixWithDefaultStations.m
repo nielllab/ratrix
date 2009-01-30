@@ -3,7 +3,7 @@ function r=createRatrixWithDefaultStations(machines,dataPath,rewardMethod,localM
 serverDataPath = fullfile(dataPath, 'ServerData');
 r=ratrix(serverDataPath,1);
 
-    screenNum=int8(0);
+screenNum=int8(0);
 pportaddr=[];
 
 if localMultiDisplaySetup
@@ -15,8 +15,8 @@ if localMultiDisplaySetup
     
     screenNum=int8(max(Screen('Screens')));
     
-    %screenNum=int8(1);
-    %pportaddr='B888';
+    %screenNum=int8(1); %may need to uncomment for some dual-headed rig stations
+    %rather than set special rig station pportaddr's here, set up a mapping to their mac address in makeDefaultStation
 end
     
 for i=1:length(machines)

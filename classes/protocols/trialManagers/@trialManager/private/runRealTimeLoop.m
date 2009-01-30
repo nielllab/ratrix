@@ -633,7 +633,7 @@ while ~done && ~quit;
     %     pThisLoop=0;
     [keyIsDown,secs,keyCode]=KbCheck; % do this check outside of function to save function call overhead
     
-    timestamps.kbCheckDone;
+    timestamps.kbCheckDone=GetSecs;
     
     if keyIsDown && framesSinceKbInput > -1
         [didAPause paused done phaseRecords(specInd).response doValves ports didValves didHumanResponse manual doPuff pressingM pressingP] = ...

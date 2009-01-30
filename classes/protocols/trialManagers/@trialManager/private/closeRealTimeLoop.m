@@ -1,6 +1,6 @@
 function [tm responseDetails] = closeRealTimeLoop(tm, responseDetails, station, frameNum, startTime, valveErrorDetails, window, texture, ...
   destRect, filtMode, dontclear, vbl, framesPerUpdate, ifi, originalPriority)
-
+error('no one calls this')
 % This function cleans up after the realtime loop is finished running - draws the final texture and then clears cache.
 % Part of stimOGL rewrite.
 % INPUT: tm, responseDetails, station, frameNum, startTime, valveErrorDetails, window, texture,

@@ -29,7 +29,6 @@
 /determineStrategy.m -text
 /saveMissedFrameData.m -text
 /setUpOrStopDatanet.m -text
-/calibrateEyeTracker.m -text
 /determineColorPrecision.m -text
 /drawFrameUsingTextureCache.m -text
 /drawFirstFrame.m -text

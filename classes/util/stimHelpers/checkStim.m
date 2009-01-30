@@ -3,6 +3,8 @@ function [success] = checkStim(templateStimMgr, targetStimMgrs, localMultiDispla
 % (as calculated by calcStim)
 % - need to do this check in case the expert/dynamic mode PTB calls are messing up in some weird way
 
+error('edf says make this private method of trialManager')
+
 % ========================================================================================
 targetFrame=[];
 templateFrame=[];

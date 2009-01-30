@@ -4,6 +4,8 @@ function [vbl sos ft lastFrameTime lastI] = drawFirstFrame(tm, window, standardF
 % INPUT: window, standardFontSize, texture, lengthOfStim, destRect, filtMode, dontclear
 % OUTPUT: vbl, sos, ft, lastFrameTime, lastI
 
+error('no one calls')
+
 sos=[];
 ft=[];
 lastI=[];

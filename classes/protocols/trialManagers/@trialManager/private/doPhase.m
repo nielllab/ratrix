@@ -17,3 +17,4 @@ function responseDetails = doPhase(tm, ...
 'performReinforcement'
 'performReinforcement'
 
+error('no one calls')

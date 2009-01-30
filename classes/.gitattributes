@@ -15,13 +15,6 @@ protocols/@stimSpec/stimSpec.m -text
 protocols/@stimSpec/getCriterion.m -text
 protocols/@stimSpec/getStochasticDistribution.m -text
 protocols/@stimSpec/getStimType.m -text
-protocols/trialManagers/@phasednAFC/getRequestRewardSizeULorMS.m -text
-protocols/trialManagers/@phasednAFC/getRequestPorts.m -text
-protocols/trialManagers/@phasednAFC/getPhases.m -text
-protocols/trialManagers/@phasednAFC/stationOKForTrialManager.m -text
-protocols/trialManagers/@phasednAFC/getResponsePorts.m -text
-protocols/trialManagers/@phasednAFC/getPhaseCriteria.m -text
-protocols/trialManagers/@phasednAFC/phasednAFC.m -text
 protocols/stimManagers/@crossModal/crossModal.m -text
 protocols/stimManagers/@crossModal/display.m -text
 protocols/stimManagers/@crossModal/calcStim.m -text

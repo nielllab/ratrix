@@ -16,14 +16,12 @@
 /flipFrameAndDoPulse.m -text
 /handleKeyboard.m -text
 /setSeed.m -text
-/getRequestPorts.m -text
 /drawText.m -text
 /getSoundManager.m -text
 /cacheTextures.m -text
 /stopEyeTracking.m -text
 /updateFrameIndexUsingTextureCache.m -text
 /handlePhasedTrialLogic.m -text
-/getResponsePorts.m -text
 /phaseify.m -text
 /setupServerPumpRewards.m -text
 /determineStrategy.m -text

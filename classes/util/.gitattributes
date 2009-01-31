@@ -1,5 +1,3 @@
-/setRequestReward.m -text
-/upize.m -text
 parallelPort/lptwrite.mexw32 -text
 parallelPort/pt_ioctl.c -text
 parallelPort/portTest.m -text
@@ -101,13 +99,6 @@ infrastructure/LUTlookup.m -text
 trialRecordProcessing/addOrFindInLUT.m -text
 stimHelpers/generateFactorialCombo.m -text
 infrastructure/getRatrix.m -text
-matbugs/bayesSDT/BayesSDT_v2.txt -text
-matbugs/bayesSDT/BayesSDT_v1.txt -text
-matbugs/bayesSDT/BayesSDT.m -text
-matbugs/bayesSDT/ReadMe.txt -text
-matbugs/matbugs.m -text
-R_files/play.R -text
-R_files/template.R -text
 analysis/getSignificantSTASpots.m -text
 analysis/getNeuralAnalysis.m -text
 analysis/getCycPerDeg.m -text
@@ -131,3 +122,4 @@ misc/goodies.m -text
 nidaq/openNidaqForAnalogRecording.m -text
 nidaq/closeAllDaqDevices.m -text
 nidaq/findDevicesOfTypeWithConstructor.m -text
+infrastructure/upize.m -text

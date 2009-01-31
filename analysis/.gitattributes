@@ -8,7 +8,6 @@ pmm/pmmInspect.m -text
 pmm/filterFlankerStatistics.m -text
 pmm/exploreDPrime.m -text
 /doPlotPercentCorrect.m -text
-/calculateRewardPerOpenTime.m -text
 /colorplot.m -text
 /cleanUpFigure.m -text
 /removeSomeSmalls.m -text
@@ -32,7 +31,6 @@ pmm/exploreDPrime.m -text
 /savePlotsToPNG.m -text
 /quickInspect.m -text
 /fullscreen.m -text
-/getMarvLogs.m -text
 /calcAmountCorrectInRow.m -text
 /getSideCorrectContext.m -text
 /moveLargeDataAndAddExplicitTrialNumbers.m -text
@@ -299,8 +297,10 @@ spike[!!-~]sorting/osort/continuous/plotSingleSpikes.m -text
 spike[!!-~]sorting/osort/continuous/defineFileFormat.m -text
 spike[!!-~]sorting/osort/continuous/plotBandpassFreqResp.m -text
 spike[!!-~]sorting/KlustaKwik/KlustaKwik.exe -text
+obselete/ratrixAnalysis.m -text
 R_files/play.R -text
 R_files/template.R -text
+pmm/getMarvLogs.m -text
 matbugs/bayesSDT/BayesSDT_v2.txt -text
 matbugs/bayesSDT/BayesSDT.m -text
 matbugs/bayesSDT/ReadMe.txt -text

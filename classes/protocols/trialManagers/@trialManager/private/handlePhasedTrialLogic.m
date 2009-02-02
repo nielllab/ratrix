@@ -72,8 +72,6 @@ end
 %     end
 % end
 
-
-
 % Check against framesUntilTransition - Transition BY TIME
 % if we are at grad by time, then manually set port to the correct one
 % note that we will need to flag that this was done as "auto-request"
@@ -101,11 +99,11 @@ for gcInd=1:2:length(transitionCriterion)-1
 %              specInd
         else
             % move to the next phase as specified by graduationCriterion
-      %      specInd = transitionCriterion{gcInd+1};
+      %      specInd = transitionCriterion{gcInd+1};          
             newSpecInd = transitionCriterion{gcInd+1};
-            if (specInd == newSpecInd)
-                error('same indices at %d', specInd);
-            end
+%             if (specInd == newSpecInd)
+%                 error('same indices at %d', specInd);
+%             end
             updatePhase = 1;
         end
         transitionedByPortFlag = true;
@@ -115,6 +113,12 @@ for gcInd=1:2:length(transitionCriterion)-1
         response = ports;
         % set correct if we are on a target or distractor
         if any(ports(targetOptions))
+            % 2/2/09 - if multiple ports blocked, then automatically respond as incorrect and change newSpecInd appropriately
+            if length(find(ports))>1
+                errorPhaseInd = newSpecInd+1; % how do we know errorPhaseInd, except by policy of error phase being immediately after correct phase?
+                % maybe we can loop through transitionCriterion again and look? but that sucks
+                newSpecInd = errorPhaseInd;
+            end
             trialResponse =response;
         elseif any(ports(distractorOptions))
             trialResponse = response;

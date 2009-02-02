@@ -1,8 +1,8 @@
-function [floatprecision stim] = determineColorPrecision(tm, stim, verbose, strategy)
-% This function determines the floatprecision of the trial.
+function [floatprecision stim finalScreenLuminance] = determineColorPrecision(tm, stim, verbose, strategy, finalScreenLuminance)
+% This function determines the floatprecision and finalScreenLuminance of the trial.
 % Part of stimOGL rewrite.
-% INPUT: stim, verbose, strategy
-% OUTPUT: floatprecision, stim
+% INPUT: stim, verbose, strategy, finalScreenLuminance
+% OUTPUT: floatprecision, stim, finalScreenLuminance
 
 if verbose
     disp(sprintf('stim class is %s',class(stim)));
@@ -13,7 +13,7 @@ if ~isempty(strategy) && strcmp(strategy, 'expert')
     floatprecision = stim.floatprecision;
 else % non expert - calculate floatprecision
     floatprecision=0;
-    if isreal(stim)
+    if isreal(stim) && isreal(finalScreenLuminance)
         switch class(stim)
             case {'double','single'}
                 if any(stim(:)>1) || any(stim(:)<0)
@@ -34,7 +34,9 @@ else % non expert - calculate floatprecision
     else
         stim       
         class(stim)
-        error('stim must be real')
+        finalScreenLuminance
+        class(finalScreenLuminance)
+        error('stim and finalScreenLuminance must be real')
     end
 end
 

@@ -3,48 +3,63 @@
 % define your stimManager subclass to contain any necessary state
 % calcStim output is interpreted by a trialManager, this document describes the interpretation by nAFC, freeDrinks, and their subclasses.
 %
+% calcStim can return either phased or non-phased outputs, depending on the return value of 'type'
+% see below for more detailed description of each return value in both cases
+% 
 % INPUTS
-%   stimulus            this images stimManager object (contains your custom state)
-%   trialManagerClass   the trialManager class for the running training step
-%   resolutions         struct array of available resolutions
-%   displaySize         physical dimensions of the display in mm (see discusion in help for screen('displaysize'))
-%   LUTbits             number of bits in the color look up (gamma/linearization) table
-%   responsePorts       vector of available response port indices on the running station (determined by trial manager)
-%   totalPorts          total number of available ports on this station (useful for positioning stimuli)
-%   trialRecords        a struct array of trialRecords from previous trials (all trials from this session included)
-%                       on Nth trial of this session, M-N+1 trials from previous sessions are included
-%                       M currently hardcoded in station.doTrials to 100
+%   stimulus                this images stimManager object (contains your custom state)
+%   trialManagerClass       the trialManager class for the running training step
+%   resolutions             struct array of available resolutions
+%   displaySize             physical dimensions of the display in mm (see discusion in help for screen('displaysize'))
+%   LUTbits                 number of bits in the color look up (gamma/linearization) table
+%   responsePorts           vector of available response port indices on the running station (determined by trial manager)
+%   totalPorts              total number of available ports on this station (useful for positioning stimuli)
+%   trialRecords            a struct array of trialRecords from previous trials (all trials from this session included)
+%                           on Nth trial of this session, M-N+1 trials from previous sessions are included
+%                           M currently hardcoded in station.doTrials to 100
+%                           the last element of trialRecords will the trialRecord for THIS trial (for access to the trainingStepNum, etc)
 % OUTPUTS
-%   stimulus            this images stimManager object
-%   updateSM            boolean flag indicating whether you've changed state (field values) in this object that you'd like to persist for future reference
-%   resolutionIndex     index from the resolutions input that you want to set
-%   out                 monochrome stimulus frames.  logical, real (0<=x<=1) [double single], or [uint8 uint16].  2 or 3 dimensional array (y,x,frame)
-%                       uint8 values will be mapped to 8-bit clut indices
-%                       uint16 are converted to singles and treated as float
-%                       float (double, single) values will be processed at 16 bits until finally rendered through a potentially higher dynamic range clut
-%   LUT                 the color look up (gamma/linearization) table to pass to the gfx card
-%                       n X 3 array, 0<=x<=1, n is system dependent, but typically 256 (n=dacbits=log2(reallutsize) from screen('ReadNormalizedGammaTable'))
-%                       on windows, table subject to unpublished constraints vaguely resembling monotonic increasing
-%   scaleFactor         (potentially non-integer) factors by which to scale stim when mapping onto pixels
-%                       [height width]>0, special case scalar zero means scale to full screen
-%                       scaleFactor.*[y x] (dimensions of out array) must not exceed the resolution you specify
-%   type                see below
-%   targetPorts         vector subset of responsePorts that will count as correct responses 
-%   distractorPorts     vector subset of responsePorts (disjoint with targetPorts) that will count as incorrect responses (remainder will be dead ports)
-%                       if union(targetPorts distractorPorts) is empty, the trial ends when the stimulus ends, rather than waiting for a response
-%                       for stimuli with no "end," union must not be empty, or there would be no way for the trial to end
-%   details             a structure of your design including parameters you choose in this method that will be saved with the trialRecord 
-%   interTrialLuminance a scalar value that matches type and scale of out
-%                       full field luminance at this value will be shown until the first request
-%                       also held after this trial ends until the beginning of the next trial
-%                       if requestPorts (determined by the trialManager) is empty, the stimulus you provide (out) starts immediately
-%   text                message to add to text label on each frame (can be single string or cell vector of length numFrames)
+%   stimulus                this images stimManager object
+%   updateSM                boolean flag indicating whether you've changed state (field values) in this object that you'd like to persist for future reference
+%   resolutionIndex         index from the resolutions input that you want to set
+%   out (non-phased)        monochrome stimulus frames.  logical, real (0<=x<=1) [double single], or [uint8 uint16].  2 or 3 dimensional array (y,x,frame)
+%                           uint8 values will be mapped to 8-bit clut indices
+%                           uint16 are converted to singles and treated as float
+%                           float (double, single) values will be processed at 16 bits until finally rendered through a potentially higher dynamic range clut
+%                           alternatively, this field can be a struct of parameters for expert mode PTB calls.
+%   out (phased)            a struct that contains a cell array of stimSpecs (see below)
+%   LUT                     the color look up (gamma/linearization) table to pass to the gfx card
+%                           n X 3 array, 0<=x<=1, n is system dependent, but typically 256 (n=dacbits=log2(reallutsize) from screen('ReadNormalizedGammaTable'))
+%                           on windows, table subject to unpublished constraints vaguely resembling monotonic increasing
+%   scaleFactor (non-phased)    (potentially non-integer) factors by which to scale stim when mapping onto pixels
+%                               [height width]>0, special case scalar zero means scale to full screen
+%                               scaleFactor.*[y x] (dimensions of out array) must not exceed the resolution you specify
+%   scaleFactor (phased)    this value is ignored because a phase-specific scaleFactor is defined in each stimSpec (see below)
+%   type                    see below
+%   targetPorts             vector subset of responsePorts that will count as correct responses 
+%   distractorPorts         vector subset of responsePorts (disjoint with targetPorts) that will count as incorrect responses (remainder will be dead ports)
+%                           if union(targetPorts distractorPorts) is empty, the trial ends when the stimulus ends, rather than waiting for a response
+%                           for stimuli with no "end," union must not be empty, or there would be no way for the trial to end
+%   details                 a structure of your design including parameters you choose in this method that will be saved with the trialRecord 
+%   interTrialLuminance     a scalar value that matches type and scale of out
+%                           full field luminance at this value will be shown until the first request
+%                           also held after this trial ends until the beginning of the next trial
+%                           if requestPorts (determined by the trialManager) is empty, the stimulus you provide (out) starts immediately
+%                           NOTE: in phased case, this value is no longer drawn automatically at then end of a trial; you should
+%                           make a "final" phase that holds this value as you need
+%   text                    message to add to text label on each frame (can be single string or cell vector of length numFrames)
 %
 % values for 'type,' their semantics, and restrictions 
 % note that these options grew organically as they were needed scientifically
 % they are not intended to be an elegant covering of the space of possibilities
 % if creative use of these does not meet your needs, implement a new type!
 % 
+% type='phased'             treat 'out' as an array of stimSpecs, and do not call the phaseify function
+%
+% %%% For all other types listed below, phaseify will be called to convert the non-phased calcStim output to a phased version,
+%       according to trialManagerClass. phaseify() will automatically convert the non-phased output to a stimSpec, with the appropriate behavior for
+%       nAFC and freeDrinks. for future stimulus managers, however, calcStim should return phased outputs instead of relying on this function. 
+%
 % type='static'             show one single frame
 % 
 % type='trigger'            show frame 1, except during requests, show frame 2
@@ -76,4 +91,35 @@
 % type='expert'            will call stimManager.moreStim(usefulState) before each frame
 %   user calls ptb drawing functions directly
 %   leave frame text stamps and screen('drawingfinished') to stimOGL
-%   not yet implemented 
+%
+%
+% stimSpec objects
+% out.stimSpecs is a cell array of stimSpec objects, each of which represents one phase of the trial
+% 
+% stimSpec.stimulus         the stimulus frames to show, or expert-mode parameters struct (equivalent to non-phased 'out')
+% stimSpec.criterion        a cell array of the format {port1 target1 port2 target2 ...} where triggering port1 will cause a phase transition to 
+%                           the phase specified by target1, triggering port2 will cause a phase transition to the phase specified by target2, etc.
+%                           the port values are a subset of [1 2 3] and the target values are indices into the array of stimSpec objects.
+%                           if the port value is empty ([]), then there is no phase transition by port triggering (instead, relies on frame timeout, see below)
+% stimSpec.stimType         must be one of the non-phased values for 'type' listed above, with the same properties
+%                           this is effectively a phase-specific type, instead of trial-specific
+% stimSpec.rewardType       determines whether or not a reward/airpuff is given in this phase, and also how the rewardDuration is calculated
+%                           'reward' - a water reward of duration stimSpec.rewardDuration is given at the beginning of this phase
+%                           'airpuff' - an airpuff of duration stimSpec.rewardDuration is given at the beginning of this phase
+%                           'rewardSizeMSorUL' - a water reward of duration specified by the reinforcementManager's rewardSizeMSorUL field is given at the beginning of this phase
+%                           'msAirpuff' - an airpuff of duration specified by the reinforcementManager is given at the beginning of this phase
+%                           [] - no reward or airpuff for this phase
+%                           These five values for rewardType allow for the port-triggered reinforcement as in non-phased version, but also allow for
+%                           phase-specific rewards not linked to port triggering (ie progressive rewards)
+% stimSpec.rewardDuration   specifies the duration of the reward - see rewardType
+%                           ignored if rewardType is empty
+% stimSpec.framesUntilTransition    length of the frame timeout (if we have shown this phase for framesUntilTransition frames with no transition by port selection,
+%                                   then advance to the next phase as specified by the criterion automatically)
+%                                   advances to the first phase target specified by criterion (target1) - see above
+%                                   if empty, then hold this phase indefinitely until a port transition is triggered
+% stimSpec.stochasticDistribution   a cell array of values {pA, portA, pB, portB,...} where pA specifies the probability of stochastically triggering
+%                                   portA, and pB specifies the probability of triggering portB, etc
+%                                   this is done for every frame of the stimulus (loop of runRealTimeLoop), and the execution order is whatever comes first
+%                                   in this cell array (ie pA is tried, then pB, and so forth)
+% stimSpec.scaleFactor      % the scaleFactor associated with this phase - see non-phased scaleFactor for details
+% stimSpec.isFinalPhase     % a flag if this is the final phase of the trial (defaults to zero)

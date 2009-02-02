@@ -1,7 +1,7 @@
 function spec=stimSpec(varargin)
 % stimSpec  class constructor. 
-% spec=stimSpec(stimulus,criterion,stimType,rewardType,rewardDuration,framesUntilGrad,stochasticDistribution,isFinalPhase)
-% spec=stimSpec(stimulus,criterion,stimType,rewardType,rewardDuration,framesUntilGrad,stochasticDistribution)
+% spec=stimSpec(stimulus,criterion,stimType,rewardType,rewardDuration,framesUntilGrad,stochasticDistribution,scaleFactor,isFinalPhase)
+% spec=stimSpec(stimulus,criterion,stimType,rewardType,rewardDuration,framesUntilGrad,stochasticDistribution,scaleFactor)
 % the stimulus is the visual movie
 % criterion is the phase transitions
 % stimType is the format of the movie (toggle, loop, once-through, timedFrames, indexedFrames) - default is loop
@@ -15,6 +15,7 @@ function spec=stimSpec(varargin)
 %   the second element is what port to auto trigger (given as a vector)
 
 % criteria is the port(s) that will graduate from this phase - chosen from the set {'request', 'response', 'target', 'distractor', 'any', 'none'}
+% scaleFactor is the scaleFactor for this phase
 % isFinalPhase is a flag that indicates if this phase means the end of a trial
 
 % fields in the stimSpec object
@@ -25,6 +26,7 @@ spec.rewardType = [];
 spec.rewardDuration = 100;
 spec.framesUntilTransition = [];
 spec.stochasticDistribution = []; % for now the "distribution" is a unit random criterion between 0 and 1
+spec.scaleFactor=0;
 spec.isFinalPhase = 0;
 
 
@@ -64,7 +66,7 @@ switch nargin
 		spec.criterion = varargin{2};
 		spec = class(spec,'stimSpec');
         
-    case 8
+    case 9
         % stimulus
         spec.stimulus = varargin{1};
 		% criteria
@@ -89,7 +91,7 @@ switch nargin
         %ischar(varargin(3))
         %strcmp(varargin(3),'trigger')
         if ischar(varargin{3}) && (strcmp(varargin{3}, 'trigger') || strcmp(varargin{3}, 'loop') || ...
-                strcmp(varargin{3}, 'once') || strcmp(varargin{3}, 'cache') || strcmp(varargin{3},'expert')) % handle single char arrays
+                strcmp(varargin{3}, 'cache') || strcmp(varargin{3},'expert')) % handle single char arrays
             % error-check that if we want toggle mode, only a 2-frame movie
             if strcmp(varargin{3}, 'trigger') && size(spec.stimulus,3) ~= 2
                 size(spec.stimulus,3)
@@ -104,7 +106,7 @@ switch nargin
                 error('invalid specification of stimType in cell array format');
             end
         else
-            error('stimType must be trigger, loop, once, cache, timedFrames, indexedFrames, or expert');
+            error('stimType must be trigger, loop, cache, timedFrames, indexedFrames, or expert');
         end
         % rewardType
         if ischar(varargin{4}) && (strcmp(varargin{4}, 'reward') || strcmp(varargin{4}, 'airpuff') || ...
@@ -144,14 +146,22 @@ switch nargin
         else
             error('stochasticDistribution must be a cell array');
         end
-        % isFinalPhase
-        if isscalar(varargin{8}) && (varargin{8} == 0 || varargin{8} == 1)
-            spec.isFinalPhase = varargin{8};
+        % scaleFactor
+        if (length(varargin{8})==2 && all(varargin{8}>0)) || (length(varargin{8})==1 && varargin{8}==0)
+            spec.scaleFactor=varargin{8};
         else
-            error('isFinalPhase must be a scalar 0 or 1')
+            error('scale factor is either 0 (for scaling to full screen) or [width height] positive values')
+        end
+        % isFinalPhase
+        if nargin==9
+            if isscalar(varargin{9}) && (varargin{9} == 0 || varargin{9} == 1)
+                spec.isFinalPhase = varargin{9};
+            else
+                error('isFinalPhase must be a scalar 0 or 1')
+            end
         end
         
-        % this stays at the bottom of case 6 - out of the input arg parsing
+        % this stays at the bottom of case 9 - out of the input arg parsing
         spec = class(spec,'stimSpec');
         
     otherwise

@@ -112,7 +112,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 resInd, ...
                 stim, ...           %not recorded in trial record
                 LUT, ...            %not recorded in trial record
-                trialRecords(trialInd).scaleFactor, ...
+                trialRecords(trialInd).scaleFactor, ... % this scaleFactor is for non-phased stims that call phaseify; phased stims will put the scaleFactor in stim.stimSpecs and ignore this value
                 trialRecords(trialInd).type, ...
                 trialRecords(trialInd).targetPorts, ...
                 trialRecords(trialInd).distractorPorts, ...
@@ -176,8 +176,6 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             % stimulusDetails to be phase-specific
             if ischar(trialRecords(trialInd).type) && strcmp(trialRecords(trialInd).type,'phased')
                 stimSpecs = stim.stimSpecs;
-%                 soundTypes = stim.soundTypes;
-                scaleFactors = stim.scaleFactors;
             else
 %                 class(trialManager)
 %                 error('stop b/c not phased');
@@ -187,7 +185,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
 %                 error('stop');
 %                 t = GetSecs();
 %                 error('it took %s to phase-ify', GetSecs() - t);
-                [stimSpecs scaleFactors] = phaseify(trialManager,stim,stimManager,trialRecords(trialInd).type,...
+                [stimSpecs] = phaseify(trialManager,stim,stimManager,trialRecords(trialInd).type,...
                     trialRecords(trialInd).targetPorts,trialRecords(trialInd).distractorPorts,trialRecords(trialInd).scaleFactor,...
                     rewardSizeULorMS,msPenalty,getIFI(station));
             end
@@ -355,10 +353,10 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 msRewardSound, ... %10/13/08 - to determine duration of these playSound sounds
                 msPenaltySound, ... %10/13/08 - to determine duration of these playSound sounds
                 LUT, ...
-                scaleFactors, ...
                 trialRecords(trialInd).targetPorts, ...
                 trialRecords(trialInd).distractorPorts, ...
                 getRequestPorts(trialManager, getNumPorts(station)), ...
+                trialRecords(trialInd).interTrialLuminance, ...
                 station, ...
                 manualOn, ...
                 1, ...
@@ -393,12 +391,12 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             if ~ischar(trialRecords(trialInd).response)
                 if length(resp)==1
                     trialRecords(trialInd).correct = ismember(resp,trialRecords(trialInd).targetPorts);
-                elseif length(resp)>1
-                    % triggered two or more ports at same time
-                    trialRecords(trialInd).response
-                    trialRecords(trialInd).correct=0;
-                    fprintf('setting stopEarly because multiple ports blocked\n')
-                    stopEarly=1;
+%                 elseif length(resp)>1
+%                     % triggered two or more ports at same time
+%                     trialRecords(trialInd).response
+%                     trialRecords(trialInd).correct=0;
+%                     fprintf('setting stopEarly because multiple ports blocked\n')
+%                     stopEarly=1;
                 else
                     trialRecords(trialInd).correct = 0;                   
                 end

@@ -11,7 +11,7 @@ if isnan(resolutionIndex)
     resolutionIndex=1;
 end
 
-scaleFactor = getScaleFactor(stimulus);
+scaleFactor=0; % dummy value since we are phased anyways; the real scaleFactor is stored in each phase's stimSpec
 interTrialLuminance = getInterTrialLuminance(stimulus);
 type='phased';
 
@@ -162,12 +162,10 @@ for i=1:length(unsortedUniques)
 end
 
 % now create stimSpecs
-out.stimSpecs{1} = stimSpec(stim,{[] 2},'expert',[],1,[],[],0); % expert mode
-out.scaleFactors{1} = scaleFactor;
+out.stimSpecs{1} = stimSpec(stim,{[] 2},'expert',[],1,[],[],getScaleFactor(stimulus),0); % expert mode
 
 % final phase
-out.stimSpecs{2} = stimSpec(interTrialLuminance,{[] 1},'loop',[],1,1,[],1);
-out.scaleFactors{2} = 0;
+out.stimSpecs{2} = stimSpec(interTrialLuminance,{[] 1},'loop',[],1,1,[],getScaleFactor(stimulus),1);
 
 % =====================================================================================================
 % return out.stimSpecs, out.scaleFactors for each phase (only one phase for now?)

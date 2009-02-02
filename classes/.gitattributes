@@ -170,3 +170,4 @@ protocols/stimManagers/@whiteNoise/extractDetailFields.m -text
 protocols/@stimSpec/setRewardTypeAndDuration.m -text
 protocols/@stimSpec/setRewardType.m -text
 protocols/@stimSpec/setRewardDuration.m -text
+protocols/@stimSpec/getScaleFactor.m -text

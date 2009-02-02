@@ -1,7 +1,7 @@
 function [quit response didManualInTrial manual actualReinforcementDurationMSorUL proposedReinforcementDurationMSorUL ...
     phaseRecords eyeData gaze frameDropCorner] ...
     = runRealTimeLoop(tm, window, ifi, stimSpecs, phaseData, stimManager, msRewardSound, msPenaltySound, ...
-    targetOptions, distractorOptions, requestOptions, ...
+    targetOptions, distractorOptions, requestOptions, interTrialLuminance, ...
     station, manual,allowQPM,timingCheckPct,noPulses,textLabel,rn,subID,stimID,protocolStr,ptbVersion,ratrixVersion,trialLabel,msAirpuff, ...
     originalPriority, verbose, eyeTracker, frameDropCorner)
 
@@ -304,6 +304,11 @@ respStart = 0; % initialize respStart to zero - it won't get set until we get a 
 audioStimPlaying = false;
 response='none'; %initialize
 
+% draw interTrialLuminance first
+interTrialTex=Screen('MakeTexture', window, interTrialLuminance,0,0,0); %ned floatprecision=0 for remotedesktop
+% we dont know what floatprecision to use for the interTrial because all floatprecisions are specified per-phase, not per trial
+% should we have an interTrialFloatprecision, or just assume 0?
+Screen('DrawTexture', window, interTrialTex);
 [timestamps.vbl sos startTime]=Screen('Flip',window);  %make sure everything after this point is preallocated
 
 timestamps.lastFrameTime=GetSecs;
@@ -654,13 +659,15 @@ while ~done && ~quit;
     end
     
     % 1/21/09 - how should we handle tries? - do we count attempts that occur during a phase w/ no port transitions (ie timeout only)?
-    if any(ports)
-        phaseRecords(specInd).responseDetails.tries{end+1} = ports;
-        phaseRecords(specInd).responseDetails.times{end+1} = GetSecs() - startTime;
-    end
+%     if any(ports)
+%         phaseRecords(specInd).responseDetails.tries{end+1} = ports;
+%         phaseRecords(specInd).responseDetails.times{end+1} = GetSecs() - startTime;
+%     end
     
     if any(ports~=lastPorts)
-        disp(ports)
+        phaseRecords(specInd).responseDetails.tries{end+1} = ports;
+        phaseRecords(specInd).responseDetails.times{end+1} = GetSecs() - startTime;
+%         disp(ports)
     end
     lastPorts=ports;
     

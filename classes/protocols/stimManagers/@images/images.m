@@ -18,6 +18,7 @@ s.background=0;
 s.yPositionPercent=0;
 s.cache=[];
 s.trialDistribution={};
+s.imageSelectionMode=[];
 
 % added 12/8/08 - size and rotation parameters
 s.size=[];

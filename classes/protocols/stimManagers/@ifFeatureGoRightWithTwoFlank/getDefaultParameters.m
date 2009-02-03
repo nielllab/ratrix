@@ -137,12 +137,23 @@ switch defaultSettings
         default.fpaRelativeTargetOrientation=nan;
         default.fpaRelativeFlankerOrientation=nan;
         default.svnRev={'svn://132.239.158.177/projects/ratrix/trunk'}; %1/8/09 - added to support trunk version of trainingStep
-
+        %default.svnRev{2}=1920; %not used yet
+        
         default.blocking=[];
         default.fitRF=[];
         default.dynamicSweep=[];
         
         default.renderMode='ratrixGeneral-maskTimesGrating';
+        
+        %for trial manager
+        default.eyeTracker=[];
+        default.eyeController=[];
+        default.datanet=[];
+            
+        default.frameDropCorner={'off'};
+        default.dropFrames=true;  % dropped frames were added in and took effect after feb 2,2009; before: 
+        default.displayMethod='ptb';
+
         
     otherwise
         error ('unknown default settings date')

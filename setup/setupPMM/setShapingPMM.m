@@ -76,7 +76,7 @@ switch protocolVersion
         parameters.blocking.sweptParameters={'targetOrientations','flankerOrientations','flankerPosAngle'};
         parameters.blocking.sweptValues=generateFlankerFactorialCombo(ifFeatureGoRightWithTwoFlank, parameters.blocking.sweptParameters, {'ordered'}, parameters);
         
-        parameters.renderMode='dynamic-precachedInsertion'; %'ratrixGeneral-maskTimesGrating', 'ratrixGeneral-precachedInsertion','dynamic-precachedInsertion','dynamic-maskTimesGrating','dynamic-onePatch'
+        parameters.renderMode='ratrixGeneral-maskTimesGrating'; %'ratrixGeneral-maskTimesGrating', 'ratrixGeneral-precachedInsertion','dynamic-precachedInsertion','dynamic-maskTimesGrating','dynamic-onePatch'
             %error if dynamic and toggle is on
             parameters.targetOnOff=int16([1 200]);
             parameters.flankerOnOff=int16([100 800]);
@@ -394,9 +394,9 @@ switch protocolVersion
         [vvVHOffsets previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 end
 
-fd1TM = makeFreeDrinksTM(0.01); %juicy
-fd2TM = makeFreeDrinksTM(0.001); % some
-[fd3TM, SM] = makeFreeDrinksTM(0); % none
+fd1TM = makeFreeDrinksTM(parameters,0.01,0); %juicy
+fd2TM = makeFreeDrinksTM(parameters,0.001,0); % some
+[fd3TM, SM] = makeFreeDrinksTM(parameters,0,0); % none
 
 
 grad1 = rateCriterion(4,1); %(3,2)? (3,3)?

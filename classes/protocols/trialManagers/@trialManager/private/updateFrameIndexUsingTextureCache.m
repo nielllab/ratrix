@@ -8,6 +8,8 @@ function [tm frameIndex i done doFramePulse didPulse] = updateFrameIndexUsingTex
 %   i, requestFrame, frameNum, timedFrames, responseOptions, done, doFramePulse, didPulse
 % OUTPUT: tm frameIndex i done doFramePulse didPulse
 
+
+
 if frameIndexed
     if loop
         if tm.dropFrames

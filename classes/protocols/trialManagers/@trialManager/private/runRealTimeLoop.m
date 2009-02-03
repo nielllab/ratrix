@@ -428,10 +428,10 @@ while ~done && ~quit;
             proposedReinforcementDurationMSorUL = proposedReinforcementDurationMSorUL + rewardDuration;
         end
         
-        % get startFrame if not empty
-        if ~isempty(getStartFrame(spec))
-            i=getStartFrame(spec);
-        end
+%         % get startFrame if not empty
+%         if ~isempty(getStartFrame(spec))
+%             i=getStartFrame(spec);
+%         end
         
         stepsInPhase = 0;
         isFinalPhase = getIsFinalPhase(spec); % we set the isFinalPhase flag to true if we are on the last phase
@@ -576,7 +576,7 @@ while ~done && ~quit;
         % =====================================================================================================================
         if ~paused
             
-            scheduledFrameNum=ceil((firstVBLofPhase-GetSecs)/(framesPerUpdate*ifi)); %could include pessimism about the time it will take to get from here to the flip and how much advance notice flip needs
+            scheduledFrameNum=ceil((GetSecs-firstVBLofPhase)/(framesPerUpdate*ifi)); %could include pessimism about the time it will take to get from here to the flip and how much advance notice flip needs
             % note this does not take pausing into account -- edf thinks we should get rid of pausing
             
             switch strategy

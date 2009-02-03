@@ -140,7 +140,7 @@ end
 
 
 
-[fdTM,SM] = makeFreeDrinksTM(0); % none
+[fdTM,SM] = makeFreeDrinksTM(parameters,0,0); % none
 fd = trainingStep(fdTM, SM, rateCriterion(4,1), minutesPerSession(90,3),parameters.svnRev);
 
 %% assemble the protocol

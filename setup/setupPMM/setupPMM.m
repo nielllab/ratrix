@@ -79,12 +79,13 @@ if ~exist('subjects','var') || isempty(subjects)
             r=setShapingPMM(r,subjects, 'goToLeftDetection', '2_3')
             return
         case 'defineAllFemale'
-            %             subjects={'296','303','304','305','306','rack3test7'}
+                         subjects={'296','303','304','305','306','rack3test7'}
             %
         case 'defineAllMale'
             subjects={'102','117','130','136','137','138','139','227','228','232','229',...
-                '230','234','237','272','275','277','274','278','231','233',...
+                '230','234','237','275','277','278','231','233',...
                 'test_l1','test_r1','test_l2','test_r2','test_l3','test_r3'}   % plus tests
+            %flunked dec 2008: 272, 274
             %flunked oct 2008: '271','273','276'
             %subjects=createSubjectsFromDB(ids) %see addRatsForRack, but would have to remove pams...?
         case 'defineAll' %everybody in the ratrix gets defined

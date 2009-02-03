@@ -1,3 +1,4 @@
+
 function [stimulus,updateSM,resInd,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance, text]=...
     calcStim(stimulus, trialManagerClass,resolutions,screenDisplaySize,LUTbits,responsePorts,totalPorts,trialRecords,forceStimDetails);
 %[stimulus updateSM out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance isCorrection] = calcStim(stimulus,trialManagerClass,frameRate,responsePorts,totalPorts,trialRecords)
@@ -333,7 +334,7 @@ details.gratingType=stimulus.gratingType;
 details.positionalHint=stimulus.positionalHint;
 details.xPosNoiseStd = stimulus.xPosNoise;
 details.yPosNoiseStd = stimulus.yPosNoise;
-fitRF=0;
+fitRF=0; % still in testing mode
 if fitRF
     dataPath='\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\Fan\datanet\demo2';
     % subjectID=
@@ -435,8 +436,23 @@ details.renderMode=stimulus.renderMode;
 switch details.renderMode
     case {'dynamic-precachedInsertion','dynamic-maskTimesGrating','dynamic-onePatchPerPhase','dynamic-onePatch'}
         details.backgroundColor=details.mean;
-         type='expert'; %'dynamic';
+        details.floatprecision=1;
+         type='expert'; 
          out=details;
+         
+         switch trialManagerClass
+             case 'nAFC'
+                 %how do i get rewardSizeULorMS and msPenalty inside calcStim?
+                [stimSpecs scaleFactors] = phaseify(nAFC,stim,stimulus,type,targetPorts,distractorPorts,scaleFactor,rewardSizeULorMS,msPenalty,1/details.hz);
+             
+                %check this with fan:
+                out=stimSpecs; 
+                scaleFactor=scaleFactors;
+                type='expert?  phased?'
+             otherwise 
+                 error('dynamic not tested in that mode yet')
+         end
+         
     case {'ratrixGeneral-maskTimesGrating', 'ratrixGeneral-precachedInsertion'}
         try
 

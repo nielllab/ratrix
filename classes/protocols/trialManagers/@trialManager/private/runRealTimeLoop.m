@@ -302,7 +302,10 @@ analogOutput=[];
 
 if window>0
     % draw interTrialLuminance first
-    interTrialTex=Screen('MakeTexture', window, interTrialLuminance,0,0,1); %ned floatprecision=0 for remotedesktop
+    interTrialLuminance
+    phaseData{1}.destRect
+    class(interTrialLuminance)
+    interTrialTex=Screen('MakeTexture', window, interTrialLuminance,0,0,0); %ned floatprecision=0 for remotedesktop
     % we dont know what floatprecision to use for the interTrial because all floatprecisions are specified per-phase, not per trial
     % should we have an interTrialFloatprecision, or just assume 0?
     Screen('DrawTexture', window, interTrialTex,phaseData{1}.destRect, [], filtMode);
@@ -344,7 +347,7 @@ while ~done && ~quit;
     % if we are entering a new phase, re-initialize variables
     if updatePhase == 1
         
-        i=1;
+        i=0;
         frameIndex=0;
         %         attempt=0;
         
@@ -587,7 +590,7 @@ while ~done && ~quit;
                     
                     % =====================================================================================================================
                     % function to draw the appropriate texture using the textureCache strategy
-                    
+                    i
                     drawFrameUsingTextureCache(tm, window, i, frameNum, size(stim,3), lastI, dontclear, textures(i), destRect, ...
                         filtMode, labelFrames, xOrigTextPos, yNewTextPos);
                     

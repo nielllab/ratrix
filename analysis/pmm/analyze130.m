@@ -1,4 +1,4 @@
-function analyze130
+%function analyze130
 
    d=getSmalls('130',[],1);
      d=removeSomeSmalls(d,~getGoods(d))

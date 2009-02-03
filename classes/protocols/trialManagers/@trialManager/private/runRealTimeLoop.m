@@ -66,7 +66,7 @@ timestamps.phaseLogicDone=0;
 timestamps.rewardDone=0;
 timestamps.serverCommDone=0;
 timestamps.phaseRecordsDone=0;
-timestamps.loopEnd=0;  
+timestamps.loopEnd=0;
 timestamps.prevPostFlipPulse=0;
 timestamps.vbl=0;
 timestamps.ft=0;
@@ -176,12 +176,13 @@ lastAirpuffTime=[];
 GetSecs;
 Screen('Screens');
 
-% set font size correctly
-standardFontSize=11; %big was 25
-subjectFontSize=35;
-oldFontSize = Screen('TextSize',window,standardFontSize);
-Screen('Preference', 'TextRenderer', 0);  % consider moving to PTB setup
-[normBoundsRect, offsetBoundsRect]= Screen('TextBounds', window, 'TEST');
+if window>0
+    % set font size correctly
+    standardFontSize=11; %big was 25
+    oldFontSize = Screen('TextSize',window,standardFontSize);
+    Screen('Preference', 'TextRenderer', 0);  % consider moving to PTB setup
+    [normBoundsRect, offsetBoundsRect]= Screen('TextBounds', window, 'TEST');
+end
 
 %KbName('UnifyKeyNames'); %does not appear to choose keynamesosx on windows - KbName('KeyNamesOSX') comes back wrong
 KbConstants.allKeys=KbName('KeyNames');
@@ -207,7 +208,7 @@ for i=1:10
     KbConstants.numKeys{i}=find(strncmp(char(KbConstants.asciiOne+i-1),KbConstants.allKeys,1));
 end
 
-priorityLevel=MaxPriority(window,'GetSecs','KbCheck');
+priorityLevel=MaxPriority('GetSecs','KbCheck');
 
 Priority(priorityLevel);
 if verbose
@@ -288,13 +289,6 @@ keepGoingOn=false;
 
 %logwrite('about to enter stimOGL loop');
 
-doLED=false;
-if doLED
-    [ao bits]=openNidaqForAnalogOutput(sampRate,range);
-    putdata(ao,data);
-    start(ao);
-end
-
 
 %any stimulus onset synched actions
 
@@ -304,12 +298,16 @@ respStart = 0; % initialize respStart to zero - it won't get set until we get a 
 audioStimPlaying = false;
 response='none'; %initialize
 
-% draw interTrialLuminance first
-interTrialTex=Screen('MakeTexture', window, interTrialLuminance,0,0,0); %ned floatprecision=0 for remotedesktop
-% we dont know what floatprecision to use for the interTrial because all floatprecisions are specified per-phase, not per trial
-% should we have an interTrialFloatprecision, or just assume 0?
-Screen('DrawTexture', window, interTrialTex);
-[timestamps.vbl sos startTime]=Screen('Flip',window);  %make sure everything after this point is preallocated
+analogOutput=[];
+
+if window>0
+    % draw interTrialLuminance first
+    interTrialTex=Screen('MakeTexture', window, interTrialLuminance,0,0,1); %ned floatprecision=0 for remotedesktop
+    % we dont know what floatprecision to use for the interTrial because all floatprecisions are specified per-phase, not per trial
+    % should we have an interTrialFloatprecision, or just assume 0?
+    Screen('DrawTexture', window, interTrialTex,phaseData{1}.destRect, [], filtMode);
+    [timestamps.vbl sos startTime]=Screen('Flip',window);  %make sure everything after this point is preallocated
+end
 
 timestamps.lastFrameTime=GetSecs;
 timestamps.missesRecorded       = timestamps.lastFrameTime;
@@ -352,6 +350,7 @@ while ~done && ~quit;
         
         frameNum=1;
         phaseStartTime=GetSecs;
+        firstVBLofPhase=timestamps.vbl;
         
         
         %         logIt=0;
@@ -510,94 +509,164 @@ while ~done && ~quit;
         
         updatePhase = 0;
         
+        
+        if strcmp(tm.displayMethod,'LED')
+            if ~isempty(analogOutput)
+                stop(analogOutput);
+                
+                if specInd>1
+                    phaseRecords(specInd-1).LEDstopped=GetSecs; %need to preallocate
+                    phaseRecords(specInd-1).totalSampsOutput=get(analogOutput,'SamplesOutput'); %need to preallocate
+                else
+                    error('shouldn''t happen')
+                end
+                
+                delete(analogOutput); %we don't save it cuz we might want a new sampling rate and the putdata will probably take more time than openNidaqForAnalogOutput
+                analogOutput=[];
+            end
+            
+            if loop && ~frameIndexed && ~trigger && ~timeIndexed
+                %pass
+            else
+                error('LED only supports loop at the moment -- should be easy to generalize to all tho')
+            end
+
+            outputRange=[0 5];
+           
+            if all([size(1,stim) size(2,stim)]==1) && all(stim>=0) && all(stim<=1)
+                data=squeeze(stim);
+                data=data*diff(outputRange);
+                data=data-(min(data)-outputRange(1));
+            else
+                error('bad stim size for LED')
+            end
+            
+            
+            %LED won't currently handle intertrial interval/luminance
+            %consider using these analogOutput properties
+            %OutOfDataMode
+            %DefaultChannelValue
+            
+            [analogOutput bits]=openNidaqForAnalogOutput(getHz(spec),[-10 10]); %should ultimately send bits back through stimOGL to doTrial so can be stored as trialRecords(trialInd).resolution.pixelSize
+            putdata(analogOutput,data); %this might run out of RAM...  check MaxSamplesQueued 
+            verify=setverify(analogOutput,'RepeatOutput',inf);
+            if ~isinf(verify)
+                error('couldn''t set to repeat forever')
+            end
+            start(analogOutput);
+            
+            phaseRecords(specInd).LEDstarted=GetSecs; %need to preallocate
+            
+            if ~noPulses
+                framePulse(station);
+            end
+        end
+        
     end
     
     timestamps.phaseUpdated=GetSecs;
     
-    % =====================================================================================================================
-    if ~paused
+    doFramePulse=~noPulses;
+                
+    if window>0
         
-        doFramePulse=~noPulses;
-        switch strategy
+        % =====================================================================================================================
+        if ~paused
             
-            % ====================================================================================================================
-            case 'textureCache'
-                % function to determine the frame index using the textureCache strategy
-                [tm frameIndex i done doFramePulse didPulse] = updateFrameIndexUsingTextureCache(tm, ...
-                    frameIndexed, loop, trigger, timeIndexed, frameIndex, indexedFrames, size(stim,3), isRequesting, ...
-                    i, requestFrame, frameNum, timedFrames, responseOptions, done, doFramePulse, didPulse);
+            scheduledFrameNum=ceil((firstVBLofPhase-GetSecs)/(framesPerUpdate*ifi)); %could include pessimism about the time it will take to get from here to the flip and how much advance notice flip needs
+            % note this does not take pausing into account -- edf thinks we should get rid of pausing
+            
+            switch strategy
                 
-                % =====================================================================================================================
-                % function to draw the appropriate texture using the textureCache strategy
-                
-                drawFrameUsingTextureCache(tm, window, i, frameNum, size(stim,3), lastI, dontclear, textures(i), destRect, ...
-                    filtMode, labelFrames, xOrigTextPos, yNewTextPos);
-                
-                % =====================================================================================================================
-            case 'expert'
-                % 10/31/08 - implementing expert mode
-                % call a method of the given stimManager that draws the expert frame
-%                 i=i+1; % 11/7/08 - this needs to happen first because i starts at 0
-                [doFramePulse expertCache dynamicDetails textLabel i] = ...
-                    drawExpertFrame(stimManager,stim,i,phaseStartTime,window,textLabel,floatprecision,destRect,filtMode,expertCache,ifi);
-                if ~isempty(dynamicDetails)
-                    phaseRecords(specInd).dynamicDetails{end+1}=dynamicDetails; % dynamicDetails better specify what frame it is b/c the record will not save empty details
+                % ====================================================================================================================
+                case 'textureCache'
+                    % function to determine the frame index using the textureCache strategy
+                    [tm frameIndex i done doFramePulse didPulse] = updateFrameIndexUsingTextureCache(tm, ...
+                        frameIndexed, loop, trigger, timeIndexed, frameIndex, indexedFrames, size(stim,3), isRequesting, ...
+                        i, requestFrame, frameNum, timedFrames, responseOptions, done, doFramePulse, didPulse, scheduledFrameNum);
+                    
+                    % =====================================================================================================================
+                    % function to draw the appropriate texture using the textureCache strategy
+                    
+                    drawFrameUsingTextureCache(tm, window, i, frameNum, size(stim,3), lastI, dontclear, textures(i), destRect, ...
+                        filtMode, labelFrames, xOrigTextPos, yNewTextPos);
+                    
+                    % =====================================================================================================================
+                case 'expert'
+                    % 10/31/08 - implementing expert mode
+                    % call a method of the given stimManager that draws the expert frame
+                    % i=i+1; % 11/7/08 - this needs to happen first because i starts at 0
+                    [doFramePulse expertCache dynamicDetails textLabel i] = ...
+                        drawExpertFrame(stimManager,stim,i,phaseStartTime,window,textLabel,floatprecision,destRect,filtMode,expertCache,ifi,scheduledFrameNum,tm.dropFrames);
+                    if ~isempty(dynamicDetails)
+                        phaseRecords(specInd).dynamicDetails{end+1}=dynamicDetails; % dynamicDetails better specify what frame it is b/c the record will not save empty details
+                    end
+                otherwise
+                    error('unrecognized strategy')
+            end
+            
+            timestamps.frameDrawn=GetSecs;
+            
+            %logwrite(sprintf('stim is started, i is calculated: %d',i));
+            
+            if frameDropCorner.on
+                Screen('FillRect', window, frameDropCorner.seq(frameDropCorner.ind), frameDropCorner.rect);
+                frameDropCorner.ind=frameDropCorner.ind+1;
+                if frameDropCorner.ind>length(frameDropCorner.seq)
+                    frameDropCorner.ind=1;
                 end
-            otherwise
-                error('unrecognized strategy')
-        end
-        
-        timestamps.frameDrawn=GetSecs;
-        
-        %logwrite(sprintf('stim is started, i is calculated: %d',i));
-        
-        if frameDropCorner.on
-            Screen('FillRect', window, round(size(currentCLUT,1)*frameDropCorner.seq(frameDropCorner.ind)), frameDropCorner.rect);
+            end
             
-            frameDropCorner.ind=frameDropCorner.ind+1;
-            if frameDropCorner.ind>length(frameDropCorner.seq)
-                frameDropCorner.ind=1;
+            timestamps.frameDropCornerDrawn=GetSecs;
+            
+            %text commands are supposed to be last for performance reasons
+            
+            % =====================================================================================================================
+            % function for drawing text
+            if manual
+                didManual=1;
+            end
+            if window>=0
+                xTextPos = drawText(tm, window, labelFrames, subID, xOrigTextPos, yTextPos, yNewTextPos, normBoundsRect, stimID, protocolStr, ...
+                    textLabel, trialLabel, i, frameNum, manual, didAPause, ptbVersion, ratrixVersion,phaseRecords(specInd).responseDetails.numMisses, phaseRecords(specInd).responseDetails.numApparentMisses, specInd, getStimType(spec));
+            end
+            
+            timestamps.textDrawn=GetSecs;
+            
+            % =====================================================================================================================
+        else
+            %do i need to copy previous screen?
+            %Screen('CopyWindow', window, window);
+            if window>=0
+                Screen('DrawText',window,'paused (k+p to toggle)',xTextPos,yNewTextPos,100*ones(1,3));
             end
         end
         
-        timestamps.frameDropCornerDrawn=GetSecs;
+        % =====================================================================================================================
+        % function here to do flip and other Screen stuff
         
-        %text commands are supposed to be last for performance reasons
+        [lastI timestamps] = ...
+            flipFrameAndDoPulse(tm, window, dontclear, i, framesPerUpdate, ifi, paused, doFramePulse,station,timestamps);
         
         % =====================================================================================================================
-        % function for drawing text
-        if manual
-            didManual=1;
-        end
-        if window>=0
-            xTextPos = drawText(tm, window, labelFrames, subID, xOrigTextPos, yTextPos, yNewTextPos, normBoundsRect, stimID, protocolStr, ...
-                textLabel, trialLabel, i, frameNum, manual, didAPause, ptbVersion, ratrixVersion,phaseRecords(specInd).responseDetails.numMisses, phaseRecords(specInd).responseDetails.numApparentMisses, specInd, getStimType(spec));
-        end
+        % function here to save information about missed frames
+        [phaseRecords(specInd).responseDetails timestamps] = ...
+            saveMissedFrameData(tm, phaseRecords(specInd).responseDetails, frameNum, timingCheckPct, ifi, timestamps);
         
-        timestamps.textDrawn=GetSecs;
-        
-        % =====================================================================================================================
+        timestamps.missesRecorded=GetSecs;
     else
-        %do i need to copy previous screen?
-        %Screen('CopyWindow', window, window);
-        if window>=0
-            Screen('DrawText',window,'paused (k+p to toggle)',xTextPos,yNewTextPos,100*ones(1,3));
+        
+        if ~isempty(analogOutput)
+            stimDone = false; %need to figure this out for non-loop stims
+            
+            if stimDone && isempty(responseOptions) && ~any([frameIndexed loop trigger timeIndexed])
+                done=1;
+            end
         end
+        
+        %WaitSecs('UntilTime', ifi*framesPerUpdate + ); %need to choke the loop cuz the phased architecture converts reward durations, etc, to numbers of frames -- i don't think it knows about framesPerUpdate though?
     end
-    
-    % =====================================================================================================================
-    % function here to do flip and other Screen stuff
-    
-    [lastI timestamps] = ...
-        flipFrameAndDoPulse(tm, window, dontclear, i, framesPerUpdate, ifi, paused, doFramePulse,station,timestamps);
-    
-    % =====================================================================================================================
-    % function here to save information about missed frames
-    [phaseRecords(specInd).responseDetails timestamps] = ...
-        saveMissedFrameData(tm, phaseRecords(specInd).responseDetails, frameNum, timingCheckPct, ifi, timestamps);
-    
-    timestamps.missesRecorded=GetSecs;
-    
+
     % =====================================================================================================================
     % =====================================================================================================================
     % 10/19/08 - get eyeTracker sample
@@ -664,15 +733,15 @@ while ~done && ~quit;
     end
     
     % 1/21/09 - how should we handle tries? - do we count attempts that occur during a phase w/ no port transitions (ie timeout only)?
-%     if any(ports)
-%         phaseRecords(specInd).responseDetails.tries{end+1} = ports;
-%         phaseRecords(specInd).responseDetails.times{end+1} = GetSecs() - startTime;
-%     end
+    %     if any(ports)
+    %         phaseRecords(specInd).responseDetails.tries{end+1} = ports;
+    %         phaseRecords(specInd).responseDetails.times{end+1} = GetSecs() - startTime;
+    %     end
     
     if any(ports~=lastPorts)
         phaseRecords(specInd).responseDetails.tries{end+1} = ports;
         phaseRecords(specInd).responseDetails.times{end+1} = GetSecs() - startTime;
-%         disp(ports)
+        %         disp(ports)
     end
     lastPorts=ports;
     
@@ -995,13 +1064,19 @@ if doFramePulse
     framePulse(station);
 end
 
+if ~isempty(analogOutput)
+    stop(analogOutput);
+    delete(analogOutput);
+end
+
 Screen('Close'); %leaving off second argument closes all textures but leaves windows open
 Priority(originalPriority);
 ListenChar(0);
 
 % function [tm responseDetails] = closeRealTimeLoop(tm, responseDetails, station, frameNum, startTime, valveErrorDetails, window, texture,
 %   destRect, filtMode, dontclear, vbl, framesPerUpdate, ifi, originalPriority)
-% [tm responseDetails] = closeRealTimeLoop(tm, responseDetails, station, frameNum, startTime, valveErrorDetails, window, textures(size(stim,3)+1), ...
+% [tm responseDetails] = closeRealTimeLoop(tm, responseDetails, station,
+% frameNum, startTime, valveErrorDetails, window, textures(size(stim,3)+1), ...
 %   destRect, filtMode, dontclear, vbl, framesPerUpdate, ifi, originalPriority);
 
 % =====================================================================================================================

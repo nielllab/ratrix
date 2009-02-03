@@ -1,12 +1,12 @@
 function spec=stimSpec(varargin)
 % stimSpec  class constructor. 
 % spec=stimSpec(stimulus,criterion,stimType,startFrame,rewardType,rewardDuration,rewardPorts,...
-%   framesUntilGrad,stochasticDistribution,scaleFactor[,isFinalPhase])
+%   framesUntilGrad,stochasticDistribution,scaleFactor,isFinalPhase,hz)
 %
 % the stimulus is the visual movie
 % criterion is the phase transitions
 % stimType is the format of the movie (toggle, loop, once-through, timedFrames, indexedFrames) - default is loop
-    % it must be either a single char array, or a cell array (if time or frame indexed) of the form {'timedFrames', [indicies]}
+% it must be either a single char array, or a cell array (if time or frame indexed) of the form {'timedFrames', [indicies]}
 % startFrame is the frame index at which to start for this phase (indexes into stimulus)
 % rewardType is either reward or airpuff
 % rewardDuration is the duration of the reinforcement in milliseconds
@@ -34,62 +34,63 @@ spec.framesUntilTransition = [];
 spec.stochasticDistribution = []; % for now the "distribution" is a unit random criterion between 0 and 1
 spec.scaleFactor=0;
 spec.isFinalPhase = 0;
-
+spec.hz=0;
 
 switch nargin
     case 0
         % if no input arguments, create a default object
-
+        
         spec = class(spec,'stimSpec');
     case 1
         % if single argument of this class type, return it
         if (isa(varargin{1},'stimSpec'))
             spec = varargin{1};
-        % if single argument is a stimulus, use blank sounds and
-        % rewardDuration
+            % if single argument is a stimulus, use blank sounds and
+            % rewardDuration
         elseif isa(varargin{1}, 'numeric')
             spec.stimulus = varargin{1};
             spec = class(spec,'stimSpec');
         else
             error('Input argument is not a stimSpec object or cell array of stim frames')
         end
-	case 2
-		% if we are given a stimulus and a criteria
+    case 2
+        % if we are given a stimulus and a criteria
         goodInput = 0;
-		if isa(varargin{1}, 'numeric') && iscell(varargin{2})
-			temp = varargin{2}; % this is the cell array that has key value pairs
-			for i=1:2:length(varargin{2})-1 % check each transition port set
-				if isa(temp{1}, 'numeric')
+        if isa(varargin{1}, 'numeric') && iscell(varargin{2})
+            temp = varargin{2}; % this is the cell array that has key value pairs
+            for i=1:2:length(varargin{2})-1 % check each transition port set
+                if isa(temp{1}, 'numeric')
                     goodInput = 1;
-				else
-					error('Invalid port set specified');
-				end
+                else
+                    error('Invalid port set specified');
+                end
             end
-		else
-			error('Invalid inputs');
+        else
+            error('Invalid inputs');
         end
         spec.stimulus = varargin{1};
-		spec.criterion = varargin{2};
-		spec = class(spec,'stimSpec');
-        
-    case 11
+        spec.criterion = varargin{2};
+        spec = class(spec,'stimSpec');
+
+    case 12
+
         % stimulus
         spec.stimulus = varargin{1};
-		% criteria
+        % criteria
         goodInput = 0;
-		if iscell(varargin{2})
-			temp = varargin{2}; % this is the cell array that has key value pairs
-			for i=1:2:length(varargin{2})-1 % check each transition port set
-				if isa(varargin{2}{i}, 'numeric')
-					
+        if iscell(varargin{2})
+            temp = varargin{2}; % this is the cell array that has key value pairs
+            for i=1:2:length(varargin{2})-1 % check each transition port set
+                if isa(varargin{2}{i}, 'numeric')
+                    
                     goodInput=1;
-				else
-					error('Invalid port set specified');
-				end
+                else
+                    error('Invalid port set specified');
+                end
             end
-            spec.criterion = varargin{2};   
-		else
-			error('Invalid inputs');
+            spec.criterion = varargin{2};
+        else
+            error('Invalid inputs');
         end
         
         % stimType
@@ -170,16 +171,23 @@ switch nargin
         else
             error('scale factor is either 0 (for scaling to full screen) or [width height] positive values')
         end
+        
         % isFinalPhase
-        if nargin==11
+
             if isscalar(varargin{11}) && (varargin{11} == 0 || varargin{11} == 1)
                 spec.isFinalPhase = varargin{11};
             else
                 error('isFinalPhase must be a scalar 0 or 1')
             end
+
+
+        if isscalar(varargin{12}) && varargin{12}>0 && isreal(varargin{12})
+            spec.hz=varargin{12};
+        else
+            error('hz must be scalar real >0')
         end
         
-        % this stays at the bottom of case 11 - out of the input arg parsing
+
         spec = class(spec,'stimSpec');
         
     otherwise

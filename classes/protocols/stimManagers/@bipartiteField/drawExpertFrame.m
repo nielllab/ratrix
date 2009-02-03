@@ -40,7 +40,7 @@ expertFrame(1,stim.numLeftPixels+1:end) = stim.frames(2,i);
 % 11/14/08 - moved the make and draw to stimManager specific getexpertFrame b/c they might draw differently
 dynTex = Screen('MakeTexture', window, expertFrame,0,0,floatprecision);
 Screen('DrawTexture', window, dynTex,[],destRect,[],filtMode);
-
+Screen('Close',dynTex); % close this texture to remove from VRAM
 % increment i
 i=i+1;
 

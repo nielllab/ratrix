@@ -28,6 +28,8 @@ pnet(datacon,'setwritetimeout', 5);
 
 % 2/2/09 - start the event GUI now - we have to do it locally so that the data is within the scope of this daemon
 % so that datanet can request a trial's worth of events
+events_data=[];
+eventsToSendIndex=1;
 % ========================================================================================
 % size of the GUI - parameters
 oneRowHeight=25;
@@ -357,8 +359,8 @@ while ~quit
                 fprintf('we got a command to store a local timestamp\n');
                 message = constants.dataToStimResponses.D_TIMESTAMPED;
                 [timestampData,timestamp] = getdata(ai,1);
-            case constants.stimToDataCommands.S_SEND_DATA_CMD
-                % we got a S_SEND_DATA_CMD - try to read filename now
+            case constants.stimToDataCommands.S_SAVE_DATA_CMD
+                % we got a S_SAVE_DATA_CMD - try to read filename now
                 filename=pnet(datacon,'read',MAXSIZE,'char','noblock');
                 while isempty(filename)
                     success=false;
@@ -379,13 +381,18 @@ while ~quit
                 neuralData(find(neuralDataTimes<timestamp), :) = [];
                 neuralDataTimes(find(neuralDataTimes<timestamp)) = [];
                 % CHANGE MESSAGE TO BE neuralDataTimes, not a random data
+                
+                % also get events from events_data
+                neuralEvents=events_data(eventsToSendIndex:end);
+                eventsToSendIndex=length(events_data)+1;
                 % =================================================================================================
                 fullFilename = fullfile(datanet.storepath, 'neuralRecords', filename);
                 %                 trialData=[10 11 12];
                 %                 times = [1 2 3 4 5 6 7];
-                save(fullFilename, 'neuralData', 'neuralDataTimes', 'samplingRate', 'matlabTimeStamp', 'firstNeuralDataTime', 'parameters');
+                save(fullFilename, 'neuralData', 'neuralDataTimes', 'samplingRate', 'matlabTimeStamp',...
+                    'firstNeuralDataTime', 'parameters','neuralEvents');
                 fprintf('we got a command to send a trial''s worth of data\n');
-                message = constants.dataToStimResponses.D_DATA;
+                message = constants.dataToStimResponses.D_DATA_SAVED;
             case constants.stimToDataCommands.S_STOP_RECORDING_CMD
                 success = true;
                 % do something here to stop recording (turn off NIDAQ)
@@ -446,7 +453,7 @@ while ~quit
     % send ack to stim computer if successful
     %%%% THIS IS WHERE BEHAVIOR WILL BE DIFFERENT FOR DIFFERENT RECEIVED COMMANDS
     % if we received a S_START_RECORDING_CMD, then run local calls to start recording, then send ack
-    % if we received a S_SEND_DATA_CMD, then just send data (tell stim to listen)
+    % if we received a S_SAVE_DATA_CMD, then just send data (tell stim to listen)
     % etc etc
 end
 

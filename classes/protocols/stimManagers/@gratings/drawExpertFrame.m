@@ -88,6 +88,9 @@ if ~isempty(stim.masks)
     Screen('DrawTexture',window,expertCache.annulitexs{stim.annuliInds(gratingToDraw)},[],destRect,[],filtMode);
 end
 
+% clear the gratingtex from vram
+Screen('Close',gratingtex);
+
 % increment i as necessary
 i=i+1;
 

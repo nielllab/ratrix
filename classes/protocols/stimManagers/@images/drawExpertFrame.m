@@ -51,7 +51,8 @@ end
 
 % disable alpha blending (for text)
 Screen('BlendFunction',window,GL_ONE,GL_ZERO);
-
+% clear imagetex from vram
+Screen('Close',imagetex);
 % increment i
 i=i+1;
 

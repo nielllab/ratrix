@@ -16,7 +16,7 @@ r.constants.startConnectionCommands.D_LISTENER_STARTED = 102;
 % Stim to Data commands
 r.constants.stimToDataCommands.S_START_RECORDING_CMD = 1;
 r.constants.stimToDataCommands.S_TIMESTAMP_CMD = 2;
-r.constants.stimToDataCommands.S_SEND_DATA_CMD = 3;
+r.constants.stimToDataCommands.S_SAVE_DATA_CMD = 3;
 r.constants.stimToDataCommands.S_STOP_RECORDING_CMD = 4;
 r.constants.stimToDataCommands.S_SHUTDOWN_CMD = 5;
 r.constants.stimToDataCommands.S_SET_STOREPATH_CMD = 6;
@@ -26,7 +26,7 @@ r.constants.stimToDataCommands.S_SET_LOCAL_PARAMETERS_CMD = 8;
 % Data to Stim messages
 r.constants.dataToStimResponses.D_RECORDING_STARTED = 11;
 r.constants.dataToStimResponses.D_TIMESTAMPED = 12;
-r.constants.dataToStimResponses.D_DATA = 13;
+r.constants.dataToStimResponses.D_DATA_SAVED = 13;
 r.constants.dataToStimResponses.D_RECORDING_STOPPED = 14;
 r.constants.dataToStimResponses.D_SHUTDOWN = 15;
 r.constants.dataToStimResponses.D_STOREPATH_SET = 16;

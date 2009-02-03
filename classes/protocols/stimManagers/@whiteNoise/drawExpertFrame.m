@@ -26,7 +26,8 @@ expertFrame(expertFrame>1) = 1;
 % 11/14/08 - moved the make and draw to stimManager specific getexpertFrame b/c they might draw differently
 dynTex = Screen('MakeTexture', window, expertFrame,0,0,floatprecision);
 Screen('DrawTexture', window, dynTex,[],destRect,[],filtMode);
-
+% clear dynTex from vram
+Screen('Close',dynTex);
 % increment i
 i=i+1;
 

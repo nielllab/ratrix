@@ -469,7 +469,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             if ~isempty(trialManager.datanet)
                 datanet_constants = getConstants(trialManager.datanet);
                 commands = [];
-                commands.cmd = datanet_constants.stimToDataCommands.S_SEND_DATA_CMD;
+                commands.cmd = datanet_constants.stimToDataCommands.S_SAVE_DATA_CMD;
                 commands.arg = sprintf('neuralRecords_%d-%s.mat',trialRecords(trialInd).trialNumber, datestr(trialRecords(trialInd).date, 30));
                 [trialData, gotAck] = sendCommandAndWaitForAck(trialManager.datanet, getCon(trialManager.datanet), commands);
                 % now try to load this file and store into trialData to be used next trial

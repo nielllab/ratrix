@@ -358,7 +358,7 @@ nameOfShapingStep=repmat({'junkStep'},1,11);  % skip the first 11 of training...
 
 
 nameOfShapingStep{end+1} = sprintf('Expt 1: contrast sweep', protocolType);
-[sweepContrast previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+% [sweepContrast previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 % ====================================================================================================================
 % training steps
 svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
@@ -601,7 +601,7 @@ for i=1:length(subjIDs),
 %         case {'rack3test4','rack3test5','rack3test6'} % nAFC, orientedGabors
 %             p=protocol('nAFC,orientedGabors',{ts4});
         otherwise
-            p=protocol('demo',{ts30});
+            p=protocol('demo',{ts4});
 %             error('unknown subject');
     end
     

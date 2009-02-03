@@ -14,7 +14,7 @@ constants = getConstants(datanet);
 
 % now send command to data process to send data
 commands=[];
-commands.cmd = constants.stimToDataCommands.S_SEND_DATA_CMD;
+commands.cmd = constants.stimToDataCommands.S_SAVE_DATA_CMD;
 commands.arg = filename;
 
 [trialData, gotAck] = sendCommandAndWaitForAck(datanet, stimcon, commands);

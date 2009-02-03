@@ -1,5 +1,5 @@
 function [tm done newSpecInd specInd updatePhase transitionedByTimeFlag transitionedByPortFlag response trialResponse...
-    isRequesting lastSoundsPlayed] = ... 
+    isRequesting lastSoundsPlayed] = ...
     handlePhasedTrialLogic(tm, done, ...
     ports, station, specInd, transitionCriterion, framesUntilTransition, stepsInPhase, isFinalPhase, response, trialResponse, ...
     stimManager, msRewardSound, mePenaltySound, targetOptions, distractorOptions, requestOptions, isRequesting, lastSoundsPlayed)
@@ -9,7 +9,7 @@ function [tm done newSpecInd specInd updatePhase transitionedByTimeFlag transiti
 % INPUT: tm, responseDetails, done, ports, station, specInd, transitionCriterion, framesUntilTransition, stepsInPhase,
 %   isFinalPhase, response, stimManager, msRewardSound, mePenaltySound, targetOptions, distractorOptions, requestOptions, correct,
 %   isRequesting, lastSoundsPlayed
-% OUTPUT: tm, responseDetails, done, newSpecInd, specInd, updatePhase, transitionedByTimeFlag, transitionedByPortFlag, 
+% OUTPUT: tm, responseDetails, done, newSpecInd, specInd, updatePhase, transitionedByTimeFlag, transitionedByPortFlag,
 %   stepsInPhase, response, correct, isRequesting, lastSoundsPlayed
 
 updatePhase=0;
@@ -29,21 +29,21 @@ for i=1:length(lastSoundsPlayed)
         tm.soundMgr = playLoop(tm.soundMgr,lastSoundsPlayed{i},station,0);
     end
 end
-        
+
 % soundsToPlay is a cell array of sound names {{playLoop sounds}, {playSound sounds}} to be played at current frame
 for i=1:length(soundsToPlay{1})
-%     if ~any(ismember(soundsToPlay{1}{i}, lastSoundsPlayed))
-        % if this sound isnt already playing
-        tm.soundMgr = playLoop(tm.soundMgr,soundsToPlay{1}{i},station,1);
-%     end
+    %     if ~any(ismember(soundsToPlay{1}{i}, lastSoundsPlayed))
+    % if this sound isnt already playing
+    tm.soundMgr = playLoop(tm.soundMgr,soundsToPlay{1}{i},station,1);
+    %     end
 end
 % lastSoundsPlayed should be updated to the currently playing sounds
 lastSoundsPlayed = soundsToPlay{1};
 
 % now play one-time sounds
 for i=1:length(soundsToPlay{2})
-%     soundsToPlay{2}{i}{1}
-%     soundsToPlay{2}{i}{2}
+    %     soundsToPlay{2}{i}{1}
+    %     soundsToPlay{2}{i}{2}
     tm.soundMgr = playSound(tm.soundMgr,soundsToPlay{2}{i}{1},soundsToPlay{2}{i}{2}/1000.0,station);
 end
 
@@ -63,7 +63,7 @@ end
 %             % no response, this is a frame indexed sound stimulus
 %             portSet = '';
 %         end
-% 
+%
 %         if shouldWePlay(st,portSet, stepsInPhase)
 %             tempSoundMgr = playSound(getSoundManager(tm),getName(st),getDuration(st)/1000.0,station);
 %             tm = setSoundManager(tm, tempSoundMgr);
@@ -81,7 +81,7 @@ if ~isempty(framesUntilTransition) && stepsInPhase == framesUntilTransition - 1 
     updatePhase = 1;
     if isFinalPhase
         done = 1;
-  %      error('we are done by time');
+        %      error('we are done by time');
     end
     %error('transitioned by time in phase %d', specInd);
     transitionedByTimeFlag = true;
@@ -95,20 +95,20 @@ for gcInd=1:2:length(transitionCriterion)-1
         if isFinalPhase
             done = 1;
             updatePhase = 1;
-%              'we are done with this trial'
-%              specInd
+            %              'we are done with this trial'
+            %              specInd
         else
             % move to the next phase as specified by graduationCriterion
-      %      specInd = transitionCriterion{gcInd+1};          
+            %      specInd = transitionCriterion{gcInd+1};
             newSpecInd = transitionCriterion{gcInd+1};
-%             if (specInd == newSpecInd)
-%                 error('same indices at %d', specInd);
-%             end
+            %             if (specInd == newSpecInd)
+            %                 error('same indices at %d', specInd);
+            %             end
             updatePhase = 1;
         end
         transitionedByPortFlag = true;
         
-        % set response to the ports array when it is triggered during a phase transition (ie response will be whatever the last port to trigger 
+        % set response to the ports array when it is triggered during a phase transition (ie response will be whatever the last port to trigger
         %   a transition was)
         response = ports;
         % set correct if we are on a target or distractor

@@ -105,7 +105,18 @@ if isreal(LUT) && all(size(LUT)==[256 3])
         error('the LUT is not what you think it is')
     end
     
-    frameDropCorner.seq=linspace(1,0,size(currentCLUT,1));
+    switch tm.frameDropCorner{1}
+        case 'off'
+        case 'flickerRamp'
+            inds=findClosestInds(tm.frameDropCorner{2},mean(currentCLUT'));
+            frameDropCorner.seq=size(currentCLUT,1):-1:inds(1);
+            frameDropCorner.seq(2,:)=inds(2);
+            frameDropCorner.seq=frameDropCorner.seq(:); %interleave them
+        case 'sequence'
+            frameDropCorner.seq=findClosestInds(tm.frameDropCorner{2},mean(currentCLUT'));
+        otherwise
+            error('shouldn''t happen')
+    end
 else
     reallutsize
     error('LUT must be real 256 X 3 matrix')

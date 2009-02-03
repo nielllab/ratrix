@@ -1,7 +1,7 @@
 function t=freeDrinks(varargin)
 % FREEDRINKS  class constructor.
 % t=freeDrinks(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,soundManager,freeDrinkLikelihood, reinforcementManager, 
-%   [eyeTracker,eyeController,datanet])
+%   [eyeTracker],[eyeController],[datanet],[frameDropCorner],[dropFrames],[displayMethod])
 
 switch nargin
     case 0
@@ -17,7 +17,7 @@ switch nargin
         else
             error('Input argument is not a freeDrinks object')
         end
-    case {6 7 8 9}
+    case {6 7 8 9 10 11 12}
 
         if varargin{5}>=0
             t.freeDrinkLikelihood=varargin{5};
@@ -27,17 +27,17 @@ switch nargin
 
         d=sprintf('free drinks\n\t\t\tfreeDrinkLikelihood: %g',t.freeDrinkLikelihood);
 
-        if nargin==6
-            a=trialManager(varargin{1},varargin{2},varargin{3},varargin{4},varargin{6},d);
-        elseif nargin==7
-            a=trialManager(varargin{1},varargin{2},varargin{3},varargin{4},varargin{6},d,varargin{7});
-        elseif nargin==8
-            a=trialManager(varargin{1},varargin{2},varargin{3},varargin{4},varargin{6},varargin{7},varargin{8},d);
-        elseif nargin==9
-            a=trialManager(varargin{1},varargin{2},varargin{3},varargin{4},varargin{6},varargin{7},varargin{8},d,varargin{9});
-        else
-            error('should never happen')
+        
+        for i=7:12
+            if i <= nargin
+                args{i}=varargin{i};
+            else
+                args{i}=[];
+            end
         end
+        
+            a=trialManager(varargin{1},varargin{2},varargin{3},varargin{4},varargin{6},args{7},args{8},d,args{9},args{10},args{11},args{12});
+
         
         t = class(t,'freeDrinks',a);
     otherwise

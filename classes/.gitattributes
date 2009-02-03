@@ -173,3 +173,4 @@ protocols/@stimSpec/setRewardDuration.m -text
 protocols/@stimSpec/getScaleFactor.m -text
 protocols/@stimSpec/getRewardPorts.m -text
 protocols/@stimSpec/getStartFrame.m -text
+protocols/@stimSpec/getHz.m -text

@@ -3,7 +3,7 @@ function t=nAFC(varargin)
 % t=nAFC(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,soundManager,...
 %                requestRewardSizeULorMS,percentCorrectionTrials,msResponseTimeLimit,pokeToRequestStim,...
 %                maintainPokeToMaintainStim,msMaximumStimPresentationDuration,maximumNumberStimPresentations,doMask, rewardManager,
-%                [eyeTracker,eyeController,datanet])
+%                [eyeTracker],[eyeController],[datanet],[frameDropCorner],[dropFrames],[displayMethod])
 % msResponseTimeLimit=0 means unlimited response time
 % msMaximumStimPresentationDuration=0 means unlimited stim presentation duration
 % maximumNumberStimPresentations=0 means unlimited presentations
@@ -31,7 +31,7 @@ switch nargin
         else
             error('Input argument is not a nAFC object')
         end
-    case {13 14 15 16}
+    case {13 14 15 16 17 18 19}
 
 
 
@@ -115,17 +115,17 @@ switch nargin
             t.pokeToRequestStim,t.maintainPokeToMaintainStim,maxStimPresDurStr,...
             maxNumStimPresStr,t.doMask);
 
-        if nargin==13
-            a=trialManager(varargin{1},varargin{2},varargin{3},varargin{4},varargin{13},d);
-        elseif nargin==14
-            a=trialManager(varargin{1},varargin{2},varargin{3},varargin{4},varargin{13},d,varargin{14});
-        elseif nargin==15
-            a=trialManager(varargin{1},varargin{2},varargin{3},varargin{4},varargin{13},varargin{14},varargin{15},d);
-        elseif nargin==16
-            a=trialManager(varargin{1},varargin{2},varargin{3},varargin{4},varargin{13},varargin{14},varargin{15},d,varargin{16});
-        else
-            error('should never happen')
+        
+        for i=14:19
+            if i <= nargin
+                args{i}=varargin{i};
+            else
+                args{i}=[];
+            end
         end
+
+            a=trialManager(varargin{1},varargin{2},varargin{3},varargin{4},varargin{13},args{14},args{15},d,args{16},args{17},args{18},args{19});
+
         
         t = class(t,'nAFC',a);
         % setRequestRewardSizeULorMS

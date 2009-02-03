@@ -105,7 +105,14 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             % 10/17/08 - DO SOMETHING HERE WITH INPUT TRIALDATA before it gets overwritten
             % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
-            resolutions=getResolutions(station);
+            switch trialManager.displayMethod
+                case 'ptb'
+                    resolutions=getResolutions(station);
+                case 'LED'
+                    resolutions=[];
+                otherwise
+                    error('shouldn''t happen')
+            end
 
             [newSM, ...
                 updateSM, ...
@@ -139,7 +146,18 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 error('frame label must be vector')
             end
             
-            [station trialRecords(trialInd).resolution]=setResolution(station,resolutions(resInd));
+            switch trialManager.displayMethod
+                case 'ptb'
+                    [station trialRecords(trialInd).resolution]=setResolution(station,resolutions(resInd));
+                case 'LED'
+                    trialRecords(trialInd).resolution.width=uint8(1);
+                    trialRecords(trialInd).resolution.height=uint8(1);
+                    trialRecords(trialInd).resolution.pixelSize=uint8(16); %should set using 2nd output of openNidaqForAnalogOutput
+                    trialRecords(trialInd).resolution.hz=resInd;
+                otherwise
+                    error('shouldn''t happen')
+            end
+            
             trialRecords(trialInd).station = structize(station); %wait til now to record, so we get an updated ifi measurement in the station object
 
             if (isempty(trialRecords(trialInd).targetPorts) || isvector(trialRecords(trialInd).targetPorts))...
@@ -187,7 +205,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
 %                 error('it took %s to phase-ify', GetSecs() - t);
                 [stimSpecs] = phaseify(trialManager,stim,stimManager,trialRecords(trialInd).type,...
                     trialRecords(trialInd).targetPorts,trialRecords(trialInd).distractorPorts,trialRecords(trialInd).scaleFactor,...
-                    rewardSizeULorMS,msPenalty,getIFI(station));
+                    rewardSizeULorMS,msPenalty,getIFI(station),trialRecords(trialInd).resolution.hz);
             end
             
             % 1/29/09 - go through all stimSpecs and insert any values from rm as flagged

@@ -42,7 +42,7 @@ doMask=false;
 
 vh=nAFC(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,requestRewardSizeULorMS,...
     percentCorrectionTrials,msResponseTimeLimit,pokeToRequestStim,maintainPokeToMaintainStim,msMaximumStimPresentationDuration,...
-    maximumNumberStimPresentations,doMask,constantRewards);
+    maximumNumberStimPresentations,doMask,constantRewards,[],[],[],{'flickerRamp',[0 .5]},true,'LED');
 
 pixPerCycs              =[20];
 targetOrientations      =[pi/2];
@@ -202,7 +202,7 @@ ts8 = trainingStep(vh, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svn
 ts9 = trainingStep(vh, hateren,  repeatIndefinitely(), noTimeOff(), svnRev); %hateren
 
 p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8, ts9});
-stepNum=uint8(6);
+stepNum=uint8(9);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

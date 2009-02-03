@@ -123,3 +123,4 @@ nidaq/openNidaqForAnalogRecording.m -text
 nidaq/closeAllDaqDevices.m -text
 nidaq/findDevicesOfTypeWithConstructor.m -text
 infrastructure/upize.m -text
+matlaby/findClosestInds.m -text

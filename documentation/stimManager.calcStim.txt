@@ -88,9 +88,39 @@
 % type='dynamic'            will call frames=stimManager.moreStim(usefulState) to request additional frames whenever it runs out
 %   not yet implemented 
 %
-% type='expert'            will call stimManager.moreStim(usefulState) before each frame
-%   user calls ptb drawing functions directly
-%   leave frame text stamps and screen('drawingfinished') to stimOGL
+% type='expert'            will call stimManager.drawExpertFrame before each frame
+%   your stimManager should override this method and call ptb drawing functions directly
+%   leave frame text stamps, frameDropCorner, screen('drawingfinished'), and screen('flip') to stimOGL
+%   this is an opportunity to use the imaging pipeline and shader programs for fast GPU-based stim computation, see ptb examples:
+%       PsychDemos\ProceduralGaborDemo.m
+%       PsychDemos\ProceduralGarboriumDemo.m
+%       PsychDemos\ContrastModulatedNoiseTheElegantStyleDemo.m
+%       PsychAlpha\FastSeparableFilteredNoiseDemo.m
+%       PsychGLImageProcessing\FastFilteredNoiseDemo.m
+%       PsychGLImageProcessing\NewFastFilteredNoiseDemo.m
+%       PsychAlpha\ImageUndistortionDemo.m
+%       PsychAlpha\ImageWarpingDemo.m
+%   other uses: fast GPU-based rotation available in screen('drawtexture'), stimulus is too large to precache but fast enough to dynamically compute, alphablending, etc.
+%   don't forget to call screen('close',[textureIDs]) on textures you create after no longer using them so you don't run out of VRAM (they will be automatically destroyed at the end of the trial)
+%   INPUTS
+%           stimManager         - your stimManager object
+%           stim                - the stim returned by your calcStim
+%           i                   - starts at 1, printed out on the frame lables as 'stimInd' and if textLabel is a cell, determines which is printed -- changing so that future values determined by returning updated value
+%           phaseStartTime      - the GetSecs() timestamp at the beginning of this phase (will be AFTER the last VBL from the previous phase)
+%           window              - the ptb window handle you should draw to
+%           textLabel           - the text returned by your calcStim or previous calls to drawExpertFrame
+%           floatprecision      - the precision associated with screen('maketexture') for the stim returned by calcStim for this phase (determined by determineColorPrecision)
+%           destRect            - the destinationRect associated with screen('drawtexture') for this phase (determined by determineScreenParametersAndLUT) -- typically represents entire screen
+%           filtMode            - the filterMode to pass to screen('drawtexture') (currently hardcoded in runRealTimeLoop)
+%           expertCache         - you can stick stuff here and it will be passed back to you on future calls
+%           ifi                 - the measured ifi in seconds
+%           scheduledFrameNum   - the frame number that would be scheduled for this time, assuming no drops, with respect to the beginning of the phase (starts at 1).  takes ifi and framesPerUpdate, but not pauses, into account.
+%           dropFrames          - if the trialManager was contructed with dropFrames set, you should draw the scheduledFrameNum rather than incrementally drawing the next frame (skipping frames that have been missed)
+%   OUTPUTS 
+%           doFramePulse        - whether flipFrameAndDoPulse should emit frame pulses (setting is sticky and overrides stimOGL's noPulses argument
+%           expertCache         - you can stick stuff here and it will be passed back to you on future calls
+%           dynamicDetails      - a structure of your design including parameters you choose in this method that will be saved with the trialRecord 
+%           textLabel           - use this to override the text returned by your calcStim
 %
 %
 % stimSpec objects

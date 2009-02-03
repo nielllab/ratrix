@@ -1,13 +1,17 @@
 function spec=stimSpec(varargin)
 % stimSpec  class constructor. 
-% spec=stimSpec(stimulus,criterion,stimType,rewardType,rewardDuration,framesUntilGrad,stochasticDistribution,scaleFactor,isFinalPhase)
-% spec=stimSpec(stimulus,criterion,stimType,rewardType,rewardDuration,framesUntilGrad,stochasticDistribution,scaleFactor)
+% spec=stimSpec(stimulus,criterion,stimType,startFrame,rewardType,rewardDuration,rewardPorts,...
+%   framesUntilGrad,stochasticDistribution,scaleFactor[,isFinalPhase])
+%
 % the stimulus is the visual movie
 % criterion is the phase transitions
 % stimType is the format of the movie (toggle, loop, once-through, timedFrames, indexedFrames) - default is loop
     % it must be either a single char array, or a cell array (if time or frame indexed) of the form {'timedFrames', [indicies]}
+% startFrame is the frame index at which to start for this phase (indexes into stimulus)
 % rewardType is either reward or airpuff
 % rewardDuration is the duration of the reinforcement in milliseconds
+% rewardPorts is the ports at which to give a reward, if rewardType is 'reward' or 'rewardSizeULorMS'
+    % rewardPorts should be [3] if you want to have runRealTimeLoop say rewardValves=[0 0 1]
 % framesUntilTransition is the number of frames that this phase plays (exactly) and then graduates - this is useful if we want
 % a wait phase that doesn't need a port response to move into discrim phase
 % note that this only works for 'loop' stimType (because we count by frames, not by real time)
@@ -22,8 +26,10 @@ function spec=stimSpec(varargin)
 spec.stimulus = zeros(1,1,1);
 spec.criterion = {[], 0};
 spec.stimType = 'loop';
+spec.startFrame = 1;
 spec.rewardType = [];
 spec.rewardDuration = 100;
+spec.rewardPorts = [];
 spec.framesUntilTransition = [];
 spec.stochasticDistribution = []; % for now the "distribution" is a unit random criterion between 0 and 1
 spec.scaleFactor=0;
@@ -66,7 +72,7 @@ switch nargin
 		spec.criterion = varargin{2};
 		spec = class(spec,'stimSpec');
         
-    case 9
+    case 11
         % stimulus
         spec.stimulus = varargin{1};
 		% criteria
@@ -108,60 +114,72 @@ switch nargin
         else
             error('stimType must be trigger, loop, cache, timedFrames, indexedFrames, or expert');
         end
+        % startFrame
+        if isscalar(varargin{4}) && varargin{4}>0
+            spec.startFrame=varargin{4};
+        else
+            error('startFrame must be >0');
+        end
         % rewardType
-        if ischar(varargin{4}) && (strcmp(varargin{4}, 'reward') || strcmp(varargin{4}, 'airpuff') || ...
-                strcmp(varargin{4},'rewardSizeMSorUL') || strcmp(varargin{4},'msPuff')) % 1/29/09 - also allow these flags to get value from reinforcementMgr
-            spec.rewardType = varargin{4};
-		elseif isempty(varargin{4})
+        if ischar(varargin{5}) && (strcmp(varargin{5}, 'reward') || strcmp(varargin{5}, 'airpuff') || ...
+                strcmp(varargin{5},'rewardSizeMSorUL') || strcmp(varargin{5},'msPuff')) % 1/29/09 - also allow these flags to get value from reinforcementMgr
+            spec.rewardType = varargin{5};
+		elseif isempty(varargin{5})
 			spec.rewardType = []; % no reward/airpuff here
         else
             error('rewardType must be reward or airpuff');
         end
         % rewardDuration
-        if varargin{5} > 0
-            spec.rewardDuration = varargin{5};
+        if varargin{6} > 0
+            spec.rewardDuration = varargin{6};
         else
             error('rewardDuration must be longer than zero');
         end
+        % rewardPorts
+        if isnumeric(varargin{7})
+            spec.rewardPorts=varargin{7};
+        else
+            error('rewardPorts must be numeric');
+        end
         % framesUntilTransition
-        if isscalar(varargin{6}) && varargin{6} > 0
-            spec.framesUntilTransition = varargin{6};
-        elseif ischar(varargin{6}) && strcmp(varargin{6},'msPenalty') % also allow this flag to get value from reinforcementMgr
-            spec.framesUntilTransition = varargin{6};
-        elseif isempty(varargin{6})
+        if isscalar(varargin{8}) && varargin{8} > 0
+            spec.framesUntilTransition = varargin{8};
+        elseif ischar(varargin{8}) && strcmp(varargin{8},'msPenalty') % also allow this flag to get value from reinforcementMgr
+            spec.framesUntilTransition = varargin{8};
+        elseif isempty(varargin{8})
             spec.framesUntilTransition = [];
         else
             error('framesUntilGrad must be a real scalar or empty')
         end
         % stochasticDistribution
-        if iscell(varargin{7})
-                stoD = varargin{7};
+        if iscell(varargin{9})
+                stoD = varargin{9};
                 if isreal(stoD{1}) && stoD{1} >= 0 && stoD{1} < 1 && isvector(stoD{2})
-                    spec.stochasticDistribution = varargin{7};
+                    spec.stochasticDistribution = varargin{9};
                 else
                     error('distribution must be a real number in [0,1) and port must be a vector');
                 end
-        elseif isempty(varargin{7})
+        elseif isempty(varargin{9})
             'do nothing here b/c we do not want any auto requests';
         else
             error('stochasticDistribution must be a cell array');
         end
         % scaleFactor
-        if (length(varargin{8})==2 && all(varargin{8}>0)) || (length(varargin{8})==1 && varargin{8}==0)
-            spec.scaleFactor=varargin{8};
+        if (length(varargin{10})==2 && all(varargin{10}>0)) || (length(varargin{10})==1 && varargin{10}==0)
+            spec.scaleFactor=varargin{10};
         else
             error('scale factor is either 0 (for scaling to full screen) or [width height] positive values')
         end
         % isFinalPhase
-        if nargin==9
-            if isscalar(varargin{9}) && (varargin{9} == 0 || varargin{9} == 1)
-                spec.isFinalPhase = varargin{9};
+        if nargin==11
+            if isscalar(varargin{11}) && (varargin{11} == 0 || varargin{11} == 1)
+                spec.isFinalPhase = varargin{11};
             else
                 error('isFinalPhase must be a scalar 0 or 1')
             end
         end
         
-        % this stays at the bottom of case 9 - out of the input arg parsing
+        % this stays at the bottom of case 11 - out of the input arg parsing
         spec = class(spec,'stimSpec');
         
     otherwise

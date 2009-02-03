@@ -162,10 +162,10 @@ for i=1:length(unsortedUniques)
 end
 
 % now create stimSpecs
-out.stimSpecs{1} = stimSpec(stim,{[] 2},'expert',[],1,[],[],getScaleFactor(stimulus),0); % expert mode
+out.stimSpecs{1} = stimSpec(stim,{[] 2},'expert',1,[],1,targetPorts,[],[],getScaleFactor(stimulus),0); % expert mode
 
 % final phase
-out.stimSpecs{2} = stimSpec(interTrialLuminance,{[] 1},'loop',[],1,1,[],getScaleFactor(stimulus),1);
+out.stimSpecs{2} = stimSpec(interTrialLuminance,{[] 1},'loop',1,[],1,[],1,[],getScaleFactor(stimulus),1);
 
 % =====================================================================================================
 % return out.stimSpecs, out.scaleFactors for each phase (only one phase for now?)

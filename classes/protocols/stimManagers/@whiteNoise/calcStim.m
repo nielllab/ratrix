@@ -143,11 +143,11 @@ stim.floatprecision = 1;
 % set seed values
 rand('state',sum(100*clock)); % initialize randn to random starting state
 stim.seedValues = ceil(rand(1,numFrames)*1000000);
-out.stimSpecs{1} = stimSpec(stim,{[] 2},'expert',[],1,numFrames,[],scaleFactor,0); % expert mode
+out.stimSpecs{1} = stimSpec(stim,{[] 2},'expert',1,[],1,targetPorts,numFrames,[],scaleFactor,0); % expert mode
 % out.stimSpecs{1} = stimSpec(movie,{[] 2}, 'loop',[],1,numFrames,[],0); % regular mode
 
 % final phase
-out.stimSpecs{2} = stimSpec(interTrialLuminance,{[] 1},'loop',[],1,1,[],scaleFactor,1);
+out.stimSpecs{2} = stimSpec(interTrialLuminance,{[] 1},'loop',1,[],1,[],1,[],scaleFactor,1);
 
 % details.big = {'expert', stim.seedValues}; % store in 'big' so it gets written to file
 % variables to be stored for recalculation of stimulus from seed value for rand generator

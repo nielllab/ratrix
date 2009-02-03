@@ -25,6 +25,257 @@ parameters=[];
 % now we have a connection from client
 pnet(datacon,'setreadtimeout', 5); % set timeout to (hopefully) affect pnet_getvar
 pnet(datacon,'setwritetimeout', 5);
+
+% 2/2/09 - start the event GUI now - we have to do it locally so that the data is within the scope of this daemon
+% so that datanet can request a trial's worth of events
+% ========================================================================================
+% size of the GUI - parameters
+oneRowHeight=25;
+margin=10;
+fieldWidth=100;
+fWidth=2*margin+9*fieldWidth;
+fHeight=margin+15*oneRowHeight+margin;
+
+% ========================================================================================
+% the GUI
+f = figure('Visible','off','MenuBar','none','Name','neural GUI',...
+    'NumberTitle','off','Resize','off','Units','pixels','Position',[50 50 fWidth fHeight],...
+    'CloseRequestFcn',@cleanup);
+    function cleanup(source,eventdata)
+        % return event here
+        %         events = guidata(f);
+        %         events_data
+        closereq;
+        return;
+    end % end cleanup function
+
+    function updateDisplay()
+        %         numToShow=str2double(get(numEventsToShow,'String'));
+        %         numToShow=min(numToShow,length(events_data));
+        numToShow=length(events_data);
+        toShow=events_data(end-numToShow+1:end);
+        dispStr='';
+        lastP=0;
+        lastPosition=[0 0 0];
+        newP=true;
+        for i=length(toShow):-1:1
+            %         for i=1:length(toShow)
+            % if this was a new penetration, get duration of previous
+            if toShow(i).penetrationNum~=lastP
+                if lastP~=0
+                    % get the duration between the last event of lastP and the first event of lastP
+                    % or should it be (now - firstEventOfLastP)?
+                    lastPduration=events_data(find([events_data.penetrationNum]==lastP,1,'first')).time - ...
+                        events_data(find([events_data.penetrationNum]==toShow(i).penetrationNum,1,'first')).time;
+                    %                     lastP
+                    [events_data.penetrationNum]
+                    %                     i
+                    %                     toShow
+                    %                     find([events_data.penetrationNum]==lastP)
+                    %                 lastPduration=events_data(find([events_data.penetrationNum]==lastP,1,'last')).time - ...
+                    %                     events_data(find([events_data.penetrationNum]==lastP,1,'first')).time;
+                    durStr=sprintf('%sh %smin', datestr(lastPduration,'HH'), datestr(lastPduration,'MM'));
+                    appnd = sprintf('\nlast penetration duration: %s\n',durStr);
+                    dispStr=[dispStr appnd];
+                end
+                % write new penetration #, anchor, and top
+                appnd = sprintf('Penetration #%d:\n\tAP\tML\tZ\nAnchor\t%.2f\t%.2f\t%.2f\nTop\t%.2f\t%.2f\t%.2f\n', toShow(i).penetrationNum,...
+                    toShow(i).surgeryAnchor, toShow(i).surgeryBregma);
+                dispStr=[dispStr appnd];
+                newP=true;
+            end
+            % write this event
+            appnd = sprintf('%s\t',datestr(toShow(i).time,'HH:MM'));
+            dispStr=[dispStr appnd];
+            % display AP and ML coordinates if they are diff from last, or if new penetration
+            for j=1:2
+                if toShow(i).position(j)~=lastPosition(j) || newP
+                    appnd = sprintf('%.2f\t',toShow(i).position(j));
+                else
+                    appnd = sprintf('\t');
+                end
+                dispStr=[dispStr appnd];
+            end
+            % display Z coord and comment
+            appnd = sprintf('%.2f\t%s\n',toShow(i).position(3),toShow(i).comment);
+            dispStr=[dispStr appnd];
+            % update lastP
+            lastP=toShow(i).penetrationNum;
+            lastPosition=toShow(i).position;
+            newP=false;
+        end
+
+        % now update the recentEventsDisplay
+        set(recentEventsDisplay,'String',dispStr);
+    end % end updateDisplay function
+
+
+% ========================================================================================
+% draw text labels for surgery anchor
+APHeader = uicontrol(f,'Style','text','String','AP','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+fieldWidth fHeight-oneRowHeight-margin fieldWidth oneRowHeight]);
+MLHeader = uicontrol(f,'Style','text','String','ML','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+2*fieldWidth fHeight-oneRowHeight-margin fieldWidth oneRowHeight]);
+ZHeader = uicontrol(f,'Style','text','String','Z','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+3*fieldWidth fHeight-oneRowHeight-margin fieldWidth oneRowHeight]);
+surgeryAnchorLabel = uicontrol(f,'Style','text','String','Anchor','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+0*fieldWidth fHeight-2*oneRowHeight-margin fieldWidth oneRowHeight]);
+surgeryBregmaLabel = uicontrol(f,'Style','text','String','Bregma','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+0*fieldWidth fHeight-3*oneRowHeight-margin fieldWidth oneRowHeight]);
+
+% ========================================================================================
+% surgery anchor and bregma text fields
+surgeryAnchorAPField = uicontrol(f,'Style','edit','String','nan','Units','pixels',...
+    'Enable','off','Position',[1*margin+1*fieldWidth fHeight-2*oneRowHeight-margin fieldWidth oneRowHeight]);
+surgeryAnchorMLField = uicontrol(f,'Style','edit','String','nan','Units','pixels',...
+    'Enable','off','Position',[1*margin+2*fieldWidth fHeight-2*oneRowHeight-margin fieldWidth oneRowHeight]);
+surgeryAnchorZField = uicontrol(f,'Style','edit','String','nan','Units','pixels',...
+    'Enable','off','Position',[1*margin+3*fieldWidth fHeight-2*oneRowHeight-margin fieldWidth oneRowHeight]);
+surgeryBregmaAPField = uicontrol(f,'Style','edit','String','nan','Units','pixels',...
+    'Enable','off','Position',[1*margin+1*fieldWidth fHeight-3*oneRowHeight-margin fieldWidth oneRowHeight]);
+surgeryBregmaMLField = uicontrol(f,'Style','edit','String','nan','Units','pixels',...
+    'Enable','off','Position',[1*margin+2*fieldWidth fHeight-3*oneRowHeight-margin fieldWidth oneRowHeight]);
+surgeryBregmaZField = uicontrol(f,'Style','edit','String','nan','Units','pixels',...
+    'Enable','off','Position',[1*margin+3*fieldWidth fHeight-3*oneRowHeight-margin fieldWidth oneRowHeight]);
+
+% checkbox to enable surgery field input
+enableSurgeryFields = uicontrol(f,'Style','checkbox',...
+    'String','unlock surgery fields','Enable','on','Visible','on',...
+    'Value',0,'Units','pixels','Position',[2*margin+4*fieldWidth fHeight-2*oneRowHeight-margin fieldWidth+margin*3 oneRowHeight],...
+    'CallBack',@enableSurgeryEntry);
+    function enableSurgeryEntry(source,eventdata)
+        if get(enableSurgeryFields,'Value')==1
+            set(surgeryAnchorAPField,'Enable','on');
+            set(surgeryAnchorMLField,'Enable','on');
+            set(surgeryAnchorZField,'Enable','on');
+            set(surgeryBregmaAPField,'Enable','on');
+            set(surgeryBregmaMLField,'Enable','on');
+            set(surgeryBregmaZField,'Enable','on');
+        else
+            set(surgeryAnchorAPField,'Enable','off');
+            set(surgeryAnchorMLField,'Enable','off');
+            set(surgeryAnchorZField,'Enable','off');
+            set(surgeryBregmaAPField,'Enable','off');
+            set(surgeryBregmaMLField,'Enable','off');
+            set(surgeryBregmaZField,'Enable','off');
+        end
+    end % end enableSurgeryEntry function
+
+% ========================================================================================
+% draw text labels for surgery anchor
+APHeader = uicontrol(f,'Style','text','String','AP','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+fieldWidth fHeight-oneRowHeight-margin fieldWidth oneRowHeight]);
+MLHeader = uicontrol(f,'Style','text','String','ML','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+2*fieldWidth fHeight-oneRowHeight-margin fieldWidth oneRowHeight]);
+ZHeader = uicontrol(f,'Style','text','String','Z','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+3*fieldWidth fHeight-oneRowHeight-margin fieldWidth oneRowHeight]);
+surgeryAnchorLabel = uicontrol(f,'Style','text','String','Surgery Anchor','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+0*fieldWidth fHeight-2*oneRowHeight-margin fieldWidth oneRowHeight]);
+surgeryBregmaLabel = uicontrol(f,'Style','text','String','Surgery Bregma','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+0*fieldWidth fHeight-3*oneRowHeight-margin fieldWidth oneRowHeight]);
+
+% ========================================================================================
+% current anchor label
+currentAnchorLabel = uicontrol(f,'Style','text','String','Current Anchor','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+0*fieldWidth fHeight-4*oneRowHeight-2*margin fieldWidth oneRowHeight]);
+% current anchor text field
+currentAnchorAPField = uicontrol(f,'Style','edit','String','nan','Units','pixels',...
+    'Enable','off','Position',[1*margin+1*fieldWidth fHeight-4*oneRowHeight-2*margin fieldWidth oneRowHeight]);
+currentAnchorMLField = uicontrol(f,'Style','edit','String','nan','Units','pixels',...
+    'Enable','off','Position',[1*margin+2*fieldWidth fHeight-4*oneRowHeight-2*margin fieldWidth oneRowHeight]);
+currentAnchorZField = uicontrol(f,'Style','edit','String','nan','Units','pixels',...
+    'Enable','off','Position',[1*margin+3*fieldWidth fHeight-4*oneRowHeight-2*margin fieldWidth oneRowHeight]);
+
+% checkbox to enable current anchor field input
+enableCurrentAnchorField = uicontrol(f,'Style','checkbox',...
+    'String','unlock current anchor','Enable','on','Visible','on',...
+    'Value',0,'Units','pixels','Position',[2*margin+4*fieldWidth fHeight-4*oneRowHeight-2*margin fieldWidth+margin*3 oneRowHeight],...
+    'CallBack',@enableCurrentAnchorEntry);
+    function enableCurrentAnchorEntry(source,eventdata)
+        if get(enableCurrentAnchorField,'Value')==1
+            set(currentAnchorAPField,'Enable','on');
+            set(currentAnchorMLField,'Enable','on');
+            set(currentAnchorZField,'Enable','on');
+        else
+            set(currentAnchorAPField,'Enable','off');
+            set(currentAnchorMLField,'Enable','off');
+            set(currentAnchorZField,'Enable','off');
+        end
+    end % end enableCurrentAnchorEntry function
+
+% ========================================================================================
+% number of recent events to show
+numEventsToShow = uicontrol(f,'Style','edit','String','10','Visible','off','Units','pixels',...
+    'FontWeight','normal','HorizontalAlignment','center', ...
+    'Position',[3*margin+6*fieldWidth fHeight-oneRowHeight-margin fieldWidth/2 oneRowHeight]);
+numEventsToShowLabel = uicontrol(f,'Style','text','String','recent events to show','Visible','off','Units','pixels',...
+    'FontWeight','normal','HorizontalAlignment','left', ...
+    'Position',[3*margin+6.5*fieldWidth fHeight-oneRowHeight-margin fieldWidth+2*margin oneRowHeight]);
+
+% ========================================================================================
+% current event label, fields, and "submit" button
+currentEventLabel = uicontrol(f,'Style','text','String','Current','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+0*fieldWidth fHeight-5*oneRowHeight-2*margin fieldWidth oneRowHeight]);
+currentAPField = uicontrol(f,'Style','edit','Units','pixels','String','nan',...
+    'Enable','on','Position',[1*margin+1*fieldWidth fHeight-5*oneRowHeight-2*margin fieldWidth oneRowHeight]);
+currentMLField = uicontrol(f,'Style','edit','Units','pixels','String','nan',...
+    'Enable','on','Position',[1*margin+2*fieldWidth fHeight-5*oneRowHeight-2*margin fieldWidth oneRowHeight]);
+currentZField = uicontrol(f,'Style','edit','Units','pixels','String','nan',...
+    'Enable','on','Position',[1*margin+3*fieldWidth fHeight-5*oneRowHeight-2*margin fieldWidth oneRowHeight]);
+currentComment = uicontrol(f,'Style','edit','Units','pixels','String','',...
+    'Enable','on','Position',[1*margin+4*fieldWidth fHeight-5*oneRowHeight-2*margin fieldWidth*4 oneRowHeight]);
+
+currentEventSubmit = uicontrol(f,'Style','pushbutton','String','enter','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center','CallBack',@logEvent, ...
+    'Position',[2*margin+8*fieldWidth fHeight-5*oneRowHeight-2*margin fieldWidth oneRowHeight]);
+    function logEvent(source,eventdata)
+        % make a new entry in events
+        events_data(end+1).time=now;
+        events_data(end).surgeryAnchor=[str2double(get(surgeryAnchorAPField,'String')) str2double(get(surgeryAnchorMLField,'String')) str2double(get(surgeryAnchorZField,'String'))];
+        events_data(end).surgeryBregma=[str2double(get(surgeryBregmaAPField,'String')) str2double(get(surgeryBregmaMLField,'String')) str2double(get(surgeryBregmaZField,'String'))];
+        events_data(end).currentAnchor=[str2double(get(currentAnchorAPField,'String')) str2double(get(currentAnchorMLField,'String')) str2double(get(currentAnchorZField,'String'))];
+        events_data(end).position=[str2double(get(currentAPField,'String')) str2double(get(currentMLField,'String')) str2double(get(currentZField,'String'))];
+        % update pNum if necessary (if AP or ML differ from last)
+        if length(events_data)>=2 && any(events_data(end-1).position(1:2)~=events_data(end).position(1:2))
+            events_data(end).penetrationNum=events_data(end-1).penetrationNum+1;
+        elseif length(events_data)==1 % first time
+            events_data(end).penetrationNum=1;
+        else
+            events_data(end).penetrationNum=events_data(end-1).penetrationNum;
+        end
+        events_data(end).comment=get(currentComment,'String');
+
+        %         dispStr=sprintf('logged %s %s %s at pNum=%d',get(currentAPField,'String'),get(currentMLField,'String'),get(currentZField,'String'), events_data(end).penetrationNum);
+        %         disp(dispStr);
+        updateDisplay();
+        % flush the comments buffer
+        set(currentComment,'String','');
+    end % end logEvent function
+
+% ========================================================================================
+% display box
+recentEventsDisplay = uicontrol(f,'Style','edit','String','recent events','Visible','on','Units','pixels',...
+    'FontWeight','normal','HorizontalAlignment','left','Max',2,'Min',0, ...
+    'Position',[margin+0*fieldWidth fHeight-14*oneRowHeight-1*margin fieldWidth*8-margin oneRowHeight*8]);
+
+% ========================================================================================
+% turn on the GUI
+set(f,'Visible','on');
+% ========================================================================================
+
+
 while ~quit
     success = false;
     received = pnet(datacon,'read',CMDSIZE,'double','noblock');
@@ -37,10 +288,13 @@ while ~quit
                 success = true;
                 fprintf('we got a command to start the data listener\n');
                 message = constants.startConnectionCommands.D_LISTENER_STARTED;
+
+
+
             case constants.stimToDataCommands.S_SET_AI_PARAMETERS_CMD
                 params = pnet_getvar(datacon);
                 datanet.ai_parameters = params;
-                success = true;            
+                success = true;
                 message = constants.dataToStimResponses.D_AI_PARAMETERS_SET;
             case constants.stimToDataCommands.S_SET_LOCAL_PARAMETERS_CMD
                 parameters = pnet_getvar(datacon);
@@ -76,7 +330,7 @@ while ~quit
                 % start NIDAQ
                 sprintf('starting NIDAQ with %d channels %d sampRate',numChans,sampRate)
                 inputRanges
-                
+
                 [ai chans recordingFile]=openNidaqForAnalogRecording(numChans,sampRate,inputRanges,recordingFile);
                 ai
                 set(ai)
@@ -127,8 +381,8 @@ while ~quit
                 % CHANGE MESSAGE TO BE neuralDataTimes, not a random data
                 % =================================================================================================
                 fullFilename = fullfile(datanet.storepath, 'neuralRecords', filename);
-%                 trialData=[10 11 12];
-%                 times = [1 2 3 4 5 6 7];
+                %                 trialData=[10 11 12];
+                %                 times = [1 2 3 4 5 6 7];
                 save(fullFilename, 'neuralData', 'neuralDataTimes', 'samplingRate', 'matlabTimeStamp', 'firstNeuralDataTime', 'parameters');
                 fprintf('we got a command to send a trial''s worth of data\n');
                 message = constants.dataToStimResponses.D_DATA;
@@ -157,12 +411,12 @@ while ~quit
                 success=true;
                 datanet.storepath = path;
                 % 11/5/08 - move directory creation here (create dirs when we set the path)
-%                 mkdir(path);
+                %                 mkdir(path);
                 mkdir(fullfile(path, 'eyeRecords'));
                 mkdir(fullfile(path, 'neuralRecords'));
                 mkdir(fullfile(path, 'stimRecords'));
                 fprintf('we got a command to set the storepath to %s\n', path);
-                message = constants.dataToStimResponses.D_STOREPATH_SET;             
+                message = constants.dataToStimResponses.D_STOREPATH_SET;
             otherwise
                 success = false;
                 received
@@ -170,22 +424,22 @@ while ~quit
         end
     else % if nothing received, try pnet_getvar
         % failed to receive valid command using read - try using pnet_getvar
-%             received = pnet_getvar(serv);
-%         if ~isempty(received) % IGNORE THIS PART FOR NOW - PNET_GETVAR disconnects remote host for some reason
-%             success = true;
-%             message = constants.dataToStimResponses.D_RECEIVED_VAR;
-%             % just echo received for now
-%             received
-%             fprintf('we got something through pnet_getvar\n');
-%         end
+        %             received = pnet_getvar(serv);
+        %         if ~isempty(received) % IGNORE THIS PART FOR NOW - PNET_GETVAR disconnects remote host for some reason
+        %             success = true;
+        %             message = constants.dataToStimResponses.D_RECEIVED_VAR;
+        %             % just echo received for now
+        %             received
+        %             fprintf('we got something through pnet_getvar\n');
+        %         end
     end
 
-        
+
     % now send appropriate message to the stim computer (ack or fail)
     if success
         pnet(datacon,'write',message);
     elseif ~success % dont write anything when fails
-%             pnet(con,'write',-1);
+        %             pnet(con,'write',-1);
     else
         error('if neither successful nor unsuccessful then what is this?')
     end

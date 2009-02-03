@@ -1,5 +1,5 @@
-function [doFramePulse expertCache dynamicDetails textLabel] = ...
-    drawExpertFrame(stimulus,stim,i,phaseStartTime,window,textLabel,floatprecision,destRect,filtMode,expertCache)
+function [doFramePulse expertCache dynamicDetails textLabel i] = ...
+    drawExpertFrame(stimulus,stim,i,phaseStartTime,window,textLabel,floatprecision,destRect,filtMode,expertCache,ifi)
 % 11/14/08 - implementing expert mode for gratings
 % this function calculates an expert frame, and then makes and draws the texture; nothing needs to be done in runRealTimeLoop
 % this should be a stimManager-specific implementation (if expert mode is supported for the given stimulus)
@@ -34,7 +34,6 @@ white=1.0;
 gray = (white-black)/2;
 
 %stim.velocities(gratingToDraw) is in cycles per second
-ifi=Screen('GetFlipInterval', window);
 cycsPerFrameVel = stim.driftfrequencies(gratingToDraw)*ifi; % in units of cycles/frame
 offset = 2*pi*cycsPerFrameVel*i;
 
@@ -87,6 +86,9 @@ if ~isempty(stim.masks)
     % Draw mask texture: (with no rotation)
     Screen('DrawTexture', window, expertCache.masktexs{stim.maskInds(gratingToDraw)}, [], destRect,[], filtMode);
     Screen('DrawTexture',window,expertCache.annulitexs{stim.annuliInds(gratingToDraw)},[],destRect,[],filtMode);
-end;
+end
+
+% increment i as necessary
+i=i+1;
 
 end % end function

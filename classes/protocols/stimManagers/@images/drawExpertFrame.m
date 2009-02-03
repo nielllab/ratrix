@@ -1,5 +1,5 @@
-function [doFramePulse expertCache dynamicDetails textLabel] = ...
-    drawExpertFrame(stimulus,stim,i,phaseStartTime,window,textLabel,floatprecision,destRect,filtMode,expertCache)
+function [doFramePulse expertCache dynamicDetails textLabel i] = ...
+    drawExpertFrame(stimulus,stim,i,phaseStartTime,window,textLabel,floatprecision,destRect,filtMode,expertCache,ifi)
 % implements expert mode for images - calls PTB drawing functions directly, leaving drawText and drawingFinished to stimOGL
 %
 % state.destRect
@@ -25,22 +25,22 @@ Screen('FillRect', window, 0);
 Screen('BlendFunction', window, GL_SRC_ALPHA, GL_ONE); % necessary to do the transparency blending
 
 imgs=stimulus.images;
-for i=1:size(imgs,1) % for each actual image, not the entire screen
-    if ~isempty(imgs{i,1})
+for j=1:size(imgs,1) % for each actual image, not the entire screen
+    if ~isempty(imgs{j,1})
         % if not empty, then rotate and draw
-        imgToProcess=imgs{i,1};
+        imgToProcess=imgs{j,1};
         % rotate
         imagetex=Screen('MakeTexture',window,imgToProcess,0,0,floatprecision);
         thisDestRect=destRect;
-        thisDestRect(3)=imgs{i,2}(2);
-        thisDestRect(1)=imgs{i,2}(1);
+        thisDestRect(3)=imgs{j,2}(2);
+        thisDestRect(1)=imgs{j,2}(1);
         % do image scaling now
         thisDestHeight=thisDestRect(4)-thisDestRect(2)+1;
-        newHeight=thisDestHeight*stimulus.selectedSizes(i);
+        newHeight=thisDestHeight*stimulus.selectedSizes(j);
         deltaHeight=(thisDestHeight-newHeight)/2;
         
         thisDestWidth=thisDestRect(3)-thisDestRect(1)+1;
-        newWidth=thisDestWidth*stimulus.selectedSizes(i);
+        newWidth=thisDestWidth*stimulus.selectedSizes(j);
         deltaWidth=(thisDestWidth-newWidth)/2;
         
         newDestRect=[thisDestRect(1)+deltaWidth thisDestRect(2)+deltaHeight thisDestRect(3)-deltaWidth thisDestRect(4)-deltaHeight];
@@ -51,5 +51,8 @@ end
 
 % disable alpha blending (for text)
 Screen('BlendFunction',window,GL_ONE,GL_ZERO);
+
+% increment i
+i=i+1;
 
 end % end function

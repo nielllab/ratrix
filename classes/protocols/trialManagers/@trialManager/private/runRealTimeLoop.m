@@ -346,7 +346,7 @@ while ~done && ~quit;
     % if we are entering a new phase, re-initialize variables
     if updatePhase == 1
         
-        i=0;
+        i=1;
         frameIndex=0;
         %         attempt=0;
         
@@ -412,7 +412,7 @@ while ~done && ~quit;
         % reinforcement
         rewardType = getRewardType(spec);
         rewardDuration = getRewardDuration(spec);
-        rewardPorts = 2; % TEMPORARY UNTIL FIGURE OUT HOW TO ASSIGN THIS
+        rewardPorts = getRewardPorts(spec); % TEMPORARY UNTIL FIGURE OUT HOW TO ASSIGN THIS
         % if there is a reinforcement, then set up for functions that follow trial logic
         if ~isempty(rewardType) && strcmp(rewardType, 'reward')
             requestRewardStarted = true;
@@ -424,6 +424,11 @@ while ~done && ~quit;
             msAirpuffOwed = msAirpuffOwed + rewardDuration;
             %             doPuff = true;
             proposedReinforcementDurationMSorUL = proposedReinforcementDurationMSorUL + rewardDuration;
+        end
+        
+        % get startFrame if not empty
+        if ~isempty(getStartFrame(spec))
+            i=getStartFrame(spec);
         end
         
         stepsInPhase = 0;
@@ -532,9 +537,9 @@ while ~done && ~quit;
             case 'expert'
                 % 10/31/08 - implementing expert mode
                 % call a method of the given stimManager that draws the expert frame
-                i=i+1; % 11/7/08 - this needs to happen first because i starts at 0
-                [doFramePulse expertCache dynamicDetails textLabel] = ...
-                    drawExpertFrame(stimManager,stim,i,phaseStartTime,window,textLabel,floatprecision,destRect,filtMode,expertCache);
+%                 i=i+1; % 11/7/08 - this needs to happen first because i starts at 0
+                [doFramePulse expertCache dynamicDetails textLabel i] = ...
+                    drawExpertFrame(stimManager,stim,i,phaseStartTime,window,textLabel,floatprecision,destRect,filtMode,expertCache,ifi);
                 if ~isempty(dynamicDetails)
                     phaseRecords(specInd).dynamicDetails{end+1}=dynamicDetails; % dynamicDetails better specify what frame it is b/c the record will not save empty details
                 end
@@ -746,7 +751,7 @@ while ~done && ~quit;
             if strcmp(class(ports),'double') %happens on osx, why?
                 ports=logical(ports);
             end
-            rewardValves(ports)=1;
+            rewardValves(rewardPorts)=1; % rewardPorts is now the rewardPorts specified by stimSpec
             
             %         if isempty(rewardPorts)
             %             rewardValves(requestOptions) = 1;

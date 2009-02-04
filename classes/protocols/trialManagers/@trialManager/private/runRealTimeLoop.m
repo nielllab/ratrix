@@ -74,6 +74,16 @@ timestamps.ft=0;
 timestamps.missed=0;
 timestamps.lastFrameTime=0;
 
+timestamps.logicGotSounds=0;
+timestamps.logicSoundsDone=0;
+timestamps.logicFramesDone=0;
+timestamps.logicPortsDone=0;
+timestamps.logicRequestingDone=0;
+
+timestamps.kbOverhead=0;
+timestamps.kbInit=0;
+timestamps.kbKDown=0;
+
 % preallocate phaseRecords
 
 responseDetails.numMisses=0;
@@ -161,6 +171,7 @@ lastRewardTime=[];
 msAirpuffOwed=0;
 airpuffOn=false;
 lastAirpuffTime=[];
+soundNames=getSoundNames(getSoundManager(tm));
 
 
 % =====================================================================================================================
@@ -733,11 +744,11 @@ while ~done && ~quit;
     
     timestamps.kbCheckDone=GetSecs;
     
-    if keyIsDown && framesSinceKbInput > -1
-        [didAPause paused done phaseRecords(specInd).response doValves ports didValves didHumanResponse manual doPuff pressingM pressingP] = ...
+    if keyIsDown
+        [didAPause paused done phaseRecords(specInd).response doValves ports didValves didHumanResponse manual doPuff pressingM pressingP...
+            timestamps.kbOverhead,timestamps.kbInit,timestamps.kbKDown] = ...
             handleKeyboard(tm, keyCode, didAPause, paused, done, phaseRecords(specInd).response, doValves, ports, didValves, didHumanResponse, ...
             manual, doPuff, pressingM, pressingP, allowQPM, originalPriority, priorityLevel, KbConstants);
-        framesSinceKbInput=0;
     end
     
     timestamps.keyboardDone=GetSecs;
@@ -780,11 +791,12 @@ while ~done && ~quit;
     timestamps.enteringPhaseLogic=GetSecs;
     
     [tm done newSpecInd specInd updatePhase transitionedByTimeFlag ...
-        transitionedByPortFlag phaseRecords(specInd).response response isRequesting lastSoundsPlayed] = ...
+        transitionedByPortFlag phaseRecords(specInd).response response isRequesting lastSoundsPlayed ...
+        timestamps.logicGotSounds timestamps.logicSoundsDone timestamps.logicFramesDone timestamps.logicPortsDone timestamps.logicRequestingDone] = ...
         handlePhasedTrialLogic(tm, done, ...
         ports, lastPorts, station, specInd, transitionCriterion, framesUntilTransition, stepsInPhase, isFinalPhase, ...
         phaseRecords(specInd).response, response, ...
-        stimManager, msRewardSound, msPenaltySound, targetOptions, distractorOptions, requestOptions, isRequesting, lastSoundsPlayed);
+        stimManager, msRewardSound, msPenaltySound, targetOptions, distractorOptions, requestOptions, isRequesting, soundNames, lastSoundsPlayed);
     
     stepsInPhase = stepsInPhase + 1; %10/16/08 - moved from handlePhasedTrialLogic to prevent COW
     lastPorts=ports; % moved from above trial logic - we need lastPorts to correctly set isRequesting

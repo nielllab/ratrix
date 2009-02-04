@@ -1,4 +1,5 @@
-function [didAPause paused done response doValves ports didValves didHumanResponse manual doPuff pressingM pressingP] = ...
+function [didAPause paused done response doValves ports didValves didHumanResponse manual doPuff pressingM pressingP...
+    overheadTime initTime kDownTime] = ...
   handleKeyboard(tm, keyCode, didAPause, paused, done, response, doValves, ports, didValves, ...
   didHumanResponse, manual, doPuff, pressingM, pressingP, allowQPM, originalPriority, priorityLevel, KbConstants)
 
@@ -11,6 +12,8 @@ function [didAPause paused done response doValves ports didValves didHumanRespon
 % note: this function pretty much updates a bunch of flags....
 
 %logwrite(sprintf('keys are down:',num2str(find(keyCode))));
+
+overheadTime=GetSecs;
 
 mThisLoop = 0;
 pThisLoop = 0;
@@ -32,7 +35,8 @@ end
 for nNum=1:length(KbConstants.numKeys)
     numsDown(nNum)=any(keyCode(KbConstants.numKeys{nNum}));
 end
-            
+      
+initTime=GetSecs;
 %map a 1-key shortcut left center right reponse - this 
 %            if arrowKeyDown
 %                 for keyNum=1:length(keys)
@@ -116,6 +120,7 @@ if kDown
         doPrime(station);
     end
 end
+kDownTime=GetSecs;
 if ~mThisLoop && pressingM
     pressingM=0;
 end

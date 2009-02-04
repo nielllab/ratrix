@@ -1,8 +1,8 @@
 function [tm done newSpecInd specInd updatePhase transitionedByTimeFlag transitionedByPortFlag response trialResponse...
-    isRequesting lastSoundsPlayed] = ...
+    isRequesting lastSoundsPlayed getSoundsTime soundsDoneTime framesDoneTime portSelectionDoneTime isRequestingDoneTime] = ...
     handlePhasedTrialLogic(tm, done, ...
     ports, lastPorts, station, specInd, transitionCriterion, framesUntilTransition, stepsInPhase, isFinalPhase, response, trialResponse, ...
-    stimManager, msRewardSound, mePenaltySound, targetOptions, distractorOptions, requestOptions, isRequesting, lastSoundsPlayed)
+    stimManager, msRewardSound, mePenaltySound, targetOptions, distractorOptions, requestOptions, isRequesting, soundNames, lastSoundsPlayed)
 
 % This function handles trial logic for a phased trial manager.
 % Part of stimOGL rewrite.
@@ -17,11 +17,17 @@ newSpecInd = specInd;
 transitionedByTimeFlag = false;
 transitionedByPortFlag = false;
 
+% ===================================================
+% SOUNDS
 % Check for sounds to play
 % 10/13/08 - call the function getSoundsToPlay(stimManager, soundNames, ports, phase, stepsInPhase)
 % this function should know about its phases and will determine what sounds to play based on ports, phase and stepsInPhase
-soundsToPlay = getSoundsToPlay(stimManager, getSoundNames(getSoundManager(tm)), ports, specInd, stepsInPhase,msRewardSound, mePenaltySound, ...
+
+soundsToPlay = getSoundsToPlay(stimManager, soundNames, ports, specInd, stepsInPhase,msRewardSound, mePenaltySound, ...
     targetOptions, distractorOptions, requestOptions, class(tm));
+getSoundsTime=GetSecs;
+
+
 % first end any sounds that were playing last frame but should no longer be played
 for i=1:length(lastSoundsPlayed)
     if ~any(ismember(lastSoundsPlayed{i}, soundsToPlay{1}))
@@ -46,32 +52,10 @@ for i=1:length(soundsToPlay{2})
     %     soundsToPlay{2}{i}{2}
     tm.soundMgr = playSound(tm.soundMgr,soundsToPlay{2}{i}{1},soundsToPlay{2}{i}{2}/1000.0,station);
 end
+% lastSoundsPlayed={};
+soundsDoneTime=GetSecs;
 
-% look at each element of soundTypesInPhase and use the shouldWePlay method
-% if ~isempty(soundTypesInPhase)
-%     for stInd=1:length(soundTypesInPhase)
-%         st = soundTypesInPhase{stInd};
-%         % decide what portSet to send to shouldWePlay
-%         if ports(targetOptions)
-%             portSet = 'target';
-%         elseif ports(distractorOptions)
-%             portSet = 'distractor';
-%         elseif ports(requestOptions)
-%             % request
-%             portSet = 'request';
-%         else
-%             % no response, this is a frame indexed sound stimulus
-%             portSet = '';
-%         end
-%
-%         if shouldWePlay(st,portSet, stepsInPhase)
-%             tempSoundMgr = playSound(getSoundManager(tm),getName(st),getDuration(st)/1000.0,station);
-%             tm = setSoundManager(tm, tempSoundMgr);
-% %                         tm.soundMgr = playLoop(tm.soundMgr,getName(st),station,getReps(st));
-%         end
-%     end
-% end
-
+% ===================================================
 % Check against framesUntilTransition - Transition BY TIME
 % if we are at grad by time, then manually set port to the correct one
 % note that we will need to flag that this was done as "auto-request"
@@ -86,6 +70,8 @@ if ~isempty(framesUntilTransition) && stepsInPhase == framesUntilTransition - 1 
     %error('transitioned by time in phase %d', specInd);
     transitionedByTimeFlag = true;
 end
+
+framesDoneTime=GetSecs;
 
 % Check for transition by port selection
 for gcInd=1:2:length(transitionCriterion)-1
@@ -127,6 +113,7 @@ for gcInd=1:2:length(transitionCriterion)-1
     end
 end
 
+portSelectionDoneTime=GetSecs;
 
 % set isRequesting when request port is hit according to these rules:
 %   if isRequesting was already 1, then set it to 0
@@ -141,6 +128,7 @@ if any(ports(requestOptions)) && ~any(lastPorts(requestOptions))
     end
 end
 
+isRequestingDoneTime=GetSecs;
 
 % moved to runRealTimeLoop to save on copy-on-write 10/16/08
 % stepsInPhase = stepsInPhase + 1; % increment number of steps in this phase

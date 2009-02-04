@@ -60,7 +60,17 @@ if ~strcmp(type,'')
     fprintf('\tprepulses done:\t\t\t%g\n',      1000*(timestamps.prePulses            - timestamps.drawingFinished))
     fprintf('\tvbl done:\t\t\t%g\n',            1000*(timestamps.vbl                  - timestamps.prePulses))    
     fprintf('\tflip returned:\t\t\t%g\n',       1000*(timestamps.ft                   - timestamps.vbl))    
-    fprintf('\tpost flip pulse:\t\t%g\n',       1000*(timestamps.postFlipPulse        - timestamps.ft)) 
+    fprintf('\tpost flip pulse:\t\t%g\n',       1000*(timestamps.postFlipPulse        - timestamps.ft))
+    
+    fprintf('\tphase logic gotsounds:\t\t%g\n',    1000*(timestamps.logicGotSounds      - timestamps.enteringPhaseLogic))
+    fprintf('\tphase logic sound done:\t\t%g\n',    1000*(timestamps.logicSoundsDone      - timestamps.logicGotSounds))
+    fprintf('\tphase logic frame:\t\t%g\n',     1000*(timestamps.logicFramesDone      - timestamps.logicSoundsDone))
+    fprintf('\tphase logic port:\t\t%g\n',      1000*(timestamps.logicPortsDone       - timestamps.logicFramesDone))
+    fprintf('\tphase logic request:\t\t%g\n',   1000*(timestamps.logicRequestingDone  - timestamps.logicPortsDone))
+    
+    fprintf('\tkb overhead:\t\t%g\n',   1000*(timestamps.kbOverhead  - timestamps.kbCheckDone))
+    fprintf('\tkb init:\t\t%g\n',   1000*(timestamps.kbInit  - timestamps.kbOverhead))
+    fprintf('\tkb kDown:\t\t%g\n',   1000*(timestamps.kbKDown  - timestamps.kbInit))
 end
 
 timestamps.lastFrameTime=timestamps.vbl;

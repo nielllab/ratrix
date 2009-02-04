@@ -10,25 +10,22 @@ playSoundSounds={};
 % nAFC setup:
 if strcmp(trialManagerClass, 'nAFC')
     % play white noise (when responsePort triggered during phase 1)
-    if any(ports(union(targetOptions,distractorOptions))) && phase == 1
+    if phase == 1 && (any(ports(targetOptions)) || any(ports(distractorOptions)))
         playLoopSounds{end+1} = 'trySomethingElseSound';
-    end
-    % play stim sound (when stim is requested during phase 2)
-    if any(ports(requestOptions)) && phase == 2
+    elseif phase == 2 && any(ports(requestOptions))  
+        % play stim sound (when stim is requested during phase 2)
         playLoopSounds{end+1} = 'keepGoingSound';
-    end
-    % play correct sound
-    if phase == 3 && stepsInPhase <= 0
+    elseif phase == 3 && stepsInPhase <= 0
+        % play correct sound
         playSoundSounds{end+1} = {'correctSound', msRewardSound};
-    end
-    % play wrong sound
-    if phase == 4 && stepsInPhase <= 0
+    elseif phase == 4 && stepsInPhase <= 0
+        % play wrong sound
         playSoundSounds{end+1} = {'wrongSound', msPenaltySound};
-    end
+    end   
 % freeDrinks setup
 elseif strcmp(trialManagerClass, 'freeDrinks')
     % play white noise (when any port that is not a target is triggered)
-    if any(ports(setdiff(1:length(ports), targetOptions))) && phase == 1
+    if phase == 1 && any(ports(setdiff(1:length(ports), targetOptions)))
         playLoopSounds{end+1} = 'trySomethingElseSound';
     end
     % play correct sound

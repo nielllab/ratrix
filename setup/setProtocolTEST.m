@@ -601,7 +601,7 @@ for i=1:length(subjIDs),
 %         case {'rack3test4','rack3test5','rack3test6'} % nAFC, orientedGabors
 %             p=protocol('nAFC,orientedGabors',{ts4});
         otherwise
-            p=protocol('demo',{ts25});
+            p=protocol('demo',{ts4});
 %             error('unknown subject');
     end
     

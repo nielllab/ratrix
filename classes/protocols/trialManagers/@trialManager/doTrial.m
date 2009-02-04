@@ -204,9 +204,9 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
 %                 error('stop');
 %                 t = GetSecs();
 %                 error('it took %s to phase-ify', GetSecs() - t);
-                [stimSpecs] = phaseify(trialManager,stim,stimManager,trialRecords(trialInd).type,...
+                [stimSpecs] = phaseify(trialManager,stim,trialRecords(trialInd).type,...
                     trialRecords(trialInd).targetPorts,trialRecords(trialInd).distractorPorts,trialRecords(trialInd).scaleFactor,...
-                    getIFI(station),trialRecords(trialInd).resolution.hz);
+                    trialRecords(trialInd).interTrialLuminance,getIFI(station),trialRecords(trialInd).resolution.hz);
             end
             
             % 1/29/09 - go through all stimSpecs and insert any values from rm as flagged

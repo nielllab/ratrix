@@ -182,12 +182,13 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             % =====================================================================================================
             %UPDATE REWARDS AND PENALTIES BASED ON REWARD MANAGER - pmm 070525 (need to give correct errStim)
             %rewardManager happens to live in trialManager for now... getting it for use
-            [rm rewardSizeULorMS msPenalty msPuff msRewardSound msPenaltySound updateRM] =calcReinforcement(getReinforcementManager(trialManager),trialRecords, subject);
-            updateTM = updateTM || updateRM;
-            
-            if updateRM
-                trialManager = setReinforcementManager(trialManager, rm);
-            end
+% this now happens inside runRealTimeLoop 2/3/09
+%             [rm rewardSizeULorMS msPenalty msPuff msRewardSound msPenaltySound updateRM] =calcReinforcement(getReinforcementManager(trialManager),trialRecords, subject);
+%             updateTM = updateTM || updateRM;
+%             
+%             if updateRM
+%                 trialManager = setReinforcementManager(trialManager, rm);
+%             end
             % =====================================================================================================
             % phase-ify if necessary (if trialRecords(trialInd).type is 'phased')
             % - this means we need stimSpecs, soundTypes, scaleFactors, and
@@ -205,22 +206,22 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
 %                 error('it took %s to phase-ify', GetSecs() - t);
                 [stimSpecs] = phaseify(trialManager,stim,stimManager,trialRecords(trialInd).type,...
                     trialRecords(trialInd).targetPorts,trialRecords(trialInd).distractorPorts,trialRecords(trialInd).scaleFactor,...
-                    rewardSizeULorMS,msPenalty,getIFI(station),trialRecords(trialInd).resolution.hz);
+                    getIFI(station),trialRecords(trialInd).resolution.hz);
             end
             
             % 1/29/09 - go through all stimSpecs and insert any values from rm as flagged
-            for i=1:length(stimSpecs)
-                % set reward type and duration
-                if strcmp(getRewardType(stimSpecs{i}),'rewardSizeULorMS')
-                    stimSpecs{i}=setRewardTypeAndDuration(stimSpecs{i},'reward',rewardSizeULorMS);
-                elseif strcmp(getRewardType(stimSpecs{i}),'msPuff')
-                    stimSpecs{i}=setRewardTypeAndDuration(stimSpecs{i},'airpuff',msPuff);
-                end
-                % set time-out (msPenalty)
-                if ischar(getFramesUntilTransition(stimSpecs{i})) && strcmp(getFramesUntilTransition(stimSpecs{i}),'msPenalty')
-                    stimSpecs{i}=setFramesUntilTransition(stimSpecs{i},ceil((msPenalty/1000)/getIFI(station)));
-                end
-            end
+%             for i=1:length(stimSpecs)
+%                 % set reward type and duration
+%                 if strcmp(getRewardType(stimSpecs{i}),'rewardSizeULorMS')
+%                     stimSpecs{i}=setRewardTypeAndDuration(stimSpecs{i},'reward',rewardSizeULorMS);
+%                 elseif strcmp(getRewardType(stimSpecs{i}),'msPuff')
+%                     stimSpecs{i}=setRewardTypeAndDuration(stimSpecs{i},'airpuff',msPuff);
+%                 end
+%                 % set time-out (msPenalty)
+%                 if ischar(getFramesUntilTransition(stimSpecs{i})) && strcmp(getFramesUntilTransition(stimSpecs{i}),'msPenalty')
+%                     stimSpecs{i}=setFramesUntilTransition(stimSpecs{i},ceil((msPenalty/1000)/getIFI(station)));
+%                 end
+%             end
             
             % we have called calcStim() to successfully return our cell
             % array of stimSpec objects along with target, distractor, and
@@ -299,13 +300,13 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
 
             currentValveStates=verifyValvesClosed(station);
             
-            trialRecords(trialInd).proposedRewardDurationMSorUL = 0;
-            % calculate and record expected reward duration
-            for tempInd=1:length(stimSpecs)
-                if ~isempty(getRewardType(stimSpecs{tempInd}))
-                    trialRecords(trialInd).proposedRewardDurationMSorUL = trialRecords(trialInd).proposedRewardDurationMSorUL + getRewardDuration(stimSpecs{tempInd});
-                end
-            end
+%             trialRecords(trialInd).proposedRewardDurationMSorUL = 0;
+%             % calculate and record expected reward duration
+%             for tempInd=1:length(stimSpecs)
+%                 if ~isempty(getRewardType(stimSpecs{tempInd}))
+%                     trialRecords(trialInd).proposedRewardDurationMSorUL = trialRecords(trialInd).proposedRewardDurationMSorUL + getRewardDuration(stimSpecs{tempInd});
+%                 end
+%             end
             
             % =====================================================================================================
             % 10/19/08 - setup of eyeTracker (start recording or check that recording is happening each trial)
@@ -368,8 +369,6 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 trialManager, ...
                 stimSpecs,  ...  %changed stim to stimSpecs (stimOGL needs to handle a cell array of stimSpecs for this trial)
                 newSM, ... %10/13/08 - used to determine what sounds to play at each frame in runRealTimeLoop %1/20/09 - also used to do expert mode
-                msRewardSound, ... %10/13/08 - to determine duration of these playSound sounds
-                msPenaltySound, ... %10/13/08 - to determine duration of these playSound sounds
                 LUT, ...
                 trialRecords(trialInd).targetPorts, ...
                 trialRecords(trialInd).distractorPorts, ...
@@ -379,7 +378,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 manualOn, ...
                 1, ...
                 .1, ... % 10% should be ~1 ms of acceptable frametime error
-                0,text,rn,getID(subject),class(newSM),pStr,trialLabel,trialManager.eyeTracker,0);
+                0,text,rn,getID(subject),class(newSM),pStr,trialLabel,trialManager.eyeTracker,0,trialRecords);
 
             if ~isempty(trialManager.eyeTracker)
                 [junk junk eyeDataVarNames]=getSample(trialManager.eyeTracker); %throws out a sample in order to get variable names... dirty
@@ -514,11 +513,11 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             %if slow rewards check, here or the calc reinforcement are likely implicated
             trialRecords(trialInd).reinforcementManager = structize(trialManager.reinforcementManager);
             trialRecords(trialInd).reinforcementManagerClass = class(trialManager.reinforcementManager);
-            trialRecords(trialInd).proposedRewardSizeULorMS=rewardSizeULorMS;
-            trialRecords(trialInd).proposedMsPenalty=msPenalty;
-            trialRecords(trialInd).proposedMsRewardSound=msRewardSound;
-            trialRecords(trialInd).proposedMsPenaltySound=msPenaltySound;
-            trialRecords(trialInd).proposedMsPuff=msPuff;
+%             trialRecords(trialInd).proposedRewardSizeULorMS=rewardSizeULorMS;
+%             trialRecords(trialInd).proposedMsPenalty=msPenalty;
+%             trialRecords(trialInd).proposedMsRewardSound=msRewardSound;
+%             trialRecords(trialInd).proposedMsPenaltySound=msPenaltySound;
+%             trialRecords(trialInd).proposedMsPuff=msPuff;
 
 %             %UPDATE REWARDS AND PENALTIES BASED ON REWARD MANAGER - pmm 070525
 %             %rewardManager happens to live in trialManager for now... getting it for use

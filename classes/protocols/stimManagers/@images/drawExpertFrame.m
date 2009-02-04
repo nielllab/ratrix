@@ -1,5 +1,5 @@
 function [doFramePulse expertCache dynamicDetails textLabel i] = ...
-    drawExpertFrame(stimulus,stim,i,phaseStartTime,window,textLabel,floatprecision,destRect,filtMode,expertCache,ifi)
+    drawExpertFrame(stimulus,stim,i,phaseStartTime,window,textLabel,floatprecision,destRect,filtMode,expertCache,ifi,scheduledFrameNum,dropFrames)
 % implements expert mode for images - calls PTB drawing functions directly, leaving drawText and drawingFinished to stimOGL
 %
 % state.destRect
@@ -11,6 +11,13 @@ function [doFramePulse expertCache dynamicDetails textLabel i] = ...
 % stimManager.selectedSizes
 % stimManager.selectedRotation
 
+
+% increment i
+if dropFrames
+    i=scheduledFrameNum;
+else
+    i=i+1;
+end
 dynamicDetails=[];
 doFramePulse=true;
 
@@ -53,7 +60,5 @@ end
 Screen('BlendFunction',window,GL_ONE,GL_ZERO);
 % clear imagetex from vram
 Screen('Close',imagetex);
-% increment i
-i=i+1;
 
 end % end function

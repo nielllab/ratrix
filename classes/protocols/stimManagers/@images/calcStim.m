@@ -90,7 +90,7 @@ end
 % ====================================================================================
 % do image preparation
 scaleFactor = getScaleFactor(stimulus);
-interTrialLuminance = uint8(intmax('uint8')*getInterTrialLuminance(stimulus));
+interTrialLuminance = getInterTrialLuminance(stimulus);
 
 % 12/8/08 - randomly draw from size and rotation; store values into selectedSize and selectedRotation, and also write to details
 % goes hand in hand with dynamic mode for doing the rotation and scaling

@@ -1,5 +1,5 @@
 function [stimSpecs] = phaseify(trialManager,stim,stimManager,type,...
-    targetPorts,distractorPorts,scaleFactor,rewardSizeULorMS,msPenalty,ifi,hz)
+    targetPorts,distractorPorts,scaleFactor,ifi,hz)
 % this function takes the output from calcStim of a non-phased stim manager, and converts it to stimSpecs according to the trialManager class
 % inputs should be self-explanatory
 % outputs are cell arrays of stimSpecs 
@@ -16,51 +16,51 @@ if strmatch(class(trialManager), 'nAFC')
     end
     % waiting for request
     criterion = {[2], [2]};
-    stimSpecs{1} = stimSpec(getInterTrialLuminance(stimManager),criterion,'cache',1,[],rewardSizeULorMS,targetPorts,framesUntilTransition,[],0,0,hz);
+    stimSpecs{1} = stimSpec(getInterTrialLuminance(stimManager),criterion,'cache',0,framesUntilTransition,[],0,0,hz,[]);
     % waiting for response
     %reverse frames
 %     reverse_stim(:,:,1) = stim(:,:,2);
 %     reverse_stim(:,:,2) = stim(:,:,1);
     criterion = {targetPorts, 3, distractorPorts, 4};
-    stimSpecs{2} = stimSpec(stim,criterion,type,1,[],rewardSizeULorMS,targetPorts,[],[],scaleFactor,0,hz);
+    stimSpecs{2} = stimSpec(stim,criterion,type,0,[],[],scaleFactor,0,hz,[]);
     % correct
     criterion = {[], 5};
-    numCorrectFrames=ceil((rewardSizeULorMS/1000)/ifi);
-    stimSpecs{3} = stimSpec(getInterTrialLuminance(stimManager),criterion,'cache',1,'reward',rewardSizeULorMS,targetPorts,numCorrectFrames,[],0,0,hz);
+    stimSpecs{3} = stimSpec(getInterTrialLuminance(stimManager),criterion,'cache',0,[],[],0,0,hz,'correct'); % changed to empty timeout - assigned during runRealTimeLoop
     % wrong
     criterion = {[], 5};
-    numErrorFrames=ceil((msPenalty/1000)/ifi);
-    [errStim errorScale] = errorStim(stimManager,numErrorFrames);
-    stimSpecs{4} = stimSpec(errStim,criterion,'cache',1,[],rewardSizeULorMS,targetPorts,numErrorFrames,[],errorScale,0,hz);
+%     numErrorFrames=ceil((msPenalty/1000)/ifi);
+%     [errStim errorScale] = errorStim(stimManager,numErrorFrames);
+%   the error phase has an empty stim, because we dont know how long of a stim to compute using errorStim(stimManager,numErrorFrames) until
+%   we get to the error phase and call calcReinforcement!
+    stimSpecs{4} = stimSpec([],criterion,'cache',0,[],[],scaleFactor,0,hz,'error');
     % final
     criterion = {[], 1};
-    stimSpecs{5} = stimSpec(getInterTrialLuminance(stimManager),criterion,'cache',1,...
-        [],rewardSizeULorMS,targetPorts,1,[],0,1,hz);
+    stimSpecs{5} = stimSpec(getInterTrialLuminance(stimManager),criterion,'cache',0,...
+        1,[],0,1,hz,[]);
 elseif strmatch(class(trialManager), 'freeDrinks')
     % freeDrinks
     % =====================================================================================================
     % waiting for response phase
     criterion = {targetPorts, 2};
     stochasticP = getFreeDrinkLikelihood(trialManager);
-    stimSpecs{1} = stimSpec(stim, criterion,'loop',1,[],rewardSizeULorMS,targetPorts,[],{stochasticP,1,stochasticP,2,stochasticP,3},scaleFactor,0,hz);
+    stimSpecs{1} = stimSpec(stim, criterion,'loop',0,[],{stochasticP,1,stochasticP,2,stochasticP,3},scaleFactor,0,hz,[]);
     % correct phase (always correct)
     criterion = {[], 3};
-    numCorrectFrames=ceil((rewardSizeULorMS/1000)/ifi);
-    stimSpecs{2} = stimSpec(getInterTrialLuminance(stimManager),criterion,'cache',1,'reward',rewardSizeULorMS,targetPorts,numCorrectFrames,[],0,0,hz);
+    stimSpecs{2} = stimSpec(getInterTrialLuminance(stimManager),criterion,'cache',0,[],[],0,0,hz,'correct');
     % final
     criterion = {[], 1};
-    stimSpecs{3} = stimSpec(getInterTrialLuminance(stimManager),criterion,'cache',1,...
-        [],rewardSizeULorMS,targetPorts,1,[],0,1,hz);
+    stimSpecs{3} = stimSpec(getInterTrialLuminance(stimManager),criterion,'cache',0,...
+        1,[],0,1,hz,[]);
 elseif strcmp(class(trialManager), 'autopilot')
     % autopilot
     % just put in loop mode, one phase
     criterion = {[], 2};
-    stimSpecs{1} = stimSpec(stim, criterion,'loop',1,[],rewardSizeULorMS,targetPorts,[],[],scaleFactor,0,hz);
+    stimSpecs{1} = stimSpec(stim, criterion,'loop',0,[],[],scaleFactor,0,hz,[]);
     % final phase
     criterion = {[], 1};
-    stimSpecs{2} = stimSpec(getInterTrialLuminance(stimManager),criterion,'cache',1,...
-        [],rewardSizeULorMS,targetPorts,1,[],0,1,hz);
+    stimSpecs{2} = stimSpec(getInterTrialLuminance(stimManager),criterion,'cache',0,...
+        1,[],0,1,hz,[]);
 else
-    error('only nAFC and freeDrinks for now');
+    error('only nAFC, freeDrinks, and autopilot for now');
 end
 

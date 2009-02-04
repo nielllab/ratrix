@@ -1,7 +1,7 @@
 function [tm done newSpecInd specInd updatePhase transitionedByTimeFlag transitionedByPortFlag response trialResponse...
     isRequesting lastSoundsPlayed] = ...
     handlePhasedTrialLogic(tm, done, ...
-    ports, station, specInd, transitionCriterion, framesUntilTransition, stepsInPhase, isFinalPhase, response, trialResponse, ...
+    ports, lastPorts, station, specInd, transitionCriterion, framesUntilTransition, stepsInPhase, isFinalPhase, response, trialResponse, ...
     stimManager, msRewardSound, mePenaltySound, targetOptions, distractorOptions, requestOptions, isRequesting, lastSoundsPlayed)
 
 % This function handles trial logic for a phased trial manager.
@@ -132,7 +132,8 @@ end
 %   if isRequesting was already 1, then set it to 0
 %   if isRequesting was 0, then set it to 1
 %   (basically flip the bit every time request port is hit)
-if any(ports(requestOptions))
+% 
+if any(ports(requestOptions)) && ~any(lastPorts(requestOptions))
     if isRequesting
         isRequesting=false;
     else

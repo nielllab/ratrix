@@ -100,7 +100,8 @@ details.toggleStim=stimulus.toggleStim;
 %scaleFactor = getScaleFactor(stimulus);
 scaleFactor = 0; %makes it full screen
 
-interTrialLuminance = intmax(class(stimulus.cache.flankerStim))*getInterTrialLuminance(stimulus);
+% interTrialLuminance = intmax(class(stimulus.cache.flankerStim))*getInterTrialLuminance(stimulus);
+interTrialLuminance = getInterTrialLuminance(stimulus);
 
 LUT=getLUT(stimulus);
 details.LUT=LUT;  % in future, consider saving a LUT id?

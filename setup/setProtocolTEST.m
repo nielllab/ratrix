@@ -104,7 +104,7 @@ ai_parameters.inputRanges=repmat([-1 6],ai_parameters.numChans,1);
 
 vh_datanet=nAFC(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,requestRewardSizeULorMS,...
     percentCorrectionTrials,msResponseTimeLimit,pokeToRequestStim,maintainPokeToMaintainStim,msMaximumStimPresentationDuration,...
-    maximumNumberStimPresentations,doMask,constantRewards,...
+    maximumNumberStimPresentations,doMask,constantRewards,[],[],...
     datanet('stim','localhost','132.239.158.179','\\132.239.158.179\datanet_storage',ai_parameters));
 
 
@@ -120,7 +120,7 @@ gts = nAFC(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,reque
 % autopilot trialManager (for gratings currently) - 11/12/08 fli
 aP = autopilot(percentCorrectionTrials,msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,constantRewards);
 aP_datanet = autopilot(percentCorrectionTrials,msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,constantRewards, ...
-    datanet('stim','localhost','132.239.158.179','\\132.239.158.179\datanet_storage',ai_parameters));
+    [],[],datanet('stim','localhost','132.239.158.179','\\132.239.158.179\datanet_storage',ai_parameters));
 
 % ====================================================================================================================
 % variables for stim managers
@@ -358,7 +358,7 @@ nameOfShapingStep=repmat({'junkStep'},1,11);  % skip the first 11 of training...
 
 
 nameOfShapingStep{end+1} = sprintf('Expt 1: contrast sweep', protocolType);
-% [sweepContrast previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+[sweepContrast previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 % ====================================================================================================================
 % training steps
 svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
@@ -601,7 +601,7 @@ for i=1:length(subjIDs),
 %         case {'rack3test4','rack3test5','rack3test6'} % nAFC, orientedGabors
 %             p=protocol('nAFC,orientedGabors',{ts4});
         otherwise
-            p=protocol('demo',{ts4});
+            p=protocol('demo',{ts25});
 %             error('unknown subject');
     end
     

@@ -18,14 +18,16 @@ tic
 switch strategy
     case 'textureCache'
         %load all frame caches into VRAM
-
-        textures=zeros(1,size(stim,3));
-        for i=1:size(stim,3)
-            if window>=0
-                textures(i)=Screen('MakeTexture', window, squeeze(stim(:,:,i)),0,0,floatprecision); %ned floatprecision=0 for remotedesktop
+        
+        if ~isempty(stim) % necessary because size([],3)==1 stupidly enough
+            textures=zeros(1,size(stim,3));
+            for i=1:size(stim,3)
+                if window>=0
+                    textures(i)=Screen('MakeTexture', window, squeeze(stim(:,:,i)),0,0,floatprecision); %ned floatprecision=0 for remotedesktop
+                end
             end
         end
-
+        
     case 'expert'
         % 10/31/08 - in our implementation of dynamic mode, 'stim' should have all parameters necessary to do on-the-fly drawing
         % no caching of textures should happen

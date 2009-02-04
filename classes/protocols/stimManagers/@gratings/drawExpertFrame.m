@@ -1,9 +1,15 @@
 function [doFramePulse expertCache dynamicDetails textLabel i] = ...
-    drawExpertFrame(stimulus,stim,i,phaseStartTime,window,textLabel,floatprecision,destRect,filtMode,expertCache,ifi)
+    drawExpertFrame(stimulus,stim,i,phaseStartTime,window,textLabel,floatprecision,destRect,filtMode,expertCache,ifi,scheduledFrameNum,dropFrames)
 % 11/14/08 - implementing expert mode for gratings
 % this function calculates an expert frame, and then makes and draws the texture; nothing needs to be done in runRealTimeLoop
 % this should be a stimManager-specific implementation (if expert mode is supported for the given stimulus)
 
+% increment i
+if dropFrames
+    i=scheduledFrameNum;
+else
+    i=i+1;
+end
 % stimulus = stimManager
 doFramePulse=true;
 dynamicDetails=[];
@@ -91,7 +97,5 @@ end
 % clear the gratingtex from vram
 Screen('Close',gratingtex);
 
-% increment i as necessary
-i=i+1;
 
 end % end function

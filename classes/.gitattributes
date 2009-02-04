@@ -7,8 +7,6 @@ protocols/criteria/@parameterThresholdCriterion/rateCriterion.m -text
 protocols/criteria/@parameterThresholdCriterion/display.m -text
 protocols/criteria/@parameterThresholdCriterion/parameterThresholdCriterion.m -text
 protocols/@stimSpec/getFramesUntilTransition.m -text
-protocols/@stimSpec/getRewardType.m -text
-protocols/@stimSpec/getRewardDuration.m -text
 protocols/@stimSpec/getStim.m -text
 protocols/@stimSpec/stimSpec.m -text
 protocols/@stimSpec/getCriterion.m -text
@@ -167,10 +165,7 @@ protocols/stimManagers/@gratings/extractDetailFields.m -text
 protocols/stimManagers/@fullField/extractDetailFields.m -text
 protocols/stimManagers/@bipartiteField/extractDetailFields.m -text
 protocols/stimManagers/@whiteNoise/extractDetailFields.m -text
-protocols/@stimSpec/setRewardTypeAndDuration.m -text
-protocols/@stimSpec/setRewardType.m -text
-protocols/@stimSpec/setRewardDuration.m -text
 protocols/@stimSpec/getScaleFactor.m -text
-protocols/@stimSpec/getRewardPorts.m -text
 protocols/@stimSpec/getStartFrame.m -text
 protocols/@stimSpec/getHz.m -text
+protocols/@stimSpec/getPhaseType.m -text

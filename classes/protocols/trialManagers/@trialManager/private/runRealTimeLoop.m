@@ -1,9 +1,9 @@
 function [quit response didManualInTrial manual actualReinforcementDurationMSorUL proposedReinforcementDurationMSorUL ...
     phaseRecords eyeData gaze frameDropCorner] ...
-    = runRealTimeLoop(tm, window, ifi, stimSpecs, phaseData, stimManager, msRewardSound, msPenaltySound, ...
-    targetOptions, distractorOptions, requestOptions, interTrialLuminance, ...
+    = runRealTimeLoop(tm, window, ifi, stimSpecs, phaseData, stimManager, ...
+    targetOptions, distractorOptions, requestOptions, interTrialLuminance, interTrialPrecision, ...
     station, manual,allowQPM,timingCheckPct,noPulses,textLabel,rn,subID,stimID,protocolStr,ptbVersion,ratrixVersion,trialLabel,msAirpuff, ...
-    originalPriority, verbose, eyeTracker, frameDropCorner)
+    originalPriority, verbose, eyeTracker, frameDropCorner,trialRecords)
 
 
 % need actual versus proposed reward duration (save in phaseRecords per phase)
@@ -39,7 +39,8 @@ if ismac
     labelFrames=0;
 end
 
-
+msRewardSound=0;
+msPenaltySound=0;
 quit=false;
 responseOptions = union(targetOptions, distractorOptions);
 
@@ -99,7 +100,7 @@ responseDetails.nominalIFI=ifi;
 responseDetails.toggleStim=toggleStim;
 responseDetails.tries={};
 responseDetails.times={};
-responseDetails.requestRewardPorts=[];
+% responseDetails.requestRewardPorts=[];
 responseDetails.durs={};
 responseDetails.requestRewardStartTime=[];
 responseDetails.requestRewardDurationActual=[];
@@ -294,7 +295,8 @@ keepGoingOn=false;
 
 startTime=GetSecs();
 respStart = 0; % initialize respStart to zero - it won't get set until we get a response through trial logic
-
+isRequesting=0;
+        
 audioStimPlaying = false;
 response='none'; %initialize
 
@@ -302,13 +304,14 @@ analogOutput=[];
 
 if window>0
     % draw interTrialLuminance first
-    interTrialLuminance
-    phaseData{1}.destRect
-    class(interTrialLuminance)
-    interTrialTex=Screen('MakeTexture', window, interTrialLuminance,0,0,0); %ned floatprecision=0 for remotedesktop
+%     interTrialLuminance
+%     phaseData{end}.destRect % this is more likely to be the interTrial screen
+%     class(interTrialLuminance)
+%     interTrialPrecision
+    interTrialTex=Screen('MakeTexture', window, interTrialLuminance,0,0,interTrialPrecision); %ned floatprecision=0 for remotedesktop
     % we dont know what floatprecision to use for the interTrial because all floatprecisions are specified per-phase, not per trial
     % should we have an interTrialFloatprecision, or just assume 0?
-    Screen('DrawTexture', window, interTrialTex,phaseData{1}.destRect, [], filtMode);
+    Screen('DrawTexture', window, interTrialTex,phaseData{end}.destRect, [], filtMode);
     [timestamps.vbl sos startTime]=Screen('Flip',window);  %make sure everything after this point is preallocated
 end
 
@@ -388,7 +391,7 @@ while ~done && ~quit;
         requestRewardStarted=false;
         requestRewardStartLogged=false;
         requestRewardDone=false;
-        requestRewardPorts=0*readPorts(station);
+%         requestRewardPorts=0*readPorts(station);
         requestRewardDurLogged=false;
         requestRewardOpenCmdDone=false;
         serverValveChange=false;
@@ -397,48 +400,10 @@ while ~done && ~quit;
         didStochasticResponse=false;
         didHumanResponse=false;
         
-        isRequesting=0;
         %         stimToggledOn=0;
         
-        
-        
-        % load stimSpec and phaseData
-        spec = stimSpecs{specInd};
-        stim = getStim(spec);
-        
-        transitionCriterion = getCriterion(spec);
-        framesUntilTransition = getFramesUntilTransition(spec);
-        % flag for graduation by time (port was autoselected due to graduation by time)
-        %         transitionedByTimeFlag = false;
-        %         transitionedByPortFlag = false;
-        % reinforcement
-        rewardType = getRewardType(spec);
-        rewardDuration = getRewardDuration(spec);
-        rewardPorts = getRewardPorts(spec); % TEMPORARY UNTIL FIGURE OUT HOW TO ASSIGN THIS
-        % if there is a reinforcement, then set up for functions that follow trial logic
-        if ~isempty(rewardType) && strcmp(rewardType, 'reward')
-            requestRewardStarted = true;
-            requestRewardPorts=zeros(1,getNumPorts(station));
-            requestRewardPorts(rewardPorts) = 1;
-            proposedReinforcementDurationMSorUL = proposedReinforcementDurationMSorUL + rewardDuration;
-            msRewardOwed = msRewardOwed + rewardDuration;
-        elseif ~isempty(rewardType) && strcmp(rewardType, 'airpuff')
-            msAirpuffOwed = msAirpuffOwed + rewardDuration;
-            %             doPuff = true;
-            proposedReinforcementDurationMSorUL = proposedReinforcementDurationMSorUL + rewardDuration;
-        end
-        
-%         % get startFrame if not empty
-%         if ~isempty(getStartFrame(spec))
-%             i=getStartFrame(spec);
-%         end
-        
-        stepsInPhase = 0;
-        isFinalPhase = getIsFinalPhase(spec); % we set the isFinalPhase flag to true if we are on the last phase
-        stochasticDistribution = getStochasticDistribution(spec);
-        
+        % load phaseData
         phase = phaseData{specInd};
-        
         floatprecision = phase.floatprecision;
         frameIndexed = phase.frameIndexed;
         loop = phase.loop;
@@ -446,7 +411,6 @@ while ~done && ~quit;
         timeIndexed = phase.timeIndexed;
         indexedFrames = phase.indexedFrames;
         timedFrames = phase.timedFrames;
-        
         strategy = phase.strategy;
         % 11/9/08 - if dynamic strategy, then create a big field
         %         if strcmp(strategy, 'dynamic')
@@ -454,7 +418,6 @@ while ~done && ~quit;
         % %             phaseRecords(specInd).big=zeros(stim.height,stim.width,numDynamicFrames);
         %         end
         destRect = phase.destRect;
-        
         textures = phase.textures;
         numDots = phase.numDots;
         dotX = phase.dotX;
@@ -462,8 +425,60 @@ while ~done && ~quit;
         dotLocs = phase.dotLocs;
         dotSize = phase.dotSize;
         dotCtr = phase.dotCtr;
-        
         currentCLUT = phase.CLUT;
+        
+        % load stimSpec
+        spec = stimSpecs{specInd};
+        stim = getStim(spec);
+        transitionCriterion = getCriterion(spec);
+        framesUntilTransition = getFramesUntilTransition(spec);
+        % TEST - call calcReinforcement see if this is fast enough
+        phaseType = getPhaseType(spec);
+        if isempty(phaseType)
+            % not correct or error, do nothing
+        elseif strcmp(phaseType,'correct')
+            % correct phase - assign reward values from calcReinforcement 
+            [rm rewardSizeULorMS msPenalty msPuff msRewardSound msPenaltySound updateRM] =...
+                calcReinforcement(getReinforcementManager(tm),trialRecords, []);
+            msRewardOwed=msRewardOwed+rewardSizeULorMS; % give reward duration
+            % set timeout for reward phase
+            if isempty(framesUntilTransition)
+                framesUntilTransition = ceil((rewardSizeULorMS/1000)/ifi);
+            end
+            proposedReinforcementDurationMSorUL = proposedReinforcementDurationMSorUL + rewardSizeULorMS;
+        elseif strcmp(phaseType,'error')
+             % error phase - assign error values from calcReinforcement 
+            [rm rewardSizeULorMS msPenalty msPuff msRewardSound msPenaltySound updateRM] =...
+                calcReinforcement(getReinforcementManager(tm),trialRecords, []);
+            % also need to call errorStim(stimManager,numErrorFrames) here...wtf how do we do this..
+            % and assign to textures now
+            numErrorFrames=ceil((msPenalty/1000)/ifi);
+            [stim errorScale] = errorStim(stimManager,numErrorFrames);
+            [floatprecision stim garbage] = determineColorPrecision(tm, stim, false, strategy, interTrialLuminance);
+            [textures, garbage, garbage, garbage, garbage, ...
+                garbage, garbage] ...
+                = cacheTextures(tm,strategy,stim,window,floatprecision,false);
+            % set timeout for error phase
+            if isempty(framesUntilTransition)
+                framesUntilTransition = numErrorFrames;
+            end
+            % fix destRect
+%             destRect=phaseData{specInd-1}.destRect;
+            destRect=Screen('Rect',window);
+%             sca
+%             keyboard
+        end
+        
+        % get startFrame if not empty
+        if ~isempty(getStartFrame(spec))
+            i=getStartFrame(spec);
+        end
+        
+        stepsInPhase = 0;
+        isFinalPhase = getIsFinalPhase(spec); % we set the isFinalPhase flag to true if we are on the last phase
+        stochasticDistribution = getStochasticDistribution(spec);
+        
+
         
         % Initialize this phaseRecord
         %         phaseRecords(specInd).response='none';
@@ -483,8 +498,8 @@ while ~done && ~quit;
         phaseRecords(specInd).responseDetails.toggleStim=toggleStim;
         %
         % Initialize this phaseRecord
-        phaseRecords(specInd).proposedReinforcementSizeULorMS = rewardDuration;
-        phaseRecords(specInd).proposedReinforcementType = rewardType;
+%         phaseRecords(specInd).proposedReinforcementSizeULorMS = rewardDuration;
+%         phaseRecords(specInd).proposedReinforcementType = rewardType;
         
         % added 8/18/08 - strategy (loop, static, trigger, cache, dynamic, expert, timeIndexed, or frameIndexed)
         phaseRecords(specInd).loop = loop;
@@ -492,6 +507,9 @@ while ~done && ~quit;
         phaseRecords(specInd).strategy = strategy;
         phaseRecords(specInd).stochasticProbability = stochasticDistribution;
         phaseRecords(specInd).timeoutLengthInFrames = framesUntilTransition;
+        phaseRecords(specInd).floatprecision = floatprecision;
+        phaseRecords(specInd).stim=stim;
+        phaseRecords(specInd).phaseType = phaseType;
         %
         %         % pump stuff
         %         phaseRecords(specInd).valveErrorDetails=[];
@@ -577,6 +595,9 @@ while ~done && ~quit;
         if ~paused
             
             scheduledFrameNum=ceil((GetSecs-firstVBLofPhase)/(framesPerUpdate*ifi)); %could include pessimism about the time it will take to get from here to the flip and how much advance notice flip needs
+            if scheduledFrameNum<=0
+                scheduledFrameNum=1;
+            end
             % note this does not take pausing into account -- edf thinks we should get rid of pausing
             
             switch strategy
@@ -590,9 +611,9 @@ while ~done && ~quit;
                     
                     % =====================================================================================================================
                     % function to draw the appropriate texture using the textureCache strategy
-                    i
                     drawFrameUsingTextureCache(tm, window, i, frameNum, size(stim,3), lastI, dontclear, textures(i), destRect, ...
                         filtMode, labelFrames, xOrigTextPos, yNewTextPos);
+
                     
                     % =====================================================================================================================
                 case 'expert'
@@ -600,7 +621,8 @@ while ~done && ~quit;
                     % call a method of the given stimManager that draws the expert frame
                     % i=i+1; % 11/7/08 - this needs to happen first because i starts at 0
                     [doFramePulse expertCache dynamicDetails textLabel i] = ...
-                        drawExpertFrame(stimManager,stim,i,phaseStartTime,window,textLabel,floatprecision,destRect,filtMode,expertCache,ifi,scheduledFrameNum,tm.dropFrames);
+                        drawExpertFrame(stimManager,stim,i,phaseStartTime,window,textLabel,...
+                        floatprecision,destRect,filtMode,expertCache,ifi,scheduledFrameNum,tm.dropFrames);
                     if ~isempty(dynamicDetails)
                         phaseRecords(specInd).dynamicDetails{end+1}=dynamicDetails; % dynamicDetails better specify what frame it is b/c the record will not save empty details
                     end
@@ -746,7 +768,7 @@ while ~done && ~quit;
         phaseRecords(specInd).responseDetails.times{end+1} = GetSecs() - startTime;
         %         disp(ports)
     end
-    lastPorts=ports;
+    
     
     % =====================================================================================================================
     % large function here that handles trial logic (what state are we in - did we have a request, response, should we give reward, etc)
@@ -760,11 +782,12 @@ while ~done && ~quit;
     [tm done newSpecInd specInd updatePhase transitionedByTimeFlag ...
         transitionedByPortFlag phaseRecords(specInd).response response isRequesting lastSoundsPlayed] = ...
         handlePhasedTrialLogic(tm, done, ...
-        ports, station, specInd, transitionCriterion, framesUntilTransition, stepsInPhase, isFinalPhase, ...
+        ports, lastPorts, station, specInd, transitionCriterion, framesUntilTransition, stepsInPhase, isFinalPhase, ...
         phaseRecords(specInd).response, response, ...
         stimManager, msRewardSound, msPenaltySound, targetOptions, distractorOptions, requestOptions, isRequesting, lastSoundsPlayed);
     
     stepsInPhase = stepsInPhase + 1; %10/16/08 - moved from handlePhasedTrialLogic to prevent COW
+    lastPorts=ports; % moved from above trial logic - we need lastPorts to correctly set isRequesting
     
     timestamps.phaseLogicDone=GetSecs;
     
@@ -823,7 +846,7 @@ while ~done && ~quit;
             if strcmp(class(ports),'double') %happens on osx, why?
                 ports=logical(ports);
             end
-            rewardValves(rewardPorts)=1; % rewardPorts is now the rewardPorts specified by stimSpec
+            rewardValves(ports)=1;
             
             %         if isempty(rewardPorts)
             %             rewardValves(requestOptions) = 1;
@@ -858,7 +881,7 @@ while ~done && ~quit;
                             setAndCheckValves(station,zeros(1,getNumPorts(station)),currentValveStates,...
                             phaseRecords(specInd).valveErrorDetails,...
                             lastRewardTime,'correct reward close');
-                        %                     newValveState=doValves|requestRewardPorts; % this shouldnt be used for now...figure out later...
+                        %                     newValveState=doValves|rewardValves; % this shouldnt be used for now...figure out later...
                         %disp('closing valves')
                         %GetSecs
                     else
@@ -870,7 +893,7 @@ while ~done && ~quit;
                     if start
                         %'turning on localPump reward'
                         rewardCurrentlyOn=true;
-                        station=doReward(station,msRewardOwed/1000,requestRewardPorts);
+                        station=doReward(station,msRewardOwed/1000,rewardValves);
                         actualReinforcementDurationMSorUL = actualReinforcementDurationMSorUL + msRewardOwed;
                         msRewardOwed=0;
                         requestRewardDone=true;
@@ -887,7 +910,7 @@ while ~done && ~quit;
                     [currentValveState phaseRecords(specInd).valveErrorDetails quit serverValveChange phaseRecords(specInd).responseDetails ...
                         requestRewardStartLogged requestRewardDurLogged] = ...
                         setupServerPumpRewards(tm, rn, station, newValveState, currentValveState, phaseRecords(specInd).valveErrorDetails, ...
-                        startTime, serverValveChange, requestRewardStarted, requestRewardStartLogged, requestRewardPorts, requestRewardDone, ...
+                        startTime, serverValveChange, requestRewardStarted, requestRewardStartLogged, rewardValves, requestRewardDone, ...
                         requestRewardDurLogged, phaseRecords(specInd).responseDetails, quit);
                     
                     % =====================================================================================================================

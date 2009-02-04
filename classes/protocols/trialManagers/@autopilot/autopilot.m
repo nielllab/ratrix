@@ -1,7 +1,7 @@
 function t=autopilot(varargin)
 % AUTOPILOT  class constructor.
 % t=autopilot(percentCorrectionTrials,msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,soundManager,...
-%                rewardManager,[datanet],[eyeTracker,eyeController])
+%                rewardManager,[eyeTracker],[eyeController],[datanet],[frameDropCorner],[dropFrames],[displayMethod])
 %
 % Used for the whiteNoise, bipartiteField, fullField, and gratings stims, which don't require any response to go through the trial
 % basically just play through the stims, with no sounds, no correction trials
@@ -22,7 +22,7 @@ switch nargin
         else
             error('Input argument is not a autopilot object')
         end
-    case {6 7 8 9}
+    case {6 7 8 9 10 11 12}
         % percentCorrectionTrials
         if varargin{1}>=0 && varargin{1}<=1
             t.percentCorrectionTrials=varargin{1};
@@ -32,17 +32,17 @@ switch nargin
         
         d=sprintf('autopilot');
 
-        if nargin==6 % no optional arguments
-            a=trialManager(varargin{2},varargin{3},varargin{4},varargin{5},varargin{6},d);
-        elseif nargin==7 % datanet
-            a=trialManager(varargin{2},varargin{3},varargin{4},varargin{5},varargin{6},d,varargin{7});
-        elseif nargin==8 % eyeTracker and eyeController, no datanet
-            a=trialManager(varargin{2},varargin{3},varargin{4},varargin{5},varargin{6},varargin{7},varargin{8},d);
-        elseif nargin==9 % all optional arguments
-            a=trialManager(varargin{2},varargin{3},varargin{4},varargin{5},varargin{6},varargin{8},varargin{9},d,varargin{7});
-        else
-            error('should never happen')
+        args={};
+        for i=7:12
+            if i <= nargin
+                args{i}=varargin{i};
+            else
+                args{i}=[];
+            end
         end
+
+        a=trialManager(varargin{2},varargin{3},varargin{4},varargin{5},varargin{6},args{7},args{8},d,args{9},args{10},args{11},args{12});
+
         
         t = class(t,'autopilot',a);
         

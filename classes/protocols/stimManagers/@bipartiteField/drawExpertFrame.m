@@ -1,9 +1,15 @@
 function [doFramePulse expertCache dynamicDetails textLabel i] = ...
-    drawExpertFrame(stimulus,stim,i,phaseStartTime,window,textLabel,floatprecision,destRect,filtMode,expertCache,ifi)
+    drawExpertFrame(stimulus,stim,i,phaseStartTime,window,textLabel,floatprecision,destRect,filtMode,expertCache,ifi,scheduledFrameNum,dropFrames)
 % 11/7/08 - implementing expert mode for bipartiteField 
 % this function calculates an expert frame, and then makes and draws the texture; nothing needs to be done in runRealTimeLoop
 % this should be a stimManager-specific implementation (if expert mode is supported for the given stimulus)
 
+% increment i
+if dropFrames
+    i=scheduledFrameNum;
+else
+    i=i+1;
+end
 % stimulus = stimManager
 doFramePulse=true;
 dynamicDetails=[];
@@ -41,7 +47,5 @@ expertFrame(1,stim.numLeftPixels+1:end) = stim.frames(2,i);
 dynTex = Screen('MakeTexture', window, expertFrame,0,0,floatprecision);
 Screen('DrawTexture', window, dynTex,[],destRect,[],filtMode);
 Screen('Close',dynTex); % close this texture to remove from VRAM
-% increment i
-i=i+1;
 
 end % end function

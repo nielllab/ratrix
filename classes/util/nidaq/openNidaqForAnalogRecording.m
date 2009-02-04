@@ -14,10 +14,11 @@ devices=findDevicesOfTypeWithConstructor('analoginput','nidaq');
 for j=1:length(devices)
     if ~foundMatch
         ai=analoginput(devices{j}{1},devices{j}{2});
-        aiInfo=daqhwinfo(ai);
+        aiInfo=daqhwinfo(ai)
 
-        configs = propinfo(ai,'InputType');
-        configs = configs.ConstraintValue;
+        configs = propinfo(ai,'InputType')
+        configs = configs.ConstraintValue
+        
         if any(strcmp(configs,config))
             if strcmp(setverify(ai,'InputType',config),config)
 
@@ -61,7 +62,8 @@ for j=1:length(devices)
                             passed=true;
                             for rangeNum=1:numChans
                                 rangeVerify=setverify(ai.Channel(rangeNum),'InputRange',inputRanges(rangeNum,:));
-                                passed=passed && all(rangeVerify==inputRanges(rangeNum,:));
+                                %passed=passed && all(rangeVerify==inputRanges(rangeNum,:));
+                                passed = passed && rangeVerify(1)<=inputRanges(rangeNum,1) && rangeVerify(2)>=inputRanges(rangeNum,2);
                             end
                             if passed && setverify(ai,'SamplesPerTrigger',inf)==inf && strcmp(setverify(ai,'LogToDiskMode','Index'),'Index') && strcmp(setverify(ai,'LogFileName',recordingFile), recordingFile) && strcmp(setverify(ai,'LoggingMode','Disk&Memory'),'Disk&Memory')
 

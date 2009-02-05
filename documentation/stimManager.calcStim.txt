@@ -133,16 +133,7 @@
 %                           if the port value is empty ([]), then there is no phase transition by port triggering (instead, relies on frame timeout, see below)
 % stimSpec.stimType         must be one of the non-phased values for 'type' listed above, with the same properties
 %                           this is effectively a phase-specific type, instead of trial-specific
-% stimSpec.rewardType       determines whether or not a reward/airpuff is given in this phase, and also how the rewardDuration is calculated
-%                           'reward' - a water reward of duration stimSpec.rewardDuration is given at the beginning of this phase
-%                           'airpuff' - an airpuff of duration stimSpec.rewardDuration is given at the beginning of this phase
-%                           'rewardSizeMSorUL' - a water reward of duration specified by the reinforcementManager's rewardSizeMSorUL field is given at the beginning of this phase
-%                           'msAirpuff' - an airpuff of duration specified by the reinforcementManager is given at the beginning of this phase
-%                           [] - no reward or airpuff for this phase
-%                           These five values for rewardType allow for the port-triggered reinforcement as in non-phased version, but also allow for
-%                           phase-specific rewards not linked to port triggering (ie progressive rewards)
-% stimSpec.rewardDuration   specifies the duration of the reward - see rewardType
-%                           ignored if rewardType is empty
+% stimSpec.phaseType        one of {'correct', 'error', ''}
 % stimSpec.framesUntilTransition    length of the frame timeout (if we have shown this phase for framesUntilTransition frames with no transition by port selection,
 %                                   then advance to the next phase as specified by the criterion automatically)
 %                                   advances to the first phase target specified by criterion (target1) - see above
@@ -153,3 +144,4 @@
 %                                   in this cell array (ie pA is tried, then pB, and so forth)
 % stimSpec.scaleFactor      % the scaleFactor associated with this phase - see non-phased scaleFactor for details
 % stimSpec.isFinalPhase     % a flag if this is the final phase of the trial (defaults to zero)
+% stimSpec.startFrame       % set to zero to start at the beginning

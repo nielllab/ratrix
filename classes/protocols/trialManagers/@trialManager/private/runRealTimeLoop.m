@@ -606,9 +606,7 @@ while ~done && ~quit;
         if ~paused
             
             scheduledFrameNum=ceil((GetSecs-firstVBLofPhase)/(framesPerUpdate*ifi)); %could include pessimism about the time it will take to get from here to the flip and how much advance notice flip needs
-            if scheduledFrameNum<=0
-                scheduledFrameNum=1;
-            end
+
             % note this does not take pausing into account -- edf thinks we should get rid of pausing
             
             switch strategy

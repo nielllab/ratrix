@@ -306,3 +306,4 @@ matbugs/bayesSDT/BayesSDT.m -text
 matbugs/bayesSDT/ReadMe.txt -text
 matbugs/bayesSDT/BayesSDT_v1.txt -text
 matbugs/matbugs.m -text
+spike[!!-~]sorting/getFrameTimes.m -text

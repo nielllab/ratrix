@@ -277,6 +277,7 @@ recentEventsDisplay = uicontrol(f,'Style','edit','String','recent events','Visib
 set(f,'Visible','on');
 % ========================================================================================
 
+specificCommand=[];
 
 while ~quit
     success = false;
@@ -285,6 +286,9 @@ while ~quit
     if ~isempty(received) % if we received something, decide what to do with the command
         size(received)
         received
+        if ~isempty(specificCommand) && received~=specificCommand
+            error('received a faulty command %d when waiting for the specific command %d', received, specificCommand);
+        end
         switch received % decide what to do based on what command was received
             case constants.startConnectionCommands.S_START_DATA_LISTENER_CMD
                 success = true;
@@ -375,24 +379,33 @@ while ~quit
                 samplingRate = get(ai,'SampleRate');
                 estimatedElapsedTime = GetSecs() - matlabTimeStamp; % estimated time of recording to retrieve
                 estimatedNumberOfSamples = (estimatedElapsedTime+1)*samplingRate; % estimated number of samples to get - add a 1sec buffer
+                if estimatedNumberOfSamples > get(ai,'SamplesAvailable')
+                    estimatedNumberOfSamples
+                    newnum=get(ai,'SamplesAvailable')
+                    warning('we requested more samples from the nidaq than available - resetting to max available!!');
+                    estimatedNumberOfSamples=newnum;
+                end
                 [neuralData, neuralDataTimes] = getdata(ai, estimatedNumberOfSamples);
                 firstNeuralDataTime = neuralDataTimes(1);
                 % now go through and throw out trialData that is past our timestamp
                 neuralData(find(neuralDataTimes<timestamp), :) = [];
                 neuralDataTimes(find(neuralDataTimes<timestamp)) = [];
                 % CHANGE MESSAGE TO BE neuralDataTimes, not a random data
-                
-                % also get events from events_data
-                neuralEvents=events_data(eventsToSendIndex:end);
-                eventsToSendIndex=length(events_data)+1;
+               
                 % =================================================================================================
                 fullFilename = fullfile(datanet.storepath, 'neuralRecords', filename);
                 %                 trialData=[10 11 12];
                 %                 times = [1 2 3 4 5 6 7];
                 save(fullFilename, 'neuralData', 'neuralDataTimes', 'samplingRate', 'matlabTimeStamp',...
-                    'firstNeuralDataTime', 'parameters','neuralEvents');
+                    'firstNeuralDataTime', 'parameters');
                 fprintf('we got a command to send a trial''s worth of data\n');
                 message = constants.dataToStimResponses.D_DATA_SAVED;
+            case constants.stimToDataCommands.S_SEND_EVENT_DATA_CMD
+                % get events from events_data
+                neuralEvents=events_data(eventsToSendIndex:end);
+                eventsToSendIndex=length(events_data)+1;
+                specificCommand=constants.stimToDataCommands.S_ACK_EVENT_DATA_CMD;
+                message = neuralEvents;
             case constants.stimToDataCommands.S_STOP_RECORDING_CMD
                 success = true;
                 % do something here to stop recording (turn off NIDAQ)
@@ -424,6 +437,10 @@ while ~quit
                 mkdir(fullfile(path, 'stimRecords'));
                 fprintf('we got a command to set the storepath to %s\n', path);
                 message = constants.dataToStimResponses.D_STOREPATH_SET;
+            case constants.stimToDataCommands.S_ACK_EVENT_DATA_CMD
+                fprintf('we received an event data ack from stim, resetting specificCommand to []\n');
+                specificCommand=[];
+                message = constants.dataToStimResponses.D_EVENT_DATA_ACK_RECVD;
             otherwise
                 success = false;
                 received

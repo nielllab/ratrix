@@ -17,21 +17,25 @@ r.constants.startConnectionCommands.D_LISTENER_STARTED = 102;
 r.constants.stimToDataCommands.S_START_RECORDING_CMD = 1;
 r.constants.stimToDataCommands.S_TIMESTAMP_CMD = 2;
 r.constants.stimToDataCommands.S_SAVE_DATA_CMD = 3;
-r.constants.stimToDataCommands.S_STOP_RECORDING_CMD = 4;
-r.constants.stimToDataCommands.S_SHUTDOWN_CMD = 5;
-r.constants.stimToDataCommands.S_SET_STOREPATH_CMD = 6;
-r.constants.stimToDataCommands.S_SET_AI_PARAMETERS_CMD = 7;
-r.constants.stimToDataCommands.S_SET_LOCAL_PARAMETERS_CMD = 8;
+r.constants.stimToDataCommands.S_SEND_EVENT_DATA_CMD = 4;
+r.constants.stimToDataCommands.S_STOP_RECORDING_CMD = 5;
+r.constants.stimToDataCommands.S_SHUTDOWN_CMD = 6;
+r.constants.stimToDataCommands.S_SET_STOREPATH_CMD = 7;
+r.constants.stimToDataCommands.S_SET_AI_PARAMETERS_CMD = 8;
+r.constants.stimToDataCommands.S_SET_LOCAL_PARAMETERS_CMD = 9;
+r.constants.stimToDataCommands.S_ACK_EVENT_DATA_CMD = 10;
 
 % Data to Stim messages
-r.constants.dataToStimResponses.D_RECORDING_STARTED = 11;
-r.constants.dataToStimResponses.D_TIMESTAMPED = 12;
-r.constants.dataToStimResponses.D_DATA_SAVED = 13;
-r.constants.dataToStimResponses.D_RECORDING_STOPPED = 14;
-r.constants.dataToStimResponses.D_SHUTDOWN = 15;
-r.constants.dataToStimResponses.D_STOREPATH_SET = 16;
-r.constants.dataToStimResponses.D_AI_PARAMETERS_SET = 17;
-r.constants.dataToStimResponses.D_LOCAL_PARAMETERS_SET = 18;
+r.constants.dataToStimResponses.D_RECORDING_STARTED = 51;
+r.constants.dataToStimResponses.D_TIMESTAMPED = 52;
+r.constants.dataToStimResponses.D_DATA_SAVED = 53;
+r.constants.dataToStimResponses.D_EVENT_DATA_SENT = 54;
+r.constants.dataToStimResponses.D_RECORDING_STOPPED = 55;
+r.constants.dataToStimResponses.D_SHUTDOWN = 56;
+r.constants.dataToStimResponses.D_STOREPATH_SET = 57;
+r.constants.dataToStimResponses.D_AI_PARAMETERS_SET = 58;
+r.constants.dataToStimResponses.D_LOCAL_PARAMETERS_SET = 59;
+r.constants.dataToStimResponses.D_EVENT_DATA_ACK_RECVD = 60;
 % r.constants.dataToStimResponses.D_RECEIVED_VAR = 16;
 
 

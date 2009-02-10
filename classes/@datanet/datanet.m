@@ -38,6 +38,9 @@ r.constants.dataToStimResponses.D_LOCAL_PARAMETERS_SET = 59;
 r.constants.dataToStimResponses.D_EVENT_DATA_ACK_RECVD = 60;
 % r.constants.dataToStimResponses.D_RECEIVED_VAR = 16;
 
+% a list of commands that should invoke pnet_getvar handling before regular
+% reading
+r.constants.pnetGetvarCommands=[4];
 
 r.type=[]; % either 'stim' or 'data'
 r.host=[]; % hostname

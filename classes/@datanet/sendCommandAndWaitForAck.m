@@ -45,23 +45,29 @@ end
 
 % wait for acknowledgement from data computer that connection was received
 gotAck = false;
+constants = getConstants(datanet);
 while ~gotAck
+    % need a switch here depending on commands.cmd
+    % most cases, just do the below,
+    % but in case we need to use a pnet_getvar, this has to come BEFORE any
+    % pnet('read') ops b/c pnet works that way dammit
+    % for now, whenever commands.cmd==4 (getting neural events data)
+    if ismember(commands.cmd, constants.pnetGetvarCommands) % getting neural events
+        disp('trying pnet_getvar to get neural events');
+        trialData=pnet_getvar(stimcon);
+    end
     received = pnet(stimcon,'read',MAXSIZE,'double','noblock');
     if ~isempty(received) % if we received something from data computer (ack or fail)
         disp('received something')
         received
-        receivedIsAck = isAck(datanet,received);
+        receivedIsAck = isAck(datanet,received,constants);
         if receivedIsAck
             gotAck = true; 
             % try using pnet_getvar
             % this needs to be done using a switch on the commands.cmd field
             % (only should be done in certain cases)
             % b/c this depends on what kind of ack you expect to get back
-            if commands.cmd==4 % getting neural events
-                disp('trying pnet_getvar to get neural events');
-                trialData=pnet_getvar(stimcon);
-%                 gotAck=true;
-            end
+
             % try to load from file if getDataFromFile is set
 %             if getDataFromFile
 %                 t = GetSecs();
@@ -93,9 +99,9 @@ end % end function
 
 
 % =====================================================================================
-function ack = isAck(datanet,data)
-% this subfunction determines if the value returned from data is a success acknowledgement (based on constants.dataToStimResponses)
-constants = getConstants(datanet);
+function ack = isAck(datanet,data,constants)
+% this subfunction determines if the value returned from data is a success
+% acknowledgement (based on constants.dataToStimResponses)
 ack = false;
 responses = fields(constants.dataToStimResponses);
 for i=1:length(responses)

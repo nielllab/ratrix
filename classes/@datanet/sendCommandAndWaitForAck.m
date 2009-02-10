@@ -48,9 +48,20 @@ gotAck = false;
 while ~gotAck
     received = pnet(stimcon,'read',MAXSIZE,'double','noblock');
     if ~isempty(received) % if we received something from data computer (ack or fail)
+        disp('received something')
+        received
         receivedIsAck = isAck(datanet,received);
         if receivedIsAck
             gotAck = true; 
+            % try using pnet_getvar
+            % this needs to be done using a switch on the commands.cmd field
+            % (only should be done in certain cases)
+            % b/c this depends on what kind of ack you expect to get back
+            if commands.cmd==4 % getting neural events
+                disp('trying pnet_getvar to get neural events');
+                trialData=pnet_getvar(stimcon);
+%                 gotAck=true;
+            end
             % try to load from file if getDataFromFile is set
 %             if getDataFromFile
 %                 t = GetSecs();
@@ -61,8 +72,10 @@ while ~gotAck
         elseif ~isempty(received) % received is not empty but it is not an ack - must be trialData
             trialData = received;
             gotAck = true;
+            disp('reading received first time')
             % if we didn't finish reading - because pnet('read') has a maxsize limit of stuff it can read
             while ~isempty(received)
+                disp('reading received again')
                 received = pnet(stimcon,'read',MAXSIZE,'double','noblock');
                 trialData = [trialData received];
             end
@@ -70,6 +83,7 @@ while ~gotAck
             error('if received isnt empty and isnt an ack, then what is it?');
         end
     else % didnt receive anything yet, so keep listening
+
     end
 end
 

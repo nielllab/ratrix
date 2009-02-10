@@ -402,10 +402,12 @@ while ~quit
                 message = constants.dataToStimResponses.D_DATA_SAVED;
             case constants.stimToDataCommands.S_SEND_EVENT_DATA_CMD
                 % get events from events_data
+                success=true;
                 neuralEvents=events_data(eventsToSendIndex:end);
                 eventsToSendIndex=length(events_data)+1;
                 specificCommand=constants.stimToDataCommands.S_ACK_EVENT_DATA_CMD;
-                message = neuralEvents;
+                pnet_putvar(datacon,neuralEvents);
+                message = constants.dataToStimResponses.D_EVENT_DATA_SENT;
             case constants.stimToDataCommands.S_STOP_RECORDING_CMD
                 success = true;
                 % do something here to stop recording (turn off NIDAQ)
@@ -438,6 +440,7 @@ while ~quit
                 fprintf('we got a command to set the storepath to %s\n', path);
                 message = constants.dataToStimResponses.D_STOREPATH_SET;
             case constants.stimToDataCommands.S_ACK_EVENT_DATA_CMD
+                success=true;
                 fprintf('we received an event data ack from stim, resetting specificCommand to []\n');
                 specificCommand=[];
                 message = constants.dataToStimResponses.D_EVENT_DATA_ACK_RECVD;

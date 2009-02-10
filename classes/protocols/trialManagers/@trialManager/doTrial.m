@@ -4,10 +4,6 @@ verbose=1;
 updateTM=false;
 stopEarly=0;
 
-% if ~isempty(rn)
-%     error('rn in phasedTrialManager/doTrial is not empty anymore');
-% end
-
 % List of variables used: 
     % verbose - flag for verbose output
     % updateTM - output flag if we need to update TM
@@ -68,39 +64,6 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             trialRecords(trialInd).criterion = structize(getCriterion(ts));
             trialRecords(trialInd).schedulerClass = class(getScheduler(ts));
             trialRecords(trialInd).criterionClass = class(getCriterion(ts));
-            
-
-            
-            % the stim here is used as input to stimOGL - we need to modify
-            % it to be a cell array of stimSpecs, and run stimOGL on this
-            % cell array (other record keeping may change too)
-            
-            % we are assuming that calcStim() is changed to return a cell
-            % array of stimSpecs instead of a single stim
-            % calcStim() also returns the total length (in frames) of all
-            % the stimSpecs added up
-            % - target and distractor ports are same for all phases
-            % - also need to change details to be a vector of detail
-            % objects, one for each phase? or remove since we have stimSpec
-            % - removed interTrialLuminance (no longer needed as this is in
-            % stimSpec)
-%             [newSM, ...
-%                 updateSM, ...
-%                 stimSpecs, ...                %changed stim to stimSpecs %trialRecords(trialInd).stim, ...
-%                 soundTypes, ...               % added this to store the soundTypes for each phase
-%                 LUT, ...
-%                 stimulusDetails, ... % we need this to track correctionTrial status; this is stored in TrialRecords(index).stimDetails as a struct
-%                 scaleFactors, ...
-%                 trialRecords(trialInd).targetPorts, ...
-%                 trialRecords(trialInd).distractorPorts, ...
-%                 isCorrection]= ...
-%                 calcStim(stimManager, ... 
-%                 class(trialManager), ...
-%                 getResponsePorts(trialManager,getNumPorts(station)), ...
-%                 getNumPorts(station), ...
-%                 getLUTbits(station), ...
-%                 trialRecords(1:end-1));
-
 
             % 10/17/08 - DO SOMETHING HERE WITH INPUT TRIALDATA before it gets overwritten
             % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -196,37 +159,14 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             if ischar(trialRecords(trialInd).type) && strcmp(trialRecords(trialInd).type,'phased')
                 stimSpecs = stim.stimSpecs;
             else
-%                 class(trialManager)
-%                 error('stop b/c not phased');
-%                 phaseify();
-
-%                 size(stim,3)
-%                 error('stop');
-%                 t = GetSecs();
-%                 error('it took %s to phase-ify', GetSecs() - t);
                 [stimSpecs] = phaseify(trialManager,stim,trialRecords(trialInd).type,...
                     trialRecords(trialInd).targetPorts,trialRecords(trialInd).distractorPorts,trialRecords(trialInd).scaleFactor,...
                     trialRecords(trialInd).interTrialLuminance,getIFI(station),trialRecords(trialInd).resolution.hz);
             end
             
-            % 1/29/09 - go through all stimSpecs and insert any values from rm as flagged
-%             for i=1:length(stimSpecs)
-%                 % set reward type and duration
-%                 if strcmp(getRewardType(stimSpecs{i}),'rewardSizeULorMS')
-%                     stimSpecs{i}=setRewardTypeAndDuration(stimSpecs{i},'reward',rewardSizeULorMS);
-%                 elseif strcmp(getRewardType(stimSpecs{i}),'msPuff')
-%                     stimSpecs{i}=setRewardTypeAndDuration(stimSpecs{i},'airpuff',msPuff);
-%                 end
-%                 % set time-out (msPenalty)
-%                 if ischar(getFramesUntilTransition(stimSpecs{i})) && strcmp(getFramesUntilTransition(stimSpecs{i}),'msPenalty')
-%                     stimSpecs{i}=setFramesUntilTransition(stimSpecs{i},ceil((msPenalty/1000)/getIFI(station)));
-%                 end
-%             end
-            
             % we have called calcStim() to successfully return our cell
             % array of stimSpec objects along with target, distractor, and
             % request ports, and other information
-            
             
 			% NEED TO VALIDATE STIMSPECS HERE
 			validateStimSpecs(stimSpecs);
@@ -297,16 +237,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
 %             updateTM = updateTM || updateRM;
 
             drawnow;
-
             currentValveStates=verifyValvesClosed(station);
-            
-%             trialRecords(trialInd).proposedRewardDurationMSorUL = 0;
-%             % calculate and record expected reward duration
-%             for tempInd=1:length(stimSpecs)
-%                 if ~isempty(getRewardType(stimSpecs{tempInd}))
-%                     trialRecords(trialInd).proposedRewardDurationMSorUL = trialRecords(trialInd).proposedRewardDurationMSorUL + getRewardDuration(stimSpecs{tempInd});
-%                 end
-%             end
             
             % =====================================================================================================
             % 10/19/08 - setup of eyeTracker (start recording or check that recording is happening each trial)
@@ -336,15 +267,6 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             end
             
             % =====================================================================================================
-%             if ~isempty(trialManager.datanet)
-%                 % 10/17/08 - start of a datanet trial - timestamp
-%                 datanet_constants = getConstants(trialManager.datanet);
-%                 commands = [];
-%                 commands.cmd = datanet_constants.stimToDataCommands.S_TIMESTAMP_CMD;
-%                 [trialData, gotAck] = sendCommandAndWaitForAck(trialManager.datanet, getCon(trialManager.datanet), commands);
-%             end
-            % =====================================================================================================
-
             % finished setting up variables and stuff, now we call stimOGL
             % will deal with trialRecords recordkeeping later - just let it
             % record whatever it does for now
@@ -357,8 +279,10 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             [stopEarly trialRecords(trialInd).response,...
                 trialRecords(trialInd).leftWithManualPokingOn,...
                 trialRecords(trialInd).containedManualPokes,...
-                trialRecords(trialInd).actualReinforcementDurationMSorUL,...
-                trialRecords(trialInd).proposedReinforcementDurationMSorUL, ... %pmm added 4/3/08
+                trialRecords(trialInd).actualRewardDurationMSorUL,...
+                trialRecords(trialInd).proposedRewardDurationMSorUL, ... %pmm added 4/3/08
+                trialRecords(trialInd).actualAirpuffDuration,...
+                trialRecords(trialInd).proposedAirpuffDuration, ... %pmm added 4/3/08
                 eyeData,...
                 gaze,...
                 station,...
@@ -503,231 +427,12 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             end
             % 10/19/08 - need to decide what to do with trialData - do we pass back to doTrials?
             % =====================================================================================================
-            % 12/5/08 - add trainingStep.generateStepName() here to store name of the training step for this trial
-            % assembles a name by calling a getNameFragment() method on its trialMgr, stimMgr, rewadrMgr, and scheduler,
-            % together with the actual svnRev and ptbRev for that trial 
-            % (which should be added to the trialRecord in trialManager.doTrial() anyway --
-            %   return ptbVersion and ratrixVersion from stimOGL). 
-            % the base class inherited implementation for each getNameFragment() could just return 
-            % an abbreviated class name, but could be overridden by subclasses to include important parameter values.
-            trialRecords(trialInd).trainingStepName = generateStepName(ts,ratrixSVNInfo,ptbSVNInfo);
-            
-            % END additions
-            % =====================================================================================================
-
-            %if slow rewards check, here or the calc reinforcement are likely implicated
             trialRecords(trialInd).reinforcementManager = structize(trialManager.reinforcementManager);
             trialRecords(trialInd).reinforcementManagerClass = class(trialManager.reinforcementManager);
-%             trialRecords(trialInd).proposedRewardSizeULorMS=rewardSizeULorMS;
-%             trialRecords(trialInd).proposedMsPenalty=msPenalty;
-%             trialRecords(trialInd).proposedMsRewardSound=msRewardSound;
-%             trialRecords(trialInd).proposedMsPenaltySound=msPenaltySound;
-%             trialRecords(trialInd).proposedMsPuff=msPuff;
 
-%             %UPDATE REWARDS AND PENALTIES BASED ON REWARD MANAGER - pmm 070525
-%             %rewardManager happens to live in trialManager for now... getting it for use
-%             [rm rewardSizeULorMS msPenalty msRewardSound msPenaltySound updateRM] =calcReinforcement(getReinforcementManager(trialManager),trialRecords, subject);
-%             updateTM = updateTM || updateRM;
-% 
-%             if updateRM
-%                 trialManager = setReinforcementManager(trialManager, rm);
-%             end
-% 
-%             %if slow rewards check, here or the calc reinforcement are likely implicated
-%             trialRecords(trialInd).reinforcementManager = structize(trialManager.reinforcementManager);
-%             trialRecords(trialInd).reinforcementManagerClass = class(trialManager.reinforcementManager);
-% %             trialRecords(trialInd).proposedRewardSizeULorMS=rewardSizeULorMS;
-% %             trialRecords(trialInd).proposedMsPenalty=msPenalty;
-% %             trialRecords(trialInd).proposedMsRewardSound=msRewardSound;
-% %             trialRecords(trialInd).proposedMsPenaltySound=msPenaltySound;
 
-%             if ~stopEarly
-% 
-%                 if trialRecords(trialInd).correct
-% 
-%                     rewardValves=zeros(1,getNumPorts(station));
-%                     rewardValves(resp)=1;
-%                     rewardValves=logical(rewardValves);
-%                     allClosed=logical(zeros(1,getNumPorts(station)));
-% 
-%                     switch getRewardMethod(station)
-% 
-%                         case 'localTimed'
-%                             trialManager.soundMgr=playSound(trialManager.soundMgr,'correctSound',msRewardSound/1000.0,station);
-% 
-%                             %OPEN VALVE
-%                             %setValves(station, rewardValves)
-%                             %expectedValveState=zeros(1,getNumPorts(station));
-%                             [currentValveStates trialRecords(trialInd).responseDetails.valveErrorDetails]=...
-%                                 setAndCheckValves(station,rewardValves,currentValveStates,...
-%                                 trialRecords(trialInd).responseDetails.valveErrorDetails,...
-%                                 trialRecords(trialInd).responseDetails.startTime,'correct reward open');
-%                             valveStart=GetSecs();
-% 
-%                             WaitSecs(rewardSizeULorMS/1000); %%pause(rewardSizeULorMS/1000)
-% 
-%                             %CLOSE VALVE
-%                             %setValves(station,zeros(1,getNumPorts(station)));
-%                             %expectedValveState=rewardValves;
-%                             [currentValveStates trialRecords(trialInd).responseDetails.valveErrorDetails]=...
-%                                 setAndCheckValves(station,zeros(1,getNumPorts(station)),currentValveStates,...
-%                                 trialRecords(trialInd).responseDetails.valveErrorDetails,...
-%                                 trialRecords(trialInd).responseDetails.startTime,'correct reward close');
-%                             trialRecords(trialInd).actualRewardDuration = GetSecs()-valveStart;
-% 
-%                             if verbose
-%                                 trialRecords(trialInd).actualRewardDuration
-%                             end
-%                             pctRewardOff=abs(1.0-(trialRecords(trialInd).actualRewardDuration/(rewardSizeULorMS/1000.0)));
-%                             if pctRewardOff>.05
-%                                 warning('reward duration was off by %g',pctRewardOff)
-%                             end
-% 
-%                         case 'serverPump'
-%                             valveStart=GetSecs();
-%                             timeout=-5.0;
-%                             trialManager.soundMgr = playLoop(trialManager.soundMgr,'correctSound',station,1);
-% 
-%                             sprintf('*****should be no output between here *****')
-% 
-%                             stopEarly=sendToServer(rn,getClientId(rn),constants.priorities.IMMEDIATE_PRIORITY,constants.stationToServerCommands.C_REWARD_CMD,{rewardSizeULorMS,logical(rewardValves)});
-%                             rewardDone=false;
-%                             if ~stopEarly
-%                                 trialRecords(trialInd).primingValveErrorDetails=[];
-%                                 trialRecords(trialInd).latencyToOpenPrimingValves=[];
-%                                 trialRecords(trialInd).latencyToClosePrimingValveRecd=[];
-%                                 trialRecords(trialInd).latencyToClosePrimingValves=[];
-%                                 trialRecords(trialInd).actualPrimingDuration=[];
-%                             end
-%                             while ~rewardDone && ~stopEarly
-%                                 [stopEarly openValveCom openValveCmd openValveCmdArgs]=waitForSpecificCommand(rn,[],constants.serverToStationCommands.S_SET_VALVES_CMD,timeout,'waiting for server open valve response to C_REWARD_CMD',constants.statuses.MID_TRIAL);
-% 
-% 
-%                                 if stopEarly
-%                                     'got stopEarly 2'
-%                                 end
-% 
-% 
-%                                 if ~stopEarly
-% 
-%                                     if any([isempty(openValveCom) isempty(openValveCmd) isempty(openValveCmdArgs)])
-%                                         error('waitforspecificcommand acted like it got a stop early even though it says it didn''t')
-%                                     end
-% 
-%                                     requestedValveState=openValveCmdArgs{1};
-%                                     isPrime=openValveCmdArgs{2};
-% 
-% 
-% 
-%                                     if ~isPrime
-%                                         rewardDone=true;
-%                                         trialRecords(trialInd).latencyToOpenValveRecd=GetSecs()-valveStart;
-% 
-%                                         [stopEarly trialRecords(trialInd).valveErrorDetails,...
-%                                             trialRecords(trialInd).latencyToOpenValves,...
-%                                             trialRecords(trialInd).latencyToCloseValveRecd,...
-%                                             trialRecords(trialInd).latencyToCloseValves,...
-%                                             trialRecords(trialInd).actualRewardDuration,...
-%                                             trialRecords(trialInd).latencyToRewardCompleted,...
-%                                             trialRecords(trialInd).latencyToRewardCompletelyDone]...
-%                                             =clientAcceptReward(...
-%                                             rn,...
-%                                             openValveCom,...
-%                                             station,...
-%                                             timeout,...
-%                                             valveStart,...
-%                                             requestedValveState,...
-%                                             rewardValves,...
-%                                             isPrime);
-% 
-%                                         if stopEarly
-%                                             'got stopEarly 3'
-%                                         end
-% 
-%                                     else
-% 
-%                                         [stopEarly trialRecords(trialInd).primingValveErrorDetails(end+1),...
-%                                             trialRecords(trialInd).latencyToOpenPrimingValves(end+1),...
-%                                             trialRecords(trialInd).latencyToClosePrimingValveRecd(end+1),...
-%                                             trialRecords(trialInd).latencyToClosePrimingValves(end+1),...
-%                                             trialRecords(trialInd).actualPrimingDuration(end+1),...
-%                                             garbage,...
-%                                             garbage]...
-%                                             =clientAcceptReward(...
-%                                             rn,...
-%                                             openValveCom,...
-%                                             station,...
-%                                             timeout,...
-%                                             valveStart,...
-%                                             requestedValveState,...
-%                                             [],...
-%                                             isPrime);
-% 
-%                                         if stopEarly
-%                                             'got stopEarly 4'
-%                                         end
-%                                     end
-%                                 end
-% 
-%                             end
-% 
-%                             sprintf('*****and here *****')
-% 
-%                             trialManager.soundMgr = playLoop(trialManager.soundMgr,'',station,0);
-%                         otherwise
-%                             error('unrecognized reward method')
-%                     end
-% 
-%                 % we can probably remove this part - this handles the wrong
-%                 % response case - this is a phase now
-%                 elseif ~ischar(trialRecords(trialInd).response)
-%                     trialManager.soundMgr=playSound(trialManager.soundMgr,'wrongSound',msPenaltySound/1000,station);
-%                     numErrorFrames=ceil((msPenalty/1000)/ifi);
-%                     [errStim errorScale] = errorStim(stimManager,numErrorFrames);
-%                     errAudioStim = [];
-% 
-%                     [stopEarly,...
-%                         errorRecords(trialInd).response,...
-%                         errorRecords(trialInd).responseDetails,...
-%                         errorRecords(trialInd).containedManualPokes,...
-%                         errorRecords(trialInd).leftWithManualPokingOn,...
-%                         errorRecords(trialInd).containedAPause,...
-%                         errorRecords(trialInd).containedForcedRewards, ...
-%                         errorRecords(trialInd).didHumanResponse, ... 
-%                         errorRecords(trialInd).didStochasticResponse] ...
-%                         =stimOGL( ...
-%                         trialManager, ...
-%                         errStim, ...
-%                         errAudioStim, ...
-%                         LUT, ...
-%                         'cache', ...
-%                         errorScale, ...
-%                         window, ...
-%                         ifi, ...
-%                         [], ...
-%                         [], ...
-%                         trialRecords(trialInd).interTrialLuminance, ...
-%                         station,0,0,.5,1,0,rn,getID(subject),trialRecords(trialInd).stimManagerClass);
-% 
-%                     trialRecords(trialInd).errorRecords=errorRecords(trialInd);
-% 
-%                     if stopEarly
-%                         'got stopEarly 6'
-%                     end
-%                     
-%                 % END REMOVE
-%                 % ==================================================
-%                 
-%                 else
-%                     trialRecords(trialInd).response
-%                     stopEarly=1;
-% 
-%                     if stopEarly
-%                         'setting stopEarly '
-%                     end
-%                 end
-%             end
-
+            % =====================================================================================================
+            % handle any after-trial server commands
             currentValveStates=verifyValvesClosed(station);
 
             while ~isempty(rn) && commandsAvailable(rn,constants.priorities.AFTER_TRIAL_PRIORITY) && ~stopEarly

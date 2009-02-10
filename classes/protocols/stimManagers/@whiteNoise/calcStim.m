@@ -148,6 +148,7 @@ out.stimSpecs{1} = stimSpec(stim,{[] 2},'expert',0,numFrames,[],scaleFactor,0,hz
 
 % final phase
 out.stimSpecs{2} = stimSpec(interTrialLuminance,{[] 1},'loop',0,1,[],scaleFactor,1,hz,[]);
+% out.stimSpecs{2} = stimSpec(interTrialLuminance,{[] 1},'loop',0,15,[],scaleFactor,0,hz,[]); % go back to phase 1
 
 % details.big = {'expert', stim.seedValues}; % store in 'big' so it gets written to file
 % variables to be stored for recalculation of stimulus from seed value for rand generator

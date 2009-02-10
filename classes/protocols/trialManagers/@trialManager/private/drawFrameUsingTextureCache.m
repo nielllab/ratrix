@@ -3,7 +3,7 @@ function drawFrameUsingTextureCache(tm, window, i, frameNum, stimSize, lastI, do
 
 % This function draws the given frame using the textureCache strategy.
 % Part of stimOGL rewrite.
-% INPUT: window, i, frameNum, stimSize, lastI, dontclear, textures(i), destRect, filtMode, labelFrames, ...
+% INPUT: window, i, frameNum, stimSize, lastI, dontclear, texture, destRect, filtMode, labelFrames, ...
 %    xOrigTextPos, yNewTextPos
 % OUTPUT: (none)
 

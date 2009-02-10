@@ -6,8 +6,9 @@ function [didAPause paused done response doValves ports didValves didHumanRespon
 % This function handles the keyboard input part of stimOGL.
 % Part of stimOGL rewrite.
 % INPUT: keyCode, didAPause, paused, done, response, doValves, ports, didValves, didHumanResponse, manual, doPuff, pressingM, pressingP, allowQPM,
-%            originalPriority, priorityLevel
-% OUTPUT: didAPause, paused, done, response, doValves, ports, didValves, didHumanResponse, manual, doPuff, pressingM, pressingP
+%            originalPriority, priorityLevel, kbConstants
+% OUTPUT: didAPause, paused, done, response, doValves, ports, didValves, didHumanResponse, manual, doPuff, pressingM, pressingP, 
+%            overheadTime, initTime, kDownTime
 
 % note: this function pretty much updates a bunch of flags....
 

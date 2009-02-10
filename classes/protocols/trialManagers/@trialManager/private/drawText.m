@@ -3,8 +3,8 @@ function xTextPos = drawText(tm, window, labelFrames, subID, xOrigTextPos, yText
 
 % This function draws display text for each stim frame.
 % Part of stimOGL rewrite.
-% INPUT: tm, window, labelFrames, subID, xOrigTextPos, yTextPos, yNewTextPos, stimID, protocolStr,
-%   textLabel, trialLabel, i, frameNum, manual, didAPause, ptbVersion, ratrixVersion
+% INPUT: window, labelFrames, subID, xOrigTextPos, yTextPos, yNewTextPos, normBoundsRect, stimID, protocolStr,
+%   textLabel, trialLabel, i, frameNum, manual, didAPause, ptbVersion, ratrixVersion, numDrops, numApparentDrops, phaseInd, phaseType
 % OUTPUT: xTextPos
 
 xTextPos=xOrigTextPos;

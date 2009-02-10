@@ -2,7 +2,7 @@ function [loop trigger frameIndexed timeIndexed indexedFrames timedFrames strate
 % This function determines what strategy to use in showing the frames of the visual stimulus.
 % Part of stimOGL rewrite.
 % INPUT: stim, type, responseOptions
-% OUTPUT: loop, trigger, frameIndexed, timeIndexed, indexedFrames, strategy
+% OUTPUT: loop, trigger, frameIndexed, timeIndexed, indexedFrames, timedFrames, strategy
 
 if length(size(stim))>3
     error('stim must be 2 or 3 dims')
@@ -70,11 +70,9 @@ else
             strategy = 'textureCache';
             loop = 1;
         case 'dynamic'
-            %             strategy = 'dynamic'; % 10/31/08 - implementing dynamic mode
             error('dynamic type not yet implemented') % 1/20/09 - dynamic is not the same as expert (expert is what we want)
         case 'expert' %callback moreStim() to call ptb drawing methods, but leave frame labels and 'drawingfinished' to stimOGL
             strategy='expert';
-            %             error('expert type not yet implemented')
         otherwise
             error('unrecognized stim type, must be ''static'', ''cache'', ''loop'', ''dynamic'', ''expert'', {''indexedFrames'' [frameIndices]}, or {''timedFrames'' [frameTimes]}')
     end

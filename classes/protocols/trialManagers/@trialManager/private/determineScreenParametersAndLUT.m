@@ -2,8 +2,8 @@ function [scrWidth scrHeight scaleFactor height width scrRect scrLeft scrTop scr
     = determineScreenParametersAndLUT(tm, window, station, metaPixelSize, stim, LUT, verbose, strategy, frameDropCorner)
 % This function determines the scaleFactor and LUT of the Screen window.
 % Part of stimOGL rewrite.
-% INPUT: window, station, metaPixelSize, stim, LUT, verbose, strategy
-% OUTPUT: scrWidth scrHeight scaleFactor height width scrRect scrLeft scrTop scrRight scrBottom destRect
+% INPUT: window, station, metaPixelSize, stim, LUT, verbose, strategy, frameDropCorner
+% OUTPUT: scrWidth, scrHeight, scaleFactor, height, width, scrRect, scrLeft, scrTop, scrRight, scrBottom, destRect, currentCLUT, frameDropCorner
 
 if window>=0
     [scrWidth scrHeight]=Screen('WindowSize', window);
@@ -14,7 +14,6 @@ end
 
 % 10/31/08 - implement handling of expert mode (if expert, height and width should be fields of stim)
 if ~isempty(strategy) && strcmp(strategy, 'expert')
-    stim
     height = stim.height;
     width = stim.width;
     scaleFactor = metaPixelSize; % unused in this case (height and width are already set)

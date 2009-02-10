@@ -110,6 +110,8 @@ for gcInd=1:2:length(transitionCriterion)-1
             trialResponse = response;
         end
         
+        % we should stop checking all the criteria if we already passed one (essentially first come first served)
+        break;
     end
 end
 

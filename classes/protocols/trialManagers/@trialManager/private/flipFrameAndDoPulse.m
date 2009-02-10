@@ -1,5 +1,8 @@
 function [lastI timestamps] = ...
     flipFrameAndDoPulse(tm, window, dontclear, i, framesPerUpdate, ifi, paused, doFramePulse,station,timestamps)
+% This function does the Screen('Flip') and frame pulses
+% INPUT: window, dontclear, i, framesPerUpdate, ifi, paused, doFramePulse, station, timestamps
+% OUTPUT: lastI, timestamps
 
 timeStamps.enteredFlipFrameAndDoPulse=GetSecs;
 

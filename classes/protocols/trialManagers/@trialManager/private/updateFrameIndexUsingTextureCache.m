@@ -60,11 +60,6 @@ elseif timeIndexed %ok, this is where we do the timedFrames type
     if tm.dropFrames
         i=min(find(scheduledFrameNum<=cumsum(double(timedFrames))));
     else
-        
-        %     if requestFrame~=0
-        %         i=min(find((frameNum-requestFrame)<=cumsum(double(timedFrames))));     %find the stim frame number for the number of frames since the request
-        %     end
-        
         i=min(find(frameNum<=cumsum(double(timedFrames))));
     end
     

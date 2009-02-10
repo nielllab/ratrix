@@ -1,11 +1,9 @@
-function [quit response manual didManualInTrial actualReinforcementDurationMSorUL proposedReinforcementDurationMSorUL ...
-    eyeData gaze station phaseRecords ratrixSVNInfo ptbSVNInfo]=  ...
+function [quit response manual didManualInTrial actualRewardDurationMSorUL proposedRewardDurationMSorUL ...
+    actualAirpuffDuration proposedAirpuffDuration eyeData gaze station phaseRecords ratrixSVNInfo ptbSVNInfo]=  ...
     stimOGL(tm, stimSpecs, stimManager, LUT, targetOptions, distractorOptions, requestOptions, interTrialLuminance, ...
     station, manual,allowQPM,timingCheckPct, ...
     noPulses,textLabel,rn,subID,stimID,protocolStr,trialLabel,eyeTracker,msAirpuff,trialRecords)
 
-%%% Edited 8/8/08 - fan
-%%% Break this into functions so that each type of trialManager can have different handling
 %%% =====================================================================================================================
 
 
@@ -81,26 +79,20 @@ try
         metaPixelSize = getScaleFactor(spec);
 
         % =====================================================================================================================
-        % function [loop trigger frameIndexed timeIndexed indexedFrames strategy] = determineStrategy(tm, stim, type, responseOptions)
         [phaseData{i}.loop phaseData{i}.trigger phaseData{i}.frameIndexed phaseData{i}.timeIndexed ...
             phaseData{i}.indexedFrames phaseData{i}.timedFrames phaseData{i}.strategy] = determineStrategy(tm, stim, type, responseOptions);
         
         % =====================================================================================================================
-        % function floatprecision = determineColorPrecision(tm, stim, verbose, strategy)
         [phaseData{i}.floatprecision stim interTrialLuminance] = ...
             determineColorPrecision(tm, stim, verbose, phaseData{i}.strategy, interTrialLuminance);
         stimSpecs{i}=setStim(spec,stim);
 
         % =====================================================================================================================
-        % % function [scrWidth scrHeight scaleFactor] = determineScaleFactorAndLUT(window, station, metaPixelSize, stim, LUT, verbose, strategy)
         if window>0
             [scrWidth scrHeight scaleFactor height width scrRect scrLeft scrTop scrRight scrBottom phaseData{i}.destRect, phaseData{i}.CLUT frameDropCorner] ...
                 = determineScreenParametersAndLUT(tm, window, station, metaPixelSize, stim, LUT, verbose, phaseData{i}.strategy, frameDropCorner);
 
             % =====================================================================================================================
-            %  function [textures, numDots, dotX, dotY, dotLocs, dotSize, dotCtr, resident, texidresident] ...
-            %    = cacheTextures(tm, strategy, stim, window, floatprecision, verbose)
-
             %   show movie following mario's 'ProgrammingTips' for the OpenGL version of PTB
             %   http://www.kyb.tuebingen.mpg.de/bu/people/kleinerm/ptbosx/ptbdocu-1.0.5MK4R1.html
 
@@ -113,6 +105,7 @@ try
             phaseData{i}.CLUT=[];
             phaseData{i}.textures=[];
             
+            % these were used for dynamicDots - are we okay with getting rid of that?
             %should eliminate the following from cacheTextures, they're never used
             phaseData{i}.numDots=[];
             phaseData{i}.dotX=[];
@@ -121,6 +114,7 @@ try
             phaseData{i}.dotSize=[];
             phaseData{i}.dotCtr=[];
 
+            % happens in runRealTimeLoop
             %these should be taken care of?
             %             phase.frameIndexed;
             %             phase.loop;
@@ -141,18 +135,12 @@ try
 
     % =====================================================================================================================
     % Enter main real-time loop
-    %     function [quit response didManualInTrial manual actualReinforcementDurationMSorUL proposedReinforcementDurationMSorUL phaseRecords] ...
-    %     = runRealTimeLoop(tm, window, ifi, stimSpecs, phaseData, stimManager, ...
-    %     targetOptions, distractorOptions, requestOptions, ...
-    %     station, manual,allowQPM,timingCheckPct,noPulses,textLabel,rn,subID,stimID,protocolStr,trialLabel,msAirpuff, ...
-    %     originalPriority, verbose);
 
     % we need the floatprecision for the interTrialLuminance (assume it is the last phase)
-
     interTrialPrecision=phaseData{end}.floatprecision;
-
     % We will break this main function into smaller functions also in the trialManager class
-    [quit response didManualInTrial manual actualReinforcementDurationMSorUL proposedReinforcementDurationMSorUL phaseRecords eyeData gaze frameDropCorner station] ...
+    [quit response didManualInTrial manual actualRewardDurationMSorUL proposedRewardDurationMSorUL actualAirpuffDuration proposedAirpuffDuration ...
+        phaseRecords eyeData gaze frameDropCorner station] ...
         = runRealTimeLoop(tm, window, ifi, stimSpecs, phaseData, stimManager, ...
         targetOptions, distractorOptions, requestOptions, interTrialLuminance, interTrialPrecision, ...
         station, manual,allowQPM,timingCheckPct,noPulses,textLabel,rn,subID,stimID,protocolStr,ptbVersion,ratrixVersion,trialLabel,msAirpuff, ...

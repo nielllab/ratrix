@@ -68,7 +68,9 @@ switch nargin
                     error('orientation must be real scalar')
                 end
 
-                if (isscalar(in.startFrame) && isinteger(in.startFrame) && in.startFrame>0) || strcmp(in.startFrame,'randomize')
+                if (isscalar(in.startFrame) && isinteger(in.startFrame) && in.startFrame>0)
+                    varargin{1}(j).startFrame=uint32(in.startFrame); %otherwise our frame indices can't exceed the max of the datatype of the startframe, and there's no colon operator on uint64...
+                elseif strcmp(in.startFrame,'randomize')
                     %pass
                 else
                     error('start frame must be scalar integer >0 or ''randomize''')

@@ -1,5 +1,5 @@
 function r=doTrials(s,r,n,rn,trustOsRecordFiles)
-%this will doTrials on station=(s) of ratrix=(r).  
+%this will doTrials on station=(s) of ratrix=(r).
 %n=number of trials, where 0 means repeat indefinitely
 %rn is a ratrix network object, which only the server uses, otherwise leave empty
 %trustOsRecordFiles is risky because we know that they can be wrong when
@@ -9,7 +9,7 @@ function r=doTrials(s,r,n,rn,trustOsRecordFiles)
 %recordNeuralData is a flag to decide whether or not to start datanet for NIDAQ recording
 if ~exist('trustOsRecordFiles','var')
     trustOsRecordFiles=false;
-end 
+end
 
 if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
     if ~isempty(getStationByID(r,s.id))
@@ -19,10 +19,12 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
         trialNum=0;
 
         if n>=0
-          
-            
+
+            ListenChar(2);
+            FlushEvents('keyDown');
+
             subject = calibrateEyeTracker(subject);
-            %some calibration requires GUi's &  must happen before PTB       
+            %some calibration requires GUi's &  must happen before PTB
 
             if strcmp(s.rewardMethod,'localPump')
                 if ~ s.localPumpInited
@@ -34,7 +36,7 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
             end
 
             s=startPTB(s);
-            
+
             % 10/17/08 - start datanet (for neural data recording)
             % ==========================================================================
             % this has to be done at the trialManager level, because the datanet is owned by the trialManager
@@ -44,23 +46,23 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
             parameters.refreshRate = params.hz;
             parameters.subjectID = getID(subject);
             subject = setUpOrStopDatanet(subject,'setup',parameters); % replace datanet_path with oracle lookup (hard coded for now in setup(datanet))
-            
+
             % 10/29/08 - send a command to data listener to store local variables (resolution, refreshRate)
             % ==========================================================================
-            
-            
+
+
             %make sure valves are in a known state: closed - pmm 080621
             setValves(s, 0*getValves(s))
-            %if this is not the case some stations (quatech PCMCIA) complain on the first setAndCheckValves 
-            
+            %if this is not the case some stations (quatech PCMCIA) complain on the first setAndCheckValves
+
             % This is a hard coded trial records filter
             % Need to decide where to parameterize this
             filter = {'lastNTrials',int32(100)};
-            
+
             % Load a subset of the previous trial records based on the given filter
             [trialRecords localRecordsIndex sessionNumber] = getTrialRecordsForSubjectID(r,getID(subject),filter, trustOsRecordFiles);
-            
-        
+
+
             while keepWorking
                 trialNum=trialNum+1;
                 [subject r keepWorking secsRemainingTilStateFlip trialRecords s]= ...
@@ -79,7 +81,7 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
 
                 if n>0 && trialNum>=n
                     keepWorking=0;
-                    
+
                 end
             end
 
@@ -91,8 +93,8 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
 
             s=stopPTB(s);
 
-            stopEyeTracking(subject); 
-            
+            stopEyeTracking(subject);
+
             % 10/17/08 - stop datanet
             % ==========================================================================
             subject = setUpOrStopDatanet(subject,'stop',[]);
@@ -109,6 +111,7 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
 
 
             close all
+            ListenChar(0);
         else
             error('n must be >= 0')
         end

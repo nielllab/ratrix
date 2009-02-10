@@ -42,7 +42,7 @@ doMask=false;
 
 vh=nAFC(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,requestRewardSizeULorMS,...
     percentCorrectionTrials,msResponseTimeLimit,pokeToRequestStim,maintainPokeToMaintainStim,msMaximumStimPresentationDuration,...
-    maximumNumberStimPresentations,doMask,constantRewards,[],[],[],{'flickerRamp',[0 .5]},true,'LED');
+    maximumNumberStimPresentations,doMask,constantRewards,[],[],[],{'flickerRamp',[0 .5]},true,'ptb');
 
 pixPerCycs              =[20];
 targetOrientations      =[pi/2];
@@ -163,7 +163,9 @@ noiseStim=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLumin
 
 unfilteredNoise=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
-
+led=nAFC(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,requestRewardSizeULorMS,...
+    percentCorrectionTrials,msResponseTimeLimit,pokeToRequestStim,maintainPokeToMaintainStim,msMaximumStimPresentationDuration,...
+    maximumNumberStimPresentations,doMask,constantRewards,[],[],[],{'off'},false,'LED');
 
 if ismac
     ts001 = '/Users/eflister/Desktop/ratrix trunk/classes/protocols/stimManagers/@flicker/ts001';
@@ -176,7 +178,6 @@ end
 [noiseSpec.loopDuration]         =deal(30);
 
 hateren=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-
 
 
 [noiseSpec.locationDistribution]=deal(1);
@@ -198,7 +199,7 @@ ts4 = trainingStep(vh, discrimStim, repeatIndefinitely(), noTimeOff(), svnRev);%
 ts5 = trainingStep(vh, imageStim,  repeatIndefinitely(), noTimeOff(), svnRev); %morph discrim
 ts6 = trainingStep(vh, noiseStim,  repeatIndefinitely(), noTimeOff(), svnRev); %filteredNoise discrim
 ts7 = trainingStep(vh, unfilteredNoise,  repeatIndefinitely(), noTimeOff(), svnRev); %unfiltered goToSide
-ts8 = trainingStep(vh, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svnRev); %fullfieldFlicker
+ts8 = trainingStep(led, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svnRev); %fullfieldFlicker
 ts9 = trainingStep(vh, hateren,  repeatIndefinitely(), noTimeOff(), svnRev); %hateren
 
 p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8, ts9});

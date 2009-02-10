@@ -16,6 +16,7 @@ elseif 2==exist([fileName '.txt'],'file')
     %     fprintf('textscan took %g secs\n',toc)
     %     noise=C{1};
     
+    noise=noise-min(noise);
     
     encodeAsInt=false;
     if encodeAsInt %no file size gain, but RAM gain
@@ -23,7 +24,6 @@ elseif 2==exist([fileName '.txt'],'file')
             error('file contained some non-integers')
         end
         
-        noise=noise-min(noise);
         bits=ceil(log2(max(noise)));
         bits=num2str(2^nextpow2(bits));
         if ismember(bits,{'8' '16' '32' '64'})
@@ -46,6 +46,8 @@ if ~(isvector(noise) && isreal(noise) && isnumeric(noise))
     error('file contents not real numeric vector')
 end
 
+noise=normalize(noise);
+
 outInds=[];
 if duration>0
     lastAvailable=length(noise)-duration*oldHz+1;
@@ -60,9 +62,6 @@ if duration>0
     noise=noise(inds);
     outInds=[inds(1) inds(end)];
 end
-
-noise=double(noise);
-noise=normalize(noise);
 
 mins=(0:(length(noise)-1))/oldHz/60;
 doplot=false;
@@ -116,11 +115,13 @@ if oldHz~=newHz
         error('resampling gave wrong length for new sig')
     end
     noise=newNoise;
+    noise=normalize(noise);
 end
-noise=normalize(noise);
+
 end
 
 function v=normalize(v)
+v=double(v);
 v=v-min(v);
 v=v/max(v);
 end

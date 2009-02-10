@@ -17,7 +17,7 @@ end
 
 matches={};
 
-devices=daqhwinfo;
+devices=daqhwinfo; %this is slow!
 devices=devices.InstalledAdaptors;
 
 %go through installed daq devices to find one that meets our requirements

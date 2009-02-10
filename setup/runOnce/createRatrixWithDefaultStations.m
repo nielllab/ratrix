@@ -1,5 +1,4 @@
 function r=createRatrixWithDefaultStations(machines,dataPath,rewardMethod,localMultiDisplaySetup)
-
 serverDataPath = fullfile(dataPath, 'ServerData');
 r=ratrix(serverDataPath,1);
 
@@ -11,11 +10,10 @@ if localMultiDisplaySetup
         error('you probably don''t really mean localMultiDisplaySetup on mac')
     end
     warning('you are running with local multidisplay -- timing will be bad!')
-    Screen('Preference', 'SkipSyncTests',1) %hmm, i think startPTB will undo this
     
     screenNum=int8(max(Screen('Screens')));
     
-    %screenNum=int8(1); %may need to uncomment for some dual-headed rig stations
+    screenNum=int8(1); %may need to uncomment for some dual-headed rig stations
     %rather than set special rig station pportaddr's here, set up a mapping to their mac address in makeDefaultStation
 end
     

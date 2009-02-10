@@ -47,7 +47,7 @@ try
         if abs((s.ifi/(1/res.hz))-1)>.1
             s.ifi
             1/res.hz
-            error('screen(resolution) reporting framerate off by more than 10% of measured ifi') %needs to be warning to work with remotedesktop
+            error('screen(resolution) reporting framerate off by more than 10%% of measured ifi') %needs to be warning to work with remotedesktop
         end
     else
         if ~ismac

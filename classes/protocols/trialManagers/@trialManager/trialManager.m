@@ -123,6 +123,14 @@ switch nargin
             error('frameDropCorner must be {''off''}, {''sequence'',[vector of normalized luminance values]}, or {''flickerRamp'',[rampBottomNormalizedLuminanceValue flickerNormalizedLuminanceValue]}')
         end
         
+        if strcmp(t.displayMethod,'LED')
+            if strcmp(t.frameDropCorner{1},'off') && ~t.dropFrames
+                %pass
+            else
+                error('must have dropFrames=false and frameDropCorner={''off''} for LED')
+            end
+        end
+        
         t = class(t,'trialManager');
         
         

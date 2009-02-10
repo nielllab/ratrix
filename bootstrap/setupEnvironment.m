@@ -16,6 +16,7 @@ warning('on','MATLAB:dispatcher:nameConflict')
 
 clearJavaComponents();
 closeAllSerials
+daqreset
 
 setupDBPaths();
 %would like to have these taken care of in setupEnvironment(), but some java problem seems to conflict with making the rnet (addJavaComponents() does update the path, but the import fails to make the class def's visible)

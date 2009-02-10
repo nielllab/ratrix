@@ -1,5 +1,5 @@
 function [quit response didManualInTrial manual actualReinforcementDurationMSorUL proposedReinforcementDurationMSorUL ...
-    phaseRecords eyeData gaze frameDropCorner] ...
+    phaseRecords eyeData gaze frameDropCorner station] ...
     = runRealTimeLoop(tm, window, ifi, stimSpecs, phaseData, stimManager, ...
     targetOptions, distractorOptions, requestOptions, interTrialLuminance, interTrialPrecision, ...
     station, manual,allowQPM,timingCheckPct,noPulses,textLabel,rn,subID,stimID,protocolStr,ptbVersion,ratrixVersion,trialLabel,msAirpuff, ...
@@ -453,38 +453,73 @@ while ~done && ~quit;
                 calcReinforcement(getReinforcementManager(tm),trialRecords, []);
             msRewardOwed=msRewardOwed+rewardSizeULorMS; % give reward duration
             % set timeout for reward phase
-            if isempty(framesUntilTransition)
-                framesUntilTransition = ceil((rewardSizeULorMS/1000)/ifi);
+
+            
+            if window>0
+                if isempty(framesUntilTransition)
+                    framesUntilTransition = ceil((rewardSizeULorMS/1000)/ifi);
+                end
+            elseif strcmp(tm.displayMethod,'LED')
+                if isempty(framesUntilTransition)
+                    framesUntilTransition=ceil(getHz(spec)*rewardSizeULorMS/1000);
+                    if isscalar(squeeze(stim))
+                        stim=stim*ones(framesUntilTransition,1); %need to lengthen the stim cuz rewards are currently timed based on frames
+                    else
+                        size(stim)
+                        error('stim wasn''t scalar')
+                    end
+                else
+                    framesUntilTransition
+                    error('LED needs framesUntilTransition empty for reward')
+                end
+            else
+                error('huh?')
             end
+
+
             proposedReinforcementDurationMSorUL = proposedReinforcementDurationMSorUL + rewardSizeULorMS;
         elseif strcmp(phaseType,'error')
-             % error phase - assign error values from calcReinforcement 
+            % error phase - assign error values from calcReinforcement
             [rm rewardSizeULorMS msPenalty msPuff msRewardSound msPenaltySound updateRM] =...
                 calcReinforcement(getReinforcementManager(tm),trialRecords, []);
+
             % also need to call errorStim(stimManager,numErrorFrames) here...wtf how do we do this..
             % and assign to textures now
-            numErrorFrames=ceil((msPenalty/1000)/ifi);
+            if window>0
+                numErrorFrames=ceil((msPenalty/1000)/ifi);
+            elseif strcmp(tm.displayMethod,'LED')
+                numErrorFrames=ceil(getHz(spec)*msPenalty/1000);                
+            else
+                error('huh?')
+            end
+            
             [stim errorScale] = errorStim(stimManager,numErrorFrames);
-            [floatprecision stim garbage] = determineColorPrecision(tm, stim, false, strategy, interTrialLuminance);
-            [textures, garbage, garbage, garbage, garbage, ...
-                garbage, garbage] ...
-                = cacheTextures(tm,strategy,stim,window,floatprecision,false);
+
+            if window>0
+                [floatprecision stim garbage] = determineColorPrecision(tm, stim, false, strategy, interTrialLuminance);
+                [textures, garbage, garbage, garbage, garbage, ...
+                    garbage, garbage] ...
+                    = cacheTextures(tm,strategy,stim,window,floatprecision,false);
+                destRect=Screen('Rect',window);
+            elseif strcmp(tm.displayMethod,'LED')
+                floatprecision=[];
+            else
+                error('huh?')
+            end
+            
             % set timeout for error phase
             if isempty(framesUntilTransition)
                 framesUntilTransition = numErrorFrames;
+            elseif strcmp(tm.displayMethod,'LED')
+                error('LED needs framesUntilTransition empty for error')
             end
-            % fix destRect
-%             destRect=phaseData{specInd-1}.destRect;
-            destRect=Screen('Rect',window);
-%             sca
-%             keyboard
         end
-        
+
         % get startFrame if not empty
         if ~isempty(getStartFrame(spec))
             i=getStartFrame(spec);
         end
-        
+
         stepsInPhase = 0;
         isFinalPhase = getIsFinalPhase(spec); % we set the isFinalPhase flag to true if we are on the last phase
         stochasticDistribution = getStochasticDistribution(spec);
@@ -541,10 +576,23 @@ while ~done && ~quit;
         
         updatePhase = 0;
         
-        
         if strcmp(tm.displayMethod,'LED')
+            station=stopPTB(station); %should handle this better -- LED setting is trialManager specific, so other training steps will expect ptb to still exist
+            %would prefer to never startPTB until a trialManager needs it,and then start it at the proper res the first time
+            %trialManager.doTrial should startPTB if it wants one and there isn't one, and stop it if there is one and it doesn't want it
+            %note that ifi is not coming in empty on the first trial and the leftover value from the screen is misleading, need to fix...
+            
+            fprintf('doing phase %d\n',specInd) %note that the way we use specInd prevents us from revisiting phases, we would overwrite records...  should be fixed...
+            
+            outputRange=[-5 0]; %hardcoded for our LED amp
+            
             if ~isempty(analogOutput)
                 stop(analogOutput);
+                
+                evts=showdaqevents(analogOutput);
+                if ~isempty(evts)
+                    evts
+                end
                 
                 if specInd>1
                     phaseRecords(specInd-1).LEDstopped=GetSecs; %need to preallocate
@@ -552,40 +600,129 @@ while ~done && ~quit;
                 else
                     error('shouldn''t happen')
                 end
-                
-                delete(analogOutput); %we don't save it cuz we might want a new sampling rate and the putdata will probably take more time than openNidaqForAnalogOutput
-                analogOutput=[];
+
+                %need to remove leftover data from previous putdata calls (no other way to do it that i see)
+                if get(analogOutput,'SamplesAvailable')>0
+                    delete(analogOutput.Channel(1));
+
+                    %this block stolen from openNidaqForAnalogOutput -- need to refactor
+                    aoInfo=daqhwinfo(analogOutput);
+                    hwChans=aoInfo.ChannelIDs;
+                    chans=addchannel(analogOutput,hwChans(1));
+                    if length(chans)~=1
+                        error('didn''t get requested num chans even though hardware appears to support it')
+                    end
+                    if setverify(analogOutput,'SampleRate',getHz(spec))~=getHz(spec)
+                        rates = propinfo(analogOutput,'SampleRate')
+                        rates.ConstraintValue
+                        getHz(spec)
+                        error('couldn''t set requested sample rate')
+                    end
+                    verifyRange=setverify(analogOutput.Channel(1),'OutputRange',outputRange);
+                    if verifyRange(1)<=outputRange(1)&& verifyRange(2)>=outputRange(2)
+                        uVerifyRange=setverify(analogOutput.Channel(1),'UnitsRange',verifyRange);
+                        if any(uVerifyRange~=verifyRange)
+                            verifyRange
+                            uVerifyRange
+                            error('could not set UnitsRange to match OutputRange')
+                        end
+                    else
+                        aoInfo.OutputRanges
+                        outputRange
+                        error('couldn''t get requested output range')
+                    end
+                    %end refactor block
+                end
+
+            else
+                preAnalog=GetSecs;
+                [analogOutput bits]=openNidaqForAnalogOutput(getHz(spec),outputRange); %should ultimately send bits back through stimOGL to doTrial so can be stored as trialRecords(trialInd).resolution.pixelSize
+                fprintf('took %g secs to open analog out (mostly in call to daqhwinfo)\n',GetSecs-preAnalog)
             end
             
-            if loop && ~frameIndexed && ~trigger && ~timeIndexed
-                %pass
-            else
-                error('LED only supports loop at the moment -- should be easy to generalize to all tho')
+            if tm.dropFrames
+                error('can''t have dropFrames set for LED')
             end
-
-            outputRange=[0 5];
-           
-            if all([size(1,stim) size(2,stim)]==1) && all(stim>=0) && all(stim<=1)
-                data=squeeze(stim);
-                data=data*diff(outputRange);
-                data=data-(min(data)-outputRange(1));
+            
+            if isscalar(interTrialLuminance) && interTrialLuminance>=0 && interTrialLuminance<=1
+                scaledInterTrialLuminance=interTrialLuminance*diff(outputRange)+outputRange(1);
+            else
+                error('bad interTrialLuminance')
+            end
+            verify=setverify(analogOutput,'OutOfDataMode','DefaultValue');
+            if ~strcmp(verify,'DefaultValue')
+                error('couldn''t set OutOfDataMode to DefaultValue')
+            end
+            
+            verify=setverify(analogOutput.Channel(1),'DefaultChannelValue',scaledInterTrialLuminance);
+            if verify~=scaledInterTrialLuminance
+                error('couldn''t set DefaultChannelValue')
+            end
+                    
+            data=squeeze(stim);
+            
+            %could move this logic to updateFrameIndexUsingTextureCache, it is related to that info  
+            if frameIndexed
+                %might also be loop, will handle below with 'RepeatOutput'
+                data=data(indexedFrames);
+            elseif loop
+                %pass
+            elseif trigger
+                error('trigger not yet supported by LED') %would be easy to add with putsample, but a single 1x1 discriminandum frame can only be luminance discrimination - not very interesting
+            elseif timeIndexed 
+                oldData=data;
+                data=[];
+                for fNum=1:length(timedFrames)
+                    data(end+1:end+timedFrames(fNum))=oldData(fNum);
+                end
+                if timedFrames(end)==0
+                    data(end+1)=timedFrames(end);
+                    verify=setverify(analogOutput,'OutOfDataMode','Hold');
+                    if ~strcmp(verify,'Hold')
+                        error('couldn''t set OutOfDataMode to Hold')
+                    end
+                end
+            end
+            
+            if isvector(data) && all(data>=0) && all(data<=1)
+                data=data*diff(outputRange)+outputRange(1);
             else
                 error('bad stim size for LED')
             end
             
-            
-            %LED won't currently handle intertrial interval/luminance
-            %consider using these analogOutput properties
-            %OutOfDataMode
-            %DefaultChannelValue
-            
-            [analogOutput bits]=openNidaqForAnalogOutput(getHz(spec),[-10 10]); %should ultimately send bits back through stimOGL to doTrial so can be stored as trialRecords(trialInd).resolution.pixelSize
-            putdata(analogOutput,data); %this might run out of RAM...  check MaxSamplesQueued 
-            verify=setverify(analogOutput,'RepeatOutput',inf);
-            if ~isinf(verify)
-                error('couldn''t set to repeat forever')
+            if get(analogOutput,'MaxSamplesQueued')>=length(data) %if BufferingMode set to Auto, should only be limited by system RAM, on rig computer >930 mins @ 1200 Hz 
+                preAnalog=GetSecs;
+                if length(data)>1
+                    putdata(analogOutput,data); %crashes when length is 1! have to use putsample, then 'SamplesOutput' doesn't work... :(
+                    outputsamplesOK=true;
+                else
+                    putsample(analogOutput,data);
+                    outputsamplesOK=false;
+                end
+                fprintf('took %g secs to put analog data\n',GetSecs-preAnalog)
+            else
+                get(analogOutput,'MaxSamplesQueued')/length(data)
+                error('need to manually buffer this much data for LED')
             end
-            start(analogOutput);
+            
+            if loop
+                if timeIndexed || trigger
+                    error('can''t have loop when timeIndexed or trigger')
+                end
+                rpts=inf;
+            else
+                rpts=0; %sets *additional* repeats, 1 is assumed
+            end
+            verify=setverify(analogOutput,'RepeatOutput',rpts);
+            if rpts~=verify
+                rpts
+                verify
+                error('couldn''t set to repeats')
+            end
+            
+            if outputsamplesOK
+                start(analogOutput);
+            end
             
             phaseRecords(specInd).LEDstarted=GetSecs; %need to preallocate
             
@@ -690,15 +827,26 @@ while ~done && ~quit;
         timestamps.missesRecorded=GetSecs;
     else
         
-        if ~isempty(analogOutput)
-            stimDone = false; %need to figure this out for non-loop stims
+        if ~isempty(analogOutput) || window<=0 || strcmp(tm.displayMethod,'LED')
+            phaseRecords(specInd).LEDintermediateTimestamp=GetSecs; %need to preallocate
+            phaseRecords(specInd).intermediateSampsOutput=get(analogOutput,'SamplesOutput'); %need to preallocate
             
-            if stimDone && isempty(responseOptions) && ~any([frameIndexed loop trigger timeIndexed])
-                done=1;
+            if ~isempty(framesUntilTransition)
+                %framesUntilTransition is calculated off of the screen's ifi which is not correct when using LED
+                framesUntilTransition=stepsInPhase+2; %prevent handlePhasedTrialLogic from tripping to next phase
+            end
+            
+            %note this logic is related to updateFrameIndexUsingTextureCache
+            if ~loop && (get(analogOutput,'SamplesOutput')>=length(data) || ~outputsamplesOK)
+                if isempty(responseOptions)
+                    done=1;
+                end
+                if ~isempty(framesUntilTransition)
+                    framesUntilTransition=stepsInPhase+1; %cause handlePhasedTrialLogic to trip to next phase
+                end
             end
         end
         
-        %WaitSecs('UntilTime', ifi*framesPerUpdate + ); %need to choke the loop cuz the phased architecture converts reward durations, etc, to numbers of frames -- i don't think it knows about framesPerUpdate though?
     end
 
     % =====================================================================================================================
@@ -819,8 +967,8 @@ while ~done && ~quit;
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % start/stop as necessary
-    start = msRewardOwed > 0.0 && ~rewardCurrentlyOn;
-    stop = msRewardOwed <= 0.0 && rewardCurrentlyOn;
+    rStart = msRewardOwed > 0.0 && ~rewardCurrentlyOn;
+    rStop = msRewardOwed <= 0.0 && rewardCurrentlyOn;
     currentValveStates=getValves(station);         % get current state of valves and what to change
     
     % if any doValves, override this stuff
@@ -839,7 +987,12 @@ while ~done && ~quit;
             case 'localPump'
                 if any(doValves)
                     primeMLsPerSec=1.0;
-                    station=doReward(station,primeMLsPerSec*ifi,doValves,true);
+                    if window<=0 || strcmp(tm.displayMethod,'LED')
+                        ifi
+                        error('ifi will not be appropriate here when using LED')
+                    else
+                        station=doReward(station,primeMLsPerSec*ifi,doValves,true);
+                    end
                 end
                 newValveState=0*doValves; % set newValveStates to 0 because localPump locks the loop while calling doReward
             otherwise
@@ -848,7 +1001,7 @@ while ~done && ~quit;
         
     else
         
-        if start || stop
+        if rStart || rStop
             rewardValves=zeros(1,getNumPorts(station));
             % we give the reward at whatever port is specified by the current phase (weird...fix later?)
             % the default if the current phase does not have a criterion port is the requestOptions (input to stimOGL)
@@ -872,7 +1025,7 @@ while ~done && ~quit;
             switch getRewardMethod(station)
                 case 'localTimed'
                     % handle start and stop cases
-                    if start
+                    if rStart
                         %'turning on localTimed reward'
                         rewardCurrentlyOn = true;
                         %OPEN VALVE
@@ -883,7 +1036,7 @@ while ~done && ~quit;
                         %rewardValves
                         %disp('opening valves')
                         %GetSecs
-                    elseif stop
+                    elseif rStop
                         %'turning off reward'
                         rewardCurrentlyOn = false;
                         %CLOSE VALVE
@@ -900,14 +1053,14 @@ while ~done && ~quit;
                 case 'localPump'
                     % localPump method copied from merge stimOGL
                     % (non-phased)
-                    if start
+                    if rStart
                         %'turning on localPump reward'
                         rewardCurrentlyOn=true;
                         station=doReward(station,msRewardOwed/1000,rewardValves);
                         actualReinforcementDurationMSorUL = actualReinforcementDurationMSorUL + msRewardOwed;
                         msRewardOwed=0;
                         requestRewardDone=true;
-                    elseif stop
+                    elseif rStop
                         rewardCurrentlyOn=false;
                     end
                     % there is nothing to do in the stop case, because the doReward method is already timed to msRewardOwed
@@ -1045,12 +1198,12 @@ while ~done && ~quit;
         actualReinforcementDurationMSorUL = actualReinforcementDurationMSorUL + elapsedTime*1000.0;
     end
     
-    start = msAirpuffOwed > 0 && ~airpuffOn;
-    stop = msAirpuffOwed <= 0 && airpuffOn;
-    if start || doPuff
+    aStart = msAirpuffOwed > 0 && ~airpuffOn;
+    aStop = msAirpuffOwed <= 0 && airpuffOn;
+    if aStart || doPuff
         setPuff(station, true);
         airpuffOn = true;
-    elseif stop
+    elseif aStop
         doPuff = false;
         airpuffOn = false;
         setPuff(station, false);
@@ -1101,13 +1254,18 @@ if doFramePulse
 end
 
 if ~isempty(analogOutput)
+    evts=showdaqevents(analogOutput);
+    if ~isempty(evts)
+        evts
+    end
+    
     stop(analogOutput);
-    delete(analogOutput);
+    delete(analogOutput); %should pass back to caller and preserve for next trial so intertrial works and can avoid contruction costs
 end
 
 Screen('Close'); %leaving off second argument closes all textures but leaves windows open
 Priority(originalPriority);
-ListenChar(0);
+%ListenChar(0); %not the best place for this -- we wind up getting intertrial key strokes going thru
 
 % function [tm responseDetails] = closeRealTimeLoop(tm, responseDetails, station, frameNum, startTime, valveErrorDetails, window, texture,
 %   destRect, filtMode, dontclear, vbl, framesPerUpdate, ifi, originalPriority)

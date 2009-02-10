@@ -1,5 +1,4 @@
 function [ao bits]=openNidaqForAnalogOutput(sampRate,range)
-
 devices=findDevicesOfTypeWithConstructor('analogoutput','nidaq');
 foundMatch = false;
 
@@ -31,18 +30,27 @@ for j=1:size(devices,1)
 
                 if all(size(range)==[1 2]) && isnumeric(range) && all(diff(range')>0)
 
-                    if all(setverify(ao.Channel(1),'OutputRange',range)==range)
+                    verifyRange=setverify(ao.Channel(1),'OutputRange',range);
+                    if verifyRange(1)<=range(1)&& verifyRange(2)>=range(2)
+                        
+                        uVerifyRange=setverify(ao.Channel(1),'UnitsRange',verifyRange);
+                        if any(uVerifyRange~=verifyRange)
+                            verifyRange
+                            uVerifyRange
+                            error('could not set UnitsRange to match OutputRange')
+                        end
+                        
                         bits=aoInfo.Bits;
                         foundMatch = true;
 
-                        ao
-                        chans
-                        daqhwinfo(ao)
-                        set(ao)
-                        get(ao)
-                        get(ao,'Channel')
-                        set(chans(1))
-                        get(chans(1))
+%                         ao
+%                         chans
+%                         daqhwinfo(ao)
+%                         set(ao)
+%                         get(ao)
+%                         get(ao,'Channel')
+%                         set(chans(1))
+%                         get(chans(1))
 
                     else
                         devices{j}{:}

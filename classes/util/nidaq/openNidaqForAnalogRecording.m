@@ -35,8 +35,8 @@ for j=1:length(devices)
                 rates = rates.ConstraintValue;
                 switch aiInfo.SampleType
                     case 'Scanning'
-                        minRate=floor(rates(1)/numChans);
-                        maxRate=floor(rates(2)/numChans);
+                        minRate=rates(1)/numChans;
+                        maxRate=rates(2)/numChans;
                     case 'Simultaneous'
                         minRate=rates(1);
                         maxRate=rates(2);
@@ -50,7 +50,7 @@ for j=1:length(devices)
                         error('didn''t get requested num chans even though hardware appears to support it')
                     end
                     sampRateProp=propinfo(ai,'SampleRate');
-                    disp(sprintf('max samp rate: %g',max(sampRateProp.ConstraintValue)));
+                    %disp(sprintf('max samp rate: %g',max(sampRateProp.ConstraintValue)));
                     if setverify(ai,'SampleRate',sampRate)~=sampRate %errors when sampRate is over max?  shouldn't it just fail?
                         propinfo(ai,'SampleRate')
                         error('couldn''t set requested sample rate even though hardware appears to support it')
@@ -61,8 +61,20 @@ for j=1:length(devices)
                         if all(size(inputRanges)==[numChans 2]) && isnumeric(inputRanges) && all(diff(inputRanges')>0)
                             passed=true;
                             for rangeNum=1:numChans
-                                rangeVerify=setverify(ai.Channel(rangeNum),'InputRange',inputRanges(rangeNum,:));
-                                passed = passed && rangeVerify(1)<=inputRanges(rangeNum,1) && rangeVerify(2)>=inputRanges(rangeNum,2);
+                                if passed
+                                    try
+                                        rangeVerify=setverify(ai.Channel(rangeNum),'InputRange',inputRanges(rangeNum,:));
+                                    catch ex
+                                        ple(ex)
+                                        r=propinfo(ai.Channel(rangeNum),'InputRange');
+                                        disp('range constraints:')
+                                        r.ConstraintValue
+                                        passed=false;
+                                    end
+                                    sensorVerify=setverify(ai.Channel(rangeNum),'SensorRange',rangeVerify);
+                                    unitsVerify=setverify(ai.Channel(rangeNum),'UnitsRange',rangeVerify);
+                                    passed = passed && rangeVerify(1)<=inputRanges(rangeNum,1) && rangeVerify(2)>=inputRanges(rangeNum,2) && all(sensorVerify==unitsVerify & unitsVerify==rangeVerify);
+                                end
                             end
                             if passed && setverify(ai,'SamplesPerTrigger',inf)==inf && strcmp(setverify(ai,'LogToDiskMode','Index'),'Index') && strcmp(setverify(ai,'LogFileName',recordingFile), recordingFile) && strcmp(setverify(ai,'LoggingMode','Disk&Memory'),'Disk&Memory')
 

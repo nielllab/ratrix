@@ -53,7 +53,7 @@ while stimFit == 0
     hintOffSet= repmat([0, 0, xPixHint, xPixHint], numPatchesInserted, 1);
     if stimulus.displayTargetAndDistractor
         %first half move one direction, second half move the other
-        hintOffSet= [ hintOffSet; -hintOffSet];
+        hintOffSet(numPatchesInserted/2+1:end,:)= -hintOffSet(1:numPatchesInserted/2,:)
         %  hintOffSet= [repmat([0, 0,  xPixHint,  xPixHint], numPatchesInserted/2, 1);...
         %  repmat([0, 0, -xPixHint, -xPixHint], numPatchesInserted/2, 1)];
     end

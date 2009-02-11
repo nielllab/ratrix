@@ -40,15 +40,15 @@ goToSide = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,m
 
 
 % gratings
-pixPerCycs=2.^([2:9]); %freq
+pixPerCycs=2.^([2:9]); % freq
 driftfrequencies=[2];  % in cycles per second
 orientations=[pi/2];   % in radians
 phases=[0];            % initial phase
-contrasts=[1];         % contrast of the grating
+contrasts=[0.5];         % contrast of the grating
 durations=[3];         % duration of each grating
-radius=.08;            % radius of the gaussian mask
-annuli=0;             % radius of inner annuli
-location=[0.25 0.75];  % center of mask
+radius=2;              % radius of the circular mask, 2= twice screen hieght
+annuli=0;              % radius of inner annuli
+location=[.5 .5];      % center of mask
 waveform='square';     
 normalizationMethod='normalizeDiagonal';
 mean=0.5;
@@ -56,9 +56,9 @@ scaleFactor             =0;
 sfGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
     waveform,normalizationMethod,mean,thresh,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
-numOrientations=6;
-orientations=([pi/2]*[1:numOrientations])/numOrientations; % in radians
-pixPerCycs=[64];  % reset to one value
+numOrientations=8;
+orientations=([2*pi]*[1:numOrientations])/numOrientations; % in radians
+pixPerCycs=2^9;%temp [64];  % reset to one value
 orGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
 waveform,normalizationMethod,mean,thresh,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
@@ -163,13 +163,13 @@ ffSearch=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLumina
 
 crf=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
-[noiseSpec.distribution]         =deal({'sinusoidalFlicker',[1 2 4 8 32 50 100],1,.1}); %temporal freqs, contrasts, gapSecs
+[noiseSpec.distribution]         =deal({'sinusoidalFlicker',[1 2 4 8 32 50],1,.1}); %temporal freqs, contrasts, gapSecs
 
 trf=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 [noiseSpec.distribution]         =deal('gaussian');
 [noiseSpec.contrast]             =deal(pickContrast(.5,.01));
-[noiseSpec.loopDuration]         =deal(5*60);
+[noiseSpec.loopDuration]         =deal(1*60);
 
 ffGauss=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
@@ -181,7 +181,17 @@ ffGauss=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminan
 
 rptUnq=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
+
+
+
+
+
+%flankers
 flankers=ifFeatureGoRightWithTwoFlank('phys');
+
+prm=getDefaultParameters(ifFeatureGoRightWithTwoFlank, 'goToSide','1_0','Oct.09,2007');
+
+
 
 % bipartiteField
 receptiveFieldLocation = [0.25 0.5]; 
@@ -205,9 +215,11 @@ stimLocation=[0,0,maxWidth,maxHeight];
 numFrames=1000;   %100 to test; 5*60*100=30000 for experiment
 % s = whiteNoise(meanLuminance,std,background,method,requestedStimLocation,stixelSize,searchSubspace,numFrames,
 %       maxWidth,maxHeight,scaleFactor,interTrialLuminance)
-
 wn = whiteNoise(mean,std,background,method,stimLocation,stixelSize,searchSubspace,numFrames,1280,1024,0,.5);
 
+numFrames=3000; 
+stixelSize = [maxWidth,maxHeight];
+ffwn = whiteNoise(mean,std,background,method,stimLocation,stixelSize,searchSubspace,numFrames,1280,1024,0,.5);
 
 
 %% trial / sound / reinforcement managers
@@ -267,7 +279,7 @@ afc=nAFC(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,request
     percentCorrectionTrials,msResponseTimeLimit,pokeToRequestStim,maintainPokeToMaintainStim,msMaximumStimPresentationDuration,...
     maximumNumberStimPresentations,doMask,constantRewards,eyeTracker,eyeController,dn);
 
-ap=autopilot(percentCorrectionTrials,msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,constantRewards,dn)
+ap=autopilot(percentCorrectionTrials,msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,constantRewards,eyeTracker,eyeController,dn) % [frameDropCorner],[dropFrames],[displayMethod]
 
 %% trainingsteps
 
@@ -281,12 +293,13 @@ ts{3}  = trainingStep(afc, trf,         repeatIndefinitely(), noTimeOff(), svnRe
 ts{4}  = trainingStep(afc, sfGratings,  repeatIndefinitely(), noTimeOff(), svnRev); %gratings: spatial frequency
 ts{5}  = trainingStep(afc, orGratings,  repeatIndefinitely(), noTimeOff(), svnRev); %gratings: orientation
 ts{6}  = trainingStep(afc, cntrGratings,repeatIndefinitely(), noTimeOff(), svnRev); %gratings: contrast
-ts{7} = trainingStep(afc, gaussNoise,  repeatIndefinitely(), noTimeOff(), svnRev); %unfilteredNoise discrim
-ts{8} = trainingStep(afc, biField,     repeatIndefinitely(), noTimeOff(), svnRev); %bipartite field for X-Y classification
+ts{7}  = trainingStep(afc, gaussNoise,  repeatIndefinitely(), noTimeOff(), svnRev); %unfilteredNoise discrim
+ts{8}  = trainingStep(afc, biField,     repeatIndefinitely(), noTimeOff(), svnRev); %bipartite field for X-Y classification
 
 
 %common "acclimate a rat"
-ts{9}  = trainingStep(afc, goToSide, repeatIndefinitely(), noTimeOff(), svnRev);   %go to side
+%=setFlankerStimRewardAndTrialManager(prm, 'flanker go to side');
+ts{9}   = trainingStep(afc, goToSide, repeatIndefinitely(), noTimeOff(), svnRev);   %go to side
 ts{10}  = trainingStep(fd,  freeStim, repeatIndefinitely(), noTimeOff(), svnRev);   %stochastic free drinks
 ts{11}  = trainingStep(fd2, freeStim, repeatIndefinitely(), noTimeOff(), svnRev);   %free drinks
 
@@ -300,11 +313,11 @@ ts{17} = trainingStep(ap,  binNoise, repeatIndefinitely(), noTimeOff(), svnRev);
 
 %testing
 ts{18} = trainingStep(afc,  wn, repeatIndefinitely(), noTimeOff(), svnRev);   %unfilteredNoise discrim
-
+ts{19} = trainingStep(afc,ffwn, repeatIndefinitely(), noTimeOff(), svnRev);   %unfilteredNoise discrim
 %% make and set it
 
-p=protocol('practice phys',{ts{1:18}});
-stepNum=uint8(18);
+p=protocol('practice phys',{ts{1:19}});
+stepNum=uint8(19);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

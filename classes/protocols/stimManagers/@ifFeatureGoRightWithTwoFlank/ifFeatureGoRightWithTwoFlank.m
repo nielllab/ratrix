@@ -174,6 +174,7 @@ switch nargin
                         %do nothing
                     case 'phys' % not fixed
                         p.flankerOffset=3;
+                        p.stdGaussMask=1/16;
                         p.renderMode='dynamic-precachedInsertion'; % dynamic-maskTimesGrating, dynamic-onePatchPerPhase,or dynamic-onePatch
                         
                         p.dynamicSweep.sweepMode={'ordered'};

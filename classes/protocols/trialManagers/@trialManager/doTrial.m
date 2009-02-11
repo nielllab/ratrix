@@ -413,18 +413,17 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 commands = [];
                 commands.cmd = datanet_constants.stimToDataCommands.S_SAVE_DATA_CMD;
                 commands.arg = sprintf('neuralRecords_%d-%s.mat',trialRecords(trialInd).trialNumber, datestr(trialRecords(trialInd).date, 30));
-                [trialData, gotAck] = sendCommandAndWaitForAck(trialManager.datanet, getCon(trialManager.datanet), commands);
-                trialRecords(trialInd).stimDetails.neuralEvents=trialData; % sent from data side
-                % get neuralEvents from data
+                [junk, gotAck] = sendCommandAndWaitForAck(trialManager.datanet, getCon(trialManager.datanet), commands);
+                % get physiologyEvents from data computer
                 commands=[];
                 commands.cmd = datanet_constants.stimToDataCommands.S_SEND_EVENT_DATA_CMD;
-                [trialData, gotAck] = sendCommandAndWaitForAck(trialManager.datanet, getCon(trialManager.datanet), commands);
-                % store trialData (neural events) into trialRecord
-                trialRecords(trialInd).neuralEvents = trialData;
-                % now send ack to data side that we received neuralEvents
+                [physiologyEvents, gotAck] = sendCommandAndWaitForAck(trialManager.datanet, getCon(trialManager.datanet), commands);
+                % store physiologyEvents into trialRecord
+                trialRecords(trialInd).physiologyEvents = physiologyEvents;
+                % now send ack to data side that we received physiologyEvents
                 commands=[];
                 commands.cmd = datanet_constants.stimToDataCommands.S_ACK_EVENT_DATA_CMD;
-                [trialData, gotAck] = sendCommandAndWaitForAck(trialManager.datanet, getCon(trialManager.datanet), commands);
+                [junk, gotAck] = sendCommandAndWaitForAck(trialManager.datanet, getCon(trialManager.datanet), commands);
             end
             % 10/19/08 - need to decide what to do with trialData - do we pass back to doTrials?
             % =====================================================================================================

@@ -428,7 +428,10 @@ while ~done && ~quit;
         stim = getStim(spec);
         transitionCriterion = getCriterion(spec);
         framesUntilTransition = getFramesUntilTransition(spec);
-        % TEST - call calcReinforcement see if this is fast enough
+        
+        % =====================================================================================================================
+        % determine reward/error handling based on phaseType
+        % calls calcReinforcement to get reward/airpuff/sound durations, and also calls errorStim as necessary
         phaseType = getPhaseType(spec);
         if isempty(phaseType)
             % not correct or error, do nothing
@@ -474,28 +477,32 @@ while ~done && ~quit;
                 error('huh?')
             end
             
-            [stim errorScale] = errorStim(stimManager,numErrorFrames);
+            % only override stim if it is empty
+            if isempty(stim)
+                [stim errorScale] = errorStim(stimManager,numErrorFrames);
 
-            if window>0
-                [floatprecision stim garbage] = determineColorPrecision(tm, stim, false, strategy, interTrialLuminance);
-                [textures, garbage, garbage, garbage, garbage, ...
-                    garbage, garbage] ...
-                    = cacheTextures(tm,strategy,stim,window,floatprecision,false);
-                destRect=Screen('Rect',window);
-            elseif strcmp(tm.displayMethod,'LED')
-                floatprecision=[];
-            else
-                error('huh?')
+                if window>0
+                    [floatprecision stim garbage] = determineColorPrecision(tm, stim, false, strategy, interTrialLuminance);
+                    [textures, garbage, garbage, garbage, garbage, ...
+                        garbage, garbage] ...
+                        = cacheTextures(tm,strategy,stim,window,floatprecision,false);
+                    destRect=Screen('Rect',window);
+                elseif strcmp(tm.displayMethod,'LED')
+                    floatprecision=[];
+                else
+                    error('huh?')
+                end
             end
             
-            % set timeout for error phase
+            % set timeout for error phase if not defined by stimSpec
             if isempty(framesUntilTransition)
                 framesUntilTransition = numErrorFrames;
             elseif strcmp(tm.displayMethod,'LED')
                 error('LED needs framesUntilTransition empty for error')
             end
         end
-
+        
+        % =====================================================================================================================
         % get startFrame if not empty
         if ~isempty(getStartFrame(spec))
             i=getStartFrame(spec);

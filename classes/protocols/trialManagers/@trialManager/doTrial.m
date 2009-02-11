@@ -66,6 +66,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             trialRecords(trialInd).criterionClass = class(getCriterion(ts));
 
             % 10/17/08 - DO SOMETHING HERE WITH INPUT TRIALDATA before it gets overwritten
+            trialRecords(trialInd).neuralEvents = [];
             % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
             switch trialManager.displayMethod
@@ -418,19 +419,12 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 commands=[];
                 commands.cmd = datanet_constants.stimToDataCommands.S_SEND_EVENT_DATA_CMD;
                 [trialData, gotAck] = sendCommandAndWaitForAck(trialManager.datanet, getCon(trialManager.datanet), commands);
-                trialData
+                % store trialData (neural events) into trialRecord
+                trialRecords(trialInd).neuralEvents = trialData;
                 % now send ack to data side that we received neuralEvents
                 commands=[];
                 commands.cmd = datanet_constants.stimToDataCommands.S_ACK_EVENT_DATA_CMD;
-                disp('sending S_ACK_EVENT_DATA_CMD to data');
                 [trialData, gotAck] = sendCommandAndWaitForAck(trialManager.datanet, getCon(trialManager.datanet), commands);
-                disp('got ack of ACK_EVENT_DATA_CMD from data');
-                % now try to load this file and store into trialData to be used next trial
-%                 try
-%                     trialData = load(fullfile(getStorePath(trialManager.datanet), commands.arg), 'trialData', 'times');
-%                 catch ex
-%                     error('failed to load from tempfile.mat for neural data');
-%                 end
             end
             % 10/19/08 - need to decide what to do with trialData - do we pass back to doTrials?
             % =====================================================================================================

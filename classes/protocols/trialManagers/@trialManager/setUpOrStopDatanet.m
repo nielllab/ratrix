@@ -7,6 +7,8 @@ elseif strmatch(flag, 'setup')
 elseif strmatch(flag, 'stop')
     trialManager.datanet=stop(trialManager.datanet);
 else
+    flag
+    struct(trialManager)
     error('flag must be setup or stop');
 end
 

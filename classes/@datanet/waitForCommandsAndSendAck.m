@@ -10,22 +10,6 @@ if strmatch(datanet.type, 'stim')
     error('must be called on datanet of type ''data''');
 end
 
-% first connection - keep trying to get a connection using tcplisten
-datacon = -1;
-while datacon == -1
-    datacon=pnet(datanet.sockcon,'tcplisten');
-end
-
-
-% local variables that can be set by commands
-% parameters.refreshRate - in hz
-% parameters.resolution - [width height]
-parameters=[];
-
-% now we have a connection from client
-pnet(datacon,'setreadtimeout', 5); % set timeout to (hopefully) affect pnet_getvar
-pnet(datacon,'setwritetimeout', 5);
-
 % 2/2/09 - start the event GUI now - we have to do it locally so that the data is within the scope of this daemon
 % so that datanet can request a trial's worth of events
 events_data=[];
@@ -275,10 +259,28 @@ recentEventsDisplay = uicontrol(f,'Style','edit','String','recent events','Visib
 % ========================================================================================
 % turn on the GUI
 set(f,'Visible','on');
-% ========================================================================================
 
+% ========================================================================================
+% DATANET STUFF
+% first connection - keep trying to get a connection using tcplisten
+datacon = -1;
+while datacon == -1
+    datacon=pnet(datanet.sockcon,'tcplisten');
+end
+
+
+% local variables that can be set by commands
+% parameters.refreshRate - in hz
+% parameters.resolution - [width height]
+parameters=[];
+
+% now we have a connection from client
+pnet(datacon,'setreadtimeout', 5); % set timeout to (hopefully) affect pnet_getvar
+pnet(datacon,'setwritetimeout', 5);
 specificCommand=[];
 
+% ========================================================================================
+% ENTERING LISTENER LOOP
 while ~quit
     success = false;
     received = pnet(datacon,'read',CMDSIZE,'double','noblock');

@@ -133,7 +133,9 @@
 %                           if the port value is empty ([]), then there is no phase transition by port triggering (instead, relies on frame timeout, see below)
 % stimSpec.stimType         must be one of the non-phased values for 'type' listed above, with the same properties
 %                           this is effectively a phase-specific type, instead of trial-specific
-% stimSpec.phaseType        one of {'correct', 'error', ''}
+% stimSpec.phaseType        one of {'correct', 'error', 'trigger', ''} -- correct and error will ask the reinforcement manager how much water/airpuff to deliver at the beginning of the phase
+%                                   trigger will ask the reinforcement manager for this info after each new lick.
+%                                   a reward that extends beyond the end of the phase is cut off.
 % stimSpec.framesUntilTransition    length of the frame timeout (if we have shown this phase for framesUntilTransition frames with no transition by port selection,
 %                                   then advance to the next phase as specified by the criterion automatically)
 %                                   advances to the first phase target specified by criterion (target1) - see above
@@ -145,3 +147,22 @@
 % stimSpec.scaleFactor      % the scaleFactor associated with this phase - see non-phased scaleFactor for details
 % stimSpec.isFinalPhase     % a flag if this is the final phase of the trial (defaults to zero)
 % stimSpec.startFrame       % set to zero to start at the beginning
+
+% for phased type, your stimManager may want to override the method getSoundsToPlay, which is called every frame.  the default will play trySomethingElse, keepGoing, correct and incorrect sounds appropriate for phaseified nAFC/freeDrinks.
+% INPUTS
+%   stimManager         your stimManager object
+%   soundNames          the available soundNames
+%   ports               the ports just triggered
+%   phase               the stimSpec index 
+%   stepsInPhase        the number of frame flips that have occured in this phase (starts at zero, equals the frame number if you haven't dropped any)
+%   msRewardSound       the msRewardSound returned by the reinforcementManager
+%   msPenaltySound      the msPenaltySound returned by the reinforcementManager
+%   targetOptions       the target ports your calcStim returned
+%   distractorOptions   the distractor ports your calcStim returned
+%   requestOptions      the request ports your calcStim returned
+%   trialManagerClass   the class of the trialManager
+% OUTPUTS
+%   soundsToPlay    a cell array of sound names in the form:  { {playLoop sounds}, {{playSound sound, playSound duration}, {playSound sound, playSound duration}, ...} }
+%                   to loop a sound, include it in the playLoop list on every frame during which it should play
+%                   to stop a looping sound, stop including it in the list
+%                   a playSound that is longer than the phase is cut off at the end of the phase.

@@ -24,12 +24,12 @@ if isa(r,'ratrix') && isa(station,'station') && (isempty(rn) || isa(rn,'rnet'))
                 % note that this will have bad interaction with the listener - stop(datanet) causes listener to shutdown
                 % so user will have to manually restart listener after stim switching...
                 subject = setUpOrStopDatanet(subject,'stop',[]); % stop if datanet exists for the current trainingStep
-                [subject r]=setStepNum(subject,newTsNum,r,sprintf('manually setting to %s',newTsNum),'ratrix');
-                params = Screen('Resolution', station.screenNum);
+                [subject r]=setStepNum(subject,newTsNum,r,sprintf('manually setting to %d',newTsNum),'ratrix');
+                params = Screen('Resolution', getScreenNum(station));
                 parameters = [];
                 parameters.refreshRate = params.hz;
                 parameters.subjectID = getID(subject);
-                subject = setUpOrStopDatanet(subject,'start',parameters); % start datanet if exists for new trainingStep
+                subject = setUpOrStopDatanet(subject,'setup',parameters); % start datanet if exists for new trainingStep
             else
 %                 [subject r]=setStepNum(subject,t,r,'invalid trainingStep specified - ignoring!','ratrix');
             end

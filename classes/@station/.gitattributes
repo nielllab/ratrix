@@ -33,3 +33,4 @@
 /doPrime.m -text
 /setMACaddress.m -text
 /flushPorts.m -text
+/getScreenNum.m -text

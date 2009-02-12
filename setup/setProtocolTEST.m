@@ -278,6 +278,10 @@ numFrames=100;   %100 to test; 5*60*100=30000 for experiment
 
 wn = whiteNoise(mean,std,background,method,stimLocation,stixelSize,searchSubspace,numFrames,1280,1024,0,.5);
 
+% passiveViewer (using a whiteNoise movie)
+numFrames=1000;
+passive = passiveViewer(mean,std,background,method,stimLocation,stixelSize,searchSubspace,numFrames,1280,1024,0,.5);
+
 % bipartiteField
 receptiveFieldLocation = [0.25 0.5];
 frequencies = [12 60 200];
@@ -531,6 +535,9 @@ ts28=trainingStep(vh_datanet,fF,repeatIndef,noTimeOff(),svnRev);
 % whiteNoise no datanet
 ts29=trainingStep(aP,wn,repeatIndef,noTimeOff(),svnRev);
 
+% passiveViewer no datanet
+ts40=trainingStep(aP,passive,repeatIndef,noTimeOff(),svnRev);
+
 % images
 %path containing ALL the stimuli
 imdir='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\PriyaV\TMPPriyaImageSet';
@@ -601,7 +608,7 @@ for i=1:length(subjIDs),
 %         case {'rack3test4','rack3test5','rack3test6'} % nAFC, orientedGabors
 %             p=protocol('nAFC,orientedGabors',{ts4});
         otherwise
-            p=protocol('demo',{ts23});
+            p=protocol('demo',{ts40});
 %             error('unknown subject');
     end
     

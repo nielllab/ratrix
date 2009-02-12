@@ -169,3 +169,11 @@ protocols/@stimSpec/getScaleFactor.m -text
 protocols/@stimSpec/getStartFrame.m -text
 protocols/@stimSpec/getHz.m -text
 protocols/@stimSpec/getPhaseType.m -text
+protocols/stimManagers/@passiveViewer/passiveViewer.m -text
+protocols/stimManagers/@passiveViewer/drawExpertFrame.m -text
+protocols/stimManagers/@passiveViewer/extractDetailFields.m -text
+protocols/stimManagers/@passiveViewer/flushLUT.m -text
+protocols/stimManagers/@passiveViewer/getLUT.m -text
+protocols/stimManagers/@passiveViewer/calcStim.m -text
+protocols/stimManagers/@passiveViewer/fillLUT.m -text
+protocols/stimManagers/@passiveViewer/stimMgrOKForTrialMgr.m -text

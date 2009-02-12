@@ -156,12 +156,13 @@ switch nargin
             error('hz must be scalar real >0')
         end
         % rewardType - we need this so that runRealTimeLoop knows whether or not this phase should do a reward/airpuff, etc
-        if ~isempty(varargin{10}) && ischar(varargin{10}) && (strcmp(varargin{10},'correct') || strcmp(varargin{10},'error'))
+        if ~isempty(varargin{10}) && ischar(varargin{10}) && (strcmp(varargin{10},'correct') || strcmp(varargin{10},'error')) ...
+                || strcmp(varargin{10},'trigger')
             spec.phaseType=varargin{10};
         elseif isempty(varargin{10})
             spec.phaseType=[];
         else
-            error('phaseType must be ''correct'',''error'',or []');
+            error('phaseType must be ''correct'',''error'',''trigger'',or []');
         end       
 
         spec = class(spec,'stimSpec');

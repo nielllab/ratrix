@@ -85,8 +85,8 @@ for i=1:length(frequencies)
     % now "stretch" out samps to map to the monitor refresh rate (hz)
     msamps=samps ./ frequencies(i);
     
-    framesL = [framesL 0.5*sin(msamps)+0.5];
-    framesR = [framesR 0.5*sin(msamps+pi)+0.5];
+    framesL = [framesL 0.5*cos(msamps)+0.5];
+    framesR = [framesR 0.5*cos(msamps+pi)+0.5];
 end
 
 % now repmat to number of reps

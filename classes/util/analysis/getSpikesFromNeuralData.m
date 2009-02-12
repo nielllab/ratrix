@@ -129,7 +129,8 @@ switch upper(spikeDetectionMethod)
         error('unsupported spike detection method');
 end
 
-% plotting to show results (for testing)
+% plotting to show results (for testing);   probably these tools should be
+% supported in a gui outside this function...
 if 0
     spikePoints=ones(1,length(spikeTimestamps));
     subplot(2,1,1)
@@ -238,8 +239,8 @@ switch upper(spikeSortingMethod)
             newSpikes=spikeWaveforms;
             newTimestamps=spikeTimestamps;
         end
-        numSpikes=size(newSpikes);
-        numSpikes
+        numSpikes=size(newSpikes,1);
+        disp(sprintf('got %d spikes; about %2.2g Hz',numSpikes,  numSpikes/diff(neuralDataTimes([1 end]))))
         
         %convert to RBF and realign
         [spikesRBF, spikesSolved] = RBFconv( newSpikes );
@@ -383,15 +384,15 @@ end
 
 if 1 % view plots (for testing)
     
-    size(spikes)
-    
-    
+
     whichSpikes=find(assignedClusters~=999);
     whichNoise=find(assignedClusters==999);
     candTimes=find(spikes);
     spikeTimes=candTimes(whichSpikes);
     noiseTimes=candTimes(whichNoise);
     
+    
+    N=20; %downsampling for the display of the whole trace; maybe some user control?
     
     %choose y range for raw, crop extremes is more than N std
     dataMinMax=1.1*minmax(neuralData');
@@ -409,7 +410,7 @@ if 1 % view plots (for testing)
     % a smart way to choose a zoom center on a spike
     % this should be able to be a user selected spike (click on main timeline nearest x-val  AND  key combo for prev / next spike)
     % but for now its the last one
-    zoomWidth=40000*0.05;  % 50msec default, key board zoom steps by a factor of 2
+    zoomWidth=spikeDetectionParams.samplingFreq*0.05;  % 50msec default, key board zoom steps by a factor of 2
     lastSpikeTimePad=min([max(spikeTimes)+200 size(neuralData,1)]);
     zoomInds=[max(lastSpikeTimePad-zoomWidth,1):lastSpikeTimePad ];
     
@@ -419,17 +420,27 @@ if 1 % view plots (for testing)
     hold on;
     plot(spikeWaveforms(whichSpikes,:)','r')
     axis([ 1 size(spikeWaveforms,2)  1.1*minmax(spikeWaveforms(:)') ])
-     
+     xlabel(sprintf('%d spikes, %2.2g Hz', length(spikeTimes),length(spikeTimes)/diff(neuralDataTimes([1 end]))))
     
-    % a button should allow selection between filtered or non-filtered (only show one kind)
-    subplot(2,3,1)
-    title('rawSignal and spikes');
-    plot(neuralDataTimes,neuralData,'k');
+     subplot(2,3,1)
+     %inter-spike interval distribution
+    ISI=diff(1000*neuralDataTimes(spikeTimes));
+    edges=linspace(0,10,100);
+    count=histc(ISI,edges);
+    if sum(count)>0
+        prob=count/sum(count);
+        bar(edges,prob,'histc');
+        axis([0 max(edges) 0 max(prob)])
+    else
+        text(0,0,'no ISI < 10 msec')
+    end
     hold on
-    plot(neuralDataTimes(noiseTimes),neuralData(noiseTimes),'.b');
-    plot(neuralDataTimes(spikeTimes),neuralData(spikeTimes),'.r');
-     axis([ minmax(neuralDataTimes')   yRange ])
-        
+    lockout=1000*39/spikeDetectionParams.samplingFreq;  %why is there a algorithm-imposed minimum ISI?  i think it is line 65  detectSpikes
+    lockout=edges(max(find(edges<=lockout)));
+    plot([lockout lockout],get(gca,'YLim'),'k') % 
+    plot([2 2], get(gca,'YLim'),'k--')
+    
+%         
     subplot(2,3,2)
     title('rawSignal zoom');
     plot(neuralDataTimes(zoomInds),neuralData(zoomInds),'k');
@@ -442,12 +453,21 @@ if 1 % view plots (for testing)
     
     subplot(2,3,4)
     title('filtSignal and spikes');
-    plot(neuralDataTimes,filteredSignal,'k');
+    plot(downsample(neuralDataTimes,N),downsample(filteredSignal,N),'k');
     hold on
     plot(neuralDataTimes(noiseTimes),filteredSignal(noiseTimes),'.b');
     plot(neuralDataTimes(spikeTimes),filteredSignal(spikeTimes),'.r');
     axis([ minmax(neuralDataTimes')   1.1*minmax(filteredSignal') ])
-        
+% a button should allow selection between filtered or non-filtered (only show one kind)
+
+%     title('rawSignal and spikes');
+%     plot(downsample(neuralDataTimes,N),downsample(neuralData,N),'k');
+%     hold on
+%     plot(neuralDataTimes(noiseTimes),neuralData(noiseTimes),'.b');
+%     plot(neuralDataTimes(spikeTimes),neuralData(spikeTimes),'.r');
+%      axis([ minmax(neuralDataTimes')   yRange ])
+    
+    
     subplot(2,3,5)
     title('filtSignal zoom');
     plot(neuralDataTimes(zoomInds),filteredSignal(zoomInds),'k');
@@ -455,6 +475,20 @@ if 1 % view plots (for testing)
         plot(neuralDataTimes(someNoiseTimes),filteredSignal(someNoiseTimes),'.b');
     plot(neuralDataTimes(someSpikeTimes),filteredSignal(someSpikeTimes),'.r');
     axis([ minmax(neuralDataTimes(zoomInds)')   1.1*minmax(filteredSignal(zoomInds)') ])
+    
+    
+%     figure()
+%     allSpikesDecorrelated=spikeWaveforms; %this is not decorellated!
+%     allSpikesOrig=spikeWaveforms;
+%     assigned=?
+%     clNr1=just ID?
+%     clNr2=justID?
+%     plabel='';
+%     mode=1; %maybe 2 later
+%     [d,residuals1,residuals2,Rsquare1, Rsquare2] = figureClusterOverlap(allSpikesDecorrelated, allSpikesOrig, assigned, clNr1, clNr2,plabel ,mode , {'b','r'})
+
+
+   
     %%
 end
 

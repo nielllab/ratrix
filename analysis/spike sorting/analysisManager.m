@@ -1,4 +1,4 @@
-function quit = analysisManager(subjectID, path, spikeDetectionParams, spikeSortingParams,trialRange,timeRangePerTrialSecs,overwriteAll,usePhotoDiodeSpikes)
+function quit = analysisManager(subjectID, path, spikeDetectionParams, spikeSortingParams,trialRange,timeRangePerTrialSecs,stimClassToAnalyze,overwriteAll,usePhotoDiodeSpikes)
 % this runs the loop to check for neuralData and do analysis as necessary
 % inputs include the subjectID and path (where eyeRecords,neuralRecords,and stimRecords are stored)
 
@@ -31,6 +31,20 @@ else
         error('frame pulse detection has not been validated if you do not start at time=0')
         %do we throw out the first pulse?
     end
+    if timeRangePerTrialSecs(2)<3
+        requestedEndDuration= timeRangePerTrialSecs(2)
+        error('frame pulse detection has not been validated if you do not have at least some pulses')
+        %do we throw out the first pulse?
+    end
+end
+
+if ~exist('stimClassToAnalyze','var') || isempty(stimClassToAnalyze)
+    stimClassToAnalyze='all';
+else
+    if ~(iscell(stimClassToAnalyze) ) % and they are all chars
+        stimClassToAnalyze
+        error('must be a cell of chars of SM classes or ''all'' ')
+    end
 end
 
 if ~exist('usePhotoDiodeSpikes','var') || isempty(usePhotoDiodeSpikes)
@@ -52,6 +66,7 @@ while ~quit
     % get a list of the available neuralRecords
     neuralRecordsPath = fullfile(path, subjectID, 'neuralRecords');
     if ~isdir(neuralRecordsPath)
+        neuralRecordsPath
         error('unable to find directory to neuralRecords');
     end
     
@@ -75,7 +90,7 @@ while ~quit
     
     %then remove all files if out of trial range
     goodFiles=goodFiles([goodFiles.trialNum]>=trialRange(1) & [goodFiles.trialNum]<=trialRange(2));
-
+    
     
     % neuralRecord_1-20081023T155924.mat
     % for each neuralRecord here, try to load the corresponding stimRecord
@@ -99,127 +114,145 @@ while ~quit
             end
             analysisLocation = fullfile(analysisPath, sprintf('physAnalysis_%d-%s.mat',goodFiles(i).trialNum,goodFiles(i).timestamp));
             
-            % =================================================================================
-            % if there is no spikeRecord corresponding to the current neuralRecord, run spike analysis on it
-            if ~exist(spikeRecordLocation,'file')
-                disp(sprintf('loading neural record %s', neuralRecordLocation));
-                load(neuralRecordLocation);    % has neuralData, neuralDataTimes, samplingRate, parameters
+            %stimRecordLocation
+            load(stimRecordLocation, 'stimManagerClass')                
+            analyzeThisClass= all(strcmp('all',stimClassToAnalyze)) ||  any(strcmp(stimManagerClass,stimClassToAnalyze));
+            if analyzeThisClass
                 
-                %timeRangePerTrialSamps=timeRangePerTrialSecs*samplingRate; % not needed, but might be faster ; 
-                timeSinceTrialStart=neuralDataTimes-neuralDataTimes(1);
-                neuralData=neuralData(timeSinceTrialStart>=timeRangePerTrialSecs(1) ...
-                    & timeSinceTrialStart<=timeRangePerTrialSecs(2),:);
-
-                
-                % get frameIndices and frameTimes (from screen pulses)
-                % bounds to decide whether or not to continue with analysis
-                warningBound = 0.01;
-                errorBound = 0.05;
-                ifi = 1/100;
-                spikeDetails=[];
-                [frameIndices frameTimes frameLengths correctedFrameIndices correctedFrameTimes correctedFrameLengths passedQualityTest] = ...
-                    getFrameTimes(neuralData(:,1),neuralDataTimes,samplingRate,warningBound,errorBound,ifi); % pass in the pulse channel
-                if usePhotoDiodeSpikes
-                    [spikes photoDiode]=getSpikesFromPhotodiode(neuralData(:,2),neuralDataTimes, correctedFrameIndices);
-                    spikeTimestamps = neuralDataTimes(spikes==1);
-                    spikeWaveforms=[];
-                    assignedClusters=ones(1,length(spikeTimestamps));
-                    %                         frameTimes(:,1); %frame starts
-                    %                         frameTimes(:,2); %frame stops
+                % =================================================================================
+                % if there is no spikeRecord corresponding to the current neuralRecord, run spike analysis on it
+                if ~exist(spikeRecordLocation,'file') || overwriteAll
+                    disp(sprintf('loading neural record %s', neuralRecordLocation));
+                    load(neuralRecordLocation);    % has neuralData, neuralDataTimes, samplingRate, parameters
+                    
+                    %timeRangePerTrialSamps=timeRangePerTrialSecs*samplingRate; % not needed, but might be faster ;
+                    %eben better is if we could load "part" of a matlab variable (specified inds) at a faster speeds.
+                    % probably can't b/c matlab compression
+                    timeSinceTrialStart=neuralDataTimes-neuralDataTimes(1);
+                    withinTimeRange=timeSinceTrialStart>=timeRangePerTrialSecs(1) & timeSinceTrialStart<=timeRangePerTrialSecs(2);
+                    neuralData=neuralData(withinTimeRange,:);
+                    neuralDataTimes=neuralDataTimes(withinTimeRange);
+                    
+                    % get frameIndices and frameTimes (from screen pulses)
+                    % bounds to decide whether or not to continue with analysis
+                    warningBound = 0.01;
+                    errorBound = 0.05;
+                    ifi = 1/100;
+                    spikeDetails=[];
+                    [frameIndices frameTimes frameLengths correctedFrameIndices correctedFrameTimes correctedFrameLengths passedQualityTest] = ...
+                        getFrameTimes(neuralData(:,1),neuralDataTimes,samplingRate,warningBound,errorBound,ifi); % pass in the pulse channel
+                    if usePhotoDiodeSpikes
+                        [spikes photoDiode]=getSpikesFromPhotodiode(neuralData(:,2),neuralDataTimes, correctedFrameIndices);
+                        spikeTimestamps = neuralDataTimes(spikes==1);
+                        spikeWaveforms=[];
+                        assignedClusters=ones(1,length(spikeTimestamps));
+                        %                         frameTimes(:,1); %frame starts
+                        %                         frameTimes(:,2); %frame stops
+                    else
+                        
+                        %detection params needs samplingRate
+                        spikeDetectionParams.samplingFreq=samplingRate; % always overwrite with current value
+                        %                     if ismember('samplingFreq',fields(spikeDetectionParams))
+                        %                         spikeDetectionParams.samplingFreq
+                        %                         error('when using analysis manager, samplingFreq is not specified by user, but rather loaded direct from the neural data file')
+                        %                     else
+                        %                         spikeDetectionParams.samplingFreq=samplingRate;
+                        %                     end
+                        
+                        [spikes spikeWaveforms spikeTimestamps assignedClusters rankedClusters photoDiode]=...
+                            getSpikesFromNeuralData(neuralData(:,3),neuralDataTimes,spikeDetectionParams,spikeSortingParams);
+                        % 11/25/08 - do some post-processing on the spike's assignedClusters ('treatAllNonNoiseAsSpikes', 'largestClusterAsSpikes', etc)
+                        
+                        if ~isempty(assignedClusters)
+                            spikeDetails = postProcessSpikeClusters(assignedClusters,rankedClusters,spikeSortingParams);
+                            spikeDetails.rankedClusters=rankedClusters;
+                        else
+                            passedQualityTest=false;
+                        end
+                    end
+                    % do some plotting
+                    %                 plot(neuralDataTimes, neuralData(:,1), '-db');
+                    %                 hold on
+                    %                 y2 = ones(1, length(neuralDataTimes))*5;
+                    %                 y2(frameIndices(:,1)) = 0.1;
+                    %                 plot(neuralDataTimes, y2, '.r');
+                    %                 hold off
+                    
+                    
+                    %save spike-related data
+                    save(spikeRecordLocation,'spikes','spikeWaveforms','spikeTimestamps','assignedClusters','spikeDetails',...
+                        'frameIndices','frameTimes','frameLengths','correctedFrameIndices','correctedFrameTimes','correctedFrameLengths',...
+                        'photoDiode','passedQualityTest','samplingRate');
+                    disp('saved spike data');
                 else
-                    
-                    %detection params needs samplingRate
-                    if ismember('samplingFreq',fields(spikeDetectionParams))
-                        spikeDetectionParams.samplingFreq
-                        error('when using analysis manager, samplingFreq is not specified by user, but rather loaded direct from the neural data file')
-                    else
-                        spikeDetectionParams.samplingFreq=samplingRate; 
-                    end
-                    
-                    [spikes spikeWaveforms spikeTimestamps assignedClusters rankedClusters photoDiode]=...
-                        getSpikesFromNeuralData(neuralData(:,3),neuralDataTimes,spikeDetectionParams,spikeSortingParams);
-                    % 11/25/08 - do some post-processing on the spike's assignedClusters ('treatAllNonNoiseAsSpikes', 'largestClusterAsSpikes', etc)
-                    
-                    if ~isempty(assignedClusters)
-                        spikeDetails = postProcessSpikeClusters(assignedClusters,rankedClusters,spikeSortingParams);
-                        spikeDetails.rankedClusters=rankedClusters;
-                    else
-                        passedQualityTest=false;
-                    end
+                    % already have a spikeRecord for this neuralRecord, just load it
+                    load(spikeRecordLocation); % this also populates passedQualityTest (to check if we should do analysis)
+                    disp('loaded spikeRecord');
                 end
-                % do some plotting
-                %                 plot(neuralDataTimes, neuralData(:,1), '-db');
-                %                 hold on
-                %                 y2 = ones(1, length(neuralDataTimes))*5;
-                %                 y2(frameIndices(:,1)) = 0.1;
-                %                 plot(neuralDataTimes, y2, '.r');
-                %                 hold off
                 
+                % check that we have spikes
+                if isempty(assignedClusters)
+                    passedQualityTest=false;
+                end
                 
-                %save spike-related data
-                save(spikeRecordLocation,'spikes','spikeWaveforms','spikeTimestamps','assignedClusters','spikeDetails',...
-                    'frameIndices','frameTimes','frameLengths','correctedFrameIndices','correctedFrameTimes','correctedFrameLengths',...
-                    'photoDiode','passedQualityTest');
-                disp('saved spike data');
+                % =================================================================================
+                % now run analysis on spikeRecords and stimRecords
+                % try to get location of analysis file
+                quality.passedQualityTest=passedQualityTest;
+                quality.frameIndices=frameIndices;
+                quality.frameTimes=frameTimes;
+                quality.frameLengths=frameLengths;
+                quality.correctedFrameIndices=correctedFrameIndices;
+                quality.correctedFrameTimes=correctedFrameTimes;
+                quality.correctedFrameLengths=correctedFrameLengths;
+                quality.samplingRate=samplingRate; % from neuralRecord
+                
+                % load stimRecords  
+                load(stimRecordLocation);
+                evalStr = sprintf('sm = %s();',stimManagerClass);
+                eval(evalStr);
+                % 1/26/09 - skip analysis if not worth sorting spikes
+                doAnalysis= (~exist(analysisLocation,'file') || overwriteAll) && worthSpikeSorting(sm,quality);
+                % if we need to do analysis (either no analysis file exists or
+                % we want to overwrite)
+                
+                if doAnalysis
+                    % do something with loaded information
+                    if ~exist('parameters','var')
+                        parameters=[];
+                    end
+                    % spikeData is a struct that contains all spike information that different analyses may want
+                    spikeData=[];
+                    spikeData.spikes=spikes;
+                    spikeData.frameIndices=correctedFrameIndices; % dont give physAnalysis the bad frames
+                    spikeData.photoDiode=photoDiode;
+                    spikeData.spikeWaveforms=spikeWaveforms;
+                    spikeData.spikeTimestamps=spikeTimestamps;
+                    spikeData.assignedClusters=assignedClusters;
+                    spikeData.spikeDetails=spikeDetails; % could contain anything
+                    % the stimManagerClass to be passed in is for class typing only -
+                    % the analysis function is called as a static method of the stimManager class
+                    % just pass in a default stimManager - no variables are used
+                    % stuff to class type the analysis method
+                    % stimManagerClass = stimulusDetails.stimManagerClass;
+                    % already its own variable in stimRecords
+                    [analysisdata] = physAnalysis(sm,spikeData,stimulusDetails,plotParameters,parameters,analysisdata);
+                    % parameters is from neuralRecord
+                    % we pass in the analysisdata because it contains cumulative information that is specific to the analysis method
+                    % this is the way of making sure it gets in every trial's analysis file, and that it will get propagated to the next analysis
+                    save(analysisLocation, 'analysisdata');
+                elseif ~overwriteAll && passedQualityTest % if the analysis file already exists in an acceptable state
+                    load(analysisLocation, 'analysisdata');
+                end
             else
-                % already have a spikeRecord for this neuralRecord, just load it
-                load(spikeRecordLocation); % this also populates passedQualityTest (to check if we should do analysis)
-                disp('loaded spikeRecord');
+                disp(sprintf('skipping class: %s',stimManagerClass))
             end
             
-            % check that we have spikes
-            if isempty(assignedClusters)
-                passedQualityTest=false;
-            end
-            
-            % =================================================================================
-            % now run analysis on spikeRecords and stimRecords
-            % try to get location of analysis file
-            quality.passedQualityTest=passedQualityTest;
-            quality.frameIndices=frameIndices;
-            quality.frameTimes=frameTimes;
-            quality.frameLengths=frameLengths;
-            quality.correctedFrameIndices=correctedFrameIndices;
-            quality.correctedFrameTimes=correctedFrameTimes;
-            quality.correctedFrameLengths=correctedFrameLengths;
-            quality.samplingRate=samplingRate; % from neuralRecord
-            % load stimRecords
-            stimRecordLocation
-            load(stimRecordLocation);
-            evalStr = sprintf('sm = %s();',stimManagerClass);
-            eval(evalStr);
-            % 1/26/09 - skip analysis if not worth sorting spikes
-            doAnalysis= (~exist(analysisLocation,'file') || overwriteAll) && worthSpikeSorting(sm,quality);
-            % if we need to do analysis (either no analysis file exists or
-            % we want to overwrite)
-            
-            if doAnalysis                
-                % do something with loaded information
-                if ~exist('parameters','var')
-                    parameters=[];
-                end
-                % spikeData is a struct that contains all spike information that different analyses may want
-                spikeData=[];
-                spikeData.spikes=spikes;
-                spikeData.frameIndices=correctedFrameIndices; % dont give physAnalysis the bad frames
-                spikeData.photoDiode=photoDiode;
-                spikeData.spikeWaveforms=spikeWaveforms;
-                spikeData.spikeTimestamps=spikeTimestamps;
-                spikeData.assignedClusters=assignedClusters;
-                spikeData.spikeDetails=spikeDetails; % could contain anything
-                % the stimManagerClass to be passed in is for class typing only -
-                % the analysis function is called as a static method of the stimManager class
-                % just pass in a default stimManager - no variables are used
-                % stuff to class type the analysis method
-                % stimManagerClass = stimulusDetails.stimManagerClass;
-                % already its own variable in stimRecords
-                [analysisdata] = physAnalysis(sm,spikeData,stimulusDetails,plotParameters,parameters,analysisdata);
-                % parameters is from neuralRecord
-                % we pass in the analysisdata because it contains cumulative information that is specific to the analysis method
-                % this is the way of making sure it gets in every trial's analysis file, and that it will get propagated to the next analysis
-                save(analysisLocation, 'analysisdata');
-            elseif ~overwriteAll && passedQualityTest % if the analysis file already exists in an acceptable state
-                load(analysisLocation, 'analysisdata');
+            if goodFiles(i).trialNum==trialRange(2);  
+                % will stop analyzing after last requested trial ...
+                % in default will keep looking for new data, because 
+                % trialRange(2)< Inf
+                quit=1;
             end
             
         catch ex
@@ -231,6 +264,7 @@ while ~quit
         end
         
     end
+    
     
     
     %     % get a list of the available stimRecords

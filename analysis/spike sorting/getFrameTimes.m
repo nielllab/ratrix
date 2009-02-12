@@ -12,18 +12,20 @@ amp = 4; % conservative amplitude of pulse peak
 % threshold = max(min(amp / (r*sampleRate), 4), 0.05); % restricted to be 0.05<=threshold<=4
 % 10/30/08 - decided to make the threshold fixed at 1.0 (even at sampling rate of 125kHz, TTL pulses still only take one sample)
 % sometimes (randomly) due to aliasing will fall in between two samples
-threshold = 1.0;
+threshold = -2.0; % falling is the first edge of the downward pulse
 
 % need to fix threshold testing - if sampling rate too high, then the spike gets split among samples
 % if we check for low enough threshold, each spike gets multiple counted, if too high threshold, misses these split spikes
 % need to check low threshold, but throw out consecutive crosses of threshold (only keep last one as end of spike)
 diff_vector = diff(pulseData); % first derivative
 % find all pulses (places where the diff is > threshold)
-pulses = find(diff_vector > threshold); % this is only the left edge of each pulse
+pulses = find(diff_vector < threshold); % this is only the left edge of each pulse
 % 10/30/08 - need to postprocess pulses (to weed out cases where the pulse is split among multiple samples)
 % only take the last sample of the pulse (set threshold to be low then)
 runs = diff(pulses);
-runs(end+1) = -1; % automatically include the pulse if it happens on last sample
+if pulses(end)==size(pulseData,1)
+    runs(end+1) = -1; % automatically include the pulse if it happens on last sample
+end
 pulses = pulses(find(runs~=1));
 
 % processing to adjust first pulse to be a single pulse (throw away starting pulses if they are part of the two-pulse signal)
@@ -34,8 +36,10 @@ if gaps(2) > gaps(1) && gaps(3) > gaps(1)
 elseif gaps(1) > gaps(3) && gaps(2) > gaps(3)
     % we started with two-pulse signal, but with one cut off - throw away first pulse
     pulses(1) = [];
+    error('don''t ever expect to find a oulse split in two')
 else
     % we started with single-pulse signal - do nothing
+    error('don''t ever expect to find a single pulse start')
 end
 
 frameTimes=[];
@@ -47,20 +51,49 @@ frameIndices(:,2) = pulses(4:3:end)-1;
 % ==================================
 correctedFrameTimes=frameTimes;
 correctedFrameIndices=frameIndices; % default values are same as uncorrected; correct only those values that need it
-for i=1:length(frameTimes) % indexes frameTimes
-    % correct times and pulses
-    if abs(1000*(frameIndices(i,2)-frameIndices(i,1))/sampleRate-ifi)>warningBound %are more than ifi, then must be missed frame
-        % the same start time
-        correctedFrameTimes(i,1)=frameTimes(i,1);
-        % the corrected end time (estimated using ifi)
-        correctedFrameTimes(i,2)=frameTimes(i,1)+ifi-(1/sampleRate); % need to remove one sample's worth of time
-        % the same start index
-        correctedFrameIndices(i,1)=frameIndices(i,1);
-        % the corrected end index (again, using ifi)
-        [m correctedFrameIndices(i,2)]=min(abs(pulseDataTimes-correctedFrameTimes(i,2)));
+% for i=1:length(frameTimes) % indexes frameTimes
+%     if mod(i,100)==0
+%         disp(sprintf('doing frame: %d/%d, %2.2g%%',i, length(frameTimes),100*i/length(frameTimes)))
+%         pause(0.01)
+%     end
+%     % correct times and pulses
+%     if abs(1000*(frameIndices(i,2)-frameIndices(i,1))/sampleRate-ifi)>warningBound %are more than ifi, then must be missed frame
+%         % the same start time
+%         correctedFrameTimes(i,1)=frameTimes(i,1); % redundant
+%         % the corrected end time (estimated using ifi)
+%         correctedFrameTimes(i,2)=frameTimes(i,1)+ifi-(1/sampleRate); % need to remove one sample's worth of time
+%         % the same start index
+%         correctedFrameIndices(i,1)=frameIndices(i,1); %redundant
+%         % the corrected end index (again, using ifi)
+% 
+%         %[m correctedFrameIndices(i,2)]=min(abs(pulseDataTimes-correctedFrameTimes(i,2))); %SLOW! -pmm
+%     end
+% end
+
+
+whichDrop=find((abs(1000*(diff(frameIndices'))/sampleRate-ifi)>warningBound));
+correctedFrameTimes(whichDrop,2)=frameTimes(whichDrop,1)+ifi-(1/sampleRate); % the corrected end time (estimated using ifi), need to remove one sample's worth of time
+% %vectorized runs out of memory, using a bound method in a for loop of only the dropped frames
+% can the bound method be vectorized?
+%    x=repmat(pulseDataTimes,1,length(whichDrop))-repmat(correctedFrameTimes(whichDrop,2)',length(pulseDataTimes),1);
+%    [a correctedFrameIndices(whichDrop,2)]=min(abs(x));
+
+% correct times and pulses
+for i=whichDrop %are more than ifi, then must be missed frame
+    if mod(i,100)==0
+        disp(sprintf('doing frame: %d/%d, %2.2g%%',i, length(frameTimes),100*i/length(frameTimes)))
+        pause(0.01)
     end
+    %[m correctedFrameIndices(i,2)]=min(abs(pulseDataTimes-correctedFrameTimes(i,2))); %SLOW! -pmm
+    
+    %choose indices in pulse data garunteed to have the end frame, but MUCH shorter than the whole thing
+    lowerBound=max(1,floor((frameTimes(i,1)-pulseDataTimes(1))*sampleRate-1));                                 % subtract one and floor for padding, no smaller than 1
+    upperBound=min(length(pulseDataTimes),ceil((frameTimes(min(i+1,end),1)-pulseDataTimes(1))*sampleRate+1));  % add one and ceil for padding, no larger than max ind
+    [m relInd]=min(abs(pulseDataTimes(lowerBound:upperBound)-correctedFrameTimes(i,2)));
+    correctedFrameIndices(i,2)=lowerBound+relInd-1;
 end
-% ==================================
+
+    % ==================================
 
 
 % error checking
@@ -70,7 +103,7 @@ correctedFrameLengths = correctedFrameIndices(:,2)-correctedFrameIndices(:,1)+1;
 % due to aliasing, up to three values are acceptable
 if length(unique(frameLengths)) > 3
     
-    ifiMS=1000*unique(frameLengths)./sampleRate
+    ifiMS=[1000*unique(frameLengths)./sampleRate]'
     warning('found more than 3 unique frame lengths - miscalculation of frame start/stop indices');
     mn = mean(frameLengths);
 %     if any(frameLengths < (1-errorBound)*mn)

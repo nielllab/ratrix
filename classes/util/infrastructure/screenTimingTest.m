@@ -18,7 +18,7 @@ sampRate=44100;
 latclass=1;
 buffsize=1250;
 
-InitializePsychSound(1);
+InitializePsychSound(1); %argument seems to do nothing
 
 tryAgainSound=1;
 requestSound=2;
@@ -353,7 +353,7 @@ try
                 
                 if ~ismember(requestSound,playing)
                     PsychPortAudio('Start', players{requestSound}, 0);
-                    playing=[playing requestSound];
+                    playing(end+1)=requestSound;
                 end
                 
                 if ~lookForChange
@@ -372,10 +372,10 @@ try
                 playing=stopAllSounds;
                 if length(find(ports))==1
                     PsychPortAudio('Start', players{responseSound}, 1);
-                    playing=[playing responseSound];
+                    playing(end+1)=responseSound;
                 else
                     PsychPortAudio('Start', players{errorSound}, 1);
-                    playing=[playing errorSound];
+                    playing(end+1)=errorSound;
                 end
             end
             
@@ -386,7 +386,7 @@ try
                 
                 if ~ismember(tryAgainSound,playing)
                     PsychPortAudio('Start', players{tryAgainSound}, 0);
-                    playing=[playing tryAgainSound];
+                    playing(end+1)=tryAgainSound;
                 end
                 
                 if (attempt==0 || any(ports~=lastPorts))
@@ -412,11 +412,13 @@ try
         
         while ~isempty(playing) || KbCheck
             for pNum=1:length(playing)
-                s=PsychPortAudio('GetStatus',players{playing(pNum)});
+                s=PsychPortAudio('GetStatus',players{playing(pNum)}); %on osx, after the first time we play a sound with reps set to 1, .Active stays *false* (first time it is true until the sound finishes)
                 if ~s.Active
                     playing=setdiff(playing,playing(pNum));
                 end
             end
+            Screen('DrawText',window,sprintf('waiting for %d sounds to finish all all keys to be released',length(playing)),100,100);
+            Screen('Flip',window);
         end
     end
     
@@ -429,6 +431,9 @@ try
     end
     hist(records,100)
     title('called flip with ms headroom')
+    hold on
+    plot(repmat(ifi*1000,1,2),[0 max(ylim)],'k')
+    xlim([min(0,min(records)) max(max(records),1000*ifi*1.2)]);
     
     if ~isempty(diffs)
         subplot(2,1,2)

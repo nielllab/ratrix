@@ -68,7 +68,7 @@ try
     records=nan*zeros(1,round(1/ifi)*60*60*numHrs);
     recordNum=0;
     
-    stim=rand(10,10,numHrs*60*60*round(1/ifi));
+    stim=rand(25,25,round(numHrs*60*60/ifi));
     interTrialLuminance = .5;
     
     [scrWidth scrHeight]=Screen('WindowSize', window);

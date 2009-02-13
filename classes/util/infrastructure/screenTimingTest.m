@@ -2,6 +2,14 @@ function screenTimingTest
 clc
 close all
 
+logDir=sprintf('%s.logs',mfilename);
+warning('off','MATLAB:MKDIR:DirectoryExists')
+mkdir(logDir);
+warning('on','MATLAB:MKDIR:DirectoryExists')
+dstr=datestr(now,30);
+diary(fullfile(logDir,sprintf('%s.%s.log',mfilename,dstr)));
+graphName=fullfile(logDir,sprintf('%s.%s.png',mfilename,dstr));
+
 scrNum=max(Screen('Screens'));
 
 if IsWin
@@ -12,7 +20,7 @@ floatprecision = 1;
 filtMode = 0;
 dontclear = 0;
 
-timingCheckPct = .03;
+timingCheckPct = .02;
 
 sampRate=44100;
 latclass=1;
@@ -60,15 +68,21 @@ try
     window = Screen('OpenWindow',scrNum);
     ifi = Screen('GetFlipInterval',window);
     
+    Screen('Preference', 'TextRenderer', 0);
+    Screen('Preference', 'TextAlphaBlending',0);
+    Screen('Preference', 'TextAntiAliasing', 0);
+    [normBoundsRect, offsetBoundsRect]= Screen('TextBounds', window, 'TEST');
+    
     HideCursor;
     ListenChar(2);
     FlushEvents('keyDown');
     
-    numHrs=.05;
+    numHrs=.05; %if > ~.05, make textures on the fly, otherwise drawtexture has to swap VRAM with system memory and is slow
+    dims=50;
     records=nan*zeros(1,round(1/ifi)*60*60*numHrs);
     recordNum=0;
     
-    stim=rand(25,25,round(numHrs*60*60/ifi));
+    stim=rand(dims,dims,round(numHrs*60*60/ifi));
     interTrialLuminance = .5;
     
     [scrWidth scrHeight]=Screen('WindowSize', window);
@@ -141,12 +155,9 @@ try
     end
     
     doText=IsWin;
-    Screen('Preference', 'TextRenderer', 0);
-    Screen('Preference', 'TextAlphaBlending',0);
-    Screen('Preference', 'TextAntiAliasing', 0);
-    [normBoundsRect, offsetBoundsRect]= Screen('TextBounds', window, 'TEST');
     yTxtPos=100;
     xTxtPos=100;
+    txtCol=1;
     
     numDrops=0;
     numUncaughtDrops=0;
@@ -156,7 +167,7 @@ try
     theseDiffs=[];
     
     stars='';
-    limit=2;
+    limit=.5;
     theFlip='time in flip til vbl';
     timeLabels={...
         'last timing checked',...
@@ -247,12 +258,12 @@ try
             timestamps.textureDrawn=GetSecs;
             
             if doText
-                [newX newY]=Screen('DrawText',window,sprintf('trialNum:%g stimInd:%g frameNum:%g numDrops:%g(%g)',trialNum, i,frameNum,numDrops,numUncaughtDrops),xTxtPos,yTxtPos);
+                [newX newY]=Screen('DrawText',window,sprintf('trialNum:%g stimInd:%g frameNum:%g numDrops:%g(%g)',trialNum, i,frameNum,numDrops,numUncaughtDrops),xTxtPos,yTxtPos,txtCol);
                 if ~isempty(rqStr)
-                    [newX newY]=Screen('DrawText',window,sprintf('hit%s to start trial',rqStr),xTxtPos,newY+normBoundsRect(4));
+                    [newX newY]=Screen('DrawText',window,sprintf('hit%s to start trial',rqStr),xTxtPos,newY+normBoundsRect(4),txtCol);
                 end
-                [newX newY]=Screen('DrawText',window,sprintf('hit one of [%s ] to respond',rspStr),xTxtPos,newY+normBoundsRect(4));
-                [newX newY]=Screen('DrawText',window,'hit q to quit',xTxtPos,newY+normBoundsRect(4));
+                [newX newY]=Screen('DrawText',window,sprintf('hit one of [%s ] to respond',rspStr),xTxtPos,newY+normBoundsRect(4),txtCol);
+                [newX newY]=Screen('DrawText',window,'hit q to quit',xTxtPos,newY+normBoundsRect(4),txtCol);
             end
             timestamps.textDone=GetSecs;
             
@@ -317,7 +328,7 @@ try
             recordNum=recordNum+1;
             if recordNum<=length(records)
                 records(recordNum)=1000*(timestamps.lastVBL + ifi - timestamps.drawingFinished);
-            else
+            elseif recordNum==length(records)+1
                 fprintf('got to end of records\n')
                 %quit=true;
             end
@@ -412,7 +423,7 @@ try
         
         while ~isempty(playing) || KbCheck
             for pNum=1:length(playing)
-                s=PsychPortAudio('GetStatus',players{playing(pNum)}); %on osx, after the first time we play a sound with reps set to 1, .Active stays *false* (first time it is true until the sound finishes)
+                s=PsychPortAudio('GetStatus',players{playing(pNum)}); %after the first time we play a sound with reps set to 1, .Active stays *false* (first time it is true until the sound finishes)
                 if ~s.Active
                     playing=setdiff(playing,playing(pNum));
                 end
@@ -444,6 +455,7 @@ try
         set(gca,'XTick',1:length(diffs)-1)
         set(gca,'XTickLabel',{timeLabels{inds}})
     end
+    saveas(gcf,graphName);
 catch ex
     cleanup(window);
     ple(ex)
@@ -455,7 +467,8 @@ Screen('DrawText',window,'closing...',100,100);
 Screen('Flip',window);
 Screen('CloseAll');
 PsychPortAudio('Close');
-ListenChar(0);
+ListenChar(0); %if not in same function that called ListenChar(2), seems to dump everything back to screen
 ShowCursor;
 Priority(0);
+diary off
 end

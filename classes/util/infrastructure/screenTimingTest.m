@@ -79,13 +79,12 @@ try
     Screen('Preference', 'TextAntiAliasing', 0);
     [normBoundsRect, offsetBoundsRect]= Screen('TextBounds', window, 'TEST');
 
-    numHrs=.1; %.1 only works w/precache if you restart matlab, otherwise too large.  
-    %if > ~.1, make textures on the fly, otherwise drawtexture has to swap VRAM with system memory and is slow
+    numHrs=3;
     records=nan*zeros(1,round(1/ifi)*60*60*numHrs);
     recordNum=0;
 
     precache=false;
-    if precache
+    if precache %only works if numHrs < ~.1, otherwise too large, and should make textures on the fly (drawtexture swaps VRAM with system memory and is slow)
         lastSecs=0;
         dims=50;
         stim=rand(dims,dims,round(numHrs*60*60/ifi));
@@ -99,7 +98,7 @@ try
             end
         end
     else
-        dims=350;
+        dims=250;
     end
 
     interTrialLuminance = .5;
@@ -174,7 +173,6 @@ try
     diffs=[];
     theseDiffs=[];
 
-    stars='';
     limit=.5;
     theFlip='time in flip til vbl';
     timeLabels={...
@@ -220,6 +218,7 @@ try
         missed=0;
 
         thisIFI=0;
+        headroom=0;
 
         timestamps.lastVBL        =0;
         timestamps.bottomOfLoop   =0;
@@ -293,6 +292,7 @@ try
                 fprintf('frameNum %g: long delay inside flip after the swap-- ft-vbl:%g%% of ifi, now-vbl:%g\n',frameNum,100*(timestamps.frameTime-timestamps.VBL)/ifi,GetSecs-timestamps.VBL)
             end
 
+            headroom=1000*(timestamps.lastVBL + ifi - timestamps.drawingFinished);
             thisIFI = timestamps.VBL - timestamps.lastVBL;
             if missed>0 || abs(thisIFI/ifi-1)>timingCheckPct
                 if missed>0
@@ -328,21 +328,22 @@ try
 
                 for d=1:length(timeLabels)
                     if theseDiffs(d)>limit
-                        fprintf('\t%s%s:\t%g\n',stars,timeLabels{d},theseDiffs(d));
+                        fprintf('\t%s:\t%g\n',timeLabels{d},theseDiffs(d));
                     end
-                    %fprintf('\t%s%s:\t%g\n',stars,timeLabels{d},theseDiffs(d));
                 end
 
                 if ~length(theseDiffs)==d
                     error('bad theseDiffs')
                 end
+                
+                fprintf('\tgot to flip with headroom:\t%g\n\n',headroom)
             end
 
             recordNum=recordNum+1;
             if recordNum<=length(records)
-                records(recordNum)=1000*(timestamps.lastVBL + ifi - timestamps.drawingFinished);
+                records(recordNum)=headroom;
             elseif recordNum==length(records)+1
-                fprintf('got to end of records\n')
+                fprintf('frameNum:%d got to end of records\n',frameNum)
                 %quit=true;
             end
 

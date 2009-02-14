@@ -8,7 +8,6 @@ mkdir(logDir);
 warning('on','MATLAB:MKDIR:DirectoryExists')
 dstr=datestr(now,30);
 diary(fullfile(logDir,sprintf('%s.%s.log',mfilename,dstr)));
-graphName=fullfile(logDir,sprintf('%s.%s.png',mfilename,dstr));
 
 scrNum=max(Screen('Screens'));
 
@@ -19,6 +18,9 @@ end
 HideCursor;
 ListenChar(2); %if located in try block, all keystrokes dumped to screen at end?
 FlushEvents('keyDown');
+
+priorityLevel=MaxPriority('GetSecs','KbCheck');
+Priority(priorityLevel);
 
 floatprecision = 1;
 filtMode = 0;
@@ -77,20 +79,53 @@ try
     Screen('Preference', 'TextAntiAliasing', 0);
     [normBoundsRect, offsetBoundsRect]= Screen('TextBounds', window, 'TEST');
 
-    numHrs=.03; %if > ~.05, make textures on the fly, otherwise drawtexture has to swap VRAM with system memory and is slow
-    dims=50;
+    numHrs=.1; %.1 only works w/precache if you restart matlab, otherwise too large.  
+    %if > ~.1, make textures on the fly, otherwise drawtexture has to swap VRAM with system memory and is slow
     records=nan*zeros(1,round(1/ifi)*60*60*numHrs);
     recordNum=0;
 
-    stim=rand(dims,dims,round(numHrs*60*60/ifi));
+    precache=false;
+    if precache
+        lastSecs=0;
+        dims=50;
+        stim=rand(dims,dims,round(numHrs*60*60/ifi));
+        textures=zeros(1,size(stim,3));
+        for i=1:size(stim,3)
+            textures(i)=Screen('MakeTexture', window, squeeze(stim(:,:,i)),0,0,floatprecision);
+            if GetSecs-lastSecs>.5
+                Screen('DrawText',window,sprintf('%d of %d textures made (%g%%)',i,size(stim,3),100*i/size(stim,3)),100,100);
+                Screen('Flip',window);
+                lastSecs=GetSecs;
+            end
+        end
+    else
+        dims=350;
+    end
+
     interTrialLuminance = .5;
+    tmpTex=[];
+    itlTex=Screen('MakeTexture', window, interTrialLuminance,0,0,floatprecision);
+
+    if precache
+        Screen('DrawText',window,'preloading textures',100,100);
+        Screen('Flip',window);
+
+        [resident texidresident] = Screen('PreloadTextures', window); %takes forever if lots of textures, can crash osx
+        if resident ~= 1
+            disp(sprintf('error: some textures not cached'));
+            find(texidresident~=1)
+        end
+
+        Screen('DrawText',window,'textures preloaded',100,100);
+        Screen('Flip',window);
+    end
 
     [scrWidth scrHeight]=Screen('WindowSize', window);
 
-    scaleFactor = [scrHeight scrWidth]./[size(stim,1) size(stim,2)];
+    scaleFactor = [scrHeight scrWidth]./[dims dims];
 
-    height = scaleFactor(1)*size(stim,1);
-    width = scaleFactor(2)*size(stim,2);
+    height = scaleFactor(1)*dims;
+    width = scaleFactor(2)*dims;
 
     scrRect = Screen('Rect', window);
     scrLeft = scrRect(1);
@@ -102,35 +137,8 @@ try
 
     destRect = round([(scrWidth/2)-(width/2) (scrHeight/2)-(height/2) (scrWidth/2)+(width/2) (scrHeight/2)+(height/2)]); %[left top right bottom]
 
-    textures=zeros(1,size(stim,3));
-    lastSecs=0;
-    for i=1:size(stim,3)
-        textures(i)=Screen('MakeTexture', window, squeeze(stim(:,:,i)),0,0,floatprecision);
-        if GetSecs-lastSecs>.5
-            Screen('DrawText',window,sprintf('%d of %d textures made (%g%%)',i,size(stim,3),100*i/size(stim,3)),100,100);
-            Screen('Flip',window);
-            lastSecs=GetSecs;
-        end
-    end
-    textures(size(stim,3)+1)=Screen('MakeTexture', window, interTrialLuminance,0,0,floatprecision);
-
-    Screen('DrawText',window,'preloading textures',100,100);
-    Screen('Flip',window);
-
-    [resident texidresident] = Screen('PreloadTextures', window); %takes forever if lots of textures, can crash osx
-    if resident ~= 1
-        disp(sprintf('error: some textures not cached'));
-        find(texidresident~=1)
-    end
-
-    Screen('DrawText',window,'textures preloaded',100,100);
-    Screen('Flip',window);
-
     [keyIsDown,secs,keyCode]=KbCheck; %load mex files into ram + preallocate return vars
     GetSecs;
-
-    priorityLevel=MaxPriority(window,'GetSecs','KbCheck');
-    Priority(priorityLevel);
 
     %KbName('UnifyKeyNames'); %does not appear to choose keynamesosx on windows - KbName('KeyNamesOSX') comes back wrong
     allKeys=KbName('KeyNames');
@@ -234,7 +242,7 @@ try
 
         playing=[];
 
-        Screen('DrawTexture', window, textures(size(stim,3)+1),[],destRect,[],filtMode);
+        Screen('DrawTexture', window, itlTex,[],destRect,[],filtMode);
         [timestamps.lastVBL sos timestamps.bottomOfLoop]=Screen('Flip',window);
 
         timestamps.timingChecked=timestamps.bottomOfLoop;
@@ -250,10 +258,17 @@ try
             timestamps.topOfLoop=GetSecs;
 
             if stimStarted
-                i = mod(i,size(stim,3)-1)+1;
-                Screen('DrawTexture', window, textures(i),[],destRect,[],filtMode);
+                if precache
+                    i = mod(i,size(stim,3)-1)+1;
+                    Screen('DrawTexture', window, textures(i),[],destRect,[],filtMode);
+                else
+                    i=i+1;
+                    tmpTex=Screen('MakeTexture', window, rand(dims),0,0,floatprecision);
+                    Screen('DrawTexture', window, tmpTex,[],destRect,[],filtMode);
+                    Screen('Close', tmpTex);
+                end
             else
-                Screen('DrawTexture', window, textures(size(stim,3)+1),[],destRect,[],filtMode);
+                Screen('DrawTexture', window, itlTex,[],destRect,[],filtMode);
             end
             timestamps.textureDrawn=GetSecs;
 
@@ -313,11 +328,9 @@ try
 
                 for d=1:length(timeLabels)
                     if theseDiffs(d)>limit
-                        stars='***';
-                    else
-                        stars='';
+                        fprintf('\t%s%s:\t%g\n',stars,timeLabels{d},theseDiffs(d));
                     end
-                    fprintf('\t%s%s:\t%g\n',stars,timeLabels{d},theseDiffs(d));
+                    %fprintf('\t%s%s:\t%g\n',stars,timeLabels{d},theseDiffs(d));
                 end
 
                 if ~length(theseDiffs)==d
@@ -455,7 +468,7 @@ try
         set(gca,'XTick',1:length(diffs)-1)
         set(gca,'XTickLabel',{timeLabels{inds}})
     end
-    saveas(gcf,graphName);
+    saveas(gcf,fullfile(logDir,sprintf('%s.%s.png',mfilename,dstr)));
 catch ex
     cleanup(window);
     ple(ex)

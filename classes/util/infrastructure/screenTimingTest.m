@@ -356,7 +356,7 @@ try
             [keyIsDown,secs,keyCode]=KbCheck;
             ports=keyCode(portKeys);
             if keyCode(qKey)
-                fprintf('got quit key\n')
+                fprintf('frameNum:%d got quit key\n',frameNum)
                 quit = true;
             end
             timestamps.kbChecked=GetSecs;

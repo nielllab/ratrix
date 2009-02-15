@@ -1,16 +1,16 @@
 function drawFrameUsingTextureCache(tm, window, i, frameNum, stimSize, lastI, dontclear, texture, destRect, filtMode, labelFrames, ...
-    xOrigTextPos, yNewTextPos)
-
-% This function draws the given frame using the textureCache strategy.
-% Part of stimOGL rewrite.
-% INPUT: window, i, frameNum, stimSize, lastI, dontclear, texture, destRect, filtMode, labelFrames, ...
-%    xOrigTextPos, yNewTextPos
-% OUTPUT: (none)
+    xOrigTextPos, yNewTextPos, strategy,floatprecision)
 
 if window>=0
     if i>0 && i <= stimSize
         if ~(i==lastI) || (dontclear==0) %only draw if texture different from last one, or if every flip is redrawn
+            if strcmp(strategy,'noCache')
+                texture=Screen('MakeTexture', window, texture,0,0,floatprecision); %ned floatprecision=0 for remotedesktop
+            end
             Screen('DrawTexture', window, texture,[],destRect,[],filtMode);
+            if strcmp(strategy,'noCache')
+                Screen('Close',texture);
+            end
         else
             if labelFrames
                 thisMsg=sprintf('This frame stim index (%d) is staying here without drawing new textures %d',i,frameNum);

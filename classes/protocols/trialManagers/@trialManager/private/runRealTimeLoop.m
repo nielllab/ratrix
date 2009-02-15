@@ -418,12 +418,6 @@ while ~done && ~quit;
 
         destRect = phase.destRect;
         textures = phase.textures;
-        numDots = phase.numDots;
-        dotX = phase.dotX;
-        dotY = phase.dotY;
-        dotLocs = phase.dotLocs;
-        dotSize = phase.dotSize;
-        dotCtr = phase.dotCtr;
         currentCLUT = phase.CLUT;
         
         % =====================================================================================================================
@@ -497,9 +491,7 @@ while ~done && ~quit;
 
                 if window>0
                     [floatprecision stim garbage] = determineColorPrecision(tm, stim, false, strategy, interTrialLuminance);
-                    [textures, garbage, garbage, garbage, garbage, ...
-                        garbage, garbage] ...
-                        = cacheTextures(tm,strategy,stim,window,floatprecision,false);
+                    textures = cacheTextures(tm,strategy,stim,window,floatprecision,false);
                     destRect=Screen('Rect',window);
                 elseif strcmp(tm.displayMethod,'LED')
                     floatprecision=[];
@@ -715,15 +707,21 @@ while ~done && ~quit;
             
             switch strategy
                 % ====================================================================================================================
-                case 'textureCache'
+                case {'textureCache','noCache'}
                     % function to determine the frame index using the textureCache strategy
                     [tm frameIndex i done doFramePulse didPulse] = updateFrameIndexUsingTextureCache(tm, ...
                         frameIndexed, loop, trigger, timeIndexed, frameIndex, indexedFrames, size(stim,3), isRequesting, ...
                         i, requestFrame, frameNum, timedFrames, responseOptions, done, doFramePulse, didPulse, scheduledFrameNum);
                     % =====================================================================================================================
                     % function to draw the appropriate texture using the textureCache strategy
-                    drawFrameUsingTextureCache(tm, window, i, frameNum, size(stim,3), lastI, dontclear, textures(i), destRect, ...
-                        filtMode, labelFrames, xOrigTextPos, yNewTextPos);
+                    switch strategy
+                        case 'textureCache'
+                            drawFrameUsingTextureCache(tm, window, i, frameNum, size(stim,3), lastI, dontclear, textures(i), destRect, ...
+                                filtMode, labelFrames, xOrigTextPos, yNewTextPos);
+                        case 'noCache'
+                            drawFrameUsingTextureCache(tm, window, i, frameNum, size(stim,3), lastI, dontclear, squeeze(stim(:,:,i)), destRect, ...
+                                filtMode, labelFrames, xOrigTextPos, yNewTextPos,strategy,floatprecision);
+                    end
                 % =====================================================================================================================
                 case 'expert'
                     % 10/31/08 - implementing expert mode

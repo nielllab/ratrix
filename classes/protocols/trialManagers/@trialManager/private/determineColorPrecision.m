@@ -21,6 +21,12 @@ else % non expert - calculate floatprecision
                 else
                     floatprecision=1;%will tell maketexture to use 0.0-1.0 format with 16bpc precision (2 would do 32bpc)
                 end
+                
+                %edf thinks maketexture will barf if we try to send it singles
+                if strcmp(class(stim),'single')
+                    stim=double(stim);
+                end
+                
             case 'uint8'
                 %do nothing
             case 'uint16'
@@ -32,12 +38,21 @@ else % non expert - calculate floatprecision
                 error('unexpected stim variable class; currently stimOGL expects double, single, unit8, uint16, or logical')
         end
     else
-        stim       
+        stim
         class(stim)
         finalScreenLuminance
         class(finalScreenLuminance)
         error('stim and finalScreenLuminance must be real')
     end
+end
+
+if floatprecision ~=0 || ~strcmp(class(stim),'uint8')
+    %convert stim/floatprecision to uint8 so when
+    %drawFrameUsingTextureCache calls maketexture it is fast
+    %(especially when strategy is noCache and we make each texture
+    %during each frame)
+    floatprecision=0;
+    stim=uint8(stim*double(intmax('uint8')));
 end
 
 end % end function

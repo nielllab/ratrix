@@ -150,7 +150,7 @@ switch nargin
                 error('isFinalPhase must be a scalar 0 or 1')
             end
         % hz
-        if isscalar(varargin{9}) && varargin{9}>0 && isreal(varargin{9})
+        if isscalar(varargin{9}) && (varargin{9}>0 || (ismac && varargin{9}==0)) && isreal(varargin{9})
             spec.hz=varargin{9};
         else
             error('hz must be scalar real >0')

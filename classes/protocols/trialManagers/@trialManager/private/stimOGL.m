@@ -101,23 +101,12 @@ try
             %   show movie following mario's 'ProgrammingTips' for the OpenGL version of PTB
             %   http://www.kyb.tuebingen.mpg.de/bu/people/kleinerm/ptbosx/ptbdocu-1.0.5MK4R1.html
 
-            [phaseData{i}.textures, phaseData{i}.numDots, phaseData{i}.dotX, phaseData{i}.dotY, phaseData{i}.dotLocs, ...
-                phaseData{i}.dotSize, phaseData{i}.dotCtr] ...
-                = cacheTextures(tm, phaseData{i}.strategy, stim, window, phaseData{i}.floatprecision, verbose);
+            phaseData{i}.textures = cacheTextures(tm, phaseData{i}.strategy, stim, window, phaseData{i}.floatprecision, verbose);
         else
 
             phaseData{i}.destRect=[];
             phaseData{i}.CLUT=[];
             phaseData{i}.textures=[];
-            
-            % these were used for dynamicDots - are we okay with getting rid of that?
-            %should eliminate the following from cacheTextures, they're never used
-            phaseData{i}.numDots=[];
-            phaseData{i}.dotX=[];
-            phaseData{i}.dotY=[];
-            phaseData{i}.dotLocs=[];
-            phaseData{i}.dotSize=[];
-            phaseData{i}.dotCtr=[];
 
             % happens in runRealTimeLoop
             %these should be taken care of?
@@ -160,8 +149,10 @@ try
 catch ex
     ple(ex)
 
-    daqreset;
-
+    if IsWin
+        daqreset;
+    end
+    
     Screen('CloseAll');
     Priority(originalPriority);
     ShowCursor(0);

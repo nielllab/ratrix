@@ -83,4 +83,8 @@ if isempty(responseOptions) && (trigger || loop || (timeIndexed && timedFrames(e
     error('can''t loop with no response ports -- would have no way out')
 end
 
+if strcmp(strategy,'textureCache') % edf thinks texture precaching causes dropped frames
+    strategy = 'noCache';
+end
+
 end

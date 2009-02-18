@@ -1,6 +1,7 @@
 function r=constantReinforcement(varargin)
 % ||constantReinforcement||  class constructor.
-% r=constantReinforcement(rewardSizeULorMS,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msPuff)
+% r=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,...
+%   msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msPuff)
 
         r.rewardSizeULorMS=0;
 
@@ -17,8 +18,9 @@ switch nargin
         else
             error('Input argument is not a constantReinforcement object')
         end
-    case 6
-        r = class(r,'constantReinforcement',reinforcementManager(varargin{2},varargin{6},varargin{5},varargin{3},varargin{4}));
+    case 8
+        r = class(r,'constantReinforcement',...
+            reinforcementManager(varargin{4},varargin{8},varargin{7},varargin{5},varargin{6},varargin{2},varargin{3}));
         r = setRewardSizeULorMS(r,varargin{1});
     otherwise
         error('Wrong number of input arguments')

@@ -59,6 +59,9 @@ end
 quit = false;
 result=[];
 analysisdata=[];
+stimManagerClass=[];
+stimulusDetails=[];
+physiologyEvents=[];
 plotParameters.doPlot=false;
 plotParameters.handle=figure;
 
@@ -115,6 +118,12 @@ while ~quit
             analysisLocation = fullfile(analysisPath, sprintf('physAnalysis_%d-%s.mat',goodFiles(i).trialNum,goodFiles(i).timestamp));
             
             %stimRecordLocation
+            lastStimManagerClass=stimManagerClass; % store the previous trial's stim class
+            if ~isempty(physiologyEvents)
+                lastZposition=physiologyEvents(end).position(3); % store the previous trial's ending z-position
+            else
+                lastZposition=[];
+            end
             load(stimRecordLocation, 'stimManagerClass')                
             analyzeThisClass= all(strcmp('all',stimClassToAnalyze)) ||  any(strcmp(stimManagerClass,stimClassToAnalyze));
             if analyzeThisClass
@@ -208,6 +217,7 @@ while ~quit
                 quality.samplingRate=samplingRate; % from neuralRecord
                 
                 % load stimRecords  
+                lastStimulusDetails=stimulusDetails;
                 load(stimRecordLocation);
                 evalStr = sprintf('sm = %s();',stimManagerClass);
                 eval(evalStr);
@@ -242,7 +252,19 @@ while ~quit
                     % this is the way of making sure it gets in every trial's analysis file, and that it will get propagated to the next analysis
                     save(analysisLocation, 'analysisdata');
                 elseif ~overwriteAll && passedQualityTest % if the analysis file already exists in an acceptable state
-                    load(analysisLocation, 'analysisdata');
+                    % also check the following before loading:
+                    % trialNum is not out of trialRange - already checked above (weeds out goodFiles)
+                    % previous trial is same stim manager class
+                    % stim size is the same (see stimulusDetails)
+                    % z depth (physiologyEvents) is the same
+                    if (isempty(lastStimManagerClass) || strcmp(lastStimManagerClass, stimManagerClass)) ...
+                            && lastStimulusDetails.height==stimulusDetails.height ...
+                            && lastStimulusDetails.width==stimulusDetails.width ...
+                            && (isempty(physiologyEvents) || all([physiologyEvents.position(3)]==lastZposition))
+                        load(analysisLocation, 'analysisdata');
+                    else
+                        warning('did not load analysis file due to inconsistencies between this trial and last');
+                    end
                 end
             else
                 disp(sprintf('skipping class: %s',stimManagerClass))

@@ -52,17 +52,9 @@ fractionOpenTimeSoundIsOn=1;
 fractionPenaltySoundIsOn=1;
 scalar=1;
 msAirpuff=msPenalty;
-msFlushDuration         =1000;
-msMinimumPokeDuration   =10;
-msMinimumClearDuration  =10;
 requestRewardSizeULorMS=10;
 percentCorrectionTrials=.5;
-msResponseTimeLimit=0;
-pokeToRequestStim=true;
-maintainPokeToMaintainStim=true;
-msMaximumStimPresentationDuration=0;
-maximumNumberStimPresentations=0;
-doMask=false;
+doAllRequests='first';
 
 freeDrinkLikelihood=0.003; % changes for stochastic/regular freeDrinks
 
@@ -75,52 +67,64 @@ sm=soundManager({soundClip('correctSound','allOctaves',[400],20000), ...
 
 % ====================================================================================================================
 % reinforcementManager
-constantRewards=constantReinforcement(rewardSizeULorMS,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
+constantRewards=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,doAllRequests,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 
-increasingRewards=rewardNcorrectInARow([20,80,150,250,350,500,1000],msPenalty,1,1, scalar, msAirpuff); %[20 80 100 150 250] is what philip uses ..
+doAllRequests='all';
+constantRewardsWithAllRequests=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,doAllRequests,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
+
+doAllRequests='nonrepeats';
+constantRewardsWithNonrepeats=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,doAllRequests,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
+
+increasingRewards=rewardNcorrectInARow([20,80,150,250,350,500,1000],requestRewardSizeULorMS,doAllRequests,msPenalty,1,1, scalar, msAirpuff); %[20 80 100 150 250] is what philip uses ..
 
 % ====================================================================================================================
 % trialManager
-fd_sto = freeDrinks(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,freeDrinkLikelihood,constantRewards);
+fd_sto = freeDrinks(sm,freeDrinkLikelihood,constantRewards);
 
 freeDrinkLikelihood=0;
-fd = freeDrinks(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,freeDrinkLikelihood,constantRewards);
+fd = freeDrinks(sm,freeDrinkLikelihood,constantRewards);
 
 % freeDrinks (stochastic and nonstochastic) but with increasingRewards instead of constantRewards
 freeDrinkLikelihood=0.003;
-fd_sto_increasing_rewards = freeDrinks(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,freeDrinkLikelihood,increasingRewards);
+fd_sto_increasing_rewards = freeDrinks(sm,freeDrinkLikelihood,increasingRewards);
 
 freeDrinkLikelihood=0;
-fd_increasing_rewards = freeDrinks(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,freeDrinkLikelihood,increasingRewards);
+fd_increasing_rewards = freeDrinks(sm,freeDrinkLikelihood,increasingRewards);
 
-vh=nAFC(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,requestRewardSizeULorMS,...
-    percentCorrectionTrials,msResponseTimeLimit,pokeToRequestStim,maintainPokeToMaintainStim,msMaximumStimPresentationDuration,...
-    maximumNumberStimPresentations,doMask,constantRewards);
+fd_all_requests=freeDrinks(sm,freeDrinkLikelihood,constantRewardsWithAllRequests,...
+    [],[],[],[],[],[],'all');
+
+fd_nonrepeats=freeDrinks(sm,freeDrinkLikelihood,constantRewardsWithNonrepeats,...
+    [],[],[],[],[],[],'all');
+
+vh=nAFC(sm,percentCorrectionTrials,constantRewards);
+
 
 ai_parameters=[];
 ai_parameters.numChans=3;
 ai_parameters.sampRate=50000;
 ai_parameters.inputRanges=repmat([-1 6],ai_parameters.numChans,1);
 
-vh_datanet=nAFC(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,requestRewardSizeULorMS,...
-    percentCorrectionTrials,msResponseTimeLimit,pokeToRequestStim,maintainPokeToMaintainStim,msMaximumStimPresentationDuration,...
-    maximumNumberStimPresentations,doMask,constantRewards,[],[],...
+vh_datanet=nAFC(sm,percentCorrectionTrials,constantRewards,[],[],...
     datanet('stim','localhost','132.239.158.179','\\132.239.158.179\datanet_storage',ai_parameters));
 
 
 % uses rewardNcorrectInARow reinforcementManager, but same nAFC otherwise
-nAFC_increasing_rewards =nAFC(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,requestRewardSizeULorMS,...
-    percentCorrectionTrials,msResponseTimeLimit,pokeToRequestStim,maintainPokeToMaintainStim,msMaximumStimPresentationDuration,...
-    maximumNumberStimPresentations,doMask,increasingRewards);
+nAFC_increasing_rewards =nAFC(sm,percentCorrectionTrials,increasingRewards);
 
 %%%%%%%%%% go to stim - Balaji (same as Erik's go to side)
-gts = nAFC(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,requestRewardSizeULorMS,percentCorrectionTrials,...
-    msResponseTimeLimit,pokeToRequestStim,maintainPokeToMaintainStim,msMaximumStimPresentationDuration,maximumNumberStimPresentations,doMask,constantRewards);
+gts = nAFC(sm,percentCorrectionTrials,constantRewards);
 
 % autopilot trialManager (for gratings currently) - 11/12/08 fli
-aP = autopilot(percentCorrectionTrials,msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,constantRewards);
-aP_datanet = autopilot(percentCorrectionTrials,msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,constantRewards, ...
+aP = autopilot(percentCorrectionTrials,sm,constantRewards);
+aP_datanet = autopilot(percentCorrectionTrials,sm,constantRewards, ...
     [],[],datanet('stim','localhost','132.239.158.179','\\132.239.158.179\datanet_storage',ai_parameters));
+
+% passiveViewing trialManager
+% allowRepeats=true;
+% passive=passiveViewing(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,requestRewardSizeULorMS,...
+%     percentCorrectionTrials,msResponseTimeLimit,pokeToRequestStim,maintainPokeToMaintainStim,msMaximumStimPresentationDuration,...
+%     maximumNumberStimPresentations,doMask,constantRewards,allowRepeats);
 
 % ====================================================================================================================
 % variables for stim managers
@@ -272,15 +276,11 @@ background=gray;
 method='texOnPartOfScreen';
 stixelSize = [20,16];
 stimLocation=[0,0,1280,1024];
-numFrames=100;   %100 to test; 5*60*100=30000 for experiment
+numFrames=1000;   %100 to test; 5*60*100=30000 for experiment
 % s = whiteNoise(meanLuminance,std,background,method,requestedStimLocation,stixelSize,searchSubspace,numFrames,
 %       maxWidth,maxHeight,scaleFactor,interTrialLuminance)
 
 wn = whiteNoise(mean,std,background,method,stimLocation,stixelSize,searchSubspace,numFrames,1280,1024,0,.5);
-
-% passiveViewer (using a whiteNoise movie)
-numFrames=1000;
-passive = passiveViewer(mean,std,background,method,stimLocation,stixelSize,searchSubspace,numFrames,1280,1024,0,.5);
 
 % bipartiteField
 receptiveFieldLocation = [0.25 0.5];
@@ -307,6 +307,7 @@ fF = fullField(contrast,frequencies,duration,repetitions,maxWidth,maxHeight,scal
 default=getDefaultParameters(ifFeatureGoRightWithTwoFlank,protocolType,protocolVersion,defaultSettingsDate);
 parameters=default;
 parameters.requestRewardSizeULorMS  =30;
+parameters.doAllRequests='first';
 parameters.msPenalty=1000;
 parameters.scheduler=minutesPerSession(90,3);
 %parameters.scheduler = nTrialsThenWait([1000],[1],[0.01],[1]);
@@ -535,8 +536,11 @@ ts28=trainingStep(vh_datanet,fF,repeatIndef,noTimeOff(),svnRev);
 % whiteNoise no datanet
 ts29=trainingStep(aP,wn,repeatIndef,noTimeOff(),svnRev);
 
-% passiveViewer no datanet
-ts40=trainingStep(aP,passive,repeatIndef,noTimeOff(),svnRev);
+% passiveViewing no datanet with a fullField stim, 'all' requestPorts, 'all' requests rewarded
+ts40 = trainingStep(fd_all_requests, wn, repeatIndef, noTimeOff(), svnRev);
+
+% passiveViewing no datanet with a fullField stim, 'all' requestPorts, 'nonrepeats' rewarded
+ts41 = trainingStep(fd_nonrepeats, wn, repeatIndef, noTimeOff(), svnRev);
 
 % images
 %path containing ALL the stimuli
@@ -580,7 +584,7 @@ ts30 = trainingStep(vh, discrimStim5A,repeatIndef,noTimeOff(),svnRev);
 %     ts18, ts19, ts20, ts21, ts22});
 % stepNum=21;
 % p=protocol('gabor test2', {ts29, ts1, ts4, ts12, ts2, ts12, ts8, ts11,ts9,ts10,sweepContrast,ts23,ts24,ts27,ts30});
-stepNum=uint8(1);
+stepNum=uint8(3);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});
@@ -608,7 +612,7 @@ for i=1:length(subjIDs),
 %         case {'rack3test4','rack3test5','rack3test6'} % nAFC, orientedGabors
 %             p=protocol('nAFC,orientedGabors',{ts4});
         otherwise
-            p=protocol('demo',{ts40});
+            p=protocol('demo',{ts40,ts41,ts4,ts2,ts25});
 %             error('unknown subject');
     end
     

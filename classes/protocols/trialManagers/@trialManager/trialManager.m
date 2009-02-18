@@ -1,14 +1,23 @@
 function t=trialManager(varargin)
 % TRIALMANAGER  class constructor.  ABSTRACT CLASS-- DO NOT INSTANTIATE
-% t=trialManager(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,soundManager,reinforcementManager,eyeTracker,eyeController,customDescription,datanet,frameDropCorner, dropFrames, displayMethod)
-
+% t=trialManager(soundManager,reinforcementManager,eyeTracker,eyeController,customDescription,datanet,
+%   frameDropCorner, dropFrames, displayMethod, requestPorts)
+%
 % 10/8/08 - this is the new integrated trialManager that handles all stims in a phased way - uses phased doTrial and stimOGL
-
+%
+% soundMgr - the soundManager object
+% reinforcementManager - the reinforcementManager object
+% description - a string description of this trialManager
+% eyeTracker - the eyeTracker object
+% eyeController - the eyeController object
+% datanet - the datanet object
+% frameDropCorner - a struct containing frameDropCorner params
+% dropFrames - whether or not to skip dropped frames
+% displayMethod - 'LED' or 'ptb'
+% requestPorts - one of the strings {'none', 'center', 'all'}; defines which ports should be returned as requestPorts
+%       by the stimManager's calcStim; the default for nAFC is 'center' and the default for freeDrinks is 'none'
 requiredSoundNames = {'correctSound','keepGoingSound','trySomethingElseSound','wrongSound'};
 
-t.msFlushDuration=0;
-t.msMinimumPokeDuration=0;
-t.msMinimumClearDuration=0;
 t.soundMgr=soundManager();
 t.reinforcementManager=reinforcementManager();
 t.description='';
@@ -18,6 +27,7 @@ t.datanet=[];
 t.frameDropCorner={};
 t.dropFrames=false;
 t.displayMethod='';
+t.requestPorts='none'; % either 'none','center',or 'all'
 
 switch nargin
     case 0
@@ -31,42 +41,33 @@ switch nargin
         else
             error('Input argument is not a trialManager object')
         end
-    case 12
-        if varargin{1}>=0
-            t.msFlushDuration=varargin{1};
-        else
-            error('msFlushDuration must be >=0')
-        end
+    case 10
         
-        if varargin{2}>0
-            t.msMinimumPokeDuration=varargin{2};
-        else
-            error('msMinimumPokeDuration must be > 0')
-        end
-        
-        if varargin{3}>=0
-            t.msMinimumClearDuration=varargin{3};
-        else
-            error('msMinimumClearDuration must be >=0')
-        end
-        
-        if isa(varargin{4},'soundManager') && all(ismember(requiredSoundNames, getSoundNames(varargin{4})))
-            t.soundMgr=varargin{4};
+        % soundManager
+        if isa(varargin{1},'soundManager') && all(ismember(requiredSoundNames, getSoundNames(varargin{1})))
+            t.soundMgr=varargin{1};
         else
             error(['not a soundManager object, or doesn''t contain required sounds ' printAsList(requiredSoundNames)])
         end
         
-        if isa(varargin{5},'reinforcementManager')
-            t.reinforcementManager=varargin{5};
+        % reinforcementManager
+        if isa(varargin{2},'reinforcementManager')
+            t.reinforcementManager=varargin{2};
         else
             error('must be a reinforcementManager')
         end
         
+        % eyeTracker
+        t.eyeTracker=varargin{3};
         
-        t.eyeTracker=varargin{6};
-        t.eyeController=varargin{7};
-        customDescription=varargin{8};
-        t.datanet=varargin{9};
+        % eyeController
+        t.eyeController=varargin{4};
+        
+        % customDescription
+        customDescription=varargin{5};
+        
+        % datanet
+        t.datanet=varargin{6};
         
         
         if isa(t.eyeTracker,'eyeTracker') || isempty(t.eyeTracker)
@@ -83,19 +84,19 @@ switch nargin
         end
         
         if ischar(customDescription)
-            t.description=sprintf(['%s\n'...
-                '\t\t\tmsFlushDuration:\t%d\n'...
-                '\t\t\tmsMinimumPokeDuration:\t%d\n'...
-                '\t\t\tmsMinimumClearDuration:\t%d'], ...
-                customDescription,t.msFlushDuration,t.msMinimumPokeDuration,t.msMinimumClearDuration);
+            % do nothing
         else
             error('not a string')
         end
         
+        % frameDropCOrner
+        t.frameDropCorner=varargin{7};
         
-        t.frameDropCorner=varargin{10};
-        t.dropFrames=varargin{11};
-        t.displayMethod=varargin{12};
+        % dropFrames
+        t.dropFrames=varargin{8};
+        
+        % displayMethod
+        t.displayMethod=varargin{9};
         
         if isempty(t.dropFrames)
             t.dropFrames=false;
@@ -129,6 +130,14 @@ switch nargin
             else
                 error('must have dropFrames=false and frameDropCorner={''off''} for LED')
             end
+        end
+        
+        % requestPorts
+        t.requestPorts=varargin{10};
+        if ischar(t.requestPorts) && (strcmp(t.requestPorts,'none') || strcmp(t.requestPorts,'all') || strcmp(t.requestPorts,'center'))
+            %pass
+        else
+            error('requestPorts must be ''none'', ''all'', or ''center''');
         end
         
         t = class(t,'trialManager');

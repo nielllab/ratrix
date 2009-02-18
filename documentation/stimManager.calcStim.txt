@@ -127,10 +127,12 @@
 % out.stimSpecs is a cell array of stimSpec objects, each of which represents one phase of the trial
 % 
 % stimSpec.stimulus         the stimulus frames to show, or expert-mode parameters struct (equivalent to non-phased 'out')
-% stimSpec.criterion        a cell array of the format {port1 target1 port2 target2 ...} where triggering port1 will cause a phase transition to 
+% stimSpec.transitions      a cell array of the format {port1 target1 port2 target2 ...} where triggering port1 will cause a phase transition to 
 %                           the phase specified by target1, triggering port2 will cause a phase transition to the phase specified by target2, etc.
-%                           the port values are a subset of [1 2 3] and the target values are indices into the array of stimSpec objects.
-%                           if the port value is empty ([]), then there is no phase transition by port triggering (instead, relies on frame timeout, see below)
+%                           the port values are a subset of all ports and the target values are indices into the array of stimSpec objects.
+%                           if the port value is empty ([]), then there is no phase transition by port triggering (instead, this is the special 'frame timeout' transition, see below)
+%                           this 'frame timeout' transition is also used even if framesUntilTransition is empty, but if the stimType is 'cache'
+%                           or 'timedFrames' with a nonzero end, and we finish showing the stimulus for the specified duration.
 % stimSpec.stimType         must be one of the non-phased values for 'type' listed above, with the same properties
 %                           this is effectively a phase-specific type, instead of trial-specific
 % stimSpec.phaseType        one of {'correct', 'error', 'trigger', ''} -- correct and error will ask the reinforcement manager how much water/airpuff to deliver at the beginning of the phase
@@ -138,15 +140,19 @@
 %                                   a reward that extends beyond the end of the phase is cut off.
 % stimSpec.framesUntilTransition    length of the frame timeout (if we have shown this phase for framesUntilTransition frames with no transition by port selection,
 %                                   then advance to the next phase as specified by the criterion automatically)
-%                                   advances to the first phase target specified by criterion (target1) - see above
-%                                   if empty, then hold this phase indefinitely until a port transition is triggered
+%                                   if framesUntilTransition is greater than the length of the stimulus and the stimType is 'cache' or
+%                                   'timedFrames' with nonzero end, then we will throw an error during the validation process.                                  
+%                                   advances to the special 'frame timeout' phase - see above
+%                                   if empty, then hold this phase indefinitely until a port transition is triggered 
+%                                   or we transition due to the strategy of 'cache' or 'timedFrames'.
 % stimSpec.stochasticDistribution   a cell array of values {pA, portA, pB, portB,...} where pA specifies the probability of stochastically triggering
 %                                   portA, and pB specifies the probability of triggering portB, etc
 %                                   this is done for every frame of the stimulus (loop of runRealTimeLoop), and the execution order is whatever comes first
 %                                   in this cell array (ie pA is tried, then pB, and so forth)
 % stimSpec.scaleFactor      % the scaleFactor associated with this phase - see non-phased scaleFactor for details
 % stimSpec.isFinalPhase     % a flag if this is the final phase of the trial (defaults to zero)
-% stimSpec.startFrame       % set to zero to start at the beginning
+% stimSpec.startFrame       what frame of the stimulus to start this phase at; if 'loop' mode, automatically start at first frame after looping through once
+%                           set to zero to start at the beginning
 
 % for phased type, your stimManager may want to override the method getSoundsToPlay, which is called every frame.  the default will play trySomethingElse, keepGoing, correct and incorrect sounds appropriate for phaseified nAFC/freeDrinks.
 % INPUTS

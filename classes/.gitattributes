@@ -9,7 +9,6 @@ protocols/criteria/@parameterThresholdCriterion/parameterThresholdCriterion.m -t
 protocols/@stimSpec/getFramesUntilTransition.m -text
 protocols/@stimSpec/getStim.m -text
 protocols/@stimSpec/stimSpec.m -text
-protocols/@stimSpec/getCriterion.m -text
 protocols/@stimSpec/getStochasticDistribution.m -text
 protocols/@stimSpec/getStimType.m -text
 protocols/stimManagers/@crossModal/crossModal.m -text
@@ -130,7 +129,6 @@ protocols/criteria/@receptiveFieldCriterion/checkCriterion.m -text
 protocols/@stimSpec/getIsFinalPhase.m -text
 protocols/trialManagers/@autopilot/autopilot.m -text
 protocols/trialManagers/@autopilot/stationOKForTrialManager.m -text
-protocols/trialManagers/@autopilot/getRequestPorts.m -text
 protocols/trialManagers/@autopilot/getResponsePorts.m -text
 protocols/stimManagers/@fullField/fullField.m -text
 protocols/stimManagers/@fullField/getLUT.m -text
@@ -169,11 +167,7 @@ protocols/@stimSpec/getScaleFactor.m -text
 protocols/@stimSpec/getStartFrame.m -text
 protocols/@stimSpec/getHz.m -text
 protocols/@stimSpec/getPhaseType.m -text
-protocols/stimManagers/@passiveViewer/passiveViewer.m -text
-protocols/stimManagers/@passiveViewer/drawExpertFrame.m -text
-protocols/stimManagers/@passiveViewer/extractDetailFields.m -text
-protocols/stimManagers/@passiveViewer/flushLUT.m -text
-protocols/stimManagers/@passiveViewer/getLUT.m -text
-protocols/stimManagers/@passiveViewer/calcStim.m -text
-protocols/stimManagers/@passiveViewer/fillLUT.m -text
-protocols/stimManagers/@passiveViewer/stimMgrOKForTrialMgr.m -text
+protocols/@stimSpec/getTransitions.m -text
+protocols/reinforcementManagers/@reinforcementManager/getRequestRewardSizeULorMS.m -text
+protocols/reinforcementManagers/@reinforcementManager/getRequestMode.m -text
+protocols/reinforcementManagers/@reinforcementManager/setRequestRewardSizeULorMS.m -text

@@ -1,4 +1,5 @@
-function [r rewardSizeULorMS msPenalty msPuff msRewardSound msPenaltySound updateTM] = calcReinforcement(r,trialRecords, subject)
+function [r rewardSizeULorMS requestRewardSizeULorMS msPenalty msPuff msRewardSound msPenaltySound updateTM] = ...
+    calcReinforcement(r,trialRecords, subject)
 verbose=0;
 
 correct=0;
@@ -31,7 +32,7 @@ end
 
 updateTM=0;
 
-[rewardSizeULorMS msPenalty msPuff msRewardSound msPenaltySound] = calcCommonValues(r,r.rewardNthCorrect(n));
+[rewardSizeULorMS requestRewardSizeULorMS msPenalty msPuff msRewardSound msPenaltySound] = calcCommonValues(r,r.rewardNthCorrect(n),getRequestRewardSizeULorMS(r));
 
 if verbose
     disp(sprintf('if next trial is correct will reward %d ms, reward level %d',rewardSizeULorMS,n))

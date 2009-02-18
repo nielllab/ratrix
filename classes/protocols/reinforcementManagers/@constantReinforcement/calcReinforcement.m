@@ -1,5 +1,7 @@
-function [r rewardSizeULorMS msPenalty msPuff msRewardSound msPenaltySound updateRM] = calcReinforcement(r,trialRecords, subject)
+function [r rewardSizeULorMS requestRewardSizeULorMS msPenalty msPuff msRewardSound msPenaltySound updateRM] = ...
+    calcReinforcement(r,trialRecords, subject)
 
-[rewardSizeULorMS msPenalty msPuff msRewardSound msPenaltySound] = calcCommonValues(r,r.rewardSizeULorMS);
+[rewardSizeULorMS requestRewardSizeULorMS msPenalty msPuff msRewardSound msPenaltySound] = ...
+    calcCommonValues(r,r.rewardSizeULorMS,getRequestRewardSizeULorMS(r));
 
 updateRM=0;

@@ -3,7 +3,7 @@ function textures = cacheTextures(tm, strategy, stim, window, floatprecision, ve
 % This function precaches all textures for the given stimulus using Screen('MakeTexture') and Screen('PreloadTextures').
 % Note that if finalScreenLuminance is blank (ie for phased stim), then it does not get loaded as a texture
 
-if floatprecision~=0 || ~strcmp(class(stim),'uint8')
+if ~(ischar(strategy) && strcmp(strategy,'expert')) && (floatprecision~=0 || ~strcmp(class(stim),'uint8')) % only in non-expert mode
     error('expects floatprecision to be 0 and stim to be uint8 so that maketexture is fast')
 end
 

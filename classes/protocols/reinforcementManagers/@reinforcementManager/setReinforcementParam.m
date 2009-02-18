@@ -8,6 +8,8 @@ try
             rm=setScalar(rm,val);
         case 'rewardULorMS'
             rm=setRewardSizeULorMS(rm,val);
+        case 'requestRewardSizeULorMS'
+            rm=setRequestRewardSizeULorMS(rm,val);
         otherwise
             param
             error('unrecognized param')

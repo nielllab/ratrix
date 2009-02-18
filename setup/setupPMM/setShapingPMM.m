@@ -35,6 +35,7 @@ default=getDefaultParameters(ifFeatureGoRightWithTwoFlank,protocolType,protocolV
 nameOfShapingStep{1} = sprintf('Step 2a: Easy %s, friendly', protocolType);
 parameters=default;
 parameters.requestRewardSizeULorMS             =30;
+parameters.requestMode = 'first';
 parameters.msPenalty=1000;
 parameters.scheduler=minutesPerSession(90,3);
 %parameters.scheduler = nTrialsThenWait([1000],[1],[0.01],[1]);

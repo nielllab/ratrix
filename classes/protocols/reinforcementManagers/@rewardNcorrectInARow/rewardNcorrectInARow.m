@@ -1,6 +1,7 @@
 function r=rewardNcorrectInARow(varargin)
 % ||rewardNcorrectInARow||  class constructor.
-% r=rewardNcorrectInARow(rewardNthCorrect,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msPuff)
+% r=rewardNcorrectInARow(rewardNthCorrect,requestRewardSizeULorMS,requestMode,msPenalty,...
+%   fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msPuff)
 
 switch nargin
     case 0
@@ -16,7 +17,7 @@ switch nargin
             error('Input argument is not a rewardNcorrectInARow object')
         end
 
-    case 6
+    case 8
 
         if all(varargin{1})>=0
             r.rewardNthCorrect=varargin{1};
@@ -24,7 +25,8 @@ switch nargin
             error('all the rewardSizeULorMSs must be >=0')
         end
 
-        r = class(r,'rewardNcorrectInARow',reinforcementManager(varargin{2},varargin{6},varargin{5},varargin{3}, varargin{4}));
+        r = class(r,'rewardNcorrectInARow',...
+            reinforcementManager(varargin{4},varargin{8},varargin{7},varargin{5}, varargin{6}, varargin{2}, varargin{3}));
 
     otherwise
         nargin

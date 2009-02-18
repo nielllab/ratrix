@@ -1,11 +1,13 @@
-function [stimSpecs] = phaseify(trialManager,stim,type,...
-    targetPorts,distractorPorts,scaleFactor,interTrialLuminance,ifi,hz)
+function [stimSpecs startingStimSpecInd] = phaseify(trialManager,stim,type,...
+    targetPorts,distractorPorts,requestPorts,scaleFactor,interTrialLuminance,ifi,hz)
 % this function takes the output from calcStim of a non-phased stim manager, and converts it to stimSpecs according to the trialManager class
 % inputs should be self-explanatory
 % we pass the trialRecords(trialInd).interTrialLuminance even though we have access to interTrialLuminance because
 % calcStim might have changed the class of the ITL!
 % outputs are cell arrays of stimSpecs 
 
+startingStimSpecInd=1; % which phase to start with (passed to stimOGL->runRealTimeLoop)
+% this allows us to have an optional 'waiting for request' phase in nAFC and not mess up sound handling
 % =====================================================================================================
 if strmatch(class(trialManager), 'nAFC')
     % nAFC
@@ -17,8 +19,8 @@ if strmatch(class(trialManager), 'nAFC')
         framesUntilTransition=[];
     end
     % waiting for request
-    criterion = {[2], [2]};
-    stimSpecs{1} = stimSpec(interTrialLuminance,criterion,'cache',0,framesUntilTransition,[],0,0,hz,[]);
+    criterion = {requestPorts, [2]};
+    stimSpecs{1} = stimSpec(interTrialLuminance,criterion,'loop',0,framesUntilTransition,[],0,0,hz,[]);
     % waiting for response
     %reverse frames
 %     reverse_stim(:,:,1) = stim(:,:,2);
@@ -39,6 +41,12 @@ if strmatch(class(trialManager), 'nAFC')
     criterion = {[], 1};
     stimSpecs{5} = stimSpec(interTrialLuminance,criterion,'cache',0,...
         1,[],0,1,hz,[]);
+    
+    % if no requestPorts, skip to phase 2
+    if isempty(requestPorts)
+        startingStimSpecInd=2;
+    end
+    
 elseif strmatch(class(trialManager), 'freeDrinks')
     % freeDrinks
     % =====================================================================================================
@@ -62,6 +70,13 @@ elseif strcmp(class(trialManager), 'autopilot')
     criterion = {[], 1};
     stimSpecs{2} = stimSpec(interTrialLuminance,criterion,'cache',0,...
         1,[],0,1,hz,[]);
+elseif strcmp(class(trialManager), 'passiveViewing')
+    % passiveViewing
+    % create one phase that uses phaseType='trigger', and an intertrial phase
+    criterion = {[], 2};
+    stimSpecs{1} = stimSpec(stim, criterion,'loop',0,[],[],scaleFactor,0,hz,'trigger');
+    criterion = {[], 1};
+    stimSpecs{2} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,[]);
 else
     error('only nAFC, freeDrinks, and autopilot for now');
 end

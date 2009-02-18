@@ -33,7 +33,7 @@ for i=1:size(subjectIDs,2)
             
         %calculate the reward the rat would get after 100 corrects
         [trialRecords(1:100).correct]=deal(true);
-        [rm rewardSizeULorMS msPenalty] = calcReinforcement(rm,trialRecords, s);
+        [rm rewardSizeULorMS requestRewardSizeULorMS msPenalty] = calcReinforcement(rm,trialRecords, s);
         stimName=class(sm);
         rewardName=class(rm);
         protocolName=getName(p);

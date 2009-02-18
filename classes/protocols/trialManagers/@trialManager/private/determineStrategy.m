@@ -1,7 +1,7 @@
-function [loop trigger frameIndexed timeIndexed indexedFrames timedFrames strategy] = determineStrategy(tm, stim, type, responseOptions)
+function [loop trigger frameIndexed timeIndexed indexedFrames timedFrames strategy] = determineStrategy(tm, stim, type, responseOptions, framesUntilTransition)
 % This function determines what strategy to use in showing the frames of the visual stimulus.
 % Part of stimOGL rewrite.
-% INPUT: stim, type, responseOptions
+% INPUT: stim, type, responseOptions, framesUntilTransition
 % OUTPUT: loop, trigger, frameIndexed, timeIndexed, indexedFrames, timedFrames, strategy
 
 if length(size(stim))>3
@@ -79,7 +79,11 @@ else
 end
 
 % strategy
-if isempty(responseOptions) && (trigger || loop || (timeIndexed && timedFrames(end)==0) || frameIndexed)
+if isempty(responseOptions) && isempty(framesUntilTransition) && (trigger || loop || (timeIndexed && timedFrames(end)==0) || frameIndexed)
+    trigger
+    loop
+    timeIndexed
+    frameIndexed
     error('can''t loop with no response ports -- would have no way out')
 end
 

@@ -3,21 +3,22 @@
 
 %% first get a file to work with
 %loc='\\132.239.158.179\datanet_storage\demo1\neuralRecords\neuralRecords_33-20090122T175736.mat'
-%loc='\\132.239.158.179\datanet_storage\demo1\neuralRecords\neuralRecords_256-20090205T171510.mat' %long
-loc='\\132.239.158.179\datanet_storage\demo1\neuralRecords\neuralRecords_253-20090205T170914.mat'; % short
+% loc='\\132.239.158.179\datanet_storage\demo1\neuralRecords\neuralRecords_261-20090205T173104.mat' %longer
+% loc='\\132.239.158.179\datanet_storage\demo1\neuralRecords\neuralRecords_256-20090205T171510.mat' %long
+% loc='\\132.239.158.179\datanet_storage\demo1\neuralRecords\neuralRecords_253-20090205T170914.mat'; % short
 %loc='\\132.239.158.179\datanet_storage\demo1\neuralRecords\neuralRecords_255-20090205T171323.mat'; %med
-load(loc)
-maxTime=400000; %just for testing, its faster if we process less.
-maxTime=size(neuralData,1)
+% load(loc)
+% maxTime=400000; %just for testing, its faster if we process less.
+% maxTime=size(neuralData,1)
 
 %% twiddle the params and sort it
 close all
 
 spikeDetectionParams=[];
 spikeDetectionParams.method='OSORT';
-spikeDetectionParams.samplingFreq=samplingRate; % don't define if using analysis manager, just for temp testing of getSpikesFromNeuralData
-Wn = [300 4000]/(spikeDetectionParams.samplingFreq/2); % default to bandpass 300Hz - 4000Hz
-[b,a] = butter(4,Wn); Hd=[]; Hd{1}=b; Hd{2}=a;      
+% spikeDetectionParams.samplingFreq=samplingRate; % don't define if using analysis manager, just for temp testing of getSpikesFromNeuralData
+% Wn = [300 4000]/(spikeDetectionParams.samplingFreq/2); % default to bandpass 300Hz - 4000Hz
+% [b,a] = butter(4,Wn); Hd=[]; Hd{1}=b; Hd{2}=a;      
 spikeDetectionParams.nrNoiseTraces=0;   % what does this do for us? any effect if set to 2?
 spikeDetectionParams.extractionThreshold = 5;
 %should be replaced with a string that collapses these two confusing categories into one value;  'maxPeak' 'minPeak' 'maxMinPeak' 'power' 'MTEO'
@@ -71,7 +72,7 @@ end
 % quality test // dropped frames adjustment
 overwriteAll=true; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
 classesAnalyzed=[];%{'filteredNoise'};
-trialRange=[186 293];
+trialRange=[263 263];
 analysisManager([], [], spikeDetectionParams,spikeSortingParams,trialRange,[0 Inf],classesAnalyzed,overwriteAll);
 
 

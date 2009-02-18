@@ -159,9 +159,11 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             % stimulusDetails to be phase-specific
             if ischar(trialRecords(trialInd).type) && strcmp(trialRecords(trialInd).type,'phased')
                 stimSpecs = stim.stimSpecs;
+                startingStimSpecInd = 1;
             else
-                [stimSpecs] = phaseify(trialManager,stim,trialRecords(trialInd).type,...
-                    trialRecords(trialInd).targetPorts,trialRecords(trialInd).distractorPorts,trialRecords(trialInd).scaleFactor,...
+                [stimSpecs startingStimSpecInd] = phaseify(trialManager,stim,trialRecords(trialInd).type,...
+                    trialRecords(trialInd).targetPorts,trialRecords(trialInd).distractorPorts,getRequestPorts(trialManager,getNumPorts(station)),...
+                    trialRecords(trialInd).scaleFactor,...
                     trialRecords(trialInd).interTrialLuminance,getIFI(station),trialRecords(trialInd).resolution.hz);
             end
             
@@ -314,6 +316,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 stimOGL( ...
                 trialManager, ...
                 stimSpecs,  ...  %changed stim to stimSpecs (stimOGL needs to handle a cell array of stimSpecs for this trial)
+                startingStimSpecInd, ...
                 newSM, ... %10/13/08 - used to determine what sounds to play at each frame in runRealTimeLoop %1/20/09 - also used to do expert mode
                 LUT, ...
                 trialRecords(trialInd).targetPorts, ...
@@ -384,8 +387,26 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             % gives stimOGL a chance to store dynamic mode stuff in phaseRecords
             % rewrote so saving bigs is only if datanet is defined -pmm
             
-            if ~isempty(trialManager.datanet) % only use data net if its there
-                
+            % =====================================================================================================
+            % 10/17/08 - get trial's worth of data from datanet (neural data)
+            if ~isempty(trialManager.datanet)
+                datanet_constants = getConstants(trialManager.datanet);
+                commands = [];
+                commands.cmd = datanet_constants.stimToDataCommands.S_SAVE_DATA_CMD;
+                commands.arg = sprintf('neuralRecords_%d-%s.mat',trialRecords(trialInd).trialNumber, datestr(trialRecords(trialInd).date, 30));
+                [junk, gotAck] = sendCommandAndWaitForAck(trialManager.datanet, getCon(trialManager.datanet), commands);
+                % get physiologyEvents from data computer
+                commands=[];
+                commands.cmd = datanet_constants.stimToDataCommands.S_SEND_EVENT_DATA_CMD;
+                [physiologyEvents, gotAck] = sendCommandAndWaitForAck(trialManager.datanet, getCon(trialManager.datanet), commands);
+                % store physiologyEvents into trialRecord
+                trialRecords(trialInd).physiologyEvents = physiologyEvents;
+                % now send ack to data side that we received physiologyEvents
+                commands=[];
+                commands.cmd = datanet_constants.stimToDataCommands.S_ACK_EVENT_DATA_CMD;
+                [junk, gotAck] = sendCommandAndWaitForAck(trialManager.datanet, getCon(trialManager.datanet), commands);
+
+                % =====================================================================================================
                 % save this stim details to subject-specific place (with neural and eye data)
                 % this includes all normal details as well as big stuff, example: large random noise movie 
                 stim_path = fullfile(getStorePath(trialManager.datanet), 'stimRecords');
@@ -403,7 +424,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 stimManagerClass=trialRecords(trialInd).stimManagerClass;
                 
                 try
-                    save(stim_filename, 'stimulusDetails','stimManagerClass');
+                    save(stim_filename, 'stimulusDetails','stimManagerClass','physiologyEvents');
                 catch
                     warningStr('unable to save to %s',stim_path);
                     error(warningStr);
@@ -428,25 +449,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 saveEyeData(eyeTracker,eyeData,eyeDataVarNames,gaze,trialRecords(trialInd).trialNumber)
                 %not currently saving data from any other phase besides disciminandum
             end
-            % =====================================================================================================
-            % 10/17/08 - get trial's worth of data from datanet (neural data)
-            if ~isempty(trialManager.datanet)
-                datanet_constants = getConstants(trialManager.datanet);
-                commands = [];
-                commands.cmd = datanet_constants.stimToDataCommands.S_SAVE_DATA_CMD;
-                commands.arg = sprintf('neuralRecords_%d-%s.mat',trialRecords(trialInd).trialNumber, datestr(trialRecords(trialInd).date, 30));
-                [junk, gotAck] = sendCommandAndWaitForAck(trialManager.datanet, getCon(trialManager.datanet), commands);
-                % get physiologyEvents from data computer
-                commands=[];
-                commands.cmd = datanet_constants.stimToDataCommands.S_SEND_EVENT_DATA_CMD;
-                [physiologyEvents, gotAck] = sendCommandAndWaitForAck(trialManager.datanet, getCon(trialManager.datanet), commands);
-                % store physiologyEvents into trialRecord
-                trialRecords(trialInd).physiologyEvents = physiologyEvents;
-                % now send ack to data side that we received physiologyEvents
-                commands=[];
-                commands.cmd = datanet_constants.stimToDataCommands.S_ACK_EVENT_DATA_CMD;
-                [junk, gotAck] = sendCommandAndWaitForAck(trialManager.datanet, getCon(trialManager.datanet), commands);
-            end
+
             % 10/19/08 - need to decide what to do with trialData - do we pass back to doTrials?
             % =====================================================================================================
             trialRecords(trialInd).reinforcementManager = structize(trialManager.reinforcementManager);
@@ -581,12 +584,13 @@ function validateStimSpecs(stimSpecs)
     % check that if the transition criterion is 'none', that a transition timeout is defined (framesUntilTransition)
     for i=1:length(stimSpecs)
         spec = stimSpecs{i};
-        cr = getCriterion(spec);
+        cr = getTransitions(spec);
         fr = getFramesUntilTransition(spec);
 
         if strcmp(cr{1}, 'none') && (isempty(fr) || (isscalar(fr) && fr<=0))
             error('must have a transition port set or a transition by timeout');
         end
+        
     end
 end
 

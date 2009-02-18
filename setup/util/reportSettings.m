@@ -57,7 +57,7 @@ if ~isempty(ids)
                                         fprintf('\t%s(%d/%d)\ttrlMgr:%s\t',getName(p),t,getNumTrainingSteps(p),class(tm));
 
 
-                                        [junk rewardSizeULorMS msPenalty] = calcReinforcement(getReinforcementManager(tm),[]);
+                                        [junk rewardSizeULorMS requestRewardSizeULorMS msPenalty] = calcReinforcement(getReinforcementManager(tm),[]);
                                         fprintf('reward:%g pnlty:%g\n',rewardSizeULorMS,msPenalty)
                                     else
                                         fprintf('\t\t\t%s has no protocol\n',ratID);

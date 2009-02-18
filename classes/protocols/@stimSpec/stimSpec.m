@@ -1,10 +1,10 @@
 function spec=stimSpec(varargin)
 % stimSpec  class constructor. 
-% spec=stimSpec(stimulus,criterion,stimType,startFrame,...
+% spec=stimSpec(stimulus,transitions,stimType,startFrame,...
 %   framesUntilTransition,stochasticDistribution,scaleFactor,isFinalPhase,hz,rewardType)
 %
 % the stimulus is the visual movie
-% criterion is the phase transitions
+% transitions is the phase transitions
 % stimType is the format of the movie (toggle, loop, once-through, timedFrames, indexedFrames) - default is loop
 % it must be either a single char array, or a cell array (if time or frame indexed) of the form {'timedFrames', [indicies]}
 % startFrame is the frame index at which to start for this phase (indexes into stimulus)
@@ -14,7 +14,7 @@ function spec=stimSpec(varargin)
 % stochasticDistribution is a two-element cell array - the first element is the distribution from which to pick an auto response
 %   the second element is what port to auto trigger (given as a vector)
 
-% criteria is the port(s) that will graduate from this phase - chosen from the set {'request', 'response', 'target', 'distractor', 'any', 'none'}
+% transitions is the port(s) that will graduate from this phase - chosen from the set {'request', 'response', 'target', 'distractor', 'any', 'none'}
 % scaleFactor is the scaleFactor for this phase
 % isFinalPhase is a flag that indicates if this phase means the end of a trial
 % hz is something erik added...
@@ -22,7 +22,7 @@ function spec=stimSpec(varargin)
 
 % fields in the stimSpec object
 spec.stimulus = zeros(1,1,1);
-spec.criterion = {[], 0};
+spec.transitions = {[], 0};
 spec.stimType = 'loop';
 spec.startFrame = 1;
 spec.framesUntilTransition = [];
@@ -49,29 +49,10 @@ switch nargin
         else
             error('Input argument is not a stimSpec object or cell array of stim frames')
         end
-    case 2
-        % if we are given a stimulus and a criteria
-        goodInput = 0;
-        if isa(varargin{1}, 'numeric') && iscell(varargin{2})
-            temp = varargin{2}; % this is the cell array that has key value pairs
-            for i=1:2:length(varargin{2})-1 % check each transition port set
-                if isa(temp{1}, 'numeric')
-                    goodInput = 1;
-                else
-                    error('Invalid port set specified');
-                end
-            end
-        else
-            error('Invalid inputs');
-        end
-        spec.stimulus = varargin{1};
-        spec.criterion = varargin{2};
-        spec = class(spec,'stimSpec');
-
     case 10
         % stimulus
         spec.stimulus = varargin{1};
-        % criteria
+        % transitions
         goodInput = 0;
         if iscell(varargin{2})
             temp = varargin{2}; % this is the cell array that has key value pairs
@@ -83,15 +64,12 @@ switch nargin
                     error('Invalid port set specified');
                 end
             end
-            spec.criterion = varargin{2};
+            spec.transitions = varargin{2};
         else
             error('Invalid inputs');
         end
         
         % stimType
-        %varargin{3}
-        %ischar(varargin(3))
-        %strcmp(varargin(3),'trigger')
         if ischar(varargin{3}) && (strcmp(varargin{3}, 'trigger') || strcmp(varargin{3}, 'loop') || ...
                 strcmp(varargin{3}, 'cache') || strcmp(varargin{3},'expert')) % handle single char arrays
             % error-check that if we want toggle mode, only a 2-frame movie
@@ -119,6 +97,12 @@ switch nargin
         % framesUntilTransition
         if isscalar(varargin{5}) && varargin{5} > 0
             spec.framesUntilTransition = varargin{5};
+            % check that we have a 'frame timeout' port specified in the transitions
+            if ~any(cellfun('isempty',spec.transitions))
+                spec.framesUntilTransition
+                spec.transitions
+                error('if defining framesUntilTransition, must specify a ''frame timeout'' phase target');
+            end
         elseif isempty(varargin{5})
             spec.framesUntilTransition = [];
         else

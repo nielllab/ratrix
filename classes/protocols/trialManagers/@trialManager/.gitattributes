@@ -20,3 +20,4 @@
 /getResponsePorts.m -text
 /setUpOrStopDatanet.m -text
 /calibrateEyeTracker.m -text
+/getAllowRepeats.m -text

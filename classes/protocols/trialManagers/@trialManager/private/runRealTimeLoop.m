@@ -266,12 +266,14 @@ if ~isempty(eyeTracker)
     
     framesPerAllocationChunk=getFramesPerAllocationChunk(eyeTracker);
     
-    if isa(eyeTracker,'eyeLinkTracker')
-        eyeData=nan(framesPerAllocationChunk,40);
-        gaze=nan(framesPerAllocationChunk,2);
-    else
-        error('no other methods')
-    end
+    % dont do this initialize-time preallocation b/c we will dynamically allocate every frame depending on the number
+    % of samples retrieved
+%     if isa(eyeTracker,'eyeLinkTracker')
+%         eyeData=nan(framesPerAllocationChunk,40);
+%         gaze=nan(framesPerAllocationChunk,2);
+%     else
+%         error('no other methods')
+%     end
 end
 
 % =====================================================================================================================
@@ -842,20 +844,28 @@ while ~done && ~quit;
             sca
             error('lost tracker connection!')
         end
-        
-        if totalEyeDataInd>length(eyeData)
+
+        % change to get multiple samples (as many as are available)
+        [gazes samples] = getSamples(eyeTracker);
+        numEyeTrackerSamples = size(samples,1);
+                
+        % allocate space in gaze and eyeData - based on numEyeTrackerSamples (this will happen every frame)
+        % see if this causes framedrops...
+        if totalEyeDataInd>length(eyeData) % should always be true (totalEyeDataInd=end+1)
             %  allocateMore
-            newEnd=length(eyeData)+ framesPerAllocationChunk;
-            disp(sprintf('did allocation to eyeTrack data; up to %d samples enabled',newEnd))
+            newEnd=length(eyeData)+ numEyeTrackerSamples;
+%             disp(sprintf('did allocation to eyeTrack data; up to %d samples enabled',newEnd))
             eyeData(end+1:newEnd,:)=nan;
             gaze(end+1:newEnd,:)=nan;
         end
         
-        % change to get multiple samples (as many as are available)
-        [gaze(totalEyeDataInd,:) eyeData(totalEyeDataInd,:)]=getSample(eyeTracker);
-        % increment totalEyeDataInd
-        totalEyeDataInd = totalEyeDataInd + 1;
-        
+        % put extracted samples in gaze and eyeData (should be preallocated correctly)
+        gaze(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = gazes;
+        eyeData(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = samples;
+        %         [gaze(totalEyeDataInd,:) eyeData(totalEyeDataInd,:)]=getSample(eyeTracker);
+        % increment totalEyeDataInd by however many samples we grabbed this frame
+        totalEyeDataInd = totalEyeDataInd + numEyeTrackerSamples;
+
     end
     
     timestamps.eyeTrackerDone=GetSecs;

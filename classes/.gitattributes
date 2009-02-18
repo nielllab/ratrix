@@ -171,3 +171,4 @@ protocols/@stimSpec/getTransitions.m -text
 protocols/reinforcementManagers/@reinforcementManager/getRequestRewardSizeULorMS.m -text
 protocols/reinforcementManagers/@reinforcementManager/getRequestMode.m -text
 protocols/reinforcementManagers/@reinforcementManager/setRequestRewardSizeULorMS.m -text
+protocols/eyeTrackers/@eyeLinkTracker/getSamples.m -text

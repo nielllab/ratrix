@@ -23,7 +23,12 @@ responseOptions = union(targetOptions, distractorOptions);
 % Variable initialization
 % Needs to happen inside stimOGL, not a function
 originalPriority = Priority;
-ListenChar(2);
+
+%ListenChar(2); 
+%FlushEvents('keyDown');
+%edf moved these to station.doTrials() so that we don't get garbage sent to matlab windows from between-trial keypresses.  
+%however, whether they're here or there, we still seem to get garbage -- figure out why!
+%something wrong with flushevents?
 
 % struct to store phase-specific data that gets determined during caching (textures, strategy, etc)
 phaseData = cell(1,length(stimSpecs)); % a cell array of structs (one per phase)

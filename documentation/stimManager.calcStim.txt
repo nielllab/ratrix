@@ -6,6 +6,8 @@
 % calcStim can return either phased or non-phased outputs, depending on the return value of 'type'
 % see below for more detailed description of each return value in both cases
 % 
+%
+%
 % INPUTS
 %   stimulus                this images stimManager object (contains your custom state)
 %   trialManagerClass       the trialManager class for the running training step
@@ -21,44 +23,56 @@
 % OUTPUTS
 %   stimulus                this images stimManager object
 %   updateSM                boolean flag indicating whether you've changed state (field values) in this object that you'd like to persist for future reference
-%   resolutionIndex         index from the resolutions input that you want to set
-%   out (non-phased)        monochrome stimulus frames.  logical, real (0<=x<=1) [double single], or [uint8 uint16].  2 or 3 dimensional array (y,x,frame)
-%                           uint8 values will be mapped to 8-bit clut indices
-%                           uint16 are converted to singles and treated as float
-%                           float (double, single) values will be processed at 16 bits until finally rendered through a potentially higher dynamic range clut
-%                           alternatively, this field can be a struct of parameters for expert mode PTB calls.
-%   out (phased)            a struct that contains a cell array of stimSpecs (see below)
+%   resolutionIndex         if trialManager.displayMethod = 'ptb'
+%                               index from the resolutions input that you want to set
+%                           if trialManager.displayMethod = 'LED'
+%                               the analog output hz you want to use for this trial (ignored if type is 'phased' - each stimSpec has its own hz)
+%   out                     if type is 'expert':
+%                               a struct with fields that are required, have no direct effect, but affect what is passed to your drawExpertFrame method:
+%                                   floatprecision (as defined for screen('MakeTexture') -- will be passed to your drawExpertFrame method)
+%                                   height (in pixels, will scale stim to this size to compute the destRect passed to your drawExpertFrame method)
+%                                   width (as above)
+%                           if type is 'phased':
+%                               a struct that contains a cell vector of stimSpecs (see below + the stimSpec constructor help)
+%                           otherwise:
+%                               monochrome stimulus frames.  logical, real (0<=x<=1) [double single], or [uint8 uint16].  2 or 3 dimensional array (y,x,frame)
+%                               uint8 values will be mapped to 8-bit clut indices
+%                               uint16 are converted to singles and treated as float
+%                               float (double, single) values will be processed at 16 bits until finally rendered through a potentially higher dynamic range clut           
 %   LUT                     the color look up (gamma/linearization) table to pass to the gfx card
 %                           n X 3 array, 0<=x<=1, n is system dependent, but typically 256 (n=dacbits=log2(reallutsize) from screen('ReadNormalizedGammaTable'))
 %                           on windows, table subject to unpublished constraints vaguely resembling monotonic increasing
-%   scaleFactor (non-phased)    (potentially non-integer) factors by which to scale stim when mapping onto pixels
+%   scaleFactor             ignored if type is 'phased' (each stimSpec has its own scaleFactor)    
+%                           (potentially non-integer) factors by which to scale stim when mapping onto pixels
 %                               [height width]>0, special case scalar zero means scale to full screen
 %                               scaleFactor.*[y x] (dimensions of out array) must not exceed the resolution you specify
-%   scaleFactor (phased)    this value is ignored because a phase-specific scaleFactor is defined in each stimSpec (see below)
 %   type                    see below
-%   targetPorts             vector subset of responsePorts that will count as correct responses 
-%   distractorPorts         vector subset of responsePorts (disjoint with targetPorts) that will count as incorrect responses (remainder will be dead ports)
+%   targetPorts             ignored if type is 'phased'
+%                           vector subset of responsePorts that will count as correct responses 
+%   distractorPorts         ignored if type is 'phased'
+%                           vector subset of responsePorts (disjoint with targetPorts) that will count as incorrect responses (remainder will be dead ports)
 %                           if union(targetPorts distractorPorts) is empty, the trial ends when the stimulus ends, rather than waiting for a response
 %                           for stimuli with no "end," union must not be empty, or there would be no way for the trial to end
 %   details                 a structure of your design including parameters you choose in this method that will be saved with the trialRecord 
-%   interTrialLuminance     a scalar value that matches type and scale of out
+%   interTrialLuminance     ignored if type is 'phased' (make a "final" stimSpec that holds this value as you need)
+%                           a scalar value that matches type and scale of out
 %                           full field luminance at this value will be shown until the first request
 %                           also held after this trial ends until the beginning of the next trial
 %                           if requestPorts (determined by the trialManager) is empty, the stimulus you provide (out) starts immediately
-%                           NOTE: in phased case, this value is no longer drawn automatically at then end of a trial; you should
-%                           make a "final" phase that holds this value as you need
 %   text                    message to add to text label on each frame (can be single string or cell vector of length numFrames)
+%
+%
 %
 % values for 'type,' their semantics, and restrictions 
 % note that these options grew organically as they were needed scientifically
 % they are not intended to be an elegant covering of the space of possibilities
 % if creative use of these does not meet your needs, implement a new type!
 % 
-% type='phased'             treat 'out' as an array of stimSpecs, and do not call the phaseify function
+% type='phased'             'out' is a cell vector of stimSpecs (see stimSpec constructor help) (will not call the phaseify method)
 %
 % %%% For all other types listed below, phaseify will be called to convert the non-phased calcStim output to a phased version,
 %       according to trialManagerClass. phaseify() will automatically convert the non-phased output to a stimSpec, with the appropriate behavior for
-%       nAFC and freeDrinks. for future stimulus managers, however, calcStim should return phased outputs instead of relying on this function. 
+%       nAFC and freeDrinks. for future stimulus managers, however, calcStim should return phased outputs instead of relying on this method. 
 %
 % type='static'             show one single frame
 % 
@@ -109,8 +123,8 @@
 %           phaseStartTime      - the GetSecs() timestamp at the beginning of this phase (will be AFTER the last VBL from the previous phase)
 %           window              - the ptb window handle you should draw to
 %           textLabel           - the text returned by your calcStim or previous calls to drawExpertFrame
-%           floatprecision      - the precision associated with screen('maketexture') for the stim returned by calcStim for this phase (determined by determineColorPrecision)
-%           destRect            - the destinationRect associated with screen('drawtexture') for this phase (determined by determineScreenParametersAndLUT) -- typically represents entire screen
+%           floatprecision      - the precision associated with screen('maketexture') for the stim returned by calcStim for this phase (determined by the out.floatprecision of your calcStim method)
+%           destRect            - the destinationRect associated with screen('drawtexture') for this phase (determined by the out.width and out.height of your calcStim method) -- typically represents entire screen
 %           filtMode            - the filterMode to pass to screen('drawtexture') (currently hardcoded in runRealTimeLoop)
 %           expertCache         - you can stick stuff here and it will be passed back to you on future calls
 %           ifi                 - the measured ifi in seconds
@@ -121,38 +135,7 @@
 %           expertCache         - you can stick stuff here and it will be passed back to you on future calls
 %           dynamicDetails      - a structure of your design including parameters you choose in this method that will be saved with the trialRecord 
 %           textLabel           - use this to override the text returned by your calcStim
-%
-%
-% stimSpec objects
-% out.stimSpecs is a cell array of stimSpec objects, each of which represents one phase of the trial
-% 
-% stimSpec.stimulus         the stimulus frames to show, or expert-mode parameters struct (equivalent to non-phased 'out')
-% stimSpec.transitions      a cell array of the format {port1 target1 port2 target2 ...} where triggering port1 will cause a phase transition to 
-%                           the phase specified by target1, triggering port2 will cause a phase transition to the phase specified by target2, etc.
-%                           the port values are a subset of all ports and the target values are indices into the array of stimSpec objects.
-%                           if the port value is empty ([]), then there is no phase transition by port triggering (instead, this is the special 'frame timeout' transition, see below)
-%                           this 'frame timeout' transition is also used even if framesUntilTransition is empty, but if the stimType is 'cache'
-%                           or 'timedFrames' with a nonzero end, and we finish showing the stimulus for the specified duration.
-% stimSpec.stimType         must be one of the non-phased values for 'type' listed above, with the same properties
-%                           this is effectively a phase-specific type, instead of trial-specific
-% stimSpec.phaseType        one of {'correct', 'error', 'trigger', ''} -- correct and error will ask the reinforcement manager how much water/airpuff to deliver at the beginning of the phase
-%                                   trigger will ask the reinforcement manager for this info after each new lick.
-%                                   a reward that extends beyond the end of the phase is cut off.
-% stimSpec.framesUntilTransition    length of the frame timeout (if we have shown this phase for framesUntilTransition frames with no transition by port selection,
-%                                   then advance to the next phase as specified by the criterion automatically)
-%                                   if framesUntilTransition is greater than the length of the stimulus and the stimType is 'cache' or
-%                                   'timedFrames' with nonzero end, then we will throw an error during the validation process.                                  
-%                                   advances to the special 'frame timeout' phase - see above
-%                                   if empty, then hold this phase indefinitely until a port transition is triggered 
-%                                   or we transition due to the strategy of 'cache' or 'timedFrames'.
-% stimSpec.stochasticDistribution   a cell array of values {pA, portA, pB, portB,...} where pA specifies the probability of stochastically triggering
-%                                   portA, and pB specifies the probability of triggering portB, etc
-%                                   this is done for every frame of the stimulus (loop of runRealTimeLoop), and the execution order is whatever comes first
-%                                   in this cell array (ie pA is tried, then pB, and so forth)
-% stimSpec.scaleFactor      % the scaleFactor associated with this phase - see non-phased scaleFactor for details
-% stimSpec.isFinalPhase     % a flag if this is the final phase of the trial (defaults to zero)
-% stimSpec.startFrame       what frame of the stimulus to start this phase at; if 'loop' mode, automatically start at first frame after looping through once
-%                           set to zero to start at the beginning
+
 
 % for phased type, your stimManager may want to override the method getSoundsToPlay, which is called every frame.  the default will play trySomethingElse, keepGoing, correct and incorrect sounds appropriate for phaseified nAFC/freeDrinks.
 % INPUTS

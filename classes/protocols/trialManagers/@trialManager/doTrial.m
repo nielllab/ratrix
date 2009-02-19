@@ -161,6 +161,12 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 stimSpecs = stim.stimSpecs;
                 startingStimSpecInd = 1;
             else
+                
+                % we pass the trialRecords(trialInd).interTrialLuminance even though we have access to interTrialLuminance because
+                % calcStim might have changed the class of the ITL!
+                % from edf: what did you mean by this?  how do we have access to a member on stimManager?  
+                % by calling stimManager.getInterTrialLuminance()?  i wish that were a protected method.
+                
                 [stimSpecs startingStimSpecInd] = phaseify(trialManager,stim,trialRecords(trialInd).type,...
                     trialRecords(trialInd).targetPorts,trialRecords(trialInd).distractorPorts,getRequestPorts(trialManager,getNumPorts(station)),...
                     trialRecords(trialInd).scaleFactor,...

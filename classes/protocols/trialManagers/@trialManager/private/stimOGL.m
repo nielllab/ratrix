@@ -95,8 +95,7 @@ try
             phaseData{i}.indexedFrames phaseData{i}.timedFrames phaseData{i}.strategy] = determineStrategy(tm, stim, type, responseOptions, framesUntilTransition);
         
         % =====================================================================================================================
-        [phaseData{i}.floatprecision stim interTrialLuminance] = ...
-            determineColorPrecision(tm, stim, verbose, phaseData{i}.strategy, interTrialLuminance);
+        [phaseData{i}.floatprecision stim] = determineColorPrecision(tm, stim, phaseData{i}.strategy);
         stimSpecs{i}=setStim(spec,stim);
 
         % =====================================================================================================================
@@ -137,8 +136,8 @@ try
     % =====================================================================================================================
     % Enter main real-time loop
 
-    % we need the floatprecision for the interTrialLuminance (assume it is the last phase)
-    interTrialPrecision=phaseData{end}.floatprecision;
+    [interTrialPrecision interTrialLuminance] = determineColorPrecision(tm, interTrialLuminance, 'static');
+        
     % We will break this main function into smaller functions also in the trialManager class
 %     [quit response didManualInTrial manual actualRewardDurationMSorUL proposedRewardDurationMSorUL actualAirpuffDuration proposedAirpuffDuration ...
 %         phaseRecords eyeData gaze frameDropCorner station] ...

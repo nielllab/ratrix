@@ -13,36 +13,26 @@ sm=soundManager({soundClip('correctSound','allOctaves',[400],20000), ...
     soundClip('trySomethingElseSound','gaussianWhiteNoise'), ...
     soundClip('wrongSound','tritones',[300 400],20000)});
 
-rewardSizeULorMS        =50;
-msPenalty               =1000;
-fractionOpenTimeSoundIsOn=1;
-fractionPenaltySoundIsOn=1;
-scalar=1;
-msAirpuff=msPenalty;
+rewardSizeULorMS          =50;
+requestRewardSizeULorMS   =10;
+requestMode               ='first'; 
+msPenalty                 =1000;
+fractionOpenTimeSoundIsOn =1;
+fractionPenaltySoundIsOn  =1;
+scalar                    =1;
+msAirpuff                 =msPenalty;
 
-constantRewards=constantReinforcement(rewardSizeULorMS,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
+constantRewards=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 
-msFlushDuration         =1000;
-msMinimumPokeDuration   =10;
-msMinimumClearDuration  =10;
 freeDrinkLikelihood=0.003;
-fd = freeDrinks(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,freeDrinkLikelihood,constantRewards);
+fd = freeDrinks(sm,freeDrinkLikelihood,constantRewards);
 
 freeDrinkLikelihood=0;
-fd2 = freeDrinks(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,freeDrinkLikelihood,constantRewards);
+fd2 = freeDrinks(sm,freeDrinkLikelihood,constantRewards);
 
-requestRewardSizeULorMS=10;
 percentCorrectionTrials=.5;
-msResponseTimeLimit=0;
-pokeToRequestStim=true;
-maintainPokeToMaintainStim=true;
-msMaximumStimPresentationDuration=0;
-maximumNumberStimPresentations=0;
-doMask=false;
 
-vh=nAFC(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,requestRewardSizeULorMS,...
-    percentCorrectionTrials,msResponseTimeLimit,pokeToRequestStim,maintainPokeToMaintainStim,msMaximumStimPresentationDuration,...
-    maximumNumberStimPresentations,doMask,constantRewards,[],[],[],{'flickerRamp',[0 .5]},true,'ptb');
+vh=nAFC(sm,percentCorrectionTrials,constantRewards,[],[],[],{'flickerRamp',[0 .5]},true,'ptb');
 
 pixPerCycs              =[20];
 targetOrientations      =[pi/2];
@@ -85,8 +75,7 @@ for i=1:floor(length(ims)/2)
     [junk n2 junk junk]=fileparts(ims(length(ims)-(i-1)).name);
     trialDistribution{end+1}={{n1 n2} 1};
 end
-imageStim = discrimStim;%tmp images(imageDir,ypos,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,trialDistribution);
-
+imageStim = images(imageDir,ypos,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,trialDistribution,'normal',[1 1],false,[0 0]);
 
 d=2; %decrease to broaden
 gran=100;
@@ -163,9 +152,7 @@ noiseStim=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLumin
 
 unfilteredNoise=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
-led=nAFC(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,requestRewardSizeULorMS,...
-    percentCorrectionTrials,msResponseTimeLimit,pokeToRequestStim,maintainPokeToMaintainStim,msMaximumStimPresentationDuration,...
-    maximumNumberStimPresentations,doMask,constantRewards,[],[],[],{'off'},false,'LED');
+led=nAFC(sm,percentCorrectionTrials,constantRewards,[],[],[],{'off'},false,'LED');
 
 if ismac
     ts001 = '/Users/eflister/Desktop/ratrix trunk/classes/protocols/stimManagers/@flicker/ts001';

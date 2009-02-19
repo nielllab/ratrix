@@ -55,7 +55,7 @@
 %                           for stimuli with no "end," union must not be empty, or there would be no way for the trial to end
 %   details                 a structure of your design including parameters you choose in this method that will be saved with the trialRecord 
 %   interTrialLuminance     ignored if type is 'phased' (make a "final" stimSpec that holds this value as you need)
-%                           a scalar value that matches type and scale of out
+%                           a scalar value.  class determins interpreation as for out.
 %                           full field luminance at this value will be shown until the first request
 %                           also held after this trial ends until the beginning of the next trial
 %                           if requestPorts (determined by the trialManager) is empty, the stimulus you provide (out) starts immediately

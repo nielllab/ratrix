@@ -434,7 +434,7 @@ while ~done && ~quit;
         spec = stimSpecs{phaseInd};
         stim = getStim(spec);
         transitionCriterion = getTransitions(spec);
-        framesUntilTransition = getFramesUntilTransition(spec)
+        framesUntilTransition = getFramesUntilTransition(spec);
                
         % =====================================================================================================================
         % determine reward/error handling based on phaseType
@@ -499,7 +499,7 @@ while ~done && ~quit;
                 [stim errorScale] = errorStim(stimManager,numErrorFrames);
 
                 if window>0
-                    [floatprecision stim garbage] = determineColorPrecision(tm, stim, false, strategy, interTrialLuminance);
+                    [floatprecision stim] = determineColorPrecision(tm, stim, strategy);
                     textures = cacheTextures(tm,strategy,stim,window,floatprecision,false);
                     destRect=Screen('Rect',window);
                 elseif strcmp(tm.displayMethod,'LED')

@@ -2,8 +2,7 @@ function [stimSpecs startingStimSpecInd] = phaseify(trialManager,stim,type,...
     targetPorts,distractorPorts,requestPorts,scaleFactor,interTrialLuminance,ifi,hz)
 % this function takes the output from calcStim of a non-phased stim manager, and converts it to stimSpecs according to the trialManager class
 % inputs should be self-explanatory
-% we pass the trialRecords(trialInd).interTrialLuminance even though we have access to interTrialLuminance because
-% calcStim might have changed the class of the ITL!
+
 % outputs are cell arrays of stimSpecs 
 
 startingStimSpecInd=1; % which phase to start with (passed to stimOGL->runRealTimeLoop)
@@ -70,13 +69,13 @@ elseif strcmp(class(trialManager), 'autopilot')
     criterion = {[], 1};
     stimSpecs{2} = stimSpec(interTrialLuminance,criterion,'cache',0,...
         1,[],0,1,hz,[]);
-elseif strcmp(class(trialManager), 'passiveViewing')
-    % passiveViewing
-    % create one phase that uses phaseType='trigger', and an intertrial phase
-    criterion = {[], 2};
-    stimSpecs{1} = stimSpec(stim, criterion,'loop',0,[],[],scaleFactor,0,hz,'trigger');
-    criterion = {[], 1};
-    stimSpecs{2} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,[]);
+% elseif strcmp(class(trialManager), 'passiveViewing')
+%     % passiveViewing
+%     % create one phase that uses phaseType='trigger', and an intertrial phase
+%     criterion = {[], 2};
+%     stimSpecs{1} = stimSpec(stim, criterion,'loop',0,[],[],scaleFactor,0,hz,'trigger');
+%     criterion = {[], 1};
+%     stimSpecs{2} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,[]);
 else
     error('only nAFC, freeDrinks, and autopilot for now');
 end

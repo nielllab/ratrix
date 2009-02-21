@@ -1,6 +1,5 @@
 /stimOGL.m -text
 /stimOGL_OLD.m -text
-/determineScreenParametersAndLUT.m -text
 /testStimOGL.m -text
 /runRealTimeLoop.m -text
 /getEyeTracker.m -text
@@ -13,8 +12,11 @@
 /updateFrameIndexUsingTextureCache.m -text
 /handlePhasedTrialLogic.m -text
 /phaseify.m -text
-/setupServerPumpRewards.m -text
 /determineStrategy.m -text
 /saveMissedFrameData.m -text
 /determineColorPrecision.m -text
 /drawFrameUsingTextureCache.m -text
+/setCLUTandFrameDropCorner.m -text
+/determineDestRect.m -text
+/LEDphase.m -text
+/serverPumpRewards.m -text

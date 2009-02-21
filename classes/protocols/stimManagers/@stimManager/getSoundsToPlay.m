@@ -1,8 +1,6 @@
 function soundsToPlay = getSoundsToPlay(stimManager, soundNames, ports, lastPorts, phase, stepsInPhase,msRewardSound, msPenaltySound, ...
     targetOptions, distractorOptions, requestOptions, playRequestSoundLoop, trialManagerClass)
-% this function decides what sounds to play given the current ports, phase, and stepsInPhase
-% returns a cell array of sound names in this form:
-% { {playLoop sounds}, {{playSound sound, playSound duration}, {playSound sound, playSound duration}} }
+% see doc in stimManager.calcStim.txt
 
 playLoopSounds={};
 playSoundSounds={};

@@ -1,8 +1,6 @@
 function [responseDetails timestamps] = ...
     saveMissedFrameData(tm, responseDetails, frameNum, timingCheckPct, ifi, timestamps)
 
-%save facts about missed frames
-
 type='';
 thisIFI=timestamps.vbl-timestamps.lastFrameTime;
 

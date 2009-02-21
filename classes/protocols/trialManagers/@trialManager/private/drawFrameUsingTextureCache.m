@@ -3,9 +3,9 @@ function drawFrameUsingTextureCache(tm, window, i, frameNum, stimSize, lastI, do
 
 if window>=0
     if i>0 && i <= stimSize
-        if ~(i==lastI) || (dontclear==0) %only draw if texture different from last one, or if every flip is redrawn
+        if i~=lastI || (dontclear~=1) %only draw if texture different from last one, or if every flip is redrawn
             if strcmp(strategy,'noCache')
-                texture=Screen('MakeTexture', window, texture,0,0,floatprecision); %ned floatprecision=0 for remotedesktop
+                texture=Screen('MakeTexture', window, texture,0,0,floatprecision); %need floatprecision=0 for remotedesktop
             end
             Screen('DrawTexture', window, texture,[],destRect,[],filtMode);
             if strcmp(strategy,'noCache')
@@ -19,7 +19,7 @@ if window>=0
         end
     else
         if stimSize==0
-            %'stim had zeros frames, probably an penalty stim with zero duration'
+            %probably a penalty stim with zero duration
         else
             i
             sprintf('stimSize: %d',stimSize)

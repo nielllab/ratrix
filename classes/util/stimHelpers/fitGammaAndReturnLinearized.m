@@ -34,6 +34,12 @@ measured= (measured-sensorRange(1))/abs(sensorRange(2) - sensorRange(1));
 %get the best fitting gamma function
 %NOTE:  psychtoolbox has a function fit gamma with more options and uses fminuc
 
+%edf wonders about the implications of minimizing error vs. options available in curve fittings toolbox that allow weighting, speedups, noise dependency, etc.
+%and if fminbnd isn't a good choice
+%note matlab docs say: fminsearch is not the preferred choice for solving problems that are sums of squares
+%Instead use the lsqnonlin function, which has been optimized for problems of this form.
+%http://www.mathworks.com/access/helpdesk/help/toolbox/optim/ug/fminsearch.html (notes section)
+
 %x is 3 params          %the fit               %measured  %mse
 GammaError=@(x) sum((  x(1)*(sent.^x(2))+x(3)  -measured ).^2);
 g=[1 2.5 0.05];  %starting estimate

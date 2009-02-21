@@ -1,14 +1,8 @@
-function [tm frameIndex i done doFramePulse didPulse] = updateFrameIndexUsingTextureCache(tm, ...
-    frameIndexed, loop, trigger, timeIndexed, frameIndex, indexedFrames, stimSize, isRequesting, ...
-    i, requestFrame, frameNum, timedFrames, responseOptions, done, doFramePulse, didPulse, scheduledFrameNum)
+function [tm frameIndex i done doFramePulse didPulse] ...
+    = updateFrameIndexUsingTextureCache(tm, frameIndexed, loop, trigger, timeIndexed, frameIndex, indexedFrames, stimSize, isRequesting, ...
+    i, frameNum, timedFrames, responseOptions, done, doFramePulse, didPulse, scheduledFrameNum)
 
-% This function calculates the correct frame index (which frame of the movie to play at the given loop) and also triggers sound as necessary
-% Part of stimOGL rewrite.
-% INPUT: tm, frameIndexed, loop, trigger, timeIndexed, frameIndex, indexedFrames, stimSize, isRequesting,
-%   i, requestFrame, frameNum, timedFrames, responseOptions, done, doFramePulse, didPulse
-% OUTPUT: tm frameIndex i done doFramePulse didPulse
-
-
+% This method calculates the correct frame index (which frame of the movie to play at the given loop)
 
 if frameIndexed
     if loop
@@ -55,8 +49,9 @@ elseif trigger
         i=2;
     end
     
-elseif timeIndexed %ok, this is where we do the timedFrames type
+elseif timeIndexed
     
+    %should precache cumsum(double(timedFrames))
     if tm.dropFrames
         i=min(find(scheduledFrameNum<=cumsum(double(timedFrames))));
     else
@@ -66,6 +61,8 @@ elseif timeIndexed %ok, this is where we do the timedFrames type
     if isempty(i)  %if we have passed the last stim frame
         i=length(timedFrames);  %hold the last frame if the last frame duration specified was zero
         if timedFrames(end)
+            error('currently broken')
+            
             i=i+1;      %otherwise move on to the finalScreenLuminance blank screen -- this will probably error on the phased architecture, need to advance phase, but it's too late by this point?
             % from fan:
             % > i think this would have to be handled by the framesUntilTransition timeout.
@@ -73,7 +70,7 @@ elseif timeIndexed %ok, this is where we do the timedFrames type
             % > argument of 600 frames if they vector of timedFrames sums up to 600 and does
             % > not end in zero. phaseify could automatically handle this, but new calcStims
             % > would have to be aware of this.
-
+            
         end
     end
     

@@ -17,6 +17,9 @@ function [linearizedCLUT g]=fitGamma(sent, measured, l_range ,colorMapSize,plotO
     %sent=[1 31 61 91 121 151 181 211 241 252];
     %measured=[.3 .9 5.9 17.8 37.8 67.1 106 156 218 255];
 
+error('this looks redundant with classes/util/stimHelpers/fitGammaAndReturnLinearized')    
+    
+    
 if min(sent)~=0
     warning('should send a 0 for a good darkValue estimate');
 end

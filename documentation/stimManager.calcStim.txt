@@ -13,7 +13,7 @@
 %   trialManagerClass       the trialManager class for the running training step
 %   resolutions             struct array of available resolutions
 %   displaySize             physical dimensions of the display in mm (see discusion in help for screen('displaysize'))
-%   LUTbits                 number of bits in the color look up (gamma/linearization) table
+%   LUTbits                 precision of entries in the color look up (gamma/linearization) table
 %   responsePorts           vector of available response port indices on the running station (determined by trial manager)
 %   totalPorts              total number of available ports on this station (useful for positioning stimuli)
 %   trialRecords            a struct array of trialRecords from previous trials (all trials from this session included)
@@ -40,7 +40,7 @@
 %                               uint16 are converted to singles and treated as float
 %                               float (double, single) values will be processed at 16 bits until finally rendered through a potentially higher dynamic range clut           
 %   LUT                     the color look up (gamma/linearization) table to pass to the gfx card
-%                           n X 3 array, 0<=x<=1, n is system dependent, but typically 256 (n=dacbits=log2(reallutsize) from screen('ReadNormalizedGammaTable'))
+%                           must be 256 X 3 array, 0<=x<=1 (reallutsize from screen('ReadNormalizedGammaTable') is inaccurate -- can be 1024 on osx, but 'LoadNormalizedGammaTable' silently fails when table is longer than 256)
 %                           on windows, table subject to unpublished constraints vaguely resembling monotonic increasing
 %   scaleFactor             ignored if type is 'phased' (each stimSpec has its own scaleFactor)    
 %                           (potentially non-integer) factors by which to scale stim when mapping onto pixels
@@ -136,20 +136,21 @@
 %           dynamicDetails      - a structure of your design including parameters you choose in this method that will be saved with the trialRecord 
 %           textLabel           - use this to override the text returned by your calcStim
 
-
-% for phased type, your stimManager may want to override the method getSoundsToPlay, which is called every frame.  the default will play trySomethingElse, keepGoing, correct and incorrect sounds appropriate for phaseified nAFC/freeDrinks.
+% for phased type, your stimManager must override the method getSoundsToPlay, which is called every frame.  
 % INPUTS
-%   stimManager         your stimManager object
-%   soundNames          the available soundNames
-%   ports               the ports just triggered
-%   phase               the stimSpec index 
-%   stepsInPhase        the number of frame flips that have occured in this phase (starts at zero, equals the frame number if you haven't dropped any)
-%   msRewardSound       the msRewardSound returned by the reinforcementManager
-%   msPenaltySound      the msPenaltySound returned by the reinforcementManager
-%   targetOptions       the target ports your calcStim returned
-%   distractorOptions   the distractor ports your calcStim returned
-%   requestOptions      the request ports your calcStim returned
-%   trialManagerClass   the class of the trialManager
+%   stimManager          your stimManager object
+%   soundNames           the available soundNames
+%   ports                the ports just triggered
+%   lastPorts            the ports triggered on the last loop (so you can notice changes)
+%   phase                the stimSpec index
+%   stepsInPhase         the number of frame flips that have occured in this phase (starts at zero, equals the frame number if you haven't dropped any)
+%   msRewardSound        the msRewardSound returned by the reinforcementManager
+%   msPenaltySound       the msPenaltySound returned by the reinforcementManager
+%   targetOptions        the target ports your calcStim returned
+%   distractorOptions    the distractor ports your calcStim returned
+%   requestOptions       the request ports your calcStim returned
+%   playRequestSoundLoop a request is currently underway (as defined by the trialManager's request ports and reinforcementManager's request repeat mode)
+%   trialManagerClass    the class of the trialManager
 % OUTPUTS
 %   soundsToPlay    a cell array of sound names in the form:  { {playLoop sounds}, {{playSound sound, playSound duration}, {playSound sound, playSound duration}, ...} }
 %                   to loop a sound, include it in the playLoop list on every frame during which it should play

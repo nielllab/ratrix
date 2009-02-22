@@ -30,9 +30,9 @@ if ismac
 end
 
 dontclear = 2;              %will be passed to flip
-%                           %0 = flip will set framebuffer to background
+%                           %0 = flip will set framebuffer to background (slow, but other options fail on some gfx cards, like the integrated gfx on our asus mobos?)
 %                           %1 = flip will leave the buffer as is ("incremental drawing" - but unclear if it copies the buffer just drawn into the buffer you're about to draw to, or if it is from a frame before that...)
-%                           %2 = flip does nothing, buffer state undefined (you must draw into each pixel if you care) - fastest, but fails on some gfx cards, like the integrated gfx on our asus mobos?
+%                           %2 = flip does nothing, buffer state undefined (you must draw into each pixel if you care) - fastest
 % =====================================================================================================================
 
 trialInd=length(trialRecords);
@@ -216,6 +216,9 @@ if window>0
 end
 
 %KbName('UnifyKeyNames'); %does not appear to choose keynamesosx on windows - KbName('KeyNamesOSX') comes back wrong
+
+%consider using RestrictKeysForKbCheck for speedup of KbCheck
+
 KbConstants.allKeys=KbName('KeyNames');
 KbConstants.allKeys=lower(cellfun(@char,KbConstants.allKeys,'UniformOutput',false));
 KbConstants.controlKeys=find(cellfun(@(x) ~isempty(x),strfind(KbConstants.allKeys,'control')));

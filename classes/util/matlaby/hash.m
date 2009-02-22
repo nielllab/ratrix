@@ -42,6 +42,12 @@ function h = hash(inp,meth)
 %     disp(h)
 % end
 
+if ~usejava('jvm')
+    warning('no hash without java')
+    h=0;
+    return
+end
+
 inp=inp(:);
 % convert strings and logicals into uint8 format
 if ischar(inp) || islogical(inp)

@@ -21,8 +21,10 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
         if n>=0
 
             ListenChar(2);
-            FlushEvents('keyDown');
-
+            if usejava('jvm')
+                FlushEvents('keyDown');
+            end
+            
             subject = calibrateEyeTracker(subject);
             %some calibration requires GUi's &  must happen before PTB
 

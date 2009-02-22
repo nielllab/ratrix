@@ -3,6 +3,10 @@ function SVNproperties = getSVNPropertiesForPath(SVNpath, properties)
 % INPUT: SVNpath, properties (cell array of strings)
 % OUTPUT: struct SVNproperties, with fields corresponding to the input properties
 
+if ~usejava('jvm')
+    error('no svn info without java')
+end
+
 % Required java import and setup
 % Trying java xpath pars
 import javax.xml.xpath.*;

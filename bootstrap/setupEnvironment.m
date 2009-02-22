@@ -17,7 +17,7 @@ warning('on','MATLAB:dispatcher:nameConflict')
 clearJavaComponents();
 closeAllSerials
 if IsWin
-daqreset
+    daqreset
 end
 
 setupDBPaths();

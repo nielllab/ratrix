@@ -31,7 +31,7 @@ if oldRes.width~=res.width || oldRes.height~=res.height || oldRes.hz ~=res.hz ||
          [resolutions.pixelSize]==res.pixelSize
         error('target res not available')
     end
-%     Screen('Preference', 'SkipSyncTests',1);
+
     s=stopPTB(s);
 
     Screen('Resolution', s.screenNum, res.width, res.height, res.hz, res.pixelSize);

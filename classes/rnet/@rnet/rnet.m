@@ -1,4 +1,9 @@
 function r = rnet(varargin)
+
+if ~usejava('jvm')
+    error('no rnet without java')
+end
+
 % Server to Station Commands
 r.constants.serverToStationCommands.S_START_TRIALS_CMD = 1;
 r.constants.serverToStationCommands.S_STOP_TRIALS_CMD = 2;

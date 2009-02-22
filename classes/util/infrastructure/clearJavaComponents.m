@@ -3,8 +3,10 @@ function clearJavaComponents()
 % java.lang.System.gc();
 % clear java;
 
-java.lang.System.gc();
-clear java;
-warning('off','MATLAB:GENERAL:JAVARMPATH:NotFoundInPath')
-javarmpath(getRlabJarPath);
-warning('on','MATLAB:GENERAL:JAVARMPATH:NotFoundInPath')
+if usejava('jvm')
+    java.lang.System.gc();
+    clear java;
+    warning('off','MATLAB:GENERAL:JAVARMPATH:NotFoundInPath')
+    javarmpath(getRlabJarPath);
+    warning('on','MATLAB:GENERAL:JAVARMPATH:NotFoundInPath')
+end

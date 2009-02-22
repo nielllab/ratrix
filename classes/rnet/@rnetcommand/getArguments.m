@@ -8,7 +8,7 @@ if ~isempty(c.arguments)
     for i=1:length(c.arguments)
         arg = c.arguments(i);
         if isa(arg,'int8')
-            tmp = mdeserialize(arg);
+            tmp = mdeserialize(arg); %this is old and broken usage of a discontinued undocumented matlab function
             arg = tmp;
         elseif isa(arg,'java.util.Vector')
             % Vectors translate to cell arrays

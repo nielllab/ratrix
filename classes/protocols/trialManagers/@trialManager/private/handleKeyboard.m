@@ -55,18 +55,18 @@ initTime=GetSecs;
 if kDown
     if any(keyCode(KbConstants.pKey))
         pThisLoop=1;
-        
+
         if ~pressingP
-            
+
             didAPause=1;
             paused=~paused;
-            
+
             if paused
                 Priority(originalPriority);
             else
                 Priority(priorityLevel);
             end
-            
+
             pressingP=1;
         end
     elseif any(keyCode(KbConstants.qKey)) && ~paused
@@ -81,14 +81,6 @@ if kDown
         didHumanResponse=true;
         done=1;
     elseif any(portsDown)
-        if shiftDown
-            if atDown && portsDown(2)
-                %note that this misses shift-2 without 'k'...  :(
-                'WARNING!!!  you just hit shift-2 ("@"), which mario declared a synonym to sca (screen(''closeall'')) -- everything is going to break now'
-                done=1;
-                response='shift-2 kill';
-            end
-        end
         if ctrlDown
             doValves(portsDown)=1;
             didValves=true;
@@ -98,9 +90,9 @@ if kDown
         end
     elseif any(keyCode(KbConstants.mKey))
         mThisLoop=1;
-        
+
         if ~pressingM && ~paused
-            
+
             manual=~manual;
             pressingM=1;
         end
@@ -110,6 +102,12 @@ if kDown
         doPrime(station);
     end
 end
+if shiftDown && atDown
+    'WARNING!!!  you just hit shift-2 ("@"), which mario declared a synonym to sca (screen(''closeall'')) -- everything is going to break now'
+    done=1;
+    response='shift-2 kill';
+end
+
 kDownTime=GetSecs;
 if ~mThisLoop && pressingM
     pressingM=0;

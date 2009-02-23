@@ -1,62 +1,40 @@
 function [tm done newSpecInd specInd updatePhase transitionedByTimeFlag transitionedByPortFlag response trialResponse...
-    isRequesting lastSoundsPlayed getSoundsTime soundsDoneTime framesDoneTime portSelectionDoneTime isRequestingDoneTime] = ...
+    isRequesting lastSoundsLooped getSoundsTime soundsDoneTime framesDoneTime portSelectionDoneTime isRequestingDoneTime] = ...
     handlePhasedTrialLogic(tm, done, ...
     ports, lastPorts, station, specInd, transitionCriterion, framesUntilTransition, numFramesInStim,...
     stepsInPhase, isFinalPhase, response, trialResponse, ...
     stimManager, msRewardSound, mePenaltySound, targetOptions, distractorOptions, requestOptions, ...
-    playRequestSoundLoop, isRequesting, soundNames, lastSoundsPlayed)
-
-% This function handles trial logic for a phased trial manager.
-% Part of stimOGL rewrite.
-% INPUT: tm, done, ...
-%     ports, lastPorts, station, specInd, transitionCriterion, framesUntilTransition, numFramesInStim,...
-%     stepsInPhase, isFinalPhase, response, trialResponse, ...
-%     stimManager, msRewardSound, mePenaltySound, targetOptions, distractorOptions, requestOptions, lastRequestPorts ...
-%     requestMode, requestRewardDone, isRequesting, soundNames, lastSoundsPlayed
-% OUTPUT: tm done newSpecInd specInd updatePhase transitionedByTimeFlag transitionedByPortFlag response trialResponse
-%     isRequesting lastSoundsPlayed getSoundsTime soundsDoneTime framesDoneTime portSelectionDoneTime isRequestingDoneTime
+    playRequestSoundLoop, isRequesting, soundNames, lastSoundsLooped)
 
 updatePhase=0;
 newSpecInd = specInd;
 transitionedByTimeFlag = false;
 transitionedByPortFlag = false;
 
-% ===================================================
-% SOUNDS
-% Check for sounds to play
-% 10/13/08 - call the function getSoundsToPlay(stimManager, soundNames, ports, phase, stepsInPhase)
-% this function should know about its phases and will determine what sounds to play based on ports, phase and stepsInPhase
-
 soundsToPlay = getSoundsToPlay(stimManager, soundNames, ports, lastPorts, specInd, stepsInPhase,msRewardSound, mePenaltySound, ...
     targetOptions, distractorOptions, requestOptions, playRequestSoundLoop, class(tm));
 getSoundsTime=GetSecs;
-
-
-% first end any sounds that were playing last frame but should no longer be played
-for i=1:length(lastSoundsPlayed)
-    if ~any(ismember(lastSoundsPlayed{i}, soundsToPlay{1}))
-        % if this sound should be stopped
-        tm.soundMgr = playLoop(tm.soundMgr,lastSoundsPlayed{i},station,0);
-    end
-end
-
 % soundsToPlay is a cell array of sound names {{playLoop sounds}, {playSound sounds}} to be played at current frame
-for i=1:length(soundsToPlay{1})
-    %     if ~any(ismember(soundsToPlay{1}{i}, lastSoundsPlayed))
-    % if this sound isnt already playing
-    tm.soundMgr = playLoop(tm.soundMgr,soundsToPlay{1}{i},station,1);
-    %     end
+
+% first end any loops that were looping last frame but should no longer be looped
+stopLooping=setdiff(lastSoundsLooped,soundsToPlay{1});
+for snd=stopLooping
+    tm.soundMgr = playLoop(tm.soundMgr,snd,station,0);
 end
-% lastSoundsPlayed should be updated to the currently playing sounds
-lastSoundsPlayed = soundsToPlay{1};
+
+% then start any loops that weren't already looping
+startLooping=setdiff(soundsToPlay{1},lastSoundsLooped);
+for snd=startLooping
+    tm.soundMgr = playLoop(tm.soundMgr,snd,station,1);
+end
+
+lastSoundsLooped = soundsToPlay{1};
 
 % now play one-time sounds
 for i=1:length(soundsToPlay{2})
-    %     soundsToPlay{2}{i}{1}
-    %     soundsToPlay{2}{i}{2}
     tm.soundMgr = playSound(tm.soundMgr,soundsToPlay{2}{i}{1},soundsToPlay{2}{i}{2}/1000.0,station);
 end
-% lastSoundsPlayed={};
+
 soundsDoneTime=GetSecs;
 
 % ===================================================

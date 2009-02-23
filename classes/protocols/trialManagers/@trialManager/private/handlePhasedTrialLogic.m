@@ -1,5 +1,5 @@
 function [tm done newSpecInd specInd updatePhase transitionedByTimeFlag transitionedByPortFlag response trialResponse...
-    isRequesting lastSoundsLooped getSoundsTime soundsDoneTime framesDoneTime portSelectionDoneTime isRequestingDoneTime] = ...
+    isRequesting lastSoundsLooped getSoundsTime soundsDoneTime framesDoneTime portSelectionDoneTime isRequestingDoneTime goDirectlyToError] = ...
     handlePhasedTrialLogic(tm, done, ...
     ports, lastPorts, station, specInd, transitionCriterion, framesUntilTransition, numFramesInStim,...
     stepsInPhase, isFinalPhase, response, trialResponse, ...
@@ -10,6 +10,7 @@ updatePhase=0;
 newSpecInd = specInd;
 transitionedByTimeFlag = false;
 transitionedByPortFlag = false;
+goDirectlyToError=false;
 
 soundsToPlay = getSoundsToPlay(stimManager, soundNames, ports, lastPorts, specInd, stepsInPhase,msRewardSound, mePenaltySound, ...
     targetOptions, distractorOptions, requestOptions, playRequestSoundLoop, class(tm));
@@ -89,23 +90,21 @@ for gcInd=1:2:length(transitionCriterion)-1
             updatePhase = 1;
         end
         transitionedByPortFlag = true;
-        
+
         % set response to the ports array when it is triggered during a phase transition (ie response will be whatever the last port to trigger
         %   a transition was)
         response = ports;
         % set correct if we are on a target or distractor
         if any(ports(targetOptions))
-            % 2/2/09 - if multiple ports blocked, then automatically respond as incorrect and change newSpecInd appropriately
-            if length(find(ports))>1
-                errorPhaseInd = newSpecInd+1; % how do we know errorPhaseInd, except by policy of error phase being immediately after correct phase?
-                % maybe we can loop through transitionCriterion again and look? but that sucks
-                newSpecInd = errorPhaseInd;
-            end
             trialResponse =response;
         elseif any(ports(distractorOptions))
             trialResponse = response;
         end
-        
+
+        if length(find(ports))>1
+            goDirectlyToError=true;
+        end
+
         % we should stop checking all the criteria if we already passed one (essentially first come first served)
         break;
     end

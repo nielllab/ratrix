@@ -38,8 +38,7 @@ function spec=stimSpec(varargin)
 %                               expert phase types:
 %                                   set this value to your desired value for each phase (stimManager.calcStim()'s resolutionIndex output is ignored)
 %                           even when ignored, value must be scalar >0 (on mac, can be 0, and is ignored because Screen('Resolutions') and Screen('Resolution') return 0hz -- macs do not have the data acquisition toolbox and therefore cannot have trialManager.displayMethod='LED' anyway)
-% rewardType                one of {'correct', 'error', 'trigger', ''} -- correct and error will ask the reinforcement manager how much water/airpuff to deliver at the beginning of the phase
-%                           	trigger will ask the reinforcement manager for this info after each new lick.
+% rewardType                one of {'correct', 'error', ''} -- correct and error will ask the reinforcement manager how much water/airpuff to deliver at the beginning of the phase
 %                               a reward that extends beyond the end of the phase is cut off.
 
 % fields in the stimSpec object
@@ -162,13 +161,12 @@ switch nargin
             error('hz must be scalar real >0')
         end
         % rewardType - we need this so that runRealTimeLoop knows whether or not this phase should do a reward/airpuff, etc
-        if ~isempty(varargin{10}) && ischar(varargin{10}) && (strcmp(varargin{10},'correct') || strcmp(varargin{10},'error')) ...
-                || strcmp(varargin{10},'trigger')
+        if ~isempty(varargin{10}) && ischar(varargin{10}) && (strcmp(varargin{10},'correct') || strcmp(varargin{10},'error'))
             spec.phaseType=varargin{10};
         elseif isempty(varargin{10})
             spec.phaseType=[];
         else
-            error('phaseType must be ''correct'',''error'',''trigger'',or []');
+            error('phaseType must be ''correct'',''error'',or []');
         end       
 
         spec = class(spec,'stimSpec');

@@ -1,5 +1,5 @@
 function xTextPos = drawText(tm, window, labelFrames, subID, xOrigTextPos, yTextPos, normBoundsRect, stimID, protocolStr, ...
-    textLabel, trialLabel, i, frameNum, manual, didAPause, ptbVersion, ratrixVersion, numDrops, numApparentDrops, phaseInd, phaseType)
+    textLabel, trialLabel, i, frameNum, manual, didManual, didAPause, ptbVersion, ratrixVersion, numDrops, numApparentDrops, phaseInd, phaseType)
 
 %DrawFormattedText() won't be any faster cuz it loops over calls to Screen('DrawText'), tho it would clean this code up a bit.
 
@@ -37,7 +37,7 @@ if manual
 else
     manTxt='off';
 end
-if manual
+if didManual
     [garbage,yTextPos] = Screen('DrawText',window,sprintf('trial record will indicate manual poking on this trial (k+m to toggle for next trial: %s)',manTxt),xTextPos,yTextPos,100*ones(1,3));
     yTextPos=yTextPos+1.5*normBoundsRect(4);
 end

@@ -1,6 +1,7 @@
-function [didAPause paused done response doValves ports didValves didHumanResponse manual doPuff pressingM pressingP overheadTime initTime kDownTime] ...
+function [didAPause paused done response doValves ports ...
+    didValves didHumanResponse manual doPuff pressingM pressingP overheadTime initTime kDownTime allowKeyboard] ...
     = handleKeyboard(tm, keyCode, didAPause, paused, done, response, doValves, ports, didValves, ...
-    didHumanResponse, manual, doPuff, pressingM, pressingP, originalPriority, priorityLevel, KbConstants)
+    didHumanResponse, manual, doPuff, pressingM, pressingP, originalPriority, priorityLevel, KbConstants, allowKeyboard)
 
 % note: this function pretty much updates a bunch of flags....
 
@@ -52,7 +53,7 @@ initTime=GetSecs;
 %                 end
 %            end
 
-if kDown
+if kDown && allowKeyboard
     if any(keyCode(KbConstants.pKey))
         pThisLoop=1;
 
@@ -76,10 +77,12 @@ if kDown
         newTsNum=find(numsDown,1,'first');
         done=1;
         response=sprintf('manual training step %d',newTsNum);
+        allowKeyboard=false; %must reset keyboard input after setting manual training step
     elseif fDown
         response=sprintf('manual flushPorts');
         didHumanResponse=true;
         done=1;
+        allowKeyboard=false; %must reset keyboard input after calling flushPorts
     elseif any(portsDown)
         if ctrlDown
             doValves(portsDown)=1;
@@ -92,14 +95,19 @@ if kDown
         mThisLoop=1;
 
         if ~pressingM && ~paused
+%         if ~paused
 
             manual=~manual;
+            dispStr=sprintf('set manual to %d\n',manual);
+            disp(dispStr);
             pressingM=1;
+            allowKeyboard=false;
         end
     elseif any(keyCode(KbConstants.aKey))
         doPuff=true;
     elseif any(keyCode(KbConstants.rKey)) && strcmp(getRewardMethod(station),'localPump')
         doPrime(station);
+        allowKeyboard=false; %must reset keyboard input after station pump prime
     end
 end
 if shiftDown && atDown

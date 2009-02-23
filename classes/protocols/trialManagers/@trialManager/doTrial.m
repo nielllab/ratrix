@@ -137,7 +137,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             end
             
             if ischar(trialRecords(trialInd).type) && strcmp(trialRecords(trialInd).type,'phased')
-                stimSpecs = stim.stimSpecs;
+                stimSpecs = stim;
                 startingStimSpecInd = 1;
             else
                 
@@ -207,7 +207,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             
             trialLabel=sprintf('session:%d trial:%d (%d)',sessionNumber,sum(trialRecords(trialInd).sessionNumber == [trialRecords.sessionNumber]),trialRecords(trialInd).trialNumber);
             
-            [stopEarly,...
+            [trialManager stopEarly,...
                 trialRecords,...
                 eyeData,...
                 gaze,...
@@ -248,7 +248,9 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 if length(resp)==1
                     trialRecords(trialInd).correct = ismember(resp,trialRecords(trialInd).targetPorts);
                 end
-            elseif ischar(trialRecords(trialInd).response) && strcmp(trialRecords(trialInd).response, 'none')
+%             elseif ischar(trialRecords(trialInd).response) && strcmp(trialRecords(trialInd).response, 'multiple ports')
+                % keep doing trials if response was 'multiple ports'
+%             elseif ischar(trialRecords(trialInd).response) && strcmp(trialRecords(trialInd).response, 'none')
                 % temporarily continue doing trials if response = 'none'
                 % edf: how would stimOGL exit while leaving response as 'none'?  passive viewing?  (empty responseOptions)
                 % if so, why do you say 'temporarily'?  also, should verify that this really was a passive viewing.
@@ -429,6 +431,20 @@ for i=1:length(stimSpecs)
     spec = stimSpecs{i};
     cr = getTransitions(spec);
     fr = getFramesUntilTransition(spec);
+    stimType = getStimType(spec);
+    
+    % if expert mode, check that the stim is a struct with the following fields:
+    %   floatprecision
+    %   height
+    %   width
+    if ischar(stimType) && strcmp(stimType,'expert')
+        s=getStim(spec);
+        if isstruct(s) && isfield(s,'floatprecision') && isfield(s,'height') && isfield(s,'width')
+            % pass
+        else
+            error('in ''expert'' mode, stim must be a struct with fields ''floatprecision'', ''height'', and ''width''');
+        end
+    end
     
     if strcmp(cr{1}, 'none') && (isempty(fr) || (isscalar(fr) && fr<=0))
         error('must have a transition port set or a transition by timeout');

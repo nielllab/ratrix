@@ -33,7 +33,7 @@
 %                                   height (in pixels, will scale stim to this size to compute the destRect passed to your drawExpertFrame method)
 %                                   width (as above)
 %                           if type is 'phased':
-%                               a struct that contains a cell vector of stimSpecs (see below + the stimSpec constructor help)
+%                               a cell vector of stimSpecs (see below + the stimSpec constructor help)
 %                           otherwise:
 %                               monochrome stimulus frames.  logical, real (0<=x<=1) [double single], or [uint8 uint16].  2 or 3 dimensional array (y,x,frame)
 %                               uint8 values will be mapped to 8-bit clut indices

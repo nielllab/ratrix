@@ -49,6 +49,7 @@ bloat=false;
 [out.manualVersion compiledLUT]                              =extractFieldAndEnsure(trialRecords,{'protocolVersion','manualVersion'},'scalar',compiledLUT);
 [out.autoVersion compiledLUT]                                =extractFieldAndEnsure(trialRecords,{'protocolVersion','autoVersion'},'scalar',compiledLUT);
 [out.protocolDate compiledLUT]                               =extractFieldAndEnsure(trialRecords,{'protocolVersion','date'},'datenum',compiledLUT);
+% change correct to be something that needs to be computed if trialManagerClass=nAFC
 [out.correct compiledLUT]                                    =extractFieldAndEnsure(trialRecords,{'correct'},'scalar',compiledLUT);
 [out.trialManagerClass compiledLUT]                          =extractFieldAndEnsure(trialRecords,{'trialManagerClass'},'scalarLUT',compiledLUT);
 [out.stimManagerClass compiledLUT]                           =extractFieldAndEnsure(trialRecords,{'stimManagerClass'},'scalarLUT',compiledLUT);
@@ -63,6 +64,7 @@ out.response                                                 =ensureScalar(cellf
 if any(out.response==0)
     error('got zero response')
 end
+[out.containedAPause compiledLUT]                            =extractFieldAndEnsure(trialRecords,{'containedAPause'},'scalar',compiledLUT);
 [out.containedManualPokes compiledLUT]                       =extractFieldAndEnsure(trialRecords,{'containedManualPokes'},'scalar',compiledLUT);
 [out.didHumanResponse compiledLUT]                           =extractFieldAndEnsure(trialRecords,{'didHumanResponse'},'scalar',compiledLUT);
 [out.containedForcedRewards compiledLUT]                     =extractFieldAndEnsure(trialRecords,{'containedForcedRewards'},'scalar',compiledLUT);

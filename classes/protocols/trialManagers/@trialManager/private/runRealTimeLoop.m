@@ -388,7 +388,7 @@ while ~done && ~quit;
         timedFrames = phase.timedFrames;
         strategy = phase.strategy;
         toggleStim = phase.toggleStim; %lickometer % now passed in from calcStim
-        phaseRecords(phaseNum).toggleStim=toggleStim; % flag for lickometer/nosepokes
+        phaseRecords(phaseNum).toggleStim=toggleStim; % flag for whether the end of a beam break ends the request state
         
         destRect = phase.destRect;
         textures = phase.textures;
@@ -505,7 +505,7 @@ while ~done && ~quit;
         
         % we might need to do if isempty(framesUntilTransition) && strategy is 'cache', then set a framesUntilTransition==size(stim,3)
         
-        stepsInPhase = 0;
+        framesInPhase = 0;
         isFinalPhase = getIsFinalPhase(spec);
         stochasticDistribution = getStochasticDistribution(spec);
         
@@ -620,7 +620,7 @@ while ~done && ~quit;
             
             if ~isempty(framesUntilTransition)
                 %framesUntilTransition is calculated off of the screen's ifi which is not correct when using LED
-                framesUntilTransition=stepsInPhase+2; %prevent handlePhasedTrialLogic from tripping to next phase
+                framesUntilTransition=framesInPhase+2; %prevent handlePhasedTrialLogic from tripping to next phase
             end
             
             %note this logic is related to updateFrameIndexUsingTextureCache
@@ -629,7 +629,7 @@ while ~done && ~quit;
                     done=1;
                 end
                 if ~isempty(framesUntilTransition)
-                    framesUntilTransition=stepsInPhase+1; %cause handlePhasedTrialLogic to trip to next phase
+                    framesUntilTransition=framesInPhase+1; %cause handlePhasedTrialLogic to trip to next phase
                 end
             end
         end
@@ -744,7 +744,7 @@ while ~done && ~quit;
             transitionedByPortFlag phaseRecords(phaseNum).response trialRecords(trialInd).response isRequesting lastSoundsLooped ...
             timestamps.logicGotSounds timestamps.logicSoundsDone timestamps.logicFramesDone timestamps.logicPortsDone timestamps.logicRequestingDone goDirectlyToError] ...
             = handlePhasedTrialLogic(tm, done, ...
-            ports, lastPorts, station, phaseInd, transitionCriterion, framesUntilTransition, numFramesInStim, stepsInPhase, isFinalPhase, ...
+            ports, lastPorts, station, phaseInd, transitionCriterion, framesUntilTransition, numFramesInStim, framesInPhase, isFinalPhase, ...
             phaseRecords(phaseNum).response, trialRecords(trialInd).response, ...
             stimManager, msRewardSound, msPenaltySound, targetOptions, distractorOptions, requestOptions, ...
             playRequestSoundLoop, isRequesting, soundNames, lastSoundsLooped);
@@ -1006,7 +1006,7 @@ while ~done && ~quit;
     timestamps.phaseRecordsDone=GetSecs;
     
     if ~paused
-        stepsInPhase = stepsInPhase + 1; % moved from handlePhasedTrialLogic to prevent copy on write
+        framesInPhase = framesInPhase + 1; % moved from handlePhasedTrialLogic to prevent copy on write
         lastPorts=ports;
 
         phaseInd = newSpecInd;

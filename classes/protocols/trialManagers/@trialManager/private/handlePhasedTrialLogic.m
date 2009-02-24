@@ -2,7 +2,7 @@ function [tm done newSpecInd specInd updatePhase transitionedByTimeFlag transiti
     isRequesting lastSoundsLooped getSoundsTime soundsDoneTime framesDoneTime portSelectionDoneTime isRequestingDoneTime goDirectlyToError] = ...
     handlePhasedTrialLogic(tm, done, ...
     ports, lastPorts, station, specInd, transitionCriterion, framesUntilTransition, numFramesInStim,...
-    stepsInPhase, isFinalPhase, response, trialResponse, ...
+    framesInPhase, isFinalPhase, response, trialResponse, ...
     stimManager, msRewardSound, mePenaltySound, targetOptions, distractorOptions, requestOptions, ...
     playRequestSoundLoop, isRequesting, soundNames, lastSoundsLooped)
 
@@ -12,7 +12,7 @@ transitionedByTimeFlag = false;
 transitionedByPortFlag = false;
 goDirectlyToError=false;
 
-soundsToPlay = getSoundsToPlay(stimManager, ports, lastPorts, specInd, stepsInPhase,msRewardSound, mePenaltySound, ...
+soundsToPlay = getSoundsToPlay(stimManager, ports, lastPorts, specInd, framesInPhase,msRewardSound, mePenaltySound, ...
     targetOptions, distractorOptions, requestOptions, playRequestSoundLoop, class(tm));
 getSoundsTime=GetSecs;
 % soundsToPlay is a cell array of sound names {{playLoop sounds}, {playSound sounds}} to be played at current frame
@@ -46,7 +46,7 @@ soundsDoneTime=GetSecs;
 % Check against framesUntilTransition - Transition BY TIME
 % if we are at grad by time, then manually set port to the correct one
 % note that we will need to flag that this was done as "auto-request"
-if ~isempty(framesUntilTransition) && stepsInPhase == framesUntilTransition - 1 % changed to framesUntilTransition-1 % 8/19/08
+if ~isempty(framesUntilTransition) && framesInPhase == framesUntilTransition - 1 % changed to framesUntilTransition-1 % 8/19/08
     % find the special 'timeout' transition (the port set should be empty)
     newSpecInd = transitionCriterion{cellfun('isempty',transitionCriterion)+1}; 
     % this will always work as long as we guarantee the presence of this special indicator (checked in stimSpec constructor)
@@ -61,7 +61,7 @@ end
 
 % Check against transition by numFramesInStim (based on size of the stimulus in 'cache' or 'timedIndexed' mode)
 % in other modes, such as 'loop', this will never pass b/c numFramesInStim==Inf
-if stepsInPhase==numFramesInStim
+if framesInPhase==numFramesInStim
     % find the special 'timeout' transition (the port set should be empty)
     newSpecInd = transitionCriterion{cellfun('isempty',transitionCriterion)+1}; 
     % this will always work as long as we guarantee the presence of this special indicator (checked in stimSpec constructor)
@@ -130,8 +130,5 @@ if any(ports(requestOptions)) && ~any(lastPorts(requestOptions))
 end
 
 isRequestingDoneTime=GetSecs;
-
-% moved to runRealTimeLoop to save on copy-on-write 10/16/08
-% stepsInPhase = stepsInPhase + 1; % increment number of steps in this phase
 
 end % end function

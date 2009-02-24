@@ -1,6 +1,6 @@
 function [tm quit trialRecords eyeData gaze station ratrixSVNInfo ptbSVNInfo] ...
     = stimOGL(tm, stimSpecs, startingStimSpecInd, stimManager, LUT, targetOptions, distractorOptions, requestOptions, interTrialLuminance, ...
-    station, manual,timingCheckPct,textLabel,rn,subID,stimID,protocolStr,trialLabel,eyeTracker,msAirpuff,trialRecords,toggleStim)
+    station, manual,timingCheckPct,textLabel,rn,subID,stimID,protocolStr,trialLabel,eyeTracker,msAirpuff,trialRecords)
 
 verbose = false;
 responseOptions = union(targetOptions, distractorOptions);
@@ -54,7 +54,7 @@ try
         framesUntilTransition = getFramesUntilTransition(spec);
 
         [phaseData{i}.loop phaseData{i}.trigger phaseData{i}.frameIndexed phaseData{i}.timeIndexed ...
-            phaseData{i}.indexedFrames phaseData{i}.timedFrames phaseData{i}.strategy] = determineStrategy(tm, stim, type, responseOptions, framesUntilTransition);
+            phaseData{i}.indexedFrames phaseData{i}.timedFrames phaseData{i}.strategy phaseData{i}.toggleStim] = determineStrategy(tm, stim, type, responseOptions, framesUntilTransition);
         
         [phaseData{i}.floatprecision stim] = determineColorPrecision(tm, stim, phaseData{i}.strategy);
         stimSpecs{i}=setStim(spec,stim);
@@ -77,7 +77,7 @@ try
         = runRealTimeLoop(tm, window, ifi, stimSpecs, startingStimSpecInd, phaseData, stimManager, ...
         targetOptions, distractorOptions, requestOptions, interTrialLuminance, interTrialPrecision, ...
         station, manual,timingCheckPct,textLabel,rn,subID,stimID,protocolStr,ptbVersion,ratrixVersion,trialLabel,msAirpuff, ...
-        originalPriority, verbose,eyeTracker,frameDropCorner,trialRecords,toggleStim);
+        originalPriority, verbose,eyeTracker,frameDropCorner,trialRecords);
 
 catch ex
     ple(ex)

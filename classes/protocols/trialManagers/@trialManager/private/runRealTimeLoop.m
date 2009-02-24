@@ -2,7 +2,7 @@ function [tm quit trialRecords eyeData gaze frameDropCorner station] ...
     = runRealTimeLoop(tm, window, ifi, stimSpecs, startingStimSpecInd, phaseData, stimManager, ...
     targetOptions, distractorOptions, requestOptions, interTrialLuminance, interTrialPrecision, ...
     station, manual,timingCheckPct,textLabel,rn,subID,stimID,protocolStr,ptbVersion,ratrixVersion,trialLabel,msAirpuff, ...
-    originalPriority, verbose, eyeTracker, frameDropCorner,trialRecords,toggleStim)
+    originalPriority, verbose, eyeTracker, frameDropCorner,trialRecords)
 
 % =====================================================================================================================
 %   show movie following mario's 'ProgrammingTips' for the OpenGL version of PTB
@@ -86,9 +86,6 @@ doFramePulse=1;
 doValves=0*ports;
 newValveState=doValves;
 doPuff=false;
-
-% toggleStim=true; %lickometer % now passed in from calcStim
-trialRecords(trialInd).toggleStim=toggleStim; % flag for lickometer/nosepokes
 
 % =========================================================================
 
@@ -390,6 +387,8 @@ while ~done && ~quit;
         indexedFrames = phase.indexedFrames;
         timedFrames = phase.timedFrames;
         strategy = phase.strategy;
+        toggleStim = phase.toggleStim; %lickometer % now passed in from calcStim
+        phaseRecords(phaseNum).toggleStim=toggleStim; % flag for lickometer/nosepokes
         
         destRect = phase.destRect;
         textures = phase.textures;
@@ -566,7 +565,7 @@ while ~done && ~quit;
                     % i=i+1; % 11/7/08 - this needs to happen first because i starts at 0
                     [doFramePulse expertCache dynamicDetails textLabel i dontclear] ...
                         = drawExpertFrame(stimManager,stim,i,phaseStartTime,window,textLabel,...
-                        floatprecision,destRect,filtMode,expertCache,ifi,scheduledFrameNum,tm.dropFrames,dontclear);
+                        destRect,filtMode,expertCache,ifi,scheduledFrameNum,tm.dropFrames,dontclear);
                     if ~isempty(dynamicDetails)
                         phaseRecords(phaseNum).dynamicDetails{end+1}=dynamicDetails; % dynamicDetails better specify what frame it is b/c the record will not save empty details
                     end

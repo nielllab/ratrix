@@ -1,4 +1,4 @@
-function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text,toggleStim] =... 
+function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text] =... 
     calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % 1/3/0/09 - trialRecords now includes THIS trial
 %LUT = Screen('LoadCLUT', 0);
@@ -10,7 +10,6 @@ numColors=2^LUTBitDepth; maxColorID=numColors-1; fraction=1/(maxColorID);
 ramp=[0:fraction:1];
 LUT= [ramp;ramp;ramp]';
 
-toggleStim=true;
 text='hemifield';
 updateSM=0;
 correctionTrial=0;

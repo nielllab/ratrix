@@ -11,7 +11,7 @@ function spec=stimSpec(varargin)
 %                               this 'frame timeout' transition is also used even if framesUntilTransition is empty, but if the stimType is 'cache'
 %                               or 'timedFrames' with a nonzero end, and we finish showing the stimulus for the specified duration.
 % stimType                  must be one of the non-phased values for stimManager.calcStim()'s 'type' output, with the same properties 
-%                               ('static', 'trigger', 'cache', 'loop', {'timedFrames', [frameTimes]}, {'indexedFrames', [frameIndices]}, or 'expert') - default is loop
+%                               ('static', {'trigger',toggleStim}, 'cache', 'loop', {'timedFrames', [frameTimes]}, {'indexedFrames', [frameIndices]}, or 'expert') - default is loop
 %                               this is effectively a phase-specific type, instead of trial-specific
 % startFrame                what frame of the stimulus to start this phase at; if 'loop' mode, automatically start at first frame after looping through once
 %                               set to zero to start at the beginning
@@ -93,17 +93,24 @@ switch nargin
         end
         
         % stimType
-        if ischar(varargin{3}) && (strcmp(varargin{3}, 'trigger') || strcmp(varargin{3}, 'loop') || ...
+        if ischar(varargin{3}) && (strcmp(varargin{3}, 'loop') || ...
                 strcmp(varargin{3}, 'cache') || strcmp(varargin{3},'expert')) % handle single char arrays
-            % error-check that if we want toggle mode, only a 2-frame movie
-            if strcmp(varargin{3}, 'trigger') && size(spec.stimulus,3) ~= 2
-                size(spec.stimulus,3)
-                error('trigger mode only works with a 2-frame movie');
-            end
             spec.stimType = varargin{3};
         elseif iscell(varargin{3})
             typeArray = varargin{3};
-            if strcmp(typeArray{1}, 'timedFrames') || strcmp(typeArray{1}, 'indexedFrames')
+            if strcmp(typeArray{1}, 'timedFrames') || strcmp(typeArray{1}, 'indexedFrames') || ...
+                    strcmp(typeArray{1},'trigger')
+                % error-check that if we want trigger mode, only a 2-frame movie
+                if strcmp(typeArray{1}, 'trigger')
+                    if size(spec.stimulus,3) ~= 2
+                        size(spec.stimulus,3)
+                        error('trigger mode only works with a 2-frame movie');
+                    end
+                    if ~islogical(typeArray{2})
+                        typeArray{2}
+                        error('toggleStim must be a logical');
+                    end
+                end
                 spec.stimType = varargin{3};
             else
                 error('invalid specification of stimType in cell array format');

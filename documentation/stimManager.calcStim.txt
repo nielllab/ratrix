@@ -76,7 +76,7 @@
 %
 % type='static'             show one single frame
 % 
-% type='trigger'            show frame 1, except during requests, show frame 2
+% type={'trigger' toggleStim}            show frame 1, except during requests, show frame 2
 %	for nosepokes, requests are coextensive with beambreaks (for now, hardcode 'toggleStim' in stimOGL to false)
 %	for lickometers, the request state toggles with each beambreak (hardcode 'toggleStim' in stimOGL to true)
 %	future design: pass toggleStim in from calcStim
@@ -135,6 +135,8 @@
 %           expertCache         - you can stick stuff here and it will be passed back to you on future calls
 %           dynamicDetails      - a structure of your design including parameters you choose in this method that will be saved with the trialRecord 
 %           textLabel           - use this to override the text returned by your calcStim
+%           i                   - updated frame index i
+%           dontclear           - expert value for 'dontclear', used by Screen('Flip')
 
 % for phased type, your stimManager must override the method getSoundsToPlay, which is called every frame.  
 % INPUTS

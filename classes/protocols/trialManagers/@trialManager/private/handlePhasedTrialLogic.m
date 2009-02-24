@@ -12,10 +12,14 @@ transitionedByTimeFlag = false;
 transitionedByPortFlag = false;
 goDirectlyToError=false;
 
-soundsToPlay = getSoundsToPlay(stimManager, soundNames, ports, lastPorts, specInd, stepsInPhase,msRewardSound, mePenaltySound, ...
+soundsToPlay = getSoundsToPlay(stimManager, ports, lastPorts, specInd, stepsInPhase,msRewardSound, mePenaltySound, ...
     targetOptions, distractorOptions, requestOptions, playRequestSoundLoop, class(tm));
 getSoundsTime=GetSecs;
 % soundsToPlay is a cell array of sound names {{playLoop sounds}, {playSound sounds}} to be played at current frame
+% validate soundsToPlay here (make sure they are all members of soundNames)
+if ~isempty(setdiff(soundsToPlay{1},soundNames)) || ~all(cellfun(@(x) ismember(x{1},soundNames),soundsToPlay{2}))
+    error('getSoundsToPlay assigned sounds that are not in the soundManager!');
+end
 
 % first end any loops that were looping last frame but should no longer be looped
 stopLooping=setdiff(lastSoundsLooped,soundsToPlay{1});

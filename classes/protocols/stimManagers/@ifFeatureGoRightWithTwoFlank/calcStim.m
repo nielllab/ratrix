@@ -1,5 +1,5 @@
 
-function [stimulus,updateSM,resInd,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance, text,toggleStim]=...
+function [stimulus,updateSM,resInd,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance, text]=...
     calcStim(stimulus, trialManagerClass,resolutions,screenDisplaySize,LUTbits,responsePorts,totalPorts,trialRecords,forceStimDetails);
 %[stimulus updateSM out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance isCorrection] = calcStim(stimulus,trialManagerClass,frameRate,responsePorts,totalPorts,trialRecords)
 %
@@ -9,7 +9,6 @@ function [stimulus,updateSM,resInd,out,LUT,scaleFactor,type,targetPorts,distract
 %flankers above and below target, total of three stims
 % 1/3/0/09 - trialRecords now includes THIS trial
 
-toggleStim=true;
 text='pmmStim';
 details.screenDisplaySize=screenDisplaySize;
 
@@ -522,7 +521,7 @@ switch details.renderMode
 
             details.persistFlankersDuringToggle=stimulus.persistFlankersDuringToggle;
             if  details.toggleStim==1 % when strcmp(type,'trigger')
-                type='trigger';
+                type={'trigger',toggleStim};
                 frameTimes=[]; % saved to details
                 %only send 2 frames if in toggle stim mode
                 out=stim(:,:,end-1:end);

@@ -1,4 +1,4 @@
-function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text,toggleStim] =...
+function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text] =...
     calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % see ratrixPath\documentation\stimManager.calcStim.txt for argument specification (applies to calcStims of all stimManagers)
 % 1/3/0/09 - trialRecords now includes THIS trial
@@ -11,7 +11,6 @@ if isnan(resolutionIndex)
     resolutionIndex=1;
 end
 
-toggleStim=true;
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);
 
@@ -31,7 +30,7 @@ switch trialManagerClass
         distractorPorts=[];
 
     case 'nAFC'
-        type='trigger';
+        type={'trigger',true};
 
         details.pctCorrectionTrials=.5; % need to change this to be passed in from trial manager
         if ~isempty(trialRecords) && length(trialRecords)>=2
@@ -73,7 +72,7 @@ details.xPosPcts = xPosPcts([targetPorts'; distractorLocs']);
 
 params = [repmat([stimulus.radius details.pixPerCyc],numGabors,1) details.phases details.orientations repmat([stimulus.contrast stimulus.thresh],numGabors,1) details.xPosPcts repmat([stimulus.yPosPct],numGabors,1)];
 out(:,:,1)=computeGabors(params,stimulus.mean,min(width,getMaxWidth(stimulus)),min(height,getMaxHeight(stimulus)),stimulus.waveform, stimulus.normalizedSizeMethod,0);
-if strcmp(type,'trigger')
+if iscell(type) && strcmp(type{1},'trigger')
     out(:,:,2)=stimulus.mean;
 end
 

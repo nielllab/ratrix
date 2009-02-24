@@ -1,4 +1,4 @@
-function [stimulus updateSM resolutionIndex out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance text toggleStim] = ...
+function [stimulus updateSM resolutionIndex out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance text] = ...
     calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % 1/30/09 - trialRecords now includes THIS trial
 s = stimulus;
@@ -8,7 +8,6 @@ s = stimulus;
 
 % TODO:  Change this
 % out = 1;
-toggleStim=true;
 
 LUTBitDepth=8;
 numColors=2^LUTBitDepth; maxColorID=numColors-1; fraction=1/(maxColorID);

@@ -1,4 +1,4 @@
-function [loop trigger frameIndexed timeIndexed indexedFrames timedFrames strategy] = determineStrategy(tm, stim, type, responseOptions, framesUntilTransition)
+function [loop trigger frameIndexed timeIndexed indexedFrames timedFrames strategy toggleStim] = determineStrategy(tm, stim, type, responseOptions, framesUntilTransition)
 
 if length(size(stim))>3
     error('stim must be 2 or 3 dims')
@@ -10,6 +10,7 @@ frameIndexed=0; % Whether the stim is indexed with a list of frames
 timeIndexed=0; % Whether the stim is timed with a list of frames
 indexedFrames = []; % List of indices referencing the frames
 timedFrames = [];
+toggleStim=true; % default, overriden by {'trigger',toggleStim}
 
 if iscell(type)
     if length(type)~=2
@@ -39,6 +40,14 @@ if iscell(type)
             else
                 error('bad vector for timedFrames type: must be a vector of length equal to stim dim 3 of integers > 0 (number or refreshes to display each frame). A zero in the final entry means hold display of last frame.')
             end
+        case 'trigger'   %2 static frames -- if request, show frame 1; else show frame 2
+            strategy = 'textureCache';
+            loop = 0;
+            trigger = 1;
+            toggleStim=type{2};
+            if size(stim,3)~=2
+                error('trigger type must have stim with exactly 2 frames')
+            end
         otherwise
             error('Unsupported stim type using a cell, either indexedFrames or timedFrames')
     end
@@ -48,14 +57,6 @@ else
             strategy = 'textureCache';
             if size(stim,3)~=1
                 error('static type must have stim with exactly 1 frame')
-            end
-        case 'trigger'   %2 static frames -- if request, show frame 1; else show frame 2
-            strategy = 'textureCache';
-            loop = 0;
-            trigger = 1;
-            %dontclear = 1;  %might save time, but breaks on lame graphics cards (such as integrated gfx on asus mobos?)
-            if size(stim,3)~=2
-                error('trigger type must have stim with exactly 2 frames')
             end
         case 'cache'    %dynamic n-frame stimulus (play once)
             strategy = 'textureCache';

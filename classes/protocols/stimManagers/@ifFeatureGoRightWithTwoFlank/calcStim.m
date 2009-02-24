@@ -521,7 +521,7 @@ switch details.renderMode
 
             details.persistFlankersDuringToggle=stimulus.persistFlankersDuringToggle;
             if  details.toggleStim==1 % when strcmp(type,'trigger')
-                type={'trigger',toggleStim};
+                type={'trigger',details.toggleStim};
                 frameTimes=[]; % saved to details
                 %only send 2 frames if in toggle stim mode
                 out=stim(:,:,end-1:end);

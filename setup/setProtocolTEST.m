@@ -584,7 +584,7 @@ ts30 = trainingStep(vh, discrimStim5A,repeatIndef,noTimeOff(),svnRev);
 %     ts18, ts19, ts20, ts21, ts22});
 % stepNum=21;
 % p=protocol('gabor test2', {ts29, ts1, ts4, ts12, ts2, ts12, ts8, ts11,ts9,ts10,sweepContrast,ts23,ts24,ts27,ts30});
-stepNum=uint8(2);
+stepNum=uint8(3);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});
@@ -612,7 +612,7 @@ for i=1:length(subjIDs),
 %         case {'rack3test4','rack3test5','rack3test6'} % nAFC, orientedGabors
 %             p=protocol('nAFC,orientedGabors',{ts4});
         otherwise
-            p=protocol('demo',{ts40,ts41,ts4,ts2,ts25});
+            p=protocol('demo',{ts40,ts41,ts4,ts2,ts25,sweepContrast});
 %             error('unknown subject');
     end
     

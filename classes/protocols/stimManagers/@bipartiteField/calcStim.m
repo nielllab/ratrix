@@ -124,10 +124,10 @@ for i=1:length(framesL)
 end
 
 % now return the stimSpec
-out{1} = stimSpec(stim,{[] 2},'cache',0,numFramesToMake,[],scaleFactor,0,hz,[]); % cache mode
+out{1} = stimSpec(stim,{[] 2},'cache',0,numFramesToMake,[],scaleFactor,0,hz,[],'display'); % cache mode
 
 % final phase
-out{2} = stimSpec(interTrialLuminance,{[] 1},'loop',0,1,1,[],0,1,hz,[]);
+out{2} = stimSpec(interTrialLuminance,{[] 1},'loop',0,1,1,[],0,1,hz,[],'itl');
 
 % return out.stimSpecs, out.scaleFactors for each phase (only one phase for now?)
 details.frequencies=frequencies;

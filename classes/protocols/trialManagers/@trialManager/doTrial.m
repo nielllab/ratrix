@@ -60,6 +60,8 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             
             % 10/17/08 - DO SOMETHING HERE WITH INPUT TRIALDATA before it gets overwritten
             % edf: what does this comment mean?
+            % fli: data that might get sent over from the nidaq/physiology event viewer
+            % currently, we don't do this, but it might want to get stored in trialRecords or passed to calcStim
             
             trialRecords(trialInd).neuralEvents = [];
             
@@ -77,7 +79,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 resInd, ...
                 stim, ...           %not recorded in trial record
                 LUT, ...            %not recorded in trial record
-                trialRecords(trialInd).scaleFactor, ... % this scaleFactor is for non-phased stims that call phaseify; phased stims will put the scaleFactor in stim.stimSpecs and ignore this value
+                trialRecords(trialInd).scaleFactor, ... % this scaleFactor is for non-phased stims that call phaseify; phased stims will put the scaleFactor in stimSpecs and ignore this value
                 trialRecords(trialInd).type, ...
                 trialRecords(trialInd).targetPorts, ...
                 trialRecords(trialInd).distractorPorts, ...
@@ -115,6 +117,8 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             
             trialRecords(trialInd).station = structize(station); %wait til now to record, so we get an updated ifi measurement in the station object
             
+            
+            % check port logic (depends on trialManager class)
             if (isempty(trialRecords(trialInd).targetPorts) || isvector(trialRecords(trialInd).targetPorts))...
                     && (isempty(trialRecords(trialInd).distractorPorts) || isvector(trialRecords(trialInd).distractorPorts))
                 
@@ -136,6 +140,23 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 error('targetPorts and distractorPorts must be row vectors')
             end
             
+            % check trialManager class specific port logic
+            % see http://132.239.158.177/trac/rlab_hardware/ticket/180
+            switch class(trialManager)
+                case 'nAFC'
+                    % check nAFC specific port logic
+                    % target/distractor cannot both be empty
+                    if isempty(trialRecords(trialInd).targetPorts) && isempty(trialRecords(trialInd).distractorPorts)
+                        error('targetPorts and distractorPorts cannot both be empty in nAFC');
+                    end
+                case 'freeDrinks'
+                    % check freeDrinks specific port logic
+                    % targetPorts cannot be empty if distractorPorts is not
+                    if isempty(trialRecords(trialInd).targetPorts) && ~isempty(trialRecords(trialInd).distractorPorts)
+                        error('cannot have distractor ports without target ports in freeDrinks');
+                    end
+            end
+            
             if ischar(trialRecords(trialInd).type) && strcmp(trialRecords(trialInd).type,'phased')
                 stimSpecs = stim;
                 startingStimSpecInd = 1;
@@ -145,6 +166,9 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 % calcStim might have changed the class of the ITL!
                 % edf: what did you mean by this?  how do we have access to a member on stimManager?
                 % by calling stimManager.getInterTrialLuminance()?  i wish that were a protected method.
+                % fli: yeah, i mean we have access to the method - this was just a note to myself that
+                % calcStim could change the class of the ITL and return it as trialRecords(trialInd).interTrialLuminance,
+                % so we want to use this value from calcStim, not the stimManager's original value
                 
                 [stimSpecs startingStimSpecInd] ...
                     = phaseify(trialManager,stim,trialRecords(trialInd).type,...

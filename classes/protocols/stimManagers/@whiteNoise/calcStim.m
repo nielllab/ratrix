@@ -143,11 +143,11 @@ stim.floatprecision = 1;
 % set seed values
 rand('state',sum(100*clock)); % initialize randn to random starting state
 stim.seedValues = ceil(rand(1,numFrames)*1000000);
-out{1} = stimSpec(stim,{[] 2},'expert',0,numFrames,[],scaleFactor,0,hz,[]); % expert mode
+out{1} = stimSpec(stim,{[] 2},'expert',0,numFrames,[],scaleFactor,0,hz,[],'display'); % expert mode
 % out{1} = stimSpec(movie,{[] 2}, 'loop',[],1,numFrames,[],0); % regular mode
 
 % final phase
-out{2} = stimSpec(interTrialLuminance,{[] 1},'loop',0,1,[],scaleFactor,1,hz,[]);
+out{2} = stimSpec(interTrialLuminance,{[] 1},'loop',0,1,[],scaleFactor,1,hz,[],'itl');
 % out.stimSpecs{2} = stimSpec(interTrialLuminance,{[] 1},'loop',0,15,[],scaleFactor,0,hz,[]); % go back to phase 1
 
 % details.big = {'expert', stim.seedValues}; % store in 'big' so it gets written to file

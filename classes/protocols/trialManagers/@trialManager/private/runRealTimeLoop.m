@@ -58,6 +58,8 @@ lastAirpuffTime=[];
 msRewardSound=0;
 msPenaltySound=0;
 lastRewardTime=[];
+thisRewardPhaseNum=[];
+thisAirpuffPhaseNum=[];
 
 quit=false;
 responseOptions = union(targetOptions, distractorOptions);
@@ -151,7 +153,7 @@ responseDetails.durs={};
 % responseDetails.requestRewardDone=false;
 resposneDetails.requestRewardPorts=[];
 responseDetails.requestRewardStartTime=[];
-responseDetails.requestRewardDurationActual=[];
+responseDetails.requestRewardDurationActual=0;
 
 responseDetails.startTime=[];
 
@@ -509,6 +511,7 @@ while ~done && ~quit;
         phaseRecords(phaseNum).floatprecision = floatprecision;
         % phaseRecords(phaseNum).stim=stim;
         phaseRecords(phaseNum).phaseType = phaseType;
+        phaseRecords(phaseNum).phaseLabel = getPhaseLabel(spec);
         
         phaseRecords(phaseNum).responseDetails.startTime = startTime;
         
@@ -773,19 +776,36 @@ while ~done && ~quit;
         playRequestSoundLoop=true;
     end
     
+    % =========================================================================
+    % reward handling
+    % calculate elapsed time since last loop, and decide whether to start/stop reward
+    if isempty(thisRewardPhaseNum)
+        % default to this phase's phaseRecord, but we will hard-set this during a rStart, so that
+        % the last loop of a reward gets added to the correct N-th phaseRecord, instead of the (N+1)th
+        % this happens b/c the phaseNum gets updated before reward stuff...
+        thisRewardPhaseNum = phaseNum;
+    end
+    
     if ~isempty(lastRewardTime) && rewardCurrentlyOn
-        elapsedTime = GetSecs() - lastRewardTime;
+        rewardCheckTime = GetSecs();
+        elapsedTime = rewardCheckTime - lastRewardTime;
         if strcmp(getRewardMethod(station),'localTimed')
+            doRequestReward
             if ~doRequestReward % this was a normal reward, log it
                 msRewardOwed = msRewardOwed - elapsedTime*1000.0;
-%                 elapsedTime*1000.0
-%                 msRewardOwed
-%                 msRequestRewardOwed
-                phaseRecords(phaseNum).actualRewardDurationMSorUL = phaseRecords(phaseNum).actualRewardDurationMSorUL + elapsedTime*1000.0;
-%                 phaseRecords(phaseNum).actualRewardDurationMSorUL
+                elapsedTime*1000.0
+                msRewardOwed
+                msRequestRewardOwed
+                phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL = phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL + elapsedTime*1000.0;
+                phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL
             else % this was a request reward, dont log it
                 msRequestRewardOwed = msRequestRewardOwed - elapsedTime*1000.0;
-                phaseRecords(phaseNum).responseDetails.requestRewardDurationActual=phaseRecords(phaseNum).responseDetails.requestRewardDurationActual+elapsedTime*1000.0;
+                phaseRecords(thisRewardPhaseNum).responseDetails.requestRewardDurationActual=phaseRecords(thisRewardPhaseNum).responseDetails.requestRewardDurationActual+elapsedTime*1000.0;
+                requestRewardDuration = phaseRecords(thisRewardPhaseNum).responseDetails.requestRewardDurationActual;
+                'requestReward'
+                requestRewardDuration
+                msRequestRewardOwed
+                elapsedTime*1000.0
             end
         elseif strcmp(getRewardMethod(station),'localPump')
             % in localPump mode, msRewardOwed gets zeroed out after the call to station/doReward
@@ -796,12 +816,19 @@ while ~done && ~quit;
     rStart = msRewardOwed+msRequestRewardOwed > 0.0 && ~rewardCurrentlyOn;
     rStop = msRewardOwed+msRequestRewardOwed <= 0.0 && rewardCurrentlyOn;
     
+    if rStart
+        thisRewardPhaseNum=phaseNum;
+        % used to properly put reward logging data in their respective phaseRecords
+        % default is current phase, but will set after rStart
+    end
+    
     if rStop % if stop, then reset owed time to zero
         msRewardOwed=0;
         msRequestRewardOwed=0;
     end
     currentValveStates=getValves(station);
     
+    % =========================================================================
     % if any doValves, override this stuff
     % newValveState will be used to keep track of doValves stuff - figure out server-based use later
     if any(doValves~=newValveState)
@@ -850,12 +877,23 @@ while ~done && ~quit;
                 case 'localTimed'
                     if rStart
                         rewardCurrentlyOn = true;
-                        [currentValveStates phaseRecords(phaseNum).valveErrorDetails]=...
-                            setAndCheckValves(station,rewardValves,currentValveStates,phaseRecords(phaseNum).valveErrorDetails,lastRewardTime,'correct reward open');
+                        [currentValveStates phaseRecords(thisRewardPhaseNum).valveErrorDetails]=...
+                            setAndCheckValves(station,rewardValves,currentValveStates,phaseRecords(thisRewardPhaseNum).valveErrorDetails,lastRewardTime,'correct reward open');
                     elseif rStop
                         rewardCurrentlyOn = false;
-                        [currentValveStates phaseRecords(phaseNum).valveErrorDetails]=...
-                            setAndCheckValves(station,zeros(1,getNumPorts(station)),currentValveStates,phaseRecords(phaseNum).valveErrorDetails,lastRewardTime,'correct reward close');
+                        [currentValveStates phaseRecords(thisRewardPhaseNum).valveErrorDetails]=...
+                            setAndCheckValves(station,zeros(1,getNumPorts(station)),currentValveStates,phaseRecords(thisRewardPhaseNum).valveErrorDetails,lastRewardTime,'correct reward close');
+                        % also add the additional time that reward was on from rewardCheckTime to now
+                        rewardCheckToValveCloseTime = GetSecs() - rewardCheckTime;
+                        rewardCheckToValveCloseTime
+                        if ~doRequestReward
+                            phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL = phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL + rewardCheckToValveCloseTime*1000.0;
+                            phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL
+                            'stopping normal reward'
+                        else
+                            phaseRecords(thisRewardPhaseNum).responseDetails.requestRewardDurationActual=phaseRecords(thisRewardPhaseNum).responseDetails.requestRewardDurationActual+rewardCheckToValveCloseTime*1000.0;
+                            'stopping request reward'
+                        end                       
                         % newValveState=doValves|rewardValves; % this shouldnt be used for now...figure out later...
                     else
                         error('has to be either start or stop - should not be here');
@@ -864,7 +902,7 @@ while ~done && ~quit;
                     if rStart
                         rewardCurrentlyOn=true;
                         station=doReward(station,(msRewardOwed+msRequestRewardOwed)/1000,rewardValves);
-                        phaseRecords(phaseNum).actualRewardDurationMSorUL = phaseRecords(phaseNum).actualRewardDurationMSorUL + msRewardOwed;
+                        phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL = phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL + msRewardOwed;
                         msRewardOwed=0;
                         msRequestRewardOwed=0;
                         requestRewardDone=true;
@@ -873,12 +911,12 @@ while ~done && ~quit;
                     end
                 case 'serverPump'
                     
-                    [currentValveState phaseRecords(phaseNum).valveErrorDetails quit serverValveChange phaseRecords(phaseNum).responseDetails ...
-                        requestRewardStartLogged requestRewardDurLogged phaseRecords(phaseNum)] ... 
-                        = serverPumpRewards(tm, rn, station, newValveState, currentValveState, phaseRecords(phaseNum).valveErrorDetails, ...
+                    [currentValveState phaseRecords(thisRewardPhaseNum).valveErrorDetails quit serverValveChange phaseRecords(thisRewardPhaseNum).responseDetails ...
+                        requestRewardStartLogged requestRewardDurLogged phaseRecords(thisRewardPhaseNum)] ... 
+                        = serverPumpRewards(tm, rn, station, newValveState, currentValveState, phaseRecords(thisRewardPhaseNum).valveErrorDetails, ...
                         startTime, serverValveChange, requestRewardStarted, ...
                         requestRewardStartLogged, rewardValves, requestRewardDone, ...
-                        requestRewardDurLogged, phaseRecords(phaseNum).responseDetails, quit, phaseRecords(phaseNum));
+                        requestRewardDurLogged, phaseRecords(thisRewardPhaseNum).responseDetails, quit, phaseRecords(thisRewardPhaseNum));
                     
                 otherwise
                     error('unsupported rewardMethod');
@@ -890,7 +928,7 @@ while ~done && ~quit;
     timestamps.rewardDone=GetSecs;
     
     if ~isempty(rn) || strcmp(getRewardMethod(station),'serverPump')
-        [done quit phaseRecords(phaseNum).valveErrorDetails serverValveStates serverValveChange ...
+        [done quit phaseRecords(thisRewardPhaseNum).valveErrorDetails serverValveStates serverValveChange ...
             trialRecords(trialInd).response newValveState ...
             requestRewardDone requestRewardOpenCmdDone] ...
             = handleServerCommands(tm, rn, done, quit, requestRewardStarted, ...
@@ -904,22 +942,31 @@ while ~done && ~quit;
     timestamps.serverCommDone=GetSecs;
     
     % =========================================================================
+    % airpuff
+    if isempty(thisAirpuffPhaseNum)
+        thisAirpuffPhaseNum=phaseNum;
+    end
     
     if ~isempty(lastAirpuffTime) && airpuffOn
-        elapsedTime = GetSecs() - lastAirpuffTime;
+        airpuffCheckTime = GetSecs();
+        elapsedTime = airpuffCheckTime - lastAirpuffTime;
         msAirpuffOwed = msAirpuffOwed - elapsedTime*1000.0;
-        phaseRecords(phaseNum).actualAirpuffDuration = phaseRecords(phaseNum).actualAirpuffDuration + elapsedTime*1000.0;
+        phaseRecords(thisAirpuffPhaseNum).actualAirpuffDuration = phaseRecords(thisAirpuffPhaseNum).actualAirpuffDuration + elapsedTime*1000.0;
     end
     
     aStart = msAirpuffOwed > 0 && ~airpuffOn;
     aStop = msAirpuffOwed <= 0 && airpuffOn; % msAirpuffOwed<=0 also catches doPuff==false, and will stop airpuff when k+a is lifted
     if aStart || doPuff
+        thisAirpuffPhaseNum = phaseNum; % set default airpuff phase num
         setPuff(station, true);
         airpuffOn = true;
     elseif aStop
         doPuff = false;
         airpuffOn = false;
         setPuff(station, false);
+        airpuffCheckToSetPuffTime = GetSecs() - airpuffCheckTime; % time from the airpuff check to after setPuff returns
+        % increase actualAirpuffDuration by this 'lag' time...
+        phaseRecords(thisAirpuffPhaseNum).actualAirpuffDuration = phaseRecords(thisAirpuffPhaseNum).actualAirpuffDuration + airpuffCheckToSetPuffTime*1000.0;
     end
     lastAirpuffTime = GetSecs();
     

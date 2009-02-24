@@ -15,25 +15,25 @@ if strmatch(class(trialManager), 'nAFC')
     
     % waiting for request
     criterion = {requestPorts, 2};
-    stimSpecs{1} = stimSpec(interTrialLuminance,criterion,'loop',0,framesUntilTransition,[],0,0,hz,[]);
+    stimSpecs{1} = stimSpec(interTrialLuminance,criterion,'loop',0,framesUntilTransition,[],0,0,hz,[],'waiting for request');
     
     % waiting for response
     criterion = {targetPorts, 3, distractorPorts, 4};
-    stimSpecs{2} = stimSpec(stim,criterion,type,0,[],[],scaleFactor,0,hz,[]);
+    stimSpecs{2} = stimSpec(stim,criterion,type,0,[],[],scaleFactor,0,hz,[],'discrim');
     
     % correct
     criterion = {[], 5};
-    stimSpecs{3} = stimSpec(interTrialLuminance,criterion,'cache',0,[],[],0,0,hz,'correct'); % timeout assigned during runRealTimeLoop
+    stimSpecs{3} = stimSpec(interTrialLuminance,criterion,'cache',0,[],[],0,0,hz,'correct','correct'); % timeout assigned during runRealTimeLoop
     
     % wrong
     criterion = {[], 5};
     % the error phase has an empty stim, because we dont know how long of a stim to compute using errorStim(stimManager,numErrorFrames) until
     % we get to the error phase and call calcReinforcement!
-    stimSpecs{4} = stimSpec([],criterion,'cache',0,[],[],scaleFactor,0,hz,'error');
+    stimSpecs{4} = stimSpec([],criterion,'cache',0,[],[],scaleFactor,0,hz,'error','error');
     
     % final
     criterion = {[], 1};
-    stimSpecs{5} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,[]);
+    stimSpecs{5} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,[],'itl');
     
     if isempty(requestPorts)
         startingStimSpecInd=2;
@@ -44,25 +44,25 @@ elseif strmatch(class(trialManager), 'freeDrinks')
     % waiting for response phase
     criterion = {targetPorts, 2};
     stochasticP = getFreeDrinkLikelihood(trialManager);
-    stimSpecs{1} = stimSpec(stim, criterion,'loop',0,[],{stochasticP,1,stochasticP,2,stochasticP,3},scaleFactor,0,hz,[]);
+    stimSpecs{1} = stimSpec(stim, criterion,'loop',0,[],{stochasticP,1,stochasticP,2,stochasticP,3},scaleFactor,0,hz,[],'discrim');
 
     % correct phase (always correct)
     criterion = {[], 3};
-    stimSpecs{2} = stimSpec(interTrialLuminance,criterion,'cache',0,[],[],0,0,hz,'correct');
+    stimSpecs{2} = stimSpec(interTrialLuminance,criterion,'cache',0,[],[],0,0,hz,'correct','correct');
     
     % final
     criterion = {[], 1};
-    stimSpecs{3} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,[]);
+    stimSpecs{3} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,[],'itl');
 
 elseif strcmp(class(trialManager), 'autopilot')
 
     % just put in loop mode, one phase
     criterion = {[], 2};
-    stimSpecs{1} = stimSpec(stim, criterion,'loop',0,[],[],scaleFactor,0,hz,[]);
+    stimSpecs{1} = stimSpec(stim, criterion,'loop',0,[],[],scaleFactor,0,hz,[],'display');
 
     % final phase
     criterion = {[], 1};
-    stimSpecs{2} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,[]);
+    stimSpecs{2} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,[],'itl');
 
 else
     error('only nAFC, freeDrinks, and autopilot for now');

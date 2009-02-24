@@ -106,7 +106,7 @@ switch nargin
                         size(spec.stimulus,3)
                         error('trigger mode only works with a 2-frame movie');
                     end
-                    if ~islogical(typeArray{2})
+                    if typeArray{2}~=0 && typeArray{2}~=1
                         typeArray{2}
                         error('toggleStim must be a logical');
                     end

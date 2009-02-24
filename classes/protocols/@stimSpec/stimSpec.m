@@ -11,7 +11,7 @@ function spec=stimSpec(varargin)
 %                               this 'frame timeout' transition is also used even if framesUntilTransition is empty, but if the stimType is 'cache'
 %                               or 'timedFrames' with a nonzero end, and we finish showing the stimulus for the specified duration.
 % stimType                  must be one of the non-phased values for stimManager.calcStim()'s 'type' output, with the same properties 
-%                               ('static', 'trigger', 'trigger', 'loop', {'timedFrames', [frameTimes]}, {'indexedFrames', [frameIndices]}, or 'expert') - default is loop
+%                               ('static', 'trigger', 'cache', 'loop', {'timedFrames', [frameTimes]}, {'indexedFrames', [frameIndices]}, or 'expert') - default is loop
 %                               this is effectively a phase-specific type, instead of trial-specific
 % startFrame                what frame of the stimulus to start this phase at; if 'loop' mode, automatically start at first frame after looping through once
 %                               set to zero to start at the beginning

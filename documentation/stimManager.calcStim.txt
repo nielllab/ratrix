@@ -144,7 +144,7 @@
 %   ports                the ports just triggered
 %   lastPorts            the ports triggered on the last loop (so you can notice changes)
 %   phase                the stimSpec index
-%   stepsInPhase         the number of frame flips that have occured in this phase (starts at zero, equals the frame number if you haven't dropped any)
+%   framesInPhase        the number of frame flips that have occured in this phase (starts at zero, equals the frame number if you haven't dropped any)
 %   msRewardSound        the msRewardSound returned by the reinforcementManager
 %   msPenaltySound       the msPenaltySound returned by the reinforcementManager
 %   targetOptions        the target ports your calcStim returned

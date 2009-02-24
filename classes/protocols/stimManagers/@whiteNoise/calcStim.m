@@ -1,4 +1,4 @@
-function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text] =...
+function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text,toggleStim] =...
     calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % see ratrixPath\documentation\stimManager.calcStim.txt for argument specification (applies to calcStims of all stimManagers)
 % 1/3/0/09 - trialRecords now includes THIS trial
@@ -12,6 +12,7 @@ if isnan(resolutionIndex)
     resolutionIndex=1;
 end
 
+toggleStim=true;
 type = 'phased';
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);
@@ -139,7 +140,6 @@ spatialDim=ceil([requestedStimLocation(3)-requestedStimLocation(1) requestedStim
 stim = [];
 stim.height = min(height,getMaxHeight(stimulus));
 stim.width = min(width,getMaxWidth(stimulus));
-stim.floatprecision = 1;
 % set seed values
 rand('state',sum(100*clock)); % initialize randn to random starting state
 stim.seedValues = ceil(rand(1,numFrames)*1000000);

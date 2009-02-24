@@ -1,7 +1,7 @@
 function [floatprecision stim] = determineColorPrecision(tm, stim, strategy)
 
 if ~isempty(strategy) && strcmp(strategy, 'expert')
-    floatprecision = stim.floatprecision;
+    floatprecision = []; % no default floatprecision for expert mode - override during drawExpertFrame or will throw error
 else
     floatprecision=0;
     if isreal(stim)

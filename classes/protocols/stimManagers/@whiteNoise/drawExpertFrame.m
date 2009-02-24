@@ -1,8 +1,11 @@
-function [doFramePulse expertCache dynamicDetails textLabel i] = ...
-    drawExpertFrame(stimulus,stim,i,phaseStartTime,window,textLabel,floatprecision,destRect,filtMode,expertCache,ifi,scheduledFrameNum,dropFrames)
+function [doFramePulse expertCache dynamicDetails textLabel i dontclear] = ...
+    drawExpertFrame(stimulus,stim,i,phaseStartTime,window,textLabel,floatprecision,destRect,filtMode,...
+    expertCache,ifi,scheduledFrameNum,dropFrames,dontclear)
 % 10/31/08 - implementing expert mode for whiteNoise
 % this function calculates a expert frame, and then makes and draws the texture; nothing needs to be done in runRealTimeLoop
 % this should be a stimManager-specific implementation (if expert mode is supported for the given stimulus)
+
+floatprecision=1;
 
 % increment i
 if dropFrames

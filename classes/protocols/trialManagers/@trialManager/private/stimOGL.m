@@ -1,6 +1,6 @@
 function [tm quit trialRecords eyeData gaze station ratrixSVNInfo ptbSVNInfo] ...
     = stimOGL(tm, stimSpecs, startingStimSpecInd, stimManager, LUT, targetOptions, distractorOptions, requestOptions, interTrialLuminance, ...
-    station, manual,timingCheckPct,textLabel,rn,subID,stimID,protocolStr,trialLabel,eyeTracker,msAirpuff,trialRecords)
+    station, manual,timingCheckPct,textLabel,rn,subID,stimID,protocolStr,trialLabel,eyeTracker,msAirpuff,trialRecords,toggleStim)
 
 verbose = false;
 responseOptions = union(targetOptions, distractorOptions);
@@ -77,7 +77,7 @@ try
         = runRealTimeLoop(tm, window, ifi, stimSpecs, startingStimSpecInd, phaseData, stimManager, ...
         targetOptions, distractorOptions, requestOptions, interTrialLuminance, interTrialPrecision, ...
         station, manual,timingCheckPct,textLabel,rn,subID,stimID,protocolStr,ptbVersion,ratrixVersion,trialLabel,msAirpuff, ...
-        originalPriority, verbose,eyeTracker,frameDropCorner,trialRecords);
+        originalPriority, verbose,eyeTracker,frameDropCorner,trialRecords,toggleStim);
 
 catch ex
     ple(ex)

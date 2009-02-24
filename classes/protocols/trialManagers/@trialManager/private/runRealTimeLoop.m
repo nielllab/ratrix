@@ -2,7 +2,7 @@ function [tm quit trialRecords eyeData gaze frameDropCorner station] ...
     = runRealTimeLoop(tm, window, ifi, stimSpecs, startingStimSpecInd, phaseData, stimManager, ...
     targetOptions, distractorOptions, requestOptions, interTrialLuminance, interTrialPrecision, ...
     station, manual,timingCheckPct,textLabel,rn,subID,stimID,protocolStr,ptbVersion,ratrixVersion,trialLabel,msAirpuff, ...
-    originalPriority, verbose, eyeTracker, frameDropCorner,trialRecords)
+    originalPriority, verbose, eyeTracker, frameDropCorner,trialRecords,toggleStim)
 
 % =====================================================================================================================
 %   show movie following mario's 'ProgrammingTips' for the OpenGL version of PTB
@@ -87,6 +87,9 @@ doValves=0*ports;
 newValveState=doValves;
 doPuff=false;
 
+% toggleStim=true; %lickometer % now passed in from calcStim
+trialRecords(trialInd).toggleStim=toggleStim; % flag for lickometer/nosepokes
+
 % =========================================================================
 
 timestamps.loopStart=0;
@@ -152,8 +155,8 @@ responseDetails.times={};
 responseDetails.durs={};
 % responseDetails.requestRewardDone=false;
 resposneDetails.requestRewardPorts=[];
-responseDetails.requestRewardStartTime=[];
-responseDetails.requestRewardDurationActual=0;
+responseDetails.requestRewardStartTime={};
+responseDetails.requestRewardDurationActual={};
 
 responseDetails.startTime=[];
 
@@ -402,6 +405,13 @@ while ~done && ~quit;
         if isempty(phaseType)
             % not correct or error, do nothing
         elseif ismember(phaseType,{'correct','error'})
+            
+            % can do a trialManager-specific method call here that sets trialRecords(trialInd).correct
+            % based on trialRecords(trialInd).response (which should have been set as the trialResponse by previous
+            % phase's logic)
+            % we then pass this 'correct' value to calcReinforcement through the trialRecords, so it knows
+            % if to do reward/airpuff, etc
+            
             [rm rewardSizeULorMS requestRewardSizeULorMS msPenalty msPuff msRewardSound msPenaltySound updateRM] =...
                 calcReinforcement(getReinforcementManager(tm),trialRecords, []);
             
@@ -554,9 +564,9 @@ while ~done && ~quit;
                     end
                 case 'expert'
                     % i=i+1; % 11/7/08 - this needs to happen first because i starts at 0
-                    [doFramePulse expertCache dynamicDetails textLabel i] ...
+                    [doFramePulse expertCache dynamicDetails textLabel i dontclear] ...
                         = drawExpertFrame(stimManager,stim,i,phaseStartTime,window,textLabel,...
-                        floatprecision,destRect,filtMode,expertCache,ifi,scheduledFrameNum,tm.dropFrames);
+                        floatprecision,destRect,filtMode,expertCache,ifi,scheduledFrameNum,tm.dropFrames,dontclear);
                     if ~isempty(dynamicDetails)
                         phaseRecords(phaseNum).dynamicDetails{end+1}=dynamicDetails; % dynamicDetails better specify what frame it is b/c the record will not save empty details
                     end
@@ -697,19 +707,20 @@ while ~done && ~quit;
     end
     
     if ~paused
+        % end of a response
         if lookForChange && any(ports~=lastPorts) % end of a response
             phaseRecords(thisResponsePhaseNum).responseDetails.durs{end+1} = GetSecs() - respStart;
             lookForChange=false;
+            logIt=true;
 %             dispStr=sprintf('marking end of a response at time %d with dur %d during phaseNum %d\n',GetSecs(),phaseRecords(thisResponsePhaseNum).responseDetails.durs{end},thisResponsePhaseNum);
 %             disp(dispStr);
-        end
-
-        if any(ports(responseOptions)) || any(ports(requestOptions))
-            logIt=true;
-        end
-
+            if ~toggleStim % beambreak mode (once request ends, stop showing stim)
+                isRequesting=~isRequesting;
+            end
+        
         % 1/21/09 - how should we handle tries? - do we count attempts that occur during a phase w/ no port transitions (ie timeout only)?
-        if any(ports~=lastPorts) && logIt
+        % start of a response
+        elseif any(ports~=lastPorts) && logIt
             phaseRecords(phaseNum).responseDetails.tries{end+1} = ports;
             phaseRecords(phaseNum).responseDetails.times{end+1} = GetSecs() - startTime;
             respStart = GetSecs();
@@ -767,7 +778,8 @@ while ~done && ~quit;
         dispStr=sprintf('increasing msRequestRewardOwed by %d during phaseNum %d\n',requestRewardSizeULorMS,phaseNum);
         disp(dispStr)
         phaseRecords(phaseNum).responseDetails.requestRewardPorts=ports;
-        phaseRecords(phaseNum).responseDetails.requestRewardStartTime=GetSecs();
+        phaseRecords(phaseNum).responseDetails.requestRewardStartTime{end+1}=GetSecs();
+        phaseRecords(phaseNum).responseDetails.requestRewardDurationActual{end+1}=0;
         requestRewardDone=true;
         if updateRM
             tm=setReinforcementManager(tm,rm);
@@ -790,22 +802,21 @@ while ~done && ~quit;
         rewardCheckTime = GetSecs();
         elapsedTime = rewardCheckTime - lastRewardTime;
         if strcmp(getRewardMethod(station),'localTimed')
-            doRequestReward
+%             doRequestReward
             if ~doRequestReward % this was a normal reward, log it
-                msRewardOwed = msRewardOwed - elapsedTime*1000.0;
-                elapsedTime*1000.0
-                msRewardOwed
-                msRequestRewardOwed
+%                 msRewardOwed = msRewardOwed - elapsedTime*1000.0;
+%                 elapsedTime*1000.0
+%                 msRewardOwed
+%                 msRequestRewardOwed
                 phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL = phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL + elapsedTime*1000.0;
-                phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL
+%                 phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL
             else % this was a request reward, dont log it
                 msRequestRewardOwed = msRequestRewardOwed - elapsedTime*1000.0;
-                phaseRecords(thisRewardPhaseNum).responseDetails.requestRewardDurationActual=phaseRecords(thisRewardPhaseNum).responseDetails.requestRewardDurationActual+elapsedTime*1000.0;
-                requestRewardDuration = phaseRecords(thisRewardPhaseNum).responseDetails.requestRewardDurationActual;
-                'requestReward'
-                requestRewardDuration
-                msRequestRewardOwed
-                elapsedTime*1000.0
+                phaseRecords(thisRewardPhaseNum).responseDetails.requestRewardDurationActual{end}=phaseRecords(thisRewardPhaseNum).responseDetails.requestRewardDurationActual{end}+elapsedTime*1000.0;
+%                 'requestReward'
+%                 requestRewardDuration
+%                 msRequestRewardOwed
+%                 elapsedTime*1000.0
             end
         elseif strcmp(getRewardMethod(station),'localPump')
             % in localPump mode, msRewardOwed gets zeroed out after the call to station/doReward
@@ -885,14 +896,14 @@ while ~done && ~quit;
                             setAndCheckValves(station,zeros(1,getNumPorts(station)),currentValveStates,phaseRecords(thisRewardPhaseNum).valveErrorDetails,lastRewardTime,'correct reward close');
                         % also add the additional time that reward was on from rewardCheckTime to now
                         rewardCheckToValveCloseTime = GetSecs() - rewardCheckTime;
-                        rewardCheckToValveCloseTime
+%                         rewardCheckToValveCloseTime
                         if ~doRequestReward
                             phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL = phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL + rewardCheckToValveCloseTime*1000.0;
-                            phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL
-                            'stopping normal reward'
+%                             phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL
+%                             'stopping normal reward'
                         else
-                            phaseRecords(thisRewardPhaseNum).responseDetails.requestRewardDurationActual=phaseRecords(thisRewardPhaseNum).responseDetails.requestRewardDurationActual+rewardCheckToValveCloseTime*1000.0;
-                            'stopping request reward'
+                            phaseRecords(thisRewardPhaseNum).responseDetails.requestRewardDurationActual{end}=phaseRecords(thisRewardPhaseNum).responseDetails.requestRewardDurationActual{end}+rewardCheckToValveCloseTime*1000.0;
+%                             'stopping request reward'
                         end                       
                         % newValveState=doValves|rewardValves; % this shouldnt be used for now...figure out later...
                     else

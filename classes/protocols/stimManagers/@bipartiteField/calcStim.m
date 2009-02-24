@@ -1,4 +1,4 @@
-function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text] =...
+function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text,toggleStim] =...
     calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % see ratrixPath\documentation\stimManager.calcStim.txt for argument specification (applies to calcStims of all stimManagers)
 % 1/30/09 - trialRecords includes THIS trial now
@@ -11,6 +11,7 @@ if isnan(resolutionIndex)
     resolutionIndex=1;
 end
 
+toggleStim=true;
 type = 'phased';
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);
@@ -111,7 +112,6 @@ end
 % stim = [];
 % stim.height = height;
 % stim.width = width;
-% stim.floatprecision = 1;
 % stim.frames(1,:) = framesL(:);
 % stim.frames(2,:) = framesR(:);
 % stim.numLeftPixels = numLeftPixels;

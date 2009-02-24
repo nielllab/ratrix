@@ -119,7 +119,7 @@
 %   INPUTS
 %           stimManager         - your stimManager object
 %           stim                - the stim returned by your calcStim
-%           i                   - starts at 1, printed out on the frame lables as 'stimInd' and if textLabel is a cell, determines which is printed -- changing so that future values determined by returning updated value
+%           i                   - starts at 1, printed out on the frame lables as 'stimInd' and if textLabel is a cell, determines which is printed
 %           phaseStartTime      - the GetSecs() timestamp at the beginning of this phase (will be AFTER the last VBL from the previous phase)
 %           window              - the ptb window handle you should draw to
 %           textLabel           - the text returned by your calcStim or previous calls to drawExpertFrame

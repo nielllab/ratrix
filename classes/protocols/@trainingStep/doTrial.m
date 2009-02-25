@@ -84,10 +84,10 @@ try
                 doTrial(ts.trialManager,station,ts.stimManager,subject,r,rn,trialRecords,sessionNumber);
             keepWorking=~stopEarly;
 
-            % 1/22/09 - check to see if we want to dynamically change trainingStep (look in trialRecords(end).response, if stopEarly is set)
+            % 1/22/09 - check to see if we want to dynamically change trainingStep (look in trialRecords(end).result, if stopEarly is set)
             if stopEarly
-                if isfield(trialRecords(end),'response') && ischar(trialRecords(end).response)
-                    [match tokens]=regexp(trialRecords(end).response,'manual training step (\d+)','match','tokens');
+                if isfield(trialRecords(end),'result') && ischar(trialRecords(end).result)
+                    [match tokens]=regexp(trialRecords(end).result,'manual training step (\d+)','match','tokens');
                     if ~isempty(match)
                         % manually update trainingstep
                         newTsNum=uint8(str2double(tokens{1}{1}));

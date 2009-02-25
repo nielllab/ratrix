@@ -20,7 +20,7 @@ if ~isempty(trialRecords) && length(trialRecords)>=2
 else
     lastRec=[];
 end
-[targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts);
+[targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass);
 
 typeInd=find([stimulus.port{:}]==targetPorts);
 if length(typeInd)==0

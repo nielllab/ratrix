@@ -151,7 +151,7 @@ responseDetails.tries={};
 responseDetails.times={};
 responseDetails.durs={};
 % responseDetails.requestRewardDone=false;
-resposneDetails.requestRewardPorts=[];
+responseDetails.requestRewardPorts={};
 responseDetails.requestRewardStartTime={};
 responseDetails.requestRewardDurationActual={};
 
@@ -161,7 +161,6 @@ responseDetails.startTime=[];
 
 phaseRecordAllocChunkSize = 1;
 [phaseRecords(1:length(stimSpecs)).responseDetails]= deal(responseDetails);
-[phaseRecords(1:length(stimSpecs)).response]=deal('none');
 
 [phaseRecords(1:length(stimSpecs)).proposedRewardDurationMSorUL] = deal(0);
 [phaseRecords(1:length(stimSpecs)).proposedAirpuffDuration] = deal(0);
@@ -277,7 +276,9 @@ kDown=false;
 portsDown=false(1,length(ports));
 pNum=0;
 
-trialRecords(trialInd).response='none'; %initialize
+trialRecords(trialInd).result=[]; %initialize
+trialRecords(trialInd).correct=[];
+checkCorrect=false;
 analogOutput=[];
 startTime=0;
 logIt=true;
@@ -330,7 +331,6 @@ while ~done && ~quit;
             
             nextPhaseRecordNum=length(phaseRecords)+1;
             [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).responseDetails]= deal(responseDetails);
-            [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).response]=deal('none');
             
             [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).proposedRewardDurationMSorUL] = deal([]);
             [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).proposedAirpuffDuration] = deal([]);
@@ -389,7 +389,6 @@ while ~done && ~quit;
         strategy = phase.strategy;
         toggleStim = phase.toggleStim; %lickometer % now passed in from calcStim
         phaseRecords(phaseNum).toggleStim=toggleStim; % flag for whether the end of a beam break ends the request state
-        
         destRect = phase.destRect;
         textures = phase.textures;
         
@@ -398,92 +397,10 @@ while ~done && ~quit;
         stim = getStim(spec);
         transitionCriterion = getTransitions(spec);
         framesUntilTransition = getFramesUntilTransition(spec);
+        phaseType = getPhaseType(spec);
         
         % =========================================================================
-        phaseType = getPhaseType(spec);
-        if isempty(phaseType)
-            % not correct or error, do nothing
-        elseif ismember(phaseType,{'correct','error'})
-            
-            % can do a trialManager-specific method call here that sets trialRecords(trialInd).correct
-            % based on trialRecords(trialInd).response (which should have been set as the trialResponse by previous
-            % phase's logic)
-            % we then pass this 'correct' value to calcReinforcement through the trialRecords, so it knows
-            % if to do reward/airpuff, etc
-            
-            [rm rewardSizeULorMS requestRewardSizeULorMS msPenalty msPuff msRewardSound msPenaltySound updateRM] =...
-                calcReinforcement(getReinforcementManager(tm),trialRecords, []);
-            
-            if updateRM
-                tm=setReinforcementManager(tm,rm);
-            end
-            
-            if strcmp(phaseType,'correct')
-                
-%                 dispStr=sprintf('increasing msRewardOwed by %d during phaseNum %d\n',rewardSizeULorMS,phaseNum);
-%                 disp(dispStr);
-                msRewardOwed=msRewardOwed+rewardSizeULorMS;
-                doRequestReward=false; % doing a normal reward, not a request reward now
-                
-                if window>0
-                    if isempty(framesUntilTransition)
-                        framesUntilTransition = ceil((rewardSizeULorMS/1000)/ifi);
-                    end
-                elseif strcmp(tm.displayMethod,'LED')
-                    if isempty(framesUntilTransition)
-                        framesUntilTransition=ceil(getHz(spec)*rewardSizeULorMS/1000);
-                        if isscalar(squeeze(stim))
-                            stim=stim*ones(framesUntilTransition,1); %need to lengthen the stim cuz rewards are currently timed based on frames
-                        else
-                            size(stim)
-                            error('stim wasn''t scalar')
-                        end
-                    else
-                        framesUntilTransition
-                        error('LED needs framesUntilTransition empty for reward')
-                    end
-                else
-                    error('huh?')
-                end
-                phaseRecords(phaseNum).proposedRewardDurationMSorUL = rewardSizeULorMS;
-                
-            elseif strcmp(phaseType,'error')
-                
-                % should we update msAirpuffOwed with the msPuff value?
-                % msAirpuffOwed = msAirpuffOwed + msPuff;
-                
-                if window>0
-                    numErrorFrames=ceil((msPenalty/1000)/ifi);
-                elseif strcmp(tm.displayMethod,'LED')
-                    numErrorFrames=ceil(getHz(spec)*msPenalty/1000);
-                else
-                    error('huh?')
-                end
-                
-                if isempty(stim)
-                    [stim errorScale] = errorStim(stimManager,numErrorFrames);
-                    
-                    if window>0
-                        [floatprecision stim] = determineColorPrecision(tm, stim, strategy);
-                        textures = cacheTextures(tm,strategy,stim,window,floatprecision);
-                        destRect=Screen('Rect',window);
-                    elseif strcmp(tm.displayMethod,'LED')
-                        floatprecision=[];
-                    else
-                        error('huh?')
-                    end
-                end
-                
-                if isempty(framesUntilTransition)
-                    framesUntilTransition = numErrorFrames;
-                elseif strcmp(tm.displayMethod,'LED')
-                    error('LED needs framesUntilTransition empty for error')
-                end
-            end
-        else
-            phaseType
-            error('unrecognized phase type')
-        end
+
         
         % =========================================================================
         
@@ -547,6 +464,54 @@ while ~done && ~quit;
             scheduledFrameNum=ceil((GetSecs-firstVBLofPhase)/(framesPerUpdate*ifi)); %could include pessimism about the time it will take to get from here to the flip and how much advance notice flip needs
             % this will surely have drift errors...
             % note this does not take pausing into account -- edf thinks we should get rid of pausing
+            
+
+            % here should be the function that also checks to see if we should assign trialRecords.correct
+            % and trialRecords.response, and also does tm-specific reward checks (nAFC should check to update reward/airpuff
+            % if first frame of a 'reinforced' phase)
+            [tm trialRecords(trialInd).correct trialRecords(trialInd).result spec ...
+                rewardSizeULorMS requestRewardSizeULorMS ...
+                msPuff msRewardSound msPenalty msPenaltySound floatprecision textures destRect checkCorrect] = ...
+                updateTrialState(tm, stimManager, trialRecords(trialInd).correct, trialRecords(trialInd).result, spec, ports, lastPorts, ...
+                targetOptions, requestOptions, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
+                floatprecision, textures, destRect, ...
+                requestRewardDone, checkCorrect);
+            % because the target ports = setdiff(responsePorts, lastResponse) which is always empty
+            % so we will always have the same empty responsePorts and same nonempty requestPorts
+            % we do the repeat-checking in runRealTimeLoop using ~any(ports==lastRequestPorts)
+            % should we save lastRequestPorts somewhere in trialRecord so we can load the correct value for the next trial...?
+            % edf: i don't follow this comment
+            if rewardSizeULorMS~=0
+                doRequestReward=false;
+                msRewardOwed=msRewardOwed+rewardSizeULorMS;
+                phaseRecords(phaseNum).proposedRewardDurationMSorUL = rewardSizeULorMS;
+                dispStr=sprintf('giving reward %d during phaseNum %d\n',rewardSizeULorMS,phaseNum);
+                disp(dispStr)
+            elseif msPenalty~=0
+                doRequestReward=false;
+                msAirpuffOwed=msAirpuffOwed+msPuff;
+                phaseRecords(phaseNum).proposedAirpuffDuration = msPuff;
+            end
+            framesUntilTransition=getFramesUntilTransition(spec);
+            stim=getStim(spec);
+            scaleFactor=getScaleFactor(spec);
+            
+            if requestRewardSizeULorMS~=0
+                doRequestReward=true;
+                dispStr=sprintf('increasing msRequestRewardOwed by %d during phaseNum %d\n',requestRewardSizeULorMS,phaseNum);
+                disp(dispStr)
+                msRequestRewardOwed=msRequestRewardOwed+requestRewardSizeULorMS;
+                phaseRecords(phaseNum).responseDetails.requestRewardPorts{end+1}=ports;
+                phaseRecords(phaseNum).responseDetails.requestRewardStartTime{end+1}=GetSecs();
+                phaseRecords(phaseNum).responseDetails.requestRewardDurationActual{end+1}=0;
+
+                lastRequestPorts=ports; % do we even need this?
+                playRequestSoundLoop=true;
+                requestRewardDone=true;
+            end
+            
+            lastPorts=ports; % has to be this sequence of events: readPorts -> handleTrialLogic -> updateTrialState -> lastPorts
+            % =========================================================================
             
             switch strategy
                 case {'textureCache','noCache'}
@@ -681,9 +646,9 @@ while ~done && ~quit;
     timestamps.kbCheckDone=GetSecs;
     
     if keyIsDown && allowKeyboard
-        [didAPause paused done phaseRecords(phaseNum).response doValves ports didValves didHumanResponse manual ...
+        [didAPause paused done trialRecords(trialInd).result doValves ports didValves didHumanResponse manual ...
             doPuff pressingM pressingP,timestamps.kbOverhead,timestamps.kbInit,timestamps.kbKDown,allowKeyboard] ...
-            = handleKeyboard(tm, keyCode, didAPause, paused, done, phaseRecords(phaseNum).response, doValves, ports, didValves, didHumanResponse, ...
+            = handleKeyboard(tm, keyCode, didAPause, paused, done, trialRecords(trialInd).result, doValves, ports, didValves, didHumanResponse, ...
             manual, doPuff, pressingM, pressingP, originalPriority, priorityLevel, KbConstants, allowKeyboard);
     else
         % require a break between keyboard inputs
@@ -711,8 +676,8 @@ while ~done && ~quit;
             phaseRecords(thisResponsePhaseNum).responseDetails.durs{end+1} = GetSecs() - respStart;
             lookForChange=false;
             logIt=true;
-%             dispStr=sprintf('marking end of a response at time %d with dur %d during phaseNum %d\n',GetSecs(),phaseRecords(thisResponsePhaseNum).responseDetails.durs{end},thisResponsePhaseNum);
-%             disp(dispStr);
+            dispStr=sprintf('marking end of a response at time %d with dur %d during phaseNum %d\n',GetSecs(),phaseRecords(thisResponsePhaseNum).responseDetails.durs{end},thisResponsePhaseNum);
+            disp(dispStr);
             if ~toggleStim % beambreak mode (once request ends, stop showing stim)
                 isRequesting=~isRequesting;
             end
@@ -727,65 +692,41 @@ while ~done && ~quit;
             logIt=false;
             lookForChange=true;
             thisResponsePhaseNum=phaseNum;
-%             dispStr=sprintf('marking start of a response [%d %d %d] at time %d during phaseNum %d\n',ports,respStart,phaseNum);
-%             disp(dispStr);
+            dispStr=sprintf('marking start of a response [%d %d %d] at time %d during phaseNum %d\n',ports,respStart,phaseNum);
+            disp(dispStr);
         end
 
-        % if phaseRecords(phaseNum).response got set by keyboard, duplicate response on trial level
-        if ~strcmp('none', phaseRecords(phaseNum).response)
-            trialRecords(trialInd).response = phaseRecords(phaseNum).response;
-        end
+%         % if response got set by keyboard, duplicate response on trial level
+%         if ~strcmp('none', response)
+%             trialRecords(trialInd).result = response;
+%         end
     end
     
     timestamps.enteringPhaseLogic=GetSecs;
     
     if ~paused
         [tm done newSpecInd phaseInd updatePhase transitionedByTimeFlag ...
-            transitionedByPortFlag phaseRecords(phaseNum).response trialRecords(trialInd).response isRequesting lastSoundsLooped ...
-            timestamps.logicGotSounds timestamps.logicSoundsDone timestamps.logicFramesDone timestamps.logicPortsDone timestamps.logicRequestingDone goDirectlyToError] ...
+            transitionedByPortFlag trialRecords(trialInd).result isRequesting lastSoundsLooped ...
+            timestamps.logicGotSounds timestamps.logicSoundsDone timestamps.logicFramesDone ...
+            timestamps.logicPortsDone timestamps.logicRequestingDone goDirectlyToError checkCorrect] ...
             = handlePhasedTrialLogic(tm, done, ...
             ports, lastPorts, station, phaseInd, transitionCriterion, framesUntilTransition, numFramesInStim, framesInPhase, isFinalPhase, ...
-            phaseRecords(phaseNum).response, trialRecords(trialInd).response, ...
+            trialRecords(trialInd).result, trialRecords(trialInd).correct, ...
             stimManager, msRewardSound, msPenaltySound, targetOptions, distractorOptions, requestOptions, ...
             playRequestSoundLoop, isRequesting, soundNames, lastSoundsLooped);
 
         % if goDirectlyToError, then reset newSpecInd to the first error phase in stimSpecs
         if goDirectlyToError
-            newSpecInd=find(strcmp(cellfun(@getPhaseType,stimSpecs,'UniformOutput',false),'error'));
+            newSpecInd=find(strcmp(cellfun(@getPhaseType,stimSpecs,'UniformOutput',false),'reinforced'));
         end
 
+        
     end
     timestamps.phaseLogicDone=GetSecs;
     
     % =========================================================================
     
-    % because the target ports = setdiff(responsePorts, lastResponse) which is always empty
-    % so we will always have the same empty responsePorts and same nonempty requestPorts
-    % we do the repeat-checking in runRealTimeLoop using ~any(ports==lastRequestPorts)
-    % should we save lastRequestPorts somewhere in trialRecord so we can load the correct value for the next trial...?
-    % edf: i don't follow this comment
-    if (any(ports(requestOptions)) && ~any(lastPorts(requestOptions))) && ... % if a request port is triggered
-            ((strcmp(getRequestMode(getReinforcementManager(tm)),'nonrepeats') && ~any(ports&lastRequestPorts)) || ... % if non-repeat
-            strcmp(getRequestMode(getReinforcementManager(tm)),'all') || ...  % all requests
-            ~requestRewardDone) % first request
-        
-        [rm rewardSizeULorMS requestRewardSizeULorMS msPenalty msPuff msRewardSound msPenaltySound updateRM] =...
-            calcReinforcement(getReinforcementManager(tm),trialRecords, []);
-        
-        doRequestReward=true; % flag so we know if we are doing a request reward or a normal reward
-        msRequestRewardOwed = msRequestRewardOwed + requestRewardSizeULorMS;
-        dispStr=sprintf('increasing msRequestRewardOwed by %d during phaseNum %d\n',requestRewardSizeULorMS,phaseNum);
-        disp(dispStr)
-        phaseRecords(phaseNum).responseDetails.requestRewardPorts=ports;
-        phaseRecords(phaseNum).responseDetails.requestRewardStartTime{end+1}=GetSecs();
-        phaseRecords(phaseNum).responseDetails.requestRewardDurationActual{end+1}=0;
-        requestRewardDone=true;
-        if updateRM
-            tm=setReinforcementManager(tm,rm);
-        end
-        lastRequestPorts=ports; % do we even need this?
-        playRequestSoundLoop=true;
-    end
+
     
     % =========================================================================
     % reward handling
@@ -803,7 +744,7 @@ while ~done && ~quit;
         if strcmp(getRewardMethod(station),'localTimed')
 %             doRequestReward
             if ~doRequestReward % this was a normal reward, log it
-%                 msRewardOwed = msRewardOwed - elapsedTime*1000.0;
+                msRewardOwed = msRewardOwed - elapsedTime*1000.0;
 %                 elapsedTime*1000.0
 %                 msRewardOwed
 %                 msRequestRewardOwed
@@ -939,12 +880,12 @@ while ~done && ~quit;
     
     if ~isempty(rn) || strcmp(getRewardMethod(station),'serverPump')
         [done quit phaseRecords(thisRewardPhaseNum).valveErrorDetails serverValveStates serverValveChange ...
-            trialRecords(trialInd).response newValveState ...
+            trialRecords(trialInd).result newValveState ...
             requestRewardDone requestRewardOpenCmdDone] ...
             = handleServerCommands(tm, rn, done, quit, requestRewardStarted, ...
             requestRewardStartLogged, requestRewardOpenCmdDone, ...
             requestRewardDone, station, ports, serverValveStates, doValves, ...
-            trialRecords(trialInd).response);
+            trialRecords(trialInd).result);
     elseif isempty(rn) && strcmp(getRewardMethod(station),'serverPump')
         error('need a rnet for serverPump')
     end
@@ -1007,7 +948,6 @@ while ~done && ~quit;
     
     if ~paused
         framesInPhase = framesInPhase + 1; % moved from handlePhasedTrialLogic to prevent copy on write
-        lastPorts=ports;
 
         phaseInd = newSpecInd;
         frameNum = frameNum + 1;

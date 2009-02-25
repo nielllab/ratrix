@@ -20,39 +20,15 @@ dynamicMode = true; % do things dynamically as in driftdemo2
 % dynamicMode=false;
 
 % =====================================================================================================
-switch trialManagerClass
-    case 'freeDrinks'
-%         type='static';
-        if ~isempty(trialRecords) && length(trialRecords)>=2
-            lastResponse=find(trialRecords(end-1).response);
-            if length(lastResponse)>1
-                lastResponse=lastResponse(1);
-            end
-        else
-            lastResponse=[];
-        end
 
-        targetPorts=setdiff(responsePorts,lastResponse);
-        distractorPorts=[];
-
-    case 'nAFC'
-%         type='trigger';
-
-        details.pctCorrectionTrials=.5; % need to change this to be passed in from trial manager
-        if ~isempty(trialRecords) && length(trialRecords)>=2
-            lastRec=trialRecords(end-1);
-        else
-            lastRec=[];
-        end
-        [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts);
-    case 'autopilot'
-        details.pctCorrectionTrials=0;
-        details.correctionTrial=0;
-        targetPorts=[1];
-        distractorPorts=[];
-    otherwise
-        error('unknown trial manager class')
+details.pctCorrectionTrials=.5; % need to change this to be passed in from trial manager
+if ~isempty(trialRecords) && length(trialRecords)>=2
+    lastRec=trialRecords(end-1);
+else
+    lastRec=[];
 end
+[targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass);
+
 % =====================================================================================================
 
 % set up params for computeGabors

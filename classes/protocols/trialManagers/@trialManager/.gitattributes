@@ -21,3 +21,6 @@
 /setUpOrStopDatanet.m -text
 /calibrateEyeTracker.m -text
 /getAllowRepeats.m -text
+/cacheTextures.m -text
+/determineDestRect.m -text
+/determineColorPrecision.m -text

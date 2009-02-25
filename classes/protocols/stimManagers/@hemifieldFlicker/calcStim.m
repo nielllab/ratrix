@@ -17,67 +17,20 @@ correctionTrial=0;
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);
 
+details.pctCorrectionTrials=.5; % need to change this to be passed in from trial manager
+if ~isempty(trialRecords) && length(trialRecords)>=2
+    lastRec=trialRecords(end-1);
+else
+    lastRec=[];
+end
+[targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass);
 switch trialManagerClass
     case 'freeDrinks'
         type={'indexedFrames',[]};%int32([10 10]); % This is 'timedFrames'
-        if ~isempty(trialRecords) && length(trialRecords)>=2
-            lastResponse=find(trialRecords(end-1).response);
-            if length(lastResponse)>1
-                lastResponse=lastResponse(1);
-            end
-        else
-            lastResponse=[];
-        end
-
-        targetPorts=setdiff(responsePorts,lastResponse);
-        distractorPorts=[];
-
     case 'nAFC'
         type={'indexedFrames',[]};%int32([10 10]); % This is 'timedFrames'
-        
-        %edf: 11.25.06: copied correction trial logic from hack addition to cuedGoToFeatureWithTwoFlank
-        %edf: 11.15.06 realized we didn't have correction trials!
-        %changing below...
-
-
-        details.pctCorrectionTrials=.5; % need to change this to be passed in from trial manager
-        
-        if ~isempty(trialRecords) && length(trialRecords)>=2
-            lastResponse=find(trialRecords(end-1).response);
-            lastCorrect=trialRecords(end-1).correct;
-            if any(strcmp(fields(trialRecords(end-1).stimDetails),'correctionTrial'))
-                lastWasCorrection=trialRecords(end-1).stimDetails.correctionTrial;
-            else
-                lastWasCorrection=0;
-            end
-            if length(lastResponse)>1
-                lastResponse=lastResponse(1);
-            end
-        else
-            lastResponse=[];
-            lastCorrect=[];
-            lastWasCorrection=0;
-        end
-
-        %note that this implementation will not show the exact same
-        %stimulus for a correction trial, but just have the same side
-        %correct.  may want to change...
-        if ~isempty(lastCorrect) && ~isempty(lastResponse) && ~lastCorrect && (lastWasCorrection || rand<details.pctCorrectionTrials)
-            details.correctionTrial=1;
-            'correction trial!'
-            targetPorts=trialRecords(end-1).targetPorts;
-            correctionTrial=1;
-        else
-            details.correctionTrial=0;
-            targetPorts=responsePorts(ceil(rand*length(responsePorts)));
-        end
-        
-        distractorPorts=setdiff(responsePorts,targetPorts);
-        targetPorts
-
-
     otherwise
-        error('unknown trial manager class')
+        error('unsupported trialManagerClass');
 end
 
 numTargs=length(stimulus.targetContrasts);

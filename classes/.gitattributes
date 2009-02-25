@@ -173,3 +173,4 @@ protocols/reinforcementManagers/@reinforcementManager/getRequestMode.m -text
 protocols/reinforcementManagers/@reinforcementManager/setRequestRewardSizeULorMS.m -text
 protocols/eyeTrackers/@eyeLinkTracker/getSamples.m -text
 protocols/@stimSpec/getPhaseLabel.m -text
+protocols/@stimSpec/setFramesUntilTransition.m -text

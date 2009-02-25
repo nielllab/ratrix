@@ -1,8 +1,9 @@
-function [tm done newSpecInd specInd updatePhase transitionedByTimeFlag transitionedByPortFlag response trialResponse...
-    isRequesting lastSoundsLooped getSoundsTime soundsDoneTime framesDoneTime portSelectionDoneTime isRequestingDoneTime goDirectlyToError] = ...
+function [tm done newSpecInd specInd updatePhase transitionedByTimeFlag transitionedByPortFlag result...
+    isRequesting lastSoundsLooped getSoundsTime soundsDoneTime framesDoneTime ...
+    portSelectionDoneTime isRequestingDoneTime goDirectlyToError checkCorrect] = ...
     handlePhasedTrialLogic(tm, done, ...
     ports, lastPorts, station, specInd, transitionCriterion, framesUntilTransition, numFramesInStim,...
-    framesInPhase, isFinalPhase, response, trialResponse, ...
+    framesInPhase, isFinalPhase, result, correct, ...
     stimManager, msRewardSound, mePenaltySound, targetOptions, distractorOptions, requestOptions, ...
     playRequestSoundLoop, isRequesting, soundNames, lastSoundsLooped)
 
@@ -11,9 +12,10 @@ newSpecInd = specInd;
 transitionedByTimeFlag = false;
 transitionedByPortFlag = false;
 goDirectlyToError=false;
+checkCorrect=false;
 
 soundsToPlay = getSoundsToPlay(stimManager, ports, lastPorts, specInd, framesInPhase,msRewardSound, mePenaltySound, ...
-    targetOptions, distractorOptions, requestOptions, playRequestSoundLoop, class(tm));
+    targetOptions, distractorOptions, requestOptions, playRequestSoundLoop, class(tm), correct);
 getSoundsTime=GetSecs;
 % soundsToPlay is a cell array of sound names {{playLoop sounds}, {playSound sounds}} to be played at current frame
 % validate soundsToPlay here (make sure they are all members of soundNames)
@@ -95,14 +97,17 @@ for gcInd=1:2:length(transitionCriterion)-1
         end
         transitionedByPortFlag = true;
 
-        % set response to the ports array when it is triggered during a phase transition (ie response will be whatever the last port to trigger
+        % set result to the ports array when it is triggered during a phase transition (ie result will be whatever the last port to trigger
         %   a transition was)
-        response = ports;
+        result = ports;
         % set correct if we are on a target or distractor
-        if any(ports(targetOptions))
-            trialResponse =response;
-        elseif any(ports(distractorOptions))
-            trialResponse = response;
+%         if any(ports(targetOptions))
+%             result =result;
+%         elseif any(ports(distractorOptions))
+%             result = result;
+%         end
+        if any(ports(targetOptions)) || any(ports(distractorOptions))
+            checkCorrect=true;
         end
 
         if length(find(ports))>1
@@ -130,5 +135,4 @@ if any(ports(requestOptions)) && ~any(lastPorts(requestOptions))
 end
 
 isRequestingDoneTime=GetSecs;
-
 end % end function

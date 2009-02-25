@@ -14,39 +14,22 @@ end
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);
 
+details.pctCorrectionTrials=.5; % need to change this to be passed in from trial manager
+if ~isempty(trialRecords) && length(trialRecords)>=2
+    lastRec=trialRecords(end-1);
+else
+    lastRec=[];
+end
+[targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass);
 switch trialManagerClass
     case 'freeDrinks'
         type='static';
-        if ~isempty(trialRecords) && length(trialRecords)>=2
-            lastResponse=find(trialRecords(end-1).response);
-            if length(lastResponse)>1
-                lastResponse=lastResponse(1);
-            end
-        else
-            lastResponse=[];
-        end
-
-        targetPorts=setdiff(responsePorts,lastResponse);
-        distractorPorts=[];
-
     case 'nAFC'
         type={'trigger',true};
-
-        details.pctCorrectionTrials=.5; % need to change this to be passed in from trial manager
-        if ~isempty(trialRecords) && length(trialRecords)>=2
-            lastRec=trialRecords(end-1);
-        else
-            lastRec=[];
-        end
-        [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts);
-    
     case 'autopilot'
         type='static';
-        details.pctCorrectionTrials=0;
-        targetPorts=[1];
-        distractorPorts=[3];
     otherwise
-        error('unknown trial manager class')
+        error('unsupported trialManagerClass');
 end
 
 numFreqs=length(stimulus.pixPerCycs);

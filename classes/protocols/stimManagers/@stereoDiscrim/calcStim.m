@@ -22,15 +22,16 @@ interTrialLuminance = getInterTrialLuminance(stimulus);
 switch trialManagerClass
     case 'freeDrinks'
         type='static';
+        % fli: this never gets used anyways, so why is it still here?
         % Determine what the last response was
-        if ~isempty(trialRecords) && length(trialRecords)>=2
-            lastResponse=find(trialRecords(end-1).response);
-            if length(lastResponse)>1
-                lastResponse=lastResponse(1);
-            end
-        else
-            lastResponse=[];
-        end
+%         if ~isempty(trialRecords) && length(trialRecords)>=2
+%             lastResponse=find(trialRecords(end-1).response);
+%             if length(lastResponse)>1
+%                 lastResponse=lastResponse(1);
+%             end
+%         else
+%             lastResponse=[];
+%         end
         % Go to port with sound, ignore wrong answers
         '##################CALC STIM RESPONSE PORTS#################'
         responsePorts
@@ -50,36 +51,12 @@ switch trialManagerClass
         %changing below...
 
         details.pctCorrectionTrials=.5; % need to change this to be passed in from trial manager
-        
         if ~isempty(trialRecords) && length(trialRecords)>=2
-            lastResponse=find(trialRecords(end-1).response);
-            lastCorrect=trialRecords(end-1).correct;
-            if any(strcmp(fields(trialRecords(end-1).stimDetails),'correctionTrial'))
-                lastWasCorrection=trialRecords(end-1).stimDetails.correctionTrial;
-            else
-                lastWasCorrection=0;
-            end
-            if length(lastResponse)>1
-                lastResponse=lastResponse(1);
-            end
+            lastRec=trialRecords(end-1);
         else
-            lastResponse=[];
-            lastCorrect=[];
-            lastWasCorrection=0;
+            lastRec=[];
         end
-
-        %note that this implementation will not show the exact same
-        %stimulus for a correction trial, but just have the same side
-        %correct.  may want to change...
-        if ~isempty(lastCorrect) && ~isempty(lastResponse) && ~lastCorrect && (lastWasCorrection || rand<details.pctCorrectionTrials)
-            details.correctionTrial=1;
-            'correction trial!'
-            targetPorts=trialRecords(end-1).targetPorts;
-            details.correctionTrial=1;
-        else
-            details.correctionTrial=0;
-            targetPorts=responsePorts(ceil(rand*length(responsePorts)));
-        end
+        [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass);
 
 
         distractorPorts=setdiff(responsePorts,targetPorts);

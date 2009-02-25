@@ -1,6 +1,6 @@
-function [didAPause paused done response doValves ports ...
+function [didAPause paused done result doValves ports ...
     didValves didHumanResponse manual doPuff pressingM pressingP overheadTime initTime kDownTime allowKeyboard] ...
-    = handleKeyboard(tm, keyCode, didAPause, paused, done, response, doValves, ports, didValves, ...
+    = handleKeyboard(tm, keyCode, didAPause, paused, done, result, doValves, ports, didValves, ...
     didHumanResponse, manual, doPuff, pressingM, pressingP, originalPriority, priorityLevel, KbConstants, allowKeyboard)
 
 % note: this function pretty much updates a bunch of flags....
@@ -72,14 +72,14 @@ if kDown && allowKeyboard
         end
     elseif any(keyCode(KbConstants.qKey)) && ~paused
         done=1;
-        response='manual kill';
+        result='manual kill';
     elseif tDown && any(numsDown)
         newTsNum=find(numsDown,1,'first');
         done=1;
-        response=sprintf('manual training step %d',newTsNum);
+        result=sprintf('manual training step %d',newTsNum);
         allowKeyboard=false; %must reset keyboard input after setting manual training step
     elseif fDown
-        response=sprintf('manual flushPorts');
+        result=sprintf('manual flushPorts');
         didHumanResponse=true;
         done=1;
         allowKeyboard=false; %must reset keyboard input after calling flushPorts
@@ -113,7 +113,7 @@ end
 if shiftDown && atDown
     'WARNING!!!  you just hit shift-2 ("@"), which mario declared a synonym to sca (screen(''closeall'')) -- everything is going to break now'
     done=1;
-    response='shift-2 kill';
+    result='shift-2 kill';
 end
 
 kDownTime=GetSecs;

@@ -1,5 +1,5 @@
 function soundsToPlay = getSoundsToPlay(stimManager, ports, lastPorts, phase, stepsInPhase,msRewardSound, msPenaltySound, ...
-    targetOptions, distractorOptions, requestOptions, playRequestSoundLoop, trialManagerClass)
+    targetOptions, distractorOptions, requestOptions, playRequestSoundLoop, trialManagerClass, correct)
 % see doc in stimManager.calcStim.txt
 
 playLoopSounds={};
@@ -13,10 +13,10 @@ if strcmp(trialManagerClass, 'nAFC')
     elseif phase == 2 && any(ports(requestOptions))  
         % play stim sound (when stim is requested during phase 2)
         playLoopSounds{end+1} = 'keepGoingSound';
-    elseif phase == 3 && stepsInPhase <= 0
+    elseif phase == 3 && stepsInPhase <= 0 && correct
         % play correct sound
         playSoundSounds{end+1} = {'correctSound', msRewardSound};
-    elseif phase == 4 && stepsInPhase <= 0
+    elseif phase == 3 && stepsInPhase <= 0 && ~correct
         % play wrong sound
         playSoundSounds{end+1} = {'wrongSound', msPenaltySound};
     end   

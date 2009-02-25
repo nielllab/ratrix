@@ -18,22 +18,16 @@ if strmatch(class(trialManager), 'nAFC')
     stimSpecs{1} = stimSpec(interTrialLuminance,criterion,'loop',0,framesUntilTransition,[],0,0,hz,[],'waiting for request');
     
     % waiting for response
-    criterion = {targetPorts, 3, distractorPorts, 4};
+    criterion = {[targetPorts distractorPorts], 3};
     stimSpecs{2} = stimSpec(stim,criterion,type,0,[],[],scaleFactor,0,hz,[],'discrim');
     
-    % correct
-    criterion = {[], 5};
-    stimSpecs{3} = stimSpec(interTrialLuminance,criterion,'cache',0,[],[],0,0,hz,'correct','correct'); % timeout assigned during runRealTimeLoop
-    
-    % wrong
-    criterion = {[], 5};
-    % the error phase has an empty stim, because we dont know how long of a stim to compute using errorStim(stimManager,numErrorFrames) until
-    % we get to the error phase and call calcReinforcement!
-    stimSpecs{4} = stimSpec([],criterion,'cache',0,[],[],scaleFactor,0,hz,'error','error');
+    % reinforcement (correct/wrong)
+    criterion = {[], 4};
+    stimSpecs{3} = stimSpec([],criterion,'cache',0,[],[],[],0,hz,'reinforced','reinforcement'); % timeout assigned during runRealTimeLoop
     
     % final
     criterion = {[], 1};
-    stimSpecs{5} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,[],'itl');
+    stimSpecs{4} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,[],'itl');
     
     if isempty(requestPorts)
         startingStimSpecInd=2;
@@ -48,7 +42,7 @@ elseif strmatch(class(trialManager), 'freeDrinks')
 
     % correct phase (always correct)
     criterion = {[], 3};
-    stimSpecs{2} = stimSpec(interTrialLuminance,criterion,'cache',0,[],[],0,0,hz,'correct','correct');
+    stimSpecs{2} = stimSpec([],criterion,'cache',0,[],[],0,0,hz,'reinforced','reinforcement');
     
     % final
     criterion = {[], 1};

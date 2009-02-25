@@ -15,6 +15,10 @@ else
         scaleFactor = [scrHeight scrWidth]./[size(stim,1) size(stim,2)];
     elseif length(metaPixelSize)==2 && all(metaPixelSize)>0
         scaleFactor = metaPixelSize;
+    elseif isempty(metaPixelSize)
+        % empty only for 'reinforced' phases, in which case we dont care what destRect is, since it will get overriden anyways
+        % during updateTrialState(tm)
+        scaleFactor = [1 1];
     else
         error('bad metaPixelSize argument')
     end

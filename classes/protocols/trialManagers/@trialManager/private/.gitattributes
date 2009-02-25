@@ -8,15 +8,12 @@
 /handleKeyboard.m -text
 /drawText.m -text
 /getSoundManager.m -text
-/cacheTextures.m -text
 /updateFrameIndexUsingTextureCache.m -text
 /handlePhasedTrialLogic.m -text
 /phaseify.m -text
 /determineStrategy.m -text
 /saveMissedFrameData.m -text
-/determineColorPrecision.m -text
 /drawFrameUsingTextureCache.m -text
 /setCLUTandFrameDropCorner.m -text
-/determineDestRect.m -text
 /LEDphase.m -text
 /serverPumpRewards.m -text

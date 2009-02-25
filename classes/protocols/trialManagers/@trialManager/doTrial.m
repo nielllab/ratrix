@@ -266,15 +266,15 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             
             currentValveStates=verifyValvesClosed(station);
             
-            trialRecords(trialInd).correct = 0;
-            if ~ischar(trialRecords(trialInd).response)
-                resp=find(trialRecords(trialInd).response);
-                if length(resp)==1
-                    trialRecords(trialInd).correct = ismember(resp,trialRecords(trialInd).targetPorts);
-                end
-%             elseif ischar(trialRecords(trialInd).response) && strcmp(trialRecords(trialInd).response, 'multiple ports')
+%             trialRecords(trialInd).correct = 0;
+            if ~ischar(trialRecords(trialInd).result)
+%                 resp=find(trialRecords(trialInd).result);
+%                 if length(resp)==1
+%                     trialRecords(trialInd).correct = ismember(resp,trialRecords(trialInd).targetPorts);
+%                 end
+%             elseif ischar(trialRecords(trialInd).result) && strcmp(trialRecords(trialInd).result, 'multiple ports')
                 % keep doing trials if response was 'multiple ports'
-%             elseif ischar(trialRecords(trialInd).response) && strcmp(trialRecords(trialInd).response, 'none')
+%             elseif ischar(trialRecords(trialInd).result) && strcmp(trialRecords(trialInd).result, 'none')
                 % temporarily continue doing trials if response = 'none'
                 % edf: how would stimOGL exit while leaving response as 'none'?  passive viewing?  (empty responseOptions)
                 % if so, why do you say 'temporarily'?  also, should verify that this really was a passive viewing.
@@ -282,11 +282,14 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 % i think response is also 'none' if there is a bad error in stimOGL, 
                 % like an rnet error, in which case we should not continue trials
                 % we need to flag any error with a special response so we know what's going on and don't continue
-            elseif ischar(trialRecords(trialInd).response) && strcmp(trialRecords(trialInd).response, 'manual flushPorts')
+            elseif ischar(trialRecords(trialInd).result) && strcmp(trialRecords(trialInd).result, 'manual flushPorts')
                 flushPorts(.05,5,.5,station);
                 stopEarly=false; % reset stopEarly/quit to be false, so continue doing trials
+            elseif ischar(trialRecords(trialInd).result) && (strcmp(trialRecords(trialInd).result, 'nominal') || ...
+                    strcmp(trialRecords(trialInd).result, 'multiple ports'))
+                % keep doing trials
             else
-                trialRecords(trialInd).response
+                trialRecords(trialInd).result
                 fprintf('setting stopEarly\n')
                 stopEarly = 1;
             end

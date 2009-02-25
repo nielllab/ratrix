@@ -38,7 +38,7 @@ function spec=stimSpec(varargin)
 %                               expert phase types:
 %                                   set this value to your desired value for each phase (stimManager.calcStim()'s resolutionIndex output is ignored)
 %                           even when ignored, value must be scalar >0 (on mac, can be 0, and is ignored because Screen('Resolutions') and Screen('Resolution') return 0hz -- macs do not have the data acquisition toolbox and therefore cannot have trialManager.displayMethod='LED' anyway)
-% phaseType                 one of {'correct', 'error', ''} -- correct and error will ask the reinforcement manager how much water/airpuff to deliver at the beginning of the phase
+% phaseType                 one of {'reinforced', ''} -- reinforced will ask the reinforcement manager how much water/airpuff to deliver at the beginning of the phase
 %                               a reward that extends beyond the end of the phase is cut off.
 % phaseLabel                a text label for the given phase to be stored in phaseRecords
 
@@ -154,8 +154,10 @@ switch nargin
         % scaleFactor
         if (length(varargin{7})==2 && all(varargin{7}>0)) || (length(varargin{7})==1 && varargin{7}==0)
             spec.scaleFactor=varargin{7};
+        elseif isempty(varargin{7})
+            spec.scaleFactor=[];
         else
-            error('scale factor is either 0 (for scaling to full screen) or [width height] positive values')
+            error('scale factor is either 0 (for scaling to full screen) or [width height] positive values, or empty to be filled in by a reinforced phase')
         end
         % isFinalPhase
             if isscalar(varargin{8}) && (varargin{8} == 0 || varargin{8} == 1)
@@ -170,12 +172,12 @@ switch nargin
             error('hz must be scalar real >0')
         end
         % phaseType - we need this so that runRealTimeLoop knows whether or not this phase should do a reward/airpuff, etc
-        if ~isempty(varargin{10}) && ischar(varargin{10}) && (strcmp(varargin{10},'correct') || strcmp(varargin{10},'error'))
+        if ~isempty(varargin{10}) && ischar(varargin{10}) && strcmp(varargin{10},'reinforced')
             spec.phaseType=varargin{10};
         elseif isempty(varargin{10})
             spec.phaseType=[];
         else
-            error('phaseType must be ''correct'',''error'',or []');
+            error('phaseType must be ''reinforced'',or []');
         end     
         % phaseLabel
         if ischar(varargin{11})
@@ -186,6 +188,10 @@ switch nargin
             error('phaseLabel must be a string or empty');
         end
 
+        if (isempty(spec.scaleFactor) || isempty(spec.stimulus)) && ~strcmp(spec.phaseType,'reinforced')
+            error('empty scaleFactor and stimulus allowed only for reinforced phaseType');
+        end
+        
         spec = class(spec,'stimSpec');
         
     otherwise

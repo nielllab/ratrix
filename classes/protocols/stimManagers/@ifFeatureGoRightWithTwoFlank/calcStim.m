@@ -137,7 +137,7 @@ switch trialManagerClass
         else
             lastRec=[];
         end
-        [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts);
+        [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass);
 
         %note that this implementation will not show the exact same
         %stimulus for a correction trial, but just have the same side

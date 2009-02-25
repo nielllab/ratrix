@@ -60,9 +60,9 @@ bloat=false;
 [out.type compiledLUT]                                       =extractFieldAndEnsure(trialRecords,{'type'},'scalarLUT',compiledLUT);
 [out.targetPorts compiledLUT]                                =extractFieldAndEnsure(trialRecords,{'targetPorts'},{'typedVector','index'},compiledLUT);
 [out.distractorPorts compiledLUT]                            =extractFieldAndEnsure(trialRecords,{'distractorPorts'},{'typedVector','index'},compiledLUT);
-out.response                                                 =ensureScalar(cellfun(@encodeResponse,{trialRecords.response},out.targetPorts,out.distractorPorts,num2cell(out.correct),'UniformOutput',false));
-if any(out.response==0)
-    error('got zero response')
+out.result                                                   =ensureScalar(cellfun(@encodeResult,{trialRecords.result},out.targetPorts,out.distractorPorts,num2cell(out.correct),'UniformOutput',false));
+if any(out.result==0)
+    error('got zero result')
 end
 [out.containedAPause compiledLUT]                            =extractFieldAndEnsure(trialRecords,{'containedAPause'},'scalar',compiledLUT);
 [out.containedManualPokes compiledLUT]                       =extractFieldAndEnsure(trialRecords,{'containedManualPokes'},'scalar',compiledLUT);
@@ -154,21 +154,19 @@ if bloat out.subjectsInBox                      =ensureTypedVector({trialRecords
 verifyAllFieldsNCols(out,length(trialRecords));
 end
 
-function out=encodeResponse(resp,targs,dstrs,correct)
+function out=encodeResult(result,targs,dstrs,correct)
 
-if isa(resp,'double') && all(resp==1 | resp==0)
+if isa(result,'double') && all(result==1 | result==0)
     warning('edf sees double rather than logical response on osx 01.21.09 -- why?')
-    resp=logical(resp);
+    result=logical(result);
 end
 
-if islogical(resp)
-    if isscalar(find(resp))
-        out=find(resp);
-    else
-        out=-1; %multiple blocked ports
-    end
-elseif ischar(resp)
-    switch resp
+if ischar(result)
+    switch result
+        case 'nominal'
+            out=1;
+        case 'multiple ports'
+            out=-1;
         case 'none'
             out=-2;
         case 'manual kill'
@@ -181,26 +179,29 @@ elseif ischar(resp)
             out=-8;
         otherwise
             % 1/22/09 - if the response is 'manual training step %d'
-            match=regexp(resp,'manual training step \d+','match');
+            match=regexp(result,'manual training step \d+','match');
             if ~isempty(match)
                 out=-7; % manually set training step
             else
                 out=-6;
-                resp
+                result
                 warning('unrecognized response')
             end
     end
 else
-    resp
-    class(resp)
-    error('unrecognized response type')
+    result
+    class(result)
+    error('unrecognized result type')
 end
 
-if ismember(out,targs) == correct
-    %pass
-else
-    error('bad correct calc')
-end
+% if ismember(out,targs) == correct
+%     %pass
+% else
+%     out
+%     targs
+%     correct
+%     error('bad correct calc')
+% end
 
 if all(isempty(intersect(dstrs,targs)))
     %pass

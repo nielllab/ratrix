@@ -8,7 +8,11 @@ lastWasCorrection=0;
 switch TMclass
     case 'nAFC'
         if ~isempty(lastTrialRec) % if there were previous trials
-            lastResult=find(lastTrialRec.result);
+            try
+                lastResult=find(lastTrialRec.result);
+            catch
+                lastResult=[];
+            end
             lastCorrect=lastTrialRec.correct;
 
             if any(strcmp(fields(lastTrialRec.stimDetails),'correctionTrial'))

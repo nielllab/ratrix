@@ -24,3 +24,4 @@
 /cacheTextures.m -text
 /determineDestRect.m -text
 /determineColorPrecision.m -text
+/updateTrialState.m -text

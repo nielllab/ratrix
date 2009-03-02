@@ -115,6 +115,9 @@ switch nargin
                     if isscalar(tmp.numRepeatsPerUnique) && isinteger(tmp.numRepeatsPerUnique) && tmp.numRepeatsPerUnique>=0 && ...
                             isscalar(tmp.numCycles) && isinteger(tmp.numCycles) && tmp.numCycles>0 && ...
                             isscalar(tmp.cycleDurSeconds) && isreal(tmp.cycleDurSeconds) && isnumeric(tmp.cycleDurSeconds) && tmp.cycleDurSeconds>0
+                        if ~strcmp(class(tmp.numRepeatsPerUnique),class(tmp.numCycles)) || ~strcmp(class(tmp.numRepeatsPerUnique),class(tmp.cycleDurSeconds))
+                            warning('there can be int overflow problems with rpts/unqs if you''re not careful')
+                        end
                         varargin{1}(j).loopDuration=tmp;
                     else
                         error('numRepeatsPerUnique must be scalar integer >=0, numCycles must be scalar integer >0, and cycleDurSeconds must be scalar numeric real >0')

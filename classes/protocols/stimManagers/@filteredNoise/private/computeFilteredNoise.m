@@ -1,3 +1,4 @@
+%intent: stim output always normalized
 function stimulus=computeFilteredNoise(stimulus,hz)
 stimulus.hz=hz;
 
@@ -62,9 +63,9 @@ for i=1:length(stimulus.port)
         for j=1:length(stimulus.distribution{i}.conditions)
             noise=[noise stimulus.distribution{i}.conditions{j}{1}*makeSinusoid(hz,stimulus.distribution{i}.conditions{j}{2},dur) zeros(1,round(stimulus.distribution{i}.gapSecs*hz))];
         end
-        noise=noise-.5;
+        %noise=noise-.5; don't think i want this, right?
         noise=permute(noise,[3 1 2]);
-        repmat(noise,[sz 1]);
+        repmat(noise,[sz 1]); %shouldn't this be noise=?
     elseif ischar(stimulus.distribution{i})
         switch stimulus.distribution{i}
             case 'gaussian'
@@ -76,19 +77,19 @@ for i=1:length(stimulus.port)
                 if strcmp(stimulus.distribution{i},'binary')
                     noise=(noise>.5);
                 end
-                noise=noise-.5;
+                %noise=noise-.5; don't think i want this, right?
             otherwise
                 if ~isstruct(stimulus.loopDuration{i}) && stimulus.loopDuration{i}==0
                     frames=0;
                 end
                 [noise stimulus.inds{i}]=loadStimFile(stimulus.distribution{i},stimulus.origHz{i},hz,frames/hz,stimulus.startFrame{i});
-                noise=noise-.5;
+                %noise=noise-.5; don't think i want this, right?
                 if size(noise,1)>1
                     noise=noise';
                 end
                 %noise=-.5:.01:.5;
                 noise=permute(noise,[3 1 2]);
-                repmat(noise,[sz 1]);
+                repmat(noise,[sz 1]); %shouldn't this be noise=?
         end
         if isstruct(stimulus.loopDuration{i})
             new=nan*zeros(size(noise,1),size(noise,2),totalFrames);
@@ -147,6 +148,8 @@ for i=1:length(stimulus.port)
         stim=imfilter(noise,k,'circular'); %allows looping, does it keep edges nice?
         fprintf('took %g to filter noise\n',toc)
     end
+    
+    stim=normalize(stim);
 
     %         c = hist(stim(:),b);
     %         std(stim(:))

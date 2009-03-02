@@ -46,8 +46,10 @@ if hz==0
     end
 end
 
+need to call pickcontrast in gaussian computefilterednoise and clip top of hateren and figure out summing here
+
 if isempty(stimulus.cache) || isempty(stimulus.hz) || stimulus.hz~=hz
-    stimulus=computeFilteredNoise(stimulus,hz);
+    stimulus=computeFilteredNoise(stimulus,hz); %intent: stim always normalized
     updateSM=true;
 else
     updateSM=false;

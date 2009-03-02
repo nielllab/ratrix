@@ -86,6 +86,7 @@ end
 %out(:,:,2)=secondOut;
 
 % Normalize all values so that all are 0<=val<=1
+%edf: this is not what 'normalize' means -- should say 'clip'
 out(out<0)=0;
 out(out>1)=1;
 

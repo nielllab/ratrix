@@ -259,7 +259,7 @@ end
 
 out=mean+squeeze(sum(img,1));
 
-if normalize
+if normalize %note this is not what normalize means -- should be called clip!
     out(out<0)=0;
     out(out>1)=1;
 end

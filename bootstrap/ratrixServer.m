@@ -288,7 +288,7 @@ cycleB=uicontrol(f,'Style','togglebutton','String',buttonT,'Units','pixels','Pos
         fixSystemTime;
         % 12/3/08 - write start time of this heat to oracle table for logging
         conn=dbConn();
-        execStr=sprintf('insert into heat_start_events values (''%s'',sysdate,''start'',''%s'')',heatStrs{get(swapM,'Value')},server_name);
+        execStr=sprintf('insert into heat_start_events values (''%s'',to_char(sysdate,''dd-MON-yyyy hh24:mi''),''start'',''%s'')',heatStrs{get(swapM,'Value')},server_name);
         count=exec(conn,execStr);
         closeConn(conn);
         % finished writing start time of this heat to oracle
@@ -305,7 +305,7 @@ cycleB=uicontrol(f,'Style','togglebutton','String',buttonT,'Units','pixels','Pos
         updateUI();
         % 12/3/08 - write stop time of this heat to oracle table for logging
         conn=dbConn();
-        execStr=sprintf('insert into heat_start_events values (''%s'',sysdate,''stop'',''%s'')',heatStrs{get(swapM,'Value')},server_name);
+        execStr=sprintf('insert into heat_start_events values (''%s'',to_char(sysdate,''dd-MON-yyyy hh24:mi''),''stop'',''%s'')',heatStrs{get(swapM,'Value')},server_name);
         count=exec(conn,execStr);
         closeConn(conn);
         % finished writing stop time of this heat to oracle

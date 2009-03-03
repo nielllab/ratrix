@@ -6,10 +6,16 @@ function s=filteredNoise(varargin)
 % in.port                       1x1 integer denoting correct port for the parameters specified in this entry ("column") in the struct array
 %
 % stim properties:
-% in.distribution               'gaussian', 'binary', 'uniform', or a path to a file name (either .txt or .mat, extension omitted, .txt loadable via load(), and containing a single vector of numbers named 'noise')
-%                               distribution can also be cell array of following form: {'sinusoidalFlicker',[temporalFreqs],[contrasts],gapSecs} - each freq x contrast combo will be shown for equal time in random order, total time including gaps will be in.loopDuration
-% in.origHz                     only used if distribution is a file name, indicating sampling rate of file
-% in.contrast                   std dev in normalized luminance units (just counting patch, before mask application), values will saturate
+% in.distribution               'binary', 'uniform', or one of the following forms: 
+%                                   {'sinusoidalFlicker',[temporalFreqs],[contrasts],gapSecs} - each freq x contrast combo will be shown for equal time in random order, total time including gaps will be in.loopDuration
+%                                   {'gaussian',percent} - %choose variance so that percent of an infinite stim would be clipped (includes both low and hi) 
+%                                   {path, origHz, clipPercentile} -  path is to a file (either .txt or .mat, extension omitted, .txt loadable via load()) containing a single vector of stim values named 'noise', with original sampling rate origHz.  will clip top clipPercentile.
+
+% remove: in.origHz                     only used if distribution is a file name, indicating sampling rate of file
+
+% in.contrast                   above stim is set to have range 0-1, then multiply stim by this value (before mask application)
+% in.offset                     value to add to stim after multiplying by contrast.  after this, values outside 0-1 will saturate.
+
 % in.startFrame                 'randomize' or integer indicating fixed frame number to start with
 % in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file)
 %                               to make uniques and repeats, pass {numRepeatsPerUnique numCycles cycleDurSeconds} - a cycle is a whole set of repeats and one unique - distribution cannot be sinusoidalFlicker 
@@ -20,7 +26,7 @@ function s=filteredNoise(varargin)
 % in.patchDims                  [height width]
 % in.patchHeight                0-1, normalized to stim area height
 % in.patchWidth                 0-1, normalized to stim area width
-% in.background                 0-1, normalized
+% in.background                 0-1, normalized (luminance outside patch)
 %
 % filter properties:
 % in.orientation                filter orientation in radians, 0 is vertical, positive is clockwise

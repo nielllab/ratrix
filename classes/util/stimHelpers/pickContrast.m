@@ -3,7 +3,7 @@
 %abs(doNotExceed)
 function out=pickContrast(doNotExceed,ptile)
 if ptile<=0 || ptile>=.5
-    error('0<=ptile<=1')
+    error('0<ptile<.5')
 end
 
 out=abs(doNotExceed/norminv(ptile/2));

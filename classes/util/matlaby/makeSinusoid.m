@@ -1,2 +1,2 @@
 function out=makeSinusoid(samplingRate,freq,secsDur)
-out=sin(linspace(0,2*pi*freq*secsDur,secsDur*samplingRate));
+out=cos(linspace(0,2*pi*freq*(secsDur-1/samplingRate),secsDur*samplingRate)); %cos instead of sin, so that at least first value will be at an extreme (using sin, eg 50Hz flicker at 100Hz would be all zeros)

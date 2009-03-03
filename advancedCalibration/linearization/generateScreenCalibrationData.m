@@ -199,11 +199,14 @@ try
         g(:,:,2)=1;
         b(:,:,3)=1;
 
-        for i=1:size(clut,1)
-            stim(:,:,:,0*size(clut,1)+i)=r*i;
-            stim(:,:,:,1*size(clut,1)+i)=g*i;
-            stim(:,:,:,2*size(clut,1)+i)=b*i;
-            stim(:,:,:,3*size(clut,1)+i)=k*i;
+        numValsPerChannel=4; %size(clut,1)
+        entryNum=0;
+        for i=round(linspace(1,size(clut,1),numValsPerChannel)) %1:size(clut,1)
+            entryNum=entryNum+1;
+            stim(:,:,:,0*numValsPerChannel+entryNum)=r*i;
+            stim(:,:,:,1*numValsPerChannel+entryNum)=g*i;
+            stim(:,:,:,2*numValsPerChannel+entryNum)=b*i;
+            stim(:,:,:,3*numValsPerChannel+entryNum)=k*i;
         end
     elseif ~(size(stim,3) == 3 && length(size(stim))==4 && allClutIndices(stim(:),size(clut,1)))
             error('stim must be size [rows cols 3 numStims] and 1 <= int values <= size(clut)')

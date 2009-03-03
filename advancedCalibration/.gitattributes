@@ -1,3 +1,13 @@
 /smallerloop.m -text
 /smallloop.m -text
 /test10bit.m -text
+useSpyder/spyderLib/spyderAPI/cvspyder.lib -text
+useSpyder/spyderLib/spyderAPI/Spyder_Mac_SDK_2.zip -text
+useSpyder/spyderLib/spyderAPI/cvtypes.h -text
+useSpyder/spyderLib/spyderAPI/dc102-C.doc -text
+useSpyder/spyderLib/spyderAPI/cvimport.h -text
+useSpyder/spyderLib/spyderAPI/CVSpyder.dll -text
+useSpyder/spyderLib/spyderError.m -text
+useSpyder/spyderLib/closeSpyder.m -text
+useSpyder/spyderLib/openSpyder.m -text
+useSpyder/useSpyder.m -text

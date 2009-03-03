@@ -794,6 +794,11 @@ while ~done && ~quit;
                         ifi
                         error('ifi will not be appropriate here when using LED')
                     else
+                        % 3/3/09 - error for now if not in 'static' mode b/c doReward blocks real-time loop
+                        stimType=getStimType(spec);
+                        if ~ischar(stimType) || ~strcmp(stimType,'static')
+                            error('localPump only supported with a static stimulus until blocking is resolved');
+                        end
                         station=doReward(station,primeMLsPerSec*ifi,doValves,true);
                     end
                 end
@@ -852,6 +857,11 @@ while ~done && ~quit;
                 case 'localPump'
                     if rStart
                         rewardCurrentlyOn=true;
+                        % 3/3/09 - error for now if not in 'static' mode b/c doReward blocks real-time loop
+                        stimType=getStimType(spec);
+                        if ~ischar(stimType) || ~strcmp(stimType,'static')
+                            error('localPump only supported with a static stimulus until blocking is resolved');
+                        end
                         station=doReward(station,(msRewardOwed+msRequestRewardOwed)/1000,rewardValves);
                         phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL = phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL + msRewardOwed;
                         msRewardOwed=0;

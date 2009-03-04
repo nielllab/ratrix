@@ -610,25 +610,26 @@ while ~done && ~quit;
         end
         
         % change to get multiple samples (as many as are available)
-        [gazes samples] = getSamples(eyeTracker);
+        [gazeEstimate samples] = getSamples(eyeTracker);
         numEyeTrackerSamples = size(samples,1);
         
-        % allocate space in gaze and eyeData - based on numEyeTrackerSamples (this will happen every frame)
-        % see if this causes framedrops...
-        if totalEyeDataInd>length(eyeData) % should always be true (totalEyeDataInd=end+1)
-            %  allocateMore
-            newEnd=length(eyeData)+ numEyeTrackerSamples;
-            %             disp(sprintf('did allocation to eyeTrack data; up to %d samples enabled',newEnd))
-            eyeData(end+1:newEnd,:)=nan;
-            gaze(end+1:newEnd,:)=nan;
-        end
-        
-        gaze(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = gazes;
-        eyeData(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = samples;
-        % [gaze(totalEyeDataInd,:) eyeData(totalEyeDataInd,:)]=getSample(eyeTracker);
-        
-        totalEyeDataInd = totalEyeDataInd + numEyeTrackerSamples;
-        
+        % eyeData is now a cell array, so we don't allocate, just assign the vector of samples to next element
+        % will this hurt us vs allocating?
+        gaze(end+1)=gazeEstimate;
+        eyeData{end+1}=samples;
+%         if totalEyeDataInd>length(eyeData) % should always be true (totalEyeDataInd=end+1)
+%             %  allocateMore
+%             newEnd=length(eyeData)+ numEyeTrackerSamples;
+%             %             disp(sprintf('did allocation to eyeTrack data; up to %d samples enabled',newEnd))
+%             eyeData(end+1:newEnd,:)=nan;
+%             gaze(end+1:newEnd,:)=nan;
+%         end
+%         
+%         gaze(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = gazes;
+%         eyeData(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = samples;
+%         % [gaze(totalEyeDataInd,:) eyeData(totalEyeDataInd,:)]=getSample(eyeTracker);
+%         
+%         totalEyeDataInd = totalEyeDataInd + numEyeTrackerSamples;
     end
     
     timestamps.eyeTrackerDone=GetSecs;

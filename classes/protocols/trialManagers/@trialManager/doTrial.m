@@ -233,8 +233,8 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             
             [trialManager stopEarly,...
                 trialRecords,...
-                eyeData,...
-                gaze,...
+                eyeData,... % 3/4/09 - now a cell array, one element per frame of stim; each frame has multiple samples
+                gaze,... % 3/4/09 - still an array, only one gaze estimate per frame
                 station,...
                 ratrixSVNInfo,...
                 ptbSVNInfo] ...
@@ -341,16 +341,10 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             
             trialRecords(trialInd).stimDetails = stimulusDetails;
             
-            if ~isempty(eyeTracker)
-                [junk junk eyeDataVarNames]=getSample(eyeTracker);
-                %throws out a sample in order to get variable names... dirty
-                
-                saveEyeData(eyeTracker,eyeData,eyeDataVarNames,gaze,trialRecords(trialInd).trialNumber)
-                %not currently saving data from any other phase besides disciminandum
-            end
-            
             % need to decide what to do with trialData - do we pass back to doTrials?
             % edf: do you mean trialRecords?
+            % fli: no, trialData is some data that may or may not be passed from the data collection side (ie nidaq)
+            % the decision is whether or not any of it belongs in trialRecords, or if it will be stored independently
             
             trialRecords(trialInd).reinforcementManager = structize(trialManager.reinforcementManager);
             trialRecords(trialInd).reinforcementManagerClass = class(trialManager.reinforcementManager);

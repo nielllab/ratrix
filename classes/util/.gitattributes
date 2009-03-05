@@ -125,3 +125,4 @@ nidaq/findDevicesOfTypeWithConstructor.m -text
 infrastructure/upize.m -text
 matlaby/findClosestInds.m -text
 matlaby/normalize.m -text
+stimHelpers/makeLinearizedLUT.m -text

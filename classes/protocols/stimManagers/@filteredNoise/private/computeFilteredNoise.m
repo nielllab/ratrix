@@ -67,29 +67,51 @@ for i=1:length(stimulus.port)
         noise=permute(noise,[3 1 2]);
         repmat(noise,[sz 1]); %shouldn't this be noise=?
     elseif ischar(stimulus.distribution{i})
-        switch stimulus.distribution{i}
-            case 'gaussian'
-                randn('state',stimulus.seed{i});
-                noise=randn([sz frames]);
-            case {'binary','uniform'}
-                rand('twister',stimulus.seed{i});
-                noise=rand([sz frames]);
-                if strcmp(stimulus.distribution{i},'binary')
-                    noise=(noise>.5);
-                end
-                %noise=noise-.5; don't think i want this, right?
-            otherwise
-                if ~isstruct(stimulus.loopDuration{i}) && stimulus.loopDuration{i}==0
-                    frames=0;
-                end
-                [noise stimulus.inds{i}]=loadStimFile(stimulus.distribution{i},stimulus.origHz{i},hz,frames/hz,stimulus.startFrame{i});
-                %noise=noise-.5; don't think i want this, right?
-                if size(noise,1)>1
-                    noise=noise';
-                end
-                %noise=-.5:.01:.5;
-                noise=permute(noise,[3 1 2]);
-                repmat(noise,[sz 1]); %shouldn't this be noise=?
+        if ismember( stimulus.distribution{i},  {'binary','uniform'} )
+            rand('twister',stimulus.seed{i});
+            noise=rand([sz frames]);
+            if strcmp(stimulus.distribution{i},'binary')
+                noise=(noise>.5);
+            end
+            %noise=noise-.5; don't think i want this, right?
+        elseif iscell(stimulus.distribution{i})
+            switch stimulus.distribution{i}.special
+                case 'gaussian'
+
+                    randn('state',stimulus.seed{i});
+                    noise=randn([sz frames])*pickContrast(.5,stimulus.distribution{i}.clipPercent) +.5;
+
+                    hiClipInds=noise>1;
+                    loClipInds=noise<0;
+                    fprintf('*** gaussian: clipping %g%% of values (should be %g)\n',100*(sum(hiClipInds(:))+sum(loClipInds(:)))/numel(noise),100*stimulus.distribution{i}.clipPercent)
+                    noise(hiClipInds)=1;
+                    noise(loClipInds)=0;
+
+                otherwise
+                    if ~isstruct(stimulus.loopDuration{i}) && stimulus.loopDuration{i}==0
+                        frames=0;
+                    end
+                    [noise stimulus.inds{i}]=loadStimFile(stimulus.distribution{i}.special,stimulus.distribution{i}.origHz,hz,frames/hz,stimulus.startFrame{i});
+                    %noise=noise-.5; don't think i want this, right?
+                    if size(noise,1)>1
+                        noise=noise';
+                    end
+
+                    %noise=-.5:.01:.5;
+                    noise=permute(noise,[3 1 2]);
+                    repmat(noise,[sz 1]); %shouldn't this be noise=?
+
+                    clipInds=noise>stimulus.distribution{i}.normalizedClipVal;
+                    fprintf('*** hateren: clipping %g%% of values (should be 1%)\n',100*sum(clipInds(:))/numel(noise))
+                    noise(clipInds)=stimulus.distribution{i}.normalizedClipVal;
+                    noise=normalize(noise);
+                    fprintf('*** hateren: %g%% values below 1/3 of max (should be 73%)',100*sum(noise(:)<(1/3)))
+
+            end
+
+        else
+            stimulus.distribution{i}
+            error('bad distribution')
         end
         if isstruct(stimulus.loopDuration{i})
             new=nan*zeros(size(noise,1),size(noise,2),totalFrames);
@@ -122,7 +144,7 @@ for i=1:length(stimulus.port)
 
     try
         stimulus.sha1{i} = hash(noise,'SHA-1');
-    catch 
+    catch
         ex=lasterror;
         if ~isempty(findstr('OutOfMemoryError',ex.message))
             stimulus.sha1{i} = hash(noise(1:1000),'SHA-1');
@@ -148,7 +170,7 @@ for i=1:length(stimulus.port)
         stim=imfilter(noise,k,'circular'); %allows looping, does it keep edges nice?
         fprintf('took %g to filter noise\n',toc)
     end
-    
+
     stim=normalize(stim);
 
     %         c = hist(stim(:),b);

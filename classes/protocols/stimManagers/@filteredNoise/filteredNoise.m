@@ -6,19 +6,15 @@ function s=filteredNoise(varargin)
 % in.port                       1x1 integer denoting correct port for the parameters specified in this entry ("column") in the struct array
 %
 % stim properties:
-% in.distribution               'binary', 'uniform', or one of the following forms: 
+% in.distribution               'binary', 'uniform', or one of the following forms:
 %                                   {'sinusoidalFlicker',[temporalFreqs],[contrasts],gapSecs} - each freq x contrast combo will be shown for equal time in random order, total time including gaps will be in.loopDuration
-%                                   {'gaussian',percent} - %choose variance so that percent of an infinite stim would be clipped (includes both low and hi) 
-%                                   {path, origHz, clipPercentile} -  path is to a file (either .txt or .mat, extension omitted, .txt loadable via load()) containing a single vector of stim values named 'noise', with original sampling rate origHz.  will clip top clipPercentile.
-
-% remove: in.origHz                     only used if distribution is a file name, indicating sampling rate of file
-
-% in.contrast                   above stim is set to have range 0-1, then multiply stim by this value (before mask application)
-% in.offset                     value to add to stim after multiplying by contrast.  after this, values outside 0-1 will saturate.
-
+%                                   {'gaussian',clipPercent} - choose variance so that clipPercent of an infinite stim would be clipped (includes both low and hi)
+%                                   {path, origHz, normalizedClipVal} -  path is to a file (either .txt or .mat, extension omitted, .txt loadable via load()) containing a single vector of stim values named 'noise', with original sampling rate origHz.  will clip values over normalizedClipVal.
+% in.contrast                   above stim has range 0-1 (and is already clipped), then multiply stim by this value
+% in.offset                     normalized value to add to stim after multiplying by contrast.  after this, values outside 0-1 will saturate.
 % in.startFrame                 'randomize' or integer indicating fixed frame number to start with
 % in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file)
-%                               to make uniques and repeats, pass {numRepeatsPerUnique numCycles cycleDurSeconds} - a cycle is a whole set of repeats and one unique - distribution cannot be sinusoidalFlicker 
+%                               to make uniques and repeats, pass {numRepeatsPerUnique numCycles cycleDurSeconds} - a cycle is a whole set of repeats and one unique - distribution cannot be sinusoidalFlicker
 %
 % patch properties:
 % in.locationDistribution       2-d density, will be normalized to stim area
@@ -36,7 +32,7 @@ function s=filteredNoise(varargin)
 % in.filterStrength             0 means no filtering (kernel is all zeros, except 1 in center), 1 means pure mvgaussian kernel (center not special), >1 means surrounding pixels more important
 % in.bound                      .5-1 edge percentile for long axis of kernel when parallel to window
 
-fieldNames={'port','distribution','origHz','contrast','startFrame','loopDuration','locationDistribution','maskRadius','patchDims','patchHeight','patchWidth','background','orientation','kernelSize','kernelDuration','ratio','filterStrength','bound'};
+fieldNames={'port','distribution','contrast','offset','startFrame','loopDuration','locationDistribution','maskRadius','patchDims','patchHeight','patchWidth','background','orientation','kernelSize','kernelDuration','ratio','filterStrength','bound'};
 for i=1:length(fieldNames)
     s.(fieldNames{i})=[];
 end
@@ -81,37 +77,58 @@ switch nargin
                 else
                     error('start frame must be scalar integer >0 or ''randomize''')
                 end
-                
+
+
                 isSinusoidalFlicker=false;
-                if isvector(in.distribution) && ischar(in.distribution)
-                    if ismember(in.distribution,{'uniform','gaussian','binary'})
-                        %pass
-                    elseif any([exist([in.distribution '.txt'],'file') exist([in.distribution '.mat'],'file')]==2)
-                        if isscalar(in.origHz) && in.origHz>0 && isreal(in.origHz)
+                if isvector(in.distribution) && ischar(in.distribution) && ismember(in.distribution,{'uniform','binary'})
+                    %pass
+                elseif iscell(in.distribution)
+                    tmp.special=in.distribution{1};
+                    if all(size(in.distribution)==[1 4]) && strcmp(tmp.special,'sinusoidalFlicker')
+                        tmp.freqs=in.distribution{2};
+                        tmp.contrasts=in.distribution{3};
+                        tmp.gapSecs=in.distribution{4};
+                        if isvector(tmp.freqs) && isreal(tmp.freqs) && isnumeric(tmp.freqs) && all(tmp.freqs>=0) && ...
+                                isvector(tmp.contrasts) && isreal(tmp.contrasts) && isnumeric(tmp.contrasts) && all(tmp.contrasts>=0) && all(tmp.contrasts<=1) && ...
+                                isscalar(tmp.gapSecs) && isreal(tmp.gapSecs) && isnumeric(tmp.gapSecs) && tmp.gapSecs>=0
+                            isSinusoidalFlicker=true;
+                        else
+                            error('temporalFreqs and contrasts must be real numeric vectors >=0, contrasts must be <=1, gapSecs must be real numeric scalar >=0')
+                        end
+                    elseif all(size(in.distribution)==[1 2]) && strcmp(tmp.special,'gaussian')
+                        tmp.clipPercent=in.distribution{2};
+                        
+                        if isscalar(tmp.clipPercent) && tmp.clipPercent>=0 && tmp.clipPercent<=1 && isreal(tmp.clipPercent)
                             %pass
                         else
-                            error('if distribution is file, origHz must be real scalar > 0')
+                            error('clipPercent must be real scalar 0<=x<=1')
                         end
-                    end
-                elseif iscell(in.distribution) && all(size(in.distribution)==[1 4]) && strcmp(in.distribution{1},'sinusoidalFlicker')
-                    tmp.special=in.distribution{1};
-                    tmp.freqs=in.distribution{2};
-                    tmp.contrasts=in.distribution{3};
-                    tmp.gapSecs=in.distribution{4};
-                    if isvector(tmp.freqs) && isreal(tmp.freqs) && isnumeric(tmp.freqs) && all(tmp.freqs>=0) && ...
-                            isvector(tmp.contrasts) && isreal(tmp.contrasts) && isnumeric(tmp.contrasts) && all(tmp.contrasts>=0) && all(tmp.contrasts<=1) && ...
-                            isscalar(tmp.gapSecs) && isreal(tmp.gapSecs) && isnumeric(tmp.gapSecs) && tmp.gapSecs>=0
-                        varargin{1}(j).distribution=tmp;
-                        isSinusoidalFlicker=true;
+
+                    elseif all(size(in.distribution)==[1 3]) && any([exist([tmp.special '.txt'],'file') exist([tmp.special '.mat'],'file')]==2)
+                        tmp.origHz=in.distribution{2};
+                        tmp.normalizedClipVal=in.distribution{3};
+                        
+                        if isscalar(tmp.origHz) && tmp.origHz>0 && isreal(tmp.origHz)
+                            %pass
+                        else
+                            error('origHz must be real scalar > 0')
+                        end
+                        
+                        if isscalar(tmp.normalizedClipVal) && tmp.normalizedClipVal>=0 && tmp.normalizedClipVal<=1 && isreal(tmp.normalizedClipVal)
+                            %pass
+                        else
+                            error('normalizedClipVal must be real scalar 0<=x<=1')
+                        end
                     else
-                        error('temporalFreqs and contrasts must be real numeric vectors >=0, contrasts must be <=1, gapSecs must be real numeric scalar >=0')
+                        error('cell vector distribution must be one of {''gaussian'',clipPercent},  {''sinusoidalFlicker'',[temporalFreqs],[contrasts],gapSecs}, {filePath, origHz, normalizedClipVal} (filePath a string containing a file name (either .txt or .mat, extension omitted, .txt loadable via load())')
                     end
+                    varargin{1}(j).distribution=tmp;
                 else
-                    error('distribution must be one of gaussian, uniform, binary, or a string containing a file name (either .txt or .mat, extension omitted, .txt loadable via load()), or  {''sinusoidalFlicker'',[temporalFreqs],[contrasts],gapSecs}');
+                    error('distribution must be one of ''uniform'', ''binary'', or a cell vector')
                 end
 
-                
-                
+
+
                 if isscalar(in.loopDuration) && isreal(in.loopDuration) && in.loopDuration>=0
                     %pass
                 elseif iscell(in.loopDuration) && isvector(in.loopDuration) && all(size(in.loopDuration)==[1 3]) && ~isSinusoidalFlicker
@@ -131,7 +148,7 @@ switch nargin
                 else
                     error('loopDuration must be real scalar >=0, zero loopDuration means 1 static looped frame, except for file stims, where it means play the whole file instead of a subset.  to make uniques and repeats, pass {numRepeatsPerUnique numCycles cycleDurSeconds} - a cycle is a whole set of repeats and one unique - distribution cannot be sinusoidalFlicker')
                 end
-                
+
                 pos={in.contrast in.maskRadius in.kernelDuration in.filterStrength};
                 for i=1:length(pos)
                     if isscalar(pos{i}) && isreal(pos{i}) && pos{i}>=0
@@ -142,19 +159,29 @@ switch nargin
                 end
 
 
-                norms={in.background in.patchHeight in.patchWidth in.kernelSize in.ratio};
+                norms={in.background in.patchHeight in.patchWidth in.kernelSize in.ratio in.offset};
+                goodNorms=true;
                 for i=1:length(norms)
-                    if isscalar(norms{i}) && isreal(norms{i}) && norms{i}>0 && norms{i}<=1
-                        %pass
-                    else
-                        if i==1 && in.background==0
-                            %pass
-                        elseif i==4 && in.kernelSize==0
+                    if isscalar(norms{i}) && isreal(norms{i}) && norms{i}<=1
+                        if norms{i}>0
                             %pass
                         else
-                            error('background, patchHeight, patchWidth, kernelSize, and ratio must be 0<x<=1, real scalars (exception: background and kernelSize can be 0, zero kernelSize means no spatial extent beyond 1 pixel (may still have kernelDuration>0))')
+                            if i==1 && in.background==0
+                                %pass
+                            elseif i==4 && in.kernelSize==0
+                                %pass
+                            elseif i==6 && in.offset==0
+                                %pass
+                            else
+                                goodNorms=false;
+                            end
                         end
+                    else
+                        goodNorms=false;
                     end
+                end
+                if ~goodNorms
+                    error('background, patchHeight, patchWidth, kernelSize, ratio, and offset must be 0<x<=1, real scalars (exception: background, kernelSize, and offset can be 0, zero kernelSize means no spatial extent beyond 1 pixel (may still have kernelDuration>0))')
                 end
 
 

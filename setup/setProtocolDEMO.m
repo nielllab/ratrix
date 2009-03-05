@@ -86,17 +86,20 @@ ports=cellfun(@uint8,{1 3},'UniformOutput',false);
 [noiseSpec(1:length(ports)).port]=deal(ports{:});
 
 % stim properties:
-% in.distribution               'gaussian', 'binary', 'uniform', or a path to a file name (either .txt or .mat, extension omitted, .txt loadable via load(), and containing a single vector of numbers named 'noise')
-% in.origHz                     only used if distribution is a file name, indicating sampling rate of file
-% in.contrast                   std dev in normalized luminance units (just counting patch, before mask application), values will saturate
+% in.distribution               'binary', 'uniform', or one of the following forms:
+%                                   {'sinusoidalFlicker',[temporalFreqs],[contrasts],gapSecs} - each freq x contrast combo will be shown for equal time in random order, total time including gaps will be in.loopDuration
+%                                   {'gaussian',clipPercent} - choose variance so that clipPercent of an infinite stim would be clipped (includes both low and hi)
+%                                   {path, origHz, normalizedClipVal} -  path is to a file (either .txt or .mat, extension omitted, .txt loadable via load()) containing a single vector of stim values named 'noise', with original sampling rate origHz.  will clip values over normalizedClipVal.
+% in.contrast                   above stim has range 0-1 (and is already clipped), then multiply stim by this value
+% in.offset                     normalized value to add to stim after multiplying by contrast.  after this, values outside 0-1 will saturate.
 % in.startFrame                 'randomize' or integer indicating fixed frame number to start with
 % in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file)
-%                               to make uniques and repeats, pass {numRepeatsPerUnique numCycles cycleDurSeconds} - a cycle is a whole set of repeats and one unique - distribution cannot be sinusoidalFlicker 
+%                               to make uniques and repeats, pass {numRepeatsPerUnique numCycles cycleDurSeconds} - a cycle is a whole set of repeats and one unique - distribution cannot be sinusoidalFlicker
 
-[noiseSpec.distribution]         =deal('gaussian');
-[noiseSpec.origHz]               =deal(0);
-[noiseSpec.contrast]             =deal(pickContrast(.5,.01));
-[noiseSpec.startFrame]           =deal('randomize');
+[noiseSpec.distribution]         =deal({'gaussian' .01});
+[noiseSpec.offset]               =deal(0);
+[noiseSpec.contrast]             =deal(1);
+[noiseSpec.startFrame]           =deal(uint8(1)); %deal('randomize');
 [noiseSpec.loopDuration]         =deal(1);
 
 % patch properties:
@@ -105,7 +108,7 @@ ports=cellfun(@uint8,{1 3},'UniformOutput',false);
 % in.patchDims                  [height width]
 % in.patchHeight                0-1, normalized to stim area height
 % in.patchWidth                 0-1, normalized to stim area width
-% in.background                 0-1, normalized
+% in.background                 0-1, normalized (luminance outside patch)
 
 [noiseSpec.locationDistribution]=deal(reshape(mvnpdf([a(:) b(:)],[-d/2 d/2]),gran,gran),reshape(mvnpdf([a(:) b(:)],[d/2 d/2]),gran,gran));
 [noiseSpec.maskRadius]           =deal(.045);
@@ -160,16 +163,16 @@ else
     ts001 = '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\hateren\ts001';
 end
 
-[noiseSpec.distribution]         =deal(ts001);
-[noiseSpec.origHz]               =deal(1200);
-[noiseSpec.loopDuration]         =deal(30);
+[noiseSpec.distribution]         =deal({ts001, 1200, 12800/32767}); %for clip val, see pam email to Alex Casti on January 25, 2005, and Reinagel Reid 2000
+numRepeatsPerUnique=4;
+[noiseSpec.loopDuration]         =deal({uint32(numRepeatsPerUnique) uint32(32) uint32((numRepeatsPerUnique+1)*8)}); %{numRepeatsPerUnique numCycles cycleDurSeconds}
 
 hateren=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 
 [noiseSpec.locationDistribution]=deal(1);
-[noiseSpec.distribution]         =deal('gaussian');
-[noiseSpec.contrast]             =deal(pickContrast(.5,.01));
+[noiseSpec.distribution]         =deal('gaussian', .01);
+[noiseSpec.contrast]             =deal(1);
 [noiseSpec.patchDims]            =deal(uint16([1 1]));
 [noiseSpec.patchHeight]          =deal(.5);
 [noiseSpec.patchWidth]           =deal(.5);

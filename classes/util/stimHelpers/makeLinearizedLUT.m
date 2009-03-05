@@ -9,8 +9,9 @@
 % ratrix trunk rev 1992
 %
 % spyderData=useSpyder('CRT', 1, repmat(linspace(0,1,2^8)',1,3))
+% spyderCdPerMsquared=spyderData(end-255:end,2);
 
-function newLUT=linearizedLUT(monitorID)
+function newLUT=makeLinearizedLUT(monitorID)
 vals=0:255;
 
 switch monitorID
@@ -283,7 +284,7 @@ else
     error('vals not monotonic -- should fit parametrically or check that data collection OK')
 end
 
-% above linearization gives following quite linear fit:
+% above linearization gives following quite linear fit: (interp1('linear') not 'pchip')
 % bwData=[
 %     2.577
 %     3.309

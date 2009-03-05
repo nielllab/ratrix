@@ -175,4 +175,3 @@ protocols/eyeTrackers/@eyeLinkTracker/getSamples.m -text
 protocols/@stimSpec/getPhaseLabel.m -text
 protocols/@stimSpec/setFramesUntilTransition.m -text
 protocols/@stimSpec/setScaleFactor.m -text
-protocols/stimManagers/@filteredNoise/LUT.m -text

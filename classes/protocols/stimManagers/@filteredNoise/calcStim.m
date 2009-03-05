@@ -53,15 +53,19 @@ end
 if isempty(stimulus.cache) || isempty(stimulus.hz) || stimulus.hz~=hz
     stimulus=computeFilteredNoise(stimulus,hz); %intent: stim always normalized
 
-    if true && isstruct(stimulus.loopDuration{typeInd}) && isfield(stimulus.distribution{typeInd}, 'origHz') && size(stimulus.cache{typeInd},1)==1 && size(stimulus.cache{typeInd},2)==1 
+    if true && isstruct(stimulus.loopDuration{typeInd}) && size(stimulus.cache{typeInd},1)==1 && size(stimulus.cache{typeInd},2)==1 
         sca
+        
+        if isfield(stimulus.distribution{typeInd}, 'origHz')
+            efStimOrig=load('\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\hateren\ts001.txt');
+            subplot(2,1,1)
+
+            plot(efStimOrig(1: round(stimulus.distribution{typeInd}.origHz * stimulus.loopDuration{typeInd}.cycleDurSeconds/(stimulus.loopDuration{typeInd}.numRepeatsPerUnique+1)  )))
+            subplot(2,1,2)
+        end
 
         efStim=squeeze(stimulus.cache{typeInd});
-        efStimOrig=load('\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\hateren\ts001.txt');
-        subplot(2,1,1)
 
-        plot(efStimOrig(1: round(stimulus.distribution{typeInd}.origHz * stimulus.loopDuration{typeInd}.cycleDurSeconds/(stimulus.loopDuration{typeInd}.numRepeatsPerUnique+1)  )))
-        subplot(2,1,2)
         numChunks = length(efStim)/(stimulus.distribution{typeInd}.numCycles * (stimulus.loopDuration{typeInd}.numRepeatsPerUnique+1));
         chunkLength = length(efStim)/numChunks;
         if numChunks ~= round(numChunks) || chunkLength ~= round(chunkLength)

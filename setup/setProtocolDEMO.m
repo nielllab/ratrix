@@ -32,7 +32,8 @@ fd2 = freeDrinks(sm,freeDrinkLikelihood,constantRewards);
 
 percentCorrectionTrials=.5;
 
-vh=nAFC(sm,percentCorrectionTrials,constantRewards,[],[],[],{'flickerRamp',[0 .5]},true,'ptb');
+% {'flickerRamp',[0 .5]}
+vh=nAFC(sm,percentCorrectionTrials,constantRewards,[],[],[],{'off'},true,'ptb');
 
 pixPerCycs              =[20];
 targetOrientations      =[pi/2];
@@ -139,7 +140,6 @@ scaleFactor            = 0;
 noiseStim=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 
-
 [noiseSpec.orientation]         =deal(0);
 [noiseSpec.locationDistribution]=deal([0 0;1 0], [0 0;0 1]);
 [noiseSpec.distribution]         =deal('binary');
@@ -167,18 +167,24 @@ end
 numRepeatsPerUnique=4;
 [noiseSpec.loopDuration]         =deal({uint32(numRepeatsPerUnique) uint32(32) uint32((numRepeatsPerUnique+1)*8)}); %{numRepeatsPerUnique numCycles cycleDurSeconds}
 
-hateren=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-
-
 [noiseSpec.locationDistribution]=deal(1);
-[noiseSpec.distribution]         =deal('gaussian', .01);
 [noiseSpec.contrast]             =deal(1);
 [noiseSpec.patchDims]            =deal(uint16([1 1]));
-[noiseSpec.patchHeight]          =deal(.5);
-[noiseSpec.patchWidth]           =deal(.5);
+[noiseSpec.patchHeight]          =deal(1);
+[noiseSpec.patchWidth]           =deal(1);
+
+hateren=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
+[noiseSpec.distribution]         =deal('gaussian', .01);
 
 fullfieldFlicker=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
+[noiseSpec.distribution]         =deal({'sinusoidalFlicker',[1 5 10 25 50],[.1 .25 .5 .75 1],.1}); %temporal freqs, contrasts, gapSecs
+[noiseSpec.loopDuration]         =deal(5*5*5);
+[noiseSpec.contrast]             =deal(1);
+[noiseSpec.patchHeight]          =deal(1);
+[noiseSpec.patchWidth]           =deal(1);
+crftrf=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
 
@@ -188,12 +194,13 @@ ts3 = trainingStep(vh, freeStim, repeatIndefinitely(), noTimeOff(), svnRev);   %
 ts4 = trainingStep(vh, discrimStim, repeatIndefinitely(), noTimeOff(), svnRev);%orientation discrim
 ts5 = trainingStep(vh, imageStim,  repeatIndefinitely(), noTimeOff(), svnRev); %morph discrim
 ts6 = trainingStep(vh, noiseStim,  repeatIndefinitely(), noTimeOff(), svnRev); %filteredNoise discrim
-ts7 = trainingStep(vh, unfilteredNoise,  repeatIndefinitely(), noTimeOff(), svnRev); %unfiltered goToSide
-ts8 = trainingStep(led, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svnRev); %fullfieldFlicker
-ts9 = trainingStep(vh, hateren,  repeatIndefinitely(), noTimeOff(), svnRev); %hateren
+%ts7 = trainingStep(vh, unfilteredNoise,  repeatIndefinitely(), noTimeOff(), svnRev); %unfiltered goToSide
+ts7 = trainingStep(vh, hateren,  repeatIndefinitely(), noTimeOff(), svnRev); %hateren
+ts8 = trainingStep(vh, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svnRev); %fullfieldFlicker
+ts9 = trainingStep(vh, crftrf,  repeatIndefinitely(), noTimeOff(), svnRev); %crf/trf
 
 p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8, ts9});
-stepNum=uint8(6);
+stepNum=uint8(9);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

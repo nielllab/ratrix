@@ -89,7 +89,7 @@ for i=1:length(stimulus.port)
 
                 hiClipInds=noise>1;
                 loClipInds=noise<0;
-                fprintf('*** gaussian: clipping %g%% of values (should be %g)\n',100*(sum(hiClipInds(:))+sum(loClipInds(:)))/numel(noise),100*stimulus.distribution{i}.clipPercent)
+                fprintf('*** gaussian: clipping %g%% of values (should be %g%%)\n',100*(sum(hiClipInds(:))+sum(loClipInds(:)))/numel(noise),100*stimulus.distribution{i}.clipPercent)
                 noise(hiClipInds)=1;
                 noise(loClipInds)=0;
 
@@ -108,10 +108,10 @@ for i=1:length(stimulus.port)
                 repmat(noise,[sz 1]); %shouldn't this be noise=?
 
                 clipInds=noise>stimulus.distribution{i}.normalizedClipVal;
-                fprintf('*** hateren: clipping %g%% of values (should be 1%)\n',100*sum(clipInds(:))/numel(noise))
+                fprintf('*** hateren: clipping %g%% of values (should be 1%%)\n',100*sum(clipInds(:))/numel(noise))
                 noise(clipInds)=stimulus.distribution{i}.normalizedClipVal;
                 noise=normalize(noise);
-                fprintf('*** hateren: %g%% values below 1/3 of max (should be 73%)',100*sum(noise(:)<(1/3)))
+                fprintf('*** hateren: %g%% values below 1/3 of max (should be 73%%)\n',100*sum(noise(:)<(1/3))/numel(noise))
 
         end
 

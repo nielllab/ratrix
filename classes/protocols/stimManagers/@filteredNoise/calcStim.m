@@ -54,7 +54,7 @@ fprintf('about to compute stim\n')
 if isempty(stimulus.cache) || isempty(stimulus.hz) || stimulus.hz~=hz
     stimulus=computeFilteredNoise(stimulus,hz); %intent: stim always normalized
 
-    if true && isstruct(stimulus.loopDuration{typeInd}) && size(stimulus.cache{typeInd},1)==1 && size(stimulus.cache{typeInd},2)==1 
+    if false && isstruct(stimulus.loopDuration{typeInd}) && size(stimulus.cache{typeInd},1)==1 && size(stimulus.cache{typeInd},2)==1 
         sca
         
         cds=double(stimulus.loopDuration{typeInd}.cycleDurSeconds);

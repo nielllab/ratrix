@@ -59,7 +59,7 @@ if isempty(stimulus.cache) || isempty(stimulus.hz) || stimulus.hz~=hz
         
         cds=double(stimulus.loopDuration{typeInd}.cycleDurSeconds);
         nrpu=double(stimulus.loopDuration{typeInd}.numRepeatsPerUnique);
-        nc=double(stimulus.distribution{typeInd}.numCycles);
+        nc=double(stimulus.loopDuration{typeInd}.numCycles);
         
         if isfield(stimulus.distribution{typeInd}, 'origHz')
             efStimOrig=load('\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\hateren\ts001.txt');
@@ -71,8 +71,8 @@ if isempty(stimulus.cache) || isempty(stimulus.hz) || stimulus.hz~=hz
 
         efStim=squeeze(stimulus.cache{typeInd});
 
-        numChunks = length(efStim)/(nc * (nrpu+1));
-        chunkLength = length(efStim)/numChunks;
+        chunkLength = length(efStim)/(nc * (nrpu+1));
+        numChunks = length(efStim)/chunkLength;
         if numChunks ~= round(numChunks) || chunkLength ~= round(chunkLength)
             error('partial chunk')
         end

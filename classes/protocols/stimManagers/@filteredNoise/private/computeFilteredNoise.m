@@ -50,7 +50,7 @@ for i=1:length(stimulus.port)
         %convert to doubles to avoid int overflow issues
         cds=double(stimulus.loopDuration{i}.cycleDurSeconds);
         nrpu=double(stimulus.loopDuration{i}.numRepeatsPerUnique);
-        nc=double(stimulus.distribution{i}.numCycles);
+        nc=double(stimulus.loopDuration{i}.numCycles);
         
         chunkSize=round(hz*cds/(1+nrpu)); %number of frames in a single repeat or unique
         frames=chunkSize*(1+nc); %the number of raw frames we need, before making the repeats/uniques

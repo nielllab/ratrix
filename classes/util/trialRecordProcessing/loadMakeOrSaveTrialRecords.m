@@ -50,8 +50,9 @@ if doSave
         % if type is cell, then use LUT and replace with an array of indices
 
         fields = fieldnames(trialRecords(1));
-        % do not process the 'result' field
+        % do not process the 'result' or 'type' fields because they will mess up LUT handling
         fields(find(strcmp(fields,'result')))=[];
+        fields(find(strcmp(fields,'type')))=[];
         [sessionLUT fieldsInLUT trialRecords] = processFields(fields,sessionLUT,fieldsInLUT,trialRecords);
     end
     
@@ -118,7 +119,7 @@ for ii=1:length(fields)
             addToLUT=false;
             for trialInd=1:length(trialRecords)
                 thisRecordCell=[trialRecords(trialInd).(fn)];
-                if all(cellfun('isclass',thisRecordCell,'char'))
+                if all(cellfun('isclass',thisRecordCell,'char') | cellfun('isreal',thisRecordCell)) % 3/3/09 - should change to if all(ischar or isscalar)
                     [indices sessionLUT] = addOrFindInLUT(sessionLUT,thisRecordCell);
                     trialRecords(trialInd).(fn)=indices;
                     addToLUT=true;

@@ -40,7 +40,6 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             trialRecords(trialInd).numStepsInProtocol = getNumTrainingSteps(p);
             trialRecords(trialInd).protocolVersion = getProtocolVersion(subject);
             
-            trialRecords(trialInd).correct = [];
             trialRecords(trialInd).reinforcementManager = [];
             trialRecords(trialInd).reinforcementManagerClass = [];
             
@@ -140,6 +139,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 error('targetPorts and distractorPorts must be row vectors')
             end
             
+            % 3/4/09 - TODO: replace with nAFC/freeDrinks-specific functions and abstract parent function
             % check trialManager class specific port logic
             % see http://132.239.158.177/trac/rlab_hardware/ticket/180
             switch class(trialManager)
@@ -177,7 +177,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             end
             
             validateStimSpecs(stimSpecs);
-            
+
             [tempSoundMgr updateSndM] = cacheSounds(getSoundManager(trialManager),station);
             trialManager = setSoundManager(trialManager, tempSoundMgr);
             updateTM = updateTM || updateSndM;
@@ -266,7 +266,13 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             
             currentValveStates=verifyValvesClosed(station);
             
-%             trialRecords(trialInd).correct = 0;
+            % set correct=0 if it was not set during real-time loop
+            % we need correct to be empty at the start of the loop so that we know that it needs to be set by updateTrialState,
+            % but an empty correct field causes problems for compiling b/c it is not scalar
+            if isempty(trialRecords(trialInd).correct)
+                trialRecords(trialInd).correct = 0;
+            end
+            
             if ~ischar(trialRecords(trialInd).result)
 %                 resp=find(trialRecords(trialInd).result);
 %                 if length(resp)==1

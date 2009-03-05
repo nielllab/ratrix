@@ -57,12 +57,17 @@ bloat=false;
 [out.criterionClass compiledLUT]                             =extractFieldAndEnsure(trialRecords,{'criterionClass'},'scalarLUT',compiledLUT);
 [out.reinforcementManagerClass compiledLUT]                  =extractFieldAndEnsure(trialRecords,{'reinforcementManagerClass'},'scalarLUT',compiledLUT);
 [out.scaleFactor compiledLUT]                                =extractFieldAndEnsure(trialRecords,{'scaleFactor'},'equalLengthVects',compiledLUT);
-[out.type compiledLUT]                                       =extractFieldAndEnsure(trialRecords,{'type'},'scalarLUT',compiledLUT);
+[out.type compiledLUT]                                       =extractFieldAndEnsure(trialRecords,{'type'},'mixed',compiledLUT);
 [out.targetPorts compiledLUT]                                =extractFieldAndEnsure(trialRecords,{'targetPorts'},{'typedVector','index'},compiledLUT);
 [out.distractorPorts compiledLUT]                            =extractFieldAndEnsure(trialRecords,{'distractorPorts'},{'typedVector','index'},compiledLUT);
-out.result                                                   =ensureScalar(cellfun(@encodeResult,{trialRecords.result},out.targetPorts,out.distractorPorts,num2cell(out.correct),'UniformOutput',false));
-if any(out.result==0)
-    error('got zero result')
+try
+    out.result                                                   =ensureScalar(cellfun(@encodeResult,{trialRecords.result},out.targetPorts,out.distractorPorts,num2cell(out.correct),'UniformOutput',false));
+    if any(out.result==0)
+        error('got zero result')
+    end
+catch
+    ple
+    out.result=ones(1,length(trialRecords))*nan;
 end
 [out.containedAPause compiledLUT]                            =extractFieldAndEnsure(trialRecords,{'containedAPause'},'scalar',compiledLUT);
 [out.containedManualPokes compiledLUT]                       =extractFieldAndEnsure(trialRecords,{'containedManualPokes'},'scalar',compiledLUT);

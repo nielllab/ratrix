@@ -41,8 +41,18 @@ try
             try
                 out=ensureScalar({trialRecords.(fieldPath)});
             catch
-                ensureTypedVector({trialRecords.(fieldPath)},'char'); % ensure is char otherwise no reason to use LUT
                 [out LUT]=addOrFindInLUT(LUT, {trialRecords.(fieldPath)});
+            end
+        case 'mixed'
+            % this means that this field of trialRecords may have mixed types (specifically for trialRecords.type)
+            % we try first to encode as a simple string, but if not, then assume it is a cell array of mixed types
+            % only compiling the first string element of each cell array
+            % for type, that means we throw away toggleStim/timedFrames/indexedFrames
+            try
+                ensureTypedVector({trialRecords.(fieldPath)},'char');
+                [out LUT]=addOrFindInLUT(LUT, {trialRecords.(fieldPath)});
+            catch
+                [out LUT]=addOrFindInLUT(LUT, cellfun(@(x)x{1},{trialRecords.(fieldPath)},'UniformOutput',false));
             end
         case 'equalLengthVects'
             out=ensureEqualLengthVects({trialRecords.(fieldPath)});
@@ -92,7 +102,6 @@ try
             end
             % now cellfun phaseRecords, getting all tries for each phase
             out = cellfun(@getTimes,phaseRecords,'UniformOutput',false);
-            % now convert from a cell array of cell arrays to a vector of length-1's
             out = cell2mat(cellfun(@diffFirstTwo,out,'UniformOutput',false));
         case 'none'
             out=[trialRecords.(fieldPath)];

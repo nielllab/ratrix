@@ -7,12 +7,16 @@ function [indices LUT] = addOrFindInLUT(LUT, fields)
 
 indices=zeros(1,length(fields));
 for i=1:length(fields)
-    result=find(strcmp(LUT,fields{i}));
-    if isempty(result) % did not find in LUT - ADD
-        LUT{end+1} = fields{i};
-        result=length(LUT);
+    if ischar(fields{i})
+        result=find(strcmp(LUT,fields{i}));
+        if isempty(result) % did not find in LUT - ADD
+            LUT{end+1} = fields{i};
+            result=length(LUT);
+        end
+        indices(i)=result;
+    else
+        indices(i)=fields{i};
     end
-    indices(i)=result;
 end
 
 end % end function

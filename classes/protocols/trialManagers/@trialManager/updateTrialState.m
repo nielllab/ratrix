@@ -27,7 +27,7 @@ if ~isempty(result) && ~ischar(result) && isempty(correct) && checkCorrect
         correct = ismember(resp,targetPorts);
         result = 'nominal';
     else
-        correct = false;
+        correct = 0;
         result = 'multiple ports';
     end
     % change result from the port vector to 'nominal'

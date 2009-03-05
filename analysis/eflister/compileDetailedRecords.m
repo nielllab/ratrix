@@ -198,124 +198,143 @@ for i=1:length(ids)
             fieldsInLUT=[];
         end
         tr=tr.trialRecords;
-        % 12/17/08 - also handle sessionLUT and fieldsInLUT (each trialRecords session has its own LUT)
-        % compile these together, and set values appropriately
 
-        for k=1:length(tr)
-            if tr(k).trialNumber ~= expectedTrialNumber
-                tr(k).trialNumber
-                expectedTrialNumber
-                error('got unexpected trial number')
-            else
-                expectedTrialNumber=expectedTrialNumber+1;
-            end
-            if ~isempty(classes)
-                ind=find(strcmp(LUTlookup(sessionLUT,tr(k).stimManagerClass),classes(1,:)));
-            else
-                ind=[];
-            end
-            if length(ind)==1
-                %nothing
-            elseif length(ind)>1
-                error('found more than one cached default stim manager class match')
-            else
-                fprintf('\t\tmaking first %s\n',LUTlookup(sessionLUT,tr(k).stimManagerClass))
-                classes{1,end+1}=LUTlookup(sessionLUT,tr(k).stimManagerClass);
-                classes{2,end}=eval(LUTlookup(sessionLUT,tr(k).stimManagerClass)); %construct default stimManager of correct type, to fake static method call
-                classes{3,end}=[];
-                ind=size(classes,2);
-            end
-            classes{3,ind}(end+1)=k;
-        end
 
-        % it is very important that this function keep the same fieldNames in newBasicRecs as they were in trialRecords
-        % because otherwise we don't know which fields are using the sessionLUT
-        [newBasicRecs compiledLUT]=extractBasicFields(sm,tr,compiledLUT);
-        verifyAllFieldsNCols(newBasicRecs,length(tr));
-
-        % 12/18/08 - now update newBasicRecs as appropriate (shift LUT indices by the length of compiledLUT)
-        % then add sessionLUT to compiledLUT
-        newBasicRecsToUpdate=intersect(fieldsInLUT,fields(newBasicRecs));
-        for n=1:length(newBasicRecsToUpdate)
-            % for each field in newBasicRecs that uses the sessionLUT
-            try
-                % 1/2/09 - need to do something about fieldsInLUT to avoid this error?
-                % Warning: 'trialManager.trialManager.reinforcementManager.reinforcementManager.rewardStrategy'
-                % exceeds MATLAB's maximum name length of 63 characters and has been truncated to
-                % 'trialManager.trialManager.reinforcementManager.reinforcementMan'.
-                % - maybe separate each element of fieldsInLUT (a fieldPath) into each step, and then build thisFieldValue from that
-                
-                % 1/20/09 - split fieldsInLUT using \. as the delimiter, and then loop through each "step" in the path
-                pathToThisField = regexp(newBasicRecsToUpdate{n},'\.','split');
-                thisField=newBasicRecs;
-                for nn=1:length(pathToThisField)
-                    thisField=thisField.(pathToThisField{nn});
-                end
-                thisFieldValues = sessionLUT(thisField);
-            catch
-                warningStr=sprintf('could not find %s in newBasicRecs - skipping',newBasicRecsToUpdate{n});
-%                 warning(warningStr);
-                continue;
-            end
-            [indices compiledLUT] = addOrFindInLUT(compiledLUT, thisFieldValues);
-            for nn=1:length(indices)
-                evalStr=sprintf('newBasicRecs.%s(nn) = indices(nn);',newBasicRecsToUpdate{n});
-                eval(evalStr); % set new indices
-            end
-%             newBasicRecs.(fieldsInLUT{n}) = indices; % set new indices based on integrated LUT
-        end
+        % 3/5/09 - we should separate the compile process based on trainingStepNum
+        % to handle manual training step transitions gracefully
+        uniqueTrainingSteps=unique([tr.trainingStepNum]);
+        loadedClasses=classes;
+        loadedExpectedTrialNumber=expectedTrialNumber;
         
-        
-        if isempty(compiledTrialRecords)
-            compiledTrialRecords=newBasicRecs;
-        else
-            compiledTrialRecords=concatAllFields(compiledTrialRecords,newBasicRecs);
-        end
-        for c=1:size(classes,2)
-
-            if length(classes{3,c})>0 %prevent subtle bug that is easy to write into extractDetailFields -- if you send zero trials to them, they may try to look deeper than the top level of fields, but they won't exist ('MATLAB:nonStrucReference') -- see example in crossModal.extractDetailFields()
-                %no way to guarantee that a stim manager's calcStim will make a stimDetails
-                %that includes all info its super class would have, so cannot call this
-                %method on every anscestor class.  must leave calling super class's
-                %extractDetailFields up to the sub class.
-                LUTparams=[];
-                LUTparams.lastIndex=length(compiledLUT);
-                LUTparams.compiledLUT=compiledLUT;
-                [newRecs newLUT]=extractDetailFields(classes{2,c},colsFromAllFields(newBasicRecs,classes{3,c}),tr(classes{3,c}),LUTparams);
-                % if extractDetailFields returns a stim-specific LUT, add it to our main compiledLUT
-                if ~isempty(newLUT)
-                    compiledLUT = [compiledLUT newLUT];
+        for tsNum=uniqueTrainingSteps
+            thisTsInds=find([tr.trainingStepNum]==tsNum);
+            classes=loadedClasses;
+            expectedTrialNumber=loadedExpectedTrialNumber;
+            
+            % START COMPILE PROCESS
+            % ================================================
+            for k=1:length(thisTsInds)
+                if tr(k).trialNumber ~= expectedTrialNumber
+                    k
+                    tr(k).trialNumber
+                    expectedTrialNumber
+                    error('got unexpected trial number')
+                else
+                    expectedTrialNumber=expectedTrialNumber+1;
                 end
-                
+                if ~isempty(classes)
+                    ind=find(strcmp(LUTlookup(sessionLUT,tr(k).stimManagerClass),classes(1,:)));
+                else
+                    ind=[];
+                end
+                if length(ind)==1
+                    %nothing
+                elseif length(ind)>1
+                    error('found more than one cached default stim manager class match')
+                else
+                    fprintf('\t\tmaking first %s\n',LUTlookup(sessionLUT,tr(k).stimManagerClass))
+                    classes{1,end+1}=LUTlookup(sessionLUT,tr(k).stimManagerClass);
+                    classes{2,end}=eval(LUTlookup(sessionLUT,tr(k).stimManagerClass)); %construct default stimManager of correct type, to fake static method call
+                    classes{3,end}=[];
+                    ind=size(classes,2);
+                end
+                classes{3,ind}(end+1)=k;
+            end
 
-                
-                verifyAllFieldsNCols(newRecs,length(classes{3,c}));
-                bailed=isempty(fieldnames(newRecs)); %extractDetailFields bailed for some reason (eg unimplemented or missing fields from old records)
+            % it is very important that this function keep the same fieldNames in newBasicRecs as they were in trialRecords
+            % because otherwise we don't know which fields are using the sessionLUT
+            [newBasicRecs compiledLUT]=extractBasicFields(sm,tr(thisTsInds),compiledLUT);
+            verifyAllFieldsNCols(newBasicRecs,length(tr(thisTsInds)));
 
-                if length(compiledDetails)<c
-                    compiledDetails(c).className=classes{1,c};
-                    if bailed
-                        compiledDetails(c).records=[];
+            % 12/18/08 - now update newBasicRecs as appropriate (shift LUT indices by the length of compiledLUT)
+            % then add sessionLUT to compiledLUT
+            newBasicRecsToUpdate=intersect(fieldsInLUT,fields(newBasicRecs));
+            for n=1:length(newBasicRecsToUpdate)
+                % for each field in newBasicRecs that uses the sessionLUT
+                try
+                    % 1/2/09 - need to do something about fieldsInLUT to avoid this error?
+                    % Warning: 'trialManager.trialManager.reinforcementManager.reinforcementManager.rewardStrategy'
+                    % exceeds MATLAB's maximum name length of 63 characters and has been truncated to
+                    % 'trialManager.trialManager.reinforcementManager.reinforcementMan'.
+                    % - maybe separate each element of fieldsInLUT (a fieldPath) into each step, and then build thisFieldValue from that
+
+                    % 1/20/09 - split fieldsInLUT using \. as the delimiter, and then loop through each "step" in the path
+                    % this addresses the comment from 1/2/09
+                    pathToThisField = regexp(newBasicRecsToUpdate{n},'\.','split');
+                    thisField=newBasicRecs;
+                    for nn=1:length(pathToThisField)
+                        thisField=thisField.(pathToThisField{nn});
+                    end
+                    thisFieldValues = sessionLUT(thisField);
+                catch
+                    warningStr=sprintf('could not find %s in newBasicRecs - skipping',newBasicRecsToUpdate{n});
+                    warning(warningStr);
+                    continue;
+                end
+                [indices compiledLUT] = addOrFindInLUT(compiledLUT, thisFieldValues);
+                for nn=1:length(indices)
+                    evalStr=sprintf('newBasicRecs.%s(nn) = indices(nn);',newBasicRecsToUpdate{n});
+                    eval(evalStr); % set new indices
+                end
+    %             newBasicRecs.(fieldsInLUT{n}) = indices; % set new indices based on integrated LUT
+            end
+
+
+            if isempty(compiledTrialRecords)
+                compiledTrialRecords=newBasicRecs;
+            else
+                compiledTrialRecords=concatAllFields(compiledTrialRecords,newBasicRecs);
+            end
+            for c=1:size(classes,2)
+
+                if length(classes{3,c})>0 %prevent subtle bug that is easy to write into extractDetailFields -- if you send zero trials to them, they may try to look deeper than the top level of fields, but they won't exist ('MATLAB:nonStrucReference') -- see example in crossModal.extractDetailFields()
+                    %no way to guarantee that a stim manager's calcStim will make a stimDetails
+                    %that includes all info its super class would have, so cannot call this
+                    %method on every anscestor class.  must leave calling super class's
+                    %extractDetailFields up to the sub class.
+                    LUTparams=[];
+                    LUTparams.lastIndex=length(compiledLUT);
+                    LUTparams.compiledLUT=compiledLUT;
+                    [newRecs newLUT]=extractDetailFields(classes{2,c},colsFromAllFields(newBasicRecs,classes{3,c}),tr(classes{3,c}),LUTparams);
+                    
+                    % if extractDetailFields returns a stim-specific LUT, add it to our main compiledLUT
+                    if ~isempty(newLUT)
+                        compiledLUT = [compiledLUT newLUT];
+                    end
+
+
+
+                    verifyAllFieldsNCols(newRecs,length(classes{3,c}));
+                    bailed=isempty(fieldnames(newRecs)); %extractDetailFields bailed for some reason (eg unimplemented or missing fields from old records)
+
+                    if length(compiledDetails)<c
+                        compiledDetails(c).className=classes{1,c};
+                        if bailed
+                            compiledDetails(c).records=[];
+                        else
+                            compiledDetails(c).records=newRecs;
+                        end
+                        compiledDetails(c).trialNums=[];
+                        compiledDetails(c).bailedTrialNums=[];
+                    elseif strcmp(compiledDetails(c).className,classes{1,c})
+                        if ~bailed
+                            compiledDetails(c).records=concatAllFields(compiledDetails(c).records,newRecs);
+                        end
                     else
-                        compiledDetails(c).records=newRecs;
+                        error('class name doesn''t match')
                     end
-                    compiledDetails(c).trialNums=[];
-                    compiledDetails(c).bailedTrialNums=[];
-                elseif strcmp(compiledDetails(c).className,classes{1,c})
-                    if ~bailed
-                        compiledDetails(c).records=concatAllFields(compiledDetails(c).records,newRecs);
+                    tmp=colsFromAllFields(newBasicRecs,classes{3,c});
+                    if bailed
+                        compiledDetails(c).bailedTrialNums(end+1:end+length(classes{3,c}))=tmp.trialNumber;
+                    else
+                        compiledDetails(c).trialNums(end+1:end+length(classes{3,c}))=tmp.trialNumber;
                     end
-                else
-                    error('class name doesn''t match')
-                end
-                tmp=colsFromAllFields(newBasicRecs,classes{3,c});
-                if bailed
-                    compiledDetails(c).bailedTrialNums(end+1:end+length(classes{3,c}))=tmp.trialNumber;
-                else
-                    compiledDetails(c).trialNums(end+1:end+length(classes{3,c}))=tmp.trialNumber;
                 end
             end
-        end
+            % END COMPILE PROCESS
+            % ================================================
+        end % end for each trainingStep loop
+        
     end
     % delete old compiledDetails file if we added records
     if addedRecords

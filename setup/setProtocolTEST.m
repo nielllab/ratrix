@@ -414,9 +414,10 @@ ports=cellfun(@uint8,{1 3},'UniformOutput',false);
 % in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file)
 %                               to make uniques and repeats, pass {numRepeatsPerUnique numCycles cycleDurSeconds} - a cycle is a whole set of repeats and one unique - distribution cannot be sinusoidalFlicker 
 
-[noiseSpec.distribution]         =deal('gaussian');
+[noiseSpec.distribution]         =deal({'gaussian',.5});
 [noiseSpec.origHz]               =deal(0);
 [noiseSpec.contrast]             =deal(pickContrast(.5,.01));
+[noiseSpec.offset]               =deal(0);
 [noiseSpec.startFrame]           =deal('randomize');
 [noiseSpec.loopDuration]         =deal(1);
 
@@ -481,7 +482,7 @@ else
     ts001 = '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\hateren\ts001';
 end
 
-[noiseSpec.distribution]         =deal(ts001);
+[noiseSpec.distribution]         =deal({ts001,100,.5});
 [noiseSpec.origHz]               =deal(1200);
 [noiseSpec.loopDuration]         =deal(30);
 
@@ -490,7 +491,7 @@ hateren=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminan
 
 
 [noiseSpec.locationDistribution]=deal(1);
-[noiseSpec.distribution]         =deal('gaussian');
+[noiseSpec.distribution]         =deal('binary');
 [noiseSpec.contrast]             =deal(pickContrast(.5,.01));
 [noiseSpec.patchDims]            =deal(uint16([1 1]));
 [noiseSpec.patchHeight]          =deal(.5);
@@ -584,7 +585,7 @@ ts30 = trainingStep(vh, discrimStim5A,repeatIndef,noTimeOff(),svnRev);
 %     ts18, ts19, ts20, ts21, ts22});
 % stepNum=21;
 % p=protocol('gabor test2', {ts29, ts1, ts4, ts12, ts2, ts12, ts8, ts11,ts9,ts10,sweepContrast,ts23,ts24,ts27,ts30});
-stepNum=uint8(7);
+stepNum=uint8(3);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

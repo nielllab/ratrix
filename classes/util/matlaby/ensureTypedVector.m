@@ -6,7 +6,7 @@ if isvector(cellIn)
         elseif all(cellfun(@(x)strcmp(class(x),t),cellIn))
             %pass
         else
-            cellfun(@class,cellIn,'UniformOutput',false)
+            cellfun(@class,cellIn,'UniformOutput',false) % this line produces print-out when type is a cell
             error('not all of class')
         end
     else

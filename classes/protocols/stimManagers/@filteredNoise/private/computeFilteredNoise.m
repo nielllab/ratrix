@@ -4,7 +4,8 @@ stimulus.hz=hz;
 
 for i=1:length(stimulus.port)
 
-    sz=stimulus.patchDims{i}; %[height, width]
+    %convert to double to avoid int overflow problems
+    sz=double(stimulus.patchDims{i}); %[height, width]
 
     scale=floor(stimulus.kernelSize{i}*sqrt(sum(sz.^2)));
     if rem(scale,2)==0
@@ -45,9 +46,15 @@ for i=1:length(stimulus.port)
     %must be a deep reason this is same as pythagorean
 
     if isstruct(stimulus.loopDuration{i})
-        chunkSize=round(hz*stimulus.loopDuration{i}.cycleDurSeconds/(1+double(stimulus.loopDuration{i}.numRepeatsPerUnique))); %number of frames in a single repeat or unique
-        frames=chunkSize*(1+double(stimulus.loopDuration{i}.numCycles)); %the number of raw frames we need, before making the repeats/uniques
-        totalFrames=double(stimulus.loopDuration{i}.numCycles)*chunkSize*(1+double(stimulus.loopDuration{i}.numRepeatsPerUnique));
+        
+        %convert to doubles to avoid int overflow issues
+        cds=double(stimulus.loopDuration{i}.cycleDurSeconds);
+        nrpu=double(stimulus.loopDuration{i}.numRepeatsPerUnique);
+        nc=double(stimulus.distribution{i}.numCycles);
+        
+        chunkSize=round(hz*cds/(1+nrpu)); %number of frames in a single repeat or unique
+        frames=chunkSize*(1+nc); %the number of raw frames we need, before making the repeats/uniques
+        totalFrames=nc*chunkSize*(1+nrpu);
     else
         frames=max(1,round(stimulus.loopDuration{i}*hz));
     end
@@ -66,80 +73,78 @@ for i=1:length(stimulus.port)
         %noise=noise-.5; don't think i want this, right?
         noise=permute(noise,[3 1 2]);
         repmat(noise,[sz 1]); %shouldn't this be noise=?
-    elseif ischar(stimulus.distribution{i})
-        if ismember( stimulus.distribution{i},  {'binary','uniform'} )
-            rand('twister',stimulus.seed{i});
-            noise=rand([sz frames]);
-            if strcmp(stimulus.distribution{i},'binary')
-                noise=(noise>.5);
-            end
-            %noise=noise-.5; don't think i want this, right?
-        elseif iscell(stimulus.distribution{i})
-            switch stimulus.distribution{i}.special
-                case 'gaussian'
-
-                    randn('state',stimulus.seed{i});
-                    noise=randn([sz frames])*pickContrast(.5,stimulus.distribution{i}.clipPercent) +.5;
-
-                    hiClipInds=noise>1;
-                    loClipInds=noise<0;
-                    fprintf('*** gaussian: clipping %g%% of values (should be %g)\n',100*(sum(hiClipInds(:))+sum(loClipInds(:)))/numel(noise),100*stimulus.distribution{i}.clipPercent)
-                    noise(hiClipInds)=1;
-                    noise(loClipInds)=0;
-
-                otherwise
-                    if ~isstruct(stimulus.loopDuration{i}) && stimulus.loopDuration{i}==0
-                        frames=0;
-                    end
-                    [noise stimulus.inds{i}]=loadStimFile(stimulus.distribution{i}.special,stimulus.distribution{i}.origHz,hz,frames/hz,stimulus.startFrame{i});
-                    %noise=noise-.5; don't think i want this, right?
-                    if size(noise,1)>1
-                        noise=noise';
-                    end
-
-                    %noise=-.5:.01:.5;
-                    noise=permute(noise,[3 1 2]);
-                    repmat(noise,[sz 1]); %shouldn't this be noise=?
-
-                    clipInds=noise>stimulus.distribution{i}.normalizedClipVal;
-                    fprintf('*** hateren: clipping %g%% of values (should be 1%)\n',100*sum(clipInds(:))/numel(noise))
-                    noise(clipInds)=stimulus.distribution{i}.normalizedClipVal;
-                    noise=normalize(noise);
-                    fprintf('*** hateren: %g%% values below 1/3 of max (should be 73%)',100*sum(noise(:)<(1/3)))
-
-            end
-
-        else
-            stimulus.distribution{i}
-            error('bad distribution')
+    elseif ischar(stimulus.distribution{i}) && ismember( stimulus.distribution{i},  {'binary','uniform'} )
+        rand('twister',stimulus.seed{i});
+        noise=rand([sz frames]);
+        if strcmp(stimulus.distribution{i},'binary')
+            noise=(noise>.5);
         end
-        if isstruct(stimulus.loopDuration{i})
-            new=nan*zeros(size(noise,1),size(noise,2),totalFrames);
-            rpt=noise(:,:,1:chunkSize);
-            start=1;
-            unqPos=chunkSize+1;
-            for c=1:stimulus.loopDuration{i}.numCycles
-                for r=1:stimulus.loopDuration{i}.numRepeatsPerUnique
-                    new(:,:,start:start+chunkSize-1)=rpt;
-                    start=start+chunkSize;
+        %noise=noise-.5; don't think i want this, right?
+    elseif isstruct(stimulus.distribution{i})
+        switch stimulus.distribution{i}.special
+            case 'gaussian'
+
+                randn('state',stimulus.seed{i});
+                noise=randn([sz frames])*pickContrast(.5,stimulus.distribution{i}.clipPercent) +.5;
+
+                hiClipInds=noise>1;
+                loClipInds=noise<0;
+                fprintf('*** gaussian: clipping %g%% of values (should be %g)\n',100*(sum(hiClipInds(:))+sum(loClipInds(:)))/numel(noise),100*stimulus.distribution{i}.clipPercent)
+                noise(hiClipInds)=1;
+                noise(loClipInds)=0;
+
+            otherwise
+                if ~isstruct(stimulus.loopDuration{i}) && stimulus.loopDuration{i}==0
+                    frames=0;
                 end
-                new(:,:,start:start+chunkSize-1)=noise(:,:,unqPos:unqPos+chunkSize-1);
-                start=start+chunkSize;
-                unqPos=unqPos+chunkSize;
-            end
-            if any(isnan(new(:)))
-                error('miss!')
-            end
-            if unqPos~=1+size(noise,3)
-                error('miss!')
-            end
-            noise=new;
+                [noise stimulus.inds{i}]=loadStimFile(stimulus.distribution{i}.special,stimulus.distribution{i}.origHz,hz,frames/hz,stimulus.startFrame{i});
+                %noise=noise-.5; don't think i want this, right?
+                if size(noise,1)>1
+                    noise=noise';
+                end
+
+                %noise=-.5:.01:.5;
+                noise=permute(noise,[3 1 2]);
+                repmat(noise,[sz 1]); %shouldn't this be noise=?
+
+                clipInds=noise>stimulus.distribution{i}.normalizedClipVal;
+                fprintf('*** hateren: clipping %g%% of values (should be 1%)\n',100*sum(clipInds(:))/numel(noise))
+                noise(clipInds)=stimulus.distribution{i}.normalizedClipVal;
+                noise=normalize(noise);
+                fprintf('*** hateren: %g%% values below 1/3 of max (should be 73%)',100*sum(noise(:)<(1/3)))
+
         end
+
     else
-        '***'
         stimulus.distribution{i}
-        '***'
         error('bad distribution')
+    end
+    
+    if isstruct(stimulus.loopDuration{i})
+        if isstruct(stimulus.distribution{i}) && strcmp(stimulus.distribution{i}.special,'sinusoidalFlicker')
+            error('can''t have rpts/unqs for sinusoidalFlicker')
+        end
+        
+        new=nan*zeros(size(noise,1),size(noise,2),totalFrames);
+        rpt=noise(:,:,1:chunkSize);
+        start=1;
+        unqPos=chunkSize+1;
+        for c=1:nc
+            for r=1:nrpu
+                new(:,:,start:start+chunkSize-1)=rpt;
+                start=start+chunkSize;
+            end
+            new(:,:,start:start+chunkSize-1)=noise(:,:,unqPos:unqPos+chunkSize-1);
+            start=start+chunkSize;
+            unqPos=unqPos+chunkSize;
+        end
+        if any(isnan(new(:)))
+            error('miss!')
+        end
+        if unqPos~=1+size(noise,3)
+            error('miss!')
+        end
+        noise=new;
     end
 
     try

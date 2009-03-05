@@ -175,12 +175,12 @@ numRepeatsPerUnique=4;
 
 hateren=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
-[noiseSpec.distribution]         =deal('gaussian', .01);
+[noiseSpec.distribution]         =deal({'gaussian', .01});
 
 fullfieldFlicker=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 [noiseSpec.distribution]         =deal({'sinusoidalFlicker',[1 5 10 25 50],[.1 .25 .5 .75 1],.1}); %temporal freqs, contrasts, gapSecs
-[noiseSpec.loopDuration]         =deal(5*5*5);
+[noiseSpec.loopDuration]         =deal(5*5*1);
 [noiseSpec.contrast]             =deal(1);
 [noiseSpec.patchHeight]          =deal(1);
 [noiseSpec.patchWidth]           =deal(1);

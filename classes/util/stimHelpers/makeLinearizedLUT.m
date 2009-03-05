@@ -280,6 +280,7 @@ end
 if all(diff(spyderCdPerMsquared)>0) && length(spyderCdPerMsquared)==length(vals)
     desiredVals=linspace(spyderCdPerMsquared(1),spyderCdPerMsquared(end),length(spyderCdPerMsquared));
     newLUT = interp1(spyderCdPerMsquared,vals,desiredVals,'linear')/vals(end); %consider pchip
+    newLUT = repmat(newLUT',1,3);
 else
     error('vals not monotonic -- should fit parametrically or check that data collection OK')
 end

@@ -50,23 +50,28 @@ if hz==0
     end
 end
 
+fprintf('about to compute stim\n')
 if isempty(stimulus.cache) || isempty(stimulus.hz) || stimulus.hz~=hz
     stimulus=computeFilteredNoise(stimulus,hz); %intent: stim always normalized
 
     if true && isstruct(stimulus.loopDuration{typeInd}) && size(stimulus.cache{typeInd},1)==1 && size(stimulus.cache{typeInd},2)==1 
         sca
         
+        cds=double(stimulus.loopDuration{typeInd}.cycleDurSeconds);
+        nrpu=double(stimulus.loopDuration{typeInd}.numRepeatsPerUnique);
+        nc=double(stimulus.distribution{typeInd}.numCycles);
+        
         if isfield(stimulus.distribution{typeInd}, 'origHz')
             efStimOrig=load('\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\hateren\ts001.txt');
             subplot(2,1,1)
 
-            plot(efStimOrig(1: round(stimulus.distribution{typeInd}.origHz * stimulus.loopDuration{typeInd}.cycleDurSeconds/(stimulus.loopDuration{typeInd}.numRepeatsPerUnique+1)  )))
+            plot(efStimOrig(1: round(stimulus.distribution{typeInd}.origHz * cds/(nrpu+1)  )))
             subplot(2,1,2)
         end
 
         efStim=squeeze(stimulus.cache{typeInd});
 
-        numChunks = length(efStim)/(stimulus.distribution{typeInd}.numCycles * (stimulus.loopDuration{typeInd}.numRepeatsPerUnique+1));
+        numChunks = length(efStim)/(nc * (nrpu+1));
         chunkLength = length(efStim)/numChunks;
         if numChunks ~= round(numChunks) || chunkLength ~= round(chunkLength)
             error('partial chunk')
@@ -83,6 +88,7 @@ if isempty(stimulus.cache) || isempty(stimulus.hz) || stimulus.hz~=hz
 else
     updateSM=false;
 end
+fprintf('done computing stim\n')
 
 pre=stimulus.cache{typeInd};
 

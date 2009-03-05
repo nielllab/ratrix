@@ -108,10 +108,10 @@ switch nargin
                         tmp.origHz=in.distribution{2};
                         tmp.normalizedClipVal=in.distribution{3};
                         
-                        if isscalar(tmp.origHz) && tmp.origHz>0 && isreal(tmp.origHz)
+                        if isscalar(tmp.origHz) && tmp.origHz>0 && isreal(tmp.origHz) && isfloat(tmp.origHz)
                             %pass
                         else
-                            error('origHz must be real scalar > 0')
+                            error('origHz must be real float scalar > 0')
                         end
                         
                         if isscalar(tmp.normalizedClipVal) && tmp.normalizedClipVal>=0 && tmp.normalizedClipVal<=1 && isreal(tmp.normalizedClipVal)

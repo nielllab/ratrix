@@ -13,7 +13,7 @@ switch TMclass
             catch
                 lastResult=[];
             end
-            lastCorrect=lastTrialRec.correct;
+            lastCorrect=lastTrialRec.trialDetails.correct;
 
             if any(strcmp(fields(lastTrialRec.stimDetails),'correctionTrial'))
                 lastWasCorrection=lastTrialRec.stimDetails.correctionTrial;

@@ -1,5 +1,5 @@
 function soundsToPlay = getSoundsToPlay(stimManager, ports, lastPorts, phase, stepsInPhase,msRewardSound, msPenaltySound, ...
-    targetOptions, distractorOptions, requestOptions, playRequestSoundLoop, trialManagerClass, correct)
+    targetOptions, distractorOptions, requestOptions, playRequestSoundLoop, trialManagerClass, trialDetails)
 % see doc in stimManager.calcStim.txt
 
 playLoopSounds={};
@@ -13,10 +13,10 @@ if strcmp(trialManagerClass, 'nAFC')
     elseif phase == 2 && any(ports(requestOptions))  
         % play stim sound (when stim is requested during phase 2)
         playLoopSounds{end+1} = 'keepGoingSound';
-    elseif phase == 3 && stepsInPhase <= 0 && correct
+    elseif phase == 3 && stepsInPhase <= 0 && trialDetails.correct
         % play correct sound
         playSoundSounds{end+1} = {'correctSound', msRewardSound};
-    elseif phase == 3 && stepsInPhase <= 0 && ~correct
+    elseif phase == 3 && stepsInPhase <= 0 && ~trialDetails.correct
         % play wrong sound
         playSoundSounds{end+1} = {'wrongSound', msPenaltySound};
     end   
@@ -41,6 +41,7 @@ elseif strcmp(trialManagerClass, 'freeDrinks')
 elseif strcmp(trialManagerClass, 'autopilot')
     % do nothing because we don't play any sounds in this case
 else
+    trialManagerClass
     error('default getSoundsToPlay should only be for non-phased cases');
 end
 

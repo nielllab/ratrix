@@ -37,6 +37,8 @@ try
     switch ensureMode
         case 'scalar'
             out=ensureScalar({trialRecords.(fieldPath)});
+        case 'scalarOrEmpty'
+            out=ensureScalarOrEmpty({trialRecords.(fieldPath)});
         case 'scalarLUT'
             try
                 out=ensureScalar({trialRecords.(fieldPath)});

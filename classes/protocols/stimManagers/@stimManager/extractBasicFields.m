@@ -50,7 +50,11 @@ bloat=false;
 [out.autoVersion compiledLUT]                                =extractFieldAndEnsure(trialRecords,{'protocolVersion','autoVersion'},'scalar',compiledLUT);
 [out.protocolDate compiledLUT]                               =extractFieldAndEnsure(trialRecords,{'protocolVersion','date'},'datenum',compiledLUT);
 % change correct to be something that needs to be computed if trialManagerClass=nAFC
-[out.correct compiledLUT]                                    =extractFieldAndEnsure(trialRecords,{'correct'},'scalar',compiledLUT);
+[out.correct compiledLUT]                                    =extractFieldAndEnsure(trialRecords,{'trialDetails', 'correct'},'scalarOrEmpty',compiledLUT);
+if length(out.correct)~=length(trialRecords)
+    out.correct=ones(1,length(trialRecords))*nan;
+end
+
 [out.trialManagerClass compiledLUT]                          =extractFieldAndEnsure(trialRecords,{'trialManagerClass'},'scalarLUT',compiledLUT);
 [out.stimManagerClass compiledLUT]                           =extractFieldAndEnsure(trialRecords,{'stimManagerClass'},'scalarLUT',compiledLUT);
 [out.schedulerClass compiledLUT]                             =extractFieldAndEnsure(trialRecords,{'schedulerClass'},'scalarLUT',compiledLUT);
@@ -105,7 +109,11 @@ end
 %         out.firstIRI(i)=diff(cell2mat(trialRecords(i).responseDetails.times(1:2)));
 %     end
 % end
+try
 verifyAllFieldsNCols(out,length(trialRecords));
+catch
+    keyboard
+end
 end
 
 % ==================================================================

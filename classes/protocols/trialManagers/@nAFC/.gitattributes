@@ -3,3 +3,4 @@
 /getResponsePorts.m -text
 /stationOKForTrialManager.m -text
 /checkPorts.m -text
+/updateTrialState.m -text

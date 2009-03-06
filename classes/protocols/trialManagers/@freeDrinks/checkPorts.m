@@ -1,6 +1,6 @@
 function out = checkPorts(tm,targetPorts,distractorPorts)
 
-if isempty(trialRecords(trialInd).targetPorts) && ~isempty(trialRecords(trialInd).distractorPorts)
+if isempty(targetPorts) && ~isempty(distractorPorts)
     error('cannot have distractor ports without target ports in freeDrinks');
 end
 

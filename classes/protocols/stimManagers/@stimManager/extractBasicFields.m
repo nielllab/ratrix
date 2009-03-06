@@ -86,6 +86,11 @@ end
 % 1/14/09 - added numRequestLicks and firstILI
 [out.numRequests compiledLUT]                                =extractFieldAndEnsure(trialRecords,{},'numRequests',compiledLUT);
 [out.firstIRI compiledLUT]                                   =extractFieldAndEnsure(trialRecords,{},'firstIRI',compiledLUT);
+
+% 3/5/09 - we need to calculate a 'response' field for analysis based either on trialRecords.response (old-style)
+% or trialRecords.phaseRecords.responseDetails.tries (new-style) for the phase labeled 'discrim'
+[out.response]                                               =getResponseFromTrialRecords(trialRecords);
+
 % out.numRequests=ones(1,length(trialRecords))*nan;
 % for i=1:length(trialRecords)
 %     if isfield(trialRecords(i),'responseDetails') && isfield(trialRecords(i).responseDetails,'tries') && ...
@@ -100,64 +105,11 @@ end
 %         out.firstIRI(i)=diff(cell2mat(trialRecords(i).responseDetails.times(1:2)));
 %     end
 % end
-
-% ==============================================================================================
-% old-style extraction - to be commented out 1/8/09
-% out.trialNumber                                 =ensureScalar({trialRecords.trialNumber});
-% out.sessionNumber                               =ensureScalar({trialRecords.sessionNumber});
-% out.date                                        =datenum(reshape([trialRecords.date],6,length(trialRecords))')';
-
-% temp=[trialRecords.station];
-if bloat out.stationID                          =ensureScalar({temp.id}); end
-% out.soundOn                                     =ensureScalar({temp.soundOn});
-if bloat [out.rewardMethod compiledLUT]         =ensureScalarOrAddCellToLUT({temp.rewardMethod},compiledLUT); end
-if bloat [out.MAC compiledLUT]                  =ensureScalarOrAddCellToLUT({temp.MACaddress},compiledLUT); end
-% out.physicalLocation                            =ensureEqualLengthVects({temp.physicalLocation});
-% out.numPorts                                    =ensureScalar({temp.numPorts});
-
-% out.step                                        =ensureScalar({trialRecords.trainingStepNum});
-% if isfield(trialRecords(1),'trainingStepName')
-%     [out.trainingStepName compiledLUT]          =ensureScalarOrAddCellToLUT({trialRecords.trainingStepName},compiledLUT);
-% else
-%     out.trainingStepName                        =ones(1,length(trialRecords))*nan;
-% end
-% [out.protocolName compiledLUT]                  =ensureScalarOrAddCellToLUT({trialRecords.protocolName},compiledLUT);
-% out.numStepsInProtocol                          =ensureScalar({trialRecords.numStepsInProtocol});
-
-% temp=[trialRecords.protocolVersion];
-% out.manualVersion                               =ensureScalar({temp.manualVersion});
-% out.autoVersion                                 =ensureScalar({temp.autoVersion});
-% out.protocolDate                                =datenum(reshape([temp.date],6,length(temp))')';
-if bloat out.protocolAuthor                     =ensureScalar({temp.author}); end
-
-% out.correct                                     =ensureScalar({trialRecords.correct});
-if bloat out.subjectsInBox                      =ensureTypedVector({trialRecords.subjectsInBox},'cell'); end %ensure vector cells of chars?
-% [out.trialManagerClass compiledLUT]             =ensureScalarOrAddCellToLUT({trialRecords.trialManagerClass},compiledLUT);
-% [out.stimManagerClass compiledLUT]              =ensureScalarOrAddCellToLUT({trialRecords.stimManagerClass},compiledLUT);
-% [out.schedulerClass compiledLUT]                =ensureScalarOrAddCellToLUT({trialRecords.schedulerClass},compiledLUT);
-% [out.criterionClass compiledLUT]                =ensureScalarOrAddCellToLUT({trialRecords.criterionClass},compiledLUT);
-% [out.reinforcementManagerClass compiledLUT]     =ensureScalarOrAddCellToLUT({trialRecords.reinforcementManagerClass},compiledLUT);
-% out.scaleFactor                                 =ensureEqualLengthVects({trialRecords.scaleFactor});
-% [out.type compiledLUT]                          =ensureScalarOrAddCellToLUT({trialRecords.type},compiledLUT); %ensure type check?
-% out.targetPorts                                 =ensureTypedVector({trialRecords.targetPorts},'index');
-% out.distractorPorts                             =ensureTypedVector({trialRecords.distractorPorts},'index');
-
-% out.response                                    =ensureScalar(cellfun(@encodeResponse,{trialRecords.response},out.targetPorts,out.distractorPorts,num2cell(out.correct),'UniformOutput',false));
-% if any(out.response==0)
-%     error('got zero response')
-% end
-
-% out.containedManualPokes                        =ensureScalar({trialRecords.containedManualPokes});
-% if ismember('didHumanResponse',fieldnames(trialRecords))
-%     out.didHumanResponse                        =ensureScalar({trialRecords.didHumanResponse});
-% else
-%     out.didHumanResponse                        =ensureScalar(num2cell(nan*zeros(1,length(trialRecords))));
-% end
-% out.containedForcedRewards                      =ensureScalar({trialRecords.containedForcedRewards});
-% out.didStochasticResponse                       =ensureScalar({trialRecords.didStochasticResponse});
-
 verifyAllFieldsNCols(out,length(trialRecords));
 end
+
+% ==================================================================
+% HELPER FUNCTIONS
 
 function out=encodeResult(result,targs,dstrs,correct)
 
@@ -227,6 +179,48 @@ catch
     [out compiledLUT] = addOrFindInLUT(compiledLUT, fieldArray);
 end
 
+end % end function
+
+function out = getResponseFromTrialRecords(trialRecords)
+% Get the trialRecords.response field if it exists, otherwise look for trialRecords.phaseRecords.responseDetails.tries
+% return -1 if neither exists...uh oh
+out=ones(1,length(trialRecords))*-1;
+
+if isfield(trialRecords,'response')
+    out=cell2mat(cellfun(@decideResponse,{trialRecords.response},'UniformOutput',false));
+end
+if isfield(trialRecords,'phaseRecords') && isfield(trialRecords,'result') % these two 'if' cases should be mutually exclusive in latest code, but not always been the case
+    out=cell2mat(cellfun(@getResponseFromTries,{trialRecords.phaseRecords},'UniformOutput',false));
+end
+end
+
+function out = decideResponse(response)
+resp=find(response);
+if length(resp)==1 && ~ischar(response)
+    out=resp;
+else
+    out=-1;
+end
+end % end function
+
+function out = getResponseFromTries(phaseRecords)
+try
+    pInd=find(strcmp({phaseRecords.phaseLabel},'discrim'));
+catch
+    pInd=[];
+end
+% we assume the last try of the 'discrim' phase to be the response
+if length(pInd)==1
+    try
+        tries=phaseRecords(pInd).responseDetails.tries;
+        response=tries{end};
+        out=decideResponse(response);
+    catch
+        out=-1;
+    end
+else
+    out=-1;
+end
 end % end function
 
 

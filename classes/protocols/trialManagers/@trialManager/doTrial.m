@@ -139,23 +139,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 error('targetPorts and distractorPorts must be row vectors')
             end
             
-            % 3/4/09 - TODO: replace with nAFC/freeDrinks-specific functions and abstract parent function
-            % check trialManager class specific port logic
-            % see http://132.239.158.177/trac/rlab_hardware/ticket/180
-            switch class(trialManager)
-                case 'nAFC'
-                    % check nAFC specific port logic
-                    % target/distractor cannot both be empty
-                    if isempty(trialRecords(trialInd).targetPorts) && isempty(trialRecords(trialInd).distractorPorts)
-                        error('targetPorts and distractorPorts cannot both be empty in nAFC');
-                    end
-                case 'freeDrinks'
-                    % check freeDrinks specific port logic
-                    % targetPorts cannot be empty if distractorPorts is not
-                    if isempty(trialRecords(trialInd).targetPorts) && ~isempty(trialRecords(trialInd).distractorPorts)
-                        error('cannot have distractor ports without target ports in freeDrinks');
-                    end
-            end
+            checkPorts(trialManager,trialRecords(trialInd).targetPorts,trialRecords(trialInd).distractorPorts);
             
             if ischar(trialRecords(trialInd).type) && strcmp(trialRecords(trialInd).type,'phased')
                 stimSpecs = stim;

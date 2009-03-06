@@ -385,6 +385,8 @@ switch plotType
             if (trialsPerDay(i))>0
                 when=floor((d.date(ss(i):ee(i))-d.date(ss(i)))*secondsPerDay)+1;
                 when=when(when<seccondsPerSession);  % don't look at trials after 1st session this day...
+                % 3/6/09 - somehow we got non monotonically increasing dates (maybe something changed the clock)
+                when(when<=0)=[];
                 timeVec(i,when)=1;  % mark each second a trial occured
                 ht=-i*(10/numDays);
                 plot(when,ht(ones(size(when))),'.','MarkerSize',1); %raster on the bottom

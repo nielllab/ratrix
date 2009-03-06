@@ -179,12 +179,13 @@ for i=1:length(ids)
         [matches tokens] = regexpi(subjectFiles{i}{j}, 'trialRecords_(\d+)-(\d+).*\.mat', 'match', 'tokens');
         rng=[str2num(tokens{1}{1}) str2num(tokens{1}{2})];
         if expectedTrialNumber ~= rng(1)
-%             dispStr=sprintf('skipping %d-%d',rng(1),rng(2));
-%             disp(dispStr);
+            dispStr=sprintf('skipping %d-%d where expected was %d\n',rng(1),rng(2),expectedTrialNumber);
+            disp(dispStr);
             continue;
         end
         addedRecords=true; % if we ever got passed the skip, then we added records and thus can delete compiledFile
-        fprintf('\tdoing %s of %d\n',subjectFiles{i}{j},ranges{i}(2,end));
+%         fprintf('\tdoing %s of %d\n',subjectFiles{i}{j},ranges{i}(2,end));
+        fprintf('\tdoing %s of %d with j=%d of %d\n',subjectFiles{i}{j},ranges{i}(2,end),j,length(subjectFiles{i}));
         warning('off','MATLAB:elementsNowStruc'); %expect some class defs to be out of date, will get structs instead of objects (shouldn't keep objects in records anyway)
         tr=load(subjectFiles{i}{j});
         warning('on','MATLAB:elementsNowStruc');
@@ -204,16 +205,16 @@ for i=1:length(ids)
         % to handle manual training step transitions gracefully
         uniqueTrainingSteps=unique([tr.trainingStepNum]);
         loadedClasses=classes;
-        loadedExpectedTrialNumber=expectedTrialNumber;
+%         loadedExpectedTrialNumber=expectedTrialNumber;
         
         for tsNum=uniqueTrainingSteps
             thisTsInds=find([tr.trainingStepNum]==tsNum);
             classes=loadedClasses;
-            expectedTrialNumber=loadedExpectedTrialNumber;
+%             expectedTrialNumber=loadedExpectedTrialNumber;
             
             % START COMPILE PROCESS
             % ================================================
-            for k=1:length(thisTsInds)
+            for k=thisTsInds
                 if tr(k).trialNumber ~= expectedTrialNumber
                     k
                     tr(k).trialNumber
@@ -238,7 +239,9 @@ for i=1:length(ids)
                     classes{3,end}=[];
                     ind=size(classes,2);
                 end
-                classes{3,ind}(end+1)=k;
+                 % this confusing term just means that we set the indices of trialRecords that belong to this class
+                 % to start indexing at 1, instead of wherever they might fall on the session's multiple trainingSteps
+                classes{3,ind}(end+1)=k-(thisTsInds(1)-1);
             end
 
             % it is very important that this function keep the same fieldNames in newBasicRecs as they were in trialRecords
@@ -267,8 +270,8 @@ for i=1:length(ids)
                     end
                     thisFieldValues = sessionLUT(thisField);
                 catch
-                    warningStr=sprintf('could not find %s in newBasicRecs - skipping',newBasicRecsToUpdate{n});
-                    warning(warningStr);
+%                     warningStr=sprintf('could not find %s in newBasicRecs - skipping',newBasicRecsToUpdate{n});
+%                     warning(warningStr);
                     continue;
                 end
                 [indices compiledLUT] = addOrFindInLUT(compiledLUT, thisFieldValues);
@@ -278,13 +281,13 @@ for i=1:length(ids)
                 end
     %             newBasicRecs.(fieldsInLUT{n}) = indices; % set new indices based on integrated LUT
             end
-
-
+            
             if isempty(compiledTrialRecords)
                 compiledTrialRecords=newBasicRecs;
             else
                 compiledTrialRecords=concatAllFields(compiledTrialRecords,newBasicRecs);
             end
+            
             for c=1:size(classes,2)
 
                 if length(classes{3,c})>0 %prevent subtle bug that is easy to write into extractDetailFields -- if you send zero trials to them, they may try to look deeper than the top level of fields, but they won't exist ('MATLAB:nonStrucReference') -- see example in crossModal.extractDetailFields()
@@ -334,8 +337,8 @@ for i=1:length(ids)
             % END COMPILE PROCESS
             % ================================================
         end % end for each trainingStep loop
-        
     end
+    
     % delete old compiledDetails file if we added records
     if addedRecords
         delete(compiledFile);

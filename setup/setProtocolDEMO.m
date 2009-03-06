@@ -90,16 +90,13 @@ ports=cellfun(@uint8,{1 3},'UniformOutput',false);
 % in.distribution               'binary', 'uniform', or one of the following forms:
 %                                   {'sinusoidalFlicker',[temporalFreqs],[contrasts],gapSecs} - each freq x contrast combo will be shown for equal time in random order, total time including gaps will be in.loopDuration
 %                                   {'gaussian',clipPercent} - choose variance so that clipPercent of an infinite stim would be clipped (includes both low and hi)
-%                                   {path, origHz, normalizedClipVal} -  path is to a file (either .txt or .mat, extension omitted, .txt loadable via load()) containing a single vector of stim values named 'noise', with original sampling rate origHz.  will clip values over normalizedClipVal.
-% in.contrast                   above stim has range 0-1 (and is already clipped), then multiply stim by this value
-% in.offset                     normalized value to add to stim after multiplying by contrast.  after this, values outside 0-1 will saturate.
+%                                   {path, origHz, normalizedClipVal} -
+%                                   path is to a file (either .txt or .mat, extension omitted, .txt loadable via load()) containing a single vector of stim values named 'noise', with original sampling rate origHz.  will clip values over normalizedClipVal.
 % in.startFrame                 'randomize' or integer indicating fixed frame number to start with
 % in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file)
 %                               to make uniques and repeats, pass {numRepeatsPerUnique numCycles cycleDurSeconds} - a cycle is a whole set of repeats and one unique - distribution cannot be sinusoidalFlicker
 
 [noiseSpec.distribution]         =deal({'gaussian' .01});
-[noiseSpec.offset]               =deal(0);
-[noiseSpec.contrast]             =deal(1);
 [noiseSpec.startFrame]           =deal(uint8(1)); %deal('randomize');
 [noiseSpec.loopDuration]         =deal(1);
 
@@ -143,7 +140,6 @@ noiseStim=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLumin
 [noiseSpec.orientation]         =deal(0);
 [noiseSpec.locationDistribution]=deal([0 0;1 0], [0 0;0 1]);
 [noiseSpec.distribution]         =deal('binary');
-[noiseSpec.contrast]             =deal(1);
 [noiseSpec.maskRadius]           =deal(100);
 [noiseSpec.kernelSize]           =deal(0);
 [noiseSpec.kernelDuration]       =deal(0);
@@ -168,7 +164,6 @@ numRepeatsPerUnique=4;
 [noiseSpec.loopDuration]         =deal({uint32(numRepeatsPerUnique) uint32(32) uint32((numRepeatsPerUnique+1)*8)}); %{numRepeatsPerUnique numCycles cycleDurSeconds}
 
 [noiseSpec.locationDistribution]=deal(1);
-[noiseSpec.contrast]             =deal(1);
 [noiseSpec.patchDims]            =deal(uint16([1 1]));
 [noiseSpec.patchHeight]          =deal(1);
 [noiseSpec.patchWidth]           =deal(1);
@@ -181,7 +176,6 @@ fullfieldFlicker=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTri
 
 [noiseSpec.distribution]         =deal({'sinusoidalFlicker',[1 5 10 25 50],[.1 .25 .5 .75 1],.1}); %temporal freqs, contrasts, gapSecs
 [noiseSpec.loopDuration]         =deal(5*5*1);
-[noiseSpec.contrast]             =deal(1);
 [noiseSpec.patchHeight]          =deal(1);
 [noiseSpec.patchWidth]           =deal(1);
 crftrf=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
@@ -200,7 +194,7 @@ ts8 = trainingStep(vh, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svn
 ts9 = trainingStep(vh, crftrf,  repeatIndefinitely(), noTimeOff(), svnRev); %crf/trf
 
 p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8, ts9});
-stepNum=uint8(9);
+stepNum=uint8(7);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

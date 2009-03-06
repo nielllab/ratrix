@@ -1,4 +1,4 @@
-%intent: stim output always normalized
+%intent: stim output always btw 0-1 (DO NOT NORMALIZE to cover whole range - example would be dark segment of natural timeseries)
 function stimulus=computeFilteredNoise(stimulus,hz)
 stimulus.hz=hz;
 
@@ -70,16 +70,18 @@ for i=1:length(stimulus.port)
         for j=1:length(stimulus.distribution{i}.conditions)
             noise=[noise stimulus.distribution{i}.conditions{j}{1}*makeSinusoid(hz,stimulus.distribution{i}.conditions{j}{2},dur) zeros(1,round(stimulus.distribution{i}.gapSecs*hz))];
         end
-        %noise=noise-.5; don't think i want this, right?
+        noise=.5+noise/2;
+        noise(noise>1)=1;
+        noise(noise<0)=0;
         noise=permute(noise,[3 1 2]);
         repmat(noise,[sz 1]); %shouldn't this be noise=?
     elseif ischar(stimulus.distribution{i}) && ismember( stimulus.distribution{i},  {'binary','uniform'} )
+        % consider adding offset/contrast for these types
         rand('twister',stimulus.seed{i});
         noise=rand([sz frames]);
         if strcmp(stimulus.distribution{i},'binary')
             noise=(noise>.5);
         end
-        %noise=noise-.5; don't think i want this, right?
     elseif isstruct(stimulus.distribution{i})
         switch stimulus.distribution{i}.special
             case 'gaussian'
@@ -98,20 +100,19 @@ for i=1:length(stimulus.port)
                     frames=0;
                 end
                 [noise stimulus.inds{i}]=loadStimFile(stimulus.distribution{i}.special,stimulus.distribution{i}.origHz,hz,frames/hz,stimulus.startFrame{i});
-                %noise=noise-.5; don't think i want this, right?
+
                 if size(noise,1)>1
                     noise=noise';
                 end
 
-                %noise=-.5:.01:.5;
                 noise=permute(noise,[3 1 2]);
                 repmat(noise,[sz 1]); %shouldn't this be noise=?
 
                 clipInds=noise>stimulus.distribution{i}.normalizedClipVal;
-                fprintf('*** hateren: clipping %g%% of values (should be 1%%)\n',100*sum(clipInds(:))/numel(noise))
+                fprintf('*** hateren: clipping %g%% of values (should be 1%% to match reinagel reid 2000)\n',100*sum(clipInds(:))/numel(noise))
                 noise(clipInds)=stimulus.distribution{i}.normalizedClipVal;
-                noise=normalize(noise);
-                fprintf('*** hateren: %g%% values below 1/3 of max (should be 73%%)\n',100*sum(noise(:)<(1/3))/numel(noise))
+                noise=noise/stimulus.distribution{i}.normalizedClipVal; %DO NOT NORMALIZE in case this whole clip is darker than the clip val
+                fprintf('*** hateren: %g%% values below 1/3 of max (should be 73%% to match reinagel reid 2000)\n',100*sum(noise(:)<(1/3)*max(noise(:)))/numel(noise))
 
         end
 
@@ -174,9 +175,11 @@ for i=1:length(stimulus.port)
         %stim=convn(noise,k,'same'); %slower than imfilter
         stim=imfilter(noise,k,'circular'); %allows looping, does it keep edges nice?
         fprintf('took %g to filter noise\n',toc)
+        %hmm - need to worry that filter will change contrast...  but cannot normalize...
     end
 
-    stim=normalize(stim);
+    stim(stim>1)=1;%DO NOT NORMALIZE!!!
+    stim(stim<0)=0;
 
     %         c = hist(stim(:),b);
     %         std(stim(:))

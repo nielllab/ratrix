@@ -16,13 +16,13 @@ elseif 2==exist([fileName '.txt'],'file')
     %     fprintf('textscan took %g secs\n',toc)
     %     noise=C{1};
     
-    noise=noise-min(noise);
-    
     encodeAsInt=false;
     if encodeAsInt %no file size gain, but RAM gain
         if any(noise ~= round(noise))
             error('file contained some non-integers')
         end
+        
+        noise=noise-min(noise);
         
         bits=ceil(log2(max(noise)));
         bits=num2str(2^nextpow2(bits));
@@ -46,7 +46,7 @@ if ~(isvector(noise) && isreal(noise) && isnumeric(noise))
     error('file contents not real numeric vector')
 end
 
-noise=normalize(noise);
+noise=normalize(noise); %IMPORTANT that this is relative to the whole file!
 
 outInds=[];
 if duration>0
@@ -115,7 +115,10 @@ if oldHz~=newHz
         error('resampling gave wrong length for new sig')
     end
     noise=newNoise;
-    noise=normalize(noise);
+    %noise=normalize(noise); MUST NOT NORMALIZE!  resampling has added artifacts outside of expected range such that normalizing will reduce contrast!
+    %                                             plus, if you are in a dark chunk of the file, you want it to stay that way!
+    noise(noise>1)=1;
+    noise(noise<0)=0;
 end
 
 end

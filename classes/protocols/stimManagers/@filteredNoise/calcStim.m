@@ -52,7 +52,7 @@ end
 
 fprintf('about to compute stim\n')
 if isempty(stimulus.cache) || isempty(stimulus.hz) || stimulus.hz~=hz
-    stimulus=computeFilteredNoise(stimulus,hz); %intent: stim always normalized
+    stimulus=computeFilteredNoise(stimulus,hz);
 
     if false && isstruct(stimulus.loopDuration{typeInd}) && size(stimulus.cache{typeInd},1)==1 && size(stimulus.cache{typeInd},2)==1 
         sca
@@ -94,7 +94,7 @@ pre=stimulus.cache{typeInd};
 
 details.hz=stimulus.hz;
 
-detailFields={'distribution','startFrame','contrast','offset','loopDuration','maskRadius','patchDims','patchHeight','patchWidth','background','orientation','kernelSize','kernelDuration','ratio','filterStrength','bound','inds','seed','sha1'};
+detailFields={'distribution','startFrame','loopDuration','maskRadius','patchDims','patchHeight','patchWidth','background','orientation','kernelSize','kernelDuration','ratio','filterStrength','bound','inds','seed','sha1'};
 for i=1:length(detailFields)
     details.(detailFields{i})=stimulus.(detailFields{i}){typeInd};
 end
@@ -141,18 +141,21 @@ if ~isempty(resolutions)
     d=sqrt(sum([height width].^2));
     [a b]=meshgrid(1:width,1:height);
     mask=reshape(mvnpdf([a(:) b(:)],[width height].*details.location,(details.maskRadius*d)^2*eye(2)),height,width);
-    mask=mask/max(mask(:));
+    mask=mask/max(mask(:)); %DO NOT also normalize bottom to zero!  will effectively change radius to be same as patch size.
 
-    out=details.contrast*out.*mask(:,:,ones(1,size(pre,3)))+details.offset;
+    out=out.*mask(:,:,ones(1,size(pre,3)));
 else
     if any([h w]~=1)
         error('LED only works with 1x1 output')
     end
-    out=details.contrast*pre+details.offset;
+    out=pre;
 end
 
-out(out<0)=0;
-out(out>1)=1;
+if any(out<0) || any(out>1)
+    error('vals outside range somehow')
+end
+%out(out<0)=0;
+%out(out>1)=1;
 %out=uint8(double(intmax('uint8'))*out);
 
 if details.correctionTrial;

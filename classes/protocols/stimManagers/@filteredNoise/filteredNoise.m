@@ -9,9 +9,7 @@ function s=filteredNoise(varargin)
 % in.distribution               'binary', 'uniform', or one of the following forms:
 %                                   {'sinusoidalFlicker',[temporalFreqs],[contrasts],gapSecs} - each freq x contrast combo will be shown for equal time in random order, total time including gaps will be in.loopDuration
 %                                   {'gaussian',clipPercent} - choose variance so that clipPercent of an infinite stim would be clipped (includes both low and hi)
-%                                   {path, origHz, normalizedClipVal} -  path is to a file (either .txt or .mat, extension omitted, .txt loadable via load()) containing a single vector of stim values named 'noise', with original sampling rate origHz.  will clip values over normalizedClipVal.
-% in.contrast                   above stim has range 0-1 (and is already clipped), then multiply stim by this value
-% in.offset                     normalized value to add to stim after multiplying by contrast.  after this, values outside 0-1 will saturate.
+%                                   {path, origHz, normalizedClipVal} - path is to a file (either .txt or .mat, extension omitted, .txt loadable via load()) containing a single vector of stim values named 'noise', with original sampling rate origHz.  will normalize whole file to normalizedClipVal (0-1), setting darkest val in file to 0 and values over normalizedClipVal to 1.
 % in.startFrame                 'randomize' or integer indicating fixed frame number to start with
 % in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file)
 %                               to make uniques and repeats, pass {numRepeatsPerUnique numCycles cycleDurSeconds} - a cycle is a whole set of repeats and one unique - distribution cannot be sinusoidalFlicker
@@ -32,7 +30,7 @@ function s=filteredNoise(varargin)
 % in.filterStrength             0 means no filtering (kernel is all zeros, except 1 in center), 1 means pure mvgaussian kernel (center not special), >1 means surrounding pixels more important
 % in.bound                      .5-1 edge percentile for long axis of kernel when parallel to window
 
-fieldNames={'port','distribution','contrast','offset','startFrame','loopDuration','locationDistribution','maskRadius','patchDims','patchHeight','patchWidth','background','orientation','kernelSize','kernelDuration','ratio','filterStrength','bound'};
+fieldNames={'port','distribution','startFrame','loopDuration','locationDistribution','maskRadius','patchDims','patchHeight','patchWidth','background','orientation','kernelSize','kernelDuration','ratio','filterStrength','bound'};
 for i=1:length(fieldNames)
     s.(fieldNames{i})=[];
 end
@@ -149,17 +147,17 @@ switch nargin
                     error('loopDuration must be real scalar >=0, zero loopDuration means 1 static looped frame, except for file stims, where it means play the whole file instead of a subset.  to make uniques and repeats, pass {numRepeatsPerUnique numCycles cycleDurSeconds} - a cycle is a whole set of repeats and one unique - distribution cannot be sinusoidalFlicker')
                 end
 
-                pos={in.contrast in.maskRadius in.kernelDuration in.filterStrength};
+                pos={in.maskRadius in.kernelDuration in.filterStrength};
                 for i=1:length(pos)
                     if isscalar(pos{i}) && isreal(pos{i}) && pos{i}>=0
                         %pass
                     else
-                        error('contrast, maskRadius, kernelDuration, and filterStrength must be real scalars >=0')
+                        error('maskRadius, kernelDuration, and filterStrength must be real scalars >=0')
                     end
                 end
 
 
-                norms={in.background in.patchHeight in.patchWidth in.kernelSize in.ratio in.offset};
+                norms={in.background in.patchHeight in.patchWidth in.kernelSize in.ratio};
                 goodNorms=true;
                 for i=1:length(norms)
                     if isscalar(norms{i}) && isreal(norms{i}) && norms{i}<=1
@@ -170,8 +168,6 @@ switch nargin
                                 %pass
                             elseif i==4 && in.kernelSize==0
                                 %pass
-                            elseif i==6 && in.offset==0
-                                %pass
                             else
                                 goodNorms=false;
                             end
@@ -181,7 +177,7 @@ switch nargin
                     end
                 end
                 if ~goodNorms
-                    error('background, patchHeight, patchWidth, kernelSize, ratio, and offset must be 0<x<=1, real scalars (exception: background, kernelSize, and offset can be 0, zero kernelSize means no spatial extent beyond 1 pixel (may still have kernelDuration>0))')
+                    error('background, patchHeight, patchWidth, kernelSize, and ratio must be 0<x<=1, real scalars (exception: background and kernelSize can be 0, zero kernelSize means no spatial extent beyond 1 pixel (may still have kernelDuration>0))')
                 end
 
 

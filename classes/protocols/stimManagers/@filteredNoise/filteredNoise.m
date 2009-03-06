@@ -9,10 +9,13 @@ function s=filteredNoise(varargin)
 % in.distribution               'binary', 'uniform', or one of the following forms:
 %                                   {'sinusoidalFlicker',[temporalFreqs],[contrasts],gapSecs} - each freq x contrast combo will be shown for equal time in random order, total time including gaps will be in.loopDuration
 %                                   {'gaussian',clipPercent} - choose variance so that clipPercent of an infinite stim would be clipped (includes both low and hi)
-%                                   {path, origHz, normalizedClipVal} - path is to a file (either .txt or .mat, extension omitted, .txt loadable via load()) containing a single vector of stim values named 'noise', with original sampling rate origHz.  will normalize whole file to normalizedClipVal (0-1), setting darkest val in file to 0 and values over normalizedClipVal to 1.
+%                                   {path, origHz, clipVal, clipType} - path is to a file (either .txt or .mat, extension omitted, .txt loadable via load()) containing a single vector of stim values named 'noise', with original sampling rate origHz.
+%                                       clipType:
+%                                       'normalized' will normalize whole file to clipVal (0-1), setting darkest val in file to 0 and values over clipVal to 1.
+%                                       'ptile' will normalize just the contiguous part of the file you are using to 0-1, clipping top clipVal (0-1) proportion of vals (considering only the contiguous part of the file you are using)
 % in.startFrame                 'randomize' or integer indicating fixed frame number to start with
 % in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file)
-%                               to make uniques and repeats, pass {numRepeatsPerUnique numCycles cycleDurSeconds} - a cycle is a whole set of repeats and one unique - distribution cannot be sinusoidalFlicker
+%                               to make uniques and repeats, pass {numRepeats numUniques numCycles chunkSeconds} - chunk refers to one repeat/unique - distribution cannot be sinusoidalFlicker
 %
 % patch properties:
 % in.locationDistribution       2-d density, will be normalized to stim area
@@ -102,49 +105,52 @@ switch nargin
                             error('clipPercent must be real scalar 0<=x<=1')
                         end
 
-                    elseif all(size(in.distribution)==[1 3]) && any([exist([tmp.special '.txt'],'file') exist([tmp.special '.mat'],'file')]==2)
+                    elseif all(size(in.distribution)==[1 4]) && ismember(in.distribution{4},{'ptile','normalized'}) && any([exist([tmp.special '.txt'],'file') exist([tmp.special '.mat'],'file')]==2)
                         tmp.origHz=in.distribution{2};
-                        tmp.normalizedClipVal=in.distribution{3};
-                        
+                        tmp.clipVal=in.distribution{3};
+                        tmp.clipType=in.distribution{4};
+                                                
                         if isscalar(tmp.origHz) && tmp.origHz>0 && isreal(tmp.origHz) && isfloat(tmp.origHz)
                             %pass
                         else
                             error('origHz must be real float scalar > 0')
                         end
                         
-                        if isscalar(tmp.normalizedClipVal) && tmp.normalizedClipVal>=0 && tmp.normalizedClipVal<=1 && isreal(tmp.normalizedClipVal)
+                        if isscalar(tmp.clipVal) && tmp.clipVal>=0 && tmp.clipVal<=1 && isreal(tmp.clipVal)
                             %pass
                         else
-                            error('normalizedClipVal must be real scalar 0<=x<=1')
+                            error('clipVal must be real scalar 0<=x<=1')
                         end
                     else
-                        error('cell vector distribution must be one of {''gaussian'',clipPercent},  {''sinusoidalFlicker'',[temporalFreqs],[contrasts],gapSecs}, {filePath, origHz, normalizedClipVal} (filePath a string containing a file name (either .txt or .mat, extension omitted, .txt loadable via load())')
+                        error('cell vector distribution must be one of {''gaussian'',clipPercent},  {''sinusoidalFlicker'',[temporalFreqs],[contrasts],gapSecs}, {filePath, origHz, clipVal, clipType} (filePath a string containing a file name (either .txt or .mat, extension omitted, .txt loadable via load()), clipType in {''ptile'',''normalized''}')
                     end
                     varargin{1}(j).distribution=tmp;
                 else
                     error('distribution must be one of ''uniform'', ''binary'', or a cell vector')
                 end
 
-
-
                 if isscalar(in.loopDuration) && isreal(in.loopDuration) && in.loopDuration>=0
                     %pass
-                elseif iscell(in.loopDuration) && isvector(in.loopDuration) && all(size(in.loopDuration)==[1 3]) && ~isSinusoidalFlicker
-                    tmp.numRepeatsPerUnique = in.loopDuration{1};
-                    tmp.numCycles =  in.loopDuration{2};
-                    tmp.cycleDurSeconds =  in.loopDuration{3};
-                    if isscalar(tmp.numRepeatsPerUnique) && isinteger(tmp.numRepeatsPerUnique) && tmp.numRepeatsPerUnique>=0 && ...
+                elseif iscell(in.loopDuration) && isvector(in.loopDuration) && all(size(in.loopDuration)==[1 4]) && ~isSinusoidalFlicker
+                    tmp.numRepeats = in.loopDuration{1};
+                    tmp.numUniques = in.loopDuration{2};
+                    tmp.numCycles =  in.loopDuration{3};
+                    tmp.chunkSeconds =  in.loopDuration{4};
+                    if isscalar(tmp.numRepeats) && isinteger(tmp.numRepeats) && tmp.numRepeats>=0 && ...
+                            isscalar(tmp.numUniques) && isinteger(tmp.numUniques) && tmp.numUniques>=0 && ...
                             isscalar(tmp.numCycles) && isinteger(tmp.numCycles) && tmp.numCycles>0 && ...
-                            isscalar(tmp.cycleDurSeconds) && isreal(tmp.cycleDurSeconds) && isnumeric(tmp.cycleDurSeconds) && tmp.cycleDurSeconds>0
-                        if ~strcmp(class(tmp.numRepeatsPerUnique),class(tmp.numCycles)) || ~strcmp(class(tmp.numRepeatsPerUnique),class(tmp.cycleDurSeconds))
-                            warning('there can be int overflow problems with rpts/unqs if you''re not careful')
-                        end
+                            isscalar(tmp.chunkSeconds) && isreal(tmp.chunkSeconds) && isnumeric(tmp.chunkSeconds) && tmp.chunkSeconds>0
+                        %convert to doubles to avoid int overflow issues when used in computeFilteredNoise
+                        tmp.numRepeats = double(tmp.numRepeats);
+                        tmp.numUniques = double(tmp.numUniques);
+                        tmp.numCycles =  double(tmp.numCycles);
+                        tmp.chunkSeconds =  double(tmp.chunkSeconds);
                         varargin{1}(j).loopDuration=tmp;
                     else
-                        error('numRepeatsPerUnique must be scalar integer >=0, numCycles must be scalar integer >0, and cycleDurSeconds must be scalar numeric real >0')
+                        error('numRepeats and numUniques must be scalar integers >=0, numCycles must be scalar integer >0, and chunkSeconds must be scalar numeric real >0')
                     end
                 else
-                    error('loopDuration must be real scalar >=0, zero loopDuration means 1 static looped frame, except for file stims, where it means play the whole file instead of a subset.  to make uniques and repeats, pass {numRepeatsPerUnique numCycles cycleDurSeconds} - a cycle is a whole set of repeats and one unique - distribution cannot be sinusoidalFlicker')
+                    error('loopDuration must be real scalar >=0, zero loopDuration means 1 static looped frame, except for file stims, where it means play the whole file instead of a subset. to make uniques and repeats, pass {numRepeats numUniques numCycles chunkSeconds} - chunk refers to one repeat/unique - distribution cannot be sinusoidalFlicker')
                 end
 
                 pos={in.maskRadius in.kernelDuration in.filterStrength};

@@ -90,11 +90,13 @@ ports=cellfun(@uint8,{1 3},'UniformOutput',false);
 % in.distribution               'binary', 'uniform', or one of the following forms:
 %                                   {'sinusoidalFlicker',[temporalFreqs],[contrasts],gapSecs} - each freq x contrast combo will be shown for equal time in random order, total time including gaps will be in.loopDuration
 %                                   {'gaussian',clipPercent} - choose variance so that clipPercent of an infinite stim would be clipped (includes both low and hi)
-%                                   {path, origHz, normalizedClipVal} -
-%                                   path is to a file (either .txt or .mat, extension omitted, .txt loadable via load()) containing a single vector of stim values named 'noise', with original sampling rate origHz.  will clip values over normalizedClipVal.
+%                                   {path, origHz, clipVal, clipType} - path is to a file (either .txt or .mat, extension omitted, .txt loadable via load()) containing a single vector of stim values named 'noise', with original sampling rate origHz.
+%                                       clipType:
+%                                       'normalized' will normalize whole file to clipVal (0-1), setting darkest val in file to 0 and values over clipVal to 1.
+%                                       'ptile' will normalize just the contiguous part of the file you are using to 0-1, clipping top clipVal (0-1) proportion of vals (considering only the contiguous part of the file you are using)
 % in.startFrame                 'randomize' or integer indicating fixed frame number to start with
 % in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file)
-%                               to make uniques and repeats, pass {numRepeatsPerUnique numCycles cycleDurSeconds} - a cycle is a whole set of repeats and one unique - distribution cannot be sinusoidalFlicker
+%                               to make uniques and repeats, pass {numRepeats numUniques numCycles chunkSeconds} - chunk refers to one repeat/unique - distribution cannot be sinusoidalFlicker
 
 [noiseSpec.distribution]         =deal({'gaussian' .01});
 [noiseSpec.startFrame]           =deal(uint8(1)); %deal('randomize');
@@ -159,9 +161,9 @@ else
     ts001 = '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\hateren\ts001';
 end
 
-[noiseSpec.distribution]         =deal({ts001, 1200, 12800/32767}); %for clip val, see pam email to Alex Casti on January 25, 2005, and Reinagel Reid 2000
-numRepeatsPerUnique=4;
-[noiseSpec.loopDuration]         =deal({uint32(numRepeatsPerUnique) uint32(32) uint32((numRepeatsPerUnique+1)*8)}); %{numRepeatsPerUnique numCycles cycleDurSeconds}
+[noiseSpec.distribution]         =deal({ts001, 1200, .01, 'ptile'}); %12800/32767 for normalized clipVal, see pam email to Alex Casti on January 25, 2005, and Reinagel Reid 2000
+[noiseSpec.loopDuration]         =deal({uint32(60) uint32(0) uint32(1) uint32(30)}); %{numRepeats numUniques numCycles chunkSeconds}
+
 
 [noiseSpec.locationDistribution]=deal(1);
 [noiseSpec.patchDims]            =deal(uint16([1 1]));

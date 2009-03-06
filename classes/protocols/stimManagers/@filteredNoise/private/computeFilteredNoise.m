@@ -46,15 +46,9 @@ for i=1:length(stimulus.port)
     %must be a deep reason this is same as pythagorean
 
     if isstruct(stimulus.loopDuration{i})
-        
-        %convert to doubles to avoid int overflow issues
-        cds=double(stimulus.loopDuration{i}.cycleDurSeconds);
-        nrpu=double(stimulus.loopDuration{i}.numRepeatsPerUnique);
-        nc=double(stimulus.loopDuration{i}.numCycles);
-        
-        chunkSize=round(hz*cds/(1+nrpu)); %number of frames in a single repeat or unique
-        frames=chunkSize*(1+nc); %the number of raw frames we need, before making the repeats/uniques
-        totalFrames=nc*chunkSize*(1+nrpu);
+        chunkSize=round(hz*stimulus.loopDuration{i}.chunkSeconds); %number of frames in a single repeat or unique
+        frames=chunkSize*(1 + stimulus.loopDuration{i}.numCycles*stimulus.loopDuration{i}.numUniques); %the number of raw frames we need, before making the repeats/uniques
+        totalFrames=stimulus.loopDuration{i}.numCycles*chunkSize*(stimulus.loopDuration{i}.numRepeats+stimulus.loopDuration{i}.numUniques);
     else
         frames=max(1,round(stimulus.loopDuration{i}*hz));
     end
@@ -94,28 +88,38 @@ for i=1:length(stimulus.port)
                 fprintf('*** gaussian: clipping %g%% of values (should be %g%%)\n',100*(sum(hiClipInds(:))+sum(loClipInds(:)))/numel(noise),100*stimulus.distribution{i}.clipPercent)
                 noise(hiClipInds)=1;
                 noise(loClipInds)=0;
-
+                
             otherwise
                 if ~isstruct(stimulus.loopDuration{i}) && stimulus.loopDuration{i}==0
                     frames=0;
                 end
                 [noise stimulus.inds{i}]=loadStimFile(stimulus.distribution{i}.special,stimulus.distribution{i}.origHz,hz,frames/hz,stimulus.startFrame{i});
-
+                
                 if size(noise,1)>1
                     noise=noise';
                 end
-
+                
                 noise=permute(noise,[3 1 2]);
                 repmat(noise,[sz 1]); %shouldn't this be noise=?
-
-                clipInds=noise>stimulus.distribution{i}.normalizedClipVal;
+                
+                switch stimulus.distribution{i}.clipType
+                    case 'normalized'
+                        %DO NOT NORMALIZE - want to keep clip relative to whole file
+                        clipPoint=stimulus.distribution{i}.clipVal;
+                    case 'ptile'
+                        noise=normalize(noise);
+                        clipPoint=prctile(noise,100*(1-stimulus.distribution{i}.clipVal));
+                    otherwise
+                        error('bad clipType')
+                end
+                
+                clipInds=noise>clipPoint;
                 fprintf('*** hateren: clipping %g%% of values (should be 1%% to match reinagel reid 2000)\n',100*sum(clipInds(:))/numel(noise))
-                noise(clipInds)=stimulus.distribution{i}.normalizedClipVal;
-                noise=noise/stimulus.distribution{i}.normalizedClipVal; %DO NOT NORMALIZE in case this whole clip is darker than the clip val
+                noise(clipInds)=clipPoint;
+                noise=noise/clipPoint; %DO NOT NORMALIZE in case the whole clip is darker than the clip val or brighter than zero
                 fprintf('*** hateren: %g%% values below 1/3 of max (should be 73%% to match reinagel reid 2000)\n',100*sum(noise(:)<(1/3)*max(noise(:)))/numel(noise))
-
         end
-
+        
     else
         stimulus.distribution{i}
         error('bad distribution')
@@ -130,14 +134,16 @@ for i=1:length(stimulus.port)
         rpt=noise(:,:,1:chunkSize);
         start=1;
         unqPos=chunkSize+1;
-        for c=1:nc
-            for r=1:nrpu
+        for c=1:stimulus.loopDuration{i}.numCycles
+            for r=1:stimulus.loopDuration{i}.numRepeats
                 new(:,:,start:start+chunkSize-1)=rpt;
                 start=start+chunkSize;
             end
-            new(:,:,start:start+chunkSize-1)=noise(:,:,unqPos:unqPos+chunkSize-1);
-            start=start+chunkSize;
-            unqPos=unqPos+chunkSize;
+            for u=1:stimulus.loopDuration{i}.numUniques
+                new(:,:,start:start+chunkSize-1)=noise(:,:,unqPos:unqPos+chunkSize-1);
+                start=start+chunkSize;
+                unqPos=unqPos+chunkSize;
+            end
         end
         if any(isnan(new(:)))
             error('miss!')

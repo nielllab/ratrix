@@ -57,21 +57,17 @@ if isempty(stimulus.cache) || isempty(stimulus.hz) || stimulus.hz~=hz
     if false && isstruct(stimulus.loopDuration{typeInd}) && size(stimulus.cache{typeInd},1)==1 && size(stimulus.cache{typeInd},2)==1 
         sca
         
-        cds=double(stimulus.loopDuration{typeInd}.cycleDurSeconds);
-        nrpu=double(stimulus.loopDuration{typeInd}.numRepeatsPerUnique);
-        nc=double(stimulus.loopDuration{typeInd}.numCycles);
-        
         if isfield(stimulus.distribution{typeInd}, 'origHz')
-            efStimOrig=load('\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\hateren\ts001.txt');
+            efStimOrig=load([stimulus.distribution{typeInd}.special '.txt']);
             subplot(2,1,1)
 
-            plot(efStimOrig(1: round(stimulus.distribution{typeInd}.origHz * cds/(nrpu+1)  )))
+            plot(efStimOrig(1: round(stimulus.distribution{typeInd}.origHz * stimulus.loopDuration{typeInd}.chunkSeconds  )))
             subplot(2,1,2)
         end
 
         efStim=squeeze(stimulus.cache{typeInd});
 
-        chunkLength = length(efStim)/(nc * (nrpu+1));
+        chunkLength = length(efStim)/(stimulus.loopDuration{typeInd}.numCycles * (stimulus.loopDuration{typeInd}.numRepeats+stimulus.loopDuration{typeInd}.numUniques));
         numChunks = length(efStim)/chunkLength;
         if numChunks ~= round(numChunks) || chunkLength ~= round(chunkLength)
             error('partial chunk')

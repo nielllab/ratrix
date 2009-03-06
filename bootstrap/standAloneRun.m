@@ -54,7 +54,7 @@ else
         end
 
         machines={{'1U',mac,[1 1 1]}};
-        rx=createRatrixWithDefaultStations(machines,dataPath,'localTimed',false); %last argument is localMultiDisplaySetup flag - false if single monitor, true only if dual displays
+        rx=createRatrixWithDefaultStations(machines,dataPath,'localTimed');
         permStorePath=fullfile(dataPath,'PermanentTrialRecordStore');
         mkdir(permStorePath);
         rx=setStandAlonePath(rx,permStorePath);

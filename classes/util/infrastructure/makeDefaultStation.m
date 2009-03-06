@@ -42,7 +42,21 @@ if ~exist('rewardMethod','var') || isempty(rewardMethod)
 end
 
 if ~exist('screenNum','var') || isempty(screenNum)
-    screenNum=int8(max(Screen('Screens')));
+
+    screenNum=int8(0);
+    
+    if length(Screen('Screens'))>1
+        [a b]=getMACaddress;
+        if a
+            switch b
+                case '001D7D9ACF80' %phys rig
+                    %screenNum=int8(max(Screen('Screens')));
+                    screenNum=int8(1);
+                otherwise
+                    %pass
+            end
+        end
+    end
 end
 
 if ~exist('soundOn','var') || isempty(soundOn)

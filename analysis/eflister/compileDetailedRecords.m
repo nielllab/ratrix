@@ -179,13 +179,12 @@ for i=1:length(ids)
         [matches tokens] = regexpi(subjectFiles{i}{j}, 'trialRecords_(\d+)-(\d+).*\.mat', 'match', 'tokens');
         rng=[str2num(tokens{1}{1}) str2num(tokens{1}{2})];
         if expectedTrialNumber ~= rng(1)
-            dispStr=sprintf('skipping %d-%d where expected was %d\n',rng(1),rng(2),expectedTrialNumber);
-            disp(dispStr);
+%             dispStr=sprintf('skipping %d-%d where expected was %d\n',rng(1),rng(2),expectedTrialNumber);
+%             disp(dispStr);
             continue;
         end
         addedRecords=true; % if we ever got passed the skip, then we added records and thus can delete compiledFile
-%         fprintf('\tdoing %s of %d\n',subjectFiles{i}{j},ranges{i}(2,end));
-        fprintf('\tdoing %s of %d with j=%d of %d\n',subjectFiles{i}{j},ranges{i}(2,end),j,length(subjectFiles{i}));
+        fprintf('\tdoing %s of %d\n',subjectFiles{i}{j},ranges{i}(2,end));
         warning('off','MATLAB:elementsNowStruc'); %expect some class defs to be out of date, will get structs instead of objects (shouldn't keep objects in records anyway)
         tr=load(subjectFiles{i}{j});
         warning('on','MATLAB:elementsNowStruc');
@@ -205,12 +204,10 @@ for i=1:length(ids)
         % to handle manual training step transitions gracefully
         uniqueTrainingSteps=unique([tr.trainingStepNum]);
         loadedClasses=classes;
-%         loadedExpectedTrialNumber=expectedTrialNumber;
         
         for tsNum=uniqueTrainingSteps
             thisTsInds=find([tr.trainingStepNum]==tsNum);
             classes=loadedClasses;
-%             expectedTrialNumber=loadedExpectedTrialNumber;
             
             % START COMPILE PROCESS
             % ================================================

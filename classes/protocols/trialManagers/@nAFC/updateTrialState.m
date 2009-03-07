@@ -12,7 +12,6 @@ function [tm trialDetails result spec rewardSizeULorMS requestRewardSizeULorMS .
 %   - update the TM's RM if neceesary
 
 rewardSizeULorMS=0;
-requestRewardSizeULorMS=0;
 msPuff=0;
 msRewardSound=0;
 msPenalty=0;
@@ -56,7 +55,6 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) &&
     if updateRM
         tm=setReinforcementManager(tm,rm);
     end
-    requestRewardSizeULorMS=0; % we don't want to get a request value here, because the check for requests is later
     
     if correct
         msPuff=0;
@@ -135,7 +133,7 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) &&
 end % end reward handling
 
 % call parent's updateTrialState() to do the request reward handling
-[tm.trialManager] = ...
+[tm.trialManager garbage garbage garbage garbage requestRewardSizeULorMS] = ...
     updateTrialState(tm.trialManager, sm, result, spec, ports, lastPorts, ...
     targetPorts, requestPorts, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
     floatprecision, textures, destRect, ...

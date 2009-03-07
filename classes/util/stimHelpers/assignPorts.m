@@ -13,7 +13,15 @@ switch TMclass
             catch
                 lastResult=[];
             end
-            lastCorrect=lastTrialRec.trialDetails.correct;
+            if isfield(lastTrialRec,'trialDetails') && isfield(lastTrialRec.trialDetails,'correct')
+                lastCorrect=lastTrialRec.trialDetails.correct;
+            else
+                try
+                    lastCorrect=lastTrialRec.correct;
+                catch
+                    lastCorrect=[];
+                end
+            end
 
             if any(strcmp(fields(lastTrialRec.stimDetails),'correctionTrial'))
                 lastWasCorrection=lastTrialRec.stimDetails.correctionTrial;

@@ -126,3 +126,4 @@ infrastructure/upize.m -text
 matlaby/findClosestInds.m -text
 matlaby/normalize.m -text
 stimHelpers/makeLinearizedLUT.m -text
+matlaby/ensureScalarOrEmpty.m -text

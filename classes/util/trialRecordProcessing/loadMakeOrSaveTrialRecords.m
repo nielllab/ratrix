@@ -93,7 +93,7 @@ for ii=1:length(fields)
             end
             fieldsInLUT{end+1}=fieldPath;
         elseif isstruct(trialRecords(1).(fn)) && ~isempty(trialRecords(1).(fn)) && ~strcmp(fn,'errorRecords')...
-                && ~strcmp(fn,'responseDetails') && ~strcmp(fn,'phaseRecords')% check not an empty struct
+                && ~strcmp(fn,'responseDetails') && ~strcmp(fn,'phaseRecords') && ~strcmp(fn,'trialDetails')% check not an empty struct
             % 12/23/08 - note that this assumes that all fields are the same structurally throughout this session
             % this doesn't work in the case of errorRecords, which is empty sometimes, and non-empty other times
             % this is a struct - recursively call processFields on all fields of the struct

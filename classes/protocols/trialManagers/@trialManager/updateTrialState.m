@@ -4,12 +4,9 @@ function [tm trialDetails result spec rewardSizeULorMS requestRewardSizeULorMS .
     targetPorts, requestPorts, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
     floatprecision, textures, destRect, ...
     requestRewardDone, checkCorrect)
-% This function is a tm-specific method to update trial state before every flip.
+% This function is a TM base class method to update trial state before every flip.
 % Things done here include:
-%   - set trialRecords.correct and trialRecords.result as necessary
-%   - call RM's calcReinforcement as necessary
-%   - update the stimSpec as necessary (with correctStim() and errorStim())
-%   - update the TM's RM if neceesary
+% - check for request rewards
 
 rewardSizeULorMS=0;
 requestRewardSizeULorMS=0;

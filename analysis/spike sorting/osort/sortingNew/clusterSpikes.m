@@ -112,7 +112,7 @@ for i=2:till
     end
     
     if mod(i,100)==0
-        i
+        disp(sprintf('clustering spike %d of %d',i,till))
     end
 end
 

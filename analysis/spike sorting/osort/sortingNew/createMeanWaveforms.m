@@ -29,7 +29,7 @@ for meanClustersToConsider=1:size(meanSpikeForms,1)
     end
 end
 
-meanClustersToConsider
+% meanClustersToConsider
 
 nrAssigned=[];
 for i=1:meanClustersToConsider
@@ -37,8 +37,8 @@ for i=1:meanClustersToConsider
     nrAssigned(i) = rankedClusters(end+1-i,2);
 end
 
-nrAssigned
-nrSpikes
+% nrAssigned
+% nrSpikes
 
 %
 %meanWaveforms -> is ordered according to rank.

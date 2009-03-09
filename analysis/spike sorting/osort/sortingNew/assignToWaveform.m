@@ -58,7 +58,7 @@ thres = ((globalStd.^2)*weights)/256;
 %avMean = 1/2*mean( meanWaveforms(:,95) )
 upperEnvelope= meanWaveforms + stdEstimate*envelopeSize; %repmat(weightsInv'*avMean, size(meanWaveforms,1),1);
 lowerEnvelope= meanWaveforms - stdEstimate*envelopeSize; %repmat(weightsInv'*avMean, size(meanWaveforms,1),1);
-['std estimate used for envelope is ' num2str(stdEstimate)]
+disp(['std estimate used for envelope is ' num2str(stdEstimate)])
 
 %----
 

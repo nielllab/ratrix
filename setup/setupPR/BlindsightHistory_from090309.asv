@@ -1,0 +1,27 @@
+%090309
+% history of setProtocol commands run for all blindsight rats for Pam's new
+% server in the Male room.
+
+ValidRats={'307','309','297','298','299','302'};  
+
+% FAN will add rats to rack?
+cd('C:\Documents and Settings\rlab\Desktop\Ratrix\bootstrap') % refers to rack1Temp tag
+setupEnvironment
+dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep); 
+r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
+subjIDs=ValidRats;
+addNewSubject(r,subjIDs); 
+
+%run setprotocol to assign rats to protocols
+% 299 ready for AdvancedVisionBattery!
+setProtocolAdvancedVisionBattery({'299'}); % assign these rats to step 1 of image task
+
+% 297 is just now ready for step 8 of previous protocol (hard motion),
+% needs hand graduation
+% 298 is on step 8 long time but not stable (falls & recovers each day)
+% 302 looks like 298
+
+% 307 still at chance on 6 (4 days), should stay on easy motion a bit longer
+% 309 slightly above chance on 6 (4 days), should stay on easy motion a bit longer
+
+

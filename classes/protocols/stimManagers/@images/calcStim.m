@@ -124,7 +124,7 @@ if ~isempty(trialRecords) && length(trialRecords)>1 % added length check because
 else
     lastRec=[];
 end
-[targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts);
+[targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass);
 
 %assign the correct answer to the target port (defined to be first file listed in the trialDistribution entry)
 pics=cell(totalPorts,2);

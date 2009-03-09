@@ -1,5 +1,6 @@
-function [doFramePulse expertCache dynamicDetails textLabel i] = ...
-    drawExpertFrame(stimulus,stim,i,phaseStartTime,window,textLabel,floatprecision,destRect,filtMode,expertCache,ifi,scheduledFrameNum,dropFrames)
+function [doFramePulse expertCache dynamicDetails textLabel i dontclear] = ...
+    drawExpertFrame(stimulus,stim,i,phaseStartTime,window,textLabel,destRect,...
+    filtMode,expertCache,ifi,scheduledFrameNum,dropFrames,dontclear)
 % implements expert mode for images - calls PTB drawing functions directly, leaving drawText and drawingFinished to stimOGL
 %
 % state.destRect
@@ -20,6 +21,7 @@ else
 end
 dynamicDetails=[];
 doFramePulse=true;
+floatprecision=0;
 
 % % try simple thing for now
 % imagestex=Screen('MakeTexture',state.window,state.img,0,0,state.floatprecision);

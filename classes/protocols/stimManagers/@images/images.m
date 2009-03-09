@@ -10,8 +10,13 @@ function s=images(varargin)
 % trial chosen according to probabilities provided (will be normalized)
 % image names should not include path or extension
 % images must reside in directory indicated and be .png's with alpha channels
-% drawingMode is an optional argument that specifies drawing in 'expert' mode instead of 'static' (default)
-% imageSelection mode is either 'normal' or 'deck' (deck means we make use of the deck-style card selection used in v0.8)
+% 
+% imageSelectionMode is either 'normal' or 'deck' (deck means we make use of the deck-style card selection used in v0.8)
+% size is a [2x1] vector that specifies a range from which to randomly select a size for the images (varies from 0-1)
+% sizeyoked is a flag that indicates if all images have same size, or if to randomly draw a size for each image
+% rotation is a [2x1] vector that specifies ar range from which to randomly select a rotation value for the images (in degrees!)
+%   - the rotation is the same for all images (ie always yoked)
+% drawingMode is an optional argument that specifies drawing in 'expert' versus 'static' mode (default is 'expert')
 
 s.directory = '';
 s.background=0;

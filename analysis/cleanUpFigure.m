@@ -1,5 +1,8 @@
 function cleanUpFigure(f,settings)
 
+if ~exist('f','var') || isempty(f)
+   f=gcf;
+end
 
 if ~exist('settings','var') || isempty(settings)
    settings.default=1;
@@ -24,6 +27,10 @@ end
 
 if ~ismember('fontSize',fields(settings)) 
     settings.fontSize=14;
+end
+
+if ~ismember('tickDir',fields(settings)) 
+    settings.tickDir='out';
 end
 
 for i=1:length(f)
@@ -67,8 +74,9 @@ set(a,'LineWidth', settings.AxisLineWidth)
 if settings.turnOffTics
     set(a,'TickLength', [0.001 0])
 end
-set(a,'TickDir', 'out')
-set(gca,'fontSize', settings.fontSize)
+if settings.tickDir
+    set(a,'TickDir', settings.tickDir)
+end
 children=get(a, 'Children');
 doClassSpecificAction(children,settings)
 succ=1;

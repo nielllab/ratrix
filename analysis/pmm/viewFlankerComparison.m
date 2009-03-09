@@ -1,4 +1,4 @@
-function [delta CI deltas CIs]=viewFlankerComparison(names,params,cMatrix,statTypes,subjects,diffEdges,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot)
+function [delta CI deltas CIs]=viewFlankerComparison(names,params,cMatrix,statTypes,subjects,diffEdges,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot, objectColors)
 % params- from getFlankerStats
 % names-  from getFlankerStats
 % cMatrix- cell array 2xN numberComparison  example with N=1 comparison:
@@ -85,6 +85,22 @@ if ~exist('multiComparePerPlot','var') || isempty(multiComparePerPlot)
     multiComparePerPlot=false;
 end
 
+if ~exist('objectColors','var') || isempty(objectColors)
+    objectColors.histSig=[.8 0 0];
+    objectColors.histInsig=[0 0 0];
+    objectColors.subjectSig=[.8 0 0];
+    objectColors.subjectInsig=[0 0 0];
+end
+
+if ~exist('yScaling','var') || isempty(yScaling)
+    yScaling=[40 20 20 20];
+end
+dataFraction=yScaling(1)/sum(yScaling);
+gapFraction=yScaling(2)/sum(yScaling);
+histFraction=yScaling(3)/sum(yScaling);
+basementFraction=yScaling(4)/sum(yScaling);
+
+
 conditionType=params.settings.conditionType;
 
 if ~exist('cMatrix','var') || isempty(cMatrix)
@@ -113,7 +129,7 @@ if ~exist('cMatrix','var') || isempty(cMatrix)
                 [10],[14]};
         case {'noFlank&nfBlock'}
             cMatrix={[1],[2]};
-        case {'colin+1&devs'}
+        case {'colin+1&devs','2flanks&devs'}
             dimming=flipLR([1:4]/5)';
             cMatrix={[1],[2];
                 [3],[4];
@@ -180,8 +196,21 @@ for k=1:numSubjects
                     deltas(i,j,k)=deltas(i,j,k)*100;
                     CIs(i,j,k,1:2)=CIs(i,j,k,1:2)*100;
                     xlabelStrings{j}=sprintf('change in %s',statTypes{j});
-                case {'dpr','RT'}
-
+                case {'distanceROC'}
+                    if all(ismember({'hits','CRs'},names.stats))
+                        [a aCI ns(1)] = compareAtoBbinofit(more,cMatrix{i,1},cMatrix{i,2},'hits',alpha);
+                        [b bCI ns(2)] = compareAtoBbinofit(more,cMatrix{i,1},cMatrix{i,2},'CRs',alpha);
+                        
+                        er=100*sqrt(diff(aCI)^2+diff(bCI)^2)/2; %the diagonal CI in each direction
+                        deltas(i,j,k)=100*sqrt(a^2+b^2);
+                        CIs(i,j,k,1:2)=deltas(i,j,k)+[-er er];
+                        numSamples(i,j,k)=min(ns); %just keeping num samples from the smaller comparison
+                        xlabelStrings{j}=sprintf('change in %s',statTypes{j});
+                    else
+                        error('distanceROC needs both hits and CRs... and needs to be defined after both for now')
+                    end
+                case {'dpr','RT','crit'}
+                    
                     deltas(i,j,k)=...
                         mean(params.stats(k,cMatrix{i,1},statInd))-... %difference
                         mean(params.stats(k,cMatrix{i,2},statInd));%works on the average of the statistics, not a weighed average
@@ -190,7 +219,7 @@ for k=1:numSubjects
                     %                         mean(params.stats(k,cMatrix{i,1},statInd))./...%log ratio
                     %                         mean(params.stats(k,cMatrix{i,2},statInd)));%works on the average of the statistics, not a weighed average
 
-                    CIs(i,j,k,1:2)=nan;
+                    CIs(i,j,k,1:2)=0; %nan, 0 condiders all significant, nan = none significant... should use MCMC for significance
                     numSamples(i,j,k)=sum(more.numAttempted([cMatrix{i,1} cMatrix{i,2}])); %unknown
                     xlabelStrings{j}=sprintf('change in %s',statTypes{j});
                 case {'dprimeMCMC'}
@@ -261,17 +290,35 @@ combined.numAttempted=sum(params.raw.numAttempt,1)';
 combined.numCorrect=sum(params.raw.numCorrect,1)';
 for i=1:numComparison
     for j=1:numStats
-        statInd=find(strcmp(statTypes{j},names.stats));
-        if size(cMatrix{i,1},2)==1 && size(cMatrix{i,2},2)==1
-            popStats=...
-                (params.stats(:,cMatrix{i,1},statInd)'-...%difference
-                params.stats(:,cMatrix{i,2},statInd)');   %works on the average of the statistics, not a weighed average
-        else
-            popStats=...
-                mean(params.stats(:,cMatrix{i,1},statInd)')-...%difference
-                mean(params.stats(:,cMatrix{i,2},statInd)');   %works on the average of the statistics, not a weighed average
-        end
+
+        if ~strcmp('distanceROC',statTypes{j})
+            %normal populations setup
+            statInd=find(strcmp(statTypes{j},names.stats));
+            if size(cMatrix{i,1},2)==1 && size(cMatrix{i,2},2)==1
+                popStats=...
+                    (params.stats(:,cMatrix{i,1},statInd)'-...%difference
+                    params.stats(:,cMatrix{i,2},statInd)');   %works on the average of the statistics, not a weighed average
+            else
+                popStats=...
+                    mean(params.stats(:,cMatrix{i,1},statInd)')-...%difference
+                    mean(params.stats(:,cMatrix{i,2},statInd)');   %works on the average of the statistics, not a weighed average
+            end
+        else        
+            %distanceROC population setup
+            if size(cMatrix{i,1},2)==1 && size(cMatrix{i,2},2)==1
+                statInd=find(strcmp({'hits'},names.stats)); %to get the second value, b=CRs
+                a= (params.stats(:,cMatrix{i,1},statInd)'-...%difference
+                    params.stats(:,cMatrix{i,2},statInd)');   %works on the average of the statistics, not a weighed average
                 
+                statInd=find(strcmp({'CRs'},names.stats)); %to get the second value, b=CRs
+                b= (params.stats(:,cMatrix{i,1},statInd)'-...%difference
+                    params.stats(:,cMatrix{i,2},statInd)');   %works on the average of the statistics, not a weighed average
+                popStats=100*sqrt(a.^2+b.^2);
+            else
+                error('group comparisons not supported for ROC distance')
+            end
+        end
+
         switch statTypes{j}
             case {'pctCorrect', 'yes', 'hits', 'CRs'}
                 [delta(i,j) CI(i,j,1:2)]=compareAtoBbinofit(combined,cMatrix{i,1},cMatrix{i,2},statTypes{j},alpha);
@@ -280,11 +327,12 @@ for i=1:numComparison
                 statInd=find(strcmp(statTypes{j},names.stats));
                 popStats=100*popStats;
                 CI2(i,j,1:2)=mean(popStats) + [-1 1]*std(popStats); % delta+/- stdPop
-                %disp(sprintf('uber: %2.2g %2.2g stds: %2.2g %2.2g',CI(i,j,1),CI(i,j,2),CI2(i,j,1),CI2(i,j,2)))
-            case {'biasMCMC', 'criterionMCMC','dprimeMCMC','dpr','RT'}
+                %disp(sprintf('uber: %2.2g %2.2g stds: %2.2g %2.2g',CI(i,j,1),CI(i,j,2),CI2(i,j,1),CI2(i,j,2)))           
+            case {'biasMCMC', 'criterionMCMC','dprimeMCMC','dpr','crit','RT','distanceROC'}
                 delta(i,j)=mean(popStats);
                 stdPop=std(popStats);
                 CI(i,j,1:2)=delta(i,j) + [-stdPop stdPop]; % delta+/- stdPop
+                CI2=CI;
             otherwise
                 statTypes{j}
                 error('bad type');
@@ -316,6 +364,7 @@ numComparison=length(whichComparison);
 
 % pass this control from outside...
 for j=1:numStats
+    maxBinHeight=0;
     maxBinCount=0;
     if createDefaultDiffEdges
         theseValues=CIs(:,j,:,:);
@@ -325,30 +374,39 @@ for j=1:numStats
         maxX=edgeValue;
         diffEdges(j,:)=linspace(minX,maxX,nBins+1);
     end
-    %small loop to find maxBinCount per statistic
+    histFraction=0.3;  % pass this param up...
+    totalFigureHeight=diff([minX maxX]); % maintain sqaurness of numerical values, for later rotation
+    %small loop to find maxBinHeight per statistic
     for i=whichComparison
         try
-            count=histc(permute(deltas(i,j,:),[3 2 1]), diffEdges(j,:)); % make a matrix...
+            sigSubjects=sign(CIs(i,j,:,2))==sign(CIs(i,j,:,1));
+            sigCount=histc(permute(deltas(i,j,find(sigSubjects==1)),[3 2 1])', diffEdges(j,:)); % make a matrix...
+            insigCount=histc(permute(deltas(i,j,find(~sigSubjects)),[3 2 1])', diffEdges(j,:));
+            count=[sigCount; insigCount];
         catch
             keyboard
         end
 
         doSubPlot(doFigAndSub,squareStats,multiComparePerPlot,numStats, numComparison,i,j);
 
+        maxBinHeight=histFraction*totalFigureHeight;
         if ~multiComparePerPlot
-            bar(diffEdges(j,:),count,'histc');
-        else
-            plot(minmax(diffEdges(j,:)), [0 0] ,'k');
+            countVal=count*(maxBinHeight/max(sum(count)));
+%             histHandle=bar(diffEdges(j,1:end-1),countVal(1:end-1),'histc');  
+            rlabHist(diffEdges(j,:),countVal(:,1:end-1), [objectColors.histSig; objectColors.histInsig]);
         end
         hold on
-        maxBinCount=max(maxBinCount, max(count));
+        plot(minmax(diffEdges(j,:)), [0 0] ,'k'); %always plot black line over plot if hist, black line if no hist
+        maxBinCount=max(maxBinCount, max(sum(count)));
+        
     end
 
     if multiComparePerPlot
-        interComparisonSpace=4;
-        statSpace=5;
+        interComparisonSpace=4;  % how big the gap between comparisions is, in units of one subject gap
+        %statSpace=5;
         inds=([1:numComparison]-1)*(numSubjects+interComparisonSpace)+(numSubjects/2);
-        comparisonYVals=maxBinCount*(1.1+((statSpace*inds)/((numSubjects+interComparisonSpace)*numComparison)));
+        %comparisonYVals=maxBinHeight*(1.1+((statSpace*inds)/( (numSubjects+interComparisonSpace)*numComparison )));
+        comparisonYVals=totalFigureHeight*(histFraction+gapFraction/2+dataFraction*(inds/max(inds)));
     else
         statSpace=2;
     end
@@ -363,9 +421,9 @@ for j=1:numStats
                 color=comparisonColor(i,:);
             else
                 if sign(CIs(i,j,k,2))==sign(CIs(i,j,k,1))
-                    color=[1 0 0];
+                    color=objectColors.subjectSig;
                 else
-                    color=[0 0 0];
+                    color=objectColors.subjectInsig;
                 end
             end
 
@@ -378,17 +436,20 @@ for j=1:numStats
 
             if multiComparePerPlot
                 ind=(i-1)*(numSubjects+interComparisonSpace)+k;
-                yVal=maxBinCount*(1.1+((statSpace*ind)/((numSubjects+interComparisonSpace)*numComparison)));
+                %yVal=maxBinHeight*(1.1+((statSpace*ind)/((numSubjects+interComparisonSpace)*numComparison)));
+                %yVal=maxBinHeight*(1.1+((statSpace*ind)/((numSubjects+interComparisonSpace)*numComparison)));
+                yVal=totalFigureHeight*(histFraction+gapFraction/2+dataFraction*(ind/( (numSubjects+interComparisonSpace)*numComparison )));
                 %plot([CIs(i,j,k,1) CIs(i,j,k,2)], [yVal yVal], 'color', color);
                 %plot(deltas(i,j,k), yVal,mark, 'markerSize', 7, 'color', color);  % supress per subject
             else
-                yVal=maxBinCount*(1.1+((statSpace*k)/numSubjects));
+                %yVal=maxBinHeight*1.25 +*(1.1+((statSpace*k)/numSubjects));
+                yVal=totalFigureHeight*(histFraction+gapFraction/2+dataFraction*(k/numSubjects));
                 plot([CIs(i,j,k,1) CIs(i,j,k,2)], [yVal yVal], 'color', color);
                 plot(deltas(i,j,k), yVal,mark, 'markerSize', 7, 'color', color);
             end
 
            
-            plot([0 0], [0 (1.2+statSpace)*maxBinCount],'k');
+            plot([0 0], [0 totalFigureHeight*(1-basementFraction)],'k');
             if addTrialNums
                 t=text(maxX, yVal, num2str(numSamples(i,j,k)));
                 set(t, 'HorizontalAlignment', 'right');
@@ -408,31 +469,36 @@ for j=1:numStats
             if multiComparePerPlot
                 color=comparisonColor(i,:);
             else
-                if abs(delta(i,j))>(CI(i,j,2)-CI(i,j,1))*(2/2)
+                if sign(CI(i,j,1))==sign(CI(i,j,2))
                     %more lenient thresh: sign(CI(i,j,1))==sign(CI(i,j,2))
-                    color=[1 0 0];
+                    %stricter thresh: abs(delta(i,j))>(CI(i,j,2)-CI(i,j,1))*(2/2)
+                  color=objectColors.subjectSig;
                 else
-                    color=[0 0 0];
+                    color=objectColors.subjectInsig;
                 end
             end
 
-            populationYVal=-maxBinCount/2;
+            populationYVal= -totalFigureHeight*(basementFraction/2);
             if multiComparePerPlot
-                plot([ CI(i,j,1)  CI(i,j,2)], repmat(comparisonYVals(i),1,2), 'color', color,'lineWidth',4); % uber-rat errorbar
-                plot([CI2(i,j,1) CI2(i,j,2)], repmat(comparisonYVals(i),1,2), 'color', [0 0 0],'lineWidth',2); %   population std
-                plot(delta(i,j), comparisonYVals(i), 'o', 'markerSize', 7, 'color', color);
+                %plot([ CI(i,j,1)  CI(i,j,2)], repmat(comparisonYVals(i),1,2), 'color', color,'lineWidth',4); % uber-rat errorbar
+                plot([CI2(i,j,1) CI2(i,j,2)], repmat(comparisonYVals(i),1,2), 'color', color,'lineWidth',2); %   population std
+                plot(delta(i,j), comparisonYVals(i), '.', 'markerSize', 7, 'color', color);
             else
-                plot([CI(i,j,1) CI(i,j,2)], repmat(populationYVal,1,2), 'color', color,'lineWidth',4); %   population errorbar
-                plot(delta(i,j), populationYVal, 'o', 'markerSize', 7, 'color', color);
+                %plot([CI(i,j,1) CI(i,j,2)], repmat(populationYVal,1,2), 'color', color,'lineWidth',4); %   population errorbar
+                plot([CI2(i,j,1) CI2(i,j,2)], repmat(populationYVal,1,2), 'color', color,'lineWidth',2); %   population std
+                plot(delta(i,j), populationYVal, '.', 'markerSize', 7, 'color', color);
                 %CI2(i,j,1:2)
             end
             
         end
 
-        axis([minX maxX (maxBinCount+eps)*[-1 1.2+statSpace]]) %eps fixes error if maxBinCount=0
+        padwidth=totalFigureHeight/20;
+        pad=[-padwidth padwidth -padwidth padwidth];
+        axis([minX maxX -totalFigureHeight*basementFraction totalFigureHeight*(1-basementFraction)]+pad) 
+        %rectangle('Position', [ minX-padwidth -totalFigureHeight*basementFraction-padwidth totalFigureHeight+padwidth*2 totalFigureHeight+padwidth*2], 'EdgeColor',[0 1 0])
         if ~multiComparePerPlot
         set(gca, 'YTickLabel', maxBinCount);
-        set(gca, 'YTick', maxBinCount);
+        set(gca, 'YTick', maxBinHeight);
         else 
             set(gca, 'YTickLabel', comparisonNames);
             set(gca, 'YTick', comparisonYVals);

@@ -43,6 +43,10 @@ if ~exist('arrowFromAtoB','var') || isempty(arrowFromAtoB)
     %arrowFromAtoB={'changeFlank','colin'};
 end
 
+whichArrowsShifted=[]; %discover from 4th arg of arrow
+
+
+
 % if ~exist('measureLabels','var') || isempty(measureLabels)
 %     addMeasureLabel=0;
 % else
@@ -70,7 +74,7 @@ crInd=find(strcmp('CRs',names.stats));
 
 %make settings per subject per condition
 if size(doCurve)==[1 1];
-    doCurve=doCurve*ones(length(names.subjects),length(names.conditions))
+    doCurve=doCurve*ones(length(names.subjects),length(names.conditions));
 else
     doCurve=doCurve;
 end
@@ -84,7 +88,7 @@ end
 if size(doCorrectLine)==[1 1];
     doCorrectLine=doCorrectLine*ones(length(names.subjects),length(names.conditions));
 else
-    doCorrectLine=doCurve;
+    doCorrectLine=doCorrectLine;
 end
 
 if drawDiag
@@ -99,16 +103,22 @@ for i=1:length(subjects)
     subInd=find(strcmp(subjects(i),names.subjects));
     for j=1:length(conditions)
         condInd=find(strcmp(conditions(j),names.conditions));
-        [subInd,condInd,hitInd]
-        size(stats)
+        %[subInd,condInd,hitInd];
+        %size(stats)
         hitRate= stats(subInd,condInd,hitInd);
         faRate=1-stats(subInd,condInd,crInd);
         if doCurve(subInd,condInd)
-            dpr = sqrt(2) * (erfinv((2*hitRate - 1)) + erfinv((1-2*faRate))); %check assumptions....
+            dpr = norminv(hitRate)-norminv(faRate);
+            % dpr = sqrt(2) * (erfinv((2*hitRate - 1)) + erfinv((1-2*faRate))) %checked assumptions.... is the same
             % dpr = sqrt(2) * (erfinv((hits - misses)/numSigs) + erfinv((CR - FA)/numNoSigs)); %what I use (from code)
-            [dprMesh h f]=getDprMesh;
-            [cs,hh] = contour(f,h,dprMesh,[dpr dpr]);
-            set(hh, 'LineColor', colors(condInd,:));
+            %             [dprMesh cr h f]=getDprMesh(501);
+            %             [cs,hh] = contour(f,h,dprMesh,[dpr dpr]);
+            %             set(hh, 'LineColor', colors(condInd,:));
+
+            cr =-(norminv(hitRate)+norminv(faRate))/2;
+            [dprHandle crHandle ] = getDprCurve(51, dpr, cr, 1);
+            set(dprHandle, 'Color', colors(condInd,:));
+            set(crHandle, 'Color', colors(condInd,:));
         end
         if doYesLine(subInd,condInd)
             plot([faRate (hitRate+faRate)./2], [hitRate (hitRate+faRate)./2],'-','color', colors(condInd,:)); % %yes diagonal line
@@ -131,8 +141,8 @@ for i=1:length(subjects)
         faRate=1-stats(subInd,condInd,crInd);
         hitPci= reshape(CI(subInd,condInd,hitInd,:),1,2);
         faPci=1-reshape(CI(subInd,condInd,crInd ,:),1,2);
-    
-
+        
+        
         %plot cross
         switch doErrorBars
             case 0
@@ -149,7 +159,7 @@ for i=1:length(subjects)
             case 3
                 %ellipse
                 ellipse = fncmb(fncmb(rsmak('circle'),[diff(faPci)/2 0;0 diff(hitPci)/2]),[faRate;hitRate]);
-
+                
                 %switch num2str(colors(condInd,:))
                 %case num2str([1 0 0])
                 if colors(condInd,1)>colors(condInd,2) & colors(condInd,1)>colors(condInd,3) & colors(condInd,2)==colors(condInd,3)
@@ -167,25 +177,78 @@ for i=1:length(subjects)
                 doErrorBars
                 error('bad')
         end
-
-
+        
+        
         for j=1:numArrowsPerSubject
             %do arrows
             %Aind=arrowFromAtoB(j,1);
             %Bind=arrowFromAtoB(j,2);
-
+            
             Aind=find(ismember(names.conditions,arrowFromAtoB{j,1}));
             Bind=find(ismember(names.conditions,arrowFromAtoB{j,2}));
-
+            
             x=1-[stats(subInd,Aind,crInd ) stats(subInd,Bind,crInd )];
             y=  [stats(subInd,Aind,hitInd) stats(subInd,Bind,hitInd)];
-            %[fx,fy] = dsxy2figxy(gca, x, y);
-            %a=annotation('arrow',fx,fy,'HeadStyle','cback1','HeadWidth',5,'HeadLength',5,'Color',colors(Bind,:));
-            %arrow('Start',[x(1) y(1)],'Stop',[x(2) y(2)],'Length',9,'Width',1) % good for full size plot
-            arrow('Start',[x(1) y(1)],'Stop',[x(2) y(2)],'Length',4,'Width',0.5) % good for half size subplot
-
+            if  all(ismember({'dprimeMCMC','criterionMCMC'},names.stats))
+                dprInd=find(strcmp('dprimeMCMC',names.stats));
+                critInd=find(strcmp('criterionMCMC',names.stats));
+                hasDprNcrit=1;
+            elseif all(ismember({'dpr','crit'},names.stats))
+                dprInd=find(strcmp('dpr',names.stats));
+                critInd=find(strcmp('crit',names.stats));
+                hasDprNcrit=1;
+            else
+                hasDprNcrit=0;
+            end
+            
+            if size(arrowFromAtoB,2)>2
+                arrowType=arrowFromAtoB{j,3}(1);
+            else
+                arrowType=1;
+            end
+            
+            doArrows(x,y,arrowType);
+            
+            
+            if size(arrowFromAtoB,2)>3
+                arrowShift=arrowFromAtoB{j,4}(1);
+                if arrowShift
+                    whichArrowsShifted=unique([whichArrowsShifted j]);
+                end
+            else
+                arrowShift=false;
+            end
+            
+            
+            
+            if arrowShift
+                if  hasDprNcrit
+                    base=[.45 .3];
+                    doArrows([base(1) base(1)+x(2)-x(1)],[base(2) base(2)+y(2)-y(1)],arrowType);
+                    
+                    base2=[.75 .6];
+                    %get std measures
+                    dpr=[stats(subInd,Aind,dprInd ) stats(subInd,Bind,dprInd )];
+                    crit=[stats(subInd,Aind,critInd ) stats(subInd,Bind,critInd )];
+                    %add an arbitrary scale, consistent across all plots...
+                    crScale=1/2;
+                    dprScale=1/8;
+                    crit=crit*crScale;
+                    dpr=dpr*dprScale;
+                    %rotate axis 45deg
+                    x2=-(dpr+crit);
+                    y2=dpr-crit;
+                    doArrows([base2(1) base2(1)+x2(2)-x2(1)],[base2(2) base2(2)+y2(2)-y2(1)],arrowType);
+                    
+                else
+                    base=[.45 .3];
+                    doArrows([base(1) base(1)+x(2)-x(1)],[base(2) base(2)+y(2)-y(1)],arrowType);
+                    base2=[0 0];
+                end
+            end
+            
         end
-
+        
         if sideText
             if ifYesIsLeftRat(subjects{i})
                 text(.5,.2,'Y=L');
@@ -197,13 +260,115 @@ for i=1:length(subjects)
 end
 
 
-    %labels
-    if doLegend
-        legend(pt,conditions,'Location','SouthEast')
+
+%labels
+if doLegend
+    legend(pt,conditions,'Location','SouthEast')
+end
+set(gca,'YTickLabel',[0 .5 1])
+set(gca,'YTick',[0 .5 1])
+ylabel('Hit Rate'); xlabel('False Alarm Rate');
+
+
+
+doSubAxes=1;
+if ~isempty(whichArrowsShifted) & doSubAxes
+    
+    if 0 %for reference aligning
+        plot( base([1 1]),base([2 2])+[-.1 +.1],'g')
+        plot(base([1 1])+[-.1 +.1],base([2 2]),'g')
+        plot( base2([1 1]),base2([2 2])+[-.1 +.1],'g')
+        plot(base2([1 1])+[-.1 +.1],base2([2 2]),'g')
+        
+        plot( base( [1 1])+[ .1 -.1],base( [2 2])+[-.1 .1],'r')
+        plot( base( [1 1])+[-.1  .1],base( [2 2])+[-.1 .1],'r')
+        plot( base2([1 1])+[ .1 -.1],base2([2 2])+[-.1 .1],'r')
+        plot( base2([1 1])+[-.1  .1],base2([2 2])+[-.1 .1],'r')
     end
-    set(gca,'YTickLabel',[0 .5 1])
-    set(gca,'YTick',[0 .5 1])
-    ylabel('Hit Rate'); xlabel('False Alarm Rate');
+    
+    axis square
+    mainAx=gca;
+    %make axes
+    subAxesWidth=0.20; %sqrt(2); % fit visually
+    [fx1 fy1]=dsxy2figxy(base(1)-subAxesWidth*(1.1), base(2)-subAxesWidth*1.25);
+    [fx2 fy2]=dsxy2figxy(base(1)-subAxesWidth*(0.08), base(2)-subAxesWidth*1.25);
+    [fx3 fy3]=dsxy2figxy(base2(1)-subAxesWidth*(1.42), base2(2)-subAxesWidth*1.25);
+    [fx4 fy4]=dsxy2figxy(base2(1)-subAxesWidth*(0.4), base2(2)-subAxesWidth*1.25);
+    
+            
+    for j=1:length(whichArrowsShifted)
+        Aind=find(ismember(names.conditions,arrowFromAtoB{whichArrowsShifted(j),1}));
+        Bind=find(ismember(names.conditions,arrowFromAtoB{whichArrowsShifted(j),2}));
+        cMatrix={[Bind],[Aind]};
+        
+        diffEdges=[-6:2:6];
+        alpha=0.05;
+        multiComparePerPlot=false;
+        
+        a= axes;
+        set(a,'position', [fx1 fy1 subAxesWidth subAxesWidth]);
+        viewFlankerComparison(names,params,cMatrix,{'pctCorrect'},subjects,diffEdges,alpha,false,false,false,multiComparePerPlot)
+        xlabel(''); ylabel(''); set(gca,'xTickLabel',''); set(gca,'yTickLabel','');
+        set(a,'CameraUpVector', [1 -1 0]);  axis equal
+        set(gca,'Visible','off');
+        %camroll(sa1, 180-fake45)
+        %set(sa1, 'CameraPosition', get(sa1, 'CameraTarget')+[0 0 20])
+        %set(sa1, 'CameraUpVector', [0 0 1])
+        
+        
+        a=axes; axis equal
+        set(a,'position', [fx2 fy2 subAxesWidth subAxesWidth]);
+        viewFlankerComparison(names,params,fliplr(cMatrix),{'yes'},subjects,diffEdges,alpha,false,false,false,multiComparePerPlot)
+        xlabel(''); ylabel(''); set(gca,'xTickLabel',''); set(gca,'yTickLabel','');
+        set(a,'CameraUpVector', [-1 -1 0]);  axis equal
+        set(gca,'Visible','off');
+        
+        if all(ismember({'dpr','crit'},names.stats))
+            diffEdges=[-.4:0.1:.4];
+            
+            a=axes; axis equal;
+            set(a,'position', [fx3 fy3 subAxesWidth subAxesWidth]);
+            set(a,'CameraUpVector', [1 1 0]);
+            viewFlankerComparison(names,params,cMatrix,{'dpr'},subjects,diffEdges,alpha,false,false,false,multiComparePerPlot)
+            xlabel(''); ylabel(''); set(gca,'xTickLabel',''); set(gca,'yTickLabel','');
+            set(a,'CameraUpVector', [1 -1 0]);  axis equal
+            set(gca,'Visible','off');
+            
+            diffEdges=diffEdges*(dprScale/crScale);
+            a=axes; axis equal;
+            set(a,'position', [fx4 fy4 subAxesWidth subAxesWidth]);
+            viewFlankerComparison(names,params,cMatrix,{'crit'},subjects,diffEdges,alpha,false,false,false,multiComparePerPlot)
+            xlabel(''); ylabel(''); set(gca,'xTickLabel',''); set(gca,'yTickLabel','');
+            set(a,'CameraUpVector', [-1 -1 0]);  axis equal
+            set(gca,'Visible','off');
+            
+        end
+        
+    end
+    
+    set(gcf,'CurrentAxes',mainAx) % return for further plotting
+    
+end
+
+
+
+function doArrows(x,y,arrowType)
+%old sucky:
+%[fx,fy] = dsxy2figxy(gca, x, y);
+%a=annotation('arrow',fx,fy,'HeadStyle','cback1','HeadWidth',5,'HeadLength',5,'Color',colors(Bind,:));
+
+switch arrowType
+    case 1
+        arrow('Start',[x(1) y(1)],'Stop',[x(2) y(2)],'Length',9,'Width',1)
+    case 2 % thin arrow
+        % good for half size subplot
+        arrow('Start',[x(1) y(1)],'Stop',[x(2) y(2)],'Length',4,'Width',0.5)
+    case 3 %thin grey line
+        plot(x,y,'color',[.5 .5 .5])
+    otherwise
+        arrowType
+        error('bad arrowType')
+end
 
 
 

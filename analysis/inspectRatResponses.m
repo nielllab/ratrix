@@ -602,7 +602,7 @@ if plotFlankerAnalysis
         for  i=1:length(ind)
             dpr = sqrt(2) * (erfinv((2*hitRate(ind(i)) - 1)) + erfinv((1-2*faRate(ind(i))))); %check assumptions....
             % dpr = sqrt(2) * (erfinv((hits - misses)/numSigs) + erfinv((CR - FA)/numNoSigs)); %what I use (from code)
-            [dprMesh h f]=getDprMesh;
+            [dprMesh cr h f]=getDprMesh;
             [cs,hh] = contour(f*xLim(2),h*yLim(2),dprMesh,[dpr dpr]);
             set(hh, 'LineColor', colors(ind(i),:));
         end

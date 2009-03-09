@@ -1,4 +1,7 @@
-function [dpr h f]=getDprMesh(numBins)
+function [dpr cr h f]=getDprMesh(numBins)
+% returns a mesh of dprime and criteria
+% dpr = norminv(h)-norminv(f);  
+% cr =-(norminv(h)+norminv(f))/2;  
 
 if ~exist('numBins','var')
 numBins=101; %101
@@ -21,12 +24,11 @@ hits=numSigs-misses;
 h=hits/numSigs;
 f=FA/numNoSigs;
 
+zHit = norminv(h) ;
+zFA  = norminv(f) ;
+dpr = zHit - zFA;    %this is within rounding error of what I use (from code)
+%dpr = sqrt(2) * (erfinv((hits - misses)/numSigs) + erfinv((CR -FA)/numNoSigs)); %
+cr = (zHit + zFA) ./ (-2);
 
-dpr = sqrt(2) * (erfinv((hits - misses)/numSigs) + erfinv((CR - FA)/numNoSigs)); %what I use (from code)
 
-% dpr2 = sqrt(2) * (erfinv((2*h - 1)) + erfinv((1-2*f))) 
-% diff=(dpr-dpr2)
-%why isnt' this true?... rounding errors??
-% imagesc(diff)
 
-%dpr=flipud(dpr);

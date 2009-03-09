@@ -1,5 +1,6 @@
 
-%
+
+
 %path='C:\Documents and Settings\rlab\Desktop\tempAnalysis'; % a temp directory okay to make files
 %cd(path)
 
@@ -70,7 +71,6 @@ end
 
 montage(images,'DisplayRange',[0 255],'Size',[1 6]); % or [2 2] if
 title('sample stimuli')
-
 %%
 
 sx=384;
@@ -150,7 +150,7 @@ title('colinear example')
 xlabel('left = no                   right = yes')
 
 subplot(1,2,2)
-montage(images(:,:,:,[1 2 3 4 9 10 11 12 ]),'DisplayRange',[0 255],'Size',[2 4]);
+montage(images(:,:,:,[1 3 2 4 9 11 10 12 ]),'DisplayRange',[0 255],'Size',[2 4]);
 title('stimulus grouping')
 set(gca,'xTick',diff(get(gca,'Xlim'))*[1:4]/5)
 set(gca,'xTickLabel',diff(get(gca,'Xlim'))*[1:4]/5)

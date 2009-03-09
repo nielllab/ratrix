@@ -1,7 +1,6 @@
 
 
 
-
 %% stats
 x=100*diff(stats(:,find(ismember(names.conditions,{'colin','changeFlank'})),find(strcmp('pctCorrect',names.stats)))');
 [h p] = ttest(x,0,.05,'right');
@@ -258,12 +257,17 @@ curveAndBias=1;
 %% alternate setup
 % compare colinear to popout
 subjects={'232','138'};%     
-subjects={'232','233','138','228','139'};%     
+subjects={'232','233','138','228','139'};%    
+dateRange=[datenum('Nov.15,2008') now];
+%last problematic day for 139
+%Nov.15,2008=datestr(ceil(d.date(max(find(d.targetContrast==1)))),22)
+%Mar.16,2008=datestr(ceil(d.date(max(find(d.targetContrast>0 & d.targetContrast<.7)))),22)
 %subjects={'232'};%     
+filter{1}.type='13';
 filter{2}.type='responseSpeedPercentile';
 filter{2}.parameters.range=[0 0.7];%whats justified?
 filter{2}=[]; %remove it
-    [stats CI names params]=getFlankerStats(subjects,'colin+1&devs',{'hits','CRs','yes','pctCorrect'},filter,[1 now]);
+    [stats CI names params]=getFlankerStats(subjects,'colin+1&devs',{'hits','CRs','yes','pctCorrect'},filter,dateRange);
     values = cellfun(@(x) str2num(x(5:end)), names.conditions); 
     small=0.1; values=values+repmat([-1 1]*small,1,4);  %offset for viewing
     %values([1 2 5 6 9 10 13 14])=-1; %hack to only plot the first half, by

@@ -307,3 +307,7 @@ matbugs/bayesSDT/ReadMe.txt -text
 matbugs/bayesSDT/BayesSDT_v1.txt -text
 matbugs/matbugs.m -text
 spike[!!-~]sorting/getFrameTimes.m -text
+pmm/cosyne2009.m -text
+pmm/getDprCurve.m -text
+pmm/speciesCSF.m -text
+/rlabHist.m -text

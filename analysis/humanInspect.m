@@ -3,8 +3,8 @@ close all
 
 sx=3;
 sy=2;
-subjects={'pkc'} %bas, cmg, jsl, dan
-%subjects={'cmg','dan','pkc'} %enough trials and correct
+subjects={'lct'} %bas, cmg, jsl, dan, pkc,lct
+%subjects={'cmg','dan','pkc','lct'} %enough trials and correct
 dateRange=[datenum('04-Jan-2009 19:34:59') now];
 goodType='humanPsych';
 
@@ -13,22 +13,24 @@ condType='8flanks+'%'colin+3'%&nfMix', '8flanks+'
 filter=[];
 filter{1}.type='11';
 filter{2}.type='manualVersion';
-filter{2}.includedVersions=[3:10];
-%filter{2}=[]
+filter{2}.includedVersions=[2,3,5:10]; %remove first version learning, and 4th version wrong contrast
+filter{3}.type='performanceRange';
+filter{3}.parameters.performanceMethod='pCorrect';               
+filter{3}.parameters.performanceParameters={[.6 1],'symetricBoxcar',100}; 
+filter{3}.parameters.goodType=goodType;
+filter{3}.parameters.whichCondition={'hasFlank',[1]};
+filter{2}=[];
+filter{3}=[];
 [stats CI names params]=getFlankerStats(subjects,condType,{'pctCorrect','yes','hits','CRs'},filter,dateRange,goodType);
 %[stats2 CI2 names2 params2]=getFlankerStats({'cmg'},'colin+3&contrasts',{'pctCorrect','yes','hits','CRs'},'12',dateRange,goodType);
 [delta ]=viewFlankerComparison(names,params);
 figure
 
-%%
-
-dateRange(2)=now;
 % dateRange=[now-(40./(60*24)) now];
 for i=1:length(subjects)
     d=getSmalls(subjects{i},dateRange)
     minUsed= 60*24*(d.date(end)-d.date(1));
     minLeft=90-minUsed;
-    d=removeSomeSmalls(d,d.manualVersion==1)
     goods=getGoods(d,goodType);
     [condInd name has colors]=getFlankerConditionInds(d,goods,condType);
     
@@ -55,7 +57,11 @@ for i=1:length(subjects)
             legend(plotParams.conditionNames)
             
             subplot(sx,sy,6)
-            [s plotParams]=flankerAnalysis(d,'colin+1','performancePerDeviationPerCondition', 'pctCor','13',goodType);
+            %[s plotParams]=flankerAnalysis(d,'colin+1','performancePerDeviationPerCondition', 'pctCor','13',goodType);
+            
+            filter{1}.type='14'; % keep filter{2} from above
+            [stats CI names params]=getFlankerStats(subjects,'allRelativeTFOrientationMag',{'pctCorrect','yes','hits','CRs'},filter,dateRange,goodType);
+            doHitFAScatter(stats,CI,names,params,[],[],0,0,0,0,1,3,[])
         case 12
             subplot(sx,sy,4)
             [s plotParams]=flankerAnalysis(d,condType,'performancePerContrastPerCondition', 'hits','12',goodType);

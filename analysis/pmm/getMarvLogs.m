@@ -64,11 +64,11 @@ eventLog{eventNum}.details.to =[3];
 
 eventNum = eventNum +1; %okay
 eventLog{eventNum}.date =datenum('Dec.16,2007');%datestr(now,21)
-eventLog{eventNum}.eventName ='ratrix down on 12-15-07, no stations working except middle left #1, according to Aria';
+eventLog{eventNum}.eventName ='ratrixDowwn';
 eventLog{eventNum}.subject ='rat_128';
 eventLog{eventNum}.stationID ='2';
 eventLog{eventNum}.issuedBy ='mrz';
-eventLog{eventNum}.comment ='corrected error of missing bracket line 90'; 
+eventLog{eventNum}.comment ='ratrix down on 12-15-07, no stations working except middle left #1, according to Aria,corrected error of missing bracket line 90'; 
 eventLog{eventNum}.details.from ='subject {i.';
 eventLog{eventNum}.details.to ='subject {i.}';
 
@@ -110,7 +110,7 @@ eventLog{eventNum}.details.to   =[4; 4000];
 
 eventNum = eventNum +1;m %bad format --pmm
 eventLog{eventNum}.date =datenum('Dec.17,2007');%datestr(now,21)
-eventLog{eventNum}.eventName ='rewardIncrease, penaltyDecrease';
+eventLog{eventNum}.eventName ='rewardIncrease', 'penaltyDecrease';
 eventLog{eventNum}.subject =   {'rat_145, rat_148'};
 eventLog{eventNum}.stationID =11; %B
 eventLog{eventNum}.issuedBy ='mrz';
@@ -120,7 +120,7 @@ eventLog{eventNum}.details.to   ='4, 4000; 4, 4000';
 
 eventNum = eventNum +1; %bad format --pmm
 eventLog{eventNum}.date =datenum('Dec.17,2007');%datestr(now,21)
-eventLog{eventNum}.eventName ='penalty decrease';
+eventLog{eventNum}.eventName ='penaltyDecrease';
 eventLog{eventNum}.subject =    'rat_115';
 eventLog{eventNum}.stationID =9; %D
 eventLog{eventNum}.issuedBy ='mrz';
@@ -130,7 +130,7 @@ eventLog{eventNum}.details.to   =' 4000';
 
 eventNum = eventNum +1; %bad format --pmm
 eventLog{eventNum}.date =datenum('Dec.19,2007');%datestr(now,21)
-eventLog{eventNum}.eventName ='reward increase, penalty decrease';
+eventLog{eventNum}.eventName ='rewardIncrease', 'penaltyDecrease';
 eventLog{eventNum}.subject =     'rat_132, rat_133';
 eventLog{eventNum}.stationID =2; %E 
 eventLog{eventNum}.issuedBy ='mrz';
@@ -140,7 +140,7 @@ eventLog{eventNum}.details.to   ='6, 2000; 6, 2000';
 
 eventNum = eventNum +1; %bad format --pmm
 eventLog{eventNum}.date =datenum('Jan.16,2008');%datestr(now,21)
-eventLog{eventNum}.eventName ='reward decrease';
+eventLog{eventNum}.eventName ='rewardDecrease';
 eventLog{eventNum}.subject =  'rat_138';
 eventLog{eventNum}.stationID =2; %E
 eventLog{eventNum}.issuedBy ='pmm';
@@ -150,7 +150,7 @@ eventLog{eventNum}.details.to   ='3';
 
 eventNum = eventNum +1; %bad format --pmm
 eventLog{eventNum}.date =datenum('Jan.16,2008');%datestr(now,21)
-eventLog{eventNum}.eventName ='reward decrease';
+eventLog{eventNum}.eventName ='rewardDecrease';
 eventLog{eventNum}.subject =  'rat_137';
 eventLog{eventNum}.stationID =4; %F
 eventLog{eventNum}.issuedBy ='pmm';
@@ -160,7 +160,7 @@ eventLog{eventNum}.details.to   ='3';
 
 eventNum = eventNum +1; %bad format --pmm
 eventLog{eventNum}.date =datenum('Jan.16,2008');%datestr(now,21)
-eventLog{eventNum}.eventName ='reward decrease';
+eventLog{eventNum}.eventName ='rewardDecrease';
 eventLog{eventNum}.subject =  'rat_139';
 eventLog{eventNum}.stationID =2; %these MUST be numbers!, you can comment letters after (see above)
 eventLog{eventNum}.issuedBy ='pmm';
@@ -834,7 +834,7 @@ eventLog{eventNum}.details.to   = [4 3];
 
 eventNum = eventNum +1;  
 eventLog{eventNum}.date =datenum('Nov.29,2008');%datestr(now,21)
-eventLog{eventNum}.eventName ={'station started'};
+eventLog{eventNum}.eventName ={'stationBiasStarted'};
 eventLog{eventNum}.subject ={'285','225','227','229','231','233'};
 eventLog{eventNum}.stationID ={'1A'}; 
 eventLog{eventNum}.issuedBy ='pmm';  % daniel's help
@@ -844,7 +844,7 @@ eventLog{eventNum}.details.to   = [];
 
 eventNum = eventNum +1;  
 eventLog{eventNum}.date =datenum('Dec.01,2008');%datestr(now,21)
-eventLog{eventNum}.eventName ={'station bias fixed'};
+eventLog{eventNum}.eventName ={'stationBiasFixed'};
 eventLog{eventNum}.subject ={'285','225','227','229','231','233'};
 eventLog{eventNum}.stationID ={'1A'}; 
 eventLog{eventNum}.issuedBy ='pmm';  % daniel's help
@@ -874,7 +874,7 @@ eventLog{eventNum}.details.to   = 'standard';
 
 eventNum = eventNum +1;  
 eventLog{eventNum}.date =datenum('July.10,2008');%datestr(now,21)  % attempted change at 'Dec.02,2008', 
-eventLog{eventNum}.eventName ={'switchStation'};
+eventLog{eventNum}.eventName ={'moveStation'};
 eventLog{eventNum}.subject ={}; %102, 117, etc...
 eventLog{eventNum}.stationID ={'1C'}; 
 eventLog{eventNum}.issuedBy ='pmm';  % sarah's help
@@ -891,3 +891,78 @@ eventLog{eventNum}.issuedBy ='pmm';  % yuli's help
 eventLog{eventNum}.comment ='problem started this day and fixed this day; see email from yuli'; 
 eventLog{eventNum}.details.from = 'normal'; 
 eventLog{eventNum}.details.to   = 'left side unplugged';  
+
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Feb.11,2009');%datestr(now,21)  % attempted change at 'Dec.02,2008', 
+eventLog{eventNum}.eventName ={'startCarrots'};
+eventLog{eventNum}.subject ={'304'}; %102, 117, etc...
+eventLog{eventNum}.stationID ={'3G'}; 
+eventLog{eventNum}.issuedBy ='pmm';  % alee identified
+eventLog{eventNum}.comment ='body weight at 85%.  rat learned slow despite no carrots.  now finnaly learning.  should see if learning stops/ slows'; 
+eventLog{eventNum}.details.from = 'noCarrots'; 
+eventLog{eventNum}.details.to   = 'dailyCarrots';  
+
+%%%
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Feb.17,2009');%datestr(now,21)  % attempted change at 'Dec.02,2008', 
+eventLog{eventNum}.eventName ={'rewardIncrease'};
+eventLog{eventNum}.subject ={'130','230','234'}; %102, 117, etc...
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';  % sarah identified
+eventLog{eventNum}.comment ='long term lowish body weight, '; 
+eventLog{eventNum}.details.from = [1 1 1]; 
+eventLog{eventNum}.details.to   = [1.5 1.5 1.5];  
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Feb.17,2009');%datestr(now,21)  % attempted change at 'Dec.02,2008', 
+eventLog{eventNum}.eventName ={'flunked'};
+eventLog{eventNum}.subject ={'102'}; 
+eventLog{eventNum}.stationID ={'1C'}; 
+eventLog{eventNum}.issuedBy ='pmm';  
+eventLog{eventNum}.comment ='confirm old rat not blind'; 
+eventLog{eventNum}.details.from = [8]; 
+eventLog{eventNum}.details.to   = [6];  
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Feb.17,2009');%datestr(now,21)  % attempted change at 'Dec.02,2008', 
+eventLog{eventNum}.eventName ={'rewardDecrease'};
+eventLog{eventNum}.subject ={'275'}; %102, 117, etc...
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';  % sarah identified
+eventLog{eventNum}.comment ='falling to chance'; 
+eventLog{eventNum}.details.from = [1 ]; 
+eventLog{eventNum}.details.to   = [0.75];  
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Feb.17,2009');%datestr(now,21)  % attempted change at 'Dec.02,2008', 
+eventLog{eventNum}.eventName ={'rewardDecrease'};
+eventLog{eventNum}.subject ={'275'}; %102, 117, etc...
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';  % sarah identified
+eventLog{eventNum}.comment ='falling to chance'; 
+eventLog{eventNum}.details.from = [1 ]; 
+eventLog{eventNum}.details.to   = [0.75];  
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Mar.09,2009');%datestr(now,21)  %written on 'Mar.09,2009'  will take effect when on trunk only, in a few days 
+eventLog{eventNum}.eventName ={'rewardIncrease'};
+eventLog{eventNum}.subject ={'139','229','232','234','237'}; 
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';  % sarah identified 139 & 229
+eventLog{eventNum}.comment ='all above chance perf, and could use a little BW help.  139 could use much help'; 
+eventLog{eventNum}.details.from = [1, 1  , 1  , 1.5, 1  ]; 
+eventLog{eventNum}.details.to   = [2, 1.5, 1.5, 2  , 1.5];  
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Mar.09,2009');%datestr(now,21)  % %written on 'Mar.09,2009'  will take effect when on trunk only, in a few days 
+eventLog{eventNum}.eventName ={'removeCTs'};
+eventLog{eventNum}.subject ={'275','277','278'};
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='all exploit CTs, but varying perf:  275 & 277 just lost perf, 278 has been at chance'; 
+eventLog{eventNum}.details.from = [0.5]; 
+eventLog{eventNum}.details.to   = [0];  
+
+

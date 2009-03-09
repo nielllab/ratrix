@@ -19,6 +19,16 @@ for i=1:length(filter)
         switch filter{i}.type
             case '9.4'
                 d=removeSomeSmalls(d,d.step~=9 | d.flankerContrast~=0.4);
+            case '9.4range'  % included interleaved no flanks
+                cands=~(d.step~=9 | d.flankerContrast~=0.4);
+                cands=cands & ~( d.date>datenum('May.2,2008') & d.date<datenum('May.11,2008')); % this filters out 3 days of contrast sweep that get in the way for early rats 
+                %note:still don't have a solution for mulitple independant
+                %blocks of 9.4... but this might never happen
+                rng=minmax(find(cands));
+                d=removeSomeSmalls(d,d.trialNumber<rng(1) & d.trialNumber>rng(2));
+                if 0 % view
+                     figure;plot(cands); hold on; plot(rng,[.8,.8],'r'); pause
+                end
             case 'X.4'
                 % all steps where flankers are 0.4 (usually 9 and 10)
                 % some rats have a different number of steps (this includes the functionally equialent 6 and 7)
@@ -30,12 +40,15 @@ for i=1:length(filter)
                 d=removeSomeSmalls(d,d.step~=step);
             case 'preFlanker'
                 d=removeSomeSmalls(d,d.flankerContrast~=0);  %pre-flanker test
+            case 'preFlankerStep'
+                firstFlankerStep=d.step(min(find(d.flankerContrast~=0 & ~isnan(d.flankerContrast))));
+                d=removeSomeSmalls(d,d.step~=firstFlankerStep-1);  %only the step before it
             case 'none'
                 %don't filter; keep all
             case 'responseSpeed'               
                 range=filter{i}.parameters.range;
                 d=removeSomeSmalls(d,~(d.responseTime>range(1) & d.responseTime<range(2)));
-            case 'manualVersion'
+            case {'manualVersion'}
                d=removeSomeSmalls(d,~(ismember(d.manualVersion,filter{i}.includedVersions)));      
             case 'responseSpeedPercentile'
                 try
@@ -88,7 +101,8 @@ for i=1:length(filter)
                         for j=1:length(analyzedInds)
                             if ~isnan(performance(j)) % this won't analyze the first pts which are garaunteed to be nans, so could potentially
                                 selectedTrials(prevInd:analyzedInds(j))=withinRange(j);
-                                prevInd=analyzedInds(j);                            end
+                                prevInd=analyzedInds(j);                           
+                            end
                         end
 
                     otherwise

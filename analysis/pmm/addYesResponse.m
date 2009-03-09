@@ -34,6 +34,8 @@ if size(d.date,2)>0
         end
     end
 
+    
+    cutOut=zeros(size(d.date)); %don't cut anything out, unless known prob for specific rat
     %confirm its detection and the type of response that means yes
     if all(d.correctResponseIsLeft(d.targetContrast==0)==1) & all(d.correctResponseIsLeft(d.targetContrast>0)==-1)
         type='rightMeansYes';
@@ -45,15 +47,28 @@ if size(d.date,2)>0
         %quick and dirty code to find when and what
         zeroContrastWrongLeftRuleFraction=sum(d.correctResponseIsLeft(d.targetContrast==0)==1)./sum(d.targetContrast==0)
         zeroContrastWrongRightRuleFraction=sum(d.correctResponseIsLeft(d.targetContrast==0)==-1)./sum(d.targetContrast==0)
-        firstBadLeft=find(d.correctResponseIsLeft(d.targetContrast==0)==1); %actually all of them...index the first one
-        firstBadRight=find(d.correctResponseIsLeft(d.targetContrast==0)==-1);
+        BadLeft=find(d.correctResponseIsLeft(d.targetContrast==0)==1); %actually all of them...index the first one
+        BadRight=find(d.correctResponseIsLeft(d.targetContrast==0)==-1);
         zeroContrastWrongRuleFraction=min(zeroContrastWrongLeftRuleFraction,zeroContrastWrongRightRuleFraction) % guess
-        firstBadTrial=d.trialNumber(max([firstBadLeft(1) firstBadRight(1) ]))
-        firstBadTrialDate=datestr(d.date(max([firstBadLeft(1) firstBadRight(1) ])))
-        d.info.subject
+        whichRule=find([zeroContrastWrongLeftRuleFraction,zeroContrastWrongRightRuleFraction]==zeroContrastWrongRuleFraction)
+        switch whichRule
+            case 1 
+                error('never yet')
+            case 2
+                firstBadTrial=d.trialNumber( BadRight(1) )
+                lastBadTrial=d.trialNumber(BadRight(end) )
+                firstBadTrialDate=datestr(d.date(BadRight(1) ))
+                lastBadTrialDate=datestr(d.date(BadRight(end) ))
+        end
         %d=getSmalls(char(d.info.subject));%,[datenum(firstBadTrialDate)-10 datenum(firstBadTrialDate)+10]);  % inifinite recursion!
         %figure; doPlotPercentCorrect(d)
-        error('should never happen-- suggests this rat has some trials where yes=left and others where yes=right')
+        switch char(d.info.subject)
+            case {'138','139'}
+                cutOut(firstBadTrial:lastBadTrial)=1;
+                type='rightMeansYes';
+            otherwise         
+                error('should never happen-- suggests this rat has some trials where yes=left and others where yes=right')
+        end
     end
 
     if  ~isempty(r)
@@ -79,7 +94,7 @@ if size(d.date,2)>0
     end
 
     d.yes=nan(1,length(d.date));
-    possible=~isnan(d.targetContrast); % use to determine if it was a flankerProtocol with a target, (vs. free drinks or other stim Managers)
+    possible=~isnan(d.targetContrast) & ~cutOut; % target contrast is use to determine if it was a flankerProtocol with a target, (vs. free drinks or other stim Managers)
     switch type
         case 'rightMeansYes'
             d.yes(possible & d.response==3)=1;
@@ -93,7 +108,7 @@ if size(d.date,2)>0
     
     d.correctAnswerID=d.correctResponseIsLeft;
     d.correctAnswerID(d.correctAnswerID==-1)=3; % map "not left" to right port=3
-    if ~all(unique(d.correctAnswerID)==[1 3])
+    if ~all(ismember(d.correctAnswerID(~isnan(d.correctAnswerID)),[1 3]))
         unique(d.correctAnswerID)
         error('unexpected answer IDs')
     end

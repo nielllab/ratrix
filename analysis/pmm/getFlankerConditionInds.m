@@ -341,7 +341,7 @@ switch types
             end
         end
         warndlg('while this works, its risky.  reasons: 1) did you think about flanker contrast=0 trials?  2) when do you pool the no sig conditions? 3) why not just use flankerAnalysis.m?')
-    case {'colin+3&devs','colin+1&devs'}
+    case {'colin+3&devs','colin+1&devs','2flanks&devs'}
         devs=unique(d.deviation(~isnan(d.deviation)));
         numDevs=length(devs);
         [tempConditionInds tempNames tempHaveData tempColors]=getFlankerConditionInds(d,restrictedSubset,types(1:7));
@@ -432,6 +432,13 @@ switch types
         conditionInds(end+1,:)=conditionInds(strcmp(names,'LRR'),:) | conditionInds(strcmp(names,'RLL'),:);
         conditionInds(end+1,:)=conditionInds(strcmp(names,'RRL'),:) | conditionInds(strcmp(names,'LLR'),:);
         conditionInds(end+1,:)=conditionInds(10,:) | conditionInds(11,:) | conditionInds(12,:);
+    case '2flanks'
+        [conditionInds names haveData colors]=getFlankerConditionInds(d,restrictedSubset,'8flanks+');
+        whichInds=[find(strcmp({'colin'},names))  find(strcmp({'changeFlank'},names)) ];
+        conditionInds=conditionInds(whichInds,:);
+        names=names(whichInds);
+        haveData=intersect(haveData,whichInds);
+        colors=colors(whichInds,:);
     case 'colinSymetryCheck'
 
 
@@ -462,6 +469,10 @@ switch types
         conditionInds=d.flankerContrast==0;
         colors=[.5 1 .5];
         names={'noF'};
+    case 'hasFlank'
+        conditionInds=d.flankerContrast>0;
+        colors=[.6 .6 .6];
+        names={'hasF'};
    case 'skip'
        % do nothing, this is a condition used to prevent overwriting
     otherwise

@@ -60,7 +60,7 @@ params.settings.goodTrialType=goodTrialType;
 numSubjects=length(subjects);
 names.subjects=subjects;
 
-[justForSize justForNames b c]=getFlankerConditionInds( filterFlankerData(getSmalls(subjects{1}),filterType),[],conditionType);
+[justForSize justForNames b c]=getFlankerConditionInds( filterFlankerData(getSmalls(subjects{1},dateRange),filterType),[],conditionType);
 numConditions=size(justForSize,1);
 names.conditions=justForNames;
 
@@ -135,6 +135,7 @@ for i=1:numSubjects
     [containsContrasts junk whichContrast]=unique(d.targetContrast(~isnan(d.targetContrast)));
     if length(containsContrasts)>2
         containsContrasts
+        pctThisContrast=[];
         for cc=1:length(containsContrasts)
             pctThisContrast(cc)=mean(whichContrast==cc);
         end
@@ -226,15 +227,16 @@ for i=1:numSubjects
                     params.factors.targetPhase(i,j)=d.targetPhase(firstInd);
                 case {'allDevs'}
                     params.factors.deviation(i,j)=d.deviation(firstInd);
-                case {'colin+3&devs','colin+1&devs'}
+                case {'colin+3&devs','colin+1&devs','2flanks&devs'}
                     params.factors.targetOrientation(i,j)=d.targetOrientation(firstInd);
                     params.factors.flankerOrientation(i,j)=d.flankerOrientation(firstInd);
                     params.factors.flankerPosAngle(i,j)=d.flankerPosAngle(firstInd);
                     params.factors.targetPhase(i,j)=d.targetPhase(firstInd);
                     params.factors.flankerPhase(i,j)=d.flankerPhase(firstInd);
-                case {'noFlank&nfBlock'}
+                case {'noFlank&nfBlock','noFlank'}
                     %none
                 otherwise
+                    
                     error('factors not listed yet for that conditionType')
             end
         else
@@ -254,6 +256,14 @@ for i=1:numSubjects
                 case {'dpr'}
                     stats(i,j,k)=dprime(d.response(conditionInds(j,:)),d.correctAnswerID(conditionInds(j,:)),'presentVal',presentVal,'absentVal',absentVal,'silent');
                     CI(i,j,k,:)=nan;
+                case {'crit'}
+                    try
+                    [junk more]=dprime(d.response(conditionInds(j,:)),d.correctAnswerID(conditionInds(j,:)),'presentVal',presentVal,'absentVal',absentVal,'silent');
+                    stats(i,j,k)= -(norminv(more.hitsPercent/100)+norminv(more.falseAlarmsPercent/100))/2;  %cr =-(norminv(h)+norminv(f))/2;  
+                    CI(i,j,k,:)=nan;
+                    catch
+                        h=1
+                    end
                 case {'criterionMCMC', 'biasMCMC', 'dprimeMCMC'}
                     stats(i,j,k)=nan;
                     CI(i,j,k,:)=nan;

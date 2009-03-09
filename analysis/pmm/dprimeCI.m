@@ -21,8 +21,7 @@ switch dprimeMethod
     case 'dprimeMCMC'
 
 
-        prevDir=pwd;
-        cd(fullfile(getRatrixPath, 'classes', 'util', 'matbugs', 'BayesSDT'));
+        
         whichParams=[1 1 1 1 1 1];
         whichParams=[0 0 0 0 0 0]; %turn off plotting
         %d h f k c b
@@ -46,6 +45,8 @@ switch dprimeMethod
         D.ccheck=whichParams(5)*ones(1,N); %is a vector of 0 and 1 entries for each data set, indicating whether or not the c parameter should be analyzed.
         D.bcheck=whichParams(6)*ones(1,N); %is a vector of 0 and 1 entries for each data set, indicating whether or not the b parameter should be analyzed.
 
+        prevDir=pwd;
+        cd(fullfile(getRatrixPath, 'analysis', 'matbugs', 'BayesSDT')); 
         [samples mcmcStats]=BayesSDT(D);
         cd(prevDir); %return to where you were
 

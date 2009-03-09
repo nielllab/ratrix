@@ -78,6 +78,7 @@ if ll > 0
         nfa = falseAlarms / ll;
         dpr = sqrt(2) * (erfinv((hits - misses)/ps) + erfinv((correctRejects - falseAlarms)/ns));
 else    
+        dpr=nan;
         disp('No responses recorded from subject');
         answers
 end

@@ -1,7 +1,7 @@
 function [didAPause paused done result doValves ports ...
-    didValves didHumanResponse manual doPuff pressingM pressingP overheadTime initTime kDownTime allowKeyboard] ...
+    didValves didHumanResponse manual doPuff pressingM pressingP overheadTime initTime kDownTime] ...
     = handleKeyboard(tm, keyCode, didAPause, paused, done, result, doValves, ports, didValves, ...
-    didHumanResponse, manual, doPuff, pressingM, pressingP, originalPriority, priorityLevel, KbConstants, allowKeyboard)
+    didHumanResponse, manual, doPuff, pressingM, pressingP, originalPriority, priorityLevel, KbConstants)
 
 % note: this function pretty much updates a bunch of flags....
 
@@ -53,7 +53,7 @@ initTime=GetSecs;
 %                 end
 %            end
 
-if kDown && allowKeyboard
+if kDown
     if any(keyCode(KbConstants.pKey))
         pThisLoop=1;
 
@@ -73,16 +73,13 @@ if kDown && allowKeyboard
     elseif any(keyCode(KbConstants.qKey)) && ~paused
         done=1;
         result='manual kill';
-    elseif tDown && any(numsDown)
-        newTsNum=find(numsDown,1,'first');
+    elseif tDown
         done=1;
-        result=sprintf('manual training step %d',newTsNum);
-        allowKeyboard=false; %must reset keyboard input after setting manual training step
+        result=sprintf('manual training step');
     elseif fDown
         result=sprintf('manual flushPorts');
         didHumanResponse=true;
         done=1;
-        allowKeyboard=false; %must reset keyboard input after calling flushPorts
     elseif any(portsDown)
         if ctrlDown
             doValves(portsDown)=1;
@@ -101,13 +98,11 @@ if kDown && allowKeyboard
             dispStr=sprintf('set manual to %d\n',manual);
             disp(dispStr);
             pressingM=1;
-            allowKeyboard=false;
         end
     elseif any(keyCode(KbConstants.aKey))
         doPuff=true;
     elseif any(keyCode(KbConstants.rKey)) && strcmp(getRewardMethod(station),'localPump')
         doPrime(station);
-        allowKeyboard=false; %must reset keyboard input after station pump prime
     end
 end
 if shiftDown && atDown

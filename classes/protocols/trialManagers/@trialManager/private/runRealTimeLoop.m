@@ -77,7 +77,6 @@ updatePhase = 1; % are we starting a new phase?
 
 lastI = 0;
 isRequesting=0;
-allowKeyboard=true;
 
 lastSoundsLooped={};
 totalEyeDataInd=1;
@@ -366,7 +365,6 @@ while ~done && ~quit;
         didPulse=0;
         didValves=0;
         arrowKeyDown=false;
-%         allowKeyboard=false;
         
         %         puffStarted=0;
         %         puffDone=false;
@@ -647,14 +645,11 @@ while ~done && ~quit;
     [keyIsDown,secs,keyCode]=KbCheck; % do this check outside of function to save function call overhead
     timestamps.kbCheckDone=GetSecs;
     
-    if keyIsDown && allowKeyboard
+    if keyIsDown
         [didAPause paused done trialRecords(trialInd).result doValves ports didValves didHumanResponse manual ...
-            doPuff pressingM pressingP,timestamps.kbOverhead,timestamps.kbInit,timestamps.kbKDown,allowKeyboard] ...
+            doPuff pressingM pressingP,timestamps.kbOverhead,timestamps.kbInit,timestamps.kbKDown] ...
             = handleKeyboard(tm, keyCode, didAPause, paused, done, trialRecords(trialInd).result, doValves, ports, didValves, didHumanResponse, ...
-            manual, doPuff, pressingM, pressingP, originalPriority, priorityLevel, KbConstants, allowKeyboard);
-    else
-        % require a break between keyboard inputs
-        allowKeyboard=true;
+            manual, doPuff, pressingM, pressingP, originalPriority, priorityLevel, KbConstants);
     end
     
     timestamps.keyboardDone=GetSecs;
@@ -946,7 +941,6 @@ while ~done && ~quit;
         phaseRecords(phaseNum).didStochasticResponse = didStochasticResponse;
         
         phaseRecords(phaseNum).responseDetails.totalFrames = frameNum;
-%         allowKeyboard=false;
         % how do we only clear the textures from THIS phase (since all textures for all phases are precached....)
         % close all textures from this phase if in non-expert mode
         %         if ~strcmp(strategy,'expert')

@@ -169,7 +169,14 @@ parameters.shapingValues.currentValue=0.01;
 parameters.shapingValues.goalValue=.1;
 parameters.graduation = parameterThresholdCriterion('.stimDetails.xPosNoiseStd','>=',.1);
 
-[varyTargetPos unUsed]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+
+[incVaryTargetPos unUsed]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+    parameters.shapedParameter=[];
+    parameters.shapingMethod=[];
+    parameters.shapingValues=[];
+    parameters.xPosNoise=.1;
+    parameters.graduation = performanceCriterion([0.99],int16([9999]));
+    [varyTargetPos unUsed]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end}); %changed in trunk too!
 % end optional
 
 nameOfShapingStep{end+1} = sprintf('Step 3a: Dim flankers %s, stringent', protocolType);
@@ -471,9 +478,9 @@ switch protocolVersion
     case {'1_6','1_7', '1_8', '1_9', '2_1'}
         p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,smaller,dimFlankers,dimmerTarget,strongerFlanker,fullFlankers,flanksToggleToo,varyPosition})
     case '2_0'
-        p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,shrinking,varyTargetPos})
+p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,shrinking,incVaryTargetPos,varyTargetPos})
     case '2_2' %detection first learn on linearized small thin target
-        p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,smaller,dimFlankers,dimmerTarget,flanksToggleToo,varyPosition}) %
+        p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,smaller,dimFlankers,dimmerTarget,flanksToggleToo,incVaryTargetPos}) %
     case {'2_3','2_4','2_5validate'} %sweep contrast as first expt, then position, then orientation; manual graduations don't control order
         p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,smaller,dimFlankers,dimmerTarget,flanksToggleToo,sweepContrast,sweepFlankerPosition,sweepFlankerOrientation})
     otherwise

@@ -10,7 +10,7 @@ function [doFramePulse expertCache dynamicDetails textLabel i dontclear] = ...
 % state.img
 %
 % stimManager.selectedSizes
-% stimManager.selectedRotation
+% stimManager.selectedRotations
 
 
 % increment i
@@ -29,7 +29,7 @@ floatprecision=0;
 % % Draw images texture, rotated by "rotation":
 % newDestRect=state.destRect*stimManager.selectedSize;
 % Screen('DrawTexture', state.window, imagestex,[],newDestRect, ...
-%     stimManager.selectedRotation, state.filtMode);
+%     stimManager.selectedRotations, state.filtMode);
 Screen('FillRect', window, 0);
 Screen('BlendFunction', window, GL_SRC_ALPHA, GL_ONE); % necessary to do the transparency blending
 
@@ -54,7 +54,7 @@ for j=1:size(imgs,1) % for each actual image, not the entire screen
         
         newDestRect=[thisDestRect(1)+deltaWidth thisDestRect(2)+deltaHeight thisDestRect(3)-deltaWidth thisDestRect(4)-deltaHeight];
         % draw
-        Screen('DrawTexture',window,imagetex,[],newDestRect,stimulus.selectedRotation,filtMode);
+        Screen('DrawTexture',window,imagetex,[],newDestRect,stimulus.selectedRotations(j),filtMode);
     end
 end
 

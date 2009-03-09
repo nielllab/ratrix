@@ -90,7 +90,7 @@ end
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);
 
-% 12/8/08 - randomly draw from size and rotation; store values into selectedSize and selectedRotation, and also write to details
+% 12/8/08 - randomly draw from size and rotation; store values into selectedSize and selectedRotations, and also write to details
 % goes hand in hand with dynamic mode for doing the rotation and scaling
 % 12/15/08 - moved up here so that these values can get sent to checkImages->prepareImages (for static mode rotation/scaling)
 if stimulus.sizeyoked
@@ -102,8 +102,14 @@ else
         stimulus.selectedSizes(i) = stimulus.size(1) + rand(1)*(stimulus.size(2)-stimulus.size(1));
     end
 end
-stimulus.selectedRotation = round(stimulus.rotation(1) + rand(1)*(stimulus.rotation(2)-stimulus.rotation(1)));
-
+if stimulus.rotationyoked
+    stimulus.selectedRotations = repmat(round(stimulus.rotation(1) + rand(1)*(stimulus.rotation(2)-stimulus.rotation(1))),1,totalPorts);
+else
+    stimulus.selectedRotations = zeros(1,totalPorts);
+    for i=1:totalPorts
+        stimulus.selectedRotations(i) = round(stimulus.rotation(1) + rand(1)*(stimulus.rotation(2)-stimulus.rotation(1)));
+    end
+end
 %from PR: how to get this passed to calcstim as user defined param?
 %response from edf: add fields to the class (in its constructor)
 normalizeHistograms=false;
@@ -165,7 +171,7 @@ end
 details.size=stimulus.size;
 details.rotation=stimulus.rotation;
 details.selectedSizes=stimulus.selectedSizes;
-details.selectedRotation=stimulus.selectedRotation;
+details.selectedRotations=stimulus.selectedRotations;
 details.sizeyoked=stimulus.sizeyoked;
 
 details.trialDistribution = stimulus.trialDistribution;

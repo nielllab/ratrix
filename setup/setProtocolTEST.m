@@ -186,10 +186,11 @@ gratingStim = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts
     waveform,normalizationMethod,mean,thresh,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 imageSize=[1 1];
-imageRotation=[0 0];
+imageRotation=[0 210];
 imageYoked=false;
+rotationYoked=false;
 imageStim = images(imageDir,ypos,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,trialDistribution,imageSelectionMode,...
-    imageSize,imageYoked,imageRotation);
+    imageSize,imageYoked,imageRotation,rotationYoked);
 
 % for Phil's stim managers
 pixPerCycs              =[20];
@@ -576,7 +577,7 @@ imlist.ts5A={...
 
 
 discrimStim5A = images(imdir,ypos_nAFC,background_nAFC,...
-    maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts5A,imageSelectionMode,[.15 1],false,[0 180],'expert');
+    maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts5A,imageSelectionMode,[.15 1],false,[0 180],false,'expert');
 % discrimStim6A = images(imdir,ypos_nAFC,background_nAFC,...
 %     maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts6A,[.5 .75],true,[0 90]);
 
@@ -591,7 +592,7 @@ ts30 = trainingStep(vh, discrimStim5A,repeatIndef,noTimeOff(),svnRev);
 %     ts18, ts19, ts20, ts21, ts22});
 % stepNum=21;
 % p=protocol('gabor test2', {ts29, ts1, ts4, ts12, ts2, ts12, ts8, ts11,ts9,ts10,sweepContrast,ts23,ts24,ts27,ts30});
-stepNum=uint8(3);
+stepNum=uint8(8);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});
@@ -619,7 +620,7 @@ for i=1:length(subjIDs),
 %         case {'rack3test4','rack3test5','rack3test6'} % nAFC, orientedGabors
 %             p=protocol('nAFC,orientedGabors',{ts4});
         otherwise
-            p=protocol('demo',{ts40,ts41,ts4,ts2,ts25,sweepContrast,ts12});
+            p=protocol('demo',{ts40,ts41,ts4,ts2,ts25,sweepContrast,ts12,ts5});
 %             error('unknown subject');
     end
     

@@ -1,7 +1,7 @@
 function s=images(varargin)
 % IMAGES  class constructor.
 % s = images(directory,yPositionPercent,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,...
-%   trialDistribution,imageSelectionMode,size,sizeyoked,rotation[,drawingMode])
+%   trialDistribution,imageSelectionMode,size,sizeyoked,rotation,rotationyoked[,drawingMode])
 % yPositionPercent (0 <= value <= 1), in normalized units of the diagonal of the stim region
 % trialDistribution in format { { {imagePrefixN imagePrefixP} .1}...
 %                               { {imagePrefixP imagePrefixM} .9}...
@@ -15,7 +15,7 @@ function s=images(varargin)
 % size is a [2x1] vector that specifies a range from which to randomly select a size for the images (varies from 0-1)
 % sizeyoked is a flag that indicates if all images have same size, or if to randomly draw a size for each image
 % rotation is a [2x1] vector that specifies ar range from which to randomly select a rotation value for the images (in degrees!)
-%   - the rotation is the same for all images (ie always yoked)
+% rotationyoked is a flag that indicates if all images have same rotation, or if to randomly draw a rotation for each image
 % drawingMode is an optional argument that specifies drawing in 'expert' versus 'static' mode (default is 'expert')
 
 s.directory = '';
@@ -31,11 +31,12 @@ s.size=[];
 % and scale the size of image by this factor 
 s.rotation=[];
 s.sizeyoked=[];
+s.rotationyoked=[];
 % if 1, the size of distractor is scaled by
 % the same amount as the target; if 0,
 % independently draw a scale factor for the distractor 
 s.selectedSizes=[]; % not user-defined; this gets set by calcStim as the randomly drawn value from the size range
-s.selectedRotation=[]; % not user-defined; this gets set by calcStim as the randomly drawn value from the rotation range
+s.selectedRotations=[]; % not user-defined; this gets set by calcStim as the randomly drawn value from the rotation range
 s.images=[]; % used for expert mode
 s.drawingMode='expert';
 
@@ -53,7 +54,7 @@ switch nargin
         else
             error('Input argument is not an images object')
         end
-    case {12 13}
+    case {13 14}
         % create object using specified values
 
         if ischar(varargin{1})
@@ -138,10 +139,17 @@ switch nargin
             error('rotation must be a 2-element vector');
         end
         
+        %rotationyoked
+        if islogical(varargin{13})
+            s.rotationyoked=varargin{13};
+        else
+            error('rotationyoked must be a logical');
+        end
+        
         %mode
-        if nargin==13
-            if ischar(varargin{13}) && (strcmp(varargin{13},'expert') || strcmp(varargin{13},'cache'))
-                s.drawingMode=varargin{13};
+        if nargin==14
+            if ischar(varargin{14}) && (strcmp(varargin{14},'expert') || strcmp(varargin{14},'cache'))
+                s.drawingMode=varargin{14};
             else
                 error('drawingMode must be ''expert'' or ''cache''');
             end

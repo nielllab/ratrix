@@ -47,17 +47,17 @@ if isempty(s.cache) %without the above, we won't see changes to the files once w
     %scale images, set in background, normalize areas and histograms
     width=min(width,getMaxWidth(s));
     height=min(height,getMaxHeight(s));
-    % 12/15/08 - added arguments for selectedSizes and selectedRotation (static mode rotation/scaling)
+    % 12/15/08 - added arguments for selectedSizes and selectedRotations (static mode rotation/scaling)
     selectedSizes=s.selectedSizes;
-    selectedRotation=s.selectedRotation;
+    selectedRotations=s.selectedRotations;
     % 1/2/09 - pass these selected parameters to prepareImages if mode is static, otherwise pass zeros (expert mode)
     if strcmp(s.drawingMode,'expert')
         selectedSizes=zeros(size(selectedSizes));
-        selectedRotation=0;
+        selectedRotations=0;
     end
     [allIms s.cache.deltas]=...
         prepareImages(ims,alphas,[height floor(length(s.cache.names)*width/n)],.95,pctScreenFill, backgroundcolor, normalizeHistograms, ...
-        selectedSizes,selectedRotation);
+        selectedSizes,selectedRotations);
 
     imWidth=size(allIms,2)/length(ims);
     for i=1:length(ims)

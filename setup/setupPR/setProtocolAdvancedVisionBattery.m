@@ -13,7 +13,7 @@ function r = setProtocolAdvVisTest(r,subjIDs)
 % define rat cohorts 
 % all rats that received LGN lesions in cohort 2 or 3
 ValidRats={'307','309','297','298','299','302'};  
-demostep=7; % affects demo1 subject only
+demostep=1; % affects demo1 subject only
 
 % params used by both freedrinks and gotostim trial managers
 msFlushDuration =1000; %CHECK not used??
@@ -159,40 +159,14 @@ imagelevel2invar = images(imdir,ypos_nAFC,background_nAFC,...
    imageRotation); %rotation[,drawingMode]
 %define the associated training step
 objrec2invar = trainingStep(gotostim, imagelevel2invar, graduationCriterion, scheduler,svnRevision); 
- 
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%objrec3 =gotos+ ignore s- [Nike Shuttle] INVARIANT TO MIRROR IMAGES!
-%use same nAFC object (trial manager)
-imagelevel3 = images(imdir,ypos_nAFC,background_nAFC,...
-    maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.level3);
-%define the associated training step
-objrec3 = trainingStep(gotostim, imagelevel3, graduationCriterion, scheduler,svnRevision); 
- 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%objrec4 =gotos+ ignore s- [Nike Shuttle] INVARIANT TO MIRROR IMAGES, MORE
-%DISTRACTOR IMAGES
-%use same nAFC object (trial manager)
-imagelevel4 = images(imdir,ypos_nAFC,background_nAFC,...
-    maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.level4);
-%define the associated training step
-objrec4 = trainingStep(gotostim, imagelevel4, graduationCriterion, scheduler,svnRevision); 
- 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%objrec4easy =gotos+ ignore s- [Nike Shuttle] 
-%exactly like 4, but no mirror image target
-imagelevel4easy = images(imdir,ypos_nAFC,background_nAFC,...
-    maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.level4easy);
-%define the associated training step
-objrec4easy = trainingStep(gotostim, imagelevel4easy, graduationCriterion, scheduler,svnRevision); 
- 
-
-
-
+%%%TO ADD%%
+%grating psychophysics
+%motion psychophysics
+%invariance to flipped images
 
 %%%PROTOCOLS%%%%%
-pAdvTest=   protocol('advanced vision tests', {});  
+pAdvTest=   protocol('advanced vision tests', {objrec1 objrec2 objrec2invar});  
 
 %%%%%%%%%%%%
 thisIsANewProtocol=1; % typically 1
@@ -214,9 +188,11 @@ for i=1:length(ratIDs)
             case '307', stepNum=1; %
             case '309', stepNum=1; %
         end
-
-        [subjObj r]=setProtocolAndStep(subjObj,pTest,1,1,1,stepNum,r,'Advanced Vision Tests','pr');
+        
+        [subjObj r]=setProtocolAndStep(subjObj,pAdvTest,thisIsANewProtocol,thisIsANewTrainingStep,thisIsANewStepNum,stepNum,r,'Advanced Vision Tests','pr');
         fprintf(fid,'%s finished setting %s to step %d of pAdvTest\n', datestr(now),ratIDs{i},stepNum);
+    elseif ismember(subjIDs{i}, {'demo1'}),% for testing
+        [subj r]=setProtocolAndStep(subj,pAdvTest,thisIsANewProtocol,thisIsANewTrainingStep,thisIsANewStepNum,demostep,r,'Advanced Vision Tests','pr');
     else
         error('unexpected ID')
     end

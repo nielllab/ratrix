@@ -46,7 +46,7 @@ if ~exist('r','var') || isempty(r)
         else
             [suc mac]=getMACaddress();
             machines={{'1U',mac,[1 1 1]}};
-            r=createRatrixWithDefaultStations(machines,dataPath, rewardMethod,false);
+            r=createRatrixWithDefaultStations(machines,dataPath, rewardMethod);
             %subs=createSubjectsFromDB(subjects);
             %for i=1:length(subs)
             %    r=addSubject(r,subs(i),auth);
@@ -57,7 +57,7 @@ if ~exist('r','var') || isempty(r)
             else
                 isempty(serverName)
                 serverName
-                error('unknown serverName')
+                warning('unknown serverName') % error?
             end
         end
     else
@@ -82,10 +82,11 @@ if ~exist('subjects','var') || isempty(subjects)
                          subjects={'296','303','304','305','306','rack3test7'}
             %
         case 'defineAllMale'
-            subjects={'102','117','130','136','137','138','139','227','228','232','229',...
+            subjects={'102','130','138','139','227','228','232','229',...
                 '230','234','237','275','277','278','231','233',...
                 'test_l1','test_r1','test_l2','test_r2','test_l3','test_r3'}   % plus tests
-            %flunked dec 2008: 272, 274
+            %flunked feb 2009: 117
+            %flunked dec 2008: 272, 274,  to community room: 136,137
             %flunked oct 2008: '271','273','276'
             %subjects=createSubjectsFromDB(ids) %see addRatsForRack, but would have to remove pams...?
         case 'defineAll' %everybody in the ratrix gets defined

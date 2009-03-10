@@ -17,4 +17,4 @@ for i=1:length(stations)
 end
 
 
-r=createRatrixWithDefaultStations(machines,dataPath,rewardMethod,false);
+r=createRatrixWithDefaultStations(machines,dataPath,rewardMethod);

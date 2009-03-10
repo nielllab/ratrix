@@ -15,7 +15,7 @@ function r = setProtocolAdvVisTest(r,subjIDs)
 % max stim duration
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-svnRevision={'svn://132.239.158.177/projects/ratrix/trunk'};
+svnRevision={'svn://132.239.158.177/projects/ratrix/tags/v1.0'};
 ValidRats={'307','309','297','298','299','302'};  % all rats that received LGN lesions in cohort 2 or 3 
 demostep=3; % for testing: affects demo1 subject only
 

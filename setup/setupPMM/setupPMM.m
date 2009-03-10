@@ -42,7 +42,7 @@ if ~exist('r','var') || isempty(r)
         if ismember(serverName,{'server-01-male-pmm-154','server-02-female-pmm-156'})
             %r=createRatrixWithStationsForRack(rackID,rewardMethod);
             %r=addRatsForRack(rackID,auth);
-            r=firstMakeRatrix(rewardMethod);
+            r=firstMakeRatrix(rewardMethod,serverName);
         else
             [suc mac]=getMACaddress();
             machines={{'1U',mac,[1 1 1]}};

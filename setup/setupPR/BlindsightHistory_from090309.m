@@ -5,15 +5,16 @@
 ValidRats={'307','309','297','298','299','302'};  
 
 % FIRST RATS assigned to Pam's new server
+% run March 10, 2009, 7:33am
 cd('C:\Documents and Settings\rlab\Desktop\Ratrix\bootstrap') % refers to rack1Temp tag
 setupEnvironment
 dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep); 
 r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
 subjIDs=ValidRats;
 %add these rats to the ratrix
-addNewSubject(r,subjIDs); 
+r=addNewSubject(r,subjIDs); 
 %run setprotocol for these rats
-setProtocolAdvancedVisionBattery(r, subjIDs); % assign these rats to step 1 of image task
+r=setProtocolAdvancedVisionBattery(r, subjIDs); % assign these rats to step 1 of image task
 
 % notes to self regarding later training steps:
 % 299 completed all of the earlier protocol; needs object, psychophysics of

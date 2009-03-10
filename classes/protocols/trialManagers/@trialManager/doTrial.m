@@ -253,9 +253,9 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             % set correct=0 if it was not set during real-time loop
             % we need correct to be empty at the start of the loop so that we know that it needs to be set by updateTrialState,
             % but an empty correct field causes problems for compiling b/c it is not scalar
-            if isempty(trialRecords(trialInd).correct)
-                trialRecords(trialInd).correct = 0;
-            end
+%             if isempty(trialRecords(trialInd).correct)
+%                 trialRecords(trialInd).correct = 0;
+%             end
             
             if ~ischar(trialRecords(trialInd).result)
 %                 resp=find(trialRecords(trialInd).result);

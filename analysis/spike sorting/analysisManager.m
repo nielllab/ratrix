@@ -229,7 +229,7 @@ while ~quit
                 if doAnalysis
                     % do something with loaded information
                     if ~exist('parameters','var')
-                        parameters=[];
+                        load(neuralRecordLocation,'parameters');    
                     end
                     % spikeData is a struct that contains all spike information that different analyses may want
                     spikeData=[];
@@ -258,9 +258,14 @@ while ~quit
                     % stim size is the same (see stimulusDetails)
                     % z depth (physiologyEvents) is the same
                     if (isempty(lastStimManagerClass) || strcmp(lastStimManagerClass, stimManagerClass)) ...
-                            && lastStimulusDetails.height==stimulusDetails.height ...
-                            && lastStimulusDetails.width==stimulusDetails.width ...
-                            && (isempty(physiologyEvents) || all([physiologyEvents.position(3)]==lastZposition))
+                            && (isempty(physiologyEvents) || all([physiologyEvents.position(3)]==lastZposition))%...
+                             % && lastStimulusDetails.height==stimulusDetails.height ...
+                            % && lastStimulusDetails.width==stimulusDetails.width ...
+                            % these checks belong in physAnalysis.  the
+                            % cumulative gets reset if they fail, it simply
+                            % ignores the previous analysis info
+                            % other stim types don't nec. have these fields
+                            % defined. -pmm
                         load(analysisLocation, 'analysisdata');
                     else
                         warning('did not load analysis file due to inconsistencies between this trial and last');

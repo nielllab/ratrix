@@ -280,6 +280,9 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 % keep doing trials
             else
                 trialRecords(trialInd).result
+                if strcmp(trialRecords(trialInd).result,'manual training step')
+                    updateTM=true; % to make sure that soundMgr gets decached and passed back to the subject/doTrial where the k+t happens
+                end
                 fprintf('setting stopEarly\n')
                 stopEarly = 1;
             end
@@ -396,11 +399,11 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             currentValveStates=verifyValvesClosed(station);
             
             if stopEarly
-                uninit(trialManager.soundMgr,station);
+                trialManager.soundMgr=uninit(trialManager.soundMgr,station);
             end
             
             if stopEarly
-                uninit(trialManager.soundMgr,station);
+                trialManager.soundMgr=uninit(trialManager.soundMgr,station);
             end
             
         else

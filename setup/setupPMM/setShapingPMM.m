@@ -412,9 +412,9 @@ grad2 = rateCriterion(5,2); % how likely is it that false positives trigger a gr
 grad3 = rateCriterion(6,3); % rateCriterion(10,3) % (20,1)? (5,20)?
 
 
-fd1 = trainingStep(fd1TM, SM, grad1, minutesPerSession(90,3), parameters.svnRev); %nTrialsThenWait([1000],[1],[0.001],[1])
-fd2 = trainingStep(fd2TM, SM, grad2, minutesPerSession(90,3), parameters.svnRev);
-fd3 = trainingStep(fd3TM, SM, grad3, minutesPerSession(90,3), parameters.svnRev);
+fd1 = trainingStep(fd1TM, SM, grad1, minutesPerSession(90,3), parameters.svnRev, parameters.svnCheckMode); %nTrialsThenWait([1000],[1],[0.001],[1])
+fd2 = trainingStep(fd2TM, SM, grad2, minutesPerSession(90,3), parameters.svnRev, parameters.svnCheckMode);
+fd3 = trainingStep(fd3TM, SM, grad3, minutesPerSession(90,3), parameters.svnRev, parameters.svnCheckMode);
 %fdSteps=protocol('contrasty gabor free drinks weening',{fd1, fd2, fd3});
 
 

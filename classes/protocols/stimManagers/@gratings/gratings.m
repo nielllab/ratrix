@@ -23,7 +23,8 @@ function s=gratings(varargin)
 %   does the combinations in the following order:
 %   pixPerCycs > driftfrequencies > orientations > contrasts > phases > durations
 %   - if false, then takes unique selection of these parameters (they all have to be same length)
-%   - in future, handle a cell array for this flag that customizes the combo selection process
+%   - in future, handle a cell array for this flag that customizes the
+%   combo selection process.. if so, update analysis too
 
 s.pixPerCycs = [];
 s.driftfrequencies = [];

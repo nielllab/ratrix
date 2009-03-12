@@ -223,10 +223,9 @@ while ~quit
                 eval(evalStr);
                 % 1/26/09 - skip analysis if not worth sorting spikes
                 doAnalysis= (~exist(analysisLocation,'file') || overwriteAll) && worthSpikeSorting(sm,quality);
-                % if we need to do analysis (either no analysis file exists or
-                % we want to overwrite)
+                % if we need to do analysis (either no analysis file exists or we want to overwrite)
                 
-                if doAnalysis
+                if 1 %doAnalysis
                     % do something with loaded information
                     if ~exist('parameters','var')
                         load(neuralRecordLocation,'parameters');    

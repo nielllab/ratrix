@@ -137,6 +137,7 @@ switch defaultSettings
         default.fpaRelativeTargetOrientation=nan;
         default.fpaRelativeFlankerOrientation=nan;
         default.svnRev={'svn://132.239.158.177/projects/ratrix/trunk'}; %1/8/09 - added to support trunk version of trainingStep
+        default.svnCheckMode='session';
         %default.svnRev{2}=1920; %not used yet
         
         default.blocking=[];

@@ -1,7 +1,7 @@
 function quit=updateRatrixRevisionIfNecessary(args)
 quit=false;
 [runningSVNversion repositorySVNversion url]=getSVNRevisionFromXML(getRatrixPath);
-% properties = getSVNPropertiesForPath(url,{'commit'});
+properties = getSVNPropertiesForPath(url,{'commit'});
 % lastCommitVersion = properties.commit;
 [targetSVNurl targetRevNum] =checkTargetRevision(args);
 
@@ -21,7 +21,7 @@ quit=false;
 %       (check that the runningSVNversion is at least as recent as the commitVersion of all folders except 'setup')
 
 if ~strcmp(url,targetSVNurl) || ...
-        ((isempty(targetRevNum) && checkAllRatrixFoldersExceptSetup) || ...
+        ((isempty(targetRevNum) && properties.commit~=runningSVNversion) || ...
             (~isempty(targetRevNum) && targetRevNum~=runningSVNversion))
     writeSVNUpdateCommand(targetSVNurl,targetRevNum);
 %     fprintf('we need to update\n');
@@ -30,25 +30,4 @@ if ~strcmp(url,targetSVNurl) || ...
 else
 %     fprintf('no need to update\n');
 end
-end % end function
-
-function update = checkAllRatrixFoldersExceptSetup
-update = false;
-
-d = dir(getRatrixPath);
-for i=1:length(d)
-    if (d(i).isdir==1) && ~strcmp(d(i).name, '.svn') && ~strcmp(d(i).name,'setup') && ~strcmp(d(i).name, '.') && ~strcmp(d(i).name, '..')
-        % any directory that is not .svn or setup
-        [runningSVNversion repositorySVNversion url]=getSVNRevisionFromXML(fullfile(getRatrixPath, d(i).name));
-        properties = getSVNPropertiesForPath(url, {'commit'});
-        % if the commit is after runningSVNversion, flag update
-%         properties.commit
-%         runningSVNversion
-%         d(i).name
-        if properties.commit > runningSVNversion
-            update = true;
-        end
-    end
-end
-
 end % end function

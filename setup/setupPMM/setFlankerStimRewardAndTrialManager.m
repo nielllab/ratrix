@@ -44,5 +44,5 @@ switch tmClass
         t=trialManager(p.msFlushDuration,p.msMinimumPokeDuration,p.msMinimumClearDuration,p.sndManager,increasingReward,eyeTracker,eyeController)
 
 end
-step= trainingStep(tm, stim, p.graduation, p.scheduler, p.svnRev); %it would be nice to add the nameOfShapingStep
+step= trainingStep(tm, stim, p.graduation, p.scheduler, p.svnRev, p.svnCheckMode); %it would be nice to add the nameOfShapingStep
 

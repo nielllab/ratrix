@@ -1,9 +1,10 @@
 function t=trainingStep(varargin)
 % TRAININGSTEP  class constructor.
-% t = trainingStep(trialManager,stimManager,criterion,scheduler,svnRevision)
+% t = trainingStep(trialManager,stimManager,criterion,scheduler,svnRevision,svnCheckMode)
 
 t.svnRevURL = [];
 t.svnRevNum = [];
+t.svnCheckMode = 'session'; % default means we only check for an svn update once per session
 
 switch nargin
     case 0
@@ -29,13 +30,20 @@ switch nargin
         else
             error('Input argument is not a trainingStep object')
         end
-    case 5
+    case 6
         % create object using specified values
         if isa(varargin{1},'trialManager') && isa(varargin{2},'stimManager') && isa(varargin{3},'criterion') && isa(varargin{4},'scheduler')
             t.trialManager = varargin{1};
             t.stimManager = varargin{2};
             t.criterion = varargin{3};
             t.scheduler = varargin{4};
+            
+            if ischar(varargin{6}) && (strcmp(varargin{6},'session') || strcmp(varargin{6},'trial'))
+                t.svnCheckMode = varargin{6};
+            else
+                error('svnCheckMode must be ''session'' or ''trial''');
+            end
+            
 
             try
             [t.svnRevURL t.svnRevNum]=checkTargetRevision(varargin{5});

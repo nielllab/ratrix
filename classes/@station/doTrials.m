@@ -17,6 +17,21 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
         subject=getCurrentSubject(s,r);
         keepWorking=1;
         trialNum=0;
+        
+        % 3/12/09 - call updateRatrixRevisionIfNecessary here when the trainingStep's svnCheckMode is 'session'
+        [p t]=getProtocolAndStep(subject);
+        ts=getTrainingStep(p,t);
+        if ~isempty(rn) && strcmp(getSVNCheckMode(ts),'session')
+            if ~isempty(getSVNRevNum(ts))
+                args={getSVNRevURL(ts) getSVNRevNum(ts)};
+            else
+                args={getSVNRevURL(ts)};
+            end
+            doQuit=updateRatrixRevisionIfNecessary(args);
+            if doQuit
+                keepWorking=false;
+            end
+        end
 
         if n>=0
 

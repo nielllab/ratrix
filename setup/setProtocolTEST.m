@@ -479,76 +479,77 @@ crftrf=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminanc
 % ====================================================================================================================
 % training steps
 svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
+svnCheckMode='session';
 % set up graduationCriterion
 graduateQuickly = performanceCriterion([.9, .5], [uint8(10), uint8(20)]); %cannot use this for freeDrinks b/c no "correct" answer
 repeatIndef = repeatIndefinitely();
 
 % DEMO
-ts1 = trainingStep(fd_sto, freeStim, repeatIndef, noTimeOff(), svnRev);   %stochastic free drinks
-ts2 = trainingStep(fd, freeStim, repeatIndef, noTimeOff(), svnRev);  %free drinks
-ts3 = trainingStep(vh, freeStim, graduateQuickly, noTimeOff(), svnRev);   %go to stim - orientedGabors w/ nAFC
-ts4 = trainingStep(vh, discrimStim, repeatIndef, noTimeOff(), svnRev);%orientation discrim - orientedGabors w/ nAFC
-ts5 = trainingStep(vh, imageStim,  graduateQuickly, noTimeOff(), svnRev); %morph discrim - images w/ nAFC
+ts1 = trainingStep(fd_sto, freeStim, repeatIndef, noTimeOff(), svnRev, svnCheckMode);   %stochastic free drinks
+ts2 = trainingStep(fd, freeStim, repeatIndef, noTimeOff(), svnRev, svnCheckMode);  %free drinks
+ts3 = trainingStep(vh, freeStim, graduateQuickly, noTimeOff(), svnRev, svnCheckMode);   %go to stim - orientedGabors w/ nAFC
+ts4 = trainingStep(vh, discrimStim, repeatIndef, noTimeOff(), svnRev, svnCheckMode);%orientation discrim - orientedGabors w/ nAFC
+ts5 = trainingStep(vh, imageStim,  graduateQuickly, noTimeOff(), svnRev, svnCheckMode); %morph discrim - images w/ nAFC
 
 % Balaji
-ts6 = trainingStep(gts, freeStim, graduateQuickly, noTimeOff(), svnRev);  % go to stim
+ts6 = trainingStep(gts, freeStim, graduateQuickly, noTimeOff(), svnRev, svnCheckMode);  % go to stim
 
 % Phil
-ts7 = trainingStep(fd, freeAudioStim, graduateQuickly, noTimeOff(), svnRev); % stereoDiscrim w/ fd
-ts8 = trainingStep(vh, discrimAudioStim, graduateQuickly, noTimeOff(), svnRev); % stereoDiscrim w/ nAFC
-ts9 = trainingStep(fd, freeVisualStim, graduateQuickly, noTimeOff(), svnRev); % hemifieldFlicker w/ fd
-ts10 = trainingStep(vh, discrimVisualStim, graduateQuickly, noTimeOff(), svnRev); % hemifieldFlicker w/ nAFC
-ts11 = trainingStep(vh, crossModalStim, graduateQuickly, noTimeOff(), svnRev); % crossModel w/ nAFC
+ts7 = trainingStep(fd, freeAudioStim, graduateQuickly, noTimeOff(), svnRev, svnCheckMode); % stereoDiscrim w/ fd
+ts8 = trainingStep(vh, discrimAudioStim, graduateQuickly, noTimeOff(), svnRev, svnCheckMode); % stereoDiscrim w/ nAFC
+ts9 = trainingStep(fd, freeVisualStim, graduateQuickly, noTimeOff(), svnRev, svnCheckMode); % hemifieldFlicker w/ fd
+ts10 = trainingStep(vh, discrimVisualStim, graduateQuickly, noTimeOff(), svnRev, svnCheckMode); % hemifieldFlicker w/ nAFC
+ts11 = trainingStep(vh, crossModalStim, graduateQuickly, noTimeOff(), svnRev, svnCheckMode); % crossModel w/ nAFC
 
 % Pam
-ts12 = trainingStep(vh, cDots, repeatIndef, noTimeOff(), svnRev); % coherentDots w/ nAFC
-% ts13 = trainingStep(vh, cDots2, graduateQuickly, noTimeOff(), svnRev); % coherentDots w/ nAFC
-% ts14 = trainingStep(vh, cDots3, graduateQuickly, noTimeOff(), svnRev); % coherentDots w/ nAFC
-% ts15 = trainingStep(vh, cDots4, graduateQuickly, noTimeOff(), svnRev); % coherentDots w/ nAFC
-% ts16 = trainingStep(vh, cDots5, graduateQuickly, noTimeOff(), svnRev); % coherentDots w/ nAFC
-% ts17 = trainingStep(vh, cDots6, graduateQuickly, noTimeOff(), svnRev); % coherentDots w/ nAFC
+ts12 = trainingStep(vh, cDots, repeatIndef, noTimeOff(), svnRev, svnCheckMode); % coherentDots w/ nAFC
+% ts13 = trainingStep(vh, cDots2, graduateQuickly, noTimeOff(), svnRev, svnCheckMode); % coherentDots w/ nAFC
+% ts14 = trainingStep(vh, cDots3, graduateQuickly, noTimeOff(), svnRev, svnCheckMode); % coherentDots w/ nAFC
+% ts15 = trainingStep(vh, cDots4, graduateQuickly, noTimeOff(), svnRev, svnCheckMode); % coherentDots w/ nAFC
+% ts16 = trainingStep(vh, cDots5, graduateQuickly, noTimeOff(), svnRev, svnCheckMode); % coherentDots w/ nAFC
+% ts17 = trainingStep(vh, cDots6, graduateQuickly, noTimeOff(), svnRev, svnCheckMode); % coherentDots w/ nAFC
 
 
 % DEMO - with NcorrectInARow reinforcement manager instead of constantReinforcement
-ts18 = trainingStep(fd_sto_increasing_rewards, freeStim, graduateQuickly, noTimeOff(), svnRev); %stochastic free drinks
-ts19 = trainingStep(fd_increasing_rewards, freeStim, graduateQuickly, noTimeOff(), svnRev);  %free drinks
-ts20 = trainingStep(nAFC_increasing_rewards, freeStim, graduateQuickly, noTimeOff(), svnRev);   %go to stim - orientedGabors w/ nAFC
-ts21 = trainingStep(nAFC_increasing_rewards, discrimStim, graduateQuickly, noTimeOff(), svnRev);%orientation discrim - orientedGabors w/ nAFC
-% ts22 = trainingStep(nAFC_increasing_rewards, imageStim,  graduateQuickly, noTimeOff(), svnRev); %morph discrim - images w/ nAFC
+ts18 = trainingStep(fd_sto_increasing_rewards, freeStim, graduateQuickly, noTimeOff(), svnRev, svnCheckMode); %stochastic free drinks
+ts19 = trainingStep(fd_increasing_rewards, freeStim, graduateQuickly, noTimeOff(), svnRev, svnCheckMode);  %free drinks
+ts20 = trainingStep(nAFC_increasing_rewards, freeStim, graduateQuickly, noTimeOff(), svnRev, svnCheckMode);   %go to stim - orientedGabors w/ nAFC
+ts21 = trainingStep(nAFC_increasing_rewards, discrimStim, graduateQuickly, noTimeOff(), svnRev, svnCheckMode);%orientation discrim - orientedGabors w/ nAFC
+% ts22 = trainingStep(nAFC_increasing_rewards, imageStim,  graduateQuickly, noTimeOff(), svnRev, svnCheckMode); %morph discrim - images w/ nAFC
 
 % whiteNoise
 % numTrialsDoneCriterion
 doFiveTimes = numTrialsDoneCriterion(5);
-ts23 = trainingStep(vh, wn, repeatIndef, noTimeOff(), svnRev); % whiteNoise stim
+ts23 = trainingStep(vh, wn, repeatIndef, noTimeOff(), svnRev, svnCheckMode); % whiteNoise stim
 
 % bipartiteField
-ts24 = trainingStep(aP,biField,repeatIndef,noTimeOff(),svnRev);
+ts24 = trainingStep(aP,biField,repeatIndef,noTimeOff(),svnRev, svnCheckMode);
 
 % gratings
-ts25 = trainingStep(aP,gratingStim,repeatIndef,noTimeOff(),svnRev);
+ts25 = trainingStep(aP,gratingStim,repeatIndef,noTimeOff(),svnRev, svnCheckMode);
 
 % regular nAFC orientedGabors with no datanet
-ts26 = trainingStep(vh, discrimStim, repeatIndef, noTimeOff(), svnRev);%orientation discrim - orientedGabors w/ nAFC
+ts26 = trainingStep(vh, discrimStim, repeatIndef, noTimeOff(), svnRev, svnCheckMode);%orientation discrim - orientedGabors w/ nAFC
 
 % fullField
-ts27=trainingStep(vh,fF,repeatIndef,noTimeOff(),svnRev);
+ts27=trainingStep(vh,fF,repeatIndef,noTimeOff(),svnRev, svnCheckMode);
 
 % fullField with datanet
-ts28=trainingStep(vh_datanet,fF,repeatIndef,noTimeOff(),svnRev);
+ts28=trainingStep(vh_datanet,fF,repeatIndef,noTimeOff(),svnRev, svnCheckMode);
 
 % whiteNoise no datanet
-ts29=trainingStep(aP,wn,repeatIndef,noTimeOff(),svnRev);
+ts29=trainingStep(aP,wn,repeatIndef,noTimeOff(),svnRev, svnCheckMode);
 
 % erik filteredNoise
-ts30 = trainingStep(vh, hateren,  repeatIndefinitely(), noTimeOff(), svnRev); %hateren
-ts31 = trainingStep(vh, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svnRev); %fullfieldFlicker
-ts32 = trainingStep(vh, crftrf,  repeatIndefinitely(), noTimeOff(), svnRev); %crf/trf
+ts30 = trainingStep(vh, hateren,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %hateren
+ts31 = trainingStep(vh, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %fullfieldFlicker
+ts32 = trainingStep(vh, crftrf,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %crf/trf
 
 % passiveViewing no datanet with a fullField stim, 'all' requestPorts, 'all' requests rewarded
-ts40 = trainingStep(fd_all_requests, wn, repeatIndef, noTimeOff(), svnRev);
+ts40 = trainingStep(fd_all_requests, wn, repeatIndef, noTimeOff(), svnRev, svnCheckMode);
 
 % passiveViewing no datanet with a fullField stim, 'all' requestPorts, 'nonrepeats' rewarded
-ts41 = trainingStep(fd_nonrepeats, wn, repeatIndef, noTimeOff(), svnRev);
+ts41 = trainingStep(fd_nonrepeats, wn, repeatIndef, noTimeOff(), svnRev, svnCheckMode);
 
 % images
 %path containing ALL the stimuli
@@ -582,9 +583,25 @@ discrimStim5A = images(imdir,ypos_nAFC,background_nAFC,...
 %     maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts6A,[.5 .75],true,[0 90]);
 
 
-ts30 = trainingStep(vh, discrimStim5A,repeatIndef,noTimeOff(),svnRev);
+ts30 = trainingStep(vh, discrimStim5A,repeatIndef,noTimeOff(),svnRev, svnCheckMode);
 % ts31 = trainingStep(vh, sweepContrast,repeatIndef,noTimeOff(),svnRev);
 % ts25 = trainingStep(vh, discrimStim6A,graduateQuickly,noTimeOff(),svnRev);
+
+
+% phil's
+%% default for all of pmeier stims
+default=getDefaultParameters(ifFeatureGoRightWithTwoFlank,protocolType,protocolVersion,defaultSettingsDate);
+%% parameters for each shaping step
+nameOfShapingStep{1} = sprintf('Step 2a: Easy %s, friendly', protocolType);
+parameters=default;
+parameters.requestRewardSizeULorMS             =30;
+parameters.requestMode = 'first';
+parameters.msPenalty=1000;
+parameters.scheduler=minutesPerSession(90,3);
+%parameters.scheduler = nTrialsThenWait([1000],[1],[0.01],[1]);
+%%noTimeOff()
+parameters.graduation = performanceCriterion([0.85, 0.8],int16([200, 500]));
+[easyStep previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 
 % ====================================================================================================================
 % protocol and rest of setup stuff
@@ -592,7 +609,7 @@ ts30 = trainingStep(vh, discrimStim5A,repeatIndef,noTimeOff(),svnRev);
 %     ts18, ts19, ts20, ts21, ts22});
 % stepNum=21;
 % p=protocol('gabor test2', {ts29, ts1, ts4, ts12, ts2, ts12, ts8, ts11,ts9,ts10,sweepContrast,ts23,ts24,ts27,ts30});
-stepNum=uint8(8);
+stepNum=uint8(9);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});
@@ -620,7 +637,7 @@ for i=1:length(subjIDs),
 %         case {'rack3test4','rack3test5','rack3test6'} % nAFC, orientedGabors
 %             p=protocol('nAFC,orientedGabors',{ts4});
         otherwise
-            p=protocol('demo',{ts40,ts41,ts4,ts2,ts25,sweepContrast,ts12,ts5});
+            p=protocol('demo',{ts40,ts41,ts4,ts2,ts25,sweepContrast,ts12,ts5,easyStep});
 %             error('unknown subject');
     end
     

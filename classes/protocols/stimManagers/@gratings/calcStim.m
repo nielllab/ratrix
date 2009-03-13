@@ -41,7 +41,11 @@ details.driftfrequencies=stimulus.driftfrequencies;
 details.orientations=stimulus.orientations;
 details.phases=stimulus.phases;
 details.contrasts=stimulus.contrasts;
-details.location=stimulus.location;
+if isa(stimulus.location,'RFestimator')
+    details.location=getCenter(stimulus.location);
+else
+    details.location=stimulus.location;
+end
 details.durations=stimulus.durations;
 details.radii=stimulus.radii;
 details.annuli=stimulus.annuli;

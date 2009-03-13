@@ -15,6 +15,7 @@ function s=gratings(varargin)
 % radii - the std dev of the enveloping gaussian, (by default in normalized units of the diagonal of the stim region) - can be of length N (N masks)
 % annuli - the radius of annuli that are centered inside the grating (in same units as radii)
 % location - a 2x1 vector, specifying x- and y-positions where the gratings should be centered; in normalized units as fraction of screen
+%           OR: a RFestimator object that will get an estimated location when needed
 % waveform - 'square', 'sine', or 'none'
 % normalizationMethod - 'normalizeDiagonal' (default), 'normalizeHorizontal', 'normalizeVertical', or 'none'
 % mean - must be between 0 and 1
@@ -125,8 +126,10 @@ switch nargin
         % location
         if isnumeric(varargin{9}) && all(varargin{9}>=0) && all(varargin{9}<=1)
             s.location=varargin{9};
+        elseif isa(varargin{9},'RFestimator')
+            s.location=varargin{9};
         else
-            error('all location must be >= 0 and <= 1');
+            error('all location must be >= 0 and <= 1, or location must be an RFestimator object');
         end        
         % waveform
         if ischar(varargin{10})

@@ -109,6 +109,11 @@ for gcInd=1:2:length(transitionCriterion)-1
     end
 end
 
+if done && isempty(result)
+    % this means we were on 'autopilot', so the result should technically be nominal for this trial
+    result='nominal';
+end
+
 portSelectionDoneTime=GetSecs;
 
 % set isRequesting when request port is hit according to these rules:

@@ -177,3 +177,6 @@ protocols/@stimSpec/setFramesUntilTransition.m -text
 protocols/@stimSpec/setScaleFactor.m -text
 protocols/stimManagers/@filteredNoise/private/checkHateren.m -text
 protocols/stimManagers/@gratings/physAnalysis.m -text
+protocols/@RFestimator/getDataSource.m -text
+protocols/@RFestimator/getCenter.m -text
+protocols/@RFestimator/RFestimator.m -text

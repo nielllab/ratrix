@@ -277,7 +277,7 @@ background=gray;
 method='texOnPartOfScreen';
 stixelSize = [20,16];
 stimLocation=[0,0,1280,1024];
-numFrames=1000;   %100 to test; 5*60*100=30000 for experiment
+numFrames=100;   %100 to test; 5*60*100=30000 for experiment
 % s = whiteNoise(meanLuminance,std,background,method,requestedStimLocation,stixelSize,searchSubspace,numFrames,
 %       maxWidth,maxHeight,scaleFactor,interTrialLuminance)
 
@@ -520,7 +520,7 @@ ts21 = trainingStep(nAFC_increasing_rewards, discrimStim, graduateQuickly, noTim
 % whiteNoise
 % numTrialsDoneCriterion
 doFiveTimes = numTrialsDoneCriterion(5);
-ts23 = trainingStep(vh, wn, repeatIndef, noTimeOff(), svnRev, svnCheckMode); % whiteNoise stim
+ts23 = trainingStep(aP, wn, repeatIndef, noTimeOff(), svnRev, svnCheckMode); % whiteNoise stim
 
 % bipartiteField
 ts24 = trainingStep(aP,biField,repeatIndef,noTimeOff(),svnRev, svnCheckMode);
@@ -609,7 +609,7 @@ parameters.graduation = performanceCriterion([0.85, 0.8],int16([200, 500]));
 %     ts18, ts19, ts20, ts21, ts22});
 % stepNum=21;
 % p=protocol('gabor test2', {ts29, ts1, ts4, ts12, ts2, ts12, ts8, ts11,ts9,ts10,sweepContrast,ts23,ts24,ts27,ts30});
-stepNum=uint8(8);
+stepNum=uint8(10);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});
@@ -637,7 +637,7 @@ for i=1:length(subjIDs),
 %         case {'rack3test4','rack3test5','rack3test6'} % nAFC, orientedGabors
 %             p=protocol('nAFC,orientedGabors',{ts4});
         otherwise
-            p=protocol('demo',{ts40,ts41,ts4,ts2,ts25,sweepContrast,ts12,ts5,easyStep});
+            p=protocol('demo',{ts40,ts41,ts4,ts2,ts25,sweepContrast,ts12,ts5,easyStep,ts23});
 %             error('unknown subject');
     end
     

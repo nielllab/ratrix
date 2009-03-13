@@ -278,9 +278,9 @@ switch upper(spikeSortingMethod)
         %   nStarts - (optional) (default 1) number of starts of the algorithm for each initial cluster count
         %   splitEvery - (optional) (default 50) Test to see if any clusters should be split every n steps. 0 means don't split.
         %   maxPossibleClusters - (optional) (default 100) Cluster splitting can produce no more than this many clusters.
-        %   useAllFeatures - (optional) (default 1) 1 = use all features (all datapoints of each waveform)
-        %                                           2 = use first 10
-        %                                           principal components
+        %   features - (optional) (default) 'allRaw' = use all features (all datapoints of each waveform)
+        %           'tenPCs' = use first 10 principal components
+        %           features should a cell array of a subset of these possible features
         
         % check params
         % minClusters
@@ -309,30 +309,84 @@ switch upper(spikeSortingMethod)
             spikeSortingParams.maxPossibleClusters=100;
         end
         % useAllFeatures
-        if ~isfield(spikeSortingParams,'useAllFeatures')
-            warning('useAllFeatures not defined - using default value of 1');
-            spikeSortingParams.useAllFeatures=1;
+        if ~isfield(spikeSortingParams,'features')
+            warning('features not defined - using default value of ''allRaw''');
+            spikeSortingParams.features={'allRaw'};
         end
         
         % we need a file temp.fet.1 as input to KlustaKwik, and the output file will be temp.clu.1
         % change to ratrixPath/KlustaKwik directory
         currentDir=pwd;
-        tempDir=fullfile(getRatrixPath,'KlustaKwik');
+        tempDir=fullfile(getRatrixPath,'analysis','spike sorting','KlustaKwik');
         cd(tempDir);
         
-        % determine the number of datapoints for each spike (either all, or 10 PCs)
-        if spikeSortingParams.useAllFeatures == 1
-            nrDatapoints=size(spikeWaveforms,2);
-            score=spikeWaveforms;
-        else
-            [pc,score,latent,tsquare] = princomp(spikeWaveforms);
-            nrDatapoints=10; %first 10 PCs
+        nrDatapoints=0;
+        nrSamples=size(spikeWaveforms,2);
+        score=[];
+        features=[];
+        
+        for fInd=1:length(spikeSortingParams.features)
+            feat=spikeSortingParams.features{fInd};
+            switch feat %change to allow more than one feature
+                case 'allRaw'
+                    nrDatapoints=size(spikeWaveforms,2);
+                    features=[features spikeWaveforms];
+                case 'tenPCs'
+                    [pc,score,latent,tsquare] = princomp(spikeWaveforms);
+                    nrDatapoints=nrDatapoints+10; %first 10 PCs
+                    features=[features score(:,1:10)];
+                case {'wavePC1', 'wavePC2'}
+                    w=spikeWaveforms;
+                    l2norms = sqrt(sum(w.^2,2));
+                    w = w./l2norms(:,ones(1,nrSamples));
+                    [pc,score] = princomp(w);
+                    nrDatapoints=nrDatapoints+1;
+                    if strcmp(feat,'wavePC1')
+                        features=[features score(:,1)]; % first PC only
+                    else
+                        features=[features score(:,2)]; % second PC only
+                    end
+                case 'energy'
+                    score=sqrt(sum(spikeWaveforms(:,:).^2,2))./sqrt(nrSamples);
+                    nrDatapoints=nrDatapoints+1;
+                    features=[features score];
+                case 'peak'
+                    score=max(spikeWaveforms,[],2);
+                    nrDatapoints=nrDatapoints+1;
+                    features=[features score];
+                case 'valley'
+                    score=min(spikeWaveforms,[],2);
+                    nrDatapoints=nrDatapoints+1;
+                    features=[features score];
+                case 'peakToValley'
+                    score=abs(max(spikeWaveforms,[],2))./abs(min(spikeWaveforms,[],2));
+                    nrDatapoints=nrDatapoints+1;
+                    features=[features score];
+                case 'spikeWidth'
+                    [score imax] = max(spikeWaveforms,[],2);
+                    [score imin] = min(spikeWaveforms,[],2);
+                    score=abs(imin-imax);
+                    nrDatapoints=nrDatapoints+1;
+                    features=[features score];
+                case 'waveFFT'
+                    Y = fft(squeeze(spikeWaveforms(:,:))',nrSamples);
+                    Pyy = Y.*conj(Y)/nrSamples;
+                    WeightMatrix = repmat(([1:nrSamples/2 nrSamples/2:-1:1])',1,length(Pyy(1,:)));
+                    SumPyy = sum(Pyy);
+                    score = (sum(Pyy.*WeightMatrix)./SumPyy)';
+                    nrDatapoints=nrDatapoints+1;
+                    features=[features score];
+                otherwise
+                    error('unsupported feature selection');
+            end
         end
+        
+        
         % write the feature file
         fid = fopen('temp.fet.1','w+');
         fprintf(fid,[num2str(nrDatapoints) '\n']);
         for k=1:length(spikeTimestamps)
-                fprintf(fid,'%s\n', num2str(score(k,1:nrDatapoints)));        
+                fprintf(fid,'%s\n', num2str(features(k,1:nrDatapoints)));        
         end  
         fclose(fid);
         

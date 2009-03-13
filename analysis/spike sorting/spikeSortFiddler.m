@@ -50,7 +50,7 @@ spikeSortingParams.maxDistance=30; %(optional) maxDistance parameter passed in t
 spikeSortingParams.envelopeSize=20; %(optional) parameter passed in to osort's assignToWaveform method; additionally must fall withing mean +/- envelopeSize*std (i think at every timepoint of waveform); [0.5-3]; set large (>100) for negnigable influence
         
 
-if 0 %try klusta
+if 1 %try klusta
     %why does everything get considered to be a spike?
 spikeSortingParams=[];
 spikeSortingParams.method='KlustaKwik';
@@ -59,8 +59,7 @@ spikeSortingParams.maxClusters=30;  %%(optional) (default 30) max number of init
 spikeSortingParams.nStarts=5; %     (optional) (default 1) number of starts of the algorithm for each initial cluster count
 spikeSortingParams.splitEvery=50; %  (optional) (default 50) Test to see if any clusters should be split every n steps. 0 means don't split.
 spikeSortingParams.maxPossibleClusters=100; %(optional) (default 100) Cluster splitting can produce no more than this many clusters.
-spikeSortingParams.useAllFeatures=2; %(optional) (default 1) 1 = use all features (all datapoints of each waveform)
-        %                                                    2 = use first 10 principal components
+spikeSortingParams.features={'tenPCs'}; 
 end
 
 %  [spikes spikeWaveforms spikeTimestamps assignedClusters rankedClusters photoDiode]=...
@@ -72,8 +71,9 @@ end
 % quality test // dropped frames adjustment
 overwriteAll=false; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
 classesAnalyzed=[];%{'filteredNoise'};
-trialRange=[301 307]; % 263
-backupPath='\\132.239.158.183\rlab_storage\pmeier\backup\devNeuralData_090310'; %b/c i can't see datanet_storage folder on .179
+trialRange=[1 13]; % 263
+% backupPath='\\132.239.158.183\rlab_storage\pmeier\backup\devNeuralData_090310'; %b/c i can't see datanet_storage folder on .179
+backupPath='C:\Documents and Settings\rlab\Desktop\neural';
 analysisManager([],backupPath, spikeDetectionParams,spikeSortingParams,trialRange,[0 Inf],classesAnalyzed,overwriteAll);
 
 

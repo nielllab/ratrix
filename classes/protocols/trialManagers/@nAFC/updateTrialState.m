@@ -1,9 +1,9 @@
 function [tm trialDetails result spec rewardSizeULorMS requestRewardSizeULorMS ...
-    msPuff msRewardSound msPenalty msPenaltySound floatprecision textures destRect checkCorrect] = ...
+    msPuff msRewardSound msPenalty msPenaltySound floatprecision textures destRect] = ...
     updateTrialState(tm, sm, result, spec, ports, lastPorts, ...
     targetPorts, requestPorts, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
     floatprecision, textures, destRect, ...
-    requestRewardDone,checkCorrect)
+    requestRewardDone)
 % This function is a tm-specific method to update trial state before every flip.
 % Things done here include:
 %   - set trialRecords.correct and trialRecords.result as necessary
@@ -26,7 +26,8 @@ end
 % ========================================================
 % if the result is a port vector, and we have not yet assigned correct, then the current result must be the trial response
 % because phased trial logic returns the 'result' from previous phase only if it matches a target/distractor
-if ~isempty(result) && ~ischar(result) && isempty(correct) && checkCorrect
+% 3/13/09 - we rely on nAFC's phaseify to correctly assign stimSpec.phaseLabel to identify where to check for correctness
+if ~isempty(result) && ~ischar(result) && isempty(correct) && strcmp(getPhaseLabel(spec),'reinforcement')
     resp=find(result);
     if length(resp)==1
         correct = ismember(resp,targetPorts);
@@ -35,8 +36,6 @@ if ~isempty(result) && ~ischar(result) && isempty(correct) && checkCorrect
         correct = 0;
         result = 'multiple ports';
     end
-    % change result from the port vector to 'nominal'
-    checkCorrect=false;
 end
 
 % ========================================================
@@ -81,7 +80,7 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) &&
         spec=setFramesUntilTransition(spec,framesUntilTransition);
         [cStim correctScale] = correctStim(sm,numCorrectFrames);
         spec=setScaleFactor(spec,correctScale);
-        strategy='textureCache';
+        strategy='noCache';
         if window>0
             [floatprecision cStim] = determineColorPrecision(tm, cStim, strategy);
             textures = cacheTextures(tm,strategy,cStim,window,floatprecision);
@@ -117,7 +116,7 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) &&
         spec=setFramesUntilTransition(spec,framesUntilTransition);
         [eStim errorScale] = errorStim(sm,numErrorFrames);
         spec=setScaleFactor(spec,errorScale);
-        strategy='textureCache';
+        strategy='noCache';
         if window>0
             [floatprecision eStim] = determineColorPrecision(tm, eStim, strategy);
             textures = cacheTextures(tm,strategy,eStim,window,floatprecision);
@@ -137,7 +136,7 @@ end % end reward handling
     updateTrialState(tm.trialManager, sm, result, spec, ports, lastPorts, ...
     targetPorts, requestPorts, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
     floatprecision, textures, destRect, ...
-    requestRewardDone, checkCorrect);
+    requestRewardDone);
 
 
 trialDetails.correct=correct;

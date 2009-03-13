@@ -55,12 +55,12 @@ for j=1:size(imgs,1) % for each actual image, not the entire screen
         newDestRect=[thisDestRect(1)+deltaWidth thisDestRect(2)+deltaHeight thisDestRect(3)-deltaWidth thisDestRect(4)-deltaHeight];
         % draw
         Screen('DrawTexture',window,imagetex,[],newDestRect,stimulus.selectedRotations(j),filtMode);
+        % clear imagetex from vram
+        Screen('Close',imagetex);
     end
 end
 
 % disable alpha blending (for text)
 Screen('BlendFunction',window,GL_ONE,GL_ZERO);
-% clear imagetex from vram
-Screen('Close',imagetex);
 
 end % end function

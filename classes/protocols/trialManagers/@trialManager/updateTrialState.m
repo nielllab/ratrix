@@ -1,9 +1,9 @@
 function [tm trialDetails result spec rewardSizeULorMS requestRewardSizeULorMS ...
-    msPuff msRewardSound msPenalty msPenaltySound floatprecision textures destRect checkCorrect] = ...
+    msPuff msRewardSound msPenalty msPenaltySound floatprecision textures destRect] = ...
     updateTrialState(tm, sm, result, spec, ports, lastPorts, ...
     targetPorts, requestPorts, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
     floatprecision, textures, destRect, ...
-    requestRewardDone, checkCorrect)
+    requestRewardDone)
 % This function is a TM base class method to update trial state before every flip.
 % Things done here include:
 % - check for request rewards
@@ -14,7 +14,6 @@ msPuff=0;
 msRewardSound=0;
 msPenalty=0;
 msPenaltySound=0;
-checkCorrect=false;
 
 if (any(ports(requestPorts)) && ~any(lastPorts(requestPorts))) && ... % if a request port is triggered
         ((strcmp(getRequestMode(getReinforcementManager(tm)),'nonrepeats') && ~any(ports&lastRequestPorts)) || ... % if non-repeat

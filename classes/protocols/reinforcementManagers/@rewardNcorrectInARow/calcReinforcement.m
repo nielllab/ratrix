@@ -7,6 +7,13 @@ correct=0;
 if ~isempty(trialRecords)
     if any(strcmp(fields(trialRecords),'correct')) && ~isempty([trialRecords.correct])
         correct=[trialRecords.correct];
+    elseif isfield(trialRecords,'trialDetails') && isfield([trialRecords.trialDetails],'correct')
+        td=[trialRecords.trialDetails];
+        if ~isempty([td.correct])
+            correct=[td.correct];
+        else
+            warning('**trialRecord.trialDetails has an empty ''correct'' field');
+        end
     else
         warning('**trialRecords does not have the ''correct'' field yet or is empty')
     end

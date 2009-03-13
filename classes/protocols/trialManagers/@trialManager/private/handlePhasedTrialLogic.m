@@ -1,6 +1,6 @@
 function [tm done newSpecInd specInd updatePhase transitionedByTimeFlag transitionedByPortFlag result...
     isRequesting lastSoundsLooped getSoundsTime soundsDoneTime framesDoneTime ...
-    portSelectionDoneTime isRequestingDoneTime goDirectlyToError checkCorrect] = ...
+    portSelectionDoneTime isRequestingDoneTime goDirectlyToError] = ...
     handlePhasedTrialLogic(tm, done, ...
     ports, lastPorts, station, specInd, transitionCriterion, framesUntilTransition, numFramesInStim,...
     framesInPhase, isFinalPhase, trialDetails, result, ...
@@ -12,7 +12,6 @@ newSpecInd = specInd;
 transitionedByTimeFlag = false;
 transitionedByPortFlag = false;
 goDirectlyToError=false;
-checkCorrect=false;
 
 soundsToPlay = getSoundsToPlay(stimManager, ports, lastPorts, specInd, framesInPhase,msRewardSound, mePenaltySound, ...
     targetOptions, distractorOptions, requestOptions, playRequestSoundLoop, class(tm), trialDetails);
@@ -100,15 +99,6 @@ for gcInd=1:2:length(transitionCriterion)-1
         % set result to the ports array when it is triggered during a phase transition (ie result will be whatever the last port to trigger
         %   a transition was)
         result = ports;
-        % set correct if we are on a target or distractor
-%         if any(ports(targetOptions))
-%             result =result;
-%         elseif any(ports(distractorOptions))
-%             result = result;
-%         end
-        if any(ports(targetOptions)) || any(ports(distractorOptions))
-            checkCorrect=true;
-        end
 
         if length(find(ports))>1
             goDirectlyToError=true;

@@ -277,7 +277,6 @@ pNum=0;
 
 trialRecords(trialInd).result=[]; %initialize
 trialRecords(trialInd).correct=[];
-checkCorrect=false;
 analogOutput=[];
 startTime=0;
 logIt=true;
@@ -469,11 +468,11 @@ while ~done && ~quit;
             % if first frame of a 'reinforced' phase)
             [tm trialRecords(trialInd).trialDetails trialRecords(trialInd).result spec ...
                 rewardSizeULorMS requestRewardSizeULorMS ...
-                msPuff msRewardSound msPenalty msPenaltySound floatprecision textures destRect checkCorrect] = ...
+                msPuff msRewardSound msPenalty msPenaltySound floatprecision textures destRect] = ...
                 updateTrialState(tm, stimManager, trialRecords(trialInd).result, spec, ports, lastPorts, ...
                 targetOptions, requestOptions, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
                 floatprecision, textures, destRect, ...
-                requestRewardDone, checkCorrect);
+                requestRewardDone);
             
             % because the target ports = setdiff(responsePorts, lastResponse) which is always empty
             % so we will always have the same empty responsePorts and same nonempty requestPorts
@@ -484,8 +483,8 @@ while ~done && ~quit;
                 doRequestReward=false;
                 msRewardOwed=msRewardOwed+rewardSizeULorMS;
                 phaseRecords(phaseNum).proposedRewardDurationMSorUL = rewardSizeULorMS;
-                dispStr=sprintf('giving reward %d during phaseNum %d\n',rewardSizeULorMS,phaseNum);
-                disp(dispStr)
+%                 dispStr=sprintf('giving reward %d during phaseNum %d\n',rewardSizeULorMS,phaseNum);
+%                 disp(dispStr)
             elseif msPenalty~=0
                 doRequestReward=false;
                 msAirpuffOwed=msAirpuffOwed+msPuff;
@@ -497,8 +496,8 @@ while ~done && ~quit;
             
             if requestRewardSizeULorMS~=0
                 doRequestReward=true;
-                dispStr=sprintf('increasing msRequestRewardOwed by %d during phaseNum %d\n',requestRewardSizeULorMS,phaseNum);
-                disp(dispStr)
+%                 dispStr=sprintf('increasing msRequestRewardOwed by %d during phaseNum %d\n',requestRewardSizeULorMS,phaseNum);
+%                 disp(dispStr)
                 msRequestRewardOwed=msRequestRewardOwed+requestRewardSizeULorMS;
                 phaseRecords(phaseNum).responseDetails.requestRewardPorts{end+1}=ports;
                 phaseRecords(phaseNum).responseDetails.requestRewardStartTime{end+1}=GetSecs();
@@ -673,8 +672,8 @@ while ~done && ~quit;
             phaseRecords(thisResponsePhaseNum).responseDetails.durs{end+1} = GetSecs() - respStart;
             lookForChange=false;
             logIt=true;
-            dispStr=sprintf('marking end of a response at time %d with dur %d during phaseNum %d\n',GetSecs(),phaseRecords(thisResponsePhaseNum).responseDetails.durs{end},thisResponsePhaseNum);
-            disp(dispStr);
+%             dispStr=sprintf('marking end of a response at time %d with dur %d during phaseNum %d\n',GetSecs(),phaseRecords(thisResponsePhaseNum).responseDetails.durs{end},thisResponsePhaseNum);
+%             disp(dispStr);
             if ~toggleStim % beambreak mode (once request ends, stop showing stim)
                 isRequesting=~isRequesting;
             end
@@ -689,8 +688,8 @@ while ~done && ~quit;
             logIt=false;
             lookForChange=true;
             thisResponsePhaseNum=phaseNum;
-            dispStr=sprintf('marking start of a response [%d %d %d] at time %d during phaseNum %d\n',ports,respStart,phaseNum);
-            disp(dispStr);
+%             dispStr=sprintf('marking start of a response [%d %d %d] at time %d during phaseNum %d\n',ports,respStart,phaseNum);
+%             disp(dispStr);
         end
 
 %         % if response got set by keyboard, duplicate response on trial level
@@ -705,7 +704,7 @@ while ~done && ~quit;
         [tm done newSpecInd phaseInd updatePhase transitionedByTimeFlag ...
             transitionedByPortFlag trialRecords(trialInd).result isRequesting lastSoundsLooped ...
             timestamps.logicGotSounds timestamps.logicSoundsDone timestamps.logicFramesDone ...
-            timestamps.logicPortsDone timestamps.logicRequestingDone goDirectlyToError checkCorrect] ...
+            timestamps.logicPortsDone timestamps.logicRequestingDone goDirectlyToError] ...
             = handlePhasedTrialLogic(tm, done, ...
             ports, lastPorts, station, phaseInd, transitionCriterion, framesUntilTransition, numFramesInStim, framesInPhase, isFinalPhase, ...
             trialRecords(trialInd).trialDetails, trialRecords(trialInd).result, ...

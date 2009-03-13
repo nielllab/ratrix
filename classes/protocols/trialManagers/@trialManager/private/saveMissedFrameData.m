@@ -1,6 +1,7 @@
 function [responseDetails timestamps] = ...
     saveMissedFrameData(tm, responseDetails, frameNum, timingCheckPct, ifi, timestamps)
 
+debug=false;
 type='';
 thisIFI=timestamps.vbl-timestamps.lastFrameTime;
 
@@ -37,7 +38,7 @@ else
     end
 end
 
-if ~strcmp(type,'')
+if ~strcmp(type,'') && debug
     fprintf('missed frameNum: %d, ifi: %g (%g%% late): %s\n',frameNum,thisIFI,100*((thisIFI/ifi)-1),type)
     fprintf('\tlast misses recorded:\t\t%g\n',  1000*(timestamps.missesRecorded       - timestamps.prevPostFlipPulse))
     fprintf('\tlast eyetracker done:\t\t%g\n',  1000*(timestamps.eyeTrackerDone       - timestamps.missesRecorded))

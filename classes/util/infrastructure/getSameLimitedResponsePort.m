@@ -21,6 +21,10 @@ else
     if all(size(trialRecords)>0)
         if any(strcmp(fields(trialRecords),'correct')) && any(strcmp(fields(trialRecords),'targetPorts'))
             correct=[trialRecords.correct];
+            if isfield(trialRecords,'trialDetails')
+                td=[trialRecords.trialDetails];
+                correct=[td.correct];
+            end
             targetPorts=[trialRecords.targetPorts];
         else
             error('**trialRecords does not have the ''correct'' field')

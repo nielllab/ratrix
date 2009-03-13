@@ -29,7 +29,12 @@ if ~isempty(trialRecords)
     %get the correct vector
     switch recordType
         case 'largeData'
-            correct=[trialRecords.correct];
+            if isfield(trialRecords,'trialDetails')
+                td=[trialRecords.trialDetails];
+                correct=[td.correct];
+            else
+                correct=[trialRecords.correct];
+            end
             %todo
             %'WARNING': make sure to limit this to this session
         case 'circularBuffer'

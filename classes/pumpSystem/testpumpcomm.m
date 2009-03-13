@@ -89,10 +89,10 @@ if NO_SENSORS
         fopen(p.serialPort);
         p.pumpOpen=1;
         [p durs]=sendCommands(p,pumpProgram);
-    catch
+    catch ex
         fprintf('closing serial port due to error\n');
         fclose(p.serialPort);
-        rethrow(lasterror)
+        rethrow(ex)
     end
 
     % Try a withdrawal and a close
@@ -155,17 +155,15 @@ if p.pumpOpen
                         successfulSend=true;
                     end
                 catch
-                    err=lasterror
                     warning('pump failure on read!  cycling pump!')
                     p=closePump(p);
                     p=openPump(p);
                 end
-            catch
-                err=lasterror
+            catch ex
                 warning('pump failure on write!  cycling pump!')
                 p=closePump(p);
                 p=openPump(p);
-                %rethrow(lasterror)
+                %rethrow(ex)
             end
         end
         durs(i)=GetSecs()-start;

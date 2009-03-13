@@ -251,7 +251,8 @@ for i =1:length(subjects)
                     confirmSave(destinationFile)
                     sessionNumber=sessionNumber+1;
 
-                catch
+                catch ex 
+                    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
                     keyboard
                 end
 

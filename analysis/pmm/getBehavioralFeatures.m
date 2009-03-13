@@ -107,7 +107,8 @@ for i=1:length(window.Sizes)
         try
         data(:,ind)=conv2(value,kernal,'valid');
 
-        catch
+        catch ex 
+             disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
             the_data=size(data(:,ind))
             the_conv=size(conv2(value,kernal,'valid'))
             the_values=size(value)

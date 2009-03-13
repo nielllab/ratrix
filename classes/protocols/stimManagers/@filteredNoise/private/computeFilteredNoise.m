@@ -156,8 +156,7 @@ for i=1:length(stimulus.port)
 
     try
         stimulus.sha1{i} = hash(noise,'SHA-1');
-    catch
-        ex=lasterror;
+    catch ex
         if ~isempty(findstr('OutOfMemoryError',ex.message))
             stimulus.sha1{i} = hash(noise(1:1000),'SHA-1');
         else

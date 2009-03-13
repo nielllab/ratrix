@@ -169,8 +169,7 @@ end
 function quit=sendRatrixToServer(ratrixDataPath,r,constants)
 try
     rx=ratrix(fullfile(ratrixDataPath, 'ServerData'),0); %load from file
-catch
-    ex=lasterror;
+catch ex
     noDBstr='no db at that location';
     if ~isempty(findstr(ex.message,noDBstr))
         rx=[];

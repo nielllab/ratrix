@@ -38,9 +38,8 @@ for i=1:length(s)
     try
         dob=datestr(s(i).dob,'mm/dd/yyyy');
         dateEntered=datestr(s(i).date_entered,'mm/dd/yyyy');
-    catch
-        ex=lasterror;
-        ple(ex)
+    catch ex
+        disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
         s(i).dob
         error ('bad date')
     end

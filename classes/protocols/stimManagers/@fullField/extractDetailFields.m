@@ -8,8 +8,7 @@ try
     [out.duration newLUT] = extractFieldAndEnsure(stimDetails,{'duration'},'scalar',newLUT);
     [out.repetitions newLUT] = extractFieldAndEnsure(stimDetails,{'repetitions'},'scalar',newLUT);
 
-catch
-    ex=lasterror;
+catch ex
     out=handleExtractDetailFieldsException(sm,ex,trialRecords);
     verifyAllFieldsNCols(out,length(trialRecords));
     return

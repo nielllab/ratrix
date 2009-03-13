@@ -472,7 +472,7 @@ try
     saveas(gcf,fullfile(logDir,sprintf('%s.%s.png',mfilename,dstr)));
 catch ex
     cleanup(window);
-    ple(ex)
+    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
 end
 end
 

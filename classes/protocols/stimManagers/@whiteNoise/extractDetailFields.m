@@ -13,8 +13,7 @@ try
     [out.meanLuminance newLUT] = extractFieldAndEnsure(stimDetails,{'meanLuminance'},'scalar',newLUT);
     [out.numFrames newLUT] = extractFieldAndEnsure(stimDetails,{'numFrames'},'scalar',newLUT);
 
-catch
-    ex=lasterror;
+catch ex
     out=handleExtractDetailFieldsException(sm,ex,trialRecords);
     verifyAllFieldsNCols(out,length(trialRecords));
     return

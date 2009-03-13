@@ -51,17 +51,11 @@ for i=1:length(filter)
             case {'manualVersion'}
                d=removeSomeSmalls(d,~(ismember(d.manualVersion,filter{i}.includedVersions)));      
             case 'responseSpeedPercentile'
-                try
                 range=filter{i}.parameters.range;
                 sorted=sort(d.responseTime);
                 rangeInds=[max(floor(range(1)*length(sorted)),1) ceil(range(2)*length(sorted))];
                 rangeValue=sorted(rangeInds);
                 d=removeSomeSmalls(d,~(d.responseTime>rangeValue(1) & d.responseTime<rangeValue(2)));  
-                catch
-                    
-                    'ho'
-                    keyboard
-                end
             case {'performanceRange','performancePercentile'}
                 goods=getGoods(d,filter{i}.parameters.goodType);
                 conditionType=filter{i}.parameters.whichCondition{1};

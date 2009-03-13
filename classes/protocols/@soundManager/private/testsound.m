@@ -7,9 +7,8 @@ priority(p);
 initializepsychsound(1);
 try
     x=psychportaudio('open',[],[],4,[],[],4096); %reqclass 4 doesn't work with asio4all + enhanced dll
-catch
-    ex=lasterror;
-    ple(ex)
+catch ex
+    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
     x=psychportaudio('open',[],[],2,[],[],4096);
 end
 s=psychportaudio('getstatus',x);

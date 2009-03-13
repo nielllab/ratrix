@@ -7,8 +7,7 @@ try
     frewind(fd);
     load(fd,'tmp');
     fclose(fd);
-catch
-    ex=lasterror;
-    ple(ex)
+catch ex
+    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
     error('Unable to handle given argument %s',class(arguments{i}));
 end

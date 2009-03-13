@@ -134,11 +134,9 @@ try
         error('need station and ratrix and subject and rnet objects')
     end
 
-catch
-    ex=lasterror
+catch ex
     display(ts)
-
-    ple(ex)
+    %disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
     Screen('CloseAll');
     rethrow(ex)
 end

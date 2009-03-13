@@ -79,8 +79,7 @@ if mlVol<=p.mlMaxSinglePump && mlVol>=0 %|| override
                 while ~wdrTooFar(p)
                     try
                         [durs t p]=doAction(p,getMlOpportunisticRefill(p),'withdrawl');
-                    catch
-                        ex=lasterror;
+                    catch ex
                         if strcmp(ex.message,'withdrawl reqeust while sensor indicates withdrawn too far')
                             break %lack of hysteresis on sensor -- it told us that wdrTooFar was false, but then, without moving, decided wdrTooFar was true -- happens when flag is just breaking the beam
                         else

@@ -58,11 +58,10 @@ try
             errs{i}=1;
         end
     end
-catch
-    y = lasterror
-    y.stack.line
-    y.stack.file
-    y.message
+catch ex
+    ex.stack.line
+    ex.stack.file
+    ex.message
     fclose(s1);
 end
 for i=1:length(code)

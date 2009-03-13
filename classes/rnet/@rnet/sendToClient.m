@@ -19,8 +19,8 @@ jCom = packageArguments(r,jCom,arguments);
 try
     r.server.sendImmediately(jCom);
     com = rnetcommand(jCom);
-catch
-    ex=lasterror;
+catch ex
+    
     quit=true;
 
     'got a quit in sendToClient on command'
@@ -28,7 +28,7 @@ catch
     'to client'
     clientId
 
-    ple(ex)
+    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
 
     try
         f=fopen('SocketErrorLog.txt','a');
@@ -37,9 +37,9 @@ catch
         fprintf(f,['\t' ex.stack.file '\n']);
         fprintf(f,['\t' ex.stack.line '\n']);
         fclose(f);
-    catch
-        ex=lasterror;
-        ple(ex)
+    catch ex
+        disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
+        error('errored within a caught error display!')
     end
     com=[];
 end

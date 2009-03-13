@@ -14,8 +14,7 @@ try
             param
             error('unrecognized param')
     end
-catch
-    ex=lasterror
+catch ex
     if strcmp(ex.identifier,'MATLAB:UndefinedFunction')
         class(rm)    
         warning(sprintf('can''t set %s for reinforcementManager of this class',param))

@@ -49,10 +49,9 @@ fprintf('quitting\n')
 
 try
     r=shutdown(r,[],[]);
-catch
-    ex=lasterror;
+catch ex
     fprintf('error shutting down rnet\n')
-    ple(ex)
+    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
 end
 
 end
@@ -92,13 +91,12 @@ try
         end
     end
     connectedClients={};
-catch
-    ex=lasterror;
+catch ex
     quit=true;
     er=true;
 
     fprintf('shutting down rnet due to error\n')
-    ple(ex)
+    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
     
     connectedClients={};
     clients=[];

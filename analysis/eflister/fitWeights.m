@@ -130,8 +130,8 @@ try
     [theFit,gof,output] = fit(day,data,f,opts);
     warning('on','curvefit:fit:noStartPoint')
     done=true;
-catch 
-    lasterror
+catch ex 
+    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
     name
     error('got a nan, you need to set bounds')
 end

@@ -565,12 +565,9 @@ try
         viewSequence(values(1,:),[history.acceptance],targetRange,i)
     end
 
-catch
-    warning('error in exploding collapse');
-    e=lasterror
-    e.message
-    e.stack.name
-    e.stack.line
+catch ex 
+    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
+    disp('error in exploding collapse');
     keyboard
     viewSequence([history.value],[history.acceptance],targetRange,i)
 end

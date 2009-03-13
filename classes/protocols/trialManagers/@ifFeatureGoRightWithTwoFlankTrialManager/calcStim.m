@@ -378,15 +378,11 @@ end
     end
      
     
-      catch
-
+      catch ex
           sca
           ShowCursor;
-          err=lasterror
-          err.stack.line
-          err.stack.name
-          err.stack.file
-          rethrow(lasterror);
+          %disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
+          rethrow(ex);
       end
       
 end

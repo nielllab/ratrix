@@ -289,8 +289,8 @@ try
     mean(sum(times'))
     mean(times)./mean(sum(times'))
 
-catch
-    lasterr
+catch ex
+    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
     fclose(s)
 end
 

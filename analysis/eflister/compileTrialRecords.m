@@ -273,8 +273,9 @@ for i=1:length(subjectFiles)
                     try
                         compiledTrialRecords=loadCompiledTrialRecords(compiledFile,compiledRange,{fieldNames{:,1}});
                         goodLoad = true;
-                    catch 
-                        ex=lasterror
+                    catch ex 
+                        disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
+                        
                         dispStr=sprintf('failed to load compiledTrialRecord for subject %s',names{i});
                         disp(dispStr);
                         dispStr=sprintf('Retry #%d...',numTries);
@@ -407,12 +408,7 @@ for i=1:length(subjectFiles)
                                     %only a single val from the LUT
                                     for tr=1:length(newTrialRecs)
                                         if ismember('stimDetails',fields(newTrialRecs(tr))) && ismember('LUT',fields(newTrialRecs(tr).stimDetails)) && ~isempty(newTrialRecs(tr).stimDetails.LUT)% if the field exists
-                                            try
                                                 compiledTrialRecords.redLUT(ranges{i}(1,j)+tr-1)=newTrialRecs(tr).stimDetails.LUT(end,1);
-                                            catch
-                                                keyboard
-                                            end
-
                                         end
                                     end
 

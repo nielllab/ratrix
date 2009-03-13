@@ -7,8 +7,7 @@ try
     [out.pctCorrectionTrials newLUT] = extractFieldAndEnsure(stimDetails,{'pctCorrectionTrials'},'scalar',newLUT);
     [out.doCombos newLUT] = extractFieldAndEnsure(stimDetails,{'doCombos'},'scalar',newLUT);
 
-catch
-    ex=lasterror;
+catch ex
     out=handleExtractDetailFieldsException(sm,ex,trialRecords);
     verifyAllFieldsNCols(out,length(trialRecords));
     return

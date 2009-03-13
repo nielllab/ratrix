@@ -59,9 +59,8 @@ try
         0,text,[],'dummy',class(stimManager),'dummyProtocol(1m:1a) step:1/1','session:1 trial:1 (1)',trialManager.eyeTracker,0);
 
     station=stopPTB(station);
-catch
-    ex=lasterror;
-    ple(ex)
+catch ex
+    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
     Screen('CloseAll');
     Priority(0);
     ShowCursor(0);

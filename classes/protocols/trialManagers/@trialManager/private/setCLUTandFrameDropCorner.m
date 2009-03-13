@@ -34,11 +34,10 @@ if isreal(LUT) && all(size(LUT)==[256 3])
     end
     try
         oldCLUT = Screen('LoadNormalizedGammaTable', window, LUT,0); %apparently it's ok to use a window ptr instead of a screen ptr, despite the docs
-    catch 
-        e=lasterror;
+    catch ex
         %if the above fails, we lose our window
         
-        e.message
+        ex.message
         error('couldnt set clut')
     end
     currentCLUT = Screen('ReadNormalizedGammaTable', window);

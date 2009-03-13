@@ -101,15 +101,15 @@ if testLoop
         sca
         Priority(0);
         ShowCursor;
-    catch
+    catch ex
         sca
         Priority(0);
         ShowCursor;
-        err=lasterror
+        err=ex
         err.stack.line
         err.stack.name
         err.stack.file
-        rethrow(lasterror);
+        rethrow(ex);
     end
 
     relativeTime = vbl(:) - vbl(1);

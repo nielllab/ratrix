@@ -359,13 +359,10 @@ beep;beep
         end
             daqData = intensity;
     end
-catch
+catch ex
 %     showcursor; 
     sca
-    x=lasterror;
-    x.message
-    x.stack.file
-    x.stack.line
+    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
     ai=cleanup(originalPriority,screenNum,oldClut,parallelPortAddress,framePulseCode,spyderLib,ai);
 end
 

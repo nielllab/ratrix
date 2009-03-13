@@ -77,9 +77,8 @@ else
     subjectID=lower(subjectID);
     try
         isSubjectInRatrix=getSubjectFromID(rx,subjectID);
-    catch
-        e=lasterror;
-        if ~isempty(strfind(e.message,'request for subject id not contained in ratrix'))
+    catch ex
+        if ~isempty(strfind(ex.message,'request for subject id not contained in ratrix'))
             if recordInOracle
                 sub =createSubjectsFromDB({subjectID});
                 if isempty(sub)
@@ -93,7 +92,7 @@ else
                 needToAddSubject=true;
             end
         else
-            rethrow(e)
+            rethrow(ex)
         end
     end
 end
@@ -149,9 +148,8 @@ try
     compileDetailedRecords([],{subjectID},[],getStandAlonePath(rx),compilePath);
     subjectAnalysis(compilePath);
     cleanup;
-catch 
-   ex=lasterror
-    ple(ex)
+catch ex
+    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
     cleanup;
     rethrow(ex)
 end

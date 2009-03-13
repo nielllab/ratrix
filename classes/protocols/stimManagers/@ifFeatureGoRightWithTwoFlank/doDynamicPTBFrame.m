@@ -284,8 +284,7 @@ try
 
     Screen('DrawingFinished', w);
 
-catch
-    err=lasterror
+catch ex
     sca
     pInd
     oInd
@@ -293,9 +292,9 @@ catch
     destinationRect
     globalAlpha
 
-    err.stack.line
-    err.stack.name
-    err.stack.file
+%     ex.stack.line
+%     ex.stack.name
+%     ex.stack.file
     ShowCursor;
 
     rethrow(err);

@@ -155,8 +155,8 @@ for i=1:length(ids)
             'response'};
         try
             [compiledTrialRecords compiledDetails compiledLUT]=loadDetailedTrialRecords(compiledFile,compiledRange,fieldNames);
-        catch
-            ex=lasterror
+        catch ex
+            disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
             % if loadDetailedTrialRecords throws an error, then skip this subject and try to compile the next one
             % typically this means that old-style compiledRecords exist for this subject
             warning('error loading compiledRecord for %s, most likely because the compiled file is old-style for this subject - skipping!',ids{i});

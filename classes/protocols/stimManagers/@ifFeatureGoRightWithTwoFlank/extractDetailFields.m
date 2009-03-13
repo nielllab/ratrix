@@ -147,8 +147,7 @@ else
         %         fprintf('}\n');
         %     end % if 0
 
-    catch
-        ex=lasterror;
+    catch ex
         out=handleExtractDetailFieldsException(sm,ex,trialRecords);
         verifyAllFieldsNCols(out,length(trialRecords));
         return

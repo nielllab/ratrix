@@ -589,18 +589,13 @@ try
 
             out=calibStim;
         end
-
-
-        catch
-
-            sca
-            ShowCursor;
-            err=lasterror
-            err.stack.line
-            err.stack.name
-            err.stack.file
-            rethrow(lasterror);
-end  
+        
+        
+catch ex
+    sca
+    ShowCursor;
+    rethrow(ex);
+end
 
 
 function stim=insertPatch(s,insertMethod,stim,pos,maskVideo,featureVideo,featureOptions1, featureOptions2,chosenFeature1, chosenFeature2 ,chosenFeature3,mean,contrast)

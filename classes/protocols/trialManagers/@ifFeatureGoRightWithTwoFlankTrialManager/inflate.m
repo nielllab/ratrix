@@ -143,14 +143,10 @@ switch t.renderMode
             t.cache.BTex = screen('makeTexture',w,t.cache.B);
             end
             
-        catch
+        catch ex
             sca
             ShowCursor;
-            err=lasterror
-            err.stack.line
-            err.stack.name
-            err.stack.file
-            rethrow(lasterror);
+            rethrow(ex);
         end
         
 end

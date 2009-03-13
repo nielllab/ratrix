@@ -38,22 +38,21 @@ for f=1:length(subDirs)
     [fp,fn,fe,fv]=fileparts(fileName);
     try
         tr=load(fullfile(filePath,fileName)); %this is safe cuz it's local
-    catch 
-        loaderror=lasterror
-        if strcmp(loaderror.identifier,'MATLAB:load:unableToReadMatFile')
+    catch ex
+        if strcmp(ex.identifier,'MATLAB:load:unableToReadMatFile')
             fullfile(filePath,fileName)
-            loaderror.message
+            ex.message
             warning('can''t load file, renaming')
             tr.trialRecords=[];
             [sMV msgMV idMV]=movefile(fullfile(filePath,fileName),fullfile(filePath,['corrupt.' fileName '.' datestr(now,30) '.corrupt']));
             if ~sMV
-                ple(loaderror)
+                disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
                 msgMV
                 idMV
                 error('error trying to rename unreadable trialrecords file')
             end
         else
-            ple(loaderror)
+            disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
             error('unknown load problem')
         end
     end
@@ -138,9 +137,8 @@ for f=1:length(subDirs)
                                 successC = true;
                             end
                             closeConn(conn);
-                        catch
-                             ex=lasterror
-                            ple(ex)
+                        catch ex
+                            disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
                             successC = false;
                         end
                     else

@@ -207,14 +207,11 @@ try
     Priority(0);
     Screen('closeAll')
     out='done';
-catch
+catch ex 
+   disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
    Screen('CloseAll');
-   Priority(0);
-   ers=lasterror
-   ers.stack.file
-   ers.stack.name
-   ers.stack.line
-   rethrow(lasterror);
+   Priority(0)
+   rethrow(ex);
    out='used catch';
 end
 

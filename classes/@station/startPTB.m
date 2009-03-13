@@ -73,13 +73,12 @@ try
     
     Screen('Close'); %leaving off second argument closes all textures
     
-catch
-    ex=lasterror
+catch ex                  
     s.ifi=[];
     s.window=[];
     Screen('CloseAll');
     Priority(0);
     ShowCursor;
-    ple(ex)
+    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
     rethrow(ex);
 end

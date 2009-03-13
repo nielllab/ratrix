@@ -41,8 +41,7 @@ try
             %             else
             r = rnet('client',id,serverAddress);
             %             end
-        catch
-            ex=lasterror
+        catch ex
             errStrs={'Unable to establish socket in RlabNetworkClient constructor',...
                 'Unable to open input streams',...
                 'Unable to open I/O streams on server socket in client thread',...
@@ -62,7 +61,7 @@ try
             else
                 errStrs
                 ex.message
-                ple(ex)
+                disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
                 error('bootstrap problem')
             end
         end
@@ -91,9 +90,8 @@ try
         end
     end
 
-catch
-    ex=lasterror;
-    ple(ex)
+catch ex
+    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
 
     fprintf('shutting down client due to error\n')
     cleanup(r);

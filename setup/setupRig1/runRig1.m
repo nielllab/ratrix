@@ -33,12 +33,10 @@ replicateTrialRecords({getPermanentStorePath(r),extraServerPermanentStore},delet
 try
     r=doTrials(st(1),r,0,[],trustOsRecordFiles); %0 means repeat forever
     sca; ListenChar(0); ShowCursor(0); r=removeSubjectFromBox(r,subjectID,bIDs(1),'','pmm');
-catch
+catch ex                        
     sca; ListenChar(0); ShowCursor(0); r=removeSubjectFromBox(r,subjectID,bIDs(1),'','pmm');
-    lasterr; x=lasterror;
-    x.stack.file
-    x.stack.line
-    rethrow(lasterror)
+    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
+    rethrow(ex)
 end
 
 replicateTrialRecords({getPermanentStorePath(r),extraServerPermanentStore},deleteOnSuccess,recordInOracle);

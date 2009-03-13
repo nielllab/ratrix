@@ -18,21 +18,19 @@ if p.pumpOpen
                     else
                         successfulSend=true;
                     end
-                catch
-                    ex=lasterror;
-                    ple(ex)
+                catch ex
+                   disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
                     in
                     warning('pump failure on read!  cycling pump!')
                     p=closePump(p);
                     p=openPump(p);
                 end
-            catch
-                ex=lasterror;
-                ple(ex)
+            catch ex
+                disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
                 warning('pump failure on write!  cycling pump!')
                 p=closePump(p);
                 p=openPump(p);
-                %rethrow(lasterror)
+                %rethrow(ex)
             end
         end
         durs(i)=GetSecs()-start;

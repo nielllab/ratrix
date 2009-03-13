@@ -27,8 +27,7 @@ if ~isempty(find(valves))
         for i=1:numPumps
             try
                 [durs t s.pump]=doAction(s.pump,volPerPump,'infuse');
-            catch
-                ex=lasterror;
+            catch ex
                 if ~isempty(findstr(ex.message,'request will put pump outside max/min position -- reset pump position first'))
                     setValves(s.station, 0*valves);
                     WaitSecs(s.valveDelay);

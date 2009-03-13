@@ -22,8 +22,7 @@ else
         % out.cardSelected
         % out.cardsRemaining
         % out.decksFinished
-    catch
-        ex=lasterror;
+    catch ex
         out=handleExtractDetailFieldsException(sm,ex,trialRecords);
         verifyAllFieldsNCols(out,length(trialRecords));
         return

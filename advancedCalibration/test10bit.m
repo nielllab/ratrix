@@ -53,12 +53,9 @@ switch mode
             end
             info = Screen('GetWindowInfo',windowPtr)
             sca
-        catch
+        catch ex
             sca
-            e=lasterror
-            e.stack
-            rethrow(e)
-
+            rethrow(ex)
         end
     case 'temporal'
         error('not yet')

@@ -80,7 +80,7 @@ try
         originalPriority, verbose,eyeTracker,frameDropCorner,trialRecords);
 
 catch ex
-    ple(ex)
+    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
 
     if IsWin
         daqreset;

@@ -11,8 +11,7 @@ try
     [out.numLeftPixels newLUT] = extractFieldAndEnsure(stimDetails,{'numLeftPixels'},'scalar',newLUT);
     [out.numRightPixels newLUT] = extractFieldAndEnsure(stimDetails,{'numRightPixels'},'scalar',newLUT);
 
-catch
-    ex=lasterror;
+catch ex
     out=handleExtractDetailFieldsException(sm,ex,trialRecords);
     verifyAllFieldsNCols(out,length(trialRecords));
     return

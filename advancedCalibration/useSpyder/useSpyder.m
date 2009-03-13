@@ -222,8 +222,8 @@ try
     
     cleanup(originalPriority,screenNum,oldClut,spyderLib);
 
-catch
-    ple
+catch ex
+    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
     cleanup(originalPriority,screenNum,oldClut,spyderLib);
 end
 end

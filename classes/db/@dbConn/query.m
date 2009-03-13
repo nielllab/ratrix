@@ -35,17 +35,15 @@ try
             end
         end
         rs.close();
-    catch 
-        ex=lasterror;
+    catch ex
         rs.close();
-        ex
+        disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
         failed = true;
     end
     stmt.close();
-catch 
-    ex=lasterror;
+catch ex
     stmt.close();
-    ex
+    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
     failed = true;
 end
 % Make sure the statement and recordset are closed, now we can error if needed

@@ -37,13 +37,10 @@ try
     r=doTrials(st(1),r,0,[]); %0 means repeat forever
     cleanup;
 
-catch
-    lasterr
-    x=lasterror
-    x.stack.file
-    x.stack.line
+catch ex
+    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
     cleanup;
-    rethrow(lasterror)
+    rethrow(ex)
 end
 
 function cleanup

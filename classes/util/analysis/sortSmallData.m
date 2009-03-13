@@ -25,10 +25,9 @@ if ~isempty(smallData)
                 command=sprintf('smallData.%s=smallData.%s(inds);',f{i},f{i});
                 try
                     eval(command);
-                catch
+                catch ex
+                    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
                     disp(command);
-                    e=lasterr;
-                    e
                     error('problem with this command')
                 end
             end

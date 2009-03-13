@@ -33,10 +33,9 @@ for f=1:numFields
 
         try
             eval(command)
-        catch
+        catch ex
             disp(command);
-            rethrow(lasterror);
-            %             psychrethrow(psychlasterror);
+            rethrow(ex);
 
 
             disp(sprintf('size of trial records is: %d trials',size(trialRecords,2)))

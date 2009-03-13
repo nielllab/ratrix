@@ -38,12 +38,12 @@ sys=pumpSystem(p,{zLow,zMid,zHi});
 %     p=emptyRez(zLow,p);
 %     p=closePump(p);
 %     closeAllValves(sys);
-% catch
+% catch ex
 %     closeAllValves(sys);
 %     fprintf('closing pump due to error\n');
 %     %p=closePump(p);
 %     fclose(instrfind);
-%     rethrow(lasterror)
+%     rethrow(ex)
 % end
 
 
@@ -63,10 +63,10 @@ try
     
     sys=doOpportunisticRefillPumps(sys,vol,keys);
     %sys=doPumps(sys,2*ones(1,500),0.03);
-catch
-    y=lasterror
-    y.stack.file
-    y.stack.line
+catch ex
+    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
+    %ex.stack.file
+    %ex.stack.line
 end
 
 

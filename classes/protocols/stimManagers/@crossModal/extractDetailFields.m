@@ -82,8 +82,7 @@ try
     [out.modalitySwitchType newLUT] = extractFieldAndEnsure(stimDetails,{'modalitySwitchType'},{'typedVector','char'},newLUT);
 %     out.modalitySwitchMethod=ensureTypedVector({stimDetails.modalitySwitchMethod},'char');
 %     out.modalitySwitchType=ensureTypedVector({stimDetails.modalitySwitchType},'char');
-catch
-    ex=lasterror;
+catch ex
     out=handleExtractDetailFieldsException(sm,ex,trialRecords);
 end
 

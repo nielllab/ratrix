@@ -76,19 +76,15 @@ keyboard
 
     frameRecords.xxx = [];  %ToDo: empirically test speed of saving frameRecords{i}.xxx outside this function versus frameRecords.xxx(i,:) inside this function
 
-catch
+catch ex
     sca
     pInd
     oInd
     typeInd
     destinationRect
     globalAlpha
-    err=lasterror
-    err.stack.line
-    err.stack.name
-    err.stack.file
     ShowCursor;
 
-    rethrow(lasterror);
+    rethrow(ex);
 end
 

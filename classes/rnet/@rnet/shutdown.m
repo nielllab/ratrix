@@ -14,17 +14,15 @@ switch r.type
         for i=1:length(clients)
             try
                 [r rx]=remoteClientShutdown(r,clients(i),rx,subjects);
-            catch
-                ex=lasterror;
+            catch ex
                 firstErr=ex;
-                ple(ex)
+                disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
             end
             try
                 cList=disconnectClient(r,clients(i));
                 cList=[]; % Ignore leftover commands
-            catch
-                ex=lasterror;
-                ple(ex)
+            catch ex
+                disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
             end
         end
         %         catch
@@ -48,10 +46,9 @@ switch r.type
             end
 
             r.server=[];
-        catch
-            ex=lasterror;
-            ple(ex)
-            %rethrow(lasterror);
+        catch ex
+            disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
+            %rethrow(ex);
         end
         if ~isempty(firstErr)
             %rethrow(firstErr)

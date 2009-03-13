@@ -16,8 +16,8 @@ function [quit com] = sendToServer(r,clientId,priority,command,arguments)
   try
       r.client.sendImmediately(jCom);
       com = rnetcommand(jCom);
-  catch
-      ex=lasterror;
+  catch ex
+      disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
       quit=true;
 
       ple(ex)
@@ -28,9 +28,9 @@ function [quit com] = sendToServer(r,clientId,priority,command,arguments)
           fprintf(f,['\t' ex.stack.file '\n']);
           fprintf(f,['\t' ex.stack.line '\n']);
           fclose(f);
-      catch
-          ex=lasterror;
-          ple(ex)
+      catch ex
+          disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
+          error('errored within a caught error log!') %-pmm, cleaning up errs
       end
       com=[];
   end

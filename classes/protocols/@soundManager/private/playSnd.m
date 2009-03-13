@@ -113,9 +113,8 @@ if isa(station,'station')
                         else
                             error('Unkown sound player type')
                         end
-                    catch
-                        ex=lasterror;
-                        ple(ex)
+                    catch ex
+                        %disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
                         rethrow(ex)
                     end
                 end

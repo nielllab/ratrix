@@ -19,8 +19,7 @@ else
 %         out.rightAmplitude=ensureEqualLengthVects({stimDetails.rightAmplitude});
 
         checkTargets(sm,out.leftAmplitude,out.rightAmplitude,basicRecords.targetPorts,basicRecords.distractorPorts,basicRecords.numPorts);
-    catch 
-        ex=lasterror;
+    catch ex
         out=handleExtractDetailFieldsException(sm,ex,trialRecords);
     end
 end

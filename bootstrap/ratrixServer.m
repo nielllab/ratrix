@@ -261,9 +261,8 @@ swapM = uicontrol(f,'Style','popupmenu',...
 %             all_other_subjects
 %             size(all_other_subjects)
             makeMini(subjects,all_other_subjects,racks_used,rooms_used,miniSz,f,heatCol,roomBorderWidth);
-        catch
-            ex=lasterror;
-            ple(ex)
+        catch ex
+            disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
             y=errordlg(['call erik or philip before closing this box.  quitting due to error: ' ex.message],'ratrix error','modal')
             uiwait(y)
             cleanup
@@ -808,13 +807,12 @@ try
         end
     end
     clients={};  %release references to java objects
-catch 
-    ex=lasterror;
+catch ex
     quit=true;
     er=true;
 
     fprintf('%s: shutting down rnet and pump system due to error\n',datestr(now))
-    ple(ex)
+    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
 
     %if call ListenChar(0) to undo the ListenChar(2) before this point, seems to replace useful errors with 'Undefined function or variable GetCharJava_1_4_2_09.'
 
@@ -838,19 +836,17 @@ function [sys,r,rx]=cleanup(servePump,sys,r,rx,subjects)
 if servePump
     try
         sys=closePumpSystem(sys);
-    catch
-        ex=lasterror;
+    catch ex
         fprintf('error shutting down pump\n')
-        ple(ex)
+        disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
     end
 end
 
 try
     [r rx]=shutdown(r,rx,subjects);
-catch 
-    ex=lasterror;
+catch ex
     fprintf('error shutting down rnet\n')
-    ple(ex)
+    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
 end
 
 [rx ids]=emptyAllBoxes(rx,'ratrixServer cleanup','ratrix');

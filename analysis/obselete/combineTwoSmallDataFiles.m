@@ -90,10 +90,9 @@ if ~isempty(d1) & ~isempty(d2) %this only happens if there is data to combine
                 command=sprintf('d1.%s=nan(size(d1.date));',f2{i});
                 try
                     eval(command)
-                catch
+                catch ex 
+                   disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
                     disp(command);
-                    e=lasterr;
-                    e
                     error('problem with this command')
                 end
             end
@@ -115,10 +114,9 @@ if ~isempty(d1) & ~isempty(d2) %this only happens if there is data to combine
                 command=sprintf('d2.%s=nan(size(d2.date));',f1{i});
                 try
                     eval(command);
-                catch
+                catch ex 
+                    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
                     disp(command);
-                    e=lasterr;
-                    e
                     error('problem with this command')
                 end
             end
@@ -136,10 +134,9 @@ if ~isempty(d1) & ~isempty(d2) %this only happens if there is data to combine
             command=sprintf('combined.%s(end+1:end+numNewTrials)=d2.%s(newIndices);',f2{i},f2{i});
             try
                 eval(command)
-            catch
+            catch ex 
+                disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
                 disp(command);
-                e=lasterr;
-                e
                 error('problem with this command')
             end
         end

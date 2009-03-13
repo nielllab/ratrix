@@ -22,13 +22,10 @@ try
     
     cleanup(r,subID,b);
 
-catch
-    lasterr
-    x=lasterror
-    x.stack.file
-    x.stack.line
+catch ex
+    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
     cleanup(r,subID,b);
-    rethrow(lasterror)
+    rethrow(ex)
 end
 
 function cleanup(r,subID,b)

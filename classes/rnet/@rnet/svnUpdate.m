@@ -73,10 +73,9 @@ while ~successful
       error('In svnUpdate(): Unknown node type');
     end
     successful = true;
-  catch
-      ex=lasterror;
+  catch ex
     successful = false;
-    ple(ex)
+    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
     pause(1.0);
     fprintf('Attempting to reconnect in svnUpdate()\n');
   end

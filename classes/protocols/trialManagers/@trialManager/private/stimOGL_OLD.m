@@ -889,19 +889,16 @@ try
 	
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % catch any exceptions thrown in stimOGL loop
-catch
-    ers=lasterror
-    ers.message
-    ers.stack.file
-    ers.stack.name
-    ers.stack.line
+catch ex
+    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
 
 
     Screen('CloseAll');
     Priority(originalPriority);
     ShowCursor(0);
     ListenChar(0);
-    rethrow(lasterror);
     response=sprintf('error_in_StimOGL: %s',ers.message);
+    rethrow(ex);
+    
 
 end

@@ -24,4 +24,7 @@ else
     size(contrasts,1)
     error('dims of contrasts and xPosPcts don''t match')
 end
-checkNafcTargets(targetIsRight,targetPorts,distractorPorts,numPorts);
+% checkNafcTargets(targetIsRight,targetPorts,distractorPorts,numPorts);
+% 3/15/09 - fli removed this check because found trialRecords with freeDrinks-like target/distractor but nAFC tm
+% see behavior/pmmTrialRecords/subjects/225/trialRecords_6811-7091_20080502T113147-20080502T130836.mat
+% trialRecords(1)

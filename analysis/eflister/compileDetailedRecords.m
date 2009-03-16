@@ -167,7 +167,11 @@ for i=1:length(ids)
         % set classes
         for k=1:length(compiledDetails)
             classes{1,k} = compiledDetails(k).className;
-            classes{2,k} = eval(compiledDetails(k).className);
+            try
+                classes{2,k} = eval(compiledDetails(k).className);
+            catch
+                classes{2,k} = eval('stimManager()');
+            end
             classes{3,k} = sort([compiledDetails(k).trialNums compiledDetails(k).bailedTrialNums]);
         end
     end % end load from existing compile record
@@ -233,7 +237,11 @@ for i=1:length(ids)
                 else
                     fprintf('\t\tmaking first %s\n',LUTlookup(sessionLUT,tr(k).stimManagerClass))
                     classes{1,end+1}=LUTlookup(sessionLUT,tr(k).stimManagerClass);
-                    classes{2,end}=eval(LUTlookup(sessionLUT,tr(k).stimManagerClass)); %construct default stimManager of correct type, to fake static method call
+                    try
+                        classes{2,end}=eval(LUTlookup(sessionLUT,tr(k).stimManagerClass)); %construct default stimManager of correct type, to fake static method call
+                    catch
+                        classes{2,end}=eval('stimManager()');
+                    end
                     classes{3,end}=[];
                     ind=size(classes,2);
                 end

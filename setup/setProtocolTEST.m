@@ -56,7 +56,7 @@ requestRewardSizeULorMS=10;
 percentCorrectionTrials=.5;
 doAllRequests='first';
 
-freeDrinkLikelihood=0.003; % changes for stochastic/regular freeDrinks
+freeDrinkLikelihood=0.1; % changes for stochastic/regular freeDrinks
 
 % ====================================================================================================================
 % soundManager
@@ -551,39 +551,59 @@ ts40 = trainingStep(fd_all_requests, wn, repeatIndef, noTimeOff(), svnRev, svnCh
 % passiveViewing no datanet with a fullField stim, 'all' requestPorts, 'nonrepeats' rewarded
 ts41 = trainingStep(fd_nonrepeats, wn, repeatIndef, noTimeOff(), svnRev, svnCheckMode);
 
-% images
+% pam's new images
+%create sound manager object used by all the other trial managers
+sm =soundManager({soundClip('correctSound','allOctaves',[400],20000), ...
+    soundClip('keepGoingSound','allOctaves',[300],20000), ...
+    soundClip('trySomethingElseSound','gaussianWhiteNoise'), ...
+   soundClip('wrongSound','allOctaves',[50],20000)}); % tone
+
+%create scheduer used by all trial managers
+scheduler=minutesPerSession(120,3); % sch=noTimeOff();
 %path containing ALL the stimuli
-imdir='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\PriyaV\TMPPriyaImageSet';
-% '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\PriyaV\PriyaImageSet'; 
-% execute separate file containing the lists for each trainingstep
-% TMP enforces erik's naming scheme, for use with his checkImages 
-imlist=PriyaImageSets; % populate struct, each training step has a field for its list
-% each list is a cell array of cell arrays, passed to images
-%CAR/BOX
+imdir='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\preinagel\PRimageset' 
+imlist=PR_ImageSet1; % populate struct, each training step has a field for its list  
+ requestRewardSizeULorMS=0;
+rewardSizeULorMS        =50;
+fractionSoundOn        = 1;
+fractionPenaltySoundOn = 0;
+rewardScalar =1;
+msPuff=0;
+% params for all the NAFC trial managers
+%NB LUT is set in CALCSTIM; image method uses ramp not linearized
+%NB error stim set in ERRORSTIM; image method set to BLACK screen
+msPenaltyNAFC          =2000;
+percentCorrectionTrials=.1; % LOW for post lesion tests
+%NOTE nAFC uses maxWidth, maxHeight and scaleFactor defined above
 interTrialLuminance_nAFC = 0.3; %extremely brief during stim calculation
 background_nAFC=0; % range 0-1; bg for images (should differ from error screen) **CHANGED 080707**
 % note this is also the color of screen between toggles but does NOT
 % determine pre-requst color.
 ypos_nAFC=0; %location of image stimuli is near ports
-maxWidth                =1024; % of the screen
-maxHeight               =768; % of the screen
-scaleFactor             =[1 1]; %show image at full size
+% new in trunk 3/9/09
+doAllRequests='first'; % only reward first request trial lick
+%create reinforcement manager object for all nAFC training steps
+nAFCreinfmanager = constantReinforcement(rewardSizeULorMS,...
+    requestRewardSizeULorMS,doAllRequests,... % NEW parameters
+    msPenaltyNAFC,... %different penalty duration
+    fractionSoundOn, fractionPenaltySoundOn,rewardScalar,msPuff);
+gotostim=nAFC(sm,percentCorrectionTrials,nAFCreinfmanager);
+%create the associated stim manager (gets images from path defined above)
+imageSelectionMode='normal'; % not deck
+imageSize=[1 1]; % full size
+imageSizeYoked=true; % images have same size
+imageRotation=[0 0]; % upright
+imageRotationYoked=false; % images have same size
+drawingMode='expert';
+imagelevel1 = images(imdir,ypos_nAFC, background_nAFC,...
+    maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.level1,...
+    imageSelectionMode,imageSize,imageSizeYoked,imageRotation,imageRotationYoked,drawingMode);
+%create graduation criterion object for nAFC trial managers
+graduationCriterion=performanceCriterion([.85 0.80], int16([200 300])); %85% correct for 200 consecutive trials
 
-% testing for new images list
-imlist=[];
-imlist.ts5A={...
-   {  {'paintbrush_flashlight01'  'paintbrush_flashlight30'} 1} ... % pure exemplars
-   {  {'paintbrush_flashlight15'  'paintbrush_flashlight16'  'paintbrush_flashlight29'} 1} ... % nearly identical
-};
+objrec1 = trainingStep(gotostim, imagelevel1, graduationCriterion, scheduler,svnRev,svnCheckMode);
 
-
-discrimStim5A = images(imdir,ypos_nAFC,background_nAFC,...
-    maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts5A,imageSelectionMode,[.15 1],false,[0 180],false,'expert');
-% discrimStim6A = images(imdir,ypos_nAFC,background_nAFC,...
-%     maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.ts6A,[.5 .75],true,[0 90]);
-
-
-ts30 = trainingStep(vh, discrimStim5A,repeatIndef,noTimeOff(),svnRev, svnCheckMode);
+% ts30 = trainingStep(vh, discrimStim5A,repeatIndef,noTimeOff(),svnRev, svnCheckMode);
 % ts31 = trainingStep(vh, sweepContrast,repeatIndef,noTimeOff(),svnRev);
 % ts25 = trainingStep(vh, discrimStim6A,graduateQuickly,noTimeOff(),svnRev);
 
@@ -609,7 +629,7 @@ parameters.graduation = performanceCriterion([0.85, 0.8],int16([200, 500]));
 %     ts18, ts19, ts20, ts21, ts22});
 % stepNum=21;
 % p=protocol('gabor test2', {ts29, ts1, ts4, ts12, ts2, ts12, ts8, ts11,ts9,ts10,sweepContrast,ts23,ts24,ts27,ts30});
-stepNum=uint8(10);
+stepNum=uint8(1);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});
@@ -637,7 +657,7 @@ for i=1:length(subjIDs),
 %         case {'rack3test4','rack3test5','rack3test6'} % nAFC, orientedGabors
 %             p=protocol('nAFC,orientedGabors',{ts4});
         otherwise
-            p=protocol('demo',{ts40,ts41,ts4,ts2,ts25,sweepContrast,ts12,ts5,easyStep,ts23});
+            p=protocol('demo',{ts1,ts40,ts41,ts4,ts2,ts25,sweepContrast,ts12,ts5,easyStep,ts23,objrec1});
 %             error('unknown subject');
     end
     

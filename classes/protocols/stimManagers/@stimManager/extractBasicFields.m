@@ -138,7 +138,7 @@ if ischar(result)
         case 'none'
             out=-2;
         case 'manual kill'
-            out=-3;
+            out=0;
         case 'shift-2 kill'
             out=-4;
         case 'server kill'

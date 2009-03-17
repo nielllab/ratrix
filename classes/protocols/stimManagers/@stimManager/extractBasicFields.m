@@ -69,9 +69,6 @@ end
 [out.distractorPorts compiledLUT]                            =extractFieldAndEnsure(trialRecords,{'distractorPorts'},{'typedVector','index'},compiledLUT);
 try
     out.result                                                   =ensureScalar(cellfun(@encodeResult,{trialRecords.result},out.targetPorts,out.distractorPorts,num2cell(out.correct),'UniformOutput',false));
-    if any(out.result==0)
-        error('got zero result')
-    end
 catch
     ple
     out.result=ones(1,length(trialRecords))*nan;

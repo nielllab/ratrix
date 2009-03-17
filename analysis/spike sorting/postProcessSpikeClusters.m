@@ -25,10 +25,11 @@ switch process
             spikeDetails.processedClusterRanks=[0 1];
         end
     case 'largestNonNoiseClusterOnly'
+         
         % all spikes belonging to the largest non-noise cluster
         spikeDetails.processedClusters=ones(1,length(assignedClusters));
         % zero out anything not equal to first rankedCluster
-        spikeDetails.processedClusters(spikeDetails.processedClusters~=rankedClusters(1))=0;
+        spikeDetails.processedClusters(assignedClusters~=rankedClusters(1))=0;
     otherwise
         error('unsupported method for postProcessing spike clusters');
 end

@@ -1,4 +1,4 @@
-function [analysisdata] = physAnalysis(stimManager,spikeData,stimulusDetails,plotParameters,parameters,analysisdata)
+function [analysisdata] = physAnalysis(stimManager,spikeData,stimulusDetails,plotParameters,parameters,analysisdata,eyeData)
 % stimManager is the stimulus manager
 % spikes is a logical vector of size (number of neural data samples), where 1 represents a spike happening
 % frameIndices is an nx2 array of frame start and stop indices - [start stop], n = number of frames
@@ -6,6 +6,12 @@ function [analysisdata] = physAnalysis(stimManager,spikeData,stimulusDetails,plo
 % all the information needed to reconstruct stimData)
 % plotParameters - currently not used
 
+
+spikes=spikeData.spikes; %all waveforms
+waveInds=find(spikes); % location of all waveforms
+thisCluster=spikeData.spikeDetails.processedClusters==1;
+spikes(waveInds(~thisCluster))=0; % set all the non-spike waveforms to be zero;
+%spikes(waveInds(spikeData.assignedClusters~=1))=0; this should select the noise only!  just for testing
 
 if stimulusDetails.doCombos==1
     comboMatrix = generateFactorialCombo({stimulusDetails.spatialFrequencies,stimulusDetails.driftfrequencies,stimulusDetails.orientations,...
@@ -67,8 +73,13 @@ phases=mod(phases,2*pi);
 % count the number of spikes per frame
 % spikeCount is a 1xn vector of (number of spikes per frame), where n = number of frames
 spikeCount=zeros(1,size(spikeData.frameIndices,1));
+
+
+
+
+
 for i=1:length(spikeCount) % for each frame
-    spikeCount(i)=sum(spikeData.spikes(spikeData.frameIndices(i,1):spikeData.frameIndices(i,2)));  % inclusive?  policy: include start & stop
+    spikeCount(i)=sum(spikes(spikeData.frameIndices(i,1):spikeData.frameIndices(i,2)));  % inclusive?  policy: include start & stop
 end
 
 % probablity of a spike per phase
@@ -175,6 +186,10 @@ end
 
 % setup for plotting
 vals=eval(char(sweptParameter));
+if strcmp(sweptParameter,'orientations')
+    vals=rad2deg(vals);
+end
+
 if all(rem(vals,1)==0)
     format='%2.0f';
 else
@@ -223,6 +238,13 @@ xlabel(sweptParameter); set(gca,'XTickLabel',valNames,'XTick',[1:length(vals)]);
 ylim=get(gca,'YLim'); yvals=[ ylim(1) mean(ylim) ylim(2)];set(gca,'YTickLabel',yvals,'YTick',yvals)
 set(gca,'XLim',[1 length(vals)])
 
+meanRate=(sum(spikes))/diff(spikeData.spikeTimestamps([1 end]));
+isi=diff(spikeData.spikeTimestamps(thisCluster))*1000;
+N=sum(isi<parameters.ISIviolationMS); percentN=100*N/length(isi);
+%datestr(parameters.date,22)
+infoString=sprintf('subj: %s  trial: %d\nHz: %d  viol: %2.2f%% (%d /%d)',parameters.subjectID,parameters.trialNumber,round(meanRate),percentN,N,length(isi));
+disp(infoString);
+text(1.2,ylim(2),infoString);
 
 %rasterDurationSec=1;
 %linesPerChunk=round((unique(durations/parameters.refreshRate))/rasterDurationSec);
@@ -238,7 +260,7 @@ if 0
             %TIME
             %st=spikeData.frameIndices(sf,1); % time start index
             %et=spikeData.frameIndices(ef,2); % time stop index
-            %times=find(spikeData.spikes(st:et))/samplingRate;
+            %times=find(spikes(st:et))/samplingRate;
             %times=times*pixPerCycs(j);  % hack rescaling of time, to match phases... increases "apparent" firing rate
             %plot(times,(j-1)*numRepeats+i,'.','color',colors(j,:))
             

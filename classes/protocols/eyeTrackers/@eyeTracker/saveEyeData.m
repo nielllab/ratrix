@@ -1,5 +1,5 @@
 
-function duration=saveEyeData(et,eyeData,eyeDataVarNames,gaze,trialNum)
+function duration=saveEyeData(et,eyeData,eyeDataVarNames,gaze,trialNum,trialStartTime)
 %save the eye data where it belongs, tell you how long it took
 
 then=getSecs;
@@ -19,7 +19,7 @@ gaze(allEmpty,:)=[];
 eyeTrackerClass=class(et);
 eyeTracker=structize(et);
 
-fileName=sprintf('eyeRecords_%d_%s',trialNum,datestr(now,30));
+fileName=sprintf('eyeRecords_%d_%s',trialNum,datestr(trialStartTime,30));
 savefile=fullfile(et.eyeDataPath,fileName);
 
 save(savefile,'eyeData','eyeDataVarNames','gaze','eyeTracker','eyeTrackerClass')

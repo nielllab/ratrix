@@ -16,6 +16,8 @@ close all
 
 spikeDetectionParams=[];
 spikeDetectionParams.method='OSORT';
+spikeDetectionParams.ISIviolationMS=2; % just for human reports
+
 % spikeDetectionParams.samplingFreq=samplingRate; % don't define if using analysis manager, just for temp testing of getSpikesFromNeuralData
 % Wn = [300 4000]/(spikeDetectionParams.samplingFreq/2); % default to bandpass 300Hz - 4000Hz
 % [b,a] = butter(4,Wn); Hd=[]; Hd{1}=b; Hd{2}=a;      
@@ -51,7 +53,6 @@ spikeSortingParams.envelopeSize=20; %(optional) parameter passed in to osort's a
         
 
 if 1 %try klusta
-    %why does everything get considered to be a spike?
 spikeSortingParams=[];
 spikeSortingParams.method='KlustaKwik';
 spikeSortingParams.minClusters=20; % (optional) (default 20) min number of initial clusters - final number may be different due to splitting/deleting
@@ -59,7 +60,8 @@ spikeSortingParams.maxClusters=30;  %%(optional) (default 30) max number of init
 spikeSortingParams.nStarts=5; %     (optional) (default 1) number of starts of the algorithm for each initial cluster count
 spikeSortingParams.splitEvery=50; %  (optional) (default 50) Test to see if any clusters should be split every n steps. 0 means don't split.
 spikeSortingParams.maxPossibleClusters=100; %(optional) (default 100) Cluster splitting can produce no more than this many clusters.
-spikeSortingParams.features={'tenPCs'}; 
+spikeSortingParams.features={'energy','wavePC1','waveFFT'}; 
+ spikeSortingParams.postProcessing='largestNonNoiseClusterOnly';
 end
 
 %  [spikes spikeWaveforms spikeTimestamps assignedClusters rankedClusters photoDiode]=...
@@ -69,11 +71,11 @@ end
 
 % CANT USE analysisManager yet on white noise b/c trials keep failing the
 % quality test // dropped frames adjustment
-overwriteAll=false; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
+overwriteAll=0; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
 classesAnalyzed=[];%{'filteredNoise'};
-trialRange=[1 13]; % 263
-% backupPath='\\132.239.158.183\rlab_storage\pmeier\backup\devNeuralData_090310'; %b/c i can't see datanet_storage folder on .179
-backupPath='C:\Documents and Settings\rlab\Desktop\neural';
+trialRange=[173]; % 263 % [1 13] [173 191]
+backupPath='\\132.239.158.183\rlab_storage\pmeier\backup\devNeuralData_090310'; %b/c i can't see datanet_storage folder on .179
+% backupPath='C:\Documents and Settings\rlab\Desktop\neural';
 analysisManager([],backupPath, spikeDetectionParams,spikeSortingParams,trialRange,[0 Inf],classesAnalyzed,overwriteAll);
 
 

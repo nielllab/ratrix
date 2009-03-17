@@ -12,6 +12,17 @@ function [spikes spikeWaveforms spikeTimestamps assignedClusters rankedClusters 
 photoDiode=[];
 spikes=[];
 
+
+% default inputs for all methods
+
+if ~isfield(spikeDetectionParams, 'ISIviolationMS')
+    spikeDetectionParams.ISIviolationMS=2; % used for plots and reports of violations
+end
+if ~isfield(spikeSortingParams, 'ISIviolationMS')
+    spikeSortingParams.ISIviolationMS=spikeDetectionParams.ISIviolationMS; % used for plots and reports of violations
+end
+
+
 % =====================================================================================================================
 % SPIKE DETECTION
 
@@ -22,6 +33,7 @@ if isfield(spikeDetectionParams, 'method')
 else
     error('must specify a method for spike detection');
 end
+
 % switch on the detection method
 switch upper(spikeDetectionMethod)
     case 'OSORT'
@@ -337,7 +349,7 @@ switch upper(spikeSortingMethod)
                     features=[features score(:,1:10)];
                 case {'wavePC1', 'wavePC2'}
                     w=spikeWaveforms;
-                    l2norms = sqrt(sum(w.^2,2));
+                    l2norms = sqrt(sum(w.^2,2)); % normalize waveforms first
                     w = w./l2norms(:,ones(1,nrSamples));
                     [pc,score] = princomp(w);
                     nrDatapoints=nrDatapoints+1;
@@ -421,7 +433,7 @@ switch upper(spikeSortingMethod)
         end
         clusterCounts=sortrows(clusterCounts,-2);
         rankedClusters=rankedClusters(clusterCounts(:,1));
-        rankedClusters(rankedClusters==1)=[];
+        rankedClusters(rankedClusters==1)=[];  % how do we know that 1 is the noise cluster,  does k.kwik enforce or is it a guess based on num samples.
         rankedClusters(end+1)=1; % move noise cluster '1' to end
         fclose(fid);
         

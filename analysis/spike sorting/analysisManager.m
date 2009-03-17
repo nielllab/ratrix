@@ -14,6 +14,7 @@ end
 
 if ~exist('spikeDetectionParams','var') || isempty(spikeDetectionParams)
     spikeDetectionParams.method='oSort';
+    spikeDetectionParams.ISIviolationMS;
 end
 
 if ~exist('spikeSortingParams','var') || isempty(spikeSortingParams)
@@ -22,6 +23,10 @@ end
 
 if ~exist('trialRange','var') || isempty(trialRange)
     trialRange = [0 Inf]; %all
+end
+
+if all(size(trialRange)==1)
+    trialRange=[trialRange trialRange]; % single trial is the start and stop trial
 end
 
 if ~exist('timeRangePerTrialSecs','var') || isempty(timeRangePerTrialSecs)
@@ -65,14 +70,35 @@ physiologyEvents=[];
 plotParameters.doPlot=false;
 plotParameters.handle=figure;
 
+%SETUP: determine record paths (may need to mkdir) ... could be a function
+neuralRecordsPath = fullfile(path, subjectID, 'neuralRecords');
+if ~isdir(neuralRecordsPath)
+    neuralRecordsPath
+    error('unable to find directory to neuralRecords');
+end
+
+stimRecordsPath = fullfile(path, subjectID, 'stimRecords');
+if ~isdir(stimRecordsPath)
+    mkdir(stimRecordsPath);
+end
+
+spikeRecordPath = fullfile(path, subjectID, 'spikeRecords');
+if ~isdir(spikeRecordPath)
+    mkdir(spikeRecordPath);
+end
+
+eyeRecordPath = fullfile(path, subjectID, 'eyeRecords');
+if ~isdir(eyeRecordPath)
+    mkdir(eyeRecordPath);
+end
+
+analysisPath = fullfile(path, subjectID, 'analysis');
+if ~isdir(analysisPath)
+    mkdir(analysisPath);
+end
+
 while ~quit
     % get a list of the available neuralRecords
-    neuralRecordsPath = fullfile(path, subjectID, 'neuralRecords');
-    if ~isdir(neuralRecordsPath)
-        neuralRecordsPath
-        error('unable to find directory to neuralRecords');
-    end
-    
     waitsecs(0.5);
     d=dir(neuralRecordsPath);
     disp('waited after dir');
@@ -101,20 +127,11 @@ while ~quit
         % now try to load the corresponding stimRecord
         try
             % =================================================================================
-            % setup filenames and paths
-            stimRecordFilename = sprintf('stimRecords_%d-%s.mat', goodFiles(i).trialNum, goodFiles(i).timestamp);
-            stimRecordLocation = fullfile(path, subjectID, 'stimRecords', stimRecordFilename);
+            % setup filenames and paths -- could be a function...
+            stimRecordLocation = fullfile(stimRecordsPath, sprintf('stimRecords_%d-%s.mat', goodFiles(i).trialNum, goodFiles(i).timestamp));
             neuralRecordLocation = fullfile(neuralRecordsPath, sprintf('neuralRecords_%d-%s.mat',goodFiles(i).trialNum,goodFiles(i).timestamp));
-            % try to find spike records (may need to mkdir)
-            spikeRecordPath = fullfile(path, subjectID, 'spikeRecords');
-            if ~isdir(spikeRecordPath)
-                mkdir(spikeRecordPath);
-            end
             spikeRecordLocation = fullfile(spikeRecordPath, sprintf('spikeRecords_%d-%s.mat',goodFiles(i).trialNum,goodFiles(i).timestamp));
-            analysisPath = fullfile(path, subjectID, 'analysis');
-            if ~isdir(analysisPath)
-                mkdir(analysisPath);
-            end
+            %eyeRecordLocation = fullfile(eyeRecordPath,sprintf('eyeRecords_%d-%s.mat',goodFiles(i).trialNum,goodFiles(i).timestamp)); % uses function
             analysisLocation = fullfile(analysisPath, sprintf('physAnalysis_%d-%s.mat',goodFiles(i).trialNum,goodFiles(i).timestamp));
             
             %stimRecordLocation
@@ -137,10 +154,16 @@ while ~quit
                     %timeRangePerTrialSamps=timeRangePerTrialSecs*samplingRate; % not needed, but might be faster ;
                     %eben better is if we could load "part" of a matlab variable (specified inds) at a faster speeds.
                     % probably can't b/c matlab compression
-                    timeSinceTrialStart=neuralDataTimes-neuralDataTimes(1);
-                    withinTimeRange=timeSinceTrialStart>=timeRangePerTrialSecs(1) & timeSinceTrialStart<=timeRangePerTrialSecs(2);
-                    neuralData=neuralData(withinTimeRange,:);
-                    neuralDataTimes=neuralDataTimes(withinTimeRange);
+                    
+                    % avoid making big variables to filter the data if you can...
+                    if timeRangePerTrialSecs(1)==0 & timeRangePerTrialSecs(2)> diff(neuralDataTimes([1 end]))% use all
+                        % do nothing, b/c using all
+                    else %filter
+                        timeSinceTrialStart=neuralDataTimes-neuralDataTimes(1);
+                        withinTimeRange=timeSinceTrialStart>=timeRangePerTrialSecs(1) & timeSinceTrialStart<=timeRangePerTrialSecs(2);
+                        neuralData=neuralData(withinTimeRange,:);
+                        neuralDataTimes=neuralDataTimes(withinTimeRange);
+                    end
                     
                     % get frameIndices and frameTimes (from screen pulses)
                     % bounds to decide whether or not to continue with analysis
@@ -227,9 +250,16 @@ while ~quit
                 
                 if 1 %doAnalysis
                     % do something with loaded information
+                    
+                    % get some paramteres from neual data
                     if ~exist('parameters','var')
                         load(neuralRecordLocation,'parameters');    
                     end
+                    %Add some more parameters about the trial
+                     parameters.trialNumber=goodFiles(i).trialNum;
+                    parameters.date=datenumFor30(goodFiles(i).timestamp);
+                    parameters.ISIviolationMS=spikeDetectionParams.ISIviolationMS;
+                    
                     % spikeData is a struct that contains all spike information that different analyses may want
                     spikeData=[];
                     spikeData.spikes=spikes;
@@ -239,13 +269,15 @@ while ~quit
                     spikeData.spikeTimestamps=spikeTimestamps;
                     spikeData.assignedClusters=assignedClusters;
                     spikeData.spikeDetails=spikeDetails; % could contain anything
+                    
+                    eyeData=getEyeRecords(eyeRecordPath, goodFiles(i).trialNum,goodFiles(i).timestamp);
                     % the stimManagerClass to be passed in is for class typing only -
                     % the analysis function is called as a static method of the stimManager class
                     % just pass in a default stimManager - no variables are used
                     % stuff to class type the analysis method
                     % stimManagerClass = stimulusDetails.stimManagerClass;
                     % already its own variable in stimRecords
-                    [analysisdata] = physAnalysis(sm,spikeData,stimulusDetails,plotParameters,parameters,analysisdata);
+                    [analysisdata] = physAnalysis(sm,spikeData,stimulusDetails,plotParameters,parameters,analysisdata,eyeData);
                     % parameters is from neuralRecord
                     % we pass in the analysisdata because it contains cumulative information that is specific to the analysis method
                     % this is the way of making sure it gets in every trial's analysis file, and that it will get propagated to the next analysis
@@ -339,6 +371,69 @@ for i=1:size(frameIndices,1)
     end
 end
 disp('got spikes from photo diode');
+
+end % end function
+% ===============================================================================================
+
+
+function  eyeData=getEyeRecords(eyeRecordPath, trialNum,timestamp);
+% is compatible with older eyeRecords in which multiple .mats got saved per
+% trial at different times.
+
+try 
+    %this handles current versions
+    filename=sprintf('eyeRecords_%d_%s.mat',trialNum,timestamp);
+    fullfilepath=fullfile(eyeRecordPath,filename);
+    eyeData=load(fullfilepath);
+catch ex
+    % this handles old record types prior to march 17, 2009
+
+    if strcmp(ex.identifier,'MATLAB:load:couldNotReadFile')
+        d=dir(eyeRecordPath);
+        goodFiles = [];
+        
+        % first sort the neuralRecords by trial number
+        for i=1:length(d)
+            %'eyeRecords_(\d+)-(.*)\.mat'
+            %searchString=sprintf('eyeRecords_(%d)-(.*)\\.mat',trialNum)
+            [matches tokens] = regexpi(d(i).name, 'eyeRecords_(\d+)_(.*)\.mat', 'match', 'tokens');
+            if length(matches) ~= 1
+                %d(i).name
+                %warning('not a eyeRecord file name');
+            else
+                if str2double(tokens{1}{1})==trialNum
+                    goodFiles(end+1).trialNum = str2double(tokens{1}{1});
+                    goodFiles(end).timestamp = tokens{1}{2};
+                end
+            end
+        end
+        if size(goodFiles,2)>0
+        [sorted order]=sort(datenumFor30([goodFiles.timestamp]));
+        goodFiles=goodFiles(order);
+        
+        %check that its within the hour of the start trial
+        hrAfterStart=(datenumFor30(goodFiles(end).timestamp)-datenumFor30(timestamp))*24;
+        if hrAfterStart>0 & hrAfterStart<1
+            %LOAD THE MOST RECENT ONE, after checking sanity of time
+            filename=sprintf('eyeRecords_%d_%s.mat',trialNum,goodFiles(end).timestamp);
+            fullfilepath=fullfile(eyeRecordPath,filename);
+            eyeData=load(fullfilepath);
+        else
+            warning('weird time relation')
+            hrAfterStart
+            saved=goodFiles(end).timestamp
+            started=datenumFor30(timestamp)
+            keyboard
+        end
+        else
+            eyeData=[]; % there were no records, eye tracker might have been off
+        end
+    else
+        rethrow(ex);
+    end
+    
+end
+
 
 end % end function
 % ===============================================================================================

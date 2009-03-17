@@ -239,7 +239,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
 
             if ~isempty(trialManager.eyeTracker)
                 [junk junk eyeDataVarNames]=getSample(trialManager.eyeTracker); %throws out a sample in order to get variable names... dirty
-                saveEyeData(trialManager.eyeTracker,eyeData,eyeDataVarNames,gaze,trialRecords(trialInd).trialNumber)
+                saveEyeData(trialManager.eyeTracker,eyeData,eyeDataVarNames,gaze,trialRecords(trialInd).trialNumber,trialRecords(trialInd).date)
             end
             
             trialRecords(trialInd).trainingStepName = generateStepName(ts,ratrixSVNInfo,ptbSVNInfo);
@@ -249,6 +249,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             end
             
             currentValveStates=verifyValvesClosed(station);
+            
             
             % set correct=0 if it was not set during real-time loop
             % we need correct to be empty at the start of the loop so that we know that it needs to be set by updateTrialState,

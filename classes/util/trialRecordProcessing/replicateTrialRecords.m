@@ -57,15 +57,35 @@ for f=1:length(subDirs)
         end
     end
 
-    if ~isempty(tr.trialRecords)
-        trialNums=[tr.trialRecords.trialNumber];
+    if length(fieldnames(tr))>1
+        
+        % collection process
+        trialRecords = collectTrialRecords(tr);
+        
+        trialNums=[trialRecords.trialNumber];
         if ~all(diff(trialNums)==1)
             diff(trialNums)
             error('missing trials!')
         end
+        
+        % 3/17/09 - do the 'collection' and LUTizing here, then resave to local trialRecords.mat
+        % because the replicate processes uses movefile instead of matlab save
+        sessionLUT={};
+        fieldsInLUT={};
+        %12/17/08 - put LUT processing here?
+        %12/11/08 - newRecs is a struct, each field is an array/matrix of values
+        % if type is cell, then use LUT and replace with an array of indices
+
+        fields = fieldnames(trialRecords(1));
+        % do not process the 'result' or 'type' fields because they will mess up LUT handling
+        fields(find(strcmp(fields,'result')))=[];
+        fields(find(strcmp(fields,'type')))=[];
+        [sessionLUT fieldsInLUT trialRecords] = processFields(fields,sessionLUT,fieldsInLUT,trialRecords);
+        
+        save(fullfile(filePath,fileName),'trialRecords','sessionLUT','fieldsInLUT');
 
         newFileName=[fn '_' num2str(trialNums(1)) '-' num2str(trialNums(end)) '_' ...
-            datestr(tr.trialRecords(1).date,30) '-' datestr(tr.trialRecords(end).date,30) fe];
+            datestr(trialRecords(1).date,30) '-' datestr(trialRecords(end).date,30) fe];
 
         % =======================================================================
         % 9/16/08 - change here to get paths from oracle db (specific for each subject)
@@ -189,3 +209,82 @@ for f=1:length(subDirs)
         %delete(fullfile(filePath,fileName))?
     end
 end
+
+end % end function
+
+% ==================================
+% HELPER FUNCTION 
+% this function will be used recursively to look through structs
+function [sessionLUT fieldsInLUT trialRecords] = processFields(fields,sessionLUT,fieldsInLUT,trialRecords,prefix)
+
+% if prefix is defined, then use it for fieldsInLUT
+if ~exist('prefix','var')
+    prefix='';
+end
+
+for ii=1:length(fields)
+    fn = fields{ii};
+    %                     fn
+    %                     newRecs.(fn)
+    %                     class(newRecs.(fn))
+%     trialRecords(1)
+%     fields
+    try
+        if ~isempty(prefix)
+            fieldPath = [prefix '.' fn];
+        else
+            fieldPath = fn;
+        end
+        if ischar(trialRecords(1).(fn))
+            % this field is a char - use LUT
+            [indices sessionLUT] = addOrFindInLUT(sessionLUT,{trialRecords.(fn)});
+            for i=1:length(indices)
+                trialRecords(i).(fn) = indices(i);
+            end
+            fieldsInLUT{end+1}=fieldPath;
+        elseif isstruct(trialRecords(1).(fn)) && ~isempty(trialRecords(1).(fn)) && ~strcmp(fn,'errorRecords')...
+                && ~strcmp(fn,'responseDetails') && ~strcmp(fn,'phaseRecords') && ~strcmp(fn,'trialDetails')% check not an empty struct
+            % 12/23/08 - note that this assumes that all fields are the same structurally throughout this session
+            % this doesn't work in the case of errorRecords, which is empty sometimes, and non-empty other times
+            % this is a struct - recursively call processFields on all fields of the struct
+            thisStructFields = fieldnames((trialRecords(1).(fn)));
+            % now call processFields recursively - pass in fn as a prefix (so we know how to store to fieldsinLUT)
+%             trialRecords
+%             fn
+%             fieldPath
+            [sessionLUT fieldsInLUT theseStructs] = processFields(thisStructFields,sessionLUT,fieldsInLUT,[trialRecords.(fn)],fieldPath);
+            % we have to return a temporary 'theseStructs' and then manually reassign in trialRecords unless can figure out correct indexing
+    %         size(theseStructs)
+    %         size(trialRecords)
+    %         theseStructs
+            for j=1:length(trialRecords)
+                trialRecords(j).(fn)=theseStructs(j);
+            end
+        elseif iscell(trialRecords(1).(fn))
+            % if a simple cell (all entries are strings), then do LUT stuff
+            % otherwise, we should recursively look through the entries, but this is complicated and no easy way to track in fieldsInLUT
+            % because the places where you might find struct/cell in the cell array is not consistent across trials
+            % keeping track of each exact location in fieldsInLUT will result in trialRecords.stimDetails.imageDetails{i} for all i in trialRecords
+            % this kills the point of using a LUT! - for now, just don't handle complicated cases (leave as is)
+            addToLUT=false;
+            for trialInd=1:length(trialRecords)
+                thisRecordCell=[trialRecords(trialInd).(fn)];
+                if all(cellfun('isclass',thisRecordCell,'char') | cellfun('isreal',thisRecordCell)) % 3/3/09 - should change to if all(ischar or isscalar)
+                    [indices sessionLUT] = addOrFindInLUT(sessionLUT,thisRecordCell);
+                    trialRecords(trialInd).(fn)=indices;
+                    addToLUT=true;
+                end
+            end
+            if addToLUT
+                fieldsInLUT{end+1}=fieldPath;
+            end
+
+        end
+    catch
+        ple
+        warning('LUT processing of trialRecords failed! - probably due to manual training step switching.');
+    end
+end
+
+end % end helper function
+% ==================================

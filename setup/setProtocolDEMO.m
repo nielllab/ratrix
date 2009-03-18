@@ -183,17 +183,18 @@ fullfieldFlicker=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTri
 crftrf=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
+svnCheckMode='session';
 
-ts1 = trainingStep(fd, freeStim, repeatIndefinitely(), noTimeOff(), svnRev);   %stochastic free drinks
-ts2 = trainingStep(fd2, freeStim, repeatIndefinitely(), noTimeOff(), svnRev);  %free drinks
-ts3 = trainingStep(vh, freeStim, repeatIndefinitely(), noTimeOff(), svnRev);   %go to stim
-ts4 = trainingStep(vh, discrimStim, repeatIndefinitely(), noTimeOff(), svnRev);%orientation discrim
-ts5 = trainingStep(vh, imageStim,  repeatIndefinitely(), noTimeOff(), svnRev); %morph discrim
-ts6 = trainingStep(vh, noiseStim,  repeatIndefinitely(), noTimeOff(), svnRev); %filteredNoise discrim
-ts7 = trainingStep(vh, unfilteredNoise,  repeatIndefinitely(), noTimeOff(), svnRev); %unfiltered goToSide
-%ts7 = trainingStep(vh, hateren,  repeatIndefinitely(), noTimeOff(), svnRev); %hateren
-ts8 = trainingStep(vh, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svnRev); %fullfieldFlicker
-ts9 = trainingStep(vh, crftrf,  repeatIndefinitely(), noTimeOff(), svnRev); %crf/trf
+ts1 = trainingStep(fd, freeStim, repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode);   %stochastic free drinks
+ts2 = trainingStep(fd2, freeStim, repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode);  %free drinks
+ts3 = trainingStep(vh, freeStim, repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode);   %go to stim
+ts4 = trainingStep(vh, discrimStim, repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode);%orientation discrim
+ts5 = trainingStep(vh, imageStim,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %morph discrim
+ts6 = trainingStep(vh, noiseStim,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %filteredNoise discrim
+ts7 = trainingStep(vh, unfilteredNoise,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %unfiltered goToSide
+%ts7 = trainingStep(vh, hateren,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %hateren
+ts8 = trainingStep(vh, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %fullfieldFlicker
+ts9 = trainingStep(vh, crftrf,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %crf/trf
 
 p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8, ts9});
 stepNum=uint8(7);

@@ -1,5 +1,5 @@
 function [spikes spikeWaveforms spikeTimestamps assignedClusters rankedClusters photoDiode]= ...
-    getSpikesFromNeuralData(neuralData,neuralDataTimes,spikeDetectionParams,spikeSortingParams)
+    getSpikesFromNeuralData(neuralData,neuralDataTimes,spikeDetectionParams,spikeSortingParams,analysisPath)
 % Get spikes using some spike detection method - plugin to Osort, WaveClus, KlustaKwik
 % Outputs:
 %   spikes - a logical vector of length n, where n=number of neuralData samples, and 1=a spike occurred here
@@ -186,6 +186,9 @@ switch upper(spikeSortingMethod)
     case 'OSORT'
         % spikeSortingParams can have the following fields:
         %   method - osort
+        %   features - (optional) (default) 'allRaw' = use all features (all datapoints of each waveform)
+        %           'tenPCs' = use first 10 principal components
+        %           features should a cell array of a subset of these possible features
         %   doPostDetectionFiltering - (optional) specify whether or not to do post-detection filtering; see postDetectionFilter.m
         %   alignParam - (optional) alignParam to be passed in to osort's realigneSpikes method
         %   peakAlignMethod - (optional) peak alignment method used by osort's realigneSpikes method
@@ -195,6 +198,11 @@ switch upper(spikeSortingMethod)
         %   envelopeSize - (optional) parameter passed in to osort's assignToWaveform method; not sure what this does...
         
         % check params
+        % features
+        if ~isfield(spikeSortingParams,'features')
+            warning('features not defined - using default value of ''allRaw''');
+            spikeSortingParams.features={'allRaw'};
+        end
         if ~isfield(spikeSortingParams,'doPostDetectionFiltering')
             warning('doPostDetectionFiltering not defined - using default value of false');
             spikeSortingParams.doPostDetectionFiltering = false;
@@ -236,6 +244,16 @@ switch upper(spikeSortingMethod)
         
         % end param checks
         % ===============================================================================
+        % generate feature file for MClust manual use
+        % write the feature file
+        fname = fullfile(analysisPath,'temp.fet.1');
+        fid = fopen(fname,'w+');
+        fprintf(fid,[num2str(nrDatapoints) '\n']);
+        for k=1:length(spikeTimestamps)
+                fprintf(fid,'%s\n', num2str(features(k,1:nrDatapoints)));        
+        end  
+        fclose(fid);
+        
         % first upsample spikes
         spikeWaveforms=upsampleSpikes(spikeWaveforms);
         % get estimate of std from raw signal
@@ -283,6 +301,15 @@ switch upper(spikeSortingMethod)
         uniqueClusters(end+1)=999;
         rankedClusters=uniqueClusters;
         
+        % write cluster file
+        fname = fullfile(analysisPath,'temp.clu.1');
+        fid = fopen(fname,'w+');
+        fprintf(fid,[num2str(nrDatapoints) '\n']);
+        for k=1:length(spikeTimestamps)
+                fprintf(fid,'%s\n', num2str(features(k,1:nrDatapoints)));        
+        end  
+        fclose(fid);
+        
     case 'KLUSTAKWIK'
         % spikeSortingParams can have the following fields:
         %   minClusters - (optional) (default 20) min number of initial clusters - final number may be different due to splitting/deleting
@@ -320,7 +347,7 @@ switch upper(spikeSortingMethod)
             warning('maxPossibleClusters not defined - using default value of 100');
             spikeSortingParams.maxPossibleClusters=100;
         end
-        % useAllFeatures
+        % features
         if ~isfield(spikeSortingParams,'features')
             warning('features not defined - using default value of ''allRaw''');
             spikeSortingParams.features={'allRaw'};
@@ -332,67 +359,8 @@ switch upper(spikeSortingMethod)
         tempDir=fullfile(getRatrixPath,'analysis','spike sorting','KlustaKwik');
         cd(tempDir);
         
-        nrDatapoints=0;
         nrSamples=size(spikeWaveforms,2);
-        score=[];
-        features=[];
-        
-        for fInd=1:length(spikeSortingParams.features)
-            feat=spikeSortingParams.features{fInd};
-            switch feat %change to allow more than one feature
-                case 'allRaw'
-                    nrDatapoints=size(spikeWaveforms,2);
-                    features=[features spikeWaveforms];
-                case 'tenPCs'
-                    [pc,score,latent,tsquare] = princomp(spikeWaveforms);
-                    nrDatapoints=nrDatapoints+10; %first 10 PCs
-                    features=[features score(:,1:10)];
-                case {'wavePC1', 'wavePC2'}
-                    w=spikeWaveforms;
-                    l2norms = sqrt(sum(w.^2,2)); % normalize waveforms first
-                    w = w./l2norms(:,ones(1,nrSamples));
-                    [pc,score] = princomp(w);
-                    nrDatapoints=nrDatapoints+1;
-                    if strcmp(feat,'wavePC1')
-                        features=[features score(:,1)]; % first PC only
-                    else
-                        features=[features score(:,2)]; % second PC only
-                    end
-                case 'energy'
-                    score=sqrt(sum(spikeWaveforms(:,:).^2,2))./sqrt(nrSamples);
-                    nrDatapoints=nrDatapoints+1;
-                    features=[features score];
-                case 'peak'
-                    score=max(spikeWaveforms,[],2);
-                    nrDatapoints=nrDatapoints+1;
-                    features=[features score];
-                case 'valley'
-                    score=min(spikeWaveforms,[],2);
-                    nrDatapoints=nrDatapoints+1;
-                    features=[features score];
-                case 'peakToValley'
-                    score=abs(max(spikeWaveforms,[],2))./abs(min(spikeWaveforms,[],2));
-                    nrDatapoints=nrDatapoints+1;
-                    features=[features score];
-                case 'spikeWidth'
-                    [score imax] = max(spikeWaveforms,[],2);
-                    [score imin] = min(spikeWaveforms,[],2);
-                    score=abs(imin-imax);
-                    nrDatapoints=nrDatapoints+1;
-                    features=[features score];
-                case 'waveFFT'
-                    Y = fft(squeeze(spikeWaveforms(:,:))',nrSamples);
-                    Pyy = Y.*conj(Y)/nrSamples;
-                    WeightMatrix = repmat(([1:nrSamples/2 nrSamples/2:-1:1])',1,length(Pyy(1,:)));
-                    SumPyy = sum(Pyy);
-                    score = (sum(Pyy.*WeightMatrix)./SumPyy)';
-                    nrDatapoints=nrDatapoints+1;
-                    features=[features score];
-                otherwise
-                    error('unsupported feature selection');
-            end
-        end
-        
+        [features nrDatapoints] = calculateFeatures(spikeWaveforms,spikeSortingParams.features);
         
         % write the feature file
         fid = fopen('temp.fet.1','w+');
@@ -437,8 +405,21 @@ switch upper(spikeSortingMethod)
         rankedClusters(end+1)=1; % move noise cluster '1' to end
         fclose(fid);
         
+        % now move files from the Klusta directory (temp) to analysisPath
+        d=dir;
+        for i=1:length(d)
+            [matches] = regexpi(d(i).name, 'temp\..*', 'match');
+            if length(matches) ~= 1
+                %         warning('not a neuralRecord file name');
+            else
+                [successM messageM messageIDM]=movefile(d(i).name,fullfile(analysisPath,d(i).name));
+            end
+        end
+        
         % change back to original directory
         cd(currentDir);
+        
+        
     otherwise
         spikeSortingMethod
         error('unsupported spike sorting method');

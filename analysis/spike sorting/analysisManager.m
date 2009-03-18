@@ -130,9 +130,16 @@ while ~quit
             % setup filenames and paths -- could be a function...
             stimRecordLocation = fullfile(stimRecordsPath, sprintf('stimRecords_%d-%s.mat', goodFiles(i).trialNum, goodFiles(i).timestamp));
             neuralRecordLocation = fullfile(neuralRecordsPath, sprintf('neuralRecords_%d-%s.mat',goodFiles(i).trialNum,goodFiles(i).timestamp));
-            spikeRecordLocation = fullfile(spikeRecordPath, sprintf('spikeRecords_%d-%s.mat',goodFiles(i).trialNum,goodFiles(i).timestamp));
+
+            
             %eyeRecordLocation = fullfile(eyeRecordPath,sprintf('eyeRecords_%d-%s.mat',goodFiles(i).trialNum,goodFiles(i).timestamp)); % uses function
+            analysisPath = fullfile(analysisPath, sprintf('%d-%s',goodFiles(i).trialNum,goodFiles(i).timestamp));
+            if ~isdir(analysisPath)
+                mkdir(analysisPath);
+            end
+            spikeRecordLocation = fullfile(analysisPath, sprintf('spikeRecords_%d-%s.mat',goodFiles(i).trialNum,goodFiles(i).timestamp));
             analysisLocation = fullfile(analysisPath, sprintf('physAnalysis_%d-%s.mat',goodFiles(i).trialNum,goodFiles(i).timestamp));
+            
             
             %stimRecordLocation
             lastStimManagerClass=stimManagerClass; % store the previous trial's stim class
@@ -192,7 +199,7 @@ while ~quit
                         %                     end
                         
                         [spikes spikeWaveforms spikeTimestamps assignedClusters rankedClusters photoDiode]=...
-                            getSpikesFromNeuralData(neuralData(:,3),neuralDataTimes,spikeDetectionParams,spikeSortingParams);
+                            getSpikesFromNeuralData(neuralData(:,3),neuralDataTimes,spikeDetectionParams,spikeSortingParams,analysisPath);
                         % 11/25/08 - do some post-processing on the spike's assignedClusters ('treatAllNonNoiseAsSpikes', 'largestClusterAsSpikes', etc)
                         
                         if ~isempty(assignedClusters)

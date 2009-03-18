@@ -205,6 +205,60 @@ for i=1:length(ids)
         tr=tr.trialRecords;
 
 
+        printFrameDropReports=true;
+        if printFrameDropReports
+            frameDropDir=fullfile(compiledRecordsDirectory,'framedropReports',ids{i});
+            [status,message,messageid]=mkdir(frameDropDir);
+            
+            if status~=1
+                message
+                messageid
+                status
+                error('couldn''t make framedrop dir')
+            end
+            
+            try
+            trialNums=[tr.trialNumber];
+            [frameDropFID frameDropMsg] = fopen(fullfile(frameDropDir,['framedrops.' ids{i} '.trials.' sprintf('%d-%d',trialNums(1),trialNums(end)) '.txt']), 'wt');
+
+            if frameDropFID==-1 || ~isempty(frameDropMsg)
+                frameDropMsg
+                error('couldn''t open framedrop file')
+            end
+            
+            for trNum=1:length(tr)
+                for phNum=1:length(tr(trNum).phaseRecords)
+                    thisRec=tr(trNum).phaseRecords(phNum).responseDetails;
+                    fprintf(frameDropFID,'framedrop report for trial %d phase %d:\n',trNum,phNum);
+                    
+                    for mNum=1:length(thisRec.misses)
+                        printDroppedFrameReport(frameDropFID,thisRec.missTimestamps(mNum),thisRec.misses(mNum),thisRec.missIFIs(mNum),tr(trNum).station.ifi,'caught');
+                    end
+                    if length(thisRec.misses) ~= length(thisRec.missTimestamps) || length(thisRec.misses) ~= length(thisRec.missIFIs)
+                        fprintf(frameDropFID,'hmm, %d misses, but %d miss timestamps and %d miss ifis\n',length(thisRec.misses),length(thisRec.missTimestamps),length(thisRec.missIFIs));
+                    end
+                    
+                    for mNum=1:length(thisRec.apparentMisses)
+                        printDroppedFrameReport(frameDropFID,thisRec.apparentMissTimestamps(mNum),thisRec.apparentMisses(mNum),thisRec.apparentMissIFIs(mNum),tr(trNum).station.ifi,'unnoticed');
+                    end                    
+                    if length(thisRec.apparentMisses) ~= length(thisRec.apparentMissTimestamps) || length(thisRec.apparentMisses) ~= length(thisRec.apparentMissIFIs)
+                        fprintf(frameDropFID,'hmm, %d apparent misses, but %d apparent miss timestamps and %d apparent miss ifis\n',length(thisRec.apparentMisses),length(thisRec.apparentMissTimestamps),length(thisRec.apparentMissIFIs));
+                    end
+                    
+                    fprintf(frameDropFID,'\n\n');
+                end
+                fprintf(frameDropFID,'*********end of trial*******\n\n');
+            end
+            fclose(frameDropFID);
+            catch ex
+                disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
+                if frameDropFID~=-1
+                    fclose(frameDropFID);
+                end
+                warning('couldn''t write frame drop report file')
+            end
+        end
+        
         % 3/5/09 - we should separate the compile process based on trainingStepNum
         % to handle manual training step transitions gracefully
         uniqueTrainingSteps=unique([tr.trainingStepNum]);

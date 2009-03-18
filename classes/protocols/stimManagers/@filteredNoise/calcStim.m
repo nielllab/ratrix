@@ -147,7 +147,7 @@ else
     out=pre;
 end
 
-if any(out<0) || any(out>1)
+if any(out(:)<0) || any(out(:)>1)
     error('vals outside range somehow')
 end
 %out(out<0)=0;

@@ -304,9 +304,9 @@ switch upper(spikeSortingMethod)
         % write cluster file
         fname = fullfile(analysisPath,'temp.clu.1');
         fid = fopen(fname,'w+');
-        fprintf(fid,[num2str(nrDatapoints) '\n']);
-        for k=1:length(spikeTimestamps)
-                fprintf(fid,'%s\n', num2str(features(k,1:nrDatapoints)));        
+        fprintf(fid,[num2str(length(uniqueClusters)) '\n']);
+        for k=1:length(assignedClusters)
+                fprintf(fid,'%s\n', num2str(assignedClusters(k)));        
         end  
         fclose(fid);
         

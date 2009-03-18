@@ -127,3 +127,5 @@ matlaby/findClosestInds.m -text
 matlaby/normalize.m -text
 stimHelpers/makeLinearizedLUT.m -text
 matlaby/ensureScalarOrEmpty.m -text
+analysis/selectDenseEyeRegions.m -text
+analysis/getPxyCRxy.m -text

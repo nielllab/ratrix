@@ -24,8 +24,8 @@ if (ischar(stimulusDetails.strategy) && strcmp(stimulusDetails.strategy,'expert'
     for frameNum=1:length(seeds)
         randn('state',seeds(frameNum));
         stixels = round(255*(randn(spatialDim)*std+meanLuminance));
-        stixels(stixels>255)=255; 
-        stixels(stixels<0)=0; 
+        stixels(stixels>255)=255;
+        stixels(stixels<0)=0;
         
         %stixels=randn(spatialDim);  % for test only
         % =======================================================
@@ -68,15 +68,38 @@ if size(spikeData.frameIndices,1)~=size(stimData,3)
     error('the number of frame start/stop times does not match the number of movie frames');
 end
 
+
+%CHOOSE CLUSTER
+spikes=spikeData.spikes; %all waveforms
+waveInds=find(spikes); % location of all waveforms
+thisCluster=spikeData.spikeDetails.processedClusters==1;
+spikes(waveInds(~thisCluster))=0; % set all the non-spike waveforms to be zero;
+
+
 % count the number of spikes per frame
 % spikeCount is a 1xn vector of (number of spikes per frame), where n = number of frames
 spikeCount=zeros(1,size(spikeData.frameIndices,1));
 for i=1:length(spikeCount) % for each frame
-    spikeCount(i)=sum(spikeData.spikes(spikeData.frameIndices(i,1):spikeData.frameIndices(i,2)));  % inclusive?  policy: include start & stop
+    spikeCount(i)=sum(spikes(spikeData.frameIndices(i,1):spikeData.frameIndices(i,2)));  % inclusive?  policy: include start & stop
 end
 
 % calculate the number of frames in the window for each spike
 timeWindowFrames=ceil(timeWindowMs*(refreshRate/1000));
+
+
+%figure out which spikes to use based on eyeData
+if ~isempty(eyeData)
+    [px py crx cry]=getPxyCRxy(eyeData);
+    eyeSig=[crx-px cry-py];
+    
+    if length(unique(eyeSig(:,1)))>10 % if at least 10 x-positions
+        %do stuff
+        density=hist3(eyeSig);
+    else
+        disp(sprintf('no good eyeData on trial %d',parameters.trialNumber))
+    end
+end
+
 
 % grab the window for each spike, and store into triggers
 % triggers is a 4-d matrix:
@@ -102,6 +125,21 @@ for i=find(spikeCount>0) % for each index that has spikes
         repmat(stimData(:,:,[i-framesBefore:i+framesAfter]),[1 1 1 spikeCount(i)]); % pad for border handling?
     triggerInd = triggerInd+spikeCount(i);
 end
+
+if 0 %INCLUDE THE DROPPED FRAMES IN THIS ANALYSIS
+    %spikeCount--> represent in terms of number of flips
+    numFlipsPerStimFrame=[1 1 1 1 2 2 2 2 1 1 1 3 1 1 1 1];
+    stimFrameDisplayed=[1 2 3 4 5 6 6 7 7 8 8 9 9 10 11 12 13 13 13 14 15 16 17];
+    %spikes.droppedFrameIndices= same format as spikes.frameIndices, but
+    %each flip start and stop will be estimated based evenly dividing the N
+    %dropped frames as estimated by something like round(dropTime*refreshRate=100) ie. (.021*100)-->2)
+    % where drop time is the end of first flip of a stim frame to the start of the
+    % first flip of the next stim frame
+    triggers(indexedAsAbove)= ...
+        repmat(stimData(:,:,stimFrameDisplayed([i-framesBefore:i+framesAfter])),[1 1 1 spikeCount(i)]);
+end
+
+
 % spike triggered average
 STA=mean(triggers,4);    %the mean over instances of the trigger
 STV=var(triggers,0,4);  %the variance over instances of the trigger (not covariance!)
@@ -190,8 +228,6 @@ if doSpatial
     % end
 end
 
-
-
 function [sig CI ind]=getTemporalSignal(STA,STV,numSpikes,selection)
 
 switch selection
@@ -202,6 +238,8 @@ switch selection
     otherwise
         error('bad selection')
 end
+
+ind=ind(1); %use the first one if there is a tie. (more common with low samples)
 
 [X Y T]=ind2sub(size(STA),ind);
 ind=[X Y T];

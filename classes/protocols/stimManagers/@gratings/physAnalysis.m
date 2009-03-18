@@ -77,7 +77,6 @@ spikeCount=zeros(1,size(spikeData.frameIndices,1));
 
 
 
-
 for i=1:length(spikeCount) % for each frame
     spikeCount(i)=sum(spikes(spikeData.frameIndices(i,1):spikeData.frameIndices(i,2)));  % inclusive?  policy: include start & stop
 end
@@ -163,6 +162,55 @@ for i=1:numRepeats
     end
 end
 
+
+
+%get eyeData for phase-eye analysis
+if ~isempty(eyeData)
+    [px py crx cry]=getPxyCRxy(eyeData);
+    eyeSig=[crx-px cry-py];
+    eyeSig(end,:)=[]; % remove last ones to match (not principled... what if we should throw out the first ones?)
+
+    if length(unique(eyeSig(:,1)))>10 % if at least 10 x-positions
+        
+         regionBoundsXY=[1 .5]; % these are CRX-PY bounds of unknown degrees
+        [within ellipses]=selectDenseEyeRegions(eyeSig,1,regionBoundsXY);
+        
+        whichOne=0; % various things to look at
+        switch whichOne
+            case 0
+                %do nothing
+            case 1 % plot eye position and the clusters
+                regionBoundsXY=[1 .5]; % these are CRX-PY bounds of unknown degrees
+                within=selectDenseEyeRegions(eyeSig,3,regionBoundsXY,true);
+            case 2  % coded by phase
+                [n phaseID]=histc(phases,edges);
+                figure; hold on;
+                phaseColor=jet(numPhaseBins);
+                for i=1:numPhaseBins
+                    plot(eyeSig(phaseID==i,1),eyeSig(phaseID==i,2),'.','color',phaseColor(i,:))
+                end
+            case 3
+                density=hist3(eyeSig);
+                imagesc(density)
+            case 4
+                eyeMotion=diff(eyeSig(:,1));
+                mean(eyeMotion>0)/mean(eyeMotion<0);   % is close to 1 so little bias to drift and snap
+                bound=3*std(eyeMotion(~isnan(eyeMotion)));
+                motionEdges=linspace(-bound,bound,100);
+                count=histc(eyeMotion,motionEdges);
+                
+                figure; bar(motionEdges,log(count),'histc'); ylabel('log(count)'); xlabel('eyeMotion (crx-px)''')
+                
+                figure; plot(phases',eyeMotion,'.'); % no motion per phase (more interesting for sqaure wave single freq)
+        end
+    else
+        disp(sprintf('no good eyeData on trial %d',parameters.trialNumber))
+    end
+end
+
+
+
+
 % events(events>possibleEvents)=possibleEvents % note: more than one spike could occur per frame, so not really binomial
 % [pspike pspikeCI]=binofit(events,possibleEvents);
 
@@ -201,7 +249,7 @@ end;
 
 colors=jet(numTypes);
 figure;
-subplot(2,2,1); hold on; %p=plot([1:numPhaseBins]-.5,rate')
+subplot(3,2,1); hold on; %p=plot([1:numPhaseBins]-.5,rate')
 plot([0 numPhaseBins], [rate(1) rate(1)],'color',[1 1 1]); % to save tight axis chop
 x=[1:numPhaseBins]-.5;
 for i=1:numTypes
@@ -214,7 +262,7 @@ xlabel('phase');  set(gca,'XTickLabel',{'0','pi','2pi'},'XTick',([0 .5 1]*numPha
 axis tight
 
 %rate density over phase... doubles as a legend
-subplot(2,2,2); hold on
+subplot(3,2,2); hold on
 im=zeros([size(phaseDensity) 3]);
 hues=rgb2hsv(colors);  % get colors to match jet
 hues=repmat(hues(:,1)',numRepeats,1); % for each rep
@@ -228,11 +276,11 @@ axis([0 size(im,2) 0 size(im,1)]+.5);
 ylabel(sweptParameter); set(gca,'YTickLabel',valNames,'YTick',size(im,1)*([1:length(vals)]-.5)/length(vals))
 xlabel('phase');  set(gca,'XTickLabel',{'0','pi','2pi'},'XTick',([0 .5 1]*numPhaseBins)+.5);
 
-subplot(2,2,3); plot(mean(rate'),'k','lineWidth',2); %legend({'Fo'})
+subplot(3,2,3); plot(mean(rate'),'k','lineWidth',2); %legend({'Fo'})
 xlabel(sweptParameter); set(gca,'XTickLabel',valNames,'XTick',[1:length(vals)]); ylabel('rate (f0)'); set(gca,'YTickLabel',[0:.1:1]*parameters.refreshRate,'YTick',[0:.1:1])
 set(gca,'XLim',[1 length(vals)])
 
-subplot(2,2,4); plot(pow,'k','lineWidth',2); hold on; %legend({'f1'})
+subplot(3,2,4); plot(pow,'k','lineWidth',2); hold on; %legend({'f1'})
 plot([1:length(vals); 1:length(vals)],[pow; pow]+(powSEM'*[-1 1])','k')
 xlabel(sweptParameter); set(gca,'XTickLabel',valNames,'XTick',[1:length(vals)]); ylabel('rate (f1)');
 ylim=get(gca,'YLim'); yvals=[ ylim(1) mean(ylim) ylim(2)];set(gca,'YTickLabel',yvals,'YTick',yvals)
@@ -242,9 +290,37 @@ meanRate=(sum(spikes))/diff(spikeData.spikeTimestamps([1 end]));
 isi=diff(spikeData.spikeTimestamps(thisCluster))*1000;
 N=sum(isi<parameters.ISIviolationMS); percentN=100*N/length(isi);
 %datestr(parameters.date,22)
-infoString=sprintf('subj: %s  trial: %d\nHz: %d  viol: %2.2f%% (%d /%d)',parameters.subjectID,parameters.trialNumber,round(meanRate),percentN,N,length(isi));
-disp(infoString);
+infoString=sprintf('subj: %s  trial: %d Hz: %d',parameters.subjectID,parameters.trialNumber,round(meanRate));
 text(1.2,ylim(2),infoString);
+
+
+
+subplot(3,2,5);  
+numBins=40; maxTime=10; % ms
+edges=linspace(0,maxTime,numBins); [count]=histc(isi,edges);
+hold off; bar(edges,count,'histc'); axis([0 maxTime get(gca,'YLim')]);
+hold on; plot(parameters.ISIviolationMS([1 1]),get(gca,'YLim'),'k' )
+xvalsName=[0 parameters.ISIviolationMS maxTime]; xvals=xvalsName*samplingRate/(1000*numBins);
+set(gca,'XTickLabel',xvalsName,'XTick',xvals)
+infoString=sprintf('viol: %2.2f%%\n(%d /%d)',percentN,N,length(isi))
+text(xvals(3),max(count),infoString,'HorizontalAlignment','right','VerticalAlignment','top');
+ylabel('count'); xlabel('isi (ms)')
+
+subplot(3,2,6);
+if exist('ellipses','var')
+    hold on; colorplot(eyeSig(:,1)',eyeSig(:,2)',20,[0.2,0.8,0.9],[0.7,0.0,0.1]); % overplot?
+    colors=jet(length(ellipses));
+    for i=1:length(ellipses)
+        plot(eyeSig(within(:,i),1),eyeSig(within(:,i),2),'.','color',colors(i,:))
+        e = fncmb(fncmb(rsmak('circle'),[ellipses(i).stds(1) 0;0 ellipses(i).stds(2)]),[ellipses(i).center(1);ellipses(i).center(2)]);
+        fnplt(e,1,'k');
+    end
+    infoString=sprintf('%2.0f%% (%2.0f%%)',100*mean(~isnan(eyeSig(:,2))), 100*mean(sum(within,2)>0)); %fraction of frames with eyeData
+    text(max(eyeSig(:,1)),max(eyeSig(:,2)),infoString,'HorizontalAlignment','right','VerticalAlignment','top');
+else
+    text(.5,.5,'no good eye data')
+end
+xlabel('eye position (cr-p)')
 
 %rasterDurationSec=1;
 %linesPerChunk=round((unique(durations/parameters.refreshRate))/rasterDurationSec);

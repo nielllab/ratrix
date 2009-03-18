@@ -404,11 +404,12 @@ catch ex
                 if str2double(tokens{1}{1})==trialNum
                     goodFiles(end+1).trialNum = str2double(tokens{1}{1});
                     goodFiles(end).timestamp = tokens{1}{2};
+                    goodFiles(end).date = datenumFor30(tokens{1}{2});
                 end
             end
         end
         if size(goodFiles,2)>0
-        [sorted order]=sort(datenumFor30([goodFiles.timestamp]));
+        [sorted order]=sort([goodFiles.date]);
         goodFiles=goodFiles(order);
         
         %check that its within the hour of the start trial

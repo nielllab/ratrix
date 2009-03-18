@@ -1,4 +1,4 @@
-function [tm quit trialRecords eyeData gaze frameDropCorner station] ...
+function [tm quit trialRecords eyeData eyeDataFrameInds gaze frameDropCorner station] ...
     = runRealTimeLoop(tm, window, ifi, stimSpecs, startingStimSpecInd, phaseData, stimManager, ...
     targetOptions, distractorOptions, requestOptions, interTrialLuminance, interTrialPrecision, ...
     station, manual,timingCheckPct,textLabel,rn,subID,stimID,protocolStr,ptbVersion,ratrixVersion,trialLabel,msAirpuff, ...
@@ -65,6 +65,7 @@ quit=false;
 responseOptions = union(targetOptions, distractorOptions);
 done=0;
 eyeData=[];
+eyeDataFrameInds=[];
 gaze=[];
 soundNames=getSoundNames(getSoundManager(tm));
 
@@ -79,6 +80,7 @@ lastI = 0;
 isRequesting=0;
 
 lastSoundsLooped={};
+totalFrameNum=1; % for eyetracker
 totalEyeDataInd=1;
 doFramePulse=1;
 
@@ -251,13 +253,14 @@ if ~isempty(eyeTracker)
     
     framesPerAllocationChunk=getFramesPerAllocationChunk(eyeTracker);
     
-    % dont do this initialize-time preallocation b/c we will dynamically allocate every frame depending on the number of samples retrieved
-    %     if isa(eyeTracker,'eyeLinkTracker')
-    %         eyeData=nan(framesPerAllocationChunk,40);
-    %         gaze=nan(framesPerAllocationChunk,2);
-    %     else
-    %         error('no other methods')
-    %     end
+    
+    if isa(eyeTracker,'eyeLinkTracker')
+        eyeData=nan(framesPerAllocationChunk,40);
+        eyeDataFrameInds=nan(framesPerAllocationChunk,1);
+        gaze=nan(framesPerAllocationChunk,2);
+    else
+        error('no other methods')
+    end
 end
 
 % =========================================================================
@@ -608,26 +611,24 @@ while ~done && ~quit;
         end
         
         % change to get multiple samples (as many as are available)
-        [gazeEstimate samples] = getSamples(eyeTracker);
+        [gazeEstimates samples] = getSamples(eyeTracker);
+        % gazeEstimates should be a Nx2 matrix, samples should be Nx40 matrix, totalFrameNum is the frame number we are on
         numEyeTrackerSamples = size(samples,1);
         
-        % eyeData is now a cell array, so we don't allocate, just assign the vector of samples to next element
-        % will this hurt us vs allocating?
-        gaze(end+1)=gazeEstimate;
-        eyeData{end+1}=samples;
-%         if totalEyeDataInd>length(eyeData) % should always be true (totalEyeDataInd=end+1)
-%             %  allocateMore
-%             newEnd=length(eyeData)+ numEyeTrackerSamples;
-%             %             disp(sprintf('did allocation to eyeTrack data; up to %d samples enabled',newEnd))
-%             eyeData(end+1:newEnd,:)=nan;
-%             gaze(end+1:newEnd,:)=nan;
-%         end
-%         
-%         gaze(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = gazes;
-%         eyeData(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = samples;
-%         % [gaze(totalEyeDataInd,:) eyeData(totalEyeDataInd,:)]=getSample(eyeTracker);
-%         
-%         totalEyeDataInd = totalEyeDataInd + numEyeTrackerSamples;
+        if (totalEyeDataInd+numEyeTrackerSamples)>length(eyeData) %if samples from this frame make us exceed size of eyeData
+            %  allocateMore
+            newEnd=length(eyeData)+ framesPerAllocationChunk;
+            %             disp(sprintf('did allocation to eyeTrack data; up to %d samples enabled',newEnd))
+            eyeData(end+1:newEnd,:)=nan;
+            eyeDataFrameInds(end+1:newEnd,:)=nan;
+            gaze(end+1:newEnd,:)=nan;
+        end
+        
+        gaze(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = gazeEstimates;
+        eyeData(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = samples;
+        eyeDataFrameInds(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = totalFrameNum;
+        
+        totalEyeDataInd = totalEyeDataInd + numEyeTrackerSamples;
     end
     
     timestamps.eyeTrackerDone=GetSecs;
@@ -956,6 +957,7 @@ while ~done && ~quit;
 
         phaseInd = newSpecInd;
         frameNum = frameNum + 1;
+        totalFrameNum = totalFrameNum + 1;
         framesSinceKbInput = framesSinceKbInput + 1;
     end
     

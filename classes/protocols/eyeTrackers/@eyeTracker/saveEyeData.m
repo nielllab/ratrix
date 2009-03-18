@@ -1,5 +1,5 @@
 
-function duration=saveEyeData(et,eyeData,eyeDataVarNames,gaze,trialNum,trialStartTime)
+function duration=saveEyeData(et,eyeData,eyeDataFrameInds,eyeDataVarNames,gaze,trialNum,trialStartTime)
 %save the eye data where it belongs, tell you how long it took
 
 then=getSecs;
@@ -13,6 +13,7 @@ end
 %prune pre-allocated nans
 allEmpty=sum(isnan(eyeData'))==size(eyeData,2);
 eyeData(allEmpty,:)=[];
+eyeDataFrameInds(allEmpty,:)=[];
 gaze(allEmpty,:)=[];
 
 %make struct
@@ -22,6 +23,6 @@ eyeTracker=structize(et);
 fileName=sprintf('eyeRecords_%d_%s',trialNum,datestr(trialStartTime,30));
 savefile=fullfile(et.eyeDataPath,fileName);
 
-save(savefile,'eyeData','eyeDataVarNames','gaze','eyeTracker','eyeTrackerClass')
+save(savefile,'eyeData','eyeDataFrameInds','eyeDataVarNames','gaze','eyeTracker','eyeTrackerClass')
 duration=GetSecs-then;
 disp(sprintf('saved %s: took %2.2g sec',fileName,duration))

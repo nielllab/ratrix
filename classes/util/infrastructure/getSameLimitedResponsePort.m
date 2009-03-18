@@ -23,7 +23,11 @@ else
             correct=[trialRecords.correct];
             if isfield(trialRecords,'trialDetails')
                 td=[trialRecords.trialDetails];
-                correct=[td.correct];
+                if isfield(td,'correct')
+                    correct=[td.correct];
+                else
+                    error('trialDetails does not have the ''correct'' field');
+                end
             end
             targetPorts=[trialRecords.targetPorts];
         else

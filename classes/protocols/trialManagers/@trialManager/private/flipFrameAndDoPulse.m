@@ -3,7 +3,12 @@ function timestamps = flipFrameAndDoPulse(tm, window, dontclear, framesPerUpdate
 timeStamps.enteredFlipFrameAndDoPulse=GetSecs;
 
 if window>=0
-    Screen('DrawingFinished',window,dontclear); % enhances performance
+    Screen('DrawingFinished',window,dontclear); % supposed to enhance performance
+    % this usually returns fast but on asus mobos sometimes takes up to 2ms.
+    % it is not strictly necessary and there have been some hints
+    % that it actually hurts performance -- mario usually does not (but
+    % sometimes does) include it in demos, and has mentioned to be suspect of
+    % it. we may want to consider testing effects of removing it or giving user control over it.
 end
 timestamps.drawingFinished=GetSecs;
 

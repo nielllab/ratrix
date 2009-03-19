@@ -8,7 +8,8 @@ if window>=0
     % it is not strictly necessary and there have been some hints
     % that it actually hurts performance -- mario usually does not (but
     % sometimes does) include it in demos, and has mentioned to be suspect of
-    % it. we may want to consider testing effects of removing it or giving user control over it.
+    % it.  it's almost certainly very sensitive to driver version.  
+    % we may want to consider testing effects of removing it or giving user control over it.
 end
 timestamps.drawingFinished=GetSecs;
 

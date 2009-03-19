@@ -205,7 +205,7 @@ for i=1:length(ids)
         tr=tr.trialRecords;
 
 
-        printFrameDropReports=true;
+        printFrameDropReports=false;
         if printFrameDropReports
             frameDropDir=fullfile(compiledRecordsDirectory,'framedropReports',ids{i});
             [status,message,messageid]=mkdir(frameDropDir);

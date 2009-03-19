@@ -61,6 +61,16 @@ end
 
 if ~exist('soundOn','var') || isempty(soundOn)
     soundOn=true;
+
+    [a b]=getMACaddress;
+    if a
+        switch b
+            case '001D7DA5B8D5'
+                soundOn=false; %erik's dev machine's sound is busted
+            otherwise
+                %pass
+        end
+    end
 end
 
 stationSpec.id                                = id;

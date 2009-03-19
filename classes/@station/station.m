@@ -80,16 +80,16 @@ switch nargin
                     error('sensorPins must be vector of integers')
                 end
 
-                if isvector(in.portSpec.framePulsePins) && isinteger(in.portSpec.framePulsePins)
+                if isempty(in.portSpec.framePulsePins) || (isvector(in.portSpec.framePulsePins) && isinteger(in.portSpec.framePulsePins))
                     s.framePulsePins=in.portSpec.framePulsePins;
                 else
-                    error('framePulsePins must be vector of integers')
+                    error('framePulsePins must be empty or vector of integers')
                 end
 
-                if isvector(in.portSpec.eyePuffPins) && isinteger(in.portSpec.eyePuffPins)
+                if isempty(in.portSpec.eyePuffPins) || (isvector(in.portSpec.eyePuffPins) && isinteger(in.portSpec.eyePuffPins))
                     s.eyePuffPins=in.portSpec.eyePuffPins;
                 else
-                    error('eyePuffPins must be vector of integers')
+                    error('eyePuffPins must be empty or vector of integers')
                 end
 
                 usingPport=true;
@@ -157,29 +157,35 @@ if usingPport
     end
 
     s.framePulsePins=assignPins(s.framePulsePins,'write',s.decPPortAddr,[s.sensorPins.pinNums s.valvePins.pinNums]);
-
-    if all(s.framePulsePins(1).decAddr==[s.framePulsePins.decAddr])
+    
+    pinRec=struct('decAddr',{},'pinNums',{},'invs',{},'bitLocs',{});
+    
+    if isempty(s.framePulsePins)
+        pulseRec=pinRec;
+    elseif all(s.framePulsePins(1).decAddr==[s.framePulsePins.decAddr])
         pulseRec.decAddr=s.framePulsePins(1).decAddr;
         pulseRec.pinNums=[s.framePulsePins.pin];
         pulseRec.invs=[s.framePulsePins.inv];
         pulseRec.bitLocs=[s.framePulsePins.bitLoc];
-        s.framePulsePins=pulseRec;
     else
         error('framepulse pins must be all on the same parallel port register')
     end
-
+    s.framePulsePins=pulseRec;
+        
     s.eyePuffPins=assignPins(s.eyePuffPins,'write',s.decPPortAddr,[s.sensorPins.pinNums s.valvePins.pinNums s.framePulsePins.pinNums]);
 
-    if all(s.eyePuffPins(1).decAddr==[s.eyePuffPins.decAddr])
+    if isempty(s.eyePuffPins)
+        puffRec=pinRec;
+    elseif all(s.eyePuffPins(1).decAddr==[s.eyePuffPins.decAddr])
         puffRec.decAddr=s.eyePuffPins(1).decAddr;
         puffRec.pinNums=[s.eyePuffPins.pin];
         puffRec.invs=[s.eyePuffPins.inv];
         puffRec.bitLocs=[s.eyePuffPins.bitLoc];
-        s.eyePuffPins=puffRec;
     else
         error('eyepuff pins must be all on the same parallel port register')
     end
-
+    s.eyePuffPins=puffRec;
+    
 end
 
 if needToInit

@@ -181,7 +181,7 @@ while ~quit
                     % what is the difference between frameIndices and correctedFrameIndices?
                     % we pass correctedFrameIndices to spikeData, which is what physAnalysis sees, but 
                     % we don't tell the getSpikesFromNeuralData function anything about dropped frames?  
-                    [frameIndices frameTimes frameLengths correctedFrameIndices correctedFrameTimes correctedFrameLengths passedQualityTest] = ...
+                    [frameIndices frameTimes frameLengths correctedFrameIndices correctedFrameTimes correctedFrameLengths stimInds passedQualityTest] = ...
                         getFrameTimes(neuralData(:,1),neuralDataTimes,samplingRate,warningBound,errorBound,ifi); % pass in the pulse channel
                     
                     if usePhotoDiodeSpikes
@@ -225,7 +225,7 @@ while ~quit
                     %save spike-related data
                     save(spikeRecordLocation,'spikes','spikeWaveforms','spikeTimestamps','assignedClusters','spikeDetails',...
                         'frameIndices','frameTimes','frameLengths','correctedFrameIndices','correctedFrameTimes','correctedFrameLengths',...
-                        'photoDiode','passedQualityTest','samplingRate');
+                        'stimInds','photoDiode','passedQualityTest','samplingRate');
                     disp('saved spike data');
                 else
                     % already have a spikeRecord for this neuralRecord, just load it
@@ -274,7 +274,8 @@ while ~quit
                     % spikeData is a struct that contains all spike information that different analyses may want
                     spikeData=[];
                     spikeData.spikes=spikes;
-                    spikeData.frameIndices=correctedFrameIndices; % dont give physAnalysis the bad frames
+                    spikeData.frameIndices=correctedFrameIndices; % give physAnalysis all frames, including dropped
+                    spikeData.stimIndices=stimInds;
                     spikeData.photoDiode=photoDiode;
                     spikeData.spikeWaveforms=spikeWaveforms;
                     spikeData.spikeTimestamps=spikeTimestamps;

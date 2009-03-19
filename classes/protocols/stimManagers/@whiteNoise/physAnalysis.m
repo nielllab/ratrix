@@ -20,8 +20,8 @@ if (ischar(stimulusDetails.strategy) && strcmp(stimulusDetails.strategy,'expert'
     factor = width/spatialDim(1);
     
     %                     stimData=zeros(height,width,length(seeds)); % method 1
-    stimData=zeros(spatialDim(1),spatialDim(2),length(seeds)); % method 2
-    for frameNum=1:length(seeds)
+    stimData=zeros(spatialDim(1),spatialDim(2),length(stimInds)); % method 2
+    for frameNum=stimInds
         randn('state',seeds(frameNum));
         stixels = round(255*(randn(spatialDim)*std+meanLuminance));
         stixels(stixels>255)=255;

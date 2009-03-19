@@ -1,4 +1,5 @@
-function [frameIndices frameTimes frameLengths correctedFrameIndices correctedFrameTimes correctedFrameLengths passedQualityTest] = ...
+function [frameIndices frameTimes frameLengths correctedFrameIndices correctedFrameTimes correctedFrameLengths stimInds ...
+    passedQualityTest] = ...
     getFrameTimes(pulseData, pulseDataTimes, sampleRate, warningBound, errorBound, ifi)
 % calculate pulses and frameTimes based on pulseData
 % frameIndices - the exact sample index for each pulse
@@ -51,6 +52,7 @@ frameIndices(:,2) = pulses(4:3:end)-1;
 % ==================================
 correctedFrameTimes=frameTimes;
 correctedFrameIndices=frameIndices; % default values are same as uncorrected; correct only those values that need it
+stimInds=1:size(frameIndices,1);
 % for i=1:length(frameTimes) % indexes frameTimes
 %     if mod(i,100)==0
 %         disp(sprintf('doing frame: %d/%d, %2.2g%%',i, length(frameTimes),100*i/length(frameTimes)))
@@ -75,6 +77,7 @@ whichDrop=find((abs(diff(frameIndices')/sampleRate-ifi)>warningBound));
 correctedFrameTimes(whichDrop,2)=frameTimes(whichDrop,1)+ifi-(1/sampleRate); % the corrected end time (estimated using ifi), need to remove one sample's worth of time
 addedFrameIndices=[];
 addedFrameTimes=[];
+addedStimInds=[];
 % %vectorized runs out of memory, using a bound method in a for loop of only the dropped frames
 % can the bound method be vectorized?
 %    x=repmat(pulseDataTimes,1,length(whichDrop))-repmat(correctedFrameTimes(whichDrop,2)',length(pulseDataTimes),1);
@@ -103,6 +106,7 @@ for i=whichDrop %are more than ifi, then must be missed frame
     toAdd(:,1)=ceil(addVec(1:end-1));
     toAdd(:,2)=floor(addVec(2:end));
     addedFrameIndices=[addedFrameIndices;toAdd];
+    addedStimInds=[addedStimInds ones(1,size(toAdd,1))*i];
 end
 
 % ==================================
@@ -111,6 +115,7 @@ end
 correctedFrameIndices=sort([correctedFrameIndices;addedFrameIndices]);
 addedFrameTimes=pulseDataTimes(addedFrameIndices);
 correctedFrameTimes=sort([correctedFrameTimes;addedFrameTimes]);
+stimInds=sort([stimInds addedStimInds]);
 
 % error checking
 % frameLengths = diff(frameIndices(:,1),1);

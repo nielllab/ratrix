@@ -771,10 +771,10 @@ database.subject{i}.pctCTs=0; %if not empty overrides all steps
 
 i=i+1;
 database.subject{i}.subjectID='296';
-database.subject{i}.stepNumber=8;
+database.subject{i}.stepNumber=9;
 database.subject{i}.rewardScalar=.2;
 database.subject{i}.msPenalty=1000;
-% database.subject{i}.currentShapedValue = 0.4; %+ eps/ 4;
+database.subject{i}.currentShapedValue = 0.3 + eps/ 4; %+ eps/ 4;
 database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 
@@ -804,7 +804,7 @@ database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 i=i+1;
 database.subject{i}.subjectID='306';
-database.subject{i}.stepNumber=6;
+database.subject{i}.stepNumber=7;
 database.subject{i}.rewardScalar=.2;
 database.subject{i}.msPenalty=1000;
 % database.subject{i}.currentShapedValue = 0.4; %+ eps/ 4;

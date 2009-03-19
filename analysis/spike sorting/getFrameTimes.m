@@ -71,8 +71,10 @@ correctedFrameIndices=frameIndices; % default values are same as uncorrected; co
 % end
 
 
-whichDrop=find((abs(1000*(diff(frameIndices'))/sampleRate-ifi)>warningBound));
+whichDrop=find((abs(diff(frameIndices')/sampleRate-ifi)>warningBound));
 correctedFrameTimes(whichDrop,2)=frameTimes(whichDrop,1)+ifi-(1/sampleRate); % the corrected end time (estimated using ifi), need to remove one sample's worth of time
+addedFrameIndices=[];
+addedFrameTimes=[];
 % %vectorized runs out of memory, using a bound method in a for loop of only the dropped frames
 % can the bound method be vectorized?
 %    x=repmat(pulseDataTimes,1,length(whichDrop))-repmat(correctedFrameTimes(whichDrop,2)',length(pulseDataTimes),1);
@@ -91,10 +93,24 @@ for i=whichDrop %are more than ifi, then must be missed frame
     upperBound=min(length(pulseDataTimes),ceil((frameTimes(min(i+1,end),1)-pulseDataTimes(1))*sampleRate+1));  % add one and ceil for padding, no larger than max ind
     [m relInd]=min(abs(pulseDataTimes(lowerBound:upperBound)-correctedFrameTimes(i,2)));
     correctedFrameIndices(i,2)=lowerBound+relInd-1;
+    % now add frame inds and times for removed section
+    addStart = correctedFrameIndices(i,2)+1;
+    addEnd = frameIndices(i,2);
+    addNum = round(((addEnd-addStart)/sampleRate)/ifi);
+    % now linspace from start to end, and those are the start and stop inds, and then use corresponding frameTimes
+    addVec=linspace(addStart,addEnd,addNum);
+    toAdd=[];
+    toAdd(:,1)=ceil(addVec(1:end-1));
+    toAdd(:,2)=floor(addVec(2:end));
+    addedFrameIndices=[addedFrameIndices;toAdd];
 end
 
-    % ==================================
-
+% ==================================
+% currently, if frameIndices = [1 1000] for 4 flips (1 real, 3 dropped), then correctedIndices goes to [1 250]
+% we want to change it so that correctedIndices = [1 250; 251 500; 501 750; 751 1000]
+correctedFrameIndices=sort([correctedFrameIndices;addedFrameIndices]);
+addedFrameTimes=pulseDataTimes(addedFrameIndices);
+correctedFrameTimes=sort([correctedFrameTimes;addedFrameTimes]);
 
 % error checking
 % frameLengths = diff(frameIndices(:,1),1);

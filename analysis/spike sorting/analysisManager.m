@@ -178,8 +178,12 @@ while ~quit
                     errorBound = 0.05;
                     ifi = 1/100;
                     spikeDetails=[];
+                    % what is the difference between frameIndices and correctedFrameIndices?
+                    % we pass correctedFrameIndices to spikeData, which is what physAnalysis sees, but 
+                    % we don't tell the getSpikesFromNeuralData function anything about dropped frames?  
                     [frameIndices frameTimes frameLengths correctedFrameIndices correctedFrameTimes correctedFrameLengths passedQualityTest] = ...
                         getFrameTimes(neuralData(:,1),neuralDataTimes,samplingRate,warningBound,errorBound,ifi); % pass in the pulse channel
+                    
                     if usePhotoDiodeSpikes
                         [spikes photoDiode]=getSpikesFromPhotodiode(neuralData(:,2),neuralDataTimes, correctedFrameIndices);
                         spikeTimestamps = neuralDataTimes(spikes==1);

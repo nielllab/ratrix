@@ -16,7 +16,7 @@ function s=filteredNoise(varargin)
 % in.startFrame                 'randomize' or integer indicating fixed frame number to start with
 % in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file)
 %                               to make uniques and repeats, pass {numRepeats numUniques numCycles chunkSeconds} - chunk refers to one repeat/unique - distribution cannot be sinusoidalFlicker
-% in.numLoops                   must be >0 or inf, fractional values ok (will be rounded)
+% in.numLoops                   must be >0 or inf, fractional values ok (will be rounded to nearest frame)
 %
 % patch properties:
 % in.locationDistribution       2-d density, will be normalized to stim area

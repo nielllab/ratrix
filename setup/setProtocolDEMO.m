@@ -97,10 +97,12 @@ ports=cellfun(@uint8,{1 3},'UniformOutput',false);
 % in.startFrame                 'randomize' or integer indicating fixed frame number to start with
 % in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file)
 %                               to make uniques and repeats, pass {numRepeats numUniques numCycles chunkSeconds} - chunk refers to one repeat/unique - distribution cannot be sinusoidalFlicker
+% in.numLoops                   must be >0 or inf, fractional values ok (will be rounded to nearest frame)
 
 [noiseSpec.distribution]         =deal({'gaussian' .01});
 [noiseSpec.startFrame]           =deal(uint8(1)); %deal('randomize');
 [noiseSpec.loopDuration]         =deal(1);
+[noiseSpec.numLoops]             =deal(inf);
 
 % patch properties:
 % in.locationDistribution       2-d density, will be normalized to stim area
@@ -192,12 +194,12 @@ ts4 = trainingStep(vh, discrimStim, repeatIndefinitely(), noTimeOff(), svnRev,sv
 ts5 = trainingStep(vh, imageStim,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %morph discrim
 ts6 = trainingStep(vh, noiseStim,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %filteredNoise discrim
 ts7 = trainingStep(vh, unfilteredNoise,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %unfiltered goToSide
-%ts7 = trainingStep(vh, hateren,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %hateren
-ts8 = trainingStep(vh, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %fullfieldFlicker
-ts9 = trainingStep(vh, crftrf,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %crf/trf
+ts8 = trainingStep(vh, hateren,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %hateren
+ts9 = trainingStep(vh, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %fullfieldFlicker
+ts10 = trainingStep(vh, crftrf,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %crf/trf
 
-p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8, ts9});
-stepNum=uint8(7);
+p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts4, ts6, ts7, ts8, ts9, ts10});
+stepNum=uint8(10);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

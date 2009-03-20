@@ -7,6 +7,10 @@ pup(pup==-32768)=nan;
 
 %Short code
 switch et.method
+    case 'cr-p'
+        %these are not in terms of screen coordinates, and do not acoud for eye curvature, animal position, etc  
+        %but they do monotonically relate to gaze angle. 
+        gaze=cr-pup;
     case 'simple'
         %same function in few lines, less interpretable b/c no intermediate variables
         gaze=[(et.MonitorImSizePixs(1)/2)+et.MonitorPixPerMm(1)*(et.eyeToMonitorTangentMm*tan(asin((cr(1)-pup(1))/(et.CameraPixPerMm(1)*et.Rp))-(et.degreesCameraIsClockwiseOfMonitorCenter*pi/180))+et.eyeRightOfMonitorCenterMm),...

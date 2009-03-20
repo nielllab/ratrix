@@ -956,7 +956,7 @@ eventLog{eventNum}.details.from = [1, 1  , 1  , 1.5, 1  ];
 eventLog{eventNum}.details.to   = [2, 1.5, 1.5, 2  , 1.5];  
 
 eventNum = eventNum +1;  
-eventLog{eventNum}.date =datenum('Mar.09,2009');%datestr(now,21)  % %written on 'Mar.09,2009'  will take effect when on trunk only, in a few days 
+eventLog{eventNum}.date =datenum('Mar.12,2009');%datestr(now,21)  % %written on 'Mar.09,2009'  will take effect when on trunk only, in a few days 
 eventLog{eventNum}.eventName ={'removeCTs'};
 eventLog{eventNum}.subject ={'275','277','278'};
 eventLog{eventNum}.stationID ={}; 
@@ -966,3 +966,22 @@ eventLog{eventNum}.details.from = [0.5];
 eventLog{eventNum}.details.to   = [0];  
 
 
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Mar.18,2009');%datestr(now,21)  % %written on 'Mar.18,2009'  will take effect, in a few days on rebuild
+eventLog{eventNum}.eventName ={'addCTs'};
+eventLog{eventNum}.subject ={'275'};
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='crazy bias when we removed them, exploits them at 50%... try inbetween'; 
+eventLog{eventNum}.details.from = [0]; 
+eventLog{eventNum}.details.to   = [0.25];  
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Mar.15,2009');%datestr(now,21)  % %written on 'Mar.19,2009'  started a few days ago
+eventLog{eventNum}.eventName ={'badBias'};
+eventLog{eventNum}.subject ={'275'};
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm'; % sarah lets me know
+eventLog{eventNum}.comment ='many rats get a bad bias after long inter trials hits them'; 
+eventLog{eventNum}.details.from = []; 
+eventLog{eventNum}.details.to   = [];  

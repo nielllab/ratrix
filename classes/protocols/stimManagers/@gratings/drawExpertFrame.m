@@ -14,6 +14,7 @@ else
     i=i+1;
 end
 % stimulus = stimManager
+
 doFramePulse=true;
 dynamicDetails=[];
 % expertCache should contain masktexs and annulitexs

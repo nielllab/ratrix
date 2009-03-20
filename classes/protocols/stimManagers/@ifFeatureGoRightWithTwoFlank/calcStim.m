@@ -438,18 +438,20 @@ switch details.renderMode
     case {'dynamic-precachedInsertion','dynamic-maskTimesGrating','dynamic-onePatchPerPhase','dynamic-onePatch'}
         details.backgroundColor=details.mean;
         details.floatprecision=1;
-         type='expert'; 
-         out=details;
-         
+
          switch trialManagerClass
              case 'nAFC'
-                 %how do i get rewardSizeULorMS and msPenalty inside calcStim?
-                [stimSpecs scaleFactors] = phaseify(nAFC,stim,stimulus,type,targetPorts,distractorPorts,scaleFactor,rewardSizeULorMS,msPenalty,1/details.hz);
-             
-                %check this with fan:
-                out=stimSpecs; 
-                scaleFactor=scaleFactors;
-                type='expert?  phased?'
+                 %REQUESTED TRIALS
+                 %                  type='expert';
+                 %                  requestPort=2; % center with 3 ports
+                 %                 [out ] = phaseify(nAFC,details,type,targetPorts,distractorPorts,requestPort,scaleFactor,interTrialLuminance,details.hz)
+                 
+                 %AUTOTRIGGERED
+                 % now create stimSpecs (copied from gratings march 20.2009)
+                 type='phased';
+                 out{1} = stimSpec(details,{[] 2},'expert',0,[],[],scaleFactor,0,details.hz,[],'display'); % expert mode
+                 out{2} = stimSpec(interTrialLuminance,{[] 1},'loop',0,1,[],scaleFactor,1,details.hz,[],'itl');
+                 
              otherwise 
                  error('dynamic not tested in that mode yet')
          end

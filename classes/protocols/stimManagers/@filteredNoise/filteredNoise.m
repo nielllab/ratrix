@@ -127,6 +127,7 @@ switch nargin
                     end
                     varargin{1}(j).distribution=tmp;
                 else
+                    in.distribution
                     error('distribution must be one of ''uniform'', ''binary'', or a cell vector')
                 end
 
@@ -223,7 +224,9 @@ switch nargin
 
             s = class(s,'filteredNoise',stimManager(varargin{2},varargin{3},varargin{4},varargin{5}));
         else
-            fieldNames
+            required=fieldNames'
+            have=fields(varargin{1})
+            setdiff(required,have)
             error('input must be struct with all of the above fields')
 
         end

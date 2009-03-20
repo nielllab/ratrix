@@ -46,7 +46,7 @@ while stimFit == 0
 
     %DETERMINE SCREEN POSITIONS IN PIXELS
     pos = round(centers.* repmat([ height, height, width, width],numPatchesInserted,1)...          %convert to pixel vals
-        -  repmat([ floor(szY/2), -(ceil(szY/2)-1 ), floor(szX/2) -(ceil(szX/2)-1)],numPatchesInserted,1)); %account for patch size
+        -  repmat([ floor(szY/2), -(ceil(szY/2)-1 ), floor(szX/2) -(ceil(szX/2)-1)],numPatchesInserted,1))+1; %account for patch size
     xPixHint = round(details.positionalHint * width)*sign(-details.correctResponseIsLeft); % x shift value in pixels caused by hint
     detail.xPixShiftHint = xPixHint;
 
@@ -67,6 +67,8 @@ while stimFit == 0
         szY
         centers
         pos
+        sca
+        keyboard
         error('At least one image patch is going to be off the screen.  Make patches smaller or closer together or check the size of xPosHint.')
     end
 

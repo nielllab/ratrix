@@ -169,6 +169,7 @@ switch nargin
         end
         s = class(s,'gratings',stimManager(varargin{15},varargin{16},varargin{17},varargin{18}));
     otherwise
+        nargin
         error('Wrong number of input arguments')
 end
 

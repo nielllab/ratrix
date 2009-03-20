@@ -356,30 +356,35 @@ end % end main function
 
 function [spikes photoDiode]=getSpikesFromPhotodiode(photoDiodeData,photoDiodeDataTimes,frameIndices)
 % get spikes from neuralData and neuralDataTimes, and given frameTimes
-photoDiode=[];
+photoDiode=zeros(size(frameIndices,1),1);
 % now calculate spikes in each frame
-spikes = zeros(1, size(photoDiodeData, 1));
+spikes = zeros(size(photoDiodeData, 1),1);
 % channel = 1; % what channel of the neuralData to look at
 % first go through and histogram the values to get a threshold
-valuesToCalcThreshold = zeros(1, size(frameIndices,1));
+darkFloor=min(photoDiodeData); % is there a better way to determin the dark value?  noise is a problem! last value particularly bad... why?
 for i=1:size(frameIndices,1)
-    % frameValue is the sum of all neuralData of the given channel for the given samples (determined by frame start/stop)
-    frameValue = sum(photoDiodeData(frameIndices(i,1):frameIndices(i,2)));
-    valuesToCalcThreshold(i) = frameValue*frameValue;
+    % photoDiode is the sum of all neuralData of the given channel for the given samples (determined by frame start/stop)
+    photoDiode(i) = sum(photoDiodeData(frameIndices(i,1):frameIndices(i,2))-darkFloor);
+    %why are these negative?... i thought black was zero... guess not! subtracting a darkfloor now -pmm
 end
+squaredVals = (photoDiode).^2;  % rescale so zero is smallest value... a bit funny
 % now sort the values, and choose the first 5% to show threshold
-valuesToCalcThreshold = sort(valuesToCalcThreshold,'descend');
-pivot = ceil(length(valuesToCalcThreshold) / 20);
+%fractionBaselineSpikes=0.05; % chance of a single spike on a frame % not used
+fractionStimSpikes=0.1;      % chance of any spikes on a frame caused by stim
+maxNumStimSpikes=10;         % per frame
+valuesToCalcThreshold = sort(squaredVals,'descend');
+pivot = ceil(length(squaredVals) * fractionStimSpikes);
 threshold = (valuesToCalcThreshold(pivot) + valuesToCalcThreshold(pivot+1)) / 2;
+
+
+%numSpikes=ceil(maxNumStimSpikes*(squaredVals-threshold)/(valuesToCalcThreshold(1)-threshold));
 
 % for each frame, see if it passes a threshold
 for i=1:size(frameIndices,1)
-    % frameValue is the sum of all neuralData of the given channel for the given samples (determined by frame start/stop)
-    frameValue = sum(photoDiodeData(frameIndices(i,1):frameIndices(i,2)));
-    if frameValue*frameValue > threshold
-        % pick a random index in the specified frame
-        ind = ceil(rand*(frameIndices(i,2)-frameIndices(i,1)))+frameIndices(i,1);
-        spikes(ind) = 1;
+    if squaredVals(i) > threshold
+        numSpikes=ceil(maxNumStimSpikes*(squaredVals(i)-threshold)/(valuesToCalcThreshold(1)-threshold));
+        randInds=randperm(diff(frameIndices(i,:)))+frameIndices(i,1); % randomly order the candidate locations
+        spikes(randInds(1:numSpikes))=1;  % put N spikes at random locations (doesn't respect refractory)
     end
 end
 disp('got spikes from photo diode');

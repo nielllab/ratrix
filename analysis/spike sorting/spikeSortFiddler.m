@@ -71,12 +71,13 @@ end
 
 % CANT USE analysisManager yet on white noise b/c trials keep failing the
 % quality test // dropped frames adjustment
-overwriteAll=0; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
+overwriteAll=1; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
 classesAnalyzed=[];%{'filteredNoise'};
-trialRange=[173]; % 263 % [1 13] [173 191] [257]
+trialRange=[173 191]; % 263 % [1 13] [173 191] [257] [309 320]
 backupPath='\\132.239.158.183\rlab_storage\pmeier\backup\devNeuralData_090310'; %b/c i can't see datanet_storage folder on .179
 % backupPath='C:\Documents and Settings\rlab\Desktop\neural';
-analysisManager([],backupPath, spikeDetectionParams,spikeSortingParams,trialRange,[0 Inf],classesAnalyzed,overwriteAll);
+photoDiodeSpikes=1;
+analysisManager([],backupPath, spikeDetectionParams,spikeSortingParams,trialRange,[0 Inf],classesAnalyzed,overwriteAll,photoDiodeSpikes);
 
 
 %% tried to see how osort works using all its native format, but failed, maybe b/c format is wrong in text?

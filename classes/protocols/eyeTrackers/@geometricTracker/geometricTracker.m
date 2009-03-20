@@ -57,7 +57,7 @@ switch nargin
         end
         
     case 16
-        if ismember(varargin{1}, {'simple', 'yCorrected'})
+        if ismember(varargin{1}, {'simple', 'yCorrected','cr-p'})
             et.method=varargin{1};
         else
             error('method must be simple or ycorrected')

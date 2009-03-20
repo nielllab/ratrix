@@ -16,6 +16,7 @@ function s=filteredNoise(varargin)
 % in.startFrame                 'randomize' or integer indicating fixed frame number to start with
 % in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file)
 %                               to make uniques and repeats, pass {numRepeats numUniques numCycles chunkSeconds} - chunk refers to one repeat/unique - distribution cannot be sinusoidalFlicker
+% in.numLoops                   must be >0 or inf, fractional values ok (will be rounded)
 %
 % patch properties:
 % in.locationDistribution       2-d density, will be normalized to stim area
@@ -33,7 +34,7 @@ function s=filteredNoise(varargin)
 % in.filterStrength             0 means no filtering (kernel is all zeros, except 1 in center), 1 means pure mvgaussian kernel (center not special), >1 means surrounding pixels more important
 % in.bound                      .5-1 edge percentile for long axis of kernel when parallel to window
 
-fieldNames={'port','distribution','startFrame','loopDuration','locationDistribution','maskRadius','patchDims','patchHeight','patchWidth','background','orientation','kernelSize','kernelDuration','ratio','filterStrength','bound'};
+fieldNames={'port','distribution','startFrame','loopDuration','numLoops','locationDistribution','maskRadius','patchDims','patchHeight','patchWidth','background','orientation','kernelSize','kernelDuration','ratio','filterStrength','bound'};
 for i=1:length(fieldNames)
     s.(fieldNames{i})=[];
 end
@@ -153,6 +154,12 @@ switch nargin
                     error('loopDuration must be real scalar >=0, zero loopDuration means 1 static looped frame, except for file stims, where it means play the whole file instead of a subset. to make uniques and repeats, pass {numRepeats numUniques numCycles chunkSeconds} - chunk refers to one repeat/unique - distribution cannot be sinusoidalFlicker')
                 end
 
+                if in.numLoops>0 && isscalar(in.numLoops) && isreal(in.numLoops)
+                    %pass
+                else
+                    error('numLoops must be >0 real scalar or inf')
+                end
+                
                 pos={in.maskRadius in.kernelDuration in.filterStrength};
                 for i=1:length(pos)
                     if isscalar(pos{i}) && isreal(pos{i}) && pos{i}>=0

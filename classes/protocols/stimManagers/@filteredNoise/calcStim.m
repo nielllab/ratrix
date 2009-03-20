@@ -9,7 +9,11 @@ end
 
 LUT=makeLinearizedLUT('trinitron');%makeStandardLUT(LUTbits);
 
-type='loop';
+if isinf(stimulus.numLoops{i})
+    type='loop';
+else
+    type='cache';
+end
 
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);

@@ -192,8 +192,15 @@ for i=1:length(stimulus.port)
     %         figure
     %         plot(b,[a' c']);
 
-    stimulus.cache{i}=stim;
-
+    if isinf(stimulus.numLoops{i})
+        stimulus.cache{i}=stim;
+    else
+        f=floor(stimulus.numLoops{i});
+        r=round((stimulus.numLoops{i}-f)*size(stim,3));
+        stimulus.cache{i}=repmat(stim,[1,1,f]);
+        stimulus.cache{i}(:,:,end+1:end+r)=stim(:,:,1:r);
+    end
+    
     %         i
     %         stimulus.orientations{i}
     %         size(stim)

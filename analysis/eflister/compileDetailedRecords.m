@@ -52,13 +52,16 @@ end
 % get trialRecord files
 subjectFiles={};
 ranges={};
+
+if ~exist('source','var') || isempty(source)
+    conn=dbConn();
+end
+
 for i=1:length(ids)
     % if we have source, don't overwrite it!
     if ~exist('source','var') || isempty(source)
-        conn = dbConn();
         store_path = getPermanentStorePathBySubject(conn, ids{i});
         store_path = store_path{1}; % b/c this gets returned by the query as a 1x1 cell array holding the char array
-        closeConn(conn);
     else
         store_path = fullfile(source, ids{i});
         %         source
@@ -66,8 +69,16 @@ for i=1:length(ids)
     [subjectFiles{end+1} ranges{end+1}]=getTrialRecordFiles(store_path); %unreliable if remote
 end
 
+if ~exist('source','var') || isempty(source)
+    closeConn(conn);
+end
+
 %this will recompile from scratch every time -- add feature to only compile new data by default
 % 12/12/08 - added parameter 'recompile'; if false will try to load existing compiledRecords
+
+if ~exist('destination','var') || isempty(destination)
+    conn=dbConn();
+end
 
 sm=stimManager;
 for i=1:length(ids)
@@ -78,10 +89,8 @@ for i=1:length(ids)
     expectedTrialNumber=1;
     classes={};
     if ~exist('destination', 'var') || isempty(destination)
-        conn=dbConn();
         compiledRecordsDirectory=getCompilePathBySubject(conn, ids{i});
         compiledRecordsDirectory = compiledRecordsDirectory{1};
-        closeConn(conn);
     else
         compiledRecordsDirectory=destination;
     end
@@ -426,6 +435,11 @@ for i=1:length(ids)
 %         plot(tmp(1,:),tmp(2,:))
 %     end
 end % end for each subject loop
+
+if ~exist('destination','var') || isempty(destination)
+    closeConn(conn);
+end
+
 end % end function
 
 function a=concatAllFields(a,b)

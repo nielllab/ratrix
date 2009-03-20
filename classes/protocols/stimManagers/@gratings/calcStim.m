@@ -49,6 +49,7 @@ end
 details.durations=stimulus.durations;
 details.radii=stimulus.radii;
 details.annuli=stimulus.annuli;
+details.numRepeats=stimulus.numRepeats;
 details.doCombos=stimulus.doCombos;
 
 % NOTE: all fields in details should be MxN now
@@ -71,6 +72,7 @@ stim=[];
 stim.height=height;
 stim.width=width;
 stim.location=details.location;
+stim.numRepeats=details.numRepeats;
 
 % details has the parameters before combos, stim should have them after combos are taken
 if stimulus.doCombos
@@ -141,8 +143,14 @@ for i=1:length(unsortedUniques)
     stim.annuliMatrices{i}=annulus;
 end
 
+if isinf(stim.numRepeats)
+    timeout=[];
+else
+    timeout=sum(stim.durations)*stim.numRepeats;
+end
+
 % now create stimSpecs
-out{1} = stimSpec(stim,{[] 2},'expert',0,[],[],getScaleFactor(stimulus),0,hz,[],'display'); % expert mode
+out{1} = stimSpec(stim,{[] 2},'expert',0,timeout,[],getScaleFactor(stimulus),0,hz,[],'display'); % expert mode
 
 % final phase
 out{2} = stimSpec(interTrialLuminance,{[] 1},'loop',0,1,[],getScaleFactor(stimulus),1,hz,[],'itl');

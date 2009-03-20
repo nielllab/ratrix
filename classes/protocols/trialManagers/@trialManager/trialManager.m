@@ -28,6 +28,7 @@ t.frameDropCorner={};
 t.dropFrames=false;
 t.displayMethod='';
 t.requestPorts='none'; % either 'none','center',or 'all'
+t.showText=true;
 
 switch nargin
     case 0
@@ -41,7 +42,7 @@ switch nargin
         else
             error('Input argument is not a trialManager object')
         end
-    case 10
+    case {10 11}
         
         % soundManager
         if isa(varargin{1},'soundManager') && all(ismember(requiredSoundNames, getSoundNames(varargin{1})))
@@ -138,6 +139,15 @@ switch nargin
             %pass
         else
             error('requestPorts must be ''none'', ''all'', or ''center''');
+        end
+        
+        % showText
+        if nargin==11
+            if islogical(varargin{11})
+                t.showText=varargin{11};
+            else
+                error('showText must be logical');
+            end
         end
         
         t = class(t,'trialManager');

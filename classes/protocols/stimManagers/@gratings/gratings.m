@@ -1,6 +1,7 @@
 function s=gratings(varargin)
 % GRATINGS  class constructor.
-% s = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radii,annuli,location,waveform,normalizationMethod,mean,thresh,
+% s = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radii,annuli,location,
+%       waveform,normalizationMethod,mean,thresh,numRepeats,
 %       maxWidth,maxHeight,scaleFactor,interTrialLuminance[,doCombos])
 % Each of the following arguments is a 1xN vector, one element for each of N gratings
 % pixPerCycs - specified as in orientedGabors
@@ -20,6 +21,7 @@ function s=gratings(varargin)
 % normalizationMethod - 'normalizeDiagonal' (default), 'normalizeHorizontal', 'normalizeVertical', or 'none'
 % mean - must be between 0 and 1
 % thresh - must be greater than 0; in normalized luminance units, the value below which the stim should not appear
+% numRepeats - how many times to cycle through all combos
 % doCombos - a flag that determines whether or not to take the factorialCombo of all parameters (default is true)
 %   does the combinations in the following order:
 %   pixPerCycs > driftfrequencies > orientations > contrasts > phases > durations
@@ -32,7 +34,8 @@ s.driftfrequencies = [];
 s.orientations = [];
 s.phases = [];
 s.contrasts = [];
-s.durations = []; 
+s.durations = [];
+s.numRepeats = [];
 
 s.radii = [];
 s.annuli = [];
@@ -58,11 +61,11 @@ switch nargin
         else
             error('Input argument is not a gratings object')
         end
-    case {17 18}
+    case {18 19}
         % create object using specified values
         % check for doCombos argument first (it decides other error checking)
-        if nargin==18 && islogical(varargin{18})
-            s.doCombos=varargin{18};
+        if nargin==19 && islogical(varargin{19})
+            s.doCombos=varargin{19};
         end
         % pixPerCycs
         if isvector(varargin{1}) && isnumeric(varargin{1})
@@ -112,6 +115,11 @@ switch nargin
         else
             error('all annuli must be >= 0');
         end
+        % numRepeats
+        if isinteger(varargin{14}) || isinf(varargin{14}) || isNearInteger(varargin{14})
+            s.numRepeats=varargin{14};
+        end
+        
         % check that if doCombos is false, then all parameters must be same length
         if ~s.doCombos
             paramLength = length(s.pixPerCycs);
@@ -159,7 +167,7 @@ switch nargin
         else
             error('thresh must be >= 0')
         end
-        s = class(s,'gratings',stimManager(varargin{14},varargin{15},varargin{16},varargin{17}));
+        s = class(s,'gratings',stimManager(varargin{15},varargin{16},varargin{17},varargin{18}));
     otherwise
         error('Wrong number of input arguments')
 end

@@ -47,7 +47,7 @@ if strcmp(type,'weight')
         end
     end
     %[weights dates] = getBodyWeightHistory(conn,subjectID); %this is fast
-    [weights dates thresholds thresholds_90pct] = getBodyWeightHistory(conn,subjectID); % 10/30/08 - added 90% IACUC thresholds
+    [weights dates thresholds thresholds_90pct ages] = getBodyWeightHistory(conn,subjectID); % 10/30/08 - added 90% IACUC thresholds
     %need a faster solution, see: http://132.239.158.177/trac/rlab_hardware/ticket/129
 %     thresholds=.85*thresholds; % 10/20/08 - the thresholds from getBodyWeightHistory are already scaled to 85%
     % 11/4/08 - get free water information as well
@@ -135,6 +135,7 @@ if strcmp(type,'weight')
     
     set(AX(2), 'YAxisLocation', 'left');
     ylabel(AX(2), 'weight (g)');
+    xlabel(AX(2), 'date');
     
     if range(dates)>50
         set(AX(2),'XTick',fliplr([ceil(max(dates)):-30:floor(min(dates))]));
@@ -145,6 +146,20 @@ if strcmp(type,'weight')
     end
     
     xlim(AX(2),[floor(min(dates)) ceil(max(dates))]);
+    
+    % this axes is used to label x-axis with rat ages
+    AX(3)=axes('Position',get(AX(2),'Position'),'Color','none','XColor','k','YColor','k');
+    set(AX(3),'XAxisLocation','top');
+    xlim(AX(3),[floor(min(ages)) ceil(max(ages))]);
+    if range(ages)>50
+        set(AX(3),'XTick',fliplr([ceil(max(ages)):-30:floor(min(ages))]));
+    elseif range(ages)>8
+        set(AX(3),'XTick',fliplr([ceil(max(ages)):-7:floor(min(ages))]));
+    else
+        set(AX(3),'XTick',fliplr([ceil(max(ages)):-1:floor(min(ages))]));
+    end
+    xlabel(AX(3),'Rat age');
+    
     if ~(isempty(free_water_minutes) && isempty(free_water_mls))
         yLimits = [floor(min([free_water_minutes free_water_mls])) ceil(max([free_water_minutes free_water_mls]))];
         % 11/6/08 - if rat has only one free_water value, then set limits to be 30 above and below the single value

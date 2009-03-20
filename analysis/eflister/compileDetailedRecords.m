@@ -402,22 +402,23 @@ for i=1:length(ids)
     % delete old compiledDetails file if we added records
     if addedRecords
         delete(compiledFile);
+        % save
+        save(fullfile(compiledRecordsDirectory,sprintf('%s.compiledTrialRecords.%d-%d.mat',ids{i},ranges{i}(1,1),ranges{i}(2,end))),'compiledDetails','compiledTrialRecords','compiledLUT');
+        tmp=[];
+        for c=1:length(compiledDetails)
+            newNums=[compiledDetails(c).trialNums compiledDetails(c).bailedTrialNums];
+            tmp=[tmp [newNums;repmat(c,1,length(newNums))]];
+        end
+        [a b]=sort(tmp(1,:));
+        if any(a~=1:length(a))
+            error('missing trials')
+        end
     else
         dispStr=sprintf('nothing to do for %s',ids{i});
         disp(dispStr);
     end
-    % save
-    save(fullfile(compiledRecordsDirectory,sprintf('%s.compiledTrialRecords.%d-%d.mat',ids{i},ranges{i}(1,1),ranges{i}(2,end))),'compiledDetails','compiledTrialRecords','compiledLUT');
+   
 
-    tmp=[];
-    for c=1:length(compiledDetails)
-        newNums=[compiledDetails(c).trialNums compiledDetails(c).bailedTrialNums];
-        tmp=[tmp [newNums;repmat(c,1,length(newNums))]];
-    end
-    [a b]=sort(tmp(1,:));
-    if any(a~=1:length(a))
-        error('missing trials')
-    end
 %     doPlot=true;
 %     if doPlot
 %         figure

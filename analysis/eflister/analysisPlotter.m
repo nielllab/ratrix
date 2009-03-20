@@ -29,9 +29,9 @@ if strcmp(selection.type,'all')
             for j = 1:numRows
                 for k = 1:numCols
                     subplot(numRows,numCols,(j-1)*numCols+k);
-                    title(sprintf('%s - %s: %s',char(toBePlotted((j-1)*numCols+k)), char(subIDs(i)), datestr(now,0)));
                     hold on
                     doAnalysisPlot(compiledFileDir, subIDs{i}, char(toBePlotted((j-1)*numCols+k)), selection.filter, selection.filterVal, selection.filterParam,includeKeyboard);
+                    title(sprintf('%s - %s: %s',char(toBePlotted((j-1)*numCols+k)), char(subIDs(i)), datestr(now,0)));
                 end
             end
         end
@@ -60,7 +60,6 @@ else
             for k=1:numCols
                 if ~isempty(selection.subjects{i,j,k})
                     subplot(numRows,numCols,(j-1)*numCols+k)
-                    title(sprintf('%s - %s: %s',selection.type,selection.subjects{i,j,k},datestr(now,0)))
                     % added 10/3/08 - get compiledFileDir from subID, subject-specific
                     if isempty(compiledFileDir)
                         conn = dbConn();
@@ -70,6 +69,7 @@ else
                     end
                     hold on
                     doAnalysisPlot(compiledFileDir,selection.subjects{i,j,k},selection.type, selection.filter, selection.filterVal, selection.filterParam,includeKeyboard);
+                    title(gca,sprintf('%s - %s: %s',selection.type,selection.subjects{i,j,k},datestr(now,0)))
                 end
             end
         end

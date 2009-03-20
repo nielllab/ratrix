@@ -73,7 +73,7 @@ if doSave
         tn=0;
         evalStr=sprintf('tr%d = trialRecords;',tn);
         eval(evalStr);
-        evalStr=sprintf('save ''%s'' ''tr%d''',fullfile(subPath,fileName),tn);
+        evalStr=sprintf('save ''%s'' ''trialRecords''',fullfile(subPath,fileName));
         eval(evalStr);
     end
     

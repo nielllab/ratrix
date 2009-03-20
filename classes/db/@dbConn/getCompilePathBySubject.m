@@ -5,10 +5,10 @@ function path = getCompilePathBySubject(conn, subjectID)
 getPathQuery = sprintf('select compile_path from subjects where display_uin=''%s''', subjectID);
 
 path=query(conn,getPathQuery);
-path
-if isempty(path{1})
-    error('could not find compiled trialRecords store path for this subject %s', subjectID);
-end
+% path
+% if isempty(path{1})
+%     error('could not find compiled trialRecords store path for this subject %s', subjectID);
+% end
 
 
 end %end function

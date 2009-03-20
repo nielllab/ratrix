@@ -23,6 +23,10 @@ if strcmp(selection.type,'all')
                 conn = dbConn();
                 compiledFileDir = getCompilePathBySubject(conn, subIDs{1});
                 compiledFileDir = compiledFileDir{1};
+                if isempty(compiledFileDir) % no compiled directory in oracle!
+                    toBePlotted = {'weight'};
+                    [numRows numCols] = getArrangement(length(toBePlotted));
+                end
                 closeConn(conn);
             end
             fs(end+1) = figure('Name', char(subIDs(i)),'NumberTitle','off');
@@ -64,7 +68,10 @@ else
                     if isempty(compiledFileDir)
                         conn = dbConn();
                         compiledFileDir = getCompilePathBySubject(conn, selection.subjects{i,j,k});
-                        compiledFileDir = compiledFileDir{1}
+                        compiledFileDir = compiledFileDir{1};
+                        if isempty(compiledFileDir) && ~strcmp(selection.type,'weight')
+                            error('cannot plot %s without a compiledFileDir!',selection.type);
+                        end
                         closeConn(conn);
                     end
                     hold on

@@ -197,7 +197,8 @@ out=ones(1,length(trialRecords))*-1;
 if isfield(trialRecords,'response')
     out=cell2mat(cellfun(@decideResponse,{trialRecords.response},'UniformOutput',false));
 end
-if isfield(trialRecords,'phaseRecords') && isfield(trialRecords,'result') % these two 'if' cases should be mutually exclusive in latest code, but not always been the case
+if isfield(trialRecords,'phaseRecords') && isfield(trialRecords,'result') && ...
+        ~all(cellfun(@isempty,{trialRecords.phaseRecords})) % these two 'if' cases should be mutually exclusive in latest code, but not always been the case
     out=cell2mat(cellfun(@getResponseFromTries,{trialRecords.phaseRecords},'UniformOutput',false));
 end
 end

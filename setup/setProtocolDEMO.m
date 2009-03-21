@@ -35,7 +35,7 @@ percentCorrectionTrials=.5;
 maxWidth               = 800;
 maxHeight              = 600;
 
-eyetrack=true;
+eyetrack=false;
 if eyetrack
     alpha=12; %deg above...really?
     beta=0;   %deg to side... really?
@@ -46,7 +46,7 @@ else
 end
 eyeController=[];
 
-dataNetOn=true;
+dataNetOn=false;
 if dataNetOn
     ai_parameters.numChans=3;
     ai_parameters.sampRate=40000;

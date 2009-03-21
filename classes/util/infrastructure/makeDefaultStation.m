@@ -27,9 +27,9 @@ if ~exist('pportaddr','var') || isempty(pportaddr)
     if a
         switch b
             %some rig stations have special pport setups
-            case '0014225E4685'
+            case '0014225E4685' %dell machine w/nvidia card + sound card + nidaq card
                 pportaddr='FFF8'; %the pcmcia add on card
-            case '001372708179'
+            case '001372708179' %dell machine w/ati card
                 pportaddr='B888'; %the pci add on card
             otherwise
                 %pass
@@ -51,6 +51,8 @@ if ~exist('screenNum','var') || isempty(screenNum)
             switch b
                 case {'001D7D9ACF80','00095B8E6171'} %phys rig (00095B8E6171 is the netgear GA302T added for talking to eyelink (and returned by ptb's macid/getmac), 001D7D9ACF80 is the integrated)
                     %screenNum=int8(max(Screen('Screens')));
+                    screenNum=int8(1);
+                case '0014225E4685' %left hand rig computer
                     screenNum=int8(1);
                 otherwise
                     %pass

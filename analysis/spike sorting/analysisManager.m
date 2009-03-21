@@ -14,7 +14,7 @@ end
 
 if ~exist('spikeDetectionParams','var') || isempty(spikeDetectionParams)
     spikeDetectionParams.method='oSort';
-    spikeDetectionParams.ISIviolationMS;
+    spikeDetectionParams.ISIviolationMS=2;
 end
 
 if ~exist('spikeSortingParams','var') || isempty(spikeSortingParams)

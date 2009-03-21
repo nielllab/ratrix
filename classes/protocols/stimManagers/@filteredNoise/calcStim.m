@@ -9,12 +9,6 @@ end
 
 LUT=makeLinearizedLUT('trinitron');%makeStandardLUT(LUTbits);
 
-if isinf(stimulus.numLoops{i})
-    type='loop';
-else
-    type='cache';
-end
-
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);
 
@@ -27,6 +21,13 @@ end
 [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass);
 
 typeInd=find([stimulus.port{:}]==targetPorts);
+
+if isinf(stimulus.numLoops{typeInd})
+    type='loop';
+else
+    type='cache';
+end
+
 if length(typeInd)==0
     error('no matching target port')
 elseif length(typeInd)>1

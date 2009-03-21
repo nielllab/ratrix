@@ -25,7 +25,7 @@ if ismac
     %http://psychtoolbox.org/wikka.php?wakka=FaqPerformanceTuning1
     %Screen('DrawText'): This is fast and low-quality on MS-Windows and beautiful but slow on OS/X.
     %also not good enough on asus mobo w/8600
-    
+
     %setting textrenderer and textantialiasing to 0 not good enough
     labelFrames=0;
 end
@@ -190,6 +190,8 @@ phaseRecordAllocChunkSize = 1;
 
 % =========================================================================
 
+headroom=nan(1,responseDetails.numDetailedDrops);
+
 if ~isempty(rn)
     constants = getConstants(rn);
 end
@@ -251,10 +253,10 @@ if ~isempty(eyeTracker)
             error('message error, status: %g',status)
         end
     end
-    
+
     framesPerAllocationChunk=getFramesPerAllocationChunk(eyeTracker);
-    
-    
+
+
     if isa(eyeTracker,'eyeLinkTracker')
         eyeData=nan(framesPerAllocationChunk,40);
         eyeDataFrameInds=nan(framesPerAllocationChunk,1);
@@ -320,25 +322,25 @@ timestamps.prevPostFlipPulse    = timestamps.lastFrameTime;
 %show stim -- be careful in this realtime loop!
 while ~done && ~quit;
     timestamps.loopStart=GetSecs;
-    
+
     xOrigTextPos = 10;
     xTextPos=xOrigTextPos;
     yTextPos = 20;
-    
+
     if updatePhase == 1
-        
+
         startTime=GetSecs(); % startTime is now per-phase instead of per trial, since corresponding times in responseDetails are also per-phase
         phaseNum=phaseNum+1;
         if phaseNum>length(phaseRecords)
-            
+
             nextPhaseRecordNum=length(phaseRecords)+1;
             [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).responseDetails]= deal(responseDetails);
-            
+
             [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).proposedRewardDurationMSorUL] = deal([]);
             [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).proposedAirpuffDuration] = deal([]);
             [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).actualRewardDurationMSorUL] = deal([]);
             [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).actualAirpuffDuration] = deal([]);
-            
+
             [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).valveErrorDetails]=deal([]);
             [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).latencyToOpenValves]= deal([]);
             [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).latencyToCloseValveRecd]= deal([]);
@@ -350,7 +352,7 @@ while ~done && ~quit;
             [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).latencyToClosePrimingValveRecd]= deal([]);
             [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).latencyToClosePrimingValves]= deal([]);
             [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).actualPrimingDuration]= deal([]);
-            
+
             [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).containedManualPokes]= deal([]);
             [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).leftWithManualPokingOn]= deal([]);
             [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).containedAPause]= deal([]);
@@ -358,26 +360,26 @@ while ~done && ~quit;
             [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).containedForcedRewards]= deal([]);
             [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).didStochasticResponse]= deal([]);
         end
-        
+
         i=0;
         frameIndex=0;
         frameNum=1;
         phaseStartTime=GetSecs;
         firstVBLofPhase=timestamps.vbl;
-       
+
         didPulse=0;
         didValves=0;
         arrowKeyDown=false;
-        
+
         %         puffStarted=0;
         %         puffDone=false;
-        
+
         currentValveState=getValves(station); % cant do verifyClosed here because it might be open from a reward from previous phase
         serverValveChange=false;
         serverValveStates=false;
         didStochasticResponse=false;
         didHumanResponse=false;
-        
+
         % =========================================================================
         phase = phaseData{phaseInd};
         floatprecision = phase.floatprecision;
@@ -392,23 +394,23 @@ while ~done && ~quit;
         phaseRecords(phaseNum).toggleStim=toggleStim; % flag for whether the end of a beam break ends the request state
         destRect = phase.destRect;
         textures = phase.textures;
-        
+
         % =========================================================================
         spec = stimSpecs{phaseInd};
         stim = getStim(spec);
         transitionCriterion = getTransitions(spec);
         framesUntilTransition = getFramesUntilTransition(spec);
         phaseType = getPhaseType(spec);
-        
+
         % =========================================================================
 
-        
+
         % =========================================================================
-        
+
         if ~isempty(getStartFrame(spec))
             i=getStartFrame(spec);
         end
-        
+
         if ischar(strategy) && strcmp(strategy,'cache')
             numFramesInStim = size(stim)-i;
         elseif timeIndexed
@@ -420,15 +422,15 @@ while ~done && ~quit;
         else
             numFramesInStim = Inf;
         end
-        
+
         % we might need to do if isempty(framesUntilTransition) && strategy is 'cache', then set a framesUntilTransition==size(stim,3)
-        
+
         framesInPhase = 0;
         isFinalPhase = getIsFinalPhase(spec);
         stochasticDistribution = getStochasticDistribution(spec);
-        
+
         % =========================================================================
-        
+
         phaseRecords(phaseNum).dynamicDetails={};
         phaseRecords(phaseNum).loop = loop;
         phaseRecords(phaseNum).trigger = trigger;
@@ -439,33 +441,33 @@ while ~done && ~quit;
         % phaseRecords(phaseNum).stim=stim;
         phaseRecords(phaseNum).phaseType = phaseType;
         phaseRecords(phaseNum).phaseLabel = getPhaseLabel(spec);
-        
+
         phaseRecords(phaseNum).responseDetails.startTime = startTime;
-        
+
         updatePhase = 0;
-        
+
         % =========================================================================
         if strcmp(tm.displayMethod,'LED')
             station=stopPTB(station); %should handle this better -- LED setting is trialManager specific, so other training steps will expect ptb to still exist
             %would prefer to never startPTB until a trialManager needs it,and then start it at the proper res the first time
             %trialManager.doTrial should startPTB if it wants one and there isn't one, and stop it if there is one and it doesn't want it
             %note that ifi is not coming in empty on the first trial and the leftover value from the screen is misleading, need to fix...
-  
+
             [phaseRecords analogOutput outputsamplesOK] = LEDphase(tm,phaseInd,analogOutput,phaseRecords,spec,interTrialLuminance,stim,frameIndexed,indexedFrames,loop,trigger,timeIndexed,timedFrames,station);
-        end 
+        end
     end % fininshed with phaseUpdate
-    
+
     timestamps.phaseUpdated=GetSecs;
     doFramePulse=true;
-    
+
     if window>0
-        
+
         if ~paused
-            
+
             scheduledFrameNum=ceil((GetSecs-firstVBLofPhase)/(framesPerUpdate*ifi)); %could include pessimism about the time it will take to get from here to the flip and how much advance notice flip needs
             % this will surely have drift errors...
             % note this does not take pausing into account -- edf thinks we should get rid of pausing
-            
+
 
             % here should be the function that also checks to see if we should assign trialRecords.correct
             % and trialRecords.response, and also does tm-specific reward checks (nAFC should check to update reward/airpuff
@@ -477,7 +479,7 @@ while ~done && ~quit;
                 targetOptions, requestOptions, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
                 floatprecision, textures, destRect, ...
                 requestRewardDone);
-            
+
             % because the target ports = setdiff(responsePorts, lastResponse) which is always empty
             % so we will always have the same empty responsePorts and same nonempty requestPorts
             % we do the repeat-checking in runRealTimeLoop using ~any(ports==lastRequestPorts)
@@ -487,8 +489,8 @@ while ~done && ~quit;
                 doRequestReward=false;
                 msRewardOwed=msRewardOwed+rewardSizeULorMS;
                 phaseRecords(phaseNum).proposedRewardDurationMSorUL = rewardSizeULorMS;
-%                 dispStr=sprintf('giving reward %d during phaseNum %d\n',rewardSizeULorMS,phaseNum);
-%                 disp(dispStr)
+                %                 dispStr=sprintf('giving reward %d during phaseNum %d\n',rewardSizeULorMS,phaseNum);
+                %                 disp(dispStr)
             elseif msPenalty~=0
                 doRequestReward=false;
                 msAirpuffOwed=msAirpuffOwed+msPuff;
@@ -497,11 +499,11 @@ while ~done && ~quit;
             framesUntilTransition=getFramesUntilTransition(spec);
             stim=getStim(spec);
             scaleFactor=getScaleFactor(spec);
-            
+
             if requestRewardSizeULorMS~=0
                 doRequestReward=true;
-%                 dispStr=sprintf('increasing msRequestRewardOwed by %d during phaseNum %d\n',requestRewardSizeULorMS,phaseNum);
-%                 disp(dispStr)
+                %                 dispStr=sprintf('increasing msRequestRewardOwed by %d during phaseNum %d\n',requestRewardSizeULorMS,phaseNum);
+                %                 disp(dispStr)
                 msRequestRewardOwed=msRequestRewardOwed+requestRewardSizeULorMS;
                 phaseRecords(phaseNum).responseDetails.requestRewardPorts{end+1}=ports;
                 phaseRecords(phaseNum).responseDetails.requestRewardStartTime{end+1}=GetSecs();
@@ -511,10 +513,10 @@ while ~done && ~quit;
                 playRequestSoundLoop=true;
                 requestRewardDone=true;
             end
-            
+
             lastPorts=ports; % has to be this sequence of events: readPorts -> handleTrialLogic -> updateTrialState -> lastPorts
             % =========================================================================
-            
+
             switch strategy
                 case {'textureCache','noCache'}
                     [tm frameIndex i done doFramePulse didPulse] ...
@@ -539,9 +541,9 @@ while ~done && ~quit;
                 otherwise
                     error('unrecognized strategy')
             end
-            
+
             timestamps.frameDrawn=GetSecs;
-            
+
             if frameDropCorner.on
                 Screen('FillRect', window, frameDropCorner.seq(frameDropCorner.ind), frameDropCorner.rect);
                 frameDropCorner.ind=frameDropCorner.ind+1;
@@ -549,9 +551,9 @@ while ~done && ~quit;
                     frameDropCorner.ind=1;
                 end
             end
-            
+
             timestamps.frameDropCornerDrawn=GetSecs;
-            
+
             %text commands are supposed to be last for performance reasons
             if manual
                 didManual=1;
@@ -560,9 +562,9 @@ while ~done && ~quit;
                 xTextPos = drawText(tm, window, labelFrames, subID, xOrigTextPos, yTextPos, normBoundsRect, stimID, protocolStr, ...
                     textLabel, trialLabel, i, frameNum, manual, didManual, didAPause, ptbVersion, ratrixVersion,phaseRecords(phaseNum).responseDetails.numMisses, phaseRecords(phaseNum).responseDetails.numApparentMisses, phaseInd, getStimType(spec));
             end
-            
+
             timestamps.textDrawn=GetSecs;
-            
+
         else
             %do we need to copy previous screen?
             %Screen('CopyWindow', window, window);
@@ -571,25 +573,25 @@ while ~done && ~quit;
                 Screen('DrawText',window,'paused (k+p to toggle)',xTextPos,yTextPos,100*ones(1,3));
             end
         end
-        
-        timestamps = flipFrameAndDoPulse(tm, window, dontclear, framesPerUpdate, ifi, paused, doFramePulse,station,timestamps);
+
+        [timestamps headroom(totalFrameNum)] = flipFrameAndDoPulse(tm, window, dontclear, framesPerUpdate, ifi, paused, doFramePulse,station,timestamps);
         lastI=i;
-        
+
         [phaseRecords(phaseNum).responseDetails timestamps] = ...
             saveMissedFrameData(tm, phaseRecords(phaseNum).responseDetails, frameNum, timingCheckPct, ifi, timestamps);
-        
+
         timestamps.missesRecorded=GetSecs;
     else
-        
+
         if ~isempty(analogOutput) || window<=0 || strcmp(tm.displayMethod,'LED')
             phaseRecords(phaseNum).LEDintermediateTimestamp=GetSecs; %need to preallocate
             phaseRecords(phaseNum).intermediateSampsOutput=get(analogOutput,'SamplesOutput'); %need to preallocate
-            
+
             if ~isempty(framesUntilTransition)
                 %framesUntilTransition is calculated off of the screen's ifi which is not correct when using LED
                 framesUntilTransition=framesInPhase+2; %prevent handlePhasedTrialLogic from tripping to next phase
             end
-            
+
             %note this logic is related to updateFrameIndexUsingTextureCache
             if ~loop && (get(analogOutput,'SamplesOutput')>=length(data) || ~outputsamplesOK)
                 if isempty(responseOptions)
@@ -600,22 +602,22 @@ while ~done && ~quit;
                 end
             end
         end
-        
+
     end
-    
+
     % =========================================================================
-    
+
     if ~isempty(eyeTracker)
         if ~checkRecording(eyeTracker)
             sca
             error('lost tracker connection!')
         end
-        
+
         % change to get multiple samples (as many as are available)
         [gazeEstimates samples] = getSamples(eyeTracker);
         % gazeEstimates should be a Nx2 matrix, samples should be Nx40 matrix, totalFrameNum is the frame number we are on
         numEyeTrackerSamples = size(samples,1);
-        
+
         if (totalEyeDataInd+numEyeTrackerSamples)>length(eyeData) %if samples from this frame make us exceed size of eyeData
             %  allocateMore
             newEnd=length(eyeData)+ framesPerAllocationChunk;
@@ -624,37 +626,37 @@ while ~done && ~quit;
             eyeDataFrameInds(end+1:newEnd,:)=nan;
             gaze(end+1:newEnd,:)=nan;
         end
-        
+
         gaze(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = gazeEstimates;
         eyeData(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = samples;
         eyeDataFrameInds(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = totalFrameNum;
-        
+
         totalEyeDataInd = totalEyeDataInd + numEyeTrackerSamples;
     end
-    
+
     timestamps.eyeTrackerDone=GetSecs;
-    
+
     % =========================================================================
     % all trial logic follows
-    
+
     if ~paused
         ports=readPorts(station);
     end
     doValves=0*ports;
     doPuff=false;
-    
+
     [keyIsDown,secs,keyCode]=KbCheck; % do this check outside of function to save function call overhead
     timestamps.kbCheckDone=GetSecs;
-    
+
     if keyIsDown
         [didAPause paused done trialRecords(trialInd).result doValves ports didValves didHumanResponse manual ...
             doPuff pressingM pressingP,timestamps.kbOverhead,timestamps.kbInit,timestamps.kbKDown] ...
             = handleKeyboard(tm, keyCode, didAPause, paused, done, trialRecords(trialInd).result, doValves, ports, didValves, didHumanResponse, ...
             manual, doPuff, pressingM, pressingP, originalPriority, priorityLevel, KbConstants);
     end
-    
+
     timestamps.keyboardDone=GetSecs;
-    
+
     % do stochastic port hits after keyboard so that wont happen if another port already triggered
     if ~paused
         if ~isempty(stochasticDistribution) && ~any(ports)
@@ -667,21 +669,21 @@ while ~done && ~quit;
             end
         end
     end
-    
+
     if ~paused
         % end of a response
         if lookForChange && any(ports~=lastPorts) % end of a response
             phaseRecords(thisResponsePhaseNum).responseDetails.durs{end+1} = GetSecs() - respStart;
             lookForChange=false;
             logIt=true;
-%             dispStr=sprintf('marking end of a response at time %d with dur %d during phaseNum %d\n',GetSecs(),phaseRecords(thisResponsePhaseNum).responseDetails.durs{end},thisResponsePhaseNum);
-%             disp(dispStr);
+            %             dispStr=sprintf('marking end of a response at time %d with dur %d during phaseNum %d\n',GetSecs(),phaseRecords(thisResponsePhaseNum).responseDetails.durs{end},thisResponsePhaseNum);
+            %             disp(dispStr);
             if ~toggleStim % beambreak mode (once request ends, stop showing stim)
                 isRequesting=~isRequesting;
             end
-        
-        % 1/21/09 - how should we handle tries? - do we count attempts that occur during a phase w/ no port transitions (ie timeout only)?
-        % start of a response
+
+            % 1/21/09 - how should we handle tries? - do we count attempts that occur during a phase w/ no port transitions (ie timeout only)?
+            % start of a response
         elseif any(ports~=lastPorts) && logIt
             phaseRecords(phaseNum).responseDetails.tries{end+1} = ports;
             phaseRecords(phaseNum).responseDetails.times{end+1} = GetSecs() - startTime;
@@ -690,18 +692,18 @@ while ~done && ~quit;
             logIt=false;
             lookForChange=true;
             thisResponsePhaseNum=phaseNum;
-%             dispStr=sprintf('marking start of a response [%d %d %d] at time %d during phaseNum %d\n',ports,respStart,phaseNum);
-%             disp(dispStr);
+            %             dispStr=sprintf('marking start of a response [%d %d %d] at time %d during phaseNum %d\n',ports,respStart,phaseNum);
+            %             disp(dispStr);
         end
 
-%         % if response got set by keyboard, duplicate response on trial level
-%         if ~strcmp('none', response)
-%             trialRecords(trialInd).result = response;
-%         end
+        %         % if response got set by keyboard, duplicate response on trial level
+        %         if ~strcmp('none', response)
+        %             trialRecords(trialInd).result = response;
+        %         end
     end
-    
+
     timestamps.enteringPhaseLogic=GetSecs;
-    
+
     if ~paused
         [tm done newSpecInd phaseInd updatePhase transitionedByTimeFlag ...
             transitionedByPortFlag trialRecords(trialInd).result isRequesting lastSoundsLooped ...
@@ -718,14 +720,14 @@ while ~done && ~quit;
             newSpecInd=find(strcmp(cellfun(@getPhaseType,stimSpecs,'UniformOutput',false),'reinforced'));
         end
 
-        
+
     end
     timestamps.phaseLogicDone=GetSecs;
-    
-    % =========================================================================
-    
 
-    
+    % =========================================================================
+
+
+
     % =========================================================================
     % reward handling
     % calculate elapsed time since last loop, and decide whether to start/stop reward
@@ -735,48 +737,48 @@ while ~done && ~quit;
         % this happens b/c the phaseNum gets updated before reward stuff...
         thisRewardPhaseNum = phaseNum;
     end
-    
+
     if ~isempty(lastRewardTime) && rewardCurrentlyOn
         rewardCheckTime = GetSecs();
         elapsedTime = rewardCheckTime - lastRewardTime;
         if strcmp(getRewardMethod(station),'localTimed')
-%             doRequestReward
+            %             doRequestReward
             if ~doRequestReward % this was a normal reward, log it
                 msRewardOwed = msRewardOwed - elapsedTime*1000.0;
-%                 elapsedTime*1000.0
-%                 msRewardOwed
-%                 msRequestRewardOwed
+                %                 elapsedTime*1000.0
+                %                 msRewardOwed
+                %                 msRequestRewardOwed
                 phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL = phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL + elapsedTime*1000.0;
-%                 phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL
+                %                 phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL
             else % this was a request reward, dont log it
                 msRequestRewardOwed = msRequestRewardOwed - elapsedTime*1000.0;
                 phaseRecords(thisRewardPhaseNum).responseDetails.requestRewardDurationActual{end}=phaseRecords(thisRewardPhaseNum).responseDetails.requestRewardDurationActual{end}+elapsedTime*1000.0;
-%                 'requestReward'
-%                 requestRewardDuration
-%                 msRequestRewardOwed
-%                 elapsedTime*1000.0
+                %                 'requestReward'
+                %                 requestRewardDuration
+                %                 msRequestRewardOwed
+                %                 elapsedTime*1000.0
             end
         elseif strcmp(getRewardMethod(station),'localPump')
             % in localPump mode, msRewardOwed gets zeroed out after the call to station/doReward
         end
     end
     lastRewardTime = GetSecs();
-    
+
     rStart = msRewardOwed+msRequestRewardOwed > 0.0 && ~rewardCurrentlyOn;
     rStop = msRewardOwed+msRequestRewardOwed <= 0.0 && rewardCurrentlyOn;
-    
+
     if rStart
         thisRewardPhaseNum=phaseNum;
         % used to properly put reward logging data in their respective phaseRecords
         % default is current phase, but will set after rStart
     end
-    
+
     if rStop % if stop, then reset owed time to zero
         msRewardOwed=0;
         msRequestRewardOwed=0;
     end
     currentValveStates=getValves(station);
-    
+
     % =========================================================================
     % if any doValves, override this stuff
     % newValveState will be used to keep track of doValves stuff - figure out server-based use later
@@ -804,7 +806,7 @@ while ~done && ~quit;
             otherwise
                 error('unsupported rewardMethod');
         end
-        
+
     else
         if rStart || rStop
             rewardValves=zeros(1,getNumPorts(station));
@@ -815,18 +817,18 @@ while ~done && ~quit;
                 ports=logical(ports);
             end
             rewardValves(ports)=1;
-            
+
             %         if isempty(rewardPorts)
             %             rewardValves(requestOptions) = 1;
             %         else
             %             rewardValves(rewardPorts)=1;
             %         end
             rewardValves=logical(rewardValves);
-            
+
             if length(rewardValves) ~= 3
                 error('rewardValves has %d and currentValveStates has %d with port = %d', length(rewardValves), length(currentValveStates), port);
             end
-            
+
             switch getRewardMethod(station)
                 case 'localTimed'
                     if rStart
@@ -839,15 +841,15 @@ while ~done && ~quit;
                             setAndCheckValves(station,zeros(1,getNumPorts(station)),currentValveStates,phaseRecords(thisRewardPhaseNum).valveErrorDetails,lastRewardTime,'correct reward close');
                         % also add the additional time that reward was on from rewardCheckTime to now
                         rewardCheckToValveCloseTime = GetSecs() - rewardCheckTime;
-%                         rewardCheckToValveCloseTime
+                        %                         rewardCheckToValveCloseTime
                         if ~doRequestReward
                             phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL = phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL + rewardCheckToValveCloseTime*1000.0;
-%                             phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL
-%                             'stopping normal reward'
+                            %                             phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL
+                            %                             'stopping normal reward'
                         else
                             phaseRecords(thisRewardPhaseNum).responseDetails.requestRewardDurationActual{end}=phaseRecords(thisRewardPhaseNum).responseDetails.requestRewardDurationActual{end}+rewardCheckToValveCloseTime*1000.0;
-%                             'stopping request reward'
-                        end                       
+                            %                             'stopping request reward'
+                        end
                         % newValveState=doValves|rewardValves; % this shouldnt be used for now...figure out later...
                     else
                         error('has to be either start or stop - should not be here');
@@ -869,23 +871,23 @@ while ~done && ~quit;
                         rewardCurrentlyOn=false;
                     end
                 case 'serverPump'
-                    
+
                     [currentValveState phaseRecords(thisRewardPhaseNum).valveErrorDetails quit serverValveChange phaseRecords(thisRewardPhaseNum).responseDetails ...
-                        requestRewardStartLogged requestRewardDurLogged phaseRecords(thisRewardPhaseNum)] ... 
+                        requestRewardStartLogged requestRewardDurLogged phaseRecords(thisRewardPhaseNum)] ...
                         = serverPumpRewards(tm, rn, station, newValveState, currentValveState, phaseRecords(thisRewardPhaseNum).valveErrorDetails, ...
                         startTime, serverValveChange, requestRewardStarted, ...
                         requestRewardStartLogged, rewardValves, requestRewardDone, ...
                         requestRewardDurLogged, phaseRecords(thisRewardPhaseNum).responseDetails, quit, phaseRecords(thisRewardPhaseNum));
-                    
+
                 otherwise
                     error('unsupported rewardMethod');
             end
         end
-        
+
     end % end valves
-    
+
     timestamps.rewardDone=GetSecs;
-    
+
     if ~isempty(rn) || strcmp(getRewardMethod(station),'serverPump')
         [done quit phaseRecords(thisRewardPhaseNum).valveErrorDetails serverValveStates serverValveChange ...
             trialRecords(trialInd).result newValveState ...
@@ -897,22 +899,22 @@ while ~done && ~quit;
     elseif isempty(rn) && strcmp(getRewardMethod(station),'serverPump')
         error('need a rnet for serverPump')
     end
-    
+
     timestamps.serverCommDone=GetSecs;
-    
+
     % =========================================================================
     % airpuff
     if isempty(thisAirpuffPhaseNum)
         thisAirpuffPhaseNum=phaseNum;
     end
-    
+
     if ~isempty(lastAirpuffTime) && airpuffOn
         airpuffCheckTime = GetSecs();
         elapsedTime = airpuffCheckTime - lastAirpuffTime;
         msAirpuffOwed = msAirpuffOwed - elapsedTime*1000.0;
         phaseRecords(thisAirpuffPhaseNum).actualAirpuffDuration = phaseRecords(thisAirpuffPhaseNum).actualAirpuffDuration + elapsedTime*1000.0;
     end
-    
+
     aStart = msAirpuffOwed > 0 && ~airpuffOn;
     aStop = msAirpuffOwed <= 0 && airpuffOn; % msAirpuffOwed<=0 also catches doPuff==false, and will stop airpuff when k+a is lifted
     if aStart || doPuff
@@ -928,9 +930,9 @@ while ~done && ~quit;
         phaseRecords(thisAirpuffPhaseNum).actualAirpuffDuration = phaseRecords(thisAirpuffPhaseNum).actualAirpuffDuration + airpuffCheckToSetPuffTime*1000.0;
     end
     lastAirpuffTime = GetSecs();
-    
+
     % =========================================================================
-    
+
     if updatePhase
         phaseRecords(phaseNum).transitionedByPortResponse = transitionedByPortFlag;
         phaseRecords(phaseNum).transitionedByTimeout = transitionedByTimeFlag;
@@ -940,7 +942,7 @@ while ~done && ~quit;
         phaseRecords(phaseNum).containedForcedRewards = didValves;
         phaseRecords(phaseNum).didHumanResponse = didHumanResponse;
         phaseRecords(phaseNum).didStochasticResponse = didStochasticResponse;
-        
+
         phaseRecords(phaseNum).responseDetails.totalFrames = frameNum;
         % how do we only clear the textures from THIS phase (since all textures for all phases are precached....)
         % close all textures from this phase if in non-expert mode
@@ -950,9 +952,9 @@ while ~done && ~quit;
         %             expertCleanUp(stimManager);
         %         end
     end
-    
+
     timestamps.phaseRecordsDone=GetSecs;
-    
+
     if ~paused
         framesInPhase = framesInPhase + 1; % moved from handlePhasedTrialLogic to prevent copy on write
 
@@ -961,7 +963,7 @@ while ~done && ~quit;
         totalFrameNum = totalFrameNum + 1;
         framesSinceKbInput = framesSinceKbInput + 1;
     end
-    
+
     timestamps.loopEnd=GetSecs;
 end
 
@@ -986,12 +988,42 @@ if ~isempty(analogOutput)
     if ~isempty(evts)
         evts
     end
-    
+
     stop(analogOutput);
     delete(analogOutput); %should pass back to caller and preserve for next trial so intertrial works and can avoid contruction costs
 end
 
 Screen('Close'); %leaving off second argument closes all textures but leaves windows open
 Priority(originalPriority);
+
+plotHeadroom=false;
+if plotHeadroom
+    headroomfig=figure;
+    plot(headroom)
+    title('headroom')
+end
+
+plotGaze=false;
+if plotGaze
+    gazefig=figure;
+    subplot(2,1,1)
+    plot(gaze)
+    title('gaze')
+    legend({'gaze_x','gaze_y'})
+    subplot(2,1,2)
+    plot(eyeData(:,27:30))
+    legend({'raw_pupil_x','raw_pupil_y','raw_cr_x','raw_cr_y'})
+end
+
+if plotGaze || plotHeadroom
+    fprintf('hit a key to close headroom and/or gaze figures')
+    pause
+    if plotHeadroom
+        close(headroomfig)
+    end
+    if plotGaze
+        close(gazefig)
+    end
+end
 
 end % end function

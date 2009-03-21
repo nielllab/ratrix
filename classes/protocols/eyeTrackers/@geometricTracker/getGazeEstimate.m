@@ -1,25 +1,26 @@
 function gaze=getGazeEstimate(et,cr,pup)
 %using Fick coordinates; see Stahl, 2002 and 2004
 %toDo:  find whats causing the imaginary component
+el = getConstants(et);
 
-cr(cr==-32768)=nan;
-pup(pup==-32768)=nan;
+cr(cr==el.MISSING_DATA)=nan;
+pup(pup==el.MISSING_DATA)=nan;
 
 %Short code
 switch et.method
     case 'cr-p'
-        %these are not in terms of screen coordinates, and do not acoud for eye curvature, animal position, etc  
-        %but they do monotonically relate to gaze angle. 
+        %these are not in terms of screen coordinates, and do not acoud for eye curvature, animal position, etc
+        %but they do monotonically relate to gaze angle.
         gaze=cr-pup;
     case 'simple'
         %same function in few lines, less interpretable b/c no intermediate variables
         gaze=[(et.MonitorImSizePixs(1)/2)+et.MonitorPixPerMm(1)*(et.eyeToMonitorTangentMm*tan(asin((cr(1)-pup(1))/(et.CameraPixPerMm(1)*et.Rp))-(et.degreesCameraIsClockwiseOfMonitorCenter*pi/180))+et.eyeRightOfMonitorCenterMm),...
-              (et.MonitorImSizePixs(2)/2)+et.MonitorPixPerMm(2)*(et.eyeToMonitorTangentMm*tan(atan((cr(2)-pup(2))/(et.CameraPixPerMm(2)*et.Rp))-(et.degreesCameraIsAboveEye*pi/180))+et.eyeAboveMonitorCenterMm)];
+            (et.MonitorImSizePixs(2)/2)+et.MonitorPixPerMm(2)*(et.eyeToMonitorTangentMm*tan(atan((cr(2)-pup(2))/(et.CameraPixPerMm(2)*et.Rp))-(et.degreesCameraIsAboveEye*pi/180))+et.eyeAboveMonitorCenterMm)];
     case 'yCorrected'
         Rp0b=sqrt(((cr(2)-pup(2))/CameraPixPerMm(2)+Rcornea*sin((alpha*pi/180)/2))^2+Rp^2);
         RpCorrectedb=sqrt(sqrt(((cr(2)-pup(2))/CameraPixPerMm(2)+Rcornea*sin((alpha*pi/180)/2))^2+Rp^2)^2 -(((cr(2)-pup(2)))/CameraPixPerMm(2))^2 );
         gaze=[(MonitorImSizePixs(1)/2)+MonitorPixPerMm(1)*(eyeToMonitorTangentMm*tan(asin((cr(1)-pup(1))/(CameraPixPerMm(1)*RpCorrectedb))-(degreesCameraIsClockwiseOfMonitorCenter*pi/180))+eyeRightOfMonitorCenterMm),...
-          (MonitorImSizePixs(2)/2)+MonitorPixPerMm(2)*(eyeToMonitorTangentMm*tan(asin((cr(2)-pup(2))/(CameraPixPerMm(2)*Rp0b))-(degreesCameraIsAboveEye*pi/180))+eyeAboveMonitorCenterMm)];
+            (MonitorImSizePixs(2)/2)+MonitorPixPerMm(2)*(eyeToMonitorTangentMm*tan(asin((cr(2)-pup(2))/(CameraPixPerMm(2)*Rp0b))-(degreesCameraIsAboveEye*pi/180))+eyeAboveMonitorCenterMm)];
 end
 
 if 0

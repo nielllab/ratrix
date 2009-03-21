@@ -11,7 +11,7 @@ constants = getConstants(datanet);
 % connect to data computer
 stimcon=-1;
 while stimcon==-1
-    disp('trying tcpconnect');
+    fprintf('trying tcpconnect\n');
     stimcon=pnet('tcpconnect',hostname,8888); % stim=client, connect to 8888 (data)
 end
 

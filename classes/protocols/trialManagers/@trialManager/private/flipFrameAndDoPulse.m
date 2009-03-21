@@ -1,4 +1,4 @@
-function timestamps = flipFrameAndDoPulse(tm, window, dontclear, framesPerUpdate, ifi, paused, doFramePulse,station,timestamps)
+function [timestamps headroom] = flipFrameAndDoPulse(tm, window, dontclear, framesPerUpdate, ifi, paused, doFramePulse,station,timestamps)
 
 timeStamps.enteredFlipFrameAndDoPulse=GetSecs;
 
@@ -21,6 +21,7 @@ if ~paused && doFramePulse
     framePulse(station);
 end
 timestamps.prePulses=GetSecs;
+headroom=(timestamps.vbl+(framesPerUpdate)*ifi)-timestamps.prePulses;
 
 if window>=0
     [timestamps.vbl sos timestamps.ft timestamps.missed]=Screen('Flip',window,timestamps.when,dontclear);

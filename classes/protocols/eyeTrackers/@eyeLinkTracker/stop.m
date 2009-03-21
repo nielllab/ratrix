@@ -32,6 +32,13 @@ disp('done transfer');
 %
 % btw, what does 2.95 refer to?
 
+% edf recommends you do the following check:
+%if 2==exist(edfFile, 'file')
+%     fprintf('Data file ''%s'' can be found in ''%s''\n', edfFile, pwd );
+% else
+%     disp('unknown where data file went')
+% end
+
 if ~status==0
     status=status
     fileName=fileName

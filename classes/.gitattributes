@@ -180,3 +180,5 @@ protocols/stimManagers/@gratings/physAnalysis.m -text
 protocols/@RFestimator/getDataSource.m -text
 protocols/@RFestimator/getCenter.m -text
 protocols/@RFestimator/RFestimator.m -text
+protocols/eyeTrackers/@eyeLinkTracker/setConstants.m -text
+protocols/eyeTrackers/@eyeLinkTracker/getConstants.m -text

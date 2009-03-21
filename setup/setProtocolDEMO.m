@@ -32,8 +32,32 @@ fd2 = freeDrinks(sm,freeDrinkLikelihood,constantRewards);
 
 percentCorrectionTrials=.5;
 
+maxWidth               = 800;
+maxHeight              = 600;
+
+eyetrack=true;
+if eyetrack
+    alpha=12; %deg above...really?
+    beta=0;   %deg to side... really?
+    settingMethod='none';  % will run with these defaults without consulting user, else 'guiPrompt'
+    eyeTracker=geometricTracker('cr-p', 2, 3, alpha, beta, int16([1280,1024]), [42,28], int16([maxWidth,maxHeight]), [400,290], 300, -55, 0, 45, 0,settingMethod,10000);
+else
+    eyeTracker=[];
+end
+eyeController=[];
+
+dataNetOn=true;
+if dataNetOn
+    ai_parameters.numChans=3;
+    ai_parameters.sampRate=40000;
+    ai_parameters.inputRanges=repmat([-1 6],ai_parameters.numChans,1);
+    dn=datanet('stim','localhost','132.239.158.179','\\132.239.158.179\datanet_storage',ai_parameters)
+else
+    dn=[];
+end
+
 % {'flickerRamp',[0 .5]}
-vh=nAFC(sm,percentCorrectionTrials,constantRewards,[],[],[],{'off'},true,'ptb');
+vh=nAFC(sm,percentCorrectionTrials,constantRewards,eyeTracker,eyeController,dn,{'off'},true,'ptb');
 
 pixPerCycs              =[20];
 targetOrientations      =[pi/2];
@@ -44,9 +68,7 @@ contrast                =1;
 thresh                  =.00005;
 yPosPct                 =.65;
 %screen('resolutions') returns values too high for our NEC MultiSync FE992's -- it must just consult graphics card
-maxWidth                =1024;
-maxHeight               =768;
-scaleFactor             =[1 1];
+scaleFactor            = 0; %[1 1];
 interTrialLuminance     =.5;
 freeStim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
@@ -134,12 +156,7 @@ ports=cellfun(@uint8,{1 3},'UniformOutput',false);
 [noiseSpec.filterStrength]       =deal(1);
 [noiseSpec.bound]                =deal(.99);
 
-maxWidth               = 800;
-maxHeight              = 600;
-scaleFactor            = 0;
-
 noiseStim=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-
 
 [noiseSpec.orientation]         =deal(0);
 [noiseSpec.locationDistribution]=deal([0 0;1 0], [0 0;0 1]);
@@ -199,7 +216,7 @@ ts9 = trainingStep(vh, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svn
 ts10 = trainingStep(vh, crftrf,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %crf/trf
 
 p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts4, ts6, ts7, ts8, ts9, ts10});
-stepNum=uint8(10);
+stepNum=uint8(2);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

@@ -29,7 +29,7 @@ if ~exist('pportaddr','var') || isempty(pportaddr)
             %some rig stations have special pport setups
             case '0014225E4685'
                 pportaddr='FFF8'; %the pcmcia add on card
-            case '00095B8E6171' %this is what psychtoolbox's macid returns, but it happens to be the pci netgear 302T we added, not the main nvidia builtin connection (001372708179)
+            case '001372708179'
                 pportaddr='B888'; %the pci add on card
             otherwise
                 %pass
@@ -49,7 +49,7 @@ if ~exist('screenNum','var') || isempty(screenNum)
         [a b]=getMACaddress;
         if a
             switch b
-                case '001D7D9ACF80' %phys rig
+                case {'001D7D9ACF80','00095B8E6171'} %phys rig (00095B8E6171 is the netgear GA302T added for talking to eyelink (and returned by ptb's macid/getmac), 001D7D9ACF80 is the integrated)
                     %screenNum=int8(max(Screen('Screens')));
                     screenNum=int8(1);
                 otherwise

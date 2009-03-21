@@ -8,6 +8,8 @@ et.eyeLinkDLL=which('eyeLink'); %not used, just for record keeping
 et.eyeUsed=[];  %this is a variable that says which eye channel EyeLink is using in software
 %it tends to be left, but is meaningless for our data;  don't want to save it b/c its confusing.
 
+et.constants=[];
+
 switch nargin
     case 0
         % if no input arguments, create a default object  

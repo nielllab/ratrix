@@ -67,25 +67,20 @@ end
         error('link_sample_data error, status: ',status)
     end
 
+    status=Eyelink('command','file_sample_data = LEFT,RIGHT,GAZE,AREA,GAZERES,HREF,PUPIL,STATUS,INPUT,HMARKER');
+    if status~=0
+        error('file_sample_data error, status: ',status)
+    end
+    
 %     turned off for a test
     status=Eyelink('command','inputword_is_window = ON');
     if status~=0
         error('inputword_is_window error, status: ',status)
     end
 
-    
-%% MAYBE ADD ON!
-if 0
-    % Provide Eyelink with details about the graphics environment
-    % and perform some initializations. The information is returned
-    % in a structure that also contains useful defaults
-    % and control codes (e.g. tracker state bit and Eyelink key values).
-    if doDisplay
-        el=EyelinkInitDefaults(window);
-    else
-        el=EyelinkInitDefaults();
-    end
-end
+    et=setConstants(et);
+
+
 
 
 %% set the path for the data

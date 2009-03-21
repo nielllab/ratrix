@@ -155,6 +155,8 @@ switch defaultSettings
         default.dropFrames=true;  % dropped frames were added in and took effect after feb 2,2009; before: 
         default.displayMethod='ptb';
 
+        %for reinforcment manager
+        default.requestMode='first';  % only first request lick is rewarded
         
     otherwise
         error ('unknown default settings date')

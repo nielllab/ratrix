@@ -5,7 +5,7 @@ function   [targetIsOn flankerIsOn effectiveFrame cycleNum sweptID repetition]=i
 
 if ~isempty(s.dynamicSweep) 
     %determine the effective frame
-    framesPerCycle=max([s.targetOnOff s.flankerOnOff]);
+    framesPerCycle=double(max([s.targetOnOff s.flankerOnOff]));
     cycleNum=floor(frame/framesPerCycle)+1;
     effectiveFrame=mod(frame, framesPerCycle); 
     

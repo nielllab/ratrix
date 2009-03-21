@@ -109,7 +109,7 @@ while ~done
         if isstruct(sample) && isstruct(raw)
             sampleInd=sampleInd+1;
 
-            %nows(sampleInd)=now; %edf: why do we want this?
+            nows(sampleInd)=now; %edf: why do we want this?
             timeCPUs(sampleInd)=GetSecs;
 
             gazes(sampleInd,:)=getGazeEstimate(et,raw.raw_cr,raw.raw_pupil); %this can have nans in it if some of the raw values are the MISSING_DATA code
@@ -170,7 +170,7 @@ samples(1:sampleInd,13) = [samps.input];
 samples(1:sampleInd,14) = [samps.buttons];
 samples(1:sampleInd,15) = [samps.htype];
 samples(1:sampleInd,16) = timeCPUs(1:sampleInd);
-samples(1:sampleInd,17) = 0; %nows(1:sampleInd); %edf thinks this is waste of time
+samples(1:sampleInd,17) =  nows(1:sampleInd); %edf thinks this is waste of time, pmm notes its easier to relate to trial start time... is it slow? 
 samples(1:sampleInd,18) = [samps.time];
 
 tmp=cell2mat({samps.hdata}');

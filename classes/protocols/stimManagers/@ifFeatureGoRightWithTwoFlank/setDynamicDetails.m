@@ -20,6 +20,11 @@ for i=1:length(s.dynamicSweep.sweptParameters)
             doSpatialUpdate=true;
         case {'targetContrast','flankerContrast'}  % is the same in the details is the name in the stim manager and requres no computation
             stimDetails.(param)=value;
+        case {'phase'} % all phases yoked together...
+            stimDetails.targetPhase=value;
+            stimDetails.flankerPhase=value;
+            stimDetails.distractorPhase=value;
+            stimDetails.distractorFlankerPhase=value;
         otherwise
             error(sprintf('bad param: %s',param))
     end

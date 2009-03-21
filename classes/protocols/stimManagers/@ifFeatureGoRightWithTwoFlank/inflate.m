@@ -119,12 +119,22 @@ switch s.renderMode
 %             cache{4}.features=cast(double(intmax(integerType))*(distractorStim), integerType);
 %             cache{5}.features=cast(double(intmax(integerType))*(distractorFlankerStim), integerType);
 
-            %cache as double
+            %cache as double, range -1 to 1
             cache{1}.features=(goRightStim-s.mean)*2;
             cache{2}.features=(goLeftStim-s.mean)*2;
             cache{3}.features=(flankerStim-s.mean)*2;
             cache{4}.features=(distractorStim-s.mean)*2;
             cache{5}.features=(distractorFlankerStim-s.mean)*2;
+            
+%             %gratings range from [-0.5  1.5]...wierd
+%             %1*cos(linspace(0, pi,6))+0.5
+%             
+%             %cache as double, range [-0.5  1.5]
+%             cache{1}.features=s.mean+(goRightStim-s.mean)*2;
+%             cache{2}.features=s.mean+(goLeftStim-s.mean)*2;
+%             cache{3}.features=s.mean+(flankerStim-s.mean)*2;
+%             cache{4}.features=s.mean+(distractorStim-s.mean)*2;
+%             cache{5}.features=s.mean+(distractorFlankerStim-s.mean)*2;
             
             
             

@@ -169,26 +169,48 @@ switch nargin
                 s = varargin{1};
             case 'char'
                 p=getDefaultParameters(ifFeatureGoRightWithTwoFlank);
+                p.mean=0.5;
                 switch varargin{1}
                     case 'def'
                         %do nothing
                     case 'phys' % not fixed
+
                         p.flankerOffset=3;
+                        p.flankerContrast=1;
+                        p.goLeftContrast=.2;
+                        p.goRightContrast=1;
                         p.stdGaussMask=1/16;
+                        p.pixPerCycs=32;
+                        p.targetOnOff=int32([10 50]);
+                        p.flankerOnOff=int32([10 50]);
+                        
+                        %temp restrict
+                        %p.goLeftOrientations=p.goLeftOrientations(1);
+                        %p.goRightOrientations=p.goRightOrientations(1);
+                        %p.flankerOrientations=p.flankerOrientations(1);
+                        %p.flankerPosAngle=p.flankerPosAngle(1);
+                        
                         p.renderMode='dynamic-precachedInsertion'; % dynamic-maskTimesGrating, dynamic-onePatchPerPhase,or dynamic-onePatch
                         
                         p.dynamicSweep.sweepMode={'ordered'};
                         p.dynamicSweep.sweptValues=[];
-                        p.dynamicSweep.sweptParameters={'targetOrientations','flankerOffset'}% 'flankerOrientations'}%,'flankerOffset','flankerPosAngle'};
+                        p.dynamicSweep.sweptParameters={'targetOrientations','flankerOrientations','flankerPosAngle','phase'};% 'flankerOrientations'}%,'flankerOffset','flankerPosAngle'};
                         %         p.fitRF.fitMethod='elipse';
                         %         p.fitRF.which='last';
                         %         p.fitRF.medianFilter=logical(ones(3));
                         %         p.fitRF.alpha=0.05;
                         %         p.fitRF.numSpotsPerSTA=1;
                         %         p.fitRF.spotSizeInSTA=10;
+                    case 'physFullFieldTarget'
+                        p.stdGaussMask=Inf;
+                        p.pixPerCycs=32;
+                        p.renderMode='dynamic-precachedInsertion'; % dynamic-maskTimesGrating, dynamic-onePatchPerPhase,or dynamic-onePatch
+                        
+                        p.dynamicSweep.sweepMode={'ordered'};
+                        p.dynamicSweep.sweptValues=[];
+                        p.dynamicSweep.sweptParameters={'targetOrientations'};
                     case '10'
                         p.renderMode='ratrixGeneral-precachedInsertion';
-                        p.mean=0.5;
                     otherwise
                         varargin{1}
                         error('Single input argument is bad')
@@ -567,8 +589,12 @@ switch nargin
         %maxHeight=varargin{22**old val};
 
         %determine gabor window size within patch here
-        s.stdsPerPatch=4; %this is an even number that is very reasonable fill of square
-
+        if ~isinf(s.stdGaussMask)
+            s.stdsPerPatch=4; %this is an even number that is very reasonable fill of square
+        else
+            s.stdsPerPatch=0;  % will create infinite radius  
+        end
+        
         %start deflated
         s.cache.mask =[];
         s.cache.goRightStim=[];

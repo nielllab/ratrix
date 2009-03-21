@@ -69,8 +69,8 @@ orientations=[pi/2]; % reset to one value
 cntrGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
     waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
-numAnulli=5;
-annuli=[0.05 .1 .2 .3 .4 ]; % annulus of the grating
+numAnulli=8;
+annuli=[0.02 0.05 .1 .2 .3 .4 .5 2]; % annulus of the grating
 contrasts=1; % reset to one value
 anGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
     waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
@@ -321,7 +321,7 @@ ts{21} = trainingStep(ap,  binNoise, repeatIndefinitely(), noTimeOff(), svnRev, 
 %% make and set it
 
 p=protocol('practice phys',{ts{1:19}});
-stepNum=uint8(3);
+stepNum=uint8(6);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

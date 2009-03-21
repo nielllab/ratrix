@@ -433,7 +433,7 @@ if 1 % view plots (for testing)
     
 
     whichSpikes=find(assignedClusters~=999);
-    whichNoise=find(assignedClusters==999);
+    whichNoise=find(assignedClusters==999);  % i think o sort only... need to be specific to noise clouds in other detection methods
     candTimes=find(spikes);
     spikeTimes=candTimes(whichSpikes);
     noiseTimes=candTimes(whichNoise);

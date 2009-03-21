@@ -4,6 +4,7 @@ function n=datenumFor30(x)
 %
 %x='20071013T000552'
 %y=datenumFor30 (x)
+
 year=str2num(x(1:4));
 month=str2num(x(5:6));
 day=str2num(x(7:8));

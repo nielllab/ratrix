@@ -101,7 +101,7 @@ for i=whichDrop %are more than ifi, then must be missed frame
     addEnd = frameIndices(i,2);
     addNum = round(((addEnd-addStart)/sampleRate)/ifi);
     % now linspace from start to end, and those are the start and stop inds, and then use corresponding frameTimes
-    addVec=linspace(addStart,addEnd,addNum);
+    addVec=linspace(addStart,addEnd,addNum+1);
     toAdd=[];
     toAdd(:,1)=ceil(addVec(1:end-1));
     toAdd(:,2)=floor(addVec(2:end));
@@ -114,7 +114,11 @@ end
 % we want to change it so that correctedIndices = [1 250; 251 500; 501 750; 751 1000]
 correctedFrameIndices=sort([correctedFrameIndices;addedFrameIndices]);
 addedFrameTimes=pulseDataTimes(addedFrameIndices);
-correctedFrameTimes=sort([correctedFrameTimes;addedFrameTimes']); % added a transpose... pmm
+if size(addedFrameTimes)==[2 1]
+    %warning('only one sample..needs a transpose'); 
+    addedFrameTimes=addedFrameTimes';
+end
+correctedFrameTimes=sort([correctedFrameTimes;addedFrameTimes]);
 stimInds=sort([stimInds addedStimInds]);
 
 % error checking

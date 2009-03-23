@@ -59,7 +59,7 @@ else
 end
 
 % timeWindowMs
-timeWindowMs=[300 50]; % parameter [300 50]
+timeWindowMs=[200 30]; % parameter [300 50]
 
 %Check num stim frames makes sense
 if size(spikeData.frameIndices,1)~=size(stimData,3)
@@ -74,7 +74,7 @@ waveInds=find(spikes); % location of all waveforms
 if isstruct(spikeData.spikeDetails) && ismember({'processedClusters'},fields(spikeData.spikeDetails)) 
     thisCluster=spikeData.spikeDetails.processedClusters==1;
 else
-    thisCluster=ones(size(waveInds));
+    thisCluster=logical(ones(size(waveInds)));
     %use all (photodiode uses this)
 end
 spikes(waveInds(~thisCluster))=0; % set all the non-spike waveforms to be zero;
@@ -130,20 +130,6 @@ for i=find(spikeCount>0) % for each index that has spikes
     triggerInd = triggerInd+spikeCount(i);
 end
 
-if 0 %INCLUDE THE DROPPED FRAMES IN THIS ANALYSIS
-    %spikeCount--> represent in terms of number of flips
-    numFlipsPerStimFrame=[1 1 1 1 2 2 2 2 1 1 1 3 1 1 1 1];
-    stimFrameDisplayed=[1 2 3 4 5 6 6 7 7 8 8 9 9 10 11 12 13 13 13 14 15 16 17];
-    %spikes.droppedFrameIndices= same format as spikes.frameIndices, but
-    %each flip start and stop will be estimated based evenly dividing the N
-    %dropped frames as estimated by something like round(dropTime*refreshRate=100) ie. (.021*100)-->2)
-    % where drop time is the end of first flip of a stim frame to the start of the
-    % first flip of the next stim frame
-    triggers(indexedAsAbove)= ...
-        repmat(stimData(:,:,stimFrameDisplayed([i-framesBefore:i+framesAfter])),[1 1 1 spikeCount(i)]);
-end
-
-
 % spike triggered average
 STA=mean(triggers,4);    %the mean over instances of the trigger
 STV=var(triggers,0,4);  %the variance over instances of the trigger (not covariance!)
@@ -192,12 +178,14 @@ if doSpatial
     subplot(2,2,1)
     imagesc(squeeze(analysisdata.cumulativeSTA(:,:,brightInd(3))),rng);
     colormap(gray); colorbar;
-    hold on; plot(brightInd(1), brightInd(2),'bo')
-    hold on; plot(darkInd(1)  , darkInd(2),'ro')
+    hold on; plot(brightInd(2), brightInd(1),'bo')
+    hold on; plot(darkInd(2)  , darkInd(1),'ro')
     xlabel(sprintf('cumulative (%d-%d)',min(analysisdata.cumulativeTrialNumbers),max(analysisdata.cumulativeTrialNumbers)))
     
     subplot(2,2,2)
     hold off; imagesc(squeeze(STA(:,:,brightInd(3))),[min(STA(:)) max(STA(:))]);
+    hold on; plot(brightInd(2), brightInd(1),'bo')
+    hold on; plot(darkInd(2)  , darkInd(1),'ro')
     colormap(gray); colorbar;
     
     xlabel(sprintf('this trial (%d)',analysisdata.trialNumber))
@@ -210,11 +198,11 @@ ns=length(timeMs);
 
 hold off; plot(timeWindowFrames([1 1])+1, [0 255],'k');
 hold on;  plot([1 ns],meanLuminance([1 1])*255,'k')
-plot([1:ns], analysisdata.singleTrialTemporalRecord, 'color',[.8 .8 .8])
-fh=fill([1:ns fliplr([1:ns])]',[darkCI(:,1); flipud(darkCI(:,2))],'b'); set(fh,'edgeAlpha',0,'faceAlpha',.5)
+plot([1:ns], analysisdata.singleTrialTemporalRecord, 'color',[.8 .8 1])
 fh=fill([1:ns fliplr([1:ns])]',[darkCI(:,1); flipud(darkCI(:,2))],'r'); set(fh,'edgeAlpha',0,'faceAlpha',.5)
-plot([1:ns], darkSignal(:)','b')
-plot([1:ns], brightSignal(:)','r')
+fh=fill([1:ns fliplr([1:ns])]',[brightCI(:,1); flipud(brightCI(:,2))],'b'); set(fh,'edgeAlpha',0,'faceAlpha',.5)
+plot([1:ns], darkSignal(:)','r')
+plot([1:ns], brightSignal(:)','b')
 
 peakFrame=find(brightSignal==max(brightSignal(:)));
 timeInds=[1 peakFrame timeWindowFrames(1)+1 size(STA,3)];

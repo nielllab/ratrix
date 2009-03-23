@@ -733,7 +733,7 @@ database.subject{i}.stepNumber=9;
 database.subject{i}.rewardScalar=0.75;
 database.subject{i}.msPenalty=1000;
 database.subject{i}.currentShapedValue = 0.3 + eps/4;
-database.subject{i}.pctCTs=0; %if not empty overrides all steps
+database.subject{i}.pctCTs=0.25; %if not empty overrides all steps
 
 
 i=i+1;

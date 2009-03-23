@@ -73,7 +73,7 @@ end
 % quality test // dropped frames adjustment
 overwriteAll=1; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
 classesAnalyzed=[];%{'filteredNoise'};
-trialRange=[173 191]; % 263 % [1 13] [173 191] [257] [309 320]
+trialRange=[173 179]; % 263 % [1 13] [173 191] [257] [309 320] {}
 backupPath='\\132.239.158.183\rlab_storage\pmeier\backup\devNeuralData_090310'; %b/c i can't see datanet_storage folder on .179
 % backupPath='C:\Documents and Settings\rlab\Desktop\neural';
 photoDiodeSpikes=1;

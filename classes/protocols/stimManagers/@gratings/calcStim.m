@@ -42,7 +42,12 @@ details.orientations=stimulus.orientations;
 details.phases=stimulus.phases;
 details.contrasts=stimulus.contrasts;
 if isa(stimulus.location,'RFestimator')
-    details.location=getCenter(stimulus.location);
+    if size(trialRecords(end).subjectsInBox,2)==1
+        subjectID=char(trialRecords(end).subjectsInBox);
+    else
+        error('only one subject allowed')
+    end
+    details.location=getCenter(stimulus.location,subjectID);
 else
     details.location=stimulus.location;
 end

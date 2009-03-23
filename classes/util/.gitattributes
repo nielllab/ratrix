@@ -132,3 +132,4 @@ analysis/getPxyCRxy.m -text
 trialRecordProcessing/collectTrialRecords.m -text
 analysis/calculateFeatures.m -text
 infrastructure/printDroppedFrameReport.m -text
+matlaby/unsortedUniques.m -text

@@ -270,12 +270,14 @@ for i=1:length(ids)
         
         % 3/5/09 - we should separate the compile process based on trainingStepNum
         % to handle manual training step transitions gracefully
-        uniqueTrainingSteps=unique([tr.trainingStepNum]);
+        uniqueTrainingSteps=unsortedUniques([tr.trainingStepNum]);
         loadedClasses=classes;
+        allDetails=[];
         
         for tsNum=uniqueTrainingSteps
             thisTsInds=find([tr.trainingStepNum]==tsNum);
             classes=loadedClasses;
+            compiledDetails=[];
             
             % START COMPILE PROCESS
             % ================================================
@@ -367,7 +369,7 @@ for i=1:length(ids)
                     LUTparams=[];
                     LUTparams.lastIndex=length(compiledLUT);
                     LUTparams.compiledLUT=compiledLUT;
-                    [newRecs newLUT]=extractDetailFields(classes{2,c},colsFromAllFields(newBasicRecs,classes{3,c}),tr(classes{3,c}),LUTparams);
+                    [newRecs newLUT]=extractDetailFields(classes{2,c},colsFromAllFields(newBasicRecs,classes{3,c}),tr(thisTsInds),LUTparams);
                     
                     % if extractDetailFields returns a stim-specific LUT, add it to our main compiledLUT
                     if ~isempty(newLUT)
@@ -403,6 +405,9 @@ for i=1:length(ids)
                     end
                 end
             end
+            
+            allDetails=[allDetails compiledDetails];
+            
             % END COMPILE PROCESS
             % ================================================
         end % end for each trainingStep loop
@@ -412,6 +417,7 @@ for i=1:length(ids)
     if addedRecords
         delete(compiledFile);
         % save
+        compiledDetails=allDetails;
         save(fullfile(compiledRecordsDirectory,sprintf('%s.compiledTrialRecords.%d-%d.mat',ids{i},ranges{i}(1,1),ranges{i}(2,end))),'compiledDetails','compiledTrialRecords','compiledLUT');
         tmp=[];
         for c=1:length(compiledDetails)

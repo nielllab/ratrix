@@ -21,9 +21,14 @@ function st=makeDefaultStation(id,path,mac,physicalLocation,screenNum,rewardMeth
 % 16  control           i/o
 % 17  control	inv     i/o
 
+
+
+[a b]=getMACaddress;
+
+
 if ~exist('pportaddr','var') || isempty(pportaddr)
     pportaddr= '0378';
-    [a b]=getMACaddress;
+    %[a b]=getMACaddress;
     if a
         switch b
             %some rig stations have special pport setups
@@ -46,7 +51,7 @@ if ~exist('screenNum','var') || isempty(screenNum)
     screenNum=int8(0);
     
     if length(Screen('Screens'))>1
-        [a b]=getMACaddress;
+        %[a b]=getMACaddress;
         if a
             switch b
                 case {'001D7D9ACF80','00095B8E6171'} %phys rig (00095B8E6171 is the netgear GA302T added for talking to eyelink (and returned by ptb's macid/getmac), 001D7D9ACF80 is the integrated)
@@ -64,7 +69,7 @@ end
 if ~exist('soundOn','var') || isempty(soundOn)
     soundOn=true;
 
-    [a b]=getMACaddress;
+    %[a b]=getMACaddress;
     if a
         switch b
             case '001D7DA5B8D5'
@@ -74,6 +79,28 @@ if ~exist('soundOn','var') || isempty(soundOn)
         end
     end
 end
+
+if a
+    switch b
+        %some rig stations have eyeTrackers and datanets available
+        case '00095B8E6171' %phys stim machine stolen from 2F
+            ai_parameters.numChans=3;
+            ai_parameters.sampRate=40000;
+            ai_parameters.inputRanges=repmat([-1 6],ai_parameters.numChans,1);
+            dn=datanet('stim','localhost','132.239.158.179','\\132.239.158.179\datanet_storage',ai_parameters)
+
+            %calc stim should set the method to 'cr-p', calls set
+            %resolution should update et
+            alpha=12; %deg above...really?
+            beta=0;   %deg to side... really?
+            settingMethod='none';  % will run with these defaults without consulting user, else 'guiPrompt'
+            et=geometricTracker('cr-p', 2, 3, alpha, beta, int16([1280,1024]), [42,28], int16([maxWidth,maxHeight]), [400,290], 300, -55, 0, 45, 0,settingMethod,10000);
+        otherwise
+            dn=[];
+            et=[];
+    end
+end
+
 
 stationSpec.id                                = id;
 stationSpec.path                              = path;

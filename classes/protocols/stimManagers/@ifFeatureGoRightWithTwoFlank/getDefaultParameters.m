@@ -154,6 +154,7 @@ switch defaultSettings
         default.frameDropCorner={'off'};
         default.dropFrames=true;  % dropped frames were added in and took effect after feb 2,2009; before: 
         default.displayMethod='ptb';
+        default.requestPorts='center';
 
         %for reinforcment manager
         default.requestMode='first';  % only first request lick is rewarded

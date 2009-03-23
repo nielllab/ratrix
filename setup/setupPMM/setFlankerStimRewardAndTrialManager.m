@@ -26,7 +26,7 @@ increasingReward=rewardNcorrectInARow(p.rewardNthCorrect,p.requestRewardSizeULor
 switch tmClass
     case 'nAFC'
         tm=nAFC(p.sndManager,p.percentCorrectionTrials,increasingReward,p.eyeController,...
-            p.frameDropCorner,p.dropFrames,p.displayMethod);
+            p.frameDropCorner,p.dropFrames,p.displayMethod,p.requestPorts);
         case 'freeDrinks'
             error('not yet') % but could get rid of makeFreeDrinksTM this way, need to test calcStim
     case 'promptedNAFC'

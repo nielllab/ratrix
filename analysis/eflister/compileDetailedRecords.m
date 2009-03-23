@@ -185,6 +185,7 @@ for i=1:length(ids)
         end
     end % end load from existing compile record
     
+    allDetails=compiledDetails;
     for j=1:length(subjectFiles{i})
         % why do this?
         for k=1:size(classes,2)
@@ -272,7 +273,6 @@ for i=1:length(ids)
         % to handle manual training step transitions gracefully
         uniqueTrainingSteps=unsortedUniques([tr.trainingStepNum]);
         loadedClasses=classes;
-        allDetails=[];
         
         for tsNum=uniqueTrainingSteps
             thisTsInds=find([tr.trainingStepNum]==tsNum);
@@ -291,6 +291,14 @@ for i=1:length(ids)
                     expectedTrialNumber=expectedTrialNumber+1;
                 end
                 if ~isempty(classes)
+                    % throw out all classes that aren't this trainingStep's type
+                    toDelete=[];
+                    for x=1:size(classes,2)
+                        if ~strcmp(classes{1,x},LUTlookup(sessionLUT,tr(k).stimManagerClass))
+                            toDelete=[toDelete x];
+                        end
+                    end
+                    classes(:,toDelete)=[];
                     ind=find(strcmp(LUTlookup(sessionLUT,tr(k).stimManagerClass),classes(1,:)));
                 else
                     ind=[];
@@ -380,7 +388,7 @@ for i=1:length(ids)
 
                     verifyAllFieldsNCols(newRecs,length(classes{3,c}));
                     bailed=isempty(fieldnames(newRecs)); %extractDetailFields bailed for some reason (eg unimplemented or missing fields from old records)
-
+                    
                     if length(compiledDetails)<c
                         compiledDetails(c).className=classes{1,c};
                         if bailed
@@ -406,7 +414,21 @@ for i=1:length(ids)
                 end
             end
             
-            allDetails=[allDetails compiledDetails];
+            if isempty(allDetails)
+                allDetails=compiledDetails;
+            else
+                for d=1:length(compiledDetails)
+                    [tf loc]=ismember(compiledDetails(1).className,{allDetails.className});
+                    if tf
+                        % append records, dont make new class
+                        allDetails(loc).records=concatAllFields(allDetails(loc).records,compiledDetails(d).records);
+                        allDetails(loc).trialNums=[allDetails(loc).trialNums compiledDetails(d).trialNums];
+                        allDetails(loc).bailedTrialNums=[allDetails(loc).bailedTrialNums compiledDetails(d).bailedTrialNums];
+                    else
+                        allDetails=[allDetails compiledDetails(d)];
+                    end
+                end
+            end
             
             % END COMPILE PROCESS
             % ================================================
@@ -426,6 +448,7 @@ for i=1:length(ids)
         end
         [a b]=sort(tmp(1,:));
         if any(a~=1:length(a))
+            keyboard
             error('missing trials')
         end
     else

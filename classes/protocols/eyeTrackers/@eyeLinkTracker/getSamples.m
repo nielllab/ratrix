@@ -171,6 +171,8 @@ samples(1:sampleInd,14) = [samps.buttons];
 samples(1:sampleInd,15) = [samps.htype];
 samples(1:sampleInd,16) = timeCPUs(1:sampleInd);
 samples(1:sampleInd,17) =  nows(1:sampleInd); %edf thinks this is waste of time, pmm notes its easier to relate to trial start time... is it slow? 
+%edf: this line isn't slow but the original call to now for each sample is.  it is less accurate than GetSecs and takes 4x longer -- minimum 30us per call, often takes 100us and peaks at 5ms!!!
+
 samples(1:sampleInd,18) = [samps.time];
 
 tmp=cell2mat({samps.hdata}');

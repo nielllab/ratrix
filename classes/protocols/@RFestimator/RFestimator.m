@@ -10,8 +10,8 @@ function RFe = RFestimator(varargin)
 % method - method for estimating the receptive field (eg 'centerOfMass', 'significantCoherence', 'fitGaussian')
 % params - method-specific estimation parameters as a cell array
 % eyeParams - cell array of eye parameters, empty for now
-% dataSource - the path to the analysis files (ex: datanet_storage/demo1/) - this should not include .../analysis (because we look there
-%       in the call to getNeuralAnalysis)
+% dataSource - the path to the analysis files (always set to datanet_storage/) - this should not include ...demo1/analysis 
+%(pmm: b/c we have to adapt to different subjects!) (fan:because we look there in the call to getNeuralAnalysis)
 % dateRange - range of dates within which to look for analysis results
 %
 % from phil:

@@ -275,7 +275,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 % like an rnet error, in which case we should not continue trials
                 % we need to flag any error with a special response so we know what's going on and don't continue
             elseif ischar(trialRecords(trialInd).result) && strcmp(trialRecords(trialInd).result, 'manual flushPorts')
-                flushPorts(.05,5,.5,station);
+                flushPorts(station,.05,5,.5);
                 stopEarly=false; % reset stopEarly/quit to be false, so continue doing trials
             elseif ischar(trialRecords(trialInd).result) && (strcmp(trialRecords(trialInd).result, 'nominal') || ...
                     strcmp(trialRecords(trialInd).result, 'multiple ports'))

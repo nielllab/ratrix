@@ -20,8 +20,8 @@ if (ischar(stimulusDetails.strategy) && strcmp(stimulusDetails.strategy,'expert'
     factor = width/spatialDim(1);
     
     %                     stimData=zeros(height,width,length(seeds)); % method 1
-    stimData=zeros(spatialDim(1),spatialDim(2),length(stimInds)); % method 2
-    for frameNum=stimInds
+    stimData=zeros(spatialDim(1),spatialDim(2),length(spikeData.stimIndices)); % method 2
+    for frameNum=spikeData.stimIndices
         randn('state',seeds(frameNum));
         stixels = round(255*(randn(spatialDim)*std+meanLuminance));
         stixels(stixels>255)=255;
@@ -68,11 +68,15 @@ if size(spikeData.frameIndices,1)~=size(stimData,3)
     error('the number of frame start/stop times does not match the number of movie frames');
 end
 
-
 %CHOOSE CLUSTER
 spikes=spikeData.spikes; %all waveforms
 waveInds=find(spikes); % location of all waveforms
-thisCluster=spikeData.spikeDetails.processedClusters==1;
+if isstruct(spikeData.spikeDetails) && ismember({'processedClusters'},fields(spikeData.spikeDetails)) 
+    thisCluster=spikeData.spikeDetails.processedClusters==1;
+else
+    thisCluster=ones(size(waveInds));
+    %use all (photodiode uses this)
+end
 spikes(waveInds(~thisCluster))=0; % set all the non-spike waveforms to be zero;
 
 

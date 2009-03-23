@@ -92,9 +92,9 @@ if ~isdir(eyeRecordPath)
     mkdir(eyeRecordPath);
 end
 
-analysisPath = fullfile(path, subjectID, 'analysis');
-if ~isdir(analysisPath)
-    mkdir(analysisPath);
+baseAalysisPath = fullfile(path, subjectID, 'analysis');
+if ~isdir(baseAalysisPath)
+    mkdir(baseAalysisPath);
 end
 
 while ~quit
@@ -133,7 +133,7 @@ while ~quit
 
             
             %eyeRecordLocation = fullfile(eyeRecordPath,sprintf('eyeRecords_%d-%s.mat',goodFiles(i).trialNum,goodFiles(i).timestamp)); % uses function
-            analysisPath = fullfile(analysisPath, sprintf('%d-%s',goodFiles(i).trialNum,goodFiles(i).timestamp));
+            analysisPath = fullfile(baseAalysisPath, sprintf('%d-%s',goodFiles(i).trialNum,goodFiles(i).timestamp));
             if ~isdir(analysisPath)
                 mkdir(analysisPath);
             end

@@ -114,7 +114,7 @@ end
 % we want to change it so that correctedIndices = [1 250; 251 500; 501 750; 751 1000]
 correctedFrameIndices=sort([correctedFrameIndices;addedFrameIndices]);
 addedFrameTimes=pulseDataTimes(addedFrameIndices);
-correctedFrameTimes=sort([correctedFrameTimes;addedFrameTimes]);
+correctedFrameTimes=sort([correctedFrameTimes;addedFrameTimes']); % added a transpose... pmm
 stimInds=sort([stimInds addedStimInds]);
 
 % error checking

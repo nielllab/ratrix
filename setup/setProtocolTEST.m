@@ -92,10 +92,10 @@ freeDrinkLikelihood=0;
 fd_increasing_rewards = freeDrinks(sm,freeDrinkLikelihood,increasingRewards);
 
 fd_all_requests=freeDrinks(sm,freeDrinkLikelihood,constantRewardsWithAllRequests,...
-    [],[],[],[],[],[],'all');
+    [],[],[],[],'all');
 
 fd_nonrepeats=freeDrinks(sm,freeDrinkLikelihood,constantRewardsWithNonrepeats,...
-    [],[],[],[],[],[],'all');
+    [],[],[],[],'all');
 
 vh=nAFC(sm,percentCorrectionTrials,constantRewards);
 
@@ -105,9 +105,8 @@ ai_parameters.numChans=3;
 ai_parameters.sampRate=50000;
 ai_parameters.inputRanges=repmat([-1 6],ai_parameters.numChans,1);
 
-vh_datanet=nAFC(sm,percentCorrectionTrials,constantRewards,[],[],...
-    datanet('stim','localhost','132.239.158.179','\\132.239.158.179\datanet_storage',ai_parameters));
-
+vh_datanet=nAFC(sm,percentCorrectionTrials,constantRewards);
+% datanet('stim','localhost','132.239.158.179','\\132.239.158.179\datanet_storage',ai_parameters)
 
 % uses rewardNcorrectInARow reinforcementManager, but same nAFC otherwise
 nAFC_increasing_rewards =nAFC(sm,percentCorrectionTrials,increasingRewards);
@@ -117,8 +116,7 @@ gts = nAFC(sm,percentCorrectionTrials,constantRewards);
 
 % autopilot trialManager (for gratings currently) - 11/12/08 fli
 aP = autopilot(percentCorrectionTrials,sm,constantRewards);
-aP_datanet = autopilot(percentCorrectionTrials,sm,constantRewards, ...
-    [],[],datanet('stim','localhost','132.239.158.179','\\132.239.158.179\datanet_storage',ai_parameters));
+aP_datanet = autopilot(percentCorrectionTrials,sm,constantRewards);
 
 % passiveViewing trialManager
 % allowRepeats=true;
@@ -133,7 +131,7 @@ targetOrientations      =[pi/2];
 distractorOrientations  =[];
 mean                    =.5;
 radius                  =.04;
-contrast                =1;
+contrasts                =[1 .5];
 thresh                  =.00005;
 yPosPct                 =.65;
 %screen('resolutions') returns values too high for our NEC MultiSync FE992's -- it must just consult graphics card
@@ -157,20 +155,21 @@ end
 
 % ====================================================================================================================
 % stimManager
-freeStim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+freeStim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrasts,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 pixPerCycs=[20 10];
+targetOrientations=[pi/2 pi/3 pi/4];
 distractorOrientations=[0];
-discrimStim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+discrimStim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrasts,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 % gratings
-pixPerCycs=[100 20 50]; %freq
+pixPerCycs=[100]; %freq
 driftfrequencies=[1 6]; % in cycles per second
-orientations=[pi/3 pi/4 pi/6]; % in radians
+orientations=[pi/3]; % in radians
 phases=[0]; % initial phase
-contrasts=[1 0.01]; % contrast of the grating
+contrasts=[0.99]; % contrast of the grating
 durations=[2];
-radii=[.08 0.04]; % radius of the gaussian mask
+radii=[.08]; % radius of the gaussian mask
 annuli=[0.01]; % radius of inner annuli
 location=[0.25 0.75];
 waveform='square';
@@ -182,8 +181,9 @@ maxWidth                =1024;
 maxHeight               =768;
 scaleFactor             =0;
 interTrialLuminance     =.5;
+numRepeats=2;
 gratingStim = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radii,annuli,location,...
-    waveform,normalizationMethod,mean,thresh,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 imageSize=[1 1];
 imageRotation=[0 210];
@@ -445,7 +445,7 @@ noiseStim=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLumin
 
 unfilteredNoise=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
-led=nAFC(sm,percentCorrectionTrials,constantRewards,[],[],[],{'off'},false,'LED');
+led=nAFC(sm,percentCorrectionTrials,constantRewards,[],{'off'},false,'LED');
 
 if ismac
     ts001 = '/Users/eflister/Desktop/ratrix trunk/classes/protocols/stimManagers/@flicker/ts001';
@@ -629,7 +629,7 @@ parameters.graduation = performanceCriterion([0.85, 0.8],int16([200, 500]));
 %     ts18, ts19, ts20, ts21, ts22});
 % stepNum=21;
 % p=protocol('gabor test2', {ts29, ts1, ts4, ts12, ts2, ts12, ts8, ts11,ts9,ts10,sweepContrast,ts23,ts24,ts27,ts30});
-stepNum=uint8(1);
+stepNum=uint8(4);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

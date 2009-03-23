@@ -1,8 +1,8 @@
 function s=orientedGabors(varargin)
 % ORIENTEDGABORS  class constructor.
-% s = orientedGabors([pixPerCycs],[targetOrientations],[distractorOrientations],mean,radius,contrast,thresh,yPositionPercent,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[waveform],[normalizedSizeMethod])
+% s = orientedGabors([pixPerCycs],[targetOrientations],[distractorOrientations],mean,radius,contrasts,thresh,yPositionPercent,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[waveform],[normalizedSizeMethod])
 % orientations in radians
-% mean, contrast, yPositionPercent normalized (0 <= value <= 1)
+% mean, contrasts, yPositionPercent normalized (0 <= value <= 1)
 % radius is the std dev of the enveloping gaussian, (by default in normalized units of the diagonal of the stim region)
 % thresh is in normalized luminance units, the value below which the stim should not appear
 
@@ -12,7 +12,7 @@ s.distractorOrientations = [];
 
 s.mean = 0;
 s.radius = 0;
-s.contrast = 0;
+s.contrasts = 0;
 s.thresh = 0;
 s.yPosPct = 0;
 
@@ -63,10 +63,10 @@ switch nargin
             error('radius must be >= 0')
         end
 
-        if isnumeric(varargin{6})
-            s.contrast=varargin{6};
+        if all(isnumeric(varargin{6}))
+            s.contrasts=varargin{6};
         else
-            error('contrast must be numeric')
+            error('contrasts must be numeric')
         end
 
         if varargin{7} >= 0

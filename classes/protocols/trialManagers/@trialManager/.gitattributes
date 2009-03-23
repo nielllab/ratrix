@@ -18,7 +18,6 @@
 /getRequestPorts.m -text
 /stopEyeTracking.m -text
 /getResponsePorts.m -text
-/setUpOrStopDatanet.m -text
 /calibrateEyeTracker.m -text
 /getAllowRepeats.m -text
 /cacheTextures.m -text

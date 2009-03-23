@@ -186,31 +186,6 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             drawnow;
             currentValveStates=verifyValvesClosed(station);
             
-            eyeTracker=getEyeTracker(trialManager);
-            if ~isempty(eyeTracker)
-                if isa(eyeTracker,'eyeTracker')
-                    if isTracking(eyeTracker)
-                        checkRecording(eyeTracker);
-                    else
-                        %figure out where to save eyeTracker data
-                        if ~isempty(trialManager.datanet)
-                            eyeDataPath = fullfile(getStorePath(trialManager.datanet), 'eyeRecords');
-                        else
-                            %right now its hard coded when no datanet
-                            %maybe put it with trial records in the permanent store?
-                            eyeDataPath = fullfile('\\132.239.158.179','datanet_storage', getID(subject), 'eyeRecords');
-                        end
-                        
-                        eyeTracker=initialize(eyeTracker,eyeDataPath)%,%station.window);
-                        eyeTracker=start(eyeTracker,trialRecords(trialInd).trialNumber);
-                        trialManager=setEyeTracker(trialManager,eyeTracker);
-                        updateTM=true;
-                    end
-                else
-                    error('not an eyeTracker')
-                end
-            end
-            
             pStr=[trialRecords(trialInd).protocolName '(' num2str(trialRecords(trialInd).protocolVersion.manualVersion) 'm:' num2str(trialRecords(trialInd).protocolVersion.autoVersion) 'a)' ' step:' num2str(trialRecords(trialInd).trainingStepNum) '/' num2str(trialRecords(trialInd).numStepsInProtocol) ];
             
             trialLabel=sprintf('session:%d trial:%d (%d)',sessionNumber,sum(trialRecords(trialInd).sessionNumber == [trialRecords.sessionNumber]),trialRecords(trialInd).trialNumber);
@@ -236,11 +211,11 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 station, ...
                 manualOn, ...
                 .1, ... % 10% should be ~1 ms of acceptable frametime error
-                text,rn,getID(subject),class(newSM),pStr,trialLabel,trialManager.eyeTracker,0,trialRecords);
+                text,rn,getID(subject),class(newSM),pStr,trialLabel,getEyeTracker(station),0,trialRecords);
 
-            if ~isempty(trialManager.eyeTracker)
-                [junk junk eyeDataVarNames]=getSample(trialManager.eyeTracker); %throws out a sample in order to get variable names... dirty
-                saveEyeData(trialManager.eyeTracker,eyeData,eyeDataFrameInds,eyeDataVarNames,gaze,trialRecords(trialInd).trialNumber,trialRecords(trialInd).date)
+            if ~isempty(getEyeTracker(station))
+                [junk junk eyeDataVarNames]=getSample(getEyeTracker(station)); %throws out a sample in order to get variable names... dirty
+                saveEyeData(getEyeTracker(station),eyeData,eyeDataFrameInds,eyeDataVarNames,gaze,trialRecords(trialInd).trialNumber,trialRecords(trialInd).date)
             end
             
             trialRecords(trialInd).trainingStepName = generateStepName(ts,ratrixSVNInfo,ptbSVNInfo);
@@ -289,24 +264,24 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 stopEarly = 1;
             end
             
-            if ~isempty(trialManager.datanet)
-                datanet_constants = getConstants(trialManager.datanet);
+            if ~isempty(getDatanet(station))
+                datanet_constants = getConstants(getDatanet(station));
                 
                 commands = [];
                 commands.cmd = datanet_constants.stimToDataCommands.S_SAVE_DATA_CMD;
                 commands.arg = sprintf('neuralRecords_%d-%s.mat',trialRecords(trialInd).trialNumber, datestr(trialRecords(trialInd).date, 30));
-                [junk, gotAck] = sendCommandAndWaitForAck(trialManager.datanet, getCon(trialManager.datanet), commands);
+                [junk, gotAck] = sendCommandAndWaitForAck(getDatanet(station), getCon(getDatanet(station)), commands);
                 
                 commands=[];
                 commands.cmd = datanet_constants.stimToDataCommands.S_SEND_EVENT_DATA_CMD;
-                [physiologyEvents, gotAck] = sendCommandAndWaitForAck(trialManager.datanet, getCon(trialManager.datanet), commands);
+                [physiologyEvents, gotAck] = sendCommandAndWaitForAck(getDatanet(station), getCon(getDatanet(station)), commands);
                 trialRecords(trialInd).physiologyEvents = physiologyEvents;
                 
                 commands=[];
                 commands.cmd = datanet_constants.stimToDataCommands.S_ACK_EVENT_DATA_CMD;
-                [junk, gotAck] = sendCommandAndWaitForAck(trialManager.datanet, getCon(trialManager.datanet), commands);
+                [junk, gotAck] = sendCommandAndWaitForAck(getDatanet(station), getCon(getDatanet(station)), commands);
                 
-                stim_path = fullfile(getStorePath(trialManager.datanet), 'stimRecords');
+                stim_path = fullfile(getStorePath(getDatanet(station)), 'stimRecords');
                 stim_filename = fullfile(stim_path, sprintf('stimRecords_%d-%s',trialRecords(trialInd).trialNumber,datestr(trialRecords(trialInd).date, 30)));
                 
                 %also maybe include something from the phased records?

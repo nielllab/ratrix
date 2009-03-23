@@ -16,7 +16,6 @@
 /calibrateEyeTracker.m -text
 /setReinforcementParam.m -text
 /generateStepName.m -text
-/setUpOrStopDatanet.m -text
 /getSVNCheckMode.m -text
 /getSVNRevNum.m -text
 /getSVNRevURL.m -text

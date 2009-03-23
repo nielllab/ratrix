@@ -288,10 +288,10 @@ startTime=0;
 logIt=true;
 lookForChange=false;
 
-if ~isempty(tm.datanet)
-    datanet_constants = getConstants(tm.datanet);
+if ~isempty(getDatanet(station))
+    datanet_constants = getConstants(getDatanet(station));
     commands.cmd = datanet_constants.stimToDataCommands.S_TIMESTAMP_CMD;
-    [trialData, gotAck] = sendCommandAndWaitForAck(tm.datanet, getCon(tm.datanet), commands);
+    [trialData, gotAck] = sendCommandAndWaitForAck(getDatanet(station), getCon(getDatanet(station)), commands);
 end
 
 % =========================================================================

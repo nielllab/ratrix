@@ -34,3 +34,5 @@
 /setMACaddress.m -text
 /flushPorts.m -text
 /getScreenNum.m -text
+/getDatanet.m -text
+/getEyeTracker.m -text

@@ -53,7 +53,9 @@ xPosPcts = [linspace(0,1,totalPorts+2)]';
 xPosPcts = xPosPcts(2:end-1);
 details.xPosPcts = xPosPcts([targetPorts'; distractorLocs']);
 
-params = [repmat([stimulus.radius details.pixPerCyc],numGabors,1) details.phases details.orientations repmat([stimulus.contrast stimulus.thresh],numGabors,1) details.xPosPcts repmat([stimulus.yPosPct],numGabors,1)];
+details.contrast=stimulus.contrasts(ceil(rand*length(stimulus.contrasts))); % pick a random contrast from list
+
+params = [repmat([stimulus.radius details.pixPerCyc],numGabors,1) details.phases details.orientations repmat([details.contrast stimulus.thresh],numGabors,1) details.xPosPcts repmat([stimulus.yPosPct],numGabors,1)];
 out(:,:,1)=computeGabors(params,stimulus.mean,min(width,getMaxWidth(stimulus)),min(height,getMaxHeight(stimulus)),stimulus.waveform, stimulus.normalizedSizeMethod,0);
 if iscell(type) && strcmp(type{1},'trigger')
     out(:,:,2)=stimulus.mean;

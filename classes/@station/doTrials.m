@@ -40,7 +40,9 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
                 FlushEvents('keyDown');
             end
             
-            subject = calibrateEyeTracker(subject);
+            if ~isempty(s.eyeTracker)
+                s.eyeTracker=calibrate(s.eyeTracker);
+            end
             %some calibration requires GUi's &  must happen before PTB
 
             if strcmp(s.rewardMethod,'localPump')
@@ -56,14 +58,13 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
 
             % 10/17/08 - start datanet (for neural data recording)
             % ==========================================================================
-            % this has to be done at the trialManager level, because the datanet is owned by the trialManager
-            % so we need to tunnel down and pass back subject->protocol->trainingStep->trialManager
-            params = Screen('Resolution', s.screenNum);
-            parameters = [];
-            parameters.refreshRate = params.hz;
-            parameters.subjectID = getID(subject);
-            subject = setUpOrStopDatanet(subject,'setup',parameters); % replace datanet_path with oracle lookup (hard coded for now in setup(datanet))
-
+            if ~isempty(s.datanet)
+                params = Screen('Resolution', s.screenNum);
+                parameters = [];
+                parameters.refreshRate = params.hz;
+                parameters.subjectID = getID(subject);
+                s.datanet=setup(s.datanet,parameters);
+            end
             % 10/29/08 - send a command to data listener to store local variables (resolution, refreshRate)
             % ==========================================================================
 
@@ -79,6 +80,33 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
             % Load a subset of the previous trial records based on the given filter
             [trialRecords localRecordsIndex sessionNumber] = getTrialRecordsForSubjectID(r,getID(subject),filter, trustOsRecordFiles);
 
+            % Initialize/start eyeTracker after getting trialRecords so we know the trialNumber
+            if ~isempty(s.eyeTracker)
+                if isa(s.eyeTracker,'eyeTracker')
+                    if isTracking(s.eyeTracker)
+                        checkRecording(s.eyeTracker);
+                    else
+                        %figure out where to save eyeTracker data
+                        if ~isempty(s.datanet)
+                            eyeDataPath = fullfile(getStorePath(s.datanet), 'eyeRecords');
+                        else
+                            %right now its hard coded when no datanet
+                            %maybe put it with trial records in the permanent store?
+                            eyeDataPath = fullfile('\\132.239.158.179','datanet_storage', getID(subject), 'eyeRecords');
+                        end
+
+                        if isempty(trialRecords)
+                            tn=1;
+                        else
+                            tn=trialRecords(end).trialNumber+1;
+                        end
+                        s.eyeTracker=initialize(s.eyeTracker,eyeDataPath);%,%station.window);
+                        s.eyeTracker=start(s.eyeTracker,tn);
+                    end
+                else
+                    error('not an eyeTracker')
+                end
+            end
 
             while keepWorking
                 trialNum=trialNum+1;
@@ -110,11 +138,15 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
 
             s=stopPTB(s);
 
-            stopEyeTracking(subject);
+            if ~isempty(s.eyeTracker)
+                s.eyeTracker=stop(s.eyeTracker);
+            end
 
             % 10/17/08 - stop datanet
             % ==========================================================================
-            subject = setUpOrStopDatanet(subject,'stop',[]);
+            if ~isempty(s.datanet)
+                s.datanet = stop(s.datanet);
+            end
             % ==========================================================================
 
             if strcmp(s.rewardMethod,'localPump')

@@ -21,6 +21,8 @@ function s=station(varargin)
 %       portSpec.sensorPins
 %       portSpec.framePulsePins
 %       portSpec.eyePuffPins
+% stationSpec.datanet
+% stationSpec.eyeTracker
 
 s.id=0;
 s.path='';
@@ -41,6 +43,9 @@ s.eyePuffPins=[];
 s.localPump=[];
 s.localPumpInited=false;
 
+s.datanet=[];
+s.eyeTracker=[];
+
 needToInit=false;
 usingPport=false;
 
@@ -55,7 +60,7 @@ switch nargin
         % if single argument of this class type, return it
         if isa(varargin{1},'station')
             s = varargin{1};
-        elseif isstruct(varargin{1}) && all(ismember({'id','path','screenNum','soundOn','rewardMethod','MACaddress','physicalLocation','portSpec'},fields(varargin{1})))
+        elseif isstruct(varargin{1}) && all(ismember({'id','path','screenNum','soundOn','rewardMethod','MACaddress','physicalLocation','portSpec','datanet','eyeTracker'},fields(varargin{1})))
             in=varargin{1};
             if isscalar(in.portSpec) && isinteger(in.portSpec)&& in.portSpec>0 %no parallel port
                 s.responseMethod='keyboard';
@@ -196,6 +201,8 @@ if needToInit
     s.rewardMethod=in.rewardMethod;
     s.MACaddress=in.MACaddress;
     s.physicalLocation=in.physicalLocation;
+    s.datanet=in.datanet;
+    s.eyeTracker=in.eyeTracker;
 
     if strcmp(class(s.id),'char')
         parse = textscan(s.id, '%d%s','expChars','');
@@ -262,6 +269,20 @@ if needToInit
     else
         s.physicalLocation
         error('location must be vector of 3 integers [rackID shelf position], upper left is 1,1')
+    end
+    
+    if isempty(s.datanet) || isa(s.datanet,'datanet')
+        %pass
+    else
+        s.datanet
+        error('datanet must be empty or a datanet object');
+    end
+    
+    if isempty(s.eyeTracker) || isa(s.eyeTracker,'eyeTracker')
+        %pass
+    else
+        s.eyeTracker
+        error('eyeTracker must be empty or a datanet object');
     end
 
     s = class(s,'station');

@@ -1,6 +1,6 @@
 function t=trialManager(varargin)
 % TRIALMANAGER  class constructor.  ABSTRACT CLASS-- DO NOT INSTANTIATE
-% t=trialManager(soundManager,reinforcementManager,eyeTracker,eyeController,customDescription,datanet,
+% t=trialManager(soundManager,reinforcementManager,eyeController,customDescription,
 %   frameDropCorner, dropFrames, displayMethod, requestPorts)
 %
 % 10/8/08 - this is the new integrated trialManager that handles all stims in a phased way - uses phased doTrial and stimOGL
@@ -8,9 +8,7 @@ function t=trialManager(varargin)
 % soundMgr - the soundManager object
 % reinforcementManager - the reinforcementManager object
 % description - a string description of this trialManager
-% eyeTracker - the eyeTracker object
 % eyeController - the eyeController object
-% datanet - the datanet object
 % frameDropCorner - a struct containing frameDropCorner params
 % dropFrames - whether or not to skip dropped frames
 % displayMethod - 'LED' or 'ptb'
@@ -21,9 +19,7 @@ requiredSoundNames = {'correctSound','keepGoingSound','trySomethingElseSound','w
 t.soundMgr=soundManager();
 t.reinforcementManager=reinforcementManager();
 t.description='';
-t.eyeTracker=[];
 t.eyeController=[];
-t.datanet=[];
 t.frameDropCorner={};
 t.dropFrames=false;
 t.displayMethod='';
@@ -42,7 +38,7 @@ switch nargin
         else
             error('Input argument is not a trialManager object')
         end
-    case {10 11}
+    case {8 9}
         
         % soundManager
         if isa(varargin{1},'soundManager') && all(ismember(requiredSoundNames, getSoundNames(varargin{1})))
@@ -58,24 +54,11 @@ switch nargin
             error('must be a reinforcementManager')
         end
         
-        % eyeTracker
-        t.eyeTracker=varargin{3};
-        
         % eyeController
-        t.eyeController=varargin{4};
+        t.eyeController=varargin{3};
         
         % customDescription
-        customDescription=varargin{5};
-        
-        % datanet
-        t.datanet=varargin{6};
-        
-        
-        if isa(t.eyeTracker,'eyeTracker') || isempty(t.eyeTracker)
-            %pass
-        else
-            error('must be an eyeTracker or empty')
-        end
+        customDescription=varargin{4};
         
         if isempty(t.eyeController)
             %pass
@@ -91,13 +74,13 @@ switch nargin
         end
         
         % frameDropCOrner
-        t.frameDropCorner=varargin{7};
+        t.frameDropCorner=varargin{5};
         
         % dropFrames
-        t.dropFrames=varargin{8};
+        t.dropFrames=varargin{6};
         
         % displayMethod
-        t.displayMethod=varargin{9};
+        t.displayMethod=varargin{7};
         
         if isempty(t.dropFrames)
             t.dropFrames=false;
@@ -134,7 +117,7 @@ switch nargin
         end
         
         % requestPorts
-        t.requestPorts=varargin{10};
+        t.requestPorts=varargin{8};
         if ischar(t.requestPorts) && (strcmp(t.requestPorts,'none') || strcmp(t.requestPorts,'all') || strcmp(t.requestPorts,'center'))
             %pass
         else
@@ -142,9 +125,9 @@ switch nargin
         end
         
         % showText
-        if nargin==11
-            if islogical(varargin{11})
-                t.showText=varargin{11};
+        if nargin==9
+            if islogical(varargin{9})
+                t.showText=varargin{9};
             else
                 error('showText must be logical');
             end

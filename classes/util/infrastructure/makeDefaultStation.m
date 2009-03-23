@@ -87,6 +87,8 @@ stationSpec.portSpec.valveSpec                = int8([4,3,2]);
 stationSpec.portSpec.sensorPins               = int8([13,10,12]);
 stationSpec.portSpec.framePulsePins           = int8(9);
 stationSpec.portSpec.eyePuffPins              = int8(6);
+stationSpec.datanet                           = [];
+stationSpec.eyeTracker                        = [];
 
 if ismac
     stationSpec.portSpec = int8(3);

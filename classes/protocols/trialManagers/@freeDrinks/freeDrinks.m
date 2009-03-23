@@ -1,7 +1,7 @@
 function t=freeDrinks(varargin)
 % FREEDRINKS  class constructor.
 % t=freeDrinks(soundManager,freeDrinkLikelihood, reinforcementManager, 
-%   [eyeTracker],[eyeController],[datanet],[frameDropCorner],[dropFrames],[displayMethod],[requestPorts])
+%   [eyeController],[frameDropCorner],[dropFrames],[displayMethod],[requestPorts])
 
 switch nargin
     case 0
@@ -17,7 +17,7 @@ switch nargin
         else
             error('Input argument is not a freeDrinks object')
         end
-    case {3 4 5 6 7 8 9 10}
+    case {3 4 5 6 7 8}
 
         % freeDrinkLikelihood
         if varargin{2}>=0
@@ -29,7 +29,7 @@ switch nargin
         d=sprintf('free drinks\n\t\t\tfreeDrinkLikelihood: %g',t.freeDrinkLikelihood);
 
         
-        for i=4:10
+        for i=4:8
             if i <= nargin
                 args{i}=varargin{i};
             else
@@ -38,11 +38,11 @@ switch nargin
         end
         
         % requestPorts
-        if isempty(args{10})
-            args{10}='none'; % default freeDrinks requestPorts should be 'none'
+        if isempty(args{8})
+            args{8}='none'; % default autopilot requestPorts should be 'none'
         end
-        
-        a=trialManager(varargin{1},varargin{3},args{4},args{5},d,args{6},args{7},args{8},args{9},args{10});
+
+        a=trialManager(varargin{1},varargin{3},args{4},d,args{5},args{6},args{7},args{8});
         
         t = class(t,'freeDrinks',a);
     otherwise

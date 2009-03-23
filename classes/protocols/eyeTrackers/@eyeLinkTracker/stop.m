@@ -49,3 +49,5 @@ end
 Eyelink('Shutdown')
 
 et=setIsTracking(et, false);
+et=setEyeUsed(et, []);
+et=clearEyeDataPath(et);

@@ -2,7 +2,6 @@
 /stimOGL_OLD.m -text
 /testStimOGL.m -text
 /runRealTimeLoop.m -text
-/getEyeTracker.m -text
 /handleServerCommands.m -text
 /flipFrameAndDoPulse.m -text
 /handleKeyboard.m -text

@@ -7,7 +7,6 @@
 /setReinforcementManager.m -text
 /getReinforcementManager.m -text
 /setEyeTracker.m -text
-/getMsFlushDuration.m -text
 /getDescription.m -text
 /setSoundManager.m -text
 /getMsMinimumClearDuration.m -text

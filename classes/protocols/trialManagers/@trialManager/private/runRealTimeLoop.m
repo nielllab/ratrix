@@ -789,16 +789,17 @@ while ~done && ~quit;
                     setAndCheckValves(station,doValves,currentValveStates,phaseRecords(phaseNum).valveErrorDetails,GetSecs,'doValves');
             case 'localPump'
                 if any(doValves)
-                    primeMLsPerSec=1.0;
                     if window<=0 || strcmp(tm.displayMethod,'LED')
                         ifi
                         error('ifi will not be appropriate here when using LED')
                     else
+                        error('edf asks when this condition occurs?  shouldn''t all pump reward happen below in rStart?  primeMLsPerSec looks concerningly arbitrary.  is it for k+r (pump priming)?  in that case we need not be concerned about blocking/framedrops -- and the trial should be aborted with a flag that this happened.')
                         % 3/3/09 - error for now if not in 'static' mode b/c doReward blocks real-time loop
                         stimType=getStimType(spec);
                         if ~ischar(stimType) || ~strcmp(stimType,'static')
                             error('localPump only supported with a static stimulus until blocking is resolved');
                         end
+                        primeMLsPerSec=1.0;
                         station=doReward(station,primeMLsPerSec*ifi,doValves,true);
                     end
                 end

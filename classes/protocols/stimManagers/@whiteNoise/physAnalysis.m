@@ -141,13 +141,14 @@ analysisdata.STV = STV;
 analysisdata.numSpikes = numSpikes;
 analysisdata.trialNumber=parameters.trialNumber;
 % if the cumulative values don't exist (first analysis)
-if ~isfield(analysisdata, 'cumulativeSTA')
+if ~isfield(analysisdata, 'cumulativeSTA') %first trial through
     analysisdata.cumulativeSTA = STA;
     analysisdata.cumulativeSTV = STV;
     analysisdata.cumulativeNumSpikes = analysisdata.numSpikes;
     analysisdata.cumulativeTrialNumbers=parameters.trialNumber;
     analysisdata.singleTrialTemporalRecord=[];
-else
+elseif ~ismember(parameters.trialNumber,analysisdata.cumulativeTrialNumbers) %only for new trials
+    
     % set STA and STV to weighted probability mass of num events (==spike count)
     analysisdata.cumulativeSTA = (analysisdata.cumulativeSTA*analysisdata.cumulativeNumSpikes + STA*analysisdata.numSpikes) / ...
         (analysisdata.cumulativeNumSpikes + analysisdata.numSpikes);
@@ -156,11 +157,15 @@ else
     %then increment the cumulative count
     analysisdata.cumulativeNumSpikes = analysisdata.cumulativeNumSpikes + analysisdata.numSpikes;
     analysisdata.cumulativeTrialNumbers(end+1)=parameters.trialNumber;
+    
+    %this trial..history of bright ones saved
+    analysisdata.singleTrialTemporalRecord(end+1,:)=getTemporalSignal(STA,STV,numSpikes,'bright');
+    
+else % repeat sweep through same trial
+    %do nothing
 end
 
 
-%this trial..history of bright ones saved
-analysisdata.singleTrialTemporalRecord(end+1,:)=getTemporalSignal(STA,STV,numSpikes,'bright');
 
 % cumulative
 [brightSignal brightCI brightInd]=getTemporalSignal(analysisdata.cumulativeSTA,analysisdata.cumulativeSTV,analysisdata.cumulativeNumSpikes,'bright');

@@ -7,9 +7,15 @@ function [analysisdata] = physAnalysis(stimManager,spikeData,stimulusDetails,plo
 % plotParameters - currently not used
 
 
+%CHOOSE CLUSTER
 spikes=spikeData.spikes; %all waveforms
 waveInds=find(spikes); % location of all waveforms
-thisCluster=spikeData.spikeDetails.processedClusters==1;
+if isstruct(spikeData.spikeDetails) && ismember({'processedClusters'},fields(spikeData.spikeDetails)) 
+    thisCluster=spikeData.spikeDetails.processedClusters==1;
+else
+    thisCluster=logical(ones(size(waveInds)));
+    %use all (photodiode uses this)
+end
 spikes(waveInds(~thisCluster))=0; % set all the non-spike waveforms to be zero;
 %spikes(waveInds(spikeData.assignedClusters~=1))=0; this should select the noise only!  just for testing
 
@@ -248,7 +254,8 @@ for i=1:length(vals);
 end; 
 
 colors=jet(numTypes);
-figure;
+figure; % always new
+set(gcf,'position',[100 400 560 620])
 subplot(3,2,1); hold on; %p=plot([1:numPhaseBins]-.5,rate')
 plot([0 numPhaseBins], [rate(1) rate(1)],'color',[1 1 1]); % to save tight axis chop
 x=[1:numPhaseBins]-.5;

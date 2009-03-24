@@ -99,7 +99,6 @@ end
 
 while ~quit
     % get a list of the available neuralRecords
-    waitsecs(0.5);
     d=dir(neuralRecordsPath);
     disp('waited after dir');
     goodFiles = [];
@@ -120,6 +119,7 @@ while ~quit
     %then remove all files if out of trial range
     goodFiles=goodFiles([goodFiles.trialNum]>=trialRange(1) & [goodFiles.trialNum]<=trialRange(2));
     
+    waitsecs(2); %slow down: gives cpu time, also allows stim to get saved
     
     % neuralRecord_1-20081023T155924.mat
     % for each neuralRecord here, try to load the corresponding stimRecord
@@ -442,6 +442,10 @@ catch ex
             saved=goodFiles(end).timestamp
             started=datenumFor30(timestamp)
             keyboard
+            
+            filename=sprintf('eyeRecords_%d_%s.mat',trialNum,goodFiles(end).timestamp);
+            fullfilepath=fullfile(eyeRecordPath,filename);
+            eyeData=load(fullfilepath);
         end
         else
             eyeData=[]; % there were no records, eye tracker might have been off

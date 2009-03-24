@@ -132,8 +132,13 @@ end
 
 % spike triggered average
 STA=mean(triggers,4);    %the mean over instances of the trigger
-STV=var(triggers,0,4);  %the variance over instances of the trigger (not covariance!)
-% this is not the "unbiased variance" but the second moment of the sample about its mean
+try
+    STV=var(triggers,0,4);  %the variance over instances of the trigger (not covariance!)
+    % this is not the "unbiased variance" but the second moment of the sample about its mean
+catch ex
+    getReport(ex); % common place to run out of memory
+    STV=nan(size(STA)); % thus no confidence will be reported
+end
 
 % fill in analysisdata with new values
 analysisdata.STA = STA;
@@ -141,14 +146,15 @@ analysisdata.STV = STV;
 analysisdata.numSpikes = numSpikes;
 analysisdata.trialNumber=parameters.trialNumber;
 % if the cumulative values don't exist (first analysis)
-if ~isfield(analysisdata, 'cumulativeSTA') %first trial through
+if ~isfield(analysisdata, 'cumulativeSTA')  || ~all(size(STA)==size(analysisdata.cumulativeSTA)) %first trial through with these parameters
     analysisdata.cumulativeSTA = STA;
     analysisdata.cumulativeSTV = STV;
     analysisdata.cumulativeNumSpikes = analysisdata.numSpikes;
     analysisdata.cumulativeTrialNumbers=parameters.trialNumber;
     analysisdata.singleTrialTemporalRecord=[];
+    addSingleTrial=true;
 elseif ~ismember(parameters.trialNumber,analysisdata.cumulativeTrialNumbers) %only for new trials
-    
+
     % set STA and STV to weighted probability mass of num events (==spike count)
     analysisdata.cumulativeSTA = (analysisdata.cumulativeSTA*analysisdata.cumulativeNumSpikes + STA*analysisdata.numSpikes) / ...
         (analysisdata.cumulativeNumSpikes + analysisdata.numSpikes);
@@ -158,14 +164,17 @@ elseif ~ismember(parameters.trialNumber,analysisdata.cumulativeTrialNumbers) %on
     analysisdata.cumulativeNumSpikes = analysisdata.cumulativeNumSpikes + analysisdata.numSpikes;
     analysisdata.cumulativeTrialNumbers(end+1)=parameters.trialNumber;
     
-    %this trial..history of bright ones saved
-    analysisdata.singleTrialTemporalRecord(end+1,:)=getTemporalSignal(STA,STV,numSpikes,'bright');
+    addSingleTrial=true;
     
 else % repeat sweep through same trial
     %do nothing
+    addSingleTrial=false;
 end
 
-
+if  addSingleTrial
+    %this trial..history of bright ones saved
+    analysisdata.singleTrialTemporalRecord(end+1,:)=getTemporalSignal(STA,STV,numSpikes,'bright');
+end
 
 % cumulative
 [brightSignal brightCI brightInd]=getTemporalSignal(analysisdata.cumulativeSTA,analysisdata.cumulativeSTV,analysisdata.cumulativeNumSpikes,'bright');
@@ -175,6 +184,7 @@ rng=[min(analysisdata.cumulativeSTA(:)) max(analysisdata.cumulativeSTA(:))];
 
 % 11/25/08 - update GUI
 figure(plotParameters.handle); % make the figure current and then plot into it
+set(gcf,'position',[100 400 560 620])
 % size(analysisdata.cumulativeSTA)
 
 doSpatial=~(size(STA,1)==1 & size(STA,2)==1); % if spatial dimentions exist
@@ -200,10 +210,13 @@ end
 
 timeMs=linspace(-timeWindowMs(1),timeWindowMs(2),size(STA,3));
 ns=length(timeMs);
-
 hold off; plot(timeWindowFrames([1 1])+1, [0 255],'k');
 hold on;  plot([1 ns],meanLuminance([1 1])*255,'k')
-plot([1:ns], analysisdata.singleTrialTemporalRecord, 'color',[.8 .8 1])
+try
+    plot([1:ns], analysisdata.singleTrialTemporalRecord, 'color',[.8 .8 1])
+catch
+    keyboard
+end
 fh=fill([1:ns fliplr([1:ns])]',[darkCI(:,1); flipud(darkCI(:,2))],'r'); set(fh,'edgeAlpha',0,'faceAlpha',.5)
 fh=fill([1:ns fliplr([1:ns])]',[brightCI(:,1); flipud(brightCI(:,2))],'b'); set(fh,'edgeAlpha',0,'faceAlpha',.5)
 plot([1:ns], darkSignal(:)','r')

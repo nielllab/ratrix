@@ -29,12 +29,15 @@ if strcmp(selection.type,'all')
                 end
                 closeConn(conn);
             end
+            % 3/23/09 - moved loading compiledRecord here from doAnalysisPlot so we dont repeat the load 4x
+            records=getRecords(compiledFileDir,subIDs{i});
+            
             fs(end+1) = figure('Name', char(subIDs(i)),'NumberTitle','off');
             for j = 1:numRows
                 for k = 1:numCols
                     subplot(numRows,numCols,(j-1)*numCols+k);
                     hold on
-                    doAnalysisPlot(compiledFileDir, subIDs{i}, char(toBePlotted((j-1)*numCols+k)), selection.filter, selection.filterVal, selection.filterParam,includeKeyboard);
+                    doAnalysisPlot(records, subIDs{i}, char(toBePlotted((j-1)*numCols+k)), selection.filter, selection.filterVal, selection.filterParam,includeKeyboard);
                     title(sprintf('%s - %s: %s',char(toBePlotted((j-1)*numCols+k)), char(subIDs(i)), datestr(now,0)));
                 end
             end
@@ -74,8 +77,10 @@ else
                         end
                         closeConn(conn);
                     end
+                    % 3/23/09 - moved loading compiledRecord here from doAnalysisPlot so we dont repeat the load 4x
+                    records=getRecords(compiledFileDir,selection.subjects{i,j,k});
                     hold on
-                    doAnalysisPlot(compiledFileDir,selection.subjects{i,j,k},selection.type, selection.filter, selection.filterVal, selection.filterParam,includeKeyboard);
+                    doAnalysisPlot(records,selection.subjects{i,j,k},selection.type, selection.filter, selection.filterVal, selection.filterParam,includeKeyboard);
                     title(gca,sprintf('%s - %s: %s',selection.type,selection.subjects{i,j,k},datestr(now,0)))
                 end
             end
@@ -107,6 +112,30 @@ function [l b] = getArrangement(i)
     l = ceil(sqrt(i));
     b = l;
 end
+
+
+function records=getRecords(compiledFileDir,subjectID)
+
+compiledFile=fullfile(compiledFileDir,[subjectID '.compiledTrialRecords.*.mat']);
+d=dir(compiledFile);
+records=[];
+for i=1:length(d)
+    if ~d(i).isdir
+        [rng num er]=sscanf(d(i).name,[subjectID '.compiledTrialRecords.%d-%d.mat'],2);
+        if num~=2
+            d(i).name
+            er
+        else
+            fprintf('loading file')
+            t=GetSecs();
+            ctr=load(fullfile(compiledFileDir,d(i).name));
+            fprintf('\ttime elapsed: %g\n',GetSecs-t)
+            records=ctr.compiledTrialRecords;
+        end
+    end
+end
+
+end % end function
 
 %
 % subjectID='159';

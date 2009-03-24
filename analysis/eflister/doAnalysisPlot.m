@@ -1,23 +1,23 @@
-function doAnalysisPlot(compiledFileDir,subjectID,type,filter,filterVal,filterParam,includeKeyboard)
+function doAnalysisPlot(records,subjectID,type,filter,filterVal,filterParam,includeKeyboard)
 
-compiledFile=fullfile(compiledFileDir,[subjectID '.compiledTrialRecords.*.mat']);
-d=dir(compiledFile);
-records=[];
-for i=1:length(d)
-    if ~d(i).isdir
-        [rng num er]=sscanf(d(i).name,[subjectID '.compiledTrialRecords.%d-%d.mat'],2);
-        if num~=2
-            d(i).name
-            er
-        else
-            fprintf('loading file')
-            t=GetSecs();
-            ctr=load(fullfile(compiledFileDir,d(i).name));
-            fprintf('\ttime elapsed: %g\n',GetSecs-t)
-            records=ctr.compiledTrialRecords;
-        end
-    end
-end
+% compiledFile=fullfile(compiledFileDir,[subjectID '.compiledTrialRecords.*.mat']);
+% d=dir(compiledFile);
+% records=[];
+% for i=1:length(d)
+%     if ~d(i).isdir
+%         [rng num er]=sscanf(d(i).name,[subjectID '.compiledTrialRecords.%d-%d.mat'],2);
+%         if num~=2
+%             d(i).name
+%             er
+%         else
+%             fprintf('loading file')
+%             t=GetSecs();
+%             ctr=load(fullfile(compiledFileDir,d(i).name));
+%             fprintf('\ttime elapsed: %g\n',GetSecs-t)
+%             records=ctr.compiledTrialRecords;
+%         end
+%     end
+% end
 % 
 % switch filter
 %     case 'all'

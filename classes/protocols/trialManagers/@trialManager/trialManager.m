@@ -23,7 +23,7 @@ t.eyeController=[];
 t.frameDropCorner={};
 t.dropFrames=false;
 t.displayMethod='';
-t.requestPorts='none'; % either 'none','center',or 'all'
+t.requestPorts='center'; % either 'none','center',or 'all'
 t.showText=true;
 
 switch nargin

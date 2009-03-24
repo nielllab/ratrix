@@ -16,69 +16,11 @@ if isa(r,'ratrix') && isa(station,'station') && (isempty(rn) || isa(rn,'rnet'))
             newTsNum=[];
             [garbage currentTsNum]=getProtocolAndStep(subject);
             validTs=[1:getNumTrainingSteps(p)];
-            entry='';
-            priorityLevel=MaxPriority('GetSecs','KbCheck');
-            Priority(priorityLevel);
-            ListenChar(2);
-            
-            KbConstants.allKeys=KbName('KeyNames');
-            KbConstants.allKeys=lower(cellfun(@char,KbConstants.allKeys,'UniformOutput',false));
-            KbConstants.asciiZero=double('0');
-            KbConstants.numKeys={};
-            for i=1:10
-                KbConstants.numKeys{i}=find(strncmp(char(KbConstants.asciiZero+i-1),KbConstants.allKeys,1));
-            end
-            KbConstants.enterKey=KbName('RETURN');
-%             stopPTB(station);
-%             startPTB(station);
-            Screen('Preference', 'TextRenderer', 0);  % consider moving to station.startPTB
-            Screen('Preference', 'TextAntiAliasing', 0); % consider moving to station.startPTB
-            window=getPTBWindow(station);
-            allowKeyboard=true;
-            Screen('FillRect',window,200*ones(1,3));
-            while isempty(newTsNum)
-                
-                text=sprintf('Enter new trainingStepNum between %d and %d (current trainingStepNum is %d)',validTs(1),validTs(end),currentTsNum);
-                Screen('DrawText',window,text,10,20,100*ones(1,3));
-                text=sprintf('New trainingStepNum: %s',entry);
-                Screen('DrawText',window,text,10,40,100*ones(1,3));
-                Screen('Flip',window);
-                
-                % read from keyboard
-                [keyIsDown,secs,keyCode]=KbCheck; % do this check outside of function to save function call overhead
-                if keyIsDown
-                    numsDown=false(1,length(KbConstants.numKeys));
-                    for nNum=1:length(KbConstants.numKeys)
-                        numsDown(nNum)=any(keyCode(KbConstants.numKeys{nNum}));
-                    end
-                    enterDown=any(keyCode(KbConstants.enterKey));
-                                        
-                    if any(numsDown) && allowKeyboard
-                        newNum=find(numsDown)-1;
-                        if length(newNum)==1
-                            entry=[entry char(newNum+KbConstants.asciiZero)];
-                        else
-                            % how did you have multiple number inputs? - we should ignore this
-                        end
-                    elseif enterDown && allowKeyboard
-                        if ~isempty(str2num(entry)) && ~isempty(find(validTs==str2num(entry)))
-                            newTsNum=uint16(str2num(entry));
-                            trialRecords(end).result=[trialRecords(end).result ' ' entry];
-                        else
-                            text=sprintf('Invalid trainingStepNum! Please try again.');
-                            Screen('DrawText',window,text,10,60,100*ones(1,3));
-                            Screen('Flip',window);
-                            entry='';
-                            WaitSecs(3);
-                        end
-                    end
-                    allowKeyboard=false;
-                else
-                    allowKeyboard=true;
-                end
-                
-            end % end while loop
-            
+            validInputs{1}=validTs;
+            type='manual ts';
+            typeParams.currentTsNum=currentTsNum;
+            newTsNum = userPrompt(getPTBWindow(station),validInputs,type,typeParams);
+            trialRecords(end).result=[trialRecords(end).result ' ' num2str(newTsNum)];
             if newTsNum~=currentTsNum
                 [subject r]=setStepNum(subject,newTsNum,r,sprintf('manually setting to %d',newTsNum),'ratrix');
             end

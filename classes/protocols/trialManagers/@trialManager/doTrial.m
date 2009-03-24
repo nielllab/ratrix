@@ -250,7 +250,15 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 % like an rnet error, in which case we should not continue trials
                 % we need to flag any error with a special response so we know what's going on and don't continue
             elseif ischar(trialRecords(trialInd).result) && strcmp(trialRecords(trialInd).result, 'manual flushPorts')
-                flushPorts(station,.05,5,.5);
+                type='flushPorts';
+                typeParams=[];
+                validInputs={};
+                validInputs{1}=1:getNumPorts(station);
+                validInputs{2}=[1 100];
+                validInputs{3}=[0 10];
+                validInputs{4}=[0 60];
+                fpVars = userPrompt(getPTBWindow(station),validInputs,type,typeParams);
+                flushPorts(station,fpVars(3),fpVars(2),fpVars(4),fpVars(1));
                 stopEarly=false; % reset stopEarly/quit to be false, so continue doing trials
             elseif ischar(trialRecords(trialInd).result) && (strcmp(trialRecords(trialInd).result, 'nominal') || ...
                     strcmp(trialRecords(trialInd).result, 'multiple ports'))

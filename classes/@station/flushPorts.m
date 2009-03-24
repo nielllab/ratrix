@@ -1,4 +1,4 @@
-function times=flushPorts(st,dursSec,numSquirts,ifi)
+function times=flushPorts(st,dursSec,numSquirts,ifi,ports)
 
 if ~exist('dursSec','var')
     dursSec=2;  
@@ -45,7 +45,7 @@ switch getRewardMethod(st)
     case 'localTimed'
         % localTimed method
         for i=1:numSquirts
-            for j=1:numPorts
+            for j=ports
                 valvesUsed=zeros(1,numPorts);
                 valvesUsed(j)=1;
 
@@ -63,7 +63,7 @@ switch getRewardMethod(st)
     case 'localPump'
         % do localPump stuff
         for i=1:numSquirts
-            for j=1:numPorts
+            for j=ports
                 valvesUsed=zeros(1,numPorts);
                 valvesUsed(j)=1;
                 times(j,i)=GetSecs();

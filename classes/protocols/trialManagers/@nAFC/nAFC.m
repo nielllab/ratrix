@@ -40,7 +40,7 @@ switch nargin
         
         % requestPorts
         if isempty(args{8})
-            args{8}='none'; % default autopilot requestPorts should be 'none'
+            args{8}='center'; % default nAFC requestPorts should be 'center'
         end
 
         a=trialManager(varargin{1},varargin{3},args{4},d,args{5},args{6},args{7},args{8});

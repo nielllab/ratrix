@@ -5,12 +5,12 @@ function RFe = RFestimator(varargin)
 %
 % centerParams - a cell array of {stimClass,method,params} used by getCenter
 % boundaryParams - a cell array of {stimClass,method,params} used by getBoundary
-% 
+%
 % stimClass - the type of stimulus used to induce a RF (eg 'whiteNoise')
 % method - method for estimating the receptive field (eg 'centerOfMass', 'significantCoherence', 'fitGaussian')
 % params - method-specific estimation parameters as a cell array
 % eyeParams - cell array of eye parameters, empty for now
-% dataSource - the path to the analysis files (always set to datanet_storage/) - this should not include ...demo1/analysis 
+% dataSource - the path to the analysis files (always set to datanet_storage/) - this should not include ...demo1/analysis
 %(pmm: b/c we have to adapt to different subjects!) (fan:because we look there in the call to getNeuralAnalysis)
 % dateRange - range of dates within which to look for analysis results
 %
@@ -18,7 +18,7 @@ function RFe = RFestimator(varargin)
 % always gets the most recent analysis result within RFestimator.dateRange
 % phys setup will choose dateRange=[floor(now) Inf] to specify today
 % centerDataSource='whiteNoise'; (%could be other stuff)
-% 
+%
 % centerParameters= {dataSource,method,params}
 % ie. {'whiteNoise','centerOfMass',{
 % alphaSignificantPixels medianFilter}}
@@ -28,16 +28,16 @@ function RFe = RFestimator(varargin)
 % or {'whiteNoise','fitGaussian',{medianFilter nStd2Bound}}
 % eyeParameters= []; % for now
 % methods: getCenter and getOuterRadiusBound
-% if fitGaussian, use the tools i started to prototype in fitRF=0 in the ifFeature calcStim, but these are not the final methods at all. lets review choices once its functional.  feel free to make changes & explain why. 
-% 
-% 
+% if fitGaussian, use the tools i started to prototype in fitRF=0 in the ifFeature calcStim, but these are not the final methods at all. lets review choices once its functional.  feel free to make changes & explain why.
+%
+%
 % if there is no RF estimate available in that range, error.
 % %how can we do this more gracefully...? its a costly and plausible mistake...
-% 
+%
 % set gratings to accept RFestimator object instead of  position
 % (then call getCenter on the object once on first trial to cache the values)
 % function: sweep multiple anuli over center of RF
-% 
+%
 % set gratings to accept RFestimator object instead of annulus radius, and call getOuterRadiusBound to cache it
 
 RFe.centerParams=[];
@@ -76,21 +76,91 @@ switch nargin
         if ~ischar(RFe.centerParams{1})
             error('centerParams stimClass must be a string');
         end
-        if ~ischar(RFe.centerParams{2}) || ~ismember(RFe.centerParams{2},{'centerOfMass','significantCoherence','ttestF1','fitGaussian'})
-            error('centerParams method must be one of ''centerOfMass'',''significantCoherence'',''ttestF1'', or ''fitGaussian''');
-        end
         if ~iscell(RFe.centerParams{3}) && ~isempty(RFe.centerParams{3})
             error('centerParams params must be a cell array or empty');
+        else
+            p=RFe.centerParams{3}; % dynamic params
         end
+        
+        switch RFe.centerParams{1}
+            case 'whiteNoise'
+                switch RFe.centerParams{2}
+                    case 'centerOfMass'
+                        if ~isempty(p)
+                            error('no parameters for centerOfMass, use empty set')
+                        end
+                    case 'fitGaussian'
+                        if ~(length(p)==1 & p{1}>0 & p{1}<10)
+                            error('first parameter must be a std threshold between 0 and 10')
+                        end
+                    case 'fitGaussianSigEnvelope'
+                        isMedianFilter=( (all(size(p{3})==[3 3]) && islogical(p{3})) || (ischar(p{3}) && ismember(p{3},{'box','cross'})));
+                        if ~(length(p)==3 & p{1}>0 & p{1}<10 & p{2}>0 & p{2}<1 & isMedianFilter)
+                            p
+                            std=p{1}
+                            alpha=p{2}
+                            medianFilter=p{3}
+                            isMedianFilter
+                            error('first parameter must be a std threshold between 0 and 10, second parameter must be an alpha between 0 and 1, third parameter must be a median filter: either a size 3 logical or ''box'' or ''cross''')
+                        end
+                    otherwise
+                        error(sprintf('%s is a bad method for %s',RFe.centerParams{2},RFe.centerParams{1}))
+                end
+            case 'gratings'
+                error('no gratings center method exists')
+        end
+        
+        
         % check boundaryParams
         if ~ischar(RFe.boundaryParams{1})
             error('boundaryParams stimClass must be a string');
         end
-        if ~ischar(RFe.boundaryParams{2}) || ~ismember(RFe.boundaryParams{2},{'centerOfMass','significantCoherence','ttestF1','fitGaussian'})
-            error('boundaryParams method must be one of ''centerOfMass'',''significantCoherence'',''ttestF1'', or ''fitGaussian''');
-        end
         if ~iscell(RFe.boundaryParams{3}) && ~isempty(RFe.boundaryParams{3})
             error('boundaryParams params must be a cell array or empty');
+        else
+            p=RFe.boundaryParams{3}; % dynamic params
+        end
+        
+        switch RFe.boundaryParams{1}
+            case 'whiteNoise'
+                switch RFe.boundaryParams{2}
+                    case 'centerOfMass'
+                        error('not allowed for the boundary method')
+                    case 'fitGaussian'
+                        if ~(length(p)==1 & p{1}>0 & p{1}<10)
+                            error('first parameter must be a std threshold between 0 and 10')
+                        end
+                    case 'fitGaussianSigEnvelope'
+                        isMedianFilter=( (all(size(p{3})==[3 3]) && islogical(p{3})) || (ischar(p{3}) && ismember(p{3},{'box','cross'})))
+                        if ~(length(p)==3 & p{1}>0 & p{1}<10 & p{2}>0 & p{2}<1 & isMedianFilter)
+                            p
+                            std=p{1}
+                            alpha=p{2}
+                            medianFilter=p{3}
+                            isMedianFilter
+                            error('first parameter must be a std threshold between 0 and 10, second parameter must be an alpha between 0 and 10, third parameter must be a median filter: either a size 3 logical or ''box'' or ''cross''')
+                        end
+                    otherwise
+                        error(sprintf('%s is a bad method for %s',RFe.centerParams{2},RFe.centerParams{1}))
+                end
+            case 'gratings'
+                switch RFe.boundaryParams{2}
+                    case 'significantCoherence'
+                        error('not yet')
+                    case 'ttestF1'
+                        if ~(p{1}>0 && p{1}<1)
+                            p{1}
+                            error('must be alpha between 0 and 1')
+                        end
+                        switch p{2}
+                            case 'fft'
+                            otherwise
+                                p{2}
+                                error('must choose frequency estimation method')
+                        end
+                    otherwise
+                        error(sprintf('%s is a bad method for %s',RFe.centerParams{2},RFe.centerParams{1}))
+                end
         end
         
         % eyeParams
@@ -99,7 +169,7 @@ switch nargin
         else
             error('eyeParams must be a cell array or empty');
         end
-        % dataSource
+        
         if ~isempty(varargin{4}) && ischar(varargin{4}) && isdir(varargin{4})
             RFe.dataSource=varargin{4};
         else
@@ -119,5 +189,4 @@ switch nargin
 end
 
 end % end function
-            
-            
+

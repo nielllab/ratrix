@@ -19,6 +19,20 @@ end
 spikes(waveInds(~thisCluster))=0; % set all the non-spike waveforms to be zero;
 %spikes(waveInds(spikeData.assignedClusters~=1))=0; this should select the noise only!  just for testing
 
+%SET UP RELATION stimInd <--> frameInd
+numStimFrames=max(spikeData.stimIndices);
+analyzeDrops=true;
+if analyzeDrops
+    stimFrames=spikeData.stimIndices;
+    frameIndices=spikeData.frameIndices;
+else
+    stimFrames=1:numStimFrames;
+    firstFramePerStimInd=~[0 diff(spikeData.stimIndices)==0];
+    frameIndices=spikeData.frameIndices(firstFramePerStimInd);
+end
+
+
+
 if stimulusDetails.doCombos==1
     comboMatrix = generateFactorialCombo({stimulusDetails.spatialFrequencies,stimulusDetails.driftfrequencies,stimulusDetails.orientations,...
         stimulusDetails.contrasts,stimulusDetails.phases,stimulusDetails.durations,stimulusDetails.radii,stimulusDetails.annuli});
@@ -29,16 +43,14 @@ if stimulusDetails.doCombos==1
     startPhases=comboMatrix(5,:);
     durations=round(comboMatrix(6,:)*parameters.refreshRate); % CONVERTED FROM seconds to frames
     radii=comboMatrix(7,:);
-    annuli=comboMatrix(8,:);
-    
-    numFrames=length(spikeData.frameIndices);
-    frames=1:numFrames;
-    repeat=ceil(frames/sum(durations));
-    numRepeats=ceil(numFrames/sum(durations));
+    annuli=comboMatrix(8,:); 
+
+    repeat=ceil(stimFrames/sum(durations));
+    numRepeats=ceil(numStimFrames/sum(durations));
     chunkEndFrame=[cumsum(repmat(durations,1,numRepeats))];
-    chunkStartFrame=[1 chunkEndFrame(1:end-1)];
-    %chunkStartFrame(chunkStartFrame>numFrames)=[]; %remove chunks that were never reached. OK TO LEAVE IF WE INDEX BY OTHER THINGS
-    %chunkEndFrame(chunkStartFrame>numFrames)=[]; %remove chunks that were never reached.
+    chunkStartFrame=[0 chunkEndFrame(1:end-1)]+1;
+    %chunkStartFrame(chunkStartFrame>numStimFrames)=[]; %remove chunks that were never reached. OK TO LEAVE IF WE INDEX BY OTHER THINGS
+    %chunkEndFrame(chunkStartFrame>numStimFrames)=[]; %remove chunks that were never reached.
     numChunks=length(chunkStartFrame);
     numTypes=length(durations);
 else
@@ -60,7 +72,7 @@ end
 if length(unique(durations))==1
     duration=unique(durations);
     type=repmat([1:numTypes],duration,numRepeats);
-    type=type(1:numFrames); % vectorize matrix and remove extras
+    type=type(stimFrames); % vectorize matrix and remove extras
 else
     error('multiple durations can''t rely on mod to determine the frame type')
 end
@@ -68,23 +80,19 @@ end
 %empirically
 samplingRate=round(diff(minmax(find(spikeData.spikes)'))/ diff(spikeData.spikeTimestamps([1 end])));
 
-
 % calc phase per frame, just like dynamic
 x = 2*pi./pixPerCycs(type); % adjust phase for spatial frequency, using pixel=1 which is likely offscreen if rotated
 cycsPerFrameVel = driftfrequencies(type)*1/(parameters.refreshRate); % in units of cycles/frame
-offset = 2*pi*cycsPerFrameVel.*frames;
+offset = 2*pi*cycsPerFrameVel.*stimFrames;
 phases=x + offset+startPhases(type);
 phases=mod(phases,2*pi);
 
 % count the number of spikes per frame
 % spikeCount is a 1xn vector of (number of spikes per frame), where n = number of frames
-spikeCount=zeros(1,size(spikeData.frameIndices,1));
-
-
-
+spikeCount=zeros(1,size(frameIndices,1));
 
 for i=1:length(spikeCount) % for each frame
-    spikeCount(i)=sum(spikes(spikeData.frameIndices(i,1):spikeData.frameIndices(i,2)));  % inclusive?  policy: include start & stop
+    spikeCount(i)=sum(spikes(frameIndices(i,1):frameIndices(i,2)));  % inclusive?  policy: include start & stop
 end
 
 % probablity of a spike per phase
@@ -117,11 +125,8 @@ for i=1:numRepeats
             fy=abs(fy(2:length(fy)/2)); % get rid of DC and symetry
             fx=abs(fx(2:length(fx)/2));
             peakFreqInd=find(fy==max(fy)); % find the right freq index using stim
-            try
-                pow(i,j)=fx(peakFreqInd); % determine the power at that freq
-            catch
-                h=1
-            end
+            pow(i,j)=fx(peakFreqInd); % determine the power at that freq
+
             if 0 %development
                 
                 [b,a] = butter(1,.1);
@@ -167,8 +172,6 @@ for i=1:numRepeats
         end
     end
 end
-
-
 
 %get eyeData for phase-eye analysis
 if ~isempty(eyeData)
@@ -341,8 +344,8 @@ if 0
             ef=min(chunkEndFrame((i-1)*numTypes+j),numFrames); % frame end
             
             %TIME
-            %st=spikeData.frameIndices(sf,1); % time start index
-            %et=spikeData.frameIndices(ef,2); % time stop index
+            %st=frameIndices(sf,1); % time start index
+            %et=frameIndices(ef,2); % time stop index
             %times=find(spikes(st:et))/samplingRate;
             %times=times*pixPerCycs(j);  % hack rescaling of time, to match phases... increases "apparent" firing rate
             %plot(times,(j-1)*numRepeats+i,'.','color',colors(j,:))

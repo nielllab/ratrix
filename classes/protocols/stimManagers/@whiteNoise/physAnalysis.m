@@ -6,6 +6,19 @@ function [analysisdata] = physAnalysis(stimManager,spikeData,stimulusDetails,plo
 % photoDiode - currently not used
 % plotParameters - currently not used
 
+
+%SET UP RELATION stimInd <--> frameInd
+analyzeDrops=true;
+if analyzeDrops
+    stimFrames=spikeData.stimIndices;
+    frameIndices=spikeData.frameIndices;
+else
+    numStimFrames=max(spikeData.stimIndices);
+    stimFrames=1:numStimFrames;
+    firstFramePerStimInd=~[0 diff(spikeData.stimIndices)==0];
+    frameIndices=spikeData.frameIndices(firstFramePerStimInd);
+end
+
 % stimData is the entire movie shown for this trial
 % removed 1/26/09 and replaced with stimulusDetails
 % reconstruct stimData from stimulusDetails - stimManager specific method
@@ -19,12 +32,13 @@ if (ischar(stimulusDetails.strategy) && strcmp(stimulusDetails.strategy,'expert'
     width=stimulusDetails.width;
     factor = width/spatialDim(1);
     
-    %                     stimData=zeros(height,width,length(seeds)); % method 1
-    stimData=zeros(spatialDim(1),spatialDim(2),length(spikeData.stimIndices)); % method 2
-    for frameNum=spikeData.stimIndices
-        randn('state',seeds(frameNum));
-        stixels = round(255*(randn(spatialDim)*std+meanLuminance));
-        stixels(stixels>255)=255;
+    %  stimData=zeros(height,width,length(seeds)); % method 1
+    stimData=nan(spatialDim(1),spatialDim(2),length(stimFrames)); % method 2
+    for i=1:length(stimFrames)
+        randn('state',seeds(stimFrames(i)));
+        whiteVal=255;
+        stixels = round(whiteVal*(randn(spatialDim)*std+meanLuminance));
+        stixels(stixels>whiteVal)=whiteVal;
         stixels(stixels<0)=0;
         
         %stixels=randn(spatialDim);  % for test only
@@ -37,19 +51,21 @@ if (ischar(stimulusDetails.strategy) && strcmp(stimulusDetails.strategy,'expert'
         %                                 pxRow(end+1:end+factor) = repmat(stixels(stRow,stCol), [1 factor]);
         %                             end
         %                             % now repmat pxRow vertically in stimData
-        %                             stimData(factor*(stRow-1)+1:factor*stRow,:,frameNum) = repmat(pxRow, [factor 1]);
+        %                             stimData(factor*(stRow-1)+1:factor*stRow,:,i) = repmat(pxRow, [factor 1]);
         %                         end
         %                         % reset variables
         %                         pxRow=[];
         % =======================================================
         % method 2 - leave stimData in stixel size
-        stimData(:,:,frameNum) = stixels;
+        stimData(:,:,i) = stixels;
         
         
         % =======================================================
     end
+    if any(isnan(stimData))
+        error('missed a frame in reconstruction')
+    end
 end
-
 
 % refreshRate - try to retrieve from neuralRecord (passed from stim computer)
 if isfield(parameters, 'refreshRate')
@@ -59,7 +75,7 @@ else
 end
 
 % timeWindowMs
-timeWindowMs=[200 30]; % parameter [300 50]
+timeWindowMs=[300 50]; % parameter [300 50]
 
 %Check num stim frames makes sense
 if size(spikeData.frameIndices,1)~=size(stimData,3)
@@ -112,7 +128,9 @@ numSpikingFrames=sum(spikeCount>0);
 numSpikes = sum(spikeCount);
 triggerInd = 1;
 % triggers = zeros(stim_width, stim_height, # of window frames per spike, number of spikes)
-triggers=zeros(size(stimData,1),size(stimData,2),sum(timeWindowFrames)+1,numSpikes); % +1 is for the frame that is on the spike
+%initialize trigger with mean values for temporal border padding
+meanValue=whiteVal*stimulusDetails.meanLuminance; 
+triggers=meanValue(ones(size(stimData,1),size(stimData,2),sum(timeWindowFrames)+1,numSpikes)); % +1 is for the frame that is on the spike
 for i=find(spikeCount>0) % for each index that has spikes
     %every frame with a spike count, gets included... it is multiplied by the number of spikes in that window
     framesBefore = timeWindowFrames(1);
@@ -210,13 +228,10 @@ end
 
 timeMs=linspace(-timeWindowMs(1),timeWindowMs(2),size(STA,3));
 ns=length(timeMs);
-hold off; plot(timeWindowFrames([1 1])+1, [0 255],'k');
-hold on;  plot([1 ns],meanLuminance([1 1])*255,'k')
-try
-    plot([1:ns], analysisdata.singleTrialTemporalRecord, 'color',[.8 .8 1])
-catch
-    keyboard
-end
+hold off; plot(timeWindowFrames([1 1])+1, [0 whiteVal],'k');
+hold on;  plot([1 ns],meanLuminance([1 1])*whiteVal,'k')
+plot([1:ns], analysisdata.singleTrialTemporalRecord, 'color',[.8 .8 1])
+
 fh=fill([1:ns fliplr([1:ns])]',[darkCI(:,1); flipud(darkCI(:,2))],'r'); set(fh,'edgeAlpha',0,'faceAlpha',.5)
 fh=fill([1:ns fliplr([1:ns])]',[brightCI(:,1); flipud(brightCI(:,2))],'b'); set(fh,'edgeAlpha',0,'faceAlpha',.5)
 plot([1:ns], darkSignal(:)','r')
@@ -224,7 +239,8 @@ plot([1:ns], brightSignal(:)','b')
 
 peakFrame=find(brightSignal==max(brightSignal(:)));
 timeInds=[1 peakFrame timeWindowFrames(1)+1 size(STA,3)];
-set(gca,'XTickLabel',unique(timeMs(timeInds)),'XTick',unique(timeInds),'XLim',minmax(timeInds),'YLim',[minmax(analysisdata.singleTrialTemporalRecord(:)')+[-5 5]]);
+set(gca,'XTickLabel',unique(timeMs(timeInds)),'XTick',unique(timeInds),'XLim',minmax(timeInds));
+set(gca,'YLim',[minmax([analysisdata.singleTrialTemporalRecord(:)' darkCI(:)' brightCI(:)'])+[-5 5]])
 ylabel('RGB(gunVal)')
 xlabel('msec')
 

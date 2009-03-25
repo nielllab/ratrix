@@ -72,6 +72,10 @@ cntrGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrast
 numAnulli=8;
 annuli=[0.02 0.05 .1 .2 .3 .4 .5 2]; % annulus of the grating
 contrasts=1; % reset to one value
+if 0
+    %location = RFestimator({'whiteNoise','fitGaussianSigEnvelope',{3,0.05,logical(ones(3))}},{'gratings','ttestF1',{0.05}},[],RFdataSource,[now-100 Inf]);
+    location = RFestimator({'whiteNoise','fitGaussian',{3}},{'gratings','ttestF1',{0.05,'fft'}},[],RFdataSource,[now-100 Inf]);
+end
 anGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
     waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 

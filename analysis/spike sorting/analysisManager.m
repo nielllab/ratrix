@@ -370,8 +370,8 @@ end
 squaredVals = (photoDiode).^2;  % rescale so zero is smallest value... a bit funny
 % now sort the values, and choose the first 5% to show threshold
 %fractionBaselineSpikes=0.05; % chance of a single spike on a frame % not used
-fractionStimSpikes=0.1;      % chance of any spikes on a frame caused by stim
-maxNumStimSpikes=10;         % per frame
+fractionStimSpikes=0.5;      % chance of any spikes on a frame caused by stim
+maxNumStimSpikes=3;         % per frame
 valuesToCalcThreshold = sort(squaredVals,'descend');
 pivot = ceil(length(squaredVals) * fractionStimSpikes);
 threshold = (valuesToCalcThreshold(pivot) + valuesToCalcThreshold(pivot+1)) / 2;

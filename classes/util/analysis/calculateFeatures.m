@@ -9,7 +9,7 @@ features=[];
 nrDatapoints=0;
 
 for fInd=1:length(featureList)
-    feat=featureList(fInd);
+    feat=featureList{fInd};
     switch feat %change to allow more than one feature
         case 'allRaw'
             nrDatapoints=size(data,2);
@@ -21,7 +21,7 @@ for fInd=1:length(featureList)
         case {'wavePC1', 'wavePC2'}
             w=data;
             l2norms = sqrt(sum(w.^2,2)); % normalize waveforms first
-            w = w./l2norms(:,ones(1,nrSamples));
+            w = w./l2norms(:,ones(1,size(data,2)));
             [pc,score] = princomp(w);
             nrDatapoints=nrDatapoints+1;
             if strcmp(feat,'wavePC1')
@@ -30,7 +30,7 @@ for fInd=1:length(featureList)
                 features=[features score(:,2)]; % second PC only
             end
         case 'energy'
-            score=sqrt(sum(data(:,:).^2,2))./sqrt(nrSamples);
+            score=sqrt(sum(data(:,:).^2,2))./sqrt(size(data,2));
             nrDatapoints=nrDatapoints+1;
             features=[features score];
         case 'peak'
@@ -52,14 +52,16 @@ for fInd=1:length(featureList)
             nrDatapoints=nrDatapoints+1;
             features=[features score];
         case 'waveFFT'
-            Y = fft(squeeze(data(:,:))',nrSamples);
-            Pyy = Y.*conj(Y)/nrSamples;
-            WeightMatrix = repmat(([1:nrSamples/2 nrSamples/2:-1:1])',1,length(Pyy(1,:)));
+            Y = fft(squeeze(data(:,:))',size(data,2));
+            Pyy = Y.*conj(Y)/size(data,2);
+            WeightMatrix = repmat(([1:size(data,2)/2 size(data,2)/2:-1:1])',1,length(Pyy(1,:)));
             SumPyy = sum(Pyy);
             score = (sum(Pyy.*WeightMatrix)./SumPyy)';
             nrDatapoints=nrDatapoints+1;
             features=[features score];
         otherwise
+            feat
+            class(feat)
             error('unsupported feature selection');
     end
 end

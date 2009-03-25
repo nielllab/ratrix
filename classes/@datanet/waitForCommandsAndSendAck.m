@@ -262,6 +262,8 @@ set(f,'Visible','on');
 
 % ========================================================================================
 % DATANET STUFF
+% open a socket connection
+datanet.sockcon = pnet('tcpsocket', datanet.port);
 % first connection - keep trying to get a connection using tcplisten
 datacon = -1;
 while datacon == -1

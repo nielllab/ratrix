@@ -83,7 +83,7 @@ end
 if a
     switch b
         %some rig stations have eyeTrackers and datanets available
-        case '00095B8E6171' %phys stim machine stolen from 2F
+        case {'00095B8E6171','001D7DA80EFC'} %phys stim machine stolen from 2F
             ai_parameters.numChans=3;
             ai_parameters.sampRate=40000;
             ai_parameters.inputRanges=repmat([-1 6],ai_parameters.numChans,1);
@@ -94,6 +94,8 @@ if a
             alpha=12; %deg above...really?
             beta=0;   %deg to side... really?
             settingMethod='none';  % will run with these defaults without consulting user, else 'guiPrompt'
+            maxWidth=1;
+            maxHeight=1;
             et=geometricTracker('cr-p', 2, 3, alpha, beta, int16([1280,1024]), [42,28], int16([maxWidth,maxHeight]), [400,290], 300, -55, 0, 45, 0,settingMethod,10000);
         otherwise
             dn=[];
@@ -114,8 +116,8 @@ stationSpec.portSpec.valveSpec                = int8([4,3,2]);
 stationSpec.portSpec.sensorPins               = int8([13,10,12]);
 stationSpec.portSpec.framePulsePins           = int8(9);
 stationSpec.portSpec.eyePuffPins              = int8(6);
-stationSpec.datanet                           = [];
-stationSpec.eyeTracker                        = [];
+stationSpec.datanet                           = dn;
+stationSpec.eyeTracker                        = et;
 
 if ismac
     stationSpec.portSpec = int8(3);

@@ -9,6 +9,7 @@ data_hostname = datanet.data_hostname;
 if isempty(data_hostname)
     error('no data hostname found in this datanet object')
 end
+datanet.sockcon = pnet('tcpsocket', datanet.port); % open socket connection
 datanet.con = connectToDataListener(datanet,data_hostname);
 % set store path
 path = fullfile(datanet.storepath,data.subjectID);

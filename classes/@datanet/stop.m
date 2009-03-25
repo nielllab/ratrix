@@ -21,6 +21,7 @@ if ~gotAck
 end
 pnet('closeall');
 
-    
+datanet.con=[];
+datanet.sockcon=[];
     
 end % end function

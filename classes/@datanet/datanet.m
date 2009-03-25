@@ -67,7 +67,6 @@ switch nargin
                 r.type = 'data';
                 r.port = 8888;
                 r.host = varargin{2};
-                r.sockcon = pnet('tcpsocket', r.port);
             else
                 error('first argument must be either ''data'' and second argument must be a string');
             end
@@ -88,7 +87,6 @@ switch nargin
                 r.type = 'stim';
                 r.port = 8888;
                 r.host = varargin{2};
-                r.sockcon = pnet('tcpsocket', r.port);
             else
                 error('type must be stim');
             end
@@ -119,8 +117,6 @@ switch nargin
         nargin
         error('Wrong number of input arguments')
 end
-if r.sockcon == -1
-    error('failed to create valid socket connection');
-end
+
 r = class(r, 'datanet');
 

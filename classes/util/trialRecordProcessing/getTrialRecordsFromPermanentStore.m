@@ -92,6 +92,11 @@ goodRecs=getRangesFromTrialRecordFileNames(fileNames);
 % end
 
 files=applyTrialFilter(goodRecs,filter);
+if iscell(filter)
+    filterType=filter{1};
+else
+    error('filter must be a cell array');
+end
 
 if length(files) <= 0
     error('Files listed in db, but no records recovered')

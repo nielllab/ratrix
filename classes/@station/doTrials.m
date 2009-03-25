@@ -58,7 +58,7 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
 
             % 10/17/08 - start datanet (for neural data recording)
             % ==========================================================================
-            if ~isempty(s.datanet)
+            if ~isempty(s.datanet) && isa(s.datanet,'datanet')
                 params = Screen('Resolution', s.screenNum);
                 parameters = [];
                 parameters.refreshRate = params.hz;
@@ -144,7 +144,7 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
 
             % 10/17/08 - stop datanet
             % ==========================================================================
-            if ~isempty(s.datanet)
+            if ~isempty(s.datanet) && isa(s.datanet,'datanet')
                 s.datanet = stop(s.datanet);
             end
             % ==========================================================================

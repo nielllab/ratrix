@@ -13,6 +13,9 @@ stimcon=-1;
 while stimcon==-1
     fprintf('trying tcpconnect\n');
     stimcon=pnet('tcpconnect',hostname,8888); % stim=client, connect to 8888 (data)
+    if stimcon==-1
+        fprintf('could not tcpconnect to data listener - perhaps you need to start the data listener?\n');
+    end
 end
 
 % tell data computer to start listener and send ack

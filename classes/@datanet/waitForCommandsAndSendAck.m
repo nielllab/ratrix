@@ -453,16 +453,12 @@ while ~quit
                 received
                 fprintf('we got an unrecognized command\n');
         end
-    else % if nothing received, try pnet_getvar
-        % failed to receive valid command using read - try using pnet_getvar
-        %             received = pnet_getvar(serv);
-        %         if ~isempty(received) % IGNORE THIS PART FOR NOW - PNET_GETVAR disconnects remote host for some reason
-        %             success = true;
-        %             message = constants.dataToStimResponses.D_RECEIVED_VAR;
-        %             % just echo received for now
-        %             received
-        %             fprintf('we got something through pnet_getvar\n');
-        %         end
+    else  % if nothing received, then use pnet('status') to check for disconnect
+        stat=pnet(datacon,'status');
+        if stat==0
+            quit=true;
+            fprintf('status revealed a disconnect from ratrix machine - quitting!');
+        end
     end
 
 

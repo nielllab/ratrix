@@ -392,8 +392,8 @@ while ~quit
                 [neuralData, neuralDataTimes] = getdata(ai, estimatedNumberOfSamples);
                 firstNeuralDataTime = neuralDataTimes(1);
                 % now go through and throw out trialData that is past our timestamp
-                neuralData(find(neuralDataTimes<timestamp), :) = [];
-                neuralDataTimes(find(neuralDataTimes<timestamp)) = [];
+                neuralData(neuralDataTimes<timestamp, :) = [];
+                neuralDataTimes(neuralDataTimes<timestamp) = [];
                 % CHANGE MESSAGE TO BE neuralDataTimes, not a random data
                
                 % =================================================================================================
@@ -470,11 +470,6 @@ while ~quit
     else
         error('if neither successful nor unsuccessful then what is this?')
     end
-    % send ack to stim computer if successful
-    %%%% THIS IS WHERE BEHAVIOR WILL BE DIFFERENT FOR DIFFERENT RECEIVED COMMANDS
-    % if we received a S_START_RECORDING_CMD, then run local calls to start recording, then send ack
-    % if we received a S_SAVE_DATA_CMD, then just send data (tell stim to listen)
-    % etc etc
 end
 
 

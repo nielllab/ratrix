@@ -271,11 +271,17 @@ for i=1:length(ids)
         
         % 3/5/09 - we should separate the compile process based on trainingStepNum
         % to handle manual training step transitions gracefully
-        uniqueTrainingSteps=unsortedUniques([tr.trainingStepNum]);
+        % tsIntervals should be [tsNum startNum stopNum; ...] for each unique ts interval
+        tsNums=double([tr.trainingStepNum]);
+        tsIntervals=[];
+        tsIntervals(:,1)=[tsNums(find(diff(tsNums))) tsNums(end)]';
+        tsIntervals(:,2)=[1 find(diff(tsNums))+1];
+        tsIntervals(:,3)=[find(diff(tsNums)) length(tsNums)];
         loadedClasses=classes;
         
-        for tsNum=uniqueTrainingSteps
-            thisTsInds=find([tr.trainingStepNum]==tsNum);
+        for intInd=1:size(tsIntervals,1)
+            tsNum=tsIntervals(intInd,1);
+            thisTsInds=tsIntervals(intInd,2):tsIntervals(intInd,3);
             classes=loadedClasses;
             compiledDetails=[];
             
@@ -374,11 +380,12 @@ for i=1:length(ids)
                     %that includes all info its super class would have, so cannot call this
                     %method on every anscestor class.  must leave calling super class's
                     %extractDetailFields up to the sub class.
+                    colInds=classes{3,c};
+                    
                     LUTparams=[];
                     LUTparams.lastIndex=length(compiledLUT);
                     LUTparams.compiledLUT=compiledLUT;
-                    [newRecs newLUT]=extractDetailFields(classes{2,c},colsFromAllFields(newBasicRecs,classes{3,c}),tr(thisTsInds),LUTparams);
-                    
+                    [newRecs newLUT]=extractDetailFields(classes{2,c},colsFromAllFields(newBasicRecs,colInds),tr(thisTsInds),LUTparams);
                     % if extractDetailFields returns a stim-specific LUT, add it to our main compiledLUT
                     if ~isempty(newLUT)
                         compiledLUT = [compiledLUT newLUT];
@@ -405,7 +412,7 @@ for i=1:length(ids)
                     else
                         error('class name doesn''t match')
                     end
-                    tmp=colsFromAllFields(newBasicRecs,classes{3,c});
+                    tmp=colsFromAllFields(newBasicRecs,colInds);
                     if bailed
                         compiledDetails(c).bailedTrialNums(end+1:end+length(classes{3,c}))=tmp.trialNumber;
                     else
@@ -421,7 +428,9 @@ for i=1:length(ids)
                     [tf loc]=ismember(compiledDetails(1).className,{allDetails.className});
                     if tf
                         % append records, dont make new class
-                        allDetails(loc).records=concatAllFields(allDetails(loc).records,compiledDetails(d).records);
+                        if ~isempty(compiledDetails(d).records)
+                            allDetails(loc).records=concatAllFields(allDetails(loc).records,compiledDetails(d).records);
+                        end
                         allDetails(loc).trialNums=[allDetails(loc).trialNums compiledDetails(d).trialNums];
                         allDetails(loc).bailedTrialNums=[allDetails(loc).bailedTrialNums compiledDetails(d).bailedTrialNums];
                     else
@@ -448,7 +457,6 @@ for i=1:length(ids)
         end
         [a b]=sort(tmp(1,:));
         if any(a~=1:length(a))
-            keyboard
             error('missing trials')
         end
     else

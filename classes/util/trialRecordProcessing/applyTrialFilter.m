@@ -1,4 +1,4 @@
-function files = applyTrialFilter(goodRecs,filter)
+function [files lowestTrialNum highestTrialNum] = applyTrialFilter(goodRecs,filter)
 % This function carries out daterange or lastNTrials filtering on a struct array of candidate trials
 % INPUTS:
 %   goodRecs - a struct with fields 'dateStart','dateStop','trialStart', and 'trialStop'
@@ -9,6 +9,9 @@ function files = applyTrialFilter(goodRecs,filter)
 %   filter - either {'dateRange',[startVec endVec]}, {'lastNTrials',numTrials}, or {'all'}
 % OUTPUTS:
 %   files - elements of goodRecs that pass the given filter
+
+lowestTrialNum=[];
+highestTrialNum=[];
 
 if iscell(filter)
     filterType=filter{1};

@@ -91,7 +91,7 @@ goodRecs=getRangesFromTrialRecordFileNames(fileNames);
 %     end
 % end
 
-files=applyTrialFilter(goodRecs,filter);
+[files lowestTrialNum highestTrialNum]=applyTrialFilter(goodRecs,filter);
 if iscell(filter)
     filterType=filter{1};
 else

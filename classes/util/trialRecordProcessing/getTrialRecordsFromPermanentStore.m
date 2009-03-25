@@ -91,60 +91,7 @@ goodRecs=getRangesFromTrialRecordFileNames(fileNames);
 %     end
 % end
 
-if ~exist('filter','var') ||  isempty(filter)
-    filter = {'all'};
-else
-    if ~iscell(filter) || ~isvector(filter)
-        error('Filter invalid')
-    end
-end
-filterType = filter{1};
-switch(filterType)
-    case 'dateRange'
-        if length(filter) ~= 2 || length(filter{2}) ~= 2
-            error('Invalid filter parameters for dateRange')
-        end
-        dateRange = datenum(filter{2});
-        dateRange = sort(dateRange);
-        dateStart = dateRange(1);
-        dateStop = dateRange(end);
-        files = [];
-        for i=1:length(goodRecs)
-            if goodRecs(i).dateStart<=dateStop && goodRecs(i).dateStop>=dateStart
-                if isempty(files)
-                    files = goodRecs(i);
-                else
-                    files(end+1)=goodRecs(i);
-                end
-            end
-        end
-
-    case 'lastNTrials'
-        if length(filter) ~= 2 || ~isinteger(filter{2}) || ~isscalar(filter{2}) || filter{2} < 0
-            error('Invalid filter parameters for lastNTrials')
-        end
-        lastNTrials = filter{2};
-        files = [];
-        [garbage sortIndices]=sort([goodRecs.trialStart],2,'descend');
-        goodRecs = goodRecs(sortIndices);
-        highestTrialNum = goodRecs(1).trialStop;
-        lowestTrialNum = highestTrialNum-lastNTrials;
-        for i=1:length(goodRecs)
-            if highestTrialNum-goodRecs(i).trialStop>=lastNTrials
-                break;
-            end
-            if isempty(files)
-                files = goodRecs(i);
-            else
-                files(end+1)=goodRecs(i);
-            end
-        end
-
-    case 'all'
-        files = goodRecs;
-    otherwise
-        error('Unsupported filter type')
-end
+files=applyTrialFilter(goodRecs,filter);
 
 if length(files) <= 0
     error('Files listed in db, but no records recovered')

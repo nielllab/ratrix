@@ -246,6 +246,8 @@ switch upper(spikeSortingMethod)
         % ===============================================================================
         % generate feature file for MClust manual use
         % write the feature file
+        [features nrDatapoints] = calculateFeatures(spikeWaveforms,spikeSortingParams.features);
+        
         fname = fullfile(analysisPath,'temp.fet.1');
         fid = fopen(fname,'w+');
         fprintf(fid,[num2str(nrDatapoints) '\n']);
@@ -359,7 +361,6 @@ switch upper(spikeSortingMethod)
         tempDir=fullfile(getRatrixPath,'analysis','spike sorting','KlustaKwik');
         cd(tempDir);
         
-        nrSamples=size(spikeWaveforms,2);
         [features nrDatapoints] = calculateFeatures(spikeWaveforms,spikeSortingParams.features);
         
         % write the feature file

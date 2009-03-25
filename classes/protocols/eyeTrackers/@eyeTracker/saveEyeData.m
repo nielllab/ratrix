@@ -23,6 +23,8 @@ eyeTracker=structize(et);
 fileName=sprintf('eyeRecords_%d_%s',trialNum,datestr(trialStartTime,30));
 savefile=fullfile(et.eyeDataPath,fileName);
 
-save(savefile,'eyeData','eyeDataFrameInds','eyeDataVarNames','gaze','eyeTracker','eyeTrackerClass')
+[version, versionString] = Eyelink('GetTrackerVersion');
+
+save(savefile,'eyeData','eyeDataFrameInds','eyeDataVarNames','gaze','eyeTracker','eyeTrackerClass','version','versionString')
 duration=GetSecs-then;
 disp(sprintf('saved %s: took %2.2g sec',fileName,duration))

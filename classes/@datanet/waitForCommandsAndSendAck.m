@@ -476,5 +476,6 @@ while ~quit
     end
 end
 
-
+pnet('closeall'); % close all sockets/connections before exiting the listener loop
+% should we do this? or do we want the datanet obj to be reuseable?
 end % end function

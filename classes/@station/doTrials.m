@@ -143,7 +143,7 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
             catch ex
                 disp(['CAUGHT ER: ' getReport(ex)]);
                 if ~isempty(s.datanet) && isa(s.datanet,'datanet')
-                    pnet(getCon(s.datanet),'close');
+                    pnet('closeall');
                     s.datanet=cleanup(s.datanet);
                 end
                 rethrow(ex);

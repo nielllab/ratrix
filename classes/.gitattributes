@@ -188,3 +188,4 @@ protocols/eyeTrackers/@eyeLinkTracker/old[!!-~]dev/fixationSoundDemo.m -text
 protocols/eyeTrackers/@eyeLinkTracker/setEyeUsed.m -text
 protocols/eyeTrackers/@eyeTracker/clearEyeDataPath.m -text
 @datanet/cleanup.m -text
+@datanet/loadobj.m -text

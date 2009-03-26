@@ -456,8 +456,12 @@ while ~quit
     else  % if nothing received, then use pnet('status') to check for disconnect
         stat=pnet(datacon,'status');
         if stat==0
+            stop(ai)
+            delete(ai)
+            clear ai
+            fprintf('NIDAQ recording stopped due to error on ratrix machine!\n');
             quit=true;
-            fprintf('status revealed a disconnect from ratrix machine - quitting!');
+            fprintf('status revealed a disconnect from ratrix machine - quitting!\n');
         end
     end
 

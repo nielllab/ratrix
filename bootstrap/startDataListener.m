@@ -6,8 +6,6 @@ try
     pnet('closeall');
     data = datanet('data','localhost')
     quit = waitForCommandsAndSendAck(data)
-    stop(data)
 catch ex
     disp(['CAUGHT ER: ' getReport(ex)])
-    stop(data)
 end

@@ -253,12 +253,16 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 type='flushPorts';
                 typeParams=[];
                 validInputs={};
-                validInputs{1}=1:getNumPorts(station);
+                validInputs{1}=0:getNumPorts(station);
                 validInputs{2}=[1 100];
                 validInputs{3}=[0 10];
                 validInputs{4}=[0 60];
                 fpVars = userPrompt(getPTBWindow(station),validInputs,type,typeParams);
-                flushPorts(station,fpVars(3),fpVars(2),fpVars(4),fpVars(1));
+                portsToFlush=fpVars(1);
+                if portsToFlush==0 % 0 is a special flag that means do all ports (for calibration, we need interleaved ports)
+                    portsToFlush=1:getNumPorts(station);
+                end
+                flushPorts(station,fpVars(3),fpVars(2),fpVars(4),portsToFlush);
                 stopEarly=false; % reset stopEarly/quit to be false, so continue doing trials
             elseif ischar(trialRecords(trialInd).result) && (strcmp(trialRecords(trialInd).result, 'nominal') || ...
                     strcmp(trialRecords(trialInd).result, 'multiple ports'))

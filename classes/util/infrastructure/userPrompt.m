@@ -21,8 +21,7 @@ end
 KbConstants.enterKey=KbName('RETURN');
 KbConstants.deleteKeys=[KbName('delete') KbName('backspace')];
 KbConstants.decimalKey=KbName('.>');
-%             stopPTB(station);
-%             startPTB(station);
+
 Screen('Preference', 'TextRenderer', 0);  % consider moving to station.startPTB
 Screen('Preference', 'TextAntiAliasing', 0); % consider moving to station.startPTB
 allowKeyboard=true;
@@ -61,7 +60,7 @@ while isempty(out)
         i=1;
     else
         if isempty(port)
-            text=sprintf('Select a port (%d-%d):',validInputs{1}(1),validInputs{1}(end));
+            text=sprintf('Select a port (%d-%d, %d for all ports):',validInputs{1}(2),validInputs{1}(end),validInputs{1}(1));
             i=1;
         elseif isempty(numSquirts)
             text=sprintf('Select number of water squirts (%d-%d):',validInputs{2}(1),validInputs{2}(2));
@@ -82,7 +81,7 @@ while isempty(out)
     Screen('Flip',window);
 
     % read from keyboard
-    [keyIsDown,secs,keyCode]=KbCheck; % do this check outside of function to save function call overhead
+    [keyIsDown,secs,keyCode]=KbCheck;
     if keyIsDown
         numsDown=false(1,length(KbConstants.numKeys));
         for nNum=1:length(KbConstants.numKeys)

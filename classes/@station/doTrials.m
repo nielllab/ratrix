@@ -45,17 +45,6 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
             end
             %some calibration requires GUi's &  must happen before PTB
 
-            if strcmp(s.rewardMethod,'localPump')
-                if ~ s.localPumpInited
-                    s.localPump=initLocalPump(s.localPump,s,dec2hex(s.decPPortAddr));
-                    s.localPumpInited=true;
-                else
-                    error('localPump already inited')
-                end
-            end
-
-            s=startPTB(s);
-
             % 10/17/08 - start datanet (for neural data recording)
             % ==========================================================================
             if ~isempty(s.datanet) && isa(s.datanet,'datanet')
@@ -65,78 +54,100 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
                 parameters.subjectID = getID(subject);
                 s.datanet=setup(s.datanet,parameters);
             end
-            % 10/29/08 - send a command to data listener to store local variables (resolution, refreshRate)
-            % ==========================================================================
-
-
-            %make sure valves are in a known state: closed - pmm 080621
-            setValves(s, 0*getValves(s))
-            %if this is not the case some stations (quatech PCMCIA) complain on the first setAndCheckValves
-
-            % This is a hard coded trial records filter
-            % Need to decide where to parameterize this
-            filter = {'lastNTrials',int32(100)};
-
-            % Load a subset of the previous trial records based on the given filter
-            [trialRecords localRecordsIndex sessionNumber] = getTrialRecordsForSubjectID(r,getID(subject),filter, trustOsRecordFiles);
-
-            % Initialize/start eyeTracker after getting trialRecords so we know the trialNumber
-            if ~isempty(s.eyeTracker)
-                if isa(s.eyeTracker,'eyeTracker')
-                    if isTracking(s.eyeTracker)
-                        checkRecording(s.eyeTracker);
+            % 10/29/08 - send a command to data listener to store local
+            % variables (resolution, refreshRate)
+            
+            try
+                if strcmp(s.rewardMethod,'localPump')
+                    if ~ s.localPumpInited
+                        s.localPump=initLocalPump(s.localPump,s,dec2hex(s.decPPortAddr));
+                        s.localPumpInited=true;
                     else
-                        %figure out where to save eyeTracker data
-                        if ~isempty(s.datanet)
-                            eyeDataPath = fullfile(getStorePath(s.datanet), 'eyeRecords');
-                        else
-                            %right now its hard coded when no datanet
-                            %maybe put it with trial records in the permanent store?
-                            eyeDataPath = fullfile('\\132.239.158.179','datanet_storage', getID(subject), 'eyeRecords');
-                        end
-
-                        if isempty(trialRecords)
-                            tn=1;
-                        else
-                            tn=trialRecords(end).trialNumber+1;
-                        end
-                        s.eyeTracker=initialize(s.eyeTracker,eyeDataPath);%,%station.window);
-                        s.eyeTracker=start(s.eyeTracker,tn);
+                        error('localPump already inited')
                     end
-                else
-                    error('not an eyeTracker')
                 end
+
+                s=startPTB(s);
+
+                % ==========================================================================
+
+
+                %make sure valves are in a known state: closed - pmm 080621
+                setValves(s, 0*getValves(s))
+                %if this is not the case some stations (quatech PCMCIA) complain on the first setAndCheckValves
+
+                % This is a hard coded trial records filter
+                % Need to decide where to parameterize this
+                filter = {'lastNTrials',int32(100)};
+
+                % Load a subset of the previous trial records based on the given filter
+                [trialRecords localRecordsIndex sessionNumber] = getTrialRecordsForSubjectID(r,getID(subject),filter, trustOsRecordFiles);
+
+                % Initialize/start eyeTracker after getting trialRecords so we know the trialNumber
+                if ~isempty(s.eyeTracker)
+                    if isa(s.eyeTracker,'eyeTracker')
+                        if isTracking(s.eyeTracker)
+                            checkRecording(s.eyeTracker);
+                        else
+                            %figure out where to save eyeTracker data
+                            if ~isempty(s.datanet)
+                                eyeDataPath = fullfile(getStorePath(s.datanet), 'eyeRecords');
+                            else
+                                %right now its hard coded when no datanet
+                                %maybe put it with trial records in the permanent store?
+                                eyeDataPath = fullfile('\\132.239.158.179','datanet_storage', getID(subject), 'eyeRecords');
+                            end
+
+                            if isempty(trialRecords)
+                                tn=1;
+                            else
+                                tn=trialRecords(end).trialNumber+1;
+                            end
+                            s.eyeTracker=initialize(s.eyeTracker,eyeDataPath);%,%station.window);
+                            s.eyeTracker=start(s.eyeTracker,tn);
+                        end
+                    else
+                        error('not an eyeTracker')
+                    end
+                end
+
+                while keepWorking
+                    trialNum=trialNum+1;
+                    [subject r keepWorking secsRemainingTilStateFlip trialRecords s]= ...
+                        doTrial(subject,r,s,rn,trialRecords,sessionNumber);
+                    % Cut off a trial record as we increment trials, IFF we
+                    % still have remote records (because we need to keep all
+                    % local records to properly save the local .mat)
+                    if localRecordsIndex > 1
+                        trialRecords = trialRecords(2:end);
+                    end
+                    % Now update the local index (eventually all of the records
+                    % will be local if run long enough)
+                    localRecordsIndex = max(1,localRecordsIndex-1);
+                    % Only save the local records to the local copy!
+                    updateTrialRecordsForSubjectID(r,getID(subject),trialRecords(localRecordsIndex:end));
+
+                    if n>0 && trialNum>=n
+                        keepWorking=0;
+
+                    end
+                end
+
+
+                %should use secsRemainingTilStateFlip to ignore this
+                %subject for a while?  turn off station if only subject in
+                %box?
+
+
+                s=stopPTB(s);
+            catch ex
+                disp(['CAUGHT ER: ' getReport(ex)]);
+                if ~isempty(s.datanet) && isa(s.datanet,'datanet')
+                    pnet(getCon(s.datanet),'close');
+                    s.datanet=cleanup(s.datanet);
+                end
+                rethrow(ex);
             end
-
-            while keepWorking
-                trialNum=trialNum+1;
-                [subject r keepWorking secsRemainingTilStateFlip trialRecords s]= ...
-                    doTrial(subject,r,s,rn,trialRecords,sessionNumber);
-                % Cut off a trial record as we increment trials, IFF we
-                % still have remote records (because we need to keep all
-                % local records to properly save the local .mat)
-                if localRecordsIndex > 1
-                    trialRecords = trialRecords(2:end);
-                end
-                % Now update the local index (eventually all of the records
-                % will be local if run long enough)
-                localRecordsIndex = max(1,localRecordsIndex-1);
-                % Only save the local records to the local copy!
-                updateTrialRecordsForSubjectID(r,getID(subject),trialRecords(localRecordsIndex:end));
-
-                if n>0 && trialNum>=n
-                    keepWorking=0;
-
-                end
-            end
-
-
-            %should use secsRemainingTilStateFlip to ignore this
-            %subject for a while?  turn off station if only subject in
-            %box?
-
-
-            s=stopPTB(s);
 
             if ~isempty(s.eyeTracker)
                 s.eyeTracker=stop(s.eyeTracker);

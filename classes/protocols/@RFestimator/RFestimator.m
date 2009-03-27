@@ -39,6 +39,10 @@ function RFe = RFestimator(varargin)
 % function: sweep multiple anuli over center of RF
 %
 % set gratings to accept RFestimator object instead of annulus radius, and call getOuterRadiusBound to cache it
+%
+%example test use:
+%path='\\132.239.158.183\rlab_storage\pmeier\backup\devNeuralData_090310\'
+% rf=RFestimator({'whiteNoise','fitGaussian',{2}},{'gratings','ttestF1',{0.03,'fft'}},[],path,[now-100 Inf]); x=getCenter(rf,'g')
 
 RFe.centerParams=[];
 RFe.boundaryParams=[];

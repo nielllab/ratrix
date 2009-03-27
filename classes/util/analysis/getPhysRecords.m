@@ -14,7 +14,7 @@ if ~exist('when','var') || isempty(when)
 end
 
 if ~exist('what','var') || isempty(what)
-    what='anything';
+    what={'stim','neural','spike','analysis'};
 end
 
 goodFiles=[];
@@ -115,7 +115,7 @@ while ~success && ~isempty(goodFiles)
     
     % check that stimManagerClass==filter for now, but we should make filter more general
     fn=sprintf('stimRecords_%d-%s.mat', goodFiles(end).trialStart, goodFiles(end).dateStart);
-    record=load(fullfile(subjectDataPath,'stimRecords',fn));
+    record=load(fullfile(subjectDataPath,'stimRecords',fn),'stimManagerClass'); % only get the class
 
     switch filter
         case {'whiteNoise','gratings'}
@@ -134,7 +134,8 @@ while ~success && ~isempty(goodFiles)
         for w=1:length(what)
             switch what{w}
                 case 'stim'
-                    % record should already be loaded (since we use to filter - change?)
+                    fn=sprintf('stimRecords_%d-%s.mat',goodFiles(end).trialStart,goodFiles(end).dateStart);
+                    record=load(fullfile(subjectDataPath,'stimRecords',fn));
                 case 'neural'
                     fn=sprintf('neuralRecords_%d-%s.mat',goodFiles(end).trialStart,goodFiles(end).dateStart);
                     record=load(fullfile(subjectDataPath,'neuralRecords',fn));

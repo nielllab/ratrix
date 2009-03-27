@@ -90,7 +90,7 @@ phases=mod(phases,2*pi);
 % count the number of spikes per frame
 % spikeCount is a 1xn vector of (number of spikes per frame), where n = number of frames
 spikeCount=zeros(1,size(frameIndices,1));
-
+spikeInds=find(spikes);
 for i=1:length(spikeCount) % for each frame
     spikeCount(i)=sum(spikes(frameIndices(i,1):frameIndices(i,2)));  % inclusive?  policy: include start & stop
 end
@@ -104,6 +104,10 @@ phaseDensity=zeros(numRepeats*numTypes,numPhaseBins);
 pow=nan(numRepeats,numTypes);
 for i=1:numRepeats
     for j=1:numTypes
+        chunk=(i-1)*numTypes+j;
+        sf=min(find(stimFrames==chunkStartFrame(chunk)));
+        ef=max(find(stimFrames==chunkEndFrame(chunk)));
+                
         whichType=find(type==j & repeat==i);
         if length(whichType)>5  % need some spikes, 2 would work mathematically
             [n phaseID]=histc(phases(whichType),edges);
@@ -122,11 +126,127 @@ for i=1:numRepeats
             % find the power in the spikes at the freq of the grating
             fy=fft(.5+cos(phases(whichType))/2); %fourier of stim
             fx=fft(spikeCount(whichType)); % fourier of spikes
-            fy=abs(fy(2:length(fy)/2)); % get rid of DC and symetry
-            fx=abs(fx(2:length(fx)/2));
+            fy=abs(fy(2:floor(length(fy)/2))); % get rid of DC and symetry
+            fx=abs(fx(2:floor(length(fx)/2)));
             peakFreqInd=find(fy==max(fy)); % find the right freq index using stim
             pow(i,j)=fx(peakFreqInd); % determine the power at that freq
 
+            
+            if ~isempty(ef)
+                chrParam.tapers=[3 5]; % same as default, but turns off warning
+                chrParam.err=[2 0.05];  % use 2 for jacknife
+                fscorr=true;
+                % should check chronux's chrParam,trialave=1 to see how to
+                % handle CI's better.. will need to do all repeats at once
+                [C,phi,S12,S1,S2,f,zerosp,confC,phistd,Cerr]=coherencycpb(cos(phases(whichType)'),spikeCount(sf:ef)',chrParam,fscorr);
+            end
+            
+            if ~zerosp & ~isempty(ef)
+                peakFreqInds=find(S1>max(S1)*.95); % a couple bins near the peak of 
+                [junk maxFreqInd]=max(S1);
+                coh(i,j)=mean(C(peakFreqInds));
+                cohLB(i,j)=Cerr(1,maxFreqInd);  
+            else
+                coh(i,j)=nan;
+            end
+            
+            if 0 & j==3  & ~isempty(ef) % 1; %chunk==6 %chronuxDev
+                
+
+                %get the spikes times as a pt process
+                sf=min(find(stimFrames==chunkStartFrame(chunk)));
+                ef=max(find(stimFrames==chunkEndFrame(chunk)));
+                
+                ss=frameIndices(sf,1); % start samp
+                es=frameIndices(ef,2); % end samp
+                whichSpikes=spikeInds>=ss & spikeInds<=es;
+                
+                %durE=durations(j)/parameters.refreshRate; %expected if not frame drops
+                %samplingRate/driftfrequencies(j)
+                %dur=(es-ss)/samplingRate; % actual w/ frame drops
+                
+                cycs=driftfrequencies(j)*durations(j)/parameters.refreshRate;
+               eFreq=1/cycs; % in normalized units
+               
+                %fRange=(1./(cycs*[2 1/2]));
+
+                
+                
+                %chrParam.tapers=[dur/3 dur 1];  %width, dur, 
+                %chrParam.pad=[0];
+                %chrParam.Fs=[1];
+                %chrParam.fpass=fRange;
+                %chrParam.err=[2 0.05];  % use 2 for jacknife
+                
+                
+
+                                
+                chrParam.tapers=[3 5];
+                chrParam.pad=[0];
+                chrParam.Fs=[1];
+                chrParam.fpass=[0 .5];
+                chrParam.err=[2 0.05];  % use 2 for jacknife
+                
+                chrParam.fpass=[0.0 0.08] % these values are not dynamic to stim type... just for viewing
+                fscorr=true;   % maybe should be true so that the finit size correction for spikes is used
+                [C3,phi3,S13,S1,S3,f,zerosp,confC3,phistd3,Cerr3]=coherencycpb(cos(phases(whichType)'),spikeCount(sf:ef)',chrParam,fscorr);
+                [junk maxFreqIndFewTapers]=max(S1);         
+                                
+                figure
+                t1s=[3 5]% [1 3 5 20];
+                t2s=[5 9]% [ 5 10 20]
+                for ii=1:length(t1s)
+                    for jj=1:length(t2s)
+                        chrParam.tapers=[t1s(ii) t2s(jj)];
+                        [C3,phi3,S13,S1,S3,f,zerosp,confC3,phistd3,Cerr3]=coherencycpb(cos(phases(whichType)'),spikeCount(sf:ef)',chrParam,fscorr);
+                        
+                        [junk expectedFreqInd]=min(abs(eFreq-f));
+                        [junk maxFreqInd]=max(S1);
+                        peakFreqInds=find(S1>max(S1)*.95);
+                        
+                        subplot(length(t2s),length(t1s),(ii-1)*length(t1s)+jj)
+                        hold off
+                                                fill([f, fliplr(f)],[Cerr3(1,:), fliplr(Cerr3(2,:))],'m','faceAlpha',0.2,'edgeAlpha',0);
+                                                hold on;
+                        plot(f,S1/max(S1),'k');             
+                        plot(f,S3/max(S3),'b');
+                        plot(f,C3/max(C3),'r');
+
+                        %plot(f(expectedFreqInd),0,'r*')
+                        plot(f(maxFreqInd),0,'b*')
+                        plot(f(peakFreqInds),0.1,'b.')
+                        plot(f(maxFreqIndFewTapers),0.1,'g*')
+                    end
+                    
+                end
+                
+                if 0 % compare pt process estimates, which seem noiser
+                    pt.times=[spikeData.spikeTimestamps(whichSpikes)];  % are times in the right format?  seconds in a range
+                    t=[]; % should calc the time grid for the start and stop of the trial.
+                    fscorr=true;   % maybe should be true so that the finit size correction for spikes is used
+                    if chrParam.err(1)==2
+                        [C,phi,S12,S1,S2,f,zerosp,confC,phistd,Cerr]=coherencycpt(cos(phases(whichType)'),pt,chrParam,fscorr,t);
+                        [C3,phi3,S13,S1,S3,f,zerosp,confC3,phistd3,Cerr3]=coherencycpb(cos(phases(whichType)'),spikeCount(sf:ef)',chrParam,fscorr);
+                    else
+                        [C,phi,S12,S1,S2,f,zerosp]=coherencycpt(cos(phases(whichType)'),pt,chrParam,fscorr,t);
+                        [C3,phi3,S13,S1,S3,f,zerosp]=coherencycpb(cos(phases(whichType)'),spikeCount(sf:ef)',chrParam,fscorr);
+                    end
+                    
+                    
+                    figure
+                    plot(f,S1/max(S1),'k');             hold on;
+                    plot(f,S2/max(S2),'b');
+                    fill([f, fliplr(f)],[Cerr(1,:), fliplr(Cerr(2,:))],'c','faceAlpha',0.2,'edgeAlpha',0);
+                    plot(f,S3/max(S3),'r');
+                    fill([f, fliplr(f)],[Cerr3(1,:), fliplr(Cerr3(2,:))],'m','faceAlpha',0.2,'edgeAlpha',0);
+                    plot(f(expectedFreqInd),0,'r*')
+                    
+                end
+                
+                
+            
+            end
+            
             if 0 %development
                 
                 [b,a] = butter(1,.1);
@@ -146,7 +266,8 @@ for i=1:numRepeats
                 peakFreqInd=find(fy==max(fy));
                 pow=fx(peakFreqInd); % thi is what we use
                 figure; plot(fy); hold on; plot(fx,'r')
-                
+            end 
+            
                 if 0 % fancier spectral ideas not used
                     Fs=parameters.refreshRate;
                     
@@ -168,7 +289,7 @@ for i=1:numRepeats
                     plot(Xpsd)
                 end
                 
-            end
+
         end
     end
 end
@@ -226,7 +347,9 @@ end
 fullRate=events./possibleEvents;
 rate=reshape(sum(events)./sum(possibleEvents),numTypes,numPhaseBins); % combine repetitions
 [repInds typeInds]=find(isnan(pow));
-pow(unique(repInds),:)=[]; % remove reps with bad power estimates
+pow(unique(repInds),:)=[];   % remove reps with bad power estimates
+coh(unique(repInds),:)=[];   % remove reps with bad power estimates
+cohLB(unique(repInds),:)=[]; % remove reps with bad power estimates
 if numRepeats>2
     rateSEM=reshape(std(events(1:end-1,:,:)./possibleEvents(1:end-1,:,:)),numTypes,numPhaseBins)/sqrt(numRepeats-1);
 else
@@ -236,8 +359,14 @@ end
 if size(pow,1)>1
     powSEM=std(pow)/sqrt(size(pow,1));
     pow=mean(pow);
+    
+    cohSEM=std(coh)/sqrt(size(coh,1));
+    coh=mean(coh);
+    cohLB=mean(cohLB);  % do you really want the mean of the lower bound?  
 else
     powSEM=nan(1,size(pow,2));
+    cohSEM=nan(1,size(pow,2));
+    cohLB_SEM=nan(1,size(pow,2));
 end
 
 
@@ -290,8 +419,14 @@ subplot(3,2,3); plot(mean(rate'),'k','lineWidth',2); %legend({'Fo'})
 xlabel(sweptParameter); set(gca,'XTickLabel',valNames,'XTick',[1:length(vals)]); ylabel('rate (f0)'); set(gca,'YTickLabel',[0:.1:1]*parameters.refreshRate,'YTick',[0:.1:1])
 set(gca,'XLim',[1 length(vals)])
 
-subplot(3,2,4); plot(pow,'k','lineWidth',2); hold on; %legend({'f1'})
+subplot(3,2,4); plot(pow,'k','lineWidth',2); hold on; 
+cohScaled=coh*max(pow); %1 is peak FR
+plot(cohScaled,'color',[.8 .8 .8],'lineWidth',1); 
+sigs=find(cohLB>0);
+plot(sigs,cohScaled(sigs),'o','color',[.6 .6 .6]); 
+legend({'f1','coh'})
 plot([1:length(vals); 1:length(vals)],[pow; pow]+(powSEM'*[-1 1])','k')
+plot([1:length(vals); 1:length(vals)]+0.1,[coh; coh]+(cohSEM'*[-1 1])','color',[.8 .8 .8])
 xlabel(sweptParameter); set(gca,'XTickLabel',valNames,'XTick',[1:length(vals)]); ylabel('rate (f1)');
 ylim=get(gca,'YLim'); yvals=[ ylim(1) mean(ylim) ylim(2)];set(gca,'YTickLabel',yvals,'YTick',yvals)
 set(gca,'XLim',[1 length(vals)])

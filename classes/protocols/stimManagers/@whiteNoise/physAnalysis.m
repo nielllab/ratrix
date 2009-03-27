@@ -208,22 +208,40 @@ set(gcf,'position',[100 400 560 620])
 doSpatial=~(size(STA,1)==1 & size(STA,2)==1); % if spatial dimentions exist
 % %% spatial signal (best via bright)
 if doSpatial
+    
+    
+    %fit model to best spatial
+    stdThresh=1;
+    [STAenvelope STAparams] =fitGaussianEnvelopeToImage(analysisdata.cumulativeSTA(:,:,brightInd(3)),stdThresh,false,false,false);
+    cx=STAparams(2)*size(STAenvelope,2)+1;
+    cy=STAparams(3)*size(STAenvelope,1)+1;
+    stdx=size(STAenvelope,2)*STAparams(5);
+    stdy=size(STAenvelope,1)*STAparams(5);
+    e1 = fncmb(fncmb(rsmak('circle'),[stdx*1 0;0 stdy*1]),[cx;cy]);
+    e2 = fncmb(fncmb(rsmak('circle'),[stdx*2 0;0 stdy*2]),[cx;cy]);
+    e3 = fncmb(fncmb(rsmak('circle'),[stdx*3 0;0 stdy*3]),[cx;cy]);
+    
+    
     subplot(2,2,1)
     imagesc(squeeze(analysisdata.cumulativeSTA(:,:,brightInd(3))),rng);
     colormap(gray); colorbar;
     hold on; plot(brightInd(2), brightInd(1),'bo')
     hold on; plot(darkInd(2)  , darkInd(1),'ro')
     xlabel(sprintf('cumulative (%d-%d)',min(analysisdata.cumulativeTrialNumbers),max(analysisdata.cumulativeTrialNumbers)))
+    fnplt(e1,1,'g'); fnplt(e2,1,'g'); fnplt(e3,1,'g'); % plot elipses
+        
     
     subplot(2,2,2)
     hold off; imagesc(squeeze(STA(:,:,brightInd(3))),[min(STA(:)) max(STA(:))]);
     hold on; plot(brightInd(2), brightInd(1),'bo')
     hold on; plot(darkInd(2)  , darkInd(1),'ro')
     colormap(gray); colorbar;
-    
+    fnplt(e1,1,'g'); fnplt(e2,1,'g'); fnplt(e3,1,'g'); % plot elipses
     xlabel(sprintf('this trial (%d)',analysisdata.trialNumber))
     
     subplot(2,2,3)
+    
+    
 end
 
 timeMs=linspace(-timeWindowMs(1),timeWindowMs(2),size(STA,3));
@@ -253,6 +271,8 @@ if doSpatial
     % imagesc(STA(:,:,i),'range',[min(STA(:)) min(STA(:))]);
     % end
 end
+
+drawnow
 
 function [sig CI ind]=getTemporalSignal(STA,STV,numSpikes,selection)
 

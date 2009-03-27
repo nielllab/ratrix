@@ -30,7 +30,7 @@ switch(filterType)
         dateStop = dateRange(end);
         files = [];
         for i=1:length(goodRecs)
-            if goodRecs(i).dateStart<=dateStop && goodRecs(i).dateStop>=dateStart
+            if datenumFor30(goodRecs(i).dateStart)<=dateStop && datenumFor30(goodRecs(i).dateStop)>=dateStart
                 if isempty(files)
                     files = goodRecs(i);
                 else

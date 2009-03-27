@@ -1,6 +1,26 @@
-w = Screen('OpenWindow', 0, 0, [0 0 650 500]); 
-PsychEyelinkDispatchCallback(w); 
-%status = Eyelink('InitializeDummy', 'PsychEyelinkDispatchCallback');
-status = Eyelink('Initialize', 'PsychEyelinkDispatchCallback'); 
+w = Screen('OpenWindow', 1)
+Eyelink('Verbosity', 7)
+PsychEyelinkDispatchCallback(w) 
+status = Eyelink('Initialize', 'PsychEyelinkDispatchCallback')
+
+result = Eyelink('ImageModeDisplay')
+result = Eyelink('WaitForModeReady', 0)
+mode = Eyelink('CurrentMode')
+
+result = Eyelink('StartSetup')
+result = Eyelink('WaitForModeReady', 0)
+mode = Eyelink('CurrentMode')
+
+status = Eyelink('DriftCorrStart', 30, 30)
+result = Eyelink('WaitForModeReady', 2)
+mode = Eyelink('CurrentMode')
+
+result = Eyelink('StartSetup',1)
+
+status = Eyelink('DriftCorrStart', 30, 30, 1)
+
+status = Eyelink('DriftCorrStart', 30, 30, 1, 1, 1)
+
+pause
 Eyelink('Shutdown'); 
 sca;

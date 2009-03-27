@@ -1,4 +1,4 @@
-function PsychEyelinkDispatchCallback(callArgs)
+function rc = PsychEyelinkDispatchCallback(callArgs, msg)
 % Retrieve live eye-image from Eyelink, show it in onscreen window.
 %
 % This function is normally called from within the Eyelink() file, not from
@@ -20,6 +20,8 @@ persistent eyelinktex;
 
 % Cached window handle for target onscreen window:
 persistent win;
+persistent calxy;
+persistent imgtitle;
 
 % Cached constant definitions:
 persistent GL_RGBA;
@@ -32,6 +34,13 @@ if isempty(eyelinktex)
     GL_RGBA = 6408;
     GL_RGBA8 = 32856;
     GL_UNSIGNED_BYTE = 5121;
+end
+
+% Preinit return code to zero:
+rc = 0;
+
+if nargin < 2
+    msg = [];
 end
 
 if nargin < 1
@@ -67,20 +76,61 @@ end
 % Extract command code:
 eyecmd = callArgs(1);
 
-% Currently all command codes except eyecmd == 1 are no-ops, but one could
-% define command codes and switch-case for functions like drawing of
-% calibration targets etc.
-if eyecmd ~= 1
-    % Unknown command code: No operation.
-    return;
-end
-
 if isempty(win)
     warning('Got called as callback function from Eyelink() but usercode has not set a valid target onscreen window handle yet! Aborted.'); %#ok<WNTAG>
     return;
 end
 
-% Callback from Eyelink: We have a 'eyewidth' by 'eyeheight' pixels
+switch eyecmd
+    case 1,
+        % Nothing to do here. See code below for eye image display...
+        
+    case 2,
+        % Eyelink Keyboard query:
+        [isdown, secs, keyCode] = KbCheck;
+        if isdown
+            % This needs more thought. Which keys should we pass to
+            % Eyelink? How do our KbCheck keycodes map to Eyelinks
+            % expectations?
+            rc = min(find(keyCode)); %#ok<MXFND>
+            
+            % The proper implementation probably would use:
+            % For that we need the 'el' eyelinks struct. Not my business
+            % integrating this properly...
+            
+            % [rc, el]=EyelinkGetKey(el)
+        else
+            rc = 0;
+        end
+        
+    case 3,
+        % Alert message:
+        fprintf('Eyelink ALERT: %s.\n', msg);
+        
+    case 4,
+        % Image title:
+        fprintf('Eyelink image title is %s.\n', msg);
+        imgtitle = msg;
+        
+    case 5,
+        % Draw calibration target:
+        calxy = callArgs(2:3);
+        Screen('DrawDots', win, calxy, 5, [255 255 0]);
+        
+    case {6 , 7}
+        % Setup calibration display: Do nothing except clear screen:
+        Screen('Flip', win);
+        
+    otherwise
+        % Unknown command:
+        return;
+end
+
+if eyecmd ~= 1
+    return;
+end
+
+% Video callback from Eyelink: We have a 'eyewidth' by 'eyeheight' pixels
 % live eye image from the Eyelink system. Each pixel is encoded as a 4 byte
 % RGBA pixel with alpha channel set to a constant value of 255 and the RGB
 % channels encoding a 1-Byte per channel R, G or B color value. The
@@ -100,6 +150,16 @@ eyelinktex = Screen('SetOpenGLTextureFromMemPointer', win, eyelinktex, eyeimgptr
 
 % Draw texture centered in window:
 Screen('DrawTexture', win, eyelinktex);
+
+% Draw calibration target:
+if ~isempty(calxy)
+    Screen('DrawDots', win, calxy, 5, [255 255 0]);
+end
+
+% Draw title:
+if ~isempty(imgtitle)
+    Screen('DrawText', win, imgtitle, eyewidth / 2, 10, [255 0 0]); 
+end
 
 % Show it:
 Screen('Flip', win);

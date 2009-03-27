@@ -57,7 +57,7 @@ else
 end
 
 % {'flickerRamp',[0 .5]}
-vh=nAFC(sm,percentCorrectionTrials,constantRewards,eyeTracker,eyeController,dn,{'off'},true,'ptb');
+vh=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,{'off'},true,'ptb','center');
 
 pixPerCycs              =[20];
 targetOrientations      =[pi/2];
@@ -172,7 +172,7 @@ noiseStim=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLumin
 
 unfilteredNoise=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
-led=nAFC(sm,percentCorrectionTrials,constantRewards,[],[],[],{'off'},false,'LED');
+led=nAFC(sm,percentCorrectionTrials,constantRewards,[],{'off'},false,'LED');
 
 if ismac
     ts001 = '/Users/eflister/Desktop/ratrix trunk/classes/protocols/stimManagers/@flicker/ts001';

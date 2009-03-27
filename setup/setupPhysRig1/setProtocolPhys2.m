@@ -9,11 +9,11 @@ if ~all(ismember(subjIDs,getSubjectIDs(r)))
 end
 
 if ~exist('dataNetOn','var') || isempty(dataNetOn)
-     dataNetOn=0;
+     dataNetOn=1;
 end
 
 if ~exist('eyeTrackerOn','var') || isempty(eyeTrackerOn)
-     eyeTrackerOn=0;
+     eyeTrackerOn=1;
 end
 
 
@@ -72,9 +72,9 @@ cntrGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrast
 numAnulli=8;
 annuli=[0.02 0.05 .1 .2 .3 .4 .5 2]; % annulus of the grating
 contrasts=1; % reset to one value
-if 0
-    %location = RFestimator({'whiteNoise','fitGaussianSigEnvelope',{3,0.05,logical(ones(3))}},{'gratings','ttestF1',{0.05}},[],RFdataSource,[now-100 Inf]);
-    location = RFestimator({'whiteNoise','fitGaussian',{3}},{'gratings','ttestF1',{0.05,'fft'}},[],RFdataSource,[now-100 Inf]);
+if 1 % needs testing, datanet on
+     RFdataSource='\\132.239.158.179\datanet_storage'; % good only as long as default stations don't change, %how do we get this from the dn in the station!?
+     location = RFestimator({'whiteNoise','fitGaussian',{3}},{'gratings','ttestF1',{0.05,'fft'}},[],RFdataSource,[now-100 Inf]);
 end
 anGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
     waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
@@ -194,9 +194,6 @@ rptUnq=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminanc
 
 
 
-
-
-
 %flankers
 flankers=ifFeatureGoRightWithTwoFlank('phys');
 flankersFF=ifFeatureGoRightWithTwoFlank('physFullFieldTarget');
@@ -235,23 +232,23 @@ ffwn = whiteNoise(mean,std,background,method,stimLocation,stixelSize,searchSubsp
 
 %% trial / sound / reinforcement managers
 
-if dataNetOn
-    ai_parameters.numChans=3;
-    ai_parameters.sampRate=40000;
-    ai_parameters.inputRanges=repmat([-1 6],ai_parameters.numChans,1);
-    dn=datanet('stim','localhost','132.239.158.179','\\132.239.158.179\datanet_storage',ai_parameters)
-else
-    dn=[];
-end
-
-if eyeTrackerOn
-   alpha=12; %deg above...really?
-   beta=0;   %deg to side... really?
-   settingMethod='none';  % will run with these defaults without consulting user, else 'guiPrompt'
-   eyeTracker=geometricTracker('cr-p', 2, 3, alpha, beta, int16([1280,1024]), [42,28], int16([maxWidth,maxHeight]), [400,290], 300, -55, 0, 45, 0,settingMethod,10000); % changing calibration params we be updated by user on startup
-else
-   eyeTracker=[];
-end
+% if dataNetOn
+%       ai_parameters.numChans=3;
+%             ai_parameters.sampRate=40000;
+%             ai_parameters.inputRanges=repmat([-1 6],ai_parameters.numChans,1);
+%             dn=datanet('stim','localhost','132.239.158.179','\\132.239.158.179\datanet_storage',ai_parameters)
+% else
+%     dn=[];
+% end
+% 
+% if eyeTrackerOn
+%    alpha=12; %deg above...really?
+%    beta=0;   %deg to side... really?
+%    settingMethod='none';  % will run with these defaults without consulting user, else 'guiPrompt'
+%    eyeTracker=geometricTracker('cr-p', 2, 3, alpha, beta, int16([1280,1024]), [42,28], int16([maxWidth,maxHeight]), [400,290], 300, -55, 0, 45, 0,settingMethod,10000); % changing calibration params we be updated by user on startup
+% else
+%    eyeTracker=[];
+% end
 eyeController=[];
 
 sm=soundManager({soundClip('correctSound','allOctaves',[400],20000), ...
@@ -281,9 +278,10 @@ frameDropCorner=false;
 dropFrames=false;
 frameDropCorner={'off'};
 displayMethod='ptb';
-afc=nAFC(sm,percentCorrectionTrials,constantRewards,eyeTracker,eyeController,dn,frameDropCorner,dropFrames,displayMethod);
-
-ap=autopilot(percentCorrectionTrials,sm,constantRewards,eyeTracker,eyeController,dn,frameDropCorner,dropFrames,displayMethod);
+requestPort='center'; 
+afc=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,frameDropCorner,dropFrames,displayMethod,requestPort);
+requestPort='none'; 
+ap=autopilot(percentCorrectionTrials,sm,constantRewards,eyeController,frameDropCorner,dropFrames,displayMethod,requestPort);
 
 %% trainingsteps
 
@@ -291,14 +289,14 @@ svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
 svnCheckMode='session';
 
 %common "search and characterization"
-ts{1} = trainingStep(afc, ffwn,        repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
-ts{2} = trainingStep(afc, crf,         repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %contrast response
-ts{3} = trainingStep(afc, flankersFF,  repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %flankers with giant target
+ts{1} = trainingStep(afc, ffwn,        numTrialsDoneCriterion(3), noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
+ts{2} = trainingStep(afc, crf,         repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %contrast response
+ts{3} = trainingStep(afc, flankersFF,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %flankers with giant target
 ts{4} = trainingStep(afc, wn,          repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
-ts{5} = trainingStep(afc, anGratings,  repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %gratings: annulus size
+ts{5} = trainingStep(afc, anGratings,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %gratings: annulus size
 ts{6} = trainingStep(afc, flankers,    repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %flankers
-ts{7} = trainingStep(afc, biField,     numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %bipartite field for X-Y classification
-ts{8} = trainingStep(afc, sfGratings,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: spatial frequency (should it be before annulus?)
+ts{7} = trainingStep(afc, biField,     repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %bipartite field for X-Y classification
+ts{8} = trainingStep(afc, sfGratings,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %gratings: spatial frequency (should it be before annulus?)
 ts{9} = trainingStep(afc, orGratings,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: orientation
 
 ts{10}= trainingStep(afc, trf,         numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %temporal reponse
@@ -324,8 +322,8 @@ ts{21} = trainingStep(ap,  binNoise, repeatIndefinitely(), noTimeOff(), svnRev, 
 
 %% make and set it
 
-p=protocol('practice phys',{ts{1:19}});
-stepNum=uint8(6);
+p=protocol('practice phys',{ts{1:21}});
+stepNum=uint8(4);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

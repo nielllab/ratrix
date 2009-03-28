@@ -16,7 +16,8 @@ timestamps.drawingFinished=GetSecs;
 timestamps.when=timestamps.vbl+(framesPerUpdate-0.8)*ifi; %this 0.8 is critical -- get frame drops if it is 0.2.  mario uses 0.5.  in theory any number 0<x<1 should give identical results.
 %                                                         %discussion at http://tech.groups.yahoo.com/group/psychtoolbox/message/9165
 
-if ~paused && doFramePulse
+if false && ~paused && doFramePulse
+	%ONLY turn these on to do local tests for headroom -- leave them off in the main branch because they complicate pulse interpretation during real analysis
     framePulse(station);
     framePulse(station);
 end

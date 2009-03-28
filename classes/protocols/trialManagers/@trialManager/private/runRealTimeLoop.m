@@ -319,6 +319,8 @@ timestamps.phaseRecordsDone     = timestamps.lastFrameTime;
 timestamps.loopEnd              = timestamps.lastFrameTime;
 timestamps.prevPostFlipPulse    = timestamps.lastFrameTime;
 
+trialPulse(station);
+
 %show stim -- be careful in this realtime loop!
 while ~done && ~quit;
     timestamps.loopStart=GetSecs;
@@ -328,7 +330,8 @@ while ~done && ~quit;
     yTextPos = 20;
 
     if updatePhase == 1
-
+		phasePulse(station);
+		
         startTime=GetSecs(); % startTime is now per-phase instead of per trial, since corresponding times in responseDetails are also per-phase
         phaseNum=phaseNum+1;
         if phaseNum>length(phaseRecords)
@@ -977,8 +980,9 @@ trialRecords(trialInd).didStochasticResponse=any([phaseRecords.didStochasticResp
 trialRecords(trialInd).containedManualPokes=didManual;
 trialRecords(trialInd).leftWithManualPokingOn=manual;
 
-if doFramePulse
+if false && doFramePulse
     % do 3 pulses b/c the analysis expects a 2-pulse signal followed by a single-pulse signal
+	%do NOT turn these on except for local debugging.  real analysis should trigger off of a single pulse that occurs immediately after each screen flip.
     framePulse(station);
     framePulse(station);
     framePulse(station);

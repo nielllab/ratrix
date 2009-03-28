@@ -18,8 +18,8 @@ function st=makeDefaultStation(id,path,mac,physicalLocation,screenNum,rewardMeth
 % 13  status            i   left lick sensor
 % 14  control	inv     i/o	localPump withdrawnTooFar
 % 15  status            i
-% 16  control           i/o
-% 17  control	inv     i/o
+% 16  control           i/o phasePulse
+% 17  control	inv     i/o trialPulse
 
 
 
@@ -118,6 +118,8 @@ stationSpec.portSpec.framePulsePins           = int8(9);
 stationSpec.portSpec.eyePuffPins              = int8(6);
 stationSpec.datanet                           = dn;
 stationSpec.eyeTracker                        = et;
+stationSpec.portSpec.phasePulsePins           = int8(16);
+stationSpec.portSpec.trialPulsePins           = int8(17);
 
 if ismac
     stationSpec.portSpec = int8(3);

@@ -36,3 +36,6 @@
 /getScreenNum.m -text
 /getDatanet.m -text
 /getEyeTracker.m -text
+private/genericPulse.m -text
+/phasePulse.m -text
+/trialPulse.m -text

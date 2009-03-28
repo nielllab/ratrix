@@ -4,15 +4,15 @@ PsychEyelinkDispatchCallback(w)
 status = Eyelink('Initialize', 'PsychEyelinkDispatchCallback')
 
 result = Eyelink('ImageModeDisplay')
-result = Eyelink('WaitForModeReady', 0)
+result = Eyelink('WaitForModeReady', 10)
 mode = Eyelink('CurrentMode')
 
 result = Eyelink('StartSetup')
-result = Eyelink('WaitForModeReady', 0)
+result = Eyelink('WaitForModeReady', 10)
 mode = Eyelink('CurrentMode')
 
 status = Eyelink('DriftCorrStart', 30, 30)
-result = Eyelink('WaitForModeReady', 2)
+result = Eyelink('WaitForModeReady', 10)
 mode = Eyelink('CurrentMode')
 
 result = Eyelink('StartSetup',1)

@@ -1,8 +1,13 @@
-function s=startPTB(s)
+function s=startPTB(s,imagingTasks)
 
 clear Screen;
 Screen('Screens');
 try
+    
+    if ~exist(imagingTasks) || isempty('imagingTasks')
+        imagingTasks=[]; % default mode does not require any tasks for the imaging pipeline
+    end
+        
     AssertOpenGL;
     %Screen('Preference','Backgrounding',0);  %mac only?
     HideCursor;
@@ -35,14 +40,14 @@ try
     %4) Be pretty verbose about information and hints to optimize your code and system.
     %5) Levels 5 and higher enable very verbose debugging output, mostly useful for debugging PTB itself, not generally useful for end-users.
     
-    
-    
-    %PsychImaging('PrepareConfiguration');
-    %PsychImaging('AddTask', 'General', 'FloatingPoint32BitIfPossible'); %enable general support of such tasts
-
     preScreen=GetSecs();
-    s.window = Screen('OpenWindow',s.screenNum,0);%,[],32,2); %color, rect, depth, buffers (none can be changed in curent version)
-    %s.window = PsychImaging('OpenWindow', s.screenNum, 0); % use psychImaging if tasks are applied
+    if isempty(imagingTasks)
+        s.window = Screen('OpenWindow',s.screenNum,0);%,[],32,2);  %%color, rect, depth, buffers (none can be changed in basic version)
+    else
+        PsychImaging('PrepareConfiguration');
+        PsychImaging('AddTask', 'General', 'FloatingPoint32BitIfPossible'); %enable general support of such tasks
+        s.window = PsychImaging('OpenWindow', s.screenNum, 0); % use psychImaging if tasks are applied
+    end
     disp(sprintf('took %g to call screen(openwindow)',GetSecs()-preScreen))
     
     res=Screen('Resolution', s.screenNum);

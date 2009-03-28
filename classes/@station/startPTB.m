@@ -35,8 +35,14 @@ try
     %4) Be pretty verbose about information and hints to optimize your code and system.
     %5) Levels 5 and higher enable very verbose debugging output, mostly useful for debugging PTB itself, not generally useful for end-users.
     
+    
+    
+    %PsychImaging('PrepareConfiguration');
+    %PsychImaging('AddTask', 'General', 'FloatingPoint32BitIfPossible'); %enable general support of such tasts
+
     preScreen=GetSecs();
     s.window = Screen('OpenWindow',s.screenNum,0);%,[],32,2); %color, rect, depth, buffers (none can be changed in curent version)
+    %s.window = PsychImaging('OpenWindow', s.screenNum, 0); % use psychImaging if tasks are applied
     disp(sprintf('took %g to call screen(openwindow)',GetSecs()-preScreen))
     
     res=Screen('Resolution', s.screenNum);

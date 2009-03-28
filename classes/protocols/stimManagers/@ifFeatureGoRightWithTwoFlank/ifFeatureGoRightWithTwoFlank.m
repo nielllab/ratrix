@@ -184,6 +184,8 @@ switch nargin
                         p.targetOnOff=int32([10 50]);
                         p.flankerOnOff=int32([10 50]);
                         
+                        RFdataSource='\\132.239.158.179\datanet_storage';
+                        p.fitRF = RFestimator({'spatialWhiteNoise','fitGaussian',{1}},{'spatialWhiteNoise','fitGaussian',{1}},[],RFdataSource,[now-100 Inf]);
                         %temp restrict
                         %p.goLeftOrientations=p.goLeftOrientations(1);
                         %p.goRightOrientations=p.goRightOrientations(1);
@@ -566,10 +568,10 @@ switch nargin
             error ('wrong fields in blocking')
         end
 
-        if (checkFitRF(ifFeatureGoRightWithTwoFlank(),varargin{54}))
+        if isa(varargin{54},'RFestimator') || isempty(varargin{54})%(checkFitRF(ifFeatureGoRightWithTwoFlank(),varargin{54}))
             s.fitRF=varargin{54};
         else
-            error ('wrong fields in dynamic')
+            error ('fitRF must be an RFestimator object or empty')
         end
 
         if (checkDynamicSweep(ifFeatureGoRightWithTwoFlank(),varargin{55}))

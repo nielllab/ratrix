@@ -116,19 +116,37 @@ while ~success && ~isempty(goodFiles)
     % check that stimManagerClass==filter for now, but we should make filter more general
     fn=sprintf('stimRecords_%d-%s.mat', goodFiles(end).trialStart, goodFiles(end).dateStart);
     record=load(fullfile(subjectDataPath,'stimRecords',fn),'stimManagerClass'); % only get the class
-
-    switch filter
-        case {'whiteNoise','gratings'}
-            if strcmp(record.stimManagerClass,filter)
-                success=true;
+ 
+    % allows identity of a subclass to be determined based on the relevant params
+    switch record.stimManagerClass
+        case 'whiteNoise'
+            record=load(fullfile(subjectDataPath,'stimRecords',fn),'stimulusDetails')
+            if any(record.stimulusDetails.spatialDim>1)
+                stimIdentity='spatialWhiteNoise';
+            else
+                stimIdentity='temporalWhiteNoise';
             end
-        case 'anything'
-            %no check require
         otherwise
-            filter
-            error('bad request');
+            stimIdentity=record.stimManagerClass;
     end
     
+    switch filter
+        case 'whiteNoise'
+           error('whiteNoise must specify spatialWhiteNoise or temporalWhiteNoise')
+        case {'gratings','spatialWhiteNoise','temporalWhiteNoise'}
+            %okay to pass
+        case 'anything'
+            stimIdentity='anything'; %will match filter now
+        otherwise
+            filter
+            error('bad filter request');
+            %could turn this error off, and allow all stim types to be checked
+    end
+    
+    if strcmp(stimIdentity,filter)
+         success=true;
+    end
+            
     if success
         % load files desired in 'what'
         for w=1:length(what)

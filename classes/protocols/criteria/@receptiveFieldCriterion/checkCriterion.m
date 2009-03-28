@@ -6,6 +6,12 @@ function [graduate, details] = checkCriterion(c,subject,trainingStep,trialRecord
 recordType='largeData'; %circularBuffer
 graduate=0;
 
+
+sca
+disp('use util function to load analysis')
+keyboard
+
+
 % try to load the most recent analysis file and corresponding stimRecord
 % c.dataRecordsPath
 d=dir(fullfile(c.dataRecordsPath, getID(subject), 'analysis'));
@@ -64,6 +70,13 @@ else
                     graduate=1;
                 end
                 
+                error('COMPARE WITH THIS')
+                sigSpots=getSignificantSTASpots(RFData.STA,sum(RFData.cumulativeSpikeCount),RFData.mean,RFData.contrast,stimulus.fitRF.medianFilter,stimulus.fitRF.alpha);
+                if ~length(union(unique(sigSpots),[0 1]))==2
+                    error('more than one RF spot!')
+                end
+    
+    
             case 'circularBuffer'
                 error('not written yet');
             otherwise
@@ -73,6 +86,7 @@ else
 end
 
 
+   
 
 
 %play graduation tone

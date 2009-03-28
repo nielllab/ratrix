@@ -110,7 +110,8 @@ switch s.renderMode
             textures=nan(stimTypes,numOrients,numPhases);
 
             integerType='uint8';
-            s.cache.mask = cast(double(intmax(integerType))*(mask),integerType);
+            %s.cache.mask = cast(double(intmax(integerType))*(mask),integerType);
+            s.cache.mask = cast(double(intmax(integerType))*(mask),'double');
                    
             %draws fine but overlaps
 %             cache{1}.features=cast(double(intmax(integerType))*(goRightStim), integerType);
@@ -120,11 +121,19 @@ switch s.renderMode
 %             cache{5}.features=cast(double(intmax(integerType))*(distractorFlankerStim), integerType);
 
             %cache as double, range -1 to 1
-            cache{1}.features=(goRightStim-s.mean)*2;
-            cache{2}.features=(goLeftStim-s.mean)*2;
-            cache{3}.features=(flankerStim-s.mean)*2;
-            cache{4}.features=(distractorStim-s.mean)*2;
-            cache{5}.features=(distractorFlankerStim-s.mean)*2;
+%             cache{1}.features=(goRightStim-s.mean)*2;
+%             cache{2}.features=(goLeftStim-s.mean)*2;
+%             cache{3}.features=(flankerStim-s.mean)*2;
+%             cache{4}.features=(distractorStim-s.mean)*2;
+%             cache{5}.features=(distractorFlankerStim-s.mean)*2;
+            
+            
+            %cache as double, range -.5 to .5
+            cache{1}.features=(goRightStim-s.mean);
+            cache{2}.features=(goLeftStim-s.mean);
+            cache{3}.features=(flankerStim-s.mean);
+            cache{4}.features=(distractorStim-s.mean);
+            cache{5}.features=(distractorFlankerStim-s.mean);
             
 %             %gratings range from [-0.5  1.5]...wierd
 %             %1*cos(linspace(0, pi,6))+0.5
@@ -144,14 +153,23 @@ switch s.renderMode
             for type=1:stimTypes
                 for o=1:orientsPerType(type)
                     for p=1:phasesPerType(type)
-                        %add an alpha channel
+                        %add an alpha channel - i don't think this is necc.
                         %fourChannelIM=repmat(cache{type}.features(:,:,o,p), [1, 1, 4]);
                         %fourChannelIM(:,:,4)=s.cache.mask;
                         %textures(type,o,p)= screen('makeTexture',w,fourChannelIM);   
-                       
-                        % Screen('BlendFunction', textures(type,o,p),GL_SRC_ALPHA, GL_ONE); % blend source then add it
-                        %textures(type,o,p)= screen('makeTexture',w,cache{type}.features(:,:,o,p)); % NO ALPHA  
-                        textures(type,o,p)= screen('makeTexture',w,cache{type}.features(:,:,o,p),[],[],1); % NO ALPHA , double precision
+                        
+                        % Screen('BlendFunction',  textures(type,o,p),GL_SRC_ALPHA, GL_ONE); % blend source then add it; mario only does it once before the loop in garboriumDemo
+                        %textures(type,o,p)= screen('makeTexture',w,cache{type}.features(:,:,o,p)); %default has no control over precision%
+                        textures(type,o,p)= screen('makeTexture',w,cache{type}.features(:,:,o,p),[],[],1); % NO ALPHA , FAN USES precision=1 for gratings, 0.5 centered doubles, [-.5 1.5]
+                        %textures(type,o,p)= screen('makeTexture',w,cache{type}.features(:,:,o,p),[],[],2); % NO ALPHA , Mario uses precision= 2 for garboriumDemo, 0 centered doubles, +/-0.27
+
+                        %[oldmaximumvalue oldclampcolors] = Screen('ColorRange', w);   %this is [1 255], could that be limiting? fan's also has [1 255] inside of gratings expertFrame, so prob not
+                        check=Screen('getImage',textures(type,o,p));
+                        if 1 %all(check(:)==128)
+                            checkD=Screen('getImage',textures(type,o,p),[],[],2);
+                            sca
+                            keyboard
+                        end
                     end
                 end
             end

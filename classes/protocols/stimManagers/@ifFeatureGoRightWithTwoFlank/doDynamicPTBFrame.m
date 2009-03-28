@@ -11,6 +11,8 @@ function [doFramePulse expertCache dynamicDetails textLabel i dontclear] = ...
 %drawExpertFrame(stimulus,stim,i,phaseStartTime,window,textLabel,destRect,filtMode,expertCache,ifi,scheduledFrameNum,dropFrames,dontclear)
 
 
+error('old code to be deleted')
+
 
 %properties of screen
 filterMode=1; %0 = Nearest neighbour filtering, 1 = Bilinear

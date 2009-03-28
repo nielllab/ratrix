@@ -985,3 +985,15 @@ eventLog{eventNum}.issuedBy ='pmm'; % sarah lets me know
 eventLog{eventNum}.comment ='many rats get a bad bias after long inter trials hits them'; 
 eventLog{eventNum}.details.from = []; 
 eventLog{eventNum}.details.to   = [];  
+
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Mar.27,2009');%datestr(now,21)  
+eventLog{eventNum}.eventName ={'startCarrots'};
+eventLog{eventNum}.subject ={'139'}; %102, 117, etc...
+eventLog{eventNum}.stationID ={''}; 
+eventLog{eventNum}.issuedBy ='pmm';  % sarah identified
+eventLog{eventNum}.comment ='dropped BW to ~80%, stabalized with h20 rewards 2-3 wks, now trying to bring back up'; 
+eventLog{eventNum}.details.from = 'noCarrots'; 
+eventLog{eventNum}.details.to   = 'dailyCarrots';  
+

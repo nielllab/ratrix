@@ -7,6 +7,8 @@ function [doFramePulse expertCache dynamicDetails textLabel i dontclear] = ...
 
 floatprecision=1;
 
+
+
 % increment i
 if dropFrames
     i=scheduledFrameNum;
@@ -97,6 +99,22 @@ if ~isempty(stim.masks)
     Screen('DrawTexture', window, expertCache.masktexs{stim.maskInds(gratingToDraw)}, [], destRect,[], filtMode);
     Screen('DrawTexture',window,expertCache.annulitexs{stim.annuliInds(gratingToDraw)},[],destRect,[],filtMode);
 end
+
+
+inspect=0;
+if inspect & i>3
+    [oldmaximumvalue oldclampcolors] = Screen('ColorRange', window)
+    x=Screen('getImage', window)
+    tx=Screen('getImage', gratingtex)
+    unique(tx(:)')
+    figure; hist(double(tx(:)'),200)
+    figure; imagesc(tx); % what is this? mean up front and then black heavy grating?
+     unique(tx(:)')
+    figure; hist(double(tx(:)'),200)
+    sca
+    keyboard
+end
+
 
 % clear the gratingtex from vram
 Screen('Close',gratingtex);

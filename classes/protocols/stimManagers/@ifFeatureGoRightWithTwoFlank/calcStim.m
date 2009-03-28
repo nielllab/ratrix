@@ -335,66 +335,23 @@ details.gratingType=stimulus.gratingType;
 details.positionalHint=stimulus.positionalHint;
 details.xPosNoiseStd = stimulus.xPosNoise;
 details.yPosNoiseStd = stimulus.yPosNoise;
-fitRF=0; % still in testing mode
-if fitRF
-    dataPath='\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\Fan\datanet\demo2';
-    % subjectID=
-    % analysisPath=fullfile(c.dataRecordsPath, getID(subject), 'analysis');
-    RFData=getNeuralAnalysis(dataPath,'last','RFEstimate');
-    stimulus.fitRF.medianFilter=logical(ones(3));
-    stimulus.fitRF.alpha=.05;
-
-
-
-    sigSpots=getSignificantSTASpots(RFData.STA,sum(RFData.cumulativeSpikeCount),RFData.mean,RFData.contrast,stimulus.fitRF.medianFilter,stimulus.fitRF.alpha);
-    if ~length(union(unique(sigSpots),[0 1]))==2
-        error('more than one RF spot!')
+if ~isempty(stimulus.fitRF) & isa(stimulus.fitRF,'RFestimator')
+    
+    if size(trialRecords(end).subjectsInBox,2)==1
+        subjectID=char(trialRecords(end).subjectsInBox);
+    else
+        error('only one subject allowed')
     end
+    
+    [center details.RFsourceCenter details.RFdetailsCenter]=getCenter(stimulus.fitRF,subjectID);
+    [bound  details.RFsourceBound  details.RFdetailsBound]=getBoundary(stimulus.fitRF,subjectID);
 
-    %fake it for code
-%%   
-    stimParams = [ rand/3 4 0 pi/6 1 0.001 rand rand ];
-    %STA=computeGabors(params,0.5,64,64,'square','normalizeVertical',0)-.48+ 0.05*randn(64,64);
-    %sigSpots=abs(STA)>0.4;
-    STA=computeGabors(stimParams,0.5,64,64,'square','normalizeVertical',0)+ 0.09*(randn(64,64) + 0.1);
-    sigSpots=getSignificantSTASpots(STA,500,[],0.005);  
-    
-    %fit a guassian to the binary image -- conservative
-    [sigEnvelope sigConservativeParams] =fitGaussianEnvelopeToImage(sigSpots,0.05,[],false,false);
-    
-    %use the conservative field to narrow a better seach of the STA
-    [STAenvelope STAparams] =fitGaussianEnvelopeToImage(STA,0.05,sigEnvelope,false,false);
-    
-    mixIm=zeros([size(STA) 3]);
-    
-    mixIm(:,:,1)=1-sigSpots;
-    mixIm(:,:,2)=(STA-min(STA(:)))/range(STA(:));
-    mixIm(:,:,3)=1-STAenvelope;
-    %mixIm(:,:,3)=1-sigEnvelope;
-    image(mixIm)
-
-    
-    details.stdGaussMask=STAparams(4)*3;
-    details.xPositionPercent=STAparams(1);
-    details.yPositionPercent=STAparams(2);
-    
-    
-    stimParams = [details.stdGaussMask 4 0 pi/6 1 0.001 STAparams(1:2) ]; % stim
-    stim=computeGabors(stimParams,0.5,64,64,'square','normalizeVertical',0)+ 0.09*(randn(64,64) + 0.1);
-    
-    subplot(2,2,1); imagesc(STA)
-    subplot(2,2,2); image(mixIm)
-    subplot(2,2,3); image(mixIm)
-    subplot(2,2,4); imagesc(stim-STAenvelope)
-%% 
-    %[bw params] =fitElipseToBinaryImage(sigSpots)
-
-    %%
-    details.stdGaussMask=a
-    details.xPositionPercent=STAparams(1);
-    details.yPositionPercent=STAparams(2);
-else
+    details.stdGaussMask=bound;  % if gauss , use same, if circ then std*4?
+    details.xPositionPercent=center(1);
+    details.yPositionPercent=center(2);
+    details.fitRf=struct(stimulus.fitRF);
     details.stdGaussMask=stimulus.stdGaussMask;
+else
     details.xPositionPercent=stimulus.xPositionPercent;
     details.yPositionPercent=stimulus.targetYPosPct;
 end    

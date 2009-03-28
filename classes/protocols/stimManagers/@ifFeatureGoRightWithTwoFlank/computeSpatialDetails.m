@@ -59,8 +59,8 @@ while stimFit == 0
     end
     pos = pos + hintOffSet;
 
-    % CHECK ERROR WITHOUT NOISE
-    if any(any((pos(:,1:2)<1) | (pos(:,1:2)>height) | (pos(:,3:4)<1) | (pos(:,3:4)>width)))
+    % CHECK ERROR WITHOUT NOISE - dynamic may pass
+    if any(any((pos(:,1:2)<1) | (pos(:,1:2)>height) | (pos(:,3:4)<1) | (pos(:,3:4)>width))) && isempty(strfind(stimulus.renderMode,'dynamic'))
         width
         height
         xPixHint
@@ -68,7 +68,9 @@ while stimFit == 0
         centers
         pos
         sca
+        edit(mfilename)
         keyboard
+        
         error('At least one image patch is going to be off the screen.  Make patches smaller or closer together or check the size of xPosHint.')
     end
 
@@ -83,7 +85,7 @@ while stimFit == 0
     pos = pos + repmat([yPixShift, yPixShift, xPixShift, xPixShift], numPatchesInserted, 1);
 
     %ERROR CHECK WITH NOISE
-    if any(any((pos(:,1:2)<1) | (pos(:,1:2)>height) | (pos(:,3:4)<1) | (pos(:,3:4)>width)))
+    if any(any((pos(:,1:2)<1) | (pos(:,1:2)>height) | (pos(:,3:4)<1) | (pos(:,3:4)>width))) && isempty(strfind(stimulus.renderMode,'dynamic'))
         resampleCounter = resampleCounter+1;
         display(sprintf('stimulus off screen because of noise, number of resamples = %d', resampleCounter));
         if resampleCounter > 10

@@ -4,7 +4,7 @@ clear Screen;
 Screen('Screens');
 try
     
-    if ~exist(imagingTasks) || isempty('imagingTasks')
+    if ~exist('imagingTasks','var') || isempty('imagingTasks')
         imagingTasks=[]; % default mode does not require any tasks for the imaging pipeline
     end
         

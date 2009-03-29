@@ -1,4 +1,5 @@
 BOMB DEBUGGING GUIDE
+applies to all bomb revisions
 
 
 STEP ONE

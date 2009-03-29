@@ -166,6 +166,12 @@ try
     end
     
     
+    %always need this in order to wipe out the existing image from before...
+      Screen('FillRect',window, stim.backgroundColor);
+    %end
+    
+    
+    
     if targetIsOn || flankerIsOn
         version=stimulus.renderMode(strfind(stimulus.renderMode,'-')+1:end);
         switch version
@@ -183,12 +189,6 @@ try
                 
                 %[resident texidresident] = Screen('PreloadTextures', window)
                 
-                %if 0 % try turning off in case real time loops call is
-                %good enough - text overlaps if its turned off
-                   Screen('FillRect',window, stim.backgroundColor);
-                %end
-                
-
                 %draw the patches
                 N=size(oInd,2);
                 %                         for n=1:N
@@ -276,7 +276,7 @@ try
                 % Gaussian Mask are stored seperate and gratings are recalculated
                 
                 %[resident texidresident] = Screen('PreloadTextures', window)
-                Screen('FillRect',window, stim.backgroundColor);
+
                 
                 maskInd = stimulus.stdGaussMask==details.stdGaussMask
                 WHITE=double(intmax(class(stim)));
@@ -302,7 +302,7 @@ try
                 
                 
                 %[resident texidresident] = Screen('PreloadTextures', window)
-                Screen('FillRect',window, stim.backgroundColor);
+
                 
                 rotAngles=rad2deg(params(:,4)');
                 

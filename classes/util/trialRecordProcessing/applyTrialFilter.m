@@ -40,7 +40,7 @@ switch(filterType)
         end
 
     case 'lastNTrials'
-        if length(filter) ~= 2 || ~isinteger(filter{2}) || ~isscalar(filter{2}) || filter{2} < 0
+        if length(filter) ~= 2 || ~iswholenumber(filter{2}) || ~isscalar(filter{2}) || filter{2} < 0
             error('Invalid filter parameters for lastNTrials')
         end
         lastNTrials = filter{2};

@@ -222,11 +222,19 @@ if doSpatial
     e3 = fncmb(fncmb(rsmak('circle'),[stdx*3 0;0 stdy*3]),[cx;cy]);
     
     
-    subplot(2,2,1)
+    %get significant pixels and denoised spots
+    empiricMean=mean(stimData(:));
+    empiricStd=std(stimData(:));
+    [bigSpots sigPixels]=getSignificantSTASpots(analysisdata.cumulativeSTA(:,:,brightInd(3)),analysisdata.cumulativeNumSpikes,empiricMean,empiricStd,ones(3),3,0.05);
+    [bigIndY bigIndX]=find(bigSpots~=0);
+    [sigIndY sigIndX]=find(sigPixels~=0);
+    
     imagesc(squeeze(analysisdata.cumulativeSTA(:,:,brightInd(3))),rng);
     colormap(gray); colorbar;
     hold on; plot(brightInd(2), brightInd(1),'bo')
-    hold on; plot(darkInd(2)  , darkInd(1),'ro')
+    hold on; plot(darkInd(2)  , darkInd(1),  'ro')
+    hold on; plot(bigIndX     , bigIndY,     'y.')
+    hold on; plot(sigIndX     , sigIndY,     'y.','markerSize',1)
     xlabel(sprintf('cumulative (%d-%d)',min(analysisdata.cumulativeTrialNumbers),max(analysisdata.cumulativeTrialNumbers)))
     fnplt(e1,1,'g'); fnplt(e2,1,'g'); fnplt(e3,1,'g'); % plot elipses
         

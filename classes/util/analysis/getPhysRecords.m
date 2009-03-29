@@ -120,7 +120,7 @@ while ~success && ~isempty(goodFiles)
     % allows identity of a subclass to be determined based on the relevant params
     switch record.stimManagerClass
         case 'whiteNoise'
-            record=load(fullfile(subjectDataPath,'stimRecords',fn),'stimulusDetails')
+            record=load(fullfile(subjectDataPath,'stimRecords',fn),'stimulusDetails');
             if any(record.stimulusDetails.spatialDim>1)
                 stimIdentity='spatialWhiteNoise';
             else

@@ -13,10 +13,15 @@ while true
     if ~all(this==last)
         clc
         last=this %type out the state of the left, center, right sensors (zero=open, one=blocked)
+        'hit a key to quit'
     end
     t=closed;
     t(valves(out(sensors)))='1';
     lptwrite(hex2dec(addr),bin2dec(t));
+    if KbCheck
+        lptwrite(hex2dec(addr),bin2dec(closed));
+        break
+    end
 end
 
 

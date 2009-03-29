@@ -247,7 +247,7 @@ function s=station(varargin)
 	end
 end
 
-function [out assignedSoFar]=assignPins(pins,dir,baseAddr,dontMatch)
+function [out assignedSoFar]=assignPins(pins,dir,baseAddr,dontMatch,pinGroupName)
 	out=[];
 	checks={};
 	for cNum=1:length(pins)

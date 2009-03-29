@@ -1,2 +1,2 @@
 function phasePulse(s)
-	genericPulse(s,phasePulsePins);
+	genericPulse(s,s.phasePulsePins);

@@ -146,10 +146,13 @@ switch s.renderMode
 %             cache{5}.features=s.mean+(distractorFlankerStim-s.mean)*2;
             
             
+
+
             
             disp('pre-caching textures into PTB');
             w=getWindow() %local helper function
             Screen('BlendFunction', w,GL_SRC_ALPHA, GL_ONE); % blend source then add it
+            %interTrialTex= screen('makeTexture',w,0.5,[],[],2); % try to prevent conflicts... this shouldn't be necc. trak ticket/286 DOES NOT HELP
             for type=1:stimTypes
                 for o=1:orientsPerType(type)
                     for p=1:phasesPerType(type)
@@ -160,20 +163,24 @@ switch s.renderMode
                         
                         % Screen('BlendFunction',  textures(type,o,p),GL_SRC_ALPHA, GL_ONE); % blend source then add it; mario only does it once before the loop in garboriumDemo
                         %textures(type,o,p)= screen('makeTexture',w,cache{type}.features(:,:,o,p)); %default has no control over precision%
-                        textures(type,o,p)= screen('makeTexture',w,cache{type}.features(:,:,o,p),[],[],1); % NO ALPHA , FAN USES precision=1 for gratings, 0.5 centered doubles, [-.5 1.5]
-                        %textures(type,o,p)= screen('makeTexture',w,cache{type}.features(:,:,o,p),[],[],2); % NO ALPHA , Mario uses precision= 2 for garboriumDemo, 0 centered doubles, +/-0.27
+                        %textures(type,o,p)= screen('makeTexture',w,cache{type}.features(:,:,o,p),[],[],1); % NO ALPHA , FAN USES precision=1 for gratings, 0.5 centered doubles, [-.5 1.5]
+                        textures(type,o,p)= screen('makeTexture',w,cache{type}.features(:,:,o,p),[],[],2); % NO ALPHA , Mario uses precision= 2 for garboriumDemo, 0 centered doubles, +/-0.27
 
-                        %[oldmaximumvalue oldclampcolors] = Screen('ColorRange', w);   %this is [1 255], could that be limiting? fan's also has [1 255] inside of gratings expertFrame, so prob not
-                        check=Screen('getImage',textures(type,o,p));
-                        if 1 %all(check(:)==128)
-                            checkD=Screen('getImage',textures(type,o,p),[],[],2);
-                            sca
-                            keyboard
-                        end
+                        %[oldmaximumvalue oldclampcolors] = Screen('ColorRange', w);   %this is [1 255], could that be limiting? fan's also has [1 255] inside of gratings expertFrame, so prob not               
                     end
                 end
             end
 
+            temp=cumprod(size(textures));
+            numTexs=temp(end)
+            for i=1:numTexs
+                txs{i}=Screen('GetImage', textures(i),[],[],2);
+                [type o p]=ind2sub(size(textures),i); %type,o,p
+                typeSz(i,:)=[type o p size(txs{i}) textures(i)];
+            end
+            
+            s.cache.typeSz=typeSz;
+                 
             %[resident [texidresident]] = Screen('PreloadTextures', windowPtr [, texids]); %%use preload?;   
                         
             %s.cache.maskTexture = screen('makeTexture',w,s.cache.mask);

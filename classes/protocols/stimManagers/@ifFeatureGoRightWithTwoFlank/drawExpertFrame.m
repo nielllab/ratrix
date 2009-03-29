@@ -185,7 +185,7 @@ try
                 
                 %if 0 % try turning off in case real time loops call is
                 %good enough - text overlaps if its turned off
-                   % Screen('FillRect',window, stim.backgroundColor);
+                   Screen('FillRect',window, stim.backgroundColor);
                 %end
                 
 
@@ -212,7 +212,7 @@ try
                 %                         alpha=globalAlpha(1:N)
                 %                         modColor=modulateColor
                 %                         textShade=textureShader
-                %Screen('DrawTextures', window, stimulus.cache.textures(texInds) ,[] , destinationRect(1:N,:)', [], repmat(filterMode,1,N), globalAlpha(1:N), modulateColor, textureShader);
+                Screen('DrawTextures', window, stimulus.cache.textures(texInds) ,[] , destinationRect(1:N,:)', [], repmat(filterMode,1,N), globalAlpha(1:N), modulateColor, textureShader);
                 %Screen('DrawTextures', windowPointer, texturePointer(s) [, sourceRect(s)] [, destinationRect(s)] [, rotationAngle(s)] [, filterMode(s)] [, globalAlpha(s)] [, modulateColor(s)] [, textureShader] [, specialFlags] [, auxParameters]);
                 
                 %                         mainIm=unique(Screen('GetImage', window))
@@ -220,7 +220,7 @@ try
                 
                 
                 
-                inspect=1;
+                inspect=0;
                 if inspect & i>25% mean(before(:)==255)>0.012  %
                     [oldmaximumvalue oldclampcolors] = Screen('ColorRange', window); 
                     x=Screen('GetImage', window);
@@ -229,19 +229,44 @@ try
                     tx2=Screen('GetImage', stimulus.cache.textures(texInds(2)));
                     tx3=Screen('GetImage', stimulus.cache.textures(texInds(3)));
                     
-                    tx1d=Screen('GetImage', stimulus.cache.textures(texInds(1)),[],[],1);
-                    tx2d=Screen('GetImage', stimulus.cache.textures(texInds(2)),[],[],1);
-                                        
+                    tx1d=Screen('GetImage', stimulus.cache.textures(texInds(1)),[],[],2);
+                    tx2d=Screen('GetImage', stimulus.cache.textures(texInds(2)),[],[],2);
+                    
+                    
+                    temp=cumprod(size(stimulus.cache.textures));
+                    numTexs=temp(end)
+                    for i=1:numTexs
+                        txs{i}=Screen('GetImage', stimulus.cache.textures(i),[],[],2);
+                        [type o p]=ind2sub(size(stimulus.cache.textures),i); %type,o,p
+                        typeSz(i,:)=[type o p size(txs{i}) stimulus.cache.textures(i)]
+                    end
+                    
                     sca
+                    
+                    typeSz
+                    %stimulus.cache.typeSz
+                    figure; hist(double(xd(:)),255)
+                    fractionWhite=mean(xd(:)==1)
+                    screenRange=minmax(double(xd(:)'))
+                    tx1Range=minmax(double(tx1d(:)'))
+                    tx2Range=minmax(double(tx2d(:)'))
+                    if any(typeSz(:)~=stimulus.cache.typeSz(:))
+                        [type feature]=find(typeSz~=stimulus.cache.typeSz);
+                        badValues=typeSz(unique(type),feature);
+                        val=unique(txs{unique(type)})
+                        disp(sprintf('szX and szY have changed! : [%d   %d] its val is: %4.4f',badValues,val))
+                    else
+                        disp('sizes match... yay')
+                    end
+                    
                     keyboard
                     figure; imagesc(x)
-                    figure; imagesc(tx2)
-                    figure; hist(double(xd(:)),200)
-                    minmax(double(x(:)'))
-                    minmax(double(st(:)'))
+                    figure; imagesc(tx1)
+                    figure; hist(double(x(200:end,:)),255)
+
                     
                     
-                    xx=Screen('GetImage', stimulus.cache.textures(texInds(1)));
+                   
                 end
                 
                 

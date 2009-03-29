@@ -30,10 +30,10 @@ switch nargin
     case 8
         % create object using specified values
         % receptiveFieldLocation
-        if isvector(varargin{1}) && length(varargin{1}) == 2
+        if (isvector(varargin{1}) && length(varargin{1}) == 2) || isa(varargin{1},'RFestimator')
             s.receptiveFieldLocation = varargin{1};
         else
-            error('receptiveFieldLocation must be a two-element array [xPos yPos] as fractional locations');
+            error('receptiveFieldLocation must be a two-element array [xPos yPos] as fractional locations, or an RFestimator');
         end
         % frequencies
         if isvector(varargin{2}) && isnumeric(varargin{2})

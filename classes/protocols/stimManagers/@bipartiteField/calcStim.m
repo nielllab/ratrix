@@ -43,7 +43,19 @@ numFramesToMake = numFramesPerFreq * length(frequencies) * repetitions;
 
 framesL=[];
 framesR=[];
-partition=stimulus.receptiveFieldLocation;
+
+
+if isa(stimulus.receptiveFieldLocation,'RFestimator')
+    if size(trialRecords(end).subjectsInBox,2)==1
+        subjectID=char(trialRecords(end).subjectsInBox);
+    else
+        error('only one subject allowed')
+    end
+    partition=getCenter(stimulus.receptiveFieldLocation,subjectID);
+else
+    partition=stimulus.location;
+end
+
 % calculate the number of pixels horizontally on each side (reduced using gcd)
 leftlength=floor(partition(1)*width);
 rightstart=ceil(partition(1)*width);

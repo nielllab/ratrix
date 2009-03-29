@@ -28,6 +28,9 @@ if ~isempty(dynamicSweep)
     if ~isempty(dynamicSweep.sweptValues) & ~strcmp('manual',dynamicSweep.sweepMode{1})
         error('sweptValues must be empty if in any mode but manual')
     end
+     if ~((iswholenumber(dynamicSweep.numRepeats) & dynamicSweep.numRepeats>0) || isinf(dynamicSweep.numRepeats))
+        error('numRepeats must a whole number greater than 0, or Inf')
+    end
     %not used
 %     if ~(isnumeric(dynamicSweep.ISI) & dynamicSweep.ISI>=0)
 %         error('ISI must be a number >=0')

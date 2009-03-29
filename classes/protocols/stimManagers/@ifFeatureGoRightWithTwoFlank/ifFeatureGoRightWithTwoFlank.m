@@ -181,8 +181,8 @@ switch nargin
                         p.goRightContrast=1;
                         p.stdGaussMask=1/16;
                         p.pixPerCycs=32;
-                        p.targetOnOff=int32([10 50]);
-                        p.flankerOnOff=int32([10 50]);
+                        p.targetOnOff=int32([40 50]);
+                        p.flankerOnOff=int32([40 50]);
                         
                         RFdataSource='\\132.239.158.179\datanet_storage';
                         p.fitRF = RFestimator({'spatialWhiteNoise','fitGaussian',{1}},{'spatialWhiteNoise','fitGaussian',{1}},[],RFdataSource,[now-100 Inf]);
@@ -192,11 +192,15 @@ switch nargin
                         %p.flankerOrientations=p.flankerOrientations(1);
                         %p.flankerPosAngle=p.flankerPosAngle(1);
                         
+                        
+                        s.interTrialLuminance=0;  % just a test
+                        
                         p.renderMode='dynamic-precachedInsertion'; % dynamic-maskTimesGrating, dynamic-onePatchPerPhase,or dynamic-onePatch
                         
                         p.dynamicSweep.sweepMode={'ordered'};
                         p.dynamicSweep.sweptValues=[];
                         p.dynamicSweep.sweptParameters={'targetOrientations','flankerOrientations','flankerPosAngle','phase'};% 'flankerOrientations'}%,'flankerOffset','flankerPosAngle'};
+                        p.dynamicSweep.numRepeats=2;
                         %         p.fitRF.fitMethod='elipse';
                         %         p.fitRF.which='last';
                         %         p.fitRF.medianFilter=logical(ones(3));
@@ -211,6 +215,7 @@ switch nargin
                         p.dynamicSweep.sweepMode={'ordered'};
                         p.dynamicSweep.sweptValues=[];
                         p.dynamicSweep.sweptParameters={'targetOrientations'};
+                        p.dynamicSweep.numRepeats=4;
                     case '10'
                         p.renderMode='ratrixGeneral-precachedInsertion';
                     otherwise

@@ -92,8 +92,8 @@ try
             end
             
             graduate = checkCriterion(ts.criterion,subject,ts, trialRecords);
-            %END SESSION BY GRADUATION
-            if graduate
+            %END SESSION BY GRADUATION (only if not in standalone mode)
+            if graduate && isempty(getStandAlonePath(r))
                 %do the graduation
                 %This code already exists in the doTrial for the subject
 

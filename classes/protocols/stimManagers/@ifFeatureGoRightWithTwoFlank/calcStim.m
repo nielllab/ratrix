@@ -403,10 +403,16 @@ switch details.renderMode
                  %                  requestPort=2; % center with 3 ports
                  %                 [out ] = phaseify(nAFC,details,type,targetPorts,distractorPorts,requestPort,scaleFactor,interTrialLuminance,details.hz)
                  
-                 %AUTOTRIGGERED
-                 % now create stimSpecs (copied from gratings march 20.2009)
+                 %AUTOTRIGGERED      
+                 if isinf(stimulus.dynamicSweep.numRepeats)
+                     timeout=[];
+                 else
+                     timeout=max([details.targetOnOff details.flankerOnOff])*size(stimulus.dynamicSweep.sweptValues,2)* stimulus.dynamicSweep.numRepeats;
+                 end
+
+                  % now create stimSpecs (copied from gratings march 20.2009)
                  type='phased';
-                 out{1} = stimSpec(details,{[] 2},'expert',0,[],[],scaleFactor,0,details.hz,[],'display'); % expert mode
+                 out{1} = stimSpec(details,{[] 2},'expert',0,timeout,[],scaleFactor,0,details.hz,[],'display'); % expert mode
                  out{2} = stimSpec(interTrialLuminance,{[] 1},'loop',0,1,[],scaleFactor,1,details.hz,[],'itl');
                  
              otherwise 

@@ -285,7 +285,7 @@ afc=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,frameDropCorne
 requestPort='none'; 
 ap=autopilot(percentCorrectionTrials,sm,constantRewards,eyeController,frameDropCorner,dropFrames,displayMethod,requestPort);
 
-rfIsGood=receptiveFieldCriterion(0.05,RFdataSource,1,'box',3)
+rfIsGood=receptiveFieldCriterion(0.05,RFdataSource,1,'box',3);
 
 
 

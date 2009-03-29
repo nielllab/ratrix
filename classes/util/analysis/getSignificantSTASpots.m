@@ -59,7 +59,7 @@ significantPixels2D=significantPixels(:,:,whichTime(1));
 bigs = bwareaopen(sigSpots2D,atLeastNpixels);
 bigSpots2D(bigs)=sigSpots2D(bigs);
 
-view=2;
+view=0;
 if view
     x=bigSpots2D;
     x(bigs)=x(bigs)+20;

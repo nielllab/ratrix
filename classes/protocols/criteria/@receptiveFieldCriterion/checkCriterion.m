@@ -3,8 +3,10 @@ function [graduate, details] = checkCriterion(c,subject,trainingStep,trialRecord
 % maybe add confident pixels and bounded region support to RFestimators...
 % then just use one of those in here
 
-
+%init
 details=[];
+graduate=false;
+
 % try to load the most recent analysis file and corresponding stimRecord
 if ~strcmp(trialRecords(end).stimManagerClass,'whiteNoise')
     error('this crierion is only supported for spatial white noise')
@@ -16,7 +18,7 @@ end
 %Failure mode: if you get a RFestimate from a previous run... force it to be this session
 trialsThisSession=trialRecords([trialRecords.sessionNumber]==trialRecords(end).sessionNumber).trialNumber;
 filter={'lastNTrials',length(trialsThisSession)};
-filter={'dateRange',[now-100 now]}; % only for testing
+%filter={'dateRange',[now-100 now]}; % only for testing
 [data success]=getPhysRecords(fullfile(c.dataRecordsPath,getID(subject)),filter,{'analysis','stim'},getRecordOfType);
 if ~success
     warning('no analysis records found - will not be able to graduate');
@@ -43,9 +45,7 @@ else
     end
     
     if length(setdiff(unique(bigSpots),[0]))<= c.numberSpotsAllowed
-        graduate=1;
-    else
-        graduate=0;
+        graduate=true;
     end
     
     

@@ -20,6 +20,8 @@ end
 goodFiles=[];
 
 trials={};
+
+try
 %  go through each 'what' and get the intersection of their good trialNums and timestamps
 for w=1:length(what)
     trials{w}={};
@@ -102,9 +104,12 @@ for i=1:length(goodTrials)
     goodFiles(end).dateStart=timestamp;
     goodFiles(end).dateStop=timestamp;
 end
-[sorted order]=sort([goodFiles.trialStart]);
-goodFiles=goodFiles(order);
-goodFiles=applyTrialFilter(goodFiles,when);
+
+if ~isempty(goodFiles)
+    [sorted order]=sort([goodFiles.trialStart]);
+    goodFiles=goodFiles(order);
+    goodFiles=applyTrialFilter(goodFiles,when);
+end
 
 % then filter the remaining files based on 'filter', and retrieve the most recent file that fits our criteria
 % then we will filter out goodFiles based on 'filter'
@@ -179,6 +184,14 @@ while ~success && ~isempty(goodFiles)
     else
         goodFiles(end)=[];% remove last record from goodFiles since it failed our filter
     end
+end
+
+catch ex
+    sca
+    edit(mfilename)
+    getReport(ex)
+    disp('check editor')
+    keyboard
 end
 
 end % end function

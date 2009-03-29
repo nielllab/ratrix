@@ -21,7 +21,7 @@ switch nargin
         else
             error('Input argument is not a receptiveFieldCriterion object')
         end
-    case 3
+    case 5
         % alpha
         if isscalar(varargin{1})
             s.alpha = varargin{1};
@@ -59,7 +59,7 @@ switch nargin
         
         % atLeastNPixels
         if iswholenumber(varargin{5}) & varargin{5}>0
-            s.numberSpotsAllowed = varargin{5};
+            s.atLeastNPixels = varargin{5};
         else
             error('numberSpotsAllowed must be a scalar');
         end

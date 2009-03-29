@@ -6,22 +6,25 @@ addr='0378';
 valves=[6 7 8];
 sensors=[4 2 3];
 closed=char('0'*ones(1,8));
-last=sensors;
+lastBlockedSensors=sensors;
 while true
     out=dec2bin(lptread(hex2dec(addr)+1),8)=='0';
     this=out(sensors); 
-    if ~all(this==last)
+    if ~all(this==lastBlockedSensors)
         clc
-        last=this %type out the state of the left, center, right sensors (zero=open, one=blocked)
-        'hit a key to quit'
+        lastBlockedSensors=this %type out the state of the left, center, right sensors (zero=open, one=blocked)
+        'hit space to quit, or 1-2-3 to activate valves L-C-R'
     end
-    t=closed;
-    t(valves(out(sensors)))='1';
-    lptwrite(hex2dec(addr),bin2dec(t));
-    if KbCheck
+    
+    [blah blah codes]=KbCheck;
+    if codes(KbName('space'))
         lptwrite(hex2dec(addr),bin2dec(closed));
         break
     end
+    
+    t=closed;
+    t(valves(codes(cellfun(@KbName,{'1!' '2@' '3#'})) | out(sensors)))='1';
+    lptwrite(hex2dec(addr),bin2dec(t));
 end
 
 

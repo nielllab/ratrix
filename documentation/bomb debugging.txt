@@ -1,0 +1,153 @@
+BOMB DEBUGGING GUIDE
+
+
+STEP ONE
+narrowing things down + common easy fixes
+
+	see if you can narrow down a bomb's problem to save yourself some time.  
+
+	plug in the valves, the lickometer, power, and connect the parallel port on a computer (like ginger's test station) into HOST INTERFACE.  make sure all three red LED's light up.  if one or more does not, wiggle all the telephone jacks.  try to push them into their jacks as far as they'll go -- sometimes they are a little loose.  if no LEDs are lighting up, make sure the power supply (the black box that connects the bomb to wall power) is working.  some of our power supplies have a green LED on them to show you if they are on -- those are the easiest to use if you can find one.  if one or more LED still won't turn on, you'll have to continue on the next step.  
+
+	otherwise, hook up some water (try to make sure you get the left/right/center water lines correct if possible, but this test will still work if you got it wrong).  
+
+	find a ratrix folder on that machine and svn update it (right click, choose 'SVN Update').  now, in that folder, double click "portTest.bat".  alternatively, i put the same thing on the server at '\\Reinagel-lab.AD.ucsd.edu\RLAB\Rodent-Data\portTest'.  this will enter a loop that will type out zero when each lick sensor is open, and one when it is blocked.  it will also open the valves for any blocked ports.  or, if the sensors might not be working, you can hit 1-2-3 to open the left-center-right valves.  hit any key to quit.  note that the water squirting out can block the port, so it might enter into a feedback loop of continuously squirting water.  just jiggle it.
+
+	so what isn't working on this bomb?  if one of the valves isn't working, the number one thing that goes wrong with bombs is a loose connection in the harness between the cooldrive (located on the bomb) and the bomb itself -- this would cause one or more valves to not open.  wiggle each of the wires connecting the two and visually inspect for bad connections.  it helps to know the valve mappings to cooldrive pin numbers see below.  if this doesn't help, go on to the next steps.
+		right valve  <-> cooldrive output 1  <-> bomb valve output 1
+		center valve <-> cooldrive output 2  <-> bomb valve output 2
+		left valve   <-> cooldrive output 3  <-> bomb valve output 3
+
+	if one of the sensors didn't cause 1's and 0's to appear on the screen, or was continuously acting blocked, then first try replacing it with another sensor.  sensors are frequently damaged by chewing or the beam path is clogged.  if that doesn't help, go on to the next steps.
+
+	if none of the sensors caused 1's and 0's to appear on the screen and you aren't sure that the computer you're using has worked for this test before, reboot the computer and hold down DELETE (or whatever the boot screen says will get you into the BIOS).  the BIOS controls the basic settings of the computer, and you need to make sure that the parallel port is set to SPP mode, not ECP or EPP.  for the gigabyte motherboards (our common ratrix computers, blue motherboards in black cases), this setting is under the 'Integrated Peripherals' screen, at the bottom.  changing any other settings would be VERY BAD!  :)
+
+	also, a general debugging technique that applies to all aspects of life is that, if you suspect some particular component  is bad, a very fast way to narrow things down is to try to replace it with one you know works and retest.  for the rest of this guide i'll assume you tried that.
+
+
+STEP TWO
+intro to multimeters
+
+	now you need some background.  if you know how multimeters work, skip this step.  otherwise, get a multimeter (black handlheld box w/lcd display and red + black probe hanging off).  
+
+	you will use this in two modes - 'continuity' and 'VDC'.
+
+	***CONTINUITY***
+	continuity means turn the dial to the little speaker symbol (the 4th one above "off").  in this mode, the multimeter will beep whenever the two probes are touching a wire that has very low resistance (a direct connection).  the beep is quiet so you might need to hold the bomb to your ear with your shoulder, like a phone.  you should often check that everything is working as you expect by touching the probes to each other and hearing the beep.  the multimeter will silently turn itself off after a while, which can confuse you.  black vs. red does not matter when measuring continuity, but the probes have to be plugged in to the right jacks -- the same jacks as described below for VDC.
+
+	if you find something that should be continuous but isn't, then either a wire is broken, a solder joint is broken, or a jack connection is bad.  continue to check continuity along that path until you isolate the disconnected part.
+
+	the continuity mode will sometimes tell you that things are connected that you think shouldn't be.  that's probably because you have the bomb connected to something with a transistor or amplifier in it, which might connect things that otherwise wouldn't be connected.  if you run into this, remove power and disconnect things like the parallel port.
+
+	***VDC***
+	VDC means a DC voltage measurement.  turn the dial to the V with the solid and dashed line (2nd above "off").
+
+	in this mode, the multimeter will tell you a DC voltage.  it is easy to confuse yourself by accidentally selecting the AC voltage measurement, which is the dial setting below this one, V with a little sine wave.  again, it is good to check every so often that you get 0 volts when touching the probes to each other.  another way to confuse yourself is to have the probes plugged into the wrong ports on the multimeter.  the black one should be in the black jack named 'COM'.  the red one should be in the red jack just to its right, labeled 'Ohm/CAP/V/HZ'.  the 'V' in there is for volts, which is what you want.  it should NOT be in one of the jacks labled '10A' or 'mA/uA' -- 'A' is for amps, which is current, which is what those other jacks are for measuring.  
+
+	now, to measure a voltage, first touch the black lead to ground.  there are lots of places on the bomb to do this, but the easiest to hold the probe into is the hole (or screw) labeled '25' by the "HOST INTERFACE".  then touch the red probe to the point i tell you to measure, and check the reading.  one should first verify that the ground you are using is reliable, so make sure there is continuity from HOST pin #25 to the middle lead coming out of the back of the power supply jack.  once you verify continuity from this lead of the power supply jack to any ground point, that ground point is as good as any other for measuring VDC.
+
+	if you get the black and red backwards (ie, red on ground and black on the thing you're measuring), you'll just get the negative of the true voltage.
+
+	the last way to get confused when measuring VDC are the units.  the multimeter dynamically adjusts the units to be appropriate for the voltage level it's seeing -- notice the tiny indicator to the right of the reading -- it will usually be V (Volts), but will flip to mV (millivolts) for very small signals (such as the voltage fluctuations in air when the leads aren't touching anything).  1mV = 0.001V.  mV are insignificant for our purposes, only differences of 1 or more volt matter.
+
+	one general thing to point out is that the power supplies  will usually detect a short (any time electricity can flow directly from one of the power supply's positive leads to its ground lead) and turn off.  simply unplug it for a few seconds, and plug it back in to restore power.  creating a short is not that good for you, the power supply, or the bomb, so try not to accidentally create unintended connections between contact points as you are poking your probes around.  :)  but it is not all that dangerous either so don't worry too much.
+
+
+STEP THREE
+power supply problems
+
+	plug in the bomb to power, and plug in the lickometer/sensors.  do any LEDs light up?  if so, you probably don't have power supply problems.  if no LEDs light up, there is probably a problem with the power supply.  if the power supply seems to not work, try a different one, and pick one with a green LED if possible so you don't have to question it.  looking at the back of the power jack with the bomb face up, you will see 5 leads coming out.  label them 1-5 from left to right.  #3 is ground.  when it is working, there should be 5V at #5, and 12V at #4.  the numbers can be off by a few tenths.
+	
+	if no LED's are lighting up, but you think the power supply is OK, the problem may be in the connections to the sensors.  the sensors must be plugged in and at least one of them must be operational for one of the LED's to light up.
+
+
+STEP FOUR
+valve problems
+
+	is a valve not opening?  the number one thing that goes wrong with bombs is a loose connection in the harness between the cooldrive (located on the bomb) and the bomb itself -- this would cause one or more valves to not open.  wiggle each of the wires connecting the two and visually inspect for bad connections.  you can check continuity within the little harnesses if you are suspicious -- make sure all the connections are good.  there are three separate groups of wires.
+
+	the power from the bomb to the cooldrive is the little group of 3.  check the VDC on the COOLDRIVE side (important to check the COOLDRIVE side) -- the pins are labeled ground, +5V, and V+.  when the main bomb power is plugged in, +5V should be around 5V, and V+ should be around 12V.  also check continuity from this ground pin to the bomb's ground (HOST #25, etc).
+
+	the connection between the computer's parallel port output that tells the valves to open or close and the cooldrive input is the little group of 5.  check the continuity from these 5 pins as follows (this must be done with the parallel port DISCONNECTED!):
+	COOLDRIVE SIGNAL IN #1 <-> HOST INTERFACE #2
+	COOLDRIVE SIGNAL IN #2 <-> HOST INTERFACE #3
+	COOLDRIVE SIGNAL IN #3 <-> HOST INTERFACE #4
+	COOLDRIVE SIGNAL IN #4 <-> HOST INTERFACE #5
+	COOLDRIVE SIGNAL IN #5 <-> HOST INTERFACE #6
+
+	finally, check the continuity from the outputs of the cooldrive to the valve wires themselves.  every valve should have one wire that connects to one wire of all the other valves.  all of these wires should connect to all of the bottom connections on the cooldrive outputs -- all of these bottom connections are all connected together (but this is not ground!).  then, each valve will have one wire that is only connected to one of the top connections on the cooldrive outputs as follows (THE MAIN BOMB POWER MUST BE UNPLUGGED FOR THIS TO WORK):
+	COOLDRIVE OUT 1 <-> RIGHT valve
+	COOLDRIVE OUT 2 <-> CENTER valve
+	COOLDRIVE OUT 3 <-> LEFT valve
+
+	if any of these connections are broken, you can narrow down where the problem is.  looking at the bomb with the VALVES OUT jack pointing up, label the pins 1-6 from left to right.  most of the black telephone jacks have little gaps along the top with exposed leads for letting you touch probes there.  if you find one that doesn't, you'll have to use the solder points on the other side of the board (but make sure you see how these line up with the pin numbers we agreed on!).  test the continuity as follows (THE MAIN BOMB POWER MUST BE UNPLUGGED FOR THIS TO WORK):
+	VALVES OUT #1 <-> the bottom of all the COOLDRIVE OUTPUTS
+	VALVES OUT #2 <-> NONE
+	VALVES OUT #3 <-> NONE
+	VALVES OUT #4 <-> LEFT VALVE
+	VALVES OUT #5 <-> CENTER VALVE
+	VALVES OUT #6 <-> RIGHT VALVE
+
+	if any valves still mysteriously don't work, check that the command from the computer's parallel port is indeed getting to the COOLDRIVE.  run portTest again, and use keys 1-2-3 to send the command to open each valve.  when holding down a key, the VDC should be 5V, and it should be 0V when not holding down the key.
+	'3' key <-> COOLDRIVE SIGNAL IN #1 <-> HOST INTERFACE #2 <-> (should open right valve)
+	'2' key <-> COOLDRIVE SIGNAL IN #2 <-> HOST INTERFACE #3 <-> (should open center valve)
+	'1' key <-> COOLDRIVE SIGNAL IN #3 <-> HOST INTERFACE #4 <-> (should open left valve)
+
+
+STEP FIVE
+sensor problems
+
+	is a sensor not working, or are some LED's not lighting up?  the first thing to check is that the sensors are getting power.
+
+	plug in the bomb to power, and plug in the lickometer/sensors.  if any LED's light up, then you know the power supply is working, the corresponding sensors are getting power, and at least the side that emits the infrared beam is working.  the sensors corresponding to the non-lit LEDs are not getting power and their beams are not working.  you must first get all the LED's lit up, and thus all the beams working, before it makes sense to check that the detector sides are working.
+
+	check continuity internal to the bomb between the lickometer jack and LED's.  looking at the top of the bomb with the lickometer jack facing up, number the leads 1-8 left to right.  you need to unplug the lickometer for this to work, because the amplifiers inside the sensors will interfere with your measurement.  
+	#1 should be continuous with ground.
+	#2 should be continuous with the +5V power lead (see above)
+		this is what powers the detectors' amplifiers
+	#3 should be continuous with HOST #13
+		this is how the computer detects LEFT licks
+	#4 touch the BLACK PROBE lead to this pin while holding the RED PROBE lead to ground (in continuity mode)
+		the LED labeled LEFT should light
+		the test pulse coming out of the multimeter to check continuity is enough to light the LED
+		this lead supplies current to the infrared LED inside the sensor
+	#5 should be continuous with HOST #10
+		this is how the computer detects CENTER licks
+	#6 touch the BLACK PROBE lead to this pin while holding the RED PROBE lead to ground (in continuity mode)
+		the LED labeled CENTER should light
+		this lead supplies current to the infrared LED inside the sensor
+	#7 should be continuous with HOST #12
+		this is how the computer detects RIGHT licks
+	#8 touch the BLACK PROBE lead to this pin while holding the RED PROBE lead to ground (in continuity mode)
+		the LED labeled RIGHT should light
+		this lead supplies current to the infrared LED inside the sensor
+
+	now you should plug the lickometer in again, to check continuity from the lickometer jack to the sensor wires.  this time, unplug the bomb power (again to prevent the sensor amps from interfering).  for each sensor, the following should be true (here, the pin numbers given are left-right on the little phone jack/circuit board adaptors that connect the three sensors to a single phone line that goes to the bomb, with the jacks facing up):
+	green (2) - continuous with ground 
+			this is the ground for the detector
+	blue  (3) - LEFT<->HOST 13,        CENTER<->HOST 10,          RIGHT<->HOST 12  
+			this is how the computer detects licks
+	white (4) - continuous with +5V power (see above)
+			this is what powers the detctors' amplifiers
+	red   (5) - LEFT<->LICKOMETER 4,   CENTER<-> LICKOMETER 6,    RIGHT<->LICKOMETER 8
+			this supplies current to the infrared LED inside the sensor
+	black (6) -  continuous with ground
+			this is the ground for the infrared LED's inside the sensor
+
+	if all that looks good, then it is hard to explain why an LED isn't lighting.  did you try a new sensor?
+
+	now, to check that the detector is sensing the beambreak and sending that information out to the HOST connection.  plug the power to the bomb back in.  leave the lickometer plugged in, but make sure the computer is not connected to HOST.  find something opaque (white paper is not opaque enough, a black twist-tie is) to be your tongue simulator.  with one hand, hold the BLACK PROBE lead on ground (HOST #25), and hold the RED PROBE lead to the HOST pins mentioned below.  with the other hand, simulate some licking.  the VDC measurement should be +5V for unbroken beams and 0V for broken beams.  these can be off by half a volt or more.
+	left   - HOST #13
+	center - HOST #10
+	right  - HOST #12
+
+	if you don't see the voltage changing from high to low, check if the sensor beam path is clogged.
+
+
+STEP SIX
+pump connections
+
+	we'll cross this bridge when we get there.  the principles behind the sensors are the same, and it's even more important that the computer BIOS is in SPP mode for this as well.
+
+
+YER DONE
+that's it!  not so bad, huh?  let me know if this was useful and if you can think of any improvements.  or feel free to contribute some yourself!  i will buy a mocha for anyone that finds a bomb problem not solved by these steps.  :)

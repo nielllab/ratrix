@@ -17,6 +17,8 @@ narrowing things down + common easy fixes
 		center valve <-> cooldrive output 2  <-> bomb valve output 2
 		left valve   <-> cooldrive output 3  <-> bomb valve output 3
 
+	here's a video of how to fix any loose connections in the bomb harness:  http://rocky.digikey.com/WebLib/Amp/Web%20Photo/Videos/Amp%20MTA.html
+
 	if one of the sensors didn't cause 1's and 0's to appear on the screen, or was continuously acting blocked, then first try replacing it with another sensor.  sensors are frequently damaged by chewing or the beam path is clogged.  if that doesn't help, go on to the next steps.
 
 	if none of the sensors caused 1's and 0's to appear on the screen and you aren't sure that the computer you're using has worked for this test before, reboot the computer and hold down DELETE (or whatever the boot screen says will get you into the BIOS).  the BIOS controls the basic settings of the computer, and you need to make sure that the parallel port is set to SPP mode, not ECP or EPP.  for the gigabyte motherboards (our common ratrix computers, blue motherboards in black cases), this setting is under the 'Integrated Peripherals' screen, at the bottom.  changing any other settings would be VERY BAD!  :)

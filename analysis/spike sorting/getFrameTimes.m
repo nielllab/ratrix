@@ -54,8 +54,8 @@ if triplePulseCode
 else
     
     % EASIER ONE PULSE METHOD
-    frameIndices(:,1) = pulses;
-    frameIndices(:,2) = pulses;
+    frameIndices(:,1) = pulses(1:end-1);
+    frameIndices(:,2) = pulses(2:end)-1;
     frameTimes(:,1) = pulseDataTimes(frameIndices(:,1));
     frameTimes(:,2) = pulseDataTimes(frameIndices(:,2));
 end
@@ -125,7 +125,7 @@ end
 % we want to change it so that correctedIndices = [1 250; 251 500; 501 750; 751 1000]
 correctedFrameIndices=sort([correctedFrameIndices;addedFrameIndices]);
 addedFrameTimes=pulseDataTimes(addedFrameIndices);
-if size(addedFrameTimes)==[2 1]
+if all(size(addedFrameTimes)==[2 1])
     %warning('only one sample..needs a transpose'); 
     addedFrameTimes=addedFrameTimes';
 end
@@ -142,9 +142,9 @@ if length(unique(frameLengths)) > 3
     ifiMS=[1000*unique(frameLengths)./sampleRate]'
     warning('found more than 3 unique frame lengths - miscalculation of frame start/stop indices');
     mn = mean(frameLengths);
-%     if any(frameLengths < (1-errorBound)*mn)
-%         warning('check your assumptions about frame start/stop calculation - found frameLength too small; failing quality test');
-%         passedQualityTest = false;
+     if any(frameLengths < (1-errorBound)*mn)
+         error('check your assumptions about frame start/stop calculation - found frameLength too small; failing quality test');
+         passedQualityTest = false;
 %     elseif any(frameLengths < (1-warningBound)*mn)
 %         warning('found frame lengths outside the warningBound (too small)');
 %     elseif any(frameLengths > (1+warningBound)*mn)
@@ -154,9 +154,9 @@ if length(unique(frameLengths)) > 3
 %         warning('found dropped frames');
 %         if any(frameLengths > (1+errorBound)*mn)
 %             passedQualityTest = false;
-%             warning('found frame lengths outside the errorBound (too long) - failling quality test');
+%             warning('found frame lengths outside the errorBound (too long) - failing quality test');
 %         end
-%     end
+     end
 end
 
 %

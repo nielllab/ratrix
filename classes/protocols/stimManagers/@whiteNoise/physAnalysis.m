@@ -201,8 +201,9 @@ end
 rng=[min(analysisdata.cumulativeSTA(:)) max(analysisdata.cumulativeSTA(:))];
 
 % 11/25/08 - update GUI
-figure(plotParameters.handle); % make the figure current and then plot into it
-set(gcf,'position',[100 400 560 620])
+%figure(plotParameters.handle); % make the figure current and then plot into it
+figure(min(analysisdata.cumulativeTrialNumbers)) % trialBased is better
+set(gcf,'position',[100 400 800 700])
 % size(analysisdata.cumulativeSTA)
 
 doSpatial=~(size(STA,1)==1 & size(STA,2)==1); % if spatial dimentions exist
@@ -223,12 +224,14 @@ if doSpatial
     
     
     %get significant pixels and denoised spots
-    empiricMean=mean(stimData(:));
-    empiricStd=std(stimData(:));
-    [bigSpots sigPixels]=getSignificantSTASpots(analysisdata.cumulativeSTA(:,:,brightInd(3)),analysisdata.cumulativeNumSpikes,empiricMean,empiricStd,ones(3),3,0.05);
+    stdStimulus = stimulusDetails.std*whiteVal;
+    meanLuminanceStimulus = stimulusDetails.meanLuminance*whiteVal;
+    [bigSpots sigPixels]=getSignificantSTASpots(analysisdata.cumulativeSTA(:,:,brightInd(3)),analysisdata.cumulativeNumSpikes,meanLuminanceStimulus,stdStimulus,ones(3),3,0.05);
     [bigIndY bigIndX]=find(bigSpots~=0);
     [sigIndY sigIndX]=find(sigPixels~=0);
     
+    
+        subplot(2,2,1)
     imagesc(squeeze(analysisdata.cumulativeSTA(:,:,brightInd(3))),rng);
     colormap(gray); colorbar;
     hold on; plot(brightInd(2), brightInd(1),'bo')

@@ -148,7 +148,17 @@ while ~quit
             else
                 lastZposition=[];
             end
-            load(stimRecordLocation, 'stimManagerClass')                
+            loaded=false;
+            if ~loaded
+                try
+                    load(stimRecordLocation, 'stimManagerClass')
+                    %often we go too early b/c its still being written
+                    loaded=true;
+                catch
+                    waitsecs(abs(randn));
+                    disp('waiting for stim to be loaded')
+                end
+            end
             analyzeThisClass= all(strcmp('all',stimClassToAnalyze)) ||  any(strcmp(stimManagerClass,stimClassToAnalyze));
             if analyzeThisClass
                 
@@ -175,7 +185,7 @@ while ~quit
                     % get frameIndices and frameTimes (from screen pulses)
                     % bounds to decide whether or not to continue with analysis
                     warningBound = 0.01;
-                    errorBound = 0.05;
+                    errorBound = 0.5; % half a frame
                     ifi = 1/100;
                     spikeDetails=[];
                     % what is the difference between frameIndices and correctedFrameIndices?
@@ -183,6 +193,12 @@ while ~quit
                     % we don't tell the getSpikesFromNeuralData function anything about dropped frames?  
                     [frameIndices frameTimes frameLengths correctedFrameIndices correctedFrameTimes correctedFrameLengths stimInds passedQualityTest] = ...
                         getFrameTimes(neuralData(:,1),neuralDataTimes,samplingRate,warningBound,errorBound,ifi); % pass in the pulse channel
+                    
+                    if 0 %for inspecting errors in frames
+                        figure('position',[100 500 500 500])
+                        inspectFramesPulses(neuralData,neuralDataTimes,frameIndices,'shortest'); 
+                        % first last shortest longest
+                    end
                     
                     if usePhotoDiodeSpikes
                         [spikes photoDiode]=getSpikesFromPhotodiode(neuralData(:,2),neuralDataTimes, correctedFrameIndices);
@@ -437,7 +453,7 @@ catch ex
             fullfilepath=fullfile(eyeRecordPath,filename);
             eyeData=load(fullfilepath);
         else
-            warning('weird time relation')
+            error('weird time relation')
             hrAfterStart
             saved=goodFiles(end).timestamp
             started=datenumFor30(timestamp)
@@ -459,3 +475,41 @@ end
 
 end % end function
 % ===============================================================================================
+
+
+function inspectFramesPulses(neuralData,neuralDataTimes,frameIndices,mode,numFrames)
+
+if ~exist('numFrames','var') || isempty(numFrames)
+    numFrames=6;
+end
+
+
+
+numFramesPad=ceil(numFrames/2)
+switch mode
+    case {'start','first'}
+        which=1+numFrames;
+        timePad=4000;
+    case {'end','last'}
+        which=length(frameIndices)-numFrames;
+        timePad=4000;
+    case 'shortest'
+        shortestFrameLength=min(unique(diff(frameIndices')));
+        which=find(shortestFrameLength==diff(frameIndices'))
+        timePad=0;
+    case 'longest'
+        longestFrameLength=min(unique(diff(frameIndices')));
+        which=find(longestFrameLength==diff(frameIndices'));
+        timePad=0;
+    otherwise
+        error('bad mode')
+end
+
+ss=frameIndices(which-numFramesPad,1)-timePad;
+ee=frameIndices(which+numFramesPad,1)+timePad;
+
+hold off
+plot(neuralDataTimes(ss:ee),neuralData(ss:ee,2))
+hold on;
+plot(neuralDataTimes(ss:ee),neuralData(ss:ee,1),'r')
+end

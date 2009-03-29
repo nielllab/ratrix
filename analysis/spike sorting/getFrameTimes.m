@@ -29,26 +29,37 @@ if pulses(end)==size(pulseData,1)
 end
 pulses = pulses(find(runs~=1));
 
-% processing to adjust first pulse to be a single pulse (throw away starting pulses if they are part of the two-pulse signal)
-gaps = diff(pulses(1:4));
-if gaps(2) > gaps(1) && gaps(3) > gaps(1)
-    % we started with two-pulse signal - throw away first two pulses
-    pulses(1:2) = [];
-elseif gaps(1) > gaps(3) && gaps(2) > gaps(3)
-    % we started with two-pulse signal, but with one cut off - throw away first pulse
-    pulses(1) = [];
-    error('don''t ever expect to find a oulse split in two')
+triplePulseCode=false;
+if triplePulseCode
+    % % processing to adjust first pulse to be a single pulse (throw away
+    % starting pulses if they are part of the two-pulse signal)
+    % gaps = diff(pulses(1:4));
+    % if gaps(2) > gaps(1) && gaps(3) > gaps(1)
+    %     % we started with two-pulse signal - throw away first two pulses
+    %     pulses(1:2) = [];
+    % elseif gaps(1) > gaps(3) && gaps(2) > gaps(3)
+    %     % we started with two-pulse signal, but with one cut off - throw away first pulse
+    %     pulses(1) = [];
+    %     error('don''t ever expect to find a oulse split in two')
+    % else
+    %     % we started with single-pulse signal - do nothing
+    %     error('don''t ever expect to find a single pulse start')
+    % end
+    % frameTimes=[];
+    % frameIndices=[];
+    % frameIndices(:,1) = pulses(1:3:end-3);
+    % frameIndices(:,2) = pulses(4:3:end)-1;
+    % frameTimes(:,1) = pulseDataTimes(pulses(1:3:end-3));
+    % frameTimes(:,2) = pulseDataTimes(pulses(4:3:end)-1);
 else
-    % we started with single-pulse signal - do nothing
-    error('don''t ever expect to find a single pulse start')
+    
+    % EASIER ONE PULSE METHOD
+    frameIndices(:,1) = pulses;
+    frameIndices(:,2) = pulses;
+    frameTimes(:,1) = pulseDataTimes(frameIndices(:,1));
+    frameTimes(:,2) = pulseDataTimes(frameIndices(:,2));
 end
 
-frameTimes=[];
-frameTimes(:,1) = pulseDataTimes(pulses(1:3:end-3));
-frameTimes(:,2) = pulseDataTimes(pulses(4:3:end)-1);
-frameIndices=[];
-frameIndices(:,1) = pulses(1:3:end-3);
-frameIndices(:,2) = pulses(4:3:end)-1;
 % ==================================
 correctedFrameTimes=frameTimes;
 correctedFrameIndices=frameIndices; % default values are same as uncorrected; correct only those values that need it

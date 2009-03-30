@@ -14,11 +14,15 @@ if isa(r,'ratrix') && isa(station,'station') && (isempty(rn) || isa(rn,'rnet'))
         % 1/22/09 - if newTsNum is not empty, this means we want to manually move the trainingstep (not graduate)
         if manualTs
             newTsNum=[];
-            [garbage currentTsNum]=getProtocolAndStep(subject);
+            [proto currentTsNum]=getProtocolAndStep(subject);
             validTs=[1:getNumTrainingSteps(p)];
             validInputs{1}=validTs;
             type='manual ts';
             typeParams.currentTsNum=currentTsNum;
+            typeParams.trainingStepNames={};
+            for i=validTs
+                typeParams.trainingStepNames{end+1}=generateStepName(getTrainingStep(proto,i),'','');
+            end
             newTsNum = userPrompt(getPTBWindow(station),validInputs,type,typeParams);
             trialRecords(end).result=[trialRecords(end).result ' ' num2str(newTsNum)];
             if newTsNum~=currentTsNum

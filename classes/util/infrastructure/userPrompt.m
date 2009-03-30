@@ -20,7 +20,7 @@ for i=1:10
 end
 KbConstants.enterKey=KbName('RETURN');
 KbConstants.deleteKeys=[KbName('delete') KbName('backspace')];
-KbConstants.decimalKey=KbName('.>');
+KbConstants.decimalKey=[KbName('.>') KbName('.')];
 
 Screen('Preference', 'TextRenderer', 0);  % consider moving to station.startPTB
 Screen('Preference', 'TextAntiAliasing', 0); % consider moving to station.startPTB
@@ -37,10 +37,10 @@ isi=[];
 % error-check based on type
 if ischar(type)
     if strcmp(type,'manual ts')
-        if isfield(typeParams,'currentTsNum')
+        if isfield(typeParams,'currentTsNum') && isfield(typeParams,'trainingStepNames')
             % pass
         else
-            error('manual ts userPrompt needs currentTsNum');
+            error('manual ts userPrompt needs currentTsNum and trainingStepNames');
         end
     elseif strcmp(type,'flushPorts')
         % nothing
@@ -52,10 +52,17 @@ else
 end
 
 
+
 while isempty(out)
 
+    yTextPos=20;
     if strcmp(type,'manual ts')
         text=sprintf('Enter new trainingStepNum between %d and %d (current trainingStepNum is %d)',validInputs{1}(1),validInputs{1}(end),typeParams.currentTsNum);
+        for j=1:length(typeParams.trainingStepNames)
+            jtext=sprintf('Training step %d: %s',j,typeParams.trainingStepNames{j});
+            Screen('DrawText',window,jtext,10,yTextPos,100*ones(1,3));
+            yTextPos=yTextPos+20;
+        end
         textprompt=sprintf('New trainingStepNum: %s',entry);
         i=1;
     else
@@ -76,8 +83,8 @@ while isempty(out)
     end
 
 
-    Screen('DrawText',window,text,10,20,100*ones(1,3));
-    Screen('DrawText',window,textprompt,10,40,100*ones(1,3));
+    Screen('DrawText',window,text,10,yTextPos,100*ones(1,3));
+    Screen('DrawText',window,textprompt,10,yTextPos+20,100*ones(1,3));
     Screen('Flip',window);
 
     % read from keyboard

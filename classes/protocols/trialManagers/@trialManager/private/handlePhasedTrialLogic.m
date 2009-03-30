@@ -13,36 +13,6 @@ transitionedByTimeFlag = false;
 transitionedByPortFlag = false;
 goDirectlyToError=false;
 
-soundsToPlay = getSoundsToPlay(stimManager, ports, lastPorts, specInd, framesInPhase,msRewardSound, mePenaltySound, ...
-    targetOptions, distractorOptions, requestOptions, playRequestSoundLoop, class(tm), trialDetails);
-getSoundsTime=GetSecs;
-% soundsToPlay is a cell array of sound names {{playLoop sounds}, {playSound sounds}} to be played at current frame
-% validate soundsToPlay here (make sure they are all members of soundNames)
-if ~isempty(setdiff(soundsToPlay{1},soundNames)) || ~all(cellfun(@(x) ismember(x{1},soundNames),soundsToPlay{2}))
-    error('getSoundsToPlay assigned sounds that are not in the soundManager!');
-end
-
-% first end any loops that were looping last frame but should no longer be looped
-stopLooping=setdiff(lastSoundsLooped,soundsToPlay{1});
-for snd=stopLooping
-    tm.soundMgr = playLoop(tm.soundMgr,snd,station,0);
-end
-
-% then start any loops that weren't already looping
-startLooping=setdiff(soundsToPlay{1},lastSoundsLooped);
-for snd=startLooping
-    tm.soundMgr = playLoop(tm.soundMgr,snd,station,1);
-end
-
-lastSoundsLooped = soundsToPlay{1};
-
-% now play one-time sounds
-for i=1:length(soundsToPlay{2})
-    tm.soundMgr = playSound(tm.soundMgr,soundsToPlay{2}{i}{1},soundsToPlay{2}{i}{2}/1000.0,station);
-end
-
-soundsDoneTime=GetSecs;
-
 % ===================================================
 % Check against framesUntilTransition - Transition BY TIME
 % if we are at grad by time, then manually set port to the correct one
@@ -115,6 +85,39 @@ if done && isempty(result)
 end
 
 portSelectionDoneTime=GetSecs;
+
+% =================================================
+% SOUNDS
+soundsToPlay = getSoundsToPlay(stimManager, ports, lastPorts, newSpecInd, framesInPhase,msRewardSound, mePenaltySound, ...
+    targetOptions, distractorOptions, requestOptions, playRequestSoundLoop, class(tm), trialDetails);
+getSoundsTime=GetSecs;
+% soundsToPlay is a cell array of sound names {{playLoop sounds}, {playSound sounds}} to be played at current frame
+% validate soundsToPlay here (make sure they are all members of soundNames)
+if ~isempty(setdiff(soundsToPlay{1},soundNames)) || ~all(cellfun(@(x) ismember(x{1},soundNames),soundsToPlay{2}))
+    error('getSoundsToPlay assigned sounds that are not in the soundManager!');
+end
+
+% first end any loops that were looping last frame but should no longer be looped
+stopLooping=setdiff(lastSoundsLooped,soundsToPlay{1});
+for snd=stopLooping
+    tm.soundMgr = playLoop(tm.soundMgr,snd,station,0);
+end
+
+% then start any loops that weren't already looping
+startLooping=setdiff(soundsToPlay{1},lastSoundsLooped);
+for snd=startLooping
+    tm.soundMgr = playLoop(tm.soundMgr,snd,station,1);
+end
+
+lastSoundsLooped = soundsToPlay{1};
+
+% now play one-time sounds
+for i=1:length(soundsToPlay{2})
+    tm.soundMgr = playSound(tm.soundMgr,soundsToPlay{2}{i}{1},soundsToPlay{2}{i}{2}/1000.0,station);
+end
+
+soundsDoneTime=GetSecs;
+
 
 % set isRequesting when request port is hit according to these rules:
 %   if isRequesting was already 1, then set it to 0

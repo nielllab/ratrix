@@ -1,6 +1,6 @@
 function spec=stimSpec(varargin)
 % stimSpec  class constructor. 
-% spec=stimSpec(stimulus,transitions,stimType,startFrame,framesUntilTransition,stochasticDistribution,scaleFactor,isFinalPhase,hz,phaseType,phaseLabel,isStim)
+% spec=stimSpec(stimulus,transitions,stimType,startFrame,framesUntilTransition,stochasticDistribution,scaleFactor,isFinalPhase,hz,phaseType,phaseLabel,[isStim])
 %
 % INPUTS
 % stimulus                  the stimulus frames to show, or expert-mode parameters struct (equivalent to non-phased 'out')
@@ -41,7 +41,7 @@ function spec=stimSpec(varargin)
 % phaseType                 one of {'reinforced', ''} -- reinforced will ask the reinforcement manager how much water/airpuff to deliver at the beginning of the phase
 %                               a reward that extends beyond the end of the phase is cut off.
 % phaseLabel                a text label for the given phase to be stored in phaseRecords
-% isStim                    a boolean indicating whether to set the station's stim pin high during this phase (usually during discriminanda)
+% isStim                    a boolean indicating whether to set the station's stim pin high during this phase (usually during discriminanda) [defaults to false]
 
 % fields in the stimSpec object
 spec.stimulus = zeros(1,1,1);
@@ -74,7 +74,7 @@ switch nargin
         else
             error('Input argument is not a stimSpec object or cell array of stim frames')
         end
-    case 12
+    case {11 12}
         % stimulus
         spec.stimulus = varargin{1};
         % transitions
@@ -190,7 +190,9 @@ switch nargin
             error('phaseLabel must be a string or empty');
 		end
 
-		spec.isStim=varargin{12};
+		if nargin>=12
+			spec.isStim=varargin{12};
+		end
 		if islogical(spec.isStim) && isscalar(spec.isStim)
 			%pass
 		else

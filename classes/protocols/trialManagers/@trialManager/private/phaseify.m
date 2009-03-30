@@ -26,7 +26,7 @@ if strmatch(class(trialManager), 'nAFC')
     stimSpecs{3} = stimSpec([],criterion,'cache',0,[],[],[],0,hz,'reinforced','reinforcement',false); % timeout assigned during runRealTimeLoop
     
     % final
-    criterion = {[], 1};
+    criterion = {[], 4};
     stimSpecs{4} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,[],'itl',false);
     
     if isempty(requestPorts)
@@ -45,7 +45,7 @@ elseif strmatch(class(trialManager), 'freeDrinks')
     stimSpecs{2} = stimSpec([],criterion,'cache',0,[],[],0,0,hz,'reinforced','reinforcement',false);
     
     % final
-    criterion = {[], 1};
+    criterion = {[], 3};
     stimSpecs{3} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,[],'itl',false);
 
 elseif strcmp(class(trialManager), 'autopilot')
@@ -55,7 +55,7 @@ elseif strcmp(class(trialManager), 'autopilot')
     stimSpecs{1} = stimSpec(stim, criterion,'loop',0,[],[],scaleFactor,0,hz,[],'display',true);
 
     % final phase
-    criterion = {[], 1};
+    criterion = {[], 2};
     stimSpecs{2} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,[],'itl',false);
 
 else

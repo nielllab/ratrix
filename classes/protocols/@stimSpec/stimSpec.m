@@ -1,6 +1,6 @@
 function spec=stimSpec(varargin)
 % stimSpec  class constructor. 
-% spec=stimSpec(stimulus,transitions,stimType,startFrame,framesUntilTransition,stochasticDistribution,scaleFactor,isFinalPhase,hz,rewardType)
+% spec=stimSpec(stimulus,transitions,stimType,startFrame,framesUntilTransition,stochasticDistribution,scaleFactor,isFinalPhase,hz,phaseType,phaseLabel,isStim)
 %
 % INPUTS
 % stimulus                  the stimulus frames to show, or expert-mode parameters struct (equivalent to non-phased 'out')
@@ -41,6 +41,7 @@ function spec=stimSpec(varargin)
 % phaseType                 one of {'reinforced', ''} -- reinforced will ask the reinforcement manager how much water/airpuff to deliver at the beginning of the phase
 %                               a reward that extends beyond the end of the phase is cut off.
 % phaseLabel                a text label for the given phase to be stored in phaseRecords
+% isStim                    a boolean indicating whether to set the station's stim pin high during this phase (usually during discriminanda)
 
 % fields in the stimSpec object
 spec.stimulus = zeros(1,1,1);
@@ -54,6 +55,7 @@ spec.isFinalPhase = 0;
 spec.hz=0;
 spec.phaseType=[];
 spec.phaseLabel='';
+spec.isStim=false;
 
 switch nargin
     case 0
@@ -72,7 +74,7 @@ switch nargin
         else
             error('Input argument is not a stimSpec object or cell array of stim frames')
         end
-    case 11
+    case 12
         % stimulus
         spec.stimulus = varargin{1};
         % transitions
@@ -186,8 +188,15 @@ switch nargin
             spec.phaseLabel='';
         else
             error('phaseLabel must be a string or empty');
-        end
+		end
 
+		spec.isStim=varargin{12};
+		if islogical(spec.isStim) && isscalar(spec.isStim)
+			%pass
+		else
+			error('isStim must be logical scalar')
+		end
+		
         if (isempty(spec.scaleFactor) || isempty(spec.stimulus)) && ~strcmp(spec.phaseType,'reinforced')
             error('empty scaleFactor and stimulus allowed only for reinforced phaseType');
         end

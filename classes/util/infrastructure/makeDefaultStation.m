@@ -116,12 +116,12 @@ stationSpec.rewardMethod                      = rewardMethod;
 stationSpec.portSpec.parallelPortAddress      = pportaddr;
 stationSpec.portSpec.valveSpec                = int8([4,3,2]);
 stationSpec.portSpec.sensorPins               = int8([13,10,12]);
-stationSpec.portSpec.framePulsePins           = int8(9);
+stationSpec.portSpec.framePins                = int8(9);
 stationSpec.portSpec.eyePuffPins              = int8(6);
 stationSpec.datanet                           = dn;
 stationSpec.eyeTracker                        = et;
-stationSpec.portSpec.phasePulsePins           = int8(16);
-stationSpec.portSpec.trialPulsePins           = int8(17);
+stationSpec.portSpec.phasePins                = int8(16);
+stationSpec.portSpec.stimPins                 = int8(17);
 
 if ismac
     stationSpec.portSpec = int8(3);

@@ -19,9 +19,9 @@ function s=station(varargin)
 	%               valveSpec.valvePins
 	%               valveSpec.pumpObject
 	%       portSpec.sensorPins
-	%       portSpec.framePulsePins
-	%       portSpec.phasePulsePins
-	%       portSpec.trialPulsePins
+	%       portSpec.framePins
+	%       portSpec.phasePins
+	%       portSpec.stimPins
 	%       portSpec.eyePuffPins
 	% stationSpec.datanet
 	% stationSpec.eyeTracker
@@ -39,9 +39,9 @@ function s=station(varargin)
 	s.decPPortAddr='';
 	s.valvePins=[];
 	s.sensorPins=[];
-	s.framePulsePins=[];
-	s.phasePulsePins=[];
-	s.trialPulsePins=[];
+	s.framePins=[];
+	s.phasePins=[];
+	s.stimPins=[];
 	s.eyePuffPins=[];
 
 	s.localPump=[];
@@ -70,7 +70,7 @@ function s=station(varargin)
 					s.responseMethod='keyboard';
 					s.numPorts=in.portSpec;
 					needToInit=true;
-				elseif isstruct(in.portSpec) && all(ismember({'parallelPortAddress','valveSpec','sensorPins','framePulsePins','trialPulsePins','phasePulsePins','eyePuffPins'},fields(in.portSpec))) %with parallel port
+				elseif isstruct(in.portSpec) && all(ismember({'parallelPortAddress','valveSpec','sensorPins','framePins','stimPins','phasePins','eyePuffPins'},fields(in.portSpec))) %with parallel port
 					s.responseMethod='parallelPort';
 					s.decPPortAddr=hex2dec(in.portSpec.parallelPortAddress);
 
@@ -90,7 +90,7 @@ function s=station(varargin)
 						error('sensorPins must be vector of integers')
 					end
 
-					optionalPins={'framePulsePins','phasePulsePins','trialPulsePins','eyePuffPins'};
+					optionalPins={'framePins','phasePins','stimPins','eyePuffPins'};
 
 					for eNum=1:length(optionalPins)
 						eVal=in.portSpec.(optionalPins{eNum});

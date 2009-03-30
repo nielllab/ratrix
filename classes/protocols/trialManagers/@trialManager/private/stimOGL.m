@@ -82,18 +82,16 @@ try
 catch ex
     disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
 
-    if IsWin
-        daqreset;
-    end
+	securePins(station);
     
     Screen('CloseAll');
     Priority(originalPriority);
     ShowCursor(0);
     ListenChar(0);
 
-    if hasAirpuff(station)
-        setPuff(station,false);
-    end
+	if IsWin
+		daqreset;
+	end
 
     if ~isempty(eyeTracker)
         cleanUp(eyeTracker);

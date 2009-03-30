@@ -145,4 +145,5 @@ end
 
 phaseRecords(phaseNum).LEDstarted=GetSecs; %need to preallocate
 
-framePulse(station);
+setStatePins(station,'frame',true);
+setStatePins(station,'frame',false);

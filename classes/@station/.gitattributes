@@ -10,7 +10,6 @@
 /getRewardMethod.m -text
 /display.m -text
 /getValves.m -text
-/framePulse.m -text
 /setSoundOn.m -text
 /getPhysicalLocation.m -text
 /getMACaddress.m -text
@@ -36,6 +35,5 @@
 /getScreenNum.m -text
 /getDatanet.m -text
 /getEyeTracker.m -text
-private/genericPulse.m -text
-/phasePulse.m -text
-/trialPulse.m -text
+/setStatePins.m -text
+/securePins.m -text

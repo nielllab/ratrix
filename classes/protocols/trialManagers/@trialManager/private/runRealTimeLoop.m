@@ -4,6 +4,8 @@ function [tm quit trialRecords eyeData eyeDataFrameInds gaze frameDropCorner sta
     station, manual,timingCheckPct,textLabel,rn,subID,stimID,protocolStr,ptbVersion,ratrixVersion,trialLabel,msAirpuff, ...
     originalPriority, verbose, eyeTracker, frameDropCorner,trialRecords)
 
+securePins(station);
+
 % =====================================================================================================================
 %   show movie following mario's 'ProgrammingTips' for the OpenGL version of PTB
 %   http://www.kyb.tuebingen.mpg.de/bu/people/kleinerm/ptbosx/ptbdocu-1.0.5MK4R1.html
@@ -319,8 +321,6 @@ timestamps.phaseRecordsDone     = timestamps.lastFrameTime;
 timestamps.loopEnd              = timestamps.lastFrameTime;
 timestamps.prevPostFlipPulse    = timestamps.lastFrameTime;
 
-trialPulse(station);
-
 %show stim -- be careful in this realtime loop!
 while ~done && ~quit;
     timestamps.loopStart=GetSecs;
@@ -330,7 +330,8 @@ while ~done && ~quit;
     yTextPos = 20;
 
     if updatePhase == 1
-		phasePulse(station);
+		setStatePins(station,'stim',false);
+		setStatePins(station,'phase',true);
 		
         startTime=GetSecs(); % startTime is now per-phase instead of per trial, since corresponding times in responseDetails are also per-phase
         phaseNum=phaseNum+1;
@@ -457,7 +458,11 @@ while ~done && ~quit;
             %note that ifi is not coming in empty on the first trial and the leftover value from the screen is misleading, need to fix...
 
             [phaseRecords analogOutput outputsamplesOK] = LEDphase(tm,phaseInd,analogOutput,phaseRecords,spec,interTrialLuminance,stim,frameIndexed,indexedFrames,loop,trigger,timeIndexed,timedFrames,station);
-        end
+		end
+		setStatePins(station,'phase',false);
+		if isStim(spec)
+			setStatePins(station,'stim',true);
+		end
     end % fininshed with phaseUpdate
 
     timestamps.phaseUpdated=GetSecs;
@@ -971,6 +976,8 @@ while ~done && ~quit;
     timestamps.loopEnd=GetSecs;
 end
 
+securePins(station);
+
 trialRecords(trialInd).phaseRecords=phaseRecords;
 % per-trial records, collected from per-phase stuff
 trialRecords(trialInd).containedAPause=any([phaseRecords.containedAPause]);
@@ -979,14 +986,6 @@ trialRecords(trialInd).containedForcedRewards=any([phaseRecords.containedForcedR
 trialRecords(trialInd).didStochasticResponse=any([phaseRecords.didStochasticResponse]);
 trialRecords(trialInd).containedManualPokes=didManual;
 trialRecords(trialInd).leftWithManualPokingOn=manual;
-
-if false && doFramePulse
-    % do 3 pulses b/c the analysis expects a 2-pulse signal followed by a single-pulse signal
-	%do NOT turn these on except for local debugging.  real analysis should trigger off of a single pulse that occurs immediately after each screen flip.
-    framePulse(station);
-    framePulse(station);
-    framePulse(station);
-end
 
 if ~isempty(analogOutput)
     evts=showdaqevents(analogOutput);

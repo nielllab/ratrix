@@ -1,6 +1,5 @@
 function currentValveStates=verifyValvesClosed(station)
 
-%currentValveStates=logical(readPorts(station)); %this was reading licks!?!?
 currentValveStates=getValves(station);
 if any(currentValveStates)
     
@@ -11,5 +10,3 @@ if any(currentValveStates)
     
     warning('verify valves closed found open valves')
 end
-
-  setPuff(station,false);

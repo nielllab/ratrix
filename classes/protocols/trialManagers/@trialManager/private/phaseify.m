@@ -15,19 +15,19 @@ if strmatch(class(trialManager), 'nAFC')
     
     % waiting for request
     criterion = {requestPorts, 2};
-    stimSpecs{1} = stimSpec(interTrialLuminance,criterion,'loop',0,framesUntilTransition,[],0,0,hz,[],'waiting for request');
+    stimSpecs{1} = stimSpec(interTrialLuminance,criterion,'loop',0,framesUntilTransition,[],0,0,hz,[],'waiting for request',false);
     
     % waiting for response
     criterion = {[targetPorts distractorPorts], 3};
-    stimSpecs{2} = stimSpec(stim,criterion,type,0,[],[],scaleFactor,0,hz,[],'discrim');
+    stimSpecs{2} = stimSpec(stim,criterion,type,0,[],[],scaleFactor,0,hz,[],'discrim',true);
     
     % reinforcement (correct/wrong)
     criterion = {[], 4};
-    stimSpecs{3} = stimSpec([],criterion,'cache',0,[],[],[],0,hz,'reinforced','reinforcement'); % timeout assigned during runRealTimeLoop
+    stimSpecs{3} = stimSpec([],criterion,'cache',0,[],[],[],0,hz,'reinforced','reinforcement',false); % timeout assigned during runRealTimeLoop
     
     % final
     criterion = {[], 1};
-    stimSpecs{4} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,[],'itl');
+    stimSpecs{4} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,[],'itl',false);
     
     if isempty(requestPorts)
         startingStimSpecInd=2;
@@ -38,25 +38,25 @@ elseif strmatch(class(trialManager), 'freeDrinks')
     % waiting for response phase
     criterion = {targetPorts, 2};
     stochasticP = getFreeDrinkLikelihood(trialManager);
-    stimSpecs{1} = stimSpec(stim, criterion,'loop',0,[],{stochasticP,1,stochasticP,2,stochasticP,3},scaleFactor,0,hz,[],'discrim');
+    stimSpecs{1} = stimSpec(stim, criterion,'loop',0,[],{stochasticP,1,stochasticP,2,stochasticP,3},scaleFactor,0,hz,[],'discrim',true);
 
     % correct phase (always correct)
     criterion = {[], 3};
-    stimSpecs{2} = stimSpec([],criterion,'cache',0,[],[],0,0,hz,'reinforced','reinforcement');
+    stimSpecs{2} = stimSpec([],criterion,'cache',0,[],[],0,0,hz,'reinforced','reinforcement',false);
     
     % final
     criterion = {[], 1};
-    stimSpecs{3} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,[],'itl');
+    stimSpecs{3} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,[],'itl',false);
 
 elseif strcmp(class(trialManager), 'autopilot')
 
     % just put in loop mode, one phase
     criterion = {[], 2};
-    stimSpecs{1} = stimSpec(stim, criterion,'loop',0,[],[],scaleFactor,0,hz,[],'display');
+    stimSpecs{1} = stimSpec(stim, criterion,'loop',0,[],[],scaleFactor,0,hz,[],'display',true);
 
     % final phase
     criterion = {[], 1};
-    stimSpecs{2} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,[],'itl');
+    stimSpecs{2} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,[],'itl',false);
 
 else
     error('only nAFC, freeDrinks, and autopilot for now');

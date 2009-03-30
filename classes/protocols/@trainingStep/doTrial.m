@@ -92,19 +92,11 @@ try
             end
             
             graduate = checkCriterion(ts.criterion,subject,ts, trialRecords);
-			
-            %END SESSION BY GRADUATION (only if not in standalone mode)
-			%   edf sez: PLEASE don't fill the code with random special cases like this.  
-			%            it makes the code very hard to understand and maintain, not to mention giving inconsistent and inexplicable behavior at the user level.
-			%            look into why it was necessary in the first place.
-			%            if it is no longer necessary, then don't special case it.  if it is necessary and you need it fixed, then fix it.
-			%            the reason you have been able to use this software to get data is that it is not written with a quick-fix mentality.
-			%            http://132.239.158.177/trac/rlab_hardware/ticket/282#comment:5
-            if graduate % && isempty(getStandAlonePath(r))
-                %do the graduation
-                %This code already exists in the doTrial for the subject
 
-                %stop the session
+			%END SESSION BY GRADUATION
+            if false && graduate % && isempty(getStandAlonePath(r)) %this was phil's quick-fix mentality hack to create an ugly special case for standalone
+				% see http://132.239.158.177/trac/rlab_hardware/ticket/282#comment:5
+                % edf thinks this is no longer necessary since fli updated trial records to allow multiple stim/trialManager types per file
                 keepWorking=0;
             end
 

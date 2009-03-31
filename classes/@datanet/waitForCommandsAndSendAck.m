@@ -14,13 +14,14 @@ end
 % so that datanet can request a trial's worth of events
 events_data=[];
 eventsToSendIndex=1;
+
 % ========================================================================================
 % size of the GUI - parameters
 oneRowHeight=25;
 margin=10;
 fieldWidth=100;
 fWidth=2*margin+9*fieldWidth;
-fHeight=margin+15*oneRowHeight+margin;
+fHeight=margin+20*oneRowHeight+margin;
 
 % ========================================================================================
 % the GUI
@@ -31,13 +32,12 @@ f = figure('Visible','off','MenuBar','none','Name','neural GUI',...
         % return event here
         %         events = guidata(f);
         %         events_data
+        save temp events_data;
         closereq;
         return;
     end % end cleanup function
 
     function updateDisplay()
-        %         numToShow=str2double(get(numEventsToShow,'String'));
-        %         numToShow=min(numToShow,length(events_data));
         numToShow=length(events_data);
         toShow=events_data(end-numToShow+1:end);
         dispStr='';
@@ -54,7 +54,7 @@ f = figure('Visible','off','MenuBar','none','Name','neural GUI',...
                     lastPduration=events_data(find([events_data.penetrationNum]==lastP,1,'first')).time - ...
                         events_data(find([events_data.penetrationNum]==toShow(i).penetrationNum,1,'first')).time;
                     %                     lastP
-                    [events_data.penetrationNum]
+%                     [events_data.penetrationNum]
                     %                     i
                     %                     toShow
                     %                     find([events_data.penetrationNum]==lastP)
@@ -174,19 +174,19 @@ surgeryBregmaLabel = uicontrol(f,'Style','text','String','Surgery Bregma','Visib
 % current anchor label
 currentAnchorLabel = uicontrol(f,'Style','text','String','Current Anchor','Visible','on','Units','pixels',...
     'FontWeight','bold','HorizontalAlignment','center', ...
-    'Position',[margin+0*fieldWidth fHeight-4*oneRowHeight-2*margin fieldWidth oneRowHeight]);
+    'Position',[margin+0*fieldWidth fHeight-9*oneRowHeight-2*margin fieldWidth oneRowHeight]);
 % current anchor text field
 currentAnchorAPField = uicontrol(f,'Style','edit','String','nan','Units','pixels',...
-    'Enable','off','Position',[1*margin+1*fieldWidth fHeight-4*oneRowHeight-2*margin fieldWidth oneRowHeight]);
+    'Enable','off','Position',[1*margin+1*fieldWidth fHeight-9*oneRowHeight-2*margin fieldWidth oneRowHeight]);
 currentAnchorMLField = uicontrol(f,'Style','edit','String','nan','Units','pixels',...
-    'Enable','off','Position',[1*margin+2*fieldWidth fHeight-4*oneRowHeight-2*margin fieldWidth oneRowHeight]);
+    'Enable','off','Position',[1*margin+2*fieldWidth fHeight-9*oneRowHeight-2*margin fieldWidth oneRowHeight]);
 currentAnchorZField = uicontrol(f,'Style','edit','String','nan','Units','pixels',...
-    'Enable','off','Position',[1*margin+3*fieldWidth fHeight-4*oneRowHeight-2*margin fieldWidth oneRowHeight]);
+    'Enable','off','Position',[1*margin+3*fieldWidth fHeight-9*oneRowHeight-2*margin fieldWidth oneRowHeight]);
 
 % checkbox to enable current anchor field input
 enableCurrentAnchorField = uicontrol(f,'Style','checkbox',...
     'String','unlock current anchor','Enable','on','Visible','on',...
-    'Value',0,'Units','pixels','Position',[2*margin+4*fieldWidth fHeight-4*oneRowHeight-2*margin fieldWidth+margin*3 oneRowHeight],...
+    'Value',0,'Units','pixels','Position',[2*margin+4*fieldWidth fHeight-9*oneRowHeight-2*margin fieldWidth+margin*3 oneRowHeight],...
     'CallBack',@enableCurrentAnchorEntry);
     function enableCurrentAnchorEntry(source,eventdata)
         if get(enableCurrentAnchorField,'Value')==1
@@ -201,31 +201,61 @@ enableCurrentAnchorField = uicontrol(f,'Style','checkbox',...
     end % end enableCurrentAnchorEntry function
 
 % ========================================================================================
-% number of recent events to show
-numEventsToShow = uicontrol(f,'Style','edit','String','10','Visible','off','Units','pixels',...
-    'FontWeight','normal','HorizontalAlignment','center', ...
-    'Position',[3*margin+6*fieldWidth fHeight-oneRowHeight-margin fieldWidth/2 oneRowHeight]);
-numEventsToShowLabel = uicontrol(f,'Style','text','String','recent events to show','Visible','off','Units','pixels',...
-    'FontWeight','normal','HorizontalAlignment','left', ...
-    'Position',[3*margin+6.5*fieldWidth fHeight-oneRowHeight-margin fieldWidth+2*margin oneRowHeight]);
+% penetration parameters (ratID, experimenter, electrode make/model, lot#, ID#, impedence)
+ratIDLabel = uicontrol(f,'Style','text','String','Rat ID','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+7*fieldWidth fHeight-1*oneRowHeight-margin fieldWidth oneRowHeight]);
+experimenterLabel = uicontrol(f,'Style','text','String','Experimenter','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+7*fieldWidth fHeight-2*oneRowHeight-margin fieldWidth oneRowHeight]);
+electrodeMakeLabel = uicontrol(f,'Style','text','String','electrode make','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+7*fieldWidth fHeight-3*oneRowHeight-margin fieldWidth oneRowHeight]);
+electrodeModelLabel = uicontrol(f,'Style','text','String','electrode model','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+7*fieldWidth fHeight-4*oneRowHeight-margin fieldWidth oneRowHeight]);
+lotNumLabel = uicontrol(f,'Style','text','String','lot #','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+7*fieldWidth fHeight-5*oneRowHeight-margin fieldWidth oneRowHeight]);
+IDNumLabel = uicontrol(f,'Style','text','String','ID #','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+7*fieldWidth fHeight-6*oneRowHeight-margin fieldWidth oneRowHeight]);
+impedenceLabel = uicontrol(f,'Style','text','String','Impedence','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+7*fieldWidth fHeight-7*oneRowHeight-margin fieldWidth oneRowHeight]);
+
+ratIDField = uicontrol(f,'Style','edit','String','','Units','pixels',...
+    'Enable','on','Position',[margin+8*fieldWidth fHeight-1*oneRowHeight-margin fieldWidth oneRowHeight]);
+experimenterField = uicontrol(f,'Style','edit','String','','Units','pixels',...
+    'Enable','on','Position',[margin+8*fieldWidth fHeight-2*oneRowHeight-margin fieldWidth oneRowHeight]);
+electrodeMakeField = uicontrol(f,'Style','edit','String','','Units','pixels',...
+    'Enable','on','Position',[margin+8*fieldWidth fHeight-3*oneRowHeight-margin fieldWidth oneRowHeight]);
+electrodeModelField = uicontrol(f,'Style','edit','String','','Units','pixels',...
+    'Enable','on','Position',[margin+8*fieldWidth fHeight-4*oneRowHeight-margin fieldWidth oneRowHeight]);
+lotNumField = uicontrol(f,'Style','edit','String','','Units','pixels',...
+    'Enable','on','Position',[margin+8*fieldWidth fHeight-5*oneRowHeight-margin fieldWidth oneRowHeight]);
+IDNumField = uicontrol(f,'Style','edit','String','','Units','pixels',...
+    'Enable','on','Position',[margin+8*fieldWidth fHeight-6*oneRowHeight-margin fieldWidth oneRowHeight]);
+impedenceField = uicontrol(f,'Style','edit','String','','Units','pixels',...
+    'Enable','on','Position',[margin+8*fieldWidth fHeight-7*oneRowHeight-margin fieldWidth oneRowHeight]);
 
 % ========================================================================================
 % current event label, fields, and "submit" button
 currentEventLabel = uicontrol(f,'Style','text','String','Current','Visible','on','Units','pixels',...
     'FontWeight','bold','HorizontalAlignment','center', ...
-    'Position',[margin+0*fieldWidth fHeight-5*oneRowHeight-2*margin fieldWidth oneRowHeight]);
+    'Position',[margin+0*fieldWidth fHeight-10*oneRowHeight-2*margin fieldWidth oneRowHeight]);
 currentAPField = uicontrol(f,'Style','edit','Units','pixels','String','nan',...
-    'Enable','on','Position',[1*margin+1*fieldWidth fHeight-5*oneRowHeight-2*margin fieldWidth oneRowHeight]);
+    'Enable','on','Position',[1*margin+1*fieldWidth fHeight-10*oneRowHeight-2*margin fieldWidth oneRowHeight]);
 currentMLField = uicontrol(f,'Style','edit','Units','pixels','String','nan',...
-    'Enable','on','Position',[1*margin+2*fieldWidth fHeight-5*oneRowHeight-2*margin fieldWidth oneRowHeight]);
+    'Enable','on','Position',[1*margin+2*fieldWidth fHeight-10*oneRowHeight-2*margin fieldWidth oneRowHeight]);
 currentZField = uicontrol(f,'Style','edit','Units','pixels','String','nan',...
-    'Enable','on','Position',[1*margin+3*fieldWidth fHeight-5*oneRowHeight-2*margin fieldWidth oneRowHeight]);
+    'Enable','on','Position',[1*margin+3*fieldWidth fHeight-10*oneRowHeight-2*margin fieldWidth oneRowHeight]);
 currentComment = uicontrol(f,'Style','edit','Units','pixels','String','',...
-    'Enable','on','Position',[1*margin+4*fieldWidth fHeight-5*oneRowHeight-2*margin fieldWidth*4 oneRowHeight]);
+    'Enable','on','Position',[1*margin+4*fieldWidth fHeight-10*oneRowHeight-2*margin fieldWidth*4 oneRowHeight]);
 
 currentEventSubmit = uicontrol(f,'Style','pushbutton','String','enter','Visible','on','Units','pixels',...
     'FontWeight','bold','HorizontalAlignment','center','CallBack',@logEvent, ...
-    'Position',[2*margin+8*fieldWidth fHeight-5*oneRowHeight-2*margin fieldWidth oneRowHeight]);
+    'Position',[2*margin+8*fieldWidth fHeight-10*oneRowHeight-2*margin fieldWidth oneRowHeight]);
     function logEvent(source,eventdata)
         % make a new entry in events
         events_data(end+1).time=now;
@@ -233,28 +263,58 @@ currentEventSubmit = uicontrol(f,'Style','pushbutton','String','enter','Visible'
         events_data(end).surgeryBregma=[str2double(get(surgeryBregmaAPField,'String')) str2double(get(surgeryBregmaMLField,'String')) str2double(get(surgeryBregmaZField,'String'))];
         events_data(end).currentAnchor=[str2double(get(currentAnchorAPField,'String')) str2double(get(currentAnchorMLField,'String')) str2double(get(currentAnchorZField,'String'))];
         events_data(end).position=[str2double(get(currentAPField,'String')) str2double(get(currentMLField,'String')) str2double(get(currentZField,'String'))];
+        events_data(end).comment=get(currentComment,'String');       
+        
         % update pNum if necessary (if AP or ML differ from last)
-        if length(events_data)>=2 && any(events_data(end-1).position(1:2)~=events_data(end).position(1:2))
-            events_data(end).penetrationNum=events_data(end-1).penetrationNum+1;
-        elseif length(events_data)==1 % first time
-            events_data(end).penetrationNum=1;
+        if (length(events_data)>=2 && any(events_data(end-1).position(1:2)~=events_data(end).position(1:2))) ...
+                || length(events_data)==1
+            % record events_data.penetrationParams here (ratID, experimenters, 
+            %   electrode make, model, lot#, ID#, impedence, reference mark xyz, target xy)
+            
+            params=[];
+            params.ratID=get(ratIDField,'String');
+            params.experimenter=get(experimenterField,'String');
+            params.electrodeMake=get(electrodeMakeField,'String');
+            params.electrodeModel=get(electrodeModelField,'String');
+            params.lotNum=str2double(get(lotNumField,'String'));
+            params.IDNum=get(IDNumField,'String');
+            params.impedence=str2double(get(impedenceField,'String'));
+            events_data(end).penetrationParams=params;
+
+            if length(events_data)==1
+                events_data(end).penetrationNum=1;
+            else
+                events_data(end).penetrationNum=events_data(end-1).penetrationNum+1;
+            end
         else
             events_data(end).penetrationNum=events_data(end-1).penetrationNum;
+            events_data(end).penetrationParams=[];
         end
-        events_data(end).comment=get(currentComment,'String');
-
-        %         dispStr=sprintf('logged %s %s %s at pNum=%d',get(currentAPField,'String'),get(currentMLField,'String'),get(currentZField,'String'), events_data(end).penetrationNum);
-        %         disp(dispStr);
+        
         updateDisplay();
         % flush the comments buffer
         set(currentComment,'String','');
     end % end logEvent function
 
 % ========================================================================================
+% save events button
+saveEventsSubmit = uicontrol(f,'Style','pushbutton','String','save events','Visible','on','Units','pixels',...
+    'FontWeight','normal','HorizontalAlignment','center','CallBack',@saveEvents, ...
+    'Position',[2*margin+8*fieldWidth fHeight-19*oneRowHeight-2*margin fieldWidth oneRowHeight]);
+    function saveEvents(source,eventdata)
+        [saveFilename,savePathname] = uiputfile('*.mat','Save Events As');
+        if ischar(saveFilename) && ischar(savePathname)
+            save(fullfile(savePathname,saveFilename),'events_data');
+%         else % 0
+%             disp('user canceled save');
+        end
+    end
+
+% ========================================================================================
 % display box
 recentEventsDisplay = uicontrol(f,'Style','edit','String','recent events','Visible','on','Units','pixels',...
     'FontWeight','normal','HorizontalAlignment','left','Max',2,'Min',0, ...
-    'Position',[margin+0*fieldWidth fHeight-14*oneRowHeight-1*margin fieldWidth*8-margin oneRowHeight*8]);
+    'Position',[margin+0*fieldWidth fHeight-19*oneRowHeight-1*margin fieldWidth*8-margin oneRowHeight*8]);
 
 % ========================================================================================
 % turn on the GUI

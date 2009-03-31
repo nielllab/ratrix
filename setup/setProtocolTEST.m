@@ -377,6 +377,7 @@ x=linspace(-d,d,gran);
 
 ports=cellfun(@uint8,{1 3},'UniformOutput',false);
 [noiseSpec(1:length(ports)).port]=deal(ports{:});
+[noiseSpec.numLoops]=deal(1);
 
 % stim properties:
 % in.distribution               'binary', 'uniform', or one of the following forms:

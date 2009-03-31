@@ -38,7 +38,9 @@ else
         %convert stim/floatprecision to uint8 so when drawFrameUsingTextureCache calls maketexture it is fast
         %(especially when strategy is noCache and we make each texture during each frame)
         floatprecision=0;
+        warning('off','MATLAB:intConvertNonIntVal')
         stim=uint8(stim*double(intmax('uint8')));
+        warning('on','MATLAB:intConvertNonIntVal')
     end
 end
 

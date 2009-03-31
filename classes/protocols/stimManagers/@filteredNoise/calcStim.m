@@ -59,9 +59,9 @@ fprintf('about to compute stim\n')
 if isempty(stimulus.cache) || isempty(stimulus.hz) || stimulus.hz~=hz
     stimulus=computeFilteredNoise(stimulus,hz);
 
-    if false && isstruct(stimulus.loopDuration{typeInd}) && size(stimulus.cache{typeInd},1)==1 && size(stimulus.cache{typeInd},2)==1 
+    if false && isstruct(stimulus.loopDuration{typeInd}) && size(stimulus.cache{typeInd},1)==1 && size(stimulus.cache{typeInd},2)==1
         sca
-        
+
         if isfield(stimulus.distribution{typeInd}, 'origHz')
             efStimOrig=load([stimulus.distribution{typeInd}.special '.txt']);
             subplot(2,1,1)
@@ -141,10 +141,14 @@ if ~isempty(resolutions)
     height=size(out,1);
     d=sqrt(sum([height width].^2));
     [a b]=meshgrid(1:width,1:height);
-    mask=reshape(mvnpdf([a(:) b(:)],[width height].*details.location,(details.maskRadius*d)^2*eye(2)),height,width);
+    if details.maskRadius>0
+        mask=reshape(mvnpdf([a(:) b(:)],[width height].*details.location,(details.maskRadius*d)^2*eye(2)),height,width);
+    else
+        mask=ones(height,width);
+    end
     mask=mask/max(mask(:)); %DO NOT also normalize bottom to zero!  will effectively change radius to be same as patch size.
 
-    out=out.*mask(:,:,ones(1,size(pre,3)));
+    out=(out-details.background).*mask(:,:,ones(1,size(pre,3)))+details.background;
 else
     if any([h w]~=1)
         error('LED only works with 1x1 output')

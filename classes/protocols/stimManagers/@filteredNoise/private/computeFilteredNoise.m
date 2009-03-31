@@ -1,6 +1,7 @@
 %intent: stim output always btw 0-1 (DO NOT NORMALIZE to cover whole range - example would be dark segment of natural timeseries)
 function stimulus=computeFilteredNoise(stimulus,hz)
 stimulus.hz=hz;
+filteringOK = false;
 
 for i=1:length(stimulus.port)
 
@@ -40,11 +41,12 @@ for i=1:length(stimulus.port)
         end
     end
 
-    k=k/sqrt(sum(k(:).^2));  %to preserve contrast
+    k=k/sqrt(sum(k(:).^2));  %to preserve contrast (tho only for gaussian stimuli)
     %filtering effectively summed a bunch of independent gaussians with variances determined by the kernel entries
     %if X ~ N(0,a) and Y ~ N(0,b), then X+Y ~ N(0,a+b) and cX ~ N(0,ac^2)
     %must be a deep reason this is same as pythagorean
-
+    %note that stim mean must be zero for this to work!
+    
     if isstruct(stimulus.loopDuration{i})
         chunkSize=round(hz*stimulus.loopDuration{i}.chunkSeconds); %number of frames in a single repeat or unique
         frames=chunkSize*(1 + stimulus.loopDuration{i}.numCycles*stimulus.loopDuration{i}.numUniques); %the number of raw frames we need, before making the repeats/uniques
@@ -65,10 +67,17 @@ for i=1:length(stimulus.port)
             noise=[noise stimulus.distribution{i}.conditions{j}{1}*makeSinusoid(hz,stimulus.distribution{i}.conditions{j}{2},dur) zeros(1,round(stimulus.distribution{i}.gapSecs*hz))];
         end
         noise=.5+noise/2;
-        noise(noise>1)=1;
-        noise(noise<0)=0;
+        
+        %these should not be needed, and happen later anyway
+        %noise(noise>1)=1;
+        %noise(noise<0)=0;
+        
         noise=permute(noise,[3 1 2]);
         repmat(noise,[sz 1]); %shouldn't this be noise=?
+        
+        if ~all(sz==1)
+            error('the code is probably wrong for size other than [1 1]')
+        end
     elseif ischar(stimulus.distribution{i}) && ismember( stimulus.distribution{i},  {'binary','uniform'} )
         % consider adding offset/contrast for these types
         rand('twister',stimulus.seed{i});
@@ -86,9 +95,12 @@ for i=1:length(stimulus.port)
                 hiClipInds=noise>1;
                 loClipInds=noise<0;
                 fprintf('*** gaussian: clipping %g%% of values (should be %g%%)\n',100*(sum(hiClipInds(:))+sum(loClipInds(:)))/numel(noise),100*stimulus.distribution{i}.clipPercent)
-                noise(hiClipInds)=1;
-                noise(loClipInds)=0;
                 
+                %these will happen later, and screw up the gaussian-contrast-preserving filtering if done now 
+                %noise(hiClipInds)=1;
+                %noise(loClipInds)=0;
+
+                filteringOK=true;
             otherwise
                 if ~isstruct(stimulus.loopDuration{i}) && stimulus.loopDuration{i}==0
                     frames=0;
@@ -101,6 +113,10 @@ for i=1:length(stimulus.port)
                 
                 noise=permute(noise,[3 1 2]);
                 repmat(noise,[sz 1]); %shouldn't this be noise=?
+                
+                if ~all(sz==1)
+                    error('the code is probably wrong for size other than [1 1]')
+                end
                 
                 switch stimulus.distribution{i}.clipType
                     case 'normalized'
@@ -164,9 +180,6 @@ for i=1:length(stimulus.port)
         end
     end
 
-    %         [a b] = hist(noise(:),100);
-    %         std(noise(:))
-
     t=zeros(size(k));
     t(ceil(length(t(:))/2))=1;
     if all(rem(size(k),2)==1) && all(k(:)==t(:))
@@ -176,22 +189,42 @@ for i=1:length(stimulus.port)
             beep;pause(.1);
         end
     else
+        if ~filteringOK
+            error('you shouldn''t filter non-gaussian stims')
+        end
+        
+        theMean=mean(noise(:));
         tic
         %stim=convn(noise,k,'same'); %slower than imfilter
-        stim=imfilter(noise,k,'circular'); %allows looping, does it keep edges nice?
+        stim=imfilter(noise-theMean,k,'circular')+theMean; %allows looping, does it keep edges nice?
         fprintf('took %g to filter noise\n',toc)
-        %hmm - need to worry that filter will change contrast...  but cannot normalize...
     end
-
+    
     stim(stim>1)=1;%DO NOT NORMALIZE!!!
     stim(stim<0)=0;
-
-    %         c = hist(stim(:),b);
-    %         std(stim(:))
-    %
-    %         figure
-    %         plot(b,[a' c']);
-
+    
+    comparePreAndPostFilteredDistributions=false;
+    if comparePreAndPostFilteredDistributions
+        % for some reason, filtered is coming out slightly lower contrast... why?  rounding errors?
+        
+        sca
+        noise(noise>1)=1;
+        noise(noise<0)=0;
+        [h b]=hist(stim(:),1000);
+        h2=hist(noise(:),b);
+        subplot(2,1,1)
+        plot(b,[h' h2'])
+        legend({'filtered','unfiltered'})
+        xlim([-.1 1.1])
+        subplot(2,1,2)
+        plot(b,h-h2)
+        hold on
+        plot(b,ones(1,length(b)))
+        legend('filtered-unfiltered')
+        xlim([-.1 1.1])
+        keyboard
+    end
+    
     if isinf(stimulus.numLoops{i})
         stimulus.cache{i}=stim;
     else
@@ -200,10 +233,5 @@ for i=1:length(stimulus.port)
         stimulus.cache{i}=repmat(stim,[1,1,f]);
         stimulus.cache{i}(:,:,end+1:end+r)=stim(:,:,1:r);
     end
-    
-    %         i
-    %         stimulus.orientations{i}
-    %         size(stim)
-    %         imagesc(stim(:,:,round(size(stim,3)/2)))
 
 end

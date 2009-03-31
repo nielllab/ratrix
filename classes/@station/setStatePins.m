@@ -18,9 +18,9 @@ if strcmp(s.responseMethod,'parallelPort')
 			done=true;
 			pins=possibles{i,2}; %edf worries this is slow
 			if ~isempty(pins)
-				state=state(ones(1,length(pins.pinNums)));
-				state(pins.invs)=~state(pins.invs);
-				lptWriteBits(pins.decAddr,pins.bitLocs,state);
+				thisState=state(ones(1,length(pins.pinNums)));
+				thisState(pins.invs)=~thisState(pins.invs);
+				lptWriteBits(pins.decAddr,pins.bitLocs,thisState);
 			else
 				warning('station asked to set optional state pins it doesn''t have')
 			end

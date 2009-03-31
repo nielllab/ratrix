@@ -135,7 +135,7 @@ ports=cellfun(@uint8,{1 3},'UniformOutput',false);
 % in.background                 0-1, normalized (luminance outside patch)
 
 [noiseSpec.locationDistribution]=deal(reshape(mvnpdf([a(:) b(:)],[-d/2 d/2]),gran,gran),reshape(mvnpdf([a(:) b(:)],[d/2 d/2]),gran,gran));
-[noiseSpec.maskRadius]           =deal(.045);
+[noiseSpec.maskRadius]           =deal(0.06);%.045);
 [noiseSpec.patchDims]            =deal(uint16([50 50]));
 [noiseSpec.patchHeight]          =deal(.4);
 [noiseSpec.patchWidth]           =deal(.4);
@@ -216,7 +216,7 @@ ts9 = trainingStep(vh, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svn
 ts10 = trainingStep(vh, crftrf,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %crf/trf
 
 p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts4, ts6, ts7, ts8, ts9, ts10});
-stepNum=uint8(2);
+stepNum=uint8(6);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

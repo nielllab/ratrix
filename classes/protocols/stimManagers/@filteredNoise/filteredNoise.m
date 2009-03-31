@@ -161,12 +161,18 @@ switch nargin
                     error('numLoops must be >0 real scalar or inf')
                 end
                 
-                pos={in.maskRadius in.kernelDuration in.filterStrength};
+                if isreal(in.maskRadius) && isscalar(in.maskRadius)
+                    %pass
+                else
+                    error('maskRadius must be real scalar')
+                end
+                
+                pos={in.kernelDuration in.filterStrength};
                 for i=1:length(pos)
                     if isscalar(pos{i}) && isreal(pos{i}) && pos{i}>=0
                         %pass
                     else
-                        error('maskRadius, kernelDuration, and filterStrength must be real scalars >=0')
+                        error('kernelDuration and filterStrength must be real scalars >=0')
                     end
                 end
 

@@ -35,7 +35,7 @@ if (ischar(stimulusDetails.strategy) && strcmp(stimulusDetails.strategy,'expert'
     %  stimData=zeros(height,width,length(seeds)); % method 1
     stimData=nan(spatialDim(1),spatialDim(2),length(stimFrames)); % method 2
     for i=1:length(stimFrames)
-        randn('state',seeds(stimFrames(i)));
+        randn('state',seeds(mod(stimFrames(i)-1,length(seeds))+1)); % we only have enough seeds for a single repeat of whiteNoise; if numRepeats>1, need to modulo
         whiteVal=255;
         stixels = round(whiteVal*(randn(spatialDim)*std+meanLuminance));
         stixels(stixels>whiteVal)=whiteVal;

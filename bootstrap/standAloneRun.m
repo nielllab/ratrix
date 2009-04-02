@@ -156,5 +156,6 @@ end
 
 function cleanup
 sca
+FlushEvents('mouseUp','mouseDown','keyDown','autoKey','update');
 ListenChar(0)
 ShowCursor(0)

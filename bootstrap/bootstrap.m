@@ -101,6 +101,7 @@ end
 
 
 function r=cleanup(r)
+FlushEvents('mouseUp','mouseDown','keyDown','autoKey','update');
 ListenChar(0);
 ShowCursor(0);
 if exist('r','var') && isa(r,'rnet')

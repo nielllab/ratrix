@@ -87,6 +87,7 @@ catch ex
     Screen('CloseAll');
     Priority(originalPriority);
     ShowCursor(0);
+    FlushEvents('mouseUp','mouseDown','keyDown','autoKey','update');
     ListenChar(0);
 
 	if IsWin

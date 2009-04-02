@@ -171,6 +171,7 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
 
 
             close all
+            FlushEvents('mouseUp','mouseDown','keyDown','autoKey','update');
             ListenChar(0);
         else
             error('n must be >= 0')

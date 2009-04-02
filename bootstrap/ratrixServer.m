@@ -195,6 +195,7 @@ f = figure('Visible','off','MenuBar','none','Name',sprintf('ratrix control: %s I
                 errordlg('must stop running before closing','error','modal')
                 doDelete=false;
             else
+                FlushEvents('mouseUp','mouseDown','keyDown','autoKey','update');
                 ListenChar(0) %'called listenchar(0) -- why doesn''t keyboard work?'
                 ShowCursor(0)
 

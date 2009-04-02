@@ -4,8 +4,8 @@ function t=soundManager(varargin)
 % typical soundClips: {correctSound,keepGoingSound,trySomethingElseSound,wrongSound}
 
 t.clips={};
-t.players={};
-t.usePsychPortAudio=true; %expect bad things if this is false.  should always be true now.
+t.player=[];
+t.boundaries=[];
 
 switch nargin
     case 0
@@ -22,7 +22,7 @@ switch nargin
     otherwise
         error('Wrong number of input arguments')
 end
-t.playingNonLoop=false(1,length(t.clips));
-t.playingLoop=false(1,length(t.clips));
+t.playing=[];
+t.looping=false;
 t.clipDurs=zeros(1,length(t.clips));
 t = class(t,'soundManager');

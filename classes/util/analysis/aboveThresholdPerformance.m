@@ -31,7 +31,9 @@ if ~isempty(trialRecords)
         case 'largeData'
             if isfield(trialRecords,'trialDetails')
                 td=[trialRecords.trialDetails];
-                correct=[td.correct];
+                if isfield(td,'correct')
+                    correct=[td.correct];
+                end
             else
                 correct=[trialRecords.correct];
             end

@@ -63,12 +63,17 @@ end
 
 quit = false;
 result=[];
-analysisdata=[];
-stimManagerClass=[];
-stimulusDetails=[];
-physiologyEvents=[];
+% stimManagerClass=[];
+% stimulusDetails=[];
+% physiologyEvents=[];
 plotParameters.doPlot=false;
 plotParameters.handle=figure;
+
+neuralRecord=[];
+stimRecord=[];
+spikeRecord=[];
+eyeRecord=[];
+analysisdata=[];
 
 %SETUP: determine record paths (may need to mkdir) ... could be a function
 neuralRecordsPath = fullfile(path, subjectID, 'neuralRecords');
@@ -80,11 +85,6 @@ end
 stimRecordsPath = fullfile(path, subjectID, 'stimRecords');
 if ~isdir(stimRecordsPath)
     mkdir(stimRecordsPath);
-end
-
-spikeRecordPath = fullfile(path, subjectID, 'spikeRecords');
-if ~isdir(spikeRecordPath)
-    mkdir(spikeRecordPath);
 end
 
 eyeRecordPath = fullfile(path, subjectID, 'eyeRecords');
@@ -124,6 +124,7 @@ while ~quit
     % neuralRecord_1-20081023T155924.mat
     % for each neuralRecord here, try to load the corresponding stimRecord
     for i=1:length(goodFiles)
+
         % now try to load the corresponding stimRecord
         try
             % =================================================================================
@@ -142,44 +143,40 @@ while ~quit
             
             
             %stimRecordLocation
-            lastStimManagerClass=stimManagerClass; % store the previous trial's stim class
-            if ~isempty(physiologyEvents)
-                lastZposition=physiologyEvents(end).position(3); % store the previous trial's ending z-position
+            if isempty(stimRecord)
+                lastStimManagerClass=[];
+            else
+                lastStimManagerClass=stimRecord.stimManagerClass; % store the previous trial's stim class
+            end
+            if ~isempty(stimRecord) && ~isempty(stimRecord.physiologyEvents)
+                lastZposition=stimRecord.physiologyEvents(end).position(3); % store the previous trial's ending z-position
             else
                 lastZposition=[];
             end
-            loaded=false;
-            if ~loaded
-                try
-                    load(stimRecordLocation, 'stimManagerClass')
-                    %often we go too early b/c its still being written
-                    loaded=true;
-                catch
-                    waitsecs(abs(randn));
-                    disp('waiting for stim to be loaded')
-                end
-            end
-            analyzeThisClass= all(strcmp('all',stimClassToAnalyze)) ||  any(strcmp(stimManagerClass,stimClassToAnalyze));
+            
+            stimRecord=stochasticLoad(stimRecordLocation,{'stimManagerClass'});
+            analyzeThisClass= all(strcmp('all',stimClassToAnalyze)) ||  any(strcmp(stimRecord.stimManagerClass,stimClassToAnalyze));
             if analyzeThisClass
                 
                 % =================================================================================
                 % if there is no spikeRecord corresponding to the current neuralRecord, run spike analysis on it
                 if ~exist(spikeRecordLocation,'file') || overwriteAll
                     disp(sprintf('loading neural record %s', neuralRecordLocation));
-                    load(neuralRecordLocation);    % has neuralData, neuralDataTimes, samplingRate, parameters
+                    neuralRecord=stochasticLoad(neuralRecordLocation);    
+                    % has neuralData, neuralDataTimes, samplingRate, parameters, matlabTimeStamp, firstNeuralDataTime
                     
                     %timeRangePerTrialSamps=timeRangePerTrialSecs*samplingRate; % not needed, but might be faster ;
                     %eben better is if we could load "part" of a matlab variable (specified inds) at a faster speeds.
                     % probably can't b/c matlab compression
                     
                     % avoid making big variables to filter the data if you can...
-                    if timeRangePerTrialSecs(1)==0 & timeRangePerTrialSecs(2)> diff(neuralDataTimes([1 end]))% use all
+                    if timeRangePerTrialSecs(1)==0 & timeRangePerTrialSecs(2)> diff(neuralRecord.neuralDataTimes([1 end]))% use all
                         % do nothing, b/c using all
                     else %filter
-                        timeSinceTrialStart=neuralDataTimes-neuralDataTimes(1);
+                        timeSinceTrialStart=neuralRecord.neuralDataTimes-neuralRecord.neuralDataTimes(1);
                         withinTimeRange=timeSinceTrialStart>=timeRangePerTrialSecs(1) & timeSinceTrialStart<=timeRangePerTrialSecs(2);
-                        neuralData=neuralData(withinTimeRange,:);
-                        neuralDataTimes=neuralDataTimes(withinTimeRange);
+                        neuralRecord.neuralData=neuralRecord.neuralData(withinTimeRange,:);
+                        neuralRecord.neuralDataTimes=neuralRecord.neuralDataTimes(withinTimeRange);
                     end
                     
                     % get frameIndices and frameTimes (from screen pulses)
@@ -187,30 +184,34 @@ while ~quit
                     warningBound = 0.01;
                     errorBound = 0.5; % half a frame
                     ifi = 1/100;
-                    spikeDetails=[];
+                    spikeRecord.spikeDetails=[];
+                    spikeRecord.samplingRate=neuralRecord.samplingRate;
                     % what is the difference between frameIndices and correctedFrameIndices?
                     % we pass correctedFrameIndices to spikeData, which is what physAnalysis sees, but 
                     % we don't tell the getSpikesFromNeuralData function anything about dropped frames?  
-                    [frameIndices frameTimes frameLengths correctedFrameIndices correctedFrameTimes correctedFrameLengths stimInds passedQualityTest] = ...
-                        getFrameTimes(neuralData(:,1),neuralDataTimes,samplingRate,warningBound,errorBound,ifi); % pass in the pulse channel
+                    [spikeRecord.frameIndices spikeRecord.frameTimes spikeRecord.frameLengths spikeRecord.correctedFrameIndices...
+                        spikeRecord.correctedFrameTimes spikeRecord.correctedFrameLengths spikeRecord.stimInds ...
+                        spikeRecord.passedQualityTest] = ...
+                        getFrameTimes(neuralRecord.neuralData(:,1),neuralRecord.neuralDataTimes,neuralRecord.samplingRate,warningBound,errorBound,ifi); % pass in the pulse channel
                     
                     if 0 %for inspecting errors in frames
                         figure('position',[100 500 500 500])
-                        inspectFramesPulses(neuralData,neuralDataTimes,frameIndices,'shortest'); 
+                        inspectFramesPulses(neuralRecord.neuralData,neuralRecord.neuralDataTimes,spikeRecord.frameIndices,'shortest'); 
                         % first last shortest longest
                     end
                     
                     if usePhotoDiodeSpikes
-                        [spikes photoDiode]=getSpikesFromPhotodiode(neuralData(:,2),neuralDataTimes, correctedFrameIndices);
-                        spikeTimestamps = neuralDataTimes(spikes==1);
-                        spikeWaveforms=[];
-                        assignedClusters=ones(1,length(spikeTimestamps));
+                        [spikeRecord.spikes spikeRecord.photoDiode]=getSpikesFromPhotodiode(neuralRecord.neuralData(:,2),...
+                            neuralRecord.neuralDataTimes, spikeRecord.correctedFrameIndices);
+                        spikeRecord.spikeTimestamps = neuralRecord.neuralDataTimes(spikes==1);
+                        spikeRecord.spikeWaveforms=[];
+                        spikeRecord.assignedClusters=ones(1,length(spikeRecord.spikeTimestamps));
                         %                         frameTimes(:,1); %frame starts
                         %                         frameTimes(:,2); %frame stops
                     else
                         
                         %detection params needs samplingRate
-                        spikeDetectionParams.samplingFreq=samplingRate; % always overwrite with current value
+                        spikeDetectionParams.samplingFreq=neuralRecord.samplingRate; % always overwrite with current value
                         %                     if ismember('samplingFreq',fields(spikeDetectionParams))
                         %                         spikeDetectionParams.samplingFreq
                         %                         error('when using analysis manager, samplingFreq is not specified by user, but rather loaded direct from the neural data file')
@@ -218,13 +219,15 @@ while ~quit
                         %                         spikeDetectionParams.samplingFreq=samplingRate;
                         %                     end
                         
-                        [spikes spikeWaveforms spikeTimestamps assignedClusters rankedClusters photoDiode]=...
-                            getSpikesFromNeuralData(neuralData(:,3),neuralDataTimes,spikeDetectionParams,spikeSortingParams,analysisPath);
+                        [spikeRecord.spikes spikeRecord.spikeWaveforms spikeRecord.spikeTimestamps spikeRecord.assignedClusters ...
+                            spikeRecord.rankedClusters spikeRecord.photoDiode]=...
+                            getSpikesFromNeuralData(neuralRecord.neuralData(:,3),neuralRecord.neuralDataTimes,...
+                            spikeDetectionParams,spikeSortingParams,analysisPath);
                         % 11/25/08 - do some post-processing on the spike's assignedClusters ('treatAllNonNoiseAsSpikes', 'largestClusterAsSpikes', etc)
                         
-                        if ~isempty(assignedClusters)
-                            spikeDetails = postProcessSpikeClusters(assignedClusters,rankedClusters,spikeSortingParams);
-                            spikeDetails.rankedClusters=rankedClusters;
+                        if ~isempty(spikeRecord.assignedClusters)
+                            spikeRecord.spikeDetails = postProcessSpikeClusters(spikeRecord.assignedClusters,spikeRecord.rankedClusters,spikeSortingParams);
+                            spikeRecord.spikeDetails.rankedClusters=spikeRecord.rankedClusters;
                         else
                             passedQualityTest=false;
                         end
@@ -239,37 +242,53 @@ while ~quit
                     
                     
                     %save spike-related data
+                    % 4/2/09 - have to copy fields from spikeRecord to individual variables to save - shitty
+                    spikeRecordFields={'spikes','spikeWaveforms','spikeTimestamps','assignedClusters','spikeDetails',...
+                        'frameIndices','frameTimes','frameLengths','correctedFrameIndices','correctedFrameTimes','correctedFrameLengths',...
+                        'stimInds','photoDiode','passedQualityTest','samplingRate'};
+                    for sp=1:length(spikeRecordFields)
+                        evalStr=sprintf('%s = spikeRecord.%s;',spikeRecordFields{sp},spikeRecordFields{sp});
+                        eval(evalStr);
+                    end
                     save(spikeRecordLocation,'spikes','spikeWaveforms','spikeTimestamps','assignedClusters','spikeDetails',...
                         'frameIndices','frameTimes','frameLengths','correctedFrameIndices','correctedFrameTimes','correctedFrameLengths',...
                         'stimInds','photoDiode','passedQualityTest','samplingRate');
                     disp('saved spike data');
+                    for sp=1:length(spikeRecordFields)
+                        evalStr=sprintf('clear %s;',spikeRecordFields{sp});
+                        eval(evalStr);
+                    end
                 else
                     % already have a spikeRecord for this neuralRecord, just load it
-                    load(spikeRecordLocation); % this also populates passedQualityTest (to check if we should do analysis)
+                    spikeRecord=stochasticLoad(spikeRecordLocation); % this also populates passedQualityTest (to check if we should do analysis)
                     disp('loaded spikeRecord');
                 end
                 
                 % check that we have spikes
-                if isempty(assignedClusters)
-                    passedQualityTest=false;
+                if isempty(spikeRecord.assignedClusters)
+                    spikeRecord.passedQualityTest=false;
                 end
                 
                 % =================================================================================
                 % now run analysis on spikeRecords and stimRecords
                 % try to get location of analysis file
-                quality.passedQualityTest=passedQualityTest;
-                quality.frameIndices=frameIndices;
-                quality.frameTimes=frameTimes;
-                quality.frameLengths=frameLengths;
-                quality.correctedFrameIndices=correctedFrameIndices;
-                quality.correctedFrameTimes=correctedFrameTimes;
-                quality.correctedFrameLengths=correctedFrameLengths;
-                quality.samplingRate=samplingRate; % from neuralRecord
+                quality.passedQualityTest=spikeRecord.passedQualityTest;
+                quality.frameIndices=spikeRecord.frameIndices;
+                quality.frameTimes=spikeRecord.frameTimes;
+                quality.frameLengths=spikeRecord.frameLengths;
+                quality.correctedFrameIndices=spikeRecord.correctedFrameIndices;
+                quality.correctedFrameTimes=spikeRecord.correctedFrameTimes;
+                quality.correctedFrameLengths=spikeRecord.correctedFrameLengths;
+                quality.samplingRate=spikeRecord.samplingRate; % from neuralRecord
                 
                 % load stimRecords  
-                lastStimulusDetails=stimulusDetails;
-                load(stimRecordLocation);
-                evalStr = sprintf('sm = %s();',stimManagerClass);
+                if ~isempty(stimRecord) && isfield(stimRecord,'stimulusDetails')
+                    lastStimulusDetails=stimRecord.stimulusDetails;
+                else
+                    lastStimulusDetails=[];
+                end
+                stimRecord=stochasticLoad(stimRecordLocation);
+                evalStr = sprintf('sm = %s();',stimRecord.stimManagerClass);
                 eval(evalStr);
                 % 1/26/09 - skip analysis if not worth sorting spikes
                 doAnalysis= (~exist(analysisLocation,'file') || overwriteAll) && worthSpikeSorting(sm,quality);
@@ -279,24 +298,27 @@ while ~quit
                     % do something with loaded information
                     
                     % get some paramteres from neual data
-                    if ~exist('parameters','var')
-                        load(neuralRecordLocation,'parameters');    
+                    if exist('neuralRecord','var') && isfield(neuralRecord,'parameters')
+                        %pass
+                    else
+                        out=stochasticLoad(neuralRecordLocation,{'parameters'});
+                        neuralRecord.parameters=out.parameters;
                     end
                     %Add some more parameters about the trial
-                     parameters.trialNumber=goodFiles(i).trialNum;
-                    parameters.date=datenumFor30(goodFiles(i).timestamp);
-                    parameters.ISIviolationMS=spikeDetectionParams.ISIviolationMS;
+                    neuralRecord.parameters.trialNumber=goodFiles(i).trialNum;
+                    neuralRecord.parameters.date=datenumFor30(goodFiles(i).timestamp);
+                    neuralRecord.parameters.ISIviolationMS=spikeDetectionParams.ISIviolationMS;
                     
                     % spikeData is a struct that contains all spike information that different analyses may want
                     spikeData=[];
-                    spikeData.spikes=spikes;
-                    spikeData.frameIndices=correctedFrameIndices; % give physAnalysis all frames, including dropped
-                    spikeData.stimIndices=stimInds;
-                    spikeData.photoDiode=photoDiode;
-                    spikeData.spikeWaveforms=spikeWaveforms;
-                    spikeData.spikeTimestamps=spikeTimestamps;
-                    spikeData.assignedClusters=assignedClusters;
-                    spikeData.spikeDetails=spikeDetails; % could contain anything
+                    spikeData.spikes=spikeRecord.spikes;
+                    spikeData.frameIndices=spikeRecord.correctedFrameIndices; % give physAnalysis all frames, including dropped
+                    spikeData.stimIndices=spikeRecord.stimInds;
+                    spikeData.photoDiode=spikeRecord.photoDiode;
+                    spikeData.spikeWaveforms=spikeRecord.spikeWaveforms;
+                    spikeData.spikeTimestamps=spikeRecord.spikeTimestamps;
+                    spikeData.assignedClusters=spikeRecord.assignedClusters;
+                    spikeData.spikeDetails=spikeRecord.spikeDetails; % could contain anything
                     
                     eyeData=getEyeRecords(eyeRecordPath, goodFiles(i).trialNum,goodFiles(i).timestamp);
                     % the stimManagerClass to be passed in is for class typing only -
@@ -305,7 +327,7 @@ while ~quit
                     % stuff to class type the analysis method
                     % stimManagerClass = stimulusDetails.stimManagerClass;
                     % already its own variable in stimRecords
-                    [analysisdata] = physAnalysis(sm,spikeData,stimulusDetails,plotParameters,parameters,analysisdata,eyeData);
+                    [analysisdata] = physAnalysis(sm,spikeData,stimRecord.stimulusDetails,plotParameters,neuralRecord.parameters,analysisdata,eyeData);
                     % parameters is from neuralRecord
                     % we pass in the analysisdata because it contains cumulative information that is specific to the analysis method
                     % this is the way of making sure it gets in every trial's analysis file, and that it will get propagated to the next analysis
@@ -316,8 +338,8 @@ while ~quit
                     % previous trial is same stim manager class
                     % stim size is the same (see stimulusDetails)
                     % z depth (physiologyEvents) is the same
-                    if (isempty(lastStimManagerClass) || strcmp(lastStimManagerClass, stimManagerClass)) ...
-                            && (isempty(physiologyEvents) || all([physiologyEvents.position(3)]==lastZposition))%...
+                    if (isempty(lastStimManagerClass) || strcmp(lastStimManagerClass, stimRecord.stimManagerClass)) ...
+                            && (isempty(stimRecord.physiologyEvents) || all([stimRecord.physiologyEvents.position(3)]==lastZposition))%...
                              % && lastStimulusDetails.height==stimulusDetails.height ...
                             % && lastStimulusDetails.width==stimulusDetails.width ...
                             % these checks belong in physAnalysis.  the
@@ -325,13 +347,13 @@ while ~quit
                             % ignores the previous analysis info
                             % other stim types don't nec. have these fields
                             % defined. -pmm
-                        load(analysisLocation, 'analysisdata');
+                        analysisdata=stochasticLoad(analysisLocation, {'analysisdata'});
                     else
                         warning('did not load analysis file due to inconsistencies between this trial and last');
                     end
                 end
             else
-                disp(sprintf('skipping class: %s',stimManagerClass))
+                disp(sprintf('skipping class: %s',stimRecord.stimManagerClass))
             end
             
             if goodFiles(i).trialNum==trialRange(2);  
@@ -512,4 +534,34 @@ hold off
 plot(neuralDataTimes(ss:ee),neuralData(ss:ee,2))
 hold on;
 plot(neuralDataTimes(ss:ee),neuralData(ss:ee,1),'r')
+end % end function
+
+% ===============================================================================================
+function out=stochasticLoad(filename,fieldsToLoad)
+if ~exist('fieldsToLoad','var')
+    fieldsToLoad=[];
 end
+
+success=false;
+while ~success
+    try
+        if isempty(fieldsToLoad) % default to load all
+            out=load(filename);
+        else
+            evalStr=sprintf('out = load(''%s''',filename);
+            for i=1:length(fieldsToLoad)
+                evalStr=[evalStr ','''  fieldsToLoad{i} ''''];
+            end
+            evalStr=[evalStr ');'];
+            eval(evalStr);
+        end
+        success=true;
+    catch
+        WaitSecs(abs(randn));
+        dispStr=sprintf('failed to load %s - trying again',filename);
+        disp(dispStr)
+    end
+end
+
+
+end % end function

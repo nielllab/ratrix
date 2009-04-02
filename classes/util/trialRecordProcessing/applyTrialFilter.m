@@ -6,7 +6,7 @@ function [files lowestTrialNum highestTrialNum] = applyTrialFilter(goodRecs,filt
 %       - dateStop is the ending timestamp
 %       - trialStart is the starting trialNum
 %       - trialStop is the ending trialNum
-%   filter - either {'dateRange',[startVec endVec]}, {'lastNTrials',numTrials}, or {'all'}
+%   filter - either {'dateRange',[startVec endVec]}, {'lastNTrials',numTrials}, {'trialRange',[start end]}, or {'all'}
 % OUTPUTS:
 %   files - elements of goodRecs that pass the given filter
 
@@ -59,7 +59,25 @@ switch(filterType)
                 files(end+1)=goodRecs(i);
             end
         end
-
+    case 'trialRange'
+        if length(filter)~=2 || any(~isnumeric(filter{2})) || length(filter{2})~=2
+            error('Invalid filter parameters for trialRange');
+        end
+        trialRange=filter{2};
+        trialStart=trialRange(1);
+        trialStop=trialRange(2);
+        files = [];
+        for i=1:length(goodRecs)
+            if goodRecs(i).trialStart>=trialStart && goodRecs(i).trialStop<=trialStop 
+                % this isn't strict checking - we rely on goodRecs being reasonable
+                % ie goodRecs.trialStart <= goodRecs.trialStop
+                if isempty(files)
+                    files = goodRecs(i);
+                else
+                    files(end+1)=goodRecs(i);
+                end
+            end
+        end
     case 'all'
         files = goodRecs;
     otherwise

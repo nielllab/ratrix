@@ -3,7 +3,7 @@ function [physRecords success]=getPhysRecords(subjectDataPath,when,what,filter)
 %   subjectDataPath - the location of this subject's physiology records
 %   	this location should have folders named 'neuralRecords', 'stimRecords', and 'analysis'
 %       the 'analysis' folder contains a separate folder for each trial; each trial's folder contains the physAnalysis and spikeRecords files
-%   when - a trialRange [min max] specifying which trials to load records for
+%   when - a trialFilter
 %   what - what type of records to load (eg 'stim','neural','spike','analysis')
 %   filter - how to filter the records (eg 'whiteNoise')
 % OUTPUTS:
@@ -15,6 +15,11 @@ end
 
 if ~exist('what','var') || isempty(what)
     what={'stim','neural','spike','analysis'};
+end
+
+% error checking
+if ~iscell(what) || ~iscell(when)
+    error('what and when must be cell arrays');
 end
 
 goodFiles=[];

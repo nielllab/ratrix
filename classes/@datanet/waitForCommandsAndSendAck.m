@@ -32,7 +32,7 @@ f = figure('Visible','off','MenuBar','none','Name','neural GUI',...
         % return event here
         %         events = guidata(f);
         %         events_data
-        save temp events_data;
+%         save temp events_data;
         closereq;
         return;
     end % end cleanup function

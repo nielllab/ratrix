@@ -1,5 +1,5 @@
-function standAloneRun(ratrixPath,setupFile,subjectID,recordInOracle)
-%standAloneRun([ratrixPath],[setupFile],[subjectID],[recordInOracle])
+function standAloneRun(ratrixPath,setupFile,subjectID,recordInOracle,backupToServer)
+%standAloneRun([ratrixPath],[setupFile],[subjectID],[recordInOracle],[backupToServer])
 %
 % ratrixPath (optional, string path to preexisting ratrix 'db.mat' file)
 % defaults to checking for db.mat in ...\<ratrix install directory>\..\ratrixData\ServerData\
@@ -17,6 +17,10 @@ function standAloneRun(ratrixPath,setupFile,subjectID,recordInOracle)
 % if true, subject must be in oracle database and history file name loading from
 % database will be exercised.
 %
+% backupOnServer (optional, must be logical or a path to the server, default false)
+% if true, will also replicate to a hard-coded server path
+% all trial record indexing (standAlonePath) is still handled locally
+%
 % recordNeuralData (optional, must be logical, default false)
 % if true, will start datanet for nidaq recording
 
@@ -26,6 +30,17 @@ if ~exist('recordInOracle','var') || isempty(recordInOracle)
     recordInOracle = false;
 elseif ~islogical(recordInOracle)
     error('recordInOracle must be logical')
+end
+
+if ~exist('backupToServer','var') || isempty(backupToServer)
+    backupToServer = false;
+elseif islogical(backupToServer);
+    xtraServerBackupPath='\\Reinagel-lab.AD.ucsd.edu\RLAB\Rodent-Data\behavior\standAloneRecords';
+elseif isDirRemote(backupToServer)
+    xtraServerBackupPath=backupToServer;
+    backupToServer=true;
+else
+    error('backupToServer must be logical or a valid path')
 end
 
 if exist('ratrixPath','var') && ~isempty(ratrixPath)
@@ -125,9 +140,15 @@ if exist('setupFile','var') && ~isempty(setupFile)
 end
 
 try
-    deleteOnSuccess = true;
+    deleteOnSuccess = true; 
+    
+    if backupToServer
+        replicationPaths={getStandAlonePath(rx),xtraServerBackupPath};
+    else
+        replicationPaths={getStandAlonePath(rx)};
+    end
 
-    replicateTrialRecords({getStandAlonePath(rx)},deleteOnSuccess, recordInOracle);
+    replicateTrialRecords(replicationPaths,deleteOnSuccess, recordInOracle);
 
     s=getSubjectFromID(rx,subjectID);
 
@@ -140,9 +161,8 @@ try
     rx=doTrials(st(1),rx,0,[],~recordInOracle); %0 means keep running trials til something stops you (quit, error, etc)
     [rx ids] = emptyAllBoxes(rx,'done running trials in standAloneRun',auth);
 
-    replicateTrialRecords({getStandAlonePath(rx)},deleteOnSuccess, recordInOracle);
-
-    compilePath=fullfile(fileparts(getStandAlonePath(rx)),'CompiledTrialRecords');
+    replicateTrialRecords(replicationPaths,deleteOnSuccess, recordInOracle);
+    compilePath=fullfile(fileparts(getStandAlonePath(rx)),'CompiledTrialRecords');       
     mkdir(compilePath);
 %     compileTrialRecords([],[],[],{subjectID},getStandAlonePath(rx),compilePath);
     compileDetailedRecords([],{subjectID},[],getStandAlonePath(rx),compilePath);

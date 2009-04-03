@@ -517,6 +517,9 @@ switch details.renderMode
 
 end
 
+details.sm=struct(decache(stimulus));
+
+
 function stim=insertPatch(s,insertMethod,stim,pos,maskVideo,featureVideo,featureOptions1, featureOptions2,chosenFeature1, chosenFeature2 ,chosenFeature3,mean,contrast)
 %   size (featureOptions1)
 %   size (featureOptions2)

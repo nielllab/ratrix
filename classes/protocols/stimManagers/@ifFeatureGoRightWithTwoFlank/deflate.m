@@ -17,3 +17,7 @@ s.cache.distractorFlankerStim= [];
 %     dynamicSweep.sweptValues=[];
 %     end
 % end
+
+%choose to keep
+% s.cache.textures % just numbers, not always there
+% s.cache.typeSz % just numbers for debugging, not always there

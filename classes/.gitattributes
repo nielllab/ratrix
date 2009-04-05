@@ -166,7 +166,6 @@ eyeTrackers/@eyeLinkTracker/old[!!-~]dev/fixationSoundDemo.m -text
 eyeTrackers/@eyeLinkTracker/old[!!-~]dev/getExtendedEyelinkData.c -text
 eyeTrackers/@eyeLinkTracker/old[!!-~]dev/eyelinkTest.m -text
 eyeTrackers/@eyeLinkTracker/setEyeUsed.m -text
-eyeTrackers/@eyeLinkTracker/getSample.m -text
 eyeTrackers/@eyeLinkTracker/stop.m -text
 eyeTrackers/@eyeLinkTracker/getCurrentCalibrationValues.m -text
 eyeTrackers/@eyeLinkTracker/checkRecording.m -text

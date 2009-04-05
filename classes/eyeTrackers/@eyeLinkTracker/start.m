@@ -77,7 +77,8 @@ end
         error('gotta have an eye')
     end
     
-    if et.eyeUsed~=0 && et.eyeUsed~=1
+    el=getConstants(et);
+    if ~ismember(et.eyeUsed,[el.LEFT_EYE el.RIGHT_EYE])
         error(sprintf('must be left or right, which is 0 or 1: but rather was found to be %d',et.eyeUsed))
     end
     %tracker will always indicate left eye in software, but we always use

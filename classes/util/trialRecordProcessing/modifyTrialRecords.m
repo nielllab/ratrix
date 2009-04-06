@@ -50,7 +50,7 @@ for i=1:length(goodFiles)
     % save new file
     newTrialEndNum = newStartingTrialNum + numRecordsInThisFile - 1;
     newFileName = sprintf('trialRecords_%d-%d_%s.mat',newStartingTrialNum,newTrialEndNum,goodFiles(i).timestamp);
-    save(fullfile(destination,newFileName),'trialRecords');
+    save(fullfile(destination,newFileName),'trialRecords','sessionLUT','fieldsInLUT');
     
     printStr=sprintf('replaced %s trials %d to %d with %d to %d',subjectID,goodFiles(i).trialStartNum,goodFiles(i).trialEndNum,newStartingTrialNum,newTrialEndNum);
     disp(printStr);

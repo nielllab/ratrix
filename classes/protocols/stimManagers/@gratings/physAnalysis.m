@@ -141,7 +141,7 @@ for i=1:numRepeats
                 [C,phi,S12,S1,S2,f,zerosp,confC,phistd,Cerr]=coherencycpb(cos(phases(whichType)'),spikeCount(sf:ef)',chrParam,fscorr);
             end
             
-            if ~zerosp & ~isempty(ef)
+            if ~isempty(ef) && ~zerosp 
                 peakFreqInds=find(S1>max(S1)*.95); % a couple bins near the peak of 
                 [junk maxFreqInd]=max(S1);
                 coh(i,j)=mean(C(peakFreqInds));
@@ -296,7 +296,7 @@ end
 
 %get eyeData for phase-eye analysis
 if ~isempty(eyeData)
-    [px py crx cry]=getPxyCRxy(eyeData);
+    [px py crx cry]=getPxyCRxy(eyeData,10);
     eyeSig=[crx-px cry-py];
     eyeSig(end,:)=[]; % remove last ones to match (not principled... what if we should throw out the first ones?)
 

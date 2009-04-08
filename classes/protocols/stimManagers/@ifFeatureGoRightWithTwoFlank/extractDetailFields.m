@@ -69,7 +69,72 @@ else
 %         out.blocking=isDefined(trialRecords, 'blocking');
 %         out.dynamicSweep=isDefined(trialRecords, 'dynamicSweep');
         
-        
+        % 4/8/09 - actualTargetOnOffMs and actualFlankerOnOffMs
+        % how to vectorize this? b/c we need to collect all the tries for a given trial
+        % only works in nAFC (because we can assume that 2nd phase is where stim presentation happens!)
+        % look in phaseRecords(2) for request times
+        % start of stim is assumed to be startTime=0 at phase 2
+        out.actualTargetOnMs=ones(1,length(trialRecords))*nan;
+        out.actualTargetOffMs=ones(1,length(trialRecords))*nan;
+        out.actualFlankerOnMs=ones(1,length(trialRecords))*nan;
+        out.actualFlankerOffMs=ones(1,length(trialRecords))*nan;
+        for i=1:length(trialRecords)
+            if trialRecords(i).stimDetails.toggleStim % toggle mode
+                if isfield(trialRecords(i),'phaseRecords')
+                    allTimes=cell2mat([0 trialRecords(i).phaseRecords(2).responseDetails.times]);
+                else
+                    tries=cell2mat(trialRecords(i).responseDetails.tries');
+                    firstRequest=find(tries(:,2),1,'first');
+                    if isempty(firstRequest)
+                        firstRequest=1;
+                        firstResponse=1;
+                    else
+                        firstLeft=find(tries(firstRequest:end,1),1,'first');
+                        firstRight=find(tries(firstRequest:end,3),1,'first');
+                        if isempty(firstLeft)
+                            firstLeft=Inf;
+                        end
+                        if isempty(firstRight)
+                            firstRight=Inf;
+                        end
+                        firstResponse=min(firstRight,firstLeft);
+                        if isempty(firstResponse)
+                            firstResponse=1;
+                        end
+                        firstResponse=firstResponse+firstRequest-1;
+                    end
+                    allTimes=cell2mat(trialRecords(i).responseDetails.times(firstRequest:firstResponse));
+                end
+                    
+                allDiffs=diff(allTimes);
+                out.actualTargetOnMs(i)=sum(allDiffs(1:2:end));
+                out.actualTargetOffMs(i)=sum(allDiffs(2:2:end));
+                out.actualFlankerOnMs=out.actualTargetOnMs; % how do we know if flankers are on or not?
+                out.actualFlankerOffMs=out.actualTargetOffMs; 
+            else % dropped frames
+                tm= trialRecords(i).trialManager.trialManager;
+
+                % numUndroppedFrames*nominalIFI + missIFIs that are in the targetOnOff interval
+                targetOnOff=trialRecords(i).stimDetails.targetOnOff;
+                flankerOnOff=trialRecords(i).stimDetails.flankerOnOff;
+                misses=trialRecords(i).phaseRecords(2).responseDetails.misses;
+                targetInds=misses>targetOnOff(1)&misses<=targetOnOff(2);
+                flankerInds=misses>flankerOnOff(1)&misses<=flankerOnOff(2);
+                if isfield(tm,'dropFrames') && tm.dropFrames  % tm.dropFrames is set
+                    numUndroppedTarget=double(targetOnOff(2)-targetOnOff(1))-length(find(targetInds));
+                    numUndroppedFlanker=double(flankerOnOff(2)-flankerOnOff(1))-length(find(flankerInds));
+                else % tm.dropFrames is either not present or not set
+                    numUndroppedTarget=double(targetOnOff(2)-targetOnOff(1));
+                    numUndroppedFlanker=double(flankerOnOff(2)-flankerOnOff(1));
+                end
+                out.actualTargetOnMs(i)=sum(trialRecords(i).phaseRecords(2).responseDetails.missIFIs(targetInds)) + ...
+                    numUndroppedTarget*trialRecords(i).phaseRecords(2).responseDetails.nominalIFI;
+                out.actualFlankerOnMs(i)=sum(trialRecords(i).phaseRecords(2).responseDetails.missIFIs(flankerInds)) + ...
+                    numUndroppedFlanker*trialRecords(i).phaseRecords(2).responseDetails.nominalIFI;
+            end
+        end
+            
+            
         
         %     if 0 % FROM old COMPILED
         %         % 12/16/08 - first 3 entries might be common to many stims
@@ -154,6 +219,7 @@ else
     end
 end
 verifyAllFieldsNCols(out,length(trialRecords));
+end
 
 
 % function out=isDefined(trialRecords, field)

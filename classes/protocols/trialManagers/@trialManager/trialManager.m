@@ -1,7 +1,7 @@
 function t=trialManager(varargin)
 % TRIALMANAGER  class constructor.  ABSTRACT CLASS-- DO NOT INSTANTIATE
 % t=trialManager(soundManager,reinforcementManager,eyeController,customDescription,
-%   frameDropCorner, dropFrames, displayMethod, requestPorts)
+%   frameDropCorner, dropFrames, displayMethod, requestPorts,saveDetailedFramedrops[,showText])
 %
 % 10/8/08 - this is the new integrated trialManager that handles all stims in a phased way - uses phased doTrial and stimOGL
 %
@@ -22,6 +22,7 @@ t.description='';
 t.eyeController=[];
 t.frameDropCorner={};
 t.dropFrames=false;
+t.saveDetailedFramedrops=false;
 t.displayMethod='';
 t.requestPorts='center'; % either 'none','center',or 'all'
 t.showText=true;
@@ -38,7 +39,7 @@ switch nargin
         else
             error('Input argument is not a trialManager object')
         end
-    case {8 9}
+    case {9 10}
         
         % soundManager
         if isa(varargin{1},'soundManager') && all(ismember(requiredSoundNames, getSoundNames(varargin{1})))
@@ -121,13 +122,25 @@ switch nargin
         if ischar(t.requestPorts) && (strcmp(t.requestPorts,'none') || strcmp(t.requestPorts,'all') || strcmp(t.requestPorts,'center'))
             %pass
         else
+            t.requestPorts
             error('requestPorts must be ''none'', ''all'', or ''center''');
         end
         
+        % saveDetailedFramedrops
+        if islogical(varargin{9})
+            t.saveDetailedFramedrops=varargin{9};
+        elseif isempty(varargin{9})
+            % pass - ignore empty args
+        else
+            error('saveDetailedFramedrops must be a logical');
+        end
+        
         % showText
-        if nargin==9
-            if islogical(varargin{9})
-                t.showText=varargin{9};
+        if nargin==10
+            if islogical(varargin{10})
+                t.showText=varargin{10};
+            elseif isempty(varargin{10})
+                %pass - ignore empty args
             else
                 error('showText must be logical');
             end

@@ -1,7 +1,7 @@
 function t=nAFC(varargin)
 % NAFC  class constructor.
 % t=nAFC(soundManager,percentCorrectionTrials,rewardManager,
-%         [eyeController],[frameDropCorner],[dropFrames],[displayMethod],[requestPorts])
+%         [eyeController],[frameDropCorner],[dropFrames],[displayMethod],[requestPorts],[saveDetailedFramedrops],[showText])
 
 switch nargin
     case 0
@@ -17,7 +17,7 @@ switch nargin
         else
             error('Input argument is not a nAFC object')
         end
-    case {3 4 5 6 7 8}
+    case {3 4 5 6 7 8 9 10}
 
         % percentCorrectionTrials
         if varargin{2}>=0 && varargin{2}<=1
@@ -30,7 +30,7 @@ switch nargin
             '\n\t\t\tpercentCorrectionTrials:\t%g'], ...
             t.percentCorrectionTrials);
         
-        for i=4:8
+        for i=4:10
             if i <= nargin
                 args{i}=varargin{i};
             else
@@ -43,7 +43,7 @@ switch nargin
             args{8}='center'; % default nAFC requestPorts should be 'center'
         end
 
-        a=trialManager(varargin{1},varargin{3},args{4},d,args{5},args{6},args{7},args{8});
+        a=trialManager(varargin{1},varargin{3},args{4},d,args{5},args{6},args{7},args{8},args{9},args{10});
 
         t = class(t,'nAFC',a);
         

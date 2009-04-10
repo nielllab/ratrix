@@ -14,7 +14,9 @@ if timestamps.missed>0
         responseDetails.misses(responseDetails.numMisses)=frameNum;
         responseDetails.afterMissTimes(responseDetails.numMisses)=GetSecs();
         responseDetails.missIFIs(responseDetails.numMisses)=thisIFI;
-        responseDetails.missTimestamps(responseDetails.numMisses)=timestamps; %need to figure out: Error: Subscripted assignment between dissimilar structures
+        if tm.saveDetailedFramedrops
+            responseDetails.missTimestamps(responseDetails.numMisses)=timestamps; %need to figure out: Error: Subscripted assignment between dissimilar structures
+        end
     else
         responseDetails.numUnsavedMisses=responseDetails.numUnsavedMisses+1;
     end
@@ -30,7 +32,9 @@ else
             responseDetails.apparentMisses(responseDetails.numApparentMisses)=frameNum;
             responseDetails.afterApparentMissTimes(responseDetails.numApparentMisses)=GetSecs();
             responseDetails.apparentMissIFIs(responseDetails.numApparentMisses)=thisIFI;
-            responseDetails.apparentMissTimestamps(responseDetails.numApparentMisses)=timestamps; %need to figure out: Error: Subscripted assignment between dissimilar structures
+            if tm.saveDetailedFramedrops
+                responseDetails.apparentMissTimestamps(responseDetails.numApparentMisses)=timestamps; %need to figure out: Error: Subscripted assignment between dissimilar structures
+            end
         else
             responseDetails.numUnsavedApparentMisses=responseDetails.numUnsavedApparentMisses+1;
         end

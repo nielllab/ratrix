@@ -91,7 +91,6 @@ infrastructure/getSVNPropertiesForPath.m -text
 stimHelpers/pickContrast.m -text
 stimHelpers/drawFrom2Ddist.m -text
 matlaby/hash.m -text
-trialRecordProcessing/modifyTrialRecords.m -text
 nidaq/openNidaqForAnalogOutput.m -text
 matlaby/makeSinusoid.m -text
 matlaby/getShuffledCross.m -text
@@ -136,3 +135,4 @@ matlaby/unsortedUniques.m -text
 infrastructure/userPrompt.m -text
 analysis/getPhysRecords.m -text
 trialRecordProcessing/applyTrialFilter.m -text
+trialRecordProcessing/fixTrialRecordRanges.m -text

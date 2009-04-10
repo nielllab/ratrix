@@ -1,4 +1,4 @@
-function modifyTrialRecords(source,destination,subjectID,newStartingTrialNum,modifyOracle)
+function fixTrialRecordRanges(source,destination,subjectID,newStartingTrialNum,modifyOracle)
 % This is a tool used to modify existing trialRecord files. Renumber trial records and save new files with updated names.
 % For now, only creates new files (does not delete existing files) to limit danger of operation.
 % INPUTS:

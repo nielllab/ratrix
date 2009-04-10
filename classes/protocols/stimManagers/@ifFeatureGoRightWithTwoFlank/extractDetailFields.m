@@ -74,10 +74,10 @@ else
         % only works in nAFC (because we can assume that 2nd phase is where stim presentation happens!)
         % look in phaseRecords(2) for request times
         % start of stim is assumed to be startTime=0 at phase 2
-        out.actualTargetOnMs=ones(1,length(trialRecords))*nan;
-        out.actualTargetOffMs=ones(1,length(trialRecords))*nan;
-        out.actualFlankerOnMs=ones(1,length(trialRecords))*nan;
-        out.actualFlankerOffMs=ones(1,length(trialRecords))*nan;
+        out.actualTargetOnSecs=ones(1,length(trialRecords))*nan;
+        out.actualTargetOffSecs=ones(1,length(trialRecords))*nan;
+        out.actualFlankerOnSecs=ones(1,length(trialRecords))*nan;
+        out.actualFlankerOffSecs=ones(1,length(trialRecords))*nan;
         for i=1:length(trialRecords)
             if trialRecords(i).stimDetails.toggleStim % toggle mode
                 if isfield(trialRecords(i),'phaseRecords')
@@ -107,10 +107,10 @@ else
                 end
                     
                 allDiffs=diff(allTimes);
-                out.actualTargetOnMs(i)=sum(allDiffs(1:2:end));
-                out.actualTargetOffMs(i)=sum(allDiffs(2:2:end));
-                out.actualFlankerOnMs=out.actualTargetOnMs; % how do we know if flankers are on or not?
-                out.actualFlankerOffMs=out.actualTargetOffMs; 
+                out.actualTargetOnSecs(i)=sum(allDiffs(1:2:end));
+                out.actualTargetOffSecs(i)=sum(allDiffs(2:2:end));
+                out.actualFlankerOnSecs=out.actualTargetOnSecs; % how do we know if flankers are on or not?
+                out.actualFlankerOffSecs=out.actualTargetOffSecs; 
             else % dropped frames
                 tm= trialRecords(i).trialManager.trialManager;
 
@@ -127,9 +127,9 @@ else
                     numUndroppedTarget=double(targetOnOff(2)-targetOnOff(1));
                     numUndroppedFlanker=double(flankerOnOff(2)-flankerOnOff(1));
                 end
-                out.actualTargetOnMs(i)=sum(trialRecords(i).phaseRecords(2).responseDetails.missIFIs(targetInds)) + ...
+                out.actualTargetOnSecs(i)=sum(trialRecords(i).phaseRecords(2).responseDetails.missIFIs(targetInds)) + ...
                     numUndroppedTarget*trialRecords(i).phaseRecords(2).responseDetails.nominalIFI;
-                out.actualFlankerOnMs(i)=sum(trialRecords(i).phaseRecords(2).responseDetails.missIFIs(flankerInds)) + ...
+                out.actualFlankerOnSecs(i)=sum(trialRecords(i).phaseRecords(2).responseDetails.missIFIs(flankerInds)) + ...
                     numUndroppedFlanker*trialRecords(i).phaseRecords(2).responseDetails.nominalIFI;
             end
         end

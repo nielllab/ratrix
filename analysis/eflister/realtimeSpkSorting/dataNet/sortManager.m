@@ -256,8 +256,8 @@ threshLoS=uicontrol(f,'Style','slider','String','loThresh','Min',-1,'Max',0,'Sli
         
         if ismac
             kPath='./KlustaKwik/macosx-i386/';
-        else
-            error('still need to set up klustakwik windows')
+		else
+			kPath=['"' fullfile(getRatrixPath,'analysis','spike sorting','KlustaKwik') '"']; %#ok<NASGU>
         end
         fileBase='eTest';
         numPCs=3;

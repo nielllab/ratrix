@@ -205,8 +205,7 @@ switch nargin
             error('empty scaleFactor and stimulus allowed only for reinforced phaseType');
 		end
         
-		stimLen=size(spec.stimulus);
-		stimLen=stimLen(end);
+		stimLen=size(spec.stimulus,3);
 		if nargin>=13 && ~isempty(varargin{13})
 			spec.indexPulses=varargin{13};
 		else

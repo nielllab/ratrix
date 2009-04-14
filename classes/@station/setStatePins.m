@@ -11,7 +11,8 @@ if strcmp(s.responseMethod,'parallelPort')
 	possibles={ ... %edf worries this is slow
 		'frame',s.framePins; ...
 		'stim',s.stimPins; ...
-		'phase',s.phasePins};
+		'phase',s.phasePins; ...
+        'index',s.indexPins};
 
 	for i=1:size(possibles,1)
 		if ismember(pinClass,{'all',possibles{i,1}}) %edf worries this is slow

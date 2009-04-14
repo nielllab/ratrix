@@ -113,8 +113,8 @@ if numTrials>0
 
         rgbIm=zeros(size(count));
         %rgbIm(:,:,1)=uint8(count);
-        rgbIm(:,:,2)=uint8(correctCount);
-        rgbIm(:,:,3)=uint8(wrongCount);
+        %rgbIm(:,:,2)=uint8(correctCount);
+        %rgbIm(:,:,3)=uint8(wrongCount);
 
         % threeIm(:,:,1)=0.4*correctCount/max(count(:)); %Hue 0--> 0.4 = incorrect --> correct
         % threeIm(:,:,2)=count/max(count(:)); %Saturation = trialRate
@@ -123,10 +123,13 @@ if numTrials>0
 
         nonLinearWarp= @(x) atan(x*4*pi) / atan(4*pi);
         %plot(nonLinearWarp([0:.01:1]))  %non linearity
-        correctIm=correctCount./max(count(:));
+        correctIm=correctCount./count;
         countIm=nonLinearWarp(count./max(count(:)));
-
-        threeIm(:,:,1)=0.6*correctIm; %Hue 0--> 0.4 = incorrect --> correct
+        correctIm=correctIm-.5;
+        correctIm(correctIm<0)=0; % below chance plotted the same color
+        correctIm=correctIm*.8; %Hue 0--> 0.4 = chance --> correct
+        
+        threeIm(:,:,1)=(correctIm); 
         threeIm(:,:,2)=1*ones(size(count));      %Saturation =  could be bias! OVERRIDE
         threeIm(:,:,3)=countIm; %Value = trialRate
         rgbIm=hsv2rgb(threeIm);
@@ -135,9 +138,8 @@ if numTrials>0
         if size(rgbIm,1)<size(rgbIm,2)
             vertStrech=floor(size(rgbIm,2)/size(rgbIm,1));
             rgbIm=imresize(rgbIm,[size(rgbIm,1)*vertStrech size(rgbIm,2)]);
-        end
-
-        figure(handles(6)); subplot(subplotParams.y, subplotParams.x, subplotParams.index);
+        end 
+        
         imshow(rgbIm);
         C=hsv2rgb([linspace(0, .4, 256);...
             linspace(1, 1, 256);...

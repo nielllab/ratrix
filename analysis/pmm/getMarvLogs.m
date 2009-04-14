@@ -967,7 +967,7 @@ eventLog{eventNum}.details.to   = [0];
 
 
 eventNum = eventNum +1;  
-eventLog{eventNum}.date =datenum('Mar.18,2009');%datestr(now,21)  % %written on 'Mar.18,2009'  will take effect, in a few days on rebuild
+eventLog{eventNum}.date =datenum('Mar.18,2009');%datestr(now,21)  % %written on 'Mar.18,2009'  will take effect, in a few days on rebuild but may have been off on rck1temp and then back to .25 on tag. 1.0.1 on april 9thd
 eventLog{eventNum}.eventName ={'addCTs'};
 eventLog{eventNum}.subject ={'275'};
 eventLog{eventNum}.stationID ={}; 
@@ -997,3 +997,35 @@ eventLog{eventNum}.comment ='dropped BW to ~80%, stabalized with h20 rewards 2-3
 eventLog{eventNum}.details.from = 'noCarrots'; 
 eventLog{eventNum}.details.to   = 'dailyCarrots';  
 
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Apr.09,2009');%datestr(now,21)  % %written on 'Mar.18,2009'  will take effect, in a few days on rebuild but may have been off on rck1temp and then back to .25 on tag. 1.0.1 on april 9thd
+eventLog{eventNum}.eventName ={'addCTs'};
+eventLog{eventNum}.subject ={'275,237'};
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='crazy bias on 237, 275 reimplimenting what it should be.  maybe one day off'; 
+eventLog{eventNum}.details.from = [0.25 0]; 
+eventLog{eventNum}.details.to   = [0.25 0.25]; 
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Apr.06,2009');%datestr(now,21)  % %written on 'Mar.18,2009'  will take effect, in a few days on rebuild but may have been off on rck1temp and then back to .25 on tag. 1.0.1 on april 9thd
+eventLog{eventNum}.dateConfidence =10;  %+/-days
+eventLog{eventNum}.eventName ={'codeChange'};
+eventLog{eventNum}.subject ={'275,237'};
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='was on trunk breifly for a week about 2 weeks ago'; 
+eventLog{eventNum}.details.from = 'rack1temp'; 
+eventLog{eventNum}.details.to   = 'tag1.0.1'; 
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Apr.06,2009');%datestr(now,21)  % %written on 'Mar.18,2009'  will take effect, in a few days on rebuild but may have been off on rck1temp and then back to .25 on tag. 1.0.1 on april 9thd
+eventLog{eventNum}.dateConfidence =10;  %+/-days
+eventLog{eventNum}.eventName ={'computerChange'};
+eventLog{eventNum}.subject ={'all pmm male'};
+eventLog{eventNum}.stationID ={'1D','1E','1F','1H','1I'}; %J is down now, it woulf be beige 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='in order to minimize frame drops for future non-toggle'; 
+eventLog{eventNum}.details.from = 'beige'; 
+eventLog{eventNum}.details.to   = 'black'; 

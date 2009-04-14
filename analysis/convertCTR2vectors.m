@@ -24,7 +24,7 @@ d.info.strLUT=compiledLUT;
 function d=set(d,source)
 %d= small data, n= numTrials
 
-n=range(d.trialNumber);
+n=max(d.trialNumber);
 inds=source.trialNumber;
 f=fields(source);
 for i=1:length(f)

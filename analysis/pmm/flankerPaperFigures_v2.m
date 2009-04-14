@@ -123,7 +123,7 @@ none=zeros(size(stats,1),size(stats,2));
 doCurve=zeros(size(stats,1),size(stats,2));  doCurve([find(ismember(names.subjects,{'230'}))],[find(ismember(names.conditions,{'colin','changeFlank'}))])=1;
 %doHitFAScatter(stats,CI,names,params,{'228','230','138'},{'colin','changeFlank'},false,doCurve,doCurve,doCurve,false);
 %doHitFAScatter(stats,CI,names,params,{'230'},{'colin','changeFlank'},false,doCurve,doCurve,doCurve,false,3,{'changeFlank','colin'}); axis([.46 .55 .7 .79])
-doHitFAScatter(stats,CI,names,params,[],{'colin','changeFlank'},false,none
+doHitFAScatter(stats,CI,names,params,[],{'colin','changeFlank'},false,none)
 %,none,doCurve,false,3,{'changeFlank','colin'});
 title('ROC space, influence of collinear')
 
@@ -242,8 +242,10 @@ cleanUpFigure(gcf,settings)
 %setup basic- no flanker conditions, just distance
 subjects={'233','138','232'};%     '228','139'
 %subjects={'228','139'};%     
+subjects={'232','138'};%   
 subjects={'232','233','138','228','139'};%     
-subjects={'232','138'};%     
+  
+
 
 filter{1}.type='13';
 filter{2}.type='responseSpeedPercentile';
@@ -258,7 +260,10 @@ curveAndBias=1;
 % compare colinear to popout
 subjects={'232','138'};%     
 subjects={'232','233','138','228','139'};%    
+subjects={'232'};%    
 dateRange=[datenum('Nov.15,2008') now];
+%endToggleDate april 14th 2009
+%dateRange=[now-60 now]; % just a test, no special meaning
 %last problematic day for 139
 %Nov.15,2008=datestr(ceil(d.date(max(find(d.targetContrast==1)))),22)
 %Mar.16,2008=datestr(ceil(d.date(max(find(d.targetContrast>0 & d.targetContrast<.7)))),22)
@@ -273,9 +278,10 @@ filter{2}=[]; %remove it
     %values([1 2 5 6 9 10 13 14])=-1; %hack to only plot the first half, by
     %moving the other half off the visible plot
     %values([3 4 7 8 11 12 15 16])=-1; %hack to cut off some kinds
-arrows={'l-l 2.50','--- 2.50'; 'l-l 3.00','--- 3.00';'l-l 3.50','--- 3.50';'l-l 5.00','--- 5.00'};
+arrows={'l-l 2.50','--- 2.50',1; 'l-l 3.00','--- 3.00',3;'l-l 3.50','--- 3.50',3;'l-l 5.00','--- 5.00',3};
 curveAndBias=0;
-[delta CI deltas CIs]=viewFlankerComparison(names,params,[],{'yes'},[],[-10 10],[],[],false,false,true)
+[delta CId deltas CIs]=viewFlankerComparison(names,params,[],{'yes'},[],[-10 10],[],[],false,false,true)
+figure; doHitFAScatter(stats,CI,names,params,subjects,[],0,curveAndBias,curveAndBias,0,0,3,arrows);
 %%
 figure(4)
 w=3; %w=5;
@@ -315,7 +321,6 @@ for i=1:length(subjects)
    axis square
    
    subplot(length(subjects),w,(i-1)*w+3);
-   %doHitFAScatter(stats,CI,names,params,subjects(i),[],0,curveAndBias,curveAndBias,0,0,3,arrows);
    doHitFAScatter(stats,CI,names,params,subjects(i),[],0,curveAndBias,curveAndBias,0,0,3,arrows);
 end
 settings.turnOffLines=1;

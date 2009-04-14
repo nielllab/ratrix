@@ -15,7 +15,7 @@ function doPlot(plotType,d,figureHandle,subplotX,subplotY,subplotInd,goodType,re
 % 		'plotBiasScatter'
 %  		'plotBias'
 %  		'plotRatePerDay'
-%
+%       'makeDailyRaster'
 % d		ratrix data structure (returned by getSmalls)
 % figureHandle
 % subplotx
@@ -505,6 +505,10 @@ switch plotType
         ylabel('ITI')
         xlabel('trial #')
                 
+    case 'makeDailyRaster'
+        smoothingWidth=100;
+        minsPerBin=5;
+        junk=makeDailyRaster(d.correct,d.date,goods,smoothingWidth,minsPerBin,subject,true,[],[],true,false); %in terms of good trials, PLOT NOT SAVED      
     otherwise
         plotType=plotType
         error('unknown plot type')
@@ -540,6 +544,8 @@ switch plotType
         requiredFields={'date'};
     case 'plotITI'
         requiredFields={'date'};
+    case 'makeDailyRaster'
+        requiredFields={'date','correct'};
     otherwise
         plotType=plotType
         error('unknown plot type')

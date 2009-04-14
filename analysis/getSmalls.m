@@ -3,7 +3,7 @@ function smallData=getSmalls(subjectID,dateRange,rack,verbose)
 if ~exist('rack','var') | isempty(rack)
     if isHumanSubjectID(subjectID)
         rack=103;
-    else  
+    else
         % rack=getRackForSubject ...
         %it might be better to pass in from analysisPlotter rather than keep hitting the oracleDB
         rack=1;
@@ -19,7 +19,6 @@ compiledFile=fullfile(getCompiledDirForRack(rack),[subjectID '.compiledTrialReco
 %temp hack:
 %compiledFile=fullfile('\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\behavior\pmeierTrialRecords\compiledbackup4',[subjectID '.compiledTrialRecords.*.mat']);
 
-
 d=dir(compiledFile);
 smallData=[];
 for i=1:length(d)
@@ -30,17 +29,43 @@ for i=1:length(d)
             er
         else
             if verbose
-                fprintf(sprintf('loading file for %s',subjectID))
+                fprintf(sprintf('loading file for %s\n',subjectID))
                 t=GetSecs();
             end
-            ctr=load(fullfile(getCompiledDirForRack(rack),d(i).name));
-            %temp hack:
-            %ctr=load(fullfile('\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\behavior\pmeierTrialRecords\compiledbackup4',d(i).name));
-
-            if verbose
-                fprintf('\ttime elapsed: %g\n',GetSecs-t)
+            
+            ff=fullfile(getCompiledDirForRack(rack),d(i).name);
+            
+            %get smallData if its there
+            in=load(ff,'smallData');
+            if ismember('smallData',fields(in))
+                smallData=in.smallData;
+                totalSmallTrials=length(smallData.date);
+            else
+                smallData=[];
+                totalSmallTrials=0;
             end
-            smallData=ctr.compiledTrialRecords;
+            
+            %don't use smallData unless its up to date - will compare to
+            %details b/c they are faster to load! (ironically)
+            cdet=load(ff,'compiledDetails');
+            totalTrials=0;
+            for i=1:length(cdet.compiledDetails)
+                totalTrials=max([totalTrials max(cdet.compiledDetails(2).trialNums)]); % add all possible new trials
+                totalTrials=max([totalTrials max(cdet.compiledDetails(2).trialNums)]);
+            end
+            
+            if totalSmallTrials==totalTrials
+                if verbose
+                    fprintf('...found exisiting smallData up to date\n\ttime elapsed: %g\n',GetSecs-t)
+                end         
+            else
+                ctr=load(ff);
+                if verbose
+                    fprintf('\ttime elapsed: %g\n',GetSecs-t)
+                end
+                smallData=ctr.compiledTrialRecords;
+            end
+            
         end
     end
 end
@@ -48,57 +73,61 @@ end
 if ~isempty(smallData)
     
     %if LUT and other exists then convert it to the desired format
-    if ismember('compiledDetails',fields(ctr))
+    if exist('ctr','var') && ismember('compiledDetails',fields(ctr))
         if verbose
             t=GetSecs();
             fprintf(sprintf('converting to double format\n'))
         end
-       
-        smallData=convertCTR2vectors(ctr.compiledTrialRecords,ctr.compiledLUT,ctr.compiledDetails);
         
+        smallData=convertCTR2vectors(ctr.compiledTrialRecords,ctr.compiledLUT,ctr.compiledDetails);
+        % save a copy of the small data for faster access next time!
+        save(ff,'smallData','-append');
+    
+    
         if verbose
             fprintf('done converting to double format \ttime elapsed: %g\n',GetSecs-t)
         end
     end
-
+    
     %filter date range
     if exist('dateRange','var') && ~isempty(dateRange)
         smallData=removeSomeSmalls(smallData, ~(smallData.date>dateRange(1) & smallData.date<dateRange(2)));
     end
-
+    
     %remove all fields that have no content
     f=fields(smallData);
     f(strcmp('info',f))=[];
     remove=[];
     for i=1:length(f)
-        if all(isnan(smallData.(f{i}))) 
+        if all(isnan(smallData.(f{i})))
             remove=[remove i];
         end
     end
     smallData=rmfield(smallData,f(remove));
-
+    
     %add name
     if strcmp(class(subjectID),'char')
         smallData.info.subject={subjectID};
     end
     
+
     %add yes response if detection
     %can't for all, some rats have problems still unsolved.  138-9
-%     if ismember('targetContrast',fields(smallData)) && any(smallData.targetContrast==0)
-%         [smallData sideType]=addYesResponse(smallData);
-%         smallData.info.sideType=sideType;
-%     end
+    %     if ismember('targetContrast',fields(smallData)) && any(smallData.targetContrast==0)
+    %         [smallData sideType]=addYesResponse(smallData);
+    %         smallData.info.sideType=sideType;
+    %     end
     
     
     if verbose & ~isempty(remove)
         disp(sprintf('removing %d fields that are full of NaNs',length(remove)))
-        fprintf('done-time elapsed since start: %g\n',GetSecs-t)
+        fprintf('done-time elapsed since start conversion: %g\n',GetSecs-t)
     end
-
-%     if all(size(smallData.date)==[1 0])
-%         smallData=[]; % %if there are no trials d turns into an empty set
-%     end
-
+    
+    %     if all(size(smallData.date)==[1 0])
+    %         smallData=[]; % %if there are no trials d turns into an empty set
+    %     end
+    
 else
     disp(sprintf('%s: empty data!',subjectID))
     subject

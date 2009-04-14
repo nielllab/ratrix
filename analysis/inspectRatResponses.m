@@ -131,6 +131,7 @@ if plotTrialsPerDay
 end
 
 if plotResponseDensity || plotResponseRaster
+    figure(handles(6)); subplot(subplotParams.y, subplotParams.x, subplotParams.index);
     junk=makeDailyRaster(d.correct(goods),d.date(goods),smoothingWidth,5,subject,1,handles,subplotParams,plotResponseDensity,plotResponseRaster); %in terms of good trials, PLOT NOT SAVED
 end
 

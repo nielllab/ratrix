@@ -530,6 +530,7 @@ while ~done && ~quit;
                     [tm frameIndex i done doFramePulse didPulse] ...
                         = updateFrameIndexUsingTextureCache(tm, frameIndexed, loop, trigger, timeIndexed, frameIndex, indexedFrames, size(stim,3), isRequesting, ...
                         i, frameNum, timedFrames, responseOptions, done, doFramePulse, didPulse, scheduledFrameNum);
+					indexPulse=getIndexPulse(spec,i);
                     switch strategy
                         case 'textureCache'
                             drawFrameUsingTextureCache(tm, window, i, frameNum, size(stim,3), lastI, dontclear, textures(i), destRect, ...
@@ -540,7 +541,7 @@ while ~done && ~quit;
                     end
                 case 'expert'
                     % i=i+1; % 11/7/08 - this needs to happen first because i starts at 0
-                    [doFramePulse expertCache dynamicDetails textLabel i dontclear] ...
+                    [doFramePulse expertCache dynamicDetails textLabel i dontclear indexPulse] ...
                         = drawExpertFrame(stimManager,stim,i,phaseStartTime,window,textLabel,...
                         destRect,filtMode,expertCache,ifi,scheduledFrameNum,tm.dropFrames,dontclear);
                     if ~isempty(dynamicDetails)
@@ -548,8 +549,10 @@ while ~done && ~quit;
                     end
                 otherwise
                     error('unrecognized strategy')
-            end
+			end
 
+			setStatePins(station,'index',indexPulse);
+			
             timestamps.frameDrawn=GetSecs;
 
             if frameDropCorner.on

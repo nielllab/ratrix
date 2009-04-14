@@ -192,3 +192,4 @@ eyeTrackers/@eyeLinkTracker/old[!!-~]dev/eyelinkQueuedDataTest.m -text
 @RFestimator/getBoundary.m -text
 protocols/@stimSpec/isStim.m -text
 eyeTrackers/@eyeLinkTracker/getEyeDataVarNames.m -text
+protocols/@stimSpec/getIndexPulse.m -text

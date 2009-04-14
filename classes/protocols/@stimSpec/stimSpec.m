@@ -1,6 +1,6 @@
 function spec=stimSpec(varargin)
 % stimSpec  class constructor. 
-% spec=stimSpec(stimulus,transitions,stimType,startFrame,framesUntilTransition,stochasticDistribution,scaleFactor,isFinalPhase,hz,phaseType,phaseLabel,[isStim])
+% spec=stimSpec(stimulus,transitions,stimType,startFrame,framesUntilTransition,stochasticDistribution,scaleFactor,isFinalPhase,hz,phaseType,phaseLabel,[isStim],[indexPulses])
 %
 % INPUTS
 % stimulus                  the stimulus frames to show, or expert-mode parameters struct (equivalent to non-phased 'out')
@@ -42,6 +42,7 @@ function spec=stimSpec(varargin)
 %                               a reward that extends beyond the end of the phase is cut off.
 % phaseLabel                a text label for the given phase to be stored in phaseRecords
 % isStim                    a boolean indicating whether to set the station's stim pin high during this phase (usually during discriminanda) [defaults to false]
+% indexPulses               a boolean vector same length as stimulus indicating what to output on the station's indexPin during each frame (defaults to all false)
 
 % fields in the stimSpec object
 spec.stimulus = zeros(1,1,1);
@@ -56,6 +57,7 @@ spec.hz=0;
 spec.phaseType=[];
 spec.phaseLabel='';
 spec.isStim=false;
+spec.indexPulses=[];
 
 switch nargin
     case 0
@@ -74,7 +76,7 @@ switch nargin
         else
             error('Input argument is not a stimSpec object or cell array of stim frames')
         end
-    case {11 12}
+    case {11 12 13}
         % stimulus
         spec.stimulus = varargin{1};
         % transitions
@@ -190,7 +192,7 @@ switch nargin
             error('phaseLabel must be a string or empty');
 		end
 
-		if nargin>=12
+		if nargin>=12 && ~isempty(varargin{12})
 			spec.isStim=varargin{12};
 		end
 		if islogical(spec.isStim) && isscalar(spec.isStim)
@@ -201,8 +203,21 @@ switch nargin
 		
         if (isempty(spec.scaleFactor) || isempty(spec.stimulus)) && ~strcmp(spec.phaseType,'reinforced')
             error('empty scaleFactor and stimulus allowed only for reinforced phaseType');
-        end
+		end
         
+		stimLen=size(spec.stimulus);
+		stimLen=stimLen(end);
+		if nargin>=13 && ~isempty(varargin{13})
+			spec.indexPulses=varargin{13};
+		else
+			spec.indexPulses=false(1,stimLen);
+		end
+		if isvector(spec.indexPulses) && islogical(spec.indexPulses) && length(spec.indexPulses)==stimLen
+			%pass
+		else
+			error('indexPulses must be logical vector same length as stimulus')
+		end
+		
         spec = class(spec,'stimSpec');
         
     otherwise

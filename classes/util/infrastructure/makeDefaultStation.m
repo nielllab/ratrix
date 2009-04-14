@@ -10,7 +10,7 @@ function st=makeDefaultStation(id,path,mac,physicalLocation,screenNum,rewardMeth
 % 5   data              i/o	localPump rezervoir valve (cooldrive valve 4)
 % 6   data              i/o eyePuff valve (cooldrive valve 5)
 % 7   data              i/o	localPump direction control
-% 8   data              i/o
+% 8   data              i/o indexPulse
 % 9   data              i/o framePulse
 % 10  status            i   center lick sensor
 % 11  status    inv     i	localPump motorRunning
@@ -19,7 +19,7 @@ function st=makeDefaultStation(id,path,mac,physicalLocation,screenNum,rewardMeth
 % 14  control	inv     i/o	localPump withdrawnTooFar
 % 15  status            i
 % 16  control           i/o phasePulse
-% 17  control	inv     i/o trialPulse
+% 17  control	inv     i/o stimPulse
 
 
 
@@ -122,6 +122,7 @@ stationSpec.datanet                           = dn;
 stationSpec.eyeTracker                        = et;
 stationSpec.portSpec.phasePins                = int8(16);
 stationSpec.portSpec.stimPins                 = int8(17);
+stationSpec.portSpec.indexPins                = int8(8);
 
 if ismac
     stationSpec.portSpec = int8(3);

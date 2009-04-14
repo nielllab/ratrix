@@ -60,6 +60,7 @@
 %                           also held after this trial ends until the beginning of the next trial
 %                           if requestPorts (determined by the trialManager) is empty, the stimulus you provide (out) starts immediately
 %   text                    message to add to text label on each frame (can be single string or cell vector of length numFrames)
+%   indexPulses             boolean vector same length as out indicating what to output on the station's indexPin during each frame (set to [] for all false)
 %
 %
 %
@@ -136,6 +137,7 @@
 %           textLabel           - use this to override the text returned by your calcStim
 %           i                   - integer to print on the frame lables as 'stimInd' (if textLabel is a cell, determines which is printed)
 %           dontclear           - expert value for 'dontclear', used by Screen('Flip') and Screen('DrawingFinished')
+%           indexPulse          - boolean scalar indicating what to output on the station's indexPin during this frame
 
 % for phased type, your stimManager must override the method getSoundsToPlay, which is called every frame.  
 % INPUTS

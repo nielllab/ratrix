@@ -1,4 +1,4 @@
-function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text] =...
+function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text,indexPulse] =...
     calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % see ratrixPath\documentation\stimManager.calcStim.txt for argument specification (applies to calcStims of all stimManagers)
 % 1/3/0/09 - trialRecords now includes THIS trial
@@ -162,6 +162,9 @@ end
 %out(out<0)=0;
 %out(out>1)=1;
 %out=uint8(double(intmax('uint8'))*out);
+
+indexPulse=false(1,size(out,3));
+indexPulse(1)=true;
 
 if details.correctionTrial;
     text='correction trial!';

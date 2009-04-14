@@ -1,5 +1,5 @@
 function [stimSpecs startingStimSpecInd] = phaseify(trialManager,stim,type,...
-    targetPorts,distractorPorts,requestPorts,scaleFactor,interTrialLuminance,hz)
+    targetPorts,distractorPorts,requestPorts,scaleFactor,interTrialLuminance,hz,indexPulses)
 % this method takes the output from calcStim of a non-phased stim manager, and converts it to stimSpecs according to the trialManager class
 % output is cell arrays of stimSpecs
 
@@ -19,7 +19,7 @@ if strmatch(class(trialManager), 'nAFC')
     
     % waiting for response
     criterion = {[targetPorts distractorPorts], 3};
-    stimSpecs{2} = stimSpec(stim,criterion,type,0,[],[],scaleFactor,0,hz,[],'discrim',true);
+    stimSpecs{2} = stimSpec(stim,criterion,type,0,[],[],scaleFactor,0,hz,[],'discrim',true,indexPulses);
     
     % reinforcement (correct/wrong)
     criterion = {[], 4};
@@ -38,7 +38,7 @@ elseif strmatch(class(trialManager), 'freeDrinks')
     % waiting for response phase
     criterion = {targetPorts, 2};
     stochasticP = getFreeDrinkLikelihood(trialManager);
-    stimSpecs{1} = stimSpec(stim, criterion,'loop',0,[],{stochasticP,1,stochasticP,2,stochasticP,3},scaleFactor,0,hz,[],'discrim',true);
+    stimSpecs{1} = stimSpec(stim, criterion,'loop',0,[],{stochasticP,1,stochasticP,2,stochasticP,3},scaleFactor,0,hz,[],'discrim',true,indexPulses);
 
     % correct phase (always correct)
     criterion = {[], 3};

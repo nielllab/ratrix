@@ -1,5 +1,5 @@
 
-function [stimulus,updateSM,resInd,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance, text]=...
+function [stimulus,updateSM,resInd,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance, text,indexPulses]=...
     calcStim(stimulus, trialManagerClass,resolutions,screenDisplaySize,LUTbits,responsePorts,totalPorts,trialRecords,forceStimDetails);
 %[stimulus updateSM out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance isCorrection] = calcStim(stimulus,trialManagerClass,frameRate,responsePorts,totalPorts,trialRecords)
 %
@@ -8,7 +8,7 @@ function [stimulus,updateSM,resInd,out,LUT,scaleFactor,type,targetPorts,distract
 %a detection paradigm follows if the left stims have 0 contrast
 %flankers above and below target, total of three stims
 % 1/3/0/09 - trialRecords now includes THIS trial
-
+indexPulses=[];
 text='pmmStim';
 details.screenDisplaySize=screenDisplaySize;
 

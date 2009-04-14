@@ -1,8 +1,10 @@
-function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text] =... 
+function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text,indexPulses] =... 
     calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % 1/3/0/09 - trialRecords now includes THIS trial
 %LUT = Screen('LoadCLUT', 0);
 %LUT=LUT/max(LUT(:));
+
+indexPulses=[];
 
 LUTBitDepth=8;
 numColors=2^LUTBitDepth; maxColorID=numColors-1; fraction=1/(maxColorID);

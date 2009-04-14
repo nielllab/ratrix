@@ -1,4 +1,4 @@
-function [doFramePulse expertCache dynamicDetails textLabel i dontclear] = ...
+function [doFramePulse expertCache dynamicDetails textLabel i dontclear indexPulse] = ...
     drawExpertFrame(stimulus,stim,i,phaseStartTime,window,textLabel,destRect,...
     filtMode,expertCache,ifi,scheduledFrameNum,dropFrames,dontclear)
 % remains untested
@@ -13,6 +13,8 @@ function [doFramePulse expertCache dynamicDetails textLabel i dontclear] = ...
 %1) mysterious white box. (maybe related to targetOrientation, and its dynamic choice via stim.correctResponseIsLeft)
 %2) repitition number flickers, suggesting that its wrong
 %3) no black values... is blending wrong...?
+
+indexPulse=false;
 
 %properties of screen
 filterMode=1; %0 = Nearest neighbour filtering, 1 = Bilinear

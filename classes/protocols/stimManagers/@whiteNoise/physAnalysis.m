@@ -19,6 +19,9 @@ else
     frameIndices=spikeData.frameIndices(firstFramePerStimInd);
 end
 
+
+doSTC=false;
+
 % stimData is the entire movie shown for this trial
 % removed 1/26/09 and replaced with stimulusDetails
 % reconstruct stimData from stimulusDetails - stimManager specific method
@@ -157,6 +160,30 @@ catch ex
     getReport(ex); % common place to run out of memory
     STV=nan(size(STA)); % thus no confidence will be reported
 end
+doSpatial=~(size(STA,1)==1 & size(STA,2)==1); % if spatial dimentions exist
+
+if doSTC
+    st=cumprod(size(triggers));
+    if ~doSpatial
+        figure(min(analysisdata.cumulativeTrialNumbers)) 
+        subplot(1,2,2)
+        t=shiftDim(triggers)';
+        sta1=(mean(t)-128);
+        sta1=sta1./norm(sta1,2);
+        c=cov(t-repmat(mean(t),size(t,1),1));
+        [u s v]=svd(c);
+        eig=diag(s); e=eig/max(eig); n=sum(cumsum(e)<0.1*sum(e)); %10% of variance
+        hold off; plot(e-min(e),'color',[.8 1 .8]);
+        hold on; plot([1:n],e(1:n)-min(e),'.g')
+        a=plot(v(:,1),'r'); b=plot(sta1);
+        legend([a b],{'sta','stc1'},'location','southwest')
+        set(gca,'XTick',[],'XLim',[1 length(sta1)]);
+        set(gca,'YTick',[])
+        ylabel('RGB(gunVal)')
+        xlabel(sprintf('msec - STC trial (%d)',analysisdata.trialNumber))
+        subplot(1,2,1)
+    end
+end
 
 % fill in analysisdata with new values
 analysisdata.STA = STA;
@@ -206,7 +233,7 @@ figure(min(analysisdata.cumulativeTrialNumbers)) % trialBased is better
 set(gcf,'position',[100 400 800 700])
 % size(analysisdata.cumulativeSTA)
 
-doSpatial=~(size(STA,1)==1 & size(STA,2)==1); % if spatial dimentions exist
+
 % %% spatial signal (best via bright)
 if doSpatial
     
@@ -271,7 +298,7 @@ timeInds=[1 peakFrame timeWindowFrames(1)+1 size(STA,3)];
 set(gca,'XTickLabel',unique(timeMs(timeInds)),'XTick',unique(timeInds),'XLim',minmax(timeInds));
 set(gca,'YLim',[minmax([analysisdata.singleTrialTemporalRecord(:)' darkCI(:)' brightCI(:)'])+[-5 5]])
 ylabel('RGB(gunVal)')
-xlabel('msec')
+xlabel(sprintf('msec -- cumulative STA(%d-%d)',min(analysisdata.cumulativeTrialNumbers),max(analysisdata.cumulativeTrialNumbers)))
 
 if doSpatial
     subplot(2,2,4)

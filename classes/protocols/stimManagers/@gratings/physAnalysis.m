@@ -32,7 +32,6 @@ else
 end
 
 
-
 if stimulusDetails.doCombos==1
     comboMatrix = generateFactorialCombo({stimulusDetails.spatialFrequencies,stimulusDetails.driftfrequencies,stimulusDetails.orientations,...
         stimulusDetails.contrasts,stimulusDetails.phases,stimulusDetails.durations,stimulusDetails.radii,stimulusDetails.annuli});
@@ -288,8 +287,6 @@ for i=1:numRepeats
                     
                     plot(Xpsd)
                 end
-                
-
         end
     end
 end

@@ -30,8 +30,8 @@ else
     repetition=ones(size(frame));
 end
 
-targetIsOn=(effectiveFrame>=s.targetOnOff(1) & effectiveFrame<=s.targetOnOff(2));
-flankerIsOn=(effectiveFrame>=s.flankerOnOff(1) & effectiveFrame<=s.flankerOnOff(2));
+targetIsOn=(effectiveFrame>=s.targetOnOff(1) & effectiveFrame<s.targetOnOff(2));
+flankerIsOn=(effectiveFrame>=s.flankerOnOff(1) & effectiveFrame<s.flankerOnOff(2));
 
 if length(frame)>1
     targetIsOn=double(targetIsOn).*sweptID;

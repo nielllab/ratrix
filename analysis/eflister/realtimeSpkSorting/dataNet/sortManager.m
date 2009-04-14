@@ -103,6 +103,8 @@ threshLoS=uicontrol(f,'Style','slider','String','loThresh','Min',-1,'Max',0,'Sli
         setHz=10;
         crossingRecords=[];
         numSteps=50;
+
+        
         for w=[1 -1]
             for v=linspace(w,0,numSteps)
                 crossHz=sum(diff((w*filt)>(w*v))>0)/secDur;
@@ -138,6 +140,10 @@ threshLoS=uicontrol(f,'Style','slider','String','loThresh','Min',-1,'Max',0,'Sli
                 end
             end
             plot(hah,[crossingRecords.crossHz],[crossingRecords.val],'r');
+            set(hah,'nextplot','add');
+            change=[0 diff([crossingRecords.crossHz])]; %change in rate per thresh
+            change=maxHz*change/max(change); % normalize
+            plot(hah,change,[crossingRecords.val],'g');
             crossingRecords=[];
             xlabel(hah,'hz')
             set(hah,'nextplot','add');
@@ -236,12 +242,13 @@ threshLoS=uicontrol(f,'Style','slider','String','loThresh','Min',-1,'Max',0,'Sli
         xlabel(usah,'ms')
         
         [coeff scores] = princomp(zscore(spks'));
-        plot(sah,spkPts,coeff(:,1:3),'k','LineWidth',2);
+        
+        plot(sah,spkPts,coeff(:,1:3),'k','LineWidth',2); %need to remember to destandardize these!
         plot3(pcah,scores(:,1),scores(:,2),scores(:,3),'k.','MarkerSize',10);
         axis(pcah,'equal');
         
         [coeff uScores] = princomp(zscore(uSpks'));
-        plot(usah,spkPts,coeff(:,1:3),'k','LineWidth',2);
+        plot(usah,spkPts,coeff(:,1:3),'k','LineWidth',2);%need to remember to destandardize these!
         plot3(upcah,uScores(:,1),uScores(:,2),uScores(:,3),'k.','MarkerSize',10);
         axis(upcah,'equal');
         

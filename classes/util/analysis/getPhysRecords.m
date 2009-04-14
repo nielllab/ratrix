@@ -37,6 +37,9 @@ for w=1:length(what)
         case 'neural'
             d=dir(fullfile(subjectDataPath,'neuralRecords'));
             searchStr='neuralRecords_(\d+)-(.*)\.mat';
+       case 'eye'
+            d=dir(fullfile(subjectDataPath,'eyeRecords'));
+            searchStr='eyeRecords_(\d+)_(.*)\.mat';
         case 'spike'
             goods=[];
             d=dir(fullfile(subjectDataPath,'analysis'));
@@ -175,6 +178,9 @@ while ~success && ~isempty(goodFiles)
                     ff=sprintf('%d-%s',goodFiles(end).trialStart,goodFiles(end).dateStart);
                     fn=sprintf('spikeRecords_%d-%s.mat',goodFiles(end).trialStart,goodFiles(end).dateStart);
                     record=load(fullfile(subjectDataPath,'analysis',ff,fn));
+                case 'eye'
+                    fn=sprintf('eyeRecords_%d_%s.mat',goodFiles(end).trialStart,goodFiles(end).dateStart);
+                    record=load(fullfile(subjectDataPath,'eyeRecords',fn));
                 otherwise
                     error('unsupported what');
             end

@@ -70,17 +70,23 @@ end
 
 
 % CANT USE analysisManager yet on white noise b/c trials keep failing the
-% quality test // dropped frames adjustment
+% quality test // dropped frames adjustmented
 overwriteAll=0; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
 classesAnalyzed=[];%{'filteredNoise'};
-trialRange=[8 ]; %test [44]
+%demo1 % 263 % [1 13] [173 191] [226 236]anethSTA  [240 250]awake [257] [309 320] [304]
 %test2 [8]
-%demo1 % 263 % [1 13] [173 191] [257] [309 320] {}
-% backupPath='\\132.239.158.183\rlab_storage\pmeier\backup\devNeuralData_090310'; %b/c i can't see datanet_storage folder on .179
+%test3 [122 139] [126 130]sta [154]rep4 [157]20rep-whitebox [159]20rep-noWhitebox [164]20rep-noWhitebox [166]smallerstripes [168]moreradii
+%test4 [108 115]spatial  [130-155]spatial"Binary" [157 ] [226-259]quadrant
+%[296-396] [397-399]ffBinary [401 520]wakingUp [401 420]iso [489 499]awake []
+
+%[555 558] cell2 spatial 
+
+trialRange=[515 520]; %test [44]
+% path='\\132.239.158.183\rlab_storage\pmeier\backup\devNeuralData_090310'; %b/c i can't see datanet_storage folder on .179
 % backupPath='C:\Documents and Settings\rlab\Desktop\neural';
 path='\\132.239.158.179\datanet_storage'
-photoDiodeSpikes=1;
-subjectID = 'test2'; % demo1 test
+photoDiodeSpikes=0;
+subjectID = 'test4'; % demo1 test
 analysisManager(subjectID,path, spikeDetectionParams,spikeSortingParams,trialRange,[0 Inf],classesAnalyzed,overwriteAll,photoDiodeSpikes);
 
 

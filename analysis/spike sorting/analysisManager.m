@@ -182,7 +182,7 @@ while ~quit
                     % get frameIndices and frameTimes (from screen pulses)
                     % bounds to decide whether or not to continue with analysis
                     warningBound = 0.01;
-                    errorBound = 0.5; % half a frame
+                    errorBound = 1; % full frame (maybhe go to .8?)
                     ifi = 1/100;
                     spikeRecord.spikeDetails=[];
                     spikeRecord.samplingRate=neuralRecord.samplingRate;
@@ -407,12 +407,12 @@ for i=1:size(frameIndices,1)
 end
 squaredVals = (photoDiode).^2;  % rescale so zero is smallest value... a bit funny
 % now sort the values, and choose the first 5% to show threshold
-%fractionBaselineSpikes=0.05; % chance of a single spike on a frame % not used
-fractionStimSpikes=0.5;      % chance of any spikes on a frame caused by stim
-maxNumStimSpikes=3;         % per frame
+fractionBaselineSpikes=0.3; % chance of each spike on a frame 
+fractionStimSpikes=.5;      % will have a chance of any spikes on a frame caused by stim 
+maxNumStimSpikes=1;          % per frame
 valuesToCalcThreshold = sort(squaredVals,'descend');
 pivot = ceil(length(squaredVals) * fractionStimSpikes);
-threshold = (valuesToCalcThreshold(pivot) + valuesToCalcThreshold(pivot+1)) / 2;
+threshold = valuesToCalcThreshold(pivot);
 
 
 %numSpikes=ceil(maxNumStimSpikes*(squaredVals-threshold)/(valuesToCalcThreshold(1)-threshold));
@@ -420,7 +420,9 @@ threshold = (valuesToCalcThreshold(pivot) + valuesToCalcThreshold(pivot+1)) / 2;
 % for each frame, see if it passes a threshold
 for i=1:size(frameIndices,1)
     if squaredVals(i) > threshold
-        numSpikes=ceil(maxNumStimSpikes*(squaredVals(i)-threshold)/(valuesToCalcThreshold(1)-threshold));
+        %numSpikes=ceil(maxNumStimSpikes*(squaredVals(i)-threshold)/(valuesToCalcThreshold(1)-threshold)); %fixed%
+        baseLineSpikes= sum(rand(1,maxNumStimSpikes)<fractionBaselineSpikes);
+        numSpikes=baseLineSpikes+sum(rand(1,maxNumStimSpikes-baseLineSpikes)<(squaredVals(i)-threshold)/(valuesToCalcThreshold(1)-threshold)); % poission
         randInds=randperm(diff(frameIndices(i,:)))+frameIndices(i,1); % randomly order the candidate locations
         spikes(randInds(1:numSpikes))=1;  % put N spikes at random locations (doesn't respect refractory)
     end
@@ -517,7 +519,7 @@ switch mode
         timePad=4000;
     case 'shortest'
         shortestFrameLength=min(unique(diff(frameIndices')));
-        which=find(shortestFrameLength==diff(frameIndices'))
+        which=find(shortestFrameLength==diff(frameIndices'));
         timePad=0;
     case 'longest'
         longestFrameLength=min(unique(diff(frameIndices')));
@@ -527,8 +529,8 @@ switch mode
         error('bad mode')
 end
 
-ss=frameIndices(which-numFramesPad,1)-timePad;
-ee=frameIndices(which+numFramesPad,1)+timePad;
+ss=frameIndices(max(1,which-numFramesPad),1)-timePad;
+ee=frameIndices(min(size(frameIndices,1),which+numFramesPad),1)+timePad;
 
 hold off
 plot(neuralDataTimes(ss:ee),neuralData(ss:ee,2))

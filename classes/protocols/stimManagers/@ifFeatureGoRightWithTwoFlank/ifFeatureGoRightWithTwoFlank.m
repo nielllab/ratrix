@@ -315,16 +315,16 @@ switch nargin
             error('0 <= flankerOffset < something with a center that fits on the screen')
         end
 
-        if all(varargin{17} >= 0) && isinteger(varargin{17}) && size(varargin{17},2)==2 && varargin{17}(1)<varargin{17}(2)
+        if all(varargin{17} > 0) && isinteger(varargin{17}) && size(varargin{17},2)==2 && varargin{17}(1)<varargin{17}(2)
             s.flankerOnOff=varargin{17};
         else
-            error('0 <= framesJustCue; must be two increasing integers...this will become framesFlankerOnOff')
+            error('0 <= flankerOnOff; must be two increasing integers...this will become framesFlankerOnOff')
         end
 
-        if all(varargin{18} >= 0) && isinteger(varargin{18}) && size(varargin{18},2)==2 && varargin{18}(1)<varargin{18}(2)
+        if all(varargin{18} > 0) && isinteger(varargin{18}) && size(varargin{18},2)==2 && varargin{18}(1)<varargin{18}(2)
             s.targetOnOff=varargin{18};
         else
-            error('0 <= framesStimOn; must be two increasing integers...this will become framesTargetOnOff')
+            error('0 <= targetOnOff; must be two increasing integers...this will become framesTargetOnOff')
         end
 
 

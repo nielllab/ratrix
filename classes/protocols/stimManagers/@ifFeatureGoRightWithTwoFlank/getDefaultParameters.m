@@ -90,8 +90,8 @@ switch defaultSettings
         % in order to be replaced evantually by framesTargetOnOff & framesFlankerOnOff
         % in code that was written on jan 12, 2009 on the trunk
         % but only took over rack1 temp when merge happened
-        default.targetOnOff= int8([0 10]);
-        default.flankerOnOff=int8([0 10]);
+        default.targetOnOff= int8([1 10]);
+        default.flankerOnOff=int8([1 10]);
         
         default.thresh = 0.001;
         default.yPositionPercent = 0.5;
@@ -152,7 +152,7 @@ switch defaultSettings
         default.datanet=[];
             
         default.frameDropCorner={'off'};
-        default.dropFrames=true;  % dropped frames were added in and took effect after feb 2,2009; before: 
+        default.dropFrames=true;  % dropped frames were added in and took effect after feb 2,2009; before: april 11th, 2009
         default.displayMethod='ptb';
         default.requestPorts='center';
         default.saveDetailedFramedrops=true;
@@ -160,6 +160,11 @@ switch defaultSettings
         %for reinforcment manager
         default.requestMode='first';  % only first request lick is rewarded
         
+    case 'Apr.13,2009'
+        %get the above defaults and add on
+        [default t]=getDefaultParameters(t, 'unused','none','Oct.09,2007');
+        default.toggleStim = 0;
+
     otherwise
         error ('unknown default settings date')
 
@@ -168,6 +173,8 @@ end
 
 %% set protocol type
 switch protocolVersion
+    case 'none'
+        % do nothing... just for internal setting calls... don't use
     case '1_0'
         switch protocolType
 

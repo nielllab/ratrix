@@ -1,7 +1,8 @@
 function [stim frameTimes]=createDiscriminandumContextOnOffMovie(t,empty,targetOnly,contextOnly,targetAndContext,targetOnOff,contextOnOff)
 %this makes a 2-5 frame stimulus for the timedFrames type in stimOGL,
 %set the displayMethod=frameTimes to use the appropriate timed frames
-
+% policy: the on frame is the index if the frame that will first se the
+% target, the off-1 is the last frame to se the target (b/c it will be off on the off frame)
 
 [height width]=size(empty);
 
@@ -20,11 +21,11 @@ elseif targetOnOff(1)==contextOnOff(1)
 end
 
 changeTimes=unique([targetOnOff contextOnOff]);
-if any(changeTimes==0)
+if any(changeTimes==1)
     stim=stim(:,:,2:end); %this makes the first scene start right away with no mean screen
     frameTimes=[diff(changeTimes)]; % hold last frame using a zero
 else
-    firstWait=changeTimes(1);
+    firstWait=changeTimes(1)-1;
     frameTimes=[firstWait diff(changeTimes)]
 end
 
@@ -43,12 +44,12 @@ end
 if 0 %old code but it accomplishes the same effects more generally
     changeTimes=unique([targetOnOff contextOnOff]);
 
-    if any(changeTimes==0)
+    if any(changeTimes==1)
         frameTimes=diff(changeTimes);
         %this makes the first scene start right away with no mean screen
         stimInd=1;
     else  %there is a delay beforethe first stim
-        firstWait=changeTimes(1);
+        firstWait=changeTimes(1)-1;
         frameTimes=[firstWait diff(changeTimes)]
         %this lets the first stim frame be a mean screen
         stimInd=2;

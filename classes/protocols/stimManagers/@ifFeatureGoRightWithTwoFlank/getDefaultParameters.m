@@ -12,7 +12,7 @@ end
 if ~exist('defaultSettings','var') || isempty(defaultSettings)
     defaultSettings='Oct.09,2007';
 end
-    
+
 switch defaultSettings
     case 'Oct.09,2007'
 
@@ -67,10 +67,6 @@ switch defaultSettings
         default.framesMotionDelay = Inf;
         default.numMotionStimFrames = 0;
         default.framesPerMotionStim = 0;
-
-        default.protocolType=protocolType;
-        default.protocolVersion=protocolVersion;
-        default.protocolSettings = defaultSettings;
 
         default.cueLum=[];                %luminance of cue square
         default.cueSize=0;               %roughly in pixel radii
@@ -162,14 +158,19 @@ switch defaultSettings
         
     case 'Apr.13,2009'
         %get the above defaults and add on
-        [default t]=getDefaultParameters(t, 'unused','none','Oct.09,2007');
-        default.toggleStim = 0;
+        [default t]=getDefaultParameters(t,'unused','none','Oct.09,2007');
+        default.toggleStim = false;
 
     otherwise
         error ('unknown default settings date')
 
 end
 
+
+% save these
+default.protocolType=protocolType;
+default.protocolVersion=protocolVersion;
+default.protocolSettings = defaultSettings;
 
 %% set protocol type
 switch protocolVersion

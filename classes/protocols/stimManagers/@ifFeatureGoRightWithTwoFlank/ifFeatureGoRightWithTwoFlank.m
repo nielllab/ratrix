@@ -489,6 +489,7 @@ switch nargin
         if  any(strcmp(varargin{46},{'goToRightDetection', 'goToLeftDetection','tiltDiscrim','goToSide'}))
             s.protocolType=varargin{46};
         else
+            varargin{46}
             error('protocolType must be goToRightDetection or goToLeftDetection or tiltDiscrim or goToSide')
         end
 
@@ -498,7 +499,7 @@ switch nargin
             error('protocolVersion must be very specific')
         end
 
-        if  any(strcmp(varargin{48},{'Oct.09,2007'}))
+        if  any(strcmp(varargin{48},{'Oct.09,2007','Apr.13,2009'}))
             s.protocolSettings=varargin{48};
         else
             error('protocolSettings must be very specific string')

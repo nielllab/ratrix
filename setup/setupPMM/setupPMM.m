@@ -99,49 +99,50 @@ end
 
 %% define all subjects
 
+dsd='Apr.13,2009'; %defaultSettingsDate
 for i=1:length(subjects)
     disp(sprintf('doing subject %s''s protocol',subjects{i}))
     switch subjects{i}
         case {'demo1'}
-            r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_5validate');
+            r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_5validate',dsd);
         case {'test_l1','test_r1','test_l2','test_r2','test_l3','test_r3','rack2test4','rack2test5','rack2test6','rack3test7'}
-            r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_4');
-        case {'102'} %127 head fixed
-            r=setShapingPMM(r,subjects(i), 'goToRightDetection', '1_3');
-        case {'117'}
-            r=setShapingPMM(r,subjects(i), 'tiltDiscrim', '2_0');
+            r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_4',dsd);
         case {'130'}
-            r=setShapingPMM(r,subjects(i), 'tiltDiscrim', '2_0');
-        case {'136','137'} %'131' head fixed
-            r=setShapingPMM(r,subjects(i), 'goToSide', '1_7');
+            r=setShapingPMM(r,subjects(i), 'tiltDiscrim', '2_0','Oct.09,2007'); % gets to stay on toggle
+        case {'275','277'}
+            r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_1',dsd);
+        case {'231','232','228','227','272'} % 274 flunked
+            r=setShapingPMM(r,subjects(i), 'goToLeftDetection',  '2_3',dsd);
+        case {'233','234','138','139','230','229','237','278'}
+            r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_3',dsd);
+        case {'305','rack3test7'} % 303 flunked
+            r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_4',dsd);
+        case {'296','304','306'}
+            r=setShapingPMM(r,subjects(i), 'goToLeftDetection', '2_4',dsd);
+        case {'none'} %127 head fixed, 102 sac'd
+            %r=setShapingPMM(r,subjects(i), 'goToRightDetection', '1_3','Oct.09,2007');
+        case {'none'} %117 sac'd
+            %r=setShapingPMM(r,subjects(i), 'tiltDiscrim', '2_0','Oct.09,2007');
+        case {'none'} %131 head fixed, 136 & 137 sac'd
+            %r=setShapingPMM(r,subjects(i), 'goToSide', '1_7','Oct.09,2007');
             %case {'195','196'} pam removed, no longer supported in PMM
             %r=setCoherentDotSteps(r,subjects(i));
         case {'none'} %xfered: '138','139'
-            r=setShapingPMM(r,subjects(i), 'goToRightDetection', '1_9');
+            %r=setShapingPMM(r,subjects(i), 'goToRightDetection', '1_9','Oct.09,2007');
         case {'none'} %removed '235','236','214','219' xfered: 231,232,228,227
-            r=setShapingPMM(r,subjects(i), 'goToLeftDetection',  '1_9');
+            %r=setShapingPMM(r,subjects(i), 'goToLeftDetection',  '1_9','Oct.09,2007');
         case {'none'} %removed '238' xfered: 233,'234','230','229','237'
-            r=setShapingPMM(r,subjects(i), 'goToRightDetection', '1_9');
-        case {'271',} %271 flunked oct 2008, xfered '272'
-            r=setShapingPMM(r,subjects(i), 'goToLeftDetection',  '2_1');
-        case {'275','277'}
-            r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_1');
-        case {'273'} %xfered: '274'
-            r=setShapingPMM(r,subjects(i), 'goToLeftDetection',  '2_2');
-        case {'276'} %xfered: '278'
-            r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_2');
-        case {'231','274','232','228','227','272'}
-            r=setShapingPMM(r,subjects(i), 'goToLeftDetection',  '2_3');
-        case {'233','234','138','139','230','229','237','278'}
-            r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_3');
-        case {'303','305','rack3test7'}
-            r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_4');
-        case {'296','304','306'}
-            r=setShapingPMM(r,subjects(i), 'goToLeftDetection', '2_4');
+            %r=setShapingPMM(r,subjects(i), 'goToRightDetection', '1_9','Oct.09,2007');
+        case {'none',} %271 flunked oct 2008, xfered '272'
+            %r=setShapingPMM(r,subjects(i), 'goToLeftDetection',  '2_1','Oct.09,2007');
+        case {'none'} %xfered: '274' 273 flunked
+            %r=setShapingPMM(r,subjects(i), 'goToLeftDetection',  '2_2','Oct.09,2007');
+        case {'none'} %xfered: '278', flnked 276
+            %r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_2','Oct.09,2007');
         otherwise
             if  isHumanSubjectID(subjects{i})
                 % is three letters (and maybe numbers follwoing), considered a human subject!
-                
+                error('check default settings like tm.dropFrames')
                 if rem(sum(double(subjects{i}(1:3))),2) % choose half of subjects using odd-valued initial sums
                     r=setHumanExpt(r,subjects(i), 'goToLeftDetection', '2_4',[],false);
                 else

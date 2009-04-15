@@ -111,6 +111,17 @@ if ~isstruct(details.loopDuration)
         error('startFrame was too large')
     end
     pre=pre(:,:,[details.startFrame:size(pre,3) 1:details.startFrame-1]);
+    indexPulse=false(1,size(pre,3));
+    indexPulse(1)=true;
+else
+    chunkLength = size(pre,3)/(details.loopDuration.numCycles * (details.loopDuration.numRepeats+details.loopDuration.numUniques));
+    numChunks = size(pre,3)/chunkLength;
+    if numChunks ~= round(numChunks) || chunkLength ~= round(chunkLength)
+        error('partial chunk')
+    end
+    indexPulse=false(1,chunkLength);
+    indexPulse(1)=true;
+    indexPulse=repmat(indexPulse,1,numChunks);
 end
 
 h=size(pre,1);
@@ -162,9 +173,6 @@ end
 %out(out<0)=0;
 %out(out>1)=1;
 %out=uint8(double(intmax('uint8'))*out);
-
-indexPulse=false(1,size(out,3));
-indexPulse(1)=true;
 
 if details.correctionTrial;
     text='correction trial!';

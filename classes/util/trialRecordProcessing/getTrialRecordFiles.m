@@ -16,7 +16,7 @@ historyFiles=dir(fullfile(permanentStore,'trialRecords_*.mat'));
 try
 fileRecs=getRangesFromTrialRecordFileNames({historyFiles.name},true);
 catch ex
-    permanentStore;
+    permanentStore
     rethrow(ex)
 end
 

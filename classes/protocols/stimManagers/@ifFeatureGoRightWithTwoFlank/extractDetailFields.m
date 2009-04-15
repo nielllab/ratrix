@@ -75,65 +75,74 @@ else
         % look in phaseRecords(2) for request times
         % start of stim is assumed to be startTime=0 at phase 2
         out.actualTargetOnSecs=ones(1,length(trialRecords))*nan;
-        out.actualTargetOffSecs=ones(1,length(trialRecords))*nan;
+        out.actualTargetOnsetTime=ones(1,length(trialRecords))*nan;
         out.actualFlankerOnSecs=ones(1,length(trialRecords))*nan;
-        out.actualFlankerOffSecs=ones(1,length(trialRecords))*nan;
+        out.actualFlankerOnsetTime=ones(1,length(trialRecords))*nan;
         for i=1:length(trialRecords)
-            if trialRecords(i).stimDetails.toggleStim % toggle mode
-                if isfield(trialRecords(i),'phaseRecords')
-                    allTimes=cell2mat([0 trialRecords(i).phaseRecords(2).responseDetails.times]);
-                else
-                    tries=cell2mat(trialRecords(i).responseDetails.tries');
-                    firstRequest=find(tries(:,2),1,'first');
-                    if isempty(firstRequest)
-                        firstRequest=1;
-                        firstResponse=1;
-                    else
-                        firstLeft=find(tries(firstRequest:end,1),1,'first');
-                        firstRight=find(tries(firstRequest:end,3),1,'first');
-                        if isempty(firstLeft)
-                            firstLeft=Inf;
+            try
+                % if we are doing new-style records (both toggle and timed mode)
+                if isfield(trialRecords(i),'phaseRecords') && ~isempty(trialRecords(i).phaseRecords)
+                    % toggle mode
+                    if trialRecords(i).stimDetails.toggleStim
+                        tries=trialRecords(i).phaseRecords(1).responseDetails.tries{end};
+                        tries=[tries trialRecords(i).phaseRecords(2).responseDetails.tries];
+                        times=[0 trialRecords(i).phaseRecords(2).responseDetails.times]; % start of phase is when we assume toggle started
+                        nominalIFI=trialRecords(i).phaseRecords(2).responseDetails.nominalIFI;
+                        dropIFI=0;
+                        if any(trialRecords(i).phaseRecords(2).responseDetails.misses==1)
+                            dropIFI=trialRecords(i).phaseRecords(2).responseDetails.missIFIs(1)-nominalIFI;
                         end
-                        if isempty(firstRight)
-                            firstRight=Inf;
+                        [out.actualTargetOnSecs(i) out.actualTargetOnsetTime(i) out.actualFlankerOnSecs(i) ...
+                            out.actualFlankerOnsetTime(i)] = ...
+                            getDurationsAndOnsetTimesFromToggleMode(cell2mat(tries'),times,nominalIFI,dropIFI);
+                    else % timed mode
+                        tm= trialRecords(i).trialManager.trialManager;
+                        if isfield(tm,'dropFrames')
+                            dropFrames=tm.dropFrames;
+                        else
+                            dropFrames=false;
                         end
-                        firstResponse=min(firstRight,firstLeft);
-                        if isempty(firstResponse)
-                            firstResponse=1;
-                        end
-                        firstResponse=firstResponse+firstRequest-1;
-                    end
-                    allTimes=cell2mat(trialRecords(i).responseDetails.times(firstRequest:firstResponse));
-                end
-                    
-                allDiffs=diff(allTimes);
-                out.actualTargetOnSecs(i)=sum(allDiffs(1:2:end));
-                out.actualTargetOffSecs(i)=sum(allDiffs(2:2:end));
-                out.actualFlankerOnSecs=out.actualTargetOnSecs; % how do we know if flankers are on or not?
-                out.actualFlankerOffSecs=out.actualTargetOffSecs; 
-            else % dropped frames
-                tm= trialRecords(i).trialManager.trialManager;
+                        targetOnOff=trialRecords(i).stimDetails.targetOnOff;
+                        flankerOnOff=trialRecords(i).stimDetails.flankerOnOff;
+                        misses=trialRecords(i).phaseRecords(2).responseDetails.misses;
+                        missIFIs=trialRecords(i).phaseRecords(2).responseDetails.missIFIs;
+                        nominalIFI=trialRecords(i).phaseRecords(2).responseDetails.nominalIFI;
 
-                % numUndroppedFrames*nominalIFI + missIFIs that are in the targetOnOff interval
-                targetOnOff=trialRecords(i).stimDetails.targetOnOff;
-                flankerOnOff=trialRecords(i).stimDetails.flankerOnOff;
-                misses=trialRecords(i).phaseRecords(2).responseDetails.misses;
-                targetInds=misses>targetOnOff(1)&misses<=targetOnOff(2);
-                flankerInds=misses>flankerOnOff(1)&misses<=flankerOnOff(2);
-                if isfield(tm,'dropFrames') && tm.dropFrames  % tm.dropFrames is set
-                    numUndroppedTarget=double(targetOnOff(2)-targetOnOff(1))-length(find(targetInds));
-                    numUndroppedFlanker=double(flankerOnOff(2)-flankerOnOff(1))-length(find(flankerInds));
-                else % tm.dropFrames is either not present or not set
-                    numUndroppedTarget=double(targetOnOff(2)-targetOnOff(1));
-                    numUndroppedFlanker=double(flankerOnOff(2)-flankerOnOff(1));
+                        [out.actualTargetOnSecs(i) out.actualFlankerOnSecs(i)] = ...
+                            calculateIntervalDuration(targetOnOff,flankerOnOff,misses,missIFIs,nominalIFI,dropFrames);
+
+                        % now figure out onset time...
+                        targetOnsetDelay=[1 targetOnOff(1)];
+                        flankerOnsetDelay=[1 flankerOnOff(1)];
+                        [actualTargetOnsetDelay actualFlankerOnsetDelay] = ...
+                            calculateIntervalDuration(targetOnsetDelay,flankerOnsetDelay,misses,missIFIs,nominalIFI,dropFrames);
+                        % actual onset time is the delay + the lick time + nominalIFI
+                        % do we want the absolute time or the time relative to the lick?
+                        %                 lickTime=trialRecords(i).phaseRecords(1).responseDetails.times(end);
+                        %                 lickTime=lickTime{1}+trialRecords(i).phaseRecords(1).responseDetails.startTime;
+                        %                 out.actualTargetOnsetTime(i)=lickTime+actualTargetOnsetDelay+nominalIFI;
+                        %                 out.actualFlankerOnsetTime(i)=lickTime+actualFlankerOnsetDelay+nominalIFI;
+                        out.actualTargetOnsetTime(i)=actualTargetOnsetDelay+nominalIFI;
+                        out.actualFlankerOnsetTime(i)=actualFlankerOnsetDelay+nominalIFI;
+                    end
+
+                else % old-style records (only toggle mode)
+                    if trialRecords(i).stimDetails.toggleStim
+                        tries=trialRecords(i).responseDetails.tries;
+                        times=trialRecords(i).responseDetails.times;
+                        nominalIFI=trialRecords(i).responseDetails.nominalIFI;
+                        dropIFI=0;
+                        [out.actualTargetOnSecs(i) out.actualTargetOnsetTime(i) out.actualFlankerOnSecs(i) ...
+                            out.actualFlankerOnsetTime(i)] = ...
+                            getDurationsAndOnsetTimesFromToggleMode(tries',times,nominalIFI,dropIFI);
+                    end
                 end
-                out.actualTargetOnSecs(i)=sum(trialRecords(i).phaseRecords(2).responseDetails.missIFIs(targetInds)) + ...
-                    numUndroppedTarget*trialRecords(i).phaseRecords(2).responseDetails.nominalIFI;
-                out.actualFlankerOnSecs(i)=sum(trialRecords(i).phaseRecords(2).responseDetails.missIFIs(flankerInds)) + ...
-                    numUndroppedFlanker*trialRecords(i).phaseRecords(2).responseDetails.nominalIFI;
+            catch ex
+                % if something goes wrong for this trial, just leave as nans
+                getReport(ex)
+                continue;
             end
-        end
-            
+        end           
             
         
         %     if 0 % FROM old COMPILED
@@ -222,56 +231,86 @@ verifyAllFieldsNCols(out,length(trialRecords));
 end
 
 
-% function out=isDefined(trialRecords, field)
-% %returns a one if the field is there and contain anything
-% 
-% stimDetails=[trialRecords.stimDetails];
-% f=fields(stimDetails);
-% if ~strcmp(field,f)
-%     %if the field is missing, it's not there (false=0)
-%     out=zeros(size(trialRecords));
-% else
-%     cellValues={stimDetails.(field)};
-%     out = cell2mat(cellfun('isempty',cellValues, 'UniformOutput',false));
-% end
-%     
-% function out=getDetail(trialRecords,field,nthValue,ifNotEmpty)
-% %helper function puts in a single double per trial, a nan if the field is
-% %missing, or a single value from a matrix if there are mutliple values
-% %perTrial
-% 
-% if ~exist('nthValue','var')
-%     nthValue=[];
-% end
-% 
-% stimDetails=[trialRecords.stimDetails];
-% f=fields(stimDetails);
-% if ~strcmp(field,f)
-%     %missing field, put nans
-%     fprintf('%s: \t inserted nan [1,(%d:%d)] <-- %s \n ',char(trialRecords(1).subjectsInBox),trialRecords(1).trialNumber,trialRecords(end).trialNumber,field)
-%     out=nan(size(trialRecords));
-% else
-%     if size([stimDetails.(field)])==size(trialRecords)
-%         %get basic double
-%         out=[stimDetails.(field)]; 
-%     else
-%         if ~isempty(nthValue)
-%             %get nth value of matrix
-%             cellValues={stimDetails.(field)};
-%             cellNth=repmat({nthValue},1,(length(trialRecords)));
-%             out = cell2mat(cellfun(@takeNthValue,cellValues ,cellNth, 'UniformOutput',false));
-%             if size(out)~=size(trialRecords)
-%                 cellValues
-%                 out
-%                 size(out)
-%                 size(trialRecords)
-%                 error('should have one value per trial! failed!  maybe nans emptys in values?')
-%             end
-%         else
-%             error('should have one value per trial! failed! and nthValue is undefined')
-%         end
-%     end
-% end
-% 
-% function out=takeNthValue(values,N)
-% out=values(N);
+function [actualTargetOnSecs actualTargetOnsetTime actualFlankerOnSecs actualFlankerOnsetTime] = ...
+    getDurationsAndOnsetTimesFromToggleMode(tries,times,nominalIFI,dropIFI)
+firstRequest=find(tries(:,2),1,'first');
+if isempty(firstRequest)
+    firstRequest=1;
+    firstResponse=1;
+else
+    firstLeft=find(tries(firstRequest:end,1),1,'first');
+    firstRight=find(tries(firstRequest:end,3),1,'first');
+    if isempty(firstLeft)
+        firstLeft=Inf;
+    end
+    if isempty(firstRight)
+        firstRight=Inf;
+    end
+    firstResponse=min(firstRight,firstLeft);
+    if isempty(firstResponse)
+        firstResponse=1;
+    end
+    firstResponse=firstResponse+firstRequest-1;
+end
+allTimes=cell2mat(times(firstRequest:firstResponse));
+
+allDiffs=diff(allTimes);
+
+
+actualTargetOnSecs=sum(allDiffs(1:2:end));
+actualTargetOnsetTime=allTimes(1)+nominalIFI+dropIFI; % 4/13/09 - we estimate the onset time as the lick time of the first request + nominalIFI + dropIFI(if we know it from phaseRecords)!
+actualFlankerOnSecs=actualTargetOnSecs; % how do we know if flankers are on or not?
+actualFlankerOnsetTime=allTimes(1)+nominalIFI+dropIFI;
+end
+
+
+
+function [actualTargetOnSecs actualFlankerOnSecs] = ...
+    calculateIntervalDuration(targetOnOff,flankerOnOff,misses,missIFIs,nominalIFI,dropFrames)
+
+targetInds=misses>=targetOnOff(1)&misses<targetOnOff(2);
+flankerInds=misses>=flankerOnOff(1)&misses<flankerOnOff(2);
+if dropFrames % dropFrames==true (harder case)
+    lastMissedFrameBeforeInterval=find(misses<targetOnOff(1),1,'last');
+    lastMissedFrameOfInterval=find(misses<targetOnOff(2),1,'last');
+    numFramesLost=round(missIFIs(lastMissedFrameBeforeInterval)/nominalIFI)-1 ...
+        -(double(targetOnOff(1))-misses(lastMissedFrameBeforeInterval)); % equiv to (est. # of dropped frames eating into interval) - (distance away from interval)
+    numFramesGained=round(missIFIs(lastMissedFrameOfInterval)/nominalIFI)-1 ...
+        -(double(targetOnOff(2))-misses(lastMissedFrameOfInterval)); % equiv to (est. # of dropped frames extending interval) - (distance away from interval)
+    
+    if isempty(numFramesLost) || numFramesLost<0
+        numFramesLost=0;
+    end
+    if isempty(numFramesGained) || numFramesGained<0
+        numFramesGained=0;
+    end
+    estTargetFramesInInterval=double(targetOnOff(2)-targetOnOff(1))+numFramesGained-numFramesLost;
+
+    lastMissedFrameBeforeInterval=find(misses<flankerOnOff(1),1,'last');
+    lastMissedFrameOfInterval=find(misses<flankerOnOff(2),1,'last');
+    numFramesLost=round(missIFIs(lastMissedFrameBeforeInterval)/nominalIFI)-1 ...
+        -(double(flankerOnOff(1))-misses(lastMissedFrameBeforeInterval)); % equiv to (est. # of dropped frames eating into interval) - (distance away from interval)
+    numFramesGained=round(missIFIs(lastMissedFrameOfInterval)/nominalIFI)-1 ...
+        -(double(flankerOnOff(2))-misses(lastMissedFrameOfInterval)); % equiv to (est. # of dropped frames extending interval) - (distance away from interval)
+    if isempty(numFramesLost) || numFramesLost<0
+        numFramesLost=0;
+    end
+    if isempty(numFramesGained) || numFramesGained<0
+        numFramesGained=0;
+    end
+    estFlankerFramesInInterval=double(flankerOnOff(2)-flankerOnOff(1))+numFramesGained-numFramesLost;
+
+    allMissIFIs=sum(missIFIs(targetInds));
+    % number of undropped frames depends on the estNum of frames in the interval and the number/duration of all dropped frames within the interval
+    numUndroppedTarget=round((nominalIFI*estTargetFramesInInterval - allMissIFIs) / nominalIFI);
+    numUndroppedFlanker=round((nominalIFI*estFlankerFramesInInterval - allMissIFIs) / nominalIFI);
+else % dropFrames==false (easy case)
+    % number of undropped frames is just the total expected number minus the number of drops
+    numUndroppedTarget=double(targetOnOff(2)-targetOnOff(1))-length(find(targetInds));
+    numUndroppedFlanker=double(flankerOnOff(2)-flankerOnOff(1))-length(find(flankerInds));
+end
+actualTargetOnSecs=sum(missIFIs(targetInds)) + ...
+    numUndroppedTarget*nominalIFI;
+actualFlankerOnSecs=sum(missIFIs(flankerInds)) + ...
+    numUndroppedFlanker*nominalIFI;
+end

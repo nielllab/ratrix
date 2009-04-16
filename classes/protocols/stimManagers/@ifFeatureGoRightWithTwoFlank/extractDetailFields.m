@@ -134,7 +134,7 @@ else
                         dropIFI=0;
                         [out.actualTargetOnSecs(i) out.actualTargetOnsetTime(i) out.actualFlankerOnSecs(i) ...
                             out.actualFlankerOnsetTime(i)] = ...
-                            getDurationsAndOnsetTimesFromToggleMode(tries',times,nominalIFI,dropIFI);
+                            getDurationsAndOnsetTimesFromToggleMode(cell2mat(tries'),times,nominalIFI,dropIFI);
                     end
                 end
             catch ex

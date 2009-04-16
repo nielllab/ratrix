@@ -11,7 +11,7 @@ spkDurMS=2;
 sampRate=40000;
 secDur=30;
 
-data=makeChunk(sampRate,secDur/60);
+data=single(makeChunk(sampRate,secDur/60));
 
 times=linspace(0,secDur,secDur*sampRate);
 %data=randn(size(times));
@@ -101,52 +101,50 @@ threshLoS=uicontrol(f,'Style','slider','String','loThresh','Min',-1,'Max',0,'Sli
         filtV = interp1(times,filt,timesV,'linear');
         
         setHz=10;
-        crossingRecords=[];
         numSteps=50;
 
         
         for w=[1 -1]
-            for v=linspace(w,0,numSteps)
-                crossHz=sum(diff((w*filt)>(w*v))>0)/secDur;
-                if w>0
-                    if isempty(hiThresh) && crossHz>setHz
-                        set(threshHiS,'Value',v);
-                        hiThresh=v;
-                    end
-                else
-                    if isempty(loThresh) && crossHz>setHz
-                        set(threshLoS,'Value',v);
-                        loThresh=v;
-                    end
+            v=linspace(w,0,numSteps)';
+            dRate=5000;
+            dTimes=linspace(0,secDur,secDur*dRate);
+            dFilt=interp1(times,filt,dTimes,'linear'); %without downsampling, the following line runs out of memory even for singles when > ~15s @40kHz
+            crossHz=sum(diff((w*repmat(dFilt,numSteps,1))>(w*repmat(single(v),1,length(dFilt))),1,2)>0,2)/secDur;
+            
+            if w>0
+                newMin=v(find(crossHz>maxHz,1,'first'));
+                if isempty(newMin)
+                    newMin=0;
                 end
-                if crossHz>maxHz
-                    if w>0
-                        if get(threshHiS,'Value')<v
-                            set(threshHiS,'Value',v);
-                        end
-                        set(threshHiS,'min',v);
-                        %fprintf('set min of top to %g\n',v);
-                    else
-                        if get(threshLoS,'Value')>v
-                            set(threshLoS,'Value',v);
-                        end
-                        set(threshLoS,'max',v);
-                        %fprintf('set max of bottom to %g\n',v);
-                    end
-                    break
-                else
-                    crossingRecords(end+1).val=v; %#ok<AGROW>
-                    crossingRecords(end).crossHz=crossHz; %#ok<AGROW>
+                set(threshHiS,'min',newMin);
+                
+                hiThresh=v(find(crossHz>setHz,1,'first'));
+                if isempty(hiThresh)
+                    hiThresh=0;
                 end
+                set(threshHiS,'Value',hiThresh);
+            else
+                newMax=v(find(crossHz>maxHz,1,'first'));
+                if isempty(newMax)
+                    newMax=0;
+                end
+                set(threshLoS,'max',newMax);
+                
+                loThresh=v(find(crossHz>setHz,1,'first'));
+                if isempty(loThresh)
+                    loThresh=0;
+                end
+                set(threshLoS,'Value',loThresh);
             end
-            plot(hah,[crossingRecords.crossHz],[crossingRecords.val],'r');
+            
+            plot(hah,crossHz,v,'r');
             set(hah,'nextplot','add');
-            change=[0 diff([crossingRecords.crossHz])]; %change in rate per thresh
+            
+            change=[0 diff(crossHz)']; %change in rate per thresh
             change=maxHz*change/max(change); % normalize
-            plot(hah,change,[crossingRecords.val],'g');
-            crossingRecords=[];
+            plot(hah,change,v,'g');
+            
             xlabel(hah,'hz')
-            set(hah,'nextplot','add');
         end
         
         ylim(hah,[-1 1]);

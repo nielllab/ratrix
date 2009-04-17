@@ -21,7 +21,8 @@ else
         [out.selectedDotSize newLUT] = extractFieldAndEnsure(stimDetails,{'selectedDotSize'},'scalar',newLUT);
         [out.selectedContrast newLUT] = extractFieldAndEnsure(stimDetails,{'selectedContrast'},'scalar',newLUT);
         [out.selectedSpeed newLUT] = extractFieldAndEnsure(stimDetails,{'selectedSpeed'},'scalar',newLUT);
-                
+        [out.numDots newLUT] = extractFieldAndEnsure(stimDetails,{'stimStruct','num_dots'},'scalar',newLUT);
+        
         % 12/16/08 - this stuff might be common to many stims
         % should correctionTrial be here in compiledDetails (whereas it was originally in compiledTrialRecords)
         % or should extractBasicRecs be allowed to access stimDetails to get correctionTrial?

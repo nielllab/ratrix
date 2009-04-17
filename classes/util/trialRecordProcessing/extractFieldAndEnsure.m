@@ -105,6 +105,11 @@ try
             % now cellfun phaseRecords, getting all tries for each phase
             out = cellfun(@getTimes,phaseRecords,'UniformOutput',false);
             out = cell2mat(cellfun(@diffFirstTwo,out,'UniformOutput',false));
+        case 'responseTime'
+            times = cellfun(@getTimes,phaseRecords,'UniformOutput',false);
+            out = cell2mat(cellfun(@diffFirstLast,times,'UniformOutput',false));
+            % could ad a feature to check that all prior licks were only
+            % center licks... and error if not.
         case 'none'
             out=[trialRecords.(fieldPath)];
         otherwise
@@ -134,4 +139,10 @@ if length(cellIn)>=3 % if more than 2 responses
     out=cellIn{2}-cellIn{1};
 end
 end
-    
+
+function out=diffFirstLast(cellIn)
+out=nan;
+if length(cellIn)>=2 % if more than 2 responses
+    out=cellIn{end}-cellIn{1};
+end
+end

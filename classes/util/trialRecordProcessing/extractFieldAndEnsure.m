@@ -99,15 +99,24 @@ try
         case 'firstIRI'
             if isfield(trialRecords,'phaseRecords')
                 phaseRecords={trialRecords.phaseRecords}; % this has to be a cell array b/c phaseRecords aren't always the same across trials
+                            times = cellfun(@getTimes,phaseRecords,'UniformOutput',false);
             else
-                error('failed to find phaseRecords during numRequests handling');
+                            times = cellfun(@getTimes,trialRecords,'UniformOutput',false);
             end
             % now cellfun phaseRecords, getting all tries for each phase
-            out = cellfun(@getTimes,phaseRecords,'UniformOutput',false);
-            out = cell2mat(cellfun(@diffFirstTwo,out,'UniformOutput',false));
+
+            out = cell2mat(cellfun(@diffFirstTwo,times,'UniformOutput',false));
+            
         case 'responseTime'
-            times = cellfun(@getTimes,phaseRecords,'UniformOutput',false);
+             if isfield(trialRecords,'phaseRecords')
+                phaseRecords={trialRecords.phaseRecords}; % this has to be a cell array b/c phaseRecords aren't always the same across trials
+                            times = cellfun(@getTimesPhased,phaseRecords,'UniformOutput',false);
+             else
+                 times = cellfun(@getTimesNonphased,{trialRecords.responseDetails},'UniformOutput',false);
+            end
+            % now cellfun phaseRecords, getting all tries for each phase
             out = cell2mat(cellfun(@diffFirstLast,times,'UniformOutput',false));
+      
             % could ad a feature to check that all prior licks were only
             % center licks... and error if not.
         case 'none'
@@ -120,10 +129,11 @@ try
             ensureMode
             error('unsupported ensureMode');
     end
-catch
+catch ex
     % if this field doesn't exist, fill with nans
 %     ple
-    out=nan*ones(1,length(trialRecords));
+    getReport(ex)
+out=nan*ones(1,length(trialRecords));
 end
 
 end % end function
@@ -132,9 +142,21 @@ function out=takeNthValue(values,N)
 out=values(N);
 end
 
-function out=getTimes(phaseRecord)
+function out=getTimesPhased(phaseRecord)
 thisTrialResponseDetails=[phaseRecord.responseDetails];
 out=[thisTrialResponseDetails.times];
+end
+
+function out = getTimesNonphased(trialRecord)
+try
+    if isfield(trialRecord,'times')
+    out = [trialRecord.times];
+    else
+        out = NaN;
+    end
+catch
+    error('you shouldn''t be here!')
+end
 end
 
 function out=diffFirstTwo(cellIn)

@@ -65,10 +65,10 @@ end
 [out.reinforcementManagerClass compiledLUT]                  =extractFieldAndEnsure(trialRecords,{'reinforcementManagerClass'},'scalarLUT',compiledLUT);
 [out.scaleFactor compiledLUT]                                =extractFieldAndEnsure(trialRecords,{'scaleFactor'},'equalLengthVects',compiledLUT);
 [out.type compiledLUT]                                       =extractFieldAndEnsure(trialRecords,{'type'},'mixed',compiledLUT);
-[out.targetPorts compiledLUT]                                =extractFieldAndEnsure(trialRecords,{'targetPorts'},{'typedVector','index'},compiledLUT);
-[out.distractorPorts compiledLUT]                            =extractFieldAndEnsure(trialRecords,{'distractorPorts'},{'typedVector','index'},compiledLUT);
+[out.targetPorts compiledLUT]                                =extractFieldAndEnsure(trialRecords,{'targetPorts'},{'bin2dec',num2cell(out.numPorts)},compiledLUT);
+[out.distractorPorts compiledLUT]                            =extractFieldAndEnsure(trialRecords,{'distractorPorts'},{'bin2dec',num2cell(out.numPorts)},compiledLUT);
 try
-    out.result                                                   =ensureScalar(cellfun(@encodeResult,{trialRecords.result},out.targetPorts,out.distractorPorts,num2cell(out.correct),'UniformOutput',false));
+    out.result                                                   =ensureScalar(cellfun(@encodeResult,{trialRecords.result},num2cell(out.targetPorts),num2cell(out.distractorPorts),num2cell(out.correct),'UniformOutput',false));
 catch
     ple
     out.result=ones(1,length(trialRecords))*nan;
@@ -127,6 +127,14 @@ if isa(result,'double') && all(result==1 | result==0)
     warning('edf sees double rather than logical response on osx 01.21.09 -- why?')
     result=logical(result);
 end
+if targs==0 %empty target ports (in decimal representation)
+    targs=[];
+end
+if dstrs==0 % empty distractor ports (in decimal representation)
+    dstrs=[];
+end
+% if we do decide to re-implement errorchecking on targets/distractors, keep in mind that
+% targs/dstrs are in DECIMAL format (ie targetPorts [1,3] = '101' = 5)
 
 if ischar(result)
     switch result

@@ -112,6 +112,10 @@ try
             % center licks... and error if not.
         case 'none'
             out=[trialRecords.(fieldPath)];
+        case 'bin2dec' %note uses trialRecords.station.numPorts in order to pad w/ sig digits
+            % ensureType is a cell array of numPorts
+            ports={trialRecords.(fieldPath)};
+            out = cell2mat(cellfun(@convertPortsToDec,ports,ensureType,'UniformOutput',false));
         otherwise
             ensureMode
             error('unsupported ensureMode');
@@ -145,4 +149,11 @@ out=nan;
 if length(cellIn)>=2 % if more than 2 responses
     out=cellIn{end}-cellIn{1};
 end
+end
+
+function out = convertPortsToDec(portCellIn,numPortsCellIn)
+out=zeros(1,numPortsCellIn);
+out(portCellIn)=1;
+
+out=bin2dec(num2str(out));
 end

@@ -86,39 +86,27 @@ try
             else
                 error('should have one value per trial! failed! and nthValue is undefined')
             end
-        case 'numRequests'
+        case {'responseTime','firstIRI','numRequests'} 
             if isfield(trialRecords,'phaseRecords')
-                phaseRecords={trialRecords.phaseRecords}; % this has to be a cell array b/c phaseRecords aren't always the same across trials
+                % this has to be a cell array b/c phaseRecords aren't always the same across trials
+                times = cellfun(@getTimesPhased,{trialRecords.phaseRecords},'UniformOutput',false);
             else
-                error('failed to find phaseRecords during numRequests handling');
+                % this has to be a cell array b/c times aren't always there across trials
+                times = cellfun(@getTimesNonphased,{trialRecords.responseDetails},'UniformOutput',false);
             end
-            % now cellfun phaseRecords, getting all tries for each phase
-            out = cellfun(@getTimes,phaseRecords,'UniformOutput',false);
-            % now convert from a cell array of cell arrays to a vector of length-1's
-            out = cellfun('length',out) - 1;
-        case 'firstIRI'
-            if isfield(trialRecords,'phaseRecords')
-                phaseRecords={trialRecords.phaseRecords}; % this has to be a cell array b/c phaseRecords aren't always the same across trials
-                            times = cellfun(@getTimes,phaseRecords,'UniformOutput',false);
-            else
-                            times = cellfun(@getTimes,trialRecords,'UniformOutput',false);
-            end
-            % now cellfun phaseRecords, getting all tries for each phase
-
-            out = cell2mat(cellfun(@diffFirstTwo,times,'UniformOutput',false));
             
-        case 'responseTime'
-             if isfield(trialRecords,'phaseRecords')
-                phaseRecords={trialRecords.phaseRecords}; % this has to be a cell array b/c phaseRecords aren't always the same across trials
-                            times = cellfun(@getTimesPhased,phaseRecords,'UniformOutput',false);
-             else
-                 times = cellfun(@getTimesNonphased,{trialRecords.responseDetails},'UniformOutput',false);
+            switch ensureMode
+                case 'responseTime'
+                    % could ad a feature to check that all prior licks were only
+                    % center licks... and error if not. but that would be slow.
+                    out = cell2mat(cellfun(@diffFirstLast,times,'UniformOutput',false));
+                case 'firstIRI'
+                    out = cell2mat(cellfun(@diffFirstTwo,times,'UniformOutput',false));
+                case 'numRequests'
+                    % now convert from a cell array of cell arrays to a vector of length-1's
+                    out = cellfun('length',times) - 1;
             end
-            % now cellfun phaseRecords, getting all tries for each phase
-            out = cell2mat(cellfun(@diffFirstLast,times,'UniformOutput',false));
-      
-            % could ad a feature to check that all prior licks were only
-            % center licks... and error if not.
+             
         case 'none'
             out=[trialRecords.(fieldPath)];
         case 'bin2dec' %note uses trialRecords.station.numPorts in order to pad w/ sig digits
@@ -131,9 +119,10 @@ try
     end
 catch ex
     % if this field doesn't exist, fill with nans
-%     ple
+    
+    % pmm says: should check to see if the offending field was on the first trial or a latter trial.  error if not the first. 
     getReport(ex)
-out=nan*ones(1,length(trialRecords));
+    out=nan*ones(1,length(trialRecords));
 end
 
 end % end function
@@ -144,32 +133,32 @@ end
 
 function out=getTimesPhased(phaseRecord)
 thisTrialResponseDetails=[phaseRecord.responseDetails];
-out=[thisTrialResponseDetails.times];
+if isfield(thisTrialResponseDetails,'times') % often the last trial lacks this
+    out=[thisTrialResponseDetails.times];
+else
+    out = NaN;
+end
 end
 
 function out = getTimesNonphased(trialRecord)
-try
-    if isfield(trialRecord,'times')
+if isfield(trialRecord,'times') % often the last trial lacks this
     out = [trialRecord.times];
-    else
-        out = NaN;
-    end
-catch
-    error('you shouldn''t be here!')
+else
+    out = NaN;
 end
 end
 
 function out=diffFirstTwo(cellIn)
 out=nan;
-if length(cellIn)>=3 % if more than 2 responses
+if length(cellIn)>=3 % if more than 2 responses, then 1st 2 are requests
     out=cellIn{2}-cellIn{1};
 end
 end
 
 function out=diffFirstLast(cellIn)
 out=nan;
-if length(cellIn)>=2 % if more than 2 responses
-    out=cellIn{end}-cellIn{1};
+if length(cellIn)>=2 % if request and responses
+    out=cellIn{end}-cellIn{1}; 
 end
 end
 

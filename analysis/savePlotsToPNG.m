@@ -1,17 +1,14 @@
-function  savePlotsToPNG(savePlots,handles,who,savePath)
+function  savePlotsToPNG(plotNames,handles,who,savePath)
 
-
-if size(handles)~=size(savePlots)
-    error('must specify whether or not to save every handle')
+if ~iscell(plotNames)
+    error('plotNames must be in cell mode now, not a logical from old code')
 end
 
 todayDate=datestr(now,29);
-fileOut=sprintf('%s_%s_%s',todayDate,who,'fig')
+mkdir(savePath);
+fileOut=sprintf('%s_%s_',todayDate,who)
 for i=1:size(handles,2)
-    if savePlots(i)==1
-        %figure(handles(i))
-        saveas(handles(i),[savePath fileOut num2str(i)],'png')
-        
+        saveas(handles(i),fullfile(savePath,[fileOut plotNames{i}]),'png')
         disp(sprintf('saving figureid: %d',i))
     end
 end

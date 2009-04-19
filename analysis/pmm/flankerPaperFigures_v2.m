@@ -260,13 +260,14 @@ curveAndBias=1;
 % compare colinear to popout
 subjects={'232','138'};%     
 subjects={'232','233','138','228','139'};%    
-subjects={'232'};%    
-dateRange=[datenum('Nov.15,2008') now];
-%endToggleDate april 14th 2009
-%dateRange=[now-60 now]; % just a test, no special meaning
-%last problematic day for 139
+%subjects={'232'};%    
+dateRange=[ now];
+last139problemDate=datenum('Nov.15,2008');
 %Nov.15,2008=datestr(ceil(d.date(max(find(d.targetContrast==1)))),22)
-%Mar.16,2008=datestr(ceil(d.date(max(find(d.targetContrast>0 & d.targetContrast<.7)))),22)
+%Mar.16,2008=datestr(ceil(d.date(max(find(d.targetContrast>0 &
+%d.targetContrast<.7)))),22)
+endToggleDate=datenum('Apr.13,2009');
+dateRange=[endToggleDate now];
 %subjects={'232'};%     
 filter{1}.type='13';
 filter{2}.type='responseSpeedPercentile';

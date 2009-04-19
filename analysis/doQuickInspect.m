@@ -1,4 +1,4 @@
-function doQuickInspect(subjects,heatViewed,boxViewed,daysBackAnalyzed,suppressUpdates,seeBW,justOne,whichOne,more,rackNum)
+function doQuickInspect(subjects,heatViewed,boxViewed,daysBackAnalyzed,suppressUpdates,seeBW,justOne,whichOne,more,serverID)
 
 
 %% 
@@ -15,24 +15,18 @@ if ~exist('subjects','var')
     more=              0;  %get some more plots
 end
 
-masterMode=0;
-if masterMode
-    %special things happen
-end
-
-
-%**************************************************************************************
-%DON'T CHANGE THINGS BELOW HERE UNLESS YOU REALLY KNOW WHAT YOURE DOING -the management
-
 
 % SETUP
-m=more; %more
-whichPlots= [1 1 0 m 0 m m 1 0 0 0 0 0 seeBW 1 m m m]; %see basics
-%whichPlots=[0 0 0 m 0 m m m 0 0 0 0 0 0 0 1]; %see basics
-%whichPlots=[0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0]; %BW only
-%whichPlots= [0 0 0 0 0 0 0 0 0 0 0 0 0 seeBW 0 0 1 1]; %see basics
+whichPlots={'plotPerformance','plotTrialsPerDay','plotBias'};
+if more
+    whichPlots{end+1}='plotLickAndRT';
+    whichPlots{end+1}='plotBiasScatter';
+    whichPlots{end+1}='plotRatePerDay';
+    whichPlots{end+1}='plotPerformancePerDaysTrial';
+end
 
 dateRange=[now-daysBackAnalyzed now];
+%dateRange=[datenum('Apr.11,2009') datenum('Apr.14,2009')] % hack
 positions=subjects;
 
 if heatViewed>0;
@@ -79,46 +73,50 @@ warning('on','MATLAB:dispatcher:nameConflict')
 
 
 %% Get Data To Usable Format  -- now handled by deamon
-if ~suppressUpdates
-    forceSmallDataUpdate=0; %don't mess with this unless you know what you're doing
-    recompile=forceSmallDataUpdate;
-    fieldNames=[]; %use default
-    compileTrialRecords(rackNum,fieldNames,recompile)
-    %old code for netwrok management with no rnet:
-    %junk=allToSmall(subjects,dateRange,suppressUpdates,forceSmallDataUpdate);  
-end
+% if ~suppressUpdates
+%     forceSmallDataUpdate=0; %don't mess with this unless you know what you're doing
+%     recompile=forceSmallDataUpdate;
+%     fieldNames=[]; %use default
+%     compileTrialRecords(serverID,fieldNames,recompile)
+%     %old code for netwrok management with no rnet:
+%     %junk=allToSmall(subjects,dateRange,suppressUpdates,forceSmallDataUpdate);  
+% end
 
 %% Display Data
 subjects=subjects';
 numRats=size(subjects,2)*size(subjects,1)
 for i=1:numRats
     %Get Data
-    d=getSmalls(subjects{i},dateRange,rackNum);
-    numFig=18; %number of possible figures
+    d=getSmalls(subjects{i},dateRange,serverID);
+    numFig=length(whichPlots); %number of possible figures
     if numRats==1
         subplotParams.index=1; subplotParams.x=1; subplotParams.y=1; handles=[1:numFig];
         who=subjects{1};
     elseif numRats<=6
         subplotParams.index=i; subplotParams.x=2; subplotParams.y=3; handles=[numFig+1:2*numFig];
         who=sprintf('heat-%d',heatViewed);
-    else
-        subplotParams.index=i; subplotParams.x=6; subplotParams.y=6; handles=[(2*numFig)+1:3*numFig];
+    elseif numRats==20
+        subplotParams.index=i; subplotParams.x=4; subplotParams.y=5; handles=[(2*numFig)+1:3*numFig];
         who=sprintf('all',heatViewed);
+    else  
+        xx=ceil(sqrt(numRats)); yy=ceil(numRats/xx); % square fit
+        subplotParams.index=i; subplotParams.x=xx; subplotParams.y=yy; handles=[(2*numFig)+1:3*numFig];
+        who='someRats';
     end
-    i
     inspectRatResponses(char(subjects{i}),'noPathUsed',whichPlots,handles,subplotParams,d);
 end
 
 %save local and remote graph
-whereOnServer=fullfile((fileparts(getSubDirForRack(rackID))),'graphs')
-savePlotsToPNG(whichPlots,handles,who,where);
 local=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData','graphs');
-savePlotsToPNG(whichPlots,handles,who,where);
+savePlotsToPNG(whichPlots,handles,who,local);
+whereOnServer=fullfile((fileparts(getSubDirForServerID(serverID))),'graphs')
+savePlotsToPNG(whichPlots,handles,who,whereOnServer);
+
 
 
 %%
 if heatViewed==0 & daysBackAnalyzed>7 & ~justOne
-     weeklyReport(rackNum);
+     weeklyReport(serverID);
 end
 
 

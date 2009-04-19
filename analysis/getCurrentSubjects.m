@@ -28,7 +28,7 @@ for i=1:size(subjects,1)
 end
 
 %example output :
-% % HEAT       %1        %2       %3        %4     %overnight
+% % HEAT       %red     %orange  %yellow  %green     %blue
 % subjects={'rat_213','rat_215','rat_216','rat_195','rat_144';... %3  upper-left
 %           'rat_214','rat_219','rat_217','rat_218','rat_220';... %11 upper-right
 %           'rat_221','rat_222','rat_102','rat_106','rat_196';... %1  middle-left

@@ -1,4 +1,4 @@
-function wholeReport=weeklyReport(subjectsOrRack,includeHeader,saveToDesktop,heatName)
+function wholeReport=weeklyReport(subjectsOrServer,includeHeader,saveToDesktop,heatName)
 %generates useful text summary of performance for a list of rats
 %
 %initially created to be used by holly, july 2007, pmm
@@ -9,15 +9,15 @@ function wholeReport=weeklyReport(subjectsOrRack,includeHeader,saveToDesktop,hea
 %afternoon=weeklyReport(uiparams.heats{1}.subjects,1,0,{uiparams.heats{1}.name});
 
 
-if ~exist('subjectsOrRack','var')
-    subjectsOrRack=1;
+if ~exist('subjectsOrServer','var')
+    subjectsOrServer=1;
 end
 
-if isnumeric(subjectsOrRack)
-    rackID=subjectsOrRack;
-    [subjects heatName]=getCurrentSubjects(subjectsOrRack);
+if isnumeric(subjectsOrServer)
+    serverID=subjectsOrServer;
+    [subjects heatName]=getCurrentSubjects(subjectsOrServer);
 else
-    subjects=subjectsOrRack;
+    subjects=subjectsOrServer;
 end
 
 if ~exist('includeHeader','var')
@@ -36,8 +36,8 @@ end
 smoothingWidth=500;
 
 desktopPath=fileparts(fileparts(getRatrixPath));
-if exist('rackID','var')
-    archivePath=fullfile(  fileparts(getSubDirForRack(rackID)) ,'weeklyReports')
+if exist('serverID','var')
+    archivePath=fullfile(  fileparts(getSubDirForServerID(serverID)) ,'weeklyReports')
 end
 
 wholeReport='';
@@ -128,7 +128,7 @@ if saveToDesktop
 end
 
 saveForPosterity=1;
-if saveForPosterity & exist('rackID','var')
+if saveForPosterity & exist('serverID','var')
     reportName=sprintf('%s_weeklyReport.txt',datestr(now,30));
     fid = fopen([archivePath '\' reportName],'wt');
     fprintf(fid,'%s',sprintf (wholeReport));

@@ -1029,3 +1029,14 @@ eventLog{eventNum}.issuedBy ='pmm';
 eventLog{eventNum}.comment ='in order to minimize frame drops for future non-toggle'; 
 eventLog{eventNum}.details.from = 'beige'; 
 eventLog{eventNum}.details.to   = 'black'; 
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Apr.16,2009');%datestr(now,21)  % %written on 'Mar.18,2009'  will take effect, in a few days on rebuild but may have been off on rck1temp and then back to .25 on tag. 1.0.1 on april 9thd
+eventLog{eventNum}.eventName ={'addCTs'};
+eventLog{eventNum}.subject ={'138'};
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='alternates sides eventually, but has a same side bias... dhad it for weeks/months, performance is down in the past 2/3 weeks '; 
+eventLog{eventNum}.details.from = [0]; 
+eventLog{eventNum}.details.to   = [0.25]; 
+

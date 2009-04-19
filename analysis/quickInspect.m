@@ -2,31 +2,34 @@
 
 close all
 
+serverID=          1;  %male =1, female=2; rig=101;
 heatViewed=        0;  %1-6; filters which heat    (RED =1 etc),   0 allows all rats and weeklyReports
 stationViewed=     0;  %1-6; filters which station (stationA=1 etc), 0 allows all stations
-daysBackAnalyzed= 40;  %at least 8 if using weeklyReport
-seeBW=             0;  %1 if you want to see body weights, 0 otherwise
-justOne=           1;  %0 is default, 1 to view a single rat
-%whichOne={'136','137'}; 
-whichOne={'296','304','304','305','306'}; 
-%whichOne={%'137','275','277','136','139'};   %low body weight
-%whichOne={'228','130','102','277','136','237'} %riskier BW
-%whichOne={'273','232','274','137','275','139'} % less risky BW
-%whichOne={'138','139','227','228'}; % CTs off
-%whichOne={'227','228','229','234','237','274'}; % penaltyIncresed?
-%whichOne={'231','234','274'}; % orientationSweep
-%whichOne={'138','139','228','232','233'}; %varyPosition
-%whichOne={'227','229','230','237'}; % constant test%
-%whichOne={'102','275','278'}% oddballs
-
-more=              0;  %see more plots
-rackNum=           2;  %male =1, female=2; gingers=3; rig=101;
-
+justSome=           1;  %0 is default heat & station defined, 1 to view explicit list
 suppressUpdates=   1;  %don't update - server does that! can cause collisions with mulitple users
+%manual compile: compileDetailedRecords('server-01-male-pmm-154')
 
-subjects=getCurrentSubjects(rackNum); %this will always be the active list of rats in that rack
-%subjects=whichOne;
-doQuickInspect(subjects,heatViewed,stationViewed,daysBackAnalyzed,suppressUpdates,seeBW,justOne,whichOne,more,rackNum);
+daysBackAnalyzed=  7;  %at least 8 if using weeklyReport
+seeBW=             0;  %1 if you want to see body weights, 0 otherwise
+more=              1;  %see more plots
+
+whichOnes={'227','231','233','228','230','232','234','237','277','138','139','275','278','130','229'}; % ,
+%whichOnes={'138'}; 
+%whichOnes={'232','234'}
+%whichOnes={'136','137'}; 
+%whichOnes={'296','304','304','305','306'}; 
+%whichOnes={%'137','275','277','136','139'};   %low body weight
+%whichOnes={'228','130','102','277','136','237'} %riskier BW
+%whichOnes={'273','232','274','137','275','139'} % less risky BW
+%whichOnes={'138','139','227','228'}; % CTs off
+%whichOnes={'227','228','229','234','237','274'}; % penaltyIncresed?
+%whichOnes={'231','234','274'}; % orientationSweep
+%whichOnes={'138','139','228','232','233'}; %varyPosition
+%whichOnes={'227','229','230','237'}; % constant test%
+%whichOnes={'102','275','278'}% oddballs
+
+subjects=getCurrentSubjects(serverID); %this will always be the active list of rats in that rack
+doQuickInspect(subjects,heatViewed,stationViewed,daysBackAnalyzed,suppressUpdates,seeBW,justSome,whichOnes,more,serverID);
 %pmmInspect
 
 

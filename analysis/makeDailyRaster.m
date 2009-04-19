@@ -152,10 +152,7 @@ if numTrials>0
 
 
     if plotResponseRaster
-
-
-
-        figure(handles(7)); subplot(subplotParams.y, subplotParams.x, subplotParams.index);
+        error('turned off.. handle figures  better')
         contextInfo=[subject ' between ' datestr(min(date),22) ' and ' datestr(max(date),22)];
         correct=logical(correct);
         hold off; plot(pctTime(correct),    dayAfterStart(dayIndex(correct)),'g.');

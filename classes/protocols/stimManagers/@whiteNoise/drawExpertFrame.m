@@ -7,6 +7,16 @@ function [doFramePulse expertCache dynamicDetails textLabel i dontclear indexPul
 indexPulse=false;
 floatprecision=1;
 
+%initialize first frame
+if scheduledFrameNum==1
+    if 1%stimulus.changeable
+        %start with mouse in the center
+        [a,b]=WindowCenter(window);
+        SetMouse(a,b,window);
+        expertCache.positionShift=[0 0];
+    end
+end
+
 % increment i
 if dropFrames
     i=scheduledFrameNum;
@@ -17,24 +27,48 @@ end
 doFramePulse=true;
 dynamicDetails=[];
 % ================================================================================
+
 % start calculating frames now
-meanLuminance = stimulus.meanLuminance;
-std = stimulus.std;
-requestedStimLocation = stimulus.requestedStimLocation;
+stimLocation = stimulus.requestedStimLocation;
+if stimulus.changeable
+    [mouseX, mouseY, buttons]=GetMouse(window);
+    if buttons(1) % right click if you want to update the position... only persists this trial!
+        [a,b]=WindowCenter(window);
+        %shift stimulus away from predefined location by the amount that the mouse is away from center
+        expertCache.positionShift=[mouseX-a mouseY-b];
+    end
+    stimLocation=stimLocation+expertCache.positionShift([1 2 1 2]);
+    dynamicDetails.stimLocation=stimLocation;
+end
+
 stixelSize = stimulus.stixelSize;
 
 %calculate spatialDim
-spatialDim=ceil([requestedStimLocation(3)-requestedStimLocation(1) requestedStimLocation(4)-requestedStimLocation(2)]./stixelSize);
+spatialDim=ceil([diff(stimulus.requestedStimLocation([1 3])) diff(stimulus.requestedStimLocation([2 4]))]./stixelSize);
 
-% set randn to the current frame's precalculated seed value
-randn('state',stim.seedValues(i));
-expertFrame = randn(spatialDim)*1*std+meanLuminance;
-expertFrame(expertFrame<0) = 0;
-expertFrame(expertFrame>1) = 1;
+% set randn/rand to the current frame's precalculated seed value -- 
+% make this a method so its always in sync with analysis ... save sha1?
+switch stimulus.distribution.type
+    case 'gaussian'
+        meanLuminance = stimulus.distribution.meanLuminance;
+        std = stimulus.distribution.std;
+        randn('state',stim.seedValues(i));
+        expertFrame = randn(spatialDim([2 1]))*1*std+meanLuminance;
+        expertFrame(expertFrame<0) = 0;
+        expertFrame(expertFrame>1) = 1;
+    case 'binary'
+        rand('state',stim.seedValues(i));
+        lumDiff=stimulus.distribution.hiVal-stimulus.distribution.lowVal;
+        expertFrame = stimulus.distribution.lowVal+(double(rand(spatialDim([2 1]))<stimulus.distribution.probability)*lumDiff);
+    otherwise
+        error('bad type')
+end
 
+%background
+Screen('FillRect', window, stimulus.background*WhiteIndex(window));
 % 11/14/08 - moved the make and draw to stimManager specific getexpertFrame b/c they might draw differently
 dynTex = Screen('MakeTexture', window, expertFrame,0,0,floatprecision);
-Screen('DrawTexture', window, dynTex,[],destRect,[],filtMode);
+Screen('DrawTexture', window, dynTex,[],stimLocation,[],filtMode);
 % clear dynTex from vram
 Screen('Close',dynTex);
 

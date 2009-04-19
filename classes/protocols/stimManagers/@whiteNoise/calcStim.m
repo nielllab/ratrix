@@ -28,18 +28,20 @@ end
 
 % ================================================================================
 % start calculating frames now
-meanLuminance = stimulus.meanLuminance;
-std = stimulus.std;
+
+
+
 background = stimulus.background;
 method = stimulus.method;
 requestedStimLocation = stimulus.requestedStimLocation;
 stixelSize = stimulus.stixelSize;
 searchSubspace = stimulus.searchSubspace;
 numFrames = stimulus.numFrames;
+distribution = stimulus.distribution;
 
 %calculate spatialDim
-spatialDim=ceil([requestedStimLocation(3)-requestedStimLocation(1) requestedStimLocation(4)-requestedStimLocation(2)]./stixelSize)
-
+spatialDim=ceil([requestedStimLocation(3)-requestedStimLocation(1) requestedStimLocation(4)-requestedStimLocation(2)]./stixelSize);
+ 
 % %if not evenly tiled, make the stim location slightly larger, to the nearest integer pixel size
 % reqCntr=[(requestedStimLocation(3)+requestedStimLocation(1))/2 (requestedStimLocation(4)+requestedStimLocation(2))/2]
 % reqSz=[requestedStimLocation(3)-requestedStimLocation(1) requestedStimLocation(4)-requestedStimLocation(2)]
@@ -131,8 +133,9 @@ details.strategy='expert';
 details.seedValues=stim.seedValues;
 details.spatialDim = spatialDim;
 details.stixelSize = stixelSize;
-details.std = stimulus.std;
-details.meanLuminance = meanLuminance;
+ %details.std = stimulus.std;  % in distribution now.
+ %details.meanLuminance = meanLuminance; % in distribution now.
+details.distribution = distribution;
 details.numFrames=numFrames;
 details.height=stim.height;
 details.width=stim.width;
@@ -142,5 +145,5 @@ details.width=stim.width;
 if strcmp(trialManagerClass,'nAFC') && details.correctionTrial
     text='correction trial!';
 else
-    text=sprintf('meanLuminance: %g',meanLuminance);
+    text='  '; %sprintf('meanLuminance: %g',meanLuminance);
 end

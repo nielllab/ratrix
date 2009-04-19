@@ -53,7 +53,7 @@ waveform='square';
 normalizationMethod='normalizeDiagonal';
 mean=0.5;
 numRepeats=3;
-scaleFactor             =0;
+%scaleFactor             =0;
 sfGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
     waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
@@ -136,7 +136,7 @@ ports=cellfun(@uint8,{1 3},'UniformOutput',false);
 
 %maxWidth               = 800; uncommenting these effects all stims below here which would be bad
 %maxHeight              = 600;
-scaleFactor            = 0;
+%scaleFactor            = 0;
 
 orNoise=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
@@ -208,7 +208,7 @@ receptiveFieldLocation = location; %as in annuli
 frequencies = [12 60 200];
 duration = 2;
 repetitions=2;
-scaleFactor=0;
+%scaleFactor=0;
 interTrialLuminance=0.5;
 biField = bipartiteField(receptiveFieldLocation,frequencies,duration,repetitions,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
@@ -220,17 +220,51 @@ std=gray*(2/3);
 searchSubspace=[1];
 background=gray;
 method='texOnPartOfScreen';
-stixelSize = [32,32];
+changeable=false;
+
+%fullField 
 stimLocation=[0,0,maxWidth,maxHeight];
-numFrames=1000;   %100 to test; 5*60*100=30000 for experiment
-% s = whiteNoise(meanLuminance,std,background,method,requestedStimLocation,stixelSize,searchSubspace,numFrames,
-%       maxWidth,maxHeight,scaleFactor,interTrialLuminance)
-wn = whiteNoise(mean,std,background,method,stimLocation,stixelSize,searchSubspace,numFrames,1280,1024,0,.5);
+numFrames=400;   %100 to test; 5*60*100=30000 for experiment
+stixelSize = [maxHeight maxWidth];
+ffgwn = whiteNoise({'gaussian',gray,std},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+ffbin = whiteNoise({'binary',0,1,.5},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
-numFrames=3000; 
-stixelSize = [maxWidth,maxHeight];
-ffwn = whiteNoise(mean,std,background,method,stimLocation,stixelSize,searchSubspace,numFrames,1280,1024,0,.5);
+%big grid - gaussian and many sparse types
+stixelSize = [32,32]; %[xPix yPix]
+gwn = whiteNoise({'gaussian',gray,std},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+bin = whiteNoise({'binary',0,1,.5},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+sparseness=0.05; %sparseness
+sparseBright=whiteNoise({'binary',0.5,1,sparseness},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+sparseDark=whiteNoise({'binary',0,0.5,1-sparseness},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+sparseBrighter=whiteNoise({'binary',0,1,sparseness},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
+% bars are black and white sparsely white like sparseBrighter
+barSize=stixelSize; barSize(1)=maxWidth;
+horizBars=whiteNoise({'binary',0,1,sparseness},background,method,stimLocation,barSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+barSize=stixelSize; barSize(2)=maxHeight;
+vertBars=whiteNoise({'binary',0,1,sparseness},background,method,stimLocation,barSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
+%changeable solid bars
+changeable=true;
+background=0;
+barSize=stixelSize; barSize(1)=maxWidth; stimLocation= [0 maxHeight 0 maxHeight]/2+[ 0 0 barSize] ;% put bar in center
+horizBar=whiteNoise({'binary',0,1,1},background,method,stimLocation,barSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+barSize=stixelSize; barSize(2)=maxHeight; stimLocation= [maxWidth 0 maxWidth 0 ]/2+[ 0 0 barSize] ;% put bar in center
+vertBar=whiteNoise({'binary',0,1,1},background,method,stimLocation,barSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
+%changeable small grid 
+background=0.5;
+frac=1/4; % fraction of the screen
+stimLocation=[maxWidth*(1-frac)/2,maxHeight*(1-frac)/2,maxWidth*(1+frac)/2,maxHeight*(1+frac)/2]; % in center
+boxSize=[maxWidth maxHeight]*frac;
+darkBox=whiteNoise({'binary',0,1,0},background,method,stimLocation,boxSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+brightBox=whiteNoise({'binary',0,1,1},background,method,stimLocation,boxSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+flickeringBox=whiteNoise({'binary',0,1,.5},background,method,stimLocation,boxSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+% has small pixels in limted spatial region... using mean background and BW stixels 
+localizedBin=whiteNoise({'binary',0,1,.5},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
+%toDo:
+% compute kinds:  temporal, spatial, vertBars, horizBars
 
 %% trial / sound / reinforcement managers
 
@@ -295,42 +329,61 @@ svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
 svnCheckMode='session';
 
 %common "search and characterization"
-ts{1} = trainingStep(afc, ffwn,        repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
+ts{1} = trainingStep(afc, ffgwn,        repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
 ts{2} = trainingStep(afc, crf,         numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %contrast response
 ts{3} = trainingStep(afc, flankersFF,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %flankers with giant target
-ts{4} = trainingStep(afc, wn,          rfIsGood,                  noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
+ts{4} = trainingStep(afc, sparseBright,   rfIsGood,                  noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
 ts{5} = trainingStep(afc, anGratings,  numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %gratings: annulus size
 ts{6} = trainingStep(afc, flankers,    numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %flankers
 ts{7} = trainingStep(afc, biField,     numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %bipartite field for X-Y classification
 ts{8} = trainingStep(afc, sfGratings,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: spatial frequency (should it be before annulus?)
 ts{9} = trainingStep(afc, orGratings,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: orientation
 
-ts{10}= trainingStep(afc, trf,         numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %temporal reponse
-ts{11}= trainingStep(afc, cntrGratings,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: contrast
-ts{12}= trainingStep(afc, gaussNoise,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
-ts{13}= trainingStep(afc, ffSearch,    numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %full field search
+%search tools
+ts{10}= trainingStep(afc, brightBox,   numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
+ts{11}= trainingStep(afc, horizBar,    numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
+ts{12}= trainingStep(afc, vertBar,     numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
+ts{13}= trainingStep(afc, flickeringBox,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode); %
+ts{14}= trainingStep(afc, localizedBin,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
+ts{15}= trainingStep(afc, bin,         numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
+ts{16}= trainingStep(afc, sparseBrighter,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode); %
+%sparseBright
+%sparseDark
+ts{17}= trainingStep(afc, horizBars,   numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %full field search
+ts{18}= trainingStep(afc, vertBars,         numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %temporal reponse
+ts{19}= trainingStep(afc, gwn,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: contrast
+ts{20}= trainingStep(afc, gaussNoise,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
+
+%ffgwn
+%ffbin
+%darkBox
+
+ts{21}= trainingStep(afc, ffSearch,    numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %full field search
+ts{22}= trainingStep(afc, trf,         numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %temporal reponse
+ts{23}= trainingStep(afc, cntrGratings,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: contrast
+ts{24}= trainingStep(afc, gaussNoise,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
+ts{25}= trainingStep(afc, ffSearch,    numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %full field search
 
 %common "acclimate a rat"
 %=setFlankerStimRewardAndTrialManager(prm, 'flanker go to side');
-ts{14}   = trainingStep(afc, goToSide, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %go to side
-ts{15}  = trainingStep(fd,  freeStim, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %stochastic free drinks
-ts{16}  = trainingStep(fd2, freeStim, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %free drinks
+ts{26}   = trainingStep(afc, goToSide, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %go to side
+ts{27}  = trainingStep(fd,  freeStim, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %stochastic free drinks
+ts{28}  = trainingStep(fd2, freeStim, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %free drinks
 
 %common "lots of data collection"
-ts{17} = trainingStep(afc, ffGauss,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %fullfieldFlicker Gaussian
-ts{18} = trainingStep(afc, hateren,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %hateren
+ts{29} = trainingStep(afc, ffGauss,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %fullfieldFlicker Gaussian
+ts{30} = trainingStep(afc, hateren,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %hateren
 
 
-ts{19} = trainingStep(afc, rptUnq,   repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %rpt/unq
-ts{20} = trainingStep(afc, orNoise,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %filteredNoise discrim
-ts{21} = trainingStep(ap,  binNoise, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %unfilteredNoise discrim
-
+ts{31} = trainingStep(afc, rptUnq,   repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %rpt/unq
+ts{32} = trainingStep(afc, orNoise,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %filteredNoise discrim
+ts{33} = trainingStep(ap,  binNoise, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %unfilteredNoise discrim
 
 %% make and set it
 
 
-p=protocol('practice phys',{ts{1:21}});
-stepNum=uint8(4);
+p=protocol('practice phys',{ts{1:33}});
+stepNum=uint8(10);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

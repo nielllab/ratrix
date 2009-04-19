@@ -29,20 +29,45 @@ if (ischar(stimulusDetails.strategy) && strcmp(stimulusDetails.strategy,'expert'
         (exist('fieldsInLUT','var') && ismember('stimDetails.strategy',fieldsInLUT) && strcmp(LUTlookup(sessionLUT,stimulusDetails.strategy),'expert'))
     seeds=stimulusDetails.seedValues;
     spatialDim = stimulusDetails.spatialDim;
+
+    
+ switch stimulus.distribution.type
+    case 'gaussian'
+        std = stimulusDetails.distribution.std;
+        meanLuminance = stimulusDetails.distribution.meanLuminance;
+    case 'binary'
+        p=stimulus.distribution.probability;
+        hiLoDiff=(stimulusDetails.distribution.hiVal-stimulusDetails.distribution.lowVal);
+        std=hiLoDiff*p*(1-p);
+        meanLuminance=(p*stimulusDetails.distribution.hiVal)+((1-p)*stimulusDetails.distribution.lowVal);
+    end
+else
+    %old convention prior to april 17th, 2009
+    stimulus.distribution.type='gaussian';
     std = stimulusDetails.std;
-    meanLuminance = stimulusDetails.meanLuminance;
+    std = stimulusDetails.meanLuminance;
+end
+
     height=stimulusDetails.height;
     width=stimulusDetails.width;
-    factor = width/spatialDim(1);
     
     %  stimData=zeros(height,width,length(seeds)); % method 1
-    stimData=nan(spatialDim(1),spatialDim(2),length(stimFrames)); % method 2
+    stimData=nan(spatialDim(2),spatialDim(1),length(stimFrames)); % method 2
     for i=1:length(stimFrames)
-        randn('state',seeds(mod(stimFrames(i)-1,length(seeds))+1)); % we only have enough seeds for a single repeat of whiteNoise; if numRepeats>1, need to modulo
+        
+        %recompute stim - note: all sha1ing would have to happen w/o whiteVal and round
         whiteVal=255;
-        stixels = round(whiteVal*(randn(spatialDim)*std+meanLuminance));
-        stixels(stixels>whiteVal)=whiteVal;
-        stixels(stixels<0)=0;
+        switch stimulus.distribution.type
+            case 'guassian'
+                % we only have enough seeds for a single repeat of whiteNoise; if numRepeats>1, need to modulo
+                randn('state',seeds(mod(stimFrames(i)-1,length(seeds))+1)); 
+                stixels = round(whiteVal*(randn(spatialDim([2 1]))*std+meanLuminance));
+                stixels(stixels>whiteVal)=whiteVal;
+                stixels(stixels<0)=0;
+            case 'binary'
+                rand('state',seeds(mod(stimFrames(i)-1,length(seeds))+1));
+                stixels = round(hiLoDiff+(double(rand(spatialDim([2 1]))>stimulus.distribution.probability)*stimulus.distribution.lowVal));
+        end
         
         %stixels=randn(spatialDim);  % for test only
         % =======================================================
@@ -61,7 +86,6 @@ if (ischar(stimulusDetails.strategy) && strcmp(stimulusDetails.strategy,'expert'
         % =======================================================
         % method 2 - leave stimData in stixel size
         stimData(:,:,i) = stixels;
-        
         
         % =======================================================
     end
@@ -258,11 +282,11 @@ if doSpatial
     [sigIndY sigIndX]=find(sigPixels~=0);
     
     
-        subplot(2,2,1)
+    subplot(2,2,1)
     imagesc(squeeze(analysisdata.cumulativeSTA(:,:,brightInd(3))),rng);
-    colormap(gray); colorbar;
-    hold on; plot(brightInd(2), brightInd(1),'bo')
-    hold on; plot(darkInd(2)  , darkInd(1),  'ro')
+    colorbar; %colormap(blueToRed(meanLuminanceStimulus,rng)); 
+    hold on; plot(brightInd(2), brightInd(1),'yo')
+    hold on; plot(darkInd(2)  , darkInd(1),  'yo')
     hold on; plot(bigIndX     , bigIndY,     'y.')
     hold on; plot(sigIndX     , sigIndY,     'y.','markerSize',1)
     xlabel(sprintf('cumulative (%d-%d)',min(analysisdata.cumulativeTrialNumbers),max(analysisdata.cumulativeTrialNumbers)))
@@ -271,9 +295,9 @@ if doSpatial
     
     subplot(2,2,2)
     hold off; imagesc(squeeze(STA(:,:,brightInd(3))),[min(STA(:)) max(STA(:))]);
-    hold on; plot(brightInd(2), brightInd(1),'bo')
-    hold on; plot(darkInd(2)  , darkInd(1),'ro')
-    colormap(gray); colorbar;
+    hold on; plot(brightInd(2), brightInd(1),'yo')
+    hold on; plot(darkInd(2)  , darkInd(1),'yo')
+    colorbar; %colormap(blueToRed(meanLuminanceStimulus,rng));
     fnplt(e1,1,'g'); fnplt(e2,1,'g'); fnplt(e3,1,'g'); % plot elipses
     xlabel(sprintf('this trial (%d)',analysisdata.trialNumber))
     
@@ -288,10 +312,10 @@ hold off; plot(timeWindowFrames([1 1])+1, [0 whiteVal],'k');
 hold on;  plot([1 ns],meanLuminance([1 1])*whiteVal,'k')
 plot([1:ns], analysisdata.singleTrialTemporalRecord, 'color',[.8 .8 1])
 
-fh=fill([1:ns fliplr([1:ns])]',[darkCI(:,1); flipud(darkCI(:,2))],'r'); set(fh,'edgeAlpha',0,'faceAlpha',.5)
-fh=fill([1:ns fliplr([1:ns])]',[brightCI(:,1); flipud(brightCI(:,2))],'b'); set(fh,'edgeAlpha',0,'faceAlpha',.5)
-plot([1:ns], darkSignal(:)','r')
-plot([1:ns], brightSignal(:)','b')
+fh=fill([1:ns fliplr([1:ns])]',[darkCI(:,1); flipud(darkCI(:,2))],'b'); set(fh,'edgeAlpha',0,'faceAlpha',.5)
+fh=fill([1:ns fliplr([1:ns])]',[brightCI(:,1); flipud(brightCI(:,2))],'r'); set(fh,'edgeAlpha',0,'faceAlpha',.5)
+plot([1:ns], darkSignal(:)','b')
+plot([1:ns], brightSignal(:)','r')
 
 peakFrame=find(brightSignal==max(brightSignal(:)));
 timeInds=[1 peakFrame timeWindowFrames(1)+1 size(STA,3)];
@@ -303,6 +327,7 @@ xlabel(sprintf('msec -- cumulative STA(%d-%d)',min(analysisdata.cumulativeTrialN
 if doSpatial
     subplot(2,2,4)
     montage(reshape(analysisdata.cumulativeSTA,[size(STA,1) size(STA,2) 1 size(STA,3) ] ),'DisplayRange',rng)
+    colormap(blueToRed(meanLuminanceStimulus,[0 255]));
     % %% spatial signal (all)
     % for i=1:
     % subplot(4,n,2*n+i)

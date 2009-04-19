@@ -409,3 +409,5 @@ chronux/spectral_analysis/pointtimes/mtspecgrampt.m -text
 chronux/spectral_analysis/pointtimes/cohgrampt.m -text
 chronux/spectral_analysis/pointtimes/padNaN.m -text
 chronux/spectral_analysis/chronux.m -text
+pmm/addSTAEvents.m -text
+pmm/continualAnalysisSTA.m -text

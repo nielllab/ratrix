@@ -38,7 +38,7 @@ stixelSize = stimulus.stixelSize;
 searchSubspace = stimulus.searchSubspace;
 numFrames = stimulus.numFrames;
 distribution = stimulus.distribution;
-
+patternType=stimulus.patternType;
 %calculate spatialDim
 spatialDim=stimulus.spatialDim;% =ceil([requestedStimLocation(3)-requestedStimLocation(1) requestedStimLocation(4)-requestedStimLocation(2)]./stixelSize);
  

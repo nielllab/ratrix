@@ -36,9 +36,16 @@ if stimulus.changeable
         [a,b]=WindowCenter(window);
         %shift stimulus away from predefined location by the amount that the mouse is away from center
         expertCache.positionShift=[mouseX-a mouseY-b];
+        stimLocation=stimLocation+expertCache.positionShift([1 2 1 2]);
+
+        %only send dynamic details on frames that change positions by mouse down
+        dynamicDetails.stimLocation=stimLocation;
+        dynamicDetails.sendDuringRealtimeloop=true;
+    else
+        %sustain the moved stim location regardless of mouse down
+        stimLocation=stimLocation+expertCache.positionShift([1 2 1 2]);
     end
-    stimLocation=stimLocation+expertCache.positionShift([1 2 1 2]);
-    dynamicDetails.stimLocation=stimLocation;
+
 end
 
 % set randn/rand to the current frame's precalculated seed value -- 

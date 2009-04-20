@@ -547,7 +547,16 @@ while ~done && ~quit;
                         = drawExpertFrame(stimManager,stim,i,phaseStartTime,window,textLabel,...
                         destRect,filtMode,expertCache,ifi,scheduledFrameNum,tm.dropFrames,dontclear);
                     if ~isempty(dynamicDetails)
-                        phaseRecords(phaseNum).dynamicDetails{end+1}=dynamicDetails; % dynamicDetails better specify what frame it is b/c the record will not save empty details
+                        % dynamicDetails better specify what frame it is b/c the record will not save empty details
+                        dynamicDetails.scheduledFrameNum=scheduledFrameNum;
+                        dynamicDetails.displayedFrameNum=i;
+                        phaseRecords(phaseNum).dynamicDetails{end+1}=dynamicDetails; 
+                        if 0 % not yet ... if dynamicDetails.sendDuringRealtimeloop==true & ~isempty(getDatanet(station))
+                            commands = [];
+                            commands.cmd = datanet_constants.stimToDataCommands.S_SAVE_DYNAMIC_DETAIL_CMD; % does not exist yet
+                            commands.arg = dynamicDetails;
+                            [junk, gotAck] = sendCommandAndWaitForAck(getDatanet(station), getCon(getDatanet(station)), commands);
+                        end
                     end
                 otherwise
                     error('unrecognized strategy')

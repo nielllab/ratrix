@@ -173,11 +173,11 @@ switch nargin
                 switch varargin{1}
                     case 'def'
                         %do nothing
-                    case 'phys' % not fixed
+                    case 'phys' 
 
                         p.flankerOffset=3;
                         p.flankerContrast=1;
-                        p.goLeftContrast=.2;
+                        p.goLeftContrast=1;
                         p.goRightContrast=1;
                         p.stdGaussMask=1/16;
                         p.pixPerCycs=32;
@@ -197,7 +197,7 @@ switch nargin
                         p.dynamicSweep.sweepMode={'ordered'};
                         p.dynamicSweep.sweptValues=[];
                         p.dynamicSweep.sweptParameters={'targetOrientations','flankerOrientations','flankerPosAngle','phase'};% 'flankerOrientations'}%,'flankerOffset','flankerPosAngle'};
-                        p.dynamicSweep.numRepeats=4;
+                        p.dynamicSweep.numRepeats=20;
                        
                     case 'physFullFieldTarget'
                         p.stdGaussMask=Inf;

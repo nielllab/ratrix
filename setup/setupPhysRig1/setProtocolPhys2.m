@@ -235,7 +235,7 @@ changeable=false;
 
 %fullField 
 stimLocation=[0,0,maxWidth,maxHeight];
-numFrames=400;   %100 to test; 5*60*100=30000 for experiment
+numFrames=3000;   %100 to test; 5*60*100=30000 for experiment
 stixelSize = [maxHeight maxWidth];
 ffgwn = whiteNoise({'gaussian',gray,std},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 ffbin = whiteNoise({'binary',0,1,.5},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
@@ -340,11 +340,11 @@ svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
 svnCheckMode='session';
 
 %common "search and characterization"
-ts{1} = trainingStep(afc, ffwn,        repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
-ts{2} = trainingStep(afc, ffwn,        numTrialsDoneCriterion(3),      noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
+ts{1} = trainingStep(afc, ffgwn,        repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
+ts{2} = trainingStep(afc, ffgwn,        numTrialsDoneCriterion(3),      noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
 %ts{2} = trainingStep(fd2, crf,        numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %contrast response
 ts{3} = trainingStep(afc, flankersFF,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %flankers with giant target
-ts{4} = trainingStep(afc, wn,          repeatIndefinitely(),                  noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
+ts{4} = trainingStep(afc, gwn,          repeatIndefinitely(),                  noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
 ts{5} = trainingStep(afc, anGratings,  numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %gratings: annulus size
 ts{6} = trainingStep(afc, flankers,    numTrialsDoneCriterion(5), noTimeOff(), svnRev, svnCheckMode);  %flankers
 ts{7} = trainingStep(afc, biField,     repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %bipartite field for X-Y classification
@@ -365,13 +365,14 @@ ts{16}= trainingStep(afc, sparseBrighter,numTrialsDoneCriterion(1), noTimeOff(),
 %sparseDark
 ts{17}= trainingStep(afc, horizBars,   numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %full field search
 ts{18}= trainingStep(afc, vertBars,    numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %temporal reponse
-ts{19}= trainingStep(afc, gwn,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: contrast
-ts{20}= trainingStep(afc, gaussNoise,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
+ts{19}= trainingStep(afc, gwn,         numTrialsDoneCriterion(4), noTimeOff(), svnRev, svnCheckMode);  %gratings: contrast
+
 
 %ffgwn
 %ffbin
 %darkBox
 
+ts{20}= trainingStep(afc, gaussNoise,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
 ts{21}= trainingStep(afc, ffSearch,    numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %full field search
 ts{22}= trainingStep(afc, trf,         numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %temporal reponse
 ts{23}= trainingStep(afc, cntrGratings,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: contrast
@@ -399,7 +400,7 @@ ts{34} = trainingStep(afc, dynGrating, repeatIndefinitely(), noTimeOff(), svnRev
 
 
 p=protocol('practice phys',{ts{1:34}});
-stepNum=uint8(4);
+stepNum=uint8(10);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

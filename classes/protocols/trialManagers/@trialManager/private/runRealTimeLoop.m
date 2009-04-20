@@ -260,7 +260,7 @@ if ~isempty(eyeTracker)
 
 
     if isa(eyeTracker,'eyeLinkTracker')
-        eyeData=nan(framesPerAllocationChunk,40);
+        eyeData=nan(framesPerAllocationChunk,43);
         eyeDataFrameInds=nan(framesPerAllocationChunk,1);
         gaze=nan(framesPerAllocationChunk,2);
     else
@@ -303,9 +303,11 @@ end
 
 if window>0
     % draw interTrialLuminance first
-    interTrialTex=Screen('MakeTexture', window, interTrialLuminance,0,0,interTrialPrecision); %need floatprecision=0 for remotedesktop
-    Screen('DrawTexture', window, interTrialTex,phaseData{end}.destRect, [], filtMode);
-    [timestamps.vbl sos startTime]=Screen('Flip',window);
+    %!!!DONT COMMIT !!!!!!!!!!!!!!!
+    
+%     interTrialTex=Screen('MakeTexture', window, interTrialLuminance,0,0,interTrialPrecision); %need floatprecision=0 for remotedesktop
+%     Screen('DrawTexture', window, interTrialTex,phaseData{end}.destRect, [], filtMode);
+     [timestamps.vbl sos startTime]=Screen('Flip',window);
 end
 
 timestamps.lastFrameTime=GetSecs;
@@ -626,23 +628,25 @@ while ~done && ~quit;
 
         % change to get multiple samples (as many as are available)
         [gazeEstimates samples] = getSamples(eyeTracker);
-        % gazeEstimates should be a Nx2 matrix, samples should be Nx40 matrix, totalFrameNum is the frame number we are on
+        % gazeEstimates should be a Nx2 matrix, samples should be Nx43 matrix, totalFrameNum is the frame number we are on
         numEyeTrackerSamples = size(samples,1);
 
-        if (totalEyeDataInd+numEyeTrackerSamples)>length(eyeData) %if samples from this frame make us exceed size of eyeData
-            %  allocateMore
-            newEnd=length(eyeData)+ framesPerAllocationChunk;
-            %             disp(sprintf('did allocation to eyeTrack data; up to %d samples enabled',newEnd))
-            eyeData(end+1:newEnd,:)=nan;
-            eyeDataFrameInds(end+1:newEnd,:)=nan;
-            gaze(end+1:newEnd,:)=nan;
+        if numEyeTrackerSamples > 0
+            if (totalEyeDataInd+numEyeTrackerSamples)>length(eyeData) %if samples from this frame make us exceed size of eyeData
+                %  allocateMore
+                newEnd=length(eyeData)+ framesPerAllocationChunk;
+                %             disp(sprintf('did allocation to eyeTrack data; up to %d samples enabled',newEnd))
+                eyeData(end+1:newEnd,:)=nan;
+                eyeDataFrameInds(end+1:newEnd,:)=nan;
+                gaze(end+1:newEnd,:)=nan;
+            end
+
+            gaze(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = gazeEstimates;
+            eyeData(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = samples;
+            eyeDataFrameInds(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = totalFrameNum;
+            totalEyeDataInd = totalEyeDataInd + numEyeTrackerSamples;
         end
 
-        gaze(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = gazeEstimates;
-        eyeData(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = samples;
-        eyeDataFrameInds(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = totalFrameNum;
-
-        totalEyeDataInd = totalEyeDataInd + numEyeTrackerSamples;
     end
 
     timestamps.eyeTrackerDone=GetSecs;

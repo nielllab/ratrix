@@ -12,6 +12,8 @@ s.stixelSize = [];
 s.searchSubspace = [];
 s.numFrames = [];
 s.changeable = [];
+s.spatialDim=[];
+s.patternType=[];
 s.LUT=[];
 s.LUTbits=0;
 
@@ -136,8 +138,24 @@ switch nargin
             error('changeable must be a logicial');
         end
         
-        s = class(s,'whiteNoise',stimManager(varargin{9},varargin{10},varargin{11},varargin{12}));
+        %calculate spatialDim
+        s.spatialDim=ceil([diff(s.requestedStimLocation([1 3])) diff(s.requestedStimLocation([2 4]))]./s.stixelSize);
         
+        %group into pattern type, using spatial dim
+        if all(s.spatialDim==1)
+            s.patternType='temporal';
+        elseif s.spatialDim(1)==1
+            s.patternType='horizontalBar';
+        elseif s.spatialDim(2)==1
+            s.patternType='verticalBar';
+        elseif all(s.spatialDim>1)
+            s.patternType='grid';
+        else
+            s.spatialDim
+            error('should never happen')
+        end
+        
+        s = class(s,'whiteNoise',stimManager(varargin{9},varargin{10},varargin{11},varargin{12}));
     otherwise
         error('invalid number of input arguments');
 end

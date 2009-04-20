@@ -55,7 +55,7 @@ if isa(stimulus.receptiveFieldLocation,'RFestimator')
     end
     partition=getCenter(stimulus.receptiveFieldLocation,subjectID);
 else
-    partition=stimulus.location;
+    partition=stimulus.receptiveFieldLocation;
 end
 
 % calculate the number of pixels horizontally on each side (reduced using gcd)

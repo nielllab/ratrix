@@ -64,6 +64,8 @@ switch nargin
             if stimMgrOKForTrialMgr(t.stimManager,t.trialManager)
                 t = class(t,'trainingStep');
             else
+                class(t.stimManager)
+                class(t.trialManager)
                 error('stimManager doesn''t know about this kind of trialManager')
             end
 

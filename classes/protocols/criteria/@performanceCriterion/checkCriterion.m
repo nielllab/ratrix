@@ -66,12 +66,7 @@ if graduate
     beep;
     waitsecs(.2);
     beep;
-    waitsecs(1);
-    [junk stepNum]=getProtocolAndStep(subject);
-    for i=1:stepNum+1
-        beep;
-        waitsecs(.4);
-    end
+
     if (nargout > 1)
         details.date = now;
         details.criteria = c;

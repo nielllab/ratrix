@@ -14,12 +14,13 @@ else
     getRecordOfType='spatialWhiteNoise';
 end
 
-
 %Failure mode: if you get a RFestimate from a previous run... force it to be this session
-trialsThisSession=trialRecords([trialRecords.sessionNumber]==trialRecords(end).sessionNumber).trialNumber;
-filter={'lastNTrials',length(trialsThisSession)};
+trialsThisSession=sum([trialRecords.sessionNumber]==trialRecords(end).sessionNumber);
+filter={'lastNTrials',trialsThisSession-1};
+% sca
+% keyboard
 %filter={'dateRange',[now-100 now]}; % only for testing
-[data success]=getPhysRecords(fullfile(c.dataRecordsPath,getID(subject)),filter,{'analysis','stim'},getRecordOfType);
+[data success]=getPhysRecords(fullfile(c.dataRecordsPath,getID(subject)),filter,{'stim','analysis'},getRecordOfType);
 if ~success
     warning('no analysis records found - will not be able to graduate');
 else
@@ -59,10 +60,4 @@ if graduate
     beep;
     waitsecs(.2);
     beep;
-    waitsecs(1);
-    [junk stepNum]=getProtocolAndStep(subject);
-    for i=1:stepNum+1
-        beep;
-        waitsecs(.4);
-    end
 end

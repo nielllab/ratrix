@@ -40,7 +40,7 @@ numFrames = stimulus.numFrames;
 distribution = stimulus.distribution;
 
 %calculate spatialDim
-spatialDim=ceil([requestedStimLocation(3)-requestedStimLocation(1) requestedStimLocation(4)-requestedStimLocation(2)]./stixelSize);
+spatialDim=stimulus.spatialDim;% =ceil([requestedStimLocation(3)-requestedStimLocation(1) requestedStimLocation(4)-requestedStimLocation(2)]./stixelSize);
  
 % %if not evenly tiled, make the stim location slightly larger, to the nearest integer pixel size
 % reqCntr=[(requestedStimLocation(3)+requestedStimLocation(1))/2 (requestedStimLocation(4)+requestedStimLocation(2))/2]
@@ -133,6 +133,7 @@ details.strategy='expert';
 details.seedValues=stim.seedValues;
 details.spatialDim = spatialDim;
 details.stixelSize = stixelSize;
+details.patternType = patternType;
  %details.std = stimulus.std;  % in distribution now.
  %details.meanLuminance = meanLuminance; % in distribution now.
 details.distribution = distribution;
@@ -145,5 +146,5 @@ details.width=stim.width;
 if strcmp(trialManagerClass,'nAFC') && details.correctionTrial
     text='correction trial!';
 else
-    text='  '; %sprintf('meanLuminance: %g',meanLuminance);
+    text=sprintf('whiteNoise: %s',stimulus.patternType);
 end

@@ -111,6 +111,8 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
                     end
                 end
 
+
+                
                 while keepWorking
                     trialNum=trialNum+1;
                     [subject r keepWorking secsRemainingTilStateFlip trialRecords s]= ...

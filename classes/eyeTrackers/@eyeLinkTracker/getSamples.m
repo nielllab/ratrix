@@ -29,6 +29,8 @@ if ~ismember(et.eyeUsed,[el.LEFT_EYE el.RIGHT_EYE])
     error('bad eye')
 end
 
+gazes=[]; %initialize in case all samples are lost data
+
 justGetLatestSample=false;
 
 if justGetLatestSample
@@ -110,8 +112,8 @@ else
             fprintf('got %d lost data events\n',sum(losts))
         end
 
-        gazes=getGazeEstimate(et,samples(~losts,[34 35]),samples(~losts,[32 33])); %this can have nans in it if some of the raw values are the MISSING_DATA code
-
+        gazes=getGazeEstimate(et,samples([34 35],~losts)',samples([32 33],~losts)'); %this can have nans in it if some of the raw values are the MISSING_DATA code
+        
         if numGood>0
             switch et.eyeUsed
                 case el.LEFT_EYE

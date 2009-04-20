@@ -8,8 +8,8 @@ indexPulse=false;
 floatprecision=1;
 
 %initialize first frame
-if scheduledFrameNum==1
-    if 1%stimulus.changeable
+if scheduledFrameNum==1 || i<2
+    if stimulus.changeable
         %start with mouse in the center
         [a,b]=WindowCenter(window);
         SetMouse(a,b,window);
@@ -41,11 +41,6 @@ if stimulus.changeable
     dynamicDetails.stimLocation=stimLocation;
 end
 
-stixelSize = stimulus.stixelSize;
-
-%calculate spatialDim
-spatialDim=ceil([diff(stimulus.requestedStimLocation([1 3])) diff(stimulus.requestedStimLocation([2 4]))]./stixelSize);
-
 % set randn/rand to the current frame's precalculated seed value -- 
 % make this a method so its always in sync with analysis ... save sha1?
 switch stimulus.distribution.type
@@ -53,13 +48,13 @@ switch stimulus.distribution.type
         meanLuminance = stimulus.distribution.meanLuminance;
         std = stimulus.distribution.std;
         randn('state',stim.seedValues(i));
-        expertFrame = randn(spatialDim([2 1]))*1*std+meanLuminance;
+        expertFrame = randn(stimulus.spatialDim([2 1]))*1*std+meanLuminance;
         expertFrame(expertFrame<0) = 0;
         expertFrame(expertFrame>1) = 1;
     case 'binary'
         rand('state',stim.seedValues(i));
         lumDiff=stimulus.distribution.hiVal-stimulus.distribution.lowVal;
-        expertFrame = stimulus.distribution.lowVal+(double(rand(spatialDim([2 1]))<stimulus.distribution.probability)*lumDiff);
+        expertFrame = stimulus.distribution.lowVal+(double(rand(stimulus.spatialDim([2 1]))<stimulus.distribution.probability)*lumDiff);
     otherwise
         error('bad type')
 end

@@ -111,7 +111,7 @@ function s=station(varargin)
 					class(in.portSpec)
 					if isstruct(in.portSpec)
 						fields(in.portSpec)
-					end
+                    end
 					error('portSpec must be scalar integer >0 or a parallel port struct')
 				end
 			else

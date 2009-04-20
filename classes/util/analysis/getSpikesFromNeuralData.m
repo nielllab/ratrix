@@ -74,7 +74,7 @@ switch upper(spikeDetectionMethod)
         if isfield(spikeDetectionParams, 'Hd')
             Hd = spikeDetectionParams.Hd;
         else
-            % default to bandpass 30Hz - 300Hz
+            % default to bandpass 300Hz - 3000Hz
             n = 4;
             Wn = [300 3000]/(spikeDetectionParams.samplingFreq/2);
             [b,a] = butter(n,Wn);
@@ -432,7 +432,6 @@ end
 
 if 1 % view plots (for testing)
     
-
     whichSpikes=find(assignedClusters~=999);
     whichNoise=find(assignedClusters==999);  % i think o sort only... need to be specific to noise clouds in other detection methods
     candTimes=find(spikes);

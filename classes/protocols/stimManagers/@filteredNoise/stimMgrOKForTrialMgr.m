@@ -1,9 +1,7 @@
 function out=stimMgrOKForTrialMgr(sm,tm)
 if isa(tm,'trialManager')
     switch class(tm)
-        case {'nAFC'}
-            out=true;
-        case ('autopilot')
+        case {'nAFC','autopilot','freeDrinks'}
             out=true;
         otherwise
             out=false;

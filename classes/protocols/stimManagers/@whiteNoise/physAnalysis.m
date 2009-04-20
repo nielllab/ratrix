@@ -30,69 +30,74 @@ if (ischar(stimulusDetails.strategy) && strcmp(stimulusDetails.strategy,'expert'
     seeds=stimulusDetails.seedValues;
     spatialDim = stimulusDetails.spatialDim;
 
-    
- switch stimulus.distribution.type
-    case 'gaussian'
-        std = stimulusDetails.distribution.std;
-        meanLuminance = stimulusDetails.distribution.meanLuminance;
-    case 'binary'
-        p=stimulus.distribution.probability;
-        hiLoDiff=(stimulusDetails.distribution.hiVal-stimulusDetails.distribution.lowVal);
-        std=hiLoDiff*p*(1-p);
-        meanLuminance=(p*stimulusDetails.distribution.hiVal)+((1-p)*stimulusDetails.distribution.lowVal);
+    if isfield(stimulusDetails,'distribution')
+        switch stimulusDetails.distribution.type
+            case 'gaussian'
+                std = stimulusDetails.distribution.std;
+                meanLuminance = stimulusDetails.distribution.meanLuminance;
+            case 'binary'
+                p=stimulusDetails.distribution.probability;
+                hiLoDiff=(stimulusDetails.distribution.hiVal-stimulusDetails.distribution.lowVal);
+                std=hiLoDiff*p*(1-p);
+                meanLuminance=(p*stimulusDetails.distribution.hiVal)+((1-p)*stimulusDetails.distribution.lowVal);
+        end
+    else
+        %old convention prior to april 17th, 2009
+        stimulusDetails.distribution.type='gaussian';
+        std = stimulusDetails.std;
+        meanLuminance = stimulusDetails.meanLuminance;
     end
-else
-    %old convention prior to april 17th, 2009
-    stimulus.distribution.type='gaussian';
-    std = stimulusDetails.std;
-    std = stimulusDetails.meanLuminance;
 end
 
-    height=stimulusDetails.height;
-    width=stimulusDetails.width;
-    
-    %  stimData=zeros(height,width,length(seeds)); % method 1
-    stimData=nan(spatialDim(2),spatialDim(1),length(stimFrames)); % method 2
-    for i=1:length(stimFrames)
-        
-        %recompute stim - note: all sha1ing would have to happen w/o whiteVal and round
-        whiteVal=255;
-        switch stimulus.distribution.type
-            case 'guassian'
-                % we only have enough seeds for a single repeat of whiteNoise; if numRepeats>1, need to modulo
-                randn('state',seeds(mod(stimFrames(i)-1,length(seeds))+1)); 
-                stixels = round(whiteVal*(randn(spatialDim([2 1]))*std+meanLuminance));
-                stixels(stixels>whiteVal)=whiteVal;
-                stixels(stixels<0)=0;
-            case 'binary'
-                rand('state',seeds(mod(stimFrames(i)-1,length(seeds))+1));
-                stixels = round(hiLoDiff+(double(rand(spatialDim([2 1]))>stimulus.distribution.probability)*stimulus.distribution.lowVal));
-        end
-        
-        %stixels=randn(spatialDim);  % for test only
-        % =======================================================
-        % method 1 - resize the movie frame to full pixel size
-        % for each stixel row, expand it to a full pixel row
-        %                         for stRow=1:size(stixels,1)
-        %                             pxRow=[];
-        %                             for stCol=1:size(stixels,2) % for each column stixel, repmat it to width/spatialDim
-        %                                 pxRow(end+1:end+factor) = repmat(stixels(stRow,stCol), [1 factor]);
-        %                             end
-        %                             % now repmat pxRow vertically in stimData
-        %                             stimData(factor*(stRow-1)+1:factor*stRow,:,i) = repmat(pxRow, [factor 1]);
-        %                         end
-        %                         % reset variables
-        %                         pxRow=[];
-        % =======================================================
-        % method 2 - leave stimData in stixel size
-        stimData(:,:,i) = stixels;
-        
-        % =======================================================
+height=stimulusDetails.height;
+width=stimulusDetails.width;
+
+%  stimData=zeros(height,width,length(seeds)); % method 1
+stimData=nan(spatialDim(2),spatialDim(1),length(stimFrames)); % method 2
+for i=1:length(stimFrames)
+
+    %recompute stim - note: all sha1ing would have to happen w/o whiteVal and round
+    whiteVal=255;
+    switch stimulusDetails.distribution.type
+        case 'gaussian'
+            % we only have enough seeds for a single repeat of whiteNoise; if numRepeats>1, need to modulo
+            %randn('state',seeds(mod(stimFrames(i)-1,length(seeds))+1));
+            randn('state',seeds(stimFrames(i)));
+            stixels = round(whiteVal*(randn(spatialDim([2 1]))*std+meanLuminance));
+            stixels(stixels>whiteVal)=whiteVal;
+            stixels(stixels<0)=0;
+        case 'binary'
+            rand('state',seeds(mod(stimFrames(i)-1,length(seeds))+1));
+            stixels = round(whiteVal* (stimulusDetails.distribution.lowVal+(double(rand(spatialDim([2 1]))<stimulusDetails.distribution.probability)*hiLoDiff)));
+        otherwise
+            error('never')
     end
-    if any(isnan(stimData))
-        error('missed a frame in reconstruction')
-    end
+
+    %stixels=randn(spatialDim);  % for test only
+    % =======================================================
+    % method 1 - resize the movie frame to full pixel size
+    % for each stixel row, expand it to a full pixel row
+    %                         for stRow=1:size(stixels,1)
+    %                             pxRow=[];
+    %                             for stCol=1:size(stixels,2) % for each column stixel, repmat it to width/spatialDim
+    %                                 pxRow(end+1:end+factor) = repmat(stixels(stRow,stCol), [1 factor]);
+    %                             end
+    %                             % now repmat pxRow vertically in stimData
+    %                             stimData(factor*(stRow-1)+1:factor*stRow,:,i) = repmat(pxRow, [factor 1]);
+    %                         end
+    %                         % reset variables
+    %                         pxRow=[];
+    % =======================================================
+    % method 2 - leave stimData in stixel size
+    stimData(:,:,i) = stixels;
+
+    % =======================================================
 end
+
+if any(isnan(stimData))
+    error('missed a frame in reconstruction')
+end
+
 
 % refreshRate - try to retrieve from neuralRecord (passed from stim computer)
 if isfield(parameters, 'refreshRate')
@@ -114,7 +119,7 @@ end
 %CHOOSE CLUSTER
 spikes=spikeData.spikes; %all waveforms
 waveInds=find(spikes); % location of all waveforms
-if isstruct(spikeData.spikeDetails) && ismember({'processedClusters'},fields(spikeData.spikeDetails)) 
+if isstruct(spikeData.spikeDetails) && ismember({'processedClusters'},fields(spikeData.spikeDetails))
     thisCluster=spikeData.spikeDetails.processedClusters==1;
 else
     thisCluster=logical(ones(size(waveInds)));
@@ -138,7 +143,7 @@ timeWindowFrames=ceil(timeWindowMs*(refreshRate/1000));
 if ~isempty(eyeData)
     [px py crx cry]=getPxyCRxy(eyeData);
     eyeSig=[crx-px cry-py];
-    
+
     if length(unique(eyeSig(:,1)))>10 % if at least 10 x-positions
         %do stuff
         density=hist3(eyeSig);
@@ -156,7 +161,7 @@ numSpikes = sum(spikeCount);
 triggerInd = 1;
 % triggers = zeros(stim_width, stim_height, # of window frames per spike, number of spikes)
 %initialize trigger with mean values for temporal border padding
-meanValue=whiteVal*stimulusDetails.meanLuminance; 
+meanValue=whiteVal*meanLuminance;
 triggers=meanValue(ones(size(stimData,1),size(stimData,2),sum(timeWindowFrames)+1,numSpikes)); % +1 is for the frame that is on the spike
 for i=find(spikeCount>0) % for each index that has spikes
     %every frame with a spike count, gets included... it is multiplied by the number of spikes in that window
@@ -186,10 +191,10 @@ catch ex
 end
 doSpatial=~(size(STA,1)==1 & size(STA,2)==1); % if spatial dimentions exist
 
-if doSTC
+if doSTC & strcmp(stimulusDetails.distribution.type,'gaussian') % - not allowed on binary w/o adjustment
     st=cumprod(size(triggers));
     if ~doSpatial
-        figure(min(analysisdata.cumulativeTrialNumbers)) 
+        figure(min(analysisdata.cumulativeTrialNumbers))
         subplot(1,2,2)
         t=shiftDim(triggers)';
         sta1=(mean(t)-128);
@@ -215,11 +220,13 @@ analysisdata.STV = STV;
 analysisdata.numSpikes = numSpikes;
 analysisdata.trialNumber=parameters.trialNumber;
 % if the cumulative values don't exist (first analysis)
-if ~isfield(analysisdata, 'cumulativeSTA')  || ~all(size(STA)==size(analysisdata.cumulativeSTA)) %first trial through with these parameters
+if ~isfield(analysisdata, 'cumulativeSTA')  || hasNewParameters(stimManager,analysisdata,stimulusDetails) %first trial through with these parameters
+
     analysisdata.cumulativeSTA = STA;
     analysisdata.cumulativeSTV = STV;
     analysisdata.cumulativeNumSpikes = analysisdata.numSpikes;
     analysisdata.cumulativeTrialNumbers=parameters.trialNumber;
+    analysisdata.distribution=stimulusDetails.distribution;
     analysisdata.singleTrialTemporalRecord=[];
     addSingleTrial=true;
 elseif ~ismember(parameters.trialNumber,analysisdata.cumulativeTrialNumbers) %only for new trials
@@ -232,9 +239,9 @@ elseif ~ismember(parameters.trialNumber,analysisdata.cumulativeTrialNumbers) %on
     %then increment the cumulative count
     analysisdata.cumulativeNumSpikes = analysisdata.cumulativeNumSpikes + analysisdata.numSpikes;
     analysisdata.cumulativeTrialNumbers(end+1)=parameters.trialNumber;
-    
+
     addSingleTrial=true;
-    
+
 else % repeat sweep through same trial
     %do nothing
     addSingleTrial=false;
@@ -260,8 +267,8 @@ set(gcf,'position',[100 400 800 700])
 
 % %% spatial signal (best via bright)
 if doSpatial
-    
-    
+
+
     %fit model to best spatial
     stdThresh=1;
     [STAenvelope STAparams] =fitGaussianEnvelopeToImage(analysisdata.cumulativeSTA(:,:,brightInd(3)),stdThresh,false,false,false);
@@ -272,27 +279,33 @@ if doSpatial
     e1 = fncmb(fncmb(rsmak('circle'),[stdx*1 0;0 stdy*1]),[cx;cy]);
     e2 = fncmb(fncmb(rsmak('circle'),[stdx*2 0;0 stdy*2]),[cx;cy]);
     e3 = fncmb(fncmb(rsmak('circle'),[stdx*3 0;0 stdy*3]),[cx;cy]);
-    
-    
+
+
     %get significant pixels and denoised spots
-    stdStimulus = stimulusDetails.std*whiteVal;
-    meanLuminanceStimulus = stimulusDetails.meanLuminance*whiteVal;
+      switch stimulusDetails.distribution.type
+        case 'gaussian'
+             stdStimulus = std*whiteVal;
+        case 'binary'
+            stdStimulus = std*whiteVal*100; % somthing very large to prevent false positives... need to figure it out analytically.. maybe use different function
+            %std=hiLoDiff*p*(1-p);
+    end
+    meanLuminanceStimulus = meanLuminance*whiteVal;
     [bigSpots sigPixels]=getSignificantSTASpots(analysisdata.cumulativeSTA(:,:,brightInd(3)),analysisdata.cumulativeNumSpikes,meanLuminanceStimulus,stdStimulus,ones(3),3,0.05);
     [bigIndY bigIndX]=find(bigSpots~=0);
     [sigIndY sigIndX]=find(sigPixels~=0);
-    
-    
+
+
     subplot(2,2,1)
     imagesc(squeeze(analysisdata.cumulativeSTA(:,:,brightInd(3))),rng);
-    colorbar; %colormap(blueToRed(meanLuminanceStimulus,rng)); 
+    colorbar; %colormap(blueToRed(meanLuminanceStimulus,rng));
     hold on; plot(brightInd(2), brightInd(1),'yo')
     hold on; plot(darkInd(2)  , darkInd(1),  'yo')
     hold on; plot(bigIndX     , bigIndY,     'y.')
     hold on; plot(sigIndX     , sigIndY,     'y.','markerSize',1)
-    xlabel(sprintf('cumulative (%d-%d)',min(analysisdata.cumulativeTrialNumbers),max(analysisdata.cumulativeTrialNumbers)))
+    xlabel(sprintf('cumulative %s (%d-%d)',stimulusDetails.distribution.type,min(analysisdata.cumulativeTrialNumbers),max(analysisdata.cumulativeTrialNumbers)))
     fnplt(e1,1,'g'); fnplt(e2,1,'g'); fnplt(e3,1,'g'); % plot elipses
-        
-    
+
+
     subplot(2,2,2)
     hold off; imagesc(squeeze(STA(:,:,brightInd(3))),[min(STA(:)) max(STA(:))]);
     hold on; plot(brightInd(2), brightInd(1),'yo')
@@ -300,10 +313,10 @@ if doSpatial
     colorbar; %colormap(blueToRed(meanLuminanceStimulus,rng));
     fnplt(e1,1,'g'); fnplt(e2,1,'g'); fnplt(e3,1,'g'); % plot elipses
     xlabel(sprintf('this trial (%d)',analysisdata.trialNumber))
-    
+
     subplot(2,2,3)
-    
-    
+
+
 end
 
 timeMs=linspace(-timeWindowMs(1),timeWindowMs(2),size(STA,3));
@@ -318,7 +331,9 @@ plot([1:ns], darkSignal(:)','b')
 plot([1:ns], brightSignal(:)','r')
 
 peakFrame=find(brightSignal==max(brightSignal(:)));
+peakFrame=peakFrame(1); % if tied, take first
 timeInds=[1 peakFrame timeWindowFrames(1)+1 size(STA,3)];
+
 set(gca,'XTickLabel',unique(timeMs(timeInds)),'XTick',unique(timeInds),'XLim',minmax(timeInds));
 set(gca,'YLim',[minmax([analysisdata.singleTrialTemporalRecord(:)' darkCI(:)' brightCI(:)'])+[-5 5]])
 ylabel('RGB(gunVal)')
@@ -327,7 +342,7 @@ xlabel(sprintf('msec -- cumulative STA(%d-%d)',min(analysisdata.cumulativeTrialN
 if doSpatial
     subplot(2,2,4)
     montage(reshape(analysisdata.cumulativeSTA,[size(STA,1) size(STA,2) 1 size(STA,3) ] ),'DisplayRange',rng)
-    colormap(blueToRed(meanLuminanceStimulus,[0 255]));
+    colormap(blueToRed(meanLuminanceStimulus,rng,true));
     % %% spatial signal (all)
     % for i=1:
     % subplot(4,n,2*n+i)
@@ -357,3 +372,32 @@ if nargout>1
     er95= sqrt(STV(X,Y,:)/numSpikes)*1.96; % b/c std error(=std/sqrt(N)) of mean * 1.96 = 95% confidence interval for gaussian, norminv(.975)
     CI=repmat(sig(:),1,2)+er95(:)*[-1 1];
 end
+
+
+function new=hasNewParameters(stimManager,analysisdata,stimulusDetails) %first trial through with these parameters
+new=false;
+
+%different size
+if  ~all(size(analysisdata.STA)==size(analysisdata.cumulativeSTA)) 
+    new=true;
+end
+
+%different distribution
+if ~strcmp(analysisdata.distribution.type,stimulusDetails.distribution.type) 
+        new=true;
+end
+
+%different parameters - a pretty general check of the params
+if ~new % only  check if they are the same distribution
+    f=fields(stimulusDetails.distribution);
+    numFields=length(f); 
+    %check all numverical parameters (note for future: won't work for uneven vector lengths or strings)
+    for i=2:numFields; % skip type i=1
+        if ~all(stimulusDetails.distribution.(f{i})==analysisdata.distribution.(f{i}))
+             new=true;
+        end
+    end
+end
+            
+            
+    

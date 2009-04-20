@@ -203,7 +203,7 @@ while ~quit
                     if usePhotoDiodeSpikes
                         [spikeRecord.spikes spikeRecord.photoDiode]=getSpikesFromPhotodiode(neuralRecord.neuralData(:,2),...
                             neuralRecord.neuralDataTimes, spikeRecord.correctedFrameIndices);
-                        spikeRecord.spikeTimestamps = neuralRecord.neuralDataTimes(spikes==1);
+                        spikeRecord.spikeTimestamps = neuralRecord.neuralDataTimes(spikeRecord.spikes==1);
                         spikeRecord.spikeWaveforms=[];
                         spikeRecord.assignedClusters=ones(1,length(spikeRecord.spikeTimestamps));
                         %                         frameTimes(:,1); %frame starts

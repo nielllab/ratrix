@@ -82,14 +82,7 @@ if verify~=scaledInterTrialLuminance
     error('couldn''t set DefaultChannelValue')
 end
 
-if isempty(stim)
-%     warning('this is probably a reinforcement phase which is not yet working for the LED, showing ITL')
-%     frameIndexed
-%     loop
-%     trigger
-%     timeIndexed
-%     data=interTrialLuminance;
-    
+if isempty(stim)    
     error('shouldn''t happen')
 else
     data=squeeze(stim);

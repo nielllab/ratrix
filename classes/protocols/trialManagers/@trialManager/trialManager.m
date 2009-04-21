@@ -94,7 +94,20 @@ switch nargin
         if isempty(t.displayMethod)
             t.displayMethod='ptb';
         elseif ismember(t.displayMethod,{'LED','ptb'})
-            %pass
+            if strcmp(t.displayMethod,'LED')
+                
+                [a b]=getMACaddress;
+                x=daqhwinfo('nidaq');
+                
+                
+                if a && strcmp(b,'0014225E4685') && length(x.InstalledBoardIds)>0
+                    %pass
+                else
+                    b
+                    length(x.InstalledBoardIds)>0
+                    error('can''t make an LED trialManager cuz this machine doesn''t have a nidaq -- currently only known nidaq is in left rig machine')
+                end
+            end
         else
             error('displayMethod must be one of {''LED'',''ptb''}')
         end

@@ -58,7 +58,7 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && framesInPhase==0
             end
             numCorrectFrames=ceil((rewardSizeULorMS/1000)/ifi);
 
-        elseif strcmp(tm.displayMethod,'LED')
+        elseif strcmp(getDisplayMethod(tm),'LED')
             if isempty(framesUntilTransition)
                 framesUntilTransition=ceil(getHz(spec)*rewardSizeULorMS/1000);
             else
@@ -77,7 +77,7 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && framesInPhase==0
             [floatprecision cStim] = determineColorPrecision(tm, cStim, strategy);
             textures = cacheTextures(tm,strategy,cStim,window,floatprecision);
             destRect = determineDestRect(tm, window, station, correctScale, cStim, strategy);
-        elseif strcmp(tm.displayMethod,'LED')
+        elseif strcmp(getDisplayMethod(tm),'LED')
             floatprecision=[];
         else
             error('huh?')
@@ -96,7 +96,7 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && framesInPhase==0
             end
             numErrorFrames=ceil((msPenalty/1000)/ifi);
 
-        elseif strcmp(tm.displayMethod,'LED')
+        elseif strcmp(getDisplayMethod(tm),'LED')
             if isempty(framesUntilTransition)
                 framesUntilTransition=ceil(getHz(spec)*msPenalty/1000);
             else
@@ -115,7 +115,7 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && framesInPhase==0
             [floatprecision eStim] = determineColorPrecision(tm, eStim, strategy);
             textures = cacheTextures(tm,strategy,eStim,window,floatprecision);
             destRect=Screen('Rect',window);
-        elseif strcmp(tm.displayMethod,'LED')
+        elseif strcmp(getDisplayMethod(tm),'LED')
             floatprecision=[];
         else
             error('huh?')

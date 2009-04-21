@@ -1,4 +1,4 @@
-function [phaseRecords analogOutput outputsamplesOK] ...
+function [phaseRecords analogOutput outputsamplesOK numSamps] ...
     = LEDphase(tm,phaseInd,analogOutput,phaseRecords,spec,interTrialLuminance,stim,frameIndexed,indexedFrames,loop,trigger,timeIndexed,timedFrames,station)
 
 fprintf('doing phase %d\n',phaseInd)
@@ -6,18 +6,21 @@ fprintf('doing phase %d\n',phaseInd)
 outputRange=[-5 0]; %hardcoded for our LED amp
 
 if ~isempty(analogOutput)
+    setStatePins(station,'frame',true);
     stop(analogOutput);
-    
-    evts=showdaqevents(analogOutput);
-    if ~isempty(evts)
-        evts
-    end
     
     if phaseInd>1
         phaseRecords(phaseInd-1).LEDstopped=GetSecs; %need to preallocate
         phaseRecords(phaseInd-1).totalSampsOutput=get(analogOutput,'SamplesOutput'); %need to preallocate
     else
         error('shouldn''t happen')
+    end
+    
+    setStatePins(station,'frame',false);
+    
+    evts=showdaqevents(analogOutput);
+    if ~isempty(evts)
+        evts
     end
     
     %need to remove leftover data from previous putdata calls (no other way to do it that i see)
@@ -56,7 +59,7 @@ if ~isempty(analogOutput)
 else
     preAnalog=GetSecs;
     [analogOutput bits]=openNidaqForAnalogOutput(getHz(spec),outputRange); %should ultimately send bits back through stimOGL to doTrial so can be stored as trialRecords(trialInd).resolution.pixelSize
-    fprintf('took %g secs to open analog out (mostly in call to daqhwinfo)\n',GetSecs-preAnalog)
+    fprintf('took %g secs to open analog out (mostly in call to daqhwinfo) - bits: %d\n',GetSecs-preAnalog,bits)
 end
 
 if tm.dropFrames
@@ -66,6 +69,7 @@ end
 if isscalar(interTrialLuminance) && interTrialLuminance>=0 && interTrialLuminance<=1
     scaledInterTrialLuminance=interTrialLuminance*diff(outputRange)+outputRange(1);
 else
+    keyboard
     error('bad interTrialLuminance')
 end
 verify=setverify(analogOutput,'OutOfDataMode','DefaultValue');
@@ -78,7 +82,18 @@ if verify~=scaledInterTrialLuminance
     error('couldn''t set DefaultChannelValue')
 end
 
-data=squeeze(stim);
+if isempty(stim)
+%     warning('this is probably a reinforcement phase which is not yet working for the LED, showing ITL')
+%     frameIndexed
+%     loop
+%     trigger
+%     timeIndexed
+%     data=interTrialLuminance;
+    
+    error('shouldn''t happen')
+else
+    data=squeeze(stim);
+end
 
 %could move this logic to updateFrameIndexUsingTextureCache, it is related to that info
 if frameIndexed
@@ -106,16 +121,20 @@ end
 if isvector(data) && all(data>=0) && all(data<=1)
     data=data*diff(outputRange)+outputRange(1);
 else
+    keyboard
     error('bad stim size for LED')
 end
 
 if get(analogOutput,'MaxSamplesQueued')>=length(data) %if BufferingMode set to Auto, should only be limited by system RAM, on rig computer >930 mins @ 1200 Hz
     preAnalog=GetSecs;
-    if length(data)>1
+    numSamps=length(data);
+    if numSamps>1
         putdata(analogOutput,data); %crashes when length is 1! have to use putsample, then 'SamplesOutput' doesn't work... :(
         outputsamplesOK=true;
     else
+        setStatePins(station,'frame',true);
         putsample(analogOutput,data);
+        setStatePins(station,'frame',false);
         outputsamplesOK=false;
     end
     fprintf('took %g secs to put analog data\n',GetSecs-preAnalog)
@@ -140,10 +159,8 @@ if rpts~=verify
 end
 
 if outputsamplesOK
+    setStatePins(station,'frame',true);
     start(analogOutput);
+    phaseRecords(phaseInd).LEDstarted=GetSecs; %need to preallocate
+    setStatePins(station,'frame',false);
 end
-
-phaseRecords(phaseNum).LEDstarted=GetSecs; %need to preallocate
-
-setStatePins(station,'frame',true);
-setStatePins(station,'frame',false);

@@ -453,80 +453,89 @@ while ~done && ~quit;
         updatePhase = 0;
 
         % =========================================================================
+
+		setStatePins(station,'phase',false);
+		if isStim(spec)
+			setStatePins(station,'stim',true);
+        end
+        
         if strcmp(tm.displayMethod,'LED')
             station=stopPTB(station); %should handle this better -- LED setting is trialManager specific, so other training steps will expect ptb to still exist
             %would prefer to never startPTB until a trialManager needs it,and then start it at the proper res the first time
             %trialManager.doTrial should startPTB if it wants one and there isn't one, and stop it if there is one and it doesn't want it
             %note that ifi is not coming in empty on the first trial and the leftover value from the screen is misleading, need to fix...
-
-            [phaseRecords analogOutput outputsamplesOK] = LEDphase(tm,phaseInd,analogOutput,phaseRecords,spec,interTrialLuminance,stim,frameIndexed,indexedFrames,loop,trigger,timeIndexed,timedFrames,station);
-		end
-		setStatePins(station,'phase',false);
-		if isStim(spec)
-			setStatePins(station,'stim',true);
-		end
+            
+            didLEDphase=false;
+            if ~isempty(stim)
+                [phaseRecords analogOutput outputsamplesOK numSamps] = LEDphase(tm,phaseInd,analogOutput,phaseRecords,spec,interTrialLuminance,stim,frameIndexed,indexedFrames,loop,trigger,timeIndexed,timedFrames,station);
+                didLEDphase=true;
+            end
+        end
     end % fininshed with phaseUpdate
 
     timestamps.phaseUpdated=GetSecs;
     doFramePulse=true;
 
+    if ~paused
+        % here should be the function that also checks to see if we should assign trialRecords.correct
+        % and trialRecords.response, and also does tm-specific reward checks (nAFC should check to update reward/airpuff
+        % if first frame of a 'reinforced' phase)
+        [tm trialRecords(trialInd).trialDetails trialRecords(trialInd).result spec ...
+            rewardSizeULorMS requestRewardSizeULorMS ...
+            msPuff msRewardSound msPenalty msPenaltySound floatprecision textures destRect] = ...
+            updateTrialState(tm, stimManager, trialRecords(trialInd).result, spec, ports, lastPorts, ...
+            targetOptions, requestOptions, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
+            floatprecision, textures, destRect, ...
+            requestRewardDone);
+        
+        % because the target ports = setdiff(responsePorts, lastResponse) which is always empty
+        % so we will always have the same empty responsePorts and same nonempty requestPorts
+        % we do the repeat-checking in runRealTimeLoop using ~any(ports==lastRequestPorts)
+        % should we save lastRequestPorts somewhere in trialRecord so we can load the correct value for the next trial...?
+        % edf: i don't follow this comment
+        if rewardSizeULorMS~=0
+            doRequestReward=false;
+            msRewardOwed=msRewardOwed+rewardSizeULorMS;
+            phaseRecords(phaseNum).proposedRewardDurationMSorUL = rewardSizeULorMS;
+            %                 dispStr=sprintf('giving reward %d during phaseNum %d\n',rewardSizeULorMS,phaseNum);
+            %                 disp(dispStr)
+        elseif msPenalty~=0
+            doRequestReward=false;
+            msAirpuffOwed=msAirpuffOwed+msPuff;
+            phaseRecords(phaseNum).proposedAirpuffDuration = msPuff;
+        end
+        framesUntilTransition=getFramesUntilTransition(spec);
+        stim=getStim(spec);
+        scaleFactor=getScaleFactor(spec);
+        
+        if requestRewardSizeULorMS~=0
+            doRequestReward=true;
+            %                 dispStr=sprintf('increasing msRequestRewardOwed by %d during phaseNum %d\n',requestRewardSizeULorMS,phaseNum);
+            %                 disp(dispStr)
+            msRequestRewardOwed=msRequestRewardOwed+requestRewardSizeULorMS;
+            phaseRecords(phaseNum).responseDetails.requestRewardPorts{end+1}=ports;
+            phaseRecords(phaseNum).responseDetails.requestRewardStartTime{end+1}=GetSecs();
+            phaseRecords(phaseNum).responseDetails.requestRewardDurationActual{end+1}=0;
+            
+            lastRequestPorts=ports; % do we even need this?
+            playRequestSoundLoop=true;
+            requestRewardDone=true;
+        end
+        
+        lastPorts=ports; % has to be this sequence of events: readPorts -> handleTrialLogic -> updateTrialState -> lastPorts
+        
+        if strcmp(tm.displayMethod,'LED') && ~didLEDphase
+            [phaseRecords analogOutput outputsamplesOK numSamps] = LEDphase(tm,phaseInd,analogOutput,phaseRecords,spec,interTrialLuminance,stim,frameIndexed,indexedFrames,loop,trigger,timeIndexed,timedFrames,station);
+            didLEDphase=true;
+        end
+    end
+
     if window>0
-
         if ~paused
-
             scheduledFrameNum=ceil((GetSecs-firstVBLofPhase)/(framesPerUpdate*ifi)); %could include pessimism about the time it will take to get from here to the flip and how much advance notice flip needs
             % this will surely have drift errors...
             % note this does not take pausing into account -- edf thinks we should get rid of pausing
-
-
-            % here should be the function that also checks to see if we should assign trialRecords.correct
-            % and trialRecords.response, and also does tm-specific reward checks (nAFC should check to update reward/airpuff
-            % if first frame of a 'reinforced' phase)
-            [tm trialRecords(trialInd).trialDetails trialRecords(trialInd).result spec ...
-                rewardSizeULorMS requestRewardSizeULorMS ...
-                msPuff msRewardSound msPenalty msPenaltySound floatprecision textures destRect] = ...
-                updateTrialState(tm, stimManager, trialRecords(trialInd).result, spec, ports, lastPorts, ...
-                targetOptions, requestOptions, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
-                floatprecision, textures, destRect, ...
-                requestRewardDone);
-
-            % because the target ports = setdiff(responsePorts, lastResponse) which is always empty
-            % so we will always have the same empty responsePorts and same nonempty requestPorts
-            % we do the repeat-checking in runRealTimeLoop using ~any(ports==lastRequestPorts)
-            % should we save lastRequestPorts somewhere in trialRecord so we can load the correct value for the next trial...?
-            % edf: i don't follow this comment
-            if rewardSizeULorMS~=0
-                doRequestReward=false;
-                msRewardOwed=msRewardOwed+rewardSizeULorMS;
-                phaseRecords(phaseNum).proposedRewardDurationMSorUL = rewardSizeULorMS;
-                %                 dispStr=sprintf('giving reward %d during phaseNum %d\n',rewardSizeULorMS,phaseNum);
-                %                 disp(dispStr)
-            elseif msPenalty~=0
-                doRequestReward=false;
-                msAirpuffOwed=msAirpuffOwed+msPuff;
-                phaseRecords(phaseNum).proposedAirpuffDuration = msPuff;
-            end
-            framesUntilTransition=getFramesUntilTransition(spec);
-            stim=getStim(spec);
-            scaleFactor=getScaleFactor(spec);
-
-            if requestRewardSizeULorMS~=0
-                doRequestReward=true;
-                %                 dispStr=sprintf('increasing msRequestRewardOwed by %d during phaseNum %d\n',requestRewardSizeULorMS,phaseNum);
-                %                 disp(dispStr)
-                msRequestRewardOwed=msRequestRewardOwed+requestRewardSizeULorMS;
-                phaseRecords(phaseNum).responseDetails.requestRewardPorts{end+1}=ports;
-                phaseRecords(phaseNum).responseDetails.requestRewardStartTime{end+1}=GetSecs();
-                phaseRecords(phaseNum).responseDetails.requestRewardDurationActual{end+1}=0;
-
-                lastRequestPorts=ports; % do we even need this?
-                playRequestSoundLoop=true;
-                requestRewardDone=true;
-            end
-
-            lastPorts=ports; % has to be this sequence of events: readPorts -> handleTrialLogic -> updateTrialState -> lastPorts
-            % =========================================================================
-
+            
             switch strategy
                 case {'textureCache','noCache'}
                     [tm frameIndex i done doFramePulse didPulse] ...
@@ -615,7 +624,7 @@ while ~done && ~quit;
             end
 
             %note this logic is related to updateFrameIndexUsingTextureCache
-            if ~loop && (get(analogOutput,'SamplesOutput')>=length(data) || ~outputsamplesOK)
+            if ~loop && (get(analogOutput,'SamplesOutput')>=numSamps || ~outputsamplesOK)
                 if isempty(responseOptions)
                     done=1;
                 end

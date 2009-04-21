@@ -40,7 +40,7 @@ else
     if isfield(stimulus.distribution{typeInd},'origHz')
         resolutionIndex=stimulus.distribution{typeInd}.origHz;
     else
-        resolutionIndex=100;
+        resolutionIndex=10000; %for LED
     end
     height=1;
     width=1;

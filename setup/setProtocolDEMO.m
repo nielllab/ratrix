@@ -217,7 +217,7 @@ ts10 = trainingStep(vh, crftrf,  repeatIndefinitely(), noTimeOff(), svnRev,svnCh
 ts11 = trainingStep(led, crftrf,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %crf/trf LED
 
 p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts4, ts6, ts7, ts8, ts9, ts10, ts11});
-stepNum=uint8(6);
+stepNum=uint8(2);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

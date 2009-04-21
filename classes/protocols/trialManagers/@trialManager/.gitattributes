@@ -25,3 +25,4 @@
 /checkPorts.m -text
 /updateTrialState.m -text
 /getShowText.m -text
+/getDisplayMethod.m -text

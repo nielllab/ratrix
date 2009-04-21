@@ -466,10 +466,6 @@ while ~done && ~quit;
             %note that ifi is not coming in empty on the first trial and the leftover value from the screen is misleading, need to fix...
             
             didLEDphase=false;
-            if ~isempty(stim)
-                [phaseRecords analogOutput outputsamplesOK numSamps] = LEDphase(tm,phaseInd,analogOutput,phaseRecords,spec,interTrialLuminance,stim,frameIndexed,indexedFrames,loop,trigger,timeIndexed,timedFrames,station);
-                didLEDphase=true;
-            end
         end
     end % fininshed with phaseUpdate
 

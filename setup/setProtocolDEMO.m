@@ -172,7 +172,14 @@ noiseStim=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLumin
 
 unfilteredNoise=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
-led=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,{'off'},false,'LED','center');
+
+[a b]=getMACaddress;
+x=daqhwinfo('nidaq');
+if a && strcmp(b,'0014225E4685') && length(x.InstalledBoardIds)>0
+    led=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,{'off'},false,'LED','center');
+else
+    led=vh;
+end
 
 if ismac
     ts001 = '/Users/eflister/Desktop/ratrix trunk/classes/protocols/stimManagers/@flicker/ts001';

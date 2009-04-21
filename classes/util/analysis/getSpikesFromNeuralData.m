@@ -463,7 +463,14 @@ if 1 % view plots (for testing)
     
     figure
     subplot(1,3,3)
+    try
+        if ~isempty(whichNoise)
     plot(spikeWaveforms(whichNoise,:)','color',[.7 .7 .7])
+        end
+    catch
+        keyboard
+        
+    end
     hold on;
     plot(spikeWaveforms(whichSpikes,:)','r')
     axis([ 1 size(spikeWaveforms,2)  1.1*minmax(spikeWaveforms(:)') ])

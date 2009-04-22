@@ -90,21 +90,43 @@ try
             if isfield(trialRecords,'phaseRecords')
                 % this has to be a cell array b/c phaseRecords aren't always the same across trials
                 times = cellfun(@getTimesPhased,{trialRecords.phaseRecords},'UniformOutput',false);
+                tries = cellfun(@getTriesPhased,{trialRecords.phaseRecords},'UniformOutput',false);
             else
                 % this has to be a cell array b/c times aren't always there across trials
                 times = cellfun(@getTimesNonphased,{trialRecords.responseDetails},'UniformOutput',false);
+                tries = cellfun(@getTriesNonphased,{trialRecords.responseDetails},'UniformOutput',false);
             end
+            
+            if isfield(trialRecords,'station')
+                numPorts=[trialRecords.station];
+                numPorts={numPorts.numPorts};
+            else
+                numPorts=num2cell(ones(1,length(trialRecords))*3); % default to 3 ports if not specified
+            end
+            allPorts=cellfun(@getAllPorts,numPorts,'UniformOutput',false);
+            if isfield(trialRecords,'targetPorts') && isfield(trialRecords,'distractorPorts')
+                responsePorts=cellfun(@union,{trialRecords.targetPorts},{trialRecords.distractorPorts},'UniformOutput',false);
+                requestPorts=cellfun(@setdiff,allPorts,responsePorts,'UniformOutput',false);
+            else
+                responsePorts=cellfun(@union,num2cell(ones(1,length(trialRecords))),num2cell(ones(1,length(trialRecords))*3),...
+                    'UniformOutput',false); % default responsePorts to [1 3]
+                requestPorts=num2cell(ones(1,length(trialRecords))*2); % default requestPorts to [2]
+            end
+            % times is a cell array of VECTORS (each vector is all the times for a trial)
+            % tries is a cell array of CELL ARRAYS (each inner cell array is all the tries for a trial)
             
             switch ensureMode
                 case 'responseTime'
                     % could ad a feature to check that all prior licks were only
                     % center licks... and error if not. but that would be slow.
-                    out = cell2mat(cellfun(@diffFirstLast,times,'UniformOutput',false));
+                    out = cell2mat(cellfun(@diffFirstRequestLastResponse,times,tries,requestPorts,responsePorts,...
+                        'UniformOutput',false));
                 case 'firstIRI'
-                    out = cell2mat(cellfun(@diffFirstTwo,times,'UniformOutput',false));
+                    % elapsed time between first two requests
+                    out = cell2mat(cellfun(@diffFirstTwoRequests,times,tries,requestPorts,'UniformOutput',false));
                 case 'numRequests'
                     % now convert from a cell array of cell arrays to a vector of length-1's
-                    out = cellfun('length',times) - 1;
+                    out = cellfun(@getNumRequests,tries,requestPorts,responsePorts,'UniformOutput',false);
             end
              
         case 'none'
@@ -133,8 +155,28 @@ end
 
 function out=getTimesPhased(phaseRecord)
 thisTrialResponseDetails=[phaseRecord.responseDetails];
-if isfield(thisTrialResponseDetails,'times') % often the last trial lacks this
-    out=[thisTrialResponseDetails.times];
+if isfield(thisTrialResponseDetails,'times') && isfield(thisTrialResponseDetails,'startTime') % often the last trial lacks this
+    startTimes=[thisTrialResponseDetails.startTime];
+    numTries=arrayfun(@getNumTries,thisTrialResponseDetails);
+    inds=[0 cumsum(numTries)];
+    timesToAdd=[];
+    for i=1:length(inds)-1
+        timesToAdd=[timesToAdd ones(1,inds(i+1)-inds(i))*startTimes(i)];
+    end
+    out=cell2mat([thisTrialResponseDetails.times])+timesToAdd;
+else
+    out = NaN;
+end
+end
+
+function out = getNumTries(responseDetails)
+out=length(responseDetails.tries);
+end
+
+function out=getTriesPhased(phaseRecord)
+thisTrialResponseDetails=[phaseRecord.responseDetails];
+if isfield(thisTrialResponseDetails,'tries') % often the last trial lacks this
+    out=[thisTrialResponseDetails.tries];
 else
     out = NaN;
 end
@@ -142,23 +184,34 @@ end
 
 function out = getTimesNonphased(trialRecord)
 if isfield(trialRecord,'times') % often the last trial lacks this
-    out = [trialRecord.times];
+    out = cell2mat([trialRecord.times]);
 else
     out = NaN;
 end
 end
 
-function out=diffFirstTwo(cellIn)
-out=nan;
-if length(cellIn)>=3 % if more than 2 responses, then 1st 2 are requests
-    out=cellIn{2}-cellIn{1};
+function out = getTriesNonphased(trialRecord)
+if isfield(trialRecord,'tries')
+    out = [trialRecord.tries];
+else
+    out= NaN;
 end
 end
 
-function out=diffFirstLast(cellIn)
+function out=diffFirstTwoRequests(times,tries,requestPorts)
 out=nan;
-if length(cellIn)>=2 % if request and responses
-    out=cellIn{end}-cellIn{1}; 
+which=find(cell2mat(cellfun(@(x) any(x(requestPorts)==1),tries,'UniformOutput',false)));
+if length(which)>=2
+    out=times(which(2))-times(which(1));
+end
+end
+
+function out=diffFirstRequestLastResponse(times,tries,requestPorts,responsePorts)
+out=nan;
+first=find(cell2mat(cellfun(@(x) any(x(requestPorts)==1),tries,'UniformOutput',false)),1,'first');
+last=find(cell2mat(cellfun(@(x) any(x(responsePorts)==1),tries,'UniformOutput',false)),1,'last');
+if ~isempty(first) && ~isempty(last)
+    out=times(last)-times(first);
 end
 end
 
@@ -167,4 +220,10 @@ out=zeros(1,numPortsCellIn);
 out(portCellIn)=1;
 
 out=bin2dec(num2str(out));
+end
+
+function out=getNumRequests(tries,requestPorts,responsePorts)
+allRequests=find(cell2mat(cellfun(@(x) any(x(requestPorts)==1),tries,'UniformOutput',false)));
+firstResponse=find(cell2mat(cellfun(@(x) any(x(responsePorts)==1),tries,'UniformOutput',false)),1,'first');
+out=length(find(allRequests<firstResponse));
 end

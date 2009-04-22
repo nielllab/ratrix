@@ -161,7 +161,8 @@ for i=1:length(ids)
             'correctionTrial',...
             'numRequests',...
             'firstIRI',...
-            'response'};
+            'response',...
+            'responseTime'};
         try
             [compiledTrialRecords compiledDetails compiledLUT]=loadDetailedTrialRecords(compiledFile,compiledRange,fieldNames);
         catch ex
@@ -510,7 +511,7 @@ if isscalar(a) && isscalar(b) && isstruct(a) && isstruct(b)
         % for ifFeature, which were not there previously.
         % now, instead of erroring here, we should just fill w/ nans in a and recall concatAllFields
         warning('b has fields not in a - padding with nans')
-        fieldsToNan=setdiff(fieldnames(b),fn)
+        fieldsToNan=setdiff(fieldnames(b),fn);
         numToNan=length(a.(fn{1}));
         for k=1:length(fieldsToNan)
             a.(fieldsToNan{k})=nan*ones(1,numToNan);

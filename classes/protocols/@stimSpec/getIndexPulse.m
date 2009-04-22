@@ -1,2 +1,6 @@
 function out=getIndexPulse(s,i)
- out=s.indexPulses(i);
+if exist('i','var') && ~isempty(i)
+    out=s.indexPulses(i);
+else
+    out=s.indexPulses;
+end

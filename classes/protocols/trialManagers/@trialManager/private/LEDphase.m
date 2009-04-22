@@ -3,8 +3,9 @@ function [phaseRecords analogOutput outputsamplesOK numSamps] ...
 
 fprintf('doing phase %d\n',phaseInd)
 
-outputRange=[-5 0]; %hardcoded for our LED amp
-
+outputRange=[-5 0;... %hardcoded for our LED amp
+             0 5]; %TTL levels for indexPulse
+         
 if ~isempty(analogOutput)
     setStatePins(station,'frame',true);
     stop(analogOutput);
@@ -25,13 +26,13 @@ if ~isempty(analogOutput)
     
     %need to remove leftover data from previous putdata calls (no other way to do it that i see)
     if get(analogOutput,'SamplesAvailable')>0
-        delete(analogOutput.Channel(1));
+        delete(analogOutput.Channel(1:size(outputRange,2)));
         
         %this block stolen from openNidaqForAnalogOutput -- need to refactor
         aoInfo=daqhwinfo(analogOutput);
         hwChans=aoInfo.ChannelIDs;
-        chans=addchannel(analogOutput,hwChans(1));
-        if length(chans)~=1
+        chans=addchannel(analogOutput,hwChans(1:size(outputRange,2)));
+        if length(chans)~=size(outputRange,2)
             error('didn''t get requested num chans even though hardware appears to support it')
         end
         if setverify(analogOutput,'SampleRate',getHz(spec))~=getHz(spec)
@@ -40,18 +41,20 @@ if ~isempty(analogOutput)
             getHz(spec)
             error('couldn''t set requested sample rate')
         end
-        verifyRange=setverify(analogOutput.Channel(1),'OutputRange',outputRange);
-        if verifyRange(1)<=outputRange(1)&& verifyRange(2)>=outputRange(2)
-            uVerifyRange=setverify(analogOutput.Channel(1),'UnitsRange',verifyRange);
-            if any(uVerifyRange~=verifyRange)
-                verifyRange
-                uVerifyRange
-                error('could not set UnitsRange to match OutputRange')
+        for cNum=1:size(outputRange,2)
+            verifyRange=setverify(analogOutput.Channel(cNum),'OutputRange',outputRange(cNum,:));
+            if verifyRange(1)<=outputRange(cNum,1)&& verifyRange(2)>=outputRange(cNum,2)
+                uVerifyRange=setverify(analogOutput.Channel(cNum),'UnitsRange',verifyRange);
+                if any(uVerifyRange~=verifyRange)
+                    verifyRange
+                    uVerifyRange
+                    error('could not set UnitsRange to match OutputRange')
+                end
+            else
+                aoInfo.OutputRanges
+                outputRange
+                error('couldn''t get requested output range')
             end
-        else
-            aoInfo.OutputRanges
-            outputRange
-            error('couldn''t get requested output range')
         end
         %end refactor block
     end
@@ -79,7 +82,12 @@ end
 
 verify=setverify(analogOutput.Channel(1),'DefaultChannelValue',scaledInterTrialLuminance);
 if verify~=scaledInterTrialLuminance
-    error('couldn''t set DefaultChannelValue')
+    error('couldn''t set DefaultChannelValue 1')
+end
+
+verify=setverify(analogOutput.Channel(2),'DefaultChannelValue',0);
+if verify~=0
+    error('couldn''t set DefaultChannelValue 2')
 end
 
 if isempty(stim)    
@@ -104,7 +112,7 @@ elseif timeIndexed
     end
     if timedFrames(end)==0
         data(end+1)=timedFrames(end);
-        verify=setverify(analogOutput,'OutOfDataMode','Hold');
+        verify=setverify(analogOutput,'OutOfDataMode','Hold'); %not correct for indexPulse channel
         if ~strcmp(verify,'Hold')
             error('couldn''t set OutOfDataMode to Hold')
         end
@@ -121,12 +129,18 @@ end
 if get(analogOutput,'MaxSamplesQueued')>=length(data) %if BufferingMode set to Auto, should only be limited by system RAM, on rig computer >930 mins @ 1200 Hz
     preAnalog=GetSecs;
     numSamps=length(data);
+    indexPulse=getIndexPulse(spec);
+    if length(indexPulse)~=numSamps
+        size(indexPulse)
+        size(numSamps)
+        error('bad indexPulse size')
+    end
     if numSamps>1
-        putdata(analogOutput,data); %crashes when length is 1! have to use putsample, then 'SamplesOutput' doesn't work... :(
+        putdata(analogOutput,[data' indexPulse']); %crashes when length is 1! have to use putsample, then 'SamplesOutput' doesn't work... :(
         outputsamplesOK=true;
     else
         setStatePins(station,'frame',true);
-        putsample(analogOutput,data);
+        putsample(analogOutput,[data indexPulse]);
         setStatePins(station,'frame',false);
         outputsamplesOK=false;
     end

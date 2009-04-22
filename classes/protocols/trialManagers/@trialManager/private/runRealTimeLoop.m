@@ -260,7 +260,7 @@ if ~isempty(eyeTracker)
 
 
     if isa(eyeTracker,'eyeLinkTracker')
-        eyeData=nan(framesPerAllocationChunk,43);
+        eyeData=nan(framesPerAllocationChunk,40);
         eyeDataFrameInds=nan(framesPerAllocationChunk,1);
         gaze=nan(framesPerAllocationChunk,2);
     else
@@ -303,11 +303,20 @@ end
 
 if window>0
     % draw interTrialLuminance first
-    %!!!DONT COMMIT !!!!!!!!!!!!!!!
-    
-%     interTrialTex=Screen('MakeTexture', window, interTrialLuminance,0,0,interTrialPrecision); %need floatprecision=0 for remotedesktop
-%     Screen('DrawTexture', window, interTrialTex,phaseData{end}.destRect, [], filtMode);
-     [timestamps.vbl sos startTime]=Screen('Flip',window);
+    if true  % trunk should always leave this true, only false for a local test
+        interTrialTex=Screen('MakeTexture', window, interTrialLuminance,0,0,interTrialPrecision); %need floatprecision=0 for remotedesktop
+        Screen('DrawTexture', window, interTrialTex,phaseData{end}.destRect, [], filtMode);
+        [timestamps.vbl sos startTime]=Screen('Flip',window);
+    else
+        % %to find out properties of the interTrialTex
+        %     allWindows=Screen('Windows');
+        %     texIDsThere=allWindows(find(Screen(allWindows,'WindowKind')==-1))
+        %     tx=screen('getImage',interTrialTex,[],[],2);
+        %     tx(:)
+        %     interTrialTex
+        %     sca
+        %     keyboard
+    end
 end
 
 timestamps.lastFrameTime=GetSecs;
@@ -552,16 +561,7 @@ while ~done && ~quit;
                         = drawExpertFrame(stimManager,stim,i,phaseStartTime,window,textLabel,...
                         destRect,filtMode,expertCache,ifi,scheduledFrameNum,tm.dropFrames,dontclear);
                     if ~isempty(dynamicDetails)
-                        % dynamicDetails better specify what frame it is b/c the record will not save empty details
-                        dynamicDetails.scheduledFrameNum=scheduledFrameNum;
-                        dynamicDetails.displayedFrameNum=i;
-                        phaseRecords(phaseNum).dynamicDetails{end+1}=dynamicDetails; 
-                        if 0 % not yet ... if dynamicDetails.sendDuringRealtimeloop==true & ~isempty(getDatanet(station))
-                            commands = [];
-                            commands.cmd = datanet_constants.stimToDataCommands.S_SAVE_DYNAMIC_DETAIL_CMD; % does not exist yet
-                            commands.arg = dynamicDetails;
-                            [junk, gotAck] = sendCommandAndWaitForAck(getDatanet(station), getCon(getDatanet(station)), commands);
-                        end
+                        phaseRecords(phaseNum).dynamicDetails{end+1}=dynamicDetails; % dynamicDetails better specify what frame it is b/c the record will not save empty details
                     end
                 otherwise
                     error('unrecognized strategy')
@@ -642,25 +642,23 @@ while ~done && ~quit;
 
         % change to get multiple samples (as many as are available)
         [gazeEstimates samples] = getSamples(eyeTracker);
-        % gazeEstimates should be a Nx2 matrix, samples should be Nx43 matrix, totalFrameNum is the frame number we are on
+        % gazeEstimates should be a Nx2 matrix, samples should be Nx40 matrix, totalFrameNum is the frame number we are on
         numEyeTrackerSamples = size(samples,1);
 
-        if numEyeTrackerSamples > 0
-            if (totalEyeDataInd+numEyeTrackerSamples)>length(eyeData) %if samples from this frame make us exceed size of eyeData
-                %  allocateMore
-                newEnd=length(eyeData)+ framesPerAllocationChunk;
-                %             disp(sprintf('did allocation to eyeTrack data; up to %d samples enabled',newEnd))
-                eyeData(end+1:newEnd,:)=nan;
-                eyeDataFrameInds(end+1:newEnd,:)=nan;
-                gaze(end+1:newEnd,:)=nan;
-            end
-
-            gaze(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = gazeEstimates;
-            eyeData(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = samples;
-            eyeDataFrameInds(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = totalFrameNum;
-            totalEyeDataInd = totalEyeDataInd + numEyeTrackerSamples;
+        if (totalEyeDataInd+numEyeTrackerSamples)>length(eyeData) %if samples from this frame make us exceed size of eyeData
+            %  allocateMore
+            newEnd=length(eyeData)+ framesPerAllocationChunk;
+            %             disp(sprintf('did allocation to eyeTrack data; up to %d samples enabled',newEnd))
+            eyeData(end+1:newEnd,:)=nan;
+            eyeDataFrameInds(end+1:newEnd,:)=nan;
+            gaze(end+1:newEnd,:)=nan;
         end
 
+        gaze(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = gazeEstimates;
+        eyeData(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = samples;
+        eyeDataFrameInds(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = totalFrameNum;
+
+        totalEyeDataInd = totalEyeDataInd + numEyeTrackerSamples;
     end
 
     timestamps.eyeTrackerDone=GetSecs;

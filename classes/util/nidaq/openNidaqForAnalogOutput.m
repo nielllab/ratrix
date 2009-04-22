@@ -82,3 +82,10 @@ end
 if ~foundMatch
     error('no analog out with those ranges and that sampling rate on that many channels')
 end
+
+if length(unique(bits))~=1
+    bits
+    error('inconsistent bits')
+else
+    bits=unique(bits);
+end

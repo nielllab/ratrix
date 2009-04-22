@@ -70,7 +70,7 @@ if tm.dropFrames
 end
 
 if isscalar(interTrialLuminance) && interTrialLuminance>=0 && interTrialLuminance<=1
-    scaledInterTrialLuminance=interTrialLuminance*diff(outputRange)+outputRange(1);
+    scaledInterTrialLuminance=interTrialLuminance*diff(outputRange(1,:))+outputRange(1,1);
 else
     keyboard
     error('bad interTrialLuminance')
@@ -120,23 +120,40 @@ elseif timeIndexed
 end
 
 if isvector(data) && all(data>=0) && all(data<=1)
-    data=data*diff(outputRange)+outputRange(1);
+    data=data*diff(outputRange(1,:))+outputRange(1,1);
 else
     keyboard
-    error('bad stim size for LED')
+    error('bad stim for LED')
+end
+
+numSamps=length(data);
+indexPulse=getIndexPulse(spec);
+
+if ~isvector(indexPulse) || length(indexPulse)~=numSamps 
+    size(indexPulse)
+    size(data)
+    error('bad indexPulse or data size')
+end
+
+if size(data,2)~=1 
+    data=data';
+end
+
+if size(indexPulse,2)~=1
+    indexPulse=indexPulse';
+end
+
+if all(indexPulse>=0) && all(indexPulse<=1)
+    indexPulse=indexPulse*diff(outputRange(2,:))+outputRange(2,1);
+else
+    keyboard
+    error('bad indexPulse')
 end
 
 if get(analogOutput,'MaxSamplesQueued')>=length(data) %if BufferingMode set to Auto, should only be limited by system RAM, on rig computer >930 mins @ 1200 Hz
     preAnalog=GetSecs;
-    numSamps=length(data);
-    indexPulse=getIndexPulse(spec);
-    if length(indexPulse)~=numSamps || size(data,1)~=1 || size(indexPulse,1)~=1
-        size(indexPulse)
-        size(numSamps)
-        error('bad indexPulse or data size')
-    end
     if numSamps>1
-        putdata(analogOutput,[data' indexPulse']); %crashes when length is 1! have to use putsample, then 'SamplesOutput' doesn't work... :(
+        putdata(analogOutput,[data indexPulse]); %crashes when length is 1! have to use putsample, then 'SamplesOutput' doesn't work... :(
         outputsamplesOK=true;
     else
         setStatePins(station,'frame',true);

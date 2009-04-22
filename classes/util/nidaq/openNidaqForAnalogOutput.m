@@ -7,7 +7,7 @@ for j=1:length(devices)
     if ~foundMatch
         ao=analogoutput(devices{j}{1},devices{j}{2});
         aoInfo=daqhwinfo(ao);
-        devices{j}{2}
+
         if strcmp(aoInfo.Polarity,'Bipolar') && strcmp(aoInfo.SampleType,'SimultaneousSample')
             
             rates = propinfo(ao,'SampleRate');

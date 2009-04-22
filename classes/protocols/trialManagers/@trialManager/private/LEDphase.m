@@ -130,10 +130,10 @@ if get(analogOutput,'MaxSamplesQueued')>=length(data) %if BufferingMode set to A
     preAnalog=GetSecs;
     numSamps=length(data);
     indexPulse=getIndexPulse(spec);
-    if length(indexPulse)~=numSamps
+    if length(indexPulse)~=numSamps || size(data,1)~=1 || size(indexPulse,1)~=1
         size(indexPulse)
         size(numSamps)
-        error('bad indexPulse size')
+        error('bad indexPulse or data size')
     end
     if numSamps>1
         putdata(analogOutput,[data' indexPulse']); %crashes when length is 1! have to use putsample, then 'SamplesOutput' doesn't work... :(

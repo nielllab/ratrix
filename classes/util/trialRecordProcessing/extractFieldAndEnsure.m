@@ -227,3 +227,7 @@ allRequests=find(cell2mat(cellfun(@(x) any(x(requestPorts)==1),tries,'UniformOut
 firstResponse=find(cell2mat(cellfun(@(x) any(x(responsePorts)==1),tries,'UniformOutput',false)),1,'first');
 out=length(find(allRequests<firstResponse));
 end
+
+function out = getAllPorts(numPorts)
+out=1:numPorts;
+end

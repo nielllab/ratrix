@@ -1,7 +1,7 @@
 function s=images(varargin)
 % IMAGES  class constructor.
 % s = images(directory,yPositionPercent,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,...
-%   trialDistribution,imageSelectionMode,size,sizeyoked,rotation,rotationyoked[,drawingMode])
+%   trialDistribution,imageSelectionMode,size,sizeyoked,rotation,rotationyoked,pctCorrectionTrials[,drawingMode])
 % yPositionPercent (0 <= value <= 1), in normalized units of the diagonal of the stim region
 % trialDistribution in format { { {imagePrefixN imagePrefixP} .1}...
 %                               { {imagePrefixP imagePrefixM} .9}...
@@ -38,6 +38,7 @@ s.rotationyoked=[];
 s.selectedSizes=[]; % not user-defined; this gets set by calcStim as the randomly drawn value from the size range
 s.selectedRotations=[]; % not user-defined; this gets set by calcStim as the randomly drawn value from the rotation range
 s.images=[]; % used for expert mode
+s.pctCorrectionTrials=[];
 s.drawingMode='expert';
 
 
@@ -54,7 +55,7 @@ switch nargin
         else
             error('Input argument is not an images object')
         end
-    case {13 14}
+    case {14 15}
         % create object using specified values
 
         if ischar(varargin{1})
@@ -144,15 +145,22 @@ switch nargin
         else
             error('rotationyoked must be a logical');
         end
+                
+        %pctCorrectionTrials
+        if ~isempty(varargin{14}) && isnumeric(varargin{14}) && varargin{14}>=0 && varargin{14}<=1
+            s.pctCorrectionTrials=varargin{14};
+        else
+            error('pctCorrectionTrials must be >=0 and <=1');
+        end
         
         %mode
-        if nargin==14
-            if ischar(varargin{14}) && (strcmp(varargin{14},'expert') || strcmp(varargin{14},'cache'))
-                s.drawingMode=varargin{14};
+        if nargin==15
+            if ischar(varargin{15}) && (strcmp(varargin{15},'expert') || strcmp(varargin{15},'cache'))
+                s.drawingMode=varargin{15};
             else
                 error('drawingMode must be ''expert'' or ''cache''');
             end
-        end
+        end       
 
         s = class(s,'images',stimManager(varargin{4},varargin{5},varargin{6},varargin{7}));
 

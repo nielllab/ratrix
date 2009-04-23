@@ -630,7 +630,7 @@ parameters.graduation = performanceCriterion([0.85, 0.8],int16([200, 500]));
 %     ts18, ts19, ts20, ts21, ts22});
 % stepNum=21;
 % p=protocol('gabor test2', {ts29, ts1, ts4, ts12, ts2, ts12, ts8, ts11,ts9,ts10,sweepContrast,ts23,ts24,ts27,ts30});
-stepNum=uint8(1);
+stepNum=uint8(5);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

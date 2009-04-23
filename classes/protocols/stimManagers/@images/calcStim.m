@@ -1,7 +1,7 @@
-function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text,indexPulses] =... 
+function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text] =... 
     calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % see ratrixPath\documentation\stimManager.calcStim.txt for argument specification (applies to calcStims of all stimManagers)
-indexPulses=[];
+
 LUT=makeStandardLUT(LUTbits);
 [resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60],32,getMaxWidth(stimulus),getMaxHeight(stimulus));
 
@@ -124,7 +124,7 @@ if strcmp(trialManagerClass,'freeDrinks') && size(ims,1)==length(responsePorts)-
     responsePorts=responsePorts(1:end-1); %free drinks trial will have one extra response port
 end
 
-details.pctCorrectionTrials=.5; % need to change this to be passed in from trial manager
+details.pctCorrectionTrials=stimulus.pctCorrectionTrials; % need to change this to be passed in from trial manager
 if ~isempty(trialRecords) && length(trialRecords)>1 % added length check because now we get trialRecords(end) (includes this trial)
     lastRec=trialRecords(end-1);
 else

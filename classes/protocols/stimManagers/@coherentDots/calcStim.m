@@ -1,4 +1,4 @@
-function [stimulus updateSM resolutionIndex out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance text indexPulse] = ...
+function [stimulus updateSM resolutionIndex out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance text] = ...
     calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % 1/30/09 - trialRecords now includes THIS trial
 s = stimulus;
@@ -27,7 +27,7 @@ updateSM=0;     % For intertrial dependencies
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);
 
-details.pctCorrectionTrials=.5; % need to change this to be passed in from trial manager
+details.pctCorrectionTrials=stimulus.pctCorrectionTrials; % need to change this to be passed in from trial manager
 if ~isempty(trialRecords) && length(trialRecords)>=2
     lastRec=trialRecords(end-1);
 else
@@ -137,8 +137,6 @@ for i=1:num_frames
 end;
 
 out = dots_movie*selectedContrast;
-indexPulse=false(1,size(out,3));
-indexPulse(1)=true;
 
 % details.stimStruct = structize(stimulus);
 details.dotDirection = dotDirection;

@@ -126,7 +126,7 @@ try
                     out = cell2mat(cellfun(@diffFirstTwoRequests,times,tries,requestPorts,'UniformOutput',false));
                 case 'numRequests'
                     % now convert from a cell array of cell arrays to a vector of length-1's
-                    out = cel2mat(cellfun(@getNumRequests,tries,requestPorts,responsePorts,'UniformOutput',false));
+                    out = cell2mat(cellfun(@getNumRequests,tries,requestPorts,responsePorts,'UniformOutput',false));
             end
 
         case 'none'

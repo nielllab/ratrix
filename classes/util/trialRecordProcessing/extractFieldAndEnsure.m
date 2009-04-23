@@ -86,7 +86,7 @@ try
             else
                 error('should have one value per trial! failed! and nthValue is undefined')
             end
-        case {'responseTime','firstIRI','numRequests'} 
+        case {'responseTime','firstIRI','numRequests'}
             if isfield(trialRecords,'phaseRecords')
                 % this has to be a cell array b/c phaseRecords aren't always the same across trials
                 times = cellfun(@getTimesPhased,{trialRecords.phaseRecords},'UniformOutput',false);
@@ -96,7 +96,7 @@ try
                 times = cellfun(@getTimesNonphased,{trialRecords.responseDetails},'UniformOutput',false);
                 tries = cellfun(@getTriesNonphased,{trialRecords.responseDetails},'UniformOutput',false);
             end
-            
+
             if isfield(trialRecords,'station')
                 numPorts=[trialRecords.station];
                 numPorts={numPorts.numPorts};
@@ -114,7 +114,7 @@ try
             end
             % times is a cell array of VECTORS (each vector is all the times for a trial)
             % tries is a cell array of CELL ARRAYS (each inner cell array is all the tries for a trial)
-            
+
             switch ensureMode
                 case 'responseTime'
                     % could ad a feature to check that all prior licks were only
@@ -128,7 +128,7 @@ try
                     % now convert from a cell array of cell arrays to a vector of length-1's
                     out = cellfun(@getNumRequests,tries,requestPorts,responsePorts,'UniformOutput',false);
             end
-             
+
         case 'none'
             out=[trialRecords.(fieldPath)];
         case 'bin2dec' %note uses trialRecords.station.numPorts in order to pad w/ sig digits
@@ -141,8 +141,8 @@ try
     end
 catch ex
     % if this field doesn't exist, fill with nans
-    
-    % pmm says: should check to see if the offending field was on the first trial or a latter trial.  error if not the first. 
+
+    % pmm says: should check to see if the offending field was on the first trial or a latter trial.  error if not the first.
     getReport(ex)
     out=nan*ones(1,length(trialRecords));
 end
@@ -156,14 +156,20 @@ end
 function out=getTimesPhased(phaseRecord)
 thisTrialResponseDetails=[phaseRecord.responseDetails];
 if isfield(thisTrialResponseDetails,'times') && isfield(thisTrialResponseDetails,'startTime') % often the last trial lacks this
-    startTimes=[thisTrialResponseDetails.startTime];
+    startTimes={thisTrialResponseDetails.startTime};
     numTries=arrayfun(@getNumTries,thisTrialResponseDetails);
     inds=[0 cumsum(numTries)];
     timesToAdd=[];
     for i=1:length(inds)-1
-        timesToAdd=[timesToAdd ones(1,inds(i+1)-inds(i))*startTimes(i)];
+
+        timesToAdd=[timesToAdd ones(1,inds(i+1)-inds(i))*startTimes{i}];
+
     end
-    out=cell2mat([thisTrialResponseDetails.times])+timesToAdd;
+    if isempty(timesToAdd)
+        out=NaN;
+    else
+        out=cell2mat([thisTrialResponseDetails.times])+timesToAdd;
+    end
 else
     out = NaN;
 end

@@ -131,7 +131,6 @@ else
     lastRec=[];
 end
 [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass);
-
 %assign the correct answer to the target port (defined to be first file listed in the trialDistribution entry)
 pics=cell(totalPorts,2);
 pics(targetPorts,:)={ims{1,:}}; %note the ROUND parens -- ugly!
@@ -177,11 +176,18 @@ details.sizeyoked=stimulus.sizeyoked;
 details.trialDistribution = stimulus.trialDistribution;
 
 % testing
+blankwidth=0;
+for i=1:size(pics,1)
+    blankwidth=blankwidth+size(pics{i,1},2);
+end
+blankwidth=width-blankwidth;
 horiz_ind = 1;
 for i=1:size(pics,1)
     if ~isempty(pics{i,1})
         pics{i,2}=[horiz_ind horiz_ind+size(pics{i,1},2)-1];
         horiz_ind=horiz_ind+size(pics{i,1},2);
+    else
+        horiz_ind=horiz_ind+blankwidth;
     end
 end
 stimulus.images=pics;

@@ -154,24 +154,12 @@ out=values(N);
 end
 
 function out=getTimesPhased(phaseRecord)
-thisTrialResponseDetails=[phaseRecord.responseDetails];
-if isfield(thisTrialResponseDetails,'times') && isfield(thisTrialResponseDetails,'startTime') % often the last trial lacks this
-    startTimes={thisTrialResponseDetails.startTime};
-    numTries=arrayfun(@getNumTries,thisTrialResponseDetails);
-    inds=[0 cumsum(numTries)];
-    timesToAdd=[];
-    for i=1:length(inds)-1
-
-        timesToAdd=[timesToAdd ones(1,inds(i+1)-inds(i))*startTimes{i}];
-
-    end
-    if isempty(timesToAdd)
-        out=NaN;
-    else
-        out=cell2mat([thisTrialResponseDetails.times])+timesToAdd;
-    end
-else
-    out = NaN;
+out=[];
+for i=1:length(phaseRecord)
+    out=[out cell2mat(phaseRecord(i).responseDetails.times)+phaseRecord(i).responseDetails.startTime];
+end
+if isempty(out)
+    out=NaN;
 end
 end
 
@@ -180,11 +168,12 @@ out=length(responseDetails.tries);
 end
 
 function out=getTriesPhased(phaseRecord)
-thisTrialResponseDetails=[phaseRecord.responseDetails];
-if isfield(thisTrialResponseDetails,'tries') % often the last trial lacks this
-    out=[thisTrialResponseDetails.tries];
-else
-    out = NaN;
+out={};
+for i=1:length(phaseRecord)
+    out=[out phaseRecord(i).responseDetails.tries];
+end
+if isempty(out)
+    out=NaN;
 end
 end
 
@@ -231,7 +220,15 @@ end
 function out=getNumRequests(tries,requestPorts,responsePorts)
 allRequests=find(cell2mat(cellfun(@(x) any(x(requestPorts)==1),tries,'UniformOutput',false)));
 firstResponse=find(cell2mat(cellfun(@(x) any(x(responsePorts)==1),tries,'UniformOutput',false)),1,'first');
-out=length(find(allRequests<firstResponse));
+if isempty(allRequests)
+    out=0;
+    return;
+else
+    if isempty(firstResponse)
+        firstResponse=Inf;
+    end
+    out=length(find(allRequests<firstResponse));
+end
 end
 
 function out = getAllPorts(numPorts)

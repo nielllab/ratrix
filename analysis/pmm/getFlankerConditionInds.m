@@ -31,7 +31,7 @@ names= {};
 conditionInds=[];
 
 
-if ~isempty(strfind(types,'colin')) 
+if ~isempty(strfind(types,'colin'))
     %setup colinear preprocessing
     d.flankerPosAngle(isnan(d.flankerPosAngle))=99;
     fpas=unique(d.flankerPosAngle);
@@ -50,16 +50,7 @@ if ~isempty(strfind(types,'colin'))
     delta=10*eps;
 end
 
-hasNF=strfind(types,'&nfMix');
-if ~isempty(hasNF)
-    types(hasNF:hasNF+5)=[];
-    [c1 nm1 junk col1 ]=getFlankerConditionInds(d,restrictedSubset,types);
-    [c2 nm2 junk col2 ]=getFlankerConditionInds(d,restrictedSubset,'noFlank');
-    conditionInds=[c1;c2];
-    names=[nm1 'noFm'];
-    colors=[col1; col2];
-    types='skip';
-end
+
 
 hasNF=strfind(types,'&nfBlock');
 % this is a sneaky process where we "add in" the data for the same rat from
@@ -70,45 +61,76 @@ if ~isempty(hasNF)
     % remove the block request and get the main conditions
     types(hasNF:hasNF+7)=[];
     [c1 nm1 junk col1 d restrictedSubset]=getFlankerConditionInds(d,restrictedSubset,types);
-     types='skip';
-     
+    types='skip';
+    
     % get the full data for this rat
     d2=getSmalls(char([d.info.subject]));
-
+    
     % check it jives - current data is a subset of all data
-    if ~all(ismember(d.date,d2.date)) 
+    if ~all(ismember(d.date,d2.date))
         error('got the wrong data when looking for this rats no flank block')
     end
-
+    
     % find the target only step
     step=min(d2.step(d2.stdGaussMask==0.0625));% probably 8
     d2=removeSomeSmalls(d2,d2.step~=step);
+    
     if any(d2.flankerContrast>0)
         step
         error('no flanker contrast allowed in this step!')
     end
     
-     if any(ismember(d2.date,d.date)) 
+    if any(~ismember(unique(d2.targetContrast),[0 1]))
+        warning('there are multiple contrasts in this step')
+        keyboard
+    end
+    
+    if any(ismember(d2.date,d.date))
         %multiple calls to getFlankerConditionInds can do this
         warning('removing the no flanker block from the original data... will combine again in conditions')
-        d=removeSomeSmalls(d,d.step==step);
+        
+        remove=d.step==step;
+        restrictedSubset(remove)=[]; %need to remove from goods
+        c1(:,remove)=[];             %need to remove from conditions
+        d=removeSomeSmalls(d,remove);%need to remove trials
+        
         if size(d.date)<1
             error('all trials gone!  something wrong')
         end
-     end
+        
+        if length(restrictedSubset)~=length(d.date)
+            error('restrictedSubset filter is out of sync with trial filter!')
+        end
+    end
     
     
     %add yes responses (d *might* have it)
     [d]=addYesResponse(d);
     [d2]=addYesResponse(d2);
     
+    % check fields missing in the inital data
+    if ~all(ismember(fields(d2),fields(d)))
+        f=fields(d2);
+        missed=f(~ismember(f,fields(d)))
+        acceptableToMiss={'pixPerCyc'}; % these might have removed b/c they are nans in later data
+        if all(ismember(missed,acceptableToMiss)) % these are fields that I have sanction its okay to be out of sync.  will be nanned on the missing side
+            for i=1:length(missed)
+                d.(missed{i})=nan(size(d.date));
+            end
+        else
+            error('miss matched fields... might have grabbed the wrong small data file for this rat...')
+        end
+    end
+    
+    
     % check fields
-    if ~all(ismember(fields(d2),fields(d))) || ~all(ismember(fields(d),fields(d2)))
-        fields(d2)
-        keyboard
+    if  ~all(ismember(fields(d),fields(d2)))
+        f=fields(d)
+        f(~ismember(f,fields(d2)))
         error('miss matched fields... might have grabbed the wrong small data file for this rat...')
     end
-      
+    
+    
     %get goods for the new data
     goods2=getGoods(d2,'withoutAfterError');
     
@@ -124,18 +146,28 @@ if ~isempty(hasNF)
     if max(d2.trialNumber)>min(d.trialNumber)
         error('expect flanker trials come after the block of target only')
         restrictedSubset=[restrictedSubset goods2];  % in principle probably works if error check the other way around to avoid sandwiches, but don't expect to need it
-       %also see order of conditionInds c1 c2
+        %also see order of conditionInds c1 c2
     else
         restrictedSubset=[goods2 restrictedSubset];
         conditionInds=[zeros([size(c1,1)  size(c2,2)]) c1;
-                       c2 zeros([1 size(c1,2)])]; 
+            c2 zeros([1 size(c1,2)])];
     end
-       
+    
     % combine the data
     d=combineTwoSmallDataFiles(d,d2);
-
+    
 end
 
+hasNF=strfind(types,'&nfMix');
+if ~isempty(hasNF)
+    types(hasNF:hasNF+5)=[];
+    [c1 nm1 junk col1 ]=getFlankerConditionInds(d,restrictedSubset,types);
+    [c2 nm2 junk col2 ]=getFlankerConditionInds(d,restrictedSubset,'noFlank');
+    conditionInds=[c1;c2];
+    names=[nm1 'noFm'];
+    colors=[col1; col2];
+    types='skip';
+end
 
 
 %add specifics
@@ -149,8 +181,8 @@ switch types
         VH=  d.targetOrientation==0 & d.flankerOrientation~=0;
         HV=  d.targetOrientation~=0 & d.flankerOrientation==0;
         HH=  d.targetOrientation~=0 & d.flankerOrientation~=0;
-
-
+        
+        
         conditionInds(i+1,:)=VV;
         conditionInds(i+2,:)=VH;
         conditionInds(i+3,:)=HV;
@@ -158,11 +190,11 @@ switch types
         i=i+4;
         names = [names, {'VV', 'VH', 'HV', 'HH'}];
         
-            colors=[1,0,0;%colinear=red
-                    0,1,1; %cyan
-                    0,1,1; %cyan
-                    0,0,0]; %black
-                
+        colors=[1,0,0;%colinear=red
+            0,1,1; %cyan
+            0,1,1; %cyan
+            0,0,0]; %black
+        
     case 'FullTargetContrastSomeFlanker'
         conditionInds=d.targetContrast==1 & d.flankerContrast>0;
         names={'fullTarget'};
@@ -175,16 +207,16 @@ switch types
         warning('only good for VH, not diagonal')
         VV=  d.targetOrientation==0 & d.flankerOrientation==0;
         VH=  d.targetOrientation==0 & d.flankerOrientation~=0;
-
+        
         conditionInds(i+1,:)=VV;
         conditionInds(i+2,:)=VH;
-
+        
         i=i+2;
         names = [names, {'VV', 'VH'}];
         
-          colors=[1,0,0;%colinear=red
-                  0,1,1]; %cyan
-            
+        colors=[1,0,0;%colinear=red
+            0,1,1]; %cyan
+        
     case 'onlyTarget'
         error('probably just use allOrientations')
         V=  d.targetOrientation==0;
@@ -201,7 +233,7 @@ switch types
             names = [names, {num2str(orients(i)*180/pi,'%2.0f')}];
         end
         colors=jet(numOrientations);
-   case 'allRelativeTFOrientationMag'
+    case 'allRelativeTFOrientationMag'
         TFangleDiff=abs(d.targetOrientation-d.flankerOrientation)*180/pi; %target-flanker angle magnitude
         %round to the nearest half degree to solve left vs. right rounding errors
         TFangleDiff=round(TFangleDiff*2)/2;
@@ -214,7 +246,7 @@ switch types
             names = [names, {num2str(orients(i),'%2.0f')}];
             colors(i,1:3)=hsv2rgb(abs((orients(i)+0)/180),1,1);
         end
-
+        
     case 'allRelativeTFOrientations'
         TFangleDiff=d.targetOrientation-d.flankerOrientation; %target-flanker angle
         
@@ -226,22 +258,22 @@ switch types
             names = [names, {num2str(orients(i)*180/pi,'%2.0f')}];
             colors(i,1:3)=hsv2rgb(abs(orients(i)/pi),1,1);
         end
-
-   case 'allRelativeTFOrientationsLR'
+        
+    case 'allRelativeTFOrientationsLR'
         %split into L and R global configs
         [tempConditionInds tempNames tempHaveData tempColors]=getFlankerConditionInds(d,restrictedSubset,'allRelativeTFOrientations');
         for i=1:size(tempConditionInds,1)
             ind=i;
             conditionInds(ind,:)= tempConditionInds(i,:) & d.flankerPosAngle<0;
             names{ind} = [tempNames{i} 'L?'];
-
+            
             ind=size(tempConditionInds,1)+i;
             conditionInds(ind,:)= tempConditionInds(i,:) & d.flankerPosAngle>0;
             names{ind} = [tempNames{i} 'R?'];
-
+            
         end
         colors=[tempColors; tempColors];
-     %imtool(reshape(colors,[22 1 3]));
+        %imtool(reshape(colors,[22 1 3]));
     case 'allTargetContrasts'
         contrasts=unique(d.targetContrast(~isnan(d.targetContrast)));
         numContrast=length(contrasts);
@@ -266,7 +298,7 @@ switch types
             names = [names, {['dev-' num2str(devs(i)*16,'%2.1f')]}];
         end
         colors=jet(numDevs);
-     case 'allPhases'
+    case 'allPhases'
         tps=unique(d.targetPhase(~isnan(d.targetPhase)));
         fps=unique(d.flankerPhase(~isnan(d.flankerPhase)));
         for i=1:length(fps)
@@ -284,20 +316,20 @@ switch types
         conditionInds(2,:)=abs(pi-relPhase)<10^-9;
         conditionInds(3,:)=~(sum(conditionInds));
         colors=[1 0 0; 0 1 1; 1 1 1];
-   
+        
     case 'colin-other'
         colinear=TFangleDiff<delta & PFangleDiff<delta & TFPhaseDiff<delta;
         phaseRev=TFangleDiff<delta & PFangleDiff<delta & abs(TFPhaseDiff-pi)<delta;
         pop= TFangleDiff>delta;
-
+        
         conditionInds(i+1,:)=colinear;
         conditionInds(i+2,:)=phaseRev;
         conditionInds(i+3,:)=pop;
-
+        
         colors=[1 ,0 ,0;%colinear=red
             0,1,0; %green
             0,1,1]; %cyan
-
+        
         i=i+3;
         names = [names, {'colinear', 'phaseRev','popOut'}];
     case 'colin+3'
@@ -306,17 +338,17 @@ switch types
         popTargetConsistent=TFangleDiff>delta & (PFangleDiff>delta) & TFPhaseDiff<delta;  % global position angle (C)onsistent with target angle, use PTangleDiff if more than 2 flankPosAngles
         popTargetInconsistent=TFangleDiff>delta & (PFangleDiff<delta) & TFPhaseDiff<delta;  % global position angle (I)nconsistent with target angle, use PTangleDiff if more than 2 flankPosAngles
         parallel=TFangleDiff<delta & (PFangleDiff>delta) & TFPhaseDiff<delta;
-
+        
         conditionInds(i+1,:)=colinear;
         conditionInds(i+2,:)=popTargetConsistent;
         conditionInds(i+3,:)=popTargetInconsistent;
         conditionInds(i+4,:)=parallel;
-
+        
         colors=[1 ,0 ,0;%colinear=red
             0,1,1; %cyan
             .5,.5,1; %purplish bc. no target has same colin flankers
             0,0,0]; %black
-
+        
         i=i+4;
         %names = [names, {'colin','popTC','popTI', 'para'}]
         names = [names, {'---','l-l','-l-', 'lll'}];
@@ -324,7 +356,7 @@ switch types
         [tempConditionInds tempNames tempHaveData tempColors]=getFlankerConditionInds(d,restrictedSubset,'colin+3');
         conditionInds=tempConditionInds(1:2,:);
         names=tempNames(1:2);
-         %intersect([1 2 ],tempHaveData) %unneccesarry
+        %intersect([1 2 ],tempHaveData) %unneccesarry
         colors=tempColors(1:2,:);
     case 'colin+3&contrasts'
         contrasts=unique(d.targetContrast(~isnan(d.targetContrast)));
@@ -355,11 +387,11 @@ switch types
                 colors(ind,:)=(3*devs(j))*colors(ind,:);
             end
         end
-
+        
     case '16flanks'
         %a hard coded double check
         %the same as:
-        % orient= pi/12; 
+        % orient= pi/12;
         % sweptParameters={'flankerOrientation','targetOrientation','flankerPosAngle','targetContrast'}; % last entry must be targetContrast
         % sweptValues={orient*[-1 1],orient*[-1 1],orient*[-1 1],[0 1]};
         % [junkImages junkNumTrials junkReturnSweptValues conditionInds2]=getStimSweep(r,d,sweptParameters,sweptValues,true);
@@ -419,12 +451,12 @@ switch types
         
     case '8flanks+'
         [conditionInds names haveData colors]=getFlankerConditionInds(d,restrictedSubset,'8flanks');
-
+        
         lumps=5;
-        colors(9:13,1:3)=[colors(1:4,:); .6 .6 .6]; 
+        colors(9:13,1:3)=[colors(1:4,:); .6 .6 .6];
         names{end+1}='colin';
         names{end+1}='changeFlank';
-        names{end+1}='changeTarget';  
+        names{end+1}='changeTarget';
         names{end+1}='para';
         names{end+1}='other';
         conditionInds(end+1,:)=conditionInds(strcmp(names,'RRR'),:) | conditionInds(strcmp(names,'LLL'),:);
@@ -440,31 +472,31 @@ switch types
         haveData=intersect(haveData,whichInds);
         colors=colors(whichInds,:);
     case 'colinSymetryCheck'
-
-
+        
+        
         [tempConditionInds tempNames tempHaveData tempColors]=getFlankerConditionInds(d,restrictedSubset,'colin+3');
-
-
+        
+        
         for i=1:length(tempNames)
             conditionInds(2*i,:)=colinear %& something>delta; %right-tipped
             conditionInds(2*i+1,:)=colinear %& something>delta; %left-tipped
-
+            
         end
-
+        
         
         error('not finished yet');
-
+        
         
         colors=[1 ,0 ,0;%colinear=red
             0,1,1; %cyan
             0,1,1; %cyan
             0,0,0]; %black
-
+        
         i=i+4;
         %names = [names, {'colin','popTC','popTI', 'para'}]
         names = [names, {'---','|-|','-|-', '|||'}];
-
-    
+        
+        
     case 'noFlank'
         conditionInds=d.flankerContrast==0;
         colors=[.5 1 .5];
@@ -473,8 +505,8 @@ switch types
         conditionInds=d.flankerContrast>0;
         colors=[.6 .6 .6];
         names={'hasF'};
-   case 'skip'
-       % do nothing, this is a condition used to prevent overwriting
+    case 'skip'
+        % do nothing, this is a condition used to prevent overwriting
     otherwise
         types
         error('undefined type flanker conditions')

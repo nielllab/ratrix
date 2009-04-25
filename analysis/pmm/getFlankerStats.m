@@ -60,9 +60,14 @@ params.settings.goodTrialType=goodTrialType;
 numSubjects=length(subjects);
 names.subjects=subjects;
 
-[justForSize justForNames b c]=getFlankerConditionInds( filterFlankerData(getSmalls(subjects{1},dateRange),filterType),[],conditionType);
+
+
+
+tempD=getSmalls('231',[datenum('21-Jun-2008') now]); % only some sample data used to determine num conditions for preallocation
+%tempD.pixPerCyc=nan(size(tempD.date));
+%[justForSize justForNames b c]=getFlankerConditionInds( filterFlankerData(getSmalls(subjects{1},[dateRange]),filterType),[],conditionType);
+[justForSize a b c]=getFlankerConditionInds(tempD,[],conditionType);
 numConditions=size(justForSize,1);
-names.conditions=justForNames;
 
 numStats=length(statTypes);
 names.stats=statTypes;
@@ -153,7 +158,7 @@ for i=1:numSubjects
 
     %define trials good for analysis
     goods=getGoods(d,goodTrialType);
-
+    
     %get indices of each condition type
     [conditionInds names.conditions haveData params.colors d goods]=getFlankerConditionInds(d,goods,conditionType);
   
@@ -171,9 +176,14 @@ for i=1:numSubjects
 
     %confirm nothing funny is going on
     if ~all((d.correctResponseIsLeft==1)==(d.correct==1 & d.response==1) | (d.correct==0 & d.response~=1))
-        x=((d.correctResponseIsLeft==1)==(d.correct==1 & d.response==1) | (d.correct==0 & d.response~=1))
+        x=((d.correctResponseIsLeft==1)==(d.correct==1 & d.response==1) | (d.correct==0 & d.response~=1)) ;
         violations=find(~x)
-        error('violates correct response is left; should never happen, regardless of trial manager rules')
+        if all(d.response(violations)==-1) && all(goods(violations)==0)
+            disp(sprintf('found %d violation of side rule in rat %s, but they were all -1 responses, already not included in goods anyways',length(violations),d.info.subject{1}))
+        else
+            error('violates correct response is left; should never happen, regardless of trial manager rules')
+        end
+
     end
 
     for j=1:numConditions
@@ -205,7 +215,7 @@ for i=1:numSubjects
         firstInd=min(find(conditionInds(j,:)));
         if  ~isempty(firstInd)
             switch conditionType
-                case {'16flanks','8flanks','8flanks+','allRelativeTFOrientationMag','8flanks+&nfMix','8flanks+&nfBlock'}
+                case {'16flanks','8flanks','8flanks+','allRelativeTFOrientationMag','8flanks+&nfMix','8flanks+&nfBlock','8flanks+&nfMix&nfBlock'}
                     params.factors.targetOrientation(i,j)=d.targetOrientation(firstInd);
                     params.factors.flankerOrientation(i,j)=d.flankerOrientation(firstInd);
                     params.factors.flankerPosAngle(i,j)=d.flankerPosAngle(firstInd);

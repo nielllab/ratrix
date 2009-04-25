@@ -130,9 +130,9 @@ spikes(waveInds(~thisCluster))=0; % set all the non-spike waveforms to be zero;
 
 % count the number of spikes per frame
 % spikeCount is a 1xn vector of (number of spikes per frame), where n = number of frames
-spikeCount=zeros(1,size(spikeData.frameIndices,1));
+spikeCount=zeros(1,size(frameIndices,1));
 for i=1:length(spikeCount) % for each frame
-    spikeCount(i)=sum(spikes(spikeData.frameIndices(i,1):spikeData.frameIndices(i,2)));  % inclusive?  policy: include start & stop
+    spikeCount(i)=sum(spikes(frameIndices(i,1):frameIndices(i,2)));  % inclusive?  policy: include start & stop
 end
 
 % calculate the number of frames in the window for each spike
@@ -141,14 +141,39 @@ timeWindowFrames=ceil(timeWindowMs*(refreshRate/1000));
 
 %figure out which spikes to use based on eyeData
 if ~isempty(eyeData)
-    [px py crx cry]=getPxyCRxy(eyeData);
+    [px py crx cry eyeTime]=getPxyCRxy(eyeData);
     eyeSig=[crx-px cry-py];
 
+
     if length(unique(eyeSig(:,1)))>10 % if at least 10 x-positions
-        %do stuff
-        density=hist3(eyeSig);
-    else
-        disp(sprintf('no good eyeData on trial %d',parameters.trialNumber))
+        
+        regionBoundsXY=[.5 .5]; % these are CRX-PY bounds of unknown degrees
+        [within ellipses]=selectDenseEyeRegions(eyeSig,1,regionBoundsXY);
+
+        
+        % currently only look at frames in which each sample was within
+        % bounds (conservative)
+        %framesEyeSamples=unique(eyeData.eyeDataFrameInds);  % this is not every frame!
+        framesSomeEyeWithin=unique(eyeData.eyeDataFrameInds(within));  % at least one sable within
+        framesSomeEyeNotIn=unique(eyeData.eyeDataFrameInds(~within));  % at least one smple without
+        framesAllEyeWithin=setdiff(framesSomeEyeWithin,framesSomeEyeNotIn);
+  
+
+        
+        if 0 %remove when eye out of bound and view temporal selected data
+            warning('don''t know if eyeDataFrameInds are the correct values -  need to check frame drops, etc')
+            %stimFrameseyeData.eyeDataFrameInds)...?
+            %stimFrames(framesSomeEyeNotIn)...?
+            
+            figure
+            %plot(eyeTime, eyeSig(:,1),'k',eyeTime(within), eyeSig(within,1),'c.')
+            plot(eyeData.eyeDataFrameInds, eyeSig(:,1),'k',eyeData.eyeDataFrameInds(within), eyeSig(within,1),'c.')
+            hold on; plot(stimFrames,spikeCount,'r')
+            
+            spikeCount(framesSomeEyeNotIn)=0;  % need to know if these are stimFramesor Nth frame that occured...
+            plot(stimFrames,spikeCount,'c');
+        end
+        
     end
 end
 
@@ -157,7 +182,7 @@ end
 % triggers is a 4-d matrix:
 % each 3d element is a movie corresponding to the spike (4th dim)
 numSpikingFrames=sum(spikeCount>0);
-numSpikes = sum(spikeCount);
+numSpikes = sum(spikeCount)
 triggerInd = 1;
 % triggers = zeros(stim_width, stim_height, # of window frames per spike, number of spikes)
 %initialize trigger with mean values for temporal border padding
@@ -258,11 +283,11 @@ end
 
 rng=[min(analysisdata.cumulativeSTA(:)) max(analysisdata.cumulativeSTA(:))];
 
-% 11/25/08 - update GUI
+
 %figure(plotParameters.handle); % make the figure current and then plot into it
 figure(min(analysisdata.cumulativeTrialNumbers)) % trialBased is better
 set(gcf,'position',[100 400 800 700])
-% size(analysisdata.cumulativeSTA)
+
 
 
 % %% spatial signal (best via bright)
@@ -310,7 +335,9 @@ if doSpatial
     hold off; imagesc(squeeze(STA(:,:,brightInd(3))),[min(STA(:)) max(STA(:))]);
     hold on; plot(brightInd(2), brightInd(1),'yo')
     hold on; plot(darkInd(2)  , darkInd(1),'yo')
-    colorbar; %colormap(blueToRed(meanLuminanceStimulus,rng));
+    colorbar;  
+    colormap(gray);
+    %colormap(blueToRed(meanLuminanceStimulus,rng,true));
     fnplt(e1,1,'g'); fnplt(e2,1,'g'); fnplt(e3,1,'g'); % plot elipses
     xlabel(sprintf('this trial (%d)',analysisdata.trialNumber))
 
@@ -339,15 +366,25 @@ set(gca,'YLim',[minmax([analysisdata.singleTrialTemporalRecord(:)' darkCI(:)' br
 ylabel('RGB(gunVal)')
 xlabel(sprintf('msec -- cumulative STA(%d-%d)',min(analysisdata.cumulativeTrialNumbers),max(analysisdata.cumulativeTrialNumbers)))
 
-if doSpatial
+if doSpatial 
     subplot(2,2,4)
-    montage(reshape(analysisdata.cumulativeSTA,[size(STA,1) size(STA,2) 1 size(STA,3) ] ),'DisplayRange',rng)
-    colormap(blueToRed(meanLuminanceStimulus,rng,true));
-    % %% spatial signal (all)
-    % for i=1:
-    % subplot(4,n,2*n+i)
-    % imagesc(STA(:,:,i),'range',[min(STA(:)) min(STA(:))]);
-    % end
+    
+    if false % turn off montage for eye data
+        montage(reshape(analysisdata.cumulativeSTA,[size(STA,1) size(STA,2) 1 size(STA,3) ] ),'DisplayRange',rng)
+        colormap(blueToRed(meanLuminanceStimulus,rng,true));
+        % %% spatial signal (all)
+        % for i=1:
+        % subplot(4,n,2*n+i)
+        % imagesc(STA(:,:,i),'range',[min(STA(:)) min(STA(:))]);
+        % end
+    else  
+        if exist('ellipses','var')
+            plotEyeElipses(eyeSig,ellipses,within,true);
+        else
+            msg=sprintf('no good eyeData on trial %d\n will analyze all data',parameters.trialNumber)
+            text(.5,.5, msg)
+        end       
+    end
 end
 
 drawnow

@@ -402,7 +402,7 @@ switch upper(spikeSortingMethod)
         end
         clusterCounts=sortrows(clusterCounts,-2);
         rankedClusters=rankedClusters(clusterCounts(:,1));
-        rankedClusters(rankedClusters==1)=[];  % how do we know that 1 is the noise cluster,  does k.kwik enforce or is it a guess based on num samples.
+        %rankedClusters(rankedClusters==1)=[];  % how do we know that 1 is the noise cluster,  does k.kwik enforce or is it a guess based on num samples.
         rankedClusters(end+1)=1; % move noise cluster '1' to end
         fclose(fid);
         
@@ -432,8 +432,17 @@ end
 
 if 1 % view plots (for testing)
     
-    whichSpikes=find(assignedClusters~=999);
-    whichNoise=find(assignedClusters==999);  % i think o sort only... need to be specific to noise clouds in other detection methods
+    switch upper(spikeSortingMethod)
+        case 'OSORT'
+            whichSpikes=find(assignedClusters~=999);
+            whichNoise=find(assignedClusters==999);  % i think o sort only... need to be specific to noise clouds in other detection methods
+        case 'KLUSTAKWIK'
+            whichSpikes=find(assignedClusters==rankedClusters(1)); % biggest
+            whichNoise=find(assignedClusters~=rankedClusters(1));  % not the biggest
+        otherwise
+            error('bad method')
+    end
+
     candTimes=find(spikes);
     spikeTimes=candTimes(whichSpikes);
     noiseTimes=candTimes(whichNoise);
@@ -462,19 +471,26 @@ if 1 % view plots (for testing)
     zoomInds=[max(lastSpikeTimePad-zoomWidth,1):lastSpikeTimePad ];
     
     figure
-    subplot(1,3,3)
-    try
-        if ~isempty(whichNoise)
-    plot(spikeWaveforms(whichNoise,:)','color',[.7 .7 .7])
+    %         if ~isempty(whichNoise)
+    %             plot(spikeWaveforms(whichNoise,:)','color',[.7 .7 .7])
+    %         end
+    %colors=brighten(brighten(bone(length(rankedClusters)),1),1);
+    colors=cool(length(rankedClusters));
+    subplot(1,3,3);hold on;
+    subplot(2,3,4); hold on;
+    for i=2:length(rankedClusters)
+        thisCluster=find(assignedClusters==rankedClusters(i));
+        if ~isempty(thisCluster)
+            subplot(1,3,3); plot(spikeWaveforms(thisCluster,:)','color',colors(i,:))
+            subplot(2,3,4); plot3(features(thisCluster,1),features(thisCluster,2),features(thisCluster,3),'.','color',colors(i,:))
         end
-    catch
-        keyboard
-        
     end
-    hold on;
-    plot(spikeWaveforms(whichSpikes,:)','r')
+    subplot(1,3,3); plot(spikeWaveforms(whichSpikes,:)','r')
     axis([ 1 size(spikeWaveforms,2)  1.1*minmax(spikeWaveforms(:)') ])
-     xlabel(sprintf('%d spikes, %2.2g Hz', length(spikeTimes),length(spikeTimes)/diff(neuralDataTimes([1 end]))))
+    subplot(2,3,4); plot3(features(whichSpikes,1),features(whichSpikes,2),features(whichSpikes,3),'r.')
+    
+
+    xlabel(sprintf('%d spikes, %2.2g Hz', length(spikeTimes),length(spikeTimes)/diff(neuralDataTimes([1 end]))))
     
      subplot(2,3,1)
      %inter-spike interval distribution
@@ -505,13 +521,15 @@ if 1 % view plots (for testing)
     plot(neuralDataTimes(someSpikeTimes),neuralData(someSpikeTimes),'.r');
     axis([ minmax(neuralDataTimes(zoomInds)')   yRange ])
     
-    subplot(2,3,4)
-    title('filtSignal and spikes');
-    plot(downsample(neuralDataTimes,N),downsample(filteredSignal,N),'k');
-    hold on
-    plot(neuralDataTimes(noiseTimes),filteredSignal(noiseTimes),'.b');
-    plot(neuralDataTimes(spikeTimes),filteredSignal(spikeTimes),'.r');
-    axis([ minmax(neuralDataTimes')   1.1*minmax(filteredSignal') ])
+    if 0
+        subplot(2,3,4)
+        title('filtSignal and spikes');
+        plot(downsample(neuralDataTimes,N),downsample(filteredSignal,N),'k');
+        hold on
+        plot(neuralDataTimes(noiseTimes),filteredSignal(noiseTimes),'.b');
+        plot(neuralDataTimes(spikeTimes),filteredSignal(spikeTimes),'.r');
+        axis([ minmax(neuralDataTimes')   1.1*minmax(filteredSignal') ])
+    end
 % a button should allow selection between filtered or non-filtered (only show one kind)
 
 %     title('rawSignal and spikes');

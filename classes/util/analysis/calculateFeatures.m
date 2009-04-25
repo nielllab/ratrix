@@ -18,16 +18,21 @@ for fInd=1:length(featureList)
             [pc,score,latent,tsquare] = princomp(data);
             nrDatapoints=nrDatapoints+10; %first 10 PCs
             features=[features score(:,1:10)];
-        case {'wavePC1', 'wavePC2'}
+        case {'wavePC1', 'wavePC2','wavePC123'}
             w=data;
             l2norms = sqrt(sum(w.^2,2)); % normalize waveforms first
             w = w./l2norms(:,ones(1,size(data,2)));
             [pc,score] = princomp(w);
-            nrDatapoints=nrDatapoints+1;
-            if strcmp(feat,'wavePC1')
-                features=[features score(:,1)]; % first PC only
-            else
-                features=[features score(:,2)]; % second PC only
+            switch feat
+                case 'wavePC1'
+                    features=[features score(:,1)]; % first PC only
+                    nrDatapoints=nrDatapoints+1;
+                case 'wavePC2'
+                    features=[features score(:,2)]; % 2nd PC only
+                    nrDatapoints=nrDatapoints+1;
+                case 'wavePC123'
+                    features=[features score(:,1:3)]; % first 3
+                    nrDatapoints=nrDatapoints+3;
             end
         case 'energy'
             score=sqrt(sum(data(:,:).^2,2))./sqrt(size(data,2));

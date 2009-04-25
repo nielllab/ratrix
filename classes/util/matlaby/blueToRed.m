@@ -110,7 +110,7 @@ numColors=size(colors,1);
 for i=1:numColors-1
     n=diff(locationInds(i:i+1));
     thisSection=linearColorFade(colors(i,:),colors(i+1,:),n);
-    map=[map; thisSection]
+    map=[map; thisSection];
     if 0 %view construction process
         colormap(map)
         drawnow

@@ -93,7 +93,7 @@ if a
                 ai_parameters.inputRanges=repmat([-1 6],ai_parameters.numChans,1);
                 dn=datanet('stim','localhost','132.239.158.179','\\132.239.158.179\datanet_storage',ai_parameters)
             end
-            if true
+            if false
                 %calc stim should set the method to 'cr-p', calls set
                 %resolution should update et
                 alpha=12; %deg above...really?

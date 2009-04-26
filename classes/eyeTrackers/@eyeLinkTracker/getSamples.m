@@ -51,7 +51,7 @@ if justGetLatestSample
 
     index=et.eyeUsed+1;
 
-    samples=single([...
+    samples=[...
         sample.time;...
         sample.type;...
         sample.flags;...
@@ -95,7 +95,7 @@ if justGetLatestSample
         raw.raw_cr2(2);...
         GetSecs;...
         now... %edf: 'now' is useless and slow -- why does pmm want it?  it is less accurate than GetSecs and takes 4x longer -- minimum 30us per call, often takes 100us and peaks at 5ms!!!
-        ]);
+        ]';
 else
 
     [samples events]=Eyelink('GetQueuedData',et.eyeUsed);
@@ -126,7 +126,7 @@ else
             badFields=(4:2:16)+badsOffset;
             goodFields=~ismember((1:size(samples,1)),badFields);
 
-            samples=single([samples(goodFields,~losts)' GetSecs*ones(numGood,1) now*ones(numGood,1)]);
+            samples=[samples(goodFields,~losts)' GetSecs*ones(numGood,1) now*ones(numGood,1)];
             %edf: 'now' is useless and slow -- why does pmm want it?  it is less accurate than GetSecs and takes 4x longer -- minimum 30us per call, often takes 100us and peaks at 5ms!!!
             %pmm notes its easier to relate to trial start time
             %edf says everything should be kept in the GetSecs scale, except the trialrecord gross time/date stamp.  if you care about accurate time since trial start, you need the trial's first GetSecs.

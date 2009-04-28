@@ -98,7 +98,7 @@ for i=1:floor(length(ims)/2)
     [junk n2 junk junk]=fileparts(ims(length(ims)-(i-1)).name);
     trialDistribution{end+1}={{n1 n2} 1};
 end
-imageStim = images(imageDir,ypos,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,trialDistribution,'normal',[1 1],false,[0 0],false);
+imageStim = images(imageDir,ypos,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,trialDistribution,'normal',[1 1],false,[0 0],false,.5);
 
 d=2; %decrease to broaden
 gran=100;
@@ -111,17 +111,19 @@ ports=cellfun(@uint8,{1 3},'UniformOutput',false);
 % stim properties:
 % in.distribution               'binary', 'uniform', or one of the following forms:
 %                                   {'sinusoidalFlicker',[temporalFreqs],[contrasts],gapSecs} - each freq x contrast combo will be shown for equal time in random order, total time including gaps will be in.loopDuration
-%                                   {'gaussian',clipPercent} - choose variance so that clipPercent of an infinite stim would be clipped (includes both low and hi)
+%                                   {'gaussian',clipPercent,seed} - choose variance so that clipPercent of an infinite stim would be clipped (includes both low and hi)
+%                                           seed - either 'new' or scalar integer 0-2^32-1 
 %                                   {path, origHz, clipVal, clipType} - path is to a file (either .txt or .mat, extension omitted, .txt loadable via load()) containing a single vector of stim values named 'noise', with original sampling rate origHz.
 %                                       clipType:
 %                                       'normalized' will normalize whole file to clipVal (0-1), setting darkest val in file to 0 and values over clipVal to 1.
 %                                       'ptile' will normalize just the contiguous part of the file you are using to 0-1, clipping top clipVal (0-1) proportion of vals (considering only the contiguous part of the file you are using)
 % in.startFrame                 'randomize' or integer indicating fixed frame number to start with
 % in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file)
-%                               to make uniques and repeats, pass {numRepeats numUniques numCycles chunkSeconds} - chunk refers to one repeat/unique - distribution cannot be sinusoidalFlicker
+%                               to make uniques and repeats, pass {numRepeats numUniques numCycles chunkSeconds centerThirdContrasts} - chunk refers to one repeat/unique - distribution cannot be sinusoidalFlicker
+%                                        centerThirdContrasts -- a vector of contrast values -1 to 1 to loop over, setting center 1/3 of each chunk
 % in.numLoops                   must be >0 or inf, fractional values ok (will be rounded to nearest frame)
 
-[noiseSpec.distribution]         =deal({'gaussian' .01});
+[noiseSpec.distribution]         =deal({'gaussian' .01 'new'});
 [noiseSpec.startFrame]           =deal(uint8(1)); %deal('randomize');
 [noiseSpec.loopDuration]         =deal(1);
 [noiseSpec.numLoops]             =deal(inf);
@@ -188,7 +190,7 @@ else
 end
 
 [noiseSpec.distribution]         =deal({ts001, 1200, .01, 'ptile'}); %12800/32767 for normalized clipVal, see pam email to Alex Casti on January 25, 2005, and Reinagel Reid 2000
-[noiseSpec.loopDuration]         =deal({uint32(60) uint32(0) uint32(1) uint32(30)}); %{numRepeats numUniques numCycles chunkSeconds}
+[noiseSpec.loopDuration]         =deal({uint32(60) uint32(0) uint32(1) uint32(30) 1}); %{numRepeats numUniques numCycles chunkSeconds centerThirdContrasts}
 
 
 [noiseSpec.locationDistribution]=deal(1);
@@ -198,12 +200,16 @@ end
 
 hateren=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
-[noiseSpec.distribution]         =deal({'gaussian', .01});
+[noiseSpec.distribution]         =deal({'gaussian', .01, uint32(12345)});
+nr=60;
+[noiseSpec.loopDuration]         =deal({uint32(nr) uint32(0) uint32(1) uint32(30) linspace(1,-1,nr)}); %{numRepeats numUniques numCycles chunkSeconds centerThirdContrasts}
 
 fullfieldFlicker=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
-[noiseSpec.distribution]         =deal({'sinusoidalFlicker',[1 5 10 25 50],[.1 .25 .5 .75 1],.1}); %temporal freqs, contrasts, gapSecs
-[noiseSpec.loopDuration]         =deal(5*5*1);
+tfs=[1 5 10 25 50];
+cs=[.1 .25 .5 .75 1];
+[noiseSpec.distribution]         =deal({'sinusoidalFlicker',tfs,cs,.1}); %temporal freqs, contrasts, gapSecs
+[noiseSpec.loopDuration]         =deal(length(cs)*length(tfs)*1);
 [noiseSpec.patchHeight]          =deal(1);
 [noiseSpec.patchWidth]           =deal(1);
 crftrf=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);

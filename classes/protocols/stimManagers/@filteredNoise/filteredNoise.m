@@ -8,14 +8,16 @@ function s=filteredNoise(varargin)
 % stim properties:
 % in.distribution               'binary', 'uniform', or one of the following forms:
 %                                   {'sinusoidalFlicker',[temporalFreqs],[contrasts],gapSecs} - each freq x contrast combo will be shown for equal time in random order, total time including gaps will be in.loopDuration
-%                                   {'gaussian',clipPercent} - choose variance so that clipPercent of an infinite stim would be clipped (includes both low and hi)
+%                                   {'gaussian',clipPercent,seed} - choose variance so that clipPercent of an infinite stim would be clipped (includes both low and hi)
+%                                           seed - either 'new' or scalar uint32 
 %                                   {path, origHz, clipVal, clipType} - path is to a file (either .txt or .mat, extension omitted, .txt loadable via load()) containing a single vector of stim values named 'noise', with original sampling rate origHz.
 %                                       clipType:
 %                                       'normalized' will normalize whole file to clipVal (0-1), setting darkest val in file to 0 and values over clipVal to 1.
 %                                       'ptile' will normalize just the contiguous part of the file you are using to 0-1, clipping top clipVal (0-1) proportion of vals (considering only the contiguous part of the file you are using)
 % in.startFrame                 'randomize' or integer indicating fixed frame number to start with
 % in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file)
-%                               to make uniques and repeats, pass {numRepeats numUniques numCycles chunkSeconds} - chunk refers to one repeat/unique - distribution cannot be sinusoidalFlicker
+%                               to make uniques and repeats, pass {numRepeats numUniques numCycles chunkSeconds centerThirdContrasts} - chunk refers to one repeat/unique - distribution cannot be sinusoidalFlicker
+%                                        centerThirdContrasts -- a vector of contrast values -1 to 1 to loop over, setting center 1/3 of each chunk
 % in.numLoops                   must be >0 or inf, fractional values ok (will be rounded to nearest frame)
 %
 % patch properties:
@@ -97,13 +99,20 @@ switch nargin
                         else
                             error('temporalFreqs and contrasts must be real numeric vectors >=0, contrasts must be <=1, gapSecs must be real numeric scalar >=0')
                         end
-                    elseif all(size(in.distribution)==[1 2]) && strcmp(tmp.special,'gaussian')
+                    elseif all(size(in.distribution)==[1 3]) && strcmp(tmp.special,'gaussian')
                         tmp.clipPercent=in.distribution{2};
-                        
+                        tmp.seed=in.distribution{3};
+                                                
                         if isscalar(tmp.clipPercent) && tmp.clipPercent>=0 && tmp.clipPercent<=1 && isreal(tmp.clipPercent)
                             %pass
                         else
                             error('clipPercent must be real scalar 0<=x<=1')
+                        end
+                        
+                        if (isscalar(tmp.seed) && isa(tmp.seed,'uint32')) || (ischar(tmp.seed) && isvector(tmp.seed) && strcmp(tmp.seed,'new'))
+                            %pass
+                        else
+                            error('seed must be scalar uint32 or ''new''')
                         end
 
                     elseif all(size(in.distribution)==[1 4]) && ismember(in.distribution{4},{'ptile','normalized'}) && any([exist([tmp.special '.txt'],'file') exist([tmp.special '.mat'],'file')]==2)
@@ -133,26 +142,29 @@ switch nargin
 
                 if isscalar(in.loopDuration) && isreal(in.loopDuration) && in.loopDuration>=0
                     %pass
-                elseif iscell(in.loopDuration) && isvector(in.loopDuration) && all(size(in.loopDuration)==[1 4]) && ~isSinusoidalFlicker
+                elseif iscell(in.loopDuration) && isvector(in.loopDuration) && all(size(in.loopDuration)==[1 5]) && ~isSinusoidalFlicker
                     tmp.numRepeats = in.loopDuration{1};
                     tmp.numUniques = in.loopDuration{2};
                     tmp.numCycles =  in.loopDuration{3};
                     tmp.chunkSeconds =  in.loopDuration{4};
+                    tmp.centerThirdContrasts = in.loopDuration{5};
                     if isscalar(tmp.numRepeats) && isinteger(tmp.numRepeats) && tmp.numRepeats>=0 && ...
                             isscalar(tmp.numUniques) && isinteger(tmp.numUniques) && tmp.numUniques>=0 && ...
                             isscalar(tmp.numCycles) && isinteger(tmp.numCycles) && tmp.numCycles>0 && ...
-                            isscalar(tmp.chunkSeconds) && isreal(tmp.chunkSeconds) && isnumeric(tmp.chunkSeconds) && tmp.chunkSeconds>0
+                            isscalar(tmp.chunkSeconds) && isreal(tmp.chunkSeconds) && isnumeric(tmp.chunkSeconds) && tmp.chunkSeconds>0 && ...
+                            isvector(tmp.centerThirdContrasts) && isreal(tmp.centerThirdContrasts)% && all(tmp.centerThirdContrasts>=-1) && all(tmp.centerThirdContrasts<=1)
                         %convert to doubles to avoid int overflow issues when used in computeFilteredNoise
                         tmp.numRepeats = double(tmp.numRepeats);
                         tmp.numUniques = double(tmp.numUniques);
                         tmp.numCycles =  double(tmp.numCycles);
                         tmp.chunkSeconds =  double(tmp.chunkSeconds);
+                        tmp.centerThirdContrasts = double(tmp.centerThirdContrasts);
                         varargin{1}(j).loopDuration=tmp;
                     else
-                        error('numRepeats and numUniques must be scalar integers >=0, numCycles must be scalar integer >0, and chunkSeconds must be scalar numeric real >0')
+                        error('numRepeats and numUniques must be scalar integers >=0, numCycles must be scalar integer >0, chunkSeconds must be scalar numeric real >0, and centerThirdContrasts must be vector of reals')
                     end
                 else
-                    error('loopDuration must be real scalar >=0, zero loopDuration means 1 static looped frame, except for file stims, where it means play the whole file instead of a subset. to make uniques and repeats, pass {numRepeats numUniques numCycles chunkSeconds} - chunk refers to one repeat/unique - distribution cannot be sinusoidalFlicker')
+                    error('loopDuration must be real scalar >=0, zero loopDuration means 1 static looped frame, except for file stims, where it means play the whole file instead of a subset. to make uniques and repeats, pass {numRepeats numUniques numCycles chunkSeconds centerThirdContrasts} - chunk refers to one repeat/unique - distribution cannot be sinusoidalFlicker')
                 end
 
                 if in.numLoops>0 && isscalar(in.numLoops) && isreal(in.numLoops)

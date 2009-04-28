@@ -4,17 +4,17 @@ stimulus.hz=hz;
 filteringOK = false;
 
 for i=1:length(stimulus.port)
-
+    
     %convert to double to avoid int overflow problems
     sz=double(stimulus.patchDims{i}); %[height, width]
-
+    
     scale=floor(stimulus.kernelSize{i}*sqrt(sum(sz.^2)));
     if rem(scale,2)==0
         scale=scale+1; %want nearest odd integer
     end
-
+    
     bound=norminv(stimulus.bound{i},0,1); %only appropriate cuz marginal of mvnorm along one of its axes is norm with same variance as that eigenvector's eigenvalue
-
+    
     %a multivariate gaussian's equidensity contours are ellipsoids
     %principle axes given by the eigenvectors of its covariance matrix
     %the eigenvalues are the squared relative lengths
@@ -23,24 +23,24 @@ for i=1:length(stimulus.port)
     rot=[cos(stimulus.orientation{i}) -sin(stimulus.orientation{i}); sin(stimulus.orientation{i}) cos(stimulus.orientation{i})];
     axes=rot*axes;
     sigma=axes*diag([stimulus.ratio{i} 1].^2)*axes';
-
+    
     [a b]=meshgrid(linspace(-bound,bound,scale));
     kernel=reshape(mvnpdf([a(:) b(:)],0,sigma),scale,scale);
     kernel=stimulus.filterStrength{i}*kernel/max(kernel(:));
-
+    
     kernel(ceil(scale/2),ceil(scale/2))=1; %so filterStrength=0 means identity
-
+    
     dur=round(stimulus.kernelDuration{i}*hz);
     if dur==0
         k=kernel;
     else
         t=normpdf(linspace(-bound,bound,dur),0,1);
-
+        
         for j=1:dur
             k(:,:,j)=kernel*t(j);
         end
     end
-
+    
     k=k/sqrt(sum(k(:).^2));  %to preserve contrast (tho only for gaussian stimuli)
     %filtering effectively summed a bunch of independent gaussians with variances determined by the kernel entries
     %if X ~ N(0,a) and Y ~ N(0,b), then X+Y ~ N(0,a+b) and cX ~ N(0,ac^2)
@@ -54,10 +54,14 @@ for i=1:length(stimulus.port)
     else
         frames=max(1,round(stimulus.loopDuration{i}*hz));
     end
-
-    maxSeed=2^32-1;
-    s=GetSecs;
-    stimulus.seed{i}=round((s-floor(s))*maxSeed);
+    
+    if ~isfield(stimulus.distribution{i},'seed') || strcmp(stimulus.distribution{i}.seed,'new')
+        maxSeed=2^32-1;
+        s=GetSecs;
+        stimulus.seed{i}=round((s-floor(s))*maxSeed);
+    else
+        stimulus.seed{i}=double(stimulus.distribution{i}.seed);
+    end
     stimulus.inds{i}=[];
     if isstruct(stimulus.distribution{i}) && strcmp(stimulus.distribution{i}.special,'sinusoidalFlicker')
         stimulus.distribution{i}.conditions=getShuffledCross({stimulus.distribution{i}.contrasts,stimulus.distribution{i}.freqs});
@@ -88,18 +92,18 @@ for i=1:length(stimulus.port)
     elseif isstruct(stimulus.distribution{i})
         switch stimulus.distribution{i}.special
             case 'gaussian'
-
+                
                 randn('state',stimulus.seed{i});
                 noise=randn([sz frames])*pickContrast(.5,stimulus.distribution{i}.clipPercent) +.5;
-
+                
                 hiClipInds=noise>1;
                 loClipInds=noise<0;
                 fprintf('*** gaussian: clipping %g%% of values (should be %g%%)\n',100*(sum(hiClipInds(:))+sum(loClipInds(:)))/numel(noise),100*stimulus.distribution{i}.clipPercent)
                 
-                %these will happen later, and screw up the gaussian-contrast-preserving filtering if done now 
+                %these will happen later, and screw up the gaussian-contrast-preserving filtering if done now
                 %noise(hiClipInds)=1;
                 %noise(loClipInds)=0;
-
+                
                 filteringOK=true;
             otherwise
                 if ~isstruct(stimulus.loopDuration{i}) && stimulus.loopDuration{i}==0
@@ -150,9 +154,17 @@ for i=1:length(stimulus.port)
         rpt=noise(:,:,1:chunkSize);
         start=1;
         unqPos=chunkSize+1;
+        contrastMask=ones(size(rpt));
+        contrastFix=zeros(size(rpt));
+        contrastMaskInd=0;
         for c=1:stimulus.loopDuration{i}.numCycles
             for r=1:stimulus.loopDuration{i}.numRepeats
-                new(:,:,start:start+chunkSize-1)=rpt;
+                thisContrast=stimulus.loopDuration{i}.centerThirdContrasts(mod(contrastMaskInd,length(stimulus.loopDuration{i}.centerThirdContrasts))+1);
+                contrastMask(:,:,round(chunkSize/3) : round(2*chunkSize/3))=thisContrast;
+                contrastFix(:,:,round(chunkSize/3) : round(2*chunkSize/3))=(1-thisContrast)/2;
+                contrastMaskInd=contrastMaskInd+1;
+                
+                new(:,:,start:start+chunkSize-1)=rpt.*contrastMask+contrastFix;
                 start=start+chunkSize;
             end
             for u=1:stimulus.loopDuration{i}.numUniques
@@ -169,7 +181,7 @@ for i=1:length(stimulus.port)
         end
         noise=new;
     end
-
+    
     try
         stimulus.sha1{i} = hash(noise,'SHA-1');
     catch ex
@@ -179,7 +191,7 @@ for i=1:length(stimulus.port)
             rethrow(ex);
         end
     end
-
+    
     t=zeros(size(k));
     t(ceil(length(t(:))/2))=1;
     if all(rem(size(k),2)==1) && all(k(:)==t(:))
@@ -202,6 +214,18 @@ for i=1:length(stimulus.port)
     
     stim(stim>1)=1;%DO NOT NORMALIZE!!!
     stim(stim<0)=0;
+    
+    saveOutput=false;
+    if saveOutput
+        bitDepth=8;
+        if size(stim,1)==1 && size(stim,2)==1 && isstruct(stimulus.loopDuration{i})
+            numChunks=stimulus.loopDuration{i}.numCycles*(stimulus.loopDuration{i}.numUniques + stimulus.loopDuration{i}.numRepeats);
+            plottable=reshape(floor(stim*2^bitDepth),chunkSize,numChunks)+repmat(2^bitDepth*(0:numChunks-1)/4,chunkSize,1);
+            save(sprintf('filteredNoise_%d_%s_%.100g.mat',i,datestr(now,30),GetSecs),'plottable','stim')
+        else
+            warning('can''t save/plot stim that isn''t 1x1xn or doesn''t have rpts/unqs')
+        end
+    end
     
     comparePreAndPostFilteredDistributions=false;
     if comparePreAndPostFilteredDistributions
@@ -233,5 +257,5 @@ for i=1:length(stimulus.port)
         stimulus.cache{i}=repmat(stim,[1,1,f]);
         stimulus.cache{i}(:,:,end+1:end+r)=stim(:,:,1:r);
     end
-
+    
 end

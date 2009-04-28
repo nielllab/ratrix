@@ -152,16 +152,25 @@ for i=1:length(stimulus.port)
         
         new=nan*zeros(size(noise,1),size(noise,2),totalFrames);
         rpt=noise(:,:,1:chunkSize);
+        
+        clipNow=true;  %if we don't clip now, lowering the contrast will bring more values in range, so the stim won't be exactly preserved
+        %but note clipping now slightly screws up gaussian contrast preserving filtering below
+        if clipNow && ~all(stimulus.loopDuration{i}.centerThirdContrasts==1)
+            rpt(rpt<0)=0;
+            rpt(rpt>1)=1;
+        end
+        
         start=1;
         unqPos=chunkSize+1;
         contrastMask=ones(size(rpt));
         contrastFix=zeros(size(rpt));
+        contrastInds=round(chunkSize/3) : round(2*chunkSize/3);
         contrastMaskInd=0;
         for c=1:stimulus.loopDuration{i}.numCycles
             for r=1:stimulus.loopDuration{i}.numRepeats
                 thisContrast=stimulus.loopDuration{i}.centerThirdContrasts(mod(contrastMaskInd,length(stimulus.loopDuration{i}.centerThirdContrasts))+1);
-                contrastMask(:,:,round(chunkSize/3) : round(2*chunkSize/3))=thisContrast;
-                contrastFix(:,:,round(chunkSize/3) : round(2*chunkSize/3))=(1-thisContrast)/2;
+                contrastMask(:,:,contrastInds)=thisContrast;
+                contrastFix(:,:,contrastInds)=(1-thisContrast)/2; %keeps mean at .5
                 contrastMaskInd=contrastMaskInd+1;
                 
                 new(:,:,start:start+chunkSize-1)=rpt.*contrastMask+contrastFix;
@@ -215,7 +224,7 @@ for i=1:length(stimulus.port)
     stim(stim>1)=1;%DO NOT NORMALIZE!!!
     stim(stim<0)=0;
     
-    saveOutput=false;
+    saveOutput=true;
     if saveOutput
         bitDepth=8;
         if size(stim,1)==1 && size(stim,2)==1 && isstruct(stimulus.loopDuration{i})

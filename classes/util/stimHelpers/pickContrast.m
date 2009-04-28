@@ -2,8 +2,8 @@
 %ptile percent of the result will have absolute values larger than
 %abs(doNotExceed)
 function out=pickContrast(doNotExceed,ptile)
-if ptile<=0 || ptile>=.5
-    error('0<ptile<.5')
+if ptile<=0 || ptile>=1
+    error('0<ptile<1')
 end
 
 out=abs(doNotExceed/norminv(ptile/2));

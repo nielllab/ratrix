@@ -155,7 +155,7 @@ for i=1:length(stimulus.port)
         
         clipNow=true;  %if we don't clip now, lowering the contrast will bring more values in range, so the stim won't be exactly preserved
         %but note clipping now slightly screws up gaussian contrast preserving filtering below
-        if clipNow && ~all(stimulus.loopDuration{i}.centerThirdContrasts==1)
+        if clipNow && ~all(stimulus.loopDuration{i}.centerThirdContrasts>=1)
             rpt(rpt<0)=0;
             rpt(rpt>1)=1;
         end
@@ -224,12 +224,12 @@ for i=1:length(stimulus.port)
     stim(stim>1)=1;%DO NOT NORMALIZE!!!
     stim(stim<0)=0;
     
-    saveOutput=true;
+    saveOutput=false;
     if saveOutput
         bitDepth=8;
         if size(stim,1)==1 && size(stim,2)==1 && isstruct(stimulus.loopDuration{i})
             numChunks=stimulus.loopDuration{i}.numCycles*(stimulus.loopDuration{i}.numUniques + stimulus.loopDuration{i}.numRepeats);
-            plottable=reshape(floor(stim*2^bitDepth),chunkSize,numChunks)+repmat(2^bitDepth*(0:numChunks-1)/4,chunkSize,1);
+            plottable=reshape(floor(stim*2^bitDepth),chunkSize,numChunks)+repmat(2^bitDepth*(0:numChunks-1),chunkSize,1);
             save(sprintf('filteredNoise_%d_%s_%.100g.mat',i,datestr(now,30),GetSecs),'plottable','stim')
         else
             warning('can''t save/plot stim that isn''t 1x1xn or doesn''t have rpts/unqs')

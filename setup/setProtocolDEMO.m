@@ -15,7 +15,7 @@ sm=soundManager({soundClip('correctSound','allOctaves',[400],20000), ...
 
 rewardSizeULorMS          =50;
 requestRewardSizeULorMS   =10;
-requestMode               ='first'; 
+requestMode               ='first';
 msPenalty                 =1000;
 fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
@@ -80,7 +80,34 @@ ims=fullfile('Rodent-Data','PriyaV','other stimuli sets','paintbrush_flashlight'
 if ispc
     imageDir=fullfile('\\Reinagel-lab.ad.ucsd.edu','rlab',ims);
 elseif ismac
-    imageDir=fullfile('/Volumes','RLAB',ims);
+    targ='/Volumes/rlab';
+    loc='@132.239.158.181/rlab ';
+    
+    [stat res]=system('mount');
+    if stat==0
+        if isempty(findstr(res,sprintf('%son %s',loc,targ)))
+            
+            [status,message,messageid] = mkdir(targ);
+            if status
+                [stat res]=system(sprintf('mount -o nodev,nosuid -t smbfs //rodent:1Mouse%s %s',loc,targ));
+                if stat~=0
+                    stat
+                    res
+                    error('couldn''t mount rlab')
+                end
+            else
+                targ
+                message
+                messageid
+                error('couldn''t mkdir')
+            end
+        end
+    else
+        stat
+        res
+        error('couldn''t check mounts')
+    end
+    imageDir=fullfile(targ,ims);
 else
     error('only works on windows and mac')
 end
@@ -112,7 +139,7 @@ ports=cellfun(@uint8,{1 3},'UniformOutput',false);
 % in.distribution               'binary', 'uniform', or one of the following forms:
 %                                   {'sinusoidalFlicker',[temporalFreqs],[contrasts],gapSecs} - each freq x contrast combo will be shown for equal time in random order, total time including gaps will be in.loopDuration
 %                                   {'gaussian',clipPercent,seed} - choose variance so that clipPercent of an infinite stim would be clipped (includes both low and hi)
-%                                           seed - either 'new' or scalar integer 0-2^32-1 
+%                                           seed - either 'new' or scalar integer 0-2^32-1
 %                                   {path, origHz, clipVal, clipType} - path is to a file (either .txt or .mat, extension omitted, .txt loadable via load()) containing a single vector of stim values named 'noise', with original sampling rate origHz.
 %                                       clipType:
 %                                       'normalized' will normalize whole file to clipVal (0-1), setting darkest val in file to 0 and values over clipVal to 1.
@@ -176,7 +203,11 @@ unfilteredNoise=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTria
 
 
 [a b]=getMACaddress;
-x=daqhwinfo('nidaq');
+if ispc
+    x=daqhwinfo('nidaq');
+else
+    x.InstalledBoardIds=[];
+end
 if a && strcmp(b,'0014225E4685') && length(x.InstalledBoardIds)>0
     led=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,{'off'},false,'LED','center');
 else

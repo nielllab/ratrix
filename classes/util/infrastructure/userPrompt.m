@@ -11,6 +11,8 @@ function out = userPrompt(window,validInputs,type,typeParams)
 
 ListenChar(2);
 
+KbName('UnifyKeyNames');
+
 KbConstants.allKeys=KbName('KeyNames');
 KbConstants.allKeys=lower(cellfun(@char,KbConstants.allKeys,'UniformOutput',false));
 KbConstants.asciiZero=double('0');
@@ -19,7 +21,7 @@ for i=1:10
     KbConstants.numKeys{i}=find(strncmp(char(KbConstants.asciiZero+i-1),KbConstants.allKeys,1));
 end
 KbConstants.enterKey=KbName('RETURN');
-KbConstants.deleteKeys=[KbName('delete') KbName('backspace')];
+KbConstants.deleteKeys=[KbName('delete')]; %this errors on osx and is covered by unifykeynames: KbName('backspace')];
 KbConstants.decimalKey=[KbName('.>') KbName('.')];
 
 Screen('Preference', 'TextRenderer', 0);  % consider moving to station.startPTB

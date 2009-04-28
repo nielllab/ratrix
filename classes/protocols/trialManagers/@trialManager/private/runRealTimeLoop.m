@@ -214,7 +214,7 @@ if window>0
     [normBoundsRect, offsetBoundsRect]= Screen('TextBounds', window, 'TEST');
 end
 
-%KbName('UnifyKeyNames'); %does not appear to choose keynamesosx on windows - KbName('KeyNamesOSX') comes back wrong
+KbName('UnifyKeyNames'); %does not appear to choose keynamesosx on windows - KbName('KeyNamesOSX') comes back wrong
 
 %consider using RestrictKeysForKbCheck for speedup of KbCheck
 

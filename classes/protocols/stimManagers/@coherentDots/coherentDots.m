@@ -1,7 +1,7 @@
 function s=coherentDots(varargin)
 % COHERENTDOTS  class constructor.
 % s=coherentDots(screen_width,screen_height,num_dots,coherence,speed,contrast,
-%   dot_size,movie_duration,screen_zoom,maxWidth,maxHeight,pctCorrectionTrials[,interTrialLuminance])
+%   dot_size,movie_duration,screen_zoom,maxWidth,maxHeight,pctCorrectionTrials,[replayMode,interTrialLuminance])
 %   screen_width - width of sourceRect (determines size of texture to make)
 %   screen_height - height of sourceRect (determines size of texture to make)
 %   num_dots - number of dots to draw
@@ -28,6 +28,7 @@ s.contrast = 1;               % contrast of the dots
 s.dot_size = 9;              % Width of dots in pixels
 s.movie_duration = 2;         % in seconds
 s.pctCorrectionTrials=.5;
+s.replayMode='loop';
 screen_zoom = [6 6];
 
     s = class(s,'coherentDots',stimManager());
@@ -39,7 +40,7 @@ case 1
     else
         error('Input argument is not an coherentDots object')
     end
-case {12 13}
+case {12 13 14}
     % screen_width
     if (floor(varargin{1}) - varargin{1} < eps)
         s.screen_width = varargin{1};
@@ -119,6 +120,7 @@ case {12 13}
     else
         error('screen_zoom must be a 1x2 array with integer values')
     end
+    
     % pctCorrectionTrials
     if isscalar(varargin{12}) && varargin{12}<=1 && varargin{12}>=0
         s.pctCorrectionTrials=varargin{12};
@@ -126,17 +128,37 @@ case {12 13}
         error('pctCorrectionTrials must be a scalar between 0 and 1');
     end
     
+    for i=13:14
+        if i <= nargin
+            args{i}=varargin{i};
+        else
+            args{i}=[];
+        end
+    end
+    
+    % replayMode
+    if ~isempty(args{13})
+        if ischar(args{13}) && (strcmp(args{13},'loop') || strcmp(args{13},'once'))
+            s.replayMode=args{13};
+        else
+            error('replay mode must be ''loop'' or ''once''');
+        end
+    else
+        s.replayMode='loop';
+    end
+    
     % maxWidth, maxHeight, scale factor, intertrial luminance
-    if nargin==12
+    if isempty(args{14})
         s = class(s,'coherentDots',stimManager(varargin{10},varargin{11},screen_zoom,uint8(0)));   
     else
         % check intertrial luminance
-        if varargin{13} >=0 && varargin{13} <= 1
-            s = class(s,'coherentDots',stimManager(varargin{10},varargin{11},screen_zoom,uint8(varargin{13}*intmax('uint8'))));
+        if args{14} >=0 && args{14} <= 1
+            s = class(s,'coherentDots',stimManager(varargin{10},varargin{11},screen_zoom,uint8(args{14}*intmax('uint8'))));
         else
             error('interTrialLuminance must be <=1 and >=0 - will be converted to a uint8 0-255');
         end
     end
+    
 otherwise
     nargin
     error('Wrong number of input arguments')

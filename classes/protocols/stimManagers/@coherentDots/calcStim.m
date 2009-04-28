@@ -34,7 +34,6 @@ else
     lastRec=[];
 end
 [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass);
-type='loop';
 
 if targetPorts == 1
     % animal should go left
@@ -137,6 +136,14 @@ for i=1:num_frames
 end;
 
 out = dots_movie*selectedContrast;
+if strcmp(stimulus.replayMode,'loop')
+    type='loop';
+elseif strcmp(stimulus.replayMode,'once')
+    type='cache';
+    out(:,:,end+1)=0;
+else
+    error('unknown replayMode');
+end
 
 % details.stimStruct = structize(stimulus);
 details.dotDirection = dotDirection;

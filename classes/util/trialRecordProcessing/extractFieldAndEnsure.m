@@ -141,7 +141,6 @@ try
     end
 catch ex
     % if this field doesn't exist, fill with nans
-
     % pmm says: should check to see if the offending field was on the first trial or a latter trial.  error if not the first.
     getReport(ex)
     out=nan*ones(1,length(trialRecords));
@@ -159,7 +158,7 @@ for i=1:length(phaseRecord)
     out=[out cell2mat(phaseRecord(i).responseDetails.times)+phaseRecord(i).responseDetails.startTime];
 end
 if isempty(out)
-    out=NaN;
+    out={NaN};
 end
 end
 
@@ -173,7 +172,7 @@ for i=1:length(phaseRecord)
     out=[out phaseRecord(i).responseDetails.tries];
 end
 if isempty(out)
-    out=NaN;
+    out={NaN};
 end
 end
 
@@ -181,7 +180,7 @@ function out = getTimesNonphased(trialRecord)
 if isfield(trialRecord,'times') % often the last trial lacks this
     out = cell2mat([trialRecord.times]);
 else
-    out = NaN;
+    out = {NaN};
 end
 end
 
@@ -189,13 +188,13 @@ function out = getTriesNonphased(trialRecord)
 if isfield(trialRecord,'tries')
     out = [trialRecord.tries];
 else
-    out= NaN;
+    out= {NaN};
 end
 end
 
 function out=diffFirstTwoRequests(times,tries,requestPorts)
 out=nan;
-which=find(cell2mat(cellfun(@(x) any(x(requestPorts)==1),tries,'UniformOutput',false)));
+which=find(cell2mat(cellfun(@(x) ~any(isnan(x))&&any(x(requestPorts)==1),tries,'UniformOutput',false)));
 if length(which)>=2
     out=times(which(2))-times(which(1));
 end
@@ -203,8 +202,8 @@ end
 
 function out=diffFirstRequestLastResponse(times,tries,requestPorts,responsePorts)
 out=nan;
-first=find(cell2mat(cellfun(@(x) any(x(requestPorts)==1),tries,'UniformOutput',false)),1,'first');
-last=find(cell2mat(cellfun(@(x) any(x(responsePorts)==1),tries,'UniformOutput',false)),1,'last');
+first=find(cell2mat(cellfun(@(x) ~any(isnan(x))&&any(x(requestPorts)==1),tries,'UniformOutput',false)),1,'first');
+last=find(cell2mat(cellfun(@(x) ~any(isnan(x))&&any(x(responsePorts)==1),tries,'UniformOutput',false)),1,'last');
 if ~isempty(first) && ~isempty(last)
     out=times(last)-times(first);
 end
@@ -218,14 +217,17 @@ out=bin2dec(num2str(out));
 end
 
 function out=getNumRequests(tries,requestPorts,responsePorts)
-allRequests=find(cell2mat(cellfun(@(x) any(x(requestPorts)==1),tries,'UniformOutput',false)));
-firstResponse=find(cell2mat(cellfun(@(x) any(x(responsePorts)==1),tries,'UniformOutput',false)),1,'first');
+allRequests=find(cell2mat(cellfun(@(x) ~any(isnan(x))&&any(x(requestPorts)==1),tries,'UniformOutput',false)));
+allResponses=find(cell2mat(cellfun(@(x) ~any(isnan(x))&&any(x(responsePorts)==1),tries,'UniformOutput',false)));
 if isempty(allRequests)
     out=0;
     return;
 else
-    if isempty(firstResponse)
+    firstInd=find(allResponses>allRequests(1),1,'first');
+    if isempty(firstInd)
         firstResponse=Inf;
+    else
+        firstResponse=allResponses(firstInd);
     end
     out=length(find(allRequests<firstResponse));
 end

@@ -57,7 +57,8 @@ else
 end
 
 % {'flickerRamp',[0 .5]}
-vh=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,{'off'},true,'ptb','center');
+dropFrames=false;
+vh=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,{'off'},dropFrames,'ptb','center');
 
 pixPerCycs              =[20];
 targetOrientations      =[pi/2];
@@ -240,7 +241,7 @@ fullfieldFlicker=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTri
 tfs=[1 5 10 25 50];
 cs=[.1 .25 .5 .75 1];
 [noiseSpec.distribution]         =deal({'sinusoidalFlicker',tfs,cs,.1}); %temporal freqs, contrasts, gapSecs
-[noiseSpec.loopDuration]         =deal(length(cs)*length(tfs)*1);
+[noiseSpec.loopDuration]         =deal(length(cs)*length(tfs)*4);
 [noiseSpec.patchHeight]          =deal(1);
 [noiseSpec.patchWidth]           =deal(1);
 crftrf=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);

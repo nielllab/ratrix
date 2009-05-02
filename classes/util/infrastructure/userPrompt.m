@@ -11,7 +11,7 @@ function out = userPrompt(window,validInputs,type,typeParams)
 
 ListenChar(2);
 
-KbName('UnifyKeyNames');
+%KbName('UnifyKeyNames');
 
 KbConstants.allKeys=KbName('KeyNames');
 KbConstants.allKeys=lower(cellfun(@char,KbConstants.allKeys,'UniformOutput',false));
@@ -24,10 +24,24 @@ KbConstants.enterKey=KbName('RETURN');
 KbConstants.deleteKeys=[KbName('delete')]; %this errors on osx and is covered by unifykeynames: KbName('backspace')];
 KbConstants.decimalKey=[KbName('.>') KbName('.')];
 
-Screen('Preference', 'TextRenderer', 0);  % consider moving to station.startPTB
-Screen('Preference', 'TextAntiAliasing', 0); % consider moving to station.startPTB
+%Screen('Preference', 'TextRenderer', 0);  % consider moving to station.startPTB
+%Screen('Preference', 'TextAntiAliasing', 0); % consider moving to station.startPTB
 allowKeyboard=true;
-Screen('FillRect',window,200*ones(1,3));
+
+kind=Screen(window, 'WindowKind'); %if LED, there won't be a window
+if isempty(kind)
+    kind=0;
+end
+switch kind
+    case 0
+        %nothing
+    case 1
+        Screen('FillRect',window,200*ones(1,3));
+    otherwise
+        kind
+        error('unrecognized kind')
+end
+
 entry='';
 out=[];
 
@@ -54,15 +68,22 @@ else
 end
 
 
-
+txtDone=false;
 while isempty(out)
-
+    
     yTextPos=20;
     if strcmp(type,'manual ts')
         text=sprintf('Enter new trainingStepNum between %d and %d (current trainingStepNum is %d)',validInputs{1}(1),validInputs{1}(end),typeParams.currentTsNum);
         for j=1:length(typeParams.trainingStepNames)
             jtext=sprintf('Training step %d: %s',j,typeParams.trainingStepNames{j});
-            Screen('DrawText',window,jtext,10,yTextPos,100*ones(1,3));
+            switch kind
+                case 0
+                    if ~txtDone
+                        fprintf([jtext '\n']);
+                    end
+                case 1
+                    Screen('DrawText',window,jtext,10,yTextPos,100*ones(1,3));
+            end
             yTextPos=yTextPos+20;
         end
         textprompt=sprintf('New trainingStepNum: %s',entry);
@@ -83,12 +104,20 @@ while isempty(out)
         end
         textprompt=sprintf('New value: %s',entry);
     end
-
-
-    Screen('DrawText',window,text,10,yTextPos,100*ones(1,3));
-    Screen('DrawText',window,textprompt,10,yTextPos+20,100*ones(1,3));
-    Screen('Flip',window);
-
+    
+    switch kind
+        case 0
+            if ~txtDone
+                fprintf([text '\n']);
+                fprintf([textprompt '\n']);
+                txtDone=true;
+            end
+        case 1
+            Screen('DrawText',window,text,10,yTextPos,100*ones(1,3));
+            Screen('DrawText',window,textprompt,10,yTextPos+20,100*ones(1,3));
+            Screen('Flip',window);
+    end
+    
     % read from keyboard
     [keyIsDown,secs,keyCode]=KbCheck;
     if keyIsDown
@@ -99,7 +128,7 @@ while isempty(out)
         enterDown=any(keyCode(KbConstants.enterKey));
         deleteDown=any(keyCode(KbConstants.deleteKeys));
         decimalDown=any(keyCode(KbConstants.decimalKey));
-
+        
         if any(numsDown) && allowKeyboard
             newNum=find(numsDown)-1;
             if length(newNum)==1
@@ -133,8 +162,13 @@ while isempty(out)
                 end
             else
                 text=sprintf('Invalid entry! Please try again.');
-                Screen('DrawText',window,text,10,60,100*ones(1,3));
-                Screen('Flip',window);
+                switch kind
+                    case 0
+                        fprintf([text '\n']);
+                    case 1
+                        Screen('DrawText',window,text,10,60,100*ones(1,3));
+                        Screen('Flip',window);
+                end
                 WaitSecs(3);
             end
         end
@@ -142,7 +176,7 @@ while isempty(out)
     else
         allowKeyboard=true;
     end
-
+    
 end % end while loop
 
 end % end function

@@ -3,7 +3,7 @@ function [phaseRecords analogOutput outputsamplesOK numSamps] ...
 
 fprintf('doing phase %d\n',phaseInd)
 
-outputRange=[-5 0;... %hardcoded for our LED amp
+outputRange=[-5 -.3;... %hardcoded for our LED amp (photodiode shows LED has noise above -.3)
              0 5]; %TTL levels for indexPulse
          
 if ~isempty(analogOutput)

@@ -4,3 +4,6 @@
 /display.m -text
 /errorStim.m -text
 /extractDetailFields.m -text
+/fillLUT.m -text
+/flushLUT.m -text
+/getLUT.m -text

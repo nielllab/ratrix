@@ -20,6 +20,9 @@ end
 
 [b ind]=sort(order);
 trialRecords=unsortedRecords(ind);
+if isempty(trialRecords) % when would this happen? 
+	return;
+end
 
 % sanity checks
 if any([trialRecords.trialNumber]~=trialRecords(1).trialNumber:trialRecords(end).trialNumber)

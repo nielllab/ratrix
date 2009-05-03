@@ -9,10 +9,11 @@ s = stimulus;
 % TODO:  Change this
 % out = 1;
 
-LUTBitDepth=8;
-numColors=2^LUTBitDepth; maxColorID=numColors-1; fraction=1/(maxColorID);
-ramp=[0:fraction:1];
-LUT= [ramp;ramp;ramp]';
+% LUTBitDepth=8;
+% numColors=2^LUTBitDepth; maxColorID=numColors-1; fraction=1/(maxColorID);
+% ramp=[0:fraction:1];
+% LUT= [ramp;ramp;ramp]';
+[LUT stimulus updateSM]=getLUT(stimulus,LUTbits);
 
 [resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60],32,getMaxWidth(stimulus),getMaxHeight(stimulus));
 
@@ -21,7 +22,7 @@ if isnan(resolutionIndex)
 end
 
 
-updateSM=0;     % For intertrial dependencies
+% updateSM=0;     % For intertrial dependencies
 % isCorrection=0;     % For correction trials to force to switch sides
 
 scaleFactor = getScaleFactor(stimulus);

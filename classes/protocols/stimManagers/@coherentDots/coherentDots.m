@@ -15,10 +15,6 @@ function s=coherentDots(varargin)
 %   
 
 eps = 0.0000001;
-switch nargin
-case 0 
-% if no input arguments, create a default object
-
 s.screen_width = 100;         % for matrix
 s.screen_height = 100;        % for matrix
 s.num_dots = 100;             % Number of dots to display
@@ -29,9 +25,17 @@ s.dot_size = 9;              % Width of dots in pixels
 s.movie_duration = 2;         % in seconds
 s.pctCorrectionTrials=.5;
 s.replayMode='loop';
-screen_zoom = [6 6];
 
-    s = class(s,'coherentDots',stimManager());
+s.LUT=[];
+s.LUTbits=0;
+
+screen_zoom = [6 6]
+
+switch nargin
+case 0 
+% if no input arguments, create a default object
+
+s = class(s,'coherentDots',stimManager());
 
 case 1
 % if single argument of this class type, return it

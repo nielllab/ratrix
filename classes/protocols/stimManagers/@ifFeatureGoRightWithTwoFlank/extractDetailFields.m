@@ -4,7 +4,7 @@ function [out newLUT]=extractDetailFields(sm,basicRecords,trialRecords,LUTparams
 % quick init test after load in a trialRecord.mat
 %   LUTparams.compiledLUT='nAFC';
 %   basicRecords.trialManagerClass=1;
-%   extractDetailFields(ifFeatureGoRightWithTwoFlank,basicRecords,trialRecords,LUTparams)
+%   x=extractDetailFields(ifFeatureGoRightWithTwoFlank,basicRecords,trialRecords,LUTparams)
 
 newLUT={};
 
@@ -38,6 +38,7 @@ else
         [out.stdGaussMask newLUT] = extractFieldAndEnsure(stimDetails,{'stdGaussMask'},'scalar',newLUT);
         [out.xPosNoisePix newLUT] = extractFieldAndEnsure(stimDetails,{'xPosNoisePix'},'scalar',newLUT);
         [out.yPosNoisePix newLUT] = extractFieldAndEnsure(stimDetails,{'yPosNoisePix'},'scalar',newLUT);
+
 %         out.deviation=getDetail(trialRecords,'deviation');
 %         out.targetPhase=getDetail(trialRecords,'targetPhase');
 %         out.flankerPhase=getDetail(trialRecords,'flankerPhase');
@@ -69,6 +70,10 @@ else
 %         out.blocking=isDefined(trialRecords, 'blocking');
 %         out.dynamicSweep=isDefined(trialRecords, 'dynamicSweep');
         
+
+        [out.toggle newLUT] = extractFieldAndEnsure(stimDetails,{'toggleStim'},'scalar',newLUT);
+
+
         % 4/8/09 - actualTargetOnOffMs and actualFlankerOnOffMs
         % how to vectorize this? b/c we need to collect all the tries for a given trial
         % only works in nAFC (because we can assume that 2nd phase is where stim presentation happens!)

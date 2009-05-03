@@ -71,7 +71,7 @@ else
 %         out.dynamicSweep=isDefined(trialRecords, 'dynamicSweep');
         
 
-        [out.toggle newLUT] = extractFieldAndEnsure(stimDetails,{'toggleStim'},'scalar',newLUT);
+        [out.toggleStim newLUT] = extractFieldAndEnsure(stimDetails,{'toggleStim'},'scalar',newLUT);
 
 
         % 4/8/09 - actualTargetOnOffMs and actualFlankerOnOffMs

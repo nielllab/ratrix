@@ -416,6 +416,7 @@ while ~done && ~quit;
         transitionCriterion = getTransitions(spec);
         framesUntilTransition = getFramesUntilTransition(spec);
         phaseType = getPhaseType(spec);
+        lockoutDuration = getLockoutDuration(spec);
 
         % =========================================================================
 
@@ -666,7 +667,7 @@ while ~done && ~quit;
     % =========================================================================
     % all trial logic follows
 
-    if ~paused
+    if ~paused && frameNum>lockoutDuration
         ports=readPorts(station);
     end
     doValves=0*ports;
@@ -676,10 +677,11 @@ while ~done && ~quit;
     timestamps.kbCheckDone=GetSecs;
 
     if keyIsDown
+        allowPorts=frameNum>lockoutDuration;
         [didAPause paused done trialRecords(trialInd).result doValves ports didValves didHumanResponse manual ...
             doPuff pressingM pressingP,timestamps.kbOverhead,timestamps.kbInit,timestamps.kbKDown] ...
             = handleKeyboard(tm, keyCode, didAPause, paused, done, trialRecords(trialInd).result, doValves, ports, didValves, didHumanResponse, ...
-            manual, doPuff, pressingM, pressingP, originalPriority, priorityLevel, KbConstants);
+            manual, doPuff, pressingM, pressingP, originalPriority, priorityLevel, KbConstants, allowPorts);
     end
 
     timestamps.keyboardDone=GetSecs;
@@ -731,6 +733,7 @@ while ~done && ~quit;
 
     timestamps.enteringPhaseLogic=GetSecs;
 
+    try
     if ~paused
         [tm done newSpecInd phaseInd updatePhase transitionedByTimeFlag ...
             transitionedByPortFlag trialRecords(trialInd).result isRequesting lastSoundsLooped ...
@@ -748,6 +751,10 @@ while ~done && ~quit;
         end
 
 
+    end
+    catch
+        sca
+        keyboard
     end
     timestamps.phaseLogicDone=GetSecs;
 

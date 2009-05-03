@@ -1,6 +1,6 @@
 function spec=stimSpec(varargin)
 % stimSpec  class constructor. 
-% spec=stimSpec(stimulus,transitions,stimType,startFrame,framesUntilTransition,stochasticDistribution,scaleFactor,isFinalPhase,hz,phaseType,phaseLabel,[isStim],[indexPulses])
+% spec=stimSpec(stimulus,transitions,stimType,startFrame,framesUntilTransition,stochasticDistribution,scaleFactor,isFinalPhase,hz,phaseType,phaseLabel,[isStim],[indexPulses],[lockoutDuration])
 %
 % INPUTS
 % stimulus                  the stimulus frames to show, or expert-mode parameters struct (equivalent to non-phased 'out')
@@ -43,6 +43,7 @@ function spec=stimSpec(varargin)
 % phaseLabel                a text label for the given phase to be stored in phaseRecords
 % isStim                    a boolean indicating whether to set the station's stim pin high during this phase (usually during discriminanda) [defaults to false]
 % indexPulses               a boolean vector same length as stimulus indicating what to output on the station's indexPin during each frame (defaults to all false)
+% lockoutDuration           a scalar lockout duration specifying a number of frames at the start of the phase during which rats cannot response (keyboard still works though)
 
 % fields in the stimSpec object
 spec.stimulus = zeros(1,1,1);
@@ -58,6 +59,7 @@ spec.phaseType=[];
 spec.phaseLabel='';
 spec.isStim=false;
 spec.indexPulses=[];
+spec.lockoutDuration=0;
 
 switch nargin
     case 0
@@ -76,7 +78,7 @@ switch nargin
         else
             error('Input argument is not a stimSpec object or cell array of stim frames')
         end
-    case {11 12 13}
+    case {11 12 13 14}
         % stimulus
         spec.stimulus = varargin{1};
         % transitions
@@ -206,7 +208,7 @@ switch nargin
 		end
         
 		stimLen=size(spec.stimulus,3);
-		if nargin>=13 && ~isempty(varargin{13})
+		if nargin==13 && ~isempty(varargin{13})
 			spec.indexPulses=varargin{13};
 		else
 			spec.indexPulses=false(1,stimLen);
@@ -215,8 +217,20 @@ switch nargin
 			%pass
 		else
 			error('indexPulses must be logical vector same length as stimulus')
-		end
+        end
 		
+        if nargin==14
+             if ~isempty(varargin{14}) && isscalar(varargin{14}) && varargin{14}>=0
+                 spec.lockoutDuration=varargin{14};
+             elseif isempty(varargin{14})
+                 spec.lockoutDuration=0;
+             else
+                 error('lockoutDuration must be >=0 or empty');
+             end
+        end
+                 
+            
+        
         spec = class(spec,'stimSpec');
         
     otherwise

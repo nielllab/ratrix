@@ -1,7 +1,7 @@
 function t=trialManager(varargin)
 % TRIALMANAGER  class constructor.  ABSTRACT CLASS-- DO NOT INSTANTIATE
 % t=trialManager(soundManager,reinforcementManager,eyeController,customDescription,
-%   frameDropCorner, dropFrames, displayMethod, requestPorts,saveDetailedFramedrops[,showText])
+%   frameDropCorner, dropFrames, displayMethod, requestPorts,saveDetailedFramedrops,stimulusOnsetMode,responseWindowMs[,showText])
 %
 % 10/8/08 - this is the new integrated trialManager that handles all stims in a phased way - uses phased doTrial and stimOGL
 %
@@ -14,6 +14,11 @@ function t=trialManager(varargin)
 % displayMethod - 'LED' or 'ptb'
 % requestPorts - one of the strings {'none', 'center', 'all'}; defines which ports should be returned as requestPorts
 %       by the stimManager's calcStim; the default for nAFC is 'center' and the default for freeDrinks is 'none'
+% saveDetailedFrameDrops - a flag indicating whether or not to save detailed timestamp information for each dropped frame (causes large trialRecord files!)
+% stimulusOnsetMode - 'immediate' or {'delayed',fcn_name}
+%		- 'delayed' means that phaseify should call the function fcn_name to set a transition timeout for the 'waiting for request' phase to the 'discrim' phase
+%		- 'immediate' should be ignored by phaseify for now.. (this is default behavior)
+% responseWindowMs - the timeout length of the 'discrim' phase in milliseconds (should be used by phaseify)
 requiredSoundNames = {'correctSound','keepGoingSound','trySomethingElseSound','wrongSound'};
 
 t.soundMgr=soundManager();
@@ -26,6 +31,8 @@ t.saveDetailedFramedrops=false;
 t.displayMethod='';
 t.requestPorts='center'; % either 'none','center',or 'all'
 t.showText=true;
+t.stimulusOnsetMode='immediate';
+t.responseWindowMs=[];
 
 switch nargin
     case 0
@@ -39,7 +46,7 @@ switch nargin
         else
             error('Input argument is not a trialManager object')
         end
-    case {9 10}
+    case {11 12}
         
         % soundManager
         if isa(varargin{1},'soundManager') && all(ismember(requiredSoundNames, getSoundNames(varargin{1})))
@@ -148,11 +155,35 @@ switch nargin
             error('saveDetailedFramedrops must be a logical');
         end
         
+		% stimulusOnsetMode
+		if ~isempty(varargin{10})
+			if ischar(varargin{10}) && strcmp(varargin{10},'immediate')
+				t.stimulusOnsetMode=varargin{10};
+			elseif iscell(varargin{10}) && ischar(varargin{10}{1}) && strcmp(varargin{10}{1},'delayed')
+				t.stimulusOnsetMode=varargin{10};
+			else
+				error('stimulusOnsetMode must be ''immediate'' or {''delayed'',fcn_name}');
+			end
+		else
+			t.stimulusOnsetMode='immediate';
+		end
+		
+		% responseWindowMs
+		if ~isempty(varargin{11})
+			if isscalar(varargin{11})
+				t.responseWindowMs=varargin{11};
+			else
+				error('responseWindowMs must be scalar');
+			end
+		else
+			t.responseWindowMs=[];
+		end
+		
         % showText
-        if nargin==10
-            if islogical(varargin{10})
-                t.showText=varargin{10};
-            elseif isempty(varargin{10})
+        if nargin==12
+            if islogical(varargin{12})
+                t.showText=varargin{12};
+            elseif isempty(varargin{12})
                 %pass - ignore empty args
             else
                 error('showText must be logical');

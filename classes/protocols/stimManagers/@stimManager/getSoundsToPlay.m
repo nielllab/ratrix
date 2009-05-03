@@ -5,12 +5,12 @@ function soundsToPlay = getSoundsToPlay(stimManager, ports, lastPorts, phase, st
 playLoopSounds={};
 playSoundSounds={};
 
-% nAFC setup:
-if strcmp(trialManagerClass, 'nAFC')
+% nAFC/goNoGo setup:
+if strcmp(trialManagerClass, 'nAFC') || strcmp(trialManagerClass,'goNoGo')
     % play white noise (when responsePort triggered during phase 1)
     if phase == 1 && (any(ports(targetOptions)) || any(ports(distractorOptions)))
         playLoopSounds{end+1} = 'trySomethingElseSound';
-    elseif phase == 2 && any(ports(requestOptions))  
+    elseif phase == 2 && (any(ports(requestOptions)) || stepsInPhase==0)  
         % play stim sound (when stim is requested during phase 2)
         playLoopSounds{end+1} = 'keepGoingSound';
     elseif phase == 3 && stepsInPhase <= 0 && trialDetails.correct
@@ -19,7 +19,8 @@ if strcmp(trialManagerClass, 'nAFC')
     elseif phase == 3 && stepsInPhase <= 0 && ~trialDetails.correct
         % play wrong sound
         playSoundSounds{end+1} = {'wrongSound', msPenaltySound};
-    end   
+    end
+    
 % freeDrinks setup
 % this will have to be fixed for passiveViewing (either as a flag on freeDrinks or as a new trialManager)
 elseif strcmp(trialManagerClass, 'freeDrinks')

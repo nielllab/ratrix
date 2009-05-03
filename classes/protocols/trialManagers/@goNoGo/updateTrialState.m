@@ -12,29 +12,42 @@ function [tm trialDetails result spec rewardSizeULorMS requestRewardSizeULorMS .
 %   - update the TM's RM if neceesary
 
 rewardSizeULorMS=0;
-requestRewardSizeULorMS=0;
 msPuff=0;
 msRewardSound=0;
 msPenalty=0;
 msPenaltySound=0;
 
+if isfield(trialRecords(end),'trialDetails') && isfield(trialRecords(end).trialDetails,'correct')
+    correct=trialRecords(end).trialDetails.correct;
+else
+    correct=[];
+end
+
 % ========================================================
 % if the result is a port vector, and we have not yet assigned correct, then the current result must be the trial response
 % because phased trial logic returns the 'result' from previous phase only if it matches a target/distractor
+% 3/13/09 - we rely on nAFC's phaseify to correctly assign stimSpec.phaseLabel to identify where to check for correctness
 % call parent's updateTrialState() to do the request reward handling and check for 'timeout' flag
 [tm.trialManager possibleTimeout result garbage garbage requestRewardSizeULorMS] = ...
     updateTrialState(tm.trialManager, sm, result, spec, ports, lastPorts, ...
     targetPorts, requestPorts, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
     floatprecision, textures, destRect, ...
     requestRewardDone);
-if ~isempty(result) && ~ischar(result)
-	resp=find(result);
-	if length(resp)==1
-		result = 'nominal';
-	else
-		result = 'multiple ports';
+if isempty(possibleTimeout)
+	if ~isempty(result) && ~ischar(result) && isempty(correct) && strcmp(getPhaseLabel(spec),'reinforcement')
+		resp=find(result);
+		if length(resp)==1
+			correct = ismember(resp,targetPorts);
+			result = 'nominal';
+		else
+			correct = 0;
+			result = 'multiple ports';
+		end
 	end
+else
+	correct=possibleTimeout.correct;
 end
+
 % ========================================================
 phaseType = getPhaseType(spec);
 framesUntilTransition=getFramesUntilTransition(spec);
@@ -44,18 +57,19 @@ framesUntilTransition=getFramesUntilTransition(spec);
 % - update msRewardOwed/msAirpuffOwed as necessary (depending on correctness and TM class)
 % - call errorStim(SM), correctStim(SM) as necessary and fill in the stimSpec's stimulus field
 
-if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && framesInPhase==0
+if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) && framesInPhase==0
     % we only check to do rewards on the first frame of the 'reinforced' phase
     [rm rewardSizeULorMS requestRewardSizeULorMS msPenalty msPuff msRewardSound msPenaltySound updateRM] =...
         calcReinforcement(getReinforcementManager(tm),trialRecords, []);
     if updateRM
         tm=setReinforcementManager(tm,rm);
     end
-    if strcmp(result,'nominal')
+    
+    if correct
         msPuff=0;
         msPenalty=0;
         msPenaltySound=0;
-
+        
         if window>0
             if isempty(framesUntilTransition)
                 framesUntilTransition = ceil((rewardSizeULorMS/1000)/ifi);
@@ -87,13 +101,11 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && framesInPhase==0
             error('huh?')
         end
         spec=setStim(spec,cStim);
-    
-    elseif strcmp(result,'multiple ports')
-        % this only happens when multiple ports are triggered
+    else
         rewardSizeULorMS=0;
         msRewardSound=0;
         msPuff=0; % for now, we don't want airpuffs to be automatic punishment, right?
-
+        
         if window>0
             if isempty(framesUntilTransition)
                 framesUntilTransition = ceil((msPenalty/1000)/ifi);
@@ -126,9 +138,12 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && framesInPhase==0
         end
         spec=setStim(spec,eStim);
     end
+    
 end % end reward handling
 
+trialDetails.correct=correct;
 
+trialDetails
+struct(spec)
 
-trialDetails=[];
 end  % end function

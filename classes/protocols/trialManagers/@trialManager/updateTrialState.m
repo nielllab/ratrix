@@ -15,6 +15,26 @@ msRewardSound=0;
 msPenalty=0;
 msPenaltySound=0;
 
+if isfield(trialRecords(end),'trialDetails') && isfield(trialRecords(end).trialDetails,'correct')
+    correct=trialRecords(end).trialDetails.correct;
+else
+    correct=[];
+end
+
+if ~isempty(result) && ischar(result) && strcmp(result,'timeout') && isempty(correct) && strcmp(getPhaseLabel(spec),'reinforcement')
+	correct=0;
+	result='nominal';
+	trialDetails=[];
+	trialDetails.correct=correct;
+elseif ~isempty(result) && ischar(result) && strcmp(result,'timeout') && isempty(correct) && strcmp(getPhaseLabel(spec),'itl') 
+    % timeout during 'itl' phase - neither correct nor incorrect (only happens when no stim is shown)
+    result='nominal';
+    trialDetails=[];
+else
+	trialDetails=[];
+end
+
+
 if (any(ports(requestPorts)) && ~any(lastPorts(requestPorts))) && ... % if a request port is triggered
         ((strcmp(getRequestMode(getReinforcementManager(tm)),'nonrepeats') && ~any(ports&lastRequestPorts)) || ... % if non-repeat
         strcmp(getRequestMode(getReinforcementManager(tm)),'all') || ...  % all requests
@@ -27,5 +47,5 @@ if (any(ports(requestPorts)) && ~any(lastPorts(requestPorts))) && ... % if a req
     end
 end
 
-trialDetails=[];
+
 end  % end function

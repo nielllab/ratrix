@@ -27,15 +27,25 @@ end
 % if the result is a port vector, and we have not yet assigned correct, then the current result must be the trial response
 % because phased trial logic returns the 'result' from previous phase only if it matches a target/distractor
 % 3/13/09 - we rely on nAFC's phaseify to correctly assign stimSpec.phaseLabel to identify where to check for correctness
-if ~isempty(result) && ~ischar(result) && isempty(correct) && strcmp(getPhaseLabel(spec),'reinforcement')
-    resp=find(result);
-    if length(resp)==1
-        correct = ismember(resp,targetPorts);
-        result = 'nominal';
-    else
-        correct = 0;
-        result = 'multiple ports';
-    end
+% call parent's updateTrialState() to do the request reward handling and check for 'timeout' flag
+[tm.trialManager possibleTimeout result garbage garbage requestRewardSizeULorMS] = ...
+    updateTrialState(tm.trialManager, sm, result, spec, ports, lastPorts, ...
+    targetPorts, requestPorts, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
+    floatprecision, textures, destRect, ...
+    requestRewardDone);
+if isempty(possibleTimeout)		
+	if ~isempty(result) && ~ischar(result) && isempty(correct) && strcmp(getPhaseLabel(spec),'reinforcement')
+		resp=find(result);
+		if length(resp)==1
+			correct = ismember(resp,targetPorts);
+			result = 'nominal';
+		else
+			correct = 0;
+			result = 'multiple ports';
+		end
+	end
+else
+	correct=possibleTimeout.correct;
 end
 
 % ========================================================
@@ -130,14 +140,6 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) &&
     end
     
 end % end reward handling
-
-% call parent's updateTrialState() to do the request reward handling
-[tm.trialManager garbage garbage garbage garbage requestRewardSizeULorMS] = ...
-    updateTrialState(tm.trialManager, sm, result, spec, ports, lastPorts, ...
-    targetPorts, requestPorts, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
-    floatprecision, textures, destRect, ...
-    requestRewardDone);
-
 
 trialDetails.correct=correct;
 

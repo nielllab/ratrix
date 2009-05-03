@@ -193,3 +193,10 @@ eyeTrackers/@eyeLinkTracker/old[!!-~]dev/eyelinkQueuedDataTest.m -text
 protocols/@stimSpec/isStim.m -text
 eyeTrackers/@eyeLinkTracker/getEyeDataVarNames.m -text
 protocols/@stimSpec/getIndexPulse.m -text
+protocols/@stimSpec/getLockoutDuration.m -text
+protocols/trialManagers/@goNoGo/getResponseLockoutMs.m -text
+protocols/trialManagers/@goNoGo/goNoGo.m -text
+protocols/trialManagers/@goNoGo/getResponsePorts.m -text
+protocols/trialManagers/@goNoGo/getRequestRewardSizeULorMS.m -text
+protocols/trialManagers/@goNoGo/updateTrialState.m -text
+protocols/trialManagers/@goNoGo/stationOKForTrialManager.m -text

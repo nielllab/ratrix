@@ -1,7 +1,7 @@
 function [didAPause paused done result doValves ports ...
     didValves didHumanResponse manual doPuff pressingM pressingP overheadTime initTime kDownTime] ...
     = handleKeyboard(tm, keyCode, didAPause, paused, done, result, doValves, ports, didValves, ...
-    didHumanResponse, manual, doPuff, pressingM, pressingP, originalPriority, priorityLevel, KbConstants)
+    didHumanResponse, manual, doPuff, pressingM, pressingP, originalPriority, priorityLevel, KbConstants,allowPorts)
 
 % note: this function pretty much updates a bunch of flags....
 
@@ -85,8 +85,10 @@ if kDown
             doValves(portsDown)=1;
             didValves=true;
         else
-            ports(portsDown)=1;
-            didHumanResponse=true;
+            if allowPorts
+                ports(portsDown)=1;
+                didHumanResponse=true;
+            end
         end
     elseif any(keyCode(KbConstants.mKey))
         mThisLoop=1;

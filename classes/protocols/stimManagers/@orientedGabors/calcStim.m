@@ -29,6 +29,8 @@ switch trialManagerClass
         type={'trigger',true};
     case 'autopilot'
         type='static';
+    case 'goNoGo'
+        type={'trigger',true};
     otherwise
         error('unsupported trialManagerClass');
 end
@@ -37,12 +39,12 @@ numFreqs=length(stimulus.pixPerCycs);
 details.pixPerCyc=stimulus.pixPerCycs(ceil(rand*numFreqs));
 
 numTargs=length(stimulus.targetOrientations);
-details.orientations = stimulus.targetOrientations(ceil(rand(length(targetPorts),1)*numTargs));
+details.orientations = stimulus.targetOrientations(ceil(rand(length(targetPorts),1)*numTargs))';
 
 numDistrs=length(stimulus.distractorOrientations);
 if numDistrs>0
     numGabors=length(targetPorts)+length(distractorPorts);
-    details.orientations = [details.orientations; stimulus.distractorOrientations(ceil(rand(length(distractorPorts),1)*numDistrs))];
+    details.orientations = [details.orientations; stimulus.distractorOrientations(ceil(rand(length(distractorPorts),1)*numDistrs))'];
     distractorLocs=distractorPorts;
 else
     numGabors=length(targetPorts);

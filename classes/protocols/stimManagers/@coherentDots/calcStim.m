@@ -159,7 +159,7 @@ details.selectedDotSize = selectedDotSize;
 details.selectedContrast = selectedContrast;
 details.selectedSpeed = selectedSpeed;
 
-if strcmp(trialManagerClass,'nAFC') && details.correctionTrial
+if (strcmp(trialManagerClass,'nAFC') || strcmp(trialManagerClass,'goNoGo')) && details.correctionTrial
     text='correction trial!';
 else
     text=sprintf('coherence: %g dot_size: %g contrast: %g speed: %g',selectedCoherence,selectedDotSize,selectedContrast,selectedSpeed);

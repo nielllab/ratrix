@@ -1,7 +1,8 @@
 function t=autopilot(varargin)
 % AUTOPILOT  class constructor.
 % t=autopilot(percentCorrectionTrials,soundManager,...
-%      rewardManager,[eyeController],[frameDropCorner],[dropFrames],[displayMethod],[requestPorts],[saveDetailedFramedrops],[showText])
+%      rewardManager,[eyeController],[frameDropCorner],[dropFrames],[displayMethod],[requestPorts],[saveDetailedFramedrops],
+%	   [stiulusOnsetMode],[responseWindowMs],[showText])
 %
 % Used for the whiteNoise, bipartiteField, fullField, and gratings stims, which don't require any response to go through the trial
 % basically just play through the stims, with no sounds, no correction trials
@@ -21,7 +22,7 @@ switch nargin
         else
             error('Input argument is not a autopilot object')
         end
-    case {3 4 5 6 7 8 9 10}
+    case {3 4 5 6 7 8 9 10 11 12}
         % percentCorrectionTrials
         if varargin{1}>=0 && varargin{1}<=1
             t.percentCorrectionTrials=varargin{1};
@@ -32,7 +33,7 @@ switch nargin
         d=sprintf('autopilot');
 
         
-        for i=4:10
+        for i=4:12
             if i <= nargin
                 args{i}=varargin{i};
             else
@@ -45,7 +46,7 @@ switch nargin
             args{8}='none'; % default autopilot requestPorts should be 'none'
         end
 
-        a=trialManager(varargin{2},varargin{3},args{4},d,args{5},args{6},args{7},args{8},args{9},args{10});
+        a=trialManager(varargin{2},varargin{3},args{4},d,args{5},args{6},args{7},args{8},args{9},args{10},args{11},args{12});
         
         t = class(t,'autopilot',a);
         

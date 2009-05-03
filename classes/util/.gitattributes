@@ -138,3 +138,4 @@ trialRecordProcessing/applyTrialFilter.m -text
 trialRecordProcessing/fixTrialRecordRanges.m -text
 matlaby/blueToRed.m -text
 infrastructure/convertDecimalToIndPorts.m -text
+stimHelpers/constantDelay.m -text

@@ -99,6 +99,14 @@ fd_nonrepeats=freeDrinks(sm,freeDrinkLikelihood,constantRewardsWithNonrepeats,..
 
 vh=nAFC(sm,percentCorrectionTrials,constantRewards);
 
+% with stimulusOnsetMode and responseWindow
+% vh_responseWindow=nAFC(sm,percentCorrectionTrials,constantRewards,...
+%     [],[],[],[],[],[],{'delayed','constantDelay'},2000);
+% vh_responseWindow=nAFC(sm,percentCorrectionTrials,constantRewards,...
+%     [],[],[],[],[],[],'immediate',2000);
+responseLockoutMs=2000;
+gng=goNoGo(sm,percentCorrectionTrials,responseLockoutMs,constantRewards,...
+    [],[],[],[],[],[],{'delayed','constantDelay'},10000);
 
 ai_parameters=[];
 ai_parameters.numChans=3;
@@ -626,6 +634,10 @@ parameters.scheduler=minutesPerSession(90,3);
 parameters.graduation = performanceCriterion([0.85, 0.8],int16([200, 500]));
 [easyStep previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 
+
+
+ts101 = trainingStep(gng, discrimStim, repeatIndef, noTimeOff(), svnRev, svnCheckMode);  %free drinks
+
 % ====================================================================================================================
 % protocol and rest of setup stuff
 % p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8, ts9, ts10, ts11, ts12, ts13, ts14, ts15, ts16, ts17, ...
@@ -660,7 +672,7 @@ for i=1:length(subjIDs),
 %         case {'rack3test4','rack3test5','rack3test6'} % nAFC, orientedGabors
 %             p=protocol('nAFC,orientedGabors',{ts4});
         otherwise
-            p=protocol('demo',{ts12,ts40,ts41,ts4,ts2,ts25,sweepContrast,ts12,ts5,easyStep,ts23,objrec1});
+            p=protocol('demo',{ts101,ts2,ts40,ts41,ts4,ts2,ts25,sweepContrast,ts12,ts5,easyStep,ts23,objrec1});
 %             error('unknown subject');
     end
     

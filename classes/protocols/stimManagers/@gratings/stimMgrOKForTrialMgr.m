@@ -7,6 +7,8 @@ if isa(tm,'trialManager')
             out=1;
         case 'autopilot'
             out=1;
+        case 'goNoGo'
+            out=1;
         otherwise
             out=0;
     end

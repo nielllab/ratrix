@@ -190,7 +190,7 @@ imageRotation=[0 210];
 imageYoked=false;
 rotationYoked=false;
 imageStim = images(imageDir,ypos,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,trialDistribution,imageSelectionMode,...
-    imageSize,imageYoked,imageRotation,rotationYoked);
+    imageSize,imageYoked,imageRotation,rotationYoked,percentCorrectionTrials);
 
 % for Phil's stim managers
 pixPerCycs              =[20];
@@ -249,7 +249,7 @@ screen_height=100;
 num_dots=100;
 coherence=.85;
 speed=1;
-contrast=[0.5 1];
+contrast=[0.75 0.75];
 dot_size=[3 4];
 movie_duration=2;
 screen_zoom=[6 6];
@@ -259,7 +259,7 @@ maxHeight=768;
 
 
 cDots=coherentDots(screen_width,screen_height,num_dots,coherence,speed,contrast,dot_size,movie_duration,screen_zoom,...
-     maxWidth,maxHeight);
+     maxWidth,maxHeight,percentCorrectionTrials);
 % ====================================================================================================================
 % ifFeatureGoRightWithTwoFlank
 %% default for all of pmeier stims
@@ -270,18 +270,20 @@ defaultSettingsDate='Oct.09,2007'; %datestr(now,22)
 % whiteNoise
 % gray = 127.5;
 gray=0.5;
-mean=gray;
 std=gray*(2/3);
+distribution={'gaussian',gray,std}
 searchSubspace=[1];
 background=gray;
 method='texOnPartOfScreen';
+changeable=false;
 stixelSize = [20,16];
 stimLocation=[0,0,1280,1024];
 numFrames=100;   %100 to test; 5*60*100=30000 for experiment
 % s = whiteNoise(meanLuminance,std,background,method,requestedStimLocation,stixelSize,searchSubspace,numFrames,
 %       maxWidth,maxHeight,scaleFactor,interTrialLuminance)
 
-wn = whiteNoise(mean,std,background,method,stimLocation,stixelSize,searchSubspace,numFrames,1280,1024,0,.5);
+wn = whiteNoise(distribution,background,method,stimLocation,stixelSize,searchSubspace,...
+    numFrames,changeable,1280,1024,0,.5);
 
 % bipartiteField
 receptiveFieldLocation = [0.25 0.5];
@@ -376,104 +378,104 @@ x=linspace(-d,d,gran);
 [a b]=meshgrid(x);
 
 ports=cellfun(@uint8,{1 3},'UniformOutput',false);
-[noiseSpec(1:length(ports)).port]=deal(ports{:});
-[noiseSpec.numLoops]=deal(1);
-
-% stim properties:
-% in.distribution               'binary', 'uniform', or one of the following forms:
-%                                   {'sinusoidalFlicker',[temporalFreqs],[contrasts],gapSecs} - each freq x contrast combo will be shown for equal time in random order, total time including gaps will be in.loopDuration
-%                                   {'gaussian',clipPercent} - choose variance so that clipPercent of an infinite stim would be clipped (includes both low and hi)
-%                                   {path, origHz, clipVal, clipType} - path is to a file (either .txt or .mat, extension omitted, .txt loadable via load()) containing a single vector of stim values named 'noise', with original sampling rate origHz.
-%                                       clipType:
-%                                       'normalized' will normalize whole file to clipVal (0-1), setting darkest val in file to 0 and values over clipVal to 1.
-%                                       'ptile' will normalize just the contiguous part of the file you are using to 0-1, clipping top clipVal (0-1) proportion of vals (considering only the contiguous part of the file you are using)
-% in.startFrame                 'randomize' or integer indicating fixed frame number to start with
-% in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file)
-%                               to make uniques and repeats, pass {numRepeats numUniques numCycles chunkSeconds} - chunk refers to one repeat/unique - distribution cannot be sinusoidalFlicker
-
-[noiseSpec.distribution]         =deal({'gaussian' .01});
-[noiseSpec.startFrame]           =deal(uint8(1)); %deal('randomize');
-[noiseSpec.loopDuration]         =deal(1);
-
-% patch properties:
-% in.locationDistribution       2-d density, will be normalized to stim area
-% in.maskRadius                 std dev of the enveloping gaussian, normalized to diagonal of stim area (values <=0 mean no mask)
-% in.patchDims                  [height width]
-% in.patchHeight                0-1, normalized to stim area height
-% in.patchWidth                 0-1, normalized to stim area width
-% in.background                 0-1, normalized (luminance outside patch)
-
-[noiseSpec.locationDistribution]=deal(reshape(mvnpdf([a(:) b(:)],[-d/2 d/2]),gran,gran),reshape(mvnpdf([a(:) b(:)],[d/2 d/2]),gran,gran));
-[noiseSpec.maskRadius]           =deal(.045);
-[noiseSpec.patchDims]            =deal(uint16([50 50]));
-[noiseSpec.patchHeight]          =deal(.4);
-[noiseSpec.patchWidth]           =deal(.4);
-[noiseSpec.background]           =deal(.5);
-
-% filter properties:
-% in.orientation                filter orientation in radians, 0 is vertical, positive is clockwise
-% in.kernelSize                 0-1, normalized to diagonal of patch
-% in.kernelDuration             in seconds (will be rounded to nearest multiple of frame duration)
-% in.ratio                      ratio of short to long axis of gaussian kernel (1 means circular, no effective orientation)
-% in.filterStrength             0 means no filtering (kernel is all zeros, except 1 in center), 1 means pure mvgaussian kernel (center not special), >1 means surrounding pixels more important
-% in.bound                      .5-1 edge percentile for long axis of kernel when parallel to window
-
-[noiseSpec.orientation]         =deal(-pi/4,pi/4);
-[noiseSpec.kernelSize]           =deal(.5);
-[noiseSpec.kernelDuration]       =deal(.2);
-[noiseSpec.ratio]                =deal(1/3);
-[noiseSpec.filterStrength]       =deal(1);
-[noiseSpec.bound]                =deal(.99);
-
-maxWidth               = 800;
-maxHeight              = 600;
-scaleFactor            = 0;
-
-noiseStim=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-
-
-[noiseSpec.orientation]         =deal(0);
-[noiseSpec.locationDistribution]=deal([0 0;1 0], [0 0;0 1]);
-[noiseSpec.distribution]         =deal('binary');
-[noiseSpec.maskRadius]           =deal(100);
-[noiseSpec.kernelSize]           =deal(0);
-[noiseSpec.kernelDuration]       =deal(0);
-[noiseSpec.ratio]                =deal(1);
-[noiseSpec.filterStrength]       =deal(0);
-[noiseSpec.patchDims]            =deal(uint16([2 2]));
-[noiseSpec.patchHeight]          =deal(.1);
-[noiseSpec.patchWidth]           =deal(.1);
-
-unfilteredNoise=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-
-led=nAFC(sm,percentCorrectionTrials,constantRewards,[],{'off'},false,'LED');
-
-if ismac
-    ts001 = '/Users/eflister/Desktop/ratrix trunk/classes/protocols/stimManagers/@flicker/ts001';
-else
-    ts001 = '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\hateren\ts001';
-end
-
-[noiseSpec.distribution]         =deal({ts001, 1200, .01, 'ptile'}); %12800/32767 for normalized clipVal, see pam email to Alex Casti on January 25, 2005, and Reinagel Reid 2000
-[noiseSpec.loopDuration]         =deal({uint32(60) uint32(0) uint32(1) uint32(30)}); %{numRepeats numUniques numCycles chunkSeconds}
-
-
-[noiseSpec.locationDistribution]=deal(1);
-[noiseSpec.patchDims]            =deal(uint16([1 1]));
-[noiseSpec.patchHeight]          =deal(1);
-[noiseSpec.patchWidth]           =deal(1);
-
-hateren=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-
-[noiseSpec.distribution]         =deal({'gaussian', .01});
-
-fullfieldFlicker=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-
-[noiseSpec.distribution]         =deal({'sinusoidalFlicker',[1 5 10 25 50],[.1 .25 .5 .75 1],.1}); %temporal freqs, contrasts, gapSecs
-[noiseSpec.loopDuration]         =deal(5*5*1);
-[noiseSpec.patchHeight]          =deal(1);
-[noiseSpec.patchWidth]           =deal(1);
-crftrf=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+% % % [noiseSpec(1:length(ports)).port]=deal(ports{:});
+% % % [noiseSpec.numLoops]=deal(1);
+% % % 
+% % % % stim properties:
+% % % % in.distribution               'binary', 'uniform', or one of the following forms:
+% % % %                                   {'sinusoidalFlicker',[temporalFreqs],[contrasts],gapSecs} - each freq x contrast combo will be shown for equal time in random order, total time including gaps will be in.loopDuration
+% % % %                                   {'gaussian',clipPercent} - choose variance so that clipPercent of an infinite stim would be clipped (includes both low and hi)
+% % % %                                   {path, origHz, clipVal, clipType} - path is to a file (either .txt or .mat, extension omitted, .txt loadable via load()) containing a single vector of stim values named 'noise', with original sampling rate origHz.
+% % % %                                       clipType:
+% % % %                                       'normalized' will normalize whole file to clipVal (0-1), setting darkest val in file to 0 and values over clipVal to 1.
+% % % %                                       'ptile' will normalize just the contiguous part of the file you are using to 0-1, clipping top clipVal (0-1) proportion of vals (considering only the contiguous part of the file you are using)
+% % % % in.startFrame                 'randomize' or integer indicating fixed frame number to start with
+% % % % in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file)
+% % % %                               to make uniques and repeats, pass {numRepeats numUniques numCycles chunkSeconds} - chunk refers to one repeat/unique - distribution cannot be sinusoidalFlicker
+% % % 
+% % % [noiseSpec.distribution]         =deal({'gaussian' .01 'new'});
+% % % [noiseSpec.startFrame]           =deal(uint8(1)); %deal('randomize');
+% % % [noiseSpec.loopDuration]         =deal(1);
+% % % 
+% % % % patch properties:
+% % % % in.locationDistribution       2-d density, will be normalized to stim area
+% % % % in.maskRadius                 std dev of the enveloping gaussian, normalized to diagonal of stim area (values <=0 mean no mask)
+% % % % in.patchDims                  [height width]
+% % % % in.patchHeight                0-1, normalized to stim area height
+% % % % in.patchWidth                 0-1, normalized to stim area width
+% % % % in.background                 0-1, normalized (luminance outside patch)
+% % % 
+% % % [noiseSpec.locationDistribution]=deal(reshape(mvnpdf([a(:) b(:)],[-d/2 d/2]),gran,gran),reshape(mvnpdf([a(:) b(:)],[d/2 d/2]),gran,gran));
+% % % [noiseSpec.maskRadius]           =deal(.045);
+% % % [noiseSpec.patchDims]            =deal(uint16([50 50]));
+% % % [noiseSpec.patchHeight]          =deal(.4);
+% % % [noiseSpec.patchWidth]           =deal(.4);
+% % % [noiseSpec.background]           =deal(.5);
+% % % 
+% % % % filter properties:
+% % % % in.orientation                filter orientation in radians, 0 is vertical, positive is clockwise
+% % % % in.kernelSize                 0-1, normalized to diagonal of patch
+% % % % in.kernelDuration             in seconds (will be rounded to nearest multiple of frame duration)
+% % % % in.ratio                      ratio of short to long axis of gaussian kernel (1 means circular, no effective orientation)
+% % % % in.filterStrength             0 means no filtering (kernel is all zeros, except 1 in center), 1 means pure mvgaussian kernel (center not special), >1 means surrounding pixels more important
+% % % % in.bound                      .5-1 edge percentile for long axis of kernel when parallel to window
+% % % 
+% % % [noiseSpec.orientation]         =deal(-pi/4,pi/4);
+% % % [noiseSpec.kernelSize]           =deal(.5);
+% % % [noiseSpec.kernelDuration]       =deal(.2);
+% % % [noiseSpec.ratio]                =deal(1/3);
+% % % [noiseSpec.filterStrength]       =deal(1);
+% % % [noiseSpec.bound]                =deal(.99);
+% % % 
+% % % maxWidth               = 800;
+% % % maxHeight              = 600;
+% % % scaleFactor            = 0;
+% % % 
+% % % noiseStim=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+% % % 
+% % % 
+% % % [noiseSpec.orientation]         =deal(0);
+% % % [noiseSpec.locationDistribution]=deal([0 0;1 0], [0 0;0 1]);
+% % % [noiseSpec.distribution]         =deal('binary');
+% % % [noiseSpec.maskRadius]           =deal(100);
+% % % [noiseSpec.kernelSize]           =deal(0);
+% % % [noiseSpec.kernelDuration]       =deal(0);
+% % % [noiseSpec.ratio]                =deal(1);
+% % % [noiseSpec.filterStrength]       =deal(0);
+% % % [noiseSpec.patchDims]            =deal(uint16([2 2]));
+% % % [noiseSpec.patchHeight]          =deal(.1);
+% % % [noiseSpec.patchWidth]           =deal(.1);
+% % % 
+% % % unfilteredNoise=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+% % % 
+% % % % led=nAFC(sm,percentCorrectionTrials,constantRewards,[],{'off'},false,'LED');
+% % % 
+% % % if ismac
+% % %     ts001 = '/Users/eflister/Desktop/ratrix trunk/classes/protocols/stimManagers/@flicker/ts001';
+% % % else
+% % %     ts001 = '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\hateren\ts001';
+% % % end
+% % % 
+% % % [noiseSpec.distribution]         =deal({ts001, 1200, .01, 'ptile'}); %12800/32767 for normalized clipVal, see pam email to Alex Casti on January 25, 2005, and Reinagel Reid 2000
+% % % [noiseSpec.loopDuration]         =deal({uint32(60) uint32(0) uint32(1) uint32(30)}); %{numRepeats numUniques numCycles chunkSeconds}
+% % % 
+% % % 
+% % % [noiseSpec.locationDistribution]=deal(1);
+% % % [noiseSpec.patchDims]            =deal(uint16([1 1]));
+% % % [noiseSpec.patchHeight]          =deal(1);
+% % % [noiseSpec.patchWidth]           =deal(1);
+% % % 
+% % % hateren=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+% % % 
+% % % [noiseSpec.distribution]         =deal({'gaussian', .01});
+% % % 
+% % % fullfieldFlicker=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+% % % 
+% % % [noiseSpec.distribution]         =deal({'sinusoidalFlicker',[1 5 10 25 50],[.1 .25 .5 .75 1],.1}); %temporal freqs, contrasts, gapSecs
+% % % [noiseSpec.loopDuration]         =deal(5*5*1);
+% % % [noiseSpec.patchHeight]          =deal(1);
+% % % [noiseSpec.patchWidth]           =deal(1);
+% % % crftrf=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 
 
@@ -542,9 +544,9 @@ ts28=trainingStep(vh_datanet,fF,repeatIndef,noTimeOff(),svnRev, svnCheckMode);
 ts29=trainingStep(aP,wn,repeatIndef,noTimeOff(),svnRev, svnCheckMode);
 
 % erik filteredNoise
-ts30 = trainingStep(vh, hateren,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %hateren
-ts31 = trainingStep(vh, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %fullfieldFlicker
-ts32 = trainingStep(vh, crftrf,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %crf/trf
+% ts30 = trainingStep(vh, hateren,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %hateren
+% ts31 = trainingStep(vh, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %fullfieldFlicker
+% ts32 = trainingStep(vh, crftrf,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %crf/trf
 
 % passiveViewing no datanet with a fullField stim, 'all' requestPorts, 'all' requests rewarded
 ts40 = trainingStep(fd_all_requests, wn, repeatIndef, noTimeOff(), svnRev, svnCheckMode);
@@ -598,7 +600,7 @@ imageRotationYoked=false; % images have same size
 drawingMode='expert';
 imagelevel1 = images(imdir,ypos_nAFC, background_nAFC,...
     maxWidth,maxHeight,scaleFactor,interTrialLuminance_nAFC, imlist.level1,...
-    imageSelectionMode,imageSize,imageSizeYoked,imageRotation,imageRotationYoked,drawingMode);
+    imageSelectionMode,imageSize,imageSizeYoked,imageRotation,imageRotationYoked,percentCorrectionTrials,drawingMode);
 %create graduation criterion object for nAFC trial managers
 graduationCriterion=performanceCriterion([.85 0.80], int16([200 300])); %85% correct for 200 consecutive trials
 
@@ -630,7 +632,7 @@ parameters.graduation = performanceCriterion([0.85, 0.8],int16([200, 500]));
 %     ts18, ts19, ts20, ts21, ts22});
 % stepNum=21;
 % p=protocol('gabor test2', {ts29, ts1, ts4, ts12, ts2, ts12, ts8, ts11,ts9,ts10,sweepContrast,ts23,ts24,ts27,ts30});
-stepNum=uint8(5);
+stepNum=uint8(1);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

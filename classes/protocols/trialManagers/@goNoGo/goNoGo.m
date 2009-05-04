@@ -2,7 +2,7 @@ function t=goNoGo(varargin)
 % goNoGo  class constructor.
 % t=goNoGo(soundManager,percentCorrectionTrials,responseLockoutMs,rewardManager,
 %         [eyeController],[frameDropCorner],[dropFrames],[displayMethod],[requestPorts],[saveDetailedFramedrops],
-%		  [stimulusOnsetMode],[responseWindowMs],[showText])
+%		  [delayFunction],[responseWindowMs],[showText])
 
 switch nargin
     case 0

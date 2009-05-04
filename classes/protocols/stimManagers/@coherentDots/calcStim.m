@@ -36,21 +36,30 @@ else
 end
 [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass);
 
-if targetPorts == 1
-    % animal should go left
-    dotDirection = pi
-elseif targetPorts == 3
-    dotDirection = 0
+if length(targetPorts)==1
+    if targetPorts == 1
+        % animal should go left
+        dotDirection = pi
+    elseif targetPorts == 3
+        dotDirection = 0
+    else
+        error('Zah?  This should never happen!')
+    end
+    static=false;
+    if length(s.movie_duration)==2
+        selectedDuration = s.movie_duration(1) + rand(1)*(s.movie_duration(2)-s.movie_duration(1));
+    else
+        selectedDuration = s.movie_duration;
+    end
 else
-    error('Zah?  This should never happen!')
+    % if more than one target port, then we can only have a static image!
+    warning('more than one target port found by coherentDots calcStim - calculating a static dots image ONLY!');
+    static=true;
+    dotDirection=-1;
+    selectedDuration=1/hz;
 end
 
-if length(s.movie_duration)==2
-    selectedDuration = s.movie_duration(1) + rand(1)*(s.movie_duration(2)-s.movie_duration(1));
-else
-    selectedDuration = s.movie_duration;
-end
-num_frames = hz * selectedDuration;
+num_frames = floor(hz * selectedDuration);
 
 alldotsxy = [rand(s.num_dots,1)*(s.screen_width-1)+1 ...
               rand(s.num_dots,1)*(s.screen_height-1)+1];
@@ -105,41 +114,44 @@ dots_movie(:,:,1) = uint8(frame);
 % alldotsxy(:,1);
 % alldotsxy(:,2);
 
-vx = selectedSpeed*cos(dotDirection);
-vy = selectedSpeed*sin(dotDirection);
-
-for i=1:num_frames
-    frame = zeros(s.screen_height,s.screen_width);
-    frame(sub2ind(size(frame),floor(alldotsxy(:,2)),floor(alldotsxy(:,1)))) = 1;
-    frame = conv2(frame,shape,'same');
-    frame(frame > 0) = 255;
-    dots_movie(:,:,i) = uint8(frame);
-    dot_history(:,:,i) = alldotsxy;
+if ~static
     
-    % Randomly find who's going to be coherent and who isn't
-    move_coher = rand(s.num_dots,1) < selectedCoherence;
-    move_randomly = ~move_coher;
+    vx = selectedSpeed*cos(dotDirection);
+    vy = selectedSpeed*sin(dotDirection);
 
-    num_out = sum(move_randomly);
+    for i=1:num_frames
+        frame = zeros(s.screen_height,s.screen_width);
+        frame(sub2ind(size(frame),floor(alldotsxy(:,2)),floor(alldotsxy(:,1)))) = 1;
+        frame = conv2(frame,shape,'same');
+        frame(frame > 0) = 255;
+        dots_movie(:,:,i) = uint8(frame);
+        dot_history(:,:,i) = alldotsxy;
 
-    if (num_out ~= s.num_dots)
-        alldotsxy(move_coher,1) = alldotsxy(move_coher,1) + vx;
-        alldotsxy(move_coher,2) = alldotsxy(move_coher,2) + vy;
+        % Randomly find who's going to be coherent and who isn't
+        move_coher = rand(s.num_dots,1) < selectedCoherence;
+        move_randomly = ~move_coher;
+
+        num_out = sum(move_randomly);
+
+        if (num_out ~= s.num_dots)
+            alldotsxy(move_coher,1) = alldotsxy(move_coher,1) + vx;
+            alldotsxy(move_coher,2) = alldotsxy(move_coher,2) + vy;
+        end
+        if (num_out)
+            alldotsxy(move_randomly,:) = [rand(num_out,1)*(s.screen_width-1)+1 ...
+                rand(num_out,1)*(s.screen_height-1)+1];
+        end
+
+        overboard = alldotsxy(:,1) > s.screen_width | alldotsxy(:,2) > s.screen_height | ...
+            floor(alldotsxy(:,1)) <= 0 | floor(alldotsxy(:,2)) <= 0;
+        num_out = sum(overboard);
+        if (num_out)
+            alldotsxy(overboard,:) = [rand(num_out,1)*(s.screen_width-1)+1 ...
+                rand(num_out,1)*(s.screen_height-1)+1];
+        end
+
     end
-    if (num_out)
-        alldotsxy(move_randomly,:) = [rand(num_out,1)*(s.screen_width-1)+1 ...
-                                        rand(num_out,1)*(s.screen_height-1)+1];
-    end
-
-    overboard = alldotsxy(:,1) > s.screen_width | alldotsxy(:,2) > s.screen_height | ...
-                    floor(alldotsxy(:,1)) <= 0 | floor(alldotsxy(:,2)) <= 0;
-    num_out = sum(overboard);
-    if (num_out)
-        alldotsxy(overboard,:) = [rand(num_out,1)*(s.screen_width-1)+1 ...
-                                        rand(num_out,1)*(s.screen_height-1)+1];
-    end
-
-end;
+end
 
 out = dots_movie*selectedContrast;
 if strcmp(stimulus.replayMode,'loop')

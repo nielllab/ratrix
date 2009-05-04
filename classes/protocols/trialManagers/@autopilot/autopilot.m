@@ -2,7 +2,7 @@ function t=autopilot(varargin)
 % AUTOPILOT  class constructor.
 % t=autopilot(percentCorrectionTrials,soundManager,...
 %      rewardManager,[eyeController],[frameDropCorner],[dropFrames],[displayMethod],[requestPorts],[saveDetailedFramedrops],
-%	   [stiulusOnsetMode],[responseWindowMs],[showText])
+%	   [delayFunction],[responseWindowMs],[showText])
 %
 % Used for the whiteNoise, bipartiteField, fullField, and gratings stims, which don't require any response to go through the trial
 % basically just play through the stims, with no sounds, no correction trials

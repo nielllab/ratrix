@@ -2,7 +2,7 @@ function t=freeDrinks(varargin)
 % FREEDRINKS  class constructor.
 % t=freeDrinks(soundManager,freeDrinkLikelihood, reinforcementManager, 
 %   [eyeController],[frameDropCorner],[dropFrames],[displayMethod],[requestPorts],[saveDetailedFramedrops],
-%	[stimulusOnsetMode],[responseWindowMs],[showText])
+%	[delayFunction],[responseWindowMs],[showText])
 
 switch nargin
     case 0

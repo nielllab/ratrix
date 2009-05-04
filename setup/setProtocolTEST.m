@@ -69,6 +69,11 @@ sm=soundManager({soundClip('correctSound','allOctaves',[400],20000), ...
 % reinforcementManager
 constantRewards=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,doAllRequests,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 
+msPenalty=2000;
+constantRewards2=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,...
+    doAllRequests,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
+
+msPenalty=1000;
 doAllRequests='all';
 constantRewardsWithAllRequests=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,doAllRequests,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 
@@ -105,8 +110,11 @@ vh=nAFC(sm,percentCorrectionTrials,constantRewards);
 % vh_responseWindow=nAFC(sm,percentCorrectionTrials,constantRewards,...
 %     [],[],[],[],[],[],'immediate',2000);
 responseLockoutMs=2000;
-gng=goNoGo(sm,percentCorrectionTrials,responseLockoutMs,constantRewards,...
-    [],[],[],[],[],[],{'delayed','constantDelay'},10000);
+delayFcn=hazard(0,2000,20000,false);
+gng=goNoGo(sm,percentCorrectionTrials,responseLockoutMs,constantRewards2,...
+    [],[],[],[],[],[],delayFcn,10000);
+vh_delayed=nAFC(sm,percentCorrectionTrials,constantRewards,...
+    [],[],[],[],'none',[],delayFcn,10000);
 
 ai_parameters=[];
 ai_parameters.numChans=3;
@@ -257,7 +265,7 @@ screen_height=100;
 num_dots=100;
 coherence=.85;
 speed=1;
-contrast=[0.75 0.75];
+contrast=[.1 .1];
 dot_size=[3 4];
 movie_duration=2;
 screen_zoom=[6 6];
@@ -267,6 +275,18 @@ maxHeight=768;
 
 
 cDots=coherentDots(screen_width,screen_height,num_dots,coherence,speed,contrast,dot_size,movie_duration,screen_zoom,...
+     maxWidth,maxHeight,percentCorrectionTrials);
+ 
+movie_duration=1/60; %doesnt actually matter - calcStim will ignore this b/c the trainingStep ts102 has more than one target port
+screen_width=100;
+screen_height=100;
+num_dots=100;
+coherence=.85; % also unused in static mode
+speed=1; % also unused in static mode
+contrast=[1];
+dot_size=[3];
+screen_zoom=[6 6];
+staticDots=coherentDots(screen_width,screen_height,num_dots,coherence,speed,contrast,dot_size,movie_duration,screen_zoom,...
      maxWidth,maxHeight,percentCorrectionTrials);
 % ====================================================================================================================
 % ifFeatureGoRightWithTwoFlank
@@ -636,7 +656,9 @@ parameters.graduation = performanceCriterion([0.85, 0.8],int16([200, 500]));
 
 
 
-ts101 = trainingStep(gng, discrimStim, repeatIndef, noTimeOff(), svnRev, svnCheckMode);  %free drinks
+ts101 = trainingStep(gng, discrimStim, repeatIndef, noTimeOff(), svnRev, svnCheckMode);  %goNoGo w/ orientedGabors
+ts102 = trainingStep(gng, staticDots, repeatIndef, noTimeOff(), svnRev, svnCheckMode);  %goNoGo w/ static dots for pam
+ts103 = trainingStep(vh_delayed, cDots, repeatIndef, noTimeOff(), svnRev, svnCheckMode);  %nAFC w/ delayed dots for pam
 
 % ====================================================================================================================
 % protocol and rest of setup stuff
@@ -644,7 +666,7 @@ ts101 = trainingStep(gng, discrimStim, repeatIndef, noTimeOff(), svnRev, svnChec
 %     ts18, ts19, ts20, ts21, ts22});
 % stepNum=21;
 % p=protocol('gabor test2', {ts29, ts1, ts4, ts12, ts2, ts12, ts8, ts11,ts9,ts10,sweepContrast,ts23,ts24,ts27,ts30});
-stepNum=uint8(1);
+stepNum=uint8(2);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});
@@ -672,7 +694,7 @@ for i=1:length(subjIDs),
 %         case {'rack3test4','rack3test5','rack3test6'} % nAFC, orientedGabors
 %             p=protocol('nAFC,orientedGabors',{ts4});
         otherwise
-            p=protocol('demo',{ts101,ts2,ts40,ts41,ts4,ts2,ts25,sweepContrast,ts12,ts5,easyStep,ts23,objrec1});
+            p=protocol('demo',{ts102,ts103,ts2,ts40,ts41,ts4,ts2,ts25,sweepContrast,ts12,ts5,easyStep,ts23,objrec1});
 %             error('unknown subject');
     end
     

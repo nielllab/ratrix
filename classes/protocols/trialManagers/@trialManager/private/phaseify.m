@@ -6,26 +6,24 @@ function [stimSpecs startingStimSpecInd] = phaseify(trialManager,stim,type,...
 stimulusOnsetCriterion=[];
 startingStimSpecInd=1; % which phase to start with (passed to stimOGL->runRealTimeLoop)
 % this allows us to have an optional 'waiting for request' phase in nAFC and not mess up sound handling
-% set framesUntilStimulusOnset for stimulusOnsetMode
-trialManager.stimulusOnsetMode
-if ischar(trialManager.stimulusOnsetMode) && strcmp(trialManager.stimulusOnsetMode,'immediate')
+% set framesUntilStimulusOnset for delayFunction
+if isempty(trialManager.delayFunction)
     if iscell(type) && strcmp(type{1},'timedFrames') && type{2}(end)~=0
         framesUntilStimulusOnset=sum(type{2});
     else
         framesUntilStimulusOnset=[];
     end
-elseif iscell(trialManager.stimulusOnsetMode) && strcmp(trialManager.stimulusOnsetMode{1},'delayed')
-	evalStr=sprintf('[delay tout]=%s();',trialManager.stimulusOnsetMode{2});
-	eval(evalStr);
-    if isempty(delay)
+elseif isa(trialManager.delayFunction,'delayFunction')
+    [delayMs toutMs]=getDelayAndTimeout(trialManager.delayFunction);
+    if isempty(delayMs)
         stimulusOnsetCriterion={[],4};
-        framesUntilStimulusOnset=tout;
+        framesUntilStimulusOnset=floor(hz*toutMs/1000);
     else
-        framesUntilStimulusOnset=delay;
+        framesUntilStimulusOnset=floor(hz*delayMs/1000);
     end
 	%framesUntilStimulusOnset=fnc_name(); % replace with eval?
 else
-	error('unsupported stimulusOnsetMode - how did this get past the constructor?');
+	error('unsupported delayFunction - how did this get past the constructor?');
 end
 
 if ~isempty(trialManager.responseWindowMs)
@@ -55,7 +53,7 @@ if strmatch(class(trialManager), 'nAFC')
     criterion = {[], 4};
     stimSpecs{4} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,[],'itl',false);
     
-    if isempty(requestPorts)
+    if isempty(requestPorts) && isempty(trialManager.delayFunction) % was this for passiveViewing?
         startingStimSpecInd=2;
     end
     
@@ -76,8 +74,8 @@ elseif strmatch(class(trialManager), 'freeDrinks')
     
 elseif strmatch(class(trialManager), 'goNoGo')
     
-    if isempty(requestPorts) && ischar(trialManager.stimulusOnsetMode) && strcmp(trialManager.stimulusOnsetMode,'immediate')
-        error('cannot have ''immediate'' stimulusOnsetMode with no request ports in goNoGo');
+    if isempty(requestPorts) && isempty(trialManager.delayFunction)
+        error('cannot have empty delayFunction with no request ports in goNoGo');
     end
     lockoutDuration=floor(hz*getResponseLockoutMs(trialManager)/1000);
     % waiting for request

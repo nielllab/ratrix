@@ -2,7 +2,7 @@ function t=nAFC(varargin)
 % NAFC  class constructor.
 % t=nAFC(soundManager,percentCorrectionTrials,rewardManager,
 %         [eyeController],[frameDropCorner],[dropFrames],[displayMethod],[requestPorts],[saveDetailedFramedrops],
-%		  [stimulusOnsetMode],[responseWindowMs],[showText])
+%		  [delayFunction],[responseWindowMs],[showText])
 
 switch nargin
     case 0

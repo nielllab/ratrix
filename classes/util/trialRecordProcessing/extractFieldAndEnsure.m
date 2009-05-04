@@ -128,7 +128,14 @@ try
                     % now convert from a cell array of cell arrays to a vector of length-1's
                     out = cell2mat(cellfun(@getNumRequests,tries,requestPorts,responsePorts,'UniformOutput',false));
             end
-
+        case 'actualRewardDuration'
+            if isfield(trialRecords,'phaseRecords')
+                out = cell2mat(cellfun(@getRewardDursPhased,{trialRecords.phaseRecords},'UniformOutput',false));
+            elseif isfield(trialRecords,'actualRewardDuration') % non-phased case
+                out = cell2mat(cellfun(@getRewardDursNonphased,{trialRecords.actualRewardDuration},'UniformOutput',false));
+            else
+                out=NaN*ones(1,length(trialRecords));
+            end
         case 'none'
             out=[trialRecords.(fieldPath)];
         case 'bin2dec' %note uses trialRecords.station.numPorts in order to pad w/ sig digits
@@ -235,4 +242,17 @@ end
 
 function out = getAllPorts(numPorts)
 out=1:numPorts;
+end
+
+function out = getRewardDursPhased(phaseRecord)
+out=sum([phaseRecord.actualRewardDurationMSorUL]);
+end
+
+function out = getRewardDursNonphased(dur)
+% replace all emptys([]) with 0
+if isempty(dur)
+    out=0;
+else
+    out=dur;
+end
 end

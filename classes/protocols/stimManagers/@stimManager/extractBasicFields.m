@@ -91,6 +91,7 @@ end
 [out.numRequests compiledLUT]                                =extractFieldAndEnsure(trialRecords,{},'numRequests',compiledLUT);
 [out.firstIRI compiledLUT]                                   =extractFieldAndEnsure(trialRecords,{},'firstIRI',compiledLUT);
 [out.responseTime compiledLUT]                               =extractFieldAndEnsure(trialRecords,{},'responseTime',compiledLUT);
+[out.actualRewardDuration compiledLUT]                       =extractFieldAndEnsure(trialRecords,{},'actualRewardDuration',compiledLUT);
 
 
 % 3/5/09 - we need to calculate a 'response' field for analysis based either on trialRecords.response (old-style)

@@ -45,7 +45,12 @@ else
     error('Zah?  This should never happen!')
 end
 
-num_frames = hz * s.movie_duration;
+if length(s.movie_duration)==2
+    selectedDuration = s.movie_duration(1) + rand(1)*(s.movie_duration(2)-s.movie_duration(1));
+else
+    selectedDuration = s.movie_duration;
+end
+num_frames = hz * selectedDuration;
 
 alldotsxy = [rand(s.num_dots,1)*(s.screen_width-1)+1 ...
               rand(s.num_dots,1)*(s.screen_height-1)+1];
@@ -158,6 +163,7 @@ details.selectedCoherence = selectedCoherence;
 details.selectedDotSize = selectedDotSize;
 details.selectedContrast = selectedContrast;
 details.selectedSpeed = selectedSpeed;
+details.selectedDuration = selectedDuration;
 
 if (strcmp(trialManagerClass,'nAFC') || strcmp(trialManagerClass,'goNoGo')) && details.correctionTrial
     text='correction trial!';

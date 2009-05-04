@@ -115,8 +115,10 @@ case {12 13 14}
     % movie_duration
     if (floor(varargin{8}) - varargin{8} < eps)
         s.movie_duration = varargin{8};
+    elseif length(varargin{8})==2 && all(floor(varargin{8}) - varargin{8} < eps) && varargin{8}(1)<=varargin{8}(2)
+        s.movie_duration = varargin{8};
     else
-        error('movie_duration must be an integer')
+        error('movie_duration must be an integer or a 2-element array specifying a valid range')
     end
     % screen_zoom
     if (length(varargin{9}) == 2 && isnumeric(varargin{9}))

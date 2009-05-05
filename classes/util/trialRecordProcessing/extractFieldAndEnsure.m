@@ -142,6 +142,12 @@ try
             % ensureType is a cell array of numPorts
             ports={trialRecords.(fieldPath)};
             out = cell2mat(cellfun(@convertPortsToDec,ports,ensureType,'UniformOutput',false));
+        case 'correct'
+            if isfield(trialRecords,'trialDetails') % look here
+                out=cellfun(@getCorrect,{trialRecords.trialDetails},'UniformOutput',false);
+            else
+                out=[trialRecords.correct];
+            end
         otherwise
             ensureMode
             error('unsupported ensureMode');
@@ -254,5 +260,12 @@ if isempty(dur)
     out=0;
 else
     out=dur;
+end
+end
+
+function out = getCorrect(trialDetails)
+out=nan;
+if isfield(trialDetails,'correct') && ~isempty(trialDetails.correct)
+    out=trialDetails.correct;
 end
 end

@@ -38,8 +38,11 @@ elseif strcmp(trialManagerClass, 'freeDrinks')
     end
     % play correct/error sound
     if phase == 2 && stepsInPhase <= 0
-        playSoundSounds{end+1} = {'correctSound', msRewardSound};
-        playSoundSounds{end+1} = {'wrongSound', msPenaltySound};
+        if ~isempty(msRewardSound) && msRewardSound>0
+            playSoundSounds{end+1} = {'correctSound', msRewardSound};
+        elseif ~isempty(msPenaltySound) && msPenaltySound>0
+            playSoundSounds{end+1} = {'wrongSound', msPenaltySound};
+        end
     end
 elseif strcmp(trialManagerClass, 'autopilot')
     % do nothing because we don't play any sounds in this case

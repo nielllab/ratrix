@@ -8,31 +8,35 @@ else
 end
 
 if ~isempty(strategy) && strcmp(strategy, 'expert')
-    height = stim.height;
-    width = stim.width;
+    stimheight = stim.height;
+    stimwidth = stim.width;
 else
-    if metaPixelSize == 0
-        scaleFactor = [scrHeight scrWidth]./[size(stim,1) size(stim,2)];
-    elseif length(metaPixelSize)==2 && all(metaPixelSize)>0
-        scaleFactor = metaPixelSize;
-    elseif isempty(metaPixelSize)
-        % empty only for 'reinforced' phases, in which case we dont care what destRect is, since it will get overriden anyways
-        % during updateTrialState(tm)
-        scaleFactor = [1 1];
-    else
-        error('bad metaPixelSize argument')
-    end
-    if any(scaleFactor.*[size(stim,1) size(stim,2)]>[scrHeight scrWidth])
-        scaleFactor.*[size(stim,1) size(stim,2)]
-        scaleFactor
-        size(stim)
-        [scrHeight scrWidth]
-        error('metaPixelSize argument too big')
-    end
-
-    height = scaleFactor(1)*size(stim,1);
-    width = scaleFactor(2)*size(stim,2);
+    stimheight=size(stim,1);
+    stimwidth=size(stim,2);
 end
+
+if metaPixelSize == 0
+    scaleFactor = [scrHeight scrWidth]./[stimheight stimwidth];
+elseif length(metaPixelSize)==2 && all(metaPixelSize)>0
+    scaleFactor = metaPixelSize;
+elseif isempty(metaPixelSize)
+    % empty only for 'reinforced' phases, in which case we dont care what destRect is, since it will get overriden anyways
+    % during updateTrialState(tm)
+    scaleFactor = [1 1];
+else
+    error('bad metaPixelSize argument')
+end
+if any(scaleFactor.*[stimheight stimwidth]>[scrHeight scrWidth])
+    scaleFactor.*[stimheight stimwidth]
+    scaleFactor
+    stimheight
+    stimwidth
+    [scrHeight scrWidth]
+    error('metaPixelSize argument too big')
+end
+
+height = scaleFactor(1)*stimheight;
+width = scaleFactor(2)*stimwidth;
 
 if window>=0
     scrRect = Screen('Rect', window);

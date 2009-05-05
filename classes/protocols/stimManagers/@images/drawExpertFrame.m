@@ -41,9 +41,14 @@ for j=1:size(imgs,1) % for each actual image, not the entire screen
         imgToProcess=imgs{j,1};
         % rotate
         imagetex=Screen('MakeTexture',window,imgToProcess,0,0,floatprecision);
-        thisDestRect=destRect;
-        thisDestRect(3)=imgs{j,2}(2);
-        thisDestRect(1)=imgs{j,2}(1);
+        
+        % get img bounds in terms of normalized 0-1, then apply destRect
+        destHeight=destRect(4)-destRect(2);
+        destWidth=destRect(3)-destRect(1);
+        normImg=[imgs{j,2}(1) 0 imgs{j,2}(2) stim.height];
+        normImg=normImg ./ [stim.width stim.height stim.width stim.height];
+        thisDestRect=[destWidth*normImg(1)+destRect(1) destHeight*normImg(2)+destRect(2)...
+            destWidth*normImg(3)+destRect(1) destHeight*normImg(4)+destRect(2)];
         % do image scaling now
         thisDestHeight=thisDestRect(4)-thisDestRect(2)+1;
         newHeight=thisDestHeight*stimulus.selectedSizes(j);

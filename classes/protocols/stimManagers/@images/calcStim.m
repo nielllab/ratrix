@@ -175,19 +175,13 @@ details.sizeyoked=stimulus.sizeyoked;
 
 details.trialDistribution = stimulus.trialDistribution;
 
-% testing
-blankwidth=0;
-for i=1:size(pics,1)
-    blankwidth=blankwidth+size(pics{i,1},2);
-end
-blankwidth=width-blankwidth;
-horiz_ind = 1;
+% center images over left/right ports (hardcoded portpos)
+portpos=linspace(0,width,5);
+portpos(1)=[];
+portpos(end)=[];
 for i=1:size(pics,1)
     if ~isempty(pics{i,1})
-        pics{i,2}=[horiz_ind horiz_ind+size(pics{i,1},2)-1];
-        horiz_ind=horiz_ind+size(pics{i,1},2);
-    else
-        horiz_ind=horiz_ind+blankwidth;
+        pics{i,2}=[portpos(i)-floor(size(pics{i,1},2)/2) portpos(i)+floor(size(pics{i,1},2)/2)-1];
     end
 end
 stimulus.images=pics;

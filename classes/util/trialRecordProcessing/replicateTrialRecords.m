@@ -58,30 +58,39 @@ for f=1:length(subDirs)
     end
 
     if length(fieldnames(tr))>1
-        
+
         % collection process
         trialRecords = collectTrialRecords(tr);
-        
+
         trialNums=[trialRecords.trialNumber];
         if ~all(diff(trialNums)==1)
             diff(trialNums)
             error('missing trials!')
         end
-        
+
         % 3/17/09 - do the 'collection' and LUTizing here, then resave to local trialRecords.mat
         % because the replicate processes uses movefile instead of matlab save
         sessionLUT={};
         fieldsInLUT={};
-        %12/17/08 - put LUT processing here?
-        %12/11/08 - newRecs is a struct, each field is an array/matrix of values
-        % if type is cell, then use LUT and replace with an array of indices
 
-        fields = fieldnames(trialRecords(1));
-        % do not process the 'result' or 'type' fields because they will mess up LUT handling
-        fields(find(strcmp(fields,'result')))=[];
-        fields(find(strcmp(fields,'type')))=[];
-        [sessionLUT fieldsInLUT trialRecords] = processFields(fields,sessionLUT,fieldsInLUT,trialRecords);
-        
+
+        % 5/5/09 - lets try splitting the processFields according to trainingStepNum
+        tsNums=double([trialRecords.trainingStepNum]);
+        tsIntervals=[];
+        tsIntervals(:,1)=[tsNums(find(diff(tsNums))) tsNums(end)]';
+        tsIntervals(:,2)=[1 find(diff(tsNums))+1];
+        tsIntervals(:,3)=[find(diff(tsNums)) length(tsNums)];
+
+        for i=1:size(tsIntervals,1) % for each interval, process
+            fields=fieldnames([trialRecords(tsIntervals(i,2):tsIntervals(i,3))]);
+            % do not process the 'result' or 'type' fields because they will mess up LUT handling
+            % both fields could potentially contain strings and numerics mixed (bad for LUT indexing!)
+            fields(find(strcmp(fields,'result')))=[];
+            fields(find(strcmp(fields,'type')))=[];
+            [sessionLUT fieldsInLUT trialRecords(tsIntervals(i,2):tsIntervals(i,3))] = ...
+                processFields(fields,sessionLUT,fieldsInLUT,trialRecords(tsIntervals(i,2):tsIntervals(i,3)));
+        end
+
         save(fullfile(filePath,fileName),'trialRecords','sessionLUT','fieldsInLUT');
 
         newFileName=[fn '_' num2str(trialNums(1)) '-' num2str(trialNums(end)) '_' ...
@@ -93,9 +102,9 @@ for f=1:length(subDirs)
 
         gotPathFromOracle = 0;
         if isempty (input_paths) % if path not provided as input, get from oracle, otherwise use provided (for standAloneRun)
-                    conn = dbConn();
+            conn = dbConn();
             possible_path = getPermanentStorePathBySubject(conn, subjectName);
-                    closeConn(conn);
+            closeConn(conn);
             if ~isempty(possible_path{1})
                 paths = possible_path;
                 gotPathFromOracle = 1; %used to set paths appropriately at the last step (move files to perm store)
@@ -103,7 +112,7 @@ for f=1:length(subDirs)
         end
 
         % =======================================================================
-        
+
         for j=1:length(paths)
             % edited to switch on whether or not we are using subject-specific paths
             if gotPathFromOracle
@@ -113,7 +122,7 @@ for f=1:length(subDirs)
                 [success(j) message messageID]=mkdir(fullfile(paths{j},subjectName));
                 fprintf('made directory %s\n', fullfile(paths{j},subjectName))
             end
-            
+
             if success(j) %ignore warning if directory exists
                 d=dir(fullfile(paths{j},subjectName)); %not safe cuz of windows networking/filesharing bug -- but will just result in overwriting existing trialRecord file in case of name collision, should never happen -- ultimately just compare against filenames in oracle
                 for i=1:length(d)
@@ -135,12 +144,12 @@ for f=1:length(subDirs)
                     end
                 end
                 if success(j)
-                    
+
                     % if didn't get paths from oracle, then append subjectName to paths{j}
                     if ~gotPathFromOracle
                         paths{j} = fullfile(paths{j},subjectName);
                     end
-                    
+
                     if recordInOracle
 
                         % Attempt to do both the copy of the file and the db add
@@ -162,12 +171,12 @@ for f=1:length(subDirs)
                             successC = false;
                         end
                     else
-                        %only do the copy; don't do the db add 
-%                         filePath
-%                         fileName
-%                         paths{j}
-%                         subjectName
-%                         newFileName
+                        %only do the copy; don't do the db add
+                        %                         filePath
+                        %                         fileName
+                        %                         paths{j}
+                        %                         subjectName
+                        %                         newFileName
                         [successC messageC messageIDC]=copyfile(fullfile(filePath,fileName),fullfile(paths{j},newFileName));
                         if ~successC
                             messageC
@@ -213,7 +222,7 @@ end
 end % end function
 
 % ==================================
-% HELPER FUNCTION 
+% HELPER FUNCTION
 % this function will be used recursively to look through structs
 function [sessionLUT fieldsInLUT trialRecords] = processFields(fields,sessionLUT,fieldsInLUT,trialRecords,prefix)
 
@@ -227,8 +236,8 @@ for ii=1:length(fields)
     %                     fn
     %                     newRecs.(fn)
     %                     class(newRecs.(fn))
-%     trialRecords(1)
-%     fields
+    %     trialRecords(1)
+    %     fields
     try
         if ~isempty(prefix)
             fieldPath = [prefix '.' fn];
@@ -241,7 +250,9 @@ for ii=1:length(fields)
             for i=1:length(indices)
                 trialRecords(i).(fn) = indices(i);
             end
-            fieldsInLUT{end+1}=fieldPath;
+            if ~ismember(fieldPath,fieldsInLUT)
+                fieldsInLUT{end+1}=fieldPath;
+            end
         elseif isstruct(trialRecords(1).(fn)) && ~isempty(trialRecords(1).(fn)) && ~strcmp(fn,'errorRecords')...
                 && ~strcmp(fn,'responseDetails') && ~strcmp(fn,'phaseRecords') && ~strcmp(fn,'trialDetails')% check not an empty struct
             % 12/23/08 - note that this assumes that all fields are the same structurally throughout this session
@@ -249,14 +260,14 @@ for ii=1:length(fields)
             % this is a struct - recursively call processFields on all fields of the struct
             thisStructFields = fieldnames((trialRecords(1).(fn)));
             % now call processFields recursively - pass in fn as a prefix (so we know how to store to fieldsinLUT)
-%             trialRecords
-%             fn
-%             fieldPath
+            %             trialRecords
+            %             fn
+            %             fieldPath
             [sessionLUT fieldsInLUT theseStructs] = processFields(thisStructFields,sessionLUT,fieldsInLUT,[trialRecords.(fn)],fieldPath);
             % we have to return a temporary 'theseStructs' and then manually reassign in trialRecords unless can figure out correct indexing
-    %         size(theseStructs)
-    %         size(trialRecords)
-    %         theseStructs
+            %         size(theseStructs)
+            %         size(trialRecords)
+            %         theseStructs
             for j=1:length(trialRecords)
                 trialRecords(j).(fn)=theseStructs(j);
             end
@@ -275,7 +286,7 @@ for ii=1:length(fields)
                     addToLUT=true;
                 end
             end
-            if addToLUT
+            if addToLUT && ~ismember(fieldPath,fieldsInLUT)
                 fieldsInLUT{end+1}=fieldPath;
             end
 

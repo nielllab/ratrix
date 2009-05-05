@@ -39,12 +39,24 @@ numFreqs=length(stimulus.pixPerCycs);
 details.pixPerCyc=stimulus.pixPerCycs(ceil(rand*numFreqs));
 
 numTargs=length(stimulus.targetOrientations);
-details.orientations = stimulus.targetOrientations(ceil(rand(length(targetPorts),1)*numTargs))';
+% fixes 1xN versus Nx1 vectors if more than one targetOrientation
+if size(stimulus.targetOrientations,1)==1 && size(stimulus.targetOrientations,2)>1
+    targetOrientations=stimulus.targetOrientations';
+else
+    targetOrientations=stimulus.targetOrientations;
+end
+if size(stimulus.distractorOrientations,1)==1 && size(stimulus.distractorOrientations,2)>1
+    distractorOrientations=stimulus.distractorOrientations';
+else
+    distractorOrientations=stimulus.distractorOrientations;
+end
+    
+details.orientations = targetOrientations(ceil(rand(length(targetPorts),1)*numTargs));
 
 numDistrs=length(stimulus.distractorOrientations);
 if numDistrs>0
     numGabors=length(targetPorts)+length(distractorPorts);
-    details.orientations = [details.orientations; stimulus.distractorOrientations(ceil(rand(length(distractorPorts),1)*numDistrs))'];
+    details.orientations = [details.orientations; distractorOrientations(ceil(rand(length(distractorPorts),1)*numDistrs))];
     distractorLocs=distractorPorts;
 else
     numGabors=length(targetPorts);

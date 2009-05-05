@@ -289,7 +289,13 @@ for ii=1:length(fields)
             if addToLUT && ~ismember(fieldPath,fieldsInLUT)
                 fieldsInLUT{end+1}=fieldPath;
             end
-
+        elseif ismember(fieldPath,fieldsInLUT)
+            % 5/5/09 - if this field was LUTized in a prior training step interval, ALWAYS LUTize it here!
+            % just do basic processing on this field (fails for char -> struct/cell conversions)
+            [indices sessionLUT] = addOrFindInLUT(sessionLUT,{trialRecords.(fn)});
+            for i=1:length(indices)
+                trialRecords(i).(fn) = indices(i);
+            end
         end
     catch
         ple

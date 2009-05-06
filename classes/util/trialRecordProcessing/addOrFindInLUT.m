@@ -14,8 +14,15 @@ for i=1:length(fields)
             result=length(LUT);
         end
         indices(i)=result;
+    elseif isnumeric(fields{i})
+        result=find(cellfun(@(x) isnumeric(x)&&all(x==fields{i}), LUT));
+        if isempty(result) % did not find in LUT - ADD
+            LUT{end+1} = fields{i};
+            result=length(LUT);
+        end
+        indices(i)=result;
     else
-        indices(i)=fields{i};
+        error('can only add strings and numerics to the LUT');
     end
 end
 

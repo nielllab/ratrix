@@ -77,9 +77,12 @@ end
 % need a try-catch here because this is potentially dangerous (stimDetails may not be the same for all trials, in which case this will error
 % from the vector indexing
 try
-    [out.correctionTrial compiledLUT]                            =extractFieldAndEnsure(trialRecords,{'stimDetails','correctionTrial'},'scalar',compiledLUT);
+    if strcmp(LUTlookup(compiledLUT,unique(out.trialManagerClass)),'nAFC')
+        [out.correctionTrial compiledLUT]                            =extractFieldAndEnsure(trialRecords,{'stimDetails','correctionTrial'},'scalar',compiledLUT);
+    else
+        out.correctionTrial=ones(1,length(trialRecords))*nan;
+    end
 catch
-    ple
     out.correctionTrial=ones(1,length(trialRecords))*nan;
 end    
 % 1/14/09 - added numRequestLicks and firstILI

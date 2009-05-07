@@ -203,3 +203,6 @@ protocols/trialManagers/@goNoGo/stationOKForTrialManager.m -text
 protocols/delayFunctions/@delayFunction/delayFunction.m -text
 protocols/delayFunctions/@hazard/getDelayAndTimeout.m -text
 protocols/delayFunctions/@hazard/hazard.m -text
+db/@dbConn/clearBLOB.m -text
+db/@dbConn/updateBLOB.m -text
+db/@dbConn/getBLOB.m -text

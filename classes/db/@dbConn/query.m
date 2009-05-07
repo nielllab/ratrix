@@ -26,6 +26,15 @@ try
                         convC = c;
                     case 'char'
                         convC = c;
+                    case 'oracle.sql.BLOB'
+%                         convC=c;
+                        convC={};
+                        stream=c.getBinaryStream;
+                        nextbyte=stream.read();
+                        while nextbyte~=-1
+                            convC=[convC nextbyte];
+                            nextbyte=stream.read();
+                        end
                     otherwise
                         'Cannot handle'
                         class(c)

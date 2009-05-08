@@ -4,3 +4,5 @@
 /getScreenCalibrationData.m -text
 /calibrate.m -text
 /extframepulse.m -text
+/calibrateMonitor.m -text
+/addCLUTToOracle.m -text

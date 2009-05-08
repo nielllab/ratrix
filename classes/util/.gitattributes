@@ -139,3 +139,5 @@ trialRecordProcessing/fixTrialRecordRanges.m -text
 matlaby/blueToRed.m -text
 infrastructure/convertDecimalToIndPorts.m -text
 stimHelpers/constantDelay.m -text
+infrastructure/getDefaultPositionFrame.m -text
+misc/makelinearlutPR.m -text

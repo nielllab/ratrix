@@ -204,3 +204,6 @@ db/@dbConn/clearBLOB.m -text
 db/@dbConn/updateBLOB.m -text
 db/@dbConn/getBLOB.m -text
 protocols/@stimSpec/getPunishResponses.m -text
+protocols/delayManagers/@delayManager/delayManager.m -text
+protocols/delayManagers/@hazard/hazard.m -text
+protocols/delayManagers/@hazard/calcAutoRequest.m -text

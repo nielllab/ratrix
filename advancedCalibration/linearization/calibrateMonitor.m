@@ -108,11 +108,19 @@ rawRange=[min(raws) max(raws)];
     measuredRange,rawRange,reallutsize,false);
 
 % recall generateScreenCalibrationData w/ new linearized CLUT and get validation data
+try
 Screen('LoadNormalizedGammaTable', screenNum,linearizedCLUT);
+catch
+    sca
+    keyboard
+end
 positionFrame=[]; % no need to redo positionFrame (spyder device should already be attached)
 [validationValues]=...
     generateScreenCalibrationData(screenNum,screenType,patchRect,numFramesPerValue,...
     numInterValueFrames,linearizedCLUT,rawValues,positionFrame,interValueRGB,background,...
     parallelPortAddress,framePulseCode,useSpyder,doDaq, daqPath, daqPlot, skipSyncTest);
 
+
+% restore original CLUT
+Screen('LoadNormalizedGammaTable',screenNum,currentCLUT);
 end % end function

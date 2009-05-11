@@ -228,6 +228,7 @@ try
     if drawSpyderPositionFrame
         positionFrameSpyder = Screen('MakeTexture',window,positionFrame);
         Screen('DrawTexture', window, positionFrameSpyder);
+        Screen('DrawText',window,'Please position the spyder NOW... and then press a key',15,15,100)
         vbl = Screen('Flip',window); % why don't we need a 'flip' here???
         % possible ans: dual header mode with ATI gfx? 
         display('Please position the spyder NOW... and then press a key');
@@ -296,11 +297,16 @@ beep;beep
             Screen('DrawTexture',window,bg,[],winRect,[],0);
             Screen('DrawTexture',window,t(i),[],patchRect,[],0);
             Screen('DrawingFinished',window);
+            
+            vbl=Screen('Flip',window,0);
+            Screen('DrawTexture',window,bg,[],winRect,[],0);
+            Screen('DrawTexture',window,t(i),[],patchRect,[],0);
+            Screen('DrawingFinished',window);
 
             if useSpyder
                 when=0;
             else
-                when=vbl+(double(numFramesPerValue)-0.5)*ifi;
+                when=vbl+(double(numFramesPerValue)-1.5)*ifi;
             end
             vbl = Screen('Flip',window,when);
 
@@ -325,7 +331,11 @@ beep;beep
             Screen('DrawTexture',window,bg,[],winRect,[],0);
             Screen('DrawTexture',window,ivRGB,[],patchRect,[],0);
             Screen('DrawingFinished',window);
-            when=vbl+(double(numInterValueFrames)-0.5)*ifi;
+            vbl=Screen('Flip',window); % 5/11/09 - need to flip to interValueRGB before using numInterValueFrames
+            Screen('DrawTexture',window,bg,[],winRect,[],0);
+            Screen('DrawTexture',window,ivRGB,[],patchRect,[],0);
+            Screen('DrawingFinished',window);
+            when=vbl+(double(numInterValueFrames)-1.5)*ifi;
             vbl = Screen('Flip',window,when);
         end
         framepulse(false,parallelPortAddress,framePulseCode);

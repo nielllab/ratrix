@@ -217,7 +217,7 @@ function out=diffFirstRequestLastResponse(times,tries,requestPorts,responsePorts
 out=nan;
 first=find(cell2mat(cellfun(@(x) ~any(isnan(x))&&any(x(requestPorts)==1),tries,'UniformOutput',false)),1,'first');
 last=find(cell2mat(cellfun(@(x) ~any(isnan(x))&&any(x(responsePorts)==1),tries,'UniformOutput',false)),1,'last');
-if ~isempty(first) && ~isempty(last)
+if ~isempty(first) && ~isempty(last) && last>first
     out=times(last)-times(first);
 end
 end

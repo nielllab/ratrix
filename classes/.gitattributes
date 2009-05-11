@@ -200,7 +200,6 @@ protocols/trialManagers/@goNoGo/getResponsePorts.m -text
 protocols/trialManagers/@goNoGo/getRequestRewardSizeULorMS.m -text
 protocols/trialManagers/@goNoGo/updateTrialState.m -text
 protocols/trialManagers/@goNoGo/stationOKForTrialManager.m -text
-protocols/delayFunctions/@delayFunction/delayFunction.m -text
 protocols/delayFunctions/@hazard/getDelayAndTimeout.m -text
 protocols/delayFunctions/@hazard/hazard.m -text
 db/@dbConn/clearBLOB.m -text

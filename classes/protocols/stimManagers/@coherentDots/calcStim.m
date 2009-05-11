@@ -1,5 +1,5 @@
-function [stimulus updateSM resolutionIndex out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance text indexPulses] = ...
-    calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
+function [stimulus updateSM resolutionIndex preOnsetStim preResponseStim discrimStim LUT targetPorts distractorPorts details interTrialLuminance text indexPulses] = ...
+    calcStim(stimulus,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % 1/30/09 - trialRecords now includes THIS trial
 s = stimulus;
 indexPulses=[];
@@ -34,7 +34,7 @@ if ~isempty(trialRecords) && length(trialRecords)>=2
 else
     lastRec=[];
 end
-[targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass);
+[targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass,allowRepeats);
 
 if length(targetPorts)==1
     if targetPorts == 1
@@ -176,6 +176,24 @@ details.selectedDotSize = selectedDotSize;
 details.selectedContrast = selectedContrast;
 details.selectedSpeed = selectedSpeed;
 details.selectedDuration = selectedDuration;
+
+discrimStim=[];
+discrimStim.stimulus=out;
+discrimStim.stimType=type;
+discrimStim.scaleFactor=scaleFactor;
+discrimStim.startFrame=1;
+discrimStim.stochasticDistribution=[];
+
+preOnsetStim=[];
+preOnsetStim.stimulus=interTrialLuminance;
+preOnsetStim.stimType='loop';
+preOnsetStim.scaleFactor=0;
+preOnsetStim.startFrame=1;
+preOnsetStim.stochasticDistribution=[];
+preOnsetStim.punishResponses=false;
+
+preResponseStim=discrimStim;
+preResponseStim.punishResponses=false;
 
 if (strcmp(trialManagerClass,'nAFC') || strcmp(trialManagerClass,'goNoGo')) && details.correctionTrial
     text='correction trial!';

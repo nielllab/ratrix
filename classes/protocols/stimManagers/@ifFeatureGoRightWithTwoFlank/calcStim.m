@@ -1,6 +1,6 @@
 
-function [stimulus,updateSM,resInd,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance, text,indexPulses]=...
-    calcStim(stimulus, trialManagerClass,resolutions,screenDisplaySize,LUTbits,responsePorts,totalPorts,trialRecords,forceStimDetails);
+function [stimulus,updateSM,resInd,preOnsetStim,preResponseStim,discrimStim,LUT,targetPorts,distractorPorts,details,interTrialLuminance, text,indexPulses]=...
+    calcStim(stimulus, trialManagerClass,allowRepeats,resolutions,screenDisplaySize,LUTbits,responsePorts,totalPorts,trialRecords,forceStimDetails);
 %[stimulus updateSM out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance isCorrection] = calcStim(stimulus,trialManagerClass,frameRate,responsePorts,totalPorts,trialRecords)
 %
 %this makes a target that has feature to go right or left
@@ -411,9 +411,25 @@ switch details.renderMode
                  end
 
                   % now create stimSpecs (copied from gratings march 20.2009)
-                 type='phased';
-                 out{1} = stimSpec(details,{[] 2},'expert',0,timeout,[],scaleFactor,0,details.hz,[],'display'); % expert mode
-                 out{2} = stimSpec(interTrialLuminance,{[] 1},'loop',0,1,[],scaleFactor,1,details.hz,[],'itl');
+                 type='expert';
+                 discrimStim=[];
+                 discrimStim.stimulus=details;
+                 discrimStim.stimType=type;
+                 discrimStim.scaleFactor=scaleFactor;
+                 discrimStim.startFrame=1;
+                 discrimStim.stochasticDistribution=[];
+                 discrimStim.framesUntilTimeout=timeout;
+
+                 preOnsetStim=[];
+                 preOnsetStim.stimulus=interTrialLuminance;
+                 preOnsetStim.stimType='loop';
+                 preOnsetStim.scaleFactor=0;
+                 preOnsetStim.startFrame=1;
+                 preOnsetStim.stochasticDistribution=[];
+                 preOnsetStim.punishResponses=false;
+
+                 preResponseStim=discrimStim;
+                 preResponseStim.punishResponses=false;
                  
              otherwise 
                  error('dynamic not tested in that mode yet')
@@ -514,6 +530,24 @@ switch details.renderMode
             ShowCursor;
             rethrow(ex);
         end
+        
+        discrimStim=[];
+        discrimStim.stimulus=out;
+        discrimStim.stimType=type;
+        discrimStim.scaleFactor=scaleFactor;
+        discrimStim.startFrame=1;
+        discrimStim.stochasticDistribution=[];
+
+        preOnsetStim=[];
+        preOnsetStim.stimulus=interTrialLuminance;
+        preOnsetStim.stimType='loop';
+        preOnsetStim.scaleFactor=0;
+        preOnsetStim.startFrame=1;
+        preOnsetStim.stochasticDistribution=[];
+        preOnsetStim.punishResponses=false;
+
+        preResponseStim=discrimStim;
+        preResponseStim.punishResponses=false;
 
 end
 

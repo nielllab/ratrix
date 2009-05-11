@@ -139,6 +139,8 @@ if ischar(result)
     switch result
         case 'nominal'
             out=1;
+        case 'timedout'
+            out=2;
         case 'multiple ports'
             out=-1;
         case 'none'

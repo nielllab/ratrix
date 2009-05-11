@@ -84,23 +84,26 @@ increasingRewards=rewardNcorrectInARow([20,80,150,250,350,500,1000],requestRewar
 
 % ====================================================================================================================
 % trialManager
-fd_sto = freeDrinks(sm,freeDrinkLikelihood,constantRewards);
+allowRepeats=false;
+fd_sto = freeDrinks(sm,freeDrinkLikelihood,allowRepeats,constantRewards);
 
 freeDrinkLikelihood=0;
-fd = freeDrinks(sm,freeDrinkLikelihood,constantRewards);
+fd = freeDrinks(sm,freeDrinkLikelihood,allowRepeats,constantRewards);
 
 % freeDrinks (stochastic and nonstochastic) but with increasingRewards instead of constantRewards
 freeDrinkLikelihood=0.003;
-fd_sto_increasing_rewards = freeDrinks(sm,freeDrinkLikelihood,increasingRewards);
+fd_sto_increasing_rewards = freeDrinks(sm,freeDrinkLikelihood,allowRepeats,increasingRewards);
 
 freeDrinkLikelihood=0;
-fd_increasing_rewards = freeDrinks(sm,freeDrinkLikelihood,increasingRewards);
+fd_increasing_rewards = freeDrinks(sm,freeDrinkLikelihood,allowRepeats,increasingRewards);
 
-fd_all_requests=freeDrinks(sm,freeDrinkLikelihood,constantRewardsWithAllRequests,...
+fd_all_requests=freeDrinks(sm,freeDrinkLikelihood,allowRepeats,constantRewardsWithAllRequests,...
     [],[],[],[],'all');
 
-fd_nonrepeats=freeDrinks(sm,freeDrinkLikelihood,constantRewardsWithNonrepeats,...
+fd_nonrepeats=freeDrinks(sm,freeDrinkLikelihood,allowRepeats,constantRewardsWithNonrepeats,...
     [],[],[],[],'all');
+
+
 
 vh=nAFC(sm,percentCorrectionTrials,constantRewards);
 
@@ -109,12 +112,14 @@ vh=nAFC(sm,percentCorrectionTrials,constantRewards);
 %     [],[],[],[],[],[],{'delayed','constantDelay'},2000);
 % vh_responseWindow=nAFC(sm,percentCorrectionTrials,constantRewards,...
 %     [],[],[],[],[],[],'immediate',2000);
-responseLockoutMs=2000;
-delayFcn=hazard(0,2000,20000,false);
-gng=goNoGo(sm,percentCorrectionTrials,responseLockoutMs,constantRewards2,...
-    [],[],[],[],[],[],delayFcn,10000);
+responseLockoutMs=[2000 4000];
+delayFcn=hazard(0,2000,5000,false);
 vh_delayed=nAFC(sm,percentCorrectionTrials,constantRewards,...
-    [],[],[],[],'none',[],delayFcn,10000);
+    [],[],[],[],[],[],delayFcn,responseLockoutMs);
+
+allowRepeats=true;
+fd_delayed=freeDrinks(sm,freeDrinkLikelihood,allowRepeats,constantRewards,...
+    [],[],[],[],'none',[],delayFcn,responseLockoutMs);
 
 ai_parameters=[];
 ai_parameters.numChans=3;
@@ -654,10 +659,7 @@ parameters.scheduler=minutesPerSession(90,3);
 parameters.graduation = performanceCriterion([0.85, 0.8],int16([200, 500]));
 [easyStep previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 
-
-
-ts101 = trainingStep(gng, discrimStim, repeatIndef, noTimeOff(), svnRev, svnCheckMode);  %goNoGo w/ orientedGabors
-ts102 = trainingStep(gng, staticDots, repeatIndef, noTimeOff(), svnRev, svnCheckMode);  %goNoGo w/ static dots for pam
+ts101 = trainingStep(fd_delayed, staticDots, repeatIndef, noTimeOff(), svnRev, svnCheckMode); % freeDrinks w/ static dots for pam
 ts103 = trainingStep(vh_delayed, cDots, repeatIndef, noTimeOff(), svnRev, svnCheckMode);  %nAFC w/ delayed dots for pam
 
 % ====================================================================================================================
@@ -666,7 +668,7 @@ ts103 = trainingStep(vh_delayed, cDots, repeatIndef, noTimeOff(), svnRev, svnChe
 %     ts18, ts19, ts20, ts21, ts22});
 % stepNum=21;
 % p=protocol('gabor test2', {ts29, ts1, ts4, ts12, ts2, ts12, ts8, ts11,ts9,ts10,sweepContrast,ts23,ts24,ts27,ts30});
-stepNum=uint8(3);
+stepNum=uint8(1);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});
@@ -694,7 +696,7 @@ for i=1:length(subjIDs),
 %         case {'rack3test4','rack3test5','rack3test6'} % nAFC, orientedGabors
 %             p=protocol('nAFC,orientedGabors',{ts4});
         otherwise
-            p=protocol('demo',{ts4,ts2,ts102,ts103,ts40,ts41,ts4,ts2,ts25,sweepContrast,ts12,ts5,easyStep,ts23,objrec1});
+            p=protocol('demo',{ts4,ts2,ts101,ts103,ts40,ts41,ts4,ts2,ts25,sweepContrast,ts12,ts5,easyStep,ts23,objrec1});
 %             error('unknown subject');
     end
     

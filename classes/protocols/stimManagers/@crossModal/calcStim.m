@@ -1,5 +1,5 @@
-function [stimulus updateSM resInd out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance text indexPulses] = ...
-    calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
+function [stimulus updateSM resInd preOnsetStim preResponseStim discrimStim LUT targetPorts distractorPorts details interTrialLuminance text indexPulses] = ...
+    calcStim(stimulus,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % 1/3/0/09 - trialRecords now includes THIS trial
 indexPulses=[];
 updateSM = true; % This is always true, because the audio stimulus is always set
@@ -119,6 +119,24 @@ details.isBlocking = stimulus.isBlocking;
 details.currentModalityTrialNum = stimulus.trialNum; % How many trials were run on this modality so far
 details.modalitySwitchMethod = stimulus.modalitySwitchMethod;
 details.modalitySwitchType = stimulus.modalitySwitchType;
+
+discrimStim=[];
+discrimStim.stimulus=out;
+discrimStim.stimType=type;
+discrimStim.scaleFactor=scaleFactor;
+discrimStim.startFrame=1;
+discrimStim.stochasticDistribution=[];
+
+preOnsetStim=[];
+preOnsetStim.stimulus=interTrialLuminance;
+preOnsetStim.stimType='loop';
+preOnsetStim.scaleFactor=0;
+preOnsetStim.startFrame=1;
+preOnsetStim.stochasticDistribution=[];
+preOnsetStim.punishResponses=false;
+
+preResponseStim=discrimStim;
+preResponseStim.punishResponses=false;
 
 % Increment trial num
 stimulus.trialNum = stimulus.trialNum+1;

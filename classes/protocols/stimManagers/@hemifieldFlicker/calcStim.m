@@ -1,5 +1,5 @@
-function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text,indexPulses] =... 
-    calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
+function [stimulus,updateSM,resolutionIndex,preOnsetStim,preResponseStim,discrimStim,LUT,targetPorts,distractorPorts,details,interTrialLuminance,text,indexPulses] =... 
+    calcStim(stimulus,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % 1/3/0/09 - trialRecords now includes THIS trial
 %LUT = Screen('LoadCLUT', 0);
 %LUT=LUT/max(LUT(:));
@@ -24,7 +24,7 @@ if ~isempty(trialRecords) && length(trialRecords)>=2
 else
     lastRec=[];
 end
-[targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass);
+[targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass,allowRepeats);
 switch trialManagerClass
     case 'freeDrinks'
         type={'indexedFrames',[]};%int32([10 10]); % This is 'timedFrames'
@@ -65,3 +65,24 @@ out(:,:,1:2^numFields)=computeFlickerFields(params,stimulus.flickerType,stimulus
 %DFP: 01.04.08 -- I needed this for both freeDrinks and nAFC, because the
 %index doesn't rotate without an empty stimulus at the end
 out(:,:,3)=stimulus.mean;
+
+
+discrimStim=[];
+discrimStim.stimulus=out;
+discrimStim.stimType=type;
+discrimStim.scaleFactor=scaleFactor;
+discrimStim.startFrame=1;
+discrimStim.stochasticDistribution=[];
+
+preOnsetStim=[];
+preOnsetStim.stimulus=interTrialLuminance;
+preOnsetStim.stimType='loop';
+preOnsetStim.scaleFactor=0;
+preOnsetStim.startFrame=1;
+preOnsetStim.stochasticDistribution=[];
+preOnsetStim.punishResponses=false;
+
+preResponseStim=discrimStim;
+preResponseStim.punishResponses=false;
+
+end % end function

@@ -27,26 +27,33 @@
 %                               index from the resolutions input that you want to set
 %                           if trialManager.displayMethod = 'LED'
 %                               the analog output hz you want to use for this trial (ignored if type is 'phased' - each stimSpec has its own hz)
-%   out                     if type is 'expert':
-%                               a struct with fields that are required, have no direct effect, but affect what is passed to your drawExpertFrame method:
-%                                   floatprecision (as defined for screen('MakeTexture') -- will be passed to your drawExpertFrame method)
-%                                   height (in pixels, will scale stim to this size to compute the destRect passed to your drawExpertFrame method)
-%                                   width (as above)
-%                           if type is 'phased':
-%                               a cell vector of stimSpecs (see below + the stimSpec constructor help)
-%                           otherwise:
-%                               monochrome stimulus frames.  logical, real (0<=x<=1) [double single], or [uint8 uint16].  2 or 3 dimensional array (y,x,frame)
-%                               uint8 values will be mapped to 8-bit clut indices
-%                               uint16 are converted to singles and treated as float
-%                               float (double, single) values will be processed at 16 bits until finally rendered through a potentially higher dynamic range clut           
+%   preOnsetStim            a struct containing the following fields as parameters used to create a stimSpec for the 'pre-onset' phase
+    %   stimulus                if type is 'expert':
+    %                               a struct with fields that are required, have no direct effect, but affect what is passed to your drawExpertFrame method:
+    %                                   floatprecision (as defined for screen('MakeTexture') -- will be passed to your drawExpertFrame method)
+    %                                   height (in pixels, will scale stim to this size to compute the destRect passed to your drawExpertFrame method)
+    %                                   width (as above)
+    %                           if type is 'phased':
+    %                               a cell vector of stimSpecs (see below + the stimSpec constructor help)
+    %                           otherwise:
+    %                               monochrome stimulus frames.  logical, real (0<=x<=1) [double single], or [uint8 uint16].  2 or 3 dimensional array (y,x,frame)
+    %                               uint8 values will be mapped to 8-bit clut indices
+    %                               uint16 are converted to singles and treated as float
+    %                               float (double, single) values will be processed at 16 bits until finally rendered through a potentially higher dynamic range clut           
+    %   scaleFactor             ignored if type is 'phased' (each stimSpec has its own scaleFactor)    
+    %                           (potentially non-integer) factors by which to scale stim when mapping onto pixels
+    %                               [height width]>0, special case scalar zero means scale to full screen
+    %                               scaleFactor.*[y x] (dimensions of out array) must not exceed the resolution you specify
+    %   type                    see below
+    %   startFrame          what frame of the stimulus to start at
+    %   stochasticDistribution  an optional stochasticDistribution of port responses
+    %   framesUntilTimeout  optional parameter that indicates a timeout for this phase (only for discrimStim)
+    %   punishResponses     whether to punish/ignore responses during this phase (only for preOnsetStim and preResponseStim)
+%   preResponseStim         same as preOnsetStim; this phase happens after a request is received
+%   discrimStim             same as preOnsetStim; this phase is the normal 'discriminandum' phase
 %   LUT                     the color look up (gamma/linearization) table to pass to the gfx card
 %                           must be 256 X 3 array, 0<=x<=1 (reallutsize from screen('ReadNormalizedGammaTable') is inaccurate -- can be 1024 on osx, but 'LoadNormalizedGammaTable' silently fails when table is longer than 256)
 %                           on windows, table subject to unpublished constraints vaguely resembling monotonic increasing
-%   scaleFactor             ignored if type is 'phased' (each stimSpec has its own scaleFactor)    
-%                           (potentially non-integer) factors by which to scale stim when mapping onto pixels
-%                               [height width]>0, special case scalar zero means scale to full screen
-%                               scaleFactor.*[y x] (dimensions of out array) must not exceed the resolution you specify
-%   type                    see below
 %   targetPorts             ignored if type is 'phased'
 %                           vector subset of responsePorts that will count as correct responses 
 %   distractorPorts         ignored if type is 'phased'

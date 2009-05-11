@@ -26,3 +26,5 @@
 /updateTrialState.m -text
 /getShowText.m -text
 /getDisplayMethod.m -text
+/getResponseWindowMs.m -text
+/getDelayManager.m -text

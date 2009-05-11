@@ -3,7 +3,7 @@ function [tm trialDetails result spec rewardSizeULorMS requestRewardSizeULorMS .
     updateTrialState(tm, sm, result, spec, ports, lastPorts, ...
     targetPorts, requestPorts, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
     floatprecision, textures, destRect, ...
-    requestRewardDone)
+    requestRewardDone, punishResponses)
 % This function is a tm-specific method to update trial state before every flip.
 % Things done here include:
 %   - set trialRecords.correct and trialRecords.result as necessary
@@ -26,15 +26,25 @@ msPenaltySound=0;
     updateTrialState(tm.trialManager, sm, result, spec, ports, lastPorts, ...
     targetPorts, requestPorts, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
     floatprecision, textures, destRect, ...
-    requestRewardDone);
+    requestRewardDone,punishResponses);
 if ~isempty(result) && ~ischar(result)
 	resp=find(result);
 	if length(resp)==1
 		result = 'nominal';
-	else
+        correct=1;
+        if punishResponses
+            correct=0;
+        end
+    else
+        correct=0;
 		result = 'multiple ports';
-	end
+    end
+    trialDetails.correct=correct;
+elseif ischar(result) && strcmp(result,'timedout')
+    correct=0;
+    trialDetails.correct=correct;
 end
+
 % ========================================================
 phaseType = getPhaseType(spec);
 framesUntilTransition=getFramesUntilTransition(spec);
@@ -51,7 +61,7 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && framesInPhase==0
     if updateRM
         tm=setReinforcementManager(tm,rm);
     end
-    if strcmp(result,'nominal')
+    if correct
         msPuff=0;
         msPenalty=0;
         msPenaltySound=0;
@@ -88,7 +98,7 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && framesInPhase==0
         end
         spec=setStim(spec,cStim);
     
-    elseif strcmp(result,'multiple ports')
+    elseif ~correct
         % this only happens when multiple ports are triggered
         rewardSizeULorMS=0;
         msRewardSound=0;

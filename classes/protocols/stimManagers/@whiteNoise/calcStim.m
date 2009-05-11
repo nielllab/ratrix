@@ -1,5 +1,5 @@
-function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text,indexPulses] =...
-    calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
+function [stimulus,updateSM,resolutionIndex,preOnsetStim,preResponseStim,discrimStim,LUT,targetPorts,distractorPorts,details,interTrialLuminance,text,indexPulses] =...
+    calcStim(stimulus,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % see ratrixPath\documentation\stimManager.calcStim.txt for argument specification (applies to calcStims of all stimManagers)
 % 1/3/0/09 - trialRecords now includes THIS trial
 indexPulses=[];
@@ -14,7 +14,7 @@ if isnan(resolutionIndex)
 end
 
 toggleStim=true;
-type = 'phased';
+type = 'expert';
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);
 
@@ -24,7 +24,7 @@ if ~isempty(trialRecords) && length(trialRecords)>=2
 else
     lastRec=[];
 end
-[targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass);
+[targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass,allowRepeats);
 
 % ================================================================================
 % start calculating frames now
@@ -120,12 +120,25 @@ stim.width = min(width,getMaxWidth(stimulus));
 % set seed values
 rand('state',sum(100*clock)); % initialize randn to random starting state
 stim.seedValues = ceil(rand(1,numFrames)*1000000);
-out{1} = stimSpec(stim,{[] 2},'expert',0,numFrames,[],scaleFactor,0,hz,[],'display'); % expert mode
-% out{1} = stimSpec(movie,{[] 2}, 'loop',[],1,numFrames,[],0); % regular mode
 
-% final phase
-out{2} = stimSpec(interTrialLuminance,{[] 1},'loop',0,1,[],scaleFactor,1,hz,[],'itl');
-% out.stimSpecs{2} = stimSpec(interTrialLuminance,{[] 1},'loop',0,15,[],scaleFactor,0,hz,[]); % go back to phase 1
+discrimStim=[];
+discrimStim.stimulus=stim;
+discrimStim.stimType=type;
+discrimStim.scaleFactor=scaleFactor;
+discrimStim.startFrame=1;
+discrimStim.stochasticDistribution=[];
+discrimStim.framesUntilTimeout=numFrames;
+
+preOnsetStim=[];
+preOnsetStim.stimulus=interTrialLuminance;
+preOnsetStim.stimType='loop';
+preOnsetStim.scaleFactor=0;
+preOnsetStim.startFrame=1;
+preOnsetStim.stochasticDistribution=[];
+preOnsetStim.punishResponses=false;
+
+preResponseStim=discrimStim;
+preResponseStim.punishResponses=false;
 
 % details.big = {'expert', stim.seedValues}; % store in 'big' so it gets written to file
 % variables to be stored for recalculation of stimulus from seed value for rand generator

@@ -16,3 +16,4 @@
 /setCLUTandFrameDropCorner.m -text
 /LEDphase.m -text
 /serverPumpRewards.m -text
+/createStimSpecsFromParams.m -text

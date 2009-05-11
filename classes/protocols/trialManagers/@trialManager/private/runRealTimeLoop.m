@@ -22,6 +22,7 @@ showText = getShowText(tm); %whether or not to print text on screen
 
 Screen('Preference', 'TextRenderer', 0);  % consider moving to station.startPTB
 Screen('Preference', 'TextAntiAliasing', 0); % consider moving to station.startPTB
+Screen('Preference', 'TextAlphaBlending', 0);
 
 if ismac
     %http://psychtoolbox.org/wikka.php?wakka=FaqPerformanceTuning1
@@ -289,6 +290,7 @@ analogOutput=[];
 startTime=0;
 logIt=true;
 lookForChange=false;
+punishResponses=[];
 
 if ~isempty(getDatanet(station))
     datanet_constants = getConstants(getDatanet(station));
@@ -416,7 +418,8 @@ while ~done && ~quit;
         transitionCriterion = getTransitions(spec);
         framesUntilTransition = getFramesUntilTransition(spec);
         phaseType = getPhaseType(spec);
-        lockoutDuration = getLockoutDuration(spec);
+        punishLastResponse=punishResponses;
+        punishResponses = getPunishResponses(spec);
 
         % =========================================================================
 
@@ -492,7 +495,7 @@ while ~done && ~quit;
             updateTrialState(tm, stimManager, trialRecords(trialInd).result, spec, ports, lastPorts, ...
             targetOptions, requestOptions, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
             floatprecision, textures, destRect, ...
-            requestRewardDone);
+            requestRewardDone, punishLastResponse);
         
         % because the target ports = setdiff(responsePorts, lastResponse) which is always empty
         % so we will always have the same empty responsePorts and same nonempty requestPorts
@@ -667,7 +670,7 @@ while ~done && ~quit;
     % =========================================================================
     % all trial logic follows
 
-    if ~paused && frameNum>lockoutDuration
+    if ~paused
         ports=readPorts(station);
     end
     doValves=0*ports;
@@ -677,11 +680,10 @@ while ~done && ~quit;
     timestamps.kbCheckDone=GetSecs;
 
     if keyIsDown
-        allowPorts=frameNum>lockoutDuration;
         [didAPause paused done trialRecords(trialInd).result doValves ports didValves didHumanResponse manual ...
             doPuff pressingM pressingP,timestamps.kbOverhead,timestamps.kbInit,timestamps.kbKDown] ...
             = handleKeyboard(tm, keyCode, didAPause, paused, done, trialRecords(trialInd).result, doValves, ports, didValves, didHumanResponse, ...
-            manual, doPuff, pressingM, pressingP, originalPriority, priorityLevel, KbConstants, allowPorts);
+            manual, doPuff, pressingM, pressingP, originalPriority, priorityLevel, KbConstants);
     end
 
     timestamps.keyboardDone=GetSecs;
@@ -733,14 +735,13 @@ while ~done && ~quit;
 
     timestamps.enteringPhaseLogic=GetSecs;
 
-    try
     if ~paused
         [tm done newSpecInd phaseInd updatePhase transitionedByTimeFlag ...
             transitionedByPortFlag trialRecords(trialInd).result isRequesting lastSoundsLooped ...
             timestamps.logicGotSounds timestamps.logicSoundsDone timestamps.logicFramesDone ...
             timestamps.logicPortsDone timestamps.logicRequestingDone goDirectlyToError] ...
             = handlePhasedTrialLogic(tm, done, ...
-            ports, lastPorts, station, phaseInd, transitionCriterion, framesUntilTransition, numFramesInStim, framesInPhase, isFinalPhase, ...
+            ports, lastPorts, station, phaseInd, phaseType, transitionCriterion, framesUntilTransition, numFramesInStim, framesInPhase, isFinalPhase, ...
             trialRecords(trialInd).trialDetails, trialRecords(trialInd).result, ...
             stimManager, msRewardSound, msPenaltySound, targetOptions, distractorOptions, requestOptions, ...
             playRequestSoundLoop, isRequesting, soundNames, lastSoundsLooped);
@@ -751,10 +752,6 @@ while ~done && ~quit;
         end
 
 
-    end
-    catch
-        sca
-        keyboard
     end
     timestamps.phaseLogicDone=GetSecs;
 

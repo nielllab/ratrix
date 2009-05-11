@@ -1,4 +1,4 @@
-function soundsToPlay = getSoundsToPlay(stimManager, ports, lastPorts, phase, stepsInPhase,msRewardSound, msPenaltySound, ...
+function soundsToPlay = getSoundsToPlay(stimManager, ports, lastPorts, phase, phaseType, stepsInPhase,msRewardSound, msPenaltySound, ...
     targetOptions, distractorOptions, requestOptions, playRequestSoundLoop, trialManagerClass, trialDetails)
 % see doc in stimManager.calcStim.txt
 
@@ -8,16 +8,16 @@ playSoundSounds={};
 % nAFC/goNoGo setup:
 if strcmp(trialManagerClass, 'nAFC') || strcmp(trialManagerClass,'goNoGo')
     % play white noise (when responsePort triggered during phase 1)
-    if phase == 1 && (any(ports(targetOptions)) || any(ports(distractorOptions)) || ...
+    if strcmp(phaseType,'pre-onset') && (any(ports(targetOptions)) || any(ports(distractorOptions)) || ...
         (any(ports) && isempty(requestOptions))) 
         playLoopSounds{end+1} = 'trySomethingElseSound';
-    elseif phase == 2 && (any(ports(requestOptions)) || stepsInPhase==0)  
+    elseif ismember(phaseType,{'discrim','pre-response'}) && any(ports(requestOptions))  
         % play stim sound (when stim is requested during phase 2)
         playLoopSounds{end+1} = 'keepGoingSound';
-    elseif phase == 3 && stepsInPhase <= 0 && trialDetails.correct
+    elseif strcmp(phaseType,'reinforced') && stepsInPhase <= 0 && trialDetails.correct
         % play correct sound
         playSoundSounds{end+1} = {'correctSound', msRewardSound};
-    elseif phase == 3 && stepsInPhase <= 0 && ~trialDetails.correct
+    elseif strcmp(phaseType,'reinforced') && stepsInPhase <= 0 && ~trialDetails.correct
         % play wrong sound
         playSoundSounds{end+1} = {'wrongSound', msPenaltySound};
     end
@@ -26,9 +26,9 @@ if strcmp(trialManagerClass, 'nAFC') || strcmp(trialManagerClass,'goNoGo')
 % this will have to be fixed for passiveViewing (either as a flag on freeDrinks or as a new trialManager)
 elseif strcmp(trialManagerClass, 'freeDrinks')
     % play white noise (when any port that is not a target is triggered)
-    if phase == 1 && ~isempty(targetOptions) && any(ports(setdiff(1:length(ports), targetOptions))) % normal freeDrinks
+    if ismember(phaseType,{'discrim','pre-response'}) && ~isempty(targetOptions) && any(ports(setdiff(1:length(ports), targetOptions))) % normal freeDrinks
         playLoopSounds{end+1} = 'trySomethingElseSound';
-    elseif phase == 1 && ~isempty(requestOptions) && any(ports(requestOptions)) % passiveViewing freeDrinks
+    elseif ismember(phaseType,{'discrim','pre-response'}) && ~isempty(requestOptions) && any(ports(requestOptions)) % passiveViewing freeDrinks
         % check that the requestMode and requestRewardDone also pass 
         % same logic as in the request reward handling, but for sound
         % play keepGoing sound?
@@ -37,7 +37,7 @@ elseif strcmp(trialManagerClass, 'freeDrinks')
         end
     end
     % play correct/error sound
-    if phase == 2 && stepsInPhase <= 0
+    if strcmp(phaseType,'reinforced') && stepsInPhase <= 0
         if ~isempty(msRewardSound) && msRewardSound>0
             playSoundSounds{end+1} = {'correctSound', msRewardSound};
         elseif ~isempty(msPenaltySound) && msPenaltySound>0

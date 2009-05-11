@@ -1,5 +1,5 @@
-function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text,indexPulses] =... 
-    calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
+function [stimulus,updateSM,resolutionIndex,preOnsetStim,preResponseStim,discrimStim,LUT,targetPorts,distractorPorts,details,interTrialLuminance,text,indexPulses] =... 
+    calcStim(stimulus,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % 1/3/0/09 - trialRecords now includes THIS trial
 %LUT = Screen('LoadCLUT', 0);
 %LUT=LUT/max(LUT(:));
@@ -23,7 +23,7 @@ interTrialLuminance = getInterTrialLuminance(stimulus);
 
 switch trialManagerClass
     case 'freeDrinks'
-        type='static';
+        type='cache';
         % fli: this never gets used anyways, so why is it still here?
         % Determine what the last response was
 %         if ~isempty(trialRecords) && length(trialRecords)>=2
@@ -82,3 +82,21 @@ stimulus.stimSound = soundClip('stimSound','dualChannel',{sSound,details.leftAmp
 out=zeros(min(height,getMaxHeight(stimulus)),min(width,getMaxWidth(stimulus)),2);
 out(:,:,1)=stimulus.mean;
 out(:,:,2)=stimulus.mean;
+
+discrimStim=[];
+discrimStim.stimulus=out;
+discrimStim.stimType=type;
+discrimStim.scaleFactor=scaleFactor;
+discrimStim.startFrame=1;
+discrimStim.stochasticDistribution=[];
+
+preOnsetStim=[];
+preOnsetStim.stimulus=interTrialLuminance;
+preOnsetStim.stimType='loop';
+preOnsetStim.scaleFactor=0;
+preOnsetStim.startFrame=1;
+preOnsetStim.stochasticDistribution=[];
+preOnsetStim.punishResponses=false;
+
+preResponseStim=discrimStim;
+preResponseStim.punishResponses=false;

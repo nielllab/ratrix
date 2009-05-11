@@ -5,3 +5,4 @@
 /getResponsePorts.m -text
 /checkPorts.m -text
 /updateTrialState.m -text
+/getAllowRepeats.m -text

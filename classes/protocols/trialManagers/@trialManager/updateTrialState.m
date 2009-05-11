@@ -3,7 +3,7 @@ function [tm trialDetails result spec rewardSizeULorMS requestRewardSizeULorMS .
     updateTrialState(tm, sm, result, spec, ports, lastPorts, ...
     targetPorts, requestPorts, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
     floatprecision, textures, destRect, ...
-    requestRewardDone)
+    requestRewardDone, punishResponses)
 % This function is a TM base class method to update trial state before every flip.
 % Things done here include:
 % - check for request rewards
@@ -23,12 +23,12 @@ end
 
 if ~isempty(result) && ischar(result) && strcmp(result,'timeout') && isempty(correct) && strcmp(getPhaseLabel(spec),'reinforcement')
 	correct=0;
-	result='nominal';
+	result='timedout';
 	trialDetails=[];
 	trialDetails.correct=correct;
 elseif ~isempty(result) && ischar(result) && strcmp(result,'timeout') && isempty(correct) && strcmp(getPhaseLabel(spec),'itl') 
     % timeout during 'itl' phase - neither correct nor incorrect (only happens when no stim is shown)
-    result='nominal';
+    result='timedout';
     trialDetails=[];
 else
 	trialDetails=[];

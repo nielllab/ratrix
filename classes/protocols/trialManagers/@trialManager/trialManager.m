@@ -1,7 +1,7 @@
 function t=trialManager(varargin)
 % TRIALMANAGER  class constructor.  ABSTRACT CLASS-- DO NOT INSTANTIATE
 % t=trialManager(soundManager,reinforcementManager,eyeController,customDescription,
-%   frameDropCorner, dropFrames, displayMethod, requestPorts,saveDetailedFramedrops,delayFunction,responseWindowMs[,showText])
+%   frameDropCorner, dropFrames, displayMethod, requestPorts,saveDetailedFramedrops,delayManager,responseWindowMs[,showText])
 %
 % 10/8/08 - this is the new integrated trialManager that handles all stims in a phased way - uses phased doTrial and stimOGL
 %
@@ -15,7 +15,7 @@ function t=trialManager(varargin)
 % requestPorts - one of the strings {'none', 'center', 'all'}; defines which ports should be returned as requestPorts
 %       by the stimManager's calcStim; the default for nAFC is 'center' and the default for freeDrinks is 'none'
 % saveDetailedFrameDrops - a flag indicating whether or not to save detailed timestamp information for each dropped frame (causes large trialRecord files!)
-% delayFunction - an object that determines how to stimulus onset works (could be immediate upon request, or some delay)
+% delayManager - an object that determines how to stimulus onset works (could be immediate upon request, or some delay)
 % responseWindowMs - the timeout length of the 'discrim' phase in milliseconds (should be used by phaseify)
 requiredSoundNames = {'correctSound','keepGoingSound','trySomethingElseSound','wrongSound'};
 
@@ -29,8 +29,8 @@ t.saveDetailedFramedrops=false;
 t.displayMethod='';
 t.requestPorts='center'; % either 'none','center',or 'all'
 t.showText=true;
-t.delayFunction=[];
-t.responseWindowMs=[];
+t.delayManager=[];
+t.responseWindowMs=[0 Inf];
 
 switch nargin
     case 0
@@ -153,24 +153,28 @@ switch nargin
             error('saveDetailedFramedrops must be a logical');
         end
         
-		% delayFunction
-		if ~isempty(varargin{10}) && isa(varargin{10},'delayFunction')
-            t.delayFunction=varargin{10};
+		% delayManager
+		if ~isempty(varargin{10}) && isa(varargin{10},'delayManager')
+            t.delayManager=varargin{10};
         elseif isempty(varargin{10})
-			t.delayFunction=[];
+			t.delayManager=[];
         else
-            error('delayFunction must be empty or a valid delayFunction object');
+            error('delayManager must be empty or a valid delayManager object');
 		end
 		
 		% responseWindowMs
 		if ~isempty(varargin{11})
-			if isscalar(varargin{11})
-				t.responseWindowMs=varargin{11};
+			if isvector(varargin{11}) && isnumeric(varargin{11}) && length(varargin{11})==2
+				if varargin{11}(1)>varargin{11}(2) || varargin{11}(1)<0 || isinf(varargin{11}(1))
+					error('responseWindowMs must be [min max] within the range [0 Inf] where min cannot be infinite');
+				else
+					t.responseWindowMs=varargin{11};
+				end
 			else
-				error('responseWindowMs must be scalar');
+				error('responseWindowMs must be a 2-element array');
 			end
 		else
-			t.responseWindowMs=[];
+			t.responseWindowMs=[0 Inf];
 		end
 		
         % showText

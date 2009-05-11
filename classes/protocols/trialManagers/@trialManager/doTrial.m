@@ -73,13 +73,35 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                     error('shouldn''t happen')
             end
             
+			% calcStim should return the following:
+			%	newSM - a (possibly) modified stimManager object
+			%	updateSM - a flag whether or not to copy newSM to ratrix
+			%	resInd - for setting resolution - DO NOT CHANGE
+			%	preOnsetStim - a struct containing all stim-specifc parameters to create a stimSpec for the pre-request phase
+			%	preResponseStim - a struct containing all stim-specific parameters to create a stimSpec for the pre-response phase
+			%	discrimStim - a struct containing the parameters to create a stimSpec for the discriminandum phase
+			%		the parameters needed are: stimType, stim(actual movie frames), scaleFactor, [phaseLabel], [framesUntilTransition], [startFrame], [phaseType]
+			%		note that not all of these may be used, depending on the trialManager's delayManager and responseWindow parameters
+			%	LUT - the color lookup table - DO NOT CHANGE now; but eventually this should be a cell array of parameters to get the CLUT from oracle!
+			%	trialRecords(trialInd).targetPorts - target ports DO NOT CHANGE
+			%	trialRecords9trialInd).distractorPorts - distractor ports DO NOT CHANGE (both port sets are constant across the trial)
+			%	stimulusDetails - stimDetails DO NOT CHANGE
+			%	trialRecords(trialInd).interTrialLuminance - itl DO NOT CHANGE
+			%	text - DO NOT CHANGE
+			%	indexPulses - DO NOT CHANGE
+			
+			% now, we should ALWAYS call phaseify (perhaps rename to createStimSpecsFromParams), which should do the following:
+			%	INPUTS: preOnsetStim, preResponseStim, discrimStim, targetPorts, distractorPorts, requestPorts,interTrialLuminance,hz,indexPulses
+			%	OUTPUTS: stimSpecs, startingStimSpecInd
+			%		- should handle creation of default phase setup for nAFC/freeDrinks, and also handle additional phases depending on delayManager and responseWindow
+			%		- how then does calcStim return a set of custom phases? - it no longer can, because we are forcing calcstim to return 3 structs...to discuss later?
             [newSM, ...
                 updateSM, ...
                 resInd, ...
-                stim, ...           %not recorded in trial record
+				preOnsetStim, ...
+				preResponseStim, ...
+                discrimStim, ...           %not recorded in trial record
                 LUT, ...            %not recorded in trial record
-                trialRecords(trialInd).scaleFactor, ... % this scaleFactor is for non-phased stims that call phaseify; phased stims will put the scaleFactor in stimSpecs and ignore this value
-                trialRecords(trialInd).type, ...
                 trialRecords(trialInd).targetPorts, ...
                 trialRecords(trialInd).distractorPorts, ...
                 stimulusDetails, ...
@@ -88,6 +110,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
 				indexPulses] ...
                 = calcStim(stimManager, ...
                 class(trialManager), ...
+                getAllowRepeats(trialManager), ...
                 resolutions, ...
                 getDisplaySize(station), ...
                 getLUTbits(station), ...
@@ -95,13 +118,10 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 getNumPorts(station), ...
                 trialRecords);
             
-            if isvector(text)
-                if ~((iscell(text) && length(text)==size(stim,3) && all(cellfun(@ischar,text))) || ischar(text))
-                    error('frame label must be cell vector with same length as size(stim,3), or a char vector')
-                end
-            else
-                error('frame label must be vector')
-            end
+            % test must a single string now - dont bother w/ complicated stuff here
+			if ~ischar(text)
+				error('text must be a string');
+			end
             
             switch trialManager.displayMethod
                 case 'ptb'
@@ -142,25 +162,17 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             
             checkPorts(trialManager,trialRecords(trialInd).targetPorts,trialRecords(trialInd).distractorPorts);
             
-            if ischar(trialRecords(trialInd).type) && strcmp(trialRecords(trialInd).type,'phased')
-                stimSpecs = stim;
-                startingStimSpecInd = 1;
-            else
-                
-                % we pass the trialRecords(trialInd).interTrialLuminance even though we have access to interTrialLuminance because
-                % calcStim might have changed the class of the ITL!
-                % edf: what did you mean by this?  how do we have access to a member on stimManager?
-                % by calling stimManager.getInterTrialLuminance()?  i wish that were a protected method.
-                % fli: yeah, i mean we have access to the method - this was just a note to myself that
-                % calcStim could change the class of the ITL and return it as trialRecords(trialInd).interTrialLuminance,
-                % so we want to use this value from calcStim, not the stimManager's original value
-                
-                [stimSpecs startingStimSpecInd] ...
-                    = phaseify(trialManager,stim,trialRecords(trialInd).type,...
-                    trialRecords(trialInd).targetPorts,trialRecords(trialInd).distractorPorts,getRequestPorts(trialManager,getNumPorts(station)),...
-                    trialRecords(trialInd).scaleFactor,trialRecords(trialInd).interTrialLuminance,trialRecords(trialInd).resolution.hz,indexPulses);
-            end
-            
+			% we pass the trialRecords(trialInd).interTrialLuminance even though we have access to interTrialLuminance because
+			% calcStim might have changed the class of the ITL!
+			% edf: what did you mean by this?  how do we have access to a member on stimManager?
+			% by calling stimManager.getInterTrialLuminance()?  i wish that were a protected method.
+			% fli: yeah, i mean we have access to the method - this was just a note to myself that
+			% calcStim could change the class of the ITL and return it as trialRecords(trialInd).interTrialLuminance,
+			% so we want to use this value from calcStim, not the stimManager's original value
+            [stimSpecs startingStimSpecInd] = createStimSpecsFromParams(trialManager,preOnsetStim,preResponseStim,discrimStim,...
+				trialRecords(trialInd).targetPorts,trialRecords(trialInd).distractorPorts,getRequestPorts(trialManager,getNumPorts(station)),...
+				trialRecords(trialInd).interTrialLuminance,trialRecords(trialInd).resolution.hz,indexPulses);
+
             validateStimSpecs(stimSpecs);
 
             [tempSoundMgr updateSndM] = cacheSounds(getSoundManager(trialManager),station);
@@ -266,7 +278,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 flushPorts(station,fpVars(3),fpVars(2),fpVars(4),portsToFlush);
                 stopEarly=false; % reset stopEarly/quit to be false, so continue doing trials
             elseif ischar(trialRecords(trialInd).result) && (strcmp(trialRecords(trialInd).result, 'nominal') || ...
-                    strcmp(trialRecords(trialInd).result, 'multiple ports'))
+                    strcmp(trialRecords(trialInd).result, 'multiple ports') || strcmp(trialRecords(trialInd).result,'timedout'))
                 % keep doing trials
             else
                 trialRecords(trialInd).result

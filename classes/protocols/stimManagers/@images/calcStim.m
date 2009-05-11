@@ -1,12 +1,12 @@
-function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text] =... 
-    calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
+function [stimulus,updateSM,resolutionIndex,preOnsetStim,preResponseStim,discrimStim,LUT,targetPorts,distractorPorts,details,interTrialLuminance,text,indexPulses] =... 
+    calcStim(stimulus,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % see ratrixPath\documentation\stimManager.calcStim.txt for argument specification (applies to calcStims of all stimManagers)
 
 LUT=makeStandardLUT(LUTbits);
 [resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60],32,getMaxWidth(stimulus),getMaxHeight(stimulus));
 
-type = stimulus.drawingMode; % 12/9/08 - user can specify to use 'static' (default) or 'expert' mode (optional)
-
+type = stimulus.drawingMode; % 12/9/08 - user can specify to use 'cache' (default) or 'expert' mode (optional)
+indexPulses=[];
 % ====================================================================================
 % if we are in deck mode, do card selection and checking
 % else, just assign ind randomly based on the trialDistribution
@@ -130,7 +130,7 @@ if ~isempty(trialRecords) && length(trialRecords)>1 % added length check because
 else
     lastRec=[];
 end
-[targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass);
+[targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass,allowRepeats);
 %assign the correct answer to the target port (defined to be first file listed in the trialDistribution entry)
 pics=cell(totalPorts,2);
 pics(targetPorts,:)={ims{1,:}}; %note the ROUND parens -- ugly!
@@ -195,7 +195,23 @@ if strcmp(type,'expert')
     stim.floatprecision=0;
 end
 
-out=stim;
+discrimStim=[];
+discrimStim.stimulus=stim;
+discrimStim.stimType=type;
+discrimStim.scaleFactor=scaleFactor;
+discrimStim.startFrame=1;
+discrimStim.stochasticDistribution=[];
+
+preOnsetStim=[];
+preOnsetStim.stimulus=interTrialLuminance;
+preOnsetStim.stimType='loop';
+preOnsetStim.scaleFactor=0;
+preOnsetStim.startFrame=1;
+preOnsetStim.stochasticDistribution=[];
+preOnsetStim.punishResponses=false;
+
+preResponseStim=discrimStim;
+preResponseStim.punishResponses=false;
 
 if details.correctionTrial;
     text='correction trial!';

@@ -1,5 +1,5 @@
-function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text,indexPulses] =...
-    calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
+function [stimulus,updateSM,resolutionIndex,preOnsetStim,preResponseStim,discrimStim,LUT,targetPorts,distractorPorts,details,interTrialLuminance,text,indexPulses] =...
+    calcStim(stimulus,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % see ratrixPath\documentation\stimManager.calcStim.txt for argument specification (applies to calcStims of all stimManagers)
 % 1/3/0/09 - trialRecords now includes THIS trial
 indexPulses=[];
@@ -13,7 +13,7 @@ if isnan(resolutionIndex)
     resolutionIndex=1;
 end
 
-type = 'phased';
+type = 'cache';
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);
 
@@ -23,7 +23,7 @@ if ~isempty(trialRecords) && length(trialRecords)>=2
 else
     lastRec=[];
 end
-[targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass);
+[targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass,allowRepeats);
 
 % ================================================================================
 % start calculating frames now
@@ -73,16 +73,30 @@ for i=1:length(frames)
     stim(1,1,i) = frames(i);
 end
 
-% now return the stimSpec
-out.stimSpecs{1} = stimSpec(stim,{[] 2},'cache',0,numFramesToMake,[],0,0,hz,[]); % cache mode
-% final phase
-out.stimSpecs{2} = stimSpec(interTrialLuminance,{[] 1},'loop',0,1,[],0,1,hz,[]);
-
 % return out.stimSpecs, out.scaleFactors for each phase (only one phase for now?)
 details.stim = stim; % store in 'big' so it gets written to file
 details.frequencies=frequencies;
 details.duration=duration;
 details.repetitions=repetitions;
+
+discrimStim=[];
+discrimStim.stimulus=stim;
+discrimStim.stimType=type;
+discrimStim.scaleFactor=scaleFactor;
+discrimStim.startFrame=1;
+discrimStim.stochasticDistribution=[];
+discrimStim.framesUntilTimeout=numFramesToMake;
+
+preOnsetStim=[];
+preOnsetStim.stimulus=interTrialLuminance;
+preOnsetStim.stimType='loop';
+preOnsetStim.scaleFactor=0;
+preOnsetStim.startFrame=1;
+preOnsetStim.stochasticDistribution=[];
+preOnsetStim.punishResponses=false;
+
+preResponseStim=discrimStim;
+preResponseStim.punishResponses=false;
 
 % ================================================================================
 if strcmp(trialManagerClass,'nAFC') && details.correctionTrial

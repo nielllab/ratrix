@@ -1,4 +1,4 @@
-function [targetPorts distractorPorts details]=assignPorts(details,lastTrialRec,responsePorts,TMclass)
+function [targetPorts distractorPorts details]=assignPorts(details,lastTrialRec,responsePorts,TMclass,allowRepeats)
 
 % figure out if this is a correction trial
 lastResult=[];
@@ -65,7 +65,11 @@ switch TMclass
         if length(lastResponse)>1
             lastResponse=lastResponse(1);
         end
-        targetPorts=setdiff(responsePorts,lastResponse);                
+        if allowRepeats
+            targetPorts=responsePorts;
+        else
+            targetPorts=setdiff(responsePorts,lastResponse);   
+        end
         distractorPorts=[];
         
     case 'autopilot'

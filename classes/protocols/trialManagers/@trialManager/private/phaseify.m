@@ -6,15 +6,15 @@ function [stimSpecs startingStimSpecInd] = phaseify(trialManager,stim,type,...
 stimulusOnsetCriterion=[];
 startingStimSpecInd=1; % which phase to start with (passed to stimOGL->runRealTimeLoop)
 % this allows us to have an optional 'waiting for request' phase in nAFC and not mess up sound handling
-% set framesUntilStimulusOnset for delayFunction
-if isempty(trialManager.delayFunction)
+% set framesUntilStimulusOnset for delayManager
+if isempty(trialManager.delayManager)
     if iscell(type) && strcmp(type{1},'timedFrames') && type{2}(end)~=0
         framesUntilStimulusOnset=sum(type{2});
     else
         framesUntilStimulusOnset=[];
     end
-elseif isa(trialManager.delayFunction,'delayFunction')
-    [delayMs toutMs]=getDelayAndTimeout(trialManager.delayFunction);
+elseif isa(trialManager.delayManager,'delayManager')
+    [delayMs toutMs]=getDelayAndTimeout(trialManager.delayManager);
     if isempty(delayMs)
         stimulusOnsetCriterion={[],4};
         framesUntilStimulusOnset=floor(hz*toutMs/1000);
@@ -23,7 +23,7 @@ elseif isa(trialManager.delayFunction,'delayFunction')
     end
 	%framesUntilStimulusOnset=fnc_name(); % replace with eval?
 else
-	error('unsupported delayFunction - how did this get past the constructor?');
+	error('unsupported delayManager - how did this get past the constructor?');
 end
 
 if ~isempty(trialManager.responseWindowMs)
@@ -53,7 +53,7 @@ if strmatch(class(trialManager), 'nAFC')
     criterion = {[], 4};
     stimSpecs{4} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,[],'itl',false);
     
-    if isempty(requestPorts) && isempty(trialManager.delayFunction) % was this for passiveViewing?
+    if isempty(requestPorts) && isempty(trialManager.delayManager) % was this for passiveViewing?
         startingStimSpecInd=2;
     end
     
@@ -74,8 +74,8 @@ elseif strmatch(class(trialManager), 'freeDrinks')
     
 elseif strmatch(class(trialManager), 'goNoGo')
     
-    if isempty(requestPorts) && isempty(trialManager.delayFunction)
-        error('cannot have empty delayFunction with no request ports in goNoGo');
+    if isempty(requestPorts) && isempty(trialManager.delayManager)
+        error('cannot have empty delayManager with no request ports in goNoGo');
     end
     lockoutDuration=floor(hz*getResponseLockoutMs(trialManager)/1000);
     % waiting for request

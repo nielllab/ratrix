@@ -1,5 +1,5 @@
-function [stimulus,updateSM,resolutionIndex,out,LUT,scaleFactor,type,targetPorts,distractorPorts,details,interTrialLuminance,text,indexPulses] =...
-    calcStim(stimulus,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
+function [stimulus,updateSM,resolutionIndex,preOnsetStim,preResponseStim,discrimStim,LUT,targetPorts,distractorPorts,details,interTrialLuminance,text,indexPulses] =...
+    calcStim(stimulus,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % see ratrixPath\documentation\stimManager.calcStim.txt for argument specification (applies to calcStims of all stimManagers)
 % 1/3/0/09 - trialRecords now includes THIS trial
 indexPulses=[];
@@ -12,10 +12,10 @@ if isnan(resolutionIndex)
     resolutionIndex=1;
 end
 
-scaleFactor=0; % dummy value since we are phased anyways; the real scaleFactor is stored in each phase's stimSpec
+scaleFactor=getScaleFactor(stimulus); % dummy value since we are phased anyways; the real scaleFactor is stored in each phase's stimSpec
 interTrialLuminance = getInterTrialLuminance(stimulus);
 toggleStim=true;
-type='phased';
+type='expert';
 
 dynamicMode = true; % do things dynamically as in driftdemo2
 % dynamicMode=false;
@@ -28,7 +28,7 @@ if ~isempty(trialRecords) && length(trialRecords)>=2
 else
     lastRec=[];
 end
-[targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass);
+[targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass,allowRepeats);
 
 % =====================================================================================================
 
@@ -155,11 +155,24 @@ else
     timeout=sum(stim.durations)*stim.numRepeats;
 end
 
-% now create stimSpecs
-out{1} = stimSpec(stim,{[] 2},'expert',0,timeout,[],getScaleFactor(stimulus),0,hz,[],'display'); % expert mode
+discrimStim=[];
+discrimStim.stimulus=stim;
+discrimStim.stimType=type;
+discrimStim.scaleFactor=scaleFactor;
+discrimStim.startFrame=1;
+discrimStim.stochasticDistribution=[];
+discrimStim.framesUntilTimeout=timeout;
 
-% final phase
-out{2} = stimSpec(interTrialLuminance,{[] 1},'loop',0,1,[],getScaleFactor(stimulus),1,hz,[],'itl');
+preOnsetStim=[];
+preOnsetStim.stimulus=interTrialLuminance;
+preOnsetStim.stimType='loop';
+preOnsetStim.scaleFactor=0;
+preOnsetStim.startFrame=1;
+preOnsetStim.stochasticDistribution=[];
+preOnsetStim.punishResponses=false;
+
+preResponseStim=discrimStim;
+preResponseStim.punishResponses=false;
 
 % =====================================================================================================
 % return out.stimSpecs, out.scaleFactors for each phase (only one phase for now?)

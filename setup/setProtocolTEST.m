@@ -113,7 +113,7 @@ vh=nAFC(sm,percentCorrectionTrials,constantRewards);
 % vh_responseWindow=nAFC(sm,percentCorrectionTrials,constantRewards,...
 %     [],[],[],[],[],[],'immediate',2000);
 responseLockoutMs=[2000 4000];
-delayFcn=hazard(0,2000,5000,false);
+delayFcn=hazard(99,2000,0);
 vh_delayed=nAFC(sm,percentCorrectionTrials,constantRewards,...
     [],[],[],[],[],[],delayFcn,responseLockoutMs);
 

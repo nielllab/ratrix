@@ -1,4 +1,5 @@
 function d = calcAutoRequest(hzd)
-d=hzd.earliestStimTime + rand(1)*(hzd.latestStimTime - hzd.earliestStimTime);
+p = 1-exp(log(1-hzd.percentile)/(hzd.value+1));
+d=geornd(p)+hzd.fixedDelayMs;
 
 end

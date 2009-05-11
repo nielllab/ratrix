@@ -144,7 +144,7 @@ try
             out = cell2mat(cellfun(@convertPortsToDec,ports,ensureType,'UniformOutput',false));
         case 'correct'
             if isfield(trialRecords,'trialDetails') % look here
-                out=cellfun(@getCorrect,{trialRecords.trialDetails},'UniformOutput',false);
+                out=cell2mat(cellfun(@getCorrect,{trialRecords.trialDetails},'UniformOutput',false));
             else
                 out=[trialRecords.correct];
             end

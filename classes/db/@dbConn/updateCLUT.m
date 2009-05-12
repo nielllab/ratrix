@@ -24,6 +24,12 @@ else
     error('newdata must be uint8');
 end
 
+%5/12/09
+% for some reason, the executeUpdate statement will hang if you have SQL developer open.
+% i think this has to do with access issues to BLOB entries (when you close SQL developer, the statement finishes executing).
+% happens if you've used the CLUTs table in oracle (for example, to delete an entry).
+% i think for now it is okay to just assume that sql developer is not accessing CLUTS, but what about when calibrateMonitor 
+% automaticallys calls updateCLUT?
 str=sprintf('update CLUTS set data=? where station_mac=''%s'' and timestamp=to_date(''%s'',''mm-dd-yyyy hh24:mi'')',mac,timestamp);
 ps = conn.conn.prepareStatement(str);
 ps.setBlob(1,blob);

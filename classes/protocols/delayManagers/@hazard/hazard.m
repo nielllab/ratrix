@@ -13,7 +13,8 @@ f.fixedDelayMs=[];
 switch nargin
     case 0
         % if no input arguments, create a default object
-        error('default hazard delayManager not allowed');
+        a=delayManager('hazard function');
+        f = class(f,'hazard',a);
     case 1
         % if single argument of this class type, return it
         if (isa(varargin{1},'hazard'))

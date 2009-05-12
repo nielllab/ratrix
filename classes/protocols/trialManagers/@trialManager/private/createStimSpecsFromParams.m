@@ -53,7 +53,7 @@ switch class(trialManager)
 			addedPreResponsePhase=addedPreResponsePhase+1;
 		end
 		% optional preOnset phase
-		if ~isempty(preOnsetStim)
+		if ~isempty(preOnsetStim) && strcmp(class(trialManager),'nAFC') % only have the pre-onset phase if no delayManager in 'nAFC' class
 			if preOnsetStim.punishResponses
 				criterion={[],i+1,requestPorts,i+1,[targetPorts distractorPorts],i+2+addedPhases};
 			else

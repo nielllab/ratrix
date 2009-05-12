@@ -1,5 +1,5 @@
 function [rawValues measuredValues currentCLUT linearizedCLUT validationValues] = ...
-    calibrateMonitor(rawValues,method,writeToOracle)
+    calibrateMonitor(rawValues,monitorType,fitMethod,writeToOracle)
 % this function runs a calibration routine to get a linearized CLUT to correct for monitor's nonlinearity
 % we do this by drawing the rawValues on screen, then measuring the xyz luminance output using spyder/photodiode.
 % these xyz measurements can then be used to backcalculate a nonlinear transform that when applied, cancels out
@@ -8,7 +8,8 @@ function [rawValues measuredValues currentCLUT linearizedCLUT validationValues] 
 %
 % INPUTS: 
 %   rawValues - the native 0-255 RGB values used to get our first set of xyz measurements; should be [1 1 3 numStims] in size
-%   method - what method to use..?
+%   monitorType - what monitorType to use..?
+%   fitMethod - what method to use to generate our linearized CLUT ('linear', 'power')
 %   writeToOracle - flag to write the outputs to oracle CLUTS table
 % OUTPUTS:
 %   rawValues - the native 0-255 RGB values (not changed)
@@ -17,14 +18,19 @@ function [rawValues measuredValues currentCLUT linearizedCLUT validationValues] 
 %   validationValues - xyz measurements corresponding to rawValues with linearizedCLUT
 
 % error check inputs
-if ~ischar(method)
-    error('method must be a string');
+if ~ischar(monitorType)
+    error('monitorType must be a string');
 else
-    if strcmp(method,'standardCRT') || strcmp(method,'standardLCD')
+    if strcmp(monitorType,'standardCRT') || strcmp(monitorType,'standardLCD')
         %pass
     else
-        error('method must be ''standardCRT'' or ''standardLCD''');
+        error('monitorType must be ''standardCRT'' or ''standardLCD''');
     end
+end
+if ischar(fitType) && ismember(fitType,{'linear','power'})
+   % pass
+else
+    error('fitType must be ''linear'' or ''power''');
 end
 if islogical(writeToOracle)
     %pass
@@ -42,8 +48,8 @@ end
 screenNum=max(Screen('Screens'));
 % get current CLUT from screen
 [currentCLUT, dacbits, reallutsize] = Screen('ReadNormalizedGammaTable', screenNum);
-% set some default parameters based on method
-switch method
+% set some default parameters based on monitorType
+switch monitorType
     case 'standardCRT'
         screenType='CRT';
         patchRect=[.2 .2 .8 .8]; % normalized [left top right bottom]
@@ -83,7 +89,7 @@ switch method
         skipSyncTest=false;
         
     otherwise
-        error('unsupported method');
+        error('unsupported monitorType');
 end
 
 [spyderValues]=...
@@ -94,35 +100,43 @@ measuredValues=spyderValues(:,2,:)';
 % now do something to compute linearizedCLUT
 linearizedCLUT=zeros(reallutsize,3);
 
-% R values
-rawInds=squeeze(rawValues(:,:,1,:));
-raws=currentCLUT(uint16(rawInds)+1,1)';
-desiredVals=linspace(measuredValues(1),measuredValues(end),reallutsize);
-linearizedCLUT(:,1) = interp1(measuredValues,raws,desiredVals,'linear')'/raws(end); %consider pchip
-% G values
-rawInds=squeeze(rawValues(:,:,2,:));
-raws=currentCLUT(uint16(rawInds)+1,2)';
-desiredVals=linspace(measuredValues(1),measuredValues(end),reallutsize);
-linearizedCLUT(:,2) = interp1(measuredValues,raws,desiredVals,'linear')'/raws(end); %consider pchip
-% B values
-rawInds=squeeze(rawValues(:,:,3,:));
-raws=currentCLUT(uint16(rawInds)+1,3)';
-desiredVals=linspace(measuredValues(1),measuredValues(end),reallutsize);
-linearizedCLUT(:,3) = interp1(measuredValues,raws,desiredVals,'linear')'/raws(end); %consider pchip
+switch fitMethod
+    case 'linear'
+        % R values
+        rawInds=squeeze(rawValues(:,:,1,:));
+        raws=currentCLUT(uint16(rawInds)+1,1)';
+        desiredVals=linspace(measuredValues(1),measuredValues(end),reallutsize);
+        linearizedCLUT(:,1) = interp1(measuredValues,raws,desiredVals,'linear')'/raws(end); %consider pchip
+        % G values
+        rawInds=squeeze(rawValues(:,:,2,:));
+        raws=currentCLUT(uint16(rawInds)+1,2)';
+        desiredVals=linspace(measuredValues(1),measuredValues(end),reallutsize);
+        linearizedCLUT(:,2) = interp1(measuredValues,raws,desiredVals,'linear')'/raws(end); %consider pchip
+        % B values
+        rawInds=squeeze(rawValues(:,:,3,:));
+        raws=currentCLUT(uint16(rawInds)+1,3)';
+        desiredVals=linspace(measuredValues(1),measuredValues(end),reallutsize);
+        linearizedCLUT(:,3) = interp1(measuredValues,raws,desiredVals,'linear')'/raws(end); %consider pchip
+    case 'power'
+        error('not yet implemented');
+    otherwise
+        error('unsupported fitMethod');
+end
 
 % recall generateScreenCalibrationData w/ new linearized CLUT and get validation data
 try
 Screen('LoadNormalizedGammaTable', screenNum,linearizedCLUT);
-catch
+catch ex
     sca
+    disp(['CAUGHT EX: ' getReport(ex)]);
     keyboard
 end
 positionFrame=[]; % no need to redo positionFrame (spyder device should already be attached)
-[validationValues]=...
+[spyderValues]=...
     generateScreenCalibrationData(screenNum,screenType,patchRect,numFramesPerValue,...
     numInterValueFrames,linearizedCLUT,rawValues,positionFrame,interValueRGB,background,...
     parallelPortAddress,framePulseCode,useSpyder,doDaq, daqPath, daqPlot, skipSyncTest);
-
+validationValues=spyderValues(:,2,:)';
 
 % restore original CLUT
 Screen('LoadNormalizedGammaTable',screenNum,currentCLUT);
@@ -140,7 +154,7 @@ if writeToOracle
         CLUT=fread(fid,'*uint8');
         fclose(fid);
         timestamp=datestr(now,'mm-dd-yyyy HH:MM');
-        svnRev=1;
+        svnRev=getSVNRevisionFromXML(getRatrixPath);
         cmd='test';
         addCLUTToOracle(CLUT,mac,timestamp,svnRev,cmd)
         closeConn(conn);

@@ -97,6 +97,7 @@ preOnsetStim.startFrame=1;
 preOnsetStim.stochasticDistribution=[];
 preOnsetStim.punishResponses=false;
 
+
 preResponseStim=discrimStim;
 preResponseStim.punishResponses=false;
 

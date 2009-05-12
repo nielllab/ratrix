@@ -248,6 +248,6 @@ end
 function out = getCorrect(trialDetails)
 out=nan;
 if isfield(trialDetails,'correct') && ~isempty(trialDetails.correct)
-    out=trialDetails.correct;
+    out=double(trialDetails.correct);
 end
 end

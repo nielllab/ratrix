@@ -22,18 +22,27 @@ if ~isempty(trialRecords)
             numTrialsAnalyzed=length(trialsUsed);
             firstLick=nan(1,numTrialsAnalyzed);
             
-            %ToDo: how can we get rid of this for loop? -pmm
-            for i=1:numTrialsAnalyzed
-                trialInd=i;
-                f=fields(trialsUsed(trialInd).responseDetails);
-                if any(strcmp(f,'times')) && ~isempty(trialsUsed(trialInd).responseDetails.times)         
-                    firstLick(i)=cell2mat(trialsUsed(trialInd).responseDetails.times(1));
-                else
-                    firstLick(i)=-1;  % this will make it filtered by "tooFast" and not count towards the rate
-                end 
-                
-
+            if isfield(trialRecords,'phaseRecords')
+                % this has to be a cell array b/c phaseRecords aren't always the same across trials
+                times = cellfun(@getRelativeTimesPhased,{trialRecords.phaseRecords},'UniformOutput',false);
+            else
+                % this has to be a cell array b/c times aren't always there across trials
+                times = cellfun(@getTimesNonphased,{trialRecords.responseDetails},'UniformOutput',false);
             end
+            firstLick=cell2mat(cellfun(@getFirstLick,times,'UniformOutput',false));
+            
+%             %ToDo: how can we get rid of this for loop? -pmm
+%             for i=1:numTrialsAnalyzed
+%                 trialInd=i;
+%                 f=fields(trialsUsed(trialInd).responseDetails);
+%                 if any(strcmp(f,'times')) && ~isempty(trialsUsed(trialInd).responseDetails.times)         
+%                     firstLick(i)=cell2mat(trialsUsed(trialInd).responseDetails.times(1));
+%                 else
+%                     firstLick(i)=-1;  % this will make it filtered by "tooFast" and not count towards the rate
+%                 end 
+%                 
+% 
+%             end
 
             %firstLick = 999* ones(size(trialRecords));
             thresh = 0.03; %30 ms
@@ -94,4 +103,14 @@ if graduate
         details.allowedGraduationTo = stepNum + 1;
         details.trialsPerMin = trialsPerMin;
     end
+end
+
+
+end % end function
+
+function out=getFirstLick(thisTrialTimes)
+out=nan;
+if ~isempty(thisTrialTimes)
+    out=thisTrialTimes(1);
+end
 end

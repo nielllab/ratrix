@@ -165,16 +165,6 @@ function out=takeNthValue(values,N)
 out=values(N);
 end
 
-function out=getTimesPhased(phaseRecord)
-out=[];
-for i=1:length(phaseRecord)
-    out=[out cell2mat(phaseRecord(i).responseDetails.times)+phaseRecord(i).responseDetails.startTime];
-end
-if isempty(out)
-    out={NaN};
-end
-end
-
 function out = getNumTries(responseDetails)
 out=length(responseDetails.tries);
 end
@@ -186,14 +176,6 @@ for i=1:length(phaseRecord)
 end
 if isempty(out)
     out={NaN};
-end
-end
-
-function out = getTimesNonphased(trialRecord)
-if isfield(trialRecord,'times') % often the last trial lacks this
-    out = cell2mat([trialRecord.times]);
-else
-    out = {NaN};
 end
 end
 

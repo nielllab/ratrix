@@ -140,3 +140,6 @@ matlaby/blueToRed.m -text
 infrastructure/convertDecimalToIndPorts.m -text
 infrastructure/getDefaultPositionFrame.m -text
 misc/makelinearlutPR.m -text
+trialRecordProcessing/getRelativeTimesPhased.m -text
+trialRecordProcessing/getTimesPhased.m -text
+trialRecordProcessing/getTimesNonphased.m -text

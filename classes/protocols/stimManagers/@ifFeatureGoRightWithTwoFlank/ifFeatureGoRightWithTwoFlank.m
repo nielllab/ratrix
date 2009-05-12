@@ -11,8 +11,6 @@ function s=ifFeatureGoRightWithTwoFlank(varargin)
 % [sm updateSM out scaleFactor type targetPorts distractorPorts details interTrialLuminance] = calcStim(sm,'nAFC',100,3,[1 1 1],1280,1024,[]);
 % imagesc(out(:,:,1)); colormap(gray)
 
-
-
 % pixPerCycs = 32;
 % goRightOrientations = [pi/2];
 % goLeftOrientations = [pi/2];
@@ -173,6 +171,12 @@ switch nargin
                 switch varargin{1}
                     case 'def'
                         %do nothing
+                    case 'basic'
+                         p.flankerOffset=3;
+                         p.flankerContrast=1;
+                         p.stdGaussMask=1/16;
+                         p.pixPerCycs=32;
+                         p.phase=0;             
                     case 'phys' 
 
                         p.flankerOffset=3;
@@ -493,7 +497,7 @@ switch nargin
             error('protocolType must be goToRightDetection or goToLeftDetection or tiltDiscrim or goToSide')
         end
 
-        if  any(strcmp(varargin{47},{'1_0','1_1','1_2','1_3','1_4','1_5','1_6','1_7','1_8','1_9','2_0','2_1','2_2','2_3','2_4', '2_5validate','2_5'}))
+        if  any(strcmp(varargin{47},{'1_0','1_1','1_2','1_3','1_4','1_5','1_6','1_7','1_8','1_9','2_0','2_1','2_2','2_3','2_3reduced','2_4', '2_5validate','2_5'}))
             s.protocolVersion=varargin{47};
         else
             error('protocolVersion must be very specific')

@@ -42,10 +42,10 @@ else
 end
 
 % insert into CLUTS
-str=sprintf('insert into CLUTS (timestamp,station_mac,gfx_serial,crt_serial,svn_revision,cmd_line,data) VALUES (to_date(''%s'',''mm-dd-yyyy hh24:mi''),''%s'',''%s'',''%s'',%d,''%s'',empty_blob()',timestamp,mac,gfx,crt,svnRev,cmd);
+str=sprintf('insert into CLUTS (timestamp,station_mac,gfx_serial,crt_serial,svn_revision,cmd_line,data) VALUES (to_date(''%s'',''mm-dd-yyyy hh24:mi''),''%s'',''%s'',''%s'',%d,''%s'',empty_blob())',timestamp,mac,gfx,crt,svnRev,cmd);
 out=exec(conn,str);
 
-updateBLOB(conn,mac,timestamp,CLUT);
+updateCLUT(conn,mac,timestamp,CLUT);
 
 closeConn(conn);
 

@@ -1,4 +1,5 @@
-function [rawValues measuredValues currentCLUT linearizedCLUT validationValues] = calibrateMonitor(rawValues,method,writeToOracle)
+function [rawValues measuredValues currentCLUT linearizedCLUT validationValues] = ...
+    calibrateMonitor(rawValues,method,writeToOracle)
 % this function runs a calibration routine to get a linearized CLUT to correct for monitor's nonlinearity
 % we do this by drawing the rawValues on screen, then measuring the xyz luminance output using spyder/photodiode.
 % these xyz measurements can then be used to backcalculate a nonlinear transform that when applied, cancels out
@@ -29,6 +30,12 @@ if islogical(writeToOracle)
     %pass
 else
     error('writeToOracle must be a logical');
+end
+% raw RGB values need to be monotonically increasing
+if all(squeeze(diff(rawValues(:,:,1,:)))>=0) && all(squeeze(diff(rawValues(:,:,2,:)))>=0) && all(squeeze(diff(rawValues(:,:,3,:)))>=0)
+    %pass
+else
+    error('RGB values must be monotonically increasing');
 end
 
 
@@ -86,26 +93,22 @@ end
 measuredValues=spyderValues(:,2,:)';
 % now do something to compute linearizedCLUT
 linearizedCLUT=zeros(reallutsize,3);
-measuredRange=[min(measuredValues(:)) max(measuredValues(:))]; % measuredRange is min,max of the Y value
 
 % R values
 rawInds=squeeze(rawValues(:,:,1,:));
 raws=currentCLUT(uint16(rawInds)+1,1)';
-rawRange=[min(raws) max(raws)];
-[linearizedCLUT(:,1) g.R]=fitGammaAndReturnLinearized(raws,measuredValues,[0 1],...
-    measuredRange,rawRange,reallutsize,false);
+desiredVals=linspace(measuredValues(1),measuredValues(end),reallutsize);
+linearizedCLUT(:,1) = interp1(measuredValues,raws,desiredVals,'linear')'/raws(end); %consider pchip
 % G values
 rawInds=squeeze(rawValues(:,:,2,:));
 raws=currentCLUT(uint16(rawInds)+1,2)';
-rawRange=[min(raws) max(raws)];
-[linearizedCLUT(:,2) g.G]=fitGammaAndReturnLinearized(raws,measuredValues,[0 1],...
-    measuredRange,rawRange,reallutsize,false);
+desiredVals=linspace(measuredValues(1),measuredValues(end),reallutsize);
+linearizedCLUT(:,2) = interp1(measuredValues,raws,desiredVals,'linear')'/raws(end); %consider pchip
 % B values
 rawInds=squeeze(rawValues(:,:,3,:));
 raws=currentCLUT(uint16(rawInds)+1,3)';
-rawRange=[min(raws) max(raws)];
-[linearizedCLUT(:,3) g.B]=fitGammaAndReturnLinearized(raws,measuredValues,[0 1],...
-    measuredRange,rawRange,reallutsize,false);
+desiredVals=linspace(measuredValues(1),measuredValues(end),reallutsize);
+linearizedCLUT(:,3) = interp1(measuredValues,raws,desiredVals,'linear')'/raws(end); %consider pchip
 
 % recall generateScreenCalibrationData w/ new linearized CLUT and get validation data
 try
@@ -123,4 +126,29 @@ positionFrame=[]; % no need to redo positionFrame (spyder device should already 
 
 % restore original CLUT
 Screen('LoadNormalizedGammaTable',screenNum,currentCLUT);
+
+% put new linearizedCLUT into oracle
+if writeToOracle
+    try
+        conn=dbConn();
+        [junk mac]=getMACaddress();
+        % HACK
+%         mac='0018F35DFAC0';
+        % write linearizedCLUT to tempCLUT.mat and read as binary stream
+        save('tempCLUT.mat','linearizedCLUT','rawValues','measuredValues','currentCLUT','validationValues');
+        fid=fopen('tempCLUT.mat');
+        CLUT=fread(fid,'*uint8');
+        fclose(fid);
+        timestamp=datestr(now,'mm-dd-yyyy HH:MM');
+        svnRev=1;
+        cmd='test';
+        addCLUTToOracle(CLUT,mac,timestamp,svnRev,cmd)
+        closeConn(conn);
+    catch ex
+        disp(['CAUGHT EX: ' getReport(ex)]);
+        error('failed to get open dbConn() - no oracle access');
+    end
+end
+
+
 end % end function

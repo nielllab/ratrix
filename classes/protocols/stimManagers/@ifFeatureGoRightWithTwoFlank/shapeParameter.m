@@ -29,7 +29,12 @@ switch  t.shapingMethod
                     stimDetails=[trialRecords.stimDetails];
                 end
                 
+                try
                 thisParameter=strcmp({stimDetails.shapedParameter},stimDetails(end).shapedParameter);
+                catch
+                  stimDetails(end)
+                  error('probably had a bad previous stimulus manager; can''t shape unless we know the previous state')
+                end
                 thisValue=([stimDetails.currentShapedValue]==stimDetails(end).currentShapedValue);
                 uncorrelated=~[stimDetails.correctionTrial] & ~[stimDetails.maxCorrectForceSwitch];
                 whichTrials=thisParameter&thisValue&uncorrelated;

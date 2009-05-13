@@ -488,9 +488,14 @@ if isempty(a) && isscalar(b) && isstruct(b)
 end
 if isscalar(a) && isscalar(b) && isstruct(a) && isstruct(b)
     fn=fieldnames(a);
-    if all(ismember(fieldnames(b),fn))
+    if all(ismember(fieldnames(b),fn)) && all(ismember(fn,fieldnames(b)))
         for k=1:length(fn)
+            try
             numRowsBNeeds=size(a.(fn{k}),1)-size(b.(fn{k}),1);
+            catch
+                ple
+                keyboard
+            end
             if iscell(a.(fn{k})) && iscell(b.(fn{k}))
                 if numRowsBNeeds~=0
                     error('nan padding cells not yet implemented')
@@ -511,11 +516,16 @@ if isscalar(a) && isscalar(b) && isstruct(a) && isstruct(b)
         % 4/10/09 - added 'actualTargetOnSecs', 'actualTargetOffSecs', 'actualFlankerOnSecs', and 'actualFlankerOffSecs' to compiledDetails
         % for ifFeature, which were not there previously.
         % now, instead of erroring here, we should just fill w/ nans in a and recall concatAllFields
-        warning('b has fields not in a - padding with nans')
+        warning('a and b do not match in fields - padding with nans')
         fieldsToNan=setdiff(fieldnames(b),fn);
         numToNan=length(a.(fn{1}));
         for k=1:length(fieldsToNan)
             a.(fieldsToNan{k})=nan*ones(1,numToNan);
+        end
+        fieldsToNan=setdiff(fn,fieldnames(b));
+        numToNan=length(b.(fn{1}));
+        for k=1:length(fieldsToNan)
+            b.(fieldsToNan{k})=nan*ones(1,numToNan);
         end
         a=concatAllFields(a,b);
     end

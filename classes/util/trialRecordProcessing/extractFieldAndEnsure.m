@@ -136,6 +136,22 @@ try
             else
                 out=NaN*ones(1,length(trialRecords));
             end
+        case 'proposedRewardDuration'
+            if isfield(trialRecords,'phaseRecords')
+                out = cell2mat(cellfun(@getProposedRewardPhased,{trialRecords.phaseRecords},'UniformOutput',false));
+            elseif isfield(trialRecords,'proposedRewardSizeULorMS') % non-phased case
+                out = cell2mat(cellfun(@getProposedRewardNonphased,{trialRecords.proposedRewardSizeULorMS},'UniformOutput',false));
+            else
+                out=NaN*ones(1,length(trialRecords));
+            end
+        case 'proposedPenaltyDuration'
+            if isfield(trialRecords,'phaseRecords')
+                out = cell2mat(cellfun(@getProposedPenaltyPhased,{trialRecords.phaseRecords},'UniformOutput',false));
+            elseif isfield(trialRecords,'proposedMsPenalty') % non-phased case
+                out = cell2mat(cellfun(@getProposedPenaltyNonphased,{trialRecords.proposedMsPenalty},'UniformOutput',false));
+            else
+                out=NaN*ones(1,length(trialRecords));
+            end
         case 'none'
             out=[trialRecords.(fieldPath)];
         case 'bin2dec' %note uses trialRecords.station.numPorts in order to pad w/ sig digits
@@ -241,7 +257,33 @@ function out = getRewardDursNonphased(dur)
 if isempty(dur)
     out=0;
 else
-    out=dur;
+    out=dur*1000; % convert from secs to ms
+end
+end
+
+function out = getProposedRewardPhased(phaseRecord)
+out=sum([phaseRecord.proposedRewardDurationMSorUL]);
+end
+
+function out = getProposedRewardNonphased(dur)
+% replace all emptys([]) with 0
+if isempty(dur)
+    out=0;
+else
+    out=dur; % already in ms
+end
+end
+
+function out = getProposedPenaltyPhased(phaseRecord)
+out=sum([phaseRecord.proposedPenaltyDurationMSorUL]);
+end
+
+function out = getProposedPenaltyNonphased(dur)
+% replace all emptys([]) with 0
+if isempty(dur)
+    out=0;
+else
+    out=dur; % already in ms
 end
 end
 

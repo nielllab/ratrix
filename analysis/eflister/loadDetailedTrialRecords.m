@@ -31,13 +31,13 @@ end
 if length(fieldNames)~=length(fields(compiledTrialRecords))
     fieldNames
     fields(compiledTrialRecords)
-    error('compiledTrialRecords have different fields than the targets');
+    warning('compiledTrialRecords have different fields than the targets (this is okay now because we have nan padding)');
 end
 for m=1:length(fieldNames)
     if ~ismember(fieldNames{m},fields(compiledTrialRecords))
         fieldNames
         fields(compiledTrialRecords)
-        error('compiledTrialRecords don''t contain all target fields');
+        warning('compiledTrialRecords don''t contain all target fields (this is okay now because we have nan padding)');
     end
 end
 

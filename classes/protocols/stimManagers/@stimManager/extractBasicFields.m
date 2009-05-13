@@ -90,7 +90,8 @@ end
 [out.firstIRI compiledLUT]                                   =extractFieldAndEnsure(trialRecords,{},'firstIRI',compiledLUT);
 [out.responseTime compiledLUT]                               =extractFieldAndEnsure(trialRecords,{},'responseTime',compiledLUT);
 [out.actualRewardDuration compiledLUT]                       =extractFieldAndEnsure(trialRecords,{},'actualRewardDuration',compiledLUT);
-
+[out.proposedRewardDuration compiledLUT]                       =extractFieldAndEnsure(trialRecords,{},'proposedRewardDuration',compiledLUT);
+[out.proposedPenaltyDuration compiledLUT]                       =extractFieldAndEnsure(trialRecords,{},'proposedPenaltyDuration',compiledLUT);
 
 % 3/5/09 - we need to calculate a 'response' field for analysis based either on trialRecords.response (old-style)
 % or trialRecords.phaseRecords.responseDetails.tries (new-style) for the phase labeled 'discrim'

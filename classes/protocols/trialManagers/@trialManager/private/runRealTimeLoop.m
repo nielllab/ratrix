@@ -169,6 +169,7 @@ phaseRecordAllocChunkSize = 1;
 
 [phaseRecords(1:length(stimSpecs)).proposedRewardDurationMSorUL] = deal(0);
 [phaseRecords(1:length(stimSpecs)).proposedAirpuffDuration] = deal(0);
+[phaseRecords(1:length(stimSpecs)).proposedPenaltyDurationMSorUL] = deal(0);
 [phaseRecords(1:length(stimSpecs)).actualRewardDurationMSorUL] = deal(0);
 [phaseRecords(1:length(stimSpecs)).actualAirpuffDuration] = deal(0);
 
@@ -355,6 +356,7 @@ while ~done && ~quit;
 
             [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).proposedRewardDurationMSorUL] = deal([]);
             [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).proposedAirpuffDuration] = deal([]);
+            [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).proposedPenaltyDurationMSorUL] = deal([]);
             [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).actualRewardDurationMSorUL] = deal([]);
             [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).actualAirpuffDuration] = deal([]);
 
@@ -512,6 +514,7 @@ while ~done && ~quit;
             doRequestReward=false;
             msAirpuffOwed=msAirpuffOwed+msPuff;
             phaseRecords(phaseNum).proposedAirpuffDuration = msPuff;
+            phaseRecords(phaseNum).proposedPenaltyDurationMSorUL = msPenalty;
         end
         framesUntilTransition=getFramesUntilTransition(spec);
         stim=getStim(spec);

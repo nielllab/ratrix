@@ -56,7 +56,7 @@ framesUntilTransition=getFramesUntilTransition(spec);
 
 if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && framesInPhase==0
     % we only check to do rewards on the first frame of the 'reinforced' phase
-    [rm rewardSizeULorMS requestRewardSizeULorMS msPenalty msPuff msRewardSound msPenaltySound updateRM] =...
+    [rm rewardSizeULorMS garbage msPenalty msPuff msRewardSound msPenaltySound updateRM] =...
         calcReinforcement(getReinforcementManager(tm),trialRecords, []);
     if updateRM
         tm=setReinforcementManager(tm,rm);

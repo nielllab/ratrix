@@ -62,13 +62,14 @@ try
             out=ensureTypedVector({trialRecords.(fieldPath)},ensureType);
         case 'datenum'
             out=datenum(reshape([trialRecords.(fieldPath)],6,length(trialRecords))')';
-        case 'isNotEmpty'
+        case 'isDefinedAndNotEmpty'
             f=fields(trialRecords);
-            if ~strcmp(fieldPath,f)
+            if ~any(strcmp(fieldPath,f))
                 out=zeros(size(trialRecords));
             else
                 cellValues={trialRecords.(fieldPath)};
-                out = cell2mat(cellfun('isempty',cellValues, 'UniformOutput',false));
+                %out = cell2mat(cellfun('isempty',cellValues,'UniformOutput',false));  %errors on structs
+                out = ~cellfun(@(x) isempty(x),cellValues);
             end
         case 'NthValue'
             if ~isempty(ensureType)

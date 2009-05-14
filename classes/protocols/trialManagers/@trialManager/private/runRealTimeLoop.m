@@ -232,6 +232,7 @@ KbConstants.aKey=KbName('a');
 KbConstants.rKey=KbName('r');
 KbConstants.tKey=KbName('t');
 KbConstants.fKey=KbName('f');
+KbConstants.eKey=KbName('e');
 KbConstants.atKeys=find(cellfun(@(x) ~isempty(x),strfind(KbConstants.allKeys,'@')));
 KbConstants.asciiOne=double('1');
 KbConstants.portKeys={};
@@ -293,11 +294,11 @@ logIt=true;
 lookForChange=false;
 punishResponses=[];
 
-if ~isempty(getDatanet(station))
-    datanet_constants = getConstants(getDatanet(station));
-    commands.cmd = datanet_constants.stimToDataCommands.S_TIMESTAMP_CMD;
-    [trialData, gotAck] = sendCommandAndWaitForAck(getDatanet(station), getCon(getDatanet(station)), commands);
-end
+% % if ~isempty(getDatanet(station))
+% %     datanet_constants = getConstants(getDatanet(station));
+% %     commands.cmd = datanet_constants.stimToDataCommands.S_TIMESTAMP_CMD;
+% %     [trialData, gotAck] = sendCommandAndWaitForAck(getDatanet(station), getCon(getDatanet(station)), commands);
+% % end
 
 % =========================================================================
 % do first frame and  any stimulus onset synched actions
@@ -933,6 +934,12 @@ while ~done && ~quit;
             trialRecords(trialInd).result);
     elseif isempty(rn) && strcmp(getRewardMethod(station),'serverPump')
         error('need a rnet for serverPump')
+    end
+    
+    % also do datanet handling here
+    % this should only handle 'server quit' commands for now.... (other stuff is caught by doTrial/bootstrap)
+    if ~isempty(getDatanet(station))
+    [garbage quit] = handleCommands(getDatanet(station),[]);
     end
 
     timestamps.serverCommDone=GetSecs;

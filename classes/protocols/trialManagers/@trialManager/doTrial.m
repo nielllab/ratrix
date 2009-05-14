@@ -203,6 +203,43 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             
             trialLabel=sprintf('session:%d trial:%d (%d)',sessionNumber,sum(trialRecords(trialInd).sessionNumber == [trialRecords.sessionNumber]),trialRecords(trialInd).trialNumber);
             
+            if ~isempty(getDatanet(station))
+				% 4/11/09 - also save the stimRecord here, before trial starts (but just the stimManagerClass)
+				% also send over the filename of the neuralRecords file (so we can create it on the phys side, and then append every 30 secs)
+                datanet_constants = getConstants(getDatanet(station));
+                commands=[];
+                commands.cmd = datanet_constants.stimToDataCommands.S_TRIAL_START_EVENT_CMD;
+                cparams=[];
+                cparams.filename = sprintf('neuralRecords_%d-%s',trialRecords(trialInd).trialNumber,datestr(trialRecords(trialInd).date,30));
+                cparams.time=datenum(trialRecords(trialInd).date);
+                commands.arg=cparams;
+                [gotAck] = sendCommandAndWaitForAck(getDatanet(station), commands);
+                
+                stim_path = fullfile(getStorePath(getDatanet(station)), 'stimRecords');
+                stim_filename = fullfile(stim_path, sprintf('stimRecords_%d-%s',trialRecords(trialInd).trialNumber,datestr(trialRecords(trialInd).date, 30)));
+                
+                %also maybe include something from the phased records?
+                % maybe if ~isempty(phaseRecords{i}.responseDetails.expertDetails)
+                %for phaseInd=1:length(trialRecords(trialInd).phaseRecords)
+                %    if isfield(trialRecords(trialInd).phaseRecords(phaseInd),'responseDetails' ..etc)
+                %        stimulusDetails.dynRecords{phaseInd}=phaseRecords{i}.responseDetails.expertDetails
+                %    end
+                %end
+                
+                ratID=getID(subject);
+                trialStartTime=datestr(trialRecords(trialInd).date, 30);
+                trialNum=trialRecords(trialInd).trialNumber;
+                stimManagerClass=trialRecords(trialInd).stimManagerClass;
+                frameDropCorner=trialManager.frameDropCorner;
+                try
+                    save(stim_filename,'ratID','trialStartTime','trialNum','stimManagerClass','stimulusDetails','frameDropCorner');
+                catch
+                    warningStr=sprintf('unable to save to %s',stim_path);
+                    error(warningStr);
+                end
+            end
+            
+            
             [trialManager stopEarly,...
                 trialRecords,...
                 eyeData,...
@@ -289,42 +326,18 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 stopEarly = 1;
             end
             
-            if ~isempty(getDatanet(station))
+            % what do we do here if stopEarly is set by a
+            % D_STOP_TRIALS_CMD?
+            % should we execute this anyways, and have physServer also save
+            % neuralRecords after calling stopClientTrials?
+            if ~isempty(getDatanet(station)) %&& ~stopEarly
                 datanet_constants = getConstants(getDatanet(station));
-                
-                commands = [];
-                commands.cmd = datanet_constants.stimToDataCommands.S_SAVE_DATA_CMD;
-                commands.arg = sprintf('neuralRecords_%d-%s.mat',trialRecords(trialInd).trialNumber, datestr(trialRecords(trialInd).date, 30));
-                [junk, gotAck] = sendCommandAndWaitForAck(getDatanet(station), getCon(getDatanet(station)), commands);
-                
                 commands=[];
-                commands.cmd = datanet_constants.stimToDataCommands.S_SEND_EVENT_DATA_CMD;
-                [physiologyEvents, gotAck] = sendCommandAndWaitForAck(getDatanet(station), getCon(getDatanet(station)), commands);
-                trialRecords(trialInd).physiologyEvents = physiologyEvents;
-                
-                commands=[];
-                commands.cmd = datanet_constants.stimToDataCommands.S_ACK_EVENT_DATA_CMD;
-                [junk, gotAck] = sendCommandAndWaitForAck(getDatanet(station), getCon(getDatanet(station)), commands);
-                
-                stim_path = fullfile(getStorePath(getDatanet(station)), 'stimRecords');
-                stim_filename = fullfile(stim_path, sprintf('stimRecords_%d-%s',trialRecords(trialInd).trialNumber,datestr(trialRecords(trialInd).date, 30)));
-                
-                %also maybe include something from the phased records?
-                % maybe if ~isempty(phaseRecords{i}.responseDetails.expertDetails)
-                %for phaseInd=1:length(trialRecords(trialInd).phaseRecords)
-                %    if isfield(trialRecords(trialInd).phaseRecords(phaseInd),'responseDetails' ..etc)
-                %        stimulusDetails.dynRecords{phaseInd}=phaseRecords{i}.responseDetails.expertDetails
-                %    end
-                %end
-                
-                stimManagerClass=trialRecords(trialInd).stimManagerClass;
-                
-                try
-                    save(stim_filename, 'stimulusDetails','stimManagerClass','physiologyEvents');
-                catch
-                    warningStr('unable to save to %s',stim_path);
-                    error(warningStr);
-                end
+                commands.cmd = datanet_constants.stimToDataCommands.S_TRIAL_END_EVENT_CMD;
+                cparams=[];
+                cparams.time = now;
+                commands.arg=cparams;
+                [gotAck] = sendCommandAndWaitForAck(getDatanet(station), commands);
             end
             
             if isfield(stimulusDetails, 'big') % edf: why did this used to also test for isstruct(stimulusDetails) ?

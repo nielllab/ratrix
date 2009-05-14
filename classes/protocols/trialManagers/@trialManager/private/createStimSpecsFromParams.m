@@ -105,6 +105,27 @@ switch class(trialManager)
 		
 	case 'autopilot'
 		% do autopilot stuff..
+        % required discrim phase
+		criterion={[],i+1,[targetPorts distractorPorts],i+1};
+		if isinf(responseWindow(2))
+			framesUntilTimeout=[];
+		else
+			framesUntilTimeout=responseWindow(2);
+        end
+        if isfield(discrimStim,'framesUntilTimeout') && ~isempty(discrimStim.framesUntilTimeout)
+            if ~isempty(framesUntilTimeout)
+                error('had a finite responseWindow but also defined framesUntilTimeout in discrimStim - CANNOT USE BOTH!');
+            else
+                framesUntilTimeout=discrimStim.framesUntilTimeout;
+            end
+        end
+		stimSpecs{i} = stimSpec(discrimStim.stimulus,criterion,discrimStim.stimType,discrimStim.startFrame,...
+			framesUntilTimeout,discrimStim.stochasticDistribution,discrimStim.scaleFactor,0,hz,'discrim','discrim',false,true,indexPulses); % do not punish responses here
+		i=i+1;
+        % required final ITL phase
+		criterion={[],i+1};
+		stimSpecs{i} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,'itl','intertrial luminance',false,false); % do not punish responses here
+		i=i+1;
 		
 	otherwise
 		class(trialManager)

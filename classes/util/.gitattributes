@@ -144,6 +144,6 @@ trialRecordProcessing/getRelativeTimesPhased.m -text
 trialRecordProcessing/getTimesPhased.m -text
 trialRecordProcessing/getTimesNonphased.m -text
 infrastructure/getOrMakeDefaultRatrix.m -text
-analysis/applyChunkFilter.m -text
 analysis/getCellBoundaryFromEventLog.m -text
+analysis/applyChunkFilter.m -text
 nidaq/saveNidaqChunk.m -text

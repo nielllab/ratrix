@@ -25,9 +25,31 @@ for i=1:length(filter)
                 %note:still don't have a solution for mulitple independant
                 %blocks of 9.4... but this might never happen
                 rng=minmax(find(cands));
-                d=removeSomeSmalls(d,d.trialNumber<rng(1) & d.trialNumber>rng(2));
+                d=removeSomeSmalls(d,d.trialNumber<rng(1) | d.trialNumber>rng(2));
                 if 0 % view
                      figure;plot(cands); hold on; plot(rng,[.8,.8],'r'); pause
+                end
+            case '9.4.1+nf'
+                d=filterFlankerData(d,'9.4range');
+                if any(~ismember(d.targetContrast,[0 1]))
+                    error('need to pair up contrasts!')
+                     xxx=nearestIndices(A,B);
+                end
+                if any(~ismember(d.flankerContrast,[0 .4]))
+                    switch d.info.subject{1}
+                        case '230'
+                            % a quick hiccup to 9.3 can be reomved.
+                            %this methpd keeps the thirty or so no flnkas during 9.3
+                            [nfInds aa bb conditionColors d ]=getFlankerConditionInds(d,[],'noFlank');
+                            %doPlotPercentCorrect(d,[],[],[],[],[],[],[],[],[],[],[],{nfInds,conditionColors})
+                            pruneFraction=0.04; 
+                            wrongNFs=nearestIndices(nfInds, d.flankerContrast==0.3,pruneFraction);  % this is faster to use 9.3.  more general would be to find the 9.4 side
+                            keptNFs=(nfInds & ~wrongNFs);
+                            d=removeSomeSmalls(d,~(keptNFs | d.flankerContrast==0.4))
+                        otherwise
+                            error('need to pair up contrasts! check that it works for this rat')
+                    end
+
                 end
             case 'X.4'
                 % all steps where flankers are 0.4 (usually 9 and 10)
@@ -35,14 +57,33 @@ for i=1:length(filter)
                 d=removeSomeSmalls(d,d.flankerContrast~=0.4);
                 %case 'X.4.6' %used by 137 136
                 %    d=removeSomeSmalls(d,~(d.flankerContrast==0.4 & abs(d.targetContrast-0.5)<10^-9));
-            case {'11','12','13','14'}
+            case {'9','11','12','13','14'}
                 step=str2num(filter{i}.type);
                 d=removeSomeSmalls(d,d.step~=step);
-            case 'preFlanker'
-                d=removeSomeSmalls(d,d.flankerContrast~=0);  %pre-flanker test
+            case 'noFlanks'
+                d=removeSomeSmalls(d,d.flankerContrast~=0);
             case 'preFlankerStep'
                 firstFlankerStep=d.step(min(find(d.flankerContrast~=0 & ~isnan(d.flankerContrast))));
                 d=removeSomeSmalls(d,d.step~=firstFlankerStep-1);  %only the step before it
+            case 'preFlankerStep.last400'
+                %get the trial right before, so as not to confuse the
+                %learning process.
+                firstFlankerStep=d.step(min(find(d.flankerContrast~=0 & ~isnan(d.flankerContrast))));
+                numTrials=400;
+                lastPreFlankerTrial=max(d.trialNumber(d.step==firstFlankerStep-1));
+                d=removeSomeSmalls(d,d.step~=firstFlankerStep-1 | d.trialNumber<(lastPreFlankerTrial-numTrials+1));
+                if size(d.date,2)~=400
+                    keyboard
+                    error(sprintf('didn''t get 500 trials... maybe this rat never did 500 trial on step %d',firstFlankerStep-1))
+                end
+            case 'preFlankerStep.matchTrials.1'
+                %get the same numer of trials as flanker contrast 0.1 on
+                %the first flanker step... this is a fair way to match
+                %error bars...
+                firstFlankerStep=d.step(min(find(d.flankerContrast~=0 & ~isnan(d.flankerContrast))));
+                numTrials=sum(d.step==firstFlankerStep & d.flankerContrast==0.1)
+                lastPreFlankerTrial=max(d.trialNumber(d.step==firstFlankerStep-1));
+                d=removeSomeSmalls(d,d.step~=firstFlankerStep-1 | d.trialNumber<(lastPreFlankerTrial-numTrials+1));             
             case 'none'
                 %don't filter; keep all
             case 'responseSpeed'               

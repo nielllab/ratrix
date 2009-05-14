@@ -44,8 +44,8 @@ wholeReport='';
 for j=1:size(subjects,2)
     if includeHeader
         title=sprintf('weeklyReport generated %s',datestr(now,22));
-        header1=      '         kT d   h20     trialsPerDay   step-shn     crct        observations';
-        header2=      '                        (min/mean/max)  p day(this) (mean/max)    ';
+        header1=      '         kT d   h20     trialsPerDay   step-shn     crct             observations';
+        header2=      '                        (min/mean/max)  p day(this) (mean/max/probe)    ';
         heatNameLine=['***' heatName{j} '***'];
         %rat_112	 2  5	149	 232/ 360/ 475	p-day(this)	NaN/0.54
 
@@ -86,8 +86,13 @@ for j=1:size(subjects,2)
                 end
                 %get performance:
                 smoothingWidthUsed=min([smoothingWidth sum(goods)]);
-                [performance colors]=calculateSmoothedPerformances(d.correct(goods)',smoothingWidthUsed,'boxcar','powerlawBW');
+                [performance]=calculateSmoothedPerformances(d.correct(goods)',smoothingWidthUsed);
                 performance=performance(~isnan(performance));
+                %a flanker specific method (which could be removed...) ... b/c no one else uses this code
+                probe=getFlankerConditionInds(d,goods,'noFlank');
+                smoothingWidthUsed=min([smoothingWidth sum(probe)]);
+                [probePerf]=calculateSmoothedPerformances(d.correct(probe)',smoothingWidthUsed);
+                probePerf=probePerf(~isnan(probePerf));
                 %get h20 consumption:
                 if ismember('actualRewardDuration',fields(d))
                     secondsH20=round(sum(d.actualRewardDuration( ~isnan(d.actualRewardDuration))));
@@ -107,10 +112,10 @@ for j=1:size(subjects,2)
                     totalDays=[totalDays '+'];
                 end
                 %write it:
-                ratReport=sprintf('%s\t%2.0d %2.0d\t%2.0d\t%4.0d/%4.0d/%4.0d\t%s %s(%s)\t%2.2g/%2.2g\t :',char(subject),round(sum(goods)/1000),length(trialsPerDay),secondsH20,...
+                ratReport=sprintf('%s\t%2.0d %2.0d\t%2.0d\t%4.0d/%4.0d/%4.0d\t%s %s(%s)\t%2.2g/%2.2g/%2.2g\t :',char(subject),round(sum(goods)/1000),length(trialsPerDay),secondsH20,...
                     min(useTrialsPerDay),round(mean(useTrialsPerDay)),max(useTrialsPerDay),...
                     stepStr, daysThisStep, totalDays,...
-                    mean(performance),max(performance));
+                    mean(performance),max(performance),mean(probePerf));
                 disp(ratReport)
                 wholeReport=[wholeReport '\n' ratReport];
             end % if data
@@ -122,7 +127,7 @@ end%heat
 
 if saveToDesktop
     reportName='lastWeeklyReport.txt';
-    fid = fopen([desktopPath '\' reportName],'wt');
+    fid = fopen([desktopPath '\' reportName],'wt')
     fprintf(fid,'%s',sprintf (wholeReport));
     fclose(fid);
 end

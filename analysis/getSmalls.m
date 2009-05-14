@@ -50,8 +50,7 @@ for i=1:length(d)
             cdet=load(ff,'compiledDetails');
             totalTrials=0;
             for i=1:length(cdet.compiledDetails)
-                totalTrials=max([totalTrials max(cdet.compiledDetails(2).trialNums)]); % add all possible new trials
-                totalTrials=max([totalTrials max(cdet.compiledDetails(2).trialNums)]);
+                totalTrials=max([totalTrials max(cdet.compiledDetails(i).trialNums)]); % add all possible new trials
             end
             
             if totalSmallTrials==totalTrials

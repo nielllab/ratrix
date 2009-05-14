@@ -3,15 +3,7 @@ function [conditionInds names haveData colors d restrictedSubset]=getFlankerCond
 
 
 if ~exist('d', 'var') || isempty(d)
-    %allows you to get names and colors when you lack actual data
-    d.flankerPosAngle=nan;
-    d.targetOrientation=nan;
-    d.flankerOrientation=nan;
-    d.targetPhase=nan;
-    d.flankerPhase=nan;
-    d.pixPerCycs=nan;
-    d.deviation=nan;
-    d.date=nan;
+    d=getToyData({'detection'});
 end
 
 if ~exist('restrictedSubset','var') || isempty(restrictedSubset)
@@ -63,17 +55,26 @@ if ~isempty(hasNF)
     [c1 nm1 junk col1 d restrictedSubset]=getFlankerConditionInds(d,restrictedSubset,types);
     types='skip';
     
-    % get the full data for this rat
-    d2=getSmalls(char([d.info.subject]));
-    
-    % check it jives - current data is a subset of all data
-    if ~all(ismember(d.date,d2.date))
-        error('got the wrong data when looking for this rats no flank block')
+    if ~all(isnan(d.date));
+        % get the full data for this rat
+        d2=getSmalls(char([d.info.subject]));
+        
+        % check it jives - current data is a subset of all data
+        if ~all(ismember(d.date,d2.date))
+            error('got the wrong data when looking for this rats no flank block')
+        end
+        
+        % find the target only step
+        step=min(d2.step(d2.stdGaussMask==0.0625));% probably 8
+        d2=removeSomeSmalls(d2,d2.step~=step);
+        
+    else
+        %sometimes we process empty toy data for names of conditions
+        d2=getToyData({'detection'});
     end
     
-    % find the target only step
-    step=min(d2.step(d2.stdGaussMask==0.0625));% probably 8
-    d2=removeSomeSmalls(d2,d2.step~=step);
+    
+    
     
     if any(d2.flankerContrast>0)
         step
@@ -112,7 +113,7 @@ if ~isempty(hasNF)
     if ~all(ismember(fields(d2),fields(d)))
         f=fields(d2);
         missed=f(~ismember(f,fields(d)))
-        acceptableToMiss={'pixPerCyc'}; % these might have removed b/c they are nans in later data
+        acceptableToMiss={'pixPerCyc','responseTime'}; % these might have removed b/c they are nans in later data
         if all(ismember(missed,acceptableToMiss)) % these are fields that I have sanction its okay to be out of sync.  will be nanned on the missing side
             for i=1:length(missed)
                 d.(missed{i})=nan(size(d.date));
@@ -225,6 +226,19 @@ switch types
         conditionInds(i+2,:)=H;
         i=i+2;
         names = [names, {'V', 'H'}];
+    case 'popVsNot'
+        pop=  d.targetOrientation~=d.flankerOrientation & d.flankerContrast>0 & d.flankerPosAngle~=0;
+        not=  d.targetOrientation==d.flankerOrientation & d.flankerContrast>0 & d.flankerPosAngle~=0;
+        % no probes            no non-tilted stims
+        
+        conditionInds(1,:)=pop;
+        conditionInds(2,:)=not;
+        
+        names = [names, {'pop', 'not'}];
+        
+        colors=[0,1,1; %cyan
+            1,0,.2];  %para and colin are pseudo colinear=red
+        
     case 'allOrientations'
         orients=unique(d.targetOrientation(~isnan(d.targetOrientation)));
         numOrientations=length(orients);
@@ -274,6 +288,24 @@ switch types
         end
         colors=[tempColors; tempColors];
         %imtool(reshape(colors,[22 1 3]));
+    case 'allFlankerContrasts'
+        contrasts=unique(d.flankerContrast(~isnan(d.flankerContrast)));
+        numContrast=length(contrasts);
+        for i=1:numContrast
+            conditionInds(i,:)= d.flankerContrast==contrasts(i);
+            names = [names, {num2str(contrasts(i),'%2.2f')}];
+        end
+        colors=jet(numContrast);
+    case 'fiveFlankerContrasts'
+        %bc the dynamic stuff is a pain in the butt when some rats have a
+        %few scattered values .5-->.9
+        contrasts=linspace(0,.4,5);
+        numContrast=length(contrasts);
+        for i=1:numContrast
+            conditionInds(i,:)= d.flankerContrast==contrasts(i);
+            names = [names, {num2str(contrasts(i),'%2.2f')}];
+        end
+        colors=jet(numContrast);      
     case 'allTargetContrasts'
         contrasts=unique(d.targetContrast(~isnan(d.targetContrast)));
         numContrast=length(contrasts);
@@ -282,6 +314,23 @@ switch types
             names = [names, {num2str(contrasts(i),'%2.2f')}];
         end
         colors=jet(numContrast);
+    case 'allPhantomTargetContrastsCombined'
+        
+        respectGroups=getFlankerConditionInds(d,[],'flankOrnot');
+        d=addPhantomTargetContrast(d,respectGroups,'random');
+        
+        %d.targetContrast(isnan(d.phantomTargetContrastCalculated))
+        %sum(d.flankerContrast(isnan(d.phantomTargetContrastCalculated))==0)
+        
+        contrasts=unique(d.phantomTargetContrastCombined(~isnan(d.phantomTargetContrastCombined)));
+        numContrast=length(contrasts);
+        for i=1:numContrast
+            conditionInds(i,:)= d.phantomTargetContrastCombined==contrasts(i);
+            names = [names, {num2str(contrasts(i),'%2.2f')}];
+        end
+        colors=jet(numContrast);
+        
+        
     case 'allPixPerCycs'
         PPC=unique(d.pixPerCycs(~isnan(d.pixPerCycs)));
         numPPC=length(PPC);
@@ -400,22 +449,22 @@ switch types
         %as long as  d.targetContrast=1 as searched for above.  below is
         %general to all contrasts
         
-        conditionInds( 1,:)=d.flankerOrientation<0 & d.targetOrientation<0 & d.flankerPosAngle<0 & d.targetContrast==0;
-        conditionInds( 2,:)=d.flankerOrientation>0 & d.targetOrientation<0 & d.flankerPosAngle<0 & d.targetContrast==0;
-        conditionInds( 3,:)=d.flankerOrientation<0 & d.targetOrientation>0 & d.flankerPosAngle<0 & d.targetContrast==0;
-        conditionInds( 4,:)=d.flankerOrientation>0 & d.targetOrientation>0 & d.flankerPosAngle<0 & d.targetContrast==0;
-        conditionInds( 5,:)=d.flankerOrientation<0 & d.targetOrientation<0 & d.flankerPosAngle>0 & d.targetContrast==0;
-        conditionInds( 6,:)=d.flankerOrientation>0 & d.targetOrientation<0 & d.flankerPosAngle>0 & d.targetContrast==0;
-        conditionInds( 7,:)=d.flankerOrientation<0 & d.targetOrientation>0 & d.flankerPosAngle>0 & d.targetContrast==0;
-        conditionInds( 8,:)=d.flankerOrientation>0 & d.targetOrientation>0 & d.flankerPosAngle>0 & d.targetContrast==0;
-        conditionInds( 9,:)=d.flankerOrientation<0 & d.targetOrientation<0 & d.flankerPosAngle<0 & d.targetContrast>0;
-        conditionInds(10,:)=d.flankerOrientation>0 & d.targetOrientation<0 & d.flankerPosAngle<0 & d.targetContrast>0;
-        conditionInds(11,:)=d.flankerOrientation<0 & d.targetOrientation>0 & d.flankerPosAngle<0 & d.targetContrast>0;
-        conditionInds(12,:)=d.flankerOrientation>0 & d.targetOrientation>0 & d.flankerPosAngle<0 & d.targetContrast>0;
-        conditionInds(13,:)=d.flankerOrientation<0 & d.targetOrientation<0 & d.flankerPosAngle>0 & d.targetContrast>0;
-        conditionInds(14,:)=d.flankerOrientation>0 & d.targetOrientation<0 & d.flankerPosAngle>0 & d.targetContrast>0;
-        conditionInds(15,:)=d.flankerOrientation<0 & d.targetOrientation>0 & d.flankerPosAngle>0 & d.targetContrast>0;
-        conditionInds(16,:)=d.flankerOrientation>0 & d.targetOrientation>0 & d.flankerPosAngle>0 & d.targetContrast>0;
+        conditionInds( 1,:)=d.flankerOrientation<0 & d.targetOrientation<0 & d.flankerPosAngle<0 & d.targetContrast==0 & d.flankerContrast>0;
+        conditionInds( 2,:)=d.flankerOrientation>0 & d.targetOrientation<0 & d.flankerPosAngle<0 & d.targetContrast==0 & d.flankerContrast>0;
+        conditionInds( 3,:)=d.flankerOrientation<0 & d.targetOrientation>0 & d.flankerPosAngle<0 & d.targetContrast==0 & d.flankerContrast>0;
+        conditionInds( 4,:)=d.flankerOrientation>0 & d.targetOrientation>0 & d.flankerPosAngle<0 & d.targetContrast==0 & d.flankerContrast>0;
+        conditionInds( 5,:)=d.flankerOrientation<0 & d.targetOrientation<0 & d.flankerPosAngle>0 & d.targetContrast==0 & d.flankerContrast>0;
+        conditionInds( 6,:)=d.flankerOrientation>0 & d.targetOrientation<0 & d.flankerPosAngle>0 & d.targetContrast==0 & d.flankerContrast>0;
+        conditionInds( 7,:)=d.flankerOrientation<0 & d.targetOrientation>0 & d.flankerPosAngle>0 & d.targetContrast==0 & d.flankerContrast>0;
+        conditionInds( 8,:)=d.flankerOrientation>0 & d.targetOrientation>0 & d.flankerPosAngle>0 & d.targetContrast==0 & d.flankerContrast>0;
+        conditionInds( 9,:)=d.flankerOrientation<0 & d.targetOrientation<0 & d.flankerPosAngle<0 & d.targetContrast>0  & d.flankerContrast>0;
+        conditionInds(10,:)=d.flankerOrientation>0 & d.targetOrientation<0 & d.flankerPosAngle<0 & d.targetContrast>0  & d.flankerContrast>0;
+        conditionInds(11,:)=d.flankerOrientation<0 & d.targetOrientation>0 & d.flankerPosAngle<0 & d.targetContrast>0  & d.flankerContrast>0;
+        conditionInds(12,:)=d.flankerOrientation>0 & d.targetOrientation>0 & d.flankerPosAngle<0 & d.targetContrast>0  & d.flankerContrast>0;
+        conditionInds(13,:)=d.flankerOrientation<0 & d.targetOrientation<0 & d.flankerPosAngle>0 & d.targetContrast>0  & d.flankerContrast>0;
+        conditionInds(14,:)=d.flankerOrientation>0 & d.targetOrientation<0 & d.flankerPosAngle>0 & d.targetContrast>0  & d.flankerContrast>0;
+        conditionInds(15,:)=d.flankerOrientation<0 & d.targetOrientation>0 & d.flankerPosAngle>0 & d.targetContrast>0  & d.flankerContrast>0;
+        conditionInds(16,:)=d.flankerOrientation>0 & d.targetOrientation>0 & d.flankerPosAngle>0 & d.targetContrast>0  & d.flankerContrast>0;
         
         colors=jet(16); colors(:)=0.9; %all gray at first
         names{ 1}='nRR';
@@ -505,6 +554,12 @@ switch types
         conditionInds=d.flankerContrast>0;
         colors=[.6 .6 .6];
         names={'hasF'};
+    case 'flankOrnot'
+        [c1 n1 j col1]=getFlankerConditionInds(d,restrictedSubset,'hasFlank');
+        [c2 n2 j col2]=getFlankerConditionInds(d,restrictedSubset,'noFlank');
+        conditionInds=[c1; c2];
+        colors=[col1; col2];
+        names=[n1 n2];
     case 'skip'
         % do nothing, this is a condition used to prevent overwriting
     otherwise
@@ -528,3 +583,36 @@ haveData=find(sum(conditionInds')>0);
 %     warning('returning fewer condition inds than requested');
 % end
 conditionInds=logical(conditionInds);
+
+
+function d=getToyData(requests);
+
+%allows you to get names and colors when you lack actual data
+d.targetContrast=nan;
+d.flankerContrast=nan;
+d.flankerPosAngle=nan;
+d.targetOrientation=nan;
+d.flankerOrientation=nan;
+d.targetPhase=nan;
+d.flankerPhase=nan;
+d.pixPerCycs=nan;
+d.deviation=nan;
+d.stdGaussMask=nan;
+d.date=nan;
+d.step=nan;
+d.correctResponseIsLeft=nan;
+d.response=nan;
+d.correct=nan;
+d.trialNumber=nan;
+d.info.subject={'toyData'};
+
+for i=1:length(requests)
+    switch requests{i}
+        case 'detection'
+            d.targetContrast=0;  % in addYesResponse
+            d.correctResponseIsLeft=1; % make it a 'rightMeansYes' rat
+        otherwise
+            requests{i}
+            error('bad request')
+    end
+end

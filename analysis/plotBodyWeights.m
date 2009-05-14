@@ -54,7 +54,7 @@ end
 
 if ~exist('lastNdays','var'); lastNdays = []; end
 if isempty(lastNdays)
-    lastNdays = 9999;
+    lastNdays = Inf;
 end
 
 if ~exist('useBodyWeightCache','var'); useBodyWeightCache = []; end

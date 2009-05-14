@@ -990,7 +990,7 @@ if p.plotContrastCurve
 end
 
 if p.plotTheBodyWeights
-    lastNdays = 30;
+    lastNdays = Inf;
     plotBodyWeights({subject},lastNdays,subplotParams,handles(find(strcmp('plotTheBodyWeights',whichPlots))), useBodyWeightCache);
 end
 

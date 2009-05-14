@@ -1,4 +1,4 @@
-function [stats CI names params] =getFlankerStats(subjects,conditionType,statTypes,filterType,dateRange,goodTrialType,shuffle)
+function [stats CI names params] =getFlankerStats(subjects,conditionType,statTypes,filterType,dateRange,goodTrialType,shuffle,removeNonTilted)
 %stats is a matrix that is (i=subject,j=condition,k=statType)
 %CI is the same shape with nans for dprime
 %names is a structure with the names of the subjects, stats, and conditions
@@ -50,6 +50,13 @@ if ~exist('shuffle','var') || isempty(shuffle)
     shuffle=false;
 end
 
+if ~exist('removeNonTilted','var') || isempty(removeNonTilted)
+    removeNonTilted=true;
+end
+
+
+
+
 %for output
 params.settings.conditionType=conditionType;
 params.settings.filterType=filterType;
@@ -61,13 +68,21 @@ numSubjects=length(subjects);
 names.subjects=subjects;
 
 
-
-
-tempD=getSmalls('231',[datenum('21-Jun-2008') now]); % only some sample data used to determine num conditions for preallocation
-%tempD.pixPerCyc=nan(size(tempD.date));
-%[justForSize justForNames b c]=getFlankerConditionInds( filterFlankerData(getSmalls(subjects{1},[dateRange]),filterType),[],conditionType);
-[justForSize a b c]=getFlankerConditionInds(tempD,[],conditionType);
-numConditions=size(justForSize,1);
+if ~isempty(strfind(conditionType,'all')) ||...
+        ~isempty(strfind(conditionType,'&dev')) ||...
+        ~isempty(strfind(conditionType,'&contrasts'))
+    tempD=filterFlankerData(getSmalls(subjects{1},[dateRange]),filterType);
+    tempGoods=getGoods(tempD,goodTrialType);
+    %get the num conditions and names form the first rat in the list
+    %b/c names are dynamic to the conditions showed.
+else
+    tempD=[];
+    tempGoods=[];
+    %tempD=getSmalls('231',[datenum('21-Jun-2008') now]); % only some sample data used to determine num conditions for preallocation
+    %tempD.pixPerCyc=nan(size(tempD.date));
+end
+[a preConditionNames b c]=getFlankerConditionInds(tempD,tempGoods,conditionType);
+numConditions=size(preConditionNames,2);  % just for size, also used to confirm names in 'all' mode
 
 numStats=length(statTypes);
 names.stats=statTypes;
@@ -96,28 +111,25 @@ if ismember('RT',statTypes)
 end
 
 for i=1:numSubjects
-
+    
     %get data
     d=getSmalls(subjects{i},dateRange);
-
+    
     % filter it
     d=filterFlankerData(d,filterType);
-
-    %     if ~isempty(flankerContrast)
-    %         wrongContrast=~(ismember(d.flankerContrast,flankerContrast));
-    %         d=removeSomeSmalls(d,wrongContrast);
-    %     end
-
+    
     %exclude flanker trials that don't have a global tilt
     beforeTilt=isnan(d.flankerPosAngle);
-    d=removeSomeSmalls(d,beforeTilt);
-
+    if removeNonTilted
+        d=removeSomeSmalls(d,beforeTilt);
+    end
+    
     if shuffle
         disp('shuffling')
         goodInds=find(getGoods(d,goodTrialType));
         d.response(goodInds)=d.response(goodInds(randperm(length(goodInds))));
     end
-
+    
     tweakCheck=0;
     if tweakCheck
         %             disp('entering fake data')
@@ -135,8 +147,8 @@ for i=1:numSubjects
         %             %d.response(which)=correctAnswerID(which); %change some responses to "correct"
         %             %d.response(which)=3; %change some responses to "rightward"
     end
-
-
+    
+    
     [containsContrasts junk whichContrast]=unique(d.targetContrast(~isnan(d.targetContrast)));
     if length(containsContrasts)>2
         containsContrasts
@@ -153,15 +165,26 @@ for i=1:numSubjects
         if abs((pctThisContrast(1)-sum(pctThisContrast(2:end))))>0.05
             error('every contrast should have a no-contrast pair: check assumption about the distribution of contrasts')
         end
-
+        
     end
-
+    
     %define trials good for analysis
     goods=getGoods(d,goodTrialType);
     
     %get indices of each condition type
     [conditionInds names.conditions haveData params.colors d goods]=getFlankerConditionInds(d,goods,conditionType);
-  
+    
+    for n=1:length(names.conditions)
+        if ~strcmp(preConditionNames{n},names.conditions{n})
+            preConditionNames
+            names.conditions
+            preConditionNames{n}
+            names.conditions{n}
+            error('not all rats can be garaunteed to have the same conditions!')
+            % probably b/c all mode allows the name and the extact value to be dynamic.
+        end
+    end
+    
     %set up values for dprime, accounting for of side meaning yes
     forceGotoSideToBeDetection=true;
     [d yesType]=addYesResponse(d,[],forceGotoSideToBeDetection);
@@ -173,7 +196,7 @@ for i=1:numSubjects
             presentVal=1;
             absentVal=3;
     end
-
+    
     %confirm nothing funny is going on
     if ~all((d.correctResponseIsLeft==1)==(d.correct==1 & d.response==1) | (d.correct==0 & d.response~=1))
         x=((d.correctResponseIsLeft==1)==(d.correct==1 & d.response==1) | (d.correct==0 & d.response~=1)) ;
@@ -183,9 +206,9 @@ for i=1:numSubjects
         else
             error('violates correct response is left; should never happen, regardless of trial manager rules')
         end
-
+        
     end
-
+    
     for j=1:numConditions
         these=conditionInds(j,:);
         numAttempt=sum(these);
@@ -200,7 +223,7 @@ for i=1:numSubjects
             %set all counts to zero
             [numCorrect numYes numHits numMisses numCRs numFAs]=deal(0);
         end
-
+        
         %save and export for outside use
         params.raw.numCorrect(i,j,1)=numCorrect;
         params.raw.numAttempt(i,j,1)=numAttempt;
@@ -209,7 +232,7 @@ for i=1:numSubjects
         params.raw.numMisses(i,j,1)=numMisses;
         params.raw.numCRs(i,j,1)=numCRs;
         params.raw.numFAs(i,j,1)=numFAs;
-
+        
         %save values of the factors for outside use
         %just sample from the first relvant ind
         firstInd=min(find(conditionInds(j,:)));
@@ -219,6 +242,9 @@ for i=1:numSubjects
                     params.factors.targetOrientation(i,j)=d.targetOrientation(firstInd);
                     params.factors.flankerOrientation(i,j)=d.flankerOrientation(firstInd);
                     params.factors.flankerPosAngle(i,j)=d.flankerPosAngle(firstInd);
+                case {'popVsNot'}
+                    params.factors.targetOrientation(i,j)=d.targetOrientation(firstInd);
+                    params.factors.flankerOrientation(i,j)=d.flankerOrientation(firstInd);
                 case {'colin+3','colin-other','colin+3&nfMix'}
                     params.factors.targetOrientation(i,j)=d.targetOrientation(firstInd);
                     params.factors.flankerOrientation(i,j)=d.flankerOrientation(firstInd);
@@ -243,8 +269,12 @@ for i=1:numSubjects
                     params.factors.flankerPosAngle(i,j)=d.flankerPosAngle(firstInd);
                     params.factors.targetPhase(i,j)=d.targetPhase(firstInd);
                     params.factors.flankerPhase(i,j)=d.flankerPhase(firstInd);
-                case {'noFlank&nfBlock','noFlank'}
-                    %none
+                case {'allFlankerContrasts','fiveFlankerContrasts','noFlank&nfBlock','noFlank'}
+                    params.factors.flankerContrast(i,j)=d.flankerContrast(firstInd);
+                case {'allTargetContrasts'}
+                    params.factors.targetContrast(i,j)=d.targetContrast(firstInd);
+                case {'allPhantomTargetContrastsCombined'}
+                    params.factors.phantomTargetContrastCombined(i,j)=d.phantomTargetContrastCombined(firstInd);
                 otherwise
                     
                     error('factors not listed yet for that conditionType')
@@ -258,7 +288,7 @@ for i=1:numSubjects
             params.factors.flankerPhase(i,j)=nan;
             params.factors.targetContrast(i,j)=nan;
         end
-
+        
         for k=1:numStats
             switch statTypes{k}
                 case 'pctCorrect'
@@ -267,11 +297,11 @@ for i=1:numSubjects
                     stats(i,j,k)=dprime(d.response(conditionInds(j,:)),d.correctAnswerID(conditionInds(j,:)),'presentVal',presentVal,'absentVal',absentVal,'silent');
                     CI(i,j,k,:)=nan;
                 case {'crit'}
-
+                    
                     [junk more]=dprime(d.response(conditionInds(j,:)),d.correctAnswerID(conditionInds(j,:)),'presentVal',presentVal,'absentVal',absentVal,'silent');
-                    stats(i,j,k)= -(norminv(more.hitsPercent/100)+norminv(more.falseAlarmsPercent/100))/2;  %cr =-(norminv(h)+norminv(f))/2;  
+                    stats(i,j,k)= -(norminv(more.hitsPercent/100)+norminv(more.falseAlarmsPercent/100))/2;  %cr =-(norminv(h)+norminv(f))/2;
                     CI(i,j,k,:)=nan;
-
+                    
                 case {'criterionMCMC', 'biasMCMC', 'dprimeMCMC'}
                     stats(i,j,k)=nan;
                     CI(i,j,k,:)=nan;
@@ -290,8 +320,8 @@ for i=1:numSubjects
                     error('bad stat request')
             end
         end
-
-
+        
+        
     end
 end
 
@@ -299,19 +329,19 @@ end
 %only one runs one call to matbugs for all subjects and conditons and statTypes
 mcmcRequest=~cellfun('isempty',strfind(statTypes, 'MCMC')); %logical that is true for every statistic that is MCMC-dependent
 if any(mcmcRequest)
-
+    
     x.hits=params.raw.numHits(:);
     x.misses=params.raw.numMisses(:);
     x.FAs=params.raw.numFAs(:);
     x.CRs=params.raw.numCRs(:);
     alpha=0.05;
     [sdtCI details]=dprimeCI(x, 'dprimeMCMC', alpha); % run the MCMChain
-
+    
     statInds=find(mcmcRequest);
     numMCMCstats=length(statInds);
     params.mcmc.samples=repmat({nan},[numSubjects numConditions numStats]);  %init?
     for k=1:length(statInds)
-
+        
         switch statTypes{statInds(k)}
             %intially dprime was handled separately and the code
             %successfuly passes chekcs which compared the mean of the
@@ -333,7 +363,7 @@ if any(mcmcRequest)
             %                     reshape(dprMean, numSubjects, numConditions)
             %                     error('dprimes from mcmc and standard calculuation don''t match up.')
             %                 end
-
+            
             case {'criterionMCMC',  'biasMCMC', 'dprimeMCMC'}
                 switch statTypes{statInds(k)}
                     case  'criterionMCMC'
@@ -358,7 +388,7 @@ if any(mcmcRequest)
                         %names.conditions{j}
                         %statTypes{statInds(k)}
                         indTo =sub2ind([numSubjects numConditions numStats],i,j,statInds(k));
-                        indFrom = sub2ind([numSubjects numConditions],i,j); 
+                        indFrom = sub2ind([numSubjects numConditions],i,j);
                         %x.hits(indFrom)==params.raw.numHits
                         %                         indTo
                         %                         indFrom
@@ -371,9 +401,9 @@ if any(mcmcRequest)
                 statTypes{statInds(k)}
                 error('bad mcmcStat');
         end
-
+        
         %error check
     end
 end
-    
+
 params.stats=stats; %params really have everything

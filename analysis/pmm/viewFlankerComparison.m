@@ -130,7 +130,7 @@ if ~exist('cMatrix','var') || isempty(cMatrix)
         case {'noFlank&nfBlock'}
             cMatrix={[1],[2]};
         case {'colin+1&devs','2flanks&devs'}
-            dimming=flipLR([1:4]/5)';
+            dimming=fliplr([1:4]/5)';
             cMatrix={[1],[2];
                 [3],[4];
                 [5],[6];
@@ -337,6 +337,9 @@ for i=1:numComparison
                 statTypes{j}
                 error('bad type');
         end
+        
+        [junk sigTTest(i,j)] = ttest(popStats,0,.05,'both');
+        [sigSignRank(i,j)] = signrank(popStats,0);
     end
 end
 
@@ -477,17 +480,25 @@ for j=1:numStats
                     color=objectColors.subjectInsig;
                 end
             end
-
-            populationYVal= -totalFigureHeight*(basementFraction/2);
+            
             if multiComparePerPlot
-                %plot([ CI(i,j,1)  CI(i,j,2)], repmat(comparisonYVals(i),1,2), 'color', color,'lineWidth',4); % uber-rat errorbar
-                plot([CI2(i,j,1) CI2(i,j,2)], repmat(comparisonYVals(i),1,2), 'color', color,'lineWidth',2); %   population std
-                plot(delta(i,j), comparisonYVals(i), '.', 'markerSize', 7, 'color', color);
+                populationYVal=comparisonYVals(i);
             else
-                %plot([CI(i,j,1) CI(i,j,2)], repmat(populationYVal,1,2), 'color', color,'lineWidth',4); %   population errorbar
-                plot([CI2(i,j,1) CI2(i,j,2)], repmat(populationYVal,1,2), 'color', color,'lineWidth',2); %   population std
-                plot(delta(i,j), populationYVal, '.', 'markerSize', 7, 'color', color);
-                %CI2(i,j,1:2)
+                populationYVal= -totalFigureHeight*(basementFraction/2);
+            end
+            
+            %plot([CI(i,j,1) CI(i,j,2)], repmat(populationYVal,1,2), 'color', color,'lineWidth',4); %   population errorbar
+            plot([CI2(i,j,1) CI2(i,j,2)], repmat(populationYVal,1,2), 'color', color,'lineWidth',2); %   population std
+            plot(delta(i,j), populationYVal, '.', 'markerSize', 7, 'color', color);
+    
+            
+            dispSig=true;
+            sigMsg=sprintf('p= %5.5f 1-tail t-test\np= %5.5f sign rank test',sigTTest(i,j) ,sigSignRank(i,j) );
+            disp(sigMsg);
+            if dispSig
+                sigYVal= -totalFigureHeight*(basementFraction*3/4);
+                sigXVal=0; %delta(i,j)
+                text(sigXVal,sigYVal,sigMsg,'HorizontalAlignment','center')     
             end
             
         end

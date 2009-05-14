@@ -24,10 +24,12 @@ d.info.strLUT=compiledLUT;
 function d=set(d,source)
 %d= small data, n= numTrials
 
-n=max(d.trialNumber);
+n=range(d.trialNumber)+1;
 inds=source.trialNumber;
 f=fields(source);
 for i=1:length(f)
+    %sz=size(source.(f{i}));
+    %disp(sprintf('doing %s which is size [%d x %d]', f{i},sz(1),sz(2)));
     switch class(source.(f{i}))
         case {'double','logical','int8','uint8'}
             if size(source.(f{i}),1)==1

@@ -22,7 +22,7 @@ spikeDetectionParams.ISIviolationMS=2; % just for human reports
 % Wn = [300 4000]/(spikeDetectionParams.samplingFreq/2); % default to bandpass 300Hz - 4000Hz
 % [b,a] = butter(4,Wn); Hd=[]; Hd{1}=b; Hd{2}=a;      
 spikeDetectionParams.nrNoiseTraces=0;   % what does this do for us? any effect if set to 2?
-spikeDetectionParams.extractionThreshold = 5;
+spikeDetectionParams.extractionThreshold =8;
 %should be replaced with a string that collapses these two confusing categories into one value;  'maxPeak' 'minPeak' 'maxMinPeak' 'power' 'MTEO'
 % why is 3=power broken? can we fix it?
 spikeDetectionParams.peakAlignMethod=1;  % 1-> find peak, 2->none, 3->peak of power signal (broken), 4->peak of MTEO signal.
@@ -75,7 +75,7 @@ end
 % CANT USE analysisManager yet on white noise b/c trials keep failing the
 
 % quality test // dropped frames adjustmented
-overwriteAll=0; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
+overwriteAll=1; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
 classesAnalyzed=[];%{'filteredNoise'};
 %demo1 % 263 % [1 13] [173 191] [226 236]anethSTA  [240 250]awake [257] [309 320] [304]
 %test2 [8]
@@ -88,10 +88,10 @@ classesAnalyzed=[];%{'filteredNoise'};
 %test6 realrat [66 ]
 %
 % rat 164 [591 648]spatial bin;  [654 680]bipartiteLoc=0.9; [692 730]bin
-trialRange=[35 ]; %test [44]
+trialRange=[238 ]; %test [44]
 % path='\\132.239.158.183\rlab_storage\pmeier\backup\devNeuralData_090310'; %b/c i can't see datanet_storage folder on .179
 % backupPath='C:\Documents and Settings\rlab\Desktop\neural';
 path='\\132.239.158.179\datanet_storage'
 photoDiodeSpikes=0;
-subjectID = 'test6'; % demo1 test
+subjectID = '188dev'; % demo1 test
 analysisManager(subjectID,path, spikeDetectionParams,spikeSortingParams,trialRange,[0 Inf],classesAnalyzed,overwriteAll,photoDiodeSpikes);

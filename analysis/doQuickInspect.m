@@ -25,6 +25,10 @@ if more
     whichPlots{end+1}='plotPerformancePerDaysTrial';
 end
 
+if seeBW
+     whichPlots{end+1}='plotTheBodyWeights'
+end
+
 dateRange=[now-daysBackAnalyzed now];
 %dateRange=[datenum('Apr.11,2009') datenum('Apr.14,2009')] % hack
 positions=subjects;

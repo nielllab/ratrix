@@ -27,6 +27,17 @@ for i=1:size(subjects,1)
     stationStrs{i}=[num2str(rack) char(((i)+double('A')-1)')];
 end
 
+
+
+%remove unoccupied stations
+emptyStations=sum(~cellfun('isempty',subjects)')==0;
+subjects=subjects(find(~emptyStations),:);
+stationStrs=stationStrs(find(~emptyStations));
+
+%need work:
+heatStrs=heatStrs;  %these might be too many, and not filtered to the correct length!
+
+
 %example output :
 % % HEAT       %red     %orange  %yellow  %green     %blue
 % subjects={'rat_213','rat_215','rat_216','rat_195','rat_144';... %3  upper-left

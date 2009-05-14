@@ -1,23 +1,23 @@
 %% quick inspect - simple user interface
 
-close all
+%close all
 
-serverID=          1;  %male =1, female=2; rig=101;
+serverID=          3;  %male =1, female=3?; rig=101;
 heatViewed=        0;  %1-6; filters which heat    (RED =1 etc),   0 allows all rats and weeklyReports
 stationViewed=     0;  %1-6; filters which station (stationA=1 etc), 0 allows all stations
-justSome=           1;  %0 is default heat & station defined, 1 to view explicit list
+justSome=          1;  %0 is default heat & station defined, 1 to view explicit list
 suppressUpdates=   1;  %don't update - server does that! can cause collisions with mulitple users
 %manual compile: compileDetailedRecords('server-01-male-pmm-154')
 
-daysBackAnalyzed=  7;  %at least 8 if using weeklyReport
+daysBackAnalyzed=  40;  %at least 8 if using weeklyReport
 seeBW=             0;  %1 if you want to see body weights, 0 otherwise
 more=              1;  %see more plots
 
-whichOnes={'227','231','233','228','230','232','234','237','277','138','139','275','278','130','229'}; % ,
-%whichOnes={'138'}; 
+%whichOnes={'230','227','229','237','232','233','139','228','234','231','275','277','278','138','130'}; %males
+%whichOnes={'test_r1'}; 
 %whichOnes={'232','234'}
-%whichOnes={'136','137'}; 
-%whichOnes={'296','304','304','305','306'}; 
+%whichOnes={'304'}; 
+whichOnes={'304','305','306','296'};  % corrupt file
 %whichOnes={%'137','275','277','136','139'};   %low body weight
 %whichOnes={'228','130','102','277','136','237'} %riskier BW
 %whichOnes={'273','232','274','137','275','139'} % less risky BW

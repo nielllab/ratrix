@@ -1,4 +1,4 @@
-%function eventLog=getMarvLogs()
+function eventLog=getMarvLogs()
 
 eventNum = 0;
 eventLog=[];
@@ -108,9 +108,9 @@ eventLog{eventNum}.comment ='several days below body weight threshold';
 eventLog{eventNum}.details.from =[3;10000];
 eventLog{eventNum}.details.to   =[4; 4000];  
 
-eventNum = eventNum +1;m %bad format --pmm
+eventNum = eventNum +1; %bad format --pmm
 eventLog{eventNum}.date =datenum('Dec.17,2007');%datestr(now,21)
-eventLog{eventNum}.eventName ='rewardIncrease', 'penaltyDecrease';
+eventLog{eventNum}.eventName ={'rewardIncrease', 'penaltyDecrease'};
 eventLog{eventNum}.subject =   {'rat_145, rat_148'};
 eventLog{eventNum}.stationID =11; %B
 eventLog{eventNum}.issuedBy ='mrz';
@@ -130,7 +130,7 @@ eventLog{eventNum}.details.to   =' 4000';
 
 eventNum = eventNum +1; %bad format --pmm
 eventLog{eventNum}.date =datenum('Dec.19,2007');%datestr(now,21)
-eventLog{eventNum}.eventName ='rewardIncrease', 'penaltyDecrease';
+eventLog{eventNum}.eventName ={'rewardIncrease', 'penaltyDecrease'};
 eventLog{eventNum}.subject =     'rat_132, rat_133';
 eventLog{eventNum}.stationID =2; %E 
 eventLog{eventNum}.issuedBy ='mrz';
@@ -371,7 +371,7 @@ eventNum = eventNum +1;  %good format --pmm
 eventLog{eventNum}.date =datenum('Feb.18,2008');%datestr(now,21)
 eventLog{eventNum}.eventName ={'rewardDecrease'};
 eventLog{eventNum}.subject ={'rat_129'};
-eventLog{eventNum}.stationID =11?; %B
+eventLog{eventNum}.stationID =11; %B=11?  B is known
 eventLog{eventNum}.issuedBy ='pmm';
 eventLog{eventNum}.comment ='good weight,slightly above chance, pushable'; 
 eventLog{eventNum}.details.from =[5];  
@@ -381,7 +381,7 @@ eventNum = eventNum +1;  %good format --pmm
 eventLog{eventNum}.date =datenum('Feb.18,2008');%datestr(now,21)
 eventLog{eventNum}.eventName ={'rewardDecrease'};
 eventLog{eventNum}.subject ={'rat_130'};
-eventLog{eventNum}.stationID =9?; %D
+eventLog{eventNum}.stationID =9; %D=9? D is known
 eventLog{eventNum}.issuedBy ='pmm';
 eventLog{eventNum}.comment ='good weight,slightly above chance, pushable'; 
 eventLog{eventNum}.details.from =[3];  
@@ -431,7 +431,7 @@ eventNum = eventNum +1;  %good format --pmm
 eventLog{eventNum}.date =datenum('Feb.25,2008');%datestr(now,21)
 eventLog{eventNum}.eventName ={'rewardIncrease'};
 eventLog{eventNum}.subject ={'rat_116'};
-eventLog{eventNum}.stationID =9?; %D
+eventLog{eventNum}.stationID =9; %D=9?
 eventLog{eventNum}.issuedBy ='hvo';
 eventLog{eventNum}.comment ='dehydrated but not sick, vet agrees, increasing water reward'; 
 eventLog{eventNum}.details.from =[2];  
@@ -1036,7 +1036,90 @@ eventLog{eventNum}.eventName ={'addCTs'};
 eventLog{eventNum}.subject ={'138'};
 eventLog{eventNum}.stationID ={}; 
 eventLog{eventNum}.issuedBy ='pmm';
-eventLog{eventNum}.comment ='alternates sides eventually, but has a same side bias... dhad it for weeks/months, performance is down in the past 2/3 weeks '; 
+eventLog{eventNum}.comment ='alternates sides eventually, but has a same side bias... had it for weeks/months, performance is down in the past 2/3 weeks '; 
 eventLog{eventNum}.details.from = [0]; 
 eventLog{eventNum}.details.to   = [0.25]; 
+
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('May.02,2009');%datestr(now,21)  
+eventLog{eventNum}.eventName ={'increaseReward'};
+eventLog{eventNum}.subject ={'296', '304', '305', '306'};
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='hard time with brief stim, BW dropping'; 
+eventLog{eventNum}.details.from = [.2]; 
+eventLog{eventNum}.details.to   = [.4]; 
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('May.02,2009');%datestr(now,21)  
+eventLog{eventNum}.eventName ={'flunked'};
+eventLog{eventNum}.subject ={'296','306'};
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='306 hard time with brief stim, can''t see 296 data , both BW dropping'; 
+eventLog{eventNum}.details.from = [9.3 9.3]; 
+eventLog{eventNum}.details.to   = [9.1 9.1]; 
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('May.02,2009');%datestr(now,21)  
+eventLog{eventNum}.eventName ={'changeStimDuration'};
+eventLog{eventNum}.subject ={'296', '304', '305', '306'}; % all female now.  all male soon...
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='both targetOnOff and flankerOnOff from [1 10] to [1 21], will apply to all future rats'; 
+eventLog{eventNum}.details.from = {[1 10]}; 
+eventLog{eventNum}.details.to   = {[1 21]};
+
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('May.05,2009');%datestr(now,21)  
+eventLog{eventNum}.eventName ={'increaseReward'};
+eventLog{eventNum}.subject ={'230','227','229','237','232','233','139','228','234','231','275','277','278','138','130'}; % all male now.
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='hard time with brief stim, BW dropping'; 
+eventLog{eventNum}.details.from = [1 1 1 1 1 0.6 1 1.5 1 1 1 1 1 1 1]; 
+eventLog{eventNum}.details.to   = [2 2 2 2 2 1.2 2 2   2 2 2 2 2 2 2]; 
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('May.05,2009');%datestr(now,21)  
+eventLog{eventNum}.eventName ={'changeStimDuration'};
+eventLog{eventNum}.subject ={'230','227','229','237','232','233','139','228','234','231','275','277','278','138','130'}; % all male now.
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='both targetOnOff and flankerOnOff from [1 10] to [1 21], will apply to all future rats'; 
+eventLog{eventNum}.details.from = {[1 10]}; 
+eventLog{eventNum}.details.to   = {[1 21]};
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('May.05,2009');%datestr(now,21)  
+eventLog{eventNum}.eventName ={'reduceCTs'};
+eventLog{eventNum}.subject ={'275','277','130'}; 
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='these guys exploit CTs some, 130 is on a cockpit'; 
+eventLog{eventNum}.details.from = [.25  .5  .5]; 
+eventLog{eventNum}.details.to   = [.10 .10 .25];
+
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('May.11,2009');%datestr(now,21)  
+eventLog{eventNum}.eventName ={'manualStepChange'};
+eventLog{eventNum}.subject ={'138','139','228','232','233','231','234','278'}; 
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='done collecting sweep (13=distance, 11=confirm, 14=or, 12=target contrast), moving to confirm effect 200 msec'; 
+eventLog{eventNum}.details.from = [13 13 13 13 13 14 14 11]; %278 was oddly listed at 12 in miniDB,even though all records say he was 11, i want him to be 12 now for testing
+eventLog{eventNum}.details.to   = [11 11 11 11 11 12 12 12];
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('May.11,2009');%datestr(now,21)  
+eventLog{eventNum}.eventName ={'protocolChange'};
+eventLog{eventNum}.subject ={'231','234','278'}; 
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='starting colinear only; for the target sweep'; 
+eventLog{eventNum}.details.from = {'2_3','2_3','2_3'}; 
+eventLog{eventNum}.details.to   = {'2_3reduced','2_3reduced','2_3reduced'}; 
 

@@ -1,20 +1,25 @@
 
 function [performances colors]=calculateSmoothedPerformances(correct,windowSizes,smoothingMethod,colorMethod)
 %returns local calculation of probability correct for a range of window sizes
-%current smoothingMethod is 'boxcar' or 'symetricBoxcar'
-%current colorMethod is 'BWpowerlaw'
+%current smoothingMethod is default 'boxcar' or 'symetricBoxcar'
+%current colorMethod is 'BWpowerlaw' 
 %06xxxx edf written
 %070216 pmm turned into a util
 %080526 pmm changed default boxcar filter to be historical rather than symetric
+%090430 pmm added some defaults
 
-if ismember(smoothingMethod,{'boxcar','symetricBoxcar'}) & strcmp(colorMethod,'powerlawBW')
-    %continue
-else
-    smoothingMethod
-    colorMethod
-    error('Bad smoothing or color method. others not defined yet')
+
+if ~exist('smoothingMethod','var') || isempty(smoothingMethod)
+    smoothingMethod='boxcar';
 end
 
+if ~exist('colorMethod','var') || isempty(colorMethod)
+    colorMethod='powerlawBW';
+end
+
+if ~any(ismember(smoothingMethod,{'boxcar','symetricBoxcar'})) | ~strcmp(colorMethod,{'powerlawBW'})
+    error('Bad smoothing or color method. others not defined yet')
+end
 
 switch smoothingMethod
     case 'boxcar'

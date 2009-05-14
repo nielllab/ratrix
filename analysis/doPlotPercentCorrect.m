@@ -118,13 +118,25 @@ if addSteps
     end
 
     %only some have this
-    if any(strcmp(fields(d),'currentShapedValue')) && ~all(isnan(d.currentShapedValue))
+    haveShapedValue=any(strcmp(fields(d),'currentShapedValue')) && ~all(isnan(d.currentShapedValue));
+    haveBlocks=any(strcmp(fields(d),'blockID')) && ~all(isnan(d.blockID));
+    
+    if haveShapedValue && haveBlocks
+        error('shouldn''t have both blocks and shaping at the same time!')
+    end
+    
+    if haveShapedValue || haveBlocks
         %add on parameter using currentShapedValue
         blockHeight=stepHeight;
         blockYCenter=stepYCenter+stepHeight;
         blockYBottom=stepYBottom+stepHeight;
+        
+        if haveShapedValue
+            sVals=d.currentShapedValue;
+        elseif haveBlocks
+            sVals=d.blockID;
+        end
 
-        sVals=d.currentShapedValue;
         %this determines all the starting and ending points for continuous parameter values ignoring nans in the begining middle or end
         sValStart=find([0 (diff(sVals)~=0)] & ~isnan(sVals));
         sValEnd=find([(diff(sVals)~=0) 0] & ~isnan(sVals));
@@ -172,6 +184,21 @@ end
 plot(find(which),performanceOnGood,'color',[0,0,0], 'linewidth', 2)
 performanceOutput=performanceOnGood;
 
+if haveBlocks    
+    plot(find(which),performanceOnGood,'color',[.8,.8,.8], 'linewidth', 2);  %grey out all
+    
+    %then plot each block indpendantly (only averages within block avoids transitions due to block difficulty change)
+    for i=1:length(sValStart)
+        thisBlock=which;
+        thisBlock(1:sValStart(i)-1)=0;  % only do the ones in this block; remove w/ logical filter
+        thisBlock(sValEnd(i)+1:end)=0;  % same for after
+        [thisBlockPerformance]=calculateSmoothedPerformances(d.correct(thisBlock)',smoothingWidth,'boxcar','powerlawBW');
+        plot(find(thisBlock),thisBlockPerformance,'color',[0,0,0], 'linewidth', 2)  
+    end
+    %performanceOutput=nans(1,sum(which)); Init, not used
+    %performanceOutput=[]; % blocks never needed... could calculate it in principle
+end
+
 %add on day transitions
 if dayTransitionsOn
     [trialsPerDay]=makeDailyRaster(d.correct,d.date);  %in terms of ALL trials correction and kills, RETURN trialsPerDay
@@ -181,7 +208,7 @@ if dayTransitionsOn
     end
 end
 
-% add on threshold
+% add on thresholdd
 plot([0,totalTrials], [threshold,threshold],'color',[.8,.8,.8])
 
 

@@ -140,7 +140,7 @@ timeWindowFrames=ceil(timeWindowMs*(refreshRate/1000));
 
 
 %figure out which spikes to use based on eyeData
-if ~isempty(eyeData)
+if ~isempty(eyeData) & 0
     [px py crx cry eyeTime]=getPxyCRxy(eyeData);
     eyeSig=[crx-px cry-py];
 

@@ -23,9 +23,6 @@ subjects={'228', '227','138','139','230','233','234'}; %left and right, removed 
 subjects={'228', '227','230','233','234','139','138'};%sorted for amount of data
 labeledNames={'r7','r6','r5','r4','r3','r2','r1'};
 filter{1}.type='9.4';
-filter{2}.type='responseSpeedPercentile';
-filter{2}.parameters.range=[0 .5];%whats justified?
-filter{2}=[];
 [stats CI names params]=getFlankerStats(subjects,'8flanks+',{'pctCorrect','CRs','hits','dprimeMCMC','yes'},filter)
 
 %%
@@ -159,30 +156,32 @@ ylabel('count')
 
 subjects={'231','234'};%,[now-1 now]); % 231','234','274 % orientationSweep;  '274' removed b/c bad performance
 filter{1}.type='14';
-[stats CI names params]=getFlankerStats(subjects,'allRelativeTFOrientationMag',{'hits','CRs','yes','pctCorrect'},filter,[1 now]);
-[stats CI names params]=getFlankerStats(subjects,'allRelativeTFOrientationMag',{'hits','CRs','yes','pctCorrect','criterionMCMC','biasMCMC','dprimeMCMC'},filter,[1 now]);
+dateRange=[1 pmmEvent('endToggle')];
+%dateRange=[pmmEvent('endToggle') now];
+[stats CI names params]=getFlankerStats(subjects,'allRelativeTFOrientationMag',{'hits','CRs','yes','pctCorrect'},filter,dateRange);
+%[stats CI names params]=getFlankerStats(subjects,'allRelativeTFOrientationMag',{'hits','CRs','yes','pctCorrect','criterionMCMC','biasMCMC','dprimeMCMC'},filter,dateRange);
 params.colors=[1 0 0; .9 .2 .8; .7 .4 .9; 0 1 1; 0 .2 .8];
 values = cellfun(@(x) str2num(x), names.conditions);
 
 %%
-figure(1)
+figure(2)
 w=3; w=2;
 for i=1:length(subjects)
-    %    subplot(length(subjects),w,(i-1)*w+1); hold on
-    %    statInd=find(strcmp('pctCorrect',names.stats));
-    %    plot([-10 100],[.5 .5],'k--');
-    %    plot(values,stats(i,:,statInd),'k');
-    %    for j=1:length(values)
-    %        eb=plot([values(j) values(j)],[CI(i,j,statInd,1) CI(i,j,statInd,2)],'color',params.colors(j,:),'LineWidth',2);
-    %    end
-    %    axis([-5 95 .45 .7]);
-    %    set(gca,'xTick',[0 30 90])
-    %    set(gca,'xTickLabel',[0 30 90])
-    %    set(gca,'yTick',[.5 .6 .7])
-    %    set(gca,'yTickLabel',[.5 .6 .7])
-    %    xlabel('flanker orientation')
-    %    ylabel('p(correct)')
-    %    axis square
+       subplot(length(subjects),w,(i-1)*w+2); hold on
+       statInd=find(strcmp('pctCorrect',names.stats));
+       plot([-10 100],[.5 .5],'k--');
+       plot(values,stats(i,:,statInd),'k');
+       for j=1:length(values)
+           eb=plot([values(j) values(j)],[CI(i,j,statInd,1) CI(i,j,statInd,2)],'color',params.colors(j,:),'LineWidth',2);
+       end
+       axis([-5 95 .45 .7]);
+       set(gca,'xTick',[0 30 90])
+       set(gca,'xTickLabel',[0 30 90])
+       set(gca,'yTick',[.5 .6 .7])
+       set(gca,'yTickLabel',[.5 .6 .7])
+       xlabel('flanker orientation')
+       ylabel('p(correct)')
+       axis square
     
     subplot(length(subjects),w,(i-1)*w+1);  hold on
     statInd=find(strcmp('yes',names.stats));
@@ -219,20 +218,20 @@ for i=1:length(subjects)
     %    axis square
     %
     
-    subplot(length(subjects),w,(i-1)*w+2);  hold on
-    statInd=find(strcmp('criterionMCMC',names.stats));
-    plot(values,-stats(i,:,statInd),'k');
-    for j=1:length(values)
-        eb=plot([values(j) values(j)],-[CI(i,j,statInd,1) CI(i,j,statInd,2)],'color',params.colors(j,:),'LineWidth',2);
-    end
-    axis([-5 95 -1.5 .5]); %axis([-5 95 -.5 1.5]);
-    set(gca,'xTick',[0 30 90])
-    set(gca,'xTickLabel',[0 30 90])
-    set(gca,'yTick',[-1 -.5 0])
-    set(gca,'yTickLabel',[-1 .5 0])
-    xlabel('flanker orientation')
-    ylabel('-criterion')
-    axis square
+%     subplot(length(subjects),w,(i-1)*w+2);  hold on
+%     statInd=find(strcmp('criterionMCMC',names.stats));
+%     plot(values,-stats(i,:,statInd),'k');
+%     for j=1:length(values)
+%         eb=plot([values(j) values(j)],-[CI(i,j,statInd,1) CI(i,j,statInd,2)],'color',params.colors(j,:),'LineWidth',2);
+%     end
+%     axis([-5 95 -1.5 .5]); %axis([-5 95 -.5 1.5]);
+%     set(gca,'xTick',[0 30 90])
+%     set(gca,'xTickLabel',[0 30 90])
+%     set(gca,'yTick',[-1 -.5 0])
+%     set(gca,'yTickLabel',[-1 .5 0])
+%     xlabel('flanker orientation')
+%     ylabel('-criterion')
+%     axis square
 end
 settings.turnOffLines=1;
 cleanUpFigure(gcf,settings)
@@ -248,9 +247,6 @@ subjects={'232','233','138','228','139'};%
 
 
 filter{1}.type='13';
-filter{2}.type='responseSpeedPercentile';
-filter{2}.parameters.range=[0 .9];%whats justified?
-filter{2}=[]; %remove it
 [stats CI names params]=getFlankerStats(subjects,'allDevs',{'hits','CRs','yes','pctCorrect'},filter,[1 now]);
 values = cellfun(@(x) str2num(x(5:end)), names.conditions);
 arrows=[];
@@ -259,19 +255,13 @@ curveAndBias=1;
 %% alternate setup
 % compare colinear to popout
 subjects={'232','138'};%
-subjects={'232','233','138','228','139'};%
-%subjects={'232'};%
+subjects={'232','233','228','139','138'};% 
+%subjects={'232','233','139'}; % 138,228 not very good..
+subjects={'232'};
 last139problemDate=datenum('Nov.15,2008');
-%Nov.15,2008=datestr(ceil(d.date(max(find(d.targetContrast==1)))),22)
-%Mar.16,2008=datestr(ceil(d.date(max(find(d.targetContrast>0 &
-%d.targetContrast<.7)))),22)
-endToggleDate=datenum('Apr.13,2009');
-dateRange=[endToggleDate now];
+dateRange=[pmmEvent('endToggle') now];
 %subjects={'232'};%
 filter{1}.type='13';
-filter{2}.type='responseSpeedPercentile';
-filter{2}.parameters.range=[0 0.7];%whats justified?
-filter{2}=[]; %remove it
 [stats CI names params]=getFlankerStats(subjects,'colin+1&devs',{'hits','CRs','yes','pctCorrect'},filter,dateRange);
 values = cellfun(@(x) str2num(x(5:end)), names.conditions);
 small=0.1; values=values+repmat([-1 1]*small,1,4);  %offset for viewing
@@ -279,8 +269,8 @@ small=0.1; values=values+repmat([-1 1]*small,1,4);  %offset for viewing
 %moving the other half off the visible plot
 %values([3 4 7 8 11 12 15 16])=-1; %hack to cut off some kinds
 arrows={'l-l 2.50','--- 2.50',1; 'l-l 3.00','--- 3.00',3;'l-l 3.50','--- 3.50',3;'l-l 5.00','--- 5.00',3};
-curveAndBias=0;
-[delta CId deltas CIs]=viewFlankerComparison(names,params,[],{'yes'},[],[-10 10],[],[],false,false,true)
+curveAndBias=0
+[delta CId deltas CIs]=viewFlankerComparison(names,params,[],{'pctCorrect'},[],[-10 10],[],[],false,false,true)
 figure; doHitFAScatter(stats,CI,names,params,subjects,[],0,curveAndBias,curveAndBias,0,0,3,arrows);
 %%
 figure(4)
@@ -390,17 +380,14 @@ title('the other four rats')
 %     xlabel(subjects{i})
 % end
 
-%% make some plots on population performance - noFlank condition
+%% noFlank condition make some plots on population performance
 
 subjects={'228','227','230','233','234','138','139'};%sorted for amount of removed b/c  nfBlock problems= {'138','139',}
 %subjects= {'138'}%,'139'}
 labeledNames={'r7','r6','r5','r4','r3','r2','r1'};
-filter{1}.type='9.4range'; % use range to include noFm
-filter{2}.type='responseSpeedPercentile';
-filter{2}.parameters.range=[0 .5];%whats justified?
-filter{2}=[];
+filter{1}.type='9.4.1+nf'; % use range to include noFm
 %last139problemDate=datenum('Nov.15,2008');
-dateRange=[0 now];
+dateRange=[0 pmmEvent('endToggle')];
 [stats CI names params]=getFlankerStats(subjects,'8flanks+&nfMix&nfBlock',{'pctCorrect','CRs','hits','dpr','yes'},filter,dateRange)
 
 %%
@@ -483,3 +470,55 @@ elseif 1 %show many subjects
     set(gca,'yTick',ylab)
     set(gca,'yTickLabel',ylab)
 end
+
+%% check hitVs FA
+
+doCurve=false;  %doCurve([2],[1 2])=1;
+%[stats CI names params]=getFlankerStats({'231'},'allRelativeTFOrientationMag',{'hits','CRs'},'14',[1 now]);
+figure; doHitFAScatter(stats,CI,names,params,subjects);
+
+
+
+%% dimmer
+subjects={'228', '227','230','233','234','139','138'};% sorted for amount of data
+
+filter{1}.type='9.4';
+% filter{2}.type='responseSpeedPercentile';
+% filter{2}.parameters.range=[0 .7];%whats justified?
+dateRange=[0 pmmEvent('endToggle')];
+[stats CI names params]=getFlankerStats(subjects,'8flanks+',{'pctCorrect','CRs','hits','yes'},filter,dateRange)
+
+subjects={'237','229','227','230'}; % constant test
+filter{1}.type='11';
+% filter{2}.type='performancePercentile';
+% filter{2}.parameters.goodType='withoutAfterError';
+% filter{2}.parameters.whichCondition={'noFlank',1}
+% filter{2}.parameters.performanceMethod='pCorrect';
+% filter{2}.parameters.performanceParameters={[.25 1],'boxcar',100}
+
+              
+[stats2 CI2 names2 params2]=getFlankerStats(subjects,'8flanks+',{'pctCorrect','CRs','hits','yes'},filter,dateRange)
+%%
+arrows={'changeFlank','colin',1};
+figure; doHitFAScatter(stats2,CI2,names2,params2,[],{'changeFlank','colin'},0,0,0,0,0,3,arrows);
+figure; doHitFAScatter(stats,CI,names,params,[],{'changeFlank','colin'},0,0,0,0,0,3,arrows);
+%%
+close all
+nBins=7;  %try 7, 18, 10, 20
+subplot(2,1,1)
+cMatrix={[find(ismember(names.conditions,{'colin'}))], [find(ismember(names.conditions,{'changeFlank'}))]}
+labeledNames={'r7','r6','r5','r4','r3','r2','r1'};
+viewFlankerComparison(names,params, cMatrix,{'pctCorrect'},[],[-5:10/nBins:5],[],false,false,labeledNames)
+title('colinear - popout1')
+ylabel('count')
+ 
+
+subplot(2,1,2)
+labeledNames={'r9','r8','r6','r5'};
+viewFlankerComparison(names2,params2, cMatrix,{'pctCorrect'},[],[-5:10/nBins:5],[],false,false,labeledNames)
+
+%%
+
+
+
+

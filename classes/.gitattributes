@@ -215,3 +215,4 @@ db/@dbConn/updateCLUT.m -text
 @datanet/getTimeFromClient.m -text
 @datanet/startClientTrials.m -text
 @datanet/connectToClient.m -text
+protocols/trialManagers/@autopilot/updateTrialState.m -text

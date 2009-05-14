@@ -387,11 +387,12 @@ for i=1:length(ids)
                     LUTparams=[];
                     LUTparams.lastIndex=length(compiledLUT);
                     LUTparams.compiledLUT=compiledLUT;
-                    [newRecs newLUT]=extractDetailFields(classes{2,c},colsFromAllFields(newBasicRecs,colInds),tr(thisTsInds),LUTparams);
+                    [newRecs compiledLUT]=extractDetailFields(classes{2,c},colsFromAllFields(newBasicRecs,colInds),tr(thisTsInds),LUTparams);
                     % if extractDetailFields returns a stim-specific LUT, add it to our main compiledLUT
-                    if ~isempty(newLUT)
-                        compiledLUT = [compiledLUT newLUT];
-                    end
+                    % 5/14/09 - this already happens b/c we pass in the compiledLUT to extractDetailFields!
+%                     if ~isempty(newLUT)
+%                         compiledLUT = [compiledLUT newLUT];
+%                     end
 
 
 
@@ -533,6 +534,28 @@ else
     a
     b
     error('a and b have to both be scalar struct')
+end
+
+end
+
+
+function recsToUpdate=getIntersectingFields(fieldsInLUT,recs)
+recsToUpdate={};
+for i=1:length(fieldsInLUT)
+    pathToThisField = regexp(fieldsInLUT{i},'\.','split');
+    thisField=recs;
+    canAdd=true;
+    for nn=1:length(pathToThisField)
+        if isfield(thisField,pathToThisField{nn})      
+            thisField=thisField.(pathToThisField{nn});
+        else
+            canAdd=false;
+            break;
+        end
+    end
+    if canAdd
+        recsToUpdate{end+1}=fieldsInLUT{i};
+    end
 end
 
 end

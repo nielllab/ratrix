@@ -159,7 +159,7 @@ discrimStim=[];
 discrimStim.stimulus=stim;
 discrimStim.stimType=type;
 discrimStim.scaleFactor=scaleFactor;
-discrimStim.startFrame=1;
+discrimStim.startFrame=0;
 discrimStim.stochasticDistribution=[];
 discrimStim.framesUntilTimeout=timeout;
 
@@ -167,7 +167,7 @@ preOnsetStim=[];
 preOnsetStim.stimulus=interTrialLuminance;
 preOnsetStim.stimType='loop';
 preOnsetStim.scaleFactor=0;
-preOnsetStim.startFrame=1;
+preOnsetStim.startFrame=0;
 preOnsetStim.stochasticDistribution=[];
 preOnsetStim.punishResponses=false;
 

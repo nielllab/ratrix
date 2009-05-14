@@ -1,5 +1,5 @@
 function [out newLUT]=extractDetailFields(sm,basicRecords,trialRecords,LUTparams)
-newLUT={};
+newLUT=LUTparams.compiledLUT;
 
 try
     stimDetails=[trialRecords.stimDetails];

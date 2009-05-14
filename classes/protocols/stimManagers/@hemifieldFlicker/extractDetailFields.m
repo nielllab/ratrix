@@ -1,7 +1,7 @@
 function [out newLUT]=extractDetailFields(sm,basicRecords,trialRecords,LUTparams)
 
 
-newLUT={};
+newLUT=LUTparams.compiledLUT;
 if ~all(strcmp({trialRecords.trialManagerClass},'nAFC'))
     warning('only works for nAFC trial manager')
     out=struct;

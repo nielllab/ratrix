@@ -11,7 +11,7 @@ if ~all(strcmp({trialRecords.trialManagerClass},'nAFC'))
     error('only works for nAFC trial manager')
 end
 
-newLUT={};
+newLUT=LUTparams.compiledLUT;
 
 try
     stimDetails=[trialRecords.stimDetails];

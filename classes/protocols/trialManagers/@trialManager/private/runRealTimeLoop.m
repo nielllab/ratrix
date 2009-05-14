@@ -429,8 +429,10 @@ while ~done && ~quit;
 
         % =========================================================================
 
+        framesInPhase = 0;
         if ~isempty(getStartFrame(spec))
             i=getStartFrame(spec);
+            framesInPhase=i;
         end
 
         if ischar(strategy) && strcmp(strategy,'cache')
@@ -447,7 +449,6 @@ while ~done && ~quit;
 
         % we might need to do if isempty(framesUntilTransition) && strategy is 'cache', then set a framesUntilTransition==size(stim,3)
 
-        framesInPhase = 0;
         isFinalPhase = getIsFinalPhase(spec);
         stochasticDistribution = getStochasticDistribution(spec);
 

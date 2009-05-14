@@ -1,5 +1,5 @@
 function [out newLUT]=extractDetailFields(sm,basicRecords,trialRecords,LUTparams)
-newLUT={};
+newLUT=LUTparams.compiledLUT;
 
 nAFCindex = find(strcmp(LUTparams.compiledLUT,'nAFC'));
 if ~isempty(nAFCindex) && ~all([basicRecords.trialManagerClass]==nAFCindex)

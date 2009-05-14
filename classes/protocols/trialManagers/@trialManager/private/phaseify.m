@@ -3,6 +3,8 @@ function [stimSpecs startingStimSpecInd] = phaseify(trialManager,stim,type,...
 % this method takes the output from calcStim of a non-phased stim manager, and converts it to stimSpecs according to the trialManager class
 % output is cell arrays of stimSpecs
 
+error('obsolete - use createStimSpecsFromParams instead!');
+
 stimulusOnsetCriterion=[];
 startingStimSpecInd=1; % which phase to start with (passed to stimOGL->runRealTimeLoop)
 % this allows us to have an optional 'waiting for request' phase in nAFC and not mess up sound handling

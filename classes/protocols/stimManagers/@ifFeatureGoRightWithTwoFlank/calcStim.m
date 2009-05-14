@@ -416,7 +416,7 @@ switch details.renderMode
                  discrimStim.stimulus=details;
                  discrimStim.stimType=type;
                  discrimStim.scaleFactor=scaleFactor;
-                 discrimStim.startFrame=1;
+                 discrimStim.startFrame=0;
                  discrimStim.stochasticDistribution=[];
                  discrimStim.framesUntilTimeout=timeout;
 
@@ -424,7 +424,7 @@ switch details.renderMode
                  preOnsetStim.stimulus=interTrialLuminance;
                  preOnsetStim.stimType='loop';
                  preOnsetStim.scaleFactor=0;
-                 preOnsetStim.startFrame=1;
+                 preOnsetStim.startFrame=0;
                  preOnsetStim.stochasticDistribution=[];
                  preOnsetStim.punishResponses=false;
 
@@ -535,14 +535,14 @@ switch details.renderMode
         discrimStim.stimulus=out;
         discrimStim.stimType=type;
         discrimStim.scaleFactor=scaleFactor;
-        discrimStim.startFrame=1;
+        discrimStim.startFrame=0;
         discrimStim.stochasticDistribution=[];
 
         preOnsetStim=[];
         preOnsetStim.stimulus=interTrialLuminance;
         preOnsetStim.stimType='loop';
         preOnsetStim.scaleFactor=0;
-        preOnsetStim.startFrame=1;
+        preOnsetStim.startFrame=0;
         preOnsetStim.stochasticDistribution=[];
         preOnsetStim.punishResponses=false;
 

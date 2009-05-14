@@ -6,7 +6,7 @@ function [out newLUT]=extractDetailFields(sm,basicRecords,trialRecords,LUTparams
 %   basicRecords.trialManagerClass=1;
 %   x=extractDetailFields(ifFeatureGoRightWithTwoFlank,basicRecords,trialRecords,LUTparams)
 
-newLUT={};
+newLUT=LUTparams.compiledLUT;
 
 nAFCindex = find(strcmp(LUTparams.compiledLUT,'nAFC'));
 if ~isempty(nAFCindex) && ~all([basicRecords.trialManagerClass]==nAFCindex)

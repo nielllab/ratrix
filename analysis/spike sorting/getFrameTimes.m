@@ -1,6 +1,7 @@
 function [frameIndices frameTimes frameLengths correctedFrameIndices correctedFrameTimes correctedFrameLengths stimInds ...
     passedQualityTest] = ...
     getFrameTimes(pulseData, pulseDataTimes, sampleRate, warningBound, errorBound, ifi)
+
 % calculate pulses and frameTimes based on pulseData
 % frameIndices - the exact sample index for each pulse
 % frameTimes - the time value retrieved from the index of a corresponding pulse (not unique!)
@@ -63,7 +64,7 @@ end
 % ==================================
 correctedFrameTimes=frameTimes;
 correctedFrameIndices=frameIndices; % default values are same as uncorrected; correct only those values that need it
-stimInds=1:size(frameIndices,1);
+stimInds=[1:size(frameIndices,1)]';
 % for i=1:length(frameTimes) % indexes frameTimes
 %     if mod(i,100)==0
 %         disp(sprintf('doing frame: %d/%d, %2.2g%%',i, length(frameTimes),100*i/length(frameTimes)))
@@ -117,7 +118,7 @@ for i=whichDrop %are more than ifi, then must be missed frame
     toAdd(:,1)=ceil(addVec(1:end-1));
     toAdd(:,2)=floor(addVec(2:end));
     addedFrameIndices=[addedFrameIndices;toAdd];
-    addedStimInds=[addedStimInds ones(1,size(toAdd,1))*i];
+    addedStimInds=[addedStimInds;ones(size(toAdd,1),1)*i];
 end
 
 % ==================================
@@ -130,7 +131,7 @@ if all(size(addedFrameTimes)==[2 1])
     addedFrameTimes=addedFrameTimes';
 end
 correctedFrameTimes=sort([correctedFrameTimes;addedFrameTimes]);
-stimInds=sort([stimInds addedStimInds]);
+stimInds=sort([stimInds;addedStimInds]);
 
 % error checking
 % frameLengths = diff(frameIndices(:,1),1);

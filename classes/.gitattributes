@@ -95,7 +95,6 @@ protocols/stimManagers/@filteredNoise/decache.m -text
 @datanet/connectToDataListener.m -text
 @datanet/setStorePath.m -text
 @datanet/datanet.m -text
-@datanet/waitForCommandsAndSendAck.m -text
 @datanet/runDataListener.m -text
 @datanet/getCon.m -text
 @datanet/getTrialData.m -text
@@ -207,3 +206,12 @@ protocols/delayManagers/@hazard/hazard.m -text
 protocols/delayManagers/@hazard/calcAutoRequest.m -text
 db/@dbConn/getCLUT.m -text
 db/@dbConn/updateCLUT.m -text
+@datanet/bootstrap.m -text
+@datanet/clientHandleCommand.m -text
+@datanet/handleCommands.m -text
+@datanet/stopClientTrials.m -text
+@datanet/serverHandleCommand.m -text
+@datanet/setCon.m -text
+@datanet/getTimeFromClient.m -text
+@datanet/startClientTrials.m -text
+@datanet/connectToClient.m -text

@@ -2,14 +2,14 @@ function [spikes spikeWaveforms spikeTimestamps assignedClusters rankedClusters 
     getSpikesFromNeuralData(neuralData,neuralDataTimes,spikeDetectionParams,spikeSortingParams,analysisPath)
 % Get spikes using some spike detection method - plugin to Osort, WaveClus, KlustaKwik
 % Outputs:
-%   spikes - a logical vector of length n, where n=number of neuralData samples, and 1=a spike occurred here
-%   spikeWaveforms - a maitrx containing a 4x32 waveform for each spike
+%   spikes - a vector of indices into neuralData that indicate where a spike happened
+%   spikeWaveforms - a matrix containing a 4x32 waveform for each spike
 %   spikeTimestamps - timestamp of each spike
 %   assignedClusters - which cluster each spike belongs to
 %   rankedClusters - some ranking of the clusters - we will specify that by convention, the last element of this array is the "noise" cluster
 %   photoDiode - unused for now....
 
-photoDiode=[];
+photoDiode=0;
 spikes=[];
 
 
@@ -134,8 +134,121 @@ switch upper(spikeDetectionMethod)
         [rawMean, filteredSignal, rawTraceSpikes,spikeWaveforms, spikeTimestampIndices, runStd2, upperlim, noiseTraces] = ...
             extractSpikes(neuralData, Hd, spikeDetectionParams );
         spikeTimestamps = neuralDataTimes(spikeTimestampIndices);
-        spikes=zeros(length(neuralDataTimes),1);
-        spikes(spikeTimestampIndices)=1;
+        spikes=spikeTimestampIndices';
+        
+    case 'FILTEREDTHRESH'
+%         spikeDetectionParams.method = 'filteredThresh'
+%         spikeDetectionParams.freqLowHi = [200 10000];
+%         spikeDetectionParams.threshHoldVolts = [-1.2 Inf];
+%         spikeDetectionParams.waveformWindowMs= 1.5;
+%         spikeDetectionParams.peakWindowMs= 0.5;
+%         spikeDetectionParams.alignMethod = 'atPeak'; %atCrossing
+%         spikeDetectionParams.peakAlignment = 'filtered' % 'raw'
+%         spikeDetectionParams.returnedSpikes = 'filtered' % 'raw'
+%         spikeDetectionParams.maxDbUnMasked = [-1.2 Inf];
+        if ~isfield(spikeDetectionParams, 'samplingFreq')
+            error('samplingFreq must be a field in spikeDetectionParams');
+        end
+        if ~isfield(spikeDetectionParams, 'freqLowHi')
+            spikeDetectionParams.freqLowHi=[200 10000];
+            warning('freqLowHi not defined - using default value of [200 10000]');
+        end
+        if ~isfield(spikeDetectionParams, 'thresholdVolts')
+            spikeDetectionParams.thresholdVolts = [-1.2 Inf];
+            warning('thresholdVolts not defined - using default value of [-1.2 Inf]');
+        end
+        if ~isfield(spikeDetectionParams, 'waveformWindowMs')
+            spikeDetectionParams.waveformWindowMs=1.5;
+            warning('waveformWindowMs not defined - using default value of 1.5');
+        end
+        if ~isfield(spikeDetectionParams, 'peakWindowMs')
+            spikeDetectionParams.peakWindowMs=0.5;
+            warning('peakWindowMs not defined - using default value of 0.5');
+        end
+        if ~isfield(spikeDetectionParams, 'alignMethod')
+            spikeDetectionParams.alignMethod='atPeak';
+            warning('alignMethod not defined - using default value of ''atPeak''');
+        end
+        if ~isfield(spikeDetectionParams, 'peakAlignment')
+            spikeDetectionParams.peakAlignment='filtered';
+            warning('peakAlignment not defined - using default value of ''filtered''');
+        end
+        if ~isfield(spikeDetectionParams, 'returnedSpikes')
+            spikeDetectionParams.returnedSpikes = 'filtered';
+            warning('returnedSpikes not defined - using default value of ''filtered''');
+        end
+        if ~isfield(spikeDetectionParams, 'maxDbUnmasked')
+            spikeDetectionParams.maxDbUnmasked=[-1.2 Inf];
+            warning('maxDbUnmasked not defined - using default value of [-1.2 Inf]');
+        end
+        % ask phil where the actual detection code is?
+        secDur=30;
+        spkDurMS=2;
+        timesV=linspace(0,secDur,secDur*spikeDetectionParams.samplingFreq);
+        dataV = interp1(neuralDataTimes,neuralData,timesV,'linear');
+        fOrd=spikeDetectionParams.samplingFreq/200; %how choose filter orders?
+        loCut=100;
+        hiCut=10000;
+        loThresh=[];
+        hiThresh=[];
+        threshHiS=[];
+        threshLoS=[];
+        maxHz=150;
+        [b,a]=fir1(fOrd,2*[loCut hiCut]/spikeDetectionParams.samplingFreq);
+        filt=filtfilt(b,a,neuralData);
+        filt=filt/max(abs(filt));
+
+        filtV = interp1(neuralDataTimes,filt,timesV,'linear');
+
+        setHz=10;
+        numSteps=50;
+         for w=[1 -1]
+            v=linspace(w,0,numSteps)';
+            dRate=5000;
+            dTimes=linspace(0,secDur,secDur*dRate);
+            dFilt=interp1(neuralDataTimes,filt,dTimes,'linear'); %without downsampling, the following line runs out of memory even for singles when > ~15s @40kHz
+            crossHz=sum(diff((w*repmat(dFilt,numSteps,1))>(w*repmat(single(v),1,length(dFilt))),1,2)>0,2)/secDur;
+            
+            if w>0
+                newMin=v(find(crossHz>maxHz,1,'first'));
+                if isempty(newMin)
+                    newMin=0;
+                end
+                hiThresh=v(find(crossHz>setHz,1,'first'));
+                if isempty(hiThresh)
+                    hiThresh=0;
+                end
+                threshHiS=hiTresh;
+            else
+                newMax=v(find(crossHz>maxHz,1,'first'));
+                if isempty(newMax)
+                    newMax=0;
+                end
+                loThresh=v(find(crossHz>setHz,1,'first'));
+                if isempty(loThresh)
+                    loThresh=0;
+                end
+                threshLoS=loTresh;
+            end
+         end
+        % below is from sortManager's drawThresh
+        loThresh=threshLoS;
+        hiThresh=threshHiS;
+        tops=[false diff(filt>hiThresh)>0];
+        topCrossings=   times(tops);
+        bottoms=[false diff(filt<loThresh)>0];
+        bottomCrossings=times(bottoms);
+
+        spkLength=round(spikeRecord.samplingFreq*spkDurMS/1000);
+        spkPts=(1:spkLength)-ceil(spkLength/2);
+
+        [tops    uTops    topTimes]   =extractPeakAligned(tops,1,spikeDetectionParams.samplingFreq,spkLength,filt,neuralData);
+        [bottoms uBottoms bottomTimes]=extractPeakAligned(bottoms,-1,spikeDetectionParams.samplingFreq,spkLength,filt,neuralData);
+
+        spikes=[topTimes;bottomTimes];
+        spikeTimestamps=neuralDataTimes(spikes);
+        spikeWaveforms=[tops;bottoms]';
+        
         
     otherwise
         error('unsupported spike detection method');
@@ -161,7 +274,7 @@ if 0
     hold off
 end
 
-% output of spike detection should be spikeTimestamps and spikeWaveforms
+% output of spike detection should be spikes (indices), spikeTimestamps, and spikeWaveforms
 % END SPIKE DETECTION
 % =====================================================================================================================
 % BEGIN SPIKE SORTING
@@ -389,7 +502,7 @@ switch upper(spikeSortingMethod)
         while 1
             tline = fgetl(fid);
             if ~ischar(tline),   break,   end
-            assignedClusters = [assignedClusters str2num(tline)];
+            assignedClusters = [assignedClusters;str2num(tline)];
         end
         % throw away first element of assignedClusters - the first line of the cluster file is the number of clusters found
         assignedClusters(1)=[];
@@ -568,3 +681,28 @@ end
 % =====================================================================================================================
 
 end % end function
+
+
+function [group uGroup groupPts]=extractPeakAligned(group,flip,sampRate,spkLength,filt,data)
+maxMSforPeakAfterThreshCrossing=.5; %this is equivalent to a lockout, because all peaks closer than this will be called one peak, so you'd miss IFI's smaller than this.
+% we should check for this by checking if we said there were multiple spikes at the same time.
+% but note this is ONLY a consequence of peak alignment!  if aligned on thresh crossings, no lockout necessary (tho high frequency noise riding on the spike can cause it
+% to cross threshold multiple times, causing you to count it multiple times w/timeshift).
+% our remaining problem is if the decaying portion of the spike has high freq noise that causes it to recross thresh and get counted again, so need to look in past to see
+% if we are on the tail of a previous spk -- but this should get clustered away anyway because there's no spike-like peak in the immediate period following the crossing.
+% ie the peak is in the past, so it's a different shape, therefore a different cluster
+
+maxPeakSamps=round(sampRate*maxMSforPeakAfterThreshCrossing/1000);
+
+group=find(group)';
+groupPts=group((group+spkLength-1)<length(filt) & group-ceil(spkLength/2)>0);
+group=data(repmat(groupPts,1,maxPeakSamps)+repmat(0:maxPeakSamps-1,length(groupPts),1)); %use (sharper) unfiltered peaks!
+
+[junk loc]=max(flip*group,[],2);
+groupPts=((loc-1)+groupPts);
+groupPts=groupPts((groupPts+floor(spkLength/2))<length(filt));
+
+group= filt(repmat(groupPts,1,spkLength)+repmat(spkPts,length(groupPts),1));
+uGroup=data(repmat(groupPts,1,spkLength)+repmat(spkPts,length(groupPts),1));
+uGroup=uGroup-repmat(mean(uGroup,2),1,spkLength);
+end

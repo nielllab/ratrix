@@ -45,17 +45,12 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
             end
             %some calibration requires GUi's &  must happen before PTB
 
-            % 10/17/08 - start datanet (for neural data recording)
-            % ==========================================================================
+            % 4/6/09 - most of the datanet setup is now done by bootstrap(datanet)
             if ~isempty(s.datanet) && isa(s.datanet,'datanet')
-                params = Screen('Resolution', s.screenNum);
-                parameters = [];
-                parameters.refreshRate = params.hz;
-                parameters.subjectID = getID(subject);
-                s.datanet=setup(s.datanet,parameters);
+                % send ack of START_TRIALS_CMD
+                constants=getConstants(s.datanet);
+                pnet(getCon(s.datanet),'write',constants.stimToDataResponses.S_TRIALS_STARTED);
             end
-            % 10/29/08 - send a command to data listener to store local
-            % variables (resolution, refreshRate)
             
             try
                 if strcmp(s.rewardMethod,'localPump')
@@ -143,24 +138,17 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
 
                 s=stopPTB(s);
             catch ex
-                disp(['CAUGHT ER: ' getReport(ex)]);
-                if ~isempty(s.datanet) && isa(s.datanet,'datanet')
-                    pnet('closeall');
-                    s.datanet=cleanup(s.datanet);
-                end
+                disp(['CAUGHT ER (at doTrials): ' getReport(ex)]);
+%                 if ~isempty(s.datanet) && isa(s.datanet,'datanet')
+%                     pnet('closeall');
+%                     s.datanet=cleanup(s.datanet);
+%                 end
                 rethrow(ex);
             end
 
             if ~isempty(s.eyeTracker)
                 s.eyeTracker=stop(s.eyeTracker);
             end
-
-            % 10/17/08 - stop datanet
-            % ==========================================================================
-            if ~isempty(s.datanet) && isa(s.datanet,'datanet')
-                s.datanet = stop(s.datanet);
-            end
-            % ==========================================================================
 
             if strcmp(s.rewardMethod,'localPump')
                 if s.localPumpInited

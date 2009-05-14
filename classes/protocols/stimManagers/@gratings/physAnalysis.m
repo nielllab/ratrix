@@ -1,34 +1,34 @@
-function [analysisdata] = physAnalysis(stimManager,spikeData,stimulusDetails,plotParameters,parameters,analysisdata,eyeData)
+function [analysisdata cumulativedata] = physAnalysis(stimManager,spikeRecord,stimulusDetails,plotParameters,parameters,cumulativedata,eyeData)
 % stimManager is the stimulus manager
 % spikes is a logical vector of size (number of neural data samples), where 1 represents a spike happening
-% frameIndices is an nx2 array of frame start and stop indices - [start stop], n = number of frames
+% correctedFrameIndices is an nx2 array of frame start and stop indices - [start stop], n = number of frames
 % stimulusDetails are the stimDetails from calcStim (hopefully they contain
 % all the information needed to reconstruct stimData)
 % plotParameters - currently not used
 
 
 %CHOOSE CLUSTER
-spikes=spikeData.spikes; %all waveforms
+spikes=spikeRecord.spikes; %all waveforms
 waveInds=find(spikes); % location of all waveforms
-if isstruct(spikeData.spikeDetails) && ismember({'processedClusters'},fields(spikeData.spikeDetails)) 
-    thisCluster=spikeData.spikeDetails.processedClusters==1;
+if isstruct(spikeRecord.spikeDetails) && ismember({'processedClusters'},fields(spikeRecord.spikeDetails)) 
+    thisCluster=spikeRecord.spikeDetails.processedClusters==1;
 else
     thisCluster=logical(ones(size(waveInds)));
     %use all (photodiode uses this)
 end
 spikes(waveInds(~thisCluster))=0; % set all the non-spike waveforms to be zero;
-%spikes(waveInds(spikeData.assignedClusters~=1))=0; this should select the noise only!  just for testing
+%spikes(waveInds(spikeRecord.assignedClusters~=1))=0; this should select the noise only!  just for testing
 
 %SET UP RELATION stimInd <--> frameInd
-numStimFrames=max(spikeData.stimIndices);
+numStimFrames=max(spikeRecord.stimInds);
 analyzeDrops=true;
 if analyzeDrops
-    stimFrames=spikeData.stimIndices;
-    frameIndices=spikeData.frameIndices;
+    stimFrames=spikeRecord.stimInds;
+    correctedFrameIndices=spikeRecord.correctedFrameIndices;
 else
     stimFrames=1:numStimFrames;
-    firstFramePerStimInd=~[0 diff(spikeData.stimIndices)==0];
-    frameIndices=spikeData.frameIndices(firstFramePerStimInd);
+    firstFramePerStimInd=~[0 diff(spikeRecord.stimInds)==0];
+    correctedFrameIndices=spikeRecord.correctedFrameIndices(firstFramePerStimInd);
 end
 
 
@@ -77,7 +77,7 @@ else
 end
 
 %empirically
-samplingRate=round(diff(minmax(find(spikeData.spikes)'))/ diff(spikeData.spikeTimestamps([1 end])));
+samplingRate=round(diff(minmax(find(spikeRecord.spikes)'))/ diff(spikeRecord.spikeTimestamps([1 end])));
 
 % calc phase per frame, just like dynamic
 x = 2*pi./pixPerCycs(type); % adjust phase for spatial frequency, using pixel=1 which is likely offscreen if rotated
@@ -88,10 +88,10 @@ phases=mod(phases,2*pi);
 
 % count the number of spikes per frame
 % spikeCount is a 1xn vector of (number of spikes per frame), where n = number of frames
-spikeCount=zeros(1,size(frameIndices,1));
+spikeCount=zeros(1,size(correctedFrameIndices,1));
 spikeInds=find(spikes);
 for i=1:length(spikeCount) % for each frame
-    spikeCount(i)=sum(spikes(frameIndices(i,1):frameIndices(i,2)));  % inclusive?  policy: include start & stop
+    spikeCount(i)=sum(spikes(correctedFrameIndices(i,1):correctedFrameIndices(i,2)));  % inclusive?  policy: include start & stop
 end
 
 % probablity of a spike per phase
@@ -156,8 +156,8 @@ for i=1:numRepeats
                 sf=min(find(stimFrames==chunkStartFrame(chunk)));
                 ef=max(find(stimFrames==chunkEndFrame(chunk)));
                 
-                ss=frameIndices(sf,1); % start samp
-                es=frameIndices(ef,2); % end samp
+                ss=correctedFrameIndices(sf,1); % start samp
+                es=correctedFrameIndices(ef,2); % end samp
                 whichSpikes=spikeInds>=ss & spikeInds<=es;
                 
                 %durE=durations(j)/parameters.refreshRate; %expected if not frame drops
@@ -220,7 +220,7 @@ for i=1:numRepeats
                 end
                 
                 if 0 % compare pt process estimates, which seem noiser
-                    pt.times=[spikeData.spikeTimestamps(whichSpikes)];  % are times in the right format?  seconds in a range
+                    pt.times=[spikeRecord.spikeTimestamps(whichSpikes)];  % are times in the right format?  seconds in a range
                     t=[]; % should calc the time grid for the start and stop of the trial.
                     fscorr=true;   % maybe should be true so that the finit size correction for spikes is used
                     if chrParam.err(1)==2
@@ -428,8 +428,8 @@ xlabel(sweptParameter); set(gca,'XTickLabel',valNames,'XTick',[1:length(vals)]);
 ylim=get(gca,'YLim'); yvals=[ ylim(1) mean(ylim) ylim(2)];set(gca,'YTickLabel',yvals,'YTick',yvals)
 set(gca,'XLim',[1 length(vals)])
 
-meanRate=(sum(spikes))/diff(spikeData.spikeTimestamps([1 end]));
-isi=diff(spikeData.spikeTimestamps(thisCluster))*1000;
+meanRate=(sum(spikes))/diff(spikeRecord.spikeTimestamps([1 end]));
+isi=diff(spikeRecord.spikeTimestamps(thisCluster))*1000;
 N=sum(isi<parameters.ISIviolationMS); percentN=100*N/length(isi);
 %datestr(parameters.date,22)
 infoString=sprintf('subj: %s  trial: %d Hz: %d',parameters.subjectID,parameters.trialNumber,round(meanRate));
@@ -468,8 +468,8 @@ if 0
             ef=min(chunkEndFrame((i-1)*numTypes+j),numFrames); % frame end
             
             %TIME
-            %st=frameIndices(sf,1); % time start index
-            %et=frameIndices(ef,2); % time stop index
+            %st=correctedFrameIndices(sf,1); % time start index
+            %et=correctedFrameIndices(ef,2); % time stop index
             %times=find(spikes(st:et))/samplingRate;
             %times=times*pixPerCycs(j);  % hack rescaling of time, to match phases... increases "apparent" firing rate
             %plot(times,(j-1)*numRepeats+i,'.','color',colors(j,:))
@@ -505,7 +505,7 @@ analysisdata.rate=rate;
 analysisdata.sweptParameter=sweptParameter;
 analysisdata.vals=vals;
 analysisdata.spikeCount = spikeCount;
-
+cumulativedata=[];
 
 end % end function
 % ===============================================================================================

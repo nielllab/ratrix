@@ -412,3 +412,4 @@ chronux/spectral_analysis/chronux.m -text
 pmm/addSTAEvents.m -text
 pmm/continualAnalysisSTA.m -text
 eye/plotEyeElipses.m -text
+spike[!!-~]sorting/analysisManagerByChunk.m -text

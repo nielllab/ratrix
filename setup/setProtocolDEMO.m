@@ -246,6 +246,12 @@ cs=[.1 .25 .5 .75 1];
 [noiseSpec.patchWidth]           =deal(1);
 crftrf=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
+tfs=[1 5 7 10 15 25 50];
+cs=[1];
+[noiseSpec.distribution]         =deal({'squareFlicker',tfs,cs,0.2}); %temporal freqs, contrasts, gapSecs
+[noiseSpec.loopDuration]         =deal(length(cs)*length(tfs)*1);
+search=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
 svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
 svnCheckMode='session';
 
@@ -259,8 +265,9 @@ ts7 = trainingStep(vh, unfilteredNoise,  repeatIndefinitely(), noTimeOff(), svnR
 ts8 = trainingStep(led, hateren,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %hateren
 ts9 = trainingStep(led, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %fullfieldFlicker
 ts10 = trainingStep(led, crftrf,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %crf/trf
+ts11 = trainingStep(led, search,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %search
 
-p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts4, ts6, ts7, ts8, ts9, ts10});
+p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts4, ts6, ts7, ts8, ts9, ts10, ts11});
 stepNum=uint8(2);
 
 for i=1:length(subjIDs),

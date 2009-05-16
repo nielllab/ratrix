@@ -63,12 +63,12 @@ for i=1:length(stimulus.port)
         stimulus.seed{i}=double(stimulus.distribution{i}.seed);
     end
     stimulus.inds{i}=[];
-    if isstruct(stimulus.distribution{i}) && strcmp(stimulus.distribution{i}.special,'sinusoidalFlicker')
+    if isstruct(stimulus.distribution{i}) && ismember(stimulus.distribution{i}.special,{'sinusoidalFlicker','squareFlicker'})
         stimulus.distribution{i}.conditions=getShuffledCross({stimulus.distribution{i}.contrasts,stimulus.distribution{i}.freqs});
         noise=[];
         dur=(stimulus.loopDuration{i}/length(stimulus.distribution{i}.conditions))-stimulus.distribution{i}.gapSecs;
         for j=1:length(stimulus.distribution{i}.conditions)
-            noise=[noise stimulus.distribution{i}.conditions{j}{1}*makeSinusoid(hz,stimulus.distribution{i}.conditions{j}{2},dur) zeros(1,round(stimulus.distribution{i}.gapSecs*hz))];
+            noise=[noise stimulus.distribution{i}.conditions{j}{1}*makeSinusoid(hz,stimulus.distribution{i}.conditions{j}{2},dur,stimulus.distribution{i}.special) zeros(1,round(stimulus.distribution{i}.gapSecs*hz))];
         end
         noise=.5+noise/2;
         

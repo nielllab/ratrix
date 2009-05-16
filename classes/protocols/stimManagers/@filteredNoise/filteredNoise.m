@@ -88,7 +88,7 @@ switch nargin
                     %pass
                 elseif iscell(in.distribution)
                     tmp.special=in.distribution{1};
-                    if all(size(in.distribution)==[1 4]) && strcmp(tmp.special,'sinusoidalFlicker')
+                    if all(size(in.distribution)==[1 4]) && ismember(tmp.special,{'sinusoidalFlicker','squareFlicker'})
                         tmp.freqs=in.distribution{2};
                         tmp.contrasts=in.distribution{3};
                         tmp.gapSecs=in.distribution{4};

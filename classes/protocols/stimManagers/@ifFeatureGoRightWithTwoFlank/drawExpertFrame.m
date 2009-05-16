@@ -14,7 +14,6 @@ function [doFramePulse expertCache dynamicDetails textLabel i dontclear indexPul
 %2) repitition number flickers, suggesting that its wrong
 %3) no black values... is blending wrong...?
 
-indexPulse=false;
 
 %properties of screen
 filterMode=1; %0 = Nearest neighbour filtering, 1 = Bilinear
@@ -66,6 +65,13 @@ try
     %%% LOGIC
     [targetIsOn flankerIsOn effectiveFrame cycleNum sweptID repetition]=isTargetFlankerOn(stimulus,i);
     textLabel=sprintf('%2.2g stim#: %2.2g stimID: %2.2g rep: %2.2g', effectiveFrame,cycleNum,sweptID,repetition);
+    
+    if effectiveFrame==1 & sweptID==1
+        indexPulse=true;
+    else
+        indexPulse=false;
+    end
+        
     
     %update dynamic values if there
     if ~isempty(stimulus.dynamicSweep)

@@ -41,6 +41,7 @@ goToSide = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,m
 
 % gratings
 pixPerCycs=2.^([5:11]); % freq
+%pixPerCycs=2.^([9]);   % freq
 driftfrequencies=[2];  % in cycles per second
 orientations=[pi/2];   % in radians
 phases=[0];            % initial phase
@@ -90,6 +91,20 @@ if 1
      %location = RFestimator({'whiteNoise','fitGaussianSigEnvelope',{3,0.05,logical(ones(3))}},{'gratings','ttestF1',{0.05,'fft'}},[],RFdataSource,[now-100 Inf]);
 end
 anGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
+    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
+
+
+annuli=0;                        % reset
+location=[.5 .5];                % center of mask
+driftfrequencies=[2 4 8 16];  % in cycles per second
+%contrasts=1./2.^[0:numContrasts-1]; % contrast of the grating
+contrasts=[1];                   % contrast of the grating
+durations=[2];                   % duration of each grating
+pixPerCycs=2.^(16);              % freq really broad approximates fullfield homogenous
+
+numRepeats=5;
+fakeTRF= gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
     waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 ports=cellfun(@uint8,{1 3},'UniformOutput',false);
@@ -165,7 +180,7 @@ gaussNoise=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLumi
 
 binNoise=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
-ts001 = '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\hateren\ts001';
+ts001 = '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\stimuli\hateren\ts001';
 [noiseSpec.distribution]         =deal({ts001, 1200, .01, 'ptile'});
 [noiseSpec.loopDuration]         =deal({uint32(60) uint32(0) uint32(1) uint32(30)}); %{numRepeats numUniques numCycles chunkSeconds}
 [noiseSpec.patchDims]            =deal(uint16([1 1]));
@@ -236,12 +251,13 @@ changeable=false;
 %fullField 
 stimLocation=[0,0,maxWidth,maxHeight];
 numFrames=3000;   %100 to test; 5*60*100=30000 for experiment
-stixelSize = [maxHeight maxWidth];
+stixelSize = [maxWidth maxHeight ];
 ffgwn = whiteNoise({'gaussian',gray,std},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 ffbin = whiteNoise({'binary',0,1,.5},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 %big grid - gaussian and many sparse types
-stixelSize = [32,32]; %[xPix yPix]
+stixelSize = [128,128]; %[32 32] [xPix yPix]
+numFrames=2000;   %1000 if limited mempry for trig 4 large stims
 gwn = whiteNoise({'gaussian',gray,std},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 bin = whiteNoise({'binary',0,1,.5},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 sparseness=0.05; %sparseness
@@ -270,6 +286,7 @@ stimLocation=[maxWidth*(1-frac)/2,maxHeight*(1-frac)/2,maxWidth*(1+frac)/2,maxHe
 boxSize=[maxWidth maxHeight]*frac;
 darkBox=whiteNoise({'binary',0,1,0},background,method,stimLocation,boxSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 brightBox=whiteNoise({'binary',0,1,1},background,method,stimLocation,boxSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+brighterBox=whiteNoise({'binary',0,1,1},0,method,stimLocation,boxSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 flickeringBox=whiteNoise({'binary',0,1,.5},background,method,stimLocation,boxSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 % has small pixels in limted spatial region... using mean background and BW stixels 
 localizedBin=whiteNoise({'binary',0,1,.5},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
@@ -346,36 +363,37 @@ ts{2} = trainingStep(afc, ffgwn,        numTrialsDoneCriterion(3),      noTimeOf
 ts{3} = trainingStep(afc, flankersFF,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %flankers with giant target
 ts{4} = trainingStep(afc, gwn,          repeatIndefinitely(),                  noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
 ts{5} = trainingStep(afc, anGratings,  numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %gratings: annulus size
-ts{6} = trainingStep(afc, flankers,    numTrialsDoneCriterion(5), noTimeOff(), svnRev, svnCheckMode);  %flankers
+ts{6} = trainingStep(afc, flankers,    numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %flankers
 ts{7} = trainingStep(afc, biField,     repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %bipartite field for X-Y classification
-ts{8} = trainingStep(afc, sfGratings,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: spatial frequency (should it be before annulus?)
+ts{8} = trainingStep(afc, sfGratings,  numTrialsDoneCriterion(3), noTimeOff(), svnRev, svnCheckMode);  %gratings: spatial frequency (should it be before annulus?)
 ts{9} = trainingStep(afc, orGratings,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: orientation
 %ts{10}= trainingStep(afc, radGratings, numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %temporal reponse
 %ts{11}= trainingStep(afc, cntrGratings,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: contrast
 
 %search tools
-ts{10}= trainingStep(afc, brightBox,   numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
+ts{10}= trainingStep(afc, brighterBox, numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
 ts{11}= trainingStep(afc, horizBar,    numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
 ts{12}= trainingStep(afc, vertBar,     numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
 ts{13}= trainingStep(afc, flickeringBox,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode); %
 ts{14}= trainingStep(afc, localizedBin,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
-ts{15}= trainingStep(afc, bin,         numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
-ts{16}= trainingStep(afc, sparseBrighter,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode); %
-%sparseBright
-%sparseDark
-ts{17}= trainingStep(afc, horizBars,   numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %full field search
-ts{18}= trainingStep(afc, vertBars,    numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %temporal reponse
-ts{19}= trainingStep(afc, gwn,         numTrialsDoneCriterion(4), noTimeOff(), svnRev, svnCheckMode);  %gratings: contrast
-
+ts{15}= trainingStep(afc, bin,         repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %
+ts{16}= trainingStep(afc, sparseBrighter,repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %
+ts{17}= trainingStep(afc, horizBars,   numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
+ts{18}= trainingStep(afc, vertBars,    repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %
+ts{19}= trainingStep(afc, gwn,         numTrialsDoneCriterion(4), noTimeOff(), svnRev, svnCheckMode);  %
+ts{20}= trainingStep(afc, sparseDark,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %
+ts{21}= trainingStep(afc, sparseBright,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
+ts{22}= trainingStep(afc, darkBox,     numTrialsDoneCriterion(3), noTimeOff(), svnRev, svnCheckMode);  %
+ts{23}= trainingStep(afc, fakeTRF,     repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %
 
 %ffgwn
 %ffbin
 %darkBox
 
-ts{20}= trainingStep(afc, gaussNoise,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
-ts{21}= trainingStep(afc, ffSearch,    numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %full field search
-ts{22}= trainingStep(afc, trf,         numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %temporal reponse
-ts{23}= trainingStep(afc, cntrGratings,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: contrast
+% ts{20}= trainingStep(afc, gaussNoise,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
+% ts{21}= trainingStep(afc, ffSearch,    numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %full field search
+% ts{22}= trainingStep(afc, trf,         numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %temporal reponse
+% ts{23}= trainingStep(afc, cntrGratings,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: contrast
 ts{24}= trainingStep(afc, gaussNoise,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
 ts{25}= trainingStep(afc, ffSearch,    numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %full field search
 
@@ -400,7 +418,7 @@ ts{34} = trainingStep(afc, dynGrating, repeatIndefinitely(), noTimeOff(), svnRev
 
 
 p=protocol('practice phys',{ts{1:34}});
-stepNum=uint8(10);
+stepNum=uint8(23);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

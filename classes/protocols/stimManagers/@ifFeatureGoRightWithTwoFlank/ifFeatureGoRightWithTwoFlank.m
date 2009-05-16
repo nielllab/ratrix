@@ -205,13 +205,18 @@ switch nargin
                        
                     case 'physFullFieldTarget'
                         p.stdGaussMask=Inf;
+                        p.flankerContrast=0;
+                        p.goLeftContrast=1;
+                        p.goRightContrast=1;
                         p.pixPerCycs=32;
+                        p.targetOnOff=int32([30 40]);
+                        p.flankerOnOff=int32([30 40]);
                         p.renderMode='dynamic-precachedInsertion'; % dynamic-maskTimesGrating, dynamic-onePatchPerPhase,or dynamic-onePatch
                         
                         p.dynamicSweep.sweepMode={'ordered'};
                         p.dynamicSweep.sweptValues=[];
                         p.dynamicSweep.sweptParameters={'targetOrientations'};
-                        p.dynamicSweep.numRepeats=4;
+                        p.dynamicSweep.numRepeats=20;
                     case '10'
                         p.renderMode='ratrixGeneral-precachedInsertion';
                     otherwise

@@ -105,7 +105,7 @@ switch nargin
                 x=daqhwinfo('nidaq');
                 
                 
-                if a && strcmp(b,'0014225E4685') && length(x.InstalledBoardIds)>0
+                if a && ismember(b,{'0014225E4685','0018F35DF141'}) && length(x.InstalledBoardIds)>0
                     %pass
                 else
                     b

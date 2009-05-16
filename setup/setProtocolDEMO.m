@@ -24,11 +24,12 @@ msAirpuff                 =msPenalty;
 
 constantRewards=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 
+allowRepeats=false;
 freeDrinkLikelihood=0.003;
-fd = freeDrinks(sm,freeDrinkLikelihood,constantRewards);
+fd = freeDrinks(sm,freeDrinkLikelihood,allowRepeats,constantRewards);
 
 freeDrinkLikelihood=0;
-fd2 = freeDrinks(sm,freeDrinkLikelihood,constantRewards);
+fd2 = freeDrinks(sm,freeDrinkLikelihood,allowRepeats,constantRewards);
 
 percentCorrectionTrials=.5;
 
@@ -209,7 +210,7 @@ if ispc
 else
     x.InstalledBoardIds=[];
 end
-if a && strcmp(b,'0014225E4685') && length(x.InstalledBoardIds)>0
+if a && ismember(b,{'0014225E4685','0018F35DF141'}) && length(x.InstalledBoardIds)>0
     led=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,{'off'},false,'LED','center');
 else
     led=vh;

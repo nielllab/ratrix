@@ -86,8 +86,8 @@ et=[];
 if a
     switch b
         %some rig stations have eyeTrackers and datanets available
-        case '00095B8E6171' %phys stim machine stolen from 2F
-            if false
+        case {'001D7D9ACF80','00095B8E6171'}  %phys stim machine stolen from 2F
+            if false  %now datanet is started in chunk mode
                 ai_parameters.numChans=3;
                 ai_parameters.sampRate=40000;
                 ai_parameters.inputRanges=repmat([-1 6],ai_parameters.numChans,1);

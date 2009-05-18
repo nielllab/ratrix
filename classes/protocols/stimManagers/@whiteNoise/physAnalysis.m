@@ -38,12 +38,27 @@ if (ischar(stimulusDetails.strategy) && strcmp(stimulusDetails.strategy,'expert'
         (exist('fieldsInLUT','var') && ismember('stimDetails.strategy',fieldsInLUT) && strcmp(LUTlookup(sessionLUT,stimulusDetails.strategy),'expert'))
     seeds=stimulusDetails.seedValues;
     spatialDim = stimulusDetails.spatialDim;
-    std = stimulusDetails.std;
-    meanLuminance = stimulusDetails.meanLuminance;
-    height=stimulusDetails.height;
-    width=stimulusDetails.width;
-    factor = width/spatialDim(1);
+    if isfield(stimulusDetails,'distribution')
+        switch stimulusDetails.distribution.type
+            case 'gaussian'
+                std = stimulusDetails.distribution.std;
+                meanLuminance = stimulusDetails.distribution.meanLuminance;
+            case 'binary'
+                p=stimulusDetails.distribution.probability;
+                hiLoDiff=(stimulusDetails.distribution.hiVal-stimulusDetails.distribution.lowVal);
+                std=hiLoDiff*p*(1-p);
+                meanLuminance=(p*stimulusDetails.distribution.hiVal)+((1-p)*stimulusDetails.distribution.lowVal);
+        end
+    else
+        error('dont use old convention for whiteNoise');
+        %old convention prior to april 17th, 2009
+        stimulusDetails.distribution.type='gaussian';
+        std = stimulusDetails.std;
+        meanLuminance = stimulusDetails.meanLuminance;
+    end
 end
+height=stimulusDetails.height;
+width=stimulusDetails.width;
 
 %SET UP RELATION stimInd <--> frameInd
 analyzeDrops=true;
@@ -63,9 +78,20 @@ stimData=nan(spatialDim(1),spatialDim(2),length(stimFrames)); % method 2
 for i=1:length(stimFrames)
     randn('state',seeds(mod(stimFrames(i)-1,length(seeds))+1)); % we only have enough seeds for a single repeat of whiteNoise; if numRepeats>1, need to modulo
     whiteVal=255;
-    stixels = round(whiteVal*(randn(spatialDim)*std+meanLuminance));
-    stixels(stixels>whiteVal)=whiteVal;
-    stixels(stixels<0)=0;
+    switch stimulusDetails.distribution.type
+        case 'gaussian'
+            % we only have enough seeds for a single repeat of whiteNoise; if numRepeats>1, need to modulo
+            %randn('state',seeds(mod(stimFrames(i)-1,length(seeds))+1));
+            randn('state',seeds(stimFrames(i)));
+            stixels = round(whiteVal*(randn(spatialDim([2 1]))*std+meanLuminance));
+            stixels(stixels>whiteVal)=whiteVal;
+            stixels(stixels<0)=0;
+        case 'binary'
+            rand('state',seeds(mod(stimFrames(i)-1,length(seeds))+1));
+            stixels = round(whiteVal* (stimulusDetails.distribution.lowVal+(double(rand(spatialDim([2 1]))<stimulusDetails.distribution.probability)*hiLoDiff)));
+        otherwise
+            error('never')
+    end
 
     %stixels=randn(spatialDim);  % for test only
     % =======================================================
@@ -157,7 +183,7 @@ for piece=1:(length(starts)-1)
     triggerInd = 1;
     % triggers = zeros(stim_width, stim_height, # of window frames per spike, number of spikes)
     %initialize trigger with mean values for temporal border padding
-    meanValue=whiteVal*stimulusDetails.meanLuminance;
+    meanValue=whiteVal*meanLuminance;
     try
     triggers=meanValue(ones(size(stimData,1),size(stimData,2),sum(timeWindowFrames)+1,numSpikes)); % +1 is for the frame that is on the spike
     catch ex
@@ -272,8 +298,14 @@ if doSpatial
     
     
     %get significant pixels and denoised spots
-    stdStimulus = stimulusDetails.std*whiteVal;
-    meanLuminanceStimulus = stimulusDetails.meanLuminance*whiteVal;
+    switch stimulusDetails.distribution.type
+        case 'gaussian'
+            stdStimulus = std*whiteVal;
+        case 'binary'
+            stdStimulus = std*whiteVal*100; % somthing very large to prevent false positives... need to figure it out analytically.. maybe use different function
+            %std=hiLoDiff*p*(1-p);
+    end
+    meanLuminanceStimulus = meanLuminance*whiteVal;
     [bigSpots sigPixels]=getSignificantSTASpots(cumulativedata.cumulativeSTA(:,:,brightInd(3)),cumulativedata.cumulativeNumSpikes,meanLuminanceStimulus,stdStimulus,ones(3),3,0.05);
     [bigIndY bigIndX]=find(bigSpots~=0);
     [sigIndY sigIndX]=find(sigPixels~=0);

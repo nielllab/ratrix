@@ -88,10 +88,13 @@ classesAnalyzed=[];%{'filteredNoise'};
 %test6 realrat [66 ]
 %
 % rat 164 [591 648]spatial bin;  [654 680]bipartiteLoc=0.9; [692 730]bin
-trialRange=[238 ]; %test [44]
+% trialRange=[238 ]; %test [44]
 % path='\\132.239.158.183\rlab_storage\pmeier\backup\devNeuralData_090310'; %b/c i can't see datanet_storage folder on .179
 % backupPath='C:\Documents and Settings\rlab\Desktop\neural';
-path='\\132.239.158.179\datanet_storage'
-photoDiodeSpikes=0;
-subjectID = '188dev'; % demo1 test
-analysisManager(subjectID,path, spikeDetectionParams,spikeSortingParams,trialRange,[0 Inf],classesAnalyzed,overwriteAll,photoDiodeSpikes);
+cellBoundary={'physLog','05.14.2009','all','last'};
+path=getRatrixPath
+usePhotoDiodeSpikes=0;
+subjectID = 'fan_demo1'; % demo1 test
+stimClassToAnalyze='all';
+analysisManagerByChunk(subjectID, path, cellBoundary, spikeDetectionParams, spikeSortingParams,...
+    timeRangePerTrialSecs,stimClassToAnalyze,overwriteAll,usePhotoDiodeSpikes)

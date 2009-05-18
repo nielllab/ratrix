@@ -231,8 +231,9 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 trialNum=trialRecords(trialInd).trialNumber;
                 stimManagerClass=trialRecords(trialInd).stimManagerClass;
                 frameDropCorner=trialManager.frameDropCorner;
+                refreshRate=trialRecords(trialInd).resolution.hz;
                 try
-                    save(stim_filename,'ratID','trialStartTime','trialNum','stimManagerClass','stimulusDetails','frameDropCorner');
+                    save(stim_filename,'ratID','trialStartTime','trialNum','stimManagerClass','stimulusDetails','frameDropCorner','refreshRate');
                 catch
                     warningStr=sprintf('unable to save to %s',stim_path);
                     error(warningStr);

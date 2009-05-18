@@ -508,6 +508,7 @@ while ~quit
                         neuralRecord.activeParameters.chunkID=chunksToProcess(i,2);
                         neuralRecord.activeParameters.date=datenumFor30(timestamp);
                         neuralRecord.activeParameters.ISIviolationMS=spikeDetectionParams.ISIviolationMS;
+                        neuralRecord.activeParameters.refreshRate=stimRecord.refreshRate; % where?
 
                         eyeData=getEyeRecords(eyeRecordPath, currentTrial,timestamp);
                         % the stimManagerClass to be passed in is for class typing only -

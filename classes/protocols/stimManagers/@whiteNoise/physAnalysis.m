@@ -28,6 +28,7 @@ timeWindowMs=[300 50]; % parameter [300 50]
 if isfield(parameters, 'refreshRate')
     refreshRate = parameters.refreshRate;
 else
+    error('dont use default refreshRate');
     refreshRate = 100;
 end
 % calculate the number of frames in the window for each spike

@@ -343,7 +343,19 @@ while ~quit
                             else
                                 passedQualityTest=false;
                             end
+                            % rename .clu, .klg, .fet, and .model files to be per-chunk
+                            d=dir(analysisPath);
+                            for di=1:length(d)
+                                [matches tokens] = regexpi(d(di).name, 'temp\.(.*)\.\d+', 'match', 'tokens');
+                                if length(matches) ~= 1
+                                    %         warning('not a neuralRecord file name');
+                                else
+                                    [successM messageM messageIDM]=movefile(fullfile(analysisPath,d(di).name),...
+                                        fullfile(analysisPath,sprintf('chunk%d.%s',chunksToProcess(i,2),tokens{1}{1})));
+                                end
+                            end
                         end
+                        
                         spikeRecord.chunkID=ones(length(spikeRecord.spikes),1)*chunksToProcess(i,2);
                         spikeRecord.chunkIDForCorrectedFrames=ones(length(spikeRecord.stimInds),1)*chunksToProcess(i,2);
                         spikeRecord.chunkIDForFrames=ones(size(spikeRecord.frameIndices,1),1)*chunksToProcess(i,2);

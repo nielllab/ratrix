@@ -9,6 +9,8 @@ if isa(tm,'trialManager')
             out=1;
         case 'phasednAFC' %fans addition, new format, but same idea as NAFC
             out=1;
+        case 'autopilot'
+            out=1;
         otherwise
             out=0;
     end

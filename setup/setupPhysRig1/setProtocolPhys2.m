@@ -42,19 +42,19 @@ goToSide = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,m
 % gratings
 pixPerCycs=2.^([5:11]); % freq
 %pixPerCycs=2.^([9]);   % freq
-driftfrequencies=[2];  % in cycles per second
+driftfrequencies=[4];  % in cycles per second
 orientations=[pi/2];   % in radians
 phases=[0];            % initial phase
-contrasts=[0.5];         % contrast of the grating
+contrasts=[0.5];       % contrast of the grating
 durations=[3];         % duration of each grating
-radius=2;              % radius of the circular mask, 2= twice screen hieght
+radius=5;              % radius of the circular mask, 5= five times screen hieght
 annuli=0;              % radius of inner annuli
 location=[.5 .5];      % center of mask
 waveform='sine';     
 normalizationMethod='normalizeDiagonal';
 mean=0.5;
-numRepeats=3;
-scaleFactor             =0;
+numRepeats=4;
+scaleFactor=0;
 sfGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
     waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
@@ -83,7 +83,6 @@ contrasts=1; % reset to one value
 radGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radii,annuli,location,...
     waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
-numAnulli=8;
 annuli=[0.02 0.05 .1 .2 .3 .4 .5 2]; % annulus of the grating
 RFdataSource='\\132.239.158.179\datanet_storage'; % good only as long as default stations don't change, %how do we get this from the dn in the station!?
 if 1 
@@ -93,19 +92,22 @@ end
 anGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
     waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
-
-
 annuli=0;                        % reset
 location=[.5 .5];                % center of mask
-driftfrequencies=[2 4 8 16];  % in cycles per second
+driftfrequencies=[2 4 8 16];     % in cycles per second
 %contrasts=1./2.^[0:numContrasts-1]; % contrast of the grating
 contrasts=[1];                   % contrast of the grating
 durations=[2];                   % duration of each grating
 pixPerCycs=2.^(16);              % freq really broad approximates fullfield homogenous
 
-numRepeats=5;
+numRepeats=3;
 fakeTRF= gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
     waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
+numRepeats=10;
+fakeTRF10= gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
+    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
 
 ports=cellfun(@uint8,{1 3},'UniformOutput',false);
 [noiseSpec(1:length(ports)).port]=deal(ports{:});
@@ -122,7 +124,7 @@ ports=cellfun(@uint8,{1 3},'UniformOutput',false);
 % in.loopDuration               in seconds (will be rounded to nearest multiple of frame duration, if distribution is a file, pass 0 to loop the whole file)
 %                               to make uniques and repeats, pass {numRepeats numUniques numCycles chunkSeconds} - chunk refers to one repeat/unique - distribution cannot be sinusoidalFlicker
 
-[noiseSpec.distribution]         =deal({'gaussian',.01});
+[noiseSpec.distribution]         =deal({'gaussian',.01,uint32(0)});
 [noiseSpec.startFrame]           =deal(uint8(1)); %deal('randomize');
 [noiseSpec.loopDuration]         =deal(1);
 [noiseSpec.numLoops]             =deal(3);
@@ -182,7 +184,7 @@ binNoise=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLumina
 
 ts001 = '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\stimuli\hateren\ts001';
 [noiseSpec.distribution]         =deal({ts001, 1200, .01, 'ptile'});
-[noiseSpec.loopDuration]         =deal({uint32(60) uint32(0) uint32(1) uint32(30)}); %{numRepeats numUniques numCycles chunkSeconds}
+[noiseSpec.loopDuration]         =deal({uint32(60) uint32(0) uint32(1) uint32(30) uint32(1)}); %{numRepeats numUniques numCycles chunkSeconds centerContrast}
 [noiseSpec.patchDims]            =deal(uint16([1 1]));
 
 hateren=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
@@ -191,26 +193,24 @@ hateren=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminan
 [noiseSpec.origHz]               =deal(0);
 [noiseSpec.loopDuration]         =deal(10);
 
-
 ffSearch=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-
 
 [noiseSpec.distribution]         =deal({'sinusoidalFlicker',[10],[.1 .25 .5 .75 1],.1}); %temporal freqs, contrasts, gapSecs
 [noiseSpec.loopDuration]         =deal(10);
 
 crf=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
-[noiseSpec.distribution]         =deal({'sinusoidalFlicker',[1 2 4 8 32 50],1,.1}); %temporal freqs, contrasts, gapSecs
+[noiseSpec.distribution]         =deal({'sinusoidalFlicker',[1 2 4 8 16],1,.1}); %temporal freqs, contrasts, gapSecs
 
 trf=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
-[noiseSpec.distribution]         =deal({'gaussian', .01});
+[noiseSpec.distribution]         =deal({'gaussian', .01, uint32(0)});
 [noiseSpec.loopDuration]         =deal(1*60);
 
 ffGauss=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 [noiseSpec.distribution]         =deal({ts001, 1200, .01, 'ptile'});
-[noiseSpec.loopDuration]         =deal({uint32(4) uint32(1) uint32(50) uint32(8)}); %{numRepeats numUniques numCycles chunkSeconds}
+[noiseSpec.loopDuration]         =deal({uint32(4) uint32(1) uint32(50) uint32(8) uint32(1)}); %{numRepeats numUniques numCycles chunkSeconds centerContrast}
 [noiseSpec.contrast]             =deal(1);
 [noiseSpec.startFrame]           =deal(uint8(1));
 
@@ -223,8 +223,6 @@ flankers=ifFeatureGoRightWithTwoFlank('phys');
 flankersFF=ifFeatureGoRightWithTwoFlank('physFullFieldTarget');
 prm=getDefaultParameters(ifFeatureGoRightWithTwoFlank, 'goToSide','1_0','Oct.09,2007');
 
-
-
 % bipartiteField
 receptiveFieldLocation = location; %as in annuli
 receptiveFieldLocation = [.5 .5];
@@ -235,7 +233,6 @@ scaleFactor=0;
 interTrialLuminance=0.5;
 biField = bipartiteField(receptiveFieldLocation,frequencies,duration,repetitions,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
-
 % whiteNoise
 gray=0.5;
 mean=gray;
@@ -245,8 +242,6 @@ background=gray;
 method='texOnPartOfScreen';
 stixelSize = [32 32]% [128 128];% [128 128]; %[32,32];
 changeable=false;
-
-
 
 %fullField 
 stimLocation=[0,0,maxWidth,maxHeight];
@@ -340,12 +335,13 @@ requestPort='center';
 afc=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,frameDropCorner,dropFrames,displayMethod,requestPort);
 
 requestPort='none'; 
+allowRepeats=false;
 ap=autopilot(percentCorrectionTrials,sm,constantRewards,eyeController,frameDropCorner,dropFrames,displayMethod,requestPort);
 
 freeDrinkLikelihood=0.003;
-fd = freeDrinks(sm,freeDrinkLikelihood,constantRewards,eyeController,frameDropCorner,dropFrames,displayMethod,requestPort);
+fd = freeDrinks(sm,freeDrinkLikelihood,allowRepeats,constantRewards,eyeController,frameDropCorner,dropFrames,displayMethod,requestPort);
 freeDrinkLikelihood=0;
-fd2 = freeDrinks(sm,freeDrinkLikelihood,constantRewards,eyeController,frameDropCorner,dropFrames,displayMethod,requestPort);
+fd2 = freeDrinks(sm,freeDrinkLikelihood,allowRepeats,constantRewards,eyeController,frameDropCorner,dropFrames,displayMethod,requestPort);
 
 rfIsGood=receptiveFieldCriterion(0.05,RFdataSource,1,'box',3);
 
@@ -357,68 +353,65 @@ svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
 svnCheckMode='session';
 
 %common "search and characterization"
-ts{1} = trainingStep(afc, ffgwn,        repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
-ts{2} = trainingStep(afc, ffgwn,        numTrialsDoneCriterion(3),      noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
-%ts{2} = trainingStep(fd2, crf,        numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %contrast response
-ts{3} = trainingStep(afc, flankersFF,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %flankers with giant target
-ts{4} = trainingStep(afc, gwn,          repeatIndefinitely(),                  noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
-ts{5} = trainingStep(afc, anGratings,  numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %gratings: annulus size
-ts{6} = trainingStep(afc, flankers,    numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %flankers
-ts{7} = trainingStep(afc, biField,     repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %bipartite field for X-Y classification
-ts{8} = trainingStep(afc, sfGratings,  numTrialsDoneCriterion(3), noTimeOff(), svnRev, svnCheckMode);  %gratings: spatial frequency (should it be before annulus?)
-ts{9} = trainingStep(afc, orGratings,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: orientation
-%ts{10}= trainingStep(afc, radGratings, numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %temporal reponse
-%ts{11}= trainingStep(afc, cntrGratings,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: contrast
+ts{1}= trainingStep(ap,  fakeTRF,     repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);       %temporal response function
+ts{2}= trainingStep(ap,  ffgwn,       repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);       %full field gaussian white noise
+ts{3}= trainingStep(ap,  bin,         repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);       %binary noise grid
+ts{4}= trainingStep(ap,  fakeTRF10,   numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %temporal response function
+ts{5}= trainingStep(ap,  ffgwn,       numTrialsDoneCriterion(10), noTimeOff(), svnRev, svnCheckMode); %full field gaussian white noise
+ts{6}= trainingStep(ap,  bin,         numTrialsDoneCriterion(10), noTimeOff(), svnRev, svnCheckMode); %binary noise grid
+ts{7} = trainingStep(ap, flankersFF,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %flankers with giant target
+ts{8} = trainingStep(ap, sfGratings,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: spatial frequency (should it be before annulus?)
+ts{9} = trainingStep(ap, orGratings,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: orientation
+
+%check if it drives
+ts{10}= trainingStep(ap, sparseBrighter,numTrialsDoneCriterion(1),noTimeOff(),svnRev, svnCheckMode);  %
+ts{11}= trainingStep(ap, horizBars,   numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
+ts{12}= trainingStep(ap, vertBars,    numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
+ts{13}= trainingStep(ap, gwn,         numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
+ts{14}= trainingStep(ap, sparseDark,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
+ts{15}= trainingStep(ap, sparseBright,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
 
 %search tools
-ts{10}= trainingStep(afc, brighterBox, numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
-ts{11}= trainingStep(afc, horizBar,    numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
-ts{12}= trainingStep(afc, vertBar,     numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
-ts{13}= trainingStep(afc, flickeringBox,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode); %
-ts{14}= trainingStep(afc, localizedBin,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
-ts{15}= trainingStep(afc, bin,         repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %
-ts{16}= trainingStep(afc, sparseBrighter,repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %
-ts{17}= trainingStep(afc, horizBars,   numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
-ts{18}= trainingStep(afc, vertBars,    repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %
-ts{19}= trainingStep(afc, gwn,         numTrialsDoneCriterion(4), noTimeOff(), svnRev, svnCheckMode);  %
-ts{20}= trainingStep(afc, sparseDark,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %
-ts{21}= trainingStep(afc, sparseBright,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
-ts{22}= trainingStep(afc, darkBox,     numTrialsDoneCriterion(3), noTimeOff(), svnRev, svnCheckMode);  %
-ts{23}= trainingStep(afc, fakeTRF,     repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %
+ts{16}= trainingStep(ap, darkBox,     numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
+ts{17}= trainingStep(ap, brighterBox, numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
+ts{18}= trainingStep(ap, horizBar,    numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
+ts{19}= trainingStep(ap, vertBar,     numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
+ts{20}= trainingStep(ap, flickeringBox,numTrialsDoneCriterion(2),noTimeOff(), svnRev, svnCheckMode);  %
+ts{21}= trainingStep(ap, localizedBin,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
+ts{22}= trainingStep(ap, bin,         numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
 
-%ffgwn
-%ffbin
-%darkBox
+ts{23} = trainingStep(ap, anGratings,  numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %gratings: annulus size
+ts{24} = trainingStep(ap, flankers,    numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %flankers
+ts{25} = trainingStep(ap, biField,     numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %bipartite field for X-Y classification
+ts{26} = trainingStep(ap, dynGrating,  repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %tailored to this cell
+ts{27} = trainingStep(ap, hateren,     repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %hateren
 
+%removed things b/c not used enough:
+% ts{10}= trainingStep(afc, radGratings, numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %gratings: radius
+% ts{11}= trainingStep(afc, cntrGratings,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: contrast
+% ts{2} = trainingStep(fd2, crf,       numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %contrast response
 % ts{20}= trainingStep(afc, gaussNoise,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
-% ts{21}= trainingStep(afc, ffSearch,    numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %full field search
 % ts{22}= trainingStep(afc, trf,         numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %temporal reponse
-% ts{23}= trainingStep(afc, cntrGratings,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: contrast
-ts{24}= trainingStep(afc, gaussNoise,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
-ts{25}= trainingStep(afc, ffSearch,    numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %full field search
+% ts{24}= trainingStep(ap, gaussNoise,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
+% ts{25}= trainingStep(ap, ffSearch,    numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %full field search
 
-%common "acclimate a rat"
-%=setFlankerStimRewardAndTrialManager(prm, 'flanker go to side');
-ts{26}   = trainingStep(afc, goToSide, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %go to side
-ts{27}  = trainingStep(fd,  freeStim, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %stochastic free drinks
-ts{28}  = trainingStep(fd2, freeStim, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %free drinks
+%common "acclimate a rat":
+% ts{26}   = trainingStep(afc, goToSide, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %go to side
+% ts{27}  = trainingStep(fd,  freeStim, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %stochastic free drinks
+% ts{28}  = trainingStep(fd2, freeStim, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %free drinks
 
-%common "lots of data collection"
-ts{29} = trainingStep(afc, ffGauss,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %fullfieldFlicker Gaussian
-ts{30} = trainingStep(afc, hateren,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %hateren
+%other ideas:
+%ts{29} = trainingStep(ap, ffGauss,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %fullfieldFlicker Gaussian
+% ts{31} = trainingStep(ap, rptUnq,   repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %rpt/unq
+% ts{32} = trainingStep(ap, orNoise,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %filteredNoise discrim
+% ts{33} = trainingStep(ap, binNoise, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %unfilteredNoise discrim
 
-
-ts{31} = trainingStep(fd2, rptUnq,   repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %rpt/unq
-ts{32} = trainingStep(fd2, orNoise,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %filteredNoise discrim
-ts{33} = trainingStep(fd2, binNoise, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %unfilteredNoise discrim
-
-ts{34} = trainingStep(afc, dynGrating, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %unfilteredNoise discrim
 
 %% make and set it
 
 
-p=protocol('practice phys',{ts{1:34}});
-stepNum=uint8(23);
+p=protocol('practice phys',{ts{1:27}});
+stepNum=uint8(1);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

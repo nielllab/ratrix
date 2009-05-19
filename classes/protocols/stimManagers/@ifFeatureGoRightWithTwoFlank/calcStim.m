@@ -130,7 +130,7 @@ switch trialManagerClass
         targetPorts=setdiff(responsePorts,lastResponse);
         distractorPorts=[];
 
-    case {'nAFC','promptedNAFC'}
+    case {'nAFC','promptedNAFC','autopilot'}
 
         if ~isempty(trialRecords) && length(trialRecords)>=2
             lastRec=trialRecords(end-1);
@@ -142,7 +142,7 @@ switch trialManagerClass
         %note that this implementation will not show the exact same
         %stimulus for a correction trial, but just have the same side
         %correct.  may want to change...
-        if details.correctionTrial
+        if (isfield( details,'correctionTrial') && details.correctionTrial) || strcmp(trialManagerClass,'autopilot')
             details.maxCorrectForceSwitch=0;
         else
             [targetPorts hadToResample]=getSameLimitedResponsePort(responsePorts,stimulus.maxCorrectOnSameSide,trialRecords(1:end-1));  % add this to assignPorts
@@ -396,45 +396,48 @@ switch details.renderMode
         details.backgroundColor=details.mean;
         details.floatprecision=1;
 
-         switch trialManagerClass
-             case 'nAFC'
-                 %REQUESTED TRIALS
-                 %                  type='expert';
-                 %                  requestPort=2; % center with 3 ports
-                 %                 [out ] = phaseify(nAFC,details,type,targetPorts,distractorPorts,requestPort,scaleFactor,interTrialLuminance,details.hz)
-                 
-                 %AUTOTRIGGERED      
-                 if isinf(stimulus.dynamicSweep.numRepeats)
-                     timeout=[];
-                 else
-                     timeout=max([details.targetOnOff details.flankerOnOff])*size(stimulus.dynamicSweep.sweptValues,2)* stimulus.dynamicSweep.numRepeats;
-                 end
+        switch trialManagerClass
+            %case 'nAFC'
+                %error('not tested yet')
+                %REQUESTED TRIALS
+                % type='expert';
+                % requestPort=2; % center with 3 ports
+                % [out ] = phaseify(nAFC,details,type,targetPorts,distractorPorts,requestPort,scaleFactor,interTrialLuminance,details.hz)
+            case 'autopilot'    
+                %AUTOTRIGGERED 
+            otherwise
+                error('dynamic not tested in that mode yet')
+        end
+        
 
-                  % now create stimSpecs (copied from gratings march 20.2009)
-                 type='expert';
-                 discrimStim=[];
-                 discrimStim.stimulus=details;
-                 discrimStim.stimType=type;
-                 discrimStim.scaleFactor=scaleFactor;
-                 discrimStim.startFrame=0;
-                 discrimStim.stochasticDistribution=[];
-                 discrimStim.framesUntilTimeout=timeout;
-
-                 preOnsetStim=[];
-                 preOnsetStim.stimulus=interTrialLuminance;
-                 preOnsetStim.stimType='loop';
-                 preOnsetStim.scaleFactor=0;
-                 preOnsetStim.startFrame=0;
-                 preOnsetStim.stochasticDistribution=[];
-                 preOnsetStim.punishResponses=false;
-
-                 preResponseStim=discrimStim;
-                 preResponseStim.punishResponses=false;
-                 
-             otherwise 
-                 error('dynamic not tested in that mode yet')
-         end
-         
+        
+        if isinf(stimulus.dynamicSweep.numRepeats)
+            timeout=[];
+        else
+            timeout=max([details.targetOnOff details.flankerOnOff])*size(stimulus.dynamicSweep.sweptValues,2)* stimulus.dynamicSweep.numRepeats;
+        end
+        
+        % now create stimSpecs (copied from gratings march 20.2009)
+        type='expert';
+        discrimStim=[];
+        discrimStim.stimulus=details;
+        discrimStim.stimType=type;
+        discrimStim.scaleFactor=scaleFactor;
+        discrimStim.startFrame=0;
+        discrimStim.stochasticDistribution=[];
+        discrimStim.framesUntilTimeout=timeout;
+        
+        preOnsetStim=[];
+        preOnsetStim.stimulus=interTrialLuminance;
+        preOnsetStim.stimType='loop';
+        preOnsetStim.scaleFactor=0;
+        preOnsetStim.startFrame=0;
+        preOnsetStim.stochasticDistribution=[];
+        preOnsetStim.punishResponses=false;
+        
+        preResponseStim=discrimStim;
+        preResponseStim.punishResponses=false;
+        
     case {'ratrixGeneral-maskTimesGrating', 'ratrixGeneral-precachedInsertion'}
         try
 

@@ -192,7 +192,7 @@ preOnsetStim.punishResponses=false;
 preResponseStim=discrimStim;
 preResponseStim.punishResponses=false;
 
-if details.correctionTrial;
+if isfield(details,'correctionTrial') && details.correctionTrial;
     text='correction trial!';
 else
     text=sprintf('target: %d',targetPorts);

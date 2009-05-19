@@ -31,7 +31,7 @@ switch nargin
             error('Input argument is not a soundClip object')
         end
     case 2
-        if ismember(varargin{2},{'binaryWhiteNoise','gaussianWhiteNoise','uniformWhiteNoise'})
+        if ismember(varargin{2},{'binaryWhiteNoise','gaussianWhiteNoise','uniformWhiteNoise','empty'})
             t.fundamentalFreqs = [];
             t.maxFreq = 0;
 
@@ -49,7 +49,7 @@ switch nargin
 
             t = class(t,'soundClip');
         else
-            error('type for 2 args must be binaryWhiteNoise gaussianWhiteNoise uniformWhiteNoise')
+            error('type for 2 args must be binaryWhiteNoise gaussianWhiteNoise uniformWhiteNoise empty')
         end
     case 4
         if ischar(varargin{1})

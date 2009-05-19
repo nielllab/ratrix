@@ -176,7 +176,7 @@ details.sizeyoked=stimulus.sizeyoked;
 details.trialDistribution = stimulus.trialDistribution;
 
 % center images over left/right ports (hardcoded portpos)
-portpos=linspace(0,width,5);
+portpos=linspace(0,width,totalPorts+2);
 portpos(1)=[];
 portpos(end)=[];
 for i=1:size(pics,1)

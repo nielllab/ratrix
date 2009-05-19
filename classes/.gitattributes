@@ -9,7 +9,6 @@ protocols/criteria/@parameterThresholdCriterion/parameterThresholdCriterion.m -t
 protocols/@stimSpec/getFramesUntilTransition.m -text
 protocols/@stimSpec/getStim.m -text
 protocols/@stimSpec/stimSpec.m -text
-protocols/@stimSpec/getStochasticDistribution.m -text
 protocols/@stimSpec/getStimType.m -text
 protocols/stimManagers/@crossModal/crossModal.m -text
 protocols/stimManagers/@crossModal/display.m -text
@@ -199,8 +198,6 @@ protocols/trialManagers/@goNoGo/stationOKForTrialManager.m -text
 db/@dbConn/clearBLOB.m -text
 protocols/@stimSpec/getPunishResponses.m -text
 protocols/delayManagers/@delayManager/delayManager.m -text
-protocols/delayManagers/@hazard/hazard.m -text
-protocols/delayManagers/@hazard/calcAutoRequest.m -text
 db/@dbConn/getCLUT.m -text
 db/@dbConn/updateCLUT.m -text
 @datanet/bootstrap.m -text
@@ -213,3 +210,6 @@ db/@dbConn/updateCLUT.m -text
 @datanet/startClientTrials.m -text
 @datanet/connectToClient.m -text
 protocols/trialManagers/@autopilot/updateTrialState.m -text
+protocols/@stimSpec/getAutoTrigger.m -text
+protocols/delayManagers/@flatHazard/calcAutoRequest.m -text
+protocols/delayManagers/@flatHazard/flatHazard.m -text

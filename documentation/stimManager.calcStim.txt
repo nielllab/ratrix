@@ -27,7 +27,7 @@
 %                               index from the resolutions input that you want to set
 %                           if trialManager.displayMethod = 'LED'
 %                               the analog output hz you want to use for this trial (ignored if type is 'phased' - each stimSpec has its own hz)
-%   preOnsetStim            a struct containing the following fields as parameters used to create a stimSpec for the 'pre-onset' phase
+%   preRequestStim            a struct containing the following fields as parameters used to create a stimSpec for the 'pre-onset' phase
     %   stimulus                if type is 'expert':
     %                               a struct with fields that are required, have no direct effect, but affect what is passed to your drawExpertFrame method:
     %                                   floatprecision (as defined for screen('MakeTexture') -- will be passed to your drawExpertFrame method)
@@ -46,11 +46,14 @@
     %                               scaleFactor.*[y x] (dimensions of out array) must not exceed the resolution you specify
     %   type                    see below
     %   startFrame          what frame of the stimulus to start at
-    %   stochasticDistribution  an optional stochasticDistribution of port responses
+    %   autoTrigger         a cell array of values {pA, portA, pB, portB,...} where pA specifies the probability of stochastically triggering
+    %                            	portA, and pB specifies the probability of triggering portB, etc
+    %                           	this is done for every frame of the stimulus (loop of runRealTimeLoop), and the execution order is whatever comes first
+    %                               in this cell array (ie pA is tried, then pB, and so forth)
     %   framesUntilTimeout  optional parameter that indicates a timeout for this phase (only for discrimStim)
-    %   punishResponses     whether to punish/ignore responses during this phase (only for preOnsetStim and preResponseStim)
-%   preResponseStim         same as preOnsetStim; this phase happens after a request is received
-%   discrimStim             same as preOnsetStim; this phase is the normal 'discriminandum' phase
+    %   punishResponses     whether to punish/ignore responses during this phase (only for preRequestStim and preResponseStim)
+%   preResponseStim         same as preRequestStim; this phase happens after a request is received
+%   discrimStim             same as preRequestStim; this phase is the normal 'discriminandum' phase
 %   LUT                     the color look up (gamma/linearization) table to pass to the gfx card
 %                           must be 256 X 3 array, 0<=x<=1 (reallutsize from screen('ReadNormalizedGammaTable') is inaccurate -- can be 1024 on osx, but 'LoadNormalizedGammaTable' silently fails when table is longer than 256)
 %                           on windows, table subject to unpublished constraints vaguely resembling monotonic increasing

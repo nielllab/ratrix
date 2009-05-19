@@ -1,5 +1,5 @@
 
-function [stimulus,updateSM,resInd,preOnsetStim,preResponseStim,discrimStim,LUT,targetPorts,distractorPorts,details,interTrialLuminance, text,indexPulses]=...
+function [stimulus,updateSM,resInd,preRequestStim,preResponseStim,discrimStim,LUT,targetPorts,distractorPorts,details,interTrialLuminance, text,indexPulses]=...
     calcStim(stimulus, trialManagerClass,allowRepeats,resolutions,screenDisplaySize,LUTbits,responsePorts,totalPorts,trialRecords,forceStimDetails);
 %[stimulus updateSM out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance isCorrection] = calcStim(stimulus,trialManagerClass,frameRate,responsePorts,totalPorts,trialRecords)
 %
@@ -424,16 +424,16 @@ switch details.renderMode
         discrimStim.stimType=type;
         discrimStim.scaleFactor=scaleFactor;
         discrimStim.startFrame=0;
-        discrimStim.stochasticDistribution=[];
+        discrimStim.autoTrigger=[];
         discrimStim.framesUntilTimeout=timeout;
         
-        preOnsetStim=[];
-        preOnsetStim.stimulus=interTrialLuminance;
-        preOnsetStim.stimType='loop';
-        preOnsetStim.scaleFactor=0;
-        preOnsetStim.startFrame=0;
-        preOnsetStim.stochasticDistribution=[];
-        preOnsetStim.punishResponses=false;
+        preRequestStim=[];
+        preRequestStim.stimulus=interTrialLuminance;
+        preRequestStim.stimType='loop';
+        preRequestStim.scaleFactor=0;
+        preRequestStim.startFrame=0;
+        preRequestStim.autoTrigger=[];
+        preRequestStim.punishResponses=false;
         
         preResponseStim=discrimStim;
         preResponseStim.punishResponses=false;
@@ -539,15 +539,15 @@ switch details.renderMode
         discrimStim.stimType=type;
         discrimStim.scaleFactor=scaleFactor;
         discrimStim.startFrame=0;
-        discrimStim.stochasticDistribution=[];
+        discrimStim.autoTrigger=[];
 
-        preOnsetStim=[];
-        preOnsetStim.stimulus=interTrialLuminance;
-        preOnsetStim.stimType='loop';
-        preOnsetStim.scaleFactor=0;
-        preOnsetStim.startFrame=0;
-        preOnsetStim.stochasticDistribution=[];
-        preOnsetStim.punishResponses=false;
+        preRequestStim=[];
+        preRequestStim.stimulus=interTrialLuminance;
+        preRequestStim.stimType='loop';
+        preRequestStim.scaleFactor=0;
+        preRequestStim.startFrame=0;
+        preRequestStim.autoTrigger=[];
+        preRequestStim.punishResponses=false;
 
         preResponseStim=discrimStim;
         preResponseStim.punishResponses=false;

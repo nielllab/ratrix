@@ -1,4 +1,4 @@
-function [stimulus updateSM resolutionIndex preOnsetStim preResponseStim discrimStim LUT targetPorts distractorPorts details interTrialLuminance text indexPulses] = ...
+function [stimulus updateSM resolutionIndex preRequestStim preResponseStim discrimStim LUT targetPorts distractorPorts details interTrialLuminance text indexPulses] = ...
     calcStim(stimulus,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % 1/30/09 - trialRecords now includes THIS trial
 s = stimulus;
@@ -182,15 +182,15 @@ discrimStim.stimulus=out;
 discrimStim.stimType=type;
 discrimStim.scaleFactor=scaleFactor;
 discrimStim.startFrame=0;
-discrimStim.stochasticDistribution=[];
+discrimStim.autoTrigger=[];
 
-preOnsetStim=[];
-preOnsetStim.stimulus=interTrialLuminance;
-preOnsetStim.stimType='loop';
-preOnsetStim.scaleFactor=0;
-preOnsetStim.startFrame=0;
-preOnsetStim.stochasticDistribution=[];
-preOnsetStim.punishResponses=false;
+preRequestStim=[];
+preRequestStim.stimulus=interTrialLuminance;
+preRequestStim.stimType='loop';
+preRequestStim.scaleFactor=0;
+preRequestStim.startFrame=0;
+preRequestStim.autoTrigger=[];
+preRequestStim.punishResponses=false;
 
 preResponseStim=discrimStim;
 preResponseStim.punishResponses=false;

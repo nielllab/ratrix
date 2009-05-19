@@ -450,7 +450,7 @@ while ~done && ~quit;
         % we might need to do if isempty(framesUntilTransition) && strategy is 'cache', then set a framesUntilTransition==size(stim,3)
 
         isFinalPhase = getIsFinalPhase(spec);
-        stochasticDistribution = getStochasticDistribution(spec);
+        autoTrigger = getAutoTrigger(spec);
 
         % =========================================================================
 
@@ -458,7 +458,7 @@ while ~done && ~quit;
         phaseRecords(phaseNum).loop = loop;
         phaseRecords(phaseNum).trigger = trigger;
         phaseRecords(phaseNum).strategy = strategy;
-        phaseRecords(phaseNum).stochasticProbability = stochasticDistribution;
+        phaseRecords(phaseNum).autoTrigger = autoTrigger;
         phaseRecords(phaseNum).timeoutLengthInFrames = framesUntilTransition;
         phaseRecords(phaseNum).floatprecision = floatprecision;
         % phaseRecords(phaseNum).stim=stim;
@@ -695,10 +695,10 @@ while ~done && ~quit;
 
     % do stochastic port hits after keyboard so that wont happen if another port already triggered
     if ~paused
-        if ~isempty(stochasticDistribution) && ~any(ports)
-            for j=1:2:length(stochasticDistribution)
-                if rand<stochasticDistribution{j}
-                    ports(stochasticDistribution{j+1}) = 1;
+        if ~isempty(autoTrigger) && ~any(ports)
+            for j=1:2:length(autoTrigger)
+                if rand<autoTrigger{j}
+                    ports(autoTrigger{j+1}) = 1;
                     didStochasticResponse=true; %edf: shouldn't this only be if one was tripped?
                     break;
                 end

@@ -77,7 +77,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
 			%	newSM - a (possibly) modified stimManager object
 			%	updateSM - a flag whether or not to copy newSM to ratrix
 			%	resInd - for setting resolution - DO NOT CHANGE
-			%	preOnsetStim - a struct containing all stim-specifc parameters to create a stimSpec for the pre-request phase
+			%	preRequestStim - a struct containing all stim-specifc parameters to create a stimSpec for the pre-request phase
 			%	preResponseStim - a struct containing all stim-specific parameters to create a stimSpec for the pre-response phase
 			%	discrimStim - a struct containing the parameters to create a stimSpec for the discriminandum phase
 			%		the parameters needed are: stimType, stim(actual movie frames), scaleFactor, [phaseLabel], [framesUntilTransition], [startFrame], [phaseType]
@@ -91,14 +91,14 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
 			%	indexPulses - DO NOT CHANGE
 			
 			% now, we should ALWAYS call phaseify (perhaps rename to createStimSpecsFromParams), which should do the following:
-			%	INPUTS: preOnsetStim, preResponseStim, discrimStim, targetPorts, distractorPorts, requestPorts,interTrialLuminance,hz,indexPulses
+			%	INPUTS: preRequestStim, preResponseStim, discrimStim, targetPorts, distractorPorts, requestPorts,interTrialLuminance,hz,indexPulses
 			%	OUTPUTS: stimSpecs, startingStimSpecInd
 			%		- should handle creation of default phase setup for nAFC/freeDrinks, and also handle additional phases depending on delayManager and responseWindow
 			%		- how then does calcStim return a set of custom phases? - it no longer can, because we are forcing calcstim to return 3 structs...to discuss later?
             [newSM, ...
                 updateSM, ...
                 resInd, ...
-				preOnsetStim, ...
+				preRequestStim, ...
 				preResponseStim, ...
                 discrimStim, ...           %not recorded in trial record
                 LUT, ...            %not recorded in trial record
@@ -169,7 +169,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
 			% fli: yeah, i mean we have access to the method - this was just a note to myself that
 			% calcStim could change the class of the ITL and return it as trialRecords(trialInd).interTrialLuminance,
 			% so we want to use this value from calcStim, not the stimManager's original value
-            [stimSpecs startingStimSpecInd] = createStimSpecsFromParams(trialManager,preOnsetStim,preResponseStim,discrimStim,...
+            [stimSpecs startingStimSpecInd] = createStimSpecsFromParams(trialManager,preRequestStim,preResponseStim,discrimStim,...
 				trialRecords(trialInd).targetPorts,trialRecords(trialInd).distractorPorts,getRequestPorts(trialManager,getNumPorts(station)),...
 				trialRecords(trialInd).interTrialLuminance,trialRecords(trialInd).resolution.hz,indexPulses);
 

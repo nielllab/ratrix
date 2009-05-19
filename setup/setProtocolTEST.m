@@ -120,7 +120,7 @@ vh=nAFC(sm,percentCorrectionTrials,constantRewards);
 % vh_responseWindow=nAFC(sm,percentCorrectionTrials,constantRewards,...
 %     [],[],[],[],[],[],'immediate',2000);
 responseLockoutMs=[2000 4000];
-delayFcn=hazard(.99,2000,0);
+delayFcn=flatHazard(.99,2000,0);
 vh_delayed=nAFC(sm,percentCorrectionTrials,constantRewards,...
     [],[],[],[],[],[],delayFcn,responseLockoutMs);
 
@@ -675,7 +675,7 @@ ts103 = trainingStep(vh_delayed, cDots, repeatIndef, noTimeOff(), svnRev, svnChe
 %     ts18, ts19, ts20, ts21, ts22});
 % stepNum=21;
 % p=protocol('gabor test2', {ts29, ts1, ts4, ts12, ts2, ts12, ts8, ts11,ts9,ts10,sweepContrast,ts23,ts24,ts27,ts30});
-stepNum=uint8(11);
+stepNum=uint8(1);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

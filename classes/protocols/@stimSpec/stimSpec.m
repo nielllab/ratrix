@@ -1,7 +1,7 @@
 function spec=stimSpec(varargin)
 % stimSpec  class constructor.
 % spec=stimSpec(stimulus,transitions,stimType,startFrame,framesUntilTransition,
-%	stochasticDistribution,scaleFactor,isFinalPhase,hz,phaseType,phaseLabel,punishResponses,[isStim],[indexPulses])
+%	autoTrigger,scaleFactor,isFinalPhase,hz,phaseType,phaseLabel,punishResponses,[isStim],[indexPulses])
 %
 % INPUTS
 % stimulus                  the stimulus frames to show, or expert-mode parameters struct (equivalent to non-phased 'out')
@@ -23,7 +23,7 @@ function spec=stimSpec(varargin)
 %                               advances to the special 'frame timeout' phase - see above
 %                               if empty, then hold this phase indefinitely until a port transition is triggered
 %                               or we transition due to the strategy of 'cache' or 'timedFrames'.
-% stochasticDistribution    a cell array of values {pA, portA, pB, portB,...} where pA specifies the probability of stochastically triggering
+% autoTrigger               a cell array of values {pA, portA, pB, portB,...} where pA specifies the probability of stochastically triggering
 %                            	portA, and pB specifies the probability of triggering portB, etc
 %                           	this is done for every frame of the stimulus (loop of runRealTimeLoop), and the execution order is whatever comes first
 %                               in this cell array (ie pA is tried, then pB, and so forth)
@@ -54,7 +54,7 @@ spec.transitions = {[], 0};
 spec.stimType = 'loop';
 spec.startFrame = 1;
 spec.framesUntilTransition = [];
-spec.stochasticDistribution = []; % for now the "distribution" is a unit random criterion between 0 and 1
+spec.autoTrigger = []; % for now the "distribution" is a unit random criterion between 0 and 1
 spec.scaleFactor=0;
 spec.isFinalPhase = 0;
 spec.hz=0;
@@ -147,18 +147,18 @@ switch nargin
         else
             error('framesUntilTransition must be a real scalar or empty')
         end
-        % stochasticDistribution
+        % autoTrigger
         if iscell(varargin{6})
             stoD = varargin{6};
             if isreal(stoD{1}) && stoD{1} >= 0 && stoD{1} < 1 && isvector(stoD{2})
-                spec.stochasticDistribution = varargin{6};
+                spec.autoTrigger = varargin{6};
             else
                 error('distribution must be a real number in [0,1) and port must be a vector');
             end
         elseif isempty(varargin{6})
             'do nothing here b/c we do not want any auto requests';
         else
-            error('stochasticDistribution must be a cell array');
+            error('autoTrigger must be a cell array');
         end
         % scaleFactor
         if (length(varargin{7})==2 && all(varargin{7}>0)) || (length(varargin{7})==1 && varargin{7}==0)
@@ -181,13 +181,13 @@ switch nargin
             error('hz must be scalar real >0')
         end
         % phaseType - we need this so that runRealTimeLoop knows whether or not this phase should do a reward/airpuff, etc
-        if ~isempty(varargin{10}) && ischar(varargin{10}) && ismember(varargin{10},{'reinforced','pre-onset','pre-response',...
+        if ~isempty(varargin{10}) && ischar(varargin{10}) && ismember(varargin{10},{'reinforced','pre-request','pre-response',...
                 'discrim','itl'})
             spec.phaseType=varargin{10};
         elseif isempty(varargin{10})
             spec.phaseType=[];
         else
-            error('phaseType must be ''reinforced'', ''pre-onset'', ''pre-response'', ''discrim'', ''itl'', or []');
+            error('phaseType must be ''reinforced'', ''pre-request'', ''pre-response'', ''discrim'', ''itl'', or []');
         end
         % phaseLabel
         if ischar(varargin{11})

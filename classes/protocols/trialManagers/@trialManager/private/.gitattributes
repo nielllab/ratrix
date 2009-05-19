@@ -9,7 +9,6 @@
 /getSoundManager.m -text
 /updateFrameIndexUsingTextureCache.m -text
 /handlePhasedTrialLogic.m -text
-/phaseify.m -text
 /determineStrategy.m -text
 /saveMissedFrameData.m -text
 /drawFrameUsingTextureCache.m -text

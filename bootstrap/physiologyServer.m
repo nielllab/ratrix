@@ -163,11 +163,13 @@ f = figure('Visible','off','MenuBar','none','Name','neural GUI',...
                     end
                     for j=1:length(fn)
                         val=toShow(i).eventParams.(fn{j});
-                        if isnumeric(val)
-                            val=num2str(val);
+                        if ~isnan(val)
+                            if isnumeric(val)
+                                val=num2str(val);
+                            end
+                            appnd=sprintf('%s:%s\t',fn{j},val);
+                            str=[str appnd];
                         end
-                        appnd=sprintf('%s:%s\t',fn{j},val);
-                        str=[str appnd];
                     end
                     appnd=sprintf('%s',toShow(i).comment);
                     str=[str appnd];
@@ -651,7 +653,7 @@ offsetEventSubmit = uicontrol(f,'Style','pushbutton','String','enter','Visible',
                 eventParams.face=faceStrs{get(faceMenu,'Value')};
             case 'anesth check'
                 eventParams.isoflurane=isofluraneStrs{get(isofluraneMenu,'Value')};
-                eventParams.withdrawal=withdrawalStrs{get(withdrawalStrs,'Value')};
+                eventParams.withdrawal=withdrawalStrs{get(withdrawalMenu,'Value')};
                 eventParams.breathPerMin=breathPerMinStrs{get(breathPerMinMenu,'Value')};
                 eventParams.breathType=breathTypeStrs{get(breathTypeMenu,'Value')};
             otherwise
@@ -706,6 +708,9 @@ offsetEventSubmit = uicontrol(f,'Style','pushbutton','String','enter','Visible',
         updateDisplay();
         % flush the comments buffer
         set(currentComment,'String','');
+        % reset eventType to comment
+        set(eventTypeMenu,'Value',defaultIndex);
+        eventTypeC([],[]);
     end % end logEvent function
 
 % ========================================================================================
@@ -1013,6 +1018,8 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
                     chunkClock=t;
                 end
             end
+            updateDisplay();
+            WaitSecs(0.3);
         end
         % ==============================================
         % after a quit, handle all TRIALS stuff
@@ -1062,6 +1069,7 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
         ai=[];
         runningLoop=false;
         if running || recording % if we only turned off one of recording/running, then restart the run loop
+            updateDisplay();
             run();
         end
     end

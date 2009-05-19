@@ -6,6 +6,7 @@ function fs=analysisPlotter(selection,compiledFileDir,includeKeyboard)
 % end
 
 %compileTrialRecords
+origCompiledFileDir=compiledFileDir;
 
 fs=[];
 if strcmp(selection.type,'all')
@@ -21,7 +22,7 @@ if strcmp(selection.type,'all')
             % added 10/3/08 - get compiledFileDir from subID, subject-specific
             if isempty(compiledFileDir)
                 conn = dbConn();
-                compiledFileDir = getCompilePathBySubject(conn, subIDs{1});
+                compiledFileDir = getCompilePathBySubject(conn, subIDs{i});
                 compiledFileDir = compiledFileDir{1};
                 if isempty(compiledFileDir) % no compiled directory in oracle!
                     toBePlotted = {'weight'};
@@ -31,6 +32,7 @@ if strcmp(selection.type,'all')
             end
             % 3/23/09 - moved loading compiledRecord here from doAnalysisPlot so we dont repeat the load 4x
             records=getRecords(compiledFileDir,subIDs{i});
+            compiledFileDir=origCompiledFileDir;
             
             fs(end+1) = figure('Name', char(subIDs(i)),'NumberTitle','off');
             for j = 1:numRows
@@ -79,6 +81,7 @@ else
                     end
                     % 3/23/09 - moved loading compiledRecord here from doAnalysisPlot so we dont repeat the load 4x
                     records=getRecords(compiledFileDir,selection.subjects{i,j,k});
+                    compiledFileDir=origCompiledFileDir;
                     hold on
                     doAnalysisPlot(records,selection.subjects{i,j,k},selection.type, selection.filter, selection.filterVal, selection.filterParam,includeKeyboard);
                     title(gca,sprintf('%s - %s: %s',selection.type,selection.subjects{i,j,k},datestr(now,0)))

@@ -265,13 +265,9 @@ else
 
     else
         subjectID
-        if isempty(d)
-            compiledFile
-            dir(compiledFile)
-            dir(compiledFileDir)
-            fprintf('can''t seem to dir %s\nyou should make sure you can see this directory\ntry to open it in your file system-- you may be prompted for authentication, which may solve this problem\n',compiledFileDir)
-        end
-        d.name
+        records
+        type
+        filter
         warning('didn''t find any records')
     end
 end

@@ -6,6 +6,13 @@ function [frameIndices frameTimes frameLengths correctedFrameIndices correctedFr
 % frameIndices - the exact sample index for each pulse
 % frameTimes - the time value retrieved from the index of a corresponding pulse (not unique!)
 % each frame = three pulses (between the single pulses, ignore double pulses)
+frameIndices=[];
+frameTimes=[];
+frameLengths=[];
+correctedFrameIndices=[];
+correctedFrameTimes=[];
+correctedFrameLengths=[];
+stimInds=[];
 passedQualityTest = true; % changed to false temp - to not do analysis until we get better data (10.29.08)
 
 % parameters for threshold
@@ -22,6 +29,11 @@ threshold = -2.0; % falling is the first edge of the downward pulse
 diff_vector = diff(pulseData); % first derivative
 % find all pulses (places where the diff is > threshold)
 pulses = find(diff_vector < threshold); % this is only the left edge of each pulse
+if isempty(pulses)
+    % 5/19/09 - if there are no frame pulses in this chunk, how do we know the frames?
+    passedQualityTest=false;
+    return;
+end
 % 10/30/08 - need to postprocess pulses (to weed out cases where the pulse is split among multiple samples)
 % only take the last sample of the pulse (set threshold to be low then)
 runs = diff(pulses);

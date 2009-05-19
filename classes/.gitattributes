@@ -87,7 +87,6 @@ db/@dbConn/getFreeWaterHistory.m -text
 protocols/reinforcementManagers/@constantReinforcement/setRewardSizeULorMS.m -text
 protocols/reinforcementManagers/@reinforcementManager/setReinforcementParam.m -text
 protocols/stimManagers/@filteredNoise/decache.m -text
-@datanet/stop.m -text
 @datanet/getConstants.m -text
 @datanet/startDataListener.m -text
 @datanet/getStorePath.m -text
@@ -97,8 +96,6 @@ protocols/stimManagers/@filteredNoise/decache.m -text
 @datanet/datanet.m -text
 @datanet/runDataListener.m -text
 @datanet/getCon.m -text
-@datanet/getTrialData.m -text
-@datanet/setup.m -text
 protocols/criteria/@numTrialsDoneCriterion/checkCriterion.m -text
 protocols/criteria/@numTrialsDoneCriterion/numTrialsDoneCriterion.m -text
 protocols/criteria/@receptiveFieldCriterion/receptiveFieldCriterion.m -text

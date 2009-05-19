@@ -10,7 +10,7 @@ function quit = analysisManagerByChunk(subjectID, path, cellBoundary, spikeDetec
 %	path - the path where neuralRecords are stored
 %	cellBoundary - specifies which trials/chunks to analyze
 %       eg: {'trialRange',[1 5]} means all chunks in trials 1-5
-%       {'trialAndChunkRange',{[1 3],[4 6]}} means from trial 1, chunk 3 to trial 4, chunk 6 inclusive
+%       {'trialAndChunkRange',{[1 3], [4 6]}} means from trial 1, chunk 3 to trial 4, chunk 6 inclusive
 %       {'physLog',{'04.21.2009','all','first'}} means get the cell boundaries from the phys log for 4/21/09 (and use the first cell)
 %       {'physLog',{'04.21.2009',[4 200],'last'}} means get the last cell from 4/21/09 within events 4-200 (of that day)
 %	spikeDetectionParams - these should now be from the 'activeParameters' in the neuralRecord file
@@ -53,10 +53,10 @@ elseif iscell(cellBoundary) && length(cellBoundary)==2
             end
             boundaryRange=[cellBoundary{2}(1) 1 cellBoundary{2}(2) Inf]; % [startTrial startChunk endTrial endChunk]
         case 'trialAndChunkRange'
-            if any(~isnumeric(cellBoundary{2})) || length(cellBoundary{2})~=4
-                error('invalid parameters for trialAndChunkRange cellBoundary');
+            if ~iscell(cellBoundary{2}) || length(cellBoundary{2})~=2 || length(cellBoundary{2}{1})~=2 || length(cellBoundary{2}{2})~=2
+                error('trialAndChunkRange cellBoundary must be in format {''trialAndChunkRange'',{[startTrial startChunk], [endTrial endChunk]}}');
             end
-            boundaryRange=[cellBoundary{2}(1) cellBoundary{2}(2) cellBoundary{2}(3) cellBoundary{2}(4)]; % [startTrial startChunk endTrial endChunk]
+            boundaryRange=[cellBoundary{2}{1}(1) cellBoundary{2}{1}(2) cellBoundary{2}{2}(1) cellBoundary{2}{2}(2)]; % [startTrial startChunk endTrial endChunk]
         case 'physLog'
             boundaryRange = getCellBoundaryFromEventLog(subjectID,cellBoundary{2},neuralRecordsPath);
             startSysTime=boundaryRange(3);
@@ -495,10 +495,11 @@ while ~quit
                     evalStr = sprintf('sm = %s();',stimRecord.stimManagerClass);
                     eval(evalStr);
                     % 1/26/09 - skip analysis if not worth sorting spikes
-                    doAnalysis= (~exist(analysisLocation,'file') || overwriteAll) && worthSpikeSorting(sm,quality);
+%                     doAnalysis= (~exist(analysisLocation,'file') || overwriteAll) && worthSpikeSorting(sm,quality);
+                    doAnalysis=worthSpikeSorting(sm,quality);
                     % if we need to do analysis (either no analysis file exists or we want to overwrite)
 
-                    if 1 %doAnalysis
+                    if doAnalysis % 1
                         % do something with loaded information
                         % NOTE - neuralRecord refers to all the 'neuralRecord' for a particular chunk!
                         % get some paramteres from neual data
@@ -615,6 +616,10 @@ for i=1:size(frameIndices,1)
     photoDiode(i) = sum(photoDiodeData(frameIndices(i,1):frameIndices(i,2))-darkFloor);
     %why are these negative?... i thought black was zero... guess not! subtracting a darkfloor now -pmm
 end
+if isempty(photoDiode)
+    % that means frameIndices was empty
+    return;
+end
 squaredVals = (photoDiode).^2;  % rescale so zero is smallest value... a bit funny
 % now sort the values, and choose the first 5% to show threshold
 %fractionBaselineSpikes=0.05; % chance of a single spike on a frame % not used
@@ -624,7 +629,6 @@ valuesToCalcThreshold = sort(squaredVals,'descend');
 pivot = ceil(length(squaredVals) * fractionStimSpikes);
 threshold = (valuesToCalcThreshold(pivot) + valuesToCalcThreshold(pivot+1)) / 2;
 
-
 %numSpikes=ceil(maxNumStimSpikes*(squaredVals-threshold)/(valuesToCalcThreshold(1)-threshold));
 
 % for each frame, see if it passes a threshold
@@ -632,7 +636,7 @@ for i=1:size(frameIndices,1)
     if squaredVals(i) > threshold
         numSpikes=ceil(maxNumStimSpikes*(squaredVals(i)-threshold)/(valuesToCalcThreshold(1)-threshold));
         randInds=randperm(diff(frameIndices(i,:)))+frameIndices(i,1); % randomly order the candidate locations
-        spikes=[spikes randInds(1:numSpikes)];  % put N spikes at random locations (doesn't respect refractory)
+        spikes=[spikes;randInds(1:numSpikes)'];  % put N spikes at random locations (doesn't respect refractory)
         pre=floor(.5*samplingRate/1000);
         post=floor(1.5*samplingRate/1000); % hard-coded 1.5ms and 0.5ms for now...
         for j=1:numSpikes

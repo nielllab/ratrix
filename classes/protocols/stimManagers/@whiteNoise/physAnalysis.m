@@ -88,7 +88,7 @@ for i=1:length(stimFrames)
             stixels(stixels<0)=0;
         case 'binary'
             rand('state',seeds(mod(stimFrames(i)-1,length(seeds))+1));
-            stixels = round(whiteVal* (stimulusDetails.distribution.lowVal+(double(rand(spatialDim([2 1]))<stimulusDetails.distribution.probability)*hiLoDiff)));
+            stixels = round(whiteVal* (stimulusDetails.distribution.lowVal+(double(rand(spatialDim([1 2]))<stimulusDetails.distribution.probability)*hiLoDiff)));
         otherwise
             error('never')
     end

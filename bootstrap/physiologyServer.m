@@ -86,18 +86,21 @@ ratObsIndex=find(strcmp(eventTypeStrs,'rat obs'));
 anesthCheckIndex=find(strcmp(eventTypeStrs,'anesth check'));
 
 % ========================================================================================
+events_data=[];
+eventNum=1;
+eventsToSendIndex=1;
 savePath=fullfile('\\Reinagel-lab.AD.ucsd.edu\RLAB\Rodent-Data\physiology',ratIDStrs{defaultIndex},...
     datestr(now,'mm.dd.yyyy'));
-d=dir(fullfile(savePath,'*.mat')); % look for existing files
-% should only have one element in d
-if length(d)==1
-    load(fullfile(savePath,d(1).name));
-    disp('loaded existing event data');
-else
-    events_data=[];
-end
-eventNum=length(events_data)+1;
-eventsToSendIndex=eventNum;
+% d=dir(fullfile(savePath,'*.mat')); % look for existing files
+% % should only have one element in d
+% if length(d)==1
+%     load(fullfile(savePath,d(1).name));
+%     disp('loaded existing event data');
+% else
+%     events_data=[];
+% end
+% eventNum=length(events_data)+1;
+% eventsToSendIndex=eventNum;
 % ========================================================================================
 % the GUI
 f = figure('Visible','off','MenuBar','none','Name','neural GUI',...
@@ -425,8 +428,9 @@ clientIPField = uicontrol(f,'Style','popupmenu','String',clientIPStrs,'Units','p
     'Enable','on','Position',[8*margin+7*fieldWidth fHeight-1*oneRowHeight-margin fieldWidth*1.4 oneRowHeight]);
 ratIDField = uicontrol(f,'Style','popupmenu','String',ratIDStrs,'Units','pixels','Value',defaultIndex,...
     'Enable','on','Position',[margin+8*fieldWidth fHeight-2*oneRowHeight-margin fieldWidth oneRowHeight],...
-    'Callback',@reloadEventsForSubject);
-    function reloadEventsForSubject(source,eventdata)
+    'Callback',@reloadEventsAndSurgeryFields);
+    function reloadEventsAndSurgeryFields(source,eventdata)
+        % reload physiology event log
         savePath=fullfile('\\Reinagel-lab.AD.ucsd.edu\RLAB\Rodent-Data\physiology',ratIDStrs{get(ratIDField,'Value')},...
             datestr(now,'mm.dd.yyyy'));
         d=dir(fullfile(savePath,'*.mat')); % look for existing files
@@ -449,6 +453,20 @@ ratIDField = uicontrol(f,'Style','popupmenu','String',ratIDStrs,'Units','pixels'
         eventNum=length(events_data)+1;
         eventsToSendIndex=eventNum;
         updateDisplay();
+        % get surgery anchor and bregma fields from oracle if possible
+        try
+            conn=dbConn();
+            surg=getSurgeryFields(conn,ratIDStrs{get(ratIDField,'Value')});
+            set(surgeryAnchorAPField,'String',num2str(surg.anchorAP));
+            set(surgeryAnchorMLField,'String',num2str(surg.anchorML));
+            set(surgeryAnchorZField,'String',num2str(surg.anchorZ));
+            set(surgeryBregmaAPField,'String',num2str(surg.bregmaAP));
+            set(surgeryBregmaMLField,'String',num2str(surg.bregmaML));
+            set(surgeryBregmaZField,'String',num2str(surg.bregmaZ));
+        catch ex
+            warning('could not get surgery fields from oracle');
+        end
+            
     end
 ratProtocolField = uicontrol(f,'Style','popupmenu','String',ratProtocolStrs,'Units','pixels','Value',defaultIndex,...
     'Enable','on','Position',[margin+8*fieldWidth fHeight-3*oneRowHeight-margin fieldWidth oneRowHeight]);
@@ -1102,9 +1120,7 @@ recentEventsDisplay = uicontrol(f,'Style','edit','String','recent events','Visib
 
 % ========================================================================================
 % turn on the GUI
-if ~isempty(events_data)
-    updateDisplay()
-end
+reloadEventsAndSurgeryFields([],[]);
 set(f,'Visible','on');
 end
 

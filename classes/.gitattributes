@@ -213,3 +213,4 @@ protocols/trialManagers/@autopilot/updateTrialState.m -text
 protocols/@stimSpec/getAutoTrigger.m -text
 protocols/delayManagers/@flatHazard/calcAutoRequest.m -text
 protocols/delayManagers/@flatHazard/flatHazard.m -text
+db/@dbConn/getSurgeryFields.m -text

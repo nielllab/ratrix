@@ -49,6 +49,7 @@ else
 %         out.yPosNoisePix=getDetail(trialRecords,'yPosNoisePix');
 
         [out.blockID newLUT] = extractFieldAndEnsure(stimDetails,{'blockID'},'scalar',newLUT);
+        [out.trialThisBlock newLUT] = extractFieldAndEnsure(stimDetails,{'trialThisBlock'},'scalar',newLUT);
 %         out.blockID=getDetail(trialRecords,'blockID');
         
        

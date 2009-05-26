@@ -76,6 +76,12 @@ try
             end
             
             fprintf('got trial end command from ratrix\n')
+        case constants.stimToDataCommands.S_ERROR_RECOVERY_METHOD
+            % whether client pressed 'Restart' or 'Quit'
+            response=constants.dataToStimResponses.D_ERROR_METHOD_RECEIVED;
+            cparams=pnet_getvar(con);
+            retval=cparams.method;
+            fprintf('got error recovery method from client\n')
         case constants.omniMessages.END_OF_DOTRIALS
             % this handles a k+q from the client
             quit=true;

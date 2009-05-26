@@ -30,11 +30,13 @@ r.constants.stimToDataResponses.S_TIME_RESPONSE = 104;
 r.constants.stimToDataCommands.S_TRIAL_START_EVENT_CMD = 51;
 r.constants.stimToDataCommands.S_TRIAL_END_EVENT_CMD = 52;
 r.constants.stimToDataCommands.S_STOP_RECORDING_CMD = 53;
+r.constants.stimToDataCommands.S_ERROR_RECOVERY_METHOD = 54;
 
 % data to stim responses
 r.constants.dataToStimResponses.D_TRIAL_START_EVENT_ACK = 151;
 r.constants.dataToStimResponses.D_TRIAL_END_EVENT_ACK = 152;
 r.constants.dataToStimResponses.D_RECORDING_STOPPED = 153;
+r.constants.dataToStimResponses.D_ERROR_METHOD_RECEIVED = 154;
 
 % special omni messages that can act as both a command and a response (ack)
 r.constants.omniMessages.END_OF_DOTRIALS = 1001;

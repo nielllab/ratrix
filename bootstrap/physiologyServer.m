@@ -988,6 +988,25 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
                     % need to spool off remaining neural data for the chunk
                     % that got disconnected
                     quit=true;
+                    disp('quitting due to client disconnect');
+                    % check to see if client pressed 'Restart' or 'Quit'
+                    [data garbage retval] = handleCommands(data,[]);
+                    if ischar(retval)
+                        if strcmp(retval,'Restart')
+                            % do nothing
+                        elseif strcmp(retval, 'Quit')
+                            running=false;
+                            recording=false;
+                            set(toggleTrialsButton,'Value',0);
+                            set(toggleRecordingButton,'Value',0);
+                        else
+                            error('if not restart or quit, then what is the client method?');
+                        end
+                    else
+                        error('ERROR_RECOVERY_METHOD must be a string');
+                    end
+                    updateUI();
+                    updateDisplay();
                 end
                 if ~isempty(retval) % we have events_data to save
                     % retval should be a struct with fields 'time' and 'type' (and possibly others to add...)

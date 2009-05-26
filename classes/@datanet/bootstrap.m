@@ -49,7 +49,7 @@ while 1
                     validStr=true;
                     quit=false;
                     commands=[];
-                    commands.cmd = datanet_constants.stimToDataCommands.S_ERROR_RECOVERY_METHOD;
+                    commands.cmd = constants.stimToDataCommands.S_ERROR_RECOVERY_METHOD;
                     cparams=[];
                     cparams.method = 'Restart';
                     commands.arg=cparams;
@@ -61,7 +61,7 @@ while 1
                     while stimcon == -1
                         stimcon=pnet(datanet.sockcon,'tcplisten','noblock');
                         if stimcon==-1
-                            fprintf('tried tcplisten - no connection received')
+                            fprintf('tried tcplisten - no connection received\n')
                             WaitSecs(3);
                         end
                     end
@@ -76,7 +76,7 @@ while 1
                     validStr=true;
                     quit=true;
                     commands=[];
-                    commands.cmd = datanet_constants.stimToDataCommands.S_ERROR_RECOVERY_METHOD;
+                    commands.cmd = constants.stimToDataCommands.S_ERROR_RECOVERY_METHOD;
                     cparams=[];
                     cparams.method = 'Quit';
                     commands.arg=cparams;

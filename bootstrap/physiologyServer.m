@@ -774,6 +774,7 @@ toggleCellButton = uicontrol(f,'Style','togglebutton','String',cellT,'Visible','
                 delete(fullfile(savePath,deleteFilename));
             end
             eventNum=eventNum+1;
+            externalRequest=[];
         else
             % we just need to pass externalRequest to the run loop
         end
@@ -983,56 +984,55 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
                 if requestDone % we have to do this instead of just updating the value of externalRequest, becuase of some weird matlab scope issue
                     externalRequest=[];
                 end
-                if status==0
-                    % disconnect detected - close AI for now
-                    % need to spool off remaining neural data for the chunk
-                    % that got disconnected
-                    quit=true;
-                    disp('quitting due to client disconnect');
-                    % check to see if client pressed 'Restart' or 'Quit'
-                    [data garbage retval] = handleCommands(data,[]);
-                    if ischar(retval)
-                        if strcmp(retval,'Restart')
-                            % do nothing
-                        elseif strcmp(retval, 'Quit')
-                            running=false;
-                            recording=false;
-                            set(toggleTrialsButton,'Value',0);
-                            set(toggleRecordingButton,'Value',0);
-                        else
-                            error('if not restart or quit, then what is the client method?');
-                        end
-                    else
-                        error('ERROR_RECOVERY_METHOD must be a string');
-                    end
-                    updateUI();
-                    updateDisplay();
-                end
                 if ~isempty(retval) % we have events_data to save
                     % retval should be a struct with fields 'time' and 'type' (and possibly others to add...)
                     for j=1:length(retval)
-                        events_data(end+1).time=retval(j).time;
-                        events_data(end).eventType=retval(j).type;
-                        events_data(end).eventNumber=eventNum;
-                        if strcmp(retval(j).type,'trial start')
-                            fullFilename=retval(j).fullFilename;
-                            % reset chunkCount and chunkClock?
-                            chunkCount=1;
-                            chunkClock=GetSecs();
-                            startTime=chunkClock;
+                        if isfield(retval(j),'errorMethod') && ~isempty(retval(j).errorMethod)
+                            % this is not a phys event, but rather a
+                            % 'restart' or 'quit' from client
+                            quit=true;
+                            disp('quitting due to client disconnect');
+                            method=retval(j).errorMethod;
+                            if ischar(method)
+                                if strcmp(method,'Restart')
+                                    % do nothing
+                                elseif strcmp(method, 'Quit')
+                                    running=false;
+                                    recording=false;
+                                    set(toggleTrialsButton,'Value',0);
+                                    set(toggleRecordingButton,'Value',0);
+                                else
+                                    error('if not restart or quit, then what is the client method?');
+                                end
+                            else
+                                error('ERROR_RECOVERY_METHOD must be a string');
+                            end
+                            updateUI();
+                            updateDisplay();
+                        else
+                            events_data(end+1).time=retval(j).time;
+                            events_data(end).eventType=retval(j).type;
+                            events_data(end).eventNumber=eventNum;
+                            if strcmp(retval(j).type,'trial start')
+                                fullFilename=retval(j).fullFilename;
+                                % reset chunkCount and chunkClock?
+                                chunkCount=1;
+                                chunkClock=GetSecs();
+                                startTime=chunkClock;
+                            end
+                            % should save events to phys log here?
+                            % save event log
+                            deleteFilename=sprintf('physiologyEvents_%d-%d.mat',1,eventNum-1);
+                            saveFilename=sprintf('physiologyEvents_%d-%d.mat',1,eventNum);
+                            if ~isdir(savePath)
+                                mkdir(savePath);
+                            end
+                            save(fullfile(savePath,saveFilename),'events_data','groups');
+                            if eventNum~=1
+                                delete(fullfile(savePath,deleteFilename));
+                            end
+                            eventNum=eventNum+1;
                         end
-                        % should save events to phys log here?
-                        % save event log
-                        deleteFilename=sprintf('physiologyEvents_%d-%d.mat',1,eventNum-1);
-                        saveFilename=sprintf('physiologyEvents_%d-%d.mat',1,eventNum);
-                        if ~isdir(savePath)
-                            mkdir(savePath);
-                        end
-                        save(fullfile(savePath,saveFilename),'events_data','groups');
-                        if eventNum~=1
-                            delete(fullfile(savePath,deleteFilename));
-                        end
-                        eventNum=eventNum+1;
                     end
                 end
             else % running is set, but could not connect to client (currently shouldnt be reachable b/c errors)

@@ -44,8 +44,16 @@ while 1
             while ~validStr
                 str=input('(R)estart trials OR (q)uit trials?','s');
                 if strcmpi(str,'r')
+                    % need to send a message to the server to NOT reset
+                    % running/recording!
                     validStr=true;
                     quit=false;
+                    commands=[];
+                    commands.cmd = datanet_constants.stimToDataCommands.S_ERROR_RECOVERY_METHOD;
+                    cparams=[];
+                    cparams.method = 'Restart';
+                    commands.arg=cparams;
+                    [gotAck] = sendCommandAndWaitForAck(datanet, commands);
                     pnet(datanet.con,'close');
                     datanet.con=[];
                     % reconnect!
@@ -67,6 +75,12 @@ while 1
                 elseif strcmpi(str,'q')
                     validStr=true;
                     quit=true;
+                    commands=[];
+                    commands.cmd = datanet_constants.stimToDataCommands.S_ERROR_RECOVERY_METHOD;
+                    cparams=[];
+                    cparams.method = 'Quit';
+                    commands.arg=cparams;
+                    [gotAck] = sendCommandAndWaitForAck(datanet, commands);
                     pnet(datanet.con,'close')
                     pnet('closeall')
                     datanet.con=[];

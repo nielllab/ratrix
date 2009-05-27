@@ -1035,7 +1035,7 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
                         end
                     end
                 end
-            else % running is set, but could not connect to client (currently shouldnt be reachable b/c errors)
+            else
                 WaitSecs(0.3);
                 drawnow;
             end

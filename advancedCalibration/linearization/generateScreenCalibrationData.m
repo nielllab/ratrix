@@ -1,22 +1,28 @@
-function measuredValues = generateScreenCalibrationData(method,clut,drawSpyderPositionFrame,screenType)
+function [measuredValues rawValues] = generateScreenCalibrationData(method,clut,drawSpyderPositionFrame,screenNum,screenType)
 % this function uses spyder to measure luminance values with the given 'method' for drawing stimuli
 % INPUTS:
 %   method - how to do the screen calibration:
 %   ie {'stimInBoxOnBackground',stim,background,patchRect,interValueRGB,numFramesPerValue,numInterValueFrames}
-%   stim - [height width 3 numFrames] matrix specifying indices into the CLUT
-%   background - the background RGB values, specified as indices into the CLUT
-%   patchRect - where to draw the stim on the background
-%   interValueRGB - the RGB values to show between frames of stim, specified as indices into the CLUT
-%   numFramesPerValue - how many frames to hold each frame of the stim
-%   numInterValueFrames - how many frames of interValueRGB to show between each set of frames in stim
+    %   stim - [height width 3 numFrames] matrix specifying indices into the CLUT
+    %   background - the background RGB values, specified as indices into the CLUT
+    %   patchRect - where to draw the stim on the background
+    %   interValueRGB - the RGB values to show between frames of stim, specified as indices into the CLUT
+    %   numFramesPerValue - how many frames to hold each frame of the stim
+    %   numInterValueFrames - how many frames of interValueRGB to show between each set of frames in stim
 %   clut - the CLUT to use for this measurement
 %   drawSpyderPositionFrame - a flag indicating whether or not to prompt user to position spyder on screen
+%   screenNum - the screen number to use when calling PTB
 %   screenType - 'CRT' or 'LCD'
+% OUTPUTS:
+%   measuredValues - the measured Y luminance values from the spyder
+%   rawValues - the raw values of the stim (as indices into the CLUT): this is useful b/c calibrateMonitor might need these, but
+%       doesn't know how to get them, whereas this method switches on the method
 %
 % NOTE: all indices in the CLUT are in the range 0-255, NOT 1-256. for some reason, PTB accepts arguments to
 % 'MakeTexture' in the range 0-255 where 0 is dark and 255 is light.
 
 measuredValues=[];
+rawValues=[];
 
 if ~(ischar(screenType) && ismember(screenType,{'LCD','CRT'}))
     error('screenType must be ''LCD'' or ''CRT''');
@@ -28,7 +34,6 @@ end
 
 try
     % set up PTB
-    screenNum=max(Screen('Screens'));
     [window winRect]=Screen('OpenWindow',screenNum);
     [oldClut, dacbits, reallutsize] = Screen('ReadNormalizedGammaTable', screenNum);
     Screen('LoadNormalizedGammaTable', screenNum, clut);
@@ -39,6 +44,7 @@ try
     if length(whInd)~=3
         error('didn''t get 3 unique white indices')
     end
+    ListenChar(2);
     wh=Screen('MakeTexture',window,whInd);
     if drawSpyderPositionFrame
         positionFrame=getDefaultPositionFrame(width, height);
@@ -56,6 +62,7 @@ try
             end
         end
     end
+    ListenChar(1);
     Screen('DrawTexture',window,wh,[],winRect,[],0); %white screen required to open spyder
     Screen('DrawingFinished',window);
     vbl = Screen('Flip',window);
@@ -71,6 +78,7 @@ try
             %     {'stimInBoxOnBackground',stim,background,patchRect,interValueRGB,numFramesPerValue,numInterValueFrames}
             spyderData=stimInBoxOnBackground(window,spyderLib,...
                 method{2},method{3},method{4},method{5},method{6},method{7},reallutsize);
+            rawValues=method{2};
         otherwise
             error('unsupported method for screen calibration');
     end

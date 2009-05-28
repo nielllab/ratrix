@@ -1,4 +1,4 @@
-function out=addCLUTToOracle(CLUT,mac,timestamp,svnRev,cmd)
+function out=addCalibrationData(CLUT,mac,timestamp,svnRev,cmd)
 % this function adds the given CLUT to the oracle table 'CLUTS'
 % INPUTS:
 %   CLUT - the color LUT; may include RGB/xyz measurements, linearized LUT, and validation data
@@ -41,11 +41,11 @@ else
     error('failed to find a matching mac address!');
 end
 
-% insert into CLUTS
-str=sprintf('insert into CLUTS (timestamp,station_mac,gfx_serial,crt_serial,svn_revision,cmd_line,data) VALUES (to_date(''%s'',''mm-dd-yyyy hh24:mi''),''%s'',''%s'',''%s'',%d,''%s'',empty_blob())',timestamp,mac,gfx,crt,svnRev,cmd);
+% insert into MONITOR_CALIBRATION
+str=sprintf('insert into MONITOR_CALIBRATION (timestamp,station_mac,gfx_serial,crt_serial,svn_revision,cmd_line,data) VALUES (to_date(''%s'',''mm-dd-yyyy hh24:mi''),''%s'',''%s'',''%s'',%d,''%s'',empty_blob())',timestamp,mac,gfx,crt,svnRev,cmd);
 out=exec(conn,str);
 
-updateCLUT(conn,mac,timestamp,CLUT);
+updateCalibrationData(conn,mac,timestamp,CLUT);
 
 closeConn(conn);
 

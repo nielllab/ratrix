@@ -50,26 +50,35 @@ drawSpyderPositionFrame = true;
 desiredValues=linspace(measuredValues(1),measuredValues(end),length(measuredValues));
 
 % now do something to compute linearizedCLUT
-linearizedCLUT=zeros(reallutsize,3);
-switch fitMethod
-    case 'linear'
-        desiredValuesForLUT=linspace(measuredValues(1),measuredValues(end),reallutsize);
-        % R values
-        rawInds=squeeze(rawValues(:,:,1,:));
-        raws=currentCLUT(uint16(rawInds)+1,1)';
-        linearizedCLUT(:,1) = interp1(measuredValues,raws,desiredValuesForLUT,'linear')'/raws(end); %consider pchip
-        % G values
-        rawInds=squeeze(rawValues(:,:,2,:));
-        raws=currentCLUT(uint16(rawInds)+1,2)';
-        linearizedCLUT(:,2) = interp1(measuredValues,raws,desiredValuesForLUT,'linear')'/raws(end); %consider pchip
-        % B values
-        rawInds=squeeze(rawValues(:,:,3,:));
-        raws=currentCLUT(uint16(rawInds)+1,3)';
-        linearizedCLUT(:,3) = interp1(measuredValues,raws,desiredValuesForLUT,'linear')'/raws(end); %consider pchip
-    case 'power'
-        error('not yet implemented');
-    otherwise
-        error('unsupported fitMethod');
+try
+    linearizedCLUT=zeros(reallutsize,3);
+    switch fitMethod
+        case 'linear'
+            desiredValuesForLUT=linspace(measuredValues(1),measuredValues(end),reallutsize);
+            % R values
+            rawInds=squeeze(rawValues(:,:,1,:));
+            raws=currentCLUT(uint16(rawInds)+1,1)';
+            linearizedCLUT(:,1) = interp1(measuredValues,raws,desiredValuesForLUT,'linear')'/raws(end); %consider pchip
+            % G values
+            rawInds=squeeze(rawValues(:,:,2,:));
+            raws=currentCLUT(uint16(rawInds)+1,2)';
+            linearizedCLUT(:,2) = interp1(measuredValues,raws,desiredValuesForLUT,'linear')'/raws(end); %consider pchip
+            % B values
+            rawInds=squeeze(rawValues(:,:,3,:));
+            raws=currentCLUT(uint16(rawInds)+1,3)';
+            linearizedCLUT(:,3) = interp1(measuredValues,raws,desiredValuesForLUT,'linear')'/raws(end); %consider pchip
+        case 'power'
+            error('not yet implemented');
+        otherwise
+            error('unsupported fitMethod');
+    end
+catch
+    % this is happening when measuredValues contains non-unique entries
+    % how does spyder get non-unique measurements for Y, even though stim
+    % is always unique?
+    % - what should we do with the repeated measurements? throw them away?
+    ple
+    keyboard
 end
 
 % recall generateScreenCalibrationData w/ new linearized CLUT and get validation data
@@ -80,10 +89,10 @@ validationValues = generateScreenCalibrationData(method,linearizedCLUT,drawSpyde
 Screen('LoadNormalizedGammaTable',screenNum,currentCLUT);
 
 % compare validationValues with desiredValues
-if max(abs(validationValues-desiredValues))>1.5
-    warning('validationValues differed dramatically from desiredValues - please recalibrate!');
-    keyboard
-end
+% if max(abs(validationValues-desiredValues))>1.5
+%     warning('validationValues differed dramatically from desiredValues - please recalibrate!');
+%     keyboard
+% end
 
 % put new linearizedCLUT into oracle
 if writeToOracle
@@ -91,7 +100,7 @@ if writeToOracle
         conn=dbConn();
         [junk mac]=getMACaddress();
         % HACK
-%         mac='0018F35DFAC0';
+        mac='0018F35DFAC0';
         % write linearizedCLUT to tempCLUT.mat and read as binary stream
         save('tempCLUT.mat','linearizedCLUT','measuredValues','currentCLUT','validationValues','details');
         fid=fopen('tempCLUT.mat');
@@ -99,8 +108,8 @@ if writeToOracle
         fclose(fid);
         timestamp=datestr(now,'mm-dd-yyyy HH:MM');
         svnRev=getSVNRevisionFromXML(getRatrixPath);
-        cmd='test';
-        addCLUTToOracle(CLUT,mac,timestamp,svnRev,cmd)
+        cmd='test ginger room';
+        addCalibrationData(CLUT,mac,timestamp,svnRev,cmd)
         closeConn(conn);
     catch ex
         disp(['CAUGHT EX: ' getReport(ex)]);

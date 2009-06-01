@@ -49,6 +49,17 @@ drawSpyderPositionFrame = true;
 % they should be very similar b/c the linearizedCLUT tries to force our second measurement to be equal to the desired values
 desiredValues=linspace(measuredValues(1),measuredValues(end),length(measuredValues));
 
+% 5/28/09 HACK for now
+% if any measuredValues are non unique, add an epsilon to them so they are
+% unique and interp doesnt complain!
+u=unique(measuredValues);
+for uu=1:length(u)
+    a=find(measuredValues==u(uu));
+    if length(a)>1
+        measuredValues(a(2:end))=measuredValues(a(2:end))+eps*[1:length(a)-1];
+    end
+end
+
 % now do something to compute linearizedCLUT
 try
     linearizedCLUT=zeros(reallutsize,3);

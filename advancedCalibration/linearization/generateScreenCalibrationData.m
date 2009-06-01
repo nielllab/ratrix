@@ -79,6 +79,10 @@ try
             spyderData=stimInBoxOnBackground(window,spyderLib,...
                 method{2},method{3},method{4},method{5},method{6},method{7},reallutsize);
             rawValues=method{2};
+        case 'fullScreenStim'
+            spyderData=fullScreenStim(window,spyderLib,...
+                method{2},method{3},method{4},method{5},method{6},method{7},reallutsize);
+            rawValues=method{2};
         otherwise
             error('unsupported method for screen calibration');
     end

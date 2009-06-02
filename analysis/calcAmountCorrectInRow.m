@@ -27,7 +27,7 @@ runEnds=diff([0 correct 0])==-1;  % force an end with a 0
 
 rE=find(runEnds)-1;
 rS=find(runStarts);
-runLengths=rE-rS+1;
+runLengths=rE-rS+1;  % note this errored once b/c length(rE)~= length(rS), should catch and debug...
 
 
 

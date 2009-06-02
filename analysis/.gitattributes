@@ -41,7 +41,6 @@ pmm/getDprMesh.m -text
 pmm/analyzePerContextualState.m -text
 pmm/megaTrials.m -text
 pmm/analyze117.m -text
-/analyzeGaze.m -text
 obselete/combineTwoSmallDataFiles.m -text
 obselete/convertLargeToSmallData.m -text
 obselete/getSaveLog.m -text

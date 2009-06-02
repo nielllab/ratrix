@@ -9,5 +9,5 @@ for i=1:length(ellipses)
 end
 if addText
     infoString=sprintf('%2.0f%% (%2.0f%%)',100*mean(~isnan(eyeSig(:,2))), 100*mean(sum(within,2)>0)); %fraction of frames with eyeData
-    text(max(eyeSig(:,1)),max(eyeSig(:,2)),infoString,'HorizontalAlignment','right','VerticalAlignment','top');
+    text(min(eyeSig(:,1)),min(eyeSig(:,2)),infoString,'HorizontalAlignment','left','VerticalAlignment','bottom');
 end

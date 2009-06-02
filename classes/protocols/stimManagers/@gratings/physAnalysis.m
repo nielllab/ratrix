@@ -416,15 +416,21 @@ subplot(3,2,3); plot(mean(rate'),'k','lineWidth',2); %legend({'Fo'})
 xlabel(sweptParameter); set(gca,'XTickLabel',valNames,'XTick',[1:length(vals)]); ylabel('rate (f0)'); set(gca,'YTickLabel',[0:.1:1]*parameters.refreshRate,'YTick',[0:.1:1])
 set(gca,'XLim',[1 length(vals)])
 
-subplot(3,2,4); plot(pow,'k','lineWidth',2); hold on; 
+modulation=pow./(parameters.refreshRate*mean(rate'))
+subplot(3,2,4); 
+plot(pow,'k','lineWidth',1); hold on; 
+plot(modulation,'--k','lineWidth',2); hold on;
 cohScaled=coh*max(pow); %1 is peak FR
 plot(cohScaled,'color',[.8 .8 .8],'lineWidth',1); 
 sigs=find(cohLB>0);
 plot(sigs,cohScaled(sigs),'o','color',[.6 .6 .6]); 
-legend({'f1','coh'})
+legend({'f1','f1/f0','coh'})
+
+
 plot([1:length(vals); 1:length(vals)],[pow; pow]+(powSEM'*[-1 1])','k')
+%plot([1:length(vals); 1:length(vals)],[pow; pow]+(powSEM'*[-1 1])','k')
 plot([1:length(vals); 1:length(vals)]+0.1,[coh; coh]+(cohSEM'*[-1 1])','color',[.8 .8 .8])
-xlabel(sweptParameter); set(gca,'XTickLabel',valNames,'XTick',[1:length(vals)]); ylabel('rate (f1)');
+xlabel(sweptParameter); set(gca,'XTickLabel',valNames,'XTick',[1:length(vals)]); ylabel('modulation (f1/f0)');
 ylim=get(gca,'YLim'); yvals=[ ylim(1) mean(ylim) ylim(2)];set(gca,'YTickLabel',yvals,'YTick',yvals)
 set(gca,'XLim',[1 length(vals)])
 

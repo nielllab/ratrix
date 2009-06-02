@@ -24,6 +24,8 @@ if numColors==1
 end
 
 if numGroup~=numColors
+    numGroup
+    numColors
     error('must specify a color for each group, or provide one color for all');
 end
 

@@ -64,9 +64,9 @@ else
 %         out.redLUT=getDetail(trialRecords,'LUT',256);
         
         %if anything is defined
-        [out.fitRF newLUT] = extractFieldAndEnsure(stimDetails,{'fitRF'},'isNotEmpty',newLUT);
-        [out.blocking newLUT] = extractFieldAndEnsure(stimDetails,{'blocking'},'isNotEmpty',newLUT);
-        [out.dynamicSweep newLUT] = extractFieldAndEnsure(stimDetails,{'dynamicSweep'},'isNotEmpty',newLUT);
+        [out.fitRF newLUT] = extractFieldAndEnsure(stimDetails,{'fitRF'},'isDefinedAndNotEmpty',newLUT);
+        [out.blocking newLUT] = extractFieldAndEnsure(stimDetails,{'blocking'},'isDefinedAndNotEmpty',newLUT);
+        [out.dynamicSweep newLUT] = extractFieldAndEnsure(stimDetails,{'dynamicSweep'},'isDefinedAndNotEmpty',newLUT);
 %         out.fitRF=isDefined(trialRecords, 'fitRF');
 %         out.blocking=isDefined(trialRecords, 'blocking');
 %         out.dynamicSweep=isDefined(trialRecords, 'dynamicSweep');

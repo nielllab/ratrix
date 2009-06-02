@@ -15,7 +15,7 @@ time=time-time(1);
 %y=e.eyeData(:,strcmp(e.eyeDataVarNames,'pupil_cr_y'));
 
 badVal=intmin('int16');
-bads=py==badVal;
+bads=py==badVal | cry==badVal;
 px(bads)=nan;
 py(bads)=nan;
 crx(bads)=nan;

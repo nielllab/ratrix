@@ -30,22 +30,24 @@ end
     frameRate = [];
     frame=1;
     displaySize=[]; % to fix 1/8/09
-    LUTbits=[]; % to fix 1/8/09
+    LUTbits=[];     % to fix 1/8/09
     resolutions=[]; % to fix 1/8/09
+    allowRepeats=1; % to fix 4/19/09
     % also note that this function doesn't actually use PTB - so why do the resInd stuff? - we really shouldnt
 
     if ~doForce
         %basic calcstim
-        [t updateTM resInd out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance text] =...
-            calcStim(stimManager,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords);
+           [stimulus,updateSM,resolutionIndex,preOnsetStim,preResponseStim,discrimStim,LUT,targetPorts,distractorPorts,details,interTrialLuminance,text,indexPulses]=...
+                calcStim(stimManager,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords,forceStimDetails);
     else
         if canForceStimDetails(stimManager,forceStimDetails)
-            [t updateTM resInd out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance text] =...
-                calcStim(stimManager,trialManagerClass,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords,forceStimDetails);
+                [stimulus,updateSM,resolutionIndex,preOnsetStim,preResponseStim,discrimStim,LUT,targetPorts,distractorPorts,details,interTrialLuminance,text,indexPulses]=...
+                calcStim(stimManager,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords,forceStimDetails);
         else
             class(stimManager)
             error('can''t force these stim details')
         end
     end
 
-image = reshape(out(:, :, frame), size(out,1), size(out,2));
+stimvideo=discrimStim.stimulus;
+image = reshape(stimvideo(:, :, frame), size(stimvideo,1), size(stimvideo,2));

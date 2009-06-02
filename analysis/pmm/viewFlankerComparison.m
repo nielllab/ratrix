@@ -1,4 +1,4 @@
-function [delta CI deltas CIs]=viewFlankerComparison(names,params,cMatrix,statTypes,subjects,diffEdges,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot, objectColors)
+function [delta CI deltas CIs]=viewFlankerComparison(names,params,cMatrix,statTypes,subjects,diffEdges,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot, objectColors, displaySignificance)
 % params- from getFlankerStats
 % names-  from getFlankerStats
 % cMatrix- cell array 2xN numberComparison  example with N=1 comparison:
@@ -92,6 +92,13 @@ if ~exist('objectColors','var') || isempty(objectColors)
     objectColors.subjectInsig=[0 0 0];
 end
 
+
+if ~exist('displaySignificance','var') || isempty(displaySignificance)
+    displaySignificance=true;
+end
+
+            
+            
 if ~exist('yScaling','var') || isempty(yScaling)
     yScaling=[40 20 20 20];
 end
@@ -145,6 +152,12 @@ if ~exist('cMatrix','var') || isempty(cMatrix)
 %                 [6],[8];
 %                 [8],[8]};
 %             comparisonColor=[dimming*[1 0 0]; dimming*[0 1 1]];
+        case 'allBlockIDs&2Phases'
+            ids=unique(params.factors.blockID);
+            for i=1:length(ids)
+                cMatrix{i,1}=i;
+                cMatrix{i,2}=i+length(ids);
+            end
         otherwise
             conditionType
             error('this condition type has no default comparisons -- the must be specified in 3rd arg in ')
@@ -491,11 +504,10 @@ for j=1:numStats
             plot([CI2(i,j,1) CI2(i,j,2)], repmat(populationYVal,1,2), 'color', color,'lineWidth',2); %   population std
             plot(delta(i,j), populationYVal, '.', 'markerSize', 7, 'color', color);
     
-            
-            dispSig=true;
+           
             sigMsg=sprintf('p= %5.5f 1-tail t-test\np= %5.5f sign rank test',sigTTest(i,j) ,sigSignRank(i,j) );
             disp(sigMsg);
-            if dispSig
+            if displaySignificance
                 sigYVal= -totalFigureHeight*(basementFraction*3/4);
                 sigXVal=0; %delta(i,j)
                 text(sigXVal,sigYVal,sigMsg,'HorizontalAlignment','center')     

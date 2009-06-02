@@ -1,9 +1,10 @@
 function doBarPlotWithStims(p1,p2,images,colors,yRange,inputMode,addText)
 %by default, p1= numAttempts, p2=numCorrect b/c inputMode='binodata'
 %can also set set inputMode to 'stats&CI'
+% 
 
 if ~exist('colors') || isempty(colors)
-    colors=ones(length(numAttempts),3)*0.8;
+    colors=ones(length(p1),3)*0.8;
 end
 
 if ~exist('images') || isempty(images)
@@ -44,7 +45,7 @@ switch inputMode
 end
         
 ht=yMax-yBotttom;
-imHeight=ht/20; %in yaxis pctCorrect units, how do I calculate this, given that figures rescale?
+imHeight=ht/4; %in yaxis pctCorrect units, how do I calculate this, given that figures rescale?
 textBelowBarTop=ht/25; %in yaxis pctCorrect units, how do I calculate this, given that figures rescale?
 
 
@@ -82,11 +83,21 @@ end
 
 
 %%
-b=bar(stats,'stacked');
-cb=get(b,'Children');
-set(cb,'CData',reshape(colors,1,size(colors,1),3))
+% b=bar(stats,'stacked');
+% cb=get(b,'Children');
+% set(cb,'CData',reshape(colors,1,size(colors,1),3))
 
 
+% area show up in ppt petter than colored bars
+pad=0.1;
+r=[-1 -1 1 1]; %rect
+for i=1:n
+    x=i+.5*(r)-pad*(r)
+    y=[0 stats(i) stats(i) 0]
+    a=area(x,y); 
+    set(a,'EdgeColor', 'none', 'FaceColor' ,colors(i,:));  
+end
+    
 if addText
     for i=1:n
         t=text(i,(stats(i)-textBelowBarTop),sprintf('%2.2g%%',stats(i)));

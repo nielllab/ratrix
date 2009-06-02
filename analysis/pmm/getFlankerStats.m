@@ -269,14 +269,23 @@ for i=1:numSubjects
                     params.factors.flankerPosAngle(i,j)=d.flankerPosAngle(firstInd);
                     params.factors.targetPhase(i,j)=d.targetPhase(firstInd);
                     params.factors.flankerPhase(i,j)=d.flankerPhase(firstInd);
-                case {'allFlankerContrasts','fiveFlankerContrasts','noFlank&nfBlock','noFlank'}
+                case {'allFlankerContrasts','fiveFlankerContrasts','noFlank&nfBlock','noFlank','flankOrNot'}
                     params.factors.flankerContrast(i,j)=d.flankerContrast(firstInd);
                 case {'allTargetContrasts'}
                     params.factors.targetContrast(i,j)=d.targetContrast(firstInd);
                 case {'allPhantomTargetContrastsCombined'}
                     params.factors.phantomTargetContrastCombined(i,j)=d.phantomTargetContrastCombined(firstInd);
+                case {'allBlockIDs','allBlockSegments'}
+                    params.factors.blockID(i,j)=d.blockID(firstInd);
+                    params.factors.targetContrast(i,j)=max(d.targetContrast(firstInd),d.phantomContrast(firstInd));
+                    params.factors.flankerContrast(i,j)=d.flankerContrast(firstInd);
+               case {'allBlockIDs&2Phases'}
+                    params.factors.blockID(i,j)=d.blockID(firstInd);
+                    params.factors.targetContrast(i,j)=max(d.targetContrast(firstInd),d.phantomContrast(firstInd));
+                    params.factors.flankerContrast(i,j)=d.flankerContrast(firstInd);
+                    params.factors.alignedPhase(i,j)=d.flankerPhase(firstInd)==d.targetPhase(firstInd);
                 otherwise
-                    
+                    conditionType
                     error('factors not listed yet for that conditionType')
             end
         else

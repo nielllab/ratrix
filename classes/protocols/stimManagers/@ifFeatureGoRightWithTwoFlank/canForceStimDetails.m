@@ -12,7 +12,7 @@ function    [value]  = canForceStimDetails(stimManager,forceStimDetails)
 
 settableDetail={'targetOrientation','flankerOrientation',...
     'flankerContrast','targetContrast',...
-    'flankerPosAngle','pixPerCycs'};
+    'flankerPosAngle','pixPerCycs','flankerPhase'};
 
 if ~exist('forceStimDetails')
     value=true;

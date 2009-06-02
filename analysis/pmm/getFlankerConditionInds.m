@@ -29,10 +29,22 @@ if ~isempty(strfind(types,'colin'))
     fpas=unique(d.flankerPosAngle);
     fpas(find(fpas==0 | fpas==99))=[]; %allowed to remove these
     if size(d.date,2)>1  %only bother complaining if there is actually data
-        if ~(length(fpas)==2 && diff(sign(fpas))==2)
+        doErr=false;
+        switch length(fpas)
+            case 1
+                %okay
+            case 2
+                if diff(sign(fpas))==2
+                    doErr=true;
+                end
+            otherwise
+                doErr=true;
+        end
+        if doErr
+            numTrials=size(d.date,2)
             fpas
             d.info.subject{1}
-            error('violates conditions for analysis: must have two positions, one CW and one CCW')
+            error('violates conditions for analysis: must have two positions, one CW and one CCW, or just one position')
         end
     end
     TFangleDiff=abs(d.targetOrientation-d.flankerOrientation); %target-flanker angle
@@ -43,6 +55,24 @@ if ~isempty(strfind(types,'colin'))
 end
 
 
+
+ hasPhaseSplit=strfind(types,'&2Phases');
+ if ~isempty(hasPhaseSplit)
+        types(hasPhaseSplit:hasPhaseSplit+7)=[];
+        [c1 nm1 junk col1 d restrictedSubset]=getFlankerConditionInds(d,restrictedSubset,types);
+        types='skip';
+        [phaseConds PhaseNames]=getFlankerConditionInds(d,restrictedSubset,'3phases');
+        numConds=size(c1,1);
+        conditionInds=nan(2*numConds,size(c1,2));
+        for i=1:numConds
+            conditionInds(i,:)         =c1(i,:) & phaseConds(1,:);
+            conditionInds(i+numConds,:)=c1(i,:) & phaseConds(2,:);
+            colors(i,1:3)=col1(i,:);
+            colors(i+numConds,1:3)=col1(i,:);
+            names{i}=[nm1{i} 'Aln'];
+            names{i+numConds}=[nm1{i} 'Rev'];
+        end
+ end
 
 hasNF=strfind(types,'&nfBlock');
 % this is a sneaky process where we "add in" the data for the same rat from
@@ -113,7 +143,7 @@ if ~isempty(hasNF)
     if ~all(ismember(fields(d2),fields(d)))
         f=fields(d2);
         missed=f(~ismember(f,fields(d)))
-        acceptableToMiss={'pixPerCyc','responseTime'}; % these might have removed b/c they are nans in later data
+        acceptableToMiss={'pixPerCyc','responseTime','actualRewardDuration','proposedPenaltyDuration','proposedRewardDuration','phantomContrast','toggleStim','blockID','trialThisBlock'}; % these might have removed b/c they are nans in later data, or nans in earlier data
         if all(ismember(missed,acceptableToMiss)) % these are fields that I have sanction its okay to be out of sync.  will be nanned on the missing side
             for i=1:length(missed)
                 d.(missed{i})=nan(size(d.date));
@@ -247,6 +277,32 @@ switch types
             names = [names, {num2str(orients(i)*180/pi,'%2.0f')}];
         end
         colors=jet(numOrientations);
+     case 'allBlockIDs'
+        blocks=unique(d.blockID(~isnan(d.blockID)));
+        numBlocks=length(blocks);
+        for i=1:numBlocks
+            conditionInds(i,:)= d.blockID==blocks(i);
+            names = [names, {num2str(i,'%2.0f')}];
+        end
+        colors=jet(numBlocks);
+        
+    case 'allBlockSegments'
+        blockID=d.blockID;
+        blockID(isnan(blockID))=0;
+        startBlocks=find(diff([0 blockID])~=0);
+        endBlocks=find(diff([blockID 0])~=0);
+        if length(endBlocks)>length(startBlocks)
+            endBlocks(1)=[];
+            %if there are nans in the beggining, endBlocks calculation gets
+            %a diff from the first 0->something transition...
+        end
+        numConditions=length(startBlocks);
+        conditionInds=zeros(numConditions,length(d.date));
+        for i=1:numConditions
+            conditionInds(i,startBlocks(i):endBlocks(i))= 1;
+            names = [names, {num2str(i,'%2.0f')}];
+        end
+        colors=flag(numConditions);
     case 'allRelativeTFOrientationMag'
         TFangleDiff=abs(d.targetOrientation-d.flankerOrientation)*180/pi; %target-flanker angle magnitude
         %round to the nearest half degree to solve left vs. right rounding errors
@@ -513,6 +569,7 @@ switch types
         conditionInds(end+1,:)=conditionInds(strcmp(names,'LRR'),:) | conditionInds(strcmp(names,'RLL'),:);
         conditionInds(end+1,:)=conditionInds(strcmp(names,'RRL'),:) | conditionInds(strcmp(names,'LLR'),:);
         conditionInds(end+1,:)=conditionInds(10,:) | conditionInds(11,:) | conditionInds(12,:);
+ 
     case '2flanks'
         [conditionInds names haveData colors]=getFlankerConditionInds(d,restrictedSubset,'8flanks+');
         whichInds=[find(strcmp({'colin'},names))  find(strcmp({'changeFlank'},names)) ];
@@ -520,32 +577,6 @@ switch types
         names=names(whichInds);
         haveData=intersect(haveData,whichInds);
         colors=colors(whichInds,:);
-    case 'colinSymetryCheck'
-        
-        
-        [tempConditionInds tempNames tempHaveData tempColors]=getFlankerConditionInds(d,restrictedSubset,'colin+3');
-        
-        
-        for i=1:length(tempNames)
-            conditionInds(2*i,:)=colinear %& something>delta; %right-tipped
-            conditionInds(2*i+1,:)=colinear %& something>delta; %left-tipped
-            
-        end
-        
-        
-        error('not finished yet');
-        
-        
-        colors=[1 ,0 ,0;%colinear=red
-            0,1,1; %cyan
-            0,1,1; %cyan
-            0,0,0]; %black
-        
-        i=i+4;
-        %names = [names, {'colin','popTC','popTI', 'para'}]
-        names = [names, {'---','|-|','-|-', '|||'}];
-        
-        
     case 'noFlank'
         conditionInds=d.flankerContrast==0;
         colors=[.5 1 .5];
@@ -554,7 +585,7 @@ switch types
         conditionInds=d.flankerContrast>0;
         colors=[.6 .6 .6];
         names={'hasF'};
-    case 'flankOrnot'
+    case 'flankOrNot'
         [c1 n1 j col1]=getFlankerConditionInds(d,restrictedSubset,'hasFlank');
         [c2 n2 j col2]=getFlankerConditionInds(d,restrictedSubset,'noFlank');
         conditionInds=[c1; c2];
@@ -604,6 +635,7 @@ d.correctResponseIsLeft=nan;
 d.response=nan;
 d.correct=nan;
 d.trialNumber=nan;
+d.blockID=nan;
 d.info.subject={'toyData'};
 
 for i=1:length(requests)

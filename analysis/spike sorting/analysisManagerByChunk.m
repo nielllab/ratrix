@@ -48,8 +48,18 @@ elseif iscell(cellBoundary) && length(cellBoundary)==2
     boundaryType = cellBoundary{1};
     switch boundaryType
         case 'trialRange'
-            if any(~isnumeric(cellBoundary{2})) || length(cellBoundary{2})~=2
+            if any(~isnumeric(cellBoundary{2})) 
                 error('invalid parameters for trialRange cellBoundary');
+            
+            end
+            switch length(cellBoundary{2})
+                case 2
+                    %okay, thats normal
+                case 1
+                    %start trial is the stop trial
+                    cellBoundary{2}=[cellBoundary{2} cellBoundary{2}];
+                otherwise
+                    error('must be length 2 for [start stop] or a single trial number')
             end
             boundaryRange=[cellBoundary{2}(1) 1 cellBoundary{2}(2) Inf]; % [startTrial startChunk endTrial endChunk]
         case 'trialAndChunkRange'
@@ -225,14 +235,15 @@ while ~quit
                 dirStr=fullfile(neuralRecordsPath,sprintf('neuralRecords_%d-*.mat',newTrial));
                 d=dir(dirStr);
                 if length(d)==1 % there is a new trial neuralRecord
-                    disp('*********** ADVANCING TRIAL ******************');
-                    newTrial
-                    WaitSecs(8);
+                    fprintf('**** ADVANCING TO TRIAL %d (try number %d)*****\n',newTrial,numTriesWithNothing);
+ 
+                        
+                       
+                    %WaitSecs(8);
                     currentTrial=newTrial;
                     doneWithThisTrial=true;
                 else
-                    disp('****** NO CHUNKS LEFT, BUT NO NEW TRIAL ******');
-                    currentTrial
+                    disp('****** NO CHUNKS LEFT ON TRIAL %d, BUT NO NEW TRIAL YET ******',currentTrial);
                     WaitSecs(2);
                 end
                 numTriesWithNothing=numTriesWithNothing+1;
@@ -241,18 +252,20 @@ while ~quit
             end
 
 
-            disp('*********CHUNKS TO PROCESS*************')
-            currentTrial
-            chunksToProcess
+            %disp('*********CHUNKS TO PROCESS*************')
+            %currentTrial
+            %chunksToProcess
 
-            WaitSecs(4); %slow down: gives cpu time, also allows stim to get saved
+            WaitSecs(.1); %slow down: gives cpu time, also allows stim to get saved
             % =================================================================================
 
             for i=1:size(chunksToProcess,1)
                 try
                     % =================================================================================
-                    disp('*********DOING THIS CHUNK*************')
-                    chunksToProcess(i,2)
+                    chunkStr=sprintf('chunk%d',chunksToProcess(i,2));
+                    fprintf('*********DOING %s*************/n',chunkStr)
+                    %chunksToProcess(i,2)
+                    
                     processed=false;
                     if exist(spikeRecordLocation,'file') % if a spikeRecord already exists for this cell, check that this chunk hasn't been processed
                         p=stochasticLoad(spikeRecordLocation,{'chunkID','trialNum'});
@@ -261,7 +274,7 @@ while ~quit
                         end
                     end
                     
-                    chunkStr=sprintf('chunk%d',chunksToProcess(i,2));
+
                     neuralRecord=stochasticLoad(neuralRecordLocation,{chunkStr,'samplingRate'});
                     temp=neuralRecord.samplingRate;
                     neuralRecord=neuralRecord.(chunkStr);
@@ -383,56 +396,56 @@ while ~quit
                         % - if no spikeRecord file, create one with spikeRecordFields in it
                         % - if already have a spikeRecord file, then append each variable (ie add spikeRecord.spikes to the spikes entry in the spikeRecord, etc)
                         if exist(spikeRecordLocation,'file')
-                            stochasticLoad(spikeRecordLocation);
+                            prev=stochasticLoad(spikeRecordLocation);
                         else
-                            spikes=[];
-                            spikeWaveforms=[];
-                            spikeTimestamps=[];
-                            assignedClusters=[];
-                            spikeDetails=[];
-                            frameIndices=[];
-                            frameTimes=[];
-                            frameLengths=[];
-                            correctedFrameIndices=[];
-                            correctedFrameTimes=[];
-                            correctedFrameLengths=[];
-                            stimInds=[];
-                            photoDiode=[];
-                            passedQualityTest=[];
-                            samplingRate=[];
-                            chunkID=[];
-                            chunkIDForFrames=[];
-                            chunkIDForCorrectedFrames=[];
-                            chunkIDForDetails=[];
-                            trialNum=[];
-                            trialNumForFrames=[];
-                            trialNumForCorrectedFrames=[];
-                            trialNumForDetails=[];
+                            prev.spikes=[];
+                            prev.spikeWaveforms=[];
+                            prev.spikeTimestamps=[];
+                            prev.assignedClusters=[];
+                            prev.spikeDetails=[];
+                            prev.frameIndices=[];
+                            prev.frameTimes=[];
+                            prev.frameLengths=[];
+                            prev.correctedFrameIndices=[];
+                            prev.correctedFrameTimes=[];
+                            prev.correctedFrameLengths=[];
+                            prev.stimInds=[];
+                            prev.photoDiode=[];
+                            prev.passedQualityTest=[];
+                            prev.samplingRate=[];
+                            prev.chunkID=[];
+                            prev.chunkIDForFrames=[];
+                            prev.chunkIDForCorrectedFrames=[];
+                            prev.chunkIDForDetails=[];
+                            prev.trialNum=[];
+                            prev.trialNumForFrames=[];
+                            prev.trialNumForCorrectedFrames=[];
+                            prev.trialNumForDetails=[];
                         end
                         % now append!
-                        spikes=[spikes;spikeRecord.spikes];
-                        spikeWaveforms=[spikeWaveforms;spikeRecord.spikeWaveforms];
-                        spikeTimestamps=[spikeTimestamps;spikeRecord.spikeTimestamps];
-                        assignedClusters=[assignedClusters;spikeRecord.assignedClusters];
-                        spikeDetails=[spikeDetails;spikeRecord.spikeDetails];
-                        frameIndices=[frameIndices;spikeRecord.frameIndices];
-                        frameTimes=[frameTimes;spikeRecord.frameTimes];
-                        frameLengths=[frameLengths;spikeRecord.frameLengths];
-                        correctedFrameIndices=[correctedFrameIndices;spikeRecord.correctedFrameIndices];
-                        correctedFrameTimes=[correctedFrameTimes;spikeRecord.correctedFrameTimes];
-                        correctedFrameLengths=[correctedFrameLengths;spikeRecord.correctedFrameLengths];
-                        stimInds=[stimInds;spikeRecord.stimInds];
-                        photoDiode=[photoDiode;spikeRecord.photoDiode];
-                        passedQualityTest=[passedQualityTest;spikeRecord.passedQualityTest];
-                        samplingRate=[samplingRate;spikeRecord.samplingRate];
-                        chunkID=[chunkID;spikeRecord.chunkID];
-                        chunkIDForFrames=[chunkIDForFrames;spikeRecord.chunkIDForFrames];
-                        chunkIDForCorrectedFrames=[chunkIDForCorrectedFrames;spikeRecord.chunkIDForCorrectedFrames];
-                        chunkIDForDetails=[chunkIDForDetails;spikeRecord.chunkIDForDetails];
-                        trialNum=[trialNum;spikeRecord.trialNum];
-                        trialNumForFrames=[trialNumForFrames;spikeRecord.trialNumForFrames];
-                        trialNumForCorrectedFrames=[trialNumForCorrectedFrames;spikeRecord.trialNumForCorrectedFrames];
-                        trialNumForDetails=[trialNumForDetails;spikeRecord.trialNumForDetails];
+                        spikes=[prev.spikes;spikeRecord.spikes];
+                        spikeWaveforms=[prev.spikeWaveforms;spikeRecord.spikeWaveforms];
+                        spikeTimestamps=[prev.spikeTimestamps;spikeRecord.spikeTimestamps];
+                        assignedClusters=[prev.assignedClusters;spikeRecord.assignedClusters];
+                        spikeDetails=[prev.spikeDetails;spikeRecord.spikeDetails];
+                        frameIndices=[prev.frameIndices;spikeRecord.frameIndices];
+                        frameTimes=[prev.frameTimes;spikeRecord.frameTimes];
+                        frameLengths=[prev.frameLengths;spikeRecord.frameLengths];
+                        correctedFrameIndices=[prev.correctedFrameIndices;spikeRecord.correctedFrameIndices];
+                        correctedFrameTimes=[prev.correctedFrameTimes;spikeRecord.correctedFrameTimes];
+                        correctedFrameLengths=[prev.correctedFrameLengths;spikeRecord.correctedFrameLengths];
+                        stimInds=[prev.stimInds;spikeRecord.stimInds];
+                        photoDiode=[prev.photoDiode;spikeRecord.photoDiode];
+                        passedQualityTest=[prev.passedQualityTest;spikeRecord.passedQualityTest];
+                        samplingRate=[prev.samplingRate;spikeRecord.samplingRate];
+                        chunkID=[prev.chunkID;spikeRecord.chunkID];
+                        chunkIDForFrames=[prev.chunkIDForFrames;spikeRecord.chunkIDForFrames];
+                        chunkIDForCorrectedFrames=[prev.chunkIDForCorrectedFrames;spikeRecord.chunkIDForCorrectedFrames];
+                        chunkIDForDetails=[prev.chunkIDForDetails;spikeRecord.chunkIDForDetails];
+                        trialNum=[prev.trialNum;spikeRecord.trialNum];
+                        trialNumForFrames=[prev.trialNumForFrames;spikeRecord.trialNumForFrames];
+                        trialNumForCorrectedFrames=[prev.trialNumForCorrectedFrames;spikeRecord.trialNumForCorrectedFrames];
+                        trialNumForDetails=[prev.trialNumForDetails;spikeRecord.trialNumForDetails];
                         save(spikeRecordLocation,'spikes','spikeWaveforms','spikeTimestamps','assignedClusters','spikeDetails',...
                             'frameIndices','frameTimes','frameLengths','correctedFrameIndices','correctedFrameTimes','correctedFrameLengths',...
                             'stimInds','chunkID','chunkIDForFrames','chunkIDForCorrectedFrames','chunkIDForDetails',...
@@ -494,11 +507,11 @@ while ~quit
                     stimRecord=stochasticLoad(stimRecordLocation);
                     evalStr = sprintf('sm = %s();',stimRecord.stimManagerClass);
                     eval(evalStr);
-                    % 1/26/09 - skip analysis if not worth sorting spikes
-%                     doAnalysis= (~exist(analysisLocation,'file') || overwriteAll) && worthSpikeSorting(sm,quality);
+                    
+%                   doAnalysis= (~exist(analysisLocation,'file') || overwriteAll) && worthSpikeSorting(sm,quality);
                     doAnalysis=worthSpikeSorting(sm,quality);
-                    % if we need to do analysis (either no analysis file exists or we want to overwrite)
-
+                    doAnalysis=1; % if we need to do analysis (either no analysis file exists or we want to overwrite)
+  
                     if doAnalysis % 1
                         % do something with loaded information
                         % NOTE - neuralRecord refers to all the 'neuralRecord' for a particular chunk!

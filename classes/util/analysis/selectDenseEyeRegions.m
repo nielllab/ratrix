@@ -1,10 +1,12 @@
-function [within ellipses]=selectDenseEyeRegions(eyeSig,numRegions,stds,plotOn)
+function [within ellipses]=selectDenseEyeRegions(eyeSig,numRegions,stds,minMaxFractionExcluded,plotOn)
 % regions are peaks in the histogram and are allowed to overlap
 % within is a logical filter over eyeSamples.  [eyeSamples xnumRegions ]
+% minMaxFractionExcluded chops of the highest and lowest data so that the
+% density map can be placed over the right range
+% might want to fit the elipses better one day... klusta to find the means?
+
 
 numHistBins=20;
-minmaxX=minmax(eyeSig(~isnan(eyeSig(:,1)),1)');
-minmaxY=minmax(eyeSig(~isnan(eyeSig(:,2)),2)');
 
 if ~exist('numRegions','var') || isempty(numRegions)
     numRegions=1;
@@ -19,6 +21,25 @@ end
 
 if ~exist('plotOn','var') || isempty(plotOn)
     plotOn=false;
+end
+
+if ~exist('minMaxFractionExcluded','var') || isempty(minMaxFractionExcluded)
+    minMaxFractionExcluded=0;
+end
+
+if minMaxFractionExcluded~=0
+    rankX=sort(eyeSig(:,1));
+    rankY=sort(eyeSig(:,2));
+    numNonNan=sum(~isnan(rankX));
+    if numNonNan~=sum(~isnan(rankY));
+        error('unexpected that there are a different amount of nans in X and Y!')
+    end
+    numCutVals=floor(numNonNan*minMaxFractionExcluded/2);
+    minmaxX=rankX([numCutVals  numNonNan-numCutVals]);
+    minmaxY=rankY([numCutVals  numNonNan-numCutVals]);
+else
+    minmaxX=minmax(eyeSig(~isnan(eyeSig(:,1)),1)');
+    minmaxY=minmax(eyeSig(~isnan(eyeSig(:,2)),2)');
 end
 
 

@@ -141,7 +141,8 @@ if p.plotResponseDensity || p.plotResponseRaster
     junk=makeDailyRaster(d.correct(goods),d.date(goods),smoothingWidth,5,subject,1,handles,subplotParams,plotResponseDensity,plotResponseRaster); %in terms of good trials, PLOT NOT SAVED
 end
 
-[d.correctInRow runEnds d.numSwitchesThisRun]=calcAmountCorrectInRow(d.correct,d.response);
+%[d.correctInRow runEnds
+%d.numSwitchesThisRun]=calcAmountCorrectInRow(d.correct,d.response);  % why not work sometimes?
 if p.plotRewardTime==1 & ismember('actualRewardDuration',fields(d))
     figure(handles(find(strcmp('plotRewardTime',whichPlots)))); subplot(subplotParams.y, subplotParams.x, subplotParams.index);
     %     edges=[0:0.02:2];

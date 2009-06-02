@@ -97,6 +97,9 @@ for i=1:length(filter)
                 rangeInds=[max(floor(range(1)*length(sorted)),1) ceil(range(2)*length(sorted))];
                 rangeValue=sorted(rangeInds);
                 d=removeSomeSmalls(d,~(d.responseTime>rangeValue(1) & d.responseTime<rangeValue(2)));  
+            case 'trialThisBlockRange'
+                range=filter{i}.parameters.range;
+                d=removeSomeSmalls(d,~(d.trialThisBlock>range(1) & d.trialThisBlock<range(2))); 
             case {'performanceRange','performancePercentile'}
                 goods=getGoods(d,filter{i}.parameters.goodType);
                 conditionType=filter{i}.parameters.whichCondition{1};

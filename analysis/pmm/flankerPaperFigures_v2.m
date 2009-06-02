@@ -1,6 +1,7 @@
 
 
 
+
 %% stats
 x=100*diff(stats(:,find(ismember(names.conditions,{'colin','changeFlank'})),find(strcmp('pctCorrect',names.stats)))');
 [h p] = ttest(x,0,.05,'right');

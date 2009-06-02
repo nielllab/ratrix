@@ -84,6 +84,7 @@ try
                     ismember(method{3}{2},{'fromRaw'}) && isscalar(method{3}{1} && ...
                     method{3}{1}>=0 && method{3}{1}<=1
                 [junk method{3}]=min(abs(clut(:,1)-method{3}{1})); % find the index of the CLUT that most closely matches the requested luminance (assume grayscale)
+                method{3}=uint8(method{3}); % convert to uint8
             else
                 error('background must be {value,''fromRaw''}');
             end

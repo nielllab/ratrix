@@ -26,10 +26,7 @@ msMinimumPokeDuration   =10;
 msMinimumClearDuration  =10;
 msPenalty               =8000;
 msRewardSoundDuration   =3*msRewardDuration;
-soundMgr           =soundManager({soundClip('correctSound','allOctaves',[400],20000), ...
-                                      soundClip('keepGoingSound','allOctaves',[300],20000), ...
-                                      soundClip('trySomethingElseSound','gaussianWhiteNoise'), ...
-                                      soundClip('wrongSound','tritones',[300 400],20000)});
+soundMgr           =makeStandardSoundManager();
 
 stochasticFreeDrink = 0.01;
                                   

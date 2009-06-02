@@ -50,10 +50,7 @@ r=addSubject(r,s4,'pmm');
 s5 = subject('RAT_W', 'rat', 'long-evans', 'male', '08/20/2006', '09/20/2006', 'unknown', 'Jackson Laboratories');
 r=addSubject(r,s5,'pmm');
 
-soundManager            =soundManager({soundClip('correctSound','allOctaves',[400],20000), ...
-                                      soundClip('keepGoingSound','allOctaves',[300],20000), ...
-                                      soundClip('trySomethingElseSound','gaussianWhiteNoise'), ...
-                                      soundClip('wrongSound','tritones',[300 400],20000)});
+soundManager            =makeStandardSoundManager();
 
                                   
 %shared stim parameters                                

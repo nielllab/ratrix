@@ -122,10 +122,8 @@ msMinimumPokeDuration   =10;
 msMinimumClearDuration  =10;
 msPenalty               =1;
 msRewardSoundDuration   =msRewardDuration;
-sndManager            =soundManager({soundClip('correctSound','allOctaves',[400],20000), ...
-    soundClip('keepGoingSound','allOctaves',[300],20000), ...
-    soundClip('trySomethingElseSound','gaussianWhiteNoise'), ...
-    soundClip('wrongSound','tritones',[300 400],20000)});
+sndManager            =makeStandardSoundManager();
+
 pctStochasticReward=0.0;  %0.01 or 0.001;
 
 pixPerCycs              =[20];
@@ -284,10 +282,7 @@ function default=getDefaultParametersForPmeierStim(protocolType,protocolVersion,
 switch defaultSettingsDate
     case 'Oct.09,2007'
 
-        default.sndManager=soundManager({soundClip('correctSound','allOctaves',[400],20000), ...
-            soundClip('keepGoingSound','allOctaves',[300],20000), ...
-            soundClip('trySomethingElseSound','gaussianWhiteNoise'), ...
-            soundClip('wrongSound','tritones',[300 400],20000)});
+        default.sndManager=makeStandardSoundManager();
 
         default.maxWidth                =1024;
         default.maxHeight               =768;

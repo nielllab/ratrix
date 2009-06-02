@@ -6,11 +6,7 @@ msMinimumPokeDuration   =10;
 msMinimumClearDuration  =10;
 msPenalty               =1000;
 msRewardSoundDuration   =rewardSizeULorMS;
-sm=soundManager({soundClip('correctSound','allOctaves',[400],20000), ...
-    soundClip('keepGoingSound','allOctaves',[300],20000), ...
-    soundClip('trySomethingElseSound','gaussianWhiteNoise'), ...
-    soundClip('wrongSound','tritones',[300 400],20000)});
-    
+sm=makeStandardSoundManager();
 
 fractionOpenTimeSoundIsOn=1;
 fractionPenaltySoundIsOn=1;

@@ -1,9 +1,9 @@
 function out=getCalibrationData(conn,mac)
 % this function retrieves an existing BLOB based on mac, reads it as a binary .mat file, and loads this temp file.
 out={};
-str=sprintf('select data from MONITOR_CALIBRATION where station_mac=''%s''',mac);
+str=sprintf('select data, to_char(timestamp,''mm-dd-yyyy hh24:mi'') from MONITOR_CALIBRATION where station_mac=''%s''',mac);
 results=query(conn,str);
-if length(results)>1
+if size(results,1)>1
     warning('found multiple entries for the given mac address - using first entry!');
 end
 c=results{1};

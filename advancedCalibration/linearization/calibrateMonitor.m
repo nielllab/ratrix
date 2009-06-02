@@ -42,7 +42,7 @@ details.screenType=screenType;
 % get current CLUT from screen
 [currentCLUT, dacbits, reallutsize] = Screen('ReadNormalizedGammaTable', screenNum);
 drawSpyderPositionFrame = true;
-[measuredValues rawValues] = generateScreenCalibrationData(method,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
+[measuredValues rawValues method] = generateScreenCalibrationData(method,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
 
 % desiredValues is a linear spacing of the first set of measured Y values (with 256 entries)
 % we will compare these to our second set of measured Y values

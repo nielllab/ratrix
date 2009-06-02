@@ -1,4 +1,4 @@
-function [measuredValues rawValues] = generateScreenCalibrationData(method,clut,drawSpyderPositionFrame,screenNum,screenType)
+function [measuredValues rawValues method] = generateScreenCalibrationData(method,clut,drawSpyderPositionFrame,screenNum,screenType)
 % this function uses spyder to measure luminance values with the given 'method' for drawing stimuli
 % INPUTS:
 %   method - how to do the screen calibration:
@@ -76,9 +76,21 @@ try
     switch special
         case 'stimInBoxOnBackground'
             %     {'stimInBoxOnBackground',stim,background,patchRect,interValueRGB,numFramesPerValue,numInterValueFrames}
+            % convert background from the following:
+            % {value, 'fromRaw'} - where value ranges from 0 to 1 as a percentage of max luminance
+            % and fromRaw means find the entry in the raw CLUT that most closely matches the requested value
+            % - to an RGB triplet
+            if iscell(method{3}) && length(method{3})==2 && ischar(method{3}{2}) && ...
+                    ismember(method{3}{2},{'fromRaw'}) && isscalar(method{3}{1} && ...
+                    method{3}{1}>=0 && method{3}{1}<=1
+                [junk method{3}]=min(abs(clut(:,1)-method{3}{1})); % find the index of the CLUT that most closely matches the requested luminance (assume grayscale)
+            else
+                error('background must be {value,''fromRaw''}');
+            end
             spyderData=stimInBoxOnBackground(window,spyderLib,...
                 method{2},method{3},method{4},method{5},method{6},method{7},reallutsize);
             rawValues=method{2};
+            method{3}=clut(method{3},1); % reset the method's background to the new RGB value (for validation run)
         case 'fullScreenStim'
             spyderData=fullScreenStim(window,spyderLib,...
                 method{2},method{3},method{4},method{5},method{6},method{7},reallutsize);

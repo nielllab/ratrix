@@ -63,6 +63,7 @@ try
             eval(evalStr);
         end
         s.window = PsychImaging('OpenWindow', s.screenNum, 0); % use psychImaging if tasks are applied
+        s.imagingTasks=imagingTasks;
     end
     disp(sprintf('took %g to call screen(openwindow)',GetSecs()-preScreen))
     

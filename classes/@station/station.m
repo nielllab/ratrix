@@ -57,6 +57,7 @@ function s=station(varargin)
 
 	s.ifi=[];
 	s.window=[];
+    s.imagingTasks=[];
 
 	switch nargin
 		case 0

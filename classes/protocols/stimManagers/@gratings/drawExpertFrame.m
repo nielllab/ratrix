@@ -4,7 +4,7 @@ function [doFramePulse expertCache dynamicDetails textLabel i dontclear indexPul
 % 11/14/08 - implementing expert mode for gratings
 % this function calculates an expert frame, and then makes and draws the texture; nothing needs to be done in runRealTimeLoop
 % this should be a stimManager-specific implementation (if expert mode is supported for the given stimulus)
-indexPulse=false;
+
 floatprecision=1;
 
 
@@ -31,6 +31,13 @@ numGratings = length(stim.pixPerCycs); % number of gratings
 gratingInds = cumsum(stim.durations(:));
 gratingToDraw = min(find(mod(i-1,gratingInds(end))+1<=gratingInds));
 
+
+if gratingToDraw==1
+    indexPulse=true;  % need the first frame of this guy, not the whole thing...
+else
+    indexPulse=false;
+end
+    
 % stim.pixPerCycs - frequency of the grating (how wide the bars are)
 % stim.orientations - angle of the grating
 % stim.driftfrequencies - frequency of the phase (how quickly we go through a 0:2*pi cycle of the sine curve) - in cycles per second

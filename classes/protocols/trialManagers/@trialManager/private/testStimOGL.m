@@ -71,10 +71,7 @@ end
 function [stimManager trialManager station] = setupObjects()
 station=makeDummyStation();
 
-sm=soundManager({soundClip('correctSound','allOctaves',[400],20000), ...
-    soundClip('keepGoingSound','allOctaves',[300],20000), ...
-    soundClip('trySomethingElseSound','gaussianWhiteNoise'), ...
-    soundClip('wrongSound','tritones',[300 400],20000)});
+sm=makeStandardSoundManager();
 
 rewardSizeULorMS        =50;
 msPenalty               =1000;

@@ -14,6 +14,8 @@ addpath(genpath(fullfile(rootPath,'classes')));
             soundClip('keepGoingSound','allOctaves',[300],20000), ...
             soundClip('trySomethingElseSound','gaussianWhiteNoise'), ...
             soundClip('wrongSound','tritones',[300 400],20000)});
+        %default.sndManager==makeStandardSoundManager()  should preserve
+        %functionality... pmm added
 
         default.maxWidth                =1024;
         default.maxHeight               =768;

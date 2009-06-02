@@ -17,10 +17,7 @@ addpath(genpath(['c:\pmeier\newStimTest\']))% A few extra things in this project
 warning('on','MATLAB:dispatcher:nameConflict')
 
 %% create a trial manager with default parameters
-sndManager            =soundManager({soundClip('correctSound','allOctaves',[400],20000), ...
-    soundClip('keepGoingSound','allOctaves',[300],20000), ...
-    soundClip('trySomethingElseSound','gaussianWhiteNoise'), ...
-    soundClip('wrongSound','tritones',[300 400],20000)});
+sndManager            =makeStandardSoundManager();
 
 %shared stim parameters  -- detection
 maxWidth                =1280;

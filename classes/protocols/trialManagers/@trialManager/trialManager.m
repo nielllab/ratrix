@@ -17,7 +17,7 @@ function t=trialManager(varargin)
 % saveDetailedFrameDrops - a flag indicating whether or not to save detailed timestamp information for each dropped frame (causes large trialRecord files!)
 % delayManager - an object that determines how to stimulus onset works (could be immediate upon request, or some delay)
 % responseWindowMs - the timeout length of the 'discrim' phase in milliseconds (should be used by phaseify)
-requiredSoundNames = {'correctSound','keepGoingSound','trySomethingElseSound','wrongSound'};
+requiredSoundNames = {'correctSound','keepGoingSound','trySomethingElseSound','wrongSound','trialStartSound'};
 
 t.soundMgr=soundManager();
 t.reinforcementManager=reinforcementManager();

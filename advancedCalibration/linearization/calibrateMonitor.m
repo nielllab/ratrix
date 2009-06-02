@@ -1,5 +1,5 @@
 function [measuredValues currentCLUT linearizedCLUT validationValues details] = ...
-    calibrateMonitor(method,screenType,fitMethod,writeToOracle)
+    calibrateMonitor(method,screenType,fitMethod,writeToOracle,cmd_line)
 % this function calls generateScreenCalibrationData to get the measured values and then does a basic
 % linearization and validation before inserting into Oracle
 % INPUTS: 
@@ -14,6 +14,8 @@ function [measuredValues currentCLUT linearizedCLUT validationValues details] = 
 %   screenType - 'LCD' or 'CRT'
 %   fitMethod - 'linear' or 'power'
 %   writeToOracle - a flag indicating whether or not to write to oracle
+%   cmd_line (optional) - the string to store into the oracle field
+%   "cmd_line"
 % OUTPUTS:
 %   measuredValues - xyz measurements corresponding to rawValues with native gamma
 %   currentCLUT - the native CLUT
@@ -32,6 +34,11 @@ if islogical(writeToOracle)
 else
     error('writeToOracle must be a logical');
 end
+if exist('cmd_line','var') && ~isempty(cmd_line)
+    %pass
+else
+    cmd_line='unknown';
+end
 
 screenNum=max(Screen('Screens'));
 details=[];
@@ -42,7 +49,7 @@ details.screenType=screenType;
 % get current CLUT from screen
 [currentCLUT, dacbits, reallutsize] = Screen('ReadNormalizedGammaTable', screenNum);
 drawSpyderPositionFrame = true;
-[measuredValues rawValues method] = generateScreenCalibrationData(method,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
+[measuredValues rawValues method details.measurementDetails] = generateScreenCalibrationData(method,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
 
 % desiredValues is a linear spacing of the first set of measured Y values (with 256 entries)
 % we will compare these to our second set of measured Y values
@@ -94,7 +101,7 @@ end
 
 % recall generateScreenCalibrationData w/ new linearized CLUT and get validation data
 drawSpyderPositionFrame = false;
-validationValues = generateScreenCalibrationData(method,linearizedCLUT,drawSpyderPositionFrame,screenNum,screenType);
+[validationValues junk junk details.validationDetails] = generateScreenCalibrationData(method,linearizedCLUT,drawSpyderPositionFrame,screenNum,screenType);
 
 % restore original CLUT
 Screen('LoadNormalizedGammaTable',screenNum,currentCLUT);
@@ -119,8 +126,7 @@ if writeToOracle
         fclose(fid);
         timestamp=datestr(now,'mm-dd-yyyy HH:MM');
         svnRev=getSVNRevisionFromXML(getRatrixPath);
-        cmd='test ginger room';
-        addCalibrationData(CLUT,mac,timestamp,svnRev,cmd)
+        addCalibrationData(CLUT,mac,timestamp,svnRev,cmd_line)
         closeConn(conn);
     catch ex
         disp(['CAUGHT EX: ' getReport(ex)]);

@@ -1,4 +1,4 @@
-function [measuredValues rawValues method] = generateScreenCalibrationData(method,clut,drawSpyderPositionFrame,screenNum,screenType)
+function [measuredValues rawValues method calibrationDetails] = generateScreenCalibrationData(method,clut,drawSpyderPositionFrame,screenNum,screenType)
 % this function uses spyder to measure luminance values with the given 'method' for drawing stimuli
 % INPUTS:
 %   method - how to do the screen calibration:
@@ -23,11 +23,12 @@ function [measuredValues rawValues method] = generateScreenCalibrationData(metho
 
 measuredValues=[];
 rawValues=[];
+calibrationDetails=[];
 
 if ~(ischar(screenType) && ismember(screenType,{'LCD','CRT'}))
     error('screenType must be ''LCD'' or ''CRT''');
 end
-if ~(iscell(method) && ischar(method{1}) && ismember(method{1},{'stimInBoxOnBackground'}))
+if ~(iscell(method) && ischar(method{1}) && ismember(method{1},{'stimInBoxOnBackground','fullScreenStim'}))
     error('method must be a cell vector where first element specifies how to get screen calibration data');
 end
 
@@ -81,20 +82,24 @@ try
             % and fromRaw means find the entry in the raw CLUT that most closely matches the requested value
             % - to an RGB triplet
             if iscell(method{3}) && length(method{3})==2 && ischar(method{3}{2}) && ...
-                    ismember(method{3}{2},{'fromRaw'}) && isscalar(method{3}{1} && ...
+                    ismember(method{3}{2},{'fromRaw'}) && isscalar(method{3}{1}) && ...
                     method{3}{1}>=0 && method{3}{1}<=1
-                [junk method{3}]=min(abs(clut(:,1)-method{3}{1})); % find the index of the CLUT that most closely matches the requested luminance (assume grayscale)
+                special=method{3}{2};
+                calibrationDetails.requestedBackground=method{3}{1};
+                [calibrationDetails.diffFromRequestedBackground method{3}]=min(abs(clut(:,1)-method{3}{1})); % find the index of the CLUT that most closely matches the requested luminance (assume grayscale)
                 method{3}=uint8(method{3}); % convert to uint8
+                calibrationDetails.actualBackground=clut(method{3},1);
+                calibrationDetails.actualBackgroundRGB=method{3};
             else
                 error('background must be {value,''fromRaw''}');
             end
             spyderData=stimInBoxOnBackground(window,spyderLib,...
                 method{2},method{3},method{4},method{5},method{6},method{7},reallutsize);
             rawValues=method{2};
-            method{3}=clut(method{3},1); % reset the method's background to the new RGB value (for validation run)
+            method{3}={clut(method{3},1),special}; % reset the method's background to the 0.0-1.0 value
         case 'fullScreenStim'
             spyderData=fullScreenStim(window,spyderLib,...
-                method{2},method{3},method{4},method{5},method{6},method{7},reallutsize);
+                method{2},method{3},method{4},method{5},reallutsize);
             rawValues=method{2};
         otherwise
             error('unsupported method for screen calibration');

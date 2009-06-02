@@ -9,10 +9,7 @@ dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
 r=ratrix(fullfile(dataPath, 'ServerData'),0); %load from file
 
 % sound manager used by many training steps
-sm=soundManager({soundClip('correctSound','allOctaves',[400],20000), ...
-    soundClip('keepGoingSound','allOctaves',[300],20000), ...
-    soundClip('trySomethingElseSound','gaussianWhiteNoise'), ...
-    soundClip('wrongSound','tritones',[300 400],20000)});
+sm=makeStandardSoundManager();
 
 %create sound manager object used by stochastic free drinks only
 % no hissing sound when water clogs ports

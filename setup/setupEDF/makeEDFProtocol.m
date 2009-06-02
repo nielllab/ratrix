@@ -24,6 +24,7 @@ keepGoingClip        =soundClip('keepGoingSound','allOctaves',[300],20000);
 silentTryClip        =soundClip('trySomethingElseSound','allOctaves',[],1);
 silentWrongClip      =soundClip('wrongSound','allOctaves',[],1);
 sm=soundManager({correctClip,keepGoingClip,silentTryClip,silentWrongClip});
+%consider changes: makeStandardSoundManager();
 
 msFlushDuration         =1000;
 msMinimumPokeDuration   =10;

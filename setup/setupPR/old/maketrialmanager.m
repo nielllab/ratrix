@@ -20,6 +20,7 @@ function tm= maketrialmanager(varargin);
 %         soundClip('keepGoingSound','allOctaves',[300],20000), ...
 %         soundClip('trySomethingElseSound','gaussianWhiteNoise'), ...
 %         soundClip('wrongSound','tritones',[300 400],20000)});
+        %which is not built using makeStandardSoundManager();
 %     scalar=1;
 %     msPenalty=0; 
 %     increasingReward=rewardNcorrectInARow([20,80,150],msPenalty,1,1, scalar);
@@ -38,10 +39,7 @@ maximumNumberStimPresentations=0; % 0 means unlimited
 doMask=false;
 
 % default sound manager
-sm=soundManager({soundClip('correctSound','allOctaves',[400],20000), ...
-    soundClip('keepGoingSound','allOctaves',[300],20000), ...
-    soundClip('trySomethingElseSound','gaussianWhiteNoise'), ...
-    soundClip('wrongSound','tritones',[300 400],20000)});
+sm=makeStandardSoundManager();
 
 % default reward manager
 scalar=1;

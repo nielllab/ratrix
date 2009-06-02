@@ -8,10 +8,7 @@ if ~all(ismember(subjIDs,getSubjectIDs(r)))
     error('not all those subject IDs are in that ratrix')
 end
 
-sm=soundManager({soundClip('correctSound','allOctaves',[400],20000), ...
-    soundClip('keepGoingSound','allOctaves',[300],20000), ...
-    soundClip('trySomethingElseSound','gaussianWhiteNoise'), ...
-    soundClip('wrongSound','tritones',[300 400],20000)});
+sm=makeStandardSoundManager();
 
 rewardSizeULorMS        =50;
 msPenalty               =1000;

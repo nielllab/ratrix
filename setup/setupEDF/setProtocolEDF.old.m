@@ -11,10 +11,7 @@ msFlushDuration         =1000;
 msMinimumPokeDuration   =10;
 msMinimumClearDuration  =10;
 
-sm=soundManager({soundClip('correctSound','allOctaves',[400],20000), ...
-    soundClip('keepGoingSound','allOctaves',[300],20000), ...
-    soundClip('trySomethingElseSound','gaussianWhiteNoise'), ...
-    soundClip('wrongSound','tritones',[300 400],20000)});
+sm=makeStandardSoundManager();
 
 freeDrinkLikelihood=0.1;
 fd1 = freeDrinks(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,freeDrinkLikelihood, rm);

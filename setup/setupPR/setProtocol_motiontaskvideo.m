@@ -2,10 +2,7 @@ function r=setProtocolPR(r,ratIDs)
 % just the tasks needed to make nice movies
 
 % sound manager used by many training steps
-sm=soundManager({soundClip('correctSound','allOctaves',[400],20000), ...
-    soundClip('keepGoingSound','allOctaves',[300],20000), ...
-    soundClip('trySomethingElseSound','gaussianWhiteNoise'), ...
-    soundClip('wrongSound','tritones',[300 400],20000)});
+sm=makeStandardSoundManager();
 
 %create scheduer used by all trial managers
 sch=noTimeOff(); % return to previous scheduler

@@ -311,10 +311,8 @@ localizedBin=whiteNoise({'binary',0,1,.5},background,method,stimLocation,stixelS
 % end
 eyeController=[];
 
-sm=soundManager({soundClip('correctSound','allOctaves',[400],20000), ...
-    soundClip('keepGoingSound','allOctaves',[300],20000), ...
-    soundClip('trySomethingElseSound','gaussianWhiteNoise'), ...
-    soundClip('wrongSound','tritones',[300 400],20000)});
+sm=makeStandardSoundManager();
+
 
 rewardSizeULorMS        =150;
 requestRewardSizeULorMS =50;
@@ -378,11 +376,14 @@ ts{18}= trainingStep(ap, horizBar,    numTrialsDoneCriterion(1), noTimeOff(), sv
 ts{19}= trainingStep(ap, vertBar,     numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
 ts{20}= trainingStep(ap, flickeringBox,numTrialsDoneCriterion(2),noTimeOff(), svnRev, svnCheckMode);  %
 ts{21}= trainingStep(ap, localizedBin,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
-ts{22}= trainingStep(ap, bin,         numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
+ts{22}= trainingStep(ap, bin,         repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
 
+%might need RF estimate:
 ts{23} = trainingStep(ap, anGratings,  numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %gratings: annulus size
 ts{24} = trainingStep(ap, flankers,    numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %flankers
 ts{25} = trainingStep(ap, biField,     numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %bipartite field for X-Y classification
+
+%xtra stuff might want:
 ts{26} = trainingStep(ap, dynGrating,  repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %tailored to this cell
 ts{27} = trainingStep(ap, hateren,     repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %hateren
 
@@ -411,7 +412,7 @@ ts{27} = trainingStep(ap, hateren,     repeatIndefinitely(),      noTimeOff(), s
 
 
 p=protocol('practice phys',{ts{1:27}});
-stepNum=uint8(1);
+stepNum=uint8(4);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

@@ -17,10 +17,7 @@ msMinimumPokeDuration   =10;
 msMinimumClearDuration  =10;
 msPenalty               =3000;
 msRewardSoundDuration   =rewardSizeULorMS;
-sm=soundManager({soundClip('correctSound','allOctaves',[400],20000), ...
-    soundClip('keepGoingSound','allOctaves',[300],20000), ...
-    soundClip('trySomethingElseSound','gaussianWhiteNoise'), ...
-    soundClip('wrongSound','tritones',[300 400],20000)});
+sm=makeStandardSoundManager();
 
 freeDrinkLikelihood=0.003;
 %fd1 = freeDrinks(msFlushDuration,rewardSizeULorMS,msMinimumPokeDuration,msMinimumClearDuration,sm,msPenalty,msRewardSoundDuration,freeDrinkLikelihood);

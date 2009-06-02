@@ -22,6 +22,7 @@ keepGoingClip        =soundClip('keepGoingSound','allOctaves',[300],20000);
 silentTryClip        =soundClip('trySomethingElseSound','allOctaves',[],1);
 silentWrongClip      =soundClip('wrongSound','allOctaves',[],1);
 sm=soundManager({correctClip,keepGoingClip,silentTryClip,silentWrongClip});
+%consider changes: makeStandardSoundManager();
 
 msFlushDuration         =1000; 
 msMinimumPokeDuration   =10; 
@@ -54,6 +55,7 @@ rm = constantReinforcement(rewardSizeULorMS,msPenalty,fractionSoundOn,fractionPe
 trySomethingElseClip =soundClip('trySomethingElseSound','gaussianWhiteNoise');
 wrongClip            =soundClip('wrongSound','tritones',[300 400],20000);
 sm =soundManager({correctClip,keepGoingClip,trySomethingElseClip,wrongClip});
+%consdier changes makeStandardSoundManager();
 
 freeDrinkLikelihood     =0;
 fd = freeDrinks(msFlushDuration,msMinimumPokeDuration,msMinimumClearDuration,sm,freeDrinkLikelihood,rm);

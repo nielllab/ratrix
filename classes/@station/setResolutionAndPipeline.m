@@ -1,4 +1,4 @@
-function [s newRes]=setResolution(s,res)
+function [s newRes]=setResolutionAndPipeline(s,res,imagingTasks)
 
 if res.pixelSize~=32
     error('color depth must be 32')
@@ -35,7 +35,7 @@ if oldRes.width~=res.width || oldRes.height~=res.height || oldRes.hz ~=res.hz ||
     s=stopPTB(s);
 
     Screen('Resolution', s.screenNum, res.width, res.height, res.hz, res.pixelSize);
-    s=startPTB(s);
+    s=startPTB(s,imagingTasks);
     
     newRes=Screen('Resolution', s.screenNum);
     if ~all([newRes.width==res.width newRes.height==res.height newRes.pixelSize==res.pixelSize newRes.hz==res.hz])

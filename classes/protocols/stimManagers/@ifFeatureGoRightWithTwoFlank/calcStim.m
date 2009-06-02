@@ -1,5 +1,6 @@
 
-function [stimulus,updateSM,resInd,preRequestStim,preResponseStim,discrimStim,LUT,targetPorts,distractorPorts,details,interTrialLuminance, text,indexPulses]=...
+function [stimulus,updateSM,resInd,preRequestStim,preResponseStim,discrimStim,LUT,targetPorts,distractorPorts,...
+    details,interTrialLuminance, text,indexPulses,imagingTasks]=...
     calcStim(stimulus, trialManagerClass,allowRepeats,resolutions,screenDisplaySize,LUTbits,responsePorts,totalPorts,trialRecords,forceStimDetails);
 %[stimulus updateSM out LUT scaleFactor type targetPorts distractorPorts details interTrialLuminance isCorrection] = calcStim(stimulus,trialManagerClass,frameRate,responsePorts,totalPorts,trialRecords)
 %
@@ -9,6 +10,7 @@ function [stimulus,updateSM,resInd,preRequestStim,preResponseStim,discrimStim,LU
 %flankers above and below target, total of three stims
 % 1/3/0/09 - trialRecords now includes THIS trial
 indexPulses=[];
+imagingTasks=[];
 text='pmmStim';
 details.screenDisplaySize=screenDisplaySize;
 

@@ -1,7 +1,9 @@
-function [stimulus,updateSM,resolutionIndex,preRequestStim,preResponseStim,discrimStim,LUT,targetPorts,distractorPorts,details,interTrialLuminance,text,indexPulse] =...
+function [stimulus,updateSM,resolutionIndex,preRequestStim,preResponseStim,discrimStim,LUT,targetPorts,distractorPorts, ...
+    details,interTrialLuminance,text,indexPulse,imagingTasks] =...
     calcStim(stimulus,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % see ratrixPath\documentation\stimManager.calcStim.txt for argument specification (applies to calcStims of all stimManagers)
 % 1/3/0/09 - trialRecords now includes THIS trial
+imagingTasks=[];
 
 if ~all(ismember([stimulus.port{:}],responsePorts))
     error('not all the expected correct response ports were available in responsePorts')

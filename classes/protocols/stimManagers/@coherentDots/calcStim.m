@@ -1,8 +1,10 @@
-function [stimulus updateSM resolutionIndex preRequestStim preResponseStim discrimStim LUT targetPorts distractorPorts details interTrialLuminance text indexPulses] = ...
+function [stimulus updateSM resolutionIndex preRequestStim preResponseStim discrimStim LUT targetPorts distractorPorts ...
+    details interTrialLuminance text indexPulses imagingTasks] = ...
     calcStim(stimulus,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % 1/30/09 - trialRecords now includes THIS trial
 s = stimulus;
 indexPulses=[];
+imagingTasks=[];
 %LUT = Screen('LoadCLUT', 0);
 %LUT=LUT/max(LUT(:));
 

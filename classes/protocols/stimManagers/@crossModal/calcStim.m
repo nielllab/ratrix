@@ -1,7 +1,9 @@
-function [stimulus updateSM resInd preRequestStim preResponseStim discrimStim LUT targetPorts distractorPorts details interTrialLuminance text indexPulses] = ...
+function [stimulus updateSM resInd preRequestStim preResponseStim discrimStim LUT targetPorts distractorPorts ...
+    details interTrialLuminance text indexPulses imagingTasks] = ...
     calcStim(stimulus,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % 1/3/0/09 - trialRecords now includes THIS trial
 indexPulses=[];
+imagingTasks=[];
 updateSM = true; % This is always true, because the audio stimulus is always set
 
 % Determine if the modality should switch

@@ -1,4 +1,5 @@
-function [stimulus,updateSM,resolutionIndex,preRequestStim,preResponseStim,discrimStim,LUT,targetPorts,distractorPorts,details,interTrialLuminance,text,indexPulses] =... 
+function [stimulus,updateSM,resolutionIndex,preRequestStim,preResponseStim,discrimStim,LUT,targetPorts,distractorPorts,...
+    details,interTrialLuminance,text,indexPulses,imagingTasks] =... 
     calcStim(stimulus,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % see ratrixPath\documentation\stimManager.calcStim.txt for argument specification (applies to calcStims of all stimManagers)
 
@@ -7,6 +8,7 @@ LUT=makeStandardLUT(LUTbits);
 
 type = stimulus.drawingMode; % 12/9/08 - user can specify to use 'cache' (default) or 'expert' mode (optional)
 indexPulses=[];
+imagingTasks=[];
 % ====================================================================================
 % if we are in deck mode, do card selection and checking
 % else, just assign ind randomly based on the trialDistribution

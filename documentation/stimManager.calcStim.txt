@@ -71,6 +71,8 @@
 %                           if requestPorts (determined by the trialManager) is empty, the stimulus you provide (out) starts immediately
 %   text                    message to add to text label on each frame (can be single string or cell vector of length numFrames)
 %   indexPulses             boolean vector same length as out indicating what to output on the station's indexPin during each frame (set to [] for all false)
+%   imagingTasks            a cell array of imaging tasks to pass to the PsychImaging pipeline
+%                           typically empty, in which case we open a normal PTB window instead of using the PsychImaging pipeline
 %
 %
 %

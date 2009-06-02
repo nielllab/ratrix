@@ -46,6 +46,22 @@ try
     else
         PsychImaging('PrepareConfiguration');
         PsychImaging('AddTask', 'General', 'FloatingPoint32BitIfPossible'); %enable general support of such tasks
+        %6/2/09 - add imagingTasks to the pipeline
+        for i=1:length(imagingTasks)
+            % add task
+            evalStr=sprintf('PsychImaging(''AddTask''');
+            for j=1:length(imagingTasks{i})
+                if ischar(imagingTasks{i}{j})
+                    evalStr=sprintf('%s,''%s''',evalStr,imagingTasks{i}{j});
+                elseif isnumeric(imagingTasks{i}{j})
+                    evalStr=sprintf('%s,%d',evalStr,imagingTasks{i}{j});
+                else
+                    error('arguments to PsychImaging must be char or numeric');
+                end
+            end
+            evalStr=[evalStr ');'];
+            eval(evalStr);
+        end
         s.window = PsychImaging('OpenWindow', s.screenNum, 0); % use psychImaging if tasks are applied
     end
     disp(sprintf('took %g to call screen(openwindow)',GetSecs()-preScreen))

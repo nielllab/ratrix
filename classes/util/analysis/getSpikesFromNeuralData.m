@@ -1,4 +1,4 @@
-function [spikes spikeWaveforms spikeTimestamps assignedClusters rankedClusters photoDiode]= ...
+function [spikes spikeWaveforms spikeTimestamps assignedClusters rankedClusters]= ...
     getSpikesFromNeuralData(neuralData,neuralDataTimes,spikeDetectionParams,spikeSortingParams,analysisPath)
 % Get spikes using some spike detection method - plugin to Osort, WaveClus, KlustaKwik
 % Outputs:
@@ -7,9 +7,7 @@ function [spikes spikeWaveforms spikeTimestamps assignedClusters rankedClusters 
 %   spikeTimestamps - timestamp of each spike
 %   assignedClusters - which cluster each spike belongs to
 %   rankedClusters - some ranking of the clusters - we will specify that by convention, the last element of this array is the "noise" cluster
-%   photoDiode - unused for now....
 
-photoDiode=0;
 spikes=[];
 
 

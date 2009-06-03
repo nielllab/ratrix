@@ -207,6 +207,7 @@ while ~quit
     end
     analyzeThisTrial= all(strcmp('all',stimClassToAnalyze)) ||  any(strcmp(stimRecord.stimManagerClass,stimClassToAnalyze));
     if analyzeThisTrial
+        startingStimInd=0;
         while ~doneWithThisTrial
             % look at the neuralRecord and see if there are any new chunks to process
             chunkNames=who('-file',neuralRecordLocation);
@@ -315,7 +316,11 @@ while ~quit
                             spikeRecord.correctedFrameTimes spikeRecord.correctedFrameLengths spikeRecord.stimInds ...
                             spikeRecord.passedQualityTest] = ...
                             getFrameTimes(neuralRecord.neuralData(:,1),neuralRecord.neuralDataTimes,neuralRecord.samplingRate,warningBound,errorBound,ifi); % pass in the pulse channel
-
+                        
+                        % 6/3/09 - offset each chunk's stimInds by the last stimInd from previous chunk
+                        spikeRecord.stimInds=spikeRecord.stimInds+startingStimInd;
+                        startingStimInd=max(spikeRecord.stimInds);
+                        
                         if 0 %for inspecting errors in frames
                             figure('position',[100 500 500 500])
                             inspectFramesPulses(neuralRecord.neuralData,neuralRecord.neuralDataTimes,spikeRecord.frameIndices,'shortest');
@@ -345,11 +350,13 @@ while ~quit
                             %                     end
 
                             [spikeRecord.spikes spikeRecord.spikeWaveforms spikeRecord.spikeTimestamps spikeRecord.assignedClusters ...
-                                spikeRecord.rankedClusters spikeRecord.photoDiode]=...
+                                spikeRecord.rankedClusters]=...
                                 getSpikesFromNeuralData(neuralRecord.neuralData(:,3),neuralRecord.neuralDataTimes,...
                                 spikeDetectionParams,spikeSortingParams,analysisPath);
-                            % 11/25/08 - do some post-processing on the spike's assignedClusters ('treatAllNonNoiseAsSpikes', 'largestClusterAsSpikes', etc)
-
+                            % 6/3/09 - get integral under photoDiode curve
+                            spikeRecord.photoDiode = getPhotoDiode(neuralRecord.neuralData(:,2),spikeRecord.correctedFrameIndices);
+                            
+                            % 11/25/08 - do some post-processing on the spike's assignedClusters ('treatAllNonNoiseAsSpikes', 'largestClusterAsSpikes', etc)                     
                             if ~isempty(spikeRecord.assignedClusters)
                                 spikeRecord.spikeDetails = postProcessSpikeClusters(spikeRecord.assignedClusters,spikeRecord.rankedClusters,spikeSortingParams);
                                 spikeRecord.spikeDetails.rankedClusters=spikeRecord.rankedClusters;
@@ -477,6 +484,7 @@ while ~quit
                         spikeRecord.stimInds=spikeRecord.stimInds(which);
                         spikeRecord.chunkIDForCorrectedFrames=spikeRecord.chunkIDForCorrectedFrames(which);
                         spikeRecord.trialNumForCorrectedFrames=spikeRecord.trialNumForCorrectedFrames(which);
+                        spikeRecord.photoDiode=spikeRecord.photoDiode(which);
                         which=find(spikeRecord.chunkIDForFrames==chunksToProcess(i,2)&spikeRecord.trialNumForFrames==chunksToProcess(i,1));
                         spikeRecord.frameIndices=spikeRecord.frameIndices(which);
                         spikeRecord.frameLengths=spikeRecord.frameLengths(which);
@@ -485,7 +493,6 @@ while ~quit
                         spikeRecord.trialNumForFrames=spikeRecord.trialNumForFrames(which);
                         which=find(spikeRecord.chunkIDForDetails==chunksToProcess(i,2)&spikeRecord.trialNumForDetails==chunksToProcess(i,1));
                         spikeRecord.passedQualityTest=spikeRecord.passedQualityTest(which);
-                        spikeRecord.photoDiode=spikeRecord.photoDiode(which);
                         spikeRecord.samplingRate=spikeRecord.samplingRate(which);
                         spikeRecord.spikeDetails=spikeRecord.spikeDetails(which);
                         spikeRecord.chunkIDForDetails=spikeRecord.chunkIDForDetails(which);
@@ -510,7 +517,7 @@ while ~quit
                     
 %                   doAnalysis= (~exist(analysisLocation,'file') || overwriteAll) && worthSpikeSorting(sm,quality);
                     doAnalysis=worthSpikeSorting(sm,quality);
-                    doAnalysis=1; % if we need to do analysis (either no analysis file exists or we want to overwrite)
+%                     doAnalysis=1; % if we need to do analysis (either no analysis file exists or we want to overwrite)
   
                     if doAnalysis % 1
                         % do something with loaded information
@@ -546,6 +553,7 @@ while ~quit
                         
                         % 4/17/09 - only pass in the parts of the spikeRecord that belong to the currentTrial
                         % filteredSpikeRecord is a struct that contains all the spike data for the currentTrial to send to physAnalysis
+                        try
                         filteredSpikeRecord=[];
                         which=find(trialNum==currentTrial);
                         filteredSpikeRecord.spikes=spikes(which);
@@ -557,11 +565,15 @@ while ~quit
                         filteredSpikeRecord.correctedFrameIndices=correctedFrameIndices(which,:);
                         filteredSpikeRecord.stimInds=stimInds(which);
                         filteredSpikeRecord.chunkIDForCorrectedFrames=chunkIDForCorrectedFrames(which);
-                        which=find(trialNumForDetails==currentTrial);
                         filteredSpikeRecord.photoDiode=photoDiode(which);
+                        which=find(trialNumForDetails==currentTrial);
                         filteredSpikeRecord.spikeDetails=spikeDetails(which);
                         filteredSpikeRecord.chunkIDForDetails=chunkIDForDetails(which);
                         filteredSpikeRecord.currentChunk=chunksToProcess(i,2);
+                        catch ex
+                            getReport(ex)
+                            keyboard
+                        end
                         
                         [analysisdata cumulativedata] = physAnalysis(sm,filteredSpikeRecord,stimRecord.stimulusDetails,plotParameters,neuralRecord.activeParameters,cumulativedata,eyeData);
                         % activeParameters is from neuralRecord
@@ -618,17 +630,9 @@ end % end main function
 function [spikes spikeWaveforms photoDiode]=getSpikesFromPhotodiode(photoDiodeData,photoDiodeDataTimes,frameIndices,samplingRate)
 % get spikes from neuralData and neuralDataTimes, and given frameTimes
 spikeWaveforms=[];
-photoDiode=zeros(size(frameIndices,1),1);
+photoDiode = getPhotoDiode(photoDiodeData,frameIndices);
 % now calculate spikes in each frame
 spikes = [];
-% channel = 1; % what channel of the neuralData to look at
-% first go through and histogram the values to get a threshold
-darkFloor=min(photoDiodeData); % is there a better way to determin the dark value?  noise is a problem! last value particularly bad... why?
-for i=1:size(frameIndices,1)
-    % photoDiode is the sum of all neuralData of the given channel for the given samples (determined by frame start/stop)
-    photoDiode(i) = sum(photoDiodeData(frameIndices(i,1):frameIndices(i,2))-darkFloor);
-    %why are these negative?... i thought black was zero... guess not! subtracting a darkfloor now -pmm
-end
 if isempty(photoDiode)
     % that means frameIndices was empty
     return;
@@ -663,6 +667,18 @@ disp('got spikes from photo diode');
 end % end function
 % ===============================================================================================
 
+function photoDiode = getPhotoDiode(photoDiodeData,frameIndices)
+photoDiode=zeros(size(frameIndices,1),1);
+% now calculate spikes in each frame
+% channel = 1; % what channel of the neuralData to look at
+% first go through and histogram the values to get a threshold
+darkFloor=min(photoDiodeData); % is there a better way to determin the dark value?  noise is a problem! last value particularly bad... why?
+for i=1:size(frameIndices,1)
+    % photoDiode is the sum of all neuralData of the given channel for the given samples (determined by frame start/stop)
+    photoDiode(i) = sum(photoDiodeData(frameIndices(i,1):frameIndices(i,2))-darkFloor);
+    %why are these negative?... i thought black was zero... guess not! subtracting a darkfloor now -pmm
+end
+end % end function
 
 function  eyeData=getEyeRecords(eyeRecordPath, trialNum,timestamp);
 % is compatible with older eyeRecords in which multiple .mats got saved per

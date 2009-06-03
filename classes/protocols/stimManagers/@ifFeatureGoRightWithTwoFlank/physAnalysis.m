@@ -1,4 +1,4 @@
-function [analysisdata] = physAnalysis(stimManager,spikeData,stimulusDetails,plotParameters,parameters,analysisdata,eyeData)
+function [analysisdata cumulativedata] = physAnalysis(stimManager,spikeRecord,stimulusDetails,plotParameters,parameters,cumulativedata,eyeData)
 % stimManager is the stimulus manager
 % spikes is a logical vector of size (number of neural data samples), where 1 represents a spike happening
 % frameIndices is an nx2 array of frame start and stop indices - [start stop], n = number of frames
@@ -9,47 +9,83 @@ function [analysisdata] = physAnalysis(stimManager,spikeData,stimulusDetails,plo
 
 
 %% common - should put in util function for all physAnalysis
-analysisdata=[];
-return; % hack to run
+analysisdata=[]; %nothing passed out
+cumulativedata=[]; % not used yet, wipe out whatever data we get
 
-%CHOOSE CLUSTER
-spikes=spikeData.spikes; %all waveforms
-waveInds=find(spikes); % location of all waveforms
-if isstruct(spikeData.spikeDetails) && ismember({'processedClusters'},fields(spikeData.spikeDetails)) 
-    thisCluster=spikeData.spikeDetails.processedClusters==1;
-else
-    thisCluster=logical(ones(size(waveInds)));
-    %use all (photodiode uses this)
-end
-spikes(waveInds(~thisCluster))=0; % set all the non-spike waveforms to be zero;
-%spikes(waveInds(spikeData.assig
+% %CHOOSE CLUSTER
+% spikes=spikeRecord.spikes; %all waveforms
+% waveInds=find(spikes); % location of all waveforms
+% if isstruct(spikeData.spikeDetails) && ismember({'processedClusters'},fields(spikeData.spikeDetails)) 
+%     thisCluster=spikeData.spikeDetails.processedClusters==1;
+% else
+%     thisCluster=logical(ones(size(waveInds)));
+%     %use all (photodiode uses this)
+% end
+% spikes(waveInds(~thisCluster))=0; % set all the non-spike waveforms to be zero;
+% %spikes(waveInds(spikeData.assig
+% 
+% %SET UP RELATION stimInd <--> frameInd
+% analyzeDrops=true;
+% if analyzeDrops
+%     stimFrames=spikeData.stimIndices;
+%     frameIndices=spikeData.frameIndices;
+% else
+%     numStimFrames=max(spikeData.stimIndices);
+%     stimFrames=1:numStimFrames;
+%     firstFramePerStimInd=~[0 diff(spikeData.stimIndices)==0];
+%     frameIndices=spikeData.frameIndices(firstFramePerStimInd);
+% end
 
 %SET UP RELATION stimInd <--> frameInd
 analyzeDrops=true;
 if analyzeDrops
-    stimFrames=spikeData.stimIndices;
-    frameIndices=spikeData.frameIndices;
+    stimFrames=spikeRecord.stimInds;
+    correctedFrameIndices=spikeRecord.correctedFrameIndices;
 else
-    numStimFrames=max(spikeData.stimIndices);
+    numStimFrames=max(spikeRecord.stimInds);
     stimFrames=1:numStimFrames;
-    firstFramePerStimInd=~[0 diff(spikeData.stimIndices)==0];
-    frameIndices=spikeData.frameIndices(firstFramePerStimInd);
+    firstFramePerStimInd=~[0 diff(spikeRecord.stimInds)==0];
+    correctedFrameIndices=spikeRecord.correctedFrameIndices(firstFramePerStimInd);
 end
+
+%CHOOSE CLUSTER
+allSpikes=spikeRecord.spikes; %all waveforms
+waveInds=allSpikes; % location of all waveforms
+if isstruct(spikeRecord.spikeDetails) && ismember({'processedClusters'},fields(spikeRecord.spikeDetails))
+    if length(spikeRecord.spikeDetails.processedClusters)~=length(waveInds)
+        length(spikeRecord.spikeDetails.processedClusters)
+        length(waveInds)
+        error('spikeDetails does not correspond to the spikeRecord''s spikes');
+    end
+    thisCluster=[spikeRecord.spikeDetails.processedClusters]==1;
+else
+    thisCluster=logical(ones(size(waveInds)));
+    %use all (photodiode uses this)
+end
+allSpikes(~thisCluster)=[]; % remove spikes that dont belong to thisCluster
 
 s=setStimFromDetails(stimManager, stimulusDetails);
 [targetIsOn flankerIsOn effectiveFrame cycleNum sweptID repetition]=isTargetFlankerOn(s,stimFrames);
 
-%empirically
-samplingRate=round(diff(minmax(find(spikeData.spikes)'))/ diff(spikeData.spikeTimestamps([1 end])));
-ifi=1/stimulusDetails.hz; %same as empiric mode(diff(spikeData.frameIndices'))/samplingRate;
-%parameters.refreshRate is wrong
+%old way is empirically
+%samplingRate=round(diff(minmax(find(spikeData.spikes)'))/ diff(spikeData.spikeTimestamps([1 end])));
+samplingRate=parameters.samplingRate;
+
+ifi=1/stimulusDetails.hz;      %in old mode used to be same as empiric (diff(spikeData.frameIndices'))/samplingRate;
+ifi2=1/parameters.refreshRate; %parameters.refreshRate might be wrong, so check it
+if ifi~=ifi2
+    ifi
+    ifi2
+    error('refresh rate doesn''t agree!')
+end
+
 
 % count the number of spikes per frame
 % spikeCount is a 1xn vector of (number of spikes per frame), where n = number of frames
-spikeCount=zeros(1,size(frameIndices,1));
-spikeInds=find(spikes);
+spikeCount=zeros(1,size(correctedFrameIndices,1));
 for i=1:length(spikeCount) % for each frame
-    spikeCount(i)=sum(spikes(frameIndices(i,1):frameIndices(i,2)));  % inclusive?  policy: include start & stop
+    spikeCount(i)=length(find(spikes>=correctedFrameIndices(i,1)&spikes<=correctedFrameIndices(i,2)));
+    %spikeCount(i)=sum(spikes(frameIndices(i,1):frameIndices(i,2)));  % inclusive?  policy: include start & stop
 end
 
 
@@ -57,7 +93,7 @@ end
 
 swept=s.dynamicSweep.sweptParameters;
 %assemble a vector struct per frame (like per trial)
-d.date=spikeData.frameIndices(:,1)'/(samplingRate*60*60*24); %define field just to avoid errors
+d.date=correctedFrameIndices(:,1)'/(samplingRate*60*60*24); %define field just to avoid errors
 for i=1:length(swept)
     switch swept{i}
         case 'targetOrientations'

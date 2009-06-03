@@ -23,6 +23,35 @@ spikeRecord.photoDiode=spikeRecord.photoDiode(which);
 spikeRecord.spikeDetails=spikeRecord.spikeDetails(which);
 
 
+%SET UP RELATION stimInd <--> frameInd
+analyzeDrops=true;
+if analyzeDrops
+    stimFrames=spikeRecord.stimInds;
+    correctedFrameIndices=spikeRecord.correctedFrameIndices;
+else
+    numStimFrames=max(spikeRecord.stimInds);
+    stimFrames=1:numStimFrames;
+    firstFramePerStimInd=~[0 diff(spikeRecord.stimInds)==0];
+    correctedFrameIndices=spikeRecord.correctedFrameIndices(firstFramePerStimInd);
+end
+
+%CHOOSE CLUSTER
+allSpikes=spikeRecord.spikes; %all waveforms
+waveInds=allSpikes; % location of all waveforms
+if isstruct(spikeRecord.spikeDetails) && ismember({'processedClusters'},fields(spikeRecord.spikeDetails))
+    if length(spikeRecord.spikeDetails.processedClusters)~=length(waveInds)
+        length(spikeRecord.spikeDetails.processedClusters)
+        length(waveInds)
+        error('spikeDetails does not correspond to the spikeRecord''s spikes');
+    end
+    thisCluster=[spikeRecord.spikeDetails.processedClusters]==1;
+else
+    thisCluster=logical(ones(size(waveInds)));
+    %use all (photodiode uses this)
+end
+allSpikes(~thisCluster)=[]; % remove spikes that dont belong to thisCluster
+
+
 % xtra user paramss
 spatialSmoothingOn=false;
 doSTC=false;
@@ -69,26 +98,13 @@ if (ischar(stimulusDetails.strategy) && strcmp(stimulusDetails.strategy,'expert'
     else
         error('dont use old convention for whiteNoise');
         %old convention prior to april 17th, 2009
-        stimulusDetails.distribution.type='gaussian';
-        std = stimulusDetails.std;
-        meanLuminance = stimulusDetails.meanLuminance;
+        %stimulusDetails.distribution.type='gaussian';
+        %std = stimulusDetails.std;
+        %meanLuminance = stimulusDetails.meanLuminance;
     end
 end
 height=stimulusDetails.height;
 width=stimulusDetails.width;
-
-
-%SET UP RELATION stimInd <--> frameInd
-analyzeDrops=true;
-if analyzeDrops
-    stimFrames=spikeRecord.stimInds;
-    correctedFrameIndices=spikeRecord.correctedFrameIndices;
-else
-    numStimFrames=max(spikeRecord.stimInds);
-    stimFrames=1:numStimFrames;
-    firstFramePerStimInd=~[0 diff(spikeRecord.stimInds)==0];
-    correctedFrameIndices=spikeRecord.correctedFrameIndices(firstFramePerStimInd);
-end
 
 
 % stimData is the entire movie shown for this trial
@@ -147,21 +163,7 @@ if size(spikeRecord.correctedFrameIndices,1)~=size(stimData,3)
     error('the number of frame start/stop times does not match the number of movie frames');
 end
 
-%CHOOSE CLUSTER
-allSpikes=spikeRecord.spikes; %all waveforms
-waveInds=allSpikes; % location of all waveforms
-if isstruct(spikeRecord.spikeDetails) && ismember({'processedClusters'},fields(spikeRecord.spikeDetails))
-    if length(spikeRecord.spikeDetails.processedClusters)~=length(waveInds)
-        length(spikeRecord.spikeDetails.processedClusters)
-        length(waveInds)
-        error('spikeDetails does not correspond to the spikeRecord''s spikes');
-    end
-    thisCluster=[spikeRecord.spikeDetails.processedClusters]==1;
-else
-    thisCluster=logical(ones(size(waveInds)));
-    %use all (photodiode uses this)
-end
-allSpikes(~thisCluster)=[]; % remove spikes that dont belong to thisCluster
+
 
 analysisdata=[];
 % figure out safe "piece" size based on spatialDim and timeWindowFrames

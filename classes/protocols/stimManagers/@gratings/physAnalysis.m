@@ -1,6 +1,6 @@
 function [analysisdata cumulativedata] = physAnalysis(stimManager,spikeRecord,stimulusDetails,plotParameters,parameters,cumulativedata,eyeData)
 % stimManager is the stimulus manager
-% spikes is a logical vector of size (number of neural data samples), where 1 represents a spike happening
+% spikes is an index into neural data samples of the time of a spike
 % correctedFrameIndices is an nx2 array of frame start and stop indices - [start stop], n = number of frames
 % stimulusDetails are the stimDetails from calcStim (hopefully they contain
 % all the information needed to reconstruct stimData)
@@ -9,15 +9,18 @@ function [analysisdata cumulativedata] = physAnalysis(stimManager,spikeRecord,st
 
 %CHOOSE CLUSTER
 spikes=spikeRecord.spikes; %all waveforms
-waveInds=find(spikes); % location of all waveforms
 if isstruct(spikeRecord.spikeDetails) && ismember({'processedClusters'},fields(spikeRecord.spikeDetails)) 
-    thisCluster=spikeRecord.spikeDetails.processedClusters==1;
+    processedClusters=[];
+    for i=1:length(spikeRecord.spikeDetails)
+        processedClusters=[processedClusters spikeRecord.spikeDetails(i).processedClusters]  %this is not a cumulative analysis so by default analyze all chunks available
+    end
+    thisCluster=processedClusters==1;
 else
-    thisCluster=logical(ones(size(waveInds)));
+    thisCluster=logical(ones(size(spikes))); 
     %use all (photodiode uses this)
 end
-spikes(waveInds(~thisCluster))=0; % set all the non-spike waveforms to be zero;
-%spikes(waveInds(spikeRecord.assignedClusters~=1))=0; this should select the noise only!  just for testing
+spikes(~thisCluster)=[]; % remove spikes that dont belong to thisCluster
+
 
 %SET UP RELATION stimInd <--> frameInd
 numStimFrames=max(spikeRecord.stimInds);
@@ -76,22 +79,22 @@ else
     error('multiple durations can''t rely on mod to determine the frame type')
 end
 
-%empirically
-samplingRate=round(diff(minmax(find(spikeRecord.spikes)'))/ diff(spikeRecord.spikeTimestamps([1 end])));
+%empirically is the old way
+%samplingRate=round(diff(minmax(spikes'))/ diff(spikeRecord.spikeTimestamps([1 end])));
+samplingRate=parameters.samplingRate;
 
 % calc phase per frame, just like dynamic
 x = 2*pi./pixPerCycs(type); % adjust phase for spatial frequency, using pixel=1 which is likely offscreen if rotated
 cycsPerFrameVel = driftfrequencies(type)*1/(parameters.refreshRate); % in units of cycles/frame
-offset = 2*pi*cycsPerFrameVel.*stimFrames;
+offset = 2*pi*cycsPerFrameVel.*stimFrames';
 phases=x + offset+startPhases(type);
 phases=mod(phases,2*pi);
 
 % count the number of spikes per frame
 % spikeCount is a 1xn vector of (number of spikes per frame), where n = number of frames
 spikeCount=zeros(1,size(correctedFrameIndices,1));
-spikeInds=find(spikes);
 for i=1:length(spikeCount) % for each frame
-    spikeCount(i)=sum(spikes(correctedFrameIndices(i,1):correctedFrameIndices(i,2)));  % inclusive?  policy: include start & stop
+     spikeCount(i)=length(find(spikes>=correctedFrameIndices(i,1)&spikes<=correctedFrameIndices(i,2))); % inclusive?  policy: include start & stop
 end
 
 % probablity of a spike per phase
@@ -131,7 +134,8 @@ for i=1:numRepeats
             pow(i,j)=fx(peakFreqInd); % determine the power at that freq
 
             
-            if ~isempty(ef)
+            warning('had to turn coherency off... there is possibly a formating error b/c stimFrames is a sawtooth which we could fix here, but ought to be fixed at the concatenation point')
+            if ~isempty(ef) & 0 % turn off until matrices are the right size
                 chrParam.tapers=[3 5]; % same as default, but turns off warning
                 chrParam.err=[2 0.05];  % use 2 for jacknife
                 fscorr=true;
@@ -140,13 +144,14 @@ for i=1:numRepeats
                 [C,phi,S12,S1,S2,f,zerosp,confC,phistd,Cerr]=coherencycpb(cos(phases(whichType)'),spikeCount(sf:ef)',chrParam,fscorr);
             end
             
-            if ~isempty(ef) && ~zerosp 
+            if 0 && ~isempty(ef) && ~zerosp 
                 peakFreqInds=find(S1>max(S1)*.95); % a couple bins near the peak of 
                 [junk maxFreqInd]=max(S1);
                 coh(i,j)=mean(C(peakFreqInds));
                 cohLB(i,j)=Cerr(1,maxFreqInd);  
             else
                 coh(i,j)=nan;
+                cohLB(i,j)=nan;  
             end
             
             if 0 & j==3  & ~isempty(ef) % 1; %chunk==6 %chronuxDev
@@ -158,7 +163,7 @@ for i=1:numRepeats
                 
                 ss=correctedFrameIndices(sf,1); % start samp
                 es=correctedFrameIndices(ef,2); % end samp
-                whichSpikes=spikeInds>=ss & spikeInds<=es;
+                whichSpikes=spikes>=ss & spikes<=es;
                 
                 %durE=durations(j)/parameters.refreshRate; %expected if not frame drops
                 %samplingRate/driftfrequencies(j)
@@ -434,14 +439,12 @@ xlabel(sweptParameter); set(gca,'XTickLabel',valNames,'XTick',[1:length(vals)]);
 ylim=get(gca,'YLim'); yvals=[ ylim(1) mean(ylim) ylim(2)];set(gca,'YTickLabel',yvals,'YTick',yvals)
 set(gca,'XLim',[1 length(vals)])
 
-meanRate=(sum(spikes))/diff(spikeRecord.spikeTimestamps([1 end]));
+meanRate=(length(spikes))/diff(spikeRecord.spikeTimestamps([1 end]));
 isi=diff(spikeRecord.spikeTimestamps(thisCluster))*1000;
 N=sum(isi<parameters.ISIviolationMS); percentN=100*N/length(isi);
 %datestr(parameters.date,22)
 infoString=sprintf('subj: %s  trial: %d Hz: %d',parameters.subjectID,parameters.trialNumber,round(meanRate));
 text(1.2,ylim(2),infoString);
-
-
 
 subplot(3,2,5);  
 numBins=40; maxTime=10; % ms
@@ -476,7 +479,7 @@ if 0
             %TIME
             %st=correctedFrameIndices(sf,1); % time start index
             %et=correctedFrameIndices(ef,2); % time stop index
-            %times=find(spikes(st:et))/samplingRate;
+            %times=find(spikes(st:et))/samplingRate; error('wrong spike definition'))
             %times=times*pixPerCycs(j);  % hack rescaling of time, to match phases... increases "apparent" firing rate
             %plot(times,(j-1)*numRepeats+i,'.','color',colors(j,:))
             

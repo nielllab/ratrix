@@ -181,14 +181,12 @@ for i=1:numInds
             case 'none'
                 im0= repmat(sampleStimFrame(sm,tmClass,forceStimDetails,reponsePorts,sx,sy),[1 1 3]);
                 image=repmat(im0(1+padY:sy-padY,1+padX:sx-padX),[1 1 3]);
-            case 'input'
-                
+            case 'input'      
   
                 [im0]= sampleStimFrame(sm,tmClass,forceStimDetails,reponsePorts,sx,sy);
                 center=repmat(im0(1+padY+borderWidth:sy-padY-borderWidth,1+padX+borderWidth:sx-padX-borderWidth),[1 1 3]);
                 image=uint8(255*repmat(reshape(borderColor(i,:),[1 1 3]),[desiredY desiredX 1]));
                 image(borderWidth+1:end-borderWidth,borderWidth+1:end-borderWidth,:)=center;
- 
                  
             case 'calculate'
                 error('not yet')

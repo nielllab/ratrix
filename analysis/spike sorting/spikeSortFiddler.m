@@ -22,7 +22,7 @@ spikeDetectionParams.ISIviolationMS=2; % just for human reports
 % Wn = [300 4000]/(spikeDetectionParams.samplingFreq/2); % default to bandpass 300Hz - 4000Hz
 % [b,a] = butter(4,Wn); Hd=[]; Hd{1}=b; Hd{2}=a;      
 spikeDetectionParams.nrNoiseTraces=0;   % what does this do for us? any effect if set to 2?
-spikeDetectionParams.extractionThreshold =7;
+spikeDetectionParams.extractionThreshold =6;
 %should be replaced with a string that collapses these two confusing categories into one value;  'maxPeak' 'minPeak' 'maxMinPeak' 'power' 'MTEO'
 % why is 3=power broken? can we fix it?
 spikeDetectionParams.peakAlignMethod=1;  % 1-> find peak, 2->none, 3->peak of power signal (broken), 4->peak of MTEO signal.
@@ -52,7 +52,7 @@ spikeSortingParams.maxDistance=30; %(optional) maxDistance parameter passed in t
 spikeSortingParams.envelopeSize=10; %(optional) parameter passed in to osort's assignToWaveform method; additionally must fall withing mean +/- envelopeSize*std (i think at every timepoint of waveform); [0.5-3]; set large (>100) for negnigable influence
         
 
-if 1 %try klusta
+if 1 %use klusta
 spikeSortingParams=[];
 spikeSortingParams.method='KlustaKwik';
 spikeSortingParams.minClusters=20; % (optional) (default 20) min number of initial clusters - final number may be different due to splitting/deleting
@@ -91,10 +91,10 @@ end
 % path='C:\Documents and Settings\rlab\Desktop\neural';
 path='\\132.239.158.179\datanet_storage'
 stimClassToAnalyze={'all'}; timeRangePerTrialSecs=[0 Inf];
-overwriteAll=1; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
+overwriteAll=0; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
 usePhotoDiodeSpikes=0;
 subjectID = 'demo1'; cellBoundary={'physLog',{'05.18.2009','all','last'}};
-subjectID = 'demo1';cellBoundary={'trialRange',[7]} % all chunks in these trials
+subjectID = 'demo1';cellBoundary={'trialRange',[24 80]} % all chunks in these trials
 
 analysisManagerByChunk(subjectID, path, cellBoundary, spikeDetectionParams, spikeSortingParams,...
     timeRangePerTrialSecs,stimClassToAnalyze,overwriteAll,usePhotoDiodeSpikes)

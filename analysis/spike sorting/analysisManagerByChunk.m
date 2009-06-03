@@ -300,7 +300,7 @@ while ~quit
                         neuralRecord.neuralDataTimes=neuralRecord.neuralDataTimes(withinTimeRange);
                     end
                     
-                    if ~processed
+                    if ~processed || overwriteAll
 
                         % get frameIndices and frameTimes (from screen pulses)
                         % bounds to decide whether or not to continue with analysis
@@ -515,10 +515,8 @@ while ~quit
                     evalStr = sprintf('sm = %s();',stimRecord.stimManagerClass);
                     eval(evalStr);
                     
-%                   doAnalysis= (~exist(analysisLocation,'file') || overwriteAll) && worthSpikeSorting(sm,quality);
-                    doAnalysis=worthSpikeSorting(sm,quality);
-%                     doAnalysis=1; % if we need to do analysis (either no analysis file exists or we want to overwrite)
-  
+                    doAnalysis= (~exist(analysisLocation,'file') || overwriteAll) && worthSpikeSorting(sm,quality);
+
                     if doAnalysis % 1
                         % do something with loaded information
                         % NOTE - neuralRecord refers to all the 'neuralRecord' for a particular chunk!
@@ -593,6 +591,9 @@ while ~quit
                         eval(evalStr);
                         evalStr=sprintf('clear chunk%d;',chunksToProcess(i,2));
                         eval(evalStr);
+                    else
+                        dispStr=sprintf('skipping analysis for trial %d chunk %d',chunksToProcess(i,1),chunksToProcess(i,2));
+                        disp(dispStr);
                     end
                 catch ex
                     disp(['CAUGHT EX: ' getReport(ex)])

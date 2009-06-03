@@ -12,7 +12,7 @@ spikes=spikeRecord.spikes; %all waveforms
 if isstruct(spikeRecord.spikeDetails) && ismember({'processedClusters'},fields(spikeRecord.spikeDetails)) 
     processedClusters=[];
     for i=1:length(spikeRecord.spikeDetails)
-        processedClusters=[processedClusters spikeRecord.spikeDetails(i).processedClusters]  %this is not a cumulative analysis so by default analyze all chunks available
+        processedClusters=[processedClusters spikeRecord.spikeDetails(i).processedClusters];  %this is not a cumulative analysis so by default analyze all chunks available
     end
     thisCluster=processedClusters==1;
 else
@@ -514,7 +514,7 @@ analysisdata.rate=rate;
 analysisdata.sweptParameter=sweptParameter;
 analysisdata.vals=vals;
 analysisdata.spikeCount = spikeCount;
-cumulativedata=[];
+cumulativedata=[]; % why are we emptying out cumulativedata? do we not have anything cumulative in gratings?
 
 end % end function
 % ===============================================================================================

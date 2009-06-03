@@ -74,6 +74,7 @@ while ~gotAck
             % 4/21/09 - now try to read again to check for a response
             response=pnet(con,'read',MAXSIZE,'double','noblock');
         else
+            received
             error('if received isnt empty and isnt an ack, then what is it?');
         end
     else % didnt receive anything yet, so keep listening

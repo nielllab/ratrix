@@ -49,6 +49,8 @@ try
                 save(fullFilename, 'samplingRate');
             end
 			retval(end).fullFilename = fullFilename; % return filename for appending by physServer
+            retval(end).trialNumber=cparams.trialNumber;
+            retval(end).stimManagerClass=cparams.stimManagerClass;
             fprintf('got trial start command from ratrix\n')
 		case constants.stimToDataCommands.S_TRIAL_END_EVENT_CMD
 			% mark end of trial - how do we add an event to events_data, which is all the way out in physiologyServer?

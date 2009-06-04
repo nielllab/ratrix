@@ -19,7 +19,7 @@ which=find(spikeRecord.chunkIDForCorrectedFrames==spikeRecord.currentChunk);
 spikeRecord.correctedFrameIndices=spikeRecord.correctedFrameIndices(which,:);
 spikeRecord.stimInds=spikeRecord.stimInds(which);
 which=find(spikeRecord.chunkIDForDetails==spikeRecord.currentChunk);
-spikeRecord.photoDiode=spikeRecord.photoDiode(which);
+%spikeRecord.photoDiode=spikeRecord.photoDiode(which);  % HACK! we need this, right?
 spikeRecord.spikeDetails=spikeRecord.spikeDetails(which);
 
 

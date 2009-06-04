@@ -412,3 +412,15 @@ pmm/addSTAEvents.m -text
 pmm/continualAnalysisSTA.m -text
 eye/plotEyeElipses.m -text
 spike[!!-~]sorting/analysisManagerByChunk.m -text
+eye/analyzeGaze.m -text
+pmm/getCommonSubjectDir.m -text
+pmm/assignLabeledNames.m -text
+pmm/flankerPaperFigures_v3.m -text
+pmm/standardFlankerPaperPlot.m -text
+pmm/getBlockTransitionTrialNums.m -text
+pmm/nearestIndices.m -text
+pmm/addPhantomTargetContrast.m -text
+pmm/FlankerPapaerSupplimentary1.m -text
+pmm/pmmEvent.m -text
+pmm/viewBlockedData.m -text
+pmm/checkControls.m -text

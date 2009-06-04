@@ -213,3 +213,4 @@ protocols/delayManagers/@flatHazard/flatHazard.m -text
 db/@dbConn/getCalibrationData.m -text
 db/@dbConn/updateCalibrationData.m -text
 db/@dbConn/getSurgeryFields.m -text
+protocols/stimManagers/@whiteNoise/worthSpikeSorting.m -text

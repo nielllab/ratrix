@@ -147,3 +147,4 @@ analysis/getCellBoundaryFromEventLog.m -text
 analysis/applyChunkFilter.m -text
 nidaq/saveNidaqChunk.m -text
 stimHelpers/makeStandardSoundManager.m -text
+analysis/getAngularResolutionFromGeometry.m -text

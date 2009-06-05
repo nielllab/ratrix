@@ -282,6 +282,7 @@ f = figure('Visible','off','MenuBar','none','Name','neural GUI',...
                             error('unrecognized event type');
                     end
                 end
+                dispStrs=fliplr(dispStrs);
             otherwise
                 error('unsupported mode for now');
         end

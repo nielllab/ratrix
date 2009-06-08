@@ -1018,12 +1018,13 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
         if running
             pnet('closeall')
             data = datanet('data', getIPAddress(),client_hostname,storepath,ai_parameters); % how do we get client_hostname,storepath, and ai_parameters?
-            datacon = connectToClient(data,client_hostname);
-            if isempty(datacon)
+            [dataCmdCon dataAckCon]= connectToClient(data,client_hostname);
+            if isempty(dataCmdCon) || isempty(dataAckCon)
                 % this should error, because we pressed 'start trials' and then failed to connect to a client
                 error('failed to connect to client');
             else
-                data=setCon(data,datacon);
+                data=setCmdCon(data,dataCmdCon);
+                data=setAckCon(data,dataAckCon);
                 gotAck=startClientTrials(data,ratIDStrs{get(ratIDField,'Value')},ratProtocolStrs{get(ratProtocolField,'Value')});
                 fprintf('started client trials\n');
                 if ~gotAck
@@ -1073,7 +1074,7 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
             params.startTime=startTime;
             % ==============================================
             % handle all TRIALS stuff
-            if running && ~isempty(datacon)
+            if running && ~isempty(dataCmdCon) && ~isempty(dataAckCon)
                 [quit retval status requestDone]=doServerIteration(data,params,externalRequest);
                 if requestDone % we have to do this instead of just updating the value of externalRequest, becuase of some weird matlab scope issue
                     externalRequest=[];
@@ -1255,11 +1256,11 @@ function [quit retval status requestDone]=doServerIteration(data,params,external
 requestDone=false;
 % check pnet('status') here if ratrix throws error, go back to
 % connectToClient
-status=pnet(getCon(data),'status');
+status=pnet(getCmdCon(data),'status')>0 && pnet(getAckCon(data),'status')>0;
 
 quit=false;
 retval=[];
-if ~isempty(getCon(data))
+if ~isempty(getCmdCon(data)) && ~isempty(getAckCon(data))
     [data quit retval] = handleCommands(data,params);
 end
 if ~isempty(externalRequest)

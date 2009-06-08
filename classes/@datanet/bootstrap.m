@@ -17,21 +17,41 @@ while 1
     % ========================================================================================
     % DATANET STUFF
     % open a socket connection
-    datanet.sockcon = pnet('tcpsocket', datanet.port);
+    datanet.cmdSockcon = pnet('tcpsocket', datanet.ports(1));
+    datanet.ackSockcon = pnet('tcpsocket', datanet.ports(2));
     % first connection - keep trying to get a connection using tcplisten
-    stimcon = -1;
-    while stimcon == -1
-        stimcon=pnet(datanet.sockcon,'tcplisten','noblock');
-        if stimcon==-1
-            fprintf('tried tcplisten - no connection received\n')
+    doCmd=true;
+    doAck=true;
+    while doCmd && doAck
+        if doCmd
+            cmd_stimcon=pnet(datanet.cmdSockcon,'tcplisten','noblock');
+        end
+        if doAck
+            ack_stimcon=pnet(datanet.ackSockcon,'tcplisten','noblock');
+        end
+        if cmd_stimcon==-1
+            fprintf('tried tcplisten on cmd port - no connection received\n')
+        else
+            fprintf('got connection on cmd port!\n')
+            doCmd=false;
+        end
+        if ack_stimcon==-1
+            fprintf('tried tcplisten on ack port - no connection received\n')
+        else
+            fprintf('got connection on ack port!\n')
+            doAck=false;
+        end
+        if doCmd || doAck
             WaitSecs(3);
         end
     end
-    pnet(stimcon,'setwritetimeout',5);
-    pnet(stimcon,'setreadtimeout',5);
-    datanet=setCon(datanet,stimcon);
-    [ip port]=pnet(stimcon,'gethost')
-    % now that stimcon is not -1, that means a data-side tcpconnect was issued
+    pnet(cmd_stimcon,'setwritetimeout',5);
+    pnet(cmd_stimcon,'setreadtimeout',5);
+    pnet(ack_stimcon,'setwritetimeout',5);
+    pnet(ack_stimcon,'setreadtimeout',5);
+    datanet=setCmdCon(datanet,cmd_stimcon);
+    datanet=setAckCon(datanet,ack_stimcon);
+
     % check for commands (ie start_trials_cmd)
     disp('received connection from server')
     % basically just loop clientHandleCommands
@@ -54,22 +74,40 @@ while 1
                     cparams.method = 'Restart';
                     commands.arg=cparams;
                     [gotAck] = sendCommandAndWaitForAck(datanet, commands);
-                    pnet(datanet.con,'close');
-                    datanet.con=[];
+                    pnet(datanet.cmdCon,'close');
+                    pnet(datanet.ackCon,'close');
+                    datanet.cmdCon=[];
+                    datanet.ackCon=[];
                     % reconnect!
-                    stimcon = -1;
-                    while stimcon == -1
-                        stimcon=pnet(datanet.sockcon,'tcplisten','noblock');
-                        if stimcon==-1
-                            fprintf('tried tcplisten - no connection received\n')
-                            WaitSecs(3);
+                    doCmd=true;
+                    doAck=true;
+                    while doCmd && doAck
+                        if doCmd
+                            cmd_stimcon=pnet(datanet.cmdSockcon,'tcplisten','noblock');
+                        end
+                        if doAck
+                            ack_stimcon=pnet(datanet.ackSockcon,'tcplisten','noblock');
+                        end
+                        if cmd_stimcon==-1
+                            fprintf('tried tcplisten on cmd port - no connection received\n')
+                        else
+                            fprintf('got connection on cmd port!\n')
+                            doCmd=false;
+                        end
+                        if ack_stimcon==-1
+                            fprintf('tried tcplisten on ack port - no connection received\n')
+                        else
+                            fprintf('got connection on ack port!\n')
+                            doAck=false;
                         end
                     end
-                    pnet(stimcon,'setwritetimeout',5);
-                    pnet(stimcon,'setreadtimeout',5);
-                    datanet=setCon(datanet,stimcon);
-                    [ip port]=pnet(stimcon,'gethost')
-                    % now that stimcon is not -1, that means a data-side tcpconnect was issued
+                    pnet(cmd_stimcon,'setwritetimeout',5);
+                    pnet(cmd_stimcon,'setreadtimeout',5);
+                    pnet(ack_stimcon,'setwritetimeout',5);
+                    pnet(ack_stimcon,'setreadtimeout',5);
+                    datanet=setCmdCon(datanet,cmd_stimcon);
+                    datanet=setAckCon(datanet,ack_stimcon);
+
                     % check for commands (ie start_trials_cmd)
                     disp('received connection from server')
                 elseif strcmpi(str,'q')
@@ -81,9 +119,11 @@ while 1
                     cparams.method = 'Quit';
                     commands.arg=cparams;
                     [gotAck] = sendCommandAndWaitForAck(datanet, commands);
-                    pnet(datanet.con,'close')
+                    pnet(datanet.cmdCon,'close');
+                    pnet(datanet.ackCon,'close');
                     pnet('closeall')
-                    datanet.con=[];
+                    datanet.cmdCon=[];
+                    datanet.ackCon=[];
                 end
             end        
         end

@@ -9,6 +9,9 @@ function r=datanet(varargin)
 % wrapper of the pnet class to use TCP/IP
 % includes commands, status, error msgs as predefined constants
 
+% port numbers are hardcoded to be 8888 and 8889. not sure if we should allow custom port numbers, because the function
+% connectToClient uses the same hardcoded ports
+% see http://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers for a list of potential port conflicts (none atm)
 
 % =================================================================
 % commands/responses where data sends a command, stim sends a response
@@ -42,46 +45,15 @@ r.constants.dataToStimResponses.D_ERROR_METHOD_RECEIVED = 154;
 r.constants.omniMessages.END_OF_DOTRIALS = 1001;
 % =================================================================
 
-% startup of data/stim connection
-% r.constants.startConnectionCommands.S_START_DATA_LISTENER_CMD = 101;
-% r.constants.startConnectionCommands.D_LISTENER_STARTED = 102;
-
-% % Stim to Data commands
-% r.constants.stimToDataCommands.S_START_RECORDING_CMD = 1;
-% r.constants.stimToDataCommands.S_TIMESTAMP_CMD = 2;
-% r.constants.stimToDataCommands.S_SAVE_DATA_CMD = 3;
-% r.constants.stimToDataCommands.S_SEND_EVENT_DATA_CMD = 4;
-% r.constants.stimToDataCommands.S_STOP_RECORDING_CMD = 5;
-% r.constants.stimToDataCommands.S_SHUTDOWN_CMD = 6;
-% r.constants.stimToDataCommands.S_SET_STOREPATH_CMD = 7;
-% r.constants.stimToDataCommands.S_SET_AI_PARAMETERS_CMD = 8;
-% r.constants.stimToDataCommands.S_SET_LOCAL_PARAMETERS_CMD = 9;
-% r.constants.stimToDataCommands.S_ACK_EVENT_DATA_CMD = 10;
-
-% % Data to Stim messages
-% r.constants.dataToStimResponses.D_RECORDING_STARTED = 51;
-% r.constants.dataToStimResponses.D_TIMESTAMPED = 52;
-% r.constants.dataToStimResponses.D_DATA_SAVED = 53;
-% r.constants.dataToStimResponses.D_EVENT_DATA_SENT = 54;
-% r.constants.dataToStimResponses.D_RECORDING_STOPPED = 55;
-% r.constants.dataToStimResponses.D_SHUTDOWN = 56;
-% r.constants.dataToStimResponses.D_STOREPATH_SET = 57;
-% r.constants.dataToStimResponses.D_AI_PARAMETERS_SET = 58;
-% r.constants.dataToStimResponses.D_LOCAL_PARAMETERS_SET = 59;
-% r.constants.dataToStimResponses.D_EVENT_DATA_ACK_RECVD = 60;
-% % r.constants.dataToStimResponses.D_RECEIVED_VAR = 16;
-
-% % a list of commands that should invoke pnet_getvar handling before regular
-% % reading
-% r.constants.pnetGetvarCommands=[4];
-
 r.type=[]; % either 'stim' or 'data'
 r.host=[]; % hostname
-r.port=[]; % port number
-r.sockcon=[]; % actual pnet object - socket
+r.ports=[]; % port numbers for cmd and ack channels
+r.cmdSockcon=[]; % actual pnet object - socket for commands
+r.ackSockcon=[]; % actual pnet object - socket for acks
 r.storepath=''; % location where all data is stored (neuralRecords, stimRecords, spikeRecords, analysis)
                         % pass this in during setProtocol to the stim datanet - it will get sent to the data datanet as well
-r.con=[]; % actual pnet object - connection
+r.cmdCon=[]; % actual pnet object - connection for commands
+r.ackCon=[]; % actual pnet object - connection for acks
 r.client_hostname = ''; % hostname of the client machine (empty if this is a 'stim' datanet)
 r.ai_parameters = []; % parameters for the nidaq instrument - must be a struct
                       % ai_parameters.numChans - number of channels for analoginput object
@@ -98,7 +70,7 @@ switch nargin
         if ischar(varargin{1}) && ischar(varargin{2})
             if strcmp(varargin{1}, 'stim')
                 r.type = 'stim';
-                r.port = 8888;
+                r.ports = [8888 8889];
                 r.host = varargin{2};
             else
                 error('first argument must be ''stim'' and second argument must be a string');
@@ -118,7 +90,7 @@ switch nargin
         if ischar(varargin{1}) && ischar(varargin{2})
             if strcmp(varargin{1}, 'data')
                 r.type = 'data';
-                r.port = 8888;
+                r.ports = [8888 8889];
                 r.host = varargin{2};
             else
                 error('type must be data');

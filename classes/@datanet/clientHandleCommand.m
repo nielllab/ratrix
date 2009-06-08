@@ -95,12 +95,12 @@ try
 	end
 	
 	% now check to see if another command is available
-	cmd=pnet(con,'read',CMDSIZE,'double','noblock');
-	if isempty(cmd) % no commands available, so just return
-		return;
-	else
-		commandAvailable=true;
-    end
+% 	cmd=pnet(con,'read',CMDSIZE,'double','noblock');
+% 	if isempty(cmd) % no commands available, so just return
+% 		return;
+% 	else
+% 		commandAvailable=true;
+%     end
 catch ex
     % if we catch an error while running doTrials, pass back a quit to
     % handleCommands

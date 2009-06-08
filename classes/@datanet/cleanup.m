@@ -6,6 +6,8 @@ function dn = cleanup(dn)
 % shutdown cmd, so we just cleanup instead, and know that the data side
 % will catch the pnet('close') using 'status'
 
-dn.sockcon=[];
-dn.con=[];
+dn.cmdSockcon=[];
+dn.ackSockcon=[];
+dn.cmdCon=[];
+dn.ackCon=[];
 end

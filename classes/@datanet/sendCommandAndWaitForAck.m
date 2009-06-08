@@ -17,28 +17,29 @@ trialData = [];
 % if strmatch(datanet.type, 'data')
 %     error('must be called on datanet of type ''stim''');
 % end
-con=getCon(datanet);
+cmdCon=getCmdCon(datanet);
+ackCon=getAckCon(datanet);
 
 if isstruct(commands)
     % cmd
     if isfield(commands,'cmd') && isscalar(commands.cmd)
-        pnet(con,'write', commands.cmd);
+        pnet(cmdCon,'write', commands.cmd);
         fprintf('writing command %d\n', commands.cmd);
     elseif iscell(commands.cmd) % if cmd is a cell of variables - could be anything, so use putvar and getvar
-        pnet_putvar(con, commands.cmd);
+        pnet_putvar(cmdCon, commands.cmd);
     else
         error('unsupported cmd type - must be constant or cell array');
     end
     % args
     if isfield(commands,'arg')
         if ischar(commands.arg)
-            pnet(con,'write',commands.arg);
+            pnet(cmdCon,'write',commands.arg);
             fprintf('writing arg %s\n', commands.arg);
         elseif isnumeric(commands.arg)
-            pnet(con,'write',commands.arg);
+            pnet(cmdCon,'write',commands.arg);
             fprintf('writing arg %s\n', commands.arg);
         elseif isstruct(commands.arg) % a struct - use putvar
-            pnet_putvar(con, commands.arg);
+            pnet_putvar(cmdCon, commands.arg);
             fprintf('using putvar for arg\n');
         else
             error('args must be a char or number array');
@@ -62,9 +63,9 @@ while ~gotAck
     % for now, whenever commands.cmd==4 (getting neural events data)
 %     if ismember(commands.cmd, constants.pnetGetvarCommands) % getting neural events
 %         disp('trying pnet_getvar to get neural events');
-%         trialData=pnet_getvar(con);
+%         trialData=pnet_getvar(cmdCon);
 %     end
-    received = pnet(con,'read',CMDSIZE,'double','noblock');
+    received = pnet(ackCon,'read',CMDSIZE,'double','noblock');
     if ~isempty(received) % if we received something from data computer (ack or fail)
         disp('received something')
         received
@@ -72,7 +73,7 @@ while ~gotAck
         if receivedIsAck
             gotAck = true; 
             % 4/21/09 - now try to read again to check for a response
-            response=pnet(con,'read',MAXSIZE,'double','noblock');
+            response=pnet(ackCon,'read',MAXSIZE,'double','noblock');
         else
             received
             error('if received isnt empty and isnt an ack, then what is it?');

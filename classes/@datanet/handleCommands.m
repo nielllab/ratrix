@@ -18,17 +18,19 @@ specificCommand=[];
 
 % ===================================================
 type=datanet.type;
-con=getCon(datanet);
+cmdCon=getCmdCon(datanet);
+ackCon=getAckCon(datanet);
 
 % ===================================================
 % try to get the first available command
 try
-	cmd=pnet(con,'read',CMDSIZE,'double','noblock');
+	cmd=pnet(cmdCon,'read',CMDSIZE,'double','noblock');
 	if isempty(cmd) % no commands available, so just return
 %         fprintf('no commands found!\n')
 		return;
 	else
 		commandAvailable=true;
+        cmd
         fprintf('we found a command!\n')
 	end
 catch ex
@@ -47,9 +49,9 @@ try
 		end
 		
 		if strcmp(type,'stim')
-			[datanet quit specificCommand response] = clientHandleCommand(datanet, con, cmd, specificCommand, params);
+			[datanet quit specificCommand response] = clientHandleCommand(datanet, cmdCon, cmd, specificCommand, params);
 		else
-			[quit specificCommand response ret] = serverHandleCommand(datanet, con, cmd, specificCommand, params);
+			[quit specificCommand response ret] = serverHandleCommand(datanet, cmdCon, cmd, specificCommand, params);
 		end
 		
 		% this means only one retval per server iteration for now...how to fix?
@@ -63,7 +65,8 @@ try
 		
 		% give a response (usually an ack)
 		if ~isempty(response)
-			pnet(con,'write',response);
+            fprintf('writing response %d\n',response)
+			pnet(ackCon,'write',response);
 		end
 		
 		if quit
@@ -71,7 +74,7 @@ try
 		end
 		
 		% now check to see if another command is available
-		cmd=pnet(con,'read',CMDSIZE,'double','noblock');
+		cmd=pnet(cmdCon,'read',CMDSIZE,'double','noblock');
 		if isempty(cmd) % no commands available, so just return
 			return;
 		else

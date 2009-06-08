@@ -49,7 +49,7 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
             if ~isempty(s.datanet) && isa(s.datanet,'datanet')
                 % send ack of START_TRIALS_CMD
                 constants=getConstants(s.datanet);
-                pnet(getCon(s.datanet),'write',constants.stimToDataResponses.S_TRIALS_STARTED);
+                pnet(getAckCon(s.datanet),'write',constants.stimToDataResponses.S_TRIALS_STARTED);
             end
             
             try

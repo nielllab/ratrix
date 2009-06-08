@@ -87,14 +87,10 @@ protocols/reinforcementManagers/@constantReinforcement/setRewardSizeULorMS.m -te
 protocols/reinforcementManagers/@reinforcementManager/setReinforcementParam.m -text
 protocols/stimManagers/@filteredNoise/decache.m -text
 @datanet/getConstants.m -text
-@datanet/startDataListener.m -text
 @datanet/getStorePath.m -text
 @datanet/sendCommandAndWaitForAck.m -text
-@datanet/connectToDataListener.m -text
 @datanet/setStorePath.m -text
 @datanet/datanet.m -text
-@datanet/runDataListener.m -text
-@datanet/getCon.m -text
 protocols/criteria/@numTrialsDoneCriterion/checkCriterion.m -text
 protocols/criteria/@numTrialsDoneCriterion/numTrialsDoneCriterion.m -text
 protocols/criteria/@receptiveFieldCriterion/receptiveFieldCriterion.m -text
@@ -202,7 +198,6 @@ protocols/delayManagers/@delayManager/delayManager.m -text
 @datanet/handleCommands.m -text
 @datanet/stopClientTrials.m -text
 @datanet/serverHandleCommand.m -text
-@datanet/setCon.m -text
 @datanet/getTimeFromClient.m -text
 @datanet/startClientTrials.m -text
 @datanet/connectToClient.m -text
@@ -214,3 +209,7 @@ db/@dbConn/getCalibrationData.m -text
 db/@dbConn/updateCalibrationData.m -text
 db/@dbConn/getSurgeryFields.m -text
 protocols/stimManagers/@whiteNoise/worthSpikeSorting.m -text
+@datanet/setCmdCon.m -text
+@datanet/getAckCon.m -text
+@datanet/getCmdCon.m -text
+@datanet/setAckCon.m -text

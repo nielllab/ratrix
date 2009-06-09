@@ -42,13 +42,14 @@ try
 			% create the neuralRecords file with that will get appended to by physServer in 30sec chunks
 			cparams=pnet_getvar(con);
             retval(end).time=cparams.time; % should also have a timestamp from client
-			filename=cparams.filename;
+			filename=cparams.neuralFilename;
 			fullFilename = fullfile(datanet.storepath, 'neuralRecords', filename);
             if ~isempty(params.ai)
                 samplingRate=params.samplingRate;
                 save(fullFilename, 'samplingRate');
             end
-			retval(end).fullFilename = fullFilename; % return filename for appending by physServer
+			retval(end).neuralFilename = fullFilename; % return filename for appending by physServer
+            retval(end).stimFilename = fullfile(datanet.storepath,'stimRecords',cparams.stimFilename);
             retval(end).trialNumber=cparams.trialNumber;
             retval(end).stimManagerClass=cparams.stimManagerClass;
             fprintf('got trial start command from ratrix\n')

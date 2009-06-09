@@ -45,7 +45,8 @@ cellT='start cell';
 cellActive=false;
 externalRequest=[];
 
-fullFilename=[];
+neuralFilename=[];
+stimFilename=[];
 data=[];
 
 eventTypeStrs={'comment','top of fluid','top of brain','ctx cell','hipp cell',...
@@ -1009,7 +1010,8 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
             mkdir(fullfile(storepath,'stimrecords'));
         end
         client_hostname=clientIPStrs{get(clientIPField,'Value')};
-        fullFilename=[];
+        neuralFilename=[];
+        stimFilename=[];
         chunkCount=1;
         chunkClock=[];
         startTime=0;
@@ -1037,7 +1039,7 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
         % ==============================================
         % SET UP NIDAQ
         if recording
-            % how to set up fullFilename
+            % how to set up neuralFilename
             dirStr=fullfile(storepath,'neuralRecords');
             goodTrials=[];
             d=dir(dirStr);
@@ -1053,10 +1055,10 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
             if isempty(lastTrial)
                 lastTrial=1;
             end
-            fullFilename=fullfile(storepath,'neuralRecords',sprintf('neuralRecords_pretrial%d-%s.mat',lastTrial,datestr(now,30)));
+            neuralFilename=fullfile(storepath,'neuralRecords',sprintf('neuralRecords_pretrial%d-%s.mat',lastTrial,datestr(now,30)));
             if ~running
                 samplingRate=ai_parameters.sampRate;
-                save(fullFilename,'samplingRate'); %create the pretrial neuralRecords file!
+                save(neuralFilename,'samplingRate'); %create the pretrial neuralRecords file!
             end
             chunkClock=GetSecs();
             startTime=chunkClock;
@@ -1068,7 +1070,8 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
         while ~quit && keepLooping
             params=[];
             params.ai=ai;
-            params.fullFilename=fullFilename;
+            params.neuralFilename=neuralFilename;
+            params.stimFilename=stimFilename;
             params.samplingRate=ai_parameters.sampRate;
             params.chunkCount=chunkCount;
             params.startTime=startTime;
@@ -1085,6 +1088,12 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
                         if isfield(retval(j),'errorMethod') && ~isempty(retval(j).errorMethod)
                             % this is not a phys event, but rather a
                             % 'restart' or 'quit' from client
+                            
+                            % 6/9/09 - should we delete the neuralRecord at
+                            % neuralFilename b/c it was error trial?
+                            % also corresponding stimRecord/eyeRecord?
+                            delete(neuralFilename);
+                            delete(stimFilename);
                             quit=true;
                             disp('quitting due to client disconnect');
                             method=retval(j).errorMethod;
@@ -1109,7 +1118,8 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
                             events_data(end).eventType=retval(j).type;
                             events_data(end).eventNumber=eventNum;
                             if strcmp(retval(j).type,'trial start')
-                                fullFilename=retval(j).fullFilename;
+                                neuralFilename=retval(j).neuralFilename;
+                                stimFilename=retval(j).stimFilename;
                                 % reset chunkCount and chunkClock?
                                 chunkCount=1;
                                 chunkClock=GetSecs();
@@ -1145,7 +1155,7 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
                     numSampsToGet=get(ai,'SamplesAvailable');
                     [neuralData,neuralDataTimes]=getdata(ai,numSampsToGet);
                     elapsedTime=GetSecs()-startTime;
-                    saveNidaqChunk(fullFilename,neuralData,neuralDataTimes([1 end]),chunkCount,elapsedTime,ai_parameters.sampRate);
+                    saveNidaqChunk(neuralFilename,neuralData,neuralDataTimes([1 end]),chunkCount,elapsedTime,ai_parameters.sampRate);
                     clear neuralData neuralDataTimes;
                     % now increment chunkCount and chunkClock
                     chunkCount=chunkCount+1;
@@ -1185,7 +1195,7 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
                     numSampsToGet=get(ai,'SamplesAvailable');
                     [neuralData,neuralDataTimes]=getdata(ai,numSampsToGet);
                     elapsedTime=GetSecs()-startTime;
-                    saveNidaqChunk(fullFilename,neuralData,neuralDataTimes([1 end]),chunkCount,elapsedTime,ai_parameters.sampRate);
+                    saveNidaqChunk(neuralFilename,neuralData,neuralDataTimes([1 end]),chunkCount,elapsedTime,ai_parameters.sampRate);
                     clear neuralData neuralDataTimes;
                     flushdata(ai);
                 catch ex

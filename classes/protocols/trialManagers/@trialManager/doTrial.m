@@ -215,15 +215,13 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                     commands=[];
                     commands.cmd = datanet_constants.stimToDataCommands.S_TRIAL_START_EVENT_CMD;
                     cparams=[];
-                    cparams.filename = sprintf('neuralRecords_%d-%s',trialRecords(trialInd).trialNumber,datestr(trialRecords(trialInd).date,30));
+                    cparams.neuralFilename = sprintf('neuralRecords_%d-%s',trialRecords(trialInd).trialNumber,datestr(trialRecords(trialInd).date,30));
+                    cparams.stimFilename = sprintf('stimRecords_%d-%s',trialRecords(trialInd).trialNumber,datestr(trialRecords(trialInd).date, 30));
                     cparams.time=datenum(trialRecords(trialInd).date);
                     cparams.trialNumber=trialRecords(trialInd).trialNumber;
                     cparams.stimManagerClass=trialRecords(trialInd).stimManagerClass;
                     commands.arg=cparams;
                     [gotAck] = sendCommandAndWaitForAck(getDatanet(station), commands);
-
-                    stim_path = fullfile(getStorePath(getDatanet(station)), 'stimRecords');
-                    stim_filename = fullfile(stim_path, sprintf('stimRecords_%d-%s',trialRecords(trialInd).trialNumber,datestr(trialRecords(trialInd).date, 30)));
 
                     %also maybe include something from the phased records?
                     % maybe if ~isempty(phaseRecords{i}.responseDetails.expertDetails)
@@ -240,7 +238,8 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                     frameDropCorner=trialManager.frameDropCorner;
                     refreshRate=trialRecords(trialInd).resolution.hz;
                     try
-                        save(stim_filename,'ratID','trialStartTime','trialNum','stimManagerClass','stimulusDetails','frameDropCorner','refreshRate');
+                        stim_path = fullfile(getStorePath(getDatanet(station)), 'stimRecords');
+                        save(fullfile(stim_path,cparams.stimFilename),'ratID','trialStartTime','trialNum','stimManagerClass','stimulusDetails','frameDropCorner','refreshRate');
                     catch
                         warningStr=sprintf('unable to save to %s',stim_path);
                         error(warningStr);

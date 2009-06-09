@@ -37,12 +37,27 @@ try
 % 			% now call standAloneRun with these subjParams
 % 			standAloneRun([],subjParams.protocol,subjParams.id);
 
-            rx=getOrMakeDefaultRatrix(true);
-            sub = subject(subjParams.id, 'rat', 'long-evans', 'male', '05/10/2005', '01/01/2006', 'unknown', 'wild caught');
-			auth='ratrix';
-            rx=addSubject(rx,sub,auth);
+            rx=getOrMakeDefaultRatrix(false);
+            auth='ratrix';
+            needToAddSubject=false;
+            try
+                isSubjectInRatrix=getSubjectFromID(rx,subjParams.id);
+            catch ex
+                if ~isempty(strfind(ex.message,'request for subject id not contained in ratrix'))
+                    needToAddSubject=true;
+                else
+                    rethrow(ex)
+                end
+            end
+            if needToAddSubject
+                sub = subject(subjParams.id, 'rat', 'long-evans', 'male', '05/10/2005', '01/01/2006', 'unknown', 'wild caught');
+                rx=addSubject(rx,sub,auth);
+            end
+            
             su=str2func(subjParams.protocol); %weird, str2func does not check for existence!
             rx=su(rx,{subjParams.id});
+            
+            rx = emptyAllBoxes(rx,'starting trials in datanet mode',auth);
             rx=putSubjectInBox(rx,subjParams.id,1,auth); % only 1 box...
             
             ids=getSubjectIDs(rx);
@@ -55,15 +70,16 @@ try
             struct(struct(st).datanet)
 
             %see commandBoxIDStationIDs() (need to add stuff for updating logs, keeping track of running, etc.)
-
-            replicateTrialRecords({getStandAlonePath(rx)},false,false); % added 6/9/09 to catch unreplicated records from an error in prev session
+            deleteOnSuccess=true; % this is needed otherwise getTrialRecordsForSubjectID gets duplicate (local+permStore) trialRecords
+            writeToOracle=false;
+            replicateTrialRecords({getStandAlonePath(rx)},deleteOnSuccess,writeToOracle); % added 6/9/09 to catch unreplicated records from an error in prev session
             fprintf('About to run trials on new ratrix\n');
             trustOsRecordFiles=true;
             rx=doTrials(st,rx,0,[],trustOsRecordFiles); %0 means repeat forever
             auth='ratrix';
             [rx ids] = emptyAllBoxes(rx,'done running trials in client mode',auth);
             
-            replicateTrialRecords({getStandAlonePath(rx)},false,false);
+            replicateTrialRecords({getStandAlonePath(rx)},deleteOnSuccess,writeToOracle);
             
             success=true; % why do we need this?
             %4/10/09 - maybe we should send a 'killed' response here

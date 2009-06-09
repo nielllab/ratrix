@@ -22,7 +22,7 @@ while 1
     % first connection - keep trying to get a connection using tcplisten
     doCmd=true;
     doAck=true;
-    while doCmd && doAck
+    while doCmd || doAck
         if doCmd
             cmd_stimcon=pnet(datanet.cmdSockcon,'tcplisten','noblock');
         end
@@ -81,7 +81,7 @@ while 1
                     % reconnect!
                     doCmd=true;
                     doAck=true;
-                    while doCmd && doAck
+                    while doCmd || doAck
                         if doCmd
                             cmd_stimcon=pnet(datanet.cmdSockcon,'tcplisten','noblock');
                         end

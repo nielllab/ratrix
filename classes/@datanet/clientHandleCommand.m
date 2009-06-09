@@ -56,6 +56,7 @@ try
 
             %see commandBoxIDStationIDs() (need to add stuff for updating logs, keeping track of running, etc.)
 
+            replicateTrialRecords({getStandAlonePath(rx)},false,false); % added 6/9/09 to catch unreplicated records from an error in prev session
             fprintf('About to run trials on new ratrix\n');
             trustOsRecordFiles=true;
             rx=doTrials(st,rx,0,[],trustOsRecordFiles); %0 means repeat forever

@@ -16,6 +16,7 @@ atDown=any(keyCode(KbConstants.atKeys));
 kDown=any(keyCode(KbConstants.kKey));
 tDown=any(keyCode(KbConstants.tKey));
 fDown=any(keyCode(KbConstants.fKey));
+eDown=any(keyCode(KbConstants.eKey));
 portsDown=false(1,length(KbConstants.portKeys));
 numsDown=false(1,length(KbConstants.numKeys));
 
@@ -80,6 +81,8 @@ if kDown
         result=sprintf('manual flushPorts');
         didHumanResponse=true;
         done=1;
+    elseif eDown
+        error('some kind of error here to test stuff...');
     elseif any(portsDown)
         if ctrlDown
             doValves(portsDown)=1;

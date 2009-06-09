@@ -263,7 +263,7 @@ if ~isempty(eyeTracker)
 
 
     if isa(eyeTracker,'eyeLinkTracker')
-        eyeData=nan(framesPerAllocationChunk,40);
+        eyeData=nan(framesPerAllocationChunk,length(getEyeDataVarNames(eyeTracker)));
         eyeDataFrameInds=nan(framesPerAllocationChunk,1);
         gaze=nan(framesPerAllocationChunk,2);
     else
@@ -651,7 +651,7 @@ while ~done && ~quit;
 
         % change to get multiple samples (as many as are available)
         [gazeEstimates samples] = getSamples(eyeTracker);
-        % gazeEstimates should be a Nx2 matrix, samples should be Nx40 matrix, totalFrameNum is the frame number we are on
+        % gazeEstimates should be a Nx2 matrix, samples should be Nx43 matrix, totalFrameNum is the frame number we are on
         numEyeTrackerSamples = size(samples,1);
 
         if (totalEyeDataInd+numEyeTrackerSamples)>length(eyeData) %if samples from this frame make us exceed size of eyeData

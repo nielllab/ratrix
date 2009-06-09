@@ -1007,7 +1007,7 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
             mkdir(fullfile(storepath,'eyeRecords'));
         end
         if ~isdir(fullfile(storepath,'stimRecords'))
-            mkdir(fullfile(storepath,'stimrecords'));
+            mkdir(fullfile(storepath,'stimRecords'));
         end
         client_hostname=clientIPStrs{get(clientIPField,'Value')};
         neuralFilename=[];

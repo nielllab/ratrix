@@ -63,7 +63,6 @@ try
             end
         end
     end
-    ListenChar(1);
     Screen('DrawTexture',window,wh,[],winRect,[],0); %white screen required to open spyder
     Screen('DrawingFinished',window);
     vbl = Screen('Flip',window);
@@ -104,6 +103,7 @@ try
         otherwise
             error('unsupported method for screen calibration');
     end
+    ListenChar(1);
 
     figure
     subplot(2,1,1)
@@ -129,6 +129,7 @@ end % end main function
 function cleanup(originalPriority,screenNum,oldClut,spyderLib)
 Priority(originalPriority);
 showcursor;
+ListenChar(1);
 Screen('CloseAll');
 Screen('LoadNormalizedGammaTable', screenNum, oldClut);
 Screen('Preference', 'SkipSyncTests',0);

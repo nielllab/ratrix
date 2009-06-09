@@ -15,6 +15,10 @@ function spyderData = stimInBoxOnBackground(window,spyderLib,stim,background,pat
 % NOTE: all indices in the CLUT are in the range 0-255, NOT 1-256. for some reason, PTB accepts arguments to
 % 'MakeTexture' in the range 0-255 where 0 is dark and 255 is light.
 
+
+KbConstants.kKey=KbName('k');
+KbConstants.qKey=KbName('q');
+
 spyderData=nan*zeros(size(stim,4),3);
 if ~(size(stim,3) == 3 && length(size(stim))==4 && allClutIndices(stim(:),reallutsize))
     error('stim must be size [rows cols 3 numStims] and 0 <= int values < size(clut)')
@@ -66,6 +70,16 @@ for i=1:size(stim,4)
     Screen('DrawTexture',window,t(i),[],patchRect,[],0);
     Screen('DrawingFinished',window);
     Screen('Flip',window);
+    
+    % do keyboard check for k+q
+    [keyIsDown,secs,keyCode]=KbCheck; % do this check outside of function to save function call overhead
+    if keyIsDown
+        kDown=any(keyCode(KbConstants.kKey));
+        qDown=any(keyCode(KbConstants.qKey));
+        if kDown && qDown
+            return
+        end
+    end
     WaitSecs(secsPerValue);
     [success, x, y, z] = calllib(spyderLib,'CV_GetXYZ',numFramesPerValue,libpointer('int32Ptr',0),libpointer('int32Ptr',0),libpointer('int32Ptr',0));
     spyderData(i,:)=[double(x) double(y) double(z)]/1000;

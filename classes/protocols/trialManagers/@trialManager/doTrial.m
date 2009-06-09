@@ -215,8 +215,8 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                     commands=[];
                     commands.cmd = datanet_constants.stimToDataCommands.S_TRIAL_START_EVENT_CMD;
                     cparams=[];
-                    cparams.neuralFilename = sprintf('neuralRecords_%d-%s',trialRecords(trialInd).trialNumber,datestr(trialRecords(trialInd).date,30));
-                    cparams.stimFilename = sprintf('stimRecords_%d-%s',trialRecords(trialInd).trialNumber,datestr(trialRecords(trialInd).date, 30));
+                    cparams.neuralFilename = sprintf('neuralRecords_%d-%s.mat',trialRecords(trialInd).trialNumber,datestr(trialRecords(trialInd).date,30));
+                    cparams.stimFilename = sprintf('stimRecords_%d-%s.mat',trialRecords(trialInd).trialNumber,datestr(trialRecords(trialInd).date, 30));
                     cparams.time=datenum(trialRecords(trialInd).date);
                     cparams.trialNumber=trialRecords(trialInd).trialNumber;
                     cparams.stimManagerClass=trialRecords(trialInd).stimManagerClass;

@@ -26,12 +26,12 @@ ai_parameters.inputRanges=repmat([-1 6],ai_parameters.numChans,1);
 % ========================================================================================
 % lists of values for settings
 clientIPStrs={'132.239.158.180'};
-ratIDStrs={'demo1','test1','fan_demo1'};
+ratIDStrs={'demo1','test1','fan_demo1','131'};
 ratProtocolStrs={'setProtocolTEST','setProtocolPhys2'};
-experimenterStrs={'','eflister','pmeier'};
+experimenterStrs={'','eflister','pmeier','bsriram'};
 electrodeMakeStrs={'FHC','MPI'};
 electrodeModelStrs={'','UEWMCGLEEN3M','UEWMCGTECN3M','WE3PT35.0A3-ME4925'};
-lotNumStrs={'','885192','885431','120016','57'};
+lotNumStrs={'','885191','885192','885431','120016','57'};
 IDNumStrs={'','1','2','3','4','5','6','7','8','9','10','11','12'};
 impedanceStrs={'','1','5'};
 

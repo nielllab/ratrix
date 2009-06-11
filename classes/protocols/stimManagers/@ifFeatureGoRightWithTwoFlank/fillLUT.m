@@ -27,7 +27,7 @@ switch method
         cal=getCalibrationData(conn,mac,dateRange);
         closeConn(conn)
             
-        linearizedCLUT=cal.linearizedCLUT; 
+        linearizedCLUT=cal.linearizedCLUT;  %this is the full clut, we want a range
         
     case '2009Trinitron255GrayBoxInterpBkgnd.5'
          
@@ -37,8 +37,20 @@ switch method
         cal=getCalibrationData(conn,mac,timeRange);
         closeConn(conn)
 
-        linearizedCLUT=cal.linearizedCLUT;  %this is the full clut, we want a range
-        
+        LUTBitDepth=8;
+        spyderCdPerMsquared=cal.measuredValues;
+        stim=cal.details.method{2};
+        vals=double(reshape(stim(:,:,1,:),[],size(stim,4)));
+        if all(diff(spyderCdPerMsquared)>0) && length(spyderCdPerMsquared)==length(vals)
+            range=diff(spyderCdPerMsquared([1 end]));
+            floor=spyderCdPerMsquared(1);
+            desiredVals=linspace(floor+range*linearizedRange(1),floor+range*linearizedRange(2),2^LUTBitDepth);
+            newLUT = interp1(spyderCdPerMsquared,vals,desiredVals,'linear')/vals(end); %consider pchip
+            linearizedCLUT = repmat(newLUT',1,3);
+        else
+            error('vals not monotonic -- should fit parametrically or check that data collection OK')
+        end
+         
         if plotOn
             figure;
             v=cal.validationValues;

@@ -1,16 +1,17 @@
-function [measuredValues currentCLUT linearizedCLUT validationValues details] = ...
-    calibrateMonitor(method,screenType,fitMethod,writeToOracle,cmd_line,screenNum)
+function [measuredR measuredG measuredB currentCLUT linearizedCLUT validationValues details] = ...
+    calibrateMonitor(method,mode,screenType,fitMethod,writeToOracle,cmd_line,screenNum)
 % this function calls generateScreenCalibrationData to get the measured values and then does a basic
 % linearization and validation before inserting into Oracle
 % INPUTS: 
 %   method - how to do the screen calibration (passed to generateScreenCalibrationData):
-%   ie {'stimInBoxOnBackground',stim,background,patchRect,interValueRGB,numFramesPerValue,numInterValueFrames}
-    %   stim - [height width 3 numFrames] matrix specifying indices into the CLUT
+%   ie {'stimInBoxOnBackground',background,patchRect,interValueRGB,numFramesPerValue,numInterValueFrames}
     %   background - the background RGB values, specified as indices into the CLUT
     %   patchRect - where to draw the stim on the background
     %   interValueRGB - the RGB values to show between frames of stim, specified as indices into the CLUT
     %   numFramesPerValue - how many frames to hold each frame of the stim
     %   numInterValueFrames - how many frames of interValueRGB to show between each set of frames in stim
+%   mode - whether to do RGB, RGBK, or grayscale and also whether to do 8 or 256 samples
+    % acceptable values are '8RGB','8RGBK','8gray',etc...
 %   screenType - 'LCD' or 'CRT'
 %   fitMethod - 'linear' or 'power'
 %   writeToOracle - a flag indicating whether or not to write to oracle
@@ -47,52 +48,110 @@ else
    screenNum=max(Screen('Screens'));
 end
 
+if ischar(mode) && ismember(mode,{'8RGB','8RGBK','8gray','256RGB','256RGBK','256gray'})
+    % pass
+else
+    error('mode must be ''8RGB'',''8RGBK'',''8gray'',''256RGB'',''256RGBK'', or ''256gray''');
+end
+
+validationValues=[];
+
 
 
 details=[];
 details.method=method;
+detailds.mode=mode;
 details.fitMethod=fitMethod;
 details.screenNum=screenNum;
 details.screenType=screenType;
 % get current CLUT from screen
 [currentCLUT, dacbits, reallutsize] = Screen('ReadNormalizedGammaTable', screenNum);
 drawSpyderPositionFrame = true;
-[measuredValues rawValues method details.measurementDetails] = generateScreenCalibrationData(method,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
+
+stim=[];
+% construct stim and call generateScreenCalibrationData as necessary
+switch mode
+    case {'8gray','256gray'}
+        if strcmp(mode,'8gray')
+            samps=floor(linspace(0,255,8));
+        else
+            samps=floor(linspace(0,255,256));
+        end
+        for i=1:length(samps)
+            stim(:,:,:,i)=uint8(samps(i)*ones(1,1,3));
+        end
+        % now run using the gray stim
+        [measuredR rawR method details.measurementDetails] = ...
+            generateScreenCalibrationData(method,stim,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
+        measuredG=measuredR;
+        measuredB=measuredR;
+        rawG=rawR;
+        rawB=rawR; % RGB are all the same since gray
+    case {'8RGB','256RGB'}
+        if strcmp(mode,'8RGB')
+            samps=floor(linspace(0,255,8));
+        else
+            samps=floor(linspace(0,255,256));
+        end
+        % do R
+        for i=1:length(samps)
+            stim(:,:,1,i)=uint8(samps(i)*ones(1,1,1));
+            stim(:,:,2:3,i)=uint8(0);
+        end
+        [measuredR rawR method details.measurementDetails] = ...
+            generateScreenCalibrationData(method,stim,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
+        drawSpyderPositionFrame=false;
+        % do G
+        for i=1:length(samps)
+            stim(:,:,2,i)=uint8(samps(i)*ones(1,1,1));
+            stim(:,:,1,i)=uint8(0);
+            stim(:,:,3,i)=uint8(0);
+        end
+        [measuredG rawG method details.measurementDetails] = ...
+            generateScreenCalibrationData(method,stim,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
+        % do B
+        for i=1:length(samps)
+            stim(:,:,3,i)=uint8(samps(i)*ones(1,1,1));
+            stim(:,:,1:2,i)=uint8(0);
+        end
+        [measuredB rawB method details.measurementDetails] = ...
+            generateScreenCalibrationData(method,stim,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
+    otherwise
+        error('unsupported mode');
+end
+% now we have rawR,rawG,rawB, measuredR,measuredG,measuredB
 
 % desiredValues is a linear spacing of the first set of measured Y values (with 256 entries)
 % we will compare these to our second set of measured Y values
 % they should be very similar b/c the linearizedCLUT tries to force our second measurement to be equal to the desired values
-desiredValues=linspace(measuredValues(1),measuredValues(end),length(measuredValues));
+measuredR=makeUnique(measuredR);
+measuredG=makeUnique(measuredG);
+measuredB=makeUnique(measuredB);
 
-% 5/28/09 HACK for now
-% if any measuredValues are non unique, add an epsilon to them so they are
-% unique and interp doesnt complain!
-u=unique(measuredValues);
-for uu=1:length(u)
-    a=find(measuredValues==u(uu));
-    if length(a)>1
-        measuredValues(a(2:end))=measuredValues(a(2:end))+eps*[1:length(a)-1];
-    end
-end
+desiredR=linspace(measuredR(1),measuredR(end),length(measuredR));
+desiredG=linspace(measuredG(1),measuredG(end),length(measuredG));
+desiredB=linspace(measuredB(1),measuredB(end),length(measuredB));
 
 % now do something to compute linearizedCLUT
 try
     linearizedCLUT=zeros(reallutsize,3);
     switch fitMethod
         case 'linear'
-            desiredValuesForLUT=linspace(measuredValues(1),measuredValues(end),reallutsize);
             % R values
-            rawInds=squeeze(rawValues(:,:,1,:));
+            desiredValuesForLUT=linspace(measuredR(1),measuredR(end),reallutsize);
+            rawInds=squeeze(rawR(:,:,1,:));
             raws=currentCLUT(uint16(rawInds)+1,1)';
-            linearizedCLUT(:,1) = interp1(measuredValues,raws,desiredValuesForLUT,'linear')'/raws(end); %consider pchip
+            linearizedCLUT(:,1) = interp1(measuredR,raws,desiredValuesForLUT,'linear')'/raws(end); %consider pchip
             % G values
-            rawInds=squeeze(rawValues(:,:,2,:));
+            desiredValuesForLUT=linspace(measuredG(1),measuredG(end),reallutsize);
+            rawInds=squeeze(rawG(:,:,2,:));
             raws=currentCLUT(uint16(rawInds)+1,2)';
-            linearizedCLUT(:,2) = interp1(measuredValues,raws,desiredValuesForLUT,'linear')'/raws(end); %consider pchip
+            linearizedCLUT(:,2) = interp1(measuredG,raws,desiredValuesForLUT,'linear')'/raws(end); %consider pchip
             % B values
-            rawInds=squeeze(rawValues(:,:,3,:));
+            desiredValuesForLUT=linspace(measuredB(1),measuredB(end),reallutsize);
+            rawInds=squeeze(rawB(:,:,3,:));
             raws=currentCLUT(uint16(rawInds)+1,3)';
-            linearizedCLUT(:,3) = interp1(measuredValues,raws,desiredValuesForLUT,'linear')'/raws(end); %consider pchip
+            linearizedCLUT(:,3) = interp1(measuredB,raws,desiredValuesForLUT,'linear')'/raws(end); %consider pchip
         case 'power'
             error('not yet implemented');
         otherwise
@@ -107,9 +166,16 @@ catch
     keyboard
 end
 
+
+
+% ==============================================================================================
+% validate on GRAY only
 % recall generateScreenCalibrationData w/ new linearized CLUT and get validation data
-drawSpyderPositionFrame = false;
-[validationValues junk junk details.validationDetails] = generateScreenCalibrationData(method,linearizedCLUT,drawSpyderPositionFrame,screenNum,screenType);
+if ismember(mode,{'8gray','256gray'})
+    drawSpyderPositionFrame = false;
+    [validationValues junk junk details.validationDetails] = ...
+        generateScreenCalibrationData(method,stim,linearizedCLUT,drawSpyderPositionFrame,screenNum,screenType);
+end
 
 % restore original CLUT
 Screen('LoadNormalizedGammaTable',screenNum,currentCLUT);
@@ -128,7 +194,7 @@ if writeToOracle
         % HACK
         mac='0018F35DFAC0';
         % write linearizedCLUT to tempCLUT.mat and read as binary stream
-        save('tempCLUT.mat','linearizedCLUT','measuredValues','currentCLUT','validationValues','details');
+        save('tempCLUT.mat','linearizedCLUT','measuredR','measuredG','measuredB','currentCLUT','validationValues','details');
         fid=fopen('tempCLUT.mat');
         CLUT=fread(fid,'*uint8');
         fclose(fid);
@@ -143,4 +209,18 @@ if writeToOracle
 end
 
 
+end % end function
+
+
+function measuredValues=makeUnique(measuredValues)
+% 5/28/09 HACK for now
+% if any measuredValues are non unique, add an epsilon to them so they are
+% unique and interp doesnt complain!
+u=unique(measuredValues);
+for uu=1:length(u)
+    a=find(measuredValues==u(uu));
+    if length(a)>1
+        measuredValues(a(2:end))=measuredValues(a(2:end))+eps*[1:length(a)-1];
+    end
+end
 end % end function

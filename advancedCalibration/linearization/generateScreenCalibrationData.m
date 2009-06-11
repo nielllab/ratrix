@@ -1,14 +1,14 @@
-function [measuredValues rawValues method calibrationDetails] = generateScreenCalibrationData(method,clut,drawSpyderPositionFrame,screenNum,screenType)
+function [measuredValues rawValues method calibrationDetails] = generateScreenCalibrationData(method,stim,clut,drawSpyderPositionFrame,screenNum,screenType)
 % this function uses spyder to measure luminance values with the given 'method' for drawing stimuli
 % INPUTS:
 %   method - how to do the screen calibration:
-%   ie {'stimInBoxOnBackground',stim,background,patchRect,interValueRGB,numFramesPerValue,numInterValueFrames}
-    %   stim - [height width 3 numFrames] matrix specifying indices into the CLUT
+%   ie {'stimInBoxOnBackground',background,patchRect,interValueRGB,numFramesPerValue,numInterValueFrames}
     %   background - the background RGB values, specified as indices into the CLUT
     %   patchRect - where to draw the stim on the background
     %   interValueRGB - the RGB values to show between frames of stim, specified as indices into the CLUT
     %   numFramesPerValue - how many frames to hold each frame of the stim
     %   numInterValueFrames - how many frames of interValueRGB to show between each set of frames in stim
+%   stim - [height width 3 numFrames] matrix specifying indices into the CLUT
 %   clut - the CLUT to use for this measurement
 %   drawSpyderPositionFrame - a flag indicating whether or not to prompt user to position spyder on screen
 %   screenNum - the screen number to use when calling PTB
@@ -81,26 +81,26 @@ try
             % {value, 'fromRaw'} - where value ranges from 0 to 1 as a percentage of max luminance
             % and fromRaw means find the entry in the raw CLUT that most closely matches the requested value
             % - to an RGB triplet
-            if iscell(method{3}) && length(method{3})==2 && ischar(method{3}{2}) && ...
-                    ismember(method{3}{2},{'fromRaw'}) && isscalar(method{3}{1}) && ...
-                    method{3}{1}>=0 && method{3}{1}<=1
-                special=method{3}{2};
-                calibrationDetails.requestedBackground=method{3}{1};
-                [calibrationDetails.diffFromRequestedBackground method{3}]=min(abs(clut(:,1)-method{3}{1})); % find the index of the CLUT that most closely matches the requested luminance (assume grayscale)
-                method{3}=uint8(method{3}); % convert to uint8
-                calibrationDetails.actualBackground=clut(method{3},1);
-                calibrationDetails.actualBackgroundRGB=method{3};
+            if iscell(method{2}) && length(method{2})==2 && ischar(method{2}{2}) && ...
+                    ismember(method{2}{2},{'fromRaw'}) && isscalar(method{2}{1}) && ...
+                    method{2}{1}>=0 && method{2}{1}<=1
+                special=method{2}{2};
+                calibrationDetails.requestedBackground=method{2}{1};
+                [calibrationDetails.diffFromRequestedBackground method{2}]=min(abs(clut(:,1)-method{2}{1})); % find the index of the CLUT that most closely matches the requested luminance (assume grayscale)
+                method{2}=uint8(method{2}); % convert to uint8
+                calibrationDetails.actualBackground=clut(method{2},1);
+                calibrationDetails.actualBackgroundRGB=method{2};
             else
                 error('background must be {value,''fromRaw''}');
             end
-            spyderData=stimInBoxOnBackground(window,spyderLib,...
-                method{2},method{3},method{4},method{5},method{6},method{7},reallutsize,refreshRate);
-            rawValues=method{2};
-            method{3}={clut(method{3},1),special}; % reset the method's background to the 0.0-1.0 value
+            spyderData=stimInBoxOnBackground(window,spyderLib,stim,...
+                method{2},method{3},method{4},method{5},method{6},reallutsize,refreshRate);
+            rawValues=stim;
+            method{2}={clut(method{2},1),special}; % reset the method's background to the 0.0-1.0 value
         case 'fullScreenStim'
-            spyderData=fullScreenStim(window,spyderLib,...
-                method{2},method{3},method{4},method{5},reallutsize,refreshRate);
-            rawValues=method{2};
+            spyderData=fullScreenStim(window,spyderLib,stim,...
+                method{2},method{3},method{4},reallutsize,refreshRate);
+            rawValues=stim;
         otherwise
             error('unsupported method for screen calibration');
     end

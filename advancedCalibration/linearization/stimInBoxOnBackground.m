@@ -1,4 +1,4 @@
-function spyderData = stimInBoxOnBackground(window,spyderLib,stim,background,patchRect,...
+function [spyderData quit] = stimInBoxOnBackground(window,spyderLib,stim,background,patchRect,...
     interValueRGB,numFramesPerValue,numInterValueFrames,reallutsize,refreshRate)
 % this function uses spyder to measure the output from a stim in box on background
 % INPUTS:
@@ -18,26 +18,25 @@ function spyderData = stimInBoxOnBackground(window,spyderLib,stim,background,pat
 if numFramesPerValue<refreshRate*5
     error('spyder wants at least 5 secs per sample');
 end
+quit=false;
 
 KbConstants.kKey=KbName('k');
 KbConstants.qKey=KbName('q');
 
 spyderData=nan*zeros(size(stim,4),3);
 if ~(size(stim,3) == 3 && length(size(stim))==4 && allClutIndices(stim(:),reallutsize) && ... 
-        all(diff(squeeze(stim(:,:,1,:)))>0) && all(diff(squeeze(stim(:,:,2,:)))>0) && all(diff(squeeze(stim(:,:,3,:)))>0))
+        all(diff(squeeze(stim(:,:,1,:)))>=0) && all(diff(squeeze(stim(:,:,2,:)))>=0) && all(diff(squeeze(stim(:,:,3,:)))>=0))
     error('stim must be size [rows cols 3 numStims] and 0 <= int values < size(clut)')
 end
-if ~(length(size(background))<=2 && allClutIndices(background(:),reallutsize))
+if ~(length(size(background))==3 && size(background,3)==3 && allClutIndices(background(:),reallutsize))
     sca
     background
-    keyboard
-    error('background must be at most 2-dims and 0 <= int values < size(clut)')
+    error('background must be of size [1 1 3] as an RGB vector and 0 <= int values < size(clut)')
 end
-if ~(isvector(interValueRGB) && length(interValueRGB)==3 && allClutIndices(interValueRGB(:),reallutsize))
+if ~(length(size(interValueRGB))==3 && size(interValueRGB,3)==3 && allClutIndices(interValueRGB(:),reallutsize))
     sca
     interValueRGB
-    keyboard
-    error('interValueRGB must be a 3-element vector and 0 <= int values < size(clut)')
+    error('interValueRGB must be of size [1 1 3] as an RGB vector and 0 <= int values < size(clut)')
 end
 if ~(isinteger(numInterValueFrames) && isinteger(numFramesPerValue) && ...
         isscalar(numInterValueFrames) && isscalar(numFramesPerValue))
@@ -81,6 +80,8 @@ for i=1:size(stim,4)
         kDown=any(keyCode(KbConstants.kKey));
         qDown=any(keyCode(KbConstants.qKey));
         if kDown && qDown
+            quit=true;
+            sca
             return
         end
     end

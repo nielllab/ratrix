@@ -67,13 +67,13 @@ details.screenNum=screenNum;
 details.screenType=screenType;
 % get current CLUT from screen
 [currentCLUT, dacbits, reallutsize] = Screen('ReadNormalizedGammaTable', screenNum);
-drawSpyderPositionFrame = true;
+drawSpyderPositionFrame = true; % HACK
 
 
 % construct stim and call generateScreenCalibrationData as necessary
 switch mode
     case {'8gray','256gray'}
-        stim=[];
+        stim=uint8([]);
         if strcmp(mode,'8gray')
             samps=floor(linspace(0,255,8));
         else
@@ -82,15 +82,19 @@ switch mode
         for i=1:length(samps)
             stim(:,:,:,i)=uint8(samps(i)*ones(1,1,3));
         end
+        channels=[1 1 1]; % all RGB channels
         % now run using the gray stim
-        [measuredR rawR method details.measurementDetails] = ...
+        [measuredR rawR method details.measurementDetails quit] = ...
             generateScreenCalibrationData(method,stim,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
+        if quit
+            return; %debugging only
+        end
         measuredG=measuredR;
         measuredB=measuredR;
         rawG=rawR;
         rawB=rawR; % RGB are all the same since gray
     case {'8RGB','256RGB'}
-        stim=[];
+        stim=uint8([]);
         if strcmp(mode,'8RGB')
             samps=floor(linspace(0,255,8));
         else
@@ -101,8 +105,12 @@ switch mode
             stim(:,:,1,i)=uint8(samps(i)*ones(1,1,1));
             stim(:,:,2:3,i)=uint8(0);
         end
-        [measuredR rawR method details.measurementDetails] = ...
-            generateScreenCalibrationData(method,stim,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
+        channels=uint8([1 0 0]); % only R channel
+        [measuredR rawR method details.measurementDetails quit] = ...
+            generateScreenCalibrationData(method,stim,channels,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
+        if quit
+            return; %debugging only
+        end
         drawSpyderPositionFrame=false;
         % do G
         for i=1:length(samps)
@@ -110,20 +118,32 @@ switch mode
             stim(:,:,1,i)=uint8(0);
             stim(:,:,3,i)=uint8(0);
         end
-        [measuredG rawG method details.measurementDetails] = ...
-            generateScreenCalibrationData(method,stim,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
+        channels=uint8([0 1 0]); % only G channel
+        [measuredG rawG method details.measurementDetails quit] = ...
+            generateScreenCalibrationData(method,stim,channels,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
+        if quit
+            return; %debugging only
+        end
         % do B
         for i=1:length(samps)
             stim(:,:,3,i)=uint8(samps(i)*ones(1,1,1));
             stim(:,:,1:2,i)=uint8(0);
         end
-        [measuredB rawB method details.measurementDetails] = ...
-            generateScreenCalibrationData(method,stim,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
+        channels=uint8([0 0 1]); % only B channel
+        [measuredB rawB method details.measurementDetails quit] = ...
+            generateScreenCalibrationData(method,stim,channels,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
+        if quit
+            return; %debugging only
+        end
     case 'custom'
         % assume grayscale
         % now run using the gray stim
-        [measuredR rawR method details.measurementDetails] = ...
-            generateScreenCalibrationData(method,stim,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
+        channels=uint8([1 1 1]);
+        [measuredR rawR method details.measurementDetails quit] = ...
+            generateScreenCalibrationData(method,stim,channels,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
+        if quit
+            return; %debugging only
+        end
         measuredG=measuredR;
         measuredB=measuredR;
         rawG=rawR;

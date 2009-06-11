@@ -1,4 +1,4 @@
-function [measuredValues rawValues method calibrationDetails] = generateScreenCalibrationData(method,stim,clut,drawSpyderPositionFrame,screenNum,screenType)
+function [measuredValues rawValues method calibrationDetails quit] = generateScreenCalibrationData(method,stim,channels,clut,drawSpyderPositionFrame,screenNum,screenType)
 % this function uses spyder to measure luminance values with the given 'method' for drawing stimuli
 % INPUTS:
 %   method - how to do the screen calibration:
@@ -9,6 +9,7 @@ function [measuredValues rawValues method calibrationDetails] = generateScreenCa
     %   numFramesPerValue - how many frames to hold each frame of the stim
     %   numInterValueFrames - how many frames of interValueRGB to show between each set of frames in stim
 %   stim - [height width 3 numFrames] matrix specifying indices into the CLUT
+%   channels - which of the RGB channels to use (as a [1x3] logical vector)
 %   clut - the CLUT to use for this measurement
 %   drawSpyderPositionFrame - a flag indicating whether or not to prompt user to position spyder on screen
 %   screenNum - the screen number to use when calling PTB
@@ -24,6 +25,7 @@ function [measuredValues rawValues method calibrationDetails] = generateScreenCa
 measuredValues=[];
 rawValues=[];
 calibrationDetails=[];
+quit=false;
 
 if ~(ischar(screenType) && ismember(screenType,{'LCD','CRT'}))
     error('screenType must be ''LCD'' or ''CRT''');
@@ -86,17 +88,33 @@ try
                     method{2}{1}>=0 && method{2}{1}<=1
                 special=method{2}{2};
                 calibrationDetails.requestedBackground=method{2}{1};
-                [calibrationDetails.diffFromRequestedBackground method{2}]=min(abs(clut(:,1)-method{2}{1})); % find the index of the CLUT that most closely matches the requested luminance (assume grayscale)
-                method{2}=uint8(method{2}); % convert to uint8
-                calibrationDetails.actualBackground=clut(method{2},1);
-                calibrationDetails.actualBackgroundRGB=method{2};
+                [calibrationDetails.diffFromRequestedBackground bg]=min(abs(clut(:,1)-method{2}{1})); % find the index of the CLUT that most closely matches the requested luminance (assume grayscale)
+                calibrationDetails.actualBackground=clut(bg,find(channels));
+                bg=uint8(bg)*channels; % convert to uint8
+                % a bunch of annoying stuff to convert a single RGB index
+                % into the appropriate channel(s) imageMatrix that PTB
+                % wants
+                bkgd=uint8(zeros(1,1,3));
+                bkgd(1,1,:)=bg;
+                calibrationDetails.actualBackgroundRGB=bg;
             else
                 error('background must be {value,''fromRaw''}');
             end
-            spyderData=stimInBoxOnBackground(window,spyderLib,stim,...
-                method{2},method{3},method{4},method{5},method{6},reallutsize,refreshRate);
+            if isinteger(method{4})
+                iV=method{4}*channels;
+                interV=uint8(zeros(1,1,3));
+                interV(1,1,:)=iV;
+            else
+                error('interValueRGB must be a single integer value');
+            end
+            [spyderData quit]=stimInBoxOnBackground(window,spyderLib,stim,...
+                bkgd,method{3},interV,method{5},method{6},reallutsize,refreshRate);
+            if quit
+                quit=true;
+                return % should only be used for debugging
+            end
             rawValues=stim;
-            method{2}={clut(method{2},1),special}; % reset the method's background to the 0.0-1.0 value
+            method{2}={clut(bg(find(bg)),find(bg)),special}; % reset the method's background to the 0.0-1.0 value
         case 'fullScreenStim'
             spyderData=fullScreenStim(window,spyderLib,stim,...
                 method{2},method{3},method{4},reallutsize,refreshRate);
@@ -121,6 +139,7 @@ try
 catch ex
     sca
     disp(['CAUGHT EX: ' getReport(ex)]);
+    keyboard
     if ~isempty(strfind(getReport(ex),'go to http://www.colorvision.com/dl_software.php and download the latest spyder driver and/or the latest version of spyder2PRO (serial: 112710-692340-550088).  install, reboot, and run spyder2PRO.  make sure the spyder is attached via USB and appears in device manager attached to driver C:\WINDOWS\system32\drivers\Spyder2.sys (modified 1/17/2007)'))
         error('Check that the spyder is plugged in!!');
     end

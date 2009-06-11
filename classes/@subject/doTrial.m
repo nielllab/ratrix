@@ -31,7 +31,7 @@ if isa(r,'ratrix') && isa(station,'station') && (isempty(rn) || isa(rn,'rnet'))
             keepWorking=1;
         end
         
-        if graduate
+        if graduate && ~manualTs % 6/11/09 - dont graduate if manual k+t switching to new training step
             if getNumTrainingSteps(p)>=t+1
                 [subject r]=setStepNum(subject,t+1,r,'graduated!','ratrix');
             else

@@ -35,6 +35,7 @@ end
 
 try
     % set up PTB
+    hidecursor;
     [window winRect]=Screen('OpenWindow',screenNum);
     [oldClut, dacbits, reallutsize] = Screen('ReadNormalizedGammaTable', screenNum);
     Screen('LoadNormalizedGammaTable', screenNum, clut);
@@ -93,12 +94,12 @@ try
                 error('background must be {value,''fromRaw''}');
             end
             spyderData=stimInBoxOnBackground(window,spyderLib,...
-                method{2},method{3},method{4},method{5},method{6},method{7},reallutsize);
+                method{2},method{3},method{4},method{5},method{6},method{7},reallutsize,refreshRate);
             rawValues=method{2};
             method{3}={clut(method{3},1),special}; % reset the method's background to the 0.0-1.0 value
         case 'fullScreenStim'
             spyderData=fullScreenStim(window,spyderLib,...
-                method{2},method{3},method{4},method{5},reallutsize);
+                method{2},method{3},method{4},method{5},reallutsize,refreshRate);
             rawValues=method{2};
         otherwise
             error('unsupported method for screen calibration');
@@ -114,6 +115,7 @@ try
     legend({'x','y','z'})
 
     measuredValues=spyderData(:,2,:)';
+    calibrationDetails.spyderData=spyderData;
     cleanup(originalPriority,screenNum,oldClut,spyderLib);
 
 catch ex

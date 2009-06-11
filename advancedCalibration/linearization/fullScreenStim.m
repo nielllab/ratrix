@@ -1,5 +1,5 @@
 function spyderData = fullScreenStim(window,spyderLib,stim,...
-    interValueRGB,numFramesPerValue,numInterValueFrames,reallutsize)
+    interValueRGB,numFramesPerValue,numInterValueFrames,reallutsize,refreshRate)
 % this function uses spyder to measure the output from a full screen stim
 % INPUTS:
 %   window - the PTB windowPtr
@@ -14,6 +14,10 @@ function spyderData = fullScreenStim(window,spyderLib,stim,...
 %
 % NOTE: all indices in the CLUT are in the range 0-255, NOT 1-256. for some reason, PTB accepts arguments to
 % 'MakeTexture' in the range 0-255 where 0 is dark and 255 is light.
+
+if numFramesPerValue<refreshRate*5
+    error('spyder wants at least 5 secs per sample');
+end
 
 KbConstants.kKey=KbName('k');
 KbConstants.qKey=KbName('q');

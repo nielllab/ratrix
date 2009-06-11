@@ -1,5 +1,5 @@
 function spyderData = stimInBoxOnBackground(window,spyderLib,stim,background,patchRect,...
-    interValueRGB,numFramesPerValue,numInterValueFrames,reallutsize)
+    interValueRGB,numFramesPerValue,numInterValueFrames,reallutsize,refreshRate)
 % this function uses spyder to measure the output from a stim in box on background
 % INPUTS:
 %   window - the PTB windowPtr
@@ -15,12 +15,16 @@ function spyderData = stimInBoxOnBackground(window,spyderLib,stim,background,pat
 % NOTE: all indices in the CLUT are in the range 0-255, NOT 1-256. for some reason, PTB accepts arguments to
 % 'MakeTexture' in the range 0-255 where 0 is dark and 255 is light.
 
+if numFramesPerValue<refreshRate*5
+    error('spyder wants at least 5 secs per sample');
+end
 
 KbConstants.kKey=KbName('k');
 KbConstants.qKey=KbName('q');
 
 spyderData=nan*zeros(size(stim,4),3);
-if ~(size(stim,3) == 3 && length(size(stim))==4 && allClutIndices(stim(:),reallutsize))
+if ~(size(stim,3) == 3 && length(size(stim))==4 && allClutIndices(stim(:),reallutsize) && ... 
+        all(diff(squeeze(stim(:,:,1,:)))>0) && all(diff(squeeze(stim(:,:,2,:)))>0) && all(diff(squeeze(stim(:,:,3,:)))>0))
     error('stim must be size [rows cols 3 numStims] and 0 <= int values < size(clut)')
 end
 if ~(length(size(background))<=2 && allClutIndices(background(:),reallutsize))

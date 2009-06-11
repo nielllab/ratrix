@@ -1,5 +1,5 @@
 function [measuredValues currentCLUT linearizedCLUT validationValues details] = ...
-    calibrateMonitor(method,screenType,fitMethod,writeToOracle,cmd_line)
+    calibrateMonitor(method,screenType,fitMethod,writeToOracle,cmd_line,screenNum)
 % this function calls generateScreenCalibrationData to get the measured values and then does a basic
 % linearization and validation before inserting into Oracle
 % INPUTS: 
@@ -16,6 +16,7 @@ function [measuredValues currentCLUT linearizedCLUT validationValues details] = 
 %   writeToOracle - a flag indicating whether or not to write to oracle
 %   cmd_line (optional) - the string to store into the oracle field
 %   "cmd_line"
+%   screenNum (optional) - which screen to draw to
 % OUTPUTS:
 %   measuredValues - xyz measurements corresponding to rawValues with native gamma
 %   currentCLUT - the native CLUT
@@ -40,7 +41,14 @@ else
     cmd_line='unknown';
 end
 
-screenNum=max(Screen('Screens'));
+if exist('screenNum','var') && ~isempty(screenNum)
+    %pass
+else
+   screenNum=max(Screen('Screens'));
+end
+
+
+
 details=[];
 details.method=method;
 details.fitMethod=fitMethod;

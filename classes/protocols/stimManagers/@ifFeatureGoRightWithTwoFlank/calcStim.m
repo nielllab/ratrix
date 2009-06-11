@@ -411,7 +411,7 @@ switch details.renderMode
                 error('dynamic not tested in that mode yet')
         end
         
-        imagingTasks={'General', 'FloatingPoint32BitIfPossible'};
+        imagingTasks{1}={'General', 'FloatingPoint32BitIfPossible'};
 
         if isinf(stimulus.dynamicSweep.numRepeats)
             timeout=[];

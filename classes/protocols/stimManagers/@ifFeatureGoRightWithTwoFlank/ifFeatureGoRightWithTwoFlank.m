@@ -191,6 +191,7 @@ switch nargin
                         RFdataSource='\\132.239.158.179\datanet_storage';
                         p.fitRF = RFestimator({'spatialWhiteNoise','fitGaussian',{1}},{'spatialWhiteNoise','fitGaussian',{1}},[],RFdataSource,[now-100 Inf]);
                         %temp restrict
+                        p.fitRF=[];
                         %p.goLeftOrientations=p.goLeftOrientations(1);
                         %p.goRightOrientations=p.goRightOrientations(1);
                         %p.flankerOrientations=p.flankerOrientations(1);
@@ -202,6 +203,8 @@ switch nargin
                         p.dynamicSweep.sweptValues=[];
                         p.dynamicSweep.sweptParameters={'targetOrientations','flankerOrientations','flankerPosAngle','phase'};% 'flankerOrientations'}%,'flankerOffset','flankerPosAngle'};
                         p.dynamicSweep.numRepeats=20;
+                        
+                        p.typeOfLUT='2009Trinitron255GrayBoxInterpBkgnd.5';
                        
                     case 'physFullFieldTarget'
                         p.stdGaussMask=Inf;
@@ -217,6 +220,8 @@ switch nargin
                         p.dynamicSweep.sweptValues=[];
                         p.dynamicSweep.sweptParameters={'targetOrientations'};
                         p.dynamicSweep.numRepeats=20;
+                        
+                        p.typeOfLUT='2009Trinitron255GrayBoxInterpBkgnd.5';
                     case '10'
                         p.renderMode='ratrixGeneral-precachedInsertion';
                     otherwise
@@ -355,7 +360,7 @@ switch nargin
             error('toggleStim must be logical')
         end
 
-        if strcmp(varargin{22},'linearizedDefault') || strcmp(varargin{22},'useThisMonitorsUncorrectedGamma') || strcmp(varargin{22},'mostRecentLinearized')
+        if any(strcmp(varargin{22},{'linearizedDefault','useThisMonitorsUncorrectedGamma','mostRecentLinearized','2009Trinitron255GrayBoxInterpBkgnd.5'}))
             s.typeOfLUT=varargin{22};
         else
             error('typeOfLUT must be linearizedDefault, useThisMonitorsUncorrectedGamma, or mostRecentLinearized')

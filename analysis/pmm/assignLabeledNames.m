@@ -8,7 +8,11 @@ pairing={'139','r1';
     '233','r4';
     '230','r5';
     '227','r6';
-    '228','r7'};
+    '228','r7';
+    ... only used for short durations, not main figs
+    '232','r8';
+    '237','r9'
+    '229','r10'};
 
 for i=1:length(subjects)
     which=strcmp(subjects{i},pairing); % as logicals

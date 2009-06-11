@@ -431,12 +431,12 @@ for j=1:numStats
     for i=whichComparison
         doSubPlot(doFigAndSub,squareStats,multiComparePerPlot,numStats, numComparison,i,j);
         for k=1:numSubjects
-
+            subjectInd=find(strcmp(subjects{k},subjects))';
             %assign color
             if multiComparePerPlot
                 color=comparisonColor(i,:);
             else
-                if sign(CIs(i,j,k,2))==sign(CIs(i,j,k,1))
+                if sign(CIs(i,j,subjectInd,2))==sign(CIs(i,j,subjectInd,1))
                     color=objectColors.subjectSig;
                 else
                     color=objectColors.subjectInsig;
@@ -451,27 +451,29 @@ for j=1:numStats
             end
 
             if multiComparePerPlot
-                ind=(i-1)*(numSubjects+interComparisonSpace)+k;
+                ind=(i-1)*(numSubjects+interComparisonSpace)+subjectInd;
                 %yVal=maxBinHeight*(1.1+((statSpace*ind)/((numSubjects+interComparisonSpace)*numComparison)));
                 %yVal=maxBinHeight*(1.1+((statSpace*ind)/((numSubjects+interComparisonSpace)*numComparison)));
                 yVal=totalFigureHeight*(histFraction+gapFraction/2+dataFraction*(ind/( (numSubjects+interComparisonSpace)*numComparison )));
-                %plot([CIs(i,j,k,1) CIs(i,j,k,2)], [yVal yVal], 'color', color);
-                %plot(deltas(i,j,k), yVal,mark, 'markerSize', 7, 'color', color);  % supress per subject
+                %plot([CIs(i,j,subjectInd,1) CIs(i,j,subjectInd,2)], [yVal yVal], 'color', color);
+                %plot(deltas(i,j,subjectInd), yVal,mark, 'markerSize', 7, 'color', color);  % supress per subject
             else
                 %yVal=maxBinHeight*1.25 +*(1.1+((statSpace*k)/numSubjects));
-                yVal=totalFigureHeight*(histFraction+gapFraction/2+dataFraction*(k/numSubjects));
-                plot([CIs(i,j,k,1) CIs(i,j,k,2)], [yVal yVal], 'color', color);
-                plot(deltas(i,j,k), yVal,mark, 'markerSize', 7, 'color', color);
+                yVal=totalFigureHeight*(histFraction+gapFraction/2+dataFraction*(subjectInd/numSubjects));
+                plot([CIs(i,j,subjectInd,1) CIs(i,j,subjectInd,2)], [yVal yVal], 'color', color);
+                plot(deltas(i,j,subjectInd), yVal,mark, 'markerSize', 7, 'color', color);
             end
 
            
             plot([0 0], [0 totalFigureHeight*(1-basementFraction)],'k');
             if addTrialNums
-                t=text(maxX, yVal, num2str(numSamples(i,j,k)));
+                t=text(maxX, yVal, num2str(numSamples(i,j,subjectInd)));
                 set(t, 'HorizontalAlignment', 'right');
             end
             if addNames
                 t=text(maxX*0.9, yVal, labeledNames(k));
+                %t=text(maxX*0.9, yVal,
+                %sprintf('%s-%s-%d',labeledNames{k},subjects{k},subjectInd)); to test and confrim
                 set(t, 'HorizontalAlignment', 'right');
             end
             set(gca, 'TickLength', [0 0]);

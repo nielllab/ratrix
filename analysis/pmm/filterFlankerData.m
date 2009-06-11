@@ -100,6 +100,9 @@ for i=1:length(filter)
             case 'trialThisBlockRange'
                 range=filter{i}.parameters.range;
                 d=removeSomeSmalls(d,~(d.trialThisBlock>range(1) & d.trialThisBlock<range(2))); 
+            case 'targetDurationRangeMs'
+                range=filter{i}.parameters.range/1000; % convert ms to Seconds
+                d=removeSomeSmalls(d,~(d.actualTargetOnSecs>=range(1) & d.actualTargetOnSecs<=range(2)));  % inclusive to allow one exact time
             case {'performanceRange','performancePercentile'}
                 goods=getGoods(d,filter{i}.parameters.goodType);
                 conditionType=filter{i}.parameters.whichCondition{1};

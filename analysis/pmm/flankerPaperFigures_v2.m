@@ -1,4 +1,4 @@
-
+e
 
 
 
@@ -508,15 +508,12 @@ close all
 nBins=7;  %try 7, 18, 10, 20
 subplot(2,1,1)
 cMatrix={[find(ismember(names.conditions,{'colin'}))], [find(ismember(names.conditions,{'changeFlank'}))]}
-labeledNames={'r7','r6','r5','r4','r3','r2','r1'};
-viewFlankerComparison(names,params, cMatrix,{'pctCorrect'},[],[-5:10/nBins:5],[],false,false,labeledNames)
+viewFlankerComparison(names,params, cMatrix,{'pctCorrect'},[],[-5:10/nBins:5],[],false,false,[])
 title('colinear - popout1')
 ylabel('count')
- 
 
 subplot(2,1,2)
-labeledNames={'r9','r8','r6','r5'};
-viewFlankerComparison(names2,params2, cMatrix,{'pctCorrect'},[],[-5:10/nBins:5],[],false,false,labeledNames)
+viewFlankerComparison(names2,params2, cMatrix,{'pctCorrect'},[],[-5:10/nBins:5],[],false,false,[])
 
 %%
 

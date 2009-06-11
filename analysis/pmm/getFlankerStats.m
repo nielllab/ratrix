@@ -201,9 +201,12 @@ for i=1:numSubjects
     if ~all((d.correctResponseIsLeft==1)==(d.correct==1 & d.response==1) | (d.correct==0 & d.response~=1))
         x=((d.correctResponseIsLeft==1)==(d.correct==1 & d.response==1) | (d.correct==0 & d.response~=1)) ;
         violations=find(~x)
-        if all(d.response(violations)==-1) && all(goods(violations)==0)
-            disp(sprintf('found %d violation of side rule in rat %s, but they were all -1 responses, already not included in goods anyways',length(violations),d.info.subject{1}))
+        if  all(goods(violations)==0)
+            disp(sprintf('found %d violation of side rule in rat %s, but they already not included in goods anyways',length(violations),d.info.subject{1}))
         else
+            results=unique(d.result(x & goods ))
+            includedViolations=find(x & goods)
+            z=removeSomeSmalls(d,1:length(d.date)~=includedViolations(1))
             error('violates correct response is left; should never happen, regardless of trial manager rules')
         end
         

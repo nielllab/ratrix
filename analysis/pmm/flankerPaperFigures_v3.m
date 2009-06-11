@@ -128,4 +128,39 @@ for i=1:numSubjects
     daysOn(i)=diff(minmax(d.date))
 end
 
+%%  check on short stims
+
+
+subjects={'230','227','233','232'} %good performers on all trials ... note: I pulled these out as the ones I cared about before looking at the other 3 rats, which turn out to be low performers... does that justify their exclusion?  how does it effect stat testing?
+subjects={'229','237','138','230', '227','233','232'};% include low or chance performers to see what they are like
+
+filter{1}.type='11';
+% filter{2}.type='responseSpeedPercentile';
+% filter{2}.parameters.range=[0 .7];%whats justified?
+dateRange=[pmmEvent('endToggle') now];
+% filter{2}.type='performancePercentile';
+% filter{2}.parameters.goodType='withoutAfterError';
+% filter{2}.parameters.whichCondition={'noFlank',1}
+% filter{2}.parameters.performanceMethod='pCorrect';
+% filter{2}.parameters.performanceParameters={[.25 1],'boxcar',100}
+filter{2}.type='targetDurationRangeMs';
+filter{2}.parameters.range=[199 201];
+
+
+[stats CI names params]=getFlankerStats(subjects,'8flanks+',{'pctCorrect','CRs','hits','yes'},filter,dateRange)
 %%
+figure
+nBins=7;  %try 7, 18, 10, 20
+subplot(2,1,1)
+cMatrix={[find(ismember(names.conditions,{'colin'}))], [find(ismember(names.conditions,{'changeFlank'}))]}
+labeledNames=assignLabeledNames(subjects);
+viewFlankerComparison(names,params,cMatrix,{'pctCorrect'},subjects,[-5:10/nBins:5],[],false,true,labeledNames)
+title('colinear - popout1')
+ylabel('count')
+axis square
+
+subplot(2,1,2)
+arrows={'changeFlank','colin',1};
+doHitFAScatter(stats,CI,names,params,subjects,{'changeFlank','colin'},0,0,0,0,0,3,arrows);
+
+

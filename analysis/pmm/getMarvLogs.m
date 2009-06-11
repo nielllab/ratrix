@@ -1123,3 +1123,64 @@ eventLog{eventNum}.comment ='starting colinear only; for the target sweep';
 eventLog{eventNum}.details.from = {'2_3','2_3','2_3'}; 
 eventLog{eventNum}.details.to   = {'2_3reduced','2_3reduced','2_3reduced'}; 
 
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Jun.09,2009');%datestr(now,21)
+eventLog{eventNum}.eventName ={'protocolChange'};
+eventLog{eventNum}.subject ={'138','139', '228', '277',               '227','229', '230', '237', '232', '233','277'};
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';  
+eventLog{eventNum}.comment ='starting blocking experiments'; 
+eventLog{eventNum}.details.from = {'2_3','2_3','2_3','2_3',           '2_3','2_3','2_3','2_3','2_3'}; 
+eventLog{eventNum}.details.to   = {'2_6','2_6','2_6special','2_6',     '2_6special','2_6','2_6','2_6','2_6special','2_6'};  
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Jun.09,2009');%datestr(now,21)
+eventLog{eventNum}.eventName ={'manualStepChange'};
+eventLog{eventNum}.subject ={'138','139', '228','277',       '227', '229', '230', '237', '232', '233'};
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';  
+eventLog{eventNum}.comment ='starting blocking experiments'; 
+eventLog{eventNum}.details.from = [11 13 11 9     9  11 11 11 11 11 ]; 
+eventLog{eventNum}.details.to   = [11 11 11 11    12 12 12 12 12 12 ];  
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Jun.09,2009');%datestr(now,21)
+eventLog{eventNum}.eventName ={'reduceCTs'};
+eventLog{eventNum}.subject ={'138','130','237'}; 
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='138 exploits CTs some, might as well lower others to a standard'; 
+eventLog{eventNum}.details.from = [.25 .25 .25]; 
+eventLog{eventNum}.details.to   = [.10 .10 .10];
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Jun.09,2009');%datestr(now,21)
+eventLog{eventNum}.eventName ={'increaseReward'};
+eventLog{eventNum}.subject ={'138'}; 
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='138 has low BW, db.mat says his reward is/ has been "1" but miniDB is already set to 2!'; 
+eventLog{eventNum}.details.from = [1]; 
+eventLog{eventNum}.details.to   = [2];
+
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Jun.10,2009');%datestr(now,21)
+eventLog{eventNum}.eventName ={'increasePenalty','increasePenalty','decreasePenalty'};
+eventLog{eventNum}.subject ={'138','237','277'}; 
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='bug in set minidatabase prevented some penalty and reward from taking place till now; steps were always correct, see ''fixed miniDB bug June2009.txt'''; 
+eventLog{eventNum}.details.from = [4000 4000 4000]; 
+eventLog{eventNum}.details.to   = [6000 10000 1000];
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Jun.10,2009');%datestr(now,21)
+eventLog{eventNum}.eventName ={'increaseReward'};
+eventLog{eventNum}.subject ={'130','138','137','277'}; 
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='bug in set minidatabase prevented some penalty and reward from taking place till now; steps were always correct, see ''fixed miniDB bug June2009.txt'''; 
+eventLog{eventNum}.details.from = [1 1 1 1]; 
+eventLog{eventNum}.details.to   = [2 2 2 2];
+

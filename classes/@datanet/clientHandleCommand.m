@@ -60,8 +60,7 @@ try
             rx = emptyAllBoxes(rx,'starting trials in datanet mode',auth);
             rx=putSubjectInBox(rx,subjParams.id,1,auth); % only 1 box...
             
-            ids=getSubjectIDs(rx);
-            s=getSubjectFromID(rx,ids{1});
+            s=getSubjectFromID(rx,subjParams.id);
             b=getBoxIDForSubjectID(rx,getID(s));
             st=getStationsForBoxID(rx,b);
             st=st(1);

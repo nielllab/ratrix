@@ -121,6 +121,10 @@ try
 catch ex
     sca
     disp(['CAUGHT EX: ' getReport(ex)]);
+    if ~isempty(strfind(getReport(ex),'go to http://www.colorvision.com/dl_software.php and download the latest spyder driver and/or the latest version of spyder2PRO (serial: 112710-692340-550088).  install, reboot, and run spyder2PRO.  make sure the spyder is attached via USB and appears in device manager attached to driver C:\WINDOWS\system32\drivers\Spyder2.sys (modified 1/17/2007)'))
+        error('Check that the spyder is plugged in!!');
+    end
+    spyderLib=[];
     cleanup(originalPriority,screenNum,oldClut,spyderLib);
 end
 

@@ -1,8 +1,9 @@
 function [measuredR measuredG measuredB currentCLUT linearizedCLUT validationValues details] = ...
-    calibrateMonitor(method,mode,screenType,fitMethod,writeToOracle,cmd_line,screenNum)
+    calibrateMonitor(stim,method,mode,screenType,fitMethod,writeToOracle,cmd_line,screenNum)
 % this function calls generateScreenCalibrationData to get the measured values and then does a basic
 % linearization and validation before inserting into Oracle
 % INPUTS: 
+%   stim - [1 1 3 n] matrix of RGB values 
 %   method - how to do the screen calibration (passed to generateScreenCalibrationData):
 %   ie {'stimInBoxOnBackground',background,patchRect,interValueRGB,numFramesPerValue,numInterValueFrames}
     %   background - the background RGB values, specified as indices into the CLUT
@@ -11,7 +12,7 @@ function [measuredR measuredG measuredB currentCLUT linearizedCLUT validationVal
     %   numFramesPerValue - how many frames to hold each frame of the stim
     %   numInterValueFrames - how many frames of interValueRGB to show between each set of frames in stim
 %   mode - whether to do RGB, RGBK, or grayscale and also whether to do 8 or 256 samples
-    % acceptable values are '8RGB','8RGBK','8gray',etc...
+    % acceptable values are '8RGB','8RGBK','8gray', and 'custom', in which case we use the stim input
 %   screenType - 'LCD' or 'CRT'
 %   fitMethod - 'linear' or 'power'
 %   writeToOracle - a flag indicating whether or not to write to oracle
@@ -68,10 +69,11 @@ details.screenType=screenType;
 [currentCLUT, dacbits, reallutsize] = Screen('ReadNormalizedGammaTable', screenNum);
 drawSpyderPositionFrame = true;
 
-stim=[];
+
 % construct stim and call generateScreenCalibrationData as necessary
 switch mode
     case {'8gray','256gray'}
+        stim=[];
         if strcmp(mode,'8gray')
             samps=floor(linspace(0,255,8));
         else
@@ -88,6 +90,7 @@ switch mode
         rawG=rawR;
         rawB=rawR; % RGB are all the same since gray
     case {'8RGB','256RGB'}
+        stim=[];
         if strcmp(mode,'8RGB')
             samps=floor(linspace(0,255,8));
         else
@@ -116,6 +119,15 @@ switch mode
         end
         [measuredB rawB method details.measurementDetails] = ...
             generateScreenCalibrationData(method,stim,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
+    case 'custom'
+        % assume grayscale
+        % now run using the gray stim
+        [measuredR rawR method details.measurementDetails] = ...
+            generateScreenCalibrationData(method,stim,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
+        measuredG=measuredR;
+        measuredB=measuredR;
+        rawG=rawR;
+        rawB=rawR; % RGB are all the same since gray
     otherwise
         error('unsupported mode');
 end

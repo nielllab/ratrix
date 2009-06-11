@@ -411,8 +411,8 @@ switch details.renderMode
                 error('dynamic not tested in that mode yet')
         end
         
+        imagingTasks={'General', 'FloatingPoint32BitIfPossible'};
 
-        
         if isinf(stimulus.dynamicSweep.numRepeats)
             timeout=[];
         else
@@ -439,6 +439,8 @@ switch details.renderMode
         
         preResponseStim=discrimStim;
         preResponseStim.punishResponses=false;
+        
+        
         
     case {'ratrixGeneral-maskTimesGrating', 'ratrixGeneral-precachedInsertion'}
         try

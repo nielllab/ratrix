@@ -45,7 +45,7 @@ try
         s.window = Screen('OpenWindow',s.screenNum,0);%,[],32,2);  %%color, rect, depth, buffers (none can be changed in basic version)
     else
         PsychImaging('PrepareConfiguration');
-        PsychImaging('AddTask', 'General', 'FloatingPoint32BitIfPossible'); %enable general support of such tasks
+        % PsychImaging('AddTask', 'General', 'FloatingPoint32BitIfPossible'); %enable general support of such tasks
         %6/2/09 - add imagingTasks to the pipeline
         for i=1:length(imagingTasks)
             % add task

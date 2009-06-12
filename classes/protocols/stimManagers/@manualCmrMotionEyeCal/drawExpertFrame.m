@@ -1,12 +1,12 @@
 function [doFramePulse expertCache dynamicDetails textLabel i dontclear indexPulse] = ...
-    drawExpertFrame(stimulus,stim,i,phaseStartTime,window,textLabel,destRect,filtMode,...
-    expertCache,ifi,scheduledFrameNum,dropFrames,dontclear)
+    drawExpertFrame(stimulus,stim,i,phaseStartTime,totalFrameNum,window,textLabel,destRect,filtMode,...
+    expertCache,ifi,scheduledFrameNum,dropFrames,dontclear,dynamicDetails)
 % 10/31/08 - implementing expert mode for whiteNoise
 % this function calculates a expert frame, and then makes and draws the texture; nothing needs to be done in runRealTimeLoop
 % this should be a stimManager-specific implementation (if expert mode is supported for the given stimulus)
 indexPulse=false;
 
-numSweepsToDo=1;
+numSweepsToDo=stimulus.numSweeps;
 
 % increment i
 if dropFrames
@@ -16,7 +16,13 @@ else
 end
 % stimulus = stimManager
 doFramePulse=true;
-dynamicDetails=[];
+
+if isempty(dynamicDetails)
+    dynamicDetails.recordingIntervalsA=[];
+    dynamicDetails.recordingIntervalsB=[];
+end
+Asize=size(dynamicDetails.recordingIntervalsA,1);
+Bsize=size(dynamicDetails.recordingIntervalsB,1);
 % ================================================================================
 
 %background
@@ -45,14 +51,21 @@ stateTransitionValues=[2 3 4 5 2 1];
 stateDurationValues=[10 10 5 10 5 10]; % in seconds
 if isempty(expertCache)
     expertCache.state='initialize';
-    expertCache.startTimeOfCurrentPosition=GetSecs;
+    expertCache.startFrameOfCurrentPosition=totalFrameNum;
     expertCache.numSweepsDone=0;
 end
-elapsed=GetSecs-expertCache.startTimeOfCurrentPosition;
+elapsedFrames=totalFrameNum-expertCache.startFrameOfCurrentPosition;
+elapsed=elapsedFrames*ifi;
 ind=find(strcmp(expertCache.state,stateValues));
+
+% check for transition to next state
 if elapsed>=stateDurationValues(ind)
     if strcmp(expertCache.state,'recording at B')
+        % end of a recording interval at B
+        dynamicDetails.recordingIntervalsB(Bsize,2)=totalFrameNum-1;
         expertCache.numSweepsDone=expertCache.numSweepsDone+1;
+    elseif strcmp(expertCache.state,'recording at A')
+        dynamicDetails.recordingIntervalsA(Asize,2)=totalFrameNum-1;
     elseif strcmp(expertCache.state,'done')
         expertCache.numSweepsDone=0;
     end
@@ -63,11 +76,21 @@ if elapsed>=stateDurationValues(ind)
     end
     elapsed=0;
     ind=find(strcmp(expertCache.state,stateValues));
-    expertCache.startTimeOfCurrentPosition=GetSecs;
+    expertCache.startFrameOfCurrentPosition=totalFrameNum;
+end
+
+% logic for storing recording intervals (in terms of frame indices -> eyeDataStimInds)
+if expertCache.startFrameOfCurrentPosition==totalFrameNum % that means this frame is the first of a new position
+    if strcmp(expertCache.state,'recording at A')
+        dynamicDetails.recordingIntervalsA(Asize+1,1)=totalFrameNum;
+    elseif strcmp(expertCache.state,'recording at B')
+        dynamicDetails.recordingIntervalsB(Bsize+1,1)=totalFrameNum;
+    end
 end
 
 % show appropriate text
-txt=sprintf('%1.0f seconds have elapsed (%1.0f remaining) in state %s',elapsed,stateDurationValues(ind)-elapsed,expertCache.state);
+txt=sprintf('%d frames have elapsed (%d remaining) in state %s totalFrameNum:%d',...
+    elapsedFrames,floor((stateDurationValues(ind)-elapsed)/ifi),expertCache.state,totalFrameNum);
 Screen('DrawText',window,txt,xTextPos,yTextPos,100*ones(1,3));
 
 end % end function

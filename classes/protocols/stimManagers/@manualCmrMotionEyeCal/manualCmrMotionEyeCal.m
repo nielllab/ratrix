@@ -1,10 +1,11 @@
 function s=manualCmrMotionEyeCal(varargin)
 % MANUALCMRMOTIONEYECAL  class constructor.
 
-% s = manualCmrMotionEyeCal(background,
+% s = manualCmrMotionEyeCal(background,numSweeps,
 %       maxWidth,maxHeight,scaleFactor,interTrialLuminance)
 
-s.background = [];
+s.background=[];
+s.numSweeps=[];
 
 s.LUT=[];
 s.LUTbits=0;
@@ -21,7 +22,7 @@ switch nargin
         else
             error('Input argument is not a manualCmrMotionEyeCal object')
         end
-    case 5
+    case 6
         % create object using specified values
         
         % background
@@ -30,8 +31,14 @@ switch nargin
         else
             error('background must be a scalar');
         end
+        % numSweeps
+        if isscalar(varargin{2}) && isinteger(varargin{2}) && varargin{2}>0
+            s.numSweeps=varargin{2};
+        else
+            error('numSweeps must be a positive integer');
+        end
         
-        s = class(s,'manualCmrMotionEyeCal',stimManager(varargin{2},varargin{3},varargin{4},varargin{5}));
+        s = class(s,'manualCmrMotionEyeCal',stimManager(varargin{3},varargin{4},varargin{5},varargin{6}));
     otherwise
         error('invalid number of input arguments');
 end

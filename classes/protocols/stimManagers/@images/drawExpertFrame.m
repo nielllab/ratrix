@@ -1,6 +1,6 @@
 function [doFramePulse expertCache dynamicDetails textLabel i dontclear indexPulse] = ...
-    drawExpertFrame(stimulus,stim,i,phaseStartTime,window,textLabel,destRect,...
-    filtMode,expertCache,ifi,scheduledFrameNum,dropFrames,dontclear)
+    drawExpertFrame(stimulus,stim,i,phaseStartTime,totalFrameNum,window,textLabel,destRect,...
+    filtMode,expertCache,ifi,scheduledFrameNum,dropFrames,dontclear,dynamicDetails)
 % implements expert mode for images - calls PTB drawing functions directly, leaving drawText and drawingFinished to stimOGL
 %
 % state.destRect
@@ -20,7 +20,6 @@ if dropFrames
 else
     i=i+1;
 end
-dynamicDetails=[];
 doFramePulse=true;
 floatprecision=0;
 

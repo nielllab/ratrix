@@ -454,7 +454,7 @@ while ~done && ~quit;
 
         % =========================================================================
 
-        phaseRecords(phaseNum).dynamicDetails={};
+        phaseRecords(phaseNum).dynamicDetails=[];
         phaseRecords(phaseNum).loop = loop;
         phaseRecords(phaseNum).trigger = trigger;
         phaseRecords(phaseNum).strategy = strategy;
@@ -566,12 +566,10 @@ while ~done && ~quit;
                     end
                 case 'expert'
                     % i=i+1; % 11/7/08 - this needs to happen first because i starts at 0
-                    [doFramePulse expertCache dynamicDetails textLabel i dontclear indexPulse] ...
-                        = drawExpertFrame(stimManager,stim,i,phaseStartTime,window,textLabel,...
-                        destRect,filtMode,expertCache,ifi,scheduledFrameNum,tm.dropFrames,dontclear);
-                    if ~isempty(dynamicDetails)
-                        phaseRecords(phaseNum).dynamicDetails{end+1}=dynamicDetails; % dynamicDetails better specify what frame it is b/c the record will not save empty details
-                    end
+                    [doFramePulse expertCache phaseRecords(phaseNum).dynamicDetails textLabel i dontclear indexPulse] ...
+                        = drawExpertFrame(stimManager,stim,i,phaseStartTime,totalFrameNum,window,textLabel,...
+                        destRect,filtMode,expertCache,ifi,scheduledFrameNum,tm.dropFrames,dontclear,...
+                        phaseRecords(phaseNum).dynamicDetails);
                 otherwise
                     error('unrecognized strategy')
 			end

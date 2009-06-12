@@ -344,10 +344,12 @@ scaleFactor=0;
 interTrialLuminance=0.5;
 fF = fullField(contrast,frequencies,duration,repetitions,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
+% manualCmrMotionEyeCal
 background=0.5;
+numSweeps=5;
 maxWidth=1024;
 maxHeight=768;
-manualCam = manualCmrMotionEyeCal(background,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+manualCam = manualCmrMotionEyeCal(background,numSweeps,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 default=getDefaultParameters(ifFeatureGoRightWithTwoFlank,protocolType,protocolVersion,defaultSettingsDate);
 parameters=default;

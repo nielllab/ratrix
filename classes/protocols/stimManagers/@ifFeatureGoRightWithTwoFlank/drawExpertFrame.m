@@ -1,6 +1,6 @@
 function [doFramePulse expertCache dynamicDetails textLabel i dontclear indexPulse] = ...
-    drawExpertFrame(stimulus,stim,i,phaseStartTime,window,textLabel,destRect,...
-    filtMode,expertCache,ifi,scheduledFrameNum,dropFrames,dontclear)
+    drawExpertFrame(stimulus,stim,i,phaseStartTime,totalFrameNum,window,textLabel,destRect,...
+    filtMode,expertCache,ifi,scheduledFrameNum,dropFrames,dontclear,dynamicDetails)
 % remains untested
 % not used: phaseStartTime, destRect, filtMode, ifi
 % maybe should use: expertCache, scheduledFrameNum, dropFrames, dontclear
@@ -29,7 +29,6 @@ globalAlpha=[];  % will get overwritten per texture
 
 %init
 doFramePulse=true;
-dynamicDetails=[];
 texNum=0;
 expertCache=[];
 

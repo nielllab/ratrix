@@ -213,4 +213,14 @@ protocols/stimManagers/@whiteNoise/worthSpikeSorting.m -text
 @datanet/getAckCon.m -text
 @datanet/getCmdCon.m -text
 @datanet/setAckCon.m -text
+protocols/stimManagers/@manualCmrMotionEyeCal/extractDetailFields.m -text
+protocols/stimManagers/@manualCmrMotionEyeCal/manualCmrMotionEyeCal.m -text
+protocols/stimManagers/@manualCmrMotionEyeCal/calcStim.m -text
+protocols/stimManagers/@manualCmrMotionEyeCal/physAnalysis.m -text
+protocols/stimManagers/@manualCmrMotionEyeCal/fillLUT.m -text
+protocols/stimManagers/@manualCmrMotionEyeCal/drawExpertFrame.m -text
+protocols/stimManagers/@manualCmrMotionEyeCal/flushLUT.m -text
+protocols/stimManagers/@manualCmrMotionEyeCal/worthSpikeSorting.m -text
+protocols/stimManagers/@manualCmrMotionEyeCal/getLUT.m -text
+protocols/stimManagers/@manualCmrMotionEyeCal/stimMgrOKForTrialMgr.m -text
 db/@dbConn/listAllCalibrationEntries.m -text

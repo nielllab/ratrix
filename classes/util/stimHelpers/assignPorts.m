@@ -73,7 +73,7 @@ switch TMclass
         distractorPorts=[];
         
     case 'autopilot'
-        targetPorts=[1];
+        targetPorts=[];
         distractorPorts=[];
     case 'goNoGo'
                 if ~isempty(lastTrialRec) % if there were previous trials

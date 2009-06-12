@@ -140,6 +140,7 @@ gts = nAFC(sm,percentCorrectionTrials,constantRewards);
 
 % autopilot trialManager (for gratings currently) - 11/12/08 fli
 aP = autopilot(percentCorrectionTrials,sm,constantRewards);
+aP_no_text = autopilot(percentCorrectionTrials,sm,constantRewards,[],[],[],[],[],[],[],[],false);
 aP_datanet = autopilot(percentCorrectionTrials,sm,constantRewards);
 
 % passiveViewing trialManager
@@ -343,6 +344,11 @@ scaleFactor=0;
 interTrialLuminance=0.5;
 fF = fullField(contrast,frequencies,duration,repetitions,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
+background=0.5;
+maxWidth=1024;
+maxHeight=768;
+manualCam = manualCmrMotionEyeCal(background,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
 default=getDefaultParameters(ifFeatureGoRightWithTwoFlank,protocolType,protocolVersion,defaultSettingsDate);
 parameters=default;
 parameters.requestRewardSizeULorMS  =30;
@@ -520,14 +526,14 @@ ports=cellfun(@uint8,{1 3},'UniformOutput',false);
 svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
 svnCheckMode='session';
 % set up graduationCriterion
-graduateQuickly = performanceCriterion([.9, .5], [uint8(10), uint8(20)]); %cannot use this for freeDrinks b/c no "correct" answer
+graduateQuickly = performanceCriterion([.2, .5], [uint8(5), uint8(20)]); %cannot use this for freeDrinks b/c no "correct" answer
 repeatIndef = repeatIndefinitely();
 
 % DEMO
 ts1 = trainingStep(fd_sto, freeStim, repeatIndef, noTimeOff(), svnRev, svnCheckMode);   %stochastic free drinks
 ts2 = trainingStep(fd, freeStim, repeatIndef, noTimeOff(), svnRev, svnCheckMode);  %free drinks
 ts3 = trainingStep(vh, freeStim, graduateQuickly, noTimeOff(), svnRev, svnCheckMode);   %go to stim - orientedGabors w/ nAFC
-ts4 = trainingStep(vh, discrimStim, repeatIndef, noTimeOff(), svnRev, svnCheckMode);%orientation discrim - orientedGabors w/ nAFC
+ts4 = trainingStep(vh, discrimStim, graduateQuickly, noTimeOff(), svnRev, svnCheckMode);%orientation discrim - orientedGabors w/ nAFC
 ts5 = trainingStep(vh, imageStim,  graduateQuickly, noTimeOff(), svnRev, svnCheckMode); %morph discrim - images w/ nAFC
 
 % Balaji
@@ -589,6 +595,9 @@ ts40 = trainingStep(fd_all_requests, wn, repeatIndef, noTimeOff(), svnRev, svnCh
 
 % passiveViewing no datanet with a fullField stim, 'all' requestPorts, 'nonrepeats' rewarded
 ts41 = trainingStep(fd_nonrepeats, wn, repeatIndef, noTimeOff(), svnRev, svnCheckMode);
+
+% manualCmrMotionEyeCal
+ts42 = trainingStep(aP_no_text,manualCam,repeatIndef,noTimeOff(),svnRev, svnCheckMode);
 
 % pam's new images
 %create sound manager object used by all the other trial managers
@@ -701,7 +710,7 @@ for i=1:length(subjIDs),
 %         case {'rack3test4','rack3test5','rack3test6'} % nAFC, orientedGabors
 %             p=protocol('nAFC,orientedGabors',{ts4});
         otherwise
-            p=protocol('demo',{ts4,ts2,ts101,ts103,ts40,ts41,ts4,ts2,ts25,sweepContrast,ts12,ts5,easyStep,ts23,objrec1});
+            p=protocol('demo',{ts42,ts4,ts2,ts101,ts103,ts40,ts41,ts4,ts2,ts25,sweepContrast,ts12,ts5,easyStep,ts23,objrec1});
 %             error('unknown subject');
     end
     

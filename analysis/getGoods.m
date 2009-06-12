@@ -85,7 +85,9 @@ end
 goods(isnan(d.correct))=0;
 
 %remove trials where response is not nominal
-goods(d.result~=1)=0;
+if isfield(d,'result')
+    goods(d.result~=1)=0;
+end
 
 
 if removeHuman

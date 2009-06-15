@@ -106,7 +106,7 @@ switch mode
             stim(:,:,2:3,i)=uint8(0);
         end
         channels=uint8([1 0 0]); % only R channel
-        [measuredR rawR method details.measurementDetails quit] = ...
+        [measuredR rawR method details.measurementDetailsR quit] = ...
             generateScreenCalibrationData(method,stim,channels,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
         if quit
             return; %debugging only
@@ -119,7 +119,7 @@ switch mode
             stim(:,:,3,i)=uint8(0);
         end
         channels=uint8([0 1 0]); % only G channel
-        [measuredG rawG method details.measurementDetails quit] = ...
+        [measuredG rawG method details.measurementDetailsG quit] = ...
             generateScreenCalibrationData(method,stim,channels,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
         if quit
             return; %debugging only
@@ -130,7 +130,7 @@ switch mode
             stim(:,:,1:2,i)=uint8(0);
         end
         channels=uint8([0 0 1]); % only B channel
-        [measuredB rawB method details.measurementDetails quit] = ...
+        [measuredB rawB method details.measurementDetailsB quit] = ...
             generateScreenCalibrationData(method,stim,channels,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
         if quit
             return; %debugging only
@@ -203,11 +203,11 @@ end
 % ==============================================================================================
 % validate on GRAY only
 % recall generateScreenCalibrationData w/ new linearized CLUT and get validation data
-if ismember(mode,{'8gray','256gray'})
+% if ismember(mode,{'8gray','256gray'})
     drawSpyderPositionFrame = false;
-    [validationValues junk junk details.validationDetails] = ...
-        generateScreenCalibrationData(method,stim,linearizedCLUT,drawSpyderPositionFrame,screenNum,screenType);
-end
+    [validationValues junk junk details.validationDetails quit] = ...
+        generateScreenCalibrationData(method,stim,channels,linearizedCLUT,drawSpyderPositionFrame,screenNum,screenType);
+% end
 
 % restore original CLUT
 Screen('LoadNormalizedGammaTable',screenNum,currentCLUT);

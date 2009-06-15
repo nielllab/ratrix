@@ -346,7 +346,7 @@ fF = fullField(contrast,frequencies,duration,repetitions,maxWidth,maxHeight,scal
 
 % manualCmrMotionEyeCal
 background=0.5;
-numSweeps=5;
+numSweeps=uint8(5);
 maxWidth=1024;
 maxHeight=768;
 manualCam = manualCmrMotionEyeCal(background,numSweeps,maxWidth,maxHeight,scaleFactor,interTrialLuminance);

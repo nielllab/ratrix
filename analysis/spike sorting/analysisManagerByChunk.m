@@ -515,8 +515,13 @@ while ~quit
                     evalStr = sprintf('sm = %s();',stimRecord.stimManagerClass);
                     eval(evalStr);
                     
-                    doAnalysis= (~exist(analysisLocation,'file') || overwriteAll) && worthSpikeSorting(sm,quality);
-
+                    % 6/15/09 - decide whether to do analysis in a stim-specific way
+                    % (default = if quality is good)
+                    % (whiteNoise = always do analysis for now)
+                    % (manualCmrMotionEyeCal = always do analysis for now - future ignore spikes)
+                    analysisExists=exist(analysisLocation,'file');
+                    doAnalysis=worthPhysAnalysis(sm,quality,analysisExists,overwriteAll);
+                    
                     if doAnalysis % 1
                         % do something with loaded information
                         % NOTE - neuralRecord refers to all the 'neuralRecord' for a particular chunk!

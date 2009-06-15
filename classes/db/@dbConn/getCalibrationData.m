@@ -13,6 +13,8 @@ which=find(cell2mat(results(:,2))>=timeRange(1)&cell2mat(results(:,2))<=timeRang
 if length(which)>1
     which
     warning('found multiple entries for the given mac address - using first entry!');
+elseif isempty(which)
+    error('failed to find any entries for the given mac address and timeRange');
 end
 c=results{which(1),1};
 stream=c.getBinaryStream;

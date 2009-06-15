@@ -1,4 +1,4 @@
-function retval = worthSpikeSorting(sm,quality)
+function retval = worthPhysAnalysis(sm,quality,analysisExists,overwriteAll)
 % returns true if worth spike sorting given the values in the quality struct
 % default method for all stims - can be overriden for specific stims
 %

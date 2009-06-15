@@ -21,6 +21,6 @@
 /getPercentCorrectionTrials.m -text
 /physAnalysis.m -text
 /expertCleanUp.m -text
-/worthSpikeSorting.m -text
 /correctStim.m -text
 /setMaxWidthAndHeight.m -text
+/worthPhysAnalysis.m -text

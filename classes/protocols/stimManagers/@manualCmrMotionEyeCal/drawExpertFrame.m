@@ -92,5 +92,8 @@ end
 txt=sprintf('%d frames have elapsed (%d remaining) in state %s totalFrameNum:%d',...
     elapsedFrames,floor((stateDurationValues(ind)-elapsed)/ifi),expertCache.state,totalFrameNum);
 Screen('DrawText',window,txt,xTextPos,yTextPos,100*ones(1,3));
+yTextPos=yTextPos+15;
+txt=sprintf('numSweepsDone: %d/%d',expertCache.numSweepsDone,numSweepsToDo);
+Screen('DrawText',window,txt,xTextPos,yTextPos,100*ones(1,3));
 
 end % end function

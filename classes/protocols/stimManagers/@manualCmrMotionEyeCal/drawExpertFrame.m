@@ -45,10 +45,7 @@ yTextPos=55;
 %   'move camera to B'
 %   'recording at B'
 %   'done'
-% here are the values as a faked LUT
-stateValues={'initialize','move camera to A','recording at A','move camera to B','recording at B','done'};
-stateTransitionValues=[2 3 4 5 2 1];
-stateDurationValues=[10 10 5 10 5 10]; % in seconds
+
 if isempty(expertCache)
     expertCache.state='initialize';
     expertCache.startFrameOfCurrentPosition=totalFrameNum;
@@ -56,10 +53,10 @@ if isempty(expertCache)
 end
 elapsedFrames=totalFrameNum-expertCache.startFrameOfCurrentPosition;
 elapsed=elapsedFrames*ifi;
-ind=find(strcmp(expertCache.state,stateValues));
+ind=find(strcmp(expertCache.state,stimulus.stateValues));
 
 % check for transition to next state
-if elapsed>=stateDurationValues(ind)
+if elapsed>=stimulus.stateDurationValues(ind)
     if strcmp(expertCache.state,'recording at B')
         % end of a recording interval at B
         dynamicDetails.recordingIntervalsB(Bsize,2)=totalFrameNum-1;
@@ -72,10 +69,10 @@ if elapsed>=stateDurationValues(ind)
     if expertCache.numSweepsDone==numSweepsToDo
         expertCache.state='done';
     else
-        expertCache.state=stateValues{stateTransitionValues(ind)};
+        expertCache.state=stimulus.stateValues{stimulus.stateTransitionValues(ind)};
     end
     elapsed=0;
-    ind=find(strcmp(expertCache.state,stateValues));
+    ind=find(strcmp(expertCache.state,stimulus.stateValues));
     expertCache.startFrameOfCurrentPosition=totalFrameNum;
 end
 
@@ -90,7 +87,7 @@ end
 
 % show appropriate text
 txt=sprintf('%d frames have elapsed (%d remaining) in state %s totalFrameNum:%d',...
-    elapsedFrames,floor((stateDurationValues(ind)-elapsed)/ifi),expertCache.state,totalFrameNum);
+    elapsedFrames,floor((stimulus.stateDurationValues(ind)-elapsed)/ifi),expertCache.state,totalFrameNum);
 Screen('DrawText',window,txt,xTextPos,yTextPos,100*ones(1,3));
 yTextPos=yTextPos+15;
 txt=sprintf('numSweepsDone: %d/%d',expertCache.numSweepsDone,numSweepsToDo);

@@ -10,6 +10,11 @@ s.numSweeps=[];
 s.LUT=[];
 s.LUTbits=0;
 
+% constant values for this stim manager - drawExpertFrame will reference these values
+s.stateValues={'initialize','move camera to A','recording at A','move camera to B','recording at B','done'};
+s.stateTransitionValues=[2 3 4 5 2 1];
+s.stateDurationValues=[10 10 5 10 5 10]; % in seconds
+
 switch nargin
     case 0
         % if no input arguments, create a default object

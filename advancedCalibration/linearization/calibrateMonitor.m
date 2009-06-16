@@ -204,9 +204,14 @@ end
 % validate on GRAY only
 % recall generateScreenCalibrationData w/ new linearized CLUT and get validation data
 % if ismember(mode,{'8gray','256gray'})
-    drawSpyderPositionFrame = false;
-    [validationValues junk junk details.validationDetails quit] = ...
-        generateScreenCalibrationData(method,stim,channels,linearizedCLUT,drawSpyderPositionFrame,screenNum,screenType);
+stim=uint8([]);
+for i=1:length(samps)
+    stim(:,:,:,i)=uint8(samps(i)*ones(1,1,3));
+end
+channels=uint8([1 1 1]);
+drawSpyderPositionFrame = false;
+[validationValues junk junk details.validationDetails quit] = ...
+    generateScreenCalibrationData(method,stim,channels,linearizedCLUT,drawSpyderPositionFrame,screenNum,screenType);
 % end
 
 % restore original CLUT

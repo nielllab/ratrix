@@ -257,7 +257,7 @@ u=unique(measuredValues);
 for uu=1:length(u)
     a=find(measuredValues==u(uu));
     if length(a)>1
-        measuredValues(a(2:end))=measuredValues(a(2:end))+eps(measuredValues(a(2:end)));
+        measuredValues(a(2:end))=measuredValues(a(2:end))+eps(measuredValues(a(2:end))).*[1:length(a)-1];
     end
 end
 end % end function

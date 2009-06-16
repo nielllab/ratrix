@@ -83,7 +83,7 @@ while Btransition~=Bind
     Btransition=stimulus.stateTransitionValues(Btransition);
 end
     
-for i=1:stimulus.numSweeps
+for i=1:double(stimulus.numSweeps)
     details.recordingIntervalsA(i,1)=hz*sum(stimulus.stateDurationValues(1:Aind-1))+1+(i-1)*Agap;
     details.recordingIntervalsA(i,2)=hz*sum(stimulus.stateDurationValues(1:Aind))+(i-1)*Agap;
     details.recordingIntervalsB(i,1)=hz*sum(stimulus.stateDurationValues(1:Bind-1))+1+(i-1)*Bgap;

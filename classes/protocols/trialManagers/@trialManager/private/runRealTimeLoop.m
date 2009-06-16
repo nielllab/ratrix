@@ -660,12 +660,13 @@ while ~done && ~quit;
             eyeDataFrameInds(end+1:newEnd,:)=nan;
             gaze(end+1:newEnd,:)=nan;
         end
-
-        gaze(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = gazeEstimates;
-        eyeData(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = samples;
-        eyeDataFrameInds(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = totalFrameNum;
-
-        totalEyeDataInd = totalEyeDataInd + numEyeTrackerSamples;
+        
+        if ~isempty(gazeEstimates) && ~isempty(samples)
+            gaze(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = gazeEstimates;
+            eyeData(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = samples;
+            eyeDataFrameInds(totalEyeDataInd:totalEyeDataInd+numEyeTrackerSamples-1,:) = totalFrameNum;
+            totalEyeDataInd = totalEyeDataInd + numEyeTrackerSamples;
+        end
     end
 
     timestamps.eyeTrackerDone=GetSecs;

@@ -45,8 +45,8 @@ discrimStim.startFrame=0;
 discrimStim.autoTrigger=[];
 onlyOnce=find(ismember(stimulus.stateValues,{'initialize','done'}));
 discrimStim.framesUntilTimeout=hz*...
-    (sum(stimulus.stateDurationValues(setdiff(1:length(stimulus.stateDurationValues),onlyOnce)))...
-    *stimulus.numSweeps+sum(stimulus.stateDurationValues(onlyOnce)));
+    (sum(double(stimulus.stateDurationValues(setdiff(1:length(stimulus.stateDurationValues),onlyOnce))))...
+    *double(stimulus.numSweeps)+sum(double(stimulus.stateDurationValues(onlyOnce))));
 preRequestStim=[];
 preRequestStim.stimulus=interTrialLuminance;
 preRequestStim.stimType='loop';

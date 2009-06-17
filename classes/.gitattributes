@@ -224,3 +224,4 @@ protocols/stimManagers/@manualCmrMotionEyeCal/stimMgrOKForTrialMgr.m -text
 db/@dbConn/listAllCalibrationEntries.m -text
 protocols/stimManagers/@manualCmrMotionEyeCal/worthPhysAnalysis.m -text
 protocols/stimManagers/@whiteNoise/worthPhysAnalysis.m -text
+db/@dbConn/deleteCalibrationData.m -text

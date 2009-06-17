@@ -7,6 +7,6 @@ function retval = worthPhysAnalysis(sm,quality,analysisExists,overwriteAll)
 % quality.frameTimes
 % quality.frameLengths (this was used by getFrameTimes to calculate passedQualityTest)
 
-retval=true;
+retval=~analysisExists; % so we dont repeat the same analysis for every chunk in this trial!
 
 end % end function

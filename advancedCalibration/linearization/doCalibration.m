@@ -5,6 +5,7 @@ out=[];
 
 inp = input(['What calibration do you want to do?\n', ...
     '1 = default stimInBoxOnBackground (all 256 RGB triplets, gray background, write to oracle)\n', ...
+    '2 = default stimInBoxOnBackground (all 256 values, RGB independently, mean voltage background, write to oracle)\n', ...
     'Q = quit\n',...
     '>>'], 's');
 
@@ -23,27 +24,37 @@ end
 
 switch type
     case 1
-        rawValues=uint8(zeros(1,1,3,1));
-        rawValues(:,:,:,2)=uint8(15*ones(1,1,3));
-        rawValues(:,:,:,3)=uint8(172*ones(1,1,3));
-        rawValues(:,:,:,4)=uint8(255*ones(1,1,3));
-        background=0.2;
+        background=0.5;
         interValueRGB=uint8([255 255 255]);
         numFramesPerValue=uint32(300);
         numInterValueFrames=uint32(150);
         patchRect=[0.2 0.2 0.8 0.8];
-        method={'stimInBoxOnBackground',rawValues,background,patchRect,interValueRGB,numFramesPerValue,numInterValueFrames};
-        screenType='LCD';
+        method={'stimInBoxOnBackground',background,patchRect,interValueRGB,numFramesPerValue,numInterValueFrames};
+        screenType='CRT';
         fitMethod='linear';
-
+        mode='256gray';
+        stim=[];
+        writeToOracle=true;
+        
+    case 2
+        background=0.5;
+        interValueRGB=uint8([255 255 255]);
+        numFramesPerValue=uint32(300);
+        numInterValueFrames=uint32(150);
+        patchRect=[0.2 0.2 0.8 0.8];
+        method={'stimInBoxOnBackground',background,patchRect,interValueRGB,numFramesPerValue,numInterValueFrames};
+        screenType='CRT';
+        fitMethod='linear';
+        mode='256RGB';
+        stim=[];
         writeToOracle=true;
         
     otherwise
         error('unsupported type - how did this get past the error check?');
 end
 
-[out.measuredValues out.currentCLUT out.linearizedCLUT out.validationValues] = ...
-    calibrateMonitor(method,screenType,fitMethod,writeToOracle);
+[out.measuredR out.measuredG out.measuredB out.currentCLUT out.linearizedCLUT out.validationValues details] = ...
+    calibrateMonitor(stim,method,mode,screenType,fitMethod,writeToOracle,comment);
 
 end % end function
 

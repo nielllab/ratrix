@@ -1,4 +1,4 @@
-function out=addCalibrationData(CLUT,mac,timestamp,svnRev,cmd)
+function out=addCalibrationData(CLUT,mac,timestamp,svnRev,comment,calibrationString)
 % this function adds the given CLUT to the oracle table 'CLUTS'
 % INPUTS:
 %   CLUT - the color LUT; may include RGB/xyz measurements, linearized LUT, and validation data
@@ -6,7 +6,8 @@ function out=addCalibrationData(CLUT,mac,timestamp,svnRev,cmd)
 %   mac - the mac address of the station (will be used to look up gfx and crt serials in the GFX_CRT_SERIALS table)
 %   timestamp - the timestamp of this entry in the format 'mm-dd-yyyy hh24:mi'
 %   svnRev - svn revision number
-%   cmd - cmd-line command run
+%   comment - comment for this calibration entry
+%   calibrationString - automatically generated string for this calibration entry from the stim draw method, mode, screenType, and fitMethod
 
 if ~isMACaddress(mac)
     error('mac must be a valid MAC address');
@@ -42,7 +43,7 @@ else
 end
 
 % insert into MONITOR_CALIBRATION
-str=sprintf('insert into MONITOR_CALIBRATION (timestamp,station_mac,gfx_serial,crt_serial,svn_revision,cmd_line,data) VALUES (to_date(''%s'',''mm-dd-yyyy hh24:mi''),''%s'',''%s'',''%s'',%d,''%s'',empty_blob())',timestamp,mac,gfx,crt,svnRev,cmd);
+str=sprintf('insert into MONITOR_CALIBRATION (timestamp,station_mac,gfx_serial,crt_serial,svn_revision,comment,calibrationString,data) VALUES (to_date(''%s'',''mm-dd-yyyy hh24:mi''),''%s'',''%s'',''%s'',%d,''%s'',''%s'',empty_blob())',timestamp,mac,gfx,crt,svnRev,comment,calibrationString);
 out=exec(conn,str);
 
 updateCalibrationData(conn,mac,timestamp,CLUT);

@@ -95,6 +95,8 @@ eventNum=1;
 eventsToSendIndex=1;
 savePath=fullfile('\\Reinagel-lab.AD.ucsd.edu\RLAB\Rodent-Data\physiology',ratIDStrs{defaultIndex},...
     datestr(now,'mm.dd.yyyy'));
+historyDates={};
+historyDateIndex=[];
 % d=dir(fullfile(savePath,'*.mat')); % look for existing files
 % % should only have one element in d
 % if length(d)==1
@@ -134,9 +136,9 @@ f = figure('Visible','off','MenuBar','none','Name','neural GUI',...
         dispStrs={};
         lastP=0;
         lastPosition=[0 0 0];
-        firstTrialNumOfInterval=0;
+        firstTrialNumOfInterval=1;
         firstStartTimeOfInterval=[];
-        lastTrialNum=0;
+        lastTrialNum=1;
         lastStimClass='unknown';
         lastEventType=[];
         newP=true;
@@ -265,11 +267,13 @@ f = figure('Visible','off','MenuBar','none','Name','neural GUI',...
                                     dispStrs{end}=str;
                                 else
                                     % new stim class
-                                    str=sprintf('%s\ttrial %d-%d:\t%s',datestr(toShow(i).time,'HH:MM'),firstTrialNumOfInterval,...
-                                        lastTrialNum,lastStimClass);
                                     firstTrialNumOfInterval=toShow(i).eventParams.trialNumber;
                                     firstStartTimeOfInterval=toShow(i).time;
-                                    dispStrs{end+1}=str;
+                                    str=sprintf('%s\ttrial %d-%d:\t%s',datestr(toShow(i).time,'HH:MM'),firstTrialNumOfInterval,...
+                                        toShow(i).eventParams.trialNumber,toShow(i).eventParams.stimManagerClass);
+                                    if lastTrialNum~=0 % dont display the first 'interval' of unknown
+                                        dispStrs{end+1}=str;
+                                    end
                                 end
                                 lastTrialNum=toShow(i).eventParams.trialNumber;
                                 lastStimClass=toShow(i).eventParams.stimManagerClass;
@@ -339,6 +343,21 @@ f = figure('Visible','off','MenuBar','none','Name','neural GUI',...
         set(toggleRecordingButton,'String',recordingT);
         set(toggleTrialsButton,'String',runningT);
         set(toggleCellButton,'String',cellT);
+        
+        % previous, next, and today buttons
+        if historyDateIndex>1
+            set(previousDayButton,'Enable','on');
+        else
+            set(previousDayButton,'Enable','off');
+        end
+        if historyDateIndex==length(historyDates)
+            set(nextDayButton,'Enable','off');
+            set(todayButton,'Enable','off');
+        else
+            set(nextDayButton,'Enable','on');
+            set(todayButton,'Enable','on');
+        end
+        
         drawnow;
     end
 	
@@ -371,7 +390,43 @@ f = figure('Visible','off','MenuBar','none','Name','neural GUI',...
 		set(withdrawalMenu,'Visible','off','Enable','off');
 		set(breathPerMinMenu,'Visible','off','Enable','off');
 		set(breathTypeMenu,'Visible','off','Enable','off');
-	end
+    end
+
+% ========================================================================================
+% date selector for which day's event to show and write to
+dateField = uicontrol(f,'Style','text','String',datestr(now,'mm.dd.yyyy'),'Visible','on','Units','pixels',...
+    'HorizontalAlignment','center',...
+    'Position',[margin+5*fieldWidth fHeight-oneRowHeight-margin fieldWidth*0.6 oneRowHeight]);
+nextDayButton = uicontrol(f,'Style','pushbutton','String','>','Visible','on','Units','pixels','Enable','off',...
+    'FontWeight','bold','HorizontalAlignment','center','CallBack',@nextDay, ...
+    'Position',[2*margin+5.5*fieldWidth fHeight-oneRowHeight-margin 2*margin oneRowHeight]);
+    function nextDay(source,eventdata)
+        historyDateIndex=historyDateIndex+1;
+        set(dateField,'String',historyDates{historyDateIndex});
+        updateUI();
+        reloadEventsAndSurgeryFields([],[],false);
+    end
+previousDayButton = uicontrol(f,'Style','pushbutton','String','<','Visible','on','Units','pixels','Enable','on',...
+    'FontWeight','bold','HorizontalAlignment','center','CallBack',@previousDay, ...
+    'Position',[0*margin+4.9*fieldWidth fHeight-oneRowHeight-margin 2*margin oneRowHeight]);
+    function previousDay(source,eventdata)
+        historyDateIndex=historyDateIndex-1;
+        set(dateField,'String',historyDates{historyDateIndex});
+        updateUI();
+        reloadEventsAndSurgeryFields([],[],false);
+    end
+todayButton = uicontrol(f,'Style','pushbutton','String','>>','Visible','on','Units','pixels','Enable','off',...
+    'FontWeight','bold','HorizontalAlignment','center','CallBack',@goToToday, ...
+    'Position',[4*margin+5.5*fieldWidth fHeight-oneRowHeight-margin 2*margin oneRowHeight]);
+    function goToToday(source,eventdata)
+        historyDateIndex=length(historyDates);
+        set(dateField,'String',historyDates{historyDateIndex});
+        updateUI();
+        reloadEventsAndSurgeryFields([],[],false);
+    end
+        
+        
+        
 
 % ========================================================================================
 % draw text labels for surgery anchor
@@ -524,10 +579,29 @@ clientIPField = uicontrol(f,'Style','popupmenu','String',clientIPStrs,'Units','p
 ratIDField = uicontrol(f,'Style','popupmenu','String',ratIDStrs,'Units','pixels','Value',defaultIndex,...
     'Enable','on','Position',[margin+8*fieldWidth fHeight-2*oneRowHeight-margin fieldWidth oneRowHeight],...
     'Callback',@reloadEventsAndSurgeryFields);
-    function reloadEventsAndSurgeryFields(source,eventdata)
+    function reloadEventsAndSurgeryFields(source,eventdata,reloadHistory)
+        if ~exist('reloadHistory','var')
+            reloadHistory=true;
+        end
         % reload physiology event log
-        savePath=fullfile('\\Reinagel-lab.AD.ucsd.edu\RLAB\Rodent-Data\physiology',ratIDStrs{get(ratIDField,'Value')},...
-            datestr(now,'mm.dd.yyyy'));
+        savePath=fullfile('\\Reinagel-lab.AD.ucsd.edu\RLAB\Rodent-Data\physiology',ratIDStrs{get(ratIDField,'Value')});
+        if reloadHistory
+            d=dir(savePath);
+            historyDates={};
+            historyDateIndex=[];
+            for dd=1:length(d)
+                match=regexp(d(dd).name,'\d{2}\.\d{2}\.\d{4}','match');
+                if ~isempty(match)
+                    historyDates{end+1}=d(dd).name;
+                end
+            end
+            historyDateIndex=find(strcmp(datestr(now,'mm.dd.yyyy'),historyDates));
+            if isempty(historyDateIndex)
+                historyDates{end+1}=datestr(now,'mm.dd.yyyy');
+                historyDateIndex=length(historyDates);
+            end
+        end
+        savePath=fullfile(savePath,get(dateField,'String'));
         d=dir(fullfile(savePath,'*.mat')); % look for existing files
         % should only have one element in d
         if length(d)==1

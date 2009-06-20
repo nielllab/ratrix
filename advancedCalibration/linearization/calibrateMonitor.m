@@ -1,5 +1,5 @@
 function [measuredR measuredG measuredB currentCLUT linearizedCLUT validationValues details] = ...
-    calibrateMonitor(stim,method,mode,screenType,fitMethod,writeToOracle,cmd_line,screenNum)
+    calibrateMonitor(stim,method,mode,screenType,fitMethod,writeToOracle,comment,screenNum)
 % this function calls generateScreenCalibrationData to get the measured values and then does a basic
 % linearization and validation before inserting into Oracle
 % INPUTS: 
@@ -16,8 +16,8 @@ function [measuredR measuredG measuredB currentCLUT linearizedCLUT validationVal
 %   screenType - 'LCD' or 'CRT'
 %   fitMethod - 'linear' or 'power'
 %   writeToOracle - a flag indicating whether or not to write to oracle
-%   cmd_line (optional) - the string to store into the oracle field
-%   "cmd_line"
+%   comment (optional) - the string to store into the oracle field
+%   "comment"
 %   screenNum (optional) - which screen to draw to
 % OUTPUTS:
 %   measuredValues - xyz measurements corresponding to rawValues with native gamma
@@ -37,10 +37,10 @@ if islogical(writeToOracle)
 else
     error('writeToOracle must be a logical');
 end
-if exist('cmd_line','var') && ~isempty(cmd_line)
+if exist('comment','var') && ~isempty(comment)
     %pass
 else
-    cmd_line='unknown';
+    comment='';
 end
 
 if exist('screenNum','var') && ~isempty(screenNum)
@@ -57,6 +57,8 @@ end
 
 validationValues=[];
 
+% generate calibrationString from the stim draw method, mode, screenType, and fitMethod
+calibrationString=[method{1} '_' mode '_' screenType '_' fitMethod];
 
 
 details=[];
@@ -237,7 +239,7 @@ if writeToOracle
         fclose(fid);
         timestamp=datestr(now,'mm-dd-yyyy HH:MM');
         svnRev=getSVNRevisionFromXML(getRatrixPath);
-        addCalibrationData(CLUT,mac,timestamp,svnRev,cmd_line)
+        addCalibrationData(CLUT,mac,timestamp,svnRev,comment,calibrationString)
         closeConn(conn);
     catch ex
         disp(['CAUGHT EX: ' getReport(ex)]);

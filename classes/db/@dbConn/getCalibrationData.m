@@ -3,7 +3,7 @@ function out=getCalibrationData(conn,mac,timeRange)
 % timeRange is specified as a a 2x1 vector of datenums
 
 out={};
-str=sprintf('select data, to_char(timestamp,''mm-dd-yyyy hh24:mi''),comment,calibrationString from MONITOR_CALIBRATION where station_mac=''%s''',mac);
+str=sprintf('select data, to_char(timestamp,''mm-dd-yyyy hh24:mi''),comm,calibrationString from MONITOR_CALIBRATION where station_mac=''%s''',mac);
 results=query(conn,str);
 list=results(:,[2 3 4]);
 

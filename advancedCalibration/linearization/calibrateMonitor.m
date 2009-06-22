@@ -68,7 +68,12 @@ details.fitMethod=fitMethod;
 details.screenNum=screenNum;
 details.screenType=screenType;
 % get current CLUT from screen
-[currentCLUT, dacbits, reallutsize] = Screen('ReadNormalizedGammaTable', screenNum);
+% [currentCLUT, dacbits, reallutsize] = Screen('ReadNormalizedGammaTable', screenNum);
+% just use a linear ramp
+currentCLUT=linspace(0,1,256);
+currentCLUT=repmat(currentCLUT,[3 1])';
+reallutsize=256;
+
 drawSpyderPositionFrame = true; % HACK
 
 
@@ -87,7 +92,7 @@ switch mode
         channels=[1 1 1]; % all RGB channels
         % now run using the gray stim
         [measuredR rawR method details.measurementDetails quit] = ...
-            generateScreenCalibrationData(method,stim,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
+            generateScreenCalibrationData(method,stim,channels,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
         if quit
             return; %debugging only
         end

@@ -2,7 +2,7 @@ function out=deleteCalibrationData(conn,mac,timeRange)
 % this function deletes calibrationData entries based on a mac and timeRange
 
 out=0;
-str=sprintf('select data, to_char(timestamp,''mm-dd-yyyy hh24:mi''),comment,calibrationString from MONITOR_CALIBRATION where station_mac=''%s''',mac);
+str=sprintf('select data, to_char(timestamp,''mm-dd-yyyy hh24:mi''),comm,calibrationString from MONITOR_CALIBRATION where station_mac=''%s''',mac);
 results=query(conn,str);
 list=results(:,[2 3 4]);
 
@@ -20,7 +20,7 @@ if ~isempty(which)
             validInput=true;
             % do delete
             for i=1:length(which)
-                str=sprintf('delete from MONITOR_CALIBRATION where comment=''%s'' and calibrationString=''%s'' and timestamp=to_date(''%s'',''mm-dd-yyyy hh24:mi'')',...
+                str=sprintf('delete from MONITOR_CALIBRATION where comm=''%s'' and calibrationString=''%s'' and timestamp=to_date(''%s'',''mm-dd-yyyy hh24:mi'')',...
                     list{which(i),2},list{which(i),3},list{which(i),1})
                 exec(conn,str);
                 out=out+1;

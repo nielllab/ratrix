@@ -43,7 +43,7 @@ else
 end
 
 % insert into MONITOR_CALIBRATION
-str=sprintf('insert into MONITOR_CALIBRATION (timestamp,station_mac,gfx_serial,crt_serial,svn_revision,comment,calibrationString,data) VALUES (to_date(''%s'',''mm-dd-yyyy hh24:mi''),''%s'',''%s'',''%s'',%d,''%s'',''%s'',empty_blob())',timestamp,mac,gfx,crt,svnRev,comment,calibrationString);
+str=sprintf('insert into MONITOR_CALIBRATION (timestamp,station_mac,gfx_serial,crt_serial,svn_revision,comm,calibrationString,data) VALUES (to_date(''%s'',''mm-dd-yyyy hh24:mi''),''%s'',''%s'',''%s'',%d,''%s'',''%s'',empty_blob())',timestamp,mac,gfx,crt,svnRev,comment,calibrationString);
 out=exec(conn,str);
 
 updateCalibrationData(conn,mac,timestamp,CLUT);

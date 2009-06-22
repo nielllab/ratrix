@@ -55,7 +55,6 @@ if ~isempty(strfind(types,'colin'))
 end
 
 
-
  hasPhaseSplit=strfind(types,'&2Phases');
  if ~isempty(hasPhaseSplit)
         types(hasPhaseSplit:hasPhaseSplit+7)=[];
@@ -280,11 +279,28 @@ switch types
      case 'allBlockIDs'
         blocks=unique(d.blockID(~isnan(d.blockID)));
         numBlocks=length(blocks);
-        for i=1:numBlocks
-            conditionInds(i,:)= d.blockID==blocks(i);
-            names = [names, {num2str(i,'%2.0f')}];
-        end
         colors=jet(numBlocks);
+        for i=1:numBlocks
+            conditionInds(i,:)= d.blockID==blocks(i); 
+            intstanceID=min(find(conditionInds(i,:)));
+            contrast=max([d.phantomContrast(intstanceID); d.targetContrast(intstanceID)]);
+            if d.targetOrientation(intstanceID)==d.flankerOrientation(intstanceID) && d.targetOrientation(intstanceID)==d.flankerPosAngle(intstanceID)
+                colors(i,:)=brighten([.3 0 0],contrast);
+                nameStr='colin';
+            elseif d.targetOrientation(intstanceID)~=d.flankerOrientation(intstanceID)
+                colors(i,:)=brighten([0 .3 .3],contrast);
+                if d.targetOrientation(intstanceID)==d.flankerPosAngle(intstanceID)
+                    nameStr='pop1';
+                else
+                    nameStr='pop2';
+                end
+            else 
+                colors(i,:)=brighten([.3 .3 .3],contrast)-0.2;
+                nameStr='para';
+            end
+            names = [names, {sprintf('%s-%2.2f-%2.2f',nameStr,contrast,d.flankerContrast(intstanceID))}];
+        end
+
         
     case 'allBlockSegments'
         blockID=d.blockID;
@@ -569,7 +585,9 @@ switch types
         conditionInds(end+1,:)=conditionInds(strcmp(names,'LRR'),:) | conditionInds(strcmp(names,'RLL'),:);
         conditionInds(end+1,:)=conditionInds(strcmp(names,'RRL'),:) | conditionInds(strcmp(names,'LLR'),:);
         conditionInds(end+1,:)=conditionInds(10,:) | conditionInds(11,:) | conditionInds(12,:);
- 
+    case '4flanksBlocked'
+        [c1 n1 haveData1 color1]=getFlankerConditionInds(d,restrictedSubset,'8flanks+');
+       [c1 n1 haveData1 color1]=getFlankerConditionInds(d,restrictedSubset,'8flanks+');
     case '2flanks'
         [conditionInds names haveData colors]=getFlankerConditionInds(d,restrictedSubset,'8flanks+');
         whichInds=[find(strcmp({'colin'},names))  find(strcmp({'changeFlank'},names)) ];

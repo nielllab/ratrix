@@ -5,7 +5,6 @@ standardFlankerPaperPlot([2:4]);
 
 %%
 
-
 % GET STATS
 dateRange=[0 pmmEvent('endToggle')];
 statTypes={'pctCorrect','CRs','hits','dpr','yes'};
@@ -130,14 +129,13 @@ end
 
 %%  check on short stims
 
-
 subjects={'230','227','233','232'} %good performers on all trials ... note: I pulled these out as the ones I cared about before looking at the other 3 rats, which turn out to be low performers... does that justify their exclusion?  how does it effect stat testing?
 subjects={'229','237','138','230', '227','233','232'};% include low or chance performers to see what they are like
 
 filter{1}.type='11';
 % filter{2}.type='responseSpeedPercentile';
 % filter{2}.parameters.range=[0 .7];%whats justified?
-dateRange=[pmmEvent('endToggle') now];
+dateRange=[pmmEvent('endToggle') pmmEvent('startBlocking10rats')];
 % filter{2}.type='performancePercentile';
 % filter{2}.parameters.goodType='withoutAfterError';
 % filter{2}.parameters.whichCondition={'noFlank',1}
@@ -145,7 +143,6 @@ dateRange=[pmmEvent('endToggle') now];
 % filter{2}.parameters.performanceParameters={[.25 1],'boxcar',100}
 filter{2}.type='targetDurationRangeMs';
 filter{2}.parameters.range=[199 201];
-
 
 [stats CI names params]=getFlankerStats(subjects,'8flanks+',{'pctCorrect','CRs','hits','yes'},filter,dateRange)
 %%
@@ -163,4 +160,39 @@ subplot(2,1,2)
 arrows={'changeFlank','colin',1};
 doHitFAScatter(stats,CI,names,params,subjects,{'changeFlank','colin'},0,0,0,0,0,3,arrows);
 
+%% check the effect after starting blocking
+subjects={'138','139', '228','277'};  % single contrast - low performers.   not finding an effect
+filter{1}.type='11';
+dateRange=[pmmEvent('startBlocking10rats') now];
+filter{2}.type='targetDurationRangeMs';
+filter{2}.parameters.range=[199 201];
+[stats CI names params]=getFlankerStats(subjects,'8flanks+',{'pctCorrect','CRs','hits','yes'},filter,dateRange)
 
+figure
+subplot(2,1,1)
+cMatrix={[find(ismember(names.conditions,{'colin'}))], [find(ismember(names.conditions,{'changeFlank'}))]}
+labeledNames=subjects;
+viewFlankerComparison(names,params,cMatrix,{'pctCorrect'},subjects,[],[],false,true,labeledNames)
+title('colinear - popout1'); ylabel('count'); axis square
+subplot(2,1,2); arrows={'changeFlank','colin',1};
+doHitFAScatter(stats,CI,names,params,subjects,{'changeFlank','colin'},0,0,0,0,0,3,arrows);
+
+%% check the effect after starting blocking
+subjects={'227', '229', '230', '237', '232', '233'} % better performers, range of contrast
+filter{1}.type='12';
+dateRange=[pmmEvent('startBlocking10rats') now];
+filter{2}.type='targetDurationRangeMs';
+filter{2}.parameters.range=[199 201];
+%need more data:  not all rats can be garaunteed to have the same
+%conditions! e.g. colin-1.00-0.40, pop1-1.00-0.40
+%[stats CI names params]=getFlankerStats(subjects,'allBlockIDs',{'pctCorrect','CRs','hits','yes'},filter,dateRange)
+[stats CI names params]=getFlankerStats(subjects,'8flanks+',{'pctCorrect','CRs','hits','yes'},filter,dateRange)
+ 
+figure; 
+subplot(2,1,1);
+cMatrix={[find(ismember(names.conditions,{'colin'}))], [find(ismember(names.conditions,{'changeFlank'}))]}
+labeledNames=subjects;
+viewFlankerComparison(names,params,cMatrix,{'pctCorrect'},subjects,[],[],false,true,labeledNames)
+title('colinear - popout1'); ylabel('count'); axis square
+subplot(2,1,2); arrows={'changeFlank','colin',1};
+doHitFAScatter(stats,CI,names,params,subjects,{'changeFlank','colin'},0,0,0,0,0,3,arrows);

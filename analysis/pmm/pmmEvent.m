@@ -24,6 +24,8 @@ switch id
         date=datenum('Apr.13,2009')
     case 'firstBlocking'
         date=datenum('May.11,2009')
+    case 'startBlocking10rats'
+        date =datenum('Jun.09,2009');
     otherwise
         id
         error('bad event id')

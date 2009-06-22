@@ -11,9 +11,11 @@ pairing={'139','r1';
     '228','r7';
     ... only used for short durations, not main figs
     '232','r8';
-    '237','r9'
-    '229','r10'};
-
+    '237','r9';
+    '229','r10';
+    ... only used for more testing, not for main figs
+    '277','r11'};
+   
 for i=1:length(subjects)
     which=strcmp(subjects{i},pairing); % as logicals
     if sum(which(:))==1

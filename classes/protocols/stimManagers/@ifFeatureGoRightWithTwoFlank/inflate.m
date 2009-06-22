@@ -70,6 +70,23 @@ end
 switch s.renderMode
     case {'ratrixGeneral-maskTimesGrating'}
         s.cache.mask= mask;  %keep as double
+    case {'symbolicFlankerFromServerPNG'}
+        s.cache.mask= ones(size(mask));  %keep as double
+        
+        integerType='uint8';
+        symbolicIm=imread('\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\pmeier\flankerSupport\symbolicRender\symbolicRender.png');
+        % rgb2gray(symbolicIm) % don't need to cuz it already is BW!
+        % symbolicIm=cast(symbolicIm,integerType); % don't need to cuz it already is uint8!
+        symbolicIm=imresize(symbolicIm,size(mask));  %the right size
+        symbolicIm=fliplr(symbolicIm);  % the first one is tipped CW!
+        symbolicIm(:,:,2)=fliplr(symbolicIm);  % and in the second orientation as a L/R mirror image
+        s.phase=s.phase(1); %the 4th dimention is phase which we will force to be one kind for these stims.
+        s.mean=1; %white background
+        
+        s.cache.goRightStim= symbolicIm;
+        s.cache.goLeftStim = symbolicIm;
+        s.cache.flankerStim= symbolicIm;
+        
     case  'ratrixGeneral-precachedInsertion'
 
         %%store these as int8 for more space... (consider int16 if better CLUT exists)

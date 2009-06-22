@@ -153,6 +153,8 @@ switch defaultSettings
         %for reinforcment manager
         default.requestMode='first';  % only first request lick is rewarded
         
+        
+        default.allowFreeDrinkRepeatsAtSameLocation=false;
     case 'Apr.13,2009'
         %get the above defaults and add on
         [default t]=getDefaultParameters(t,'unused','none','Oct.09,2007');

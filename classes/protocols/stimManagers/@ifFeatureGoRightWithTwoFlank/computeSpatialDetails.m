@@ -68,8 +68,8 @@ while stimFit == 0
         centers
         pos
         sca
-        edit(mfilename)
-        keyboard
+        mfilename
+        %keyboard
         
         error('At least one image patch is going to be off the screen.  Make patches smaller or closer together or check the size of xPosHint.')
     end

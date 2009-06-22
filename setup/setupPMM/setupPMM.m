@@ -119,6 +119,8 @@ for i=1:length(subjects)
             r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_4',dsd);
         case {'296','304','306'}
             r=setShapingPMM(r,subjects(i), 'goToLeftDetection', '2_4',dsd);
+       case {'forfiguresonly_1_9'} %removed '238' xfered: 233,'234','230','229','237'
+            r=setShapingPMM(r,subjects(i), 'goToRightDetection', '1_9','Oct.09,2007');
         case {'none'} %127 head fixed, 102 sac'd
             %r=setShapingPMM(r,subjects(i), 'goToRightDetection', '1_3','Oct.09,2007');
         case {'none'} %117 sac'd
@@ -131,8 +133,7 @@ for i=1:length(subjects)
             %r=setShapingPMM(r,subjects(i), 'goToRightDetection', '1_9','Oct.09,2007');
         case {'none'} %removed '235','236','214','219' xfered: 231,232,228,227
             %r=setShapingPMM(r,subjects(i), 'goToLeftDetection',  '1_9','Oct.09,2007');
-        case {'none'} %removed '238' xfered: 233,'234','230','229','237'
-            %r=setShapingPMM(r,subjects(i), 'goToRightDetection', '1_9','Oct.09,2007');
+       
         case {'none',} %271 flunked oct 2008, xfered '272'
             %r=setShapingPMM(r,subjects(i), 'goToLeftDetection',  '2_1','Oct.09,2007');
         case {'none'} %xfered: '274' 273 flunked

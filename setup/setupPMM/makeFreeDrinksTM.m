@@ -2,9 +2,9 @@ function [TM, SM] = makeFreeDrinksTM(p, pctStochasticReward, contrast)
 
 %constantReinforcement
 rewardManager=constantReinforcement(p.rewardNthCorrect(1),p.requestRewardSizeULorMS,p.requestMode,p.msPenalty,p.fractionOpenTimeSoundIsOn,p.fractionPenaltySoundIsOn,p.scalar,p.msPuff)
-TM = freeDrinks(p.sndManager,pctStochasticReward,rewardManager,...
-    p.eyeController,...
-    p.frameDropCorner,p.dropFrames,p.displayMethod,p.requestPorts,p.saveDetailedFramedrops);
+TM = freeDrinks(p.sndManager,pctStochasticReward,p.allowFreeDrinkRepeatsAtSameLocation, rewardManager)
+%   [eyeController],[frameDropCorner],[dropFrames],[displayMethod],[requestPorts],[saveDetailedFramedrops],
+%	[delayManager],[responseWindowMs],[showText])
 
 targetOrientations      =0; % less calculating
 distractorOrientations  =[];

@@ -13,7 +13,7 @@ numInterValueFrames=uint16(100);      % - how many frames of interValueRGB to sh
 background={0.5,'fromRaw'};
 method={'stimInBoxOnBackground',stim,background,patchRect,interValueRGB,numFramesPerValue,numInterValueFrames};
 cmd_line='basic 256 gray Trinitron';
-screenNum=1;  % 1 for phys rig, 0 or empty for single monitor
+screenNum=0;  % 1 for phys rig, 0 or empty for single monitor
 
 screenType='CRT';      % - 'LCD' or 'CRT'
 fitMethod = 'linear';  % - 'linear' 'power'

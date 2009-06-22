@@ -34,7 +34,7 @@ if ~isempty(strfind(types,'colin'))
             case 1
                 %okay
             case 2
-                if diff(sign(fpas))==2
+                if diff(sign(fpas))~=2 || diff(abs(fpas))~=0
                     doErr=true;
                 end
             otherwise

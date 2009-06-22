@@ -1,4 +1,4 @@
-function [imageMatrix numTrials sweptValues conditionInds]=getStimSweep(sweptParameters,sweptValues,borderColor,dataSource,doMontage)
+function [imageMatrix numTrials sweptValues conditionInds]=getStimSweep(sweptParameters,sweptValues,borderColor,dataSource,imageType,doMontage,antiAliasing,useSymbolicFlankers)
 %returns a cell array of images for all sweptParmeters
 %and an optional (potentially very  large) matrix of logical inds
 %such that inds(:,n) is a logical for all trials in d that showed stim{n}
@@ -28,6 +28,14 @@ if ~exist('imageType') || isempty(imageType)
     imageType= 'column'; % 'iconSquare','column','full'
 end
 
+
+if ~exist('antiAliasing') || isempty(antiAliasing)
+    antiAliasing= false;
+end
+
+if ~exist('useSymbolicFlankers') || isempty(useSymbolicFlankers)
+    useSymbolicFlankers= false;
+end
 
 
 if exist('r','var')
@@ -68,23 +76,38 @@ if ~exist('doMontage') || isempty(doMontage)
     doMontage=false;  %might run out of memory if using many conditions; use for debugging during small stim cases
 end
 
+
+if useSymbolicFlankers
+    sm=setRenderMode(sm,'symbolicFlankerFromServerPNG');
+end
+
 switch imageType
     case 'iconSquare'
         desiredX=100;
         desiredY=100;
     case 'column'
-        sx=384;
-        sy=512;
-        desiredX=250;
-        desiredY=400;
-        padX=(sx-desiredX)/2; padY=(sy-desiredY)/2;
+        sx=1024;
+        sy=768;
+        desiredX=300;
+        desiredY=500;
+
         borderWidth=10;
     case 'full'
         sx=1024;
+        sy=768;    
+    case 'fullZoom600'
+        sx=1024;
         sy=768;
+        desiredX=600;
+        desiredY=600;
+        borderWidth=25;
     otherwise
+        imageType
         error('bad imageType')
 end
+padX=(sx-desiredX)/2; padY=(sy-desiredY)/2;
+       
+
 sm=setMaxWidthAndHeight(sm,sx,sy);
 sm=cache(sm);
 
@@ -180,10 +203,27 @@ for i=1:numInds
         switch borderMethod
             case 'none'
                 im0= repmat(sampleStimFrame(sm,tmClass,forceStimDetails,reponsePorts,sx,sy),[1 1 3]);
+                if antiAliasing
+                    im0=imresize(imresize(im0,2/3,'bicubic'),3/2,'bicubic'); % downsamp, then upsamp... this will blur!
+                    %FACTOR CODE OUT
+                end
                 image=repmat(im0(1+padY:sy-padY,1+padX:sx-padX),[1 1 3]);
             case 'input'      
   
                 [im0]= sampleStimFrame(sm,tmClass,forceStimDetails,reponsePorts,sx,sy);
+                if antiAliasing
+                    m=2;
+                    switch m
+                        case 1
+                            im0=imresize(imresize(im0,2/3,'bicubic'),3/2,'bicubic'); % downsamp, then upsamp... this will blur!
+                            %note: super sampling may be wiser than subsampling.
+                            %http://en.wikipedia.org/wiki/Anti-aliasing
+                            %'%bicubic' is on option that looks okay, not perfect...lanczos2 is another method
+                            im0=imresize(imresize(im0,2/3,'bicubic'),3/2,'bicubic'); % downsamp, then upsamp... this will blur!
+                        case 2
+                            im0=imresize(imresize(im0,1/2,'bicubic'),2,'bicubic'); % downsamp, then upsamp... this will blur!
+                    end
+                end
                 center=repmat(im0(1+padY+borderWidth:sy-padY-borderWidth,1+padX+borderWidth:sx-padX-borderWidth),[1 1 3]);
                 image=uint8(255*repmat(reshape(borderColor(i,:),[1 1 3]),[desiredY desiredX 1]));
                 image(borderWidth+1:end-borderWidth,borderWidth+1:end-borderWidth,:)=center;

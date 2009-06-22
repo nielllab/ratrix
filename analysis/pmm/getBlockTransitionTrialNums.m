@@ -32,12 +32,11 @@ if ~all(binsBeforeAfter~=trialsBeforeAfter*trialsPerBin)
     error('trialsPerBin must fit evenly into trialsBeforeAfter')
 end
 
-
+baseID=min(find(~isnan(d.trialThisBlock)));
 if length(transitionFilter)==1 && isinf(transitionFilter) % all increases   
-    baseID=min(find(~isnan(d.trialThisBlock)));
     instances=baseID+find(diff(d.blockID(baseID:end))*sign(transitionFilter)>=1);  %the index into the dat were the transition happens
-else
-    error('not yet')
+elseif length(transitionFilter)==1 && iswholenumber(transitionFilter)
+        instances=baseID+find(diff(d.blockID(baseID:end))==transitionFilter);  %the index into the dat were the transition happens
 end
    
 binStartStop=[linspace(-trialsBeforeAfter(1),trialsBeforeAfter(2)-trialsPerBin,sum(binsBeforeAfter));

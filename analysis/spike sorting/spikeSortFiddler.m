@@ -22,15 +22,15 @@ spikeDetectionParams.ISIviolationMS=2; % just for human reports
 % Wn = [300 4000]/(spikeDetectionParams.samplingFreq/2); % default to bandpass 300Hz - 4000Hz
 % [b,a] = butter(4,Wn); Hd=[]; Hd{1}=b; Hd{2}=a;      
 spikeDetectionParams.nrNoiseTraces=0;   % what does this do for us? any effect if set to 2?
-spikeDetectionParams.extractionThreshold =6;
+spikeDetectionParams.extractionThreshold =5;
 %should be replaced with a string that collapses these two confusing categories into one value;  'maxPeak' 'minPeak' 'maxMinPeak' 'power' 'MTEO'
 % why is 3=power broken? can we fix it?
 spikeDetectionParams.peakAlignMethod=1;  % 1-> find peak, 2->none, 3->peak of power signal (broken), 4->peak of MTEO signal.
-spikeDetectionParams.alignMethod=2;  %only used if peakAlignMethod is 1=peak; if so (1: peak is max, 2: peak is min, 3: mixed)
+spikeDetectionParams.alignMethod=1;  %only used if peakAlignMethod is 1=peak; if so (1: peak is max, 2: peak is min, 3: mixed)
 
 spikeDetectionParams.prewhiten = 0;  %will error if true, and less than 400,000 samples ~10 secs / trial; need to understand whittening with Linear Predictor Coefficients to lax requirements (help lpc)
 spikeDetectionParams.limit = 2000;
-spikeDetectionParams.detectionMethod=3 % 1 -> from power signal, 2 threshold positive, 3 threshold negative, 4 threshold abs, 5 wavelet
+spikeDetectionParams.detectionMethod=1 % 1 -> from power signal, 2 threshold positive, 3 threshold negative, 4 threshold abs, 5 wavelet
 spikeDetectionParams.kernelSize=25;
 %         spikeDetectionParams.detectionMethod=5
 %         spikeDetectionParams.scaleRanges = [0.5 1.0];
@@ -44,7 +44,7 @@ spikeSortingParams.doPostDetectionFiltering=0; % - (optional) specify whether or
 %will error if not the same as detection params, *unless* detection is 'MTEO' in which case allow 'maxPeak' 'minPeak' 'maxMinPeak' 'power'
 %Q: why can't we call MTEO for the realligning as well?
 spikeSortingParams.peakAlignMethod=1; %(optional)    peak alignment method used by osort's realigneSpikes method;  only for post upsampling jitter, 1=peak, 2=none, 3= power; 
-spikeSortingParams.alignParam=3; %(optional) alignParam to be passed in to osort's realigneSpikes method; only for post upsampling jitter, only used if peakAlignMethod is 1=peak; if so (1: peak is max, 2: peak is min, 3: mixed)
+spikeSortingParams.alignParam=2; %(optional) alignParam to be passed in to osort's realigneSpikes method; only for post upsampling jitter, only used if peakAlignMethod is 1=peak; if so (1: peak is max, 2: peak is min, 3: mixed)
 
 spikeSortingParams.distanceWeightMode=1; %(optional) mode of distance weight calculation used by osort's setDistanceWeight method, 1= weight equally; 2= weight peak more, and falloff gaussian, but check if peak center garaunteed to be 95, also its hard coded to 1 in assignToWaveform
 spikeSortingParams.minClusterSize=50; %(optional) minimum number of elements in each cluster; passed in to osort's createMeanWaveforms method
@@ -86,15 +86,22 @@ end
 %   cell1 [132 139]
 %   cell2: [184] TRF [264 320]off screen? ;[363 378] spatial sta; [382 393] small sta
 
+
+%subjectID = 'demo1'; cellBoundary={'physLog',{'06.03.2009','all','last'}};
+%subjectID = '131';cellBoundary={'trialRange',[7]} % TRF
+%subjectID = '131';cellBoundary={'trialRange',[54 ]} % binSTA at 17 inches from screen
+subjectID = '131';cellBoundary={'trialRange',[54 131]} % binSTA at 17 inches from screen
+%subjectID = '131dev3';cellBoundary={'trialRange',[6 22]} % sparse grid [12 x 16]
+subjectID = '131dev4';cellBoundary={'trialRange',[74 80]} % sparse grid [12 x 16]
+subjectID = '131dev4';cellBoundary={'trialRange',[75 ]} % sparse grid%[12 x 16]
+%subjectID = '131';cellBoundary={'trialRange',[243 350 ]} % sparse grid%[12 x 16]
+
+overwriteAll=1; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
+usePhotoDiodeSpikes=0;
+stimClassToAnalyze={'all'}; timeRangePerTrialSecs=[0 Inf];
 % path='\\132.239.158.183\rlab_storage\pmeier\backup\devNeuralData_090310'; %b/c i can't see datanet_storage folder on .179
 % path='\\132.239.158.183\rlab_storage\pmeier\backup\neuralData_090505';
 % path='C:\Documents and Settings\rlab\Desktop\neural';
-path='C:\Documents and Settings\rlab\Desktop\ratrixData'
-stimClassToAnalyze={'all'}; timeRangePerTrialSecs=[0 Inf];
-overwriteAll=1; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
-usePhotoDiodeSpikes=0;
-% subjectID = 'demo1'; cellBoundary={'physLog',{'05.18.2009','all','last'}};
-subjectID = 'demo1';cellBoundary={'trialRange',[1]} % all chunks in these trials
-
+path='\\132.239.158.179\datanet_storage'
 analysisManagerByChunk(subjectID, path, cellBoundary, spikeDetectionParams, spikeSortingParams,...
     timeRangePerTrialSecs,stimClassToAnalyze,overwriteAll,usePhotoDiodeSpikes)

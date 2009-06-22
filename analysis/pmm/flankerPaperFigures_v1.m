@@ -6,10 +6,10 @@
 
 %%
 %relevantRatrix='\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\pmeier\xfer\db081013.mat';
-%relevantRatrix='\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\pmeier\xfer\db081130.mat';
-%load(relevantRatrix)
+relevantRatrix='\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\pmeier\xfer\db081130.mat';
+load(relevantRatrix)
 
-r=getRatrix
+%r=getRatrix
 
 
 %% timeline

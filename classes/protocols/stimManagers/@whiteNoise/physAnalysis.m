@@ -39,8 +39,8 @@ end
 allSpikes=spikeRecord.spikes; %all waveforms
 waveInds=allSpikes; % location of all waveforms
 if isstruct(spikeRecord.spikeDetails) && ismember({'processedClusters'},fields(spikeRecord.spikeDetails))
-    if length(spikeRecord.spikeDetails.processedClusters)~=length(waveInds)
-        length(spikeRecord.spikeDetails.processedClusters)
+    if length([spikeRecord.spikeDetails.processedClusters])~=length(waveInds)
+        length([spikeRecord.spikeDetails.processedClusters])
         length(waveInds)
         error('spikeDetails does not correspond to the spikeRecord''s spikes');
     end
@@ -168,7 +168,7 @@ end
 analysisdata=[];
 % figure out safe "piece" size based on spatialDim and timeWindowFrames
 % we only need to reduce the size of spikes
-maxSpikes=floor(15000000/(spatialDim(1)*spatialDim(2)*sum(timeWindowFrames))); % equiv to 100 spikes at 64x64 spatial dim, 36 frame window
+maxSpikes=floor(10000000/(spatialDim(1)*spatialDim(2)*sum(timeWindowFrames))); % equiv to 100 spikes at 64x64 spatial dim, 36 frame window
 starts=[1:maxSpikes:length(allSpikes) length(allSpikes)+1];
 for piece=1:(length(starts)-1)
     spikes=allSpikes(starts(piece):(starts(piece+1)-1));
@@ -286,7 +286,7 @@ end %loop over safe "pieces"
 
 % now we should have our analysisdata for all "pieces"
 % if the cumulative values don't exist (first analysis)
-if ~isfield(cumulativedata, 'cumulativeSTA')  || ~all(size(analysisdata.STA)==size(cumulativedata.cumulativeSTA)) %first trial through with these parameters
+if 1%~isfield(cumulativedata, 'cumulativeSTA')  || ~all(size(analysisdata.STA)==size(cumulativedata.cumulativeSTA)) %first trial through with these parameters
     cumulativedata.cumulativeSTA = analysisdata.STA;
     cumulativedata.cumulativeSTV = analysisdata.STV;
     cumulativedata.cumulativeNumSpikes = analysisdata.numSpikes;
@@ -336,9 +336,11 @@ doSpatial=~(size(STA,1)==1 & size(STA,2)==1); % if spatial dimentions exist
 % %% spatial signal (best via bright)
 if doSpatial
     
+    contextInd=darkInd;
+                
     %fit model to best spatial
     stdThresh=1;
-    [STAenvelope STAparams] =fitGaussianEnvelopeToImage(cumulativedata.cumulativeSTA(:,:,brightInd(3)),stdThresh,false,false,false);
+    [STAenvelope STAparams] =fitGaussianEnvelopeToImage(cumulativedata.cumulativeSTA(:,:,contextInd(3)),stdThresh,false,false,false);
     cx=STAparams(2)*size(STAenvelope,2)+1;
     cy=STAparams(3)*size(STAenvelope,1)+1;
     stdx=size(STAenvelope,2)*STAparams(5);
@@ -357,22 +359,22 @@ if doSpatial
             %std=hiLoDiff*p*(1-p);
     end
     meanLuminanceStimulus = meanLuminance*whiteVal;
-    [bigSpots sigPixels]=getSignificantSTASpots(cumulativedata.cumulativeSTA(:,:,brightInd(3)),cumulativedata.cumulativeNumSpikes,meanLuminanceStimulus,stdStimulus,ones(3),3,0.05);
+    [bigSpots sigPixels]=getSignificantSTASpots(cumulativedata.cumulativeSTA(:,:,contextInd(3)),cumulativedata.cumulativeNumSpikes,meanLuminanceStimulus,stdStimulus,ones(3),3,0.05);
     [bigIndY bigIndX]=find(bigSpots~=0);
     [sigIndY sigIndX]=find(sigPixels~=0);
     
     subplot(2,2,1)
-    %     im=single(squeeze(analysisdata.cumulativeSTA(:,:,brightInd(3))));
-    %    imagesc(squeeze(cumulativedata.cumulativeSTA(:,:,brightInd(3))),rng);
-    im=single(squeeze(cumulativedata.cumulativeSTA(:,:,brightInd(3))));
+    %     im=single(squeeze(analysisdata.cumulativeSTA(:,:,contextInd(3))));
+    %    imagesc(squeeze(cumulativedata.cumulativeSTA(:,:,contextInd(3))),rng);
+    im=single(squeeze(cumulativedata.cumulativeSTA(:,:,contextInd(3))));
     
     if spatialSmoothingOn
         im=imfilter(im,filt,'replicate','same');
     end
     imagesc(im,rng);
     colorbar; %colormap(blueToRed(meanLuminanceStimulus,rng));
-    hold on; plot(brightInd(2), brightInd(1),'yo')
-    hold on; plot(darkInd(2)  , darkInd(1),  'yo')
+    hold on; plot(brightInd(2), brightInd(1),'y+')
+    hold on; plot(darkInd(2)  , darkInd(1),  'y-')
     hold on; plot(bigIndX     , bigIndY,     'y.')
     hold on; plot(sigIndX     , sigIndY,     'y.','markerSize',1)
     minTrial=min(cumulativedata.cumulativeTrialNumbers);
@@ -385,10 +387,10 @@ if doSpatial
     
     subplot(2,2,2)
     
-    %hold off; imagesc(squeeze(STA(:,:,brightInd(3))),[min(STA(:)) max(STA(:))]);
-    hold off; imagesc(squeeze(analysisdata.STA(:,:,brightInd(3))),[min(analysisdata.STA(:)) max(analysisdata.STA(:))]);
-    hold on; plot(brightInd(2), brightInd(1),'yo')
-    hold on; plot(darkInd(2)  , darkInd(1),'yo')
+    %hold off; imagesc(squeeze(STA(:,:,contextInd(3))),[min(STA(:)) max(STA(:))]);
+    hold off; imagesc(squeeze(analysisdata.STA(:,:,contextInd(3))),[min(analysisdata.STA(:)) max(analysisdata.STA(:))]);
+    hold on; plot(brightInd(2), brightInd(1),'y+')
+    hold on; plot(darkInd(2)  , darkInd(1),'y-')
     colorbar;
     colormap(gray);
     %colormap(blueToRed(meanLuminanceStimulus,rng,true));
@@ -411,8 +413,8 @@ catch
 end
 fh=fill([1:ns fliplr([1:ns])]',[darkCI(:,1); flipud(darkCI(:,2))],'r'); set(fh,'edgeAlpha',0,'faceAlpha',.5)
 fh=fill([1:ns fliplr([1:ns])]',[brightCI(:,1); flipud(brightCI(:,2))],'b'); set(fh,'edgeAlpha',0,'faceAlpha',.5)
-plot([1:ns], darkSignal(:)','r')
-plot([1:ns], brightSignal(:)','b')
+plot([1:ns], darkSignal(:)','b')
+plot([1:ns], brightSignal(:)','r')
 
 peakFrame=find(brightSignal==max(brightSignal(:)));
 timeInds=[1 peakFrame timeWindowFrames(1)+1 size(analysisdata.STA,3)];
@@ -453,16 +455,16 @@ if doSpatial
             
             %user controls these somehow... params?
             eyeToMonitorMm=330;
-            contextSize=1;
+            contextSize=2;
             pixelPad=0.1; %fractional pad 0-->0.5
             
-            
+
             %stimRect=[500 1000 800 1200]; %need to get this stuff!
             stimRect=[0 0 stimulusDetails.width stimulusDetails.height]; %need to get this! now forcing full screen
             stimRectFraction=stimRect./[stimulusDetails.width stimulusDetails.height stimulusDetails.width stimulusDetails.height];
             [vRes hRes]=getAngularResolutionFromGeometry(size(STA,2),size(STA,1),eyeToMonitorMm,stimRectFraction);
-            contextResY=vRes(brightInd(1),brightInd(2));
-            contextResX=hRes(brightInd(1),brightInd(2));
+            contextResY=vRes(contextInd(1),contextInd(2));
+            contextResX=hRes(contextInd(1),contextInd(2));
             
             
             contextOffset=-contextSize:1:contextSize;
@@ -473,12 +475,12 @@ if doSpatial
             hold off; plot(0,0,'.')
             hold on
             for i=1:n
-                yInd=brightInd(1)+contextOffset(i);
+                yInd=contextInd(1)+contextOffset(i);
                 for j=1:n
-                    xInd=brightInd(2)+contextOffset(j);
+                    xInd=contextInd(2)+contextOffset(j);
                     if xInd>0 && xInd<=size(STA,2) && yInd>0 && yInd<=size(STA,1)
                         %make the image
-                        selection(i,j)=sub2ind(size(STA),yInd,xInd,brightInd(3));
+                        selection(i,j)=sub2ind(size(STA),yInd,xInd,contextInd(3));
                         contextIm(i,j)=cumulativedata.cumulativeSTA(selection(i,j));
                         %get temporal signal
                         [stixSig stixCI stixtInd]=getTemporalSignal(cumulativedata.cumulativeSTA,cumulativedata.cumulativeSTV,cumulativedata.cumulativeNumSpikes,selection(i,j));

@@ -54,3 +54,5 @@
 /drawExpertFrame.m -text
 /setStimFromDetails.m -text
 /physAnalysis.m -text
+/setStdGaussMask.m -text
+/setRenderMode.m -text

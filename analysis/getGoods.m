@@ -85,9 +85,14 @@ end
 goods(isnan(d.correct))=0;
 
 %remove trials where response is not nominal
-if isfield(d,'result')
-    goods(d.result~=1)=0;
+if ismember('result', fields(d))
+    %all trials in the future would have nominal==1
+    goods(d.result~=1 & ~isnan(d.result))=0;
+    %many trials in the past may have nan for result, so thats still an
+    %acceptable answer for now... maybe we can remove this if every rat
+    %ever on the ratrix is recompiled. (including non-active ones)
 end
+
 
 
 if removeHuman

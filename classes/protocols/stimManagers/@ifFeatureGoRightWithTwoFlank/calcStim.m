@@ -305,32 +305,6 @@ end
 details.stdGaussMask=stimulus.stdGaussMask(m);
 details.pixPerCycs=stimulus.pixPerCycs(x);
 
-
-%FORCE STIMULUS DETAILS -- USED IN NOT RATRIX ENVIRONMENT
-if exist('forceStimDetails','var')
-    if canForceStimDetails(stimulus,forceStimDetails)
-        fsdf=fields(forceStimDetails);
-        df=fields(details);
-        for i=1:length(fsdf)
-            switch fsdf{i}
-                case 'flankerPosAngle' %special b/c two numbers are needed, but only one specified in compiled
-                    details.flankerPosAngles= forceStimDetails.(fsdf{i}) + [0 pi];
-                otherwise %everything else treated in the general case
-                    if any(strcmp(df,fsdf{i}))
-                        details.(fsdf{i})
-                        details.(fsdf{i})=forceStimDetails.(fsdf{i}); %overwrite field
-                        details.(fsdf{i})
-                    else
-                        error('not allowed to add a new field in force details!, just overwrite')
-                    end
-            end
-        end
-    else
-        error('can''t force those stim details')
-    end
-end
-
-
 %SPATIAL DETAILS
 details.flankerOffset=stimulus.flankerOffset(h);
 details.gratingType=stimulus.gratingType;
@@ -358,9 +332,6 @@ else
     details.yPositionPercent=stimulus.targetYPosPct;
 end    
 
-
-details=computeSpatialDetails(stimulus,details);
-
 details.targetOnOff=stimulus.targetOnOff;
 details.flankerOnOff=stimulus.flankerOnOff;
                 
@@ -374,6 +345,45 @@ end
 %stim class is inherited from flankstim patch
 %just check flankerStim, assume others are same
             
+
+%FORCE STIMULUS DETAILS -- USED IN NOT RATRIX ENVIRONMENT
+if exist('forceStimDetails','var')
+    if canForceStimDetails(stimulus,forceStimDetails)
+        fsdf=fields(forceStimDetails);
+        df=fields(details);
+        for i=1:length(fsdf)
+            switch fsdf{i}
+                case 'flankerPosAngle' %special b/c two numbers are needed, but only one specified in compiled, also a new name
+                    details.flankerPosAngles= forceStimDetails.(fsdf{i}) + [0 pi];
+                case 'mean'
+                    if isinteger(stimulus.cache.flankerStim)
+                        details.mean=forceStimDetails.(fsdf{i})*intmax(class(stimulus.cache.flankerStim));
+                    elseif isfloat(stimulus.cache.flankerStim)
+                        details.mean=forceStimDetails.(fsdf{i}); %keep as float
+                    end
+                case 'stdGaussMask'
+                    details.(fsdf{i})=forceStimDetails.(fsdf{i}); %overwrite field
+                    stimulus=setStdGaussMask(stimulus, forceStimDetails.(fsdf{i}));
+                    stimulus=inflate(stimulus);
+                otherwise %everything else treated in the general case
+                    if any(strcmp(df,fsdf{i}))
+                        before=details.(fsdf{i});
+                        details.(fsdf{i})=forceStimDetails.(fsdf{i}); %overwrite field
+                        after=details.(fsdf{i});
+                        fprintf('FORCE: %s from %2.2g to %2.2g\n',fsdf{i},before,after)
+                    else
+                        error('not allowed to add a new field in force details!, just overwrite')
+                    end
+            end
+        end
+    else
+        error('can''t force those stim details')
+    end
+end
+
+
+%KEEP THIS AFTER THE FORCE
+details=computeSpatialDetails(stimulus,details);
 
 
 %OLD WAY ON THE FLY
@@ -442,7 +452,7 @@ switch details.renderMode
         
         
         
-    case {'ratrixGeneral-maskTimesGrating', 'ratrixGeneral-precachedInsertion'}
+    case {'ratrixGeneral-maskTimesGrating', 'ratrixGeneral-precachedInsertion','symbolicFlankerFromServerPNG'}
         try
 
             stim=details.mean(ones(height,width,3,'uint8')); %the unit8 just makes it faster, it does not influence the clas of stim, rather the class of details determines that
@@ -579,7 +589,7 @@ function stim=insertPatch(s,insertMethod,stim,pos,maskVideo,featureVideo,feature
 switch insertMethod
     case {'directPTB',{}}
         error('insertion happens in dynamic code!')
-    case 'ratrixGeneral-precachedInsertion'
+    case {'ratrixGeneral-precachedInsertion','symbolicFlankerFromServerPNG'}
         %insert in stim
         featureInd1 = find(featureOptions1 == chosenFeature1);
         featureInd2 = find(featureOptions2 == chosenFeature2);

@@ -1184,3 +1184,14 @@ eventLog{eventNum}.comment ='bug in set minidatabase prevented some penalty and 
 eventLog{eventNum}.details.from = [1 1 1 1]; 
 eventLog{eventNum}.details.to   = [2 2 2 2];
 
+
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Jun.12,2009');%datestr(now,21)
+eventLog{eventNum}.eventName ={'addCTs'};
+eventLog{eventNum}.subject ={'228'}; 
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm'; % danielle point out to consider bias on 227, 228, 231 and 138 
+eventLog{eventNum}.comment ='138 exploits CTs some, might as well lower others to a standard'; 
+eventLog{eventNum}.details.from = [0]; 
+eventLog{eventNum}.details.to   = [.10 ];

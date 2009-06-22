@@ -402,6 +402,7 @@ switch protocolVersion
         [vvVHOffsets previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 end
 
+
 fd1TM = makeFreeDrinksTM(parameters,0.01,0); %juicy
 fd2TM = makeFreeDrinksTM(parameters,0.001,0); % some
 [fd3TM, SM] = makeFreeDrinksTM(parameters,0,0); % none
@@ -410,7 +411,6 @@ fd2TM = makeFreeDrinksTM(parameters,0.001,0); % some
 grad1 = rateCriterion(4,1); %(3,2)? (3,3)?
 grad2 = rateCriterion(5,2); % how likely is it that false positives trigger a graduation without rat licks? -pmm
 grad3 = rateCriterion(6,3); % rateCriterion(10,3) % (20,1)? (5,20)?
-
 
 fd1 = trainingStep(fd1TM, SM, grad1, minutesPerSession(90,3), parameters.svnRev, parameters.svnCheckMode); %nTrialsThenWait([1000],[1],[0.001],[1])
 fd2 = trainingStep(fd2TM, SM, grad2, minutesPerSession(90,3), parameters.svnRev, parameters.svnCheckMode);

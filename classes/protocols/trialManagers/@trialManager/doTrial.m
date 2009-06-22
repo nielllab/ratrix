@@ -247,6 +247,15 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 end
             end
             
+            if isfield(stimulusDetails, 'big') % edf: why did this used to also test for isstruct(stimulusDetails) ?
+                stimulusDetails = rmfield(stimulusDetails, 'big');
+
+                %also, maybe one day these exist and need removing:
+                % phaseRecords{i}.responseDetails.expertDetails.big
+            end
+            
+            trialRecords(trialInd).stimDetails = stimulusDetails;
+            
             % stopEarly could potentially be set by the datanet's handleCommands (if server tells this client to shutdown
             % while we are in doTrial)
             if ~stopEarly
@@ -351,15 +360,6 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 commands.arg=cparams;
                 [gotAck] = sendCommandAndWaitForAck(getDatanet(station), commands);
             end
-            
-            if isfield(stimulusDetails, 'big') % edf: why did this used to also test for isstruct(stimulusDetails) ?
-                stimulusDetails = rmfield(stimulusDetails, 'big');
-                
-                %also, maybe one day these exist and need removing:
-                % phaseRecords{i}.responseDetails.expertDetails.big
-            end
-            
-            trialRecords(trialInd).stimDetails = stimulusDetails;
             
             % need to decide what to do with trialData - do we pass back to doTrials?
             % edf: do you mean trialRecords?

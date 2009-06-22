@@ -231,7 +231,7 @@ if writeToOracle
         conn=dbConn();
         [junk mac]=getMACaddress();
         % HACK
-        mac='0018F35DFAC0';
+%         mac='0018F35DFAC0';
         % write linearizedCLUT to tempCLUT.mat and read as binary stream
         save('tempCLUT.mat','linearizedCLUT','measuredR','measuredG','measuredB','currentCLUT','validationValues','details');
         fid=fopen('tempCLUT.mat');

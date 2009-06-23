@@ -23,9 +23,10 @@ if ~isdir(neuralRecordsLocation)
 end
 specific=Inf;
 % process eventParams
-%       {'04.21.2009','all','first'} means get the cell boundaries from the phys log for 4/21/09 (and use the first cell)
-%       {'04.21.2009',[4 200],'last'} means get the last cell from 4/21/09 within events 4-200 (of that day)
-%       {'04.21.2009','0040 - 0530',2} means get the 2nd cell from 4/21/09 within the time range 12:40am-530am (time range is military time)
+%       {'04.21.2009','events','all','first'} means get the cell boundaries from the phys log for 4/21/09 (and use the first cell)
+%       {'04.21.2009','events',[4 200],'last'} means get the last cell from 4/21/09 within events 4-200 (of that day)
+%       {'04.21.2009','events','0040 - 0530',2} means get the 2nd cell from 4/21/09 within the time range 12:40am-530am (time range is military time)
+%       {'04.21.2009','labels',5} means get the cell boundary corresponding to all events labeled with ID '5' for 4/21/09 (does not look at cell start/stop events, but rather at the labels)
 date=eventParams{1};
 physLogPath=fullfile('\\Reinagel-lab.AD.ucsd.edu\RLAB\Rodent-Data\physiology',subjectID,date);
 dirStr=fullfile(physLogPath,'physiologyEvents*');
@@ -35,74 +36,91 @@ if length(d)==1
 else
     error('no phys log found!');
 end
-load(physLogFilename);
+load(physLogFilename); % should have 'events' and 'labels'
 events=events_data;
 clear events_data;
-% now filter events based on eventParams{2}
-if ischar(eventParams{2})
-    if strcmp(eventParams{2},'all')
-        % do nothing, keep all events
-    else
-        [match tokens]=regexp(eventParams{2},'(\d{4})\s*-\s*(\d{4})','match','tokens');
-        if ~isempty(match)
-            startTime=datenum(sprintf('%s-%s',date,tokens{1}{1}),'mm.dd.yyyy-HHMM');
-            stopTime=datenum(sprintf('%s-%s',date,tokens{1}{2}),'mm.dd.yyyy-HHMM');
-            % filter events that fall within startTime/stopTime
-            goods=find([events.time]>=startTime&[events.time]<=stopTime);
-            events=events(goods);
-        else
-            error('failed to parse time range');
-        end
-    end
-elseif isvector(eventParams{2}) && length(eventParams{2})==2
-    start=min(max(1,eventParams{2}(1)),length(events));
-    stop=max(1,min(length(events),eventParams{2}(2)));
-    events=events(start:stop);
-else
-    error('invalid eventParams{2}');
-end
-which = eventParams{3};
-if ischar(which) && (strcmp(which,'first') || strcmp(which,'last'))
-    % pass
-elseif isinteger(which)
-    % also pass
-    specific=which;
-    which='specific';
-else
-    error('which must be either ''first'', ''last'', or an integer');
-end
 
-
-% first get cell boundary in terms of a start/stop matlab time
-cellStartInds=find(strcmp({events.eventType},'cell start'));
-cellStopInds=find(strcmp({events.eventType},'cell stop'));
-if length(cellStartInds)>length(cellStopInds)+1
-    error('mismatch between cell start and stop events (too many cell starts!)');
-end
-if isempty(cellStartInds)
-    cellBoundary=[]; % return empty if no 'cell start' events found!
-    return;
-end
-
-switch which
-    case 'first'
-        startTime=events(cellStartInds(1)).time;
-        if length(cellStopInds)>=1 % if there is a stop time
-            stopTime=events(cellStopInds(1)).time;
-        else
-            stopTime=Inf;
+switch eventParams{2}
+    case 'labels'
+        % do label stuff to get a matlab timeRange
+        which=find(labels==eventParams{3});
+        if isempty(which)
+            % no labels found that match the requested!
+            error('no matching labels found!');
         end
-    case {'last','specific'}
-        ind=min(length(cellStartInds),specific); %specific is Inf if 'last' mode, so this will just be the last cell start
-        startTime=events(cellStartInds(ind)).time;
-        if length(cellStopInds)==length(cellStartInds)
-            stopTime=events(cellStopInds(ind)).time;
+        startTime=events(min(which)).time;
+        stopTime=events(max(which)).time;
+    case 'events'
+        % now filter events based on eventParams{3}
+        if ischar(eventParams{3})
+            if strcmp(eventParams{3},'all')
+                % do nothing, keep all events
+            else
+                [match tokens]=regexp(eventParams{3},'(\d{4})\s*-\s*(\d{4})','match','tokens');
+                if ~isempty(match)
+                    startTime=datenum(sprintf('%s-%s',date,tokens{1}{1}),'mm.dd.yyyy-HHMM');
+                    stopTime=datenum(sprintf('%s-%s',date,tokens{1}{2}),'mm.dd.yyyy-HHMM');
+                    % filter events that fall within startTime/stopTime
+                    goods=find([events.time]>=startTime&[events.time]<=stopTime);
+                    events=events(goods);
+                else
+                    error('failed to parse time range');
+                end
+            end
+        elseif isvector(eventParams{3}) && length(eventParams{3})==2
+            start=min(max(1,eventParams{3}(1)),length(events));
+            stop=max(1,min(length(events),eventParams{3}(2)));
+            events=events(start:stop);
         else
-            stopTime=Inf;
+            error('invalid eventParams{3}');
         end
+        which = eventParams{4};
+        if ischar(which) && (strcmp(which,'first') || strcmp(which,'last'))
+            % pass
+        elseif isinteger(which)
+            % also pass
+            specific=which;
+            which='specific';
+        else
+            error('which must be either ''first'', ''last'', or an integer');
+        end
+        % first get cell boundary in terms of a start/stop matlab time
+        cellStartInds=find(strcmp({events.eventType},'cell start'));
+        cellStopInds=find(strcmp({events.eventType},'cell stop'));
+        if length(cellStartInds)>length(cellStopInds)+1
+            error('mismatch between cell start and stop events (too many cell starts!)');
+        end
+        if isempty(cellStartInds)
+            cellBoundary=[]; % return empty if no 'cell start' events found!
+            return;
+        end
+
+        switch which
+            case 'first'
+                startTime=events(cellStartInds(1)).time;
+                if length(cellStopInds)>=1 % if there is a stop time
+                    stopTime=events(cellStopInds(1)).time;
+                else
+                    stopTime=Inf;
+                end
+            case {'last','specific'}
+                ind=min(length(cellStartInds),specific); %specific is Inf if 'last' mode, so this will just be the last cell start
+                startTime=events(cellStartInds(ind)).time;
+                if length(cellStopInds)==length(cellStartInds)
+                    stopTime=events(cellStopInds(ind)).time;
+                else
+                    stopTime=Inf;
+                end
+            otherwise
+                error('unknown which');
+        end
+        
     otherwise
-        error('unknown which');
+        error('invalid eventParams - must be ''labels'' or ''events''');
 end
+
+
+% =====================================================================================================
 
 % then convert this time boundary to a trial/chunk boundary by doing the following:
 %   1) look in neuralRecordsLocation to find all trials within the time range (based on neuralRecords start times),
@@ -150,6 +168,10 @@ stopChunk=Inf;
 cellBoundary=[startTrial startChunk startTime stopTrial stopChunk stopTime];
 
 end % end function
+
+
+% ==========================================================================
+% HELPER FUNCTIONS
 
 function goodChunks = findChunksInTimerange(neuralRecord,timerange)
 goodChunks=[];

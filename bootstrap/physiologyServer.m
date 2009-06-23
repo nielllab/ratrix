@@ -7,7 +7,6 @@ global ai;
 f2=[];
 a2=[];
 data=[];
-groups={};
 ai=[];
 
 % ========================================================================================
@@ -91,6 +90,7 @@ displayModeIndex=find(strcmp(displayModeStrs,'condensed'));
 
 % ========================================================================================
 events_data=[];
+labels=[];
 eventNum=1;
 eventsToSendIndex=1;
 savePath=fullfile('\\Reinagel-lab.AD.ucsd.edu\RLAB\Rodent-Data\physiology',ratIDStrs{defaultIndex},...
@@ -199,6 +199,9 @@ f = figure('Visible','off','MenuBar','none','Name','neural GUI',...
                         case {'trial start','trial end','cell start','cell stop'}
                             % these only have an eventType, time, and eventNumber
                             str=sprintf('%s\t%d\t%s',datestr(toShow(i).time,'HH:MM'),toShow(i).eventNumber,toShow(i).eventType);
+                            if strcmp(toShow(i).eventType,'trial start') % also have trialNumber
+                                str=sprintf('%s #%d',str,toShow(i).eventParams.trialNumber);
+                            end
                         otherwise
                             toShow(i)
                             error('unrecognized event type');
@@ -258,7 +261,6 @@ f = figure('Visible','off','MenuBar','none','Name','neural GUI',...
                             lastP=toShow(i).penetrationNum;
                             lastPosition=toShow(i).position;
                             newP=false;
-                            str
                             dispStrs{end+1}=str; % always add a new str to display
                         case {'trial start','trial end'}
                             if strcmp(toShow(i).eventType,'trial start')
@@ -296,11 +298,11 @@ f = figure('Visible','off','MenuBar','none','Name','neural GUI',...
         end
         
         set(recentEventsDisplay,'String',dispStrs);
-        dispStrs={};
-        for i=length(events_data):-1:1
-            dispStrs=[dispStrs;num2str(i)];
-        end
-        set(eventsSelector,'String',dispStrs);
+% %         dispStrs={};
+% %         for i=length(events_data):-1:1
+% %             dispStrs=[dispStrs;num2str(i)];
+% %         end
+% %         set(eventsSelector,'String',dispStrs);
     end % end function
 % quick plot events
 % % %         vhToPlot=strcmp({events_data.eventType},'visual hash');
@@ -609,6 +611,7 @@ ratIDField = uicontrol(f,'Style','popupmenu','String',ratIDStrs,'Units','pixels'
         % should only have one element in d
         if length(d)==1
             events_data=load(fullfile(savePath,d(1).name));
+            labels=events_data.labels;
             events_data=events_data.events_data;
             cellStartInds=find(strcmp({events_data.eventType},'cell start'));
             cellStopInds=find(strcmp({events_data.eventType},'cell stop'));
@@ -818,6 +821,7 @@ offsetEventSubmit = uicontrol(f,'Style','pushbutton','String','enter','Visible',
 
         % make a new entry in events
         events_data(end+1).time=now;
+        labels(end+1)=nan;
         events_data(end).eventNumber=eventNum;
         events_data(end).surgeryAnchor=[str2double(get(surgeryAnchorAPField,'String')) str2double(get(surgeryAnchorMLField,'String')) str2double(get(surgeryAnchorZField,'String'))];
         events_data(end).surgeryBregma=[str2double(get(surgeryBregmaAPField,'String')) str2double(get(surgeryBregmaMLField,'String')) str2double(get(surgeryBregmaZField,'String'))];
@@ -889,7 +893,7 @@ offsetEventSubmit = uicontrol(f,'Style','pushbutton','String','enter','Visible',
         if ~isdir(savePath)
             mkdir(savePath);
         end
-        save(fullfile(savePath,saveFilename),'events_data','groups');
+        save(fullfile(savePath,saveFilename),'events_data','labels');
         if eventNum~=1
             delete(fullfile(savePath,deleteFilename));
         end
@@ -932,6 +936,7 @@ toggleCellButton = uicontrol(f,'Style','togglebutton','String',cellT,'Visible','
         % get time from client machine (if it exists)
         if ~running
             events_data(end+1).time=now;
+            labels(end+1)=nan;
             events_data(end).eventType=externalRequest;
             events_data(end).eventNumber=eventNum;
             % save events
@@ -941,7 +946,7 @@ toggleCellButton = uicontrol(f,'Style','togglebutton','String',cellT,'Visible','
             if ~isdir(savePath)
                 mkdir(savePath);
             end
-            save(fullfile(savePath,saveFilename),'events_data','groups');
+            save(fullfile(savePath,saveFilename),'events_data','labels');
             if eventNum~=1
                 delete(fullfile(savePath,deleteFilename));
             end
@@ -1192,6 +1197,7 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
                             updateDisplay();
                         else
                             events_data(end+1).time=retval(j).time;
+                            labels(end+1)=nan;
                             events_data(end).eventType=retval(j).type;
                             events_data(end).eventNumber=eventNum;
                             if strcmp(retval(j).type,'trial start')
@@ -1211,7 +1217,7 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
                             if ~isdir(savePath)
                                 mkdir(savePath);
                             end
-                            save(fullfile(savePath,saveFilename),'events_data','groups');
+                            save(fullfile(savePath,saveFilename),'events_data','labels');
                             if eventNum~=1
                                 delete(fullfile(savePath,deleteFilename));
                             end
@@ -1249,6 +1255,7 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
             if ~isempty(retval) % save last trial's TRIAL_END event (the call to stopClientTrials saved its neuralRecord)
                 for j=1:length(retval)
                     events_data(end+1).time=retval(j).time;
+                    labels(end+1)=nan;
                     events_data(end).eventType=retval(j).type;
                     events_data(end).eventNumber=eventNum;
                     % save event log
@@ -1257,7 +1264,7 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
                     if ~isdir(savePath)
                         mkdir(savePath);
                     end
-                    save(fullfile(savePath,saveFilename),'events_data','groups');
+                    save(fullfile(savePath,saveFilename),'events_data','labels');
                     if eventNum~=1
                         delete(fullfile(savePath,deleteFilename));
                     end
@@ -1295,20 +1302,6 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
         end
     end
 
-% ========================================================================================
-% event selector (for grouping)
-eventsSelector = uicontrol(f,'Style','listbox','String',{},'Visible','on','Units','pixels',...
-    'FontWeight','normal','Value',[],'Enable','on','Max',999,'Min',0,...
-    'Position',[margin+0*fieldWidth fHeight-17*oneRowHeight-1*margin fieldWidth*1-margin oneRowHeight*6]);
-
-addGroupButton = uicontrol(f,'Style','pushbutton','String','add group','Visible','on','Units','pixels',...
-    'Position',[margin+0*fieldWidth fHeight-19*oneRowHeight-1*margin fieldWidth*1-margin oneRowHeight],...
-    'Value',0,'Callback',@addGroup);
-    function addGroup(source,eventdata)
-        v=length(events_data):-1:1;
-        groups{end+1}=sort(v(get(eventsSelector,'Value')));
-        groups{end}
-    end
 
 % ========================================================================================
 % display box
@@ -1324,11 +1317,6 @@ displayModeSelector = uicontrol(f,'Style','popup',...
     'Value',displayModeIndex,'Units','pixels','Position',...
     [margin+fieldWidth fHeight-20*oneRowHeight-2*margin fieldWidth*1-margin oneRowHeight],...
     'Callback',@updateDisplay);
-
-% recentEventsDisplay = uicontrol(f,'Style','listbox',...
-%                 'String','recent events',...
-%                 'Max',2,'Min',0,'Value',[1 3],,...
-%                 'Position',[30 20 130 80]);
 
 % ========================================================================================
 % turn on the GUI

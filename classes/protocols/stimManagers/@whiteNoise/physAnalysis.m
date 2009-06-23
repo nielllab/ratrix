@@ -286,7 +286,8 @@ end %loop over safe "pieces"
 
 % now we should have our analysisdata for all "pieces"
 % if the cumulative values don't exist (first analysis)
-if 1%~isfield(cumulativedata, 'cumulativeSTA')  || ~all(size(analysisdata.STA)==size(cumulativedata.cumulativeSTA)) %first trial through with these parameters
+% 6/23/09 fli - why do we always do this first thing instead of checking for cumulative values???
+if ~isfield(cumulativedata, 'cumulativeSTA')  || ~all(size(analysisdata.STA)==size(cumulativedata.cumulativeSTA)) %first trial through with these parameters
     cumulativedata.cumulativeSTA = analysisdata.STA;
     cumulativedata.cumulativeSTV = analysisdata.STV;
     cumulativedata.cumulativeNumSpikes = analysisdata.numSpikes;

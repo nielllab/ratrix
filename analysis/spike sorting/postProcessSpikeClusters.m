@@ -5,6 +5,12 @@ function spikeDetails = postProcessSpikeClusters(assignedClusters,rankedClusters
 %   'largestNonNoiseClusterOnly' - only spikes belonging to the largest non-noise cluster will be considered to be true spikes
 %   
 
+if isempty(assignedClusters)
+    spikeDetails.processedClusters=[];
+%     spikeDetails.processedClusterRanks=[];
+    return;
+end
+
 if ~isfield(spikeSortingParams, 'postProcessing')
     warning('postProcessing not defined - using default value of ''treatAllNonNoiseAsSpike''');
     process = 'treatAllNonNoiseAsSpike';

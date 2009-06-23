@@ -141,6 +141,7 @@ f = figure('Visible','off','MenuBar','none','Name','neural GUI',...
         lastTrialNum=1;
         lastStimClass='unknown';
         lastEventType=[];
+        lastTrialIntervalInd=[];
         newP=true;
         switch mode
             case 'full'
@@ -257,6 +258,7 @@ f = figure('Visible','off','MenuBar','none','Name','neural GUI',...
                             lastP=toShow(i).penetrationNum;
                             lastPosition=toShow(i).position;
                             newP=false;
+                            str
                             dispStrs{end+1}=str; % always add a new str to display
                         case {'trial start','trial end'}
                             if strcmp(toShow(i).eventType,'trial start')
@@ -264,7 +266,7 @@ f = figure('Visible','off','MenuBar','none','Name','neural GUI',...
                                     % same stim still
                                     str=sprintf('%s\ttrial %d-%d:\t%s',datestr(firstStartTimeOfInterval,'HH:MM'),firstTrialNumOfInterval,...
                                         toShow(i).eventParams.trialNumber,toShow(i).eventParams.stimManagerClass);
-                                    dispStrs{end}=str;
+                                    dispStrs{lastTrialIntervalInd}=str;
                                 else
                                     % new stim class
                                     firstTrialNumOfInterval=toShow(i).eventParams.trialNumber;
@@ -274,6 +276,7 @@ f = figure('Visible','off','MenuBar','none','Name','neural GUI',...
                                     if lastTrialNum~=0 % dont display the first 'interval' of unknown
                                         dispStrs{end+1}=str;
                                     end
+                                    lastTrialIntervalInd=length(dispStrs);
                                 end
                                 lastTrialNum=toShow(i).eventParams.trialNumber;
                                 lastStimClass=toShow(i).eventParams.stimManagerClass;

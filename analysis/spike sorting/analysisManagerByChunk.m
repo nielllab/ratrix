@@ -13,8 +13,8 @@ function quit = analysisManagerByChunk(subjectID, path, cellBoundary, spikeDetec
 %       {'trialAndChunkRange',{[1 3], [4 6]}} means from trial 1, chunk 3 to trial 4, chunk 6 inclusive
 %       {'physLog',{'04.21.2009','all','first'}} means get the cell boundaries from the phys log for 4/21/09 (and use the first cell)
 %       {'physLog',{'04.21.2009',[4 200],'last'}} means get the last cell from 4/21/09 within events 4-200 (of that day)
-%	spikeDetectionParams - these should now be from the 'activeParameters' in the neuralRecord file
-%	spikeSortingParams - these should now be from the 'activeParameters' in the neuralRecord file
+%	spikeDetectionParams - these should now be from the 'activeParameters' 
+%	spikeSortingParams - these should now be from the 'activeParameters'
 %	timeRangePerTrialSecs - dont know, phil added this
 %	stimClassToAnalyze - doesnt really make sense for now, since we only test that this single trial is of this stimClass
 %	overwriteAll - whether or not to overwrite existing analyses
@@ -79,13 +79,20 @@ else
     error('bad cellBoundary input');
 end
 
+activeParamFile = fullfile('\\132.239.158.179\datanet_storage\',subjectID,'activeSortingParams.mat');
 if ~exist('spikeDetectionParams','var') || isempty(spikeDetectionParams)
     spikeDetectionParams.method='oSort';
     spikeDetectionParams.ISIviolationMS=2;
+elseif strcmp(spikeDetectionParams.method,'activeSortingParameters')
+    % get spikeDetectionParams from activeSortingParameters.mat
+    spikeDetectionParams=load(activeParamFile,'spikeDetectionParams');
 end
 
 if ~exist('spikeSortingParams','var') || isempty(spikeSortingParams)
     spikeSortingParams.method='oSort';
+elseif strcmp(spikeSortingParams.method,'activeSortingParameters')
+    % get spikeSortingParams from activeSortingParameters.mat
+    spikeSortingParams=load(activeParamFile,'spikeSortingParams');
 end
 
 if ~exist('timeRangePerTrialSecs','var') || isempty(timeRangePerTrialSecs)
@@ -150,6 +157,10 @@ baseAnalysisPath = fullfile(path, subjectID, 'analysis',sprintf('%d-%d',boundary
 if ~isdir(baseAnalysisPath)
     mkdir(baseAnalysisPath);
 end
+
+% 6/22/09 - should also save activeSortingParameters to a file in the base analysis location!
+save(fullfile(baseAnalysisPath,'activeSortingParams.mat'),'spikeDetectionParams','spikeSortingParams');
+
 % ==========================================================================================
 
 while ~quit
@@ -357,10 +368,10 @@ while ~quit
                             spikeRecord.photoDiode = getPhotoDiode(neuralRecord.neuralData(:,2),spikeRecord.correctedFrameIndices);
                             
                             % 11/25/08 - do some post-processing on the spike's assignedClusters ('treatAllNonNoiseAsSpikes', 'largestClusterAsSpikes', etc)                     
-                            if ~isempty(spikeRecord.assignedClusters)
-                                spikeRecord.spikeDetails = postProcessSpikeClusters(spikeRecord.assignedClusters,spikeRecord.rankedClusters,spikeSortingParams);
-                                spikeRecord.spikeDetails.rankedClusters=spikeRecord.rankedClusters;
-                            else
+                            
+                            spikeRecord.spikeDetails = postProcessSpikeClusters(spikeRecord.assignedClusters,spikeRecord.rankedClusters,spikeSortingParams);
+                            spikeRecord.spikeDetails.rankedClusters=spikeRecord.rankedClusters;
+                            if isempty(spikeRecord.assignedClusters)
                                 passedQualityTest=false;
                             end
                             % rename .clu, .klg, .fet, and .model files to be per-chunk
@@ -526,25 +537,25 @@ while ~quit
                         % do something with loaded information
                         % NOTE - neuralRecord refers to all the 'neuralRecord' for a particular chunk!
                         % get some paramteres from neual data
-                        if exist('neuralRecord','var') && isfield(neuralRecord,'activeParameters')
+                        if exist('neuralRecord','var') && isfield(neuralRecord,'parameters')
                             %pass
                         else
-                            out=stochasticLoad(neuralRecordLocation,{'activeParameters'});
-                            if isfield(out,'activeParameters')
-                                neuralRecord.activeParameters=out.activeParameters;
+                            out=stochasticLoad(neuralRecordLocation,{'parameters'});
+                            if isfield(out,'parameters')
+                                neuralRecord.parameters=out.parameters;
                             else
-                                activeParam=[];
-                                activeParams.samplingRate=neuralRecord.samplingRate;
-                                activeParams.subjectID=subjectID;
-                                neuralRecord.activeParameters=activeParams;
+                                p=[];
+                                p.samplingRate=neuralRecord.samplingRate;
+                                p.subjectID=subjectID;
+                                neuralRecord.parameters=p;
                             end
                         end
                         %Add some more activeParameters about the trial
-                        neuralRecord.activeParameters.trialNumber=currentTrial;
-                        neuralRecord.activeParameters.chunkID=chunksToProcess(i,2);
-                        neuralRecord.activeParameters.date=datenumFor30(timestamp);
-                        neuralRecord.activeParameters.ISIviolationMS=spikeDetectionParams.ISIviolationMS;
-                        neuralRecord.activeParameters.refreshRate=stimRecord.refreshRate; % where?
+                        neuralRecord.parameters.trialNumber=currentTrial;
+                        neuralRecord.parameters.chunkID=chunksToProcess(i,2);
+                        neuralRecord.parameters.date=datenumFor30(timestamp);
+                        neuralRecord.parameters.ISIviolationMS=spikeDetectionParams.ISIviolationMS;
+                        neuralRecord.parameters.refreshRate=stimRecord.refreshRate; % where?
 
                         eyeData=getEyeRecords(eyeRecordPath, currentTrial,timestamp);
                         % the stimManagerClass to be passed in is for class typing only -
@@ -578,8 +589,8 @@ while ~quit
                             keyboard
                         end
                         
-                        [analysisdata cumulativedata] = physAnalysis(sm,filteredSpikeRecord,stimRecord.stimulusDetails,plotParameters,neuralRecord.activeParameters,cumulativedata,eyeData);
-                        % activeParameters is from neuralRecord
+                        [analysisdata cumulativedata] = physAnalysis(sm,filteredSpikeRecord,stimRecord.stimulusDetails,plotParameters,neuralRecord.parameters,cumulativedata,eyeData);
+                        % parameters is from neuralRecord
                         % we pass in the analysisdata because it contains cumulative information that is specific to the analysis method
                         % this is the way of making sure it gets in every trial's analysis file, and that it will get propagated to the next analysis
 

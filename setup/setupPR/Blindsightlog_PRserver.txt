@@ -28,3 +28,9 @@
 22-Jun-2009 15:12:23 finished setting 297 to step 3 of motionpsychometricsPam090504
 22-Jun-2009 15:12:23 finished setting 298 to step 3 of motionpsychometricsPam090504
 22-Jun-2009 15:12:23 finished setting 299 to step 3 of motionpsychometricsPam090504
+24-Jun-2009 16:13:57 finished setting 302 to step 3 of motionpsychometricsPam090504
+24-Jun-2009 16:13:57 finished setting 307 to step 3 of motionpsychometricsPam090504
+24-Jun-2009 16:13:57 finished setting 309 to step 3 of motionpsychometricsPam090504
+24-Jun-2009 16:13:57 finished setting 297 to step 3 of motionpsychometricsPam090504
+24-Jun-2009 16:13:57 finished setting 298 to step 3 of motionpsychometricsPam090504
+24-Jun-2009 16:13:57 finished setting 299 to step 3 of motionpsychometricsPam090504

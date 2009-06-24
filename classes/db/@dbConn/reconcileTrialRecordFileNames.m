@@ -1,5 +1,6 @@
 function success=reconcileTrialRecordFileNames(conn, subID, permStore, doUpdate, verbose, doWarn)
-
+% VALIDATED 6/24/09 fli
+%   useful in conjunction with fixTrialRecordRanges if a rat is accidentally run under the wrong subject
 if ~exist('subID','var') || isempty(subID)
     error('please enter valid subID');
 end

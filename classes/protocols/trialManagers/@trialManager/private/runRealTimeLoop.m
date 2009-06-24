@@ -3,6 +3,17 @@ function [tm quit trialRecords eyeData eyeDataFrameInds gaze frameDropCorner sta
     targetOptions, distractorOptions, requestOptions, interTrialLuminance, interTrialPrecision, ...
     station, manual,timingCheckPct,textLabel,rn,subID,stimID,protocolStr,ptbVersion,ratrixVersion,trialLabel,msAirpuff, ...
     originalPriority, verbose, eyeTracker, frameDropCorner,trialRecords)
+% This function does the real-time looping for stimulus presentation. The rough order of events per loop:
+%   - (possibly) update phase-specific information
+%   - call updateTrialState to set correctness and determine rewards
+%   - update stim frame index and draw new frame as needed
+%   - (possibly) get eyeTracker data
+%   - check for keyboard input
+%   - check for port input
+%   - carry out logic (whether we need to transition phases, what responses we got, what sounds to play)
+%   - carry out rewards
+%   - check for server and datanet commands
+%   - carry out airpuffs
 
 securePins(station);
 
@@ -45,7 +56,6 @@ ports=logical(0*readPorts(station));
 lastPorts=ports;
 lastRequestPorts=ports;
 playRequestSoundLoop=false;
-% allRequestOptions=requestOptions;
 
 requestRewardStarted=false;
 requestRewardStartLogged=false;
@@ -73,9 +83,6 @@ eyeDataFrameInds=[];
 gaze=[];
 soundNames=getSoundNames(getSoundManager(tm));
 
-% although we load our phase-specific data from phaseInd, we record into phaseRecords using phaseNum b/c we might repeat phases!
-% each phaseRecord should save the phaseInd and phaseInd
-% edf: did you mean "and stimSpecInd"?
 phaseInd = startingStimSpecInd; % which phase we are on (index for stimSpecs and phaseData)
 phaseNum = 0; % increasing counter for each phase that we visit (may not match phaseInd if we repeat phases) - start at 0 b/c we increment during updatePhase
 updatePhase = 1; % are we starting a new phase?
@@ -294,12 +301,6 @@ logIt=true;
 lookForChange=false;
 punishResponses=[];
 
-% % if ~isempty(getDatanet(station))
-% %     datanet_constants = getConstants(getDatanet(station));
-% %     commands.cmd = datanet_constants.stimToDataCommands.S_TIMESTAMP_CMD;
-% %     [trialData, gotAck] = sendCommandAndWaitForAck(getDatanet(station), getCon(getDatanet(station)), commands);
-% % end
-
 % =========================================================================
 % do first frame and  any stimulus onset synched actions
 % make sure everything after this point is preallocated
@@ -394,7 +395,7 @@ while ~done && ~quit;
         %         puffStarted=0;
         %         puffDone=false;
 
-        currentValveState=getValves(station); % cant do verifyClosed here because it might be open from a reward from previous phase
+        currentValveState=getValves(station); % if valve reward is still going from previous phase, we force it closed. in other words, make sure your phases are long enough for the rewards that happen in them!
         serverValveChange=false;
         serverValveStates=false;
         didStochasticResponse=false;
@@ -426,9 +427,6 @@ while ~done && ~quit;
 
         % =========================================================================
 
-
-        % =========================================================================
-
         framesInPhase = 0;
         if ~isempty(getStartFrame(spec))
             i=getStartFrame(spec);
@@ -447,8 +445,6 @@ while ~done && ~quit;
             numFramesInStim = Inf;
         end
 
-        % we might need to do if isempty(framesUntilTransition) && strategy is 'cache', then set a framesUntilTransition==size(stim,3)
-
         isFinalPhase = getIsFinalPhase(spec);
         autoTrigger = getAutoTrigger(spec);
 
@@ -461,7 +457,6 @@ while ~done && ~quit;
         phaseRecords(phaseNum).autoTrigger = autoTrigger;
         phaseRecords(phaseNum).timeoutLengthInFrames = framesUntilTransition;
         phaseRecords(phaseNum).floatprecision = floatprecision;
-        % phaseRecords(phaseNum).stim=stim;
         phaseRecords(phaseNum).phaseType = phaseType;
         phaseRecords(phaseNum).phaseLabel = getPhaseLabel(spec);
 
@@ -501,17 +496,10 @@ while ~done && ~quit;
             floatprecision, textures, destRect, ...
             requestRewardDone, punishLastResponse);
         
-        % because the target ports = setdiff(responsePorts, lastResponse) which is always empty
-        % so we will always have the same empty responsePorts and same nonempty requestPorts
-        % we do the repeat-checking in runRealTimeLoop using ~any(ports==lastRequestPorts)
-        % should we save lastRequestPorts somewhere in trialRecord so we can load the correct value for the next trial...?
-        % edf: i don't follow this comment
         if rewardSizeULorMS~=0
             doRequestReward=false;
             msRewardOwed=msRewardOwed+rewardSizeULorMS;
             phaseRecords(phaseNum).proposedRewardDurationMSorUL = rewardSizeULorMS;
-            %                 dispStr=sprintf('giving reward %d during phaseNum %d\n',rewardSizeULorMS,phaseNum);
-            %                 disp(dispStr)
         elseif msPenalty~=0
             doRequestReward=false;
             msAirpuffOwed=msAirpuffOwed+msPuff;
@@ -524,19 +512,17 @@ while ~done && ~quit;
         
         if requestRewardSizeULorMS~=0
             doRequestReward=true;
-            %                 dispStr=sprintf('increasing msRequestRewardOwed by %d during phaseNum %d\n',requestRewardSizeULorMS,phaseNum);
-            %                 disp(dispStr)
             msRequestRewardOwed=msRequestRewardOwed+requestRewardSizeULorMS;
             phaseRecords(phaseNum).responseDetails.requestRewardPorts{end+1}=ports;
             phaseRecords(phaseNum).responseDetails.requestRewardStartTime{end+1}=GetSecs();
             phaseRecords(phaseNum).responseDetails.requestRewardDurationActual{end+1}=0;
             
-            lastRequestPorts=ports; % do we even need this?
+            lastRequestPorts=ports;
             playRequestSoundLoop=true;
             requestRewardDone=true;
         end
         
-        lastPorts=ports; % has to be this sequence of events: readPorts -> handleTrialLogic -> updateTrialState -> lastPorts
+        lastPorts=ports;
         
         if strcmp(tm.displayMethod,'LED') && ~didLEDphase
             [phaseRecords analogOutput outputsamplesOK numSamps] = LEDphase(tm,phaseInd,analogOutput,phaseRecords,spec,interTrialLuminance,stim,frameIndexed,indexedFrames,loop,trigger,timeIndexed,timedFrames,station);
@@ -555,7 +541,7 @@ while ~done && ~quit;
                     [tm frameIndex i done doFramePulse didPulse] ...
                         = updateFrameIndexUsingTextureCache(tm, frameIndexed, loop, trigger, timeIndexed, frameIndex, indexedFrames, size(stim,3), isRequesting, ...
                         i, frameNum, timedFrames, responseOptions, done, doFramePulse, didPulse, scheduledFrameNum);
-					indexPulse=getIndexPulse(spec,i);
+                    indexPulse=getIndexPulse(spec,i);
                     switch strategy
                         case 'textureCache'
                             drawFrameUsingTextureCache(tm, window, i, frameNum, size(stim,3), lastI, dontclear, textures(i), destRect, ...
@@ -565,14 +551,13 @@ while ~done && ~quit;
                                 filtMode, labelFrames, xOrigTextPos, yTextPos,strategy,floatprecision);
                     end
                 case 'expert'
-                    % i=i+1; % 11/7/08 - this needs to happen first because i starts at 0
                     [doFramePulse expertCache phaseRecords(phaseNum).dynamicDetails textLabel i dontclear indexPulse] ...
                         = drawExpertFrame(stimManager,stim,i,phaseStartTime,totalFrameNum,window,textLabel,...
                         destRect,filtMode,expertCache,ifi,scheduledFrameNum,tm.dropFrames,dontclear,...
                         phaseRecords(phaseNum).dynamicDetails);
                 otherwise
                     error('unrecognized strategy')
-			end
+            end
 
 			setStatePins(station,'index',indexPulse);
 			
@@ -646,8 +631,6 @@ while ~done && ~quit;
             sca
             error('lost tracker connection!')
         end
-
-        % change to get multiple samples (as many as are available)
         [gazeEstimates samples] = getSamples(eyeTracker);
         % gazeEstimates should be a Nx2 matrix, samples should be Nx43 matrix, totalFrameNum is the frame number we are on
         numEyeTrackerSamples = size(samples,1);
@@ -711,8 +694,6 @@ while ~done && ~quit;
             phaseRecords(thisResponsePhaseNum).responseDetails.durs{end+1} = GetSecs() - respStart;
             lookForChange=false;
             logIt=true;
-            %             dispStr=sprintf('marking end of a response at time %d with dur %d during phaseNum %d\n',GetSecs(),phaseRecords(thisResponsePhaseNum).responseDetails.durs{end},thisResponsePhaseNum);
-            %             disp(dispStr);
             if ~toggleStim % beambreak mode (once request ends, stop showing stim)
                 isRequesting=~isRequesting;
             end
@@ -727,14 +708,7 @@ while ~done && ~quit;
             logIt=false;
             lookForChange=true;
             thisResponsePhaseNum=phaseNum;
-            %             dispStr=sprintf('marking start of a response [%d %d %d] at time %d during phaseNum %d\n',ports,respStart,phaseNum);
-            %             disp(dispStr);
         end
-
-        %         % if response got set by keyboard, duplicate response on trial level
-        %         if ~strcmp('none', response)
-        %             trialRecords(trialInd).result = response;
-        %         end
     end
 
     timestamps.enteringPhaseLogic=GetSecs;
@@ -777,21 +751,12 @@ while ~done && ~quit;
         rewardCheckTime = GetSecs();
         elapsedTime = rewardCheckTime - lastRewardTime;
         if strcmp(getRewardMethod(station),'localTimed')
-            %             doRequestReward
             if ~doRequestReward % this was a normal reward, log it
                 msRewardOwed = msRewardOwed - elapsedTime*1000.0;
-                %                 elapsedTime*1000.0
-                %                 msRewardOwed
-                %                 msRequestRewardOwed
                 phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL = phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL + elapsedTime*1000.0;
-                %                 phaseRecords(thisRewardPhaseNum).actualRewardDurationMSorUL
             else % this was a request reward, dont log it
                 msRequestRewardOwed = msRequestRewardOwed - elapsedTime*1000.0;
                 phaseRecords(thisRewardPhaseNum).responseDetails.requestRewardDurationActual{end}=phaseRecords(thisRewardPhaseNum).responseDetails.requestRewardDurationActual{end}+elapsedTime*1000.0;
-                %                 'requestReward'
-                %                 requestRewardDuration
-                %                 msRequestRewardOwed
-                %                 elapsedTime*1000.0
             end
         elseif strcmp(getRewardMethod(station),'localPump')
             % in localPump mode, msRewardOwed gets zeroed out after the call to station/doReward

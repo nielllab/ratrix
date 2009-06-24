@@ -1,10 +1,12 @@
 function replicateTrialRecords(paths,deleteOnSuccess, recordInOracle)
-% Copy the trial records stored in the ratrixData directory to the
-% set of paths given in paths.
+% This function transforms the raw, local trialRecords file into the formatted permanent-store trialRecords file.
+% Does the following:
+%   1) calls collectTrialRecords to format from {tr1,tr2,tr3,etc} to vectorized format
+%   2) does LUT processing
+%   3) Copy the trial records stored in the (local) ratrixData directory to the
+%       set of paths given in paths. Typically, paths is a location on the fileserver (ie each subject's permanent store path).
 
-% erase or keep?
 input_paths = paths;
-% ======
 
 subDirs=struct([]);
 boxDirs=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData','Boxes');
@@ -72,7 +74,6 @@ for f=1:length(subDirs)
         % because the replicate processes uses movefile instead of matlab save
         sessionLUT={};
         fieldsInLUT={};
-
 
         % 5/5/09 - lets try splitting the processFields according to trainingStepNum
         tsNums=double([trialRecords.trainingStepNum]);
@@ -233,11 +234,6 @@ end
 
 for ii=1:length(fields)
     fn = fields{ii};
-    %                     fn
-    %                     newRecs.(fn)
-    %                     class(newRecs.(fn))
-    %     trialRecords(1)
-    %     fields
     try
         if ~isempty(prefix)
             fieldPath = [prefix '.' fn];
@@ -261,14 +257,8 @@ for ii=1:length(fields)
             % this is a struct - recursively call processFields on all fields of the struct
             thisStructFields = fieldnames((trialRecords(1).(fn)));
             % now call processFields recursively - pass in fn as a prefix (so we know how to store to fieldsinLUT)
-            %             trialRecords
-            %             fn
-            %             fieldPath
             [sessionLUT fieldsInLUT theseStructs] = processFields(thisStructFields,sessionLUT,fieldsInLUT,[trialRecords.(fn)],fieldPath);
             % we have to return a temporary 'theseStructs' and then manually reassign in trialRecords unless can figure out correct indexing
-            %         size(theseStructs)
-            %         size(trialRecords)
-            %         theseStructs
             for j=1:length(trialRecords)
                 trialRecords(j).(fn)=theseStructs(j);
             end
@@ -298,8 +288,8 @@ for ii=1:length(fields)
                 trialRecords(i).(fn) = indices(i);
             end
         end
-    catch
-        ple
+    catch ex
+        disp(['CAUGHT EX: ' getReport(ex)]);
         warning('LUT processing of trialRecords failed! - probably due to manual training step switching.');
     end
 end

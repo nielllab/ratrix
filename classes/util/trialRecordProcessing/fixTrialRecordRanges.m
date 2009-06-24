@@ -1,12 +1,19 @@
 function fixTrialRecordRanges(source,destination,subjectID,newStartingTrialNum,modifyOracle)
+% VALIDATED 6/24/09 fli
 % This is a tool used to modify existing trialRecord files. Renumber trial records and save new files with updated names.
 % For now, only creates new files (does not delete existing files) to limit danger of operation.
 % INPUTS:
 %   source - directory of source trialRecord files
 %   destination - directory where new trialRecord files will be written
-%   subjectID - id of the subject whose trialRecords are being modified - as a char array
+%   subjectID - id of the subject whose trialRecords are being modified - as a char; this is used to (possibly) modify oracle
 %   newStartingTrialNum - first trialRecord number of new numbering system (all subsequent trials will be sequential from this number)
 %   modifyOracle - if flagged, also delete old entries from oracle and insert new entries
+%
+% a typical call would be something like this:
+%   fixTrialRecordRanges('C:\to_fix','C:\fixed','299',50710,true)
+%   - this would renumber all trialRecord file located at C:\to_fix and create new files at C:\fixed; new trial start number would be 50710
+%   - we would also modify the corresponding oracle entries for subject '299'
+%   - the final (manual) step would be then to copy the new files over to the fileserver and delete the old files
 
 % error-checking
 if ~isdir(destination)

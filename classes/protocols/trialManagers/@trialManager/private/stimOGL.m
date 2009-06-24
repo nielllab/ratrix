@@ -1,6 +1,9 @@
 function [tm quit trialRecords eyeData eyeDataFrameInds gaze station ratrixSVNInfo ptbSVNInfo] ...
     = stimOGL(tm, stimSpecs, startingStimSpecInd, stimManager, LUT, targetOptions, distractorOptions, requestOptions, interTrialLuminance, ...
     station, manual,timingCheckPct,textLabel,rn,subID,stimID,protocolStr,trialLabel,eyeTracker,msAirpuff,trialRecords)
+% This function gets ready for stimulus presentation by precaching textures (unless expert mode), and setting up some other small stuff.
+% All of the actual real-time looping is handled by runRealTimeLoop.
+
 
 verbose = false;
 responseOptions = union(targetOptions, distractorOptions);

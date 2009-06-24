@@ -1,12 +1,30 @@
 function [trialManager updateTM newSM updateSM stopEarly trialRecords station] ...
     = doTrial(trialManager,station,stimManager,subject,r,rn,trialRecords,sessionNumber)
+% This function handles most of the per-trial functionality, including stim creation and display, reward handling, and trialRecord recording.
+% Main functions called: calcStim, createStimSpecsFromParams, stimOGL
+% INPUTS:
+%   trialManager - the trial manager object
+%   station - the station object
+%   stimManager - the stim manager object
+%   subject - the subject object
+%   r - the ratrix object
+%   rn - the rnet object
+%   trialRecords - a vector of the current session's trialRecords (includes some history from prev. session until they get replaced by current session)
+%   sessionNumber - the current session number
+% OUTPUTS:
+%   trialManager - the (potentially modified) trial manager object
+%   updateTM - a flag indicating if the trialManager needs to be persisted
+%   newSM - a possibly new stimManager object
+%   updateSM - a flag indicating if the stimManager needs to be persisted
+%   stopEarly - a flag to stop running trials
+%   trialRecords - the updated trial records
+%   station - the (potentially modified) station object
+
 verbose=1;
 updateTM=false;
 stopEarly=0;
 
 % verbose - flag for verbose output
-% updateTM - output flag if we need to update TM
-% stopEarly - flag to stop running
 % constants - returned from getConstants(rn) if we have a rnet
 % trialInd - the index of the current trialRecord
 % p - current training protocol
@@ -57,11 +75,6 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             trialRecords(trialInd).schedulerClass = class(getScheduler(ts));
             trialRecords(trialInd).criterionClass = class(getCriterion(ts));
             
-            % 10/17/08 - DO SOMETHING HERE WITH INPUT TRIALDATA before it gets overwritten
-            % edf: what does this comment mean?
-            % fli: data that might get sent over from the nidaq/physiology event viewer
-            % currently, we don't do this, but it might want to get stored in trialRecords or passed to calcStim
-            
             trialRecords(trialInd).neuralEvents = [];
             
             switch trialManager.displayMethod
@@ -90,7 +103,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
 			%	text - DO NOT CHANGE
 			%	indexPulses - DO NOT CHANGE
 			
-			% now, we should ALWAYS call phaseify (perhaps rename to createStimSpecsFromParams), which should do the following:
+			% now, we should ALWAYS call createStimSpecsFromParams, which should do the following:
 			%	INPUTS: preRequestStim, preResponseStim, discrimStim, targetPorts, distractorPorts, requestPorts,interTrialLuminance,hz,indexPulses
 			%	OUTPUTS: stimSpecs, startingStimSpecInd
 			%		- should handle creation of default phase setup for nAFC/freeDrinks, and also handle additional phases depending on delayManager and responseWindow
@@ -100,8 +113,8 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 resInd, ...
 				preRequestStim, ...
 				preResponseStim, ...
-                discrimStim, ...           %not recorded in trial record
-                LUT, ...            %not recorded in trial record
+                discrimStim, ... 
+                LUT, ...
                 trialRecords(trialInd).targetPorts, ...
                 trialRecords(trialInd).distractorPorts, ...
                 stimulusDetails, ...
@@ -162,14 +175,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             end
             
             checkPorts(trialManager,trialRecords(trialInd).targetPorts,trialRecords(trialInd).distractorPorts);
-            
-			% we pass the trialRecords(trialInd).interTrialLuminance even though we have access to interTrialLuminance because
-			% calcStim might have changed the class of the ITL!
-			% edf: what did you mean by this?  how do we have access to a member on stimManager?
-			% by calling stimManager.getInterTrialLuminance()?  i wish that were a protected method.
-			% fli: yeah, i mean we have access to the method - this was just a note to myself that
-			% calcStim could change the class of the ITL and return it as trialRecords(trialInd).interTrialLuminance,
-			% so we want to use this value from calcStim, not the stimManager's original value
+
             [stimSpecs startingStimSpecInd] = createStimSpecsFromParams(trialManager,preRequestStim,preResponseStim,discrimStim,...
 				trialRecords(trialInd).targetPorts,trialRecords(trialInd).distractorPorts,getRequestPorts(trialManager,getNumPorts(station)),...
 				trialRecords(trialInd).interTrialLuminance,trialRecords(trialInd).resolution.hz,indexPulses);
@@ -181,7 +187,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             updateTM = updateTM || updateSndM;
             
             trialRecords(trialInd).stimManager = structize(decache(newSM)); %many rouge stimManagers have a LUT cached in them and aren't decaching it -- hopefully will be fixed by the LUT fixing... (http://132.239.158.177/trac/rlab_hardware/ticket/224)
-            stimulusDetails=structize(stimulusDetails); %don't add to trialRecords til later cuz datanet might remove a .big field
+            stimulusDetails=structize(stimulusDetails);
             
             manualOn=0;
             if length(trialRecords)>1
@@ -223,14 +229,6 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                     commands.arg=cparams;
                     [gotAck] = sendCommandAndWaitForAck(getDatanet(station), commands);
 
-                    %also maybe include something from the phased records?
-                    % maybe if ~isempty(phaseRecords{i}.responseDetails.expertDetails)
-                    %for phaseInd=1:length(trialRecords(trialInd).phaseRecords)
-                    %    if isfield(trialRecords(trialInd).phaseRecords(phaseInd),'responseDetails' ..etc)
-                    %        stimulusDetails.dynRecords{phaseInd}=phaseRecords{i}.responseDetails.expertDetails
-                    %    end
-                    %end
-
                     ratID=getID(subject);
                     trialStartTime=datestr(trialRecords(trialInd).date, 30);
                     trialNum=trialRecords(trialInd).trialNumber;
@@ -240,7 +238,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                     try
                         stim_path = fullfile(getStorePath(getDatanet(station)), 'stimRecords');
                         save(fullfile(stim_path,cparams.stimFilename),'ratID','trialStartTime','trialNum','stimManagerClass','stimulusDetails','frameDropCorner','refreshRate');
-                    catch
+                    catch ex
                         warningStr=sprintf('unable to save to %s',stim_path);
                         error(warningStr);
                     end
@@ -296,14 +294,6 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             
             currentValveStates=verifyValvesClosed(station);
             
-            
-            % set correct=0 if it was not set during real-time loop
-            % we need correct to be empty at the start of the loop so that we know that it needs to be set by updateTrialState,
-            % but an empty correct field causes problems for compiling b/c it is not scalar
-%             if isempty(trialRecords(trialInd).correct)
-%                 trialRecords(trialInd).correct = 0;
-%             end
-            
             if ~ischar(trialRecords(trialInd).result)
 %                 resp=find(trialRecords(trialInd).result);
 %                 if length(resp)==1
@@ -346,10 +336,6 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 stopEarly = 1;
             end
             
-            % what do we do here if stopEarly is set by a
-            % D_STOP_TRIALS_CMD?
-            % should we execute this anyways, and have physServer also save
-            % neuralRecords after calling stopClientTrials?
             if ~isempty(getDatanet(station)) %&& ~stopEarly
                 [garbage garbage] = handleCommands(getDatanet(station),[]);
                 datanet_constants = getConstants(getDatanet(station));
@@ -360,11 +346,6 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 commands.arg=cparams;
                 [gotAck] = sendCommandAndWaitForAck(getDatanet(station), commands);
             end
-            
-            % need to decide what to do with trialData - do we pass back to doTrials?
-            % edf: do you mean trialRecords?
-            % fli: no, trialData is some data that may or may not be passed from the data collection side (ie nidaq)
-            % the decision is whether or not any of it belongs in trialRecords, or if it will be stored independently
             
             trialRecords(trialInd).reinforcementManager = structize(trialManager.reinforcementManager);
             trialRecords(trialInd).reinforcementManagerClass = class(trialManager.reinforcementManager);

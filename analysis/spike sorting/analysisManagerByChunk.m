@@ -11,8 +11,9 @@ function quit = analysisManagerByChunk(subjectID, path, cellBoundary, spikeDetec
 %	cellBoundary - specifies which trials/chunks to analyze
 %       eg: {'trialRange',[1 5]} means all chunks in trials 1-5
 %       {'trialAndChunkRange',{[1 3], [4 6]}} means from trial 1, chunk 3 to trial 4, chunk 6 inclusive
-%       {'physLog',{'04.21.2009','all','first'}} means get the cell boundaries from the phys log for 4/21/09 (and use the first cell)
-%       {'physLog',{'04.21.2009',[4 200],'last'}} means get the last cell from 4/21/09 within events 4-200 (of that day)
+%       {'physLog',{'04.21.2009','events','all','first'}} means get the cell boundaries from the phys log for 4/21/09 (and use the first cell)
+%       {'physLog',{'04.21.2009','events',[4 200],'last'}} means get the last cell from 4/21/09 within events 4-200 (of that day)
+%       {'physLog',{'04.21.2009','labels',5}) means the events (trials) defined by label 5 for the phys log from 4/21/09
 %	spikeDetectionParams - these should now be from the 'activeParameters' 
 %	spikeSortingParams - these should now be from the 'activeParameters'
 %	timeRangePerTrialSecs - dont know, phil added this

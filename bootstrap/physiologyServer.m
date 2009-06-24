@@ -1319,6 +1319,18 @@ displayModeSelector = uicontrol(f,'Style','popup',...
     'Callback',@updateDisplay);
 
 % ========================================================================================
+% labels
+openLabelingWindowButton = uicontrol(f,'Style','pushbutton','String','add labels','Visible','on','Units','pixels',...
+    'Position',[margin+0*fieldWidth fHeight-19*oneRowHeight-1*margin fieldWidth*1-margin oneRowHeight],...
+    'Value',0,'Callback',@openLabelingWindow);
+    function openLabelingWindow(source,eventdata)
+        labels=grouper(labels);
+        % need to save labels to file now? - could use safesave here!
+        saveFilename=sprintf('physiologyEvents_%d-%d.mat',1,eventNum-1);
+        save(fullfile(savePath,saveFilename),'events_data','labels');
+    end
+
+% ========================================================================================
 % turn on the GUI
 reloadEventsAndSurgeryFields([],[]);
 set(f,'Visible','on');

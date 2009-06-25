@@ -120,6 +120,9 @@ delayFcn=flatHazard(.99,2000,0);
 vh_delayed=nAFC(sm,percentCorrectionTrials,constantRewards,...
     [],[],[],[],[],[],delayFcn,responseLockoutMs);
 
+oMo=oddManOut(sm,percentCorrectionTrials,constantRewards,...
+    [],[],[],[],'none',[],delayFcn,responseLockoutMs);
+
 allowRepeats=true;
 fd_delayed=freeDrinks(sm,freeDrinkLikelihood,allowRepeats,constantRewards,...
     [],[],[],[],'none',[],delayFcn,responseLockoutMs);
@@ -215,6 +218,15 @@ imageRotation=[0 210];
 imageYoked=false;
 rotationYoked=false;
 imageStim = images(imageDir,ypos,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,trialDistribution,imageSelectionMode,...
+    imageSize,imageYoked,imageRotation,rotationYoked,percentCorrectionTrials);
+
+trialDistribution={};
+for i=1:floor(length(ims)/2)
+    [junk n1 junk junk]=fileparts(ims(i).name);
+    [junk n2 junk junk]=fileparts(ims(length(ims)-(i-1)).name);
+    trialDistribution{end+1}={{n1 n2 n2} 1};
+end
+oddManOutStim = images(imageDir,ypos,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,trialDistribution,imageSelectionMode,...
     imageSize,imageYoked,imageRotation,rotationYoked,percentCorrectionTrials);
 
 % for Phil's stim managers
@@ -537,6 +549,7 @@ ts2 = trainingStep(fd, freeStim, repeatIndef, noTimeOff(), svnRev, svnCheckMode)
 ts3 = trainingStep(vh, freeStim, graduateQuickly, noTimeOff(), svnRev, svnCheckMode);   %go to stim - orientedGabors w/ nAFC
 ts4 = trainingStep(vh, discrimStim, graduateQuickly, noTimeOff(), svnRev, svnCheckMode);%orientation discrim - orientedGabors w/ nAFC
 ts5 = trainingStep(vh, imageStim,  graduateQuickly, noTimeOff(), svnRev, svnCheckMode); %morph discrim - images w/ nAFC
+ts5b = trainingStep(oMo, oddManOutStim,  graduateQuickly, noTimeOff(), svnRev, svnCheckMode); %morph discrim - images w/ nAFC
 
 % Balaji
 ts6 = trainingStep(gts, freeStim, graduateQuickly, noTimeOff(), svnRev, svnCheckMode);  % go to stim
@@ -712,7 +725,7 @@ for i=1:length(subjIDs),
 %         case {'rack3test4','rack3test5','rack3test6'} % nAFC, orientedGabors
 %             p=protocol('nAFC,orientedGabors',{ts4});
         otherwise
-            p=protocol('demo',{ts42,ts4,ts2,ts101,ts103,ts40,ts41,ts4,ts2,ts25,sweepContrast,ts12,ts5,easyStep,ts23,objrec1});
+            p=protocol('demo',{ts5b,ts42,ts4,ts2,ts101,ts103,ts40,ts41,ts4,ts2,ts25,sweepContrast,ts12,ts5,easyStep,ts23,objrec1});
 %             error('unknown subject');
     end
     

@@ -6,7 +6,7 @@ lastCorrect=[];
 lastWasCorrection=0;
 
 switch TMclass
-    case 'nAFC'
+    case {'nAFC' 'oddManOut'}
         if ~isempty(lastTrialRec) % if there were previous trials
             try
                 lastResult=find(lastTrialRec.result);

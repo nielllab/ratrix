@@ -2,11 +2,10 @@ function [out newLUT]=extractDetailFields(sm,basicRecords,trialRecords,LUTparams
 newLUT=LUTparams.compiledLUT;
 
 nAFCindex = find(strcmp(LUTparams.compiledLUT,'nAFC'));
-if ~isempty(nAFCindex) && ~all([basicRecords.trialManagerClass]==nAFCindex)
+if isempty(nAFCindex) || (~isempty(nAFCindex) && ~all([basicRecords.trialManagerClass]==nAFCindex))
     warning('only works for nAFC trial manager')
     out=struct;
 else
-
     try
         stimDetails=[trialRecords.stimDetails];
         [out.correctionTrial newLUT] = extractFieldAndEnsure(stimDetails,{'correctionTrial'},'scalar',newLUT);

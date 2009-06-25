@@ -47,7 +47,7 @@ startingStimSpecInd=1;
 i=1;
 addedPreResponsePhase=0;
 switch class(trialManager)
-	case {'nAFC','freeDrinks'}
+	case {'nAFC','freeDrinks','oddManOut'}
 		% we need to figure out when the reinforcement phase is (in case we want to punish responses, we need to know which phase to transition to)
 		if ~isempty(preResponseStim) && responseWindow(1)~=0
 			addedPreResponsePhase=addedPreResponsePhase+1;

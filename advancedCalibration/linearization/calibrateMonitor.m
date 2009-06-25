@@ -113,7 +113,7 @@ switch mode
             stim(:,:,2:3,i)=uint8(0);
         end
         channels=uint8([1 0 0]); % only R channel
-        [measuredR rawR method details.measurementDetailsR quit] = ...
+        [measuredR rawR junk details.measurementDetailsR quit] = ...
             generateScreenCalibrationData(method,stim,channels,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
         if quit
             return; %debugging only
@@ -126,7 +126,7 @@ switch mode
             stim(:,:,3,i)=uint8(0);
         end
         channels=uint8([0 1 0]); % only G channel
-        [measuredG rawG method details.measurementDetailsG quit] = ...
+        [measuredG rawG junk details.measurementDetailsG quit] = ...
             generateScreenCalibrationData(method,stim,channels,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
         if quit
             return; %debugging only
@@ -159,6 +159,9 @@ switch mode
         error('unsupported mode');
 end
 % now we have rawR,rawG,rawB, measuredR,measuredG,measuredB
+
+% 5/25/09 - we only return a modified 'method' after the last raw measurement, so that validation can use the same voltage value
+% - this assumes that the R/G/B voltage values are the same, which is true because our first CLUT is a linear ramp!
 
 % desiredValues is a linear spacing of the first set of measured Y values (with 256 entries)
 % we will compare these to our second set of measured Y values

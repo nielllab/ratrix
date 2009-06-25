@@ -1,22 +1,20 @@
-function labels = grouper(labels)
+function labels = grouper(events,labels)
 
 oneRowHeight=25;
 margin=10;
 fieldWidth=100;
-fWidth=2*margin+1*fieldWidth;
+fWidth=2*margin+5*fieldWidth;
 fHeight=margin+15*oneRowHeight+margin;
 
-labelStrs={};
+eventStrs={};
 
 f = figure('Visible','off','MenuBar','none','Name','Labels',...
-    'NumberTitle','off','Resize','off','Units','pixels','Position',[50 50 fWidth fHeight]);
+    'NumberTitle','off','Resize','off','Units','pixels','Position',[50 50 fWidth fHeight],...
+    'WindowStyle','modal');
 
     function updateUI
-        labelStrs={};
-        for i=length(labels):-1:1
-            labelStrs{end+1}=sprintf('%d - %d',i,labels(i));
-        end
-        set(eventsSelector,'String',labelStrs);
+        eventStrs=createDisplayStrs(events,labels,'grouper');
+        set(eventsSelector,'String',eventStrs);
     end
 
 % ========================================================================================
@@ -28,14 +26,14 @@ newLabelTag = uicontrol(f,'Style','text','String','label to apply','Visible','on
 newLabelField = uicontrol(f,'Style','edit','String',[],'Visible','on','Enable','on','Units','pixels',...
     'Position',[margin fHeight-2*oneRowHeight-2*margin fieldWidth-margin oneRowHeight]);
 
-eventsSelector = uicontrol(f,'Style','listbox','String',labelStrs,'Visible','on','Units','pixels',...
+eventsSelector = uicontrol(f,'Style','listbox','String',eventStrs,'Visible','on','Units','pixels',...
     'FontWeight','normal','Value',[],'Enable','on','Max',999,'Min',0,...
-    'Position',[margin+0*fieldWidth fHeight-13*oneRowHeight-1*margin fieldWidth*1-margin oneRowHeight*10]);
+    'Position',[margin+0*fieldWidth fHeight-13*oneRowHeight-1*margin fieldWidth*3-margin oneRowHeight*10]);
 
-editLabelsButton = uicontrol(f,'Style','pushbutton','String','label','Visible','on','Units','pixels',...
-    'Enable','on','Position',[margin fHeight-14*oneRowHeight-2*margin fieldWidth-margin oneRowHeight],...
-    'Callback',@editLabels);
-    function editLabels(source,eventdata)
+applyLabelsButton = uicontrol(f,'Style','pushbutton','String','apply labels','Visible','on','Units','pixels',...
+    'Enable','on','Position',[margin+fieldWidth fHeight-1*oneRowHeight-2*margin fieldWidth-margin oneRowHeight],...
+    'Callback',@applyLabels);
+    function applyLabels(source,eventdata)
         inds=get(eventsSelector,'Value');
         inds=length(labels)-inds+1; % the indices of labels to update
         % check that the new label is valid
@@ -49,7 +47,7 @@ editLabelsButton = uicontrol(f,'Style','pushbutton','String','label','Visible','
     end
 
 saveLabelsButton = uicontrol(f,'Style','pushbutton','String','save labels','Visible','on','Units','pixels',...
-    'Enable','on','Position',[margin fHeight-15*oneRowHeight-2*margin fieldWidth-margin oneRowHeight],...
+    'Enable','on','Position',[margin+fieldWidth fHeight-2*oneRowHeight-2*margin fieldWidth-margin oneRowHeight],...
     'Callback',@saveLabels);
     function saveLabels(source,eventdata)
         % return from function and close the figure

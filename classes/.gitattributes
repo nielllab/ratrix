@@ -242,9 +242,9 @@ protocols/reinforcementManagers/@cuedReinforcement/setRewardSizeULorMS.m -text
 protocols/reinforcementManagers/@cuedReinforcement/calcReinforcement.m -text
 protocols/reinforcementManagers/@cuedReinforcement/shortDisp.m -text
 protocols/reinforcementManagers/@cuedReinforcement/cuedReinforcement.m -text
-protocols/trialManagers/@oddManOut/getRequestRewardSizeULorMS.m -text
-protocols/trialManagers/@oddManOut/stationOKForTrialManager.m -text
 protocols/trialManagers/@oddManOut/checkPorts.m -text
 protocols/trialManagers/@oddManOut/oddManOut.m -text
+protocols/trialManagers/@oddManOut/getRequestRewardSizeULorMS.m -text
+protocols/trialManagers/@oddManOut/stationOKForTrialManager.m -text
 protocols/trialManagers/@oddManOut/updateTrialState.m -text
 protocols/trialManagers/@oddManOut/getResponsePorts.m -text

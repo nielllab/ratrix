@@ -3,7 +3,7 @@ function r= cuedMotionPsychophysicsEmily(r, ratIDs)
 % on 5/27/09
 % now this is only for 195 and 196 and is owned by Emily. PR.
 
-svnRev={'svn://132.239.158.177/projects/ratrix/trunk',2526};
+svnRev={'svn://132.239.158.177/projects/ratrix/trunk',2531};
 svnCheckMode='session';
 % rats validated on this protocol
 dotRatCohort={'195','196'};

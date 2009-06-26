@@ -1,29 +1,29 @@
 function s=fillLUT(s,method,linearizedRange,plotOn);
-%stim=fillLUT(stim,'useThisMonitorsUncorrectedGamma')
-%or
-%stim=fillLUT(stim,'linearizedDefault',linearizedRange [,plotOn]);
-%linearizedRange=[linearRangeMin linearRangeMax]
-%note: this calculates and fits gamma with finminsearch each time
-%might want a fast way to load the default which is the same each time
-%edf wants to migrate this to a ststion method  - this code is redundant
-%for each stim -- ACK!
+%function s=fillLUT(s,method,linearizedRange [,plotOn]);
+%stim=fillLUT(stim,'linearizedDefault');
+%note:
+% PR added method 'hardwiredLinear' (hardwired linearized lut range 0-1)
+%   note, this could also be loaded from file
+
+if ~exist('plotOn','var')
+    plotOn=0;
+end
+
+useUncorrected=0;
 
 switch method
-    case 'mostRecentLinearized'
-
+    case 'hardwiredLinear' % added PR 5/5/09
+        uncorrected=makelinearlutPR;
+        useUncorrected=1;
+    case 'mostRecentLinearized' % not supported
+         
         method
         error('that method for getting a LUT is not defined');
-    case 'linearizedDefault'
-
-        if ~exist('plotOn','var') || isempty(plotOn)
-            plotOn=0;
-        end
+    
+    case 'linearizedDefault' % 
         
-        if ~isvector(linearizedRange) || ~length(linearizedRange)==2 || linearizedRange(1)>=linearizedRange(2) || any(linearizedRange<0) || any(linearizedRange)>1
-            error('linearizedRange must be [smaller bigger] values btw 0 and 1')
-        end
-
         %WARNING:  need to get gamma from measurements of ratrix workstation with NEC monitor and new graphics card
+        LUTBitDepth=8;
 
         %sample from lower left of triniton, pmm 070106
         %sent=       [0      0.0667    0.1333    0.2000    0.2667    0.3333    0.4000    0.4667    0.5333  0.6000    0.6667    0.7333    0.8000    0.8667    0.9333    1.0000];
@@ -37,27 +37,21 @@ switch method
         measured_G= [0.0042 0.0053    0.0073    0.0110    0.0167    0.0245    0.0345    0.047     0.063   0.081     0.103     0.127     0.156     0.187     0.222     0.260 ];
         measured_B= [0.0042 0.0051    0.0072    0.0105    0.0160    0.0235    0.033     0.0445    0.0595  0.077     0.097     0.120     0.1465    0.176     0.208     0.244 ];
 
-        s.LUT=zeros(2^s.LUTbits,3);
-        if plotOn
-            subplot([311]);
-        end
-        [s.LUT(:,1) g.R]=fitGammaAndReturnLinearized(sent, measured_R, linearizedRange, 2^s.LUTbits,plotOn);
-
-        if plotOn
-            subplot([312]);
-        end
-        [s.LUT(:,2) g.G]=fitGammaAndReturnLinearized(sent, measured_G, linearizedRange, 2^s.LUTbits,plotOn);
-
-        if plotOn
-            subplot([313]);
-        end
-        [s.LUT(:,3) g.B]=fitGammaAndReturnLinearized(sent, measured_B, linearizedRange, 2^s.LUTbits,plotOn);
+        sensorValues = [measured_R, measured_G, measured_B];
+        sensorRange = [min(sensorValues), max(sensorValues)];
+        gamutRange = [min(sent), max(sent)];
+        %oldCLUT = Screen('LoadNormalizedGammaTable', w, linearizedCLUT,1);
     case 'useThisMonitorsUncorrectedGamma'
-        if exist('plotOn','var') || exist('linearizedRange','var')
-            error('cant have plotOn or linearizedRange for useThisMonitorsUncorrectedGamma')
-        end
-        s.LUT=makeStandardLUT(s.LUTbits);
+
+        LUTBitDepth=8;
+        numColors=2^LUTBitDepth; maxColorID=numColors-1; fraction=1/(maxColorID);
+        ramp=[0:fraction:1];
+        grayColors= [ramp;ramp;ramp]';
+        %maybe ask for red / green / blue gun only
+        uncorrected=grayColors;
+        useUncorrected=1;
     case 'calibrateNow'
+        
         %[measured_R measured_G measured_B] measureRGBscale()
         method
         error('that method for getting a LUT is not defined');
@@ -65,3 +59,25 @@ switch method
         method
         error('that method for getting a LUT is not defined');
 end
+
+if useUncorrected
+    linearizedCLUT=uncorrected;
+else
+    linearizedCLUT=zeros(2^LUTBitDepth,3);
+    if plotOn
+        subplot([311]);
+    end
+    [linearizedCLUT(:,1) g.R]=fitGammaAndReturnLinearized(sent, measured_R, linearizedRange, sensorRange, gamutRange, 2^LUTBitDepth,plotOn);
+
+    if plotOn
+        subplot([312]);
+    end
+    [linearizedCLUT(:,2) g.G]=fitGammaAndReturnLinearized(sent, measured_G, linearizedRange, sensorRange, gamutRange, 2^LUTBitDepth,plotOn);
+
+    if plotOn
+        subplot([313]);
+    end
+    [linearizedCLUT(:,3) g.B]=fitGammaAndReturnLinearized(sent, measured_B, linearizedRange, sensorRange, gamutRange, 2^LUTBitDepth,plotOn);
+end
+
+s.LUT=linearizedCLUT;

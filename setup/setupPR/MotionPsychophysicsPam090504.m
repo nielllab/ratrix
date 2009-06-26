@@ -6,7 +6,7 @@ function r= MotionPsychophysicsPam090504(r, ratIDs)
 % on this protocol version monitors use linearlized LUT (but not calib for
 % same monitor)
 
-svnRev={'svn://132.239.158.177/projects/ratrix/trunk',2526};
+svnRev={'svn://132.239.158.177/projects/ratrix/trunk',2531};
 svnCheckMode='session';
 % rats validated on this protocol
 LGNLesionCohort={'307','309','297','298','299','302'};  

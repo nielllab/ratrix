@@ -116,6 +116,7 @@ try
             rawValues=stim;
             % we can unique here b/c we expect all these values to be the same if more than one!
             method{2}={unique(clut(bg(find(bg)),find(bg))),special}; % reset the method's background to the 0.0-1.0 value
+            % it is okay to unique the clut entries because we are assuming that the R/G/B channels are identical!
         case 'fullScreenStim'
             spyderData=fullScreenStim(window,spyderLib,stim,...
                 method{2},method{3},method{4},reallutsize,refreshRate);

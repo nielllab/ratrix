@@ -137,6 +137,9 @@ switch mode
             stim(:,:,1:2,i)=uint8(0);
         end
         channels=uint8([0 0 1]); % only B channel
+        % 6/25/09 fli - we return a modified method here so generateScreenCalibrationData can change the background
+        % for use by validation to be the background voltage used during the last raw run. this only works if we assume
+        % that the native CLUT is a linear ramp in which R/G/B channels are identical
         [measuredB rawB method details.measurementDetailsB quit] = ...
             generateScreenCalibrationData(method,stim,channels,currentCLUT,drawSpyderPositionFrame,screenNum,screenType);
         if quit

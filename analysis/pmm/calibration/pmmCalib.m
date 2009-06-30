@@ -17,7 +17,7 @@ methodType='stimInBoxOnBackground';
 method={methodType,background,patchRect,interValueRGB,numFramesPerValue,numInterValueFrames};
 cmd_line=sprintf('round1-%s-%s-%2.2f_%s-Rect[%2.2f_%2.2f_%2.2f_%2.2f]-%d-%d-%d',mode,methodType,background{1},background{2}...
     ,patchRect,unique(interValueRGB),numFramesPerValue,numInterValueFrames)
-screenNum=1;  % 1 for phys rig, 0 or empty for single monitor
+screenNum=0;  % 1 for phys rig, 0 or empty for single monitor
 
 %%
 screenType='CRT';      % - 'LCD' or 'CRT'
@@ -37,15 +37,17 @@ writeToOracle= true; % - a flag indicating whether or not to write to oracle
 
 
 if 1 % load back in example
+    
+    %%
     [suc mac]=getMACAddress();  % now correct supported method
     %mac='0018F35DFAC0'  %old (b4 july2009) hack universal storage, b/c all calibs were being stored under a single (incorrect) testing ID
-    %mac='00095B8E6171': %to view phys rig remotely
+   % mac='00095B8E6171'; %to view phys rig remotely
     conn=dbconn();
     x=getCalibrationData(conn,mac,[0 Inf]);
     closeConn(conn);
     
     figure; 
-   
+  
     subplot(2,2,1)
     plot(x.measuredR,'r'); hold on
     plot(x.measuredG,'g'); 
@@ -67,7 +69,7 @@ if 1 % load back in example
     title('linearized')
     xlabel('clut index')
     subplot(2,2,3)
-    
+   
     error=(expected-x.validationValues);%./expected;
     plot([0 255],[0 0],'color',[.8 .8 .8]); hold on
  plot(error,'k')

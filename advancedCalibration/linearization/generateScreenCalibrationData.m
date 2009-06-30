@@ -101,7 +101,7 @@ try
                 error('background must be {value,''fromRaw''}');
             end
             if isinteger(method{4})
-                iV=method{4}*channels;
+                iV=method{4}.*channels;
                 interV=uint8(zeros(1,1,3));
                 interV(1,1,:)=iV;
             else

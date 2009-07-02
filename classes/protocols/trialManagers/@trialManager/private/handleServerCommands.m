@@ -7,6 +7,7 @@ serverValveChange = false;
 
 if ~isConnected(rn)
     done=true; %should this also set quit?
+    quit=true; % 7/1/09 - also set quit (copied from v1.0.1)
 end
 
 constants=getConstants(rn);
@@ -18,6 +19,7 @@ while commandsAvailable(rn,constants.priorities.IMMEDIATE_PRIORITY) && ~done && 
     %logwrite('handling IMMEDIATE priority command in stimOGL');
     if ~isConnected(rn)
         done=true;%should this also set quit?
+        quit=true; % 7/1/09 - also set quit (copied from v1.0.1)
     end
     com=getNextCommand(rn,constants.priorities.IMMEDIATE_PRIORITY);
     if ~isempty(com)

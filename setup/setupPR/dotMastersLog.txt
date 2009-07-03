@@ -14,3 +14,5 @@
 24-Jun-2009 16:13:18 finished setting 196 to step 1 of cuedMotionPsychophysicsEmily
 25-Jun-2009 21:02:55 finished setting 195 to step 1 of cuedMotionPsychophysicsEmily
 25-Jun-2009 21:02:55 finished setting 196 to step 1 of cuedMotionPsychophysicsEmily
+02-Jul-2009 19:36:14 finished setting 195 to step 1 of cuedMotionPsychophysicsEmily
+02-Jul-2009 19:36:14 finished setting 196 to step 1 of cuedMotionPsychophysicsEmily

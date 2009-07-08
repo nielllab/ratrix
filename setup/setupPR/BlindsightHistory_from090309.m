@@ -26,3 +26,6 @@ r=setProtocolAdvancedVisionBattery(r, subjIDs); % assign these rats to step 1 of
 % 309 needs to start motion on easiest level (step 6 of prvious protocol)
 
 
+% note these rats have been assigned to new protocols and steps many times
+% not lgged here!!
+

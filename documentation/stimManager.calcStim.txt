@@ -25,6 +25,7 @@
 %   updateSM                boolean flag indicating whether you've changed state (field values) in this object that you'd like to persist for future reference
 %   resolutionIndex         if trialManager.displayMethod = 'ptb'
 %                               index from the resolutions input that you want to set
+%                               (you may wish to use chooseLargestResForHzsDepthRatio with the maxWidth/maxHeight set in the stimulusManager constructor by the setup file -- call getMaxWidth(stimulus))
 %                           if trialManager.displayMethod = 'LED'
 %                               the analog output hz you want to use for this trial (ignored if type is 'phased' - each stimSpec has its own hz)
 %   preRequestStim            a struct containing the following fields as parameters used to create a stimSpec for the 'pre-onset' phase
@@ -33,6 +34,7 @@
     %                                   floatprecision (as defined for screen('MakeTexture') -- will be passed to your drawExpertFrame method)
     %                                   height (in pixels, will scale stim to this size to compute the destRect passed to your drawExpertFrame method)
     %                                   width (as above)
+    %                                   (you may wish to set width/height using the maxWidth/maxHeight set in the stimulusManager constructor by the setup file -- call getMaxWidth(stimulus))
     %                           if type is 'phased':
     %                               a cell vector of stimSpecs (see below + the stimSpec constructor help)
     %                           otherwise:
@@ -40,6 +42,7 @@
     %                               uint8 values will be mapped to 8-bit clut indices
     %                               uint16 are converted to singles and treated as float
     %                               float (double, single) values will be processed at 16 bits until finally rendered through a potentially higher dynamic range clut           
+    %                               (you may wish to set the dimensions using the maxWidth/maxHeight set in the stimulusManager constructor by the setup file -- call getMaxWidth(stimulus))
     %   scaleFactor             ignored if type is 'phased' (each stimSpec has its own scaleFactor)    
     %                           (potentially non-integer) factors by which to scale stim when mapping onto pixels
     %                               [height width]>0, special case scalar zero means scale to full screen

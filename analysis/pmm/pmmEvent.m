@@ -26,6 +26,8 @@ switch id
         date=datenum('May.11,2009')
     case 'startBlocking10rats'
         date =datenum('Jun.09,2009');
+    case '231&234-jointSweep'
+         date =datenum('Jul.22,2009');
     otherwise
         id
         error('bad event id')

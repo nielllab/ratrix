@@ -13,8 +13,9 @@ pairing={'139','r1';
     '232','r8';
     '237','r9';
     '229','r10';
-    ... only used for more testing, not for main figs
-    '277','r11'};
+    ... only used for more testing and supplimental, not for main figs
+    '277','r11'
+    '231','r12'};
    
 for i=1:length(subjects)
     which=strcmp(subjects{i},pairing); % as logicals

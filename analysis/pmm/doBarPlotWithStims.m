@@ -1,4 +1,4 @@
-function doBarPlotWithStims(p1,p2,images,colors,yRange,inputMode,addText, groupingBar)
+function doBarPlotWithStims(p1,p2,images,colors,yRange,inputMode,addText, groupingBar,imWidth)
 %by default, p1= numAttempts, p2=numCorrect b/c inputMode='binodata'
 %can also set set inputMode to 'stats&CI'
 % groupingBars are {'label',members,height}
@@ -31,6 +31,9 @@ if ~exist('groupingBar') || isempty(groupingBar)
     groupingBar=[];
 end
 
+if ~exist('imWidth') || isempty(imWidth)
+    imWidth=0.6; % normalized to bar width, units of x axis
+end
 
 
 switch inputMode
@@ -48,10 +51,7 @@ switch inputMode
         error('bad inputMode')
 end
 
-ht=yMax-yBotttom;
-imHeight=ht/4; %in yaxis pctCorrect units, how do I calculate this, given that figures rescale?
-textBelowBarTop=ht/25; %in yaxis pctCorrect units, how do I calculate this, given that figures rescale?
-
+n=length(stats);
 
 
 multiImage=0;
@@ -59,26 +59,41 @@ if ~isempty(images) && strcmp(class(images{1}),'cell')
     multiImage=1;
 end
 
+if multiImage
+ imSize=[size(images{1}{1},1) size(images{1}{1},2)];
+else
+    if ~isempty(images)
+        imSize=[size(images{1},1) size(images{1},2)];
+    else
+        imSize=[0 0];
+    end
+end
 
+ht=yMax-yBotttom;
+imWidthFrac=imWidth/(n+1);  % normalized to figure width
+imHeightFrac=imWidthFrac*imSize(1)/imSize(2); % normalized to figure height
+imHeight=imHeightFrac*ht; % normalized to figure height, units of y axis
 
-n=length(stats);
+textBelowBarTop=ht/25; %in yaxis pctCorrect units, how do I calculate this, given that figures rescale?
+
 
 hold on
 
 for i=1:n
     yLength=(yMax-yBotttom);
-    imTop=yBotttom+yLength*.95;
+    imTop=yBotttom+yLength*1.00;
+    %imTop=yBotttom+yLength*.95;
     imBottom=imTop-imHeight;
     
     if ~isempty(images)
         if multiImage
             for j=1:length(images{i})
-                x=linspace(i-0.3,i+0.3,size(images{i}{j},2));
+                x=linspace(i-imWidth/2,i+imWidth/2,size(images{i}{j},2));
                 y=linspace(imBottom,imTop,size(images{i}{j},1));
                 image(x,y-((j-1)*imHeight*1.2),uint8(images{i}{j}));  %images in a column stack
             end
         else
-            x=linspace(i-0.3,i+0.3,size(images{i},2));
+            x=linspace(i-imWidth/2,i+imWidth/2,size(images{i},2));
             y=linspace(imBottom,imTop,size(images{i},1));
             image(x,y,uint8(images{i}));  %single image
         end

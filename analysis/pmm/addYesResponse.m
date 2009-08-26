@@ -62,13 +62,23 @@ if size(d.date,2)>0
         end
         %d=getSmalls(char(d.info.subject));%,[datenum(firstBadTrialDate)-10 datenum(firstBadTrialDate)+10]);  % inifinite recursion!
         %figure; doPlotPercentCorrect(d)
-        switch char(d.info.subject)
-            case {'138','139'}
-                cutOut(firstBadTrial:lastBadTrial)=1;
-                type='rightMeansYes';
-            otherwise         
-                error('should never happen-- suggests this rat has some trials where yes=left and others where yes=right')
-        end
+        
+            switch char(d.info.subject)
+                case {'138','139'}
+                    type='rightMeansYes';
+                    if ~special138_139data(d)
+                        cutOut(firstBadTrial:lastBadTrial)=1; % when processing the later data on these rats, dont't define yes in the bad data
+                    else
+                        %special data gets analyzed anyways, if its ONLY
+                        %that data... "yes" data really does reflect true
+                        %yes responses, though there may be confusion with
+                        %the correct response with no contrast if doing
+                        %subsequent error checking
+                    end 
+                otherwise
+                    error('should never happen-- suggests this rat has some trials where yes=left and others where yes=right')
+            end
+       
     end
 
     if  ~isempty(r)

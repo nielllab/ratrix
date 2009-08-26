@@ -4,6 +4,9 @@
 % flanker contrast (as many as have enough data, blocked)
 % flanker distance (randomized)
 
+minCandela=4;
+maxCandela=84;
+
 %% target contrast
 
 subjects={'233','231' }%  '231'  is 231 used elsewhere in the study?
@@ -12,7 +15,9 @@ dateRange=[0 pmmEvent('endToggle')];
 [stats CI names params]=getFlankerStats(subjects,'allPhantomTargetContrastsCombined',{'hits','CRs','yes','pctCorrect'},filter,dateRange);
 [nfstats nfCI nfnames nfparams]=getFlankerStats(subjects,'noFlank',{'hits','CRs','yes','pctCorrect'},filter,dateRange);
 params.colors(:,:)=.8;  % overwrite color with gray
-values = params.factors.phantomTargetContrastCombined(1,:);
+values = getMichealsonContrast(params.factors.phantomTargetContrastCombined(1,:),minCandela,maxCandela);
+values = log2(getMichealsonContrast(params.factors.phantomTargetContrastCombined(1,:),minCandela,maxCandela))
+values =params.factors.phantomTargetContrastCombined(1,:);
 %doHitFAScatter(stats,CI,names,params,subjects,[],0,0,0,0,0,3,[]);  %
 
 %%
@@ -21,10 +26,10 @@ for i=1:length(subjects)
     subInd=find(strcmp(subjects{i},names.subjects));
     statInd=find(strcmp('pctCorrect',names.stats));
     
-    subplot(1,3,1); hold on
+    subplot(1,4,2); hold on
     
-    plot([0 7],[.5 .5],'k--');
-    plot([2 2],[0 1],'k--');
+    plot([-7 7],[.5 .5],'k--');
+    %plot([2 2],[0 1],'k--');
     
     %plot(values,stats(i,:,statInd),'k');
     for j=1:length(values)
@@ -39,7 +44,10 @@ for i=1:length(subjects)
     end
     plot(values,stats(subInd,:,statInd),'k')
     
-    text(1.2,stats(subInd,end,statInd),subjects{i})
+    %text(0,stats(subInd,end,statInd),subjects{i})
+    %axis([-2 0.5 .45 1]);
+    
+    text(1.2,stats(subInd,end,statInd),assignLabeledNames(subjects(i)))
     axis([0 1.5 .45 1]);
     set(gca,'xTick',[0 .5 1])
     set(gca,'xTickLabel',{'0','0.5','1'})
@@ -74,7 +82,7 @@ for i=1:length(subjects)
     subInd=find(strcmp(subjects{i},names.subjects));
     statInd=find(strcmp('pctCorrect',names.stats));
     
-    subplot(1,3,2);
+    subplot(1,4,3);
     hold on
     
     plot([-.25 1],[.5 .5],'k--');
@@ -93,7 +101,7 @@ for i=1:length(subjects)
     
     plot(values(2:end),stats(subInd,2:end,statInd),'k')
     
-    text(.5,stats(subInd,end,statInd),subjects{i})
+    text(.5,stats(subInd,end,statInd),assignLabeledNames(subjects(i)))
     axis([-.25 1 .45 1]);
     set(gca,'xTick',[0 .2 .4])
     set(gca,'xTickLabel',{'0','.2','.4'})
@@ -118,12 +126,12 @@ values = cellfun(@(x) str2num(x(5:end)), names.conditions);
 
 %%
 %figure
+subplot(1,4,4); hold on
 for i=1:length(subjects)
     subInd=find(strcmp(subjects{i},names.subjects));
     statInd=find(strcmp('pctCorrect',names.stats));
     
-    %subplot(1,3,3);
-    %hold on
+    
     
     plot([0 7],[.5 .5],'k--');
     plot([2 2],[0 1],'k--');
@@ -141,7 +149,7 @@ for i=1:length(subjects)
     
     plot(values,stats(subInd,:,statInd),'k')
     
-    text(6.5,nfstats(subInd,end,statInd),subjects{i})
+    text(6.5,nfstats(subInd,end,statInd),assignLabeledNames(subjects(i)))
     axis([0 7 .45 1]);
     set(gca,'xTick',[3 5 6])
     set(gca,'xTickLabel',{'3','5','inf'})
@@ -170,6 +178,8 @@ figure
 doHitFAScatter(stats,CI,names,params,subjects,[],0,0,0,0,0,3,[]);  % note bias - say yes more when close
 
 %%
+
+if 0
 figure; hold on
 for i=1:length(subjects)
     subInd=find(strcmp(subjects{i},names.subjects));
@@ -205,11 +215,11 @@ end
 
 
 %%
+
 cMatrix=[];
 addTrialNums=1;
 doFigAndSub=0;
 multiComparePerPlot=0;
-figure
 [delta CI deltas CIs]=viewFlankerComparison(names,params,cMatrix,{'pctCorrect'},subjects,[],[],doFigAndSub,addTrialNums,true,multiComparePerPlot, []);
 close(gcf);
 figure; hold on
@@ -229,3 +239,56 @@ plot(values(col),-delta,'.k')
     xlabel('flanker distance')
     ylabel('change in pctCorrect (pop1-colin)')
     axis square
+end
+%% new figure for target alone
+
+subplot(1,4,1); hold on
+subjects={'138','139'}
+subjects={'138'}
+  startSweepDate=datenum('Feb.21,2008')
+    endSweepDate=datenum('Mar.18,2008')
+dateRange=[startSweepDate endSweepDate]
+filter{1}.type='2';
+removeNonTilted=false;
+[stats CI names params]=getFlankerStats(subjects,'allPixPerCycs&PhantomContrast',{'pctCorrect'},filter,dateRange,[],[],removeNonTilted)
+params.colors(:,:)=.8;  % overwrite color with gray
+c=params.factors.phantomTargetContrastCombined(1,:);
+%c = log2(getMichealsonContrast(params.factors.phantomTargetContrastCombined(1,:),minCandela,maxCandela))
+ppc=params.factors.pixPerCycs(1,:); % only need it for one subjetc
+%%
+includePPC=[16 32];
+for i=1:length(subjects)
+  
+    for j=1:length(includePPC)
+
+    subInd=find(strcmp(subjects{i},names.subjects));
+    statInd=find(strcmp('pctCorrect',names.stats));
+    condInds=find(ppc==includePPC(j))
+    condInds(c(condInds)==0)=[];
+    plot([0 1],[.5 .5],'k--');
+    
+    if includePPC(j)>30
+    plot(c(condInds),stats(i,condInds,statInd),'k');  % don't inlcude the 0 contrast condition
+    else
+     plot(c(condInds),stats(i,condInds,statInd),'k-.');  % don't inlcude the 0 contrast condition\
+    end
+    for j=1:length(condInds)    
+        c(condInds(j))
+        eb=plot([c(condInds(j)) c(condInds(j))],[CI(subInd,condInds(j),statInd,1) CI(subInd,condInds(j),statInd,2)],'color',params.colors(condInds(j),:),'LineWidth',2);
+    end
+   
+ text(1.2,stats(subInd,condInds(end),statInd),assignLabeledNames(subjects(i)))
+    axis([0 1.5 .45 1]);
+    set(gca,'xTick',[0 .5 1])
+    set(gca,'xTickLabel',{'0','0.5','1'})
+    set(gca,'yTick',[.5 .75 1])
+    set(gca,'yTickLabel',[.5 .75 1])
+    xlabel('target Contrast')
+    ylabel('p(correct)')
+    axis square
+    end
+end
+
+
+
+cleanUpFigure(gcf)

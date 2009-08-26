@@ -41,6 +41,12 @@ isRightDetection=(all(leftContrasts==0) && all(~ismember(rightContrasts,0)));
 isLeftDetection=(all(rightContrasts==0) && all(~ismember(leftContrasts,0)));  % all becomes "any" to tolerate that bad early data
 isDetection= isRightDetection || isLeftDetection;
 
+if special138_139data(d)
+    isDetection=true
+    isRightDetection=true;
+    rightContrasts(rightContrasts==0)=[];  %remove the one contrast condition that has no contrats, don't analyze
+end
+
 if ~isDetection
     error('don''t use this code for non-detection data')
 end

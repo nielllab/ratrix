@@ -1,5 +1,5 @@
 function [delta CI deltas CIs]=viewFlankerComparison(names,params,cMatrix,statTypes,subjects,diffEdges,alpha,doFigAndSub,addTrialNums,addNames,...
-    multiComparePerPlot, objectColors, displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI)
+    multiComparePerPlot, objectColors, displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction)
 % params- from getFlankerStats
 % names-  from getFlankerStats
 % cMatrix- cell array 2xN numberComparison  example with N=1 comparison:
@@ -111,9 +111,6 @@ if ~exist('viewPopulationMeanAndCI','var') || isempty(viewPopulationMeanAndCI)
 end
 
 
-
-
-
 if ~exist('yScaling','var') || isempty(yScaling)
     yScaling=[40 20 20 20];
 end
@@ -121,6 +118,10 @@ dataFraction=yScaling(1)/sum(yScaling);
 gapFraction=yScaling(2)/sum(yScaling);
 histFraction=yScaling(3)/sum(yScaling);
 basementFraction=yScaling(4)/sum(yScaling);
+
+if ~exist('padFraction','var') || isempty(padFraction)
+padFraction=0.05;
+end
 
 
 conditionType=params.settings.conditionType;
@@ -219,7 +220,7 @@ for k=1:numSubjects
         for j=1:size(statTypes,2)
             statInd=find(strcmp(statTypes{j},names.stats));
             switch statTypes{j}
-                case {'pctCorrect', 'yes', 'hits', 'CRs'}
+                case {'pctCorrect', 'yes', 'hits', 'CRs','FAs'}
                     [deltas(i,j,k) CIs(i,j,k,1:2) numSamples(i,j,k)] = compareAtoBbinofit(more,cMatrix{i,1},cMatrix{i,2},statTypes{j},alpha);
                     deltas(i,j,k)=deltas(i,j,k)*100;
                     CIs(i,j,k,1:2)=CIs(i,j,k,1:2)*100;
@@ -348,7 +349,7 @@ for i=1:numComparison
         end
         
         switch statTypes{j}
-            case {'pctCorrect', 'yes', 'hits', 'CRs'}
+            case {'pctCorrect', 'yes', 'hits', 'CRs','FAs'}
                 [delta(i,j) CI(i,j,1:2)]=compareAtoBbinofit(combined,cMatrix{i,1},cMatrix{i,2},statTypes{j},alpha);
                 delta(i,j)=delta(i,j)*100;
                 CI(i,j,1:2)=CI(i,j,1:2)*100;
@@ -368,7 +369,11 @@ for i=1:numComparison
         
         [junk sigTTest(i,j)] = ttest(popStats,0,.05,'both');
         sigSignRank(i,j) = signrank(popStats,0);
-        nonNormal(i,j)=lillietest(popStats);
+        if length(popStats)>=4
+            nonNormal(i,j)=lillietest(popStats);
+        else
+            nonNormal(i,j)=false;  % not enough evidence to test that its non-normal
+        end
     end
 end
 
@@ -491,7 +496,7 @@ for j=1:numStats
                 set(t, 'HorizontalAlignment', 'right');
             end
             if addNames
-                t=text(maxX*0.9, yVal, labeledNames(k));
+                t=text(-maxX*1.05, yVal, labeledNames(k));
                 %t=text(maxX*0.9, yVal,
                 %sprintf('%s-%s-%d',labeledNames{k},subjects{k},subjectInd)); to test and confrim
                 set(t, 'HorizontalAlignment', 'right');
@@ -530,22 +535,27 @@ for j=1:numStats
             
             if nonNormal(i,j)
                 %show t-test for reference, but include sign rank
-                sigMsg=sprintf('p= %5.5f 1-tail t-test\np= %5.5f sign rank test',sigTTest(i,j) ,sigSignRank(i,j) );
+                %sigMsg=sprintf('p= %s 1-tail t-test\np= %s sign rank test',prettySciNotation(sigTTest(i,j)) ,prettySciNotation(sigSignRank(i,j) ));
+                sigMsg=sprintf('p= %s 1ttt\np= %s srt',prettySciNotation(sigTTest(i,j)) ,prettySciNotation(sigSignRank(i,j) ));
             else
                 %t-test is good enough cuz it passed lille test
-                sigMsg=sprintf('p= %5.5f 1-tail t-test',sigTTest(i,j));
+                %sigMsg=sprintf('p= %s 1-tail t-test',prettySciNotation(sigTTest(i,j)));
+                %sigMsg=sprintf('p=%s',prettySciNotation(sigTTest(i,j)));
+                sigMsg=sprintf('%s',prettySciNotation(sigTTest(i,j)));
             end
             
             disp(sigMsg);
             if displaySignificance
-                sigYVal= -totalFigureHeight*(basementFraction*3/4);
-                sigXVal=0; %delta(i,j)
+                %sigYVal= -totalFigureHeight*(basementFraction*3/4);
+                sigYVal= (totalFigureHeight*(gapFraction+histFraction/2));
+                
+                sigXVal=maxX*.5; %delta(i,j)
                 text(sigXVal,sigYVal,sigMsg,'HorizontalAlignment','center')
             end
             
         end
         
-        padwidth=totalFigureHeight/20;
+        padwidth=totalFigureHeight*padFraction;
         pad=[-padwidth padwidth -padwidth padwidth];
         axis([minX maxX -totalFigureHeight*basementFraction totalFigureHeight*(1-basementFraction)]+pad)
         %rectangle('Position', [ minX-padwidth -totalFigureHeight*basementFraction-padwidth totalFigureHeight+padwidth*2 totalFigureHeight+padwidth*2], 'EdgeColor',[0 1 0])
@@ -640,12 +650,16 @@ if doFigAndSub
 end
 
 
+function string=prettySciNotation(value)
 
-
-
-
-
-
-
+x=num2str(value,'%1.0e');
+ind=strfind(x,'e')
+sigDigs=x(1:ind-1);
+exp=x(ind+1:end);
+zeroExpInds=strfind(exp,'0');
+sigExp=exp; sigExp(zeroExpInds)=[];
+%string=sprintf('%se^{%s}',sigDigs,sigExp);
+%string=sprintf('%s x 10^{%s}',sigDigs,sigExp);
+string=sprintf('%sx10^{%s}',sigDigs,sigExp);
 
 

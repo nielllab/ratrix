@@ -17,6 +17,7 @@ function colorMap=blueToRed(mean, range,quashSmallerExcursion,desaturationPoint)
 % long as range and mean use the same units
 %
 % this function also contains useful subfunctions for generating custum color maps
+% philip meier.  2009
 
 if ~exist('mean','var') || isempty(mean)
     mean=0.5;

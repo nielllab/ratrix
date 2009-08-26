@@ -168,6 +168,8 @@ for i=1:length(subjects)
                 elseif colors(condInd,2)>colors(condInd,1) & colors(condInd,3)>colors(condInd,1) & colors(condInd,2)==colors(condInd,3)
                     colorString='c';
                     %otherwise
+                elseif all(colors(condInd,:)==0)
+                    colorString='k';
                 else
                     colorString='b';
                     disp('no found color match for elipse')
@@ -365,6 +367,8 @@ switch arrowType
         arrow('Start',[x(1) y(1)],'Stop',[x(2) y(2)],'Length',4,'Width',0.5)
     case 3 %thin grey line
         plot(x,y,'color',[.5 .5 .5])
+    case 4 %event thinner arrow 
+         arrow('Start',[x(1) y(1)],'Stop',[x(2) y(2)],'Length',2,'Width',0.25)
     otherwise
         arrowType
         error('bad arrowType')

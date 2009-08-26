@@ -119,8 +119,8 @@ for i=1:numSubjects
     d=filterFlankerData(d,filterType);
     
     %exclude flanker trials that don't have a global tilt
-    beforeTilt=isnan(d.flankerPosAngle);
     if removeNonTilted
+        beforeTilt=isnan(d.flankerPosAngle);
         d=removeSomeSmalls(d,beforeTilt);
     end
     
@@ -162,7 +162,7 @@ for i=1:numSubjects
         if any(abs(meanPct-pctThisContrast(2:end))>meanPct*0.1)
             warning('greater than 10% count different between contrast conditions')
         end
-        if abs((pctThisContrast(1)-sum(pctThisContrast(2:end))))>0.05
+        if abs((pctThisContrast(1)-sum(pctThisContrast(2:end))))>0.05 & ~special138_139data(d)
             error('every contrast should have a no-contrast pair: check assumption about the distribution of contrasts')
         end
         
@@ -278,6 +278,9 @@ for i=1:numSubjects
                     params.factors.targetContrast(i,j)=d.targetContrast(firstInd);
                 case {'allPhantomTargetContrastsCombined'}
                     params.factors.phantomTargetContrastCombined(i,j)=d.phantomTargetContrastCombined(firstInd);
+                case {'allPixPerCycs&PhantomContrast'}
+                    params.factors.phantomTargetContrastCombined(i,j)=d.phantomTargetContrastCombined(firstInd);
+                    params.factors.pixPerCycs(i,j)=d.pixPerCycs(firstInd);
                 case {'allBlockIDs','allBlockSegments'}
                     params.factors.blockID(i,j)=d.blockID(firstInd);
                     params.factors.targetContrast(i,j)=max(d.targetContrast(firstInd),d.phantomContrast(firstInd));
@@ -323,6 +326,8 @@ for i=1:numSubjects
                     [stats(i,j,k)  CI(i,j,k,:)]=binofit(numHits,numHits+numMisses);
                 case 'CRs'
                     [stats(i,j,k)  CI(i,j,k,:)]=binofit(numCRs,numCRs+numFAs);
+                case 'FAs'
+                    [stats(i,j,k)  CI(i,j,k,:)]=binofit(numFAs,numCRs+numFAs);
                 case 'RT'
                     [params.RT.mean(i,j,1:numRTcategories) params.RT.std(i,j,1:numRTcategories) params.RT.fast(i,j,1:numRTcategories) params.RT.CI(i,j,1:numRTcategories,1:2) names.rtCategories]=getResponseStats(d,these,rtCategories);
                     stats(i,j,k)=params.RT.fast(i,j,find(strcmp('no',names.rtCategories)))-params.RT.fast(i,j,find(strcmp('yes',names.rtCategories)));

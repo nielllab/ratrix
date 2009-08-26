@@ -388,7 +388,7 @@ switch types
         colors=jet(numContrast);
     case 'allPhantomTargetContrastsCombined'
         
-        respectGroups=getFlankerConditionInds(d,[],'flankOrnot');
+        respectGroups=getFlankerConditionInds(d,[],'flankOrNot');
         d=addPhantomTargetContrast(d,respectGroups,'random');
         
         %d.targetContrast(isnan(d.phantomTargetContrastCalculated))
@@ -402,7 +402,6 @@ switch types
         end
         colors=jet(numContrast);
         
-        
     case 'allPixPerCycs'
         PPC=unique(d.pixPerCycs(~isnan(d.pixPerCycs)));
         numPPC=length(PPC);
@@ -411,6 +410,31 @@ switch types
             names = [names, {num2str(PPC(i),'%2.0f')}];
             %get cycles per degree from spatial setup
         end
+    case 'allPixPerCycs&PhantomContrast'
+        PPC=unique(d.pixPerCycs(~isnan(d.pixPerCycs)));
+        numPPC=length(PPC);
+        for i=1:numPPC
+            respectGroups(i,:)= d.pixPerCycs==PPC(i);
+
+        end
+        color1=jet(numPPC);
+        
+         d=addPhantomTargetContrast(d,respectGroups,'random');
+        
+        %d.targetContrast(isnan(d.phantomTargetContrastCombined))
+        %sum(d.flankerContrast(isnan(d.phantomTargetContrastCombined))==0)
+        
+        contrasts=unique(d.phantomTargetContrastCombined(~isnan(d.phantomTargetContrastCombined)));
+        numContrast=length(contrasts);
+        for i=1:numPPC
+            for j=1:numContrast
+                ind=sub2ind([numPPC numContrast],i,j);
+                conditionInds(ind,:)= d.pixPerCycs==PPC(i) & d.phantomTargetContrastCombined==contrasts(j);
+                names = [names, {['ppc' num2str(PPC(i),'%2.0f') '-' num2str(contrasts(j),'%2.2f')]}];
+                colors(ind,:)=color1(i,:);
+            end
+        end
+        
     case 'allDevs'
         devs=unique(d.deviation(~isnan(d.deviation)));
         numDevs=length(devs);
@@ -586,7 +610,7 @@ switch types
         conditionInds(end+1,:)=conditionInds(strcmp(names,'RRL'),:) | conditionInds(strcmp(names,'LLR'),:);
         conditionInds(end+1,:)=conditionInds(10,:) | conditionInds(11,:) | conditionInds(12,:);
     case '4flanksBlocked'
-        [c1 n1 haveData1 color1]=getFlankerConditionInds(d,restrictedSubset,'8flanks+');
+       [c1 n1 haveData1 color1]=getFlankerConditionInds(d,restrictedSubset,'8flanks+');
        [c1 n1 haveData1 color1]=getFlankerConditionInds(d,restrictedSubset,'8flanks+');
     case '2flanks'
         [conditionInds names haveData colors]=getFlankerConditionInds(d,restrictedSubset,'8flanks+');

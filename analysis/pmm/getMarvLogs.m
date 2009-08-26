@@ -1184,8 +1184,6 @@ eventLog{eventNum}.comment ='bug in set minidatabase prevented some penalty and 
 eventLog{eventNum}.details.from = [1 1 1 1]; 
 eventLog{eventNum}.details.to   = [2 2 2 2];
 
-
-
 eventNum = eventNum +1;  
 eventLog{eventNum}.date =datenum('Jun.12,2009');%datestr(now,21)
 eventLog{eventNum}.eventName ={'addCTs'};
@@ -1195,3 +1193,59 @@ eventLog{eventNum}.issuedBy ='pmm'; % danielle point out to consider bias on 227
 eventLog{eventNum}.comment ='138 exploits CTs some, might as well lower others to a standard'; 
 eventLog{eventNum}.details.from = [0]; 
 eventLog{eventNum}.details.to   = [.10 ];
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Jun.22,2009');%datestr(now,21)
+eventLog{eventNum}.eventName ={'manualStepChange'};
+eventLog{eventNum}.subject ={'231', '234'};
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';  
+eventLog{eventNum}.comment ='lots of data for target contrast 8 values, starting flanker contrast 8 values'; 
+eventLog{eventNum}.details.from = [12 12 ]; 
+eventLog{eventNum}.details.to   = [15 15 ];  
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Jul.22,2009');%datestr(now,21)
+eventLog{eventNum}.eventName ={'manualStepChange'};
+eventLog{eventNum}.subject ={'231', '234'};
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';  
+eventLog{eventNum}.comment ='lots of data for flanker contrast 8 values, starting joint sweep 5x5'; 
+eventLog{eventNum}.details.from = [15 15 ]; 
+eventLog{eventNum}.details.to   = [16 16 ];  
+
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Jul.29,2009');%datestr(now,21)
+eventLog{eventNum}.eventName ={'manualStepChange'};
+eventLog{eventNum}.subject ={'304','306', '296'};
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';  
+eventLog{eventNum}.comment ='good enough on 9.3... moving along'; 
+eventLog{eventNum}.details.from = [7 9 11]; 
+eventLog{eventNum}.details.to   = [8 9 11];  
+
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Jul.29,2009');%datestr(now,21)
+eventLog{eventNum}.eventName ={'increaseReward'};
+eventLog{eventNum}.subject ={'228'}; 
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='just to hold BW, his performance already is bad'; 
+eventLog{eventNum}.details.from = [2]; 
+eventLog{eventNum}.details.to   = [3];
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Jul.29,2009');%datestr(now,21)
+eventLog{eventNum}.eventName ={'increaseReward'};
+eventLog{eventNum}.subject ={'304','305','306', '296'}; 
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';
+eventLog{eventNum}.comment ='was listed as 0.4 in miniDB but treated as 1.  changing DB to be correct and effective'; 
+eventLog{eventNum}.details.from = [1 1 1 1]; 
+eventLog{eventNum}.details.to   = [1 1 1 1];
+
+
+%% 234 gets a week off b/c he has a shoulder lump,  ~ aug 14 --> Aug.22,2009  .. and continuing
+

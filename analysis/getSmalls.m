@@ -103,6 +103,19 @@ if ~isempty(smallData)
         end
     end
     smallData=rmfield(smallData,f(remove));
+    f(remove)=[];
+    
+    %check all fields are the same length
+    expectedNumberOfTrials=length(smallData.date);
+     for i=1:length(f)
+        if ~length(smallData.(f{i}))==expectedNumberOfTrials
+            length(smallData.(f{i}))
+            expectedNumberOfTrials
+            error('not matching!')
+        end
+     end
+    
+    
     
     %add name
     if strcmp(class(subjectID),'char')

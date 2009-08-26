@@ -1,5 +1,6 @@
 function cleanUpFigure(f,settings)
-%
+%philip meier.  2009.   freely avaiable for use.  As-is. pmm or ucsd not
+%responsible for its use. 
 %
 %settings.turnOffLines=0;
 %settings.turnOffTics=0;
@@ -11,7 +12,7 @@ function cleanUpFigure(f,settings)
 %settings.titleFontSize=settings.fontSize;
 %settings.textObjectFontSize=settings.fontSize;
 %settings.tickDir='out';
-    
+%settings.MarkerSize=4;
     
 if ~exist('f','var') || isempty(f)
    f=gcf;
@@ -62,17 +63,48 @@ if ~ismember('tickDir',fields(settings))
     settings.tickDir='out';
 end
 
+if ~ismember('MarkerSize',fields(settings)) 
+   settings.MarkerSize=[];
+end
 
+if ~ismember('box',fields(settings)) 
+   settings.box=[];
+end
 
+if ~ismember('alphaLabel',fields(settings)) 
+   settings.alphaLabel=[];
+end
 
+if ~ismember('Units',fields(settings)) 
+   settings.Units=[];
+end
+
+if ~ismember('PaperPosition',fields(settings)) 
+   settings.PaperPosition=[];
+end
+
+if ~ismember('FontName',fields(settings)) 
+   settings.FontName=[];
+end
 
 
 for i=1:length(f)
     if strcmp(get(f(i),'type'), 'figure')
-    %get(f(i))
-    set(f(i),'Color',[1 1 1])
-    children=get(f(i), 'Children');
-    doClassSpecificAction(children,settings)
+        set(f(i),'Color',[1 1 1])
+        
+        if ~isempty(settings.Units)
+            set(f(i),'Units', settings.Units)
+        end
+        if ~isempty(settings.PaperPosition)
+            set(f(i),'PaperPosition', settings.PaperPosition)
+        end
+        
+        
+        children=get(f(i), 'Children');
+        doClassSpecificAction(children,settings)
+
+    elseif strcmp(get(f(i),'type'), 'axes')
+        cleanUpThisAxis(f(i),settings)
     end
 end
 
@@ -102,7 +134,11 @@ end
 
 function succ=cleanUpThisAxis(a,settings)
 % get(a)
-set(a,'FontName', 'Helvetica')
+
+if ~isempty(settings.FontName)
+    set(a,'FontName', settings.FontName); %'Helvetica')
+end
+
 set(a,'FontSize', settings.axisFontSize)
 
 set(a,'LineWidth', settings.AxisLineWidth)
@@ -113,9 +149,12 @@ if settings.tickDir
     set(a,'TickDir', settings.tickDir)
 end
 
+if ~isempty(settings.box)
+    set(a,'box', settings.box)
+end
+
 children=get(a, 'Children');
 doClassSpecificAction(children,settings)
-
 
 % since the axis labels and titles are text objects, we set them on their
 % own after done processing the custom text code objects
@@ -126,6 +165,22 @@ doClassSpecificAction(get(a, 'ZLabel'),settings)
 settings.textObjectFontSize=settings.titleFontSize;
 doClassSpecificAction(get(a, 'Title'),settings)
 
+if ~isempty(settings.alphaLabel)
+    ys=ylim; xs=xlim;
+    fractionOutOfCorner=[0.1 0.1];
+    if strcmp(get(a,'xDir'),'normal')
+        x=xs(1)-fractionOutOfCorner(1)*range(xs);
+    else % reverse
+        x=xs(2)+fractionOutOfCorner(1)*range(xs);
+    end
+    if strcmp(get(a,'yDir'),'normal')
+        y=ys(2)+fractionOutOfCorner(2)*range(ys);
+    else % reverse
+        y=ys(1)-fractionOutOfCorner(2)*range(ys);
+    end
+    text(x,y, settings.alphaLabel,...
+        'fontSize',settings.titleFontSize,'HorizontalAlignment','right','VerticalAlignment','bottom','fontweight','b');
+end
 
 succ=1;
 
@@ -137,7 +192,11 @@ function succ=cleanUpThisLine(h,settings)
 % get(h)
 if ~settings.turnOffLines
     set(h,'LineWidth', settings.LineWidth) 
-    % set(h,'MarkerSize', 4)
+   
+end
+
+if ~isempty(settings.MarkerSize)
+    set(h,'MarkerSize', settings.MarkerSize)
 end
 succ=1;
 

@@ -30,6 +30,12 @@ switch statType
         x2= sum(more.CRs(Bind,:),1);
         n2= sum(more.CRs(Bind,:) + more.FAs(Bind,:),1); % was wrong until 081105, now fixed
         
+    case 'FAs'
+        x1= sum(more.FAs(Aind,:),1);
+        n1= sum(more.CRs(Aind,:) + more.FAs(Aind,:),1); 
+        x2= sum(more.FAs(Bind,:),1);
+        n2= sum(more.CRs(Bind,:) + more.FAs(Bind,:),1); 
+        
     case 'dprime' %consider dprimeMCMC
         a.hits= sum(more.hits(Aind,:),1);
         a.misses= sum(more.misses(Aind,:),1);
@@ -47,7 +53,7 @@ switch statType
 end
 
 switch statType
-    case {'pctCorrect', 'yes', 'hits', 'CRs'}
+    case {'pctCorrect', 'yes', 'hits', 'CRs','FAs'}
         
         binomialMethod='agrestiCaffo';%wald';
         [delta CI]=diffOfBino(x2,x1,n2,n1,binomialMethod,alpha); %a=x1 & b=x2 so the desired a-b is correctly x1 -x2 because uses p2-p1 in this function

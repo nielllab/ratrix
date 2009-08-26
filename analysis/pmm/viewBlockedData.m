@@ -1,12 +1,12 @@
 function viewBlockedData(subjects)
 
 if ~exist('d','var') || isempty(d)
-    group=0;
+    group=1;
     switch group
         case 0
             subjects={'227'} % test any one
         case 1
-            subjects={'231','234'} % all colin, many target contrasts
+            subjects={'231','234'} % all colin, many target contrasts on 12, or many flanker onctrasts on 15
         case 2
             subjects={'227', '229', '230', '237', '232', '233'}; %many flank types, 5 contrasts
         case 3
@@ -16,22 +16,37 @@ end
 
 %quick set params
 if all(ismember(subjects,{'231','234'}))
-    dateRange= [pmmEvent('firstBlocking')+2 now]
+    dateRange= [pmmEvent('firstBlocking')+2 now];  % firstBlocking, startBlocking10rats
     conditionType='allBlockIDs';
-    filter{1}.type='12';
+    filter{1}.type='16'; % 12 15 16
+
 elseif  all(ismember(subjects,{'227', '229', '230', '237', '232', '233'}))
-    dateRange= [pmmEvent('startBlocking10rats')+2 now]
+    dateRange= [pmmEvent('startBlocking10rats')+2 now];
+    dateRange= [pmmEvent('231&234-jointSweep')+1 now];
     conditionType='allBlockIDs';
     filter{1}.type='12';
+    %filter{2}.type='trialThisBlockRange';  % could clean up some, but
+    %reduces power if you rmeove to many... maybe 10 trials?
+    %filter{2}.parameters.range=[10 150];
 elseif  all(ismember(subjects,{'138','139', '228','277'}))
-    dateRange= [pmmEvent('startBlocking10rats')+2 now]
+    dateRange= [pmmEvent('startBlocking10rats')+2 now];
     conditionType='allBlockIDs';
-    conditionType='4flanksBlocked';
+    %conditionType='4flanksBlocked';  % not yet
     filter{1}.type='11';
 else
     subjects
     error('don''t have an auto date range for that rat, or rats span group types')
 end
+
+switch filter{1}.type
+    case {'11','12'}
+        factor='targetContrast';
+    case {'15'}
+        factor='flankerContrast';
+    case {'16'}
+        factor='targetContrast';  % at actually both, but we will show target Contrast
+end
+
 
 try
     for s=1:length(subjects)
@@ -71,8 +86,8 @@ try
         offset=0.25;% for viewing
         plot(blockID+offset,100*seg_stats,'k.')
         set(gca,'xtick',unique(blockID));
-        set(gca,'xTickLabel',unique(seg_params.factors.targetContrast)); % this only works b/c we used acsending target contrasts
-        xlabel('blocks, guessing they are target contrast')
+        set(gca,'xTickLabel',unique(seg_params.factors.(factor))); % this only works b/c we used acsending target contrasts
+        xlabel(sprintf('blocks, guessing they are %s',factor))
         title(subjects{s})
         
         %%

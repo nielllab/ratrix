@@ -29,7 +29,7 @@ if ~exist('imageType') || isempty(imageType)
 end
 
 
-if ~exist('antiAliasing') || isempty(antiAliasing)
+if ~exist('antiAliasing','var') || isempty(antiAliasing)
     antiAliasing= false;
 end
 

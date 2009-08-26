@@ -1,4 +1,4 @@
-function [dprCurve critCurve]=getDprCurve(numSamps, dpr, crit, plotOn)
+function [dprCurve critCurve]=getDprCurve(numSamps, dpr, crit, plotOn,color)
 % returns a curve of dprime and criteria
 % dpr = norminv(h)-norminv(f);
 % cr =-(norminv(h)+norminv(f))/2;
@@ -24,6 +24,10 @@ if ~exist('plotOn','var')
     plotOn=false;
 end
 
+if ~exist('color','var')
+    color=[0 0 0];
+end
+
 h=linSpace(0,1,numSamps);
 dprF=normcdf(norminv(h)-dpr); %calculate the false alarm rate for the desired dpr
 dprCurve=[dprF; h];
@@ -42,6 +46,7 @@ if plotOn
     if ~isempty(dpr)
         %pass out the handle if plotting is on
         dprCurve=plot(dprCurve(1,:), dprCurve(2,:))
+        set(dprCurve, 'Color', color);
     end
     if nargout>1
         %pass out the handle if plotting is on
@@ -49,5 +54,6 @@ if plotOn
         %WHY doesn't this work!
 %         critCurve(:,diff(critCurve)>0)=nan %get rid of values below the diagonal
         critCurve=plot(critCurve(1,:), critCurve(2,:))
+        set(critCurve, 'Color', color);
     end
 end

@@ -291,14 +291,16 @@ svnCheckMode='session';
 %% Define trainingStep
 ts1 = trainingStep(vh, noiseStim,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %filteredNoise discrim
 ts2 = trainingStep(vh, unfilteredNoise,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %unfiltered goToSide
-ts3 = trainingStep(led, hateren,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %hateren
-ts4 = trainingStep(led, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %fullfieldFlicker
-ts5 = trainingStep(led, crftrf,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %crf/trf
-ts6 = trainingStep(og, gratingStim, repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %grating stim
+ts3 = trainingStep(vh, hateren,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %filteredNoise discrim
+ts4 = trainingStep(vh, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %unfiltered goToSide
+ts5 = trainingStep(led, hateren,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %hateren
+ts6 = trainingStep(led, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %fullfieldFlicker
+ts7 = trainingStep(led, crftrf,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %crf/trf
+ts8 = trainingStep(og, gratingStim, repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %grating stim
 
 %% Create protocol
 p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5, ts6});
-stepNum=uint8(6); % Which stepNum to start at
+stepNum=uint8(4); % Which stepNum to start at
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

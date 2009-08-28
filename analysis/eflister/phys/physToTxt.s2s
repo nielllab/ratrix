@@ -1,13 +1,15 @@
-const base$ := "cell 2";
+const base$ := "cell 2tmp";
 
 'enter start and end time
 const sTime := 1434;
 const eTime := 1834;
 
 'enter channel id's
-const spkChan% := 7;  'wavemark chan (fix this -- for now, all will be considered one class, hide any you don't want exported)
-const stimChan% := 1; 'photo diode recording
+const spkChan%        := 7; 'wavemark chan (fix this -- for now, all will be considered one class, hide any you don't want exported)
+const stimChan%       := 1; 'photo diode recording
 const framePulseChan% := 2; 
+const physChan%       := 3; 'the high fidelity one
+const trialPulseChan% := 0; 'indicates stimulus/repeats starts
 
 'enter output path
 const expPath$ := "C:\\Documents and Settings\\rlab\\Desktop\\";
@@ -39,6 +41,10 @@ doSave("spks");
 ExportChanList(1);
 ExportChanList(sTime, eTime, stimChan%);
 doSave("stim");
+
+ExportChanList(1);
+ExportChanList(sTime, eTime, physChan%);
+doSave("phys");
 
 ExportChanList(1);
 ExportChanList(sTime, eTime, framePulseChan%);

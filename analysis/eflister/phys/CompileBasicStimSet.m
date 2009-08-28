@@ -1,4 +1,4 @@
-function CompileBasicStimSet(wd,fileNames,stimTimes,targetBinsPerSec,pulsesPerRepeat,numRepeats,uniquesEvery,drawSummary,drawStims,forceStimRecompile)
+function compileBasicStimSet(wd,fileNames,stimTimes,targetBinsPerSec,pulsesPerRepeat,numRepeats,uniquesEvery,drawSummary,drawStims,forceStimRecompile)
 cd(wd)
 for fileNum=1:length(fileNames)
     

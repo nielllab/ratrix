@@ -7,13 +7,13 @@ function physAnalysis
 % deal w/time offset of stim
 % deal w/stim id + rpt/unq id
 
-%         if you need to edit or see stim file, you need an editor that can handle very large txt files (~1GB) 
+%         if you need to edit or see stim/phys file (unusual), you need an editor that can handle very large txt files (~1GB) 
 %            'textpad' worked for me
 %            (http://www.download.com/TextPad/3000-2352_4-10303640.html?tag=lst-0-1)
 
 %2) provide cell array of <base> from above (full paths)
-pth='C:\Documents and Settings\rlab\Desktop\cell2\';
-fileNames={'cell 2'};
+pth='C:\Documents and Settings\rlab\Desktop\cell 2tmp\';
+fileNames={'cell 2tmp'};
 
 %3) enter time ranges of particular stims for each set of files (enter 0's for stimuli not shown):
 
@@ -47,12 +47,12 @@ drawSummary=1;
 forceStimRecompile=0;
 drawStims=1;
 
-%7) this file will call CompileBasicStimSet, which makes the "compiled data.txt" file
+%7) this file will call compileBasicStimSet, which makes the "compiled data.txt" file
 % this makes loading the stimulus faster for the future
 % you should then call doAnalysis, which works on this file
 
-close all;
-clc
-format long g
-addpath(genpath('.'))
-CompileBasicStimSet(pth,fileNames,stimTimes,binsPerSec,pulsesPerRepeat,numRepeats,uniquesEvery,drawSummary,drawStims,forceStimRecompile);
+[pathstr, name, ext, versn] = fileparts(mfilename('fullpath'));
+addpath(fullfile(fileparts(fileparts(pathstr)),'bootstrap'))
+setupEnvironment;
+
+compileBasicStimSet(pth,fileNames,stimTimes,binsPerSec,pulsesPerRepeat,numRepeats,uniquesEvery,drawSummary,drawStims,forceStimRecompile);

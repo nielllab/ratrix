@@ -6,8 +6,8 @@ format long g
 %pth='C:\Documents and Settings\rlab\Desktop\physAnalysis\data\best.cell.so.far\';
 %file = 'best.cell.so.far';
 
-pth = 'C:\Documents and Settings\rlab\Desktop\cell2\';
-file = 'cell 2';
+pth = 'C:\Documents and Settings\rlab\Desktop\cell 2tmp\';
+file = 'cell 2tmp';
 
 cd(pth)
 

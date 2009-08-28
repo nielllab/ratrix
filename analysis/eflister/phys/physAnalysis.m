@@ -45,14 +45,15 @@ uniquesEvery=[];
 %6) set output flags:
 drawSummary=1;
 forceStimRecompile=0;
+forcePhysRecompile=0;
 drawStims=1;
 
-%7) this file will call compileBasicStimSet, which makes the "compiled data.txt" file
+%7) this file will call compilePhysData, which makes the "compiled data.txt" file
 % this makes loading the stimulus faster for the future
 % you should then call doAnalysis, which works on this file
 
 [pathstr, name, ext, versn] = fileparts(mfilename('fullpath'));
-addpath(fullfile(fileparts(fileparts(pathstr)),'bootstrap'))
+addpath(fullfile(fileparts(fileparts(fileparts(pathstr))),'bootstrap'))
 setupEnvironment;
 
-compileBasicStimSet(pth,fileNames,stimTimes,binsPerSec,pulsesPerRepeat,numRepeats,uniquesEvery,drawSummary,drawStims,forceStimRecompile);
+compilePhysData(pth,fileNames,stimTimes,binsPerSec,pulsesPerRepeat,numRepeats,uniquesEvery,drawSummary,drawStims,forceStimRecompile,forcePhysRecompile);

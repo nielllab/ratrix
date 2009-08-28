@@ -1,5 +1,7 @@
-function compileBasicStimSet(wd,fileNames,stimTimes,targetBinsPerSec,pulsesPerRepeat,numRepeats,uniquesEvery,drawSummary,drawStims,forceStimRecompile)
-cd(wd)
+function compilePhysData(wd,fileNames,stimTimes,targetBinsPerSec,pulsesPerRepeat,numRepeats,uniquesEvery,drawSummary,drawStims,forceStimRecompile,forcePhysRecompile)
+
+contents=what(wd);
+
 for fileNum=1:length(fileNames)
     
     file=fileNames{fileNum};
@@ -9,43 +11,25 @@ for fileNum=1:length(fileNames)
     end
     numStims=size(stimTimes(:,:,fileNum),1);
     
-    contents=what;
     name = sprintf('%s compiled stim.mat',file);
     
     fileGood = 0;
-    if any(strcmp(contents.mat,name)) && ~forceStimRecompile
-        load(name);
+    if any(strcmp(contents.mat,name)) && ~forceStimRecompile && ~forcePhysRecompile
+        load(fullfile(wd,name));
         if binsPerSec==targetBinsPerSec
             fileGood = 1;
         end
     end
     
     if ~fileGood
-        mattedName = sprintf('%s matted stim.mat',file);
-        if any(strcmp(contents.mat,mattedName)) && ~forceStimRecompile
-            stim=load(mattedName);
-            stim=stim.stim;
-        else
-            disp('have to load stims for first time -- this takes awhile')
-            stim=load(sprintf('%s stim.txt',file));
-            disp(sprintf('file %s loaded',file))
-            save(mattedName,'stim');
-            disp(sprintf('matted version saved'))
-        end
+        [phys physTms]=checkForCompiledMat(wd,'phys',file,forcePhysRecompile,contents,targetBinsPerSec);
         
-        C=doScan(sprintf('%s stim.txt',file),'%% START %% %f %f',6);
-        
-        first(fileNum)=C{1};
-        step(fileNum)=C{2};
-        
-        if first(fileNum)<0 || abs(1- step(fileNum) * 40000)>.5
-            error('bad first or step')
-        end
+        [stim stimTms first(fileNum) step(fileNum)]=checkForCompiledMat(wd,'stim',file,forceStimRecompile,contents,[]);
         
         pFile=sprintf('%s pulse.txt',file);
-        origPulses=load(pFile);
+        origPulses=load(fullfile(wd,pFile));
         
-        C=doScan(pFile,'%% %[^%] %%',2);
+        C=doScan(fullfile(wd,pFile),'%% %[^%] %%',2);
         
         %pulses from ratrix changed over experiments:
         %if VRG:
@@ -110,9 +94,8 @@ for fileNum=1:length(fileNames)
                 error('bad frame times')
             end
             
-            stimT=cumsum([first(fileNum) step(fileNum)*ones(1,length(stim)-1)]);
-            tMask=stimT>stimTimes(stimNum,1,fileNum) & stimT<stimTimes(stimNum,2,fileNum);
-            stimT=stimT(tMask); % the photo sample times
+            tMask=stimTms>stimTimes(stimNum,1,fileNum) & stimTms<stimTimes(stimNum,2,fileNum);
+            stimT=stimTms(tMask); % the photo sample times
             tStim=normalize(stim(tMask)'); %photodiode measurements should be considered linear but not calibrated
             
             boundaries=[thesePulses;thesePulses(end)+nominalSecondsPerFrame]+pulseOffsetPct*nominalSecondsPerFrame;
@@ -139,7 +122,7 @@ for fileNum=1:length(fileNames)
             doHist(binVals);
             title(sprintf('bins of %g ms',1000/binsPerSec))
             
-            saveas(f,sprintf('%s stim dist.fig',file))
+            saveas(f,fullfile(wd,sprintf('%s stim dist.fig',file)))
             
             f=figure;
             contextFrames=25;
@@ -185,7 +168,7 @@ for fileNum=1:length(fileNames)
                 ylim([0 1.1])
             end
             
-            saveas(f,sprintf('%s drop report.fig',file))
+            saveas(f,fullfile(wd,sprintf('%s drop report.fig',file)))
             
             if all(cellfun(@isempty,{pulsesPerRepeat,numRepeats,uniquesEvery}))
                 uniquesEvery(stimNum) = 0;
@@ -222,7 +205,7 @@ for fileNum=1:length(fileNames)
                 rptFrames=b(xInd+potentials-1);
             end
             repeatStimVals{stimNum} = wrap(stimVals,rptFrames,0,true);
-
+            
             subplot(3,1,1)
             plot(repeatStimVals{stimNum});
             title(sprintf('repeats at %g frames (%g secs)',rptFrames,rptFrames*nominalSecondsPerFrame))
@@ -234,12 +217,21 @@ for fileNum=1:length(fileNames)
             repeatStarts=repeatTimes{stimNum}(1,:);
             binVals=normalize(binVals);
             for rNum = 1:numRepeats(stimNum)
-                mask = binT >= repeatStarts(rNum);
+                mask  = binT    >= repeatStarts(rNum);
+                pmask = physTms >= repeatStarts(rNum);
+                
                 if rNum < numRepeats(stimNum)
-                    mask = mask & binT < repeatStarts(rNum+1);
+                    mask  = mask  & binT    < repeatStarts(rNum+1);
+                    pmask = pmask & physTms < repeatStarts(rNum+1);
+                else
+                    pmask = pmask & physTms < binT(end)+1/binsPerSec;
                 end
+                
                 binnedVals{stimNum,rNum}=binVals(mask);
                 binnedT{stimNum,rNum}=binT(mask);
+                
+                physVals{stimNum,rNum}=phys(pmask);
+                physT{stimNum,rNum}=physTms(pmask);
             end
             
             maxLagSecs = .5;
@@ -257,11 +249,11 @@ for fileNum=1:length(fileNames)
             end
             
             sigs = padToMatrix({binnedVals{stimNum,:}});
-                     
+            
             %this will run out of memory if numRepats > ~15.  how fix?
             %could do 15 at a time...
             [xc b]=xcorr(sigs,maxLagSecs*binsPerSec); %must use ZERO padding, not nan padding!!!
-
+            
             xc=normalizeCols(xc);
             
             % only want upper triangle w/o diagonal!  pick strongest one as reference
@@ -327,7 +319,7 @@ for fileNum=1:length(fileNames)
                             bestBinOffsets{stimNum}(s1)=0;
                             bestBinOffsets{stimNum}(s2)=offsets(s1,s2);
                         else
-                            if isnan(constraints(s1,s2)) 
+                            if isnan(constraints(s1,s2))
                                 constraints(s1,s2)=offsets(s1,s2);
                             else
                                 error('shouldn''t get multiple constraints per pair')
@@ -345,7 +337,7 @@ for fileNum=1:length(fileNames)
                         else
                             error('shouldn''t get multiple constraints per pair')
                         end
-                    end                    
+                    end
                 end
                 strengths(s1,s2)=nan;
             end
@@ -376,8 +368,8 @@ for fileNum=1:length(fileNames)
             xlabel('secs')
             title(sprintf('binned at %g hz',binsPerSec))
             
-            saveas(f,sprintf('%s overlayed repeats.fig',file))
-                        
+            saveas(f,fullfile(wd,sprintf('%s overlayed repeats.fig',file)))
+            
             figure
             for s1=1:numRepeats
                 for s2=1:numRepeats
@@ -418,14 +410,14 @@ for fileNum=1:length(fileNames)
             end
         end
         
-        save(name,'binsPerSec','uniqueStimVals','repeatStimVals','uniqueTimes','repeatTimes','uniqueColInds','repeatColInds','dropTimes','binnedVals','binnedT','bestBinOffsets');
         clear stim;
-        pack;
+        
+        save(fullfile(wd,name),'binsPerSec','uniqueStimVals','repeatStimVals','uniqueTimes','repeatTimes','uniqueColInds','repeatColInds','dropTimes','binnedVals','binnedT','bestBinOffsets','physVals','physT');
     end
     
-
     
-    spks=load(sprintf('%s spks.txt',file));
+    
+    spks=load(fullfile(wd,sprintf('%s spks.txt',file)));
     
     requiredRefractory=.002;
     requiredPreBurst=.100;
@@ -455,7 +447,7 @@ for fileNum=1:length(fileNames)
     bstViolationTimes=spks(bstViolationInds);
     specials={violationTimes,bstStartTimes,bstMemberTimes,bstViolationTimes};
     
-    [pks pkcodes]=textread(sprintf('%s pokes.txt',file),'%n %*q %d 0 0 0','headerlines',2);
+    [pks pkcodes]=textread(fullfile(wd,sprintf('%s pokes.txt',file)),'%n %*q %d 0 0 0','headerlines',2);
     pks=pks(pkcodes~=0);
     pkcodes=pkcodes(pkcodes~=0);
     
@@ -508,23 +500,23 @@ for fileNum=1:length(fileNames)
                     error('got nans before last repeat')
                 end
             end
-
+            
             theseBins=[theseBins(1)-1/binsPerSec; theseBins; theseBins(end)+1/binsPerSec];
             
             newCol=hist(spks,theseBins);
             if ~isempty(fs) && any(newCol(fs+1:end-1))
-               error('hist edge case didn''t hold -- found zero width bins with members') 
+                error('hist edge case didn''t hold -- found zero width bins with members')
             end
             
-%             rtRange=[repeatTimes{stimNum}(1,repeatNum) max(repeatTimes{stimNum}(:,repeatNum))+1/binsPerSec];
-%             theseSpks=spks(spks>=rtRange(1) & spks<rtRange(2));
-%             theseSpks=theseSpks-rtRange(1);
-%             
-%             if floor(max(theseSpks)*binsPerSec) > size(repeatTimes{stimNum},1)
-%                 error('bad sizes')
-%             end
-%             
-%             newCol=full(sparse(1+floor(theseSpks*binsPerSec),1,1));
+            %             rtRange=[repeatTimes{stimNum}(1,repeatNum) max(repeatTimes{stimNum}(:,repeatNum))+1/binsPerSec];
+            %             theseSpks=spks(spks>=rtRange(1) & spks<rtRange(2));
+            %             theseSpks=theseSpks-rtRange(1);
+            %
+            %             if floor(max(theseSpks)*binsPerSec) > size(repeatTimes{stimNum},1)
+            %                 error('bad sizes')
+            %             end
+            %
+            %             newCol=full(sparse(1+floor(theseSpks*binsPerSec),1,1));
             
             repeatSpikes{stimNum}(:,repeatNum)=newCol(2:end-1);
             
@@ -535,14 +527,14 @@ for fileNum=1:length(fileNames)
                     error('hist edge case didn''t hold -- found zero width bins with members')
                 end
                 
-%                 theseSpecials=specials{specialNum}(specials{specialNum}>=rtRange(1) & specials{specialNum}<rtRange(2));
-%                 theseSpecials=theseSpecials-rtRange(1);
-%                 
-%                 if floor(max(theseSpecials)*binsPerSec) > size(repeatTimes{stimNum},1)
-%                     error('bad sizes')
-%                 end
-%                 
-%                 newCol=full(sparse(1+floor(theseSpecials*binsPerSec),1,1));
+                %                 theseSpecials=specials{specialNum}(specials{specialNum}>=rtRange(1) & specials{specialNum}<rtRange(2));
+                %                 theseSpecials=theseSpecials-rtRange(1);
+                %
+                %                 if floor(max(theseSpecials)*binsPerSec) > size(repeatTimes{stimNum},1)
+                %                     error('bad sizes')
+                %                 end
+                %
+                %                 newCol=full(sparse(1+floor(theseSpecials*binsPerSec),1,1));
                 rptSpecials{stimNum,specialNum}(:,repeatNum)=newCol(2:end-1);
             end
             
@@ -554,6 +546,9 @@ for fileNum=1:length(fileNames)
                 pkTimes=1+floor(pkTimes*binsPerSec);
                 repeatPokes{stimNum}(pkTimes,repeatNum)=pkcodes(pkInds);
             end
+            
+            spectralAnalysis(physVals{stimNum,repeatNum},physT{stimNum,repeatNum});
+            
         end
         for uniqueNum=1:size(uniqueTimes{stimNum},2)
             error('unique code needs to be adjusted to match above repeat code')
@@ -579,7 +574,7 @@ for fileNum=1:length(fileNames)
     end
     
     name = sprintf('%s compiled data.mat',file);
-    save(name,'binsPerSec','uniqueStimVals','repeatStimVals','uniqueTimes','repeatTimes','uniqueColInds','repeatColInds','uniqueSpikes','uniquePokes','repeatSpikes','repeatPokes','rptSpecials','unqSpecials');
+    save(fullfile(wd,name),'binsPerSec','uniqueStimVals','repeatStimVals','uniqueTimes','repeatTimes','uniqueColInds','repeatColInds','uniqueSpikes','uniquePokes','repeatSpikes','repeatPokes','rptSpecials','unqSpecials');
     
     if drawSummary
         figure %(fileNum)
@@ -716,6 +711,204 @@ function out=padToMatrix(in)
 len=max(cellfun(@length,in));
 out=zeros(len,length(in));
 for i=1:length(in)
-   out(1:length(in{i}),i)=in{i};
+    out(1:length(in{i}),i)=in{i};
 end
+end
+
+function [data ts first step]=checkForCompiledMat(wd,fType,fName,forceRecompile,contents,resampFreq)
+mattedName = sprintf('%s matted %s.mat',fName,fType);
+
+if any(strcmp(contents.mat,mattedName)) && ~forceRecompile
+    d=load(fullfile(wd,mattedName));
+    data=d.data;
+    first=d.first;
+    step=d.step;
+else
+    fprintf('have to load %s for first time -- this takes awhile\n',fType)
+    
+    tName=sprintf('%s %s.txt',fName,fType);
+    
+    C=doScan(fullfile(wd,tName),'%% START %% %f %f',6);
+    
+    first=C{1};
+    step=C{2};
+    
+    if first<0 || abs(1- step * 40000)>.5
+        error('bad first or step')
+    end
+    
+    data=load(fullfile(wd,tName));
+    disp(sprintf('file %s loaded',tName))
+    
+    save(fullfile(wd,mattedName),'data','first','step');
+    disp(sprintf('matted version saved'))
+end
+
+ts=getTimes(first, step, length(data));
+
+if isscalar(resampFreq)
+    
+    checkSecs=3;
+    checkInds=1:checkSecs/step;
+    figure
+    plot(ts(checkInds),data(checkInds),'b')
+    hold on
+    
+    if ~all(arrayfun(@isNearInteger,[resampFreq,1/step]))
+        %         [resampFreq,1/step]
+        %         warning('resample requires ints -- need to find ints P,Q, s.t. P/Q = ')
+        %         resampFreq * step
+        str = sprintf('%g',resampFreq*step);
+        while str(end)=='0';
+            str=str(1:end-1);
+        end
+        decstr=str;
+        decCount=0;
+        while length(decstr)>0 && decstr(end)~='.';
+            decstr=decstr(1:end-1);
+            decCount=decCount+1;
+        end
+        if isempty(decstr)
+            P=resampFreq*step;
+            Q=1;
+            if ~isNearInteger(P)
+                error('shouldn''t be possible')
+            end
+        else
+            P=resampFreq*step*10^decCount;
+            Q=10^decCount;
+        end
+        if (P/Q ~= resampFreq*step)
+            error('fix didn''t work')
+        end
+    else
+        P=resampFreq;
+        Q=1/step;
+    end
+    fprintf('resampling %s\n',fType)
+    data=resample(data,P,Q);
+    step=1/resampFreq;
+    ts=getTimes(first, step, length(data));
+    fprintf('done resampling phys\n')
+    
+    checkInds=1:checkSecs/step;
+    plot(ts(checkInds),data(checkInds),'r')
+end
+end
+
+function out=getTimes(first, step, len)
+out=cumsum([first step*ones(1,len-1)]);
+end
+
+function spectralAnalysis(data,t)
+if true
+    
+    p=.95;
+    winDur = .1;
+    
+    hz=1/unique(diff(t));
+    if length(hz)~=1
+        error('bad hz')
+    end
+    
+    figure
+    params.Fs=hz;
+    params.err=[2 p]; %0 for none, [1 p] for theoretical(?), [2 p] for jackknife
+    [garbage,garbage,garbage,garbage,garbage,garbage,params]=getparams(params);
+    params
+    
+    movingwin=[winDur winDur]; %[window winstep] (in secs)
+    
+    if false
+        figure
+        subplot(4,1,1)
+        fprintf('chronux coh w/err:')
+        tic
+        [C,phi,S12,S1,S2,t,f,zerosp,confC,phistd,Cerr]=cohgramcpt(data,spks,movingwin,params,0);
+        toc
+        
+        C(repmat(logical(zerosp),1,size(C,2)))=0;
+        gram(C',t,f,'lin');
+        title('coherence')
+        
+        subplot(4,1,2)
+        gram(squeeze(Cerr(1,:,:))',t,f,'lin');
+        title('chronux bottom err')
+        subplot(4,1,3)
+        gram(squeeze(Cerr(2,:,:))',t,f,'lin');
+        title('chronux top err')
+        
+        subplot(4,1,4)
+        gram(phi',t,f,'lin');
+        title('chronux phase')
+    end
+    
+    if false
+        fprintf('chronux w/err: \t')
+        tic
+        [S,t,f,Serr]=mtspecgramc(data,movingwin,params); %takes 180 sec for 5 mins @ 40kHz
+        toc
+        
+        figure
+        subplot(2,1,1)
+        plotSpecGram(squeeze(Serr(1,:,:))',t,f,'log');
+        title('chronux bottom err')
+        subplot(2,1,2)
+        plotSpecGram(squeeze(Serr(2,:,:))',t,f,'log');
+        title('chronux top err')
+        
+        figure
+        subplot(3,1,1)
+        plotSpecGram(S',t,f,'log');
+        title('chronux w/err')
+    else
+        figure
+    end
+    
+    params.err=0;
+    
+    fprintf('chronux w/o err:')
+    tic
+    [S,t,f]=mtspecgramc(data,movingwin,params); %takes ? sec for 5 mins @ 40kHz
+    toc
+    t2=t;
+    
+    subplot(3,1,2)
+    plotSpecGram(S',t,f,'log');
+    title('chronux w/o err')
+    
+    
+    fprintf('spectrogram: \t')
+    tic
+    [stft,f2,t,S] = spectrogram(data,round(movingwin(1)*hz),round(hz*(movingwin(1)-movingwin(2))),f,hz); % takes ? sec for 5 mins @ 40kHz
+    toc
+    
+    if ~all(f2(:)==f(:))
+        error('f error')
+    end
+    
+    subplot(3,1,3)
+    plotSpecGram(S,t,f,'log');
+    title('spectrogram')
+end
+end
+
+function gram(S,t,f,type)
+imagesc(t,f,S);
+axis xy;
+xlabel('time (s)');
+ylabel('freq (hz)');
+colorbar;
+end
+
+function plotSpecGram(S,t,f,type)
+if any(S(:)<0)
+    error('not expecting negative S')
+end
+gram(10*log10(abs(S)+eps),t,f,type); %this code for plotting log psd is from matlab's spectrogram, chronux's plot_matrix uses similar, but without abs or eps
+
+%    set(gca,'XTick',-pi:pi/2:pi)
+%    set(gca,'XTickLabel',{'-pi','-pi/2','0','pi/2','pi'})
+
+%    ytick
 end

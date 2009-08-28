@@ -66,4 +66,4 @@ phys/doAnalysis.m -text
 phys/physToTxt.s2s -text
 phys/physAnalysis.m -text
 phys/scratch.m -text
-phys/compilePhysData -text
+phys/compilePhysData.m -text

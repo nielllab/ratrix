@@ -64,6 +64,6 @@ phys/info/normalize.m -text
 phys/info/doHierarchicalBayes.m -text
 phys/doAnalysis.m -text
 phys/physToTxt.s2s -text
-phys/CompileBasicStimSet.m -text
 phys/physAnalysis.m -text
 phys/scratch.m -text
+phys/compilePhysData -text

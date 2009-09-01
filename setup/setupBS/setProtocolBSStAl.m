@@ -166,7 +166,7 @@ gratingStim = gratings(pixPerCycs,driftFrequencies,Orientation,Phase,Contrast,Du
     normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance, doCombos);
 
 %% Noise Stimuli
-ports=cellfun(@uint8,{1 3},'UniformOutput',false);
+ports=cellfun(@uint8,{1 3} ,'UniformOutput',false);
 [noiseSpec(1:length(ports)).port]=deal(ports{:});
 
 % stim properties:
@@ -187,7 +187,7 @@ ports=cellfun(@uint8,{1 3},'UniformOutput',false);
 [noiseSpec.distribution]         =deal({'gaussian' .01 'new'});
 [noiseSpec.startFrame]           =deal(uint8(1)); %deal('randomize');
 [noiseSpec.loopDuration]         =deal(1);
-[noiseSpec.numLoops]             =deal(inf);
+[noiseSpec.numLoops]             =deal(10);
 
 % patch properties:
 % in.locationDistribution       2-d density, will be normalized to stim area
@@ -197,11 +197,12 @@ ports=cellfun(@uint8,{1 3},'UniformOutput',false);
 % in.patchWidth                 0-1, normalized to stim area width
 % in.background                 0-1, normalized (luminance outside patch)
 
-[noiseSpec.locationDistribution]=deal(reshape(mvnpdf([a(:) b(:)],[-d/2 d/2]),gran,gran),reshape(mvnpdf([a(:) b(:)],[d/2 d/2]),gran,gran));
-[noiseSpec.maskRadius]           =deal(0.06);%.045);
+%[noiseSpec.locationDistribution] =deal(reshape(mvnpdf([a(:) b(:)],[-d/2 d/2]),gran,gran),reshape(mvnpdf([a(:) b(:)],[d/2 d/2]),gran,gran));
+[noiseSpec.locationDistribution] =deal(0.5,0.5)
+[noiseSpec.maskRadius]           =deal(0.1);%.045);
 [noiseSpec.patchDims]            =deal(uint16([50 50]));
-[noiseSpec.patchHeight]          =deal(.4);
-[noiseSpec.patchWidth]           =deal(.4);
+[noiseSpec.patchHeight]          =deal(.8);
+[noiseSpec.patchWidth]           =deal(.8);
 [noiseSpec.background]           =deal(.5);
 
 % filter properties:
@@ -212,7 +213,10 @@ ports=cellfun(@uint8,{1 3},'UniformOutput',false);
 % in.filterStrength             0 means no filtering (kernel is all zeros, except 1 in center), 1 means pure mvgaussian kernel (center not special), >1 means surrounding pixels more important
 % in.bound                      .5-1 edge percentile for long axis of kernel when parallel to window
 
-[noiseSpec.orientation]         =deal(-pi/4,pi/4);
+ltOrientation = -pi/2*(1-rand);
+rtOrientation = pi/2*rand;
+
+[noiseSpec.orientation]          =deal(ltOrientation, rtOrientation);%deal([-pi/2 0], [0 pi/2]);
 [noiseSpec.kernelSize]           =deal(.5);
 [noiseSpec.kernelDuration]       =deal(.2);
 [noiseSpec.ratio]                =deal(1/3);
@@ -297,12 +301,13 @@ ts5 = trainingStep(led, hateren,  repeatIndefinitely(), noTimeOff(), svnRev,svnC
 ts6 = trainingStep(led, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %fullfieldFlicker
 ts7 = trainingStep(led, crftrf,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %crf/trf
 ts8 = trainingStep(og, gratingStim, repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %grating stim
+ts9 = trainingStep(vh, crftrf,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %crf/trf
 
 %% Create protocol
-p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5, ts6});
-stepNum=uint8(4); % Which stepNum to start at
+p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8, ts9});
+stepNum=uint8(1); % Which stepNum to start at
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});
-    [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolBSAnesth','bs');
+    [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolBSStAl','bs');
 end

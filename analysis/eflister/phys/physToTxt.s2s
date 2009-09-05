@@ -1,18 +1,21 @@
-const base$ := "cell 2tmp";
+'the following parameters are now set by matlab
 
-'enter start and end time
-const sTime := 1434;
-const eTime := 1834;
+'const base$ := "cell 2tmp";
 
-'enter channel id's
-const spkChan%        := 7; 'wavemark chan (fix this -- for now, all will be considered one class, hide any you don't want exported)
-const stimChan%       := 1; 'photo diode recording
-const framePulseChan% := 2; 
-const physChan%       := 3; 'the high fidelity one
-const trialPulseChan% := 0; 'indicates stimulus/repeats starts
+''enter start and end time
+'const sTime := 1434;
+'const eTime := 1834;
 
-'enter output path
-const expPath$ := "C:\\Documents and Settings\\rlab\\Desktop\\";
+''enter channel id's
+'const spkChan%        := 7; 'wavemark chan (all will be considered one class, hide any you don't want exported)
+'const stimChan%       := 1; 'photodiode recording
+'const framePulseChan% := 2; 
+'const physChan%       := 3; 'the high fidelity one
+'const trialPulseChan% := 0; 'indicates stimulus/repeats starts
+
+''enter output path
+'const expPath$ := "C:\\Documents and Settings\\rlab\\Desktop\\";
+
 
 '''''''''' dont edit below here '''''''''''''
 
@@ -34,9 +37,16 @@ ExportChanList(sTime, eTime, spkChan%);
 
 ExportTextFormat();                    'reset export params
 ExportChanFormat(6,0,1,3);			      'type%, synop%, data%{, as%}   -switch to as=5 to do multiple cells-   (supposed to return error code but doesn't)?
+
 ExportTextFormat(0, 0, 1, "%", "\t");  '(head%, sum%, cols%{, delim${, sep$}})  "\""
+Try(MarkMask(spkChan%,0),"setting mask mode to AND all 4 layers");
+Try(MarkMask(spkChan%,-1,1,-1),"setting mask to all visible");
+Try(MarkMask(spkChan%,0,0,-1),"setting mask to empty 1st layer");
+Try(MarkMask(spkChan%,0,1,spkCode%),"setting mask to just spkCode in 1st layer");
 
 doSave("spks");
+
+Try(MarkMask(spkChan%,-1,1,-1),"resetting mask to all visible");
 
 ExportChanList(1);
 ExportChanList(sTime, eTime, stimChan%);
@@ -51,6 +61,8 @@ ExportChanList(sTime, eTime, framePulseChan%);
 'ExportChanFormat(4,0,1,2);	'doesn't seem to have desired effect of not showing both edges of pulses, so we compensate in matlab
 doSave("pulse");
 
+FileClose(-1,-1);
+FileQuit();
 Halt;
 
 proc doSave(suffix$)

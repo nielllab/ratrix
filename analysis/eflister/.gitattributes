@@ -67,3 +67,5 @@ phys/physToTxt.s2s -text
 phys/physAnalysis.m -text
 phys/scratch.m -text
 phys/compilePhysData.m -text
+phys/exportSpkData.m -text
+realtimeSpkSorting/dataNet/eSorter.m -text

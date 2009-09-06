@@ -162,8 +162,13 @@ try
         case 'correct'
             if isfield(trialRecords,'trialDetails') % look here
                 out=cell2mat(cellfun(@getCorrect,{trialRecords.trialDetails},'UniformOutput',false));
-            else
-                out=[trialRecords.correct];
+            else 
+               % out=[trialRecords.correct];
+               % edit 8/27/09 fli - use cellfun to avoid dropping empty 'correct' field
+               % out=cell2mat(cellfun(@getCorrect,{trialRecords.correct},'UniformOutput',false)); 
+               % fans method returns all nans, cuz none of the values in the cell are in the field 'correct'...
+               % pmm applied this change to trunk starting from an idea on fan's uncommitted tag 1.0.1, sept 5th, 2009
+                out=cell2mat(cellfun(@getCorrectExtractedFromField,{trialRecords.correct},'UniformOutput',false));      
             end
         otherwise
             ensureMode
@@ -290,7 +295,16 @@ end
 
 function out = getCorrect(trialDetails)
 out=nan;
-if isfield(trialDetails,'correct') && ~isempty(trialDetails.correct)
+if  isfield(trialDetails,'correct') && ~isempty(trialDetails.correct) 
     out=double(trialDetails.correct);
 end
 end
+
+function out = getCorrectExtractedFromField(correctFieldInCell)
+%handles trials prior to 'correct' being located at trialDetails.correct
+out=nan;
+if  ~isempty(correctFieldInCell) 
+    out=double(correctFieldInCell);
+end
+end
+

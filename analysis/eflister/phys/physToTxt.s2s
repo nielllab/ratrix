@@ -48,6 +48,9 @@ doSave("spks");
 
 Try(MarkMask(spkChan%,-1,1,-1),"resetting mask to all visible");
 
+ExportChanFormat(6,0,1,0);
+doSave("waveforms");
+
 ExportChanList(1);
 ExportChanList(sTime, eTime, stimChan%);
 doSave("stim");

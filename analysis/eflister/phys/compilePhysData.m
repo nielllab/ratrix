@@ -690,19 +690,6 @@ b=b/max(b);
 plot(a,b,c);
 end
 
-function C=doScan(file,format,headerlines)
-[fid msg]=fopen(file,'rt');
-if ~isempty(msg)
-    msg
-end
-if fid>2
-    C = textscan(fid,format, 1, 'headerlines',headerlines);
-else
-    error('no file')
-end
-fclose(fid);
-end
-
 function x=normalize(x)
 x=x-min(x);
 x=x/max(x);

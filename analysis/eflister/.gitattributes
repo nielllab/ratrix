@@ -60,7 +60,6 @@ phys/info/doMID.m -text
 phys/info/getIndexedResponses.m -text
 phys/info/doHistograms.m -text
 phys/info/lookup.m -text
-phys/info/normalize.m -text
 phys/info/doHierarchicalBayes.m -text
 phys/doAnalysis.m -text
 phys/physToTxt.s2s -text
@@ -70,3 +69,7 @@ phys/compilePhysData.m -text
 phys/exportSpkData.m -text
 realtimeSpkSorting/dataNet/eSorter.m -text
 phys/edf[!!-~]phys[!!-~]record.ods -text
+phys/info/private/normalize.m -text
+phys/normalizeByDim.m -text
+phys/getNumLines.m -text
+phys/doScan.m -text

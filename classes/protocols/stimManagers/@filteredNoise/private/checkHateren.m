@@ -80,6 +80,7 @@ semilogy(bottom*cut*ones(1,2),[10^-10 maxH],'k')
 function out=pct(val,decs)
 out=round(100*10^decs*val)/10^decs;
 
+%can use ratrix\classes\util\matlaby\normalize if don't mind doubleified output
 function x=normalize(x)
 x=x-min(x(:));
 x=x/max(x(:));

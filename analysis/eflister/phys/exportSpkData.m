@@ -11,8 +11,8 @@ baseDir='C:\Documents and Settings\rlab\Desktop\';
 csvfile='C:\Documents and Settings\rlab\Desktop\edf phys record.csv';
 %use textscan to read this and get paths, times, chan numbers, etc for above recordingID
 
-params=readPhysRecord(csvfile,recordingID);
-keyboard
+%params=readPhysRecord(csvfile,recordingID);
+%keyboard
 
 params.baseDir=baseDir;
 params.base='164.pen1.2nd';
@@ -36,6 +36,91 @@ if status~=0
     result
 end
 delete(scriptfile);
+
+doWaveforms(baseDir,params.base,params.spkChan,params.spkCode);
+end
+
+function doWaveforms(baseDir,base,chan,code)
+f=fullfile(baseDir,[base ' waveforms.txt']);
+
+f='C:\Documents and Settings\rlab\Desktop\164.pen1.2nd waveforms.txt';
+chan=6;
+code=1;
+
+numLines=getNumLines(f);
+
+format='%% volt %% %u16 %u16 %u16';
+C=doScan(f,format,2,chan,1,3,false);
+idealRate=C{1}; %coming out like "30" when should be "30120"?
+totalPoints=C{2};
+prePoints=C{3};
+
+numRecs=(numLines-4)/(2+totalPoints); %4 cuz there's a newline on the end
+
+if ~isNearInteger(numRecs)
+    error('numRecs problem')
+end
+
+combos=repmat(' \n %f',1,totalPoints);
+format=['%% WAVMK %% %f %f %u8 0 0 0' combos ' \n'];
+C=doScan(f,format,3,chan,numRecs,3+totalPoints,true);
+
+C=[num2cell(C{1}) num2cell(C{2}) num2cell(C{3}) mat2cell([C{4:end}],ones(numRecs,1),totalPoints)];
+recs = cell2struct(C,{'time','rate','code','points'},2);
+
+if any(diff([recs.time])<=0)
+    error('time error')
+end
+
+r=unique([recs.rate]);
+if ~isscalar(r)
+    error('rate error')
+else
+    tms=cumsum(ones(1,totalPoints)*r)*1000;
+end
+
+codes=unique([recs.code]);
+if ~ismember(code,codes)
+    error('code error')
+end
+codes=[code setdiff(codes,code)];
+
+savefile
+
+figure
+col=[0 0 0];
+for c=codes
+    matches=[recs.code]==c;
+    traces=cat(1,recs(matches).points)';
+    
+    %argh no alpha for lines :(
+    
+    subplot(2,1,1)
+    h=plot(tms,traces,'Color',col)
+    hold on
+    
+    subplot(2,1,2)
+    plot(tms,normalizeByDim(traces,2),'Color',col)
+    hold on
+    
+    col=[1 0 0];
+end
+allTraces=cat(1,recs.points);
+allTraces=allTraces(:);
+pT=ones(1,2)*tms(prePoints+1);
+for i=1:2
+    subplot(2,1,i)
+    if i==1
+        ys=[min(allTraces) max(allTraces)];
+    else
+        ys=[0 1];
+    end
+    plot(pT,ys,'k')
+    xlabel('ms')
+    legend({'accepted','rejected'})
+end
+
+% TODO: compare times to phys file to make sure they are the peaks, not beginnings
 end
 
 function makeTmpScript(fName,params)

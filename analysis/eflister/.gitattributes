@@ -73,3 +73,4 @@ phys/info/private/normalize.m -text
 phys/normalizeByDim.m -text
 phys/getNumLines.m -text
 phys/doScan.m -text
+phys/doWaveforms.m -text

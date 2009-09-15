@@ -60,6 +60,25 @@ for fileNum=1:length(fileNames)
             case 'CRT'
                 switch pulseProtocol
                     case 'old'
+                        
+
+% example pulse file:                        
+% 1   %CHANNEL%	%2%
+% 2   %Evt+-%
+% 3   %%
+% 4   %pulse%
+% 5   
+% 6   %HIGH%
+% 7   1435.8024667
+% ... ...
+
+%above doScan w/2 header lines doesn't look right -- 4 or 5 works.
+%also verify line 2: "%Evt+-%"
+
+%note: consider exporting wavemarks as visual measure of sort quality
+%with wavemarks as events, peaks are aligned, and times are peak times (i believe)
+%if they are PRE times, they would be offset consistently within file but not across files
+                        
                         if ~strcmp(C{1},'HIGH')
                             error('bad pulse parity')
                         end

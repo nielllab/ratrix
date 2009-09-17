@@ -14,7 +14,8 @@ try
             %http://www.mathworks.com/matlabcentral/newsreader/view_thread/235126
             
             while ~feof(fid)
-                line=fgetl(fid);
+                %line=fgetl(fid);
+                fgetl(fid); %faster?
                 out=out+1;
             end
         else

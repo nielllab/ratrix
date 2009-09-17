@@ -226,7 +226,9 @@ if doPrewhittening
 end
 
 function y=normalize(x)
-%edf sez: this is a poor choice for a function name, but OK cuz local functions have precedence
+%edf sez: beware using a name like this (i found while searching for it),
+%it's not the normal meaning of this word and we have a function that clashes with it
+%but OK cuz local functions have precedence
 %http://www.mathworks.com/access/helpdesk/help/techdoc/matlab_prog/f7-58170.html#bresuvu-6    
 
 %order the distribution, and force it to be gaussian, drawn from a normal distribution

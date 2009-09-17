@@ -74,3 +74,7 @@ phys/normalizeByDim.m -text
 phys/getNumLines.m -text
 phys/doScan.m -text
 phys/doWaveforms.m -text
+phys/new/helpers/extractPhysRecord.m -text
+phys/new/helpers/extractPhysToText.m -text
+phys/new/doPhys.m -text
+phys/edf[!!-~]phys[!!-~]record.xls -text

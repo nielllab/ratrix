@@ -10,12 +10,12 @@ analysisBase='C:\Documents and Settings\rlab\Desktop\edf analysis';
 dataBase='C:\eflister\phys\sorted';
 
 %indicate what to process
-target.rat_ids={'164'};
-target.dates={'10.16.08','03.25.09'};
-target.depths=[13.24,19.97];
+target.rat_ids={};%{'164'};
+target.dates={};%{'10.16.08','03.25.09'};
+target.depths=[];%[13.24,19.97];
 
 %do all BUT targets
-exclude=false;
+exclude=true;
 
 %%%%%
 % setup done, don't edit below here

@@ -1,21 +1,18 @@
-'the following parameters are now set by matlab
+'the following are filled in by matlab automatically
 
-'const base$ := "cell 2tmp";
+'const base$           := ;
+'const expPath$        := ;
+'const sTime           := ;
+'const eTime           := ;
 
-''enter start and end time
-'const sTime := 1434;
-'const eTime := 1834;
+'one of the following chunks will be filled in, the other should all be set to -1
 
-''enter channel id's
-'const spkChan%        := 7; 'wavemark chan (all will be considered one class, hide any you don't want exported)
-'const stimChan%       := 1; 'photodiode recording
-'const framePulseChan% := 2; 
-'const physChan%       := 3; 'the high fidelity one
-'const trialPulseChan% := 0; 'indicates stimulus/repeats starts
+'const physChan%      := ;       %the high fidelity one
+'const stimChan%      := ;       %photodiode recording
+'var pulses%[]      := ;
 
-''enter output path
-'const expPath$ := "C:\\Documents and Settings\\rlab\\Desktop\\";
-
+'const spkChan%       := ;        %wavemark chan (all codes will be considered one class, so we hide those we don't want exported)
+'const spkCode%       := ;
 
 '''''''''' dont edit below here '''''''''''''
 
@@ -32,45 +29,63 @@ ChanProcessClear(); 'removes all processes from all channels
 '8	TextMark	
 '9	RealWave
 
-ExportChanList(1);                    'clear export list, set zero shift
-ExportChanList(sTime, eTime, spkChan%);
+ExportChanList(1);                     'clear export list, set zero shift
+'actually, i think i was misreading the doc
+'now i think it says that supplying 1 will tell it to shift the earliest time to zero!
+'that is NOT what we want
+'but fortunately i think it only affects saving of .smr files, not .txt files
+'for now leaving as is, cuz it seems to work
+'also affects each call below
 
 ExportTextFormat();                    'reset export params
-ExportChanFormat(6,0,1,3);			      'type%, synop%, data%{, as%}   -switch to as=5 to do multiple cells-   (supposed to return error code but doesn't)?
-
 ExportTextFormat(0, 0, 1, "%", "\t");  '(head%, sum%, cols%{, delim${, sep$}})  "\""
-Try(MarkMask(spkChan%,0),"setting mask mode to AND all 4 layers");
-Try(MarkMask(spkChan%,-1,1,-1),"setting mask to all visible");
-Try(MarkMask(spkChan%,0,0,-1),"setting mask to empty 1st layer");
-Try(MarkMask(spkChan%,0,1,spkCode%),"setting mask to just spkCode in 1st layer");
 
-doSave("spks");
+if spkChan%>0 and spkCode%>-1 then
+    ExportChanList(sTime, eTime, spkChan%);
 
-Try(MarkMask(spkChan%,-1,1,-1),"resetting mask to all visible");
+    ExportChanFormat(6,0,1,3);			   'type%, synop%, data%{, as%}   -switch to as=5 to do multiple cells-   (supposed to return error code but doesn't)?
 
-ExportChanFormat(6,0,1,0);
-doSave("waveforms");
+    Try(MarkMask(spkChan%,0),"setting mask mode to AND all 4 layers");
+    Try(MarkMask(spkChan%,-1,1,-1),"setting mask to all visible");
+    Try(MarkMask(spkChan%,0,0,-1),"setting mask to empty 1st layer");
+    Try(MarkMask(spkChan%,0,1,spkCode%),"setting mask to just spkCode in 1st layer");
 
-ExportChanList(1);
-ExportChanList(sTime, eTime, stimChan%);
-doSave("stim");
+    doSave("spks");
 
-ExportChanList(1);
-ExportChanList(sTime, eTime, physChan%);
-doSave("phys");
+    Try(MarkMask(spkChan%,-1,1,-1),"resetting mask to all visible");
 
-ExportChanList(1);
-ExportChanList(sTime, eTime, framePulseChan%);
-'ExportChanFormat(4,0,1,2);	'doesn't seem to have desired effect of not showing both edges of pulses, so we compensate in matlab
-doSave("pulse");
+    ExportChanFormat(6,0,1,0);
+    doSave("waveforms");
+endif;
+
+if stimChan%>0 then
+    ExportChanList(1);
+    ExportChanList(sTime, eTime, stimChan%);
+    doSave("stim");
+endif;
+
+if physChan%>0 then
+    ExportChanList(1);
+    ExportChanList(sTime, eTime, physChan%);
+    doSave("phys");
+endif;
+
+if Len(pulses%[])>1 then
+    ExportChanList(1);
+    ExportChanList(sTime, eTime, pulses%[]);
+    'ExportChanFormat(4,0,1,2);	'doesn't seem to have desired effect of not showing both edges of pulses, so we compensate in matlab
+    ExportChanFormat(6,0,1,3);  'indexPulses are wavemarks, we just want events
+    doSave("pulse");
+    ExportChanFormat(6,0,1,0);
+endif;
 
 FileClose(-1,-1);
 FileQuit();
 Halt;
 
-proc doSave(suffix$)
+proc doSave(prefix$)
 	'consider err% := FilePathSet(expPath$,0,1); 'but then reset to previous
-	Try(FileSaveAs(expPath$+base$+" "+suffix$+".txt", 1),"writing "+suffix$+" file"); 'will prompt to overwrite
+	Try(FileSaveAs(expPath$+prefix$+"."+base$+".txt", 1),"writing "+prefix$+" file"); 'will prompt to overwrite
 end;
 
 proc Try(succ%, s$)

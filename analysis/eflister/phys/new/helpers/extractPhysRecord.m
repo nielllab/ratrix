@@ -23,7 +23,10 @@ else
         end
         error('good') %cuz no finally
     catch ex
-        fclose(fid);
+        if fclose(fid)
+            error('fclose error')
+        end
+        
         if ~strcmp(ex.message,'good')
             getReport(ex)
             rethrow(ex)
@@ -153,6 +156,10 @@ out=chanFields;
 out(end+1)={'spkChan'};
 end
 
+function out=isWaveMarkOnly(f)
+out=~strcmp(f.file,f.baseFile);
+end
+
 %handles the inheretence of blanks
 %this is more complex than i expected, sorry :(  works tho :)
 function flist=consistencyChecksAndReduce(out,dataBase,stimTimes)
@@ -212,8 +219,12 @@ for i=1:length(out)
                 error('unknown pulse type')
         end
         
-        flist(end).waveMarkOnly = any(cellfun(@(x) ischar(flist(end).(x)) && strcmp(flist(end).(x),'X'),chanFields));
-        if flist(end).waveMarkOnly
+        bf=length(flist);
+        if any(cellfun(@(x) ischar(flist(end).(x)) && strcmp(flist(end).(x),'X'),chanFields))
+            bf=bf-1;
+        end
+        flist(end).baseFile = flist(bf).file;
+        if isWaveMarkOnly(flist(end))
             if any(cellfun(@(x) ~ismember(flist(end).(x),{'X','none'}),chanFields))
                 error('if any channel is marked X for wavemark only, all of them must be X or none')
             end
@@ -245,15 +256,23 @@ for i=1:length(out)
         
         if length(flist(end).chunks)>0
             z=flist(end).chunks(end).cell_Z;
+            if isWaveMarkOnly(flist(end))
+                error('shouldn''t happen')
+            end
         elseif length(flist)>1 && strcmp(flist(end-1).rat_id,flist(end).rat_id) && flist(end-1).date==flist(end).date && all(cellfun(@(lv) isempty(out(i).(lv)),checkList))
             z=flist(end-1).chunks(end).cell_Z;
         else
+            if isWaveMarkOnly(flist(end))
+                error('shouldn''t happen')
+            end
             z=nan;
             lastWasDummy=true;
             if verbose
                 warning('got a z dummy')
             end
         end
+    elseif isWaveMarkOnly(flist(end))
+        error('wavemark only files must inherit')
     end
     flist(end).chunks(end+1).cell_Z=z;
     
@@ -302,7 +321,7 @@ for i=1:length(out)
         end
     end
     
-    if ~isempty(flist(end).file) && ~flist(end).dummy && ~flist(end).waveMarkOnly && isempty(flist(end).stimTimes)
+    if ~isempty(flist(end).file) && ~flist(end).dummy && ~isWaveMarkOnly(flist(end)) && isempty(flist(end).stimTimes)
         error('files that aren''t dummy or wavemarkonly must have stimtimes')
     end
 end

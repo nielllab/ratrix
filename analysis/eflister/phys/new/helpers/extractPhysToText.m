@@ -1,4 +1,9 @@
 function extractPhysToText(record,analysisBase,dataBase)
+%this is inefficient because it does each chunk in a separate run of spike,
+%rather than grouping a file and all its chunks into one run.  thus, you
+%pay the cost of opening the file multiple times.  would be more
+%complicated, but doable, to do it all at once...
+
 force=false;
 
 fileFiles={'stim','phys','pulse','pokes'};

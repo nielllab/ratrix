@@ -93,7 +93,7 @@ fName=fullfile(analysisDir,'tmp.s2s');
 
 params.baseDir=analysisDir;
 if params.baseDir(end)~=filesep
-    params.baseDir(end+1)=filsep;
+    params.baseDir(end+1)=filesep;
 end
 params.base=base;
 

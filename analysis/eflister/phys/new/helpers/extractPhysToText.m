@@ -92,6 +92,9 @@ function fName=makeTmpScript(type,analysisDir,rec,base,lastStop)
 fName=fullfile(analysisDir,'tmp.s2s');
 
 params.baseDir=analysisDir;
+if params.baseDir(end)~=filesep
+    params.baseDir(end+1)=filsep;
+end
 params.base=base;
 
 params.physChan=-1;
@@ -206,8 +209,7 @@ out{end+1}=sprintf('const spkCode%%       :=  %d ;',params.spkCode);
 end
 
 function runScript(scriptfile,datafile)
-%[status result]=system(['C:\Spike5\sonview /M "' datafile '" "' scriptfile '"']);
-status=0;
+[status result]=system(['C:\Spike5\sonview /M "' datafile '" "' scriptfile '"']);
 
 if status~=0
     result

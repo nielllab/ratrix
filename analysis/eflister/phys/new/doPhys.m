@@ -4,13 +4,13 @@ function record=doPhys
 %%%%%
 
 %directory containing 'phys record.csv' and that will receive output
-analysisBase='C:\Documents and Settings\rlab\Desktop\edf analysis';
+analysisBase='D:\physDB'; %'C:\Documents and Settings\rlab\Desktop\edf analysis';
 
 %directory containing .smr files, in subdirectories ratID\mm.dd.yy\*.smr
 dataBase='C:\eflister\phys\sorted';
 
 %indicate what to process
-target.rat_ids={'164'};
+target.rat_ids={};%{'164'};
 
 % 164 done
 % 10.16.08
@@ -39,12 +39,12 @@ target.rat_ids={'164'};
 % 05.08.09
 
 
-target.dates={'03.25.09','04.07.09','04.15.09','04.17.09'};
+target.dates={};%{'03.25.09','04.07.09','04.15.09','04.17.09'};
 
 target.depths=[];%[13.24,19.97];
 
 %do all BUT targets
-exclude=false;
+exclude=true;
 
 %%%%%
 % setup done, don't edit below here

@@ -20,7 +20,9 @@ for i=1:length(record)
         
         fns=cellfun(@(x) fullfile(analysisDir,[x '.' base '.txt']),fileFiles,'UniformOutput',false);
         
-        if (force || ~all(cellfun(@(x) exist(x,'file'),fns))) && strcmp(record(i).file,record(i).baseFile)  %CHECK: make sure we really should prevent from calling when wavemarkonly -- for some reason i thought this was wrong for a while
+        wavemarkOnly=~strcmp(record(i).file,record(i).baseFile);
+        
+        if (force || ~all(cellfun(@(x) exist(x,'file'),fns))) && ~wavemarkOnly  %CHECK: make sure we really should prevent from calling when wavemarkonly -- for some reason i thought this was wrong for a while
             fprintf('%s\n',datafile)
             resetDir(analysisDir); %pessimistic if any are missing
             rec=record(i);
@@ -36,6 +38,7 @@ for i=1:length(record)
         
         cbase=hash(record(i).file,'SHA1');
         analysisDir=fullfile(analysisBase,pth,cbase);
+        datafile=fullfile(dataBase,pth,record(i).file);
         
         for j=1:length(record(i).chunks)
             base=['chunk' num2str(j) '.' cbase];

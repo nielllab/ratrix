@@ -214,7 +214,8 @@ else
 end
 
 if ismac
-    ts001 = '/Users/eflister/Desktop/ratrix trunk/classes/protocols/stimManagers/@flicker/ts001';
+    %ts001 = '/Users/eflister/Desktop/ratrix trunk/classes/protocols/stimManagers/@flicker/ts001';
+    ts001=fullfile(getRatrixPath,'ts001');
 else
     ts001 = '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\stimuli\hateren\ts001';
 end

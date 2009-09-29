@@ -91,9 +91,11 @@ switch class(trialManager)
                 framesUntilTimeout=discrimStim.framesUntilTimeout;
             end
         end
+        
 		stimSpecs{i} = stimSpec(discrimStim.stimulus,criterion,discrimStim.stimType,discrimStim.startFrame,...
 			framesUntilTimeout,discrimStim.autoTrigger,discrimStim.scaleFactor,0,hz,'discrim','discrim',false,true,indexPulses); % do not punish responses here
-		i=i+1;
+        
+        i=i+1;
 		% required reinforcement phase
 		criterion={[],i+1};
 		stimSpecs{i} = stimSpec([],criterion,'cache',0,[],[],0,0,hz,'reinforced','reinforcement',false,false); % do not punish responses here

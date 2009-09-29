@@ -151,6 +151,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             
             trialRecords(trialInd).station = structize(station); %wait til now to record, so we get an updated ifi measurement in the station object
             
+            refreshRate=1/getIFI(station); %resolution.hz is 0 on OSX
             
             % check port logic (depends on trialManager class)
             if (isempty(trialRecords(trialInd).targetPorts) || isvector(trialRecords(trialInd).targetPorts))...
@@ -178,7 +179,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
 
             [stimSpecs startingStimSpecInd] = createStimSpecsFromParams(trialManager,preRequestStim,preResponseStim,discrimStim,...
 				trialRecords(trialInd).targetPorts,trialRecords(trialInd).distractorPorts,getRequestPorts(trialManager,getNumPorts(station)),...
-				trialRecords(trialInd).interTrialLuminance,trialRecords(trialInd).resolution.hz,indexPulses);
+				trialRecords(trialInd).interTrialLuminance,refreshRate,indexPulses);
 
             validateStimSpecs(stimSpecs);
 
@@ -234,7 +235,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                     trialNum=trialRecords(trialInd).trialNumber;
                     stimManagerClass=trialRecords(trialInd).stimManagerClass;
                     frameDropCorner=trialManager.frameDropCorner;
-                    refreshRate=trialRecords(trialInd).resolution.hz;
+
                     try
                         stim_path = fullfile(getStorePath(getDatanet(station)), 'stimRecords');
                         save(fullfile(stim_path,cparams.stimFilename),'ratID','trialStartTime','trialNum','stimManagerClass','stimulusDetails','frameDropCorner','refreshRate');

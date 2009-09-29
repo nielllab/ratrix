@@ -1,5 +1,7 @@
 function s=stopPTB(s)
 
+Screen('LoadNormalizedGammaTable', s.window, makeStandardLUT(8));
+
 s.ifi=[];
 s.window=[];
 Screen('CloseAll');

@@ -44,6 +44,8 @@ try
     if isempty(imagingTasks)
         s.window = Screen('OpenWindow',s.screenNum,0);%,[],32,2);  %%color, rect, depth, buffers (none can be changed in basic version)
     else
+        error('edf says: have you checked that the stopPTB will remove these tasks?  i see no evidence that you clean up after yourself if a later trial doesn''t want these things.  a clear Screen may help, but i want proof.  it''s not stated in ''help psychimaging'' -- worst case, ask mario.  also, i don''t see that you''ve been careful to make sure the pipeline details are recorded in the trial record.')
+        
         PsychImaging('PrepareConfiguration');
         % PsychImaging('AddTask', 'General', 'FloatingPoint32BitIfPossible'); %enable general support of such tasks
         %6/2/09 - add imagingTasks to the pipeline

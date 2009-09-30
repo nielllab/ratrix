@@ -75,7 +75,7 @@ try
                 end
                 
                 var=sprintf('out%d',cycs);
-                eval([var ' = out;']);
+                eval([var ' = out;']); %feval(@=,var,out) %= not a func :(
                 if cycs>0
                     save(targ,var,'-append');
                 else

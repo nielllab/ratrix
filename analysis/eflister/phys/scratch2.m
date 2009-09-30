@@ -1,4 +1,4 @@
-function [hrs y]=scratch
+function [hrs y]=scratch2
 % D:\physDB\164\02.27.09\8d315fc3a807c5b249e5ebf3e99a8cbd19e0ffd4 %1G
 % D:\physDB\164\03.17.09\3b43c16b7b96f501204aa3bca54bd522856d2320
 % D:\physDB\164\03.25.09\fd0540a23f6a44ae778fdc547bb870bf9bd1f5e0
@@ -15,8 +15,8 @@ step=0.0000249;
 start=376.0000181;
 hrs=3.48196573658334;
 targRate=1000;
-minRate=2;
-maxRate=5;
+%minRate=2;
+%maxRate=5;
 
 f=[b '.txt'];
 m=[b '.mat'];
@@ -37,19 +37,20 @@ end
 
 y=whos('-file',m);
 
-if false && IsWin
-    [m1 m2]=memory;
-    m1=m1.MaxPossibleArrayBytes;
-else
-    m1=6*10^8; %makes 3.5 hrs @ 40kHz doubles about 300 MB and 3kHz
-end
-newRate=m1/8/60/60/hrs/2;
-if newRate<minRate*targRate
-    error('largest contig not big enough')
-elseif newRate>maxRate*targRate
-    newRate=maxRate*targRate;
-end
-group=ceil((1/step)/newRate);
+% if false && IsWin
+%     [m1 m2]=memory;
+%     m1=m1.MaxPossibleArrayBytes;
+% else
+%     m1=6*10^8; %makes 3.5 hrs @ 40kHz doubles about 300 MB and 3kHz
+% end
+% newRate=m1/8/60/60/hrs/2;
+% if newRate<minRate*targRate
+%     error('largest contig not big enough')
+% elseif newRate>maxRate*targRate
+%     newRate=maxRate*targRate;
+% end
+newRate=targRate;
+group=floor((1/step)/newRate);
 
 newOut=nan(1,ceil(hrs*60*60*newRate));
 newT=newOut;

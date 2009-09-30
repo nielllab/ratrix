@@ -79,3 +79,4 @@ phys/edf[!!-~]phys[!!-~]record.xls -text
 phys/new/helpers/reduceTxt.m -text
 phys/scratch2.m -text
 phys/new/helpers/extractPhysThenAnalyze.m -text
+phys/new/helpers/compilePhysTxt.m -text

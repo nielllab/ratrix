@@ -12,8 +12,14 @@ function physAnalysis
 %            (http://www.download.com/TextPad/3000-2352_4-10303640.html?tag=lst-0-1)
 
 %2) provide cell array of <base> from above (full paths)
-pth='C:\Documents and Settings\rlab\Desktop\cell 2tmp\';
-fileNames={'cell 2tmp'};
+
+%failed -- seems to have pulse problems...
+%pth='/Users/eflister/Desktop/physChk/164/10.16.08/71d175b616650bff5161fb39a38d8ea40550bd59/';
+%fileNames={'71d175b616650bff5161fb39a38d8ea40550bd59'};
+
+pth='/Users/eflister/Desktop/physChk/164/10.21.08/7877f102598baece5bd3a79ec76311f0ff33befa/chunk1/'; %also 2 and 3
+fileNames={'7877f102598baece5bd3a79ec76311f0ff33befa'};
+
 
 %3) enter time ranges of particular stims for each set of files (enter 0's for stimuli not shown):
 

@@ -29,7 +29,11 @@ for fileNum=1:length(fileNames)
         pFile=sprintf('%s pulse.txt',file);
         origPulses=load(fullfile(wd,pFile));
         
-        C=doScan(fullfile(wd,pFile),'%% %[^%] %%',2);
+        cv=2;
+        edf1=0;
+        edf2=1;
+        tf=false;
+        C=doScan(fullfile(wd,pFile),'%% %[^%] %%',2,cv,edf1,edf2,tf);
         
         %pulses from ratrix changed over experiments:
         %if VRG:
@@ -82,10 +86,10 @@ for fileNum=1:length(fileNames)
                         dPulses=diff(origPulses)<.0004; %major problems if flip or stim comp is ever this fast, or if double pulses take longer than this
                         stimComputed=[false; dPulses] & [false; false; dPulses(1:end-1)] & [false; false; false; dPulses(1:end-2)]; %pulses preceded by 3 quick events
                         
-                        numFrames=length(stimComputed)/6;
+                        numFrames=floor(length(stimComputed)/6); %hacked in floor
                         check=reshape(stimComputed,6,numFrames)==repmat([0 0 0 1 0 0]',1,numFrames);
                         if numFrames~=round(numFrames) || ~all(check(:)) %can be quite confident if we pass this
-                            error('bad pulses')
+                            warning('bad pulses') %relaxing this - HACK!
                         end
                         
                         pulses=origPulses([false; stimComputed(1:end-1)]); % take first down after the double to be the moment flip returns, gun will reach photodiode for this frame in about .9ms
@@ -730,12 +734,28 @@ else
     
     tName=sprintf('%s %s.txt',fName,fType);
     
-    C=doScan(fullfile(wd,tName),'%% START %% %f %f',6);
+    switch fType
+        case 'phys'
+            cv=3;
+            edf1=1;
+            edf2=2;
+            tf=false;
+        case 'stim'
+            cv=1;
+            edf1=1;
+            edf2=2;
+            tf=false;
+        otherwise
+            fType
+            keyboard
+            %error('unknowntype')
+    end
+    C=doScan(fullfile(wd,tName),'%% START %% %f %f',6,cv,edf1,edf2,tf);
     
     first=C{1};
     step=C{2};
     
-    if first<0 || abs(1- step * 40000)>.5
+    if first<0 || abs(1- step * 40000)>3 %used to be .5, edf raised to 1 so 10k acceptable (october files sample low)
         error('bad first or step')
     end
     

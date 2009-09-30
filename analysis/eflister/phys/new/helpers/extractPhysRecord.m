@@ -35,6 +35,39 @@ else
     numRecs=numRecs-1;
     record=parsefields(C,numRecs,dataBase);
 end
+printSummary(record);
+end
+
+function printSummary(r)
+files=0;
+days=0;
+times=[];
+uniqueZs=0;
+lastZ=nan;
+lastDate=nan;
+for i=1:length(r)
+    if ~r(i).dummy
+        files=files+1;
+        if lastDate~=r(i).date
+            days=days+1;
+            lastDate=r(i).date;
+        end
+        for j=1:length(r(i).chunks)
+            time=r(i).chunks(j).stop_time-r(i).chunks(j).start_time;
+            z=r(i).chunks(j).cell_Z;
+            if z==lastZ
+                times(end)=times(end)+time;
+            else
+                uniqueZs=uniqueZs+1;
+                lastZ=z;
+                times(end+1)=time;
+            end
+        end
+    end
+end
+
+fprintf('found %d files with %d putative cells over %d unique days\n',files,uniqueZs,days);
+fprintf('total good recording time is %.2f hours (avg %.2f mins/cell)\n',sum(times)/60/60,sum(times)/uniqueZs/60);
 end
 
 function m=parsefields(C,n,dataBase)
@@ -327,6 +360,10 @@ for i=1:length(out)
 end
 arrayfun(@doCheck,flist);
     function doCheck(rec)
+        if isempty(dataBase)
+            warning('running in no-txt-extract mode (no access to .smr files)')
+            return
+        end
         f=fullfile(dataBase,rec.rat_id,datestr(rec.date,'mm.dd.yy'),rec.file);
         if verbose
             fprintf('checking %s\n',f);

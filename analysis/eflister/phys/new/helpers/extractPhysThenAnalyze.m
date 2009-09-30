@@ -11,25 +11,26 @@ chunkFiles={'spks','waveforms'};
 reduceFiles={'stim','phys'};
 
 for i=1:length(record)
-    if ~record(i).dummy
-        pth=fullfile(record(i).rat_id,datestr(record(i).date,'mm.dd.yy'));
+    rec=record(i);
+    if ~rec.dummy
+        pth=fullfile(rec.rat_id,datestr(rec.date,'mm.dd.yy'));
         
-        datafile=fullfile(dataBase,pth,record(i).baseFile);
+        datafile=fullfile(dataBase,pth,rec.baseFile);
         
-        base=hash(record(i).baseFile,'SHA1');
+        base=hash(rec.baseFile,'SHA1');
         analysisDir=fullfile(analysisBase,pth,base);
         targetDir=fullfile(targetBase,pth,base);
         
         fns=cellfun(@(x) fullfile(analysisDir,[x '.' base '.txt']),fileFiles,'UniformOutput',false);
         
-        wavemarkOnly=~strcmp(record(i).file,record(i).baseFile);
+        wavemarkOnly=~strcmp(rec.file,rec.baseFile);
 
         newTxts=false;
         if ~wavemarkOnly  %CHECK: make sure we really should prevent from calling when wavemarkonly -- for some reason i thought this was wrong for a while
             if force || ~all(cellfun(@(x) exist(x,'file'),fns))
                 fprintf('%s\n',datafile)
                 resetDir(analysisDir); %pessimistic if any are missing
-                rec=record(i);
+
                 rec.chunks=[];
                 
                 fns{:}
@@ -45,14 +46,14 @@ for i=1:length(record)
             if force || ~all(cellfun(@(x) exist(x,'file'),fns)) || newTxts
                 resetDir(targetDir);
                 for rNum=1:length(fns)
-                    reduceTxt(targetDir,analysisDir,base,reduceFiles{rNum},binsPerSec);
+                    reduceTxt(targetDir,analysisDir,base,reduceFiles{rNum},binsPerSec,rec.([reduceFiles{rNum} 'Chan']));
                 end
             end
         end
         
-        cbase=hash(record(i).file,'SHA1');
+        cbase=hash(rec.file,'SHA1');
         analysisDir=fullfile(analysisBase,pth,cbase);
-        datafile=fullfile(dataBase,pth,record(i).file);
+        datafile=fullfile(dataBase,pth,rec.file);
         
         for j=1:length(record(i).chunks)
             base=['chunk' num2str(j) '.' cbase];
@@ -61,8 +62,8 @@ for i=1:length(record)
             cfns=cellfun(@(x) fullfile(chunkDir,[x '.' base '.txt']),chunkFiles,'UniformOutput',false);
             if force || ~all(cellfun(@(x) exist(x,'file'),cfns))
                 resetDir(chunkDir);
-                rec=record(i);
-                rec.chunks=rec.chunks(j);
+
+                rec.chunks=record(i).chunks(j);
                 
                 cfns{:}
                 

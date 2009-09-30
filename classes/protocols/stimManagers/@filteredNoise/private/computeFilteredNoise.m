@@ -218,6 +218,16 @@ for i=1:length(stimulus.port)
         tic
         %stim=convn(noise,k,'same'); %slower than imfilter
         stim=imfilter(noise-theMean,k,'circular')+theMean; %allows looping, does it keep edges nice?
+
+        %for reasonable stims, takes 6x realtime on fast systems
+        %i have circular filtering worked out by hand in matlab, to translate to gpu shader to get realtime speed
+        %tho note problems: http://tech.groups.yahoo.com/group/psychtoolbox/message/8742
+
+        %http://blogs.mathworks.com/steve/2006/11/28/separable-convolution-part-2/#comment-21123
+        %alternative: work out how to do in fourier domain
+        %from cris niell: ifft(randn*freqs*exp(2*pi*i*phases)  (here, randn and phases are space x space x time)
+        %requires some fftshifting, symmetry issues, etc.
+        
         fprintf('took %g to filter noise\n',toc)
     end
     

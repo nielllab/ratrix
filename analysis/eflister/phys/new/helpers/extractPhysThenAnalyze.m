@@ -1,4 +1,4 @@
-function extractPhysToText(record,analysisBase,dataBase)
+function extractPhysThenAnalyze(record,analysisBase,dataBase,targetBase,binsPerSec)
 %this is inefficient because it does each chunk in a separate run of spike,
 %rather than grouping a file and all its chunks into one run.  thus, you
 %pay the cost of opening the file multiple times.  would be more
@@ -8,6 +8,7 @@ force=false;
 
 fileFiles={'stim','phys','pulse','pokes'};
 chunkFiles={'spks','waveforms'};
+reduceFiles={'stim','phys'};
 
 for i=1:length(record)
     if ~record(i).dummy
@@ -17,23 +18,36 @@ for i=1:length(record)
         
         base=hash(record(i).baseFile,'SHA1');
         analysisDir=fullfile(analysisBase,pth,base);
+        targetDir=fullfile(targetBase,pth,base);
         
         fns=cellfun(@(x) fullfile(analysisDir,[x '.' base '.txt']),fileFiles,'UniformOutput',false);
         
         wavemarkOnly=~strcmp(record(i).file,record(i).baseFile);
-        
-        if (force || ~all(cellfun(@(x) exist(x,'file'),fns))) && ~wavemarkOnly  %CHECK: make sure we really should prevent from calling when wavemarkonly -- for some reason i thought this was wrong for a while
-            fprintf('%s\n',datafile)
-            resetDir(analysisDir); %pessimistic if any are missing
-            rec=record(i);
-            rec.chunks=[];
+
+        newTxts=false;
+        if ~wavemarkOnly  %CHECK: make sure we really should prevent from calling when wavemarkonly -- for some reason i thought this was wrong for a while
+            if force || ~all(cellfun(@(x) exist(x,'file'),fns))
+                fprintf('%s\n',datafile)
+                resetDir(analysisDir); %pessimistic if any are missing
+                rec=record(i);
+                rec.chunks=[];
+                
+                fns{:}
+                
+                makeEmptyTxtFile(fullfile(analysisDir,['pokes.' base '.txt']));
+                tic
+                runScript(makeTmpScript('file',analysisDir,rec,base,getLastStop(record,i)),datafile);
+                toc
+                newTxts=true;
+            end
             
-            fns{:}
-            
-            makeEmptyTxtFile(fullfile(analysisDir,['pokes.' base '.txt']));
-            tic
-            runScript(makeTmpScript('file',analysisDir,rec,base,getLastStop(record,i)),datafile);
-            toc
+            fns=cellfun(@(x) fullfile(targetDir,[x '.' base '.mat']),reduceFiles,'UniformOutput',false);
+            if force || ~all(cellfun(@(x) exist(x,'file'),fns)) || newTxts
+                resetDir(targetDir);
+                for rNum=1:length(fns)
+                    reduceTxt(targetDir,analysisDir,base,reduceFiles{rNum},binsPerSec);
+                end
+            end
         end
         
         cbase=hash(record(i).file,'SHA1');

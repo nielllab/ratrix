@@ -1,3 +1,13 @@
+function reduceTxt(targetDir,analysisDir,base,prefix,binsPerSec)
+
+target=fullfile(targetDir  ,[prefix '.' base '.txt']);
+src   =fullfile(analysisDir,[prefix '.' base '.mat']);
+chunkTxtToMat(target,src);
+
+
+end
+
+
 % this is for dealing with spike export .txt's (for phys and stim) that are
 % really big.  note spike has no way to export uint16's, even though that
 % would give us 4x the capacity and it only a2d's at 16 bit -- only exports floats.
@@ -33,16 +43,13 @@
 % win32: 1.2GB limit, not much help from 3GB switch or OSX32, but linux32 or win64+ml32 roughly 2x both
 % os64/ml64: essentially RAM limited, so practical is 4GB = ~3.5 hours
 
-function hrs=reduceTxt(file,step,start)
+function chunkTxtToMat(target,src)
 hrs=0;
 cycs=0;
-
-[pathstr, name, ext, versn]=fileparts(file);
-targ=fullfile(pathstr,[name '.mat']);
-delete(targ);
+delete(target);
 
 try
-    [fid msg]=fopen(file,'rt');
+    [fid msg]=fopen(src,'rt');
     if ~isempty(msg)
         msg
     end
@@ -62,25 +69,27 @@ try
             n=10^7;
         end
         while ~feof(fid)
+            step,start
+            
+            save(target,'step','start');
+            
             C=textscan(fid,'%f',n,'CommentStyle','%'); %'CollectOutput',true,
             
             if isscalar(C)
                 nitems=size(C{1},1);
+                
                 out=nan(nitems,2);
-                out(:,2)=C{1};
-                out(:,1)=start+step*(0:nitems-1)';
-                start=out(end,1)+step;
+                out(:,1)=C{1};
+                %out(:,1)=start+step*(0:nitems-1)';
+                %start=out(end,1)+step;
+                
                 if any(isnan(out(:)))
                     error('got a nan')
                 end
                 
                 var=sprintf('out%d',cycs);
                 eval([var ' = out;']); %feval(@=,var,out) %= not a func :(
-                if cycs>0
-                    save(targ,var,'-append');
-                else
-                    save(targ,var);
-                end
+                save(target,var,'-append');
                 clear(var);
                 
                 hrs=hrs+nitems*step/60/60;

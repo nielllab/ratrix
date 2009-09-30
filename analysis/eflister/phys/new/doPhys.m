@@ -3,11 +3,16 @@ function record=doPhys
 %setup the following fields to control the analysis
 %%%%%
 
-%directory containing 'phys record.csv' and that will receive output
+%directory containing 'phys record.csv' and that will receive text output
 analysisBase='D:\physDB'; %'C:\Documents and Settings\rlab\Desktop\edf analysis';
 
 %directory containing .smr files, in subdirectories ratID\mm.dd.yy\*.smr
 dataBase='C:\eflister\phys\sorted';
+
+%directory to receive .mat intermediates and figs
+targetBase='C:\Documents and Settings\rlab\Desktop\phys analysis';
+
+binsPerSec=1000;
 
 %indicate what to process
 target.rat_ids={};%{'164'};
@@ -56,8 +61,7 @@ setupEnvironment;
 
 record=doExclusion(extractPhysRecord(fullfile(analysisBase,'phys record.csv'),dataBase),target,exclude);
 
-extractPhysToText(record,analysisBase,dataBase);
-
+extractPhysThenAnalyze(record,analysisBase,dataBase,targetBase,binsPerSec);
 end
 
 function record=doExclusion(record,target,exclude)

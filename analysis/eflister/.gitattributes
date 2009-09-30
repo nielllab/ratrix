@@ -74,8 +74,8 @@ phys/getNumLines.m -text
 phys/doScan.m -text
 phys/doWaveforms.m -text
 phys/new/helpers/extractPhysRecord.m -text
-phys/new/helpers/extractPhysToText.m -text
 phys/new/doPhys.m -text
 phys/edf[!!-~]phys[!!-~]record.xls -text
 phys/new/helpers/reduceTxt.m -text
 phys/scratch2.m -text
+phys/new/helpers/extractPhysThenAnalyze.m -text

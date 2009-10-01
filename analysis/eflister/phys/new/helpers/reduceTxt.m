@@ -1,7 +1,7 @@
 function reduceTxt(targetDir,analysisDir,base,prefix,binsPerSec,chan)
 
-target=fullfile(targetDir  ,[prefix '.' base '.txt']);
-src   =fullfile(analysisDir,[prefix '.' base '.mat']);
+target=fullfile(targetDir  ,[prefix '.' base '.mat']);
+src   =fullfile(analysisDir,[prefix '.' base '.txt']);
 chunkTxtToMat(target,src,chan);
 
 
@@ -46,9 +46,25 @@ end
 function chunkTxtToMat(target,src,chan)
 hrs=0;
 cycs=0;
+
+warning('off','MATLAB:DELETE:FileNotFound')
 delete(target);
+warning('on','MATLAB:DELETE:FileNotFound')
+
+fprintf('extracting %s -- takes a while\n',src)
 
 try
+    C=doScan(src,'%% START %% %f %f',6,chan,1,2,false);
+    
+    start=C{1};
+    step=C{2};
+    
+    if start<0 || abs(1- step * 40000)>3 %used to be .5, raised so 10k acceptable (october files sample low)
+        error('bad start or step')
+    end
+    
+    save(target,'step','start');
+    
     [fid msg]=fopen(src,'rt');
     if ~isempty(msg)
         msg
@@ -68,50 +84,40 @@ try
         else
             n=10^7;
         end
+        
         while ~feof(fid)
-            
-            C=doScan(src,'%% START %% %f %f',6,chan,1,2,false);
-            
-            start=C{1};
-            step=C{2};
-            
-            if start<0 || abs(1- step * 40000)>.5
-                error('bad start or step')
-            end
-            
-            save(target,'step','start');
-            
-            keyboard
             
             %here's the heart of the matter -- we'd like to just use
             %"load" (we were careful to format the txt file to allow this), but
             %the txt file is frequently too large to load all in one go.
             C=textscan(fid,'%f',n,'CommentStyle','%'); %'CollectOutput',true,
             
-            if isscalar(C)
-                nitems=size(C{1},1);
+            if isscalar(C) && isvector(C{1})
                 
-                out=nan(nitems,2);
-                out(:,1)=C{1};
+%                 nitems=size(C{1},1);
+                
+%                 out=nan(nitems,2);
+%                 out(:,1)=C{1};
                 %out(:,1)=start+step*(0:nitems-1)';
                 %start=out(end,1)+step;
                 
-                if any(isnan(out(:)))
-                    error('got a nan')
-                end
+%                 if any(isnan(out(:)))
+%                     error('got a nan')
+%                 end
                 
                 var=sprintf('out%d',cycs);
-                eval([var ' = out;']); %feval(@=,var,out) %= not a func :(
+                eval([var ' = C{1};']); %feval(@=,var,C{1}) %no assignment func (= not a func) :(
                 save(target,var,'-append');
-                clear(var);
                 
-                hrs=hrs+nitems*step/60/60;
+                hrs=hrs+eval(['length(' var ')'])*step/60/60; %no way to use feval :(
                 fprintf('%g hours\n',hrs)
                 cycs=cycs+1;
+
+                clear(var);
             else
                 size(C)
                 size(C{1})
-                error('C not scalar')
+                error('C not scalar cell containing vector')
             end
         end
     else
@@ -120,8 +126,9 @@ try
     
     error('finally')
     
+    %should alter filename of output at this point to indicate it was successfully and completely generated, for a future check that we don't need to regenerate
 catch ex
-    if exist('fid','var')
+    if exist('fid','var') && fid>2
         s=fclose(fid);
         if s
             error('fclose error')

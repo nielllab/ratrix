@@ -80,3 +80,4 @@ phys/new/helpers/reduceTxt.m -text
 phys/scratch2.m -text
 phys/new/helpers/extractPhysThenAnalyze.m -text
 phys/new/helpers/compilePhysTxt.m -text
+phys/new/helpers/getRangeFromChunks.m -text

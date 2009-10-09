@@ -1,6 +1,6 @@
 function out=getRangeFromChunks(file,startsMS,durMS)
 
-file='C:\eflister\phys analysis\164\02.27.09\8d315fc3a807c5b249e5ebf3e99a8cbd19e0ffd4\phys.8d315fc3a807c5b249e5ebf3e99a8cbd19e0ffd4.mat';
+%file='C:\eflister\phys analysis\164\02.27.09\8d315fc3a807c5b249e5ebf3e99a8cbd19e0ffd4\phys.8d315fc3a807c5b249e5ebf3e99a8cbd19e0ffd4.mat';
 
 recs=whos('-file',file);
 s=load(file,'step','start');
@@ -40,6 +40,7 @@ boundaries=(s.start+binds*s.step)*1000;
 
 if ~exist('startsMS','var') || isempty(startsMS)
     out=cellfun(@(x) x(boundaries),{@min @max});
+    return
 elseif ~isvector(startsMS)
     error('not a vec')
 else
@@ -65,24 +66,18 @@ for i=1:length(names)
         times=cumsum([boundaries(i) 1000*s.step*ones(1,length(raw.(name))-1)]);
         tinds=binds(i):binds(i+1)-1;
         fprintf('done\n')
-        for j=1:size(matches,1)
-            %take=tinds>=min(inds(j,:)) & tinds<=max(inds(j,:)); %why is this line slow?  tinds is large, but come on, takes as long as the load!
-            take=find(tinds>=min(inds(j,:)),1,'first') : find(tinds<=max(inds(j,:)),1,'last'); %twice as fast as above line
-            
-            if false %why aren't take2 and take3 always equivalent to take?  they aren't any faster, so no matter.
-                take2=find(tinds>=min(inds(j,:)),1,'first') : find(tinds>=max(inds(j,:)),1,'first');
-                take3=find(tinds<=min(inds(j,:)),1,'last') : find(tinds<=max(inds(j,:)),1,'last');
-                q={take,take2,take3};
-                for qn=1:length(q)
-                    qn
-                    if ~isempty(q{qn})
-                        [q{qn}(1) q{qn}(end)]
-                    end
+        for j=1:size(matches,1) %hard to vectorize cuz of partial rows
+            if any(flatten(matches(j,:)))
+                offset=inds(j,1)-tinds(1)+1;
+                take=max(1,offset):offset+min(length(inds(j,:))-1,length(tinds)-offset);
+                
+                if all(isnan(flatten(out(j,matches(j,:),:))))
+                    out(j,matches(j,:),1)=times(take);
+                    out(j,matches(j,:),2)=raw.(name)(take);
+                else
+                    error('overwrite')
                 end
             end
-            
-            out(j,matches(j,:),1)=times(take);
-            out(j,matches(j,:),2)=raw.(name)(take);
         end
     end
 end
@@ -91,4 +86,8 @@ if any(isnan(out(:)))
     error('got a nan')
 end
 plot(diff(out(:,:,1)')) %reveals a 1% error at chunk transitions -- why?  i can't find the cause...
+end
+
+function x=flatten(x) %cuz matlab won't let you (:) on a slice
+x=reshape(x,[1 numel(x)]);
 end

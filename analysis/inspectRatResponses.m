@@ -96,7 +96,8 @@ goods=getGoods(d,'withoutAfterError');
 %goods=getGoods(d);
 
 if p.plotBias || p.plotBiasScatter
-    goodForBias=getGoods(d,'forBias');
+    includeCenterResponses=false;
+    goodForBias=getGoods(d,'withoutAfterError',[],includeCenterResponses)
 end
 
 %pretty important hard coded parameter -  consider what uses it before

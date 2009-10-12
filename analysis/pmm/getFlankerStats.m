@@ -254,7 +254,7 @@ for i=1:numSubjects
                     params.factors.flankerPosAngle(i,j)=d.flankerPosAngle(firstInd);
                     params.factors.targetPhase(i,j)=d.targetPhase(firstInd);
                     params.factors.flankerPhase(i,j)=d.flankerPhase(firstInd);
-                case {'colin+3&contrasts'}
+                case {'colin+3&contrasts','colin+3&blockedContrasts'}
                     params.factors.targetOrientation(i,j)=d.targetOrientation(firstInd);
                     params.factors.flankerOrientation(i,j)=d.flankerOrientation(firstInd);
                     params.factors.flankerPosAngle(i,j)=d.flankerPosAngle(firstInd);

@@ -38,7 +38,7 @@ end
     if ~doForce
         %basic calcstim
            [stimulus,updateSM,resolutionIndex,preOnsetStim,preResponseStim,discrimStim,LUT,targetPorts,distractorPorts,details,interTrialLuminance,text,indexPulses]=...
-                calcStim(stimManager,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords,forceStimDetails);
+                calcStim(stimManager,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords);
     else
         if canForceStimDetails(stimManager,forceStimDetails)
                 [stimulus,updateSM,resolutionIndex,preOnsetStim,preResponseStim,discrimStim,LUT,targetPorts,distractorPorts,details,interTrialLuminance,text,indexPulses]=...

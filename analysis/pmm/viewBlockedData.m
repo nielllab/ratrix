@@ -1,28 +1,29 @@
 function viewBlockedData(subjects)
 
 if ~exist('d','var') || isempty(d)
-    group=1;
+    group=0;
     switch group
         case 0
-            subjects={'227'} % test any one
+            subjects={'277'} % test any one
         case 1
-            subjects={'231','234'} % all colin, many target contrasts on 12, or many flanker onctrasts on 15
+            subjects={'231','234'} % all colin, many target contrasts on 12, or many flanker onctrasts on 15, or joint contrast on colinear on 16
         case 2
             subjects={'227', '229', '230', '237', '232', '233'}; %many flank types, 5 contrasts
         case 3
-            subjects={'138','139', '228','277'}; %many flanks, one contrast
+            subjects={'138','139', '228','277'}; %many flanks, one contrast  -- can these be directly compared to interleaved trials?
     end
 end
 
 %quick set params
 if all(ismember(subjects,{'231','234'}))
     dateRange= [pmmEvent('firstBlocking')+2 now];  % firstBlocking, startBlocking10rats
+    dateRange= [pmmEvent('231&234-jointSweep')+1 now];
     conditionType='allBlockIDs';
     filter{1}.type='16'; % 12 15 16
 
 elseif  all(ismember(subjects,{'227', '229', '230', '237', '232', '233'}))
     dateRange= [pmmEvent('startBlocking10rats')+2 now];
-    dateRange= [pmmEvent('231&234-jointSweep')+1 now];
+    %dateRange= [pmmEvent('231&234-jointSweep')+1 now];
     conditionType='allBlockIDs';
     filter{1}.type='12';
     %filter{2}.type='trialThisBlockRange';  % could clean up some, but

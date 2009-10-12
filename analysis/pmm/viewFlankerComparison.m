@@ -174,6 +174,11 @@ if ~exist('cMatrix','var') || isempty(cMatrix)
                 cMatrix{i,1}=i;
                 cMatrix{i,2}=i+length(ids);
             end
+        case 'colin+3&blockedContrasts'
+              cMatrix={[1],[2];
+                [5],[6];
+                [9],[10];
+                [13],[14];};
         otherwise
             conditionType
             error('this condition type has no default comparisons -- the must be specified in 3rd arg in ')
@@ -407,6 +412,10 @@ for j=1:numStats
         theseValues=CIs(:,j,:,:);
         thoseValues=deltas(:,j,:);
         edgeValue=max(abs([theseValues(:); thoseValues(:) ]))*1.1;
+        if isinf(edgeValue)
+            % CI can be inf, then just use the data
+            edgeValue=max(abs([ thoseValues(:) ]))*1.1;
+        end
         minX=-edgeValue;
         maxX=edgeValue;
         diffEdges(j,:)=linspace(minX,maxX,nBins+1);

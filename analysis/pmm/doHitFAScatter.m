@@ -153,9 +153,11 @@ for i=1:length(subjects)
                 vci=plot([faRate faRate],[hitPci(1) hitPci(2)],'color',colors(condInd,:)); %vert error bar
                 set(hci, 'LineWidth',ciwidth)
                 set(vci, 'LineWidth',ciwidth)
+                dataGraphic(j)=hci(j);
             case 2
                 %plot dot
                 pt(j)=plot(faRate, hitRate,'.','MarkerSize',20,'color',colors(condInd,:));
+                dataGraphic(j)=pt(j);
             case 3
                 %ellipse
                 ellipse = fncmb(fncmb(rsmak('circle'),[diff(faPci)/2 0;0 diff(hitPci)/2]),[faRate;hitRate]);
@@ -175,6 +177,7 @@ for i=1:length(subjects)
                     disp('no found color match for elipse')
                 end
                 fnplt(ellipse,1,colorString);
+                dataGraphic(j)=ellipse;
             otherwise
                 doErrorBars
                 error('bad')
@@ -265,7 +268,7 @@ end
 
 %labels
 if doLegend
-    legend(pt,conditions,'Location','SouthEast')
+    legend(dataGraphic,conditions,'Location','SouthEast')
 end
 set(gca,'YTickLabel',[0 .5 1])
 set(gca,'YTick',[0 .5 1])

@@ -1,6 +1,4 @@
 
-
-
 %path='C:\Documents and Settings\rlab\Desktop\tempAnalysis'; % a temp directory okay to make files
 %cd(path)
 
@@ -8,9 +6,7 @@
 %relevantRatrix='\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\pmeier\xfer\db081013.mat';
 relevantRatrix='\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\pmeier\xfer\db081130.mat';
 load(relevantRatrix)
-
 %r=getRatrix
-
 
 %% timeline
 subject='234'

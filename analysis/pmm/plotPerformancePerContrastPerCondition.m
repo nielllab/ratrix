@@ -1,4 +1,4 @@
-function plotPerformancePerContrastPerCondition(numCorrect, numAttempted, dpr, method, params)
+function plotPerformaePerContrastPerCondition(numCorrect, numAttempted, dpr, method, params)
 %this functions assumes input of the type (targetContrast, condition, deviation, flankerContrast) 
 
 someConditions=params.someConditions;

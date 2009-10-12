@@ -6,7 +6,7 @@ close all;
 if ~exist('figID','var') || isempty(figID)
     figID=[ 2 3 4 6]; % 6
     %figID=[3];  % test one of them
-    %figID=[5];  % test one of them
+    figID=[4];  % test one of them
 end
 
 if ~exist('dateRange','var')
@@ -21,18 +21,18 @@ end
 if ~exist('subjects','var')
     subjects={'228','227','230','233','234','138','139'}; %sorted for amount
     %subjects={'138','228','230','233'}; % quick for testing, passes lillie-test
-    % subjects={'138','228'}; % quick for testing
+    %subjects={'138','228'}; % quick for testing
 end
 
 if ~exist('savePath','var')
-    %savePath='C:\Documents and Settings\rlab\Desktop\graphs';
-    savePath='L:\Rodent-Data\pmeier\flankerSupport\activeFigures'; 
+    savePath='C:\Documents and Settings\rlab\Desktop\graphs';
+    %savePath='L:\Rodent-Data\pmeier\flankerSupport\activeFigures'; 
     %resolution=300;  % only applies to -dformat
     %figureType= {'png','jpg','bmp','fig','-dpsc','-depsc2','-dtiffn'} % compare many
     %renderer= {'-painters','-zbuffer','-opengl'}  % compare many
     %figureType={'-dtiffn','png'};  renderer= {'-opengl'}; resolution=1200; % paper print quality
     figureType={'png'};  renderer= {'-zbuffer'}; resolution=300; % draft quality
-    %figureType={'bmp','fig'}  % as matlab fig looks on screen
+    figureType={'bmp','fig'}  % as matlab fig looks on screen
 end
  
 
@@ -194,14 +194,15 @@ for f=1:length(figID)
         case 2
             %images
             sweptImageParameters={'flankerOrientation','targetOrientation','flankerPosAngle','targetContrast','flankerContrast'}; % why does contrast have to be last?
+            or=-or;
             sweptImageValues={or,or,or,1,[1 0 0]};
             borderColor=[ .9 0 0; .2 .5 .2; .4 .9 .4];
             montageSize=[1 3];
             montageReorder=[1 2 3];
             rocReorder=montageReorder;
             barImageOrder=[1 2 3];
-                        
-            
+             
+          
 
             
 %             conditionType='8flanks+&nfMix&nfBlock'  % use the + which groups the base 8 types and gives them a condition name.
@@ -228,12 +229,24 @@ for f=1:length(figID)
             diffEdges=linspace(-20,20,numBins+1);
             dprimeDiffRange=linspace(-0.8,0.8,numBins+1);
             critDiffRange=linspace(-0.8,0.8,numBins+1);
+            
+              %alt
+              if 1
+                  montageSize=[1 2];
+                  montageReorder=[1 2 ];
+                  rocReorder=montageReorder;
+                  barImageOrder=[1 2 ];
+                  useConds={'hasF','noFm'};       % display these conditions
+                  condRename={'F+','F-'}; % rename them this way
+                  colors=[.9 0 0; .2 .5 .2];     % assign these colors
+              end
+              
         case 3
             %images
             sweptImageParameters={'flankerOrientation','targetOrientation','flankerPosAngle','targetContrast','flankerContrast'}; % why does contrast have to be last?
             or=[-1 1]*(or);
-            sweptImageValues={or,or(1),or(1),1,1};
-            borderColor=[.9 0 0; 0 .8 .8 ];
+            sweptImageValues={or,or,or,1,1};
+            borderColor=[.9 0 0; 0 .8 .8; 0 .8 .8 ; .2 .2 .2; .2 .2 .2; 0 .8 .8 ; 0 .8 .8 ; .9 0 0];
             montageSize=[1 2];
             montageReorder=[1 2];
             barImageOrder=montageReorder;
@@ -275,7 +288,7 @@ for f=1:length(figID)
             sweptImageValues={or,or,or,1,1};
             borderColor=[.9 0 0; 0 .8 .8 ; 0 .8 .8 ; .2 .2 .2; .2 .2 .2; 0 .8 .8 ; 0 .8 .8 ; .9 0 0];
             montageSize=[1 4];
-            montageReorder=[1 4 2 3];
+            montageReorder=[1 5 2 6]; %[1 4 2 3]; old prioriized position, this new hold target orientation constant
             barImageOrder=montageReorder;
             rocReorder=[1 5];
             barGroups={}; % add grouped labels
@@ -428,6 +441,7 @@ for f=1:length(figID)
     
     % assign names and colors for calls below
     labeledNames=assignLabeledNames(subjects);
+    labeledNames=subjects;
     
     cMatrix{1}=find(strcmp(names.conditions,arrows{1,2}));
     cMatrix{2}=find(strcmp(names.conditions,arrows{1,1}));

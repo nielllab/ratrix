@@ -26,7 +26,7 @@ for i=1:length(subjects)
     subInd=find(strcmp(subjects{i},names.subjects));
     statInd=find(strcmp('pctCorrect',names.stats));
     
-    subplot(1,4,2); hold on
+    %subplot(1,4,2); hold on
     
     plot([-7 7],[.5 .5],'k--');
     %plot([2 2],[0 1],'k--');
@@ -60,7 +60,7 @@ end
 
 %%  flanker contrast
 subjects={'233'}; % 231
-subjects={'233','139','138','228','232','231'};% '138, 228 '232' have extra contrasts.  228 [.1 .2 .3 .4]
+subjects={'233','139','138','228','232'}%,'231'};% '138, 228 '232' have extra contrasts.  228 [.1 .2 .3 .4]
 %subjects={'231'}; % why is 228 missing step 8 data?
 conditionType='fiveFlankerContrasts';
 removeNonTilted=false; % this influences: 138, 228 232
@@ -77,12 +77,12 @@ params.colors(:,:)=.8;  % overwrite color with gray
 values = params.factors.flankerContrast(1,:);
 
 %%
-%figure
+figure
 for i=1:length(subjects)
     subInd=find(strcmp(subjects{i},names.subjects));
     statInd=find(strcmp('pctCorrect',names.stats));
     
-    subplot(1,4,3);
+    %subplot(1,4,3);
     hold on
     
     plot([-.25 1],[.5 .5],'k--');
@@ -126,7 +126,8 @@ values = cellfun(@(x) str2num(x(5:end)), names.conditions);
 
 %%
 %figure
-subplot(1,4,4); hold on
+subplot(1,4,4); 
+hold on
 for i=1:length(subjects)
     subInd=find(strcmp(subjects{i},names.subjects));
     statInd=find(strcmp('pctCorrect',names.stats));
@@ -242,7 +243,9 @@ plot(values(col),-delta,'.k')
 end
 %% new figure for target alone
 
-subplot(1,4,1); hold on
+subplot(1,4,1); 
+%figure
+hold on
 subjects={'138','139'}
 subjects={'138'}
   startSweepDate=datenum('Feb.21,2008')
@@ -256,7 +259,7 @@ c=params.factors.phantomTargetContrastCombined(1,:);
 %c = log2(getMichealsonContrast(params.factors.phantomTargetContrastCombined(1,:),minCandela,maxCandela))
 ppc=params.factors.pixPerCycs(1,:); % only need it for one subjetc
 %%
-includePPC=[16 32];
+includePPC=[16 32 64];
 for i=1:length(subjects)
   
     for j=1:length(includePPC)

@@ -1,11 +1,14 @@
-function goods=getGoods(d,type,removeHuman)
+function goods=getGoods(d,type,removeHuman,includeCenterResponses)
 
-if ~exist('removeHuman','var')
+if ~exist('removeHuman','var') || isempty(removeHuman)
     removeHuman=true;
 end
 
-if ~exist('type', 'var'); type=[]; end
-if isempty(type)
+if ~exist('includeCenterResponses','var') || isempty(includeCenterResponses)
+    includeCenterResponses=false;  %non-2AFC paradigms will need to include these to analyze center response trials
+end
+
+if ~exist('type', 'var') || isempty(type)
     type='basic';
 end
 
@@ -70,7 +73,8 @@ switch type
         goods=(~CTs  & ~manualKill & ~dualResponse & ~nonRandom & ~didStochasticResponse & ~containedForcedRewards); %including afterError in goods
         removeHuman=false;
     case 'forBias'
-        centerResponses = d.response==2;
+        error('just includeCenterResponses')
+        
         %this is to ignore center responses in free drinks, if you want
         %to analyze free drinks stuff, the notion of bias must be
         %updated, rigth now numRight+numLeft=total.  Another type of
@@ -80,6 +84,13 @@ switch type
     otherwise
         error('wrong type')
 end
+
+
+if ~includeCenterResponses
+    centerResponses = d.response==2;
+    goods=goods & ~centerResponses;
+end
+
 
 %remove trials where correctness is not known
 goods(isnan(d.correct))=0;

@@ -517,7 +517,50 @@ switch types
                 colors(ind,:)=(0.5+contrasts(j)/2)*colors(ind,:);
             end
         end
-        warndlg('while this works, its risky.  reasons: 1) did you think about flanker contrast=0 trials?  2) when do you pool the no sig conditions? 3) why not just use flankerAnalysis.m?')
+        warndlg('while this works, its risky.  reasons: 1) did you think about flanker contrast=0 trials?  2) when do you pool the no sig conditions? 3) why not just use flankerAnalysis.m? or consider the conditions in colin+3&blockedContrasts')
+    case 'colin+3&blockedContrasts'
+        %if  d.blockID
+        if ~(all(d.blocking==1) || length(d.date)==1) %toy data of length 1 can pass
+            error('expected all trials to be blocked for this analysis')
+        end
+
+        contrasts=unique(d.targetContrast(~isnan(d.targetContrast)));
+        contrasts(contrasts==0)=[];  % remove zero
+        
+        if isempty(contrasts)
+            %this is a hack to pass the test on pre-condition names...
+            %should be better
+            contrasts=[1:4]/4;
+        end
+        
+        
+        numContrast=length(contrasts);
+        [tempConditionInds tempNames tempHaveData tempColors]=getFlankerConditionInds(d,restrictedSubset,'colin+3');
+        names=repmat(tempNames,1,numContrast);
+        colors=repmat(tempColors,numContrast,1);
+        
+        for i=1:size(tempConditionInds,1)
+            blockIDsThisFlankerCondition=unique(d.blockID(tempConditionInds(i,:)));
+            for j=1:numContrast
+                
+                % include all blocks that have this contrast at least once
+                % in that block (gets the contrast and the zero contrast
+                % from that block)
+                count=0; thisConditionAndContrast=[];
+                for k=1:length(blockIDsThisFlankerCondition)
+                    if any(d.targetContrast(d.blockID==blockIDsThisFlankerCondition(k))==contrasts(j))
+                        count=count+1;
+                        thisConditionAndContrast(count)=blockIDsThisFlankerCondition(k);
+                    end
+                end
+                
+                ind=((j-1)*size(tempConditionInds,1))+i;
+                conditionInds(ind,:)=ismember(d.blockID,thisConditionAndContrast);
+                names{ind} = [names{ind} ' ' num2str(contrasts(j),'%2.2f')];
+                colors(ind,:)=(0.5+contrasts(j)/2)*colors(ind,:);
+            end
+        end
+        
     case {'colin+3&devs','colin+1&devs','2flanks&devs'}
         devs=unique(d.deviation(~isnan(d.deviation)));
         numDevs=length(devs);
@@ -678,6 +721,7 @@ d.response=nan;
 d.correct=nan;
 d.trialNumber=nan;
 d.blockID=nan;
+d.blocking=nan;
 d.info.subject={'toyData'};
 
 for i=1:length(requests)

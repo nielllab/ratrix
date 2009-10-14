@@ -1,4 +1,4 @@
-function reduceTxt(targetDir,analysisDir,base,prefix,binsPerSec,chan)
+function reduceTxt(targetDir,analysisDir,base,prefix,chan)
 
 target=fullfile(targetDir  ,[prefix '.' base '.mat']);
 src   =fullfile(analysisDir,[prefix '.' base '.txt']);

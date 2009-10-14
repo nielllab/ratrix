@@ -1,4 +1,4 @@
-function extractPhysThenAnalyze(record,analysisBase,dataBase,targetBase,binsPerSec)
+function extractPhysThenAnalyze(record,analysisBase,dataBase,targetBase)
 %this is inefficient because it does each chunk in a separate run of spike,
 %rather than grouping a file and all its chunks into one run.  thus, you
 %pay the cost of opening the file multiple times.  would be more
@@ -46,19 +46,19 @@ for i=1:length(record)
             if force || ~all(cellfun(@(x) exist(x,'file'),fns)) || newTxts
                 resetDir(targetDir);
                 for rNum=1:length(fns)
-                    reduceTxt(targetDir,analysisDir,base,reduceFiles{rNum},binsPerSec,rec.([reduceFiles{rNum} 'Chan']));
+                    reduceTxt(targetDir,analysisDir,base,reduceFiles{rNum},rec.([reduceFiles{rNum} 'Chan']));
                 end
             end
         end
         
         cbase=hash(rec.file,'SHA1');
-        analysisDir=fullfile(analysisBase,pth,cbase);
+        %analysisDir=fullfile(analysisBase,pth,cbase);
         datafile=fullfile(dataBase,pth,rec.file);
         
         for j=1:length(record(i).chunks)
             base=['chunk' num2str(j) '.' cbase];
             
-            chunkDir=fullfile(analysisDir,['chunk' num2str(j)]); %this naming scheme fails badly if anyone reorders spreadsheet columns -- need to think of a way to externally verify the data matches up
+            chunkDir=fullfile(analysisBase,pth,cbase,['chunk' num2str(j)]); %this naming scheme fails badly if anyone reorders spreadsheet columns -- need to think of a way to externally verify the data matches up
             cfns=cellfun(@(x) fullfile(chunkDir,[x '.' base '.txt']),chunkFiles,'UniformOutput',false);
             if force || ~all(cellfun(@(x) exist(x,'file'),cfns))
                 resetDir(chunkDir);
@@ -79,6 +79,8 @@ for i=1:length(record)
                 end
             end
         end
+        
+        compilePhysTxt(targetDir,analysisDir,rec); %munge this to handle waveformonly (03.25.09)
     end
 end
 

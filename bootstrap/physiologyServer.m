@@ -49,8 +49,8 @@ stimFilename=[];
 data=[];
 
 eventTypeStrs={'comment','top of fluid','top of brain','ctx cell','hipp cell',...
-	'deadzone','theta chatter','visual hash','visual cell','electrode bend','clapping','rat obs',...
-	'anesth check'};
+    'deadzone','theta chatter','visual hash','visual cell','electrode bend','clapping','rat obs',...
+    'anesth check'};
 visualHashStrs={'weak','strong'};
 snrStrs={[]};
 for i=1:0.5:7
@@ -134,11 +134,11 @@ f = figure('Visible','off','MenuBar','none','Name','neural GUI',...
         dispStrs = createDisplayStrs(events_data,labels,mode);
         
         set(recentEventsDisplay,'String',dispStrs);
-% %         dispStrs={};
-% %         for i=length(events_data):-1:1
-% %             dispStrs=[dispStrs;num2str(i)];
-% %         end
-% %         set(eventsSelector,'String',dispStrs);
+        % %         dispStrs={};
+        % %         for i=length(events_data):-1:1
+        % %             dispStrs=[dispStrs;num2str(i)];
+        % %         end
+        % %         set(eventsSelector,'String',dispStrs);
     end % end function
 % quick plot events
 % % %         vhToPlot=strcmp({events_data.eventType},'visual hash');
@@ -201,36 +201,36 @@ f = figure('Visible','off','MenuBar','none','Name','neural GUI',...
         
         drawnow;
     end
-	
-	function turnOffAllLabelsAndMenus()
-		set(visualHashLabel,'Visible','off');
-		set(snrLabel,'Visible','off');
-		set(vcTypeLabel,'Visible','off');
-		set(vcEyeLabel,'Visible','off');
-		set(vcBurstyLabel,'Visible','off');
-		set(vcRFAzimuthLabel,'Visible','off');
-		set(vcRFElevationLabel,'Visible','off');
-		set(arousalLabel,'Visible','off');
-		set(eyesLabel,'Visible','off');
-		set(faceLabel,'Visible','off');
-		set(isofluraneLabel,'Visible','off');
-		set(withdrawalLabel,'Visible','off');
-		set(breathPerMinLabel,'Visible','off');
-		set(breathTypeLabel,'Visible','off');
-		set(visualHashMenu,'Visible','off','Enable','off');
-		set(snrMenu,'Visible','off','Enable','off');
-		set(vcTypeMenu,'Visible','off','Enable','off');
-		set(vcEyeMenu,'Visible','off','Enable','off');
-		set(vcBurstyMenu,'Visible','off','Enable','off');
-		set(vcRFAzimuthMenu,'Visible','off','Enable','off');
-		set(vcRFElevationMenu,'Visible','off','Enable','off');
-		set(arousalMenu,'Visible','off','Enable','off');
-		set(eyesMenu,'Visible','off','Enable','off');
-		set(faceMenu,'Visible','off','Enable','off');
-		set(isofluraneMenu,'Visible','off','Enable','off');
-		set(withdrawalMenu,'Visible','off','Enable','off');
-		set(breathPerMinMenu,'Visible','off','Enable','off');
-		set(breathTypeMenu,'Visible','off','Enable','off');
+
+    function turnOffAllLabelsAndMenus()
+        set(visualHashLabel,'Visible','off');
+        set(snrLabel,'Visible','off');
+        set(vcTypeLabel,'Visible','off');
+        set(vcEyeLabel,'Visible','off');
+        set(vcBurstyLabel,'Visible','off');
+        set(vcRFAzimuthLabel,'Visible','off');
+        set(vcRFElevationLabel,'Visible','off');
+        set(arousalLabel,'Visible','off');
+        set(eyesLabel,'Visible','off');
+        set(faceLabel,'Visible','off');
+        set(isofluraneLabel,'Visible','off');
+        set(withdrawalLabel,'Visible','off');
+        set(breathPerMinLabel,'Visible','off');
+        set(breathTypeLabel,'Visible','off');
+        set(visualHashMenu,'Visible','off','Enable','off');
+        set(snrMenu,'Visible','off','Enable','off');
+        set(vcTypeMenu,'Visible','off','Enable','off');
+        set(vcEyeMenu,'Visible','off','Enable','off');
+        set(vcBurstyMenu,'Visible','off','Enable','off');
+        set(vcRFAzimuthMenu,'Visible','off','Enable','off');
+        set(vcRFElevationMenu,'Visible','off','Enable','off');
+        set(arousalMenu,'Visible','off','Enable','off');
+        set(eyesMenu,'Visible','off','Enable','off');
+        set(faceMenu,'Visible','off','Enable','off');
+        set(isofluraneMenu,'Visible','off','Enable','off');
+        set(withdrawalMenu,'Visible','off','Enable','off');
+        set(breathPerMinMenu,'Visible','off','Enable','off');
+        set(breathTypeMenu,'Visible','off','Enable','off');
     end
 
 % ========================================================================================
@@ -265,9 +265,9 @@ todayButton = uicontrol(f,'Style','pushbutton','String','>>','Visible','on','Uni
         updateUI();
         reloadEventsAndSurgeryFields([],[],false);
     end
-        
-        
-        
+
+
+
 
 % ========================================================================================
 % draw text labels for surgery anchor
@@ -482,7 +482,7 @@ ratIDField = uicontrol(f,'Style','popupmenu','String',ratIDStrs,'Units','pixels'
         catch ex
             warning('could not get surgery fields from oracle');
         end
-            
+        
     end
 ratProtocolField = uicontrol(f,'Style','popupmenu','String',ratProtocolStrs,'Units','pixels','Value',defaultIndex,...
     'Enable','on','Position',[margin+8*fieldWidth fHeight-3*oneRowHeight-margin fieldWidth oneRowHeight]);
@@ -553,26 +553,26 @@ eventTypeMenu = uicontrol(f,'Style','popupmenu','String',eventTypeStrs,'Visible'
     'Enable','on','Value',defaultIndex,'Callback',@eventTypeC,...
     'Position',[margin+0*fieldWidth fHeight-9*oneRowHeight-margin fieldWidth oneRowHeight]);
     function eventTypeC(source,eventdata)
-		turnOffAllLabelsAndMenus();
+        turnOffAllLabelsAndMenus();
         if get(eventTypeMenu,'Value')==visualHashIndex
             set(visualHashLabel,'Visible','on');
             set(visualHashMenu,'Visible','on','Enable','on');
-		elseif get(eventTypeMenu,'Value')==ratObsIndex
-			set(arousalLabel,'Visible','on');
-			set(eyesLabel,'Visible','on');
-			set(faceLabel,'Visible','on');
-			set(arousalMenu,'Visible','on','Enable','on');
-			set(eyesMenu,'Visible','on','Enable','on');
-			set(faceMenu,'Visible','on','Enable','on');
-		elseif get(eventTypeMenu,'Value')==anesthCheckIndex
-			set(isofluraneLabel,'Visible','on');
-			set(withdrawalLabel,'Visible','on');
-			set(breathPerMinLabel,'Visible','on');
-			set(breathTypeLabel,'Visible','on');
-			set(isofluraneMenu,'Visible','on','Enable','on');
-			set(withdrawalMenu,'Visible','on','Enable','on');
-			set(breathPerMinMenu,'Visible','on','Enable','on');
-			set(breathTypeMenu,'Visible','on','Enable','on');
+        elseif get(eventTypeMenu,'Value')==ratObsIndex
+            set(arousalLabel,'Visible','on');
+            set(eyesLabel,'Visible','on');
+            set(faceLabel,'Visible','on');
+            set(arousalMenu,'Visible','on','Enable','on');
+            set(eyesMenu,'Visible','on','Enable','on');
+            set(faceMenu,'Visible','on','Enable','on');
+        elseif get(eventTypeMenu,'Value')==anesthCheckIndex
+            set(isofluraneLabel,'Visible','on');
+            set(withdrawalLabel,'Visible','on');
+            set(breathPerMinLabel,'Visible','on');
+            set(breathTypeLabel,'Visible','on');
+            set(isofluraneMenu,'Visible','on','Enable','on');
+            set(withdrawalMenu,'Visible','on','Enable','on');
+            set(breathPerMinMenu,'Visible','on','Enable','on');
+            set(breathTypeMenu,'Visible','on','Enable','on');
         elseif any(cellIndices==get(eventTypeMenu,'Value'))
             set(snrLabel,'Visible','on');
             set(snrMenu,'Visible','on','Enable','on');
@@ -589,7 +589,7 @@ eventTypeMenu = uicontrol(f,'Style','popupmenu','String',eventTypeStrs,'Visible'
                 set(vcRFElevationMenu,'Visible','on','Enable','on');
             end
         else
-			% do nothing - already all off
+            % do nothing - already all off
         end
     end % end function
 
@@ -659,7 +659,7 @@ offsetEventSubmit = uicontrol(f,'Style','pushbutton','String','enter','Visible',
         else
             lastEventWithCoords=[];
         end
-
+        
         % make a new entry in events
         events_data(end+1).time=now;
         labels(end+1)=nan;
@@ -696,14 +696,14 @@ offsetEventSubmit = uicontrol(f,'Style','pushbutton','String','enter','Visible',
         end
         events_data(end).eventParams=eventParams;
         events_data(end).comment=get(currentComment,'String');
-
+        
         % update pNum if necessary (if AP or ML differ from last)
         if ~isempty(lastEventWithCoords)
             if (length(events_data)>=2 && any(events_data(lastEventWithCoords).position(1:2)~=events_data(end).position(1:2))) ...
                     || length(events_data)==1
                 % record events_data.penetrationParams here (ratID, experimenters,
                 %   electrode make, model, lot#, ID#, impedance, reference mark xyz, target xy)
-
+                
                 params=[];
                 params.ratID=ratIDStrs{get(ratIDField,'Value')};
                 params.experimenter=experimenterStrs{get(experimenterField,'Value')};
@@ -713,7 +713,7 @@ offsetEventSubmit = uicontrol(f,'Style','pushbutton','String','enter','Visible',
                 params.IDNum=IDNumStrs{get(IDNumField,'Value')};
                 params.impedance=impedanceStrs{get(impedanceField,'Value')};
                 events_data(end).penetrationParams=params;
-
+                
                 if length(events_data)==1
                     events_data(end).penetrationNum=1;
                 else
@@ -727,7 +727,7 @@ offsetEventSubmit = uicontrol(f,'Style','pushbutton','String','enter','Visible',
             events_data(end).penetrationNum=1;
             events_data(end).penetrationParams=[];
         end
-
+        
         % save event log
         deleteFilename=sprintf('physiologyEvents_%d-%d.mat',1,eventNum-1);
         saveFilename=sprintf('physiologyEvents_%d-%d.mat',1,eventNum);
@@ -738,7 +738,7 @@ offsetEventSubmit = uicontrol(f,'Style','pushbutton','String','enter','Visible',
         if eventNum~=1
             delete(fullfile(savePath,deleteFilename));
         end
-
+        
         eventNum=eventNum+1;
         updateDisplay();
         % flush the comments buffer
@@ -749,19 +749,36 @@ offsetEventSubmit = uicontrol(f,'Style','pushbutton','String','enter','Visible',
     end % end logEvent function
 
 % ========================================================================================
-% quick plot
+% quick plot - improved
 quickPlotButton = uicontrol(f,'Style','pushbutton','String','quick plot','Visible','on','Units','pixels',...
     'FontWeight','normal','HorizontalAlignment','center','CallBack',@quickPlot, ...
     'Position',[2*margin+8*fieldWidth fHeight-18*oneRowHeight-2*margin fieldWidth oneRowHeight]);
     function quickPlot(source,eventdata)
-        p=vertcat(events_data.position);
+        %p=vertcat(events_data.position);
+        %plot3(p(:,1),p(:,2),p(:,3),'k.')
+        
+        ALL=true(1,length(events_data));
+        TOB=ismember({events_data.eventType},{'top of brain'});
+        VIS=ismember({events_data.eventType},{'visual cell','visual hash'});
+        CELL=ismember({events_data.eventType},{'ctx cell','hipp cell','visual cell'});
+        BEND=ismember({events_data.eventType},{'electrode bend'});
+        
         g=figure;
-        plot3(p(:,1),p(:,2),p(:,3),'.r');
-        xlabel('x position');
-        ylabel('y position');
-        zlabel('z position');
+        plotInBregmaCoordinates(events_data,ALL,'.k',[1 1 1 0]);
+        hold on;
+        plotInBregmaCoordinates(events_data,TOB,'ok');
+        plotInBregmaCoordinates(events_data,VIS,'c.');
+        plotInBregmaCoordinates(events_data,CELL,'b*');
+        plotInBregmaCoordinates(events_data,CELL & VIS,'r*');
+        plotInBregmaCoordinates(events_data,BEND,'xr');
+        xlabel('posterior');
+        ylabel('lateral');
+        zlabel('depth');
         grid on;
+        set(gca,'View',[240 60])
+        set(gca,'YDir','reverse');  %why?  thats just the way it is in plot3
     end
+
 
 % ========================================================================================
 % start/stop cell
@@ -816,7 +833,7 @@ toggleRecordingButton = uicontrol(f,'Style','togglebutton','String',recordingT,'
         if get(toggleRecordingButton,'Value') % start recording
             recording=true;
             keepLooping=false;
-             if ~running
+            if ~running
                 q=questdlg('Also start trials?','start recording','Yes','No','Cancel','Yes');
                 switch q
                     case {'Yes','No'}
@@ -987,9 +1004,9 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
             startTime=chunkClock;
             [ai recordingFile]=startNidaq(ai_parameters);
         end
-
+        
         quit=false;
-
+        
         while ~quit && keepLooping
             params=[];
             params.ai=ai;
@@ -1131,7 +1148,7 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
             end
             ai=stopNidaq(ai);
         end
-
+        
         % reset some flags for next instance of run
         pnet('closeall');
         data=[];

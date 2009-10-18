@@ -425,3 +425,5 @@ pmm/pmmEvent.m -text
 pmm/viewBlockedData.m -text
 pmm/checkControls.m -text
 pmm/calibration/pmmCalib.m -text
+anatomy/getLgnCoordinates.m -text
+anatomy/plotInBregmaCoordinates.m -text

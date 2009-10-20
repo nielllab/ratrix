@@ -84,21 +84,26 @@ switch method
         
         %oldCLUT = Screen('LoadNormalizedGammaTable', w, linearizedCLUT,1);
         
+        % trying to adapt to a change, i think made by fan, so as to normalize ranges
+        gamutRange=[0 1];
         linearizedCLUT=zeros(2^LUTBitDepth,3);
         if plotOn
             subplot([311]);
         end
-        [linearizedCLUT(:,1) g.R]=fitGammaAndReturnLinearized(sent, measured_R, linearizedRange, 2^LUTBitDepth,plotOn);
+        sensorRange=minmax(measured_R);
+        [linearizedCLUT(:,1) g.R]=fitGammaAndReturnLinearized(sent, measured_R, linearizedRange,sensorRange, gamutRange, 2^LUTBitDepth,plotOn);
         
         if plotOn
             subplot([312]);
         end
-        [linearizedCLUT(:,2) g.G]=fitGammaAndReturnLinearized(sent, measured_G, linearizedRange, 2^LUTBitDepth,plotOn);
+        %sensorRange=minmax(measured_G);  % while this is more appropriate, it is not back compatible  (all were yoked to R range)
+        [linearizedCLUT(:,2) g.G]=fitGammaAndReturnLinearized(sent, measured_G, linearizedRange,sensorRange, gamutRange, 2^LUTBitDepth,plotOn);
         
         if plotOn
             subplot([313]);
         end
-        [linearizedCLUT(:,3) g.B]=fitGammaAndReturnLinearized(sent, measured_B, linearizedRange, 2^LUTBitDepth,plotOn);
+        %sensorRange=minmax(measured_B);  % while this is more appropriate, it is not back compatible  (all were yoked to R range)
+        [linearizedCLUT(:,3) g.B]=fitGammaAndReturnLinearized(sent, measured_B, linearizedRange,sensorRange, gamutRange, 2^LUTBitDepth,plotOn);
     case 'useThisMonitorsUncorrectedGamma'
         
         LUTBitDepth=8;

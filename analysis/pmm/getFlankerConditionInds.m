@@ -378,6 +378,16 @@ switch types
             names = [names, {num2str(contrasts(i),'%2.2f')}];
         end
         colors=jet(numContrast);      
+    case 'fiveFlankerContrastsFullRange'
+        %bc the dynamic stuff is a pain in the butt when some rats have a
+        %few scattered values 0-->1
+        contrasts=linspace(0,1,5);
+        numContrast=length(contrasts);
+        for i=1:numContrast
+            conditionInds(i,:)= d.flankerContrast==contrasts(i);
+            names = [names, {num2str(contrasts(i),'%2.2f')}];
+        end
+        colors=jet(numContrast);      
     case 'allTargetContrasts'
         contrasts=unique(d.targetContrast(~isnan(d.targetContrast)));
         numContrast=length(contrasts);

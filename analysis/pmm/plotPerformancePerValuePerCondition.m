@@ -55,7 +55,7 @@ switch performanceMeasure
             for condition=someConditions
                 h(condition)=plot(values+smallDisplacement(condition),perf(:,condition),'.','MarkerSize',20,'color',colors(condition,:));
             end
-            %legend(h(fliplr(someConditions)),vals.conditionNames(fliplr(someConditions)),'Location','NorthEast')%NorthEastOutside
+            legend(h(fliplr(someConditions)),vals.conditionNames(fliplr(someConditions)),'Location','NorthEast')%NorthEastOutside
             hold off
         catch
             numCorrect

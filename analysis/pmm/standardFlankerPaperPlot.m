@@ -1,4 +1,4 @@
-function done=standardFlankerPaperPlot(figID)
+function done=standardFlankerPaperPlot(figID,subjects,dateRange)
 
 done=0; 
 close all;
@@ -19,7 +19,8 @@ if ~exist('statTypes','var')
 end
 
 if ~exist('subjects','var')
-    subjects={'228','227','230','233','234','138','139'}; %sorted for amount
+    %subjects={'228','227','230','233','234','138','139'}; %OLD: sorted for amount
+    subjects={'138','228','227','230','233','234','139'}; %puts single rat in first position
     %subjects={'138','228','230','233'}; % quick for testing, passes lillie-test
     %subjects={'138','228'}; % quick for testing
 end
@@ -161,7 +162,7 @@ end
 
 for f=1:length(figID)
     or=(pi/12);
-    singleRat='138';     % use for single rat plot
+    singleRat=subjects{1};  % use first one for single rat plot  (138 for main paper)
     subject='234';  %check this one out
     
     
@@ -416,6 +417,37 @@ for f=1:length(figID)
             colors=[.9 0 0; .2 .2 .2; 0 .8 .8 ; 0 .8 .8 ];    % assign these colors
             %cMatrix={[1],[2]};                     % emphasize this comparison, calculate it from first arrow
             arrows={'lll','---'};                   % arrows from A-->B
+         
+             
+        case {14,15}% during later testing phase  (like fig 4 except for filter type)
+            
+            %images
+            sweptImageParameters={'flankerOrientation','targetOrientation','flankerPosAngle','targetContrast','flankerContrast'}; % why does contrast have to be last?
+            or=[-1 1]*(or);
+            sweptImageValues={or,or,or,1,1};
+            borderColor=[.9 0 0; 0 .8 .8 ; 0 .8 .8 ; .2 .2 .2; .2 .2 .2; 0 .8 .8 ; 0 .8 .8 ; .9 0 0];
+            montageSize=[1 4];
+            montageReorder=[1 5 2 6]; %[1 4 2 3]; old prioriized position, this new hold target orientation constant
+            barImageOrder=montageReorder;
+            rocReorder=[1 5];
+            barGroups={}; % add grouped labels
+            
+            
+            switch figID(f)
+                case 14
+                                filter{1}.type='11';                    % 
+                case 15
+                                filter{1}.type='12';                    % 
+            end
+
+            conditionType='8flanks+';               % lump popout and non-popout groups
+            useConds={'colin','para','changeFlank','changeTarget'};  % display these conditions
+            condRename={'col','para','pop1','pop2'};% rename them this way
+            colors=[.9 0 0; .2 .2 .2; 0 .8 .8 ; 0 .8 .8 ];                     % assign these colors
+            %cMatrix={[1],[2]};                      % emphasize this comparison, calculate it from first arrow
+            arrows={'para','colin'};          % arrows from A-->B
+            ROCuseConds=arrows;
+            
             
         case -99 % lard
             %colors=[.9 0 0; .8 1 1; .8 1 1; .6 .6 .6; .2,.2,.2; 0 1 .5; 0 1 .8];
@@ -469,17 +501,22 @@ for f=1:length(figID)
     settings.box='off';
     sx=2;sy=2;si=0;
     
-    if includeModel
+    if includeModel 
+        
         %SUBPLOT: model
         si=si+1; 
         subplot(sx,sy,si);
         set(gca,'Position',[0.07 0.54 0.4 0.4])
         %modelImagePath='L:\Rodent-Data\pmeier\flankerSupport\ppt figures in progress\TIFF_models\models300dpi';
         modelImagePath='\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\pmeier\flankerSupport\ppt figures in progress\TIFF_models_biggerText\modelsAlone3';
-        im=imread(fullfile(modelImagePath,sprintf('Slide%d.TIF',figID(f)-1)));
-        %modelName=sprintf('Model %s',63+figID(f));
-        %text(.5,.5,modelName)
-        imshow(im(:,:,1:3));
+        
+        if ismember(figID(f)-1,[1:5])
+            im=imread(fullfile(modelImagePath,sprintf('Slide%d.TIF',figID(f)-1)));
+            %modelName=sprintf('Model %s',63+figID(f));
+            %text(.5,.5,modelName)
+            imshow(im(:,:,1:3));
+        end
+        
         axis square;
         set(gca,'Visible','off','box','off')
         %set(gca,'Visible','on','box','on')
@@ -582,8 +619,10 @@ for f=1:length(figID)
                        end
                     case {11,12,13}
                        t=text(nc+0.5, y2(end)+.5,labeledNames(j)); %label subjects
+                    otherwise
+                        t=text(nc+0.5, y2(end)+.5,labeledNames(j)); %label subjects
                 end
-                set(t, 'HorizontalAlignment', 'center','VerticalAlignment','middle');
+                    set(t, 'HorizontalAlignment', 'center','VerticalAlignment','middle');
             end
         end
     end

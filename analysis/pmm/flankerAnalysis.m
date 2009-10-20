@@ -339,6 +339,11 @@ switch plotType
         plotMethod='mostFrequentDevAndFlankerContrast' %'all devs and flankerContrasts';
         valueName = 'contrasts';
         plotPerformancePerValuePerCondition(numCorrect, numAttempted, numResponseYes, performanceMeasure, valueName, plotMethod, plotParams)
+    case 'performancePerContrastPerConditionWithAllFlankContastAndDev'
+
+        plotMethod='allDevsAndFlankerContrasts'; %all devs and flankerContrasts
+        valueName = 'contrasts';
+        plotPerformancePerValuePerCondition(numCorrect, numAttempted, numResponseYes, performanceMeasure, valueName, plotMethod, plotParams)
 
     case 'performancePerDeviationPerCondition'
 

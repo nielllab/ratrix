@@ -1,10 +1,11 @@
 function [step parameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep,tmClass)
 
+p=parameters;
+
 if ~exist('tmClass','var')
-    tmClass='nAFC'
+    tmClass=p.tmClass; %'nAFC' is default
 end
 
-p=parameters;
 stim = ifFeatureGoRightWithTwoFlank([p.pixPerCycs],[p.goRightOrientations],[p.goLeftOrientations],[p.flankerOrientations],...
     p.topYokedToBottomFlankerOrientation,p.topYokedToBottomFlankerContrast,[p.goRightContrast],[p.goLeftContrast],...
     [p.flankerContrast],p.mean,p.cueLum,p.cueSize,p.xPositionPercent,p.cuePercentTargetEcc,p.stdGaussMask,p.flankerOffset,...
@@ -19,6 +20,7 @@ stim = ifFeatureGoRightWithTwoFlank([p.pixPerCycs],[p.goRightOrientations],[p.go
     p.percentCorrectionTrials,...
     p.fpaRelativeTargetOrientation, p.fpaRelativeFlankerOrientation,...
     p.blocking, p.fitRF, p.dynamicSweep, p.renderMode,...
+    p.dynamicFlicker,...
     p.maxWidth,p.maxHeight,p.scaleFactor,p.interTrialLuminance);
 
 increasingReward=rewardNcorrectInARow(p.rewardNthCorrect,p.requestRewardSizeULorMS,p.requestMode,p.msPenalty,p.fractionOpenTimeSoundIsOn,p.fractionPenaltySoundIsOn, p.scalar, p.msPuff);
@@ -26,20 +28,33 @@ increasingReward=rewardNcorrectInARow(p.rewardNthCorrect,p.requestRewardSizeULor
 switch tmClass
     case 'nAFC'
         tm=nAFC(p.sndManager,p.percentCorrectionTrials,increasingReward,p.eyeController,...
-            p.frameDropCorner,p.dropFrames,p.displayMethod,p.requestPorts,p.saveDetailedFramedrops);
-        case 'freeDrinks'
+            p.frameDropCorner,p.dropFrames,p.displayMethod,p.requestPorts,p.saveDetailedFramedrops,...
+            p.delayManager,p.responseWindowMs,p.showText);
+    case 'goNoGo'      
+        tm=goNoGo(p.sndManager,p.percentCorrectionTrials,p.responseLockoutMs,increasingReward,p.eyeController,...
+            p.frameDropCorner,p.dropFrames,p.displayMethod,p.requestPorts,p.saveDetailedFramedrops,...
+            p.delayManager,p.responseWindowMs,p.showText);
+    case 'freeDrinks'
             error('not yet') % but could get rid of makeFreeDrinksTM this way, need to test calcStim
     case 'promptedNAFC'
+         
+        %temp here until tested and moved to params
+        %p.delayManager=[];
+        percentile=0.99;
+        value=10000;
+        fixedDelayMs=1000;
+        p.delayManager=flatHazard(percentile, value, fixedDelayMs);
         
-        %p.eyeTracker=geometricTracker(getDefaults(geometricTracker));
-        p.eyeTracker=geometricTracker('simple', 2, 3, 12, 0, int16([1280,1024]), [42,28], int16([1024,768]), [400,290], 300, -25, 0, 45, 0);
-        p.eyeController=[];
+%         %p.eyeTracker=geometricTracker(getDefaults(geometricTracker));
+%         p.eyeTracker=geometricTracker('simple', 2, 3, 12, 0, int16([1280,1024]), [42,28], int16([1024,768]), [400,290], 300, -25, 0, 45, 0);
+%         p.eyeController=[];
+% 
+%         
+%         tm=promptedNAFC(p.msFlushDuration,p.msMinimumPokeDuration,p.msMinimumClearDuration,p.sndManager,...
+%             p.requestRewardSizeULorMS,p.percentCorrectionTrials,p.msResponseTimeLimit,p.pokeToRequestStim,...
+%             p.maintainPokeToMaintainStim,p.msMaximumStimPresentationDuration,p.maximumNumberStimPresentations,p.doMask,increasingReward,...
+%             p.delayMeanMs, p.delayStdMs, p.delayStim, p.promptStim,p.eyeTracker,p.eyeController);
 
-        
-        tm=promptedNAFC(p.msFlushDuration,p.msMinimumPokeDuration,p.msMinimumClearDuration,p.sndManager,...
-            p.requestRewardSizeULorMS,p.percentCorrectionTrials,p.msResponseTimeLimit,p.pokeToRequestStim,...
-            p.maintainPokeToMaintainStim,p.msMaximumStimPresentationDuration,p.maximumNumberStimPresentations,p.doMask,increasingReward,...
-            p.delayMeanMs, p.delayStdMs, p.delayStim, p.promptStim,p.eyeTracker,p.eyeController);
          case 'phasedNAFC'
         t=trialManager(p.msFlushDuration,p.msMinimumPokeDuration,p.msMinimumClearDuration,p.sndManager,increasingReward,eyeTracker,eyeController)
 

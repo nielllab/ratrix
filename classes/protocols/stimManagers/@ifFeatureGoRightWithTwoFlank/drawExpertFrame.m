@@ -11,6 +11,8 @@ function [doFramePulse expertCache dynamicDetails textLabel i dontclear indexPul
 %drawExpertFrame(stimulus,stim,i,phaseStartTime,window,textLabel,destRect,filtMode,expertCache,ifi,scheduledFrameNum,dropFrames,dontclear)
 % known problems:
 %1) mysterious white box. (maybe related to targetOrientation, and its dynamic choice via stim.correctResponseIsLeft)
+%  might be related to intertrial texture  -- search: interTrialTex=Screen('MakeTexture'
+  %consider looking at: stimulus.cache.typeSz
 %2) repitition number flickers, suggesting that its wrong
 %3) no black values... is blending wrong...?
 
@@ -74,7 +76,12 @@ try
     
     %update dynamic values if there
     if ~isempty(stimulus.dynamicSweep)
-        stim=setDynamicDetails(stimulus,stim,sweptID);
+        [stim dynamicDetails]=setDynamicDetails(stimulus,stim,sweptID,dynamicDetails);
+    end
+    
+    %update dynamic values if there
+    if ~isempty(stimulus.dynamicFlicker)
+        [stim dynamicDetails]=setDynamicFlicker(stimulus,stim,effectiveFrame,dynamicDetails);
     end
     
     %set up target
@@ -171,7 +178,6 @@ try
             end
         end
     end
-    
     
     %always need this in order to wipe out the existing image from before...
       Screen('FillRect',window, stim.backgroundColor);
@@ -371,14 +377,15 @@ catch ex
     typeInd
     destinationRect
     globalAlpha
-    texInds
+    %texInds
     
     filterMode
     modulateColor
     textureShader
     
-    stimulus.cache.textures(texInds)
+    %stimulus.cache.textures(texInds)
     getReport(ex)
+    sca
     keyboard
     
     %     ex.stack.line

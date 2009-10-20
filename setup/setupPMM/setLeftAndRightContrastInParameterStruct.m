@@ -3,7 +3,7 @@ switch protocolType
     case 'goToSide'
         parameters.goRightContrast = [targetContrast];    %choose a random contrast from this list each trial
         parameters.goLeftContrast =  [targetContrast];
-    case 'goToRightDetection'
+    case {'goToRightDetection','goNoGo','cuedGoNoGo'}
         parameters.goRightContrast = [targetContrast];    %choose a random contrast from this list each trial
         parameters.goLeftContrast =  [0];
     case 'goToLeftDetection'

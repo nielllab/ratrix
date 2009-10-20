@@ -39,7 +39,7 @@ else
         end
         appropriateSizeAndRefresh=appropriateSize & ([resolutions.hz]==selectedHz);
         resInd=find(appropriateSizeAndRefresh);
-
+        
         %     if sum(appropriateSizeAndRefresh)==1
         %         resInd=find(appropriateSizeAndRefresh);
         %     elseif sum(appropriateSizeAndRefresh)>1
@@ -50,7 +50,7 @@ else
     else
         error ('can''t find appropriate resolution');
     end
-
+    
     details.width=resolutions(resInd).width;
     details.height=resolutions(resInd).height;
     details.pixelSize=resolutions(resInd).pixelSize;
@@ -128,19 +128,27 @@ details.maxCorrectForceSwitch=0;  % make sure this gets defined even if no trial
 
 switch trialManagerClass
     case 'freeDrinks'
-
+        
         targetPorts=setdiff(responsePorts,lastResponse);
         distractorPorts=[];
-
+    case 'goNoGo'
+        % avoiding fans code in assignPorts ... no correction trials for now...
+        % but testing out to see what it does ....
+        targetPorts=responsePorts; %choose all response port to be correct answer
+        %pmm:  these apear to be all "go" trials how do we get "no go" trials?
+        % this mode should not be conditioned on a sound
+        distractorPorts=setdiff(responsePorts,targetPorts);
+        details.correctionTrial=0;
+        details.maxCorrectForceSwitch=0;
     case {'nAFC','promptedNAFC','autopilot'}
-
+        
         if ~isempty(trialRecords) && length(trialRecords)>=2
             lastRec=trialRecords(end-1);
         else
             lastRec=[];
         end
         [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass);
-
+        
         %note that this implementation will not show the exact same
         %stimulus for a correction trial, but just have the same side
         %correct.  may want to change...
@@ -150,8 +158,8 @@ switch trialManagerClass
             [targetPorts hadToResample]=getSameLimitedResponsePort(responsePorts,stimulus.maxCorrectOnSameSide,trialRecords(1:end-1));  % add this to assignPorts
             details.maxCorrectForceSwitch=hadToResample;
         end
-
-
+        
+        
         %         if ~isempty(lastCorrect) && ~isempty(lastResponse) && ~lastCorrect && (lastWasCorrection || rand<details.pctCorrectionTrials)
         %             details.correctionTrial=1;
         %             details.maxCorrectForceSwitch=0;
@@ -165,26 +173,45 @@ switch trialManagerClass
         %             %targetPorts=responsePorts(ceil(rand*length(responsePorts)));
         %             %old random selection is now inside helper function -pmm
         %         end
-
+        
         %isCorrection = details.correctionTrial;
-
+        
         distractorPorts=setdiff(responsePorts,targetPorts);
     otherwise
         error('unknown trial manager class')
 end
 
 %CORRECT RESPONSE
-if targetPorts==1
-    details.correctResponseIsLeft=1;
-elseif targetPorts==3
-    details.correctResponseIsLeft=-1; % on the right
-else
-    targetPorts
-    error('Targetports is inappropriate.  Stimulus is defined for 3 ports with one correct L/R answer')
-    %i have never seen this happen -pmm 080504
-    %one reason one could get here is if Center  and Left were blocked
-    %during a correction trial that was right before manual graduation from freeDrinks, then lastResponse=lastResponse(1)
-    % and target ports from the trial history was 2.  RARE.
+switch length(targetPorts)
+    case 0
+        if ismember(trialManagerClass,{'autopilot'})
+            %autopilot uses this stimulus that means "go right"
+            details.correctResponseIsLeft=-1;
+        else
+            error('unexpected')
+        end
+    case 1
+        if targetPorts==1
+            details.correctResponseIsLeft=1;
+        elseif targetPorts==3
+            details.correctResponseIsLeft=-1; % on the right
+        else
+            error('Targetports is inappropriate.  Stimulus is defined for 3 ports with one correct L/R answer in nAFC')
+            %i have never seen this happen -pmm 080504
+            %one reason one could get here is if Center  and Left were blocked
+            %during a correction trial that was right before manual graduation from freeDrinks, then lastResponse=lastResponse(1)
+            %and target ports from the trial history was 2.  RARE.
+        end
+    case 3
+        if ismember(trialManagerClass,{'goNoGo'})
+            %autopilot uses this stimulus that means "go right"
+            details.correctResponseIsLeft=-1;
+        else
+            error('unexpected')
+        end
+    otherwise
+        targetPorts
+        error('Targetports is inappropriate.  Stimulus is defined for 3 ports with one correct L/R answer in nAFC, no correct in autopilot, and all coprrect in goNoGo')
 end
 
 %CALC CUE PARAMS
@@ -321,7 +348,7 @@ if ~isempty(stimulus.fitRF) & isa(stimulus.fitRF,'RFestimator')
     
     [center details.RFsourceCenter details.RFdetailsCenter]=getCenter(stimulus.fitRF,subjectID);
     [bound  details.RFsourceBound  details.RFdetailsBound]=getBoundary(stimulus.fitRF,subjectID);
-
+    
     details.stdGaussMask=bound;  % if gauss , use same, if circ then std*4?
     details.xPositionPercent=center(1);
     details.yPositionPercent=center(2);
@@ -330,11 +357,11 @@ if ~isempty(stimulus.fitRF) & isa(stimulus.fitRF,'RFestimator')
 else
     details.xPositionPercent=stimulus.xPositionPercent;
     details.yPositionPercent=stimulus.targetYPosPct;
-end    
+end
 
 details.targetOnOff=stimulus.targetOnOff;
 details.flankerOnOff=stimulus.flankerOnOff;
-                
+
 if isinteger(stimulus.cache.flankerStim)
     details.mean=stimulus.mean*intmax(class(stimulus.cache.flankerStim));
 elseif isfloat(stimulus.cache.flankerStim)
@@ -344,7 +371,7 @@ else
 end
 %stim class is inherited from flankstim patch
 %just check flankerStim, assume others are same
-            
+
 
 %FORCE STIMULUS DETAILS -- USED IN NOT RATRIX ENVIRONMENT
 if exist('forceStimDetails','var')
@@ -407,22 +434,22 @@ switch details.renderMode
     case {'dynamic-precachedInsertion','dynamic-maskTimesGrating','dynamic-onePatchPerPhase','dynamic-onePatch'}
         details.backgroundColor=details.mean;
         details.floatprecision=1;
-
+        
         switch trialManagerClass
-            %case 'nAFC'
+            case 'nAFC'
                 %error('not tested yet')
                 %REQUESTED TRIALS
                 % type='expert';
                 % requestPort=2; % center with 3 ports
                 % [out ] = phaseify(nAFC,details,type,targetPorts,distractorPorts,requestPort,scaleFactor,interTrialLuminance,details.hz)
-            case 'autopilot'    
-                %AUTOTRIGGERED 
+            case 'autopilot'
+                %AUTOTRIGGERED
             otherwise
                 error('dynamic not tested in that mode yet')
         end
         
         imagingTasks{1}={'General', 'FloatingPoint32BitIfPossible'};
-
+        
         if isinf(stimulus.dynamicSweep.numRepeats)
             timeout=[];
         else
@@ -454,21 +481,21 @@ switch details.renderMode
         
     case {'ratrixGeneral-maskTimesGrating', 'ratrixGeneral-precachedInsertion','symbolicFlankerFromServerPNG'}
         try
-
+            
             stim=details.mean(ones(height,width,3,'uint8')); %the unit8 just makes it faster, it does not influence the clas of stim, rather the class of details determines that
             %details.insertMethod='maskTimesGrating'; %old name, now the same as 'ratrixGeneral-maskTimesGrating'
-
+            
             %PRESTIM  - flankers first
             if details.flankerContrast > 0
                 stim(:,:,1)=insertPatch(stimulus,details.renderMode,stim(:,:,1),details.stimRects(2,:),stimulus.cache.mask,stimulus.cache.flankerStim,stimulus.flankerOrientations, stimulus.phase, details.flankerOrientation, details.flankerPhase,  details.pixPerCycs,details.mean,details.flankerContrast);
                 stim(:,:,1)=insertPatch(stimulus,details.renderMode,stim(:,:,1),details.stimRects(3,:),stimulus.cache.mask,stimulus.cache.flankerStim,stimulus.flankerOrientations, stimulus.phase, details.flankerOrientation, details.flankerPhase,  details.pixPerCycs,details.mean,details.flankerContrast);
-
+                
                 if stimulus.displayTargetAndDistractor == 1 % add distractor flankers on the opposite side y.z
                     stim(:,:,1)=insertPatch(stimulus,details.renderMode,stim(:,:,1),details.stimRects(5,:),stimulus.cache.mask,stimulus.cache.flankerStim,stimulus.flankerOrientations, stimulus.phase, details.distractorFlankerOrientation, details.distractorFlankerPhase,  details.pixPerCycs,details.mean,details.distractorFlankerContrast);
                     stim(:,:,1)=insertPatch(stimulus,details.renderMode,stim(:,:,1),details.stimRects(6,:),stimulus.cache.mask,stimulus.cache.flankerStim,stimulus.flankerOrientations, stimulus.phase, details.distractorFlankerOrientation, details.distractorFlankerPhase,  details.pixPerCycs,details.mean,details.distractorFlankerContrast);
                 end
             end
-
+            
             %MAIN STIM this could be a for loop except variables are stored
             %as named types...
             if details.correctResponseIsLeft==1       % choose TARGET stim patch from LEFT candidates
@@ -492,9 +519,9 @@ switch details.renderMode
             else
                 error('Invalid response side value. details.correctResponseIsLeft must be -1 or 1.')
             end
-
+            
             targetOnly=stim(:,:,2); % save a copy w/o flankers for the non-toggle movie creation mode
-
+            
             %and flankers
             if details.flankerContrast > 0
                 stim(:,:,2)=insertPatch(stimulus,details.renderMode,stim(:,:,2),details.stimRects(2,:),stimulus.cache.mask,stimulus.cache.flankerStim,stimulus.flankerOrientations, stimulus.phase, details.flankerOrientation, details.flankerPhase,  details.pixPerCycs,details.mean,details.flankerContrast);
@@ -504,7 +531,7 @@ switch details.renderMode
                     stim(:,:,2)=insertPatch(stimulus,details.renderMode,stim(:,:,2),details.stimRects(6,:),stimulus.cache.mask,stimulus.cache.flankerStim,stimulus.flankerOrientations, stimulus.phase, details.distractorFlankerOrientation, details.distractorFlankerPhase, details.pixPerCycs,details.mean,details.distractorFlankerContrast);
                 end
             end
-
+            
             %RENDER CUE - side cue not used, only fixation dot
             %stim(cueRect(1)-stimulus.cueSize:cueRect(2)+stimulus.cueSize,cueRect(3)-stimulus.cueSize:cueRect(4)+stimulus.cueSize,1:3)=1-stimulus.cueLum; %edf added to make cue bigger and more contrasty
             %stim(cueRect(1):cueRect(2),cueRect(3):cueRect(4),1:3)=stimulus.cueLum;
@@ -516,7 +543,7 @@ switch details.renderMode
             if cornerMarkerOn
                 stim(1)=0; stim(2)=255;
             end
-
+            
             details.persistFlankersDuringToggle=stimulus.persistFlankersDuringToggle;
             if  details.toggleStim==1 % when strcmp(type,'trigger')
                 type={'trigger',details.toggleStim};
@@ -538,23 +565,18 @@ switch details.renderMode
                 [out frameTimes]=createDiscriminandumContextOnOffMovie(stimulus,stim(:,:,3),targetOnly,stim(:,:,1),stim(:,:,2),details.targetOnOff,details.flankerOnOff);
                 type={'timedFrames',frameTimes}; % 040108 dfp changed format to cell array
             end
-
+            
             %TEMPORAL PARAMS
             details.requestedNumberStimframes=frameTimes;
-
+            
         catch ex
             sca
             ShowCursor;
             rethrow(ex);
         end
-        
-        discrimStim=[];
-        discrimStim.stimulus=out;
-        discrimStim.stimType=type;
-        discrimStim.scaleFactor=scaleFactor;
-        discrimStim.startFrame=0;
-        discrimStim.autoTrigger=[];
 
+      
+        % a gray screen
         preRequestStim=[];
         preRequestStim.stimulus=interTrialLuminance;
         preRequestStim.stimType='loop';
@@ -562,10 +584,37 @@ switch details.renderMode
         preRequestStim.startFrame=0;
         preRequestStim.autoTrigger=[];
         preRequestStim.punishResponses=false;
-
-        preResponseStim=discrimStim;
-        preResponseStim.punishResponses=false;
-
+        
+        switch trialManagerClass
+            case 'freeDrinks'
+                preResponseStim=[]; % not used
+                discrimStim=preRequestStim;   
+            case 'goNoGo'
+                %the stimulus appears imediatelty *before* the discrim phase
+                preResponseStim=[];
+                preResponseStim.stimulus=out;
+                preResponseStim.stimType=type;
+                preResponseStim.scaleFactor=scaleFactor;
+                preResponseStim.startFrame=0;
+                preResponseStim.autoTrigger=[];
+                preResponseStim.punishResponses=false;
+                
+                %the discrim phase is actually blank
+                 discrimStim=preRequestStim;
+            case {'nAFC','autopilot'}
+                discrimStim=[];
+                discrimStim.stimulus=out;
+                discrimStim.stimType=type;
+                discrimStim.scaleFactor=scaleFactor;
+                discrimStim.startFrame=0;
+                discrimStim.autoTrigger=[];
+                
+                preResponseStim=preRequestStim;
+                preResponseStim.punishResponses=false;
+            otherwise
+                error('unknown how to handle that trial manager class')
+        end
+        
 end
 
 details.sm=struct(decache(stimulus));
@@ -610,15 +659,15 @@ switch insertMethod
         %maskInd = find(maskInd == chosenMask);
         maskInd = 1;
         [patchX patchY]=getPatchSize(s);
-
+        
         %       %radius      pixPerCyc      phase          %orientation
         params= [Inf      chosenFeature3  chosenFeature2   chosenFeature1     1    s.thresh  1/2     1/2   ];
         grating=computeGabors(params,0.5,patchX,patchY,s.gratingType,'normalizeVertical',1);
         grating=(grating-0.5);
-
+        
         WHITE=double(intmax(class(stim)));
         patch=(WHITE*contrast)*(maskVideo.*grating);
-
+        
         above=zeros(size(patch),class(stim));
         below=above;
         above(sign(patch)==1)=(patch(sign(patch)==1));

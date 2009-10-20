@@ -3,7 +3,7 @@ function [tm trialDetails result spec rewardSizeULorMS requestRewardSizeULorMS .
     updateTrialState(tm, sm, result, spec, ports, lastPorts, ...
     targetPorts, requestPorts, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
     floatprecision, textures, destRect, ...
-    requestRewardDone)
+    requestRewardDone, punishResponses)
 % This function is a tm-specific method to update trial state before every flip.
 % Things done here include:
 %   - set trialRecords.correct and trialRecords.result as necessary
@@ -32,12 +32,15 @@ end
     updateTrialState(tm.trialManager, sm, result, spec, ports, lastPorts, ...
     targetPorts, requestPorts, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
     floatprecision, textures, destRect, ...
-    requestRewardDone);
+    requestRewardDone, punishResponses);
 if isempty(possibleTimeout)
 	if ~isempty(result) && ~ischar(result) && isempty(correct) && strcmp(getPhaseLabel(spec),'reinforcement')
 		resp=find(result);
 		if length(resp)==1
 			correct = ismember(resp,targetPorts);
+            if punishResponses % this means we got a response, but we want to punish, not reward
+				correct=0; % we could only get here if we got a response (not by request or anything else), so it should always be correct=0
+			end
 			result = 'nominal';
 		else
 			correct = 0;

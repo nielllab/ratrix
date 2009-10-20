@@ -63,7 +63,8 @@ switch protocolVersion
         parameters.dynamicSweep.sweepMode={'ordered'};
         parameters.dynamicSweep.sweptValues=[];
         parameters.dynamicSweep.sweptParameters={'targetOrientations','flankerOffset'}% 'flankerOrientations'}%,'flankerOffset','flankerPosAngle'};
-
+        %parameters.dynamicSweep.numRepeats= Inf; % not tested
+        
         %         fitRF.fitMethod='elipse';
         %         fitRF.which='last';
         %         fitRF.medianFilter=logical(ones(3));

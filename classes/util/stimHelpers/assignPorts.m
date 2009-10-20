@@ -106,11 +106,19 @@ switch TMclass
         % determine correct port
         if ~isempty(lastCorrect) && ~isempty(lastResult) && ~lastCorrect && length(lastTrialRec.targetPorts)==3 && (lastWasCorrection || rand<details.pctCorrectionTrials)
             details.correctionTrial=1;
+            %correction trials are a very strange brew for goNoGo... i
+            %doubt its what we want... 
+            
             %'correction trial!'
             targetPorts=lastTrialRec.targetPorts; % same ports are correct
         else
             details.correctionTrial=0;
             targetPorts=responsePorts; %choose all response port to be correct answer
+            %pmm:  these apear to be all "go" trials how do we get "no go" trials?
+            % i guess the idea of a "trial" is bankrupt in this mode
+            % the noGos are all the momement in time of waiting, which
+            % could be trials... as long as there is no auditory cue and/or
+            % flanker that is correlated with the noGo stimulus
         end
         distractorPorts=setdiff(responsePorts,targetPorts);
         

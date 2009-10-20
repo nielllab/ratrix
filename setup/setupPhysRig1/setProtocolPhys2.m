@@ -221,6 +221,7 @@ rptUnq=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminanc
 %flankers
 flankers=ifFeatureGoRightWithTwoFlank('phys');
 flankersFF=ifFeatureGoRightWithTwoFlank('physFullFieldTarget');
+fTestFlicker=ifFeatureGoRightWithTwoFlank('testFlicker');
 prm=getDefaultParameters(ifFeatureGoRightWithTwoFlank, 'goToSide','1_0','Oct.09,2007');
 
 % bipartiteField
@@ -386,6 +387,8 @@ ts{25} = trainingStep(ap, biField,     numTrialsDoneCriterion(2), noTimeOff(), s
 %xtra stuff might want:
 ts{26} = trainingStep(ap, dynGrating,  repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %tailored to this cell
 ts{27} = trainingStep(ap, hateren,     repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %hateren
+ts{28} = trainingStep(ap, fTestFlicker,repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
+
 
 %removed things b/c not used enough:
 % ts{10}= trainingStep(afc, radGratings, numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %gratings: radius
@@ -411,8 +414,8 @@ ts{27} = trainingStep(ap, hateren,     repeatIndefinitely(),      noTimeOff(), s
 %% make and set it
 
 
-p=protocol('practice phys',{ts{1:27}});
-stepNum=uint8(4);
+p=protocol('practice phys',{ts{1:28}});
+stepNum=uint8(28);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

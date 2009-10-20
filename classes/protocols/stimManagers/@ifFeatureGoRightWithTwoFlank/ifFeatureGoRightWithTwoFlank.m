@@ -140,6 +140,7 @@ switch nargin
         
         s.renderMode=[];
         
+        s.dynamicFlicker=[];
         
         s.stdsPerPatch=0;
 
@@ -222,6 +223,40 @@ switch nargin
                         p.dynamicSweep.numRepeats=20;
                         
                         p.typeOfLUT='2009Trinitron255GrayBoxInterpBkgnd.5';
+                    case 'testFlicker'
+                        
+                       %save space for the memory problem of making all the tex's
+                        %p.goLeftOrientations=p.goLeftOrientations(1);
+                        %p.goRightOrientations=p.goRightOrientations(1);
+                        %p.flankerOrientations=p.flankerOrientations(1);
+                        
+                        %p.stdGaussMask=Inf;
+                        p.stdGaussMask=1/16;
+                        p.flankerOffset=3;
+                        
+                        p.flankerContrast=0;
+                        p.goLeftContrast=1;
+                        p.goRightContrast=1;
+                        p.pixPerCycs=32;
+                        p.targetOnOff=int32([300 340]);
+                        p.flankerOnOff=int32([1 340]);
+                        p.renderMode='dynamic-precachedInsertion'; % dynamic-maskTimesGrating, dynamic-onePatchPerPhase,or dynamic-onePatch
+                        
+                        p.dynamicSweep.sweepMode={'ordered'};
+                        p.dynamicSweep.sweptValues=[];
+                        p.dynamicSweep.sweptParameters={'targetOrientations'};
+                        p.dynamicSweep.numRepeats=20;
+                        
+                        p.phase=0;%2*pi*[1:8]/8;   
+                        
+                        %example setup
+                        p.dynamicFlicker.flickerMode='random';
+                        p.dynamicFlicker.flickeringParameters={'flankerContrast','phase'};
+                        p.dynamicFlicker.flickeringValues{1}=[0 0 0 0 0 0 0 0 0 0 0 0 0.2];
+                        p.dynamicFlicker.flickeringValues{2}=p.phase;
+                        p.dynamicFlicker.framesSavedBeforeAfter=[300 100];
+                        
+                        
                     case '10'
                         p.renderMode='ratrixGeneral-precachedInsertion';
                     otherwise
@@ -233,7 +268,7 @@ switch nargin
                 class(varargin{1})
                 error('Single input argument is bad')
         end
-    case 60
+    case 61
         % create object using specified values
 
         if all(varargin{1})>0
@@ -500,7 +535,7 @@ switch nargin
             error('framesPerMotionStim must be a single number')
         end
 
-        if  any(strcmp(varargin{46},{'goToRightDetection', 'goToLeftDetection','tiltDiscrim','goToSide'}))
+        if  any(strcmp(varargin{46},{'goToRightDetection', 'goToLeftDetection','tiltDiscrim','goToSide','goNoGo','cuedGoNoGo'}))
             s.protocolType=varargin{46};
         else
             varargin{46}
@@ -589,7 +624,7 @@ switch nargin
         if (checkDynamicSweep(ifFeatureGoRightWithTwoFlank(),varargin{55}))
             s.dynamicSweep=varargin{55};
         else
-            error ('wrong fields in fitRF')
+            error ('wrong fields in dynamicSweep')
         end
 
         if  any(strcmp(varargin{56},{'ratrixGeneral-maskTimesGrating', 'ratrixGeneral-precachedInsertion','dynamic-precachedInsertion','dynamic-maskTimesGrating','dynamic-onePatchPerPhase','dynamic-onePatch'}))
@@ -597,8 +632,13 @@ switch nargin
         else
             error('renderMode must be ratrixGeneral-maskTimesGrating, ratrixGeneral-precachedInsertion,dynamic-precachedInsertion, dynamic-maskTimesGrating, dynamic-onePatchPerPhase,or dynamic-onePatch')
         end
-
-
+        
+        if (checkDynamicFlicker(ifFeatureGoRightWithTwoFlank(),varargin{57}))
+            s.dynamicFlicker=varargin{57};
+        else
+            error ('wrong fields in dynamicFlicker')
+        end
+        
         %s.phase=0; %no longer randomized;   would need movie for that (hieght x width x orientations x phase)
         %maxHeight=varargin{22**old val};
 

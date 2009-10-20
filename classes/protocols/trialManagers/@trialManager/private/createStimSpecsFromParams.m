@@ -47,13 +47,13 @@ startingStimSpecInd=1;
 i=1;
 addedPreResponsePhase=0;
 switch class(trialManager)
-	case {'nAFC','freeDrinks','oddManOut'}
+	case {'nAFC','freeDrinks','oddManOut','goNoGo'}
 		% we need to figure out when the reinforcement phase is (in case we want to punish responses, we need to know which phase to transition to)
 		if ~isempty(preResponseStim) && responseWindow(1)~=0
 			addedPreResponsePhase=addedPreResponsePhase+1;
 		end
 		% optional preOnset phase
-		if ~isempty(preRequestStim) && strcmp(class(trialManager),'nAFC') % only have the pre-request phase if no delayManager in 'nAFC' class
+		if ~isempty(preRequestStim) &&  ismember(class(trialManager),{'nAFC','goNoGo'}) % only have the pre-request phase if no delayManager in 'nAFC' class
 			if preRequestStim.punishResponses
 				criterion={[],i+1,requestPorts,i+1,[targetPorts distractorPorts],i+2+addedPhases};
 			else
@@ -104,7 +104,6 @@ switch class(trialManager)
 		criterion={[],i+1};
 		stimSpecs{i} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,'itl','intertrial luminance',false,false); % do not punish responses here
 		i=i+1;
-		
 	case 'autopilot'
 		% do autopilot stuff..
         % required discrim phase

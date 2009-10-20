@@ -9,7 +9,11 @@ width=details.width;
 fracSizeX=szX/width;
 fracSizeY=szY/height;
 
-dev = details.flankerOffset*details.stdGaussMask;
+if ~isinf(details.stdGaussMask)
+    dev = details.flankerOffset*details.stdGaussMask;
+else
+    dev=0; % infinitelty large patches don't get translated at all
+end
 devY = dev.*cos(details.flankerPosAngles(1)); %caluate from details
 devX = dev.*sin(details.flankerPosAngles(1));
 nDevX= devX* (height/width); %normalized by the height:width ratio, so that when screen width is multiplied by the fraction x value, the linear displacement is appropriate

@@ -153,8 +153,15 @@ switch defaultSettings
         %for reinforcment manager
         default.requestMode='first';  % only first request lick is rewarded
         
+        efault.allowFreeDrinkRepeatsAtSameLocation=false;
         
-        default.allowFreeDrinkRepeatsAtSameLocation=false;
+        default.dynamicFlicker=[];    % never was dynamicFlicker by default; oct 14, 2009
+        
+        default.delayManager=[];  %defaults made explicit Oct 19, 2009
+        default.responseWindowMs=[0 Inf];
+        default.showText=true;
+        default.tmClass='nAFC';
+        
     case 'Apr.13,2009'
         %get the above defaults and add on
         [default t]=getDefaultParameters(t,'unused','none','Oct.09,2007');
@@ -578,7 +585,66 @@ switch protocolVersion
 
                 default.phase=[0 pi];
                 default.flankerPosAngle=orients;
+            case 'goNoGo'
+                default.goRightContrast = [1];    %RULE FOR CODE RE-USE: 'goDetection' uses "right" for "go"
+                default.goLeftContrast =  [0];
+                default.flankerContrast = [0];
 
+                orients=[-pi/12,pi/12];%%-15, 15
+                default.goRightOrientations = orients;
+                default.goLeftOrientations =  orients;
+                default.flankerOrientations = orients;
+
+                default.stdGaussMask = 1/5;
+                default.positionalHint=0;
+                default.displayTargetAndDistractor=0;
+                default.phase=[0 pi];
+                default.flankerPosAngle=orients;
+                
+                
+                %set a few things unique to go-no-go
+                percentile=0.99;
+                value=10000;
+                fixedDelayMs=1000;
+                default.delayManager=flatHazard(percentile, value, fixedDelayMs);
+                
+                default.responseWindowMs=[500 1500];  % do these conflict with one another?
+                default.responseLockoutMs=500;
+                
+                default.requestPorts='none';
+                default.tmClass='goNoGo';
+                % default.rewardNthCorrect=1*[20,80,100,150,250];  % really? 
+            case 'cuedGoNoGo'
+                default.goRightContrast = [1];    %RULE FOR CODE RE-USE: 'goDetection' uses "right" for "go"
+                default.goLeftContrast =  [0];
+                default.flankerContrast = [0];
+
+                orients=[-pi/12,pi/12];%%-15, 15
+                default.goRightOrientations = orients;
+                default.goLeftOrientations =  orients;
+                default.flankerOrientations = orients;
+
+                default.stdGaussMask = 1/5;
+                default.positionalHint=0;
+                default.displayTargetAndDistractor=0;
+                default.phase=[0 pi];
+                default.flankerPosAngle=orients;
+                
+                
+                %set a few things unique to go-no-go
+                %percentile=0.99;
+                %value=10000;
+                %fixedDelayMs=1000;
+                %default.delayManager=flatHazard(percentile, value, fixedDelayMs);
+                default.delayManager=constantDelay(1000);
+                
+                default.responseWindowMs=[500 1500];  % do these conflict with one another?
+                default.responseLockoutMs=500;
+                
+                default.requestPorts='none';
+                default.tmClass='nAFC'; % not actually using goNoGo trial Manager!
+                
+                
             otherwise
                 protocolVersion=protocolVersion
                 error('unknown type of protocol for this version')

@@ -1,4 +1,4 @@
-function stimDetails=setDynamicDetails(s,stimDetails,sweptID);
+function [stimDetails dynamicDetails]=setDynamicDetails(s,stimDetails,sweptID,dynamicDetails);
 %updates the value in stim details and recomputes, and updates relevant fields
 
 %init

@@ -110,7 +110,7 @@ width=stimulusDetails.width;
 % stimData is the entire movie shown for this trial
 % removed 1/26/09 and replaced with stimulusDetails
 % reconstruct stimData from stimulusDetails - stimManager specific method
-stimData=nan(spatialDim(1),spatialDim(2),length(stimFrames));
+stimData=nan(spatialDim(2),spatialDim(1),length(stimFrames));
 for i=1:length(stimFrames)
     
     %recompute stim - note: all sha1ing would have to happen w/o whiteVal and round
@@ -125,7 +125,7 @@ for i=1:length(stimFrames)
             stixels(stixels<0)=0;
         case 'binary'
             rand('state',seeds(mod(stimFrames(i)-1,length(seeds))+1));
-            stixels = round(whiteVal* (stimulusDetails.distribution.lowVal+(double(rand(spatialDim([1 2]))<stimulusDetails.distribution.probability)*hiLoDiff)));
+            stixels = round(whiteVal* (stimulusDetails.distribution.lowVal+(double(rand(spatialDim([2 1]))<stimulusDetails.distribution.probability)*hiLoDiff)));
         otherwise
             error('never')
     end
@@ -337,7 +337,7 @@ doSpatial=~(size(STA,1)==1 & size(STA,2)==1); % if spatial dimentions exist
 % %% spatial signal (best via bright)
 if doSpatial
     
-    contextInd=darkInd;
+    contextInd=brightInd;
                 
     %fit model to best spatial
     stdThresh=1;
@@ -412,13 +412,13 @@ try
 catch
     keyboard
 end
-fh=fill([1:ns fliplr([1:ns])]',[darkCI(:,1); flipud(darkCI(:,2))],'r'); set(fh,'edgeAlpha',0,'faceAlpha',.5)
-fh=fill([1:ns fliplr([1:ns])]',[brightCI(:,1); flipud(brightCI(:,2))],'b'); set(fh,'edgeAlpha',0,'faceAlpha',.5)
+fh=fill([1:ns fliplr([1:ns])]',[darkCI(:,1); flipud(darkCI(:,2))],'b'); set(fh,'edgeAlpha',0,'faceAlpha',.5)
+fh=fill([1:ns fliplr([1:ns])]',[brightCI(:,1); flipud(brightCI(:,2))],'r'); set(fh,'edgeAlpha',0,'faceAlpha',.5)
 plot([1:ns], darkSignal(:)','b')
 plot([1:ns], brightSignal(:)','r')
 
 peakFrame=find(brightSignal==max(brightSignal(:)));
-timeInds=[1 peakFrame timeWindowFrames(1)+1 size(analysisdata.STA,3)];
+timeInds=[1 peakFrame(end) timeWindowFrames(1)+1 size(analysisdata.STA,3)];
 set(gca,'XTickLabel',unique(timeMs(timeInds)),'XTick',unique(timeInds),'XLim',minmax(timeInds));
 set(gca,'YLim',[minmax([analysisdata.singleChunkTemporalRecord(:)' darkCI(:)' brightCI(:)'])+[-5 5]])
 ylabel('RGB(gunVal)')

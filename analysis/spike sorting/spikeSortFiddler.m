@@ -26,7 +26,7 @@ spikeDetectionParams.extractionThreshold =5;
 %should be replaced with a string that collapses these two confusing categories into one value;  'maxPeak' 'minPeak' 'maxMinPeak' 'power' 'MTEO'
 % why is 3=power broken? can we fix it?
 spikeDetectionParams.peakAlignMethod=1;  % 1-> find peak, 2->none, 3->peak of power signal (broken), 4->peak of MTEO signal.
-spikeDetectionParams.alignMethod=1;  %only used if peakAlignMethod is 1=peak; if so (1: peak is max, 2: peak is min, 3: mixed)
+spikeDetectionParams.alignMethod=2;  %only used if peakAlignMethod is 1=peak; if so (1: peak is max, 2: peak is min, 3: mixed)
 
 spikeDetectionParams.prewhiten = 0;  %will error if true, and less than 400,000 samples ~10 secs / trial; need to understand whittening with Linear Predictor Coefficients to lax requirements (help lpc)
 spikeDetectionParams.limit = 2000;
@@ -90,14 +90,16 @@ end
 %subjectID = 'demo1'; cellBoundary={'physLog',{'06.03.2009','all','last'}};
 %subjectID = '131';cellBoundary={'trialRange',[7]} % TRF
 %subjectID = '131';cellBoundary={'trialRange',[54 ]} % binSTA at 17 inches from screen
-subjectID = '131';cellBoundary={'trialRange',[54 131]} % binSTA at 17 inches from screen
-%subjectID = '131dev3';cellBoundary={'trialRange',[6 22]} % sparse grid [12 x 16]
-subjectID = '131dev4';cellBoundary={'trialRange',[74 80]} % sparse grid [12 x 16]
-subjectID = '131dev4';cellBoundary={'trialRange',[75 ]} % sparse grid%[12 x 16]
-%subjectID = '131';cellBoundary={'trialRange',[243 350 ]} % sparse grid%[12 x 16]
+subjectID = '131';cellBoundary={'trialRange',[54 131]}; % binSTA at 17 inches from screen
+%subjectID = '131dev3';cellBoundary={'trialRange',[6 22]}; % sparse grid [12 x 16]
+subjectID = '131dev4';cellBoundary={'trialRange',[74 80]}; % sparse grid [12 x 16]
+subjectID = '131dev4';cellBoundary={'trialRange',[75 ]}; % sparse grid%[12 x 16]
+%subjectID = '131';cellBoundary={'trialRange',[243 350 ]}; % sparse grid%[12 x 16]
+subjectID = '303';cellBoundary={'trialRange',[1 27 ]}; % all
+subjectID = '303';cellBoundary={'trialRange',[7]} % sparse grid%[12 x 16]
 
 overwriteAll=1; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
-usePhotoDiodeSpikes=0;
+usePhotoDiodeSpikes=1;
 stimClassToAnalyze={'all'}; timeRangePerTrialSecs=[0 Inf];
 % path='\\132.239.158.183\rlab_storage\pmeier\backup\devNeuralData_090310'; %b/c i can't see datanet_storage folder on .179
 % path='\\132.239.158.183\rlab_storage\pmeier\backup\neuralData_090505';

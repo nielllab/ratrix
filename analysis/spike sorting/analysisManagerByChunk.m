@@ -131,6 +131,7 @@ end
 % some counters
 quit = false;
 doneWithThisTrial=false;
+haveDeletedAnalysisRecords=false;
 result=[];
 plotParameters.doPlot=false;
 plotParameters.handle=figure;
@@ -200,9 +201,31 @@ while ~quit
     stimRecordLocation = fullfile(stimRecordsPath,sprintf('stimRecords_%d-%s.mat',currentTrial,timestamp));
     neuralRecordLocation = fullfile(neuralRecordsPath,sprintf('neuralRecords_%d-%s.mat',currentTrial,timestamp));
     analysisPath = fullfile(baseAnalysisPath,sprintf('%d-%s',currentTrial,timestamp));
+    
+    if overwriteAll & exist(baseAnalysisPath,'dir')  & ~haveDeletedAnalysisRecords 
+             
+            % the first time we get here we delete the whole 
+            % folder and all the previous analysis, as we want to
+            % overwrite ALL.  If we don't do this, we will store
+            % muliple cumulative copies of each spike
+            %(for every time the extraction/clustering is re-run)
+            
+            %delete the existing sub-directory for all the records with
+            %this exact trial range (ie. the folder '31-35' but not the folder '32-32' which is its own redundant repository)
+            [succ,msg,msgID] = rmdir(baseAnalysisPath,'s');  % includes all subdirectory regardless of permissions
+            
+            if ~succ
+                msg
+                error('failed to remove existing files when running with ''overwriteAll=true''')
+            else
+                haveDeletedAnalysisRecords=true;
+            end
+    end
+    
     if ~isdir(analysisPath)
         mkdir(analysisPath);
     end
+    
 %     spikeRecordLocation = fullfile(baseAnalysisPath,sprintf('spikeRecords_%d-%s.mat',currentTrial,timestamp));
     spikeRecordLocation=fullfile(baseAnalysisPath,'spikeRecords.mat'); % HACK FOR NOW - per cell spikeRecord
     analysisLocation = fullfile(analysisPath,sprintf('physAnalysis_%d-%s.mat',currentTrial,timestamp));
@@ -220,6 +243,7 @@ while ~quit
     analyzeThisTrial= all(strcmp('all',stimClassToAnalyze)) ||  any(strcmp(stimRecord.stimManagerClass,stimClassToAnalyze));
     if analyzeThisTrial
         startingStimInd=0;
+        
         while ~doneWithThisTrial
             % look at the neuralRecord and see if there are any new chunks to process
             chunkNames=who('-file',neuralRecordLocation);
@@ -344,10 +368,12 @@ while ~quit
                                 getSpikesFromPhotodiode(neuralRecord.neuralData(:,2),...
                                 neuralRecord.neuralDataTimes, spikeRecord.correctedFrameIndices,neuralRecord.samplingRate);
                             spikeRecord.spikeTimestamps = neuralRecord.neuralDataTimes(spikeRecord.spikes);
-%                             spikeRecord.spikeWaveforms=[];
-                            det.rankedClusters=[];
-                            spikeRecord.spikeDetails=det;
                             spikeRecord.assignedClusters=[ones(1,length(spikeRecord.spikeTimestamps))]';
+%                             spikeRecord.spikeWaveforms=[];
+                            det.rankedClusters=[];  % needs to be there for the contcatenation not to fail, though its empty
+                            det.processedClusters=spikeRecord.assignedClusters'; % select all of them as belonging to a processed group
+                            spikeRecord.spikeDetails=det;
+                            
                             %                         frameTimes(:,1); %frame starts
                             %                         frameTimes(:,2); %frame stops
                         else
@@ -672,8 +698,8 @@ for i=1:size(frameIndices,1)
         numSpikes=ceil(maxNumStimSpikes*(squaredVals(i)-threshold)/(valuesToCalcThreshold(1)-threshold));
         randInds=randperm(diff(frameIndices(i,:)))+frameIndices(i,1); % randomly order the candidate locations
         spikes=[spikes;randInds(1:numSpikes)'];  % put N spikes at random locations (doesn't respect refractory)
-        pre=floor(.5*samplingRate/1000);
-        post=floor(1.5*samplingRate/1000); % hard-coded 1.5ms and 0.5ms for now...
+        pre=floor(.58*samplingRate/1000);
+        post=floor(1.0*samplingRate/1000); % hard-coded 1.5ms and 0.5ms for now... matches the 64 samps made by osort
         for j=1:numSpikes
             spikeWaveforms=[spikeWaveforms; photoDiodeData(randInds(j)-pre:randInds(j)+post)'];
         end

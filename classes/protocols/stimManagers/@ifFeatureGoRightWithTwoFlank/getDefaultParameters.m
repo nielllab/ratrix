@@ -153,7 +153,7 @@ switch defaultSettings
         %for reinforcment manager
         default.requestMode='first';  % only first request lick is rewarded
         
-        efault.allowFreeDrinkRepeatsAtSameLocation=false;
+        default.allowFreeDrinkRepeatsAtSameLocation=false;
         
         default.dynamicFlicker=[];    % never was dynamicFlicker by default; oct 14, 2009
         

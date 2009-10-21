@@ -25,7 +25,7 @@ ai_parameters.inputRanges=repmat([-1 6],ai_parameters.numChans,1);
 % ========================================================================================
 % lists of values for settings
 clientIPStrs={'132.239.158.180'};
-ratIDStrs={'demo1','test1','fan_demo1','131','303'};
+ratIDStrs={'demo1','test1','fan_demo1','131','303','138'};
 ratProtocolStrs={'setProtocolTEST','setProtocolPhys2'};
 experimenterStrs={'','eflister','pmeier','bsriram'};
 electrodeMakeStrs={'FHC','MPI','gentner'};
@@ -72,7 +72,7 @@ arousalStrs={[],'awake','asleep','anesth'};
 eyesStrs={[],'open','closed','squinty','stable','saccades','poor signal'};
 faceStrs={[],'whisking','no whisking','grinding','licking','squeaking'};
 
-isofluraneStrs={[],'0.0','1.0','1.5','2.0','2.5','3.0','4.0','5.0','oxy'};
+isofluraneStrs={[],'0.0','1.0','1.25','1.5','2.0','2.5','3.0','4.0','5.0','oxy'};
 withdrawalStrs={[],'none','sluggish','quick'};
 breathPerMinStrs={[],'24-','30','36','42','48','54','60+'};
 breathTypeStrs={[],'normal','arrhythmic','wheezing','hooting'};

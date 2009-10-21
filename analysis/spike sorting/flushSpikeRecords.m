@@ -2,7 +2,10 @@ function subIDsFlushed = flushSpikeRecords(path,subIDs,trialFilter)
 % This function removes the selected spikeRecords (specified by trialFilter [min max]) of the specified subIDs.
 % The spikeRecords should be in the directory path/subIDs{i}
 % trialFilter can be a two-element array [min max] or the string 'all' (default)
+% ids=flushSpikeRecords('\\132.239.158.179\datanet_storage',{'303'})
 
+
+error('this method needs to be upated to the format in which everything is in ''analysis'' ... why not just use the OS to delete?')
 if ~exist('trialFilter','var')
     trialFilter='all';
 end

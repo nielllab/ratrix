@@ -390,8 +390,8 @@ end;
 colors=jet(numTypes);
 figure(parameters.trialNumber); % new for each trial
 set(gcf,'position',[100 400 560 620])
-subplot(3,2,1); hold on; %p=plot([1:numPhaseBins]-.5,rate')
-plot([0 numPhaseBins], [rate(1) rate(1)],'color',[1 1 1]); % to save tight axis chop
+subplot(3,2,1); hold off; %p=plot([1:numPhaseBins]-.5,rate')
+plot([0 numPhaseBins], [rate(1) rate(1)],'color',[1 1 1]); hold on;% to save tight axis chop
 x=[1:numPhaseBins]-.5;
 for i=1:numTypes
     plot(x,rate(i,:),'color',colors(i,:))
@@ -403,7 +403,7 @@ xlabel('phase');  set(gca,'XTickLabel',{'0','pi','2pi'},'XTick',([0 .5 1]*numPha
 axis tight
 
 %rate density over phase... doubles as a legend
-subplot(3,2,2); hold on
+subplot(3,2,2); hold off; 
 im=zeros([size(phaseDensity) 3]);
 hues=rgb2hsv(colors);  % get colors to match jet
 hues=repmat(hues(:,1)',numRepeats,1); % for each rep
@@ -412,17 +412,17 @@ im(:,:,1)=hues; % hue
 im(:,:,2)=1; % saturation
 im(:,:,3)=phaseDensity/max(phaseDensity(:)); % value
 rgbIm=hsv2rgb(im);
-image(rgbIm);
+image(rgbIm); hold on
 axis([0 size(im,2) 0 size(im,1)]+.5);
 ylabel(sweptParameter); set(gca,'YTickLabel',valNames,'YTick',size(im,1)*([1:length(vals)]-.5)/length(vals))
 xlabel('phase');  set(gca,'XTickLabel',{'0','pi','2pi'},'XTick',([0 .5 1]*numPhaseBins)+.5);
 
-subplot(3,2,3); plot(mean(rate'),'k','lineWidth',2); %legend({'Fo'})
+subplot(3,2,3); hold off; plot(mean(rate'),'k','lineWidth',2); hold on; %legend({'Fo'})
 xlabel(sweptParameter); set(gca,'XTickLabel',valNames,'XTick',[1:length(vals)]); ylabel('rate (f0)'); set(gca,'YTickLabel',[0:.1:1]*parameters.refreshRate,'YTick',[0:.1:1])
 set(gca,'XLim',[1 length(vals)])
 
 modulation=pow./(parameters.refreshRate*mean(rate'))
-subplot(3,2,4); 
+subplot(3,2,4); hold off
 plot(pow,'k','lineWidth',1); hold on; 
 plot(modulation,'--k','lineWidth',2); hold on;
 cohScaled=coh*max(pow); %1 is peak FR
@@ -446,7 +446,7 @@ N=sum(isi<parameters.ISIviolationMS); percentN=100*N/length(isi);
 infoString=sprintf('subj: %s  trial: %d Hz: %d',parameters.subjectID,parameters.trialNumber,round(meanRate));
 text(1.2,ylim(2),infoString);
 
-subplot(3,2,5);  
+subplot(3,2,5);
 numBins=40; maxTime=10; % ms
 edges=linspace(0,maxTime,numBins); [count]=histc(isi,edges);
 hold off; bar(edges,count,'histc'); axis([0 maxTime get(gca,'YLim')]);
@@ -457,7 +457,8 @@ infoString=sprintf('viol: %2.2f%%\n(%d /%d)',percentN,N,length(isi))
 text(xvals(3),max(count),infoString,'HorizontalAlignment','right','VerticalAlignment','top');
 ylabel('count'); xlabel('isi (ms)')
 
-subplot(3,2,6);
+subplot(3,2,6); hold off;
+plot(eyeSig(1,1),eyeSig(1,2),'.k');  hold on; % plot one dot to flush history
 if exist('ellipses','var')
     plotEyeElipses(eyeSig,ellipses,within,true)
 else

@@ -554,7 +554,8 @@ if 1 % view plots (for testing)
             error('bad method')
     end
 
-    candTimes=find(spikes);
+    candTimes=spikes;
+    %candTimes=find(spikes);
     spikeTimes=candTimes(whichSpikes);
     noiseTimes=candTimes(whichNoise);
     

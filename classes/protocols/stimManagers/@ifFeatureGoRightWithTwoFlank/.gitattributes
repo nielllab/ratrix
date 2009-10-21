@@ -56,3 +56,5 @@
 /physAnalysis.m -text
 /setStdGaussMask.m -text
 /setRenderMode.m -text
+/checkDynamicFlicker.m -text
+/setDynamicFlicker.m -text

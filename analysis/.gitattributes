@@ -427,5 +427,6 @@ pmm/checkControls.m -text
 pmm/calibration/pmmCalib.m -text
 anatomy/getLgnCoordinates.m -text
 anatomy/plotInBregmaCoordinates.m -text
+anatomy/getV1Coordinates.m -text
 anatomy/getPositionInBregmaCoordinates.m -text
 pmm/PatchVideo.m -text

@@ -1,5 +1,5 @@
-function compilePhysTxt(targetDir,analysisDir,wavemarkDir,rec,force)
-verbose=true;
+function compilePhysTxt(targetDir,analysisDir,wavemarkDir,rec,force,targetBinsPerSec)
+verbose=false;
 
 chunkStarts=[rec.chunks.start_time];
 chunkEnds=[rec.chunks.stop_time];
@@ -40,95 +40,38 @@ for j=1:numStims
             warning('multiple chunks for stim')
         end
         
-        fprintf('\n')
         for chunkNum=c
+            fileNames=[];
             [garbage code]=fileparts(targetDir);
             
-            stimFile=constructPath(targetDir,'stim',code,'mat');
-            physFile=constructPath(targetDir,'phys',code,'mat');
-            pulseFile=constructPath(analysisDir,'pulse',code,'txt');
-            pokesFile=constructPath(analysisDir,'pokes',code,'txt');
+            fileNames.stimFile=constructPath(targetDir,'stim',code,'mat');
+            fileNames.physFile=constructPath(targetDir,'phys',code,'mat');
+            fileNames.pulseFile=constructPath(analysisDir,'pulse',code,'txt');
+            fileNames.pokesFile=constructPath(analysisDir,'pokes',code,'txt');
             
             chunkName=sprintf('chunk%d',chunkNum);
             [garbage code]=fileparts(wavemarkDir);
             
-            spikesFile=constructPath(fullfile(wavemarkDir,chunkName),['spks.' chunkName],code,'txt');
-            wavemarkFile=constructPath(fullfile(wavemarkDir,chunkName),['waveforms.' chunkName],code,'txt');
+            fileNames.spikesFile=constructPath(fullfile(wavemarkDir,chunkName),['spks.' chunkName],code,'txt');
+            fileNames.wavemarkFile=constructPath(fullfile(wavemarkDir,chunkName),['waveforms.' chunkName],code,'txt');
             
             thisStart=max(chunkStarts(chunkNum),stimStart);
             thisStop=min(chunkEnds(chunkNum),stimStop);
+
+            stimName=sprintf('%d.%s',j,rec.stimTimes{j,2});
+            stimName=stimName(~ismember(stimName,['<>/\?:*"|'])); %TODO: check for excluded filename characters on osx
+            z=sprintf('%g',rec.chunks(chunkNum).cell_Z);
+            tRange=sprintf('%g-%g',thisStart,thisStop);
+            chunkName=sprintf('%d.%s',chunkNum,code);
+            desc=[stimName '.z.' z '.t.' tRange '.chunk.' chunkName];
             
-            fileName=sprintf('%s: %d.%s.chunk%d',targetDir,j,rec.stimTimes{j,2},chunkNum);
-            fprintf('\t%s: %g-%g\n',fileName,thisStart,thisStop);
-        end
-    end
-    fprintf('\n')
-end
-fprintf('\n')
+            fileNames.targetFile=fullfile(targetDir,desc,[desc '.compiled.mat']);
 
-if false
-    fprintf('\ndoing waveforms\n')
-    tic
-    doWaveforms(baseDir,params.base,params.spkChan,params.spkCode);
-    toc
-end
-
-if false
-    targetBinsPerSec=1000;
-    
-    drawSummary=1;
-    forceStimRecompile=0;
-    forcePhysRecompile=0;
-    drawStims=1;
-    
-    for fileNum=1:length(rec)
-        h=hash(rec(fileNum).baseFile,'SHA1');
-        fileDir=fullfile(analysisDir,rec(fileNum).rat_id,datestr(rec(fileNum).date,'mm.dd.yy'),h);
-        for chunkNum=1:length(rec(fileNum).chunks)
-            chunk=['chunk' num2str(chunkNum)];
-            suffix=[chunk '.' h '.txt'];
+                recM=rec;
+                recM.chunks=rec.chunks(chunkNum);
+                recM.stimTimes=[];
+                compilePhysData(fileNames,[thisStart thisStop],recM,rec.stimTimes{j,2},targetBinsPerSec,force);
         end
-        
-        
-        %3) enter time ranges of particular stims for each set of files (enter 0's for stimuli not shown):
-        
-        stimTimes=[];
-        
-        %stimTimes(:,:,1) = [
-        %1425 1850;  % gaussian
-        %];
-        
-        %stimTimes(:,:,2)=[
-        %389.1093948    1589.1474132; % gaussian 2.5 std
-        %1594.2254112   2874.2534028; % natural hateren t001
-        %2879.3494116    4159.3714056 % white hateren t001
-        %];
-        
-        
-        %5) enter the repeat/unique format (one entry for each stim in stimTimes):
-        
-        pulsesPerRepeat=[];
-        numRepeats=[];
-        uniquesEvery=[];
-        
-        %pulsesPerRepeat=[100*5*60]; %[120000,800,800];
-        %numRepeats=[1];             %[1,160,160];
-        %uniquesEvery=[0];           %[0,5,5];
-        
-        
-        
-        %7) this file will call compilePhysData, which makes the "compiled data.txt" file
-        % this makes loading the stimulus faster for the future
-        % you should then call doAnalysis, which works on this file
-        
-        if isempty(stimTimes)
-            stimTimes(:,:,fileNum)=[0 inf];
-        end
-        numStims=size(stimTimes(:,:,fileNum),1);
-        
-        compiledFile = sprintf('compiled stim.%s.mat',h);
-        contents=what(fileDir);
-        
     end
 end
 end

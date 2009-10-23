@@ -39,7 +39,7 @@ binds=cumsum([0 out.len]);
 boundaries=(s.start+binds*s.step)*1000;
 
 if ~exist('startsMS','var') || isempty(startsMS)
-    out=cellfun(@(x) x(boundaries),{@min @max});
+    out=boundaries;%cellfun(@(x) x(boundaries),{@min @max});
     return
 elseif ~isvector(startsMS)
     error('not a vec')

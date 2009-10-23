@@ -1,4 +1,4 @@
-function extractPhysThenAnalyze(record,analysisBase,dataBase,targetBase)
+function extractPhysThenAnalyze(record,analysisBase,dataBase,targetBase,targetBinsPerSec)
 %this is inefficient because it does each chunk in a separate run of spike,
 %rather than grouping a file and all its chunks into one run.  thus, you
 %pay the cost of opening the file multiple times.  would be more
@@ -84,7 +84,7 @@ for i=1:length(record)
             end
         end
         
-        compilePhysTxt(targetDir,analysisDir,wavemarkDir,record(i),force);
+        compilePhysTxt(targetDir,analysisDir,wavemarkDir,record(i),force,targetBinsPerSec);
     end
 end
 

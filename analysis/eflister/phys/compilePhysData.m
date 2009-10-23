@@ -1,27 +1,42 @@
-function compilePhysData(wd,fileNames,stimTimes,targetBinsPerSec,pulsesPerRepeat,numRepeats,uniquesEvery,drawSummary,drawStims,forceStimRecompile,forcePhysRecompile)
+function compilePhysData(fileNames,stimTimes,rec,stimType,targetBinsPerSec,force)
 
-contents=what(wd);
+if false
+    fileNames.stimFile
+    fileNames.physFile
+    fileNames.pulseFile
+    fileNames.pokesFile
+    fileNames.spikesFile
+    fileNames.wavemarkFile
+    fileNames.targetFile
+end
 
-for fileNum=1:length(fileNames)
-    
-    file=fileNames{fileNum};
-    
-    if isempty(stimTimes)
-        stimTimes(:,:,fileNum)=[0 inf];
+fileGood = false;
+if exist(fileNames.targetFile,'file') && ~force
+    load(fileNames.targetFile);
+    if binsPerSec==targetBinsPerSec
+        fileGood = true;
     end
-    numStims=size(stimTimes(:,:,fileNum),1);
+end
+
+if ~fileGood
+    fprintf('compiling %s\n',fileNames.targetFile);
+    [pth name]=fileparts([fileparts(fileNames.targetFile) '.blah']);
+        
+    [phys physTms]=checkForResampledMat('phys',pth,force,targetBinsPerSec);
     
-    name = sprintf('%s compiled stim.mat',file);
-    
-    fileGood = 0;
-    if any(strcmp(contents.mat,name)) && ~forceStimRecompile && ~forcePhysRecompile
-        load(fullfile(wd,name));
-        if binsPerSec==targetBinsPerSec
-            fileGood = 1;
-        end
-    end
+    [stim stimTms first step]=checkForResampledMat('stim',pth,force,targetBinsPerSec);
+end
+
+if false
+    fprintf('\ndoing waveforms\n')
+    tic
+    doWaveforms(baseDir,params.base,params.spkChan,params.spkCode);
+    toc
     
     if ~fileGood
+        
+        
+        
         [phys physTms]=checkForCompiledMat(wd,'phys',file,forcePhysRecompile,contents,targetBinsPerSec);
         
         [stim stimTms first(fileNum) step(fileNum)]=checkForCompiledMat(wd,'stim',file,forceStimRecompile,contents,[]);
@@ -65,19 +80,19 @@ for fileNum=1:length(fileNames)
                 switch pulseProtocol
                     case 'old'
                         
-
-% example pulse file:                        
-% 1   %CHANNEL%	%2%
-% 2   %Evt+-%
-% 3   %%
-% 4   %pulse%
-% 5   
-% 6   %HIGH%
-% 7   1435.8024667
-% ... ...
-
-%above doScan w/2 header lines doesn't look right -- 4 or 5 works.
-%also verify line 2: "%Evt+-%"
+                        
+                        % example pulse file:
+                        % 1   %CHANNEL%	%2%
+                        % 2   %Evt+-%
+                        % 3   %%
+                        % 4   %pulse%
+                        % 5
+                        % 6   %HIGH%
+                        % 7   1435.8024667
+                        % ... ...
+                        
+                        %above doScan w/2 header lines doesn't look right -- 4 or 5 works.
+                        %also verify line 2: "%Evt+-%"
                         
                         if ~strcmp(C{1},'HIGH')
                             error('bad pulse parity')
@@ -721,60 +736,42 @@ for i=1:length(in)
 end
 end
 
-function [data ts first step]=checkForCompiledMat(wd,fType,fName,forceRecompile,contents,resampFreq)
-mattedName = sprintf('%s matted %s.mat',fName,fType);
+function [data ts first step]=checkForResampledMat(fType,pth,force,resampFreq)
+[garbage code]=fileparts(pth);
+origName = fullfile(pth,[fType '.' code '.mat']);
+if ~exist(origName,'file')
+    error('no file')
+end
 
-if any(strcmp(contents.mat,mattedName)) && ~forceRecompile
-    d=load(fullfile(wd,mattedName));
+mattedName = fullfile(pth,[fType '.' code '.resamp.' num2str(resampFreq) '.mat']);
+
+if exist(mattedName,'file') && ~force
+    d=load(mattedName);
     data=d.data;
     first=d.first;
     step=d.step;
+    if step~=(1/fresampFreq)
+        error('step doesn''t equal 1/resamp')
+    end
 else
-    fprintf('have to load %s for first time -- this takes awhile\n',fType)
+    fprintf('\tresampling to %s\n',mattedName)
+    boundaries=getRangeFromChunks(origName);
     
-    tName=sprintf('%s %s.txt',fName,fType);
     
-    switch fType
-        case 'phys'
-            cv=3;
-            edf1=1;
-            edf2=2;
-            tf=false;
-        case 'stim'
-            cv=1;
-            edf1=1;
-            edf2=2;
-            tf=false;
-        otherwise
-            fType
-            keyboard
-            %error('unknowntype')
-    end
-    C=doScan(fullfile(wd,tName),'%% START %% %f %f',6,cv,edf1,edf2,tf);
+    total=diff(cellfun(@(x) x(boundaries),{@min @max}));
+    data=nan(1,ceil(resampFreq*total/1000));
+    x=whos('data');
+    fprintf('\tcompressing to %g MB\n',x.bytes/1000/1000); %sometimes up to 100MB
     
-    first=C{1};
-    step=C{2};
+    %out=getRangeFromChunks(file,);'
+    %verify 10-50k
     
-    if first<0 || abs(1- step * 40000)>3 %used to be .5, edf raised to 1 so 10k acceptable (october files sample low)
-        error('bad first or step')
-    end
-    
-    data=load(fullfile(wd,tName));
-    disp(sprintf('file %s loaded',tName))
-    
-    save(fullfile(wd,mattedName),'data','first','step');
-    disp(sprintf('matted version saved'))
-end
+    first=0;
+    step=0;
 
-ts=getTimes(first, step, length(data));
-
-if isscalar(resampFreq)
-    
-    checkSecs=3;
-    checkInds=1:checkSecs/step;
-    figure
-    plot(ts(checkInds),data(checkInds),'b')
-    hold on
+    for 
+        out=getRangeFromChunks(origName,startsMS,durMS); %make this so omitting durMS or empty gives chunk num
+    end
     
     if ~all(arrayfun(@isNearInteger,[resampFreq,1/step]))
         %         [resampFreq,1/step]
@@ -815,8 +812,42 @@ if isscalar(resampFreq)
     
     checkInds=1:checkSecs/step;
     plot(ts(checkInds),data(checkInds),'r')
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    checkPlot=false
+    if checkPlot
+        checkSecs=3;
+        checkInds=1:checkSecs/step;
+        figure
+        plot(ts(checkInds),data(checkInds),'b')
+        hold on
+    end
 end
+
+ts=getTimes(first, step, length(data));
+
 end
+
 
 function out=getTimes(first, step, len)
 out=cumsum([first step*ones(1,len-1)]);

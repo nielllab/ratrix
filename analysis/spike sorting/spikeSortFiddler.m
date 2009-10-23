@@ -22,7 +22,7 @@ spikeDetectionParams.ISIviolationMS=2; % just for human reports
 % Wn = [300 4000]/(spikeDetectionParams.samplingFreq/2); % default to bandpass 300Hz - 4000Hz
 % [b,a] = butter(4,Wn); Hd=[]; Hd{1}=b; Hd{2}=a;      
 spikeDetectionParams.nrNoiseTraces=0;   % what does this do for us? any effect if set to 2?
-spikeDetectionParams.extractionThreshold =5;
+spikeDetectionParams.extractionThreshold =6;
 %should be replaced with a string that collapses these two confusing categories into one value;  'maxPeak' 'minPeak' 'maxMinPeak' 'power' 'MTEO'
 % why is 3=power broken? can we fix it?
 spikeDetectionParams.peakAlignMethod=1;  % 1-> find peak, 2->none, 3->peak of power signal (broken), 4->peak of MTEO signal.
@@ -55,11 +55,11 @@ spikeSortingParams.envelopeSize=10; %(optional) parameter passed in to osort's a
 if 1 %use klusta
 spikeSortingParams=[];
 spikeSortingParams.method='KlustaKwik';
-spikeSortingParams.minClusters=20; % (optional) (default 20) min number of initial clusters - final number may be different due to splitting/deleting
-spikeSortingParams.maxClusters=30;  %%(optional) (default 30) max number of initial clusters - final number may be different due to splitting/deleting
+spikeSortingParams.minClusters=1; % (optional) (default 20) min number of initial clusters - final number may be different due to splitting/deleting
+spikeSortingParams.maxClusters=2;  %%(optional) (default 30) max number of initial clusters - final number may be different due to splitting/deleting
 spikeSortingParams.nStarts=1; %     (optional) (default 1) number of starts of the algorithm for each initial cluster count
 spikeSortingParams.splitEvery=50; %  (optional) (default 50) Test to see if any clusters should be split every n steps. 0 means don't split.
-spikeSortingParams.maxPossibleClusters=30; %(optional) (default 100) Cluster splitting can produce no more than this many clusters.
+spikeSortingParams.maxPossibleClusters=4; %(optional) (default 100) Cluster splitting can produce no more than this many clusters.
 spikeSortingParams.features={'wavePC123'}; 
 %spikeSortingParams.features={'wavePC1','peakToValley','wavePC2'}; 
 %spikeSortingParams.features={'spikeWidth','peakToValley','energy'};
@@ -97,9 +97,27 @@ subjectID = '131dev4';cellBoundary={'trialRange',[75 ]}; % sparse grid%[12 x 16]
 %subjectID = '131';cellBoundary={'trialRange',[243 350 ]}; % sparse grid%[12 x 16]
 subjectID = '303';cellBoundary={'trialRange',[1 27 ]}; % all
 subjectID = '303';cellBoundary={'trialRange',[7]} % sparse grid%[12 x 16]
+subjectID = 'test1';cellBoundary={'trialRange',[116 Inf]} % sparse grid%[12 x 16]
+subjectID = '262';cellBoundary={'trialRange',[34 41]} % ffgwn - has temporal STA
+subjectID = '262';cellBoundary={'trialRange',[42 44]} % bin - has no spatial
+subjectID = '262';cellBoundary={'trialRange',[54]} % bars ... failing do to ISI too small
+subjectID = '262';cellBoundary={'trialRange',[70]} % gratingsSF
+%subjectID = '262';cellBoundary={'trialRange',[71]} % gratingsOR
+subjectID = '262';cellBoundary={'trialRange',[75 85]} % spatial binary
+subjectID = '262';cellBoundary={'trialRange',[75 85]} % spatial binary
+%subjectID = '262';cellBoundary={'trialRange',[95 96]} % rat closer
+subjectID = '262';cellBoundary={'trialRange',[105 108]} % ffwgn
+subjectID = '262';cellBoundary={'trialRange',[111 115 ]} % ffgwn after tuning out high freq "cell"
+subjectID = '262';cellBoundary={'trialRange',[118 123]} % spatial binary
+subjectID = '262';cellBoundary={'trialRange',[126]} % ffwgn
+subjectID = '262';cellBoundary={'trialRange',[128 149]} % spatial binary
+subjectID = '262';cellBoundary={'trialRange',[157]} % flankers, the target and bottom flanker are on the screen
+subjectID = '262';cellBoundary={'trialRange',[159]} % SF
+subjectID = '262';cellBoundary={'trialRange',[172]} % flankers, 5 lambda
 
-overwriteAll=1; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
-usePhotoDiodeSpikes=1;
+
+overwriteAll=0; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
+usePhotoDiodeSpikes=0;
 stimClassToAnalyze={'all'}; timeRangePerTrialSecs=[0 Inf];
 % path='\\132.239.158.183\rlab_storage\pmeier\backup\devNeuralData_090310'; %b/c i can't see datanet_storage folder on .179
 % path='\\132.239.158.183\rlab_storage\pmeier\backup\neuralData_090505';

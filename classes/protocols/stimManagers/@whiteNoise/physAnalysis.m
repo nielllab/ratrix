@@ -373,7 +373,7 @@ if doSpatial
         im=imfilter(im,filt,'replicate','same');
     end
     imagesc(im,rng);
-    colorbar; %colormap(blueToRed(meanLuminanceStimulus,rng));
+    %colorbar; %colormap(blueToRed(meanLuminanceStimulus,rng));
     hold on; plot(brightInd(2), brightInd(1),'y+')
     hold on; plot(darkInd(2)  , darkInd(1),  'y-')
     hold on; plot(bigIndX     , bigIndY,     'y.')
@@ -392,7 +392,7 @@ if doSpatial
     hold off; imagesc(squeeze(analysisdata.STA(:,:,contextInd(3))),[min(analysisdata.STA(:)) max(analysisdata.STA(:))]);
     hold on; plot(brightInd(2), brightInd(1),'y+')
     hold on; plot(darkInd(2)  , darkInd(1),'y-')
-    colorbar;
+    %colorbar;
     colormap(gray);
     %colormap(blueToRed(meanLuminanceStimulus,rng,true));
     

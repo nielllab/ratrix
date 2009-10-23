@@ -73,9 +73,10 @@ samplingRate=parameters.samplingRate;
 
 ifi=1/stimulusDetails.hz;      %in old mode used to be same as empiric (diff(spikeData.frameIndices'))/samplingRate;
 ifi2=1/parameters.refreshRate; %parameters.refreshRate might be wrong, so check it
-if ifi~=ifi2
+if (abs(ifi-ifi2)/ifi)>0.01  % 1 percent error tolerated
     ifi
     ifi2
+    er=(abs(ifi-ifi2)/ifi)
     error('refresh rate doesn''t agree!')
 end
 

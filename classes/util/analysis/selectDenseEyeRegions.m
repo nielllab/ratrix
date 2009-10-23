@@ -35,8 +35,13 @@ if minMaxFractionExcluded~=0
         error('unexpected that there are a different amount of nans in X and Y!')
     end
     numCutVals=floor(numNonNan*minMaxFractionExcluded/2);
-    minmaxX=rankX([numCutVals  numNonNan-numCutVals]);
-    minmaxY=rankY([numCutVals  numNonNan-numCutVals]);
+    if numCutVals~=0
+        minmaxX=rankX([numCutVals  numNonNan-numCutVals]);
+        minmaxY=rankY([numCutVals  numNonNan-numCutVals]);
+    else
+        minmaxX=[];
+        minmaxY=[];
+    end
 else
     minmaxX=minmax(eyeSig(~isnan(eyeSig(:,1)),1)');
     minmaxY=minmax(eyeSig(~isnan(eyeSig(:,2)),2)');

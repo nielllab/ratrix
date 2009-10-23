@@ -59,6 +59,14 @@ else
     error('analysis not handled yet for this case')
 end
 
+
+if numStimFrames<max(chunkEndFrame)
+    analysisdata=[];
+    cumulativedata=[];
+    warning('skipping analysis of gratings untill all the chunks are there')
+    return; % don't analyze partial data
+end
+    
 % find out what parameter is varying
 numValsPerParam=...
     [length(unique(pixPerCycs)) length(unique(driftfrequencies))  length(unique(orientations))  length(unique(contrasts)) length(unique(startPhases)) length(unique(durations))  length(unique(radii))  length(unique(annuli))];
@@ -347,7 +355,7 @@ end
 % [pspike pspikeCI]=binofit(events,possibleEvents);
 
 fullRate=events./possibleEvents;
-rate=reshape(sum(events)./sum(possibleEvents),numTypes,numPhaseBins); % combine repetitions
+rate=reshape(sum(events,1)./sum(possibleEvents,1),numTypes,numPhaseBins); % combine repetitions
 [repInds typeInds]=find(isnan(pow));
 pow(unique(repInds),:)=[];   % remove reps with bad power estimates
 coh(unique(repInds),:)=[];   % remove reps with bad power estimates

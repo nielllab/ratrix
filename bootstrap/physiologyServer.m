@@ -25,7 +25,7 @@ ai_parameters.inputRanges=repmat([-1 6],ai_parameters.numChans,1);
 % ========================================================================================
 % lists of values for settings
 clientIPStrs={'132.239.158.180'};
-ratIDStrs={'demo1','test1','fan_demo1','131','303','138'};
+ratIDStrs={'demo1','test1','fan_demo1','131','303','138','262'};
 ratProtocolStrs={'setProtocolTEST','setProtocolPhys2'};
 experimenterStrs={'','eflister','pmeier','bsriram'};
 electrodeMakeStrs={'FHC','MPI','gentner'};

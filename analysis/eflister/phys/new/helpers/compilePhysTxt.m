@@ -1,6 +1,5 @@
-function compilePhysTxt(targetDir,analysisDir,rec)
-
-fprintf('\n\nstims for %s\n',targetDir)
+function compilePhysTxt(targetDir,analysisDir,wavemarkDir,rec,force)
+verbose=true;
 
 chunkStarts=[rec.chunks.start_time];
 chunkEnds=[rec.chunks.stop_time];
@@ -9,101 +8,70 @@ if any(chunkEnds<=chunkStarts)
     error('backwards chunk times')
 end
 
-chunkStarts
-chunkEnds
-rec.stimTimes
+if verbose
+    fprintf('\n\nstims for %s\n',targetDir)
+    chunkStarts
+    chunkEnds
+    rec.stimTimes
+end
 
-chunkNums=cell(1,size(rec.stimTimes,1));
-for j=1:length(chunkNums)
+numStims=size(rec.stimTimes,1);
+
+for j=1:numStims
     stimStart=rec.stimTimes{j,1};
-    
-    if j<length(chunkNums)
+
+    if j<numStims
         stimStop=rec.stimTimes{j+1,1};
     else
         stimStop=max(chunkEnds);
     end
     
-    if stimStop>max(chunkEnds)
+    if stimStop>max(chunkEnds) && verbose
         warning('stim extends past last chunk')
     end
     
     c=find(arrayfun(@(x,y) stimStart<=y && stimStop>=x,chunkStarts,chunkEnds));
     if isempty(c) || stimStart>=stimStop
-        warning('no chunk for stim')
+        if verbose
+            warning('no chunk for stim')
+        end
     else
-        chunkNums{j}=c;
-        if ~isscalar(c)
+        if ~isscalar(c) && verbose
             warning('multiple chunks for stim')
         end
+        
+        fprintf('\n')
+        for chunkNum=c
+            [garbage code]=fileparts(targetDir);
+            
+            stimFile=constructPath(targetDir,'stim',code,'mat');
+            physFile=constructPath(targetDir,'phys',code,'mat');
+            pulseFile=constructPath(analysisDir,'pulse',code,'txt');
+            pokesFile=constructPath(analysisDir,'pokes',code,'txt');
+            
+            chunkName=sprintf('chunk%d',chunkNum);
+            [garbage code]=fileparts(wavemarkDir);
+            
+            spikesFile=constructPath(fullfile(wavemarkDir,chunkName),['spks.' chunkName],code,'txt');
+            wavemarkFile=constructPath(fullfile(wavemarkDir,chunkName),['waveforms.' chunkName],code,'txt');
+            
+            thisStart=max(chunkStarts(chunkNum),stimStart);
+            thisStop=min(chunkEnds(chunkNum),stimStop);
+            
+            fileName=sprintf('%s: %d.%s.chunk%d',targetDir,j,rec.stimTimes{j,2},chunkNum);
+            fprintf('\t%s: %g-%g\n',fileName,thisStart,thisStop);
+        end
     end
-    fprintf('\t%s: %d chunks (%g-%g)\n',rec.stimTimes{j,2},length(chunkNums{j}),stimStart,stimStop)
-    chunkNums{j}
+    fprintf('\n')
 end
+fprintf('\n')
 
-
-% for i=1:length(rec.chunks)
-% 
-%         if rec.chunks(i).start_time<=rec.stimTimes{j,1}
-%             
-%                             if isnan(chunkNums(j))
-%                     chunkNums(j)=i;
-%                 else
-%                     error('more than one chunk for a stim')
-%                 end
-%             
-%             if rec.chunks(i).stop_time>=rec.stimTimes
-% 
-%             elseif all(rec.chunks(i).start_time>=[rec.chunks.start_time]) && 
-%                 
-%             else
-%                 error('stim crosses chunks')
-%             end
-%         end
-%     end
-% end
-% 
-% if any(isnan(chunkNums))
-%     warning('stim outside of all chunks')
-% end
-% 
-% chunkStarts=[rec.chunks.start_time];
-% chunkEnds=[rec.chunks.stop_time];
-% 
-% chunkStarts
-% chunkEnds
-% rec.stimTimes
-% 
-% for i=1:size(rec.stimTimes,1)
-%     stimStart=rec.stimTimes{i,1};
-%     firstChunk = find(chunkStarts<=stimStart,1,'last');
-%     if ~isscalar(firstChunk)
-%         error('no chunk')
-%     end
-%     if stimStart>chunkEnds(firstChunk)
-%         warning('stim after last chunk')
-%         firstChunk=nan;
-%         lastChunk=nan;
-%         stimStart=nan;
-%         stimEnd=nan;
-%     else
-%         if i~=size(rec.stimTimes,1)
-%             stimEnd=rec.stimTimes{i+1,1};
-%         else
-%             if firstChunk~=length(chunkEnds)
-%                 error('last stim is mroe than one chunk')
-%             end
-%             stimEnd=chunkEnds(end);
-%         end
-%         lastChunk=find(chunkEnds>=stimEnd,1,'first');
-%         if ~isscalar(lastChunk)
-%             warning('stimEnd after last chunkEnd')
-%             lastChunk=length(chunkEnds);
-%             stimEnd=chunkEnds(end);
-%         end
-%     end
-%     
-%     fprintf('\t%s: chunks %d-%d (%g-%g)\n',rec.stimTimes{i,2},firstChunk,lastChunk,stimStart,stimEnd)
-% end
+if false
+    fprintf('\ndoing waveforms\n')
+    tic
+    doWaveforms(baseDir,params.base,params.spkChan,params.spkCode);
+    toc
+end
 
 if false
     targetBinsPerSec=1000;
@@ -162,5 +130,12 @@ if false
         contents=what(fileDir);
         
     end
+end
+end
+
+function out=constructPath(pth,name,code,sfx)
+out=fullfile(pth,[name '.' code '.' sfx]);
+if ~exist(out,'file')
+    error('no such file')
 end
 end

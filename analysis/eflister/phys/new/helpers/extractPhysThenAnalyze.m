@@ -52,7 +52,7 @@ for i=1:length(record)
         end
         
         cbase=hash(rec.file,'SHA1');
-        %analysisDir=fullfile(analysisBase,pth,cbase);
+        wavemarkDir=fullfile(analysisBase,pth,cbase);
         datafile=fullfile(dataBase,pth,rec.file);
         
         for j=1:length(record(i).chunks)
@@ -70,17 +70,21 @@ for i=1:length(record)
                 tic
                 runScript(makeTmpScript('chunk',chunkDir,rec,base),datafile);
                 toc
-                
-                if false
-                    fprintf('\ndoing waveforms\n')
-                    tic
-                    doWaveforms(baseDir,params.base,params.spkChan,params.spkCode);
-                    toc
-                end
             end
         end
         
-        compilePhysTxt(targetDir,analysisDir,rec); %munge this to handle waveformonly (03.25.09)
+        if wavemarkOnly
+            if i==1
+                error('first rec was a wavemarkonly')
+            end
+            if strcmp(rec.baseFile,record(i-1).baseFile) && ~isempty(record(i-1).stimTimes)
+                record(i).stimTimes=record(i-1).stimTimes;
+            else
+                error('wavemarkonly not preceded by rec with matching basefile and some stimtimes')
+            end
+        end
+        
+        compilePhysTxt(targetDir,analysisDir,wavemarkDir,record(i),force);
     end
 end
 

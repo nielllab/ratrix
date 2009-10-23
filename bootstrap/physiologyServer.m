@@ -699,7 +699,7 @@ offsetEventSubmit = uicontrol(f,'Style','pushbutton','String','enter','Visible',
         
         % update pNum if necessary (if AP or ML differ from last)
         if ~isempty(lastEventWithCoords)
-            if (length(events_data)>=2 && any(events_data(lastEventWithCoords).position(1:2)~=events_data(end).position(1:2))) ...
+            if (length(events_data)>=2 && any(events_data(lastEventWithCoords).position(1:2)~=events_data(end).position(1:2)) && all(~isnan(events_data(end).position(1:2))) ) ...
                     || length(events_data)==1
                 % record events_data.penetrationParams here (ratID, experimenters,
                 %   electrode make, model, lot#, ID#, impedance, reference mark xyz, target xy)
@@ -764,13 +764,14 @@ quickPlotButton = uicontrol(f,'Style','pushbutton','String','quick plot','Visibl
         BEND=ismember({events_data.eventType},{'electrode bend'});
         
         g=figure;
-        plotInBregmaCoordinates(events_data,ALL,'.k',[1 1 1 0]);
+        levelToTopOfBrain=false;
+        plotInBregmaCoordinates(events_data,ALL,'.k',[1 1 1 1],levelToTopOfBrain);
         hold on;
-        plotInBregmaCoordinates(events_data,TOB,'ok');
-        plotInBregmaCoordinates(events_data,VIS,'c.');
-        plotInBregmaCoordinates(events_data,CELL,'b*');
-        plotInBregmaCoordinates(events_data,CELL & VIS,'r*');
-        plotInBregmaCoordinates(events_data,BEND,'xr');
+        plotInBregmaCoordinates(events_data,TOB,'ok',[],levelToTopOfBrain);
+        plotInBregmaCoordinates(events_data,VIS,'c.',[],levelToTopOfBrain);
+        plotInBregmaCoordinates(events_data,CELL,'b*',[],levelToTopOfBrain);
+        plotInBregmaCoordinates(events_data,CELL & VIS,'r*',[],levelToTopOfBrain);
+        plotInBregmaCoordinates(events_data,BEND,'xr',[],levelToTopOfBrain);
         xlabel('posterior');
         ylabel('lateral');
         zlabel('depth');

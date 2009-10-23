@@ -12,6 +12,9 @@ lastStimClass='unknown';
 lastEventType=[];
 lastTrialIntervalInd=[];
 newP=true;
+fixedTab='    ';
+textWrapLength=70;
+numberIndentSpaces=100;
 switch mode
     case 'full'
         for i=length(toShow):-1:1
@@ -21,7 +24,7 @@ switch mode
                     % all of these have MP,AP,Z,penetration# fields and need to have the penetration index handling
                     str=sprintf('%s\t%d\t',datestr(toShow(i).time,'HH:MM'),toShow(i).eventNumber);
                     if toShow(i).penetrationNum~=lastP
-                        appnd=sprintf('Pene#:%d\t',toShow(i).penetrationNum);
+                        appnd=sprintf('Pen#%d\t',toShow(i).penetrationNum);
                         newP=true;
                         str=[str appnd];
                     else
@@ -29,16 +32,20 @@ switch mode
                         str=[str appnd];
                     end
                     % AP and ML (if differ from last)
+                    thisPosition=getPositionInBregmaCoordinates(toShow,i);
                     for j=1:2
-                        if isfield(toShow(i),'position') && (toShow(i).position(j)~=lastPosition(j) || newP)
-                            appnd = sprintf('%.2f\t%.2f\t',toShow(i).position(j));
+                        if isfield(toShow(i),'position') && (thisPosition(j)~=lastPosition(j) || newP) && ~isnan(thisPosition(j))
+                            %appnd = sprintf('%.2f\t%.2f\t',toShow(i).position(j));
+                            appnd = sprintf('%.2f\t%.2f\t',thisPosition(j));
                         else
                             appnd = sprintf('\t');
                         end
                         str=[str appnd];
                     end
                     % Z and type-specific comment
-                    appnd = sprintf('%.2f\t',toShow(i).position(3));
+                    if ~isnan(thisPosition(3))
+                        appnd=sprintf('%.2f (%.2f)\t',thisPosition(3),toShow(i).position(3));
+                    end
                     str=[str appnd];
                     if ~strcmp(toShow(i).eventType,'comment')
                         appnd=sprintf('%s\t',toShow(i).eventType);
@@ -77,16 +84,16 @@ switch mode
             end
             dispStrs{end+1}=str;
         end
-
+        
     case 'condensed'
         for i=1:length(toShow)
             switch toShow(i).eventType
                 case {'comment','top of fluid','top of brain','ctx cell','hipp cell','deadzone','theta chatter','visual hash','visual cell',...
                         'electrode bend','clapping','rat obs','anesth check'}
                     % all of these have MP,AP,Z,penetration# fields and need to have the penetration index handling
-                    str=sprintf('%s\ttrial %d:\t',datestr(toShow(i).time,'HH:MM'),lastTrialNum);
+                    str=sprintf('%s%strial %d%s',datestr(toShow(i).time,'HH:MM'),fixedTab,lastTrialNum,fixedTab);
                     if toShow(i).penetrationNum~=lastP
-                        appnd=sprintf('Pene#:%d\t',toShow(i).penetrationNum);
+                        appnd=sprintf('Pen#%d\t',toShow(i).penetrationNum);
                         newP=true;
                         str=[str appnd];
                     else
@@ -94,20 +101,27 @@ switch mode
                         str=[str appnd];
                     end
                     % AP and ML (if differ from last)
+                    thisPosition=getPositionInBregmaCoordinates(toShow,i);
                     for j=1:2
-                        if isfield(toShow(i),'position') && (toShow(i).position(j)~=lastPosition(j) || newP)
-                            appnd = sprintf('%.2f\t%.2f\t',toShow(i).position(j));
+                        if isfield(toShow(i),'position') && (thisPosition(j)~=lastPosition(j) || newP) && ~isnan(thisPosition(j))
+                            %appnd = sprintf('%.2f\t%.2f\t',toShow(i).position(j));
+                            appnd = sprintf('%.2f  %.2f  ',thisPosition(j));
                         else
-                            appnd = sprintf('\t');
+                            appnd = sprintf('          ');
                         end
                         str=[str appnd];
                     end
                     % Z and type-specific comment
-                    appnd = sprintf('%.2f\t',toShow(i).position(3));
+                    if ~isnan(thisPosition(3))
+                        appnd=sprintf('%.2f (%.2f)\t',thisPosition(3),toShow(i).position(3));
+                    end
                     str=[str appnd];
+                    
+                    %%%%start main text
+                    mainText=[];
                     if ~strcmp(toShow(i).eventType,'comment')
-                        appnd=sprintf('%s\t',toShow(i).eventType);
-                        str=[str appnd];
+                        appnd=sprintf('%s%s',toShow(i).eventType,fixedTab);
+                        mainText=[mainText appnd];
                     end
                     if ~isempty(toShow(i).eventParams)
                         fn=fields(toShow(i).eventParams);
@@ -120,30 +134,36 @@ switch mode
                             if isnumeric(val)
                                 val=num2str(val);
                             end
-                            appnd=sprintf('%s:%s\t',fn{j},val);
-                            str=[str appnd];
+                            appnd=sprintf('%s:%s, ',fn{j},val);
+                            
+                            mainText=[mainText appnd];
                         end
                     end
                     appnd=sprintf('%s',toShow(i).comment);
-                    str=[str appnd];
+                    mainText=[mainText appnd];
+                    %%% end main text
+                    
+                    [junk wrappedTextCells]=wrapText(mainText,str,textWrapLength,numberIndentSpaces);
                     % update lastP
                     lastP=toShow(i).penetrationNum;
-                    lastPosition=toShow(i).position;
+                    lastPosition=thisPosition;
                     newP=false;
-                    dispStrs{end+1}=str; % always add a new str to display
+                    for i=length(wrappedTextCells):-1:1
+                        dispStrs{end+1}=wrappedTextCells{i}; % always add a new str to display
+                    end
                 case {'trial start','trial end'}
                     if strcmp(toShow(i).eventType,'trial start')
                         if strcmp(toShow(i).eventParams.stimManagerClass,lastStimClass)
                             % same stim still
-                            str=sprintf('%s\ttrial %d-%d:\t%s',datestr(firstStartTimeOfInterval,'HH:MM'),firstTrialNumOfInterval,...
-                                toShow(i).eventParams.trialNumber,toShow(i).eventParams.stimManagerClass);
+                            str=sprintf('%s%str%d-%d%s%s',datestr(firstStartTimeOfInterval,'HH:MM'),fixedTab,firstTrialNumOfInterval,...
+                                toShow(i).eventParams.trialNumber,fixedTab,toShow(i).eventParams.stimManagerClass);
                             dispStrs{lastTrialIntervalInd}=str;
                         else
                             % new stim class
                             firstTrialNumOfInterval=toShow(i).eventParams.trialNumber;
                             firstStartTimeOfInterval=toShow(i).time;
-                            str=sprintf('%s\ttrial %d-%d:\t%s',datestr(toShow(i).time,'HH:MM'),firstTrialNumOfInterval,...
-                                toShow(i).eventParams.trialNumber,toShow(i).eventParams.stimManagerClass);
+                            str=sprintf('%s%str%d-%d%s%s',datestr(toShow(i).time,'HH:MM'),fixedTab,firstTrialNumOfInterval,...
+                                toShow(i).eventParams.trialNumber,fixedTab,toShow(i).eventParams.stimManagerClass);
                             if lastTrialNum~=0 % dont display the first 'interval' of unknown
                                 dispStrs{end+1}=str;
                             end
@@ -154,7 +174,7 @@ switch mode
                     end
                 case {'cell start','cell stop'}
                     % these only have an eventType, time, eventNumber, and trialNumber
-                    str=sprintf('%s\ttrial %d:\t%s',datestr(toShow(i).time,'HH:MM'),lastTrialNum,toShow(i).eventType);
+                    str=sprintf('%s%strial %d%s%s',datestr(toShow(i).time,'HH:MM'),fixedTab,lastTrialNum,fixedTab,toShow(i).eventType);
                     dispStrs{end+1}=str;
                 otherwise
                     toShow(i)
@@ -186,3 +206,60 @@ switch mode
     otherwise
         error('unsupported mode for now');
 end
+
+function [wrapedText textInCell]=wrapText(mainText,startLineString,textWrapLength,numberIndentSpaces);
+%returns wrapedText which can be used with fprintf, but actually we need it
+%in a cell without /n's, so we pass it out in a cell for each line
+
+if length(mainText)<textWrapLength
+    done=1;
+    wrapedText=mainText;
+    textInCell{1}=[startLineString mainText];
+else
+    done=0;
+    lineNumber=0;
+    lineBreak=0;
+    wrapedText=[];
+end
+
+spaces=[''];
+for i=1:numberIndentSpaces
+    spaces=[spaces ' '];
+end
+
+while ~done
+    lineNumber=lineNumber+1;
+    lineStart=lineBreak+1;
+    
+    if lineStart+textWrapLength>length(mainText)
+        % the line needs no more breaking, at the end
+        wrapedText=[wrapedText mainText(lineStart:end)];
+        textInCell{lineNumber}=[spaces mainText(lineStart:end)];
+        
+        %fprintf(wrapedText)
+        %disp('finish!')
+        done=1;
+        break
+    else  % find a place to break the line
+        spaceLocations=strfind(mainText,' ');
+        lineBreak=lineStart+textWrapLength;  % default if we can't find an appropriate space candidate
+        if ~isempty(spaceLocations)
+            candidate=max(spaceLocations(spaceLocations<lineStart+textWrapLength));
+        end
+        if ~isempty(candidate)
+            lineBreak=candidate;
+        end
+    end
+    
+    wrapedText=[wrapedText mainText(lineStart:lineBreak) '\n' spaces];
+    if lineNumber==1
+        textInCell{lineNumber}=[startLineString mainText(lineStart:lineBreak)];
+    else
+        textInCell{lineNumber}=[spaces mainText(lineStart:lineBreak)];
+    end
+    %     if lineNumber>4
+    %         keyboard
+    %     end
+end
+
+

@@ -81,6 +81,7 @@ stim.height=height;
 stim.width=width;
 stim.location=details.location;
 stim.numRepeats=details.numRepeats;
+stim.waveform=stimulus.waveform;
 
 % details has the parameters before combos, stim should have them after combos are taken
 if stimulus.doCombos

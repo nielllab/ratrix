@@ -12,8 +12,11 @@ function [ctr source details]  = getCenter(RFe,subjectID)
 %load('\\132.239.158.183\rlab_storage\pmeier\backup\devNeuralData_090310\test\analysis\20-20090323T201110\physAnalysis_20-20090323T201110.mat')
 %load('\\132.239.158.183\rlab_storage\pmeier\backup\devNeuralData_090310\test\stimRecords\stimRecords_20-20090323T201110.mat')
 
+sca
+keyboard  % need to fix getPhysRecords
 
-[data success]=getPhysRecords(fullfile(getDataSource(RFe),subjectID),{'dateRange',RFe.dateRange},{'analysis','stim'},RFe.centerParams{1})
+[data success]=getPhysRecords(fullfile(getDataSource(RFe),subjectID),{'dateRange',RFe.dateRange},...
+    {'analysis','stim'},RFe.centerParams{1});
 if ~success
     error('bad phys load!')
 else

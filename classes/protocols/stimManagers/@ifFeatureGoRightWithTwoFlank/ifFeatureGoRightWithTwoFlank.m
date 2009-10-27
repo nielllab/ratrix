@@ -180,7 +180,7 @@ switch nargin
                          p.phase=0;             
                     case 'phys' 
 
-                        p.flankerOffset=3;
+                        p.flankerOffset=5;
                         p.flankerContrast=1;
                         p.goLeftContrast=1;
                         p.goRightContrast=1;
@@ -188,6 +188,15 @@ switch nargin
                         p.pixPerCycs=32;
                         p.targetOnOff=int32([30 40]);
                         p.flankerOnOff=int32([30 40]);
+                        
+                        
+                        % a guess based on a particular RF on oct 22nd
+                        p.xPositionPercent=0.2;
+                        p.yPositionPercent=1/16;
+                        p.stdGaussMask=1/16;
+                        p.showText=false;
+                        
+                        p.phase=[pi]*[0 0.5 1 1.5]; 
                         
                         RFdataSource='\\132.239.158.179\datanet_storage';
                         p.fitRF = RFestimator({'spatialWhiteNoise','fitGaussian',{1}},{'spatialWhiteNoise','fitGaussian',{1}},[],RFdataSource,[now-100 Inf]);

@@ -31,7 +31,7 @@ else
     appropriateSize=([resolutions.height]==desiredHeight) & ([resolutions.width]==desiredWidth) & ([resolutions.pixelSize]==ratrixEnforcedColor);
     if sum(appropriateSize)>0
         hz=[resolutions.hz];
-        maxHz=max(hz(appropriateSize));
+        maxHz=min(100,max(hz(appropriateSize))); % don't go over 100hz (could go up to 150 on phys mon))
         if maxHz==75
             selectedHz=60; %this enforces that some LCD's won't fail sync tests, but shouldn't influence any NEC CRT's
         else

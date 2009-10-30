@@ -21,7 +21,7 @@ end
 if ~fileGood
     fprintf('compiling %s\n',fileNames.targetFile);
     [pth name]=fileparts([fileparts(fileNames.targetFile) '.blah']);
-        
+    
     [phys physTms]=checkForResampledMat('phys',pth,force,targetBinsPerSec);
     
     [stim stimTms first step]=checkForResampledMat('stim',pth,force,targetBinsPerSec);
@@ -736,7 +736,52 @@ for i=1:length(in)
 end
 end
 
+function [P,Q]=getPQ(resampFreq,step)
+if ~all(arrayfun(@isNearInteger,[resampFreq,1/step]))
+    %         [resampFreq,1/step]
+    %         warning('resample requires ints -- need to find ints P,Q, s.t. P/Q = ')
+    %         resampFreq * step
+    str = sprintf('%g',resampFreq*step);
+    while str(end)=='0';
+        str=str(1:end-1);
+    end
+    decstr=str;
+    decCount=0;
+    while length(decstr)>0 && decstr(end)~='.';
+        decstr=decstr(1:end-1);
+        decCount=decCount+1;
+    end
+    if isempty(decstr)
+        P=resampFreq*step;
+        Q=1;
+        if ~isNearInteger(P)
+            error('shouldn''t be possible')
+        end
+    else
+        P=resampFreq*step*10^decCount;
+        Q=10^decCount;
+    end
+    if (P/Q ~= resampFreq*step)
+        error('fix didn''t work')
+    end
+else
+    P=resampFreq;
+    Q=1/step;
+end
+P=round(P);
+Q=round(Q);
+if ~almostEqual(resampFreq, P/Q/step)
+    error('PQerr')
+end
+fprintf('resampling from %g to %g (P=%d, Q=%d)\n',1/step,resampFreq,P,Q);
+end
+
 function [data ts first step]=checkForResampledMat(fType,pth,force,resampFreq)
+checkPlot=false;
+cs={};
+ds={};
+checkSecs=1;
+
 [garbage code]=fileparts(pth);
 origName = fullfile(pth,[fType '.' code '.mat']);
 if ~exist(origName,'file')
@@ -750,7 +795,7 @@ if exist(mattedName,'file') && ~force
     data=d.data;
     first=d.first;
     step=d.step;
-    if step~=(1/fresampFreq)
+    if ~almostEqual(step,(1/resampFreq))
         error('step doesn''t equal 1/resamp')
     end
 else
@@ -758,16 +803,22 @@ else
     boundaries=getRangeFromChunks(origName);
     
     total=diff(cellfun(@(x) x(boundaries),{@min @max}));
-    data=nan(1,ceil(resampFreq*total/1000));
+    finalLen=floor(resampFreq*total/1000);
+    data=nan(1,finalLen);
     x=whos('data');
     fprintf('\tcompressing to %g MB\n',x.bytes/1000/1000); %sometimes up to 100MB
+    
+    P = [];
+    Q = [];
     
     prevChunk = [];
     numChunks = length(boundaries) -1;
     step = [];
     ind = 1;
+    extended=false;
     for chunkNum=0:numChunks-1
         out=getRangeFromChunks(origName,chunkNum);
+        
         predictedEnd=boundaries(chunkNum+2);
         testStep=mean(diff(out(2,:)));
         if testStep < 1000/50000 || testStep > 1000/10000
@@ -776,59 +827,58 @@ else
         if isempty(step)
             step=testStep;
         else
-            if step~=testStep
+            if ~almostEqual(step,testStep)
                 error('inconsistent rates')
             end
         end
         if chunkNum~=numChunks-1 || true %looks like last boundary includes one extra step?
             predictedEnd=predictedEnd-step;
         end
-        if out(2,1) ~= boundaries(chunkNum+1) || abs(out(2,end) - predictedEnd) > .005*step
+        if out(2,1) ~= boundaries(chunkNum+1) || abs(out(2,end) - predictedEnd) > .2*step
             error('time error')
         end
         
-        
-        if ~all(arrayfun(@isNearInteger,[resampFreq,1/step]))
-            %         [resampFreq,1/step]
-            %         warning('resample requires ints -- need to find ints P,Q, s.t. P/Q = ')
-            %         resampFreq * step
-            str = sprintf('%g',resampFreq*step);
-            while str(end)=='0';
-                str=str(1:end-1);
+        if isempty(P) || isempty(Q)
+            if ~ (isempty(P) && isempty(Q))
+                error('PQ error')
             end
-            decstr=str;
-            decCount=0;
-            while length(decstr)>0 && decstr(end)~='.';
-                decstr=decstr(1:end-1);
-                decCount=decCount+1;
+            [P,Q]=getPQ(resampFreq,step/1000);
+            testLen=ceil((boundaries(end)-boundaries(1))*P/Q/step);
+            switch testLen - length(data)
+                case 1
+                    data(end+1)=nan;
+                    finalLen=finalLen+1;
+                    extended=true;
+                case 0
+                    %pass
+                otherwise
+                    error('data len error')
             end
-            if isempty(decstr)
-                P=resampFreq*step;
-                Q=1;
-                if ~isNearInteger(P)
-                    error('shouldn''t be possible')
-                end
-            else
-                P=resampFreq*step*10^decCount;
-                Q=10^decCount;
-            end
-            if (P/Q ~= resampFreq*step)
-                error('fix didn''t work')
-            end
-        else
-            P=resampFreq;
-            Q=1/step;
         end
-        fprintf('\tresampling %d of %d\n',chunkNum,numChunks-1)
         
-        thisChunk=[prevChunk out(1,:)];
+        if checkPlot
+            checkInds=floor(min(1000*checkSecs/step,size(out,2)));
+            cs{end+1}=out(:,1:checkInds);
+            cs{end+1}=out(:,end-checkInds:end);
+        end
         
-        maxResampLen=1550000; %else OOM
+        fprintf('\tresampling %d of %d\n',chunkNum+1,numChunks)
+        
+        thisChunk=[prevChunk out];
+        
+        maxResampLen=7500000;
         miniNum=1;
-        while length(thisChunk)>maxResampLen
-            fprintf('\t\tresampling mini %d of %d\n',miniNum,2*size(out,2)/maxResampLen)
-            resamped=resample(thisChunk(1:maxResampLen),round(P),round(Q));
-
+        tag=1;
+        while size(thisChunk,2)>maxResampLen
+            if checkPlot
+                checkInds=floor(min(1000*checkSecs/step));
+                ds{end+1}=thisChunk(:,1:checkInds);
+                ds{end+1}=thisChunk(:,maxResampLen-checkInds:maxResampLen);
+            end
+            
+            fprintf('\t\tresampling mini %d of %g\n',miniNum,2*size(thisChunk,2)/maxResampLen)
+            resamped=resample(thisChunk(1,1:maxResampLen),P,Q);
+            
             tag=ceil(length(resamped)/4);
             lastInd=ind+length(resamped)-tag;
             
@@ -839,72 +889,55 @@ else
                 data(ind:lastInd)=resamped(tag:end);
                 ind=lastInd-tag;
             end
-
-            cut=ceil(maxResampleLen/2);
-            thisChunk=thisChunk(cut:end);
+            
+            cut=ceil(maxResampLen/2);
+            if checkPlot
+                ds{end+1}=thisChunk(:,cut-checkInds:cut+checkInds);
+            end
+            thisChunk=thisChunk(:,cut:end);
             
             miniNum=miniNum+1;
         end
         prevChunk = thisChunk;
     end
     
-    resamped=resample(out(1,end-maxResampLen:end),round(P),round(Q));
+    if size(prevChunk,2)>size(out,2)
+        out=prevChunk;
+    end
+    resamped=resample(out(1,:),round(P),round(Q));
+    if tag==1 && extended && length(data)-length(resamped)==1
+        data=data(1:end-1); %covers for some bug i don't understand when everything was in one chunk..
+        finalLen=finalLen-1;
+    end
     data(end-length(resamped)+tag:end)=resamped(tag:end);
     
-    if any(isnan(data))
+    if any(isnan(data)) || length(data)~=finalLen
         error('missed')
     end
     
-    keyboard
-    
-    first=0;
-
-
-    
-%     for 
-%         out=getRangeFromChunks(origName,startsMS,durMS); %make this so omitting durMS or empty gives chunk num
-%     end
-    
-
-
-    ts=getTimes(first, step, length(data));
     fprintf('done resampling %s\n',fType)
     
-    checkInds=1:checkSecs/step;
-    plot(ts(checkInds),data(checkInds),'r')
+    first=boundaries(1)/1000;
+    step= 1/(P/(Q*step/1000));
     
+    save(mattedName,'data','first','step');
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
-    checkPlot=false
-    if checkPlot
-        checkSecs=3;
-        checkInds=1:checkSecs/step;
-        figure
-        plot(ts(checkInds),data(checkInds),'b')
-        hold on
-    end
 end
 
-ts=getTimes(first, step, length(data));
+ts=getTimes(first,step, length(data));
+
+if checkPlot
+    figure
+    plot(ts,data,'b')
+    hold on
+    for c=1:length(cs)
+        plot(cs{c}(2,:)/1000,cs{c}(1,:),'r')
+    end
+    for d=1:length(ds)
+        plot(ds{d}(2,:)/1000,ds{d}(1,:),'g')
+    end
+    keyboard
+end
 
 end
 

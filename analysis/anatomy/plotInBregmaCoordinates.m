@@ -112,7 +112,7 @@
             end
             
             
-            plot3(p(:,1),p(:,2),p(:,3),labelString,'markerSize',10);  % bending tip
+            plot3(p(:,1),p(:,2),p(:,3),labelString,'markerSize',10);  % plot the marker
         end
         
         if  addSkullPlates

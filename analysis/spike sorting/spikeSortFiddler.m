@@ -14,6 +14,14 @@
 %% twiddle the params and sort it
 close all
 
+
+stimClassToAnalyze={'all'}; timeRangePerTrialSecs=[0 Inf];
+% path='\\132.239.158.183\rlab_storage\pmeier\backup\devNeuralData_090310'; %b/c i can't see datanet_storage folder on .179
+% path='\\132.239.158.183\rlab_storage\pmeier\backup\neuralData_090505';
+% path='C:\Documents and Settings\rlab\Desktop\neural';
+path='\\132.239.158.179\datanet_storage'
+
+
 spikeDetectionParams=[];
 spikeDetectionParams.method='OSORT';
 spikeDetectionParams.ISIviolationMS=2; % just for human reports
@@ -22,7 +30,6 @@ spikeDetectionParams.ISIviolationMS=2; % just for human reports
 % Wn = [300 4000]/(spikeDetectionParams.samplingFreq/2); % default to bandpass 300Hz - 4000Hz
 % [b,a] = butter(4,Wn); Hd=[]; Hd{1}=b; Hd{2}=a;      
 spikeDetectionParams.nrNoiseTraces=0;   % what does this do for us? any effect if set to 2?
-spikeDetectionParams.extractionThreshold =6;
 %should be replaced with a string that collapses these two confusing categories into one value;  'maxPeak' 'minPeak' 'maxMinPeak' 'power' 'MTEO'
 % why is 3=power broken? can we fix it?
 spikeDetectionParams.peakAlignMethod=1;  % 1-> find peak, 2->none, 3->peak of power signal (broken), 4->peak of MTEO signal.
@@ -30,7 +37,7 @@ spikeDetectionParams.alignMethod=2;  %only used if peakAlignMethod is 1=peak; if
 
 spikeDetectionParams.prewhiten = 0;  %will error if true, and less than 400,000 samples ~10 secs / trial; need to understand whittening with Linear Predictor Coefficients to lax requirements (help lpc)
 spikeDetectionParams.limit = 2000;
-spikeDetectionParams.detectionMethod=1 % 1 -> from power signal, 2 threshold positive, 3 threshold negative, 4 threshold abs, 5 wavelet
+spikeDetectionParams.detectionMethod=3 % 1 -> from power signal, 2 threshold positive, 3 threshold negative, 4 threshold abs, 5 wavelet
 spikeDetectionParams.kernelSize=25;
 %         spikeDetectionParams.detectionMethod=5
 %         spikeDetectionParams.scaleRanges = [0.5 1.0];
@@ -55,8 +62,8 @@ spikeSortingParams.envelopeSize=10; %(optional) parameter passed in to osort's a
 if 1 %use klusta
 spikeSortingParams=[];
 spikeSortingParams.method='KlustaKwik';
-spikeSortingParams.minClusters=1; % (optional) (default 20) min number of initial clusters - final number may be different due to splitting/deleting
-spikeSortingParams.maxClusters=2;  %%(optional) (default 30) max number of initial clusters - final number may be different due to splitting/deleting
+spikeSortingParams.minClusters=2; % (optional) (default 20) min number of initial clusters - final number may be different due to splitting/deleting
+spikeSortingParams.maxClusters=3;  %%(optional) (default 30) max number of initial clusters - final number may be different due to splitting/deleting
 spikeSortingParams.nStarts=1; %     (optional) (default 1) number of starts of the algorithm for each initial cluster count
 spikeSortingParams.splitEvery=50; %  (optional) (default 50) Test to see if any clusters should be split every n steps. 0 means don't split.
 spikeSortingParams.maxPossibleClusters=4; %(optional) (default 100) Cluster splitting can produce no more than this many clusters.
@@ -115,13 +122,53 @@ subjectID = '262';cellBoundary={'trialRange',[157]} % flankers, the target and b
 subjectID = '262';cellBoundary={'trialRange',[159]} % SF
 subjectID = '262';cellBoundary={'trialRange',[172]} % flankers, 5 lambda
 
+subjectID = '261';cellBoundary={'trialRange',[25]} % 
+subjectID = '261';cellBoundary={'trialRange',[40]} % sf
+subjectID = '261';cellBoundary={'trialRange',[42]} % sparse brighter grid
+subjectID = '261';cellBoundary={'trialRange',[43]} % horiz bars
+%subjectID = '261';cellBoundary={'trialRange',[44]} % vert bars
+%subjectID = '261';cellBoundary={'trialRange',[41]} % orient
+subjectID = '261';cellBoundary={'trialRange',[54 60]} % binary localized
+subjectID = '261';cellBoundary={'trialRange',[65]} % annuli ;  v1
+subjectID = '261';cellBoundary={'trialRange',[118 121]} % ffgwn ; 
+subjectID = '261';cellBoundary={'trialRange',[127 128]} % bars ;   move
+subjectID = '261';cellBoundary={'trialRange',[132 140]} % binary ; 
+subjectID = '261';cellBoundary={'trialRange',[142 143]} % binary ; 
+subjectID = '261';cellBoundary={'trialRange',[155 159]} % h-bar ; 
+subjectID = '261';cellBoundary={'trialRange',[160 164]} % v-bar ; 
+subjectID = '261';cellBoundary={'trialRange',[166 169]} % bar ; 
+subjectID = '261';cellBoundary={'trialRange',[171 177]} % bar ; 
+subjectID = '261';cellBoundary={'trialRange',[181 185]} % ffgwn ;   NEXT CELL, same penetration
+subjectID = '261';cellBoundary={'trialRange',[187 188]} % ffgwn ;   
+subjectID = '261';cellBoundary={'trialRange',[197 200]} % ffgwn ;  
+subjectID = '261';cellBoundary={'trialRange',[205]} % gratings ;   
+subjectID = '261';cellBoundary={'trialRange',[228]} % sparse grid  ;   
+subjectID = '261';cellBoundary={'trialRange',[243 250]} % ffgwn  ;   NEXT CELL; same penetration
+subjectID = '261';cellBoundary={'trialRange',[257 259]} % binary white noise; 
+subjectID = '261';cellBoundary={'trialRange',[257 261]} % binary white noise; 
+subjectID = '261';cellBoundary={'trialRange',[262]} % spatial frequency gratings; 
+subjectID = '261';cellBoundary={'trialRange',[271 272]} % ffgwn; 
+subjectID = '261';cellBoundary={'trialRange',[288 293]} % ffgwn NEW cell
+subjectID = '261';cellBoundary={'trialRange',[294]} % spat freq gratings
+subjectID = '261';cellBoundary={'trialRange',[295]} % orientation
+subjectID = '261';cellBoundary={'trialRange',[296]} % binary flicker
+subjectID = '261';cellBoundary={'trialRange',[302 304]} % bars
+subjectID = '261';cellBoundary={'trialRange',[324 332]} % [324 338?] bin grid, 3x4
+%subjectID = '261';cellBoundary={'trialRange',[341 346]} % bin grid, 6x8, 347 has issues sorting
+subjectID = '261';cellBoundary={'trialRange',[351 359]} % bin grid, 6x8
+subjectID = '261';cellBoundary={'trialRange',[365]} % bin grid, 6x8
+subjectID = '261';cellBoundary={'trialRange',[366 369]} % bars
+subjectID = '261';cellBoundary={'trialRange',[370 372]} % bars
+subjectID = '261';cellBoundary={'trialRange',[377 378]} % more bars, moved rat
+subjectID = '261';cellBoundary={'trialRange',[380 383]} % more bars, 
 
-overwriteAll=0; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
+subjectID = '261';cellBoundary={'trialRange',[398 404]} % ffgwn, poor sort, MUA
+subjectID = '261';cellBoundary={'trialRange',[406 408]} % bin grid
+subjectID = '261';cellBoundary={'trialRange',[415]} % bin grid
+
+spikeDetectionParams.detectionMethod=3 % 1 -> from power signal, 2 threshold positive, 3 threshold negative, 4 threshold abs, 5 wavelet
+spikeDetectionParams.extractionThreshold =9;
+overwriteAll=1; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
 usePhotoDiodeSpikes=0;
-stimClassToAnalyze={'all'}; timeRangePerTrialSecs=[0 Inf];
-% path='\\132.239.158.183\rlab_storage\pmeier\backup\devNeuralData_090310'; %b/c i can't see datanet_storage folder on .179
-% path='\\132.239.158.183\rlab_storage\pmeier\backup\neuralData_090505';
-% path='C:\Documents and Settings\rlab\Desktop\neural';
-path='\\132.239.158.179\datanet_storage'
 analysisManagerByChunk(subjectID, path, cellBoundary, spikeDetectionParams, spikeSortingParams,...
     timeRangePerTrialSecs,stimClassToAnalyze,overwriteAll,usePhotoDiodeSpikes)

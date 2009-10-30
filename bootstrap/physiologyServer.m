@@ -25,9 +25,9 @@ ai_parameters.inputRanges=repmat([-1 6],ai_parameters.numChans,1);
 % ========================================================================================
 % lists of values for settings
 clientIPStrs={'132.239.158.180'};
-ratIDStrs={'demo1','test1','fan_demo1','131','303','138','262'};
-ratProtocolStrs={'setProtocolTEST','setProtocolPhys2'};
-experimenterStrs={'','eflister','pmeier','bsriram'};
+ratIDStrs={'demo1','test1','fan_demo1','131','303','138','262','261'};
+ratProtocolStrs={'setProtocolPhys2','setProtocolTEST'};
+experimenterStrs={'','pmeier','bsriram','dnguyen','eflister'};
 electrodeMakeStrs={'FHC','MPI','gentner'};
 electrodeModelStrs={'','UEWMCGLEEN3M','UEWMCGLECN3M','UEWMCGTECN3M','WE3PT35.0A3-ME4925'};
 lotNumStrs={'','885191','885192','885431','120016','57','1'};
@@ -762,6 +762,14 @@ quickPlotButton = uicontrol(f,'Style','pushbutton','String','quick plot','Visibl
         VIS=ismember({events_data.eventType},{'visual cell','visual hash'});
         CELL=ismember({events_data.eventType},{'ctx cell','hipp cell','visual cell'});
         BEND=ismember({events_data.eventType},{'electrode bend'});
+        %get the last defined position in the list 
+        CURRENT= false(1,length(events_data))  % this is the start of the logicals
+        candidates=find( ~cellfun('isempty',{events_data.position})  )
+        % next:  find the cands that are not nan ... problem:  all apear to
+        % be nan?  not true
+        CURRENT(max())=true;
+        % cellfun(@(x) any(isnan(x)),{events_data.position}) &  % that is
+        % not a nan .. prob is need to add back in
         
         g=figure;
         levelToTopOfBrain=false;
@@ -772,6 +780,8 @@ quickPlotButton = uicontrol(f,'Style','pushbutton','String','quick plot','Visibl
         plotInBregmaCoordinates(events_data,CELL,'b*',[],levelToTopOfBrain);
         plotInBregmaCoordinates(events_data,CELL & VIS,'r*',[],levelToTopOfBrain);
         plotInBregmaCoordinates(events_data,BEND,'xr',[],levelToTopOfBrain);
+        plotInBregmaCoordinates(events_data,CURRENT,'og',[],levelToTopOfBrain);
+        
         xlabel('posterior');
         ylabel('lateral');
         zlabel('depth');
@@ -789,7 +799,7 @@ toggleCellButton = uicontrol(f,'Style','togglebutton','String',cellT,'Visible','
     function toggleCell(source,eventdata)
         if get(toggleCellButton,'Value')
             externalRequest='cell start';
-        else
+%         else
             externalRequest='cell stop';
         end
         % get time from client machine (if it exists)

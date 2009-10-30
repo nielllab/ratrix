@@ -59,13 +59,13 @@ else
     error('analysis not handled yet for this case')
 end
 
-
-if numStimFrames<max(chunkEndFrame)
-    analysisdata=[];
-    cumulativedata=[];
-    warning('skipping analysis of gratings untill all the chunks are there')
-    return; % don't analyze partial data
-end
+% 
+% if numStimFrames<max(chunkEndFrame)
+%     analysisdata=[];
+%     cumulativedata=[];
+%     warning('skipping analysis of gratings untill all the chunks are there')
+%     return; % don't analyze partial data
+% end
     
 % find out what parameter is varying
 numValsPerParam=...
@@ -466,13 +466,17 @@ text(xvals(3),max(count),infoString,'HorizontalAlignment','right','VerticalAlign
 ylabel('count'); xlabel('isi (ms)')
 
 subplot(3,2,6); hold off;
-plot(eyeSig(1,1),eyeSig(1,2),'.k');  hold on; % plot one dot to flush history
-if exist('ellipses','var')
-    plotEyeElipses(eyeSig,ellipses,within,true)
+if ~isempty(eyeData)
+    plot(eyeSig(1,1),eyeSig(1,2),'.k');  hold on; % plot one dot to flush history
+    if exist('ellipses','var')
+        plotEyeElipses(eyeSig,ellipses,within,true)
+    else
+        text(.5,.5,'no good eye data')
+    end
+    xlabel('eye position (cr-p)')
 else
-    text(.5,.5,'no good eye data')
+    text(.5,.5,'no eye data')
 end
-xlabel('eye position (cr-p)')
 
 %rasterDurationSec=1;
 %linesPerChunk=round((unique(durations/parameters.refreshRate))/rasterDurationSec);

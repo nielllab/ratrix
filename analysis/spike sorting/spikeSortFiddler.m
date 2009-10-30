@@ -105,6 +105,7 @@ subjectID = '131dev4';cellBoundary={'trialRange',[75 ]}; % sparse grid%[12 x 16]
 subjectID = '303';cellBoundary={'trialRange',[1 27 ]}; % all
 subjectID = '303';cellBoundary={'trialRange',[7]} % sparse grid%[12 x 16]
 subjectID = 'test1';cellBoundary={'trialRange',[116 Inf]} % sparse grid%[12 x 16]
+
 subjectID = '262';cellBoundary={'trialRange',[34 41]} % ffgwn - has temporal STA
 subjectID = '262';cellBoundary={'trialRange',[42 44]} % bin - has no spatial
 subjectID = '262';cellBoundary={'trialRange',[54]} % bars ... failing do to ISI too small
@@ -113,14 +114,19 @@ subjectID = '262';cellBoundary={'trialRange',[70]} % gratingsSF
 subjectID = '262';cellBoundary={'trialRange',[75 85]} % spatial binary
 subjectID = '262';cellBoundary={'trialRange',[75 85]} % spatial binary
 %subjectID = '262';cellBoundary={'trialRange',[95 96]} % rat closer
-subjectID = '262';cellBoundary={'trialRange',[105 108]} % ffwgn
-subjectID = '262';cellBoundary={'trialRange',[111 115 ]} % ffgwn after tuning out high freq "cell"
-subjectID = '262';cellBoundary={'trialRange',[118 123]} % spatial binary
-subjectID = '262';cellBoundary={'trialRange',[126]} % ffwgn
+% subjectID = '262';cellBoundary={'trialRange',[105 108]} % ffwgn
+% subjectID = '262';cellBoundary={'trialRange',[111 115 ]} % ffgwn after tuning out high freq "cell"
+ subjectID = '262';cellBoundary={'trialRange',[118 123]} % spatial binary
+% subjectID = '262';cellBoundary={'trialRange',[126]} % ffwgn
 subjectID = '262';cellBoundary={'trialRange',[128 149]} % spatial binary
-subjectID = '262';cellBoundary={'trialRange',[157]} % flankers, the target and bottom flanker are on the screen
-subjectID = '262';cellBoundary={'trialRange',[159]} % SF
-subjectID = '262';cellBoundary={'trialRange',[172]} % flankers, 5 lambda
+% subjectID = '262';cellBoundary={'trialRange',[157]} % flankers, the target and bottom flanker are on the screen
+% subjectID = '262';cellBoundary={'trialRange',[159]} % SF
+% subjectID = '262';cellBoundary={'trialRange',[172]} % flankers, 5 lambda
+% subjectID = 'test1';cellBoundary={'trialRange',[145]} % test if flankers drop frames (it says they drop every one, but parens are 0) ie.  drops: high(0)
+% subjectID = 'test1';cellBoundary={'trialRange',[155]} % test if flankers drop frames (it says they drop ~ every 10sec, but parens are 0) ie.  drops: 27(0)
+% subjectID = 'test1';cellBoundary={'trialRange',[162]} % test if flankers drop frames (some at beginning) ie.  drops: 3(0)
+subjectID = 'test1';cellBoundary={'trialRange',[167]} % test if flankers drop frames (some at beginning) ie.  drops: 3(0)
+subjectID = 'test1';cellBoundary={'trialRange',[178 180]} % spatial test
 
 subjectID = '261';cellBoundary={'trialRange',[25]} % 
 subjectID = '261';cellBoundary={'trialRange',[40]} % sf

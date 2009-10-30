@@ -757,58 +757,118 @@ else
     fprintf('\tresampling to %s\n',mattedName)
     boundaries=getRangeFromChunks(origName);
     
-    
     total=diff(cellfun(@(x) x(boundaries),{@min @max}));
     data=nan(1,ceil(resampFreq*total/1000));
     x=whos('data');
     fprintf('\tcompressing to %g MB\n',x.bytes/1000/1000); %sometimes up to 100MB
     
-    %out=getRangeFromChunks(file,);'
-    %verify 10-50k
-    
-    first=0;
-    step=0;
-
-    for 
-        out=getRangeFromChunks(origName,startsMS,durMS); %make this so omitting durMS or empty gives chunk num
-    end
-    
-    if ~all(arrayfun(@isNearInteger,[resampFreq,1/step]))
-        %         [resampFreq,1/step]
-        %         warning('resample requires ints -- need to find ints P,Q, s.t. P/Q = ')
-        %         resampFreq * step
-        str = sprintf('%g',resampFreq*step);
-        while str(end)=='0';
-            str=str(1:end-1);
+    prevChunk = [];
+    numChunks = length(boundaries) -1;
+    step = [];
+    ind = 1;
+    for chunkNum=0:numChunks-1
+        out=getRangeFromChunks(origName,chunkNum);
+        predictedEnd=boundaries(chunkNum+2);
+        testStep=mean(diff(out(2,:)));
+        if testStep < 1000/50000 || testStep > 1000/10000
+            error('rate error')
         end
-        decstr=str;
-        decCount=0;
-        while length(decstr)>0 && decstr(end)~='.';
-            decstr=decstr(1:end-1);
-            decCount=decCount+1;
+        if isempty(step)
+            step=testStep;
+        else
+            if step~=testStep
+                error('inconsistent rates')
+            end
         end
-        if isempty(decstr)
-            P=resampFreq*step;
-            Q=1;
-            if ~isNearInteger(P)
-                error('shouldn''t be possible')
+        if chunkNum~=numChunks-1 || true %looks like last boundary includes one extra step?
+            predictedEnd=predictedEnd-step;
+        end
+        if out(2,1) ~= boundaries(chunkNum+1) || abs(out(2,end) - predictedEnd) > .005*step
+            error('time error')
+        end
+        
+        
+        if ~all(arrayfun(@isNearInteger,[resampFreq,1/step]))
+            %         [resampFreq,1/step]
+            %         warning('resample requires ints -- need to find ints P,Q, s.t. P/Q = ')
+            %         resampFreq * step
+            str = sprintf('%g',resampFreq*step);
+            while str(end)=='0';
+                str=str(1:end-1);
+            end
+            decstr=str;
+            decCount=0;
+            while length(decstr)>0 && decstr(end)~='.';
+                decstr=decstr(1:end-1);
+                decCount=decCount+1;
+            end
+            if isempty(decstr)
+                P=resampFreq*step;
+                Q=1;
+                if ~isNearInteger(P)
+                    error('shouldn''t be possible')
+                end
+            else
+                P=resampFreq*step*10^decCount;
+                Q=10^decCount;
+            end
+            if (P/Q ~= resampFreq*step)
+                error('fix didn''t work')
             end
         else
-            P=resampFreq*step*10^decCount;
-            Q=10^decCount;
+            P=resampFreq;
+            Q=1/step;
         end
-        if (P/Q ~= resampFreq*step)
-            error('fix didn''t work')
+        fprintf('\tresampling %d of %d\n',chunkNum,numChunks-1)
+        
+        thisChunk=[prevChunk out(1,:)];
+        
+        maxResampLen=1550000; %else OOM
+        miniNum=1;
+        while length(thisChunk)>maxResampLen
+            fprintf('\t\tresampling mini %d of %d\n',miniNum,2*size(out,2)/maxResampLen)
+            resamped=resample(thisChunk(1:maxResampLen),round(P),round(Q));
+
+            tag=ceil(length(resamped)/4);
+            lastInd=ind+length(resamped)-tag;
+            
+            if ind==1
+                data(ind:length(resamped))=resamped;
+                ind=lastInd+1;
+            else
+                data(ind:lastInd)=resamped(tag:end);
+                ind=lastInd-tag;
+            end
+
+            cut=ceil(maxResampleLen/2);
+            thisChunk=thisChunk(cut:end);
+            
+            miniNum=miniNum+1;
         end
-    else
-        P=resampFreq;
-        Q=1/step;
+        prevChunk = thisChunk;
     end
-    fprintf('resampling %s\n',fType)
-    data=resample(data,P,Q);
-    step=1/resampFreq;
+    
+    resamped=resample(out(1,end-maxResampLen:end),round(P),round(Q));
+    data(end-length(resamped)+tag:end)=resamped(tag:end);
+    
+    if any(isnan(data))
+        error('missed')
+    end
+    
+    keyboard
+    
+    first=0;
+
+
+    
+%     for 
+%         out=getRangeFromChunks(origName,startsMS,durMS); %make this so omitting durMS or empty gives chunk num
+%     end
+    
+
+
     ts=getTimes(first, step, length(data));
-    fprintf('done resampling phys\n')
+    fprintf('done resampling %s\n',fType)
     
     checkInds=1:checkSecs/step;
     plot(ts(checkInds),data(checkInds),'r')

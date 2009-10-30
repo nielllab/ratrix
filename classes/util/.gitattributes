@@ -150,3 +150,4 @@ stimHelpers/makeStandardSoundManager.m -text
 analysis/getAngularResolutionFromGeometry.m -text
 analysis/grouper.m -text
 analysis/createDisplayStrs.m -text
+infrastructure/mountOSX.m -text

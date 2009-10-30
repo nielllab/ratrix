@@ -1,6 +1,7 @@
 function out=getRangeFromChunks(file,startsMS,durMS)
 
 %file='C:\eflister\phys analysis\164\02.27.09\8d315fc3a807c5b249e5ebf3e99a8cbd19e0ffd4\phys.8d315fc3a807c5b249e5ebf3e99a8cbd19e0ffd4.mat';
+%file='/Volumes/Maxtor One Touch II/eflister phys/phys analysis/164/02.27.09/8d315fc3a807c5b249e5ebf3e99a8cbd19e0ffd4/phys.8d315fc3a807c5b249e5ebf3e99a8cbd19e0ffd4.mat';
 
 recs=whos('-file',file);
 s=load(file,'step','start');
@@ -43,6 +44,24 @@ if ~exist('startsMS','var') || isempty(startsMS)
     return
 elseif ~isvector(startsMS)
     error('not a vec')
+elseif ~exist('durMS','var') || isempty(durMS)
+    if all(ismember(startsMS,names)) && isscalar(startsMS) %todo: allow multiple
+        %pass
+    else
+        error('not a chunk num')
+    end
+    
+    name=['out' num2str(startsMS)];
+    fprintf('loading %s...',name)
+    raw=load(file,name);
+    fprintf('indexing...')
+    
+    times=cumsum([boundaries(startsMS+1) 1000*s.step*ones(1,length(raw.(name))-1)]);
+    
+    fprintf('done\n')
+    
+    out=[raw.(name)';times];
+    return
 else
     [sortedStarts ord]=sort(startsMS);
     if size(sortedStarts,1)==1

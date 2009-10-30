@@ -373,7 +373,12 @@ arrayfun(@doCheck,flist);
 %             fprintf('\n')
         end
         if ~exist(f,'file')
+            [garbage,tmpf]=fileparts(f);
+            if strcmp(tmpf,'breakup') %temp hack!
+                %pass
+            else
             error('can''t find file')
+            end
         end
     end
 end

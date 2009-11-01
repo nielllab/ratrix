@@ -15,8 +15,16 @@ function d=addPhantomTargetContrast(d,respectGroups,assignmentMethod)
 % sampling some of the exitsing trials twice...
 
 
+hasAllPhantomContrastLabeled=false;
 if isfield(d,'phantomContrast')
-    error('this data has the phantom contrast stored... need to rethink... only deal with nan data?')
+    if all(~isnan(d.phantomContrast))
+        % has em all, so just use em!
+        hasAllPhantomContrastLabeled=true;
+        else
+        %has some but not all... never happened, but could
+        error('this data has the phantom contrast stored... need to rethink... only deal with nan data?')
+    end
+
 end
 
 if ~exist('respectGroups','var') || isempty(respectGroups)
@@ -65,8 +73,17 @@ end
 phantomContrast=nan(size(d.date));
 phantomContrast(~targetAbsent)=d.targetContrast(~targetAbsent); % add in the known contrast
 
+if hasAllPhantomContrastLabeled
+   phantomContrast(targetAbsent)=d.phantomContrast(targetAbsent);
+end
 
 for i=1:size(respectGroups,1)
+    
+    if hasAllPhantomContrastLabeled
+        %don't need to assign, just continue to the error checking at the end
+        break
+    end
+    
     candidates=targetAbsent &  respectGroups(i,:);
     for c=1:length(contrasts)
         

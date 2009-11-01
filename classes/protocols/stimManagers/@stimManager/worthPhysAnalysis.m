@@ -1,4 +1,4 @@
-function retval = worthPhysAnalysis(sm,quality,analysisExists,overwriteAll)
+function retval = worthPhysAnalysis(sm,quality,analysisExists,overwriteAll,isLastChunkInTrial)
 % returns true if worth spike sorting given the values in the quality struct
 % default method for all stims - can be overriden for specific stims
 %
@@ -7,6 +7,8 @@ function retval = worthPhysAnalysis(sm,quality,analysisExists,overwriteAll)
 % quality.frameTimes
 % quality.frameLengths (this was used by getFrameTimes to calculate passedQualityTest)
 
-retval=quality.passedQualityTest && (overwriteAll || ~analysisExists);
+retval=quality.passedQualityTest && ...
+    (isLastChunkInTrial || enableChunkedPhysAnalysis(sm)) &&...    
+    (overwriteAll || ~analysisExists);
 
 end % end function

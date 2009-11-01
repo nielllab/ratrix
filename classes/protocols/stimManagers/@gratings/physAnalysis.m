@@ -406,7 +406,9 @@ for i=1:numTypes
     plot([x; x]+(i*0.05),[rate(i,:); rate(i,:)]+(rateSEM(i,:)'*[-1 1])','color',colors(i,:))
 end
 maxPowerInd=find(pow==max(pow));
-plot(x,rate(maxPowerInd,:),'color',colors(maxPowerInd,:),'lineWidth',2);
+if ~isempty(pow)
+    plot(x,rate(maxPowerInd,:),'color',colors(maxPowerInd,:),'lineWidth',2);
+end
 xlabel('phase');  set(gca,'XTickLabel',{'0','pi','2pi'},'XTick',([0 .5 1]*numPhaseBins)); ylabel('rate'); set(gca,'YTickLabel',[0:.1:1]*parameters.refreshRate,'YTick',[0:.1:1])
 axis tight
 
@@ -429,29 +431,34 @@ subplot(3,2,3); hold off; plot(mean(rate'),'k','lineWidth',2); hold on; %legend(
 xlabel(sweptParameter); set(gca,'XTickLabel',valNames,'XTick',[1:length(vals)]); ylabel('rate (f0)'); set(gca,'YTickLabel',[0:.1:1]*parameters.refreshRate,'YTick',[0:.1:1])
 set(gca,'XLim',[1 length(vals)])
 
-modulation=pow./(parameters.refreshRate*mean(rate'))
+
 subplot(3,2,4); hold off
-plot(pow,'k','lineWidth',1); hold on; 
-plot(modulation,'--k','lineWidth',2); hold on;
-cohScaled=coh*max(pow); %1 is peak FR
-plot(cohScaled,'color',[.8 .8 .8],'lineWidth',1); 
-sigs=find(cohLB>0);
-plot(sigs,cohScaled(sigs),'o','color',[.6 .6 .6]); 
-legend({'f1','f1/f0','coh'})
-
-
-plot([1:length(vals); 1:length(vals)],[pow; pow]+(powSEM'*[-1 1])','k')
-%plot([1:length(vals); 1:length(vals)],[pow; pow]+(powSEM'*[-1 1])','k')
-plot([1:length(vals); 1:length(vals)]+0.1,[coh; coh]+(cohSEM'*[-1 1])','color',[.8 .8 .8])
-xlabel(sweptParameter); set(gca,'XTickLabel',valNames,'XTick',[1:length(vals)]); ylabel('modulation (f1/f0)');
-ylim=get(gca,'YLim'); yvals=[ ylim(1) mean(ylim) ylim(2)];set(gca,'YTickLabel',yvals,'YTick',yvals)
-set(gca,'XLim',[1 length(vals)])
-
+if ~isempty(pow)
+    modulation=pow./(parameters.refreshRate*mean(rate'))
+    plot(pow,'k','lineWidth',1); hold on;
+    plot(modulation,'--k','lineWidth',2); hold on;
+    cohScaled=coh*max(pow); %1 is peak FR
+    plot(cohScaled,'color',[.8 .8 .8],'lineWidth',1);
+    sigs=find(cohLB>0);
+    plot(sigs,cohScaled(sigs),'o','color',[.6 .6 .6]);
+    legend({'f1','f1/f0','coh'})
+    
+    
+    plot([1:length(vals); 1:length(vals)],[pow; pow]+(powSEM'*[-1 1])','k')
+    %plot([1:length(vals); 1:length(vals)],[pow; pow]+(powSEM'*[-1 1])','k')
+    plot([1:length(vals); 1:length(vals)]+0.1,[coh; coh]+(cohSEM'*[-1 1])','color',[.8 .8 .8])
+    xlabel(sweptParameter); set(gca,'XTickLabel',valNames,'XTick',[1:length(vals)]); ylabel('modulation (f1/f0)');
+    ylim=get(gca,'YLim'); yvals=[ ylim(1) mean(ylim) ylim(2)];set(gca,'YTickLabel',yvals,'YTick',yvals)
+    set(gca,'XLim',[1 length(vals)])
+else 
+    xlabel(sprintf('not enough data for all %s yet',sweptParameter{1}))
+end
 meanRate=(length(spikes))/diff(spikeRecord.spikeTimestamps([1 end]));
 isi=diff(spikeRecord.spikeTimestamps(thisCluster))*1000;
 N=sum(isi<parameters.ISIviolationMS); percentN=100*N/length(isi);
 %datestr(parameters.date,22)
 infoString=sprintf('subj: %s  trial: %d Hz: %d',parameters.subjectID,parameters.trialNumber,round(meanRate));
+ylim=get(gca,'YLim');
 text(1.2,ylim(2),infoString);
 
 subplot(3,2,5);

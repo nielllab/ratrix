@@ -272,7 +272,7 @@ for i=1:numSubjects
                     params.factors.flankerPosAngle(i,j)=d.flankerPosAngle(firstInd);
                     params.factors.targetPhase(i,j)=d.targetPhase(firstInd);
                     params.factors.flankerPhase(i,j)=d.flankerPhase(firstInd);
-                case {'allFlankerContrasts','fiveFlankerContrasts','noFlank&nfBlock','noFlank','flankOrNot','hasFlank&nfMix&nfBlock'}
+                case {'allFlankerContrasts','fiveFlankerContrasts','noFlank&nfBlock','noFlank','flankOrNot','hasFlank&nfMix&nfBlock','fiveFlankerContrastsFullRange'}
                     params.factors.flankerContrast(i,j)=d.flankerContrast(firstInd);
                 case {'allTargetContrasts'}
                     params.factors.targetContrast(i,j)=d.targetContrast(firstInd);

@@ -263,7 +263,7 @@ while ~quit
             end
             % if no more chunks to process in currentTrial, then check for a new trial within boundaryRange
             if isempty(chunksToProcess)
-                if numTriesWithNothing>=5
+                if numTriesWithNothing>=3
                     quit=true;
                     return;
                     % HACK FOR NOW - stop looping so matlab doesnt freeze
@@ -301,6 +301,14 @@ while ~quit
                     % =================================================================================
                     chunkStr=sprintf('chunk%d',chunksToProcess(i,2));
                     fprintf('*********DOING %s*************/n',chunkStr)
+                    if i==size(chunksToProcess,1)
+                        isLastChunkInTrial=true;  % warning: this could be tripped by online analysis if you analyze an ongoing trial
+                        %the reult would be that some stimManagers would
+                        %get stimuli that are reported to be "the last of
+                        %the trial, but the stim manager can not trust to be full, b/c they are partial trials
+                    else
+                        isLastChunkInTrial=false;
+                    end
                     %chunksToProcess(i,2)
                     
                     processed=false;
@@ -342,7 +350,7 @@ while ~quit
                         % bounds to decide whether or not to continue with analysis
                         warningBound = 0.01;
                         errorBound = 0.5; % half a frame
-                        ifi = 1/100;
+                        ifi = 1/100;  % why don't we get this from stimulus? -pmm 091027
                         spikeRecord.spikeDetails=[];
                         spikeRecord.samplingRate=neuralRecord.samplingRate;
                         % what is the difference between frameIndices and correctedFrameIndices?
@@ -354,8 +362,12 @@ while ~quit
                             getFrameTimes(neuralRecord.neuralData(:,1),neuralRecord.neuralDataTimes,neuralRecord.samplingRate,warningBound,errorBound,ifi); % pass in the pulse channel
                         
                         % 6/3/09 - offset each chunk's stimInds by the last stimInd from previous chunk
+                        try
                         spikeRecord.stimInds=spikeRecord.stimInds+startingStimInd;
                         startingStimInd=max(spikeRecord.stimInds);
+                        catch
+                            keyboard
+                        end
                         
                         if 0 %for inspecting errors in frames
                             figure('position',[100 500 500 500])
@@ -558,7 +570,7 @@ while ~quit
                     % (whiteNoise = always do analysis for now)
                     % (manualCmrMotionEyeCal = always do analysis for now - future ignore spikes)
                     analysisExists=exist(analysisLocation,'file');
-                    doAnalysis=worthPhysAnalysis(sm,quality,analysisExists,overwriteAll);
+                    doAnalysis=worthPhysAnalysis(sm,quality,analysisExists,overwriteAll,isLastChunkInTrial);
                     
                     if doAnalysis % 1
                         % do something with loaded information
@@ -724,71 +736,6 @@ for i=1:size(frameIndices,1)
 end
 end % end function
 
-function  eyeData=getEyeRecords(eyeRecordPath, trialNum,timestamp);
-% is compatible with older eyeRecords in which multiple .mats got saved per
-% trial at different times.
-
-try
-    %this handles current versions
-    filename=sprintf('eyeRecords_%d_%s.mat',trialNum,timestamp);
-    fullfilepath=fullfile(eyeRecordPath,filename);
-    eyeData=load(fullfilepath);
-catch ex
-    % this handles old record types prior to march 17, 2009
-
-    if strcmp(ex.identifier,'MATLAB:load:couldNotReadFile')
-        d=dir(eyeRecordPath);
-        goodFiles = [];
-
-        % first sort the neuralRecords by trial number
-        for i=1:length(d)
-            %'eyeRecords_(\d+)-(.*)\.mat'
-            %searchString=sprintf('eyeRecords_(%d)-(.*)\\.mat',trialNum)
-            [matches tokens] = regexpi(d(i).name, 'eyeRecords_(\d+)_(.*)\.mat', 'match', 'tokens');
-            if length(matches) ~= 1
-                %d(i).name
-                %warning('not a eyeRecord file name');
-            else
-                if str2double(tokens{1}{1})==trialNum
-                    goodFiles(end+1).trialNum = str2double(tokens{1}{1});
-                    goodFiles(end).timestamp = tokens{1}{2};
-                    goodFiles(end).date = datenumFor30(tokens{1}{2});
-                end
-            end
-        end
-        if size(goodFiles,2)>0
-            [sorted order]=sort([goodFiles.date]);
-            goodFiles=goodFiles(order);
-
-            %check that its within the hour of the start trial
-            hrAfterStart=(datenumFor30(goodFiles(end).timestamp)-datenumFor30(timestamp))*24;
-            if hrAfterStart>0 & hrAfterStart<1
-                %LOAD THE MOST RECENT ONE, after checking sanity of time
-                filename=sprintf('eyeRecords_%d_%s.mat',trialNum,goodFiles(end).timestamp);
-                fullfilepath=fullfile(eyeRecordPath,filename);
-                eyeData=load(fullfilepath);
-            else
-                error('weird time relation')
-                hrAfterStart
-                saved=goodFiles(end).timestamp
-                started=datenumFor30(timestamp)
-                keyboard
-
-                filename=sprintf('eyeRecords_%d_%s.mat',trialNum,goodFiles(end).timestamp);
-                fullfilepath=fullfile(eyeRecordPath,filename);
-                eyeData=load(fullfilepath);
-            end
-        else
-            eyeData=[]; % there were no records, eye tracker might have been off
-        end
-    else
-        rethrow(ex);
-    end
-
-end
-
-
-end % end function
 % ===============================================================================================
 
 

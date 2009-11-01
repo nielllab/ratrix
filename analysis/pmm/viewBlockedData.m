@@ -1,7 +1,7 @@
-function viewBlockedData(subjects)
+function viewBlockedData()%(d,subjects)
 
 if ~exist('d','var') || isempty(d)
-    group=0;
+    group=2;
     switch group
         case 0
             subjects={'277'} % test any one
@@ -91,12 +91,73 @@ try
         xlabel(sprintf('blocks, guessing they are %s',factor))
         title(subjects{s})
         
+        
+                %%
+                keyboard
+                %%
+                %close all
+                if 1 % reaction time per block
+%                     subjects={'231','234'} % all colin, many target contrasts on 12, or many flanker onctrasts on 15, or joint contrast on colinear on 16
+%                     conditionType='allBlockIDs'
+%                     conditionType='fiveFlankerContrastsFullRange'
+%                     conditionType='allPhantomTargetContrastsCombined'; %'allTargetContrasts'
+%                     filter{1}.type='16';
+%                     dateRange= [pmmEvent('231&234-jointSweep')+1 datenum('28-Oct-2009')]; % end on first analysis date
+%                     [stats CI names params]=getFlankerStats(subjects(s),conditionType,{'RT'},filter,dateRange);
+                    
+                    
+                    f1=figure;
+                    f2=figure;
+                    w=3; h=3;
+                    for i=1:length(names.rtCategories)
+                        mn=params.RT.mean(:,:,i);
+                        std=params.RT.std(:,:,i);
+                        fast=params.RT.fast(:,:,i);
+                        ci=[mn-std;  mn+std ]';  % big;  could use SEM
+                        ci=[mn;  mn]'; % doing nothing
+                        figure(f1); subplot(h,w,i);   doBarPlotWithStims(mn,ci,[],params.colors,[1 2.2],'stats&CI',false);
+                        
+                        %ci=[fast;  fast]';
+                        %figure(f2); subplot(w,h,i);   doBarPlotWithStims(fast,ci,[],params.colors,[0.7 1.1],'stats&CI',false);
+                        title(names.rtCategories{i})
+                    end
+                    
+                    
+                    As=[4 6 9]
+                    Bs=[5 8 7]
+                    w=length(As); h=1;
+                    for i=1:length(As)
+                        aID=As(i); 
+                        bID=Bs(i); 
+                        A=params.RT.mean(:,:,aID);
+                        B=params.RT.mean(:,:,bID);
+                        metric=(A-B)./((A+B)/2)
+                        ci=[metric;  metric]';
+                        
+                        er=sqrt(...
+                            (params.RT.std(:,:,aID).^2/params.raw.numMisses) + ... %params.raw.numMisses is only a rough guess ... atcual values should use the appropriate observations for that type, but this breaks the for loop, or requires a "switch" on type
+                            (params.RT.std(:,:,bID).^2/params.raw.numMisses))
+                        ci=[metric-er/2;  metric+er/2]';
+                        figure(f2); subplot(h,w,i);   doBarPlotWithStims(metric,ci,[],params.colors,[-0.5 0.5],'stats&CI',false);
+                        title(sprintf('%s-%s',names.rtCategories{aID},names.rtCategories{bID}))
+                    end
+                    subplot(h,w,1); xlabel('say yes faster')
+                    subplot(h,w,2); xlabel('...not b/c of hits')
+                    subplot(h,w,3); xlabel('...but b/c of fast FA')
+                    
+                    subplot(h,w,2); xlabel('...b/c of fast hits')
+                    subplot(h,w,3); xlabel('...despite slow FA')
+                end 
+ 
+    figure
+        
+
         %%
-        if 0
+        if 1
             %future: performance "trialPerBlock"
             figure;
             transitionFilters=[1 2 3 4 5 6 7 Inf]; %1 for up by 1 or inf for ALL ups
-            transitionFilters=[ Inf]; %1 for up by 1 or inf for ALL ups
+            %transitionFilters=[ Inf]; %1 for up by 1 or inf for ALL ups
             n=length(transitionFilters);
             for t=1:n
                 transitionFilter=transitionFilters(t);

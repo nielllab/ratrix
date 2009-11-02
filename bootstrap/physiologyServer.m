@@ -24,7 +24,7 @@ ai_parameters.inputRanges=repmat([-1 6],ai_parameters.numChans,1);
 
 % ========================================================================================
 % lists of values for settings
-clientIPStrs={'132.239.158.180'};
+clientIPStrs={'132.239.158.179'};
 ratIDStrs={'demo1','test1','fan_demo1','131','303','138','262','261'};
 ratProtocolStrs={'setProtocolPhys2','setProtocolTEST'};
 experimenterStrs={'','pmeier','bsriram','dnguyen','eflister'};
@@ -416,10 +416,11 @@ impedanceLabel = uicontrol(f,'Style','text','String','impedance','Visible','on',
     'Position',[margin+7*fieldWidth fHeight-9*oneRowHeight-margin fieldWidth oneRowHeight]);
 
 clientIPField = uicontrol(f,'Style','popupmenu','String',clientIPStrs,'Units','pixels','Value',defaultIndex,...
-    'Enable','on','Position',[8*margin+7*fieldWidth fHeight-1*oneRowHeight-margin fieldWidth*1.4 oneRowHeight]);
+    'Enable','on','Position',[8*margin+7*fieldWidth fHeight-1*oneRowHeight-margin fieldWidth*1.4 oneRowHeight],...
+    'BackgroundColor','w');
 ratIDField = uicontrol(f,'Style','popupmenu','String',ratIDStrs,'Units','pixels','Value',defaultIndex,...
     'Enable','on','Position',[margin+8*fieldWidth fHeight-2*oneRowHeight-margin fieldWidth oneRowHeight],...
-    'Callback',@reloadEventsAndSurgeryFields);
+    'BackgroundColor','w','Callback',@reloadEventsAndSurgeryFields);
     function reloadEventsAndSurgeryFields(source,eventdata,reloadHistory)
         if ~exist('reloadHistory','var')
             reloadHistory=true;
@@ -470,34 +471,110 @@ ratIDField = uicontrol(f,'Style','popupmenu','String',ratIDStrs,'Units','pixels'
         eventsToSendIndex=eventNum;
         updateDisplay();
         % get surgery anchor and bregma fields from oracle if possible
+        surgValuesinOracle = 0;
         try
             conn=dbConn();
-            surg=getSurgeryFields(conn,ratIDStrs{get(ratIDField,'Value')});
-            set(surgeryAnchorAPField,'String',num2str(surg.anchorAP));
-            set(surgeryAnchorMLField,'String',num2str(surg.anchorML));
-            set(surgeryAnchorZField,'String',num2str(surg.anchorZ));
-            set(surgeryBregmaAPField,'String',num2str(surg.bregmaAP));
-            set(surgeryBregmaMLField,'String',num2str(surg.bregmaML));
-            set(surgeryBregmaZField,'String',num2str(surg.bregmaZ));
+            surg=struct2array(getSurgeryFields(conn,ratIDStrs{get(ratIDField,'Value')}));
+            
+            % is any of surg values a NaN? %
+            surgValuesisNaN = isnan(surg);
+            if(any(surgValuesisNaN))
+                error('this is weird. there is no entry in db. yet the procedure does not error out!')
+            else
+                set(surgeryAnchorAPField,'String',num2str(surg(1)));
+                set(surgeryAnchorMLField,'String',num2str(surg(2)));
+                set(surgeryAnchorZField,'String',num2str(surg(3)));
+                set(surgeryBregmaAPField,'String',num2str(surg(4)));
+                set(surgeryBregmaMLField,'String',num2str(surg(5)));
+                set(surgeryBregmaZField,'String',num2str(surg(6)));
+                surgValuesinOracle = 1;
+            end
         catch ex
-            warning('could not get surgery fields from oracle');
+            
+            warning('could not get surgery fields from oracle. trying to obtain these fields from server.');
         end
-        
+        [surgBregma surgAnchor currAnchor currPositn penetParams isNewDay] = ...
+            getDataFromEventLog(fullfile('\\Reinagel-lab.AD.ucsd.edu\RLAB\Rodent-Data\physiology',ratIDStrs{get(ratIDField,'Value')},''));
+        surgBregma
+        surgAnchor
+        currAnchor
+        currPositn
+        penetParams
+        isNewDay
+        if ~surgValuesinOracle
+            % look for anchor data in the events_log
+            set(surgeryAnchorAPField,'String',num2str(surgAnchor(1)));
+            set(surgeryAnchorMLField,'String',num2str(surgAnchor(2)));
+            set(surgeryAnchorZField,'String',num2str(surgAnchor(3)));
+            set(surgeryBregmaAPField,'String',num2str(surgBregma(1)));
+            set(surgeryBregmaMLField,'String',num2str(surgBregma(2)));
+            set(surgeryBregmaZField,'String',num2str(surgBregma(3)));
+        end
+        if isNewDay
+            set(enableCurrentAnchorField,'Value',1);enableCurrentAnchorEntry();
+            set(currentAnchorAPField,'String',num2str(currAnchor(1)),'BackgroundColor','r');
+            set(currentAnchorMLField,'String',num2str(currAnchor(2)),'BackgroundColor','r');
+            set(currentAnchorZField,'String',num2str(currAnchor(3)),'BackgroundColor','r');
+        else
+            set(currentAnchorAPField,'String',num2str(currAnchor(1)),'BackgroundColor','w');
+            set(currentAnchorMLField,'String',num2str(currAnchor(2)),'BackgroundColor','w');
+            set(currentAnchorZField,'String',num2str(currAnchor(3)),'BackgroundColor','w');
+        end
+        set(offsetAPField,'String',num2str(currPositn(1)));
+        set(offsetMLField,'String',num2str(currPositn(2)));
+        set(offsetZField,'String',num2str(currPositn(3)));
+        if ~isempty(penetParams)
+            if ~isempty(penetParams.experimenter)
+                set(experimenterField,'Value',find(strcmp(penetParams.experimenter,experimenterStrs)),'BackgroundColor','w');
+            else
+                set(experimenterField,'String',experimenterStrs,'Value',defaultIndex,'BackgroundColor','r');
+            end
+            
+            if ~isempty(penetParams.electrodeMake)
+                set(electrodeMakeField,'Value',find(strcmp(penetParams.electrodeMake,electrodeMakeStrs)),'BackgroundColor','w');
+            else
+                set(electrodeMakeField,'String',electrodeMakeStrs,'Value',defaultIndex,'BackgroundColor','r');
+            end
+            
+            if ~isempty(penetParams.electrodeModel)
+                set(electrodeModelField,'Value',find(strcmp(penetParams.electrodeModel,electrodeModelStrs)),'BackgroundColor','w');
+            else
+                set(electrodeModelField,'String',electrodeModelStrs,'Value',defaultIndex,'BackgroundColor','r');
+            end
+            
+            if ~isempty(penetParams.lotNum)
+                set(lotNumField,'Value',find(strcmp(penetParams.lotNum,lotNumStrs)),'BackgroundColor','w');
+            else
+                set(lotNumField,'String',lotNumStrs,'Value',defaultIndex,'BackgroundColor','r');
+            end
+            
+            if ~isempty(penetParams.IDNum)
+                set(IDNumField,'Value',find(strcmp(penetParams.IDNum,IDNumStrs)),'BackgroundColor','w');
+            else
+                set(IDNumField,'String',IDNumStrs,'Value',defaultIndex,'BackgroundColor','r');
+            end
+            
+            if ~isempty(penetParams.impedance)
+                set(impedanceField,'Value',find(strcmp(penetParams.impedance,impedanceStrs)),'BackgroundColor','w');
+            else
+                set(impedanceField,'String',impedanceStrs,'Value',defaultIndex,'BackgroundColor','r');
+            end  
+        end
     end
 ratProtocolField = uicontrol(f,'Style','popupmenu','String',ratProtocolStrs,'Units','pixels','Value',defaultIndex,...
-    'Enable','on','Position',[margin+8*fieldWidth fHeight-3*oneRowHeight-margin fieldWidth oneRowHeight]);
+    'Enable','on','Position',[margin+8*fieldWidth fHeight-3*oneRowHeight-margin fieldWidth oneRowHeight],'BackgroundColor','w');
 experimenterField = uicontrol(f,'Style','popupmenu','String',experimenterStrs,'Units','pixels','Value',defaultIndex,...
-    'Enable','on','Position',[margin+8*fieldWidth fHeight-4*oneRowHeight-margin fieldWidth oneRowHeight]);
+    'Enable','on','Position',[margin+8*fieldWidth fHeight-4*oneRowHeight-margin fieldWidth oneRowHeight],'BackgroundColor','w');
 electrodeMakeField = uicontrol(f,'Style','popupmenu','String',electrodeMakeStrs,'Units','pixels','Value',defaultIndex,...
-    'Enable','on','Position',[margin+8*fieldWidth fHeight-5*oneRowHeight-margin fieldWidth oneRowHeight]);
+    'Enable','on','Position',[margin+8*fieldWidth fHeight-5*oneRowHeight-margin fieldWidth oneRowHeight],'BackgroundColor','w');
 electrodeModelField = uicontrol(f,'Style','popupmenu','String',electrodeModelStrs,'Units','pixels','Value',defaultIndex,...
-    'Enable','on','Position',[margin+8*fieldWidth fHeight-6*oneRowHeight-margin fieldWidth oneRowHeight]);
+    'Enable','on','Position',[margin+8*fieldWidth fHeight-6*oneRowHeight-margin fieldWidth oneRowHeight],'BackgroundColor','w');
 lotNumField = uicontrol(f,'Style','popupmenu','String',lotNumStrs,'Units','pixels','Value',defaultIndex,...
-    'Enable','on','Position',[margin+8*fieldWidth fHeight-7*oneRowHeight-margin fieldWidth oneRowHeight]);
+    'Enable','on','Position',[margin+8*fieldWidth fHeight-7*oneRowHeight-margin fieldWidth oneRowHeight],'BackgroundColor','w');
 IDNumField = uicontrol(f,'Style','popupmenu','String',IDNumStrs,'Units','pixels','Value',defaultIndex,...
-    'Enable','on','Position',[margin+8*fieldWidth fHeight-8*oneRowHeight-margin fieldWidth oneRowHeight]);
+    'Enable','on','Position',[margin+8*fieldWidth fHeight-8*oneRowHeight-margin fieldWidth oneRowHeight],'BackgroundColor','w');
 impedanceField = uicontrol(f,'Style','popupmenu','String',impedanceStrs,'Units','pixels','Value',defaultIndex,...
-    'Enable','on','Position',[margin+8*fieldWidth fHeight-9*oneRowHeight-margin fieldWidth oneRowHeight]);
+    'Enable','on','Position',[margin+8*fieldWidth fHeight-9*oneRowHeight-margin fieldWidth oneRowHeight],'BackgroundColor','w');
 
 % ========================================================================================
 % current event parameters - labels
@@ -746,6 +823,21 @@ offsetEventSubmit = uicontrol(f,'Style','pushbutton','String','enter','Visible',
         % reset eventType to comment
         set(eventTypeMenu,'Value',defaultIndex);
         eventTypeC([],[]);
+        
+        % reset all colors to normal
+        set(ratProtocolField,'BackgroundColor','w');
+        set(experimenterField,'BackgroundColor','w');
+        set(electrodeMakeField,'BackgroundColor','w');
+        set(electrodeModelField,'BackgroundColor','w');
+        set(lotNumField,'BackgroundColor','w');
+        set(IDNumField,'BackgroundColor','w');
+        set(impedanceField,'BackgroundColor','w');
+               
+        set(currentAnchorAPField,'BackgroundColor','w');
+        set(currentAnchorMLField,'BackgroundColor','w');
+        set(currentAnchorZField,'BackgroundColor','w');
+        set(enableCurrentAnchorField,'Value',0);enableCurrentAnchorEntry();
+        
     end % end logEvent function
 
 % ========================================================================================

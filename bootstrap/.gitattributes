@@ -9,3 +9,4 @@
 /miniServer.m -text
 /startDataListener.m -text
 /physiologyServer.m -text
+/getDataFromEventLog.m -text

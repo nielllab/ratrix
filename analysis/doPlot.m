@@ -71,7 +71,9 @@ goods=getGoods(d,goodType,removeHuman);
 %redefine goods for bias -- no center allowed!
 if any(strcmp(plotType,{'plotBias','plotBiasScatter'}))
 
-        goods=getGoods(d,'forBias',removeHuman);
+        %goods=getGoods(d,'forBias',removeHuman);
+        includeCenterResponses=false;
+        goods=getGoods(d,'basic',removeHuman,includeCenterResponses);
 
     side=double(d.response(goods)==3); %right=1 left=0
     check=size(side,2)==sum(d.response(goods)==1)+sum(d.response(goods)==3);

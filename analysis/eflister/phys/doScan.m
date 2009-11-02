@@ -27,7 +27,7 @@ try
             
             C = textscan(fid,format, 1, 'headerlines',headerlines);
             
-            if ~ismember(instancesVerify,[0 1]) %temp hack -- allow 0
+            if ~ismember(instancesVerify,[1]) %temp hack -- allow 0
                 error('specify instancesVerify=1 when rep=false')
             end
             

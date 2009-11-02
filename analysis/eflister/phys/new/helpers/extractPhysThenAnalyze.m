@@ -97,11 +97,13 @@ function out=getLastStop(r,i)
 %BUG: this will miss anyone that hasn't made it through the filter
 %SOLUTION: do a fresh extractPhysRecord to get a complete list
 
+%BUG: cuts off pulses at the end of a (sorting) chunk boundary even if a stim goes longer than that -- and we need the end of the stim to catch the right end pulses
+
 mask=strcmp({r.baseFile},r(i).baseFile);
 
 %out=max([r(mask).chunks.stop_time]); %matlab fail: Scalar index required for this type of multi-level indexing.
 r=[r(mask).chunks]; %might fail cuz of matlab's lame struct concatenation not able to merge fields unless they are exactly identical AND in the same order
-out=max([r.stop_time]);
+out=max([r.stop_time]); %need to consider stim times too to catch good end of pulses even if sorting didn't go that far
 end
 
 function makeEmptyTxtFile(f)

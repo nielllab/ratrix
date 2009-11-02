@@ -1,9 +1,6 @@
-function compilePhysData(fileNames,stimTimes,rec,stimType,targetBinsPerSec,force)
+function compilePhysData(fileNames,stimTimes,pulseTimes,rec,stimType,targetBinsPerSec,force)
 
 if false
-    fileNames.stimFile
-    fileNames.physFile
-    fileNames.pulseFile
     fileNames.pokesFile
     fileNames.spikesFile
     fileNames.wavemarkFile
@@ -21,12 +18,59 @@ end
 if ~fileGood
     fprintf('compiling %s\n',fileNames.targetFile);
     [pth name]=fileparts([fileparts(fileNames.targetFile) '.blah']);
+        
+    frameTimes=[];
+    stimTms=[];
+    phys=[];
+    tms=[];
+    stim=[];
     
-    [phys physTms]=checkForResampledMat('phys',pth,force,targetBinsPerSec);
+    if ~strcmp(stimType,'junk')
+        % [phys physTms]
+        [phys tms]=checkForResampledMat('phys',pth,force,targetBinsPerSec);
+        
+        [stim stimTms first step]=checkForResampledMat('stim',pth,force,targetBinsPerSec);
+        
+        len = min(length(stimTms),length(tms));
+        if length(tms)==length(stimTms)
+            %pass
+        elseif length(stimTms) - len == 1
+            stim=stim(1:end-1);
+            stimTms=stimTms(1:end-1);
+        elseif length(tms) - len == 1
+            phys=phys(1:end-1);
+            tms=tms(1:end-1);
+        else
+            error('bad stim/phys lengths')
+        end
+        
+        if ~all(abs(tms-stimTms < .05 *step))
+            error('stim/phys times don''t line up')
+        end
+        
+        try
+            [thesePulses, stimBreaks]=getPulses(fileNames.pulseFile,pulseTimes,rec,stimTimes,stimType);
+            fprintf('\t%g mins of frames (%g hz)\n',(frameTimes(end)-frameTimes(1))/60,length(frameTimes)/(frameTimes(end)-frameTimes(1)))
+
+            nominalSecondsPerFrame = median(diff(thesePulses));
+            if abs(1-nominalSecondsPerFrame/.01) > .1
+                error('bad frame times')
+            end
+        
+        
+        catch ex
+            getReport(ex)
+
+            if strcmp(ex.message,'num pulses error')
+                rethrow(ex)
+            end
+        end
+    end
     
-    [stim stimTms first step]=checkForResampledMat('stim',pth,force,targetBinsPerSec);
+end
 end
 
+function tmp
 if false
     fprintf('\ndoing waveforms\n')
     tic
@@ -34,100 +78,7 @@ if false
     toc
     
     if ~fileGood
-        
-        
-        
-        [phys physTms]=checkForCompiledMat(wd,'phys',file,forcePhysRecompile,contents,targetBinsPerSec);
-        
-        [stim stimTms first(fileNum) step(fileNum)]=checkForCompiledMat(wd,'stim',file,forceStimRecompile,contents,[]);
-        
-        pFile=sprintf('%s pulse.txt',file);
-        origPulses=load(fullfile(wd,pFile));
-        
-        cv=2;
-        edf1=0;
-        edf2=1;
-        tf=false;
-        C=doScan(fullfile(wd,pFile),'%% %[^%] %%',2,cv,edf1,edf2,tf);
-        
-        %pulses from ratrix changed over experiments:
-        %if VRG:
-        %pulses from vrg lag gun peaks by about 0.9ms  (may depend on curret photodiode location)
-        %
-        %if CRT:
-        %1) original: 2 pulses at end of stim comp -> flip -> single pulse -> gun (corresponding to this frame) arrives at photodiode about .9ms later
-        %2) improved: set bit -> flip -> unset bit
-        %
-        %if LED:
-        %no pulses
-        %
-        %also later added repeat boundary pulses
-        
-        dispType='CRT';
-        pulseProtocol='old';
-        scheduledFrames=false;
-        
-        if scheduledFrames
-            error('not implemented');
-        end
-        
-        switch dispType
-            case 'VRG'
-                %note that the logic here would have to be carefully reworked
-                %apparently vrg pulses lagged the gun peaks (verify this), whereas ratrix pulses precede them
-                error('not implemented')
-            case 'CRT'
-                switch pulseProtocol
-                    case 'old'
-                        
-                        
-                        % example pulse file:
-                        % 1   %CHANNEL%	%2%
-                        % 2   %Evt+-%
-                        % 3   %%
-                        % 4   %pulse%
-                        % 5
-                        % 6   %HIGH%
-                        % 7   1435.8024667
-                        % ... ...
-                        
-                        %above doScan w/2 header lines doesn't look right -- 4 or 5 works.
-                        %also verify line 2: "%Evt+-%"
-                        
-                        if ~strcmp(C{1},'HIGH')
-                            error('bad pulse parity')
-                        end
-                        
-                        dPulses=diff(origPulses)<.0004; %major problems if flip or stim comp is ever this fast, or if double pulses take longer than this
-                        stimComputed=[false; dPulses] & [false; false; dPulses(1:end-1)] & [false; false; false; dPulses(1:end-2)]; %pulses preceded by 3 quick events
-                        
-                        numFrames=floor(length(stimComputed)/6); %hacked in floor
-                        check=reshape(stimComputed,6,numFrames)==repmat([0 0 0 1 0 0]',1,numFrames);
-                        if numFrames~=round(numFrames) || ~all(check(:)) %can be quite confident if we pass this
-                            warning('bad pulses') %relaxing this - HACK!
-                        end
-                        
-                        pulses=origPulses([false; stimComputed(1:end-1)]); % take first down after the double to be the moment flip returns, gun will reach photodiode for this frame in about .9ms
-                        pulseOffsetPct = .65; %pct of a nominal frame duration that the gun LAGS the pulse (depends on pdiode location!)
-                    otherwise
-                        error('unknown protocol')
-                end
-            case 'LED'
-                error('not implemented')
-            otherwise
-                error('unknown dispType')
-        end
-        
-        binsPerSec=targetBinsPerSec;
-        
         for stimNum=1:numStims
-            thesePulses = pulses(pulses>stimTimes(stimNum,1,fileNum) & pulses<stimTimes(stimNum,2,fileNum));
-            
-            nominalSecondsPerFrame = median(diff(thesePulses));
-            if abs(1-nominalSecondsPerFrame/.01) > .1
-                error('bad frame times')
-            end
-            
             tMask=stimTms>stimTimes(stimNum,1,fileNum) & stimTms<stimTimes(stimNum,2,fileNum);
             stimT=stimTms(tMask); % the photo sample times
             tStim=normalize(stim(tMask)'); %photodiode measurements should be considered linear but not calibrated
@@ -834,8 +785,17 @@ else
         if chunkNum~=numChunks-1 || true %looks like last boundary includes one extra step?
             predictedEnd=predictedEnd-step;
         end
-        if out(2,1) ~= boundaries(chunkNum+1) || abs(out(2,end) - predictedEnd) > .2*step
-            error('time error')
+        
+        if out(2,1) ~= boundaries(chunkNum+1) || abs(out(2,end) - predictedEnd) > .25*step
+            if  abs(out(2,end) - predictedEnd) > .5*step
+                error('time error')
+            else
+                abs(out(2,end) - predictedEnd)/step
+                warning('time significantly off...') % note last ~1/3 of 03.25.09 d6 reports being off by 21.7% (both stim and phys, starting around chunk 33)?
+                % same with 04.23.09 4b (also starting around chunk 30)
+                % same with 04.24.09 91 (chunk 18)
+                % and 04.29.09 c2 (chunk 33)
+            end
         end
         
         if isempty(P) || isempty(Q)
@@ -921,7 +881,6 @@ else
     step= 1/(P/(Q*step/1000));
     
     save(mattedName,'data','first','step');
-    
 end
 
 ts=getTimes(first,step, length(data));
@@ -938,9 +897,7 @@ if checkPlot
     end
     keyboard
 end
-
 end
-
 
 function out=getTimes(first, step, len)
 out=cumsum([first step*ones(1,len-1)]);
@@ -1057,4 +1014,113 @@ gram(10*log10(abs(S)+eps),t,f,type); %this code for plotting log psd is from mat
 %    set(gca,'XTickLabel',{'-pi','-pi/2','0','pi/2','pi'})
 
 %    ytick
+end
+
+function [frameTimes, stimBreaks] = getPulses(pulseFile,pulseTimes,rec,stimTimes,stimType)
+origPulses = load(pulseFile);
+origPulses = origPulses(origPulses>=pulseTimes(1) & origPulses<=pulseTimes(2));
+frameTimes=[];
+stimBreaks=[];
+
+%pulses from ratrix changed over experiments:
+%if VRG:
+%pulses from vrg lag gun peaks by about 0.9ms  (may depend on curret photodiode location)
+%
+%if CRT:
+%1) original: 2 pulses at end of stim comp -> flip -> single pulse -> gun (corresponding to this frame) arrives at photodiode about .9ms later
+%2) improved: set bit -> flip -> unset bit
+%
+%if LED:
+%no pulses
+%
+%also later added repeat boundary pulses
+
+scheduledFrames=false; %how are we going to check for this?
+if scheduledFrames
+    error('not implemented');
+end
+
+switch rec.display_type
+    case 'vrg'
+        %note that the logic here would have to be carefully reworked
+        %apparently vrg pulses lagged the gun peaks (verify this), whereas ratrix pulses precede them
+        error('not implemented')
+    case 'crt'
+        switch rec.pulse_type
+            case 'double'
+                if ~all(strcmp({rec.indexPulseChan,rec.phasePulseChan,rec.stimPulseChan},'none'))
+                    error('inconsistent pulse type')
+                end
+                
+                % example pulse file:
+                % 1   %CHANNEL%	%2%
+                % 2   %Evt+-%
+                % 3   %%
+                % 4   %pulse%
+                % 5
+                % 6   %HIGH%
+                % 7   1435.8024667
+                % ... ...
+                
+                               
+%               C=doScan(file,format,headerlines,chanVerify,instancesVerify,fieldsVerify,rep)
+                C=doScan(pulseFile,'%% %[^%] %%',5,rec.framePulseChan,1,1,false);
+                
+                if ~strcmp(C{1},'HIGH')
+                    error('bad pulse parity')
+                end
+                
+                C=doScan(pulseFile,'%% %[^%] %%',1,rec.framePulseChan,1,1,false);
+                
+                if ~strcmp(C{1},'Evt+-')
+                    error('wrong channel type')
+                end
+                
+                numFrames=length(origPulses)/6;
+                pat=logical([0 0 0 0 1 0])';
+                frameTimes=origPulses([repmat(pat,floor(numFrames),1) ; pat(1:length(pat)*(numFrames-floor(numFrames)))]);
+                
+                if numFrames~=round(numFrames) && false %disable cuz our pulse txt file extractor cuts off pulses at the end of a (sorting) chunk boundary 
+                    %even if a stim goes longer than that -- and we need the end of the stim to catch the right end pulses
+                    %see extractPhysThenAnalyze.m/getLastStop()
+                    numFrames
+                    
+                    figure
+                    plot(origPulses,zeros(1,length(origPulses)),'kx')
+                    hold on
+                    plot(frameTimes,zeros(1,length(frameTimes)),'bo')
+                    
+                    title(sprintf('numFrames error: %g (should be     xxxx     ox   ) in %s (%g - %g) %s:%s',numFrames,stimType,stimTimes(1),stimTimes(end),[rec.rat_id ' ' datestr(rec.date)],rec.baseFile))
+                    error('num pulses error') 
+                end
+                
+                if false %this method doesn't work cuz sometimes there is a 5ms gap BETWEEN the fast double pulses!
+                    dPulses=diff(origPulses)<.0007; %.0004; %major problems if flip or stim comp is ever this fast, or if double pulses take longer than this
+                    stimComputed=[false; dPulses] & [false; false; dPulses(1:end-1)] & [false; false; false; dPulses(1:end-2)]; %pulses preceded by 3 quick events
+                    
+                    frameTimes=origPulses([false; stimComputed(1:end-1)]); % take first down after the double to be the moment flip returns, gun will reach photodiode for this frame in about .9ms
+                    
+                    check=reshape(stimComputed,6,numFrames)==repmat([0 0 0 1 0 0]',1,numFrames);
+                    if ~all(check(:)) %can be quite confident if we pass this
+                        tmp=origPulses(find(check(:)~=1))
+                        figure
+                        plot(origPulses,zeros(1,length(origPulses)),'kx')
+                        hold on
+                        plot(repmat(frameTimes',2,1),repmat(.5*[-1; 1],1,length(frameTimes)),'b')
+                        plot(repmat(tmp',2,1),repmat([-1; 1],1,length(tmp)),'r')
+                        title('pulse errors')
+                        error('pulse problem')
+                    end
+                end
+                
+                frameTimes=frameTimes(frameTimes >= stimTimes(1) & frameTimes <= stimTimes(2));
+                pulseOffsetPct = .65; %pct of a nominal frame duration that the gun LAGS the pulse (depends on pdiode location!)
+            otherwise
+                error('unknown protocol')
+        end
+    case 'led'
+        error('not implemented')
+    otherwise
+        error('unknown dispType')
+end
 end

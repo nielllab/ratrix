@@ -248,30 +248,6 @@ end
 delete(scriptfile);
 end
 
-function resetDir(d)
-a=false;
-while ~a %ah, windows...
-    [a b c]=rmdir(d,'s');
-    if ~a
-        if ~strcmp(c,'MATLAB:RMDIR:NotADirectory')
-            {b,c,d}
-            %getting     'No directories were removed.'    'MATLAB:RMDIR:NoDirectoriesRemoved'
-            %might be if someone is looking at dir remotely...
-            WaitSecs(.1);
-        else
-            a=true;
-        end
-    end
-end
-
-[a b c]=mkdir(d);
-if ~a
-    b
-    c
-    error('couldn''t mkdir')
-end
-end
-
 function out=doubleChar(in,cs)
 out=char([]);
 for i=in

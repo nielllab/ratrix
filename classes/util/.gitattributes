@@ -152,3 +152,4 @@ analysis/grouper.m -text
 analysis/createDisplayStrs.m -text
 infrastructure/mountOSX.m -text
 matlaby/almostEqual.m -text
+matlaby/resetDir.m -text

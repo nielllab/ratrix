@@ -18,53 +18,29 @@ end
 if ~fileGood
     fprintf('compiling %s\n',fileNames.targetFile);
     [pth name]=fileparts([fileparts(fileNames.targetFile) '.blah']);
-        
-    frameTimes=[];
-    stimTms=[];
-    phys=[];
-    tms=[];
-    stim=[];
+    prefix=fullfile(pth,name);
+    resetDir(prefix);
+    
+    [stim stimT phys physT] = getStimAndPhys(stimType,pth,force,targetBinsPerSec,stimTimes);
     
     if ~strcmp(stimType,'junk')
-        % [phys physTms]
-        [phys tms]=checkForResampledMat('phys',pth,force,targetBinsPerSec);
         
-        [stim stimTms first step]=checkForResampledMat('stim',pth,force,targetBinsPerSec);
+        %         try
+        [thesePulses,stimBreaks,nominalSecondsPerFrame,stim,stimT,phys,physT,origPulses]=getPulses(fileNames.pulseFile,pulseTimes,rec,stimType,stim,stimT,phys,physT);
         
-        len = min(length(stimTms),length(tms));
-        if length(tms)==length(stimTms)
-            %pass
-        elseif length(stimTms) - len == 1
-            stim=stim(1:end-1);
-            stimTms=stimTms(1:end-1);
-        elseif length(tms) - len == 1
-            phys=phys(1:end-1);
-            tms=tms(1:end-1);
-        else
-            error('bad stim/phys lengths')
-        end
+        [tStim, stimVals, expandedStim, binVals, expandedBins, binT]=doStimFrames(targetBinsPerSec,thesePulses,stim,stimT,prefix,name,nominalSecondsPerFrame);
         
-        if ~all(abs(tms-stimTms < .05 *step))
-            error('stim/phys times don''t line up')
-        end
+        frameDropReport(nominalSecondsPerFrame,thesePulses,prefix,name,stimT,tStim,expandedStim,expandedBins,origPulses);
         
-        try
-            [thesePulses, stimBreaks]=getPulses(fileNames.pulseFile,pulseTimes,rec,stimTimes,stimType);
-            fprintf('\t%g mins of frames (%g hz)\n',(frameTimes(end)-frameTimes(1))/60,length(frameTimes)/(frameTimes(end)-frameTimes(1)))
-
-            nominalSecondsPerFrame = median(diff(thesePulses));
-            if abs(1-nominalSecondsPerFrame/.01) > .1
-                error('bad frame times')
-            end
-        
-        
-        catch ex
-            getReport(ex)
-
-            if strcmp(ex.message,'num pulses error')
-                rethrow(ex)
-            end
-        end
+        %         catch ex
+        %             getReport(ex)
+        %
+        %             if strcmp(ex.message,'num pulses error')
+        %                 rethrow(ex)
+        %             end
+        %         end
+    else
+        thesePulses=[];
     end
     
 end
@@ -79,81 +55,6 @@ if false
     
     if ~fileGood
         for stimNum=1:numStims
-            tMask=stimTms>stimTimes(stimNum,1,fileNum) & stimTms<stimTimes(stimNum,2,fileNum);
-            stimT=stimTms(tMask); % the photo sample times
-            tStim=normalize(stim(tMask)'); %photodiode measurements should be considered linear but not calibrated
-            
-            boundaries=[thesePulses;thesePulses(end)+nominalSecondsPerFrame]+pulseOffsetPct*nominalSecondsPerFrame;
-            [stimVals expandedStim]=markSample(boundaries,first(fileNum),step(fileNum),tStim,'frames');
-            boundaries = boundaries(1:end-1);
-            binT=boundaries(1): 1/binsPerSec : boundaries(end);
-            [binVals expandedBins]=markSample(binT,first(fileNum),step(fileNum),tStim,'bins');
-            binT = binT(1:end-1);
-            
-            f=figure;
-            subplot(3,1,1)
-            [pHist pBins]=hist(tStim,100);
-            if pHist(end)>pHist(end-1)
-                error('photodiode may have clipped')
-            end
-            semilogy(pBins,pHist)
-            title('photo dist -- any clipping?')
-            
-            subplot(3,1,2)
-            doHist(stimVals);
-            title(sprintf('frame distribution (median hz: %g)',1/nominalSecondsPerFrame));
-            
-            subplot(3,1,3)
-            doHist(binVals);
-            title(sprintf('bins of %g ms',1000/binsPerSec))
-            
-            saveas(f,fullfile(wd,sprintf('%s stim dist.fig',file)))
-            
-            f=figure;
-            contextFrames=25;
-            contextSecs=contextFrames*nominalSecondsPerFrame;
-            
-            drops=[false; abs(1-diff(thesePulses)/nominalSecondsPerFrame)>.2];
-            numDrops=sum(drops);
-            drops([1 end])=1;
-            dropTimes=thesePulses(drops);
-            dropWins={};
-            for dropNum=1:length(dropTimes)
-                if isempty(dropWins) || dropTimes(dropNum)>dropWins{end}(1)+contextSecs
-                    dropWins{end+1}=dropTimes(dropNum);
-                else
-                    dropWins{end}(end+1)=dropTimes(dropNum);
-                end
-            end
-            dropTimes=dropTimes(2:end-1);
-            
-            for winNum=1:length(dropWins)
-                subplot(length(dropWins),1,winNum)
-                
-                tRange=dropWins{winNum}(1)+contextSecs*[-1 1];
-                tInds=stimT<tRange(2) & stimT>tRange(1);
-                
-                nPlot(stimT(tInds),expandedStim(tInds),'r');
-                hold on
-                nPlot(stimT(tInds),expandedBins(tInds),'g');
-                nPlot(stimT(tInds),tStim(tInds),'b');
-                plot(origPulses(origPulses<tRange(2) & origPulses>tRange(1)),.5,'kx');
-                plot(dropTimes,.5,'ro')
-                
-                switch winNum
-                    case 1
-                        legend({'stim','bins','photo','pulse'})
-                        title('first frame')
-                    case length(dropWins)
-                        title('last frame')
-                    otherwise
-                        title(sprintf('%g total drops',numDrops));
-                end
-                xlim(tRange)
-                ylim([0 1.1])
-            end
-            
-            saveas(f,fullfile(wd,sprintf('%s drop report.fig',file)))
             
             if all(cellfun(@isempty,{pulsesPerRepeat,numRepeats,uniquesEvery}))
                 uniquesEvery(stimNum) = 0;
@@ -619,19 +520,41 @@ if false
 end
 end
 
-function [vals expanded]=markSample(marks,begin,step,stim,str)
-fprintf(['resampling ' str '... '])
-inds=round((marks-begin)/step);
+function [vals expanded]=markSample(marks,times,stim,str)
+step=mean(diff(times));
+marks=marks(marks>times(1));
+
+inds=floor((marks-times(1))/step)+1;
+inds=inds(inds<=length(stim));
 
 ex=zeros(length(stim),1);
 ex(inds)=1;
 
+if false
+    figure
+    subplot(2,1,1)
+    plot(marks)
+    hold on
+    plot(times,'r')
+    subplot(2,1,2)
+    plot(ex)
+end
+
+fprintf(['accumulating ' str '... '])
 subs=cumsum(ex)+1;
 vals = accumarray(subs,stim);
-vals([1 end])=nan;
 expanded=vals(subs);
-vals=vals(2:end-1);
+
 fprintf('done\n')
+
+if false
+    figure
+    subplot(2,1,1)
+    plot(vals)
+    subplot(2,1,2)
+    plot(expanded)
+    keyboard
+end
 end
 
 function doHist(x)
@@ -642,6 +565,7 @@ function doHist(x)
 
 semilogy(bins,counts,'b');
 hold on
+
 gbins=linspace(-.5*max(bins),max(bins),1000);
 gaussfit=normpdf(gbins,mu,sig);
 gaussfit=max(counts)*gaussfit/max(gaussfit);
@@ -1016,11 +940,12 @@ gram(10*log10(abs(S)+eps),t,f,type); %this code for plotting log psd is from mat
 %    ytick
 end
 
-function [frameTimes, stimBreaks] = getPulses(pulseFile,pulseTimes,rec,stimTimes,stimType)
+function [frameTimes, stimBreaks, nominalSecondsPerFrame,stim,stimT,phys,physT,origPulses] = getPulses(pulseFile,pulseTimes,rec,stimType,stim,stimT,phys,physT)
 origPulses = load(pulseFile);
 origPulses = origPulses(origPulses>=pulseTimes(1) & origPulses<=pulseTimes(2));
 frameTimes=[];
 stimBreaks=[];
+pulseOffsetPct=[];
 
 %pulses from ratrix changed over experiments:
 %if VRG:
@@ -1062,8 +987,8 @@ switch rec.display_type
                 % 7   1435.8024667
                 % ... ...
                 
-                               
-%               C=doScan(file,format,headerlines,chanVerify,instancesVerify,fieldsVerify,rep)
+                
+                % doScan(file,format,headerlines,chanVerify,instancesVerify,fieldsVerify,rep)
                 C=doScan(pulseFile,'%% %[^%] %%',5,rec.framePulseChan,1,1,false);
                 
                 if ~strcmp(C{1},'HIGH')
@@ -1080,7 +1005,7 @@ switch rec.display_type
                 pat=logical([0 0 0 0 1 0])';
                 frameTimes=origPulses([repmat(pat,floor(numFrames),1) ; pat(1:length(pat)*(numFrames-floor(numFrames)))]);
                 
-                if numFrames~=round(numFrames) && false %disable cuz our pulse txt file extractor cuts off pulses at the end of a (sorting) chunk boundary 
+                if numFrames~=round(numFrames) && false %disable cuz our pulse txt file extractor cuts off pulses at the end of a (sorting) chunk boundary
                     %even if a stim goes longer than that -- and we need the end of the stim to catch the right end pulses
                     %see extractPhysThenAnalyze.m/getLastStop()
                     numFrames
@@ -1090,8 +1015,8 @@ switch rec.display_type
                     hold on
                     plot(frameTimes,zeros(1,length(frameTimes)),'bo')
                     
-                    title(sprintf('numFrames error: %g (should be     xxxx     ox   ) in %s (%g - %g) %s:%s',numFrames,stimType,stimTimes(1),stimTimes(end),[rec.rat_id ' ' datestr(rec.date)],rec.baseFile))
-                    error('num pulses error') 
+                    title(sprintf('numFrames error: %g (should be     xxxx     ox   ) in %s (%g - %g) %s:%s',numFrames,stimType,stimT(1),stimT(end),[rec.rat_id ' ' datestr(rec.date)],rec.baseFile))
+                    error('num pulses error')
                 end
                 
                 if false %this method doesn't work cuz sometimes there is a 5ms gap BETWEEN the fast double pulses!
@@ -1113,8 +1038,26 @@ switch rec.display_type
                     end
                 end
                 
-                frameTimes=frameTimes(frameTimes >= stimTimes(1) & frameTimes <= stimTimes(2));
+                cutFrameTimes=frameTimes(frameTimes >= stimT(1) & frameTimes < stimT(end));
+                
+                nominalSecondsPerFrame = median(diff(cutFrameTimes));
+                if abs(1-nominalSecondsPerFrame/.01) > .1
+                    error('bad frame times')
+                end
+                
                 pulseOffsetPct = .65; %pct of a nominal frame duration that the gun LAGS the pulse (depends on pdiode location!)
+                
+                frameTimes=frameTimes+pulseOffsetPct*nominalSecondsPerFrame;
+                origPulses=origPulses+pulseOffsetPct*nominalSecondsPerFrame;
+                
+                aboveInd=find(frameTimes>=stimT(1),1,'first');
+                belowInd=find(frameTimes<=stimT(end),1,'last');
+                frameTimes=frameTimes(aboveInd:belowInd);
+                
+                [stimT,stim]=chop(stimT,stim,[frameTimes(1),frameTimes(end)]);
+                [physT,phys]=chop(physT,phys,[frameTimes(1),frameTimes(end)]);
+                
+                fprintf('\t%g mins of frames (%g hz)\n',(frameTimes(end)-frameTimes(1))/60,1/nominalSecondsPerFrame)
             otherwise
                 error('unknown protocol')
         end
@@ -1122,5 +1065,138 @@ switch rec.display_type
         error('not implemented')
     otherwise
         error('unknown dispType')
+end
+end
+
+function [times,vals]=chop(times,vals,lims)
+tMask=times>=lims(1) & times<lims(end);
+times=times(tMask);
+vals=vals(tMask);
+end
+
+function [stim stimT phys physT] = getStimAndPhys(stimType,pth,force,targetBinsPerSec,stimTimes)
+% [phys physTms]
+[phys physT]=checkForResampledMat('phys',pth,force,targetBinsPerSec);
+
+if ~strcmp(stimType,'junk')
+    % [stim stimT first step]
+    [stim stimT]=checkForResampledMat('stim',pth,force,targetBinsPerSec);
+    
+    minT = max([physT(1), stimT(1), stimTimes(1)]);
+    maxT = min([physT(end), stimT(end), stimTimes(2)]);
+    
+    [stimT,stim]=chop(stimT,stim,[minT,maxT]);
+    [physT,phys]=chop(physT,phys,[minT,maxT]);
+    
+    if false % this isn't necessary i don't think
+        len = min(length(stimT),length(physT));
+        if length(physT)==length(stimT)
+            %pass
+        elseif length(stimT) - len == 1
+            stim=stim(1:end-1);
+            stimT=stimT(1:end-1);
+        elseif length(physT) - len == 1
+            phys=phys(1:end-1);
+            physT=physT(1:end-1);
+        else
+            error('bad stim/phys lengths')
+        end
+        
+        step=median(diff(stimT));
+        
+        if ~all(abs(physT-stimT < .05 *step))
+            error('stim/phys times don''t line up')
+        end
+    end
+else
+    stimT=[];
+    stim=[];
+end
+end
+
+function [tStim,stimVals, expandedStim, binVals, expandedBins, binT]=doStimFrames(binsPerSec,thesePulses,stim,stimT,pth,name,nominalSecondsPerFrame)
+clipS=[];
+tStim=normalize(stim'); %photodiode measurements should be considered linear but not calibrated
+
+[stimVals expandedStim]=markSample(thesePulses,stimT,tStim,'frames');
+thesePulses = thesePulses(1:end-1);
+
+binT=thesePulses(1): 1/binsPerSec : thesePulses(end);
+[binVals expandedBins]=markSample(binT,stimT,tStim,'bins');
+binT = binT(1:end-1);
+
+f=figure;
+subplot(3,1,1)
+[pHist pBins]=hist(tStim,100);
+if pHist(end)>pHist(end-1)
+    warning('photodiode may have clipped')
+    clipS='(possible photodiode clip).';
+end
+semilogy(pBins,pHist)
+title(['photo dist -- any clipping?  ' clipS])
+
+subplot(3,1,2)
+doHist(stimVals);
+title(sprintf('frame distribution (median hz: %g)',1/nominalSecondsPerFrame));
+
+subplot(3,1,3)
+doHist(binVals);
+title(sprintf('bins of %g ms',1000/binsPerSec))
+
+saveas(f,fullfile(pth,['stim dist.' clipS name '.fig']));
+close(f)
+end
+
+function frameDropReport(nominalSecondsPerFrame,thesePulses,pth,name,stimT,tStim,expandedStim,expandedBins,origPulses)
+contextFrames=25;
+maxRowsPerFig=7;
+contextSecs=contextFrames*nominalSecondsPerFrame;
+
+drops=[false; abs(1-diff(thesePulses)/nominalSecondsPerFrame)>.2];
+numDrops=sum(drops);
+drops([1 end])=1;
+dropTimes=thesePulses(drops);
+dropWins={};
+for dropNum=1:length(dropTimes)
+    if isempty(dropWins) || dropTimes(dropNum)>dropWins{end}(1)+contextSecs
+        dropWins{end+1}=dropTimes(dropNum);
+    else
+        dropWins{end}(end+1)=dropTimes(dropNum);
+    end
+end
+dropTimes=dropTimes(2:end-1);
+
+winNum=0;
+numFigs=ceil(length(dropWins)/maxRowsPerFig);
+for fig=1:numFigs
+    f=figure;
+    for winNum=winNum+1:min(length(dropWins),winNum+maxRowsPerFig)
+        subplot(maxRowsPerFig,1,mod(winNum-1,maxRowsPerFig)+1)
+        
+        tRange=dropWins{winNum}(1)+contextSecs*[-1 1];
+        tInds=stimT<tRange(2) & stimT>tRange(1);
+        
+        nPlot(stimT(tInds),expandedStim(tInds),'r');
+        hold on
+        nPlot(stimT(tInds),tStim(tInds),'b');
+        nPlot(stimT(tInds),expandedBins(tInds),'g');
+        plot(origPulses(origPulses<tRange(2) & origPulses>tRange(1)),.5,'kx');
+        plot(thesePulses(thesePulses>=tRange(1) & thesePulses<=tRange(2)),.5,'bo')
+        plot(dropTimes,.5,'ro')
+        
+        switch winNum
+            case 1
+                legend({'stim','photo','bins','pulse'})
+                title(sprintf('first frame - %g total drops',numDrops))
+            case length(dropWins)
+                title('last frame')
+            otherwise
+                title(sprintf('%g total drops',numDrops));
+        end
+        xlim(tRange)
+        ylim([0 1.1])
+    end
+    saveas(f,fullfile(pth,['drop report.' sprintf('(%d of %d - %d total drops).',fig,numFigs,numDrops) name '.fig']));
+    close(f)
 end
 end

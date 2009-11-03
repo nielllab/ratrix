@@ -57,11 +57,13 @@ for i=1:length(filter)
                 d=removeSomeSmalls(d,d.flankerContrast~=0.4);
                 %case 'X.4.6' %used by 137 136
                 %    d=removeSomeSmalls(d,~(d.flankerContrast==0.4 & abs(d.targetContrast-0.5)<10^-9));
-            case {'2','9','11','12','13','14','15','16'}
+            case {'2','9','11','12','13','14','15','16','17'}
                 step=str2num(filter{i}.type);
                 d=removeSomeSmalls(d,d.step~=step);
             case 'noFlanks'
                 d=removeSomeSmalls(d,d.flankerContrast~=0);
+            case 'flankerContrast'
+                 d=removeSomeSmalls(d,d.flankerContrast~=filter{i}.contrast);
             case 'preFlankerStep'
                 firstFlankerStep=d.step(min(find(d.flankerContrast~=0 & ~isnan(d.flankerContrast))));
                 d=removeSomeSmalls(d,d.step~=firstFlankerStep-1);  %only the step before it

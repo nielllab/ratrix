@@ -30,6 +30,8 @@ else
     repetition=ones(size(frame));
 end
 
+% on is inclusive but off is exclusive!  ... compbatible with
+% behavior that uses createDiscriminandumContextOnOffMovie
 targetIsOn=(effectiveFrame>=s.targetOnOff(1) & effectiveFrame<s.targetOnOff(2));
 flankerIsOn=(effectiveFrame>=s.flankerOnOff(1) & effectiveFrame<s.flankerOnOff(2));
 

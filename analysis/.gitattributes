@@ -430,3 +430,7 @@ anatomy/plotInBregmaCoordinates.m -text
 anatomy/getV1Coordinates.m -text
 anatomy/getPositionInBregmaCoordinates.m -text
 pmm/PatchVideo.m -text
+pmm/special138_139data.m -text
+pmm/qIsThereAnEffectOfDelay.m -text
+pmm/staticPopulationResponseSpeculation.m -text
+pmm/peekAtBlocked.m -text

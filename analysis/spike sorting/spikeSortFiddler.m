@@ -95,85 +95,85 @@ end
 
 
 %subjectID = 'demo1'; cellBoundary={'physLog',{'06.03.2009','all','last'}};
-%subjectID = '131';cellBoundary={'trialRange',[7]} % TRF
-%subjectID = '131';cellBoundary={'trialRange',[54 ]} % binSTA at 17 inches from screen
+%subjectID = '131';cellBoundary={'trialRange',[7]}; % TRF
+%subjectID = '131';cellBoundary={'trialRange',[54 ]}; % binSTA at 17 inches from screen
 subjectID = '131';cellBoundary={'trialRange',[54 131]}; % binSTA at 17 inches from screen
 %subjectID = '131dev3';cellBoundary={'trialRange',[6 22]}; % sparse grid [12 x 16]
 subjectID = '131dev4';cellBoundary={'trialRange',[74 80]}; % sparse grid [12 x 16]
 subjectID = '131dev4';cellBoundary={'trialRange',[75 ]}; % sparse grid%[12 x 16]
 %subjectID = '131';cellBoundary={'trialRange',[243 350 ]}; % sparse grid%[12 x 16]
 subjectID = '303';cellBoundary={'trialRange',[1 27 ]}; % all
-subjectID = '303';cellBoundary={'trialRange',[7]} % sparse grid%[12 x 16]
-subjectID = 'test1';cellBoundary={'trialRange',[116 Inf]} % sparse grid%[12 x 16]
+subjectID = '303';cellBoundary={'trialRange',[7]}; % sparse grid%[12 x 16]
+subjectID = 'test1';cellBoundary={'trialRange',[116 Inf]}; % sparse grid%[12 x 16]
 
-subjectID = '262';cellBoundary={'trialRange',[34 41]} % ffgwn - has temporal STA
-subjectID = '262';cellBoundary={'trialRange',[42 44]} % bin - has no spatial
-subjectID = '262';cellBoundary={'trialRange',[54]} % bars ... failing do to ISI too small
-subjectID = '262';cellBoundary={'trialRange',[70]} % gratingsSF
+subjectID = '262';cellBoundary={'trialRange',[34 41]}; % ffgwn - has temporal STA
+subjectID = '262';cellBoundary={'trialRange',[42 44]}; % bin - has no spatial
+subjectID = '262';cellBoundary={'trialRange',[54]}; % bars ... failing do to ISI too small
+subjectID = '262';cellBoundary={'trialRange',[70]}; % gratingsSF
 %subjectID = '262';cellBoundary={'trialRange',[71]} % gratingsOR
-subjectID = '262';cellBoundary={'trialRange',[75 85]} % spatial binary
-subjectID = '262';cellBoundary={'trialRange',[75 85]} % spatial binary
-%subjectID = '262';cellBoundary={'trialRange',[95 96]} % rat closer
-% subjectID = '262';cellBoundary={'trialRange',[105 108]} % ffwgn
-% subjectID = '262';cellBoundary={'trialRange',[111 115 ]} % ffgwn after tuning out high freq "cell"
- subjectID = '262';cellBoundary={'trialRange',[118 123]} % spatial binary
+subjectID = '262';cellBoundary={'trialRange',[75 85]}; % spatial binary
+subjectID = '262';cellBoundary={'trialRange',[75 85]}; % spatial binary
+%subjectID = '262';cellBoundary={'trialRange',[95 96]}; % rat closer
+% subjectID = '262';cellBoundary={'trialRange',[105 108]}; % ffwgn
+% subjectID = '262';cellBoundary={'trialRange',[111 115 ]}; % ffgwn after tuning out high freq "cell"
+ subjectID = '262';cellBoundary={'trialRange',[118 123]}; % spatial binary
 % subjectID = '262';cellBoundary={'trialRange',[126]} % ffwgn
-subjectID = '262';cellBoundary={'trialRange',[128 149]} % spatial binary
-% subjectID = '262';cellBoundary={'trialRange',[157]} % flankers, the target and bottom flanker are on the screen
-% subjectID = '262';cellBoundary={'trialRange',[159]} % SF
-% subjectID = '262';cellBoundary={'trialRange',[172]} % flankers, 5 lambda
-% subjectID = 'test1';cellBoundary={'trialRange',[145]} % test if flankers drop frames (it says they drop every one, but parens are 0) ie.  drops: high(0)
-% subjectID = 'test1';cellBoundary={'trialRange',[155]} % test if flankers drop frames (it says they drop ~ every 10sec, but parens are 0) ie.  drops: 27(0)
-% subjectID = 'test1';cellBoundary={'trialRange',[162]} % test if flankers drop frames (some at beginning) ie.  drops: 3(0)
-subjectID = 'test1';cellBoundary={'trialRange',[167]} % test if flankers drop frames (some at beginning) ie.  drops: 3(0)
-subjectID = 'test1';cellBoundary={'trialRange',[178 180]} % spatial test
+subjectID = '262';cellBoundary={'trialRange',[128 149]}; % spatial binary
+% subjectID = '262';cellBoundary={'trialRange',[157]}; % flankers, the target and bottom flanker are on the screen
+% subjectID = '262';cellBoundary={'trialRange',[159]}; % SF
+% subjectID = '262';cellBoundary={'trialRange',[172]}; % flankers, 5 lambda
+% subjectID = 'test1';cellBoundary={'trialRange',[145]}; % test if flankers drop frames (it says they drop every one, but parens are 0) ie.  drops: high(0)
+% subjectID = 'test1';cellBoundary={'trialRange',[155]}; % test if flankers drop frames (it says they drop ~ every 10sec, but parens are 0) ie.  drops: 27(0)
+% subjectID = 'test1';cellBoundary={'trialRange',[162]}; % test if flankers drop frames (some at beginning) ie.  drops: 3(0)
+subjectID = 'test1';cellBoundary={'trialRange',[167]}; % test if flankers drop frames (some at beginning) ie.  drops: 3(0)
+subjectID = 'test1';cellBoundary={'trialRange',[178 180]}; % spatial test
 
-subjectID = '261';cellBoundary={'trialRange',[25]} % 
-subjectID = '261';cellBoundary={'trialRange',[40]} % sf
-subjectID = '261';cellBoundary={'trialRange',[42]} % sparse brighter grid
-subjectID = '261';cellBoundary={'trialRange',[43]} % horiz bars
-%subjectID = '261';cellBoundary={'trialRange',[44]} % vert bars
-%subjectID = '261';cellBoundary={'trialRange',[41]} % orient
-subjectID = '261';cellBoundary={'trialRange',[54 60]} % binary localized
-subjectID = '261';cellBoundary={'trialRange',[65]} % annuli ;  v1
-subjectID = '261';cellBoundary={'trialRange',[118 121]} % ffgwn ; 
-subjectID = '261';cellBoundary={'trialRange',[127 128]} % bars ;   move
-subjectID = '261';cellBoundary={'trialRange',[132 140]} % binary ; 
-subjectID = '261';cellBoundary={'trialRange',[142 143]} % binary ; 
-subjectID = '261';cellBoundary={'trialRange',[155 159]} % h-bar ; 
-subjectID = '261';cellBoundary={'trialRange',[160 164]} % v-bar ; 
-subjectID = '261';cellBoundary={'trialRange',[166 169]} % bar ; 
-subjectID = '261';cellBoundary={'trialRange',[171 177]} % bar ; 
-subjectID = '261';cellBoundary={'trialRange',[181 185]} % ffgwn ;   NEXT CELL, same penetration
-subjectID = '261';cellBoundary={'trialRange',[187 188]} % ffgwn ;   
-subjectID = '261';cellBoundary={'trialRange',[197 200]} % ffgwn ;  
-subjectID = '261';cellBoundary={'trialRange',[205]} % gratings ;   
-subjectID = '261';cellBoundary={'trialRange',[228]} % sparse grid  ;   
-subjectID = '261';cellBoundary={'trialRange',[243 250]} % ffgwn  ;   NEXT CELL; same penetration
-subjectID = '261';cellBoundary={'trialRange',[257 259]} % binary white noise; 
-subjectID = '261';cellBoundary={'trialRange',[257 261]} % binary white noise; 
-subjectID = '261';cellBoundary={'trialRange',[262]} % spatial frequency gratings; 
-subjectID = '261';cellBoundary={'trialRange',[271 272]} % ffgwn; 
-subjectID = '261';cellBoundary={'trialRange',[288 293]} % ffgwn NEW cell
-subjectID = '261';cellBoundary={'trialRange',[294]} % spat freq gratings
-subjectID = '261';cellBoundary={'trialRange',[295]} % orientation
-subjectID = '261';cellBoundary={'trialRange',[296]} % binary flicker
-subjectID = '261';cellBoundary={'trialRange',[302 304]} % bars
-subjectID = '261';cellBoundary={'trialRange',[324 332]} % [324 338?] bin grid, 3x4
-%subjectID = '261';cellBoundary={'trialRange',[341 346]} % bin grid, 6x8, 347 has issues sorting
-subjectID = '261';cellBoundary={'trialRange',[351 359]} % bin grid, 6x8
-subjectID = '261';cellBoundary={'trialRange',[365]} % bin grid, 6x8
-subjectID = '261';cellBoundary={'trialRange',[366 369]} % bars
-subjectID = '261';cellBoundary={'trialRange',[370 372]} % bars
-subjectID = '261';cellBoundary={'trialRange',[377 378]} % more bars, moved rat
-subjectID = '261';cellBoundary={'trialRange',[380 383]} % more bars, 
+subjectID = '261';cellBoundary={'trialRange',[25]}; % 
+subjectID = '261';cellBoundary={'trialRange',[40]}; % sf
+subjectID = '261';cellBoundary={'trialRange',[42]}; % sparse brighter grid
+subjectID = '261';cellBoundary={'trialRange',[43]}; % horiz bars
+subjectID = '261';cellBoundary={'trialRange',[44]}; % vert bars
+subjectID = '261';cellBoundary={'trialRange',[41]}; % orient
+% subjectID = '261';cellBoundary={'trialRange',[54 60]}; % binary localized
+% subjectID = '261';cellBoundary={'trialRange',[65]}; % annuli ;  v1
+% subjectID = '261';cellBoundary={'trialRange',[118 121]}; % ffgwn ; 
+% subjectID = '261';cellBoundary={'trialRange',[127 128]}; % bars ;   move
+% subjectID = '261';cellBoundary={'trialRange',[132 140]}; % binary ; 
+% subjectID = '261';cellBoundary={'trialRange',[142 143]} % binary ; 
+% subjectID = '261';cellBoundary={'trialRange',[155 159]} % h-bar ; 
+% subjectID = '261';cellBoundary={'trialRange',[160 164]} % v-bar ; 
+% subjectID = '261';cellBoundary={'trialRange',[166 169]} % bar ; 
+% subjectID = '261';cellBoundary={'trialRange',[171 177]} % bar ; 
+% subjectID = '261';cellBoundary={'trialRange',[181 185]} % ffgwn ;   NEXT CELL, same penetration
+% subjectID = '261';cellBoundary={'trialRange',[187 188]}; % ffgwn ;   
+% subjectID = '261';cellBoundary={'trialRange',[197 200]}; % ffgwn ;  
+% subjectID = '261';cellBoundary={'trialRange',[205]}; % gratings ;   
+% subjectID = '261';cellBoundary={'trialRange',[228]}; % sparse grid  ;   
+% subjectID = '261';cellBoundary={'trialRange',[243 250]}; % ffgwn  ;   NEXT CELL; same penetration
+% subjectID = '261';cellBoundary={'trialRange',[257 259]}; % binary white noise; 
+% subjectID = '261';cellBoundary={'trialRange',[257 261]}; % binary white noise; 
+% subjectID = '261';cellBoundary={'trialRange',[262]}; % spatial frequency gratings; 
+% subjectID = '261';cellBoundary={'trialRange',[271 272]}; % ffgwn; 
+% subjectID = '261';cellBoundary={'trialRange',[288 293]}; % ffgwn NEW cell
+% subjectID = '261';cellBoundary={'trialRange',[294]}; % spat freq gratings
+% subjectID = '261';cellBoundary={'trialRange',[295]}; % orientation
+% subjectID = '261';cellBoundary={'trialRange',[296]}; % binary flicker
+% subjectID = '261';cellBoundary={'trialRange',[302 304]}; % bars
+% subjectID = '261';cellBoundary={'trialRange',[324 332]}; % [324 338?] bin grid, 3x4
+% %subjectID = '261';cellBoundary={'trialRange',[341 346]}; % bin grid, 6x8, 347 has issues sorting
+% subjectID = '261';cellBoundary={'trialRange',[351 359]}; % bin grid, 6x8
+% subjectID = '261';cellBoundary={'trialRange',[365]}; % bin grid, 6x8
+% subjectID = '261';cellBoundary={'trialRange',[366 369]}; % bars
+% subjectID = '261';cellBoundary={'trialRange',[370 372]}; % bars
+% subjectID = '261';cellBoundary={'trialRange',[377 378]}; % more bars, moved rat
+% subjectID = '261';cellBoundary={'trialRange',[380 383]}; % more bars, 
 
-subjectID = '261';cellBoundary={'trialRange',[398 404]} % ffgwn, poor sort, MUA
-subjectID = '261';cellBoundary={'trialRange',[406 408]} % bin grid
-subjectID = '261';cellBoundary={'trialRange',[415]} % bin grid
+% subjectID = '261';cellBoundary={'trialRange',[398 404]} % ffgwn, poor sort, MUA
+% subjectID = '261';cellBoundary={'trialRange',[406 408]} % bin grid
+% subjectID = '261';cellBoundary={'trialRange',[415]} % bin grid
 
-spikeDetectionParams.detectionMethod=3 % 1 -> from power signal, 2 threshold positive, 3 threshold negative, 4 threshold abs, 5 wavelet
-spikeDetectionParams.extractionThreshold =9;
+spikeDetectionParams.detectionMethod=3; % 1 -> from power signal, 2 threshold positive, 3 threshold negative, 4 threshold abs, 5 wavelet
+spikeDetectionParams.extractionThreshold =10;
 overwriteAll=1; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
 usePhotoDiodeSpikes=0;
 analysisManagerByChunk(subjectID, path, cellBoundary, spikeDetectionParams, spikeSortingParams,...

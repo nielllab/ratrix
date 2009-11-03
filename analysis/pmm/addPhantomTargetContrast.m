@@ -133,7 +133,7 @@ if any(isnan(phantomContrast))
     warning('failed to assign %2.2g%% of noTargets to a contrasts (%d extra trials)',100*sum(isnan(phantomContrast))/ sum(targetAbsent),sum(isnan(phantomContrast)))
 end
 
-if all(phantomContrast(~targetAbsent)~=d.targetContrast(~targetAbsent));
+if (all(phantomContrast(~targetAbsent)~=d.targetContrast(~targetAbsent))) & d.date>0;
 error('violated truth on the targets real value... this should never happen.. means a method its wrong.')
 end
 

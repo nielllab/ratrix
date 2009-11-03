@@ -1249,3 +1249,14 @@ eventLog{eventNum}.details.to   = [1 1 1 1];
 
 %% 234 gets a week off b/c he has a shoulder lump,  ~ aug 14 --> Aug.22,2009  .. and continuing
 
+%% 234 gets another week off for surgery oct 30th --> nov 7th .. and % continuing
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Nov.02,2009');%datestr(now,21)
+eventLog{eventNum}.eventName ={'manualStepChange'};
+eventLog{eventNum}.subject ={'231'};
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';  
+eventLog{eventNum}.comment ='testing to see the influence of a delay of 200 msec, target flanker onset offset are still synced'; 
+eventLog{eventNum}.details.from = [16 ]; 
+eventLog{eventNum}.details.to   = [17 ];  

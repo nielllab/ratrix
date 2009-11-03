@@ -1,4 +1,7 @@
 function doWaveforms(baseDir,base,chan,code)
+fprintf('\tdoing waveforms\n')
+tic
+
 f=fullfile(baseDir,[base ' waveforms.txt']);
 
 numLines=getNumLines(f);
@@ -78,4 +81,5 @@ for i=1:2
     xlabel('ms')
     %legend({'accepted','rejected'}) %argh legend sucks ass
 end
+toc
 end

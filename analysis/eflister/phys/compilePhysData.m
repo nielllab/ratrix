@@ -21,501 +21,592 @@ if ~fileGood
     prefix=fullfile(pth,name);
     resetDir(prefix);
     
-    [stim stimT phys physT] = getStimAndPhys(stimType,pth,force,targetBinsPerSec,stimTimes);
+    binsPerSec=targetBinsPerSec;
     
-    if ~strcmp(stimType,'junk')
+    [stim stimT phys physT] = getStimAndPhys(stimType,pth,force,binsPerSec,stimTimes);
+    
+    if ~ismember(stimType,{'junk','off'})
         
-        %         try
         [thesePulses,stimBreaks,nominalSecondsPerFrame,stim,stimT,phys,physT,origPulses]=getPulses(fileNames.pulseFile,pulseTimes,rec,stimType,stim,stimT,phys,physT);
         
-        [tStim, stimVals, expandedStim, binVals, expandedBins, binT]=doStimFrames(targetBinsPerSec,thesePulses,stim,stimT,prefix,name,nominalSecondsPerFrame);
+        [tStim, stimVals, expandedStim, binVals, expandedBins, binT]=doStimFrames(binsPerSec,thesePulses,stim,stimT,prefix,name,nominalSecondsPerFrame);
         
-        frameDropReport(nominalSecondsPerFrame,thesePulses,prefix,name,stimT,tStim,expandedStim,expandedBins,origPulses);
+        dropTimes=frameDropReport(nominalSecondsPerFrame,thesePulses,prefix,name,stimT,tStim,expandedStim,expandedBins,origPulses);
         
-        %         catch ex
-        %             getReport(ex)
-        %
-        %             if strcmp(ex.message,'num pulses error')
-        %                 rethrow(ex)
-        %             end
-        %         end
+        [uniqueStimVals,repeatStimVals,uniqueTimes,repeatTimes,uniqueColInds,repeatColInds,binnedVals,binnedT,bestBinOffsets,phys,physT]=findRepeats(stimType,stimVals,nominalSecondsPerFrame,binVals,prefix,name,thesePulses,binT,physT,phys,binsPerSec);
+        
     else
-        thesePulses=[];
+        uniqueStimVals=[];
+        repeatStimVals=[];
+        uniqueTimes=[];
+        repeatTimes=[];
+        uniqueColInds=[];
+        repeatColInds=[];
+        binnedVals=[];
+        binnedT=[];
+        bestBinOffsets=[];
+        dropTimes=[];
     end
     
+    % doWaveforms(baseDir,params.base,params.spkChan,params.spkCode);
+    
+    % clear stim;
+    
+    save(fileNames.targetFile,'binsPerSec','uniqueStimVals','repeatStimVals','uniqueTimes','repeatTimes','uniqueColInds','repeatColInds','dropTimes','binnedVals','binnedT','bestBinOffsets','phys','physT');
+end
+
+end
+
+function [uniqueStimVals,repeatStimVals,uniqueTimes,repeatTimes,uniqueColInds,repeatColInds,binnedVals,binnedT,bestBinOffsets,physVals,physT]=findRepeats(stimType,stimVals,nominalSecondsPerFrame,binVals,pth,name,boundaries,binT,physTms,phys,binsPerSec)
+test=false;
+if test
+    numrpts=10.3;
+    framesPerRpt=509;
+    stimVals=randn(framesPerRpt,1);
+    noise=.5*randn(round(numrpts*framesPerRpt),1);
+    stimVals=noise+[repmat(stimVals,floor(numrpts),1); stimVals(1:round((numrpts-floor(numrpts))*framesPerRpt))];
+end
+
+stimMins = nominalSecondsPerFrame * length(stimVals) / 60;
+
+f=figure;
+fprintf('\t\tstarting xcorr...')
+[xc b]=xcorr(stimVals);
+fprintf('done')
+xInd=(length(xc)+1)/2;
+
+    function giveup
+        plot(b(xInd:end),rptStrength)
+        hold on
+        plot(b(xInd:end),thresh*max(rptStrength)*ones(1,length(rptStrength)))
+        failStr=sprintf('could not find repeats for %g min stim.(%g xcorr thresh)',stimMins,thresh);
+        title(failStr)
+        fprintf(['\t' failStr ': ']);
+        if stimMins < 5 % || true
+            fprintf('moving on\n')
+            saveas(f,fullfile(pth,[failStr '.' name '.fig']));
+            close(f)
+            
+            uniqueStimVals=[];
+            repeatStimVals=[];
+            uniqueTimes=[];
+            repeatTimes=[];
+            uniqueColInds=[];
+            repeatColInds=[];
+            
+            binnedVals=binVals;
+            binnedT=binT;
+            
+            bestBinOffsets=[];
+            physVals=phys;
+            physT=physTms;
+        else
+            error('can''t find rpts')
+        end
+    end
+
+rptStrength=[0; diff(xc(xInd:end))];
+thresh=.6;
+potentials=find(rptStrength>thresh*max(rptStrength));
+
+if length(potentials)~=1
+    if strcmp(stimType,'sinusoid')
+        
+        potentials=[];
+        threshs=.7:-.1:.3;
+        threshNum=0;
+        while length(potentials)<15 && threshNum<length(threshs)
+            threshNum=threshNum+1;
+            thresh=threshs(threshNum);
+            potentials=find(rptStrength>thresh*max(rptStrength));
+        end
+        
+        
+        tmp=sort(diff(potentials));
+        tmp=tmp(end);
+        potentials=potentials(potentials>.75*tmp & potentials<1.25*tmp);
+        %         if mod(length(potentials),2)==1
+        %             rptFrames=potentials(ceil(length(potentials)/2));
+        %         else
+        %             error('shouldn''t it be odd?')
+        %         end
+        [garbage winner]=sort(rptStrength(potentials));
+        rptFrames=potentials(winner(end))-1;
+        if rptFrames*nominalSecondsPerFrame < 1
+            giveup;
+            return
+        end
+    else
+        potentials=potentials-1;
+        rptFrames=min(potentials);
+        if .5 > sum(nearInt(potentials/rptFrames))/length(potentials)
+            giveup;
+            return
+        end
+    end
+else
+    rptFrames=b(xInd+potentials-1);
+end
+fprintf(' wrapping...')
+repeatStimVals= wrap(stimVals,rptFrames,0,true);
+fprintf('done')
+
+fprintf(' plotting rpts 1...')
+subplot(3,1,1)
+plot(repeatStimVals);
+title(sprintf('repeats at %g frames (%g secs)',rptFrames,rptFrames*nominalSecondsPerFrame))
+xlabel('frame num')
+fprintf('done')
+
+numRepeats = size(repeatStimVals,2);
+repeatTimes = wrap(boundaries,rptFrames,0,false);
+
+succStr=sprintf('(%g repeats of %g mins each).',length(binT)/binsPerSec/(rptFrames*nominalSecondsPerFrame),rptFrames*nominalSecondsPerFrame/60);
+fprintf(['\tfound ' succStr '!\n'])
+
+fprintf('\t\tnormalizing',numRepeats)
+    
+repeatStarts=repeatTimes(1,:);
+binVals=normalize(binVals);
+
+fprintf('done.  doing bins and phys...')
+for rNum = 1:numRepeats
+    mask  = binT    >= repeatStarts(rNum);
+    pmask = physTms >= repeatStarts(rNum);
+    
+    if rNum < numRepeats
+        mask  = mask  & binT    < repeatStarts(rNum+1);
+        pmask = pmask & physTms < repeatStarts(rNum+1);
+    else
+        pmask = pmask & physTms < binT(end)+1/binsPerSec;
+    end
+    
+    binnedVals{rNum}=binVals(mask);
+    binnedT{rNum}=binT(mask);
+    
+    physVals{rNum}=phys(pmask);
+    physT{rNum}=physTms(pmask);
+end
+fprintf('done')
+
+maxLagSecs = .5;
+
+test=false;
+if test
+    adj = .5;
+    numRepeats = 15;
+    template=rand(1,10*binsPerSec);
+    for rNum=1:ceil(numRepeats)
+        binnedVals{rNum}=[rand(1,round(rand*adj*maxLagSecs*binsPerSec)) template+.2*rand(1,length(template)) rand(1,round(rand*adj*maxLagSecs*binsPerSec))];
+        binnedVals{rNum}=binnedVals{rNum}(ceil(rand*adj*maxLagSecs*binsPerSec):end-round(rand*adj*maxLagSecs*binsPerSec));
+        binnedT{rNum}=rand*binsPerSec*(adj*maxLagSecs)+(1:length(binnedVals{rNum}))/binsPerSec;
+    end
+end
+
+fprintf(' making pad...')
+sigs = padToMatrix(binnedVals);
+fprintf('done\n')
+
+colors=colormap(jet);
+
+if numRepeats<=15
+    %this will run out of memory if numRepats > ~15.  how fix?
+    %could do 15 at a time...
+    
+    fprintf('\t\t\t secondary alignment xcorr...')
+    [xc b]=xcorr(sigs,maxLagSecs*binsPerSec); %must use ZERO padding, not nan padding!!!
+    fprintf('done.  normalizing...')
+    
+    xc=normalizeCols(xc);
+    fprintf('done.  solving constraints...')
+    
+    % only want upper triangle w/o diagonal!  pick strongest one as reference
+    
+    xcinds=reshape(1:numRepeats^2,numRepeats,numRepeats);
+    offsets = nan(numRepeats,numRepeats);
+    strengths = offsets;
+    constraints = offsets;
+    violations = offsets;
+    txcinds=[];
+    for s1 = 1:numRepeats
+        for s2 = 1:numRepeats
+            if s2 > s1
+                txcinds(end+1)=xcinds(s1,s2);
+                txc=xc(:,txcinds(end));
+                [sorted order]=sort(txc,'descend');
+                offsets(s1,s2)=b(order(1));
+                
+                foundContigPeak = false;
+                strInd=1;
+                strInds=[];
+                strengths(s1,s2)=0;
+                while ~foundContigPeak
+                    iso=find(sorted==sorted(strInd));
+                    strInd=max(iso)+1;
+                    strInds=sort([strInds;order(iso)]);
+                    if any(diff(strInds)~=1)
+                        foundContigPeak=true;
+                        fprintf('\tpeakwidth: %g\n',length(strInds)-length(iso))
+                        if strengths(s1,s2)<.1 && false % disabling -- can't remember what i was doing here
+                            figure
+                            plot(txc)
+                            error('no unique contiguous peak -- probably because maxLagSecs too short')
+                        end
+                    else
+                        strengths(s1,s2)=1-sorted(strInd);
+                    end
+                end
+            end
+        end
+    end
+    
+    subplot(3,1,3)
+    
+    bestBinOffsets=nan(1,numRepeats);
+    while any(~isnan(strengths(:)))
+        best=max(strengths(:));
+        [s1,s2]=find(strengths==best);
+        if length(s1)~=1
+            strengths
+            warning('no unique max')
+            s1=s1(1);
+            s2=s2(1);
+        end
+        
+        plot(b/binsPerSec,xc(:,xcinds(s1,s2)),'Color',colors(ceil((sum(~isnan(strengths(:)))/sum([1:numRepeats-1]))*size(colors,1)),:))
+        hold on
+        
+        if isnan(bestBinOffsets(s1))
+            if isnan(bestBinOffsets(s2))
+                if all(isnan(bestBinOffsets))
+                    bestBinOffsets(s1)=0;
+                    bestBinOffsets(s2)=offsets(s1,s2);
+                else
+                    if isnan(constraints(s1,s2))
+                        constraints(s1,s2)=offsets(s1,s2);
+                    else
+                        error('shouldn''t get multiple constraints per pair')
+                    end
+                end
+            else
+                bestBinOffsets(s1)=bestBinOffsets(s2)-offsets(s1,s2);
+            end
+        else
+            if isnan(bestBinOffsets(s2))
+                bestBinOffsets(s2)=bestBinOffsets(s1)+offsets(s1,s2);
+            else
+                if isnan(constraints(s1,s2))
+                    constraints(s1,s2)=offsets(s1,s2);
+                else
+                    error('shouldn''t get multiple constraints per pair')
+                end
+            end
+        end
+        strengths(s1,s2)=nan;
+    end
+    
+    title('xcorrs')
+    xlabel('secs')
+    
+    while any(~isnan(constraints(:)))
+        [s1,s2]=find(~isnan(constraints),1,'first');
+        if (bestBinOffsets(s2)-bestBinOffsets(s1))~=constraints(s1,s2);
+            violations(s1,s2)=constraints(s1,s2)-(bestBinOffsets(s2)-bestBinOffsets(s1));
+        end
+        constraints(s1,s2)=nan;
+    end
+    
+    if any(~isnan(violations(:)))
+        warning('constraints violated')
+        violations
+    end
+    
+    bestBinOffsets=(bestBinOffsets-bestBinOffsets(1))/binsPerSec;
+    fprintf(' done\n')
+    
+    subplot(3,1,2)
+    for rNum = 1:numRepeats
+        plot(binnedT{rNum}-binnedT{rNum}(1)-bestBinOffsets(rNum),(rNum*.05)+normalize(binnedVals{rNum}),'Color',colors(round((rNum/numRepeats)*size(colors,1)),:)) %seems like we are going to zero index into colors -- what prevents this?
+        hold on
+    end
+    xlabel('secs')
+    title(sprintf('binned at %g hz',binsPerSec))
+    
+    saveas(f,fullfile(pth,['overlayed repeats.' succStr name '.fig']));
+    close(f)
+    
+    figure
+    for s1=1:numRepeats
+        for s2=1:numRepeats
+            if s1==s2
+                offset(s1,s2)=0;
+            else
+                txc=xc(:,xcinds(s1,s2));
+                if s2>s1
+                    %txc=xc(:,xcinds(s1,s2));
+                    par=1;
+                else
+                    %txc=xc(:,xcinds(s2,s1));
+                    par=1;
+                end
+                offset(s1,s2)=par*(find(txc==max(txc),1,'first')-1-floor(length(txc)/2));
+            end
+        end
+        out=zeros(1,1+max(offset(s1,:))-min(offset(s1,:)));
+        out(offset(s1,:)-min(offset(s1,:))+1)=1;
+        plot(out+.05*s1)
+        hold on
+    end
+    
+    saveas(f,fullfile(pth,['forgot what this xcorr plot means.' name '.fig']));
+    close(f)
+    
+else
+    fprintf('\t\t\tskipping bin offsetting cuz too many repeats\n')
+    bestBinOffsets=[];
+    
+    subplot(3,1,2)
+    for rNum = 1:numRepeats
+        plot(binnedT{rNum}-binnedT{rNum}(1),(rNum*.05)+normalize(binnedVals{rNum}),'Color',colors(ceil((rNum/numRepeats)*size(colors,1)),:))
+        hold on
+    end
+    xlabel('secs')
+    title(sprintf('binned at %g hz',binsPerSec))
+    
+    saveas(f,fullfile(pth,['overlayed repeats.' succStr name '.fig']));
+    close(f)    
+end
+
+if false % uniquesEvery > 0
+    uniqueColInds=[uniquesEvery:uniquesEvery:numRepeats];
+    repeatColInds=setdiff(1:numRepeats,uniqueColInds);
+    
+    uniqueTimes = repeatTimes(:,uniqueColInds);
+    repeatTimes = repeatTimes(:,repeatColInds);
+    
+    uniqueStimVals = repeatStimVals(:,uniqueColInds);
+    repeatStimVals = repeatStimVals(:,repeatColInds);
+else
+    uniqueTimes=[];
+    uniqueStimVals=[];
+    uniqueColInds=[];
+    repeatColInds=1:numRepeats;
 end
 end
 
 function tmp
-if false
-    fprintf('\ndoing waveforms\n')
-    tic
-    doWaveforms(baseDir,params.base,params.spkChan,params.spkCode);
-    toc
-    
-    if ~fileGood
-        for stimNum=1:numStims
-            
-            if all(cellfun(@isempty,{pulsesPerRepeat,numRepeats,uniquesEvery}))
-                uniquesEvery(stimNum) = 0;
-            else
-                error('haven''t yet updated code to work with old protocol (with interleaved uniques)')
-            end
-            
-            test=false;
-            if test
-                numrpts=10.3;
-                framesPerRpt=509;
-                stimVals=randn(framesPerRpt,1);
-                noise=.5*randn(round(numrpts*framesPerRpt),1);
-                stimVals=noise+[repmat(stimVals,floor(numrpts),1); stimVals(1:round((numrpts-floor(numrpts))*framesPerRpt))];
-            end
-            
-            f=figure;
-            [xc b]=xcorr(stimVals);
-            xInd=(length(xc)+1)/2;
-            
-            rptStrength=[0; diff(xc(xInd:end))];
-            thresh=.7;
-            potentials=find(rptStrength>thresh*max(rptStrength));
-            if length(potentials)~=1
-                potentials=potentials-1;
-                rptFrames=min(potentials);
-                if ~all(nearInt(potentials/rptFrames))
-                    plot(b(xInd:end),rptStrength)
-                    hold on
-                    plot(b(xInd:end),thresh*max(rptStrength)*ones(1,length(rptStrength)))
-                    error('can''t find rpts')
-                end
-            else
-                rptFrames=b(xInd+potentials-1);
-            end
-            repeatStimVals{stimNum} = wrap(stimVals,rptFrames,0,true);
-            
-            subplot(3,1,1)
-            plot(repeatStimVals{stimNum});
-            title(sprintf('repeats at %g frames (%g secs)',rptFrames,rptFrames*nominalSecondsPerFrame))
-            xlabel('frame num')
-            
-            numRepeats(stimNum) = size(repeatStimVals{stimNum},2);
-            repeatTimes{stimNum} = wrap(boundaries,rptFrames,0,false);
-            
-            repeatStarts=repeatTimes{stimNum}(1,:);
-            binVals=normalize(binVals);
-            for rNum = 1:numRepeats(stimNum)
-                mask  = binT    >= repeatStarts(rNum);
-                pmask = physTms >= repeatStarts(rNum);
-                
-                if rNum < numRepeats(stimNum)
-                    mask  = mask  & binT    < repeatStarts(rNum+1);
-                    pmask = pmask & physTms < repeatStarts(rNum+1);
-                else
-                    pmask = pmask & physTms < binT(end)+1/binsPerSec;
-                end
-                
-                binnedVals{stimNum,rNum}=binVals(mask);
-                binnedT{stimNum,rNum}=binT(mask);
-                
-                physVals{stimNum,rNum}=phys(pmask);
-                physT{stimNum,rNum}=physTms(pmask);
-            end
-            
-            maxLagSecs = .5;
-            
-            test=false;
-            if test
-                adj = .5;
-                numRepeats = 15;
-                template=rand(1,10*binsPerSec);
-                for rNum=1:ceil(numRepeats)
-                    binnedVals{stimNum,rNum}=[rand(1,round(rand*adj*maxLagSecs*binsPerSec)) template+.2*rand(1,length(template)) rand(1,round(rand*adj*maxLagSecs*binsPerSec))];
-                    binnedVals{stimNum,rNum}=binnedVals{stimNum,rNum}(ceil(rand*adj*maxLagSecs*binsPerSec):end-round(rand*adj*maxLagSecs*binsPerSec));
-                    binnedT{stimNum,rNum}=rand*binsPerSec*(adj*maxLagSecs)+(1:length(binnedVals{stimNum,rNum}))/binsPerSec;
-                end
-            end
-            
-            sigs = padToMatrix({binnedVals{stimNum,:}});
-            
-            %this will run out of memory if numRepats > ~15.  how fix?
-            %could do 15 at a time...
-            [xc b]=xcorr(sigs,maxLagSecs*binsPerSec); %must use ZERO padding, not nan padding!!!
-            
-            xc=normalizeCols(xc);
-            
-            % only want upper triangle w/o diagonal!  pick strongest one as reference
-            
-            xcinds=reshape(1:numRepeats^2,numRepeats,numRepeats);
-            offsets = nan(numRepeats,numRepeats);
-            strengths = offsets;
-            constraints = offsets;
-            violations = offsets;
-            txcinds=[];
-            for s1 = 1:numRepeats
-                for s2 = 1:numRepeats
-                    if s2 > s1
-                        txcinds(end+1)=xcinds(s1,s2);
-                        txc=xc(:,txcinds(end));
-                        [sorted order]=sort(txc,'descend');
-                        offsets(s1,s2)=b(order(1));
-                        
-                        foundContigPeak = false;
-                        strInd=1;
-                        strInds=[];
-                        strengths(s1,s2)=0;
-                        while ~foundContigPeak
-                            iso=find(sorted==sorted(strInd));
-                            strInd=max(iso)+1;
-                            strInds=sort([strInds;order(iso)]);
-                            if any(diff(strInds)~=1)
-                                foundContigPeak=true;
-                                fprintf('peakwidth: %g\n',length(strInds)-length(iso))
-                                if strengths(s1,s2)<.1
-                                    figure
-                                    plot(txc)
-                                    error('no unique contiguous peak -- probably because maxLagSecs too short')
-                                end
-                            else
-                                strengths(s1,s2)=1-sorted(strInd);
-                            end
-                        end
-                    end
-                end
-            end
-            
-            colors=colormap(jet);
-            subplot(3,1,3)
-            
-            bestBinOffsets{stimNum}=nan(1,numRepeats);
-            while any(~isnan(strengths(:)))
-                best=max(strengths(:));
-                [s1,s2]=find(strengths==best);
-                if length(s1)~=1
-                    strengths
-                    warning('no unique max')
-                    s1=s1(1);
-                    s2=s2(1);
-                end
-                
-                plot(b/binsPerSec,xc(:,xcinds(s1,s2)),'Color',colors(ceil((sum(~isnan(strengths(:)))/sum([1:numRepeats-1]))*size(colors,1)),:))
-                hold on
-                
-                if isnan(bestBinOffsets{stimNum}(s1))
-                    if isnan(bestBinOffsets{stimNum}(s2))
-                        if all(isnan(bestBinOffsets{stimNum}))
-                            bestBinOffsets{stimNum}(s1)=0;
-                            bestBinOffsets{stimNum}(s2)=offsets(s1,s2);
-                        else
-                            if isnan(constraints(s1,s2))
-                                constraints(s1,s2)=offsets(s1,s2);
-                            else
-                                error('shouldn''t get multiple constraints per pair')
-                            end
-                        end
-                    else
-                        bestBinOffsets{stimNum}(s1)=bestBinOffsets{stimNum}(s2)-offsets(s1,s2);
-                    end
-                else
-                    if isnan(bestBinOffsets{stimNum}(s2))
-                        bestBinOffsets{stimNum}(s2)=bestBinOffsets{stimNum}(s1)+offsets(s1,s2);
-                    else
-                        if isnan(constraints(s1,s2))
-                            constraints(s1,s2)=offsets(s1,s2);
-                        else
-                            error('shouldn''t get multiple constraints per pair')
-                        end
-                    end
-                end
-                strengths(s1,s2)=nan;
-            end
-            
-            title('xcorrs')
-            xlabel('secs')
-            
-            while any(~isnan(constraints(:)))
-                [s1,s2]=find(~isnan(constraints),1,'first');
-                if (bestBinOffsets{stimNum}(s2)-bestBinOffsets{stimNum}(s1))~=constraints(s1,s2);
-                    violations(s1,s2)=constraints(s1,s2)-(bestBinOffsets{stimNum}(s2)-bestBinOffsets{stimNum}(s1));
-                end
-                constraints(s1,s2)=nan;
-            end
-            
-            if any(~isnan(violations(:)))
-                warning('constraints violated')
-                violations
-            end
-            
-            bestBinOffsets{stimNum}=(bestBinOffsets{stimNum}-bestBinOffsets{stimNum}(1))/binsPerSec;
-            
-            subplot(3,1,2)
-            for rNum = 1:numRepeats(stimNum)
-                plot(binnedT{stimNum,rNum}-binnedT{stimNum,rNum}(1)-bestBinOffsets{stimNum}(rNum),(rNum*.05)+normalize(binnedVals{stimNum,rNum}),'Color',colors(round((rNum/numRepeats)*size(colors,1)),:))
-                hold on
-            end
-            xlabel('secs')
-            title(sprintf('binned at %g hz',binsPerSec))
-            
-            saveas(f,fullfile(wd,sprintf('%s overlayed repeats.fig',file)))
-            
-            figure
-            for s1=1:numRepeats
-                for s2=1:numRepeats
-                    if s1==s2
-                        offset(s1,s2)=0;
-                    else
-                        txc=xc(:,xcinds(s1,s2));
-                        if s2>s1
-                            %txc=xc(:,xcinds(s1,s2));
-                            par=1;
-                        else
-                            %txc=xc(:,xcinds(s2,s1));
-                            par=1;
-                        end
-                        offset(s1,s2)=par*(find(txc==max(txc),1,'first')-1-floor(length(txc)/2));
-                    end
-                end
-                out=zeros(1,1+max(offset(s1,:))-min(offset(s1,:)));
-                out(offset(s1,:)-min(offset(s1,:))+1)=1;
-                plot(out+.05*s1)
-                hold on
-            end
-            
-            if uniquesEvery(stimNum) > 0
-                uniqueColInds{stimNum}=[uniquesEvery(stimNum):uniquesEvery(stimNum):numRepeats(stimNum)];
-                repeatColInds{stimNum}=setdiff(1:numRepeats(stimNum),uniqueColInds{stimNum});
-                
-                uniqueTimes{stimNum} = repeatTimes{stimNum}(:,uniqueColInds{stimNum});
-                repeatTimes{stimNum} = repeatTimes{stimNum}(:,repeatColInds{stimNum});
-                
-                uniqueStimVals{stimNum} = repeatStimVals{stimNum}(:,uniqueColInds{stimNum});
-                repeatStimVals{stimNum} = repeatStimVals{stimNum}(:,repeatColInds{stimNum});
-            else
-                uniqueTimes{stimNum}=[];
-                uniqueStimVals{stimNum}=[];
-                uniqueColInds{stimNum}=[];
-                repeatColInds{stimNum}=1:numRepeats(stimNum);
-            end
+spks=load(fullfile(wd,sprintf('%s spks.txt',file)));
+
+requiredRefractory=.002;
+requiredPreBurst=.100;
+requiredPostBurst=.005;
+
+isis=diff(spks);
+violationInds=1+find(isis<=requiredRefractory);
+bstStartInds=intersect(1+find(isis>=requiredPreBurst), find(isis<=requiredPostBurst));
+bstInternalInds=[];
+bstViolationInds=[];
+for bInd=bstStartInds'
+    candidateInd=bInd+1;
+    while spks(candidateInd)-spks(candidateInd-1) <= requiredPostBurst
+        bstInternalInds=[bstInternalInds candidateInd];
+        if spks(candidateInd)-spks(candidateInd-1) <= requiredRefractory
+            bstViolationInds=[bstViolationInds candidateInd];
         end
-        
-        clear stim;
-        
-        save(fullfile(wd,name),'binsPerSec','uniqueStimVals','repeatStimVals','uniqueTimes','repeatTimes','uniqueColInds','repeatColInds','dropTimes','binnedVals','binnedT','bestBinOffsets','physVals','physT');
+        candidateInd=candidateInd+1;
+    end
+end
+
+disp(sprintf('%s has %d refractory violations, %d bursts, and %d bursts with refractory violations',file,length(violationInds),length(bstStartInds),length(bstViolationInds)))
+
+violationTimes=spks(violationInds);
+bstStartTimes=spks(bstStartInds);
+bstMemberTimes=spks(bstInternalInds);
+bstViolationTimes=spks(bstViolationInds);
+specials={violationTimes,bstStartTimes,bstMemberTimes,bstViolationTimes};
+
+[pks pkcodes]=textread(fullfile(wd,sprintf('%s pokes.txt',file)),'%n %*q %d 0 0 0','headerlines',2);
+pks=pks(pkcodes~=0);
+pkcodes=pkcodes(pkcodes~=0);
+
+for stimNum=1:numStims
+    
+    tRange=[repeatTimes{stimNum}(1,1) max(repeatTimes{stimNum}(:))+1/binsPerSec];
+    
+    numRptSpks = sum(spks>=tRange(1) & spks<tRange(2));
+    numRptPks = sum(pks>=tRange(1) & pks<tRange(2));
+    
+    for specialNum=1:length(specials)
+        rptNums(specialNum)=sum(specials{specialNum}>=tRange(1) & specials{specialNum}<tRange(2));
     end
     
-    
-    
-    spks=load(fullfile(wd,sprintf('%s spks.txt',file)));
-    
-    requiredRefractory=.002;
-    requiredPreBurst=.100;
-    requiredPostBurst=.005;
-    
-    isis=diff(spks);
-    violationInds=1+find(isis<=requiredRefractory);
-    bstStartInds=intersect(1+find(isis>=requiredPreBurst), find(isis<=requiredPostBurst));
-    bstInternalInds=[];
-    bstViolationInds=[];
-    for bInd=bstStartInds'
-        candidateInd=bInd+1;
-        while spks(candidateInd)-spks(candidateInd-1) <= requiredPostBurst
-            bstInternalInds=[bstInternalInds candidateInd];
-            if spks(candidateInd)-spks(candidateInd-1) <= requiredRefractory
-                bstViolationInds=[bstViolationInds candidateInd];
-            end
-            candidateInd=candidateInd+1;
+    numUnqSpks = 0;
+    numUnqPks = 0;
+    unqNums(1:length(specials)) = 0;
+    if ~isempty(uniqueTimes{stimNum})
+        numUnqSpks = sum(spks>=uniqueTimes{stimNum}(1,1) & spks<uniqueTimes{stimNum}(end,end)+1/binsPerSec);
+        numUnqPks = sum(pks>=uniqueTimes{stimNum}(1,1) & pks<uniqueTimes{stimNum}(end,end)+1/binsPerSec);
+        
+        for specialNum=1:length(specials)
+            unqNums(specialNum)=sum(specials{specialNum}>=uniqueTimes{stimNum}(1,1) & specials{specialNum}<uniqueTimes{stimNum}(end,end)+1/binsPerSec);
         end
+        
+    end
+    repeatSpikes{stimNum}=sparse([],[],[],size(repeatTimes{stimNum},1),size(repeatTimes{stimNum},2),numRptSpks);
+    uniqueSpikes{stimNum}=sparse([],[],[],size(uniqueTimes{stimNum},1),size(uniqueTimes{stimNum},2),numUnqSpks);
+    
+    repeatPokes{stimNum}=sparse([],[],[],size(repeatTimes{stimNum},1),size(repeatTimes{stimNum},2),numRptPks);
+    uniquePokes{stimNum}=sparse([],[],[],size(uniqueTimes{stimNum},1),size(uniqueTimes{stimNum},2),numUnqPks);
+    
+    for specialNum=1:length(specials)
+        rptSpecials{stimNum,specialNum}=sparse([],[],[],size(repeatTimes{stimNum},1),size(repeatTimes{stimNum},2),rptNums(specialNum));
+        unqSpecials{stimNum,specialNum}=sparse([],[],[],size(uniqueTimes{stimNum},1),size(uniqueTimes{stimNum},2),unqNums(specialNum));
     end
     
-    disp(sprintf('%s has %d refractory violations, %d bursts, and %d bursts with refractory violations',file,length(violationInds),length(bstStartInds),length(bstViolationInds)))
-    
-    violationTimes=spks(violationInds);
-    bstStartTimes=spks(bstStartInds);
-    bstMemberTimes=spks(bstInternalInds);
-    bstViolationTimes=spks(bstViolationInds);
-    specials={violationTimes,bstStartTimes,bstMemberTimes,bstViolationTimes};
-    
-    [pks pkcodes]=textread(fullfile(wd,sprintf('%s pokes.txt',file)),'%n %*q %d 0 0 0','headerlines',2);
-    pks=pks(pkcodes~=0);
-    pkcodes=pkcodes(pkcodes~=0);
-    
-    for stimNum=1:numStims
+    for repeatNum=1:size(repeatTimes{stimNum},2)
+        theseBins=repeatTimes{stimNum}(:,repeatNum);
+        ns = isnan(theseBins);
+        fs = find(diff(ns));
+        if repeatNum == size(repeatTimes{stimNum},2)
+            if length(fs)>1
+                error('found noncontiguous nans')
+            elseif length(fs)==1
+                theseBins(fs+1:end)=theseBins(fs); %hist will set all the zero width bins to zero
+            end
+        else
+            if any(ns) || ~isempty(fs)
+                error('got nans before last repeat')
+            end
+        end
         
-        tRange=[repeatTimes{stimNum}(1,1) max(repeatTimes{stimNum}(:))+1/binsPerSec];
+        theseBins=[theseBins(1)-1/binsPerSec; theseBins; theseBins(end)+1/binsPerSec];
         
-        numRptSpks = sum(spks>=tRange(1) & spks<tRange(2));
-        numRptPks = sum(pks>=tRange(1) & pks<tRange(2));
+        newCol=hist(spks,theseBins);
+        if ~isempty(fs) && any(newCol(fs+1:end-1))
+            error('hist edge case didn''t hold -- found zero width bins with members')
+        end
+        
+        %             rtRange=[repeatTimes{stimNum}(1,repeatNum) max(repeatTimes{stimNum}(:,repeatNum))+1/binsPerSec];
+        %             theseSpks=spks(spks>=rtRange(1) & spks<rtRange(2));
+        %             theseSpks=theseSpks-rtRange(1);
+        %
+        %             if floor(max(theseSpks)*binsPerSec) > size(repeatTimes{stimNum},1)
+        %                 error('bad sizes')
+        %             end
+        %
+        %             newCol=full(sparse(1+floor(theseSpks*binsPerSec),1,1));
+        
+        repeatSpikes{stimNum}(:,repeatNum)=newCol(2:end-1);
         
         for specialNum=1:length(specials)
-            rptNums(specialNum)=sum(specials{specialNum}>=tRange(1) & specials{specialNum}<tRange(2));
-        end
-        
-        numUnqSpks = 0;
-        numUnqPks = 0;
-        unqNums(1:length(specials)) = 0;
-        if ~isempty(uniqueTimes{stimNum})
-            numUnqSpks = sum(spks>=uniqueTimes{stimNum}(1,1) & spks<uniqueTimes{stimNum}(end,end)+1/binsPerSec);
-            numUnqPks = sum(pks>=uniqueTimes{stimNum}(1,1) & pks<uniqueTimes{stimNum}(end,end)+1/binsPerSec);
+            newCol=hist(specials{specialNum},theseBins);
             
-            for specialNum=1:length(specials)
-                unqNums(specialNum)=sum(specials{specialNum}>=uniqueTimes{stimNum}(1,1) & specials{specialNum}<uniqueTimes{stimNum}(end,end)+1/binsPerSec);
-            end
-            
-        end
-        repeatSpikes{stimNum}=sparse([],[],[],size(repeatTimes{stimNum},1),size(repeatTimes{stimNum},2),numRptSpks);
-        uniqueSpikes{stimNum}=sparse([],[],[],size(uniqueTimes{stimNum},1),size(uniqueTimes{stimNum},2),numUnqSpks);
-        
-        repeatPokes{stimNum}=sparse([],[],[],size(repeatTimes{stimNum},1),size(repeatTimes{stimNum},2),numRptPks);
-        uniquePokes{stimNum}=sparse([],[],[],size(uniqueTimes{stimNum},1),size(uniqueTimes{stimNum},2),numUnqPks);
-        
-        for specialNum=1:length(specials)
-            rptSpecials{stimNum,specialNum}=sparse([],[],[],size(repeatTimes{stimNum},1),size(repeatTimes{stimNum},2),rptNums(specialNum));
-            unqSpecials{stimNum,specialNum}=sparse([],[],[],size(uniqueTimes{stimNum},1),size(uniqueTimes{stimNum},2),unqNums(specialNum));
-        end
-        
-        for repeatNum=1:size(repeatTimes{stimNum},2)
-            theseBins=repeatTimes{stimNum}(:,repeatNum);
-            ns = isnan(theseBins);
-            fs = find(diff(ns));
-            if repeatNum == size(repeatTimes{stimNum},2)
-                if length(fs)>1
-                    error('found noncontiguous nans')
-                elseif length(fs)==1
-                    theseBins(fs+1:end)=theseBins(fs); %hist will set all the zero width bins to zero
-                end
-            else
-                if any(ns) || ~isempty(fs)
-                    error('got nans before last repeat')
-                end
-            end
-            
-            theseBins=[theseBins(1)-1/binsPerSec; theseBins; theseBins(end)+1/binsPerSec];
-            
-            newCol=hist(spks,theseBins);
             if ~isempty(fs) && any(newCol(fs+1:end-1))
                 error('hist edge case didn''t hold -- found zero width bins with members')
             end
             
-            %             rtRange=[repeatTimes{stimNum}(1,repeatNum) max(repeatTimes{stimNum}(:,repeatNum))+1/binsPerSec];
-            %             theseSpks=spks(spks>=rtRange(1) & spks<rtRange(2));
-            %             theseSpks=theseSpks-rtRange(1);
+            %                 theseSpecials=specials{specialNum}(specials{specialNum}>=rtRange(1) & specials{specialNum}<rtRange(2));
+            %                 theseSpecials=theseSpecials-rtRange(1);
             %
-            %             if floor(max(theseSpks)*binsPerSec) > size(repeatTimes{stimNum},1)
-            %                 error('bad sizes')
-            %             end
+            %                 if floor(max(theseSpecials)*binsPerSec) > size(repeatTimes{stimNum},1)
+            %                     error('bad sizes')
+            %                 end
             %
-            %             newCol=full(sparse(1+floor(theseSpks*binsPerSec),1,1));
-            
-            repeatSpikes{stimNum}(:,repeatNum)=newCol(2:end-1);
-            
-            for specialNum=1:length(specials)
-                newCol=hist(specials{specialNum},theseBins);
-                
-                if ~isempty(fs) && any(newCol(fs+1:end-1))
-                    error('hist edge case didn''t hold -- found zero width bins with members')
-                end
-                
-                %                 theseSpecials=specials{specialNum}(specials{specialNum}>=rtRange(1) & specials{specialNum}<rtRange(2));
-                %                 theseSpecials=theseSpecials-rtRange(1);
-                %
-                %                 if floor(max(theseSpecials)*binsPerSec) > size(repeatTimes{stimNum},1)
-                %                     error('bad sizes')
-                %                 end
-                %
-                %                 newCol=full(sparse(1+floor(theseSpecials*binsPerSec),1,1));
-                rptSpecials{stimNum,specialNum}(:,repeatNum)=newCol(2:end-1);
-            end
-            
-            if ~isempty(pks)
-                error('poke code needs to be adjusted to match above repeat code')
-                pkInds=find(pks>=rtRange(1) & pks<rtRange(2));
-                pkTimes=pks(pkInds);
-                pkTimes=pkTimes-rtRange(1);
-                pkTimes=1+floor(pkTimes*binsPerSec);
-                repeatPokes{stimNum}(pkTimes,repeatNum)=pkcodes(pkInds);
-            end
-            
-            spectralAnalysis(physVals{stimNum,repeatNum},physT{stimNum,repeatNum});
-            
+            %                 newCol=full(sparse(1+floor(theseSpecials*binsPerSec),1,1));
+            rptSpecials{stimNum,specialNum}(:,repeatNum)=newCol(2:end-1);
         end
-        for uniqueNum=1:size(uniqueTimes{stimNum},2)
-            error('unique code needs to be adjusted to match above repeat code')
-            
-            theseSpks=spks(spks>=uniqueTimes{stimNum}(1,uniqueNum) & spks<uniqueTimes{stimNum}(end,uniqueNum)+1/binsPerSec);
-            theseSpks=theseSpks-uniqueTimes{stimNum}(1,uniqueNum);
-            newCol=full(sparse(1+floor(theseSpks*binsPerSec),1,1));
-            uniqueSpikes{stimNum}(1:length(newCol),uniqueNum)=newCol;
-            
-            for specialNum=1:length(specials)
-                theseSpecials=specials{specialNum}(specials{specialNum}>=uniqueTimes{stimNum}(1,uniqueNum) & specials{specialNum}<uniqueTimes{stimNum}(end,uniqueNum)+1/binsPerSec);
-                theseSpecials=theseSpecials-uniqueTimes{stimNum}(1,uniqueNum);
-                newCol=full(sparse(1+floor(theseSpecials*binsPerSec),1,1));
-                unqSpecials{stimNum,specialNum}(1:length(newCol),uniqueNum)=newCol;
-            end
-            
-            pkInds=find(pks>=uniqueTimes{stimNum}(1,uniqueNum) & pks<uniqueTimes{stimNum}(end,uniqueNum)+1/binsPerSec);
+        
+        if ~isempty(pks)
+            error('poke code needs to be adjusted to match above repeat code')
+            pkInds=find(pks>=rtRange(1) & pks<rtRange(2));
             pkTimes=pks(pkInds);
-            pkTimes=pkTimes-uniqueTimes{stimNum}(1,uniqueNum);
+            pkTimes=pkTimes-rtRange(1);
             pkTimes=1+floor(pkTimes*binsPerSec);
-            uniquePokes{stimNum}(pkTimes,uniqueNum)=pkcodes(pkInds);
+            repeatPokes{stimNum}(pkTimes,repeatNum)=pkcodes(pkInds);
         end
+        
+        spectralAnalysis(physVals{stimNum,repeatNum},physT{stimNum,repeatNum});
+        
     end
-    
-    name = sprintf('%s compiled data.mat',file);
-    save(fullfile(wd,name),'binsPerSec','uniqueStimVals','repeatStimVals','uniqueTimes','repeatTimes','uniqueColInds','repeatColInds','uniqueSpikes','uniquePokes','repeatSpikes','repeatPokes','rptSpecials','unqSpecials');
-    
-    if drawSummary
-        figure %(fileNum)
-        for stimNum=1:numStims
-            
-            subplot(numStims,3,1+3*(stimNum-1))
-            
-            range=max(max(repeatStimVals{stimNum}))-min(min(repeatStimVals{stimNum}));
-            
-            if drawStims
-                if ~isempty(uniqueStimVals{stimNum})
-                    plot(repeatStimVals{stimNum}+repmat(range*repeatColInds{stimNum},size(repeatStimVals{stimNum},1),1),'k')
-                    hold on
-                    plot(uniqueStimVals{stimNum}+repmat(range*uniqueColInds{stimNum},size(uniqueStimVals{stimNum},1),1),'r')
-                else
-                    plot(repeatStimVals{stimNum})
-                    hold on
-                end
-            end
-            
-            colors=['y','r','g','m'];
-            sizes=[50, 30, 30, 50];
-            order=[1,4,3,2];
-            if all(length(repeatColInds{stimNum}) == [size(repeatStimVals{stimNum},2) size(repeatTimes{stimNum},2)])
-                numRepeats(stimNum)=length(repeatColInds{stimNum});
-            else
-                error('numRepeats error')
-            end
-            if numRepeats(stimNum)>1
-                subplot(numStims,3,2+3*(stimNum-1))
-                for specialNum=order
-                    spy([rptSpecials{stimNum,specialNum} zeros(size(repeatSpikes{stimNum},1),1) unqSpecials{stimNum,specialNum}]',colors(specialNum),sizes(specialNum));
-                    hold on
-                end
-                spy([repeatSpikes{stimNum} ones(size(repeatSpikes{stimNum},1),1) uniqueSpikes{stimNum}]','k',5);
-                axis fill
-                
-                subplot(numStims,3,3+3*(stimNum-1))
-                colorPokes=[repeatPokes{stimNum} ones(size(repeatPokes{stimNum},1),1) uniquePokes{stimNum}]';
-                spy(colorPokes,'k',1);
-                hold on
-                spy(colorPokes==32,'r',1);
-                spy(colorPokes==64,'g',1);
-                spy(colorPokes==128,'b',1);
-                axis fill
-            else
-                plot(find(repeatSpikes{stimNum}),2*range,'rx');
-                hold on
-                tmp=find(repeatPokes{stimNum});
-                if ~isempty(tmp)
-                    plot(tmp,3*range,'ko');
-                end
-            end
-            
+    for uniqueNum=1:size(uniqueTimes{stimNum},2)
+        error('unique code needs to be adjusted to match above repeat code')
+        
+        theseSpks=spks(spks>=uniqueTimes{stimNum}(1,uniqueNum) & spks<uniqueTimes{stimNum}(end,uniqueNum)+1/binsPerSec);
+        theseSpks=theseSpks-uniqueTimes{stimNum}(1,uniqueNum);
+        newCol=full(sparse(1+floor(theseSpks*binsPerSec),1,1));
+        uniqueSpikes{stimNum}(1:length(newCol),uniqueNum)=newCol;
+        
+        for specialNum=1:length(specials)
+            theseSpecials=specials{specialNum}(specials{specialNum}>=uniqueTimes{stimNum}(1,uniqueNum) & specials{specialNum}<uniqueTimes{stimNum}(end,uniqueNum)+1/binsPerSec);
+            theseSpecials=theseSpecials-uniqueTimes{stimNum}(1,uniqueNum);
+            newCol=full(sparse(1+floor(theseSpecials*binsPerSec),1,1));
+            unqSpecials{stimNum,specialNum}(1:length(newCol),uniqueNum)=newCol;
         end
+        
+        pkInds=find(pks>=uniqueTimes{stimNum}(1,uniqueNum) & pks<uniqueTimes{stimNum}(end,uniqueNum)+1/binsPerSec);
+        pkTimes=pks(pkInds);
+        pkTimes=pkTimes-uniqueTimes{stimNum}(1,uniqueNum);
+        pkTimes=1+floor(pkTimes*binsPerSec);
+        uniquePokes{stimNum}(pkTimes,uniqueNum)=pkcodes(pkInds);
+    end
+end
+
+name = sprintf('%s compiled data.mat',file);
+save(fullfile(wd,name),'binsPerSec','uniqueStimVals','repeatStimVals','uniqueTimes','repeatTimes','uniqueColInds','repeatColInds','uniqueSpikes','uniquePokes','repeatSpikes','repeatPokes','rptSpecials','unqSpecials');
+
+if drawSummary
+    figure %(fileNum)
+    for stimNum=1:numStims
+        
+        subplot(numStims,3,1+3*(stimNum-1))
+        
+        range=max(max(repeatStimVals{stimNum}))-min(min(repeatStimVals{stimNum}));
+        
+        if drawStims
+            if ~isempty(uniqueStimVals{stimNum})
+                plot(repeatStimVals{stimNum}+repmat(range*repeatColInds{stimNum},size(repeatStimVals{stimNum},1),1),'k')
+                hold on
+                plot(uniqueStimVals{stimNum}+repmat(range*uniqueColInds{stimNum},size(uniqueStimVals{stimNum},1),1),'r')
+            else
+                plot(repeatStimVals{stimNum})
+                hold on
+            end
+        end
+        
+        colors=['y','r','g','m'];
+        sizes=[50, 30, 30, 50];
+        order=[1,4,3,2];
+        if all(length(repeatColInds{stimNum}) == [size(repeatStimVals{stimNum},2) size(repeatTimes{stimNum},2)])
+            numRepeats(stimNum)=length(repeatColInds{stimNum});
+        else
+            error('numRepeats error')
+        end
+        if numRepeats(stimNum)>1
+            subplot(numStims,3,2+3*(stimNum-1))
+            for specialNum=order
+                spy([rptSpecials{stimNum,specialNum} zeros(size(repeatSpikes{stimNum},1),1) unqSpecials{stimNum,specialNum}]',colors(specialNum),sizes(specialNum));
+                hold on
+            end
+            spy([repeatSpikes{stimNum} ones(size(repeatSpikes{stimNum},1),1) uniqueSpikes{stimNum}]','k',5);
+            axis fill
+            
+            subplot(numStims,3,3+3*(stimNum-1))
+            colorPokes=[repeatPokes{stimNum} ones(size(repeatPokes{stimNum},1),1) uniquePokes{stimNum}]';
+            spy(colorPokes,'k',1);
+            hold on
+            spy(colorPokes==32,'r',1);
+            spy(colorPokes==64,'g',1);
+            spy(colorPokes==128,'b',1);
+            axis fill
+        else
+            plot(find(repeatSpikes{stimNum}),2*range,'rx');
+            hold on
+            tmp=find(repeatPokes{stimNum});
+            if ~isempty(tmp)
+                plot(tmp,3*range,'ko');
+            end
+        end
+        
     end
 end
 end
@@ -540,7 +631,7 @@ if false
     plot(ex)
 end
 
-fprintf(['accumulating ' str '... '])
+fprintf(['\taccumulating ' str '... '])
 subs=cumsum(ex)+1;
 vals = accumarray(subs,stim);
 expanded=vals(subs);
@@ -600,7 +691,7 @@ out=out+repmat(offset*(1:numRepeats),rpt,1);
 end
 
 function out=nearInt(in)
-out= 0==in-round(in);
+out= abs(in-round(in))<.01;
 end
 
 function out=padToMatrix(in)
@@ -973,7 +1064,10 @@ switch rec.display_type
     case 'crt'
         switch rec.pulse_type
             case 'double'
-                if ~all(strcmp({rec.indexPulseChan,rec.phasePulseChan,rec.stimPulseChan},'none'))
+                
+                if rec.stimPulseChan == 'X' && rec.framePulseChan == 'X'
+                    rec.framePulseChan=2; -- a hack
+                elseif ~all(strcmp({rec.indexPulseChan,rec.phasePulseChan,rec.stimPulseChan},'none'))
                     error('inconsistent pulse type')
                 end
                 
@@ -1003,7 +1097,7 @@ switch rec.display_type
                 
                 numFrames=length(origPulses)/6;
                 pat=logical([0 0 0 0 1 0])';
-                frameTimes=origPulses([repmat(pat,floor(numFrames),1) ; pat(1:length(pat)*(numFrames-floor(numFrames)))]);
+                frameTimes=origPulses([repmat(pat,floor(numFrames),1) ; pat(1:round(length(pat)*(numFrames-floor(numFrames))))]);
                 
                 if numFrames~=round(numFrames) && false %disable cuz our pulse txt file extractor cuts off pulses at the end of a (sorting) chunk boundary
                     %even if a stim goes longer than that -- and we need the end of the stim to catch the right end pulses
@@ -1042,7 +1136,8 @@ switch rec.display_type
                 
                 nominalSecondsPerFrame = median(diff(cutFrameTimes));
                 if abs(1-nominalSecondsPerFrame/.01) > .1
-                    error('bad frame times')
+                    1/nominalSecondsPerFrame
+                    warning('bad frame times')
                 end
                 
                 pulseOffsetPct = .65; %pct of a nominal frame duration that the gun LAGS the pulse (depends on pdiode location!)
@@ -1077,8 +1172,8 @@ end
 function [stim stimT phys physT] = getStimAndPhys(stimType,pth,force,targetBinsPerSec,stimTimes)
 % [phys physTms]
 [phys physT]=checkForResampledMat('phys',pth,force,targetBinsPerSec);
-
-if ~strcmp(stimType,'junk')
+fprintf('\tphys loaded\n')
+if ~ismember(stimType,{'junk','off'})
     % [stim stimT first step]
     [stim stimT]=checkForResampledMat('stim',pth,force,targetBinsPerSec);
     
@@ -1108,10 +1203,12 @@ if ~strcmp(stimType,'junk')
             error('stim/phys times don''t line up')
         end
     end
+    fprintf('\tstim loaded\n')
 else
     stimT=[];
     stim=[];
 end
+
 end
 
 function [tStim,stimVals, expandedStim, binVals, expandedBins, binT]=doStimFrames(binsPerSec,thesePulses,stim,stimT,pth,name,nominalSecondsPerFrame)
@@ -1145,9 +1242,10 @@ title(sprintf('bins of %g ms',1000/binsPerSec))
 
 saveas(f,fullfile(pth,['stim dist.' clipS name '.fig']));
 close(f)
+fprintf('\tframes resolved\n')
 end
 
-function frameDropReport(nominalSecondsPerFrame,thesePulses,pth,name,stimT,tStim,expandedStim,expandedBins,origPulses)
+function dropTimes=frameDropReport(nominalSecondsPerFrame,thesePulses,pth,name,stimT,tStim,expandedStim,expandedBins,origPulses)
 contextFrames=25;
 maxRowsPerFig=7;
 contextSecs=contextFrames*nominalSecondsPerFrame;
@@ -1171,32 +1269,40 @@ numFigs=ceil(length(dropWins)/maxRowsPerFig);
 for fig=1:numFigs
     f=figure;
     for winNum=winNum+1:min(length(dropWins),winNum+maxRowsPerFig)
-        subplot(maxRowsPerFig,1,mod(winNum-1,maxRowsPerFig)+1)
-        
-        tRange=dropWins{winNum}(1)+contextSecs*[-1 1];
-        tInds=stimT<tRange(2) & stimT>tRange(1);
-        
-        nPlot(stimT(tInds),expandedStim(tInds),'r');
-        hold on
-        nPlot(stimT(tInds),tStim(tInds),'b');
-        nPlot(stimT(tInds),expandedBins(tInds),'g');
-        plot(origPulses(origPulses<tRange(2) & origPulses>tRange(1)),.5,'kx');
-        plot(thesePulses(thesePulses>=tRange(1) & thesePulses<=tRange(2)),.5,'bo')
-        plot(dropTimes,.5,'ro')
-        
-        switch winNum
-            case 1
-                legend({'stim','photo','bins','pulse'})
-                title(sprintf('first frame - %g total drops',numDrops))
-            case length(dropWins)
-                title('last frame')
-            otherwise
-                title(sprintf('%g total drops',numDrops));
+        if fig>5 && fig<numFigs
+            skipS='(skipping)';
+        else
+            skipS=[];
+            subplot(maxRowsPerFig,1,mod(winNum-1,maxRowsPerFig)+1)
+            
+            tRange=dropWins{winNum}(1)+contextSecs*[-1 1];
+            tInds=stimT<tRange(2) & stimT>tRange(1);
+            
+            nPlot(stimT(tInds),expandedStim(tInds),'r');
+            hold on
+            nPlot(stimT(tInds),tStim(tInds),'b');
+            nPlot(stimT(tInds),expandedBins(tInds),'g');
+            plot(origPulses(origPulses<tRange(2) & origPulses>tRange(1)),.5,'kx');
+            plot(thesePulses(thesePulses>=tRange(1) & thesePulses<=tRange(2)),.5,'bo')
+            if ~isempty(dropTimes)
+                plot(dropTimes,.5,'ro')
+            end
+            
+            switch winNum
+                case 1
+                    legend({'stim','photo','bins','pulse'})
+                    title(sprintf('first frame - %g total drops',numDrops))
+                case length(dropWins)
+                    title('last frame')
+                otherwise
+                    title(sprintf('%g total drops',numDrops));
+            end
+            xlim(tRange)
+            ylim([0 1.1])
         end
-        xlim(tRange)
-        ylim([0 1.1])
     end
-    saveas(f,fullfile(pth,['drop report.' sprintf('(%d of %d - %d total drops).',fig,numFigs,numDrops) name '.fig']));
+    saveas(f,fullfile(pth,['drop report.' sprintf('(%d%s of %d - %d total drops).',fig,skipS,numFigs,numDrops) name '.fig']));
     close(f)
 end
+fprintf('\tframe drop report done: %d drops\n',length(dropTimes))
 end

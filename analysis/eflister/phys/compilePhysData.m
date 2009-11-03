@@ -4,7 +4,6 @@ if false
     fileNames.pokesFile
     fileNames.spikesFile
     fileNames.wavemarkFile
-    fileNames.targetFile
 end
 
 fileGood = false;
@@ -1032,11 +1031,9 @@ gram(10*log10(abs(S)+eps),t,f,type); %this code for plotting log psd is from mat
 end
 
 function [frameTimes, stimBreaks, nominalSecondsPerFrame,stim,stimT,phys,physT,origPulses] = getPulses(pulseFile,pulseTimes,rec,stimType,stim,stimT,phys,physT)
-origPulses = load(pulseFile);
-origPulses = origPulses(origPulses>=pulseTimes(1) & origPulses<=pulseTimes(2));
+
 frameTimes=[];
 stimBreaks=[];
-pulseOffsetPct=[];
 
 %pulses from ratrix changed over experiments:
 %if VRG:
@@ -1065,8 +1062,8 @@ switch rec.display_type
         switch rec.pulse_type
             case 'double'
                 
-                if rec.stimPulseChan == 'X' && rec.framePulseChan == 'X'
-                    rec.framePulseChan=2; -- a hack
+                if strcmp(rec.stimPulseChan,'X') && strcmp(rec.framePulseChan,'X')
+                    rec.framePulseChan=2; %a hack
                 elseif ~all(strcmp({rec.indexPulseChan,rec.phasePulseChan,rec.stimPulseChan},'none'))
                     error('inconsistent pulse type')
                 end
@@ -1094,6 +1091,9 @@ switch rec.display_type
                 if ~strcmp(C{1},'Evt+-')
                     error('wrong channel type')
                 end
+                
+                origPulses = load(pulseFile);
+                origPulses = origPulses(origPulses>=pulseTimes(1) & origPulses<=pulseTimes(2));
                 
                 numFrames=length(origPulses)/6;
                 pat=logical([0 0 0 0 1 0])';
@@ -1132,27 +1132,16 @@ switch rec.display_type
                     end
                 end
                 
-                cutFrameTimes=frameTimes(frameTimes >= stimT(1) & frameTimes < stimT(end));
-                
-                nominalSecondsPerFrame = median(diff(cutFrameTimes));
-                if abs(1-nominalSecondsPerFrame/.01) > .1
-                    1/nominalSecondsPerFrame
-                    warning('bad frame times')
-                end
-                
                 pulseOffsetPct = .65; %pct of a nominal frame duration that the gun LAGS the pulse (depends on pdiode location!)
                 
-                frameTimes=frameTimes+pulseOffsetPct*nominalSecondsPerFrame;
-                origPulses=origPulses+pulseOffsetPct*nominalSecondsPerFrame;
+            case 'triple'
                 
-                aboveInd=find(frameTimes>=stimT(1),1,'first');
-                belowInd=find(frameTimes<=stimT(end),1,'last');
-                frameTimes=frameTimes(aboveInd:belowInd);
+                if ~all(strcmp({rec.indexPulseChan},'none'))
+                    error('inconsistent pulse type')
+                end
                 
-                [stimT,stim]=chop(stimT,stim,[frameTimes(1),frameTimes(end)]);
-                [physT,phys]=chop(physT,phys,[frameTimes(1),frameTimes(end)]);
-                
-                fprintf('\t%g mins of frames (%g hz)\n',(frameTimes(end)-frameTimes(1))/60,1/nominalSecondsPerFrame)
+                [frameTimes origPulses]=scanTriple(pulseFile,rec.framePulseChan,rec.stimPulseChan,rec.phasePulseChan,pulseTimes);
+                pulseOffsetPct = 0; 
             otherwise
                 error('unknown protocol')
         end
@@ -1161,6 +1150,26 @@ switch rec.display_type
     otherwise
         error('unknown dispType')
 end
+
+cutFrameTimes=frameTimes(frameTimes >= stimT(1) & frameTimes < stimT(end));
+
+nominalSecondsPerFrame = median(diff(cutFrameTimes));
+if abs(1-nominalSecondsPerFrame/.01) > .1
+    1/nominalSecondsPerFrame
+    warning('bad frame times')
+end
+
+frameTimes=frameTimes+pulseOffsetPct*nominalSecondsPerFrame;
+origPulses=origPulses+pulseOffsetPct*nominalSecondsPerFrame;
+
+aboveInd=find(frameTimes>=stimT(1),1,'first');
+belowInd=find(frameTimes<=stimT(end),1,'last');
+frameTimes=frameTimes(aboveInd:belowInd);
+
+[stimT,stim]=chop(stimT,stim,[frameTimes(1),frameTimes(end)]);
+[physT,phys]=chop(physT,phys,[frameTimes(1),frameTimes(end)]);
+
+fprintf('\t%g mins of frames (%g hz)\n',(frameTimes(end)-frameTimes(1))/60,1/nominalSecondsPerFrame)
 end
 
 function [times,vals]=chop(times,vals,lims)

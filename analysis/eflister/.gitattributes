@@ -82,3 +82,4 @@ phys/new/helpers/extractPhysThenAnalyze.m -text
 phys/new/helpers/compilePhysTxt.m -text
 phys/new/helpers/getRangeFromChunks.m -text
 phys/scratch3.m -text
+phys/new/helpers/scanTriple.m -text

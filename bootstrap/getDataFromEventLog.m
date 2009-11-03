@@ -1,5 +1,6 @@
-function [surgBregma surgAnchor currAnchor currPositn penetParams isNewDay] = getDataFromEventLog(eventLogPath)
+function [rigState surgBregma surgAnchor currAnchor currPositn penetParams isNewDay] = getDataFromEventLog(eventLogPath)
 
+rigState = [NaN NaN NaN];
 surgBregma = [NaN NaN NaN];
 surgAnchor = [NaN NaN NaN];
 currAnchor = [NaN NaN NaN];
@@ -7,6 +8,7 @@ currPositn = [NaN NaN NaN];
 isNewDay = false;
 penetParams = [];
 
+doRigState = true;
 doSurgBregma = true;
 doSurgAnchor = true;
 doCurrAnchor = true;
@@ -38,6 +40,17 @@ i = logLength;
 doLoop = true;
 
 while doLoop
+    if isempty(find(strcmp('rigState',fieldnames(events_data)))) % hack since we are adding rigState to the event log
+        doRigState = false;
+    end
+    
+    if doRigState
+         if (~isempty(events_data(i).rigState))&(all(~isnan(events_data(i).rigState)))
+            rigState = events_data(i).rigState;
+            doRigState = false;
+         end                
+    end
+    
     if doSurgBregma
         if (~isempty(events_data(i).surgeryBregma))&(all(~isnan(events_data(i).surgeryBregma)))
             surgBregma = events_data(i).surgeryBregma;
@@ -109,6 +122,17 @@ if(any([doSurgBregma doSurgAnchor doCurrAnchor]))
     doLoop = true;
     
     while doLoop
+        if isempty(find(strcmp('rigState',fieldnames(events_data)))) % hack since we are adding rigState to the event log
+            doRigState = false;
+        end
+        
+        if doRigState
+            if (~isempty(events_data(i).rigState))&(all(~isnan(events_data(i).rigState)))
+                rigState = events_data(i).rigState;
+                doRigState = false;
+            end
+        end
+        
         if doSurgBregma
             if (~isempty(events_data(i).surgeryBregma))&(all(~isnan(events_data(i).surgeryBregma)))
                 surgBregma = events_data(i).surgeryBregma;

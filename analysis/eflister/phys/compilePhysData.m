@@ -1,5 +1,5 @@
 function compilePhysData(fileNames,stimTimes,pulseTimes,rec,stimType,targetBinsPerSec,force)
-
+keyboard
 if false
     fileNames.pokesFile
     fileNames.spikesFile

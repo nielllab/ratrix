@@ -70,7 +70,8 @@ for j=1:numStims
                 recM=rec;
                 recM.chunks=rec.chunks(chunkNum);
                 recM.stimTimes=[];
-                compilePhysData(fileNames,[thisStart thisStop],[stimStart stimStop],recM,rec.stimTimes{j,2},targetBinsPerSec,force);
+                %compilePhysData(fileNames,[thisStart thisStop],[stimStart stimStop],recM,rec.stimTimes{j,2},targetBinsPerSec,force);
+                tmpAnalysis(fileNames,[thisStart thisStop],[stimStart stimStop],recM,rec.stimTimes{j,2},targetBinsPerSec,force);
         end
     end
 end

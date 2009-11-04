@@ -1,9 +1,9 @@
 function setupEnvironment
 
+close all
 clear classes
 clear java
 clear mex
-close all
 clc
 format long g
 format compact

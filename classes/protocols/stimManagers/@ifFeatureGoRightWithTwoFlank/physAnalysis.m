@@ -52,8 +52,8 @@ end
 allSpikes=spikeRecord.spikes; %all waveforms
 waveInds=allSpikes; % location of all waveforms
 if isstruct(spikeRecord.spikeDetails) && ismember({'processedClusters'},fields(spikeRecord.spikeDetails))
-    if length(spikeRecord.spikeDetails.processedClusters)~=length(waveInds)
-        length(spikeRecord.spikeDetails.processedClusters)
+    if length([spikeRecord.spikeDetails.processedClusters])~=length(waveInds)
+        length([spikeRecord.spikeDetails.processedClusters])
         length(waveInds)
         error('spikeDetails does not correspond to the spikeRecord''s spikes');
     end
@@ -62,12 +62,32 @@ else
     thisCluster=logical(ones(size(waveInds)));
     %use all (photodiode uses this)
 end
-allSpikes(~thisCluster)=[]; % remove spikes that dont belong to thisCluster
+spikes=allSpikes;
+spikes(~thisCluster)=[]; % remove spikes that dont belong to thisCluster
 
 s=setStimFromDetails(stimManager, stimulusDetails);
 [targetIsOn flankerIsOn effectiveFrame cycleNum sweptID repetition]=isTargetFlankerOn(s,stimFrames);
 
-%old way is empirically
+fix=1
+if fix
+    dropFraction=conv([diff(stimFrames)==0; 0],ones(1,100));
+   
+    figure
+    subplot(6,1,1); plot(effectiveFrame)
+    subplot(6,1,2); plot(stimFrames)
+    %subplot(6,1,3); plot(cycleNum)
+    subplot(6,1,3); plot(dropFraction)
+     ylabel(sprintf('drops: %d',sum(diff(stimFrames)==0)))
+    subplot(6,1,4); plot(sweptID)
+    subplot(6,1,5); plot(repetition)
+    subplot(6,1,6); plot(targetIsOn)
+
+
+    warning ('paused!')
+    %keyboard
+end
+
+    %old way is empirically
 %samplingRate=round(diff(minmax(find(spikeData.spikes)'))/ diff(spikeData.spikeTimestamps([1 end])));
 samplingRate=parameters.samplingRate;
 
@@ -134,13 +154,14 @@ numConditions=size(conditionInds,1); % regroup as flanker conditions
 numRepeats=max(repetition);
 numUniqueFrames=max(effectiveFrame);
 
+%%
 events=nan(numRepeats,numConditions,numUniqueFrames);
 possibleEvents=events;
 rasterDensity=zeros(numRepeats*numConditions,numUniqueFrames);
 for i=1:numRepeats
     for j=1:numConditions
         for k=1:numUniqueFrames
-            which=find(conditionInds(j,:) & repetition==i & effectiveFrame==k);
+            which=find(conditionInds(j,:)' & repetition==i & effectiveFrame==k);
             events(i,j,k)=sum(spikeCount(which));
             possibleEvents(i,j,k)=length(which);
             %photodiode(i,j,k)=sum(spikeData.photoDiode(which));
@@ -153,6 +174,8 @@ for i=1:numRepeats
     end
 end
 
+
+%% 
 
 
 % if ~isempty(eyeData)
@@ -194,7 +217,7 @@ rasterDensity=[rasterDensity(:,1+shift:end) rasterDensity(:,1:shift)];
 
 figure(parameters.trialNumber); % new for each trial
 set(gcf,'position',[100 400 560 620])
-subplot(2,2,1); hold on; %p=plot([1:numPhaseBins]-.5,rate')
+subplot(1,2,1); hold on; %p=plot([1:numPhaseBins]-.5,rate')
 %plot([0 numUniqueFrames], [rate(1) rate(1)],'color',[1 1 1]); % to save tight axis chop
 x=[1:numUniqueFrames]; 
 for i=1:numConditions
@@ -238,15 +261,19 @@ axis tight
 % xlabel('time');  
 % %set(gca,'XTickLabel',{'0','pi','2pi'},'XTick',([0 .5 1]*numPhaseBins)+.5);
 
-subplot(2,2,2); %2,2,4
+subplot(1,2,2); %2,2,4
 hold on
 dur=double(diff(s.targetOnOff));
 relevantRange=[numUniqueFrames-dur:numUniqueFrames];
 
-meanRateDuringPeriod=sum(fullRate(:,:,relevantRange)/dur,3);
-meanRatePerCond=mean(meanRateDuringPeriod,2); % 2 vs 3 check!
-SEMRatePerCond=std(meanRateDuringPeriod,[],2)/sqrt(numRepeats);
-stdRatePerCond=std(meanRateDuringPeriod,[],2);
+
+%meanPerRepetition?  fdivide by dur vs. divide by repetitions...
+
+%meanRateDuringPeriod=sum(fullRate(:,:,relevantRange)/dur,3);
+meanRateDuringPeriod=mean(fullRate(:,:,relevantRange),3);
+meanRatePerCond=mean(meanRateDuringPeriod,1); % 2 vs 3 check!
+SEMRatePerCond=std(meanRateDuringPeriod,[],1)/sqrt(numRepeats);
+stdRatePerCond=std(meanRateDuringPeriod,[],1);
 for i=1:numConditions
     errorbar(i,meanRatePerCond(i),stdRatePerCond(i),'color',colors(i,:));
     plot(i,meanRatePerCond(i),'.','color',colors(i,:));
@@ -257,21 +284,21 @@ set(gca,'XTickLabel',conditionNames,'XTick',1:numConditions);
 
 
 %%UGLY HACK REMOVED SOON
-subplot(2,2,4); 
-hold on
-dur=double(diff(s.targetOnOff));
-relevantRange=[numUniqueFrames-dur:numUniqueFrames];
-
-meanRateDuringPeriod=sum(fullPhotodiode(:,:,relevantRange)/dur,3);
-meanRatePerCond=mean(meanRateDuringPeriod,2); % 2 vs 3 check!
-SEMRatePerCond=std(meanRateDuringPeriod,[],2)/sqrt(numRepeats);
-stdRatePerCond=std(meanRateDuringPeriod,[],2);
-for i=1:numConditions
-    errorbar(i,meanRatePerCond(i),stdRatePerCond(i),'color',colors(i,:));
-    plot(i,meanRatePerCond(i),'.','color',colors(i,:));
-end
-ylabel('sum volts_{on}'); 
-set(gca,'xLim',[0 numConditions+1]);
-set(gca,'yLim',[106 108]);
-set(gca,'XTickLabel',conditionNames,'XTick',1:numConditions);
+% subplot(2,2,4); 
+% hold on
+% dur=double(diff(s.targetOnOff));
+% relevantRange=[numUniqueFrames-dur:numUniqueFrames];
+% 
+% meanRateDuringPeriod=sum(fullPhotodiode(:,:,relevantRange)/dur,3);
+% meanRatePerCond=mean(meanRateDuringPeriod,1); % 2 vs 3 check!
+% SEMRatePerCond=std(meanRateDuringPeriod,[],1)/sqrt(numRepeats);
+% stdRatePerCond=std(meanRateDuringPeriod,[],1);
+% for i=1:numConditions
+%     errorbar(i,meanRatePerCond(i),stdRatePerCond(i),'color',colors(i,:));
+%     plot(i,meanRatePerCond(i),'.','color',colors(i,:));
+% end
+% ylabel('sum volts_{on}'); 
+% set(gca,'xLim',[0 numConditions+1]);
+% set(gca,'yLim',[106 108]);
+% set(gca,'XTickLabel',conditionNames,'XTick',1:numConditions);
 

@@ -87,6 +87,8 @@ if ~exist('spikeDetectionParams','var') || isempty(spikeDetectionParams)
 elseif strcmp(spikeDetectionParams.method,'activeSortingParameters')
     % get spikeDetectionParams from activeSortingParameters.mat
     spikeDetectionParams=load(activeParamFile,'spikeDetectionParams');
+elseif strcmp(spikeDetectionParams.method,'activeSortingParametersThisAnalysis')
+    %will load below
 end
 
 if ~exist('spikeSortingParams','var') || isempty(spikeSortingParams)
@@ -161,8 +163,12 @@ if ~isdir(baseAnalysisPath)
 end
 
 % 6/22/09 - should also save activeSortingParameters to a file in the base analysis location!
-save(fullfile(baseAnalysisPath,'activeSortingParams.mat'),'spikeDetectionParams','spikeSortingParams');
-
+if strcmp(spikeDetectionParams.method,'activeSortingParametersThisAnalysis')
+    spikeDetectionParams=load(fullfile(baseAnalysisPath,'activeSortingParams.mat'),'spikeDetectionParams');
+    spikeSortingParams=load(fullfile(baseAnalysisPath,'activeSortingParams.mat'),'spikeSortingParams');
+else
+    save(fullfile(baseAnalysisPath,'activeSortingParams.mat'),'spikeDetectionParams','spikeSortingParams');
+end
 % ==========================================================================================
 
 while ~quit
@@ -227,7 +233,7 @@ while ~quit
     end
     
 %     spikeRecordLocation = fullfile(baseAnalysisPath,sprintf('spikeRecords_%d-%s.mat',currentTrial,timestamp));
-    spikeRecordLocation=fullfile(baseAnalysisPath,'spikeRecords.mat'); % HACK FOR NOW - per cell spikeRecord
+    spikeRecordLocation=fullfile(baseAnalysisPath,'spikeRecords.mat'); % HACK FOR NOW - per cell // per analysis range spikeRecord
     analysisLocation = fullfile(analysisPath,sprintf('physAnalysis_%d-%s.mat',currentTrial,timestamp));
 
     % check the stimRecord for stimManagerClass (and other stuff?)
@@ -246,7 +252,9 @@ while ~quit
         
         while ~doneWithThisTrial
             % look at the neuralRecord and see if there are any new chunks to process
+            disp('checking chunk names... may be slow remotely...'); tic;
             chunkNames=who('-file',neuralRecordLocation);
+            fprintf(' %2.2f seconds',toc)
             chunksToProcess=[];
             for i=1:length(chunkNames)
                 [matches tokens] = regexpi(chunkNames{i}, 'chunk(\d+)', 'match', 'tokens');
@@ -288,7 +296,9 @@ while ~quit
                 numTriesWithNothing=1;
             end
 
-
+            %SORT chunks to processing (they may be alphanumeric, we want by chunk number)
+            chunksToProcess=sort(chunksToProcess,1);
+            
             %disp('*********CHUNKS TO PROCESS*************')
             %currentTrial
             %chunksToProcess
@@ -300,12 +310,16 @@ while ~quit
                 try
                     % =================================================================================
                     chunkStr=sprintf('chunk%d',chunksToProcess(i,2));
-                    fprintf('*********DOING %s*************/n',chunkStr)
+                    fprintf('*********DOING %s*************\n',chunkStr)
                     if i==size(chunksToProcess,1)
                         isLastChunkInTrial=true;  % warning: this could be tripped by online analysis if you analyze an ongoing trial
                         %the reult would be that some stimManagers would
                         %get stimuli that are reported to be "the last of
                         %the trial, but the stim manager can not trust to be full, b/c they are partial trials
+                        %...
+                        %could also be tripped by requesting to analysis
+                        %part of a chunk in the analysis range... in which
+                        %case thats what we want
                     else
                         isLastChunkInTrial=false;
                     end
@@ -362,16 +376,13 @@ while ~quit
                             getFrameTimes(neuralRecord.neuralData(:,1),neuralRecord.neuralDataTimes,neuralRecord.samplingRate,warningBound,errorBound,ifi); % pass in the pulse channel
                         
                         % 6/3/09 - offset each chunk's stimInds by the last stimInd from previous chunk
-                        try
                         spikeRecord.stimInds=spikeRecord.stimInds+startingStimInd;
                         startingStimInd=max(spikeRecord.stimInds);
-                        catch
-                            keyboard
-                        end
-                        
-                        if 0 %for inspecting errors in frames
+ 
+                        if 1 %for inspecting errors in frames
                             figure('position',[100 500 500 500])
-                            inspectFramesPulses(neuralRecord.neuralData,neuralRecord.neuralDataTimes,spikeRecord.frameIndices,'shortest');
+                            inspectFramesPulses(neuralRecord.neuralData,neuralRecord.neuralDataTimes,spikeRecord.frameIndices,'longest');
+                            %inspectFramesPulses(neuralRecord.neuralData,neuralRecord.neuralDataTimes,spikeRecord.frameIndices,'shortest');
                             % first last shortest longest
                         end
 
@@ -406,6 +417,8 @@ while ~quit
                             % 6/3/09 - get integral under photoDiode curve
                             spikeRecord.photoDiode = getPhotoDiode(neuralRecord.neuralData(:,2),spikeRecord.correctedFrameIndices);
                             
+                        
+                           
                             % 11/25/08 - do some post-processing on the spike's assignedClusters ('treatAllNonNoiseAsSpikes', 'largestClusterAsSpikes', etc)                     
                             
                             spikeRecord.spikeDetails = postProcessSpikeClusters(spikeRecord.assignedClusters,spikeRecord.rankedClusters,spikeSortingParams);
@@ -448,14 +461,7 @@ while ~quit
                         % samplingRate
                         % spikeDetails
 
-                        % do some plotting
-                        %                 plot(neuralDataTimes, neuralData(:,1), '-db');
-                        %                 hold on
-                        %                 y2 = ones(1, length(neuralDataTimes))*5;
-                        %                 y2(frameIndices(:,1)) = 0.1;
-                        %                 plot(neuralDataTimes, y2, '.r');
-                        %                 hold off
-
+                      
                         % 4/14/09 - replace the save here with a new save:
                         % - if no spikeRecord file, create one with spikeRecordFields in it
                         % - if already have a spikeRecord file, then append each variable (ie add spikeRecord.spikes to the spikes entry in the spikeRecord, etc)
@@ -518,7 +524,7 @@ while ~quit
 
                         % check that we have spikes
                         if isempty(spikeRecord.assignedClusters)
-                            spikeRecord.passedQualityTest=false;
+                            spikeRecord.passedQualityTest(end)=false;
                         end
                     else % just load existing spikes for this chunk!
                         spikeRecord=stochasticLoad(spikeRecordLocation);
@@ -559,15 +565,30 @@ while ~quit
                     % =================================================================================
                     % now run analysis on spikeRecords and stimRecords
                     % try to get location of analysis file
-                    quality.passedQualityTest=spikeRecord.passedQualityTest;
-                    quality.frameIndices=spikeRecord.frameIndices;
-                    quality.frameTimes=spikeRecord.frameTimes;
-                    quality.frameLengths=spikeRecord.frameLengths;
-                    quality.correctedFrameIndices=spikeRecord.correctedFrameIndices;
-                    quality.correctedFrameTimes=spikeRecord.correctedFrameTimes;
-                    quality.correctedFrameLengths=spikeRecord.correctedFrameLengths;
-                    quality.samplingRate=spikeRecord.samplingRate; % from neuralRecord
-
+                    
+                    %  % deterimine the quality of this chunk file alone (maybe some analysis want this one day, but not needed yet)
+%                     lastChunkQuality.passedQualityTest=spikeRecord.passedQualityTest;
+%                     lastChunkQuality.frameIndices=spikeRecord.frameIndices;
+%                     lastChunkQuality.frameTimes=spikeRecord.frameTimes;
+%                     lastChunkQuality.frameLengths=spikeRecord.frameLengths;
+%                     lastChunkQuality.correctedFrameIndices=spikeRecord.correctedFrameIndices;
+%                     lastChunkQuality.correctedFrameTimes=spikeRecord.correctedFrameTimes;
+%                     lastChunkQuality.correctedFrameLengths=spikeRecord.correctedFrameLengths;
+%                     lastChunkQuality.samplingRate=spikeRecord.samplingRate; % from neuralRecord
+%                     quality.lastChunkQuality=lastChunkQuality;
+                    
+                    %use the cumulative information (not just the last chunks information)
+                    quality.passedQualityTest=passedQualityTest;
+                    quality.frameIndices=frameIndices;
+                    quality.frameTimes=frameTimes;
+                    quality.frameLengths=frameLengths;
+                    quality.correctedFrameIndices=correctedFrameIndices;
+                    quality.correctedFrameTimes=correctedFrameTimes;
+                    quality.correctedFrameLengths=correctedFrameLengths;
+                    quality.samplingRate=samplingRate; % from neuralRecord
+                    quality.chunkIDForCorrectedFrames=spikeRecord.chunkIDForCorrectedFrames;
+                    quality.chunkIDForFrames=spikeRecord.chunkIDForFrames;
+                                            
                     stimRecord=stochasticLoad(stimRecordLocation);
                     evalStr = sprintf('sm = %s();',stimRecord.stimManagerClass);
                     eval(evalStr);
@@ -578,6 +599,13 @@ while ~quit
                     % (manualCmrMotionEyeCal = always do analysis for now - future ignore spikes)
                     analysisExists=exist(analysisLocation,'file');
                     doAnalysis=worthPhysAnalysis(sm,quality,analysisExists,overwriteAll,isLastChunkInTrial);
+                    
+                    
+                    % possible problem:  last chunk lacks frame pulses, and
+                    % gets quality.passedQualityTest=false (not exactly sure how)
+                    % but then the whole analysis never runs, becase the
+                    % last chunk (isLastChunkInTrial=true) is the only
+                    % chance
                     
                     if doAnalysis % 1
                         % do something with loaded information
@@ -752,9 +780,7 @@ if ~exist('numFrames','var') || isempty(numFrames)
     numFrames=6;
 end
 
-
-
-numFramesPad=ceil(numFrames/2)
+numFramesPad=ceil(numFrames/2);
 switch mode
     case {'start','first'}
         which=1+numFrames;
@@ -767,20 +793,34 @@ switch mode
         which=find(shortestFrameLength==diff(frameIndices'))
         timePad=0;
     case 'longest'
-        longestFrameLength=min(unique(diff(frameIndices')));
+        longestFrameLength=max(unique(diff(frameIndices')));
         which=find(longestFrameLength==diff(frameIndices'));
         timePad=0;
     otherwise
         error('bad mode')
 end
 
-ss=frameIndices(which-numFramesPad,1)-timePad;
-ee=frameIndices(which+numFramesPad,1)+timePad;
+which=which(1);  % first one if there is a tie.
 
-hold off
-plot(neuralDataTimes(ss:ee),neuralData(ss:ee,2))
-hold on;
-plot(neuralDataTimes(ss:ee),neuralData(ss:ee,1),'r')
+sss=max(which-numFramesPad,1);
+eee=min(which+numFramesPad,size(frameIndices,1));
+ss=frameIndices(sss)-timePad;
+ee=frameIndices(eee)+timePad;
+
+if ~isempty(frameIndices)
+    hold off
+    plot(neuralDataTimes(ss:ee),neuralData(ss:ee,2))
+    hold on;
+    plot(neuralDataTimes(ss:ee),neuralData(ss:ee,1),'r')
+    
+    plot(neuralDataTimes(frameIndices([sss:eee],1)),ones(1,1+eee-sss),'k.')
+    plot(neuralDataTimes(frameIndices(which,1)),1,'ko')
+else
+    warning('frameIndices is empty... why does that happen?')
+    % maybe the last chunk this trial has no frames in it, b/c maybe
+    % datanet runs past the last frame pulse
+end
+
 end % end function
 
 % ===============================================================================================

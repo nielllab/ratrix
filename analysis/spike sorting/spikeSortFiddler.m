@@ -121,22 +121,21 @@ subjectID = '262';cellBoundary={'trialRange',[75 85]}; % spatial binary
 subjectID = '262';cellBoundary={'trialRange',[128 149]}; % spatial binary
 % subjectID = '262';cellBoundary={'trialRange',[157]}; % flankers, the target and bottom flanker are on the screen
 % subjectID = '262';cellBoundary={'trialRange',[159]}; % SF
-% subjectID = '262';cellBoundary={'trialRange',[172]}; % flankers, 5 lambda
+ subjectID = '262';cellBoundary={'trialRange',[172]}; % flankers, 5 lambda
 % subjectID = 'test1';cellBoundary={'trialRange',[145]}; % test if flankers drop frames (it says they drop every one, but parens are 0) ie.  drops: high(0)
 % subjectID = 'test1';cellBoundary={'trialRange',[155]}; % test if flankers drop frames (it says they drop ~ every 10sec, but parens are 0) ie.  drops: 27(0)
-% subjectID = 'test1';cellBoundary={'trialRange',[162]}; % test if flankers drop frames (some at beginning) ie.  drops: 3(0)
-subjectID = 'test1';cellBoundary={'trialRange',[167]}; % test if flankers drop frames (some at beginning) ie.  drops: 3(0)
-subjectID = 'test1';cellBoundary={'trialRange',[178 180]}; % spatial test
+% subjectID = 'test1';cellBoundary={'trialRange',[162]}; % test if flankers drop frames (some at beginning) ie.  drops: 3(0)% subjectID = 'test1';cellBoundary={'trialRange',[167]}; % test if flankers drop frames (some at beginning) ie.  drops: 3(0)
+% subjectID = 'test1';cellBoundary={'trialRange',[178 180]}; % spatial test
 
-subjectID = '261';cellBoundary={'trialRange',[25]}; % 
-subjectID = '261';cellBoundary={'trialRange',[40]}; % sf
-subjectID = '261';cellBoundary={'trialRange',[42]}; % sparse brighter grid
-subjectID = '261';cellBoundary={'trialRange',[43]}; % horiz bars
-subjectID = '261';cellBoundary={'trialRange',[44]}; % vert bars
-subjectID = '261';cellBoundary={'trialRange',[41]}; % orient
+% subjectID = '261';cellBoundary={'trialRange',[25]}; % 
+% subjectID = '261';cellBoundary={'trialRange',[40]}; % sf
+% subjectID = '261';cellBoundary={'trialRange',[42]}; % sparse brighter grid
+% subjectID = '261';cellBoundary={'trialRange',[43]}; % horiz bars
+% subjectID = '261';cellBoundary={'trialRange',[44]}; % vert bars
+% subjectID = '261';cellBoundary={'trialRange',[41]}; % orient
 % subjectID = '261';cellBoundary={'trialRange',[54 60]}; % binary localized
 % subjectID = '261';cellBoundary={'trialRange',[65]}; % annuli ;  v1
-% subjectID = '261';cellBoundary={'trialRange',[118 121]}; % ffgwn ; 
+ subjectID = '261';cellBoundary={'trialRange',[118 121]}; % ffgwn ; 
 % subjectID = '261';cellBoundary={'trialRange',[127 128]}; % bars ;   move
 % subjectID = '261';cellBoundary={'trialRange',[132 140]}; % binary ; 
 % subjectID = '261';cellBoundary={'trialRange',[142 143]} % binary ; 
@@ -179,5 +178,8 @@ spikeDetectionParams.LFPSamplingRateHz =500;
 
 overwriteAll=0; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
 usePhotoDiodeSpikes=0;
+%spikeDetectionParams.method='activeSortingParametersThisAnalysis';  % will override this files choices with the active params for this *subject*
+%spikeSortingParams.method='activeSortingParametersThisAnalysis';
+
 analysisManagerByChunk(subjectID, path, cellBoundary, spikeDetectionParams, spikeSortingParams,...
     timeRangePerTrialSecs,stimClassToAnalyze,overwriteAll,usePhotoDiodeSpikes)

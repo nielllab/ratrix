@@ -1,11 +1,4 @@
-%compare blocked vs. paper rats
-
-
-
-%subjects={'228','227','230','233','234','138','139'}; %in paper
-%subjects={'228','227','230','233','234','138','139'}; %have blocked data post paper
-%subjects={'227', '229', '230', '237', '232', '233'}; %many flank types, 5 contrasts
-%subjects={'138','139', '228','277'}; %many flanks, one contrast  -- can these be directly compared to interleaved trials?
+%compare 231 before (10 msec delay to t/f) to after (210msec delay to t/f)
 
 
          %%
@@ -57,4 +50,13 @@
          [stats CI names params]= getFlankerStats({'231'},'allPhantomTargetContrastsCombined',[],filter,dateRange);
          doHitFAScatter(stats,CI,names,params);
          
+         
+         %%
+         figure;
+         
+         subplot(2,2,1); hist(d16.actualTargetOnsetTime); title('delay before')
+         subplot(2,2,2); hist(d16.actualTargetOnSecs);title('duration before')
+          subplot(2,2,3); hist(d17.actualTargetOnsetTime); title('delay after') % correctly different
+           subplot(2,2,4); hist(d17.actualTargetOnSecs); title('duration after') % correctly the same
+
          

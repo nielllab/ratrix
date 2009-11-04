@@ -171,6 +171,16 @@ subjectID = '262';cellBoundary={'trialRange',[128 149]}; % spatial binary
 % subjectID = '261';cellBoundary={'trialRange',[406 408]} % bin grid
 % subjectID = '261';cellBoundary={'trialRange',[415]} % bin grid
 
+
+subjectID = '138';cellBoundary={'trialRange',[8 12]} % ffgwn
+subjectID = '138';cellBoundary={'trialRange',[13 20]} % ffgwn
+subjectID = '138';cellBoundary={'trialRange',[25 29]} % ffgwn,  new pen, new cell
+subjectID = '138';cellBoundary={'trialRange',[31]} % sf,  very broad drives it
+subjectID = '138';cellBoundary={'trialRange',[37 47]} % sf,  very broad drives it
+subjectID = '138';cellBoundary={'trialRange',[53]} % sparse bin
+subjectID = '138';cellBoundary={'trialRange',[54 58]} % bars h
+
+
 spikeDetectionParams.detectionMethod=3; % 1 -> from power signal, 2 threshold positive, 3 threshold negative, 4 threshold abs, 5 wavelet
 spikeDetectionParams.extractionThreshold =10;
 spikeDetectionParams.sampleLFP = false; %true;

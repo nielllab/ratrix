@@ -32,7 +32,7 @@ if ~fileGood
         
         dropTimes=frameDropReport(nominalSecondsPerFrame,thesePulses,prefix,name,stimT,tStim,expandedStim,expandedBins,origPulses);
         
-        [uniqueStimVals,repeatStimVals,uniqueTimes,repeatTimes,uniqueColInds,repeatColInds,binnedVals,binnedT,bestBinOffsets,phys,physT]=findRepeats(stimType,stimVals,nominalSecondsPerFrame,binVals,prefix,name,thesePulses,binT,physT,phys,binsPerSec);
+        [uniqueStimVals,repeatStimVals,uniqueTimes,repeatTimes,uniqueColInds,repeatColInds,binnedVals,binnedT,bestBinOffsets,phys,physT]=findRepeats(stimBreaks,stimType,stimVals,nominalSecondsPerFrame,binVals,prefix,name,thesePulses,binT,physT,phys,binsPerSec);
         
     else
         uniqueStimVals=[];
@@ -45,18 +45,19 @@ if ~fileGood
         binnedT=[];
         bestBinOffsets=[];
         dropTimes=[];
+        stimBreaks=[];
     end
     
     % doWaveforms(baseDir,params.base,params.spkChan,params.spkCode);
     
     % clear stim;
     
-    save(fileNames.targetFile,'binsPerSec','uniqueStimVals','repeatStimVals','uniqueTimes','repeatTimes','uniqueColInds','repeatColInds','dropTimes','binnedVals','binnedT','bestBinOffsets','phys','physT');
+    save(fileNames.targetFile,'binsPerSec','uniqueStimVals','repeatStimVals','uniqueTimes','repeatTimes','uniqueColInds','repeatColInds','dropTimes','binnedVals','binnedT','bestBinOffsets','phys','physT','stimBreaks');
 end
 
 end
 
-function [uniqueStimVals,repeatStimVals,uniqueTimes,repeatTimes,uniqueColInds,repeatColInds,binnedVals,binnedT,bestBinOffsets,physVals,physT]=findRepeats(stimType,stimVals,nominalSecondsPerFrame,binVals,pth,name,boundaries,binT,physTms,phys,binsPerSec)
+function [uniqueStimVals,repeatStimVals,uniqueTimes,repeatTimes,uniqueColInds,repeatColInds,binnedVals,binnedT,bestBinOffsets,physVals,physT]=findRepeats(stimBreaks,stimType,stimVals,nominalSecondsPerFrame,binVals,pth,name,boundaries,binT,physTms,phys,binsPerSec)
 test=false;
 if test
     numrpts=10.3;
@@ -67,12 +68,6 @@ if test
 end
 
 stimMins = nominalSecondsPerFrame * length(stimVals) / 60;
-
-f=figure;
-fprintf('\t\tstarting xcorr...')
-[xc b]=xcorr(stimVals);
-fprintf('done')
-xInd=(length(xc)+1)/2;
 
     function giveup
         plot(b(xInd:end),rptStrength)
@@ -104,48 +99,59 @@ xInd=(length(xc)+1)/2;
         end
     end
 
-rptStrength=[0; diff(xc(xInd:end))];
-thresh=.6;
-potentials=find(rptStrength>thresh*max(rptStrength));
-
-if length(potentials)~=1
-    if strcmp(stimType,'sinusoid')
-        
-        potentials=[];
-        threshs=.7:-.1:.3;
-        threshNum=0;
-        while length(potentials)<15 && threshNum<length(threshs)
-            threshNum=threshNum+1;
-            thresh=threshs(threshNum);
-            potentials=find(rptStrength>thresh*max(rptStrength));
-        end
-        
-        
-        tmp=sort(diff(potentials));
-        tmp=tmp(end);
-        potentials=potentials(potentials>.75*tmp & potentials<1.25*tmp);
-        %         if mod(length(potentials),2)==1
-        %             rptFrames=potentials(ceil(length(potentials)/2));
-        %         else
-        %             error('shouldn''t it be odd?')
-        %         end
-        [garbage winner]=sort(rptStrength(potentials));
-        rptFrames=potentials(winner(end))-1;
-        if rptFrames*nominalSecondsPerFrame < 1
-            giveup;
-            return
+f=figure;
+if isempty(stimBreaks)
+    fprintf('\t\tstarting xcorr...')
+    [xc b]=xcorr(stimVals);
+    fprintf('done')
+    xInd=(length(xc)+1)/2;
+    
+    rptStrength=[0; diff(xc(xInd:end))];
+    thresh=.6;
+    potentials=find(rptStrength>thresh*max(rptStrength));
+    
+    if length(potentials)~=1
+        if strcmp(stimType,'sinusoid')
+            
+            potentials=[];
+            threshs=.7:-.1:.3;
+            threshNum=0;
+            while length(potentials)<15 && threshNum<length(threshs)
+                threshNum=threshNum+1;
+                thresh=threshs(threshNum);
+                potentials=find(rptStrength>thresh*max(rptStrength));
+            end
+            
+            
+            tmp=sort(diff(potentials));
+            tmp=tmp(end);
+            potentials=potentials(potentials>.75*tmp & potentials<1.25*tmp);
+            %         if mod(length(potentials),2)==1
+            %             rptFrames=potentials(ceil(length(potentials)/2));
+            %         else
+            %             error('shouldn''t it be odd?')
+            %         end
+            [garbage winner]=sort(rptStrength(potentials));
+            rptFrames=potentials(winner(end))-1;
+            if rptFrames*nominalSecondsPerFrame < 1
+                giveup;
+                return
+            end
+        else
+            potentials=potentials-1;
+            rptFrames=min(potentials);
+            if .5 > sum(nearInt(potentials/rptFrames))/length(potentials)
+                giveup;
+                return
+            end
         end
     else
-        potentials=potentials-1;
-        rptFrames=min(potentials);
-        if .5 > sum(nearInt(potentials/rptFrames))/length(potentials)
-            giveup;
-            return
-        end
+        rptFrames=b(xInd+potentials-1);
     end
 else
-    rptFrames=b(xInd+potentials-1);
+    rptFrames=round(median(diff(stimBreaks))/nominalSecondsPerFrame);
 end
+
 fprintf(' wrapping...')
 repeatStimVals= wrap(stimVals,rptFrames,0,true);
 fprintf('done')
@@ -164,7 +170,7 @@ succStr=sprintf('(%g repeats of %g mins each).',length(binT)/binsPerSec/(rptFram
 fprintf(['\tfound ' succStr '!\n'])
 
 fprintf('\t\tnormalizing',numRepeats)
-    
+
 repeatStarts=repeatTimes(1,:);
 binVals=normalize(binVals);
 
@@ -373,7 +379,7 @@ else
     title(sprintf('binned at %g hz',binsPerSec))
     
     saveas(f,fullfile(pth,['overlayed repeats.' succStr name '.fig']));
-    close(f)    
+    close(f)
 end
 
 if false % uniquesEvery > 0
@@ -1062,6 +1068,8 @@ switch rec.display_type
         switch rec.pulse_type
             case 'double'
                 
+                warning('new experiments shold use the index or LED protocols (for description, see scanTriple.m)')
+                
                 if strcmp(rec.stimPulseChan,'X') && strcmp(rec.framePulseChan,'X')
                     rec.framePulseChan=2; %a hack
                 elseif ~all(strcmp({rec.indexPulseChan,rec.phasePulseChan,rec.stimPulseChan},'none'))
@@ -1136,12 +1144,23 @@ switch rec.display_type
                 
             case 'triple'
                 
+                warning('new experiments shold use the index or LED protocols (for description, see scanTriple.m)')
+                
                 if ~all(strcmp({rec.indexPulseChan},'none'))
                     error('inconsistent pulse type')
                 end
                 
                 [frameTimes origPulses]=scanTriple(pulseFile,rec.framePulseChan,rec.stimPulseChan,rec.phasePulseChan,pulseTimes);
-                pulseOffsetPct = 0; 
+                pulseOffsetPct = 0;
+            case 'index'
+                 if pulseTimes(1)==3182.599 && ~isempty(findstr(pulseFile,'8d2b23279f87853a7c63e4ab0ed38b8b150c317d')) %hack - this needs to be fixed in spreadsheet -- currently starts mid-index pulse
+                     pulseTimes(1)=3182.597;
+                 end
+                
+                [frameTimes origPulses stimBreaks]=scanTriple(pulseFile,rec.framePulseChan,rec.stimPulseChan,rec.phasePulseChan,pulseTimes, rec.indexPulseChan);
+                
+                pulseOffsetPct = 0;
+                
             otherwise
                 error('unknown protocol')
         end
@@ -1279,9 +1298,9 @@ for fig=1:numFigs
     f=figure;
     for winNum=winNum+1:min(length(dropWins),winNum+maxRowsPerFig)
         if fig>5 && fig<numFigs
-            skipS='(skipping)';
+            skip=true;
         else
-            skipS=[];
+            skip=false;
             subplot(maxRowsPerFig,1,mod(winNum-1,maxRowsPerFig)+1)
             
             tRange=dropWins{winNum}(1)+contextSecs*[-1 1];
@@ -1310,7 +1329,9 @@ for fig=1:numFigs
             ylim([0 1.1])
         end
     end
-    saveas(f,fullfile(pth,['drop report.' sprintf('(%d%s of %d - %d total drops).',fig,skipS,numFigs,numDrops) name '.fig']));
+    if ~skip
+        saveas(f,fullfile(pth,['drop report.' sprintf('(%d of %d - %d total drops).',fig,numFigs,numDrops) name '.fig']));
+    end
     close(f)
 end
 fprintf('\tframe drop report done: %d drops\n',length(dropTimes))

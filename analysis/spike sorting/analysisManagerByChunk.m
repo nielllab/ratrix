@@ -426,6 +426,13 @@ while ~quit
                             end
                         end
                         
+                        %LFP resampling
+                        if spikeDetectionParams.sampleLFP
+                            spikeRecord.LFPData = resample(neuralRecord.neuralData(:,3),spikeDetectionParams.LFPSamplingRateHz,neuralRecord.samplingRate);
+                            spikeRecord.LFPDataTimes = linspace(neuralRecord.neuralDataTimes(1),neuralRecord.neuralDataTimes(end),length(spikeRecord.LFPData));
+                        end
+                            
+                        
                         spikeRecord.chunkID=ones(length(spikeRecord.spikes),1)*chunksToProcess(i,2);
                         spikeRecord.chunkIDForCorrectedFrames=ones(length(spikeRecord.stimInds),1)*chunksToProcess(i,2);
                         spikeRecord.chunkIDForFrames=ones(size(spikeRecord.frameIndices,1),1)*chunksToProcess(i,2);

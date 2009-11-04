@@ -183,6 +183,14 @@ switch mode
         dispStrs=fliplr(dispStrs);
     case 'grouper'
         for i=length(toShow):-1:1
+            % unable to comprehend why toshow is not a string! HACKING AWAY
+            if ~ischar(toShow(i).eventType)
+                toShow(i)
+                toShow(i).eventType
+                warning('eventType is empty. Resetting it with a warning')
+                toShow(i).eventType = 'WARNING:empty event';
+            end
+            
             switch toShow(i).eventType
                 case {'comment','top of fluid','top of brain','ctx cell','hipp cell','deadzone','theta chatter','visual hash','visual cell',...
                         'electrode bend','clapping','rat obs','anesth check'}
@@ -196,6 +204,10 @@ switch mode
                     if strcmp(toShow(i).eventType,'trial start') % also have trialNumber
                         str=sprintf('%s #%d',str,toShow(i).eventParams.trialNumber);
                     end
+                case {'WARNING:empty event'}
+                    % this is a hack to deal with empty eventType. deal
+                    % with this later.
+                    str=sprintf('%g --- %d  %s',labels(i),toShow(i).eventNumber,toShow(i).eventType);
                 otherwise
                     toShow(i)
                     error('unrecognized event type');

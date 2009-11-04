@@ -905,34 +905,74 @@ quickPlotButton = uicontrol(f,'Style','pushbutton','String','quick plot','Visibl
     'FontWeight','normal','HorizontalAlignment','center','CallBack',@quickPlot, ...
     'Position',[2*margin+8*fieldWidth fHeight-23*oneRowHeight-2*margin fieldWidth oneRowHeight]);
     function quickPlot(source,eventdata)
+        
         %p=vertcat(events_data.position);
         %plot3(p(:,1),p(:,2),p(:,3),'k.')
         
-        ALL=true(1,length(events_data));
-        TOB=ismember({events_data.eventType},{'top of brain'});
-        VIS=ismember({events_data.eventType},{'visual cell','visual hash'});
-        CELL=ismember({events_data.eventType},{'ctx cell','hipp cell','visual cell'});
-        BEND=ismember({events_data.eventType},{'electrode bend'});
-        %get the last defined position in the list 
-        CURRENT= false(1,length(events_data))  % this is the start of the logicals
-        candidates=find( ~cellfun('isempty',{events_data.position})  )
+        % there are some empty eventType records. i am working around them
+        if ~isempty(cellfun(@isempty,{events_data.eventType}))
+            warning('empty evetTypes in event_data. will remove same for quickPlot');
+        end
+        events_dataNoEmpty = events_data(find(~cellfun(@isempty,{events_data.eventType})));
+        
+%         REMOVE COMMENTS AFTER DE-BUGGING EMPTY EVENT_DATA TYPES
+%         ALL=true(1,length(events_data));
+%         TOB=ismember({events_data.eventType},{'top of brain'});
+%         VIS=ismember({events_data.eventType},{'visual cell','visual hash'});
+%         CELL=ismember({events_data.eventType},{'ctx cell','hipp cell','visual cell'});
+%         BEND=ismember({events_data.eventType},{'electrode bend'});
+%         %get the last defined position in the list 
+%         CURRENT= false(1,length(events_data))  % this is the start of the logicals
+%         candidates=find( ~cellfun('isempty',{events_data.position})  )
+%         % next:  find the cands that are not nan ... problem:  all apear to
+%         % be nan?  not true
+%         CURRENT(max())=true;
+%         % cellfun(@(x) any(isnan(x)),{events_data.position}) &  % that is
+%         % not a nan .. prob is need to add back in
+%         
+%         g=figure;
+%         levelToTopOfBrain=false;
+%         plotInBregmaCoordinates(events_data,ALL,'.k',[1 1 1 1],levelToTopOfBrain);
+%         hold on;
+%         plotInBregmaCoordinates(events_data,TOB,'ok',[],levelToTopOfBrain);
+%         plotInBregmaCoordinates(events_data,VIS,'c.',[],levelToTopOfBrain);
+%         plotInBregmaCoordinates(events_data,CELL,'b*',[],levelToTopOfBrain);
+%         plotInBregmaCoordinates(events_data,CELL & VIS,'r*',[],levelToTopOfBrain);
+%         plotInBregmaCoordinates(events_data,BEND,'xr',[],levelToTopOfBrain);
+%         plotInBregmaCoordinates(events_data,CURRENT,'og',[],levelToTopOfBrain);
+%         
+%         xlabel('posterior');
+%         ylabel('lateral');
+%         zlabel('depth');
+%         grid on;
+%         set(gca,'View',[240 60])
+%         set(gca,'YDir','reverse');  %why?  thats just the way it is in plot3
+
+        ALL=true(1,length(events_dataNoEmpty));
+        TOB=ismember({events_dataNoEmpty.eventType},{'top of brain'});
+        VIS=ismember({events_dataNoEmpty.eventType},{'visual cell','visual hash'});
+        CELL=ismember({events_dataNoEmpty.eventType},{'ctx cell','hipp cell','visual cell'});
+        BEND=ismember({events_dataNoEmpty.eventType},{'electrode bend'});
+        %get the last defined position in the list
+        CURRENT= false(1,length(events_dataNoEmpty));  % this is the start of the logicals
+        candidates=find( ~cellfun('isempty',{events_dataNoEmpty.position})  );
         % next:  find the cands that are not nan ... problem:  all apear to
         % be nan?  not true
-        CURRENT(max())=true;
+        %CURRENT(max())=true;
         % cellfun(@(x) any(isnan(x)),{events_data.position}) &  % that is
         % not a nan .. prob is need to add back in
-        
+
         g=figure;
         levelToTopOfBrain=false;
-        plotInBregmaCoordinates(events_data,ALL,'.k',[1 1 1 1],levelToTopOfBrain);
+        plotInBregmaCoordinates(events_dataNoEmpty,ALL,'.k',[1 1 1 1],levelToTopOfBrain);
         hold on;
-        plotInBregmaCoordinates(events_data,TOB,'ok',[],levelToTopOfBrain);
-        plotInBregmaCoordinates(events_data,VIS,'c.',[],levelToTopOfBrain);
-        plotInBregmaCoordinates(events_data,CELL,'b*',[],levelToTopOfBrain);
-        plotInBregmaCoordinates(events_data,CELL & VIS,'r*',[],levelToTopOfBrain);
-        plotInBregmaCoordinates(events_data,BEND,'xr',[],levelToTopOfBrain);
-        plotInBregmaCoordinates(events_data,CURRENT,'og',[],levelToTopOfBrain);
-        
+        plotInBregmaCoordinates(events_dataNoEmpty,TOB,'ok',[],levelToTopOfBrain);
+        plotInBregmaCoordinates(events_dataNoEmpty,VIS,'c.',[],levelToTopOfBrain);
+        plotInBregmaCoordinates(events_dataNoEmpty,CELL,'b*',[],levelToTopOfBrain);
+        plotInBregmaCoordinates(events_dataNoEmpty,CELL & VIS,'r*',[],levelToTopOfBrain);
+        plotInBregmaCoordinates(events_dataNoEmpty,BEND,'xr',[],levelToTopOfBrain);
+        %plotInBregmaCoordinates(events_dataNoEmpty,CURRENT,'og',[],levelToTopOfBrain);
+
         xlabel('posterior');
         ylabel('lateral');
         zlabel('depth');

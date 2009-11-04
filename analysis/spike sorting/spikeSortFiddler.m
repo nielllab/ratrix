@@ -174,7 +174,10 @@ subjectID = '261';cellBoundary={'trialRange',[41]}; % orient
 
 spikeDetectionParams.detectionMethod=3; % 1 -> from power signal, 2 threshold positive, 3 threshold negative, 4 threshold abs, 5 wavelet
 spikeDetectionParams.extractionThreshold =10;
-overwriteAll=1; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
+spikeDetectionParams.sampleLFP = false; %true;
+spikeDetectionParams.LFPSamplingRateHz =500;
+
+overwriteAll=0; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
 usePhotoDiodeSpikes=0;
 analysisManagerByChunk(subjectID, path, cellBoundary, spikeDetectionParams, spikeSortingParams,...
     timeRangePerTrialSecs,stimClassToAnalyze,overwriteAll,usePhotoDiodeSpikes)

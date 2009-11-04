@@ -1165,7 +1165,64 @@ switch rec.display_type
                 error('unknown protocol')
         end
     case 'led'
-        error('not implemented')
+        if ~all(strcmp({rec.framePulseChan,rec.phasePulseChan,rec.stimPulseChan},'none')) || ~strcmp(rec.pulse_type,'led')
+            error('inconsistent pulse type')
+        end
+        
+        % example pulse file:
+        %
+        % %CHANNEL%       %9%
+        %
+        % 6123.743655
+        % 6141.744280
+        % 6159.744905
+        % 6177.745530
+        % 6195.746130
+        % 6213.746755
+        
+        try
+            [fid msg]=fopen(pulseFile,'rt');
+            if ~isempty(msg)
+                msg
+            end
+            
+            if fid>2
+                
+                chanForm='%% CHANNEL %% %% %u8 %%';
+                C = textscan(fid,chanForm,1);
+                
+                if isscalar(C)
+                    if C{1}~= rec.indexPulseChan
+                        error('wrong chan')
+                    end
+                else
+                    error('bad chan')
+                end
+                
+            else
+                error('no file')
+            end
+            error('finally')
+        catch ex
+            if exist('fid','var')
+                s=fclose(fid);
+                if s
+                    error('fclose error')
+                end
+            end
+            
+            if ~strcmp(ex.message,'finally')
+                rethrow(ex)
+            end
+        end
+
+        stimBreaks = load(pulseFile);
+        stimBreaks = stimBreaks(stimBreaks>=pulseTimes(1) & stimBreaks<=pulseTimes(2));
+        
+        frameTimes=[pulseTimes(1):.001:pulseTimes(2)]';
+        origPulses=frameTimes;
+        
+        pulseOffsetPct = 0;
     otherwise
         error('unknown dispType')
 end

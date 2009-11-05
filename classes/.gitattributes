@@ -267,3 +267,5 @@ protocols/stimManagers/@movies/moreStim.m -text
 protocols/stimManagers/@movies/drawExpertFrame.m -text
 protocols/stimManagers/@movies/decache.m -text
 protocols/stimManagers/@movies/stationOKForStimManager.m -text
+protocols/reinforcementManagers/@asymetricReinforcement/calcReinforcement.m -text
+protocols/reinforcementManagers/@asymetricReinforcement/asymetricReinforcement.m -text

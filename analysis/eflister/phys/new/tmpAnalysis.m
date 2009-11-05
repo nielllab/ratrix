@@ -21,8 +21,15 @@ switch stimType
         
         %       targs{end+1}='/Volumes/Maxtor One Touch II/eflister phys/phys analysis/188/04.23.09/a7e4526229bb5cd78d91e543fc4a0125360ea849/2.gaussian.z.38.26.t.30.292-449.144.chunk.1.a7e4526229bb5cd78d91e543fc4a0125360ea849';
         targs{end+1}='/Volumes/Maxtor One Touch II/eflister phys/phys analysis/164/04.15.09/acf4f35b54186cd6055697b58718da28e7b2bf80/3.gaussian.z.47.34.t.2042.38-4641.chunk.1.acf4f35b54186cd6055697b58718da28e7b2bf80';
+        targs{end+1}='/Volumes/Maxtor One Touch II/eflister phys/phys analysis/164/04.17.09/89493235e157403e6bad4b39b63b1c6234ea45dd/5.gaussian.z.47.88.t.3891.4-4941.chunk.2.89493235e157403e6bad4b39b63b1c6234ea45dd';
+        targs{end+1}='/Volumes/Maxtor One Touch II/eflister phys/phys analysis/188/04.23.09/4b45921ce9ef4421aa984128a39f2203b8f9a381/6.gaussian.z.38.885.t.3683.44-4944.05.chunk.3.4b45921ce9ef4421aa984128a39f2203b8f9a381';
+
+        %these died cuz the code needs to be fixed to be safe for the
+        %case of zero bursts -- i didn't save the figs yet
+        targs{end+1}='/Volumes/Maxtor One Touch II/eflister phys/phys analysis/188/04.23.09/a7e4526229bb5cd78d91e543fc4a0125360ea849/2.gaussian.z.38.26.t.30.292-449.144.chunk.1.a7e4526229bb5cd78d91e543fc4a0125360ea849';
+        targs{end+1}='/Volumes/Maxtor One Touch II/eflister phys/phys analysis/188/04.23.09/a7e4526229bb5cd78d91e543fc4a0125360ea849/6.gaussian.z.38.26.t.1269.03-2739.63.chunk.1.a7e4526229bb5cd78d91e543fc4a0125360ea849';
         
-        if ismember(prefix,targs)
+        if ~ismember(prefix,targs) && index
             doAnalysis(fileNames,stimTimes,rec,spks,stimType,rate)
         end
     case {'sinusoid','sinusoid(new)'}
@@ -39,8 +46,15 @@ end
 function doAnalysis(fileNames,stimTimes,rec,spks,stimType,hz)
 [stim,phys,rptStarts]=extractData(fileNames,stimTimes,rec);
 
+% spectralAnalysis(phys(1,:),phys(2,:));
+
+pHz=1/median(diff(phys(2,:)));
+freqs=1:50;
+spectrogram(phys(1,:),round(pHz),[],freqs,pHz,'yaxis');
+q=gcf;
+
 pre=.1;
-inter=.01;%.004;
+inter=.004;
 ref=.002;
 
 bsts=spks([false ; (diff(spks)>=pre & [inter>=diff(spks(2:end)) ; false])  ]);
@@ -78,11 +92,46 @@ end
 bstNotFst=bstNotFst(~isnan(bstNotFst));
 tonics=setdiff(spks,[bsts ; bstNotFst']);
 
-g=figure;
-title('spikes per burst')
-hist(bstLens,0:15)
+physPreMS=300;
+stimPreMS=300;
+stimPostMS=30;
 
-keyboard
+tSTL=calcSTA(tonics,phys,physPreMS,physPreMS);
+tSTS=calcSTA(tonics,stim,stimPreMS,stimPostMS);
+bSTL=calcSTA(bsts,phys,physPreMS,physPreMS);
+bSTS=calcSTA(bsts,stim,stimPreMS,stimPostMS);
+
+j=figure;
+subplot(2,1,1)
+plot(tSTS(2,:),tSTS(1,:),'k')
+hold on
+plot(bSTS(2,:),bSTS(1,:),'r')
+xlabel('ms')
+title('triggered stim')
+
+subplot(2,1,2)
+plot(tSTL(2,:),tSTL(1,:),'k')
+hold on
+plot(bSTL(2,:),bSTL(1,:),'r')
+xlabel('ms')
+title('triggered LFP')
+
+preBstMS=20;
+bstDurMS=40;
+bstDetail=getRangeFromChunks(fileNames.physFile,bsts*1000-preBstMS,bstDurMS+preBstMS);
+
+g=figure;
+hist(bstLens,0:15)
+title('spikes per burst')
+
+h=figure;
+bstD=bstDetail(:,:,2)';
+bstD=bstD-repmat(min(bstD),size(bstD,1),1);
+bstD=bstD./repmat(max(bstD),size(bstD,1),1);
+bstD=bstD+repmat(.4*(1:size(bstD,2)),size(bstD,1),1);
+plot(bstDetail(1,:,1)-bstDetail(1,1,1)-preBstMS,bstD(:,1:min(150,size(bstD,2))),'k')
+title(sprintf('%d raw burst traces',size(bstDetail,1)))
+xlabel('ms')
 
 if ~isempty(rptStarts)
     missed=.01 < abs(1 - diff(rptStarts)/median(diff(rptStarts)));
@@ -140,20 +189,69 @@ if ~isempty(rptStarts)
     end
     xlim([0 maxTime])
     
-    if false
+    if true
         [ratID date type uid hash]=parseFileName(fileNames.targetFile,stimType);
         outDir='/Users/eflister/Desktop/committee';
         
         imName=fullfile(outDir,[type '.' num2str(size(block,1)) 'rpts.' ratID '.' date '.raster.']); %will clash if same stim recorded on same date with same rat or if another cell recorded at same time
-        fprintf('\tsaving png\n')
+        fprintf('\tsaving raster png\n')
         saveas(f,[imName 'png'])
-        fprintf('\tsaving fig\n')
+        fprintf('\tsaving raster fig\n')
         saveas(f,[imName 'fig'])
         close(f)
+        
+        imName=fullfile(outDir,[type '.' sprintf('%.1f',(stimTimes(2)-stimTimes(1))/60) 'mins.' ratID '.' date '.spec.']); %will clash if same stim recorded on same date with same rat or if another cell recorded at same time
+        fprintf('\tsaving spec png\n')
+        saveas(q,[imName 'png'])
+        fprintf('\tsaving spec fig\n')
+        saveas(q,[imName 'fig'])
+        close(q)
+        
+        imName=fullfile(outDir,[type '.' ratID '.' date '.STA.']); %will clash if same stim recorded on same date with same rat or if another cell recorded at same time
+        fprintf('\tsaving sta png\n')
+        saveas(j,[imName 'png'])
+        fprintf('\tsaving sta fig\n')
+        saveas(j,[imName 'fig'])
+        close(j)
+        
+        imName=fullfile(outDir,[type '.' ratID '.' date '.bst dur hist.']); %will clash if same stim recorded on same date with same rat or if another cell recorded at same time
+        fprintf('\tsaving bst dur hist png\n')
+        saveas(g,[imName 'png'])
+        fprintf('\tsaving bst dur hist fig\n')
+        saveas(g,[imName 'fig'])
+        close(g)
+        
+        imName=fullfile(outDir,[type '.' ratID '.' date '.raw burst traces.']); %will clash if same stim recorded on same date with same rat or if another cell recorded at same time
+        fprintf('\tsaving raw burst png\n')
+        saveas(h,[imName 'png'])
+        fprintf('\tsaving raw burst fig\n')
+        saveas(h,[imName 'fig'])
+        close(h)
     else
         keyboard
     end
 end
+end
+
+function sta=calcSTA(trigTs,stim,preMS,postMS)
+trigs=trigTs(trigTs>stim(2,1)+preMS/1000 & trigTs<stim(2,end)-postMS/1000);
+
+timestep=median(diff(stim(2,:)));
+
+trigs=1+floor((trigs-stim(2,1))/timestep);
+
+preBin=floor(preMS/1000/timestep);
+postBin=floor(postMS/1000/timestep);
+tinds=-preBin:postBin;
+
+inds=repmat(tinds,length(trigs),1)+repmat(trigs,1,length(tinds));
+
+vals=stim(1,:);
+vals=vals(inds);
+vals=vals-repmat(mean(vals')',1,length(tinds)); %legit?
+
+sta=mean(vals);
+sta=[sta;tinds*timestep*1000];
 end
 
 function [ratID date type uid hash]=parseFileName(f,exType)
@@ -299,3 +397,106 @@ end
 % if any(.01 < abs(1 - diff(stimT)/median(diff(stimT))))
 %     error('stimT error')
 % end
+
+function spectralAnalysis(data,t)
+if true
+    
+    p=.95;
+    winDur = .1;
+    
+    hz=1/median(diff(t));
+    
+    figure
+    params.Fs=hz;
+    params.err=[2 p]; %0 for none, [1 p] for theoretical(?), [2 p] for jackknife
+    [garbage,garbage,garbage,garbage,garbage,garbage,params]=getparams(params);
+    params
+    
+    movingwin=[winDur winDur]; %[window winstep] (in secs)
+    
+    if false
+        figure
+        subplot(4,1,1)
+        fprintf('chronux coh w/err:')
+        tic
+        [C,phi,S12,S1,S2,t,f,zerosp,confC,phistd,Cerr]=cohgramcpt(data,spks,movingwin,params,0);
+        toc
+        
+        C(repmat(logical(zerosp),1,size(C,2)))=0;
+        gram(C',t,f,'lin');
+        title('coherence')
+        
+        subplot(4,1,2)
+        gram(squeeze(Cerr(1,:,:))',t,f,'lin');
+        title('chronux bottom err')
+        subplot(4,1,3)
+        gram(squeeze(Cerr(2,:,:))',t,f,'lin');
+        title('chronux top err')
+        
+        subplot(4,1,4)
+        gram(phi',t,f,'lin');
+        title('chronux phase')
+    end
+    
+    if false
+        fprintf('chronux w/err: \t')
+        tic
+        [S,t,f,Serr]=mtspecgramc(data,movingwin,params); %takes 180 sec for 5 mins @ 40kHz
+        toc
+        
+        figure
+        subplot(2,1,1)
+        plotSpecGram(squeeze(Serr(1,:,:))',t,f,'log');
+        title('chronux bottom err')
+        subplot(2,1,2)
+        plotSpecGram(squeeze(Serr(2,:,:))',t,f,'log');
+        title('chronux top err')
+        
+        figure
+        subplot(3,1,1)
+        plotSpecGram(S',t,f,'log');
+        title('chronux w/err')
+    else
+        figure
+    end
+    
+    params.err=0;
+    
+    fprintf('chronux w/o err:')
+    tic
+    [S,t,f]=mtspecgramc(data,movingwin,params); %takes ? sec for 5 mins @ 40kHz
+    toc
+    t2=t;
+    
+    subplot(3,1,2)
+    plotSpecGram(S',t,f,'log');
+    title('chronux w/o err')
+    
+    
+    fprintf('spectrogram: \t')
+    tic
+    [stft,f2,t,S] = spectrogram(data,round(movingwin(1)*hz),round(hz*(movingwin(1)-movingwin(2))),f,hz); % takes ? sec for 5 mins @ 40kHz
+    toc
+    
+    if ~all(f2(:)==f(:))
+        error('f error')
+    end
+    
+    subplot(3,1,3)
+    plotSpecGram(S,t,f,'log');
+    title('spectrogram')
+    keyboard
+end
+end
+
+function plotSpecGram(S,t,f,type)
+if any(S(:)<0)
+    error('not expecting negative S')
+end
+gram(10*log10(abs(S)+eps),t,f,type); %this code for plotting log psd is from matlab's spectrogram, chronux's plot_matrix uses similar, but without abs or eps
+
+%    set(gca,'XTick',-pi:pi/2:pi)
+%    set(gca,'XTickLabel',{'-pi','-pi/2','0','pi/2','pi'})
+
+%    ytick
+end

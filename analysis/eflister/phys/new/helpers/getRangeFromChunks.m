@@ -104,7 +104,9 @@ out(ord,:,:)=out;
 if any(isnan(out(:)))
     error('got a nan')
 end
+if false
 plot(diff(out(:,:,1)')) %reveals a 1% error at chunk transitions -- why?  i can't find the cause...
+end
 end
 
 function x=flatten(x) %cuz matlab won't let you (:) on a slice

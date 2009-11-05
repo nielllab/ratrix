@@ -435,3 +435,8 @@ pmm/qIsThereAnEffectOfDelay.m -text
 pmm/staticPopulationResponseSpeculation.m -text
 pmm/peekAtBlocked.m -text
 pmm/qIsBlockBlockedSameAsInterLeaved-flankerEffect.m -text
+eye/getEyeRecords.m -text
+pmm/my_yticklabels.m -text
+pmm/figurePrintSizeTest.m -text
+pmm/getMichealsonContrast.m -text
+/saveFigs.m -text

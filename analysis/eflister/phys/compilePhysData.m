@@ -1,60 +1,63 @@
-function compilePhysData(fileNames,stimTimes,pulseTimes,rec,stimType,targetBinsPerSec,force)
-keyboard
+function compilePhysData(fileNames,stimTimes,pulseTimes,rec,stimType,targetBinsPerSec,force,figureBase,analysisFilt)
 if false
     fileNames.pokesFile
     fileNames.spikesFile
     fileNames.wavemarkFile
 end
 
-fileGood = false;
-if exist(fileNames.targetFile,'file') && ~force
-    load(fileNames.targetFile);
-    if binsPerSec==targetBinsPerSec
-        fileGood = true;
-    end
-end
-
-if ~fileGood
-    fprintf('compiling %s\n',fileNames.targetFile);
-    [pth name]=fileparts([fileparts(fileNames.targetFile) '.blah']);
-    prefix=fullfile(pth,name);
-    resetDir(prefix);
+if analysisFilt(rec,stimType)
     
-    binsPerSec=targetBinsPerSec;
-    
-    [stim stimT phys physT] = getStimAndPhys(stimType,pth,force,binsPerSec,stimTimes);
-    
-    if ~ismember(stimType,{'junk','off'})
-        
-        [thesePulses,stimBreaks,nominalSecondsPerFrame,stim,stimT,phys,physT,origPulses]=getPulses(fileNames.pulseFile,pulseTimes,rec,stimType,stim,stimT,phys,physT);
-        
-        [tStim, stimVals, expandedStim, binVals, expandedBins, binT]=doStimFrames(binsPerSec,thesePulses,stim,stimT,prefix,name,nominalSecondsPerFrame);
-        
-        dropTimes=frameDropReport(nominalSecondsPerFrame,thesePulses,prefix,name,stimT,tStim,expandedStim,expandedBins,origPulses);
-        
-        [uniqueStimVals,repeatStimVals,uniqueTimes,repeatTimes,uniqueColInds,repeatColInds,binnedVals,binnedT,bestBinOffsets,phys,physT]=findRepeats(stimBreaks,stimType,stimVals,nominalSecondsPerFrame,binVals,prefix,name,thesePulses,binT,physT,phys,binsPerSec);
-        
-    else
-        uniqueStimVals=[];
-        repeatStimVals=[];
-        uniqueTimes=[];
-        repeatTimes=[];
-        uniqueColInds=[];
-        repeatColInds=[];
-        binnedVals=[];
-        binnedT=[];
-        bestBinOffsets=[];
-        dropTimes=[];
-        stimBreaks=[];
+    fileGood = false;
+    if exist(fileNames.targetFile,'file') && ~force
+        load(fileNames.targetFile,'binsPerSec');
+        if binsPerSec==targetBinsPerSec
+            fileGood = true;
+        end
     end
     
-    % doWaveforms(baseDir,params.base,params.spkChan,params.spkCode);
+    if ~fileGood
+        fprintf('compiling %s\n',fileNames.targetFile);
+        [pth name]=fileparts([fileparts(fileNames.targetFile) '.blah']);
+        prefix=fullfile(pth,name);
+        resetDir(prefix);
+        
+        binsPerSec=targetBinsPerSec;
+        
+        [stim stimT phys physT] = getStimAndPhys(stimType,pth,force,binsPerSec,stimTimes);
+        
+        if ~ismember(stimType,{'junk','off'})
+            
+            [thesePulses,stimBreaks,nominalSecondsPerFrame,stim,stimT,phys,physT,origPulses]=getPulses(fileNames.pulseFile,pulseTimes,rec,stimType,stim,stimT,phys,physT);
+            
+            [tStim, stimVals, expandedStim, binVals, expandedBins, binT]=doStimFrames(binsPerSec,thesePulses,stim,stimT,prefix,name,nominalSecondsPerFrame);
+            
+            dropTimes=frameDropReport(nominalSecondsPerFrame,thesePulses,prefix,name,stimT,tStim,expandedStim,expandedBins,origPulses);
+            
+            [uniqueStimVals,repeatStimVals,uniqueTimes,repeatTimes,uniqueColInds,repeatColInds,binnedVals,binnedT,bestBinOffsets,phys,physT]=findRepeats(stimBreaks,stimType,stimVals,nominalSecondsPerFrame,binVals,prefix,name,thesePulses,binT,physT,phys,binsPerSec);
+            
+        else
+            uniqueStimVals=[];
+            repeatStimVals=[];
+            uniqueTimes=[];
+            repeatTimes=[];
+            uniqueColInds=[];
+            repeatColInds=[];
+            binnedVals=[];
+            binnedT=[];
+            bestBinOffsets=[];
+            dropTimes=[];
+            stimBreaks=[];
+        end
+        
+        % doWaveforms(baseDir,params.base,params.spkChan,params.spkCode);
+        
+        % clear stim;
+        
+        save(fileNames.targetFile,'binsPerSec','uniqueStimVals','repeatStimVals','uniqueTimes','repeatTimes','uniqueColInds','repeatColInds','dropTimes','binnedVals','binnedT','bestBinOffsets','phys','physT','stimBreaks');
+    end
     
-    % clear stim;
-    
-    save(fileNames.targetFile,'binsPerSec','uniqueStimVals','repeatStimVals','uniqueTimes','repeatTimes','uniqueColInds','repeatColInds','dropTimes','binnedVals','binnedT','bestBinOffsets','phys','physT','stimBreaks');
+    tmpAnalysis(fileNames,stimTimes,pulseTimes,rec,stimType,targetBinsPerSec,force,figureBase);
 end
-
 end
 
 function [uniqueStimVals,repeatStimVals,uniqueTimes,repeatTimes,uniqueColInds,repeatColInds,binnedVals,binnedT,bestBinOffsets,physVals,physT]=findRepeats(stimBreaks,stimType,stimVals,nominalSecondsPerFrame,binVals,pth,name,boundaries,binT,physTms,phys,binsPerSec)
@@ -1153,9 +1156,9 @@ switch rec.display_type
                 [frameTimes origPulses]=scanTriple(pulseFile,rec.framePulseChan,rec.stimPulseChan,rec.phasePulseChan,pulseTimes);
                 pulseOffsetPct = 0;
             case 'index'
-                 if pulseTimes(1)==3182.599 && ~isempty(findstr(pulseFile,'8d2b23279f87853a7c63e4ab0ed38b8b150c317d')) %hack - this needs to be fixed in spreadsheet -- currently starts mid-index pulse
-                     pulseTimes(1)=3182.597;
-                 end
+                if pulseTimes(1)==3182.599 && ~isempty(findstr(pulseFile,'8d2b23279f87853a7c63e4ab0ed38b8b150c317d')) %hack - this needs to be fixed in spreadsheet -- currently starts mid-index pulse
+                    pulseTimes(1)=3182.597;
+                end
                 
                 [frameTimes origPulses stimBreaks]=scanTriple(pulseFile,rec.framePulseChan,rec.stimPulseChan,rec.phasePulseChan,pulseTimes, rec.indexPulseChan);
                 
@@ -1215,7 +1218,7 @@ switch rec.display_type
                 rethrow(ex)
             end
         end
-
+        
         stimBreaks = load(pulseFile);
         stimBreaks = stimBreaks(stimBreaks>=pulseTimes(1) & stimBreaks<=pulseTimes(2));
         

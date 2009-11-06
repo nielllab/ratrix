@@ -1,4 +1,4 @@
-function extractPhysThenAnalyze(record,analysisBase,dataBase,targetBase,targetBinsPerSec)
+function extractPhysThenAnalyze(record,analysisBase,dataBase,targetBase,targetBinsPerSec,figureBase,analysisFilt)
 %this is inefficient because it does each chunk in a separate run of spike,
 %rather than grouping a file and all its chunks into one run.  thus, you
 %pay the cost of opening the file multiple times.  would be more
@@ -12,7 +12,7 @@ reduceFiles={'stim','phys'};
 
 for i=1:length(record)
     rec=record(i);
-    if ~rec.dummy
+    if ~rec.dummy && analysisFilt(rec)
         pth=fullfile(rec.rat_id,datestr(rec.date,'mm.dd.yy'));
         
         datafile=fullfile(dataBase,pth,rec.baseFile);
@@ -84,7 +84,7 @@ for i=1:length(record)
             end
         end
         
-        compilePhysTxt(targetDir,analysisDir,wavemarkDir,record(i),force,targetBinsPerSec);
+        compilePhysTxt(targetDir,analysisDir,wavemarkDir,record(i),force,targetBinsPerSec,figureBase,analysisFilt);
     end
 end
 

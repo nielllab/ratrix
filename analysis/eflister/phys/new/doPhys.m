@@ -1,4 +1,4 @@
-function record=doPhys
+function doPhys
 %%%%%
 %setup the following fields to control the analysis
 %%%%%
@@ -25,55 +25,68 @@ elseif ismac
     analysisBase='/Volumes/Maxtor One Touch II/eflister phys/physDB';
     dataBase='/Volumes/Maxtor One Touch II/eflister phys/phys backup of verified good data/NOT sorted!'; %'/Volumes/rlab/Rodent-Data/physiology/eflister/sorted';
     targetBase='/Volumes/Maxtor One Touch II/eflister phys/phys analysis';
+    figureBase='/Users/eflister/Desktop/figures';
 end
 
-%indicate what to process
-target.rat_ids={};%{'164'};
-
-% 164 done
-% 10.16.08
-% 10.21.08
-% 10.22.08
-% 02.24.09
-% 02.26.09
-% 02.27.09
-% 03.13.09
-% 03.17.09
-% 03.19.09
-
-% 164 todo
-% 03.25.09
-% 04.07.09
-% 04.15.09
-% 04.17.09
-
-% 188 done
-% 04.23.09
-% 04.24.09
-
-% 188 todo
-% 04.29.09 %partial
-% 05.06.09
-% 05.08.09
-
-target.dates={};%{'03.25.09','04.07.09','04.15.09','04.17.09'};
-
-target.depths=[];%[13.24,19.97];
-
-%do all BUT targets
-exclude=true;
+    function out=analysisFilt(rec,stimType)
+        if ~exist('stimType','var')
+            stimType=[];
+        end
+        out=ismember(char(stimType),{'gaussian',''}) && isnumeric(rec.indexPulseChan);
+    end
 
 %%%%%
 % setup done, don't edit below here
 %%%%%
 
+if false
+    %indicate what to process
+    target.rat_ids={};%{'164'};
+    
+    % 164 done
+    % 10.16.08
+    % 10.21.08
+    % 10.22.08
+    % 02.24.09
+    % 02.26.09
+    % 02.27.09
+    % 03.13.09
+    % 03.17.09
+    % 03.19.09
+    
+    % 164 todo
+    % 03.25.09
+    % 04.07.09
+    % 04.15.09
+    % 04.17.09
+    
+    % 188 done
+    % 04.23.09
+    % 04.24.09
+    
+    % 188 todo
+    % 04.29.09 %partial
+    % 05.06.09
+    % 05.08.09
+    
+    target.dates={};%{'03.25.09','04.07.09','04.15.09','04.17.09'};
+    
+    target.depths=[];%[13.24,19.97];
+    
+    %do all BUT targets
+    exclude=true;
+end
+
 [pathstr, name, ext, versn] = fileparts(mfilename('fullpath'));
 addpath(fullfile(fileparts(fileparts(fileparts(fileparts(pathstr)))),'bootstrap'));
 setupEnvironment;
 
-record=doExclusion(extractPhysRecord(fullfile(analysisBase,'phys record.csv'),dataBase),target,exclude);
+record=extractPhysRecord(fullfile(analysisBase,'phys record.csv'),dataBase);
+if false
+    record=doExclusion(record,target,exclude);
+end
 
-extractPhysThenAnalyze(record,analysisBase,dataBase,targetBase,targetBinsPerSec);
+extractPhysThenAnalyze(record,analysisBase,dataBase,targetBase,targetBinsPerSec,figureBase,@analysisFilt);
 end
 
 function record=doExclusion(record,target,exclude)

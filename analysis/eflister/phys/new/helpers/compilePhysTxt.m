@@ -1,4 +1,4 @@
-function compilePhysTxt(targetDir,analysisDir,wavemarkDir,rec,force,targetBinsPerSec)
+function compilePhysTxt(targetDir,analysisDir,wavemarkDir,rec,force,targetBinsPerSec,figureBase,analysisFilt)
 verbose=false;
 
 chunkStarts=[rec.chunks.start_time];
@@ -19,7 +19,7 @@ numStims=size(rec.stimTimes,1);
 
 for j=1:numStims
     stimStart=rec.stimTimes{j,1};
-
+    
     if j<numStims
         stimStop=rec.stimTimes{j+1,1};
     else
@@ -57,7 +57,7 @@ for j=1:numStims
             
             thisStart=max(chunkStarts(chunkNum),stimStart);
             thisStop=min(chunkEnds(chunkNum),stimStop);
-
+            
             stimName=sprintf('%d.%s',j,rec.stimTimes{j,2});
             stimName=stimName(~ismember(stimName,['<>/\?:*"|'])); %TODO: check for excluded filename characters on osx
             z=sprintf('%g',rec.chunks(chunkNum).cell_Z);
@@ -66,12 +66,11 @@ for j=1:numStims
             desc=[stimName '.z.' z '.t.' tRange '.chunk.' chunkName];
             
             fileNames.targetFile=fullfile(targetDir,desc,[desc '.compiled.mat']);
-
-                recM=rec;
-                recM.chunks=rec.chunks(chunkNum);
-                recM.stimTimes=[];
-                %compilePhysData(fileNames,[thisStart thisStop],[stimStart stimStop],recM,rec.stimTimes{j,2},targetBinsPerSec,force);
-                tmpAnalysis(fileNames,[thisStart thisStop],[stimStart stimStop],recM,rec.stimTimes{j,2},targetBinsPerSec,force);
+            
+            recM=rec;
+            recM.chunks=rec.chunks(chunkNum);
+            recM.stimTimes=[];
+            compilePhysData(fileNames,[thisStart thisStop],[stimStart stimStop],recM,rec.stimTimes{j,2},targetBinsPerSec,force,figureBase,analysisFilt);
         end
     end
 end

@@ -1,50 +1,114 @@
-function tmpAnalysis(fileNames,stimTimes,pulseTimes,rec,stimType,binsPerSec,force)
+function tmpAnalysis(fileNames,stimTimes,pulseTimes,rec,stimType,binsPerSec,force,figureBase)
+
+if false
+    excludes={};
+    
+    %targs{end+1}='/Volumes/Maxtor One Touch II/eflister phys/phys analysis/188/04.23.09/a7e4526229bb5cd78d91e543fc4a0125360ea849/2.gaussian.z.38.26.t.30.292-449.144.chunk.1.a7e4526229bb5cd78d91e543fc4a0125360ea849';
+    excludes{end+1}='/Volumes/Maxtor One Touch II/eflister phys/phys analysis/164/04.15.09/acf4f35b54186cd6055697b58718da28e7b2bf80/3.gaussian.z.47.34.t.2042.38-4641.chunk.1.acf4f35b54186cd6055697b58718da28e7b2bf80';
+    excludes{end+1}='/Volumes/Maxtor One Touch II/eflister phys/phys analysis/164/04.17.09/89493235e157403e6bad4b39b63b1c6234ea45dd/5.gaussian.z.47.88.t.3891.4-4941.chunk.2.89493235e157403e6bad4b39b63b1c6234ea45dd';
+    excludes{end+1}='/Volumes/Maxtor One Touch II/eflister phys/phys analysis/188/04.23.09/4b45921ce9ef4421aa984128a39f2203b8f9a381/6.gaussian.z.38.885.t.3683.44-4944.05.chunk.3.4b45921ce9ef4421aa984128a39f2203b8f9a381';
+    
+    %these died cuz the code needs to be fixed to be safe for the
+    %case of zero bursts -- i didn't save the figs yet
+    excludes{end+1}='/Volumes/Maxtor One Touch II/eflister phys/phys analysis/188/04.23.09/a7e4526229bb5cd78d91e543fc4a0125360ea849/2.gaussian.z.38.26.t.30.292-449.144.chunk.1.a7e4526229bb5cd78d91e543fc4a0125360ea849';
+    excludes{end+1}='/Volumes/Maxtor One Touch II/eflister phys/phys analysis/188/04.23.09/a7e4526229bb5cd78d91e543fc4a0125360ea849/6.gaussian.z.38.26.t.1269.03-2739.63.chunk.1.a7e4526229bb5cd78d91e543fc4a0125360ea849';
+end
+
+if false
+    [pth name]=fileparts([fileparts(fileNames.targetFile) '.blah']);
+    prefix=fullfile(pth,name);
+    
+    info=prefix;
+    infos={};
+    while ~isempty(info)
+        [infos{end+1} info]=strtok(info,filesep);
+    end
+    data.ratID=infos{end-3};
+    data.datest=infos{end-2};
+    data.uID=infos{end};
+end
+
 if length(stimTimes)~=2 || stimTimes(2)<=stimTimes(1)
     error('stimTimes error')
 end
 
+[data.ratID data.date type data.uID data.hash data.z data.chunkNum]=parseFileName(fileNames.targetFile,stimType,rec,stimTimes);
+
+mins=(stimTimes(2)-stimTimes(1))/60;
+
+spks=load(fileNames.spikesFile);
+spks=spks(spks>=stimTimes(1) & spks<=stimTimes(2));
+rate=length(spks)/(stimTimes(2)-stimTimes(1));
+
+fprintf('%s\n\t%05.1f mins   spk rate: %04.1f hz\n',[data.ratID ' ' data.date ' ' data.uID],mins,rate);
+
+[data.stim,data.phys,data.rptStarts]=extractData(fileNames,stimTimes,rec);
+
+data.stimTimes=stimTimes;
+data.figureBase=figureBase;
+data.stimType=stimType;
+data.rec=rec;
+
+doAnalysis(data,'spectrogram');
+
 switch stimType
     case 'gaussian'
-        
-        [pth name]=fileparts([fileparts(fileNames.targetFile) '.blah']);
-        prefix=fullfile(pth,name);
-        
-        index=isnumeric(rec.indexPulseChan);
-        mins=(stimTimes(2)-stimTimes(1))/60;
-        
-        spks=load(fileNames.spikesFile);
-        spks=spks(spks>=stimTimes(1) & spks<=stimTimes(2));
-        rate=length(spks)/(stimTimes(2)-stimTimes(1));
-        
-        fprintf('%05.1f mins   spk rate: %04.1f hz   indexed: %d   %s\n',mins,rate,index,prefix);
-        targs={};
-        
-        %       targs{end+1}='/Volumes/Maxtor One Touch II/eflister phys/phys analysis/188/04.23.09/a7e4526229bb5cd78d91e543fc4a0125360ea849/2.gaussian.z.38.26.t.30.292-449.144.chunk.1.a7e4526229bb5cd78d91e543fc4a0125360ea849';
-        targs{end+1}='/Volumes/Maxtor One Touch II/eflister phys/phys analysis/164/04.15.09/acf4f35b54186cd6055697b58718da28e7b2bf80/3.gaussian.z.47.34.t.2042.38-4641.chunk.1.acf4f35b54186cd6055697b58718da28e7b2bf80';
-        targs{end+1}='/Volumes/Maxtor One Touch II/eflister phys/phys analysis/164/04.17.09/89493235e157403e6bad4b39b63b1c6234ea45dd/5.gaussian.z.47.88.t.3891.4-4941.chunk.2.89493235e157403e6bad4b39b63b1c6234ea45dd';
-        targs{end+1}='/Volumes/Maxtor One Touch II/eflister phys/phys analysis/188/04.23.09/4b45921ce9ef4421aa984128a39f2203b8f9a381/6.gaussian.z.38.885.t.3683.44-4944.05.chunk.3.4b45921ce9ef4421aa984128a39f2203b8f9a381';
-
-        %these died cuz the code needs to be fixed to be safe for the
-        %case of zero bursts -- i didn't save the figs yet
-        targs{end+1}='/Volumes/Maxtor One Touch II/eflister phys/phys analysis/188/04.23.09/a7e4526229bb5cd78d91e543fc4a0125360ea849/2.gaussian.z.38.26.t.30.292-449.144.chunk.1.a7e4526229bb5cd78d91e543fc4a0125360ea849';
-        targs{end+1}='/Volumes/Maxtor One Touch II/eflister phys/phys analysis/188/04.23.09/a7e4526229bb5cd78d91e543fc4a0125360ea849/6.gaussian.z.38.26.t.1269.03-2739.63.chunk.1.a7e4526229bb5cd78d91e543fc4a0125360ea849';
-        
-        if ~ismember(prefix,targs) && index
-            doAnalysis(fileNames,stimTimes,rec,spks,stimType,rate)
-        end
-    case {'sinusoid','sinusoid(new)'}
+        % doAnalysis(fileNames,stimTimes,rec,spks,stimType,rate)
     case 'hateren'
+    case {'sinusoid','sinusoid(new)'}
     case 'gaussgrass'
     case 'squarefreqs'
     case 'rpt/unq'
     case {'junk','off'}
     otherwise
-        fprintf('unknown type: %s\n',stimType)
+        error('unknown type: %s\n',stimType)
 end
 end
 
-function doAnalysis(fileNames,stimTimes,rec,spks,stimType,hz)
-[stim,phys,rptStarts]=extractData(fileNames,stimTimes,rec);
+function doAnalysis(data,type)
+fprintf('\tdoing %s: ',type)
+name=fullfile(data.figureBase,[data.ratID '-' data.date '-z' num2str(data.z) '-wf' data.chunkNum '-' num2str(data.rec.chunks.spkCode) '-t' num2str(data.stimTimes(1)) '-' num2str(data.stimTimes(2)) '-' data.hash],data.stimType);
+[status,message,messageid]=mkdir(name);
+if ~status
+    message
+    messageid
+    error('mkdir error')
+end
+
+name=fullfile(name,type);
+if ~(exist([name '.png'],'file') && exist([name '.fig'],'file')) %one flaw of this design is that if data were regenerated but old figs were still in this location, we'd not update the figs
+    switch type
+        case 'spectrogram'
+            savefig(name,spectro(data));
+        otherwise
+            error('unrecognized type')
+    end
+else
+    fprintf('already present\n')
+end
+fprintf('\n')
+end
+
+function savefig(name,f)
+fprintf('saving fig')
+left=0;
+bottom=0;
+width=1600;
+height=1200;
+set(f,'OuterPosition',[left, bottom, width, height]);
+
+saveas(f,[name '.png'])
+saveas(f,[name '.fig'])
+close(f)
+end
+
+function f=spectro(data)
+f=figure;
+plot(rand(10))
+fprintf('spectroing... ')
+end
+
+function ex(fileNames,stimTimes,rec,spks,stimType,hz)
 
 % spectralAnalysis(phys(1,:),phys(2,:));
 
@@ -254,7 +318,7 @@ sta=mean(vals);
 sta=[sta;tinds*timestep*1000];
 end
 
-function [ratID date type uid hash]=parseFileName(f,exType)
+function [ratID date type uid h z chunkNum]=parseFileName(f,exType,rec,stimTimes)
 a={};
 while ~isempty(f)
     [a{end+1} f]=strtok(f,filesep);
@@ -264,30 +328,129 @@ if length(a)<5
 end
 
 ratID=a{end-4};
-if ~ismember(ratID,{'164','188'})
+if ~ismember(ratID,{'164','188'}) || ~strcmp(ratID,rec.rat_id)
     error('bad parse')
 end
 
 date=a{end-3};
 datenum(date,'mm.dd.yy'); %just to check formatted right -- though datenum accepts '04.32.09'!
 
-f=a{end-1};
-
-[c d]=textscan(f,'%u8%[^.].z.%f%*[.]t.%f-%fchunk.%u8%s'); %expect problems if last f *has* decimal portion (period before chunk will fail)
-if d~=length(f)
-    c{:}
-    f
-    f(d:end)
-    textscan(f,'%u8%[^.].z.%f%*[.]t.%f-%f%*[.]chunk.%u8%s')
+if ~strcmp(date,datestr(rec.date,'mm.dd.yy'))
     error('bad parse')
 end
 
-type=c{2}{1};
+f=a{end-1};
+
+if false;
+    [c d]=textscan(f,'%u8%[^.].z.%f%*[.]t.%f-%fchunk.%u8%s'); %expect problems if last f *has* decimal portion (period before chunk will fail)
+    if d~=length(f)
+        c{:}
+        f
+        f(d:end)
+        textscan(f,'%u8%[^.].z.%f%*[.]t.%f-%f%*[.]chunk.%u8%s')
+        error('bad parse')
+    end
+end
+
+uid=f;
+e={};
+while ~isempty(f)
+    [e{end+1} f]=strtok(f,'.');
+end
+
+[n e]=scan(e,'%d');
+
+type=e{1};
 if ~strcmp(type,exType)
     error('bad parse')
 end
-uid=f;
-hash=c{7}{1};
+
+if e{2}~='z'
+    error('bad parse')
+end
+
+[z e]=scanNum(e(3:end),'t');
+
+if rec.chunks.cell_Z ~= z
+    error('bad parse')
+end
+
+h=e{end};
+
+if ~strcmp(hash(rec.file,'SHA1'),h)
+    error('bad parse')
+end
+
+chunkNum=e{end-1};
+
+if ~strcmp(e{end-2},'chunk')
+    error('bad parse')
+end
+
+e=e(2:end-3);
+
+done=false;
+i=1;
+n='';
+while ~done
+    inds=find('-'==e{i});
+    if isempty(inds)
+        n=[n e{i} '.'];
+        i=i+1;
+    elseif isscalar(inds) && sum(n=='.')<2
+        done=true;
+        n=[n e{i}(1:inds-1)];
+        m=[e{i}(inds+1:end) '.'];
+        for j=i+1:length(e)
+            m=[m e{j} '.'];
+        end
+    else
+        error('bad parse')
+    end
+end
+
+m=m(1:end-1);
+if sum(m=='.')>1
+    error('parse error')
+end
+
+n=str2num(n);
+
+if floor(n)~=floor(stimTimes(1)) || isempty(n)
+    error('bad parse')
+end
+
+n=str2num(m);
+
+if floor(n)~=floor(stimTimes(2)) || isempty(n)
+    error('bad parse')
+end
+end
+
+function [n e]=scanNum(e,test)
+n='';
+count=0;
+while ~strcmp(e{1},test)
+    [m e]=scan(e,'%d');
+    n=[n num2str(m) '.'];
+    count=count+1;
+    if count>2
+        error('bad parse')
+    end
+end
+n=str2num(n(1:end-1));
+if isempty(n)
+    error('bad parse')
+end
+end
+
+function [a out] = scan(e,pat)
+[a b c d]=sscanf(e{1},pat);
+if d== length(e{1})+1 && isempty(c) && b==1
+    out=e(2:end);
+else
+    error('bad parse')
+end
 end
 
 function plotRaster(vals,code,i,lim) %made non-anonymous cuz no functional if
@@ -303,6 +466,7 @@ out=vals(vals>=start & vals<stop)-start;
 end
 
 function [stim,phys,rptStarts]=extractData(fileNames,stimTimes,rec)
+fprintf('\textracting...\n')
 data=load(fileNames.targetFile);
 
 rptStarts=data.stimBreaks;

@@ -7,8 +7,6 @@ function [doFramePulse expertCache dynamicDetails textLabel i dontclear indexPul
 
 floatprecision=1;
 
-
-
 % increment i
 if dropFrames
     i=scheduledFrameNum;
@@ -30,12 +28,6 @@ numGratings = length(stim.pixPerCycs); % number of gratings
 gratingInds = cumsum(stim.durations(:));
 gratingToDraw = min(find(mod(i-1,gratingInds(end))+1<=gratingInds));
 
-
-if gratingToDraw==1
-    indexPulse=true;  % need the first frame of this guy, not the whole thing...
-else
-    indexPulse=false;
-end
     
 % stim.pixPerCycs - frequency of the grating (how wide the bars are)
 % stim.orientations - angle of the grating
@@ -54,6 +46,9 @@ gray = (white-black)/2;
 %stim.velocities(gratingToDraw) is in cycles per second
 cycsPerFrameVel = stim.driftfrequencies(gratingToDraw)*ifi; % in units of cycles/frame
 offset = 2*pi*cycsPerFrameVel*i;
+nextOffset = 2*pi*cycsPerFrameVel*(i+1);
+indexPulse=mod(offset,4*pi)>mod(nextOffset,4*pi);  % every 2 cycles
+
 
 % Create a 1D vector x based on the frequency pixPerCycs
 % make the grating twice the normal width (to cover entire screen if rotated)

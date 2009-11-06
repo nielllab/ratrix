@@ -1,11 +1,9 @@
 function compilePhysData(fileNames,stimTimes,pulseTimes,rec,stimType,targetBinsPerSec,force,figureBase,analysisFilt)
-if false
-    fileNames.pokesFile
-    fileNames.spikesFile
-    fileNames.wavemarkFile
-end
 
 if analysisFilt(rec,stimType)
+    
+    [pth name]=fileparts([fileparts(fileNames.targetFile) '.blah']);
+    prefix=fullfile(pth,name);
     
     fileGood = false;
     if exist(fileNames.targetFile,'file') && ~force
@@ -17,8 +15,7 @@ if analysisFilt(rec,stimType)
     
     if ~fileGood
         fprintf('compiling %s\n',fileNames.targetFile);
-        [pth name]=fileparts([fileparts(fileNames.targetFile) '.blah']);
-        prefix=fullfile(pth,name);
+
         resetDir(prefix);
         
         binsPerSec=targetBinsPerSec;
@@ -49,12 +46,12 @@ if analysisFilt(rec,stimType)
             stimBreaks=[];
         end
         
-        % doWaveforms(baseDir,params.base,params.spkChan,params.spkCode);
-        
         % clear stim;
         
         save(fileNames.targetFile,'binsPerSec','uniqueStimVals','repeatStimVals','uniqueTimes','repeatTimes','uniqueColInds','repeatColInds','dropTimes','binnedVals','binnedT','bestBinOffsets','phys','physT','stimBreaks');
     end
+    
+    parseWaveforms(fileNames.wavemarkFile,pth,rec.chunks.spkChan,force);
     
     tmpAnalysis(fileNames,stimTimes,pulseTimes,rec,stimType,targetBinsPerSec,force,figureBase);
 end

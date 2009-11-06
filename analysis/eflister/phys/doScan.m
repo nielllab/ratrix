@@ -1,4 +1,4 @@
-function C=doScan(file,format,headerlines,chanVerify,instancesVerify,fieldsVerify,rep)
+function C=doScan(file,format,headerlines,chanVerify,instancesVerify,fieldsVerify,rep,whitespace)
 
 try
     [fid msg]=fopen(file,'rt');
@@ -8,7 +8,7 @@ try
     
     if fid>2
         
-        chanForm='%% CHANNEL %% %% %u8 %%';        
+        chanForm='%% CHANNEL %% %% %u8 %%';
         C = textscan(fid,chanForm,1);
         
         if isscalar(C)
@@ -32,8 +32,12 @@ try
             end
             
         else
-            
-            [C, pos] = textscan(fid,format, 'headerlines',headerlines);
+
+            if exist('whitespace','var')
+                [C, pos] = textscan(fid,format, 'headerlines',headerlines,'whitespace',whitespace);
+            else
+                [C, pos] = textscan(fid,format, 'headerlines',headerlines);
+            end
             
             %         status = fseek(fid, 0, 'eof');
             %

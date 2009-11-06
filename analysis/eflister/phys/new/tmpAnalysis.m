@@ -36,20 +36,26 @@ end
 
 mins=(stimTimes(2)-stimTimes(1))/60;
 
-spks=load(fileNames.spikesFile);
-spks=spks(spks>=stimTimes(1) & spks<=stimTimes(2));
-rate=length(spks)/(stimTimes(2)-stimTimes(1));
+data.spks=load(fileNames.spikesFile);
+data.spks=data.spks(data.spks>=stimTimes(1) & data.spks<=stimTimes(2));
+rate=length(data.spks)/(stimTimes(2)-stimTimes(1));
 
 fprintf('%s\n\t%05.1f mins   spk rate: %04.1f hz\n',[data.ratID ' ' data.date ' ' data.uID],mins,rate);
 
 [data.stim,data.phys,data.rptStarts]=extractData(fileNames,stimTimes,rec);
+
+data=findBursts(data);
 
 data.stimTimes=stimTimes;
 data.figureBase=figureBase;
 data.stimType=stimType;
 data.rec=rec;
 
-doAnalysis(data,'spectrogram');
+%[data.waveforms data.lockout]=doWaveforms(fileNames.wavemarkFile,rec.chunks.spkChan,rec.chunks.spkCode);
+
+%doAnalysis(data,'waveforms');
+doAnalysis(data,'ISI');
+%doAnalysis(data,'spectrogram');
 
 switch stimType
     case 'gaussian'
@@ -80,6 +86,10 @@ if ~(exist([name '.png'],'file') && exist([name '.fig'],'file')) %one flaw of th
     switch type
         case 'spectrogram'
             savefig(name,spectro(data));
+        case 'ISI'
+            savefig(name,isi(data));
+        case 'waveforms'
+            savefig(name,waveforms(data));
         otherwise
             error('unrecognized type')
     end
@@ -108,36 +118,82 @@ plot(rand(10))
 fprintf('spectroing... ')
 end
 
-function ex(fileNames,stimTimes,rec,spks,stimType,hz)
+function isiSub(sub,sup,d,code)
+[tf loc]=ismember(sub,sup);
+if ~all(tf)
+    error('huh?')
+else
+    loc=loc(loc>1 & loc<length(sup));
+end
+plot(d(loc-1),d(loc),code)
+end
 
-% spectralAnalysis(phys(1,:),phys(2,:));
+function f=isi(data)
+ms=25;
+d=diff(data.spks)*1000;
+[a,b]=hist(d,0:.1:ms);
+rng=[min(d) max(d)];
 
-pHz=1/median(diff(phys(2,:)));
-freqs=1:50;
-spectrogram(phys(1,:),round(pHz),[],freqs,pHz,'yaxis');
-q=gcf;
+n=4;
+f=figure;
+subplot(n,1,1)
+plot(b(1:end-1),a(1:end-1),'k');
+hold on
+plot(ones(1,2)*data.lockout*1000,[0 max(a(1:end-1))],'k')'
+xlabel('ms')
+ylabel('count')
+title('isi')
+set(gca,'XTick',[0:ms]);
 
-pre=.1;
-inter=.004;
-ref=.002;
+subplot(n,1,2:n)
+loglog(d(1:end-1),d(2:end),'k.')
+hold on
+plot(data.ref*ones(1,2)*1000,rng,'k')
+plot(data.pre*ones(1,2)*1000,rng,'k')
+plot(rng,data.inter*ones(1,2)*1000,'k')
+plot(data.inter*ones(1,2)*1000,rng,'k')
 
-bsts=spks([false ; (diff(spks)>=pre & [inter>=diff(spks(2:end)) ; false])  ]);
-refVios=spks([false ; diff(spks)<ref]);
+isiSub(data.bsts,data.spks,d,'rx');
+isiSub(data.bstNotFst,data.spks,d,'r.');
+isiSub(data.refVios,data.spks,d,'bo');
 
-bstNotFst=nan(1,5*length(bsts));
+rng=[min([rng(1) [data.ref data.inter]*1000/2]) rng(2)];
+xlim(rng)
+ylim(rng)
+xlabel('pre isi (ms)')
+ylabel('post isi (ms)')
+axis square
+end
+
+function f=waveforms(data)
+keyboard
+f=figure;
+end
+
+function [data]=findBursts(data)
+data.pre=.1;
+data.inter=.004;
+data.ref=.002;
+
+fprintf('\tfinding bursts...\n')
+
+data.bsts=data.spks([false ; (diff(data.spks)>=data.pre & [data.inter>=diff(data.spks(2:end)) ; false])  ]);
+data.refVios=data.spks([false ; diff(data.spks)<data.ref]);
+
+data.bstNotFst=nan(1,5*length(data.bsts));
 count=0;
-bstLens=nan(1,length(bsts));
-tmp=sort(spks);
-for i=1:length(bsts) %find a vectorized way (actually this is fast enough)
+data.bstLens=nan(1,length(data.bsts));
+tmp=sort(data.spks);
+for i=1:length(data.bsts) %find a vectorized way (actually this is fast enough)
     done=false;
-    bstLens(i)=1;
-    start=bsts(i);
+    data.bstLens(i)=1;
+    start=data.bsts(i);
     tmp=tmp(tmp>start);
     while ~done && ~isempty(tmp)
-        if tmp(1)-start<=inter
+        if tmp(1)-start<=data.inter
             count=count+1;
-            bstNotFst(count)=tmp(1);
-            bstLens(i)=bstLens(i)+1;
+            data.bstNotFst(count)=tmp(1);
+            data.bstLens(i)=data.bstLens(i)+1;
             tmp=tmp(2:end); %this is empty safe!?
         else
             done=true;
@@ -147,14 +203,26 @@ for i=1:length(bsts) %find a vectorized way (actually this is fast enough)
         end
     end
 end
-if any(isnan(bstLens)) || any(bstLens<2)
+if any(isnan(data.bstLens)) || any(data.bstLens<2)
     error('bst error')
 end
-if any(isnan(bstNotFst(1:count))) || any(~isnan(bstNotFst(count+1:end)))
+if any(isnan(data.bstNotFst(1:count))) || any(~isnan(data.bstNotFst(count+1:end)))
     error('bstNotFst error')
 end
-bstNotFst=bstNotFst(~isnan(bstNotFst));
-tonics=setdiff(spks,[bsts ; bstNotFst']);
+data.bstNotFst=data.bstNotFst(~isnan(data.bstNotFst));
+data.tonics=setdiff(data.spks,[data.bsts ; data.bstNotFst']);
+end
+
+function ex(fileNames,stimTimes,rec,spks,stimType,hz)
+
+% spectralAnalysis(phys(1,:),phys(2,:));
+
+pHz=1/median(diff(phys(2,:)));
+freqs=1:50;
+spectrogram(phys(1,:),round(pHz),[],freqs,pHz,'yaxis');
+q=gcf;
+
+
 
 physPreMS=300;
 stimPreMS=300;

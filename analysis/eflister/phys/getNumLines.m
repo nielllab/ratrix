@@ -20,7 +20,7 @@ try
             
             while ~feof(fid)
                 %line=fgetl(fid);
-                fgetl(fid); %faster?
+                fgets(fid);%fgetl(fid); %faster?
                 out=out+1;
             end
         else

@@ -51,7 +51,7 @@ if analysisFilt(rec,stimType)
         save(fileNames.targetFile,'binsPerSec','uniqueStimVals','repeatStimVals','uniqueTimes','repeatTimes','uniqueColInds','repeatColInds','dropTimes','binnedVals','binnedT','bestBinOffsets','phys','physT','stimBreaks');
     end
     
-    parseWaveforms(fileNames.wavemarkFile,pth,rec.chunks.spkChan,force);
+    fileNames.wavemarkFile=parseWaveforms(fileNames.wavemarkFile,pth,rec.chunks.spkChan,force);
     
     tmpAnalysis(fileNames,stimTimes,pulseTimes,rec,stimType,targetBinsPerSec,force,figureBase);
 end

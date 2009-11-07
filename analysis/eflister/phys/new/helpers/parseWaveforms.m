@@ -1,6 +1,4 @@
-function parseWaveforms(txtFile,targPth,chan,force)
-%spike doesn't include code 0 in the wavemark output :(
-
+function t=parseWaveforms(txtFile,targPth,chan,force)
 [garbage name ext]=fileparts(txtFile);
 if ~strcmp(ext,'.txt')
     error('f error')
@@ -11,7 +9,7 @@ if exist(t,'file') && ~force
     %pass
 else
     
-    fprintf('parsing waveforms...\n')
+    fprintf('parsing waveforms from %s...\n',txtFile)
     
     tic
     

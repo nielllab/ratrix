@@ -51,10 +51,17 @@ data.figureBase=figureBase;
 data.stimType=stimType;
 data.rec=rec;
 
+fprintf('\tloading waveforms for code %d, chan %d, file %s...\n',rec.chunks.spkCode, rec.chunks.spkChan, rec.file)
+wm=load(fileNames.wavemarkFile);
+
+keyboard
+
+unique([wm.recs.code])
+
 %[data.waveforms data.lockout]=doWaveforms(fileNames.wavemarkFile,rec.chunks.spkChan,rec.chunks.spkCode);
 
 %doAnalysis(data,'waveforms');
-doAnalysis(data,'ISI');
+%doAnalysis(data,'ISI');
 %doAnalysis(data,'spectrogram');
 
 switch stimType

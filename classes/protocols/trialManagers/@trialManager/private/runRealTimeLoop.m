@@ -541,7 +541,15 @@ while ~done && ~quit;
                     [tm frameIndex i done doFramePulse didPulse] ...
                         = updateFrameIndexUsingTextureCache(tm, frameIndexed, loop, trigger, timeIndexed, frameIndex, indexedFrames, size(stim,3), isRequesting, ...
                         i, frameNum, timedFrames, responseOptions, done, doFramePulse, didPulse, scheduledFrameNum);
-                    indexPulse=getIndexPulse(spec,i);
+                    try
+                        indexPulse=getIndexPulse(spec,i);
+                    catch 
+                        sca
+                        i
+                        warning('indexPulse problem because i=0... seems to be more of a problem during reinforcement... does this depend on timeouts?');
+                        keyboard
+                    end
+                        
                     switch strategy
                         case 'textureCache'
                             drawFrameUsingTextureCache(tm, window, i, frameNum, size(stim,3), lastI, dontclear, textures(i), destRect, ...

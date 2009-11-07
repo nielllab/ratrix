@@ -48,7 +48,8 @@ switch nargin
         end
         
         
-        msPenalty=NaN;  % these should not be set in the super class, because they will vary in this sub-class
+        msPenalty=max([r.missMsPenalty r.falseAlarmMsPenalty]);  % these unfortunately are also set in the super class, because they will vary in this sub-class
+        %the super class stores the larger which is what setReinforcementParam will change... typically the only non-zero value. 
         %msPuff=NaN; % should add asymetric puffs  (to support air in face on fa, not on miss), in which case pass in NAN to super class
         msPuff=varargin{11};
         r = class(r,'asymetricReinforcement',...

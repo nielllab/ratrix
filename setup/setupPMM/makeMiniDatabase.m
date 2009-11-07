@@ -29,10 +29,10 @@ database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 i=i+1;
 database.subject{i}.subjectID='demo1';
-database.subject{i}.stepNumber=9;
+database.subject{i}.stepNumber=11;
 database.subject{i}.rewardScalar=.1;
 database.subject{i}.msPenalty=1001;
-database.subject{i}.currentShapedValue = 0.04; %test wierd values
+%database.subject{i}.currentShapedValue = 0.04; %test wierd values
 database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 

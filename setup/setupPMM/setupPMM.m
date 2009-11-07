@@ -104,6 +104,7 @@ for i=1:length(subjects)
     disp(sprintf('doing subject %s''s protocol',subjects{i}))
     switch subjects{i}
         case {'demo1'}
+            %r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_4',dsd);
             %r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_5validate',dsd);
             %r=setShapingPMM(r,subjects(i), 'goNoGo', '2_4',dsd);
             r=setShapingPMM(r,subjects(i), 'cuedGoNoGo', '2_4',dsd);

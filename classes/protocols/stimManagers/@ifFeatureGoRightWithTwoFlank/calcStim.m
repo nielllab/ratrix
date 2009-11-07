@@ -131,6 +131,16 @@ switch trialManagerClass
         
         targetPorts=setdiff(responsePorts,lastResponse);
         distractorPorts=[];
+        if targetPorts==1
+            details.correctResponseIsLeft=1;
+        elseif targetPorts==3
+            details.correctResponseIsLeft=-1; % on the right
+        elseif targetPorts==2
+            error('have never used this'); % center
+        else
+            error('Targetports is inappropriate.  Stimulus is defined for 3 ports')
+        end
+        
     case 'goNoGo'
         % avoiding fans code in assignPorts ... no correction trials for now...
         % but testing out to see what it does ....
@@ -140,26 +150,69 @@ switch trialManagerClass
         distractorPorts=setdiff(responsePorts,targetPorts);
         details.correctionTrial=0;
         details.maxCorrectForceSwitch=0;
-    case {'nAFC','promptedNAFC','autopilot'}
+         %autopilot uses this stimulus that means "go right"
+         details.correctResponseIsLeft=-1;
+    case 'autopilot'
+            %autopilot uses this stimulus that means "go right"
+            details.correctionTrial=0;
+             details.maxCorrectForceSwitch=0;
+            details.correctResponseIsLeft=-1;
+            sca
+            keyboard
+            %confirm these work and then interesting combine auto and
+            %goNoGo because they have the same logic; stimulus is always
+            %there and all targerPorts are responsePorts
+            targetPorts=responsePorts; 
+            distractorPorts=[]; %I don't think these are
+            %needed, they used to be defined by assignPorts as in nAFC
+    case {'nAFC'}
         
-        if ~isempty(trialRecords) && length(trialRecords)>=2
-            lastRec=trialRecords(end-1);
-        else
-            lastRec=[];
-        end
-        [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass);
-        
-        %note that this implementation will not show the exact same
-        %stimulus for a correction trial, but just have the same side
-        %correct.  may want to change...
-        if (isfield( details,'correctionTrial') && details.correctionTrial) || strcmp(trialManagerClass,'autopilot')
+        if strcmp(stimulus.protocolType,'cuedGoNoGo')
+            if rand>0.5
+                %targetPorts=responsePorts; %choose all response port to be correct answer
+                                targetPorts=3; %choose all response port to be correct answer
+                details.correctResponseIsLeft=-1; %goNoGo uses the stimulus that means "go right"==stimulus is there
+            else
+                                %targetPorts=[];
+                targetPorts=1; %test
+                details.correctResponseIsLeft=1; %==stimulus is not there
+            end
+            
+            distractorPorts=setdiff(responsePorts,targetPorts);
+            details.correctionTrial=0;
             details.maxCorrectForceSwitch=0;
+            
         else
-            [targetPorts hadToResample]=getSameLimitedResponsePort(responsePorts,stimulus.maxCorrectOnSameSide,trialRecords(1:end-1));  % add this to assignPorts
-            details.maxCorrectForceSwitch=hadToResample;
+            
+            if ~isempty(trialRecords) && length(trialRecords)>=2
+                lastRec=trialRecords(end-1);
+            else
+                lastRec=[];
+            end
+            [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass);
+            
+            %note that this implementation will not show the exact same
+            %stimulus for a correction trial, but just have the same side
+            %correct.  may want to change...
+            if (isfield( details,'correctionTrial') && details.correctionTrial)
+                details.maxCorrectForceSwitch=0;
+            else
+                [targetPorts hadToResample]=getSameLimitedResponsePort(responsePorts,stimulus.maxCorrectOnSameSide,trialRecords(1:end-1));  % add this to assignPorts
+                details.maxCorrectForceSwitch=hadToResample;
+            end
+            
+            if targetPorts==1
+                details.correctResponseIsLeft=1;
+            elseif targetPorts==3
+                details.correctResponseIsLeft=-1; % on the right
+            else
+                error('Targetports is inappropriate.  Stimulus is defined for 3 ports with one correct L/R answer in nAFC')
+                %i have never seen this happen -pmm 080504
+                %one reason one could get here is if Center  and Left were blocked
+                %during a correction trial that was right before manual graduation from freeDrinks, then lastResponse=lastResponse(1)
+                %and target ports from the trial history was 2.  RARE.
+            end
         end
-        
-        
         %         if ~isempty(lastCorrect) && ~isempty(lastResponse) && ~lastCorrect && (lastWasCorrection || rand<details.pctCorrectionTrials)
         %             details.correctionTrial=1;
         %             details.maxCorrectForceSwitch=0;
@@ -181,38 +234,7 @@ switch trialManagerClass
         error('unknown trial manager class')
 end
 
-%CORRECT RESPONSE
-switch length(targetPorts)
-    case 0
-        if ismember(trialManagerClass,{'autopilot'})
-            %autopilot uses this stimulus that means "go right"
-            details.correctResponseIsLeft=-1;
-        else
-            error('unexpected')
-        end
-    case 1
-        if targetPorts==1
-            details.correctResponseIsLeft=1;
-        elseif targetPorts==3
-            details.correctResponseIsLeft=-1; % on the right
-        else
-            error('Targetports is inappropriate.  Stimulus is defined for 3 ports with one correct L/R answer in nAFC')
-            %i have never seen this happen -pmm 080504
-            %one reason one could get here is if Center  and Left were blocked
-            %during a correction trial that was right before manual graduation from freeDrinks, then lastResponse=lastResponse(1)
-            %and target ports from the trial history was 2.  RARE.
-        end
-    case 3
-        if ismember(trialManagerClass,{'goNoGo'})
-            %autopilot uses this stimulus that means "go right"
-            details.correctResponseIsLeft=-1;
-        else
-            error('unexpected')
-        end
-    otherwise
-        targetPorts
-        error('Targetports is inappropriate.  Stimulus is defined for 3 ports with one correct L/R answer in nAFC, no correct in autopilot, and all coprrect in goNoGo')
-end
+
 
 %CALC CUE PARAMS
 ctr=[height/2 width/2 ];
@@ -600,17 +622,37 @@ switch details.renderMode
                 preResponseStim.punishResponses=false;
                 
                 %the discrim phase is actually blank
-                 discrimStim=preRequestStim;
+                discrimStim=preRequestStim;
             case {'nAFC','autopilot'}
-                discrimStim=[];
-                discrimStim.stimulus=out;
-                discrimStim.stimType=type;
-                discrimStim.scaleFactor=scaleFactor;
-                discrimStim.startFrame=0;
-                discrimStim.autoTrigger=[];
                 
-                preResponseStim=preRequestStim;
-                preResponseStim.punishResponses=false;
+%                 if strcmp(stimulus.protocolType,'cuedGoNoGo')
+%                     %question: is this really the right thing to do?!
+%                     
+%                     %the stimulus appears imediatelty *before* the discrim phase
+%                     preResponseStim=[];
+%                     preResponseStim.stimulus=out;
+%                     preResponseStim.stimType=type;
+%                     preResponseStim.scaleFactor=scaleFactor;
+%                     preResponseStim.startFrame=0;
+%                     preResponseStim.autoTrigger=[];
+%                     preResponseStim.punishResponses=false;
+%                     
+%                     %the discrim phase is actually blank
+%                     discrimStim=preRequestStim;
+%                 else
+%                     
+                    discrimStim=[];
+                    discrimStim.stimulus=out;
+                    discrimStim.stimType=type;
+                    discrimStim.scaleFactor=scaleFactor;
+                    discrimStim.startFrame=0;
+                    discrimStim.autoTrigger=[];
+                    
+                    preResponseStim=preRequestStim;
+                    preResponseStim.punishResponses=false;
+%                 end
+                
+                
             otherwise
                 error('unknown how to handle that trial manager class')
         end

@@ -33,6 +33,7 @@ if length(stimTimes)~=2 || stimTimes(2)<=stimTimes(1)
 end
 
 [data.ratID data.date type data.uID data.hash data.z data.chunkNum]=parseFileName(fileNames.targetFile,stimType,rec,stimTimes);
+data.fileNames=fileNames;
 
 mins=(stimTimes(2)-stimTimes(1))/60;
 
@@ -53,15 +54,23 @@ data.rec=rec;
 
 fprintf('\tloading waveforms for code %d, chan %d, file %s...\n',rec.chunks.spkCode, rec.chunks.spkChan, rec.file)
 wm=load(fileNames.wavemarkFile);
+recTimes=[wm.recs.time];
+wm.recs=wm.recs(recTimes>=stimTimes(1) & recTimes<=stimTimes(2));
 
-keyboard
+data.theseWaveforms=wm.recs(rec.chunks.spkCode==[wm.recs.code]);
+theseRecTimes=[data.theseWaveforms.time];
+if ~isempty(setdiff(data.spks,theseRecTimes)) || ~isempty(setdiff(theseRecTimes,data.spks))
+    error('recs and spks don''t match')
+end
 
-unique([wm.recs.code])
+data.otherWaveforms=wm.recs(rec.chunks.spkCode~=[wm.recs.code]);
+data.lockout=double(wm.totalPoints)*wm.rate;
+data.waveformTimes=wm.tms;
+data.numPts=wm.totalPoints;
 
-%[data.waveforms data.lockout]=doWaveforms(fileNames.wavemarkFile,rec.chunks.spkChan,rec.chunks.spkCode);
-
+doAnalysis(data,'burstDetail');
 %doAnalysis(data,'waveforms');
-%doAnalysis(data,'ISI');
+doAnalysis(data,'ISI');
 %doAnalysis(data,'spectrogram');
 
 switch stimType
@@ -80,7 +89,7 @@ end
 
 function doAnalysis(data,type)
 fprintf('\tdoing %s: ',type)
-name=fullfile(data.figureBase,[data.ratID '-' data.date '-z' num2str(data.z) '-wf' data.chunkNum '-' num2str(data.rec.chunks.spkCode) '-t' num2str(data.stimTimes(1)) '-' num2str(data.stimTimes(2)) '-' data.hash],data.stimType);
+name=fullfile(data.figureBase,[data.ratID '-' data.date '-z' num2str(data.z) '-chunk' data.chunkNum '-code' num2str(data.rec.chunks.spkCode) '-' data.hash],[data.stimType '-t' num2str(data.stimTimes(1)) '-' num2str(data.stimTimes(2))]);
 [status,message,messageid]=mkdir(name);
 if ~status
     message
@@ -90,13 +99,18 @@ end
 
 name=fullfile(name,type);
 if ~(exist([name '.png'],'file') && exist([name '.fig'],'file')) %one flaw of this design is that if data were regenerated but old figs were still in this location, we'd not update the figs
+    %also, only the first presence of the first fig determines whether we
+    %generate -- cuz we'd have to actually call the generator to find out
+    %how many to expect, which is the expense we're trying to avoid.
     switch type
         case 'spectrogram'
-            savefig(name,spectro(data));
+            savefigs(name,spectro(data));
         case 'ISI'
-            savefig(name,isi(data));
+            savefigs(name,isi(data));
         case 'waveforms'
-            savefig(name,waveforms(data));
+            savefigs(name,waveforms(data));
+        case 'burstDetail'
+            savefigs(name,burstDetail(data));
         otherwise
             error('unrecognized type')
     end
@@ -106,17 +120,45 @@ end
 fprintf('\n')
 end
 
-function savefig(name,f)
-fprintf('saving fig')
-left=0;
-bottom=0;
-width=1600;
-height=1200;
-set(f,'OuterPosition',[left, bottom, width, height]);
+function savefigs(oname,fs)
+fprintf('saving %d figs',length(fs))
 
-saveas(f,[name '.png'])
-saveas(f,[name '.fig'])
-close(f)
+for i=1:length(fs)
+    f=fs(i);
+    if i>1
+        name=[oname '-' num2str(i)];
+    else
+        name=oname;
+    end
+    
+    % saveas(f,[name '.png']) %resolution not controllable
+    
+    % print() seems to pick a size independent of the figure size (how?), so the following is unnecessary.
+    if false
+        left=0;
+        bottom=0;
+        width=1600;
+        height=1200;
+        set(f,'OuterPosition',[left, bottom, width, height]);
+    end
+    
+    %"When you print to a file, the file name must have fewer than 128 characters, including path name."
+    %http://www.mathworks.com/access/helpdesk/help/techdoc/ref/print.html#f30-534567
+    
+    fn='tmp.png';
+    dpi=300;
+    print(f,'-dpng',['-r' num2str(dpi)],fn);
+    
+    [a b c]=movefile(fn,[name '.png']);
+    if ~a
+        b
+        c
+        error('couldn''t move fig')
+    end
+    
+    saveas(f,[name '.fig'])
+    close(f)
+end
 end
 
 function f=spectro(data)
@@ -139,42 +181,280 @@ function f=isi(data)
 ms=25;
 d=diff(data.spks)*1000;
 [a,b]=hist(d,0:.1:ms);
-rng=[min(d) max(d)];
+rng=[min([data.ref data.inter]/2) 2]*1000;
+rng(1)=.5;
 
 n=4;
 f=figure;
-subplot(n,1,1)
+subplot(n,2,1:2)
 plot(b(1:end-1),a(1:end-1),'k');
 hold on
-plot(ones(1,2)*data.lockout*1000,[0 max(a(1:end-1))],'k')'
+m = max(a(1:end-1));
+plot(data.lockout*ones(1,2)*1000,[0 m],'k')
+plot(1000*data.ref*ones(1,2),[0 m],'b');
+plot(1000*data.inter*ones(1,2),[0 m],'r');
 xlabel('ms')
 ylabel('count')
 title('isi')
 set(gca,'XTick',[0:ms]);
+ylim([0 m]);
+xlim([0 ms]);
+legend({'isi distribution','lockout','refractory criterion','burst isi criterion'})
 
-subplot(n,1,2:n)
+subplot(n,2,2*[1:(n-1)]+1)
 loglog(d(1:end-1),d(2:end),'k.')
-hold on
-plot(data.ref*ones(1,2)*1000,rng,'k')
-plot(data.pre*ones(1,2)*1000,rng,'k')
-plot(rng,data.inter*ones(1,2)*1000,'k')
-plot(data.inter*ones(1,2)*1000,rng,'k')
 
+    function markup(doLog)
+        scalePts = [.5 1 2 3 4 10 100 500 1000 2000];
+        scale=scalePts;
+        stretch=ones(1,2)*1000;
+        r=rng;
+        ref=data.ref*stretch;
+        pre=data.pre*stretch;
+        inter=data.inter*stretch;
+        lockout=data.lockout*stretch;
+        
+        if doLog
+            r=logTransform(r);
+            ref=logTransform(ref);
+            pre=logTransform(pre);
+            inter=logTransform(inter);
+            scale=logTransform(scalePts);
+            lockout=logTransform(lockout);
+        end
+        
+        hold on
+        plot(ref,r,'b')
+        plot(pre,r,'r')
+        plot(r,inter,'r')
+        plot(inter,r,'r')
+        plot(lockout,r,'k')
+        plot(r,lockout,'k')
+        xlim(r)
+        ylim(r)
+        xlabel('pre isi (ms)')
+        ylabel('post isi (ms)')
+        axis square
+        
+        set(gca,'XTickLabel',scalePts);
+        set(gca,'XTick',scale);
+        set(gca,'YTickLabel',scalePts);
+        set(gca,'YTick',scale);
+        set(gca,'FontSize',6);
+    end
+
+markup(false);
 isiSub(data.bsts,data.spks,d,'rx');
 isiSub(data.bstNotFst,data.spks,d,'r.');
 isiSub(data.refVios,data.spks,d,'bo');
 
-rng=[min([rng(1) [data.ref data.inter]*1000/2]) rng(2)];
-xlim(rng)
-ylim(rng)
-xlabel('pre isi (ms)')
-ylabel('post isi (ms)')
-axis square
+res=20;
+offset=min(log(d));
+
+    function out=logTransform(in)
+        out=round(res*(log(in)-offset)+1);
+    end
+
+log_spk_diffs = logTransform(d);
+
+twoDisi = sparse([],[],[],max(log_spk_diffs),max(log_spk_diffs),length(data.spks)-2);
+for i=3:length(data.spks)
+    x=log_spk_diffs(i-1);
+    y=log_spk_diffs(i-2);
+    twoDisi(x,y)=twoDisi(x,y)+1;
+end
+
+subplot(n,2,2*[2:n])
+
+imagesc(twoDisi);
+c=colormap(jet);
+c(1,:)=[1,1,1];
+colormap(c)
+colorbar('EastOutside')
+
+markup(true);
+axis xy
 end
 
 function f=waveforms(data)
-keyboard
+tic
+
+if false
+    
+    
+    
+    
+    
+    
+    %if they are PRE times, they would be offset consistently within file but not across files
+    
+    figure
+    col=[0 0 0];
+    for c=codes
+        matches=[recs.code]==c;
+        traces=cat(1,recs(matches).points)';
+        
+        %argh no alpha for lines :(
+        
+        subplot(2,1,1)
+        plot(tms,traces,'Color',col)
+        hold on
+        
+        subplot(2,1,2)
+        plot(tms,normalizeByDim(traces,2),'Color',col)
+        hold on
+        
+        col=[1 0 0];
+    end
+    allTraces=cat(1,recs.points);
+    allTraces=allTraces(:);
+    pT=ones(1,2)*tms(prePoints+1);
+    for i=1:2
+        subplot(2,1,i)
+        if i==1
+            ys=[min(allTraces) max(allTraces)];
+        else
+            ys=[0 1];
+        end
+        plot(pT,ys,'k')
+        xlabel('ms')
+        %legend({'accepted','rejected'}) %argh legend sucks ass
+    end
+    
+    
+    
+    
+    
+end
+toc
 f=figure;
+end
+
+function f=burstDetail(data)
+preBstMS=60;
+bstDurMS=60;
+
+maxToPlot=150;
+offset=.4;
+
+times=[];
+inds=[];
+totals=[];
+for i=1:length(data.bstRecs)
+    if ~isempty(data.bstRecs{i})
+        new=data.bstRecs{i}(:,i)*1000-preBstMS;
+        times=[times ; new];
+        inds(end+1:end+length(new))=i;
+        totals(i)=length(new);
+    end
+end
+
+if isempty(data.bstRecs)
+    data.bstRecs{1}=[];
+end
+
+if ~isempty(data.bstRecs{1}) || any(inds==1)
+    error('bstRecs has nonempty record for single spike bursts')
+end
+
+times=[times ; data.refVios*1000-preBstMS]; %doing refVios as single spike bursts so that we don't pay to load the raw phys files twice -- should really fix so the fig filename isn't something to do with bursts, but then would need to output a structure of handle/name pairs...
+%note we will also do refVios in waveform scatter plots
+inds(end+1:end+length(data.refVios))=1;
+
+if length(totals)>2
+    f=figure;
+    bar(2:length(totals),totals(2:end),'k')
+    ylabel('count')
+    xlabel('spikes per burst')
+else
+    f=[];
+end
+
+fprintf('\n')
+master=getRangeFromChunks(data.fileNames.physFile,times,bstDurMS+preBstMS);
+
+for i=unique(inds)
+    
+    master2=master(inds==i,:,:);
+    
+    m=ceil(size(master2,1)/maxToPlot);
+    n=ceil(size(master2,1)/m);
+    
+    thisInd=1;
+    for j=1:m
+        nextInd=min(thisInd+n-1,size(master2,1));
+        theseInds=thisInd:nextInd;
+        thisInd=nextInd+1;
+        bstDetail=master2(theseInds,:,:);
+        
+        bstD=bstDetail(:,:,2)';
+        bstD=bstD-repmat(min(bstD),size(bstD,1),1);
+        bstD=bstD./repmat(max(bstD),size(bstD,1),1);
+        bstD=bstD+repmat(offset*(1:size(bstD,2)),size(bstD,1),1);
+        
+        f(end+1)=figure;
+        lims=cellfun(@(x) x(bstD(:)),{@min ; @max});
+        if i==1
+            plot([-data.ref*ones(2,1)*1000 zeros(2,1)],repmat(lims,1,2),'b')
+        else
+            plot([data.inter*[-1*ones(2,1) ones(2,1)]*1000 zeros(2,1)],repmat(lims,1,3),'r')
+        end
+        hold on
+        xLocs=bstDetail(1,:,1)-bstDetail(1,1,1)-preBstMS;
+        plot(xLocs,bstD,'Color',ones(1,3)*.75)
+        
+        subTraces(1000*data.bsts,'r',1);
+        subTraces(1000*data.bstNotFst','m',i-1);
+        subTraces(1000*data.tonics,'g');
+        subTraces([data.otherWaveforms.time],'b');
+        
+        % legend({'raw traces','first spike of burst','subsequent spikes in bursts','tonic spikes','other threshold crossings (other spikes or noise)'}) %god legend sucks 
+        tit=sprintf('%d of %d',size(bstDetail,1),size(master2,1));
+        if i==1
+            title([tit ' refractory violoations']);
+        else
+            title(sprintf('%s raw burst traces with %d spks/bst',tit,i))
+        end
+        xlabel('ms')
+        set(gca,'YTick',[]);
+        if size(bstD,2)<maxToPlot/2
+            ylim([0 offset*maxToPlot/2])
+        else
+            ylim(lims);
+        end
+    end
+end
+
+    function subTraces(times,c,perRow)
+        tms=[];
+        rows=[];
+        for k=1:size(bstD,2)
+            matches=times(times>=bstDetail(k,1,1) & times<=bstDetail(k,end,1));
+            if exist('perRow','var')
+                if length(matches)~=perRow && i~=1
+                    error('didn''t find exactly right number matches')
+                end
+            end
+            finds=[];
+            for q=1:length(matches)
+                finds(end+1)=find(matches(q)-bstDetail(k,:,1)<=0,1,'first'); %why aren't these exact?
+            end
+            if length(finds)~=length(matches)
+                error('didn''t find all')
+            end
+            
+            finds=finds(finds>data.numPts & finds<size(bstDetail,2)-data.numPts);
+            numFinds=length(finds);
+            
+            if ~isempty(finds)
+                finds=repmat(finds,data.numPts,1) + repmat([0:double(data.numPts)-1]',1,numFinds);
+                
+                tms=[tms reshape(xLocs(finds),size(finds,1),numFinds)];
+                rows=[rows reshape(bstD(finds,k),size(finds,1),numFinds)];
+            end
+        end
+        plot(tms,rows,c)
+    end
 end
 
 function [data]=findBursts(data)
@@ -191,19 +471,29 @@ data.bstNotFst=nan(1,5*length(data.bsts));
 count=0;
 data.bstLens=nan(1,length(data.bsts));
 tmp=sort(data.spks);
+if ~all(tmp==data.spks)
+    error('spks didn''t start off monotonic ascending')
+end
+data.bstRecs={};
 for i=1:length(data.bsts) %find a vectorized way (actually this is fast enough)
     done=false;
     data.bstLens(i)=1;
     start=data.bsts(i);
     tmp=tmp(tmp>start);
+    bstRec=start;
     while ~done && ~isempty(tmp)
-        if tmp(1)-start<=data.inter
+        if tmp(1)-bstRec(end)<=data.inter
             count=count+1;
             data.bstNotFst(count)=tmp(1);
             data.bstLens(i)=data.bstLens(i)+1;
+            bstRec(end+1)=tmp(1);
             tmp=tmp(2:end); %this is empty safe!?
         else
             done=true;
+            if length(data.bstRecs)<data.bstLens(i)
+                data.bstRecs{data.bstLens(i)}=[];
+            end
+            data.bstRecs{data.bstLens(i)}(end+1,:)=bstRec; %note we miss the very last burst if no tonics follow it
             if rand>.95 && false
                 fprintf('\t%.1f%% through bursts\n',100*i/length(bsts))
             end
@@ -218,6 +508,10 @@ if any(isnan(data.bstNotFst(1:count))) || any(~isnan(data.bstNotFst(count+1:end)
 end
 data.bstNotFst=data.bstNotFst(~isnan(data.bstNotFst));
 data.tonics=setdiff(data.spks,[data.bsts ; data.bstNotFst']);
+
+if false
+    plot(data.bstRecs{2}(:,1)-data.bsts(1:end-1)); %huh, why doesn't this make flat lines, with step offsets for each burst>2?
+end
 end
 
 function ex(fileNames,stimTimes,rec,spks,stimType,hz)
@@ -255,22 +549,7 @@ plot(bSTL(2,:),bSTL(1,:),'r')
 xlabel('ms')
 title('triggered LFP')
 
-preBstMS=20;
-bstDurMS=40;
-bstDetail=getRangeFromChunks(fileNames.physFile,bsts*1000-preBstMS,bstDurMS+preBstMS);
 
-g=figure;
-hist(bstLens,0:15)
-title('spikes per burst')
-
-h=figure;
-bstD=bstDetail(:,:,2)';
-bstD=bstD-repmat(min(bstD),size(bstD,1),1);
-bstD=bstD./repmat(max(bstD),size(bstD,1),1);
-bstD=bstD+repmat(.4*(1:size(bstD,2)),size(bstD,1),1);
-plot(bstDetail(1,:,1)-bstDetail(1,1,1)-preBstMS,bstD(:,1:min(150,size(bstD,2))),'k')
-title(sprintf('%d raw burst traces',size(bstDetail,1)))
-xlabel('ms')
 
 if ~isempty(rptStarts)
     missed=.01 < abs(1 - diff(rptStarts)/median(diff(rptStarts)));

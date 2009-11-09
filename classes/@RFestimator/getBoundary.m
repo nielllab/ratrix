@@ -6,7 +6,7 @@ function [bound source details]  = getCenter(RFe,subjectID)
 if ~success
     error('bad phys load!')
 else
-    analysisdata=data.analysisdata;
+    analysisdata=data.cumulativedata;
     stimulusDetails=data.stimulusDetails;
 end
 

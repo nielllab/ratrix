@@ -6,7 +6,7 @@ playLoopSounds={};
 playSoundSounds={};
 
 % nAFC/goNoGo setup:
-if strcmp(trialManagerClass, 'nAFC') || strcmp(trialManagerClass,'goNoGo') || strcmp(trialManagerClass,'oddManOut')
+if strcmp(trialManagerClass, 'nAFC') || strcmp(trialManagerClass,'goNoGo') || strcmp(trialManagerClass,'oddManOut') || strcmp(trialManagerClass,'cuedGoNoGo')
     % play trial start sound
     if phase==1 && stepsInPhase <=0
         playSoundSounds{end+1} = {'trialStartSound', 50};

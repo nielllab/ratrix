@@ -642,7 +642,7 @@ switch protocolVersion
                 default.responseLockoutMs=500;
                 
                 default.requestPorts='none';
-                default.tmClass='nAFC'; % not actually using goNoGo trial Manager!
+                default.tmClass='cuedGoNoGo'; 
                 
                 
             otherwise

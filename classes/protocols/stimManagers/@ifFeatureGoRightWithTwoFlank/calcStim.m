@@ -165,54 +165,50 @@ switch trialManagerClass
             targetPorts=responsePorts; 
             distractorPorts=[]; %I don't think these are
             %needed, they used to be defined by assignPorts as in nAFC
+    case {'cuedGoNoGo'}
+        if rand>0.5
+            targetPorts=responsePorts; %choose all response port to be correct answer
+            details.correctResponseIsLeft=-1; %goNoGo uses the stimulus that means "go right"==stimulus is there
+            %this is only the wierd historic convention of ifFeatureGoRightWithTwoFlank, 
+            %and future stim managers can use whatever fact they want in checkTargetIsPresent
+        else
+            targetPorts=[];
+            details.correctResponseIsLeft=1; %==stimulus is not there
+        end
+        distractorPorts=setdiff(responsePorts,targetPorts);
+        details.correctionTrial=0;
+        details.maxCorrectForceSwitch=0;
     case {'nAFC'}
         
-        if strcmp(stimulus.protocolType,'cuedGoNoGo')
-            if rand>0.5
-                %targetPorts=responsePorts; %choose all response port to be correct answer
-                                targetPorts=3; %choose all response port to be correct answer
-                details.correctResponseIsLeft=-1; %goNoGo uses the stimulus that means "go right"==stimulus is there
-            else
-                                %targetPorts=[];
-                targetPorts=1; %test
-                details.correctResponseIsLeft=1; %==stimulus is not there
-            end
-            
-            distractorPorts=setdiff(responsePorts,targetPorts);
-            details.correctionTrial=0;
-            details.maxCorrectForceSwitch=0;
-            
+        if ~isempty(trialRecords) && length(trialRecords)>=2
+            lastRec=trialRecords(end-1);
         else
-            
-            if ~isempty(trialRecords) && length(trialRecords)>=2
-                lastRec=trialRecords(end-1);
-            else
-                lastRec=[];
-            end
-            [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass);
-            
-            %note that this implementation will not show the exact same
-            %stimulus for a correction trial, but just have the same side
-            %correct.  may want to change...
-            if (isfield( details,'correctionTrial') && details.correctionTrial)
-                details.maxCorrectForceSwitch=0;
-            else
-                [targetPorts hadToResample]=getSameLimitedResponsePort(responsePorts,stimulus.maxCorrectOnSameSide,trialRecords(1:end-1));  % add this to assignPorts
-                details.maxCorrectForceSwitch=hadToResample;
-            end
-            
-            if targetPorts==1
-                details.correctResponseIsLeft=1;
-            elseif targetPorts==3
-                details.correctResponseIsLeft=-1; % on the right
-            else
-                error('Targetports is inappropriate.  Stimulus is defined for 3 ports with one correct L/R answer in nAFC')
-                %i have never seen this happen -pmm 080504
-                %one reason one could get here is if Center  and Left were blocked
-                %during a correction trial that was right before manual graduation from freeDrinks, then lastResponse=lastResponse(1)
-                %and target ports from the trial history was 2.  RARE.
-            end
+            lastRec=[];
         end
+        [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass);
+        
+        %note that this implementation will not show the exact same
+        %stimulus for a correction trial, but just have the same side
+        %correct.  may want to change...
+        if (isfield( details,'correctionTrial') && details.correctionTrial)
+            details.maxCorrectForceSwitch=0;
+        else
+            [targetPorts hadToResample]=getSameLimitedResponsePort(responsePorts,stimulus.maxCorrectOnSameSide,trialRecords(1:end-1));  % add this to assignPorts
+            details.maxCorrectForceSwitch=hadToResample;
+        end
+        
+        if targetPorts==1
+            details.correctResponseIsLeft=1;
+        elseif targetPorts==3
+            details.correctResponseIsLeft=-1; % on the right
+        else
+            error('Targetports is inappropriate.  Stimulus is defined for 3 ports with one correct L/R answer in nAFC')
+            %i have never seen this happen -pmm 080504
+            %one reason one could get here is if Center  and Left were blocked
+            %during a correction trial that was right before manual graduation from freeDrinks, then lastResponse=lastResponse(1)
+            %and target ports from the trial history was 2.  RARE.
+        end
+        
         %         if ~isempty(lastCorrect) && ~isempty(lastResponse) && ~lastCorrect && (lastWasCorrection || rand<details.pctCorrectionTrials)
         %             details.correctionTrial=1;
         %             details.maxCorrectForceSwitch=0;
@@ -623,34 +619,17 @@ switch details.renderMode
                 
                 %the discrim phase is actually blank
                 discrimStim=preRequestStim;
-            case {'nAFC','autopilot'}
+            case {'nAFC','autopilot','cuedGoNoGo'}
+                discrimStim=[];
+                discrimStim.stimulus=out;
+                discrimStim.stimType=type;
+                discrimStim.scaleFactor=scaleFactor;
+                discrimStim.startFrame=0;
+                discrimStim.autoTrigger=[];
                 
-%                 if strcmp(stimulus.protocolType,'cuedGoNoGo')
-%                     %question: is this really the right thing to do?!
-%                     
-%                     %the stimulus appears imediatelty *before* the discrim phase
-%                     preResponseStim=[];
-%                     preResponseStim.stimulus=out;
-%                     preResponseStim.stimType=type;
-%                     preResponseStim.scaleFactor=scaleFactor;
-%                     preResponseStim.startFrame=0;
-%                     preResponseStim.autoTrigger=[];
-%                     preResponseStim.punishResponses=false;
-%                     
-%                     %the discrim phase is actually blank
-%                     discrimStim=preRequestStim;
-%                 else
-%                     
-                    discrimStim=[];
-                    discrimStim.stimulus=out;
-                    discrimStim.stimType=type;
-                    discrimStim.scaleFactor=scaleFactor;
-                    discrimStim.startFrame=0;
-                    discrimStim.autoTrigger=[];
-                    
-                    preResponseStim=preRequestStim;
-                    preResponseStim.punishResponses=false;
-%                 end
+                preResponseStim=preRequestStim;
+                preResponseStim.punishResponses=false;
+                
                 
                 
             otherwise

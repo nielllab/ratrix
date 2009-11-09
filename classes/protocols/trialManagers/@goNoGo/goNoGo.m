@@ -28,6 +28,11 @@ switch nargin
             error('1 >= percentCorrectionTrials >= 0')
         end
         
+         if t.percentCorrectionTrials~=0
+            t.percentCorrectionTrials
+            error('you probably don''t want correction trials on goNoGo')
+        end
+        
         if isscalar(varargin{3}) && varargin{3}>=0
             t.responseLockoutMs=varargin{3};
         elseif isempty(varargin{3})

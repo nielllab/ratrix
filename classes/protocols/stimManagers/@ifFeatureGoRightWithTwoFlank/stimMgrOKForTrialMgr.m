@@ -13,6 +13,8 @@ if isa(tm,'trialManager')
             out=1; % useful for physiology
         case 'goNoGo'
             out=1;
+        case 'cuedGoNoGo'
+            out=1; %can display flanks alone in which case appropriate response is "noGo"
         otherwise % useful for headfixed
             out=0;
     end

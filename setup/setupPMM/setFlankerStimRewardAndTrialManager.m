@@ -28,7 +28,7 @@ stim = ifFeatureGoRightWithTwoFlank([p.pixPerCycs],[p.goRightOrientations],[p.go
 p.hitRewardSizeULorMS=500;
 p.correctRejectRewardSizeULorMS=0;
 p.missMsPenalty=0;
-p.falseAlarmMsPenalty=3;
+p.falseAlarmMsPenalty=3000;
 
 asymRm=asymetricReinforcement(p.hitRewardSizeULorMS,p.correctRejectRewardSizeULorMS,p.missMsPenalty,...
     p.falseAlarmMsPenalty,p.requestRewardSizeULorMS,p.requestMode,p.msPenalty,p.fractionOpenTimeSoundIsOn,...
@@ -36,38 +36,31 @@ asymRm=asymetricReinforcement(p.hitRewardSizeULorMS,p.correctRejectRewardSizeULo
 
 increasingReward=rewardNcorrectInARow(p.rewardNthCorrect,p.requestRewardSizeULorMS,p.requestMode,p.msPenalty,p.fractionOpenTimeSoundIsOn,p.fractionPenaltySoundIsOn, p.scalar, p.msPuff);
 
-
-
 switch tmClass
     case 'nAFC'
-        if strcmp(p.protocolType,'cuedGoNoGo')
-            rm=asymRm;
-        else
-            rm=increasingReward;
-        end
+        rm=increasingReward;
         tm=nAFC(p.sndManager,p.percentCorrectionTrials,rm,p.eyeController,...
+            p.frameDropCorner,p.dropFrames,p.displayMethod,p.requestPorts,p.saveDetailedFramedrops,...
+            p.delayManager,p.responseWindowMs,p.showText);
+    case 'cuedGoNoGo'
+         rm=asymRm;
+         %p.requestPorts='' % is already 'none'
+         tm=cuedGoNoGo(p.sndManager,rm,p.eyeController,...
             p.frameDropCorner,p.dropFrames,p.displayMethod,p.requestPorts,p.saveDetailedFramedrops,...
             p.delayManager,p.responseWindowMs,p.showText);
     case 'goNoGo'
         rm=asymRm;
+        p.percentCorrectionTrials=0;
         tm=goNoGo(p.sndManager,p.percentCorrectionTrials,p.responseLockoutMs,rm,p.eyeController,...
             p.frameDropCorner,p.dropFrames,p.displayMethod,p.requestPorts,p.saveDetailedFramedrops,...
             p.delayManager,p.responseWindowMs,p.showText);
     case 'freeDrinks'
         error('not yet') % but could get rid of makeFreeDrinksTM this way, need to test calcStim
     case 'promptedNAFC'
-        
-        %temp here until tested and moved to params
-        %p.delayManager=[];
-        percentile=0.99;
-        value=10000;
-        fixedDelayMs=1000;
-        p.delayManager=flatHazard(percentile, value, fixedDelayMs);
-        
+        error('this is no longer supported... instead change the parameters on nAFC')
         %         %p.eyeTracker=geometricTracker(getDefaults(geometricTracker));
         %         p.eyeTracker=geometricTracker('simple', 2, 3, 12, 0, int16([1280,1024]), [42,28], int16([1024,768]), [400,290], 300, -25, 0, 45, 0);
         %         p.eyeController=[];
-        %
         %
         %         tm=promptedNAFC(p.msFlushDuration,p.msMinimumPokeDuration,p.msMinimumClearDuration,p.sndManager,...
         %             p.requestRewardSizeULorMS,p.percentCorrectionTrials,p.msResponseTimeLimit,p.pokeToRequestStim,...
@@ -75,8 +68,8 @@ switch tmClass
         %             p.delayMeanMs, p.delayStdMs, p.delayStim, p.promptStim,p.eyeTracker,p.eyeController);
         
     case 'phasedNAFC'
+        error('this is no longer supported... all nAFC is infact phased now')
         t=trialManager(p.msFlushDuration,p.msMinimumPokeDuration,p.msMinimumClearDuration,p.sndManager,increasingReward,eyeTracker,eyeController)
-        
 end
 step= trainingStep(tm, stim, p.graduation, p.scheduler, p.svnRev, p.svnCheckMode); %it would be nice to add the nameOfShapingStep
 

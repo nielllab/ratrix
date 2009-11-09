@@ -1,10 +1,9 @@
 function out=getResponsePorts(trialManager,totalPorts)
 
 out=setdiff(1:totalPorts,getRequestPorts(trialManager,totalPorts)); % old: response ports are all non-request ports
-% 5/4/09 - what if we want nAFC L/R target/distractor, but no request port (using delayManager instead)
-% responsePorts then still needs to only be L/R, not all ports (since request ports is empty)
+%nAFC tries to remove the center port. but cuedGoNoGo likes the center port, and keeps it enabled.
 
-enableCenterPortResponseWhenNoRequestPort=false; %nAFC removes the center port
+enableCenterPortResponseWhenNoRequestPort=true; %false in nAFC
 if ~enableCenterPortResponseWhenNoRequestPort
     if isempty(getRequestPorts(trialManager,totalPorts)) % removes center port if no requestPort defined
         out(ceil(length(out)/2))=[];

@@ -11,10 +11,10 @@ targetIsPresent=checkTargetIsPresent(sm,details);
 
 if targetIsPresent==1
     rewardSizeULorMS=getScalar(r) * r.hitRewardSizeULorMS;
-        msPenalty=r.falseAlarmMsPenalty;
+    msPenalty=r.missMsPenalty;
 elseif targetIsPresent==0;
-        rewardSizeULorMS=getScalar(r) * r.correctRejectRewardSizeULorMS;
-        msPenalty=r.missMsPenalty;
+    rewardSizeULorMS=getScalar(r) * r.correctRejectRewardSizeULorMS;
+    msPenalty=r.falseAlarmMsPenalty;
 else  %(ie. any negative value)
     class(sm)
     targetIsPresent

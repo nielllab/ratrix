@@ -269,3 +269,9 @@ protocols/stimManagers/@movies/decache.m -text
 protocols/stimManagers/@movies/stationOKForStimManager.m -text
 protocols/reinforcementManagers/@asymetricReinforcement/calcReinforcement.m -text
 protocols/reinforcementManagers/@asymetricReinforcement/asymetricReinforcement.m -text
+protocols/trialManagers/@cuedGoNoGo/stationOKForTrialManager.m -text
+protocols/trialManagers/@cuedGoNoGo/getResponsePorts.m -text
+protocols/trialManagers/@cuedGoNoGo/updateTrialState.m -text
+protocols/trialManagers/@cuedGoNoGo/cuedGoNoGo.m -text
+protocols/trialManagers/@cuedGoNoGo/checkPorts.m -text
+protocols/reinforcementManagers/@asymetricReinforcement/setReinforcementParam.m -text

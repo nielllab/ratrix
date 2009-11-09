@@ -25,3 +25,4 @@
 /setMaxWidthAndHeight.m -text
 /worthPhysAnalysis.m -text
 /enableChunkedPhysAnalysis.m -text
+/checkTargetIsPresent.m -text

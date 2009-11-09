@@ -43,7 +43,8 @@ goToSide = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,m
 pixPerCycs=2.^([5:11]); % freq
 %pixPerCycs=2.^([9]);   % freq
 driftfrequencies=[4];  % in cycles per second
-orientations=[pi/2];   % in radians
+orientations=[pi/2];   % in radians, horiz
+orientations=[0];       % in radians, vert
 phases=[0];            % initial phase
 contrasts=[0.5];       % contrast of the grating
 durations=[3];         % duration of each grating
@@ -60,7 +61,7 @@ sfGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,
 
 
 durations=[3]
-numRepeats=10;
+numRepeats=5;
 pixPerCycs=512;
 dynGrating=gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
     waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
@@ -83,6 +84,12 @@ contrasts=1; % reset to one value
 radGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radii,annuli,location,...
     waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
+
+
+
+
+
+
 annuli=[0.02 0.05 .1 .2 .3 .4 .5 2]; % annulus of the grating
 RFdataSource='\\132.239.158.179\datanet_storage'; % good only as long as default stations don't change, %how do we get this from the dn in the station!?
 if 1 
@@ -91,6 +98,9 @@ if 1
 end
 anGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
     waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
+
+
 
 annuli=0;                        % reset
 location=[.5 .5];                % center of mask
@@ -106,6 +116,24 @@ fakeTRF= gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,dura
 
 numRepeats=10;
 fakeTRF10= gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
+    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
+
+waveform='square'; 
+pixPerCycs=2.^([8:10]); % freq
+numRepeats=1;
+durations=[3];                 % duration of each grating
+orientations=([5/4*pi]*[1:5])/5; % in radians
+contrasts=[1];              % contrast of the grating
+driftfrequencies=[1 2 4];      % in cycles per second
+searchGratings  = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
+    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
+driftfrequencies=[1/2];     % in cycles per second
+pixPerCycs=2048;
+durations=8;
+contrasts=1;
+bigSlowSquare = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
     waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 
@@ -360,12 +388,12 @@ ts{5}= trainingStep(ap,  ffgwn,       numTrialsDoneCriterion(10), noTimeOff(), s
 ts{6}= trainingStep(ap,  bin,         numTrialsDoneCriterion(10), noTimeOff(), svnRev, svnCheckMode); %binary noise grid
 ts{7} = trainingStep(ap, flankersFF,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %flankers with giant target
 ts{8} = trainingStep(ap, sfGratings,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: spatial frequency (should it be before annulus?)
-ts{9} = trainingStep(ap, orGratings,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: orientation
+ts{9} = trainingStep(ap, orGratings,   repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %gratings: orientation
 
 %check if it drives
-ts{10}= trainingStep(ap, sparseBrighter,numTrialsDoneCriterion(1),noTimeOff(),svnRev, svnCheckMode);  %
-ts{11}= trainingStep(ap, horizBars,   numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
-ts{12}= trainingStep(ap, vertBars,    numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
+ts{10}= trainingStep(ap, sparseBrighter,numTrialsDoneCriterion(8),noTimeOff(),svnRev, svnCheckMode);  %
+ts{11}= trainingStep(ap, horizBars,   numTrialsDoneCriterion(8), noTimeOff(), svnRev, svnCheckMode);  %
+ts{12}= trainingStep(ap, vertBars,    numTrialsDoneCriterion(8), noTimeOff(), svnRev, svnCheckMode);  %
 ts{13}= trainingStep(ap, gwn,         numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
 ts{14}= trainingStep(ap, sparseDark,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
 ts{15}= trainingStep(ap, sparseBright,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
@@ -373,8 +401,8 @@ ts{15}= trainingStep(ap, sparseBright,numTrialsDoneCriterion(1), noTimeOff(), sv
 %search tools
 ts{16}= trainingStep(ap, darkBox,     numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
 ts{17}= trainingStep(ap, brighterBox, numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
-ts{18}= trainingStep(ap, horizBar,    numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
-ts{19}= trainingStep(ap, vertBar,     numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
+ts{18}= trainingStep(ap, horizBar,    numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %
+ts{19}= trainingStep(ap, vertBar,     numTrialsDoneCriterion(5), noTimeOff(), svnRev, svnCheckMode);  %
 ts{20}= trainingStep(ap, flickeringBox,numTrialsDoneCriterion(2),noTimeOff(), svnRev, svnCheckMode);  %
 ts{21}= trainingStep(ap, localizedBin,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
 ts{22}= trainingStep(ap, bin,         repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
@@ -388,7 +416,8 @@ ts{25} = trainingStep(ap, biField,     numTrialsDoneCriterion(2), noTimeOff(), s
 ts{26} = trainingStep(ap, dynGrating,  repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %tailored to this cell
 ts{27} = trainingStep(ap, hateren,     repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %hateren
 ts{28} = trainingStep(ap, fTestFlicker,repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
-
+ts{29} = trainingStep(ap, searchGratings,repeatIndefinitely(),    noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
+ts{30} = trainingStep(ap, bigSlowSquare,repeatIndefinitely(),    noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
 
 %removed things b/c not used enough:
 % ts{10}= trainingStep(afc, radGratings, numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %gratings: radius
@@ -414,8 +443,8 @@ ts{28} = trainingStep(ap, fTestFlicker,repeatIndefinitely(),      noTimeOff(), s
 %% make and set it
 
 
-p=protocol('practice phys',{ts{1:28}});
-stepNum=uint8(28);
+p=protocol('practice phys',{ts{1:30}});
+stepNum=uint8(29);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

@@ -68,8 +68,13 @@ data.lockout=double(wm.totalPoints)*wm.rate;
 data.waveformTimes=wm.tms;
 data.numPts=wm.totalPoints;
 
+data.waveformPeakTime=double(wm.prePoints)*wm.rate*1000;
+if ~almostEqual(data.waveformPeakTime,data.waveformTimes(wm.prePoints+1))
+    error('waveform peak time error')
+end
+
 doAnalysis(data,'burstDetail');
-%doAnalysis(data,'waveforms');
+doAnalysis(data,'waveforms');
 doAnalysis(data,'ISI');
 %doAnalysis(data,'spectrogram');
 
@@ -277,57 +282,111 @@ axis xy
 end
 
 function f=waveforms(data)
-tic
+
+maxToShow=2000;
+
+%times indicated for spikes and waveforms are start times, not peak times.  that means they are offset consistently within file but not across files
+
+mTheseTraces=cat(1,data.theseWaveforms.points)';
+mNoiseTraces=cat(1,data.otherWaveforms.points)';
+
+t=[data.theseWaveforms.time];
+tn=[data.otherWaveforms.time];
+
+if ~all(sort(t)==t) || ~all(sort(tn)==tn)
+    error('waveform times not ascending monotonic')
+end
+
+n=ceil(size(mTheseTraces,2)/maxToShow);
+m=ceil(size(mTheseTraces,2)/n);
+
+    function tracePlot(xs,cs,p)
+        for i=1:size(cs,1)
+            plot(xs,cs{i,1},'Color',(cs{i,2}+ones(1,3))/2) % argh no alpha for lines :(
+            hold on
+        end
+        for i=1:size(cs,1)
+            ptiles=[0 1] + p*[1 -1]/2;
+            s=sort(cs{i,1},2);
+            plot(xs,s(:,round(ptiles*size(s,2))),'Color',cs{i,2})
+        end
+    end
+
+f=[];
+thisIndex=1;
+for j=1:n
+    inds=thisIndex:min(thisIndex+m,size(mTheseTraces,2));
+    thisIndex=inds(end)+1;
+    theseTraces=mTheseTraces(:,inds);
+    
+    times=t(inds([1 end]));
+    tnInds=tn>=times(1) & tn<=times(2);
+    noiseTraces=mNoiseTraces(:,tnInds);
+    
+    f(end+1)=figure;
+    subplot(2,2,[1 3])
+    tracePlot(data.waveformTimes,{theseTraces, [1 0 0]; noiseTraces, zeros(1,3)},.05);
+    
+    allTraces=[theseTraces(:) ; noiseTraces(:)];
+    lims=cellfun(@(x) x(allTraces), {@min,@max});
+    plot(ones(1,2)*data.waveformPeakTime,lims,'k')
+    ylim(lims)
+    xlabel('ms')
+    ylabel('volts')
+    title(sprintf('%d of %d waveforms (%d noise waveforms)',length(inds),size(mTheseTraces,2),sum(tnInds)))
+    
+    subplot(2,2,2)
+    
+    bits=10;%16;
+    vLims=5*[-1 1];
+    if any(allTraces<vLims(1) | allTraces>vLims(2))
+        error('volt error')
+    end
+    allTraces=[theseTraces noiseTraces];
+    im = sparse([],[],[],length(data.waveformTimes),2^bits,length(data.waveformTimes)*(size(noiseTraces,2)+size(theseTraces,2)));
+    for i=1:size(allTraces,2)
+        for x=1:length(data.waveformTimes)
+            y= 1+round((2^bits) * (allTraces(x,i)-vLims(1))/(vLims(2)-vLims(1)));
+            im(x,y)=im(x,y)+1;
+        end
+        if rand>.99
+            fprintf('%g done\n',100*i/size(allTraces,2))
+        end
+    end
+    imagesc(im')
+    
+    z=sum(im)==0;
+    
+    ylim([find(z~=1,1,'first') length(z)-find(fliplr(z)~=1,1,'first')-1])
+    set(gca,'YTick',[])
+    set(gca,'XTick',[])
+    c=colormap(jet);
+    % c(1,:)=[1,1,1];
+    colormap(c)
+    % colorbar('EastOutside')
+    axis xy
+    
+    subplot(2,2,4)
+    allTraces=allTraces';
+    [u s v]=svd(allTraces-repmat(mean(allTraces),size(allTraces,1),1));
+    s=diag(s);
+    ms=2;
+    plot(theseTraces'*v(:,1)/s(1),theseTraces'*v(:,2)/s(2),'r.','MarkerSize',ms)
+    hold on
+    plot(noiseTraces'*v(:,1)/s(1),noiseTraces'*v(:,2)/s(2),'k.','MarkerSize',ms)
+    set(gca,'YTick',[])
+    set(gca,'XTick',[])
+    
+    if false
+        plot(u(:,1)*theseTraces/s(1),u(:,2)*theseTraces/s(2),'r.')
+        hold on
+        plot(u(:,1)*noiseTraces/s(1),u(:,2)*noiseTraces/s(2),'k.')
+    end
+end
 
 if false
-    
-    
-    
-    
-    
-    
-    %if they are PRE times, they would be offset consistently within file but not across files
-    
-    figure
-    col=[0 0 0];
-    for c=codes
-        matches=[recs.code]==c;
-        traces=cat(1,recs(matches).points)';
-        
-        %argh no alpha for lines :(
-        
-        subplot(2,1,1)
-        plot(tms,traces,'Color',col)
-        hold on
-        
-        subplot(2,1,2)
-        plot(tms,normalizeByDim(traces,2),'Color',col)
-        hold on
-        
-        col=[1 0 0];
-    end
-    allTraces=cat(1,recs.points);
-    allTraces=allTraces(:);
-    pT=ones(1,2)*tms(prePoints+1);
-    for i=1:2
-        subplot(2,1,i)
-        if i==1
-            ys=[min(allTraces) max(allTraces)];
-        else
-            ys=[0 1];
-        end
-        plot(pT,ys,'k')
-        xlabel('ms')
-        %legend({'accepted','rejected'}) %argh legend sucks ass
-    end
-    
-    
-    
-    
-    
+    plot(tms,normalizeByDim(traces,2),'Color',col)
 end
-toc
-f=figure;
 end
 
 function f=burstDetail(data)
@@ -408,7 +467,7 @@ for i=unique(inds)
         subTraces(1000*data.tonics,'g');
         subTraces([data.otherWaveforms.time],'b');
         
-        % legend({'raw traces','first spike of burst','subsequent spikes in bursts','tonic spikes','other threshold crossings (other spikes or noise)'}) %god legend sucks 
+        % legend({'raw traces','first spike of burst','subsequent spikes in bursts','tonic spikes','other threshold crossings (other spikes or noise)'}) %god legend sucks
         tit=sprintf('%d of %d',size(bstDetail,1),size(master2,1));
         if i==1
             title([tit ' refractory violoations']);

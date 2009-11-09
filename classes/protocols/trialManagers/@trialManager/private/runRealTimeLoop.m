@@ -644,6 +644,11 @@ while ~done && ~quit;
         numEyeTrackerSamples = size(samples,1);
 
         if (totalEyeDataInd+numEyeTrackerSamples)>length(eyeData) %if samples from this frame make us exceed size of eyeData
+            
+            %edf notes that this method is more expensive than necessary -- by expanding the matrix in this way, the old matrix still has to be copied in
+            %instead, consider using a cell array and adding your new allocation chunk as an {end+1} cell with your matrix of nans, then no copying will be necessary
+            %then you can concat all your cells at the end of the trial
+            
             %  allocateMore
             newEnd=length(eyeData)+ framesPerAllocationChunk;
             %             disp(sprintf('did allocation to eyeTrack data; up to %d samples enabled',newEnd))

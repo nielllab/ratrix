@@ -293,7 +293,7 @@ mNoiseTraces=cat(1,data.otherWaveforms.points)';
 t=[data.theseWaveforms.time];
 tn=[data.otherWaveforms.time];
 
-if ~all(sort(t)==t) || ~all(sort(tn)==tn)
+if ~all(cellfun(@issorted,{t,tn}))
     error('waveform times not ascending monotonic')
 end
 
@@ -308,8 +308,12 @@ m=ceil(size(mTheseTraces,2)/n);
         for i=1:size(cs,1)
             ptiles=[0 1] + p*[1 -1]/2;
             s=sort(cs{i,1},2);
-            plot(xs,s(:,round(ptiles*size(s,2))),'Color',cs{i,2})
+            plot(xs,s(:,ceil(ptiles*size(s,2))),'Color',cs{i,2})
         end
+    end
+
+    function x=removeMean(x)
+        x=x-repmat(mean(x),size(x,1),1);
     end
 
 f=[];
@@ -317,12 +321,12 @@ thisIndex=1;
 for j=1:n
     inds=thisIndex:min(thisIndex+m,size(mTheseTraces,2));
     thisIndex=inds(end)+1;
-    theseTraces=mTheseTraces(:,inds);
+    theseTraces=removeMean(mTheseTraces(:,inds));
     
     times=t(inds([1 end]));
     tnInds=tn>=times(1) & tn<=times(2);
-    noiseTraces=mNoiseTraces(:,tnInds);
-    
+    noiseTraces=removeMean(mNoiseTraces(:,tnInds));
+
     f(end+1)=figure;
     subplot(2,2,[1 3])
     tracePlot(data.waveformTimes,{theseTraces, [1 0 0]; noiseTraces, zeros(1,3)},.05);
@@ -331,14 +335,15 @@ for j=1:n
     lims=cellfun(@(x) x(allTraces), {@min,@max});
     plot(ones(1,2)*data.waveformPeakTime,lims,'k')
     ylim(lims)
+    xlim([0 data.waveformTimes(end)])
     xlabel('ms')
     ylabel('volts')
     title(sprintf('%d of %d waveforms (%d noise waveforms)',length(inds),size(mTheseTraces,2),sum(tnInds)))
     
     subplot(2,2,2)
     
-    bits=10;%16;
-    vLims=5*[-1 1];
+    bits=12;%16;
+    vLims=5*[-1 1]*2; %the *2 is because we subtract the mean, so in the worst case, this makes the range twice as big
     if any(allTraces<vLims(1) | allTraces>vLims(2))
         error('volt error')
     end
@@ -368,21 +373,32 @@ for j=1:n
     
     subplot(2,2,4)
     allTraces=allTraces';
-    [u s v]=svd(allTraces-repmat(mean(allTraces),size(allTraces,1),1));
+    [u s v]=svd(allTraces);
     s=diag(s);
     ms=2;
-    plot(theseTraces'*v(:,1)/s(1),theseTraces'*v(:,2)/s(2),'r.','MarkerSize',ms)
+    svdPlot(theseTraces','r.',ms);
     hold on
-    plot(noiseTraces'*v(:,1)/s(1),noiseTraces'*v(:,2)/s(2),'k.','MarkerSize',ms)
+    svdPlot(noiseTraces','k.',ms);
     set(gca,'YTick',[])
     set(gca,'XTick',[])
     
-    if false
-        plot(u(:,1)*theseTraces/s(1),u(:,2)*theseTraces/s(2),'r.')
-        hold on
-        plot(u(:,1)*noiseTraces/s(1),u(:,2)*noiseTraces/s(2),'k.')
-    end
+    plotSpecials(data.bsts,'ro')
+    plotSpecials(data.bstNotFst,'mo')
+    plotSpecials(data.refVios,'bo')
 end
+
+    function plotSpecials(x,code)
+        [matches locs]=ismember(x,t(inds));
+        items=removeMean(mTheseTraces(:,inds(1)+locs(matches)-1))'; %this transpose shouldn't be necessary?
+        if ~all(ismember(items,theseTraces','rows'))
+            error('match error')
+        end
+        svdPlot(items,code,5) 
+    end
+
+    function svdPlot(items,code,sz)
+       plot(items*v(:,1)/s(1),items*v(:,2)/s(2),code,'MarkerSize',sz) 
+    end
 
 if false
     plot(tms,normalizeByDim(traces,2),'Color',col)
@@ -417,7 +433,7 @@ if ~isempty(data.bstRecs{1}) || any(inds==1)
 end
 
 times=[times ; data.refVios*1000-preBstMS]; %doing refVios as single spike bursts so that we don't pay to load the raw phys files twice -- should really fix so the fig filename isn't something to do with bursts, but then would need to output a structure of handle/name pairs...
-%note we will also do refVios in waveform scatter plots
+
 inds(end+1:end+length(data.refVios))=1;
 
 if length(totals)>2

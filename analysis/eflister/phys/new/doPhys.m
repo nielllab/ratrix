@@ -32,7 +32,8 @@ end
         if ~exist('stimType','var')
             stimType=[];
         end
-        out=ismember(char(stimType),{'gaussian',''}) && isnumeric(rec.indexPulseChan);
+        %out=ismember(char(stimType),{'gaussian',''}) && isnumeric(rec.indexPulseChan);
+        out=true;
     end
 
 %%%%%

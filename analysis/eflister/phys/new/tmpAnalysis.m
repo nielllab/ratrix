@@ -76,7 +76,7 @@ end
 doAnalysis(data,'burstDetail');
 doAnalysis(data,'waveforms');
 doAnalysis(data,'ISI');
-%doAnalysis(data,'spectrogram');
+doAnalysis(data,'spectrogram');
 
 switch stimType
     case 'gaussian'
@@ -167,9 +167,11 @@ end
 end
 
 function f=spectro(data)
+pHz=1/median(diff(data.phys(2,:)));
+fprintf('spectroing from %g hz... ',pHz)
+freqs=1:50;
 f=figure;
-plot(rand(10))
-fprintf('spectroing... ')
+spectrogram(data.phys(1,:),round(pHz),[],freqs,pHz,'yaxis');
 end
 
 function isiSub(sub,sup,d,code)
@@ -202,7 +204,9 @@ xlabel('ms')
 ylabel('count')
 title('isi')
 set(gca,'XTick',[0:ms]);
+if m>0
 ylim([0 m]);
+end
 xlim([0 ms]);
 legend({'isi distribution','lockout','refractory criterion','burst isi criterion'})
 
@@ -302,18 +306,25 @@ m=ceil(size(mTheseTraces,2)/n);
 
     function tracePlot(xs,cs,p)
         for i=1:size(cs,1)
+            if isempty(cs{i,1})
+                cs{i,1}=zeros(length(xs),1);
+            end
             plot(xs,cs{i,1},'Color',(cs{i,2}+ones(1,3))/2) % argh no alpha for lines :(
             hold on
         end
         for i=1:size(cs,1)
-            ptiles=[0 1] + p*[1 -1]/2;
-            s=sort(cs{i,1},2);
-            plot(xs,s(:,ceil(ptiles*size(s,2))),'Color',cs{i,2})
+            if size(cs{i,1},2)>1
+                ptiles=[0 1] + p*[1 -1]/2;
+                s=sort(cs{i,1},2);
+                plot(xs,s(:,ceil(ptiles*size(s,2))),'Color',cs{i,2})
+            end
         end
     end
 
     function x=removeMean(x)
-        x=x-repmat(mean(x),size(x,1),1);
+        if ~isempty(x)
+            x=x-repmat(mean(x),size(x,1),1);
+        end
     end
 
 f=[];
@@ -354,11 +365,11 @@ for j=1:n
             y= 1+round((2^bits) * (allTraces(x,i)-vLims(1))/(vLims(2)-vLims(1)));
             im(x,y)=im(x,y)+1;
         end
-        if rand>.99
+        if false && rand>.99
             fprintf('%g done\n',100*i/size(allTraces,2))
         end
     end
-    imagesc(im')
+    imagesc(log(im'))
     
     z=sum(im)==0;
     
@@ -385,6 +396,15 @@ for j=1:n
     plotSpecials(data.bsts,'ro')
     plotSpecials(data.bstNotFst,'mo')
     plotSpecials(data.refVios,'bo')
+    
+    if length(f)>15 && n-j>3 %runs out of memory, ugh, how fix?
+        
+        dpi=300;
+        print(f(end),'-dpng',['-r' num2str(dpi)],[sanitize(datestr(now)) '.png']);
+        
+        close(f(end)) 
+        f=f(1:end-1);
+    end
 end
 
     function plotSpecials(x,code)
@@ -397,7 +417,9 @@ end
     end
 
     function svdPlot(items,code,sz)
-       plot(items*v(:,1)/s(1),items*v(:,2)/s(2),code,'MarkerSize',sz) 
+        if ~isempty(items)
+            plot(items*v(:,1)/s(1),items*v(:,2)/s(2),code,'MarkerSize',sz)
+        end
     end
 
 if false
@@ -430,6 +452,13 @@ end
 
 if ~isempty(data.bstRecs{1}) || any(inds==1)
     error('bstRecs has nonempty record for single spike bursts')
+end
+
+maxVios=1000;
+if length(data.refVios)>maxVios %TODO: hanle this better
+    data.refVios=data.refVios(1:maxVios);
+    size(data.refVios)
+    warning('ignorming some refVios so we don''t run out of memory')
 end
 
 times=[times ; data.refVios*1000-preBstMS]; %doing refVios as single spike bursts so that we don't pay to load the raw phys files twice -- should really fix so the fig filename isn't something to do with bursts, but then would need to output a structure of handle/name pairs...
@@ -592,13 +621,6 @@ end
 function ex(fileNames,stimTimes,rec,spks,stimType,hz)
 
 % spectralAnalysis(phys(1,:),phys(2,:));
-
-pHz=1/median(diff(phys(2,:)));
-freqs=1:50;
-spectrogram(phys(1,:),round(pHz),[],freqs,pHz,'yaxis');
-q=gcf;
-
-
 
 physPreMS=300;
 stimPreMS=300;
@@ -790,7 +812,7 @@ end
 [n e]=scan(e,'%d');
 
 type=e{1};
-if ~strcmp(type,exType)
+if ~strcmp(type,sanitize(exType))
     error('bad parse')
 end
 
@@ -860,8 +882,13 @@ function [n e]=scanNum(e,test)
 n='';
 count=0;
 while ~strcmp(e{1},test)
+    possiblyHasLeadingZeros=e{1};
     [m e]=scan(e,'%d');
-    n=[n num2str(m) '.'];
+    if isnumeric(m) && ~isempty(m)
+        n=[n possiblyHasLeadingZeros '.'];
+    else
+        error('bad parse')
+    end
     count=count+1;
     if count>2
         error('bad parse')
@@ -898,10 +925,27 @@ function [stim,phys,rptStarts]=extractData(fileNames,stimTimes,rec)
 fprintf('\textracting...\n')
 data=load(fileNames.targetFile);
 
-rptStarts=data.stimBreaks;
+try
+    rptStarts=data.stimBreaks;
+catch
+    rptStarts=[];
+end
 
-if length(data.physT)~=length(data.phys) || length(data.binnedT)~=length(data.binnedVals)
-    error('length error')
+if length(data.physT)~=length(data.phys)
+    error('phys length error')
+end
+
+if length(data.binnedT)~=length(data.binnedVals)
+    if iscell(data.binnedT)
+        error('binned stim length error')
+    else
+        length(data.binnedT)-length(data.binnedVals)
+        warning('binned stim length difference')
+        %TODO: find out why this is happening
+        ml=min(length(data.binnedT),length(data.binnedVals));
+        data.binnedT=data.binnedT(1:ml);
+        data.binnedVals=data.binnedVals(1:ml);
+    end
 end
 
 phys=extract(data.phys,data.physT);
@@ -909,25 +953,41 @@ stim=extract(data.binnedVals,data.binnedT);
 end
 
 function out=extract(binnedVals,binnedT)
-totalStim=0;
-for i=1:length(binnedT)
-    totalStim=totalStim+length(binnedT{i});
-    if length(binnedVals{i})~=length(binnedT{i})
-        error('length error')
+if iscell(binnedT)
+    totalStim=0;
+    for i=1:length(binnedT)
+        totalStim=totalStim+length(binnedT{i});
+        if length(binnedVals{i})~=length(binnedT{i})
+            error('length error')
+        end
+    end
+    stim=nan(1,totalStim);
+    stimT=stim;
+    stimInd=1;
+    for i=1:length(binnedT)
+        stimIndE=stimInd+length(binnedT{i})-1;
+        if stimIndE>totalStim
+            error('total error')
+        end
+        stim(stimInd:stimIndE)=binnedVals{i};
+        stimT(stimInd:stimIndE)=binnedT{i};
+        stimInd=stimIndE+1;
+    end
+else
+    stim=binnedVals;
+    stimT=binnedT;
+end
+
+if ~all(cellfun(@(x) isvector(x) && size(x,1)==1,{stim,stimT}))
+    if all(cellfun(@isempty,{stim,stimT}))
+        %pass TODO: check that this is a junk or off (there was no stim)
+    elseif all(cellfun(@(x) isvector(x),{stim,stimT})) && size(stimT,1)==1 && size(stim,2)==1
+        stim=stim'; %TODO: find out why this happens
+    else
+        error('stim/stimT size error')
     end
 end
-stim=nan(1,totalStim);
-stimT=stim;
-stimInd=1;
-for i=1:length(binnedT)
-    stimIndE=stimInd+length(binnedT{i})-1;
-    if stimIndE>totalStim
-        error('total error')
-    end
-    stim(stimInd:stimIndE)=binnedVals{i};
-    stimT(stimInd:stimIndE)=binnedT{i};
-    stimInd=stimIndE+1;
-end
+
 if any(isnan(stim) | isnan(stimT))
     error('nan error')
 end

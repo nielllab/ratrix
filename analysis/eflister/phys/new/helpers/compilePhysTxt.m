@@ -59,7 +59,7 @@ for j=1:numStims
             thisStop=min(chunkEnds(chunkNum),stimStop);
             
             stimName=sprintf('%d.%s',j,rec.stimTimes{j,2});
-            stimName=stimName(~ismember(stimName,['<>/\?:*"|'])); %TODO: check for excluded filename characters on osx
+            stimName=sanitize(stimName);
             z=sprintf('%g',rec.chunks(chunkNum).cell_Z);
             tRange=sprintf('%g-%g',thisStart,thisStop);
             chunkName=sprintf('%d.%s',chunkNum,code);

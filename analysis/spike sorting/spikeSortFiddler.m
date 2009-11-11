@@ -15,7 +15,7 @@
 close all
 
 
-stimClassToAnalyze={'all'}; timeRangePerTrialSecs=[0 Inf];
+stimClassToAnalyze={'all'}; 
 % path='\\132.239.158.183\rlab_storage\pmeier\backup\devNeuralData_090310'; %b/c i can't see datanet_storage folder on .179
 % path='\\132.239.158.183\rlab_storage\pmeier\backup\neuralData_090505';
 % path='C:\Documents and Settings\rlab\Desktop\neural';
@@ -172,21 +172,62 @@ subjectID = '262';cellBoundary={'trialRange',[128 149]}; % spatial binary
 % subjectID = '261';cellBoundary={'trialRange',[415]} % bin grid
 
 
-subjectID = '138';cellBoundary={'trialRange',[8 12]} % ffgwn
-subjectID = '138';cellBoundary={'trialRange',[13 20]} % ffgwn
-subjectID = '138';cellBoundary={'trialRange',[25 29]} % ffgwn,  new pen, new cell
-subjectID = '138';cellBoundary={'trialRange',[31]} % sf,  very broad drives it
-subjectID = '138';cellBoundary={'trialRange',[37 47]} % sf,  very broad drives it
-subjectID = '138';cellBoundary={'trialRange',[53]} % sparse bin
-subjectID = '138';cellBoundary={'trialRange',[54 58]} % bars h
+% subjectID = '138';cellBoundary={'trialRange',[8 12]} % ffgwn
+% subjectID = '138';cellBoundary={'trialRange',[13 20]} % ffgwn
+% subjectID = '138';cellBoundary={'trialRange',[25 29]} % ffgwn,  new pen, new cell
+% subjectID = '138';cellBoundary={'trialRange',[31]} % sf,  very broad drives it
+% subjectID = '138';cellBoundary={'trialRange',[37 47]} % sf,  very broad drives it
+% subjectID = '138';cellBoundary={'trialRange',[53]} % sparse bin
+% subjectID = '138';cellBoundary={'trialRange',[54 58]} % bars h
 
+%subjectID = '249';cellBoundary={'trialRange',[42]} % ffwgn
+subjectID = '249';cellBoundary={'trialRange',[43 50]} % ffwgn
+%subjectID = '249';cellBoundary={'trialRange',[60 70]} % ffwgn
+subjectID = '249';cellBoundary={'trialRange',[78]} % gratings
+subjectID = '249';cellBoundary={'trialRange',[102]} % gratings  START OF NEW CELL AROUND HERE SOMEWHERE>?
+subjectID = '249';cellBoundary={'trialRange',[150 151]} % ffwgn
+subjectID = '249';cellBoundary={'trialRange',[158]} % bigSlow many orientations
+subjectID = '249';cellBoundary={'trialRange',[160 166]} %binary grid
+subjectID = '249';cellBoundary={'trialRange',[168 173]} % horz
+subjectID = '249';cellBoundary={'trialRange',[174 180]} %vert
+subjectID = '249';cellBoundary={'trialRange',[181 183]} %vert
+%subjectID = '249';cellBoundary={'trialRange',[187]} %spatial freq gratings
+subjectID = '249';cellBoundary={'trialRange',[196 198]} %ffgwn
+subjectID = '249';cellBoundary={'trialRange',[197 198]} %ffgwn
+subjectID = '249';cellBoundary={'trialRange',[239]} %vert  NEW CELL
+subjectID = '249';cellBoundary={'trialRange',[243 256]} %ffgwn
+subjectID = '249';cellBoundary={'trialRange',[259 264]} %bin grid
+subjectID = '249';cellBoundary={'trialRange',[296 298]} %horiz %NEW CELL, now in LGN
+subjectID = '249';cellBoundary={'trialRange',[299 301]} %more horiz background theta 4hz
+subjectID = '249';cellBoundary={'trialRange',[302]} %trf
+subjectID = '249';cellBoundary={'trialRange',[305 317]} %trf -  there might be more than one cell here
+subjectID = '249';cellBoundary={'trialRange',[323]} %
+subjectID = '249';cellBoundary={'trialRange',[339 356]} %bin3x4 -  very sparse now... iso?  bpm=30
+subjectID = '249';cellBoundary={'trialRange',[365 370]} %bin3x4 -  very sparse now... iso?  bpm=30
+subjectID = '249';cellBoundary={'trialRange',[376]} %bin3x4 -  very sparse now... iso?  bpm=48
+subjectID = '249';cellBoundary={'trialRange',[377]} %bin6x8 - 
+subjectID = '249';cellBoundary={'trialRange',[405]} %ffgwn 
+subjectID = '249';cellBoundary={'trialRange',[407 411]} %horiz 
+subjectID = '249';cellBoundary={'trialRange',[423]} % slow gratings
+subjectID = '249';cellBoundary={'trialRange',[429 439]} %
+subjectID = '249';cellBoundary={'trialRange',[450]} %horiz
+subjectID = '249';cellBoundary={'trialRange',[451]} %vert
+%subjectID = '249';cellBoundary={'trialRange',[454?]} %many slow orients... responded reasonable well. 16 orients for the v1 comparison
+subjectID = '249';cellBoundary={'trialRange',[457 464]} %3x4
+%subjectID = '249';cellBoundary={'trialRange',[469]} %horiz 
+%subjectID = '249';cellBoundary={'trialRange',[470]} %horiz 
+subjectID = '249';cellBoundary={'trialRange',[475 477]} %3x4 
+subjectID = '249';cellBoundary={'trialRange',[482 493]} %6x8 sparse brighter 
+subjectID = '249';cellBoundary={'trialRange',[495 505]} %6 horiz - not much spatial
+subjectID = '249';cellBoundary={'trialRange',[508 521]} %6 vert - not much spatial
+subjectID = '249';cellBoundary={'trialRange',[523 555]}
 
 spikeDetectionParams.detectionMethod=3; % 1 -> from power signal, 2 threshold positive, 3 threshold negative, 4 threshold abs, 5 wavelet
 spikeDetectionParams.extractionThreshold =10;
 spikeDetectionParams.sampleLFP = false; %true;
 spikeDetectionParams.LFPSamplingRateHz =500;
 
-overwriteAll=0; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
+overwriteAll=1; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
 usePhotoDiodeSpikes=0;
 %spikeDetectionParams.method='activeSortingParametersThisAnalysis';  % will override this files choices with the active params for this *subject*
 %spikeSortingParams.method='activeSortingParametersThisAnalysis';

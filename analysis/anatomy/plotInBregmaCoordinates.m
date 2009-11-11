@@ -41,7 +41,7 @@
         %extract values
         if any(which)
             
-            p=getPositionInBregmaCoordinates(eventdata,which);
+            p=getPositionInBregmaCoordinates(eventdata,which)%,levelToTopOfBrain);
 
             
 
@@ -92,20 +92,20 @@
                     end
                 end
                 
-                if 0
-                    %adjust the depth of the events, so they are aligned to the appropriate top of brain
-                    for i=1:length(positionsToChange)
-                        % subtract of the depth from top of brain
-                        try
-                            p(i,3)= 8;
-                            %eventdata(positionsToChange(i)).position(1,3)-TOBforEachEvent(i)+newTOB;
-                        catch
-                            keyboard
-                        end
-                    end
-                    x=[TOBforEachEvent; p(:,3)'; positionsToChange];
-                    eventdata(positionsToChange(isnan(TOBforEachEvent))).eventType
-                end
+%                 if 0
+%                     %adjust the depth of the events, so they are aligned to the appropriate top of brain
+%                     for i=1:length(positionsToChange)
+%                         % subtract of the depth from top of brain
+%                         try
+%                             p(i,3)= 8;
+%                             %eventdata(positionsToChange(i)).position(1,3)-TOBforEachEvent(i)+newTOB;
+%                         catch
+%                             keyboard
+%                         end
+%                     end
+%                     x=[TOBforEachEvent; p(:,3)'; positionsToChange];
+%                     eventdata(positionsToChange(isnan(TOBforEachEvent))).eventType
+%                 end
                 
                 
                      

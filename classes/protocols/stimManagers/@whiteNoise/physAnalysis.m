@@ -8,6 +8,8 @@ function [analysisdata cumulativedata] = physAnalysis(stimManager,spikeRecord,st
 % 4/17/09 - spikeRecord contains all the data from this ENTIRE trial, but we should only do analysis on the current chunk
 % to prevent memory problems
 
+
+try 
 % to save memory, only do analysis on spikeRecord.currentChunk's data
 which=find(spikeRecord.chunkID==spikeRecord.currentChunk);
 spikeRecord.spikes=spikeRecord.spikes(which);
@@ -228,7 +230,12 @@ for piece=1:(length(starts)-1)
     triggerInd = 1;
     % triggers = zeros(stim_width, stim_height, # of window frames per spike, number of spikes)
     %initialize trigger with mean values for temporal border padding
+try
     meanValue=whiteVal*meanLuminance;
+catch ex
+    keyboard
+end
+    
     try
         triggers=meanValue(ones(size(stimData,1),size(stimData,2),sum(timeWindowFrames)+1,numSpikes)); % +1 is for the frame that is on the spike
     catch ex
@@ -520,6 +527,10 @@ if doSpatial
     end
 end
 
+catch ex
+    keyboard
+end
+
 drawnow
 
 
@@ -554,7 +565,11 @@ try
     %    ind=1; %to prevent downstream errors, just make one up  THIS DOES
     %    NOT FULLY WORK... need to be smarter... prob no spikes this trial
     %end
-    ind=ind(1); %use the first one if there is a tie. (more common with low samples)
+    if  numSpikes==0 
+        ind=1; %to prevent downstream errors, just make one up
+    else
+        ind=ind(1); %use the first one if there is a tie. (more common with low samples)
+    end
 catch
     keyboard
 end

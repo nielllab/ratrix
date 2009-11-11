@@ -17,12 +17,18 @@ if length(quality.passedQualityTest)>1
     %good. to be very thourough, a stim manager may wish to confirm that
     %the reason for last chunk failing, if it did, is an acceptable reason.
     qualityOK=all(quality.passedQualityTest(1:end-1));
+    
+    %&& size(quality.chunkIDForFrames,1)>0
 else
     qualityOK=quality.passedQualityTest;
 end
 
+
+%enableChunkedPhysAnalysis(sm) sould use this function
+enableChunkedPhysAnalysis=1;
+
 retval=qualityOK && ...
-    (isLastChunkInTrial || enableChunkedPhysAnalysis(sm)) &&...    
+    (isLastChunkInTrial || enableChunkedPhysAnalysis) &&...    
     (overwriteAll || ~analysisExists);
 
 

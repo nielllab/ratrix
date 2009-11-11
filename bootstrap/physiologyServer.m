@@ -24,8 +24,8 @@ ai_parameters.inputRanges=repmat([-1 6],ai_parameters.numChans,1);
 
 % ========================================================================================
 % lists of values for settings
-clientIPStrs={'132.239.158.179'};
-ratIDStrs={'demo1','test1','fan_demo1','131','303','138','262','261','249'};
+clientIPStrs={'132.239.158.180','132.239.158.179'};  % now we use 180... why was it set to only 179 before november 2009?
+ratIDStrs={'test1','demo1','fan_demo1','131','303','138','262','261','249'};
 ratProtocolStrs={'setProtocolPhys2','setProtocolTEST'};
 experimenterStrs={'','pmeier','bsriram','dnguyen','eflister'};
 electrodeMakeStrs={'FHC','MPI','gentner'};
@@ -109,7 +109,7 @@ historyDateIndex=[];
 % eventsToSendIndex=eventNum;
 % ========================================================================================
 % the GUI
-f = figure('Visible','off','MenuBar','none','Name','Physiology Server',...
+f = figure('Visible','off','MenuBar','none','Name','neural GUI',...
     'NumberTitle','off','Resize','off','Units','pixels','Position',[50 50 fWidth fHeight],...
     'CloseRequestFcn',@cleanup);
     function cleanup(source,eventdata)
@@ -961,24 +961,34 @@ quickPlotButton = uicontrol(f,'Style','pushbutton','String','quick plot','Visibl
         %CURRENT(max())=true;
         % cellfun(@(x) any(isnan(x)),{events_data.position}) &  % that is
         % not a nan .. prob is need to add back in
-
-        g=figure;
-        levelToTopOfBrain=false;
-        plotInBregmaCoordinates(events_dataNoEmpty,ALL,'.k',[1 1 1 1],levelToTopOfBrain);
-        hold on;
-        plotInBregmaCoordinates(events_dataNoEmpty,TOB,'ok',[],levelToTopOfBrain);
-        plotInBregmaCoordinates(events_dataNoEmpty,VIS,'c.',[],levelToTopOfBrain);
-        plotInBregmaCoordinates(events_dataNoEmpty,CELL,'b*',[],levelToTopOfBrain);
-        plotInBregmaCoordinates(events_dataNoEmpty,CELL & VIS,'r*',[],levelToTopOfBrain);
-        plotInBregmaCoordinates(events_dataNoEmpty,BEND,'xr',[],levelToTopOfBrain);
-        %plotInBregmaCoordinates(events_dataNoEmpty,CURRENT,'og',[],levelToTopOfBrain);
-
-        xlabel('posterior');
-        ylabel('lateral');
-        zlabel('depth');
-        grid on;
-        set(gca,'View',[240 60])
-        set(gca,'YDir','reverse');  %why?  thats just the way it is in plot3
+        g=figure('Position',[50 700 800 400]);
+        for subPlotID=1:2
+            subplot(1,2,subPlotID)
+            levelToTopOfBrain=false;
+            plotInBregmaCoordinates(events_dataNoEmpty,ALL,'.k',[1 1 1 1],levelToTopOfBrain);
+            hold on;
+            plotInBregmaCoordinates(events_dataNoEmpty,TOB,'ok',[],levelToTopOfBrain);
+            plotInBregmaCoordinates(events_dataNoEmpty,VIS,'c.',[],levelToTopOfBrain);
+            plotInBregmaCoordinates(events_dataNoEmpty,CELL,'b*',[],levelToTopOfBrain);
+            plotInBregmaCoordinates(events_dataNoEmpty,CELL & VIS,'r*',[],levelToTopOfBrain);
+            plotInBregmaCoordinates(events_dataNoEmpty,BEND,'xr',[],levelToTopOfBrain);
+            %plotInBregmaCoordinates(events_dataNoEmpty,CURRENT,'og',[],levelToTopOfBrain);
+            
+            xlabel('posterior');
+            ylabel('lateral');
+            zlabel('depth');
+            grid on;
+            switch subPlotID 
+                case 1
+                    set(gca,'View',[-180 0])
+                case 2
+                   set(gca,'View',[-180 90])
+                case 3
+                    set(gca,'View',[240 60])
+            end
+            set(gca,'YDir','reverse');  %why?  thats just the way it is in plot3
+            set(gca,'ZLim',[-10 0]);
+        end
     end
 
 

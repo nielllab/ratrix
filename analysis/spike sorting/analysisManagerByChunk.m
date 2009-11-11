@@ -379,7 +379,7 @@ while ~quit
                         spikeRecord.stimInds=spikeRecord.stimInds+startingStimInd;
                         startingStimInd=max(spikeRecord.stimInds);
  
-                        if 1 %for inspecting errors in frames
+                        if 0 %for inspecting errors in frames
                             figure('position',[100 500 500 500])
                             inspectFramesPulses(neuralRecord.neuralData,neuralRecord.neuralDataTimes,spikeRecord.frameIndices,'longest');
                             %inspectFramesPulses(neuralRecord.neuralData,neuralRecord.neuralDataTimes,spikeRecord.frameIndices,'shortest');

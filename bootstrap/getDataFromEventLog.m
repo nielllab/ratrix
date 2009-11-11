@@ -15,19 +15,30 @@ doCurrAnchor = true;
 doCurrPositn = true;
 doPenetParams = true;
 
-pathList = dir(eventLogPath); 
-pathList = pathList(~ismember({pathList.name},{'.','..'}));
-
-[logDates order] = sort(cell2mat({pathList.datenum}),'descend');
-
-if ~exist('searchDepth','var')||isempty(searchDepth)
-    searchDepth = 2;
-elseif searchDepth>length(pathList)
-    warning('cannot search to requested depth. not enough log files. resetting searchDepth to highest poss number');
-    searchDepth = length(pathList)
+if exist(eventLogPath,'dir')
+    pathList = dir(eventLogPath);
+    pathList = pathList(~ismember({pathList.name},{'.','..'}));
+    if ~exist('searchDepth','var')||isempty(searchDepth)
+        searchDepth = min([2,length(pathList)]);
+    elseif searchDepth>length(pathList)
+        warning('cannot search to requested depth. not enough log files. resetting searchDepth to highest poss number');
+        searchDepth = length(pathList)
+    else
+        error('searchDepth has to be numeric and positive.please ensure');
+    end
+    [logDates order] = sort(cell2mat({pathList.datenum}),'descend');
 else
-    error('searchDepth has to be numeric and positive.please ensure');
+    doRigState = false;
+    doSurgBregma = false;
+    doSurgAnchor = false;
+    doCurrAnchor = false;
+    doCurrPositn = false;
+    doPenetParams = false;
+    searchDepth = 0;
 end
+
+
+
 
 for currSearchDepth = 1:searchDepth
     eventLogPathForDay = fullfile(eventLogPath,pathList(order(currSearchDepth)).name,'');
@@ -35,6 +46,7 @@ for currSearchDepth = 1:searchDepth
     pathListForDay = dir(eventLogPathForDay);
     pathListForDay = pathListForDay(~ismember({pathListForDay.name},{'.','..'}));
     
+    % some days have muliple logs. that is not supposed to be the case.
     if (length(pathListForDay)>1)
         warning('multiple event logs for this day! choosing the latest log file.');
         logFileNum = cell2mat({pathListForDay.datenum})==max(cell2mat({pathListForDay.datenum}));
@@ -49,8 +61,27 @@ for currSearchDepth = 1:searchDepth
     doLoop = true;
     
     while doLoop
-        if ~isfield(events_data,'rigState') % hack since we are adding rigState to the event log
+        % if the previous day does not contain any of the states we need,
+        % that is immediately set to false. can we think of a scenario
+        % where the previous day will not have some of these fields but
+        % will have others?
+        if ~isfield(events_data,'rigState') 
             doRigState = false;
+        end
+        if ~isfield(events_data,'surgeryBregma') 
+            doSurgBregma = false;
+        end
+        if ~isfield(events_data,'surgeryAnchor') 
+            doSurgAnchor = false;
+        end
+        if ~isfield(events_data,'currentAnchor') 
+            doCurrAnchor = false;
+        end
+        if ~isfield(events_data,'position') 
+            doCurrPositn = false;
+        end
+        if ~isfield(events_data,'penetrationParams') 
+            doPenetParams = false;
         end
         
         if doRigState
@@ -97,7 +128,7 @@ for currSearchDepth = 1:searchDepth
         
         if i>1
             i = i-1;
-            doLoop = doSurgBregma || doSurgAnchor || doCurrAnchor || doCurrPositn || doPenetParams;
+            doLoop = doRigState || doSurgBregma || doSurgAnchor || doCurrAnchor || doCurrPositn || doPenetParams;
         else
             doLoop = false;
         end

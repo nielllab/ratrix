@@ -25,7 +25,7 @@ ai_parameters.inputRanges=repmat([-1 6],ai_parameters.numChans,1);
 % ========================================================================================
 % lists of values for settings
 clientIPStrs={'132.239.158.179'};
-ratIDStrs={'demo1','test1','fan_demo1','131','303','138','262','261'};
+ratIDStrs={'demo1','test1','fan_demo1','131','303','138','262','261','249'};
 ratProtocolStrs={'setProtocolPhys2','setProtocolTEST'};
 experimenterStrs={'','pmeier','bsriram','dnguyen','eflister'};
 electrodeMakeStrs={'FHC','MPI','gentner'};
@@ -109,7 +109,7 @@ historyDateIndex=[];
 % eventsToSendIndex=eventNum;
 % ========================================================================================
 % the GUI
-f = figure('Visible','off','MenuBar','none','Name','neural GUI',...
+f = figure('Visible','off','MenuBar','none','Name','Physiology Server',...
     'NumberTitle','off','Resize','off','Units','pixels','Position',[50 50 fWidth fHeight],...
     'CloseRequestFcn',@cleanup);
     function cleanup(source,eventdata)

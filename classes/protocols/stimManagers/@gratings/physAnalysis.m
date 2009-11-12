@@ -9,14 +9,14 @@ function [analysisdata cumulativedata] = physAnalysis(stimManager,spikeRecord,st
 
 %CHOOSE CLUSTER
 spikes=spikeRecord.spikes; %all waveforms
-if isstruct(spikeRecord.spikeDetails) && ismember({'processedClusters'},fields(spikeRecord.spikeDetails)) 
+if isstruct(spikeRecord.spikeDetails) && ismember({'processedClusters'},fields(spikeRecord.spikeDetails))
     processedClusters=[];
     for i=1:length(spikeRecord.spikeDetails)
         processedClusters=[processedClusters spikeRecord.spikeDetails(i).processedClusters];  %this is not a cumulative analysis so by default analyze all chunks available
     end
     thisCluster=processedClusters==1;
 else
-    thisCluster=logical(ones(size(spikes))); 
+    thisCluster=logical(ones(size(spikes)));
     %use all (photodiode uses this)
 end
 spikes(~thisCluster)=[]; % remove spikes that dont belong to thisCluster
@@ -45,8 +45,8 @@ if stimulusDetails.doCombos==1
     startPhases=comboMatrix(5,:);
     durations=round(comboMatrix(6,:)*parameters.refreshRate); % CONVERTED FROM seconds to frames
     radii=comboMatrix(7,:);
-    annuli=comboMatrix(8,:); 
-
+    annuli=comboMatrix(8,:);
+    
     repeat=ceil(stimFrames/sum(durations));
     numRepeats=ceil(numStimFrames/sum(durations));
     chunkEndFrame=[cumsum(repmat(durations,1,numRepeats))];
@@ -59,14 +59,14 @@ else
     error('analysis not handled yet for this case')
 end
 
-% 
+%
 % if numStimFrames<max(chunkEndFrame)
 %     analysisdata=[];
 %     cumulativedata=[];
 %     warning('skipping analysis of gratings untill all the chunks are there')
 %     return; % don't analyze partial data
 % end
-    
+
 % find out what parameter is varying
 numValsPerParam=...
     [length(unique(pixPerCycs)) length(unique(driftfrequencies))  length(unique(orientations))  length(unique(contrasts)) length(unique(startPhases)) length(unique(durations))  length(unique(radii))  length(unique(annuli))];
@@ -92,19 +92,20 @@ end
 samplingRate=parameters.samplingRate;
 
 % calc phase per frame, just like dynamic
-x = 2*pi./pixPerCycs(type); % adjust phase for spatial frequency, using pixel=1 which is likely offscreen if rotated
+x = 2*pi./pixPerCycs(type); % adjust phase for spatial frequency, using pixel=1 which is likely always offscreen, given roation and oversizeness
 cycsPerFrameVel = driftfrequencies(type)*1/(parameters.refreshRate); % in units of cycles/frame
 offset = 2*pi*cycsPerFrameVel.*stimFrames';
-phases=x + offset+startPhases(type);
-phases=mod(phases,2*pi);
+risingPhases=x + offset+startPhases(type);
+phases=mod(risingPhases,2*pi);
 
 % count the number of spikes per frame
 % spikeCount is a 1xn vector of (number of spikes per frame), where n = number of frames
 spikeCount=zeros(1,size(correctedFrameIndices,1));
 for i=1:length(spikeCount) % for each frame
-     spikeCount(i)=length(find(spikes>=correctedFrameIndices(i,1)&spikes<=correctedFrameIndices(i,2))); % inclusive?  policy: include start & stop
+    spikeCount(i)=length(find(spikes>=correctedFrameIndices(i,1)&spikes<=correctedFrameIndices(i,2))); % inclusive?  policy: include start & stop
 end
 
+%%
 % probablity of a spike per phase
 numPhaseBins=8;
 edges=linspace(0,2*pi,numPhaseBins+1);
@@ -117,9 +118,11 @@ for i=1:numRepeats
         chunk=(i-1)*numTypes+j;
         sf=min(find(stimFrames==chunkStartFrame(chunk)));
         ef=max(find(stimFrames==chunkEndFrame(chunk)));
-                
+        
         whichType=find(type==j & repeat==i);
         if length(whichType)>5  % need some spikes, 2 would work mathematically
+            
+            
             [n phaseID]=histc(phases(whichType),edges);
             for k=1:numPhaseBins
                 whichPhase=find(phaseID==k);
@@ -127,7 +130,7 @@ for i=1:numRepeats
                 possibleEvents(i,j,k)=length(whichPhase);
                 
                 %in last repeat density = 0, for parsing and avoiding misleading half data
-                if numRepeats~=i
+                if 1 %numRepeats~=i
                     y=(j-1)*(numRepeats)+i;
                     phaseDensity(y,k)=events(i,j,k)/possibleEvents(i,j,k);
                 end
@@ -140,7 +143,7 @@ for i=1:numRepeats
             fx=abs(fx(2:floor(length(fx)/2)));
             peakFreqInd=find(fy==max(fy)); % find the right freq index using stim
             pow(i,j)=fx(peakFreqInd); % determine the power at that freq
-
+            
             
             warning('had to turn coherency off... there is possibly a formating error b/c stimFrames is a sawtooth which we could fix here, but ought to be fixed at the concatenation point')
             if ~isempty(ef) & 0 % turn off until matrices are the right size
@@ -152,19 +155,19 @@ for i=1:numRepeats
                 [C,phi,S12,S1,S2,f,zerosp,confC,phistd,Cerr]=coherencycpb(cos(phases(whichType)'),spikeCount(sf:ef)',chrParam,fscorr);
             end
             
-            if 0 && ~isempty(ef) && ~zerosp 
-                peakFreqInds=find(S1>max(S1)*.95); % a couple bins near the peak of 
+            if 0 && ~isempty(ef) && ~zerosp
+                peakFreqInds=find(S1>max(S1)*.95); % a couple bins near the peak of
                 [junk maxFreqInd]=max(S1);
                 coh(i,j)=mean(C(peakFreqInds));
-                cohLB(i,j)=Cerr(1,maxFreqInd);  
+                cohLB(i,j)=Cerr(1,maxFreqInd);
             else
                 coh(i,j)=nan;
-                cohLB(i,j)=nan;  
+                cohLB(i,j)=nan;
             end
             
             if 0 & j==3  & ~isempty(ef) % 1; %chunk==6 %chronuxDev
                 
-
+                
                 %get the spikes times as a pt process
                 sf=min(find(stimFrames==chunkStartFrame(chunk)));
                 ef=max(find(stimFrames==chunkEndFrame(chunk)));
@@ -178,21 +181,21 @@ for i=1:numRepeats
                 %dur=(es-ss)/samplingRate; % actual w/ frame drops
                 
                 cycs=driftfrequencies(j)*durations(j)/parameters.refreshRate;
-               eFreq=1/cycs; % in normalized units
-               
+                eFreq=1/cycs; % in normalized units
+                
                 %fRange=(1./(cycs*[2 1/2]));
-
                 
                 
-                %chrParam.tapers=[dur/3 dur 1];  %width, dur, 
+                
+                %chrParam.tapers=[dur/3 dur 1];  %width, dur,
                 %chrParam.pad=[0];
                 %chrParam.Fs=[1];
                 %chrParam.fpass=fRange;
                 %chrParam.err=[2 0.05];  % use 2 for jacknife
                 
                 
-
-                                
+                
+                
                 chrParam.tapers=[3 5];
                 chrParam.pad=[0];
                 chrParam.Fs=[1];
@@ -202,8 +205,8 @@ for i=1:numRepeats
                 chrParam.fpass=[0.0 0.08] % these values are not dynamic to stim type... just for viewing
                 fscorr=true;   % maybe should be true so that the finit size correction for spikes is used
                 [C3,phi3,S13,S1,S3,f,zerosp,confC3,phistd3,Cerr3]=coherencycpb(cos(phases(whichType)'),spikeCount(sf:ef)',chrParam,fscorr);
-                [junk maxFreqIndFewTapers]=max(S1);         
-                                
+                [junk maxFreqIndFewTapers]=max(S1);
+                
                 figure
                 t1s=[3 5]% [1 3 5 20];
                 t2s=[5 9]% [ 5 10 20]
@@ -218,12 +221,12 @@ for i=1:numRepeats
                         
                         subplot(length(t2s),length(t1s),(ii-1)*length(t1s)+jj)
                         hold off
-                                                fill([f, fliplr(f)],[Cerr3(1,:), fliplr(Cerr3(2,:))],'m','faceAlpha',0.2,'edgeAlpha',0);
-                                                hold on;
-                        plot(f,S1/max(S1),'k');             
+                        fill([f, fliplr(f)],[Cerr3(1,:), fliplr(Cerr3(2,:))],'m','faceAlpha',0.2,'edgeAlpha',0);
+                        hold on;
+                        plot(f,S1/max(S1),'k');
                         plot(f,S3/max(S3),'b');
                         plot(f,C3/max(C3),'r');
-
+                        
                         %plot(f(expectedFreqInd),0,'r*')
                         plot(f(maxFreqInd),0,'b*')
                         plot(f(peakFreqInds),0.1,'b.')
@@ -256,7 +259,7 @@ for i=1:numRepeats
                 end
                 
                 
-            
+                
             end
             
             if 0 %development
@@ -278,41 +281,140 @@ for i=1:numRepeats
                 peakFreqInd=find(fy==max(fy));
                 pow=fx(peakFreqInd); % thi is what we use
                 figure; plot(fy); hold on; plot(fx,'r')
-            end 
+            end
             
-                if 0 % fancier spectral ideas not used
-                    Fs=parameters.refreshRate;
-                    
-                    %Hs = spectrum.music(2);  % supported setup
-                    %[POW,F]=powerest(Hs,y,Fs)%,) strange error
-                    [freq,pow] = rootmusic(y,2,Fs); % this works
-                    %pmusic(x,2) % see the est
-                    
-                    h = spectrum.welch;                  % Create a Welch spectral estimator.
-                    Xpsd = psd(h,x,'Fs',Fs);             % Calculate the PSD
-                    Ypsd = psd(h,y,'Fs',Fs);             % Calculate the PSD
-                    %peakFreqInd=find(Ypsd.data==max(Ypsd.data));  % might not be as reliable
-                    
-                    f_diff=abs(Ypsd.Frequencies-freq(1));
-                    peakFreqInd=find(f_diff==min(f_diff)); % index nearest music freq est
-                    f=Ypsd.Frequencies(peakFreqInd);
-                    pow=Ypsd.data(peakFreqInd);
-                    
-                    plot(Xpsd)
-                end
+            if 0 % fancier spectral ideas not used
+                Fs=parameters.refreshRate;
+                
+                %Hs = spectrum.music(2);  % supported setup
+                %[POW,F]=powerest(Hs,y,Fs)%,) strange error
+                [freq,pow] = rootmusic(y,2,Fs); % this works
+                %pmusic(x,2) % see the est
+                
+                h = spectrum.welch;                  % Create a Welch spectral estimator.
+                Xpsd = psd(h,x,'Fs',Fs);             % Calculate the PSD
+                Ypsd = psd(h,y,'Fs',Fs);             % Calculate the PSD
+                %peakFreqInd=find(Ypsd.data==max(Ypsd.data));  % might not be as reliable
+                
+                f_diff=abs(Ypsd.Frequencies-freq(1));
+                peakFreqInd=find(f_diff==min(f_diff)); % index nearest music freq est
+                f=Ypsd.Frequencies(peakFreqInd);
+                pow=Ypsd.data(peakFreqInd);
+                
+                plot(Xpsd)
+            end
         end
     end
 end
 
+
+
+if 0
+    %% radon transform
+    %doRadonTransform
+    figure(parameters.trialNumber+10); % new for each trial
+    [spikingPhasePerType{1:numTypes}]=deal([]);  % 0 to 2 pi
+    %[spikingRisingPhasesPerType{1:numTypes}]=deal([]); % 0 and upward, no modulus
+    colors=jet(numTypes);
+    numPhaseBins=360;
+    edges=linspace(0,2*pi,numPhaseBins+1);
+    w=floor(sqrt(numTypes));
+    h=ceil(numTypes/w);
+    for j=1:numTypes
+        spikeIDPerType{j}=find(type==j & spikeCount'==1);
+        spikingPhasePerType{j}=phases(spikeIDPerType{j});
+        %spikingRisingPhasesPerType{j}=risingPhases(spikeIDPerType{j});
+        nm=length(spikingPhasePerType{j});
+        [n phaseIDnotUsed]=histc(spikingPhasePerType{j},edges);
+        n=n(1:end-1); %remove last bin
+        boxCarDegrees=30;
+        boxcar=ones(1,floor(boxCarDegrees*360/numPhaseBins));
+        hw=(length(boxcar)/2)-1;
+        smoothed=conv([n(end-floor(hw):end) n n(1:ceil(hw))] ,boxcar,'valid');
+        subplot(h,w,j);
+        p=polar(spikingPhasePerType{j},2-rand(1,nm)/3,'.'); hold on; set(p,'Color',colors(j,:))
+        p=polar(edges(1:end-1)+(pi/numPhaseBins),1.5*smoothed/max(smoothed),'k');
+        set(p,'lineWidth',2)
+        %polar(edges(1:end-1)+(pi/numPhaseBins),1.5*n/max(n),'r')
+        %[x y]=pol2cart(edges(1:end)+(pi/numPhaseBins),1.5*n/max(n));
+        %fill(x,y,'k')
+        set(gca,'xTickLabel',[])
+    end
+    
+    % each phase corresponse to a particular onEdge location, and a particular
+    % 'offEdge' location.  here we find out what that location is along the
+    % axis of of orientation used.  phase zero is in the upper right when the
+    % rotation of the grating is zero (vertical).  as the orientation changes
+    % is still in the upper right of the SOURCE, and so we do not need to back
+    % calculate to project... we simply caluclate where that edge is in the
+    % source grating.
+    
+    % since this is expected to be used with square gratings, we use the hard
+    % edge, still could work with sine wave, but less clear where the edge is.
+    % (ie. does the mean crossing really cause a spike?)
+    
+    % we will use all edges in the source (even if they would have been cropped
+    % in the destination rect actually on the screen)... could rmeove the ones
+    % off screen in future... or maybe weight by the length on the screen?
+    
+    % we fit a spline to the density per phase, and then insert the
+    %%
+    if length(stimulusDetails.phases)>1
+        stimulusDetails.phases
+        error('initial phase is expected to be the same in this caluclation')
+        %double check as startPhases may already acount for this in the
+        %calculation of phases = [ 1 x numFrames ]
+    end
+    
+    if ~isfield(stimulusDetails,'width')
+        warning('width is not a field, and should be after november 2009')
+        stimWidth=1024;  %should get this from stimulusDetails.width! added it to calc stim nov 2009 pmm
+    else
+        stimWidth=stimulusDetails.width;
+    end
+    
+    ppc=stimulusDetails.spatialFrequencies; % spatialFrequencies is actually a value of picPerCyc's that fan renamed to avoid clash
+    
+    %x=(1:stimWidth*2)*2*pi/ppc; at the fidelity of screen pixels in source...too high
+    numBinsInRadon=40;
+    x=linspace(1/numBinsInRadon,1,numBinsInRadon)*2*2*pi*(stimWidth/ppc);
+    delta=(1/numBinsInRadon)*2*2*pi*(stimWidth/ppc);
+    radonTransformOnEdge=zeros(numBinsInRadon,numTypes); % zero density at first
+    radonTransformOffEdge=zeros(numBinsInRadon,numTypes); % zero density at first
+    onEdgePhase=pi/2;
+    offEdgePhase=pi*3/2;
+    for j=1:numTypes
+        for k=1:length(spikingPhasePerType{j})  % num spiking phases
+            %spikingPhasePerType{j}
+            %grating=square(x + offset+stimulusDetails.phases+pi/2); % same as sine, but adjust for cosine
+            thisSpatialPhase=mod(x+ phases(spikeIDPerType{j}(k)),2*pi);
+            onEdgeIDs=(thisSpatialPhase <=onEdgePhase+delta & thisSpatialPhase> onEdgePhase);
+            offEdgeIDs=(thisSpatialPhase <=offEdgePhase+delta & thisSpatialPhase> offEdgePhase);
+            %[sum(onEdgeIDs) sum(offEdgeIDs)] numEdges found
+            radonTransformOnEdge(onEdgeIDs,j)=radonTransformOnEdge(onEdgeIDs,j)+spikeCount(spikeIDPerType{j}(k));
+            radonTransformOffEdge(offEdgeIDs,j)=radonTransformOffEdge(offEdgeIDs,j)+spikeCount(spikeIDPerType{j}(k));
+        end
+    end
+    
+    theta=180*orientations/(pi);
+    
+    figure(parameters.trialNumber+20); % new for each trial
+    subplot(2,2,1); imagesc(radonTransformOnEdge)
+    subplot(2,2,2); imagesc(radonTransformOffEdge)
+    subplot(2,2,3); imagesc(iradon(radonTransformOnEdge,theta)); title('on rf')
+    subplot(2,2,4); imagesc(iradon(radonTransformOffEdge,theta)); title('off rf')
+end
+
+%%
 %get eyeData for phase-eye analysis
 if ~isempty(eyeData)
     [px py crx cry]=getPxyCRxy(eyeData,10);
     eyeSig=[crx-px cry-py];
     eyeSig(end,:)=[]; % remove last ones to match (not principled... what if we should throw out the first ones?)
-
+    
     if length(unique(eyeSig(:,1)))>10 % if at least 10 x-positions
         
-         regionBoundsXY=[1 .5]; % these are CRX-PY bounds of unknown degrees
+        regionBoundsXY=[1 .5]; % these are CRX-PY bounds of unknown degrees
         [within ellipses]=selectDenseEyeRegions(eyeSig,1,regionBoundsXY);
         
         whichOne=0; % various things to look at
@@ -372,7 +474,7 @@ if size(pow,1)>1
     
     cohSEM=std(coh)/sqrt(size(coh,1));
     coh=mean(coh);
-    cohLB=mean(cohLB);  % do you really want the mean of the lower bound?  
+    cohLB=mean(cohLB);  % do you really want the mean of the lower bound?
 else
     powSEM=nan(1,size(pow,2));
     cohSEM=nan(1,size(pow,2));
@@ -391,9 +493,9 @@ if all(rem(vals,1)==0)
 else
     format='%1.2f';
 end
-for i=1:length(vals); 
-    valNames{i}=num2str(vals(i),format); 
-end; 
+for i=1:length(vals);
+    valNames{i}=num2str(vals(i),format);
+end;
 
 colors=jet(numTypes);
 figure(parameters.trialNumber); % new for each trial
@@ -413,7 +515,7 @@ xlabel('phase');  set(gca,'XTickLabel',{'0','pi','2pi'},'XTick',([0 .5 1]*numPha
 axis tight
 
 %rate density over phase... doubles as a legend
-subplot(3,2,2); hold off; 
+subplot(3,2,2); hold off;
 im=zeros([size(phaseDensity) 3]);
 hues=rgb2hsv(colors);  % get colors to match jet
 hues=repmat(hues(:,1)',numRepeats,1); % for each rep
@@ -450,7 +552,7 @@ if ~isempty(pow)
     xlabel(sweptParameter); set(gca,'XTickLabel',valNames,'XTick',[1:length(vals)]); ylabel('modulation (f1/f0)');
     ylim=get(gca,'YLim'); yvals=[ ylim(1) mean(ylim) ylim(2)];set(gca,'YTickLabel',yvals,'YTick',yvals)
     set(gca,'XLim',[1 length(vals)])
-else 
+else
     xlabel(sprintf('not enough data for all %s yet',sweptParameter{1}))
 end
 meanRate=(length(spikes))/diff(spikeRecord.spikeTimestamps([1 end]));

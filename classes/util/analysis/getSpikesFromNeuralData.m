@@ -579,7 +579,7 @@ if 1 % view plots (for testing)
     % this should be able to be a user selected spike (click on main timeline nearest x-val  AND  key combo for prev / next spike)
     % but for now its the last one
     zoomWidth=spikeDetectionParams.samplingFreq*0.05;  % 50msec default, key board zoom steps by a factor of 2
-    lastSpikeTimePad=min([max(spikeTimes)+200 size(neuralData,1)]);
+    lastSpikeTimePad=min([max(spikeTimes)+200 size(neuralDataTimes,1)]);
     zoomInds=[max(lastSpikeTimePad-zoomWidth,1):lastSpikeTimePad ];
     
     figure

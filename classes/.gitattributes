@@ -275,3 +275,4 @@ protocols/trialManagers/@cuedGoNoGo/updateTrialState.m -text
 protocols/trialManagers/@cuedGoNoGo/cuedGoNoGo.m -text
 protocols/trialManagers/@cuedGoNoGo/checkPorts.m -text
 protocols/reinforcementManagers/@asymetricReinforcement/setReinforcementParam.m -text
+protocols/stimManagers/@whiteNoise/enableChunkedPhysAnalysis.m -text

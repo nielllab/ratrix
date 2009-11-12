@@ -24,6 +24,14 @@ which=find(spikeRecord.chunkIDForDetails==spikeRecord.currentChunk);
 %spikeRecord.photoDiode=spikeRecord.photoDiode(which);  % HACK! we need this, right?
 spikeRecord.spikeDetails=spikeRecord.spikeDetails(which);
 
+if size(spikeRecord.correctedFrameIndices,1)==0 || size(spikeRecord.spikes,1)==0
+    %if this chunk has either no spikes or no stim frames, then return the cumulative data as is
+    analysisdata=[];
+    cumulativedata=cumulativedata;
+    warning(sprintf('skipping white noise analysis for trial %d chunk %d because there are %d stim frames and %d spikes',...
+        parameters.trialNumber,spikeRecord.currentChunk,size(spikeRecord.correctedFrameIndices,1),size(spikeRecord.spikes,1)))
+    return
+end
 
 %SET UP RELATION stimInd <--> frameInd
 analyzeDrops=true;

@@ -684,6 +684,17 @@ while ~quit
                     else
                         dispStr=sprintf('skipping analysis for trial %d chunk %d',chunksToProcess(i,1),chunksToProcess(i,2));
                         disp(dispStr);
+                        %                         if chunksToProcess(i,2)==1  % for debugging
+                        %                             doAnalysis=worthPhysAnalysis(sm,quality,analysisExists,overwriteAll,isLastChunkInTrial)
+                        %                             quality
+                        %                             analysisExists
+                        %                             overwriteAll
+                        %                             isLastChunkInTrial
+                        %                             class(sm)
+                        %                             analyszesEachChunk=enableChunkedPhysAnalysis(sm)
+                        %                             warning('skipped first chunk in trial...why?')
+                        %                             keyboard
+                        %                         end
                     end
                 catch ex
                     disp(['CAUGHT EX: ' getReport(ex)])

@@ -58,6 +58,8 @@ switch stim.waveform
         grating=stim.contrasts(gratingToDraw)*cos(x + offset+stim.phases(gratingToDraw))+stimulus.mean; % grating is the cos curve, with our calculated phase offset (based on driftfrequency) and initial phase
     case 'square'
         grating=stim.contrasts(gratingToDraw)*square(x + offset+stim.phases(gratingToDraw)+pi/2)+stimulus.mean; % same as sine, but adjust for cosine
+    case 'squareUp4th'
+        grating=stim.contrasts(gratingToDraw)*(-1+2*(mod([x + offset+stim.phases(gratingToDraw)+pi/2],pi*2)<pi/4))+stimulus.mean; % same as square above, but only up 1/8, as opposed to 1/2 the time... matched onset
     otherwise
         stim.waveform
         error('that waveform is not coded')

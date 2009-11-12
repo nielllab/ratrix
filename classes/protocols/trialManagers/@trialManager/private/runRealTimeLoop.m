@@ -29,7 +29,9 @@ filtMode = 0;               %how to compute the pixel values when the texture is
 framesPerUpdate = 1;        %set number of monitor refreshes for each one of your refreshes
 
 labelFrames = 1;            %print a frame ID on each frame (makes frame calculation slow!)
-showText = getShowText(tm); %whether or not to print text on screen
+textType = getShowText(tm);
+showText = ~strcmp(textType,'off'); %whether or not to call draw text to print any text on screen
+
 
 Screen('Preference', 'TextRenderer', 0);  % consider moving to station.startPTB
 Screen('Preference', 'TextAntiAliasing', 0); % consider moving to station.startPTB
@@ -587,7 +589,7 @@ while ~done && ~quit;
             end
             if window>=0 && showText
                 xTextPos = drawText(tm, window, labelFrames, subID, xOrigTextPos, yTextPos, normBoundsRect, stimID, protocolStr, ...
-                    textLabel, trialLabel, i, frameNum, manual, didManual, didAPause, ptbVersion, ratrixVersion,phaseRecords(phaseNum).responseDetails.numMisses, phaseRecords(phaseNum).responseDetails.numApparentMisses, phaseInd, getStimType(spec));
+                    textLabel, trialLabel, i, frameNum, manual, didManual, didAPause, ptbVersion, ratrixVersion,phaseRecords(phaseNum).responseDetails.numMisses, phaseRecords(phaseNum).responseDetails.numApparentMisses, phaseInd, getStimType(spec),textType);
             end
 
             timestamps.textDrawn=GetSecs;

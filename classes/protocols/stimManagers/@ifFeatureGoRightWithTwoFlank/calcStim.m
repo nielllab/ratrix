@@ -157,12 +157,10 @@ switch trialManagerClass
             details.correctionTrial=0;
              details.maxCorrectForceSwitch=0;
             details.correctResponseIsLeft=-1;
-            sca
-            keyboard
             %confirm these work and then interesting combine auto and
             %goNoGo because they have the same logic; stimulus is always
             %there and all targerPorts are responsePorts
-            targetPorts=responsePorts; 
+            targetPorts=[]; %responsePorts=[1 2 3] 
             distractorPorts=[]; %I don't think these are
             %needed, they used to be defined by assignPorts as in nAFC
     case {'cuedGoNoGo'}

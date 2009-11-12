@@ -190,18 +190,19 @@ switch nargin
                         p.flankerOnOff=int32([30 40]);
                         
                         
-                        % a guess based on a particular RF on oct 22nd
-                        p.xPositionPercent=0.2;
-                        p.yPositionPercent=1/16;
-                        p.stdGaussMask=1/16;
-                        p.showText=false;
+                        % % a guess based on a particular RF on oct 22nd
+                        %p.xPositionPercent=0.2;
+                        %p.yPositionPercent=1/16;
+                        %p.stdGaussMask=1/16;
+                        %p.showText=false;
                         
                         p.phase=[pi]*[0 0.5 1 1.5]; 
                         
                         RFdataSource='\\132.239.158.179\datanet_storage';
                         p.fitRF = RFestimator({'spatialWhiteNoise','fitGaussian',{1}},{'spatialWhiteNoise','fitGaussian',{1}},[],RFdataSource,[now-100 Inf]);
                         %temp restrict
-                        p.fitRF=[];
+                        %p.fitRF=[];
+                        
                         %p.goLeftOrientations=p.goLeftOrientations(1);
                         %p.goRightOrientations=p.goRightOrientations(1);
                         %p.flankerOrientations=p.flankerOrientations(1);

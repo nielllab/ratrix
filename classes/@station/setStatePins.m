@@ -14,8 +14,10 @@ if strcmp(s.responseMethod,'parallelPort')
 		'phase',s.phasePins; ...
         'index',s.indexPins};
 
+    
 	for i=1:size(possibles,1)
-		if ismember(pinClass,{'all',possibles{i,1}}) %edf worries this is slow
+        if strcmp('all',pinClass) || strcmp(pinClass,possibles{i,1}) %pmm finds this faster
+		%if ismember(pinClass,{'all',possibles{i,1}}) %edf worries this is slow
 			done=true;
 			pins=possibles{i,2}; %edf worries this is slow
 			if ~isempty(pins)

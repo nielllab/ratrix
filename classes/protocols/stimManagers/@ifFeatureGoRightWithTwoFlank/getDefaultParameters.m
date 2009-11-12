@@ -159,7 +159,7 @@ switch defaultSettings
         
         default.delayManager=[];  %defaults made explicit Oct 19, 2009
         default.responseWindowMs=[0 Inf];
-        default.showText=true;
+        default.showText='full';
         default.tmClass='nAFC';
         
     case 'Apr.13,2009'

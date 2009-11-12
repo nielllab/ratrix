@@ -28,7 +28,7 @@ t.dropFrames=false;
 t.saveDetailedFramedrops=false;
 t.displayMethod='';
 t.requestPorts='center'; % either 'none','center',or 'all'
-t.showText=true;
+t.showText='full'; %off, light, or full
 t.delayManager=[];
 t.responseWindowMs=[0 Inf];
 
@@ -180,11 +180,17 @@ switch nargin
         % showText
         if nargin==12
             if islogical(varargin{12})
-                t.showText=varargin{12};
+                if varargin{12}
+                    t.showText='full';  % good for development, may cause frame drops if eye tracker and other things are on
+                else
+                    t.showText='off';
+                end
             elseif isempty(varargin{12})
                 %pass - ignore empty args
+            elseif ismember(varargin{12},{'full','light','off'})  % list of acceptable modes.  "light" is faster and drops fewer frames
+                 t.showText=varargin{12};
             else
-                error('showText must be logical');
+                error('showText must be logical or aproved string, or empty');
             end
         end
         

@@ -1,4 +1,4 @@
-function r = setProtocolPhys2(r,subjIDs,dataNetOn,eyeTrackerOn)
+function r = setProtocolPhys2(r,subjIDs)
 
 if ~isa(r,'ratrix')
     error('need a ratrix')
@@ -8,13 +8,14 @@ if ~all(ismember(subjIDs,getSubjectIDs(r)))
     error('not all those subject IDs are in that ratrix')
 end
 
-if ~exist('dataNetOn','var') || isempty(dataNetOn)
-     dataNetOn=0;
-end
-
-if ~exist('eyeTrackerOn','var') || isempty(eyeTrackerOn)
-     eyeTrackerOn=0;
-end
+% moved to GUI side
+% if ~exist('dataNetOn','var') || isempty(dataNetOn)
+%      dataNetOn=0;
+% end
+% 
+% if ~exist('eyeTrackerOn','var') || isempty(eyeTrackerOn)
+%      eyeTrackerOn=0;
+% end
 
 
 %% define stim managers
@@ -124,14 +125,17 @@ pixPerCycs=2.^([8:10]); % freq
 numRepeats=1;
 durations=[3];                 % duration of each grating
 orientations=([5/4*pi]*[1:5])/5; % in radians
+
 contrasts=[1];              % contrast of the grating
 driftfrequencies=[1 2 4];      % in cycles per second
 searchGratings  = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
     waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
+numOrientations=16;
+orientations=([2*pi]*[1:numOrientations])/numOrientations; % in radians
 driftfrequencies=[1/2];     % in cycles per second
 pixPerCycs=2048;
-durations=8;
+durations=16;
 contrasts=1;
 bigSlowSquare = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
     waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
@@ -284,6 +288,12 @@ stixelSize = [128,128]; %[32 32] [xPix yPix]
 numFrames=2000;   %1000 if limited mempry for trig 4 large stims
 gwn = whiteNoise({'gaussian',gray,std},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 bin = whiteNoise({'binary',0,1,.5},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
+bin3x4 = whiteNoise({'binary',0,1,.5},background,method,stimLocation,[256 256],searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+bin6x8 = whiteNoise({'binary',0,1,.5},background,method,stimLocation,[128 128],searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+bin12x16 = whiteNoise({'binary',0,1,.5},background,method,stimLocation,[64 64],searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+bin24x32 = whiteNoise({'binary',0,1,.5},background,method,stimLocation,[32 32],searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
 sparseness=0.05; %sparseness
 sparseBright=whiteNoise({'binary',0.5,1,sparseness},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 sparseDark=whiteNoise({'binary',0,0.5,1-sparseness},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
@@ -359,11 +369,15 @@ dropFrames=false;
 frameDropCorner={'off'};
 displayMethod='ptb';
 requestPort='center'; 
-afc=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,frameDropCorner,dropFrames,displayMethod,requestPort);
 
+saveDetailedFramedrops=false;  % default is false... do we want this info, yes if few of them
+delayManager=[];
+responseWindowMs=[];
+showText='light';
+afc=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,frameDropCorner,dropFrames,displayMethod,requestPort,saveDetailedFramedrops,delayManager,responseWindowMs,showText);
 requestPort='none'; 
 allowRepeats=false;
-ap=autopilot(percentCorrectionTrials,sm,constantRewards,eyeController,frameDropCorner,dropFrames,displayMethod,requestPort);
+ap=autopilot(percentCorrectionTrials,sm,constantRewards,eyeController,frameDropCorner,dropFrames,displayMethod,requestPort,saveDetailedFramedrops,delayManager,responseWindowMs,showText);
 
 freeDrinkLikelihood=0.003;
 fd = freeDrinks(sm,freeDrinkLikelihood,allowRepeats,constantRewards,eyeController,frameDropCorner,dropFrames,displayMethod,requestPort);
@@ -391,9 +405,9 @@ ts{8} = trainingStep(ap, sfGratings,  numTrialsDoneCriterion(1), noTimeOff(), sv
 ts{9} = trainingStep(ap, orGratings,   repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %gratings: orientation
 
 %check if it drives
-ts{10}= trainingStep(ap, sparseBrighter,numTrialsDoneCriterion(8),noTimeOff(),svnRev, svnCheckMode);  %
-ts{11}= trainingStep(ap, horizBars,   numTrialsDoneCriterion(8), noTimeOff(), svnRev, svnCheckMode);  %
-ts{12}= trainingStep(ap, vertBars,    numTrialsDoneCriterion(8), noTimeOff(), svnRev, svnCheckMode);  %
+ts{10}= trainingStep(ap, sparseBrighter,repeatIndefinitely(),noTimeOff(),svnRev, svnCheckMode);  %
+ts{11}= trainingStep(ap, horizBars,   repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %
+ts{12}= trainingStep(ap, vertBars,    repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %
 ts{13}= trainingStep(ap, gwn,         numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
 ts{14}= trainingStep(ap, sparseDark,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
 ts{15}= trainingStep(ap, sparseBright,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
@@ -419,6 +433,16 @@ ts{28} = trainingStep(ap, fTestFlicker,repeatIndefinitely(),      noTimeOff(), s
 ts{29} = trainingStep(ap, searchGratings,repeatIndefinitely(),    noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
 ts{30} = trainingStep(ap, bigSlowSquare,repeatIndefinitely(),    noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
 
+ts{31} = trainingStep(ap, bin3x4,repeatIndefinitely(),    noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
+ts{32} = trainingStep(ap, bin6x8,repeatIndefinitely(),    noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
+ts{33} = trainingStep(ap, bin12x16,repeatIndefinitely(),    noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
+ts{34} = trainingStep(ap, bin24x32,repeatIndefinitely(),    noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
+
+ts{35} = trainingStep(ap, anGratings,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: annulus size
+ts{36} = trainingStep(ap, flankers,    numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %flankers
+ts{37} = trainingStep(ap, anGratings,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: annulus size
+ts{38}= trainingStep(ap, bin,         repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
+
 %removed things b/c not used enough:
 % ts{10}= trainingStep(afc, radGratings, numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %gratings: radius
 % ts{11}= trainingStep(afc, cntrGratings,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: contrast
@@ -443,8 +467,8 @@ ts{30} = trainingStep(ap, bigSlowSquare,repeatIndefinitely(),    noTimeOff(), sv
 %% make and set it
 
 
-p=protocol('practice phys',{ts{1:30}});
-stepNum=uint8(29);
+p=protocol('practice phys',{ts{1:38}});
+stepNum=uint8(31);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

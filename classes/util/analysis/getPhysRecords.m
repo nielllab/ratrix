@@ -116,9 +116,35 @@ try
     
     % now intersect the elements of trials so we only get the trials that have all the files in 'what'
     goodTrials=trials{end};
+    analysisPosition=find(strcmp(what,'analysis'));
     for i=1:length(trials)-1
         [goodTrials prevInds theseInds]=intersect(goodTrials,trials{i});
+        
         %analysisFolderLog should be kept track of here: prevInds theseInds
+        if analysisPosition==length(what)
+            %if at the end
+            analysisFolderLog=analysisFolderLog(prevInds);
+            warning('never used yet...manually confirm this is the right answer once')
+            keyboard
+        elseif i>=analysisPosition
+            %for the first time its encountered, and every time afterwards
+            % keep reducing the analysisFolderLog appropriately
+            if length(analysisFolderLog)==length(trials{i})
+                analysisFolderLog=analysisFolderLog(theseInds);
+            else
+                length(analysisFolderLog)
+                length(trials{i})
+                length(goodTrials)
+                error('should never happen')
+            end
+        elseif  i<analysisPosition
+            %have not processed analysis yet
+        elseif isempty(analysisPosition)
+            %analysis not asked for, so never process
+        else
+            error('unexpected')
+        end
+        
     end
     goodFiles=[];
     searchStr='(\d+)-(.*)';
@@ -128,6 +154,9 @@ try
         goodFiles(end).trialStop=trialNum;
         goodFiles(end).dateStart=timestamp;
         goodFiles(end).dateStop=timestamp;
+        if ~isempty(analysisPosition)
+            goodFiles(end).analysisFolderLog=analysisFolderLog{i};
+        end
     end
     
     if ~isempty(goodFiles)
@@ -188,8 +217,8 @@ try
                         fn=sprintf('neuralRecords_%d-%s.mat',goodFiles(end).trialStart,goodFiles(end).dateStart);
                         record=load(fullfile(subjectDataPath,'neuralRecords',fn));
                     case 'analysis'
-                        ff1=sprintf('%d-%s',goodFiles(end).trialStart,goodFiles(end).dateStart);
-                        ff2=sprintf('%d-%s',goodFiles(end).trialStart,goodFiles(end).dateStart); % how to we get this unknown folder? ... we had it b4...  its saved in analysisFolderLog but we do some funny filtering with intersect
+                        ff1=sprintf('%s',goodFiles(end).analysisFolderLog);
+                        ff2=sprintf('%d-%s',goodFiles(end).trialStart,goodFiles(end).dateStart);
                         fn=sprintf('physAnalysis_%d-%s.mat',goodFiles(end).trialStart,goodFiles(end).dateStart);
                         record=load(fullfile(subjectDataPath,'analysis',ff1,ff2,fn));
                     case 'spike'

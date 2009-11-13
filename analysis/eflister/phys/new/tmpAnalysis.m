@@ -35,87 +35,94 @@ end
 [data.ratID data.date type data.uID data.hash data.z data.chunkNum]=parseFileName(fileNames.targetFile,stimType,rec,stimTimes);
 data.fileNames=fileNames;
 
-mins=(stimTimes(2)-stimTimes(1))/60;
+data.mins=(stimTimes(2)-stimTimes(1))/60;
 
-data.spks=load(fileNames.spikesFile);
-data.spks=data.spks(data.spks>=stimTimes(1) & data.spks<=stimTimes(2));
-rate=length(data.spks)/(stimTimes(2)-stimTimes(1));
-
-fprintf('%s\n\t%05.1f mins   spk rate: %04.1f hz\n',[data.ratID ' ' data.date ' ' data.uID],mins,rate);
-
-[data.stim,data.phys,data.rptStarts]=extractData(fileNames,stimTimes,rec);
-
-data=findBursts(data);
-
-data.stimTimes=stimTimes;
-data.figureBase=figureBase;
-data.stimType=stimType;
-data.rec=rec;
-
-fprintf('\tloading waveforms for code %d, chan %d, file %s...\n',rec.chunks.spkCode, rec.chunks.spkChan, rec.file)
-wm=load(fileNames.wavemarkFile);
-recTimes=[wm.recs.time];
-wm.recs=wm.recs(recTimes>=stimTimes(1) & recTimes<=stimTimes(2));
-
-data.theseWaveforms=wm.recs(rec.chunks.spkCode==[wm.recs.code]);
-theseRecTimes=[data.theseWaveforms.time];
-if ~isempty(setdiff(data.spks,theseRecTimes)) || ~isempty(setdiff(theseRecTimes,data.spks))
-    error('recs and spks don''t match')
-end
-
-data.otherWaveforms=wm.recs(rec.chunks.spkCode~=[wm.recs.code]);
-data.lockout=double(wm.totalPoints)*wm.rate;
-data.waveformTimes=wm.tms;
-data.numPts=wm.totalPoints;
-
-data.waveformPeakTime=double(wm.prePoints)*wm.rate*1000;
-if ~almostEqual(data.waveformPeakTime,data.waveformTimes(wm.prePoints+1))
-    error('waveform peak time error')
-end
-
-doAnalysis(data,'burstDetail');
-doAnalysis(data,'waveforms');
-doAnalysis(data,'ISI');
-doAnalysis(data,'spectrogram');
-
-switch stimType
-    case 'gaussian'
-        % doAnalysis(fileNames,stimTimes,rec,spks,stimType,rate)
-    case 'hateren'
-    case {'sinusoid','sinusoid(new)'}
-    case 'gaussgrass'
-    case 'squarefreqs'
-    case 'rpt/unq'
-    case {'junk','off'}
-    otherwise
-        error('unknown type: %s\n',stimType)
+if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && rec.date>datenum('04.24.09','mm.dd.yy')
+    
+    data.spks=load(fileNames.spikesFile);
+    data.spks=data.spks(data.spks>=stimTimes(1) & data.spks<=stimTimes(2));
+    rate=length(data.spks)/(stimTimes(2)-stimTimes(1));
+    
+    fprintf('%s\n\t%05.1f mins   spk rate: %04.1f hz\n',[data.ratID ' ' data.date ' ' data.uID],data.mins,rate);
+    
+    [data.stim,data.phys,data.rptStarts]=extractData(fileNames,stimTimes,rec);
+    
+    data.stimTimes=stimTimes;
+    data.figureBase=figureBase;
+    data.stimType=stimType;
+    data.rec=rec;
+    
+    fprintf('\tloading waveforms for code %d, chan %d, file %s...\n',rec.chunks.spkCode, rec.chunks.spkChan, rec.file)
+    wm=load(fileNames.wavemarkFile);
+    recTimes=[wm.recs.time];
+    wm.recs=wm.recs(recTimes>=stimTimes(1) & recTimes<=stimTimes(2));
+    
+    data.theseWaveforms=wm.recs(rec.chunks.spkCode==[wm.recs.code]);
+    theseRecTimes=[data.theseWaveforms.time];
+    if ~isempty(setdiff(data.spks,theseRecTimes)) || ~isempty(setdiff(theseRecTimes,data.spks))
+        error('recs and spks don''t match')
+    end
+    
+    data.otherWaveforms=wm.recs(rec.chunks.spkCode~=[wm.recs.code]);
+    data.lockout=double(wm.totalPoints)*wm.rate;
+    data.waveformTimes=wm.tms;
+    data.numPts=wm.totalPoints;
+    
+    data.waveformPeakTime=double(wm.prePoints)*wm.rate*1000;
+    if ~almostEqual(data.waveformPeakTime,data.waveformTimes(wm.prePoints+1))
+        error('waveform peak time error')
+    end
+    
+    data=findBursts(data);
+    
+    doAnalysis(data,'STA');
+%    doAnalysis(data,'burstDetail');
+    doAnalysis(data,'waveforms');
+    doAnalysis(data,'ISI');
+%    doAnalysis(data,'spectrogram');
+    
+    switch stimType
+        case 'gaussian'
+            % doAnalysis(fileNames,stimTimes,rec,spks,stimType,rate)
+        case 'hateren'
+        case {'sinusoid','sinusoid(new)'}
+        case 'gaussgrass'
+        case 'squarefreqs'
+        case 'rpt/unq'
+        case {'junk','off'}
+        otherwise
+            error('unknown type: %s\n',stimType)
+    end
 end
 end
 
 function doAnalysis(data,type)
 fprintf('\tdoing %s: ',type)
-name=fullfile(data.figureBase,[data.ratID '-' data.date '-z' num2str(data.z) '-chunk' data.chunkNum '-code' num2str(data.rec.chunks.spkCode) '-' data.hash],[data.stimType '-t' num2str(data.stimTimes(1)) '-' num2str(data.stimTimes(2))]);
-[status,message,messageid]=mkdir(name);
+preName=fullfile(data.figureBase,[data.ratID '-' data.date '-z' num2str(data.z) '-chunk' data.chunkNum '-code' num2str(data.rec.chunks.spkCode) '-' data.hash],[data.stimType '-t' num2str(data.stimTimes(1)) '-' num2str(data.stimTimes(2))]);
+[status,message,messageid]=mkdir(preName);
 if ~status
     message
     messageid
     error('mkdir error')
 end
 
-name=fullfile(name,type);
-if ~(exist([name '.png'],'file') && exist([name '.fig'],'file')) %one flaw of this design is that if data were regenerated but old figs were still in this location, we'd not update the figs
+name=fullfile(preName,type);
+if ~(exist([name '.png'],'file')) % && exist([name '.fig'],'file')) %one flaw of this design is that if data were regenerated but old figs were still in this location, we'd not update the figs
     %also, only the first presence of the first fig determines whether we
     %generate -- cuz we'd have to actually call the generator to find out
     %how many to expect, which is the expense we're trying to avoid.
     switch type
         case 'spectrogram'
-            savefigs(name,spectro(data));
+            savefigs(name,spectro(data),data.stimType,data.mins);
         case 'ISI'
-            savefigs(name,isi(data));
+            savefigs(name,isi(data),data.stimType,data.mins);
+            saveLockoutVios(preName,data);
         case 'waveforms'
-            savefigs(name,waveforms(data));
+            savefigs(name,waveforms(data),data.stimType,data.mins);
         case 'burstDetail'
-            savefigs(name,burstDetail(data));
+            savefigs(name,burstDetail(data),data.stimType,data.mins);
+        case 'STA'
+            savefigs(name,sta(data),data.stimType,data.mins);
         otherwise
             error('unrecognized type')
     end
@@ -125,8 +132,81 @@ end
 fprintf('\n')
 end
 
-function savefigs(oname,fs)
+function saveLockoutVios(name,data)
+if ~isempty(data.lockoutVios)
+    [fid, message]=fopen(fullfile(name,'lockout violations.txt'),'wt');
+    if ismember(fid,-1:2)
+        message
+        error('couldn''t open file')
+    end
+    for i=1:length(data.lockoutVios)
+        fprintf(fid,'%g\n',data.lockoutVios(i));
+    end
+    if 0~=fclose(fid);
+        error('fclose error')
+    end
+end
+end
+
+function savefigs(oname,fs,stimType,mins)
 fprintf('saving %d figs',length(fs))
+
+pieces={};
+tName=oname;
+while ~isempty(tName)
+    [pieces{end+1} tName]=strtok(tName,filesep);
+end
+
+summaryLoc=[];
+for j=1:length(pieces)-3
+    summaryLoc=fullfile(summaryLoc,pieces{j});
+end
+
+if ismac
+    summaryLoc=[filesep summaryLoc];
+end
+
+summaryLoc=fullfile(summaryLoc,'summaries',stimType);
+
+[status,message,messageid]=mkdir(summaryLoc);
+if ~status
+    message
+    messageid
+    error('mkdir error')
+end
+
+fprintf('\nsummarizing: %s\n',summaryLoc)
+
+[fid, message]=fopen(fullfile(summaryLoc,[sanitize(stimType) ' summary.txt']),'at+');
+if ismember(fid,-1:2)
+    message
+    error('couldn''t open file')
+end
+frewind(fid);
+lines={};
+while ~feof(fid)
+    lines{end+1}=fgetl(fid);
+end
+if length(lines)==1 && isscalar(lines{end}) && isnumeric(lines{end}) && lines{end}==-1
+    lines={};
+end
+
+pth=fullfile(pieces{end-2},pieces{end-1});
+
+if isempty(lines) || isempty(findstr(lines{end},pth))
+    status=fseek(fid,0,'eof');
+    if status~=0
+        [message,errnum]=ferror(fid)
+    end
+    lines{end+1}=sprintf('%d\t%3.1f mins\t%s\n',length(lines)+1,mins,pth);
+    fprintf(fid,lines{end});
+    fprintf('\tadding summary line\n')
+else
+    fprintf('\tmatch!\n')
+end
+if 0~=fclose(fid);
+    error('fclose error')
+end
 
 for i=1:length(fs)
     f=fs(i);
@@ -154,24 +234,39 @@ for i=1:length(fs)
     dpi=300;
     print(f,'-dpng',['-r' num2str(dpi)],fn);
     
-    [a b c]=movefile(fn,[name '.png']);
+    fullName=[name '.png'];
+    [a b c]=movefile(fn,fullName);
     if ~a
         b
         c
         error('couldn''t move fig')
     end
     
-    saveas(f,[name '.fig'])
+    if false
+        saveas(f,[name '.fig'])
+    elseif ismember(pieces{end},{'ISI','waveforms','STA'}) && ismember(i,[1 length(fs)])
+        [garbage n]=fileparts(name);
+        [a b c]=copyfile(fullName,fullfile(summaryLoc,[num2str(length(lines)) '-' n '.png']));
+        if a~=1
+            b
+            c
+            error('couldn''t copy fig')
+        end
+    end
     close(f)
 end
 end
 
 function f=spectro(data)
-pHz=1/median(diff(data.phys(2,:)));
-fprintf('spectroing from %g hz... ',pHz)
-freqs=1:50;
-f=figure;
-spectrogram(data.phys(1,:),round(pHz),[],freqs,pHz,'yaxis');
+if data.mins>=.5
+    pHz=1/median(diff(data.phys(2,:)));
+    fprintf('spectroing from %g hz... ',pHz)
+    freqs=1:50;
+    f=figure;
+    spectrogram(data.phys(1,:)-mean(data.phys(1,:)),round(pHz),[],freqs,pHz,'yaxis');
+else
+    f=[];
+end
 end
 
 function isiSub(sub,sup,d,code)
@@ -205,7 +300,7 @@ ylabel('count')
 title('isi')
 set(gca,'XTick',[0:ms]);
 if m>0
-ylim([0 m]);
+    ylim([0 m]);
 end
 xlim([0 ms]);
 legend({'isi distribution','lockout','refractory criterion','burst isi criterion'})
@@ -337,7 +432,7 @@ for j=1:n
     times=t(inds([1 end]));
     tnInds=tn>=times(1) & tn<=times(2);
     noiseTraces=removeMean(mNoiseTraces(:,tnInds));
-
+    
     f(end+1)=figure;
     subplot(2,2,[1 3])
     tracePlot(data.waveformTimes,{theseTraces, [1 0 0]; noiseTraces, zeros(1,3)},.05);
@@ -384,7 +479,15 @@ for j=1:n
     
     subplot(2,2,4)
     allTraces=allTraces';
-    [u s v]=svd(allTraces);
+    
+    try
+        [u s v]=svd(allTraces);
+    catch
+        warning('too many waveforms for svd -- choosing dims based on half of waveforms')
+        fprintf('verify: using %d not %d\n',size(allTraces,1),size(allTraces,2))
+        [u s v]=svd(allTraces(rand(1,size(allTraces,1))>.5,:));
+    end
+    
     s=diag(s);
     ms=2;
     svdPlot(theseTraces','r.',ms);
@@ -402,7 +505,7 @@ for j=1:n
         dpi=300;
         print(f(end),'-dpng',['-r' num2str(dpi)],[sanitize(datestr(now)) '.png']);
         
-        close(f(end)) 
+        close(f(end))
         f=f(1:end-1);
     end
 end
@@ -413,7 +516,7 @@ end
         if ~all(ismember(items,theseTraces','rows'))
             error('match error')
         end
-        svdPlot(items,code,5) 
+        svdPlot(items,code,5)
     end
 
     function svdPlot(items,code,sz)
@@ -568,6 +671,8 @@ data.ref=.002;
 
 fprintf('\tfinding bursts...\n')
 
+data.lockoutVios=data.spks(diff(data.spks)<data.lockout);
+
 data.bsts=data.spks([false ; (diff(data.spks)>=data.pre & [data.inter>=diff(data.spks(2:end)) ; false])  ]);
 data.refVios=data.spks([false ; diff(data.spks)<data.ref]);
 
@@ -616,6 +721,11 @@ data.tonics=setdiff(data.spks,[data.bsts ; data.bstNotFst']);
 if false
     plot(data.bstRecs{2}(:,1)-data.bsts(1:end-1)); %huh, why doesn't this make flat lines, with step offsets for each burst>2?
 end
+end
+
+function f=sta(data)
+keyboard
+f=[];
 end
 
 function ex(fileNames,stimTimes,rec,spks,stimType,hz)
@@ -927,6 +1037,7 @@ data=load(fileNames.targetFile);
 
 try
     rptStarts=data.stimBreaks;
+    rptStarts=rptStarts(rptStarts>=stimTimes(1) & rptStarts<=stimTimes(2));
 catch
     rptStarts=[];
 end
@@ -948,11 +1059,11 @@ if length(data.binnedT)~=length(data.binnedVals)
     end
 end
 
-phys=extract(data.phys,data.physT);
-stim=extract(data.binnedVals,data.binnedT);
+phys=extract(data.phys,data.physT,stimTimes);
+stim=extract(data.binnedVals,data.binnedT,stimTimes);
 end
 
-function out=extract(binnedVals,binnedT)
+function out=extract(binnedVals,binnedT,stimTimes)
 if iscell(binnedT)
     totalStim=0;
     for i=1:length(binnedT)
@@ -996,6 +1107,9 @@ if any(.01 < abs(1 - diff(stimT)/median(diff(stimT))))
 end
 
 out=[stim;stimT];
+if ~isempty(out)
+    out=out(:, out(2,:)>=stimTimes(1) & out(2,:)<=stimTimes(2));
+end
 end
 
 % totalPhys=0;

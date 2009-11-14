@@ -62,6 +62,9 @@ switch nargin
             error('Input argument is not a gratings object')
         end
     case {18 19}
+        
+        error('sm.gratings needs changeableAnnulusCenter field to control expert frame')
+        
         % create object using specified values
         % check for doCombos argument first (it decides other error checking)
         if nargin==19 && islogical(varargin{19})

@@ -7,6 +7,10 @@ function [doFramePulse expertCache dynamicDetails textLabel i dontclear indexPul
 
 floatprecision=1;
 
+stim.changeableAnnulusCenter=1;
+
+
+
 % increment i
 if dropFrames
     i=scheduledFrameNum;
@@ -20,6 +24,21 @@ doFramePulse=true;
 if isempty(expertCache)
     expertCache.masktexs=[];
     expertCache.annulitexs=[];
+     if stim.changeableAnnulusCenter % initialize
+        %start with mouse in the center
+        [a,b]=WindowCenter(window);
+        SetMouse(a,b,window);
+        expertCache.annulusInd=1;
+        expertCache.positionShift=[0 0];
+        expertCache.framesTillLeftClickAllowed=0;
+        % cache all annuli right away ... will cause some drop frames... but
+        % then since its changeable we are not so precise in absolute time
+        for i=1:length(unique(stim.annuliInds))
+            expertCache.annulitexs{i}=... % expertCache.annulitexs{stim.annuliInds(gratingToDraw)}=...
+                Screen('MakeTexture',window,double(stim.annuliMatrices{i}),0,0,floatprecision);
+        end
+        
+    end
 end
 % ================================================================================
 % start calculating frames now
@@ -109,10 +128,46 @@ if ~isempty(stim.masks)
     end
     % Draw mask texture: (with no rotation)
     Screen('DrawTexture', window, expertCache.masktexs{stim.maskInds(gratingToDraw)}, [], destRect,[], filtMode);
-    Screen('DrawTexture',window,expertCache.annulitexs{stim.annuliInds(gratingToDraw)},[],destRect,[],filtMode);
+    % start calculating frames now
+    
+    if stim.changeableAnnulusCenter
+        [mouseX, mouseY, buttons]=GetMouse(window);
+        if buttons(1) % right click if you want to update the position... only persists this trial!
+            [a,b]=WindowCenter(window);
+            %shift stimulus away from predefined location by the amount that the mouse is away from center
+            expertCache.positionShift=[mouseX-a mouseY-b];
+            annulusDestRec=destRect+expertCache.positionShift([1 2 1 2]);
+            
+            %only send dynamic details on frames that change positions by mouse down
+            dynamicDetails.annulusDestRec=annulusDestRec;
+            %dynamicDetails.sendDuringRealtimeloop=true;
+
+        end
+        
+        expertCache.framesTillLeftClickAllowed=max(0,expertCache.framesTillLeftClickAllowed-1);  %count down till 0
+        
+        if buttons(3) && expertCache.framesTillLeftClickAllowed==0 % left click if you want to update the size... only persists this trial!
+            anSizes=unique(stim.annuliInds);
+            %whichSize=(mod(expertCache.annulusInd-1,length(anSizes))+1)+1;
+            whichSize=mod(expertCache.annulusInd,length(anSizes))+1; % if you were at the end, you will advance to 1
+            anInd=find(stim.annuliInds==anSizes(whichSize));
+            expertCache.annulusInd=anInd(1);
+            expertCache.framesTillLeftClickAllowed=10; % lock out 10 frames till next change allowed
+        end
+        
+        %sustain the moved stim location regardless of mouse down
+        annulusDestRec=destRect+expertCache.positionShift([1 2 1 2]);
+        %stim.annuliInds(gratingToDraw) === annulusInd
+        Screen('DrawTexture',window,expertCache.annulitexs{stim.annuliInds(expertCache.annulusInd)},[],annulusDestRec,[],filtMode);
+    else
+        annulusDestRec=destRect;
+        Screen('DrawTexture',window,expertCache.annulitexs{stim.annuliInds(gratingToDraw)},[],annulusDestRec,[],filtMode);
+    end
+
+    
 end
 
-
+textLabel=sprintf('annInd: %d',expertCache.annulusInd)
 inspect=0;
 if inspect & i>3
     [oldmaximumvalue oldclampcolors] = Screen('ColorRange', window)

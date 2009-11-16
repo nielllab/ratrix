@@ -55,7 +55,7 @@ if isa(stimulus.receptiveFieldLocation,'RFestimator')
     else
         error('only one subject allowed')
     end
-    partition=getCenter(stimulus.receptiveFieldLocation,subjectID);
+    partition=getCenter(stimulus.receptiveFieldLocation,subjectID,trialRecords);
 else
     partition=stimulus.receptiveFieldLocation;
 end

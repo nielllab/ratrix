@@ -194,13 +194,22 @@ switch nargin
                         %p.xPositionPercent=0.2;
                         %p.yPositionPercent=1/16;
                         %p.stdGaussMask=1/16;
-                        %p.showText=false;
-                        
+                        p.showText='light';
                         p.phase=[pi]*[0 0.5 1 1.5]; 
-                        
+
                         RFdataSource='\\132.239.158.179\datanet_storage';
-                        p.fitRF = RFestimator({'spatialWhiteNoise','fitGaussian',{1}},{'spatialWhiteNoise','fitGaussian',{1}},[],RFdataSource,[now-100 Inf]);
-                        %temp restrict
+                        locationMode=2;
+                        switch locationMode
+                            case 1
+                                p.fitRF = RFestimator({'spatialWhiteNoise','fitGaussian',{1}},{'spatialWhiteNoise','fitGaussian',{1}},[],RFdataSource,[now-100 Inf]);
+                            case 2
+                                p.fitRF = RFestimator({'gratingWithChangeableAnnulusCenter','lastDynamicSettings',[]},{'gratingWithChangeableAnnulusCenter','lastDynamicSettings',[]},[],RFdataSource,[now-100 Inf]);
+                            otherwise
+                                p.xPositionPercent=0.2;
+                                p.yPositionPercent=1/16;
+                                p.stdGaussMask=1/16;
+                        end
+                                %temp restrict
                         %p.fitRF=[];
                         
                         %p.goLeftOrientations=p.goLeftOrientations(1);

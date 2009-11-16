@@ -185,6 +185,12 @@ try
                 else
                     stimIdentity='temporalWhiteNoise';
                 end
+            case 'grating'
+                if record.stimulusDetails.changeableAnnulusCenter==1
+                    stimIdentity='gratingWithChangeableAnnulusCenter';
+                else
+                    stimIdentity='grating';
+                end
             otherwise
                 stimIdentity=record.stimManagerClass;
         end
@@ -192,7 +198,7 @@ try
         switch filter
             case 'whiteNoise'
                 error('whiteNoise must specify spatialWhiteNoise or temporalWhiteNoise')
-            case {'gratings','spatialWhiteNoise','temporalWhiteNoise'}
+            case {'gratings','spatialWhiteNoise','temporalWhiteNoise','gratingWithChangeableAnnulusCenter'}
                 %okay to pass
             case 'anything'
                 stimIdentity='anything'; %will match filter now

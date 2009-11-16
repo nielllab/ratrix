@@ -7,7 +7,7 @@ function RFe = RFestimator(varargin)
 % boundaryParams - a cell array of {stimClass,method,params} used by getBoundary
 %
 % stimClass - the type of stimulus used to induce a RF (eg 'whiteNoise')
-% method - method for estimating the receptive field (eg 'centerOfMass', 'significantCoherence', 'fitGaussian')
+% method - method for estimating the receptive field (eg 'centerOfMass', 'significantCoherence', 'fitGaussian','lastDynamicSetting')
 % params - method-specific estimation parameters as a cell array
 % eyeParams - cell array of eye parameters, empty for now
 % dataSource - the path to the analysis files (always set to datanet_storage/) - this should not include ...demo1/analysis
@@ -111,7 +111,15 @@ switch nargin
                         error(sprintf('%s is a bad method for %s',RFe.centerParams{2},RFe.centerParams{1}))
                 end
             case 'gratings'
-                error('no gratings center method exists')
+                switch RFe.centerParams{2}
+                    case 'lastDynamicSetting'
+                        if ~isempty(p)
+                            error('found a parameter, but none ae needed for lastDynamicSetting')
+                        end
+                    otherwise
+                        RFe.centerParams{2}
+                        error('that gratings center method does not exist')
+                end
         end
         
         
@@ -161,6 +169,10 @@ switch nargin
                             otherwise
                                 p{2}
                                 error('must choose frequency estimation method')
+                        end
+                    case 'lastDynamicSetting'
+                         if ~isempty(p)
+                            error('found a parameter, but none ae needed for lastDynamicSetting')
                         end
                     otherwise
                         error(sprintf('%s is a bad method for %s',RFe.centerParams{2},RFe.centerParams{1}))

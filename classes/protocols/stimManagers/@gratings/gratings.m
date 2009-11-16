@@ -44,6 +44,7 @@ s.waveform='square';
 s.normalizationMethod='normalizeDiagonal';
 s.mean = 0;
 s.thresh = 0;
+s.changeableAnnulusCenter=false;
 
 s.LUT =[];
 s.LUTbits=0;
@@ -61,13 +62,11 @@ switch nargin
         else
             error('Input argument is not a gratings object')
         end
-    case {18 19}
-        
-        error('sm.gratings needs changeableAnnulusCenter field to control expert frame')
+    case {18 19 20}
         
         % create object using specified values
         % check for doCombos argument first (it decides other error checking)
-        if nargin==19 && islogical(varargin{19})
+        if nargin>18 && islogical(varargin{19})
             s.doCombos=varargin{19};
         end
         % pixPerCycs
@@ -170,6 +169,15 @@ switch nargin
         else
             error('thresh must be >= 0')
         end
+        
+        if nargin>19
+            if ismember(varargin{20},[0 1])
+                s.changeableAnnulusCenter=logical(varargin{20});
+            else
+                error('gratingWithChangeableAnnulusCenter must be true / false')
+            end
+        end
+
         s = class(s,'gratings',stimManager(varargin{15},varargin{16},varargin{17},varargin{18}));
     otherwise
         nargin

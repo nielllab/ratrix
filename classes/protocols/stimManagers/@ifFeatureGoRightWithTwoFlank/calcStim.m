@@ -362,14 +362,21 @@ if ~isempty(stimulus.fitRF) & isa(stimulus.fitRF,'RFestimator')
         error('only one subject allowed')
     end
     
-    [center details.RFsourceCenter details.RFdetailsCenter]=getCenter(stimulus.fitRF,subjectID);
-    [bound  details.RFsourceBound  details.RFdetailsBound]=getBoundary(stimulus.fitRF,subjectID);
+    [center details.RFsourceCenter details.RFdetailsCenter]=getCenter(stimulus.fitRF,subjectID,trialRecords);
+    [bound  details.RFsourceBound  details.RFdetailsBound]=getBoundary(stimulus.fitRF,subjectID,trialRecords);
     
-    details.stdGaussMask=bound;  % if gauss , use same, if circ then std*4?
+
     details.xPositionPercent=center(1);
     details.yPositionPercent=center(2);
     details.fitRf=struct(stimulus.fitRF);
+    if ~strcmp(trialRecords(end).stimManager,'ifFeatureGoRightWithTwoFlank') || trialRecords(end).stimDetails.stdGaussMask~=details.stdGaussMask;
+        stimulus=setStdGaussMask(stimulus, bound);  % if gauss , use same, if circ then std*4?
+        stimulus=deflate(stimulus);
+        stimulus=inflate(stimulus);
+        updateSM=true;
+    end
     details.stdGaussMask=stimulus.stdGaussMask;
+    %details.stdGaussMask=bound; 
 else
     details.xPositionPercent=stimulus.xPositionPercent;
     details.yPositionPercent=stimulus.targetYPosPct;

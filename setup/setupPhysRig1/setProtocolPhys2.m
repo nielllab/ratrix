@@ -57,33 +57,35 @@ normalizationMethod='normalizeDiagonal';
 mean=0.5;
 numRepeats=4;
 scaleFactor=0;
+doCombos=true;
+changeableAnnulusCenter=true;
 sfGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
-    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance,doCombos,changeableAnnulusCenter);
 
 
 durations=[3]
 numRepeats=5;
 pixPerCycs=512;
 dynGrating=gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
-    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance,doCombos,changeableAnnulusCenter);
 
 
 numOrientations=8;
 orientations=([2*pi]*[1:numOrientations])/numOrientations; % in radians
 pixPerCycs=1024; %2^9;%temp [64];  % reset to one value
 orGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
-    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance,doCombos,changeableAnnulusCenter);
 
 numContrasts=6;
 contrasts=1./2.^[0:numContrasts-1]; % contrast of the grating
 orientations=[pi/4]; % reset to one value
 cntrGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
-    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance,doCombos,changeableAnnulusCenter);
 
 radii=[0.02 0.05 .1 .2 .3 .4 .5 2]; % radii of the grating
 contrasts=1; % reset to one value
 radGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radii,annuli,location,...
-    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance,doCombos,changeableAnnulusCenter);
 
 
 
@@ -93,12 +95,12 @@ radGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts
 
 annuli=[0.02 0.05 .1 .2 .3 .4 .5 2]; % annulus of the grating
 RFdataSource='\\132.239.158.179\datanet_storage'; % good only as long as default stations don't change, %how do we get this from the dn in the station!?
-if 1 
+if 0 
      location = RFestimator({'spatialWhiteNoise','fitGaussian',{3}},{'gratings','ttestF1',{0.05,'fft'}},[],RFdataSource,[now-100 Inf]);
      %location = RFestimator({'whiteNoise','fitGaussianSigEnvelope',{3,0.05,logical(ones(3))}},{'gratings','ttestF1',{0.05,'fft'}},[],RFdataSource,[now-100 Inf]);
 end
 anGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
-    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance,doCombos,changeableAnnulusCenter);
 
 
 
@@ -113,11 +115,11 @@ pixPerCycs=2.^(16);              % freq really broad approximates fullfield homo
 
 numRepeats=3;
 fakeTRF= gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
-    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance,doCombos,changeableAnnulusCenter);
 
 numRepeats=10;
 fakeTRF10= gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
-    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance,doCombos,changeableAnnulusCenter);
 
 
 waveform='square'; 
@@ -129,7 +131,7 @@ orientations=([5/4*pi]*[1:5])/5; % in radians
 contrasts=[1];              % contrast of the grating
 driftfrequencies=[1 2 4];      % in cycles per second
 searchGratings  = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
-    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance,doCombos,changeableAnnulusCenter);
 
 numOrientations=16;
 orientations=([2*pi]*[1:numOrientations])/numOrientations; % in radians
@@ -138,7 +140,7 @@ pixPerCycs=2048;
 durations=16;
 contrasts=1;
 bigSlowSquare = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
-    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance,doCombos,changeableAnnulusCenter);
 
 
 ports=cellfun(@uint8,{1 3},'UniformOutput',false);
@@ -468,7 +470,7 @@ ts{38}= trainingStep(ap, bin,         repeatIndefinitely(),      noTimeOff(), sv
 
 
 p=protocol('practice phys',{ts{1:38}});
-stepNum=uint8(31);
+stepNum=uint8(23);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

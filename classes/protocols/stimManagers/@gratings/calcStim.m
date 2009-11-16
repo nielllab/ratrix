@@ -50,7 +50,7 @@ if isa(stimulus.location,'RFestimator')
     else
         error('only one subject allowed')
     end
-    details.location=getCenter(stimulus.location,subjectID);
+    details.location=getCenter(stimulus.location,subjectID,trialRecords);
 else
     details.location=stimulus.location;
 end
@@ -59,6 +59,10 @@ details.radii=stimulus.radii;
 details.annuli=stimulus.annuli;
 details.numRepeats=stimulus.numRepeats;
 details.doCombos=stimulus.doCombos;
+details.changeableAnnulusCenter=stimulus.changeableAnnulusCenter;
+details.waveform=stimulus.waveform;
+details.width=width;
+details.height=height;
 
 % NOTE: all fields in details should be MxN now
 
@@ -77,13 +81,14 @@ details.doCombos=stimulus.doCombos;
 % stim.durations - duration of each grating (in frames)
 % stim.mask - the mask to be used (empty if unmasked)
 stim=[];
-stim.height=height;
-stim.width=width;
+
+stim.width=details.width;
+stim.height=details.height;
 stim.location=details.location;
 stim.numRepeats=details.numRepeats;
-stim.waveform=stimulus.waveform;
-details.waveform=stimulus.waveform;
-details.width=stim.width;
+stim.waveform=details.waveform;
+stim.changeableAnnulusCenter=details.changeableAnnulusCenter;
+
 
 % details has the parameters before combos, stim should have them after combos are taken
 if stimulus.doCombos

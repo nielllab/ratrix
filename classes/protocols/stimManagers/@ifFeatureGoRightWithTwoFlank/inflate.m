@@ -34,6 +34,9 @@ mask=computeGabors([radius 999 0 0 1 s.thresh 1/2 1/2],0,patchX,patchY,'none',no
 %mask=getFeaturePatchStim(patchX,patchY,'squareGrating-variableOrientationAndPhase',0,0,[radius 1000 0 0 1 s.thresh 1/2 1/2],0);
 
 
+% %circMask=double(mask>0.01);
+% %staticParams(1)=Inf;
+
 flankerStim=1; % just a place holder, may get overwritten
 s.cache.flankerStim= uint8(double(intmax('uint8'))*(flankerStim));
 %performs the follwoing function:
@@ -128,7 +131,7 @@ switch s.renderMode
 
             integerType='uint8';
             %s.cache.mask = cast(double(intmax(integerType))*(mask),integerType);
-            s.cache.mask = cast(double(intmax(integerType))*(mask),'double');
+            s.cache.mask = cast(double(intmax(integerType))*(mask),'double');  % this is not used! 
                    
             %draws fine but overlaps
 %             cache{1}.features=cast(double(intmax(integerType))*(goRightStim), integerType);
@@ -141,16 +144,23 @@ switch s.renderMode
 %             cache{1}.features=(goRightStim-s.mean)*2;
 %             cache{2}.features=(goLeftStim-s.mean)*2;
 %             cache{3}.features=(flankerStim-s.mean)*2;
-%             cache{4}.features=(distractorStim-s.mean)*2;
+%             cache{4}.features=(distractorStim-s.mrean)*2;
 %             cache{5}.features=(distractorFlankerStim-s.mean)*2;
-            
+       
+%CIRC MASK
+%  %cache as double, range -.5 to .5
+%             cache{1}.features=repmat(circMask,[1 1 size(goRightStim,3) size(goRightStim,4)]).*(goRightStim-s.mean);
+%             cache{2}.features=repmat(circMask,[1 1 size(goLeftStim,3) size(goLeftStim,4)]).*(goLeftStim-s.mean);
+%             cache{3}.features=repmat(circMask,[1 1 size(flankerStim,3) size(flankerStim,4)]).*(flankerStim-s.mean);
+%             cache{4}.features=distractorStim-s.mean;  %not circ mask here, cuz not needed... its empty -pmm hack
+%             cache{5}.features=distractorFlankerStim-s.mean;
             
             %cache as double, range -.5 to .5
             cache{1}.features=(goRightStim-s.mean);
             cache{2}.features=(goLeftStim-s.mean);
             cache{3}.features=(flankerStim-s.mean);
-            cache{4}.features=(distractorStim-s.mean);
-            cache{5}.features=(distractorFlankerStim-s.mean);
+            cache{4}.features=distractorStim-s.mean;  %not circ mask here, cuz not needed... its empty -pmm hack
+            cache{5}.features=distractorFlankerStim-s.mean;
             
 %             %gratings range from [-0.5  1.5]...wierd
 %             %1*cos(linspace(0, pi,6))+0.5

@@ -185,47 +185,63 @@ switch nargin
                         p.goLeftContrast=1;
                         p.goRightContrast=1;
                         p.stdGaussMask=1/16;
+                        p.stdGaussMask=1/8;
                         p.pixPerCycs=32;
-                        p.targetOnOff=int32([30 40]);
-                        p.flankerOnOff=int32([30 40]);
-                        
-                        
-                        % % a guess based on a particular RF on oct 22nd
-                        %p.xPositionPercent=0.2;
-                        %p.yPositionPercent=1/16;
-                        %p.stdGaussMask=1/16;
-                        p.showText='light';
-                        p.phase=[pi]*[0 0.5 1 1.5]; 
+                        p.pixPerCycs=128; %768
+                        p.targetOnOff=int32([40 60]);
+                        p.flankerOnOff=int32([40 60]);
+                        p.flankerOffset=3;
 
-                        RFdataSource='\\132.239.158.179\datanet_storage';
+                        %p.showText=false;
                         locationMode=2;
                         switch locationMode
                             case 1
+                                RFdataSource='\\132.239.158.179\datanet_storage';
                                 p.fitRF = RFestimator({'spatialWhiteNoise','fitGaussian',{1}},{'spatialWhiteNoise','fitGaussian',{1}},[],RFdataSource,[now-100 Inf]);
                             case 2
+                                RFdataSource='\\132.239.158.179\datanet_storage'; % not actually used for lastDynamicSettings
                                 p.fitRF = RFestimator({'gratingWithChangeableAnnulusCenter','lastDynamicSettings',[]},{'gratingWithChangeableAnnulusCenter','lastDynamicSettings',[]},[],RFdataSource,[now-100 Inf]);
                             otherwise
-                                p.xPositionPercent=0.2;
-                                p.yPositionPercent=1/16;
+                                p.xPositionPercent=.5;% 5/12; %0.3;
+                                p.yPositionPercent=.5; %5/8; %0.7;
                                 p.stdGaussMask=1/16;
+                                p.fitRF=[];
                         end
-                                %temp restrict
-                        %p.fitRF=[];
+                        
+                        %p.phase=[pi]*[0 0.5 1 1.5]; 
                         
                         %p.goLeftOrientations=p.goLeftOrientations(1);
                         %p.goRightOrientations=p.goRightOrientations(1);
                         %p.flankerOrientations=p.flankerOrientations(1);
                         %p.flankerPosAngle=p.flankerPosAngle(1);
                         
+                         p.phase=[pi]*[0 0.5 1 1.5]; 
+                                                
                         p.renderMode='dynamic-precachedInsertion'; % dynamic-maskTimesGrating, dynamic-onePatchPerPhase,or dynamic-onePatch
                         
                         p.dynamicSweep.sweepMode={'ordered'};
                         p.dynamicSweep.sweptValues=[];
                         p.dynamicSweep.sweptParameters={'targetOrientations','flankerOrientations','flankerPosAngle','phase'};% 'flankerOrientations'}%,'flankerOffset','flankerPosAngle'};
-                        p.dynamicSweep.numRepeats=20;
+                        p.dynamicSweep.numRepeats=4;
                         
                         p.typeOfLUT='2009Trinitron255GrayBoxInterpBkgnd.5';
-                       
+                        p.typeOfLUT= 'useThisMonitorsUncorrectedGamma';
+                        
+                        
+                        if 1
+                            default.goRightOrientations = [pi/12];
+                            default.goLeftOrientations =  [pi/12];
+                            default.flankerOrientations = [pi/12];
+                            p.flankerContrast=[0 .25 .6 .75 1];
+                            p.goLeftContrast=[0 .25 .6 .75 1];
+                            p.goRightContrast=[0 .25 .6 .75 1];
+                            
+                            p.dynamicSweep.sweepMode={'ordered'};
+                            p.dynamicSweep.sweptValues=[];
+                            p.dynamicSweep.sweptParameters={'targetContrast','flankerContrast','phase'};% 'flankerOrientations'}%,'flankerOffset','flankerPosAngle'};
+                            p.dynamicSweep.numRepeats=4;
+                        end
+                        
                     case 'physFullFieldTarget'
                         p.stdGaussMask=Inf;
                         p.flankerContrast=0;
@@ -236,12 +252,22 @@ switch nargin
                         p.flankerOnOff=int32([30 40]);
                         p.renderMode='dynamic-precachedInsertion'; % dynamic-maskTimesGrating, dynamic-onePatchPerPhase,or dynamic-onePatch
                         
+                        goRightOrientations = [0,pi/2];
+                        
+                        p.targetOnOff=int32([40 80]);
+                        p.flankerOnOff=int32([40 80]);
+                        p.pixPerCycs=512;
+                        %p.phase=[pi]*[0 0.5 1 1.5]; 
+                                                
                         p.dynamicSweep.sweepMode={'ordered'};
                         p.dynamicSweep.sweptValues=[];
                         p.dynamicSweep.sweptParameters={'targetOrientations'};
-                        p.dynamicSweep.numRepeats=20;
+                        p.dynamicSweep.numRepeats=4;
                         
-                        p.typeOfLUT='2009Trinitron255GrayBoxInterpBkgnd.5';
+                        %p.typeOfLUT='2009Trinitron255GrayBoxInterpBkgnd.5';
+                        p.typeOfLUT= 'useThisMonitorsUncorrectedGamma';
+                        p.rangeOfMonitorLinearized=[0.0 1];
+
                     case 'testFlicker'
                         
                        %save space for the memory problem of making all the tex's

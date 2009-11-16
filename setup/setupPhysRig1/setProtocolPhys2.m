@@ -42,6 +42,7 @@ goToSide = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,m
 
 % gratings
 pixPerCycs=2.^([5:11]); % freq
+pixPerCycs=2.^([7:0.5:11]); % freq
 %pixPerCycs=2.^([9]);   % freq
 driftfrequencies=[4];  % in cycles per second
 orientations=[pi/2];   % in radians, horiz
@@ -88,16 +89,13 @@ radGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts
     waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance,doCombos,changeableAnnulusCenter);
 
 
-
-
-
-
-
 annuli=[0.02 0.05 .1 .2 .3 .4 .5 2]; % annulus of the grating
 RFdataSource='\\132.239.158.179\datanet_storage'; % good only as long as default stations don't change, %how do we get this from the dn in the station!?
 if 0 
      location = RFestimator({'spatialWhiteNoise','fitGaussian',{3}},{'gratings','ttestF1',{0.05,'fft'}},[],RFdataSource,[now-100 Inf]);
      %location = RFestimator({'whiteNoise','fitGaussianSigEnvelope',{3,0.05,logical(ones(3))}},{'gratings','ttestF1',{0.05,'fft'}},[],RFdataSource,[now-100 Inf]);
+else
+     location=[.5 .5];
 end
 anGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
     waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance,doCombos,changeableAnnulusCenter);
@@ -295,6 +293,7 @@ bin3x4 = whiteNoise({'binary',0,1,.5},background,method,stimLocation,[256 256],s
 bin6x8 = whiteNoise({'binary',0,1,.5},background,method,stimLocation,[128 128],searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 bin12x16 = whiteNoise({'binary',0,1,.5},background,method,stimLocation,[64 64],searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 bin24x32 = whiteNoise({'binary',0,1,.5},background,method,stimLocation,[32 32],searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+binOther = whiteNoise({'binary',0,1,.5},background,method,stimLocation,[200 200],searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 sparseness=0.05; %sparseness
 sparseBright=whiteNoise({'binary',0.5,1,sparseness},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
@@ -403,7 +402,7 @@ ts{4}= trainingStep(ap,  fakeTRF10,   numTrialsDoneCriterion(1), noTimeOff(), sv
 ts{5}= trainingStep(ap,  ffgwn,       numTrialsDoneCriterion(10), noTimeOff(), svnRev, svnCheckMode); %full field gaussian white noise
 ts{6}= trainingStep(ap,  bin,         numTrialsDoneCriterion(10), noTimeOff(), svnRev, svnCheckMode); %binary noise grid
 ts{7} = trainingStep(ap, flankersFF,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %flankers with giant target
-ts{8} = trainingStep(ap, sfGratings,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: spatial frequency (should it be before annulus?)
+ts{8} = trainingStep(ap, sfGratings,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %gratings: spatial frequency (should it be before annulus?)
 ts{9} = trainingStep(ap, orGratings,   repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %gratings: orientation
 
 %check if it drives
@@ -425,7 +424,7 @@ ts{22}= trainingStep(ap, bin,         repeatIndefinitely(),      noTimeOff(), sv
 
 %might need RF estimate:
 ts{23} = trainingStep(ap, anGratings,  numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %gratings: annulus size
-ts{24} = trainingStep(ap, flankers,    numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %flankers
+ts{24} = trainingStep(ap, flankers,    repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %flankers
 ts{25} = trainingStep(ap, biField,     numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %bipartite field for X-Y classification
 
 %xtra stuff might want:
@@ -444,6 +443,8 @@ ts{35} = trainingStep(ap, anGratings,  numTrialsDoneCriterion(1), noTimeOff(), s
 ts{36} = trainingStep(ap, flankers,    numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %flankers
 ts{37} = trainingStep(ap, anGratings,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: annulus size
 ts{38}= trainingStep(ap, bin,         repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
+ts{39}= trainingStep(ap, binOther,         repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
+ts{40}= trainingStep(ap, ffbin,         repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
 
 %removed things b/c not used enough:
 % ts{10}= trainingStep(afc, radGratings, numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %gratings: radius
@@ -469,6 +470,8 @@ ts{38}= trainingStep(ap, bin,         repeatIndefinitely(),      noTimeOff(), sv
 %% make and set it
 
 
+p=protocol('practice phys',{ts{1:40}});
+stepNum=uint8(40);
 p=protocol('practice phys',{ts{1:38}});
 stepNum=uint8(23);
 

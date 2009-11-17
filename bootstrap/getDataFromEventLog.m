@@ -1,6 +1,8 @@
-function [rigState surgBregma surgAnchor currAnchor currPositn penetParams isNewDay] = getDataFromEventLog(eventLogPath,searchDepth)
+function [rigState ampState lensState surgBregma surgAnchor currAnchor currPositn penetParams isNewDay] = getDataFromEventLog(eventLogPath,searchDepth)
 
 rigState = [NaN NaN NaN];
+ampState = {'','','','','',NaN};
+lensState = [NaN NaN NaN NaN];
 surgBregma = [NaN NaN NaN];
 surgAnchor = [NaN NaN NaN];
 currAnchor = [NaN NaN NaN];
@@ -9,6 +11,8 @@ isNewDay = false;
 penetParams = [];
 
 doRigState = true;
+doAmpState = true;
+doLensState = true;
 doSurgBregma = true;
 doSurgAnchor = true;
 doCurrAnchor = true;
@@ -29,6 +33,8 @@ if exist(eventLogPath,'dir')
     [logDates order] = sort(cell2mat({pathList.datenum}),'descend');
 else
     doRigState = false;
+    doAmpState = false;
+    doLensState = false;
     doSurgBregma = false;
     doSurgAnchor = false;
     doCurrAnchor = false;
@@ -68,6 +74,12 @@ for currSearchDepth = 1:searchDepth
         if ~isfield(events_data,'rigState') 
             doRigState = false;
         end
+        if ~isfield(events_data,'ampState') 
+            doAmpState = false;
+        end
+        if ~isfield(events_data,'lensState') 
+            doLensState = false;
+        end
         if ~isfield(events_data,'surgeryBregma') 
             doSurgBregma = false;
         end
@@ -88,6 +100,22 @@ for currSearchDepth = 1:searchDepth
             if (~isempty(events_data(i).rigState))&(all(~isnan(events_data(i).rigState)))
                 rigState = events_data(i).rigState;
                 doRigState = false;
+            end
+        end
+        
+        if doAmpState
+            isAnyAmpStateEmpty = any(cellfun(@isempty,events_data(i).ampState));
+            isAnyAmpStateNan = any(cell2mat(cellfun(@isnan,events_data(i).ampState,'UniformOutput',false)));
+            if ~isAnyAmpStateEmpty && ~isAnyAmpStateNan
+                ampState = events_data(i).ampState;
+                doAmpState = false;
+            end
+        end
+        
+        if doLensState
+            if (~isempty(events_data(i).lensState))&(all(~isnan(events_data(i).lensState)))
+                lensState = events_data(i).lensState;
+                doLensState = false;
             end
         end
         
@@ -128,7 +156,7 @@ for currSearchDepth = 1:searchDepth
         
         if i>1
             i = i-1;
-            doLoop = doRigState || doSurgBregma || doSurgAnchor || doCurrAnchor || doCurrPositn || doPenetParams;
+            doLoop = doRigState || doAmpState || doLensState || doSurgBregma || doSurgAnchor || doCurrAnchor || doCurrPositn || doPenetParams;
         else
             doLoop = false;
         end

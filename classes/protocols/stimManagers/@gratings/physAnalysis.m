@@ -1,4 +1,4 @@
-function [analysisdata cumulativedata] = physAnalysis(stimManager,spikeRecord,stimulusDetails,plotParameters,parameters,cumulativedata,eyeData)
+function [analysisdata cumulativedata] = physAnalysis(stimManager,spikeRecord,stimulusDetails,plotParameters,parameters,cumulativedata,eyeData,LFPRecord)
 % stimManager is the stimulus manager
 % spikes is an index into neural data samples of the time of a spike
 % correctedFrameIndices is an nx2 array of frame start and stop indices - [start stop], n = number of frames
@@ -6,6 +6,13 @@ function [analysisdata cumulativedata] = physAnalysis(stimManager,spikeRecord,st
 % all the information needed to reconstruct stimData)
 % plotParameters - currently not used
 
+% what to do about the LFP??
+if ~exist('LFPRecord','var')||isempty(LFPRecord.data)
+    LFPRecord = [];
+    doLFPAnalysis = false;
+else
+    doLFPAnalysis = true;
+end
 
 %CHOOSE CLUSTER
 spikes=spikeRecord.spikes; %all waveforms
@@ -637,6 +644,10 @@ analysisdata.sweptParameter=sweptParameter;
 analysisdata.vals=vals;
 analysisdata.spikeCount = spikeCount;
 cumulativedata=[]; % why are we emptying out cumulativedata? do we not have anything cumulative in gratings?
+
+if doLFPAnalysis
+    
+end
 
 end % end function
 % ===============================================================================================

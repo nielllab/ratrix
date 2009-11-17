@@ -59,7 +59,7 @@ for i=1:length(d)
     else
         if length(matches{1}) == length(d(i).name)
             rawFileNames{end+1}=d(i).name;
-            rawStartDates(end+1)=dateNumFor30([tokens{1}{1} 'T' tokens{1}{2}]);
+            rawStartDates(end+1)=datenumFor30([tokens{1}{1} 'T' tokens{1}{2}]);
         else
             matches{1}
             error('unexpected match')
@@ -151,7 +151,7 @@ switch dataFormat
     case 'quickTest'
         data = daqread(fullfile( rawNidaqPath,rawFileNames{startRawID}),'Samples',[500 1000]);
     case 'all'
-        fprintf('reading %2.2g seconds of data',overAllEnd-overAllStart);
+        fprintf('\nreading %2.2g seconds of data',overAllEnd-overAllStart);
         [data, time, abstime, events, daqInfo] = daqread(fullfile( rawNidaqPath,rawFileNames{startRawID}),'Time',[overAllStart overAllEnd]);
     case 'iti'
         error('not yet')

@@ -14,7 +14,7 @@ ai=[];
 oneRowHeight=25;
 margin=10;
 fieldWidth=100;
-fWidth=2*margin+9*fieldWidth;
+fWidth=2*margin+10*fieldWidth;
 fHeight=margin+25*oneRowHeight+margin;
 
 ai_parameters=[];
@@ -24,8 +24,15 @@ ai_parameters.inputRanges=repmat([-1 6],ai_parameters.numChans,1);
 
 % ========================================================================================
 % lists of values for settings
+ampGainStrs = {'','100','1000','10000'}; defaultGainIndex = 3;
+ampLPStrs = {'','0.1','1','10','100','300'}; defaultLPIndex = 3;
+ampHPStrs = {'','500','1000','5000','10000','20000'};defaultHPIndex = 4;
+ampNotchStrs = {'','Out','In'}; defaultNotchIndex = 2;
+ampModeStrs = {'','Rec','Imp','Stim'}; defaultModeIndex = 2;
+
+
 clientIPStrs={'132.239.158.180','132.239.158.179'};  % now we use 180... why was it set to only 179 before november 2009?
-ratIDStrs={'test1','demo1','fan_demo1','131','303','138','262','261','249'};
+ratIDStrs={'test1','250','demo1','fan_demo1','131','303','138','262','261','249'};
 ratProtocolStrs={'setProtocolPhys2','setProtocolTEST'};
 experimenterStrs={'','pmeier','bsriram','dnguyen','eflister'};
 electrodeMakeStrs={'FHC','MPI','gentner'};
@@ -235,18 +242,18 @@ f = figure('Visible','off','MenuBar','none','Name','neural GUI',...
 
 % =========================================================================
 % the grand header!
-GrandHeader = uicontrol(f,'Style','text','String','Physiology Server','Visible','on','Units','pixels',...
-    'FontWeight','bold','HorizontalAlignment','center', 'FontSize',15, ...
-    'Position',[margin+3*fieldWidth fHeight-1.5*oneRowHeight-margin 3*fieldWidth oneRowHeight]);
+%GrandHeader = uicontrol(f,'Style','text','String','Physiology Server','Visible','on','Units','pixels',...
+%    'FontWeight','bold','HorizontalAlignment','center', 'FontSize',15, ...
+%    'Position',[margin+3*fieldWidth fHeight-1.5*oneRowHeight-margin 3*fieldWidth oneRowHeight]);
 
 % =========================================================================
 % date selector for which day's event to show and write to
 dateField = uicontrol(f,'Style','text','String',datestr(now,'mm.dd.yyyy'),'Visible','on','Units','pixels',...
     'HorizontalAlignment','center',...
-    'Position',[margin+5*fieldWidth fHeight-3*oneRowHeight-margin fieldWidth*0.6 oneRowHeight]);
+    'Position',[margin+4.4*fieldWidth fHeight-0.9*oneRowHeight-margin fieldWidth*0.6 oneRowHeight*0.8]);
 nextDayButton = uicontrol(f,'Style','pushbutton','String','>','Visible','on','Units','pixels','Enable','off',...
     'FontWeight','bold','HorizontalAlignment','center','CallBack',@nextDay, ...
-    'Position',[2*margin+5.5*fieldWidth fHeight-3*oneRowHeight-margin 2*margin oneRowHeight]);
+    'Position',[2*margin+4.9*fieldWidth fHeight-0.9*oneRowHeight-margin 2*margin oneRowHeight*0.8]);
     function nextDay(source,eventdata)
         historyDateIndex=historyDateIndex+1;
         set(dateField,'String',historyDates{historyDateIndex});
@@ -255,7 +262,7 @@ nextDayButton = uicontrol(f,'Style','pushbutton','String','>','Visible','on','Un
     end
 previousDayButton = uicontrol(f,'Style','pushbutton','String','<','Visible','on','Units','pixels','Enable','on',...
     'FontWeight','bold','HorizontalAlignment','center','CallBack',@previousDay, ...
-    'Position',[0*margin+4.9*fieldWidth fHeight-3*oneRowHeight-margin 2*margin oneRowHeight]);
+    'Position',[0*margin+4.3*fieldWidth fHeight-0.9*oneRowHeight-margin 2*margin oneRowHeight*0.8]);
     function previousDay(source,eventdata)
         historyDateIndex=historyDateIndex-1;
         set(dateField,'String',historyDates{historyDateIndex});
@@ -264,7 +271,7 @@ previousDayButton = uicontrol(f,'Style','pushbutton','String','<','Visible','on'
     end
 todayButton = uicontrol(f,'Style','pushbutton','String','>>','Visible','on','Units','pixels','Enable','off',...
     'FontWeight','bold','HorizontalAlignment','center','CallBack',@goToToday, ...
-    'Position',[4*margin+5.5*fieldWidth fHeight-3*oneRowHeight-margin 2*margin oneRowHeight]);
+    'Position',[4*margin+4.9*fieldWidth fHeight-0.9*oneRowHeight-margin 2*margin oneRowHeight*0.8]);
     function goToToday(source,eventdata)
         historyDateIndex=length(historyDates);
         set(dateField,'String',historyDates{historyDateIndex});
@@ -279,27 +286,27 @@ todayButton = uicontrol(f,'Style','pushbutton','String','>>','Visible','on','Uni
 % draw text labels for the rig state
 DistHeader = uicontrol(f,'Style','text','String','Distance','Visible','on','Units','pixels',...
     'FontWeight','bold','HorizontalAlignment','center', ...
-    'Position',[margin+fieldWidth fHeight-3*oneRowHeight-margin fieldWidth oneRowHeight]);
+    'Position',[margin+fieldWidth fHeight-1*oneRowHeight-margin fieldWidth oneRowHeight]);
 HeightHeader = uicontrol(f,'Style','text','String','Height','Visible','on','Units','pixels',...
     'FontWeight','bold','HorizontalAlignment','center', ...
-    'Position',[margin+2*fieldWidth fHeight-3*oneRowHeight-margin fieldWidth oneRowHeight]);
+    'Position',[margin+2*fieldWidth fHeight-1*oneRowHeight-margin fieldWidth oneRowHeight]);
 AngleHeader = uicontrol(f,'Style','text','String','Angle','Visible','on','Units','pixels',...
     'FontWeight','bold','HorizontalAlignment','center', ...
-    'Position',[margin+3*fieldWidth fHeight-3*oneRowHeight-margin fieldWidth oneRowHeight]);
+    'Position',[margin+3*fieldWidth fHeight-1*oneRowHeight-margin fieldWidth oneRowHeight]);
 rigStateLabel = uicontrol(f,'Style','text','String','Rig State','Visible','on','Units','pixels',...
     'FontWeight','bold','HorizontalAlignment','center', ...
-    'Position',[margin+0*fieldWidth fHeight-4*oneRowHeight-margin fieldWidth oneRowHeight]);
+    'Position',[margin+0*fieldWidth fHeight-2*oneRowHeight-margin fieldWidth oneRowHeight]);
 rigDistField = uicontrol(f,'Style','edit','String','nan','Units','pixels',...
-    'Enable','off','Position',[1*margin+1*fieldWidth fHeight-4*oneRowHeight-margin fieldWidth oneRowHeight]);
+    'Enable','off','Position',[1*margin+1*fieldWidth fHeight-2*oneRowHeight-margin fieldWidth oneRowHeight]);
 rigHeightField = uicontrol(f,'Style','edit','String','nan','Units','pixels',...
-    'Enable','off','Position',[1*margin+2*fieldWidth fHeight-4*oneRowHeight-margin fieldWidth oneRowHeight]);
+    'Enable','off','Position',[1*margin+2*fieldWidth fHeight-2*oneRowHeight-margin fieldWidth oneRowHeight]);
 rigAngleField = uicontrol(f,'Style','edit','String','nan','Units','pixels',...
-    'Enable','off','Position',[1*margin+3*fieldWidth fHeight-4*oneRowHeight-margin fieldWidth oneRowHeight]);
+    'Enable','off','Position',[1*margin+3*fieldWidth fHeight-2*oneRowHeight-margin fieldWidth oneRowHeight]);
 
 % checkbox to enable rig field input
 enableRigStateFields = uicontrol(f,'Style','checkbox',...
     'String','unlock rig fields','Enable','on','Visible','on',...
-    'Value',0,'Units','pixels','Position',[2*margin+4*fieldWidth fHeight-4*oneRowHeight-margin fieldWidth+margin*3 oneRowHeight],...
+    'Value',0,'Units','pixels','Position',[2*margin+4*fieldWidth fHeight-2*oneRowHeight-margin fieldWidth+margin*3 oneRowHeight],...
     'CallBack',@enableRigStateEntry);
     function enableRigStateEntry(source,eventdata)
         if get(enableRigStateFields,'Value')==1
@@ -311,7 +318,126 @@ enableRigStateFields = uicontrol(f,'Style','checkbox',...
             set(rigHeightField,'Enable','off');
             set(rigAngleField,'Enable','off');
         end
-    end % end enableSurgeryEntry function
+    end % end enableRigStateEntry function
+
+% ========================================================================================
+% draw text labels for the Amp settings
+ampGainHeader = uicontrol(f,'Style','text','String','Gain','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+fieldWidth fHeight-3*oneRowHeight-margin fieldWidth/2 oneRowHeight]);
+ampLPHeader = uicontrol(f,'Style','text','String','LPF','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+1.5*fieldWidth fHeight-3*oneRowHeight-margin fieldWidth/2 oneRowHeight]);
+ampHPHeader = uicontrol(f,'Style','text','String','HPF','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+2*fieldWidth fHeight-3*oneRowHeight-margin fieldWidth/2 oneRowHeight]);
+ampNotchHeader = uicontrol(f,'Style','text','String','Notch','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+2.5*fieldWidth fHeight-3*oneRowHeight-margin fieldWidth/2 oneRowHeight]);
+ampModeHeader = uicontrol(f,'Style','text','String','Mode','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+3*fieldWidth fHeight-3*oneRowHeight-margin fieldWidth/2 oneRowHeight]);
+ampCapCompHeader = uicontrol(f,'Style','text','String','Cap','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+3.5*fieldWidth fHeight-3*oneRowHeight-margin fieldWidth/2 oneRowHeight]);
+
+ampStateLabel = uicontrol(f,'Style','text','String','Amp Settings','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+0*fieldWidth fHeight-4*oneRowHeight-margin fieldWidth oneRowHeight]);
+ampGainField = uicontrol(f,'Style','popupmenu','String',ampGainStrs,'Units','pixels','Value',defaultGainIndex,...
+    'Enable','off','Position',[1*margin+1*fieldWidth fHeight-4*oneRowHeight-margin fieldWidth/2 oneRowHeight],'BackgroundColor','w');
+ampLPField = uicontrol(f,'Style','popupmenu','String',ampLPStrs,'Units','pixels','Value',defaultLPIndex,...
+    'Enable','off','Position',[1*margin+1.5*fieldWidth fHeight-4*oneRowHeight-margin fieldWidth/2 oneRowHeight],'BackgroundColor','w');
+ampHPField = uicontrol(f,'Style','popupmenu','String',ampHPStrs,'Units','pixels','Value',defaultHPIndex,...
+    'Enable','off','Position',[1*margin+2*fieldWidth fHeight-4*oneRowHeight-margin fieldWidth/2 oneRowHeight],'BackgroundColor','w');
+ampNotchField = uicontrol(f,'Style','popupmenu','String',ampNotchStrs,'Units','pixels','Value',defaultNotchIndex,...
+    'Enable','off','Position',[1*margin+2.5*fieldWidth fHeight-4*oneRowHeight-margin fieldWidth/2 oneRowHeight],'BackgroundColor','w');
+ampModeField = uicontrol(f,'Style','popupmenu','String',ampModeStrs,'Units','pixels','Value',defaultModeIndex,...
+    'Enable','off','Position',[1*margin+3*fieldWidth fHeight-4*oneRowHeight-margin fieldWidth/2 oneRowHeight],'BackgroundColor','w');
+ampCapCompField = uicontrol(f,'Style','edit','String','nan','Units','pixels',...
+    'Enable','off','Position',[1*margin+3.5*fieldWidth fHeight-4*oneRowHeight-margin fieldWidth/2 oneRowHeight],'BackgroundColor','w');
+
+% checkbox to enable amp field input
+enableAmpStateFields = uicontrol(f,'Style','checkbox',...
+    'String','unlock amp fields','Enable','on','Visible','on',...
+    'Value',0,'Units','pixels','Position',[2*margin+4*fieldWidth fHeight-4*oneRowHeight-margin fieldWidth+margin*3 oneRowHeight],...
+    'CallBack',@enableAmpStateEntry);
+    function enableAmpStateEntry(source,eventdata)
+        if get(enableAmpStateFields,'Value')==1
+            set(ampGainField,'Enable','on');
+            set(ampLPField,'Enable','on');
+            set(ampHPField,'Enable','on');
+            set(ampNotchField,'Enable','on');
+            set(ampModeField,'Enable','on');
+            set(ampCapCompField,'Enable','on');
+        else
+            set(ampGainField,'Enable','off');
+            set(ampLPField,'Enable','off');
+            set(ampHPField,'Enable','off');
+            set(ampNotchField,'Enable','off');
+            set(ampModeField,'Enable','off');
+            set(ampCapCompField,'Enable','off');
+        end
+    end % end enableAmpStateEntry function
+
+% ========================================================================================
+% draw text labels for the lens state
+Lens1DistHeader = uicontrol(f,'Style','text','String','L1 Distance','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+6.5*fieldWidth fHeight-3*oneRowHeight-margin 0.75*fieldWidth oneRowHeight]);
+Lens1PowerHeader = uicontrol(f,'Style','text','String','L1 Power','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+7.25*fieldWidth fHeight-3*oneRowHeight-margin 0.75*fieldWidth oneRowHeight]);
+Lens2DistHeader = uicontrol(f,'Style','text','String','L2 Distance','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+8.0*fieldWidth fHeight-3*oneRowHeight-margin 0.75*fieldWidth oneRowHeight]);
+Lens2PowerHeader = uicontrol(f,'Style','text','String','L2 Power','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+8.75*fieldWidth fHeight-3*oneRowHeight-margin 0.75*fieldWidth oneRowHeight]);
+
+lensStateLabel = uicontrol(f,'Style','text','String','Lens settings','Visible','on','Units','pixels',...
+    'FontWeight','bold','HorizontalAlignment','center', ...
+    'Position',[margin+5.5*fieldWidth fHeight-4*oneRowHeight-margin fieldWidth oneRowHeight]);
+
+lens1DistField = uicontrol(f,'Style','edit','String','nan','Units','pixels',...
+    'Enable','off','Position',[margin+6.5*fieldWidth fHeight-4*oneRowHeight-margin 0.75*fieldWidth oneRowHeight]);
+lens1PowerField = uicontrol(f,'Style','edit','String','nan','Units','pixels',...
+    'Enable','off','Position',[margin+7.25*fieldWidth fHeight-4*oneRowHeight-margin 0.75*fieldWidth oneRowHeight]);
+lens2DistField = uicontrol(f,'Style','edit','String','nan','Units','pixels',...
+    'Enable','off','Position',[margin+8.0*fieldWidth fHeight-4*oneRowHeight-margin 0.75*fieldWidth oneRowHeight]);
+lens2PowerField = uicontrol(f,'Style','edit','String','nan','Units','pixels',...
+    'Enable','off','Position',[margin+8.75*fieldWidth fHeight-4*oneRowHeight-margin 0.75*fieldWidth oneRowHeight]);
+
+% checkbox to enable rig field input
+enableLens1StateFields = uicontrol(f,'Style','checkbox',...
+    'String','unlock lens1 fields','Enable','on','Visible','on',...
+    'Value',0,'Units','pixels','Position',[2*margin+6.55*fieldWidth fHeight-4.8*oneRowHeight-margin fieldWidth+margin*3 0.8*oneRowHeight],...
+    'CallBack',@enableLens1StateEntry);
+enableLens2StateFields = uicontrol(f,'Style','checkbox',...
+    'String','unlock lens2 fields','Enable','on','Visible','on',...
+    'Value',0,'Units','pixels','Position',[2*margin+8.05*fieldWidth fHeight-4.8*oneRowHeight-margin fieldWidth+margin*3 0.8*oneRowHeight],...
+    'CallBack',@enableLens2StateEntry);
+    function enableLens1StateEntry(source,eventdata)
+        if get(enableLens1StateFields,'Value')==1
+            set(lens1DistField,'Enable','on');
+            set(lens1PowerField,'Enable','on');
+        else
+            set(lens1DistField,'Enable','off');
+            set(lens1PowerField,'Enable','off');
+        end
+    end % end enableLens1StateEntry function
+
+    function enableLens2StateEntry(source,eventdata)
+        if get(enableLens2StateFields,'Value')==1
+            set(enableLens1StateFields,'Value',1); enableLens1StateEntry();
+            set(lens2DistField,'Enable','on');
+            set(lens2PowerField,'Enable','on');
+        else
+            set(lens2DistField,'Enable','off');
+            set(lens2PowerField,'Enable','off');
+        end
+    end % end enableLens2StateEntry function
+
 
 % ========================================================================================
 
@@ -538,15 +664,17 @@ ratIDField = uicontrol(f,'Style','popupmenu','String',ratIDStrs,'Units','pixels'
             
             warning('could not get surgery fields from oracle. trying to obtain these fields from server.');
         end
-        [rigState surgBregma surgAnchor currAnchor currPositn penetParams isNewDay] = ...
+        [rigState ampState lensState surgBregma surgAnchor currAnchor currPositn penetParams isNewDay] = ...
             getDataFromEventLog(fullfile('\\Reinagel-lab.AD.ucsd.edu\RLAB\Rodent-Data\physiology',ratIDStrs{get(ratIDField,'Value')},''));
-        rigState
-        surgBregma
-        surgAnchor
-        currAnchor
-        currPositn
-        penetParams
-        isNewDay
+%         rigState
+%         ampState
+%         lensState
+%         surgBregma
+%         surgAnchor
+%         currAnchor
+%         currPositn
+%         penetParams
+%         isNewDay
         if ~surgValuesinOracle
             % look for anchor data in the events_log
             set(surgeryAnchorAPField,'String',num2str(surgAnchor(1)));
@@ -565,6 +693,20 @@ ratIDField = uicontrol(f,'Style','popupmenu','String',ratIDStrs,'Units','pixels'
             set(rigDistField,'String',num2str(rigState(1)),'BackgroundColor','r');
             set(rigHeightField,'String',num2str(rigState(2)),'BackgroundColor','r');
             set(rigAngleField,'String',num2str(rigState(3)),'BackgroundColor','r');
+            set(enableAmpStateFields,'Value',1);enableAmpStateEntry();
+            set(ampGainField, 'Value',find(strcmp(ampState{1},ampGainStrs)),'BackgroundColor','r');
+            set(ampLPField, 'Value',find(strcmp(ampState{2},ampLPStrs)),'BackgroundColor','r');
+            set(ampHPField, 'Value',find(strcmp(ampState{3},ampHPStrs)),'BackgroundColor','r');
+            set(ampNotchField, 'Value',find(strcmp(ampState{4},ampNotchStrs)),'BackgroundColor','r');
+            set(ampModeField, 'Value',find(strcmp(ampState{5},ampModeStrs)),'BackgroundColor','r');
+            set(ampCapCompField, 'Value',ampState{6},'BackgroundColor','r');
+            set(enableLens1StateFields,'Value',1);enableLens1StateEntry();
+            set(enableLens2StateFields,'Value',1);enableLens2StateEntry();
+            set(lens1DistField,'String',num2str(lensState(1)),'BackgroundColor','r');
+            set(lens1PowerField,'String',num2str(lensState(2)),'BackgroundColor','r');
+            set(lens2DistField,'String',num2str(lensState(3)),'BackgroundColor','r');
+            set(lens2PowerField,'String',num2str(lensState(4)),'BackgroundColor','r');
+
         else
             set(currentAnchorAPField,'String',num2str(currAnchor(1)),'BackgroundColor','w');
             set(currentAnchorMLField,'String',num2str(currAnchor(2)),'BackgroundColor','w');
@@ -572,6 +714,16 @@ ratIDField = uicontrol(f,'Style','popupmenu','String',ratIDStrs,'Units','pixels'
             set(rigDistField,'String',num2str(rigState(1)),'BackgroundColor','w');
             set(rigHeightField,'String',num2str(rigState(2)),'BackgroundColor','w');
             set(rigAngleField,'String',num2str(rigState(3)),'BackgroundColor','w');
+            set(ampGainField, 'Value',find(strcmp(ampState{1},ampGainStrs)),'BackgroundColor','w');
+            set(ampLPField, 'Value',find(strcmp(ampState{2},ampLPStrs)),'BackgroundColor','w');
+            set(ampHPField, 'Value',find(strcmp(ampState{3},ampHPStrs)),'BackgroundColor','w');
+            set(ampNotchField, 'Value',find(strcmp(ampState{4},ampNotchStrs)),'BackgroundColor','w');
+            set(ampModeField, 'Value',find(strcmp(ampState{5},ampModeStrs)),'BackgroundColor','w');
+            set(ampCapCompField, 'Value',ampState{6},'BackgroundColor','w');
+            set(lens1DistField,'String',num2str(lensState(1)),'BackgroundColor','w');
+            set(lens1PowerField,'String',num2str(lensState(2)),'BackgroundColor','w');
+            set(lens2DistField,'String',num2str(lensState(3)),'BackgroundColor','w');
+            set(lens2PowerField,'String',num2str(lensState(4)),'BackgroundColor','w');
         end
         set(offsetAPField,'String',num2str(currPositn(1)));
         set(offsetMLField,'String',num2str(currPositn(2)));
@@ -795,6 +947,9 @@ offsetEventSubmit = uicontrol(f,'Style','pushbutton','String','enter','Visible',
         labels(end+1)=nan;
         events_data(end).eventNumber=eventNum;
         events_data(end).rigState=[str2double(get(rigDistField,'String')) str2double(get(rigHeightField,'String')) str2double(get(rigAngleField,'String'))];
+        events_data(end).ampState = {ampGainStrs{get(ampGainField,'Value')},ampLPStrs{get(ampLPField,'Value')},ampHPStrs{get(ampHPField,'Value')},...
+            ampNotchStrs{get(ampNotchField,'Value')},ampModeStrs{get(ampModeField,'Value')},str2double(get(ampCapCompField,'String'))};
+        events_data(end).lensState=[str2double(get(lens1DistField,'String')) str2double(get(lens1PowerField,'String')) str2double(get(lens2DistField,'String')) str2double(get(lens2PowerField,'String'))];
         events_data(end).surgeryAnchor=[str2double(get(surgeryAnchorAPField,'String')) str2double(get(surgeryAnchorMLField,'String')) str2double(get(surgeryAnchorZField,'String'))];
         events_data(end).surgeryBregma=[str2double(get(surgeryBregmaAPField,'String')) str2double(get(surgeryBregmaMLField,'String')) str2double(get(surgeryBregmaZField,'String'))];
         events_data(end).currentAnchor=[str2double(get(currentAnchorAPField,'String')) str2double(get(currentAnchorMLField,'String')) str2double(get(currentAnchorZField,'String'))];
@@ -897,10 +1052,29 @@ offsetEventSubmit = uicontrol(f,'Style','pushbutton','String','enter','Visible',
         set(currentAnchorZField,'BackgroundColor','w');
         set(enableCurrentAnchorField,'Value',0);enableCurrentAnchorEntry();
         
+        set(ampGainField,'BackgroundColor','w');
+        set(ampLPField,'BackgroundColor','w');
+        set(ampHPField,'BackgroundColor','w');
+        set(ampNotchField,'BackgroundColor','w');
+        set(ampModeField,'BackgroundColor','w');
+        set(ampCapCompField,'BackgroundColor','w');
+        set(enableAmpStateFields,'Value',0);enableAmpStateEntry();
+        
+
+        set(lens1DistField,'BackgroundColor','w');
+        set(lens1PowerField,'BackgroundColor','w');
+        set(lens2DistField,'BackgroundColor','w');
+        set(lens2PowerField,'BackgroundColor','w');
+        set(enableLens1StateFields,'Value',0);enableLens1StateEntry();
+        set(enableLens2StateFields,'Value',0);enableLens2StateEntry();
+        
     end % end logEvent function
 
 % ========================================================================================
 % quick plot - improved
+levelToTOF = uicontrol(f,'Style','checkbox','String','level to TOF','Enable','on','Visible','on',...
+    'Value',0,'Units','pixels','Position',[2*margin+8*fieldWidth fHeight-24.5*oneRowHeight-margin fieldWidth+margin*3 oneRowHeight]);
+
 quickPlotButton = uicontrol(f,'Style','pushbutton','String','quick plot','Visible','on','Units','pixels',...
     'FontWeight','normal','HorizontalAlignment','center','CallBack',@quickPlot, ...
     'Position',[2*margin+8*fieldWidth fHeight-23*oneRowHeight-2*margin fieldWidth oneRowHeight]);
@@ -964,7 +1138,7 @@ quickPlotButton = uicontrol(f,'Style','pushbutton','String','quick plot','Visibl
         g=figure('Position',[50 700 800 400]);
         for subPlotID=1:2
             subplot(1,2,subPlotID)
-            levelToTopOfBrain=false;
+            levelToTopOfBrain=get(levelToTOF,'Value');
             plotInBregmaCoordinates(events_dataNoEmpty,ALL,'.k',[1 1 1 1],levelToTopOfBrain);
             hold on;
             plotInBregmaCoordinates(events_dataNoEmpty,TOB,'ok',[],levelToTopOfBrain);
@@ -998,9 +1172,9 @@ toggleCellButton = uicontrol(f,'Style','togglebutton','String',cellT,'Visible','
     'FontWeight','bold','HorizontalAlignment','center','CallBack',@toggleCell, ...
     'Position',[2*margin+8*fieldWidth fHeight-19*oneRowHeight-2*margin fieldWidth oneRowHeight]);
     function toggleCell(source,eventdata)
-        if get(toggleCellButton,'Value')
+        if get(toggleCellButton,'Value')==1            
             externalRequest='cell start';
-%         else
+        else
             externalRequest='cell stop';
         end
         % get time from client machine (if it exists)

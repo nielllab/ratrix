@@ -75,7 +75,7 @@ if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && rec
     
     data=findBursts(data);
     
-    doAnalysis(data,'STA');
+%    doAnalysis(data,'STA');
 %    doAnalysis(data,'burstDetail');
     doAnalysis(data,'waveforms');
     doAnalysis(data,'ISI');

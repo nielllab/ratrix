@@ -538,9 +538,9 @@ for j=1:n
     
     s=diag(s);
     ms=2;
-    svdPlot(theseTraces','r.',ms);
+    svdPlot(theseTraces','r.',ms,s,v);
     hold on
-    svdPlot(noiseTraces','k.',ms);
+    svdPlot(noiseTraces','k.',ms,s,v);
     set(gca,'YTick',[])
     set(gca,'XTick',[])
     
@@ -564,17 +564,17 @@ end
         if ~all(ismember(items,theseTraces','rows'))
             error('match error')
         end
-        svdPlot(items,code,5)
-    end
-
-    function svdPlot(items,code,sz)
-        if ~isempty(items)
-            plot(items*v(:,1)/s(1),items*v(:,2)/s(2),code,'MarkerSize',sz)
-        end
+        svdPlot(items,code,5,s,v)
     end
 
 if false
     plot(tms,normalizeByDim(traces,2),'Color',col)
+end
+end
+
+function svdPlot(items,code,sz,s,v)
+if ~isempty(items)
+    plot(items*v(:,1)/s(1),items*v(:,2)/s(2),code,'MarkerSize',sz)
 end
 end
 
@@ -872,14 +872,31 @@ dt=secs/pts;
 step=dt/2;
 
 f=figure;
+n=4;
 
 [fq t p]=getSpec(data);
-subplot(3,1,1)
+subplot(n,1,1)
 displayspectrogram(t,fq,p,false,'yaxis');
 
-subplot(3,1,2)
+subplot(n,1,2)
 
-subplot(3,1,3)
+c=colormap;
+cs=linspace(1,size(c,1),length(t));
+
+p=p-mean(p(:));
+[u s v]=svd(p);
+s=diag(s);
+ms=2;
+svdPlot(p','.',ms,s,v,cs);
+
+subplot(n,1,3)
+plot(fq,v(:,1:2))
+xaxis('hz')
+title('lfp dims')
+
+keyboard
+
+subplot(n,1,4)
 ratePlot(data.bsts,'r')
 hold on
 ratePlot(data.tonics,'k')

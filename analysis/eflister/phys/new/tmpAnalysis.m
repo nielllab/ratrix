@@ -37,7 +37,7 @@ data.fileNames=fileNames;
 
 data.mins=(stimTimes(2)-stimTimes(1))/60;
 
-if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && rec.date>datenum('04.24.09','mm.dd.yy')
+if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) % && rec.date>datenum('04.24.09','mm.dd.yy')
     
     data.spks=load(fileNames.spikesFile);
     data.spks=data.spks(data.spks>=stimTimes(1) & data.spks<=stimTimes(2));
@@ -45,7 +45,7 @@ if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && rec
     
     fprintf('%s\n\t%05.1f mins   spk rate: %04.1f hz\n',[data.ratID ' ' data.date ' ' data.uID],data.mins,rate);
     
-    [data.stim,data.phys,data.rptStarts]=extractData(fileNames,stimTimes,rec);
+    [data.stim,data.phys,data.frames,data.rptStarts]=extractData(fileNames,stimTimes,rec);
     
     data.stimTimes=stimTimes;
     data.figureBase=figureBase;
@@ -75,11 +75,12 @@ if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && rec
     
     data=findBursts(data);
     
-%    doAnalysis(data,'STA');
-%    doAnalysis(data,'burstDetail');
-    doAnalysis(data,'waveforms');
-    doAnalysis(data,'ISI');
-%    doAnalysis(data,'spectrogram');
+    doAnalysis(data,'raster');
+    % doAnalysis(data,'STA');
+    %    doAnalysis(data,'burstDetail');
+    %    doAnalysis(data,'waveforms');
+    %    doAnalysis(data,'ISI');
+    %    doAnalysis(data,'spectrogram');
     
     switch stimType
         case 'gaussian'
@@ -123,6 +124,8 @@ if ~(exist([name '.png'],'file')) % && exist([name '.fig'],'file')) %one flaw of
             savefigs(name,burstDetail(data),data.stimType,data.mins);
         case 'STA'
             savefigs(name,sta(data),data.stimType,data.mins);
+        case 'raster'
+            savefigs(name,raster(data),data.stimType,data.mins);
         otherwise
             error('unrecognized type')
     end
@@ -380,6 +383,23 @@ markup(true);
 axis xy
 end
 
+function tracePlot(xs,cs,p)
+for i=1:size(cs,1)
+    if isempty(cs{i,1})
+        cs{i,1}=zeros(length(xs),1);
+    end
+    plot(xs,cs{i,1},'Color',(cs{i,2}+ones(1,3))/2) % argh no alpha for lines :(
+    hold on
+end
+for i=1:size(cs,1)
+    if size(cs{i,1},2)>1
+        ptiles=[0 1] + p*[1 -1]/2;
+        s=sort(cs{i,1},2);
+        plot(xs,s(:,ceil(ptiles*size(s,2))),'Color',cs{i,2})
+    end
+end
+end
+
 function f=waveforms(data)
 
 maxToShow=2000;
@@ -398,23 +418,6 @@ end
 
 n=ceil(size(mTheseTraces,2)/maxToShow);
 m=ceil(size(mTheseTraces,2)/n);
-
-    function tracePlot(xs,cs,p)
-        for i=1:size(cs,1)
-            if isempty(cs{i,1})
-                cs{i,1}=zeros(length(xs),1);
-            end
-            plot(xs,cs{i,1},'Color',(cs{i,2}+ones(1,3))/2) % argh no alpha for lines :(
-            hold on
-        end
-        for i=1:size(cs,1)
-            if size(cs{i,1},2)>1
-                ptiles=[0 1] + p*[1 -1]/2;
-                s=sort(cs{i,1},2);
-                plot(xs,s(:,ceil(ptiles*size(s,2))),'Color',cs{i,2})
-            end
-        end
-    end
 
     function x=removeMean(x)
         if ~isempty(x)
@@ -448,34 +451,13 @@ for j=1:n
     
     subplot(2,2,2)
     
-    bits=12;%16;
-    vLims=5*[-1 1]*2; %the *2 is because we subtract the mean, so in the worst case, this makes the range twice as big
+        vLims=5*[-1 1]*2; %the *2 is because we subtract the mean, so in the worst case, this makes the range twice as big
     if any(allTraces<vLims(1) | allTraces>vLims(2))
         error('volt error')
     end
     allTraces=[theseTraces noiseTraces];
-    im = sparse([],[],[],length(data.waveformTimes),2^bits,length(data.waveformTimes)*(size(noiseTraces,2)+size(theseTraces,2)));
-    for i=1:size(allTraces,2)
-        for x=1:length(data.waveformTimes)
-            y= 1+round((2^bits) * (allTraces(x,i)-vLims(1))/(vLims(2)-vLims(1)));
-            im(x,y)=im(x,y)+1;
-        end
-        if false && rand>.99
-            fprintf('%g done\n',100*i/size(allTraces,2))
-        end
-    end
-    imagesc(log(im'))
     
-    z=sum(im)==0;
-    
-    ylim([find(z~=1,1,'first') length(z)-find(fliplr(z)~=1,1,'first')-1])
-    set(gca,'YTick',[])
-    set(gca,'XTick',[])
-    c=colormap(jet);
-    % c(1,:)=[1,1,1];
-    colormap(c)
-    % colorbar('EastOutside')
-    axis xy
+    traceDensity(data.waveformTimes,allTraces,vLims);
     
     subplot(2,2,4)
     allTraces=allTraces';
@@ -528,6 +510,38 @@ end
 if false
     plot(tms,normalizeByDim(traces,2),'Color',col)
 end
+end
+
+function traceDesnity(times,traces,lims)
+bits=12;%16;
+
+n=1000;
+if true && size(traces,2)>n
+    traces=traces(:,rand(1,size(traces,2))<n/size(traces,2));
+end
+
+im = sparse([],[],[],length(times),1+2^bits,length(times)*size(traces,2));
+for i=1:size(traces,2)
+    for x=1:length(times)
+        y= 1+round((2^bits) * (traces(x,i)-lims(1))/(lims(2)-lims(1)));
+        im(x,y)=im(x,y)+1;
+    end
+    if true && rand>.99
+        fprintf('%g done\n',100*i/size(traces,2))
+    end
+end
+imagesc(log(im'))
+
+z=sum(im)==0;
+
+ylim([find(z~=1,1,'first') length(z)-find(fliplr(z)~=1,1,'first')-1])
+set(gca,'YTick',[])
+set(gca,'XTick',[])
+c=colormap(jet);
+% c(1,:)=[1,1,1];
+colormap(c)
+% colorbar('EastOutside')
+axis xy
 end
 
 function f=burstDetail(data)
@@ -724,73 +738,113 @@ end
 end
 
 function f=sta(data)
-keyboard
-f=[];
+stimPreMS =200;%300;
+stimPostMS=100;% 30;
+
+color=zeros(1,3);
+c=.95;
+
+f=figure;
+n=4;
+
+if ~isempty(data.frames)
+    frames=data.frames(1,2) : median(diff(data.frames(:,2))) : data.frames(end,2);
+    frames=[interp1(data.frames(:,2),data.frames(:,1),frames,'nearest'); frames];
+    
+    [tSTF vals]=calcSTA(data.tonics,frames,stimPreMS,stimPostMS,c);
+    staPlot(tSTF,color,vals,c,n,1,'spike triggered average frame');
+    
+    [bSTF vals]=calcSTA(data.bsts,frames,stimPreMS,stimPostMS,c);
+    staPlot(bSTF,color,vals,c,n,3,'burst triggered average frame');
 end
 
-function ex(fileNames,stimTimes,rec,spks,stimType,hz)
+[tSTS vals]=calcSTA(data.tonics,data.stim,stimPreMS,stimPostMS,c);
+staPlot(tSTS,color,vals,c,n,2,'spike triggered average filtered photodiode');
 
-% spectralAnalysis(phys(1,:),phys(2,:));
+[bSTS vals]=calcSTA(data.bsts,data.stim,stimPreMS,stimPostMS,c);
+staPlot(bSTS,color,vals,c,n,4,'burst triggered average filtered photodiode');
 
-physPreMS=300;
-stimPreMS=300;
-stimPostMS=30;
-
-tSTL=calcSTA(tonics,phys,physPreMS,physPreMS);
-tSTS=calcSTA(tonics,stim,stimPreMS,stimPostMS);
-bSTL=calcSTA(bsts,phys,physPreMS,physPreMS);
-bSTS=calcSTA(bsts,stim,stimPreMS,stimPostMS);
-
-j=figure;
-subplot(2,1,1)
-plot(tSTS(2,:),tSTS(1,:),'k')
-hold on
-plot(bSTS(2,:),bSTS(1,:),'r')
+subplot(n,2,2*n-1)
 xlabel('ms')
-title('triggered stim')
 
-subplot(2,1,2)
-plot(tSTL(2,:),tSTL(1,:),'k')
+keyboard
+end
+
+function staPlot(info,color,vals,c,n,r,t,d)
+subplot(n,2,2*r-1)
+
+% fill([info(2,:) fliplr(info(2,:))],[info(3,:) fliplr(info(4,:))],mean([ones(1,3);color]))
+tracePlot(info(2,:),{vals' color},1-c);
+
 hold on
-plot(bSTL(2,:),bSTL(1,:),'r')
-xlabel('ms')
-title('triggered LFP')
+plot(info(2,:),info(1,:),'Color',color)
+lims=cellfun(@(x) x(vals(:)),{@min,@max});
+plot(zeros(2,1),lims,'k')
+if true
+    rows=rand(1,size(vals,1))>.999;
+    rows([1 end])=true;
+    plot(info(2,:),vals(rows,:)','r')
+end
 
+xlim(info(2,[1 end]))
+title(t)
 
+subplot(n,2,2*r)
+traceDesnity(info(2,:),vals',lims)
+end
 
-if ~isempty(rptStarts)
-    missed=.01 < abs(1 - diff(rptStarts)/median(diff(rptStarts)));
+function f=raster(data)
+f=figure;
+
+if ~isempty(data.rptStarts)
+    missed=.01 < abs(1 - diff(data.rptStarts)/median(diff(data.rptStarts)));
     if any(missed)
         warning('%d index pulses missed',sum(missed))
     end
     
     minLength=inf;
-    for i=1:length(rptStarts)-1
+    maxLength=0;
+    for i=1:length(data.rptStarts)-1
         %this introduces a few ms of jitter because of the jitter of the
         %index pulse wrt the crt, plus crt jitter/frame drops accumulates through each
         %trial
-        inds{i}=find(stim(2,:)>=rptStarts(i) & stim(2,:)<rptStarts(i+1));
+        inds{i}=find(data.stim(2,:)>=data.rptStarts(i) & data.stim(2,:)<data.rptStarts(i+1)); %or data.frames, but that doesn't necessarily have equal dt's
         if length(inds{i})<minLength
             minLength=length(inds{i});
         end
-        rasters{i}=separate(tonics,rptStarts(i),rptStarts(i+1));
-        bursts{i}=separate(bsts,rptStarts(i),rptStarts(i+1));
-        inBursts{i}=separate(bstNotFst,rptStarts(i),rptStarts(i+1));
-        violations{i}=separate(refVios,rptStarts(i),rptStarts(i+1));
+        if length(inds{i})>maxLength
+            maxLength=length(inds{i});
+        end
+        rasters{i}=separate(data.tonics,data.rptStarts(i),data.rptStarts(i+1));
+        bursts{i}=separate(data.bsts,data.rptStarts(i),data.rptStarts(i+1));
+        inBursts{i}=separate(data.bstNotFst,data.rptStarts(i),data.rptStarts(i+1));
+        violations{i}=separate(data.refVios,data.rptStarts(i),data.rptStarts(i+1));
     end
-    block=nan(length(rptStarts)-1,minLength);
+    
+    useMinLength=false;
+    
+    if useMinLength
+        len=minLength;
+    else
+        len=maxLength;
+    end
+    
+    block=nan(length(data.rptStarts)-1,len);
     for i=1:length(inds)
-        block(i,:)=stim(1,inds{i}(1:minLength));
+        if useMinLength
+            block(i,:)=data.stim(1,inds{i}(1:len));
+        else
+            block(i,1:length(inds{i}))=data.stim(1,inds{i});
+        end
     end
-    if any(isnan(block(:)))
+    
+    if useMinLength && any(isnan(block(:)))
         error('nan error')
     end
-    meanStim=mean(block);
-    meanStim=meanStim-min(meanStim);
-    meanStim=meanStim/max(meanStim);
-    timestep=median(diff(stim(2,:)));
-    maxTime=minLength*timestep;
-    bins=0:timestep:(minLength-1)*timestep;
+    
+    timestep=median(diff(data.stim(2,:)));
+    maxTime=len*timestep;
+    bins=0:timestep:(len-1)*timestep;
     
     psth=0;
     bpsth=0;
@@ -800,65 +854,48 @@ if ~isempty(rptStarts)
         bpsth=bpsth+hist(bursts{i}(bursts{i}<=maxTime),pbins);
     end
     
-    f=figure;
-    plot(bins,meanStim+1)
+    if false
+        block=mean(block);
+    end
+    
+    block=block'-min(block(:));
+    block=block/max(block(:));
+    plot(bins,repmat(.01*(0:size(block,2)-1),size(block,1),1)+block+1)
+    
     xlabel('secs')
-    title(sprintf('%d gaussian repeats (%.1f hz, %.1f%% bursts, %d violations)',size(block,1),hz,100*length(bsts)/length(spks),length(refVios)))
+    title(sprintf('%d gaussian repeats (%.1f hz, %.1f%% bursts, %d violations)',length(data.rptStarts),length(data.spks)/(data.stimTimes(2)-data.stimTimes(1)),100*length(data.bsts)/length(data.spks),length(data.refVios)))
     hold on
     
     plot(pbins,psth/max(psth),'k')
-    plot(pbins,bpsth/max(psth),'r')
+    plot(pbins,bpsth/max(bpsth),'r')
     
     for i=1:length(rasters)
-        cellfun(@(c) plotRaster(c{1}{i},c{2},i,maxTime),{ {rasters,'kx'} {bursts,'ro'} {inBursts,'rx'} {violations,'bo'} })
+        cellfun(@(c) plotRaster(c{1}{i},c{2},i+1,maxTime),{ {rasters,'kx'} {bursts,'ro'} {inBursts,'rx'} {violations,'bo'} })
     end
     xlim([0 maxTime])
-    
-    if true
-        [ratID date type uid hash]=parseFileName(fileNames.targetFile,stimType);
-        outDir='/Users/eflister/Desktop/committee';
-        
-        imName=fullfile(outDir,[type '.' num2str(size(block,1)) 'rpts.' ratID '.' date '.raster.']); %will clash if same stim recorded on same date with same rat or if another cell recorded at same time
-        fprintf('\tsaving raster png\n')
-        saveas(f,[imName 'png'])
-        fprintf('\tsaving raster fig\n')
-        saveas(f,[imName 'fig'])
-        close(f)
-        
-        imName=fullfile(outDir,[type '.' sprintf('%.1f',(stimTimes(2)-stimTimes(1))/60) 'mins.' ratID '.' date '.spec.']); %will clash if same stim recorded on same date with same rat or if another cell recorded at same time
-        fprintf('\tsaving spec png\n')
-        saveas(q,[imName 'png'])
-        fprintf('\tsaving spec fig\n')
-        saveas(q,[imName 'fig'])
-        close(q)
-        
-        imName=fullfile(outDir,[type '.' ratID '.' date '.STA.']); %will clash if same stim recorded on same date with same rat or if another cell recorded at same time
-        fprintf('\tsaving sta png\n')
-        saveas(j,[imName 'png'])
-        fprintf('\tsaving sta fig\n')
-        saveas(j,[imName 'fig'])
-        close(j)
-        
-        imName=fullfile(outDir,[type '.' ratID '.' date '.bst dur hist.']); %will clash if same stim recorded on same date with same rat or if another cell recorded at same time
-        fprintf('\tsaving bst dur hist png\n')
-        saveas(g,[imName 'png'])
-        fprintf('\tsaving bst dur hist fig\n')
-        saveas(g,[imName 'fig'])
-        close(g)
-        
-        imName=fullfile(outDir,[type '.' ratID '.' date '.raw burst traces.']); %will clash if same stim recorded on same date with same rat or if another cell recorded at same time
-        fprintf('\tsaving raw burst png\n')
-        saveas(h,[imName 'png'])
-        fprintf('\tsaving raw burst fig\n')
-        saveas(h,[imName 'fig'])
-        close(h)
-    else
-        keyboard
-    end
+else
+    warning('skipping raster cuz no rpts id''d')
 end
 end
 
-function sta=calcSTA(trigTs,stim,preMS,postMS)
+function ex(fileNames,stimTimes,rec,spks,stimType,hz)
+
+% spectralAnalysis(phys(1,:),phys(2,:));
+
+physPreMS=300;
+tSTL=calcSTA(tonics,phys,physPreMS,physPreMS);
+bSTL=calcSTA(bsts,phys,physPreMS,physPreMS);
+
+subplot(2,1,2)
+plot(tSTL(2,:),tSTL(1,:),'k')
+hold on
+plot(bSTL(2,:),bSTL(1,:),'r')
+xlabel('ms')
+title('triggered LFP')
+
+end
+
+function [sta vals]=calcSTA(trigTs,stim,preMS,postMS,c)
 trigs=trigTs(trigTs>stim(2,1)+preMS/1000 & trigTs<stim(2,end)-postMS/1000);
 
 timestep=median(diff(stim(2,:)));
@@ -873,10 +910,18 @@ inds=repmat(tinds,length(trigs),1)+repmat(trigs,1,length(tinds));
 
 vals=stim(1,:);
 vals=vals(inds);
-vals=vals-repmat(mean(vals')',1,length(tinds)); %legit?
+
+if false
+vals=vals-repmat(mean(vals')',1,length(tinds)); %legit? sound only help to increase SNR -- break out separate -- normalize stim vals too
+end
 
 sta=mean(vals);
 sta=[sta;tinds*timestep*1000];
+
+if false
+    svals=sort(vals);
+    sta=[sta;svals(ceil(size(svals,1)*([0 1]+[1 -1]*(1-c)/2)),:)];
+end
 end
 
 function [ratID date type uid h z chunkNum]=parseFileName(f,exType,rec,stimTimes)
@@ -1031,16 +1076,55 @@ function out=separate(vals,start,stop)
 out=vals(vals>=start & vals<stop)-start;
 end
 
-function [stim,phys,rptStarts]=extractData(fileNames,stimTimes,rec)
+function [stim,phys,frames,rptStarts]=extractData(fileNames,stimTimes,rec)
 fprintf('\textracting...\n')
 data=load(fileNames.targetFile);
 
 try
-    rptStarts=data.stimBreaks;
-    rptStarts=rptStarts(rptStarts>=stimTimes(1) & rptStarts<=stimTimes(2));
-catch
-    rptStarts=[];
+    rptStarts=data.stimBreaks; %TODO: checks below for this case (this is the index pulse case)
+catch    
+    if ~isempty(data.repeatTimes)
+        rptStarts=data.repeatTimes(1,:);
+        if ~all(cellfun(@iscell,{data.phys data.physT data.binnedVals data.binnedT}))
+            error('hypothesis violated')
+        end
+    else
+        rptStarts=[];
+        if any(cellfun(@iscell,{data.phys data.physT data.binnedVals data.binnedT}))
+            error('hypothesis violated')
+        end
+    end
+    numRpts=length(rptStarts);
+    
+    if any(numRpts~=[size(data.repeatStimVals,2) size(data.repeatTimes,2) length(data.repeatColInds)]) ...
+        || (iscell(data.phys) && any(numRpts~=[length(data.phys) length(data.physT)])) ...
+        || (iscell(data.binnedVals) && any(numRpts~=[length(data.binnedVals) length(data.binnedT)]))
+        error('num rpt err')
+    end
+    
+    if ~isempty(data.bestBinOffsets) && length(data.bestBinOffsets)~=numRpts
+        error('bestBinOffsets err')
+    end
+    
+    if numRpts==0
+        if ~isempty(data.repeatColInds)
+            error('repeat col inds err')
+        end
+    else
+        if any(data.repeatColInds~=1:numRpts)
+            error('repeat col inds err')
+        end
+    end
+    
+    if false %TODO: flesh out this check -- make sure physT and binnedT boundaries straddle the rptStarts
+        for i=1:numRpts
+            if any(rptStarts(i)~=[data.physT{i}(1) data.binnedT{i}(1)])
+                warning('repeat start times not unique')
+            end
+        end
+    end
 end
+rptStarts=rptStarts(rptStarts>=stimTimes(1) & rptStarts<=stimTimes(2));
 
 if length(data.physT)~=length(data.phys)
     error('phys length error')
@@ -1061,6 +1145,16 @@ end
 
 phys=extract(data.phys,data.physT,stimTimes);
 stim=extract(data.binnedVals,data.binnedT,stimTimes);
+
+frames=[data.repeatStimVals(:) data.repeatTimes(:)];
+frames=frames(frames(:,2)>=stimTimes(1) & frames(:,2)<=stimTimes(2),:);
+if any(isnan(frames(:)))
+    error('got a nan')
+end
+if isempty(frames)
+    %TODO: figure out why this happens -- i think it's when we can't ID repeats -- but we shouldn't let this stop us from doing the frame calc
+    warning('got empty frames')
+end
 end
 
 function out=extract(binnedVals,binnedT,stimTimes)

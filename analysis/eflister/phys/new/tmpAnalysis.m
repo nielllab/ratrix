@@ -810,14 +810,23 @@ traceDesnity(info(2,:),vals',lims)
 end
 
 function f=stationarity(data)
-dt=1;
-step=.5;
+if ~isempty(data.rptStarts)
+    start=data.rptStarts(1);
+else
+    start=min(data.tonics);
+end
+
+pts=200;
+secs=max([data.bsts ; data.tonics])-start;
+dt=secs/pts;
+step=dt/2;
 
 f=figure;
-ratePlot(data.bsts)
+ratePlot(data.bsts,'r')
 hold on
-ratePlot(data.tonics)
-    function ratePlot(in)
+ratePlot(data.tonics,'k')
+
+    function ratePlot(in,code)
         ts=min(in):step:max(in);
         out=nan(size(ts)); %TODO: do this with a filter instead
         for i=1:length(ts)
@@ -827,18 +836,45 @@ ratePlot(data.tonics)
             error('nan err')
         end
         out=out/max(out);
-        plot(ts,out);
+        plot(ts-start,out,code);
     end
 
-legend({'tonic','burst'})
-set(gca,'XTick',data.rptStarts)
+ylabel('normalized event rate')
+xlabel('secs')
+xlim([0 max([data.bsts ; data.tonics])-start]);
+
+legend({'burst','tonic'})
+
+rptPts=data.rptStarts-start;
+rptLabMask=true(size(rptPts));
+scale=0;
+if length(rptPts)>100
+    scale=floor(log10(length(rptPts)))-1+log10(2);
+elseif length(rptPts)>20
+    scale=log10(5);
+end
+
+if scale~=0
+    rptLabMask=mod(1:length(rptPts),round(10^scale))==0;
+    rptLabMask([1 end])=true;
+end
+
 xlabs={};
 for i=1:length(data.rptStarts)
     xlabs{end+1}=sprintf('%d',i);
 end
-set(gca,'XTickLabel',xlabs)
-xlabel('repeat num')
-ylabel('normalized event rate')
+
+%this thing makes zooming suck.  also no way to get rid of ticks from bottom x axes
+ax2 = axes('Position',get(gca,'Position'),...
+           'XAxisLocation','top',...
+           'Color','none',... %supposed to be default, but without this the original axes are obscured
+           'XTick',rptPts(rptLabMask),...
+           'XTickLabel',xlabs(rptLabMask),...
+           'XLim',get(gca,'XLim'));
+%            'YAxisLocation','right',...
+%            'XColor','k','YColor','k');
+
+xlabel(ax2,'repeat num');
 end
 
 function f=raster(data)

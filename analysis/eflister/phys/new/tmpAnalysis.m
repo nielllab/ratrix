@@ -238,6 +238,7 @@ for i=1:length(fs)
     print(f,'-dpng',['-r' num2str(dpi)],fn);
     
     fullName=[name '.png'];
+    figName=[name '.fig'];
     [a b c]=movefile(fn,fullName);
     if ~a
         b
@@ -245,9 +246,10 @@ for i=1:length(fs)
         error('couldn''t move fig')
     end
     
-    if false
-        saveas(f,[name '.fig'])
-    elseif ismember(pieces{end},{'ISI','waveforms','STA','raster'}) && ismember(i,[1 length(fs)])
+    if true
+        saveas(f,figName)
+    end
+    if ismember(pieces{end},{'ISI','waveforms','STA','raster'}) && ismember(i,[1 length(fs)])
         [garbage n]=fileparts(name);
         [a b c]=copyfile(fullName,fullfile(summaryLoc,[num2str(length(lines)) '-' n '.png']));
         if a~=1
@@ -255,7 +257,18 @@ for i=1:length(fs)
             c
             error('couldn''t copy fig')
         end
+        
+        if ismember(pieces{end},{'raster'})
+            [a b c]=copyfile(figName,fullfile(summaryLoc,[num2str(length(lines)) '-' n '.fig']));
+            if a~=1
+                b
+                c
+                error('couldn''t copy fig')
+            end
+        end
+        
     end
+    
     close(f)
 end
 end
@@ -796,7 +809,7 @@ end
 function f=raster(data)
 f=figure;
 
-if ~isempty(data.rptStarts)
+if ~isempty(data.rptStarts) && length(data.rptStarts)>1
     missed=.01 < abs(1 - diff(data.rptStarts)/median(diff(data.rptStarts)));
     if any(missed)
         warning('%d index pulses missed',sum(missed))
@@ -804,21 +817,28 @@ if ~isempty(data.rptStarts)
     
     minLength=inf;
     maxLength=0;
-    for i=1:length(data.rptStarts)-1
+    for i=1:length(data.rptStarts)
+        if i==length(data.rptStarts)
+            endT=data.rptStarts(i)+median(diff(data.rptStarts)); %TODO: figure out better way
+        else
+            endT=data.rptStarts(i+1);
+        end
+        
         %this introduces a few ms of jitter because of the jitter of the
         %index pulse wrt the crt, plus crt jitter/frame drops accumulates through each
         %trial
-        inds{i}=find(data.stim(2,:)>=data.rptStarts(i) & data.stim(2,:)<data.rptStarts(i+1)); %or data.frames, but that doesn't necessarily have equal dt's
-        if length(inds{i})<minLength
+        inds{i}=find(data.stim(2,:)>=data.rptStarts(i) & data.stim(2,:)<endT); %or data.frames, but that doesn't necessarily have equal dt's
+        if length(inds{i})<minLength && i~=length(data.rptStarts)
             minLength=length(inds{i});
         end
         if length(inds{i})>maxLength
             maxLength=length(inds{i});
         end
-        rasters{i}=separate(data.tonics,data.rptStarts(i),data.rptStarts(i+1));
-        bursts{i}=separate(data.bsts,data.rptStarts(i),data.rptStarts(i+1));
-        inBursts{i}=separate(data.bstNotFst,data.rptStarts(i),data.rptStarts(i+1));
-        violations{i}=separate(data.refVios,data.rptStarts(i),data.rptStarts(i+1));
+
+        rasters{i}=separate(data.tonics,data.rptStarts(i),endT);
+        bursts{i}=separate(data.bsts,data.rptStarts(i),endT);
+        inBursts{i}=separate(data.bstNotFst,data.rptStarts(i),endT);
+        violations{i}=separate(data.refVios,data.rptStarts(i),endT);
     end
     
     useMinLength=false;
@@ -829,7 +849,7 @@ if ~isempty(data.rptStarts)
         len=maxLength;
     end
     
-    block=nan(length(data.rptStarts)-1,len);
+    block=nan(length(data.rptStarts),len);
     for i=1:length(inds)
         if useMinLength
             block(i,:)=data.stim(1,inds{i}(1:len));
@@ -838,8 +858,11 @@ if ~isempty(data.rptStarts)
         end
     end
     
-    if useMinLength && any(isnan(block(:)))
-        error('nan error')
+    if useMinLength
+        tmp=block(1:end-1,:);
+        if any(isnan(tmp(:)))
+            error('nan error')
+        end
     end
     
     timestep=median(diff(data.stim(2,:)));

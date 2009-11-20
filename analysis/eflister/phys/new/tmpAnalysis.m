@@ -128,7 +128,7 @@ if ~(exist([name '.png'],'file')) % && exist([name '.fig'],'file')) %one flaw of
         case 'raster'
             savefigs(name,raster(data),data.stimType,data.mins);
         case 'stationarity'
-            savefigs(name,stationarity(data),data.stimType,data.mins);            
+            savefigs(name,stationarity(data),data.stimType,data.mins);
         otherwise
             error('unrecognized type')
     end
@@ -276,16 +276,66 @@ for i=1:length(fs)
 end
 end
 
-function f=spectro(data)
+function g=spectro(data)
 if data.mins>=.5
-    pHz=1/median(diff(data.phys(2,:)));
-    fprintf('spectroing from %g hz... ',pHz)
-    freqs=1:50;
-    f=figure;
-    spectrogram(data.phys(1,:)-mean(data.phys(1,:)),round(pHz),[],freqs,pHz,'yaxis');
+    g=figure;
+    [f t p]=getSpec(data);
+    displayspectrogram(t,f,p,false,'yaxis');
 else
-    f=[];
+    g=[];
 end
+end
+
+function [f t p]=getSpec(data)
+pHz=1/median(diff(data.phys(2,:)));
+fprintf('spectroing from %g hz... ',pHz)
+freqs=1:50;
+[s f t p]=spectrogram(data.phys(1,:)-mean(data.phys(1,:)),round(pHz),[],freqs,pHz);
+end
+
+%stolen from matlab's spectrogram.m
+function displayspectrogram(t,f,Pxx,isFsnormalized,faxisloc)
+
+% Cell array of the standard frequency units strings
+frequnitstrs = getfrequnitstrs;
+if isFsnormalized,
+    idx = 1;
+    f = f/pi; % Normalize the freq axis
+else
+    idx = 2;
+end
+
+newplot;
+if strcmpi(faxisloc,'yaxis'),
+    if length(t)==1
+        % surf requires a matrix for the third input.
+        args = {[0 t],f,10*log10(abs([Pxx Pxx])+eps)};
+    else
+        args = {t,f,10*log10(abs(Pxx)+eps)};
+    end
+    
+    % Axis labels
+    xlbl = 'Time';
+    ylbl = frequnitstrs{idx};
+else
+    if length(t)==1
+        args = {f,[0 t],10*log10(abs([Pxx' Pxx'])+eps)};
+    else
+        args = {f,t,10*log10(abs(Pxx')+eps)};
+    end
+    xlbl = frequnitstrs{idx};
+    ylbl = 'Time';
+end
+hndl = surf(args{:},'EdgeColor','none');
+
+axis xy; axis tight;
+colormap(jet);
+
+% AZ = 0, EL = 90 is directly overhead and the default 2-D view.
+view(0,90);
+
+ylabel(ylbl);
+xlabel(xlbl);
 end
 
 function isiSub(sub,sup,d,code)
@@ -467,7 +517,7 @@ for j=1:n
     
     subplot(2,2,2)
     
-        vLims=5*[-1 1]*2; %the *2 is because we subtract the mean, so in the worst case, this makes the range twice as big
+    vLims=5*[-1 1]*2; %the *2 is because we subtract the mean, so in the worst case, this makes the range twice as big
     if any(allTraces<vLims(1) | allTraces>vLims(2))
         error('volt error')
     end
@@ -822,6 +872,14 @@ dt=secs/pts;
 step=dt/2;
 
 f=figure;
+
+[fq t p]=getSpec(data);
+subplot(3,1,1)
+displayspectrogram(t,fq,p,false,'yaxis');
+
+subplot(3,1,2)
+
+subplot(3,1,3)
 ratePlot(data.bsts,'r')
 hold on
 ratePlot(data.tonics,'k')
@@ -836,7 +894,11 @@ ratePlot(data.tonics,'k')
             error('nan err')
         end
         out=out/max(out);
-        plot(ts-start,out,code);
+        if isempty(in)
+            plot([0 secs],zeros(1,2),code);
+        else
+            plot(ts-start,out,code);
+        end
     end
 
 ylabel('normalized event rate')
@@ -866,11 +928,11 @@ end
 
 %this thing makes zooming suck.  also no way to get rid of ticks from bottom x axes
 ax2 = axes('Position',get(gca,'Position'),...
-           'XAxisLocation','top',...
-           'Color','none',... %supposed to be default, but without this the original axes are obscured
-           'XTick',rptPts(rptLabMask),...
-           'XTickLabel',xlabs(rptLabMask),...
-           'XLim',get(gca,'XLim'));
+    'XAxisLocation','top',...
+    'Color','none',... %supposed to be default, but without this the original axes are obscured
+    'XTick',rptPts(rptLabMask),...
+    'XTickLabel',xlabs(rptLabMask),...
+    'XLim',get(gca,'XLim'));
 %            'YAxisLocation','right',...
 %            'XColor','k','YColor','k');
 
@@ -905,7 +967,7 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
         if length(inds{i})>maxLength
             maxLength=length(inds{i});
         end
-
+        
         rasters{i}=separate(data.tonics,data.rptStarts(i),endT);
         bursts{i}=separate(data.bsts,data.rptStarts(i),endT);
         inBursts{i}=separate(data.bstNotFst,data.rptStarts(i),endT);
@@ -1006,7 +1068,7 @@ vals=stim(1,:);
 vals=vals(inds);
 
 if false
-vals=vals-repmat(mean(vals')',1,length(tinds)); %legit? sound only help to increase SNR -- break out separate -- normalize stim vals too
+    vals=vals-repmat(mean(vals')',1,length(tinds)); %legit? sound only help to increase SNR -- break out separate -- normalize stim vals too
 end
 
 sta=mean(vals);
@@ -1176,7 +1238,7 @@ data=load(fileNames.targetFile);
 
 try
     rptStarts=data.stimBreaks; %TODO: checks below for this case (this is the index pulse case)
-catch    
+catch
     if ~isempty(data.repeatTimes)
         rptStarts=data.repeatTimes(1,:);
         if ~all(cellfun(@iscell,{data.phys data.physT data.binnedVals data.binnedT}))
@@ -1191,8 +1253,8 @@ catch
     numRpts=length(rptStarts);
     
     if any(numRpts~=[size(data.repeatStimVals,2) size(data.repeatTimes,2) length(data.repeatColInds)]) ...
-        || (iscell(data.phys) && any(numRpts~=[length(data.phys) length(data.physT)])) ...
-        || (iscell(data.binnedVals) && any(numRpts~=[length(data.binnedVals) length(data.binnedT)]))
+            || (iscell(data.phys) && any(numRpts~=[length(data.phys) length(data.physT)])) ...
+            || (iscell(data.binnedVals) && any(numRpts~=[length(data.binnedVals) length(data.binnedT)]))
         error('num rpt err')
     end
     

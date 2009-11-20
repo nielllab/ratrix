@@ -247,7 +247,7 @@ for i=1:length(fs)
     
     if false
         saveas(f,[name '.fig'])
-    elseif ismember(pieces{end},{'ISI','waveforms','STA'}) && ismember(i,[1 length(fs)])
+    elseif ismember(pieces{end},{'ISI','waveforms','STA','raster'}) && ismember(i,[1 length(fs)])
         [garbage n]=fileparts(name);
         [a b c]=copyfile(fullName,fullfile(summaryLoc,[num2str(length(lines)) '-' n '.png']));
         if a~=1

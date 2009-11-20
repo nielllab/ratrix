@@ -75,7 +75,8 @@ if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) % && r
     
     data=findBursts(data);
     
-    doAnalysis(data,'raster');
+    doAnalysis(data,'stationarity');
+    % doAnalysis(data,'raster');
     % doAnalysis(data,'STA');
     %    doAnalysis(data,'burstDetail');
     %    doAnalysis(data,'waveforms');
@@ -126,6 +127,8 @@ if ~(exist([name '.png'],'file')) % && exist([name '.fig'],'file')) %one flaw of
             savefigs(name,sta(data),data.stimType,data.mins);
         case 'raster'
             savefigs(name,raster(data),data.stimType,data.mins);
+        case 'stationarity'
+            savefigs(name,stationarity(data),data.stimType,data.mins);            
         otherwise
             error('unrecognized type')
     end
@@ -246,10 +249,10 @@ for i=1:length(fs)
         error('couldn''t move fig')
     end
     
-    if true
+    if false || ismember(pieces{end},{'raster'})
         saveas(f,figName)
     end
-    if ismember(pieces{end},{'ISI','waveforms','STA','raster'}) && ismember(i,[1 length(fs)])
+    if ismember(pieces{end},{'ISI','waveforms','STA','raster','stationarity'}) && ismember(i,[1 length(fs)])
         [garbage n]=fileparts(name);
         [a b c]=copyfile(fullName,fullfile(summaryLoc,[num2str(length(lines)) '-' n '.png']));
         if a~=1
@@ -804,6 +807,38 @@ title(t)
 
 subplot(n,2,2*r)
 traceDesnity(info(2,:),vals',lims)
+end
+
+function f=stationarity(data)
+dt=1;
+step=.5;
+
+f=figure;
+ratePlot(data.bsts)
+hold on
+ratePlot(data.tonics)
+    function ratePlot(in)
+        ts=min(in):step:max(in);
+        out=nan(size(ts)); %TODO: do this with a filter instead
+        for i=1:length(ts)
+            out(i)=sum(in>ts(i)-dt/2 & in<ts(i)+dt/2)/dt;
+        end
+        if any(isnan(out))
+            error('nan err')
+        end
+        out=out/max(out);
+        plot(ts,out);
+    end
+
+legend({'tonic','burst'})
+set(gca,'XTick',data.rptStarts)
+xlabs={};
+for i=1:length(data.rptStarts)
+    xlabs{end+1}=sprintf('%d',i);
+end
+set(gca,'XTickLabel',xlabs)
+xlabel('repeat num')
+ylabel('normalized event rate')
 end
 
 function f=raster(data)

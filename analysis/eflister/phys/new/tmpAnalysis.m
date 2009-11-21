@@ -860,23 +860,30 @@ function staPlot(info,color,vals,c,n,r,t,d)
 subplot(n,2,2*r-1)
 
 % fill([info(2,:) fliplr(info(2,:))],[info(3,:) fliplr(info(4,:))],mean([ones(1,3);color]))
-tracePlot(info(2,:),{vals' color},1-c);
+if false
+    tracePlot(info(2,:),{vals' color},1-c);
+end
 
 hold on
 plot(info(2,:),info(1,:),'Color',color)
-lims=cellfun(@(x) x(vals(:)),{@min,@max});
-plot(zeros(2,1),lims,'k')
-if true
-    rows=rand(1,size(vals,1))>.999;
-    rows([1 end])=true;
-    plot(info(2,:),vals(rows,:)','r')
+if ~isempty(vals) && false
+    lims=cellfun(@(x) x(vals(:)),{@min,@max});
+    
+    plot(zeros(2,1),lims,'k')
+    if false
+        rows=rand(1,size(vals,1))>.999;
+        rows([1 end])=true;
+        plot(info(2,:),vals(rows,:)','r')
+    end
 end
 
 xlim(info(2,[1 end]))
 title(t)
 
-subplot(n,2,2*r)
-traceDesnity(info(2,:),vals',lims)
+if ~isempty(vals) && false
+    subplot(n,2,2*r)
+    traceDesnity(info(2,:),vals',lims)
+end
 end
 
 function f=stationarity(data)
@@ -920,10 +927,11 @@ xlabel('hz')
 title('lfp dims')
 
 subplot(n,1,4)
-ratePlot(data.bsts,'r')
-hold on
-ratePlot(data.tonics,'k')
 plot(t,score,'b')
+hold on
+ratePlot(data.bsts,'r')
+ratePlot(data.tonics,'k')
+
 
     function ratePlot(in,code)
         %ts=min(in):step:max(in);
@@ -1010,9 +1018,9 @@ state=doNormRate(data.tonics)./doNormRate(data.bsts);
                     error('step err')
                 end
                 if state(i)>1
-                    hi=[hi in(1)];
+                    hi=[hi ; in(1)];
                 else
-                    lo=[lo in(1)];
+                    lo=[lo ; in(1)];
                 end
                 in=in(2:end);
             end
@@ -1048,9 +1056,35 @@ statePlot(tonicyB,hi,'rx')
         plot(in-start,val*ones(1,length(in)),code)
     end
 
-% keyboard
+f=[f figure];
 
-% f=[f figure];
+stimPreMS =200;%300;
+stimPostMS=100;% 30;
+
+color=zeros(1,3);
+c=.95;
+
+n=4;
+
+if ~isempty(data.frames)
+    frames=data.frames(1,2) : median(diff(data.frames(:,2))) : data.frames(end,2);
+    frames=[interp1(data.frames(:,2),data.frames(:,1),frames,'nearest'); frames];
+    
+    [tSTF vals]=calcSTA(tonicyS,frames,stimPreMS,stimPostMS,c);
+    staPlot(tSTF,color,vals,c,n,1,'spike triggered average frame (tonic state)');
+
+    [tSTFb vals]=calcSTA(burstyS,frames,stimPreMS,stimPostMS,c);
+    staPlot(tSTFb,color,vals,c,n,2,'spike triggered average frame (bursty state)');
+    
+    [bSTF vals]=calcSTA(tonicyB,frames,stimPreMS,stimPostMS,c);
+    staPlot(bSTF,color,vals,c,n,3,'burst triggered average frame (tonic state)');
+    
+    [bSTFb vals]=calcSTA(burstyB,frames,stimPreMS,stimPostMS,c);
+    staPlot(bSTFb,color,vals,c,n,4,'burst triggered average frame (bursty state)');
+end
+
+subplot(n,2,2*n-1)
+xlabel('ms')
 
 %abstract:
 %add the fact we sometimes burst triggered average
@@ -1183,7 +1217,11 @@ preBin=floor(preMS/1000/timestep);
 postBin=floor(postMS/1000/timestep);
 tinds=-preBin:postBin;
 
-inds=repmat(tinds,length(trigs),1)+repmat(trigs,1,length(tinds));
+if ~isempty(trigTs)
+    inds=repmat(tinds,length(trigs),1)+repmat(trigs,1,length(tinds));
+else
+    inds=[];
+end
 
 vals=stim(1,:);
 vals=vals(inds);
@@ -1192,7 +1230,11 @@ if false
     vals=vals-repmat(mean(vals')',1,length(tinds)); %legit? sound only help to increase SNR -- break out separate -- normalize stim vals too
 end
 
-sta=mean(vals);
+if ~isempty(trigTs)
+    sta=mean(vals);
+else
+    sta=zeros(size(tinds));
+end
 sta=[sta;tinds*timestep*1000];
 
 if false

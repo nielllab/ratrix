@@ -572,10 +572,30 @@ if false
 end
 end
 
-function svdPlot(items,code,sz,s,v)
+function X=svdPlot(items,code,sz,s,v,cs)
+X=[];
 if ~isempty(items)
-    plot(items*v(:,1)/s(1),items*v(:,2)/s(2),code,'MarkerSize',sz)
+    X=squish(items*v(:,1)/s(1));
+    Y=squish(items*v(:,2)/s(2));
+    if ~exist('cs','var')
+        plot(X,Y,code,'MarkerSize',sz)
+    else
+        scatter(X,Y,sz,cs,code)
+    end
+        
+    X=X-min(X);
+    X=X/max(X);
 end
+
+    function in=squish(in)
+        in(in>0)=log(in(in>0));
+        in(in<0)=-log(abs(in(in<0)));
+        
+        if any(~isreal(in))
+            error('how possible?')
+        end
+    end
+
 end
 
 function traceDesnity(times,traces,lims)
@@ -870,9 +890,10 @@ pts=200;
 secs=max([data.bsts ; data.tonics])-start;
 dt=secs/pts;
 step=dt/2;
+ts=start+(0:step:secs);
 
 f=figure;
-n=4;
+n=5;
 
 [fq t p]=getSpec(data);
 subplot(n,1,1)
@@ -880,37 +901,42 @@ displayspectrogram(t,fq,p,false,'yaxis');
 
 subplot(n,1,2)
 
-c=colormap;
-cs=linspace(1,size(c,1),length(t));
+p=p'-mean(p(:));
 
-p=p-mean(p(:));
-[u s v]=svd(p);
+try
+    [u s v]=svd(p);
+catch
+    warning('too much spectro for svd -- choosing dims based on half')
+    [u s v]=svd(p(rand(1,size(p,1))>.5,:));
+end
+
 s=diag(s);
-ms=2;
-svdPlot(p','.',ms,s,v,cs);
+ms=50;
+score=svdPlot(p,'.',ms,s,v,t);
 
 subplot(n,1,3)
 plot(fq,v(:,1:2))
-xaxis('hz')
+xlabel('hz')
 title('lfp dims')
-
-keyboard
 
 subplot(n,1,4)
 ratePlot(data.bsts,'r')
 hold on
 ratePlot(data.tonics,'k')
+plot(t,score,'b')
 
     function ratePlot(in,code)
-        ts=min(in):step:max(in);
-        out=nan(size(ts)); %TODO: do this with a filter instead
-        for i=1:length(ts)
-            out(i)=sum(in>ts(i)-dt/2 & in<ts(i)+dt/2)/dt;
-        end
-        if any(isnan(out))
-            error('nan err')
-        end
-        out=out/max(out);
+        %ts=min(in):step:max(in);
+%         out=nan(size(ts)); %TODO: do this with a filter instead
+%         for i=1:length(ts)
+%             out(i)=sum(in>ts(i)-dt/2 & in<ts(i)+dt/2)/dt;
+%         end
+%         if any(isnan(out))
+%             error('nan err')
+%         end
+%         out=out/max(out);
+        
+        out=doNormRate(in);
         if isempty(in)
             plot([0 secs],zeros(1,2),code);
         else
@@ -918,11 +944,11 @@ ratePlot(data.tonics,'k')
         end
     end
 
-ylabel('normalized event rate')
+ylabel('normalized rate or score')
 xlabel('secs')
-xlim([0 max([data.bsts ; data.tonics])-start]);
+xlim([0 secs]);
 
-legend({'burst','tonic'})
+legend({'burst','tonic','LFP state'})
 
 rptPts=data.rptStarts-start;
 rptLabMask=true(size(rptPts));
@@ -943,17 +969,95 @@ for i=1:length(data.rptStarts)
     xlabs{end+1}=sprintf('%d',i);
 end
 
-%this thing makes zooming suck.  also no way to get rid of ticks from bottom x axes
-ax2 = axes('Position',get(gca,'Position'),...
-    'XAxisLocation','top',...
-    'Color','none',... %supposed to be default, but without this the original axes are obscured
-    'XTick',rptPts(rptLabMask),...
-    'XTickLabel',xlabs(rptLabMask),...
-    'XLim',get(gca,'XLim'));
-%            'YAxisLocation','right',...
-%            'XColor','k','YColor','k');
+if true
+    %this thing makes zooming suck.  also no way to get rid of ticks from bottom x axes
+    ax2 = axes('Position',get(gca,'Position'),...
+        'XAxisLocation','top',...
+        'Color','none',... %supposed to be default, but without this the original axes are obscured
+        'XTick',rptPts(rptLabMask),...
+        'XTickLabel',xlabs(rptLabMask),...
+        'XLim',get(gca,'XLim'));
+    %            'YAxisLocation','right',...
+    %            'XColor','k','YColor','k');
+    
+    xlabel(ax2,'repeat num');
+end
 
-xlabel(ax2,'repeat num');
+state=doNormRate(data.tonics)./doNormRate(data.bsts);
+      
+    function out=doNormRate(in)
+        out=nan(size(ts)); %TODO: do this with a filter instead
+        for i=1:length(ts)
+            out(i)=sum(in>ts(i)-dt/2 & in<ts(i)+dt/2)/dt;
+        end
+        if any(isnan(out))
+            error('nan err')
+        end
+        out=out/max(out);
+    end
+
+[burstyS tonicyS]=segregate(data.spks);
+[burstyB tonicyB]=segregate(data.bsts);
+
+    function [lo hi]=segregate(in)
+        lo=[]; %could prealloc w/nans if nec
+        hi=[];
+        in=in(in>=ts(1)-step/2);
+        
+        for i=1:length(ts)
+            while ~isempty(in) && in(1)<=ts(i)+step/2
+                if in(1)<ts(i)-step/2
+                    error('step err')
+                end
+                if state(i)>1
+                    hi=[hi in(1)];
+                else
+                    lo=[lo in(1)];
+                end
+                in=in(2:end);
+            end
+            if rand>.99 && true
+                fprintf('%g%% done\n',100*i/length(ts))
+            end
+        end
+        if ~isempty(in)
+            warning('in not empty')
+        end
+    end
+
+subplot(n,1,5)
+
+state=log(state);
+state(isinf(state))=nan;
+plot(ts-start,state);
+hold on
+plot(ts-start,zeros(1,length(ts)),'k')
+xlabel('secs')
+title('state')
+xlim([0 secs])
+
+hi = max(state)/2;
+lo = min(state)/2;
+
+statePlot(burstyS,lo,'kx')
+statePlot(burstyB,lo,'rx')
+statePlot(tonicyS,hi,'kx')
+statePlot(tonicyB,hi,'rx')
+
+    function statePlot(in,val,code)
+        plot(in-start,val*ones(1,length(in)),code)
+    end
+
+% keyboard
+
+% f=[f figure];
+
+%abstract:
+%add the fact we sometimes burst triggered average
+%do tonic spikes mean something different in two states?  is BTA different 
+%cite lu
+
+%chicken burrito with no rice and lots of salsa and corn
 end
 
 function f=raster(data)

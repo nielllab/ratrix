@@ -493,7 +493,7 @@ ts{10} = trainingStep(ap, bin24x32,numTrialsDoneCriterion(15),    noTimeOff(), s
 %% make and set it
 
 
-p=protocol('practice phys',{ts{1:8}});
+p=protocol('practice phys',{ts{1:10}});
 stepNum=uint8(1);
 
 for i=1:length(subjIDs),

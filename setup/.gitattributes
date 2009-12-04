@@ -36,3 +36,4 @@ setupPhysRig1/setProtocolPhys2.m -text
 runOnce/addRatsForServer.m -text
 util/setRequestRewardULorMS.m -text
 setupBS/setProtocolBSStAl.m -text
+setupPhysRig1/setProtocolPhys3.m -text

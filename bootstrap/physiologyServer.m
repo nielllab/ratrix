@@ -32,8 +32,8 @@ ampModeStrs = {'','Rec','Imp','Stim'}; defaultModeIndex = 2;
 
 
 clientIPStrs={'132.239.158.180','132.239.158.179'};  % now we use 180... why was it set to only 179 before november 2009?
-ratIDStrs={'test1','250','demo1','fan_demo1','131','303','138','262','261','249'};
-ratProtocolStrs={'setProtocolPhys2','setProtocolTEST'};
+ratIDStrs={'test1','257','252','250','demo1','fan_demo1','131','303','138','262','261','249'};
+ratProtocolStrs={'setProtocolPhys2','setProtocolPhys3','ctxCharPtcl','ctxQckNDirtyPtcl'};
 experimenterStrs={'','pmeier','bsriram','dnguyen','eflister'};
 electrodeMakeStrs={'FHC','MPI','gentner'};
 electrodeModelStrs={'','UEWMCGLEEN3M','UEWMCGLECN3M','UEWMCGTECN3M','WE3PT35.0A3-ME4925'};
@@ -560,7 +560,7 @@ currentZField = uicontrol(f,'Style','edit','String','nan','Units','pixels',...
 % penetration parameters (ratID, experimenter, electrode make/model, lot#, ID#, impedance)
 clientIPLabel = uicontrol(f,'Style','text','String','Client IP','Visible','on','Units','pixels',...
     'FontWeight','bold','HorizontalAlignment','center', ...
-    'Position',[8*margin+6*fieldWidth fHeight-6*oneRowHeight-margin fieldWidth oneRowHeight]);
+    'Position',[margin+7*fieldWidth fHeight-6*oneRowHeight-margin fieldWidth oneRowHeight]);
 ratIDLabel = uicontrol(f,'Style','text','String','Rat ID','Visible','on','Units','pixels',...
     'FontWeight','bold','HorizontalAlignment','center', ...
     'Position',[margin+7*fieldWidth fHeight-7*oneRowHeight-margin fieldWidth oneRowHeight]);
@@ -587,10 +587,13 @@ impedanceLabel = uicontrol(f,'Style','text','String','impedance','Visible','on',
     'Position',[margin+7*fieldWidth fHeight-14*oneRowHeight-margin fieldWidth oneRowHeight]);
 
 clientIPField = uicontrol(f,'Style','popupmenu','String',clientIPStrs,'Units','pixels','Value',defaultIndex,...
-    'Enable','on','Position',[8*margin+7*fieldWidth fHeight-6*oneRowHeight-margin fieldWidth*1.4 oneRowHeight],...
+    'Enable','on','Position',[margin+8*fieldWidth fHeight-6*oneRowHeight-margin 1.1*fieldWidth oneRowHeight],...
     'BackgroundColor','w');
+deleteDbInClient = uicontrol(f,'Style','checkbox','String','delete db','Enable','on','Visible','on',...
+    'Value',1,'Units','pixels','Position',[margin+9.2*fieldWidth fHeight-6*oneRowHeight-margin fieldWidth*0.7 oneRowHeight]);
+
 ratIDField = uicontrol(f,'Style','popupmenu','String',ratIDStrs,'Units','pixels','Value',defaultIndex,...
-    'Enable','on','Position',[margin+8*fieldWidth fHeight-7*oneRowHeight-margin fieldWidth oneRowHeight],...
+    'Enable','on','Position',[margin+8*fieldWidth fHeight-7*oneRowHeight-margin 1.1*fieldWidth oneRowHeight],...
     'BackgroundColor','w','Callback',@reloadEventsAndSurgeryFields);
     function reloadEventsAndSurgeryFields(source,eventdata,reloadHistory)
         if ~exist('reloadHistory','var')
@@ -664,17 +667,18 @@ ratIDField = uicontrol(f,'Style','popupmenu','String',ratIDStrs,'Units','pixels'
             
             warning('could not get surgery fields from oracle. trying to obtain these fields from server.');
         end
-        [rigState ampState lensState surgBregma surgAnchor currAnchor currPositn penetParams isNewDay] = ...
-            getDataFromEventLog(fullfile('\\Reinagel-lab.AD.ucsd.edu\RLAB\Rodent-Data\physiology',ratIDStrs{get(ratIDField,'Value')},''));
-%         rigState
-%         ampState
-%         lensState
-%         surgBregma
-%         surgAnchor
-%         currAnchor
-%         currPositn
-%         penetParams
-%         isNewDay
+        out = getDataFromEventLog(fullfile('\\Reinagel-lab.AD.ucsd.edu\RLAB\Rodent-Data\physiology',ratIDStrs{get(ratIDField,'Value')},''));
+        
+        rigState = out.rigState;
+        ampState = out.ampState;
+        lensState = out.lensState;
+        surgBregma = out.surgBregma;
+        surgAnchor = out.surgAnchor;
+        currAnchor = out.currAnchor;
+        currPositn = out.currPositn;
+        penetParams = out.penetParams;
+        isNewDay = out.isNewDay;
+        
         if ~surgValuesinOracle
             % look for anchor data in the events_log
             set(surgeryAnchorAPField,'String',num2str(surgAnchor(1)));
@@ -767,19 +771,19 @@ ratIDField = uicontrol(f,'Style','popupmenu','String',ratIDStrs,'Units','pixels'
         end
     end
 ratProtocolField = uicontrol(f,'Style','popupmenu','String',ratProtocolStrs,'Units','pixels','Value',defaultIndex,...
-    'Enable','on','Position',[margin+8*fieldWidth fHeight-8*oneRowHeight-margin fieldWidth oneRowHeight],'BackgroundColor','w');
+    'Enable','on','Position',[margin+8*fieldWidth fHeight-8*oneRowHeight-margin 1.1*fieldWidth oneRowHeight],'BackgroundColor','w');
 experimenterField = uicontrol(f,'Style','popupmenu','String',experimenterStrs,'Units','pixels','Value',defaultIndex,...
-    'Enable','on','Position',[margin+8*fieldWidth fHeight-9*oneRowHeight-margin fieldWidth oneRowHeight],'BackgroundColor','w');
+    'Enable','on','Position',[margin+8*fieldWidth fHeight-9*oneRowHeight-margin 1.1*fieldWidth oneRowHeight],'BackgroundColor','w');
 electrodeMakeField = uicontrol(f,'Style','popupmenu','String',electrodeMakeStrs,'Units','pixels','Value',defaultIndex,...
-    'Enable','on','Position',[margin+8*fieldWidth fHeight-10*oneRowHeight-margin fieldWidth oneRowHeight],'BackgroundColor','w');
+    'Enable','on','Position',[margin+8*fieldWidth fHeight-10*oneRowHeight-margin 1.1*fieldWidth oneRowHeight],'BackgroundColor','w');
 electrodeModelField = uicontrol(f,'Style','popupmenu','String',electrodeModelStrs,'Units','pixels','Value',defaultIndex,...
-    'Enable','on','Position',[margin+8*fieldWidth fHeight-11*oneRowHeight-margin fieldWidth oneRowHeight],'BackgroundColor','w');
+    'Enable','on','Position',[margin+8*fieldWidth fHeight-11*oneRowHeight-margin 1.1*fieldWidth oneRowHeight],'BackgroundColor','w');
 lotNumField = uicontrol(f,'Style','popupmenu','String',lotNumStrs,'Units','pixels','Value',defaultIndex,...
-    'Enable','on','Position',[margin+8*fieldWidth fHeight-12*oneRowHeight-margin fieldWidth oneRowHeight],'BackgroundColor','w');
+    'Enable','on','Position',[margin+8*fieldWidth fHeight-12*oneRowHeight-margin 1.1*fieldWidth oneRowHeight],'BackgroundColor','w');
 IDNumField = uicontrol(f,'Style','popupmenu','String',IDNumStrs,'Units','pixels','Value',defaultIndex,...
-    'Enable','on','Position',[margin+8*fieldWidth fHeight-13*oneRowHeight-margin fieldWidth oneRowHeight],'BackgroundColor','w');
+    'Enable','on','Position',[margin+8*fieldWidth fHeight-13*oneRowHeight-margin 1.1*fieldWidth oneRowHeight],'BackgroundColor','w');
 impedanceField = uicontrol(f,'Style','popupmenu','String',impedanceStrs,'Units','pixels','Value',defaultIndex,...
-    'Enable','on','Position',[margin+8*fieldWidth fHeight-14*oneRowHeight-margin fieldWidth oneRowHeight],'BackgroundColor','w');
+    'Enable','on','Position',[margin+8*fieldWidth fHeight-14*oneRowHeight-margin 1.1*fieldWidth oneRowHeight],'BackgroundColor','w');
 
 % ========================================================================================
 % current event parameters - labels
@@ -1239,6 +1243,14 @@ toggleRecordingButton = uicontrol(f,'Style','togglebutton','String',recordingT,'
             updateUI();
             % if not currently looping, then start the loop
             if ~runningLoop
+                if get(deleteDbInClient,'Value')
+                    disp('deleting db.mat in the client. i am hardcoding it here. there might be a better way to handle it!')
+                    dBFileName = '\\132.239.158.180\pmeier\ratrixTrunk\ratrixData\ServerData\db.mat';
+                    succ = stochasticDelete(dBFileName);
+                    if ~succ
+                        warning('did not delete the db.mat');
+                    end
+                end
                 run();
             end
         else
@@ -1294,6 +1306,14 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
             end
             updateUI();
             if ~runningLoop % if not currently looping, then start the loop
+                if get(deleteDbInClient,'Value')
+                    disp('deleting db.mat in the client. i am hardcoding it here. there might be a better way to handle it!')
+                    dBFileName = '\\132.239.158.180\pmeier\ratrixTrunk\ratrixData\ServerData\db.mat';
+                    succ = stochasticDelete(dBFileName);
+                    if ~succ
+                        warning('did not delete the db.mat');
+                    end
+                end
                 run();
             end
         else
@@ -1604,6 +1624,7 @@ WaitSecs(0.3);
 end
 
 
+%=========================================================================
 function [ai recordingFile] = startNidaq(ai_parameters)
 % start NIDAQ recording - in both standalone and ratrix cases
 % ai_parameters = getAIParameters(data);
@@ -1645,9 +1666,43 @@ start(ai);
 
 end
 
+%=========================================================================
 function ai = stopNidaq(ai)
 stop(ai);
 delete(ai);
 % clear ai;
 ai=[];
 end
+
+%=========================================================================
+function success=stochasticDelete(filename)
+if ~exist('filename','var')||~ischar(filename)
+    error('stochasticDelete requires a filename which has to be a character datapath')
+end
+
+success=false;
+timedout = false;
+numTries = 10;
+
+currTry = 1;
+while ~success && ~timedout
+    try
+        if exist(filename,'file')
+            delete(filename);
+            success = true;
+        else
+            success = true;
+        end
+    catch
+        WaitSecs(abs(randn));
+        dispStr=sprintf('failed to delete %s - trying again',filename);
+        disp(dispStr)
+        currTry = currTry +1;
+    end
+    if currTry > numTries
+        timedout = true;
+    end
+end
+
+success = success & ~timedout;
+end % end function

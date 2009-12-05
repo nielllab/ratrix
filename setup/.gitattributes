@@ -37,3 +37,6 @@ runOnce/addRatsForServer.m -text
 util/setRequestRewardULorMS.m -text
 setupBS/setProtocolBSStAl.m -text
 setupPhysRig1/setProtocolPhys3.m -text
+setupBS/physSetups/setProtocolPhys3.m -text
+setupBS/physSetups/ctxQckNDirtyPtcl.m -text
+setupBS/physSetups/ctxCharPtcl.m -text

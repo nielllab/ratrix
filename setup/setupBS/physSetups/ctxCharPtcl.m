@@ -56,7 +56,7 @@ sfGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,
 numOrientations=8;
 orientationOrder = randPerm(numOrientations);
 orientations=([2*pi]*[1:numOrientations])/numOrientations; % in radians
-orientations = orientations(orientationsOrder);
+orientations = orientations(orientationOrder);
 pixPerCycs=1024; %2^9;%temp [64];  % reset to one value
 orGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
     waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance,doCombos,changeableAnnulusCenter);

@@ -1247,9 +1247,8 @@ eventLog{eventNum}.details.from = [1 1 1 1];
 eventLog{eventNum}.details.to   = [1 1 1 1];
 
 
-%% 234 gets a week off b/c he has a shoulder lump,  ~ aug 14 --> Aug.22,2009  .. and continuing
-
-%% 234 gets another week off for surgery oct 30th --> nov 7th .. and % continuing
+% 234 gets a week off b/c he has a shoulder lump,  ~ aug 14 -->  Aug.22,2009  .. and continuing
+% 234 gets another week off for surgery oct 30th --> nov 7th .. returns a litte before nov 30th
 
 eventNum = eventNum +1;  
 eventLog{eventNum}.date =datenum('Nov.02,2009');%datestr(now,21)
@@ -1260,3 +1259,36 @@ eventLog{eventNum}.issuedBy ='pmm';
 eventLog{eventNum}.comment ='testing to see the influence of a delay of 200 msec, target flanker onset offset are still synced'; 
 eventLog{eventNum}.details.from = [16 ]; 
 eventLog{eventNum}.details.to   = [17 ];  
+%%
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Dec.07,2009');%datestr(now,21)
+eventLog{eventNum}.eventName ={'manualStepChange'};
+eventLog{eventNum}.subject ={'228','138','139'};  % include 139?
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';  
+eventLog{eventNum}.comment ='poor performance on 11 blocked, flunked to 6: big thick linearized, so that duc might resolve correct behavior'; 
+eventLog{eventNum}.details.from = [11 11 11];
+eventLog{eventNum}.details.to   = [6  6 6];
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Dec.07,2009');%datestr(now,21)
+eventLog{eventNum}.eventName ={'manualStepChange'};
+eventLog{eventNum}.subject ={'231','234'};
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';  
+eventLog{eventNum}.comment ='231 leaves delay and enters SOA, 234 is back from surgery, and enters SOA'; 
+eventLog{eventNum}.details.from = [17 16]; 
+eventLog{eventNum}.details.to   = [18 18];  
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Dec.07,2009');%datestr(now,21)
+eventLog{eventNum}.eventName ={'manualStepChange'};
+eventLog{eventNum}.subject ={'227','229','230','232','233'};
+eventLog{eventNum}.stationID ={}; 
+eventLog{eventNum}.issuedBy ='pmm';  
+eventLog{eventNum}.comment ='patternRats get delay before SOA'; 
+eventLog{eventNum}.details.from = [12 12 12 12 12]; 
+eventLog{eventNum}.details.to   = [17 17 17 17 17];  
+
+

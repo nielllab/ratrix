@@ -441,3 +441,5 @@ pmm/figurePrintSizeTest.m -text
 pmm/getMichealsonContrast.m -text
 /saveFigs.m -text
 spike[!!-~]sorting/getRawNidaq.m -text
+bsriram/nonStandard/getDataFromEventLogNew.m -text
+bsriram/nonStandard/LFPAnalysis.m -text

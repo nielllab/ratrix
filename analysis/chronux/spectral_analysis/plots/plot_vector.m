@@ -1,4 +1,4 @@
-function plot_vector(X,f,plt,Xerr,c,w)
+function plot_vector(X,f,plt,Xerr,c,w,currAxis)
 % Function to plot a frequency dependent vector X. If error bars are specified in Xerr,
 % it also plots them. Xerr can either contain upper and lower confidence intervals 
 % on X, or simply a theoretical confidence level (for the coherence). Used
@@ -13,6 +13,8 @@ function plot_vector(X,f,plt,Xerr,c,w)
 %       level.
 % c: controls the color of the plot - input 'b','g','r' etc. Default 'b'
 % w: controls the width of the lines - input 1, 1.5, 2 etc
+% currAxis : controls where to plot the spectrum ([currFigHan currAxisHan])
+% % added by Balaji Dec 7 2009. Other minor details changed too.
 
 if nargin < 1; error('Need data'); end;
 N=length(X); 
@@ -32,6 +34,11 @@ end;
 if nargin < 6 || isempty(w);
     w=1;
 end;
+if nargin < 7 || length(currAxis)<2;
+    figure;
+    currAxis = [gcf gca];
+end;
+
 
 if strcmp(plt,'l');
     X=10*log10(X);
@@ -39,17 +46,17 @@ if strcmp(plt,'l');
 end;
 
 if nargin < 4 || isempty(Xerr);
-    plot(f,X,c,'Linewidth',w);
+    plot(f,X,'Color',c,'Linewidth',w);
 else
     if length(Xerr)==1;
-       plot(f,X,c); 
+       plot(f,X,'Color',c); 
        line(get(gca,'xlim'),[Xerr,Xerr],'Color',c,'LineStyle','--','Linewidth',w);
     elseif ~isempty(Xerr);
-       plot(f,X,c); 
-       hold on; plot(f,Xerr(1,:),[c '--'],'Linewidth',w); plot(f,Xerr(2,:),[c '--'],'Linewidth',w); 
+       plot(f,X,'Color',c); 
+       hold on; plot(f,Xerr(1,:),'Color',c,'LineStyle','--','Linewidth',w); plot(f,Xerr(2,:),'Color',c,'LineStyle','--','Linewidth',w); 
     end
 end
-xlabel('f');
-if strcmp(plt,'l'); ylabel('10*log10(X)'); else ylabel('X'); end;
+xlabel('f(Hz)');
+if strcmp(plt,'l'); ylabel('Spectral Power (dB)'); else ylabel('X'); end;
 
 

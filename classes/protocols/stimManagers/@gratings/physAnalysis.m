@@ -488,112 +488,112 @@ else
     cohLB_SEM=nan(1,size(pow,2));
 end
 
-
-% setup for plotting
-vals=eval(char(sweptParameter));
-if strcmp(sweptParameter,'orientations')
-    vals=rad2deg(vals);
-end
-
-if all(rem(vals,1)==0)
-    format='%2.0f';
-else
-    format='%1.2f';
-end
-for i=1:length(vals);
-    valNames{i}=num2str(vals(i),format);
-end;
-
-colors=jet(numTypes);
-figure(parameters.trialNumber); % new for each trial
-set(gcf,'position',[100 400 560 620])
-subplot(3,2,1); hold off; %p=plot([1:numPhaseBins]-.5,rate')
-plot([0 numPhaseBins], [rate(1) rate(1)],'color',[1 1 1]); hold on;% to save tight axis chop
-x=[1:numPhaseBins]-.5;
-for i=1:numTypes
-    plot(x,rate(i,:),'color',colors(i,:))
-    plot([x; x]+(i*0.05),[rate(i,:); rate(i,:)]+(rateSEM(i,:)'*[-1 1])','color',colors(i,:))
-end
-maxPowerInd=find(pow==max(pow));
-if ~isempty(pow)
-    plot(x,rate(maxPowerInd,:),'color',colors(maxPowerInd,:),'lineWidth',2);
-end
-xlabel('phase');  set(gca,'XTickLabel',{'0','pi','2pi'},'XTick',([0 .5 1]*numPhaseBins)); ylabel('rate'); set(gca,'YTickLabel',[0:.1:1]*parameters.refreshRate,'YTick',[0:.1:1])
-axis tight
-
-%rate density over phase... doubles as a legend
-subplot(3,2,2); hold off;
-im=zeros([size(phaseDensity) 3]);
-hues=rgb2hsv(colors);  % get colors to match jet
-hues=repmat(hues(:,1)',numRepeats,1); % for each rep
-hues=repmat(hues(:),1,numPhaseBins);  % for each phase bin
-im(:,:,1)=hues; % hue
-im(:,:,2)=1; % saturation
-im(:,:,3)=phaseDensity/max(phaseDensity(:)); % value
-rgbIm=hsv2rgb(im);
-image(rgbIm); hold on
-axis([0 size(im,2) 0 size(im,1)]+.5);
-ylabel(sweptParameter); set(gca,'YTickLabel',valNames,'YTick',size(im,1)*([1:length(vals)]-.5)/length(vals))
-xlabel('phase');  set(gca,'XTickLabel',{'0','pi','2pi'},'XTick',([0 .5 1]*numPhaseBins)+.5);
-
-subplot(3,2,3); hold off; plot(mean(rate'),'k','lineWidth',2); hold on; %legend({'Fo'})
-xlabel(sweptParameter); set(gca,'XTickLabel',valNames,'XTick',[1:length(vals)]); ylabel('rate (f0)'); set(gca,'YTickLabel',[0:.1:1]*parameters.refreshRate,'YTick',[0:.1:1])
-set(gca,'XLim',[1 length(vals)])
-
-
-subplot(3,2,4); hold off
-if ~isempty(pow)
-    modulation=pow./(parameters.refreshRate*mean(rate'))
-    plot(pow,'k','lineWidth',1); hold on;
-    plot(modulation,'--k','lineWidth',2); hold on;
-    cohScaled=coh*max(pow); %1 is peak FR
-    plot(cohScaled,'color',[.8 .8 .8],'lineWidth',1);
-    sigs=find(cohLB>0);
-    plot(sigs,cohScaled(sigs),'o','color',[.6 .6 .6]);
-    legend({'f1','f1/f0','coh'})
-    
-    
-    plot([1:length(vals); 1:length(vals)],[pow; pow]+(powSEM'*[-1 1])','k')
-    %plot([1:length(vals); 1:length(vals)],[pow; pow]+(powSEM'*[-1 1])','k')
-    plot([1:length(vals); 1:length(vals)]+0.1,[coh; coh]+(cohSEM'*[-1 1])','color',[.8 .8 .8])
-    xlabel(sweptParameter); set(gca,'XTickLabel',valNames,'XTick',[1:length(vals)]); ylabel('modulation (f1/f0)');
-    ylim=get(gca,'YLim'); yvals=[ ylim(1) mean(ylim) ylim(2)];set(gca,'YTickLabel',yvals,'YTick',yvals)
-    set(gca,'XLim',[1 length(vals)])
-else
-    xlabel(sprintf('not enough data for all %s yet',sweptParameter{1}))
-end
-meanRate=(length(spikes))/diff(spikeRecord.spikeTimestamps([1 end]));
-isi=diff(spikeRecord.spikeTimestamps(thisCluster))*1000;
-N=sum(isi<parameters.ISIviolationMS); percentN=100*N/length(isi);
-%datestr(parameters.date,22)
-infoString=sprintf('subj: %s  trial: %d Hz: %d',parameters.subjectID,parameters.trialNumber,round(meanRate));
-ylim=get(gca,'YLim');
-text(1.2,ylim(2),infoString);
-
-subplot(3,2,5);
-numBins=40; maxTime=10; % ms
-edges=linspace(0,maxTime,numBins); [count]=histc(isi,edges);
-hold off; bar(edges,count,'histc'); axis([0 maxTime get(gca,'YLim')]);
-hold on; plot(parameters.ISIviolationMS([1 1]),get(gca,'YLim'),'k' )
-xvalsName=[0 parameters.ISIviolationMS maxTime]; xvals=xvalsName*samplingRate/(1000*numBins);
-set(gca,'XTickLabel',xvalsName,'XTick',xvals)
-infoString=sprintf('viol: %2.2f%%\n(%d /%d)',percentN,N,length(isi))
-text(xvals(3),max(count),infoString,'HorizontalAlignment','right','VerticalAlignment','top');
-ylabel('count'); xlabel('isi (ms)')
-
-subplot(3,2,6); hold off;
-if ~isempty(eyeData)
-    plot(eyeSig(1,1),eyeSig(1,2),'.k');  hold on; % plot one dot to flush history
-    if exist('ellipses','var')
-        plotEyeElipses(eyeSig,ellipses,within,true)
-    else
-        text(.5,.5,'no good eye data')
+if plotParameters.showSpikeAnalysis
+    % setup for plotting
+    vals=eval(char(sweptParameter));
+    if strcmp(sweptParameter,'orientations')
+        vals=rad2deg(vals);
     end
-    xlabel('eye position (cr-p)')
-else
-    text(.5,.5,'no eye data')
+    
+    if all(rem(vals,1)==0)
+        format='%2.0f';
+    else
+        format='%1.2f';
+    end
+    for i=1:length(vals);
+        valNames{i}=num2str(vals(i),format);
+    end;
+    
+    colors=jet(numTypes);
+    figure(parameters.trialNumber); % new for each trial
+    set(gcf,'position',[100 400 560 620])
+    subplot(3,2,1); hold off; %p=plot([1:numPhaseBins]-.5,rate')
+    plot([0 numPhaseBins], [rate(1) rate(1)],'color',[1 1 1]); hold on;% to save tight axis chop
+    x=[1:numPhaseBins]-.5;
+    for i=1:numTypes
+        plot(x,rate(i,:),'color',colors(i,:))
+        plot([x; x]+(i*0.05),[rate(i,:); rate(i,:)]+(rateSEM(i,:)'*[-1 1])','color',colors(i,:))
+    end
+    maxPowerInd=find(pow==max(pow));
+    if ~isempty(pow)
+        plot(x,rate(maxPowerInd,:),'color',colors(maxPowerInd,:),'lineWidth',2);
+    end
+    xlabel('phase');  set(gca,'XTickLabel',{'0','pi','2pi'},'XTick',([0 .5 1]*numPhaseBins)); ylabel('rate'); set(gca,'YTickLabel',[0:.1:1]*parameters.refreshRate,'YTick',[0:.1:1])
+    axis tight
+    
+    %rate density over phase... doubles as a legend
+    subplot(3,2,2); hold off;
+    im=zeros([size(phaseDensity) 3]);
+    hues=rgb2hsv(colors);  % get colors to match jet
+    hues=repmat(hues(:,1)',numRepeats,1); % for each rep
+    hues=repmat(hues(:),1,numPhaseBins);  % for each phase bin
+    im(:,:,1)=hues; % hue
+    im(:,:,2)=1; % saturation
+    im(:,:,3)=phaseDensity/max(phaseDensity(:)); % value
+    rgbIm=hsv2rgb(im);
+    image(rgbIm); hold on
+    axis([0 size(im,2) 0 size(im,1)]+.5);
+    ylabel(sweptParameter); set(gca,'YTickLabel',valNames,'YTick',size(im,1)*([1:length(vals)]-.5)/length(vals))
+    xlabel('phase');  set(gca,'XTickLabel',{'0','pi','2pi'},'XTick',([0 .5 1]*numPhaseBins)+.5);
+    
+    subplot(3,2,3); hold off; plot(mean(rate'),'k','lineWidth',2); hold on; %legend({'Fo'})
+    xlabel(sweptParameter); set(gca,'XTickLabel',valNames,'XTick',[1:length(vals)]); ylabel('rate (f0)'); set(gca,'YTickLabel',[0:.1:1]*parameters.refreshRate,'YTick',[0:.1:1])
+    set(gca,'XLim',[1 length(vals)])
+    
+    
+    subplot(3,2,4); hold off
+    if ~isempty(pow)
+        modulation=pow./(parameters.refreshRate*mean(rate'))
+        plot(pow,'k','lineWidth',1); hold on;
+        plot(modulation,'--k','lineWidth',2); hold on;
+        cohScaled=coh*max(pow); %1 is peak FR
+        plot(cohScaled,'color',[.8 .8 .8],'lineWidth',1);
+        sigs=find(cohLB>0);
+        plot(sigs,cohScaled(sigs),'o','color',[.6 .6 .6]);
+        legend({'f1','f1/f0','coh'})
+        
+        
+        plot([1:length(vals); 1:length(vals)],[pow; pow]+(powSEM'*[-1 1])','k')
+        %plot([1:length(vals); 1:length(vals)],[pow; pow]+(powSEM'*[-1 1])','k')
+        plot([1:length(vals); 1:length(vals)]+0.1,[coh; coh]+(cohSEM'*[-1 1])','color',[.8 .8 .8])
+        xlabel(sweptParameter); set(gca,'XTickLabel',valNames,'XTick',[1:length(vals)]); ylabel('modulation (f1/f0)');
+        ylim=get(gca,'YLim'); yvals=[ ylim(1) mean(ylim) ylim(2)];set(gca,'YTickLabel',yvals,'YTick',yvals)
+        set(gca,'XLim',[1 length(vals)])
+    else
+        xlabel(sprintf('not enough data for all %s yet',sweptParameter{1}))
+    end
+    meanRate=(length(spikes))/diff(spikeRecord.spikeTimestamps([1 end]));
+    isi=diff(spikeRecord.spikeTimestamps(thisCluster))*1000;
+    N=sum(isi<parameters.ISIviolationMS); percentN=100*N/length(isi);
+    %datestr(parameters.date,22)
+    infoString=sprintf('subj: %s  trial: %d Hz: %d',parameters.subjectID,parameters.trialNumber,round(meanRate));
+    ylim=get(gca,'YLim');
+    text(1.2,ylim(2),infoString);
+    
+    subplot(3,2,5);
+    numBins=40; maxTime=10; % ms
+    edges=linspace(0,maxTime,numBins); [count]=histc(isi,edges);
+    hold off; bar(edges,count,'histc'); axis([0 maxTime get(gca,'YLim')]);
+    hold on; plot(parameters.ISIviolationMS([1 1]),get(gca,'YLim'),'k' )
+    xvalsName=[0 parameters.ISIviolationMS maxTime]; xvals=xvalsName*samplingRate/(1000*numBins);
+    set(gca,'XTickLabel',xvalsName,'XTick',xvals)
+    infoString=sprintf('viol: %2.2f%%\n(%d /%d)',percentN,N,length(isi))
+    text(xvals(3),max(count),infoString,'HorizontalAlignment','right','VerticalAlignment','top');
+    ylabel('count'); xlabel('isi (ms)')
+    
+    subplot(3,2,6); hold off;
+    if ~isempty(eyeData)
+        plot(eyeSig(1,1),eyeSig(1,2),'.k');  hold on; % plot one dot to flush history
+        if exist('ellipses','var')
+            plotEyeElipses(eyeSig,ellipses,within,true)
+        else
+            text(.5,.5,'no good eye data')
+        end
+        xlabel('eye position (cr-p)')
+    else
+        text(.5,.5,'no eye data')
+    end
 end
-
 %rasterDurationSec=1;
 %linesPerChunk=round((unique(durations/parameters.refreshRate))/rasterDurationSec);
 
@@ -629,6 +629,157 @@ if 0
 end
 
 
+%%LFP Analysis ONLY SUPPORTS SINGLE TYPE OF SWEEP RIGHT NOW
+correctedFrameTimes = spikeRecord.correctedFrameTimes;
+if doLFPAnalysis
+    
+    % setup for plotting
+    vals=eval(char(sweptParameter));
+    if strcmp(sweptParameter,'orientations')
+        vals=rad2deg(vals);
+    end
+    
+    if all(rem(vals,1)==0)
+        format='%2.0f';
+    else
+        format='%1.2f';
+    end
+    for i=1:length(vals);
+        valNames{i}=num2str(vals(i),format);
+    end;
+    
+%     % Average LFP over all repeats
+%     numIdealLFPSamplesPerRepeat = ceil(mean(LFPRecord.LFPSamplingRateHz)*numTypes*duration/parameters.refreshRate);
+%     timeByRepeat = linspace(0,numTypes*duration/parameters.refreshRate,numIdealLFPSamplesPerRepeat);
+%     LFPByRepeat = nan(numRepeats,numIdealLFPSamplesPerRepeat);
+%     for currRepeatNum = 1:numRepeats
+%         which = find(repeat==currRepeatNum);
+%         currRepeatTime = [min(correctedFrameTimes(which,1)) max(correctedFrameTimes(which,1))];
+%         whichInLFPRecord = LFPRecord.dataTimes>=min(correctedFrameTimes(which,1))& ...
+%             LFPRecord.dataTimes<=max(correctedFrameTimes(which,2));
+% %         figure; plot(LFPRecord.dataTimes(whichInLFPRecord)-currRepeatTime(1),LFPRecord.data(whichInLFPRecord));
+%         LFPByRepeat(currRepeatNum,:) = resample(LFPRecord.data(whichInLFPRecord),numIdealLFPSamplesPerRepeat,length(find(whichInLFPRecord)));
+%     end
+%     figure(LFPfig); 
+%     stdDevByRepeat = std(LFPByRepeat,0,1);
+%     subplot(3,3,2:3);
+%     hold on;
+%     plot(timeByRepeat,mean(LFPByRepeat,1),'Color','b','LineWidth',2);
+%     plot(timeByRepeat,mean(LFPByRepeat,1)+stdDevByRepeat,'Color',[0.8 0.8 1],'LineWidth',1);
+%     plot(timeByRepeat,mean(LFPByRepeat,1)-stdDevByRepeat,'Color',[0.8 0.8 1],'LineWidth',1);
+%     axis tight
+%     title('average LFP over all repeats +/- std');
+%     xlabel('time(s)');
+%     ylabel('voltage(V)');
+%     hold off
+
+    
+    
+    % LFP over each swept type
+
+    numIdealLFPSamplesPerTypePerRepeat = ceil(mean(LFPRecord.LFPSamplingRateHz)*duration/parameters.refreshRate);
+    timeByTypeByRepeat = linspace(0,duration/parameters.refreshRate,numIdealLFPSamplesPerTypePerRepeat);
+    LFPByType = nan(numTypes,numRepeats,numIdealLFPSamplesPerTypePerRepeat);
+    for currTypeNum = 1:numTypes
+        for currRepeatNum = 1:numRepeats
+            which = find((repeat==currRepeatNum)&(type==currTypeNum));
+            currTypeTime = [min(correctedFrameTimes(which,1)) max(correctedFrameTimes(which,1))];
+            whichInLFPRecord = LFPRecord.dataTimes>=min(correctedFrameTimes(which,1))& ...
+                LFPRecord.dataTimes<=max(correctedFrameTimes(which,2));
+            LFPByType(currTypeNum,currRepeatNum,:) = resample(LFPRecord.data(whichInLFPRecord),numIdealLFPSamplesPerTypePerRepeat,length(find(whichInLFPRecord)));
+        end
+    end
+    stdDevByTypeByRepeat = std(LFPByType,0,2);%nan(numTypes,numIdealLFPSamplesPerTypePerRepeat)
+    rangeOfLFP = [min(LFPByType(:)) max(LFPByType(:))];
+    
+    if plotParameters.showLFPAnalysis
+        LFPfig = figure('Name','LFP analysis','NumberTitle','off');
+        cmap = lines(numTypes);
+        subplot(3,3,[1 4 7]);
+        hold on;
+        for currTypeNum = 1:numTypes
+            currPlotColor = cmap(currTypeNum,:);
+            LFPForCurrType = (mean(squeeze(LFPByType(currTypeNum,:,:)),1)-rangeOfLFP(1))/diff(rangeOfLFP);
+            LFPForCurrTypePlusStd = ((mean(squeeze(LFPByType(currTypeNum,:,:)),1)+squeeze(stdDevByTypeByRepeat(currTypeNum,:)))-rangeOfLFP(1))/diff(rangeOfLFP);
+            LFPForCurrTypeMinusStd = ((mean(squeeze(LFPByType(currTypeNum,:,:)),1)-squeeze(stdDevByTypeByRepeat(currTypeNum,:)))-rangeOfLFP(1))/diff(rangeOfLFP);
+            plot(timeByTypeByRepeat,currTypeNum+LFPForCurrType-mean(LFPForCurrType),'LineWidth',2,'Color',currPlotColor);
+            plot(timeByTypeByRepeat,currTypeNum+LFPForCurrTypePlusStd-mean(LFPForCurrType),'LineWidth',1,'Color',currPlotColor);
+            plot(timeByTypeByRepeat,currTypeNum+LFPForCurrTypeMinusStd-mean(LFPForCurrType),'LineWidth',1,'Color',currPlotColor);
+        end
+        axis tight;
+        titleLabel = sprintf('average over swept parameter: %s', sweptParameter{:});
+        xLabel = 'time(s)';
+        yLabel = sprintf('%s is', sweptParameter{:});
+        title(titleLabel);
+        xlabel(xLabel);
+        ylabel(yLabel);
+        set(gca,'YTickLabel',valNames,'Ytick',1:(numTypes));
+        hold off;
+    end
+    
+    % LFP Power 
+    currRepeatNum = 1; which = find(repeat==currRepeatNum);
+    whichInLFPRecordBeforeStim = LFPRecord.dataTimes<min(correctedFrameTimes(which,1));
+    currRepeatNum = numRepeats; which = find(repeat==currRepeatNum);
+    whichInLFPRecordAfterStim = LFPRecord.dataTimes>max(correctedFrameTimes(which,2));
+    LFPBeforeStim = LFPRecord.data(whichInLFPRecordBeforeStim);
+    LFPAfterStim = LFPRecord.data(whichInLFPRecordAfterStim);
+    LFPAfterStim = LFPAfterStim-(LFPAfterStim(1)-LFPBeforeStim(end));
+    LFPWithoutStim = [LFPBeforeStim; LFPAfterStim];
+    params.Fs = mean(LFPRecord.LFPSamplingRateHz);
+    params.fpass = [0 150];
+    params.err = [2 0.05];
+    params.tapers = [3 5];
+    [specWithoutStim freq specWithoutStimErr] = mtspectrumc(LFPWithoutStim,params);
+    log10specWithoutStim = 10*log10(specWithoutStim);
+    
+    if plotParameters.showLFPAnalysis
+        currAxes = subplot(3,3,[2 3]);
+        plot_vector(specWithoutStim,freq,'l',specWithoutStimErr,[0.8 0.8 0.9],2,[LFPfig currAxes]);
+    end
+    
+    LFPPowerByType = nan(numTypes,numRepeats,length(specWithoutStim));
+    params = [];
+    params.Fs = mean(LFPRecord.LFPSamplingRateHz);
+    params.fpass = [0 150];
+    params.tapers = [3 5];
+    for currTypeNum = 1:numTypes
+        for currRepeatNum = 1:numRepeats
+            which = find((repeat==currRepeatNum)&(type==currTypeNum));
+            whichInLFPRecord = LFPRecord.dataTimes>=min(correctedFrameTimes(which,1))& ...
+                LFPRecord.dataTimes<=max(correctedFrameTimes(which,2));
+            [spec freq] = mtspectrumc(LFPRecord.data(whichInLFPRecord),params);
+            LFPPowerByType(currTypeNum,currRepeatNum,:) = interp1(freq,spec,linspace(min(freq),max(freq),length(specWithoutStim)));
+        end
+    end
+    if plotParameters.showLFPAnalysis
+        hold on;
+        for currTypeNum = 1:numTypes
+            currPlotColor = cmap(currTypeNum,:);
+            %         log10LFPPowerByType = 10*log10(squeeze(mean(LFPPowerByType(currTypeNum,:,:),2)));
+            %         log10LFPPowerErrByType = 10*log10(squeeze(std(LFPPowerByType(currTypeNum,:,:),2)));
+            plot_vector(squeeze(mean(LFPPowerByType(currTypeNum,:,:),2)),linspace(min(freq),max(freq),length(specWithoutStim)),'l',[],currPlotColor,1,[LFPfig currAxes]);
+            %         plot(freq,log10LFPPowerByType-log10specWithoutStim,'Color',currPlotColor,'LineWidth',1);
+        end
+        axis tight;
+        hold off;
+    end
+       
+    % LFP Coherence at the frequency of the input sweep 
+    stdOfMean = squeeze(std(mean(LFPByType,2),0,3));
+    if plotParameters.showLFPAnalysis
+        subplot(3,3,[5 6]);
+        plot(1:numTypes,stdOfMean);
+        set(gca,'XTick',1:numTypes,'XTickLabel',valNames);
+        xLabel = sprintf('swept parameter: %s', sweptParameter{:});
+        yLabel = 'std';
+        xlabel(xLabel);
+        ylabel(yLabel);
+        axis tight;
+    end
+end
+
+
 %CUMULATIVE IS NOT USED YET:
 % % fill in analysisdata with new values if the cumulative values don't exist (first analysis)
 % if ~isfield(analysisdata, 'cumulativeEvents') % && check that params did not change
@@ -645,9 +796,7 @@ analysisdata.vals=vals;
 analysisdata.spikeCount = spikeCount;
 cumulativedata=[]; % why are we emptying out cumulativedata? do we not have anything cumulative in gratings?
 
-if doLFPAnalysis
-    
-end
+
 
 end % end function
 % ===============================================================================================

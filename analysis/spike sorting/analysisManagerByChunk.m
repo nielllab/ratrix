@@ -1,5 +1,5 @@
 function quit = analysisManagerByChunk(subjectID, path, cellBoundary, spikeDetectionParams, spikeSortingParams,...
-    timeRangePerTrialSecs,stimClassToAnalyze,overwriteAll,usePhotoDiodeSpikes)
+    timeRangePerTrialSecs,stimClassToAnalyze,overwriteAll,usePhotoDiodeSpikes,plottingParams)
 % 4/14/09 - for now, lets assume this function only processes a single trial
 %	- one neuralRecords.mat file, with many chunks
 %	- one stimRecords.mat file, specific to this trial
@@ -20,6 +20,7 @@ function quit = analysisManagerByChunk(subjectID, path, cellBoundary, spikeDetec
 %	stimClassToAnalyze - doesnt really make sense for now, since we only test that this single trial is of this stimClass
 %	overwriteAll - whether or not to overwrite existing analyses
 %	usePhotoDiodeSpikes - flag to determine whether photoDiode or neuralRecording?
+%   plottingParams - sets what to plot and what not to plot
 % OUTPUTS:
 %	quit - a stop flag?
 %	NOTE: this process creates a spikeRecord and physAnalysis file
@@ -128,6 +129,14 @@ end
 if ~exist('overwriteAll','var') || isempty(overwriteAll)
     overwriteAll=false;
 end
+
+
+if ~exist('plottingParams','var') || isempty(plottingParams)
+    plottingParams.showSpikeAnalysis = true;
+    plottingParams.showLFPAnalysis = true;
+    plottingParams.plotSortingForTesting = false;
+end
+
 % ==========================================================================================
 
 % some counters
@@ -135,8 +144,27 @@ quit = false;
 doneWithThisTrial=false;
 haveDeletedAnalysisRecords=false;
 result=[];
+
+%=========================================================================
+% SETS UP THE PLOTTING CHARACTERISTICS OF THE ANALYSIS
 plotParameters.doPlot=false;
-plotParameters.handle=figure;
+% plotParameters.handle=figure; % some random extra window that opens up.
+% annoying!!
+plottingParamsFieldNames = fieldnames(plottingParams);
+for currFieldNum = 1:length(plottingParamsFieldNames)
+    plotParameters.(plottingParamsFieldNames{currFieldNum}) = plottingParams.(plottingParamsFieldNames{currFieldNum});
+end
+
+if ~isfield(spikeSortingParams,'plotSortingForTesting')
+    if isfield(plotParameters,'plotSortingForTesting')
+        spikeSortingParams.plotSortingForTesting = plotParameters.plotSortingForTesting;
+    else
+        spikeSortingParams.plotSortingForTesting = true;
+    end
+end
+
+% END OF PLOTTING CHARACTERISTICS SETUP
+%=========================================================================
 
 % use boundaryRange to know where our cell is
 currentTrial=boundaryRange(1);
@@ -348,7 +376,7 @@ while ~quit
                     %eben better is if we could load "part" of a matlab variable (specified inds) at a faster speeds.
                     % probably can't b/c matlab compression
 
-                    % avoid making big variables to filter the data if you can...
+                     % avoid making big variables to filter the data if you can...
                     if timeRangePerTrialSecs(1)==0 & timeRangePerTrialSecs(2)> diff(neuralRecord.neuralDataTimes([1 end]))% use all
                         % do nothing, b/c using all
                     else %filter
@@ -357,9 +385,7 @@ while ~quit
                         neuralRecord.neuralData=neuralRecord.neuralData(withinTimeRange,:);
                         neuralRecord.neuralDataTimes=neuralRecord.neuralDataTimes(withinTimeRange);
                     end
-                    
                     if ~processed || overwriteAll
-
                         % get frameIndices and frameTimes (from screen pulses)
                         % bounds to decide whether or not to continue with analysis
                         warningBound = 0.01;
@@ -378,9 +404,9 @@ while ~quit
                         % 6/3/09 - offset each chunk's stimInds by the last stimInd from previous chunk
                         spikeRecord.stimInds=spikeRecord.stimInds+startingStimInd;
                         startingStimInd=max(spikeRecord.stimInds);
- 
-                        if 0 %for inspecting errors in frames
-                            figure('position',[100 500 500 500])
+                        toInspectFramePulses = 0;
+                        if toInspectFramePulses %for inspecting errors in frames
+                            figure('position',[100 200 500 500])
                             inspectFramesPulses(neuralRecord.neuralData,neuralRecord.neuralDataTimes,spikeRecord.frameIndices,'longest');
                             %inspectFramesPulses(neuralRecord.neuralData,neuralRecord.neuralDataTimes,spikeRecord.frameIndices,'shortest');
                             % first last shortest longest
@@ -409,7 +435,6 @@ while ~quit
                             %                     else
                             %                         spikeDetectionParams.samplingFreq=samplingRate;
                             %                     end
-
                             [spikeRecord.spikes spikeRecord.spikeWaveforms spikeRecord.spikeTimestamps spikeRecord.assignedClusters ...
                                 spikeRecord.rankedClusters]=...
                                 getSpikesFromNeuralData(neuralRecord.neuralData(:,3),neuralRecord.neuralDataTimes,...
@@ -441,8 +466,13 @@ while ~quit
                         
                         %LFP resampling
                         if spikeDetectionParams.sampleLFP
-                            spikeRecord.LFPData = resample(neuralRecord.neuralData(:,3),spikeDetectionParams.LFPSamplingRateHz,neuralRecord.samplingRate);
-                            spikeRecord.LFPDataTimes = linspace(neuralRecord.neuralDataTimes(1),neuralRecord.neuralDataTimes(end),length(spikeRecord.LFPData));
+                            spikeRecord.LFPRecord.data = resample(neuralRecord.neuralData(:,3),spikeDetectionParams.LFPSamplingRateHz,neuralRecord.samplingRate);
+                            spikeRecord.LFPRecord.dataTimes = (linspace(neuralRecord.neuralDataTimes(1),neuralRecord.neuralDataTimes(end),length(spikeRecord.LFPRecord.data)))';
+                            spikeRecord.LFPSamplingRateHz = spikeDetectionParams.LFPSamplingRateHz;
+                        else
+                            spikeRecord.LFPRecord.data = [];
+                            spikeRecord.LFPRecord.dataTimes =[];
+                            spikeRecord.LFPSamplingRateHz = [];
                         end
                             
                         
@@ -491,6 +521,9 @@ while ~quit
                             prev.trialNumForFrames=[];
                             prev.trialNumForCorrectedFrames=[];
                             prev.trialNumForDetails=[];
+                            prev.LFPRecord.data = [];
+                            prev.LFPRecord.dataTimes = [];
+                            prev.LFPRecord.LFPSamplingRateHz = [];
                         end
                         % now append!
                         spikes=[prev.spikes;spikeRecord.spikes];
@@ -516,11 +549,15 @@ while ~quit
                         trialNumForFrames=[prev.trialNumForFrames;spikeRecord.trialNumForFrames];
                         trialNumForCorrectedFrames=[prev.trialNumForCorrectedFrames;spikeRecord.trialNumForCorrectedFrames];
                         trialNumForDetails=[prev.trialNumForDetails;spikeRecord.trialNumForDetails];
+                        LFPRecord.data = [prev.LFPRecord.data; spikeRecord.LFPRecord.data];
+                        LFPRecord.dataTimes = [prev.LFPRecord.dataTimes; spikeRecord.LFPRecord.dataTimes];
+                        LFPRecord.LFPSamplingRateHz= [prev.LFPRecord.LFPSamplingRateHz;spikeRecord.LFPSamplingRateHz];
+                        
                         save(spikeRecordLocation,'spikes','spikeWaveforms','spikeTimestamps','assignedClusters','spikeDetails',...
                             'frameIndices','frameTimes','frameLengths','correctedFrameIndices','correctedFrameTimes','correctedFrameLengths',...
                             'stimInds','chunkID','chunkIDForFrames','chunkIDForCorrectedFrames','chunkIDForDetails',...
                             'trialNum','trialNumForFrames','trialNumForCorrectedFrames','trialNumForDetails',...
-                            'photoDiode','passedQualityTest','samplingRate');
+                            'photoDiode','passedQualityTest','samplingRate','LFPRecord');
 
                         % check that we have spikes
                         if isempty(spikeRecord.assignedClusters)
@@ -599,7 +636,7 @@ while ~quit
                     % (manualCmrMotionEyeCal = always do analysis for now - future ignore spikes)
                     analysisExists=exist(analysisLocation,'file');
                     doAnalysis=worthPhysAnalysis(sm,quality,analysisExists,overwriteAll,isLastChunkInTrial);
-                    
+                    %doAnalysis = true;
                     
                     % possible problem:  last chunk lacks frame pulses, and
                     % gets quality.passedQualityTest=false (not exactly sure how)
@@ -651,6 +688,7 @@ while ~quit
                         filteredSpikeRecord.chunkID=chunkID(which);
                         which=find(trialNumForCorrectedFrames==currentTrial);
                         filteredSpikeRecord.correctedFrameIndices=correctedFrameIndices(which,:);
+                        filteredSpikeRecord.correctedFrameTimes = correctedFrameTimes(which,:);
                         filteredSpikeRecord.stimInds=stimInds(which);
                         filteredSpikeRecord.chunkIDForCorrectedFrames=chunkIDForCorrectedFrames(which);
                         filteredSpikeRecord.photoDiode=photoDiode(which);
@@ -663,7 +701,13 @@ while ~quit
                             keyboard
                         end
                         
-                        [analysisdata cumulativedata] = physAnalysis(sm,filteredSpikeRecord,stimRecord.stimulusDetails,plotParameters,neuralRecord.parameters,cumulativedata,eyeData);
+                        if ismember(class(sm),{'gratings'})
+                            [analysisdata cumulativedata] = physAnalysis(sm,filteredSpikeRecord,stimRecord.stimulusDetails,plotParameters,neuralRecord.parameters,cumulativedata,eyeData,LFPRecord);
+                            
+                        else
+                            [analysisdata cumulativedata] = physAnalysis(sm,filteredSpikeRecord,stimRecord.stimulusDetails,plotParameters,neuralRecord.parameters,cumulativedata,eyeData);
+                        end
+                        
                         % parameters is from neuralRecord
                         % we pass in the analysisdata because it contains cumulative information that is specific to the analysis method
                         % this is the way of making sure it gets in every trial's analysis file, and that it will get propagated to the next analysis
@@ -706,11 +750,11 @@ while ~quit
                 processedChunks=[processedChunks; chunksToProcess(i,:)];
             end
         end % end doneWithThisTrial loop
+        
     else
         disp(sprintf('skipping class: %s',stimRecord.stimManagerClass))
         currentTrial=min(currentTrial+1,boundaryRange(3));
-    end
-    
+    end    
 end % end quit loop
 
 

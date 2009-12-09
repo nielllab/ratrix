@@ -8,6 +8,7 @@ function [spikes spikeWaveforms spikeTimestamps assignedClusters rankedClusters]
 %   assignedClusters - which cluster each spike belongs to
 %   rankedClusters - some ranking of the clusters - we will specify that by convention, the last element of this array is the "noise" cluster
 
+
 spikes=[];
 
 
@@ -540,8 +541,7 @@ end
 % output of spike sorting should be assignedCluster and rankedClusters
 % assignedCluster is a 1xN vector, which is the assigned cluster number for each spike (numbers are arbitrary)
 
-
-if 1 % view plots (for testing)
+if spikeSortingParams.plotSortingForTesting % view plots (for testing)
     
     switch upper(spikeSortingMethod)
         case 'OSORT'

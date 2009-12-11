@@ -14,8 +14,8 @@ switch rackNum
         out='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\behavior\rig3TrialRecords\CompiledTrialRecords';
     case -1 % 12/13/08 -for flanker paper analysis
         out='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\behavior\pmeierTrialRecords\enhancedCompile1';
-    case -2 % 12/13/08 -for local testing, overwriteable
-        out='C:\Documents and Settings\rlab\Desktop\ratrixData\CompiledTrialRecords';
+    case -2 % 12/13/08 -for local testing
+        out=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData','CompiledTrialRecords');
     otherwise
         error('bad')
 end

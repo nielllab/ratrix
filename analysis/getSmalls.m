@@ -98,7 +98,8 @@ if ~isempty(smallData)
     f(strcmp('info',f))=[];
     remove=[];
     for i=1:length(f)
-        if all(isnan(smallData.(f{i})))
+        if (isnumeric(smallData.(f{i})) && all(isnan(smallData.(f{i})))) ... % vector of numbers all nan
+                || (iscell(smallData.(f{i})) && all(cellfun(@(x) isnan(x(1)),smallData.(f{i}))) ) %cells all nan
             remove=[remove i];
         end
     end

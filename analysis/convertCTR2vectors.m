@@ -42,7 +42,19 @@ for i=1:length(f)
                 disp(sprintf('skipped %s which is size [%d x %d]', f{i},sz(1),sz(2)));
             end
         case {'cell'}
-            disp(sprintf('skipped %s which is a %s', f{i},class(source.(f{i}))))
+            %disp(sprintf('skipped %s which is a %s', f{i},class(source.(f{i}))))
+             if size(source.(f{i}),1)==1
+                if ~ismember(f{i},fields(d))
+                    d.(f{i})=cell(1,n); %init as empty
+                    [d.(f{i}){1:n}]=deal(nan); %then fill as nan
+                end
+                for j=1:length(inds)
+                    d.(f{i}){inds(j)}=source.(f{i}){j}; %fill relevant as cell
+                end
+            else
+                sz=size(source.(f{i}));
+                disp(sprintf('skipped %s which is a cell of size [%d x %d]', f{i},sz(1),sz(2)));
+            end
         otherwise
             disp(sprintf('found %s which is a %s', f{i},class(source.(f{i}))))
             error('bad type')

@@ -154,3 +154,5 @@ infrastructure/mountOSX.m -text
 matlaby/almostEqual.m -text
 matlaby/resetDir.m -text
 matlaby/sanitize.m -text
+trialRecordProcessing/getPhaseStarts.m -text
+trialRecordProcessing/getDiscrimPhaseStart.m -text

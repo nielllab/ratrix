@@ -97,6 +97,23 @@ end
 % or trialRecords.phaseRecords.responseDetails.tries (new-style) for the phase labeled 'discrim'
 [out.response]                                               =getResponseFromTrialRecords(trialRecords);
 
+%12/10/09 - access to more lick info... only do it for goNoGos to prevent bloat
+% this would be reasonable: any(strcmp(trialRecords(1).trialManagerClass,{'cuedGoNoGo','goNoGo'}))
+% but only have the ID of the trialManger=26 without the LUT, thus using the
+% presense of the responseWindowMs instead
+x=trialRecords(1).trialManager.trialManager;
+if isfield(x,'responseWindowMs') && ~isempty(x.responseWindowMs) && ~isinf(x.responseWindowMs(2))
+    [out.lickTimes compiledLUT] = extractFieldAndEnsure(trialRecords,{},'lickTimes',compiledLUT);
+    [out.discrimStart compiledLUT] = extractFieldAndEnsure(trialRecords,{},'discrimStart',compiledLUT); % prob want this too
+else
+    % this may error if rats run on something else after a goNoGo task... leaving the
+    %field undefined... might have to define cells of nan's for all rats,
+    %but trying to avoid that
+    %[out.lickTimes]=nans
+    %[out.discrimStart]=nans
+end
+    
+    
 % out.numRequests=ones(1,length(trialRecords))*nan;
 % for i=1:length(trialRecords)
 %     if isfield(trialRecords(i),'responseDetails') && isfield(trialRecords(i).responseDetails,'tries') && ...

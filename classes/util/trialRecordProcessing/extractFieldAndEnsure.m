@@ -87,15 +87,26 @@ try
             else
                 error('should have one value per trial! failed! and nthValue is undefined')
             end
-        case {'responseTime','firstIRI','numRequests'}
+        case 'discrimStart'
+            discrimPhaseStart = cellfun(@getDiscrimPhaseStart,{trialRecords.phaseRecords},'UniformOutput',false);
+            phaseStarts = cellfun(@getPhaseStarts,{trialRecords.phaseRecords},'UniformOutput',false);
+            trialStart= cellfun(@(x) x(1),phaseStarts,'UniformOutput',false);
+            if any(cellfun(@iscell,discrimPhaseStart))
+                discrimPhaseStart{cellfun(@iscell,discrimPhaseStart)}=nan;
+                %replace the cells with nans in them with nans (and no cell)
+            end
+            out=cell2mat(discrimPhaseStart)-cell2mat(trialStart);
+        case {'responseTime','firstIRI','numRequests', 'lickTimes'}
             if isfield(trialRecords,'phaseRecords')
                 % this has to be a cell array b/c phaseRecords aren't always the same across trials
                 times = cellfun(@getTimesPhased,{trialRecords.phaseRecords},'UniformOutput',false);
                 tries = cellfun(@getTriesPhased,{trialRecords.phaseRecords},'UniformOutput',false);
+                discrimPhaseStart = cellfun(@getDiscrimPhaseStart,{trialRecords.phaseRecords},'UniformOutput',false);
             else
                 % this has to be a cell array b/c times aren't always there across trials
                 times = cellfun(@getTimesNonphased,{trialRecords.responseDetails},'UniformOutput',false);
                 tries = cellfun(@getTriesNonphased,{trialRecords.responseDetails},'UniformOutput',false);
+                %discrimPhaseStart %lick times is not back compatible yet
             end
 
             if isfield(trialRecords,'station')
@@ -128,6 +139,13 @@ try
                 case 'numRequests'
                     % now convert from a cell array of cell arrays to a vector of length-1's
                     out = cell2mat(cellfun(@getNumRequests,tries,requestPorts,responsePorts,'UniformOutput',false));
+                case 'lickTimes'
+                    out=times;  % un-normalized to stim, probably contains all phases, not just discrim
+                    %we either need to know spec.framesUntilTransition (is this even saved!?)
+                    %or the start of the discrimPhase (this is easier, i wrote one for this, and added it up above)
+                    out=cellfun(@allResponsesTimesMinusDiscrimStart,times,discrimPhaseStart,'UniformOutput',false);
+       
+                     %discrimPhaseStart = cellfun(@getDiscrimPhaseStart,{trialRecords.phaseRecords},'UniformOutput',false);   
             end
         case 'actualRewardDuration'
             if isfield(trialRecords,'phaseRecords')
@@ -216,6 +234,19 @@ if length(which)>=2
     out=times(which(2))-times(which(1));
 end
 end
+
+function out=allResponsesTimesMinusDiscrimStart(times,discrimPhaseStart)
+if iscell(times) && isnan(times{1})
+    out=nan;
+else    
+    if length(discrimPhaseStart)==1
+    out=[times]-[discrimPhaseStart];
+    else
+        error('expect discrimPhaseStart to be a single number for each trial')
+    end
+end
+end
+
 
 function out=diffFirstRequestLastResponse(times,tries,requestPorts,responsePorts)
 out=nan;

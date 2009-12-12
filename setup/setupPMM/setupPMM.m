@@ -79,7 +79,7 @@ if ~exist('subjects','var') || isempty(subjects)
             r=setShapingPMM(r,subjects, 'goToLeftDetection', '2_3')
             return
         case 'defineDucs'
-            subjects={'139','228','229'}
+            subjects={'139','228','229','test_r2'}
         case 'defineAllFemale'
             subjects={'296','304','305','306','rack3test7','rack2test4','rack2test5','rack2test6'} %'303'
             %

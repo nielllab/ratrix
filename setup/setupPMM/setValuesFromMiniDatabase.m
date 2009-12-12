@@ -1,12 +1,6 @@
 function r=setValuesFromMiniDatabase(s,r, miniDatabasePath)
 
-[p stepNum]=getProtocolAndStep(s);
-ts = getTrainingStep(p,stepNum);
-stim = getStimManager(ts);
-tm=getTrialManager(ts);
-rm = getReinforcementManager(tm);
-subID=getID(s);
-
+[r s p stepNum ts stim tm rm subID]=getCurrent(s);
 
 currentShapedValue = getCurrentShapedValue(stim);
 currentMsPenalty = getMsPenalty(rm);
@@ -40,14 +34,31 @@ if ~isempty(currentShapedValue) % some steps have no shaping, so don't get datab
     end
 end
 
+if updateSM
+    [s r]=changeProtocolStep(s,ts,r,sprintf('updating shaping value: %d',newShapedValue),'pmm'); % only change the current step for stims - currentShapedValue!
+
+    % confirm it worked
+    s2=getSubjectFromID(r,getID(s));
+    [p stepNum]=getProtocolAndStep(s2);
+    ts = getTrainingStep(p,stepNum);
+    stim = getStimManager(ts);
+    currentShapedValue = getCurrentShapedValue(stim);
+    if currentShapedValue ~= newShapedValue
+        error('what up wi'' dat?')
+    end
+    
+    [r s p stepNum ts stim tm rm subID]=getCurrent(s);
+end
+
+
 valueInDatabase = getMiniDatabaseFact(s,'msPenalty');
 if currentMsPenalty~=valueInDatabase
     if ~isempty(valueInDatabase)
-        setReinforcementParam('penaltyMS',{subID},valueInDatabase,'all','from miniDB','pmm');
+        r=setReinforcementParam('penaltyMS',{subID},valueInDatabase,'all','from miniDB','pmm');
         if getMsPenalty(getCurrentRM(s))==getMsPenalty(rm)
             error('failed to update')
         end
-
+        [r s p stepNum ts stim tm rm subID]=getCurrent(s);
     else
         doMiniDatabaseError(s, stepNum, valueInDatabase, currentMsPenalty, 'msPenalty');
     end
@@ -55,13 +66,15 @@ else
     disp('no change b/c they matched or database value is empty')
 end
 
+
 valueInDatabase = getMiniDatabaseFact(s,'rewardScalar');
 if currentScalar~=valueInDatabase
     if ~isempty(valueInDatabase)
-        setReinforcementParam('scalar',{subID},valueInDatabase,'all','from miniDB','pmm')
+        r=setReinforcementParam('scalar',{subID},valueInDatabase,'all','from miniDB','pmm')
         if getScalar(getCurrentRM(s))==getScalar(rm)
             error('failed to update')
         end
+        [r s p stepNum ts stim tm rm subID]=getCurrent(s);
     else
         doMiniDatabaseError(s, stepNum, valueInDatabase, currentScalar, 'rewardScalar');
     end
@@ -83,19 +96,7 @@ else
     newPctCTs = currentPctCTs;
 end
 
-if updateSM
-    [s r]=changeProtocolStep(s,ts,r,sprintf('updating shaping value: %d',newShapedValue),'pmm'); % only change the current step for stims - currentShapedValue!
 
-    % confirm it worked
-    s2=getSubjectFromID(r,getID(s));
-    [p stepNum]=getProtocolAndStep(s2);
-    ts = getTrainingStep(p,stepNum);
-    stim = getStimManager(ts);
-    currentShapedValue = getCurrentShapedValue(stim);
-    if currentShapedValue ~= newShapedValue
-        error('what up wi'' dat?')
-    end
-end
 
 if updatePctCTsAllSM
     [s r]=changeAllPercentCorrectionTrials(s,newPctCTs,r,sprintf('percentCorrectionTrials set: %d',newPctCTs),'pmm') 
@@ -113,7 +114,7 @@ if updatePctCTsAllSM
         desiredPctCTs=newPctCTs
         error('percent correction trials did not update!')
     end
-        
+    %[r s p stepNum ts stim tm rm subID]=getCurrent(s); % only needed if more operations below   
 end
 
 function  doMiniDatabaseError(s, stepNum, valueInDatabase, currentValue, factType)
@@ -130,3 +131,14 @@ function currentRm=getCurrentRM(s)
     ts=getTrainingStep(p,step);
     tm=getTrialManager(ts);
     currentRm =getReinforcementManager(tm);
+    
+
+function   [r s p stepNum ts stim tm rm subID]=getCurrent(s)
+r=getRatrix;
+s=getSubjectFromID(r,getID(s));
+[p stepNum]=getProtocolAndStep(s);
+ts = getTrainingStep(p,stepNum);
+stim = getStimManager(ts);
+tm=getTrialManager(ts);
+rm = getReinforcementManager(tm);
+subID=getID(s);

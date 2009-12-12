@@ -237,6 +237,13 @@ ctr=[height/2 width/2 ];
 %cueRect=[cueLoc(1)-stimulus.cueSize cueLoc(1)+stimulus.cueSize cueLoc(2)-stimulus.cueSize cueLoc(2)+stimulus.cueSize];
 %details.cueIsLeft=cueIsLeft;
 
+
+% TEMPORAL DETAILS
+%these could be overwritten by a bloacked value, so must come before selectStimulusParameters
+details.targetOnOff=stimulus.targetOnOff;
+details.flankerOnOff=stimulus.flankerOnOff;
+
+
 %choose random or block if requested
 [details a b c z d e f g h p pD pF m x fpa frto frfo] = selectStimulusParameters(stimulus,trialRecords(1:end-1),details);
 
@@ -382,8 +389,6 @@ else
     details.yPositionPercent=stimulus.targetYPosPct;
 end
 
-details.targetOnOff=stimulus.targetOnOff;
-details.flankerOnOff=stimulus.flankerOnOff;
 
 if isinteger(stimulus.cache.flankerStim)
     details.mean=stimulus.mean*intmax(class(stimulus.cache.flankerStim));
@@ -500,7 +505,12 @@ switch details.renderMode
         preResponseStim=discrimStim;
         preResponseStim.punishResponses=false;
         
-        
+         if ~isempty(details.blocking) && any(isfield(details.blocking,{'flankerOn','flankerOff','targetOn','targetOff'}))
+             error('blocking trials with flankerOnOff/targetOnOff is not currently combatible with the dynamic drawExpertFrame')
+             %reason: drawexpertFrame used isTargetFlankerOn which only
+             %check the stimulus, not the details for timing
+             % (by design, now the stim manager can never be wrong, given the fram its on, which is valuable for physiology)
+         end
         
     case {'ratrixGeneral-maskTimesGrating', 'ratrixGeneral-precachedInsertion','symbolicFlankerFromServerPNG'}
         try
@@ -562,7 +572,7 @@ switch details.renderMode
                 stim(height/2-stimulus.cueSize:height/2+stimulus.cueSize,width/2-stimulus.cueSize:width/2+stimulus.cueSize)=stimulus.cueLum*intmax(class(stim));
             end
             %BW pix in corners for imagesc
-            cornerMarkerOn=1;
+            cornerMarkerOn=0;
             if cornerMarkerOn
                 stim(1)=0; stim(2)=255;
             end

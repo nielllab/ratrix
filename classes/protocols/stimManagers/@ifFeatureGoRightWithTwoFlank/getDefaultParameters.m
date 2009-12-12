@@ -134,6 +134,7 @@ switch defaultSettings
         %default.svnRev{2}=1920; %not used yet
         
         default.blocking=[];
+        default.blockingExperiments=[]; %if defined turns on blocking in expt steps...first used by some versions on Jun.09,2009
         default.fitRF=[];
         default.dynamicSweep=[];
         
@@ -167,6 +168,15 @@ switch defaultSettings
         [default t]=getDefaultParameters(t,'unused','none','Oct.09,2007');
         default.toggleStim = false;
 
+            
+    case 'May.02,2009'
+        [default t]=getDefaultParameters(t,'unused','none','Apr.13,2009'); % includes all previous
+        default.targetOnOff= int8([1 21]);
+        default.flankerOnOff=int8([1 21]);
+    case 'Dec.11,2009'
+        [default t]=getDefaultParameters(t,'unused','none','May.02,2009'); % includes relevant previous
+        default.saveDetailedFramedrops=false;
+        default.showText='light';
     otherwise
         error ('unknown default settings date')
 
@@ -511,7 +521,7 @@ switch protocolVersion
                 protocolVersion=protocolVersion
                 error('unknown type of protocol for this version')
         end
-    case {'1_9', '2_1', '2_2','2_3'} % only 2 orients and they are -15, 15   fixed and first used on Jun.04,2008 sadly, not the same angle L vs R
+    case {'1_9', '2_1', '2_2','2_3','2_3reduced'} % only 2 orients and they are -15, 15   fixed and first used on Jun.04,2008 sadly, not the same angle L vs R
         switch protocolType
             case 'goToRightDetection'
                 default.goRightContrast = [1];    %choose a random contrast from this list each trial
@@ -649,6 +659,46 @@ switch protocolVersion
                 protocolVersion=protocolVersion
                 error('unknown type of protocol for this version')
         end
+    case {'2_6','2_6special'}  % blocking in experiments
+        orients=[-pi/12,pi/12];%%-15, 15
+        
+        if strcmp(protocolVersion,'2_6special')
+            orients=[-pi/8,pi/8]; %%-15, 15 %special back-compatibility for some rats
+            if strcmp(protocolType,'goToRightDetection')
+                error('not allowed..only for the old left side mistake')
+            end
+        end
+        default.goRightOrientations = orients;
+        default.goLeftOrientations =  orients;
+        default.flankerOrientations = orients;
+        
+        default.stdGaussMask = 1/5;
+        default.positionalHint=0;
+        default.displayTargetAndDistractor=0;
+        default.phase=[0 pi];
+        default.flankerPosAngle=orients;
+        
+        
+        default.blockingExperiments.blockingMethod='nTrials';
+        default.blockingExperiments.nTrials=150;
+        default.blockingExperiments.shuffleOrderEachBlock=true;
+        default.blockingExperiments.sweptParameters=nan; % will be defined by the experiment step
+        default.blockingExperiments.sweptValues=nan;  % will be defined by the experiment step
+        
+        switch protocolType
+            case 'goToRightDetection'
+                default.goRightContrast = [1];
+                default.goLeftContrast =  [0];
+                default.flankerContrast = [0];
+            case 'goToLeftDetection'
+                default.goRightContrast = [0];
+                default.goLeftContrast =  [1];
+                default.flankerContrast = [0];
+            otherwise
+                protocolVersion=protocolVersion
+                error('unknown type of protocol for this version')
+        end
+      
     case '2_0'
         switch protocolType
             case 'tiltDiscrim' %like 1_0, but protocol has auto shaping smaller targets

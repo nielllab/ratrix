@@ -33,7 +33,11 @@ for i=1:size(subjectIDs,2)
             
         %calculate the reward the rat would get after 100 corrects
         [trialRecords(1:100).correct]=deal(true);
-        [rm rewardSizeULorMS requestRewardSizeULorMS msPenalty] = calcReinforcement(rm,trialRecords, s);
+        if ~isa(rm,'cuedReinforcement')  % cued breaks b/c it requires calcstim's details
+            [rm rewardSizeULorMS requestRewardSizeULorMS msPenalty] = calcReinforcement(rm,trialRecords, s);
+        else
+            rewardSizeULorMS=-1;
+        end
         stimName=class(sm);
         rewardName=class(rm);
         protocolName=getName(p);
@@ -61,10 +65,14 @@ for i=1:size(subjectIDs,2)
         try
             if isa(sm,'stimManager')
                 out{count,9}=getCurrentShapedValue(sm);
+                out{count,10}=getPercentCorrectionTrials(sm); %all SM need to report this if they have it!
             else
                 out{count,9}=nan;
+                out{count,10}=nan;
             end
-        catch
+        catch ex
+            warning('probably the stim manager does not have that method')
+            getReport(ex)
             keyboard
         end
 
@@ -77,6 +85,7 @@ for i=1:size(subjectIDs,2)
         out{count,7}=nan;
         out{count,8}=nan;
         out{count,9}=nan;
+        out{count,10}=nan;
     end
 
 

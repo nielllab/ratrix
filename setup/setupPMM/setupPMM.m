@@ -10,7 +10,7 @@ function r=setupPMM(r,subjects,mode,firstTime,serverName)
 %
 %or the follwing setups- ALL WIPE OUT EXISTING RATRIX
 % r=setupPMM([],[],'testing',true,'103')  % setup first time and test one rat on the defined rack
-% r=setupPMM([],[],'defineAll',true)       % redefine all PMM from scratch
+% r=setupPMM([],[],'defineAll',true)      % redefine all PMM from scratch
 % r=setupPMM([],{'ttt'},[],true,'103')    % redefine all PMM from scratch
 
 
@@ -79,12 +79,14 @@ if ~exist('subjects','var') || isempty(subjects)
             r=setShapingPMM(r,subjects, 'goToLeftDetection', '2_3')
             return
         case 'defineAllFemale'
-                         subjects={'296','303','304','305','306','rack3test7','rack2test4','rack2test5','rack2test6'}
+                         subjects={'296','304','305','306','rack3test7','rack2test4','rack2test5','rack2test6'}
+                         %'303'
             %
         case 'defineAllMale'
-            subjects={'102','130','138','139','227','228','232','229',...
-                '230','234','237','275','277','278','231','233',...
+            subjects={'130','138','139','227','228','232','229',...
+                '230','234','237','277','278','231','233',...
                 'test_l1','test_r1','test_l2','test_r2','test_l3','test_r3'}   % plus tests
+            %sac'd march 2009: 102
             %flunked feb 2009: 117
             %flunked dec 2008: 272, 274,  to community room: 136,137
             %flunked oct 2008: '271','273','276'
@@ -99,32 +101,36 @@ end
 
 %% define all subjects
 
-dsd='Apr.13,2009'; %defaultSettingsDate
+dsd='Dec.11,2009'; %defaultSettingsDate
 for i=1:length(subjects)
     disp(sprintf('doing subject %s''s protocol',subjects{i}))
     switch subjects{i}
         case {'demo1'}
             %r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_4',dsd);
             %r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_5validate',dsd);
+            %r=setShapingPMM(r,subjects(i), 'goToRightDetection','2_6',dsd);  %
             %r=setShapingPMM(r,subjects(i), 'goNoGo', '2_4',dsd);
             r=setShapingPMM(r,subjects(i), 'cuedGoNoGo', '2_4',dsd);
             
-        case {'test_l1','test_r1','test_l2','test_r2','test_l3','test_r3','rack2test4','rack2test5','rack2test6','rack3test7'}
+
+        case {'test_l1','test_l2','test_r2','test_l3','test_r3','rack2test4','rack2test5','rack2test6','rack3test7'}
             r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_4',dsd);
-        case {'130'}
-            r=setShapingPMM(r,subjects(i), 'tiltDiscrim', '2_0','Oct.09,2007'); % gets to stay on toggle
-        case {'275','277'}
-            r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_1',dsd);
-        case {'231','232','228','227','272'} % 274 flunked
-            r=setShapingPMM(r,subjects(i), 'goToLeftDetection',  '2_3',dsd);
-        case {'233','234','138','139','230','229','237','278'}
-            r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_3',dsd);
+        case {'232','228','227'} 
+            r=setShapingPMM(r,subjects(i), 'goToLeftDetection',  '2_6special',dsd);
+        case {'231','test_r1'} 
+            r=setShapingPMM(r,subjects(i), 'goToLeftDetection',  '2_3reduced',dsd); 
+        case {'234','278'}
+            r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_3reduced',dsd);
+        case {'233','138','139','230','229','237','277'} 
+            r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_6',dsd);
         case {'305','rack3test7'} % 303 flunked
             r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_4',dsd);
         case {'296','304','306'}
             r=setShapingPMM(r,subjects(i), 'goToLeftDetection', '2_4',dsd);
-       case {'forfiguresonly_1_9'} %removed '238' xfered: 233,'234','230','229','237'
+        case {'forfiguresonly_1_9'} 
             r=setShapingPMM(r,subjects(i), 'goToRightDetection', '1_9','Oct.09,2007');
+        case {'none'}  % 130 flunked, gave to erik, sac'd dec 7th
+            %  r=setShapingPMM(r,subjects(i), 'tiltDiscrim', '2_0','Oct.09,2007'); % gets to stay on toggle
         case {'none'} %127 head fixed, 102 sac'd
             %r=setShapingPMM(r,subjects(i), 'goToRightDetection', '1_3','Oct.09,2007');
         case {'none'} %117 sac'd
@@ -137,13 +143,20 @@ for i=1:length(subjects)
             %r=setShapingPMM(r,subjects(i), 'goToRightDetection', '1_9','Oct.09,2007');
         case {'none'} %removed '235','236','214','219' xfered: 231,232,228,227
             %r=setShapingPMM(r,subjects(i), 'goToLeftDetection',  '1_9','Oct.09,2007');
-       
+        case {'none'} %removed '238' xfered: 233,'234','230','229','237'
+            %r=setShapingPMM(r,subjects(i), 'goToRightDetection', '1_9','Oct.09,2007');
         case {'none',} %271 flunked oct 2008, xfered '272'
             %r=setShapingPMM(r,subjects(i), 'goToLeftDetection',  '2_1','Oct.09,2007');
         case {'none'} %xfered: '274' 273 flunked
             %r=setShapingPMM(r,subjects(i), 'goToLeftDetection',  '2_2','Oct.09,2007');
         case {'none'} %xfered: '278', flnked 276
             %r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_2','Oct.09,2007');
+        case {'none'} %flunked 275, 277-->2_6
+            %r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_1',dsd);
+        case {'none'} % 234,278-->reduced, 233,138,139,230,229,237-->2_6
+            %r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_3',dsd);
+        case {'none'} % 274,272 flunked, 231-->reduced  228,227,232-->2_6special
+            %r=setShapingPMM(r,subjects(i), 'goToLeftDetection',  '2_3',dsd);
         otherwise
             if  isHumanSubjectID(subjects{i})
                 % is three letters (and maybe numbers follwoing), considered a human subject!

@@ -63,25 +63,25 @@ switch protocolVersion
         parameters.dynamicSweep.sweepMode={'ordered'};
         parameters.dynamicSweep.sweptValues=[];
         parameters.dynamicSweep.sweptParameters={'targetOrientations','flankerOffset'}% 'flankerOrientations'}%,'flankerOffset','flankerPosAngle'};
-        %parameters.dynamicSweep.numRepeats= Inf; % not tested
-        
+        parameters.dynamicSweep.numRepeats=4; %20
+
         %         fitRF.fitMethod='elipse';
         %         fitRF.which='last';
         %         fitRF.medianFilter=logical(ones(3));
         %         fitRF.alpha=0.05;
         %         fitRF.numSpotsPerSTA=1;
         %         fitRF.spotSizeInSTA=10;
-                
+
         %basic setup
         parameters.blocking.blockingMethod='nTrials';
         parameters.blocking.nTrials=10; %100
         parameters.blocking.sweptParameters={'targetOrientations','flankerOrientations','flankerPosAngle'};
         parameters.blocking.sweptValues=generateFlankerFactorialCombo(ifFeatureGoRightWithTwoFlank, parameters.blocking.sweptParameters, {'ordered'}, parameters);
-        
+        parameters.blocking.shuffleOrderEachBlock=false;
         parameters.renderMode='ratrixGeneral-maskTimesGrating'; %'ratrixGeneral-maskTimesGrating', 'ratrixGeneral-precachedInsertion','dynamic-precachedInsertion','dynamic-maskTimesGrating','dynamic-onePatch'
-            %error if dynamic and toggle is on
-            parameters.targetOnOff=int16([1 200]);
-            parameters.flankerOnOff=int16([100 800]);
+        %error if dynamic and toggle is on
+        parameters.targetOnOff=int16([1 200]);
+        parameters.flankerOnOff=int16([100 800]);
     otherwise
         parameters=previousParameters;
 end
@@ -172,17 +172,22 @@ parameters.graduation = parameterThresholdCriterion('.stimDetails.xPosNoiseStd',
 
 
 [incVaryTargetPos unUsed]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
-    parameters.shapedParameter=[];
-    parameters.shapingMethod=[];
-    parameters.shapingValues=[];
-    parameters.xPosNoise=.1;
-    parameters.graduation = performanceCriterion([0.99],int16([9999]));
-    [varyTargetPos unUsed]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end}); %changed in trunk too!
+parameters.shapedParameter=[];
+parameters.shapingMethod=[];
+parameters.shapingValues=[];
+parameters.xPosNoise=.1;
+parameters.graduation = performanceCriterion([0.99],int16([9999]));
+[varyTargetPos unUsed]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end}); %changed in trunk too!
 % end optional
 
 nameOfShapingStep{end+1} = sprintf('Step 3a: Dim flankers %s, stringent', protocolType);
 parameters=smallParameters;
-parameters.fractionNoFlanks=.05;
+
+switch protocolVersion
+    case {'1_0','1_1','1_2','1_3','1_4','1_5','1_6','1_7','1_8','1_9','2_0','2_1','2_2','2_3','2_3reduced','2_4', '2_5validate','2_5'}
+        parameters.fractionNoFlanks=.05;
+end
+
 parameters.flankerContrast = [ 0.1]; % **!! miniDatabase overwrites this (for rats on this step)  if rebuilding ratrix
 parameters.flankerOffset = 3;
 %for all stimuli with displayTargetAndDistractor = 0, these will not matter
@@ -255,8 +260,119 @@ switch protocolVersion
         parameters=previousParameters;
         parameters.persistFlankersDuringToggle = 0; %
         [flanksToggleToo previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+    case '2_3reduced' % redundant code: dead ended -- is used for some dynmic testing of 231 & 234,
+        %might be blocked or not!
+        %might be 8 contrasts or 4 contrasts!
+        %have no probe trials!
+
+        nameOfShapingStep{end+1} = sprintf('Step 3e: Flankers also toggle %s, stringent', protocolType);
+        parameters=previousParameters;
+        parameters.fractionNoFlanks=0;
+        parameters.shapedParameter=[];parameters.shapingMethod=[];parameters.shapingValues=[];
+        targetContrast=[.75]; %reasonably easy after the lowering,
+        parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
+        %Remove correlation for experiments
+        parameters.maxCorrectOnSameSide=int8(-1); parameters.percentCorrectionTrials=0;  %beware CTs is overpowered by the minidatabase setting!
+        parameters.persistFlankersDuringToggle = 0; %
+        parameters.graduation = performanceCriterion([0.99],int16([9999]));
+        [flanksToggleToo previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+
+        nameOfShapingStep{end+1} = sprintf('Expt 1: target contrast sweep', protocolType);
+        parameters=previousParameters;
+        %targetContrast= [0.6 0.8]; %a guess for thresh!
+        %[0.015625 0.5 0.75 1 ] 1/log2 idea: 2.^[-6,-2,-1,0]
+        targetContrast=[.25 0.5 0.75 1]; % starting sweep (rational: match acuity, but if at chance on .25 don't swamp more than you need, if above chance then add in something smaller, also easier ones will keep up moral )
+        targetContrast=[1:8]/8; %0.125 sample at smaller spacing...tested starting May.11,2009 with 231 & 234...should we keep it?
+        parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
+        parameters.blocking.blockingMethod='nTrials';
+        parameters.blocking.nTrials= 150;
+        parameters.blocking.sweptParameters={'targetContrast'};
+        parameters.blocking.sweptValues=targetContrast; %sweptValues must be a matrix m=numParameters x n=numValues, will be swept in order
+        parameters.blocking.shuffleOrderEachBlock=true;
+        [sweepTargetContrast previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+
+        nameOfShapingStep{end+1} = sprintf('Expt 2: position sweep', protocolType);
+        parameters.blocking=[];
+        targetContrast=[.75]; %reasonably easy , garaunteed contrast sensitive
+        parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
+        parameters.flankerOffset = [2.5 3 3.5 5];
+        [sweepFlankerPosition]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+
+        nameOfShapingStep{end+1} = sprintf('Expt 3: flanker orientation sweep', protocolType);
+        parameters.flankerOffset=3;
+        parameters.fpaRelativeTargetOrientation=nan;   % turned off in reduced mode... could figure it out one day if I cared to
+        %rfo=[-pi/2 -pi/4 -pi/8 -pi/16 0 0 pi/16 pi/8 pi/4 pi/2];  % 9 best with more samples at 0
+        %rfo=[-pi/2 -pi/6 -pi/12 -pi/24 0 0 pi/24 pi/12 pi/6 pi/2];  % 9 best with more samples at 0
+        parameters.fpaRelativeFlankerOrientation=nan;  % turned off in reduced mode... could figure it out one day if I cared to
+        %required=repmat(rfo,size(parameters.flankerPosAngle,2),1)-repmat(parameters.flankerPosAngle',1,size(rfo,2));
+        %parameters.flankerOrientations=unique(required(:)); % find what you need
+        parameters.phase=0;
+        [sweepFlankerOrientation ]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+
+        nameOfShapingStep{end+1} = sprintf('Expt 4: flanker contrast sweep', protocolType);
+        parameters.fpaRelativeTargetOrientation=nan; % turn off orient sweeps
+        parameters.fpaRelativeFlankerOrientation=nan;
+        parameters.flankerContrast=[1:8]/8; % 0.125 sample at smaller spacing...tested starting May.11,2009
+        parameters.blocking.blockingMethod='nTrials';
+        parameters.blocking.nTrials=150;
+        parameters.blocking.sweptParameters={'flankerContrast'};
+        parameters.blocking.sweptValues=parameters.flankerContrast; %sweptValues must be a matrix m=numParameters x n=numValues, will be swept in order
+        parameters.blocking.shuffleOrderEachBlock=true;
+        sweepFlankerContrast=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+
+        nameOfShapingStep{end+1} = sprintf('Expt 5: joint contrast sweep', protocolType);
+        parameters.flankerContrast=[0:4]/4; % five flanker contrasts
+        targetContrast=[1:4]/4;             % four target contrasts
+        [parameters]=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
+        parameters.blocking.sweptParameters={'targetContrast','flankerContrast'};
+        parameters.blocking.sweptValues=generateFactorialCombo({[targetContrast],[parameters.flankerContrast]},[1 2],[1 2],{'ordered'}); %sweptValues must be a matrix m=numParameters x n=numValues, will be swept in order
+        sweepTargetAndFlankerContrast=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+
+        nameOfShapingStep{end+1} = sprintf('Expt 6: multiple target contrast delayed', protocolType);
+        %parameters.targetOnOff= int8([21 41]); % this cohort of rats will have a delay before the target, starting on this step... a future cohort may already have the delay, and thus not need this step
+        parameters.targetOnOff= int8([6 26]); % 231 had a hard time with the delay, trying a small delay
+        parameters.flankerContrast=0.5;     % one flanker contrast, which has been tested before, and enables resaonable performance, and target above and target below
+        targetContrast=[1:4]/4;             % four target contrasts, of course half the time zero will always happen too
+        [parameters]=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
+        relativeFlankerOnset=[0];  % the first quick test excersizes code, but does not vary flank... ie. it will just have the 200msec delay to the target & flanker
+        flankerOn=relativeFlankerOnset+double(parameters.targetOnOff(1));
+        if any(flankerOn<=0)
+            flankerOn
+            error('not expectected... flanker can''t come on at a precise time before the request time')
+            % zero might be allowed but has not been tested yet
+        end
+        firstTwoParams=generateFactorialCombo({[targetContrast],[flankerOn]},[1 2],[1 2],{'ordered'}); %sweptValues must be a matrix m=numParameters x n=numValues, will be swept in order
+        parameters.blocking.sweptParameters={'targetContrast','flankerOn','flankerOff'};
+        parameters.blocking.sweptValues=[firstTwoParams; firstTwoParams(2,:)+double(diff(parameters.targetOnOff))]; %onset yoked to offset so there is a constant duration of flankers
+        sweepTargetContrastWithDelay=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});        
+        
+        nameOfShapingStep{end+1} = sprintf('Expt 7:  timing', protocolType);
+        relativeFlankerOnset=[-5 -3 -1 0 1 3 7]; %-5 often will overlap with -7
+        flankerOn=relativeFlankerOnset+double(parameters.targetOnOff(1));
+        if any(flankerOn<=0)
+            flankerOn
+            error('not expectected... flanker can''t come on at a precise time before the request time')
+            % zero might be allowed but has not been tested yet
+        end
+        targetContrast=0.75;                % one contrast
+        [parameters]=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
+        firstTwoParams=generateFactorialCombo({[targetContrast],[flankerOn]},[1 2],[1 2],{'ordered'}); %sweptValues must be a matrix m=numParameters x n=numValues, will be swept in order
+        parameters.blocking.sweptParameters={'flankerOn','flankerOff'};
+        parameters.blocking.sweptValues=[firstTwoParams(2,:); firstTwoParams(2,:)+double(diff(parameters.targetOnOff))]; %onset yoked to offset so there is a constant duration of flankers     
+        sweepTiming=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});      
+        
+        nameOfShapingStep{end+1} = sprintf('Expt 8: target contrast and timing', protocolType);
+        targetContrast=[1:4]/4;             % four target contrasts
+        [parameters]=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
+        firstTwoParams=generateFactorialCombo({[targetContrast],[flankerOn]},[1 2],[1 2],{'ordered'}); %sweptValues must be a matrix m=numParameters x n=numValues, will be swept in order
+        parameters.blocking.sweptParameters={'targetContrast','flankerOn','flankerOff'};
+        parameters.blocking.sweptValues=[firstTwoParams; firstTwoParams(2,:)+double(diff(parameters.targetOnOff))]; %onset yoked to offset so there is a constant duration of flankers
+        sweepTargetContrastAndTiming=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});      
+        
     otherwise %{'2_3','2_4'} and onwards %some skip full contrast flankers, and move right to toggle then sweep
 
+        
+        
         nameOfShapingStep{end+1} = sprintf('Step 3e: Flankers also toggle %s, stringent', protocolType);
         parameters=previousParameters;
         parameters.shapedParameter=[];
@@ -274,25 +390,40 @@ switch protocolVersion
         %parameters.graduation = timeCriterion(32);
         %parameters.graduation = experimenterControlled([16,28,32],[0,0,0]);
         parameters.graduation = performanceCriterion([0.99],int16([9999]));
+             
+        if ~isempty(parameters.blockingExperiments)
+            parameters.blocking=parameters.blockingExperiments;
+        else
+            parameters.blocking=[];
+        end
+        
+        if ~isempty(parameters.blockingExperiments)
+             parameters.blocking.sweptParameters={'targetOrientations','flankerOrientations','flankerPosAngle' };
+             parameters.blocking.sweptValues=generateFactorialCombo({[parameters.goRightOrientations],[parameters.flankerOrientations],[parameters.flankerPosAngle]},[1:3],[1:3],{'ordered'}); %sweptValues must be a matrix m=numParameters x n=numValues, will be swept in order
+        end
+        
         [flanksToggleToo previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 
-
-        nameOfShapingStep{end+1} = sprintf('Expt 1: contrast sweep', protocolType);
+        nameOfShapingStep{end+1} = sprintf('Expt 1: target contrast sweep', protocolType);
         parameters=previousParameters;
         %targetContrast= [0.6 0.8]; %a guess for thresh!
         %[0.015625 0.5 0.75 1 ] 1/log2 idea: 2.^[-6,-2,-1,0]
         targetContrast=[.25 0.5 0.75 1]; % starting sweep (rational: match acuity, but if at chance on .25 don't swamp more than you need, if above chance then add in something smaller, also easier ones will keep up moral )
         parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
-
-
-
-
-        [sweepContrast previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+        if ~isempty(parameters.blockingExperiments)
+             parameters.blocking.sweptParameters={'targetOrientations','flankerOrientations','flankerPosAngle','targetContrast'};
+             parameters.blocking.sweptValues=generateFactorialCombo({[parameters.goRightOrientations],[parameters.flankerOrientations],[parameters.flankerPosAngle],targetContrast},[1:4],[1:4],{'ordered'}); %sweptValues must be a matrix m=numParameters x n=numValues, will be swept in order
+        end
+        [sweepTargetContrast previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 
         nameOfShapingStep{end+1} = sprintf('Expt 2: position sweep', protocolType);
         targetContrast=[.75]; %reasonably easy , garaunteed contrast sensitive
         parameters=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
         parameters.flankerOffset = [2.5 3 3.5 5];
+        if ~isempty(parameters.blockingExperiments)
+             parameters.blocking.sweptParameters={'targetOrientations','flankerOrientations','flankerPosAngle','flankerOffset'};
+             parameters.blocking.sweptValues=generateFactorialCombo({[parameters.goRightOrientations],[parameters.flankerOrientations],[parameters.flankerPosAngle],[parameters.flankerOffset]},[1:4],[1:4],{'ordered'}); %sweptValues must be a matrix m=numParameters x n=numValues, will be swept in order
+        end
         [sweepFlankerPosition]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 
         nameOfShapingStep{end+1} = sprintf('Expt 3: flanker orientation sweep', protocolType);
@@ -304,8 +435,75 @@ switch protocolVersion
         required=repmat(rfo,size(parameters.flankerPosAngle,2),1)-repmat(parameters.flankerPosAngle',1,size(rfo,2));
         parameters.flankerOrientations=unique(required(:)); % find what you need
         parameters.phase=0;
+        if ~isempty(parameters.blockingExperiments)
+             parameters.blocking.sweptParameters={'targetOrientations','fpaRelativeTargetOrientation','fpaRelativeFlankerOrientation'};
+             parameters.blocking.sweptValues=generateFactorialCombo({[parameters.goRightOrientations],[parameters.fpaRelativeTargetOrientation],[parameters.fpaRelativeFlankerOrientation]},[1:3],[1:3],{'ordered'}); %sweptValues must be a matrix m=numParameters x n=numValues, will be swept in order
+        end
         [sweepFlankerOrientation ]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 
+        nameOfShapingStep{end+1} = sprintf('Expt 4: flanker contrast sweep', protocolType);
+        parameters.fpaRelativeTargetOrientation=nan; % turn off orient sweeps
+        parameters.fpaRelativeFlankerOrientation=nan;
+        parameters.flankerContrast=[.25 0.5 0.75 1];
+        if ~isempty(parameters.blockingExperiments)
+             parameters.blocking.sweptParameters={'targetOrientations','flankerOrientations','flankerPosAngle','flankerContrast'};
+             parameters.blocking.sweptValues=generateFactorialCombo({[parameters.goRightOrientations],[parameters.flankerOrientations],[parameters.flankerPosAngle],[parameters.flankerContrast]},[1:4],[1:4],{'ordered'}); %sweptValues must be a matrix m=numParameters x n=numValues, will be swept in order
+        end
+        sweepFlankerContrast=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+
+        nameOfShapingStep{end+1} = sprintf('Expt 5: joint contrast sweep', protocolType);
+        parameters.flankerContrast=[0 .25 0.5 0.75 1]; % five flanker contrasts
+        targetContrast=[.25 0.5 0.75 1];               % four target contrasts
+        if ~isempty(parameters.blockingExperiments)
+             parameters.blocking.sweptParameters={'targetOrientations','flankerOrientations','flankerPosAngle','flankerContrast','targetContrast'};
+             parameters.blocking.sweptValues=generateFactorialCombo({[parameters.goRightOrientations],[parameters.flankerOrientations],[parameters.flankerPosAngle],[parameters.flankerContrast],targetContrast},[1:5],[1:5],{'ordered'}); %sweptValues must be a matrix m=numParameters x n=numValues, will be swept in order
+        end
+        [parameters]=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
+        sweepTargetAndFlankerContrast=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
+        
+        % need expt 6 (delay) and 7 (multi-timing) with all orientations, and single contrast... don't block patterns
+        % target contrast = 0.75
+        % flanker contrast = 0.4 (like before) 0.5 (like 231) or 0.75 (match)... chose 0.5 cuz it fits curves well
+        
+        nameOfShapingStep{end+1} = sprintf('Expt 6: single target contrast delayed', protocolType);
+        parameters.targetOnOff= int8([6 26]); % 231 had a hard time with the delay, trying a small delay
+        parameters.flankerContrast=0.5;     % one flanker contrast, which has been tested before, and enables resaonable performance, and target above and target below
+        %targetContrast=[1:4]/4;            % four target contrasts would be nice, .. but have a pattern, so lets just do one contrast
+        targetContrast=0.75;                % one contrast
+        [parameters]=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
+        relativeFlankerOnset=[0];  % the first quick test excersizes code, but does not vary flank... ie. it will just have the 200msec delay to the target & flanker
+        flankerOn=relativeFlankerOnset+double(parameters.targetOnOff(1));
+        if any(flankerOn<=0)
+            flankerOn
+            error('not expectected... flanker can''t come on at a precise time before the request time')
+            % zero might be allowed but has not been tested yet
+        end
+        firstTwoParams=generateFactorialCombo({[targetContrast],[flankerOn]},[1 2],[1 2],{'ordered'}); %sweptValues must be a matrix m=numParameters x n=numValues, will be swept in order
+        parameters.blocking.sweptParameters={'flankerOn','flankerOff'};
+        parameters.blocking.sweptValues=[firstTwoParams(2,:); firstTwoParams(2,:)+double(diff(parameters.targetOnOff))]; %onset yoked to offset so there is a constant duration of flankers
+        sweepTargetContrastWithDelay=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});        
+  
+        nameOfShapingStep{end+1} = sprintf('Expt 7: timing', protocolType);
+        relativeFlankerOnset=[ -3 -1 0 1 3 ]; %maybe increase values base on data from 231/4 pilot
+        flankerOn=relativeFlankerOnset+double(parameters.targetOnOff(1));
+        if any(flankerOn<=0)
+            flankerOn
+            error('not expectected... flanker can''t come on at a precise time before the request time')
+            % zero might be allowed but has not been tested yet
+        end
+        firstTwoParams=generateFactorialCombo({[targetContrast],[flankerOn]},[1 2],[1 2],{'ordered'}); %sweptValues must be a matrix m=numParameters x n=numValues, will be swept in order
+        parameters.blocking.sweptParameters={'flankerOn','flankerOff'};
+        parameters.blocking.sweptValues=[firstTwoParams(2,:); firstTwoParams(2,:)+double(diff(parameters.targetOnOff))]; %onset yoked to offset so there is a constant duration of flankers
+        sweepTiming=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});      
+   
+        nameOfShapingStep{end+1} = sprintf('Expt 8: target contrast and timing', protocolType);  %not used  yet
+        targetContrast=[1:4]/4;             % four target contrasts
+        [parameters]=setLeftAndRightContrastInParameterStruct(parameters, protocolType, targetContrast);
+        firstTwoParams=generateFactorialCombo({[targetContrast],[flankerOn]},[1 2],[1 2],{'ordered'}); %sweptValues must be a matrix m=numParameters x n=numValues, will be swept in order
+        parameters.blocking.sweptParameters={'targetContrast','flankerOn','flankerOff'};
+        parameters.blocking.sweptValues=[firstTwoParams; firstTwoParams(2,:)+double(diff(parameters.targetOnOff))]; %onset yoked to offset so there is a constant duration of flankers
+        sweepTargetContrastAndTiming=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});      
+        
 end
 
 
@@ -403,7 +601,6 @@ switch protocolVersion
         [vvVHOffsets previousParameters]=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
 end
 
-
 fd1TM = makeFreeDrinksTM(parameters,0.01,0); %juicy
 fd2TM = makeFreeDrinksTM(parameters,0.001,0); % some
 [fd3TM, SM] = makeFreeDrinksTM(parameters,0,0); % none
@@ -412,6 +609,7 @@ fd2TM = makeFreeDrinksTM(parameters,0.001,0); % some
 grad1 = rateCriterion(4,1); %(3,2)? (3,3)?
 grad2 = rateCriterion(5,2); % how likely is it that false positives trigger a graduation without rat licks? -pmm
 grad3 = rateCriterion(6,3); % rateCriterion(10,3) % (20,1)? (5,20)?
+
 
 fd1 = trainingStep(fd1TM, SM, grad1, minutesPerSession(90,3), parameters.svnRev, parameters.svnCheckMode); %nTrialsThenWait([1000],[1],[0.001],[1])
 fd2 = trainingStep(fd2TM, SM, grad2, minutesPerSession(90,3), parameters.svnRev, parameters.svnCheckMode);
@@ -479,11 +677,11 @@ switch protocolVersion
     case {'1_6','1_7', '1_8', '1_9', '2_1'}
         p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,smaller,dimFlankers,dimmerTarget,strongerFlanker,fullFlankers,flanksToggleToo,varyPosition})
     case '2_0'
-p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,shrinking,incVaryTargetPos,varyTargetPos})
+        p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,shrinking,incVaryTargetPos,varyTargetPos})
     case '2_2' %detection first learn on linearized small thin target
         p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,smaller,dimFlankers,dimmerTarget,flanksToggleToo,incVaryTargetPos}) %
-    case {'2_3','2_4','2_5validate'} %sweep contrast as first expt, then position, then orientation; manual graduations don't control order
-        p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,smaller,dimFlankers,dimmerTarget,flanksToggleToo,sweepContrast,sweepFlankerPosition,sweepFlankerOrientation})
+    case {'2_3','2_4','2_5validate','2_3reduced','2_6','2_6special'} %sweep contrast as first expt, then position, then orientation, then flanker contrast, then both contrasts; manual graduations don't control order
+        p=protocol(nameOfProtocol,{fd1,fd2,fd3,easy,stringent,linearized,thinner,smaller,dimFlankers,dimmerTarget,flanksToggleToo,sweepTargetContrast,sweepFlankerPosition,sweepFlankerOrientation,sweepFlankerContrast, sweepTargetAndFlankerContrast,sweepTargetContrastWithDelay,sweepTiming,sweepTargetContrastAndTiming})
     otherwise
         error('bad protocol type')
 end

@@ -56,6 +56,10 @@ if ~isempty(stimulus.blocking)
                     otherwise
                         error('unvalidated blocking with this type')
                 end
+            case 'flankerOn'
+                details.flankerOnOff(1)=setValues(i);
+            case 'flankerOff'
+                details.flankerOnOff(2)=setValues(i);
             case 'flankerOrientations';             c=find(stimulus.(stimulus.blocking.sweptParameters{i})==setValues(i));
             case 'distractorOrientations';          z=find(stimulus.(stimulus.blocking.sweptParameters{i})==setValues(i));
             case 'flankerContrast';                 f=find(stimulus.(stimulus.blocking.sweptParameters{i})==setValues(i));
@@ -87,6 +91,7 @@ if isempty(a) || isempty(b) || isempty(c) || isempty(z) || isempty(d)...
     error('empty parameter index! suggests that a requested block value is undefined in the stim')
 end
 
+details.blocking=stimulus.blocking;
 
 
 % %frameInd=t.calib.frame; % total numer of possible images with the given method

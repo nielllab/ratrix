@@ -28,19 +28,27 @@ database.subject{i}.msPenalty=1001;
 database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 i=i+1;
-database.subject{i}.subjectID='demo1';
-database.subject{i}.stepNumber=11;
+database.subject{i}.subjectID='test';
+database.subject{i}.stepNumber=5;
 database.subject{i}.rewardScalar=.1;
 database.subject{i}.msPenalty=1001;
-%database.subject{i}.currentShapedValue = 0.04; %test wierd values
+%database.subject{i}.currentShapedValue = 0.01; %test wierd values
+database.subject{i}.pctCTs=[]; %if not empty overrides all steps
+
+i=i+1;
+database.subject{i}.subjectID='demo1';
+database.subject{i}.stepNumber=19;
+database.subject{i}.rewardScalar=.1;
+database.subject{i}.msPenalty=1001;
+database.subject{i}.currentShapedValue = 0.04; %test wierd values
 database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 
 i=i+1;
-database.subject{i}.subjectID='forfiguresonly_1_9';
-database.subject{i}.stepNumber=8;
+database.subject{i}.subjectID='test2';
+database.subject{i}.stepNumber=2;
 database.subject{i}.rewardScalar=1;
-database.subject{i}.msPenalty=200;
+database.subject{i}.msPenalty=1001;
 database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 
@@ -51,7 +59,6 @@ database.subject{i}.stepNumber=1;
 database.subject{i}.rewardScalar=1;
 database.subject{i}.msPenalty=1000;
 database.subject{i}.pctCTs=[]; %if not empty overrides all steps
-
 
 i=i+1;
 database.subject{i}.subjectID='test_rig1b';
@@ -65,7 +72,7 @@ database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 i=i+1;
 database.subject{i}.subjectID='test_l1';
-database.subject{i}.stepNumber=13;
+database.subject{i}.stepNumber=16;
 database.subject{i}.rewardScalar=.1;
 database.subject{i}.msPenalty=1001;
 database.subject{i}.currentShapedValue = 0.1;
@@ -74,15 +81,15 @@ database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 i=i+1;
 database.subject{i}.subjectID='test_r1';
-database.subject{i}.stepNumber=13; %5 8 11 %
-database.subject{i}.rewardScalar=2;
-database.subject{i}.msPenalty=10;
+database.subject{i}.stepNumber=17;
+database.subject{i}.rewardScalar=1;
+database.subject{i}.msPenalty=1001;
 database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 
 i=i+1;
 database.subject{i}.subjectID='test_l2';
-database.subject{i}.stepNumber=11;
+database.subject{i}.stepNumber=15;
 database.subject{i}.rewardScalar=1;
 database.subject{i}.msPenalty=1001;
 database.subject{i}.currentShapedValue = 0.1;
@@ -144,7 +151,7 @@ database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 i=i+1;
 database.subject{i}.subjectID='102';
-database.subject{i}.stepNumber=6;% Graduate to sweep contrast, flunk all the way down
+database.subject{i}.stepNumber=8;% Graduate to sweep contrast
 database.subject{i}.rewardScalar=2;
 database.subject{i}.msPenalty=10000;
 database.subject{i}.pctCTs=[]; %if not empty overrides all steps
@@ -252,11 +259,11 @@ database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 i=i+1;
 database.subject{i}.subjectID='130';
-database.subject{i}.stepNumber=10;
-database.subject{i}.rewardScalar=1.5;
+database.subject{i}.stepNumber=9;
+database.subject{i}.rewardScalar=2;
 database.subject{i}.msPenalty=10000;
-%database.subject{i}.currentShapedValue = 0.028 + eps/64; % 0.05 + eps/5.3
-database.subject{i}.pctCTs=[]; %if not empty overrides all steps
+database.subject{i}.currentShapedValue = 0.028 + eps/64; % 0.05 + eps/5.3
+database.subject{i}.pctCTs=.1; %if not empty overrides all steps
 
 
 i=i+1;
@@ -325,19 +332,19 @@ database.subject{i}.pctCTs=0; %if not empty overrides all steps
 
 i=i+1;
 database.subject{i}.subjectID='138';
-database.subject{i}.stepNumber=13; % was 10
-database.subject{i}.rewardScalar=1;
+database.subject{i}.stepNumber=11; % was 10, 13, 11 mix, 11 blocked
+database.subject{i}.rewardScalar=2;
 database.subject{i}.msPenalty=6000;
-database.subject{i}.currentShapedValue = 0.8;
-database.subject{i}.pctCTs=0; %if not empty overrides all steps
+%database.subject{i}.currentShapedValue = 0.8;
+database.subject{i}.pctCTs=0.1; %if not empty overrides all steps
 
 
 i=i+1;
 database.subject{i}.subjectID='139';
-database.subject{i}.stepNumber=13; % was 9
+database.subject{i}.stepNumber=6; % was 9, 13, 11blocked, 8 to be easy,
 database.subject{i}.rewardScalar=2;
 database.subject{i}.msPenalty=6000;
-database.subject{i}.currentShapedValue = 0.4
+%database.subject{i}.currentShapedValue = 0.4
 database.subject{i}.pctCTs=0; %if not empty overrides all steps
 
 
@@ -442,12 +449,12 @@ database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 % database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 
-% i=i+1;
-% database.subject{i}.subjectID='196';
-% database.subject{i}.stepNumber=4;  %found flunked from 7 nov 14. 2008
-% database.subject{i}.rewardScalar=1;
-% database.subject{i}.msPenalty=2000;
-% database.subject{i}.pctCTs=[]; %if not empty overrides all steps
+i=i+1;
+database.subject{i}.subjectID='196';
+database.subject{i}.stepNumber=4;  %found flunked from 7 nov 14. 2008
+database.subject{i}.rewardScalar=1;
+database.subject{i}.msPenalty=2000;
+database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 
 i=i+1;
@@ -556,8 +563,8 @@ database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 i=i+1;
 database.subject{i}.subjectID='227';
-database.subject{i}.stepNumber=11; % was 9
-database.subject{i}.rewardScalar=1;
+database.subject{i}.stepNumber=17; % was 9, 11, 12
+database.subject{i}.rewardScalar=2;
 database.subject{i}.msPenalty=10000;
 database.subject{i}.currentShapedValue = 0.4;
 database.subject{i}.pctCTs=0; %if not empty overrides all steps
@@ -565,17 +572,17 @@ database.subject{i}.pctCTs=0; %if not empty overrides all steps
 
 i=i+1;
 database.subject{i}.subjectID='228';
-database.subject{i}.stepNumber=13; % was 9
-database.subject{i}.rewardScalar=1.5;
+database.subject{i}.stepNumber=6; % was 9,13,11blocked, flunked to 8
+database.subject{i}.rewardScalar=3;
 database.subject{i}.msPenalty=10000;
 database.subject{i}.currentShapedValue = 0.4;
-database.subject{i}.pctCTs=0; %if not empty overrides all steps
+database.subject{i}.pctCTs=.1; %if not empty overrides all steps
 
 
 i=i+1;
 database.subject{i}.subjectID='229';
-database.subject{i}.stepNumber=11;
-database.subject{i}.rewardScalar=1.5;
+database.subject{i}.stepNumber=17; % 12
+database.subject{i}.rewardScalar=2;
 database.subject{i}.msPenalty=10000;
 database.subject{i}.currentShapedValue = 0.8;
 database.subject{i}.pctCTs=[]; %if not empty overrides all steps
@@ -583,8 +590,8 @@ database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 i=i+1;
 database.subject{i}.subjectID='230';
-database.subject{i}.stepNumber=11; % was 10
-database.subject{i}.rewardScalar=1.5;
+database.subject{i}.stepNumber=17; % was 10,11,12
+database.subject{i}.rewardScalar=2;
 database.subject{i}.msPenalty=1000;
 database.subject{i}.currentShapedValue = 0.8; %was at 0.3 once
 database.subject{i}.pctCTs=[]; %if not empty overrides all steps
@@ -592,25 +599,25 @@ database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 i=i+1;
 database.subject{i}.subjectID='231';
-database.subject{i}.stepNumber=14; %was 10, then 12
-database.subject{i}.rewardScalar=1;
+database.subject{i}.stepNumber=18; %was 10, then 12,14,12, 15, 16,17,18
+database.subject{i}.rewardScalar=2;
 database.subject{i}.msPenalty=6000;
 %database.subject{i}.currentShapedValue = 0.7 + eps/ 2;
 database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 i=i+1;
 database.subject{i}.subjectID='232';
-database.subject{i}.stepNumber=13; % was 10
-database.subject{i}.rewardScalar=1.5;
+database.subject{i}.stepNumber=17; % was 10, 13,12
+database.subject{i}.rewardScalar=2;
 database.subject{i}.msPenalty=1000;
-database.subject{i}.currentShapedValue = 0.5 + eps/ 2;
+%database.subject{i}.currentShapedValue = 0.5 + eps/ 2;
 database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 
 i=i+1;
 database.subject{i}.subjectID='233';
-database.subject{i}.stepNumber=13; %was 9 then 12
-database.subject{i}.rewardScalar=.6;
+database.subject{i}.stepNumber=17; %was 9 then 12,13,11,12
+database.subject{i}.rewardScalar=1.2;
 database.subject{i}.msPenalty=1000;
 %database.subject{i}.currentShapedValue = 0.4;% - eps/2;
 database.subject{i}.pctCTs=[]; %if not empty overrides all steps
@@ -618,7 +625,7 @@ database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 i=i+1;
 database.subject{i}.subjectID='234';
-database.subject{i}.stepNumber=14; % was 10
+database.subject{i}.stepNumber=18; % was 10,14,12,16,18
 database.subject{i}.rewardScalar=2;
 database.subject{i}.msPenalty=10000;
 database.subject{i}.currentShapedValue = 0.6  + eps/ 2;
@@ -642,11 +649,12 @@ database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 i=i+1;
 database.subject{i}.subjectID='237';
-database.subject{i}.stepNumber=11; % was 10
-database.subject{i}.rewardScalar=1.5;
+
+database.subject{i}.stepNumber=12; % was 10,11
+database.subject{i}.rewardScalar=2;
 database.subject{i}.msPenalty=10000;
 database.subject{i}.currentShapedValue = 0.7 +eps/2;
-database.subject{i}.pctCTs=[]; %if not empty overrides all steps
+database.subject{i}.pctCTs=.1; %if not empty overrides all steps
 
 
 i=i+1;
@@ -722,10 +730,10 @@ database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 i=i+1;
 database.subject{i}.subjectID='275';
 database.subject{i}.stepNumber=9;
-database.subject{i}.rewardScalar=0.75;
+database.subject{i}.rewardScalar=2;
 database.subject{i}.msPenalty=1000;
-database.subject{i}.currentShapedValue = 0.3 + eps/4;
-database.subject{i}.pctCTs=0.25; %if not empty overrides all steps
+database.subject{i}.currentShapedValue = 0.2;
+database.subject{i}.pctCTs=[0.1]; %if not empty overrides all steps
 
 
 i=i+1;
@@ -738,19 +746,20 @@ database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 i=i+1;
 database.subject{i}.subjectID='277';
-database.subject{i}.stepNumber=9;
-database.subject{i}.rewardScalar=1;
+database.subject{i}.stepNumber=11;
+database.subject{i}.rewardScalar=2;
 database.subject{i}.msPenalty=1000;
-database.subject{i}.pctCTs=0; %if not empty overrides all steps
-database.subject{i}.currentShapedValue = 0.2;
+database.subject{i}.currentShapedValue=0.1;
+database.subject{i}.pctCTs=.1; %if not empty overrides all steps
+
 
 i=i+1;
 database.subject{i}.subjectID='278';
-database.subject{i}.stepNumber=11;
-database.subject{i}.rewardScalar=1;
+database.subject{i}.stepNumber=12; 
+database.subject{i}.rewardScalar=2;
 database.subject{i}.msPenalty=1000;
 database.subject{i}.currentShapedValue = 0.4; %+ eps/ 4;
-database.subject{i}.pctCTs=0; %if not empty overrides all steps
+database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 
 % i=i+1;  % probably never used - false appendage
@@ -763,44 +772,44 @@ database.subject{i}.pctCTs=0; %if not empty overrides all steps
 
 i=i+1;
 database.subject{i}.subjectID='296';
-database.subject{i}.stepNumber=9;
-database.subject{i}.rewardScalar=.2;
-database.subject{i}.msPenalty=1000;
-database.subject{i}.currentShapedValue = 0.3 + eps/ 4; %+ eps/ 4;
-database.subject{i}.pctCTs=[]; %if not empty overrides all steps
+database.subject{i}.stepNumber=11;
+database.subject{i}.rewardScalar=1;
+database.subject{i}.msPenalty=4000;
+database.subject{i}.currentShapedValue = 0.1;% 3 + eps/ 4; %+ eps/ 4;
+database.subject{i}.pctCTs=.1; %if not empty overrides all steps
 
 
-i=i+1;
-database.subject{i}.subjectID='303';
-database.subject{i}.stepNumber=5;
-database.subject{i}.rewardScalar=0.2;
-database.subject{i}.msPenalty=1000;
-% database.subject{i}.currentShapedValue = 0.4; %+ eps/ 4;
-database.subject{i}.pctCTs=[]; %if not empty overrides all steps
+% i=i+1;
+% database.subject{i}.subjectID='303';
+% database.subject{i}.stepNumber=5;
+% database.subject{i}.rewardScalar=0.2;
+% database.subject{i}.msPenalty=1000;
+% % database.subject{i}.currentShapedValue = 0.4; %+ eps/ 4;
+% database.subject{i}.pctCTs=[]; %if not empty overrides all steps
 
 i=i+1;
 database.subject{i}.subjectID='304';
-database.subject{i}.stepNumber=5;
-database.subject{i}.rewardScalar=.2;
-database.subject{i}.msPenalty=1000;
+database.subject{i}.stepNumber=8;
+database.subject{i}.rewardScalar=1;
+database.subject{i}.msPenalty=4000;
 % database.subject{i}.currentShapedValue = 0.4; %+ eps/ 4;
-database.subject{i}.pctCTs=[]; %if not empty overrides all steps
+database.subject{i}.pctCTs=.1; %if not empty overrides all steps
 
 i=i+1;
 database.subject{i}.subjectID='305';
-database.subject{i}.stepNumber=5;
-database.subject{i}.rewardScalar=.2;
-database.subject{i}.msPenalty=1000;
-% database.subject{i}.currentShapedValue = 0.4; %+ eps/ 4;
-database.subject{i}.pctCTs=[]; %if not empty overrides all steps
+database.subject{i}.stepNumber=9;
+database.subject{i}.rewardScalar=1;
+database.subject{i}.msPenalty=4000;
+database.subject{i}.currentShapedValue = 0.2; %+ eps/ 4;
+database.subject{i}.pctCTs=.1; %if not empty overrides all steps
 
 i=i+1;
 database.subject{i}.subjectID='306';
-database.subject{i}.stepNumber=9;
-database.subject{i}.rewardScalar=.2;
-database.subject{i}.msPenalty=1000;
-database.subject{i}.currentShapedValue = 0.3+eps/4; %+ eps/ 4;
-database.subject{i}.pctCTs=[]; %if not empty overrides all steps
+database.subject{i}.stepNumber=11;
+database.subject{i}.rewardScalar=1;
+database.subject{i}.msPenalty=4000;
+database.subject{i}.currentShapedValue = 0.1; %0.3+eps/4; %+ eps/ 4;
+database.subject{i}.pctCTs=.1; %if not empty overrides all steps
 %% reloadStepsFromRatrix
 %make sure to get the current steps with getStepNumFromRemoteRatrix or
 %getStepNumFromRecords

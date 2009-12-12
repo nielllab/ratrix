@@ -129,7 +129,9 @@ switch defaultSettings
         %can be overwritten to get relative values
         default.fpaRelativeTargetOrientation=nan;
         default.fpaRelativeFlankerOrientation=nan;
-        default.svnRev={'svn://132.239.158.177/projects/ratrix/tags/v1.0.1'}; %1/8/09 - added to support trunk version of trainingStep
+        %default.svnRev={'svn://132.239.158.177/projects/ratrix/tags/v1.0.1'}; %1/8/09 - added to support trunk version of trainingStep
+        default.svnRev={'svn://132.239.158.177/projects/ratrix/trunk'}; %duc's runs on trunk dec.11,2009
+                
         default.svnCheckMode='session';
         %default.svnRev{2}=1920; %not used yet
         

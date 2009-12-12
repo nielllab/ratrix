@@ -479,9 +479,12 @@ switch protocolVersion
             % zero might be allowed but has not been tested yet
         end
         firstTwoParams=generateFactorialCombo({[targetContrast],[flankerOn]},[1 2],[1 2],{'ordered'}); %sweptValues must be a matrix m=numParameters x n=numValues, will be swept in order
+        if ~isempty(parameters.blockingExperiments)
+
         parameters.blocking.sweptParameters={'flankerOn','flankerOff'};
         parameters.blocking.sweptValues=[firstTwoParams(2,:); firstTwoParams(2,:)+double(diff(parameters.targetOnOff))]; %onset yoked to offset so there is a constant duration of flankers
-        sweepTargetContrastWithDelay=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});        
+        end
+        sweepTargetContrastWithDelay=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
   
         nameOfShapingStep{end+1} = sprintf('Expt 7: timing', protocolType);
         relativeFlankerOnset=[ -3 -1 0 1 3 ]; %maybe increase values base on data from 231/4 pilot
@@ -492,9 +495,12 @@ switch protocolVersion
             % zero might be allowed but has not been tested yet
         end
         firstTwoParams=generateFactorialCombo({[targetContrast],[flankerOn]},[1 2],[1 2],{'ordered'}); %sweptValues must be a matrix m=numParameters x n=numValues, will be swept in order
+                parameters.blocking.blockingMethod='nTrials';   
+                parameters.blocking.nTrials= 150;
+                parameters.blocking.shuffleOrderEachBlock=true;
         parameters.blocking.sweptParameters={'flankerOn','flankerOff'};
-        parameters.blocking.sweptValues=[firstTwoParams(2,:); firstTwoParams(2,:)+double(diff(parameters.targetOnOff))]; %onset yoked to offset so there is a constant duration of flankers
-        sweepTiming=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});      
+            parameters.blocking.sweptValues=[firstTwoParams(2,:); firstTwoParams(2,:)+double(diff(parameters.targetOnOff))]; %onset yoked to offset so there is a constant duration of flankers
+        sweepTiming=setFlankerStimRewardAndTrialManager(parameters, nameOfShapingStep{end});
    
         nameOfShapingStep{end+1} = sprintf('Expt 8: target contrast and timing', protocolType);  %not used  yet
         targetContrast=[1:4]/4;             % four target contrasts

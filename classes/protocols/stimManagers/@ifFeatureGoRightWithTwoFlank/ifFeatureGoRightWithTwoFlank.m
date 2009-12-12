@@ -587,9 +587,10 @@ switch nargin
             error('protocolType must be goToRightDetection or goToLeftDetection or tiltDiscrim or goToSide')
         end
 
-        if  any(strcmp(varargin{47},{'1_0','1_1','1_2','1_3','1_4','1_5','1_6','1_7','1_8','1_9','2_0','2_1','2_2','2_3','2_3reduced','2_4', '2_5validate','2_5','2_6','2_6validate'}))
+        if  any(strcmp(varargin{47},{'1_0','1_1','1_2','1_3','1_4','1_5','1_6','1_7','1_8','1_9','2_0','2_1','2_2','2_3','2_3reduced','2_4', '2_5validate','2_5','2_6','2_6validate','2_6special'}))
             s.protocolVersion=varargin{47};
         else
+            varargin{47}
             error('protocolVersion must be very specific')
         end
 

@@ -12,7 +12,7 @@ function r=setupPMM(r,subjects,mode,firstTime,serverName)
 % r=setupPMM([],[],'testing',true,'103')  % setup first time and test one rat on the defined rack
 % r=setupPMM([],[],'defineAll',true)      % redefine all PMM from scratch
 % r=setupPMM([],{'ttt'},[],true,'103')    % redefine all PMM from scratch
-
+% r=setupPMM([],[],'defineDucs',true)       % redefine all duc from scratch
 
 %%
 %cd ('C:\Documents and Settings\rlab\Desktop\Ratrix\bootstrap')
@@ -78,9 +78,10 @@ if ~exist('subjects','var') || isempty(subjects)
             %             end
             r=setShapingPMM(r,subjects, 'goToLeftDetection', '2_3')
             return
+        case 'defineDucs'
+            subjects={'139','228','229'}
         case 'defineAllFemale'
-                         subjects={'296','304','305','306','rack3test7','rack2test4','rack2test5','rack2test6'}
-                         %'303'
+            subjects={'296','304','305','306','rack3test7','rack2test4','rack2test5','rack2test6'} %'303'
             %
         case 'defineAllMale'
             subjects={'130','138','139','227','228','232','229',...

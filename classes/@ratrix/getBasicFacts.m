@@ -33,7 +33,9 @@ for i=1:size(subjectIDs,2)
             
         %calculate the reward the rat would get after 100 corrects
         [trialRecords(1:100).correct]=deal(true);
-        if ~isa(rm,'cuedReinforcement')  % cued breaks b/c it requires calcstim's details
+%         [trialRecords(1:100).stimManagerClass]=deal(class(sm));
+%         %asymetric needs too much history for now.
+        if ~isa(rm,'cuedReinforcement') && ~isa(rm,'asymetricReinforcement') % cued breaks b/c it requires calcstim's details
             [rm rewardSizeULorMS requestRewardSizeULorMS msPenalty] = calcReinforcement(rm,trialRecords, s);
         else
             rewardSizeULorMS=-1;

@@ -55,7 +55,7 @@ switch class(trialManager)
 		% optional preOnset phase
 		if ~isempty(preRequestStim) &&  ismember(class(trialManager),{'nAFC','goNoGo','cuedGoNoGo'}) % only some classes have the pre-request phase if no delayManager in 'nAFC' class
 			if preRequestStim.punishResponses
-				criterion={[],i+1,requestPorts,i+1,[targetPorts distractorPorts],i+2+addedPhases};
+				criterion={[],i+1,requestPorts,i+1,[targetPorts distractorPorts],i+1+addedPreResponsePhase};  %was:i+2+addedPhases ;  i+1+addedPreResponsePhase? or i+2+addedPreResponsePhase?
 			else
 				criterion={[],i+1,requestPorts,i+1};
 			end

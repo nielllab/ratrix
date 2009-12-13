@@ -503,7 +503,7 @@ switch details.renderMode
         preRequestStim.punishResponses=false;
         
         preResponseStim=discrimStim;
-        preResponseStim.punishResponses=false;
+        preResponseStim.punishResponses=false;  
         
          if ~isempty(details.blocking) && any(isfield(details.blocking,{'flankerOn','flankerOff','targetOn','targetOff'}))
              error('blocking trials with flankerOnOff/targetOnOff is not currently combatible with the dynamic drawExpertFrame')
@@ -610,13 +610,15 @@ switch details.renderMode
 
       
         % a gray screen
-        preRequestStim=[];
-        preRequestStim.stimulus=interTrialLuminance;
-        preRequestStim.stimType='loop';
-        preRequestStim.scaleFactor=0;
-        preRequestStim.startFrame=0;
-        preRequestStim.autoTrigger=[];
-        preRequestStim.punishResponses=false;
+        gray=[];
+        gray.stimulus=interTrialLuminance;
+        gray.stimType='loop';
+        gray.scaleFactor=0;
+        gray.startFrame=0;
+        gray.autoTrigger=[];
+        gray.punishResponses=false;
+        
+        preRequestStim=gray;
         
         switch trialManagerClass
             case 'freeDrinks'
@@ -634,7 +636,7 @@ switch details.renderMode
                 
                 %the discrim phase is actually blank
                 discrimStim=preRequestStim;
-            case {'nAFC','autopilot','cuedGoNoGo'}
+            case {'nAFC','autopilot'}
                 discrimStim=[];
                 discrimStim.stimulus=out;
                 discrimStim.stimType=type;
@@ -644,9 +646,34 @@ switch details.renderMode
                 
                 preResponseStim=preRequestStim;
                 preResponseStim.punishResponses=false;
+            case {'cuedGoNoGo'}
+                %dealy manager controls this gray screen
+                preRequestStim.punishResponses=false; % maybe punish before any stim is on;  consider the utility of this (Duc in charge of it until ... )
+               
+                %responseWindowMs(1) controls how long before licks count,
+                %and the stim shows up here!
+                preResponseStim=[]; 
+                preResponseStim.stimulus=out;
+                preResponseStim.stimType=type;
+                preResponseStim.scaleFactor=scaleFactor;
+                preResponseStim.startFrame=0;
+                preResponseStim.autoTrigger=[];
+                preResponseStim.punishResponses=false;  %should hiss when response is blocked
                 
+                %the discrim stim is actually blank, cuz the stim already
+                %happened... (here we expect stimuli to end before responseWindowMs(1)) 
+                discrimStim=gray;
                 
+                %if they were static and on for a while, then we should recompute this
+                if isinf(details.targetOnOff(2)) || isinf(details.flankerOnOff(2)) || details.targetOnOff(2)>50 || details.flankerOnOff(2)>50
+                   error('would need to show stim during discrim as well') 
+                   %discrimStim=preResponseStim?;
+                end
                 
+                if details.toggleStim==1
+                    error('toggle is not handed with cuedGoNoGo')
+                end
+
             otherwise
                 error('unknown how to handle that trial manager class')
         end

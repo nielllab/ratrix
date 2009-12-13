@@ -621,7 +621,12 @@ switch protocolVersion
                 default.delayManager=flatHazard(percentile, value, fixedDelayMs);
                 
                 default.responseWindowMs=[500 1500];  % do these conflict with one another?
-                default.responseLockoutMs=500;
+                default.responseLockoutMs=500;  % this is ONLY used by goNoGo (not cuedGoNoGo) and has not been tested thoroughly
+                %not clear why there are two.  maybe fan made
+                %responseLockoutMs first and responseWindowMs is more
+                %general, and he never removed the specific one from
+                %goNoGo? -pmm 12/13/09
+              
                 
                 default.requestPorts='none';
                 default.tmClass='goNoGo';
@@ -645,14 +650,14 @@ switch protocolVersion
                 
                 %set a few things unique to go-no-go
                 percentile=0.99;
-                value=100;
-                fixedDelayMs=1000;
+                value=10000;
+                fixedDelayMs=2000;
                 default.delayManager=flatHazard(percentile, value, fixedDelayMs);
-                default.delayManager=constantDelay(500);  % note: this line willinvalidatethe one above it
+                %default.delayManager=constantDelay(500);  % note: this line willinvalidatethe one above it
                 
-                default.responseWindowMs=[500 2000];  % do these conflict with one another?
-%                 default.responseLockoutMs=[0 400];
-                
+                default.responseWindowMs=[500 1500]; 
+                %this first number should always be greater than 250 (else stim might be wrong)
+                 
                 default.requestPorts='none';
                 default.tmClass='cuedGoNoGo'; 
                 

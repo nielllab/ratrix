@@ -44,9 +44,6 @@ if isempty(possibleTimeout)
 		resp=find(result);
 		if length(resp)==1
 			correct = ismember(resp,targetPorts);
-			if punishResponses % this means we got a response, but we want to punish, not reward
-				correct=0; % we could only get here if we got a response (not by request or anything else), so it should always be correct=0
-			end
 			result = 'nominal';
 		else
 			correct = 0;
@@ -56,13 +53,18 @@ if isempty(possibleTimeout)
 else
     %GO NOGO SPECIAL CODE HANDLES TIME OUTS AS NO-GO, which could be correct
 	%correct=possibleTimeout.correct;
-    if checkTargetIsPresent(sm,trialRecords(end).stimDetails);
+    if checkTargetIsPresent(sm,trialRecords(end).stimDetails);  %&& was previously in "discrim" Phase (so early pushied responses remain incorrect!)
         correct=0;
     else
         correct=1;
     end
+	result = 'nominal';
 end
 
+if punishResponses % this means we got a response, but we want to punish, not reward
+    correct=0; % we could only get here if we got a response (not by request or anything else), so it should always be correct=0
+end
+            
 % ========================================================
 phaseType = getPhaseType(spec);
 framesUntilTransition=getFramesUntilTransition(spec);

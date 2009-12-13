@@ -1,4 +1,4 @@
-function plot_vector(X,f,plt,Xerr,c,w,currAxis)
+function plot_vector(X,f,plt,Xerr,c,w,currAxis,labels)
 % Function to plot a frequency dependent vector X. If error bars are specified in Xerr,
 % it also plots them. Xerr can either contain upper and lower confidence intervals 
 % on X, or simply a theoretical confidence level (for the coherence). Used
@@ -38,7 +38,9 @@ if nargin < 7 || length(currAxis)<2;
     figure;
     currAxis = [gcf gca];
 end;
-
+if nargin < 8 || isempty(labels);
+    labels = {};
+end;
 
 if strcmp(plt,'l');
     X=10*log10(X);
@@ -56,7 +58,17 @@ else
        hold on; plot(f,Xerr(1,:),'Color',c,'LineStyle','--','Linewidth',w); plot(f,Xerr(2,:),'Color',c,'LineStyle','--','Linewidth',w); 
     end
 end
-xlabel('f(Hz)');
-if strcmp(plt,'l'); ylabel('Spectral Power (dB)'); else ylabel('X'); end;
+if isempty(labels)
+    xlabel('f(Hz)');
+    if strcmp(plt,'l'); 
+        ylabel('10*log10(X)'); 
+    else
+        ylabel('X'); 
+    end;
+else
+    title(labels{1});
+    xlabel(labels{2});
+    ylabel(labels{3});
+end
 
 

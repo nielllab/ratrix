@@ -694,17 +694,19 @@ if doLFPAnalysis
     
     if plotParameters.showLFPAnalysis
         LFPfig = figure('Name','LFP analysis','NumberTitle','off');
-        cmap = lines(numTypes);
-        subplot(3,3,[1 4 7]);
+        cmap = jet(numTypes);
+        subplot(9,3,[1 4 7 10 13 16 19 22 25]);
         hold on;
         for currTypeNum = 1:numTypes
             currPlotColor = cmap(currTypeNum,:);
             LFPForCurrType = (mean(squeeze(LFPByType(currTypeNum,:,:)),1)-rangeOfLFP(1))/diff(rangeOfLFP);
             LFPForCurrTypePlusStd = ((mean(squeeze(LFPByType(currTypeNum,:,:)),1)+squeeze(stdDevByTypeByRepeat(currTypeNum,:)))-rangeOfLFP(1))/diff(rangeOfLFP);
             LFPForCurrTypeMinusStd = ((mean(squeeze(LFPByType(currTypeNum,:,:)),1)-squeeze(stdDevByTypeByRepeat(currTypeNum,:)))-rangeOfLFP(1))/diff(rangeOfLFP);
-            plot(timeByTypeByRepeat,currTypeNum+LFPForCurrType-mean(LFPForCurrType),'LineWidth',2,'Color',currPlotColor);
-            plot(timeByTypeByRepeat,currTypeNum+LFPForCurrTypePlusStd-mean(LFPForCurrType),'LineWidth',1,'Color',currPlotColor);
-            plot(timeByTypeByRepeat,currTypeNum+LFPForCurrTypeMinusStd-mean(LFPForCurrType),'LineWidth',1,'Color',currPlotColor);
+            stimPhases = phases((repeat==1)&(type==currTypeNum));
+            plot(timeByTypeByRepeat,currTypeNum+LFPForCurrType-mean(LFPForCurrType),'LineWidth',3,'Color',currPlotColor);
+            plot(timeByTypeByRepeat,currTypeNum+LFPForCurrTypePlusStd-mean(LFPForCurrType),'LineWidth',.5,'Color',currPlotColor);
+            plot(timeByTypeByRepeat,currTypeNum+LFPForCurrTypeMinusStd-mean(LFPForCurrType),'LineWidth',.5,'Color',currPlotColor);
+            plot(timeByTypeByRepeat,currTypeNum+0.25*resample(sin(stimPhases),length(timeByTypeByRepeat),length(stimPhases)),'LineWidth',.5,'LineStyle','--','Color',currPlotColor);
         end
         axis tight;
         titleLabel = sprintf('average over swept parameter: %s', sweptParameter{:});
@@ -727,21 +729,27 @@ if doLFPAnalysis
     LFPAfterStim = LFPAfterStim-(LFPAfterStim(1)-LFPBeforeStim(end));
     LFPWithoutStim = [LFPBeforeStim; LFPAfterStim];
     params.Fs = mean(LFPRecord.LFPSamplingRateHz);
-    params.fpass = [0 150];
+%     params.fpass = [0 150];
+    params.fpass = [0 30];
     params.err = [2 0.05];
     params.tapers = [3 5];
     [specWithoutStim freq specWithoutStimErr] = mtspectrumc(LFPWithoutStim,params);
     log10specWithoutStim = 10*log10(specWithoutStim);
     
     if plotParameters.showLFPAnalysis
-        currAxes = subplot(3,3,[2 3]);
-        plot_vector(specWithoutStim,freq,'l',specWithoutStimErr,[0.8 0.8 0.9],2,[LFPfig currAxes]);
+        currAxes = subplot(9,3,[2 3]);
+        plot_vector(specWithoutStim,freq,'l',specWithoutStimErr,[0.8 0.8 0.9],2,[LFPfig currAxes],{'','','logP(dB)'});
+        axis tight;
+        currAxes = subplot(9,3,[5 6]);
+        plot_vector(specWithoutStim,freq,'n',specWithoutStimErr,[0.8 0.8 0.9],2,[LFPfig currAxes],{'','','P'});
+        axis tight;
     end
     
     LFPPowerByType = nan(numTypes,numRepeats,length(specWithoutStim));
     params = [];
     params.Fs = mean(LFPRecord.LFPSamplingRateHz);
-    params.fpass = [0 150];
+%   params.fpass = [0 150];
+    params.fpass = [0 30];
     params.tapers = [3 5];
     for currTypeNum = 1:numTypes
         for currRepeatNum = 1:numRepeats
@@ -753,31 +761,59 @@ if doLFPAnalysis
         end
     end
     if plotParameters.showLFPAnalysis
+        currAxes = subplot(9,3,[8 9]);
         hold on;
         for currTypeNum = 1:numTypes
             currPlotColor = cmap(currTypeNum,:);
             %         log10LFPPowerByType = 10*log10(squeeze(mean(LFPPowerByType(currTypeNum,:,:),2)));
             %         log10LFPPowerErrByType = 10*log10(squeeze(std(LFPPowerByType(currTypeNum,:,:),2)));
-            plot_vector(squeeze(mean(LFPPowerByType(currTypeNum,:,:),2)),linspace(min(freq),max(freq),length(specWithoutStim)),'l',[],currPlotColor,1,[LFPfig currAxes]);
+            plot_vector((squeeze(mean(LFPPowerByType(currTypeNum,:,:),2))-specWithoutStim),linspace(min(freq),max(freq),length(specWithoutStim)),'n',[],currPlotColor,1,[LFPfig currAxes],{'','f','\DeltaP'});
             %         plot(freq,log10LFPPowerByType-log10specWithoutStim,'Color',currPlotColor,'LineWidth',1);
         end
         axis tight;
         hold off;
     end
        
-    % LFP Coherence at the frequency of the input sweep 
-    stdOfMean = squeeze(std(mean(LFPByType,2),0,3));
+    % LFP Coherence
+%    stdOfMean = squeeze(std(mean(LFPByType,2),0,3));
+coherencyCoeffMatrix = [];
+coherencyPhaseMatrix = [];
     if plotParameters.showLFPAnalysis
-        subplot(3,3,[5 6]);
-        plot(1:numTypes,stdOfMean);
-        set(gca,'XTick',1:numTypes,'XTickLabel',valNames);
-        xLabel = sprintf('swept parameter: %s', sweptParameter{:});
-        yLabel = 'std';
-        xlabel(xLabel);
+         for currTypeNum = 1:numTypes            
+            LFPForCurrType = (squeeze(mean(LFPByType(currTypeNum,:,:),2))-rangeOfLFP(1))/diff(rangeOfLFP);
+            stimPhases = sin(phases((repeat==1)&(type==currTypeNum)));
+            stimIntensity = resample(sin(stimPhases),length(timeByTypeByRepeat),length(stimPhases));
+            params.Fs = ceil(length(timeByTypeByRepeat)/range(timeByTypeByRepeat));
+            params.pad = 0;
+            params.tapers = [3 5];
+            params.err = [2 0.05];
+            [C,phi,S12,S1,S2,f,confC,phistd,Cerr] = coherencyc(stimIntensity,LFPForCurrType,params);
+%             plot_vector(S1,f,'l',[],cmap(currNumType,:),1,[LFPfig currAxes]);
+            coherencyCoeffMatrix(end+1,:) = C';
+            coherencyPhaseMatrix(end+1,:) = phi';
+        end
+        hold off;
+        subplot(9,3,[11 12]);
+        imagesc(coherencyCoeffMatrix); colorbar;
+        XTicks = [0 size(coherencyCoeffMatrix,2)];
+        newXTickLabels = [min(f) max(f)]
+        set(gca,'XTick',XTicks,'XTickLabel',newXTickLabels);
+        yLabel = 'Coh';
         ylabel(yLabel);
-        axis tight;
+        axis tight
+        
+        subplot(9,3,[14 15]);
+        imagesc(coherencyPhaseMatrix); colorbar;
+        XTicks = [0 size(coherencyPhaseMatrix,2)];
+        newXTickLabels = [min(f) max(f)]
+        set(gca,'XTick',XTicks,'XTickLabel',newXTickLabels);
+        yLabel = 'Phase';
+        ylabel(yLabel);
+        axis tight
+         
+%         axis tight;
+        end
     end
-end
 
 
 %CUMULATIVE IS NOT USED YET:

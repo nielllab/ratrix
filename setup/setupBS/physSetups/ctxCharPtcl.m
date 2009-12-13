@@ -263,7 +263,7 @@ std=gray*(2/3);
 searchSubspace=[1];
 background=gray;
 method='texOnPartOfScreen';
-stixelSize = [32 32]% [128 128];% [128 128]; %[32,32];
+stixelSize = [32 32];% [128 128];% [128 128]; %[32,32];
 changeable=false;
 
 %fullField 
@@ -380,7 +380,7 @@ fd2 = freeDrinks(sm,freeDrinkLikelihood,allowRepeats,constantRewards,eyeControll
 rfIsGood=receptiveFieldCriterion(0.05,RFdataSource,1,'box',3);
 
 numSweeps=int8(3);
-cmr = manualCmrMotionEyeCal(background,numSweeps,maxWidth,maxHeight,scaleFactor,interTrialLuminance)
+cmr = manualCmrMotionEyeCal(background,numSweeps,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 %% trainingsteps
 

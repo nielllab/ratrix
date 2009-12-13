@@ -467,6 +467,12 @@ while ~quit
                         %LFP resampling
                         if spikeDetectionParams.sampleLFP
                             spikeRecord.LFPRecord.data = resample(neuralRecord.neuralData(:,3),spikeDetectionParams.LFPSamplingRateHz,neuralRecord.samplingRate);
+                            if isfield(spikeDetectionParams,'LFPBandPass') %smooth each chunk separately? or do it at the end????
+                                W = spikeDetectionParams.LFPBandPass*2/spikeDetectionParams.LFPSamplingRateHz;
+                                N = 2; % second order filter...why? because!
+                                [b a] = butter(N,W);
+                                spikeRecord.LFPRecord.data=filter(b,a,spikeRecord.LFPRecord.data);
+                            end
                             spikeRecord.LFPRecord.dataTimes = (linspace(neuralRecord.neuralDataTimes(1),neuralRecord.neuralDataTimes(end),length(spikeRecord.LFPRecord.data)))';
                             spikeRecord.LFPSamplingRateHz = spikeDetectionParams.LFPSamplingRateHz;
                         else
@@ -679,29 +685,29 @@ while ~quit
                         % 4/17/09 - only pass in the parts of the spikeRecord that belong to the currentTrial
                         % filteredSpikeRecord is a struct that contains all the spike data for the currentTrial to send to physAnalysis
                         try
-                        filteredSpikeRecord=[];
-                        which=find(trialNum==currentTrial);
-                        filteredSpikeRecord.spikes=spikes(which);
-                        filteredSpikeRecord.spikeTimestamps=spikeTimestamps(which);
-                        filteredSpikeRecord.spikeWaveforms=spikeWaveforms(which,:);
-                        filteredSpikeRecord.assignedClusters=assignedClusters(which,:);
-                        filteredSpikeRecord.chunkID=chunkID(which);
-                        which=find(trialNumForCorrectedFrames==currentTrial);
-                        filteredSpikeRecord.correctedFrameIndices=correctedFrameIndices(which,:);
-                        filteredSpikeRecord.correctedFrameTimes = correctedFrameTimes(which,:);
-                        filteredSpikeRecord.stimInds=stimInds(which);
-                        filteredSpikeRecord.chunkIDForCorrectedFrames=chunkIDForCorrectedFrames(which);
-                        filteredSpikeRecord.photoDiode=photoDiode(which);
-                        which=find(trialNumForDetails==currentTrial);
-                        filteredSpikeRecord.spikeDetails=spikeDetails(which);
-                        filteredSpikeRecord.chunkIDForDetails=chunkIDForDetails(which);
-                        filteredSpikeRecord.currentChunk=chunksToProcess(i,2);
+                            filteredSpikeRecord=[];
+                            which=find(trialNum==currentTrial);
+                            filteredSpikeRecord.spikes=spikes(which);
+                            filteredSpikeRecord.spikeTimestamps=spikeTimestamps(which);
+                            filteredSpikeRecord.spikeWaveforms=spikeWaveforms(which,:);
+                            filteredSpikeRecord.assignedClusters=assignedClusters(which,:);
+                            filteredSpikeRecord.chunkID=chunkID(which);
+                            which=find(trialNumForCorrectedFrames==currentTrial);
+                            filteredSpikeRecord.correctedFrameIndices=correctedFrameIndices(which,:);
+                            filteredSpikeRecord.correctedFrameTimes = correctedFrameTimes(which,:);
+                            filteredSpikeRecord.stimInds=stimInds(which);
+                            filteredSpikeRecord.chunkIDForCorrectedFrames=chunkIDForCorrectedFrames(which);
+                            filteredSpikeRecord.photoDiode=photoDiode(which);
+                            which=find(trialNumForDetails==currentTrial);
+                            filteredSpikeRecord.spikeDetails=spikeDetails(which);
+                            filteredSpikeRecord.chunkIDForDetails=chunkIDForDetails(which);
+                            filteredSpikeRecord.currentChunk=chunksToProcess(i,2);
                         catch ex
                             getReport(ex)
                             keyboard
                         end
                         
-                        if ismember(class(sm),{'gratings'})
+                        if ismember(class(sm),{'gratings','whiteNoise'})
                             [analysisdata cumulativedata] = physAnalysis(sm,filteredSpikeRecord,stimRecord.stimulusDetails,plotParameters,neuralRecord.parameters,cumulativedata,eyeData,LFPRecord);
                             
                         else

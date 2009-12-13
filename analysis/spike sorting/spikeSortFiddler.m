@@ -552,7 +552,7 @@ end
 % subjectID = '305';cellBoundary={'trialRange',[30 39]} % h-bars
 % subjectID = '305';cellBoundary={'trialRange',[41 51]} % v-bars
 % subjectID = '305';cellBoundary={'trialRange',[53]} % trf10
-% subjectID = '305';cellBoundary={'trialRange',[56]} % SF
+subjectID = '305';cellBoundary={'trialRange',[56]} % SF
 % subjectID = '305';cellBoundary={'trialRange',[58 60]} % adding lens
 % subjectID = '305';cellBoundary={'trialRange',[61]} % SF with lens camera was changed here....eye not very good.
 % subjectID = '305';cellBoundary={'trialRange',[63 65]} % SF everything seems to be working fine.
@@ -588,9 +588,10 @@ end
 
 %% Other Params
 spikeDetectionParams.detectionMethod=3; % 1 -> from power signal, 2 threshold positive, 3 threshold negative, 4 threshold abs, 5 wavelet
-spikeDetectionParams.extractionThreshold =15;
+spikeDetectionParams.extractionThreshold =6;
 spikeDetectionParams.sampleLFP = true; %false; %
 spikeDetectionParams.LFPSamplingRateHz =500;
+spikeDetectionParams.LFPBandPass = [1 30];
 
 % This section determines what to plot and what not to plot
 plottingParams.showSpikeAnalysis = false;

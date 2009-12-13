@@ -44,7 +44,7 @@ if ~isempty(stimulus.blocking)
                 end
             case 'targetContrast';
                 switch stimulus.protocolType
-                    case {'goToRightDetection'}
+                    case {'goToRightDetection','cuedGoNoGo','goNoGo'}
                         d=find(stimulus.goRightContrast==setValues(i));
                         %e=allow random it's 0 contrast
                     case 'goToLeftDetection'

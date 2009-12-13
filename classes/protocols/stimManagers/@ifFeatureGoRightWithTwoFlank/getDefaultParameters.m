@@ -644,14 +644,14 @@ switch protocolVersion
                 
                 
                 %set a few things unique to go-no-go
-                %percentile=0.99;
-                %value=10000;
-                %fixedDelayMs=1000;
-                %default.delayManager=flatHazard(percentile, value, fixedDelayMs);
-                default.delayManager=constantDelay(1000);
+                percentile=0.99;
+                value=100;
+                fixedDelayMs=1000;
+                default.delayManager=flatHazard(percentile, value, fixedDelayMs);
+                default.delayManager=constantDelay(500);  % note: this line willinvalidatethe one above it
                 
-                default.responseWindowMs=[500 1500];  % do these conflict with one another?
-                default.responseLockoutMs=500;
+                default.responseWindowMs=[500 2000];  % do these conflict with one another?
+%                 default.responseLockoutMs=[0 400];
                 
                 default.requestPorts='none';
                 default.tmClass='cuedGoNoGo'; 

@@ -85,3 +85,4 @@ phys/scratch3.m -text
 phys/new/helpers/scanTriple.m -text
 phys/new/tmpAnalysis.m -text
 phys/new/helpers/parseWaveforms.m -text
+phys/new/ks.m -text

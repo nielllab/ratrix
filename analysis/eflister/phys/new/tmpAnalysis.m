@@ -37,7 +37,7 @@ data.fileNames=fileNames;
 
 data.mins=(stimTimes(2)-stimTimes(1))/60;
 
-if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) % && rec.date>datenum('04.24.09','mm.dd.yy')
+if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && rec.date==datenum('04.15.09','mm.dd.yy') %example: 22	43.3 mins	164-04.15.09-z47.34-chunk1-code1-acf4f35b54186cd6055697b58718da28e7b2bf80/gaussian-t2042.385-4641
     
     data.spks=load(fileNames.spikesFile);
     data.spks=data.spks(data.spks>=stimTimes(1) & data.spks<=stimTimes(2));
@@ -75,13 +75,13 @@ if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) % && r
     
     data=findBursts(data);
     
-    doAnalysis(data,'stationarity');
+    % doAnalysis(data,'stationarity');
     % doAnalysis(data,'raster');
-    % doAnalysis(data,'STA');
-    %    doAnalysis(data,'burstDetail');
-    %    doAnalysis(data,'waveforms');
-    %    doAnalysis(data,'ISI');
-    %    doAnalysis(data,'spectrogram');
+    doAnalysis(data,'STA');
+    % doAnalysis(data,'burstDetail');
+    % doAnalysis(data,'waveforms');
+    % doAnalysis(data,'ISI');
+    % doAnalysis(data,'spectrogram');
     
     switch stimType
         case 'gaussian'
@@ -598,11 +598,13 @@ end
 
 end
 
-function traceDesnity(times,traces,lims)
-bits=12;%16;
+function traceDensity(times,traces,lims,bits,doLog)
+if ~exist('bits','var') || isempty(bits)
+    bits=12;%16;
+end
 
-n=1000;
-if true && size(traces,2)>n
+n=10000;
+if false && size(traces,2)>n
     traces=traces(:,rand(1,size(traces,2))<n/size(traces,2));
 end
 
@@ -616,7 +618,12 @@ for i=1:size(traces,2)
         fprintf('%g done\n',100*i/size(traces,2))
     end
 end
-imagesc(log(im'))
+
+if ~exist('doLog','var') || isempty(doLog) || doLog
+    imagesc(log(im'))
+else
+    imagesc(im')
+end
 
 z=sum(im)==0;
 
@@ -824,8 +831,8 @@ end
 end
 
 function f=sta(data)
-stimPreMS =200;%300;
-stimPostMS=100;% 30;
+stimPreMS =300;%1000;
+stimPostMS=75;%200;
 
 color=zeros(1,3);
 c=.95;
@@ -838,26 +845,59 @@ if ~isempty(data.frames)
     frames=[interp1(data.frames(:,2),data.frames(:,1),frames,'nearest'); frames];
     
     [tSTF vals]=calcSTA(data.tonics,frames,stimPreMS,stimPostMS,c);
-    staPlot(tSTF,color,vals,c,n,1,'spike triggered average frame');
+    staPlot(tSTF,color,vals,c,n,1,'spike triggered average frame',frames(1,:));
     
     [bSTF vals]=calcSTA(data.bsts,frames,stimPreMS,stimPostMS,c);
-    staPlot(bSTF,color,vals,c,n,3,'burst triggered average frame');
+    staPlot(bSTF,color,vals,c,n,3,'burst triggered average frame',frames(1,:));
 end
 
 [tSTS vals]=calcSTA(data.tonics,data.stim,stimPreMS,stimPostMS,c);
-staPlot(tSTS,color,vals,c,n,2,'spike triggered average filtered photodiode');
+staPlot(tSTS,color,vals,c,n,2,'spike triggered average filtered photodiode',data.stim(1,:));
 
 [bSTS vals]=calcSTA(data.bsts,data.stim,stimPreMS,stimPostMS,c);
-staPlot(bSTS,color,vals,c,n,4,'burst triggered average filtered photodiode');
+staPlot(bSTS,color,vals,c,n,4,'burst triggered average filtered photodiode',data.stim(1,:));
 
-subplot(n,2,2*n-1)
+subplot(n,3,3*n-1)
 xlabel('ms')
-
 keyboard
 end
 
-function staPlot(info,color,vals,c,n,r,t,d)
-subplot(n,2,2*r-1)
+function staPlot(info,color,vals,c,n,r,t,dist)
+    function rg=getExtremes(rs)
+        rg=cellfun(@(x) x(rs(:)),{@min,@max});
+    end
+
+if ~exist('dist','var')
+    numCols=2;
+    lims=getExtremes(vals);
+    mu=[];
+    sigma=[];
+elseif isvector(dist)
+    numCols=3;
+    lims=[-1 1]*3;
+    
+    subplot(n,numCols,numCols*r-2)
+
+    [mu,sigma] = normfit(dist);
+    
+    [counts bins]=hist((dist-mu)/sigma,100);
+    actual=-log(counts);
+    
+    plot(actual,bins)
+    
+    hold on
+    fit=-log(normpdf(bins)); % ,mu,sigma));
+    fit=fit-min(fit)+min(actual);
+    plot(fit,bins,'Color',.5*ones(1,3))
+    
+    ylim(lims)
+    xlim(getExtremes(actual(~isinf(actual))))
+    set(gca,'XTick',[])
+else
+    error('dist error')
+end
+
+subplot(n,numCols,numCols*r-1)
 
 % fill([info(2,:) fliplr(info(2,:))],[info(3,:) fliplr(info(4,:))],mean([ones(1,3);color]))
 if false
@@ -865,24 +905,60 @@ if false
 end
 
 hold on
-plot(info(2,:),info(1,:),'Color',color)
-if ~isempty(vals) && false
-    lims=cellfun(@(x) x(vals(:)),{@min,@max});
-    
-    plot(zeros(2,1),lims,'k')
-    if false
-        rows=rand(1,size(vals,1))>.999;
-        rows([1 end])=true;
-        plot(info(2,:),vals(rows,:)','r')
-    end
-end
+staInner(false,false,true);
 
-xlim(info(2,[1 end]))
+    function staInner(doExamples,normalize,doHPFs)
+        if normalize
+            theseYs = info(1,:)-min(info(1,:));
+            theseYs = theseYs/max(theseYs);
+            theseLims=[0 1];
+            
+            thisMeanStim=(mu-min(info(1,:)))/(max(info(1,:))-min(info(1,:)));
+            thisNorm=1;
+            thisColor=.7*ones(1,3);
+        else
+            theseYs=(info(1,:)-mu)/sigma;
+            theseLims=.1*[-1 1];
+            thisMeanStim=0;
+            thisNorm=sigma;
+            thisColor=color;
+        end
+        
+        h1=plot(info(2,:),theseYs,'Color',thisColor);
+        hold on
+        plot(zeros(2,1),theseLims,'k')
+        if ~isempty(thisMeanStim)
+            plot(info(2,[1 end]),thisMeanStim*ones(1,2),'k')
+        end
+        
+        if ~isempty(vals) && doExamples && ~normalize %haven't handled the normalized case yet...
+                rows=rand(1,size(vals,1))>.999;
+                rows([1 end])=true;
+                plot(info(2,:),vals(rows,:)','r')
+        end
+        
+        if doHPFs
+            h2=plot(info(2,:),thisMeanStim+mean(vals-repmat(mean(vals')',1,size(vals,2)))/thisNorm,'r');
+            h3=plot(median(diff(info(2,1:end)))/2+info(2,1:end-1),thisMeanStim+mean(diff(vals')')/thisNorm,'b');
+            legend([h1 h2 h3],{'STA','no means','STA diff'});
+        end
+        
+        xlim(info(2,[1 end]))
+        ylim(theseLims)
+    end
+
 title(t)
 
+subplot(n,numCols,numCols*r)
 if ~isempty(vals) && false
-    subplot(n,2,2*r)
-    traceDesnity(info(2,:),vals',lims)
+    traceDensity(info(2,:),vals',lims,6,false)
+else
+    pCol=zeros(1,3);
+    plot(info(2,:),info(end,:),'Color',pCol)
+    hold on
+    ylabel('p-value')
+    plot(info(2,[1 end]),.05*ones(1,2),'Color',pCol)
+    staInner(false,true,false);
 end
 end
 
@@ -1232,15 +1308,19 @@ end
 
 if ~isempty(trigTs)
     sta=mean(vals);
+    ps = ks(vals,stim(1,:));
 else
     sta=zeros(size(tinds));
+    ps=ones(size(sta));
 end
-sta=[sta;tinds*timestep*1000];
+sta=[sta; tinds*timestep*1000];
 
 if false
     svals=sort(vals);
-    sta=[sta;svals(ceil(size(svals,1)*([0 1]+[1 -1]*(1-c)/2)),:)];
+    sta=[sta; svals(ceil(size(svals,1)*([0 1]+[1 -1]*(1-c)/2)),:)];
 end
+
+sta=[sta; ps];
 end
 
 function [ratID date type uid h z chunkNum]=parseFileName(f,exType,rec,stimTimes)

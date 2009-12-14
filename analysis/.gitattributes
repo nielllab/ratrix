@@ -444,3 +444,7 @@ spike[!!-~]sorting/getRawNidaq.m -text
 bsriram/nonStandard/getDataFromEventLogNew.m -text
 bsriram/nonStandard/LFPAnalysis.m -text
 duc/doCuedGoNoGoAnalysis.m -text
+analysisScripts/260/analysisScript.m -text
+analysisScripts/305/analysisScript_12_12_2009.m -text
+analysisScripts/sampleAnalysisParameters.m -text
+bsriram/analysisEnabling/createAnalysisScript.m -text

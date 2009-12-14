@@ -51,8 +51,7 @@ elseif iscell(cellBoundary) && length(cellBoundary)==2
     switch boundaryType
         case 'trialRange'
             if any(~isnumeric(cellBoundary{2})) 
-                error('invalid parameters for trialRange cellBoundary');
-            
+                error('invalid parameters for trialRange cellBoundary');            
             end
             switch length(cellBoundary{2})
                 case 2
@@ -76,7 +75,51 @@ elseif iscell(cellBoundary) && length(cellBoundary)==2
             boundaryRange=boundaryRange([1 2 4 5]);
         otherwise
             error('bad type of cellBoundary!');
-    end    
+    end
+    maskType = 'none';
+    maskON = false;
+    maskRange = [];
+elseif iscell(cellBoundary) && length(cellBoundary)==4
+    boundaryType = cellBoundary{1};
+    switch boundaryType
+        case 'trialRange'
+            if any(~isnumeric(cellBoundary{2})) 
+                error('invalid parameters for trialRange cellBoundary');            
+            end
+            switch length(cellBoundary{2})
+                case 2
+                    %okay, thats normal
+                case 1
+                    %start trial is the stop trial
+                    cellBoundary{2}=[cellBoundary{2} cellBoundary{2}];
+                otherwise
+                    error('must be length 2 for [start stop] or a single trial number')
+            end
+            boundaryRange=[cellBoundary{2}(1) 1 cellBoundary{2}(2) Inf]; % [startTrial startChunk endTrial endChunk]
+        case 'trialAndChunkRange'
+            if ~iscell(cellBoundary{2}) || length(cellBoundary{2})~=2 || length(cellBoundary{2}{1})~=2 || length(cellBoundary{2}{2})~=2
+                error('trialAndChunkRange cellBoundary must be in format {''trialAndChunkRange'',{[startTrial startChunk], [endTrial endChunk]}}');
+            end
+            boundaryRange=[cellBoundary{2}{1}(1) cellBoundary{2}{1}(2) cellBoundary{2}{2}(1) cellBoundary{2}{2}(2)]; % [startTrial startChunk endTrial endChunk]
+        case 'physLog'
+            boundaryRange = getCellBoundaryFromEventLog(subjectID,cellBoundary{2},neuralRecordsPath);
+            startSysTime=boundaryRange(3);
+            endSysTime=boundaryRange(6);
+            boundaryRange=boundaryRange([1 2 4 5]);
+        otherwise
+            error('bad type of cellBoundary!');
+    end
+    maskType = cellBoundary{3};
+    switch maskType
+        case 'trialMask'
+            if any(~isnumeric(cellBoundary{4}))
+                error('invalid parameters for maskRange');
+            end
+            maskRange = cellBoundary{4};
+        otherwise
+            error('mask type is not supported');
+    end
+    maskON = true;
 else
     error('bad cellBoundary input');
 end
@@ -198,7 +241,7 @@ else
     save(fullfile(baseAnalysisPath,'activeSortingParams.mat'),'spikeDetectionParams','spikeSortingParams');
 end
 % ==========================================================================================
-
+maskedPrevTrial = false;
 while ~quit
     % THIS IS START OF THE LOOP FOR EACH CURRENTTRIAL
     doneWithThisTrial=false;
@@ -267,18 +310,28 @@ while ~quit
     % check the stimRecord for stimManagerClass (and other stuff?)
     stimRecord=stochasticLoad(stimRecordLocation,{'stimManagerClass'});
     stimManagerClass=stimRecord.stimManagerClass;
+    
+    % trialMasking logical
+    maskThisTrial = false;
+    if strcmp(maskType,'trialMask')
+        if  any(maskRange==currentTrial)
+            maskThisTrial = true;
+        end
+    end  
+    
     if isempty(lastStimManagerClass)
         lastStimManagerClass=stimManagerClass;
-    elseif ~strcmp(lastStimManagerClass,stimManagerClass) 
+    elseif ~strcmp(lastStimManagerClass,stimManagerClass)&& ~maskThisTrial 
         % if last trial was diff stim, then reset cumulativedata
         % - should fix to not just ~strcmp(trialManagerClasses), but a function diff on the stimManager
         cumulativedata=[];
     end
     analyzeThisTrial= all(strcmp('all',stimClassToAnalyze)) ||  any(strcmp(stimRecord.stimManagerClass,stimClassToAnalyze));
+    
     if analyzeThisTrial
         startingStimInd=0;
         
-        while ~doneWithThisTrial
+        while ~doneWithThisTrial && ~maskThisTrial
             % look at the neuralRecord and see if there are any new chunks to process
             disp('checking chunk names... may be slow remotely...'); tic;
             chunkNames=who('-file',neuralRecordLocation);
@@ -706,7 +759,6 @@ while ~quit
                             getReport(ex)
                             keyboard
                         end
-                        
                         if ismember(class(sm),{'gratings','whiteNoise'})
                             [analysisdata cumulativedata] = physAnalysis(sm,filteredSpikeRecord,stimRecord.stimulusDetails,plotParameters,neuralRecord.parameters,cumulativedata,eyeData,LFPRecord);
                             
@@ -756,7 +808,10 @@ while ~quit
                 processedChunks=[processedChunks; chunksToProcess(i,:)];
             end
         end % end doneWithThisTrial loop
-        
+        if maskThisTrial
+            disp(sprintf('skipping trialNumber: %d',currentTrial))
+            currentTrial = min(currentTrial+1,boundaryRange(3));
+        end
     else
         disp(sprintf('skipping class: %s',stimRecord.stimManagerClass))
         currentTrial=min(currentTrial+1,boundaryRange(3));

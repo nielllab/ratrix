@@ -30,8 +30,8 @@ out[!!-~]of[!!-~]date[!!-~]examples/CalibratePorts.m -text
 out[!!-~]of[!!-~]date[!!-~]examples/countLicks.m -text
 out[!!-~]of[!!-~]date[!!-~]examples/removeSubjectFromPmeierRatrix.m -text
 out[!!-~]of[!!-~]date[!!-~]examples/miniCalcStim.m -text
-out[!!-~]of[!!-~]date[!!-~]examples/run.m -text
 out[!!-~]of[!!-~]date[!!-~]examples/masterShaping.m -text
 out[!!-~]of[!!-~]date[!!-~]examples/ExampleTrials.m -text
 /portTest.bat -text
 documentation/bomb[!!-~]debugging.txt -text
+out[!!-~]of[!!-~]date[!!-~]examples/run1.m -text

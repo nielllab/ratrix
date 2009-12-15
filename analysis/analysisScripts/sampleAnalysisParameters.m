@@ -56,7 +56,7 @@ spikeDetectionParams.LFPBandPass = [1 30];
 
 %% plottingParams
 % This section determines what to plot and what not to plot
-plottingParams.showSpikeAnalysis = false;
+plottingParams.showSpikeAnalysis = true;
 plottingParams.showLFPAnalysis = true;
 plottingParams.plotSortingForTesting = false; % change this if no need for seeing how good the sort is
 

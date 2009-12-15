@@ -12,12 +12,6 @@ try
         analysisParamFileName = 'sampleAnalysisParameters';
     end
     
-    stimParameters.gratings = {'spatialFrequencies','driftfrequencies','orientations','phases','contrasts',...
-        'location','durations','radii','annuli','numRepeats','doCombos','changeableAnnulusCenter','waveform'};
-    stimParameters.whiteNoise = {'strategy','spatialDim','patternType'};
-    
-    
-    
     ratDataFolder = fullfile(dataPath,ratID);
     if ~exist(ratDataFolder,'dir')
         error('no data...');
@@ -60,9 +54,9 @@ try
     fprintf(fileID,'%s\n',ratIDString);
     fprintf(fileID,'%%%% Rat Number %s\n',ratID);
     
-    h = waitbar(1/length(ratStimContents),'Processing trials');
+    h = waitbar(1/length(ratStimContents),'Processing trial....');
     for currTrialNumber = 2:length(ratStimContents)
-        waitbar(currTrialNumber/length(ratStimContents),h);
+        waitbar(currTrialNumber/length(ratStimContents),h,sprintf('Processing trial....%d of %d',currTrialNumber,length(ratStimContents)));
         index = ~cellfun(@isempty,strfind({ratStimContents.name},['_' num2str(currTrialNumber) '-']));
         if size(index,1)>1
             error('too many stimRecords for a given trial number. recheck trial numbers...');
@@ -78,7 +72,8 @@ try
         if strcmp(currStimManager,prevStimManager)
             % if stim manager is same then check the parameters to see if the
             % stimulus has changed
-            stopAnalysisStreak = ~compareStimParameters(prevStimDetails,currStimDetails,stimParameters.(currStimManager));
+            stimType = eval(prevStimManager);
+            stopAnalysisStreak = ~compareStimRecords(stimType,prevStimDetails,currStimDetails);
         else
             % if the stim manager changed, then that streak of stimuli has
             % stopped
@@ -91,7 +86,8 @@ try
             prevStimDetails = currStimDetails;
             currStopStreak = currTrialNumber;
         else
-            explanationString = prevStimManager;
+            explanationStimType = eval(prevStimManager);
+            explanationString = commonNameForStim(explanationStimType,prevStimDetails);
             %         switch prevStimManager
             %             case 'gratings'
             %
@@ -111,32 +107,13 @@ try
         end
     end
     close(h);
-    fprintf(fileID,'%s','analysisManagerByChunk(subjectID, path, cellBoundary, spikeDetectionParams, spikeSortingParams,timeRangePerTrialSecs,stimClassToAnalyze,overwriteAll,usePhotoDiodeSpikes,plottingParams)');
+    analysisManagerByChunkString = sprintf('%s ... \n %s','analysisManagerByChunk(subjectID, path, cellBoundary, spikeDetectionParams,','spikeSortingParams,timeRangePerTrialSecs,stimClassToAnalyze,overwriteAll,usePhotoDiodeSpikes,plottingParams)')
+    fprintf(fileID,'%s',analysisManagerByChunkString);
     fclose(fileID);
     out = true;
     edit(fullfile(getRatrixPath,'analysis','analysisScripts',ratID,fileName));
-catch
+catch ex
+    getReport(ex)
     out = false;
-end
-end
-
-function paramsIdentical = compareStimParameters (params1,params2,paramsList)
-paramsIdentical = true;
-for currParamNum = 1:length(paramsList)
-    % checking method will depend upon the type of data in params. only
-    % call/char and numeric and logical types are supported
-    if isnumeric(params1.(paramsList{currParamNum}))
-        if length(params1.(paramsList{currParamNum}))==length(params2.(paramsList{currParamNum}))
-            paramsIdentical = paramsIdentical && all(sort(params1.(paramsList{currParamNum}))==sort(params2.(paramsList{currParamNum})));
-        else
-            paramsIdentical = false;
-        end
-    elseif ischar(params1.(paramsList{currParamNum})) || iscell(params1.(paramsList{currParamNum}))
-        paramsIdentical = paramsIdentical && all(strcmp(params1.(paramsList{currParamNum}),params2.(paramsList{currParamNum})));
-    elseif islogical(params1.(paramsList{currParamNum}))
-        paramsIdentical = paramsIdentical && all(double(params1.(paramsList{currParamNum}))==double(params2.(paramsList{currParamNum})));
-    else
-        error('unknown type...');
-    end
 end
 end

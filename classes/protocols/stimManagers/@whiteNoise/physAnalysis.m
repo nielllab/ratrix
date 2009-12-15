@@ -9,9 +9,6 @@ function [analysisdata cumulativedata] = physAnalysis(stimManager,spikeRecord,st
 % to prevent memory problems
 
 try
-    if plotParameters.maskedPrevTrial
-        disp('prev trial was masked');
-    end
     % to save memory, only do analysis on spikeRecord.currentChunk's data
     which=find(spikeRecord.chunkID==spikeRecord.currentChunk);
     spikeRecord.spikes=spikeRecord.spikes(which);

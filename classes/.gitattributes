@@ -276,3 +276,7 @@ protocols/trialManagers/@cuedGoNoGo/cuedGoNoGo.m -text
 protocols/trialManagers/@cuedGoNoGo/checkPorts.m -text
 protocols/reinforcementManagers/@asymetricReinforcement/setReinforcementParam.m -text
 protocols/stimManagers/@whiteNoise/enableChunkedPhysAnalysis.m -text
+protocols/stimManagers/@gratings/compareStimRecords.m -text
+protocols/stimManagers/@gratings/commonNameForStim.m -text
+protocols/stimManagers/@whiteNoise/commonNameForStim.m -text
+protocols/stimManagers/@whiteNoise/compareStimRecords.m -text

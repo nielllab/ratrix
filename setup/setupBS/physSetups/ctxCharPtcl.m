@@ -476,7 +476,7 @@ ts{10} = trainingStep(ap, bin24x32,numTrialsDoneCriterion(15),    noTimeOff(), s
 
 
 p=protocol('practice phys',{ts{1:10}});
-stepNum=uint8(1);
+stepNum=uint8(5);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

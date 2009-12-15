@@ -26,3 +26,5 @@
 /worthPhysAnalysis.m -text
 /enableChunkedPhysAnalysis.m -text
 /checkTargetIsPresent.m -text
+/compareStimRecords.m -text
+/commonNameForStim.m -text

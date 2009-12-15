@@ -106,7 +106,7 @@ dsd='Dec.11,2009'; %defaultSettingsDate
 for i=1:length(subjects)
     disp(sprintf('doing subject %s''s protocol',subjects{i}))
     switch subjects{i}
-        case {'demo1'}
+        case {'demo1', 'test_r2','139','228'}
             %r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_4',dsd);
             %r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_5validate',dsd);
             %r=setShapingPMM(r,subjects(i), 'goToRightDetection','2_6',dsd);  %
@@ -114,15 +114,15 @@ for i=1:length(subjects)
             r=setShapingPMM(r,subjects(i), 'cuedGoNoGo', '2_4',dsd);
             
 
-        case {'test_l1','test_l2','test_r2','test_l3','test_r3','rack2test4','rack2test5','rack2test6','rack3test7'}
+        case {'test_l1','test_l2','test_l3','test_r3','rack2test4','rack2test5','rack2test6','rack3test7'}
             r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_4',dsd);
-        case {'232','228','227'} 
+        case {'232','227'} 
             r=setShapingPMM(r,subjects(i), 'goToLeftDetection',  '2_6special',dsd);
         case {'231','test_r1'} 
             r=setShapingPMM(r,subjects(i), 'goToLeftDetection',  '2_3reduced',dsd); 
         case {'234','278'}
             r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_3reduced',dsd);
-        case {'233','138','139','230','229','237','277'} 
+        case {'233','138','230','229','237','277'} 
             r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_6',dsd);
         case {'305','rack3test7'} % 303 flunked
             r=setShapingPMM(r,subjects(i), 'goToRightDetection', '2_4',dsd);

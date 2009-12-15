@@ -38,7 +38,8 @@ for i=1:size(subjectIDs,2)
         if ~isa(rm,'cuedReinforcement') && ~isa(rm,'asymetricReinforcement') % cued breaks b/c it requires calcstim's details
             [rm rewardSizeULorMS requestRewardSizeULorMS msPenalty] = calcReinforcement(rm,trialRecords, s);
         else
-            rewardSizeULorMS=-1;
+            rewardSizeULorMS=nan;
+            msPenalty=nan;
         end
         stimName=class(sm);
         rewardName=class(rm);

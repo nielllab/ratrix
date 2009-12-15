@@ -372,9 +372,12 @@ for i=1:length(ids)
             if isempty(compiledTrialRecords)
                 compiledTrialRecords=newBasicRecs;
             else
+                try
                 compiledTrialRecords=concatAllFields(compiledTrialRecords,newBasicRecs);
+                catch
+                    keyboard
+                end
             end
-            
             for c=1:size(classes,2)
 
                 if length(classes{3,c})>0 %prevent subtle bug that is easy to write into extractDetailFields -- if you send zero trials to them, they may try to look deeper than the top level of fields, but they won't exist ('MATLAB:nonStrucReference') -- see example in crossModal.extractDetailFields()
@@ -497,11 +500,31 @@ if isscalar(a) && isscalar(b) && isstruct(a) && isstruct(b)
                 ple
                 keyboard
             end
-            if iscell(a.(fn{k})) && iscell(b.(fn{k}))
-                if numRowsBNeeds~=0
-                    error('nan padding cells not yet implemented')
+            if iscell(b.(fn{k}))
+                if ~iscell(a.(fn{k})) && all(isnan(a.(fn{k})))
+                    a.(fn{k})=cell(1,length(a.(fn{k})));
+
+                    %turn nans into a cell
+                    %a.(fn{k});
+                    %warning('that point where its slow')
+                    %[x{1:length(a.(fn{k}))}]=deal(nan);  nan filling is slow, but empty filling is fast
+                    %a.(fn{k})=x;
+                    %keyboard
+                    %[a.(fn{k}){:,end+1:end+size(b.(fn{k}),2)}]=deal(b.(fn{k}));
+
+                    % %                     %other way
+                    % %                     temp=cell(1,length(a.(fn{k}))+size(b.(fn{k}),2));
+                    % %                     [temp{end-size(b.(fn{k}),2)+1:end}]=deal(b.(fn{k}){:});
+                    % %                     a.(fn{k})=temp;
+
+
+                else
+                    if numRowsBNeeds~=0
+                        error('nan padding cells not yet implemented')
+                    end
+
                 end
-                a.(fn{k})(:,end+1:end+size(b.(fn{k}),2))=b.(fn{k});
+                [a.(fn{k}){:,end+1:end+size(b.(fn{k}),2)}]=deal(b.(fn{k}));
             elseif ~iscell(a.(fn{k})) && ~iscell(b.(fn{k})) %anything else to check?  %isarray(a.(fn{k})) && isarray(b.(fn{k}))
                 if numRowsBNeeds>0
                     b.(fn{k})=[b.(fn{k});nan*zeros(numRowsBNeeds,size(b.(fn{k}),2))];
@@ -546,7 +569,7 @@ for i=1:length(fieldsInLUT)
     thisField=recs;
     canAdd=true;
     for nn=1:length(pathToThisField)
-        if isfield(thisField,pathToThisField{nn})      
+        if isfield(thisField,pathToThisField{nn})
             thisField=thisField.(pathToThisField{nn});
         else
             canAdd=false;

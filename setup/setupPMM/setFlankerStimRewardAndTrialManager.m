@@ -25,7 +25,7 @@ stim = ifFeatureGoRightWithTwoFlank([p.pixPerCycs],[p.goRightOrientations],[p.go
 
 
 
-p.hitRewardSizeULorMS=500;
+p.hitRewardSizeULorMS=250;
 p.correctRejectRewardSizeULorMS=0;
 p.missMsPenalty=0;
 p.falseAlarmMsPenalty=3000;

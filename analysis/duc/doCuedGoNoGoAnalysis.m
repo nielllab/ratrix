@@ -2,11 +2,13 @@ function doCuedGoNoGoAnalysis
 %this function does the analysis for 
 
 
-renderNoLickTirals=0;
+renderNoLickTrials=0;
 
-location=-2;  % -2 is local, empty or 1 is from philip's male server
-dateRange=[]; %empty is everything
-d=getSmalls('demo1',dateRange,location);
+location=1;  % -2 is local, empty or 1 is from philip's male server
+dateRange=[now-2 now]; %empty is everything
+verbose=true;
+addLickDataIfAvailableInCTR=true;
+d=getSmalls('139',dateRange,location,verbose,addLickDataIfAvailableInCTR);
 
 % Note: in the future we would like to implement this in order to check
 % targetIsPresent=checkTargetIsPresent(sm,details);
@@ -21,31 +23,33 @@ correctRejects= targetIsPresent==0 & d.correct==1;
 falseAlarms = targetIsPresent==0 & d.correct==0;
 falseMisses = targetIsPresent==1 & d.correct==0;
 
-trialsWithLicks=cellfun(@(x) ~isnan(x(1)),d.lickTimes);
+%trialsWithLicks=cellfun(@(x) ~isnan(x(1)),d.lickTimes); % old for cells
+trialsWithLicks=sum(~isnan(d.lickTimes))>0; % new for doubles
 processOrder = [find(correctHits) find(falseAlarms) find(correctRejects) find(falseMisses)];
 groupID=[ones(1,sum(correctHits)) 2*ones(1,sum(falseAlarms)) 3*ones(1,sum(correctRejects)) 4*ones(1,sum(falseMisses))];
 colors=[1 0 0; 0 0 1; 0 1 0; 1 1 0];
 counter=0;
-figure(1);
-hold on;
+figure;hold off;
 n=length(processOrder);
-fill([.01 .21, .21, .01], [-n -n n n],[.8 .8 .8])
+fill([.01 .21, .21, .01], [-n -n n n],[.8 .8 .8]);  
+hold on;
 for i=(1:length(processOrder))
-    trialNumber=processOrder(i);
-    if renderNoLickTirals
+    trialID=processOrder(i); % isn't necc the "trialNumber" because we don't have all the data
+    if renderNoLickTrials
     counter=counter+1;
     else
-        if trialsWithLicks(trialNumber)
+        if trialsWithLicks(trialID)
             counter=counter+1;
         end
     end
-    plot(d.lickTimes{trialNumber}, -counter, '.', 'Color', colors(groupID(i),:));
+    plot(d.lickTimes(:,trialID)-repmat(d.preResponseStartRaw(1,trialID),size(d.lickTimes,1),1), -counter, '.', 'Color', colors(groupID(i),:));
     if groupID(i)==1 | groupID(i)==2
-        plot(d.lickTimes{trialNumber}(end), -counter, 'ok');
+        lastLickLogged=max(find(~isnan(d.lickTimes(:,trialID))));  %since we collect rev chronologically, this really is the last
+        plot(d.lickTimes(lastLickLogged,trialID)-d.preResponseStartRaw(1,trialID), -counter, 'ok');
     end
 end
 xlabel('time')
-axis([-10 4 -counter 0])
+axis([-10 10 -counter 0])
 set(gca, 'yTick', [-36 -34 -27 -10], 'yTickLabel', {'flaseMisses', 'correctReject', 'falseAlarms', 'correctHits'});
 
 %interesting figure to look at maybe...

@@ -103,8 +103,17 @@ end
 % presense of the responseWindowMs instead
 x=trialRecords(1).trialManager.trialManager;
 if isfield(x,'responseWindowMs') && ~isempty(x.responseWindowMs) && ~isinf(x.responseWindowMs(2))
-    [out.lickTimes compiledLUT] = extractFieldAndEnsure(trialRecords,{},'lickTimes',compiledLUT);
-    [out.discrimStart compiledLUT] = extractFieldAndEnsure(trialRecords,{},'discrimStart',compiledLUT); % prob want this too
+    %OLD
+    %[out.lickTimes compiledLUT] = extractFieldAndEnsure(trialRecords,{},'lickTimesInCell',compiledLUT); % wrt discrimStart
+    %[out.discrimStart compiledLUT] = extractFieldAndEnsure(trialRecords,{},'discrimStart',compiledLUT); % wrt trial start
+    
+    %NEW
+    [out.lickTimes compiledLUT]= extractFieldAndEnsure(trialRecords,{},'lickTimesInMatrix',compiledLUT);
+    [out.preResponseStartRaw compiledLUT]= extractFieldAndEnsure(trialRecords,{},'preResponseStartRaw',compiledLUT);
+    [out.discrimStartRaw compiledLUT]= extractFieldAndEnsure(trialRecords,{},'discrimStartRaw',compiledLUT);
+    [out.trialStartRaw compiledLUT]= extractFieldAndEnsure(trialRecords,{},'trialStartRaw',compiledLUT);
+    %[out.responseWindowStart compiledLUT]= extractFieldAndEnsure(trialRecords,{},'responseWindowStart',compiledLUT);
+    %[out.responseWindowStop compiledLUT]= extractFieldAndEnsure(trialRecords,{},'responseWindowStop',compiledLUT);
 else
     % this may error if rats run on something else after a goNoGo task... leaving the
     %field undefined... might have to define cells of nan's for all rats,

@@ -95,8 +95,18 @@ try
                 discrimPhaseStart{cellfun(@iscell,discrimPhaseStart)}=nan;
                 %replace the cells with nans in them with nans (and no cell)
             end
-            out=cell2mat(discrimPhaseStart)-cell2mat(trialStart);
-        case {'responseTime','firstIRI','numRequests', 'lickTimes'}
+            out=cell2mat(discrimPhaseStart)-cell2mat(trialStart); 
+        case 'discrimStartRaw'
+            discrimPhaseStart = cellfun(@getDiscrimPhaseStart,{trialRecords.phaseRecords},'UniformOutput',false);
+            out=cell2mat(discrimPhaseStart);
+        case 'preResponseStartRaw'
+            preResponsePhaseStart = cellfun(@getPreResponsePhaseStart,{trialRecords.phaseRecords},'UniformOutput',false);
+            out=cell2mat(preResponsePhaseStart);
+        case 'trialStartRaw'
+            phaseStarts = cellfun(@getPhaseStarts,{trialRecords.phaseRecords},'UniformOutput',false);
+            trialStart= cellfun(@(x) x(1),phaseStarts,'UniformOutput',false);
+            out=cell2mat(trialStart);
+        case {'responseTime','firstIRI','numRequests', 'lickTimesInCell','lickTimesInMatrix'}
             if isfield(trialRecords,'phaseRecords')
                 % this has to be a cell array b/c phaseRecords aren't always the same across trials
                 times = cellfun(@getTimesPhased,{trialRecords.phaseRecords},'UniformOutput',false);
@@ -129,7 +139,7 @@ try
 
             switch ensureMode
                 case 'responseTime'
-                    % could ad a feature to check that all prior licks were only
+                    % could add a feature to check that all prior licks were only
                     % center licks... and error if not. but that would be slow.
                     out = cell2mat(cellfun(@diffFirstRequestLastResponse,times,tries,requestPorts,responsePorts,...
                         'UniformOutput',false));
@@ -139,13 +149,28 @@ try
                 case 'numRequests'
                     % now convert from a cell array of cell arrays to a vector of length-1's
                     out = cell2mat(cellfun(@getNumRequests,tries,requestPorts,responsePorts,'UniformOutput',false));
-                case 'lickTimes'
+                case 'lickTimesInCell'
+                    %SLOW TO LOAD -
+                    %139.compiledTrialRecords.1-310780 - 114MB - 80 seconds  (takes <3 sec with matrix rep) 
                     out=times;  % un-normalized to stim, probably contains all phases, not just discrim
-                    %we either need to know spec.framesUntilTransition (is this even saved!?)
-                    %or the start of the discrimPhase (this is easier, i wrote one for this, and added it up above)
-                    out=cellfun(@allResponsesTimesMinusDiscrimStart,times,discrimPhaseStart,'UniformOutput',false);
-       
-                     %discrimPhaseStart = cellfun(@getDiscrimPhaseStart,{trialRecords.phaseRecords},'UniformOutput',false);   
+                    out=cellfun(@allResponsesTimesMinusDiscrimStart,times,discrimPhaseStart,'UniformOutput',false); %normalized to discrim start 
+                case 'lickTimesInMatrix'       
+                    maxLicksAllowed=50; % philip chose this hard coded param on 12/14/09
+                    %50 runs out of memory for rats with 300,000 trials, and captures 98% of goNoGo trials withless than 50 licks
+                    %25 is okay, but throws out some data. we get all the
+                    %last ones, which favors the end reward lick,
+                    %eventually getting to stim and pre-request
+                    %maybe explicitly getting the pre-request and
+                    %distrim-licks is a good idea ...
+                  
+                    lickTimesMatrix=nan(maxLicksAllowed,length(times));
+                    for i=1:length(times)
+                        if ~(iscell(times{i}) && isnan(times{i}{1})) % if nan, then no-licks to save
+                            numLicksSaved=min(maxLicksAllowed,length(times{i}));
+                            lickTimesMatrix(1:numLicksSaved,i)=times{i}(end-numLicksSaved+1:end);
+                        end
+                    end
+                    out=lickTimesMatrix;
             end
         case 'actualRewardDuration'
             if isfield(trialRecords,'phaseRecords')

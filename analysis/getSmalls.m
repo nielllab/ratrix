@@ -1,4 +1,4 @@
-function smallData=getSmalls(subjectID,dateRange,rack,verbose)
+function smallData=getSmalls(subjectID,dateRange,rack,verbose,addLickDataIfAvailableInCTR)
 
 if ~exist('rack','var') | isempty(rack)
     if isHumanSubjectID(subjectID)
@@ -12,6 +12,10 @@ end
 
 if ~exist('verbose','var') | isempty(verbose)
     verbose=1;
+end
+
+if ~exist('addLickDataIfAvailableInCTR','var') | isempty(addLickDataIfAvailableInCTR)
+    addLickDataIfAvailableInCTR=false;
 end
 
 %get location
@@ -82,10 +86,12 @@ if ~isempty(smallData)
         % save a copy of the small data for faster access next time!
         save(ff,'smallData','-append');
     
-    
+        
         if verbose
             fprintf('done converting to double format \ttime elapsed: %g\n',GetSecs-t)
         end
+        
+
     end
     
     %filter date range
@@ -93,13 +99,36 @@ if ~isempty(smallData)
         smallData=removeSomeSmalls(smallData, ~(smallData.date>dateRange(1) & smallData.date<dateRange(2)));
     end
     
+    
+    %add licks for that date range... they are often too big to "convert"
+    if addLickDataIfAvailableInCTR   
+        if ~exist('ctr','var') 
+            ctr=load(ff);
+        end
+        if ismember('compiledTrialRecords',fields(ctr)) && isfield(ctr.compiledTrialRecords,{'lickTimes'})
+            if min(ctr.compiledTrialRecords.trialNumber)==1 && max(ctr.compiledTrialRecords.trialNumber)>=max(smallData.trialNumber)
+                smallData.lickTimes=ctr.compiledTrialRecords.lickTimes(:,smallData.trialNumber);
+            else
+                error('absence of expected trials')
+            end
+            if verbose
+                fprintf('got the lickData for all %d trials... at least %d have licks\n',size(smallData.lickTimes,2),sum(sum(isnan(smallData.lickTimes))>0))
+            end
+        else
+            % if verbose
+            %    warning('failed to find lickTimes in CTR')
+            % end
+             error('failed to find lickTimes in CTR')
+        end
+    end
+    
     %remove all fields that have no content
     f=fields(smallData);
     f(strcmp('info',f))=[];
     remove=[];
     for i=1:length(f)
-        if (isnumeric(smallData.(f{i})) && all(isnan(smallData.(f{i})))) ... % vector of numbers all nan
-                || (iscell(smallData.(f{i})) && all(cellfun(@(x) isnan(x(1)),smallData.(f{i}))) ) %cells all nan
+        if (isnumeric(smallData.(f{i})) && all(isnan(smallData.(f{i})(1,:) ))) %... % vector of numbers all nan, or matrix all nan in 1st column
+                %|| (iscell(smallData.(f{i})) && all(cellfun(@(x) isnan(x(1)),smallData.(f{i}))) ) %cells all nan
             remove=[remove i];
         end
     end

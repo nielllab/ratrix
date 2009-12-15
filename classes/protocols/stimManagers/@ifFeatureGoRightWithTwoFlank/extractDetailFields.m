@@ -8,9 +8,9 @@ function [out newLUT]=extractDetailFields(sm,basicRecords,trialRecords,LUTparams
 
 newLUT=LUTparams.compiledLUT;
 
-nAFCindex = find(strcmp(LUTparams.compiledLUT,'nAFC'));
-if ~isempty(nAFCindex) && ~all([basicRecords.trialManagerClass]==nAFCindex)
-    warning('only works for nAFC trial manager')
+acceptableTmIndices = find(ismember(LUTparams.compiledLUT,{'nAFC','cuedGoNoGo'}));
+if ~isempty(acceptableTmIndices) && ~all(ismember([basicRecords.trialManagerClass],acceptableTmIndices))
+    warning('only works for nAFC trial managers or cuedGoNoGo')
     out=struct;
 else
 
@@ -74,7 +74,8 @@ else
 
         [out.toggleStim newLUT] = extractFieldAndEnsure(stimDetails,{'toggleStim'},'scalar',newLUT);
 
-
+        % consider getting this into compiled records in the future...stimDetails.protocolType
+            
         % 4/8/09 - actualTargetOnOffMs and actualFlankerOnOffMs
         % how to vectorize this? b/c we need to collect all the tries for a given trial
         % only works in nAFC (because we can assume that 2nd phase is where stim presentation happens!)
@@ -85,6 +86,11 @@ else
         out.actualFlankerOnSecs=ones(1,length(trialRecords))*nan;
         out.actualFlankerOnsetTime=ones(1,length(trialRecords))*nan;
         for i=1:length(trialRecords)
+            
+           if trialRecords(i).stimDetails.flankerOnOff(2)==21 && trialRecords(i).stimDetails.targetOnOff(2)==26
+               warning('breaking here to inspect 231''s data, and method to calculate actualFlankerOnsetTime')
+               keyboard
+           end
             try
                 % if we are doing new-style records (both toggle and timed mode)
                 if isfield(trialRecords(i),'phaseRecords') && ~isempty(trialRecords(i).phaseRecords)

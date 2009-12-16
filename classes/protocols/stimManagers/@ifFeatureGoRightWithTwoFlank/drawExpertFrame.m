@@ -41,10 +41,9 @@ else
 end
 
 
-
 try
     %SETUP
-    if i <5 %==1  OLD STIMOGL somehow it might start on 3 or 4, not one?
+    if i <4 %==1  OLD STIMOGL somehow it might start on 3 or 4, not one?
         if isempty(strfind(stimulus.renderMode,'dynamic'))
             stimulus.renderMode
             error('cannot use pbt mode if trialManager is not set to the appropriate renderMode');
@@ -53,12 +52,20 @@ try
             % for resizing
         end
         
-        if ~texsCorrespondToThisWindow(stimulus,window)
+        %badFirstTex does not solve the problem.  still have a white square sometimes
+        badFirstTex=all(size(Screen('GetImage', stimulus.cache.textures(1),[],[],2))==[1 1 3]); % one pixel tex from ITL
+        if ~(texsCorrespondToThisWindow(stimulus,window) && ~badFirstTex )
             stimulus=inflate(stimulus); %very costly! should not happen!
             disp(sprintf('UNEXPECTED REINFLATION! on frame %d',i))
             if ~texsCorrespondToThisWindow(stimulus,window)
                 error('should be there now!')
             end
+            
+            badFirstTex=all(size(Screen('GetImage', stimulus.cache.textures(1),[],[],2))==[1 1 3]); % one pixel tex from ITL
+            if  badFirstTex
+                error('bad 1st tex!')
+            end
+            
         end
     end
     
@@ -234,7 +241,7 @@ try
                 
                 
                 inspect=0;
-                if inspect & i>25% mean(before(:)==255)>0.012  %
+                if inspect & i>110% mean(before(:)==255)>0.012  %
                     [oldmaximumvalue oldclampcolors] = Screen('ColorRange', window); 
                     x=Screen('GetImage', window);
                     xd=Screen('GetImage', window,[],[],2);

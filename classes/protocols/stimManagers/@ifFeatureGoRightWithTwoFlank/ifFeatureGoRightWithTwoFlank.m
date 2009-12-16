@@ -177,10 +177,36 @@ switch nargin
                          p.flankerContrast=1;
                          p.stdGaussMask=1/16;
                          p.pixPerCycs=32;
-                         p.phase=0;             
-                    case 'phys' 
+                         p.phase=0;     
+                    case {'sevenLocs','sevenLocsFast'}
+                        p.flankerContrast=0;
+                        p.goLeftContrast=1;
+                        p.goRightContrast=1;
+                        p.stdGaussMask=1/16;
+                        p.pixPerCycs=32;
+                        if strcmp(varargin{1},'sevenLocsFast')
+                            p.targetOnOff=int32([100 120]);
+                            p.flankerOnOff=int32([100 120]);
+                        else
+                            p.targetOnOff=int32([100 150]);
+                            p.flankerOnOff=int32([100 150]);
+                        end
+                        p.renderMode='dynamic-precachedInsertion'; % dynamic-maskTimesGrating, dynamic-onePatchPerPhase,or dynamic-onePatch
+                        
+                        numLocs=7;
+                        vals=linspace(0,1,numLocs+2);
+                        vals=vals(2:end-1);
 
-                        p.flankerOffset=5;
+                        p.dynamicSweep.sweepMode={'random',1};
+                        p.dynamicSweep.sweptValues=[vals];
+                        p.dynamicSweep.sweptParameters={'xPositionPercent'};
+                        p.dynamicSweep.numRepeats=4;
+                        
+                        %p.typeOfLUT='2009Trinitron255GrayBoxInterpBkgnd.5';
+                        p.typeOfLUT= 'useThisMonitorsUncorrectedGamma';        
+                    case 'phys'
+
+
                         p.flankerContrast=1;
                         p.goLeftContrast=1;
                         p.goRightContrast=1;

@@ -82,13 +82,45 @@ switch s.renderMode
         % symbolicIm=cast(symbolicIm,integerType); % don't need to cuz it already is uint8!
         symbolicIm=imresize(symbolicIm,size(mask));  %the right size
         symbolicIm=fliplr(symbolicIm);  % the first one is tipped CW!
-        symbolicIm(:,:,2)=fliplr(symbolicIm);  % and in the second orientation as a L/R mirror image
-        s.phase=s.phase(1); %the 4th dimention is phase which we will force to be one kind for these stims.
         s.mean=1; %white background
         
-        s.cache.goRightStim= symbolicIm;
-        s.cache.goLeftStim = symbolicIm;
-        s.cache.flankerStim= symbolicIm;
+       
+        
+        if all(s.phase==0)
+            %the 4th dimention is phase which is often one kind for these stims.
+            %in this case 3 dims is enough
+            symbolicIm(:,:,2)=fliplr(symbolicIm);  % and in the second orientation as a L/R mirror image
+            s.cache.goRightStim= symbolicIm;
+            s.cache.goLeftStim = symbolicIm;
+            s.cache.flankerStim= symbolicIm;
+        elseif all(s.phase==[0 pi])
+            %if there are 2 phases, they could refer to targetphase OR
+            %flanker phase, but symbolic will only render varying flanker
+            %phases in this version
+            four=symbolicIm;
+            four(:,:,1,1)=symbolicIm;  % hack: repreat same ori
+            four(:,:,2,1)=symbolicIm;  % hack: repreat same ori
+            four(:,:,1,2)=symbolicIm;  % hack: repreat same ori
+            four(:,:,2,2)=symbolicIm;  % hack: repreat same ori
+            s.cache.goRightStim= four;  % no phase differences
+            s.cache.goLeftStim = four;  % no phase differences
+             
+            symbolicImPhaseRev=imread('\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\pmeier\flankerSupport\symbolicRender\symbolicRender4stripe.png');
+            symbolicImPhaseRev=imresize(symbolicImPhaseRev,size(mask));  %the right size
+            symbolicImPhaseRev=fliplr(symbolicImPhaseRev);  % follow convention of 3 stripe
+                    
+            %symbolicImPhaseRev=symbolicIm(:,:,1);  % not true yet, but see if it works
+            %symbolicIm(:,:,1,1)=symbolicIm;         % 3 stripe
+            four(:,:,1,2)=symbolicImPhaseRev;  % 4 stripe, both same ori
+            four(:,:,2,2)=symbolicImPhaseRev;  % 4 stripe, both same ori
+            
+            s.cache.flankerStim= four;
+        else
+            p=s.phase
+            error('that kind of phase compbo is not allowed in symbolic mode')
+        end
+        
+        
         
     case  'ratrixGeneral-precachedInsertion'
 
@@ -172,10 +204,6 @@ switch s.renderMode
 %             cache{4}.features=s.mean+(distractorStim-s.mean)*2;
 %             cache{5}.features=s.mean+(distractorFlankerStim-s.mean)*2;
             
-            
-
-
-            
             disp('pre-caching textures into PTB');
             w=getWindow() %local helper function
             Screen('BlendFunction', w,GL_SRC_ALPHA, GL_ONE); % blend source then add it
@@ -224,15 +252,28 @@ end
 
 s=fillLUT(s,s.typeOfLUT,s.rangeOfMonitorLinearized,0);
 
-if ~isempty(s.dynamicSweep) 
-    if strcmp('manual', s.dynamicSweep.sweepMode{1})
-        %don't do anything, just check if empty
-        if isempty(dynamicSweep.sweptValues)
-            error ('manual mode of dynamicSweep requires previously filled values');
-        end
-    else
+if ~isempty(s.dynamicSweep)
+    if isempty(s.dynamicSweep.sweptValues)
+        %fill them ALL from the struct of the stim
         s.dynamicSweep.sweptValues=generateFlankerFactorialCombo(s, s.dynamicSweep.sweptParameters, s.dynamicSweep.sweepMode, struct(s));
+    else
+        switch s.dynamicSweep.sweepMode{1}
+            case 'manual'
+                % no factorial combo!
+                %don't do anything... we just use the values that are there
+            case {'ordered','random'}
+                %facorialize the given values
+
+                for i=1:length(s.dynamicSweep.sweptParameters)
+                    parameters.(s.dynamicSweep.sweptParameters{i})=s.dynamicSweep.sweptValues(i,:)';
+                end
+                s.dynamicSweep.sweptValues=generateFlankerFactorialCombo(s, s.dynamicSweep.sweptParameters, s.dynamicSweep.sweepMode, parameters);
+            otherwise
+                s.dynamicSweep.sweepMode{1}
+                error('bad mode')   
+        end
     end
+    
 end
 
 uniqueRepeatDrift=0;
@@ -246,13 +287,13 @@ end
 
             
             
-function w=getWindow()
+function w =getWindow()
 w=Screen('Windows');
 onScreenWindowIndex=find(Screen(Screen('Windows'),'WindowKind')==1);
 numOnscreenWindows=length(onScreenWindowIndex);
 
 if isempty(onScreenWindowIndex)
-    warning('can''t build textures b/c no window')
+    error('can''t build textures b/c no window')
 else
     if numOnscreenWindows>1
         w
@@ -263,3 +304,5 @@ else
         w=w(onScreenWindowIndex(1))
     end
 end
+
+

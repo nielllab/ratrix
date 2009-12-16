@@ -139,7 +139,13 @@ end
 % ir=length(selection):-1:1;
 ir=selection(end:-1:1);
 
-[retval{ir}] = ndgrid(params{ir}) ;
+if size(ir)==1
+    %make sure 1D vectors don't factorialize with themselves into a matrix
+    retval{ir}=params{ir};
+else
+    [retval{ir}] = ndgrid(params{ir}) ;
+end
+
 % concatenate
 retval = reshape(cat(numParamsSelected+1,retval{:}),[],numParamsSelected);
 retval = retval';

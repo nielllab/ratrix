@@ -15,6 +15,7 @@ end
 % or goRight, this reasoning makes sense for all protocolTypes
 % 'goToRightDetection', 'goToLeftDetection','tiltDiscrim','goToSide'
 
+
 for i=1:length(sweptParameters)
     switch sweptParameters{i}
         case 'targetContrast'

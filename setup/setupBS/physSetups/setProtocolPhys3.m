@@ -400,6 +400,8 @@ rfIsGood=receptiveFieldCriterion(0.05,RFdataSource,1,'box',3);
 numSweeps=int8(3);
 cmr = manualCmrMotionEyeCal(background,numSweeps,maxWidth,maxHeight,scaleFactor,interTrialLuminance)
 
+sevenLocs=ifFeatureGoRightWithTwoFlank('sevenLocs');
+sevenLocsFast=ifFeatureGoRightWithTwoFlank('sevenLocsFast'); 
 %% trainingsteps
 
 svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
@@ -416,6 +418,8 @@ ts{7}= trainingStep(ap,  ffgwn,       numTrialsDoneCriterion(10), noTimeOff(), s
 ts{8}= trainingStep(ap,  bin,         numTrialsDoneCriterion(10), noTimeOff(), svnRev, svnCheckMode); %binary noise grid
 ts{9} = trainingStep(ap, bin12x16,numTrialsDoneCriterion(15),    noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
 ts{10} = trainingStep(ap, bin24x32,numTrialsDoneCriterion(15),    noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
+ts{11} = trainingStep(ap, sevenLocs,numTrialsDoneCriterion(15),    noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
+ts{12} = trainingStep(ap, sevenLocsFast,numTrialsDoneCriterion(15),    noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
 
 % %common "search and characterization"
 % ts{1}= trainingStep(ap,  fakeTRF,     repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);       %temporal response function
@@ -493,8 +497,8 @@ ts{10} = trainingStep(ap, bin24x32,numTrialsDoneCriterion(15),    noTimeOff(), s
 %% make and set it
 
 
-p=protocol('practice phys',{ts{1:10}});
-stepNum=uint8(1);
+p=protocol('practice phys',{ts{1:12}});
+stepNum=uint8(11);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

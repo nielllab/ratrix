@@ -12,7 +12,7 @@ for i=1:length(s.dynamicSweep.sweptParameters)
              stimDetails.targetOrientation=value;
         case 'flankerOrientations'
              stimDetails.flankerOrientation=value;
-        case {'flankerOffset'} %fields with same name, update spatial params
+        case {'flankerOffset','xPositionPercent'} %fields with same name, update spatial params
             stimDetails.(param)=value;
             doSpatialUpdate=true;
         case 'flankerPosAngle' %set the top flanker

@@ -75,9 +75,10 @@ if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && rec
     
     data=findBursts(data);
     
-    % doAnalysis(data,'stationarity');
+    doAnalysis(data,'stationarity');
     % doAnalysis(data,'raster');
-    doAnalysis(data,'STA');
+    % doAnalysis(data,'STA');
+    % doAnalysis(data,'autocorr');
     % doAnalysis(data,'burstDetail');
     % doAnalysis(data,'waveforms');
     % doAnalysis(data,'ISI');
@@ -129,6 +130,8 @@ if ~(exist([name '.png'],'file')) % && exist([name '.fig'],'file')) %one flaw of
             savefigs(name,raster(data),data.stimType,data.mins);
         case 'stationarity'
             savefigs(name,stationarity(data),data.stimType,data.mins);
+        case 'autocorr'
+            savefigs(name,autocorr(data),data.stimType,data.mins);
         otherwise
             error('unrecognized type')
     end
@@ -611,8 +614,10 @@ end
 im = sparse([],[],[],length(times),1+2^bits,length(times)*size(traces,2));
 for i=1:size(traces,2)
     for x=1:length(times)
-        y= 1+round((2^bits) * (traces(x,i)-lims(1))/(lims(2)-lims(1)));
-        im(x,y)=im(x,y)+1;
+        if traces(x,i)<=lims(2) && traces(x,i)>=lims(1)
+            y= 1+round((2^bits) * (traces(x,i)-lims(1))/(lims(2)-lims(1)));
+            im(x,y)=im(x,y)+1;
+        end
     end
     if true && rand>.99
         fprintf('%g done\n',100*i/size(traces,2))
@@ -830,6 +835,64 @@ if false
 end
 end
 
+function f=autocorr(data)
+f=figure;
+
+if false %this is to print out raw burst phys, but it's broke
+    %hack!
+    physDetailTimes=[4180 4300]*1000; %for 04.15.09 example cell
+    z=getRangeFromChunks(data.fileNames.physFile,physDetailTimes(1),diff(physDetailTimes));
+    b=fir1(30,.3,'high');
+    filted=filtfilt(b,1,z(1,:,2));
+    plot((z(1,:,1)-physDetailTimes(1))/1000,filted)
+    hold on
+    bs=data.bsts(data.bsts>=physDetailTimes(1)/1000 & data.bsts<=physDetailTimes(2)/1000)-physDetailTimes(1)/1000;
+    plot(bs,ones(1,length(bs))*max(filted),'x')
+    keyboard
+end
+
+durMS=1000;
+
+subplot(2,1,1)
+doAC(data.tonics,durMS,durMS);
+title('tonic autocorr')
+
+subplot(2,1,2)
+doAC(data.bsts,durMS,round(durMS/10));
+title('burst autocorr')
+end
+
+function doAC(ts,durMS,numBins)
+    function locAC(times,c)
+        counts=zeros(size(bins));
+        for i=1:length(times)
+            t=times-times(i);
+            counts=counts+hist(1000*t(abs(t)<=durMS/1000),bins);
+            if rand>.999
+                fprintf('%g%% done\n',100*i/length(times))
+            end
+        end
+        counts(numBins+1)=0;
+        plot(bins,counts,c)
+    end
+
+if true
+    bins=linspace(-durMS,0,numBins+1);
+    bins=[bins -1*fliplr(bins(1:end-1))];
+    
+    locAC(ts,'b')
+    hold on
+    locAC(rand(size(ts))*range(ts),'k')
+else
+    bins=linspace(0,durMS,numBins);
+    h=hist(diff(1000*ts),bins);
+    plot(bins(1:end-1),h(1:end-1))
+end
+
+ylabel('count')
+xlabel('ms')
+end
+
 function f=sta(data)
 stimPreMS =300;%1000;
 stimPostMS=75;%200;
@@ -855,14 +918,10 @@ end
 staPlot(tSTS,color,vals,c,n,2,'spike triggered average filtered photodiode',data.stim(1,:));
 
 [bSTS vals]=calcSTA(data.bsts,data.stim,stimPreMS,stimPostMS,c);
-staPlot(bSTS,color,vals,c,n,4,'burst triggered average filtered photodiode',data.stim(1,:));
-
-subplot(n,3,3*n-1)
-xlabel('ms')
-keyboard
+staPlot(bSTS,color,vals,c,n,4,'burst triggered average filtered photodiode',data.stim(1,:),true);
 end
 
-function staPlot(info,color,vals,c,n,r,t,dist)
+function staPlot(info,color,vals,c,n,r,t,dist,doLegendXLab)
     function rg=getExtremes(rs)
         rg=cellfun(@(x) x(rs(:)),{@min,@max});
     end
@@ -893,6 +952,7 @@ elseif isvector(dist)
     ylim(lims)
     xlim(getExtremes(actual(~isinf(actual))))
     set(gca,'XTick',[])
+    ylabel('stim z-score')
 else
     error('dist error')
 end
@@ -902,63 +962,56 @@ subplot(n,numCols,numCols*r-1)
 % fill([info(2,:) fliplr(info(2,:))],[info(3,:) fliplr(info(4,:))],mean([ones(1,3);color]))
 if false
     tracePlot(info(2,:),{vals' color},1-c);
+    hold on
 end
 
-hold on
-staInner(false,false,true);
+if ~isempty(vals) && false  %haven't scaled these example traces correctly yet...
+    rows=rand(1,size(vals,1))>.999;
+    rows([1 end])=true;
+    plot(info(2,:),vals(rows,:)','r')
+end
 
-    function staInner(doExamples,normalize,doHPFs)
-        if normalize
-            theseYs = info(1,:)-min(info(1,:));
-            theseYs = theseYs/max(theseYs);
-            theseLims=[0 1];
-            
-            thisMeanStim=(mu-min(info(1,:)))/(max(info(1,:))-min(info(1,:)));
-            thisNorm=1;
-            thisColor=.7*ones(1,3);
-        else
-            theseYs=(info(1,:)-mu)/sigma;
-            theseLims=.1*[-1 1];
-            thisMeanStim=0;
-            thisNorm=sigma;
-            thisColor=color;
-        end
-        
-        h1=plot(info(2,:),theseYs,'Color',thisColor);
-        hold on
-        plot(zeros(2,1),theseLims,'k')
-        if ~isempty(thisMeanStim)
-            plot(info(2,[1 end]),thisMeanStim*ones(1,2),'k')
-        end
-        
-        if ~isempty(vals) && doExamples && ~normalize %haven't handled the normalized case yet...
-                rows=rand(1,size(vals,1))>.999;
-                rows([1 end])=true;
-                plot(info(2,:),vals(rows,:)','r')
-        end
-        
-        if doHPFs
-            h2=plot(info(2,:),thisMeanStim+mean(vals-repmat(mean(vals')',1,size(vals,2)))/thisNorm,'r');
-            h3=plot(median(diff(info(2,1:end)))/2+info(2,1:end-1),thisMeanStim+mean(diff(vals')')/thisNorm,'b');
-            legend([h1 h2 h3],{'STA','no means','STA diff'});
-        end
-        
-        xlim(info(2,[1 end]))
-        ylim(theseLims)
-    end
+scaled=(info(1,:)-mu)/sigma;
+noMeans=mean(vals-repmat(mean(vals')',1,size(vals,2)))/sigma;
+diffs=mean(diff(vals')')/sigma; %since diff and avg both linear, order probably doesn't matter
+theseLims=getExtremes([scaled(:); noMeans(:); diffs(:)]);
 
+pCol=.7*ones(1,3);
+[AX,H1,H2] = plotyy(info(2,:),noMeans,info(2,:),info(end,:));
+set(H1,'Color','r');
+set(H2,'Color',pCol);
+hold(AX(1),'on')
+hold(AX(2),'on')
+set(AX(1),'YColor','k')
+set(AX(2),'YColor','k')
+
+plot(AX(1),zeros(2,1),theseLims,'k');
+plot(AX(1),info(2,[1 end]),zeros(1,2),'k')
+plot(AX(2),info(2,[1 end]),.05*ones(1,2),'Color',pCol)
+
+H3=plot(AX(1),median(diff(info(2,1:end)))/2+info(2,1:end-1),diffs,'b');
+H4=plot(AX(1),info(2,:)                                    ,scaled,'Color',color);
+
+if exist('doLegendXLab','var') && ~isempty(doLegendXLab) && doLegendXLab
+    legend([H4 H1 H3 H2],{'STA','no means','STA diff','p-value'});
+    xlabel(AX(1),'ms')
+end
+
+ylabel(AX(1),'stim z-score')
+ylabel(AX(2),'p-value')
+
+ylim(AX(1),theseLims)
+ylim(AX(2),[0 1])
+set(AX(1),'YTickMode','auto')
+set(AX(2),'YTickMode','auto')
+
+xlim(AX(1),info(2,[1 end]))
+xlim(AX(2),get(AX(1),'XLim'))
 title(t)
 
-subplot(n,numCols,numCols*r)
 if ~isempty(vals) && false
-    traceDensity(info(2,:),vals',lims,6,false)
-else
-    pCol=zeros(1,3);
-    plot(info(2,:),info(end,:),'Color',pCol)
-    hold on
-    ylabel('p-value')
-    plot(info(2,[1 end]),.05*ones(1,2),'Color',pCol)
-    staInner(false,true,false);
+    subplot(n,numCols,numCols*r)
+    traceDensity(info(2,:),(vals'-mu)/sigma,lims,12,true)
 end
 end
 
@@ -1111,6 +1164,8 @@ state=doNormRate(data.tonics)./doNormRate(data.bsts);
 
 subplot(n,1,5)
 
+keyboard %here!
+
 state=log(state);
 state(isinf(state))=nan;
 plot(ts-start,state);
@@ -1235,7 +1290,9 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
     
     psth=0;
     bpsth=0;
-    pbins=0:.01:maxTime;
+    %pbins=0:.01:maxTime;
+    pbins=0:.05:maxTime;
+        
     for i=1:length(rasters)
         psth=psth+hist(rasters{i}(rasters{i}<=maxTime),pbins);
         bpsth=bpsth+hist(bursts{i}(bursts{i}<=maxTime),pbins);
@@ -1247,7 +1304,13 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
     
     block=block'-min(block(:));
     block=block/max(block(:));
+    
+    if false %lab meeting hack
     plot(bins,repmat(.01*(0:size(block,2)-1),size(block,1),1)+block+1)
+    else
+    %plot(bins,zeros(size(bins)));
+    hold on
+    end
     
     xlabel('secs')
     title(sprintf('%d gaussian repeats (%.1f hz, %.1f%% bursts, %d violations)',length(data.rptStarts),length(data.spks)/(data.stimTimes(2)-data.stimTimes(1)),100*length(data.bsts)/length(data.spks),length(data.refVios)))
@@ -1257,12 +1320,19 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
     plot(pbins,bpsth/max(bpsth),'r')
     
     for i=1:length(rasters)
-        cellfun(@(c) plotRaster(c{1}{i},c{2},i+1,maxTime),{ {rasters,'kx'} {bursts,'ro'} {inBursts,'rx'} {violations,'bo'} })
+        cellfun(@(c) plotRaster(c{1}{i},c{2},i+1,maxTime),{ {rasters,'k.'} {bursts,'ro'} {inBursts,'r.'} {violations,'bo'} })
     end
     xlim([0 maxTime])
 else
     warning('skipping raster cuz no rpts id''d')
 end
+
+if true %lab meeting hack
+    ylim([-1 0])
+    xlim([0 30])
+    set(gca,'YTick',[])
+end
+keyboard
 end
 
 function ex(fileNames,stimTimes,rec,spks,stimType,hz)

@@ -6,7 +6,7 @@ close all;
 if ~exist('figID','var') || isempty(figID)
     figID=[ 2 3 4 6]; % 6
     %figID=[3];  % test one of them
-    figID=[4];  % test one of them
+    figID=[5];  % test one of them
 end
 
 if ~exist('dateRange','var')
@@ -20,7 +20,7 @@ end
 
 if ~exist('subjects','var')
     %subjects={'228','227','230','233','234','138','139'}; %OLD: sorted for amount
-    subjects={'138','228','227','230','233','234','139'}; %puts single rat in first position
+    subjects={'228','227','230','233','234','139','138'}; %puts high-lighted rat (end) on the top
     %subjects={'138','228','230','233'}; % quick for testing, passes lillie-test
     %subjects={'138','228'}; % quick for testing
 end
@@ -29,11 +29,12 @@ if ~exist('savePath','var')
     savePath='C:\Documents and Settings\rlab\Desktop\graphs';
     %savePath='L:\Rodent-Data\pmeier\flankerSupport\activeFigures'; 
     %resolution=300;  % only applies to -dformat
-    %figureType= {'png','jpg','bmp','fig','-dpsc','-depsc2','-dtiffn'} % compare many
+    %figureType= {'png','jpg','bmp','fig','-dpsc','-depsc2','-dtiffn'} %
+    %compare many
     %renderer= {'-painters','-zbuffer','-opengl'}  % compare many
-    %figureType={'-dtiffn','png'};  renderer= {'-opengl'}; resolution=1200; % paper print quality
-    figureType={'png'};  renderer= {'-zbuffer'}; resolution=300; % draft quality
-    figureType={'bmp','fig'}  % as matlab fig looks on screen
+    figureType={'-dtiffn','png'};  renderer= {'-opengl'}; resolution=1200; % paper print quality
+    %figureType={'png'};  renderer= {'-zbuffer'}; resolution=300; % draft quality
+    %figureType={'bmp','fig'}  % as matlab fig looks on screen
 end
  
 
@@ -162,8 +163,7 @@ end
 
 for f=1:length(figID)
     or=(pi/12);
-    singleRat=subjects{1};  % use first one for single rat plot  (138 for main paper)
-    subject='234';  %check this one out
+    singleRat='138';  % for single rat plot  (138 for main paper)
     
     
     % factor out common defaults, some may be overwritten
@@ -220,7 +220,7 @@ for f=1:length(figID)
             ROCuseConds={'noFm','hasF'};
             
             filter{1}.type='9.4.1+nf';              % use flanker present at contrast .4 with target at contratst 1.0, and no flanks mixed in to the nf analysis
-            condRename={'F+','F-','F-'}; % rename them this way
+            condRename={'F^+','F^-','F^-'}; % rename them this way
             barGroups={'mix',[1 2],[77]; 'block',[3],[79]}; % add grouped labels
             
             colors=[.9 0 0; .2 .5 .2; .4 .9 .4];     % assign these colors
@@ -232,13 +232,13 @@ for f=1:length(figID)
             critDiffRange=linspace(-0.8,0.8,numBins+1);
             
               %alt
-              if 1
+              if 0
                   montageSize=[1 2];
                   montageReorder=[1 2 ];
                   rocReorder=montageReorder;
                   barImageOrder=[1 2 ];
                   useConds={'hasF','noFm'};       % display these conditions
-                  condRename={'F+','F-'}; % rename them this way
+                  condRename={'F^+','F^-'}; % rename them this way
                   colors=[.9 0 0; .2 .5 .2];     % assign these colors
               end
               
@@ -297,7 +297,7 @@ for f=1:length(figID)
             filter{1}.type='9.4';                   % use flanker present at contrast .4 with target at contratst 1.0, and no flanks mixed in to the nf analysis
             conditionType='8flanks+';               % lump popout and non-popout groups
             useConds={'colin','para','changeFlank','changeTarget'};  % display these conditions
-            condRename={'col','para','pop1','pop2'};% rename them this way
+            condRename={'col','par','pop_1','pop_2'};% rename them this way
             colors=[.9 0 0; .2 .2 .2; 0 .8 .8 ; 0 .8 .8 ];                     % assign these colors
             %cMatrix={[1],[2]};                      % emphasize this comparison, calculate it from first arrow
             arrows={'para','colin'};          % arrows from A-->B
@@ -307,7 +307,7 @@ for f=1:length(figID)
             %phase
             sweptImageParameters={'flankerOrientation','targetOrientation','flankerPosAngle','targetContrast','flankerContrast','flankerPhase'}; % why does contrast have to be last?
 
-            sweptImageValues={or,or,or,1,1,[0 pi]};
+            sweptImageValues={-or,-or,-or,1,1,[0 pi]};
             borderColor=[.9 0 0; 0 0 1];
             montageSize=[1 2];
             montageReorder=[1 2];
@@ -321,8 +321,8 @@ for f=1:length(figID)
             condRename={'same','reverse'}; % rename them this way
             colors=borderColor;                        % assign these colors
             %cMatrix={[1],[2]};                        % emphasize this comparison, calculate it from first arrow
-            arrows=useConds;                           % arrows from A-->B
-            ROCuseConds={'phaseRev','colinear',};
+            arrows=useConds;                           % arrows from A-->B  {should this be switched or not?}
+            ROCuseConds=useConds;
 
         case 11  %% colinearity in the case where target orientation is always + (R)
             %images
@@ -394,7 +394,7 @@ for f=1:length(figID)
             filter{1}.type='9.4';                   % use flanker present at contrast .4 with target at contratst 1.0, and no flanks mixed in to the nf analysis
             conditionType='8flanks+';               % lump popout and non-popout groups
             useConds={'changeFlank','changeTarget'};  % display these conditions
-            condRename={'pop1','pop2'};% rename them this way
+            condRename={'pop_1','pop_2'};% rename them this way
             colors=[ 0 .8 .8 ; 0 .8 .8 ];                     % assign these colors
             %cMatrix={[1],[2]};                      % emphasize this comparison, calculate it from first arrow
             arrows={'changeTarget','changeFlank'};          % arrows from A-->B
@@ -413,7 +413,7 @@ for f=1:length(figID)
             filter{1}.type='9.4';                   % use flanker present at contrast .4 with target at contratst 1.0, and no flanks mixed in to the nf analysis
             conditionType='colin+3';                % lump popout and non-popout groups
             useConds={'---','lll','l-l','-l-'};     % display these conditions
-            condRename={'col','para','pop1','pop2'};% rename them this way
+            condRename={'col','par','pop_1','pop_2'};% rename them this way
             colors=[.9 0 0; .2 .2 .2; 0 .8 .8 ; 0 .8 .8 ];    % assign these colors
             %cMatrix={[1],[2]};                     % emphasize this comparison, calculate it from first arrow
             arrows={'lll','---'};                   % arrows from A-->B
@@ -442,7 +442,7 @@ for f=1:length(figID)
 
             conditionType='8flanks+';               % lump popout and non-popout groups
             useConds={'colin','para','changeFlank','changeTarget'};  % display these conditions
-            condRename={'col','para','pop1','pop2'};% rename them this way
+            condRename={'col','par','pop_1','pop_2'};% rename them this way
             colors=[.9 0 0; .2 .2 .2; 0 .8 .8 ; 0 .8 .8 ];                     % assign these colors
             %cMatrix={[1],[2]};                      % emphasize this comparison, calculate it from first arrow
             arrows={'para','colin'};          % arrows from A-->B
@@ -473,7 +473,7 @@ for f=1:length(figID)
     
     % assign names and colors for calls below
     labeledNames=assignLabeledNames(subjects);
-    labeledNames=subjects;
+    %labeledNames=subjects; this is just for pmm's confirmation
     
     cMatrix{1}=find(strcmp(names.conditions,arrows{1,2}));
     cMatrix{2}=find(strcmp(names.conditions,arrows{1,1}));
@@ -494,8 +494,10 @@ for f=1:length(figID)
     figure(figID(f));
     set(figID(f),'Position',[0 40 600 640])
     settings.PaperPosition=[.5 .5 3.5 3.5];
+    settings.LineWidth=1.5;
+    settings.HgGroupLineWidth=0.5;
     settings.fontSize=10; %12 is 12 on a 3.5 inch wide column.  10 looks better
-    settings.MarkerSize=8;
+    settings.MarkerSize=5;%8; 8 is good for dots, x is good for symbols
     settings.textObjectFontSize=7;
     settings.turnOffTics=true;
     settings.box='off';
@@ -550,7 +552,8 @@ for f=1:length(figID)
        set(gca,'xTick',[]) %VERTICAL MODE turns it off and creates text objects
        thisYLim=ylim; amp=range(thisYLim)
        for i=1:length(condRename)
-        text(i,thisYLim(1)-amp/20,condRename{i},'HorizontalAlignment','right','Rotation',90);
+           %text(i,thisYLim(1)-amp/20,condRename{i},'HorizontalAlignment','right','Rotation',90);
+           text(i,thisYLim(1)-amp/20,condRename{i},'HorizontalAlignment','center','verticalAlignment','top','Rotation',0); %
        end
         ylabel('% correct (P)'); set(gca,'yTick',ylab); set(gca,'yTickLabel',ylab)
         set(gca,'yLim',[50 max(ylab)]); 
@@ -566,7 +569,7 @@ for f=1:length(figID)
     %doBarPlotWithStims(stat,ci',[],colors,[50 75],'stats&CI',false) % with std error bar
     %doBarPlotWithStims(stat,[stat; stat]',[],colors,[55 70],'stats&CI',false) % no error bar
     hold on;
-    axis([0 nc+1 50 100])
+    axis([0.5 nc+0.5 50 100]); %axis([0 nc+1 50 100])
     if 1 % add connector per subject
         offset=0.0;
         if 0 % add connector for some subjects
@@ -586,43 +589,53 @@ for f=1:length(figID)
                 y2=100*stats(subId,usedConditionIDs,find(strcmp('pctCorrect',names.stats)));
                 plot([1:nc]+offset,y2,'color',[.8 .8 .8])
                 f
-                switch figID(f)
-                    case 2
-                        switch labeledNames{j}
-                            case {'r3','r2','r5','r6'}
-                                t=text(nc+0.5, y2(end),labeledNames(j)); %label subjects
-                            otherwise
-                                t=text(0.5, y2(1),labeledNames(j)); %label subjects
-                        end
-                    case 3
-                        switch labeledNames{j}
-                            case {'r4','r5','r6'}
-                                t=text(nc+0.5, y2(end),labeledNames(j)); %label subjects
-                            case {'r2'}
-                                t=text(nc+0.5, y2(end)+.5,labeledNames(j)); %label subjects
-                            otherwise
-                                t=text(0.5, y2(1),labeledNames(j)); %label subjects
-                        end
-                   case 4
-                        switch labeledNames{j}
-                            case {'r2','r4','r5','r6'}
-                                t=text(nc+0.5, y2(end),labeledNames(j)); %label subjects
-                            otherwise
-                                t=text(0.5, y2(1),labeledNames(j)); %label subjects
-                        end
-                   case 5
-                       switch labeledNames{j}
-                           case {'r4','r6','r1'}
-                               t=text(nc+0.5, y2(end),labeledNames(j)); %label subjects
-                           otherwise
-                               t=text(0.5, y2(1),labeledNames(j)); %label subjects
-                       end
-                    case {11,12,13}
-                       t=text(nc+0.5, y2(end)+.5,labeledNames(j)); %label subjects
-                    otherwise
-                        t=text(nc+0.5, y2(end)+.5,labeledNames(j)); %label subjects
-                end
+                %only plot some
+                someRats={'r2','r6','r7'} % 138=single, r7 = high and lefty, r6=low and lefty
+                someRats={'none'};
+                if ismember(labeledNames{j},someRats)
+                    rNudge=0.3;
+                    lNudge=0.2;
+                    switch figID(f)
+                        
+                        
+                        case 2
+                            switch labeledNames{j}
+                                case {'r3','r2','r5','r6','r7'} % {'r3','r2','r5','r6'}
+                                    t=text(nc+rNudge, y2(end),labeledNames(j)); %label subjects
+                                otherwise
+                                    t=text(1-lNudge, y2(1),labeledNames(j)); %label subjects
+                            end
+                        case 3
+                            switch labeledNames{j}
+                                case {'r4','r5','r6','r2','r7'} %{'r4','r5','r6'}
+                                    t=text(nc+rNudge, y2(end),labeledNames(j)); %label subjects
+                                case {'r2'}
+                                    t=text(nc+rNudge, y2(end)+.5,labeledNames(j)); %label subjects
+                                otherwise
+                                    t=text(1-lNudge, y2(1),labeledNames(j)); %label subjects
+                            end
+                        case 4
+                            switch labeledNames{j}
+                                case {'r2','r4','r5','r6','r7'} %{'r2','r4','r5','r6'}
+                                    t=text(nc+rNudge, y2(end),labeledNames(j)); %label subjects
+                                otherwise
+                                    t=text(1-lNudge, y2(1),labeledNames(j)); %label subjects
+                            end
+                        case 5
+                            switch labeledNames{j}
+                                case {'r4','r6','r1','r2','r7'} %{'r4','r6','r1'}
+                                    t=text(nc+rNudge, y2(end),labeledNames(j)); %label subjects
+                                otherwise
+                                    t=text(1-lNudge, y2(1),labeledNames(j)); %label subjects
+                            end
+                        case {11,12,13}
+                            t=text(nc+rNudge, y2(end)+.5,labeledNames(j)); %label subjects
+                        otherwise
+                            t=text(nc+rNudge, y2(end)+.5,labeledNames(j)); %label subjects
+                    end
                     set(t, 'HorizontalAlignment', 'center','VerticalAlignment','middle');
+                end
+                
             end
         end
     end
@@ -631,8 +644,15 @@ for f=1:length(figID)
     for j=1:size(stats,1) % subjects
         for i=1:length(usedConditionIDs)
             x=repmat(i+offset,1,length(names.subjects));
-            y=100*stats(:,usedConditionIDs(i),find(strcmp('pctCorrect',names.stats)));
-            d=plot(x(j),y(j),'.','MarkerSize',20,'color',colors(i,:));
+            %y=100*stats(:,usedConditionIDs(i),find(strcmp('pctCorrect',names.stats)));
+            y=100*stats(strcmp(subjects(j),names.subjects),usedConditionIDs(i),find(strcmp('pctCorrect',names.stats)));
+            d=plot(x(j),y,'.','MarkerSize',20,'color',colors(i,:));
+            set(d,'Marker',getMarkerSymbolForSubject(subjects(j)));
+            if ismember(labeledNames(j),{'r6','r7'})
+                set(d,'MarkerFaceColor',colors(i,:));  %filled solid
+            else
+                set(d,'MarkerFaceColor',[1 1 1]);  %open
+            end
             %set(d,'MarkerEdgeColor','b','MarkerFaceColor','r')
         end
     end
@@ -642,9 +662,11 @@ for f=1:length(figID)
     %set(gca,'xTick',[1:length(usedConditionIDs)]); set(gca,'xTickLabel',condRename)
      set(gca,'xTick',[]) %VERTICAL MODE turns it off and creates text objects
        thisYLim=ylim; amp=range(thisYLim)
-       for i=1:length(condRename)
-        text(i,thisYLim(1)-amp/20,condRename{i},'HorizontalAlignment','right','Rotation',90);
-       end
+        for i=1:length(condRename)
+           %text(i,thisYLim(1)-amp/20,condRename{i},'HorizontalAlignment','right','Rotation',90);
+           text(i,thisYLim(1)-amp/20,condRename{i},'HorizontalAlignment','center','verticalAlignment','top','Rotation',0); %
+        end
+       
        
     ylabel('% correct (P)'); set(gca,'yTick',ylab); set(gca,'yTickLabel',ylab)
     set(gca,'yLim',[50 max(ylab)]); axis square;
@@ -661,11 +683,11 @@ for f=1:length(figID)
     objectColors.histInsig=[.6 .6 .6];
     objectColors.subjectSig=objectColors.histSig;
     objectColors.subjectInsig=objectColors.histInsig;
-    displaySignificance=true;
+    displaySignificance=false;
     labelAxis=false;
     encodeSideRule=false;
     viewPopulationMeanAndCI=false;
-    yScaling=[50 25 25 0];
+    yScaling=[60 10 30 0]%[50 25 25 0];
     padFraction=0;
     viewFlankerComparison(names,params,cMatrix,{'pctCorrect'},subjects,diffEdges,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors, displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction)
     
@@ -674,7 +696,7 @@ for f=1:length(figID)
     
     if includeTitles;  title('difference in % correct'); end
     xlabel(sprintf('P(%s) - P(%s)', cMatrixNames{2},cMatrixNames{1}))
-    ylabel('count   rat ID ');
+    ylabel('count     rat ID    ');
     axis square;
 
     
@@ -708,19 +730,23 @@ for f=1:length(figID)
         doCorrectLine=false;
         sideText=false; %?
         doErrorBars=3; %ellipse
-        displaySignificance=true;
-        viewPopulationMeanAndCI=true
+        displaySignificance=false;
+        viewPopulationMeanAndCI=false;
         
         %[a b]=getDprCurve(51, .5, -.1, 1,[.2 .2 .2]);
         %[a b]=getDprCurve(51, 1, -.4, 1,[.2 .2 .2]);
 
+       axisTextSpace=0.05; %fraction of lim away from axis
        
         arrows2=arrows;
         arrows2{3}=2;
         doHitFAScatter(stats,CI,names,params,subjects,ROCuseConds,doLegend,doCurve,doYesLine,doCorrectLine,sideText,doErrorBars,arrows2)
         xlabel([])
-        set(gca,'XTick',[0 .5 1])
-        set(gca,'XTickLabel',{'0','False Alarm Rate','1'})
+        ylabel([])
+        set(gca,'XTick',[0 1],'XTickLabel',{'0','1'})
+        set(gca,'YTick',[0 1],'YTickLabel',{'0','1'})
+        text(0.5,-axisTextSpace,'False Alarm Rate','HorizontalAlignment', 'center','VerticalAlignment','top')
+        text(-axisTextSpace,0.5,'Hit Rate','HorizontalAlignment', 'center','VerticalAlignment','bottom','Rotation',90)
         if includeTitles;   title(sprintf('%s -> %s', cMatrixNames{1},cMatrixNames{2})); end
         addCornerAxis()
         
@@ -736,15 +762,18 @@ for f=1:length(figID)
         image(xx,yy,images(:,:,:,rocReorder(2)));  
         text(xx(1)-imWidth*0.25,imBottom+(imTop-imBottom)/2,'-');
         
-
-        
+        %add rectangle around each
+        rectangle('Position',[imLeft imBottom imWidth imTop-imBottom ],'EdgeColor',[1 0 0])
+        rectangle('Position',[imLeft+imWidth*1.5 imBottom imWidth imTop-imBottom ],'EdgeColor',[0 0 1])
+        text(imLeft+imWidth/2,imTop+0.01,'col','HorizontalAlignment', 'center','VerticalAlignment','bottom')
+        text(imLeft+imWidth*2,imTop+0.01,'par','HorizontalAlignment', 'center','VerticalAlignment','bottom')
         
         zoomRect=[.40 .55 .65 .8];
         plot(zoomRect([1 2]),zoomRect([3 3]),'k' )
         plot(zoomRect([1 2]),zoomRect([4 4]),'k' )
         plot(zoomRect([1 1]),zoomRect([3 4]),'k' )
         plot(zoomRect([2 2]),zoomRect([3 4]),'k' )
-                text(mean(zoomRect([1 2])),zoomRect(4),'zoom','HorizontalAlignment', 'center','VerticalAlignment','bottom');
+        text(mean(zoomRect([1 2])),zoomRect(4),'zoom','HorizontalAlignment', 'center','VerticalAlignment','bottom');
         subplot(2,2,2)
         %sub1=subplot('position',[.3 .5 .2 .2]);
         %('position',[.3 .5 .2 .2])
@@ -752,14 +781,17 @@ for f=1:length(figID)
         %[a b]=getDprCurve(51, .5, -.1, 1,[.2 .2 .2]);
         %[a b]=getDprCurve(51, 1, -.4, 1,[.2 .2 .2]);
         doHitFAScatter(stats,CI,names,params,{'230','139'},ROCuseConds,doLegend,doCurve,doYesLine,doCorrectLine,sideText,doErrorBars,arrows2)
-                xlabel([])
+        xlabel([])
+        ylabel([])
         axis(zoomRect)
-        text(.44,.68,'r1');
+        text(.44,.68,'r2');
         text(.52,.755,'r5');
-        set(gca,'XTick',[zoomRect(1) mean(zoomRect([1 2])) zoomRect(2)] )
-        set(gca,'XTickLabel',{zoomRect(1),'False Alarm Rate',zoomRect(2)})
-        set(gca,'YTick',zoomRect([3 4]))
-        set(gca,'YTickLabel',zoomRect([3 4]))
+        set(gca,'XTick',[zoomRect(1)  zoomRect(2)],'XTickLabel',{zoomRect(1),zoomRect(2)})
+        set(gca,'YTick',zoomRect([3 4]),'YTickLabel',zoomRect([3 4]))
+        
+
+        text(mean(zoomRect([1 2])),zoomRect(3)-axisTextSpace*diff(ylim),'False Alarm Rate','HorizontalAlignment', 'center','VerticalAlignment','top')
+        text(zoomRect(1)-axisTextSpace*diff(xlim),mean(zoomRect([3 4])),'Hit Rate','HorizontalAlignment', 'center','VerticalAlignment','bottom','Rotation',90)
         addCornerAxis()
     
             
@@ -769,21 +801,21 @@ for f=1:length(figID)
         %3/2 is from the ratio of width:height = 900:600
         %sub2=subplot('position',[.7 .1 0.22 .22*(3/2)])
         subplot(2,2,3)
-        
-
         viewFlankerComparison(names,params,cMatrix,{'hits'},subjects,fig6diffEdges,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors,displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction); 
         %cleanMiniStat('Hit Rate')
         %title(['\Delta Hit Rate']); axis square;
         xl=xlim; 
-        set(gca,'XTickLabel',{xl(1),'\Delta Hit Rate',xl(2)})
+        set(gca,'XTick',xl,'XTickLabel',xl)
+        text(0,-axisTextSpace*diff(ylim),'\Delta Hit Rate','HorizontalAlignment', 'center','VerticalAlignment','top')
 
+                
         %sub3=subplot('position',[.7 (.9-.22*(3/2)) 0.22 .22*(3/2)])
         subplot(2,2,4)
         viewFlankerComparison(names,params,cMatrix,{'FAs'},subjects,fig6diffEdges,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors,displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction); 
        % cleanMiniStat('False Alarm Rate')
        % title(['\Delta False Alarm Rate']);  axis square
-        xl=xlim; 
-        set(gca,'XTickLabel',{xl(1),'\Delta False Alarm Rate',xl(2)})
+        set(gca,'XTick',xl,'XTickLabel',xl)
+        text(0,-axisTextSpace*diff(ylim),'\Delta False Alarm Rate','HorizontalAlignment', 'center','VerticalAlignment','top')
 
        subplot(2,2,1); settings.alphaLabel='a'; cleanUpFigure(gca,settings)
        subplot(2,2,2); settings.alphaLabel='b'; cleanUpFigure(gca,settings)

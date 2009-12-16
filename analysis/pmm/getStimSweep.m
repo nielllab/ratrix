@@ -77,6 +77,21 @@ if ~exist('doMontage') || isempty(doMontage)
 end
 
 
+if any(ismember(sweptParameters,{'flankerPhase','targetPhase'}))
+    if any(ismember(sweptParameters,{'flankerPhase'}))
+        fp=sweptValues{strcmp('flankerPhase',sweptParameters)}
+    else
+        fp=[];
+    end
+    if any(ismember(sweptParameters,{'targetPhase'}))
+        tp=sweptValues{strcmp('targetPhase',sweptParameters)}
+    else
+        tp=[];
+    end
+    p=unique([tp fp]);
+    sm=setPhase(sm,p);
+end
+
 if useSymbolicFlankers
     sm=setRenderMode(sm,'symbolicFlankerFromServerPNG');
 end

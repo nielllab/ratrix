@@ -533,6 +533,7 @@ if isscalar(a) && isscalar(b) && isstruct(a) && isstruct(b)
                 end
                 a.(fn{k})=[a.(fn{k}) b.(fn{k})];
             else
+                (fn{k})
                 error('only works if both are cells or both are arrays')
             end
         end

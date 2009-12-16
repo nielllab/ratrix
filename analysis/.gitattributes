@@ -447,3 +447,7 @@ duc/doCuedGoNoGoAnalysis.m -text
 analysisScripts/sampleAnalysisParameters.m -text
 bsriram/analysisEnabling/createAnalysisScript.m -text
 analysisScripts/305/analysisScript_12_14_2009.m -text
+pmm/qHowDoesSOAEffectRats.m -text
+pmm/getMarkerSymbolForSubject.m -text
+pmm/peekAtEyes.m -text
+pmm/maxDetectionModel.m -text

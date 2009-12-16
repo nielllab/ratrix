@@ -1,7 +1,7 @@
 function viewBlockedData()%(d,subjects)
 
 if ~exist('d','var') || isempty(d)
-    group=2;
+    group=1;
     switch group
         case 0
             subjects={'277'} % test any one
@@ -16,23 +16,19 @@ end
 
 %quick set params
 if all(ismember(subjects,{'231','234'}))
-    dateRange= [pmmEvent('firstBlocking')+2 now];  % firstBlocking, startBlocking10rats
-    dateRange= [pmmEvent('231&234-jointSweep')+1 now];
-    conditionType='allBlockIDs';
-    filter{1}.type='16'; % 12 15 16
-
+    dateRange= [pmmEvent('firstBlocking')+2 pmmEvent('231&234-jointSweep')]; filter{1}.type='12'; 
+    dateRange= [pmmEvent('231&234-jointSweep')+1 pmmEvent('231-test200msecDelay')]; filter{1}.type='16';
+    dateRange= [pmmEvent('231&234-SOA')+1 now]; filter{1}.type='18'; % 12 15 16 18
+   dateRange= [pmmEvent('231&234-differentSOAtimes') now]
 elseif  all(ismember(subjects,{'227', '229', '230', '237', '232', '233'}))
     dateRange= [pmmEvent('startBlocking10rats')+2 now];
     %dateRange= [pmmEvent('231&234-jointSweep')+1 now];
-    conditionType='allBlockIDs';
     filter{1}.type='12';
     %filter{2}.type='trialThisBlockRange';  % could clean up some, but
     %reduces power if you rmeove to many... maybe 10 trials?
     %filter{2}.parameters.range=[10 150];
 elseif  all(ismember(subjects,{'138','139', '228','277'}))
-    dateRange= [pmmEvent('startBlocking10rats')+2 now];
-    conditionType='allBlockIDs';
-    %conditionType='4flanksBlocked';  % not yet
+    dateRange= [pmmEvent('startBlocking10rats')+2 pmmEvent('patternRatsDelay')];
     filter{1}.type='11';
 else
     subjects
@@ -41,11 +37,18 @@ end
 
 switch filter{1}.type
     case {'11','12'}
+        conditionType='allBlockIDs';
+        %conditionType='4flanksBlocked';  % not yet
         factor='targetContrast';
     case {'15'}
+        conditionType='allBlockIDs';
         factor='flankerContrast';
     case {'16'}
+        conditionType='allBlockIDs';
         factor='targetContrast';  % at actually both, but we will show target Contrast
+    case {'18'}
+        conditionType='allSOAs';
+        factor='SOA';  %will analyze most frequent SOA, but label is 1st rounded SOA
 end
 
 
@@ -93,10 +96,10 @@ try
         
         
                 %%
-                keyboard
+
                 %%
                 %close all
-                if 1 % reaction time per block
+                if 0 % reaction time per block
 %                     subjects={'231','234'} % all colin, many target contrasts on 12, or many flanker onctrasts on 15, or joint contrast on colinear on 16
 %                     conditionType='allBlockIDs'
 %                     conditionType='fiveFlankerContrastsFullRange'
@@ -104,8 +107,14 @@ try
 %                     filter{1}.type='16';
 %                     dateRange= [pmmEvent('231&234-jointSweep')+1 datenum('28-Oct-2009')]; % end on first analysis date
 %                     [stats CI names params]=getFlankerStats(subjects(s),conditionType,{'RT'},filter,dateRange);
+%                     
                     
+
+
+
+                    %[stats CI names params]=getFlankerStats(subjects(s),conditionType,{'RT'},filter,dateRange);
                     
+
                     f1=figure;
                     f2=figure;
                     w=3; h=3;
@@ -153,7 +162,7 @@ try
         
 
         %%
-        if 1
+        if 0
             %future: performance "trialPerBlock"
             figure;
             transitionFilters=[1 2 3 4 5 6 7 Inf]; %1 for up by 1 or inf for ALL ups

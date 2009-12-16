@@ -1,4 +1,4 @@
-function spikeDetails = postProcessSpikeClusters(assignedClusters,rankedClusters,spikeSortingParams)
+function spikeDetails = postProcessSpikeClusters(assignedClusters,rankedClusters,spikeSortingParams,spikeWaveforms)
 % this function does optional post-processing of the assigned clusters for each spike based on spikeSortingParams.postProcessing
 % spikeSortingParams.postProcessing can be:
 %   'treatAllNonNoiseAsSpike' - (default) all spikes assigned to non-noise clusters will be considered to be true spikes
@@ -36,6 +36,15 @@ switch process
         spikeDetails.processedClusters=ones(1,length(assignedClusters));
         % zero out anything not equal to first rankedCluster
         spikeDetails.processedClusters(assignedClusters~=rankedClusters(1))=0;
+    case 'biggestAverageAmplitudeCluster'
+        
+        clusterIDs=unique(assignedClusters);
+        for i=1:length(clusterIDs)
+            avg=mean(spikeWaveforms(clusterIDs(i),:),1);
+            amp(i)=diff(minmax(avg));
+        end
+        selected=find(amp==max(amp));
+        spikeDetails.processedClusters=assignedClusters'==selected;
     otherwise
         error('unsupported method for postProcessing spike clusters');
 end

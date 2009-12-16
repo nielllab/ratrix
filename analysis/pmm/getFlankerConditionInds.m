@@ -97,6 +97,12 @@ if ~isempty(hasNF)
         step=min(d2.step(d2.stdGaussMask==0.0625));% probably 8
         d2=removeSomeSmalls(d2,d2.step~=step);
         
+        %139 was back on step 8 later in life, and those trials must be
+        %removed, they were reliably after 100,000 trials
+        if strcmp(d2.info.subject,{'139'})
+           d2=removeSomeSmalls(d2,d2.trialNumber>100000);
+        end
+        
     else
         %sometimes we process empty toy data for names of conditions
         d2=getToyData({'detection'});
@@ -170,6 +176,9 @@ if ~isempty(hasNF)
     %combine the names and colors
     names=[nm1 'noFb'];
     colors=[col1; col2];
+    
+    
+
     
     %combine the new restricted subset and conditions, but first
     %check that analyzed flanker trials come after the block of target only
@@ -300,7 +309,22 @@ switch types
             end
             names = [names, {sprintf('%s-%2.2f-%2.2f',nameStr,contrast,d.flankerContrast(intstanceID))}];
         end
-
+    case 'allSOAs'
+        SOA=round(100*(d.actualFlankerOnsetTime-d.actualTargetOnsetTime));  %round to nearest frame if 100hz
+        SOAs=unique((SOA(~isnan(SOA))));
+        remove=[];
+        for i=1:length(SOAs)
+            if sum(SOA==SOAs(i))< 0.05*sum(~isnan(SOA))
+                remove=[remove i];
+            end
+        end
+        SOAs(remove)=[]; %remove conditions where less than 5% of the data exist
+        
+        for i=1:length(SOAs)
+            conditionInds(i,:)= SOA==SOAs(i);
+            names = [names, {num2str(SOAs(i)*10,'%2.0f')}];
+        end
+        colors=jet(length(SOAs));
         
     case 'allBlockSegments'
         blockID=d.blockID;

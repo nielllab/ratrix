@@ -285,11 +285,17 @@ for i=1:numSubjects
                     params.factors.blockID(i,j)=d.blockID(firstInd);
                     params.factors.targetContrast(i,j)=max(d.targetContrast(firstInd),d.phantomContrast(firstInd));
                     params.factors.flankerContrast(i,j)=d.flankerContrast(firstInd);
+                    params.factors.SOA(i,j)=round(100*(d.actualFlankerOnsetTime(firstInd)-d.actualTargetOnsetTime(firstInd))) ;
                case {'allBlockIDs&2Phases'}
                     params.factors.blockID(i,j)=d.blockID(firstInd);
                     params.factors.targetContrast(i,j)=max(d.targetContrast(firstInd),d.phantomContrast(firstInd));
                     params.factors.flankerContrast(i,j)=d.flankerContrast(firstInd);
                     params.factors.alignedPhase(i,j)=d.flankerPhase(firstInd)==d.targetPhase(firstInd);
+               case {'allSOAs'}
+                    params.factors.actualTargetOnsetTime(i,j)=d.actualTargetOnsetTime(firstInd);
+                    params.factors.actualFlankerOnsetTime(i,j)=d.actualFlankerOnsetTime(firstInd);
+                    params.factors.SOA(i,j)=round(100*(d.actualFlankerOnsetTime(firstInd)-d.actualTargetOnsetTime(firstInd))) ;
+d.actualTargetOnsetTime-d.actualFlankerOnsetTime
                 otherwise
                     conditionType
                     error('factors not listed yet for that conditionType')

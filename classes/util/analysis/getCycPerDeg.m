@@ -1,7 +1,8 @@
 function cycPerDeg=getCycPerDeg(pixPerCyc,monitorDiagInches,monitorRez,distanceToEyeCM)
 %this whole calulation assumes sqaurePixel, which is true for FE992 at [1024 768]
-%cycPerDeg=getCycPerDeg([4 8 16 32 64 128],17.8,[1024 768],10) % box
-%cycPerDeg=getCycPerDeg([4 8 16 32 64 128],17.8,[1024 768],16) % cockpit
+%cycPerDeg=getCycPerDeg([4 8 16 32 64 128],17.8,[1024 768],10) % box - to screen tangent
+%cycPerDeg=getCycPerDeg([4 8 16 32 64 128],17.8,[1024 768],14) % box - to screen center
+%cycPerDeg=getCycPerDeg([4 8 16 32 64 128],17.8,[1024 768],16) % cockpit -to screen tangent
 %
 % note: these cpd are true when the stimulus is in the center of the
 % screen.

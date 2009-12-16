@@ -499,7 +499,7 @@ while ~quit
                            
                             % 11/25/08 - do some post-processing on the spike's assignedClusters ('treatAllNonNoiseAsSpikes', 'largestClusterAsSpikes', etc)                     
                             
-                            spikeRecord.spikeDetails = postProcessSpikeClusters(spikeRecord.assignedClusters,spikeRecord.rankedClusters,spikeSortingParams);
+                            spikeRecord.spikeDetails = postProcessSpikeClusters(spikeRecord.assignedClusters,spikeRecord.rankedClusters,spikeSortingParams,spikeRecord.spikeWaveforms);
                             spikeRecord.spikeDetails.rankedClusters=spikeRecord.rankedClusters;
                             if isempty(spikeRecord.assignedClusters)
                                 passedQualityTest=false;

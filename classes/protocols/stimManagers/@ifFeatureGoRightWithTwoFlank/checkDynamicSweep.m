@@ -12,8 +12,8 @@ if ~isempty(dynamicSweep)
                 error('second argument 2 dynamic sweepMode must be a random seed')
             end
         case 'manual'
-            error('not yet');
-            if ~(size(dynamicSweep.sweptValues, 1)==size(dynamicSweep.sweptParameters,2) & isnumeric(dynamicSweep.sweptValues))
+            %error('not yet');
+            if ~(size(dynamicSweep.sweptValues, 1)==size(dynamicSweep.sweptParameters,2) && isnumeric(dynamicSweep.sweptValues))
                 error ('sweptValues must be a matrix m=numParameters x n=numValues')
             end
         otherwise
@@ -25,9 +25,11 @@ if ~isempty(dynamicSweep)
         
         error('sweptParameters must be a cell array of fields on the sm or belong to an acceptable list')
     end
-    if ~isempty(dynamicSweep.sweptValues) & ~strcmp('manual',dynamicSweep.sweepMode{1})
-        error('sweptValues must be empty if in any mode but manual')
-    end
+%     if ~isempty(dynamicSweep.sweptValues) & ~strcmp('manual',dynamicSweep.sweepMode{1})
+%         error('sweptValues must be empty if in any mode but manual')  %
+%         not any more... now it takes the facorial combo of these values
+%         if in ordered or random mode
+%     end
      if ~((iswholenumber(dynamicSweep.numRepeats) & dynamicSweep.numRepeats>0) || isinf(dynamicSweep.numRepeats))
         error('numRepeats must a whole number greater than 0, or Inf')
     end

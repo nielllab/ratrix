@@ -44,7 +44,7 @@ if analyzeDrops
 else
     numStimFrames=max(spikeRecord.stimInds);
     stimFrames=1:numStimFrames;
-    firstFramePerStimInd=~[0 diff(spikeRecord.stimInds)==0];
+    firstFramePerStimInd=~[0; diff(spikeRecord.stimInds)==0];
     correctedFrameIndices=spikeRecord.correctedFrameIndices(firstFramePerStimInd);
 end
 
@@ -52,16 +52,29 @@ end
 allSpikes=spikeRecord.spikes; %all waveforms
 waveInds=allSpikes; % location of all waveforms
 if isstruct(spikeRecord.spikeDetails) && ismember({'processedClusters'},fields(spikeRecord.spikeDetails))
+    try
     if length([spikeRecord.spikeDetails.processedClusters])~=length(waveInds)
         length([spikeRecord.spikeDetails.processedClusters])
         length(waveInds)
         error('spikeDetails does not correspond to the spikeRecord''s spikes');
+    end
+    catch ex
+        warning('oops')
+       keyboard 
     end
     thisCluster=[spikeRecord.spikeDetails.processedClusters]==1;
 else
     thisCluster=logical(ones(size(waveInds)));
     %use all (photodiode uses this)
 end
+
+viewSort=true;
+if viewSort
+    figure
+    plot(spikeRecord.spikeWaveforms([spikeRecord.spikeDetails.processedClusters]~=1,:)','color',[0.2 0.2 0.2]);  hold on
+    plot(spikeRecord.spikeWaveforms(find([spikeRecord.spikeDetails.processedClusters]==1),:)','r');
+end
+
 spikes=allSpikes;
 spikes(~thisCluster)=[]; % remove spikes that dont belong to thisCluster
 
@@ -83,7 +96,7 @@ if fix
     subplot(6,1,6); plot(targetIsOn)
 
 
-    warning ('paused!')
+    %warning ('paused!')
     %keyboard
 end
 
@@ -117,6 +130,8 @@ swept=s.dynamicSweep.sweptParameters;
 d.date=correctedFrameIndices(:,1)'/(samplingRate*60*60*24); %define field just to avoid errors
 for i=1:length(swept)
     switch swept{i}
+        case {'targetContrast','flankerContrast'}
+            d.(swept{i})=s.dynamicSweep.sweptValues(i,sweptID);
         case 'targetOrientations'
             d.targetOrientation=s.dynamicSweep.sweptValues(i,sweptID);
         case 'flankerOrientations'
@@ -134,12 +149,23 @@ if any(strcmp(swept,'targetOrientations'))...
         && any(strcmp(swept,'flankerOrientations'))...
         && any(strcmp(swept,'flankerPosAngle'))...
         && any(strcmp(swept,'phase'))...
-        size(swept,2)==4; 
+        && size(swept,2)==4; 
     [conditionInds conditionNames haveData colors]=getFlankerConditionInds(d,[],'colin+3');
     numUniqueTypes=size(conditionInds,1); % regroup as flanker conditions
     colors(2,:)=colors(3,:); % both pop-outs the same
     colors(4,:)=[.5 .5 .5]; % grey not black
+    
+    
+% elseif any(strcmp(swept,'targetContrast'))...
+%     && any(strcmp(swept,'flankerContrast'))...
+%     && size(swept,2)==2; 
+% 
+%     %flanker contrast only right now...
+%     [conditionInds conditionNames haveData colors]=getFlankerConditionInds(d,[],'fiveFlankerContrastsFullRange');
+%     numUniqueTypes=size(conditionInds,1)
+%     
 else
+    
     %default to each unique
     conditionsInds=zeros(max(sweptID),length(stimFrames));
     allSweptIDs=unique(sweptID);
@@ -157,24 +183,35 @@ numUniqueFrames=max(effectiveFrame);
 %%
 events=nan(numRepeats,numConditions,numUniqueFrames);
 possibleEvents=events;
-rasterDensity=zeros(numRepeats*numConditions,numUniqueFrames);
+photodiode=events;
+rasterDensity=ones(numRepeats*numConditions,numUniqueFrames)*0.1;
+p2=rasterDensity;
 for i=1:numRepeats
     for j=1:numConditions
         for k=1:numUniqueFrames
             which=find(conditionInds(j,:)' & repetition==i & effectiveFrame==k);
             events(i,j,k)=sum(spikeCount(which));
             possibleEvents(i,j,k)=length(which);
-            %photodiode(i,j,k)=sum(spikeData.photoDiode(which));
+            photodiode(i,j,k)=mean(spikeRecord.photoDiode(which));
             %in last repeat density = 0, for parsing and avoiding misleading half data
             if numRepeats~=i
                 y=(j-1)*(numRepeats)+i;
                 rasterDensity(y,k)=events(i,j,k)/possibleEvents(i,j,k);
+                p2(y,k)=photodiode(i,j,k);
             end
         end
     end
 end
 
+rasterDensity(isnan(rasterDensity))=0;
+figure; 
+subplot(2,1,1); imagesc(rasterDensity);  colormap(gray);
+subplot(2,1,2); plot(mean(rasterDensity)); set(gca,'xLim',[0 numUniqueFrames])
+xlabel(sprintf('spikes: %d',sum(spikeCount)))
 
+figure; imagesc(p2);  colormap(gray)
+subplot(2,1,1); imagesc(p2);  colormap(gray);
+subplot(2,1,2); plot(mean(p2)); set(gca,'xLim',[0 numUniqueFrames])
 %% 
 
 
@@ -216,13 +253,15 @@ rasterDensity=[rasterDensity(:,1+shift:end) rasterDensity(:,1:shift)];
 %photodiodeSEM=[photodiodeSEM(:,1+shift:end) photodiodeSEM(:,1:shift)];
 
 figure(parameters.trialNumber); % new for each trial
-set(gcf,'position',[100 400 560 620])
-subplot(1,2,1); hold on; %p=plot([1:numPhaseBins]-.5,rate')
+set(gcf,'position',[10 40 560 620])
+subplot(3,1,1); hold on; %p=plot([1:numPhaseBins]-.5,rate')
 %plot([0 numUniqueFrames], [rate(1) rate(1)],'color',[1 1 1]); % to save tight axis chop
 x=[1:numUniqueFrames]; 
 for i=1:numConditions
-    plot(x,rate(i,:),'color',colors(i,:))
-    plot([x; x]+(i*0.05),[rate(i,:); rate(i,:)]+(rateSEM(i,:)'*[-1 1])','color',colors(i,:))
+    %plot(x,rate(i,:),'color',colors(i,:))
+    
+    %plot([x; x]+(i*0.05),[rate(i,:); rate(i,:)]+(rateSEM(i,:)'*[-1 1])','color',colors(i,:))
+     plot(x,conv(rate(i,:),fspecial('gauss',[1 10],2),'same'),'color',colors(i,:))
 end
 %plot(x,rate(maxPowerInd,:),'color',colors(maxPowerInd,:),'lineWidth',2);
 xlabel('time (msec)'); 
@@ -261,16 +300,19 @@ axis tight
 % xlabel('time');  
 % %set(gca,'XTickLabel',{'0','pi','2pi'},'XTick',([0 .5 1]*numPhaseBins)+.5);
 
-subplot(1,2,2); %2,2,4
+subplot(3,1,2); %2,2,4
 hold on
 dur=double(diff(s.targetOnOff));
-relevantRange=[numUniqueFrames-dur:numUniqueFrames];
+relevantRange=[numUniqueFrames-(dur*1.5):numUniqueFrames];
 
 
 %meanPerRepetition?  fdivide by dur vs. divide by repetitions...
 
 %meanRateDuringPeriod=sum(fullRate(:,:,relevantRange)/dur,3);
 meanRateDuringPeriod=mean(fullRate(:,:,relevantRange),3);
+if isnan(meanRateDuringPeriod(end))  %iF nan REPLACE THE LAST VALUE WITH THE AVERAGE ABOVE IT
+    meanRateDuringPeriod(end)=mean(meanRateDuringPeriod(1:end-1,end))  
+end
 meanRatePerCond=mean(meanRateDuringPeriod,1); % 2 vs 3 check!
 SEMRatePerCond=std(meanRateDuringPeriod,[],1)/sqrt(numRepeats);
 stdRatePerCond=std(meanRateDuringPeriod,[],1);
@@ -302,3 +344,6 @@ set(gca,'XTickLabel',conditionNames,'XTick',1:numConditions);
 % set(gca,'yLim',[106 108]);
 % set(gca,'XTickLabel',conditionNames,'XTick',1:numConditions);
 
+
+
+subplot(3,1,3); imagesc(rasterDensity);  colormap(gray)

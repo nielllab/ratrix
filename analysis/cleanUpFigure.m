@@ -34,6 +34,9 @@ if ~ismember('LineWidth',fields(settings))
     settings.LineWidth=1.5;
 end
 
+if ~ismember('HgGroupLineWidth',fields(settings)) 
+    settings.HgGroupLineWidth=0.5;
+end
 
 if ~ismember('AxisLineWidth',fields(settings)) 
     settings.AxisLineWidth=2;
@@ -191,7 +194,17 @@ set(h,'FontSize', settings.xyLabelFontSize)
 function succ=cleanUpThisLine(h,settings)
 % get(h)
 if ~settings.turnOffLines
-    set(h,'LineWidth', settings.LineWidth) 
+    if strcmp(get(h,'Marker'),'none') 
+        %is a line, so change it
+           set(h,'LineWidth', settings.LineWidth) 
+    elseif strcmp(class(get(h,'Annotation')),'hg.Annotation')
+        %is a non-line, annotation object
+        set(h,'LineWidth', settings.HgGroupLineWidth) 
+    else
+        %not an annotation object or a line
+        get(h)
+        error('not handled yet')
+    end
    
 end
 
@@ -210,7 +223,7 @@ function succ=cleanUpThisHgGroup(h,settings)
 children=get(h, 'Children');
 doClassSpecificAction(children,settings)
 if ~settings.turnOffLines
-    set(h,'LineWidth',settings.LineWidth) %%once upon a time it errored on:
+    set(h,'LineWidth',settings.HgGroupLineWidth) %%once upon a time it errored on:
     % f=figure; flankerAnalysis(removeSomeSmalls(getSmalls('102'),d.step~=12),  'twoFlankers', 'performancePerDeviationPerCondition','pctYes',  'none', false); cleanUpFigure(f)
 end
 succ=1;

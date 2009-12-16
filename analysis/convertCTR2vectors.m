@@ -32,11 +32,21 @@ for i=1:length(f)
     %disp(sprintf('doing %s which is size [%d x %d]', f{i},sz(1),sz(2)));
     switch class(source.(f{i}))
         case {'double','logical','int8','uint8'}
-            if size(source.(f{i}),1)==1
-                if ~ismember(f{i},fields(d))
-                    d.(f{i})=nan(1,n); %init as nan
+            rows=size(source.(f{i}),1);
+            allowableSizes=[1];  % almost all is 1
+            %allowableSizes=[1 25 50];  % almost all is 1,but lickTimes is 25, and is the test case for future matrixes... all subsequent code is general to any size
+            if ismember(rows,allowableSizes)
+                try
+                    if ~ismember(f{i},fields(d))
+                        d.(f{i})=nan(rows,n); %init as nan
+                    end
+                catch ex
+                    f{i}
+                    disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
+                    warning('lickTimes may take up too much memory...too many nans')
+                    keyboard
                 end
-                d.(f{i})(inds)=source.(f{i}); %fill relevant as double
+                d.(f{i})(:,inds)=source.(f{i}); %fill relevant as double
             else
                 sz=size(source.(f{i}));
                 disp(sprintf('skipped %s which is size [%d x %d]', f{i},sz(1),sz(2)));

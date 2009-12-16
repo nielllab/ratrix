@@ -420,7 +420,7 @@ for j=1:numStats
         maxX=edgeValue;
         diffEdges(j,:)=linspace(minX,maxX,nBins+1);
     end
-    histFraction=0.3;  % pass this param up...
+
     totalFigureHeight=diff([minX maxX]); % maintain sqaurness of numerical values, for later rotation
     %small loop to find maxBinHeight per statistic
     for i=whichComparison
@@ -495,7 +495,14 @@ for j=1:numStats
                 %yVal=maxBinHeight*1.25 +*(1.1+((statSpace*k)/numSubjects));
                 yVal=totalFigureHeight*(histFraction+gapFraction/2+dataFraction*(subjectInd/numSubjects));
                 plot([CIs(i,j,subjectInd,1) CIs(i,j,subjectInd,2)], [yVal yVal], 'color', color);
-                plot(deltas(i,j,subjectInd), yVal,mark, 'markerSize', 7, 'color', color);
+                thisMark=plot(deltas(i,j,subjectInd), yVal,mark, 'markerSize', 7, 'color', color);
+
+                set(thisMark,'Marker',getMarkerSymbolForSubject(subjects(k)));
+                if ismember(labeledNames(k),{'r6','r7'})
+                    set(thisMark,'MarkerFaceColor',color);  %filled solid
+                   else 
+                    set(thisMark,'MarkerFaceColor',[1 1 1]);  %open
+                end
             end
             
             
@@ -505,7 +512,7 @@ for j=1:numStats
                 set(t, 'HorizontalAlignment', 'right');
             end
             if addNames
-                t=text(-maxX*1.05, yVal, labeledNames(k));
+                t=text(-maxX*1.05, yVal, labeledNames(k)); %thisMark
                 %t=text(maxX*0.9, yVal,
                 %sprintf('%s-%s-%d',labeledNames{k},subjects{k},subjectInd)); to test and confrim
                 set(t, 'HorizontalAlignment', 'right');

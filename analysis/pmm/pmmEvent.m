@@ -36,6 +36,10 @@ switch id
         date =datenum('07-Dec-2009 20:14:37');
     case 'patternRatsDelay' % single-contrast
         date =datenum('07-Dec-2009 20:14:37');
+    case '231&234-differentSOAtimes' % single-contrast
+        date =datenum('11-Dec-2009 16:09:28');
+    case '139,228,229toTrunk' % single-contrast
+        date =datenum('11-Dec-2009 16:09:28');
     otherwise
         id
         error('bad event id')

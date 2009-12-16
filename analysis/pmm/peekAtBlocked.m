@@ -65,20 +65,22 @@ multiComparePerPlot=false;
 %%
 
 subjects={'231','234'}
+subjects={'234'}
 numSubjects=length(subjects);
-w=2;h=1;
+w=numSubjects;h=1;
 %% 
 
 
 for i=1:numSubjects
     d=getSmalls(subjects{i})
     
-    dateRange= [pmmEvent('startBlocking10rats')+2 now];
+    %dateRange= [pmmEvent('startBlocking10rats')+2 now];
+    dateRange=[pmmEvent('231&234-jointSweep')  pmmEvent('231-test200msecDelay')];
     %conditionType='allBlockIDs';
     conditionType= 'fiveFlankerContrastsFullRange';
     filter{1}.type='16'; % 12 15 16
     plotType='performancePerContrastPerConditionWithAllFlankContastAndDev';
-    performanceMeasure='dpr'; % 'pctYes' 'pctCor'
+    performanceMeasure='pctCor'%'dpr'; % 'pctYes' 'pctCor'
     verbose=false;
     subplot(h,w,i)
     [stats plotParams]=flankerAnalysis(d, conditionType, plotType, performanceMeasure, filter, 'withoutAfterError',verbose)

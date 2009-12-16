@@ -9,10 +9,10 @@ else
 end
 
 for i=1:length(f)
-    command=sprintf('out.%s=d.%s(~which);',f{i},f{i});
+    command=sprintf('out.%s=d.%s(:,~which);',f{i},f{i});
     try
         %eval(command)
-        out.(f{i})=d.(f{i})(~which);
+        out.(f{i})=d.(f{i})(:,~which);
     catch ex
         disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
         disp(command);

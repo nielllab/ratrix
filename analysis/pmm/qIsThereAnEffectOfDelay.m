@@ -14,7 +14,8 @@
          d16=addPhantomTargetContrast(d16);
          d16=removeSomeSmalls(d16,~(d16.phantomTargetContrastCombined==tContrast & d16.flankerContrast==fContrast));
          
-         d17=removeSomeSmalls(d,d.step~=17);
+         %d17=removeSomeSmalls(d,d.step~=17);
+         d17=removeSomeSmalls(d,d.step~=17 | d.date<pmmEvent('231-test60msecDelay'));
          d17=removeSomeSmalls(d17,~getGoods(d17,'withoutAfterError'));
          figure; 
          subplot(2,1,1); doPlotPercentCorrect(d17,[],50); 
@@ -32,7 +33,12 @@
          doBarPlotWithStims(attempt,correct,[],[1 0 0; 0 1 1]);%,yRange,inputMode,addText, groupingBar,imWidth)
          legend({'jointSweep-matchedContrasts','after delay'});
          %cleanUpFigure
-         
+         %%  see boundary of performance
+         figure
+         dateRange=[datenum('25-Oct-2009') datenum('5-Nov-2009')] % 1st range compare
+         dateRange=[datenum('25-Oct-2009') datenum('10-Nov-2009')] % 2nd range compare
+         subplot(2,1,1); doPlotPercentCorrect(getSmalls('231',dateRange),[],50); 
+
          %%
          %close all
          figure; subplot(1,2,1)
@@ -46,7 +52,8 @@
          subplot(1,2,2)
          filter{2}.type='17';
          numDaysAfterStart=0;
-         dateRange=[pmmEvent('231-test200msecDelay')+numDaysAfterStart now];
+         dateRange=[pmmEvent('231-test200msecDelay') pmmEvent('231-test60msecDelay')];  % ~3 days
+         dateRange=[pmmEvent('231-test60msecDelay') now];  
          [stats CI names params]= getFlankerStats({'231'},'allPhantomTargetContrastsCombined',[],filter,dateRange);
          doHitFAScatter(stats,CI,names,params);
          

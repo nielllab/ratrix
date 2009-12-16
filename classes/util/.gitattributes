@@ -157,3 +157,4 @@ matlaby/sanitize.m -text
 trialRecordProcessing/getPhaseStarts.m -text
 trialRecordProcessing/getDiscrimPhaseStart.m -text
 analysis/stochasticLoad.m -text
+trialRecordProcessing/getPreResponsePhaseStart.m -text

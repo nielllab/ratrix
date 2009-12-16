@@ -577,13 +577,73 @@ end
 
 function X=svdPlot(items,code,sz,s,v,cs)
 X=[];
+
 if ~isempty(items)
-    X=squish(items*v(:,1)/s(1));
-    Y=squish(items*v(:,2)/s(2));
+    X=items*v(:,1)/s(1);
+    Y=items*v(:,2)/s(2);
+    
+    if false
+        X=squish(X);
+        Y=squish(Y);
+    end
+    
     if ~exist('cs','var')
         plot(X,Y,code,'MarkerSize',sz)
     else
-        scatter(X,Y,sz,cs,code)
+        close all
+        
+        cut=.05;
+        b=fir1(1000,cut);
+        pHz=1/median(diff(cs));
+
+        %this dim actually shifts mean
+        x=filtfilt(b,1,X);
+
+        if false
+        [junk junk t p]=spectrogram(X-mean(X),round(pHz),[],[],pHz);
+        x=log(sum(p))';
+        x=filtfilt(b,1,x);
+        x(end+1)=mean(x);
+        end
+        
+        %this dim only shifts variance
+
+        [junk junk t p]=spectrogram(Y-mean(Y),round(pHz),[],[],pHz);
+        y=log(sum(p))';
+        y=filtfilt(b,1,y);
+        y(end+1)=mean(y);
+        
+        %y=Y;
+        
+        x=normalize(x);
+        y=normalize(y);
+        
+        n=6;
+        subplot(n,1,1)
+        plot([Y X])
+        
+        subplot(n,1,2)
+        plot([y x])
+        
+        subplot(n,1,3)
+        scatter(x,y,sz,cs,code)
+        
+        subplot(n,1,4)
+        d=100;
+        %plot([hist(x,d);hist(y,d)]')
+        
+        q=cellfun(@(z) normalize(hist(z,d)),[{x} {y}],'UniformOutput',false);
+        plot(log(cell2mat(q')'))
+        
+        subplot(n,1,5)
+        idx = kmeans(x(:),2);
+        plot(idx)
+        ylim([.9 2.1])
+        
+        subplot(n,1,6)
+        plot(v(:,[2 1]))
+        
+        keyboard
     end
         
     X=X-min(X);
@@ -838,26 +898,42 @@ end
 function f=autocorr(data)
 f=figure;
 
-if false %this is to print out raw burst phys, but it's broke
-    %hack!
-    physDetailTimes=[4180 4300]*1000; %for 04.15.09 example cell
+switch data.date
+    case '04.15.09'
+        physDetailTimes=[4180 4300]; 
+    otherwise
+        physDetailTimes=[];
+end
+
+if ~isempty(physDetailTimes)
+    physDetailTimes=physDetailTimes*1000;
+    
     z=getRangeFromChunks(data.fileNames.physFile,physDetailTimes(1),diff(physDetailTimes));
-    b=fir1(30,.3,'high');
+    
+    nyquist=1/(2*median(diff(z(1,:,1)/1000)));
+    cutoff=250;
+    
+    b=fir1(300,cutoff/nyquist,'high');
     filted=filtfilt(b,1,z(1,:,2));
-    plot((z(1,:,1)-physDetailTimes(1))/1000,filted)
+    
+    subplot(3,1,3)
+    plot((z(1,:,1)-physDetailTimes(1))/1000,filted);
     hold on
+    
     bs=data.bsts(data.bsts>=physDetailTimes(1)/1000 & data.bsts<=physDetailTimes(2)/1000)-physDetailTimes(1)/1000;
     plot(bs,ones(1,length(bs))*max(filted),'x')
-    keyboard
+    title('example bursts')
+    xlabel('secs')
+    xlim([0 diff(physDetailTimes)/1000])
 end
 
 durMS=1000;
 
-subplot(2,1,1)
+subplot(3,1,1)
 doAC(data.tonics,durMS,durMS);
 title('tonic autocorr')
 
-subplot(2,1,2)
+subplot(3,1,2)
 doAC(data.bsts,durMS,round(durMS/10));
 title('burst autocorr')
 end
@@ -882,7 +958,7 @@ if true
     
     locAC(ts,'b')
     hold on
-    locAC(rand(size(ts))*range(ts),'k')
+    locAC(rand(size(ts))*range(ts),'k') %note the shuffle corrector doesn't work for nonstationary data
 else
     bins=linspace(0,durMS,numBins);
     h=hist(diff(1000*ts),bins);
@@ -1164,8 +1240,6 @@ state=doNormRate(data.tonics)./doNormRate(data.bsts);
 
 subplot(n,1,5)
 
-keyboard %here!
-
 state=log(state);
 state(isinf(state))=nan;
 plot(ts-start,state);
@@ -1217,12 +1291,7 @@ end
 subplot(n,2,2*n-1)
 xlabel('ms')
 
-%abstract:
-%add the fact we sometimes burst triggered average
-%do tonic spikes mean something different in two states?  is BTA different 
-%cite lu
-
-%chicken burrito with no rice and lots of salsa and corn
+keyboard
 end
 
 function f=raster(data)
@@ -1327,12 +1396,85 @@ else
     warning('skipping raster cuz no rpts id''d')
 end
 
-if true %lab meeting hack
-    ylim([-1 0])
-    xlim([0 30])
-    set(gca,'YTick',[])
+if true %the old way makes too many graphics objects and overwhelms gfx memory
+    clf 
+    
+    cellfun(@(c) doRaster(c{1},c{2},maxTime),{ {rasters,'k.'} {bursts,'ro'} {inBursts,'r.'} {violations,'bo'} })
+        
+    if false
+        granMS=1;
+        
+        info=[]; %[cols rows vals]
+        
+        for i=1:length(rasters)
+            cellfun(@(c) imRaster(c{1}{i},i,c{2},maxTime),{ {rasters,1} {bursts,2} {inBursts,3} {violations,4} });
+        end
+        
+        inds=sub2ind(arrayfun(@(x) max(info(:,x)),[2 1]),info(:,2),info(:,1));
+        if length(inds)~=length(unique(inds))
+            error('got duplicate inds') %we can't have dupes cuz sparse() adds the entries
+        end
+        
+        im=sparse(info(:,2),info(:,1),info(:,3));
+        
+        cs=([0 0 0; 1 0 0; 1 0 1; 0 0 1]);
+        
+        vals=unique(im(:));
+        vals=vals(vals~=0);
+        for v=1:length(vals)
+            [i j]=find(im==vals(v));
+            plot(j,i,'+','Color',cs(v,:))
+            hold on
+        end
+        xlim([1 size(im,2)])
+        ylim([1 size(im,1)])
+    end
+    
+    axis ij
+    ylabel('repeat')
+    xlabel('secs')
+    
+    dpi=3*72; %size of 1-pt dots (pts are 1/72", and dots are 1/3 requested pt size) http://www.mathworks.com/access/helpdesk/help/techdoc/ref/lineseriesproperties.html#MarkerSize
+    heightInches=8; %assumption -- doesn't seem to be specifiable
+    fudge=3;
+    
+    frac=length(rasters)/(dpi*heightInches);
+    
+    ylim([0 length(rasters)/min(fudge*frac,1)])
+    % xlim([0 30]) %temp hack
 end
-keyboard
+
+    function doRaster(data,code,lim)
+        info=[];
+        for i=1:length(data)
+            info=[info [i*ones(1,length(data{i}));data{i}(:)']];
+        end
+        if any(code=='.')
+            m=1;
+        else
+            m=2;
+        end
+        plot(info(2,:),info(1,:),code,'MarkerSize',m)
+        hold on
+    end
+
+    function imRaster(times,trial,val,lim)
+        times=unique(round(times(times<lim)*1000/granMS)+1); %unique is necessary to avoid putting more than one event in a bin, cuz sparse() will then add them
+        
+        if ~isempty(info)
+            matches=info(:,2)==trial & ismember(info(:,1),times);
+            if any(matches)
+                if val~=4
+                    error('only violations should overlap other events')
+                else
+                    fprintf('replacing %d violations\n',sum(matches))
+                    info=info(~matches,:);
+                end
+            end
+        end
+        
+        info=[info;times(:) repmat([trial val],length(times),1)];
+    end
 end
 
 function ex(fileNames,stimTimes,rec,spks,stimType,hz)

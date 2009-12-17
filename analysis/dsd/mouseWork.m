@@ -15,6 +15,9 @@ x=removeSomeSmalls(d,filter);
 figure; doPlotPercentCorrect(x);
 title('327 faster than 700msec')
 
+%%
+figure; hist(d.responseTime(d.responseTime<6),30)
+
 %% other things to call sometimes
 
 edit quickInspect

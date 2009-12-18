@@ -37,7 +37,7 @@ data.fileNames=fileNames;
 
 data.mins=(stimTimes(2)-stimTimes(1))/60;
 
-if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && rec.date==datenum('04.15.09','mm.dd.yy') %example: 22	43.3 mins	164-04.15.09-z47.34-chunk1-code1-acf4f35b54186cd6055697b58718da28e7b2bf80/gaussian-t2042.385-4641
+if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) % && rec.date==datenum('04.15.09','mm.dd.yy') %example: 22	43.3 mins	164-04.15.09-z47.34-chunk1-code1-acf4f35b54186cd6055697b58718da28e7b2bf80/gaussian-t2042.385-4641
     
     data.spks=load(fileNames.spikesFile);
     data.spks=data.spks(data.spks>=stimTimes(1) & data.spks<=stimTimes(2));
@@ -75,9 +75,9 @@ if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && rec
     
     data=findBursts(data);
     
-    doAnalysis(data,'stationarity');
+    % doAnalysis(data,'stationarity');
     % doAnalysis(data,'raster');
-    % doAnalysis(data,'STA');
+    doAnalysis(data,'STA');
     % doAnalysis(data,'autocorr');
     % doAnalysis(data,'burstDetail');
     % doAnalysis(data,'waveforms');
@@ -988,13 +988,19 @@ if ~isempty(data.frames)
     
     [bSTF vals]=calcSTA(data.bsts,frames,stimPreMS,stimPostMS,c);
     staPlot(bSTF,color,vals,c,n,3,'burst triggered average frame',frames(1,:));
+    
+    %not sure where to put this when the photodiode plots are on
+    info=compareTriggeredDistributions(data.tonics,data.bsts,frames,stimPreMS,stimPostMS);
+    staPlot(info,color,[],c,n,2,'spike vs. burst triggered frames',nan);
 end
 
-[tSTS vals]=calcSTA(data.tonics,data.stim,stimPreMS,stimPostMS,c);
-staPlot(tSTS,color,vals,c,n,2,'spike triggered average filtered photodiode',data.stim(1,:));
-
-[bSTS vals]=calcSTA(data.bsts,data.stim,stimPreMS,stimPostMS,c);
-staPlot(bSTS,color,vals,c,n,4,'burst triggered average filtered photodiode',data.stim(1,:),true);
+if false
+    [tSTS vals]=calcSTA(data.tonics,data.stim,stimPreMS,stimPostMS,c);
+    staPlot(tSTS,color,vals,c,n,2,'spike triggered average filtered photodiode',data.stim(1,:));
+    
+    [bSTS vals]=calcSTA(data.bsts,data.stim,stimPreMS,stimPostMS,c);
+    staPlot(bSTS,color,vals,c,n,4,'burst triggered average filtered photodiode',data.stim(1,:),true);
+end
 end
 
 function staPlot(info,color,vals,c,n,r,t,dist,doLegendXLab)
@@ -1009,26 +1015,28 @@ if ~exist('dist','var')
     sigma=[];
 elseif isvector(dist)
     numCols=3;
-    lims=[-1 1]*3;
     
-    subplot(n,numCols,numCols*r-2)
-
-    [mu,sigma] = normfit(dist);
-    
-    [counts bins]=hist((dist-mu)/sigma,100);
-    actual=-log(counts);
-    
-    plot(actual,bins)
-    
-    hold on
-    fit=-log(normpdf(bins)); % ,mu,sigma));
-    fit=fit-min(fit)+min(actual);
-    plot(fit,bins,'Color',.5*ones(1,3))
-    
-    ylim(lims)
-    xlim(getExtremes(actual(~isinf(actual))))
-    set(gca,'XTick',[])
-    ylabel('stim z-score')
+    if ~isnan(dist)
+        lims=[-1 1]*3;
+        subplot(n,numCols,numCols*r-2)
+        
+        [mu,sigma] = normfit(dist);
+        
+        [counts bins]=hist((dist-mu)/sigma,100);
+        actual=-log(counts);
+        
+        plot(actual,bins)
+        
+        hold on
+        fit=-log(normpdf(bins)); % ,mu,sigma));
+        fit=fit-min(fit)+min(actual);
+        plot(fit,bins,'Color',.5*ones(1,3))
+        
+        ylim(lims)
+        xlim(getExtremes(actual(~isinf(actual))))
+        set(gca,'XTick',[])
+        ylabel('stim z-score')
+    end
 else
     error('dist error')
 end
@@ -1047,14 +1055,23 @@ if ~isempty(vals) && false  %haven't scaled these example traces correctly yet..
     plot(info(2,:),vals(rows,:)','r')
 end
 
-scaled=(info(1,:)-mu)/sigma;
-noMeans=mean(vals-repmat(mean(vals')',1,size(vals,2)))/sigma;
-diffs=mean(diff(vals')')/sigma; %since diff and avg both linear, order probably doesn't matter
-theseLims=getExtremes([scaled(:); noMeans(:); diffs(:)]);
+scaled=info(1,:);
+if ~isnan(dist)
+    scaled=(scaled-mu)/sigma;
+    theseLims=getExtremes(scaled(:));
+    if ~isempty(vals)
+        % consier version with stim vals normalized prior to averaging?
+        noMeans=mean(vals-repmat(mean(vals')',1,size(vals,2)))/sigma;
+        diffs=mean(diff(vals')')/sigma; %since diff and avg both linear, order probably doesn't matter
+        theseLims=getExtremes([scaled(:); noMeans(:); diffs(:)]);
+    end
+else
+    theseLims=[0 1];
+end
 
 pCol=.7*ones(1,3);
-[AX,H1,H2] = plotyy(info(2,:),noMeans,info(2,:),info(end,:));
-set(H1,'Color','r');
+[AX,H1,H2] = plotyy(info(2,:),scaled,info(2,:),info(end,:));
+set(H1,'Color',color);
 set(H2,'Color',pCol);
 hold(AX(1),'on')
 hold(AX(2),'on')
@@ -1065,17 +1082,21 @@ plot(AX(1),zeros(2,1),theseLims,'k');
 plot(AX(1),info(2,[1 end]),zeros(1,2),'k')
 plot(AX(2),info(2,[1 end]),.05*ones(1,2),'Color',pCol)
 
-H3=plot(AX(1),median(diff(info(2,1:end)))/2+info(2,1:end-1),diffs,'b');
-H4=plot(AX(1),info(2,:)                                    ,scaled,'Color',color);
-
-if exist('doLegendXLab','var') && ~isempty(doLegendXLab) && doLegendXLab
-    legend([H4 H1 H3 H2],{'STA','no means','STA diff','p-value'});
-    xlabel(AX(1),'ms')
+if false
+    H3=plot(AX(1),median(diff(info(2,1:end)))/2+info(2,1:end-1),diffs,'b');
+    H4=plot(AX(1),info(2,:)                                    ,noMeans,'r');
+    
+    if exist('doLegendXLab','var') && ~isempty(doLegendXLab) && doLegendXLab
+        legend([H1 H4 H3 H2],{'STA','no means','STA diff','p-value'});
+    end
 end
 
-ylabel(AX(1),'stim z-score')
+if ~isnan(dist)
+    ylabel(AX(1),'stim z-score')
+end
 ylabel(AX(2),'p-value')
-
+xlabel(AX(1),'ms')
+        
 ylim(AX(1),theseLims)
 ylim(AX(2),[0 1])
 set(AX(1),'YTickMode','auto')
@@ -1475,6 +1496,8 @@ end
         
         info=[info;times(:) repmat([trial val],length(times),1)];
     end
+
+keyboard
 end
 
 function ex(fileNames,stimTimes,rec,spks,stimType,hz)
@@ -1495,6 +1518,26 @@ title('triggered LFP')
 end
 
 function [sta vals]=calcSTA(trigTs,stim,preMS,postMS,c)
+[vals times]=doTrigger(trigTs,stim,preMS,postMS);
+
+if ~isempty(trigTs)
+    sta=mean(vals);
+    ps = ks(vals,stim(1,:));
+else
+    sta=zeros(size(tinds));
+    ps=ones(size(sta));
+end
+sta=[sta; times];
+
+if false
+    svals=sort(vals);
+    sta=[sta; svals(ceil(size(svals,1)*([0 1]+[1 -1]*(1-c)/2)),:)];
+end
+
+sta=[sta; ps];
+end
+
+function [vals times]=doTrigger(trigTs,stim,preMS,postMS)
 trigs=trigTs(trigTs>stim(2,1)+preMS/1000 & trigTs<stim(2,end)-postMS/1000);
 
 timestep=median(diff(stim(2,:)));
@@ -1504,6 +1547,7 @@ trigs=1+floor((trigs-stim(2,1))/timestep);
 preBin=floor(preMS/1000/timestep);
 postBin=floor(postMS/1000/timestep);
 tinds=-preBin:postBin;
+times=tinds*timestep*1000;
 
 if ~isempty(trigTs)
     inds=repmat(tinds,length(trigs),1)+repmat(trigs,1,length(tinds));
@@ -1513,26 +1557,15 @@ end
 
 vals=stim(1,:);
 vals=vals(inds);
-
-if false
-    vals=vals-repmat(mean(vals')',1,length(tinds)); %legit? sound only help to increase SNR -- break out separate -- normalize stim vals too
 end
 
-if ~isempty(trigTs)
-    sta=mean(vals);
-    ps = ks(vals,stim(1,:));
-else
-    sta=zeros(size(tinds));
-    ps=ones(size(sta));
-end
-sta=[sta; tinds*timestep*1000];
+function info=compareTriggeredDistributions(trigs1,trigs2,stim,preMS,postMS); 
+[vals1 times]=doTrigger(trigs1,stim,preMS,postMS);
+[vals2 times]=doTrigger(trigs2,stim,preMS,postMS);
 
-if false
-    svals=sort(vals);
-    sta=[sta; svals(ceil(size(svals,1)*([0 1]+[1 -1]*(1-c)/2)),:)];
-end
-
-sta=[sta; ps];
+info=zeros(3,length(times));
+info(2,:)=times;
+info(3,:)=ks(vals1,vals2);
 end
 
 function [ratID date type uid h z chunkNum]=parseFileName(f,exType,rec,stimTimes)

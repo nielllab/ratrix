@@ -1,6 +1,7 @@
 % vectoried version of kstest2 specialized for our application
 % x1 is a matrix (stim vals) x (time bins) (conditional distribution)
 % x2 is a vector of stim vals (prior distribution)
+%    or a matrix of another conditional distribution
 %
 % we only return the pValues because the significance test is just:
 % alpha = .05 %default
@@ -26,17 +27,17 @@ if test
     tic
 end
 
-if ~isvector(x2)
-    error('x2 must be vector')
-else
+if isvector(x2)
     x2=x2(:);
+elseif ~size(x1,2)==size(x2,2)
+    error('if x2 is a matrix, it must have same number cols as x1')
 end
 
-if length(size(x1))~=2
-    error('x1 must be matrix (stim vals) x (time bins)')
+if ~all(cellfun(@(x) length(size(x))==2,{x1 x2}))
+    error('input matrices must be (stim vals) x (time bins)')
 end
 
-unqs=unique([x1(:);x2]);
+unqs=unique([x1(:);x2(:)]);
 
 % the following code modified from kstest2.m
 binEdges    =  [-inf ; unqs; inf];
@@ -54,37 +55,34 @@ catch %OOM
     binCounts2  =  histc (x2 , binEdges, 1);
 end
 
-s=unique(sum(binCounts1));
-if ~isscalar(s)
-    error('histogram counts not all equal')
+sampleCDF1=group(binCounts1);
+if ~isvector(x2)
+    sampleCDF2=group(binCounts2);
+    n2 = size(x2,1);
+else
+    cs=cumsum(binCounts2)./sum(binCounts2);
+    sampleCDF2 = repmat(cs(1:end-1),1,size(sampleCDF1,2));
+    n2 = length(x2);
 end
-
-sumCounts1  =  cumsum(binCounts1)/s;
-sumCounts2  =  cumsum(binCounts2)./sum(binCounts2);
-
-sampleCDF1  =  sumCounts1(1:end-1,:);
-sampleCDF2  =  sumCounts2(1:end-1);
+    function scdf=group(g)
+        s=unique(sum(g));
+        if ~isscalar(s)
+            error('histogram counts not all equal')
+        end
+        cs=cumsum(g)/s;
+        scdf=cs(1:end-1,:);
+    end
 
 % hardcode tail=0 -> 2-sided test: T = max|F1(x) - F2(x)|.
-deltaCDF  =  abs(sampleCDF1 - repmat(sampleCDF2,1,size(sampleCDF1,2)));
-KSstatistic   =  max(deltaCDF);
+KSstatistic   =  max(abs(sampleCDF1 - sampleCDF2));
 
-% Compute the asymptotic P-value approximation and accept or
-% reject the null hypothesis on the basis of the P-value.
-
+% Compute the asymptotic P-value approximation
 n1     =  size(x1,1);
-n2     =  length(x2);
 n      =  n1 * n2 /(n1 + n2);
 lambda =  max((sqrt(n) + 0.12 + 0.11/sqrt(n)) * KSstatistic , 0);
 
 %  Use the asymptotic Q-function to approximate the 2-sided P-value.
 j       =  (1:101)';
-
-if false
-    for i=1:size(x1,2) %probably could be vectorized, but don't have time now (the above gave us a 4x speedup already, and this is just a scalar calculation and only replicated once for each timestep, no big deal)...
-        pValues(i)  =  2 * sum((-1).^(j-1).*exp(-2*(lambda(i)^2)*j.^2));
-    end
-end
 
 pValues  =  2 * sum(repmat((-1).^(j-1),1,length(lambda)).*exp(-2*repmat((lambda.^2),length(j),1).*repmat(j.^2,1,length(lambda))));
 pValues  =  min(max(pValues, 0), 1);
@@ -99,4 +97,5 @@ if test
         end
     end
     toc
+end
 end

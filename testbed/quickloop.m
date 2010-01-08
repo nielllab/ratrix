@@ -6,7 +6,7 @@ if 1
     clc; format short g
 end
 
-cd ('C:\Documents and Settings\rlab\Desktop\merge20080324\bootstrap')
+cd ('C:\pmeier\trunk\bootstrap')
 setupEnvironment
 ListenChar(1)
 rootPath=getRatrixPath;
@@ -54,7 +54,7 @@ subplot(2, 3, 6); imagesc(stimDetails.finalStim.stim,[0 255]); title('finalStim'
 
 %% ptb loop
 
-testLoop = 1;
+testLoop = 0;
 if testLoop
 
     try
@@ -119,7 +119,8 @@ if testLoop
 
 end
 %%
-if 0 % the main calibration
+if 1 % the main calibration
+    %%
 skipSyncTest = 1; % problem in single header mode FE992, 1024x768, 85 Hz, ATI gfx
 n = 2;
 trialManager = setTargetOrientation(trialManager, [(0: n-1)*(pi/n)], 0); % t=setTargetOrientation(t, orientations, updateNow)
@@ -128,6 +129,7 @@ trialManager = doCalibration(trialManager, 0, [],skipSyncTest);
 seeCalibrationResults(trialManager);
 c = getCalibration(trialManager)
 c.interpretedData
+%%
 end
 
 if 0

@@ -14,7 +14,7 @@ switch t.calib.method
         totalFrames = numTargetOrientations*numTargetPhases*numFlankerOrientations*numFlankerPhases;
         trialManager.calib.orientations= numTargetOrientations; %was: unique([goRight goLeft flank]); what is suppose to be placed here?
     case 'sweepAllPhasesPerTargetOrientation'
-        totalFrames=numPhases*numTargetOrientations;
+        totalFrames=numTargetPhases*numTargetOrientations;
         trialManager.calib.orientations=t.goRightOrientations;
     case 'sweepAllPhasesPerPossibleOrientation'
         % toDo:

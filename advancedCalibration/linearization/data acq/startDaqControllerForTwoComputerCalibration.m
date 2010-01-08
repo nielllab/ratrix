@@ -7,7 +7,8 @@ recordScreenCalibrationData;
 
 function recordScreenCalibrationData()
 global initialize
-daqPath = '\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\daqXfer\Calibration';
+%daqPath = '\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\daqXfer\Calibration';
+daqPath = '\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\pmeier\oldCalibCommunication\daqXfer';
 %clear all
 close all
 %clc

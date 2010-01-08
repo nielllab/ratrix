@@ -37,7 +37,16 @@ data.fileNames=fileNames;
 
 data.mins=(stimTimes(2)-stimTimes(1))/60;
 
-if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) % && rec.date==datenum('04.15.09','mm.dd.yy') %example: 22	43.3 mins	164-04.15.09-z47.34-chunk1-code1-acf4f35b54186cd6055697b58718da28e7b2bf80/gaussian-t2042.385-4641
+if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && ismember(rec.date,datenum({'04.23.09'},'mm.dd.yy')) %,'hateren'}) % && ...
+%        (...
+%        ismember(rec.date,datenum({'04.15.09','04.24.09'},'mm.dd.yy')) ...
+%        || ...
+%        false ... %all(stimTimes==[1670 3144.317]) ...
+%        )
+    % test examples:
+    % statey -> 22	43.3 mins	164-04.15.09-z47.34-chunk1-code1-acf4f35b54186cd6055697b58718da28e7b2bf80/gaussian-t2042.385-4641
+    % great  -> 17	24.6 mins	164-03.25.09-z19.2-chunk1-code1-9d10d71ac6e4d1de0f7a8d88ca27b72790f9553d/gaussian-t1670-3144.317
+    % inter? -> 27	55.7 mins	188-04.24.09-z52.48-chunk1-code1-9196f9c63cf78cac462dac2cedd55306961b7fd0/gaussian-t5554.8235-8895.053
     
     data.spks=load(fileNames.spikesFile);
     data.spks=data.spks(data.spks>=stimTimes(1) & data.spks<=stimTimes(2));
@@ -78,6 +87,7 @@ if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) % && r
     % doAnalysis(data,'stationarity');
     % doAnalysis(data,'raster');
     doAnalysis(data,'STA');
+    % doAnalysis(data,'field');
     % doAnalysis(data,'autocorr');
     % doAnalysis(data,'burstDetail');
     % doAnalysis(data,'waveforms');
@@ -132,6 +142,8 @@ if ~(exist([name '.png'],'file')) % && exist([name '.fig'],'file')) %one flaw of
             savefigs(name,stationarity(data),data.stimType,data.mins);
         case 'autocorr'
             savefigs(name,autocorr(data),data.stimType,data.mins);
+        case 'field'
+            savefigs(name,field(data),data.stimType,data.mins);
         otherwise
             error('unrecognized type')
     end
@@ -969,32 +981,44 @@ ylabel('count')
 xlabel('ms')
 end
 
-function f=sta(data)
-stimPreMS =300;%1000;
-stimPostMS=75;%200;
+function f=field(data)
+physMS=500;
+n=3;
+f=doST(data.phys',data.tonics,data.bsts,physMS,physMS,n,'field');
+end
+
+function f=doST(data,tonics,bsts,stimPreMS,stimPostMS,n,t)
+f=figure;
 
 color=zeros(1,3);
 c=.95;
 
-f=figure;
+frames=data(1,2) : median(diff(data(:,2))) : data(end,2);
+frames=[interp1(data(:,2),data(:,1),frames,'nearest'); frames];
+
+[tSTF vals corrected]=calcSTA(tonics,frames,stimPreMS,stimPostMS,c);
+staPlot(tSTF,color,vals,c,n,1,['spike triggered average ' t],frames(1,:),[],corrected);
+
+[bSTF vals corrected]=calcSTA(bsts,frames,stimPreMS,stimPostMS,c);
+staPlot(bSTF,color,vals,c,n,3,['burst triggered average ' t],frames(1,:),[],corrected);
+
+info=compareTriggeredDistributions(tonics,bsts,frames,stimPreMS,stimPostMS);
+staPlot(info,color,[],c,n,2,['spike vs. burst triggered ' t],nan);
+end
+
+function f=sta(data)
+stimPreMS =300;%1000;
+stimPostMS=75;%200;
+
 n=4;
 
 if ~isempty(data.frames)
-    frames=data.frames(1,2) : median(diff(data.frames(:,2))) : data.frames(end,2);
-    frames=[interp1(data.frames(:,2),data.frames(:,1),frames,'nearest'); frames];
-    
-    [tSTF vals]=calcSTA(data.tonics,frames,stimPreMS,stimPostMS,c);
-    staPlot(tSTF,color,vals,c,n,1,'spike triggered average frame',frames(1,:));
-    
-    [bSTF vals]=calcSTA(data.bsts,frames,stimPreMS,stimPostMS,c);
-    staPlot(bSTF,color,vals,c,n,3,'burst triggered average frame',frames(1,:));
-    
-    %not sure where to put this when the photodiode plots are on
-    info=compareTriggeredDistributions(data.tonics,data.bsts,frames,stimPreMS,stimPostMS);
-    staPlot(info,color,[],c,n,2,'spike vs. burst triggered frames',nan);
+    f=doST(data.frames,data.tonics,data.bsts,stimPreMS,stimPostMS,n,'frame');
+else
+    f=figure;
 end
 
-if false
+if false %note this will overwrite the spk vs. bst comparison -- where should we put that?
     [tSTS vals]=calcSTA(data.tonics,data.stim,stimPreMS,stimPostMS,c);
     staPlot(tSTS,color,vals,c,n,2,'spike triggered average filtered photodiode',data.stim(1,:));
     
@@ -1003,7 +1027,7 @@ if false
 end
 end
 
-function staPlot(info,color,vals,c,n,r,t,dist,doLegendXLab)
+function staPlot(info,color,vals,c,n,r,t,dist,doLegendXLab,corrected)
     function rg=getExtremes(rs)
         rg=cellfun(@(x) x(rs(:)),{@min,@max});
     end
@@ -1056,7 +1080,7 @@ if ~isempty(vals) && false  %haven't scaled these example traces correctly yet..
 end
 
 scaled=info(1,:);
-if ~isnan(dist)
+if any(~isnan(dist)) && ~all(info(1,:)==0) && ~all(isnan(info(1,:)))
     scaled=(scaled-mu)/sigma;
     theseLims=getExtremes(scaled(:));
     if ~isempty(vals)
@@ -1070,7 +1094,9 @@ else
 end
 
 pCol=.7*ones(1,3);
-[AX,H1,H2] = plotyy(info(2,:),scaled,info(2,:),info(end,:));
+[AX,H2,H1] = plotyy(info(2,:),info(end,:),info(2,:),scaled);
+AX=fliplr(AX);
+
 set(H1,'Color',color);
 set(H2,'Color',pCol);
 hold(AX(1),'on')
@@ -1106,10 +1132,42 @@ xlim(AX(1),info(2,[1 end]))
 xlim(AX(2),get(AX(1),'XLim'))
 title(t)
 
+subplot(n,numCols,numCols*r)
 if ~isempty(vals) && false
-    subplot(n,numCols,numCols*r)
     traceDensity(info(2,:),(vals'-mu)/sigma,lims,12,true)
+else
+    p=.95;
+    f=0:200;
+
+    [pow c w]=pmtm(scaled,[],f,median(diff(info(2,:)))*1000,p); %maybe should subtract mean from scaled?
+    if ~all(w==f)
+        error('w not f')
+    end
+    
+    plot(w,log(pow),'k')
+    hold on
+    plot(w,log(c),'Color',.5*ones(1,3))
+    xlabel('hz')
+    ylabel('log power')
 end
+
+if exist('corrected','var')
+    if length(scaled)~=size(corrected,2)
+        error('wrong corrected length (probably off by one cuz of xcorr returning 2N+1')
+    end
+    plot(AX(1),info(2,:),cNorm(corrected(1,:)),'r')
+    plot(AX(1),info(2,:),cNorm(corrected(2,:)),'g')
+
+    set(H1,'LineWidth',2)
+end
+
+    function in=cNorm(in)
+        in=in-min(in);
+        in=in/max(in);
+        in=in*range(scaled);
+        in=in+min(scaled);
+    end
+
 end
 
 function f=stationarity(data)
@@ -1382,7 +1440,7 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
     bpsth=0;
     %pbins=0:.01:maxTime;
     pbins=0:.05:maxTime;
-        
+    
     for i=1:length(rasters)
         psth=psth+hist(rasters{i}(rasters{i}<=maxTime),pbins);
         bpsth=bpsth+hist(bursts{i}(bursts{i}<=maxTime),pbins);
@@ -1395,74 +1453,79 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
     block=block'-min(block(:));
     block=block/max(block(:));
     
-    if false %lab meeting hack
-    plot(bins,repmat(.01*(0:size(block,2)-1),size(block,1),1)+block+1)
-    else
-    %plot(bins,zeros(size(bins)));
-    hold on
-    end
-    
-    xlabel('secs')
-    title(sprintf('%d gaussian repeats (%.1f hz, %.1f%% bursts, %d violations)',length(data.rptStarts),length(data.spks)/(data.stimTimes(2)-data.stimTimes(1)),100*length(data.bsts)/length(data.spks),length(data.refVios)))
-    hold on
-    
-    plot(pbins,psth/max(psth),'k')
-    plot(pbins,bpsth/max(bpsth),'r')
-    
-    for i=1:length(rasters)
-        cellfun(@(c) plotRaster(c{1}{i},c{2},i+1,maxTime),{ {rasters,'k.'} {bursts,'ro'} {inBursts,'r.'} {violations,'bo'} })
-    end
-    xlim([0 maxTime])
-else
-    warning('skipping raster cuz no rpts id''d')
-end
-
-if true %the old way makes too many graphics objects and overwhelms gfx memory
-    clf 
-    
-    cellfun(@(c) doRaster(c{1},c{2},maxTime),{ {rasters,'k.'} {bursts,'ro'} {inBursts,'r.'} {violations,'bo'} })
+    if false %the old way makes too many graphics objects and overwhelms gfx memory
         
-    if false
-        granMS=1;
-        
-        info=[]; %[cols rows vals]
-        
-        for i=1:length(rasters)
-            cellfun(@(c) imRaster(c{1}{i},i,c{2},maxTime),{ {rasters,1} {bursts,2} {inBursts,3} {violations,4} });
-        end
-        
-        inds=sub2ind(arrayfun(@(x) max(info(:,x)),[2 1]),info(:,2),info(:,1));
-        if length(inds)~=length(unique(inds))
-            error('got duplicate inds') %we can't have dupes cuz sparse() adds the entries
-        end
-        
-        im=sparse(info(:,2),info(:,1),info(:,3));
-        
-        cs=([0 0 0; 1 0 0; 1 0 1; 0 0 1]);
-        
-        vals=unique(im(:));
-        vals=vals(vals~=0);
-        for v=1:length(vals)
-            [i j]=find(im==vals(v));
-            plot(j,i,'+','Color',cs(v,:))
+        if false %lab meeting hack
+            plot(bins,repmat(.01*(0:size(block,2)-1),size(block,1),1)+block+1)
+        else
+            %plot(bins,zeros(size(bins)));
             hold on
         end
-        xlim([1 size(im,2)])
-        ylim([1 size(im,1)])
+        
+        %xlabel('secs')
+        %title(sprintf('%d gaussian repeats (%.1f hz, %.1f%% bursts, %d violations)',length(data.rptStarts),length(data.spks)/(data.stimTimes(2)-data.stimTimes(1)),100*length(data.bsts)/length(data.spks),length(data.refVios)))
+        hold on
+        
+        plot(pbins,psth/max(psth),'k')
+        plot(pbins,bpsth/max(bpsth),'r')
+        
+        for i=1:length(rasters)
+            cellfun(@(c) plotRaster(c{1}{i},c{2},i+1,maxTime),{ {rasters,'k.'} {bursts,'ro'} {inBursts,'r.'} {violations,'bo'} })
+        end
+        xlim([0 maxTime])
+        
+    else 
+        % clf
+        
+        cellfun(@(c) doRaster(c{1},c{2},maxTime),{ {rasters,'k.'} {bursts,'ro'} {inBursts,'r.'} {violations,'bo'} })
+        
+        if false
+            granMS=1;
+            
+            info=[]; %[cols rows vals]
+            
+            for i=1:length(rasters)
+                cellfun(@(c) imRaster(c{1}{i},i,c{2},maxTime),{ {rasters,1} {bursts,2} {inBursts,3} {violations,4} });
+            end
+            
+            inds=sub2ind(arrayfun(@(x) max(info(:,x)),[2 1]),info(:,2),info(:,1));
+            if length(inds)~=length(unique(inds))
+                error('got duplicate inds') %we can't have dupes cuz sparse() adds the entries
+            end
+            
+            im=sparse(info(:,2),info(:,1),info(:,3));
+            
+            cs=([0 0 0; 1 0 0; 1 0 1; 0 0 1]);
+            
+            vals=unique(im(:));
+            vals=vals(vals~=0);
+            for v=1:length(vals)
+                [i j]=find(im==vals(v));
+                plot(j,i,'+','Color',cs(v,:))
+                hold on
+            end
+            xlim([1 size(im,2)])
+            ylim([1 size(im,1)])
+        end
+        
+        axis ij
+        
+        dpi=3*72; %size of 1-pt dots (pts are 1/72", and dots are 1/3 requested pt size) http://www.mathworks.com/access/helpdesk/help/techdoc/ref/lineseriesproperties.html#MarkerSize
+        heightInches=8; %assumption -- doesn't seem to be specifiable
+        fudge=3;
+        
+        frac=length(rasters)/(dpi*heightInches);
+        
+        ylim([0 length(rasters)/min(fudge*frac,1)])
+        % xlim([0 30]) %temp hack
     end
     
-    axis ij
     ylabel('repeat')
     xlabel('secs')
+    title(sprintf('%d %s repeats (%.1f hz, %.1f%% bursts (%d total), %d violations)',length(data.rptStarts),data.stimType,length(data.spks)/(data.stimTimes(2)-data.stimTimes(1)),100*length(data.bsts)/length(data.spks),length(data.bsts),length(data.refVios)))
     
-    dpi=3*72; %size of 1-pt dots (pts are 1/72", and dots are 1/3 requested pt size) http://www.mathworks.com/access/helpdesk/help/techdoc/ref/lineseriesproperties.html#MarkerSize
-    heightInches=8; %assumption -- doesn't seem to be specifiable
-    fudge=3;
-    
-    frac=length(rasters)/(dpi*heightInches);
-    
-    ylim([0 length(rasters)/min(fudge*frac,1)])
-    % xlim([0 30]) %temp hack
+else
+    warning('skipping raster cuz no rpts id''d')
 end
 
     function doRaster(data,code,lim)
@@ -1496,35 +1559,16 @@ end
         
         info=[info;times(:) repmat([trial val],length(times),1)];
     end
-
-keyboard
 end
 
-function ex(fileNames,stimTimes,rec,spks,stimType,hz)
-
-% spectralAnalysis(phys(1,:),phys(2,:));
-
-physPreMS=300;
-tSTL=calcSTA(tonics,phys,physPreMS,physPreMS);
-bSTL=calcSTA(bsts,phys,physPreMS,physPreMS);
-
-subplot(2,1,2)
-plot(tSTL(2,:),tSTL(1,:),'k')
-hold on
-plot(bSTL(2,:),bSTL(1,:),'r')
-xlabel('ms')
-title('triggered LFP')
-
-end
-
-function [sta vals]=calcSTA(trigTs,stim,preMS,postMS,c)
-[vals times]=doTrigger(trigTs,stim,preMS,postMS);
+function [sta vals corrected]=calcSTA(trigTs,stim,preMS,postMS,c)
+[vals times corrected]=doTrigger(trigTs,stim,preMS,postMS);
 
 if ~isempty(trigTs)
     sta=mean(vals);
     ps = ks(vals,stim(1,:));
 else
-    sta=zeros(size(tinds));
+    sta=zeros(size(times));
     ps=ones(size(sta));
 end
 sta=[sta; times];
@@ -1537,7 +1581,7 @@ end
 sta=[sta; ps];
 end
 
-function [vals times]=doTrigger(trigTs,stim,preMS,postMS)
+function [vals times corrected]=doTrigger(trigTs,stim,preMS,postMS)
 trigs=trigTs(trigTs>stim(2,1)+preMS/1000 & trigTs<stim(2,end)-postMS/1000);
 
 timestep=median(diff(stim(2,:)));
@@ -1557,15 +1601,65 @@ end
 
 vals=stim(1,:);
 vals=vals(inds);
+
+train=hist(trigs,1:length(stim(1,:)));
+
+if all(train==0)
+    error('why does this happen?')
+else
+    
+    % dayan and abbott have derivations of the autocorrealation corrections
+    %
+    % note stim -> rate kernel (for predicting spiketrain from stim) does NOT depend on SPIKETRAIN autocorrelation:
+    % 2.6 - white noise stim
+    % 2.57 - correlated noise stim
+    %
+    % and spiketrain -> stim kernel (for predicting stim from spiketrain) does NOT depend on STIM autocorrelation (this is what we're doing here)
+    % 3.60/3.79
+    %
+    % all use the xcorr between spike *rate* (not trains) and stim (to compute a thing proportional to STA) -- valid to use trains?
+    
+    N=max(preBin,postBin);
+    
+    [sta lags1]=xcorr(stim(1,:),train,N);
+    [staR lags2]=xcorr(train,stim(1,:),N); %pam uses this version, but it's reversed for me?
+    [auto lags3]=xcorr(train,N);
+    
+    corrected=fftshift(ifft(fft(sta)./fft(auto))); %i didn't expect fftshift to be necessary here, but it is -- why?
+    
+    if ~isreal(corrected) %pam's code thinks real() may be required, i don't think it should be necessary
+        error('imaginary components found')
+    end
+    
+    if false
+        close all
+        n=4;
+        subplot(n,1,1)
+        plot(lags1,sta)
+        subplot(n,1,2)
+        plot(lags2,staR)
+        subplot(n,1,3)
+        plot(lags3,auto)
+        subplot(n,1,4)
+        plot(corrected)
+        
+        keyboard
+    end
+    
+    corrected=[corrected;sta];
+    corrected=corrected(:,max(0,(postBin-preBin))+(1:length(tinds)));
+end
 end
 
 function info=compareTriggeredDistributions(trigs1,trigs2,stim,preMS,postMS); 
 [vals1 times]=doTrigger(trigs1,stim,preMS,postMS);
 [vals2 times]=doTrigger(trigs2,stim,preMS,postMS);
 
-info=zeros(3,length(times));
+info=nan(3,length(times));
 info(2,:)=times;
-info(3,:)=ks(vals1,vals2);
+if all(cellfun(@(x) size(x,1)>1,{vals1 vals2}))
+    info(3,:)=ks(vals1,vals2);
+end
 end
 
 function [ratID date type uid h z chunkNum]=parseFileName(f,exType,rec,stimTimes)

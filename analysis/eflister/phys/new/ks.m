@@ -29,7 +29,7 @@ end
 
 if isvector(x2)
     x2=x2(:);
-elseif ~size(x1,2)==size(x2,2)
+elseif size(x1,2)~=size(x2,2)
     error('if x2 is a matrix, it must have same number cols as x1')
 end
 
@@ -46,7 +46,7 @@ try
     binCounts1  =  histc (x1 , binEdges, 1);
     binCounts2  =  histc (x2 , binEdges, 1);
 catch %OOM
-    maxBins=100000;
+    maxBins=25000; %was 100000 -- reducing to keep cumsum (~line 72) from OOMing
     reductionFactor=ceil(length(unqs)/maxBins);
     fprintf('reducing by %d x',reductionFactor)
     
@@ -69,15 +69,19 @@ end
         if ~isscalar(s)
             error('histogram counts not all equal')
         end
-        cs=cumsum(g)/s;
+        cs=cumsum(g)/s; %OOM on this line
         scdf=cs(1:end-1,:);
     end
+
+n1     =  size(x1,1);
+
+clear binCounts1 binCounts2 x1 x2 unqs cs binEdges %note this kills our test below -- fix later
 
 % hardcode tail=0 -> 2-sided test: T = max|F1(x) - F2(x)|.
 KSstatistic   =  max(abs(sampleCDF1 - sampleCDF2));
 
 % Compute the asymptotic P-value approximation
-n1     =  size(x1,1);
+
 n      =  n1 * n2 /(n1 + n2);
 lambda =  max((sqrt(n) + 0.12 + 0.11/sqrt(n)) * KSstatistic , 0);
 

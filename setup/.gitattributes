@@ -40,3 +40,4 @@ setupPhysRig1/setProtocolPhys3.m -text
 setupBS/physSetups/setProtocolPhys3.m -text
 setupBS/physSetups/ctxQckNDirtyPtcl.m -text
 setupBS/physSetups/ctxCharPtcl.m -text
+setupPhysRig1/flankerCalibProtocol.m -text

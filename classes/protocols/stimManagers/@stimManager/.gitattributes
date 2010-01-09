@@ -20,7 +20,6 @@
 /hasUpdatablePercentCorrectionTrial.m -text
 /getPercentCorrectionTrials.m -text
 /physAnalysis.m -text
-/expertCleanUp.m -text
 /correctStim.m -text
 /setMaxWidthAndHeight.m -text
 /worthPhysAnalysis.m -text
@@ -28,3 +27,5 @@
 /checkTargetIsPresent.m -text
 /compareStimRecords.m -text
 /commonNameForStim.m -text
+/expertPostTrialCleanUp.m -text
+/postScreenResetCheckAndOrCache.m -text

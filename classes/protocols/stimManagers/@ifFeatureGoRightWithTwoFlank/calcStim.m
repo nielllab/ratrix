@@ -67,15 +67,22 @@ details.protocolType=stimulus.protocolType;
 details.protocolVersion=stimulus.protocolVersion;
 details.protocolSettings=datenum(stimulus.protocolSettings);
 
-%setup for first trial...
 
-if ~stimIsCached(stimulus)
-    stimulus=inflate(stimulus);
+ 
+%setup for first trial... 
+if ~stimIsCached(stimulus) 
+    if isDynamicRender(stimulus)
+        stimulus=inflate(stimulus,{'dynamicSweepValues','LUT'});
+        %dynamic renders will get cache stim after PTB screen size is set
+    else    
+        stimulus=inflate(stimulus,{'all'});
+    end
     setSeed(stimulus, 'seedFromClock');
     updateSM=true;
 else
     updateSM=false;
 end
+
 
 a=rand('seed');
 b=randn('seed');
@@ -460,7 +467,8 @@ details=computeSpatialDetails(stimulus,details);
 details.renderMode=stimulus.renderMode;
 switch details.renderMode
     case {'dynamic-precachedInsertion','dynamic-maskTimesGrating','dynamic-onePatchPerPhase','dynamic-onePatch'}
-        details.backgroundColor=details.mean;
+        %details.backgroundColor=details.mean; %this has problems if its not cached...which no dynamic stimuli are on the first trial (they wait for ptb)
+        details.backgroundColor=stimulus.mean*intmax('uint8'); %this is what would have been calcluated after inflating stim.
         details.floatprecision=1;
         
         switch trialManagerClass

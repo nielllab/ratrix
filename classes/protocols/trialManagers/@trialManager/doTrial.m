@@ -139,7 +139,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             
             switch trialManager.displayMethod
                 case 'ptb'
-                    [station trialRecords(trialInd).resolution]=setResolutionAndPipeline(station,resolutions(resInd),imagingTasks);
+                    [station trialRecords(trialInd).resolution trialRecords(trialInd).imagingTasks]=setResolutionAndPipeline(station,resolutions(resInd),imagingTasks);
                 case 'LED'
                     trialRecords(trialInd).resolution.width=uint8(1);
                     trialRecords(trialInd).resolution.height=uint8(1);
@@ -148,6 +148,8 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 otherwise
                     error('shouldn''t happen')
             end
+            
+            [newSM, updateSM]=postScreenResetCheckAndOrCache(newSM,updateSM); %enables SM to check or cache their tex's if they control that
             
             trialRecords(trialInd).station = structize(station); %wait til now to record, so we get an updated ifi measurement in the station object
             

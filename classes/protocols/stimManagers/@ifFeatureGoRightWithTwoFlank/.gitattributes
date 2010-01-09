@@ -60,3 +60,6 @@
 /worthPhysAnalysis.m -text
 /checkTargetIsPresent.m -text
 /setPhase.m -text
+/postScreenResetCheckAndOrCache.m -text
+/setPixPerCycs.m -text
+/isDynamicRender.m -text

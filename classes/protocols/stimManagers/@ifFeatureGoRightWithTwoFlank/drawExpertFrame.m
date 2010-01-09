@@ -9,12 +9,17 @@ function [doFramePulse expertCache dynamicDetails textLabel i dontclear indexPul
 % textString]=doDynamicPTBFrame(t,phase,stimDetails,frame,timeSinceTrial,eyeRecords,RFestimate, w,textString)
 % new signature: [doFramePulse expertCache dynamicDetails textLabel i dontclear] = ...
 %drawExpertFrame(stimulus,stim,i,phaseStartTime,window,textLabel,destRect,filtMode,expertCache,ifi,scheduledFrameNum,dropFrames,dontclear)
-% known problems:
-%1) mysterious white box. (maybe related to targetOrientation, and its dynamic choice via stim.correctResponseIsLeft)
-%  might be related to intertrial texture  -- search: interTrialTex=Screen('MakeTexture'
-  %consider looking at: stimulus.cache.typeSz
-%2) repitition number flickers, suggesting that its wrong
-%3) no black values... is blending wrong...?
+%
+% fixed problems:
+%1) mysterious white box solved when
+%   -all non-sm tex's flushed out in clean up of trial
+%   -no more reinflation allowed
+%   -confirmed with plots and stimulus.cache.typeSz
+%2) black values fixed, requires some uint8
+%
+%remainging problem worth tracking down:
+%1) repitition number flickers, suggesting that it's wrong
+% (need to turn on detailed text to help view this)
 
 
 %properties of screen
@@ -41,31 +46,17 @@ else
 end
 
 
-try
-    %SETUP
+try  
+    %ERROR CHECK
     if i <4 %==1  OLD STIMOGL somehow it might start on 3 or 4, not one?
-        if isempty(strfind(stimulus.renderMode,'dynamic'))
+        if ~isDynamicRender(stimulus)
             stimulus.renderMode
             error('cannot use pbt mode if trialManager is not set to the appropriate renderMode');
-            % current known conflict: inflate makes the wrong cache
-            % maybe  b/c inflation happens, then PTB reopens and recloses
-            % for resizing
         end
         
-        %badFirstTex does not solve the problem.  still have a white square sometimes
-        badFirstTex=all(size(Screen('GetImage', stimulus.cache.textures(1),[],[],2))==[1 1 3]); % one pixel tex from ITL
-        if ~(texsCorrespondToThisWindow(stimulus,window) && ~badFirstTex )
-            stimulus=inflate(stimulus); %very costly! should not happen!
-            disp(sprintf('UNEXPECTED REINFLATION! on frame %d',i))
-            if ~texsCorrespondToThisWindow(stimulus,window)
-                error('should be there now!')
-            end
-            
-            badFirstTex=all(size(Screen('GetImage', stimulus.cache.textures(1),[],[],2))==[1 1 3]); % one pixel tex from ITL
-            if  badFirstTex
-                error('bad 1st tex!')
-            end
-            
+        badFirstTex=all(size(Screen('GetImage', stimulus.cache.textures(1),[],[],2))==[1 1 3]); % used to be a one pixel tex from ITL, should no longe happens after pmmEvent('whiteBoxFixed')
+        if badFirstTex
+            error('the tex problem happened')
         end
     end
     
@@ -79,7 +70,7 @@ try
     else
         indexPulse=false;
     end
-        
+    
     
     %update dynamic values if there
     if ~isempty(stimulus.dynamicSweep)
@@ -187,7 +178,7 @@ try
     end
     
     %always need this in order to wipe out the existing image from before...
-      Screen('FillRect',window, stim.backgroundColor);
+    Screen('FillRect',window, stim.backgroundColor);
     %end
     
     
@@ -238,55 +229,13 @@ try
                 %                         mainIm=unique(Screen('GetImage', window))
                 %                         oneTex=unique(Screen('GetImage', stimulus.cache.textures(1)))
                 
-                
-                
                 inspect=0;
-                if inspect & i>110% mean(before(:)==255)>0.012  %
-                    [oldmaximumvalue oldclampcolors] = Screen('ColorRange', window); 
-                    x=Screen('GetImage', window);
-                    xd=Screen('GetImage', window,[],[],2);
-                    tx1=Screen('GetImage', stimulus.cache.textures(texInds(1)));
-                    tx2=Screen('GetImage', stimulus.cache.textures(texInds(2)));
-                    tx3=Screen('GetImage', stimulus.cache.textures(texInds(3)));
-                    
-                    tx1d=Screen('GetImage', stimulus.cache.textures(texInds(1)),[],[],2);
-                    tx2d=Screen('GetImage', stimulus.cache.textures(texInds(2)),[],[],2);
-                    
-                    
-                    temp=cumprod(size(stimulus.cache.textures));
-                    numTexs=temp(end)
-                    for i=1:numTexs
-                        txs{i}=Screen('GetImage', stimulus.cache.textures(i),[],[],2);
-                        [type o p]=ind2sub(size(stimulus.cache.textures),i); %type,o,p
-                        typeSz(i,:)=[type o p size(txs{i}) stimulus.cache.textures(i)]
-                    end
-                    
-                    sca
-                    
-                    typeSz
-                    %stimulus.cache.typeSz
-                    figure; hist(double(xd(:)),255)
-                    fractionWhite=mean(xd(:)==1)
-                    screenRange=minmax(double(xd(:)'))
-                    tx1Range=minmax(double(tx1d(:)'))
-                    tx2Range=minmax(double(tx2d(:)'))
-                    if any(typeSz(:)~=stimulus.cache.typeSz(:))
-                        [type feature]=find(typeSz~=stimulus.cache.typeSz);
-                        badValues=typeSz(unique(type),feature);
-                        val=unique(txs{unique(type)})
-                        disp(sprintf('szX and szY have changed! : [%d   %d] its val is: %4.4f',badValues,val))
-                    else
-                        disp('sizes match... yay')
-                    end
-                    
-                    keyboard
-                    figure; imagesc(x)
-                    figure; imagesc(tx1)
-                    figure; hist(double(x(200:end,:)),255)
-
-                    
-                    
-                   
+                if inspect & i==200 && rand <.5 % mean(before(:)==255)>0.012  %
+                    %bkgndColor=stim.backgroundColor
+                    %[typeSz txs]=getTypeSizeOfTextures(stimulus, false)
+                    %sca
+                    %keyboard
+                    inspectTexturesAndStop(stimulus,window,texInds)
                 end
                 
                 
@@ -296,7 +245,7 @@ try
                 % Gaussian Mask are stored seperate and gratings are recalculated
                 
                 %[resident texidresident] = Screen('PreloadTextures', window)
-
+                
                 
                 maskInd = stimulus.stdGaussMask==details.stdGaussMask
                 WHITE=double(intmax(class(stim)));
@@ -322,7 +271,7 @@ try
                 
                 
                 %[resident texidresident] = Screen('PreloadTextures', window)
-
+                
                 
                 rotAngles=rad2deg(params(:,4)');
                 
@@ -384,7 +333,7 @@ catch ex
     typeInd
     destinationRect
     globalAlpha
-    %texInds
+    %texIndss
     
     filterMode
     modulateColor
@@ -402,6 +351,86 @@ catch ex
     
     rethrow(ex);
 end
+end
+
+function inspectTexturesAndStop(stimulus,window,texInds)
+
+[oldmaximumvalue oldclampcolors] = Screen('ColorRange', window);
+x=Screen('GetImage', window);
+xd=Screen('GetImage', window,[],[],2);
+tx1=Screen('GetImage', stimulus.cache.textures(texInds(1)));
+tx2=Screen('GetImage', stimulus.cache.textures(texInds(2)));
+tx3=Screen('GetImage', stimulus.cache.textures(texInds(3)));
+
+tx1d=Screen('GetImage', stimulus.cache.textures(texInds(1)),[],[],2);
+tx2d=Screen('GetImage', stimulus.cache.textures(texInds(2)),[],[],2);
+
+[typeSz txs]=getTypeSizeOfTextures(stimulus, false);
+sca
+
+%stimulus.cache.typeSz
+figure; hist(double(xd(:)),255)
+fractionWhite=mean(xd(:)==1)
+screenRange=minmax(double(xd(:)'))
+tx1Range=minmax(double(tx1d(:)'))
+tx2Range=minmax(double(tx2d(:)'))
+if any(typeSz(:)~=stimulus.cache.typeSz(:))
+    [type feature]=find(typeSz~=stimulus.cache.typeSz);
+    badValues=typeSz(unique(type),feature);
+    val=unique(txs{unique(type)})
+    disp(sprintf('szX and szY have changed! : [%d   %d] its val is: %4.4f',badValues,val))
+else
+    disp('sizes match... yay')
+end
+
+keyboard
 
 
+figure; imagesc(x)
+figure; imagesc(tx1)
+figure; hist(double(x(200:end,:)),255)
+end
+
+function [typeSz txs]=getTypeSizeOfTextures(stimulus, inspect)
+
+temp=cumprod(size(stimulus.cache.textures));
+stimulus.cache.textures
+numTexs=temp(end)
+for i=1:numTexs
+    fprintf('getting tex: %d',stimulus.cache.textures(i));
+    txs{i}=Screen('GetImage', stimulus.cache.textures(i),[],[],2);
+    [type o p]=ind2sub(size(stimulus.cache.textures),i); %type,o,p
+    typeSz(i,:)=[type o p size(txs{i}) stimulus.cache.textures(i)];
+end
+
+try
+    plus=max(stimulus.cache.textures(:))+1;
+     xtraTex=Screen('GetImage',plus ,[],[],2)
+     xtraTypeSz=[nan nan nan size(xtraTex) plus]
+catch
+    sca 
+    keyboard
+end
+
+if inspect
+    sca
+    keyboard
+    %%
+    figure; colormap(gray)
+    count=0
+    for t=1:3
+        for o=1:2
+            which=find(typeSz(:,1)==t & typeSz(:,2)==o)
+            typeSz(which,:)
+            for i=1:length(which)
+                count=count+1;
+                subplot(6,length(which),count); imagesc( txs{which(i)}(:,:,1));
+                set(gca,'yTickLabel',t,'yTick',size(txs{which(i)},1)/2)
+                set(gca,'xTickLabel',typeSz(which(i),7),'xTick',size(txs{which(i)},1)/2)
+            end
+        end
+    end
+end
+
+end
 

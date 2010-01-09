@@ -80,6 +80,7 @@ thisAirpuffPhaseNum=[];
 quit=false;
 responseOptions = union(targetOptions, distractorOptions);
 done=0;
+containedExpertPhase=0;
 eyeData=[];
 eyeDataFrameInds=[];
 gaze=[];
@@ -973,6 +974,7 @@ while ~done && ~quit;
         %         else
         %             expertCleanUp(stimManager);
         %         end
+        containedExpertPhase=strcmp(strategy,'expert') || containedExpertPhase;
     end
 
     timestamps.phaseRecordsDone=GetSecs;
@@ -1010,7 +1012,15 @@ if ~isempty(analogOutput)
     delete(analogOutput); %should pass back to caller and preserve for next trial so intertrial works and can avoid contruction costs
 end
 
-Screen('Close'); %leaving off second argument closes all textures but leaves windows open
+
+if ~containedExpertPhase
+    Screen('Close'); %leaving off second argument closes all textures but leaves windows open
+else
+    %maybe once this was per phase, but now its per trial
+    expertPostTrialCleanUp(stimManager);
+end
+
+
 Priority(originalPriority);
 
 plotHeadroom=false;

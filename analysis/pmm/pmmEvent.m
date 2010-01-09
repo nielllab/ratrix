@@ -40,6 +40,15 @@ switch id
         date =datenum('11-Dec-2009 16:09:28');
     case '139,228,229toTrunk' % single-contrast
         date =datenum('11-Dec-2009 16:09:28');
+    case '228-first-cuedGoNoGo' 
+        date =datenum('17-Dec-2009 11:05:23');
+    case 'whiteBoxFixed'
+        %before this date stims with 'dynamic-' renderMode had unreliable
+        %texs because they were likely shifted 1 id (see figuringOuttheWhiteBox.pptx)
+        %after this date they are fine
+        %this means that the preliminary flanker neural data in 2009 is
+        %suspect of any detailed interpretation
+        date= datenum('08-Jan-2010 23:52:19');
     otherwise
         id
         error('bad event id')

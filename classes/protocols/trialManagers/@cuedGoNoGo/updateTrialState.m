@@ -75,6 +75,41 @@ framesUntilTransition=getFramesUntilTransition(spec);
 % - call errorStim(SM), correctStim(SM) as necessary and fill in the stimSpec's stimulus field
 
 
+if ~isempty(phaseType) && strcmp(phaseType,'earlyPenalty')
+     [rm rewardSizeULorMS=0 garbage msPenalty msPuff=0 msRewardSound=0 msPenaltySound updateRM] =...
+        calcEarlyPenalty(getReinforcementManager(tm),trialRecords, []);
+    
+    if window>0
+        numErrorFrames=max(1,ceil((msPenalty/1000)/ifi));
+        if isempty(framesUntilTransition)
+            framesUntilTransition = numErrorFrames;
+        end
+    else
+        error('no LED support.. too add see below')
+    end
+    spec=setFramesUntilTransition(spec,framesUntilTransition);
+    if msPenalty>0
+            [eStim errorScale] = errorStim(sm,numErrorFrames);
+        else
+            %if the penalty is 0 on incorrect trials, it will display one
+            %frame, and goNoGo will use the correctStim, which is typically
+            %mean screen, and not flashing full screen
+            [eStim errorScale] = correctStim(sm,numErrorFrames);
+        end
+        spec=setScaleFactor(spec,errorScale);
+        strategy='noCache';
+        if window>0
+            [floatprecision eStim] = determineColorPrecision(tm, eStim, strategy);
+            textures = cacheTextures(tm,strategy,eStim,window,floatprecision);
+            destRect=Screen('Rect',window);
+        else
+             error('no LED support.. too add see below')
+        end
+        spec=setStim(spec,eStim);
+    end
+end
+
+    
 if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) && framesInPhase==0
     % we only check to do rewards on the first frame of the 'reinforced' phase
     [rm rewardSizeULorMS garbage msPenalty msPuff msRewardSound msPenaltySound updateRM] =...

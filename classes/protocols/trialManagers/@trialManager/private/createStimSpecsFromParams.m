@@ -47,7 +47,7 @@ startingStimSpecInd=1;
 i=1;
 addedPreResponsePhase=0;
 switch class(trialManager)
-	case {'nAFC','freeDrinks','oddManOut','goNoGo','cuedGoNoGo'}
+	case {'nAFC','freeDrinks','oddManOut','goNoGo'}
 		% we need to figure out when the reinforcement phase is (in case we want to punish responses, we need to know which phase to transition to)
 		if ~isempty(preResponseStim) && responseWindow(1)~=0
 			addedPreResponsePhase=addedPreResponsePhase+1;
@@ -104,6 +104,73 @@ switch class(trialManager)
 		criterion={[],i+1};
 		stimSpecs{i} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,'itl','intertrial luminance',false,false); % do not punish responses here
 		i=i+1;
+    case 'cuedGoNoGo'
+        % we need to figure out when the reinforcement phase is (in case we want to punish responses, we need to know which phase to transition to)
+		if ~isempty(preResponseStim) && responseWindow(1)~=0
+			addedPreResponsePhase=addedPreResponsePhase+1;
+		end
+		% optional preOnset phase
+		if ~isempty(preRequestStim) &&  ismember(class(trialManager),{'nAFC','goNoGo','cuedGoNoGo'}) % only some classes have the pre-request phase if no delayManager in 'nAFC' class
+			if preRequestStim.punishResponses
+				criterion={[],i+1,requestPorts,i+1,[targetPorts distractorPorts],i+1+addedPreResponsePhase};  %was:i+2+addedPhases ;  i+1+addedPreResponsePhase? or i+2+addedPreResponsePhase?
+			else
+				criterion={[],i+1,requestPorts,i+1};
+			end
+			stimSpecs{i} = stimSpec(preRequestStim.stimulus,criterion,preRequestStim.stimType,preRequestStim.startFrame,...
+			framesUntilOnset,preRequestStim.autoTrigger,preRequestStim.scaleFactor,0,hz,'pre-request','pre-request',preRequestStim.punishResponses,false);
+			i=i+1;
+            if isempty(requestPorts) && isempty(framesUntilOnset)
+                error('cannot have empty requestPorts with no auto-request!');
+            end
+		end
+		% optional preResponse phase
+		if ~isempty(preResponseStim) && responseWindow(1)~=0
+			if preResponseStim.punishResponses
+				criterion={[],i+1,[targetPorts distractorPorts],i+2};  %not i+2 but?  i+3?
+			else
+				criterion={[],i+1};
+			end
+			stimSpecs{i} = stimSpec(preResponseStim.stimulus,criterion,preResponseStim.stimType,preResponseStim.startFrame,...
+			responseWindow(1),preResponseStim.autoTrigger,preResponseStim.scaleFactor,0,hz,'pre-response','pre-response',preResponseStim.punishResponses,false);
+			i=i+1;
+		end
+		% required discrim phase
+		criterion={[],i+1,[targetPorts distractorPorts],i+1};
+		if isinf(responseWindow(2))
+			framesUntilTimeout=[];
+		else
+			framesUntilTimeout=responseWindow(2);
+        end
+        if isfield(discrimStim,'framesUntilTimeout') && ~isempty(discrimStim.framesUntilTimeout)
+            if ~isempty(framesUntilTimeout)
+                error('had a finite responseWindow but also defined framesUntilTimeout in discrimStim - CANNOT USE BOTH!');
+            else
+                framesUntilTimeout=discrimStim.framesUntilTimeout;
+            end
+        end
+        
+		stimSpecs{i} = stimSpec(discrimStim.stimulus,criterion,discrimStim.stimType,discrimStim.startFrame,...
+			framesUntilTimeout,discrimStim.autoTrigger,discrimStim.scaleFactor,0,hz,'discrim','discrim',false,true,indexPulses); % do not punish responses here
+        
+        i=i+1;
+		% required reinforcement phase
+		criterion={[],i+2};
+		stimSpecs{i} = stimSpec([],criterion,'cache',0,[],[],0,0,hz,'reinforced','reinforcement',false,false); % do not punish responses here
+		i=i+1;
+		
+        %required early response penalty phase
+        criterion={[],i+1};
+        %stimulus=[]?,transitions=criterion,stimType='cache',startFrame=0,framesUntilTransition=[]? or earlyResponsePenaltyFrames, autoTrigger=,scaleFactor=0,isFinalPhase=0,hz,phaseType='earlyPenalty',phaseLabel='earlyPenalty',punishResponses=false,[isStim]=false,[indexPulses]=false)
+		%maybe could calc errorStim here? or pass [] and calc later
+        stimSpecs{i} = stimSpec(errorStim,criterion,'cache',0,1,[],0,0,hz,'earlyPenalty','earlyPenalty',false,false); % do not punish responses here
+		i=i+1;
+        
+        
+        % required final ITL phase
+		criterion={[],i+1};
+		stimSpecs{i} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,'itl','intertrial luminance',false,false); % do not punish responses here
+		i=i+1;
+        
 	case 'autopilot'
 		% do autopilot stuff..
         % required discrim phase

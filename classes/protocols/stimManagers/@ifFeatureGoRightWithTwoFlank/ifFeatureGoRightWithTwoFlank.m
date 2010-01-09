@@ -315,15 +315,42 @@ switch nargin
                                 p.dynamicSweep.sweptParameters={'targetContrast','flankerContrast','phase'};% 'flankerOrientations'}%,'flankerOffset','flankerPosAngle'};
                                 p.phase=pi/2
                         end
-                    case 'horizontalVerticalCalib'
-                        p.flankerContrast=0;
+                    case {'horizontalVerticalCalib','calibFlankerLocationOrientation','calibFlankerPresence'}
+                        %calib stims
                         p.goLeftContrast=1;
                         p.goRightContrast=1;
-                        p.stdGaussMask=1/16;
                         p.pixPerCycs=32; 
                         p.targetOnOff=int32([50 150]);
                         p.flankerOnOff=int32([50 150]);
-
+                        
+                        p.goRightOrientations = [0 pi/2];
+                        p.goLeftOrientations =  [0 pi/2];
+                        p.flankerOrientations =  [0 pi/2];
+                        
+                        switch varargin{1}
+                            case 'horizontalVerticalCalib'
+                                p.flankerContrast=0;
+                                p.stdGaussMask=1/5;
+                                numPhases=8;
+                                temp=linspace(0,pi*2,numPhases+1)
+                                p.phase=temp(1:end-1);
+                                p.dynamicSweep.sweptParameters={'targetOrientations','phase'};
+                            case 'calibFlankerLocationOrientation'
+                                p.flankerContrast=1;
+                                p.flankerPosAngle=p.goRightOrientations;
+                                p.stdGaussMask=1/16;
+                                p.phase=0;
+                                p.flankerOffset=3;
+                                p.dynamicSweep.sweptParameters={'targetOrientations','flankerOrientations','flankerPosAngle'};% 'flankerOffset'
+                            case 'calibFlankerPresence'
+                                p.flankerContrast=[0 1];
+                                p.flankerPosAngle=p.goRightOrientations;
+                                p.stdGaussMask=1/16;
+                                p.phase=0;
+                                p.flankerOffset=3;
+                                p.dynamicSweep.sweptParameters={'flankerContrast','flankerOrientations','flankerPosAngle'};% 
+                        end
+                        
                         p.showText=false;
                         locationMode=3;
                         switch locationMode
@@ -338,28 +365,15 @@ switch nargin
                                 p.yPositionPercent=.5; 
                                 p.fitRF=[];
                         end
-                         
-                        p.goRightOrientations = [0 pi/2];
-                        p.goLeftOrientations =  [0 pi/2];
-                        p.flankerOrientations =  [0 pi/2];
                         
-                        numPhases=8;
-                        temp=linspace(0,pi*2,numPhases+1)
-                        p.phase=temp(1:end-1); 
-                                                
+                 
                         p.renderMode='dynamic-precachedInsertion'; % dynamic-maskTimesGrating, dynamic-onePatchPerPhase,or dynamic-onePatch
-                        
                         p.dynamicSweep.sweepMode={'ordered'};
                         p.dynamicSweep.sweptValues=[];
-                        
-                        p.dynamicSweep.sweptParameters={'targetOrientations','phase'};
                         p.dynamicSweep.numRepeats=10;
-                        
                         %p.typeOfLUT='2009Trinitron255GrayBoxInterpBkgnd.5';
                         p.typeOfLUT= 'useThisMonitorsUncorrectedGamma';
-                        
-                    case 'calibFlankerLocationOrientationAndPresence'
-                        p.dynamicSweep.sweptParameters={'targetOrientations','flankerOrientations','flankerPosAngle'};% 'flankerOrientations'}%,'flankerOffset','flankerPosAngle'};
+
                     case 'physFullFieldTarget'
                         p.stdGaussMask=Inf;
                         p.flankerContrast=0;

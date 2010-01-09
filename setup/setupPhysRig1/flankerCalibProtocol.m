@@ -140,17 +140,10 @@ flankers=ifFeatureGoRightWithTwoFlank('phys');
 flankersFF=ifFeatureGoRightWithTwoFlank('physFullFieldTarget');
 fTestFlicker=ifFeatureGoRightWithTwoFlank('testFlicker');
 hvCalib=ifFeatureGoRightWithTwoFlank('horizontalVerticalCalib');
+floCalib=ifFeatureGoRightWithTwoFlank('calibFlankerLocationOrientation');
+fpCalib=ifFeatureGoRightWithTwoFlank('calibFlankerPresence');
 prm=getDefaultParameters(ifFeatureGoRightWithTwoFlank, 'goToSide','1_0','Oct.09,2007');
 
-% bipartiteField
-receptiveFieldLocation = location; %as in annuli
-receptiveFieldLocation = [.5 .5];
-frequencies = [ 4 8 16 32 64];
-duration = 4;
-repetitions=4;
-scaleFactor=0;
-interTrialLuminance=0.5;
-biField = bipartiteField(receptiveFieldLocation,frequencies,duration,repetitions,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 % whiteNoise
 gray=0.5;
@@ -170,49 +163,10 @@ ffgwn = whiteNoise({'gaussian',gray,std},background,method,stimLocation,stixelSi
 ffbin = whiteNoise({'binary',0,1,.5},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 %big grid - gaussian and many sparse types
-stixelSize = [128,128]; %[32 32] [xPix yPix]
-%stixelSize = [64,64]; %[32 32] [xPix yPix]
+stixelSize = [8,8]; %[32 32] [xPix yPix]
 numFrames=2000;   %1000 if limited mempry for trig 4 large stims
 gwn = whiteNoise({'gaussian',gray,std},background,method,stimLocation,stixelSize,searchSubspace,5,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 bin = whiteNoise({'binary',0,1,.5},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-
-bin3x4 = whiteNoise({'binary',0,1,.5},background,method,stimLocation,[256 256],searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-bin6x8 = whiteNoise({'binary',0,1,.5},background,method,stimLocation,[128 128],searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-bin12x16 = whiteNoise({'binary',0,1,.5},background,method,stimLocation,[64 64],searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-bin24x32 = whiteNoise({'binary',0,1,.5},background,method,stimLocation,[32 32],searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-bin48x64= whiteNoise({'binary',0,1,.5},background,method,stimLocation,[16 16],searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-binOther = whiteNoise({'binary',0,1,.5},background,method,stimLocation,[200 200],searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-
-sparseness=0.05; %sparseness
-sparseBright=whiteNoise({'binary',0.5,1,sparseness},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-sparseDark=whiteNoise({'binary',0,0.5,1-sparseness},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-sparseBrighter=whiteNoise({'binary',0,1,sparseness},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-
-% bars are black and white sparsely white like sparseBrighter
-barSize=stixelSize; barSize(1)=maxWidth;
-horizBars=whiteNoise({'binary',0,1,sparseness},background,method,stimLocation,barSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-barSize=stixelSize; barSize(2)=maxHeight;
-vertBars=whiteNoise({'binary',0,1,sparseness},background,method,stimLocation,barSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-
-%changeable solid bars
-changeable=true;
-background=0;
-barSize=stixelSize; barSize(1)=maxWidth; stimLocation= [0 maxHeight 0 maxHeight]/2+[ 0 0 barSize] ;% put bar in center
-horizBar=whiteNoise({'binary',0,1,1},background,method,stimLocation,barSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-barSize=stixelSize; barSize(2)=maxHeight; stimLocation= [maxWidth 0 maxWidth 0 ]/2+[ 0 0 barSize] ;% put bar in center
-vertBar=whiteNoise({'binary',0,1,1},background,method,stimLocation,barSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-
-%changeable small grid 
-background=0.5;
-frac=1/4; % fraction of the screen
-stimLocation=[maxWidth*(1-frac)/2,maxHeight*(1-frac)/2,maxWidth*(1+frac)/2,maxHeight*(1+frac)/2]; % in center
-boxSize=[maxWidth maxHeight]*frac;
-darkBox=whiteNoise({'binary',0,1,0},background,method,stimLocation,boxSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-brightBox=whiteNoise({'binary',0,1,1},background,method,stimLocation,boxSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-brighterBox=whiteNoise({'binary',0,1,1},0,method,stimLocation,boxSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-flickeringBox=whiteNoise({'binary',0,1,.5},background,method,stimLocation,boxSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-% has small pixels in limted spatial region... using mean background and BW stixels 
-localizedBin=whiteNoise({'binary',0,1,.5},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 
 %% trial / sound / reinforcement managers
@@ -255,6 +209,8 @@ svnCheckMode='session';
 
 %calib stim
 ts{1}= trainingStep(ap, hvCalib,    repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
+ts{2}= trainingStep(ap, floCalib,   repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
+ts{3}= trainingStep(ap, fpCalib,    repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
 
 %% make and set it
 

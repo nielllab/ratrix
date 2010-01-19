@@ -44,7 +44,8 @@ goToSide = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,m
 pixPerCycs=2.^([5:11]); % freq
 pixPerCycs=2.^([7:0.5:11]); % freq
 %pixPerCycs=2.^([9]);   % freq
-driftfrequencies=[4];  % in cycles per second
+%driftfrequencies=[4];  % in cycles per second
+driftfrequencies=[2];  % in cycles per second
 orientations=[pi/2];   % in radians, horiz
 orientations=[0];       % in radians, vert
 phases=[0];            % initial phase
@@ -53,13 +54,14 @@ durations=[3];         % duration of each grating
 radius=5;              % radius of the circular mask, 5= five times screen hieght
 annuli=0;              % radius of inner annuli
 location=[.5 .5];      % center of mask
+%waveform='square';     
 waveform='sine';     
 normalizationMethod='normalizeDiagonal';
 mean=0.5;
 numRepeats=4;
 scaleFactor=0;
 doCombos=true;
-changeableAnnulusCenter=true;
+changeableAnnulusCenter=false;
 sfGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
     waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance,doCombos,changeableAnnulusCenter);
 
@@ -91,17 +93,19 @@ radGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts
 
 annuli=[0.02 0.05 .1 .2 .3 .4 .5 2]; % annulus of the grating
 RFdataSource='\\132.239.158.179\datanet_storage'; % good only as long as default stations don't change, %how do we get this from the dn in the station!?
-if 0 
-     location = RFestimator({'spatialWhiteNoise','fitGaussian',{3}},{'gratings','ttestF1',{0.05,'fft'}},[],RFdataSource,[now-100 Inf]);
-     %location = RFestimator({'whiteNoise','fitGaussianSigEnvelope',{3,0.05,logical(ones(3))}},{'gratings','ttestF1',{0.05,'fft'}},[],RFdataSource,[now-100 Inf]);
-else
-     location=[.5 .5];
-end
+%location = RFestimator({'spatialWhiteNoise','fitGaussian',{3}},{'gratings','ttestF1',{0.05,'fft'}},[],RFdataSource,[now-100 Inf]);
+%location =
+%RFestimator({'whiteNoise','fitGaussianSigEnvelope',{3,0.05,logical(ones(3))}},{'gratings','ttestF1',{0.05,'fft'}},[],RFdataSource,[now-100 Inf]);
+%location=[.5 .5];
+location = RFestimator({'gratingWithChangeableAnnulusCenter','lastDynamicSettings',[]},{'gratingWithChangeableAnnulusCenter','lastDynamicSettings',[]},[],RFdataSource,[now-100 Inf]);                         
 anGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
     waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance,doCombos,changeableAnnulusCenter);
 
-
-
+changeableAnnulusCenter=true;
+location=[.5 .5];
+manAnGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
+    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance,doCombos,changeableAnnulusCenter);
+changeableAnnulusCenter=false;
 
 annuli=0;                        % reset
 location=[.5 .5];                % center of mask
@@ -135,8 +139,9 @@ numOrientations=16;
 orientations=([2*pi]*[1:numOrientations])/numOrientations; % in radians
 driftfrequencies=[1/2];     % in cycles per second
 pixPerCycs=2048;
-durations=16;
+durations=5;
 contrasts=1;
+numRepeats=3;
 bigSlowSquare = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
     waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance,doCombos,changeableAnnulusCenter);
 
@@ -261,7 +266,7 @@ receptiveFieldLocation = location; %as in annuli
 receptiveFieldLocation = [.5 .5];
 frequencies = [ 4 8 16 32 64];
 duration = 4;
-repetitions=10;
+repetitions=4;
 scaleFactor=0;
 interTrialLuminance=0.5;
 biField = bipartiteField(receptiveFieldLocation,frequencies,duration,repetitions,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
@@ -285,14 +290,16 @@ ffbin = whiteNoise({'binary',0,1,.5},background,method,stimLocation,stixelSize,s
 
 %big grid - gaussian and many sparse types
 stixelSize = [128,128]; %[32 32] [xPix yPix]
+%stixelSize = [64,64]; %[32 32] [xPix yPix]
 numFrames=2000;   %1000 if limited mempry for trig 4 large stims
-gwn = whiteNoise({'gaussian',gray,std},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+gwn = whiteNoise({'gaussian',gray,std},background,method,stimLocation,stixelSize,searchSubspace,5,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 bin = whiteNoise({'binary',0,1,.5},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 bin3x4 = whiteNoise({'binary',0,1,.5},background,method,stimLocation,[256 256],searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 bin6x8 = whiteNoise({'binary',0,1,.5},background,method,stimLocation,[128 128],searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 bin12x16 = whiteNoise({'binary',0,1,.5},background,method,stimLocation,[64 64],searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 bin24x32 = whiteNoise({'binary',0,1,.5},background,method,stimLocation,[32 32],searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+bin48x64= whiteNoise({'binary',0,1,.5},background,method,stimLocation,[16 16],searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 binOther = whiteNoise({'binary',0,1,.5},background,method,stimLocation,[200 200],searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 sparseness=0.05; %sparseness
@@ -387,7 +394,8 @@ fd2 = freeDrinks(sm,freeDrinkLikelihood,allowRepeats,constantRewards,eyeControll
 
 rfIsGood=receptiveFieldCriterion(0.05,RFdataSource,1,'box',3);
 
-
+numSweeps=int8(3);
+cmr = manualCmrMotionEyeCal(background,numSweeps,maxWidth,maxHeight,scaleFactor,interTrialLuminance)
 
 %% trainingsteps
 
@@ -409,7 +417,7 @@ ts{9} = trainingStep(ap, orGratings,   repeatIndefinitely(), noTimeOff(), svnRev
 ts{10}= trainingStep(ap, sparseBrighter,repeatIndefinitely(),noTimeOff(),svnRev, svnCheckMode);  %
 ts{11}= trainingStep(ap, horizBars,   repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %
 ts{12}= trainingStep(ap, vertBars,    repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %
-ts{13}= trainingStep(ap, gwn,         numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
+ts{13}= trainingStep(ap, gwn,         repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %
 ts{14}= trainingStep(ap, sparseDark,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
 ts{15}= trainingStep(ap, sparseBright,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
 
@@ -419,17 +427,19 @@ ts{17}= trainingStep(ap, brighterBox, numTrialsDoneCriterion(1), noTimeOff(), sv
 ts{18}= trainingStep(ap, horizBar,    numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %
 ts{19}= trainingStep(ap, vertBar,     numTrialsDoneCriterion(5), noTimeOff(), svnRev, svnCheckMode);  %
 ts{20}= trainingStep(ap, flickeringBox,numTrialsDoneCriterion(2),noTimeOff(), svnRev, svnCheckMode);  %
-ts{21}= trainingStep(ap, localizedBin,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
+ts{21}= trainingStep(ap, localizedBin,repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %
 ts{22}= trainingStep(ap, bin,         repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
 
-%might need RF estimate:
-ts{23} = trainingStep(ap, anGratings,  numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %gratings: annulus size
-ts{24} = trainingStep(ap, flankers,    repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %flankers
-ts{25} = trainingStep(ap, biField,     numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %bipartite field for X-Y classification
+%might get crude RF estimate and use:
+ts{23} = trainingStep(ap, manAnGratings,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: annulus size
+ts{24} = trainingStep(ap, anGratings,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: annulus size
+ts{25} = trainingStep(ap, flankers,    repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %flankers
+ts{26} = trainingStep(ap, anGratings,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: annulus size
+ts{27} = trainingStep(ap, biField,     numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %bipartite field for X-Y classification
 
 %xtra stuff might want:
-ts{26} = trainingStep(ap, dynGrating,  repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %tailored to this cell
-ts{27} = trainingStep(ap, hateren,     repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %hateren
+%ts{26} = trainingStep(ap, dynGrating,  repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %tailored to this cell
+%ts{27} = trainingStep(ap, hateren,     repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %hateren
 ts{28} = trainingStep(ap, fTestFlicker,repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
 ts{29} = trainingStep(ap, searchGratings,repeatIndefinitely(),    noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
 ts{30} = trainingStep(ap, bigSlowSquare,repeatIndefinitely(),    noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
@@ -439,12 +449,10 @@ ts{32} = trainingStep(ap, bin6x8,repeatIndefinitely(),    noTimeOff(), svnRev, s
 ts{33} = trainingStep(ap, bin12x16,repeatIndefinitely(),    noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
 ts{34} = trainingStep(ap, bin24x32,repeatIndefinitely(),    noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
 
-ts{35} = trainingStep(ap, anGratings,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: annulus size
-ts{36} = trainingStep(ap, flankers,    numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %flankers
-ts{37} = trainingStep(ap, anGratings,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: annulus size
-ts{38}= trainingStep(ap, bin,         repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
-ts{39}= trainingStep(ap, binOther,         repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
-ts{40}= trainingStep(ap, ffbin,         repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
+ts{35}= trainingStep(ap, bin48x64,    repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
+ts{36}= trainingStep(ap, binOther,    repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
+ts{37}= trainingStep(ap, ffbin,       repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
+ts{38}= trainingStep(ap, cmr,         repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
 
 %removed things b/c not used enough:
 % ts{10}= trainingStep(afc, radGratings, numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %gratings: radius
@@ -470,10 +478,8 @@ ts{40}= trainingStep(ap, ffbin,         repeatIndefinitely(),      noTimeOff(), 
 %% make and set it
 
 
-p=protocol('practice phys',{ts{1:40}});
-stepNum=uint8(40);
 p=protocol('practice phys',{ts{1:38}});
-stepNum=uint8(23);
+stepNum=uint8(9);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

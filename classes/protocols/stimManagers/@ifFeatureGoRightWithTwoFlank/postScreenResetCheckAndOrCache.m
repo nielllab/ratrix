@@ -1,12 +1,30 @@
-function [stimulus, updateSM]=postScreenResetCheckAndOrCache(stimulus,updateSM);
+function [stimulus updateSM stimulusDetails]=postScreenResetCheckAndOrCache(stimulus,updateSM,stimulusDetails);
 % if screens are not correct, then recache
 
 %ideally, this should be the ONLY place that caching happens, and it should
 %only happen once in the begining.  
 
 %non-dynamic renders still get cached before PTB screen size is set
-if isDynamicRender(stimulus) && ~stimIsCached(stimulus)
-    stimulus=inflate(stimulus,{'stim'});
+if isDynamicRender(stimulus)    
+   messedWithSpatialParametersNeedingReinflate=false;
+   if ~isempty(stimulus.blocking)
+       warning('this is fragile and was only used once for calibration, SF')
+       if length(stimulus.blocking.sweptParameters)==1 ...
+               && strcmp(stimulus.blocking.sweptParameters{1},'pixPerCycs')...
+               && strcmp(stimulus.blocking.blockingMethod,'nTrials')... 
+               && stimulus.blocking.nTrials==1 ... 
+               && stimulus.blocking.shuffleOrderEachBlock==0
+           stimulus.pixPerCycs=circshift(stimulus.pixPerCycs,[1 2]);
+           stimulusDetails.pixPerCycs=stimulus.pixPerCycs(1);  %the first one gets used
+           messedWithSpatialParametersNeedingReinflate=true;
+       else
+           error('this is fragile and was only used once for calibration')      
+       end
+   end
+   
+   if ~stimIsCached(stimulus) || messedWithSpatialParametersNeedingReinflate
+       stimulus=inflate(stimulus,{'stim'});
+    end
     updateSM=true;
 else
     updateSM=updateSM; % leave as is

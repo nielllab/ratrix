@@ -149,7 +149,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                     error('shouldn''t happen')
             end
             
-            [newSM, updateSM]=postScreenResetCheckAndOrCache(newSM,updateSM); %enables SM to check or cache their tex's if they control that
+            [newSM, updateSM, stimulusDetails]=postScreenResetCheckAndOrCache(newSM,updateSM,stimulusDetails); %enables SM to check or cache their tex's if they control that
             
             trialRecords(trialInd).station = structize(station); %wait til now to record, so we get an updated ifi measurement in the station object
             

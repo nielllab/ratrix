@@ -9,7 +9,25 @@ LUTbits
 displaySize
 [LUT stimulus updateSM]=getLUT(stimulus,LUTbits);
 [resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60],32,getMaxWidth(stimulus),getMaxHeight(stimulus));
-% [resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[ 60],32,getMaxWidth(stimulus),getMaxHeight(stimulus));
+%[resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[60],32,getMaxWidth(stimulus),getMaxHeight(stimulus));
+
+OLED=false;
+if OLED
+    error('forced to 60 Hz... do you realize that?')
+    desiredWidth=800;
+    desiredHeight=600;
+    desiredHertz=60;
+    ratrixEnforcedColor=32;
+    resolutionIndex=find(([resolutions.height]==desiredHeight) & ([resolutions.width]==desiredWidth) & ([resolutions.pixelSize]==ratrixEnforcedColor) & ([resolutions.hz]==desiredHertz));
+    height=resolutions(resolutionIndex).height
+    width=resolutions(resolutionIndex).width
+    hz=resolutions(resolutionIndex).hz
+    if getMaxWidth(stimulus)~=desiredWidth
+        getMaxWidth(stimulus)
+        desiredWidth
+        error('not expected for OLED')
+    end
+end
 
 if isnan(resolutionIndex)
     resolutionIndex=1;

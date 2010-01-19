@@ -415,8 +415,8 @@ ts{6} = trainingStep(ap, bigSlowSquare,numTrialsDoneCriterion(1),    noTimeOff()
 ts{7}= trainingStep(ap,  ffgwn,       numTrialsDoneCriterion(10), noTimeOff(), svnRev, svnCheckMode); %full field gaussian white noise
 ts{8}= trainingStep(ap,  bin,         numTrialsDoneCriterion(10), noTimeOff(), svnRev, svnCheckMode); %binary noise grid
 ts{9} = trainingStep(ap, bin12x16,numTrialsDoneCriterion(15),    noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
-ts{10} = trainingStep(ap, bin24x32,numTrialsDoneCriterion(15),    noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
-
+ts{10} = trainingStep(ap, bin24x32,repeatIndefinitely(),    noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
+ts{11}= trainingStep(ap, bin48x64,    repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
 % %common "search and characterization"
 % ts{1}= trainingStep(ap,  fakeTRF,     repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);       %temporal response function
 % ts{2}= trainingStep(ap,  ffgwn,       repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);       %full field gaussian white noise
@@ -493,7 +493,7 @@ ts{10} = trainingStep(ap, bin24x32,numTrialsDoneCriterion(15),    noTimeOff(), s
 %% make and set it
 
 
-p=protocol('practice phys',{ts{1:10}});
+p=protocol('practice phys',{ts{1:11}});
 stepNum=uint8(1);
 
 for i=1:length(subjIDs),

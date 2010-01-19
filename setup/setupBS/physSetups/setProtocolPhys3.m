@@ -402,6 +402,7 @@ cmr = manualCmrMotionEyeCal(background,numSweeps,maxWidth,maxHeight,scaleFactor,
 
 sevenLocs=ifFeatureGoRightWithTwoFlank('sevenLocs');
 sevenLocsFast=ifFeatureGoRightWithTwoFlank('sevenLocsFast'); 
+
 %% trainingsteps
 
 svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};

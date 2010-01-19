@@ -315,26 +315,38 @@ switch nargin
                                 p.dynamicSweep.sweptParameters={'targetContrast','flankerContrast','phase'};% 'flankerOrientations'}%,'flankerOffset','flankerPosAngle'};
                                 p.phase=pi/2
                         end
-                    case {'horizontalVerticalCalib','calibFlankerLocationOrientation','calibFlankerPresence'}
+                    case {'horizontalVerticalCalib','horizontalVerticalSFCalib','calibFlankerLocationOrientation','calibFlankerPresence'}
                         %calib stims
                         p.goLeftContrast=1;
                         p.goRightContrast=1;
                         p.pixPerCycs=32; 
-                        p.targetOnOff=int32([50 150]);
-                        p.flankerOnOff=int32([50 150]);
+                        p.targetOnOff=int32([20 300]);
+                        p.flankerOnOff=int32([20 300]);
+                        p.targetOnOff=int32([10 80]);
+                        p.flankerOnOff=int32([10 80]);
                         
-                        p.goRightOrientations = [0 pi/2];
-                        p.goLeftOrientations =  [0 pi/2];
-                        p.flankerOrientations =  [0 pi/2];
+                        ors=[0 pi/2]; %[-pi/12 pi/12]; %
+                        p.goRightOrientations = ors;
+                        p.goLeftOrientations =  ors;
+                        p.flankerOrientations =  ors;
                         
                         switch varargin{1}
-                            case 'horizontalVerticalCalib'
+                            case {'horizontalVerticalCalib','horizontalVerticalSFCalib'}
                                 p.flankerContrast=0;
-                                p.stdGaussMask=1/5;
-                                numPhases=8;
+                                p.stdGaussMask=1/8;
+                                numPhases=16;
                                 temp=linspace(0,pi*2,numPhases+1)
                                 p.phase=temp(1:end-1);
                                 p.dynamicSweep.sweptParameters={'targetOrientations','phase'};
+                                
+                                if strcmp(varargin{1},'horizontalVerticalSFCalib')
+                                    p.blocking.blockingMethod='nTrials';
+                                    p.blocking.nTrials=1;
+                                    p.blocking.shuffleOrderEachBlock=false;
+                                    p.blocking.sweptParameters={'pixPerCycs'};
+                                    p.pixPerCycs=2.^[2:8]; 
+                                    p.blocking.sweptValues=p.pixPerCycs;
+                                end
                             case 'calibFlankerLocationOrientation'
                                 p.flankerContrast=1;
                                 p.flankerPosAngle=p.goRightOrientations;
@@ -351,6 +363,9 @@ switch nargin
                                 p.dynamicSweep.sweptParameters={'flankerContrast','flankerOrientations','flankerPosAngle'};% 
                         end
                         
+                        p.gratingType='sine';
+                        p.maxWidth=800;
+                        p.maxHeight=600;
                         p.showText=false;
                         locationMode=3;
                         switch locationMode
@@ -370,8 +385,8 @@ switch nargin
                         p.renderMode='dynamic-precachedInsertion'; % dynamic-maskTimesGrating, dynamic-onePatchPerPhase,or dynamic-onePatch
                         p.dynamicSweep.sweepMode={'ordered'};
                         p.dynamicSweep.sweptValues=[];
-                        p.dynamicSweep.numRepeats=10;
-                        %p.typeOfLUT='2009Trinitron255GrayBoxInterpBkgnd.5';
+                        p.dynamicSweep.numRepeats=6;
+                        p.typeOfLUT='2009Trinitron255GrayBoxInterpBkgnd.5';
                         p.typeOfLUT= 'useThisMonitorsUncorrectedGamma';
 
                     case 'physFullFieldTarget'

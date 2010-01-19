@@ -71,7 +71,14 @@ try
             %see commandBoxIDStationIDs() (need to add stuff for updating logs, keeping track of running, etc.)
             deleteOnSuccess=true; % this is needed otherwise getTrialRecordsForSubjectID gets duplicate (local+permStore) trialRecords
             writeToOracle=false;
+            replicateChecker({getStandAlonePath(rx)},'warn')
             replicateTrialRecords({getStandAlonePath(rx)},deleteOnSuccess,writeToOracle); % added 6/9/09 to catch unreplicated records from an error in prev session
+            %note: we still have overlapping trials after client hangs...
+            %why don't we catch this upon the next start up? the line above
+            %should have solved it... maybe the line below will help
+            %discover the problem
+            replicateChecker({getStandAlonePath(rx)},'keyboard')
+                        
             fprintf('About to run trials on new ratrix\n');
             trustOsRecordFiles=true;
             rx=doTrials(st,rx,0,[],trustOsRecordFiles); %0 means repeat forever

@@ -40,7 +40,7 @@ for i=1:length(parts)
             end
             
             % params= radius   pix/cyc      phase orientation ontrast thresh % xPosPct yPosPct
-            staticParams =[radius  s.pixPerCycs  -99    -99        1    s.thresh  1/2     1/2   ];  %only used by some renderMethods
+            staticParams =[radius  s.pixPerCycs(1)  -99    -99        1    s.thresh  1/2     1/2   ];  %only used by some renderMethods
             mask=computeGabors([radius 999 0 0 1 s.thresh 1/2 1/2],0,patchX,patchY,'none',normalizeMethod,0);  %range from 0 to 1
             %mask=getFeaturePatchStim(patchX,patchY,'squareGrating-variableOrientationAndPhase',0,0,[radius 1000 0 0 1 s.thresh 1/2 1/2],0);
             

@@ -56,7 +56,9 @@ if ~exist('screenNum','var') || isempty(screenNum)
             switch b
                 case {'001D7D9ACF80','00095B8E6171'} %phys rig (00095B8E6171 is the netgear GA302T added for talking to eyelink (and returned by ptb's macid/getmac), 001D7D9ACF80 is the integrated)
                     %screenNum=int8(max(Screen('Screens')));
-                    screenNum=int8(1);
+                    screenNum=int8(0); %normally used for single header phys on CRT
+                    %screenNum=int8(2); %used for other monitor on OLED tests, or dual header tests
+                    %screenNum=int8(1); %used for local screen tests
                 case '0014225E4685' %left hand rig computer
                     screenNum=int8(1);
                 otherwise
@@ -93,7 +95,7 @@ if a
                 ai_parameters.inputRanges=repmat([-1 6],ai_parameters.numChans,1);
                 dn=datanet('stim','localhost','132.239.158.179','\\132.239.158.179\datanet_storage',ai_parameters)
             end
-            if false
+            if false% true (temp off for calibration)
                 %calc stim should set the method to 'cr-p', calls set
                 %resolution should update et
                 alpha=12; %deg above...really?
@@ -101,7 +103,8 @@ if a
                 settingMethod='none';  % will run with these defaults without consulting user, else 'guiPrompt'
                 maxWidth=1;
                 maxHeight=1;
-                et=geometricTracker('cr-p', 2, 3, alpha, beta, int16([1280,1024]), [42,28], int16([maxWidth,maxHeight]), [400,290], 300, -55, 0, 45, 0,settingMethod,10000);
+                preAllocatedStimSamples=200000; % 300000 300 sec --> 5 min (if no drops)
+                et=geometricTracker('cr-p', 2, 3, alpha, beta, int16([1280,1024]), [42,28], int16([maxWidth,maxHeight]), [400,290], 300, -55, 0, 45, 0,settingMethod,preAllocatedStimSamples);
             end
     end
 end

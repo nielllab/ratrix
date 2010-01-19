@@ -17,44 +17,58 @@ details.screenDisplaySize=screenDisplaySize;
 
 %DETERMINE RESOLUTION
 % [resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60],32,getMaxWidth(stimulus),getMaxHeight(stimulus));
-desiredWidth=getMaxWidth(stimulus);
-desiredHeight=getMaxHeight(stimulus);
-desiredHertz=100;
-ratrixEnforcedColor=32;
-if isempty(resolutions)
-    resInd=nan;
-    details.width=desiredWidth;
-    details.height=desiredHeight;
-    details.pixelSize=nan;
-    details.hz=nan;
-else
-    appropriateSize=([resolutions.height]==desiredHeight) & ([resolutions.width]==desiredWidth) & ([resolutions.pixelSize]==ratrixEnforcedColor);
-    if sum(appropriateSize)>0
-        hz=[resolutions.hz];
-        maxHz=min(100,max(hz(appropriateSize))); % don't go over 100hz (could go up to 150 on phys mon))
-        if maxHz==75
-            selectedHz=60; %this enforces that some LCD's won't fail sync tests, but shouldn't influence any NEC CRT's
-        else
-            selectedHz=maxHz;
-        end
-        appropriateSizeAndRefresh=appropriateSize & ([resolutions.hz]==selectedHz);
-        resInd=find(appropriateSizeAndRefresh);
-        
-        %     if sum(appropriateSizeAndRefresh)==1
-        %         resInd=find(appropriateSizeAndRefresh);
-        %     elseif sum(appropriateSizeAndRefresh)>1
-        %         pixelSize=[resolutions.pixelSize];
-        %         selectedSize=min(pixelSize(appropriateSizeAndRefresh));
-        %         resInd=find(appropriateSizeAndRefresh & pixelSize==selectedSize);
-        %     end
-    else
-        error ('can''t find appropriate resolution');
-    end
-    
+OLED=false;
+if OLED
+    desiredWidth=800;
+    desiredHeight=600;
+    desiredHertz=60;
+    ratrixEnforcedColor=32;
+    resInd=find(([resolutions.height]==desiredHeight) & ([resolutions.width]==desiredWidth) & ([resolutions.pixelSize]==ratrixEnforcedColor) & ([resolutions.hz]==desiredHertz));
     details.width=resolutions(resInd).width;
     details.height=resolutions(resInd).height;
     details.pixelSize=resolutions(resInd).pixelSize;
     details.hz=resolutions(resInd).hz;
+else
+    desiredWidth=getMaxWidth(stimulus);
+    desiredHeight=getMaxHeight(stimulus);
+    desiredHertz=100;
+    ratrixEnforcedColor=32;
+    
+    if isempty(resolutions)
+        resInd=nan;
+        details.width=desiredWidth;
+        details.height=desiredHeight;
+        details.pixelSize=nan;
+        details.hz=nan;
+    else
+        appropriateSize=([resolutions.height]==desiredHeight) & ([resolutions.width]==desiredWidth) & ([resolutions.pixelSize]==ratrixEnforcedColor);
+        if sum(appropriateSize)>0
+            hz=[resolutions.hz];
+            maxHz=min(100,max(hz(appropriateSize))); % don't go over 100hz (could go up to 150 on phys mon))
+            if maxHz==75
+                selectedHz=60; %this enforces that some LCD's won't fail sync tests, but shouldn't influence any NEC CRT's
+            else
+                selectedHz=maxHz;
+            end
+            appropriateSizeAndRefresh=appropriateSize & ([resolutions.hz]==selectedHz);
+            resInd=find(appropriateSizeAndRefresh);
+            
+            %     if sum(appropriateSizeAndRefresh)==1
+            %         resInd=find(appropriateSizeAndRefresh);
+            %     elseif sum(appropriateSizeAndRefresh)>1
+            %         pixelSize=[resolutions.pixelSize];
+            %         selectedSize=min(pixelSize(appropriateSizeAndRefresh));
+            %         resInd=find(appropriateSizeAndRefresh & pixelSize==selectedSize);
+            %     end
+        else
+            error ('can''t find appropriate resolution');
+        end
+        
+        details.width=resolutions(resInd).width;
+        details.height=resolutions(resInd).height;
+        details.pixelSize=resolutions(resInd).pixelSize;
+        details.hz=resolutions(resInd).hz;
+    end
 end
 
 width=details.width;
@@ -68,13 +82,13 @@ details.protocolVersion=stimulus.protocolVersion;
 details.protocolSettings=datenum(stimulus.protocolSettings);
 
 
- 
-%setup for first trial... 
-if ~stimIsCached(stimulus) 
+
+%setup for first trial...
+if ~stimIsCached(stimulus)
     if isDynamicRender(stimulus)
         stimulus=inflate(stimulus,{'dynamicSweepValues','LUT'});
         %dynamic renders will get cache stim after PTB screen size is set
-    else    
+    else
         stimulus=inflate(stimulus,{'all'});
     end
     setSeed(stimulus, 'seedFromClock');
@@ -157,24 +171,24 @@ switch trialManagerClass
         distractorPorts=setdiff(responsePorts,targetPorts);
         details.correctionTrial=0;
         details.maxCorrectForceSwitch=0;
-         %autopilot uses this stimulus that means "go right"
-         details.correctResponseIsLeft=-1;
+        %autopilot uses this stimulus that means "go right"
+        details.correctResponseIsLeft=-1;
     case 'autopilot'
-            %autopilot uses this stimulus that means "go right"
-            details.correctionTrial=0;
-             details.maxCorrectForceSwitch=0;
-            details.correctResponseIsLeft=-1;
-            %confirm these work and then interesting combine auto and
-            %goNoGo because they have the same logic; stimulus is always
-            %there and all targerPorts are responsePorts
-            targetPorts=[]; %responsePorts=[1 2 3] 
-            distractorPorts=[]; %I don't think these are
-            %needed, they used to be defined by assignPorts as in nAFC
+        %autopilot uses this stimulus that means "go right"
+        details.correctionTrial=0;
+        details.maxCorrectForceSwitch=0;
+        details.correctResponseIsLeft=-1;
+        %confirm these work and then interesting combine auto and
+        %goNoGo because they have the same logic; stimulus is always
+        %there and all targerPorts are responsePorts
+        targetPorts=[]; %responsePorts=[1 2 3]
+        distractorPorts=[]; %I don't think these are
+        %needed, they used to be defined by assignPorts as in nAFC
     case {'cuedGoNoGo'}
         if rand>0.5
             targetPorts=responsePorts; %choose all response port to be correct answer
             details.correctResponseIsLeft=-1; %goNoGo uses the stimulus that means "go right"==stimulus is there
-            %this is only the wierd historic convention of ifFeatureGoRightWithTwoFlank, 
+            %this is only the wierd historic convention of ifFeatureGoRightWithTwoFlank,
             %and future stim managers can use whatever fact they want in checkTargetIsPresent
         else
             targetPorts=[];
@@ -379,18 +393,18 @@ if ~isempty(stimulus.fitRF) & isa(stimulus.fitRF,'RFestimator')
     [center details.RFsourceCenter details.RFdetailsCenter]=getCenter(stimulus.fitRF,subjectID,trialRecords);
     [bound  details.RFsourceBound  details.RFdetailsBound]=getBoundary(stimulus.fitRF,subjectID,trialRecords);
     
-
+    
     details.xPositionPercent=center(1);
     details.yPositionPercent=center(2);
     details.fitRf=struct(stimulus.fitRF);
     if ~strcmp(trialRecords(end).stimManager,'ifFeatureGoRightWithTwoFlank') || trialRecords(end).stimDetails.stdGaussMask~=details.stdGaussMask;
-        stimulus=setStdGaussMask(stimulus, bound);  % if gauss , use same, if circ then std*4?
+        stimulus=setStdGaussMask(stimulus, bound/4);  % if gauss-gauss , use same, if gauss-circ then std*4, if circ-gauss then use 1/4?
         stimulus=deflate(stimulus);
         stimulus=inflate(stimulus);
         updateSM=true;
     end
     details.stdGaussMask=stimulus.stdGaussMask;
-    %details.stdGaussMask=bound; 
+    %details.stdGaussMask=bound;
 else
     details.xPositionPercent=stimulus.xPositionPercent;
     details.yPositionPercent=stimulus.targetYPosPct;
@@ -511,14 +525,14 @@ switch details.renderMode
         preRequestStim.punishResponses=false;
         
         preResponseStim=discrimStim;
-        preResponseStim.punishResponses=false;  
+        preResponseStim.punishResponses=false;
         
-         if ~isempty(details.blocking) && any(isfield(details.blocking,{'flankerOn','flankerOff','targetOn','targetOff'}))
-             error('blocking trials with flankerOnOff/targetOnOff is not currently combatible with the dynamic drawExpertFrame')
-             %reason: drawexpertFrame used isTargetFlankerOn which only
-             %check the stimulus, not the details for timing
-             % (by design, now the stim manager can never be wrong, given the fram its on, which is valuable for physiology)
-         end
+        if ~isempty(details.blocking) && any(isfield(details.blocking,{'flankerOn','flankerOff','targetOn','targetOff'}))
+            error('blocking trials with flankerOnOff/targetOnOff is not currently combatible with the dynamic drawExpertFrame')
+            %reason: drawexpertFrame used isTargetFlankerOn which only
+            %check the stimulus, not the details for timing
+            % (by design, now the stim manager can never be wrong, given the fram its on, which is valuable for physiology)
+        end
         
     case {'ratrixGeneral-maskTimesGrating', 'ratrixGeneral-precachedInsertion','symbolicFlankerFromServerPNG'}
         try
@@ -615,8 +629,8 @@ switch details.renderMode
             ShowCursor;
             rethrow(ex);
         end
-
-      
+        
+        
         % a gray screen
         gray=[];
         gray.stimulus=interTrialLuminance;
@@ -631,7 +645,7 @@ switch details.renderMode
         switch trialManagerClass
             case 'freeDrinks'
                 preResponseStim=[]; % not used
-                discrimStim=preRequestStim;   
+                discrimStim=preRequestStim;
             case 'goNoGo'
                 %the stimulus appears imediatelty *before* the discrim phase
                 preResponseStim=[];
@@ -657,10 +671,10 @@ switch details.renderMode
             case {'cuedGoNoGo'}
                 %dealy manager controls this gray screen
                 preRequestStim.punishResponses=false; % maybe punish before any stim is on;  consider the utility of this (Duc in charge of it until ... )
-               
+                
                 %responseWindowMs(1) controls how long before licks count,
                 %and the stim shows up here!
-                preResponseStim=[]; 
+                preResponseStim=[];
                 preResponseStim.stimulus=out;
                 preResponseStim.stimType=type;
                 preResponseStim.scaleFactor=scaleFactor;
@@ -669,19 +683,19 @@ switch details.renderMode
                 preResponseStim.punishResponses=false;  %should hiss when response is blocked
                 
                 %the discrim stim is actually blank, cuz the stim already
-                %happened... (here we expect stimuli to end before responseWindowMs(1)) 
+                %happened... (here we expect stimuli to end before responseWindowMs(1))
                 discrimStim=gray;
                 
                 %if they were static and on for a while, then we should recompute this
                 if isinf(details.targetOnOff(2)) || isinf(details.flankerOnOff(2)) || details.targetOnOff(2)>50 || details.flankerOnOff(2)>50
-                   error('would need to show stim during discrim as well') 
-                   %discrimStim=preResponseStim?;
+                    error('would need to show stim during discrim as well')
+                    %discrimStim=preResponseStim?;
                 end
                 
                 if details.toggleStim==1
                     error('toggle is not handed with cuedGoNoGo')
                 end
-
+                
             otherwise
                 error('unknown how to handle that trial manager class')
         end

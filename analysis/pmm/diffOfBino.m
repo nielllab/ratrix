@@ -79,10 +79,11 @@ switch method
         var=(p1.*(1-p1)./n1) + (p2.*(1-p2)./n2);
         delta=p2-p1;
         
-        er=erfinv(1-alpha/2)*sqrt(var);
-        %er2=erfinv(1-alpha/8)*sqrt(var);  %a more conservative interval
-        %that makes a broader range, and MIGHT be the 97.5% CI, but thats a speculative guess
-        
+
+        %er=erfinv(1-alpha/2)*sqrt(var);
+        %er=erfinv(1-alpha/2)*sqrt(var); % used erf before Jan 1st 2009
+        er=norminv(1 - alpha/2, 0, 1).*sqrt(var); % used after looking at ztest.m... is this right?
+   
         CI(1,:)=delta-er;
         CI(2,:)=delta+er;  
     case 'agrestiCaffo'
@@ -102,9 +103,24 @@ switch method
 
         var=(p1.*(1-p1)./n1) + (p2.*(1-p2)./n2);
         delta=p2-p1;
-        er=erfinv(1-alpha/2)*sqrt(var);
+        %er=erfinv(1-alpha/2)*sqrt(var); % used erf before Jan 1st 2009
+        er=norminv(1 - alpha/2, 0, 1).*sqrt(var); % used after looking at ztest.m... is this right?
         CI(1,:)=delta-er;
         CI(2,:)=delta+er;
+    case 'ztest'
+        %should be the same as a wald interval
+         % looked at ztest.m and 
+         % http://stattrek.com/AP-Statistics-4/Test-Difference-Proportion.aspx?Tutorial=AP
+         pooled=(p1*n1+p2*n2)/(n1+n2); % pooled sample proportion
+         ser=sqrt(pooled*(1-pooled)*((1/n1)+(1/n2))); % another way of getting the standard error, within rounding error of aggresti / wald code
+         delta=p2-p1;
+         
+         % looked at ztest.m
+         %z=delta/ser;
+         %p = 2 * normcdf(-abs(z),0,1) % a p-value
+         crit = norminv(1 - alpha/2, 0, 1) .* ser
+         ci = [delta-crit delta+crit];
+         
     case 'bayes'
         %from Ross (2003)
         %In MATLAB code this is simply the integral over t of betapdf(t,a1,b1).×betacdf(t-delta,a2,b2), where a1=x1+1,b1=n1?x1+1,a2=x2+1, and b2=n2?x2+1
@@ -175,10 +191,8 @@ switch method
         delta=analytic_delta;
 
         var=(p1*(1-p1)/n1) + (p2*(1-p2)/n2)
-        CIwald=(p2-p1)+(erfinv(1-alpha/2)*sqrt(var)*[-1 1]) % this works when there is ALPHA removed from the top
-        %CIwald=(p2-p1)+(erfinv(1-alpha/8)*sqrt(var)*[-1 1]) % the division
-        %by 8 is comletely unjustified from any paper, but empirically good
-        %from my first computational tests...  ?
+        %CIwald=(p2-p1)+(erfinv(1-alpha/2)*sqrt(var)*[-1 1]) % old wrong
+        CIwald=(p2-p1)+(norminv(1 - alpha/2, 0, 1)*sqrt(var)*[-1 1]) 
         hWald=plot(CIwald,[-100,-100], '^b');
 
 

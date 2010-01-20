@@ -270,7 +270,7 @@ for k=1:numSubjects
                     theDiff=params.mcmc.samples{k,cMatrix{i,1},statInd}-params.mcmc.samples{k,cMatrix{i,2},statInd};
                     deltas(i,j,k)=median(theDiff);
                     sorted=sort(theDiff);
-                    ciInds=round(size(sorted,2).*[alpha 1-alpha]);
+                    ciInds=round(size(sorted,2).*[alpha/2 1-alpha/2]);
                     CIs(i,j,k,1:2)=sorted(ciInds);
                     numSamples(i,j,k)=sum(more.numAttempted([cMatrix{i,1} cMatrix{i,2}]));
                     xlabelStrings{j}=sprintf('difference of %s',statTypes{j});
@@ -288,10 +288,11 @@ for k=1:numSubjects
                     %                     CIs(i,j,k,1:2)=sorted(ciInds);
                     %                     numSamples(i,j,k)=sum(more.numAttempted([cMatrix{i,1} cMatrix{i,2}]));
                     %                     xlabelStrings{j}=sprintf('log ratio of %s',statTypes{j});
-                case {'biasMCMC', 'criterionMCMC'}
+                case {'biasMCMC', 'criterionMCMC','pctCorrectMCMC'}
                     
                     %param2==B minus param1==A just like in
-                    %diffOfBino...WRONG! --> compareAtoBbinofit flips it back to the sensible A-B
+                    %diffOfBino...WRONG! --> compareAtoBbinofit flips it
+                    %back to the sensible A-B
                     sampleDiff=params.mcmc.samples{k,cMatrix{i,1},statInd}-params.mcmc.samples{k,cMatrix{i,2},statInd};
                     deltas(i,j,k)=median(sampleDiff);
                     sorted=sort(sampleDiff);
@@ -299,6 +300,11 @@ for k=1:numSubjects
                     CIs(i,j,k,1:2)=sorted(ciInds);
                     numSamples(i,j,k)=sum(more.numAttempted([cMatrix{i,1} cMatrix{i,2}]));
                     xlabelStrings{j}=sprintf('change in %s',statTypes{j});
+                    
+                    %figure; hist(sampleDiff,100);  xlabel('p1-p2'); ylabel('count');
+                    title(sprintf('one rat- all %d samples  [%2.2f %2.2f]',length(sampleDiff),sorted(ciInds)));
+                    %set(gca,'xtickLabel',[-5 -2.5 0 ],'xtick',[-5 -2.5 0 ],'yTick',[0 20 40], 'yTickLabel',[0 20 40])
+                    %cleanUpFigure
                 otherwise
                     statTypes{j}
                     error('bad type');
@@ -367,6 +373,18 @@ for i=1:numComparison
                 stdPop=std(popStats);
                 CI(i,j,1:2)=delta(i,j) + [-stdPop stdPop]; % delta+/- stdPop
                 CI2=CI;
+            case 'pctCorrectMCMC'
+                sampleDiff=[];
+                statInd=find(strcmp(statTypes{j},names.stats));
+                for k=1:numSubjects
+                    %subjectInd=find(strcmp(subjects{k},names.subjects))';
+                    sampleDiff=[sampleDiff (params.mcmc.samples{k,cMatrix{i,1},statInd}-params.mcmc.samples{k,cMatrix{i,2},statInd})];
+                end
+                delta(i,j)=median(sampleDiff);
+                sorted=sort(sampleDiff);
+                ciInds=round(size(sorted,2).*[alpha/2 1-alpha/2]);
+                CI(i,j,1:2)=sorted(ciInds);
+                CI2=CI;  
             otherwise
                 statTypes{j}
                 error('bad type');
@@ -489,24 +507,52 @@ for j=1:numStats
                 %yVal=maxBinHeight*(1.1+((statSpace*ind)/((numSubjects+interComparisonSpace)*numComparison)));
                 %yVal=maxBinHeight*(1.1+((statSpace*ind)/((numSubjects+interComparisonSpace)*numComparison)));
                 yVal=totalFigureHeight*(histFraction+gapFraction/2+dataFraction*(ind/( (numSubjects+interComparisonSpace)*numComparison )));
-                %plot([CIs(i,j,subjectInd,1) CIs(i,j,subjectInd,2)], [yVal yVal], 'color', color);
-                %plot(deltas(i,j,subjectInd), yVal,mark, 'markerSize', 7, 'color', color);  % supress per subject
             else
                 %yVal=maxBinHeight*1.25 +*(1.1+((statSpace*k)/numSubjects));
                 yVal=totalFigureHeight*(histFraction+gapFraction/2+dataFraction*(subjectInd/numSubjects));
+            end
+            
+            thisRatsShuffledIDs=cellfun(@(x) ~isempty(x),strfind(names.subjects,[subjects{k} '-']));
+            hasShuffledData=any(thisRatsShuffledIDs);
+            drawShuffledBound=1;
+            if hasShuffledData && drawShuffledBound
+                if ismember(statTypes(j),{'pctCorrect', 'yes', 'hits', 'CRs','FAs'})
+                    thisStatID=find(strcmp(names.stats,statTypes(j)));
+                    shuffledDist=(params.stats(thisRatsShuffledIDs,cMatrix{i,1},thisStatID)-... %A-B
+                    params.stats(thisRatsShuffledIDs,cMatrix{i,2},thisStatID))*100;%
+                else
+                    error('not approved yet for shuffled comparision..check delta method above')
+                    %does not need CI, so all stats are prob fine..  but check the *100 for pct, etc
+                     shuffledDist=params.stats(thisRatsShuffledIDs,cMatrix{i,1},thisStatID)-... %A-B
+                    params.stats(thisRatsShuffledIDs,cMatrix{i,2},thisStatID);%
+                end
+                shuffledDist=sort(shuffledDist);
+                lowTail=ceil(length(shuffledDist)*0.05);  %only does the low tail, else 0.025
+                blip=totalFigureHeight*dataFraction/(numSubjects*2);
+                %plot(shuffledDist(lowTail([1 1])),yVal+[-blip blip],'color',[0.8 0.8 0.8]);
+                fill([shuffledDist(lowTail([1 1])); maxX; maxX],yVal+blip*[-1 1 1 -1],'r','faceColor',[0.9 0.9 0.9],'edgeColor',[0.9 0.9 0.9]);
+                %explainShuffleCI(shuffledDist,deltas(i,j,subjectInd))
+            
+            end
+            
+            plot([0 0], [0 totalFigureHeight*(1-basementFraction)],'k');
+            
+            if multiComparePerPlot
+                %plot([CIs(i,j,subjectInd,1) CIs(i,j,subjectInd,2)], [yVal yVal], 'color', color);
+                %plot(deltas(i,j,subjectInd), yVal,mark, 'markerSize', 7, 'color', color);  % supress per subject
+            else
                 plot([CIs(i,j,subjectInd,1) CIs(i,j,subjectInd,2)], [yVal yVal], 'color', color);
                 thisMark=plot(deltas(i,j,subjectInd), yVal,mark, 'markerSize', 7, 'color', color);
-
+                
                 set(thisMark,'Marker',getMarkerSymbolForSubject(subjects(k)));
                 if ismember(labeledNames(k),{'r6','r7'})
                     set(thisMark,'MarkerFaceColor',color);  %filled solid
-                   else 
+                else
                     set(thisMark,'MarkerFaceColor',[1 1 1]);  %open
                 end
             end
             
             
-            plot([0 0], [0 totalFigureHeight*(1-basementFraction)],'k');
             if addTrialNums
                 t=text(maxX, yVal, num2str(numSamples(i,j,subjectInd)));
                 set(t, 'HorizontalAlignment', 'right');
@@ -545,7 +591,7 @@ for j=1:numStats
             
             if viewPopulationMeanAndCI
                 %plot([CI(i,j,1) CI(i,j,2)], repmat(populationYVal,1,2), 'color', color,'lineWidth',4); %   population errorbar
-                plot([CI2(i,j,1) CI2(i,j,2)], repmat(populationYVal,1,2), 'color', color,'lineWidth',2); %   population std
+                plot([CI2(i,j,1) CI2(i,j,2)], repmat(populationYVal,1,2), 'color', color,'lineWidth',2); %   population std, except MCMC
                 plot(delta(i,j), populationYVal, '.', 'markerSize', 7, 'color', color);
             end
             

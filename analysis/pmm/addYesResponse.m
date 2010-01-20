@@ -75,6 +75,13 @@ if size(d.date,2)>0
                         %the correct response with no contrast if doing
                         %subsequent error checking
                     end 
+                case {'228'}
+                    type='leftMeansYes';
+                    apparentRuleSwitchWithCued=strcmp(d.info.strLUT(d.trialManagerClass),'cuedGoNoGo');
+                    cutOut(apparentRuleSwitchWithCued)=1; % removing these for now, cuz its easy... thinking needed to keep apparant conflicting rule
+                    if any(d.date(~cutOut)>pmmEvent('228-first-cuedGoNoGo'))        
+                        error('no stuff after cued date is expected to be in right now')
+                    end
                 otherwise
                     error('should never happen-- suggests this rat has some trials where yes=left and others where yes=right')
             end

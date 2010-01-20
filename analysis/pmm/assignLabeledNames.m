@@ -23,8 +23,11 @@ for i=1:length(subjects)
         ind=find(which(:,1));           % find the ind
         labeledNames{i}=pairing{ind,2}; % get the labeled name
         markerSymbol{i}=pairing{ind,3}; % get the symbol
-    else
+    elseif  sum(which(:))==0
+       labeledNames{i}='**'; % unknown or shuffle name
+       markerSymbol{i}='.';  % unknown or shuffle symbol
+    elseif sum(which(:))>1
         subjects{i}
-        error('missing or duplicate subjects')
+        error('duplicate subjects')
     end
 end

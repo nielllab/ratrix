@@ -158,7 +158,6 @@ try
                     subplot(h,w,3); xlabel('...despite slow FA')
                 end 
  
-    figure
         
 
         %%

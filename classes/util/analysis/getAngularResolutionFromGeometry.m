@@ -12,6 +12,12 @@ function [vRes hRes]=getAngularResolutionFromGeometry(xbins,ybins,eyeToMonitorMm
 % eyeAboveMonitorCenterMm=-25;       % roughly measured on Oct 16, 2006;  to be adjusted based on input from JackHeight
 % eyeRightOfMonitorCenterMm=0;       % should always be zero in our setup
 
+% this code should be tested with a known value... shouldn't 180*theta be  /pi?  pmm dec 2009
+%screenPix=[1024 768]; szPix=16; hlfSzFrac=(szPix/2)./screenPix([1 1 2 2]);
+%stimRectFraction=0.5+hlfSzFrac.*[-1 1 -1 1]
+%[vRes hRes]=getAngularResolutionFromGeometry(1,1,[360 270], stimRectFraction, -100, 100)
+
+
 if ~exist('stimRectFraction','var') || isempty(stimRectFraction)
     stimRectFraction=[0 0 1 1]; 
 end

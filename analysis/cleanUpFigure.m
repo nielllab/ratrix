@@ -13,7 +13,8 @@ function cleanUpFigure(f,settings)
 %settings.textObjectFontSize=settings.fontSize;
 %settings.tickDir='out';
 %settings.MarkerSize=4;
-    
+%settings.alphaLabel=[];
+
 if ~exist('f','var') || isempty(f)
    f=gcf;
 end

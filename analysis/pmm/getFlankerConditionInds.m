@@ -98,8 +98,8 @@ if ~isempty(hasNF)
         d2=removeSomeSmalls(d2,d2.step~=step);
         
         %139 was back on step 8 later in life, and those trials must be
-        %removed, they were reliably after 100,000 trials
-        if strcmp(d2.info.subject,{'139'})
+        %removed, they were reliably after 100,000 trials...228 also
+        if ismember(d2.info.subject,{'139','228'})
            d2=removeSomeSmalls(d2,d2.trialNumber>100000);
         end
         
@@ -148,7 +148,8 @@ if ~isempty(hasNF)
     if ~all(ismember(fields(d2),fields(d)))
         f=fields(d2);
         missed=f(~ismember(f,fields(d)))
-        acceptableToMiss={'pixPerCyc','responseTime','actualRewardDuration','proposedPenaltyDuration','proposedRewardDuration','phantomContrast','toggleStim','blockID','trialThisBlock'}; % these might have removed b/c they are nans in later data, or nans in earlier data
+        acceptableToMiss={'pixPerCyc','responseTime','actualRewardDuration','proposedPenaltyDuration','proposedRewardDuration','phantomContrast',...
+            'toggleStim','blockID','trialThisBlock','discrimStartRaw','preResponseStartRaw','trialStartRaw'}; % these might have removed b/c they are nans in later data, or nans in earlier data
         if all(ismember(missed,acceptableToMiss)) % these are fields that I have sanction its okay to be out of sync.  will be nanned on the missing side
             for i=1:length(missed)
                 d.(missed{i})=nan(size(d.date));
@@ -212,8 +213,9 @@ end
 %add specifics
 switch types
     case 'everything'
-        error('unused')
-        %recursively calls all types and add them on
+        conditionInds=ones(1,length(d.date));
+        names = {'all'};
+        colors=[ 0,0,0]; %black
     case 'fourFlankers'
         warning('only good for VH, not diagonal')
         VV=  d.targetOrientation==0 & d.flankerOrientation==0;
@@ -712,6 +714,18 @@ switch types
         names=[n1 n2];
     case 'skip'
         % do nothing, this is a condition used to prevent overwriting
+    case 'allTargetOrientationAndPhase'
+        [c1 n1 j col1]=getFlankerConditionInds(d,restrictedSubset,'allOrientations');
+        
+        tps=unique(d.targetPhase(~isnan(d.targetPhase)));
+        for i=1:length(n1)
+            for j=1:length(tps)
+                conditionInds(length(tps)*(i-1)+j,:)= d.targetPhase==tps(j) & c1(i,:);
+                names = [names, {[n1{i} '-p' num2str(j)]}];
+            end
+        end 
+        col1=col1';
+        colors=reshape(repmat(col1(:),1,length(tps))',[],3);
     otherwise
         types
         error('undefined type flanker conditions')

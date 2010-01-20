@@ -308,7 +308,7 @@ while ~quit
     analysisLocation = fullfile(analysisPath,sprintf('physAnalysis_%d-%s.mat',currentTrial,timestamp));
 
     % check the stimRecord for stimManagerClass (and other stuff?)
-    stimRecord=stochasticLoad(stimRecordLocation,{'stimManagerClass'});
+    stimRecord=stochasticLoad(stimRecordLocation,{'stimManagerClass','refreshRate'});
     stimManagerClass=stimRecord.stimManagerClass;
     
     % trialMasking logical
@@ -379,7 +379,7 @@ while ~quit
 
             %SORT chunks to processing (they may be alphanumeric, we want by chunk number)
             chunksToProcess=sort(chunksToProcess,1);
-            
+            snippet=[]; snippetTimes=[];
             %disp('*********CHUNKS TO PROCESS*************')
             %currentTrial
             %chunksToProcess
@@ -420,7 +420,16 @@ while ~quit
                     neuralRecord=neuralRecord.(chunkStr);
                     neuralRecord.samplingRate=temp;
                     % reconstitute neuralDataTimes from start/end based on samplingRate
-                    neuralRecord.neuralDataTimes=[neuralRecord.neuralDataTimes(1):(1/neuralRecord.samplingRate):neuralRecord.neuralDataTimes(end)]';
+                    %neuralRecord.neuralDataTimes=[neuralRecord.neuralDataTimes(1):(1/neuralRecord.samplingRate):neuralRecord.neuralDataTimes(end)]'; % would prefer this old way to work, but it can return the wrnog number of samples (ie. one to few out of 1,234,944)
+                    neuralRecord.neuralDataTimes=linspace(neuralRecord.neuralDataTimes(1),neuralRecord.neuralDataTimes(end),size(neuralRecord.neuralData,1))';
+                    if any(abs(((unique(diff(neuralRecord.neuralDataTimes))-(1/neuralRecord.samplingRate))/(1/neuralRecord.samplingRate)))>10^-7)
+                        samplingRateInterval=(1/neuralRecord.samplingRate)
+                        foundSamplesSpaces=unique(diff(neuralRecord.neuralDataTimes))
+                        %this is a check to make sure that the sampling
+                        %calte we calculate is very darn close to the
+                        %sampling rate we were told it was.
+                        error('error on the length of one of the frames lengths was more than 1/ ten millionth')
+                    end
                     % do optional filtering on this chunk (a mask, or maybe cut off some of the beginning/end)
                     %                         neuralRecord=applyChunkFilter(neuralRecord,currentTrialStartTime,[startSysTime endSysTime]);
                     % has neuralData, neuralDataTimes, samplingRate, activeParameters, matlabTimeStamp, firstNeuralDataTime
@@ -429,6 +438,12 @@ while ~quit
                     %eben better is if we could load "part" of a matlab variable (specified inds) at a faster speeds.
                     % probably can't b/c matlab compression
 
+                    
+                    %combine previous neuralData with (the snippet after the last frame, plus 1/2 frame before)
+                    
+                    
+                    
+                    
                      % avoid making big variables to filter the data if you can...
                     if timeRangePerTrialSecs(1)==0 & timeRangePerTrialSecs(2)> diff(neuralRecord.neuralDataTimes([1 end]))% use all
                         % do nothing, b/c using all
@@ -441,22 +456,48 @@ while ~quit
                     if ~processed || overwriteAll
                         % get frameIndices and frameTimes (from screen pulses)
                         % bounds to decide whether or not to continue with analysis
-                        warningBound = 0.01;
+                        dropsAcceptableFirstNFrames=2; % first 2 frames won't kill the default quality test
+                        warningBound = 0.1; %fraction of frame to warn
                         errorBound = 0.5; % half a frame
-                        ifi = 1/100;  % why don't we get this from stimulus? -pmm 091027
+                        ifi = 1/stimRecord.refreshRate;  % why don't we get this from stimulus? -pmm 091027 // done pmm 100111
                         spikeRecord.spikeDetails=[];
                         spikeRecord.samplingRate=neuralRecord.samplingRate;
                         % what is the difference between frameIndices and correctedFrameIndices?
                         % we pass correctedFrameIndices to spikeData, which is what physAnalysis sees, but
                         % we don't tell the getSpikesFromNeuralData function anything about dropped frames?
+                        
+                        % add snippet
+
+
+                        neuralRecord.preModifiedStartStopTimes=neuralRecord.neuralDataTimes([1 end]); %keep a record of start stop before the modifications
+                        if ~isempty(snippet)
+                            %this is the data after the last flip (+ a few few sample frames for padding)
+                            %if we do not do this, analysis will "drop"
+                            %(fail to find) a frame between chunks
+                            %the neural data is MOVED to the next chunk
+                            neuralRecord.neuralData=[snippet; neuralRecord.neuralData ];    
+                            neuralRecord.neuralDataTimes=[snippetTimes; neuralRecord.neuralDataTimes]
+                        end
+                            
+   
                         [spikeRecord.frameIndices spikeRecord.frameTimes spikeRecord.frameLengths spikeRecord.correctedFrameIndices...
                             spikeRecord.correctedFrameTimes spikeRecord.correctedFrameLengths spikeRecord.stimInds ...
                             spikeRecord.passedQualityTest] = ...
-                            getFrameTimes(neuralRecord.neuralData(:,1),neuralRecord.neuralDataTimes,neuralRecord.samplingRate,warningBound,errorBound,ifi); % pass in the pulse channel
+                            getFrameTimes(neuralRecord.neuralData(:,1),neuralRecord.neuralDataTimes,neuralRecord.samplingRate,warningBound,errorBound,ifi,dropsAcceptableFirstNFrames); % pass in the pulse channel
                         
                         % 6/3/09 - offset each chunk's stimInds by the last stimInd from previous chunk
                         spikeRecord.stimInds=spikeRecord.stimInds+startingStimInd;
                         startingStimInd=max(spikeRecord.stimInds);
+                        
+                        % 01/11/10 - save the snippet for next chunk
+                        numPaddedSamples=2; % in each dirrection
+                        lastSampleKept=spikeRecord.correctedFrameIndices(end);
+                        snippet=neuralRecord.neuralData(lastSampleKept-numPaddedSamples-1:end,:); %same the snippet after the last frame
+                        snippetTimes=neuralRecord.neuralDataTimes(lastSampleKept-numPaddedSamples-1:end,:);
+                        neuralRecord.neuralData=neuralRecord.neuralData(1:lastSampleKept,:); %remove snippet after the late frame
+                        neuralRecord.neuralDataTimes=neuralRecord.neuralDataTimes(1:lastSampleKept,:); %remove snippet after the late frame
+
+
                         toInspectFramePulses = 0;
                         if toInspectFramePulses %for inspecting errors in frames
                             figure('position',[100 200 500 500])
@@ -612,6 +653,16 @@ while ~quit
                         LFPRecord.dataTimes = [prev.LFPRecord.dataTimes; spikeRecord.LFPRecord.dataTimes];
                         LFPRecord.LFPSamplingRateHz= [prev.LFPRecord.LFPSamplingRateHz;spikeRecord.LFPSamplingRateHz];
                         
+                        %                         if 0 %Used to check for gaps between frames                       
+                        %                             %%
+                        %                             figure
+                        %                             sz=size(correctedFrameTimes)
+                        %                             x=correctedFrameTimes(:);
+                        %                             x([1 end])=[]
+                        %                             y=reshape(x,sz(1)-1,[])
+                        %                             plot(y(5:end,1)-y(5:end,2))     
+                        %                         end
+                        
                         save(spikeRecordLocation,'spikes','spikeWaveforms','spikeTimestamps','assignedClusters','spikeDetails',...
                             'frameIndices','frameTimes','frameLengths','correctedFrameIndices','correctedFrameTimes','correctedFrameLengths',...
                             'stimInds','chunkID','chunkIDForFrames','chunkIDForCorrectedFrames','chunkIDForDetails',...
@@ -694,8 +745,10 @@ while ~quit
                     % (whiteNoise = always do analysis for now)
                     % (manualCmrMotionEyeCal = always do analysis for now - future ignore spikes)
                     analysisExists=exist(analysisLocation,'file');
-                    doAnalysis=worthPhysAnalysis(sm,quality,analysisExists,overwriteAll,isLastChunkInTrial);
-                    %doAnalysis = true;
+                    spikeRecord.assignedClusters
+                    quality.passedQualityTest
+                    doAnalysis=worthPhysAnalysis(sm,quality,analysisExists,overwriteAll,isLastChunkInTrial); %doAnalysis = isLastChunkInTrial;
+                    
                     
                     % possible problem:  last chunk lacks frame pulses, and
                     % gets quality.passedQualityTest=false (not exactly sure how)
@@ -847,8 +900,8 @@ end
 squaredVals = (photoDiode).^2;  % rescale so zero is smallest value... a bit funny
 % now sort the values, and choose the first 5% to show threshold
 %fractionBaselineSpikes=0.05; % chance of a single spike on a frame % not used
-fractionStimSpikes=0.5;      % chance of any spikes on a frame caused by stim
-maxNumStimSpikes=3;         % per frame
+fractionStimSpikes=0.3;      % chance of any spikes on a frame caused by stim
+maxNumStimSpikes=1;         % per frame
 valuesToCalcThreshold = sort(squaredVals,'descend');
 pivot = ceil(length(squaredVals) * fractionStimSpikes);
 threshold = (valuesToCalcThreshold(pivot) + valuesToCalcThreshold(pivot+1)) / 2;
@@ -864,7 +917,25 @@ for i=1:size(frameIndices,1)
         pre=floor(.58*samplingRate/1000);
         post=floor(1.0*samplingRate/1000); % hard-coded 1.5ms and 0.5ms for now... matches the 64 samps made by osort
         for j=1:numSpikes
-            spikeWaveforms=[spikeWaveforms; photoDiodeData(randInds(j)-pre:randInds(j)+post)'];
+            if (randInds(j)+post)<length(photoDiodeData) && (randInds(j)-pre)>0
+                try
+                    spikeWaveforms=[spikeWaveforms; photoDiodeData(randInds(j)-pre:randInds(j)+post)'];
+                catch
+                    size(spikeWaveforms)
+                    length(photoDiodeData)
+                    randInds(j)-pre
+                    randInds(j)+post
+                    error('waveform prob')
+                end
+            elseif isempty(spikeWaveforms) %make noise if first
+                spikeWaveforms=rand(1,length(pre:post));
+            else  %copy previous waveform if at end
+                
+                %sometimes the spike goes off the end of the samples
+                %available (tail is off the chunk boundary)
+                %if so, add repeat the prev waveform
+                spikeWaveforms=[spikeWaveforms; spikeWaveforms(end,:)];
+            end
         end
     end
 end
@@ -879,11 +950,30 @@ photoDiode=zeros(size(frameIndices,1),1);
 % now calculate spikes in each frame
 % channel = 1; % what channel of the neuralData to look at
 % first go through and histogram the values to get a threshold
+%%
 darkFloor=min(photoDiodeData); % is there a better way to determin the dark value?  noise is a problem! last value particularly bad... why?
+darkFloor=-0.1; % somehting hard coded to get rid of some negative values (high gain mode on photodiode has negs), but be constant across chunks
 for i=1:size(frameIndices,1)
     % photoDiode is the sum of all neuralData of the given channel for the given samples (determined by frame start/stop)
     photoDiode(i) = sum(photoDiodeData(frameIndices(i,1):frameIndices(i,2))-darkFloor);
-    %why are these negative?... i thought black was zero... guess not! subtracting a darkfloor now -pmm
+    %why are these negative?... i thought black was zero... guess not! subtracting a darkfloor now -pmm 2009
+    % a better value might be the mean... pmm 1/11/10
+end
+
+inspect=1;
+if inspect
+   %%
+   n=length(frameIndices)
+   frameRange=[n-43 n]
+   %frameRange=[1 min(1000,n)]
+   plot(photoDiodeData(frameIndices(frameRange(1),1):frameIndices(frameRange(2),2)),'g')
+   hold on
+   for i=frameRange(1):frameRange(2)
+      xIndStart= frameIndices(i,1)-frameIndices(frameRange(1),1);
+      xIndEnd= frameIndices(i,2)-frameIndices(frameRange(1),1);
+      %plot([xIndStart xIndEnd],-8+photoDiode([i i])/(12),'r-')
+      plot([xIndStart xIndEnd],-0.46+10*photoDiode([i i])/(1+xIndEnd-xIndStart),'r-')
+   end 
 end
 end % end function
 

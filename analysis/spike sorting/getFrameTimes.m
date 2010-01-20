@@ -1,6 +1,6 @@
 function [frameIndices frameTimes frameLengths correctedFrameIndices correctedFrameTimes correctedFrameLengths stimInds ...
     passedQualityTest] = ...
-    getFrameTimes(pulseData, pulseDataTimes, sampleRate, warningBound, errorBound, ifi)
+    getFrameTimes(pulseData, pulseDataTimes, sampleRate, warningBound, errorBound, ifi,dropsAcceptableFirstNFrames)
 
 % calculate pulses and frameTimes based on pulseData
 % frameIndices - the exact sample index for each pulse
@@ -97,7 +97,8 @@ stimInds=[1:size(frameIndices,1)]';
 % end
 
 
-whichDrop=find((abs(diff(frameIndices')/sampleRate-ifi)>warningBound));
+%whichDrop=find((abs(diff(frameIndices')/sampleRate-ifi)>warningBound)); % seems like a funny definition (1: don't use warning bound, use ifi, 2: used half ifi as the definition) pmm & bs
+whichDrop=find((abs(diff(frameIndices')/sampleRate-ifi)>(ifi/2)));
 correctedFrameTimes(whichDrop,2)=frameTimes(whichDrop,1)+ifi-(1/sampleRate); % the corrected end time (estimated using ifi), need to remove one sample's worth of time
 addedFrameIndices=[];
 addedFrameTimes=[];
@@ -158,17 +159,18 @@ if length(unique(frameLengths)) > 3
      if any(frameLengths < (1-errorBound)*mn)
          error('check your assumptions about frame start/stop calculation - found frameLength too small; failing quality test');
          passedQualityTest = false;
-%     elseif any(frameLengths < (1-warningBound)*mn)
-%         warning('found frame lengths outside the warningBound (too small)');
-%     elseif any(frameLengths > (1+warningBound)*mn)
-%         droppedFrames = find(frameLengths > (1+warningBound)*mn);
-%         totalNumberOfDroppedFrames = length(droppedFrames)
-%         fractionOfDroppedFrames = totalNumberOfDroppedFrames / length(frameLengths)
-%         warning('found dropped frames');
-%         if any(frameLengths > (1+errorBound)*mn)
-%             passedQualityTest = false;
-%             warning('found frame lengths outside the errorBound (too long) - failing quality test');
-%         end
+      elseif any(frameLengths < (1-warningBound)*mn)
+         warning('found frame lengths outside the warningBound (too small)');
+     elseif any(frameLengths > (1+warningBound)*mn)
+        droppedFrames = find(frameLengths > (1+warningBound)*mn);
+        totalNumberOfDroppedFrames = length(droppedFrames)
+        fractionOfDroppedFrames = totalNumberOfDroppedFrames / length(frameLengths)
+        warning('found dropped frames');
+        failedErrorTest=frameLengths > (1+errorBound)*mn;
+        if any(failedErrorTest(1+dropsAcceptableFirstNFrames:end))
+            passedQualityTest = false;
+            warning('found frame lengths outside the errorBound (too long) - failing quality test');
+        end
      end
 end
 

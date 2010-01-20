@@ -95,7 +95,7 @@ for i=1:length(filter)
                d=removeSomeSmalls(d,~(ismember(d.manualVersion,filter{i}.includedVersions)));      
             case 'responseSpeedPercentile'
                 range=filter{i}.parameters.range;
-                sorted=sort(d.responseTime);
+                sorted=sort(d.responseTime(~isnan(d.responseTime)));
                 rangeInds=[max(floor(range(1)*length(sorted)),1) ceil(range(2)*length(sorted))];
                 rangeValue=sorted(rangeInds);
                 d=removeSomeSmalls(d,~(d.responseTime>rangeValue(1) & d.responseTime<rangeValue(2)));  
@@ -156,8 +156,8 @@ for i=1:length(filter)
 
                 disp(sprintf('fraction trials removed for performance out of range: %2.2g',1-mean(selectedTrials)))
                 %check
-                inspectFilter=0;
-                if inspectFilter
+                inspectFilter=strcmp('230',d.info.subject);%0;
+                if   inspectFilter 
                     figure; hold on;
                     %doPlotPercentCorrect(d,goods,smoothingWidth,[],[],[],[],[],[],[],[],[]); %filter might not match symetricBoxcar, etc
                     plot(find(selectedTrials), repmat(lowBound,1,sum(selectedTrials)),'.') %lb

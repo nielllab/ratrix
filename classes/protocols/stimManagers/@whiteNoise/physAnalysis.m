@@ -67,7 +67,7 @@ try
     xtraPlot={'spaceTimeContext'}; % eyes, spaceTimeContext, montage
     
     % timeWindowMs
-    timeWindowMs=[300 50]; % parameter [300 50]
+    timeWindowMs=[100 20]; % parameter [300 50]
     
     
     % refreshRate - try to retrieve from neuralRecord (passed from stim computer)
@@ -244,6 +244,7 @@ try
         end
         
         try
+            pack
             triggers=meanValue(ones(size(stimData,1),size(stimData,2),sum(timeWindowFrames)+1,numSpikes)); % +1 is for the frame that is on the spike
         catch ex
             disp(['CAUGHT EX (in whiteNoise.physAnalysis):' getReport(ex)]);

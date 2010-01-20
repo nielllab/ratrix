@@ -37,12 +37,12 @@ data.fileNames=fileNames;
 
 data.mins=(stimTimes(2)-stimTimes(1))/60;
 
-if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && ismember(rec.date,datenum({'04.23.09'},'mm.dd.yy')) %,'hateren'}) % && ...
-%        (...
-%        ismember(rec.date,datenum({'04.15.09','04.24.09'},'mm.dd.yy')) ...
-%        || ...
-%        false ... %all(stimTimes==[1670 3144.317]) ...
-%        )
+if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) %,'hateren'}) % && ...
+    %        (...
+    %        ismember(rec.date,datenum({'04.15.09','04.24.09'},'mm.dd.yy')) ...
+    %        || ...
+    %        false ... %all(stimTimes==[1670 3144.317]) ...
+    %        )
     % test examples:
     % statey -> 22	43.3 mins	164-04.15.09-z47.34-chunk1-code1-acf4f35b54186cd6055697b58718da28e7b2bf80/gaussian-t2042.385-4641
     % great  -> 17	24.6 mins	164-03.25.09-z19.2-chunk1-code1-9d10d71ac6e4d1de0f7a8d88ca27b72790f9553d/gaussian-t1670-3144.317
@@ -84,9 +84,12 @@ if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && ism
     
     data=findBursts(data);
     
-    % doAnalysis(data,'stationarity');
+    doAnalysis(data,'stationarity');
     % doAnalysis(data,'raster');
-    doAnalysis(data,'STA');
+    
+    % doAnalysis(data,'STA');
+    % doAnalysis(data,'stimCheck');
+    
     % doAnalysis(data,'field');
     % doAnalysis(data,'autocorr');
     % doAnalysis(data,'burstDetail');
@@ -136,6 +139,8 @@ if ~(exist([name '.png'],'file')) % && exist([name '.fig'],'file')) %one flaw of
             savefigs(name,burstDetail(data),data.stimType,data.mins);
         case 'STA'
             savefigs(name,sta(data),data.stimType,data.mins);
+        case 'stimCheck'
+            savefigs(name,stimCheck(data),data.stimType,data.mins);
         case 'raster'
             savefigs(name,raster(data),data.stimType,data.mins);
         case 'stationarity'
@@ -267,7 +272,7 @@ for i=1:length(fs)
     if false || ismember(pieces{end},{'raster'})
         saveas(f,figName)
     end
-    if ismember(pieces{end},{'ISI','waveforms','STA','raster','stationarity'}) && ismember(i,[1 length(fs)])
+    if ismember(pieces{end},{'ISI','waveforms','STA','raster','stationarity','stimCheck'}) && ismember(i,[1 length(fs)])
         [garbage n]=fileparts(name);
         [a b c]=copyfile(fullName,fullfile(summaryLoc,[num2str(length(lines)) '-' n '.png']));
         if a~=1
@@ -602,62 +607,13 @@ if ~isempty(items)
     if ~exist('cs','var')
         plot(X,Y,code,'MarkerSize',sz)
     else
-        close all
-        
-        cut=.05;
-        b=fir1(1000,cut);
-        pHz=1/median(diff(cs));
-
-        %this dim actually shifts mean
-        x=filtfilt(b,1,X);
-
-        if false
-        [junk junk t p]=spectrogram(X-mean(X),round(pHz),[],[],pHz);
-        x=log(sum(p))';
-        x=filtfilt(b,1,x);
-        x(end+1)=mean(x);
-        end
-        
-        %this dim only shifts variance
-
-        [junk junk t p]=spectrogram(Y-mean(Y),round(pHz),[],[],pHz);
-        y=log(sum(p))';
-        y=filtfilt(b,1,y);
-        y(end+1)=mean(y);
-        
-        %y=Y;
-        
-        x=normalize(x);
-        y=normalize(y);
-        
-        n=6;
-        subplot(n,1,1)
-        plot([Y X])
-        
-        subplot(n,1,2)
-        plot([y x])
-        
-        subplot(n,1,3)
-        scatter(x,y,sz,cs,code)
-        
-        subplot(n,1,4)
-        d=100;
-        %plot([hist(x,d);hist(y,d)]')
-        
-        q=cellfun(@(z) normalize(hist(z,d)),[{x} {y}],'UniformOutput',false);
-        plot(log(cell2mat(q')'))
-        
-        subplot(n,1,5)
-        idx = kmeans(x(:),2);
-        plot(idx)
-        ylim([.9 2.1])
-        
-        subplot(n,1,6)
-        plot(v(:,[2 1]))
-        
-        keyboard
+        scatter(X,Y,sz,cs,code)
     end
-        
+    
+    axis square
+    set(gca,'YTick',[])
+    set(gca,'XTick',[])
+    
     X=X-min(X);
     X=X/max(X);
 end
@@ -912,7 +868,7 @@ f=figure;
 
 switch data.date
     case '04.15.09'
-        physDetailTimes=[4180 4300]; 
+        physDetailTimes=[4180 4300];
     otherwise
         physDetailTimes=[];
 end
@@ -984,36 +940,40 @@ end
 function f=field(data)
 physMS=500;
 n=3;
-f=doST(data.phys',data.tonics,data.bsts,physMS,physMS,n,'field');
+f=doST(getEvenFrames(data.phys'),data.tonics,data.bsts,physMS,physMS,n,'field');
 end
 
-function f=doST(data,tonics,bsts,stimPreMS,stimPostMS,n,t)
+function f=doST(frames,tonics,bsts,stimPreMS,stimPostMS,n,t,preISIs)
 f=figure;
 
 color=zeros(1,3);
 c=.95;
 
-frames=data(1,2) : median(diff(data(:,2))) : data(end,2);
-frames=[interp1(data(:,2),data(:,1),frames,'nearest'); frames];
+[tSTF vals corrected pres]=calcSTA(tonics,frames,stimPreMS,stimPostMS,c,preISIs);
+staPlot(tSTF,color,vals,c,n,1,['spike triggered average ' t],frames(1,:),[],corrected,pres);
 
-[tSTF vals corrected]=calcSTA(tonics,frames,stimPreMS,stimPostMS,c);
-staPlot(tSTF,color,vals,c,n,1,['spike triggered average ' t],frames(1,:),[],corrected);
-
-[bSTF vals corrected]=calcSTA(bsts,frames,stimPreMS,stimPostMS,c);
-staPlot(bSTF,color,vals,c,n,3,['burst triggered average ' t],frames(1,:),[],corrected);
+[bSTF vals corrected pres]=calcSTA(bsts,frames,stimPreMS,stimPostMS,c,preISIs);
+staPlot(bSTF,color,vals,c,n,3,['burst triggered average ' t],frames(1,:),[],corrected,pres);
 
 info=compareTriggeredDistributions(tonics,bsts,frames,stimPreMS,stimPostMS);
 staPlot(info,color,[],c,n,2,['spike vs. burst triggered ' t],nan);
+end
+
+function frames=getEvenFrames(data)
+frames=data(1,2) : median(diff(data(:,2))) : data(end,2);
+frames=[interp1(data(:,2),data(:,1),frames,'nearest'); frames];
 end
 
 function f=sta(data)
 stimPreMS =300;%1000;
 stimPostMS=75;%200;
 
+preISIs=[0 10 50 100 200 300];
+
 n=4;
 
 if ~isempty(data.frames)
-    f=doST(data.frames,data.tonics,data.bsts,stimPreMS,stimPostMS,n,'frame');
+    f=doST(getEvenFrames(data.frames),data.tonics,data.bsts,stimPreMS,stimPostMS,n,'frame',preISIs);
 else
     f=figure;
 end
@@ -1027,7 +987,7 @@ if false %note this will overwrite the spk vs. bst comparison -- where should we
 end
 end
 
-function staPlot(info,color,vals,c,n,r,t,dist,doLegendXLab,corrected)
+function staPlot(info,color,vals,c,n,r,t,dist,doLegendXLab,corrected,pres)
     function rg=getExtremes(rs)
         rg=cellfun(@(x) x(rs(:)),{@min,@max});
     end
@@ -1122,7 +1082,7 @@ if ~isnan(dist)
 end
 ylabel(AX(2),'p-value')
 xlabel(AX(1),'ms')
-        
+
 ylim(AX(1),theseLims)
 ylim(AX(2),[0 1])
 set(AX(1),'YTickMode','auto')
@@ -1135,29 +1095,35 @@ title(t)
 subplot(n,numCols,numCols*r)
 if ~isempty(vals) && false
     traceDensity(info(2,:),(vals'-mu)/sigma,lims,12,true)
-else
-    p=.95;
-    f=0:200;
-
-    [pow c w]=pmtm(scaled,[],f,median(diff(info(2,:)))*1000,p); %maybe should subtract mean from scaled?
-    if ~all(w==f)
-        error('w not f')
-    end
+elseif ~(isscalar(dist) && isnan(dist))
     
-    plot(w,log(pow),'k')
-    hold on
-    plot(w,log(c),'Color',.5*ones(1,3))
-    xlabel('hz')
-    ylabel('log power')
+    if false
+        %power spectrum of the STA, to see if there is 10Hz resonance, etc
+        plotSpec(scaled,1000/median(diff(info(2,:))),.95,true); %[pow c w]=pmtm(scaled-mean(scaled),[],f,1000/median(diff(info(2,:))),p);
+        %originally had this (i think it's wrong):
+        % [pow c w]=pmtm(scaled,[],f,median(diff(info(2,:)))*1000,p); %maybe should subtract mean from scaled?
+    else
+        if exist('pres','var') && ~all(0==pres(:))
+            cm=colormap;
+            for i=1:size(pres,1)
+                plot(info(2,:),pres(i,:),'Color',cm(round(((i-1)/(size(pres,1)-1))*(size(cm,1)-1))+1,:))
+                hold on
+            end
+            xlabel('ms')
+            set(gca,'YTick',[])
+            xlim(info(2,[1 end]))
+            ylim([min(pres(:)) max(pres(:))])
+        end
+    end
 end
 
-if exist('corrected','var')
+if exist('corrected','var') && ~isempty(corrected) && false
     if length(scaled)~=size(corrected,2)
         error('wrong corrected length (probably off by one cuz of xcorr returning 2N+1')
     end
     plot(AX(1),info(2,:),cNorm(corrected(1,:)),'r')
     plot(AX(1),info(2,:),cNorm(corrected(2,:)),'g')
-
+    
     set(H1,'LineWidth',2)
 end
 
@@ -1168,6 +1134,88 @@ end
         in=in+min(scaled);
     end
 
+if exist('pres','var')
+    cm=colormap;
+    for i=1:size(pres,1)
+        plot(AX(1),info(2,:),cNorm(pres(i,:)),'Color',cm(round(((i-1)/(size(pres,1)-1))*(size(cm,1)-1))+1,:)) %MUST FIX: this cNorm is NOT kosher
+    end
+end
+end
+
+function f=stimCheck(data)
+f=figure;
+
+if ~isempty(data.frames)
+    dist=getEvenFrames(data.frames);
+    
+    frames=dist(1,:);
+    times=dist(2,:);
+    
+    if ~(isscalar(frames) && isnan(frames))
+        
+        if false %how flat is flat?
+            n=30;
+            hz=100;
+            r=50;
+            d=(randn(1,n*hz));
+            subplot(2,1,1)
+            plotSpec(d,hz,.95,true,true);
+            
+            subplot(2,1,2)
+            d=repmat(d,1,r);
+            plotSpec(d,hz,.95,true,true);
+        end
+        
+        clf
+        
+        subplot(2,1,1)
+        fs=1/median(diff(times));
+        
+        plotSpec(frames,fs,.95,true,true);
+        
+        subplot(2,1,2)
+        
+        acMS=100;
+        [ac lags]=xcorr(frames,ceil(fs*acMS/1000));
+        plot(1000*lags/fs,ac)
+        xlabel('ms')
+        xlim(acMS*[-1 1])
+    else
+        warning('dist is scalar nan')
+    end
+end
+
+end
+
+function plotSpec(sig,t,p,removeMean,shuffle)
+
+if removeMean
+    sig=sig-mean(sig);
+end
+
+maxf=ceil(t/2);
+f=0:maxf;
+
+[pow c w]=pmtm(sig,[],f,t,p);
+
+if ~all(w==f)
+    error('w not f')
+end
+
+plot(w,log(pow),'b')
+hold on
+plot(w,log(c),'Color',.5*[0 0 1])
+xlabel('hz')
+ylabel('log power')
+xlim([0 maxf])
+
+if exist('shuffle','var') && ~isempty(shuffle)
+    sig=sig(randperm(length(sig)));
+    [pow c w]=pmtm(sig,[],f,t,p);
+    plot(w,log(pow),'k')
+    plot(w,log(c),'Color',.5*ones(1,3))
+end
+
 end
 
 function f=stationarity(data)
@@ -1177,119 +1225,262 @@ else
     start=min(data.tonics);
 end
 
+f=figure;
+
 pts=200;
 secs=max([data.bsts ; data.tonics])-start;
 dt=secs/pts;
 step=dt/2;
 ts=start+(0:step:secs);
 
-f=figure;
-n=5;
-
 [fq t p]=getSpec(data);
-subplot(n,1,1)
-displayspectrogram(t,fq,p,false,'yaxis');
-
-subplot(n,1,2)
-
 p=p'-mean(p(:));
 
-try
-    [u s v]=svd(p);
-catch
-    warning('too much spectro for svd -- choosing dims based on half')
-    [u s v]=svd(p(rand(1,size(p,1))>.5,:));
-end
-
-s=diag(s);
-ms=50;
-score=svdPlot(p,'.',ms,s,v,t);
-
-subplot(n,1,3)
-plot(fq,v(:,1:2))
-xlabel('hz')
-title('lfp dims')
-
-subplot(n,1,4)
-plot(t,score,'b')
-hold on
-ratePlot(data.bsts,'r')
-ratePlot(data.tonics,'k')
-
-
-    function ratePlot(in,code)
-        %ts=min(in):step:max(in);
-%         out=nan(size(ts)); %TODO: do this with a filter instead
-%         for i=1:length(ts)
-%             out(i)=sum(in>ts(i)-dt/2 & in<ts(i)+dt/2)/dt;
-%         end
-%         if any(isnan(out))
-%             error('nan err')
-%         end
-%         out=out/max(out);
-        
-        out=doNormRate(in);
-        if isempty(in)
-            plot([0 secs],zeros(1,2),code);
-        else
-            plot(ts-start,out,code);
-        end
+if false
+    try
+        [u s v]=svd(p);
+    catch
+        warning('too much spectro for svd -- choosing dims based on half')
+        [u s v]=svd(p(rand(1,size(p,1))>.5,:));
     end
-
-ylabel('normalized rate or score')
-xlabel('secs')
-xlim([0 secs]);
-
-legend({'burst','tonic','LFP state'})
-
-rptPts=data.rptStarts-start;
-rptLabMask=true(size(rptPts));
-scale=0;
-if length(rptPts)>100
-    scale=floor(log10(length(rptPts)))-1+log10(2);
-elseif length(rptPts)>20
-    scale=log10(5);
-end
-
-if scale~=0
-    rptLabMask=mod(1:length(rptPts),round(10^scale))==0;
-    rptLabMask([1 end])=true;
-end
-
-xlabs={};
-for i=1:length(data.rptStarts)
-    xlabs{end+1}=sprintf('%d',i);
+    s=diag(s);
+else
+    v=load('/Users/eflister/Desktop/classifier.mat');
+    v=v.v;
+    s=ones(1,size(v,1)); %fix so s's normalize the variances
 end
 
 if true
-    %this thing makes zooming suck.  also no way to get rid of ticks from bottom x axes
-    ax2 = axes('Position',get(gca,'Position'),...
-        'XAxisLocation','top',...
-        'Color','none',... %supposed to be default, but without this the original axes are obscured
-        'XTick',rptPts(rptLabMask),...
-        'XTickLabel',xlabs(rptLabMask),...
-        'XLim',get(gca,'XLim'));
-    %            'YAxisLocation','right',...
-    %            'XColor','k','YColor','k');
     
-    xlabel(ax2,'repeat num');
+    X=p*v(:,1)/s(1);
+    Y=p*v(:,2)/s(2);
+    
+    cut=.05;
+    order=1000;
+    
+    orderFactor=5; %hmm, 3 should work but sometimes fails
+    if orderFactor*order>length(X)
+        order=floor(length(X)/orderFactor);
+    end
+    b=fir1(order,cut);
+    pHz=1/median(diff(t));
+    
+    %this dim actually shifts mean
+    x=filtfilt(b,1,X);
+    
+    if false
+        [junk junk tx px]=spectrogram(X-mean(X),round(pHz),[],[],pHz);
+        x=log(sum(px))';
+        x=filtfilt(b,1,x);
+        x(end+1)=mean(x);
+    end
+    
+    %this dim only shifts variance
+    
+    [junk junk ty py]=spectrogram(Y-mean(Y),round(pHz),[],[],pHz);
+    y=log(sum(py))';
+    y=filtfilt(b,1,y);
+    y(end+1)=mean(y);
+    
+    %y=Y;
+    
+    x=normalize(x);
+    y=normalize(y);
+    
+    n=7;
+    
+    subplot(n,1,1)
+    plot(v(:,[2 1]))
+    title('pc''s')
+    xlabel('hz')
+    set(gca,'YTick',[])
+    xlim([1 size(v,1)])
+    
+    subplot(n,1,2)
+    imagesc(log(p-min(p(:)))')
+    axis xy
+    ylabel('hz')
+    xlabel('time')
+    set(gca,'XTick',[])
+    set(gca,'YTick',[]) %need to index into fq to get y ticks right
+    
+    subplot(n,1,3)
+    plot([Y X])
+    xlim([1 length(Y)])
+    ylim([min([Y(:);X(:)]) max([Y(:);X(:)])])
+    set(gca,'YTick',[])
+    set(gca,'XTick',[])
+    
+    subplot(n,1,4)
+    plot([y x])
+    xlim([1 length(y)])
+    set(gca,'XTick',[])
+    ylabel('normalized score')
+        
+    if false
+        subplot(n,1,6)
+        d=100;
+        %plot([hist(x,d);hist(y,d)]')
+        
+        q=cellfun(@(z) normalize(hist(z,d)),[{x} {y}],'UniformOutput',false);
+        plot(log(cell2mat(q')'))
+        set(gca,'YTick',[])
+        set(gca,'XTick',[])
+        xlabel('score')
+        ylabel('pc dist')
+    end
+    
+    subplot(n,1,6)
+    idx = kmeans(x(:),2);
+    plot(idx)
+    ylim([.9 2.1])
+    ylabel('state')
+    set(gca,'XTick',[])
+    xlim([1 length(idx)])
+    set(gca,'YTick',unique(idx))
+    
+    subplot(n,1,7)
+    ratePlot(data.bsts,'r')
+    hold on
+    ratePlot(data.tonics,'k')
+    ylabel('normalized rate')
+    set(gca,'YTick',[])
+    set(gca,'XTick',[])
+    
+    %if this isn't last, it gets erased cuz of the repositioning
+    subplot(n,1,5)
+    ms=23; %50
+    scatter(x,y,ms,t,'.')
+    axis square
+    set(gca,'YTick',[])
+    set(gca,'XTick',[])
+    pos=get(gca,'Position');
+    left=pos(1);
+    bottom=pos(2);
+    width=pos(3);
+    height=pos(4);
+    change=.1;
+    set(gca,'Position',[left bottom-change/2  width  height+change]);
+    %set(gca,'Position',[0.13 0.365118-.05 0.775 0.0747626+.1]);
+else
+    n=5;
+    
+    subplot(n,1,1)
+    displayspectrogram(t,fq,p,false,'yaxis');
+    
+    subplot(n,1,2)
+    
+    ms=50;
+    score=svdPlot(p,'.',ms,s,v,t);
+    
+    subplot(n,1,3)
+    plot(fq,v(:,1:2))
+    xlabel('hz')
+    title('lfp dims')
+    
+    subplot(n,1,4)
+    plot(t,score,'b')
+    hold on
+    ratePlot(data.bsts,'r')
+    ratePlot(data.tonics,'k')
+    
+    ylabel('normalized rate or score')
+    xlabel('secs')
+    xlim([0 secs]);
+    
+    legend({'burst','tonic','LFP state'})
+    
+    rptPts=data.rptStarts-start;
+    rptLabMask=true(size(rptPts));
+    scale=0;
+    if length(rptPts)>100
+        scale=floor(log10(length(rptPts)))-1+log10(2);
+    elseif length(rptPts)>20
+        scale=log10(5);
+    end
+    
+    if scale~=0
+        rptLabMask=mod(1:length(rptPts),round(10^scale))==0;
+        rptLabMask([1 end])=true;
+    end
+    
+    xlabs={};
+    for i=1:length(data.rptStarts)
+        xlabs{end+1}=sprintf('%d',i);
+    end
+    
+    if true
+        %this thing makes zooming suck.  also no way to get rid of ticks from bottom x axes
+        ax2 = axes('Position',get(gca,'Position'),...
+            'XAxisLocation','top',...
+            'Color','none',... %supposed to be default, but without this the original axes are obscured
+            'XTick',rptPts(rptLabMask),...
+            'XTickLabel',xlabs(rptLabMask),...
+            'XLim',get(gca,'XLim'));
+        %            'YAxisLocation','right',...
+        %            'XColor','k','YColor','k');
+        
+        xlabel(ax2,'repeat num');
+    end
+    
+    state=doNormRate(data.tonics)./doNormRate(data.bsts);
+    
+    [burstyS tonicyS]=segregate(data.spks);
+    [burstyB tonicyB]=segregate(data.bsts);
+    
+    subplot(n,1,5)
+    
+    state=log(state);
+    state(isinf(state))=nan;
+    plot(ts-start,state);
+    hold on
+    plot(ts-start,zeros(1,length(ts)),'k')
+    xlabel('secs')
+    title('state')
+    xlim([0 secs])
+    
+    hi = max(state)/2;
+    lo = min(state)/2;
+    
+    statePlot(burstyS,lo,'kx')
+    statePlot(burstyB,lo,'rx')
+    statePlot(tonicyS,hi,'kx')
+    statePlot(tonicyB,hi,'rx')
+    
+    f=[f figure];
+    
+    stimPreMS =200;%300;
+    stimPostMS=100;% 30;
+    
+    color=zeros(1,3);
+    c=.95;
+    
+    n=4;
+    
+    if ~isempty(data.frames)
+        frames=data.frames(1,2) : median(diff(data.frames(:,2))) : data.frames(end,2);
+        frames=[interp1(data.frames(:,2),data.frames(:,1),frames,'nearest'); frames];
+        
+        [tSTF vals]=calcSTA(tonicyS,frames,stimPreMS,stimPostMS,c);
+        staPlot(tSTF,color,vals,c,n,1,'spike triggered average frame (tonic state)');
+        
+        [tSTFb vals]=calcSTA(burstyS,frames,stimPreMS,stimPostMS,c);
+        staPlot(tSTFb,color,vals,c,n,2,'spike triggered average frame (bursty state)');
+        
+        [bSTF vals]=calcSTA(tonicyB,frames,stimPreMS,stimPostMS,c);
+        staPlot(bSTF,color,vals,c,n,3,'burst triggered average frame (tonic state)');
+        
+        [bSTFb vals]=calcSTA(burstyB,frames,stimPreMS,stimPostMS,c);
+        staPlot(bSTFb,color,vals,c,n,4,'burst triggered average frame (bursty state)');
+    end
+    
+    subplot(n,2,2*n-1)
+    xlabel('ms')
 end
 
-state=doNormRate(data.tonics)./doNormRate(data.bsts);
-      
-    function out=doNormRate(in)
-        out=nan(size(ts)); %TODO: do this with a filter instead
-        for i=1:length(ts)
-            out(i)=sum(in>ts(i)-dt/2 & in<ts(i)+dt/2)/dt;
-        end
-        if any(isnan(out))
-            error('nan err')
-        end
-        out=out/max(out);
+    function statePlot(in,val,code)
+        plot(in-start,val*ones(1,length(in)),code)
     end
-
-[burstyS tonicyS]=segregate(data.spks);
-[burstyB tonicyB]=segregate(data.bsts);
 
     function [lo hi]=segregate(in)
         lo=[]; %could prealloc w/nans if nec
@@ -1317,60 +1508,37 @@ state=doNormRate(data.tonics)./doNormRate(data.bsts);
         end
     end
 
-subplot(n,1,5)
-
-state=log(state);
-state(isinf(state))=nan;
-plot(ts-start,state);
-hold on
-plot(ts-start,zeros(1,length(ts)),'k')
-xlabel('secs')
-title('state')
-xlim([0 secs])
-
-hi = max(state)/2;
-lo = min(state)/2;
-
-statePlot(burstyS,lo,'kx')
-statePlot(burstyB,lo,'rx')
-statePlot(tonicyS,hi,'kx')
-statePlot(tonicyB,hi,'rx')
-
-    function statePlot(in,val,code)
-        plot(in-start,val*ones(1,length(in)),code)
+    function out=doNormRate(in)
+        out=nan(size(ts)); %TODO: do this with a filter instead
+        for i=1:length(ts)
+            out(i)=sum(in>ts(i)-dt/2 & in<ts(i)+dt/2)/dt;
+        end
+        if any(isnan(out))
+            error('nan err')
+        end
+        out=out/max(out);
     end
 
-f=[f figure];
+    function ratePlot(in,code)
+        %ts=min(in):step:max(in);
+        %         out=nan(size(ts)); %TODO: do this with a filter instead
+        %         for i=1:length(ts)
+        %             out(i)=sum(in>ts(i)-dt/2 & in<ts(i)+dt/2)/dt;
+        %         end
+        %         if any(isnan(out))
+        %             error('nan err')
+        %         end
+        %         out=out/max(out);
+        
+        out=doNormRate(in);
+        if isempty(in)
+            plot([0 secs],zeros(1,2),code);
+        else
+            plot(ts-start,out,code);
+            xlim([min(ts) max(ts)]-start)
+        end
+    end
 
-stimPreMS =200;%300;
-stimPostMS=100;% 30;
-
-color=zeros(1,3);
-c=.95;
-
-n=4;
-
-if ~isempty(data.frames)
-    frames=data.frames(1,2) : median(diff(data.frames(:,2))) : data.frames(end,2);
-    frames=[interp1(data.frames(:,2),data.frames(:,1),frames,'nearest'); frames];
-    
-    [tSTF vals]=calcSTA(tonicyS,frames,stimPreMS,stimPostMS,c);
-    staPlot(tSTF,color,vals,c,n,1,'spike triggered average frame (tonic state)');
-
-    [tSTFb vals]=calcSTA(burstyS,frames,stimPreMS,stimPostMS,c);
-    staPlot(tSTFb,color,vals,c,n,2,'spike triggered average frame (bursty state)');
-    
-    [bSTF vals]=calcSTA(tonicyB,frames,stimPreMS,stimPostMS,c);
-    staPlot(bSTF,color,vals,c,n,3,'burst triggered average frame (tonic state)');
-    
-    [bSTFb vals]=calcSTA(burstyB,frames,stimPreMS,stimPostMS,c);
-    staPlot(bSTFb,color,vals,c,n,4,'burst triggered average frame (bursty state)');
-end
-
-subplot(n,2,2*n-1)
-xlabel('ms')
-
-keyboard
 end
 
 function f=raster(data)
@@ -1474,7 +1642,7 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
         end
         xlim([0 maxTime])
         
-    else 
+    else
         % clf
         
         cellfun(@(c) doRaster(c{1},c{2},maxTime),{ {rasters,'k.'} {bursts,'ro'} {inBursts,'r.'} {violations,'bo'} })
@@ -1561,11 +1729,25 @@ end
     end
 end
 
-function [sta vals corrected]=calcSTA(trigTs,stim,preMS,postMS,c)
-[vals times corrected]=doTrigger(trigTs,stim,preMS,postMS);
+function [sta vals corrected pres]=calcSTA(trigTs,stim,preMS,postMS,c,preISIs)
+[vals times corrected]=doTrigger(trigTs,stim,preMS,postMS,preISIs);
+
+for i=1:length(preISIs)
+    if ~isempty(vals{i})
+        pres(i,:)=mean(vals{i},1); %need to specify dim in case there's only one trig
+    else
+        pres(i,:)=zeros(size(times));
+    end
+end
+
+if preISIs(1)~=0
+    error('first preISI not 0')
+end
+
+vals=vals{1};
 
 if ~isempty(trigTs)
-    sta=mean(vals);
+    sta=pres(1,:);
     ps = ks(vals,stim(1,:));
 else
     sta=zeros(size(times));
@@ -1581,31 +1763,41 @@ end
 sta=[sta; ps];
 end
 
-function [vals times corrected]=doTrigger(trigTs,stim,preMS,postMS)
-trigs=trigTs(trigTs>stim(2,1)+preMS/1000 & trigTs<stim(2,end)-postMS/1000);
+function [vals times corrected]=doTrigger(trigTs,stim,preMS,postMS,preISIs)
+allTrigs=trigTs(trigTs>stim(2,1)+preMS/1000 & trigTs<stim(2,end)-postMS/1000);
+diffs=[0 ; diff(allTrigs)]; %always throw out first spike (has unknown ISI ahead of it)
+
+if ~exist('preISIs','var') || isempty(preISIs)
+    preISIs=0;
+end
 
 timestep=median(diff(stim(2,:)));
-
-trigs=1+floor((trigs-stim(2,1))/timestep);
 
 preBin=floor(preMS/1000/timestep);
 postBin=floor(postMS/1000/timestep);
 tinds=-preBin:postBin;
 times=tinds*timestep*1000;
 
-if ~isempty(trigTs)
-    inds=repmat(tinds,length(trigs),1)+repmat(trigs,1,length(tinds));
-else
-    inds=[];
+for i=1:length(preISIs)
+    trigs=allTrigs(diffs>preISIs(i)/1000);
+    
+    trigs=1+floor((trigs-stim(2,1))/timestep);
+    
+    if ~isempty(trigTs)
+        inds=repmat(tinds,length(trigs),1)+repmat(trigs,1,length(tinds));
+    else
+        inds=[];
+    end
+    
+    vals{i}=stim(1,:);
+    vals{i}=vals{i}(inds);
 end
 
-vals=stim(1,:);
-vals=vals(inds);
-
-train=hist(trigs,1:length(stim(1,:)));
+train=hist(allTrigs,1:length(stim(1,:)));
 
 if all(train==0)
-    error('why does this happen?')
+    warning('no triggers -- probably cuz no bursts')
+    corrected=[];
 else
     
     % dayan and abbott have derivations of the autocorrealation corrections
@@ -1651,9 +1843,12 @@ else
 end
 end
 
-function info=compareTriggeredDistributions(trigs1,trigs2,stim,preMS,postMS); 
+function info=compareTriggeredDistributions(trigs1,trigs2,stim,preMS,postMS);
 [vals1 times]=doTrigger(trigs1,stim,preMS,postMS);
 [vals2 times]=doTrigger(trigs2,stim,preMS,postMS);
+
+vals1=vals1{1};
+vals2=vals2{1};
 
 info=nan(3,length(times));
 info(2,:)=times;
@@ -1884,12 +2079,17 @@ end
 phys=extract(data.phys,data.physT,stimTimes);
 stim=extract(data.binnedVals,data.binnedT,stimTimes);
 
+if any(cellfun(@isempty,{data.repeatStimVals data.repeatTimes}))
+    warning('no repeats id''d')
+end
+
 frames=[data.repeatStimVals(:) data.repeatTimes(:)];
 frames=frames(frames(:,2)>=stimTimes(1) & frames(:,2)<=stimTimes(2),:);
 if any(isnan(frames(:)))
     error('got a nan')
 end
 if isempty(frames)
+    %NEXT UP -- this cooccurs with 'binned stim length difference' warning above on id 3
     %TODO: figure out why this happens -- i think it's when we can't ID repeats -- but we shouldn't let this stop us from doing the frame calc
     warning('got empty frames')
 end

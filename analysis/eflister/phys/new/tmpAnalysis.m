@@ -37,7 +37,7 @@ data.fileNames=fileNames;
 
 data.mins=(stimTimes(2)-stimTimes(1))/60;
 
-if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) %,'hateren'}) % && ...
+if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq','hateren'}) % && ismember(rec.date,datenum({'04.15.09'},'mm.dd.yy')) %,'hateren'}) % && ...
     %        (...
     %        ismember(rec.date,datenum({'04.15.09','04.24.09'},'mm.dd.yy')) ...
     %        || ...
@@ -310,7 +310,7 @@ function [f t p]=getSpec(data)
 pHz=1/median(diff(data.phys(2,:)));
 fprintf('spectroing from %g hz... ',pHz)
 freqs=1:50;
-[s f t p]=spectrogram(data.phys(1,:)-mean(data.phys(1,:)),round(pHz),[],freqs,pHz);
+[s f t p]=spectrogram(data.phys(1,:)-mean(data.phys(1,:)),round(pHz),[],freqs,pHz); %1 sec res w/50% overlap?
 end
 
 %stolen from matlab's spectrogram.m
@@ -1236,7 +1236,7 @@ ts=start+(0:step:secs);
 [fq t p]=getSpec(data);
 p=p'-mean(p(:));
 
-if false
+if true
     try
         [u s v]=svd(p);
     catch
@@ -1244,50 +1244,120 @@ if false
         [u s v]=svd(p(rand(1,size(p,1))>.5,:));
     end
     s=diag(s);
+    
+    save(['/Users/eflister/Desktop/classifiers/' data.uID '.mat'],'v');
+    
 else
     v=load('/Users/eflister/Desktop/classifier.mat');
     v=v.v;
     s=ones(1,size(v,1)); %fix so s's normalize the variances
 end
 
+%     function out=myFind(M,DIM)
+%         switch DIM
+%             case 1
+%             case 2
+%                 M=M';
+%             otherwise
+%                 error('only works for 1 or 2 (hack)')
+%         end
+%         out=nan(1,size(M,1));
+%         for i=1:size(M,1)
+%             possible=find(M(i,:),1,'first');
+%             if isscalar(possible)
+%                 out(i)=possible;
+%             elseif ~isempty(possible)
+%                 error('huh?')
+%             end
+%         end
+%     end
+
 if true
     
     X=p*v(:,1)/s(1);
     Y=p*v(:,2)/s(2);
     
-    cut=.05;
-    order=1000;
+    if true
     
-    orderFactor=5; %hmm, 3 should work but sometimes fails
-    if orderFactor*order>length(X)
-        order=floor(length(X)/orderFactor);
+        cut=.05;
+        order=1000;
+        
+        orderFactor=5; %hmm, 3 should work but sometimes fails
+        if orderFactor*order>length(X)
+            order=floor(length(X)/orderFactor);
+        end
+        b=fir1(order,cut);
+        pHz=1/median(diff(t));
+        
+        %this dim actually shifts mean
+        x=filtfilt(b,1,X);
+        
+        if false
+            [junk junk tx px]=spectrogram(X-mean(X),round(pHz),[],[],pHz);
+            x=log(sum(px))';
+            x=filtfilt(b,1,x);
+            x(end+1)=mean(x);
+        end
+        
+        %this dim only shifts variance
+        
+        [junk junk ty py]=spectrogram(Y-mean(Y),round(pHz),[],[],pHz);
+        y=log(sum(py))';
+        y=filtfilt(b,1,y);
+        y(end+1)=mean(y);
+    
+    else
+        x=X;
+        y=Y;
     end
-    b=fir1(order,cut);
-    pHz=1/median(diff(t));
-    
-    %this dim actually shifts mean
-    x=filtfilt(b,1,X);
-    
-    if false
-        [junk junk tx px]=spectrogram(X-mean(X),round(pHz),[],[],pHz);
-        x=log(sum(px))';
-        x=filtfilt(b,1,x);
-        x(end+1)=mean(x);
-    end
-    
-    %this dim only shifts variance
-    
-    [junk junk ty py]=spectrogram(Y-mean(Y),round(pHz),[],[],pHz);
-    y=log(sum(py))';
-    y=filtfilt(b,1,y);
-    y(end+1)=mean(y);
-    
-    %y=Y;
     
     x=normalize(x);
     y=normalize(y);
     
-    n=7;
+    n=3;
+    
+    subplot(n,1,1)
+    specShow=p';
+    specShow=specShow-min(specShow(:));
+    % specShow=specShow/max(specShow(:));
+    specShow=log(specShow); %log brings out low power details (but states a little more obvious without it) -- note can add a constant inside the log to change severity of compression
+    if false
+        specShow=specShow./repmat(mean(specShow')',1,size(specShow,2)); %nothing interesting added by normalization
+    end
+    imagesc(specShow)
+    axis xy
+    ylabel('hz')
+    
+    xLabMins=5;
+    xlabs=0:xLabMins:max(t)/60;
+
+    %xrows=myFind((repmat(t/60,length(xlabs),1)-repmat(xlabs',1,length(t))) >=0,1); %gah!
+    xrows=floor(interp1(t/60,1:length(t),xlabs,'nearest'));
+    set(gca,'XTick',xrows,'XTickLabel',xlabs);
+    ylabs=0:5:max(fq);
+    %yrows=myFind((repmat(fq,1,length(ylabs))-repmat(ylabs,length(fq),1)) >=0,2); %gah!
+    yrows=floor(interp1(fq,1:length(fq),ylabs,'nearest'));
+    set(gca,'YTick',yrows,'YTickLabel',ylabs);    
+    
+    subplot(n,1,2)
+    idx = kmeans(x(:),2);
+    plot(idx)
+    ylim([.9 2.1])
+    ylabel('state')
+    set(gca,'XTick',xrows,'XTickLabel',xlabs);
+    xlim([1 length(idx)])
+    set(gca,'YTick',unique(idx))
+    
+    subplot(n,1,3)
+    ratePlot(data.bsts,'r')
+    hold on
+    ratePlot(data.tonics,'k')
+    ylabel('normalized rate')
+    set(gca,'YTick',[])
+    %set(gca,'XTick',[])
+    
+    f=[f figure];
+    n=4;
     
     subplot(n,1,1)
     plot(v(:,[2 1]))
@@ -1297,28 +1367,20 @@ if true
     xlim([1 size(v,1)])
     
     subplot(n,1,2)
-    imagesc(log(p-min(p(:)))')
-    axis xy
-    ylabel('hz')
-    xlabel('time')
-    set(gca,'XTick',[])
-    set(gca,'YTick',[]) %need to index into fq to get y ticks right
-    
-    subplot(n,1,3)
     plot([Y X])
     xlim([1 length(Y)])
     ylim([min([Y(:);X(:)]) max([Y(:);X(:)])])
     set(gca,'YTick',[])
     set(gca,'XTick',[])
     
-    subplot(n,1,4)
+    subplot(n,1,3)
     plot([y x])
     xlim([1 length(y)])
     set(gca,'XTick',[])
     ylabel('normalized score')
         
     if false
-        subplot(n,1,6)
+        subplot(n,1,4)
         d=100;
         %plot([hist(x,d);hist(y,d)]')
         
@@ -1330,25 +1392,8 @@ if true
         ylabel('pc dist')
     end
     
-    subplot(n,1,6)
-    idx = kmeans(x(:),2);
-    plot(idx)
-    ylim([.9 2.1])
-    ylabel('state')
-    set(gca,'XTick',[])
-    xlim([1 length(idx)])
-    set(gca,'YTick',unique(idx))
-    
-    subplot(n,1,7)
-    ratePlot(data.bsts,'r')
-    hold on
-    ratePlot(data.tonics,'k')
-    ylabel('normalized rate')
-    set(gca,'YTick',[])
-    set(gca,'XTick',[])
-    
     %if this isn't last, it gets erased cuz of the repositioning
-    subplot(n,1,5)
+    subplot(n,1,4)
     ms=23; %50
     scatter(x,y,ms,t,'.')
     axis square
@@ -1361,7 +1406,9 @@ if true
     height=pos(4);
     change=.1;
     set(gca,'Position',[left bottom-change/2  width  height+change]);
-    %set(gca,'Position',[0.13 0.365118-.05 0.775 0.0747626+.1]);
+    %%%% set(gca,'Position',[0.13 0.365118-.05 0.775 0.0747626+.1]);
+    xlabel('green')
+    ylabel('blue')
 else
     n=5;
     
@@ -1532,11 +1579,22 @@ end
         
         out=doNormRate(in);
         if isempty(in)
-            plot([0 secs],zeros(1,2),code);
+            xs=[0 secs];
+            plot(xs,zeros(1,2),code);
         else
-            plot(ts-start,out,code);
-            xlim([min(ts) max(ts)]-start)
+            xs=ts-start;
+            plot(xs,out,code);
         end
+        xlim([min(xs) max(xs)])
+        xlabel('mins')
+        xtl=0:5:max(xs/60);
+        xt=floor(interp1(xs/60,1:length(xs),xtl,'nearest'));
+        if length(xt)<=length(xs)
+            set(gca,'XTick',xs(xt),'XTickLabel',xtl);
+        else
+           % set(gca,'XTick',xs,'XTickLabel',xs/60) 
+        end
+        %11/11 25/25
     end
 
 end

@@ -20,7 +20,7 @@ stimClassToAnalyze={'all'}; timeRangePerTrialSecs=[0 Inf];
 % path='\\132.239.158.183\rlab_storage\pmeier\backup\neuralData_090505';
 % path='C:\Documents and Settings\rlab\Desktop\neural';
 path='\\132.239.158.179\datanet_storage'
-
+path='H:\datanetOutput'
 
 spikeDetectionParams=[];
 spikeDetectionParams.method='OSORT';
@@ -445,62 +445,65 @@ subjectID = '253';cellBoundary={'trialRange',[97]}; %flankerContrastOnePhase slo
 subjectID = '253';cellBoundary={'trialRange',[98 101]}; %flankerContrastOnePhase slow 180 ppc
 
 subjectID = '253';cellBoundary={'trialRange',[101]} %flankerContrastOnePhase slow 180 ppc
-subjectID = '252';cellBoundary={'trialRange',[156]} % flankerMatters... all colin WORTH ANALYZING
+subjectID = '253';cellBoundary={'trialRange',[156]} % flankerMatters... all colin WORTH ANALYZING
 %subjectID = '253';cellBoundary={'trialRange',[102 110]} %ffgwn
 
-%no mask; lights on
-subjectID = 'calib'; cellBoundary={'trialRange',[10 12]} %bin
-subjectID = 'calib'; cellBoundary={'trialRange',[2]} %hv
-subjectID = 'calib'; cellBoundary={'trialRange',[17]} %hv, lights off, 20 frames
-subjectID = 'calib'; cellBoundary={'trialRange',[24]} %cw:ccw, otherwise same as hv on 17
-subjectID = 'calib'; cellBoundary={'trialRange',[31]} %cw:ccw, 1/8 std, 16 phases
-%subjectID = 'calib'; cellBoundary={'trialRange',[34]} %cw:ccw, same as 31 but rotated sensor
-%subjectID = 'calib'; cellBoundary={'trialRange',[37]} %cw:ccw, same as 31 but rotated sensor
-subjectID = 'calib'; cellBoundary={'trialRange',[42]} %new day, hv, 1/8 std, 16 phases
 
-%subjectID = 'calib'; cellBoundary={'trialRange',[45]} %hv, add mask
-%subjectID = 'calib'; cellBoundary={'trialRange',[47 51]} %bin w/ mask
-% subjectID = 'calib'; cellBoundary={'trialRange',[55]} %same,  linearized
-% subjectID = 'calib'; cellBoundary={'trialRange',[57]} %same,  linearized, but cw:ccw
-% subjectID = 'calib'; cellBoundary={'trialRange',[59]} %same,  linearized, but cw:ccw, sine
- subjectID = 'calib'; cellBoundary={'trialRange',[61]} %same,  linearized, but hv, sine
+%subjectID = 'calib';  %no mask, lights on, CRT
+%cellBoundary={'trialRange',[10 12]} %bin
+%cellBoundary={'trialRange',[2]} %hv
+%cellBoundary={'trialRange',[17]} %hv, lights off, 20 frames
+%cellBoundary={'trialRange',[24]} %cw:ccw, otherwise same as hv on 17
+%cellBoundary={'trialRange',[31]} %cw:ccw, 1/8 std, 16 phases
+%cellBoundary={'trialRange',[34]} %cw:ccw, same as 31 but rotated sensor
+%cellBoundary={'trialRange',[37]} %cw:ccw, same as 31 but rotated sensor
+%cellBoundary={'trialRange',[42]} %new day, hv, 1/8 std, 16 phases
 
-% subjectID = 'calib'; cellBoundary={'trialRange',[77]} %OLED, no mask, bin (not enough data)
-% subjectID = 'calib'; cellBoundary={'trialRange',[81]} %OLED, no mask, hv 
-  
-% subjectID = 'calib'; cellBoundary={'trialRange',[84 90]} %OLED, mask, bin, screen was 1024 768, stixel was [8 8 ]
-%subjectID = 'calib'; cellBoundary={'trialRange',[93 103]} %OLED, mask, bin, screen was 800 600, stixel was [32 32 ]
-% subjectID = 'calib'; cellBoundary={'trialRange',[105 121]} %OLED, mask, bin, screen was 800 600, stixel was [16 16 ]
-%subjectID = 'calib'; cellBoundary={'trialRange',131};%[129 131]} %OLED, mask, hv
-  %subjectID = 'calib'; cellBoundary={'trialRange',131};%[129 131]} %OLED, mask, hv
-% subjectID = 'calib'; cellBoundary={'trialRange',[133 141]};%OLED, bigger mask, bin, errors mid analysis
-% subjectID = 'calib'; cellBoundary={'trialRange',[143]};%OLED, bigger mask, hv, 
-% subjectID = 'calib'; cellBoundary={'trialRange',[147]};%OLED, bigger mask, hv, native gamma
-% subjectID = 'calib'; cellBoundary={'trialRange',[161 163]};%OLED, moved mask, bin, native gamma
-% subjectID = 'calib'; cellBoundary={'trialRange',[165]};%OLED, mask, hv, native gamma, square like before
-% subjectID = 'calib'; cellBoundary={'trialRange',[170]};%OLED, mask, hv, native gamma, sine
-% subjectID = 'calib'; cellBoundary={'trialRange',[172 178]};%OLED, mask, hv, native gamma, sine, many PPC
-% subjectID = 'calib'; cellBoundary={'trialRange',[182 188]};%OLED, mask, cw-ccw, native gamma, sine, many PPC
-% subjectID = 'calib'; cellBoundary={'trialRange',[183]};%OLED, mask, cw-ccw, native gamma, sine, many PPC
-% subjectID = 'calib'; cellBoundary={'trialRange',[194]};%[193 199]OLED, mask, cw-ccw, native gamma, sine, many PPC, ~10 min long
-% %subjectID = 'calib'; cellBoundary={'trialRange',[200]};%OLED, mask, cw-ccw, native gamma, sine, many PPC, ~10 min long
+%subjectID = 'calib'; %add mask
+%cellBoundary={'trialRange',[45]} %hv 
+%cellBoundary={'trialRange',[47 51]} %bin
+%cellBoundary={'trialRange',[55]} %same,  linearized
+%cellBoundary={'trialRange',[57]} %same,  linearized, but cw:ccw
+%cellBoundary={'trialRange',[59]} %same,  linearized, but cw:ccw, sine
+%cellBoundary={'trialRange',[61]} %same,  linearized, but hv, sine
 
-subjectID = 'calib'; cellBoundary={'trialRange',[251 256]};%[250 256]%CRT, mask, hv, native gamma, sine, many PPC, ~1 min long WRONG PPC!
-subjectID = 'calib'; cellBoundary={'trialRange',[264]};%[258 263]%CRT, mask, hv, native gamma, sine, many PPC, ~1 min long
-%subjectID = 'calib'; cellBoundary={'trialRange',[258]};%[250 256]%CRT, mask, hv, native gamma, sine, many PPC, ~1 min long
-subjectID = 'calib'; cellBoundary={'trialRange',[285]};%[284 290]%OLED, mini-mask, hv, native gamma, sine, many PPC, ~1 min long, kind of noisey
+% subjectID = 'calib'; %OLED
+% cellBoundary={'trialRange',[77]} %OLED, no mask, bin (not enough data)
+% cellBoundary={'trialRange',[81]} %OLED, no mask, hv 
+% cellBoundary={'trialRange',[84 90]}   %OLED, mask, bin, screen was 1024 768, stixel was [8 8 ]
+% cellBoundary={'trialRange',[93 103]}  %OLED, mask, bin, screen was 800 600, stixel was [32 32 ]
+% cellBoundary={'trialRange',[105 121]} %OLED, mask, bin, screen was 800 600, stixel was [16 16 ]
+% cellBoundary={'trialRange',131};%[129 131]} %OLED, mask, hv
+% ellBoundary={'trialRange',131};%[129 131]} %OLED, mask, hv
+% cellBoundary={'trialRange',[133 141]};%OLED, bigger mask, bin, errors mid analysis
+% cellBoundary={'trialRange',[143]};%OLED, bigger mask, hv, 
+% cellBoundary={'trialRange',[147]};%OLED, bigger mask, hv, native gamma
+% cellBoundary={'trialRange',[161 163]};%OLED, moved mask, bin, native gamma
+% cellBoundary={'trialRange',[165]};%OLED, mask, hv, native gamma, square like before
+% cellBoundary={'trialRange',[170]};%OLED, mask, hv, native gamma, sine
+% cellBoundary={'trialRange',[172 178]};%OLED, mask, hv, native gamma, sine, many PPC
+% cellBoundary={'trialRange',[182 188]};%OLED, mask, cw-ccw, native gamma, sine, many PPC
+% cellBoundary={'trialRange',[183]};%OLED, mask, cw-ccw, native gamma, sine, many PPC
+% cellBoundary={'trialRange',[194]};%[193 199]OLED, mask, cw-ccw, native gamma, sine, many PPC, ~10 min long
+% cellBoundary={'trialRange',[200]};%OLED, mask, cw-ccw, native gamma, sine, many PPC, ~10 min long
 
+% subjectID = 'calib'; %
+% cellBoundary={'trialRange',[251 256]};%[250 256]%CRT, mask, hv, native gamma, sine, many PPC, ~1 min long WRONG PPC!
+% cellBoundary={'trialRange',[264]};%[258 263]%CRT, mask, hv, native gamma, sine, many PPC, ~1 min long
+% cellBoundary={'trialRange',[258]};%[250 256]%CRT, mask, hv, native gamma, sine, many PPC, ~1 min long
+% cellBoundary={'trialRange',[285]};%[284 290]%OLED, mini-mask, hv, native gamma, sine, many PPC, ~1 min long, kind of noisey
+
+channels={1}
 %spikeSortingParams.postProcessing= 'largestNonNoiseClusterOnly';
-  
 spikeDetectionParams.detectionMethod=3; % 1 -> from power signal, 2 threshold positive, 3 threshold negative, 4 threshold abs, 5 wavelet
 spikeDetectionParams.extractionThreshold =10;
 spikeDetectionParams.sampleLFP = false; %true;
 spikeDetectionParams.LFPSamplingRateHz =500;
 
 overwriteAll=1; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
-usePhotoDiodeSpikes=1;
+usePhotoDiodeSpikes=0;
 %spikeDetectionParams.method='activeSortingParametersThisAnalysis';  % will override this files choices with the active params for this *subject*
 %spikeSortingParams.method='activeSortingParametersThisAnalysis';
 
-analysisManagerByChunk(subjectID, path, cellBoundary, spikeDetectionParams, spikeSortingParams,...
+analysisManagerByChunk(subjectID, path, cellBoundary, channels,spikeDetectionParams, spikeSortingParams,...
     timeRangePerTrialSecs,stimClassToAnalyze,overwriteAll,usePhotoDiodeSpikes)

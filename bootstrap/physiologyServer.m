@@ -18,9 +18,14 @@ fWidth=2*margin+10*fieldWidth;
 fHeight=margin+25*oneRowHeight+margin;
 
 ai_parameters=[];
-ai_parameters.numChans=3;
+ai_parameters.numChans=16;
 ai_parameters.sampRate=40000;
 ai_parameters.inputRanges=repmat([-1 6],ai_parameters.numChans,1);
+ai_parameters.channelConfiguration={'framePulse','photodiode'};
+numPhysChannels=ai_parameters.numChans-2;
+for i=1:numPhysChannels
+    ai_parameters.channelConfiguration{i+2}=['phys' num2str(i)];
+end
 
 % ========================================================================================
 % lists of values for settings
@@ -1543,7 +1548,7 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
                     numSampsToGet=get(ai,'SamplesAvailable');
                     [neuralData,neuralDataTimes]=getdata(ai,numSampsToGet);
                     elapsedTime=GetSecs()-startTime;
-                    saveNidaqChunk(neuralFilename,neuralData,neuralDataTimes([1 end]),chunkCount,elapsedTime,ai_parameters.sampRate);
+                    saveNidaqChunk(neuralFilename,neuralData,neuralDataTimes([1 end]),chunkCount,elapsedTime,ai_parameters.sampRate,ai_parameters);
                     clear neuralData neuralDataTimes;
                     flushdata(ai);
                 catch ex

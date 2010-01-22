@@ -37,7 +37,7 @@ data.fileNames=fileNames;
 
 data.mins=(stimTimes(2)-stimTimes(1))/60;
 
-if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq','hateren'}) % && ismember(rec.date,datenum({'04.15.09'},'mm.dd.yy')) %,'hateren'}) % && ...
+if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) % && ismember(rec.date,datenum({'04.15.09'},'mm.dd.yy')) %,'hateren'}) % && ...
     %        (...
     %        ismember(rec.date,datenum({'04.15.09','04.24.09'},'mm.dd.yy')) ...
     %        || ...
@@ -109,6 +109,8 @@ if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq','hateren
         otherwise
             error('unknown type: %s\n',stimType)
     end
+else
+    fprintf('\nskipping %g mins %s\n',data.mins,stimType)
 end
 end
 
@@ -1236,7 +1238,7 @@ ts=start+(0:step:secs);
 [fq t p]=getSpec(data);
 p=p'-mean(p(:));
 
-if true
+if false
     try
         [u s v]=svd(p);
     catch
@@ -1356,6 +1358,18 @@ if true
     set(gca,'YTick',[])
     %set(gca,'XTick',[])
     
+    
+    [burstyS tonicyS]=segregate(data.spks);
+    [burstyB tonicyB]=segregate(data.bsts);
+    
+    hi = .75;
+    lo = .25;
+    
+    statePlot(burstyS,lo,'kx')
+    statePlot(burstyB,lo,'rx')
+    statePlot(tonicyS,hi,'kx')
+    statePlot(tonicyB,hi,'rx')
+
     f=[f figure];
     n=4;
     
@@ -1409,6 +1423,36 @@ if true
     %%%% set(gca,'Position',[0.13 0.365118-.05 0.775 0.0747626+.1]);
     xlabel('green')
     ylabel('blue')
+    
+    f=[f figure];
+    
+    stimPreMS =200;%300;
+    stimPostMS=100;% 30;
+    
+    color=zeros(1,3);
+    c=.95;
+    
+    n=4;
+    
+    if ~isempty(data.frames)
+        frames=getEvenFrames(data.frames);
+        
+        [tSTF vals]=calcSTA(tonicyS,frames,stimPreMS,stimPostMS,c);
+        staPlot(tSTF,color,vals,c,n,1,'spike triggered average frame (hi state)',frames(1,:));
+                
+        [tSTFb vals]=calcSTA(burstyS,frames,stimPreMS,stimPostMS,c);
+        staPlot(tSTFb,color,vals,c,n,2,'spike triggered average frame (lo state)',frames(1,:));
+        
+        [bSTF vals]=calcSTA(tonicyB,frames,stimPreMS,stimPostMS,c);
+        staPlot(bSTF,color,vals,c,n,3,'burst triggered average frame (hi state)',frames(1,:));
+        
+        [bSTFb vals]=calcSTA(burstyB,frames,stimPreMS,stimPostMS,c);
+        staPlot(bSTFb,color,vals,c,n,4,'burst triggered average frame (lo state)',frames(1,:));
+    end
+    
+    %subplot(n,2,2*n-1)
+    %xlabel('ms')
+    
 else
     n=5;
     
@@ -1530,28 +1574,42 @@ end
     end
 
     function [lo hi]=segregate(in)
-        lo=[]; %could prealloc w/nans if nec
-        hi=[];
-        in=in(in>=ts(1)-step/2);
-        
-        for i=1:length(ts)
-            while ~isempty(in) && in(1)<=ts(i)+step/2
-                if in(1)<ts(i)-step/2
-                    error('step err')
-                end
-                if state(i)>1
-                    hi=[hi ; in(1)];
-                else
-                    lo=[lo ; in(1)];
-                end
-                in=in(2:end);
+        if true
+            ids=interp1(t+data.phys(2,1),idx,in,'nearest'); %note that this corrected t is probably wrong by half a bin used in the LFP spec analysis, could be ~order secs
+            if ~all(isnan(ids) | ismember(ids,[1 2])) %nans occur where times are outside the range analyzed by the LFP analysis -- how can this happen?
+            	error('state error')
             end
-            if rand>.99 && true
-                fprintf('%g%% done\n',100*i/length(ts))
+            nanAnalysis=diff(isnan(ids));
+            nanDinds=find(nanAnalysis);
+            if length(nanDinds)>2 || ~all(nanAnalysis(nanDinds)==sort(nanAnalysis(nanDinds))) % nans should only be at beginning and end: [-1 1]
+                error('nan error')
             end
-        end
-        if ~isempty(in)
-            warning('in not empty')
+            lo=in(ids==1);
+            hi=in(ids==2);
+        else
+            lo=[]; %could prealloc w/nans if nec
+            hi=[];
+            in=in(in>=ts(1)-step/2);
+            
+            for i=1:length(ts)
+                while ~isempty(in) && in(1)<=ts(i)+step/2
+                    if in(1)<ts(i)-step/2
+                        error('step err')
+                    end
+                    if state(i)>1
+                        hi=[hi ; in(1)];
+                    else
+                        lo=[lo ; in(1)];
+                    end
+                    in=in(2:end);
+                end
+                if rand>.99 && true
+                    fprintf('%g%% done\n',100*i/length(ts))
+                end
+            end
+            if ~isempty(in)
+                warning('in not empty')
+            end
         end
     end
 
@@ -1594,7 +1652,6 @@ end
         else
            % set(gca,'XTick',xs,'XTickLabel',xs/60) 
         end
-        %11/11 25/25
     end
 
 end
@@ -1788,6 +1845,13 @@ end
 end
 
 function [sta vals corrected pres]=calcSTA(trigTs,stim,preMS,postMS,c,preISIs)
+
+if ~exist('preISIs','var') || isempty(preISIs)
+    preISIs=0;
+elseif preISIs(1)~=0
+    error('first preISI not 0')
+end
+
 [vals times corrected]=doTrigger(trigTs,stim,preMS,postMS,preISIs);
 
 for i=1:length(preISIs)
@@ -1798,15 +1862,18 @@ for i=1:length(preISIs)
     end
 end
 
-if preISIs(1)~=0
-    error('first preISI not 0')
-end
-
 vals=vals{1};
 
 if ~isempty(trigTs)
     sta=pres(1,:);
     ps = ks(vals,stim(1,:));
+    if isscalar(ps) 
+        if ps==1 && numel(vals)<=1
+            ps=ones(size(sta));
+        else
+            error('unexpected')
+        end
+    end
 else
     sta=zeros(size(times));
     ps=ones(size(sta));
@@ -1841,7 +1908,7 @@ for i=1:length(preISIs)
     
     trigs=1+floor((trigs-stim(2,1))/timestep);
     
-    if ~isempty(trigTs)
+    if ~isempty(trigs) %used to test trigTs, why?
         inds=repmat(tinds,length(trigs),1)+repmat(trigs,1,length(tinds));
     else
         inds=[];

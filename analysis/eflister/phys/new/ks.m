@@ -1,4 +1,4 @@
-% vectoried version of kstest2 specialized for our application
+% vectorized version of matlab's kstest2.m specialized for our application
 % x1 is a matrix (stim vals) x (time bins) (conditional distribution)
 % x2 is a vector of stim vals (prior distribution)
 %    or a matrix of another conditional distribution
@@ -35,6 +35,15 @@ end
 
 if ~all(cellfun(@(x) length(size(x))==2,{x1 x2}))
     error('input matrices must be (stim vals) x (time bins)')
+end
+
+if isempty(x1)
+    warning('ks passed empty conditional')
+    pValues=1;
+    %keyboard
+    return
+elseif isempty(x2)
+    error('ks passed empty prior')
 end
 
 unqs=unique([x1(:);x2(:)]);

@@ -1,4 +1,4 @@
-function smallData=getSmalls(subjectID,dateRange,rack,verbose,addLickDataIfAvailableInCTR)
+function smallData=getSmalls(subjectID,dateRange,rack,verbose,addLickDataIfAvailableInCTR,addNCorrectInARowCandidate)
 
 if ~exist('rack','var') | isempty(rack)
     if isHumanSubjectID(subjectID)
@@ -17,6 +17,12 @@ end
 if ~exist('addLickDataIfAvailableInCTR','var') | isempty(addLickDataIfAvailableInCTR)
     addLickDataIfAvailableInCTR=false;
 end
+
+if ~exist('addNCorrectInARowCandidate','var') | isempty(addNCorrectInARowCandidate)
+    addNCorrectInARowCandidate=true;  % if every filtering it in analysis it needs to be there
+    %can turn it off to speed things up, if worried about that
+end
+
 
 %get location
 compiledFile=fullfile(getCompiledDirForRack(rack),[subjectID '.compiledTrialRecords.*.mat']);
@@ -99,6 +105,15 @@ if ~isempty(smallData)
         smallData=removeSomeSmalls(smallData, ~(smallData.date>dateRange(1) & smallData.date<dateRange(2)));
     end
     
+    
+    if addNCorrectInARowCandidate
+        % note: the first trial may start at a count of one corretc in a
+        % row, but the "real" data mnay have used a correct value from the
+        % trial that got filtered... a small effect
+        nCorrectInARow=calcAmountCorrectInRow(smallData.correct,smallData.response);  %other: [correctInRow runEnds numSwitchesThisRun]
+        smallData.nCorrectInARowCandidate=[1 nCorrectInARow(1:end-1)+1];
+    end
+
     
     %add licks for that date range... they are often too big to "convert"
     if addLickDataIfAvailableInCTR   

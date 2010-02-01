@@ -204,8 +204,8 @@ switch nargin
                         
                         %p.typeOfLUT='2009Trinitron255GrayBoxInterpBkgnd.5';
                         p.typeOfLUT= 'useThisMonitorsUncorrectedGamma';        
-                    case 'phys'
-
+                    case {'phys','configPhys','contrastPhys','contrastPhysOnePhase','flankersMatterPhys'...
+                        'flankerMattersOnePhase','physFullFieldTarget','physFullFieldContrast'}
 
                         p.flankerContrast=1;
                         p.goLeftContrast=1;
@@ -215,14 +215,20 @@ switch nargin
                         p.pixPerCycs=32;
                         p.pixPerCycs=128; %768
                         p.pixPerCycs=180; %768
-%                         p.targetOnOff=int32([40 60]);
-%                          p.flankerOnOff=int32([40 60]);
+                        %                         p.targetOnOff=int32([40 60]);
+                        %                          p.flankerOnOff=int32([40 60]);
                         p.targetOnOff=int32([200 220]);
                         p.flankerOnOff=int32([200 220]);
                         p.flankerOffset=3;
+                        
+                        
+                        p.goRightOrientations = [pi/12];
+                        p.goLeftOrientations =  [pi/12];
+                        p.flankerOrientations = [pi/12];
+                        p.flankerPosAngle = [pi/12];
 
                         %p.showText=false;
-                        locationMode=2;
+                        locationMode=3;
                         switch locationMode
                             case 1
                                 RFdataSource='\\132.239.158.179\datanet_storage';
@@ -237,83 +243,80 @@ switch nargin
                                 p.fitRF=[];
                         end
                         
-                        %p.phase=[pi]*[0 0.5 1 1.5]; 
-                        
                         %p.goLeftOrientations=p.goLeftOrientations(1);
                         %p.goRightOrientations=p.goRightOrientations(1);
                         %p.flankerOrientations=p.flankerOrientations(1);
                         %p.flankerPosAngle=p.flankerPosAngle(1);
                         
-                        p.phase=[pi]*[0 0.5 1 1.5]; 
-                                                
+                        p.phase=[pi]*[0 0.5 1 1.5];                       
                         p.renderMode='dynamic-precachedInsertion'; % dynamic-maskTimesGrating, dynamic-onePatchPerPhase,or dynamic-onePatch
                         
                         %p.dynamicSweep.sweepMode={'ordered'};
                         p.dynamicSweep.sweepMode={'random',1};
                         p.dynamicSweep.sweptValues=[];
-                        
-                        p.dynamicSweep.sweptParameters={'targetOrientations','flankerOrientations','flankerPosAngle','phase'};% 'flankerOrientations'}%,'flankerOffset','flankerPosAngle'};
-                        p.dynamicSweep.numRepeats=4;
-                        
                         p.typeOfLUT='2009Trinitron255GrayBoxInterpBkgnd.5';
                         p.typeOfLUT= 'useThisMonitorsUncorrectedGamma';
+                        p.rangeOfMonitorLinearized=[0.0 1];
+                                                        
+                        if strcmp(varargin{1},'phys')
+                            kind='contrastPhysOnePhase'; % the default
+                        else
+                            kind=varargin{1};
+                        end
                         
-                        kind='contrastPhysOnePhase';
                         switch kind
                             case 'configPhys'
                                 %do nothing
+                                p.dynamicSweep.sweptParameters={'targetOrientations','flankerOrientations','flankerPosAngle'};% 'flankerOffset'
                                 p.dynamicSweep.numRepeats=8;
                             case 'contrastPhys'
-                                p.goRightOrientations = [pi/12];
-                                p.goLeftOrientations =  [pi/12];
-                                p.flankerOrientations = [pi/12];
-                                p.flankerPosAngle = [pi/12];
-                                p.flankerContrast=[0 .25 .6 .75 1];
-                                p.goLeftContrast=[0 .25 .6 .75 1];
-                                p.goRightContrast=[0 .25 .6 .75 1];
+                                p.flankerContrast=[0 .25 .5 .75 1];
+                                p.goLeftContrast=[0 .25 .5 .75 1];
+                                p.goRightContrast=[0 .25 .5 .75 1];
                                 p.dynamicSweep.numRepeats=3;
 
                                 p.dynamicSweep.sweptParameters={'targetContrast','flankerContrast','phase'};% 'flankerOrientations'}%,'flankerOffset','flankerPosAngle'};
 
                             case 'contrastPhysOnePhase'
-                                
-                                p.goRightOrientations = [pi/12];
-                                p.goLeftOrientations =  [pi/12];
-                                p.flankerOrientations = [pi/12];
-                                p.flankerPosAngle = [pi/12];
-                                p.flankerContrast=[0 .25 .6 .75 1];
-                                p.goLeftContrast=[0 .25 .6 .75 1];
-                                p.goRightContrast=[0 .25 .6 .75 1];
+
+                                p.flankerContrast=[0 .25 .5 .75 1];
+                                p.goLeftContrast=[0 .25 .5 .75 1];
+                                p.goRightContrast=[0 .25 .5 .75 1];
                                 p.dynamicSweep.numRepeats=6;
 
                                 p.phase=pi/2;
-                                p.dynamicSweep.sweptParameters={'targetContrast','flankerContrast'};% 'flankerOrientations'}%,'flankerOffset','flankerPosAngle'};
-
-                                
+                                p.dynamicSweep.sweptParameters={'targetContrast','flankerContrast'};% 'flankerOrientations'}%,'flankerOffset','flankerPosAngle'};  
                             case 'flankersMatterPhys'
-                                p.goRightOrientations = [pi/12];
-                                p.goLeftOrientations =  [pi/12];
-                                p.flankerOrientations = [pi/12];
-                                p.flankerPosAngle = [pi/12];
                                 p.flankerContrast=[0 1];
                                 p.goLeftContrast=[0 1];
                                 p.goRightContrast=[0 1];
                                 p.dynamicSweep.numRepeats=20;
-                                
-
                                 p.dynamicSweep.sweptParameters={'targetContrast','flankerContrast','phase'};% 'flankerOrientations'}%,'flankerOffset','flankerPosAngle'};
                             case 'flankerMattersOnePhase'
-                                 p.goRightOrientations = [pi/12];
-                                p.goLeftOrientations =  [pi/12];
-                                p.flankerOrientations = [pi/12];
-                                p.flankerPosAngle = [pi/12];
                                 p.flankerContrast=[0 1];
                                 p.goLeftContrast=[0 1];
                                 p.goRightContrast=[0 1];
-                                p.dynamicSweep.numRepeats=40;
-                                
-                                p.dynamicSweep.sweptParameters={'targetContrast','flankerContrast','phase'};% 'flankerOrientations'}%,'flankerOffset','flankerPosAngle'};
-                                p.phase=pi/2
+                                p.dynamicSweep.numRepeats=40;  
+                                p.phase=pi/2; %choose a good one
+                                p.dynamicSweep.sweptParameters={'targetContrast','flankerContrast','phase'};% 'flankerOrientations'}%,'flankerOffset','flankerPosAngle'};  
+
+                            case  'physFullFieldTarget'
+                                p.stdGaussMask=Inf;
+                                p.flankerContrast=0;
+                                p.targetOnOff=int32([40 60]);
+                                p.flankerOnOff=int32([40 60]);
+                                p.dynamicSweep.sweptParameters={'phase'};
+                                p.dynamicSweep.numRepeats=6;  
+                            case 'physFullFieldContrast'
+                                p.stdGaussMask=Inf;
+                                p.flankerContrast=0;
+                                p.targetOnOff=int32([40 60]);
+                                p.flankerOnOff=int32([40 60]);
+
+                                p.goLeftContrast=[0 .25 .5 .75 1];
+                                p.goRightContrast=[0 .25 .5 .75 1];
+                                p.dynamicSweep.numRepeats=6;
+                                p.dynamicSweep.sweptParameters={'targetContrast','phase'};% 'flankerOrientations'}%,'flankerOffset','flankerPosAngle'};    
                         end
                     case {'horizontalVerticalCalib','horizontalVerticalSFCalib','calibFlankerLocationOrientation','calibFlankerPresence'}
                         %calib stims
@@ -388,32 +391,6 @@ switch nargin
                         p.dynamicSweep.numRepeats=6;
                         p.typeOfLUT='2009Trinitron255GrayBoxInterpBkgnd.5';
                         p.typeOfLUT= 'useThisMonitorsUncorrectedGamma';
-
-                    case 'physFullFieldTarget'
-                        p.stdGaussMask=Inf;
-                        p.flankerContrast=0;
-                        p.goLeftContrast=1;
-                        p.goRightContrast=1;
-                        p.pixPerCycs=32;
-                        p.targetOnOff=int32([30 40]);
-                        p.flankerOnOff=int32([30 40]);
-                        p.renderMode='dynamic-precachedInsertion'; % dynamic-maskTimesGrating, dynamic-onePatchPerPhase,or dynamic-onePatch
-                        
-                        goRightOrientations = [0,pi/2];
-                        
-                        p.targetOnOff=int32([40 80]);
-                        p.flankerOnOff=int32([40 80]);
-                        p.pixPerCycs=512;
-                        %p.phase=[pi]*[0 0.5 1 1.5]; 
-                                                
-                        p.dynamicSweep.sweepMode={'ordered'};
-                        p.dynamicSweep.sweptValues=[];
-                        p.dynamicSweep.sweptParameters={'targetOrientations'};
-                        p.dynamicSweep.numRepeats=4;
-                        
-                        %p.typeOfLUT='2009Trinitron255GrayBoxInterpBkgnd.5';
-                        p.typeOfLUT= 'useThisMonitorsUncorrectedGamma';
-                        p.rangeOfMonitorLinearized=[0.0 1];
 
                     case 'testFlicker'
                         

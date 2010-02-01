@@ -22,7 +22,7 @@ switch type
         end
 
         %setup
-        out=zeros(patchX,patchY,length(orients), length(phases));
+        out=zeros(patchY,patchX,length(orients), length(phases));
         gaborParams=staticParams;
         %params= radius   pix/cyc  phase orientation contrast thresh xPosPct yPosPct
         for i=1:length(orients)
@@ -30,7 +30,7 @@ switch type
             gaborParams(5)=contrast;   %5th parameter is contrast
             for j = 1: length(phases)
                 gaborParams(3)=phases(j);            %3rd parameter is the phase
-                out(:,:,i,j)=computeGabors(gaborParams,t.mean,patchY,patchX,t.gratingType,normalizeMethod,0);
+                out(:,:,i,j)=computeGabors(gaborParams,t.mean,patchX,patchY,t.gratingType,normalizeMethod,0);
             end
         end
     otherwise

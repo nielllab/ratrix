@@ -18,6 +18,9 @@ if debuggingThisCode
     response=smallData.response(x:x+ln-1);
 end
 
+%nans are considered not correct!
+correct(isnan(correct))=0;
+
 correctInRow=zeros(size(correct));
 numSwitchesThisRun=zeros(size(correct));
 

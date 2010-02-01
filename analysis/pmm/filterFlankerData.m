@@ -88,9 +88,18 @@ for i=1:length(filter)
                 d=removeSomeSmalls(d,d.step~=firstFlankerStep-1 | d.trialNumber<(lastPreFlankerTrial-numTrials+1));             
             case 'none'
                 %don't filter; keep all
-            case 'responseSpeed'               
+            case 'responseSpeed'
                 range=filter{i}.parameters.range;
                 d=removeSomeSmalls(d,~(d.responseTime>range(1) & d.responseTime<range(2)));
+            case 'nCorrectInARowCandidate'
+                range=filter{i}.parameters.range;
+                if length(range)==2 && range(1)<=range(2)
+                    d=removeSomeSmalls(d,~(d.nCorrectInARowCandidate>=range(1) & d.nCorrectInARowCandidate<=range(2)));
+                elseif length(range)==1;
+                    d=removeSomeSmalls(d,~(d.nCorrectInARowCandidate==range));
+                else
+                    error('range must be 2 numbers high-low or an exact')
+                end
             case {'manualVersion'}
                d=removeSomeSmalls(d,~(ismember(d.manualVersion,filter{i}.includedVersions)));      
             case 'responseSpeedPercentile'

@@ -7,10 +7,9 @@ if ~exist('r','var')
     r=[];
 end
 
-if ~exist('forceGotoSideToBeDetection','var') 
+if ~exist('forceGotoSideToBeDetection','var') || isempty(forceGotoSideToBeDetection)
     forceGotoSideToBeDetection=false;
 end
-
 
 
 if size(d.date,2)>0
@@ -129,7 +128,8 @@ if size(d.date,2)>0
         unique(d.correctAnswerID)
         error('unexpected answer IDs')
     end
-    
+   
+        
 else
     d.yes=[];
     type='unknown';

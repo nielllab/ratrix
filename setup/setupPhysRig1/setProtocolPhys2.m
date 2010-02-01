@@ -253,11 +253,11 @@ ffGauss=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminan
 
 rptUnq=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
-
-
 %flankers
 flankers=ifFeatureGoRightWithTwoFlank('phys');
-flankersFF=ifFeatureGoRightWithTwoFlank('physFullFieldTarget');
+fFF=ifFeatureGoRightWithTwoFlank('physFullFieldTarget');
+fFFContrast=ifFeatureGoRightWithTwoFlank('physFullFieldContrast');
+fContrast=ifFeatureGoRightWithTwoFlank('contrastPhys');
 fTestFlicker=ifFeatureGoRightWithTwoFlank('testFlicker');
 prm=getDefaultParameters(ifFeatureGoRightWithTwoFlank, 'goToSide','1_0','Oct.09,2007');
 
@@ -409,7 +409,7 @@ ts{3}= trainingStep(ap,  bin,         repeatIndefinitely(), noTimeOff(), svnRev,
 ts{4}= trainingStep(ap,  fakeTRF10,   numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %temporal response function
 ts{5}= trainingStep(ap,  ffgwn,       numTrialsDoneCriterion(10), noTimeOff(), svnRev, svnCheckMode); %full field gaussian white noise
 ts{6}= trainingStep(ap,  bin,         numTrialsDoneCriterion(10), noTimeOff(), svnRev, svnCheckMode); %binary noise grid
-ts{7} = trainingStep(ap, flankersFF,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %flankers with giant target
+ts{7} = trainingStep(ap, fFF,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %flankers with giant target
 ts{8} = trainingStep(ap, sfGratings,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %gratings: spatial frequency (should it be before annulus?)
 ts{9} = trainingStep(ap, orGratings,   repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %gratings: orientation
 
@@ -454,6 +454,16 @@ ts{36}= trainingStep(ap, binOther,    repeatIndefinitely(),      noTimeOff(), sv
 ts{37}= trainingStep(ap, ffbin,       repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
 ts{38}= trainingStep(ap, cmr,         repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
 
+
+
+
+
+ts{39}= trainingStep(ap, fFF,         repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
+ts{40}= trainingStep(ap, fFFContrast, repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
+ts{41}= trainingStep(ap, fContrast,   repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
+
+
+
 %removed things b/c not used enough:
 % ts{10}= trainingStep(afc, radGratings, numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %gratings: radius
 % ts{11}= trainingStep(afc, cntrGratings,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: contrast
@@ -478,8 +488,8 @@ ts{38}= trainingStep(ap, cmr,         repeatIndefinitely(),      noTimeOff(), sv
 %% make and set it
 
 
-p=protocol('practice phys',{ts{1:38}});
-stepNum=uint8(9);
+p=protocol('practice phys',ts);
+stepNum=40;
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

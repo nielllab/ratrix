@@ -37,7 +37,7 @@ data.fileNames=fileNames;
 
 data.mins=(stimTimes(2)-stimTimes(1))/60;
 
-if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) % && ismember(rec.date,datenum({'04.15.09'},'mm.dd.yy')) %,'hateren'}) % && ...
+if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && ismember(rec.date,datenum({'04.15.09'},'mm.dd.yy')) %,'hateren'}) % && ...
     %        (...
     %        ismember(rec.date,datenum({'04.15.09','04.24.09'},'mm.dd.yy')) ...
     %        || ...
@@ -85,6 +85,7 @@ if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) % && i
     data=findBursts(data);
     
     doAnalysis(data,'stationarity');
+    
     % doAnalysis(data,'raster');
     
     % doAnalysis(data,'STA');
@@ -271,7 +272,8 @@ for i=1:length(fs)
         error('couldn''t move fig')
     end
     
-    if false || ismember(pieces{end},{'raster'})
+    figSaves={'raster','stationarity'};
+    if false || ismember(pieces{end},figSaves)
         saveas(f,figName)
     end
     if ismember(pieces{end},{'ISI','waveforms','STA','raster','stationarity','stimCheck'}) && ismember(i,[1 length(fs)])
@@ -283,7 +285,7 @@ for i=1:length(fs)
             error('couldn''t copy fig')
         end
         
-        if ismember(pieces{end},{'raster'})
+        if ismember(pieces{end},figSaves)
             [a b c]=copyfile(figName,fullfile(summaryLoc,[num2str(length(lines)) '-' n '.fig']));
             if a~=1
                 b
@@ -308,11 +310,11 @@ else
 end
 end
 
-function [f t p]=getSpec(data)
+function [f t p stft]=getSpec(data)
 pHz=1/median(diff(data.phys(2,:)));
 fprintf('spectroing from %g hz... ',pHz)
 freqs=1:50;
-[s f t p]=spectrogram(data.phys(1,:)-mean(data.phys(1,:)),round(pHz),[],freqs,pHz); %1 sec res w/50% overlap?
+[stft f t p]=spectrogram(data.phys(1,:)-mean(data.phys(1,:)),round(pHz),[],freqs,pHz); %1 sec res w/50% overlap?
 end
 
 %stolen from matlab's spectrogram.m
@@ -908,17 +910,27 @@ doAC(data.bsts,durMS,round(durMS/10));
 title('burst autocorr')
 end
 
-function doAC(ts,durMS,numBins)
-    function locAC(times,c)
+function out=doAC(ts,durMS,numBins,opt)
+    function counts=locAC(times,c,times2)
+        if ~exist('times2','var') || isempty(times2)
+            times2=times;
+            killCenter=true;
+        else
+            killCenter=false;
+        end
         counts=zeros(size(bins));
         for i=1:length(times)
-            t=times-times(i);
+            t=times2-times(i);
             counts=counts+hist(1000*t(abs(t)<=durMS/1000),bins);
             if rand>.999
                 fprintf('%g%% done\n',100*i/length(times))
             end
         end
-        counts(numBins+1)=0;
+        if killCenter
+            counts(numBins+1)=0;
+        else
+            counts=normalize(counts);
+        end
         plot(bins,counts,c)
     end
 
@@ -926,9 +938,16 @@ if true
     bins=linspace(-durMS,0,numBins+1);
     bins=[bins -1*fliplr(bins(1:end-1))];
     
-    locAC(ts,'b')
-    hold on
-    locAC(rand(size(ts))*range(ts),'k') %note the shuffle corrector doesn't work for nonstationary data
+    if ~exist('opt','var') || isempty(opt)
+        locAC(ts,'b')
+        hold on
+        locAC(rand(size(ts))*range(ts),'k') %note the shuffle corrector doesn't work for nonstationary data
+    else
+        for r=1:size(opt,1)
+            out(r,:)=locAC(ts,opt{r,2},opt{r,1});
+            hold on
+        end
+    end
 else
     bins=linspace(0,durMS,numBins);
     h=hist(diff(1000*ts),bins);
@@ -1048,7 +1067,12 @@ if any(~isnan(dist)) && ~all(info(1,:)==0) && ~all(isnan(info(1,:)))
     if ~isempty(vals)
         % consier version with stim vals normalized prior to averaging?
         noMeans=mean(vals-repmat(mean(vals')',1,size(vals,2)))/sigma;
+        try
         diffs=mean(diff(vals')')/sigma; %since diff and avg both linear, order probably doesn't matter
+        catch ex %OOM
+            warning('warning: shortening due to OOM')
+            diffs=mean(diff(vals(rand(size(vals,1),1)>.5,:)')')/sigma;
+        end
         theseLims=getExtremes([scaled(:); noMeans(:); diffs(:)]);
     end
 else
@@ -1119,7 +1143,7 @@ elseif ~(isscalar(dist) && isnan(dist))
     end
 end
 
-if exist('corrected','var') && ~isempty(corrected) && false
+if exist('corrected','var') && ~isempty(corrected) %&& false
     if length(scaled)~=size(corrected,2)
         error('wrong corrected length (probably off by one cuz of xcorr returning 2N+1')
     end
@@ -1127,6 +1151,12 @@ if exist('corrected','var') && ~isempty(corrected) && false
     plot(AX(1),info(2,:),cNorm(corrected(2,:)),'g')
     
     set(H1,'LineWidth',2)
+    
+elseif exist('pres','var')
+    cm=colormap;
+    for i=1:size(pres,1)
+        plot(AX(1),info(2,:),cNorm(pres(i,:)),'Color',cm(round(((i-1)/(size(pres,1)-1))*(size(cm,1)-1))+1,:)) %MUST FIX: this cNorm is NOT kosher
+    end
 end
 
     function in=cNorm(in)
@@ -1135,13 +1165,6 @@ end
         in=in*range(scaled);
         in=in+min(scaled);
     end
-
-if exist('pres','var')
-    cm=colormap;
-    for i=1:size(pres,1)
-        plot(AX(1),info(2,:),cNorm(pres(i,:)),'Color',cm(round(((i-1)/(size(pres,1)-1))*(size(cm,1)-1))+1,:)) %MUST FIX: this cNorm is NOT kosher
-    end
-end
 end
 
 function f=stimCheck(data)
@@ -1235,7 +1258,20 @@ dt=secs/pts;
 step=dt/2;
 ts=start+(0:step:secs);
 
-[fq t p]=getSpec(data);
+[fq t p stft]=getSpec(data);
+
+if true
+    %sucked out of spectrogram.m -- do i need to do anything (like correct for windowing) to stft to make a phaseogram?
+    %pretty sure answer is no...
+    % [garbage,garbage,garbage,garbage,garbage,win] = welchparse(data,'psd',varargin{:});
+    % U = win'*win;     % Compensates for the power of the window.
+    % Sxx = y.*conj(y)/U; % Auto spectrum.
+        
+    figure
+    gram(angle(stft),t,fq,'lin');
+    title('phaseogram')
+end
+
 p=p'-mean(p(:));
 
 if false
@@ -1280,7 +1316,7 @@ if true
     Y=p*v(:,2)/s(2);
     
     if true
-    
+        
         cut=.05;
         order=1000;
         
@@ -1307,7 +1343,7 @@ if true
         y=log(sum(py))';
         y=filtfilt(b,1,y);
         y(end+1)=mean(y);
-    
+        
     else
         x=X;
         y=Y;
@@ -1332,23 +1368,35 @@ if true
     
     xLabMins=5;
     xlabs=0:xLabMins:max(t)/60;
-
+    
     %xrows=myFind((repmat(t/60,length(xlabs),1)-repmat(xlabs',1,length(t))) >=0,1); %gah!
     xrows=floor(interp1(t/60,1:length(t),xlabs,'nearest'));
     set(gca,'XTick',xrows,'XTickLabel',xlabs);
     ylabs=0:5:max(fq);
     %yrows=myFind((repmat(fq,1,length(ylabs))-repmat(ylabs,length(fq),1)) >=0,2); %gah!
     yrows=floor(interp1(fq,1:length(fq),ylabs,'nearest'));
-    set(gca,'YTick',yrows,'YTickLabel',ylabs);    
+    set(gca,'YTick',yrows,'YTickLabel',ylabs);
     
     subplot(n,1,2)
-    idx = kmeans(x(:),2);
+    idx = kmeans(x(:),2); %why are we kmeansing only on x, not y?
+    
+    if mean(x(idx==1))>mean(x(idx==2))
+        sync=idx==1;
+        idx(sync)=2;
+        idx(~sync)=1;
+        % assuming we loaded the PC's, the alpha band is negative, and x should be more negative during the sync state.  we want sync state==1
+    end
+    
     plot(idx)
     ylim([.9 2.1])
     ylabel('state')
     set(gca,'XTick',xrows,'XTickLabel',xlabs);
     xlim([1 length(idx)])
-    set(gca,'YTick',unique(idx))
+    if ~all(unique(idx)==[1 2]')
+        unique(idx)
+        warning('unique(idx) not [1 2]')
+    end
+    set(gca,'YTick',[1 2],'YTickLabel',{'sync','desync'})
     
     subplot(n,1,3)
     ratePlot(data.bsts,'r')
@@ -1365,11 +1413,11 @@ if true
     hi = .75;
     lo = .25;
     
-    statePlot(burstyS,lo,'kx')
-    statePlot(burstyB,lo,'rx')
-    statePlot(tonicyS,hi,'kx')
-    statePlot(tonicyB,hi,'rx')
-
+    statePlot(burstyS,hi,'kx')
+    statePlot(burstyB,hi,'rx')
+    statePlot(tonicyS,lo,'kx')
+    statePlot(tonicyB,lo,'rx')
+    
     f=[f figure];
     n=4;
     
@@ -1392,7 +1440,7 @@ if true
     xlim([1 length(y)])
     set(gca,'XTick',[])
     ylabel('normalized score')
-        
+    
     if false
         subplot(n,1,4)
         d=100;
@@ -1424,35 +1472,154 @@ if true
     xlabel('green')
     ylabel('blue')
     
-    f=[f figure];
-    
-    stimPreMS =200;%300;
-    stimPostMS=100;% 30;
-    
-    color=zeros(1,3);
-    c=.95;
-    
-    n=4;
-    
     if ~isempty(data.frames)
         frames=getEvenFrames(data.frames);
         
-        [tSTF vals]=calcSTA(tonicyS,frames,stimPreMS,stimPostMS,c);
-        staPlot(tSTF,color,vals,c,n,1,'spike triggered average frame (hi state)',frames(1,:));
+        if false
+            f=[f figure];
+            
+            stimPreMS =200;%300;
+            stimPostMS=100;% 30;
+            
+            stimPreMS =400;
+            stimPostMS=400;
+            
+            color=zeros(1,3);
+            c=.95;
+            
+            n=4;
+            
+            [tSTF vals]=calcSTA(tonicyS,frames,stimPreMS,stimPostMS,c);
+            staPlot(tSTF,color,vals,c,n,1,'spike triggered average frame (desync)',frames(1,:));
+            
+            [tSTFb vals]=calcSTA(burstyS,frames,stimPreMS,stimPostMS,c);
+            staPlot(tSTFb,color,vals,c,n,2,'spike triggered average frame (sync)',frames(1,:));
+            
+            [bSTF vals]=calcSTA(tonicyB,frames,stimPreMS,stimPostMS,c);
+            staPlot(bSTF,color,vals,c,n,3,'burst triggered average frame (desync)',frames(1,:));
+            
+            [bSTFb vals]=calcSTA(burstyB,frames,stimPreMS,stimPostMS,c);
+            staPlot(bSTFb,color,vals,c,n,4,'burst triggered average frame (sync)',frames(1,:));
+            
+            %subplot(n,2,2*n-1)
+            %xlabel('ms')
+            
+            ns=[50 100 200 500 1000 2000 5000 10000 20000 50000];
+            resamps=20; %4
+            stimPreMS=300;
+            stimPostMS=300;
+            
+            if false
+                ns=[500 1000 5000];
+                resamps=4;
+                stimPreMS=50;
+                stimPostMS=50;
+            end
+            
+            if false
+                ns=[100 500 2000 10000];
+                resamps=5;
+            end
+            
+            f=[f figure];
+            
+            subplot(3,1,1)
+            ts=staResampSig(tonicyS,[0 0 0]);
+            tb=staResampSig(tonicyB,[1 0 0]);
+            title('desync')
+            xlim([0 max(length(tonicyS), length(tonicyB))])
+            
+            subplot(3,1,2)
+            bs=staResampSig(burstyS,[0 0 0]);
+            bb=staResampSig(burstyB,[1 0 0]);
+            title('sync')
+            xlim([0 max(length(burstyS), length(burstyB))])
+            
+            subplot(3,1,3)
+            rands=[data.spks; data.bsts];
+            randrng=[min(rands) max(rands)];
+            rands=rand(length(rands),1) * (randrng(2)-randrng(1)) + randrng(1);
+            staResampSig(rands,[0 0 0]);
+            title('rand')
+            
+        end
+        
+        if false
+            ms=150; %500 causes calcSTA to OOM on doTrigger
+            
+            color=zeros(1,3);
+            c=.95;
+            n=3;
+            
+            if strcmp(data.rec.display_type,'led')
+                %note it currently looks like LED has artificial 1ms frame times -- consider adding frame pulses to this protocol
+                %for now we trigger off the largest transitions
+                d=abs(diff(data.frames(:,1)));
+                [dist bins]=hist(d,100);
+                f=[f figure];
+                subplot(2,1,1)
+                plot(bins,dist)
+                dist=cumsum(dist)/sum(dist);
+                thresh=bins(find(dist>.9,1))/2;
+                hold on
+                plot(thresh*ones(1,2),[0 max(dist)])
+                title('led diffs')
+                frameTimes=data.frames([0 d>thresh],2);
+                subplot(2,1,2)
+                hist(diff(frameTimes),100)
+                str=sprintf('orig was %g, new is %g', median(diff(data.frames(:,2))),median(diff(frameTimes)));
+                title(sprintf('frame lengths (%s)',str))
+                fprintf('doing an led: %s\n',str)
+            else
+                frameTimes=data.frames(:,2);
+            end
+            
+            names{1}='sync';
+            names{2}='desync';
+            [frameTransitions{1} frameTransitions{2}]=segregate(frameTimes);
+            
+            for state=unique(idx')
+                f=[f figure];
                 
-        [tSTFb vals]=calcSTA(burstyS,frames,stimPreMS,stimPostMS,c);
-        staPlot(tSTFb,color,vals,c,n,2,'spike triggered average frame (lo state)',frames(1,:));
+                [stf vals]=calcSTA(frameTransitions{state},frames,ms,ms,c);
+                staPlot(stf,color,vals,c,n,1,sprintf('%s state (%s): frame triggered frames',names{state},data.rec.display_type),frames(1,:));
+                
+                try
+                [stf vals]=calcSTA(frameTransitions{state},getEvenFrames(data.phys'),ms,ms,c,[],false); %if we doKS here, we OOM on ks line 81 on short files, but not 22, why?  sampling rate is 1000hz...
+                catch ex %OOM on doTrig -> shorten ms
+                    msTmp=ms/4;
+                    warning('hack: shortening due to OOM')
+                    [stf vals]=calcSTA(frameTransitions{state},getEvenFrames(data.phys'),msTmp,msTmp,c,[],false); 
+                end
+                
+                staPlot(stf,color,vals,c,n,2,'frame triggered field',data.phys(1,:));
+                
+                subplot(3,2,5)
+                %cmp=doAC(frameTransitions{state},ms,ms,{data.tonics,'b'; data.bsts,'g'});
+
+                fs=1000; %10k OOM's
+                xc=doXC(frameTransitions{state},ms,fs,{data.tonics,'k'; data.bsts,'r'});
+                title('frame triggered spks/bursts')
+                
+                subplot(3,2,6)
+                [Pxx,Pxxc,freqs] = pmtm(removeMean(xc(1,:)),[],[],fs,c);
+                plot(freqs,Pxx,'k')
+                hold on
+                [Pxx,Pxxc,freqs] = pmtm(removeMean(xc(2,:)),[],[],fs,c);
+                plot(freqs,Pxx,'r')
+                xlabel('hz')
+                
+                %                 [Pxx,Pxxc,freqs] = pmtm(removeMean(cmp(1,:)),[],[],fs,c);
+                %                 plot(freqs,Pxx,'b')
+                %                 hold on
+                %                 [Pxx,Pxxc,freqs] = pmtm(removeMean(cmp(2,:)),[],[],fs,c);
+                %                 plot(freqs,Pxx,'g')
+            end
+        end
         
-        [bSTF vals]=calcSTA(tonicyB,frames,stimPreMS,stimPostMS,c);
-        staPlot(bSTF,color,vals,c,n,3,'burst triggered average frame (hi state)',frames(1,:));
-        
-        [bSTFb vals]=calcSTA(burstyB,frames,stimPreMS,stimPostMS,c);
-        staPlot(bSTFb,color,vals,c,n,4,'burst triggered average frame (lo state)',frames(1,:));
+        %coherenceAnalysis(frames,{tonicyS,burstyS,tonicyB,burstyB});
+        coherenceAnalysis(data.stim,{tonicyS,burstyS,tonicyB,burstyB});
     end
-    
-    %subplot(n,2,2*n-1)
-    %xlabel('ms')
-    
 else
     n=5;
     
@@ -1569,6 +1736,135 @@ else
     xlabel('ms')
 end
 
+    function xc=doXC(x,ms,fs,ys)
+        if ~exist('ys','var') || isempty(ys)
+            ys={x,'k'};
+        end
+        x=fix(x);
+        function in=fix(in)
+            if ~all(in>0)
+                error('must be all positive')
+            end
+            in=sparse(ones(1,length(in)),ceil(in*fs),ones(1,length(in)));
+        end
+        function in=chop(in)
+            in=full(in(min(bounds(:,1)):min(length(in),max(bounds(:,2)))));
+        end
+        for i=1:size(ys,1)
+            y=fix(ys{i,1});
+
+            bounds=cell2mat(cellfun(@(it) cellfun(@(f) f(it),{@min @max}),cellfun(@find,{x; y},'UniformOutput',false),'UniformOutput',false));
+            
+            [xc(i,:) lags]=xcorr(chop(y),chop(x),ceil(fs*ms/1000),'none'); %undoc'ed? must be 'none' for different length vectors -- why?  also no xcorr on sparse?  and xcorr has OOM problems...
+            lags=lags/fs;
+            xc(i,:)=normalize(xc(i,:));
+            if abs(median(diff(lags)) - 1/fs) > 10^-9
+                error('fs error')
+            end
+            plot(1000*lags,xc(i,:),ys{i,2})
+            hold on
+        end
+        xlim([-1 1]*ms);
+        xlabel('ms')
+    end
+
+    function in=removeMean(in)
+        in=in-mean(in);
+    end
+
+    function out=staResampSig(evts,color)
+        doKS=false;
+        
+        theseNs=[ns length(evts)];
+        
+        semilogx(theseNs,(1-c)*ones(1,length(theseNs)),'k')
+        hold on
+        
+        faded=color;
+        faded(faded==0)=.5;
+        
+        out=nan(length(theseNs),resamps,2);
+        scram=out;
+        
+        for i=1:length(theseNs)
+            if length(evts)>theseNs(i)
+                theseResamps=resamps;
+                sym='x';
+            elseif length(evts)==theseNs(i)
+                theseResamps=1;
+                sym='o';
+            else
+                theseResamps=0;
+            end
+            
+            for j=1:theseResamps
+                theseEvts=evts(randperm(length(evts)));
+                theseEvts=sort(theseEvts(1:theseNs(i)));
+                fprintf('doing %d %d\n',theseNs(i),j)
+                
+                info=calcSTA(theseEvts,frames,stimPreMS,stimPostMS,c,[],doKS);
+                
+                if doKS
+                    sigs=info(3,:) <= 1-c;
+                else
+                    rands=sort(rand(length(theseEvts),1)*(frames(2,end)-frames(2,1))+frames(2,1));
+                    randDist=calcSTA(rands,frames,stimPreMS,stimPostMS,c,[],doKS);
+                    samp=sort(randDist(1,:));
+                    
+                    %samp=sort(frames(ceil(rand(1,length(theseEvts))*size(frames,2))));
+                    lims=samp(round(length(samp)*([0 1]+((1-c)/2)*[1 -1])));
+                    sigs=info(1,:)<=lims(1) | info(1,:)>=lims(2);
+                end
+                
+                
+                
+                out(i,j,:)=[sum(sigs(info(2,:)<0)) sum(sigs(info(2,:)>=0))]./[sum(info(2,:)<0) sum(info(2,:)>=0)];
+                semilogx(theseNs(i),out(i,j,1),sym,'Color',color)
+                semilogx(theseNs(i),out(i,j,2),sym,'Color',faded) %this one is not showing up -- why?
+                % keyboard
+                
+                scramFrames=frames(1,:);
+                scramFrames=scramFrames(randperm(length(scramFrames)));
+                scramFrames=[scramFrames;frames(2,:)];
+                %frames(:,randperm(size(frames,2)))
+                
+                %ugh get rid of this repeated code
+                info=calcSTA(theseEvts,scramFrames,stimPreMS,stimPostMS,c,[],doKS);
+                
+                
+                if doKS
+                    sigs=info(3,:) <= 1-c;
+                else
+                    rands=sort(rand(length(theseEvts),1)*(frames(2,end)-frames(2,1))+frames(2,1));
+                    randDist=calcSTA(rands,scramFrames,stimPreMS,stimPostMS,c,[],doKS);
+                    samp=sort(randDist(1,:));
+                    
+                    
+                    %samp=sort(scramFrames(ceil(rand(1,length(theseEvts))*size(scramFrames,2))));
+                    lims=samp(round(length(samp)*([0 1]+((1-c)/2)*[1 -1])));
+                    sigs=info(1,:)<=lims(1) | info(1,:)>=lims(2);
+                end
+                
+                scram(i,j,:)=[sum(sigs(info(2,:)<0)) sum(sigs(info(2,:)>=0))]./[sum(info(2,:)<0) sum(info(2,:)>=0)];
+                semilogx(theseNs(i),scram(i,j,1),sym,'Color',[0 0 1])
+                semilogx(theseNs(i),scram(i,j,2),sym,'Color',[.5 .5 1])
+            end
+        end
+        avgs=mean(out(1:end-1,:,1)');
+        semilogx(ns(1:length(avgs)),avgs,'Color',color)
+        avgs=mean(out(1:end-1,:,2)');
+        semilogx(ns(1:length(avgs)),avgs,'Color',faded)
+        
+        %ugh get rid of this repeated code
+        avgs=mean(scram(1:end-1,:,1)');
+        semilogx(ns(1:length(avgs)),avgs,'Color',[0 0 1])
+        avgs=mean(scram(1:end-1,:,2)');
+        semilogx(ns(1:length(avgs)),avgs,'Color',[.5 .5 1])
+        
+        ylim([0 1])
+        xlim([min(theseNs) max(theseNs)])
+    end
+
     function statePlot(in,val,code)
         plot(in-start,val*ones(1,length(in)),code)
     end
@@ -1577,7 +1873,7 @@ end
         if true
             ids=interp1(t+data.phys(2,1),idx,in,'nearest'); %note that this corrected t is probably wrong by half a bin used in the LFP spec analysis, could be ~order secs
             if ~all(isnan(ids) | ismember(ids,[1 2])) %nans occur where times are outside the range analyzed by the LFP analysis -- how can this happen?
-            	error('state error')
+                error('state error')
             end
             nanAnalysis=diff(isnan(ids));
             nanDinds=find(nanAnalysis);
@@ -1650,7 +1946,7 @@ end
         if length(xt)<=length(xs)
             set(gca,'XTick',xs(xt),'XTickLabel',xtl);
         else
-           % set(gca,'XTick',xs,'XTickLabel',xs/60) 
+            % set(gca,'XTick',xs,'XTickLabel',xs/60)
         end
     end
 
@@ -1844,7 +2140,11 @@ end
     end
 end
 
-function [sta vals corrected pres]=calcSTA(trigTs,stim,preMS,postMS,c,preISIs)
+function [sta vals corrected pres]=calcSTA(trigTs,stim,preMS,postMS,c,preISIs,doKS)
+
+if ~exist('doKS','var') || isempty(doKS)
+    doKS=true;
+end
 
 if ~exist('preISIs','var') || isempty(preISIs)
     preISIs=0;
@@ -1866,8 +2166,12 @@ vals=vals{1};
 
 if ~isempty(trigTs)
     sta=pres(1,:);
-    ps = ks(vals,stim(1,:));
-    if isscalar(ps) 
+    if doKS
+        ps = ks(vals,stim(1,:));
+    else
+        ps=nan(size(sta));
+    end
+    if isscalar(ps)
         if ps==1 && numel(vals)<=1
             ps=ones(size(sta));
         else
@@ -1918,7 +2222,10 @@ for i=1:length(preISIs)
     vals{i}=vals{i}(inds);
 end
 
-train=hist(allTrigs,1:length(stim(1,:)));
+allTrigs=1+floor((allTrigs-stim(2,1))/timestep); %revision 2743 screwed up by omitting this!
+
+train=hist(allTrigs,1:length(stim(1,:))); 
+%train=hist(allTrigs,stim(2,:)); %this fix messes up the bin timing a little
 
 if all(train==0)
     warning('no triggers -- probably cuz no bursts')
@@ -2322,68 +2629,87 @@ end
 %     error('stimT error')
 % end
 
-function spectralAnalysis(data,t)
+function coherenceAnalysis(stim,evts)
+
+figure
+hist(diff(stim(2,:)),500)
+
+spks=struct('times',evts);
+
+spks=arrayfun(@(x) struct('times',x.times-stim(2,1)),spks);
+
+if ~all(arrayfun(@(x) all(x.times)>=0 && size(x.times,2)==1,spks))
+    error('negative times or not columns')
+end
+
+spks=spks(1); %TODO: fix below to deal with multiple conditions (~trials/channels)
+
+p=.95;
+winDur = 1;%.5;
+
+hz=1/median(diff(stim(2,:)));
+data=stim(1,:)';
+data=data-mean(data);
+
+params.Fs=hz;
+params.err=[2 p]; %0 for none, [1 p] for theoretical(?), [2 p] for jackknife
+[garbage,garbage,garbage,garbage,garbage,garbage,params]=getparams(params);
+params
+
+movingwin=[winDur winDur]; %[window winstep] (in secs)
+
 if true
+    figure
+    subplot(4,1,1)
+    fprintf('chronux coh w/err:')
+    tic
+    [C,phi,S12,S1,S2,t,f,zerosp,confC,phistd,Cerr]=cohgramcpt(data,spks,movingwin,params,0);
+    toc
     
-    p=.95;
-    winDur = .1;
+    C(repmat(logical(zerosp),1,size(C,2)))=0;
+    gram(C',t,f,'lin');
+    title('coherence')
     
-    hz=1/median(diff(t));
+    subplot(4,1,2)
+    gram(squeeze(Cerr(1,:,:))',t,f,'lin');
+    title('chronux bottom err')
+    subplot(4,1,3)
+    gram(squeeze(Cerr(2,:,:))',t,f,'lin');
+    title('chronux top err')
+    
+    subplot(4,1,4)
+    gram(phi',t,f,'lin');
+    title('chronux phase')
     
     figure
-    params.Fs=hz;
-    params.err=[2 p]; %0 for none, [1 p] for theoretical(?), [2 p] for jackknife
-    [garbage,garbage,garbage,garbage,garbage,garbage,params]=getparams(params);
-    params
+    subplot(2,1,1)
+    gram(S1',t,f,'lin');
+    title('stim power')
+    subplot(2,1,2)
+    gram(S2',t,f,'lin');
+    title('spks power')
+end
+
+if false
+    fprintf('chronux w/err: \t')
+    tic
+    [S,t,f,Serr]=mtspecgramc(data,movingwin,params); %takes 180 sec for 5 mins @ 40kHz
+    toc
     
-    movingwin=[winDur winDur]; %[window winstep] (in secs)
+    figure
+    subplot(2,1,1)
+    plotSpecGram(squeeze(Serr(1,:,:))',t,f,'log');
+    title('chronux bottom err')
+    subplot(2,1,2)
+    plotSpecGram(squeeze(Serr(2,:,:))',t,f,'log');
+    title('chronux top err')
     
-    if false
-        figure
-        subplot(4,1,1)
-        fprintf('chronux coh w/err:')
-        tic
-        [C,phi,S12,S1,S2,t,f,zerosp,confC,phistd,Cerr]=cohgramcpt(data,spks,movingwin,params,0);
-        toc
-        
-        C(repmat(logical(zerosp),1,size(C,2)))=0;
-        gram(C',t,f,'lin');
-        title('coherence')
-        
-        subplot(4,1,2)
-        gram(squeeze(Cerr(1,:,:))',t,f,'lin');
-        title('chronux bottom err')
-        subplot(4,1,3)
-        gram(squeeze(Cerr(2,:,:))',t,f,'lin');
-        title('chronux top err')
-        
-        subplot(4,1,4)
-        gram(phi',t,f,'lin');
-        title('chronux phase')
-    end
-    
-    if false
-        fprintf('chronux w/err: \t')
-        tic
-        [S,t,f,Serr]=mtspecgramc(data,movingwin,params); %takes 180 sec for 5 mins @ 40kHz
-        toc
-        
-        figure
-        subplot(2,1,1)
-        plotSpecGram(squeeze(Serr(1,:,:))',t,f,'log');
-        title('chronux bottom err')
-        subplot(2,1,2)
-        plotSpecGram(squeeze(Serr(2,:,:))',t,f,'log');
-        title('chronux top err')
-        
-        figure
-        subplot(3,1,1)
-        plotSpecGram(S',t,f,'log');
-        title('chronux w/err')
-    else
-        figure
-    end
-    
+    figure
+    plotSpecGram(S',t,f,'log');
+    title('chronux w/err')
+end
+
+if false
     params.err=0;
     
     fprintf('chronux w/o err:')
@@ -2392,11 +2718,12 @@ if true
     toc
     t2=t;
     
-    subplot(3,1,2)
+	figure
     plotSpecGram(S',t,f,'log');
     title('chronux w/o err')
-    
-    
+end
+
+if false
     fprintf('spectrogram: \t')
     tic
     [stft,f2,t,S] = spectrogram(data,round(movingwin(1)*hz),round(hz*(movingwin(1)-movingwin(2))),f,hz); % takes ? sec for 5 mins @ 40kHz
@@ -2406,11 +2733,26 @@ if true
         error('f error')
     end
     
-    subplot(3,1,3)
+    figure
     plotSpecGram(S,t,f,'log');
     title('spectrogram')
-    keyboard
+    
+    %sucked out of spectrogram.m -- do i need to do anything (like correct for windowing) to stft to make a phaseogram?
+    %pretty sure answer is no...
+    % [garbage,garbage,garbage,garbage,garbage,win] = welchparse(data,'psd',varargin{:});
+    % U = win'*win;     % Compensates for the power of the window.
+    % Sxx = y.*conj(y)/U; % Auto spectrum.
+    
+    if ~all(size(stft)==size(S))
+        error('size problem')
+    end
+    
+    figure
+    gram(angle(stft),t,f,'lin');
+    title('phaseogram')
 end
+
+keyboard
 end
 
 function plotSpecGram(S,t,f,type)
@@ -2423,4 +2765,12 @@ gram(10*log10(abs(S)+eps),t,f,type); %this code for plotting log psd is from mat
 %    set(gca,'XTickLabel',{'-pi','-pi/2','0','pi/2','pi'})
 
 %    ytick
+end
+
+function gram(S,t,f,type)
+imagesc(t,f,S);
+axis xy;
+xlabel('time (s)');
+ylabel('freq (hz)');
+colorbar;
 end

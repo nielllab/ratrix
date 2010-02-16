@@ -86,3 +86,5 @@ phys/new/helpers/scanTriple.m -text
 phys/new/tmpAnalysis.m -text
 phys/new/helpers/parseWaveforms.m -text
 phys/new/ks.m -text
+phys/new/lfpSim.m -text
+phys/new/MID.m -text

@@ -32,7 +32,7 @@ classdef detectionModel
         
         %infrastructure
         savePath='C:\Documents and Settings\rlab\Desktop\detectionModels'
-        modelName='Gauss-nonlinearTFcontrast' %% LL, fixedEye, fitAttnfixedEye
+        modelName='startSimTesting' %% LL, fixedEye, fitAttnfixedEye
         
         %for histograms of the signal & boundary for fminsearch
         edges=[];
@@ -927,9 +927,9 @@ classdef detectionModel
                                 axis square
                                 if t==1 && f==1
                                     xlabel('visual position')
-                                    for i=1:length(features)
+                                    for ii=1:length(features)
                                         xl=xlim;
-                                        name=features{i};
+                                        name=features{ii};
                                         if length(name)>10
                                             name='response';
                                         end
@@ -938,7 +938,7 @@ classdef detectionModel
                                             %turned off, cuz still too clutered
                                         else
                                             xx=xl(1)-diff(xl)*0.05;  % put it on the left if only one plot
-                                            text(xx,bounds(i,1),name,'Rotation',90)
+                                            text(xx,bounds(ii,1),name,'Rotation',90)
                                         end
                                         
                                     end
@@ -1031,10 +1031,11 @@ classdef detectionModel
                                 [fa faCI]=binofit(numFA,numNoSigs);
                                 cc=[.8 .8 .8];
                                 if t==length(tInd)
-                                    cc=[0 0 .8];
+                                    cc=[.8 0 0];
                                 end
                                 if f==1
-                                    cc=[.8 0 0];
+                                    
+                                    cc=[0 0 .8];
                                 end
                                 
                                 %  MIDDLE CROSS IDEA
@@ -1579,7 +1580,7 @@ classdef detectionModel
                 
                 %the raw fields are flat for ALL SUBJECTS
                 raw=p.combineStructs(raw,x.params.raw);
-                raw.subjectID=[raw.subjectID repmat(str2num(x.names.subjects{1}),1,length(x.params.raw.numCorrect))];
+                raw.subjectID=[raw.subjectID repmat(str2double(x.names.subjects{1}),1,length(x.params.raw.numCorrect))];
             end
             p.cache.raw=raw;
         end

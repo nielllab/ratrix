@@ -1250,7 +1250,7 @@ else
     start=min(data.tonics);
 end
 
-f=figure;
+f=[];
 
 pts=200;
 secs=max([data.bsts ; data.tonics])-start;
@@ -1258,17 +1258,40 @@ dt=secs/pts;
 step=dt/2;
 ts=start+(0:step:secs);
 
-[fq t p stft]=getSpec(data);
 
-if true
+
+if false %i don't think i know how to make phaseograms
+n=10000000;
+x.phys=[rand(1,n);linspace(0,n/1000,n)];
+[a b c d]=getSpec(x);
+gram(angle(d),b,a,'lin');
+keyboard
+end
+
+
+
+tmpName='/Users/eflister/Desktop/22spec.mat';
+if false
+    [fq t p stft]=getSpec(data);
+    %save(tmpName,'fq','t','p','stft');
+else
+    tmp=load(tmpName);
+    fq=tmp.fq;
+    t=tmp.t;
+    p=tmp.p;
+    stft=tmp.stft;
+    clear tmp
+end
+
+if false
     %sucked out of spectrogram.m -- do i need to do anything (like correct for windowing) to stft to make a phaseogram?
     %pretty sure answer is no...
     % [garbage,garbage,garbage,garbage,garbage,win] = welchparse(data,'psd',varargin{:});
     % U = win'*win;     % Compensates for the power of the window.
     % Sxx = y.*conj(y)/U; % Auto spectrum.
         
-    figure
-    gram(angle(stft),t,fq,'lin');
+    f=[figure f];
+    gram(angle(stft),t,fq,'lin'); %wrap() doesn't seem to be a good idea here...
     title('phaseogram')
 end
 
@@ -1309,6 +1332,8 @@ end
 %             end
 %         end
 %     end
+
+f=[figure f];
 
 if true
     
@@ -1406,6 +1431,26 @@ if true
     set(gca,'YTick',[])
     %set(gca,'XTick',[])
     
+    
+    
+    
+    idxTimes=t+data.phys(2,1);
+    currState=idx(1);
+    u=unique(idx);
+    for i=1:length(u)
+        boundaries{u(i)}=[];
+    end
+    boundaries{currState}=idxTimes(1);
+    for i=1:length(idx)
+        if idx(i)~=currState
+            boundaries{currState}(end,2)=idxTimes(i-1);
+            currState=idx(i);
+            boundaries{currState}(end+1,1)=idxTimes(i);
+        end
+    end
+    boundaries{currState}(end,2)=idxTimes(end);
+    
+
     
     [burstyS tonicyS]=segregate(data.spks);
     [burstyB tonicyB]=segregate(data.bsts);
@@ -1544,9 +1589,18 @@ if true
             
         end
         
-        if false
-            ms=150; %500 causes calcSTA to OOM on doTrigger
-            
+        if true
+            if false
+                ms=150; %500 causes calcSTA to OOM on doTrigger
+                fs=1000; %10k OOM's
+            else
+                ms=15;
+                fs=2500;
+                
+                ms=25;
+                fs=3000;
+            end
+                            
             color=zeros(1,3);
             c=.95;
             n=3;
@@ -1597,16 +1651,22 @@ if true
                 subplot(3,2,5)
                 %cmp=doAC(frameTransitions{state},ms,ms,{data.tonics,'b'; data.bsts,'g'});
 
-                fs=1000; %10k OOM's
                 xc=doXC(frameTransitions{state},ms,fs,{data.tonics,'k'; data.bsts,'r'});
                 title('frame triggered spks/bursts')
                 
+                doLog=false;
+                if doLog
+                    ff=@log;
+                else
+                    ff=@(x) x;
+                end
+                
                 subplot(3,2,6)
                 [Pxx,Pxxc,freqs] = pmtm(removeMean(xc(1,:)),[],[],fs,c);
-                plot(freqs,Pxx,'k')
+                plot(freqs,ff(Pxx),'k')
                 hold on
                 [Pxx,Pxxc,freqs] = pmtm(removeMean(xc(2,:)),[],[],fs,c);
-                plot(freqs,Pxx,'r')
+                plot(freqs,ff(Pxx),'r')
                 xlabel('hz')
                 
                 %                 [Pxx,Pxxc,freqs] = pmtm(removeMean(cmp(1,:)),[],[],fs,c);
@@ -1614,9 +1674,27 @@ if true
                 %                 hold on
                 %                 [Pxx,Pxxc,freqs] = pmtm(removeMean(cmp(2,:)),[],[],fs,c);
                 %                 plot(freqs,Pxx,'g')
+                
+                f=[f figure];
+                                
+                [stf vals]=calcSTA(scramble(frameTransitions{state},boundaries{state}),frames,ms,ms,c);
+                staPlot(stf,color,vals,c,n,1,sprintf('%s state (%s): scramble triggered frames',names{state},data.rec.display_type),frames(1,:));
+                
+                subplot(3,2,5)
+                xc=doXC(frameTransitions{state},ms,fs,{scramble(data.tonics,boundaries{state}),'k'; scramble(data.bsts,boundaries{state}),'r'}); %strong frame rate harmonics gt through unless we also scramble frameTransitions -- why?
+                title(sprintf ('frame triggered scrambled spks/bursts (%s)',names{state}))
+                
+                subplot(3,2,6)
+                [Pxx,Pxxc,freqs] = pmtm(removeMean(xc(1,:)),[],[],fs,c);
+                plot(freqs,ff(Pxx),'k')
+                hold on
+                [Pxx,Pxxc,freqs] = pmtm(removeMean(xc(2,:)),[],[],fs,c);
+                plot(freqs,ff(Pxx),'r')
+                xlabel('hz')
             end
         end
         
+        keyboard
         %coherenceAnalysis(frames,{tonicyS,burstyS,tonicyB,burstyB});
         coherenceAnalysis(data.stim,{tonicyS,burstyS,tonicyB,burstyB});
     end
@@ -1951,6 +2029,61 @@ end
     end
 
 end
+
+    function out=scramble(in,r)
+        match=nan(size(in));
+        for i=1:length(in)
+            match(i)=isWithin(in(i),r);
+        end
+        fprintf('\n%g%% match\n',100*sum(match>0)/length(match))
+        
+        d=cumsum([0 diff(r')]);
+        out=sort(rand(size(in(match>0)))*d(end));
+        
+        new=nan(size(r));
+        for i=1:size(r,1)
+            new(i,:)=[d(i) d(i+1)];
+        end
+        
+        match=nan(size(out));
+        for i=1:length(out)
+            match(i)=isWithin(out(i),new);
+        end
+        
+        for i=1:length(out)
+            out(i)=out(i)+r(match(i),1)-new(match(i),1);
+        end
+        
+        if false
+        blah=figure;
+        plot(in, zeros(1,length(in)),'rx');
+        hold on
+        plot(out, zeros(1,length(out)),'bo')
+        keyboard
+        close blah
+        end
+
+        %out=sort(rand(size(in))*diff(r)+r(1));
+    end
+
+    function out=isWithin(in,r)
+        out=nan(1,size(r,1));
+        for i=1:size(r,1)
+            if in>=r(i,1) && in<=r(i,2)
+                out(i)=1;
+            else
+                out(i)=0;
+            end
+        end
+        switch sum(out)
+            case 0
+                out=0;
+            case 1
+                out=find(out);
+            otherwise
+                error('multiple')
+        end
+    end
 
 function f=raster(data)
 f=figure;

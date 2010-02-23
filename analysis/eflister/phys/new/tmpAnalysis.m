@@ -52,7 +52,9 @@ if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && ism
     data.spks=data.spks(data.spks>=stimTimes(1) & data.spks<=stimTimes(2));
     rate=length(data.spks)/(stimTimes(2)-stimTimes(1));
     
-    fprintf('%s\n\t%05.1f mins   spk rate: %04.1f hz\n',[data.ratID ' ' data.date ' ' data.uID],data.mins,rate);
+    [bitsPerSpk bitsPerSec]=spkEntropy(data.spks);
+    
+    fprintf('%s\n\t%05.1f mins   spk rate: %04.1f hz (%04.1f bits/spk, %04.1f bits/sec)\n',[data.ratID ' ' data.date ' ' data.uID],data.mins,rate,bitsPerSpk,bitsPerSec);
     
     [data.stim,data.phys,data.frames,data.rptStarts]=extractData(fileNames,stimTimes,rec);
     
@@ -2880,7 +2882,7 @@ switch type
         ref=ref(1,:)';
         %ref=ref-mean(ref);
         
-        cols=ref;
+        cols={ref};
         
     case 'con'
         fn=@cohgramc;
@@ -2898,8 +2900,8 @@ switch type
             maxf=newNyquist
         end
         
-        start=max(cellfun(@(x) x(2,1)   ,both));
-        stop =min(cellfun(@(x) x(2,end)),both);
+        start=max(cellfun(@(x) x(2,1)  ,both));
+        stop =min(cellfun(@(x) x(2,end),both));
         
         fprintf('resampling\n')
         tic
@@ -2937,7 +2939,7 @@ movingwin=[winDur winDur]; %[window winstep] (in secs)
 
 tic
 fprintf('\ndoing coherence...')
-if false
+if true
     switch type
         case {'pt','hyb'}
             [C,phi,S12,S1,S2,t,f,zerosp,confC,phistd,Cerr]=fn(ref,evts,movingwin,params,0);

@@ -35,8 +35,10 @@ if ~status
     messageid
     error('couldn''t make dir')
 end
-tmpFile=fullfile(tmpDir,[datestr(now),'.tmpFile.mat']); %this is for accumulating quantities for population analysis - osx seems to convert the ':' time separators to '/' and is ok with that?
-diary(fullfile(tmpDir,[datestr(now),'.diary.txt']));
+tmpFile=fullfile(tmpDir,[datestr(now,30),'.tmpFile.mat']); %this is for accumulating quantities for population analysis
+init=true;
+save(tmpFile,'init'); %so we can always use -append later
+diary(fullfile(tmpDir,[datestr(now,30),'.diary.txt']));
 
 
     function out=analysisFilt(rec,stimType)
@@ -99,6 +101,8 @@ if false
 end
 
 extractPhysThenAnalyze(record,analysisBase,dataBase,targetBase,targetBinsPerSec,figureBase,@analysisFilt,tmpFile);
+
+diary off
 end
 
 function record=doExclusion(record,target,exclude)

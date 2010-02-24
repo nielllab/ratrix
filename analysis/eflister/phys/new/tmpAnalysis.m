@@ -37,7 +37,7 @@ data.fileNames=fileNames;
 
 data.mins=(stimTimes(2)-stimTimes(1))/60;
 
-if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && ismember(rec.date,datenum({'04.15.09'},'mm.dd.yy')) %,'hateren'}) % && ...
+if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq','hateren'}) % && ismember(rec.date,datenum({'04.15.09'},'mm.dd.yy')) %,'hateren'}) % && ...
     %        (...
     %        ismember(rec.date,datenum({'04.15.09','04.24.09'},'mm.dd.yy')) ...
     %        || ...
@@ -88,9 +88,14 @@ if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && ism
     
     data=findBursts(data);
    
-    [bitsPerSpk bitsPerSec]=spkEntropy(data.spks);
+    [entropy.bitsPerSpk entropy.bitsPerSec]=spkEntropy(data.spks);
+    entropy.spkRate=rate;
+    entropy.burstRate=length(data.bsts)/(stimTimes(2)-stimTimes(1));
+    entropy.stimType=stimType;
+    entropy.minsDuration=data.mins;
+    aggregate(data,'entropy',entropy);
     
-    fprintf('\t%05.1f mins   spk rate: %04.1f hz (%04.1f bits/spk, %04.1f bits/sec)\n',data.mins,rate,bitsPerSpk,bitsPerSec);
+    fprintf('\t%05.1f mins   spk rate: %04.1f hz (%04.1f bits/spk, %04.1f bits/sec)\n',data.mins,rate,entropy.bitsPerSpk,entropy.bitsPerSec);
     
     % doAnalysis(data,'fanoFactor');
     
@@ -123,6 +128,15 @@ if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && ism
 else
     fprintf('\nskipping %g mins %s\n',data.mins,stimType)
 end
+end
+
+function aggregate(data,name,val)
+z=load(data.fileNames.tmpFile,'z');
+if ~isempty(fields(z))
+    z=z.z;
+end
+z(end+1).(name)={data.uID val}; %now can dig these out with {z.(name)} and toss the emtpies.
+save(data.fileNames.tmpFile,'z','-append')
 end
 
 function doAnalysis(data,type)

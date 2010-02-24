@@ -46,7 +46,7 @@ elseif isempty(x2)
     error('ks passed empty prior')
 end
 
-unqs=unique([x1(:);x2(:)]);
+unqs=unique([x1(:);x2(:)]); %this line can OOM when stim pre/post ms are 400ms on last cell -- most recent thing to fix
 
 % the following code modified from kstest2.m
 binEdges    =  [-inf ; unqs; inf];

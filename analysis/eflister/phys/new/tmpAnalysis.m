@@ -49,12 +49,11 @@ if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && ism
     % inter? -> 27	55.7 mins	188-04.24.09-z52.48-chunk1-code1-9196f9c63cf78cac462dac2cedd55306961b7fd0/gaussian-t5554.8235-8895.053
     
     data.spks=load(fileNames.spikesFile);
+
+    fprintf('\n%s\n',[data.ratID ' ' data.date ' ' data.uID]);
+    
     data.spks=data.spks(data.spks>=stimTimes(1) & data.spks<=stimTimes(2));
     rate=length(data.spks)/(stimTimes(2)-stimTimes(1));
-    
-    [bitsPerSpk bitsPerSec]=spkEntropy(data.spks);
-    
-    fprintf('%s\n\t%05.1f mins   spk rate: %04.1f hz (%04.1f bits/spk, %04.1f bits/sec)\n',[data.ratID ' ' data.date ' ' data.uID],data.mins,rate,bitsPerSpk,bitsPerSec);
     
     [data.stim,data.phys,data.frames,data.rptStarts]=extractData(fileNames,stimTimes,rec);
     
@@ -63,8 +62,11 @@ if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && ism
     data.stimType=stimType;
     data.rec=rec;
     
-    fprintf('\tloading waveforms for code %d, chan %d, file %s...\n',rec.chunks.spkCode, rec.chunks.spkChan, rec.file)
+    tic
+    fprintf('\tloading waveforms for code %d, chan %d, file %s...',rec.chunks.spkCode, rec.chunks.spkChan, rec.file)
     wm=load(fileNames.wavemarkFile);
+    toc
+    
     recTimes=[wm.recs.time];
     wm.recs=wm.recs(recTimes>=stimTimes(1) & recTimes<=stimTimes(2));
     
@@ -85,8 +87,14 @@ if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && ism
     end
     
     data=findBursts(data);
+   
+    [bitsPerSpk bitsPerSec]=spkEntropy(data.spks);
     
-    doAnalysis(data,'stationarity');
+    fprintf('\t%05.1f mins   spk rate: %04.1f hz (%04.1f bits/spk, %04.1f bits/sec)\n',data.mins,rate,bitsPerSpk,bitsPerSec);
+    
+    % doAnalysis(data,'fanoFactor');
+    
+    % doAnalysis(data,'stationarity');
     
     % doAnalysis(data,'raster');
     
@@ -148,6 +156,8 @@ if ~(exist([name '.png'],'file')) % && exist([name '.fig'],'file')) %one flaw of
             savefigs(name,stimCheck(data),data.stimType,data.mins);
         case 'raster'
             savefigs(name,raster(data),data.stimType,data.mins);
+        case 'fanoFactor'
+            savefigs(name,fano(data),data.stimType,data.mins);
         case 'stationarity'
             savefigs(name,stationarity(data),data.stimType,data.mins);
         case 'autocorr'
@@ -811,11 +821,13 @@ end
 end
 
 function [data]=findBursts(data)
+tic
+
 data.pre=.1;
 data.inter=.004;
 data.ref=.002;
 
-fprintf('\tfinding bursts...\n')
+fprintf('\tfinding bursts...')
 
 data.lockoutVios=data.spks(diff(data.spks)<data.lockout);
 
@@ -867,6 +879,7 @@ data.tonics=setdiff(data.spks,[data.bsts ; data.bstNotFst']);
 if false
     plot(data.bstRecs{2}(:,1)-data.bsts(1:end-1)); %huh, why doesn't this make flat lines, with step offsets for each burst>2?
 end
+toc
 end
 
 function f=autocorr(data)
@@ -1245,6 +1258,25 @@ end
 
 end
 
+function f=fano(data)
+%break this out by state -- have to find blocks of time during the repeat that don't include different states, and also have consistent firing rate thru the chunk
+%show 250ms and 30s
+%coplot the psth ("whenever firing rate goes up, fano factor should go down", cuz pushing on refractoriness, but only when ff is below 1
+
+%decision - go for whole repeats taht are in one state -- don't need too many to get good estimate.
+
+%consider replacing bursts with single spikes, to ask if super poisson variability is due to burst occurances
+
+if ~isempty(data.rptStarts)
+    [out ff slidingMs f]=fanoFactor(data.spks,data.rptStarts,true);
+else
+    f=figure;
+end
+
+%f=save(data.tmpFile,,'-append');
+%save(data.tmpFile,,'-append');
+end
+
 function f=stationarity(data)
 if ~isempty(data.rptStarts)
     start=data.rptStarts(1);
@@ -1273,7 +1305,7 @@ end
 
 
 tmpName='/Users/eflister/Desktop/22spec.mat';
-if false
+if true
     [fq t p stft]=getSpec(data);
     %save(tmpName,'fq','t','p','stft');
 else
@@ -1524,14 +1556,17 @@ if true
     if ~isempty(data.frames)
         frames=getEvenFrames(data.frames);
         
-        if false
+        if true
             f=[f figure];
             
             stimPreMS =200;%300;
             stimPostMS=100;% 30;
             
             stimPreMS =400;
-            stimPostMS=400;
+            stimPostMS=400; %ks can OOM on unqiue->diff on last cell here
+            
+            stimPreMS =150;
+            stimPostMS=50;
             
             color=zeros(1,3);
             c=.95;
@@ -1553,43 +1588,45 @@ if true
             %subplot(n,2,2*n-1)
             %xlabel('ms')
             
-            ns=[50 100 200 500 1000 2000 5000 10000 20000 50000];
-            resamps=20; %4
-            stimPreMS=300;
-            stimPostMS=300;
-            
             if false
-                ns=[500 1000 5000];
-                resamps=4;
-                stimPreMS=50;
-                stimPostMS=50;
+                ns=[50 100 200 500 1000 2000 5000 10000 20000 50000];
+                resamps=20; %4
+                stimPreMS=300;
+                stimPostMS=300;
+                
+                if false
+                    ns=[500 1000 5000];
+                    resamps=4;
+                    stimPreMS=50;
+                    stimPostMS=50;
+                end
+                
+                if false
+                    ns=[100 500 2000 10000];
+                    resamps=5;
+                end
+                
+                f=[f figure];
+                
+                subplot(3,1,1)
+                ts=staResampSig(tonicyS,[0 0 0]);
+                tb=staResampSig(tonicyB,[1 0 0]);
+                title('desync')
+                xlim([0 max(length(tonicyS), length(tonicyB))])
+                
+                subplot(3,1,2)
+                bs=staResampSig(burstyS,[0 0 0]);
+                bb=staResampSig(burstyB,[1 0 0]);
+                title('sync')
+                xlim([0 max(length(burstyS), length(burstyB))])
+                
+                subplot(3,1,3)
+                rands=[data.tonics; data.bsts];
+                randrng=[min(rands) max(rands)];
+                rands=rand(length(rands),1) * (randrng(2)-randrng(1)) + randrng(1);
+                staResampSig(rands,[0 0 0]);
+                title('rand')
             end
-            
-            if false
-                ns=[100 500 2000 10000];
-                resamps=5;
-            end
-            
-            f=[f figure];
-            
-            subplot(3,1,1)
-            ts=staResampSig(tonicyS,[0 0 0]);
-            tb=staResampSig(tonicyB,[1 0 0]);
-            title('desync')
-            xlim([0 max(length(tonicyS), length(tonicyB))])
-            
-            subplot(3,1,2)
-            bs=staResampSig(burstyS,[0 0 0]);
-            bb=staResampSig(burstyB,[1 0 0]);
-            title('sync')
-            xlim([0 max(length(burstyS), length(burstyB))])
-            
-            subplot(3,1,3)
-            rands=[data.tonics; data.bsts];
-            randrng=[min(rands) max(rands)];
-            rands=rand(length(rands),1) * (randrng(2)-randrng(1)) + randrng(1);
-            staResampSig(rands,[0 0 0]);
-            title('rand')
             
         end
         
@@ -1622,7 +1659,7 @@ if true
                 hold on
                 plot(thresh*ones(1,2),[0 max(dist)])
                 title('led diffs')
-                frameTimes=data.frames([0 d>thresh],2);
+                frameTimes=data.frames([false; d>thresh],2); %changed , to ; for last cell -- other cells d isn't a column?
                 subplot(2,1,2)
                 hist(diff(frameTimes),100)
                 str=sprintf('orig was %g, new is %g', median(diff(data.frames(:,2))),median(diff(frameTimes)));
@@ -1652,24 +1689,28 @@ if true
                 stim       = {frames          ,'stim'       };
                 evts       = {spks,'tonics';bsts,'bursts'};
                 
-                %frametimes vs. spks
-                f=[f stateCoh(frameTimes,evts      ,'pt' ,names  ,data.rec.display_type)];
-                
-                %stim vs. spks
-                f=[f stateCoh(stim      ,evts      ,'hyb',names  ,data.rec.display_type)];
-                f=[f stateCoh(rawStim   ,evts      ,'hyb',names  ,data.rec.display_type)];
-
-                %lfp vs. spks
-                f=[f stateCoh(lfp       ,evts      ,'hyb',names  ,data.rec.display_type)];
-                
-                %lfp vs. stim
-                f=[f stateCoh(lfp       ,stim      ,'con',{}     ,data.rec.display_type)];
-                f=[f stateCoh(lfp       ,rawStim   ,'con',{}     ,data.rec.display_type)];
-                
-                %lfp vs. frametimes
-                f=[f stateCoh(lfp       ,frameTimes,'hyb',names  ,data.rec.display_type)];
-                
-                keyboard
+                if false
+                    %frametimes vs. spks
+                    f=[f stateCoh(frameTimes,evts      ,'pt' ,names  ,data.rec.display_type)];
+                    
+                    %stim vs. spks
+                    f=[f stateCoh(stim      ,evts      ,'hyb',names  ,data.rec.display_type)];
+                    f=[f stateCoh(rawStim   ,evts      ,'hyb',names  ,data.rec.display_type)];
+                    
+                    %lfp vs. spks
+                    f=[f stateCoh(lfp       ,evts      ,'hyb',names  ,data.rec.display_type)];
+                    
+                    %lfp vs. stim
+                    f=[f stateCoh(lfp       ,stim      ,'con',{}     ,data.rec.display_type)];
+                    f=[f stateCoh(lfp       ,rawStim   ,'con',{}     ,data.rec.display_type)];
+                    
+                    %lfp vs. frametimes
+                    f=[f stateCoh(lfp       ,frameTimes,'hyb',names  ,data.rec.display_type)];
+                else
+                    
+                    %lfp vs. spks
+                    f=[f stateCoh(lfp       ,evts      ,'hyb',names  ,data.rec.display_type)];
+                end
             else
                 for state=unique(idx')
                     
@@ -2616,8 +2657,10 @@ out=vals(vals>=start & vals<stop)-start;
 end
 
 function [stim,phys,frames,rptStarts]=extractData(fileNames,stimTimes,rec)
-fprintf('\textracting...\n')
+fprintf('\textracting stim, phys, frames...')
+tic
 data=load(fileNames.targetFile);
+toc
 
 try
     rptStarts=data.stimBreaks; %TODO: checks below for this case (this is the index pulse case)
@@ -2809,7 +2852,7 @@ if ~all(size(in1)==[1 2]) || size(in2,2)~=2
     error('bad input cells')
 end
 
-maxf=300;%50;
+maxf=50;
 f=figure;
 
 if strcmp(type,'con')
@@ -2865,9 +2908,9 @@ switch type
         ref=ref-start;
         evts=evts-start;
         
-%         tmp=cellfun(@(x) x-min([ref;evts]),{ref evts},'UniformOutput',false);
-%         ref=tmp{1};
-%         evts=tmp{2};
+        %         tmp=cellfun(@(x) x-min([ref;evts]),{ref evts},'UniformOutput',false);
+        %         ref=tmp{1};
+        %         evts=tmp{2};
         
         ref=struct('times',ref);
         check{end+1}=ref;
@@ -2876,7 +2919,7 @@ switch type
         fn=@cohgramcpt;
         
         params.Fs=1/median(diff(ref(2,:)));
-                
+        
         evts=evts-ref(2,1);
         
         ref=ref(1,:)';

@@ -26,7 +26,18 @@ elseif ismac
     dataBase='/Volumes/Maxtor One Touch II/eflister phys/phys backup of verified good data/NOT sorted!'; %'/Volumes/rlab/Rodent-Data/physiology/eflister/sorted';
     targetBase='/Volumes/Maxtor One Touch II/eflister phys/phys analysis';
     figureBase='/Users/eflister/Desktop/figures';
+    tmpDir='/Users/eflister/Desktop/analysis tmp/';
 end
+
+[status,message,messageid]=mkdir(tmpDir);
+if ~status
+    message
+    messageid
+    error('couldn''t make dir')
+end
+tmpFile=fullfile(tmpDir,[datestr(now),'.tmpFile.mat']); %this is for accumulating quantities for population analysis - osx seems to convert the ':' time separators to '/' and is ok with that?
+diary(fullfile(tmpDir,[datestr(now),'.diary.txt']));
+
 
     function out=analysisFilt(rec,stimType)
         if ~exist('stimType','var')
@@ -87,7 +98,7 @@ if false
     record=doExclusion(record,target,exclude);
 end
 
-extractPhysThenAnalyze(record,analysisBase,dataBase,targetBase,targetBinsPerSec,figureBase,@analysisFilt);
+extractPhysThenAnalyze(record,analysisBase,dataBase,targetBase,targetBinsPerSec,figureBase,@analysisFilt,tmpFile);
 end
 
 function record=doExclusion(record,target,exclude)

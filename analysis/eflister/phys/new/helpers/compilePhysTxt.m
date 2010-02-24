@@ -1,4 +1,4 @@
-function compilePhysTxt(targetDir,analysisDir,wavemarkDir,rec,force,targetBinsPerSec,figureBase,analysisFilt)
+function compilePhysTxt(targetDir,analysisDir,wavemarkDir,rec,force,targetBinsPerSec,figureBase,analysisFilt,tmpFile)
 verbose=false;
 
 chunkStarts=[rec.chunks.start_time];
@@ -48,6 +48,7 @@ for j=1:numStims
             fileNames.physFile=constructPath(targetDir,'phys',code,'mat');
             fileNames.pulseFile=constructPath(analysisDir,'pulse',code,'txt');
             fileNames.pokesFile=constructPath(analysisDir,'pokes',code,'txt');
+            fileNames.tmpFile=tmpFile;
             
             chunkName=sprintf('chunk%d',chunkNum);
             [garbage code]=fileparts(wavemarkDir);

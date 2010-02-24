@@ -90,3 +90,4 @@ phys/new/lfpSim.m -text
 phys/new/MID.m -text
 phys/new/spkEntropy.m -text
 phys/new/fanoFactor.m -text
+phys/new/summarize.m -text

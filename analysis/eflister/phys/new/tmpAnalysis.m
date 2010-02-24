@@ -8,8 +8,7 @@ if false
     excludes{end+1}='/Volumes/Maxtor One Touch II/eflister phys/phys analysis/164/04.17.09/89493235e157403e6bad4b39b63b1c6234ea45dd/5.gaussian.z.47.88.t.3891.4-4941.chunk.2.89493235e157403e6bad4b39b63b1c6234ea45dd';
     excludes{end+1}='/Volumes/Maxtor One Touch II/eflister phys/phys analysis/188/04.23.09/4b45921ce9ef4421aa984128a39f2203b8f9a381/6.gaussian.z.38.885.t.3683.44-4944.05.chunk.3.4b45921ce9ef4421aa984128a39f2203b8f9a381';
     
-    %these died cuz the code needs to be fixed to be safe for the
-    %case of zero bursts -- i didn't save the figs yet
+    %these died cuz the code needs to be fixed to be safe for the case of zero bursts -- i didn't save the figs yet
     excludes{end+1}='/Volumes/Maxtor One Touch II/eflister phys/phys analysis/188/04.23.09/a7e4526229bb5cd78d91e543fc4a0125360ea849/2.gaussian.z.38.26.t.30.292-449.144.chunk.1.a7e4526229bb5cd78d91e543fc4a0125360ea849';
     excludes{end+1}='/Volumes/Maxtor One Touch II/eflister phys/phys analysis/188/04.23.09/a7e4526229bb5cd78d91e543fc4a0125360ea849/6.gaussian.z.38.26.t.1269.03-2739.63.chunk.1.a7e4526229bb5cd78d91e543fc4a0125360ea849';
 end
@@ -37,7 +36,7 @@ data.fileNames=fileNames;
 
 data.mins=(stimTimes(2)-stimTimes(1))/60;
 
-if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq','hateren'}) % && ismember(rec.date,datenum({'04.15.09'},'mm.dd.yy')) %,'hateren'}) % && ...
+if data.mins>=5 && cosyne2010(stimType,data) % && ismember(stimType,{'gaussian','gaussgrass','rpt/unq','hateren'}) % && ismember(rec.date,datenum({'04.15.09'},'mm.dd.yy')) %,'hateren'}) % && ...
     %        (...
     %        ismember(rec.date,datenum({'04.15.09','04.24.09'},'mm.dd.yy')) ...
     %        || ...
@@ -49,7 +48,7 @@ if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq','hateren
     % inter? -> 27	55.7 mins	188-04.24.09-z52.48-chunk1-code1-9196f9c63cf78cac462dac2cedd55306961b7fd0/gaussian-t5554.8235-8895.053
     
     data.spks=load(fileNames.spikesFile);
-
+    
     fprintf('\n%s\n',[data.ratID ' ' data.date ' ' data.uID]);
     
     data.spks=data.spks(data.spks>=stimTimes(1) & data.spks<=stimTimes(2));
@@ -87,7 +86,7 @@ if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq','hateren
     end
     
     data=findBursts(data);
-   
+    
     [entropy.bitsPerSpk entropy.bitsPerSec]=spkEntropy(data.spks);
     entropy.spkRate=rate;
     entropy.burstRate=length(data.bsts)/(stimTimes(2)-stimTimes(1));
@@ -110,7 +109,7 @@ if data.mins>=5 && ismember(stimType,{'gaussian','gaussgrass','rpt/unq','hateren
     % doAnalysis(data,'autocorr');
     % doAnalysis(data,'burstDetail');
     % doAnalysis(data,'waveforms');
-    % doAnalysis(data,'ISI');
+    doAnalysis(data,'ISI');
     % doAnalysis(data,'spectrogram');
     
     switch stimType
@@ -299,7 +298,7 @@ for i=1:length(fs)
     end
     
     figSaves={'raster','stationarity'};
-    if false || ismember(pieces{end},figSaves)
+    if true || ismember(pieces{end},figSaves)
         saveas(f,figName)
     end
     if ismember(pieces{end},{'ISI','waveforms','STA','raster','stationarity','stimCheck'}) && ismember(i,[1 length(fs)])

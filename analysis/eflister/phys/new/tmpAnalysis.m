@@ -36,7 +36,8 @@ data.fileNames=fileNames;
 
 data.mins=(stimTimes(2)-stimTimes(1))/60;
 
-if data.mins>=5 && cosyne2010(stimType,data) % && ismember(stimType,{'gaussian','gaussgrass','rpt/unq','hateren'}) % && ismember(rec.date,datenum({'04.15.09'},'mm.dd.yy')) %,'hateren'}) % && ...
+if data.mins>=5 && cosyne2010(stimType,data) %  %,'hateren'}) % && ...
+        % && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && ismember(rec.date,datenum({'04.15.09'},'mm.dd.yy'))
     %        (...
     %        ismember(rec.date,datenum({'04.15.09','04.24.09'},'mm.dd.yy')) ...
     %        || ...
@@ -90,6 +91,7 @@ if data.mins>=5 && cosyne2010(stimType,data) % && ismember(stimType,{'gaussian',
     [entropy.bitsPerSpk entropy.bitsPerSec]=spkEntropy(data.spks);
     entropy.spkRate=rate;
     entropy.burstRate=length(data.bsts)/(stimTimes(2)-stimTimes(1));
+    entropy.tonicRate=length(data.tonics)/(stimTimes(2)-stimTimes(1));
     entropy.stimType=stimType;
     entropy.minsDuration=data.mins;
     aggregate(data,'entropy',entropy);
@@ -106,10 +108,10 @@ if data.mins>=5 && cosyne2010(stimType,data) % && ismember(stimType,{'gaussian',
     % doAnalysis(data,'stimCheck');
     
     % doAnalysis(data,'field');
-    % doAnalysis(data,'autocorr');
-    % doAnalysis(data,'burstDetail');
+    doAnalysis(data,'autocorr');
+    doAnalysis(data,'burstDetail');
     % doAnalysis(data,'waveforms');
-    doAnalysis(data,'ISI');
+    % doAnalysis(data,'ISI');
     % doAnalysis(data,'spectrogram');
     
     switch stimType
@@ -928,16 +930,100 @@ if ~isempty(physDetailTimes)
 end
 
 durMS=1000;
+numBins=round(durMS/10);
 
 subplot(3,1,1)
-doAC(data.tonics,durMS,durMS);
+tAC=doAC(data.tonics,durMS,numBins);
 title('tonic autocorr')
+set(gca,'ytick',[])
 
 subplot(3,1,2)
-doAC(data.bsts,durMS,round(durMS/10));
+bAC=doAC(data.bsts,durMS,numBins);
 title('burst autocorr')
+set(gca,'ytick',[])
+
+subplot(3,1,3)
+
+
+
+if false % this OOM's
+    
+    maxf=50;
+    
+    params.Fs=2*maxf;
+    params.fpass=[0 maxf];
+    p=.05;
+    
+    params.err=[2 p]; %0 for none, [1 p] for theoretical(?), [2 p] for jackknife
+    [garbage,garbage,garbage,garbage,garbage,garbage,params]=getparams(params);
+    
+    % if ~isvector(evts) || ~all(diff(evts)>=0)
+    %     error('must be ascending vector')
+    % end
+    % s.times=evts(:);
+    
+    [S,f,R,Serr]=mtspectrumpt(data.tonics,params)
+    
+    k=plot(f,S,'k');
+    hold on
+    
+    plot(f,Serr,.5*ones(1,3))
+    
+    [S,f,R,Serr]=mtspectrumpt(data.bsts,params);
+    r=plot(f,S,'r');
+    
+    plot(f,Serr,[1 .5 .5]);
+    
+else
+    
+    fs=numBins/(durMS/1000);
+    maxf=50;
+    fbins=0:maxf;
+    
+    %bAC(ceil(length(bAC)/2))=0;
+    %tAC(ceil(length(tAC)/2))=0;
+        
+    tAC=tAC-mean(tAC);
+    bAC=bAC-mean(bAC);
+    
+    [pow c w]=pmtm(tAC,[],fbins,fs,.95);
+    
+    if ~all(w==fbins)
+        error('w not f')
+    end
+    
+    k=plot(w,normalize(pow),'k');
+    hold on
+   % plot(w,c,'Color',.5*ones(1,3))
+    
+    xlim([0 maxf])
+    
+
+    
+    [pow c w]=pmtm(bAC,[],fbins,fs,.95);
+    
+    if ~all(w==fbins)
+        error('w not f')
+    end
+    
+    r=plot(w,normalize(pow),'r');
+
+   % plot(w,c,'Color',[1 .5 .5])
+   
+    ylabel('normalized power');
+    
 end
 
+legend([k r],{'tonics','bursts'});
+
+
+xlabel('freq (hz)');
+set(gca,'ytick',[])
+
+
+end
+
+%misnamed -- also does xc
 function out=doAC(ts,durMS,numBins,opt)
     function counts=locAC(times,c,times2)
         if ~exist('times2','var') || isempty(times2)
@@ -962,7 +1048,7 @@ function out=doAC(ts,durMS,numBins,opt)
         plot(bins,counts,c)
     end
 
-if true
+if false
     bins=linspace(-durMS,0,numBins+1);
     bins=[bins -1*fliplr(bins(1:end-1))];
     
@@ -976,10 +1062,27 @@ if true
             hold on
         end
     end
-else
+elseif false
     bins=linspace(0,durMS,numBins);
     h=hist(diff(1000*ts),bins);
     plot(bins(1:end-1),h(1:end-1))
+else
+    if ~exist('opt','var') || isempty(opt)
+        fs=numBins/(durMS/1000);
+        if ~isvector(ts) || ~all(diff(ts)>=0)
+            error('must be ascending vector')
+        end
+        binned=hist(ts,ts(1):1/fs:ts(end));
+        
+        maxlags=fs*durMS/1000;
+        [ac,lags]=xcorr(binned,maxlags);
+        out=ac;
+        ac(ceil(length(ac)/2))=0;
+        plot(1000*lags/fs,ac)
+        ylim([0 max(ac)])
+    else
+        error('only do this version without opt')
+    end
 end
 
 ylabel('count')
@@ -987,9 +1090,9 @@ xlabel('ms')
 end
 
 function f=field(data)
-physMS=500;
+physMS=250;
 n=3;
-f=doST(getEvenFrames(data.phys'),data.tonics,data.bsts,physMS,physMS,n,'field');
+f=doST(getEvenFrames(data.phys'),data.tonics,data.bsts,physMS,physMS,n,'field',[]);
 end
 
 function f=doST(frames,tonics,bsts,stimPreMS,stimPostMS,n,t,preISIs)
@@ -1017,7 +1120,11 @@ function f=sta(data)
 stimPreMS =300;%1000;
 stimPostMS=75;%200;
 
+if false
 preISIs=[0 10 50 100 200 300];
+else
+    preISIs=[];
+end
 
 n=4;
 
@@ -1151,7 +1258,7 @@ if ~isempty(vals) && false
     traceDensity(info(2,:),(vals'-mu)/sigma,lims,12,true)
 elseif ~(isscalar(dist) && isnan(dist))
     
-    if false
+    if true
         %power spectrum of the STA, to see if there is 10Hz resonance, etc
         plotSpec(scaled,1000/median(diff(info(2,:))),.95,true); %[pow c w]=pmtm(scaled-mean(scaled),[],f,1000/median(diff(info(2,:))),p);
         %originally had this (i think it's wrong):
@@ -1171,7 +1278,7 @@ elseif ~(isscalar(dist) && isnan(dist))
     end
 end
 
-if exist('corrected','var') && ~isempty(corrected) %&& false
+if exist('corrected','var') && ~isempty(corrected) && false
     if length(scaled)~=size(corrected,2)
         error('wrong corrected length (probably off by one cuz of xcorr returning 2N+1')
     end
@@ -1180,7 +1287,7 @@ if exist('corrected','var') && ~isempty(corrected) %&& false
     
     set(H1,'LineWidth',2)
     
-elseif exist('pres','var')
+elseif exist('pres','var') && false
     cm=colormap;
     for i=1:size(pres,1)
         plot(AX(1),info(2,:),cNorm(pres(i,:)),'Color',cm(round(((i-1)/(size(pres,1)-1))*(size(cm,1)-1))+1,:)) %MUST FIX: this cNorm is NOT kosher
@@ -1249,7 +1356,7 @@ end
 maxf=ceil(t/2);
 f=0:maxf;
 
-[pow c w]=pmtm(sig,[],f,t,p);
+[pow c w]=pmtm(double(sig),[],double(f),double(t),p);
 
 if ~all(w==f)
     error('w not f')
@@ -1424,9 +1531,11 @@ if true
     x=normalize(x);
     y=normalize(y);
     
-    n=3;
+    n=4;
+    cols=10;
+    width=1;
     
-    subplot(n,1,1)
+    subplot(n,cols,[1+width:cols])
     specShow=p';
     specShow=specShow-min(specShow(:));
     % specShow=specShow/max(specShow(:));
@@ -1451,7 +1560,6 @@ if true
     yrows=floor(interp1(fq,1:length(fq),ylabs,'nearest'));
     set(gca,'YTick',yrows,'YTickLabel',ylabs);
     
-    subplot(n,1,2)
     idx = kmeans(x(:),2); %why are we kmeansing only on x, not y?
     
     if mean(x(idx==1))>mean(x(idx==2))
@@ -1461,18 +1569,39 @@ if true
         % assuming we loaded the PC's, the alpha band is negative, and x should be more negative during the sync state.  we want sync state==1
     end
     
-    plot(idx)
-    ylim([.9 2.1])
-    ylabel('state')
-    set(gca,'XTick',xrows,'XTickLabel',xlabs);
-    xlim([1 length(idx)])
-    if ~all(unique(idx)==[1 2]')
-        unique(idx)
-        warning('unique(idx) not [1 2]')
+    if false
+        subplot(n,1,2)
+        
+        plot(idx)
+        ylim([.9 2.1])
+        ylabel('state')
+        set(gca,'XTick',xrows,'XTickLabel',xlabs);
+        xlim([1 length(idx)])
+        if ~all(unique(idx)==[1 2]')
+            unique(idx)
+            warning('unique(idx) not [1 2]')
+        end
+        set(gca,'YTick',[1 2],'YTickLabel',{'sync','desync'})
     end
-    set(gca,'YTick',[1 2],'YTickLabel',{'sync','desync'})
     
-    subplot(n,1,3)
+    subplot(n,cols,cols+(1+width:cols))
+    
+    currOn=false;
+    for i=1:length(idx)
+        if ~currOn && idx(i)==1
+            currOn=true;
+            fillX=t(i);
+            %'starting one'
+        elseif currOn && idx(i)~=1
+            currOn=false;
+            tmp=[fillX t(i)];
+            fill([tmp fliplr(tmp)],[zeros(1,2) ones(1,2)],.75*ones(1,3),'linestyle','none');
+            %'doing one'
+            fillX=[];
+            hold on
+        end
+    end
+    
     ratePlot(data.bsts,'r')
     hold on
     ratePlot(data.tonics,'k')
@@ -1481,7 +1610,12 @@ if true
     %set(gca,'XTick',[])
     
     
-    
+    subplot(n,cols,1)
+    plot(v(:,[2 1]),1:size(v,1),'linewidth',2)
+    title('pc''s')
+    ylabel('hz')
+    set(gca,'XTick',[])
+    ylim([1 size(v,1)])
     
     idxTimes=t+data.phys(2,1);
     currState=idx(1);
@@ -1504,13 +1638,24 @@ if true
     [burstyS tonicyS]=segregate(data.tonics); %fixed a serious error -- used to use data.spks, should have been data.tonics i'm pretty sure
     [burstyB tonicyB]=segregate(data.bsts);
     
-    hi = .75;
-    lo = .25;
+    if false
+        hi = .75;
+        lo = .25;
+        
+        statePlot(burstyS,hi,'kx')
+        statePlot(burstyB,hi,'rx')
+        statePlot(tonicyS,lo,'kx')
+        statePlot(tonicyB,lo,'rx')
+    end
     
-    statePlot(burstyS,hi,'kx')
-    statePlot(burstyB,hi,'rx')
-    statePlot(tonicyS,lo,'kx')
-    statePlot(tonicyB,lo,'rx')
+    %NOTE that the start and end times of these is goverend by the first/last event - need to fix!
+    subplot(n,cols,2*cols+(1+width:cols))
+    doEvtPower(data.tonics);
+    title('tonic power')
+    
+    subplot(n,cols,3*cols+(1+width:cols))
+    doEvtPower(data.bsts);
+    title('burst power')
     
     f=[f figure];
     n=4;
@@ -1551,7 +1696,8 @@ if true
     %if this isn't last, it gets erased cuz of the repositioning
     subplot(n,1,4)
     ms=23; %50
-    scatter(x,y,ms,t,'.')
+    subInds=1:30:length(x);
+    scatter(x(subInds),y(subInds),ms,t(subInds),'.')
     axis square
     set(gca,'YTick',[])
     set(gca,'XTick',[])
@@ -1580,6 +1726,9 @@ if true
             
             stimPreMS =150;
             stimPostMS=50;
+            
+            stimPreMS =300;
+            stimPostMS=100;
             
             color=zeros(1,3);
             c=.95;
@@ -1643,7 +1792,7 @@ if true
             
         end
         
-        if true
+        if false
             if false
                 ms=150; %500 causes calcSTA to OOM on doTrigger
                 fs=1000; %10k OOM's
@@ -2107,10 +2256,10 @@ end
         out=doNormRate(in);
         if isempty(in)
             xs=[0 secs];
-            plot(xs,zeros(1,2),code);
+            plot(xs,zeros(1,2),code,'linewidth',2);
         else
             xs=ts-start;
-            plot(xs,out,code);
+            plot(xs,out,code,'linewidth',2);
         end
         xlim([min(xs) max(xs)])
         xlabel('mins')
@@ -2441,13 +2590,39 @@ for i=1:length(preISIs)
     trigs=1+floor((trigs-stim(2,1))/timestep);
     
     if ~isempty(trigs) %used to test trigTs, why?
-        inds=repmat(tinds,length(trigs),1)+repmat(trigs,1,length(tinds));
+        try
+            inds=repmat(tinds,length(trigs),1)+repmat(trigs,1,length(tinds)); %OOM
+        catch
+            if all(trigs(:)>=intmin('int32')) && all(trigs(:)<=intmax('int32')) && all(tinds(:)>=intmin('int32')) && all(tinds(:)<=intmax('int32'))
+                trigs=int32(trigs);
+                tinds=int32(tinds);
+                try
+                 inds=repmat(tinds,length(trigs),1)+repmat(trigs,1,length(tinds)); % OOM
+                catch
+                    warning('doing only half the trigs')
+                    trigs=trigs(rand(1,length(trigs))>.5);
+                    inds=repmat(tinds,length(trigs),1)+repmat(trigs,1,length(tinds));
+                end
+            else
+                error('bad trigs or tinds')
+            end
+        end
     else
         inds=[];
     end
     
     vals{i}=stim(1,:);
-    vals{i}=vals{i}(inds);
+    try
+        vals{i}=vals{i}(inds); %OOM
+    catch
+        if all(inds(:)>=0) && all(inds(:)<=intmax('uint32'))
+            inds=uint32(inds);
+            vals{i}=single(vals{i});
+            vals{i}=vals{i}(inds);
+        else
+            error('bad inds')
+        end
+    end
 end
 
 allTrigs=1+floor((allTrigs-stim(2,1))/timestep); %revision 2743 screwed up by omitting this!
@@ -2473,33 +2648,41 @@ else
     
     N=max(preBin,postBin);
     
-    [sta lags1]=xcorr(stim(1,:),train,N);
-    [staR lags2]=xcorr(train,stim(1,:),N); %pam uses this version, but it's reversed for me?
-    [auto lags3]=xcorr(train,N);
-    
-    corrected=fftshift(ifft(fft(sta)./fft(auto))); %i didn't expect fftshift to be necessary here, but it is -- why?
-    
-    if ~isreal(corrected) %pam's code thinks real() may be required, i don't think it should be necessary
-        error('imaginary components found')
-    end
-    
-    if false
-        close all
-        n=4;
-        subplot(n,1,1)
-        plot(lags1,sta)
-        subplot(n,1,2)
-        plot(lags2,staR)
-        subplot(n,1,3)
-        plot(lags3,auto)
-        subplot(n,1,4)
-        plot(corrected)
+    try
+        [sta lags1]=xcorr(stim(1,:),train,N); %OOM
         
-        keyboard
+        % [staR lags2]=xcorr(train,stim(1,:),N); %pam uses this version, but it's reversed for me?
+        [auto lags3]=xcorr(train,N);
+        
+        corrected=fftshift(ifft(fft(sta)./fft(auto))); %i didn't expect fftshift to be necessary here, but it is -- why?
+        
+        if ~isreal(corrected) %pam's code thinks real() may be required, i don't think it should be necessary
+            error('imaginary components found')
+        end
+        
+        if false
+            close all
+            n=4;
+            subplot(n,1,1)
+            plot(lags1,sta)
+            subplot(n,1,2)
+            plot(lags2,staR)
+            subplot(n,1,3)
+            plot(lags3,auto)
+            subplot(n,1,4)
+            plot(corrected)
+            
+            keyboard
+        end
+        
+        corrected=[corrected;sta];
+        corrected=corrected(:,max(0,(postBin-preBin))+(1:length(tinds)));
+
+    catch
+        warning('oom on xcorr, not doing STA in fourier space')
+        corrected=[];%nan(2,length(tinds));
     end
     
-    corrected=[corrected;sta];
-    corrected=corrected(:,max(0,(postBin-preBin))+(1:length(tinds)));
 end
 end
 
@@ -3037,6 +3220,43 @@ end
 ylim([0 1])
 ylabel('coherence')
 xlabel('freq (hz)')
+end
+
+function doEvtPower(evts)
+maxf=50;
+
+params.Fs=2*maxf;
+params.fpass=[0 maxf];
+p=.05;
+winDur = 10;%1;%.5;
+params.err=[2 p]; %0 for none, [1 p] for theoretical(?), [2 p] for jackknife
+[garbage,garbage,garbage,garbage,garbage,garbage,params]=getparams(params);
+
+movingwin=[winDur winDur]; %[window winstep] (in secs)
+
+
+if ~isvector(evts) || ~all(diff(evts)>=0)
+    error('must be ascending vector')
+end
+s.times=evts(:);
+
+[S,t,f,R,Serr]=mtspecgrampt(s,movingwin,params,false);
+
+if true 
+    if all(S(:)>=0)
+    S=10*log10(abs(S)+eps);
+    else
+        error('S must be >=0')
+    end
+end
+
+imagesc(t,f,S');
+
+%colorbar - this shrinks the main data badly
+axis xy;
+xlabel('time (s)');
+ylabel('freq (hz)');
+
 end
 
 function coherenceAnalysis(stim,evts)

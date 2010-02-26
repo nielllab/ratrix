@@ -81,4 +81,6 @@ switch stimType
         end
     otherwise
 end
+out = strcmp(data.ratID,'164') && strcmp(stimType,'gaussian') && strcmp(data.date,'03.17.09') && ismember(data.hash,{'f2bf60d0a7dd03eb10ec24d6620d82cb05a63d90'}) && data.z==8.58 && ismember(data.chunkNum,{'1'});
+
 end

@@ -65,7 +65,10 @@ end
 
 [tapers,pad,Fs,fpass,err,trialave,params]=getparams(params);
 data=change_row_to_column(data);
-if isstruct(data); Ch=length(data); end;
+if isstruct(data); Ch=length(data); 
+else
+    Ch=1; %edf added cu change_row_to_column seems to destructize data
+end;
 if nargin < 4 || isempty(fscorr); fscorr=0; end;
 if nargout > 4 && err(1)==0; error('Cannot compute errors with err(1)=0'); end;
 

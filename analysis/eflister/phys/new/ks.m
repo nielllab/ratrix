@@ -46,7 +46,27 @@ elseif isempty(x2)
     error('ks passed empty prior')
 end
 
+    function makeColIn=makeCol(makeColIn)
+            makeColIn=makeColIn(:);
+    end
+
+if false
 unqs=unique([x1(:);x2(:)]); %this line can OOM when stim pre/post ms are 400ms on last cell -- most recent thing to fix
+else
+    try
+    un1=unique(x1(:)); %OOM
+    catch
+         chunks=10;
+         un1=[];
+         uInds=round(linspace(1,numel(x1),chunks+1));
+         
+         for cNum=1:chunks
+             un1=unique([un1(:);makeCol(x1(uInds(cNum):uInds(cNum+1)))]);
+         end
+    end
+    un2=unique(x2(:));
+    unqs=unique([un1(:);un2(:)]);
+end
 
 % the following code modified from kstest2.m
 binEdges    =  [-inf ; unqs; inf];

@@ -3,7 +3,8 @@ clc
 close all
 
 analysis='entropy';
-aggregateFileName='/Users/eflister/Desktop/spkEnt.mat';
+%aggregateFileName='/Users/eflister/Desktop/spkEnt.mat';
+aggregateFileName='/Users/eflister/Desktop/final cosyne/gauss hat.mat';
 
 z=load(aggregateFileName);
 z={z.z.(analysis)};
@@ -23,14 +24,22 @@ end
 function entropy(in)
 gaussians={};
 haterens={};
+gRates={};
+hRates={};
+
 for i=1:size(in,1)
     for j=1:length(in(i,2))
         gaussians{i}={};
         haterens{i}={};
+        gRates{i}={};
+        hRates{i}={};
+        
         switch in{i,2}(j).stimType
             case 'gaussian'
+                gRates{i}{end+1}={in{i,2}(j).tonicRate, in{i,2}(j).burstRate};
                 gaussians{i}{end+1}=in{i,2}(j).bitsPerSpk;
             case 'hateren'
+                hRates{i}{end+1}={in{i,2}(j).tonicRate, in{i,2}(j).burstRate};
                 haterens{i}{end+1}=in{i,2}(j).bitsPerSpk;
             otherwise
         end
@@ -71,6 +80,27 @@ ylabel('bitsPerSpk')
 set(gca,'xtick',[1 2],'xticklabel',{'gaussian','hateren'})
 xlim([0 3])
 ylim([0 maxH*1.1])
+
+figure
+for i=1:length(gRates)
+    if ~isempty(gRates{i}) 
+        gHandle=plot(gRates{i}{1}{1},gRates{i}{1}{2},'bo');
+    end
+    hold on
+end
+for i=1:length(hRates)
+    if ~isempty(hRates{i}) 
+        hHandle=plot(hRates{i}{1}{1},hRates{i}{1}{2},'g*');
+    end
+    hold on
+end
+%axis square
+%axis equal
+xlabel('tonic rate (hz)')
+ylabel('burst rate (hz)')
+legend([gHandle hHandle],'Gaussian','natural')
+%legend(hHandle,'natural')
+
 end
 
 function out=groupBy(in,fields)

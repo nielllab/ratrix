@@ -4,13 +4,12 @@ close all
 
 analysis='entropy';
 %aggregateFileName='/Users/eflister/Desktop/spkEnt.mat';
-aggregateFileName='/Users/eflister/Desktop/final cosyne/gauss hat.mat';
+aggregateFileName='/Users/eflister/Desktop/final aggregate/20100227T065419.tmpFile.mat'; %'/Users/eflister/Desktop/final cosyne/gauss hat.mat';
 
 z=load(aggregateFileName);
 z={z.z.(analysis)};
 z=z(~cellfun(@isempty,z));
 z=parse(cellfun(@(x) setfield(x{2},'uID',x{1}),z)); %gah
-
 z=groupBy(z,{'z','chunk','hash'});
 
 switch analysis
@@ -22,26 +21,30 @@ end
 end
 
 function entropy(in)
+%this is only getting 23 records when it should be getting 24+1.  figure out why
+
 gaussians={};
 haterens={};
 gRates={};
 hRates={};
 
 for i=1:size(in,1)
-    for j=1:length(in(i,2))
-        gaussians{i}={};
+            gaussians{i}={};
         haterens{i}={};
         gRates{i}={};
         hRates{i}={};
         
+    for j=1:length(in{i,2})        
         switch in{i,2}(j).stimType
-            case 'gaussian'
+            case {'gaussian','gaussgrass'}
                 gRates{i}{end+1}={in{i,2}(j).tonicRate, in{i,2}(j).burstRate};
                 gaussians{i}{end+1}=in{i,2}(j).bitsPerSpk;
             case 'hateren'
                 hRates{i}{end+1}={in{i,2}(j).tonicRate, in{i,2}(j).burstRate};
                 haterens{i}{end+1}=in{i,2}(j).bitsPerSpk;
             otherwise
+                'skipping' 
+                in{i,2}(j).stimType
         end
     end
 end
@@ -71,7 +74,7 @@ for i=1:length(gaussians)
     if ~isempty(gaussians{i}) && ~isempty(haterens{i})
         for j=1:length(gaussians{i})
             for k=1:length(haterens{i})
-                plot([1 2],[gaussians{i}(j) haterens{i}(k)],'k')
+                plot([1 2],[gaussians{i}{j} haterens{i}{k}],'k')
             end
         end
     end
@@ -100,6 +103,8 @@ xlabel('tonic rate (hz)')
 ylabel('burst rate (hz)')
 legend([gHandle hHandle],'Gaussian','natural')
 %legend(hHandle,'natural')
+
+keyboard
 
 end
 

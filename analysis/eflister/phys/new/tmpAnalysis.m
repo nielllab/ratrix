@@ -36,7 +36,7 @@ data.fileNames=fileNames;
 
 data.mins=(stimTimes(2)-stimTimes(1))/60;
 
-if data.mins>=5 && cosyne2010(stimType,data) %  %,'hateren'}) % && ...
+if selectRecordings('gauss',stimType,data) % data.mins>=5 &&  % cosyne2010(stimType,data) %  %,'hateren'}) % && ...
         % && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && ismember(rec.date,datenum({'04.15.09'},'mm.dd.yy'))
     %        (...
     %        ismember(rec.date,datenum({'04.15.09','04.24.09'},'mm.dd.yy')) ...
@@ -109,7 +109,7 @@ if data.mins>=5 && cosyne2010(stimType,data) %  %,'hateren'}) % && ...
     
     % doAnalysis(data,'field');
     doAnalysis(data,'autocorr');
-    doAnalysis(data,'burstDetail');
+    % doAnalysis(data,'burstDetail');
     % doAnalysis(data,'waveforms');
     % doAnalysis(data,'ISI');
     % doAnalysis(data,'spectrogram');

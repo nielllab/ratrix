@@ -93,3 +93,6 @@ phys/new/fanoFactor.m -text
 phys/new/summarize.m -text
 phys/new/cosyne2010.m -text
 phys/new/selectRecordings.m -text
+phys/new/fitRectifiedFModel.m -text
+phys/new/states.m -text
+phys/new/rectifiedFModel.m -text

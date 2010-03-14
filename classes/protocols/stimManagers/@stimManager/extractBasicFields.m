@@ -112,8 +112,12 @@ if isfield(x,'responseWindowMs') && ~isempty(x.responseWindowMs) && ~isinf(x.res
     [out.preResponseStartRaw compiledLUT]= extractFieldAndEnsure(trialRecords,{},'preResponseStartRaw',compiledLUT);
     [out.discrimStartRaw compiledLUT]= extractFieldAndEnsure(trialRecords,{},'discrimStartRaw',compiledLUT);
     [out.trialStartRaw compiledLUT]= extractFieldAndEnsure(trialRecords,{},'trialStartRaw',compiledLUT);
-    %[out.responseWindowStart compiledLUT]= extractFieldAndEnsure(trialRecords,{},'responseWindowStart',compiledLUT);
-    %[out.responseWindowStop compiledLUT]= extractFieldAndEnsure(trialRecords,{},'responseWindowStop',compiledLUT);
+
+    [out.expectedPreRequestDurSec compiledLUT]= extractFieldAndEnsure(trialRecords,{},'expectedPreRequestDurSec',compiledLUT);     
+    [out.responseWindowStartSec compiledLUT]= extractFieldAndEnsure(trialRecords,{},'responseWindowStartSec',compiledLUT);
+    [out.responseWindowStopSec compiledLUT]= extractFieldAndEnsure(trialRecords,{},'responseWindowStopSec',compiledLUT);
+    [out.discrimStart compiledLUT] = extractFieldAndEnsure(trialRecords,{},'discrimStart',compiledLUT); % prob want this too
+
 else
     % this may error if rats run on something else after a goNoGo task... leaving the
     %field undefined... might have to define cells of nan's for all rats,

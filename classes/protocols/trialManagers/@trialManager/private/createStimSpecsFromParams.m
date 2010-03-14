@@ -104,15 +104,16 @@ switch class(trialManager)
 		criterion={[],i+1};
 		stimSpecs{i} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,'itl','intertrial luminance',false,false); % do not punish responses here
 		i=i+1;
+        
     case 'cuedGoNoGo'
         % we need to figure out when the reinforcement phase is (in case we want to punish responses, we need to know which phase to transition to)
 		if ~isempty(preResponseStim) && responseWindow(1)~=0
 			addedPreResponsePhase=addedPreResponsePhase+1;
 		end
 		% optional preOnset phase
-		if ~isempty(preRequestStim) &&  ismember(class(trialManager),{'nAFC','goNoGo','cuedGoNoGo'}) % only some classes have the pre-request phase if no delayManager in 'nAFC' class
+		if ~isempty(preRequestStim) &&  ismember(class(trialManager),{'cuedGoNoGo'}) % only some classes have the pre-request phase if no delayManager in 'nAFC' class
 			if preRequestStim.punishResponses
-				criterion={[],i+1,requestPorts,i+1,[targetPorts distractorPorts],i+1+addedPreResponsePhase};  %was:i+2+addedPhases ;  i+1+addedPreResponsePhase? or i+2+addedPreResponsePhase?
+				criterion={[],i+1,[targetPorts distractorPorts],i+3+addedPreResponsePhase};  %was:i+2+addedPhases ;  i+1+addedPreResponsePhase? or i+2+addedPreResponsePhase?
 			else
 				criterion={[],i+1,requestPorts,i+1};
 			end
@@ -126,7 +127,7 @@ switch class(trialManager)
 		% optional preResponse phase
 		if ~isempty(preResponseStim) && responseWindow(1)~=0
 			if preResponseStim.punishResponses
-				criterion={[],i+1,[targetPorts distractorPorts],i+2};  %not i+2 but?  i+3?
+				criterion={[],i+1,[targetPorts distractorPorts],i+3};  %not i+2 but?  i+3?
 			else
 				criterion={[],i+1};
 			end
@@ -161,8 +162,8 @@ switch class(trialManager)
         %required early response penalty phase
         criterion={[],i+1};
         %stimulus=[]?,transitions=criterion,stimType='cache',startFrame=0,framesUntilTransition=[]? or earlyResponsePenaltyFrames, autoTrigger=,scaleFactor=0,isFinalPhase=0,hz,phaseType='earlyPenalty',phaseLabel='earlyPenalty',punishResponses=false,[isStim]=false,[indexPulses]=false)
-		%maybe could calc errorStim here? or pass [] and calc later
-        stimSpecs{i} = stimSpec(errorStim,criterion,'cache',0,1,[],0,0,hz,'earlyPenalty','earlyPenalty',false,false); % do not punish responses here
+		%maybe could calc eStim here? or pass [] and calc later
+        stimSpecs{i} = stimSpec([],criterion,'cache',0,1,[],0,0,hz,'earlyPenalty','earlyPenalty',false,false); % do not punish responses here
 		i=i+1;
         
         

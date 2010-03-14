@@ -670,8 +670,8 @@ switch details.renderMode
                 preResponseStim.punishResponses=false;
             case {'cuedGoNoGo'}
                 %dealy manager controls this gray screen
-                preRequestStim.punishResponses=false; % maybe punish before any stim is on;  consider the utility of this (Duc in charge of it until ... )
-                
+                preRequestStim.punishResponses=true; % maybe punish before any stim is on;  consider the utility of this (Duc in charge of it until ... )
+             
                 %responseWindowMs(1) controls how long before licks count,
                 %and the stim shows up here!
                 preResponseStim=[];
@@ -680,7 +680,7 @@ switch details.renderMode
                 preResponseStim.scaleFactor=scaleFactor;
                 preResponseStim.startFrame=0;
                 preResponseStim.autoTrigger=[];
-                preResponseStim.punishResponses=false;  %should hiss when response is blocked
+                preResponseStim.punishResponses=true;  %should hiss when response is blocked
                 
                 %the discrim stim is actually blank, cuz the stim already
                 %happened... (here we expect stimuli to end before responseWindowMs(1))

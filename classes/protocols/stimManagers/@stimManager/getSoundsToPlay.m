@@ -23,6 +23,9 @@ if strcmp(trialManagerClass, 'nAFC') || strcmp(trialManagerClass,'goNoGo') || st
     elseif strcmp(phaseType,'reinforced') && stepsInPhase <= 0 && ~trialDetails.correct
         % play wrong sound
         playSoundSounds{end+1} = {'wrongSound', msPenaltySound};
+    elseif strcmp(phaseType,'earlyPenalty') %&& stepsInPhase <= 0 what does stepsInPhase do? I don't think we need this for this phase
+        % play wrong sound
+        playSoundSounds{end+1} = {'wrongSound', msPenaltySound};
     end
     
 % freeDrinks setup

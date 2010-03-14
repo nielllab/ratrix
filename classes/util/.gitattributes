@@ -159,3 +159,6 @@ trialRecordProcessing/getDiscrimPhaseStart.m -text
 analysis/stochasticLoad.m -text
 trialRecordProcessing/getPreResponsePhaseStart.m -text
 trialRecordProcessing/replicateChecker.m -text
+trialRecordProcessing/getExpectedPreRequestDurSec.m -text
+trialRecordProcessing/getResponseWindowStart.m -text
+trialRecordProcessing/getResponseWindowStop.m -text

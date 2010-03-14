@@ -280,3 +280,4 @@ protocols/stimManagers/@gratings/commonNameForStim.m -text
 protocols/stimManagers/@gratings/compareStimRecords.m -text
 protocols/stimManagers/@whiteNoise/commonNameForStim.m -text
 protocols/stimManagers/@whiteNoise/compareStimRecords.m -text
+protocols/reinforcementManagers/@reinforcementManager/calcEarlyPenalty.m -text

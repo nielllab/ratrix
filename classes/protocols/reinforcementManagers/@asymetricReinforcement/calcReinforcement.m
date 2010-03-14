@@ -11,7 +11,7 @@ targetIsPresent=checkTargetIsPresent(sm,details);
 
 if targetIsPresent==1
     rewardSizeULorMS=getScalar(r) * r.hitRewardSizeULorMS;
-    msPenalty=r.missMsPenalty;
+    msPenalty=0; %r.missMsPenalty; %set when we want to punish falsemisses, but we don't (so set to 0)
 elseif targetIsPresent==0;
     rewardSizeULorMS=getScalar(r) * r.correctRejectRewardSizeULorMS;
     msPenalty=r.falseAlarmMsPenalty;

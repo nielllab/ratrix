@@ -27,12 +27,16 @@ stim = ifFeatureGoRightWithTwoFlank([p.pixPerCycs],[p.goRightOrientations],[p.go
 
 p.hitRewardSizeULorMS=250;
 p.correctRejectRewardSizeULorMS=0;
-p.missMsPenalty=0;
-p.falseAlarmMsPenalty=3000;
+p.missMsPenalty=2000;
+p.falseAlarmMsPenalty=2000;
 
 asymRm=asymetricReinforcement(p.hitRewardSizeULorMS,p.correctRejectRewardSizeULorMS,p.missMsPenalty,...
     p.falseAlarmMsPenalty,p.requestRewardSizeULorMS,p.requestMode,p.msPenalty,p.fractionOpenTimeSoundIsOn,...
     p.fractionPenaltySoundIsOn, p.scalar, p.msPuff);
+
+constantRm=constantReinforcement(p.hitRewardSizeULorMS,p.requestRewardSizeULorMS,p.requestMode,...
+   p.msPenalty,p.fractionOpenTimeSoundIsOn,p.fractionPenaltySoundIsOn,p.scalar,p.msPuff); 
+%01/07/10 added on in order to test out for goNoGo -dtn
 
 increasingReward=rewardNcorrectInARow(p.rewardNthCorrect,p.requestRewardSizeULorMS,p.requestMode,p.msPenalty,p.fractionOpenTimeSoundIsOn,p.fractionPenaltySoundIsOn, p.scalar, p.msPuff);
 
@@ -49,7 +53,7 @@ switch tmClass
             p.frameDropCorner,p.dropFrames,p.displayMethod,p.requestPorts,p.saveDetailedFramedrops,...
             p.delayManager,p.responseWindowMs,p.showText);
     case 'goNoGo'
-        rm=asymRm;
+        rm=constantRm;
         p.percentCorrectionTrials=0;
         tm=goNoGo(p.sndManager,p.percentCorrectionTrials,p.responseLockoutMs,rm,p.eyeController,...
             p.frameDropCorner,p.dropFrames,p.displayMethod,p.requestPorts,p.saveDetailedFramedrops,...

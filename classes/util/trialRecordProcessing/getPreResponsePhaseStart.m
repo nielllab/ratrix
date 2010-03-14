@@ -6,6 +6,6 @@ for i=1:length(phaseRecord)
     end
 end
 if isempty(out)
-    out={NaN};
+    out=NaN;
 end
 end

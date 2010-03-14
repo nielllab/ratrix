@@ -335,6 +335,8 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 if strcmp(trialRecords(trialInd).result,'manual training step')
                     updateTM=true; % to make sure that soundMgr gets decached and passed back to the subject/doTrial where the k+t happens
                 end
+%                 sca
+%                 keyboard
                 fprintf('setting stopEarly\n')
                 stopEarly = 1;
             end

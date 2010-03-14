@@ -650,12 +650,12 @@ switch protocolVersion
                 
                 %set a few things unique to go-no-go
                 percentile=0.99;
-                value=10000;
-                fixedDelayMs=2000;
+                value=10000; %use to shorten pre-request wait
+                fixedDelayMs=200;
                 default.delayManager=flatHazard(percentile, value, fixedDelayMs);
                 %default.delayManager=constantDelay(500);  % note: this line willinvalidatethe one above it
                 
-                default.responseWindowMs=[500 1500]; 
+                default.responseWindowMs=[300 1000]; 
                 %this first number should always be greater than 250 (else stim might be wrong)
                  
                 default.requestPorts='none';

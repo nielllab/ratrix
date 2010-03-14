@@ -182,12 +182,12 @@ switch nargin
         end
         % phaseType - we need this so that runRealTimeLoop knows whether or not this phase should do a reward/airpuff, etc
         if ~isempty(varargin{10}) && ischar(varargin{10}) && ismember(varargin{10},{'reinforced','pre-request','pre-response',...
-                'discrim','itl'})
+                'discrim','itl','earlyPenalty'})
             spec.phaseType=varargin{10};
         elseif isempty(varargin{10})
             spec.phaseType=[];
         else
-            error('phaseType must be ''reinforced'', ''pre-request'', ''pre-response'', ''discrim'', ''itl'', or []');
+            error('phaseType must be ''reinforced'', ''pre-request'', ''pre-response'', ''discrim'', ''itl'', ''earlyPenalty'', or []');
         end
         % phaseLabel
         if ischar(varargin{11})
@@ -214,10 +214,10 @@ switch nargin
             error('isStim must be logical scalar')
         end
 
-        if (isempty(spec.scaleFactor) || isempty(spec.stimulus)) && ~strcmp(spec.phaseType,'reinforced')
+        if (isempty(spec.scaleFactor) || isempty(spec.stimulus)) && ~strcmp(spec.phaseType,'reinforced')  && ~strcmp(spec.phaseType,'earlyPenalty') 
             error('empty scaleFactor and stimulus allowed only for reinforced phaseType');
         end
-
+        
         stimLen=size(spec.stimulus,3);
         if nargin==14 && ~isempty(varargin{14})
             spec.indexPulses=varargin{14};

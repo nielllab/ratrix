@@ -102,6 +102,15 @@ try
         case 'preResponseStartRaw'
             preResponsePhaseStart = cellfun(@getPreResponsePhaseStart,{trialRecords.phaseRecords},'UniformOutput',false);
             out=cell2mat(preResponsePhaseStart);
+        case 'responseWindowStartSec'
+            responseWindowStart = cellfun(@getResponseWindowStart,{trialRecords.trialManager},'UniformOutput',false);
+            out=cell2mat(responseWindowStart);
+        case 'responseWindowStopSec'
+            responseWindowStop = cellfun(@getResponseWindowStop,{trialRecords.trialManager},'UniformOutput',false);
+            out=cell2mat(responseWindowStop);
+        case 'expectedPreRequestDurSec'
+            expectedPreRequestDurSec = cellfun(@getExpectedPreRequestDurSec,{trialRecords.phaseRecords},{trialRecords.resolution},'UniformOutput',false);
+            out=cell2mat(expectedPreRequestDurSec);
         case 'trialStartRaw'
             phaseStarts = cellfun(@getPhaseStarts,{trialRecords.phaseRecords},'UniformOutput',false);
             trialStart= cellfun(@(x) x(1),phaseStarts,'UniformOutput',false);
@@ -155,10 +164,19 @@ try
                     out=times;  % un-normalized to stim, probably contains all phases, not just discrim
                     out=cellfun(@allResponsesTimesMinusDiscrimStart,times,discrimPhaseStart,'UniformOutput',false); %normalized to discrim start 
                 case 'lickTimesInMatrix'       
-                    maxLicksAllowed=50; % philip chose this hard coded param on 12/14/09
+                    maxLicksAllowed=5;  %03/13/10
+                    % duc reasons that maxLicksAllowed should = 1
+                    % because based on the new program one lick is all it
+                    % needs to either be correctHits, falseAlarm or
+                    % falseTrigger, there are no longer any "free" licks
+                    % allowed since it is all rewarded or punished, licks
+                    % during reinforcement phase doesn't get recorded. This
+                    % way also saves memory.
+                    
+                    % philip chose this hard coded param on 12/14/09
                     %50 runs out of memory for rats with 300,000 trials, and captures 98% of goNoGo trials withless than 50 licks
                     %25 is okay, but throws out some data. we get all the
-                    %last ones, which favors the end reward lick,
+                    %last ones used to get alll the last ones, which favors the end reward lick,
                     %eventually getting to stim and pre-request
                     %maybe explicitly getting the pre-request and
                     %distrim-licks is a good idea ...
@@ -167,7 +185,11 @@ try
                     for i=1:length(times)
                         if ~(iscell(times{i}) && isnan(times{i}{1})) % if nan, then no-licks to save
                             numLicksSaved=min(maxLicksAllowed,length(times{i}));
-                            lickTimesMatrix(1:numLicksSaved,i)=times{i}(end-numLicksSaved+1:end);
+%                             lickTimesMatrix(1:numLicksSaved,i)=times{i}(end-numLicksSaved+1:end); old method gathers
+%                             from the end -phil 03/13/10
+                            %new method gathers from the front -phil
+                            %03/13/10
+                            lickTimesMatrix(1:numLicksSaved,i)=times{i}(1:numLicksSaved);
                         end
                     end
                     out=lickTimesMatrix;

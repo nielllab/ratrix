@@ -18,6 +18,10 @@ try
             elseif rm.missMsPenalty>0 && (rm.falseAlarmMsPenalty==0 || rm.falseAlarmMsPenalty==verySmall)
                 rm.missMsPenalty=val;
             else
+                val
+                x=struct(rm)
+                
+                
                 error('dont know how to handle this case');
             end    
         case {'scalar', 'requestRewardSizeULorMS'}

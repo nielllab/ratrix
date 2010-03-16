@@ -680,7 +680,7 @@ switch details.renderMode
                 preResponseStim.scaleFactor=scaleFactor;
                 preResponseStim.startFrame=0;
                 preResponseStim.autoTrigger=[];
-                preResponseStim.punishResponses=true;  %should hiss when response is blocked
+                preResponseStim.punishResponses=false;  %should hiss when response is blocked
                 
                 %the discrim stim is actually blank, cuz the stim already
                 %happened... (here we expect stimuli to end before responseWindowMs(1))

@@ -166,10 +166,9 @@ switch class(trialManager)
         stimSpecs{i} = stimSpec([],criterion,'cache',0,1,[],0,0,hz,'earlyPenalty','earlyPenalty',false,false); % do not punish responses here
 		i=i+1;
         
-        
         % required final ITL phase
 		criterion={[],i+1};
-		stimSpecs{i} = stimSpec(interTrialLuminance,criterion,'cache',0,1,[],0,1,hz,'itl','intertrial luminance',false,false); % do not punish responses here
+		stimSpecs{i} = stimSpec([],criterion,'cache',0,1,[],0,1,hz,'itl','intertrial luminance',false,false); % do not punish responses here
 		i=i+1;
         
 	case 'autopilot'

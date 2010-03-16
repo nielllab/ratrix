@@ -1,8 +1,9 @@
 function doCuedGoNoGoAnalysisBeta
 
-dateRange=[now-20 now];
+dateRange=[];
 getLicks=true;
-d=getSmalls('demo1',dateRange,-2,1,getLicks);
+location= -2; %-2 is local, 1 is server
+d=getSmalls('demo1',dateRange,location,1,getLicks);
 
 targetIsPresent = d.targetContrast~=0;
 correct = d.correct==1;
@@ -18,10 +19,10 @@ falseTrigger = earlyPenalty==1;
 if ~isnan(d.discrimStartRaw)
     normalizedStart=d.discrimStartRaw;
 else
-    normalizedStart=d.trialStartRaw + d.expectedPreRequestDurSec + d.responseWindowStartSec;
+    normalizedStart=d.trialStartRaw + d.expectedPreRequestDurSec; %add this + d.responseWindowStartSec; preResponse is punished
 end
 
-normalizedStop=mean(d.responseWindowStopSec-d.responseWindowStartSec);
+normalizedStop=mean(d.responseWindowStopSec); %add this -d.responseWindowStartSec); when preResponse is punished
 
 figure(1); hold on;
 fill([0 .1, .1, 0], [0 0 length(d.trialNumber) length(d.trialNumber)],[.8 .8 .8])

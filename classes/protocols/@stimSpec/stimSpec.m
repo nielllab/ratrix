@@ -214,7 +214,7 @@ switch nargin
             error('isStim must be logical scalar')
         end
 
-        if (isempty(spec.scaleFactor) || isempty(spec.stimulus)) && ~strcmp(spec.phaseType,'reinforced')  && ~strcmp(spec.phaseType,'earlyPenalty') 
+        if (isempty(spec.scaleFactor) || isempty(spec.stimulus)) && ~strcmp(spec.phaseType,'reinforced')  && ~strcmp(spec.phaseType,'earlyPenalty') && ~strcmp(spec.phaseType,'itl') 
             error('empty scaleFactor and stimulus allowed only for reinforced phaseType');
         end
         

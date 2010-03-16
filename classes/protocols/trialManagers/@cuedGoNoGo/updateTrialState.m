@@ -202,6 +202,35 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) &&
     end
 end % end reward handling
 
+if ~isempty(phaseType) && strcmp(phaseType,'itl') 
+    framesUntilTransition=[];
+    if window>0
+        if isempty(framesUntilTransition)
+            if correct & checkTargetIsPresent(sm,trialRecords(end).stimDetails)
+                framesUntilTransition = 100;
+            else
+                framesUntilTransition =1;
+            end
+        end
+    else
+        error('huh?')
+    end
+    spec=setFramesUntilTransition(spec,framesUntilTransition);
+    [cStim correctScale] = correctStim(sm,framesUntilTransition);
+    spec=setScaleFactor(spec,correctScale);
+    strategy='noCache';
+    if window>0
+        [floatprecision cStim] = determineColorPrecision(tm, cStim, strategy);
+        textures = cacheTextures(tm,strategy,cStim,window,floatprecision);
+        destRect = determineDestRect(tm, window, station, correctScale, cStim, strategy);
+    elseif strcmp(getDisplayMethod(tm),'LED')
+        floatprecision=[];
+    else
+        error('huh?')
+    end
+    spec=setStim(spec,cStim);
+end
+
 trialDetails.correct=correct;
 
 if strcmp(getPhaseLabel(spec),'intertrial luminance') && ischar(result) && strcmp(result,'timeout')

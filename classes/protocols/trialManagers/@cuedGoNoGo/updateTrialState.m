@@ -207,7 +207,7 @@ if ~isempty(phaseType) && strcmp(phaseType,'itl')
     if window>0
         if isempty(framesUntilTransition)
             if correct & checkTargetIsPresent(sm,trialRecords(end).stimDetails)
-                framesUntilTransition = 100;
+                framesUntilTransition = 200;
             else
                 framesUntilTransition =1;
             end

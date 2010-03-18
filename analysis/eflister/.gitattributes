@@ -96,3 +96,9 @@ phys/new/selectRecordings.m -text
 phys/new/fitRectifiedFModel.m -text
 phys/new/states.m -text
 phys/new/rectifiedFModel.m -text
+phys/new/helpers/nanmean.m -text
+phys/new/inRange.m -text
+phys/new/minmax.m -text
+phys/new/findFreqs.m -text
+phys/new/gaussMeanFit.m -text
+phys/new/fitSinusoidal.m -text

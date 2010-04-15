@@ -1,4 +1,4 @@
-function newout=fitSinusoidal(in,freqs,numContrasts,f,S,t)
+function [newout out]=fitSinusoidal(in,freqs,numContrasts,f,S,t)
 numConds=(length(freqs)*numContrasts);
 out=medianChunk(in,numConds);
 
@@ -24,7 +24,7 @@ for i=1:length(freqs)
     if true
         %using the fitted gaussian amplitudes isn't working cuz of baseline offsets
         
-        if inrange(freqs(i),minmax(f))
+        if inRange(freqs(i),minmax(f))
             thisf=freqs(i);
         elseif freqs(i)>max(f) && ((freqs(i)/max(f)) - 1) < .01 %cuz interp2 don't extrap
             thisf=max(f);

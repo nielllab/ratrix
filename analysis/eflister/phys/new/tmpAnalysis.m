@@ -2535,7 +2535,7 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
         plot(t,fits(1,:),'ko'); 
         
         [hc hf]=hist(fits(1,:),200);
-        findFreqs([hf;hc],length(knownFreqs),minmax(knownFreqs))
+        knownFreqs=round(findFreqs([hf;hc],length(knownFreqs),minmax(knownFreqs)));
         
         tStep=median(diff(t));
         prenans=round((min(t)-min(bins))/tStep);
@@ -2543,7 +2543,7 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
         
         newT=[linspace(bins(1),t(1)-tStep,prenans) t linspace(t(end)+tStep,bins(end),postnans)];
         subplot(n,1,4)
-        fixFits=fitSinusoidal([nan(2,prenans) fits nan(2,postnans)],knownFreqs,numContrasts,f,[nan(length(f),prenans) S nan(length(f),postnans)],newT); 
+        [fixFits hack]=fitSinusoidal([nan(2,prenans) fits nan(2,postnans)],knownFreqs,numContrasts,f,[nan(length(f),prenans) S nan(length(f),postnans)],newT); 
         xlim(minmax(bins));
                 
         subplot(n,1,3)
@@ -2553,15 +2553,20 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
         subplot(n,1,5)
         plot(newT,fixFits(2,:))
         xlim(minmax(bins));
-        keyboard
     end
     
     doSinusoid=true;
     
     if doSinusoid
         %this is for 03.13 data
-        hackFreqs     = [0 50 5 0 25, 50 10 50 5 0, 0 25 25 10 5, 50 10 10 0 25, 10 50 5 25 5];
-        hackContrasts = [4 2  2 1 2   4  1  5  3 2  5 3  5  5  5  3  2  3  3 4   4  1  4 1  1];
+                         %1 50 4 1 25  50 10 50 4 1  1 25 25 10 4  50 10 10 1 25  10 50 4 25 4
+        %hackFreqs     = [0 50 5 0 25, 50 10 50 5 0, 0 25 25 10 5, 50 10 10 0 25, 10 50 5 25 5];
+        
+                        %[4 2  2 1 2   1  1  5  3 2  5 3  5  5  5  3  2  3  3 4   4  4  4 1  1
+        %hackContrasts = [4 2  2 1 2   4  1  5  3 2  5 3  5  5  5  3  2  3  3 4   4  1  4 1  1];
+        
+        hackFreqs    =hack(1,:);
+        hackContrasts=hack(2,:);
         
         uFreqs=sort(unique(hackFreqs));
         uContrasts=sort(unique(hackContrasts));
@@ -2613,10 +2618,38 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
                 f1(i,j)=Pxx(uFreqs(i)+1);
                 
                 subplot(cs,length(uContrasts),length(uContrasts)*3+j)
-                plot(freqs,Pxx)
+                plot(freqs,normalize(Pxx))
                                 
+                
+                
+
+
+                
+                forChronux=cell2struct(rasters,'times');
+                for ind=1:length(forChronux)
+                    forChronux(ind).times=bound(forChronux(ind).times,lims);
+                end
+                
+
+                
+                [S,f]=mtspectrumpt(forChronux,params);
+                
+                hold on
+                plot(f,normalize(S),'k');
+
+    
+
+    
+
+    
+    
+    
+                
+                
             end
         end
+        
+        keyboard
         
         f=[f figure];
         subplot(2,1,1)

@@ -13,6 +13,9 @@ function physAnalysis
 
 %2) provide cell array of <base> from above (full paths)
 
+pth='E:\tmpPhysTxt\164\hack\03.17.09\3b43c16b7b96f501204aa3bca54bd522856d2320\';
+fileNames={'3b43c16b7b96f501204aa3bca54bd522856d2320'};
+
 %failed -- seems to have pulse problems...
 %pth='/Users/eflister/Desktop/physChk/164/10.16.08/71d175b616650bff5161fb39a38d8ea40550bd59/';
 %fileNames={'71d175b616650bff5161fb39a38d8ea40550bd59'};

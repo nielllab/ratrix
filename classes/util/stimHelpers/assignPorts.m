@@ -1,3 +1,6 @@
+%this should be a static method on trialManagers, but those are only
+%available in the new matlab way of doing OOP -- we should eventually
+%switch
 function [targetPorts distractorPorts details]=assignPorts(details,lastTrialRec,responsePorts,TMclass,allowRepeats)
 
 % figure out if this is a correction trial

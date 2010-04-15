@@ -161,7 +161,7 @@ if get(analogOutput,'MaxSamplesQueued')>=length(data) %if BufferingMode set to A
         setStatePins(station,'frame',false);
         outputsamplesOK=false;
     end
-    fprintf('took %g secs to put analog data\n',GetSecs-preAnalog)
+    fprintf('took %g secs to put analog data (if this is too long, can use multiple analogoutput objects on same device as independent buffers - also note loadtime seems to depend on sample rate (higher is better), maybe due to buffer config?)\n',GetSecs-preAnalog)
 else
     get(analogOutput,'MaxSamplesQueued')/length(data)
     error('need to manually buffer this much data for LED')

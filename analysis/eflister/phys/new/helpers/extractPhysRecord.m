@@ -1,7 +1,7 @@
 function record=extractPhysRecord(csvfile,dataBase)
 C={};
 numRecs=0;
-fid=fopen(csvfile,'rt');
+[fid msg]=fopen(csvfile,'rt');
 if fid==-1
     msg
     error('couldn''t open csv file')

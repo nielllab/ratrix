@@ -103,3 +103,4 @@ phys/new/findFreqs.m -text
 phys/new/gaussMeanFit.m -text
 phys/new/fitSinusoidal.m -text
 phys/new/bound.m -text
+phys/new/nanMeanDown.m -text

@@ -88,6 +88,9 @@ nfft=max(2^(nextpow2(N)+pad),N); % number of points in fft of prolates
 tapers=dpsschk(tapers,N,Fs); % check tapers
 J1=mtfftc(data1,tapers,nfft,Fs); % fourier transform of continuous data
 J1=J1(findx,:,:); % restrict to required frequencies
+if any(isnan(J1(:))) %edf
+    error('got nan in continuous')
+end
 [J2,Msp2,Nsp2]=mtfftpt(data2,tapers,nfft,t,f,findx); % fourier transform of discrete data
 zerosp(Nsp2==0)=1; % set zerosp to 1 for trials where no spikes were found
 S12=squeeze(mean(conj(J1).*J2,2)); % cross spectrum

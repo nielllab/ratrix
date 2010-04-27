@@ -34,8 +34,19 @@ if isNearInteger(numFreqs) && isscalar(numFreqs) && isreal(numFreqs) && inRange(
     
     ci=confint(cfun);
     if any(diff(ci(:,inds)) > diff(range))
-        error('bad fit')
+        vs=vals(inds)
+        cs=ci(:,inds);
+        
+        vs(diff(cs)>diff(range))
+        cs(:,diff(cs)>diff(range))
+        warning('bad fit') %downgraded from error
     end
+    
+    if false
+    figure
+    plot(data(1,:),data(2,:),'kx')
+    end
+    
 else
     error('numFreqs must be real scalar int 1-8')
 end

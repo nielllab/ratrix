@@ -1,19 +1,29 @@
 function compilePhysData(fileNames,stimTimes,pulseTimes,rec,stimType,targetBinsPerSec,force,figureBase,analysisFilt)
 
+%winExist needed for very long path/file names on win, but doesn't solve
+%problem that matlab can't load file...
+    function out=winExist(f)
+        [a b c d]=fileparts(f);
+        fs=dir(a);
+        [tf n]=ismember([b c],{fs.name});
+        out = tf & ~fs(n).isDir;            
+    end
+
 if analysisFilt(rec,stimType)
     
     [pth name]=fileparts([fileparts(fileNames.targetFile) '.blah']);
     prefix=fullfile(pth,name);
     
     fileGood = false;
-    if exist(fileNames.targetFile,'file') && ~force
+    if exist(fileNames.targetFile,'file') && ~force %|| winExist(fileNames.targetFile)
         load(fileNames.targetFile,'binsPerSec');
         if binsPerSec==targetBinsPerSec
             fileGood = true;
         end
     end
-    
+
     if ~fileGood
+            keyboard
         fprintf('compiling %s\n',fileNames.targetFile);
 
         resetDir(prefix);

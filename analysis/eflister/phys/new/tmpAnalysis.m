@@ -2340,18 +2340,23 @@ inds=1:length(in);
 out=interp1(inds,in,inds-amt);
 end
 
-function offsets=align(block,timestep,timeLimit)
+function offsets=align(block,timestep,timeLimit,check)
 xcs=xcorr(block',round(timeLimit/timestep)); % 1/timestep/2));
 
 [junk minds]=max(xcs);
 
 offsets=timestep*(minds-ceil(size(xcs,1)/2));
 
-if any(abs(offsets(:)))>.1
+if any(abs(offsets(:))>.1)
+    max(abs(offsets(:)))
     warning('offsets more than 100ms')
 end
 
 offsets=reshape(offsets,size(block,1),size(block,1)); %columns are list of offsets for each trial relative to every other trial
+
+if exist('check','var') && check
+    keyboard
+end
 end
 
 function [out bins]=breakup(thisStim,starts,timestep,trialDur)
@@ -2360,8 +2365,29 @@ bins=0:timestep:(trialDur + timestep);
 
 for i=1:length(starts)
     inds=thisStim(2,:)>=starts(i) & thisStim(2,:)<=starts(i)+trialDur;
-    out(i,:)=interp1(thisStim(2,inds)-thisStim(2,find(inds,1)),thisStim(1,inds),bins,'pchip',nan);
-    nanStart(i)=find(isnan(out(i,:)),1);
+    if false
+        out(i,:)=interp1(thisStim(2,inds)-thisStim(2,find(inds,1)),thisStim(1,inds),bins,'pchip',nan); %losing low contrast high freq signals
+    else
+        original=thisStim(1,inds);
+        if abs(1-median(diff(thisStim(2,inds)))/timestep)<.01
+            d=length(bins)-length(original);
+            if d>0
+                original=[original nan(1,d)];
+            elseif d<0
+                original=original(1:length(bins));
+            end
+            out(i,:)=original;
+        else
+            error('bad timestep')
+        end
+    end
+    firstNan=find(isnan(out(i,:)),1);
+    if isempty(firstNan)
+        nanStart(i)=size(out,2)+1;
+    else
+        nanStart(i)=firstNan;
+    end
+    out(i,:)=out(i,:)-mean(out(i,~isnan(out(i,:))));
 end
 
 lastGood=min(nanStart(1:end-1)); %last trial is probably partial (what about first trial?)
@@ -2407,19 +2433,75 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
     ex=1; %consider picking a better one
     offsets=offsets(:,ex);
     
-    subplot(2,1,1)
-    plot(block')
+    trialStarts=data.rptStarts(1:length(offsets))'-offsets;
+    [block bins]=breakup(thisStim,trialStarts,timestep,trialDur);
     
-    [block bins]=breakup(thisStim,data.rptStarts(1:length(offsets))'-offsets,timestep,trialDur);
+    subplot(4,1,1)
+    plot(bins,block')
+      xlim([0 trialDur])
     
-    subplot(2,1,2)
-    plot(block')
+    subplot(4,1,2)
+    freqs=0:ceil(1/(2*timestep));
+    rez=.5;
     
-    if size(block,1)~=47
-        error('47 error')
-    end
-    
-    keyboard
+    p=.95;
+        params.err=[2 p]; %0 for none, [1 p] for theoretical(?), [2 p] for jackknife
+        params.Fs=1/timestep;
+        params.trialave=1;
+        [garbage,garbage,garbage,garbage,garbage,garbage,params]=getparams(params);
+        params.err=0;
+        
+        movingwin=[rez rez]; %[window winstep] (in secs)
+        
+        movingwin=[.5 .05];
+        
+ 
+        [S,t,specf]=mtspecgramc(block',movingwin,params);
+
+        S=log(S');
+        imagesc(t,specf,S);
+        
+        numContrasts=5;
+        knownFreqs=[1 5 10 25 50];%how get these?
+        
+        hold on
+        fits=nan(2,size(S,2));
+        for i=1:size(S,2)
+            if false %this is wrong and was designed for S', fyi
+                samps=[];
+                for j=1:size(S,2)
+                    samps=[samps specf(j)*ones(1,round(S(i,j)*10^4))];
+                end
+                plot(t(i),normfit(samps),'ko');
+            end
+            fits(:,i)=gaussMeanFit([specf; S(:,i)'],minmax(knownFreqs));
+        end
+        plot(t,fits(1,:),'ko');
+        
+        [hc hf]=hist(fits(1,:),200);
+        knownFreqs=round(findFreqs([hf;hc],length(knownFreqs),minmax(knownFreqs)));
+        
+        tStep=median(diff(t));
+        prenans=round((min(t)-min(bins))/tStep);
+        postnans=round((max(bins)-max(t))/tStep);
+        
+        newT=[linspace(bins(1),t(1)-tStep,prenans) t linspace(t(end)+tStep,bins(end),postnans)];
+        subplot(4,1,3)
+        [fixFits hack]=fitSinusoidal([nan(2,prenans) fits nan(2,postnans)],knownFreqs,numContrasts,specf,[nan(length(specf),prenans) S nan(length(specf),postnans)],newT);
+        xlim(minmax(bins));
+        
+        subplot(4,1,2)
+        plot(newT,fixFits(1,:),'k');
+        xlim(minmax(bins));
+        
+        subplot(4,1,4)
+        plot(newT,fixFits(2,:))
+        xlim(minmax(bins));   
+        
+        
+        
+        
+
     
     
     
@@ -2545,9 +2627,7 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
     else
         error('haven''t written yet')
     end
-    end
-    
-%%%%here    
+
     
     
     psth=0;
@@ -2639,9 +2719,9 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
             error('all trials had a nan')
         end
         
-        tic
+
         [S,t,specf]=mtspecgramc(trimBlock,movingwin,params);
-        toc
+
         S=log(S');
         imagesc(t,specf,S);
         
@@ -2686,6 +2766,10 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
     doSinusoid=true;
     
     if doSinusoid
+    end
+    
+end
+
         %this is for 03.13 data
         %1 50 4 1 25  50 10 50 4 1  1 25 25 10 4  50 10 10 1 25  10 50 4 25 4
         %hackFreqs     = [0 50 5 0 25, 50 10 50 5 0, 0 25 25 10 5, 50 10 10 0 25, 10 50 5 25 5];
@@ -2699,11 +2783,13 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
         uFreqs=sort(unique(hackFreqs));
         uContrasts=sort(unique(hackContrasts));
         
-        chunkLen=(thisLen+1)/length(hackFreqs);
-        chunkDur= thisDur/length(hackFreqs);
+        %chunkLen=ceil(length(bins)/length(hackFreqs));
+        chunkDur= trialDur/length(hackFreqs);
         
         %allStims=allStims-repmat(nanMeanDown(allStims),size(allStims,1),1);
         %plot(allStims)
+        
+        n=5;
         
         thisFig=1;
         for i=1:length(uFreqs)
@@ -2720,18 +2806,22 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
                     error('c error')
                 end
                 freqInds(i,j)=fInds(cInd);
-                theseInds=(freqInds(i,j)-1)*chunkLen+(1:chunkLen-1); %need chunkLen-1 cuz right now we have thisLen=2499 -- shouldn't be -- does pushing it to 2500 help alignment?
+                
+                
+                
+                %theseInds=(freqInds(i,j)-1)*chunkLen+(1:chunkLen); %-1); %need chunkLen-1 cuz right now we have thisLen=2499 -- shouldn't be -- does pushing it to 2500 help alignment?
                 lims=[0 chunkDur]+(freqInds(i,j)-1)*chunkDur;
                 
                 cs=5;
                 
+  
                 
-                
-                
-                %limit these to a wavelength or so?
-                localOffsets=align(trimBlock(theseInds,:)',timestep,2/uFreqs(i));
+                %theseInds=theseInds(theseInds<=size(block,2));
+                localOffsets=align(block(:,feval(@(x) max(1,x(1)):min(size(block,2),x(2)), round(size(block,2)*(lims./trialDur)))),timestep,2/uFreqs(i));
                 localOffsets=localOffsets(:,ex);
                 
+                chunkStarts=lims(1)+trialStarts-localOffsets;
+                    [chunkBlock chunkBins]=breakup(thisStim,chunkStarts,timestep,chunkDur); %not getting alignment... why?
                 
                 subplot(cs,length(uContrasts),j) % (j-1)*cs)
                 
@@ -2748,34 +2838,68 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
                 
                 
                 %plot(bins(theseInds),allStims(theseInds,:))
-                plot((bins(repmat(theseInds,size(trimBlock,2),1))+repmat(localOffsets,1,length(theseInds)))',trimBlock(theseInds,:)+repmat(.1*(0:size(trimBlock,2)-1),length(theseInds),1))
-                xlim(lims)
-                title(sprintf('f=%ghz c=%g',uFreqs(i),j))
+                %plot((bins(repmat(theseInds,size(trimBlock,2),1))+repmat(localOffsets,1,length(theseInds)))',trimBlock(theseInds,:)+repmat(.1*(0:size(trimBlock,2)-1),length(theseInds),1))
+                %xlim(lims)
                 
-                if j==4 && uFreqs(i)==25 && false
+                plot(chunkBins,chunkBlock'+repmat(.1*(0:size(chunkBlock,1)-1),size(chunkBlock,2),1))
+                xlim([0 chunkDur])
+                title(sprintf('f=%ghz c=%g',uFreqs(i),j))
+
+                if j==4 && uFreqs(i)==25 
+                    if false
                     subplot(cs,length(uContrasts),length(uContrasts)+j)  % (j-1)*cs+1)
                     plot(localOffsets)
+                    end
+                                    localOffsets=align(block(:,feval(@(x) x(1):x(2), round(size(block,2)*(lims./trialDur)))),timestep,2/uFreqs(i),true);
                     keyboard
                 end
                 
-                test=false;
-                if test
-                    psth(theseInds)=0;
-                    for ind=1:length(rasters)
-                        rasters{ind}=makeSpikes(lims,[ uFreqs(i)*[1 .5]],20,timestep);
-                        psth(theseInds)=psth(theseInds)+hist(rasters{ind},pbins(theseInds));
+
+                
+                
+                test=true;
+                
+                thisPsth=0;
+                thisBpsth=0;
+                for ind=1:size(chunkBlock,1)
+                    if test
+                        theseRasters   {ind}=makeSpikes([0 chunkDur],[ uFreqs(i)*[1 .5]],20,timestep);
+                        theseBRasters  {ind}=makeSpikes([0 chunkDur],[ uFreqs(i)*[1 .5]],5 ,timestep);
+                        theseInBursts  {ind}=makeSpikes([0 chunkDur],[ uFreqs(i)*[1 .5]],2 ,timestep);
+                        theseViolations{ind}=makeSpikes([0 chunkDur],[ uFreqs(i)*[1 .5]],1 ,timestep);
+                    else
+                        
+                        theseRasters   {ind}=separate(data.tonics   ,chunkStarts(ind),chunkStarts(ind)+chunkDur);
+                        theseBRasters  {ind}=separate(data.bsts     ,chunkStarts(ind),chunkStarts(ind)+chunkDur);
+                        theseInBursts  {ind}=separate(data.bstNotFst,chunkStarts(ind),chunkStarts(ind)+chunkDur);
+                        theseViolations{ind}=separate(data.refVios  ,chunkStarts(ind),chunkStarts(ind)+chunkDur);
                     end
+                    thisPsth =thisPsth +hist(theseRasters {ind},chunkBins);
+                    thisBpsth=thisBpsth+hist(theseBRasters{ind},chunkBins);
                 end
+                
+
+                
+                
+                
+                
+                
+                
+                
                 
                 subplot(cs,length(uContrasts),length(uContrasts)+j)  % (j-1)*cs+1)
                 
+                if false
                 theseRasters   =cellfun(@(x,y) x+y, rasters   ,num2cell(localOffsets'),'UniformOutput',false);
                 theseBRasters  =cellfun(@(x,y) x+y, bursts    ,num2cell(localOffsets'),'UniformOutput',false);
                 theseInBursts  =cellfun(@(x,y) x+y, inBursts  ,num2cell(localOffsets'),'UniformOutput',false);
                 theseViolations=cellfun(@(x,y) x+y, violations,num2cell(localOffsets'),'UniformOutput',false);
+                end
                 
-                cellfun(@(c) doRaster( c{1} ,c{2},lims),{ {theseRasters,'k.'} {theseBRasters,'ro'} {theseInBursts,'r.'} {theseViolations,'bo'} });
-                xlim(lims)
+                cellfun(@(c) doRaster( c{1} ,c{2},[0 chunkDur]),{ {theseRasters,'k.'} {theseBRasters,'ro'} {theseInBursts,'r.'} {theseViolations,'bo'} });
+                xlim([0 chunkDur])
+                
+                if false
                 
                 thisPsth=0;
                 thisBpsth=0;
@@ -2784,13 +2908,15 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
                     thisBpsth=thisBpsth+hist(theseBRasters{inc},pbins);
                 end
                 
+                end
                 
                 subplot(cs,length(uContrasts),length(uContrasts)*2+j) %(j-1)*cs+2)
-                plot(pbins(theseInds),thisPsth(theseInds),'k')
+                plot(chunkBins,thisPsth,'k')
                 hold on
-                plot(pbins(theseInds),thisBpsth(theseInds),'r')
-                xlim(lims)
+                plot(chunkBins,thisBpsth,'r')
+                xlim([0 chunkDur])
                 
+                if false
                 f0(i,j)=sum(thisPsth(theseInds))/length(data.rptStarts); %won't be quite right cuz of partial trials at beginning and end
                 
                 [Pxx,Pxxc,fr] = pmtm(thisPsth(theseInds),[],freqs,1/timestep,.95);
@@ -2917,8 +3043,10 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
                     figure(oldFig);
                 end
 
+                end
             end
         end
+        keyboard
         
         f=[f figure];
         
@@ -3047,7 +3175,7 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
             ylabel('contrast')
         end
         
-    end
+    
     keyboard
     if false %the old way makes too many graphics objects and overwhelms gfx memory
         

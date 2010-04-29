@@ -1,18 +1,26 @@
 function cfun=fitRectifiedFModel(numHarmonics,data,fs,f1)
-test=true;
+test=false;
 if test
     clc
     close all
     
     fs = 1000;
     f1 = 10;
-    
     f0 = 25;
+    
     amp1=30;
     phase1 = pi/4;
     amp2=10;
     phase2 = 3*pi/2;
     data=3*randn(1,10*fs)+f0; %any more noise than this and it fails pretty badly
+    
+    if true
+        amp1=5;
+        amp2=0;
+        data=zeros(1,10*fs)+f0;
+    end
+    
+    
 else
     if numHarmonics~=2
         error('2 harmonics hardcoded right now')

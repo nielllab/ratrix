@@ -1,4 +1,4 @@
-function [newout out]=fitSinusoidal(in,freqs,numContrasts,f,S,t)
+function [newout out amp]=fitSinusoidal(in,freqs,numContrasts,f,S,t)
 numConds=(length(freqs)*numContrasts);
 out=medianChunk(in,numConds);
 
@@ -49,6 +49,9 @@ plot(t,offsets+expand(amp,amps)')
 plot(t,offsets+repmat(min(amp'),size(offsets,1),1),'k')
 
 newout=expand(out,in);
+
+amp=sort(amp','descend');
+amp=exp(flipud(amp(1:numContrasts,:)));
 end
 
 function out=medianChunk(in,numConds)

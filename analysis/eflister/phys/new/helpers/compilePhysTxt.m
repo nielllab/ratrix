@@ -68,6 +68,23 @@ for j=1:numStims
             
             fileNames.targetFile=fullfile(targetDir,desc,[desc '.compiled.mat']);
             
+            if IsWin 
+                if ~isempty(findstr(fileNames.targetFile,'2.junk.z.47.34.t.2012.45-2042.39.chunk.1.acf4f35b54186cd6055697b58718da28e7b2bf80'))
+                %temp hack cuz windows printf rounds differently than osx (see http://www.mathworks.com/support/service_requests/Service_Request_Detail.do?ID=242675)
+                %better to search for 2042.39 and replace with 2042.38
+                    fileNames.targetFile='F:\a\b\164\04.15.09\acf4f35b54186cd6055697b58718da28e7b2bf80\2.junk.z.47.34.t.2012.45-2042.38.chunk.1.acf4f35b54186cd6055697b58718da28e7b2bf80\2.junk.z.47.34.t.2012.45-2042.38.chunk.1.acf4f35b54186cd6055697b58718da28e7b2bf80.compiled.mat';
+                elseif ~isempty(findstr(fileNames.targetFile,'3.gaussian.z.47.34.t.2042.39-4641.chunk.1.acf4f35b54186cd6055697b58718da28e7b2bf80'))
+                    %2042.39 -> 2042.38
+                    fileNames.targetFile='F:\a\b\164\04.15.09\acf4f35b54186cd6055697b58718da28e7b2bf80\3.gaussian.z.47.34.t.2042.38-4641.chunk.1.acf4f35b54186cd6055697b58718da28e7b2bf80\3.gaussian.z.47.34.t.2042.38-4641.chunk.1.acf4f35b54186cd6055697b58718da28e7b2bf80.compiled.mat';
+                elseif ~isempty(findstr(fileNames.targetFile,'2.sinusoid.z.38.885.t.1401.96-1572.42.chunk.1.4b45921ce9ef4421aa984128a39f2203b8f9a381'))
+                    %1572.42 -> 1572.41
+                    fileNames.targetFile='F:\a\b\188\04.23.09\4b45921ce9ef4421aa984128a39f2203b8f9a381\2.sinusoid.z.38.885.t.1401.96-1572.41.chunk.1.4b45921ce9ef4421aa984128a39f2203b8f9a381\2.sinusoid.z.38.885.t.1401.96-1572.41.chunk.1.4b45921ce9ef4421aa984128a39f2203b8f9a381.compiled.mat';
+                elseif ~isempty(findstr(fileNames.targetFile,'3.junk.z.38.885.t.1572.42-1576.86.chunk.1.4b45921ce9ef4421aa984128a39f2203b8f9a381'))
+                    %1572.42 -> 1572.41
+                    fileNames.targetFile='F:\a\b\188\04.23.09\4b45921ce9ef4421aa984128a39f2203b8f9a381\3.junk.z.38.885.t.1572.41-1576.86.chunk.1.4b45921ce9ef4421aa984128a39f2203b8f9a381\3.junk.z.38.885.t.1572.41-1576.86.chunk.1.4b45921ce9ef4421aa984128a39f2203b8f9a381.compiled.mat';                    
+                end
+            end
+            
             recM=rec;
             recM.chunks=rec.chunks(chunkNum);
             recM.stimTimes=[];

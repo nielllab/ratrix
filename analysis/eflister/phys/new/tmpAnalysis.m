@@ -37,7 +37,7 @@ data.fileNames=fileNames;
 data.mins=(stimTimes(2)-stimTimes(1))/60;
 
 if ... % selectRecordings('gauss',stimType,data) %
-        data.mins>=3 && ismember(stimType,{'sinusoid','sinusoid(new)','squarefreqs'}) && ismember(rec.date,datenum({'03.13.09'},'mm.dd.yy'))
+        data.mins>=3 && ismember(stimType,{'sinusoid','sinusoid(new)','squarefreqs'}) % && ismember(rec.date,datenum({'03.13.09'},'mm.dd.yy'))
     % && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && ismember(rec.date,datenum({'04.15.09'},'mm.dd.yy')) %'hateren'
     
     %        (...
@@ -256,9 +256,9 @@ if isempty(lines) || isempty(findstr(lines{end},pth))
     if status~=0
         [message,errnum]=ferror(fid)
     end
-    lines{end+1}=sprintf('%d\t%3.1f mins\t%s',length(lines)+1,mins,pth);
+    lines{end+1}=sprintf('%d\t%3.1f mins\t%s\n',length(lines)+1,mins,pth);
     %lines{end}
-    fprintf(fid,[lines{end} '\n']); %used to have the \n in the sprintf above, and windows, but not osx, says 'Warning: Invalid escape sequence appears in format string.' and then fails to actually add the \n to the file.
+    fprintf(fid,restoreControls(lines{end})); %without restoreControls, windows, but not osx, says 'Warning: Invalid escape sequence appears in format string.' and then fails to actually add the \n to the file.
     fprintf('\tadding summary line\n')
 else
     fprintf('\tmatch!\n')
@@ -3262,6 +3262,13 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
             
         catch ex
             ex.message
+            getReport(ex)
+            if strcmp(ex.message,'Out of memory. Type HELP MEMORY for your options.')
+                error('matlab needs to restart -- OOM');
+            elseif strcmp(ex.message,'Matrix dimensions must agree.')
+                error('what''s this about?')
+            end
+            
             warning('skipping sinusoidal due to error')
         end
     else
@@ -3763,11 +3770,39 @@ tic
 data=load(fileNames.targetFile);
 toc
 
-%something is dying here on windows: 164 04.15.09 1.sinusoid.z.47.34.t.2614.01-3169.56.chunk.1.8d2b23279f87853a7c63e4ab0ed38b8b150c317d
-
 try
     rptStarts=data.stimBreaks; %TODO: checks below for this case (this is the index pulse case)
-catch
+    %this should fail on every dataset -- Reference to non-existent field 'stimBreaks'.
+    
+    offsets=data.bestBinOffsets;  %we're not going through the catch case below -- not sure this is ok or that this assignment to offsets is right...
+     %only on windows does this?  haven't tried sinusoidals on osx...
+    if all(cellfun(@(x) isempty(findstr( fileNames.targetFile,x)),{...
+            '1.sinusoid.z.47.34.t.2614.01-3169.56.chunk.1.8d2b23279f87853a7c63e4ab0ed38b8b150c317d',...
+            '1.sinusoid.z.47.88.t.496.35-1310.29.chunk.1.89493235e157403e6bad4b39b63b1c6234ea45dd',...
+            '4.sinusoid.z.38.885.t.1576.86-1932.14.chunk.1.4b45921ce9ef4421aa984128a39f2203b8f9a381',...
+            '4.sinusoid.z.38.885.t.1932.15-3328.chunk.2.4b45921ce9ef4421aa984128a39f2203b8f9a381',...
+            '4.sinusoid.z.38.885.t.3328-3673.31.chunk.3.4b45921ce9ef4421aa984128a39f2203b8f9a381',...
+            '4.sinusoid.z.38.26.t.456.372-1262.21.chunk.1.a7e4526229bb5cd78d91e543fc4a0125360ea849',...
+            '1.sinusoid.z.52.48.t.4225-5549.31.chunk.1.9196f9c63cf78cac462dac2cedd55306961b7fd0',...
+            '1.sinusoid.z.27.89.t.0.007-2338.31.chunk.1.eb9916e6e433e0599a743952acd19ec218eb83cb',...
+            '6.sinusoid.z.27.83.t.1682.3-2938.3.chunk.1.c298e72f2ac2edbe8c043c41e72ebc6432394504',...
+            '8.sinusoid(new).z.27.83.t.3060.85-4846.62.chunk.1.c298e72f2ac2edbe8c043c41e72ebc6432394504',...
+            '1.sinusoid.z.28.04.t.226.44-1481.26.chunk.1.e8b33f5945b56d2bb55c8c098a1d72de73206822',...
+            '1.squarefreqs.z.31.t.6123.74-6728.chunk.1.93213cc4a832b81a0ba1bf4e1e6afbfcf64b82fc',...
+            '1.squarefreqs.z.31.t.6728-6980.42.chunk.2.93213cc4a832b81a0ba1bf4e1e6afbfcf64b82fc',...
+            '1.squarefreqs.z.31.t.6980.45-7547.chunk.3.93213cc4a832b81a0ba1bf4e1e6afbfcf64b82fc'...
+            }))
+        fileNames.targetFile
+        warning('not going through catch case for this file...  why?')
+    end
+    %isempty(findstr(fileNames.targetFile,'1.sinusoid.z.47.34.t.2614.01-3169.56.chunk.1.8d2b23279f87853a7c63e4ab0ed38b8b150c317d'))
+
+
+    
+catch ex
+%    ex.message
+%    fprintf('\ndoing catch case (every dataset should do this)\n')
+    
     if ~isempty(data.repeatTimes)
         rptStarts=data.repeatTimes(1,:);
         if ~all(cellfun(@iscell,{data.phys data.physT data.binnedVals data.binnedT}))

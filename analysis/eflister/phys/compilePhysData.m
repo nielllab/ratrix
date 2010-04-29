@@ -23,6 +23,8 @@ if analysisFilt(rec,stimType)
     end
 
     if ~fileGood
+        dir(pth)
+        name
             keyboard
         fprintf('compiling %s\n',fileNames.targetFile);
 

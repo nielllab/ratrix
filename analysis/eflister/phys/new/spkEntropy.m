@@ -46,6 +46,8 @@ if test
         bitsPerSpk(i)=entHelp(spkTimesSecs,1,bins(i));
     end
     plot(bins,bitsPerSpk)
+    
+    keyboard
 end
 
 function [bitsPerSpk bitsPerSec isiDist]=entHelp(spkTimesSecs,maxSecs,nBins)

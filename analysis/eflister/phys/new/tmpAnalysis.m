@@ -37,7 +37,7 @@ data.fileNames=fileNames;
 data.mins=(stimTimes(2)-stimTimes(1))/60;
 
 if ... % selectRecordings('gauss',stimType,data) %
-        data.mins>=3 && ismember(stimType,{'sinusoid','sinusoid(new)','squarefreqs'}) && ismember(rec.date,datenum({'03.13.09'},'mm.dd.yy'))
+        data.mins>=3 && ismember(stimType,{'sinusoid','sinusoid(new)','squarefreqs'}) % && ismember(rec.date,datenum({'03.13.09'},'mm.dd.yy'))
     % && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && ismember(rec.date,datenum({'04.15.09'},'mm.dd.yy')) %'hateren'
     
     %        (...
@@ -256,8 +256,9 @@ if isempty(lines) || isempty(findstr(lines{end},pth))
     if status~=0
         [message,errnum]=ferror(fid)
     end
-    lines{end+1}=sprintf('%d\t%3.1f mins\t%s\n',length(lines)+1,mins,pth);
-    fprintf(fid,lines{end});
+    lines{end+1}=sprintf('%d\t%3.1f mins\t%s',length(lines)+1,mins,pth);
+    %lines{end}
+    fprintf(fid,[lines{end} '\n']); %used to have the \n in the sprintf above, and windows, but not osx, says 'Warning: Invalid escape sequence appears in format string.'
     fprintf('\tadding summary line\n')
 else
     fprintf('\tmatch!\n')
@@ -2356,6 +2357,10 @@ offsets=reshape(offsets,size(block,1),size(block,1)); %columns are list of offse
 
 if exist('check','var') && check
     keyboard
+    plot(repmat(timestep*(1:size(block,2))',1,size(block,1))+repmat(offsets(:,1)',size(block,2),1),block')
+    
+    junk=repmat(offsets(:,1)',size(block,2),1);
+    plot(junk,'r')
 end
 end
 
@@ -2392,6 +2397,10 @@ end
 
 lastGood=min(nanStart(1:end-1)); %last trial is probably partial (what about first trial?)
 if lastGood/length(bins) < .95
+    for i=1:length(starts)-1
+        plot(i+thisStim(1,thisStim(2,:)>=starts(i) & thisStim(2,:)<=starts(i+1)))
+        hold on
+    end
     error('early nans')
 end
 
@@ -2417,34 +2426,38 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
         warning('%d index pulses missed',sum(missed))
     end
     
-    if false
-        thisStim=data.stim;
-        error('not implmented')
-    else
-        thisStim=data.frames'; % won't have equal dt's
-    end
+    doSinusoidal=true;
     
-    trialDur=median(diff(data.rptStarts));
-    timestep=median(diff(thisStim(2,:)));
-    
-    [block bins]=breakup(thisStim,data.rptStarts,timestep,trialDur);
-    
-    offsets=align(block,timestep,1);
-    ex=1; %consider picking a better one
-    offsets=offsets(:,ex);
-    
-    trialStarts=data.rptStarts(1:length(offsets))'-offsets;
-    [block bins]=breakup(thisStim,trialStarts,timestep,trialDur);
-    
-    subplot(4,1,1)
-    plot(bins,block')
-      xlim([0 trialDur])
-    
-    subplot(4,1,2)
-    freqs=0:ceil(1/(2*timestep));
-    rez=.5;
-    
-    p=.95;
+    if doSinusoidal
+        if false
+            thisStim=data.stim;
+            error('not implmented')
+        else
+            thisStim=data.frames'; % won't have equal dt's
+        end
+        
+        trialDur=median(diff(data.rptStarts));
+        timestep=median(diff(thisStim(2,:)));
+        
+        try
+        [block bins]=breakup(thisStim,data.rptStarts,timestep,trialDur);
+        
+        offsets=align(block,timestep,1);
+        ex=1; %consider picking a better one
+        offsets=offsets(:,ex);
+        
+        trialStarts=data.rptStarts(1:length(offsets))'-offsets;
+        [block bins]=breakup(thisStim,trialStarts,timestep,trialDur);
+        
+        subplot(4,1,1)
+        plot(bins,block')
+        xlim([0 trialDur])
+        
+        subplot(4,1,2)
+        freqs=0:ceil(1/(2*timestep));
+        rez=.5;
+        
+        p=.95;
         params.err=[2 p]; %0 for none, [1 p] for theoretical(?), [2 p] for jackknife
         params.Fs=1/timestep;
         params.trialave=1;
@@ -2455,9 +2468,9 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
         
         movingwin=[.5 .05];
         
- 
+        
         [S,t,specf]=mtspecgramc(block',movingwin,params);
-
+        
         S=log(S');
         imagesc(t,specf,S);
         
@@ -2496,280 +2509,280 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
         
         subplot(4,1,4)
         plot(newT,fixFits(2,:))
-        xlim(minmax(bins));   
+        xlim(minmax(bins));
         
         
         
         
-
-    
-    
-    
-    
-
-    if false
-    
-        minLength=inf;
-    maxLength=0;
-    
-    for i=1:length(data.rptStarts)
-        if i==length(data.rptStarts)
-            endT=data.rptStarts(i)+median(diff(data.rptStarts)); %TODO: figure out better way
-        else
-            endT=data.rptStarts(i+1);
-        end
-        
-        %this introduces a few ms of jitter because of the jitter of the
-        %index pulse wrt the crt, plus crt jitter/frame drops accumulates through each
-        %trial.  and if using data.frames, framedrops screw things up...
-        inds{i}=find(thisStim(2,:)>=data.rptStarts(i) & thisStim(2,:)<endT);
         
         
-        if length(inds{i})<minLength && i~=length(data.rptStarts)
-            minLength=length(inds{i});
-        end
-        if length(inds{i})>maxLength
-            maxLength=length(inds{i});
-        end
         
-        rasters{i}=separate(data.tonics,data.rptStarts(i),endT);
-        bursts{i}=separate(data.bsts,data.rptStarts(i),endT);
-        inBursts{i}=separate(data.bstNotFst,data.rptStarts(i),endT);
-        violations{i}=separate(data.refVios,data.rptStarts(i),endT);
-    end
-    
-    useMinLength=false;
-    
-    if useMinLength
-        len=minLength;
-    else
-        len=maxLength;
-    end
-    
-        timestep=median(diff(thisStim(2,:)));
-    maxTime=len*timestep;
-    %bins=0:timestep:(len-1)*timestep;
-    thisDur=thisLen*timestep;
-    
-
-    
-    %%%%%
-    
-    goodRefs=[];
-    thisLen=median(cellfun(@length,inds));
-    block=nan(length(data.rptStarts),len);
-    for i=1:length(inds)
-        if useMinLength
-            block(i,:)=thisStim(1,inds{i}(1:len));
-            error('not implemented')
-        else
-            block(i,1:length(inds{i}))=interp1(thisStim(1,inds{i}),thisStim(2,inds{i})-thisStim(2,inds{i}(1)),bins,'pchip');
-        end
         
-        if length(inds{i})==thisLen
-            goodRefs(end+1)=i;
-        end
-    end
-    
-    if useMinLength
-        tmp=block(1:end-1,:);
-        if any(isnan(tmp(:)))
-            error('nan error')
-        end
-    end
-    
-    if length(inds{end})/mean(cellfun(@(x)length(x),inds))<.95 %last trial is probably partial (what about first trial?)
-        block=block(1:end-1,:);
         
-        rasters=rasters(1:end-1);
-        bursts=bursts(1:end-1);
-        inBursts=inBursts(1:end-1);
-        violations=violations(1:end-1);
-    end
-    
-
-    
-    if ~isempty(goodRefs)
-        
-        offsets=align(block,timestep,1);
         
         if false
-            subplot(2,1,1)
-            plot((offsets + repmat(timestep*.5*(1:size(block,1))',1,size(block,1)))')
-            subplot(2,1,2)
-            plot(data.offsets)
-        end
-    else
-        error('no good refs')
-    end
-    
-    if isempty(data.offsets)
-        ex = min(goodRefs);
-        
-        offsets=offsets(:,ex); %((1:size(block,1))+(ex-1)*size(block,1),:);
-        
-        subplot(2,1,1)
-        plot(block')
-        
-        for i=1:size(block,1)
             
-            rasters{i}=rasters{i}+offsets(i);
-            bursts{i}= bursts{i}+offsets(i);
-            inBursts{i}=inBursts{i}+offsets(i);
-            violations{i}=violations{i}+offsets(i);
+            minLength=inf;
+            maxLength=0;
             
-            % TODO: need to also fix block -- should cover all stim stuff
-            block(i,:)=shift(block(i,:),offsets(i)/timestep);
-        end
-        
-        subplot(2,1,2)
-        plot(block')
-    else
-        error('haven''t written yet')
-    end
-
-    
-    
-    psth=0;
-    bpsth=0;
-    %pbins=0:.01:maxTime;
-    %pbins=0:.05:maxTime;
-    pbins=0:timestep:maxTime;
-    
-    if false
-        block=mean(block);
-    end
-    
-    block=block'-min(block(:));
-    block=block/max(block(:));
-    
-    for i=1:length(rasters)
-        psth=psth+hist(rasters{i}(rasters{i}<=maxTime),pbins);
-        bpsth=bpsth+hist(bursts{i}(bursts{i}<=maxTime),pbins);
-    end
-    
-    n=5;
-    
-    avgStim=nanmean(block');
-    
-    subplot(n,1,1)
-    allStims=repmat(.1*(0:size(block,2)-1),size(block,1),1)+block+1;
-    plot(bins,allStims)
-    xlim([0 thisDur])
-    
-    subplot(n,1,2)
-    plot(0:timestep:timestep*(length(avgStim)-1),avgStim)
-    xlim([0 thisDur])
-    
-    subplot(n,1,3)
-    freqs=0:ceil(1/(2*timestep));
-    rez=.5;
-    
-    if false
-        [stft fr t p]=spectrogram(avgStim-mean(avgStim),round(rez/timestep),[],freqs,1/timestep); %phase misalignments will cause bad cancellations here
-        imagesc(t,fr,log(p))
-    else
-        
-        p=.95;
-        params.err=[2 p]; %0 for none, [1 p] for theoretical(?), [2 p] for jackknife
-        params.Fs=1/timestep;
-        params.trialave=1;
-        [garbage,garbage,garbage,garbage,garbage,garbage,params]=getparams(params);
-        params.err=0;
-        
-        movingwin=[rez rez]; %[window winstep] (in secs)
-        
-        movingwin=[.5 .05];
-        
-        for i=1:size(block,2)
-            block(:,i)=block(:,i)-mean(block(~isnan(block(:,i)),i));
-        end
-        
-        %trimBlock=block(1:end-1,:); %exclude last trial cuz it's probably partial (what about first trials...?)
-        blockNan=find(sum(isnan(block'))>0,1);
-        if ~isempty(blockNan)
-            if blockNan/size(block,1)<.95
-                error('early nans')
+            for i=1:length(data.rptStarts)
+                if i==length(data.rptStarts)
+                    endT=data.rptStarts(i)+median(diff(data.rptStarts)); %TODO: figure out better way
+                else
+                    endT=data.rptStarts(i+1);
+                end
+                
+                %this introduces a few ms of jitter because of the jitter of the
+                %index pulse wrt the crt, plus crt jitter/frame drops accumulates through each
+                %trial.  and if using data.frames, framedrops screw things up...
+                inds{i}=find(thisStim(2,:)>=data.rptStarts(i) & thisStim(2,:)<endT);
+                
+                
+                if length(inds{i})<minLength && i~=length(data.rptStarts)
+                    minLength=length(inds{i});
+                end
+                if length(inds{i})>maxLength
+                    maxLength=length(inds{i});
+                end
+                
+                rasters{i}=separate(data.tonics,data.rptStarts(i),endT);
+                bursts{i}=separate(data.bsts,data.rptStarts(i),endT);
+                inBursts{i}=separate(data.bstNotFst,data.rptStarts(i),endT);
+                violations{i}=separate(data.refVios,data.rptStarts(i),endT);
             end
-            trimBlock=block(1:blockNan-1,:);
-        else
-            trimBlock=block;
-        end
-        
-        if false
-            blockNans=isnan(block);
-            blockNan=0;
-            for col=1:size(blockNans,1)
-                if blockNan<=0 && sum(blockNans(col,:))>0
-                    blockNan=col;
-                    if col/size(blockNans,1)<.95
+            
+            useMinLength=false;
+            
+            if useMinLength
+                len=minLength;
+            else
+                len=maxLength;
+            end
+            
+            timestep=median(diff(thisStim(2,:)));
+            maxTime=len*timestep;
+            %bins=0:timestep:(len-1)*timestep;
+            thisDur=thisLen*timestep;
+            
+            
+            
+            %%%%%
+            
+            goodRefs=[];
+            thisLen=median(cellfun(@length,inds));
+            block=nan(length(data.rptStarts),len);
+            for i=1:length(inds)
+                if useMinLength
+                    block(i,:)=thisStim(1,inds{i}(1:len));
+                    error('not implemented')
+                else
+                    block(i,1:length(inds{i}))=interp1(thisStim(1,inds{i}),thisStim(2,inds{i})-thisStim(2,inds{i}(1)),bins,'pchip');
+                end
+                
+                if length(inds{i})==thisLen
+                    goodRefs(end+1)=i;
+                end
+            end
+            
+            if useMinLength
+                tmp=block(1:end-1,:);
+                if any(isnan(tmp(:)))
+                    error('nan error')
+                end
+            end
+            
+            if length(inds{end})/mean(cellfun(@(x)length(x),inds))<.95 %last trial is probably partial (what about first trial?)
+                block=block(1:end-1,:);
+                
+                rasters=rasters(1:end-1);
+                bursts=bursts(1:end-1);
+                inBursts=inBursts(1:end-1);
+                violations=violations(1:end-1);
+            end
+            
+            
+            
+            if ~isempty(goodRefs)
+                
+                offsets=align(block,timestep,1);
+                
+                if false
+                    subplot(2,1,1)
+                    plot((offsets + repmat(timestep*.5*(1:size(block,1))',1,size(block,1)))')
+                    subplot(2,1,2)
+                    plot(data.offsets)
+                end
+            else
+                error('no good refs')
+            end
+            
+            if isempty(data.offsets)
+                ex = min(goodRefs);
+                
+                offsets=offsets(:,ex); %((1:size(block,1))+(ex-1)*size(block,1),:);
+                
+                subplot(2,1,1)
+                plot(block')
+                
+                for i=1:size(block,1)
+                    
+                    rasters{i}=rasters{i}+offsets(i);
+                    bursts{i}= bursts{i}+offsets(i);
+                    inBursts{i}=inBursts{i}+offsets(i);
+                    violations{i}=violations{i}+offsets(i);
+                    
+                    % TODO: need to also fix block -- should cover all stim stuff
+                    block(i,:)=shift(block(i,:),offsets(i)/timestep);
+                end
+                
+                subplot(2,1,2)
+                plot(block')
+            else
+                error('haven''t written yet')
+            end
+            
+            
+            
+            psth=0;
+            bpsth=0;
+            %pbins=0:.01:maxTime;
+            %pbins=0:.05:maxTime;
+            pbins=0:timestep:maxTime;
+            
+            if false
+                block=mean(block);
+            end
+            
+            block=block'-min(block(:));
+            block=block/max(block(:));
+            
+            for i=1:length(rasters)
+                psth=psth+hist(rasters{i}(rasters{i}<=maxTime),pbins);
+                bpsth=bpsth+hist(bursts{i}(bursts{i}<=maxTime),pbins);
+            end
+            
+            n=5;
+            
+            avgStim=nanmean(block');
+            
+            subplot(n,1,1)
+            allStims=repmat(.1*(0:size(block,2)-1),size(block,1),1)+block+1;
+            plot(bins,allStims)
+            xlim([0 thisDur])
+            
+            subplot(n,1,2)
+            plot(0:timestep:timestep*(length(avgStim)-1),avgStim)
+            xlim([0 thisDur])
+            
+            subplot(n,1,3)
+            freqs=0:ceil(1/(2*timestep));
+            rez=.5;
+            
+            if false
+                [stft fr t p]=spectrogram(avgStim-mean(avgStim),round(rez/timestep),[],freqs,1/timestep); %phase misalignments will cause bad cancellations here
+                imagesc(t,fr,log(p))
+            else
+                
+                p=.95;
+                params.err=[2 p]; %0 for none, [1 p] for theoretical(?), [2 p] for jackknife
+                params.Fs=1/timestep;
+                params.trialave=1;
+                [garbage,garbage,garbage,garbage,garbage,garbage,params]=getparams(params);
+                params.err=0;
+                
+                movingwin=[rez rez]; %[window winstep] (in secs)
+                
+                movingwin=[.5 .05];
+                
+                for i=1:size(block,2)
+                    block(:,i)=block(:,i)-mean(block(~isnan(block(:,i)),i));
+                end
+                
+                %trimBlock=block(1:end-1,:); %exclude last trial cuz it's probably partial (what about first trials...?)
+                blockNan=find(sum(isnan(block'))>0,1);
+                if ~isempty(blockNan)
+                    if blockNan/size(block,1)<.95
                         error('early nans')
                     end
+                    trimBlock=block(1:blockNan-1,:);
+                else
+                    trimBlock=block;
                 end
-            end
+                
+                if false
+                    blockNans=isnan(block);
+                    blockNan=0;
+                    for col=1:size(blockNans,1)
+                        if blockNan<=0 && sum(blockNans(col,:))>0
+                            blockNan=col;
+                            if col/size(blockNans,1)<.95
+                                error('early nans')
+                            end
+                        end
+                    end
                     trimBlock=block(:,1:blockNan-1);
-        end
-        
-        if sum(isnan(trimBlock(:)))>0
-            error('didn''t get rid of all nans')
-        end
-        
-        %block=block(:,sum(isnan(block))==0); %i don't think chronux can deal with nans
-        if isempty(trimBlock)
-            error('all trials had a nan')
-        end
-        
-
-        [S,t,specf]=mtspecgramc(trimBlock,movingwin,params);
-
-        S=log(S');
-        imagesc(t,specf,S);
-        
-        numContrasts=5;
-        knownFreqs=[1 5 10 25 50];%how get these?
-        
-        hold on
-        fits=nan(2,size(S,2));
-        for i=1:size(S,2)
-            if false %this is wrong and was designed for S', fyi
-                samps=[];
-                for j=1:size(S,2)
-                    samps=[samps specf(j)*ones(1,round(S(i,j)*10^4))];
                 end
-                plot(t(i),normfit(samps),'ko');
+                
+                if sum(isnan(trimBlock(:)))>0
+                    error('didn''t get rid of all nans')
+                end
+                
+                %block=block(:,sum(isnan(block))==0); %i don't think chronux can deal with nans
+                if isempty(trimBlock)
+                    error('all trials had a nan')
+                end
+                
+                
+                [S,t,specf]=mtspecgramc(trimBlock,movingwin,params);
+                
+                S=log(S');
+                imagesc(t,specf,S);
+                
+                numContrasts=5;
+                knownFreqs=[1 5 10 25 50];%how get these?
+                
+                hold on
+                fits=nan(2,size(S,2));
+                for i=1:size(S,2)
+                    if false %this is wrong and was designed for S', fyi
+                        samps=[];
+                        for j=1:size(S,2)
+                            samps=[samps specf(j)*ones(1,round(S(i,j)*10^4))];
+                        end
+                        plot(t(i),normfit(samps),'ko');
+                    end
+                    fits(:,i)=gaussMeanFit([specf; S(:,i)'],minmax(knownFreqs));
+                end
+                plot(t,fits(1,:),'ko');
+                
+                [hc hf]=hist(fits(1,:),200);
+                knownFreqs=round(findFreqs([hf;hc],length(knownFreqs),minmax(knownFreqs)));
+                
+                tStep=median(diff(t));
+                prenans=round((min(t)-min(bins))/tStep);
+                postnans=round((max(bins)-max(t))/tStep);
+                
+                newT=[linspace(bins(1),t(1)-tStep,prenans) t linspace(t(end)+tStep,bins(end),postnans)];
+                subplot(n,1,4)
+                [fixFits hack]=fitSinusoidal([nan(2,prenans) fits nan(2,postnans)],knownFreqs,numContrasts,specf,[nan(length(specf),prenans) S nan(length(specf),postnans)],newT);
+                xlim(minmax(bins));
+                
+                subplot(n,1,3)
+                plot(newT,fixFits(1,:),'k');
+                xlim(minmax(bins));
+                
+                subplot(n,1,5)
+                plot(newT,fixFits(2,:))
+                xlim(minmax(bins));
             end
-            fits(:,i)=gaussMeanFit([specf; S(:,i)'],minmax(knownFreqs));
+            
+            doSinusoid=true;
+            
+            if doSinusoid
+            end
+            
         end
-        plot(t,fits(1,:),'ko');
         
-        [hc hf]=hist(fits(1,:),200);
-        knownFreqs=round(findFreqs([hf;hc],length(knownFreqs),minmax(knownFreqs)));
-        
-        tStep=median(diff(t));
-        prenans=round((min(t)-min(bins))/tStep);
-        postnans=round((max(bins)-max(t))/tStep);
-        
-        newT=[linspace(bins(1),t(1)-tStep,prenans) t linspace(t(end)+tStep,bins(end),postnans)];
-        subplot(n,1,4)
-        [fixFits hack]=fitSinusoidal([nan(2,prenans) fits nan(2,postnans)],knownFreqs,numContrasts,specf,[nan(length(specf),prenans) S nan(length(specf),postnans)],newT);
-        xlim(minmax(bins));
-        
-        subplot(n,1,3)
-        plot(newT,fixFits(1,:),'k');
-        xlim(minmax(bins));
-        
-        subplot(n,1,5)
-        plot(newT,fixFits(2,:))
-        xlim(minmax(bins));
-    end
-    
-    doSinusoid=true;
-    
-    if doSinusoid
-    end
-    
-end
-
         %this is for 03.13 data
         %1 50 4 1 25  50 10 50 4 1  1 25 25 10 4  50 10 10 1 25  10 50 4 25 4
         %hackFreqs     = [0 50 5 0 25, 50 10 50 5 0, 0 25 25 10 5, 50 10 10 0 25, 10 50 5 25 5];
@@ -2814,26 +2827,28 @@ end
                 
                 cs=5;
                 
-  
+                
                 
                 %theseInds=theseInds(theseInds<=size(block,2));
-                localOffsets=align(block(:,feval(@(x) max(1,x(1)):min(size(block,2),x(2)), round(size(block,2)*(lims./trialDur)))),timestep,2/uFreqs(i));
+                
+                chunk=block(:,feval(@(x) max(1,x(1)):min(size(block,2),x(2)), round(size(block,2)*(lims./trialDur))));
+                localOffsets=align(chunk,timestep,2/uFreqs(i));
                 localOffsets=localOffsets(:,ex);
                 
                 chunkStarts=lims(1)+trialStarts-localOffsets;
-                    [chunkBlock chunkBins]=breakup(thisStim,chunkStarts,timestep,chunkDur); %not getting alignment... why?
+                [chunkBlock chunkBins]=breakup(thisStim,chunkStarts,timestep,chunkDur); %not getting alignment... why?
                 
                 subplot(cs,length(uContrasts),j) % (j-1)*cs)
                 
                 if false
                     close all
-
+                    
                     plot(allStims(theseInds(20:75),1:10))
                     cs=xcorr(allStims(theseInds(20:75),1:10));
                     plot(diff(cs(:,(1:48))))
                     figure
                     plot(cs(:,(1:48)+48*3))
-                                        plot(diff(cs(:,(1:48)+48*9)))
+                    plot(diff(cs(:,(1:48)+48*9)))
                 end
                 
                 
@@ -2841,23 +2856,26 @@ end
                 %plot((bins(repmat(theseInds,size(trimBlock,2),1))+repmat(localOffsets,1,length(theseInds)))',trimBlock(theseInds,:)+repmat(.1*(0:size(trimBlock,2)-1),length(theseInds),1))
                 %xlim(lims)
                 
-                plot(chunkBins,chunkBlock'+repmat(.1*(0:size(chunkBlock,1)-1),size(chunkBlock,2),1))
+                %plot(chunkBins,chunkBlock'+repmat(.1*(0:size(chunkBlock,1)-1),size(chunkBlock,2),1))
+                dispChunk=chunk' + repmat(.1*(0:size(chunk,1)-1),size(chunk,2),1);
+                plot(repmat(((0:size(chunk,2)-1)*timestep)',1,size(chunk,1)) + repmat(localOffsets',size(chunk,2),1),dispChunk); %gah -- ok -- need to figure out how to use these offsets, why can't use breakup, and fix rasters
                 xlim([0 chunkDur])
+                ylim([min(dispChunk(:)) max(dispChunk(:))])
                 title(sprintf('f=%ghz c=%g',uFreqs(i),j))
-
-                if j==4 && uFreqs(i)==25 
+                
+                if j==4 && uFreqs(i)==25 && false
                     if false
-                    subplot(cs,length(uContrasts),length(uContrasts)+j)  % (j-1)*cs+1)
-                    plot(localOffsets)
+                        subplot(cs,length(uContrasts),length(uContrasts)+j)  % (j-1)*cs+1)
+                        plot(localOffsets)
                     end
-                                    localOffsets=align(block(:,feval(@(x) x(1):x(2), round(size(block,2)*(lims./trialDur)))),timestep,2/uFreqs(i),true);
+                    localOffsets=align(block(:,feval(@(x) x(1):x(2), round(size(block,2)*(lims./trialDur)))),timestep,2/uFreqs(i),true);
                     keyboard
                 end
                 
-
                 
                 
-                test=true;
+                
+                test=false;
                 
                 thisPsth=0;
                 thisBpsth=0;
@@ -2868,17 +2886,17 @@ end
                         theseInBursts  {ind}=makeSpikes([0 chunkDur],[ uFreqs(i)*[1 .5]],2 ,timestep);
                         theseViolations{ind}=makeSpikes([0 chunkDur],[ uFreqs(i)*[1 .5]],1 ,timestep);
                     else
-                        
-                        theseRasters   {ind}=separate(data.tonics   ,chunkStarts(ind),chunkStarts(ind)+chunkDur);
-                        theseBRasters  {ind}=separate(data.bsts     ,chunkStarts(ind),chunkStarts(ind)+chunkDur);
-                        theseInBursts  {ind}=separate(data.bstNotFst,chunkStarts(ind),chunkStarts(ind)+chunkDur);
-                        theseViolations{ind}=separate(data.refVios  ,chunkStarts(ind),chunkStarts(ind)+chunkDur);
+                        chunkStart=chunkStarts(ind); %this is looking wrong -- check above how it didn't work for stim
+                        theseRasters   {ind}=separate(data.tonics   ,chunkStart,chunkStart+chunkDur);
+                        theseBRasters  {ind}=separate(data.bsts     ,chunkStart,chunkStart+chunkDur);
+                        theseInBursts  {ind}=separate(data.bstNotFst,chunkStart,chunkStart+chunkDur);
+                        theseViolations{ind}=separate(data.refVios  ,chunkStart,chunkStart+chunkDur);
                     end
                     thisPsth =thisPsth +hist(theseRasters {ind},chunkBins);
                     thisBpsth=thisBpsth+hist(theseBRasters{ind},chunkBins);
                 end
                 
-
+                
                 
                 
                 
@@ -2890,24 +2908,24 @@ end
                 subplot(cs,length(uContrasts),length(uContrasts)+j)  % (j-1)*cs+1)
                 
                 if false
-                theseRasters   =cellfun(@(x,y) x+y, rasters   ,num2cell(localOffsets'),'UniformOutput',false);
-                theseBRasters  =cellfun(@(x,y) x+y, bursts    ,num2cell(localOffsets'),'UniformOutput',false);
-                theseInBursts  =cellfun(@(x,y) x+y, inBursts  ,num2cell(localOffsets'),'UniformOutput',false);
-                theseViolations=cellfun(@(x,y) x+y, violations,num2cell(localOffsets'),'UniformOutput',false);
+                    theseRasters   =cellfun(@(x,y) x+y, rasters   ,num2cell(localOffsets'),'UniformOutput',false);
+                    theseBRasters  =cellfun(@(x,y) x+y, bursts    ,num2cell(localOffsets'),'UniformOutput',false);
+                    theseInBursts  =cellfun(@(x,y) x+y, inBursts  ,num2cell(localOffsets'),'UniformOutput',false);
+                    theseViolations=cellfun(@(x,y) x+y, violations,num2cell(localOffsets'),'UniformOutput',false);
                 end
                 
                 cellfun(@(c) doRaster( c{1} ,c{2},[0 chunkDur]),{ {theseRasters,'k.'} {theseBRasters,'ro'} {theseInBursts,'r.'} {theseViolations,'bo'} });
                 xlim([0 chunkDur])
                 
                 if false
-                
-                thisPsth=0;
-                thisBpsth=0;
-                for inc=1:length(rasters)
-                    thisPsth=thisPsth+hist(theseRasters{inc},pbins);
-                    thisBpsth=thisBpsth+hist(theseBRasters{inc},pbins);
-                end
-                
+                    
+                    thisPsth=0;
+                    thisBpsth=0;
+                    for inc=1:length(rasters)
+                        thisPsth=thisPsth+hist(theseRasters{inc},pbins);
+                        thisBpsth=thisBpsth+hist(theseBRasters{inc},pbins);
+                    end
+                    
                 end
                 
                 subplot(cs,length(uContrasts),length(uContrasts)*2+j) %(j-1)*cs+2)
@@ -2916,10 +2934,10 @@ end
                 plot(chunkBins,thisBpsth,'r')
                 xlim([0 chunkDur])
                 
-                if false
-                f0(i,j)=sum(thisPsth(theseInds))/length(data.rptStarts); %won't be quite right cuz of partial trials at beginning and end
                 
-                [Pxx,Pxxc,fr] = pmtm(thisPsth(theseInds),[],freqs,1/timestep,.95);
+                f0(i,j)=sum(thisPsth)/length(theseRasters);
+                
+                [Pxx,Pxxc,fr] = pmtm(thisPsth,[],freqs,1/timestep,.95);
                 if ~all(fr==freqs)
                     error('f error')
                 end
@@ -2941,7 +2959,7 @@ end
                 warning('off','signal:psd:PSDisObsolete')
                 
                 
-                [S,psdF]=psd(thisPsth(theseInds));
+                [S,psdF]=psd(thisPsth);
                 psdF=psdF/timestep/2;
                 plot(psdF,normalize(S),'g')
                 psdF1(i,j)=interp1(psdF,S,uFreqs(i),'pchip','extrap');
@@ -2949,7 +2967,7 @@ end
                 
                 
                 
-                S=abs(fft(thisPsth(theseInds)));
+                S=abs(fft(thisPsth));
                 S=S(1:ceil(length(S)/2));
                 fftF=linspace(0,1/timestep/2,length(S));
                 plot(fftF,normalize(S),'r')
@@ -2967,13 +2985,17 @@ end
                 
                 xcTime=.001;
                 forChronux=cell2struct(theseRasters,'times');
-                tinyTimes=lims(1):xcTime:lims(2);
+                tinyTimes=chunkBins(1):xcTime:chunkBins(end);
+                tinyRast=[];
+                fftByTrial=[];
+                psdByTrial=[];
+                pmtmByTrial=[];
                 for ind=1:length(forChronux)
-                    spks=bound(forChronux(ind).times,lims);
-                    forChronux(ind).times=spks-lims(1);
+                    %spks=bound(forChronux(ind).times,lims);
+                    %forChronux(ind).times=spks-lims(1);
                     
                     %tinyStim(ind,:)=; %needed for by-trial-coherence
-                    tinyRast(ind,:)=hist(spks,tinyTimes);
+                    tinyRast(ind,:)=hist(forChronux(ind).times,tinyTimes);
                     
                     x=xcorr(tinyRast(ind,:));
                     
@@ -3027,12 +3049,12 @@ end
                 title('by trial')
                 
                 
-                stims4chronux=trimBlock(sub2ind(size(trimBlock),min(size(trimBlock,1),max(1,(repmat(theseInds,size(trimBlock,2),1)-repmat(round(localOffsets/timestep),1,length(theseInds)))')),repmat(1:size(trimBlock,2),length(theseInds),1)));
-
+                %stims4chronux=trimBlock(sub2ind(size(trimBlock),min(size(trimBlock,1),max(1,(repmat(theseInds,size(trimBlock,2),1)-repmat(round(localOffsets/timestep),1,length(theseInds)))')),repmat(1:size(trimBlock,2),length(theseInds),1)));
+                
                 paramsC=params;
                 paramsC.err=[2 .95]; %check if this .95 should be .05!
                 
-                [thisC,phi,S12,S1,S2,cfs,zerosp,confC,phistd,Cerr]=coherencycpt(stims4chronux,forChronux,paramsC);
+                [thisC,phi,S12,S1,S2,cfs,zerosp,confC,phistd,Cerr]=coherencycpt(chunkBlock',forChronux,paramsC); %chunkBlock needs alignment fixes here, see above...
                 C(i,j)=interp1(cfs,thisC,uFreqs(i),'pchip','extrap');
                 
                 if false
@@ -3042,94 +3064,92 @@ end
                     plot(stims4chronux)
                     figure(oldFig);
                 end
-
-                end
             end
         end
-        keyboard
+        
+        if false
+            f=[f figure];
+            
+            subplot(4,1,1)
+            c=colormap;
+            cs=ceil(linspace(1,size(c,1),length(uContrasts)));
+            for i=1:length(uContrasts)
+                plot(uFreqs,f0(:,i),'Color',c(cs(i),:));
+                hold on
+            end
+            title('f0')
+            xlabel('freq (hz)')
+            ylabel('spikes/s')
+            
+            subplot(4,1,2)
+            for i=1:length(uContrasts)
+                plot(uFreqs,compf0(:,i),'Color',c(cs(i),:));
+                hold on
+            end
+            title('compf0')
+            xlabel('freq (hz)')
+            
+            subplot(4,1,3)
+            for i=1:length(uContrasts)
+                plot(uFreqs,f1(:,i),'Color',c(cs(i),:));
+                hold on
+            end
+            title('f1')
+            xlabel('freq (hz)')
+            
+            subplot(4,1,4)
+            for i=1:length(uContrasts)
+                plot(uFreqs,f1(:,i)./compf0(:,i),'Color',c(cs(i),:));
+                hold on
+            end
+            title('f1/f0')
+            xlabel('freq (hz)')
+            
+            
+            f=[f figure];
+            subplot(4,1,1)
+            for i=1:length(uContrasts)
+                plot(uFreqs,sd(:,i),'Color',c(cs(i),:));
+                hold on
+            end
+            title('std')
+            xlabel('freq (hz)')
+            
+            
+            subplot(4,1,2)
+            for i=1:length(uContrasts)
+                plot(uFreqs,va(:,i),'Color',c(cs(i),:));
+                hold on
+            end
+            title('var')
+            xlabel('freq (hz)')
+            
+            subplot(4,1,3)
+            for i=1:length(uContrasts)
+                plot(uFreqs,mn(:,i),'Color',c(cs(i),:));
+                hold on
+            end
+            title('mean')
+            xlabel('freq (hz)')
+            
+            
+            subplot(4,1,4)
+            for i=1:length(uContrasts)
+                plot(uFreqs,va(:,i)./mn(:,i),'Color',c(cs(i),:));
+                hold on
+            end
+            title('fano factor')
+            xlabel('freq (hz)')
+            
+            
+            %save('C:\Documents and Settings\rlab\Desktop\analysis tmp\for pam.mat','uFreqs','uContrasts','f0','sd','va','mn'); % all are freqs x contrasts
+        end
         
         f=[f figure];
-        
-        subplot(4,1,1)
-        c=colormap;
-        cs=ceil(linspace(1,size(c,1),length(uContrasts)));
-        for i=1:length(uContrasts)
-            plot(uFreqs,f0(:,i),'Color',c(cs(i),:));
-            hold on
-        end
-        title('f0')
-        xlabel('freq (hz)')
-        ylabel('spikes/s')
-        
-        subplot(4,1,2)
-        for i=1:length(uContrasts)
-            plot(uFreqs,compf0(:,i),'Color',c(cs(i),:));
-            hold on
-        end
-        title('compf0')
-        xlabel('freq (hz)')
-        
-        subplot(4,1,3)
-        for i=1:length(uContrasts)
-            plot(uFreqs,f1(:,i),'Color',c(cs(i),:));
-            hold on
-        end
-        title('f1')
-        xlabel('freq (hz)')
-        
-        subplot(4,1,4)
-        for i=1:length(uContrasts)
-            plot(uFreqs,f1(:,i)./compf0(:,i),'Color',c(cs(i),:));
-            hold on
-        end
-        title('f1/f0')
-        xlabel('freq (hz)')
-        
-        
-        f=[f figure];
-        subplot(4,1,1)
-        for i=1:length(uContrasts)
-            plot(uFreqs,sd(:,i),'Color',c(cs(i),:));
-            hold on
-        end
-        title('std')
-        xlabel('freq (hz)')
-        
-        
-        subplot(4,1,2)
-        for i=1:length(uContrasts)
-            plot(uFreqs,va(:,i),'Color',c(cs(i),:));
-            hold on
-        end
-        title('var')
-        xlabel('freq (hz)')
-        
-        subplot(4,1,3)
-        for i=1:length(uContrasts)
-            plot(uFreqs,mn(:,i),'Color',c(cs(i),:));
-            hold on
-        end
-        title('mean')
-        xlabel('freq (hz)')
-        
-        
-        subplot(4,1,4)
-        for i=1:length(uContrasts)
-            plot(uFreqs,va(:,i)./mn(:,i),'Color',c(cs(i),:));
-            hold on
-        end
-        title('fano factor')
-        xlabel('freq (hz)')
-        
-        
-        %save('C:\Documents and Settings\rlab\Desktop\analysis tmp\for pam.mat','uFreqs','uContrasts','f0','sd','va','mn'); % all are freqs x contrasts
-        
-        
-        figure
         n=3;
-        ps={'mean','f1','f1/mean','coh','sd','ff'};
+        ps={'mean','f1','f1/mean','coh','std','ff'};
         
-                c=colormap;
+        c=colormap;
         ccs=ceil(linspace(1,size(c,1),length(uContrasts)));
         fcs=ceil(linspace(1,size(c,1),length(uFreqs)));
         
@@ -3137,7 +3157,7 @@ end
         
         for pN=1:length(ps)
             
-            switch ps{1}
+            switch ps{pN}
                 case 'mean'
                     x=mn;
                 case 'f1'
@@ -3160,99 +3180,109 @@ end
                 hold on
             end
             title(ps{pN})
-            xlabel('freq (hz)')
+            if pN==length(ps)
+                xlabel('freq (hz)')
+            end
+            xlim([min(uFreqs) max(uFreqs)])
             
             subplot(length(ps),n,n*(pN-1) + 2)
             for i=1:length(uFreqs)
                 plot(uContrasts,x(i,:),'Color',c(fcs(i),:));
                 hold on
-            end            
-            xlabel('contrast')
-
+            end
+            if pN==length(ps)
+                xlabel('contrast')
+            end
+            xlim([min(uContrasts) max(uContrasts)])
+            
             subplot(length(ps),n,n*(pN-1) + 3)
-            surfc(uFreqs,uContrasts,x)
-            xlabel('freq (hz)')
-            ylabel('contrast')
+            surfc(uContrasts,uFreqs,x) %i had this backwards -- x's rows are freqs, cols are contrasts...
+            % but this agrees with surfc(1:10,100:200,rand(10,101)')
+            ylabel('freq (hz)')
+            xlabel('contrast')
         end
         
-    
-    keyboard
-    if false %the old way makes too many graphics objects and overwhelms gfx memory
-        
-        if false %lab meeting hack
-            plot(bins,repmat(.1*(0:size(block,2)-1),size(block,1),1)+block+1)
-        else
-            %plot(bins,zeros(size(bins)));
-            hold on
+        catch ex
+            ex.message
+            warning('skipping sinusoidal due to error')    
         end
-        
-        %xlabel('secs')
-        %title(sprintf('%d gaussian repeats (%.1f hz, %.1f%% bursts, %d violations)',length(data.rptStarts),length(data.spks)/(data.stimTimes(2)-data.stimTimes(1)),100*length(data.bsts)/(length(data.tonics)+length(data.bsts)),length(data.refVios)))
-        hold on
-        
-        plot(pbins,psth/max(psth),'k')
-        plot(pbins,bpsth/max(bpsth),'r')
-        
-        for i=1:length(rasters)
-            cellfun(@(c) plotRaster(c{1}{i},c{2},i+1,maxTime),{ {rasters,'k.'} {bursts,'ro'} {inBursts,'r.'} {violations,'bo'} })
-        end
-        xlim([0 maxTime])
-        
     else
-        % clf
-        
-        figure(f(1));
-        subplot(n,1,4)
-        
-        cellfun(@(c) doRaster(c{1},c{2},[0 maxTime]),{ {rasters,'k.'} {bursts,'ro'} {inBursts,'r.'} {violations,'bo'} })
-        
-        if false
-            granMS=1;
+        if false %the old way makes too many graphics objects and overwhelms gfx memory
             
-            info=[]; %[cols rows vals]
-            
-            for i=1:length(rasters)
-                cellfun(@(c) imRaster(c{1}{i},i,c{2},maxTime),{ {rasters,1} {bursts,2} {inBursts,3} {violations,4} });
-            end
-            
-            inds=sub2ind(arrayfun(@(x) max(info(:,x)),[2 1]),info(:,2),info(:,1));
-            if length(inds)~=length(unique(inds))
-                error('got duplicate inds') %we can't have dupes cuz sparse() adds the entries
-            end
-            
-            im=sparse(info(:,2),info(:,1),info(:,3));
-            
-            cs=([0 0 0; 1 0 0; 1 0 1; 0 0 1]);
-            
-            vals=unique(im(:));
-            vals=vals(vals~=0);
-            for v=1:length(vals)
-                [i j]=find(im==vals(v));
-                plot(j,i,'+','Color',cs(v,:))
+            if false %lab meeting hack
+                plot(bins,repmat(.1*(0:size(block,2)-1),size(block,1),1)+block+1)
+            else
+                %plot(bins,zeros(size(bins)));
                 hold on
             end
-            xlim([1 size(im,2)])
-            ylim([1 size(im,1)])
+            
+            %xlabel('secs')
+            %title(sprintf('%d gaussian repeats (%.1f hz, %.1f%% bursts, %d violations)',length(data.rptStarts),length(data.spks)/(data.stimTimes(2)-data.stimTimes(1)),100*length(data.bsts)/(length(data.tonics)+length(data.bsts)),length(data.refVios)))
+            hold on
+            
+            plot(pbins,psth/max(psth),'k')
+            plot(pbins,bpsth/max(bpsth),'r')
+            
+            for i=1:length(rasters)
+                cellfun(@(c) plotRaster(c{1}{i},c{2},i+1,maxTime),{ {rasters,'k.'} {bursts,'ro'} {inBursts,'r.'} {violations,'bo'} })
+            end
+            xlim([0 maxTime])
+            
+        else
+            % clf
+            
+            figure(f(1));
+            subplot(n,1,4)
+            
+            cellfun(@(c) doRaster(c{1},c{2},[0 maxTime]),{ {rasters,'k.'} {bursts,'ro'} {inBursts,'r.'} {violations,'bo'} })
+            
+            if false
+                granMS=1;
+                
+                info=[]; %[cols rows vals]
+                
+                for i=1:length(rasters)
+                    cellfun(@(c) imRaster(c{1}{i},i,c{2},maxTime),{ {rasters,1} {bursts,2} {inBursts,3} {violations,4} });
+                end
+                
+                inds=sub2ind(arrayfun(@(x) max(info(:,x)),[2 1]),info(:,2),info(:,1));
+                if length(inds)~=length(unique(inds))
+                    error('got duplicate inds') %we can't have dupes cuz sparse() adds the entries
+                end
+                
+                im=sparse(info(:,2),info(:,1),info(:,3));
+                
+                cs=([0 0 0; 1 0 0; 1 0 1; 0 0 1]);
+                
+                vals=unique(im(:));
+                vals=vals(vals~=0);
+                for v=1:length(vals)
+                    [i j]=find(im==vals(v));
+                    plot(j,i,'+','Color',cs(v,:))
+                    hold on
+                end
+                xlim([1 size(im,2)])
+                ylim([1 size(im,1)])
+            end
+            
+            axis ij
+            
+            dpi=3*72; %size of 1-pt dots (pts are 1/72", and dots are 1/3 requested pt size) http://www.mathworks.com/access/helpdesk/help/techdoc/ref/lineseriesproperties.html#MarkerSize
+            heightInches=8; %assumption -- doesn't seem to be specifiable
+            fudge=3;
+            
+            heightInches=heightInches/4;
+            
+            frac=length(rasters)/(dpi*heightInches);
+            
+            ylim([0 length(rasters)/min(fudge*frac,1)])
+            xlim([0 thisDur]) %temp hack
         end
         
-        axis ij
-        
-        dpi=3*72; %size of 1-pt dots (pts are 1/72", and dots are 1/3 requested pt size) http://www.mathworks.com/access/helpdesk/help/techdoc/ref/lineseriesproperties.html#MarkerSize
-        heightInches=8; %assumption -- doesn't seem to be specifiable
-        fudge=3;
-        
-        heightInches=heightInches/4;
-        
-        frac=length(rasters)/(dpi*heightInches);
-        
-        ylim([0 length(rasters)/min(fudge*frac,1)])
-        xlim([0 thisDur]) %temp hack
+        ylabel('repeat')
+        xlabel('secs')
+        title(sprintf('%d %s repeats (%.1f hz, %.1f%% bursts (%d total), %d violations)',length(data.rptStarts),data.stimType,length(data.spks)/(data.stimTimes(2)-data.stimTimes(1)),100*length(data.bsts)/(length(data.tonics)+length(data.bsts)),length(data.bsts),length(data.refVios)))
     end
-    
-    ylabel('repeat')
-    xlabel('secs')
-    title(sprintf('%d %s repeats (%.1f hz, %.1f%% bursts (%d total), %d violations)',length(data.rptStarts),data.stimType,length(data.spks)/(data.stimTimes(2)-data.stimTimes(1)),100*length(data.bsts)/(length(data.tonics)+length(data.bsts)),length(data.bsts),length(data.refVios)))
-    
 else
     warning('skipping raster cuz no rpts id''d')
 end
@@ -3290,7 +3320,6 @@ end
         info=[info;times(:) repmat([trial val],length(times),1)];
     end
 
-keyboard
 end
 
 function out=makeSpikes(lims,fs,rate,res)

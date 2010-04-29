@@ -6,6 +6,7 @@ out=medianChunk(in,numConds);
 
 freqs=sort(freqs(:),1,'descend');
 if length(unique(freqs))~=length(freqs) || ~all(freqs>0) || ~all(isreal(freqs))
+    freqs
     error('freqs must all be unique, real, strictly positive')
 end
 

@@ -37,7 +37,9 @@ data.fileNames=fileNames;
 data.mins=(stimTimes(2)-stimTimes(1))/60;
 
 if ... % selectRecordings('gauss',stimType,data) %
-        data.mins>=3 && ismember(stimType,{'sinusoid','sinusoid(new)','squarefreqs'}) % && ismember(rec.date,datenum({'03.13.09'},'mm.dd.yy'))
+        data.mins>=3 && ismember(stimType,{'sinusoid','sinusoid(new)','squarefreqs'}) ... % && ismember(rec.date,datenum({'03.13.09'},'mm.dd.yy'))
+        && ismember(rec.date,datenum({'03.17.09'},'mm.dd.yy')) && data.rec.chunks.cell_Z==9.255 %not 8.58
+    
     % && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && ismember(rec.date,datenum({'04.15.09'},'mm.dd.yy')) %'hateren'
     
     %        (...
@@ -2417,37 +2419,189 @@ end
 
 end
 
+function [amp freq]=getSinParams(fitData,fitTs)
+model=fittype('sin1');
+options=fitoptions(model);
+if ~all(cellfun(@strcmp,coeffnames(model),{'a1','b1','c1'}'))
+    coeffnames(model)
+    error('coeff name error')
+end
+
+cfun = fit(fitTs',fitData',model,options);
+
+if false
+    figure
+    plot(cfun,'g',fitTs,fitData,'k')
+end
+
+
+
+[junk ampInd]=ismember('a1',coeffnames(cfun));
+if ampInd~=1 || ~isscalar(ampInd)
+    error('bad cfun output')
+end
+a1=coeffvalues(cfun);
+amp=a1(ampInd);
+
+
+
+[junk freqInd]=ismember('b1',coeffnames(cfun));
+if freqInd~=2 || ~isscalar(freqInd)
+    error('bad cfun output')
+end
+b1=coeffvalues(cfun);
+freq=b1(freqInd)/(2*pi);
+end
+
 function f=raster(data)
 f=figure;
 
-if ~isempty(data.rptStarts) && length(data.rptStarts)>1
-    missed=.01 < abs(1 - diff(data.rptStarts)/median(diff(data.rptStarts)));
+if false
+    thisStim=data.stim;
+    error('not implmented')
+else
+    thisStim=data.frames'; % won't have equal dt's
+end
+
+doSinusoidal=true;
+
+if doSinusoidal
+    timestep=median(diff(thisStim(2,:)));
+    
+    meanlessStim=thisStim(1,:)-mean(thisStim(1,:));
+    windowDur=.25;
+    windowTimes=min(thisStim(2,:)):windowDur:max(thisStim(2,:));
+    windowFits=nan(2,length(windowTimes)-1);
+    for windowNum=1:length(windowTimes)-1
+        windowInds=thisStim(2,:)>=windowTimes(windowNum)&thisStim(2,:)<=windowTimes(windowNum+1);
+        [windowFits(1,windowNum) windowFits(2,windowNum)]=getSinParams(meanlessStim(1,windowInds),thisStim(2,windowInds));
+        if rand>.9
+            fprintf('%g%% done\n',100*windowNum/(length(windowTimes)-1))
+        end
+    end
+    subplot(3,1,1)
+    plot(thisStim(2,:),normalize(meanlessStim),'r')
+    hold on
+    plot(windowTimes(1:end-1),normalize(windowFits(1,:)),'b')
+    plot(windowTimes(1:end-1),windowFits(2,:)/50,'g')
+    subplot(3,1,2)
+    xc=diff(xcorr(windowFits(2,:)));
+    exclude=5;
+    excludeInds=round(exclude/windowDur);
+    xc((-excludeInds:excludeInds)+length(xc)/2)=0;
+    
+    %need to fit to series of deltas instead, to get smallest possible repeat length.
+    
+    [junk v]=sort(xc,'descend');
+    if false
+        xDone=false;
+        xInd=1;
+        while ~xDone
+            peaks=find(diff(xc>v(xInd)));
+            if length(peaks)>2
+                xDone=true;
+            else
+                xInd=xInd+1;
+                if xInd>length(v)
+                    error('no peaks')
+                end
+            end
+        end
+    end
+    plot(xc);
+    hold on
+    if false
+        for pNum=1:length(peaks)
+            plot(ones(1,2)*peaks(pNum),minmax(xc),'k')
+        end
+    end
+    plot(ones(1,2)*v(1),minmax(xc),'r')
+    
+    indsOffset=abs(v(1)-length(xc)/2); %use XCFit if necessary instead...
+    
+    subplot(3,1,3)
+    for i=1:ceil(size(windowFits,2)/indsOffset)
+        inds=(1:indsOffset)+(i-1)*indsOffset;
+        inds=inds(inds<=size(windowFits,2));
+        %plot(windowTimes(inds),normalize(windowFits(1,inds)),'b')
+        plot(mod(inds,indsOffset),windowFits(2,inds)+(i-1)*max(windowFits(2,:)),'g')
+        hold on
+    end
+    
+    fracOffset=indsOffset/(length(xc)/2);
+    windowFrac=.2;
+    indsOffset=fitXCModel(diff(xcorr(thisStim(1,:))),round((1 + windowFrac*[-1 1])*fracOffset*size(thisStim,2)));
+    
+    f=[f figure];
+    
+    offsetIndsStarts=[];
+    for i=1:ceil(size(thisStim,2)/indsOffset)
+        inds=(1:indsOffset)+(i-1)*indsOffset;
+        offsetIndsStarts(end+1)=inds(1);
+        inds=inds(inds<=size(thisStim,2));
+        plot(mod(inds,indsOffset),thisStim(1,inds)+(i-1)*max(thisStim(1,:)),'g') %why do we get baselines here?
+        hold on
+    end
+    
+    %hilbert instantaneous freq -- note is not considered best way to
+    %get inst. freq -- senseitive to noise -- only works for low freqs
+    %relative to sampling rate
+    % plot(diff(unwrap(angle(hilbert(sin(24*2*pi*timestep*(1:1000))))))/(timestep*2*pi),'k')
+    
+    f=[f figure];
+    
+    trialStartTimes=thisStim(2,offsetIndsStarts);
+    
+else
+    if size(data.rptStarts,1)>1
+        if ~isvector(data.rptStarts)
+            error('data.rptStarts not a vector')
+        end
+        data.rptStarts=data.rptStarts';
+        warning('had to transpose data.rptStarts -- why?')
+    end
+    
+    trialStartTimes=data.rptStarts;
+end
+
+%if ~isempty(data.rptStarts) && length(data.rptStarts)>1 % *2*  %skipping
+%raster cuz no rpts id''d (now should be fixed with new rpt analysis -- see
+%offsetIndsStarts above)
+
+if ~isempty(trialStartTimes) && length(trialStartTimes>1)
+    
+    missed=.01 < abs(1 - diff(trialStartTimes)/median(diff(trialStartTimes)));
     if any(missed)
         warning('%d index pulses missed',sum(missed))
     end
     
-    doSinusoidal=true;
-    
     if doSinusoidal
-        if false
-            thisStim=data.stim;
-            error('not implmented')
-        else
-            thisStim=data.frames'; % won't have equal dt's
-        end
-        
-        trialDur=median(diff(data.rptStarts));
-        timestep=median(diff(thisStim(2,:)));
-        
         try
-            [block bins]=breakup(thisStim,data.rptStarts,timestep,trialDur);
+            trialDur=median(diff(trialStartTimes));
+            [block bins]=breakup(thisStim,trialStartTimes,timestep,trialDur);
             
             offsets=align(block,timestep,1);
             ex=1; %consider picking a better one
             offsets=offsets(:,ex);
             
-            trialStarts=data.rptStarts(1:length(offsets))'-offsets;
-            [block bins]=breakup(thisStim,trialStarts,timestep,trialDur);
+            if false %i think our new offsets are better in every case -- just ignore old data.offsets calculations...
+                if ~isempty(data.offsets) && any(abs(data.offsets(1:length(offsets))'-offsets)>.01) % *1* can't do this if we use new trial detector -- num trials may differ
+                    if true
+                        data.offsets(1:length(offsets))'-offsets
+                        warning('data.offsets disagrees with offsets, using offsets for now...')
+                    else
+                        plot(data.offsets)
+                        hold on
+                        plot(offsets,'r')
+                        keyboard %what now?
+                    end
+                end
+            end
+            
+            
+            trialStarts=trialStartTimes(1:length(offsets))'-offsets;
+            
+            [block bins]=breakup(thisStim,trialStarts,timestep,trialDur); %how can block come back with fewer trials than trialStarts? 19 vs. 20, even though rptStarts has 21 for 04.15.09 1.sinusoid.z.47.34.t.2614.01-3169.56.chunk.1.8d2b23279f87853a7c63e4ab0ed38b8b150c317d
             
             subplot(5,1,1)
             plot(bins,block')
@@ -3063,13 +3217,6 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
                     
                     sinAmps(i,j)=mean(std(chunkBlock'));
                     
-                    model=fittype('sin1');
-                    options=fitoptions(model);
-                    if ~all(cellfun(@strcmp,coeffnames(model),{'a1','b1','c1'}'))
-                        coeffnames(model)
-                        error('coeff name error')
-                    end
-                    
                     fitAmps=[];
                     fitFreqs=[];
                     for trialNum=1:size(chunkBlock,1)
@@ -3080,32 +3227,8 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
                         fitData=chunkBlock(trialNum,1:round(.8*size(chunkBlock,2)));
                         fitTs=(0:(length(fitData)-1))/(1/timestep);
                         
-                        cfun = fit(fitTs',fitData',model,options);
+                        [fitAmps(end+1) fitFreqs(end+1)] = getSinParams(fitData,fitTs);
                         
-                        if false
-                            figure
-                            plot(cfun,'g',fitTs,fitData,'k')
-                        end
-                        
-                        
-                        
-                        [junk ampInd]=ismember('a1',coeffnames(cfun));
-                        if ampInd~=1 || ~isscalar(ampInd)
-                            error('bad cfun output')
-                        end
-                        a1=coeffvalues(cfun);
-                        a1=a1(ampInd);
-                        fitAmps(end+1)=a1;
-                        
-                        
-                        [junk freqInd]=ismember('b1',coeffnames(cfun));
-                        if freqInd~=2 || ~isscalar(freqInd)
-                            error('bad cfun output')
-                        end
-                        b1=coeffvalues(cfun);
-                        b1=b1(freqInd);
-                        
-                        fitFreqs(end+1)=b1/(2*pi);
                     end
                     sinAmpsFit(i,j)=mean(fitAmps);
                     sinFreqsFit(i,j)=mean(fitFreqs);
@@ -3242,6 +3365,7 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
                     xlabel('freq (hz)')
                 end
                 xlim([min(uFreqs) max(uFreqs)])
+                axis fill
                 
                 subplot(length(ps),n,n*(pN-1) + 2)
                 for i=1:length(uFreqs)
@@ -3252,12 +3376,14 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
                     xlabel('contrast')
                 end
                 xlim([min(uContrasts) max(uContrasts)])
+                axis fill
                 
                 subplot(length(ps),n,n*(pN-1) + 3)
                 surfc(uContrasts,uFreqs,x) %i had this backwards -- x's rows are freqs, cols are contrasts...
                 % but this agrees with surfc(1:10,100:200,rand(10,101)')
                 ylabel('freq (hz)')
                 xlabel('contrast')
+                axis fill
             end
             
         catch ex
@@ -3349,7 +3475,7 @@ if ~isempty(data.rptStarts) && length(data.rptStarts)>1
         title(sprintf('%d %s repeats (%.1f hz, %.1f%% bursts (%d total), %d violations)',length(data.rptStarts),data.stimType,length(data.spks)/(data.stimTimes(2)-data.stimTimes(1)),100*length(data.bsts)/(length(data.tonics)+length(data.bsts)),length(data.bsts),length(data.refVios)))
     end
 else
-    warning('skipping raster cuz no rpts id''d')
+    error('should no longer happen on sinusoidals (see offsetIndsStarts)')
 end
 
     function doRaster(data,code,lims)
@@ -3775,7 +3901,9 @@ try
     %this should fail on every dataset -- Reference to non-existent field 'stimBreaks'.
     
     offsets=data.bestBinOffsets;  %we're not going through the catch case below -- not sure this is ok or that this assignment to offsets is right...
-     %only on windows does this?  haven't tried sinusoidals on osx...
+    %only on windows does this?  haven't tried sinusoidals on osx...
+    %need to add all the checks below, make sure offsets (and everything else) is right
+    %size/orientation, etc.
     if all(cellfun(@(x) isempty(findstr( fileNames.targetFile,x)),{...
             '1.sinusoid.z.47.34.t.2614.01-3169.56.chunk.1.8d2b23279f87853a7c63e4ab0ed38b8b150c317d',...
             '1.sinusoid.z.47.88.t.496.35-1310.29.chunk.1.89493235e157403e6bad4b39b63b1c6234ea45dd',...
@@ -3796,12 +3924,12 @@ try
         warning('not going through catch case for this file...  why?')
     end
     %isempty(findstr(fileNames.targetFile,'1.sinusoid.z.47.34.t.2614.01-3169.56.chunk.1.8d2b23279f87853a7c63e4ab0ed38b8b150c317d'))
-
-
+    
+    
     
 catch ex
-%    ex.message
-%    fprintf('\ndoing catch case (every dataset should do this)\n')
+    %    ex.message
+    %    fprintf('\ndoing catch case (every dataset should do this)\n')
     
     if ~isempty(data.repeatTimes)
         rptStarts=data.repeatTimes(1,:);

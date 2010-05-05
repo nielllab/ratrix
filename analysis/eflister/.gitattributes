@@ -105,3 +105,5 @@ phys/new/fitSinusoidal.m -text
 phys/new/bound.m -text
 phys/new/nanMeanDown.m -text
 phys/new/restoreControls.m -text
+phys/new/XCModel.m -text
+phys/new/fitXCModel.m -text

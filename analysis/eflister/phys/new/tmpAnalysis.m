@@ -38,8 +38,9 @@ data.mins=(stimTimes(2)-stimTimes(1))/60;
 
 if ... % selectRecordings('gauss',stimType,data) %
         data.mins>=3 && ismember(stimType,{'sinusoid','sinusoid(new)','squarefreqs'}) ... % && ismember(rec.date,datenum({'03.13.09'},'mm.dd.yy'))
-        && ismember(rec.date,datenum({'03.17.09'},'mm.dd.yy')) && data.rec.chunks.cell_Z==9.255 %not 8.58
-    
+        && (ismember(rec.date,datenum({'03.17.09'},'mm.dd.yy')) && rec.chunks.cell_Z==9.255) % || ... %not 8.58 %15 mins
+   %     ismember(rec.date,datenum({'03.19.09'},'mm.dd.yy'))) %5 mins works
+   
     % && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && ismember(rec.date,datenum({'04.15.09'},'mm.dd.yy')) %'hateren'
     
     %        (...
@@ -2344,7 +2345,7 @@ out=interp1(inds,in,inds-amt);
 end
 
 function offsets=align(block,timestep,timeLimit,check)
-xcs=xcorr(block',round(timeLimit/timestep)); % 1/timestep/2));
+xcs=xcorr(block',round(timeLimit/timestep)); % 1/timestep/2));  %HERE'S WHERE WE OOM (188 04.29.09 1.sinusoid.z.27.89.t.0.007-2338.31.chunk.1.eb9916e6e433e0599a743952acd19ec218eb83cb)
 
 [junk minds]=max(xcs);
 
@@ -2461,6 +2462,10 @@ if false
     error('not implmented')
 else
     thisStim=data.frames'; % won't have equal dt's
+    if isempty(thisStim)
+        warning('empty data.frames?')
+        return
+    end
 end
 
 doSinusoidal=true;
@@ -2524,8 +2529,9 @@ if doSinusoidal
         inds=(1:indsOffset)+(i-1)*indsOffset;
         inds=inds(inds<=size(windowFits,2));
         %plot(windowTimes(inds),normalize(windowFits(1,inds)),'b')
-        plot(mod(inds,indsOffset),windowFits(2,inds)+(i-1)*max(windowFits(2,:)),'g')
+        plot(1+mod(inds-1,indsOffset),windowFits(2,inds)+(i-1)*max(windowFits(2,:)),'g')
         hold on
+                plot([1 indsOffset],ones(1,2)*(i-1)*max(windowFits(2,:)),'k')
     end
     
     fracOffset=indsOffset/(length(xc)/2);
@@ -2539,8 +2545,9 @@ if doSinusoidal
         inds=(1:indsOffset)+(i-1)*indsOffset;
         offsetIndsStarts(end+1)=inds(1);
         inds=inds(inds<=size(thisStim,2));
-        plot(mod(inds,indsOffset),thisStim(1,inds)+(i-1)*max(thisStim(1,:)),'g') %why do we get baselines here?
+        plot(1+mod(inds-1,indsOffset),thisStim(1,inds)+(i-1)*max(thisStim(1,:)),'g')
         hold on
+        plot([1 indsOffset],ones(1,2)*(i-1)+mean(thisStim(1,inds)),'k')
     end
     
     %hilbert instantaneous freq -- note is not considered best way to
@@ -3213,7 +3220,12 @@ if ~isempty(trialStartTimes) && length(trialStartTimes>1)
                     paramsC.err=[2 .95]; %check if this .95 should be .05!
                     
                     [thisC,phi,S12,S1,S2,cfs,zerosp,confC,phistd,Cerr]=coherencycpt(chunkBlock',forChronux,paramsC); %chunkBlock needs alignment fixes here, see above...
-                    C(i,j)=interp1(cfs,thisC,uFreqs(i),'pchip','extrap');
+                    if any(isnan(thisC))
+                        silentTrials=cellfun(@isempty,{forChronux.times});
+                        warning('coherencycpt seems to not be able to handle trials with no spikes (throwing away %g of them)',sum(silentTrials))
+                        [thisC,phi,S12,S1,S2,cfs,zerosp,confC,phistd,Cerr]=coherencycpt(chunkBlock(~silentTrials,:)',forChronux(~silentTrials),paramsC);
+                    end
+                    C(i,j)=interp1(cfs,thisC,uFreqs(i),'pchip','extrap'); %*3*                    
                     
                     sinAmps(i,j)=mean(std(chunkBlock'));
                     
@@ -3318,73 +3330,17 @@ if ~isempty(trialStartTimes) && length(trialStartTimes>1)
                 xlabel('freq (hz)')
             end
             
-            f=[f figure];
-            n=3;
-            ps={'mean','f1','f1/mean','coh','std','ff','mean(std(stim))','amp fit','freq fit'};
-            
+                        n=3;
             c=colormap;
             ccs=ceil(linspace(1,size(c,1),length(uContrasts)));
             fcs=ceil(linspace(1,size(c,1),length(uFreqs)));
             
             uFreqs
             
-            %save('C:\Documents and Settings\rlab\Desktop\for pam.mat','uFreqs','uContrasts','f0','sd','va','mn','f1','C'); % all are freqs x contrasts
+                        doSummaryFig({'mean(std(stim))','amp fit','freq fit'});
+            doSummaryFig({'mean','f1','f1/mean','coh','std','ff'});
             
-            for pN=1:length(ps)
-                
-                switch ps{pN}
-                    case 'mean'
-                        x=mn;
-                    case 'f1'
-                        x=f1;
-                    case 'f1/mean'
-                        x=f1./mn;
-                    case 'coh'
-                        x=C;
-                    case 'std'
-                        x=sd;
-                    case 'ff'
-                        x=va./mn;
-                    case 'mean(std(stim))'
-                        x=sinAmps;
-                    case 'amp fit'
-                        x=sinAmpsFit;
-                    case 'freq fit'
-                        x=sinFreqsFit;
-                    otherwise
-                        error('unrecognized')
-                end
-                
-                subplot(length(ps),n,n*(pN-1) + 1)
-                for i=1:length(uContrasts)
-                    plot(uFreqs,x(:,i),'Color',c(ccs(i),:));
-                    hold on
-                end
-                title(ps{pN})
-                if pN==length(ps)
-                    xlabel('freq (hz)')
-                end
-                xlim([min(uFreqs) max(uFreqs)])
-                axis fill
-                
-                subplot(length(ps),n,n*(pN-1) + 2)
-                for i=1:length(uFreqs)
-                    plot(uContrasts,x(i,:),'Color',c(fcs(i),:));
-                    hold on
-                end
-                if pN==length(ps)
-                    xlabel('contrast')
-                end
-                xlim([min(uContrasts) max(uContrasts)])
-                axis fill
-                
-                subplot(length(ps),n,n*(pN-1) + 3)
-                surfc(uContrasts,uFreqs,x) %i had this backwards -- x's rows are freqs, cols are contrasts...
-                % but this agrees with surfc(1:10,100:200,rand(10,101)')
-                ylabel('freq (hz)')
-                xlabel('contrast')
-                axis fill
-            end
+            %save('C:\Documents and Settings\rlab\Desktop\for pam.mat','uFreqs','uContrasts','f0','sd','va','mn','f1','C'); % all are freqs x contrasts
             
         catch ex
             ex.message
@@ -3393,6 +3349,8 @@ if ~isempty(trialStartTimes) && length(trialStartTimes>1)
                 error('matlab needs to restart -- OOM');
             elseif strcmp(ex.message,'Matrix dimensions must agree.')
                 error('what''s this about?')
+            else
+                error('catch everything')
             end
             
             warning('skipping sinusoidal due to error')
@@ -3477,6 +3435,65 @@ if ~isempty(trialStartTimes) && length(trialStartTimes>1)
 else
     error('should no longer happen on sinusoidals (see offsetIndsStarts)')
 end
+
+    function doSummaryFig(ps)
+        f=[f figure];
+        for pN=1:length(ps)
+            
+            switch ps{pN}
+                case 'mean'
+                    x=mn;
+                case 'f1'
+                    x=f1;
+                case 'f1/mean'
+                    x=f1./mn;
+                case 'coh'
+                    x=C;
+                case 'std'
+                    x=sd;
+                case 'ff'
+                    x=va./mn;
+                case 'mean(std(stim))'
+                    x=sinAmps;
+                case 'amp fit'
+                    x=sinAmpsFit;
+                case 'freq fit'
+                    x=sinFreqsFit;
+                otherwise
+                    error('unrecognized')
+            end
+            
+            subplot(length(ps),n,n*(pN-1) + 1)
+            for i=1:length(uContrasts)
+                plot(uFreqs,x(:,i),'Color',c(ccs(i),:));
+                hold on
+            end
+            title(ps{pN})
+            if pN==length(ps)
+                xlabel('freq (hz)')
+            end
+            xlim([min(uFreqs) max(uFreqs)])
+            axis fill
+            
+            subplot(length(ps),n,n*(pN-1) + 2)
+            for i=1:length(uFreqs)
+                plot(uContrasts,x(i,:),'Color',c(fcs(i),:));
+                hold on
+            end
+            if pN==length(ps)
+                xlabel('contrast')
+            end
+            xlim([min(uContrasts) max(uContrasts)])
+            axis fill
+            
+            subplot(length(ps),n,n*(pN-1) + 3)
+            surfc(uContrasts,uFreqs,x) %i had this backwards -- x's rows are freqs, cols are contrasts...
+            % but this agrees with surfc(1:10,100:200,rand(10,101)')
+            ylabel('freq (hz)')
+            xlabel('contrast')
+            axis fill
+        end
+    end
 
     function doRaster(data,code,lims)
         info=[];

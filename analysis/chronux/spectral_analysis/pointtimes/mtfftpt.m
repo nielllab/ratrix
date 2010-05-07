@@ -30,11 +30,16 @@ for ch=1:C;
      eval(['dtmp=data(ch).' fnames{1} ';'])
      indx=find(dtmp>=min(t)&dtmp<=max(t));
      if ~isempty(indx); dtmp=dtmp(indx);
+     else
+         dtmp=dtmp(indx); %edf: bug -- if all spikes outside range of t, they never remove them!  interp1 winds up throwing nans.
      end;
   else
      dtmp=data;
      indx=find(dtmp>=min(t)&dtmp<=max(t));
      if ~isempty(indx); dtmp=dtmp(indx);
+     else
+         %fix in previous case probably applies.
+         keyboard
      end;
   end;
   Nsp(ch)=length(dtmp);

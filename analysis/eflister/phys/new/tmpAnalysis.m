@@ -3221,6 +3221,7 @@ if ~isempty(trialStartTimes) && length(trialStartTimes>1)
                     
                     [thisC,phi,S12,S1,S2,cfs,zerosp,confC,phistd,Cerr]=coherencycpt(chunkBlock',forChronux,paramsC); %chunkBlock needs alignment fixes here, see above...
                     if any(isnan(thisC))
+                        error('this should be fixed now (see changes in mtfftpt)')
                         silentTrials=cellfun(@isempty,{forChronux.times});
                         warning('coherencycpt seems to not be able to handle trials with no spikes (throwing away %g of them)',sum(silentTrials))
                         [thisC,phi,S12,S1,S2,cfs,zerosp,confC,phistd,Cerr]=coherencycpt(chunkBlock(~silentTrials,:)',forChronux(~silentTrials),paramsC);

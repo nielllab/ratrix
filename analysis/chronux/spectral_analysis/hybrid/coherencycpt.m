@@ -86,16 +86,25 @@ N=length(t); % number of points in grid for dpss
 nfft=max(2^(nextpow2(N)+pad),N); % number of points in fft of prolates
 [f,findx]=getfgrid(Fs,nfft,fpass); 
 tapers=dpsschk(tapers,N,Fs); % check tapers
+
 J1=mtfftc(data1,tapers,nfft,Fs); % fourier transform of continuous data
 J1=J1(findx,:,:); % restrict to required frequencies
 if any(isnan(J1(:))) %edf
+    keyboard
     error('got nan in continuous')
 end
+
 [J2,Msp2,Nsp2]=mtfftpt(data2,tapers,nfft,t,f,findx); % fourier transform of discrete data
+if any(isnan(J2(:))) %edf
+    keyboard
+    error('got nan in discrete')
+end
+
 zerosp(Nsp2==0)=1; % set zerosp to 1 for trials where no spikes were found
 S12=squeeze(mean(conj(J1).*J2,2)); % cross spectrum
 S1=squeeze(mean(conj(J1).*J1,2)); % spectrum data 1
 S2=squeeze(mean(conj(J2).*J2,2)); % spectrum data 2
+
 if trialave; S12=squeeze(mean(S12,2)); S1=squeeze(mean(S1,2)); S2=squeeze(mean(S2,2)); end;
 C12=S12./sqrt(S1.*S2);
 C=abs(C12);

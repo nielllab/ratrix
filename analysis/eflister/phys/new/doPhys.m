@@ -4,6 +4,7 @@ function doPhys
 %%%%%
 
 dbstop if error
+colordef black
 
 targetBinsPerSec=1000;
 

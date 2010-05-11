@@ -38,8 +38,10 @@ data.mins=(stimTimes(2)-stimTimes(1))/60;
 
 if ... % selectRecordings('gauss',stimType,data) %
         data.mins>=3 && ismember(stimType,{'sinusoid','sinusoid(new)','squarefreqs'}) ... % && ismember(rec.date,datenum({'03.13.09'},'mm.dd.yy'))
-        && (ismember(rec.date,datenum({'03.17.09'},'mm.dd.yy')) && rec.chunks.cell_Z==9.255) % || ... %not 8.58 %15 mins
-   %     ismember(rec.date,datenum({'03.19.09'},'mm.dd.yy'))) %5 mins works
+ && (ismember(rec.date,datenum({'03.25.09'},'mm.dd.yy')) && rec.chunks.cell_Z==18.55)
+    %        && (ismember(rec.date,datenum({'03.17.09'},'mm.dd.yy')) && rec.chunks.cell_Z==8.58)
+    %    && (ismember(rec.date,datenum({'03.17.09'},'mm.dd.yy')) && rec.chunks.cell_Z==9.255) % || ... %not 8.58 %15 mins
+%     ismember(rec.date,datenum({'03.19.09'},'mm.dd.yy'))) %5 mins works
    
     % && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && ismember(rec.date,datenum({'04.15.09'},'mm.dd.yy')) %'hateren'
     
@@ -2466,6 +2468,11 @@ else
         warning('empty data.frames?')
         return
     end
+    
+    if false && (strcmp(data.date,'03.25.09') && data.rec.chunks.cell_Z==18.55)
+        keyboard
+        thisStim=thisStim(:,thisStim(2,:)>104.5); %hack -- something bad happened in trial 4 that makes it hard to recover alignment
+    end
 end
 
 doSinusoidal=true;
@@ -2474,80 +2481,240 @@ if doSinusoidal
     timestep=median(diff(thisStim(2,:)));
     
     meanlessStim=thisStim(1,:)-mean(thisStim(1,:));
-    windowDur=.25;
-    windowTimes=min(thisStim(2,:)):windowDur:max(thisStim(2,:));
-    windowFits=nan(2,length(windowTimes)-1);
-    for windowNum=1:length(windowTimes)-1
-        windowInds=thisStim(2,:)>=windowTimes(windowNum)&thisStim(2,:)<=windowTimes(windowNum+1);
-        [windowFits(1,windowNum) windowFits(2,windowNum)]=getSinParams(meanlessStim(1,windowInds),thisStim(2,windowInds));
-        if rand>.9
-            fprintf('%g%% done\n',100*windowNum/(length(windowTimes)-1))
-        end
-    end
-    subplot(3,1,1)
-    plot(thisStim(2,:),normalize(meanlessStim),'r')
-    hold on
-    plot(windowTimes(1:end-1),normalize(windowFits(1,:)),'b')
-    plot(windowTimes(1:end-1),windowFits(2,:)/50,'g')
-    subplot(3,1,2)
-    xc=diff(xcorr(windowFits(2,:)));
-    exclude=5;
-    excludeInds=round(exclude/windowDur);
-    xc((-excludeInds:excludeInds)+length(xc)/2)=0;
     
-    %need to fit to series of deltas instead, to get smallest possible repeat length.
-    
-    [junk v]=sort(xc,'descend');
     if false
-        xDone=false;
-        xInd=1;
-        while ~xDone
-            peaks=find(diff(xc>v(xInd)));
-            if length(peaks)>2
-                xDone=true;
-            else
-                xInd=xInd+1;
-                if xInd>length(v)
-                    error('no peaks')
+        
+        windowDur=.25;
+        windowTimes=min(thisStim(2,:)):windowDur:max(thisStim(2,:));
+        windowFits=nan(2,length(windowTimes)-1);
+        for windowNum=1:length(windowTimes)-1
+            windowInds=thisStim(2,:)>=windowTimes(windowNum)&thisStim(2,:)<=windowTimes(windowNum+1);
+            [windowFits(1,windowNum) windowFits(2,windowNum)]=getSinParams(meanlessStim(1,windowInds),thisStim(2,windowInds));
+            if rand>.9
+                fprintf('%g%% done\n',100*windowNum/(length(windowTimes)-1))
+            end
+        end
+        subplot(3,1,1)
+        plot(thisStim(2,:),normalize(meanlessStim),'r')
+        hold on
+        plot(windowTimes(1:end-1),normalize(windowFits(1,:)),'b')
+        plot(windowTimes(1:end-1),windowFits(2,:)/50,'g')
+        subplot(3,1,2)
+        xc=diff(xcorr(windowFits(2,:)));
+        exclude=5;
+        excludeInds=round(exclude/windowDur);
+        xc((-excludeInds:excludeInds)+length(xc)/2)=0;
+        
+        %need to fit to series of deltas instead, to get smallest possible repeat length.
+        
+        [junk v]=sort(xc,'descend');
+        if false
+            xDone=false;
+            xInd=1;
+            while ~xDone
+                peaks=find(diff(xc>v(xInd)));
+                if length(peaks)>2
+                    xDone=true;
+                else
+                    xInd=xInd+1;
+                    if xInd>length(v)
+                        error('no peaks')
+                    end
                 end
             end
         end
-    end
-    plot(xc);
-    hold on
-    if false
-        for pNum=1:length(peaks)
-            plot(ones(1,2)*peaks(pNum),minmax(xc),'k')
+        plot(xc);
+        hold on
+        if false
+            for pNum=1:length(peaks)
+                plot(ones(1,2)*peaks(pNum),minmax(xc),'k')
+            end
         end
-    end
-    plot(ones(1,2)*v(1),minmax(xc),'r')
-    
-    indsOffset=abs(v(1)-length(xc)/2); %use XCFit if necessary instead...
-    
-    subplot(3,1,3)
-    for i=1:ceil(size(windowFits,2)/indsOffset)
-        inds=(1:indsOffset)+(i-1)*indsOffset;
-        inds=inds(inds<=size(windowFits,2));
-        %plot(windowTimes(inds),normalize(windowFits(1,inds)),'b')
-        plot(1+mod(inds-1,indsOffset),windowFits(2,inds)+(i-1)*max(windowFits(2,:)),'g')
+        plot(ones(1,2)*v(1),minmax(xc),'r')
+        
+        if false
+            indsOffset=abs(v(1)-length(xc)/2); %use XCFit if necessary instead...
+        else
+            indsOffset=fitXCModel(xc,[1 floor(length(xc)/2)]);
+        end
+        
+        subplot(3,1,3)
+        
+        for i=1:ceil(size(windowFits,2)/indsOffset)
+            inds=(1:indsOffset)+(i-1)*indsOffset;
+            inds=inds(inds<=size(windowFits,2));
+            %plot(windowTimes(inds),normalize(windowFits(1,inds)),'b')
+            plot(1+mod(inds-1,indsOffset),windowFits(2,inds)+(i-1)*max(windowFits(2,:)),'g')
+            hold on
+            %plot(1+mod(inds-1,indsOffset),(normalize(windowFits(1,inds))+(i-1))*max(windowFits(2,:)),'r')
+            plot([1 indsOffset],ones(1,2)*(i-1)*max(windowFits(2,:)),'k')
+        end
+        
+        fracOffset=indsOffset/(length(xc)/2);
+        
+        f=[f figure];
+        
+        windowFrac=.2;
+        indsOffset=fitXCModel(diff(xcorr(thisStim(1,:))),round((1 + windowFrac*[-1 1])*fracOffset*size(thisStim,2)));
+        
+        indsOffset=round(median(diff(data.rptStarts))/timestep);
+        
+        offsetIndsStarts=[];
+        for i=1:ceil(size(thisStim,2)/indsOffset)
+            inds=(1:indsOffset)+(i-1)*indsOffset;
+            offsetIndsStarts(end+1)=inds(1);
+            inds=inds(inds<=size(thisStim,2));
+            plot(1+mod(inds-1,indsOffset),thisStim(1,inds)+(i-1)*max(thisStim(1,:)),'g')
+            hold on
+            plot([1 indsOffset],ones(1,2)*(i-1)+mean(thisStim(1,inds)),'k')
+        end
+    else
+        %indsOffset=2455;
+        %indsOffset=2385
+        
+        
+        [hVals hBins]=hist(meanlessStim,10000);
+        [junk hOrder]=sort(hVals,'descend');
+        nomVal=hBins(hOrder(1));
+        
+        close all
+        n=4;
+        subplot(n,1,1)
+        plot(hBins,hVals);
         hold on
-                plot([1 indsOffset],ones(1,2)*(i-1)*max(windowFits(2,:)),'k')
-    end
-    
-    fracOffset=indsOffset/(length(xc)/2);
-    windowFrac=.2;
-    indsOffset=fitXCModel(diff(xcorr(thisStim(1,:))),round((1 + windowFrac*[-1 1])*fracOffset*size(thisStim,2)));
-    
-    f=[f figure];
-    
-    offsetIndsStarts=[];
-    for i=1:ceil(size(thisStim,2)/indsOffset)
-        inds=(1:indsOffset)+(i-1)*indsOffset;
-        offsetIndsStarts(end+1)=inds(1);
-        inds=inds(inds<=size(thisStim,2));
-        plot(1+mod(inds-1,indsOffset),thisStim(1,inds)+(i-1)*max(thisStim(1,:)),'g')
+        plot(ones(1,2)*nomVal,[0 max(hVals)])
+        xlim(sort((5*[-1 1]+1)*nomVal))
+        
+        subplot(n,1,2)
+        [hVals hBins]=hist(abs(meanlessStim-nomVal),10000);
+        junk=sort(hVals,'descend');
+        crit=hBins(find(hVals<.1*junk(1),1));
+        plot(hBins,hVals)
         hold on
-        plot([1 indsOffset],ones(1,2)*(i-1)+mean(thisStim(1,inds)),'k')
+        plot(ones(1,2)*crit,[0 max(hVals)])
+        xlim([0 10*crit])
+        
+        subplot(n,1,3)
+        plot(thisStim(2,:),meanlessStim-nomVal)
+        hold on
+        plot(repmat(minmax(thisStim(2,:))',1,2),repmat([1 -1]*crit,2,1),'r')
+        if false
+            xc=xcorr(diff(abs(meanlessStim-nomVal)>crit),[-1 0 0 0 0 0 0 0 0 0 0]);
+            xc=xc(ceil((1+length(xc))/2):end);
+        else
+            template=[-1 0 0 0 0 0];
+            xc=normxcorr2(template,diff(abs(meanlessStim-nomVal)>crit));
+            xc=xc((length(template)-1):end);
+        end
+        
+        xc=find(abs(xc-1)<.00001);
+        plot(repmat(thisStim(2,xc),2,1),repmat(100*crit*[-1 1]',1,length(xc)),'r')
+        
+        nomLen=median(diff(xc))*timestep;
+        goodXCs=[];
+        for wNum=2:length(xc)-1
+            ref=thisStim(2,xc)-thisStim(2,xc(wNum));
+            if all([sum(abs((ref-nomLen)/nomLen)<.1)>0 sum(abs((ref+nomLen)/nomLen)<.1)>0])
+                plot(ones(1,2)*thisStim(2,xc(wNum)),50*crit*[-1 1]','g')
+                goodXCs(end+1)=xc(wNum);
+            end
+            
+            if false
+            pct=((xc(wNum)-xc(wNum-1))/nomLen)-1;
+            if pct>.1
+            elseif pct<-.1
+            else
+            end
+            end
+        end
+    
+        extras=[];
+        for wNum=1:length(goodXCs)
+            curr=thisStim(2,goodXCs(wNum));
+            if wNum==1
+                back=curr-nomLen;
+                done=false;
+                while ~done
+                    backInd=find(thisStim(2,:)>=back-timestep & thisStim(2,:)<=back+timestep);
+                    if ~isempty(backInd)
+                        backInd=backInd(ceil(length(backInd)/2));
+                        back=back-nomLen;
+                        extras(end+1)=backInd;
+                    else
+                        done=true;
+                    end
+                end
+            end
+            while (wNum==length(goodXCs) && curr+2*nomLen<=thisStim(2,end)) || (wNum<length(goodXCs) && (((thisStim(2,goodXCs(1+wNum))-curr)/nomLen)-1)>.5)
+                curr=curr+nomLen;
+                
+                    currInd=find(thisStim(2,:)>=curr-timestep & thisStim(2,:)<=curr+timestep);
+                    if ~isempty(currInd)
+                        currInd=currInd(ceil(length(currInd)/2));
+                    else
+                        error('bad find')
+                    end                
+                
+                extras(end+1)=currInd;
+            end
+        end
+        extras=sort(extras);
+
+        plot(ones(2,length(extras)).*repmat(thisStim(2,extras),2,1),25*crit*repmat([-1 1]',1,length(extras)),'b')
+        
+        conditionStartInds=sort([extras goodXCs]);
+        
+        conditionFits=nan(2,length(conditionStartInds));
+        for cNum=1:length(conditionStartInds)
+            cInds=conditionStartInds(cNum)+[0:round(nomLen/timestep)];
+            [conditionFits(1,cNum) conditionFits(2,cNum)]=getSinParams(meanlessStim(1,cInds)-mean(meanlessStim(1,cInds)),thisStim(2,cInds));
+            if rand>.9
+                fprintf('%g%% done\n',100*cNum/length(conditionStartInds))
+            end
+        end
+
+        subplot(n,1,4)
+        plot(sort(conditionFits(2,:)),'b')
+        hold on
+        plot(sort(max(conditionFits(2,:))*normalize(conditionFits(1,:))),'r')
+        
+        if false
+            filted=filter(bartlett(10),1,abs(meanlessStim-nomVal));
+            plot(thisStim(2,:),filted);
+            
+            plot(thisStim(2,:),filter(bartlett(10),1,(meanlessStim-nomVal)));
+            
+            subplot(n,1,3)
+            plot(diff(xcorr(filted)),'r')
+            
+            
+            hold on
+            plot(minmax(thisStim(2,:)),.1*ones(1,2)*abs(nomVal))
+            
+            close all
+            plot(thisStim(2,:),meanlessStim-nomVal,'r')
+            hold on
+            plot(thisStim(2,:),abs(hilbert(meanlessStim-nomVal)))%instantaneous amp
+        end
+        
+        condsPerTrial=fitXCModel(diff(xcorr(conditionFits(2,:))));
+        offsetIndsStarts=conditionStartInds(1:condsPerTrial:length(conditionStartInds));
+        
+                f=[f figure];
+        
+        for i=1:length(offsetIndsStarts)
+            if i<length(offsetIndsStarts)
+                inds=offsetIndsStarts(i):offsetIndsStarts(i+1);
+            else
+                inds=offsetIndsStarts(i):size(thisStim,2);
+            end
+            plot(thisStim(2,inds)-thisStim(2,inds(1)),thisStim(1,inds)+(i-1)*max(thisStim(1,:)),'g')
+            hold on
+            plot(thisStim(2,minmax(inds))-thisStim(2,inds(1)),ones(1,2)*(i-1)+mean(thisStim(1,inds)),'r')
+        end
+        
+        keyboard
+        
     end
     
     %hilbert instantaneous freq -- note is not considered best way to
@@ -3351,7 +3518,7 @@ if ~isempty(trialStartTimes) && length(trialStartTimes>1)
             elseif strcmp(ex.message,'Matrix dimensions must agree.')
                 error('what''s this about?')
             else
-                error('catch everything')
+                %error('catch everything')
             end
             
             warning('skipping sinusoidal due to error')

@@ -1,10 +1,22 @@
-function [newout out amp]=fitSinusoidal(in,freqs,numContrasts,f,S,t)
+function [newout out amp]=fitSinusoidal(in,freqs,numContrasts,f,S,t,condFreqs)
 numConds=(length(freqs)*numContrasts);
+
+if numConds~=length(condFreqs)
+    error('condfreqs error')
+end
+
 out=medianChunk(in,numConds);
 
 [junk freqOrd]=sort(out(1,:),'descend');
 
+if true
+    [freqs freqOrd]=sort(condFreqs(:),'descend');
+    freqs=reshape(freqs,numContrasts,length(freqs)/numContrasts);
+    freqs=round(mean(freqs));
+end
+
 freqs=sort(freqs(:),1,'descend');
+
 if length(unique(freqs))~=length(freqs) || ~all(freqs>0) || ~all(isreal(freqs))
     freqs
     error('freqs must all be unique, real, strictly positive')

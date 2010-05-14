@@ -38,11 +38,17 @@ data.mins=(stimTimes(2)-stimTimes(1))/60;
 
 if ... % selectRecordings('gauss',stimType,data) %
         data.mins>=3 && ismember(stimType,{'sinusoid','sinusoid(new)','squarefreqs'}) ... % && ismember(rec.date,datenum({'03.13.09'},'mm.dd.yy'))
- && (ismember(rec.date,datenum({'03.25.09'},'mm.dd.yy')) && rec.chunks.cell_Z==18.55)
+        && (ismember(rec.date,datenum({'03.25.09'},'mm.dd.yy')) && rec.chunks.cell_Z==18.55)
+    
     %        && (ismember(rec.date,datenum({'03.17.09'},'mm.dd.yy')) && rec.chunks.cell_Z==8.58)
     %    && (ismember(rec.date,datenum({'03.17.09'},'mm.dd.yy')) && rec.chunks.cell_Z==9.255) % || ... %not 8.58 %15 mins
-%     ismember(rec.date,datenum({'03.19.09'},'mm.dd.yy'))) %5 mins works
-   
+    %     ismember(rec.date,datenum({'03.19.09'},'mm.dd.yy'))) %5 mins works
+    
+    % && ((ismember(rec.date,datenum({'03.25.09'},'mm.dd.yy')) && rec.chunks.cell_Z==30.13) ...
+    % || (ismember(rec.date,datenum({'04.07.09'},'mm.dd.yy')) && rec.chunks.cell_Z==7.76))
+    
+    
+    
     % && ismember(stimType,{'gaussian','gaussgrass','rpt/unq'}) && ismember(rec.date,datenum({'04.15.09'},'mm.dd.yy')) %'hateren'
     
     %        (...
@@ -296,6 +302,7 @@ for i=1:length(fs)
     
     fn='tmp.png';
     dpi=300;
+    set(f, 'InvertHardCopy', 'off'); %preserves black background when colordef black
     print(f,'-dpng',['-r' num2str(dpi)],fn);
     
     fullName=[name '.png'];
@@ -2375,9 +2382,10 @@ bins=0:timestep:(trialDur + timestep);
 
 for i=1:length(starts)
     inds=thisStim(2,:)>=starts(i) & thisStim(2,:)<=starts(i)+trialDur;
-    if false
-        out(i,:)=interp1(thisStim(2,inds)-thisStim(2,find(inds,1)),thisStim(1,inds),bins,'pchip',nan); %losing low contrast high freq signals
-    else
+    if true
+        %out(i,:)=interp1(thisStim(2,inds)-thisStim(2,find(inds,1)),thisStim(1,inds),bins,'pchip',nan); %losing low contrast high freq signals
+        out(i,:)=interp1(thisStim(2,inds)-thisStim(2,find(inds,1)),thisStim(1,inds),bins,'nearest',nan); 
+    else %doesn't handle cases with lots of framedrops
         original=thisStim(1,inds);
         if abs(1-median(diff(thisStim(2,inds)))/timestep)<.01
             d=length(bins)-length(original);
@@ -2397,6 +2405,7 @@ for i=1:length(starts)
     else
         nanStart(i)=firstNan;
     end
+    
     out(i,:)=out(i,:)-mean(out(i,~isnan(out(i,:))));
 end
 
@@ -2454,6 +2463,14 @@ if freqInd~=2 || ~isscalar(freqInd)
 end
 b1=coeffvalues(cfun);
 freq=b1(freqInd)/(2*pi);
+end
+
+function out=nanreshape(in,r,c)
+if length(in)>r*c
+    error('in too long')
+end
+out=nan(r,c);
+out(1:length(in))=in;
 end
 
 function f=raster(data)
@@ -2577,7 +2594,7 @@ if doSinusoidal
         [junk hOrder]=sort(hVals,'descend');
         nomVal=hBins(hOrder(1));
         
-        close all
+        %close all
         n=4;
         subplot(n,1,1)
         plot(hBins,hVals);
@@ -2618,16 +2635,8 @@ if doSinusoidal
                 plot(ones(1,2)*thisStim(2,xc(wNum)),50*crit*[-1 1]','g')
                 goodXCs(end+1)=xc(wNum);
             end
-            
-            if false
-            pct=((xc(wNum)-xc(wNum-1))/nomLen)-1;
-            if pct>.1
-            elseif pct<-.1
-            else
-            end
-            end
         end
-    
+        
         extras=[];
         for wNum=1:length(goodXCs)
             curr=thisStim(2,goodXCs(wNum));
@@ -2648,18 +2657,18 @@ if doSinusoidal
             while (wNum==length(goodXCs) && curr+2*nomLen<=thisStim(2,end)) || (wNum<length(goodXCs) && (((thisStim(2,goodXCs(1+wNum))-curr)/nomLen)-1)>.5)
                 curr=curr+nomLen;
                 
-                    currInd=find(thisStim(2,:)>=curr-timestep & thisStim(2,:)<=curr+timestep);
-                    if ~isempty(currInd)
-                        currInd=currInd(ceil(length(currInd)/2));
-                    else
-                        error('bad find')
-                    end                
+                currInd=find(thisStim(2,:)>=curr-timestep & thisStim(2,:)<=curr+timestep);
+                if ~isempty(currInd)
+                    currInd=currInd(ceil(length(currInd)/2));
+                else
+                    error('bad find')
+                end
                 
                 extras(end+1)=currInd;
             end
         end
         extras=sort(extras);
-
+        
         plot(ones(2,length(extras)).*repmat(thisStim(2,extras),2,1),25*crit*repmat([-1 1]',1,length(extras)),'b')
         
         conditionStartInds=sort([extras goodXCs]);
@@ -2667,12 +2676,19 @@ if doSinusoidal
         conditionFits=nan(2,length(conditionStartInds));
         for cNum=1:length(conditionStartInds)
             cInds=conditionStartInds(cNum)+[0:round(nomLen/timestep)];
+                
+    if true %remove any spikes due to framedrops and center this condition on its mean
+        thisCond=thisStim(1,cInds);
+        thisCond(abs(thisCond-mean(thisCond))>2*std(thisCond))=mean(thisCond);
+        thisStim(1,cInds)=thisCond;
+        thisStim(1,cInds)=thisStim(1,cInds)-mean(thisStim(1,cInds));
+    end
             [conditionFits(1,cNum) conditionFits(2,cNum)]=getSinParams(meanlessStim(1,cInds)-mean(meanlessStim(1,cInds)),thisStim(2,cInds));
             if rand>.9
                 fprintf('%g%% done\n',100*cNum/length(conditionStartInds))
             end
         end
-
+        
         subplot(n,1,4)
         plot(sort(conditionFits(2,:)),'b')
         hold on
@@ -2700,7 +2716,7 @@ if doSinusoidal
         condsPerTrial=fitXCModel(diff(xcorr(conditionFits(2,:))));
         offsetIndsStarts=conditionStartInds(1:condsPerTrial:length(conditionStartInds));
         
-                f=[f figure];
+        f=[f figure];
         
         for i=1:length(offsetIndsStarts)
             if i<length(offsetIndsStarts)
@@ -2712,10 +2728,9 @@ if doSinusoidal
             hold on
             plot(thisStim(2,minmax(inds))-thisStim(2,inds(1)),ones(1,2)*(i-1)+mean(thisStim(1,inds)),'r')
         end
-        
-        keyboard
-        
     end
+    
+    condFreqs=nanmedian(nanreshape(conditionFits(2,:),condsPerTrial,ceil(length(conditionFits(2,:))/condsPerTrial))');
     
     %hilbert instantaneous freq -- note is not considered best way to
     %get inst. freq -- senseitive to noise -- only works for low freqs
@@ -2828,7 +2843,7 @@ if ~isempty(trialStartTimes) && length(trialStartTimes>1)
             
             newT=[linspace(bins(1),t(1)-tStep,prenans) t linspace(t(end)+tStep,bins(end),postnans)];
             subplot(5,1,3)
-            [fixFits hack sinAmps]=fitSinusoidal([nan(2,prenans) fits nan(2,postnans)],knownFreqs,numContrasts,specf,[nan(length(specf),prenans) S nan(length(specf),postnans)],newT);
+            [fixFits hack sinAmps]=fitSinusoidal([nan(2,prenans) fits nan(2,postnans)],knownFreqs,numContrasts,specf,[nan(length(specf),prenans) S nan(length(specf),postnans)],newT,condFreqs);
             xlim(minmax(bins));
             
             subplot(5,1,5)
@@ -2839,12 +2854,16 @@ if ~isempty(trialStartTimes) && length(trialStartTimes>1)
             plot(newT,fixFits(1,:),'k');
             xlim(minmax(bins));
             
+            midCondTimes=rem(thisStim(2,conditionStartInds)-thisStim(2,conditionStartInds(1)),trialDur)+nomLen/2;
+            plot(midCondTimes,conditionFits(2,:),'bx')
+            plot(midCondTimes(1:condsPerTrial),condFreqs,'bo','MarkerSize',15)
+            
             subplot(5,1,4)
             plot(newT,fixFits(2,:))
             xlim(minmax(bins));
             
             
-            
+            keyboard
             
             
             
@@ -3246,7 +3265,7 @@ if ~isempty(trialStartTimes) && length(trialStartTimes>1)
                         theseViolations=cellfun(@(x,y) x+y, violations,num2cell(localOffsets'),'UniformOutput',false);
                     end
                     
-                    cellfun(@(c) doRaster( c{1} ,c{2},[0 chunkDur]),{ {theseRasters,'k.'} {theseBRasters,'ro'} {theseInBursts,'r.'} {theseViolations,'bo'} });
+                    cellfun(@(c) doRaster( c{1} ,c{2},[0 chunkDur]),{ {theseRasters,'w.'} {theseBRasters,'ro'} {theseInBursts,'r.'} {theseViolations,'bo'} });
                     xlim([0 chunkDur])
                     
                     if false
@@ -3393,7 +3412,7 @@ if ~isempty(trialStartTimes) && length(trialStartTimes>1)
                         warning('coherencycpt seems to not be able to handle trials with no spikes (throwing away %g of them)',sum(silentTrials))
                         [thisC,phi,S12,S1,S2,cfs,zerosp,confC,phistd,Cerr]=coherencycpt(chunkBlock(~silentTrials,:)',forChronux(~silentTrials),paramsC);
                     end
-                    C(i,j)=interp1(cfs,thisC,uFreqs(i),'pchip','extrap'); %*3*                    
+                    C(i,j)=interp1(cfs,thisC,uFreqs(i),'pchip','extrap'); %*3*
                     
                     sinAmps(i,j)=mean(std(chunkBlock'));
                     
@@ -3498,14 +3517,14 @@ if ~isempty(trialStartTimes) && length(trialStartTimes>1)
                 xlabel('freq (hz)')
             end
             
-                        n=3;
+            n=3;
             c=colormap;
             ccs=ceil(linspace(1,size(c,1),length(uContrasts)));
             fcs=ceil(linspace(1,size(c,1),length(uFreqs)));
             
             uFreqs
             
-                        doSummaryFig({'mean(std(stim))','amp fit','freq fit'});
+            doSummaryFig({'mean(std(stim))','amp fit','freq fit'});
             doSummaryFig({'mean','f1','f1/mean','coh','std','ff'});
             
             %save('C:\Documents and Settings\rlab\Desktop\for pam.mat','uFreqs','uContrasts','f0','sd','va','mn','f1','C'); % all are freqs x contrasts

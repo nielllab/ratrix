@@ -107,3 +107,4 @@ phys/new/nanMeanDown.m -text
 phys/new/restoreControls.m -text
 phys/new/XCModel.m -text
 phys/new/fitXCModel.m -text
+phys/new/nanmedian.m -text

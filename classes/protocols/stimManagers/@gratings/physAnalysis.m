@@ -515,6 +515,7 @@ if plotParameters.showSpikeAnalysis
         plot([x; x]+(i*0.05),[rate(i,:); rate(i,:)]+(rateSEM(i,:)'*[-1 1])','color',colors(i,:))
     end
     maxPowerInd=find(pow==max(pow));
+    maxPowerInd = maxPowerInd(1);
     if ~isempty(pow)
         plot(x,rate(maxPowerInd,:),'color',colors(maxPowerInd,:),'lineWidth',2);
     end

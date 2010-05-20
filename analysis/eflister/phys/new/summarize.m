@@ -4,7 +4,10 @@ close all
 
 analysis='entropy';
 %aggregateFileName='/Users/eflister/Desktop/spkEnt.mat';
-aggregateFileName='/Users/eflister/Desktop/final aggregate/20100227T065419.tmpFile.mat'; %'/Users/eflister/Desktop/final cosyne/gauss hat.mat';
+%aggregateFileName='/Users/eflister/Desktop/final aggregate/20100227T065419.tmpFile.mat'; %'/Users/eflister/Desktop/final cosyne/gauss hat.mat';
+
+analysis='sinusoidal';
+aggregateFileName='C:\Documents and Settings\rlab\Desktop\analysis tmp\20100519T085245.tmpFile.mat';
 
 z=load(aggregateFileName);
 z={z.z.(analysis)};
@@ -15,8 +18,53 @@ z=groupBy(z,{'z','chunk','hash'});
 switch analysis
     case 'entropy'
         entropy(z);
+    case 'sinusoidal'
+        sinusoidal(z);
     otherwise
         error('unrecognized analysis')
+end
+end
+
+function sinusoidal(in)
+contrasts=[];
+cols=2;
+c=colormap;
+    colors=c(ceil(linspace(1,size(c,1),size(in,1))),:);
+    
+for i=1:size(in,1)
+    if isempty(contrasts)
+        contrasts=in{i,2}.uContrasts;
+    elseif ~all(in{i,2}.uContrasts == contrasts)
+        error('contrasts don''t match')
+    end
+    
+    for j=1:length(contrasts)
+        
+        subplot(length(contrasts),cols,cols*(j-1)+1)
+        plot(in{i,2}.uFreqs,in{i,2}.mn(:,j)/max(in{i,2}.mn(:)),'Color',colors(i,:))
+        hold on
+        title(sprintf('contrast = %g',contrasts(j)))
+        ylim([0 1])
+        
+        if j==ceil(length(contrasts)/2)
+            ylabel('normalized (all contrasts) rate')
+        end
+        if j==length(contrasts)
+            xlabel('freq (hz)')
+        end
+        
+        subplot(length(contrasts),cols,cols*(j-1)+2)
+        plot(in{i,2}.uFreqs,in{i,2}.mn(:,j)/max(in{i,2}.mn(:,j)),'Color',colors(i,:))
+        hold on
+        if j==ceil(length(contrasts)/2)
+            ylabel('normalized (this contrast) rate')
+        end
+        ylim([0 1])
+        
+        if j==length(contrasts)
+            xlabel('freq (hz)')
+        end
+    end
 end
 end
 
@@ -29,12 +77,12 @@ gRates={};
 hRates={};
 
 for i=1:size(in,1)
-            gaussians{i}={};
-        haterens{i}={};
-        gRates{i}={};
-        hRates{i}={};
-        
-    for j=1:length(in{i,2})        
+    gaussians{i}={};
+    haterens{i}={};
+    gRates{i}={};
+    hRates{i}={};
+    
+    for j=1:length(in{i,2})
         switch in{i,2}(j).stimType
             case {'gaussian','gaussgrass'}
                 gRates{i}{end+1}={in{i,2}(j).tonicRate, in{i,2}(j).burstRate};
@@ -43,7 +91,7 @@ for i=1:size(in,1)
                 hRates{i}{end+1}={in{i,2}(j).tonicRate, in{i,2}(j).burstRate};
                 haterens{i}{end+1}=in{i,2}(j).bitsPerSpk;
             otherwise
-                'skipping' 
+                'skipping'
                 in{i,2}(j).stimType
         end
     end
@@ -86,13 +134,13 @@ ylim([0 maxH*1.1])
 
 figure
 for i=1:length(gRates)
-    if ~isempty(gRates{i}) 
+    if ~isempty(gRates{i})
         gHandle=plot(gRates{i}{1}{1},gRates{i}{1}{2},'bo');
     end
     hold on
 end
 for i=1:length(hRates)
-    if ~isempty(hRates{i}) 
+    if ~isempty(hRates{i})
         hHandle=plot(hRates{i}{1}{1},hRates{i}{1}{2},'g*');
     end
     hold on

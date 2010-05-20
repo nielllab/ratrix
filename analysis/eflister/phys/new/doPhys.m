@@ -4,7 +4,7 @@ function doPhys
 %%%%%
 
 dbstop if error
-colordef black
+colordef white %black %have to change 'k's to 'w's
 
 targetBinsPerSec=1000;
 

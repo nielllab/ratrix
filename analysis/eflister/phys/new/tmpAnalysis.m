@@ -37,8 +37,8 @@ data.fileNames=fileNames;
 data.mins=(stimTimes(2)-stimTimes(1))/60;
 
 if ... % selectRecordings('gauss',stimType,data) %
-        data.mins>=3 && ismember(stimType,{'sinusoid','sinusoid(new)','squarefreqs'}) ... % && ismember(rec.date,datenum({'03.13.09'},'mm.dd.yy'))
-        && (ismember(rec.date,datenum({'03.25.09'},'mm.dd.yy')) && rec.chunks.cell_Z==18.55)
+        data.mins>=3 && ismember(stimType,{'sinusoid','sinusoid(new)','squarefreqs'}) % ... % && ismember(rec.date,datenum({'03.13.09'},'mm.dd.yy'))
+     %   && (ismember(rec.date,datenum({'03.25.09'},'mm.dd.yy')) && rec.chunks.cell_Z==18.55)
     
     %        && (ismember(rec.date,datenum({'03.17.09'},'mm.dd.yy')) && rec.chunks.cell_Z==8.58)
     %    && (ismember(rec.date,datenum({'03.17.09'},'mm.dd.yy')) && rec.chunks.cell_Z==9.255) % || ... %not 8.58 %15 mins
@@ -2713,7 +2713,7 @@ if doSinusoidal
             plot(thisStim(2,:),abs(hilbert(meanlessStim-nomVal)))%instantaneous amp
         end
         
-        condsPerTrial=fitXCModel(diff(xcorr(conditionFits(2,:))));
+        condsPerTrial=fitXCModel(diff(xcorr(conditionFits(2,:))),[10 100]);
         offsetIndsStarts=conditionStartInds(1:condsPerTrial:length(conditionStartInds));
         
         f=[f figure];
@@ -2861,15 +2861,6 @@ if ~isempty(trialStartTimes) && length(trialStartTimes>1)
             subplot(5,1,4)
             plot(newT,fixFits(2,:))
             xlim(minmax(bins));
-            
-            
-            keyboard
-            
-            
-            
-            
-            
-            
             
             if false
                 
@@ -3265,7 +3256,7 @@ if ~isempty(trialStartTimes) && length(trialStartTimes>1)
                         theseViolations=cellfun(@(x,y) x+y, violations,num2cell(localOffsets'),'UniformOutput',false);
                     end
                     
-                    cellfun(@(c) doRaster( c{1} ,c{2},[0 chunkDur]),{ {theseRasters,'w.'} {theseBRasters,'ro'} {theseInBursts,'r.'} {theseViolations,'bo'} });
+                    cellfun(@(c) doRaster( c{1} ,c{2},[0 chunkDur]),{ {theseRasters,'k.'} {theseBRasters,'ro'} {theseInBursts,'r.'} {theseViolations,'bo'} });
                     xlim([0 chunkDur])
                     
                     if false
@@ -3526,6 +3517,13 @@ if ~isempty(trialStartTimes) && length(trialStartTimes>1)
             
             doSummaryFig({'mean(std(stim))','amp fit','freq fit'});
             doSummaryFig({'mean','f1','f1/mean','coh','std','ff'});
+            
+            sinusoidals={'uFreqs','uContrasts','mn','sd','f1','C','va'}; %instead of uContrasts, consider saving calculated contrasts (sinAmpsFit)
+            for sNum=1:length(sinusoidals)
+                sinusoidal.(sinusoidals{sNum})=eval(sinusoidals{sNum});
+            end
+            
+                aggregate(data,'sinusoidal',sinusoidal);
             
             %save('C:\Documents and Settings\rlab\Desktop\for pam.mat','uFreqs','uContrasts','f0','sd','va','mn','f1','C'); % all are freqs x contrasts
             

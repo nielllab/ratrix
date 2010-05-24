@@ -37,8 +37,27 @@ data.fileNames=fileNames;
 data.mins=(stimTimes(2)-stimTimes(1))/60;
 
 if ... % selectRecordings('gauss',stimType,data) %
-        data.mins>=3 && ismember(stimType,{'sinusoid','sinusoid(new)','squarefreqs'}) % ... % && ismember(rec.date,datenum({'03.13.09'},'mm.dd.yy'))
-     %   && (ismember(rec.date,datenum({'03.25.09'},'mm.dd.yy')) && rec.chunks.cell_Z==18.55)
+        data.mins>=3 && ismember(stimType,{'sinusoid','sinusoid(new)','squarefreqs'})  ... % && ismember(rec.date,datenum({'03.13.09'},'mm.dd.yy'))
+        && ~(ismember(rec.date,datenum({'03.25.09'},'mm.dd.yy')) && rec.chunks.cell_Z==19.97) ... % fubar'd stim?
+        && ~ismember(rec.date,datenum({'02.26.09'},'mm.dd.yy')) ... %sinusoids that weren't mean centered and had aliasing problems
+        && ~(ismember(rec.date,datenum({'03.17.09'},'mm.dd.yy')) && rec.chunks.cell_Z==8.58) ... %empty data.frames
+        && ~(ismember(rec.date,datenum({'04.23.09'},'mm.dd.yy')) && rec.chunks.cell_Z==38.885) ... %OOM (easy to fix) - 3 chunks, longest 23 mins
+        && ~(ismember(rec.date,datenum({'04.24.09'},'mm.dd.yy')) && rec.chunks.cell_Z==52.48) ... %OOM (easy to fix)
+        && ~(ismember(rec.date,datenum({'04.29.09'},'mm.dd.yy')) && rec.chunks.cell_Z==27.89) ... %OOM (easy to fix) (39 mins)
+        && ~(ismember(rec.date,datenum({'04.29.09'},'mm.dd.yy')) && rec.chunks.cell_Z==27.83) ... %OOM (easy to fix) - 2 files
+        && ~(ismember(rec.date,datenum({'05.06.09'},'mm.dd.yy')) && rec.chunks.cell_Z==28.04) ... % things not working for LED yet
+        && ~(ismember(rec.date,datenum({'05.08.09'},'mm.dd.yy')) && rec.chunks.cell_Z==31) ... %OOM (easy to fix) - 3 files
+        && ~(ismember(rec.date,datenum({'03.19.09'},'mm.dd.yy')) && rec.chunks.cell_Z==8.255) ...  %fig 8 gets inconsistent dims in coherencycpt the alignment line (check_consistency.m,25)
+        && ~(ismember(rec.date,datenum({'04.07.09'},'mm.dd.yy')) && rec.chunks.cell_Z==7.76) ...  %fig 6 dies?
+        && ~(ismember(rec.date,datenum({'04.23.09'},'mm.dd.yy')) && rec.chunks.cell_Z==38.26)   %fig 7 dies?
+
+          
+
+
+
+
+    
+    %   && (ismember(rec.date,datenum({'03.25.09'},'mm.dd.yy')) && rec.chunks.cell_Z==18.55)
     
     %        && (ismember(rec.date,datenum({'03.17.09'},'mm.dd.yy')) && rec.chunks.cell_Z==8.58)
     %    && (ismember(rec.date,datenum({'03.17.09'},'mm.dd.yy')) && rec.chunks.cell_Z==9.255) % || ... %not 8.58 %15 mins
@@ -140,7 +159,7 @@ if ... % selectRecordings('gauss',stimType,data) %
             error('unknown type: %s\n',stimType)
     end
 else
-    fprintf('\nskipping %g mins %s\n',data.mins,stimType)
+    fprintf('\nskipping %g mins %s (%s z%g)\n',data.mins,stimType,datestr(rec.date,'mm.dd.yy'),rec.chunks.cell_Z)
 end
 end
 
@@ -2384,7 +2403,7 @@ for i=1:length(starts)
     inds=thisStim(2,:)>=starts(i) & thisStim(2,:)<=starts(i)+trialDur;
     if true
         %out(i,:)=interp1(thisStim(2,inds)-thisStim(2,find(inds,1)),thisStim(1,inds),bins,'pchip',nan); %losing low contrast high freq signals
-        out(i,:)=interp1(thisStim(2,inds)-thisStim(2,find(inds,1)),thisStim(1,inds),bins,'nearest',nan); 
+        out(i,:)=interp1(thisStim(2,inds)-thisStim(2,find(inds,1)),thisStim(1,inds),bins,'nearest',nan);
     else %doesn't handle cases with lots of framedrops
         original=thisStim(1,inds);
         if abs(1-median(diff(thisStim(2,inds)))/timestep)<.01
@@ -2497,7 +2516,11 @@ doSinusoidal=true;
 if doSinusoidal
     timestep=median(diff(thisStim(2,:)));
     
-    meanlessStim=thisStim(1,:)-mean(thisStim(1,:));
+    nyquist=1/(2*timestep);
+    cut=.1;
+    meanlessStim=filtfilt(fir1(300,cut/nyquist,'high'),1,thisStim(1,:)); %used to use order 3000, but i think that is actually worse at local DC removal
+    
+    meanlessStim=zscore(meanlessStim); %thisStim(1,:)-mean(thisStim(1,:));
     
     if false
         
@@ -2605,14 +2628,17 @@ if doSinusoidal
         subplot(n,1,2)
         [hVals hBins]=hist(abs(meanlessStim-nomVal),10000);
         junk=sort(hVals,'descend');
-        crit=hBins(find(hVals<.1*junk(1),1));
+        
+        % used to have: crit=hBins(find(hVals<.3*junk(1),1)); % was .1
+        crit=.15; %check on 3.13/3.17
+        
         plot(hBins,hVals)
         hold on
         plot(ones(1,2)*crit,[0 max(hVals)])
         xlim([0 10*crit])
         
         subplot(n,1,3)
-        plot(thisStim(2,:),meanlessStim-nomVal)
+        plot(thisStim(2,:),meanlessStim-nomVal,'m')
         hold on
         plot(repmat(minmax(thisStim(2,:))',1,2),repmat([1 -1]*crit,2,1),'r')
         if false
@@ -2628,13 +2654,25 @@ if doSinusoidal
         plot(repmat(thisStim(2,xc),2,1),repmat(100*crit*[-1 1]',1,length(xc)),'r')
         
         nomLen=median(diff(xc))*timestep;
+        
+        expected=1;
+        if abs(nomLen-expected)/expected > .1
+            warning('autodetection of condition duration not near expected value')
+            nomLen
+            nomLen=expected;
+        end
+        
         goodXCs=[];
         for wNum=2:length(xc)-1
             ref=thisStim(2,xc)-thisStim(2,xc(wNum));
-            if all([sum(abs((ref-nomLen)/nomLen)<.1)>0 sum(abs((ref+nomLen)/nomLen)<.1)>0])
+            if all([sum(abs((ref-nomLen)/nomLen)<.1)>0 sum(abs((ref+nomLen)/nomLen)<.1)>0]) && sum(abs(ref)<nomLen/2)==1
                 plot(ones(1,2)*thisStim(2,xc(wNum)),50*crit*[-1 1]','g')
                 goodXCs(end+1)=xc(wNum);
             end
+        end
+        
+        if any(diff(goodXCs)<nomLen*(1-.1))
+            error('bad goodXCs')
         end
         
         extras=[];
@@ -2644,10 +2682,17 @@ if doSinusoidal
                 back=curr-nomLen;
                 done=false;
                 while ~done
-                    backInd=find(thisStim(2,:)>=back-timestep & thisStim(2,:)<=back+timestep);
+                    errs=abs(thisStim(2,xc)-back);
+                    backInd=find(min(errs)==errs,1);
+                    if errs(backInd) > 3*timestep
+                        backInd=find(thisStim(2,:)>=back-timestep & thisStim(2,:)<=back+timestep);
+                    else
+                        backInd=xc(backInd);
+                    end
+                    
                     if ~isempty(backInd)
                         backInd=backInd(ceil(length(backInd)/2));
-                        back=back-nomLen;
+                        back=thisStim(2,backInd)-nomLen;
                         extras(end+1)=backInd;
                     else
                         done=true;
@@ -2657,12 +2702,20 @@ if doSinusoidal
             while (wNum==length(goodXCs) && curr+2*nomLen<=thisStim(2,end)) || (wNum<length(goodXCs) && (((thisStim(2,goodXCs(1+wNum))-curr)/nomLen)-1)>.5)
                 curr=curr+nomLen;
                 
-                currInd=find(thisStim(2,:)>=curr-timestep & thisStim(2,:)<=curr+timestep);
+                errs=abs(thisStim(2,xc)-curr);
+                currInd=find(min(errs)==errs,1);
+                if errs(currInd) > 3*timestep
+                    currInd=find(thisStim(2,:)>=curr-timestep & thisStim(2,:)<=curr+timestep);
+                else
+                    currInd=xc(currInd);
+                end
+                
                 if ~isempty(currInd)
                     currInd=currInd(ceil(length(currInd)/2));
                 else
                     error('bad find')
                 end
+                curr=thisStim(2,currInd);
                 
                 extras(end+1)=currInd;
             end
@@ -2672,17 +2725,25 @@ if doSinusoidal
         plot(ones(2,length(extras)).*repmat(thisStim(2,extras),2,1),25*crit*repmat([-1 1]',1,length(extras)),'b')
         
         conditionStartInds=sort([extras goodXCs]);
+                
+        if any(abs(diff(thisStim(2,conditionStartInds))-nomLen)/nomLen > .4) || isempty(conditionStartInds) %used to be .1 -- 03.25.09 1.sinusoid.z.18.55 is first to need .4 to pass
+                    plot(thisStim(2,:),zscore(thisStim(1,:)),'k')
+            
+            subplot(n,1,4)
+            plot(abs(diff(thisStim(2,conditionStartInds))-nomLen)/nomLen)
+            error('bad conditionStartInds')
+        end
         
         conditionFits=nan(2,length(conditionStartInds));
         for cNum=1:length(conditionStartInds)
             cInds=conditionStartInds(cNum)+[0:round(nomLen/timestep)];
-                
-    if true %remove any spikes due to framedrops and center this condition on its mean
-        thisCond=thisStim(1,cInds);
-        thisCond(abs(thisCond-mean(thisCond))>2*std(thisCond))=mean(thisCond);
-        thisStim(1,cInds)=thisCond;
-        thisStim(1,cInds)=thisStim(1,cInds)-mean(thisStim(1,cInds));
-    end
+            
+            if true %remove any spikes due to framedrops and center this condition on its mean
+                thisCond=thisStim(1,cInds);
+                thisCond(abs(thisCond-mean(thisCond))>2*std(thisCond))=mean(thisCond);
+                thisStim(1,cInds)=thisCond;
+                thisStim(1,cInds)=thisStim(1,cInds)-mean(thisStim(1,cInds));
+            end
             [conditionFits(1,cNum) conditionFits(2,cNum)]=getSinParams(meanlessStim(1,cInds)-mean(meanlessStim(1,cInds)),thisStim(2,cInds));
             if rand>.9
                 fprintf('%g%% done\n',100*cNum/length(conditionStartInds))
@@ -2726,7 +2787,7 @@ if doSinusoidal
             end
             plot(thisStim(2,inds)-thisStim(2,inds(1)),thisStim(1,inds)+(i-1)*max(thisStim(1,:)),'g')
             hold on
-            plot(thisStim(2,minmax(inds))-thisStim(2,inds(1)),ones(1,2)*(i-1)+mean(thisStim(1,inds)),'r')
+            plot(thisStim(2,minmax(inds))-thisStim(2,inds(1)),ones(1,2)*(i-1)*max(thisStim(1,:))+mean(thisStim(1,inds)),'r')
         end
     end
     
@@ -3523,7 +3584,7 @@ if ~isempty(trialStartTimes) && length(trialStartTimes>1)
                 sinusoidal.(sinusoidals{sNum})=eval(sinusoidals{sNum});
             end
             
-                aggregate(data,'sinusoidal',sinusoidal);
+            aggregate(data,'sinusoidal',sinusoidal);
             
             %save('C:\Documents and Settings\rlab\Desktop\for pam.mat','uFreqs','uContrasts','f0','sd','va','mn','f1','C'); % all are freqs x contrasts
             

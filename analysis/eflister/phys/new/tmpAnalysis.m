@@ -37,26 +37,37 @@ data.fileNames=fileNames;
 data.mins=(stimTimes(2)-stimTimes(1))/60;
 
 if ... % selectRecordings('gauss',stimType,data) %
-        data.mins>=3 && ismember(stimType,{'sinusoid','sinusoid(new)','squarefreqs'})  ... % && ismember(rec.date,datenum({'03.13.09'},'mm.dd.yy'))
+        data.mins>=3 && ismember(stimType,{'sinusoid','sinusoid(new)'})  ... %squarefreqs
+        ... %probably not fixable
         && ~(ismember(rec.date,datenum({'03.25.09'},'mm.dd.yy')) && rec.chunks.cell_Z==19.97) ... % fubar'd stim?
         && ~ismember(rec.date,datenum({'02.26.09'},'mm.dd.yy')) ... %sinusoids that weren't mean centered and had aliasing problems
+        ... %probably fixable
         && ~(ismember(rec.date,datenum({'03.17.09'},'mm.dd.yy')) && rec.chunks.cell_Z==8.58) ... %empty data.frames
-        && ~(ismember(rec.date,datenum({'04.23.09'},'mm.dd.yy')) && rec.chunks.cell_Z==38.885) ... %OOM (easy to fix) - 3 chunks, longest 23 mins
-        && ~(ismember(rec.date,datenum({'04.24.09'},'mm.dd.yy')) && rec.chunks.cell_Z==52.48) ... %OOM (easy to fix)
-        && ~(ismember(rec.date,datenum({'04.29.09'},'mm.dd.yy')) && rec.chunks.cell_Z==27.89) ... %OOM (easy to fix) (39 mins)
-        && ~(ismember(rec.date,datenum({'04.29.09'},'mm.dd.yy')) && rec.chunks.cell_Z==27.83) ... %OOM (easy to fix) - 2 files
         && ~(ismember(rec.date,datenum({'05.06.09'},'mm.dd.yy')) && rec.chunks.cell_Z==28.04) ... % things not working for LED yet
-        && ~(ismember(rec.date,datenum({'05.08.09'},'mm.dd.yy')) && rec.chunks.cell_Z==31) ... %OOM (easy to fix) - 3 files
         && ~(ismember(rec.date,datenum({'03.19.09'},'mm.dd.yy')) && rec.chunks.cell_Z==8.255) ...  %fig 8 gets inconsistent dims in coherencycpt the alignment line (check_consistency.m,25)
         && ~(ismember(rec.date,datenum({'04.07.09'},'mm.dd.yy')) && rec.chunks.cell_Z==7.76) ...  %fig 6 dies?
-        && ~(ismember(rec.date,datenum({'04.23.09'},'mm.dd.yy')) && rec.chunks.cell_Z==38.26)   %fig 7 dies?
-
-          
-
-
-
+        && ~(ismember(rec.date,datenum({'04.23.09'},'mm.dd.yy')) && rec.chunks.cell_Z==38.26) ...  %fig 7 dies?
+        && ~(ismember(rec.date,datenum({'04.29.09'},'mm.dd.yy')) && rec.chunks.cell_Z==27.83 && ismember(stimType,{'sinusoid(new)'})) ... %bad conditionStartInds
+        && ~(ismember(rec.date,datenum({'04.24.09'},'mm.dd.yy')) && rec.chunks.cell_Z==52.48) ... %early slippage
+        && ~(ismember(rec.date,datenum({'04.15.09'},'mm.dd.yy')) && rec.chunks.cell_Z==47.34) % line 3606 error "what's this about?" -- stim is pretty fubard anyway
+    
+    %squarefreqs give line 5 @ fitSinusoidal "condfreqs error"
+%188 05.08.09 1.squarefreqs.z.31.t.6123.74-6728.chunk.1.93213cc4a832b81a0ba1bf4e1e6afbfcf64b82fc
+%188 05.08.09 1.squarefreqs.z.31.t.6728-6980.42.chunk.2.93213cc4a832b81a0ba1bf4e1e6afbfcf64b82fc
+%188 05.08.09 1.squarefreqs.z.31.t.6980.45-7547.chunk.3.93213cc4a832b81a0ba1bf4e1e6afbfcf64b82fc
 
     
+    
+% fixed OOM's
+%     && ((ismember(rec.date,datenum({'04.23.09'},'mm.dd.yy')) && rec.chunks.cell_Z==38.885) ...
+%         || (ismember(rec.date,datenum({'04.29.09'},'mm.dd.yy')) && rec.chunks.cell_Z==27.83 && ismember(stimType,{'sinusoid'}))...
+%         || (ismember(rec.date,datenum({'04.29.09'},'mm.dd.yy')) && rec.chunks.cell_Z==27.89) ... %some slippage at end
+%         || (ismember(rec.date,datenum({'05.08.09'},'mm.dd.yy')) && rec.chunks.cell_Z==31))
+    
+
+
+%older
+    % && ismember(rec.date,datenum({'03.13.09'},'mm.dd.yy'))
     %   && (ismember(rec.date,datenum({'03.25.09'},'mm.dd.yy')) && rec.chunks.cell_Z==18.55)
     
     %        && (ismember(rec.date,datenum({'03.17.09'},'mm.dd.yy')) && rec.chunks.cell_Z==8.58)
@@ -159,7 +170,9 @@ if ... % selectRecordings('gauss',stimType,data) %
             error('unknown type: %s\n',stimType)
     end
 else
+    if   data.mins>=3 && ismember(stimType,{'sinusoid','sinusoid(new)','squarefreqs'})
     fprintf('\nskipping %g mins %s (%s z%g)\n',data.mins,stimType,datestr(rec.date,'mm.dd.yy'),rec.chunks.cell_Z)
+    end
 end
 end
 
@@ -168,7 +181,43 @@ z=load(data.fileNames.tmpFile,'z');
 if ~isempty(fields(z))
     z=z.z;
 end
-z(end+1).(name)={data.uID val}; %now can dig these out with {z.(name)} and toss the emtpies.
+
+% add rat, date, NUM, stimtype, z, t, chunk, hash, svn, led/crt, ...etc
+
+rec.subjectID=data.ratID;
+rec.date=data.date;
+rec.stimType=data.stimType;
+rec.z=data.z;
+rec.t=data.stimTimes;
+rec.chunk=data.chunkNum;
+rec.hash=data.hash;
+rec.display=data.rec.display_type;
+
+[svn.runningSVNversion svn.repositorySVNversion svn.url]=getSVNRevisionFromXML(getRatrixPath);
+rp=getRatrixPath;
+if rp(end)==filesep
+    rp=rp(1:end-1);
+end
+[status , svn.summary] = system([GetSubversionPath 'svnversion -n "' rp '"']);
+if status==0
+    if any(ismember({':','M','S','P'},svn.summary')) %the transpose is a trick to make it treat each letter separately (could blow out into a cell array instead)
+        svn.summary
+        warning('aggregate called with unrecoverable svn version')
+    end
+else
+    summary
+    result
+    error('couldn''t call svnversion')
+end
+
+rec.svn=svn;
+
+%rec.num = ; %the first integer of data.uID is the 'stimNum' -- i think the index of that stim in its file (for now set in line 62 of compilePhysTxt as j), but i don't think we need it
+
+z(end+1).(name)={data.uID val rec}; %now can dig these out with {z.(name)} and toss the emtpies.
+
+keyboard
+
 save(data.fileNames.tmpFile,'z','-append')
 end
 
@@ -2373,11 +2422,16 @@ out=interp1(inds,in,inds-amt);
 end
 
 function offsets=align(block,timestep,timeLimit,check)
-xcs=xcorr(block',round(timeLimit/timestep)); % 1/timestep/2));  %HERE'S WHERE WE OOM (188 04.29.09 1.sinusoid.z.27.89.t.0.007-2338.31.chunk.1.eb9916e6e433e0599a743952acd19ec218eb83cb)
-
-[junk minds]=max(xcs);
-
-offsets=timestep*(minds-ceil(size(xcs,1)/2));
+if false
+    xcs=xcorr(block',round(timeLimit/timestep)); % 1/timestep/2));  %HERE'S WHERE WE OOM (188 04.29.09 1.sinusoid.z.27.89.t.0.007-2338.31.chunk.1.eb9916e6e433e0599a743952acd19ec218eb83cb)
+    
+    [junk minds]=max(xcs);
+    
+    offsets=timestep*(minds-ceil(size(xcs,1)/2));
+    
+else %we don't need xcorr based alignment anymore
+    offsets=zeros(1,size(block,1)^2);
+end
 
 if any(abs(offsets(:))>.1)
     max(abs(offsets(:)))
@@ -2494,6 +2548,18 @@ end
 
 function f=raster(data)
 f=figure;
+
+% check for these
+%     framePulseChan: 2
+%     indexPulseChan: 'none'
+%     phasePulseChan: 'none'
+%           physChan: 3
+%         pulse_type: 'double'
+%           stimChan: 1
+%      stimPulseChan: 'none'
+% rptStarts
+
+
 
 if false
     thisStim=data.stim;

@@ -7,7 +7,9 @@ analysis='entropy';
 %aggregateFileName='/Users/eflister/Desktop/final aggregate/20100227T065419.tmpFile.mat'; %'/Users/eflister/Desktop/final cosyne/gauss hat.mat';
 
 analysis='sinusoidal';
-aggregateFileName='C:\Documents and Settings\rlab\Desktop\analysis tmp\20100520T232713.tmpFile.mat';%\20100519T085245.tmpFile.mat';
+aggregateFileName='C:\Documents and Settings\rlab\Desktop\analysis tmp\20100525T085520.tmpFile.mat';% 20100520T232713.tmpFile.mat';%\20100519T085245.tmpFile.mat';
+%20100525T083741.tmpFile.mat
+%20100525T085520.tmpFile.mat
 
 z=load(aggregateFileName);
 z={z.z.(analysis)};

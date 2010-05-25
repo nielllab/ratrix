@@ -205,8 +205,8 @@ if status==0
         warning('aggregate called with unrecoverable svn version')
     end
 else
-    summary
-    result
+    svn.summary
+    status
     error('couldn''t call svnversion')
 end
 
@@ -215,8 +215,6 @@ rec.svn=svn;
 %rec.num = ; %the first integer of data.uID is the 'stimNum' -- i think the index of that stim in its file (for now set in line 62 of compilePhysTxt as j), but i don't think we need it
 
 z(end+1).(name)={data.uID val rec}; %now can dig these out with {z.(name)} and toss the emtpies.
-
-keyboard
 
 save(data.fileNames.tmpFile,'z','-append')
 end

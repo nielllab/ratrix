@@ -1,70 +1,234 @@
 function summarize(aggregateFileName,analysis)
 clc
 close all
+dbstop if error
+
+[pathstr, name, ext, versn] = fileparts(mfilename('fullpath'));
+addpath(fullfile(fileparts(fileparts(fileparts(fileparts(pathstr)))),'bootstrap'));
+setupEnvironment;
 
 analysis='entropy';
 %aggregateFileName='/Users/eflister/Desktop/spkEnt.mat';
 %aggregateFileName='/Users/eflister/Desktop/final aggregate/20100227T065419.tmpFile.mat'; %'/Users/eflister/Desktop/final cosyne/gauss hat.mat';
 
 analysis='sinusoidal';
-aggregateFileName='C:\Documents and Settings\rlab\Desktop\analysis tmp\20100525T085520.tmpFile.mat';% 20100520T232713.tmpFile.mat';%\20100519T085245.tmpFile.mat';
-%20100525T083741.tmpFile.mat
-%20100525T085520.tmpFile.mat
+aggregateFileName='C:\Documents and Settings\rlab\Desktop\analysis tmp\20100525T131338.tmpFile.mat';
 
 z=load(aggregateFileName);
 z={z.z.(analysis)};
 z=z(~cellfun(@isempty,z));
+
+z=cellfun(@(x) {x{1} setfield(x{2},'details',x{3})},z,'UniformOutput',false);
 z=parse(cellfun(@(x) setfield(x{2},'uID',x{1}),z)); %gah
 z=groupBy(z,{'z','chunk','hash'});
 
+hs=[];
 switch analysis
     case 'entropy'
         entropy(z);
     case 'sinusoidal'
-        sinusoidal(z);
+        hs=sinusoidal(z);
     otherwise
         error('unrecognized analysis')
 end
+
+if ~isempty(hs)
+    d=fileparts(aggregateFileName);
+    d=fullfile(d,datestr(now,30));
+    [status,message,messageid] = mkdir(d);
+    if status
+        [status,message,messageid] = copyfile(aggregateFileName,d);
+        if ~status
+            message
+            messageid
+            error('couldn''t copyfile')
+        end
+        for i=1:size(hs,1)
+            name=fullfile(d,hs{i,2});
+            saveas(hs{i,1},name,'fig');
+            saveas(hs{i,1},name,'png');
+        end
+    else
+        message
+        messageid
+        error('couldn''t mkdir');
+    end
+end
+close all
 end
 
-function sinusoidal(in)
+function hs=sinusoidal(in)
 contrasts=[];
+freqs=[];
 cols=2;
 c=colormap;
+close(gcf);
+colorBySubject=true;
+tmp=[in{:,2}];
+details=[tmp.details];
+subjects=unique({details.subjectID});
+numContrasts=length(in{1,2}.uContrasts);
+if colorBySubject
+    colors=c(ceil(linspace(1,size(c,1),length(subjects))),:);
+    %avgs=cell(length(subjects),numContrasts);
+    extra=length(subjects);
+else
     colors=c(ceil(linspace(1,size(c,1),size(in,1))),:);
+    %avgs=cell(1,numContrasts);
+    extra=1;
+end
+
+displays=unique({details.display});
+if ~isscalar(displays)
+    error('not implemented yet')
+end
+
+figs={'rate','f1','f1 over f0','coh','sd','ff'};
+hs={};
+for fig=1:length(figs)
+    hs(end+1,:)={figure,figs{fig}};
+    avgs=struct('fullNorm',{},'localNorm',{});
     
-for i=1:size(in,1)
-    if isempty(contrasts)
-        contrasts=in{i,2}.uContrasts;
-    elseif ~all(in{i,2}.uContrasts == contrasts)
-        error('contrasts don''t match')
-    end
-    
-    for j=1:length(contrasts)
-        
-        subplot(length(contrasts),cols,cols*(j-1)+1)
-        plot(in{i,2}.uFreqs,in{i,2}.mn(:,j)/max(in{i,2}.mn(:)),'Color',colors(i,:))
-        hold on
-        title(sprintf('contrast = %g',contrasts(j)))
-        ylim([0 1])
-        
-        if j==ceil(length(contrasts)/2)
-            ylabel('normalized (all contrasts) rate')
+    for i=1:size(in,1)+extra
+        if i<=size(in,1)
+            if ~isscalar((in{i,2}))
+                error('not implemented yet')
+            end
+            
+            if isempty(contrasts)
+                contrasts=in{i,2}.uContrasts;
+            elseif ~all(in{i,2}.uContrasts == contrasts)
+                error('contrasts don''t match')
+            end
+            
+            if isempty(freqs)
+                freqs=in{i,2}.uFreqs;
+            elseif ~all(in{i,2}.uFreqs == freqs)
+                freqs
+                in{i,2}.uFreqs
+                warning('freqs don''t match')
+                in{i,2}.uFreqs=freqs;
+            end
+            
+            if colorBySubject
+                [junk loc]=ismember(in{i,2}.details.subjectID,subjects);
+                color=colors(loc,:);
+            else
+                color=colors(i,:);
+            end
+            lineWidth=1;
+        else
+            lineWidth=3;
+            if colorBySubject
+                loc=i-size(in,1);
+                color=colors(loc,:);
+            else
+                color=zeros(1,3);
+            end
         end
-        if j==length(contrasts)
-            xlabel('freq (hz)')
-        end
         
-        subplot(length(contrasts),cols,cols*(j-1)+2)
-        plot(in{i,2}.uFreqs,in{i,2}.mn(:,j)/max(in{i,2}.mn(:,j)),'Color',colors(i,:))
-        hold on
-        if j==ceil(length(contrasts)/2)
-            ylabel('normalized (this contrast) rate')
-        end
-        ylim([0 1])
-        
-        if j==length(contrasts)
-            xlabel('freq (hz)')
+        for j=1:length(contrasts)
+            if i<=size(in,1)
+                doNorm=false;
+                label=figs{fig};
+                field=figs{fig};
+                switch figs{fig}
+                    case 'rate'
+                        field='mn';
+                        doNorm=true;
+                    case 'f1'
+                        doNorm=true;
+                    case 'f1 over f0'
+                        label='f1/f0';
+                        field='f1';
+                    case 'coh'
+                        label='coherence';
+                        field='C';
+                    case 'sd'
+                        label='rate modulation';
+                    case 'ff'
+                        label='fano factor';
+                        field='va';
+                    otherwise
+                        error('huh?')
+                end
+                
+                curve=in{i,2}.(field)(:,j);
+                
+                if doNorm
+                    fullNorm=curve/max(in{i,2}.(field)(:));
+                    localNorm=curve/max(in{i,2}.(field)(:,j));
+                    normLabels={'normalized (all contrasts)','normalized (per contrast)'};
+                else
+                    fullNorm=curve;
+                    localNorm=[];
+                    normLabels={''};
+                end
+                
+                if ismember(figs(fig),{'f1 over f0','ff'})
+                    fullNorm=fullNorm./in{i,2}.mn(:,j);
+                end
+                
+                if colorBySubject
+                    if size(avgs,2)<j || size(avgs,1)<loc
+                        avgs(loc,j).fullNorm=[];
+                        avgs(loc,j).localNorm=[];
+                    end
+                    avgs(loc,j).fullNorm(end+1,:)=fullNorm;
+                    if ~isempty(localNorm)
+                        avgs(loc,j).localNorm(end+1,:)=localNorm;
+                    end
+                else
+                    if length(avgs)<j
+                        avgs(j).fullNorm=[];
+                        avgs(j).localNorm=[];
+                    end
+                    avgs(j).fullNorm(end+1,:)=fullNorm;
+                    avgs(j).localNorm(end+1,:)=localNorm;
+                end
+                firstPlot=fullNorm;
+                secondPlot=localNorm;
+            else
+                if colorBySubject
+                    firstPlot=mean(avgs(loc,j).fullNorm);
+                    secondPlot=mean(avgs(loc,j).localNorm);
+                else
+                    firstPlot=mean(avgs(j).fullNorm);
+                    secondPlot=mean(avgs(j).localNorm);
+                end
+            end
+            
+            subplot(length(contrasts),cols,cols*(j-1)+1)
+            
+            plot(freqs,firstPlot,'Color',color,'LineWidth',lineWidth)
+            hold on
+            title(sprintf('contrast = %g',contrasts(j)))
+            if doNorm
+                ylim([0 1])
+            end
+            xlim(minmax(freqs))
+            
+            if j==ceil(length(contrasts)/2)
+                ylabel(sprintf('%s %s',normLabels{1}, label))
+            end
+            if j==length(contrasts)
+                xlabel('freq (hz)')
+            end
+            
+            if doNorm
+                subplot(length(contrasts),cols,cols*(j-1)+2)
+                plot(freqs,secondPlot,'Color',color,'LineWidth',lineWidth)
+                hold on
+                if j==ceil(length(contrasts)/2)
+                    ylabel(sprintf('%s %s',normLabels{2}, label))
+                end
+                ylim([0 1])
+                xlim(minmax(freqs))
+                
+                if j==length(contrasts)
+                    xlabel('freq (hz)')
+                end
+            end
         end
     end
 end

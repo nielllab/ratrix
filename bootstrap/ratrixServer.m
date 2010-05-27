@@ -768,6 +768,11 @@ try
                 end
 %                 if isempty(z) || ~tf || quit || ~gotGoodRatrix
                 if isempty(z) || quit || (~gotGoodRatrix && tf)  % 9/22/08 - don't toss clients w/o a subject running
+                    z
+                    quit
+                    gotGoodRatrix
+                    tf                    
+                    
                     % toss client if there is no zone, or if quit is received, or if client is registered but did not get a good ratrix
                     % do not toss in the event that we registered a client that has no subject running (tf will be false)
                     fprintf('shutting down client -- no entry for that mac or lost connection %s\n',mac);
@@ -824,6 +829,7 @@ end
 end
 
 function tossClient(r,c)
+dbstack
 commandsWaitingFromClient=disconnectClient(r,c);
 fprintf('tossed client\n')
 if ~isempty(commandsWaitingFromClient)

@@ -207,6 +207,7 @@ end
 [status , svn.summary] = system([GetSubversionPath 'svnversion -n "' rp '"']);
 if status==0
     if any(ismember({':','M','S','P'},svn.summary')) %the transpose is a trick to make it treat each letter separately (could blow out into a cell array instead)
+        %note that after a committing 2796, you will get eg '2795:2796' (runningSVNversion:repositorySVNversion), until you also update!
         svn.summary
         warning('aggregate called with unrecoverable svn version')
     end

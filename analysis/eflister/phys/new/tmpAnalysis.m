@@ -37,26 +37,16 @@ data.fileNames=fileNames;
 data.mins=(stimTimes(2)-stimTimes(1))/60;
 
 if ... % selectRecordings('gauss',stimType,data) %
-        data.mins>=3 && ismember(stimType,{'sinusoid','sinusoid(new)'})  ... %squarefreqs
-        && (ismember(rec.date,datenum({'04.29.09'},'mm.dd.yy')) && rec.chunks.cell_Z==27.83 && ismember(stimType,{'sinusoid(new)'}))
-%        && (ismember(rec.date,datenum({'03.25.09'},'mm.dd.yy')) && rec.chunks.cell_Z==29.78)
-%        && (ismember(rec.date,datenum({'04.23.09'},'mm.dd.yy')) && rec.chunks.cell_Z==38.26)
-%        && (ismember(rec.date,datenum({'04.07.09'},'mm.dd.yy')) && rec.chunks.cell_Z==7.76)
-%        && (ismember(rec.date,datenum({'03.19.09'},'mm.dd.yy')) && rec.chunks.cell_Z==8.255)
-    
-%         ... %probably not fixable
-%         && ~(ismember(rec.date,datenum({'03.25.09'},'mm.dd.yy')) && rec.chunks.cell_Z==19.97) ... % 5 mins, fubar'd stim?
-%         && ~ismember(rec.date,datenum({'02.26.09'},'mm.dd.yy')) ... %11 mins, sinusoids that weren't mean centered and had aliasing problems
-%         ... %probably fixable
-%         && ~(ismember(rec.date,datenum({'04.29.09'},'mm.dd.yy')) && rec.chunks.cell_Z==27.83 && ismember(stimType,{'sinusoid(new)'})) ... %30 mins, bad conditionStartInds -- what is sinusoid(new)?  this is only one?  looks like stims were ~4sec long, but we're detecting 1secs...? 
-%         && ~(ismember(rec.date,datenum({'04.24.09'},'mm.dd.yy')) && rec.chunks.cell_Z==52.48) ... %22 mins, early slippage
-%         && ~(ismember(rec.date,datenum({'05.06.09'},'mm.dd.yy')) && rec.chunks.cell_Z==28.04) ... %21 mins, things not working for LED yet
-% fixed        && ~(ismember(rec.date,datenum({'04.23.09'},'mm.dd.yy')) && rec.chunks.cell_Z==38.26) ...  %13 mins, fig 7 dies?
-%         && ~(ismember(rec.date,datenum({'04.15.09'},'mm.dd.yy')) && rec.chunks.cell_Z==47.34) ... %9 mins, line 3606 error "what's this about?" -- stim is pretty fubard anyway
-% fixed        && ~(ismember(rec.date,datenum({'03.19.09'},'mm.dd.yy')) && rec.chunks.cell_Z==8.255) ...  %5 mins, (HAD BEFORE) fig 8 gets inconsistent dims in coherencycpt the alignment line (check_consistency.m,25)
-% fixed        && ~(ismember(rec.date,datenum({'03.25.09'},'mm.dd.yy')) && rec.chunks.cell_Z==29.78) ... %4 mins,  raster at 3524    - inconsistent dimensions
-%         && ~(ismember(rec.date,datenum({'03.17.09'},'mm.dd.yy')) && rec.chunks.cell_Z==8.58) ... %3 mins, empty data.frames
-% fixed        && ~(ismember(rec.date,datenum({'04.07.09'},'mm.dd.yy')) && rec.chunks.cell_Z==7.76)  %3 mins, fig 6 dies? (HAD BEFORE)
+        data.mins>=3 && ismember(stimType,{'sinusoid','sinusoid(new)'})  ... %squarefreqs    
+        ... %probably not fixable
+        && ~(ismember(rec.date,datenum({'03.25.09'},'mm.dd.yy')) && rec.chunks.cell_Z==19.97) ... % 5 mins, fubar'd stim?
+        && ~ismember(rec.date,datenum({'02.26.09'},'mm.dd.yy')) ... %11 mins, sinusoids that weren't mean centered and had aliasing problems
+        ... %probably fixable
+        && ~(ismember(rec.date,datenum({'04.29.09'},'mm.dd.yy')) && rec.chunks.cell_Z==27.83 && ismember(stimType,{'sinusoid(new)'})) ... %30 mins, bad conditionStartInds -- what is sinusoid(new)?  this is only one?  looks like stims were ~4sec long, but we're detecting 1secs...? 
+        && ~(ismember(rec.date,datenum({'04.24.09'},'mm.dd.yy')) && rec.chunks.cell_Z==52.48) ... %22 mins, early slippage
+        && ~(ismember(rec.date,datenum({'05.06.09'},'mm.dd.yy')) && rec.chunks.cell_Z==28.04) ... %21 mins, things not working for LED yet
+        && ~(ismember(rec.date,datenum({'04.15.09'},'mm.dd.yy')) && rec.chunks.cell_Z==47.34) ... %9 mins, line 3606 error "what's this about?" -- stim is pretty fubard anyway
+        && ~(ismember(rec.date,datenum({'03.17.09'},'mm.dd.yy')) && rec.chunks.cell_Z==8.58)  %3 mins, empty data.frames
        
     %squarefreqs give line 5 @ fitSinusoidal "condfreqs error"  (23 mins total)
 %188 05.08.09 1.squarefreqs.z.31.t.6123.74-6728.chunk.1.93213cc4a832b81a0ba1bf4e1e6afbfcf64b82fc
@@ -74,6 +64,12 @@ if ... % selectRecordings('gauss',stimType,data) %
 %         || (ismember(rec.date,datenum({'04.29.09'},'mm.dd.yy')) && rec.chunks.cell_Z==27.89) ... %some slippage at end
 %         || (ismember(rec.date,datenum({'05.08.09'},'mm.dd.yy')) && rec.chunks.cell_Z==31))
     
+%other fixed
+% fixed        && ~(ismember(rec.date,datenum({'04.23.09'},'mm.dd.yy')) && rec.chunks.cell_Z==38.26) ...  %13 mins, fig 7 dies?
+% fixed        && ~(ismember(rec.date,datenum({'03.19.09'},'mm.dd.yy')) && rec.chunks.cell_Z==8.255) ...  %5 mins, (HAD BEFORE) fig 8 gets inconsistent dims in coherencycpt the alignment line (check_consistency.m,25)
+% fixed        && ~(ismember(rec.date,datenum({'03.25.09'},'mm.dd.yy')) && rec.chunks.cell_Z==29.78) ... %4 mins,  raster at 3524    - inconsistent dimensions
+% fixed        && ~(ismember(rec.date,datenum({'04.07.09'},'mm.dd.yy')) && rec.chunks.cell_Z==7.76)  %3 mins, fig 6 dies? (HAD BEFORE)
+
 
 
 %older

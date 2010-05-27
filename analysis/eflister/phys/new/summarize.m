@@ -60,7 +60,7 @@ end
 function hs=sinusoidal(in)
 contrasts=[];
 freqs=[];
-cols=2;
+cols=3;
 c=colormap;
 close(gcf);
 colorBySubject=true;
@@ -88,6 +88,30 @@ hs={};
 for fig=1:length(figs)
     hs(end+1,:)={figure,figs{fig}};
     avgs=struct('fullNorm',{},'localNorm',{});
+    
+                doNorm=false;
+                label=figs{fig};
+                field=figs{fig};
+                switch figs{fig}
+                    case 'rate'
+                        field='mn';
+                        doNorm=true;
+                    case 'f1'
+                        doNorm=true;
+                    case 'f1 over f0'
+                        label='f1/f0';
+                        field='f1';
+                    case 'coh'
+                        label='coherence';
+                        field='C';
+                    case 'sd'
+                        label='rate modulation';
+                    case 'ff'
+                        label='fano factor';
+                        field='va';
+                    otherwise
+                        error('huh?')
+                end    
     
     for i=1:size(in,1)+extra
         if i<=size(in,1)
@@ -117,8 +141,10 @@ for fig=1:length(figs)
                 color=colors(i,:);
             end
             lineWidth=1;
+            color=rgb2hsv(color);
+            color=hsv2rgb([color(1) .2 1]);
         else
-            lineWidth=3;
+            lineWidth=2;
             if colorBySubject
                 loc=i-size(in,1);
                 color=colors(loc,:);
@@ -128,31 +154,7 @@ for fig=1:length(figs)
         end
         
         for j=1:length(contrasts)
-            if i<=size(in,1)
-                doNorm=false;
-                label=figs{fig};
-                field=figs{fig};
-                switch figs{fig}
-                    case 'rate'
-                        field='mn';
-                        doNorm=true;
-                    case 'f1'
-                        doNorm=true;
-                    case 'f1 over f0'
-                        label='f1/f0';
-                        field='f1';
-                    case 'coh'
-                        label='coherence';
-                        field='C';
-                    case 'sd'
-                        label='rate modulation';
-                    case 'ff'
-                        label='fano factor';
-                        field='va';
-                    otherwise
-                        error('huh?')
-                end
-                
+            if i<=size(in,1)                
                 curve=in{i,2}.(field)(:,j);
                 
                 if doNorm
@@ -161,7 +163,7 @@ for fig=1:length(figs)
                     normLabels={'normalized (all contrasts)','normalized (per contrast)'};
                 else
                     fullNorm=curve;
-                    localNorm=[];
+                    %localNorm=[];
                     normLabels={''};
                 end
                 
@@ -175,7 +177,7 @@ for fig=1:length(figs)
                         avgs(loc,j).localNorm=[];
                     end
                     avgs(loc,j).fullNorm(end+1,:)=fullNorm;
-                    if ~isempty(localNorm)
+                    if doNorm % ~isempty(localNorm)
                         avgs(loc,j).localNorm(end+1,:)=localNorm;
                     end
                 else
@@ -184,7 +186,9 @@ for fig=1:length(figs)
                         avgs(j).localNorm=[];
                     end
                     avgs(j).fullNorm(end+1,:)=fullNorm;
-                    avgs(j).localNorm(end+1,:)=localNorm;
+                    if doNorm
+                        avgs(j).localNorm(end+1,:)=localNorm;
+                    end
                 end
                 firstPlot=fullNorm;
                 secondPlot=localNorm;
@@ -230,8 +234,40 @@ for fig=1:length(figs)
                 end
             end
         end
+        
+        if length(freqs)==length(contrasts)
+            if i<=size(in,1)
+                for j=1:length(freqs)
+                    curve=in{i,2}.(field)(j,:);
+                    
+                    if ismember(figs(fig),{'f1 over f0','ff'})
+                        curve=curve./in{i,2}.mn(j,:);
+                    end
+                    
+                    subplot(length(freqs),cols,cols*(j-1)+3)
+                    
+                    plot(contrasts,curve,'Color',color,'LineWidth',lineWidth)
+                    hold on
+                    title(sprintf('freq = %g',freqs(j)))
+                    xlim(minmax(contrasts))
+                    
+                    if j==ceil(length(contrasts)/2) && doNorm
+                        ylabel(sprintf('%s %s','unnormalized', label))
+                    end
+                    if j==length(freqs)
+                        xlabel('contrast')
+                    end
+                    
+                end
+            else
+                warning('avgs not implemneted yet')
+            end
+        else
+            error('not implemented')
+        end
     end
 end
+keyboard
 end
 
 function entropy(in)

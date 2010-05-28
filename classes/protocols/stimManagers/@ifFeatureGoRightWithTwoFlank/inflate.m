@@ -107,7 +107,7 @@ for i=1:length(parts)
                         s.cache.goRightStim= symbolicIm;
                         s.cache.goLeftStim = symbolicIm;
                         s.cache.flankerStim= symbolicIm;
-                    elseif all(s.phase==[0 pi])
+                    elseif length(s.phase)==2 && all(s.phase==[0 pi])
                         %if there are 2 phases, they could refer to targetphase OR
                         %flanker phase, but symbolic will only render varying flanker
                         %phases in this version
@@ -127,6 +127,37 @@ for i=1:length(parts)
                         %symbolicIm(:,:,1,1)=symbolicIm;         % 3 stripe
                         four(:,:,1,2)=symbolicImPhaseRev;  % 4 stripe, both same ori
                         four(:,:,2,2)=symbolicImPhaseRev;  % 4 stripe, both same ori
+                        
+                        s.cache.flankerStim= four;
+                    elseif length(s.phase)==3 && all(s.phase==[0 pi/2 pi])
+                        %if there are 3 phases, they could refer to targetphase OR
+                        %flanker phase, but symbolic will only render varying flanker
+                        %phases in this version
+                        four=symbolicIm;
+                        four(:,:,1,1)=symbolicIm;  % hack: repreat same ori
+                        four(:,:,2,1)=symbolicIm;  % hack: repreat same ori
+                        four(:,:,1,2)=symbolicIm;  % hack: repreat same ori
+                        four(:,:,2,2)=symbolicIm;  % hack: repreat same ori
+                        four(:,:,1,3)=symbolicIm;  % hack: repreat same ori
+                        four(:,:,2,3)=symbolicIm;  % hack: repreat same ori
+                        s.cache.goRightStim= four;  % no phase differences
+                        s.cache.goLeftStim = four;  % no phase differences
+                        
+                        
+                        symbolicImPhaseRev=imread('\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\pmeier\flankerSupport\symbolicRender\symbolicRender4stripe.png');
+                        symbolicImPhaseRev=imresize(symbolicImPhaseRev,size(mask));  %the right size
+                        symbolicImPhaseRev=fliplr(symbolicImPhaseRev);  % follow convention of 3 stripe                    
+                        
+                        symbolicImHalfPi=imread('\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\pmeier\flankerSupport\symbolicRender\symbolicRenderHalfPi.png');
+                        symbolicImHalfPi=imresize(symbolicImHalfPi,size(mask));  %the right size
+                        symbolicImHalfPi=fliplr(symbolicImHalfPi);  % follow convention of 3 stripe
+                        
+                        %symbolicImPhaseRev=symbolicIm(:,:,1);  % not true yet, but see if it works
+                        %symbolicIm(:,:,1,1)=symbolicIm;         % 3 stripe
+                        four(:,:,1,2)=symbolicImHalfPi;    % 4 stripe asym, both same ori
+                        four(:,:,2,2)=symbolicImHalfPi;    % 4 stripe asym, both same ori
+                        four(:,:,1,3)=symbolicImPhaseRev;  % 4 stripe, both same ori
+                        four(:,:,2,3)=symbolicImPhaseRev;  % 4 stripe, both same ori
                         
                         s.cache.flankerStim= four;
                     else

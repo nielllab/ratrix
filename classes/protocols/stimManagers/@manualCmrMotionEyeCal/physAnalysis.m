@@ -1,4 +1,4 @@
-function [analysisdata cumulativedata] = physAnalysis(stimManager,spikeRecord,stimulusDetails,plotParameters,parameters,cumulativedata,eyeData)
+function [analysisdata cumulativedata] = physAnalysis(stimManager,spikeRecord,stimulusDetails,plotParameters,parameters,cumulativedata,eyeData,LFPRecord)
 % error('remove this error when you update physAnalysis to be manualCmrMotionEyeCal');
 
 analysisdata=[];

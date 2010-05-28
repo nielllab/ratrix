@@ -1,6 +1,6 @@
 function [frameIndices frameTimes frameLengths correctedFrameIndices correctedFrameTimes correctedFrameLengths stimInds ...
     passedQualityTest] = ...
-    getFrameTimes(pulseData, pulseDataTimes, sampleRate, warningBound, errorBound, ifi,dropsAcceptableFirstNFrames)
+    getFrameTimes(pulseData, pulseDataTimes, sampleRate, dropBound, warningBound, errorBound, ifi,dropsAcceptableFirstNFrames)
 
 % calculate pulses and frameTimes based on pulseData
 % frameIndices - the exact sample index for each pulse
@@ -40,7 +40,24 @@ runs = diff(pulses);
 if pulses(end)==size(pulseData,1)
     runs(end+1) = -1; % automatically include the pulse if it happens on last sample
 end
-pulses = pulses(find(runs~=1));
+whichNonDoublePulse=find(runs~=1);
+
+%pulses = pulses(whichNonDoublePulse); old one lost the last frame, made
+%the next chunk deal with it.. but that could reult in double spikes on the
+%frame! and missing last frame
+
+pulses = pulses([whichNonDoublePulse; length(pulses)]);
+
+if length(pulses)<=1
+        %code fails if not at least 2 pulses found for start and stop.
+        %will this mean that the end of the last pulse is never found?
+        %thus always miss last from of trial?... maybe.
+        %though its likely this may only happen if there is one frame on the
+        %last chunk, which is common for white noise...
+        %considered but rejected: %pulses = [pulses; lastPulse];  %02/02/10
+        passedQualityTest=false;
+        return;
+end
 
 triplePulseCode=false;
 if triplePulseCode
@@ -67,10 +84,14 @@ if triplePulseCode
 else
     
     % EASIER ONE PULSE METHOD
-    frameIndices(:,1) = pulses(1:end-1);
-    frameIndices(:,2) = pulses(2:end)-1;
-    frameTimes(:,1) = pulseDataTimes(frameIndices(:,1));
-    frameTimes(:,2) = pulseDataTimes(frameIndices(:,2));
+    try
+        frameIndices(:,1) = pulses(1:end-1);
+        frameIndices(:,2) = pulses(2:end)-1;
+        frameTimes(:,1) = pulseDataTimes(frameIndices(:,1));
+        frameTimes(:,2) = pulseDataTimes(frameIndices(:,2));
+    catch
+        keyboard
+    end
 end
 
 % ==================================
@@ -98,7 +119,18 @@ stimInds=[1:size(frameIndices,1)]';
 
 
 %whichDrop=find((abs(diff(frameIndices')/sampleRate-ifi)>warningBound)); % seems like a funny definition (1: don't use warning bound, use ifi, 2: used half ifi as the definition) pmm & bs
-whichDrop=find((abs(diff(frameIndices')/sampleRate-ifi)>(ifi/2)));
+%whichDrop=find((abs(diff(frameIndices')/sampleRate-ifi)>(ifi/2))); % this includes frames which are half an ifi too long (good), as well as half an ifi too short(bad)
+
+%note: if there is a long frame of 1.51 ifi's, and then a short frame of
+%0.49 ifi's, using a standard dropBound of 1.5 we will call the first a drop, 
+%and split it. this will still allow ids to be correct. one could imagine using the evidence of a short
+%frame afterwards to change the threshold (say from ifi/2 to ifi*3/4)
+%WE DO NOT DO THAT! what we do is considetnt with the example below:
+% was: dur =[1.51 0.49]
+%        id=[5    6   ]
+% was: fix =[1    0.51 0.49]
+%        id=[5    5    6   ]
+whichDrop=find(diff(frameIndices')/sampleRate>dropBound*ifi);
 correctedFrameTimes(whichDrop,2)=frameTimes(whichDrop,1)+ifi-(1/sampleRate); % the corrected end time (estimated using ifi), need to remove one sample's worth of time
 addedFrameIndices=[];
 addedFrameTimes=[];
@@ -128,7 +160,12 @@ for i=whichDrop %are more than ifi, then must be missed frame
     % now linspace from start to end, and those are the start and stop inds, and then use corresponding frameTimes
     addVec=linspace(addStart,addEnd,addNum+1);
     toAdd=[];
-    toAdd(:,1)=ceil(addVec(1:end-1));
+    try
+        toAdd(:,1)=ceil(addVec(1:end-1));
+    catch ex
+        warning('whats this?')
+        keyboard
+    end
     toAdd(:,2)=floor(addVec(2:end));
     addedFrameIndices=[addedFrameIndices;toAdd];
     addedStimInds=[addedStimInds;ones(size(toAdd,1),1)*i];

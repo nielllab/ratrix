@@ -14,7 +14,6 @@
 %% twiddle the params and sort it
 close all
 
-
 stimClassToAnalyze={'all'}; timeRangePerTrialSecs=[0 Inf];
 % path='\\132.239.158.183\rlab_storage\pmeier\backup\devNeuralData_090310'; %b/c i can't see datanet_storage folder on .179
 % path='\\132.239.158.183\rlab_storage\pmeier\backup\neuralData_090505';
@@ -74,6 +73,16 @@ spikeSortingParams.features={'wavePC123'};
 spikeSortingParams.features={'wavePC1','peakToValley','wavePC2'};
 spikeSortingParams.postProcessing= 'biggestAverageAmplitudeCluster'; %'largestNonNoiseClusterOnly';
 end
+
+
+frameThresholds.dropsAcceptableFirstNFrames=2; % first 2 frames won't kill the default quality test
+frameThresholds.dropBound = 1.5;   %smallest fractional length of ifi that will cause the long tail to be called a drop(s)
+frameThresholds.warningBound = 0.1; %fractional difference that will cause a warning, (after drop adjusting)
+frameThresholds.errorBound = 0.6;   %fractional difference of ifi that will cause an error (after drop adjusting)
+% this largish value of .6 allows really short frames after drops to not
+% cause errors.  the other way around this is to crank up the drop bound
+% beyond 1.5 but I think thats too dangerous
+
 
 %  [spikes spikeWaveforms spikeTimestamps assignedClusters rankedClusters photoDiode]=...
 %                         getSpikesFromNeuralData(neuralData(1:maxTime,3),neuralDataTimes(1:maxTime),spikeDetectionParams,spikeSortingParams);
@@ -168,285 +177,284 @@ subjectID = '262';cellBoundary={'trialRange',[128 149]}; % spatial binary
 % subjectID = '261';cellBoundary={'trialRange',[377 378]}; % more bars, moved rat
 % subjectID = '261';cellBoundary={'trialRange',[380 383]}; % more bars, 
 
-% subjectID = '261';cellBoundary={'trialRange',[398 404]} % ffgwn, poor sort, MUA
-% subjectID = '261';cellBoundary={'trialRange',[406 408]} % bin grid
-% subjectID = '261';cellBoundary={'trialRange',[415]} % bin grid
+% subjectID = '261';cellBoundary={'trialRange',[398 404]}; % ffgwn, poor sort, MUA
+% subjectID = '261';cellBoundary={'trialRange',[406 408]}; % bin grid
+% subjectID = '261';cellBoundary={'trialRange',[415]}; % bin grid
 
 
-% subjectID = '138';cellBoundary={'trialRange',[8 12]} % ffgwn
-% subjectID = '138';cellBoundary={'trialRange',[13 20]} % ffgwn
-% subjectID = '138';cellBoundary={'trialRange',[25 29]} % ffgwn,  new pen, new cell
-% subjectID = '138';cellBoundary={'trialRange',[31]} % sf,  very broad drives it
-% subjectID = '138';cellBoundary={'trialRange',[37 47]} % sf,  very broad drives it
-% subjectID = '138';cellBoundary={'trialRange',[53]} % sparse bin
-% subjectID = '138';cellBoundary={'trialRange',[54 58]} % bars h
+% subjectID = '138';cellBoundary={'trialRange',[8 12]}; % ffgwn
+% subjectID = '138';cellBoundary={'trialRange',[13 20]}; % ffgwn
+% subjectID = '138';cellBoundary={'trialRange',[25 29]}; % ffgwn,  new pen, new cell
+% subjectID = '138';cellBoundary={'trialRange',[31]}; % sf,  very broad drives it
+% subjectID = '138';cellBoundary={'trialRange',[37 47]}; % sf,  very broad drives it
+% subjectID = '138';cellBoundary={'trialRange',[53]}; % sparse bin
+% subjectID = '138';cellBoundary={'trialRange',[54 58]}; % bars h
 
-%subjectID = '249';cellBoundary={'trialRange',[42]} % ffwgn
-subjectID = '249';cellBoundary={'trialRange',[43 50]} % ffwgn
-%subjectID = '249';cellBoundary={'trialRange',[60 70]} % ffwgn
-subjectID = '249';cellBoundary={'trialRange',[78]} % gratings
-subjectID = '249';cellBoundary={'trialRange',[102]} % gratings  START OF NEW CELL AROUND HERE SOMEWHERE>?
-subjectID = '249';cellBoundary={'trialRange',[150 151]} % ffwgn
-subjectID = '249';cellBoundary={'trialRange',[158]} % bigSlow many orientations
-%subjectID = '249';cellBoundary={'trialRange',[160 166]} %binary grid
-%subjectID = '249';cellBoundary={'trialRange',[168 173]} % horz
-%subjectID = '249';cellBoundary={'trialRange',[174 180]} %vert
-%subjectID = '249';cellBoundary={'trialRange',[181 183]} %vert
-%subjectID = '249';cellBoundary={'trialRange',[187]} %spatial freq gratings
-% subjectID = '249';cellBoundary={'trialRange',[196 198]} %ffgwn
-% subjectID = '249';cellBoundary={'trialRange',[197 198]} %ffgwn
-% subjectID = '249';cellBoundary={'trialRange',[239]} %vert  NEW CELL
-% subjectID = '249';cellBoundary={'trialRange',[243 256]} %ffgwn
-% subjectID = '249';cellBoundary={'trialRange',[259 264]} %bin grid
-% subjectID = '249';cellBoundary={'trialRange',[296 298]} %horiz %NEW CELL, HAS SPATIAL! 
-% subjectID = '249';cellBoundary={'trialRange',[299 301]} %more horiz background theta 4hz
-% subjectID = '249';cellBoundary={'trialRange',[302]} %trf
-% subjectID = '249';cellBoundary={'trialRange',[305 317]} %trf -  there might be more than one cell here
-% subjectID = '249';cellBoundary={'trialRange',[323]} %
-% subjectID = '249';cellBoundary={'trialRange',[339 356]} %bin3x4 -  very sparse now... iso?  bpm=30
-% subjectID = '249';cellBoundary={'trialRange',[365 370]} %bin3x4 -  very sparse now... iso?  bpm=30
-% subjectID = '249';cellBoundary={'trialRange',[376]} %bin3x4 -  very sparse now... iso?  bpm=48
-% subjectID = '249';cellBoundary={'trialRange',[377]} %bin6x8 - 
-% subjectID = '249';cellBoundary={'trialRange',[405]} %ffgwn 
-% subjectID = '249';cellBoundary={'trialRange',[407 411]} %horiz 
-% subjectID = '249';cellBoundary={'trialRange',[423]} % slow gratings
-% subjectID = '249';cellBoundary={'trialRange',[429 439]} %
-% subjectID = '249';cellBoundary={'trialRange',[450]} %horiz
-% subjectID = '249';cellBoundary={'trialRange',[451]} %vert
-subjectID = '249';cellBoundary={'trialRange',[455]} %many slow orients... responded reasonable well. 16 orients for the v1 comparison
-%subjectID = '249';cellBoundary={'trialRange',[457 464]} %3x4
-%subjectID = '249';cellBoundary={'trialRange',[469]} %horiz 
-%subjectID = '249';cellBoundary={'trialRange',[470]} %horiz 
-%subjectID = '249';cellBoundary={'trialRange',[475 477]} %3x4 
-%subjectID = '249';cellBoundary={'trialRange',[482 493]} %6x8 sparse brighter 
-%subjectID = '249';cellBoundary={'trialRange',[495 505]} %6 horiz - not much spatial
-%subjectID = '249';cellBoundary={'trialRange',[508 521]} %6 vert - not much spatial
-%subjectID = '249';cellBoundary={'trialRange',[523 533]}
-%subjectID = '249';cellBoundary={'trialRange',[523 555]}
+%subjectID = '249';cellBoundary={'trialRange',[42]}; % ffwgn
+subjectID = '249';cellBoundary={'trialRange',[43 50]}; % ffwgn
+%subjectID = '249';cellBoundary={'trialRange',[60 70]}; % ffwgn
+subjectID = '249';cellBoundary={'trialRange',[78]}; % gratings
+subjectID = '249';cellBoundary={'trialRange',[102]}; % gratings  START OF NEW CELL AROUND HERE SOMEWHERE>?
+subjectID = '249';cellBoundary={'trialRange',[150 151]}; % ffwgn
+subjectID = '249';cellBoundary={'trialRange',[158]}; % bigSlow many orientations
+%subjectID = '249';cellBoundary={'trialRange',[160 166]}; %binary grid
+%subjectID = '249';cellBoundary={'trialRange',[168 173]}; % horz
+%subjectID = '249';cellBoundary={'trialRange',[174 180]}; %vert
+%subjectID = '249';cellBoundary={'trialRange',[181 183]}; %vert
+%subjectID = '249';cellBoundary={'trialRange',[187]}; %spatial freq gratings
+% subjectID = '249';cellBoundary={'trialRange',[196 198]}; %ffgwn
+% subjectID = '249';cellBoundary={'trialRange',[197 198]}; %ffgwn
+% subjectID = '249';cellBoundary={'trialRange',[239]}; %vert  NEW CELL
+% subjectID = '249';cellBoundary={'trialRange',[243 256]}; %ffgwn
+% subjectID = '249';cellBoundary={'trialRange',[259 264]}; %bin grid
+% subjectID = '249';cellBoundary={'trialRange',[296 298]}; %horiz %NEW CELL, HAS SPATIAL! 
+% subjectID = '249';cellBoundary={'trialRange',[299 301]}; %more horiz background theta 4hz
+% subjectID = '249';cellBoundary={'trialRange',[302]}; %trf
+% subjectID = '249';cellBoundary={'trialRange',[305 317]}; %trf -  there might be more than one cell here
+% subjectID = '249';cellBoundary={'trialRange',[323]}; %
+% subjectID = '249';cellBoundary={'trialRange',[339 356]}; %bin3x4 -  very sparse now... iso?  bpm=30
+% subjectID = '249';cellBoundary={'trialRange',[365 370]}; %bin3x4 -  very sparse now... iso?  bpm=30
+% subjectID = '249';cellBoundary={'trialRange',[376]}; %bin3x4 -  very sparse now... iso?  bpm=48
+% subjectID = '249';cellBoundary={'trialRange',[377]}; %bin6x8 - 
+% subjectID = '249';cellBoundary={'trialRange',[405]}; %ffgwn 
+% subjectID = '249';cellBoundary={'trialRange',[407 411]}; %horiz 
+% subjectID = '249';cellBoundary={'trialRange',[423]}; % slow gratings
+% subjectID = '249';cellBoundary={'trialRange',[429 439]}; %
+% subjectID = '249';cellBoundary={'trialRange',[450]}; %horiz
+% subjectID = '249';cellBoundary={'trialRange',[451]}; %vert
+subjectID = '249';cellBoundary={'trialRange',[455]}; %many slow orients... responded reasonable well. 16 orients for the v1 comparison
+%subjectID = '249';cellBoundary={'trialRange',[457 464]}; %3x4
+%subjectID = '249';cellBoundary={'trialRange',[469]}; %horiz 
+%subjectID = '249';cellBoundary={'trialRange',[470]}; %horiz 
+%subjectID = '249';cellBoundary={'trialRange',[475 477]}; %3x4 
+%subjectID = '249';cellBoundary={'trialRange',[482 493]}; %6x8 sparse brighter 
+%subjectID = '249';cellBoundary={'trialRange',[495 505]}; %6 horiz - not much spatial
+%subjectID = '249';cellBoundary={'trialRange',[508 521]}; %6 vert - not much spatial
+%subjectID = '249';cellBoundary={'trialRange',[523 533]};
+%subjectID = '249';cellBoundary={'trialRange',[523 555]};
 
-subjectID = '250';cellBoundary={'trialRange',[178 190]}
-subjectID = '250';cellBoundary={'trialRange',[211 215]} %eyes start moving after this... a loll
-subjectID = '250';cellBoundary={'trialRange',[223 229]}
-subjectID = '250';cellBoundary={'trialRange',[238 250]} % eyes more stable again
-subjectID = '250';cellBoundary={'trialRange',[238 250]} % eyes more stable again
-subjectID = '250';cellBoundary={'trialRange',[389]} % +16D sf
-subjectID = '250';cellBoundary={'trialRange',[388]} % -16D sf
-subjectID = '250';cellBoundary={'trialRange',[391]} % -12D sf
-subjectID = '250';cellBoundary={'trialRange',[392]} % -8D sf
-subjectID = '250';cellBoundary={'trialRange',[393]} % -6D sf
-subjectID = '250';cellBoundary={'trialRange',[394]} % -4D sf
-subjectID = '250';cellBoundary={'trialRange',[395]} % -2D sf
-subjectID = '250';cellBoundary={'trialRange',[396]} % -1D sf
-subjectID = '250';cellBoundary={'trialRange',[414]} % +32 sf
+subjectID = '250';cellBoundary={'trialRange',[178 190]};
+subjectID = '250';cellBoundary={'trialRange',[211 215]}; %eyes start moving after this... a loll
+subjectID = '250';cellBoundary={'trialRange',[223 229]};
+subjectID = '250';cellBoundary={'trialRange',[238 250]}; % eyes more stable again
+subjectID = '250';cellBoundary={'trialRange',[238 250]}; % eyes more stable again
+subjectID = '250';cellBoundary={'trialRange',[389]}; % +16D sf
+subjectID = '250';cellBoundary={'trialRange',[388]}; % -16D sf
+subjectID = '250';cellBoundary={'trialRange',[391]}; % -12D sf
+subjectID = '250';cellBoundary={'trialRange',[392]}; % -8D sf
+subjectID = '250';cellBoundary={'trialRange',[393]}; % -6D sf
+subjectID = '250';cellBoundary={'trialRange',[394]}; % -4D sf
+subjectID = '250';cellBoundary={'trialRange',[395]}; % -2D sf
+subjectID = '250';cellBoundary={'trialRange',[396]}; % -1D sf
+subjectID = '250';cellBoundary={'trialRange',[414]}; % +32 sf
 
 
-subjectID = '250';cellBoundary={'trialRange',[420 428]} % ffgwn
+subjectID = '250';cellBoundary={'trialRange',[420 428]}; % ffgwn
 
-subjectID = '250';cellBoundary={'trialRange',[432 465]} % ffgwn
+subjectID = '250';cellBoundary={'trialRange',[432 465]}; % ffgwn
 %to get contrast, all trials were set at:
 %%'useThisMonitorsUncorrectedGamma';  p.rangeOfMonitorLinearized=[0.0 1] to
-subjectID = '250';cellBoundary={'trialRange',[468]} %768 ppc, no well centered, flankers worth analyzing
-subjectID = '250';cellBoundary={'trialRange',[478]} %256 ppc well centered, with good annulus precending it
-subjectID = '250';cellBoundary={'trialRange',[483]} % 128 ppc, well centered
-subjectID = '250';cellBoundary={'trialRange',[485]} % 128 ppc, 4lambda well centered
-subjectID = '250';cellBoundary={'trialRange',[489 491]} % 128 ppc, 3lambda well centered
-subjectID = '250';cellBoundary={'trialRange',[489 491]} % 128 ppc, 3lambda well, gaussian ... oddly the same trial numbers reoccur (maybe cuased by force quitting the stim computer when it hung on 491 the first time around?)
-subjectID = '250';cellBoundary={'trialRange',[492]} % 128 ppc, 3lambda well, gaussian ... after the overlap
-subjectID = '250';cellBoundary={'trialRange',[496]} % 64 ppc, 3lambda well, gaussian
-subjectID = '250';cellBoundary={'trialRange',[498]} % 32 ppc, 3lambda well, gaussian
-subjectID = '250';cellBoundary={'trialRange',[501]} % 32 ppc, 3lambda well, gaussian, linearized drives it poorly
-subjectID = '250';cellBoundary={'trialRange',[502]} % confirm annulus blocks
-%subjectID = '250';cellBoundary={'trialRange',[507]} % target flanker contrast
-%subjectID = '250';cellBoundary={'trialRange',[508]} % confirm annulus blocks
+subjectID = '250';cellBoundary={'trialRange',[468]}; %768 ppc, no well centered, flankers worth analyzing
+subjectID = '250';cellBoundary={'trialRange',[478]}; %256 ppc well centered, with good annulus precending it
+subjectID = '250';cellBoundary={'trialRange',[483]}; % 128 ppc, well centered
+subjectID = '250';cellBoundary={'trialRange',[485]}; % 128 ppc, 4lambda well centered
+subjectID = '250';cellBoundary={'trialRange',[489 491]}; % 128 ppc, 3lambda well centered
+subjectID = '250';cellBoundary={'trialRange',[489 491]}; % 128 ppc, 3lambda well, gaussian ... oddly the same trial numbers reoccur (maybe cuased by force quitting the stim computer when it hung on 491 the first time around?)
+subjectID = '250';cellBoundary={'trialRange',[492]}; % 128 ppc, 3lambda well, gaussian ... after the overlap
+subjectID = '250';cellBoundary={'trialRange',[496]}; % 64 ppc, 3lambda well, gaussian
+subjectID = '250';cellBoundary={'trialRange',[498]}; % 32 ppc, 3lambda well, gaussian
+subjectID = '250';cellBoundary={'trialRange',[501]}; % 32 ppc, 3lambda well, gaussian, linearized drives it poorly
+subjectID = '250';cellBoundary={'trialRange',[502]}; % confirm annulus blocks
+%subjectID = '250';cellBoundary={'trialRange',[507]}; % target flanker contrast
+%subjectID = '250';cellBoundary={'trialRange',[508]}; % confirm annulus blocks
 
 %NEW CELL 4 lido
-subjectID = '250';cellBoundary={'trialRange',[531 535]} % ffgwn
+subjectID = '250';cellBoundary={'trialRange',[531 535]}; % ffgwn
 
 % Balaji recording session
-subjectID = '250';cellBoundary={'trialRange',[550 555]} % ffgwn
+subjectID = '250';cellBoundary={'trialRange',[550 555]}; % ffgwn
 
 % NEW CELL high SNR
-subjectID = '250';cellBoundary={'trialRange',[558 563]} % ffgwn
+subjectID = '250';cellBoundary={'trialRange',[558 563]}; % ffgwn
 
 % Changed rig state
-subjectID = '250';cellBoundary={'trialRange',[564 567]} % ffgwn
-subjectID = '250';cellBoundary={'trialRange',[569]} % TRF
-subjectID = '250';cellBoundary={'trialRange',[578 581]} % ffgwn
-subjectID = '250';cellBoundary={'trialRange',[582 583]} % binary flicker drives cell well
+subjectID = '250';cellBoundary={'trialRange',[564 567]}; % ffgwn
+subjectID = '250';cellBoundary={'trialRange',[569]}; % TRF
+subjectID = '250';cellBoundary={'trialRange',[578 581]}; % ffgwn
+subjectID = '250';cellBoundary={'trialRange',[582 583]}; % binary flicker drives cell well
 
 %NEW CELL
-subjectID = '250';cellBoundary={'trialRange',[592 597]} % binary flicker
+subjectID = '250';cellBoundary={'trialRange',[592 597]}; % binary flicker
 
-subjectID = '250';cellBoundary={'trialRange',[605 606]} % binary flicker
+subjectID = '250';cellBoundary={'trialRange',[605 606]}; % binary flicker
 
 % NEW DAY
-subjectID = '138';cellBoundary={'trialRange',[138 143]} % ffgwn
-subjectID = '138';cellBoundary={'trialRange',[159 164]} % bars
-subjectID = '138';cellBoundary={'trialRange',[184]} % annuli... new cell, always spikes for all annuli
-subjectID = '138';cellBoundary={'trialRange',[185]} % flankers... does not drive very well
+subjectID = '138';cellBoundary={'trialRange',[138 143]}; % ffgwn
+subjectID = '138';cellBoundary={'trialRange',[159 164]}; % bars
+subjectID = '138';cellBoundary={'trialRange',[184]}; % annuli... new cell, always spikes for all annuli
+subjectID = '138';cellBoundary={'trialRange',[185]}; % flankers... does not drive very well
 
-subjectID = '138';cellBoundary={'trialRange',[201]} % LOCALIZED HASH, annuli
-subjectID = '138';cellBoundary={'trialRange',[202 204]} % ffgwn
+subjectID = '138';cellBoundary={'trialRange',[201]}; % LOCALIZED HASH, annuli
+subjectID = '138';cellBoundary={'trialRange',[202 204]}; % ffgwn
 
 
 
 %V1
-subjectID = '252';cellBoundary={'trialRange',[9 19]} % sparse bin 6x8
-subjectID = '252';cellBoundary={'trialRange',[23 26]} % h bars  .. maybe sopmething weak
-subjectID = '252';cellBoundary={'trialRange',[27 33]} % ffgwn
-subjectID = '252';cellBoundary={'trialRange',[41]} % orient sine 4hz
-subjectID = '252';cellBoundary={'trialRange',[43]} % orient sine 2hz
-subjectID = '252';cellBoundary={'trialRange',[46]} % orient square 2hz
+subjectID = '252';cellBoundary={'trialRange',[9 19]}; % sparse bin 6x8
+subjectID = '252';cellBoundary={'trialRange',[23 26]}; % h bars  .. maybe sopmething weak
+subjectID = '252';cellBoundary={'trialRange',[27 33]}; % ffgwn
+subjectID = '252';cellBoundary={'trialRange',[41]}; % orient sine 4hz
+subjectID = '252';cellBoundary={'trialRange',[43]}; % orient sine 2hz
+subjectID = '252';cellBoundary={'trialRange',[46]}; % orient square 2hz
 
-subjectID = '252';cellBoundary={'trialRange',[50]} % %51 mannuli
-subjectID = '252';cellBoundary={'trialRange',[51]} % %51 annuli
-subjectID = '252';cellBoundary={'trialRange',[53]} % flanks 2 small
-%subjectID = '252';cellBoundary={'trialRange',[51]} % %56 annuli
+subjectID = '252';cellBoundary={'trialRange',[50]}; % %51 mannuli
+subjectID = '252';cellBoundary={'trialRange',[51]}; % %51 annuli
+subjectID = '252';cellBoundary={'trialRange',[53]}; % flanks 2 small
+%subjectID = '252';cellBoundary={'trialRange',[51]}; % %56 annuli
 
-subjectID = '252';cellBoundary={'trialRange',[56]} % an
-subjectID = '252';cellBoundary={'trialRange',[57]} % flankers
-subjectID = '252';cellBoundary={'trialRange',[58]} % an
+subjectID = '252';cellBoundary={'trialRange',[56]}; % an
+subjectID = '252';cellBoundary={'trialRange',[57]}; % flankers
+subjectID = '252';cellBoundary={'trialRange',[58]}; % an
 
-subjectID = '252';cellBoundary={'trialRange',[60]} % an
-subjectID = '252';cellBoundary={'trialRange',[61]} % flankersMatter random seed, 113 seconds till noise event
+subjectID = '252';cellBoundary={'trialRange',[60]}; % an
+subjectID = '252';cellBoundary={'trialRange',[61]}; % flankersMatter random seed, 113 seconds till noise event
 
 %MAYBE SAME CELL?
-subjectID = '252';cellBoundary={'trialRange',[70 72]} % ffgwn .. maybe but very weak
-subjectID = '252';cellBoundary={'trialRange',[74 79]} % h bars
-subjectID = '252';cellBoundary={'trialRange',[84]} % orients
-subjectID = '252';cellBoundary={'trialRange',[86]} % big slow
+subjectID = '252';cellBoundary={'trialRange',[70 72]}; % ffgwn .. maybe but very weak
+subjectID = '252';cellBoundary={'trialRange',[74 79]}; % h bars
+subjectID = '252';cellBoundary={'trialRange',[84]}; % orients
+subjectID = '252';cellBoundary={'trialRange',[86]}; % big slow
 
 
-subjectID = '252';cellBoundary={'trialRange',[88 112]} % vert bars ... has STA in 1 bar
-subjectID = '252';cellBoundary={'trialRange',[113 126]} % horiz bars
+subjectID = '252';cellBoundary={'trialRange',[88 112]}; % vert bars ... has STA in 1 bar
+subjectID = '252';cellBoundary={'trialRange',[113 126]}; % horiz bars
 
 
-subjectID = '252';cellBoundary={'trialRange',[139]} % flankers are too small
-subjectID = '252';cellBoundary={'trialRange',[140]} % an
+subjectID = '252';cellBoundary={'trialRange',[139]}; % flankers are too small
+subjectID = '252';cellBoundary={'trialRange',[140]}; % an
 
-subjectID = '252';cellBoundary={'trialRange',[144]} % flankers are okay.  sparse response.  maybe precise to onset, but not reliable.
-%subjectID = '252';cellBoundary={'trialRange',[145]} % flankers are okay.  sparse response.  maybe precise to onset, but not reliable.
+subjectID = '252';cellBoundary={'trialRange',[144]}; % flankers are okay.  sparse response.  maybe precise to onset, but not reliable.
+%subjectID = '252';cellBoundary={'trialRange',[145]}; % flankers are okay.  sparse response.  maybe precise to onset, but not reliable.
 
-subjectID = '252';cellBoundary={'trialRange',[149]} % flanker contrast (found bug where orientations vary when not expected)
-subjectID = '252';cellBoundary={'trialRange',[150]} % flanker contrast;  all same orient colin, ran out of memory on 9th repeat
-subjectID = '252';cellBoundary={'trialRange',[151]} % an
-subjectID = '252';cellBoundary={'trialRange',[152]} % flankerMatters... all parallel (didn't control fpa up till now)  WORTH ANALYZING
-subjectID = '252';cellBoundary={'trialRange',[153]} % an
+subjectID = '252';cellBoundary={'trialRange',[149]}; % flanker contrast (found bug where orientations vary when not expected)
+subjectID = '252';cellBoundary={'trialRange',[150]}; % flanker contrast;  all same orient colin, ran out of memory on 9th repeat
+subjectID = '252';cellBoundary={'trialRange',[151]}; % an
+subjectID = '252';cellBoundary={'trialRange',[152]}; % flankerMatters... all parallel (didn't control fpa up till now)  WORTH ANALYZING
+subjectID = '252';cellBoundary={'trialRange',[153]}; % an
 
-subjectID = '252';cellBoundary={'trialRange',[155]} % an - short
-subjectID = '252';cellBoundary={'trialRange',[156]} % flankerMatters... all colin WORTH ANALYZING
-subjectID = '252';cellBoundary={'trialRange',[155]} % an
+subjectID = '252';cellBoundary={'trialRange',[155]}; % an - short
+subjectID = '252';cellBoundary={'trialRange',[156]}; % flankerMatters... all colin WORTH ANALYZING
+subjectID = '252';cellBoundary={'trialRange',[155]}; % an
 
 
 %LGN
-subjectID = '252';cellBoundary={'trialRange',[162 169]} % ffgwn  ... has STA
-subjectID = '252';cellBoundary={'trialRange',[171]} % sf gratings square
-subjectID = '252';cellBoundary={'trialRange',[174]} % sf gratings sine;  drives it weakly
+subjectID = '252';cellBoundary={'trialRange',[162 169]}; % ffgwn  ... has STA
+subjectID = '252';cellBoundary={'trialRange',[171]}; % sf gratings square
+subjectID = '252';cellBoundary={'trialRange',[174]}; % sf gratings sine;  drives it weakly
 
-subjectID = '252';cellBoundary={'trialRange',[185]} % sf gratings sine; has +28D
-subjectID = '252';cellBoundary={'trialRange',[186]} % sf gratings sine; has +28D
-subjectID = '252';cellBoundary={'trialRange',[187]} % sf gratings sine; nolens ; 
+subjectID = '252';cellBoundary={'trialRange',[185]}; % sf gratings sine; has +28D
+subjectID = '252';cellBoundary={'trialRange',[186]}; % sf gratings sine; has +28D
+subjectID = '252';cellBoundary={'trialRange',[187]}; % sf gratings sine; nolens ; 
 %dropped frames a re pretty bad around here
 
 % NEW CELL
-subjectID = '252';cellBoundary={'trialRange',[191 194]} % sf gratings sine; nolens ; 
+subjectID = '252';cellBoundary={'trialRange',[191 194]}; % sf gratings sine; nolens ; 
 
 % NEW CELL
-subjectID = '252';cellBoundary={'trialRange',[199 209]} % sf gratings sine; nolens ; 
-subjectID = '252';cellBoundary={'trialRange',[210]} % sf gratings sine; nolens ; 
-subjectID = '252';cellBoundary={'trialRange',[212]} % sf gratings sine; HAS THE LENS
-subjectID = '252';cellBoundary={'trialRange',[215]} % ann; HAS THE LENS, both flankers are on the screen
-subjectID = '252';cellBoundary={'trialRange',[216]} % flankerMatter colin; HAS THE LENS, both flankers are on the screen, no eye visible
-subjectID = '252';cellBoundary={'trialRange',[217]} % ann; HAS THE LENS, both flankers are on the screen
+subjectID = '252';cellBoundary={'trialRange',[199 209]}; % sf gratings sine; nolens ; 
+subjectID = '252';cellBoundary={'trialRange',[210]}; % sf gratings sine; nolens ; 
+subjectID = '252';cellBoundary={'trialRange',[212]}; % sf gratings sine; HAS THE LENS
+subjectID = '252';cellBoundary={'trialRange',[215]}; % ann; HAS THE LENS, both flankers are on the screen
+subjectID = '252';cellBoundary={'trialRange',[216]}; % flankerMatter colin; HAS THE LENS, both flankers are on the screen, no eye visible
+subjectID = '252';cellBoundary={'trialRange',[217]}; % ann; HAS THE LENS, both flankers are on the screen
 
-subjectID = '252';cellBoundary={'trialRange',[219]} % an;
-subjectID = '252';cellBoundary={'trialRange',[220]} % flContrasts; (ran out of memory)  (2ns 220 is annuli and should be dleted)
-
-subjectID = '252';cellBoundary={'trialRange',[221]} % an
-subjectID = '252';cellBoundary={'trialRange',[222]} % flContrasts - longer mean screen gap [200 220]
-
-subjectID = '252';cellBoundary={'trialRange',[224]} % flContrasts - longer mean screen gap [200 220]... i think there are 2 spikes.  tricky sort
+subjectID = '252';cellBoundary={'trialRange',[219]}; % an;
+subjectID = '252';cellBoundary={'trialRange',[220]}; % flContrasts; (ran out of memory)  (2ns 220 is annuli and should be dleted)
+%
+subjectID = '252';cellBoundary={'trialRange',[221]}; % an
+subjectID = '252';cellBoundary={'trialRange',[222]}; % flContrasts - longer mean screen gap [200 220]
+%
+subjectID = '252';cellBoundary={'trialRange',[224]}; % flContrasts - longer mean screen gap [200 220]... i think there are 2 spikes.  tricky sort
 %out of memory 33 chunks, 900+ seconds, 5+ repeats
-
-subjectID = '252';cellBoundary={'trialRange',[224]} % flContrasts - longer mean screen gap [200 220]... i think there are 2 spikes.  tricky sort
+%
+subjectID = '252';cellBoundary={'trialRange',[224]}; % flContrasts - longer mean screen gap [200 220]... i think there are 2 spikes.  tricky sort
 % out of memory, the 2nd.. (or 3rd?) 224 is annuli, and is complete and looks good
-
-subjectID = '252';cellBoundary={'trialRange',[225]} % flConfig - shorter mean screen gap [40 60]
-subjectID = '252';cellBoundary={'trialRange',[229]} % 128 repeat of colin  (always flanks!)
-
-
-subjectID = '252';cellBoundary={'trialRange',[232 234]} % 16 x12 binary (235-244 had volleys of something odd .. spiking brethaing?)
-subjectID = '252';cellBoundary={'trialRange',[232 251]} % 16 x12 binary 
+%
+subjectID = '252';cellBoundary={'trialRange',[225]}; % flConfig - shorter mean screen gap [40 60]
+subjectID = '252';cellBoundary={'trialRange',[229]}; % 128 repeat of colin  (always flanks!)
+%
+%
+subjectID = '252';cellBoundary={'trialRange',[232 234]}; % 16 x12 binary (235-244 had volleys of something odd .. spiking brethaing?)
+subjectID = '252';cellBoundary={'trialRange',[232 251]}; % 16 x12 binary 
 % tuning cell starting 253
 subjectID = '252';cellBoundary={'trialRange',[245 261]}; % 16 x12 binary 
-
+%
 subjectID = '252';cellBoundary={'trialRange',[269 285]}; % 32 x24 binary 
-
+%
 subjectID = '252';cellBoundary={'trialRange',[287 317]}; % 64 x48 binary 
 % REMOVED LENSES
 subjectID = '252';cellBoundary={'trialRange',[320 333]}; % 6x8 binary 
 subjectID = '252';cellBoundary={'trialRange',[335 350]}; % 12x16 binary 
 subjectID = '252';cellBoundary={'trialRange',[399]}; % ffgwn
 subjectID = '252';cellBoundary={'trialRange',[407 412]}; % 12x16 binary 
-
+%
 subjectID = '252';cellBoundary={'trialRange',[425 440]}; % 6x8 binary, +32D, have the eye
-
+%
 subjectID = '252';cellBoundary={'trialRange',[446 472]}; % 24x32 binary, +32D, have the eye, has a spatila, but a bit wak
-
-subjectID = '252';cellBoundary={'trialRange',[479]} % an
+%
+subjectID = '252';cellBoundary={'trialRange',[479]}; % an
 subjectID = '252';cellBoundary={'trialRange',[480]}; % 480? flankersOnePhase
-
+%
 subjectID = '252';cellBoundary={'trialRange',[484]}; % ffgwn... some strange state changes... bursting volleys
-
+%
 subjectID = '252';cellBoundary={'trialRange',[490]}; %an .. there is still modulation with big annuli .. this makes analysis suspect
 subjectID = '252';cellBoundary={'trialRange',[491]}; %flankersConfig... top flnnker is a little bit off the screen
-
+%
 subjectID = '252';cellBoundary={'trialRange',[496]}; %flankersMatter... top flanker is a little bit off the screen
 subjectID = '252';cellBoundary={'trialRange',[497 500]}; %trf
-
+%
 subjectID = '252';cellBoundary={'trialRange',[502]}; %sf
 subjectID = '252';cellBoundary={'trialRange',[504]}; %or
 subjectID = '252';cellBoundary={'trialRange',[505 530]}; %bin  ... not great at localizing... some hope at trial 516.. but not much
-
+%
 subjectID = '252';cellBoundary={'trialRange',[505 530]}; %bin  ... not great at localizing... some hope at trial 516.. but not much
-
+%
 subjectID = '252';cellBoundary={'trialRange',[494]}; %~8 deg changes
 subjectID = '252';cellBoundary={'trialRange',[495]}; %~5 deg changes
 
 
 %LGN
-subjectID = '253';cellBoundary={'trialRange',[13 16]}; %ffgwn
-subjectID = '253';cellBoundary={'trialRange',[22]}; %sf gratings (this is from a cell that had virtually no response without a lens)
-subjectID = '253';cellBoundary={'trialRange',[24 41]}; %bin 12x16
-subjectID = '253';cellBoundary={'trialRange',[43 48]}; %h bars
+subjectID = '253'; channels={[1]};
+cellBoundary={'trialRange',[13 16]}; %ffgwn
+cellBoundary={'trialRange',[22]}; %sf gratings (this is from a cell that had virtually no response without a lens)
+cellBoundary={'trialRange',[24 41]}; %bin 12x16
+cellBoundary={'trialRange',[43 48]}; %h bars
 
 %NEW CELL
-subjectID = '253';cellBoundary={'trialRange',[72 75]}; %FFGWN
-
-subjectID = '253';cellBoundary={'trialRange',[85 95]}; % 6 X 8 spatial binary
-subjectID = '253';cellBoundary={'trialRange',[101]}; % annuli
-subjectID = '253';cellBoundary={'trialRange',[102 103]}; % flankersMatter fast
-subjectID = '253';cellBoundary={'trialRange',[105]}; % an
-subjectID = '253';cellBoundary={'trialRange',[105]}; % bipartite
-
+subjectID = '253'; channels={[1]};
+cellBoundary={'trialRange',[72 75]}; %FFGWN
+cellBoundary={'trialRange',[85 95]}; % 6 X 8 spatial binary
+cellBoundary={'trialRange',[101]}; % annuli
+cellBoundary={'trialRange',[102 103]}; % flankersMatter fast
+cellBoundary={'trialRange',[105]}; % an
+cellBoundary={'trialRange',[105]}; % bipartite
 %
-subjectID = '253';cellBoundary={'trialRange',[106]}; % flankersMatter slow
+cellBoundary={'trialRange',[106]}; % flankersMatter slow
 % a good slow flanker runs out of memory -   matters x40 slowed to [200 220]
-subjectID = '253';cellBoundary={'trialRange',[86]};  %flankerMattersOnePhase slow 128 ppc
-subjectID = '253';cellBoundary={'trialRange',[87]}; % an
-
-subjectID = '253';cellBoundary={'trialRange',[88]}; %flankerMattersOnePhase slow  180 ppc
-%subjectID = '253';cellBoundary={'trialRange',[89]}; %an - only 1 cyc
-subjectID = '253';cellBoundary={'trialRange',[90]}; %flankerMattersOnePhase slow  180 ppc
-subjectID = '253';cellBoundary={'trialRange',[92]}; %flankerMattersOnePhase slow  180 ppc
-subjectID = '253';cellBoundary={'trialRange',[94]}; %flankerMattersOnePhase slow  180 ppc
-subjectID = '253';cellBoundary={'trialRange',[95]}; %flankerMattersOnePhase slow  180 ppc
-subjectID = '253';cellBoundary={'trialRange',[97]}; %flankerContrastOnePhase slow 180 ppc - partial trial
-subjectID = '253';cellBoundary={'trialRange',[98 101]}; %flankerContrastOnePhase slow 180 ppc
-
-subjectID = '253';cellBoundary={'trialRange',[101]} %flankerContrastOnePhase slow 180 ppc
-subjectID = '253';cellBoundary={'trialRange',[156]} % flankerMatters... all colin WORTH ANALYZING
-%subjectID = '253';cellBoundary={'trialRange',[102 110]} %ffgwn
+cellBoundary={'trialRange',[86]};  %flankerMattersOnePhase slow 128 ppc
+cellBoundary={'trialRange',[87]}; % an
+%
+cellBoundary={'trialRange',[88]}; %flankerMattersOnePhase slow  180 ppc
+%cellBoundary={'trialRange',[89]}; %an - only 1 cyc
+cellBoundary={'trialRange',[90]}; %flankerMattersOnePhase slow  180 ppc
+cellBoundary={'trialRange',[92]}; %flankerMattersOnePhase slow  180 ppc
+cellBoundary={'trialRange',[94]}; %flankerMattersOnePhase slow  180 ppc
+cellBoundary={'trialRange',[95]}; %flankerMattersOnePhase slow  180 ppc
+cellBoundary={'trialRange',[97]}; %flankerContrastOnePhase slow 180 ppc - partial trial
+cellBoundary={'trialRange',[98 101]}; %flankerContrastOnePhase slow 180 ppc
+%
+cellBoundary={'trialRange',[100]}; %flankerContrastOnePhase slow 180 ppc
+%cellBoundary={'trialRange',[156]}; % flankerMatters... all colin WORTH ANALYZING ...why do i find a whitenoise Stim?
 
 
 %subjectID = 'calib';  %no mask, lights on, CRT
@@ -493,11 +501,77 @@ subjectID = '253';cellBoundary={'trialRange',[156]} % flankerMatters... all coli
 % cellBoundary={'trialRange',[258]};%[250 256]%CRT, mask, hv, native gamma, sine, many PPC, ~1 min long
 % cellBoundary={'trialRange',[285]};%[284 290]%OLED, mini-mask, hv, native gamma, sine, many PPC, ~1 min long, kind of noisey
 
-channels={1}
+% channels={[1]}
+% subjectID = 'calib'; %
+% cellBoundary={'trialRange',[316 318]};%[250 256]%LCD, mask, hv, bin, not full brightness
+% %cellBoundary={'trialRange',[325 326]};%[250 256]%LCD, mask, hv, native gamma, sine, many PPC, full brightness
+% cellBoundary={'trialRange',[328 329]};%[250 256]%LCD, mask, bin, full brightness
+% cellBoundary={'trialRange',[361 370]};%[250 256]%LCD, mask, bin, big stixel, full brightness
+% cellBoundary={'trialRange',[397]};%CRT, no mask, flankers ... fixed analysis problem from overlapping "i" loops! yay! 
+
+% 
+% subjectID = 'test1'; channels={14}
+% cellBoundary={'trialRange',[355]};%test 16 chans
+% 
+% subjectID = '306'; channels={3}
+% cellBoundary={'trialRange',[4]};%test 16 chans
+% cellBoundary={'trialRange',[115 116]};%test 16 chans
+
+subjectID = '230'; channels={1}; cellBoundary={'trialRange',[6]};%test 16 chans
+subjectID = '230'; channels={13}; cellBoundary={'trialRange',[16]};%gratings
+subjectID = '230'; channels={14}; cellBoundary={'trialRange',[22]};% 33]};%whiteNoise
+subjectID = '230'; channels={14}; cellBoundary={'trialRange',[52]};% 33]};%whiteNoise
+%SINGLE CHAN
+subjectID = '230'; channels={1}; cellBoundary={'trialRange',[137]};% [137 140]};%whiteNoise
+subjectID = '230'; channels={1}; cellBoundary={'trialRange',[141]};% [141?]};%flanker FF contrast
+%NEW CELL
+subjectID = '230'; channels={1}; cellBoundary={'trialRange',[144 155]};% [144 155]};%ffgwn
+subjectID = '230'; channels={1}; cellBoundary={'trialRange',[159]};% [157 162]};%flanker FF contrast, no stationary state (.05 Hz osillation in state)
+subjectID = '230'; channels={1}; cellBoundary={'trialRange',[165]};% [165 ]};%gratings up state
+subjectID = '230'; channels={1}; cellBoundary={'trialRange',[166]};% [165 169]};%gartings, down state
+subjectID = '230'; channels={1}; cellBoundary={'trialRange',[168 169]};% [165 169]};%gartings, down state
+subjectID = '230'; channels={1}; cellBoundary={'trialRange',[175]};% [174 177]};%fffc
+%subjectID = '230'; channels={1}; cellBoundary={'trialRange',[179 183]};% %[179 180]};%ffgwn.. still has an STA.. duped away to make room
+%subjectID = '230'; channels={1}; cellBoundary={'trialRange',[186]};% %[185]};%fffp ... duped away to make room
+subjectID = '230'; channels={1}; cellBoundary={'trialRange',[193]};% [179 192?]};%fffp
+%subjectID = '230'; channels={1}; cellBoundary={'trialRange',[196]};% %[194? 200]};%fffc,  at 197 the burst seem to grown a bit larger
+%201 some eye drift, backroumg firing not stim locked, picks up, 
+%202 light on briefly
+%subjectID = '230'; channels={1}; cellBoundary={'trialRange',[179 186]};%[200 208]};%fffc,  the bursting in the background is not stim entrained and the LFP gets crazier
+%subjectID = '230'; channels={1}; cellBoundary={'trialRange',[211]};%[211 224]};%ffwgn for the statliness, btw, photodiode is off sreen ctaching glare reflections of screen
+% NEW PENETRATION
+subjectID = '230'; channels={1}; cellBoundary={'trialRange',[229 236]};%[211 224]};%ffwgn for the statliness, btw, photodiode is off sreen ctaching glare reflections of screen .removed for dups. 
+subjectID = '230'; channels={1}; cellBoundary={'trialRange',[231]};%[231 234?] % fffp
+subjectID = '230'; channels={1}; cellBoundary={'trialRange',[242 250]};%[242 250] % bin 6x8?
+subjectID = '230'; channels={1}; cellBoundary={'trialRange',[252 258]};%[252 258] % bin 12x16, poor driver, some spikes
+subjectID = '230'; channels={1}; cellBoundary={'trialRange',[267]};% [260 272] fffc, ppc=180
+subjectID = '230'; channels={1}; cellBoundary={'trialRange',[275]};% [274 289] fffc, ppc=32, distance = 24cm ... uh oh, 276+ may need to be rescued
+%subjectID = '230'; channels={1}; cellBoundary={'trialRange',[276]};% annuli
+%%%%subjectID = '230'; channels={1}; cellBoundary={'trialRange',[277 314]};% bin.. removed for dup ..localization folder
+%%%%subjectID = '230'; channels={1}; cellBoundary={'trialRange',[316]};% annuli ..localization folder 
+%subjectID = '230'; channels={1}; cellBoundary={'trialRange',[283]};% annuli 
+subjectID = '230'; channels={1}; cellBoundary={'trialRange',[290]};% ffcc, doesn't drive very well, 64 ppc, 1/8 std
+subjectID = '230'; channels={1}; cellBoundary={'trialRange',[293 294]};% fffc, 64 ppc
+subjectID = '230'; channels={1}; cellBoundary={'trialRange',[302]};%[296 307]};%fffc, 64 ppc
+subjectID = '230'; channels={1}; cellBoundary={'trialRange',[309 343]};%[309 xx]};%bin
+subjectID = '230'; channels={1}; cellBoundary={'trialRange',[344]};%[344]};%bin oddly slow, 1 frame = about 100 frames long
+subjectID = '230'; channels={1}; cellBoundary={'trialRange',[345 348]};%[345 xx]};%ffgwn
+
+subjectID = '230'; channels={1}; cellBoundary={'trialRange',[231]};%[231 234?] % fffp
+subjectID = '230'; channels={1}; cellBoundary={'trialRange',[263 272]};% [260 272] fffc, ppc=180
+%subjectID = '230'; channels={1}; cellBoundary={'trialRange',[271]};% [260 272] fffc, ppc=180
+subjectID = '230'; channels={1}; cellBoundary={'trialRange',[267]};% [260 272] fffc, ppc=180
+
+
+subjectID = '305'; channels={1}; cellBoundary={'trialRange',[100]};% [260 272] fffc, ppc=180
+
+
+%subjectID = '230'; channels={1}; cellBoundary={'trialRange',[302]};%[296 307]};%fffc, 64 ppc
+%%
 %spikeSortingParams.postProcessing= 'largestNonNoiseClusterOnly';
 spikeDetectionParams.detectionMethod=3; % 1 -> from power signal, 2 threshold positive, 3 threshold negative, 4 threshold abs, 5 wavelet
-spikeDetectionParams.extractionThreshold =10;
-spikeDetectionParams.sampleLFP = false; %true;
+spikeDetectionParams.extractionThreshold =12;
+spikeDetectionParams.sampleLFP = true; %true;
 spikeDetectionParams.LFPSamplingRateHz =500;
 
 overwriteAll=1; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
@@ -506,4 +580,4 @@ usePhotoDiodeSpikes=0;
 %spikeSortingParams.method='activeSortingParametersThisAnalysis';
 
 analysisManagerByChunk(subjectID, path, cellBoundary, channels,spikeDetectionParams, spikeSortingParams,...
-    timeRangePerTrialSecs,stimClassToAnalyze,overwriteAll,usePhotoDiodeSpikes)
+    timeRangePerTrialSecs,stimClassToAnalyze,overwriteAll,usePhotoDiodeSpikes,[],frameThresholds)

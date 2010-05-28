@@ -603,8 +603,7 @@ while ~quit
                                 else
                                     currentTrial=currentTrial+1;
                                 end
-                             
-                                
+                               
                                 %option to do analysis in this odd location, that happens sometimes
                                 doAnalysis=worthPhysAnalysis(sm,quality,analysisExists,overwriteAll,isLastChunkInTrial); %doAnalysis = isLastChunkInTrial;
                                 if doAnalysis
@@ -612,7 +611,17 @@ while ~quit
                                         spikes,spikeTimestamps,spikeWaveforms,assignedClusters,chunkID,correctedFrameIndices,correctedFrameTimes,...
                                         stimInds,chunkIDForCorrectedFrames,photoDiode,spikeDetails,chunkIDForDetails,chunksToProcess,currentChunkInd);
                                     eyeData=getEyeRecords(eyeRecordPath, currentTrial,timestamp);
-                                    [analysisdata cumulativedata] = physAnalysis(sm,filteredSpikeRecord,stimRecord.stimulusDetails,plotParameters,getNeuralRecordParameters(neuralRecord,neuralRecordLocation,subjectID),cumulativedata,eyeData,LFPRecord);
+                                      
+                                    %DON't LIKE HAVING THIS REDUNDANTCODE HERE .. but here it is
+                                    neuralRecord.parameters=getNeuralRecordParameters(neuralRecord,neuralRecordLocation,subjectID);
+                                    %Add some more activeParameters about the trial
+                                    neuralRecord.parameters.trialNumber=currentTrial;
+                                    neuralRecord.parameters.chunkID=chunksToProcess(currentChunkInd,2);
+                                    neuralRecord.parameters.date=datenumFor30(timestamp);
+                                    neuralRecord.parameters.ISIviolationMS=spikeDetectionParams.ISIviolationMS;
+                                    neuralRecord.parameters.refreshRate=stimRecord.refreshRate; % where?
+                                    
+                                    [analysisdata cumulativedata] = physAnalysis(sm,filteredSpikeRecord,stimRecord.stimulusDetails,plotParameters,neuralRecord.parameters,cumulativedata,eyeData,LFPRecord);
                                 end
                                 break % chunksToProcess loop
                             else

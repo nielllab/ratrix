@@ -68,7 +68,7 @@ try
                     % we dont need to use the function saveNidaqChunk here
                     % because we are not in a static workspace
                     % but should we anyways for sake of consistency?
-                    saveNidaqChunk(params.neuralFilename,neuralData,neuralDataTimes([1 end]),params.chunkCount,GetSecs()-params.startTime,params.samplingRate);
+                    saveNidaqChunk(params.neuralFilename,neuralData,neuralDataTimes([1 end]),params.chunkCount,GetSecs()-params.startTime,params.samplingRate,params.ai_parameters);
                     clear neuralData neuralDataTimes;
                     flushdata(params.ai);
                 catch ex

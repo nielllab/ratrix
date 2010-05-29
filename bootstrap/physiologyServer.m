@@ -18,7 +18,7 @@ fWidth=2*margin+10*fieldWidth;
 fHeight=margin+25*oneRowHeight+margin;
 
 ai_parameters=[];
-ai_parameters.numChans=16;
+ai_parameters.numChans=3;  % 3 or 16
 ai_parameters.sampRate=40000;
 ai_parameters.inputRanges=repmat([-1 6],ai_parameters.numChans,1);
 ai_parameters.channelConfiguration={'framePulse','photodiode'};
@@ -37,12 +37,12 @@ ampModeStrs = {'','Rec','Imp','Stim'}; defaultModeIndex = 2;
 
 
 clientIPStrs={'132.239.158.180','132.239.158.179'};  % now we use 180... why was it set to only 179 before november 2009?
-ratIDStrs={'test1','305','257','252','250','demo1','fan_demo1','131','303','138','262','261','249'};
-ratProtocolStrs={'setProtocolPhys2','setProtocolPhys3','ctxCharPtcl','ctxQckNDirtyPtcl'};
+ratIDStrs={'230','calib','test1','306','305','257','252','250','demo1','fan_demo1','131','303','138','262','261','249'};
+ratProtocolStrs={'setProtocolPhys2','setProtocolPhys3','ctxCharPtcl','ctxQckNDirtyPtcl','flankerCalibProtocol'};
 experimenterStrs={'','pmeier','bsriram','dnguyen','eflister'};
-electrodeMakeStrs={'FHC','MPI','gentner'};
-electrodeModelStrs={'','UEWMCGLEEN3M','UEWMCGLECN3M','UEWMCGTECN3M','WE3PT35.0A3-ME4925'};
-lotNumStrs={'','885191','885192','885431','120016','57','1'};
+electrodeMakeStrs={'FHC','MPI','gentner','neuronexus'};
+electrodeModelStrs={'','UEWMCGLEEN3M','UEWMCGLECN3M','UEWMCGTECN3M','WE3PT35.0A3-ME4925','1x16-100um-413um2'};  
+lotNumStrs={'','885191','885192','885431','120016','57','1','6266'};
 IDNumStrs={'','1','2','3','4','5','6','7','8','9','10','11','12'};
 impedanceStrs={'','.5','1','2','5','10'};
 
@@ -86,7 +86,7 @@ faceStrs={[],'whisking','no whisking','grinding','licking','squeaking'};
 
 isofluraneStrs={[],'0.0','1.0','1.25','1.5','2.0','2.5','3.0','4.0','5.0','oxy'};
 withdrawalStrs={[],'none','sluggish','quick'};
-breathPerMinStrs={[],'24-','30','36','42','48','54','60+'};
+breathPerMinStrs={[],'24-','30','36','42','48','54','60','66','72','78+'};
 breathTypeStrs={[],'normal','arrhythmic','wheezing','hooting'};
 
 displayModeStrs={'full','condensed'};
@@ -330,10 +330,10 @@ enableRigStateFields = uicontrol(f,'Style','checkbox',...
 ampGainHeader = uicontrol(f,'Style','text','String','Gain','Visible','on','Units','pixels',...
     'FontWeight','bold','HorizontalAlignment','center', ...
     'Position',[margin+fieldWidth fHeight-3*oneRowHeight-margin fieldWidth/2 oneRowHeight]);
-ampLPHeader = uicontrol(f,'Style','text','String','LPF','Visible','on','Units','pixels',...
+ampLPHeader = uicontrol(f,'Style','text','String','LCO','Visible','on','Units','pixels',...
     'FontWeight','bold','HorizontalAlignment','center', ...
     'Position',[margin+1.5*fieldWidth fHeight-3*oneRowHeight-margin fieldWidth/2 oneRowHeight]);
-ampHPHeader = uicontrol(f,'Style','text','String','HPF','Visible','on','Units','pixels',...
+ampHPHeader = uicontrol(f,'Style','text','String','HCO','Visible','on','Units','pixels',...
     'FontWeight','bold','HorizontalAlignment','center', ...
     'Position',[margin+2*fieldWidth fHeight-3*oneRowHeight-margin fieldWidth/2 oneRowHeight]);
 ampNotchHeader = uicontrol(f,'Style','text','String','Notch','Visible','on','Units','pixels',...
@@ -672,18 +672,17 @@ ratIDField = uicontrol(f,'Style','popupmenu','String',ratIDStrs,'Units','pixels'
             
             warning('could not get surgery fields from oracle. trying to obtain these fields from server.');
         end
-        out = getDataFromEventLog(fullfile('\\Reinagel-lab.AD.ucsd.edu\RLAB\Rodent-Data\physiology',ratIDStrs{get(ratIDField,'Value')},''));
-        
-        rigState = out.rigState;
-        ampState = out.ampState;
-        lensState = out.lensState;
-        surgBregma = out.surgBregma;
-        surgAnchor = out.surgAnchor;
-        currAnchor = out.currAnchor;
-        currPositn = out.currPositn;
-        penetParams = out.penetParams;
-        isNewDay = out.isNewDay;
-        
+        [rigState ampState lensState surgBregma surgAnchor currAnchor currPositn penetParams isNewDay] = ...
+            getDataFromEventLog(fullfile('\\Reinagel-lab.AD.ucsd.edu\RLAB\Rodent-Data\physiology',ratIDStrs{get(ratIDField,'Value')},''));
+%         rigState
+%         ampState
+%         lensState
+%         surgBregma
+%         surgAnchor
+%         currAnchor
+%         currPositn
+%         penetParams
+%         isNewDay
         if ~surgValuesinOracle
             % look for anchor data in the events_log
             set(surgeryAnchorAPField,'String',num2str(surgAnchor(1)));
@@ -1349,6 +1348,8 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
     function run
         runningLoop=true;
         keepLooping=true;
+        
+        %storepath=fullfile('G:\pmeier\datanetOutput',ratIDStrs{get(ratIDField,'Value')});
         storepath=fullfile('\\132.239.158.179\datanet_storage',ratIDStrs{get(ratIDField,'Value')});
         % check that neuralRecords,eyeRecord,stimRecords folders exist
         if ~isdir(fullfile(storepath,'neuralRecords'))
@@ -1424,6 +1425,7 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
             params.neuralFilename=neuralFilename;
             params.stimFilename=stimFilename;
             params.samplingRate=ai_parameters.sampRate;
+            params.ai_parameters=ai_parameters;
             params.chunkCount=chunkCount;
             params.startTime=startTime;
             % ==============================================
@@ -1507,7 +1509,7 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
                     numSampsToGet=get(ai,'SamplesAvailable');
                     [neuralData,neuralDataTimes]=getdata(ai,numSampsToGet);
                     elapsedTime=GetSecs()-startTime;
-                    saveNidaqChunk(neuralFilename,neuralData,neuralDataTimes([1 end]),chunkCount,elapsedTime,ai_parameters.sampRate);
+                    saveNidaqChunk(neuralFilename,neuralData,neuralDataTimes([1 end]),chunkCount,elapsedTime,ai_parameters.sampRate,ai_parameters);
                     clear neuralData neuralDataTimes;
                     % now increment chunkCount and chunkClock
                     chunkCount=chunkCount+1;

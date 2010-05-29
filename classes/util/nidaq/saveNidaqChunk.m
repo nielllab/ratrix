@@ -1,4 +1,4 @@
-function saveNidaqChunk(fullFilename,neuralData,neuralDataTimes,chunkCount,elapsedTime,samplingRate,aiParams)
+function saveNidaqChunk(fullFilename,neuralData,neuralDataTimes,chunkCount,elapsedTime,samplingRate,ai_parameters)
 
 match=regexpi(fullFilename,'.*\.mat','match');
 if isempty(match)

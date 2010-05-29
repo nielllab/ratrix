@@ -82,6 +82,12 @@ switch stim.waveform
         grating=stim.contrasts(gratingToDraw)*square(x + offset+stim.phases(gratingToDraw)+pi/2)+stimulus.mean; % same as sine, but adjust for cosine
     case 'squareUp4th'
         grating=stim.contrasts(gratingToDraw)*(-1+2*(mod([x + offset+stim.phases(gratingToDraw)+pi/2],pi*2)<pi/4))+stimulus.mean; % same as square above, but only up 1/8, as opposed to 1/2 the time... matched onset
+    case {'catcam530a','haterenImage1000'} 
+        whichPixels=ceil(mod((1:stim.width*2)+(cycsPerFrameVel*i*size(stim.images,2)),size(stim.images,2)));
+        whichPixels(whichPixels==0)=size(stim.images,2);
+        whichSequence=stim.phases(gratingToDraw); % this chooses the y line to take a horizontal luminance sequence from
+        shape=stim.images(whichSequence,whichPixels);
+        grating=stim.contrasts(gratingToDraw)*shape+stimulus.mean;
     otherwise
         stim.waveform
         error('that waveform is not coded')

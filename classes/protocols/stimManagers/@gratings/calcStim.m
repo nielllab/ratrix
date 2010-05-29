@@ -182,6 +182,38 @@ else
     timeout=sum(stim.durations)*stim.numRepeats;
 end
 
+switch stimulus.waveform
+    case 'haterenImage1000'
+        path='\\132.239.158.183\rlab_storage\pmeier\vanhateren\iml_first1000';
+                imName='imk01000.iml';
+        f1=fopen(fullfile(path,imName),'rb','ieee-be');
+        w=1536;h=1024;
+        im=fread(f1,[w,h],'uint16');
+        im=im';
+        %          subplot(2,2,1); hist(im(:))
+        %          subplot(2,2,2); imagesc(im); colormap(gray)
+         im=im-mean(im(:));
+         im=0.5*im/std(im(:));
+         im(im>1)=1;
+         im(im<-1)=-1;
+         %         subplot(2,2,3); hist(im(:))
+         %         subplot(2,2,4); imagesc(im); colormap(gray)
+         details.images=im;
+         stim.images=details.images;
+    case 'catcam530a'
+        path='\\132.239.158.183\rlab_storage\pmeier\CatCam\labelb000530a';
+        imName='Catt0910.tif';
+        im=double(imread(fullfile(path,imName)));
+        im=im-mean(im(:));
+        im=0.5*im/std(im(:));
+        im(im>1)=1;
+        im(im<-1)=-1;
+        %         subplot(1,2,1); hist(im(:))
+        %         subplot(1,2,2); imagesc(im); colormap(gray)
+        details.images=im;
+        stim.images=details.images;
+end
+
 discrimStim=[];
 discrimStim.stimulus=stim;
 discrimStim.stimType=type;
@@ -200,6 +232,8 @@ preRequestStim.punishResponses=false;
 
 preResponseStim=discrimStim;
 preResponseStim.punishResponses=false;
+
+
 
 % =====================================================================================================
 % return out.stimSpecs, out.scaleFactors for each phase (only one phase for now?)

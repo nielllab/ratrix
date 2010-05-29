@@ -140,13 +140,13 @@ switch nargin
             s.location=varargin{9};
         else
             error('all location must be >= 0 and <= 1, or location must be an RFestimator object');
-        end        
+        end
         % waveform
         if ischar(varargin{10})
-            if ismember(varargin{10},{'sine', 'square', 'none'})
+            if ismember(varargin{10},{'sine', 'square', 'none','catcam530a','haterenImage1000'})
                 s.waveform=varargin{10};
             else
-                error('waveform must be ''sine'', ''square'', or ''none''')
+                error('waveform must be ''sine'', ''square'', ''catcam530a'', or ''none''')
             end
         end
         % normalizationMethod

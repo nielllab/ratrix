@@ -123,7 +123,6 @@ numRepeats=10;
 fakeTRF10= gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
     waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance,doCombos,changeableAnnulusCenter);
 
-
 waveform='square'; 
 pixPerCycs=2.^([8:10]); % freq
 numRepeats=1;
@@ -145,6 +144,16 @@ numRepeats=3;
 bigSlowSquare = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
     waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance,doCombos,changeableAnnulusCenter);
 
+waveform='haterenImage1000';%'catcam530a'; 
+pixPerCycs=2048;
+orientations=[pi/4]; % reset to one value
+phases=[100 500 1000]; % with natural gratings only, this is the y index of of the image that determines the waveform
+natGrating = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
+    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance,doCombos,changeableAnnulusCenter);
+
+annuli=[0.02 0.05 .1 .2 .3 .4 .5 2]; % annulus of the grating
+natAnnuli = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
+    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance,doCombos,changeableAnnulusCenter);
 
 ports=cellfun(@uint8,{1 3},'UniformOutput',false);
 [noiseSpec(1:length(ports)).port]=deal(ports{:});
@@ -461,7 +470,7 @@ ts{38}= trainingStep(ap, cmr,         repeatIndefinitely(),      noTimeOff(), sv
 ts{39}= trainingStep(ap, fFF,         repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
 ts{40}= trainingStep(ap, fFFContrast, repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
 ts{41}= trainingStep(ap, fContrast,   repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
-
+ts{42}= trainingStep(ap, natGrating,   repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
 
 
 %removed things b/c not used enough:
@@ -489,7 +498,7 @@ ts{41}= trainingStep(ap, fContrast,   repeatIndefinitely(),      noTimeOff(), sv
 
 
 p=protocol('practice phys',ts);
-stepNum=40;
+stepNum=42;
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

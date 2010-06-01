@@ -19,7 +19,7 @@ stimClassToAnalyze={'all'}; timeRangePerTrialSecs=[0 Inf];
 % path='\\132.239.158.183\rlab_storage\pmeier\backup\neuralData_090505';
 % path='C:\Documents and Settings\rlab\Desktop\neural';
 path='\\132.239.158.179\datanet_storage'
-path='H:\datanetOutput'
+%path='H:\datanetOutput'
 
 spikeDetectionParams=[];
 spikeDetectionParams.method='OSORT';
@@ -66,11 +66,11 @@ spikeSortingParams.maxClusters=8;  %%(optional) (default 30) max number of initi
 spikeSortingParams.nStarts=4; %     (optional) (default 1) number of starts of the algorithm for each initial cluster count
 spikeSortingParams.splitEvery=10; %  (optional) (default 50) Test to see if any clusters should be split every n steps. 0 means don't split.
 spikeSortingParams.maxPossibleClusters=10; %(optional) (default 100) Cluster splitting can produce no more than this many clusters.
-spikeSortingParams.features={'wavePC123'}; 
 %spikeSortingParams.features={'wavePC1','peakToValley','wavePC2'}; 
 %spikeSortingParams.features={'spikeWidth','peakToValley','energy'};
 %spikeSortingParams.features={'energy','wavePC1','waveFFT'}; 
-spikeSortingParams.features={'wavePC1','peakToValley','wavePC2'};
+spikeSortingParams.features={'wavePC1','peakToValley','wavePC2'};  % peak to valley prob a bad idea for multiple leads, cuz we are not sensitive to per lead facts
+spikeSortingParams.features={'wavePC123'}; 
 spikeSortingParams.postProcessing= 'biggestAverageAmplitudeCluster'; %'largestNonNoiseClusterOnly';
 end
 
@@ -564,13 +564,89 @@ subjectID = '230'; channels={1}; cellBoundary={'trialRange',[267]};% [260 272] f
 
 
 subjectID = '305'; channels={1}; cellBoundary={'trialRange',[100]};% [260 272] fffc, ppc=180
-
-
 %subjectID = '230'; channels={1}; cellBoundary={'trialRange',[302]};%[296 307]};%fffc, 64 ppc
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[1]};%natural grating drives it %%5.30.2010
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[4]};%TRF - great!
+
+
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[30]};%SF
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[25]};%ffflank
+
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[5 14]};%error in analysis
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[15 21]};%error in analysis
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[38 44]};%sparse bright
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[46 50]};%ffgwn
+
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[66]};%trf DUPPED
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[93 110   ]};%6x8 bin DUPPED
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[70 91]};%3x4 bin DUPPED
+
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[70 73]};%ffFlanker
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[75]};%ffFlanker contrast - gamma
+% subjectID = '231'; channels={1}; cellBoundary={'trialRange',[79 83]};%ffFlanker contrast - lin
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[81 87]};%ffFlanker contrast - lin
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[90]};%ffFlanker contrast - closer to screen (15)
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[91]};%ffFlanker contrast - closer to screen (15)
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[93 94]};%ffFlanker contrast - 128 ppc - has an error?
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[96]};%confirm cell in there with hammer
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[99]};%luminance ff flankers drive it. (step 7)
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[103 105]};%fff contr drive it weakly. (step 40)
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[106 109]};%fff contr drive it weakly. (step 40)
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[106 124]};%fff contr drive it weakly. (step 40)
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[125]};%
+
+%NEW CELL
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[127 129]};%nat grating
+
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[134]};%trf
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[140]};%sparse dark
+%manual stuff
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[149]};%seems quite suppressed by some gratings
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[149]};%seems quite suppressed by some gratings
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[152 154]};%ffgwn
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[158]};%trf! - may be good but skipped
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[162 163 ]};%bin grid-
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[167]};%fff
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[168]};%fff
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[169 172]};%fff
+
+%NEW CELL
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[269]};%trf
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[271 272]};%fffc
+
+%NEW CELL
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[292]};%trf
+%trying to tune it in
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[295]};%trf
+
+%NEW CELL
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[356]};%trf
+
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[361 368]};%fffc
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[370]};%sf
+
+subjectID = 'test1'; channels={1}; cellBoundary={'trialRange',[405]};%trf
+subjectID = 'test1'; channels={1}; cellBoundary={'trialRange',[415]};%trf
+subjectID = 'test1'; channels={1}; cellBoundary={'trialRange',[419]};%trf
+subjectID = 'test1'; channels={1}; cellBoundary={'trialRange',[427]};%trf
+
+subjectID = '342'; channels={6}; cellBoundary={'trialRange',[9]};%trf - fake data test 17sec chunks
+subjectID = '342'; channels={1}; cellBoundary={'trialRange',[14]};%trf - first real data, but chunk errors
+subjectID = '342'; channels={1}; cellBoundary={'trialRange',[48 52]};%the only reasonable trials so far
+subjectID = '342'; channels={1}; cellBoundary={'trialRange',[57]};%big slow ref'd to ground
+%subjectID = '342'; channels={1}; cellBoundary={'trialRange',[58]};%big slow messing with ref
+%subjectID = '342'; channels={1}; cellBoundary={'trialRange',[60]};%no messing with ref - using Agnd
+
+subjectID = '342'; channels={[1]}; cellBoundary={'trialRange',[64]};%gwn
+subjectID = '342'; channels={[1]}; cellBoundary={'trialRange',[68 80]};%12 x 16 bin
+
+
+subjectID = '342'; channels={[1 2 8 9]}; cellBoundary={'trialRange',[51]};%a test
 %%
 %spikeSortingParams.postProcessing= 'largestNonNoiseClusterOnly';
+spikeSortingParams.postProcessing= 'biggestAverageAmplitudeCluster'; 
 spikeDetectionParams.detectionMethod=3; % 1 -> from power signal, 2 threshold positive, 3 threshold negative, 4 threshold abs, 5 wavelet
-spikeDetectionParams.extractionThreshold =12;
+spikeDetectionParams.extractionThreshold =4;
 spikeDetectionParams.sampleLFP = true; %true;
 spikeDetectionParams.LFPSamplingRateHz =500;
 

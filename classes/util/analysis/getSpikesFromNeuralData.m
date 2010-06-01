@@ -128,6 +128,7 @@ switch upper(spikeDetectionMethod)
             end
         end
         
+        channelIDUsedForDetection=1;  % the first be default... never used anything besides this so far
 
         % call to Osort spike detection
         [rawMean, filteredSignal, rawTraceSpikes,spikeWaveforms, spikeTimestampIndices, runStd2, upperlim, noiseTraces] = ...
@@ -563,8 +564,8 @@ if spikeSortingParams.plotSortingForTesting % view plots (for testing)
     N=20; %downsampling for the display of the whole trace; maybe some user control?
     
     %choose y range for raw, crop extremes is more than N std
-    dataMinMax=1.1*minmax(neuralData');
-    stdRange=6*(std(neuralData'));
+    dataMinMax=1.1*minmax(neuralData(:,1)');
+    stdRange=6*(std(neuralData(:,1)'));
     if range(dataMinMax)<stdRange*2
         yRange=dataMinMax;
     else
@@ -572,7 +573,7 @@ if spikeSortingParams.plotSortingForTesting % view plots (for testing)
     end
         
     %should do same for filt if functionized, but its not needed
-    yRangeFilt= 1.1*minmax(filteredSignal');
+    yRangeFilt= 1.1*minmax(filteredSignal(:,1)');
     
     
     % a smart way to choose a zoom center on a spike

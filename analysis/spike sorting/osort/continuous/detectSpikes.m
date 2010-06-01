@@ -58,6 +58,10 @@ switch ( params.samplingFreq )
         rawTraceLength=84;        
         beforePeak=24;
         afterPeak=59;
+    case 40000 % we typically use this
+        rawTraceLength=64;
+        beforePeak=24;
+        afterPeak=39;
     otherwise
         warning('unknown sampling freq - assuming default values.');
         rawTraceLength=64;
@@ -153,7 +157,10 @@ for i=1:length(searchInds)
         end
         
         covered(counterNeg,1:2) = [fromInd2 toInd2];
-        spikeWaveforms(counterNeg,:) = rawSignal( fromInd2:toInd2 )' ;
+        %spikeWaveforms(counterNeg,:) = rawSignal( fromInd2:toInd2 )' ; %the way it came
+        temp=rawSignal( fromInd2:toInd2,:);
+        spikeWaveforms(counterNeg,:) =temp(:);  % turn all leads into one waveform vector ... feature extractor must be able to cope
+                
         spikeTimestamps(counterNeg) = fromInd+peakInd;
 
         counterNeg=counterNeg+1; %how many spikes extracted so far

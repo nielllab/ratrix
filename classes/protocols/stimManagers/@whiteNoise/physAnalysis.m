@@ -67,7 +67,7 @@ try
     xtraPlot={'spaceTimeContext'}; % eyes, spaceTimeContext, montage
     
     % timeWindowMs
-    timeWindowMs=[100 20]; % parameter [300 50]
+    timeWindowMs=[300 50]; % parameter [300 50]
     
     
     % refreshRate - try to retrieve from neuralRecord (passed from stim computer)
@@ -302,7 +302,17 @@ try
     % now we should have our analysisdata for all "pieces"
     % if the cumulative values don't exist (first analysis)
     % 6/23/09 fli - why do we always do this first thing instead of checking for cumulative values???
-    if ~isfield(cumulativedata, 'cumulativeSTA')  || ~all(size(analysisdata.STA)==size(cumulativedata.cumulativeSTA)) %first trial through with these parameters
+    % sometimes empty... think about : isempty(cumulativedata) ||
+    
+    try
+        x=isempty(cumulativedata) || ~isfield(cumulativedata, 'cumulativeSTA')  || ~all(size(analysisdata.STA)==size(cumulativedata.cumulativeSTA)) %first trial through with these parameters
+    catch
+        warning('here')
+        keyboard
+    end
+        
+    if  isempty(cumulativedata) || ~isfield(cumulativedata, 'cumulativeSTA')  || ~all(size(analysisdata.STA)==size(cumulativedata.cumulativeSTA)) %first trial through with these parameters
+        cumulativedata=[];
         cumulativedata.cumulativeSTA = analysisdata.STA;
         cumulativedata.cumulativeSTV = analysisdata.STV;
         cumulativedata.cumulativeNumSpikes = analysisdata.numSpikes;

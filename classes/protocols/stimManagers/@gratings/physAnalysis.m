@@ -684,14 +684,18 @@ if doLFPAnalysis
     for currTypeNum = 1:numTypes
         for currRepeatNum = 1:numRepeats
             which = find((repeat==currRepeatNum)&(type==currTypeNum));
-            currTypeTime = [min(correctedFrameTimes(which,1)) max(correctedFrameTimes(which,1))];
-            whichInLFPRecord = LFPRecord.dataTimes>=min(correctedFrameTimes(which,1))& ...
-                LFPRecord.dataTimes<=max(correctedFrameTimes(which,2));
-            LFPByType(currTypeNum,currRepeatNum,:) = resample(LFPRecord.data(whichInLFPRecord),numIdealLFPSamplesPerTypePerRepeat,length(find(whichInLFPRecord)));
+            if length(which)>0 %PMM
+                currTypeTime = [min(correctedFrameTimes(which,1)) max(correctedFrameTimes(which,1))];
+                whichInLFPRecord = LFPRecord.dataTimes>=currTypeTime(1)& ... %PMM
+                    LFPRecord.dataTimes<=currTypeTime(2);
+                LFPByType(currTypeNum,currRepeatNum,:) = resample(LFPRecord.data(whichInLFPRecord),numIdealLFPSamplesPerTypePerRepeat,length(find(whichInLFPRecord)));
+            else
+                % else its left as a nan
+            end
         end
     end
     stdDevByTypeByRepeat = std(LFPByType,0,2);%nan(numTypes,numIdealLFPSamplesPerTypePerRepeat)
-    rangeOfLFP = [min(LFPByType(:)) max(LFPByType(:))];
+    rangeOfLFP = [min(LFPByType(~isnan(LFPByType))) max(LFPByType(~isnan(LFPByType)))]; % PMM
     
     if plotParameters.showLFPAnalysis
         LFPfig = figure('Name','LFP analysis','NumberTitle','off');
@@ -704,10 +708,14 @@ if doLFPAnalysis
             LFPForCurrTypePlusStd = ((mean(squeeze(LFPByType(currTypeNum,:,:)),1)+squeeze(stdDevByTypeByRepeat(currTypeNum,:)))-rangeOfLFP(1))/diff(rangeOfLFP);
             LFPForCurrTypeMinusStd = ((mean(squeeze(LFPByType(currTypeNum,:,:)),1)-squeeze(stdDevByTypeByRepeat(currTypeNum,:)))-rangeOfLFP(1))/diff(rangeOfLFP);
             stimPhases = phases((repeat==1)&(type==currTypeNum));
-            plot(timeByTypeByRepeat,currTypeNum+LFPForCurrType-mean(LFPForCurrType),'LineWidth',3,'Color',currPlotColor);
-            plot(timeByTypeByRepeat,currTypeNum+LFPForCurrTypePlusStd-mean(LFPForCurrType),'LineWidth',.5,'Color',currPlotColor);
-            plot(timeByTypeByRepeat,currTypeNum+LFPForCurrTypeMinusStd-mean(LFPForCurrType),'LineWidth',.5,'Color',currPlotColor);
-            plot(timeByTypeByRepeat,currTypeNum+0.25*resample(sin(stimPhases),length(timeByTypeByRepeat),length(stimPhases)),'LineWidth',.5,'LineStyle','--','Color',currPlotColor);
+%             plot(timeByTypeByRepeat,currTypeNum+LFPForCurrTypePlusStd-mean(LFPForCurrType),'LineWidth',.5,'Color',currPlotColor);
+%             plot(timeByTypeByRepeat,currTypeNum+LFPForCurrTypeMinusStd-mean(LFPForCurrType),'LineWidth',.5,'Color',currPlotColor);
+            yWrap=[currTypeNum+LFPForCurrTypeMinusStd-mean(LFPForCurrType) fliplr(currTypeNum+LFPForCurrTypePlusStd-mean(LFPForCurrType))];
+            palerColor=brighten(mean([currPlotColor; 0.5 0.5 0.5]),.8); % less saturated the lightened
+            fill([timeByTypeByRepeat fliplr(timeByTypeByRepeat)],yWrap,'k','faceColor',palerColor,'edgeAlpha',0);
+            plot(timeByTypeByRepeat,currTypeNum+LFPForCurrType-mean(LFPForCurrType),'LineWidth',3,'Color',currPlotColor); % minimize clutter
+            %plot(timeByTypeByRepeat,currTypeNum+0.25*resample(sin(stimPhases),length(timeByTypeByRepeat),length(stimPhases)),'LineWidth',.5,'LineStyle','--','Color',currPlotColor);
+            plot(timeByTypeByRepeat,currTypeNum+0.25*resample(sin(stimPhases),length(timeByTypeByRepeat),length(stimPhases)),'LineWidth',.5,'Color','k'); % for contrast
         end
         axis tight;
         titleLabel = sprintf('average over swept parameter: %s', sweptParameter{:});
@@ -720,22 +728,26 @@ if doLFPAnalysis
         hold off;
     end
     
-    % LFP Power 
+    
+    % LFP Power
     currRepeatNum = 1; which = find(repeat==currRepeatNum);
     whichInLFPRecordBeforeStim = LFPRecord.dataTimes<min(correctedFrameTimes(which,1));
     currRepeatNum = numRepeats; which = find(repeat==currRepeatNum);
     whichInLFPRecordAfterStim = LFPRecord.dataTimes>max(correctedFrameTimes(which,2));
-    LFPBeforeStim = LFPRecord.data(whichInLFPRecordBeforeStim);
-    LFPAfterStim = LFPRecord.data(whichInLFPRecordAfterStim);
-    LFPAfterStim = LFPAfterStim-(LFPAfterStim(1)-LFPBeforeStim(end));
-    LFPWithoutStim = [LFPBeforeStim; LFPAfterStim];
+    %LFPBeforeStim = LFPRecord.data(whichInLFPRecordBeforeStim);
+    %LFPAfterStim = LFPRecord.data(whichInLFPRecordAfterStim);
+    %LFPAfterStim = LFPAfterStim-(LFPAfterStim(1)-LFPBeforeStim(end));  % WHAT?
+    %LFPWithoutStim = [LFPBeforeStim; LFPAfterStim];
+    LFPWithoutStim=LFPRecord.data(whichInLFPRecordBeforeStim | whichInLFPRecordAfterStim);  % MAYBE you mean this?
     params.Fs = mean(LFPRecord.LFPSamplingRateHz);
-%     params.fpass = [0 150];
+    %     params.fpass = [0 150];
     params.fpass = [0 30];
     params.err = [2 0.05];
     params.tapers = [3 5];
     [specWithoutStim freq specWithoutStimErr] = mtspectrumc(LFPWithoutStim,params);
     log10specWithoutStim = 10*log10(specWithoutStim);
+    
+    
     
     if plotParameters.showLFPAnalysis
         currAxes = subplot(9,3,[2 3]);
@@ -752,15 +764,20 @@ if doLFPAnalysis
 %   params.fpass = [0 150];
     params.fpass = [0 30];
     params.tapers = [3 5];
-    for currTypeNum = 1:numTypes
-        for currRepeatNum = 1:numRepeats
-            which = find((repeat==currRepeatNum)&(type==currTypeNum));
-            whichInLFPRecord = LFPRecord.dataTimes>=min(correctedFrameTimes(which,1))& ...
-                LFPRecord.dataTimes<=max(correctedFrameTimes(which,2));
-            [spec freq] = mtspectrumc(LFPRecord.data(whichInLFPRecord),params);
-            LFPPowerByType(currTypeNum,currRepeatNum,:) = interp1(freq,spec,linspace(min(freq),max(freq),length(specWithoutStim)));
+    
+
+        for currTypeNum = 1:numTypes
+            for currRepeatNum = 1:numRepeats
+                which = find((repeat==currRepeatNum)&(type==currTypeNum));
+                if length(which)>0 %PMM
+                    whichInLFPRecord = LFPRecord.dataTimes>=min(correctedFrameTimes(which,1))& ...
+                        LFPRecord.dataTimes<=max(correctedFrameTimes(which,2));
+                    [spec freq] = mtspectrumc(LFPRecord.data(whichInLFPRecord),params);
+                    LFPPowerByType(currTypeNum,currRepeatNum,:) = interp1(freq,spec,linspace(min(freq),max(freq),length(specWithoutStim))); 
+                end
+            end
         end
-    end
+
     if plotParameters.showLFPAnalysis
         currAxes = subplot(9,3,[8 9]);
         hold on;

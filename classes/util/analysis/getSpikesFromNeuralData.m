@@ -543,7 +543,7 @@ end
 % assignedCluster is a 1xN vector, which is the assigned cluster number for each spike (numbers are arbitrary)
 
 if spikeSortingParams.plotSortingForTesting % view plots (for testing)
-    
+
     switch upper(spikeSortingMethod)
         case 'OSORT'
             whichSpikes=find(assignedClusters~=999);
@@ -623,16 +623,29 @@ if spikeSortingParams.plotSortingForTesting % view plots (for testing)
     plot([lockout lockout],get(gca,'YLim'),'k') % 
     plot([2 2], get(gca,'YLim'),'k--')
     
-%         
+    
+    N=size(neuralData,2);
+    colors=0.8*ones(N,3);
+    colors(1,:)=0; %first one is black is main
+
     subplot(2,3,2)
     title('rawSignal zoom');
-    plot(neuralDataTimes(zoomInds),neuralData(zoomInds),'k');
+    %plot(neuralDataTimes(zoomInds),neuralData(zoomInds),'k');
     hold on
+    
+    steps=max(std(neuralData));
+    for i=1:N
+        plot(neuralDataTimes(zoomInds),neuralData(zoomInds,i)-steps*(i-1),'color',colors(i,:))
+        %text(xMinMax(1)-diff(xMinMax)*0.05,steps*i,num2str(i-2)) % add the name of channel... consider doing all phys channels
+    end
+    set(gca,'ytick',[])
+
     someNoiseTimes=noiseTimes(ismember(noiseTimes,zoomInds));
     someSpikeTimes=spikeTimes(ismember(spikeTimes,zoomInds));
     plot(neuralDataTimes(someNoiseTimes),neuralData(someNoiseTimes),'.b');
     plot(neuralDataTimes(someSpikeTimes),neuralData(someSpikeTimes),'.r');
-    axis([ minmax(neuralDataTimes(zoomInds)')   yRange ])
+    axis([ minmax(neuralDataTimes(zoomInds)')   ylim ])
+    
     
     if 0
         subplot(2,3,4)
@@ -643,25 +656,40 @@ if spikeSortingParams.plotSortingForTesting % view plots (for testing)
         plot(neuralDataTimes(spikeTimes),filteredSignal(spikeTimes),'.r');
         axis([ minmax(neuralDataTimes')   1.1*minmax(filteredSignal') ])
     end
-% a button should allow selection between filtered or non-filtered (only show one kind)
-
-%     title('rawSignal and spikes');
-%     plot(downsample(neuralDataTimes,N),downsample(neuralData,N),'k');
-%     hold on
-%     plot(neuralDataTimes(noiseTimes),neuralData(noiseTimes),'.b');
-%     plot(neuralDataTimes(spikeTimes),neuralData(spikeTimes),'.r');
-%      axis([ minmax(neuralDataTimes')   yRange ])
+    % a button should allow selection between filtered or non-filtered (only show one kind)
+    
+    %     title('rawSignal and spikes');
+    %     plot(downsample(neuralDataTimes,N),downsample(neuralData,N),'k');
+    %     hold on
+    %     plot(neuralDataTimes(noiseTimes),neuralData(noiseTimes),'.b');
+    %     plot(neuralDataTimes(spikeTimes),neuralData(spikeTimes),'.r');
+    %      axis([ minmax(neuralDataTimes')   yRange ])
     
     
     subplot(2,3,5)
     title('filtSignal zoom');
-    plot(neuralDataTimes(zoomInds),filteredSignal(zoomInds),'k');
+    %plot(neuralDataTimes(zoomInds),filteredSignal(zoomInds),'k');
     hold on
-        plot(neuralDataTimes(someNoiseTimes),filteredSignal(someNoiseTimes),'.b');
+    steps=max(std(filteredSignal));
+    for i=fliplr(1:N)
+        plot(neuralDataTimes(zoomInds),filteredSignal(zoomInds,i)-steps*(i-1),'color',colors(i,:))
+        %text(xMinMax(1)-diff(xMinMax)*0.05,steps*i,num2str(i-2)) % add the name of channel... consider doing all phys channels
+    end
+    set(gca,'ytick',[])
+    
+    
+    plot(neuralDataTimes(someNoiseTimes),filteredSignal(someNoiseTimes),'.b');
     plot(neuralDataTimes(someSpikeTimes),filteredSignal(someSpikeTimes),'.r');
-    axis([ minmax(neuralDataTimes(zoomInds)')   1.1*minmax(filteredSignal(zoomInds)') ])
+    axis([ neuralDataTimes(zoomInds([1 end]))'   ylim])
+    %axis([ minmax(neuralDataTimes(zoomInds)')   1.1*minmax(filteredSignal(zoomInds)') ])
     
     
+%     
+
+
+
+
+
 %     figure()
 %     allSpikesDecorrelated=spikeWaveforms; %this is not decorellated!
 %     allSpikesOrig=spikeWaveforms;
@@ -671,6 +699,7 @@ if spikeSortingParams.plotSortingForTesting % view plots (for testing)
 %     plabel='';
 %     mode=1; %maybe 2 later
 %     [d,residuals1,residuals2,Rsquare1, Rsquare2] = figureClusterOverlap(allSpikesDecorrelated, allSpikesOrig, assigned, clNr1, clNr2,plabel ,mode , {'b','r'})
+
 
 
    

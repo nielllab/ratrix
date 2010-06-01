@@ -1,5 +1,5 @@
 function quit = analysisManagerByChunk(subjectID, path, cellBoundary,channelsAnalyzed,spikeDetectionParams, spikeSortingParams,...
-    timeRangePerTrialSecs,stimClassToAnalyze,overwriteAll,usePhotoDiodeSpikes,plottingParams,frameThresholds)
+    timeRangePerTrialSecs,stimClassToAnalyze,overwriteAll,usePhotoDiodeSpikes,plottingParams,frameThresholds,paramUtil)
 % 4/14/09 - for now, lets assume this function only processes a single trial
 %	- one neuralRecords.mat file, with many chunks
 %	- one stimRecords.mat file, specific to this trial
@@ -141,8 +141,8 @@ else
         end
         
         if ~all(size(channelsAnalyzed{1})==[1 1])
-            channelsAnalyzed
-            error('haven''t handled analysis of multiple channels per group yet')
+            warning('going to try multiple leads in analysis... not tested yet')
+            channelsAnalyzed{1}
         end
         
     end
@@ -209,6 +209,11 @@ if ~exist('frameThresholds','var') || isempty(frameThresholds)
     frameThresholds.warningBound = 0.1; %fractional difference that will cause a warning, (after drop adjusting)
     frameThresholds.errorBound = 0.5;   %fractional difference of ifi that will cause an error (after drop adjusting)
     frameThresholds.dropsAcceptableFirstNFrames=2; % first 2 frames won't kill the default quality test               
+end
+
+
+if ~exist('paramUtil','var') || isempty(paramUtil)
+   paramUtil=[]; % don't do anything
 end
 
 % ==========================================================================================
@@ -364,6 +369,7 @@ while ~quit
             eval(evalStr);
             
             figure;  displayCumulativePhysAnalysis(sm,cumulativedata);
+            drawnow
             return
         end
     end
@@ -399,24 +405,40 @@ while ~quit
     
     if analyzeThisTrial
         while ~doneWithThisTrial && ~maskThisTrial
-            % look at the neuralRecord and see if there are any new chunks to process
-            disp('checking chunk names... may be slow remotely...'); tic;
-            chunkNames=who('-file',neuralRecordLocation);
-            fprintf(' %2.2f seconds',toc)
-            chunksToProcess=[];
-            for i=1:length(chunkNames)
-                [matches tokens] = regexpi(chunkNames{i}, 'chunk(\d+)', 'match', 'tokens');
-                if length(matches) ~= 1
-                    continue;
-                else
-                    chunkN = str2double(tokens{1}{1});
+            
+            
+            %DETERMINE CHUNKS TO PROCESS
+            if 0
+                %a faster way of doing this once we save the num chunks explicitly in a variable
+                varIn=load(neuralRecordLocation,'numChunks');
+                for chunkN=1:varIn.numChunks
+                    if ~isempty(processedChunks) && ~isempty(find(processedChunks(:,2)==chunkN&processedChunks(:,1)==currentTrial))
+                        % already processed - pass
+                    elseif chunkN>=currentChunkBoundary(1) && chunkN<=currentChunkBoundary(2)
+                        chunksToProcess=[chunksToProcess; currentTrial chunkN];
+                    end
                 end
-                if ~isempty(processedChunks) && ~isempty(find(processedChunks(:,2)==chunkN&processedChunks(:,1)==currentTrial))
-                    % already processed - pass
-                elseif chunkN>=currentChunkBoundary(1) && chunkN<=currentChunkBoundary(2)
-                    chunksToProcess=[chunksToProcess; currentTrial chunkN];
+            else % slower back compatible method
+                % look at the neuralRecord and see if there are any new chunks to process
+                disp('checking chunk names... may be slow remotely...'); tic;
+                chunkNames=who('-file',neuralRecordLocation);
+                fprintf(' %2.2f seconds',toc)
+                chunksToProcess=[];
+                for i=1:length(chunkNames)
+                    [matches tokens] = regexpi(chunkNames{i}, 'chunk(\d+)', 'match', 'tokens');
+                    if length(matches) ~= 1
+                        continue;
+                    else
+                        chunkN = str2double(tokens{1}{1});
+                    end
+                    if ~isempty(processedChunks) && ~isempty(find(processedChunks(:,2)==chunkN&processedChunks(:,1)==currentTrial))
+                        % already processed - pass
+                    elseif chunkN>=currentChunkBoundary(1) && chunkN<=currentChunkBoundary(2)
+                        chunksToProcess=[chunksToProcess; currentTrial chunkN];
+                    end
                 end
             end
+            
             % if no more chunks to process in currentTrial, then check for a new trial within boundaryRange
             if isempty(chunksToProcess)
                 if numTriesWithNothing>=3
@@ -523,8 +545,8 @@ while ~quit
                     %only analyze some channels
                     for c=1:length(channelsAnalyzed{1})
                         thesePhysChannelLabels{c}=['phys' num2str(channelsAnalyzed{1}(c))];
+                        thesePhysChannelInds(c)=find(ismember(neuralRecord.ai_parameters.channelConfiguration,thesePhysChannelLabels{c}));
                     end
-                    thesePhysChannelInds=find(ismember(neuralRecord.ai_parameters.channelConfiguration,thesePhysChannelLabels));
                     photoInd=find(strcmp(neuralRecord.ai_parameters.channelConfiguration,'photodiode'));
                     pulseInd=find(strcmp(neuralRecord.ai_parameters.channelConfiguration,'framePulse'));
                     
@@ -554,6 +576,12 @@ while ~quit
                         neuralRecord.neuralData=neuralRecord.neuralData(withinTimeRange,:);
                         neuralRecord.neuralDataTimes=neuralRecord.neuralDataTimes(withinTimeRange);
                     end
+                    
+                    if ~isempty(paramUtil)
+                        useSpikeThreshParamUtil(paramUtil,neuralRecord,spikeDetectionParams,spikeSortingParams,photoInd,pulseInd,thesePhysChannelInds)
+                    end
+                    
+                    
                     if ~processed || overwriteAll
                         % get frameIndices and frameTimes (from screen pulses)
                         % bounds to decide whether or not to continue with analysis
@@ -603,7 +631,10 @@ while ~quit
                                 else
                                     currentTrial=currentTrial+1;
                                 end
-                               
+                                
+                                
+                                warning('this stuff errors, going to next trial')
+                                break % chunksToProcess loop
                                 %option to do analysis in this odd location, that happens sometimes
                                 doAnalysis=worthPhysAnalysis(sm,quality,analysisExists,overwriteAll,isLastChunkInTrial); %doAnalysis = isLastChunkInTrial;
                                 if doAnalysis
@@ -622,8 +653,9 @@ while ~quit
                                     neuralRecord.parameters.refreshRate=stimRecord.refreshRate; % where?
                                     
                                     [analysisdata cumulativedata] = physAnalysis(sm,filteredSpikeRecord,stimRecord.stimulusDetails,plotParameters,neuralRecord.parameters,cumulativedata,eyeData,LFPRecord);
+                                    drawnow
                                 end
-                                break % chunksToProcess loop
+
                             else
                                 spikeRecord
                                 error(sprintf('no frames found on chunk %d which is not the last one! (trial %d has %d chunks)',chunksToProcess(currentChunkInd,2),chunksToProcess(currentChunkInd,1),size(chunksToProcess,1)))

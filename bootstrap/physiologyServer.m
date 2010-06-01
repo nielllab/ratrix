@@ -18,7 +18,7 @@ fWidth=2*margin+10*fieldWidth;
 fHeight=margin+25*oneRowHeight+margin;
 
 ai_parameters=[];
-ai_parameters.numChans=3;  % 3 or 16
+ai_parameters.numChans=16;  % 3 or 16
 ai_parameters.sampRate=40000;
 ai_parameters.inputRanges=repmat([-1 6],ai_parameters.numChans,1);
 ai_parameters.channelConfiguration={'framePulse','photodiode'};
@@ -37,7 +37,7 @@ ampModeStrs = {'','Rec','Imp','Stim'}; defaultModeIndex = 2;
 
 
 clientIPStrs={'132.239.158.180','132.239.158.179'};  % now we use 180... why was it set to only 179 before november 2009?
-ratIDStrs={'230','calib','test1','306','305','257','252','250','demo1','fan_demo1','131','303','138','262','261','249'};
+ratIDStrs={'342','231','230','calib','test1','306','305','257','252','250','demo1','fan_demo1','131','303','138','262','261','249'};
 ratProtocolStrs={'setProtocolPhys2','setProtocolPhys3','ctxCharPtcl','ctxQckNDirtyPtcl','flankerCalibProtocol'};
 experimenterStrs={'','pmeier','bsriram','dnguyen','eflister'};
 electrodeMakeStrs={'FHC','MPI','gentner','neuronexus'};
@@ -84,7 +84,7 @@ arousalStrs={[],'awake','asleep','anesth'};
 eyesStrs={[],'open','closed','squinty','stable','saccades','poor signal'};
 faceStrs={[],'whisking','no whisking','grinding','licking','squeaking'};
 
-isofluraneStrs={[],'0.0','1.0','1.25','1.5','2.0','2.5','3.0','4.0','5.0','oxy'};
+isofluraneStrs={[],'0.0','0.25','0.5','0.75','1.0','1.25','1.5','2.0','2.5','3.0','4.0','5.0','oxy'};
 withdrawalStrs={[],'none','sluggish','quick'};
 breathPerMinStrs={[],'24-','30','36','42','48','54','60','66','72','78+'};
 breathTypeStrs={[],'normal','arrhythmic','wheezing','hooting'};
@@ -1420,6 +1420,7 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
         quit=false;
         
         while ~quit && keepLooping
+            allowTimeupChunkAdvancementCheck=true;
             params=[];
             params.ai=ai;
             params.neuralFilename=neuralFilename;
@@ -1428,6 +1429,7 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
             params.ai_parameters=ai_parameters;
             params.chunkCount=chunkCount;
             params.startTime=startTime;
+            fprintf('.%d',params.chunkCount)
             % ==============================================
             % handle all TRIALS stuff
             if running && ~isempty(dataCmdCon) && ~isempty(dataAckCon)
@@ -1471,16 +1473,25 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
                             labels(end+1)=nan;
                             events_data(end).eventType=retval(j).type;
                             events_data(end).eventNumber=eventNum;
-                            if strcmp(retval(j).type,'trial start')
-                                neuralFilename=retval(j).neuralFilename;
-                                stimFilename=retval(j).stimFilename;
-                                % reset chunkCount and chunkClock?
-                                chunkCount=1;
-                                chunkClock=GetSecs();
-                                startTime=chunkClock;
-                                events_data(end).eventParams.trialNumber=retval(j).trialNumber;
-                                events_data(end).eventParams.stimManagerClass=retval(j).stimManagerClass;
+                            
+                            switch retval(j).type
+                                case 'trial start'
+                                    neuralFilename=retval(j).neuralFilename;
+                                    stimFilename=retval(j).stimFilename;
+                                    % reset chunkCount and chunkClock?
+                                    chunkCount=1;
+                                    
+                                    chunkClock=GetSecs();
+                                    startTime=chunkClock;
+                                    events_data(end).eventParams.trialNumber=retval(j).trialNumber;
+                                    events_data(end).eventParams.stimManagerClass=retval(j).stimManagerClass;
+                                case 'trial end' 
+                                    allowTimeupChunkAdvancementCheck=false;
+                                    %this will prevent a short empty chunk the length of the save duration from
+                                    %overwriting the last chunk. this bug 1st noticed and fixed when we saved longer
+                                    %trials with 16 channels. -pmm 5/31/2010
                             end
+                            
                             % should save events to phys log here?
                             % save event log
                             deleteFilename=sprintf('physiologyEvents_%d-%d.mat',1,eventNum-1);
@@ -1505,7 +1516,8 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
             if recording
                 % now check if it is time to spool off a 30sec chunk
                 t=GetSecs();
-                if t-chunkClock>=30 %hardcoded to 30 seconds for now?
+                if t-chunkClock>=20 && allowTimeupChunkAdvancementCheck %hardcoded to 30 seconds before, but 20 has a better save ratio for 16 channels
+                    disp(sprintf('going to save a chunk because %f secs elapsed',t-chunkClock))
                     numSampsToGet=get(ai,'SamplesAvailable');
                     [neuralData,neuralDataTimes]=getdata(ai,numSampsToGet);
                     elapsedTime=GetSecs()-startTime;

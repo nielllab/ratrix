@@ -30,8 +30,7 @@ try
 		return;
 	else
 		commandAvailable=true;
-        cmd
-        fprintf('we found a command!\n')
+        fprintf('we found a command (%d)!\n',cmd)
 	end
 catch ex
     keyboard

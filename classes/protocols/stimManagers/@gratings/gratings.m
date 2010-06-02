@@ -2,7 +2,7 @@ function s=gratings(varargin)
 % GRATINGS  class constructor.
 % s = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radii,annuli,location,
 %       waveform,normalizationMethod,mean,thresh,numRepeats,
-%       maxWidth,maxHeight,scaleFactor,interTrialLuminance[,doCombos])
+%       maxWidth,maxHeight,scaleFactor,interTrialLuminance[,doCombos],doPhaseInversion)
 % Each of the following arguments is a 1xN vector, one element for each of N gratings
 % pixPerCycs - specified as in orientedGabors
 % driftfrequency - specified in cycles per second for now; the rate at which the grating moves across the screen
@@ -28,6 +28,7 @@ function s=gratings(varargin)
 %   - if false, then takes unique selection of these parameters (they all have to be same length)
 %   - in future, handle a cell array for this flag that customizes the
 %   combo selection process.. if so, update analysis too
+% doPhaseInversion - the gratings is no longer a traveling wave and is instead a standing wave.
 
 s.pixPerCycs = [];
 s.driftfrequencies = [];

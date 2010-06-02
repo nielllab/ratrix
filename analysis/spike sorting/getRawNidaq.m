@@ -28,7 +28,7 @@ if ~exist('dataFormat','var') || isempty(dataFormat)
 end
 
 if ~exist('doPlot','var') || isempty(doPlot)
-    doPlot=false;
+    doPlot=true;
 end
 
 if iscell(boundaryMethod)

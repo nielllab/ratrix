@@ -1,10 +1,14 @@
-function out=stochasticLoad(filename,fieldsToLoad)
+function [out success]=stochasticLoad(filename,fieldsToLoad, noAttempts)
 if ~exist('fieldsToLoad','var')
     fieldsToLoad=[];
 end
+if ~exist('noAttempts','var')
+    noAttempts = Inf;
+end
 
+currAttempt = 1;
 success=false;
-while ~success
+while ~success && currAttempt<noAttempts
     try
         if isempty(fieldsToLoad) % default to load all
             out=load(filename);
@@ -18,10 +22,14 @@ while ~success
         end
         success=true;
     catch
+        currAttempt = currAttempt+1;
         WaitSecs(abs(randn));
         dispStr=sprintf('failed to load %s - trying again',filename);
         disp(dispStr)
-    end
+    end 
+end
+if ~success 
+    out = [];
 end
 
 

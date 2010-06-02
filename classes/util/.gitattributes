@@ -162,3 +162,4 @@ trialRecordProcessing/replicateChecker.m -text
 trialRecordProcessing/getExpectedPreRequestDurSec.m -text
 trialRecordProcessing/getResponseWindowStart.m -text
 trialRecordProcessing/getResponseWindowStop.m -text
+analysis/getCommentStringFromEventsData.m -text

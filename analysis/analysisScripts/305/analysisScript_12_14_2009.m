@@ -94,7 +94,7 @@ subjectID = '305';
 %cellBoundary={'trialRange',[372]} % tempGr: 2 tempFreqs.  waveform: sine.
 %cellBoundary={'trialRange',[373]} % ffgwn
 %cellBoundary={'trialRange',[374]} % 6X8 binary checkerboard
-%cellBoundary={'trialRange',[375]} % 12X16 binary checkerboard
+cellBoundary={'trialRange',[375]} % 12X16 binary checkerboard
 %cellBoundary={'trialRange',[376]} % tempGr: 2 tempFreqs.  waveform: sine.
 %cellBoundary={'trialRange',[377]} % ffgwn
 analysisManagerByChunk(subjectID, path, cellBoundary, spikeDetectionParams, ... 

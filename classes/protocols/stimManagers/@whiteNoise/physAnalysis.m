@@ -7,6 +7,11 @@ function [analysisdata cumulativedata] = physAnalysis(stimManager,spikeRecord,st
 % plotParameters - currently not used
 % 4/17/09 - spikeRecord contains all the data from this ENTIRE trial, but we should only do analysis on the current chunk
 % to prevent memory problems
+if ~exist('LFPRecord','var')||isempty(LFPRecord)
+    doLFPAnalysis = false;
+else
+    doLFPAnalysis = true;
+end
 
 try
     % to save memory, only do analysis on spikeRecord.currentChunk's data
@@ -67,8 +72,8 @@ try
     xtraPlot={'spaceTimeContext'}; % eyes, spaceTimeContext, montage
     
     % timeWindowMs
-    timeWindowMs=[300 50]; % parameter [300 50]
-    
+    timeWindowMsStim=[300 50]; % parameter [300 50]
+    timeWindowMsLFP =[1000 1000]; 
     
     % refreshRate - try to retrieve from neuralRecord (passed from stim computer)
     if isfield(parameters, 'refreshRate')
@@ -79,7 +84,7 @@ try
     end
     
     % calculate the number of frames in the window for each spike
-    timeWindowFrames=ceil(timeWindowMs*(refreshRate/1000));
+    timeWindowFramesStim=ceil(timeWindowMsStim*(refreshRate/1000));
     
     if spatialSmoothingOn
         filt=... a mini gaussian like fspecial('gaussian')
@@ -175,9 +180,9 @@ try
     
     
     analysisdata=[];
-    % figure out safe "piece" size based on spatialDim and timeWindowFrames
+    % figure out safe "piece" size based on spatialDim and timeWindowFramesStim
     % we only need to reduce the size of spikes
-    maxSpikes=floor(10000000/(spatialDim(1)*spatialDim(2)*sum(timeWindowFrames))); % equiv to 100 spikes at 64x64 spatial dim, 36 frame window
+    maxSpikes=floor(10000000/(spatialDim(1)*spatialDim(2)*sum(timeWindowFramesStim))); % equiv to 100 spikes at 64x64 spatial dim, 36 frame window
     starts=[1:maxSpikes:length(allSpikes) length(allSpikes)+1];
     for piece=1:(length(starts)-1)
         spikes=allSpikes(starts(piece):(starts(piece+1)-1));
@@ -244,8 +249,7 @@ try
         end
         
         try
-            pack
-            triggers=meanValue(ones(size(stimData,1),size(stimData,2),sum(timeWindowFrames)+1,numSpikes)); % +1 is for the frame that is on the spike
+            triggers=meanValue(ones(size(stimData,1),size(stimData,2),sum(timeWindowFramesStim)+1,numSpikes)); % +1 is for the frame that is on the spike
         catch ex
             disp(['CAUGHT EX (in whiteNoise.physAnalysis):' getReport(ex)]);
             memory
@@ -253,8 +257,8 @@ try
         end
         for i=find(spikeCount>0) % for each index that has spikes
             %every frame with a spike count, gets included... it is multiplied by the number of spikes in that window
-            framesBefore = timeWindowFrames(1);
-            framesAfter = timeWindowFrames(2);
+            framesBefore = timeWindowFramesStim(1);
+            framesAfter = timeWindowFramesStim(2);
             % border handling (if spike was in first frame, cant get any framesBefore)
             if i-framesBefore <= 0
                 framesBefore = i-1;
@@ -299,6 +303,38 @@ try
     end %loop over safe "pieces"
     
     
+    % now get the spikeTriggeredLFPs
+    try
+        LFPs = zeros(length(spikes),ceil((sum(timeWindowMsLFP)/1000)*mean(LFPRecord.LFPSamplingRateHz)),size(LFPRecord.data,2));
+    catch ex
+        getReport(ex)
+        memory
+        keyboard
+    end
+        
+    processedSpikeTimeStamps = spikeRecord.spikeTimestamps(thisCluster);
+    unprocessedSpikeNum = [];
+    for currSpikeNum = 1:length(spikes)
+        currTimeStamp = processedSpikeTimeStamps(currSpikeNum);
+        if ((currTimeStamp-(timeWindowMsLFP(1)/1000))<min(spikeRecord.spikeTimestamps))...
+                ||((currTimeStamp+(timeWindowMsLFP(2)/1000))>max(spikeRecord.spikeTimestamps))
+            % only process those LFP samples where you are guaranteed that
+            % the neural signal exists in the LFPRecord for that chunk!
+            unprocessedSpikeNum = [unprocessedSpikeNum currSpikeNum];
+            
+        else
+            relevantLFPRecord = LFPRecord.data((LFPRecord.dataTimes>(currTimeStamp-(timeWindowMsLFP(1)/1000)))&...
+                (LFPRecord.dataTimes<(currTimeStamp+(timeWindowMsLFP(2)/1000))),:);
+            LFPs(currSpikeNum,:,:) = resample(relevantLFPRecord,ceil((sum(timeWindowMsLFP)/1000)*mean(LFPRecord.LFPSamplingRateHz)),...
+                length(relevantLFPRecord));
+        end
+    end
+    LFPs(unprocessedSpikeNum,:,:) = [];
+    ST_LFPA = mean(LFPs,1);
+    ST_LFPV = var(LFPs,0,1);
+    numSpikesForLFP = size(LFPs,1);
+        
+    
     % now we should have our analysisdata for all "pieces"
     % if the cumulative values don't exist (first analysis)
     % 6/23/09 fli - why do we always do this first thing instead of checking for cumulative values???
@@ -318,17 +354,23 @@ try
         cumulativedata.cumulativeNumSpikes = analysisdata.numSpikes;
         cumulativedata.cumulativeTrialNumbers=parameters.trialNumber;
         cumulativedata.cumulativeChunkIDs=parameters.chunkID;
+        cumulativedata.cumulativeST_LFPA = ST_LFPA;
+        cumulativedata.cumulativeST_LFPV = ST_LFPV;
+        cumulativedata.numSpikesForLFP = numSpikesForLFP;
         analysisdata.singleChunkTemporalRecord=[];
         addSingleTrial=true;
     elseif isempty(find(parameters.trialNumber==cumulativedata.cumulativeTrialNumbers&...
             parameters.chunkID==cumulativedata.cumulativeChunkIDs))
         %only for new trials or new chunks
         [cumulativedata.cumulativeSTA cumulativedata.cumulativeSTV cumulativedata.cumulativeNumSpikes ...
-            cumulativedata.cumulativeTrialNumbers cumulativedata.cumulativeChunkIDs] = ...
+            cumulativedata.cumulativeTrialNumbers cumulativedata.cumulativeChunkIDs cumulativedata.cumulativeST_LFPA ...
+            cumulativedata.cumulativeST_LFPV cumulativedata.numSpikesForLFP] = ...
             updateCumulative(cumulativedata.cumulativeSTA,cumulativedata.cumulativeSTV,cumulativedata.cumulativeNumSpikes,...
-            cumulativedata.cumulativeTrialNumbers,cumulativedata.cumulativeChunkIDs,...
+            cumulativedata.cumulativeTrialNumbers,cumulativedata.cumulativeChunkIDs,cumulativedata.cumulativeST_LFPA,...
+            cumulativedata.cumulativeST_LFPV, cumulativedata.numSpikesForLFP,...
             analysisdata.STA,analysisdata.STV,analysisdata.numSpikes,...
-            analysisdata.trialNumber,analysisdata.chunkID);
+            analysisdata.trialNumber,analysisdata.chunkID,ST_LFPA,...
+            ST_LFPV,numSpikesForLFP);
         
         addSingleTrial=true;
     else % repeat sweep through same trial
@@ -435,10 +477,10 @@ try
         end
     end
     
-    timeMs=linspace(-timeWindowMs(1),timeWindowMs(2),size(analysisdata.STA,3));
+    timeMs=linspace(-timeWindowMsStim(1),timeWindowMsStim(2),size(analysisdata.STA,3));
     ns=length(timeMs);
     if plotParameters.showSpikeAnalysis
-        hold off; plot(timeWindowFrames([1 1])+1, [0 whiteVal],'k');
+        hold off; plot(timeWindowFramesStim([1 1])+1, [0 whiteVal],'k');
         hold on;  plot([1 ns],meanLuminance([1 1])*whiteVal,'k')
         try
             plot([1:ns], analysisdata.singleChunkTemporalRecord, 'color',[.8 .8 1])
@@ -451,7 +493,7 @@ try
         plot([1:ns], brightSignal(:)','r')
         
         peakFrame=find(brightSignal==max(brightSignal(:)));
-        timeInds=[1 peakFrame(end) timeWindowFrames(1)+1 size(analysisdata.STA,3)];
+        timeInds=[1 peakFrame(end) timeWindowFramesStim(1)+1 size(analysisdata.STA,3)];
         set(gca,'XTickLabel',unique(timeMs(timeInds)),'XTick',unique(timeInds),'XLim',minmax(timeInds));
         set(gca,'YLim',[minmax([analysisdata.singleChunkTemporalRecord(:)' darkCI(:)' brightCI(:)'])+[-5 5]])
         ylabel('RGB(gunVal)')
@@ -554,6 +596,15 @@ try
         
     end
     
+    figure(min(cumulativedata.cumulativeTrialNumbers)+1000);
+    set(gcf,'Name','LFP Analysis','NumberTitle','off');
+%     ST_LFPTime = linspace(-1000,1000,length(cumulativedata.cumulativeST_LFPA));
+%     plot(ST_LFPTime,cumulativedata.cumulativeST_LFPA,'LineWidth',2);
+    imagesc([-1000 1000],[1 14,],squeeze(cumulativedata.cumulativeST_LFPA)');colorbar;
+%     hold on;
+%     plot(ST_LFPTime,cumulativedata.cumulativeST_LFPA+sqrt(cumulativedata.cumulativeST_LFPV));
+%     plot(ST_LFPTime,cumulativedata.cumulativeST_LFPA-sqrt(cumulativedata.cumulativeST_LFPV));
+%     hold off;
 catch ex
     disp(['CAUGHT EX: ' getReport(ex)])
     %             break
@@ -642,9 +693,9 @@ if ~new % only  check if they are the same distribution
 end
 end
 
-
-function [cSTA cSTV cNumSpikes cTrialNumbers cChunkIDs] = updateCumulative(cSTA,cSTV,cNumSpikes,cTrialNumbers,cChunkIDs,...
-    STA,STV,numSpikes,trialNumbers,chunkID)
+function [cSTA cSTV cNumSpikes cTrialNumbers cChunkIDs cST_LFPA cST_LFPV cNumSpikesForLFP] = updateCumulative(cSTA,cSTV,...
+    cNumSpikes,cTrialNumbers,cChunkIDs,cST_LFPA,cST_LFPV,cNumSpikesForLFP,STA,STV,numSpikes,trialNumbers,chunkID,ST_LFPA,...
+    ST_LFPV,numSpikesForLFP)
 % only update the cumulatives if the partials are NOT nan (arithmetic w/ nans wipes out any valid numbers)
 if ~any(isnan(STA(:)))
     cSTA=(cSTA*cNumSpikes + STA*numSpikes) / (cNumSpikes + numSpikes);
@@ -656,6 +707,25 @@ if ~any(isnan(STV(:)))
 else
     warning('found NaNs in partial STV - did not update cumulative STV');
 end
+
+if exist('cST_LFPA','var') % updateCumulative is also used for piece-wise data
+    if ~any(isnan(ST_LFPA(:)))
+        cST_LFPA=(cST_LFPA*cNumSpikesForLFP + ST_LFPA*numSpikesForLFP) / (cNumSpikesForLFP + numSpikesForLFP);
+    else
+        warning('found NaNs in partial cST_LFPA - did not update cumulative ST_LFPA')
+    end
+    if ~any(isnan(ST_LFPV(:)))
+        cST_LFPV=(cST_LFPV*cNumSpikesForLFP + ST_LFPV*numSpikesForLFP) / (cNumSpikesForLFP + numSpikesForLFP);
+    else
+        warning('found NaNs in partial ST_LFPV - did not update cumulative ST_LFPV');
+    end
+    cNumSpikesForLFP = cNumSpikesForLFP + numSpikesForLFP;
+else
+    cST_LFPA = [];
+    cST_LFPV = [];
+    cNumSpikesForLFP = [];
+end
+
 cNumSpikes=cNumSpikes + numSpikes;
 cTrialNumbers=[cTrialNumbers trialNumbers];
 cChunkIDs=[cChunkIDs chunkID];

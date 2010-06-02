@@ -22,7 +22,7 @@ doPenetParams = true;
 if exist(eventLogPath,'dir')
     pathList = dir(eventLogPath);
     pathList = pathList(~ismember({pathList.name},{'.','..'}));
-    if ~exist('searchDepth','var')||isempty(searchDepth)
+    if ~exist('searchDepth','var')||isempty(searchDepth) % searchDepth tells you how far to look to get the data. Incase ther is nothing, it should send back an empty.
         searchDepth = min([2,length(pathList)]);
     elseif searchDepth>length(pathList)
         warning('cannot search to requested depth. not enough log files. resetting searchDepth to highest poss number');
@@ -104,11 +104,13 @@ for currSearchDepth = 1:searchDepth
         end
         
         if doAmpState
-            isAnyAmpStateEmpty = any(cellfun(@isempty,events_data(i).ampState));
-            isAnyAmpStateNan = any(cell2mat(cellfun(@isnan,events_data(i).ampState,'UniformOutput',false)));
-            if ~isAnyAmpStateEmpty && ~isAnyAmpStateNan
-                ampState = events_data(i).ampState;
-                doAmpState = false;
+            if ~isempty(events_data(i).ampState)
+                isAnyAmpStateEmpty = any(cellfun(@isempty,events_data(i).ampState));
+                isAnyAmpStateNan = any(cell2mat(cellfun(@isnan,events_data(i).ampState,'UniformOutput',false)));
+                if ~isAnyAmpStateEmpty && ~isAnyAmpStateNan
+                    ampState = events_data(i).ampState;
+                    doAmpState = false;
+                end
             end
         end
         

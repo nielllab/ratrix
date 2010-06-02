@@ -1,7 +1,7 @@
 close all
 useKlusta = true;
 stimClassToAnalyze={'all'}; timeRangePerTrialSecs=[0 Inf];
-path='\\132.239.158.179\datanet_storage';
+path='C:\Documents and Settings\rlab\My Documents\work\physiology data';
 %% spikesortingParams
 spikeSortingParams=[];
 spikeSortingParams.method='oSort';

@@ -37,7 +37,7 @@ ampModeStrs = {'','Rec','Imp','Stim'}; defaultModeIndex = 2;
 
 
 clientIPStrs={'132.239.158.180','132.239.158.179'};  % now we use 180... why was it set to only 179 before november 2009?
-ratIDStrs={'342','231','230','calib','test1','306','305','257','252','250','demo1','fan_demo1','131','303','138','262','261','249'};
+ratIDStrs={'test1','342','230','calib','306','305','257','252','250','demo1','fan_demo1','131','303','138','262','261','249'};
 ratProtocolStrs={'setProtocolPhys2','setProtocolPhys3','ctxCharPtcl','ctxQckNDirtyPtcl','flankerCalibProtocol'};
 experimenterStrs={'','pmeier','bsriram','dnguyen','eflister'};
 electrodeMakeStrs={'FHC','MPI','gentner','neuronexus'};

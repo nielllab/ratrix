@@ -1,4 +1,4 @@
-function quit = analysisManagerByChunk(subjectID, path, cellBoundary,channelsAnalyzed,spikeDetectionParams, spikeSortingParams,...
+function quit = analysisManagerByChunk(subjectID, path, cellBoundary,spikeChannelsAnalyzed,spikeDetectionParams, spikeSortingParams,...
     timeRangePerTrialSecs,stimClassToAnalyze,overwriteAll,usePhotoDiodeSpikes,plottingParams,frameThresholds,paramUtil)
 % 4/14/09 - for now, lets assume this function only processes a single trial
 %	- one neuralRecords.mat file, with many chunks
@@ -15,7 +15,7 @@ function quit = analysisManagerByChunk(subjectID, path, cellBoundary,channelsAna
 %       {'physLog',{'04.21.2009','events',[4 200],'last'}} means get the last cell from 4/21/09 within events 4-200 (of that day)
 %       {'physLog',{'04.21.2009','labels',5}) means the events (trials) defined by label 5 for the phys log from 4/21/09
 
-%   channelsAnalyzed - a list of the channels that are grouped to find a single (spike waveform) event;
+%   spikeChannelsAnalyzed - a list of the channels that are grouped to find a single (spike waveform) event;
 %      example: a stereotrode on channels 2 and 3, and a single channel on 8 would be {[2 3],[8]}
 %      default: only analyzed the first of n channels: {[1]}
 %	spikeDetectionParams - these should now be from the 'activeParameters'
@@ -128,21 +128,21 @@ else
     error('bad cellBoundary input');
 end
 
-if ~exist('channelsAnalyzed','var') || isempty(channelsAnalyzed)
-    channelsAnalyzed={[1]}; % default only look at first phys channel
+if ~exist('spikeChannelsAnalyzed','var') || isempty(spikeChannelsAnalyzed)
+    spikeChannelsAnalyzed={[1]}; % default only look at first phys channel
 else
     %error check
-    if ~(iscell(channelsAnalyzed))
+    if ~(iscell(spikeChannelsAnalyzed))
         error('must be a cell of groups of channels');
     else
-        if ~all(size(channelsAnalyzed)==[1 1])
-            channelsAnalyzed
+        if ~all(size(spikeChannelsAnalyzed)==[1 1])
+            spikeChannelsAnalyzed
             error('haven''t handled analysis of multiple groups yet')
         end
         
-        if ~all(size(channelsAnalyzed{1})==[1 1])
+        if ~all(size(spikeChannelsAnalyzed{1})==[1 1])
             warning('going to try multiple leads in analysis... not tested yet')
-            channelsAnalyzed{1}
+            spikeChannelsAnalyzed{1}
         end
         
     end
@@ -302,6 +302,10 @@ while ~quit
             timestamp = tokens{1}{2};
             currentTrialStartTime=datenumFor30(timestamp);
         end
+    elseif length(d)>1
+        disp('duplicates present');
+        currentTrial = min(currentTrial+1,boundaryRange(3));
+        continue;
     else
         disp('didnt find anything in d');
         currentTrial=min(currentTrial+1,boundaryRange(3));
@@ -530,7 +534,7 @@ while ~quit
                     %physChannelInds=~cellfun(@(x) isempty(x),strfind(neuralRecord.ai_parameters.channelConfiguration,'phys'));
                     %temp=cellfun(@(x) str2num(x(5:end)),neuralRecord.ai_parameters.channelConfiguration(physChannelInds),'UniformOutput',false)
                     %chansAvailable=unique([temp{:}]);
-                    chansRequired=unique([channelsAnalyzed{:}]);
+                    chansRequired=unique([spikeChannelsAnalyzed{:}]);
                     for c=1:length(chansRequired)
                         chansRequiredLabel{c}=['phys' num2str(chansRequired(c))];
                     end
@@ -543,13 +547,13 @@ while ~quit
                     
                     
                     %only analyze some channels
-                    for c=1:length(channelsAnalyzed{1})
-                        thesePhysChannelLabels{c}=['phys' num2str(channelsAnalyzed{1}(c))];
+                    for c=1:length(spikeChannelsAnalyzed{1})
+                        thesePhysChannelLabels{c}=['phys' num2str(spikeChannelsAnalyzed{1}(c))];
                         thesePhysChannelInds(c)=find(ismember(neuralRecord.ai_parameters.channelConfiguration,thesePhysChannelLabels{c}));
                     end
                     photoInd=find(strcmp(neuralRecord.ai_parameters.channelConfiguration,'photodiode'));
                     pulseInd=find(strcmp(neuralRecord.ai_parameters.channelConfiguration,'framePulse'));
-                    
+                    allPhysInds = find(~cellfun(@isempty, strfind(neuralRecord.ai_parameters.channelConfiguration,'phys')));
                     
                     
                     
@@ -722,9 +726,11 @@ while ~quit
                             end
                         end
                         
-                        %LFP resampling
+                        %LFP resampling 
+                        % change this to obtain LFP from all phys channels.
                         if spikeDetectionParams.sampleLFP
-                            spikeRecord.LFPRecord.data = resample(neuralRecord.neuralData(:,thesePhysChannelInds),spikeDetectionParams.LFPSamplingRateHz,neuralRecord.samplingRate);
+%                             spikeRecord.LFPRecord.data = resample(neuralRecord.neuralData(:,thesePhysChannelInds),spikeDetectionParams.LFPSamplingRateHz,neuralRecord.samplingRate);
+                            spikeRecord.LFPRecord.data = resample(neuralRecord.neuralData(:,allPhysInds),spikeDetectionParams.LFPSamplingRateHz,neuralRecord.samplingRate);
                             if isfield(spikeDetectionParams,'LFPBandPass') %smooth each chunk separately? or do it at the end????
                                 W = spikeDetectionParams.LFPBandPass*2/spikeDetectionParams.LFPSamplingRateHz;
                                 N = 2; % second order filter...why? because!

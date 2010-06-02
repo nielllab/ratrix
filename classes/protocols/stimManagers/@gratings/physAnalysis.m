@@ -506,7 +506,7 @@ if plotParameters.showSpikeAnalysis
     
     colors=jet(numTypes);
     figure(parameters.trialNumber); % new for each trial
-    set(gcf,'position',[100 400 560 620])
+    set(gcf,'position',[100 300 560 620])
     subplot(3,2,1); hold off; %p=plot([1:numPhaseBins]-.5,rate')
     plot([0 numPhaseBins], [rate(1) rate(1)],'color',[1 1 1]); hold on;% to save tight axis chop
     x=[1:numPhaseBins]-.5;

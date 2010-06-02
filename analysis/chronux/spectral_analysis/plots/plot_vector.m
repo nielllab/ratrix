@@ -3,7 +3,7 @@ function plot_vector(X,f,plt,Xerr,c,w,currAxis,labels)
 % it also plots them. Xerr can either contain upper and lower confidence intervals 
 % on X, or simply a theoretical confidence level (for the coherence). Used
 % to plot the spectrum and coherency.
-% Usage: plot_vector(X,f,plt,Xerr,c)
+% Usage: plot_vector(X,f,plt,Xerr,c,w,currAxis,labels)
 % Inputs:
 % X: input vector as a function of frequency (f), see third argument
 % f: f axis grid for plot. Default. [1:length(X)]

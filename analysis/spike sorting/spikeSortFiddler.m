@@ -232,6 +232,12 @@ usePhotoDiodeSpikes=0;
 %spikeDetectionParams.method='activeSortingParametersThisAnalysis';  % will override this files choices with the active params for this *subject*
 %spikeSortingParams.method='klustaModel';  NEED TO NOT DELETE THE MODEL FOLDER FILE>>>
 
-analysisManagerByChunk(subjectID, path, cellBoundary, channels,spikeDetectionParams, spikeSortingParams,...
-    timeRangePerTrialSecs,stimClassToAnalyze,overwriteAll,usePhotoDiodeSpikes,[],frameThresholds,[])
+analyzeTrials = false;
+if analyzeTrials
+    analysisManagerByChunk(subjectID, path, cellBoundary, channels,spikeDetectionParams, spikeSortingParams,...
+        timeRangePerTrialSecs,stimClassToAnalyze,overwriteAll,usePhotoDiodeSpikes,[],frameThresholds,[])
+else
+    viewAllSpikesByChannel(subjectID, path, cellBoundary, spikeDetectionParams, spikeSortingParams)
+end
 %edit historicalSpikeFiddlerCalls
+

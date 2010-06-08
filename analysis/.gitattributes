@@ -463,3 +463,4 @@ analysisScripts/257/analysisScript_05_24_2010.m -text
 analysisScripts/249/analysisScript_05_24_2010.m -text
 analysisScripts/analysisParamsForLocalStore.m -text
 spike[!!-~]sorting/historicalSpikeFiddlerCalls.m -text
+spike[!!-~]sorting/viewAllSpikesByChannel.m -text

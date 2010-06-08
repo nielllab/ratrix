@@ -1,7 +1,7 @@
 function [endValveState valveErrorDetails]=setAndCheckValves(station, requestedValves,expectedValveState,valveErrorDetails,startTime,description,barebones)
 
 if ~exist('barebones','var') || isempty(barebones)
-    barebones=false;
+    barebones=true;%false;
 end
 
 %[endValveState valveErrorDetails]=setAndCheckValves(station, requestedValves,expectedValveState,valveErrorDetails,startTime,description)

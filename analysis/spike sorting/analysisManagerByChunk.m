@@ -462,7 +462,7 @@ while ~quit
                     currentTrial=newTrial;
                     doneWithThisTrial=true;
                 else
-                    disp('****** NO CHUNKS LEFT ON TRIAL %d, BUT NO NEW TRIAL YET ******',currentTrial);
+                    disp(sprintf('****** NO CHUNKS LEFT ON TRIAL %d, BUT NO NEW TRIAL YET ******',currentTrial));
                     WaitSecs(2);
                 end
                 numTriesWithNothing=numTriesWithNothing+1;
@@ -712,6 +712,7 @@ while ~quit
                             spikeRecord.spikeDetails.rankedClusters=spikeRecord.rankedClusters;
                             if isempty(spikeRecord.assignedClusters)
                                 passedQualityTest=false;
+                                spikeRecord.spikeDetails.processedClusterRanks=[];
                             end
                             % rename .clu, .klg, .fet, and .model files to be per-chunk
                             d=dir(analysisPath);

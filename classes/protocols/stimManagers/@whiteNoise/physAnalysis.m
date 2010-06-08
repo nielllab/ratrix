@@ -119,7 +119,8 @@ try
     end
     height=stimulusDetails.height;
     width=stimulusDetails.width;
-    
+    whiteVal=255;
+    meanValue=whiteVal*meanLuminance;
     
     % stimData is the entire movie shown for this trial
     % removed 1/26/09 and replaced with stimulusDetails
@@ -128,7 +129,7 @@ try
     for i=1:length(stimFrames)
         
         %recompute stim - note: all sha1ing would have to happen w/o whiteVal and round
-        whiteVal=255;
+
         switch stimulusDetails.distribution.type
             case 'gaussian'
                 % we only have enough seeds for a single repeat of whiteNoise; if numRepeats>1, need to modulo
@@ -242,11 +243,8 @@ try
         triggerInd = 1;
         % triggers = zeros(stim_width, stim_height, # of window frames per spike, number of spikes)
         %initialize trigger with mean values for temporal border padding
-        try
-            meanValue=whiteVal*meanLuminance;
-        catch ex
-            keyboard
-        end
+
+
         
         try
             triggers=meanValue(ones(size(stimData,1),size(stimData,2),sum(timeWindowFramesStim)+1,numSpikes)); % +1 is for the frame that is on the spike
@@ -339,6 +337,13 @@ try
     % if the cumulative values don't exist (first analysis)
     % 6/23/09 fli - why do we always do this first thing instead of checking for cumulative values???
     % sometimes empty... think about : isempty(cumulativedata) ||
+    
+    
+    if isempty(allSpikes) 
+        analysisdata.STA=meanValue(ones(size(stimData,1),size(stimData,2),sum(timeWindowFrames)+1));
+        analysisdata.STV=zeros(size(analysisdata.STA));
+        analysisdata.numSpikes=0;
+    end
     
     try
         x=isempty(cumulativedata) || ~isfield(cumulativedata, 'cumulativeSTA')  || ~all(size(analysisdata.STA)==size(cumulativedata.cumulativeSTA)) %first trial through with these parameters

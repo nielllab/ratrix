@@ -57,7 +57,7 @@ switch upper(spikeDetectionMethod)
         %
         %
         %params.detectionMethod: 1 -> from power signal, 2 threshold positive, 3 threshold negative, 4 threshold abs, 5 wavelet
-        %params.detectionParams: depends on detectionMethod. 
+        %params.detectionParams: depends on detectionMethod.
         %       if detectionmethod==1, detectionParams.kernelSize
         %       if detectionmethod==4, detectionParams.scaleRanges (the range of scales (2 values))
         %                              detectionParams.waveletName (which wavelet to use)
@@ -129,7 +129,7 @@ switch upper(spikeDetectionMethod)
         end
         
         channelIDUsedForDetection=1;  % the first be default... never used anything besides this so far
-
+        
         % call to Osort spike detection
         [rawMean, filteredSignal, rawTraceSpikes,spikeWaveforms, spikeTimestampIndices, runStd2, upperlim, noiseTraces] = ...
             extractSpikes(neuralData, Hd, spikeDetectionParams );
@@ -137,15 +137,20 @@ switch upper(spikeDetectionMethod)
         spikes=spikeTimestampIndices';
         
     case 'FILTEREDTHRESH'
-%         spikeDetectionParams.method = 'filteredThresh'
-%         spikeDetectionParams.freqLowHi = [200 10000];
-%         spikeDetectionParams.threshHoldVolts = [-1.2 Inf];
-%         spikeDetectionParams.waveformWindowMs= 1.5;
-%         spikeDetectionParams.peakWindowMs= 0.5;
-%         spikeDetectionParams.alignMethod = 'atPeak'; %atCrossing
-%         spikeDetectionParams.peakAlignment = 'filtered' % 'raw'
-%         spikeDetectionParams.returnedSpikes = 'filtered' % 'raw'
-%         spikeDetectionParams.maxDbUnMasked = [-1.2 Inf];
+        %         spikeDetectionParams.method = 'filteredThresh'
+        %         spikeDetectionParams.freqLowHi = [200 10000];
+        %         spikeDetectionParams.threshHoldVolts = [-1.2 Inf];
+        %         spikeDetectionParams.waveformWindowMs= 1.5;
+        %         spikeDetectionParams.peakWindowMs= 0.5;
+        %         spikeDetectionParams.alignMethod = 'atPeak'; %atCrossing
+        %         spikeDetectionParams.peakAlignment = 'filtered' % 'raw'
+        %         spikeDetectionParams.returnedSpikes = 'filtered' % 'raw'
+        %         spikeDetectionParams.spkBeforeAfterMS=[0.6 0.975];
+        %         spikeDetectionParams.bottomTopCrossingRate=[];
+        
+        %   NOT USED
+        %         spikeDetectionParams.maxDbUnmasked = [-1.2 Inf];  % this  is not used
+        
         if ~isfield(spikeDetectionParams, 'samplingFreq')
             error('samplingFreq must be a field in spikeDetectionParams');
         end
@@ -153,9 +158,13 @@ switch upper(spikeDetectionMethod)
             spikeDetectionParams.freqLowHi=[200 10000];
             warning('freqLowHi not defined - using default value of [200 10000]');
         end
-        if ~isfield(spikeDetectionParams, 'thresholdVolts')
-            spikeDetectionParams.thresholdVolts = [-1.2 Inf];
-            warning('thresholdVolts not defined - using default value of [-1.2 Inf]');
+        if ~isfield(spikeDetectionParams, 'threshHoldVolts')
+            if ~isfield(spikeDetectionParams, 'bottomTopCrossingRate') || isempty(spikeDetectionParams.bottomTopCrossingRate)
+                spikeDetectionParams.threshHoldVolts = [-1.2 Inf];
+                warning('thresholdVolts not defined - using default value of [-1.2 Inf]');
+            else
+                spikeDetectionParams.threshHoldVolts = []; % will be determined from rate
+            end
         end
         if ~isfield(spikeDetectionParams, 'waveformWindowMs')
             spikeDetectionParams.waveformWindowMs=1.5;
@@ -177,78 +186,58 @@ switch upper(spikeDetectionMethod)
             spikeDetectionParams.returnedSpikes = 'filtered';
             warning('returnedSpikes not defined - using default value of ''filtered''');
         end
-        if ~isfield(spikeDetectionParams, 'maxDbUnmasked')
-            spikeDetectionParams.maxDbUnmasked=[-1.2 Inf];
-            warning('maxDbUnmasked not defined - using default value of [-1.2 Inf]');
-        end
-        % ask phil where the actual detection code is?
-        secDur=30;
-        spkDurMS=2;
-        timesV=linspace(0,secDur,secDur*spikeDetectionParams.samplingFreq);
-        dataV = interp1(neuralDataTimes,neuralData,timesV,'linear');
-        fOrd=spikeDetectionParams.samplingFreq/200; %how choose filter orders?
-        loCut=100;
-        hiCut=10000;
-        loThresh=[];
-        hiThresh=[];
-        threshHiS=[];
-        threshLoS=[];
-        maxHz=150;
-        [b,a]=fir1(fOrd,2*[loCut hiCut]/spikeDetectionParams.samplingFreq);
-        filt=filtfilt(b,a,neuralData);
-        filt=filt/max(abs(filt));
-
-        filtV = interp1(neuralDataTimes,filt,timesV,'linear');
-
-        setHz=10;
-        numSteps=50;
-         for w=[1 -1]
-            v=linspace(w,0,numSteps)';
-            dRate=5000;
-            dTimes=linspace(0,secDur,secDur*dRate);
-            dFilt=interp1(neuralDataTimes,filt,dTimes,'linear'); %without downsampling, the following line runs out of memory even for singles when > ~15s @40kHz
-            crossHz=sum(diff((w*repmat(dFilt,numSteps,1))>(w*repmat(single(v),1,length(dFilt))),1,2)>0,2)/secDur;
-            
-            if w>0
-                newMin=v(find(crossHz>maxHz,1,'first'));
-                if isempty(newMin)
-                    newMin=0;
-                end
-                hiThresh=v(find(crossHz>setHz,1,'first'));
-                if isempty(hiThresh)
-                    hiThresh=0;
-                end
-                threshHiS=hiTresh;
-            else
-                newMax=v(find(crossHz>maxHz,1,'first'));
-                if isempty(newMax)
-                    newMax=0;
-                end
-                loThresh=v(find(crossHz>setHz,1,'first'));
-                if isempty(loThresh)
-                    loThresh=0;
-                end
-                threshLoS=loTresh;
+        
+        if isfield(spikeDetectionParams, 'bottomTopCrossingRate') && ~isempty(spikeDetectionParams.bottomTopCrossingRate)
+            if ~isempty(spikeDetectionParams.threshHoldVolts)
+                threshHoldVolts=spikeDetectionParams.threshHoldVolts
+                bottomTopCrossingRate=spikeDetectionParams.bottomTopCrossingRate
+                error('can''t define threshold and crossing rate at the same time')
             end
-         end
-        % below is from sortManager's drawThresh
-        loThresh=threshLoS;
-        hiThresh=threshHiS;
-        tops=[false diff(filt>hiThresh)>0];
-        topCrossings=   times(tops);
-        bottoms=[false diff(filt<loThresh)>0];
-        bottomCrossings=times(bottoms);
-
-        spkLength=round(spikeRecord.samplingFreq*spkDurMS/1000);
-        spkPts=(1:spkLength)-ceil(spkLength/2);
-
-        [tops    uTops    topTimes]   =extractPeakAligned(tops,1,spikeDetectionParams.samplingFreq,spkLength,filt,neuralData);
-        [bottoms uBottoms bottomTimes]=extractPeakAligned(bottoms,-1,spikeDetectionParams.samplingFreq,spkLength,filt,neuralData);
-
+            doThreshFromRate=true;
+            bottomRate=spikeDetectionParams.bottomTopCrossingRate(1);
+            topRate=spikeDetectionParams.bottomTopCrossingRate(2);
+        else
+            loThresh=spikeDetectionParams.threshHoldVolts(1);
+            hiThresh=spikeDetectionParams.threshHoldVolts(2);
+            doThreshFromRate=false;
+        end
+        
+        N=min(spikeDetectionParams.samplingFreq/200,floor(size(neuralData,1)/3)); %how choose filter orders? one extreme bound: Data must have length more than 3 times filter order.
+        [b,a]=fir1(N,2*spikeDetectionParams.freqLowHi/spikeDetectionParams.samplingFreq);
+        filteredSignal=filtfilt(b,a,neuralData);
+        
+        if doThreshFromRate
+            % get threshold from desired rate of crossing
+            [loThresh hiThresh] = getThreshForDesiredRate(neuralDataTimes,filteredSignal,bottomRate,topRate);
+            disp(sprintf('spikeDetectionParams.threshHoldVolts=[%2.3f %2.3f]  %%fit from desired rate',loThresh,hiThresh))
+            spikeDetectionParams.threshHoldVolts=[loThresh hiThresh]; % for later display
+        end
+        
+        spkBeforeAfterMS=[spikeDetectionParams.peakWindowMs spikeDetectionParams.waveformWindowMs-spikeDetectionParams.peakWindowMs];
+        spkSampsBeforeAfter=round(spikeDetectionParams.samplingFreq*spkBeforeAfterMS/1000);
+        %spikeDetectionParams.spkBeforeAfterMS=[0.6 0.975];
+        %spkSampsBeforeAfter=[24 39] % at 40000 like default osort:
+        %rawTraceLength=64; beforePeak=24; afterPeak=39;
+        
+        tops=[false; diff(filteredSignal(:,1)>hiThresh)>0]; % only using the first listed channel to detect
+        %        tops=[false(1,size(neuralData));  diff(filteredSignal>hiThresh)>0];  % spikes on all channels
+        topCrossings=   neuralDataTimes(tops);
+        bottoms=[false; diff(filteredSignal(:,1)<loThresh)>0];
+        bottomCrossings=neuralDataTimes(bottoms);
+        
+        [tops    uTops    topTimes]   =extractPeakAligned(tops,1,spikeDetectionParams.samplingFreq,spkSampsBeforeAfter,filteredSignal,neuralData);
+        [bottoms uBottoms bottomTimes]=extractPeakAligned(bottoms,-1,spikeDetectionParams.samplingFreq,spkSampsBeforeAfter,filteredSignal,neuralData);
+        
+        %maybe sort the order...
         spikes=[topTimes;bottomTimes];
         spikeTimestamps=neuralDataTimes(spikes);
-        spikeWaveforms=[tops;bottoms]';
+        spikeWaveforms=[tops;bottoms];
         
+        if doThreshFromRate
+            dur=neuralDataTimes(end)-neuralDataTimes(1);
+            disp(sprintf('the topRate goal was %2.2fHz but got: %2.2fHz ',topRate,length(topTimes)/dur))
+            disp(sprintf('bottomRate  goal was %2.2fHz but got: %2.2fHz ',bottomRate,length(bottomTimes)/dur))
+        end
         
     otherwise
         error('unsupported spike detection method');
@@ -365,8 +354,8 @@ switch upper(spikeSortingMethod)
         fid = fopen(fname,'w+');
         fprintf(fid,[num2str(nrDatapoints) '\n']);
         for k=1:length(spikeTimestamps)
-                fprintf(fid,'%s\n', num2str(features(k,1:nrDatapoints)));        
-        end  
+            fprintf(fid,'%s\n', num2str(features(k,1:nrDatapoints)));
+        end
         fclose(fid);
         
         % first upsample spikes
@@ -397,14 +386,14 @@ switch upper(spikeSortingMethod)
         globalMean = mean(spikesSolved);
         globalStd  = std(spikesSolved);
         initialThres = ((globalStd.^2)*weights)/256;
-
+        
         %cluster to find mean waveforms of cluster
         [NrOfclustersFound, assignedCluster, meanSpikeForms, rankedClusters] = sortBlock(spikesSolved, newTimestamps, initialThres);
         
         %merge mean clusters
         [meanWaveforms,meanClusters] = ...
             createMeanWaveforms( size(spikesSolved,1), meanSpikeForms,rankedClusters,initialThres,spikeSortingParams.minClusterSize);
-
+        
         %now re-cluster, using this new mean waveforms
         [assignedClusters, rankedClusters] = ...
             assignToWaveform(spikesSolved,newTimestamps,meanClusters,initialThres,stdEstimate,spikeSortingParams.maxDistance,spikeSortingParams.envelopeSize);
@@ -421,8 +410,8 @@ switch upper(spikeSortingMethod)
         fid = fopen(fname,'w+');
         fprintf(fid,[num2str(length(uniqueClusters)) '\n']);
         for k=1:length(assignedClusters)
-                fprintf(fid,'%s\n', num2str(assignedClusters(k)));        
-        end  
+            fprintf(fid,'%s\n', num2str(assignedClusters(k)));
+        end
         fclose(fid);
         
     case 'KLUSTAKWIK'
@@ -480,29 +469,34 @@ switch upper(spikeSortingMethod)
         fid = fopen('temp.fet.1','w+');
         fprintf(fid,[num2str(nrDatapoints) '\n']);
         for k=1:length(spikeTimestamps)
-                fprintf(fid,'%s\n', num2str(features(k,1:nrDatapoints)));        
-        end  
+            fprintf(fid,'%s\n', num2str(features(k,1:nrDatapoints)));
+        end
         fclose(fid);
         
         % set which features to use
         featuresToUse='';
         for i=1:nrDatapoints
-            featuresToUse=[featuresToUse '1'];    
+            featuresToUse=[featuresToUse '1'];
         end
-
+        
         % now run KlustaKwik
         cmdStr=['KlustaKwik.exe temp 1 -MinClusters ' num2str(spikeSortingParams.minClusters) ' -MaxClusters ' num2str(spikeSortingParams.maxClusters) ...
-            ' -nStarts ' num2str(spikeSortingParams.nStarts) ' -SplitEvery ' num2str(spikeSortingParams.splitEvery) ... 
-            ' -MaxPossibleClusters ' num2str(spikeSortingParams.maxPossibleClusters) ' -UseFeatures ' featuresToUse];
+            ' -nStarts ' num2str(spikeSortingParams.nStarts) ' -SplitEvery ' num2str(spikeSortingParams.splitEvery) ...
+            ' -MaxPossibleClusters ' num2str(spikeSortingParams.maxPossibleClusters) ' -UseFeatures ' featuresToUse ' -Debug ' num2str(0) ];
         system(cmdStr);
         
         % read output temp.clu.1 file
-        fid = fopen('temp.clu.1');
-        assignedClusters=[];
-        while 1
-            tline = fgetl(fid);
-            if ~ischar(tline),   break,   end
-            assignedClusters = [assignedClusters;str2num(tline)];
+        try
+            fid = fopen('temp.clu.1');
+            assignedClusters=[];
+            while 1
+                tline = fgetl(fid);
+                if ~ischar(tline),   break,   end
+                assignedClusters = [assignedClusters;str2num(tline)];
+            end
+        catch
+            warning('huh? no .clu?')
+            keyboard
         end
         % throw away first element of assignedClusters - the first line of the cluster file is the number of clusters found
         assignedClusters(1)=[];
@@ -522,7 +516,7 @@ switch upper(spikeSortingMethod)
         % now move files from the Klusta directory (temp) to analysisPath
         d=dir;
         for i=1:length(d)
-            [matches] = regexpi(d(i).name, 'temp\..*', 'match');
+            [matches tokens] = regexpi(d(i).name, 'temp\..*', 'match');
             if length(matches) ~= 1
                 %         warning('not a neuralRecord file name');
             else
@@ -530,10 +524,29 @@ switch upper(spikeSortingMethod)
             end
         end
         
+        
         % change back to original directory
         cd(currentDir);
         
+        if 0
+            kk=klustaModelTextToStruct(fullfile(analysisPath,'temp.model.1'));
+            myAssign=clusterFeaturesWithKlustaModel(kk,features,'mvnpdf',assignedClusters) % plot verification
+        end
+    case 'KLUSTAMODEL'
+        kk=klustaModelTextToStruct(fullfile(fileparts(analysisPath),'model'));
+        assignedClusters=clusterFeaturesWithKlustaModel(kk,features,'mvnpdf');
         
+        rankedClusters = unique(assignedClusters);
+            rankedClusters = unique(assignedClusters);
+        clusterCounts=zeros(length(rankedClusters),2);
+        for i=1:size(clusterCounts,1)
+            clusterCounts(i,1) = i;
+            clusterCounts(i,2) = length(find(assignedClusters==rankedClusters(i)));
+        end
+        clusterCounts=sortrows(clusterCounts,-2);
+        rankedClusters=rankedClusters(clusterCounts(:,1));
+        rankedClusters(end+1)=1
+   
     otherwise
         spikeSortingMethod
         error('unsupported spike sorting method');
@@ -543,7 +556,7 @@ end
 % assignedCluster is a 1xN vector, which is the assigned cluster number for each spike (numbers are arbitrary)
 
 if spikeSortingParams.plotSortingForTesting % view plots (for testing)
-
+    
     switch upper(spikeSortingMethod)
         case 'OSORT'
             whichSpikes=find(assignedClusters~=999);
@@ -554,7 +567,7 @@ if spikeSortingParams.plotSortingForTesting % view plots (for testing)
         otherwise
             error('bad method')
     end
-
+    
     candTimes=spikes;
     %candTimes=find(spikes);
     spikeTimes=candTimes(whichSpikes);
@@ -564,14 +577,15 @@ if spikeSortingParams.plotSortingForTesting % view plots (for testing)
     N=20; %downsampling for the display of the whole trace; maybe some user control?
     
     %choose y range for raw, crop extremes is more than N std
-    dataMinMax=1.1*minmax(neuralData(:,1)');
-    stdRange=6*(std(neuralData(:,1)'));
+    whichChan=1;  % the one used for detecting
+    dataMinMax=1.1*minmax(neuralData(:,whichChan)');
+    stdRange=6*(std(neuralData(:,whichChan)'));
     if range(dataMinMax)<stdRange*2
         yRange=dataMinMax;
     else
-        yRange=mean(neuralData')+[-stdRange stdRange ];
+        yRange=mean(neuralData(:,whichChan)')+[-stdRange stdRange ];
     end
-        
+    
     %should do same for filt if functionized, but its not needed
     yRangeFilt= 1.1*minmax(filteredSignal(:,1)');
     
@@ -602,11 +616,11 @@ if spikeSortingParams.plotSortingForTesting % view plots (for testing)
     axis([ 1 size(spikeWaveforms,2)  1.1*minmax(spikeWaveforms(:)') ])
     subplot(2,3,4); plot3(features(whichSpikes,1),features(whichSpikes,2),features(whichSpikes,3),'r.')
     
-
+    
     xlabel(sprintf('%d spikes, %2.2g Hz', length(spikeTimes),length(spikeTimes)/diff(neuralDataTimes([1 end]))))
     
-     subplot(2,3,1)
-     %inter-spike interval distribution
+    subplot(2,3,1)
+    %inter-spike interval distribution
     ISI=diff(1000*neuralDataTimes(spikeTimes));
     edges=linspace(0,10,100);
     count=histc(ISI,edges);
@@ -620,14 +634,14 @@ if spikeSortingParams.plotSortingForTesting % view plots (for testing)
     hold on
     lockout=1000*39/spikeDetectionParams.samplingFreq;  %why is there a algorithm-imposed minimum ISI?  i think it is line 65  detectSpikes
     lockout=edges(max(find(edges<=lockout)));
-    plot([lockout lockout],get(gca,'YLim'),'k') % 
+    plot([lockout lockout],get(gca,'YLim'),'k') %
     plot([2 2], get(gca,'YLim'),'k--')
     
     
     N=size(neuralData,2);
     colors=0.8*ones(N,3);
     colors(1,:)=0; %first one is black is main
-
+    
     subplot(2,3,2)
     title('rawSignal zoom');
     %plot(neuralDataTimes(zoomInds),neuralData(zoomInds),'k');
@@ -639,7 +653,7 @@ if spikeSortingParams.plotSortingForTesting % view plots (for testing)
         %text(xMinMax(1)-diff(xMinMax)*0.05,steps*i,num2str(i-2)) % add the name of channel... consider doing all phys channels
     end
     set(gca,'ytick',[])
-
+    
     someNoiseTimes=noiseTimes(ismember(noiseTimes,zoomInds));
     someSpikeTimes=spikeTimes(ismember(spikeTimes,zoomInds));
     plot(neuralDataTimes(someNoiseTimes),neuralData(someNoiseTimes),'.b');
@@ -675,34 +689,37 @@ if spikeSortingParams.plotSortingForTesting % view plots (for testing)
         plot(neuralDataTimes(zoomInds),filteredSignal(zoomInds,i)-steps*(i-1),'color',colors(i,:))
         %text(xMinMax(1)-diff(xMinMax)*0.05,steps*i,num2str(i-2)) % add the name of channel... consider doing all phys channels
     end
-    set(gca,'ytick',[])
     
+    xl=xlim;
+    set(gca,'xtick',xlim,'xticklabel',{num2str(xl(1),'%2.2f'),num2str(xl(2),'%2.2f')})
+    if isfield(spikeDetectionParams, 'threshHoldVolts')
+        xlabel(sprintf('thresh = [%2.3f %2.3f]',spikeDetectionParams.threshHoldVolts))
+        yTickVal=[spikeDetectionParams.threshHoldVolts(1) 0 spikeDetectionParams.threshHoldVolts(2)];
+        set(gca,'ytick',yTickVal,'yticklabel',{num2str(yTickVal(1),'%2.2f'),'0',num2str(yTickVal(3),'%2.2f')})
+        plot(xl,spikeDetectionParams.threshHoldVolts([1 1]),'color',[.8 .8 .8])
+        plot(xl,spikeDetectionParams.threshHoldVolts([2 2]),'color',[.8 .8 .8])
+    else
+        set(gca,'ytick',[])
+    end
     
     plot(neuralDataTimes(someNoiseTimes),filteredSignal(someNoiseTimes),'.b');
     plot(neuralDataTimes(someSpikeTimes),filteredSignal(someSpikeTimes),'.r');
     axis([ neuralDataTimes(zoomInds([1 end]))'   ylim])
     %axis([ minmax(neuralDataTimes(zoomInds)')   1.1*minmax(filteredSignal(zoomInds)') ])
     
+    %     figure()
+    %     allSpikesDecorrelated=spikeWaveforms; %this is not decorellated!
+    %     allSpikesOrig=spikeWaveforms;
+    %     assigned=?
+    %     clNr1=just ID?
+    %     clNr2=justID?
+    %     plabel='';
+    %     mode=1; %maybe 2 later
+    %     [d,residuals1,residuals2,Rsquare1, Rsquare2] = figureClusterOverlap(allSpikesDecorrelated, allSpikesOrig, assigned, clNr1, clNr2,plabel ,mode , {'b','r'})
     
-%     
-
-
-
-
-
-%     figure()
-%     allSpikesDecorrelated=spikeWaveforms; %this is not decorellated!
-%     allSpikesOrig=spikeWaveforms;
-%     assigned=?
-%     clNr1=just ID?
-%     clNr2=justID?
-%     plabel='';
-%     mode=1; %maybe 2 later
-%     [d,residuals1,residuals2,Rsquare1, Rsquare2] = figureClusterOverlap(allSpikesDecorrelated, allSpikesOrig, assigned, clNr1, clNr2,plabel ,mode , {'b','r'})
-
-
-
-   
+    
+    
+    
     %%
 end
 
@@ -712,7 +729,7 @@ end
 end % end function
 
 
-function [group uGroup groupPts]=extractPeakAligned(group,flip,sampRate,spkLength,filt,data)
+function [group uGroup groupPts]=extractPeakAligned(group,flip,sampRate,spkSampsBeforeAfter,filt,data)
 maxMSforPeakAfterThreshCrossing=.5; %this is equivalent to a lockout, because all peaks closer than this will be called one peak, so you'd miss IFI's smaller than this.
 % we should check for this by checking if we said there were multiple spikes at the same time.
 % but note this is ONLY a consequence of peak alignment!  if aligned on thresh crossings, no lockout necessary (tho high frequency noise riding on the spike can cause it
@@ -720,18 +737,176 @@ maxMSforPeakAfterThreshCrossing=.5; %this is equivalent to a lockout, because al
 % our remaining problem is if the decaying portion of the spike has high freq noise that causes it to recross thresh and get counted again, so need to look in past to see
 % if we are on the tail of a previous spk -- but this should get clustered away anyway because there's no spike-like peak in the immediate period following the crossing.
 % ie the peak is in the past, so it's a different shape, therefore a different cluster
-
 maxPeakSamps=round(sampRate*maxMSforPeakAfterThreshCrossing/1000);
 
+spkLength=sum(spkSampsBeforeAfter)+1;
+spkPts=[-spkSampsBeforeAfter(1):spkSampsBeforeAfter(2)];
+%spkPts=(1:spkLength)-ceil(spkLength/2); % centered
+
 group=find(group)';
-groupPts=group((group+spkLength-1)<length(filt) & group-ceil(spkLength/2)>0);
+groupPts=group((group+spkLength-1)<length(filt) & group-ceil(spkLength/2)>0)';
 group=data(repmat(groupPts,1,maxPeakSamps)+repmat(0:maxPeakSamps-1,length(groupPts),1)); %use (sharper) unfiltered peaks!
 
 [junk loc]=max(flip*group,[],2);
 groupPts=((loc-1)+groupPts);
 groupPts=groupPts((groupPts+floor(spkLength/2))<length(filt));
 
+
+
 group= filt(repmat(groupPts,1,spkLength)+repmat(spkPts,length(groupPts),1));
 uGroup=data(repmat(groupPts,1,spkLength)+repmat(spkPts,length(groupPts),1));
 uGroup=uGroup-repmat(mean(uGroup,2),1,spkLength);
+end
+
+function [loThresh hiThresh] = getThreshForDesiredRate(neuralDataTimes,filtV,bottomRate,topRate)
+
+numSteps=50;
+dRate=5000; % down sampled rate
+secDur=neuralDataTimes(end)-neuralDataTimes(1);
+dTimes=linspace(neuralDataTimes(1),neuralDataTimes(end),secDur*dRate);
+whichChan=1;  % only detect off of the first listed chan
+dFilt=interp1(neuralDataTimes,filtV(:,whichChan),dTimes,'linear'); %without downsampling, the following line runs out of memory even for singles when > ~15s @40kHz
+
+mm=minmax(filtV);
+if any(ismember(mm,[0 -999 999]))
+    mm
+    error('filtered voltages should always minmax non-zero, and not expected to be -999 or 999')
+end
+
+if mm(1)>0
+    mm
+    error('expected some negative values in filtered min')
+end
+
+if mm(2)<0
+    mm
+    error('expected some posiitve values in filtered max')
+end
+
+% loop through: coarse low, coarse high, fine low, fine high
+for w=[mm -999 999]
+    switch w
+        case -999 % 2nd pass fine grain low
+            stepSz=abs(mm(1))/numSteps;
+            v=linspace(loThresh-stepSz,loThresh+stepSz,numSteps)';
+        case 999  % 2nd pass fine grain high
+            stepSz=abs(mm(2))/numSteps;
+            v=linspace(hiThresh+stepSz,hiThresh-stepSz,numSteps)';
+        otherwise % first pass coarse full rage: [min 0] and [max 0]
+            v=linspace(w,0,numSteps)';
+    end
+    
+    crossHz=sum(diff((w*repmat(dFilt,numSteps,1))>(w*repmat(single(v),1,length(dFilt))),1,2)>0,2)/secDur;
+    if w>0
+        hiThresh=v(find(crossHz>topRate,1,'first'));
+        if isempty(hiThresh)
+            hiThresh=0;
+        end
+    elseif w<0
+        loThresh=v(find(crossHz>bottomRate,1,'first'));
+        if isempty(loThresh)
+            loThresh=0;
+        end
+    end
+end
+
+end
+
+function kk=klustaModelTextToStruct(modelFile)
+
+fid=fopen(modelFile,'r');  % this is only the first one!
+if fid==-1
+    modelFile
+    error('bad file')
+end
+kk.headerJunk= fgetl(fid);
+ranges= str2num(fgetl(fid));
+sz=str2num(fgetl(fid));
+kk.numDims=sz(1);
+kk.numClust=sz(2);
+kk.numOtherThing=sz(3); % this is not num features? 
+kk.ranges=reshape(ranges,[],kk.numDims);
+kk.mean=nan(kk.numClust,kk.numDims);
+xx.cov=nan(kk.numDims,kk.numDims,kk.numClust);
+for c=1:kk.numClust
+    clustHeader=str2num(fgetl(fid));
+    if clustHeader(1)~=c-1
+        %just double check
+        error('wrong cluster')
+    end
+    kk.mean(c,:)=str2num(fgetl(fid));
+    kk.weight(c)=clustHeader(2);
+    for i=1:kk.numDims
+        kk.cov(i,:,c)=str2num(fgetl(fid));
+    end
+end
+fclose(fid);
+end
+
+function assignments=clusterFeaturesWithKlustaModel(kk,features,distanceMethod,verifyAgainst)
+
+%%
+
+%normalize from 0-->1 extrema of training set
+F=features;
+n=size(F,1);
+for d=1:kk.numDims
+    F(:,d)=F(:,d)-kk.ranges(1,d);
+    F(:,d)=F(:,d)/diff(kk.ranges(:,d));      
+end
+
+switch distanceMethod
+    case 'mvnpdf'
+        %calculate the probability that each point belongs to each cluster
+        %OLD GUESS USING MVNPDF 
+        thisMean=kk.mean; % verified empirically to be the mean per cluster after normalization
+        p=nan(size(features,1),kk.numClust);
+        for c=1:kk.numClust
+            chol=reshape(kk.cov(:,:,c),[kk.numDims kk.numDims]);
+            thisCov=chol*chol';
+            p(:,c)=mvnpdf(F,kk.mean(c,:),thisCov);
+        end
+        [junk assignments]=max(p,[],2);
+        distnce=abs(log(p));
+        %distnce=abs(log(p)-log(repmat(kk.weight,n,1)));
+        %[junk assignments]=max(distnce,[],2);
+    case 'mah'
+        %mimick Mahalanobis stuff in Klusta
+        %calculate the distance from each point to each cluster
+        invcov = cov(features)\eye( size(features,2)); % see pdist
+        %Y = pdistmex(features','mah',invcov); % why fail mex?
+        mahal = nan(size(features,1),kk.numClust);
+        for c = 1:kk.numClust
+            del = repmat(kk.mean(c,:),size(features,1),1) - features;
+            mahal(:,c)= sqrt(sum((del*invcov).*del,2));
+            
+            chol=reshape(kk.cov(:,:,c),[kk.numDims kk.numDims]);
+            LogRootDet(c)=sum(log(diag(chol)));
+            distnce(:,c)=mahal(:,c)/2+log(kk.weight(c))-LogRootDet(c); %WHAT?
+            % does klust calc an overall goodness of fit of all points?
+            % and how does the weight relate to the classification?
+            distnce(:,c)=mahal(:,c)%+log(kk.weight(c))/2; %;%-LogRootDet(c)+
+        end
+        %distnce(:,1)=Inf;
+        [junk assignments]=min(distnce,[],2);
+end
+
+if exist('verifyAgainst','var')
+    figure;
+    subplot(1,2,1); plot(distnce,'.')
+    subplot(1,2,2); hold on
+    colors=jet(kk.numClust);
+    darker=colors*.6;
+    for c=1:kk.numClust
+        which=verifyAgainst==c;
+        plot3(F(which,1),F(which,2),F(which,3),'.','color',colors(c,:));
+        which=assignments==c;
+        plot3(F(which,1),F(which,2),F(which,3),'o','color',colors(c,:));
+        plot3(kk.mean(c,1),kk.mean(c,2),kk.mean(c,3),'+','MarkerSize',20,'color',darker(c,:))
+        
+        which=verifyAgainst==c;
+        plot3(mean(F(which,1)),mean(F(which,2)),mean(F(which,3)),'o','MarkerSize',20,'color',darker(c,:))
+    end
+end
+%%
 end

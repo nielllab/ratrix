@@ -81,6 +81,7 @@ if isstruct(spikeRecord.spikeDetails) && ismember({'processedClusters'},fields(s
     catch ex
         warning('oops')
         keyboard
+        getReport(ex)
     end
     thisCluster=[spikeRecord.spikeDetails.processedClusters]==1;
 else
@@ -618,31 +619,44 @@ end
 
 %%
 plotRatePerCondition=any(ismember(plotsRequested(:),'ratePerCondition'));
-if plotRatePerCondition
+if plotRatePerCondition && 0 % skip it here run as cumulative
     figure(parameters.trialNumber);
     sub=find(strcmp(plotsRequested','ratePerCondition'));
     subplot(h,w,sub); hold on;
     dur=double(diff(s.targetOnOff))*ifi;
     
-    for i=1:numConditions
-        which=(spike.condition==i & spike.relTimes>0 & spike.relTimes<dur);
-        count(i)=sum(which);
-        for r=1:numRepeats
-            countPerRep(i,r)=sum(which & spike.repetition==r);
-            baseline(r)=sum(spike.repetition==r);
+    try
+        for i=1:numConditions
+            %which=(c.spike.condition==i & c.spike.relTimes>0 &
+            %c.spike.relTimes<dur);  %WHA?
+            which=(spike.condition==i & spike.relTimes>0 & spike.relTimes<dur);
+            count(i)=sum(which);
+            for r=1:numRepeats
+                %countPerRep(i,r)=sum(which & c.spike.repetition==r); %WHA?
+                countPerRep(i,r)=sum(which & spike.repetition==r);
+                
+            end
         end
+        meanRatePerCond=count/(dur*numInstances*numTrials);
+        SEMRatePerCond=std(countPerRep)*0;%/(dur*numInstances*numTrials/numRepeats),[],2)/sqrt(numRepeats);
+    catch ex
+        getReport(ex)
+        warning('oops')
+        keyboard
     end
-    meanRatePerCond=count/(dur*instancesPerTrial);
-    SEMRatePerCond=std(countPerRep/(dur*instancesPerTrial/numRepeats),[],2)/sqrt(numRepeats);
     
-    
+    warning('add in repeat per trial')
+    which=(c.spike.relTimes<0 | c.spike.relTimes>dur);
     for r=1:numRepeats
-        baseline(r)=sum(which & spike.repetition==r);
+        baseline(r)=sum(which & c.spike.repetition==r);
     end
-    baselineRate=baseline./(double(s.targetOnOff(2))*ifi*instancesPerTrial);
+    baselineRate=baseline./(c.targetOnOff(2)*c.ifi*numInstances*numTrials);
     meanBaseLine=mean(baselineRate);
     stdBaseLine=std(baselineRate)/sqrt(numRepeats);
+    minmaxBaseLine=[min(baselineRate) max(baselineRate)];
     
+    fill([0 0 numConditions([1 1])+1 ],minmaxBaseLine([2 1 1 2]),'m','FaceColor',[.9 .9 .9],'EdgeAlpha',0)
+    fill([0 0 numConditions([1 1])+1 ],meanBaseLine+stdBaseLine*[1 -1 -1 1],'m','FaceColor',[.8 .8 .8],'EdgeAlpha',0)
     %OLD METHOD PROBABLY WRONG NOW
 %     %meanPerRepetition?  divide by dur vs. divide by repetitions...  
 %     %meanRateDuringPeriod=sum(fullRate(:,:,relevantRange)/dur,3);
@@ -654,7 +668,6 @@ if plotRatePerCondition
     %SEMRatePerCond=std(meanRateDuringPeriod,[],1)/sqrt(numRepeats);
     %stdRatePerCond=std(meanRateDuringPeriod,[],1);
     
-    fill([0 0 numConditions([1 1])+1 ],meanBaseLine+stdBaseLine*[1 -1 -1 1],'m','FaceColor',[.8 .8 .8],'EdgeAlpha',0)
     for i=1:numConditions
         errorbar(i,meanRatePerCond(i),SEMRatePerCond(i),'color',colors(i,:));
         plot(i,meanRatePerCond(i),'.','color',colors(i,:));
@@ -676,7 +689,17 @@ if showPSTH
         
         spTm=spike.relTimes(spike.condition==i);
         count=sum(spike.condition==i);
+        try
+            if count>0
         [fi,ti] = ksdensity(spTm,'width',.01);
+            else
+                fi=[0 0]
+                ti=[.2 .4];
+            end
+        catch
+           warning('oops')
+           keyboard
+        end
         plot(ti*1000,fi*count/double(s.targetOnOff(2)),'color',colors(i,:));
         plot(spTm*1000,-i+0.5*(rand(1,length(spTm))-0.5),'.','color',brighten(colors(i,:),-0.9));
         histc(spTm,[])
@@ -837,11 +860,7 @@ if doPhotodiode
             xlabel('frame time (msec)'); ylabel ('luminance (volts)')
             subplot(2,2,3); plot(spikeRecord.spikeWaveforms(8,:)')
             
-            
-            
-            
-            
-            
+
             %%
             
             subplot(1,2,1); hold on

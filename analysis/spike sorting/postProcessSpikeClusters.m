@@ -19,11 +19,20 @@ else
 end
 
 switch process
+    case 'treatAllAsSpike'
+        spikeDetails.processedClusters=ones(1,length(assignedClusters));
+        spikeDetails.processedClusterRanks=[1];
     case 'treatAllNonNoiseAsSpike'
+        if length(rankedClusters)~=length(unique(rankedClusters))
+            rankedClusters
+            error('rankedClusters assumed to be unique... what happened?')
+            % check assumption that noise is at the end and how this is done.
+        end
         % all spikes belonging to non-noise cluster set to 1, noise set to 0
-        spikeDetails.processedClusters=assignedClusters;
-        spikeDetails.processedClusters(spikeDetails.processedClusters~=rankedClusters(end))=1;
+        spikeDetails.processedClusters=assignedClusters(:)';
         spikeDetails.processedClusters(spikeDetails.processedClusters==rankedClusters(end))=0;
+        spikeDetails.processedClusters(spikeDetails.processedClusters~=rankedClusters(end))=1;
+
         if length(find(spikeDetails.processedClusters==1))>=length(assignedClusters)/2
             % more spikes non-noise
             spikeDetails.processedClusterRanks=[1 0];
@@ -36,14 +45,14 @@ switch process
         spikeDetails.processedClusters=ones(1,length(assignedClusters));
         % zero out anything not equal to first rankedCluster
         spikeDetails.processedClusters(assignedClusters~=rankedClusters(1))=0;
-    case 'biggestAverageAmplitudeCluster'
-        
+    case 'biggestAverageAmplitudeCluster'  
         clusterIDs=unique(assignedClusters);
         for i=1:length(clusterIDs)
-            avg=mean(spikeWaveforms(clusterIDs(i),:),1);
+            avg=mean(spikeWaveforms(assignedClusters==clusterIDs(i),:),1);
             amp(i)=diff(minmax(avg));
         end
         selected=find(amp==max(amp));
+        selected=selected(1);
         spikeDetails.processedClusters=assignedClusters'==selected;
     otherwise
         error('unsupported method for postProcessing spike clusters');

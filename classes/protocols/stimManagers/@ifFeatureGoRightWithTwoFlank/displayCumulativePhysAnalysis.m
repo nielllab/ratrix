@@ -7,6 +7,19 @@ function displayCumulativePhysAnalysis(sm,cumulativeData,plotsRequested)
 
 c=cumulativeData; 
 
+if 0 %
+    %filter out some of them
+    amp= calculateFeatures(c.spikeWaveforms,{'peakToValley'});
+    which=amp<.4
+    c.spikeWaveforms=c.spikeWaveforms(which,:) % remove the filtered..
+    if length(c.spike.times)~=size(c.spikeWaveforms,1)
+        error('need to track waveform identity, or better, only include the ones that are in c.spike')
+    end
+    f=fields(c.spike);
+    for i=1:length(f)
+        c.spike.(f{i})=c.spike.(f{i})(which)
+    end
+end
 %%
 
 numConditions=length(c.conditionNames); 
@@ -25,6 +38,7 @@ numInstances=numCycles/numConditions; % these 2 terms are the same
     
 
 plotsRequested={'ratePerCondition','PSTH'};
+plotsRequested={'raster','viewSort'}; 
 if ~exist('plotsRequested','var') || isempty(plotsRequested)
     plotsRequested=c.plotsRequested;
 end
@@ -175,20 +189,23 @@ if plotRatePerCondition
         count(i)=sum(which);
         for r=1:numRepeats
             countPerRep(i,r)=sum(which & c.spike.repetition==r);
-            baseline(r)=sum(c.spike.repetition==r);
+
         end
     end
     meanRatePerCond=count/(dur*numInstances*numTrials);
     SEMRatePerCond=std(countPerRep/(dur*numInstances*numTrials/numRepeats),[],2)/sqrt(numRepeats);
     
     warning('add in repeat per trial')
+    which=(c.spike.relTimes<0 | c.spike.relTimes>dur);
     for r=1:numRepeats
         baseline(r)=sum(which & c.spike.repetition==r);
     end
     baselineRate=baseline./(c.targetOnOff(2)*c.ifi*numInstances*numTrials);
     meanBaseLine=mean(baselineRate);
     stdBaseLine=std(baselineRate)/sqrt(numRepeats);
+    minmaxBaseLine=[min(baselineRate) max(baselineRate)];
     
+    fill([0 0 numConditions([1 1])+1 ],minmaxBaseLine([2 1 1 2]),'m','FaceColor',[.9 .9 .9],'EdgeAlpha',0)
     fill([0 0 numConditions([1 1])+1 ],meanBaseLine+stdBaseLine*[1 -1 -1 1],'m','FaceColor',[.8 .8 .8],'EdgeAlpha',0)
     for i=1:numConditions
         errorbar(i,meanRatePerCond(i),SEMRatePerCond(i),'color',c.colors(i,:));

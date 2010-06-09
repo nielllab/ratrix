@@ -12,7 +12,9 @@ analysis='entropy';
 %aggregateFileName='/Users/eflister/Desktop/final aggregate/20100227T065419.tmpFile.mat'; %'/Users/eflister/Desktop/final cosyne/gauss hat.mat';
 
 analysis='sinusoidal';
-aggregateFileName='C:\Documents and Settings\rlab\Desktop\analysis tmp\20100525T131338.tmpFile.mat';
+aggregateFileName='C:\Documents and Settings\rlab\Desktop\analysis tmp\20100603T092420.tmpFile.mat';
+%20100527T103847
+%20100525T131338
 
 z=load(aggregateFileName);
 z={z.z.(analysis)};
@@ -83,11 +85,13 @@ if ~isscalar(displays)
     error('not implemented yet')
 end
 
-figs={'rate','f1','f1 over f0','coh','sd','ff'};
+figs={'rate','f1','f1 over f0','coh','sd','ff','alpha','bursts'};
 hs={};
 for fig=1:length(figs)
     hs(end+1,:)={figure,figs{fig}};
     avgs=struct('fullNorm',{},'localNorm',{});
+    globalMin=inf;
+    globalMax=-inf;
     
                 doNorm=false;
                 label=figs{fig};
@@ -109,6 +113,10 @@ for fig=1:length(figs)
                     case 'ff'
                         label='fano factor';
                         field='va';
+                    case 'alpha'
+                        field='fAlpha';
+                    case 'bursts'
+                        field='totalBursts';
                     otherwise
                         error('huh?')
                 end    
@@ -192,6 +200,8 @@ for fig=1:length(figs)
                 end
                 firstPlot=fullNorm;
                 secondPlot=localNorm;
+                globalMin=min(globalMin,min(fullNorm));
+                globalMax=max(globalMax,max(fullNorm));
             else
                 if colorBySubject
                     firstPlot=mean(avgs(loc,j).fullNorm);
@@ -209,6 +219,12 @@ for fig=1:length(figs)
             title(sprintf('contrast = %g',contrasts(j)))
             if doNorm
                 ylim([0 1])
+            else
+                set(gca,'YScale','log');
+                ylim([globalMin globalMax])
+                if i==size(in,1) && length(get(gca,'YTick'))<2
+                    set(gca,'YTick',[globalMin globalMax])
+                end
             end
             xlim(minmax(freqs))
             
@@ -250,6 +266,15 @@ for fig=1:length(figs)
                     hold on
                     title(sprintf('freq = %g',freqs(j)))
                     xlim(minmax(contrasts))
+                    set(gca,'YScale','log');
+                    if ~doNorm
+                        ylim([globalMin globalMax])
+                        if i==size(in,1) && length(get(gca,'YTick'))<2
+                            set(gca,'YTick',[globalMin globalMax])
+                        end
+                    else
+                        % axis tight
+                    end
                     
                     if j==ceil(length(contrasts)/2) && doNorm
                         ylabel(sprintf('%s %s','unnormalized', label))
@@ -267,7 +292,6 @@ for fig=1:length(figs)
         end
     end
 end
-keyboard
 end
 
 function entropy(in)

@@ -36,43 +36,63 @@ data.fileNames=fileNames;
 
 data.mins=(stimTimes(2)-stimTimes(1))/60;
 
-if ... % selectRecordings('gauss',stimType,data) %
-        data.mins>=3 && ismember(stimType,{'sinusoid','sinusoid(new)'})  ... %squarefreqs    
-        ... %probably not fixable
-        && ~(ismember(rec.date,datenum({'03.25.09'},'mm.dd.yy')) && rec.chunks.cell_Z==19.97) ... % 5 mins, fubar'd stim?
-        && ~ismember(rec.date,datenum({'02.26.09'},'mm.dd.yy')) ... %11 mins, sinusoids that weren't mean centered and had aliasing problems
-        ... %probably fixable
-        && ~(ismember(rec.date,datenum({'04.29.09'},'mm.dd.yy')) && rec.chunks.cell_Z==27.83 && ismember(stimType,{'sinusoid(new)'})) ... %30 mins, bad conditionStartInds -- what is sinusoid(new)?  this is only one?  looks like stims were ~4sec long, but we're detecting 1secs...? 
-        && ~(ismember(rec.date,datenum({'04.24.09'},'mm.dd.yy')) && rec.chunks.cell_Z==52.48) ... %22 mins, early slippage
-        && ~(ismember(rec.date,datenum({'05.06.09'},'mm.dd.yy')) && rec.chunks.cell_Z==28.04) ... %21 mins, things not working for LED yet
-        && ~(ismember(rec.date,datenum({'04.15.09'},'mm.dd.yy')) && rec.chunks.cell_Z==47.34) ... %9 mins, line 3606 error "what's this about?" -- stim is pretty fubard anyway
-        && ~(ismember(rec.date,datenum({'03.17.09'},'mm.dd.yy')) && rec.chunks.cell_Z==8.58)  %3 mins, empty data.frames
-       
+% aligned bursts (numbers from current raster dir on server)
+% 
+% hateren
+% 1	68.6 mins	164-03.13.09-z17.62-chunk1-code1-1dde0e88c83352d9790baa30af013905e63a48e7/hateren-t4159.88-8276
+% 4	36.0 mins	164-03.25.09-z19.2-chunk1-code1-9d10d71ac6e4d1de0f7a8d88ca27b72790f9553d/hateren-t3693.239-5854.765
+% 
+% gaussian
+% 9	49.0 mins	164-03.13.09-z17.62-chunk1-code1-1dde0e88c83352d9790baa30af013905e63a48e7/gaussian-t1202.274-4140.2955
+% 18	117.5 mins	164-03.25.09-z19.2-chunk1-code1-9d10d71ac6e4d1de0f7a8d88ca27b72790f9553d/gaussian-t5861.42-12912
+% 27	55.7 mins	188-04.24.09-z52.48-chunk1-code1-9196f9c63cf78cac462dac2cedd55306961b7fd0/gaussian-t5554.8235-8895.053
+
+if ... %
+...%        ismember(stimType,{'sinusoid'}) && ismember(rec.date,datenum({'04.23.09'},'mm.dd.yy')) && rec.chunks.cell_Z==38.26 %just good example sinusoid for testing
+...%        ismember(stimType,{'gaussian'}) && ismember(rec.date,datenum({'04.15.09'},'mm.dd.yy')) && rec.chunks.cell_Z==47.34 % good example gauss for testing - chunk1-code1-acf4f35b54186cd6055697b58718da28e7b2bf80-t2042.385-4641
+...%        selectRecordings('gauss',stimType,data)
+...%        ismember(stimType,{'gaussian'}) && ismember(rec.date,datenum({'04.24.09'},'mm.dd.yy')) && rec.chunks.cell_Z==52.48 % good example gauss for testing w/aligned bursts
+data.mins>=3
+% ...    
+% ...    % current sinusoidal status
+%         data.mins>=3 && ismember(stimType,{'sinusoid','sinusoid(new)'})  ... %squarefreqs
+%             ... %probably not fixable
+%             && ~(ismember(rec.date,datenum({'03.25.09'},'mm.dd.yy')) && rec.chunks.cell_Z==19.97) ... % 5 mins, fubar'd stim?
+%             && ~ismember(rec.date,datenum({'02.26.09'},'mm.dd.yy')) ... %11 mins, sinusoids that weren't mean centered and had aliasing problems
+%             ... %probably fixable
+%             && ~(ismember(rec.date,datenum({'04.29.09'},'mm.dd.yy')) && rec.chunks.cell_Z==27.83 && ismember(stimType,{'sinusoid(new)'})) ... %30 mins, bad conditionStartInds -- what is sinusoid(new)?  this is only one?  looks like stims were ~4sec long, but we're detecting 1secs...?
+%             && ~(ismember(rec.date,datenum({'04.24.09'},'mm.dd.yy')) && rec.chunks.cell_Z==52.48) ... %22 mins, early slippage
+%             && ~(ismember(rec.date,datenum({'05.06.09'},'mm.dd.yy')) && rec.chunks.cell_Z==28.04) ... %21 mins, things not working for LED yet
+%             && ~(ismember(rec.date,datenum({'04.15.09'},'mm.dd.yy')) && rec.chunks.cell_Z==47.34) ... %9 mins, line 3606 error "what's this about?" -- stim is pretty fubard anyway
+%             && ~(ismember(rec.date,datenum({'03.17.09'},'mm.dd.yy')) && rec.chunks.cell_Z==8.58)  %3 mins, empty data.frames
+    
+    
+    
     %squarefreqs give line 5 @ fitSinusoidal "condfreqs error"  (23 mins total)
-%188 05.08.09 1.squarefreqs.z.31.t.6123.74-6728.chunk.1.93213cc4a832b81a0ba1bf4e1e6afbfcf64b82fc
-%188 05.08.09 1.squarefreqs.z.31.t.6728-6980.42.chunk.2.93213cc4a832b81a0ba1bf4e1e6afbfcf64b82fc
-%188 05.08.09 1.squarefreqs.z.31.t.6980.45-7547.chunk.3.93213cc4a832b81a0ba1bf4e1e6afbfcf64b82fc
-
+    %188 05.08.09 1.squarefreqs.z.31.t.6123.74-6728.chunk.1.93213cc4a832b81a0ba1bf4e1e6afbfcf64b82fc
+    %188 05.08.09 1.squarefreqs.z.31.t.6728-6980.42.chunk.2.93213cc4a832b81a0ba1bf4e1e6afbfcf64b82fc
+    %188 05.08.09 1.squarefreqs.z.31.t.6980.45-7547.chunk.3.93213cc4a832b81a0ba1bf4e1e6afbfcf64b82fc
     
     
-
-
-
-% fixed OOM's
-%     && ((ismember(rec.date,datenum({'04.23.09'},'mm.dd.yy')) && rec.chunks.cell_Z==38.885) ...
-%         || (ismember(rec.date,datenum({'04.29.09'},'mm.dd.yy')) && rec.chunks.cell_Z==27.83 && ismember(stimType,{'sinusoid'}))...
-%         || (ismember(rec.date,datenum({'04.29.09'},'mm.dd.yy')) && rec.chunks.cell_Z==27.89) ... %some slippage at end
-%         || (ismember(rec.date,datenum({'05.08.09'},'mm.dd.yy')) && rec.chunks.cell_Z==31))
     
-%other fixed
-% fixed        && ~(ismember(rec.date,datenum({'04.23.09'},'mm.dd.yy')) && rec.chunks.cell_Z==38.26) ...  %13 mins, fig 7 dies?
-% fixed        && ~(ismember(rec.date,datenum({'03.19.09'},'mm.dd.yy')) && rec.chunks.cell_Z==8.255) ...  %5 mins, (HAD BEFORE) fig 8 gets inconsistent dims in coherencycpt the alignment line (check_consistency.m,25)
-% fixed        && ~(ismember(rec.date,datenum({'03.25.09'},'mm.dd.yy')) && rec.chunks.cell_Z==29.78) ... %4 mins,  raster at 3524    - inconsistent dimensions
-% fixed        && ~(ismember(rec.date,datenum({'04.07.09'},'mm.dd.yy')) && rec.chunks.cell_Z==7.76)  %3 mins, fig 6 dies? (HAD BEFORE)
-
-
-
-%older
+    
+    
+    
+    % fixed OOM's
+    %     && ((ismember(rec.date,datenum({'04.23.09'},'mm.dd.yy')) && rec.chunks.cell_Z==38.885) ...
+    %         || (ismember(rec.date,datenum({'04.29.09'},'mm.dd.yy')) && rec.chunks.cell_Z==27.83 && ismember(stimType,{'sinusoid'}))...
+    %         || (ismember(rec.date,datenum({'04.29.09'},'mm.dd.yy')) && rec.chunks.cell_Z==27.89) ... %some slippage at end
+    %         || (ismember(rec.date,datenum({'05.08.09'},'mm.dd.yy')) && rec.chunks.cell_Z==31))
+    
+    %other fixed
+    % fixed        && ~(ismember(rec.date,datenum({'04.23.09'},'mm.dd.yy')) && rec.chunks.cell_Z==38.26) ...  %13 mins, fig 7 dies?
+    % fixed        && ~(ismember(rec.date,datenum({'03.19.09'},'mm.dd.yy')) && rec.chunks.cell_Z==8.255) ...  %5 mins, (HAD BEFORE) fig 8 gets inconsistent dims in coherencycpt the alignment line (check_consistency.m,25)
+    % fixed        && ~(ismember(rec.date,datenum({'03.25.09'},'mm.dd.yy')) && rec.chunks.cell_Z==29.78) ... %4 mins,  raster at 3524    - inconsistent dimensions
+    % fixed        && ~(ismember(rec.date,datenum({'04.07.09'},'mm.dd.yy')) && rec.chunks.cell_Z==7.76)  %3 mins, fig 6 dies? (HAD BEFORE)
+    
+    
+    
+    %older
     % && ismember(rec.date,datenum({'03.13.09'},'mm.dd.yy'))
     %   && (ismember(rec.date,datenum({'03.25.09'},'mm.dd.yy')) && rec.chunks.cell_Z==18.55)
     
@@ -176,9 +196,7 @@ if ... % selectRecordings('gauss',stimType,data) %
             error('unknown type: %s\n',stimType)
     end
 else
-    if   data.mins>=3 && ismember(stimType,{'sinusoid','sinusoid(new)','squarefreqs'})
-    fprintf('\nskipping %g mins %s (%s z%g)\n',data.mins,stimType,datestr(rec.date,'mm.dd.yy'),rec.chunks.cell_Z)
-    end
+        fprintf('\nskipping %g mins %s (%s z%g)\n',data.mins,stimType,datestr(rec.date,'mm.dd.yy'),rec.chunks.cell_Z)
 end
 end
 
@@ -376,7 +394,7 @@ for i=1:length(fs)
     fn='tmp.png';
     dpi=300;
     set(f, 'InvertHardCopy', 'off'); %preserves black background when colordef black
-    print(f,'-dpng',['-r' num2str(dpi)],fn);
+    print(f,'-dpng',['-r' num2str(dpi)],'-opengl',fn); %opengl for transparency -- probably unnecessary cuz seems to be automatically set when needed
     
     fullName=[name '.png'];
     figName=[name '.fig'];
@@ -2554,17 +2572,16 @@ end
 function f=raster(data)
 f=figure;
 
-% check for these
-%     framePulseChan: 2
-%     indexPulseChan: 'none'
-%     phasePulseChan: 'none'
-%           physChan: 3
-%         pulse_type: 'double'
-%           stimChan: 1
-%      stimPulseChan: 'none'
-% rptStarts
-
-
+someDetails.numRpts=length(data.rptStarts);
+someDetails.rptLen=median(diff(data.rptStarts));
+someDetails.framePulseChan=data.rec.framePulseChan;
+someDetails.indexPulseChan=data.rec.indexPulseChan;
+someDetails.phasePulseChan=data.rec.phasePulseChan;
+someDetails.stimPulseChan=data.rec.stimPulseChan;
+someDetails.pulse_type=data.rec.pulse_type;
+someDetails.display_type=data.rec.display_type;
+someDetails
+aggregate(data,'someDetails',someDetails);
 
 if false
     thisStim=data.stim;
@@ -2581,11 +2598,11 @@ else
         thisStim=thisStim(:,thisStim(2,:)>104.5); %hack -- something bad happened in trial 4 that makes it hard to recover alignment
     end
 end
+timestep=median(diff(thisStim(2,:)));
 
-doSinusoidal=true;
-
+doSinusoidal=ismember(data.stimType,{'sinusoid','sinusoid(new)','squarefreqs'});
+doSinusoidal=false;%tmp hack
 if doSinusoidal
-    timestep=median(diff(thisStim(2,:)));
     
     nyquist=1/(2*timestep);
     cut=.1;
@@ -2796,9 +2813,9 @@ if doSinusoidal
         plot(ones(2,length(extras)).*repmat(thisStim(2,extras),2,1),25*crit*repmat([-1 1]',1,length(extras)),'b')
         
         conditionStartInds=sort([extras goodXCs]);
-                
+        
         if any(abs(diff(thisStim(2,conditionStartInds))-nomLen)/nomLen > .4) || isempty(conditionStartInds) %used to be .1 -- 03.25.09 1.sinusoid.z.18.55 is first to need .4 to pass
-                    plot(thisStim(2,:),zscore(thisStim(1,:)),'k')
+            plot(thisStim(2,:),zscore(thisStim(1,:)),'k')
             
             subplot(n,1,4)
             plot(abs(diff(thisStim(2,conditionStartInds))-nomLen)/nomLen)
@@ -2869,10 +2886,8 @@ if doSinusoidal
     %relative to sampling rate
     % plot(diff(unwrap(angle(hilbert(sin(24*2*pi*timestep*(1:1000))))))/(timestep*2*pi),'k')
     
-    f=[f figure];
-    
     trialStartTimes=thisStim(2,offsetIndsStarts);
-    
+    f=[f figure];
 else
     if size(data.rptStarts,1)>1
         if ~isvector(data.rptStarts)
@@ -2896,38 +2911,44 @@ if ~isempty(trialStartTimes) && length(trialStartTimes>1)
         warning('%d index pulses missed',sum(missed))
     end
     
+    trialDur=median(diff(trialStartTimes));
+    [block bins]=breakup(thisStim,trialStartTimes,timestep,trialDur);
     if doSinusoidal
-        try
-            trialDur=median(diff(trialStartTimes));
-            [block bins]=breakup(thisStim,trialStartTimes,timestep,trialDur);
-            
-            offsets=align(block,timestep,1);
-            ex=1; %consider picking a better one
-            offsets=offsets(:,ex);
-            
-            if false %i think our new offsets are better in every case -- just ignore old data.offsets calculations...
-                if ~isempty(data.offsets) && any(abs(data.offsets(1:length(offsets))'-offsets)>.01) % *1* can't do this if we use new trial detector -- num trials may differ
-                    if true
-                        data.offsets(1:length(offsets))'-offsets
-                        warning('data.offsets disagrees with offsets, using offsets for now...')
-                    else
-                        plot(data.offsets)
-                        hold on
-                        plot(offsets,'r')
-                        keyboard %what now?
-                    end
+        offsets=align(block,timestep,1);
+        ex=1; %consider picking a better one
+        offsets=offsets(:,ex);
+        
+        if false %i think our new offsets are better in every case -- just ignore old data.offsets calculations...
+            if ~isempty(data.offsets) && any(abs(data.offsets(1:length(offsets))'-offsets)>.01) % *1* can't do this if we use new trial detector -- num trials may differ
+                if true
+                    data.offsets(1:length(offsets))'-offsets
+                    warning('data.offsets disagrees with offsets, using offsets for now...')
+                else
+                    plot(data.offsets)
+                    hold on
+                    plot(offsets,'r')
+                    keyboard %what now?
                 end
             end
-            
-            
-            trialStarts=trialStartTimes(1:length(offsets))'-offsets;
-            
-            [block bins]=breakup(thisStim,trialStarts,timestep,trialDur); %how can block come back with fewer trials than trialStarts? 19 vs. 20, even though rptStarts has 21 for 04.15.09 1.sinusoid.z.47.34.t.2614.01-3169.56.chunk.1.8d2b23279f87853a7c63e4ab0ed38b8b150c317d
-            
-            subplot(5,1,1)
-            plot(bins,block')
-            xlim([0 trialDur])
-            
+        end
+        
+        
+        trialStarts=trialStartTimes(1:length(offsets))'-offsets;
+        
+        [block bins]=breakup(thisStim,trialStarts,timestep,trialDur); %how can block come back with fewer trials than trialStarts? 19 vs. 20, even though rptStarts has 21 for 04.15.09 1.sinusoid.z.47.34.t.2614.01-3169.56.chunk.1.8d2b23279f87853a7c63e4ab0ed38b8b150c317d
+        subplot(5,1,1)
+        spread=0;
+    else
+        n=4;
+        subplot(n,1,1)
+        spread=repmat((1:size(block,1))*range(block(:))/10,size(block,2),1);
+    end
+    
+    plot(bins,block'+spread)
+    xlim([0 trialDur])
+    
+    if doSinusoidal
+        try
             subplot(5,1,2)
             freqs=0:ceil(1/(2*timestep));
             rez=.5;
@@ -3250,11 +3271,6 @@ if ~isempty(trialStartTimes) && length(trialStartTimes>1)
                     xlim(minmax(bins));
                 end
                 
-                doSinusoid=true;
-                
-                if doSinusoid
-                end
-                
             end
             
             %this is for 03.13 data
@@ -3412,6 +3428,9 @@ if ~isempty(trialStartTimes) && length(trialStartTimes>1)
                     plot(chunkBins,thisBpsth,'r')
                     xlim([0 chunkDur])
                     
+                    totalBursts(i,j)=sum(thisBpsth);
+                    totalTonics(i,j)=sum(thisPsth);
+                    
                     
                     f0(i,j)=sum(thisPsth)/length(theseRasters);
                     
@@ -3513,7 +3532,8 @@ if ~isempty(trialStartTimes) && length(trialStartTimes>1)
                     f1(i,j)=interp1(specf,S,uFreqs(i),'pchip','extrap');
                     compf0(i,j)=interp1(specf,S,0);
                     
-                    
+                    alpha=10;
+                    fAlpha(i,j)=interp1(specf,S,alpha,'pchip','extrap');
                     
                     subplot(cs,length(uContrasts),length(uContrasts)*4+j)
                     
@@ -3536,7 +3556,7 @@ if ~isempty(trialStartTimes) && length(trialStartTimes>1)
                         if length(forChronux)~=size(chunkBlock,1)
                             error('chunkblock err')
                         end
-                    [thisC,phi,S12,S1,S2,cfs,zerosp,confC,phistd,Cerr]=coherencycpt(chunkBlock',forChronux,paramsC); %chunkBlock needs alignment fixes here, see above...
+                        [thisC,phi,S12,S1,S2,cfs,zerosp,confC,phistd,Cerr]=coherencycpt(chunkBlock',forChronux,paramsC); %chunkBlock needs alignment fixes here, see above...
                     catch ex
                         keyboard
                     end
@@ -3662,7 +3682,7 @@ if ~isempty(trialStartTimes) && length(trialStartTimes>1)
             doSummaryFig({'mean(std(stim))','amp fit','freq fit'});
             doSummaryFig({'mean','f1','f1/mean','coh','std','ff'});
             
-            sinusoidals={'uFreqs','uContrasts','mn','sd','f1','C','va'}; %instead of uContrasts, consider saving calculated contrasts (sinAmpsFit)
+            sinusoidals={'uFreqs','uContrasts','mn','sd','f1','C','va','totalTonics','totalBursts','fAlpha'}; %instead of uContrasts, consider saving calculated contrasts (sinAmpsFit)
             for sNum=1:length(sinusoidals)
                 sinusoidal.(sinusoidals{sNum})=eval(sinusoidals{sNum});
             end
@@ -3685,6 +3705,174 @@ if ~isempty(trialStartTimes) && length(trialStartTimes>1)
             warning('skipping sinusoidal due to error')
         end
     else
+        
+        minLength=inf;
+        maxLength=0;
+        
+        for i=1:length(trialStartTimes)
+            if i==length(trialStartTimes)
+                endT=trialStartTimes(i)+median(diff(trialStartTimes)); %TODO: figure out better way
+            else
+                endT=trialStartTimes(i+1);
+            end
+            
+            %this introduces a few ms of jitter because of the jitter of the
+            %index pulse wrt the crt, plus crt jitter/frame drops accumulates through each
+            %trial.  and if using data.frames, framedrops screw things up...
+            inds{i}=find(thisStim(2,:)>=trialStartTimes(i) & thisStim(2,:)<endT);
+            
+            
+            if length(inds{i})<minLength && i~=length(trialStartTimes)
+                minLength=length(inds{i});
+            end
+            if length(inds{i})>maxLength
+                maxLength=length(inds{i});
+            end
+            
+            rasters{i}=separate(data.tonics,trialStartTimes(i),endT);
+            bursts{i}=separate(data.bsts,trialStartTimes(i),endT);
+            inBursts{i}=separate(data.bstNotFst,trialStartTimes(i),endT);
+            violations{i}=separate(data.refVios,trialStartTimes(i),endT);
+        end
+        
+        useMinLength=false;
+        
+        if useMinLength
+            len=minLength;
+        else
+            len=maxLength;
+        end
+        
+        
+        maxTime=len*timestep;
+        %bins=0:timestep:(len-1)*timestep;
+        thisLen=median(cellfun(@length,inds));
+        thisDur=thisLen*timestep;
+        
+        if false
+            
+            goodRefs=[];
+            
+            block=nan(length(trialStartTimes),len);
+            for i=1:length(inds)
+                if useMinLength
+                    block(i,:)=thisStim(1,inds{i}(1:len));
+                    error('not implemented')
+                else
+                    if false
+                        block(i,1:length(inds{i}))=interp1(thisStim(1,inds{i}),thisStim(2,inds{i})-thisStim(2,inds{i}(1)),bins,'pchip');
+                    else
+                        block(i,1:length(inds{i}))=thisStim(1,inds{i});
+                    end
+                end
+                
+                if length(inds{i})==thisLen
+                    goodRefs(end+1)=i;
+                end
+            end
+            
+            if useMinLength
+                tmp=block(1:end-1,:);
+                if any(isnan(tmp(:)))
+                    error('nan error')
+                end
+            end
+            
+            if length(inds{end})/mean(cellfun(@(x)length(x),inds))<.95 %last trial is probably partial (what about first trial?)
+                block=block(1:end-1,:);
+                
+                rasters=rasters(1:end-1);
+                bursts=bursts(1:end-1);
+                inBursts=inBursts(1:end-1);
+                violations=violations(1:end-1);
+            end
+
+            if ~isempty(goodRefs)
+                
+                offsets=align(block,timestep,1);
+                
+                if false
+                    subplot(2,1,1)
+                    plot((offsets + repmat(timestep*.5*(1:size(block,1))',1,size(block,1)))')
+                    subplot(2,1,2)
+                    plot(data.offsets)
+                end
+            else
+                error('no good refs')
+            end
+            
+            if isempty(data.offsets)
+                ex = min(goodRefs);
+                
+                offsets=offsets(:,ex); %((1:size(block,1))+(ex-1)*size(block,1),:);
+                
+                subplot(2,1,1)
+                plot(block')
+                
+                for i=1:size(block,1)
+                    
+                    rasters{i}=rasters{i}+offsets(i);
+                    bursts{i}= bursts{i}+offsets(i);
+                    inBursts{i}=inBursts{i}+offsets(i);
+                    violations{i}=violations{i}+offsets(i);
+                    
+                    % TODO: need to also fix block -- should cover all stim stuff
+                    block(i,:)=shift(block(i,:),offsets(i)/timestep);
+                end
+                
+                subplot(2,1,2)
+                plot(block')
+            else
+                error('haven''t written yet')
+            end
+        end
+        
+        if false
+            block=mean(block);
+        end
+        
+        if false
+        block=block'-min(block(:));
+        block=block/max(block(:));
+        end                
+        
+        [psth bpsth fpsth pbins psthRng bpsthRng fpsthRng psthBounds bpsthBounds]=doPsth(rasters,bursts,.1,timestep,maxTime,.95,1000);
+        
+        subplot(n,1,3)
+        alpha=.2;
+        sat=.5;
+        shade(psthRng,pbins,zeros(1,3),sat,alpha,psth);
+        hold on
+        bOuts=shade(bpsthRng,pbins,[1 0 0],sat,alpha,bpsth);
+        plot(pbins,psthBounds','Color',zeros(1,3))
+        plot(pbins,bpsthBounds','Color',[1 0 0])
+        xlim([0 thisDur])
+        %set(gca,'YScale','log')
+        
+        subplot(n,1,4)
+        fOuts=shade(fpsthRng,pbins,[0 0 1],sat,alpha,fpsth);
+        xlim([0 thisDur])
+        title(sprintf('bursts oustide: %g%% (%g%% match), fractions outside: %g%% (%g%% match)',...
+            100*length(bOuts)/length(pbins),...
+            100*sum(ismember(bOuts,fOuts))/length(bOuts),...
+            100*length(fOuts)/length(pbins),...
+            100*sum(ismember(fOuts,bOuts))/length(fOuts)))
+        
+        subplot(n,1,2)
+        plot(bOuts,-1*ones(1,length(bOuts)),'ro');
+        hold on
+        plot(fOuts,-2*ones(1,length(fOuts)),'bo');
+                xlim([0 thisDur])
+                ylim([-.1 1.1])
+
+        
+        %ok - first thing to know is whether tonics occur more or less in
+        %any timebin than expected by chance -- if so, they are visual
+        %then, you want to know if bursts in any timebin occur more or less
+        %than expected if they were a fixed random percentage of all
+        %tonics. if so, priming is visual. so either red or blue measures
+        %this.        
+        
         if false %the old way makes too many graphics objects and overwhelms gfx memory
             
             if false %lab meeting hack
@@ -3709,8 +3897,8 @@ if ~isempty(trialStartTimes) && length(trialStartTimes>1)
         else
             % clf
             
-            figure(f(1));
-            subplot(n,1,4)
+            % figure(f(1));
+            % subplot(n,1,4)
             
             cellfun(@(c) doRaster(c{1},c{2},[0 maxTime]),{ {rasters,'k.'} {bursts,'ro'} {inBursts,'r.'} {violations,'bo'} })
             
@@ -3743,17 +3931,21 @@ if ~isempty(trialStartTimes) && length(trialStartTimes>1)
                 ylim([1 size(im,1)])
             end
             
+            if false
             axis ij
+            end
             
             dpi=3*72; %size of 1-pt dots (pts are 1/72", and dots are 1/3 requested pt size) http://www.mathworks.com/access/helpdesk/help/techdoc/ref/lineseriesproperties.html#MarkerSize
             heightInches=8; %assumption -- doesn't seem to be specifiable
             fudge=3;
             
-            heightInches=heightInches/4;
+            if true
+            heightInches=heightInches/n;
+            end
             
             frac=length(rasters)/(dpi*heightInches);
             
-            ylim([0 length(rasters)/min(fudge*frac,1)])
+            ylim([-2 length(rasters)/min(fudge*frac,1)])
             xlim([0 thisDur]) %temp hack
         end
         
@@ -3762,7 +3954,7 @@ if ~isempty(trialStartTimes) && length(trialStartTimes>1)
         title(sprintf('%d %s repeats (%.1f hz, %.1f%% bursts (%d total), %d violations)',length(data.rptStarts),data.stimType,length(data.spks)/(data.stimTimes(2)-data.stimTimes(1)),100*length(data.bsts)/(length(data.tonics)+length(data.bsts)),length(data.bsts),length(data.refVios)))
     end
 else
-    error('should no longer happen on sinusoidals (see offsetIndsStarts)')
+    error('skipping raster cuz no rpts id''d -- should no longer happen on sinusoidals (see offsetIndsStarts)')
 end
 
     function doSummaryFig(ps)
@@ -3856,6 +4048,187 @@ end
         
         info=[info;times(:) repmat([trial val],length(times),1)];
     end
+end
+
+function outsides=shade(rng,bins,col,sat,alpha,vals)
+if ~all(col==0)
+    satcol=rgb2hsv(col);
+    satcol(2)=[sat*satcol(2)];
+    satcol=hsv2rgb(satcol);
+else
+    satcol=(1-sat)*ones(1,3);
+end
+
+if any(isnan(rng(:)))
+    error('fill doesn''t have a face if there are nans')
+end
+
+if false %transparency doesn't work over remote desktop
+    p=fill([bins fliplr(bins)],[rng(1,:) fliplr(rng(2,:))],satcol,'LineStyle','none','FaceAlpha',alpha);
+    %set(p,'FaceAlpha',1);
+else
+    plot(bins,rng','Color',satcol);
+end
+hold on
+plot(bins,vals,'Color',col);
+outsides=find(vals<rng(1,:)|vals>rng(2,:));
+plot(bins(outsides),vals(outsides),'o','Color',col);
+outsides=bins(outsides);
+end
+
+function psth=psthAux(in,bins,d)
+psth=0;
+for i=1:length(in)
+    psth=psth+hist(in{i}(in{i}<=max(bins)),bins);
+end
+
+orig=psth;
+psth=filter(ones(1,d),1,psth);
+if d==1
+    if ~all(psth==orig)
+        error('filter err')
+    end
+end
+end
+
+function [psth bpsth fpsth pbins psthRng bpsthRng fpsthRng psthBounds bpsthBounds]=doPsth(rasters,bursts,win,timestep,maxTime,c,numShuffle)
+%pbins=0:.01:maxTime;
+%pbins=0:.05:maxTime;
+pbins=0:timestep:maxTime;
+d=floor(win/timestep);
+
+%dbins=0:.0001:maxTime;
+[tonicTimes tonicISIs]=getAll(rasters);
+[burstTimes burstISIs]=getAll(bursts);
+
+if false
+    psth=psthAux(rasters,pbins);
+bpsth=psthAux(bursts,pbins);
+else
+psth=psthAux({tonicTimes},pbins,d);
+bpsth=psthAux({burstTimes},pbins,d);    
+end
+
+fpsth=bpsth./(psth+bpsth);
+
+psths=nan(numShuffle,length(pbins));
+bpsths=psths; 
+psthsB=psths;
+bpsthsB=psths;
+    
+    function [out drep]=getAll(items)
+        out=cell2mat(items')';
+        drep=diff(out);
+        drep=drep(drep>=0);
+        
+        if false
+        out=[];
+        drep=[];
+        %dist=0;
+        for i=1:length(items)
+            out=[out items{i}'];
+            drep=[drep diff(items{i}')];
+            %dist=dist+hist(diff(items{i}),dbins);
+        end
+        end
+        
+        if false
+        %any vectorized way to do this?
+        curr=1;
+        drep=nan(1,sum(dist));
+        for i=1:length(dist)
+            if dist(i)>0
+                drep(curr:curr+dist(i)-1)=dbins(i);
+            end
+            curr=curr+dist(i);
+        end
+        if any(isnan(drep)) || length(drep)~=sum(dist)
+            error('bad drep')
+        end
+        end
+    end
+
+    function [out1 out2]=shuffle(in1,in2)
+        allT=[in1,in2];
+        order=randperm(length(allT));
+        out1{1}=allT(order(1:length(in1)));
+        out2{1}=allT(order((length(in1)+1):end));
+        
+        if false
+            if ~all(sort(allT)==sort([out1{1} out2{1}]))
+                error('whoops')
+            end
+        end
+    end
+
+    function out=resample(drep,num)
+        picks=cumsum(drep(ceil(rand(1,ceil(3*num*maxTime/mean(drep)))*length(drep))));
+        ind=find(picks>num*maxTime,1);
+        if isempty(ind)
+            error('ran out')
+        end
+        out={rem(picks(1:ind),maxTime)}; %sort not necessary
+
+        if false
+        out={};
+        begin=1;
+        last=[];
+        for item=1:num
+            last=findNext(picks,begin,@(x) x>maxTime*item); %sequential better than vectorized here
+            if isempty(last)
+                error('ran out')
+            end
+            out{end+1}=picks(begin:last-1)-maxTime;
+            begin=last;
+        end
+        end
+    end
+
+    function res=findNext(items,itemNum,f)
+        res=[];
+        for ind=itemNum:length(items)
+            if f(items(ind))
+                res=ind;
+                break
+            end
+        end
+    end
+
+for i=1:numShuffle
+    [srasters sbursts]=shuffle(tonicTimes,burstTimes);
+    psths(i,:)=psthAux(srasters,pbins,d);
+    bpsths(i,:)=psthAux(sbursts,pbins,d);
+    
+    psthsB(i,:)=psthAux(resample(tonicISIs,length(rasters)),pbins,d);
+    bpsthsB(i,:)=psthAux(resample(burstISIs,length(bursts)),pbins,d);
+    if rand>.95
+        fprintf('%g%% done\n',100*i/numShuffle)
+    end
+end
+
+%max(bpsths(:))
+%length(rasters)
+%mean(psths(:))
+
+fpsths=bpsths./(psths+bpsths);
+fpsths(isnan(fpsths))=0;
+
+ex=floor(numShuffle*(1-c)/2);
+if ex<1 || ex>numShuffle/2
+    error('bad c/numShuffle')
+end
+
+    function out=central(in)
+        out=sort(in);
+        out=out([ex numShuffle-ex+1],:);
+    end
+
+psthRng=central(psths);
+bpsthRng=central(bpsths);
+fpsthRng=central(fpsths);
+
+psthBounds=central(psthsB);
+bpsthBounds=central(bpsthsB);
 end
 
 function out=makeSpikes(lims,fs,rate,res)
@@ -4073,6 +4446,22 @@ end
 function info=compareTriggeredDistributions(trigs1,trigs2,stim,preMS,postMS);
 [vals1 times]=doTrigger(trigs1,stim,preMS,postMS);
 [vals2 times]=doTrigger(trigs2,stim,preMS,postMS);
+
+if false
+    
+    try
+        [u s v]=svd(p);
+    catch
+        warning('too much spectro for svd -- choosing dims based on half')
+        [u s v]=svd(p(rand(1,size(p,1))>.5,:));
+    end
+    s=diag(s);
+    
+    X=p*v(:,1)/s(1);
+    Y=p*v(:,2)/s(2);
+end
+
+keyboard
 
 vals1=vals1{1};
 vals2=vals2{1};

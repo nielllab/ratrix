@@ -1,12 +1,16 @@
 function  viewAllSpikesByChannel(subjectID, path, cellBoundary, spikeDetectionParams, spikeSortingParams)
 
-if ~exist('subjectID','var') || isempty(subjectID)
-    subjectID = 'demo1'; %
+if ~exist('plottingParams','var') || isempty(plottingParams)
+    plottingParams.showSpikeAnalysis = true;
+    plottingParams.showLFPAnalysis = true;
+    plottingParams.plotSortingForTesting = true;
 end
-
-if ~exist('path','var') || isempty(path)
-    % path = '\\Reinagel-lab.AD.ucsd.edu\RLAB\Rodent-Data\Fan\datanet' % OLD
-    path = '\\132.239.158.179\datanet_storage\';
+if ~isfield(spikeSortingParams,'plotSortingForTesting')
+    if isfield(plottingParams,'plotSortingForTesting')
+        spikeSortingParams.plotSortingForTesting = plottingParams.plotSortingForTesting;
+    else
+        spikeSortingParams.plotSortingForTesting = true;
+    end
 end
 
 % needed for physLog boundaryType
@@ -35,116 +39,17 @@ elseif iscell(cellBoundary) && length(cellBoundary)==2
                     error('must be length 2 for [start stop] or a single trial number')
             end
             boundaryRange=[cellBoundary{2}(1) 1 cellBoundary{2}(2) Inf]; % [startTrial startChunk endTrial endChunk]
-        case 'trialAndChunkRange'
-            if ~iscell(cellBoundary{2}) || length(cellBoundary{2})~=2 || length(cellBoundary{2}{1})~=2 || length(cellBoundary{2}{2})~=2
-                error('trialAndChunkRange cellBoundary must be in format {''trialAndChunkRange'',{[startTrial startChunk], [endTrial endChunk]}}');
-            end
-            boundaryRange=[cellBoundary{2}{1}(1) cellBoundary{2}{1}(2) cellBoundary{2}{2}(1) cellBoundary{2}{2}(2)]; % [startTrial startChunk endTrial endChunk]
-        case 'physLog'
-            boundaryRange = getCellBoundaryFromEventLog(subjectID,cellBoundary{2},neuralRecordsPath);
-            startSysTime=boundaryRange(3);
-            endSysTime=boundaryRange(6);
-            boundaryRange=boundaryRange([1 2 4 5]);
         otherwise
             error('bad type of cellBoundary!');
     end
-    maskType = 'none';
-    maskON = false;
-    maskRange = [];
+    if boundaryRange(1) ~= boundaryRande(2)
+        error('support only for single trials');
+    end
 elseif iscell(cellBoundary) && length(cellBoundary)==4
-    boundaryType = cellBoundary{1};
-    switch boundaryType
-        case 'trialRange'
-            if any(~isnumeric(cellBoundary{2}))
-                error('invalid parameters for trialRange cellBoundary');
-            end
-            switch length(cellBoundary{2})
-                case 2
-                    %okay, thats normal
-                case 1
-                    %start trial is the stop trial
-                    cellBoundary{2}=[cellBoundary{2} cellBoundary{2}];
-                otherwise
-                    error('must be length 2 for [start stop] or a single trial number')
-            end
-            boundaryRange=[cellBoundary{2}(1) 1 cellBoundary{2}(2) Inf]; % [startTrial startChunk endTrial endChunk]
-        case 'trialAndChunkRange'
-            if ~iscell(cellBoundary{2}) || length(cellBoundary{2})~=2 || length(cellBoundary{2}{1})~=2 || length(cellBoundary{2}{2})~=2
-                error('trialAndChunkRange cellBoundary must be in format {''trialAndChunkRange'',{[startTrial startChunk], [endTrial endChunk]}}');
-            end
-            boundaryRange=[cellBoundary{2}{1}(1) cellBoundary{2}{1}(2) cellBoundary{2}{2}(1) cellBoundary{2}{2}(2)]; % [startTrial startChunk endTrial endChunk]
-        case 'physLog'
-            boundaryRange = getCellBoundaryFromEventLog(subjectID,cellBoundary{2},neuralRecordsPath);
-            startSysTime=boundaryRange(3);
-            endSysTime=boundaryRange(6);
-            boundaryRange=boundaryRange([1 2 4 5]);
-        otherwise
-            error('bad type of cellBoundary!');
-    end
-    maskType = cellBoundary{3};
-    switch maskType
-        case 'trialMask'
-            if any(~isnumeric(cellBoundary{4}))
-                error('invalid parameters for maskRange');
-            end
-            maskRange = cellBoundary{4};
-        otherwise
-            error('mask type is not supported');
-    end
-    maskON = true;
+    error('masking not supported');    
 else
     error('bad cellBoundary input');
 end
-
-% activeParamFile = fullfile('\\132.239.158.179\datanet_storage\',subjectID,'activeSortingParams.mat');
-% if ~exist('spikeDetectionParams','var') || isempty(spikeDetectionParams)
-%     spikeDetectionParams.method='oSort';
-%     spikeDetectionParams.ISIviolationMS=2;
-% elseif strcmp(spikeDetectionParams.method,'activeSortingParameters')
-%     % get spikeDetectionParams from activeSortingParameters.mat
-%     spikeDetectionParams=load(activeParamFile,'spikeDetectionParams');
-% elseif strcmp(spikeDetectionParams.method,'activeSortingParametersThisAnalysis')
-%     %will load below
-% end
-%
-% if ~exist('spikeSortingParams','var') || isempty(spikeSortingParams)
-%     spikeSortingParams.method='oSort';
-% elseif strcmp(spikeSortingParams.method,'activeSortingParameters')
-%     % get spikeSortingParams from activeSortingParameters.mat
-%     spikeSortingParams=load(activeParamFile,'spikeSortingParams');
-% end
-%
-% if ~exist('timeRangePerTrialSecs','var') || isempty(timeRangePerTrialSecs)
-%     timeRangePerTrialSecs = [0 Inf]; %all
-% else
-%     if timeRangePerTrialSecs(1)~=0
-%         error('frame pulse detection has not been validated if you do not start at time=0')
-%         %do we throw out the first pulse?
-%     end
-%     if timeRangePerTrialSecs(2)<3
-%         requestedEndDuration= timeRangePerTrialSecs(2)
-%         error('frame pulse detection has not been validated if you do not have at least some pulses')
-%         %do we throw out the first pulse?
-%     end
-% end
-
-% if ~exist('stimClassToAnalyze','var') || isempty(stimClassToAnalyze)
-%     stimClassToAnalyze='all';
-% else
-%     if ~(iscell(stimClassToAnalyze) ) % and they are all chars
-%         stimClassToAnalyze
-%         error('must be a cell of chars of SM classes or ''all'' ')
-%     end
-% end
-
-% if ~exist('usePhotoDiodeSpikes','var') || isempty(usePhotoDiodeSpikes)
-%     usePhotoDiodeSpikes=false;
-% end
-%
-% if ~exist('overwriteAll','var') || isempty(overwriteAll)
-%     overwriteAll=false;
-% end
-
 
 % if ~exist('plottingParams','var') || isempty(plottingParams)
 %     plottingParams.showSpikeAnalysis = true;
@@ -163,72 +68,194 @@ end
 % if ~exist('paramUtil','var') || isempty(paramUtil)
 %    paramUtil=[]; % don't do anything
 % end
-for currentTrialNum = boundaryRange(1):boundaryRange(3)
-    % look for currentTrial's neuralRecord
-    dirStr=fullfile(neuralRecordsPath,sprintf('neuralRecords_%d-*.mat',currentTrial));
-    d=dir(dirStr);
-    if length(d)==1
-        neuralRecordFilename=d(1).name;
-        % get the timestamp
-        [matches tokens] = regexpi(d(1).name, 'neuralRecords_(\d+)-(.*)\.mat', 'match', 'tokens');
-        if length(matches) ~= 1
-            %         warning('not a neuralRecord file name');
-        else
-            timestamp = tokens{1}{2};
-            currentTrialStartTime=datenumFor30(timestamp);
-        end
-    elseif length(d)>1
-        disp('duplicates present');
-        currentTrial = min(currentTrial+1,boundaryRange(3));
-        continue;
+
+chansRequired = [1:14]; % hard coded here.
+currentTrialNum = boundaryRange(1);
+
+% look for currentTrial's neuralRecord
+dirStr=fullfile(neuralRecordsPath,sprintf('neuralRecords_%d-*.mat',currentTrialNum));
+d=dir(dirStr);
+if length(d)==1
+    neuralRecordFilename=d(1).name;
+    % get the timestamp
+    [matches tokens] = regexpi(d(1).name, 'neuralRecords_(\d+)-(.*)\.mat', 'match', 'tokens');
+    if length(matches) ~= 1
+        %         warning('not a neuralRecord file name');
     else
-        disp('didnt find anything in d');
-        currentTrial=min(currentTrial+1,boundaryRange(3));
-        continue;
+        timestamp = tokens{1}{2};
+        currentTrialStartTime=datenumFor30(timestamp);
     end
-    % make temporary analysis folder
-    analysisPath = fullfile(path,ratID,'tempAnalysisFolder');
-    % first delete folder if it exists
-    if exist(analysisPath,'dir')
-        [succ,msg,msgID] = rmdir(baseAnalysisPath,'s');  % includes all subdirectory regardless of permissions
-        
-        if ~succ
-            msg
-            error('failed to remove existing files when running with ''overwriteAll=true''')
-        else
-            haveDeletedAnalysisRecords=true;
+    neuralRecordLocation = fullfile(neuralRecordsPath,sprintf('neuralRecords_%d-%s.mat',currentTrialNum,timestamp));
+elseif length(d)>1
+    error('duplicates present');
+else
+    error('didnt find anything in d');
+end
+
+% load the neural data
+load(neuralRecordLocation);
+
+%DETERMINE CHUNKS TO PROCESS
+chunksToProcess = who('chunk*');
+[matches tokens] = regexpi(chunkNames{i}, 'chunk(\d+)', 'match', 'tokens');
+for i = 1:length(tokens)
+    chunkNums(i) = tokens{i}{1};
+end
+[chunksOrdered orderOfChunks] = sort(chunkNums);
+chunksToProcess = chunksToProcess(orderOfChunks);
+% make temporary analysis folder and locate the neuralRecordLocation
+analysisPathForTrial = fullfile(path,subjectID,'analysis','tempAnalysisFolder',num2str(currentTrialNum));
+% spikeRecord.mat will contain info about all the channels for that trial.
+spikeRecordLocation=fullfile(path,subjectID,'analysis','tempAnalysisFolder',num2str(currentTrialNum),'spikeRecords.mat');
+% first delete folder if it exists
+if exist(analysisPath,'dir')
+    [succ,msg,msgID] = rmdir(analysisPathForTrial,'s');  % includes all subdirectory regardless of permissions
+    if ~succ
+        msg
+        error('failed to remove existing files when running with ''overwriteAll=true''')
+    end
+end
+% now make it again
+if ~isdir(analysisPathForTrial)
+    mkdir(analysisPathForTrial);
+end
+
+for currentChunkInd=1:size(chunksToProcess,1)
+        try
+            % =================================================================================
+            chunkStr=sprintf('chunk%d',chunksToProcess(currentChunkInd));
+            fprintf('*********DOING %s*************\n',chunkStr)
+            
+            % load the chunk
+            neuralRecord=stochasticLoad(neuralRecordLocation,{chunkStr,'samplingRate'});
+            temp=neuralRecord.samplingRate;
+            neuralRecord=neuralRecord.(chunkStr);
+            neuralRecord.samplingRate=temp;
+            neuralRecord.neuralDataTimes=linspace(neuralRecord.neuralDataTimes(1),neuralRecord.neuralDataTimes(end),size(neuralRecord.neuralData,1))';
+            if ~isfield(neuralRecord,'ai_parameters')
+                neuralRecord.ai_parameters.channelConfiguration={'framePulse','photodiode','phys1'};
+                if size(neuralRecord.neuralData,2)~=3
+                    error('only expect old unlabeled data with 3 channels total... check assumptions')
+                end
+            end
+            
+            
+            thisPhysChannelLabel=['phys' num2str(currChannel)];
+            thisPhysChannelInd=find(ismember(neuralRecord.ai_parameters.channelConfiguration,thisPhysChannelLabel));
+            
+            photoInd=find(strcmp(neuralRecord.ai_parameters.channelConfiguration,'photodiode'));
+            pulseInd=find(strcmp(neuralRecord.ai_parameters.channelConfiguration,'framePulse'));
+            allPhysInds = find(~cellfun(@isempty, strfind(neuralRecord.ai_parameters.channelConfiguration,'phys')));
+            
+            spikeRecord.spikeDetails=[];
+            spikeRecord.samplingRate=neuralRecord.samplingRate;
+            spikeDetectionParams.samplingFreq=neuralRecord.samplingRate; % always overwrite with current value
+            
+            % business happens here
+            [spikeRecord.spikes spikeRecord.spikeWaveforms spikeRecord.spikeTimestamps spikeRecord.assignedClusters ...
+                spikeRecord.rankedClusters]=...
+                getSpikesFromNeuralData(neuralRecord.neuralData(:,thisPhysChannelInd),neuralRecord.neuralDataTimes,...
+                spikeDetectionParams,spikeSortingParams,analysisPath);
+            spikeRecord.chunkID=ones(length(spikeRecord.spikes),1)*chunksToProcess(currentChunkInd);
+            spikeRecord.chunkIDForDetails=chunksToProcess(currentChunkInd);
+            spikeRecord.trialNum=ones(length(spikeRecord.spikes),1)*currentTrialNum;
+            spikeRecord.trialNumForDetails=currentTrialNum;
+            
+            if exist(spikeRecordLocation,'file')
+                prev=stochasticLoad(spikeRecordLocation);
+                
+                try
+                    % 6/3/09 - offset each chunk's stimInds by the last stimInd from previous chunk (moved 2/2/10)
+                    %maybe it should be after the ~proccessed || overwriteAll else
+                    which=find(prev.trialNumForCorrectedFrames==currentTrial);
+                    if ~isempty(which)
+                        startingStimIndAdjustment=max(prev.stimInds(which));
+                        startingSampleIndAdjustment=prev.correctedFrameIndices(which(end))+numPaddedSamples;
+                    else
+                        startingStimIndAdjustment=0;
+                        startingSampleIndAdjustment=0;
+                    end
+                catch ex
+                    warning('a prob here')
+                    keyboard
+                    rethrow(ex)
+                end
+                if prev.correctedFrameIndices(end)~=prev.frameIndices(end)
+                    corrected=prev.correctedFrameIndices(end)
+                    raw=prev.frameIndices(end)
+                    error('the end frame was assumed to be the same... will this mess things up?')
+                end
+            else
+                prev.spikes=[];
+                prev.spikeWaveforms=[];
+                prev.spikeTimestamps=[];
+                prev.assignedClusters=[];
+                prev.spikeDetails=[];
+                prev.frameIndices=[];
+                prev.frameTimes=[];
+                prev.frameLengths=[];
+                prev.correctedFrameIndices=[];
+                prev.correctedFrameTimes=[];
+                prev.correctedFrameLengths=[];
+                prev.stimInds=[];
+                prev.photoDiode=[];
+                prev.passedQualityTest=[];
+                prev.samplingRate=[];
+                prev.chunkID=[];
+                prev.chunkIDForFrames=[];
+                prev.chunkIDForCorrectedFrames=[];
+                prev.chunkIDForDetails=[];
+                prev.trialNum=[];
+                prev.trialNumForFrames=[];
+                prev.trialNumForCorrectedFrames=[];
+                prev.trialNumForDetails=[];
+                prev.LFPRecord.data = [];
+                prev.LFPRecord.dataTimes = [];
+                prev.LFPRecord.LFPSamplingRateHz = [];
+                startingStimIndAdjustment=0;
+                startingSampleIndAdjustment=0;
+                
+            end
+            % now append! (and take acount chunk counters like startingStimIndAdjustment startingSampleIndAdjustment)
+            
+            spikes=[prev.spikes;spikeRecord.spikes                                                  + startingSampleIndAdjustment];
+            spikeWaveforms=[prev.spikeWaveforms;spikeRecord.spikeWaveforms];
+            spikeTimestamps=[prev.spikeTimestamps;spikeRecord.spikeTimestamps];
+            assignedClusters=[prev.assignedClusters;spikeRecord.assignedClusters];
+            spikeDetails=[prev.spikeDetails;spikeRecord.spikeDetails];
+            frameIndices=[prev.frameIndices;spikeRecord.frameIndices                                + startingSampleIndAdjustment];
+            frameTimes=[prev.frameTimes;spikeRecord.frameTimes];
+            frameLengths=[prev.frameLengths;spikeRecord.frameLengths];
+            correctedFrameIndices=[prev.correctedFrameIndices;spikeRecord.correctedFrameIndices     + startingSampleIndAdjustment];
+            correctedFrameTimes=[prev.correctedFrameTimes;spikeRecord.correctedFrameTimes];
+            correctedFrameLengths=[prev.correctedFrameLengths;spikeRecord.correctedFrameLengths];
+            stimInds=[prev.stimInds;spikeRecord.stimInds                                            + startingStimIndAdjustment];
+            photoDiode=[prev.photoDiode;spikeRecord.photoDiode];
+            passedQualityTest=[prev.passedQualityTest;spikeRecord.passedQualityTest];
+            samplingRate=[prev.samplingRate;spikeRecord.samplingRate];
+            chunkID=[prev.chunkID;spikeRecord.chunkID];
+            chunkIDForFrames=[prev.chunkIDForFrames;spikeRecord.chunkIDForFrames];
+            chunkIDForCorrectedFrames=[prev.chunkIDForCorrectedFrames;spikeRecord.chunkIDForCorrectedFrames];
+            chunkIDForDetails=[prev.chunkIDForDetails;spikeRecord.chunkIDForDetails];
+            trialNum=[prev.trialNum;spikeRecord.trialNum];
+            trialNumForFrames=[prev.trialNumForFrames;spikeRecord.trialNumForFrames];
+            trialNumForCorrectedFrames=[prev.trialNumForCorrectedFrames;spikeRecord.trialNumForCorrectedFrames];
+            trialNumForDetails=[prev.trialNumForDetails;spikeRecord.trialNumForDetails];
+            LFPRecord.data = [prev.LFPRecord.data; spikeRecord.LFPRecord.data];
+            LFPRecord.dataTimes = [prev.LFPRecord.dataTimes; spikeRecord.LFPRecord.dataTimes];
+            LFPRecord.LFPSamplingRateHz= [prev.LFPRecord.LFPSamplingRateHz;spikeRecord.LFPSamplingRateHz];
+            
+            
+            
+        catch ex
+            disp(['CAUGHT EX: ' getReport(ex)])
+            %             break
+            % 11/25/08 - restart dir loop if tried to load corrupt file
+            rethrow(ex)
+            error('failed to load from file');
         end
-    end
-    % now make it again
-    if ~isdir(analysisPath)
-        mkdir(analysisPath);
     end
     
-    %DETERMINE CHUNKS TO PROCESS
-    if 0
-        %a faster way of doing this once we save the num chunks explicitly in a variable
-        varIn=load(neuralRecordLocation,'numChunks');
-        for chunkN=1:varIn.numChunks
-            if ~isempty(processedChunks) && ~isempty(find(processedChunks(:,2)==chunkN&processedChunks(:,1)==currentTrial))
-                % already processed - pass
-            elseif chunkN>=currentChunkBoundary(1) && chunkN<=currentChunkBoundary(2)
-                chunksToProcess=[chunksToProcess; currentTrial chunkN];
-            end
-        end
-    else % slower back compatible method
-        % look at the neuralRecord and see if there are any new chunks to process
-        disp('checking chunk names... may be slow remotely...'); tic;
-        chunkNames=who('-file',neuralRecordLocation);
-        fprintf(' %2.2f seconds',toc)
-        chunksToProcess=[];
-        for i=1:length(chunkNames)
-            [matches tokens] = regexpi(chunkNames{i}, 'chunk(\d+)', 'match', 'tokens');
-            if length(matches) ~= 1
-                continue;
-            else
-                chunkN = str2double(tokens{1}{1});
-            end
-        end
-    end
+    
     
 end

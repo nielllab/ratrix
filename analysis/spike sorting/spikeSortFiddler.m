@@ -11,6 +11,8 @@ stimClassToAnalyze={'all'}; timeRangePerTrialSecs=[0 Inf];
 %path='H:\datanetOutput'  % local
 path='\\132.239.158.179\datanet_storage'
 path='\\132.239.158.179\datanetOutput'  %on the G drive remote
+path='C:\Documents and Settings\rlab\My Documents\work\physiology data'  %on the G drive remote
+% path='C:\Documents and Settings\rlab\My Documents\work\physiology data'  %local computer
 
 if 1 %use filteredThresh
     spikeDetectionParams=[];
@@ -212,11 +214,10 @@ subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[5
 % subjectID = '356'; channels={[6]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[485]}; %fffc about 3 trials near here 482-485ish?
 % subjectID = '356'; channels={[6]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[492 498]}; %fffc
 % subjectID = '356'; channels={[10]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[492 498]}; %fffc - probably 2 cells lumped into 1 anay
-subjectID = '356'; channels={[2]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[492 498]}; %fffc 
-
-
+% subjectID = '356'; channels={[2]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[492 498]}; %fffc 
+subjectID = '356'; channels={[1],[2]}; thrV=[-0.01 Inf]; cellBoundary={'trialRange',[551]};
 %%
-spikeSortingParams.postProcessing='biggestAverageAmplitudeCluster';  %'largestNonNoiseClusterOnly', 'treatAllAsSpike'; 
+spikeSortingParams.postProcessing= 'treatAllAsSpike'; %'biggestAverageAmplitudeCluster';  %'largestNonNoiseClusterOnly',  
 spikeDetectionParams.sampleLFP = false; %true;
 spikeDetectionParams.LFPSamplingRateHz =500;
 switch spikeDetectionParams.method

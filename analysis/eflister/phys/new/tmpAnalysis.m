@@ -4083,7 +4083,7 @@ for i=1:length(in)
 end
 
 orig=psth;
-psth=filter(ones(1,d),1,psth);
+psth=uint16(filter(ones(1,d),1,psth));
 if d==1
     if ~all(psth==orig)
         error('filter err')
@@ -4111,7 +4111,7 @@ end
 
 fpsth=bpsth./(psth+bpsth);
 
-psths=nan(numShuffle,length(pbins));
+psths=zeros(numShuffle,length(pbins),'uint16');
 bpsths=psths; 
 psthsB=psths;
 bpsthsB=psths;
@@ -4210,7 +4210,7 @@ end
 %length(rasters)
 %mean(psths(:))
 
-fpsths=bpsths./(psths+bpsths);
+fpsths=single(bpsths)./single(psths+bpsths);
 fpsths(isnan(fpsths))=0;
 
 ex=floor(numShuffle*(1-c)/2);
@@ -4218,14 +4218,39 @@ if ex<1 || ex>numShuffle/2
     error('bad c/numShuffle')
 end
 
-    function out=central(in)
-        out=sort(in);
-        out=out([ex numShuffle-ex+1],:);
+    function in=central(in,oomRetry)
+        if false
+            try
+                out=sort(in);
+            catch
+                %oom
+                if ~exist('oomRetry','var') || oomRetry
+                    out=uint16(in); %will fail for fpsth, which is fractional...
+                    try
+                        out=sort(out);
+                    catch
+                        for i=1:size(out,2)
+                            out(:,i)=sort(out(:,i));
+                        end
+                    end
+                else
+                    out=nan(2,size(in,2));
+                    for i=1:size(in,2)
+                        tmp=sort(in(:,i));
+                        out(:,i)=tmp([ex numShuffle-ex+1]);
+                    end
+                    return
+                end
+            end
+            out=out([ex numShuffle-ex+1],:);
+        end
+        in=sort(in);
+        in=in([ex numShuffle-ex+1],:);
     end
 
 psthRng=central(psths);
 bpsthRng=central(bpsths);
-fpsthRng=central(fpsths);
+fpsthRng=central(fpsths,false);
 
 psthBounds=central(psthsB);
 bpsthBounds=central(bpsthsB);

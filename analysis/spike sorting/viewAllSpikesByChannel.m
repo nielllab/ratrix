@@ -9,7 +9,7 @@ if ~isfield(spikeSortingParams,'plotSortingForTesting')
     if isfield(plottingParams,'plotSortingForTesting')
         spikeSortingParams.plotSortingForTesting = plottingParams.plotSortingForTesting;
     else
-        spikeSortingParams.plotSortingForTesting = true;
+        spikeSortingParams.plotSortingForTesting = false;
     end
 end
 
@@ -42,7 +42,8 @@ elseif iscell(cellBoundary) && length(cellBoundary)==2
         otherwise
             error('bad type of cellBoundary!');
     end
-    if boundaryRange(1) ~= boundaryRande(2)
+    if boundaryRange(1) ~= boundaryRange(3)
+         boundaryRange
         error('support only for single trials');
     end
 elseif iscell(cellBoundary) && length(cellBoundary)==4
@@ -92,23 +93,36 @@ else
     error('didnt find anything in d');
 end
 
-% load the neural data
-load(neuralRecordLocation);
+% % load the neural data
+% load(neuralRecordLocation);
 
 %DETERMINE CHUNKS TO PROCESS
-chunksToProcess = who('chunk*');
-[matches tokens] = regexpi(chunkNames{i}, 'chunk(\d+)', 'match', 'tokens');
-for i = 1:length(tokens)
-    chunkNums(i) = tokens{i}{1};
+
+disp('checking chunk names... may be slow remotely...'); tic;
+chunkNames=who('-file',neuralRecordLocation);
+fprintf(' %2.2f seconds',toc)
+chunksToProcess=[];
+for i=1:length(chunkNames)
+    [matches tokens] = regexpi(chunkNames{i}, 'chunk(\d+)', 'match', 'tokens');
+    if length(matches)~=0
+        chunksToProcess(end+1) =  str2double(tokens{1}{1});
+    end
 end
-[chunksOrdered orderOfChunks] = sort(chunkNums);
-chunksToProcess = chunksToProcess(orderOfChunks);
+% 
+% chunksToProcess = who('chunk*');
+% [matches tokens] = regexpi(chunkNames{i}, 'chunk(\d+)', 'match', 'tokens');
+% for i = 1:length(tokens)
+%     chunkNums(i) = tokens{i}{1};
+% end
+% [chunksOrdered orderOfChunks] = sort(chunkNums);
+chunksToProcess = sort(chunksToProcess);
+
 % make temporary analysis folder and locate the neuralRecordLocation
 analysisPathForTrial = fullfile(path,subjectID,'analysis','tempAnalysisFolder',num2str(currentTrialNum));
 % spikeRecord.mat will contain info about all the channels for that trial.
 spikeRecordLocation=fullfile(path,subjectID,'analysis','tempAnalysisFolder',num2str(currentTrialNum),'spikeRecords.mat');
 % first delete folder if it exists
-if exist(analysisPath,'dir')
+if exist(analysisPathForTrial,'dir')
     [succ,msg,msgID] = rmdir(analysisPathForTrial,'s');  % includes all subdirectory regardless of permissions
     if ~succ
         msg
@@ -120,33 +134,52 @@ if ~isdir(analysisPathForTrial)
     mkdir(analysisPathForTrial);
 end
 
-for currentChunkInd=1:size(chunksToProcess,1)
-        try
-            % =================================================================================
-            chunkStr=sprintf('chunk%d',chunksToProcess(currentChunkInd));
-            fprintf('*********DOING %s*************\n',chunkStr)
-            
-            % load the chunk
-            neuralRecord=stochasticLoad(neuralRecordLocation,{chunkStr,'samplingRate'});
-            temp=neuralRecord.samplingRate;
-            neuralRecord=neuralRecord.(chunkStr);
-            neuralRecord.samplingRate=temp;
-            neuralRecord.neuralDataTimes=linspace(neuralRecord.neuralDataTimes(1),neuralRecord.neuralDataTimes(end),size(neuralRecord.neuralData,1))';
-            if ~isfield(neuralRecord,'ai_parameters')
-                neuralRecord.ai_parameters.channelConfiguration={'framePulse','photodiode','phys1'};
-                if size(neuralRecord.neuralData,2)~=3
-                    error('only expect old unlabeled data with 3 channels total... check assumptions')
-                end
+for currentChunkInd=1:length(chunksToProcess)
+        % =================================================================================
+        chunkStr=sprintf('chunk%d',chunksToProcess(currentChunkInd));
+        fprintf('*********DOING %s*************\n',chunkStr)
+        
+        % load the chunk
+        neuralRecord=stochasticLoad(neuralRecordLocation,{chunkStr,'samplingRate'});
+        temp=neuralRecord.samplingRate;
+        neuralRecord=neuralRecord.(chunkStr);
+        neuralRecord.samplingRate=temp;
+        neuralRecord.neuralDataTimes=linspace(neuralRecord.neuralDataTimes(1),neuralRecord.neuralDataTimes(end),size(neuralRecord.neuralData,1))';
+        if ~isfield(neuralRecord,'ai_parameters')
+            neuralRecord.ai_parameters.channelConfiguration={'framePulse','photodiode','phys1'};
+            if size(neuralRecord.neuralData,2)~=3
+                error('only expect old unlabeled data with 3 channels total... check assumptions')
             end
+        end
+        
+        
+        photoInd=find(strcmp(neuralRecord.ai_parameters.channelConfiguration,'photodiode'));
+        pulseInd=find(strcmp(neuralRecord.ai_parameters.channelConfiguration,'framePulse'));
+        allPhysInds = find(~cellfun(@isempty, strfind(neuralRecord.ai_parameters.channelConfiguration,'phys')));
+        
+        % now loop through the channels
+        for thisPhysChannelInd = allPhysInds
+            analysisPathByChannel = fullfile(analysisPathForTrial,num2str(thisPhysChannelInd));
+            if ~exist(analysisPathByChannel,'dir')
+                mkdir(analysisPathByChannel);
+                spikeRecordCumulative.channelInd = thisPhysChannelInd;
+                spikeRecordCumulative.samplingRate = neuralRecord.samplingRate;
+                spikeRecordCumulative.spikes = [];
+                spikeRecordCumulative.spikeWaveforms = [];
+                spikeRecordCumulative.spikeTimestamps = [];
+                spikeRecordCumulative.assignedClusters = []
+                spikeRecordCumulative.chunkID=[];
             
-            
-            thisPhysChannelLabel=['phys' num2str(currChannel)];
-            thisPhysChannelInd=find(ismember(neuralRecord.ai_parameters.channelConfiguration,thisPhysChannelLabel));
-            
-            photoInd=find(strcmp(neuralRecord.ai_parameters.channelConfiguration,'photodiode'));
-            pulseInd=find(strcmp(neuralRecord.ai_parameters.channelConfiguration,'framePulse'));
-            allPhysInds = find(~cellfun(@isempty, strfind(neuralRecord.ai_parameters.channelConfiguration,'phys')));
-            
+            else
+                temporary = stochasticLoad(fullfile(analysisPathByChannel,'spikeRecordCumulative.mat'));
+                spikeRecordCumulative.channelInd = temporary.spikeRecordCumulative.channelInd;
+                spikeRecordCumulative.samplingRate = temporary.spikeRecordCumulative.samplingRate;
+                spikeRecordCumulative.spikes = temporary.spikeRecordCumulative.spikes;
+                spikeRecordCumulative.spikeWaveforms = temporary.spikeRecordCumulative.spikeWaveforms;
+                spikeRecordCumulative.spikeTimestamps = temporary.spikeRecordCumulative.spikeTimestamps;
+                spikeRecordCumulative.assignedClusters = temporary.spikeRecordCumulative.assignedClusters;
+                spikeRecordCumulative.chunkID=temporary.spikeRecordCumulative.chunkID;
+            end
             spikeRecord.spikeDetails=[];
             spikeRecord.samplingRate=neuralRecord.samplingRate;
             spikeDetectionParams.samplingFreq=neuralRecord.samplingRate; % always overwrite with current value
@@ -155,107 +188,23 @@ for currentChunkInd=1:size(chunksToProcess,1)
             [spikeRecord.spikes spikeRecord.spikeWaveforms spikeRecord.spikeTimestamps spikeRecord.assignedClusters ...
                 spikeRecord.rankedClusters]=...
                 getSpikesFromNeuralData(neuralRecord.neuralData(:,thisPhysChannelInd),neuralRecord.neuralDataTimes,...
-                spikeDetectionParams,spikeSortingParams,analysisPath);
+                spikeDetectionParams,spikeSortingParams,analysisPathByChannel);
+            
             spikeRecord.chunkID=ones(length(spikeRecord.spikes),1)*chunksToProcess(currentChunkInd);
-            spikeRecord.chunkIDForDetails=chunksToProcess(currentChunkInd);
-            spikeRecord.trialNum=ones(length(spikeRecord.spikes),1)*currentTrialNum;
-            spikeRecord.trialNumForDetails=currentTrialNum;
             
-            if exist(spikeRecordLocation,'file')
-                prev=stochasticLoad(spikeRecordLocation);
-                
-                try
-                    % 6/3/09 - offset each chunk's stimInds by the last stimInd from previous chunk (moved 2/2/10)
-                    %maybe it should be after the ~proccessed || overwriteAll else
-                    which=find(prev.trialNumForCorrectedFrames==currentTrial);
-                    if ~isempty(which)
-                        startingStimIndAdjustment=max(prev.stimInds(which));
-                        startingSampleIndAdjustment=prev.correctedFrameIndices(which(end))+numPaddedSamples;
-                    else
-                        startingStimIndAdjustment=0;
-                        startingSampleIndAdjustment=0;
-                    end
-                catch ex
-                    warning('a prob here')
-                    keyboard
-                    rethrow(ex)
-                end
-                if prev.correctedFrameIndices(end)~=prev.frameIndices(end)
-                    corrected=prev.correctedFrameIndices(end)
-                    raw=prev.frameIndices(end)
-                    error('the end frame was assumed to be the same... will this mess things up?')
-                end
-            else
-                prev.spikes=[];
-                prev.spikeWaveforms=[];
-                prev.spikeTimestamps=[];
-                prev.assignedClusters=[];
-                prev.spikeDetails=[];
-                prev.frameIndices=[];
-                prev.frameTimes=[];
-                prev.frameLengths=[];
-                prev.correctedFrameIndices=[];
-                prev.correctedFrameTimes=[];
-                prev.correctedFrameLengths=[];
-                prev.stimInds=[];
-                prev.photoDiode=[];
-                prev.passedQualityTest=[];
-                prev.samplingRate=[];
-                prev.chunkID=[];
-                prev.chunkIDForFrames=[];
-                prev.chunkIDForCorrectedFrames=[];
-                prev.chunkIDForDetails=[];
-                prev.trialNum=[];
-                prev.trialNumForFrames=[];
-                prev.trialNumForCorrectedFrames=[];
-                prev.trialNumForDetails=[];
-                prev.LFPRecord.data = [];
-                prev.LFPRecord.dataTimes = [];
-                prev.LFPRecord.LFPSamplingRateHz = [];
-                startingStimIndAdjustment=0;
-                startingSampleIndAdjustment=0;
-                
-            end
-            % now append! (and take acount chunk counters like startingStimIndAdjustment startingSampleIndAdjustment)
+            spikeRecordCumulative.samplingRate = [spikeRecordCumulative.samplingRate];
+            spikeRecordCumulative.spikes = [spikeRecordCumulative.spikes;spikeRecord.spikes];
+            spikeRecordCumulative.spikeWaveforms = [spikeRecordCumulative.spikeWaveforms;spikeRecord.spikeWaveforms]
+            spikeRecordCumulative.spikeTimestamps = [spikeRecordCumulative.spikeTimestamps;spikeRecord.spikeTimestamps];
+            spikeRecordCumulative.assignedClusters = [spikeRecordCumulative.assignedClusters;spikeRecord.assignedClusters]
+            spikeRecordCumulative.chunkID=[spikeRecordCumulative.chunkID;spikeRecord.chunkID];
             
-            spikes=[prev.spikes;spikeRecord.spikes                                                  + startingSampleIndAdjustment];
-            spikeWaveforms=[prev.spikeWaveforms;spikeRecord.spikeWaveforms];
-            spikeTimestamps=[prev.spikeTimestamps;spikeRecord.spikeTimestamps];
-            assignedClusters=[prev.assignedClusters;spikeRecord.assignedClusters];
-            spikeDetails=[prev.spikeDetails;spikeRecord.spikeDetails];
-            frameIndices=[prev.frameIndices;spikeRecord.frameIndices                                + startingSampleIndAdjustment];
-            frameTimes=[prev.frameTimes;spikeRecord.frameTimes];
-            frameLengths=[prev.frameLengths;spikeRecord.frameLengths];
-            correctedFrameIndices=[prev.correctedFrameIndices;spikeRecord.correctedFrameIndices     + startingSampleIndAdjustment];
-            correctedFrameTimes=[prev.correctedFrameTimes;spikeRecord.correctedFrameTimes];
-            correctedFrameLengths=[prev.correctedFrameLengths;spikeRecord.correctedFrameLengths];
-            stimInds=[prev.stimInds;spikeRecord.stimInds                                            + startingStimIndAdjustment];
-            photoDiode=[prev.photoDiode;spikeRecord.photoDiode];
-            passedQualityTest=[prev.passedQualityTest;spikeRecord.passedQualityTest];
-            samplingRate=[prev.samplingRate;spikeRecord.samplingRate];
-            chunkID=[prev.chunkID;spikeRecord.chunkID];
-            chunkIDForFrames=[prev.chunkIDForFrames;spikeRecord.chunkIDForFrames];
-            chunkIDForCorrectedFrames=[prev.chunkIDForCorrectedFrames;spikeRecord.chunkIDForCorrectedFrames];
-            chunkIDForDetails=[prev.chunkIDForDetails;spikeRecord.chunkIDForDetails];
-            trialNum=[prev.trialNum;spikeRecord.trialNum];
-            trialNumForFrames=[prev.trialNumForFrames;spikeRecord.trialNumForFrames];
-            trialNumForCorrectedFrames=[prev.trialNumForCorrectedFrames;spikeRecord.trialNumForCorrectedFrames];
-            trialNumForDetails=[prev.trialNumForDetails;spikeRecord.trialNumForDetails];
-            LFPRecord.data = [prev.LFPRecord.data; spikeRecord.LFPRecord.data];
-            LFPRecord.dataTimes = [prev.LFPRecord.dataTimes; spikeRecord.LFPRecord.dataTimes];
-            LFPRecord.LFPSamplingRateHz= [prev.LFPRecord.LFPSamplingRateHz;spikeRecord.LFPSamplingRateHz];
-            
-            
-            
-        catch ex
-            disp(['CAUGHT EX: ' getReport(ex)])
-            %             break
-            % 11/25/08 - restart dir loop if tried to load corrupt file
-            rethrow(ex)
-            error('failed to load from file');
+           % save the cumulative spikeRecord
+           currentCumulativeRecordLocation = fullfile(analysisPathByChannel,'spikeRecordCumulative.mat')
+           save(currentCumulativeRecordLocation,'spikeRecordCumulative');
+           % rename the model files of klusta here to keep them for the next series
+           m
         end
-    end
-    
-    
-    
+        clear (sprintf('chunk%d',chunksToProcess(currentChunkInd)));
+        
 end

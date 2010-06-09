@@ -4105,8 +4105,8 @@ if false
     psth=psthAux(rasters,pbins);
 bpsth=psthAux(bursts,pbins);
 else
-psth=psthAux({tonicTimes},pbins,d);
-bpsth=psthAux({burstTimes},pbins,d);    
+psth=double(psthAux({tonicTimes},pbins,d));
+bpsth=double(psthAux({burstTimes},pbins,d));    
 end
 
 fpsth=bpsth./(psth+bpsth);
@@ -4245,7 +4245,7 @@ end
             out=out([ex numShuffle-ex+1],:);
         end
         in=sort(in);
-        in=in([ex numShuffle-ex+1],:);
+        in=double(in([ex numShuffle-ex+1],:));
     end
 
 psthRng=central(psths);

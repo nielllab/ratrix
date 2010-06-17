@@ -201,7 +201,7 @@ end
 
 %add on day transitions
 if dayTransitionsOn
-    [trialsPerDay]=makeDailyRaster(d.correct,d.date);  %in terms of ALL trials correction and kills, RETURN trialsPerDay
+    [trialsPerDay]=makeDailyRaster(d.correct,d.response,d.date);  %in terms of ALL trials correction and kills, RETURN trialsPerDay
     trialsCompletedBy=cumsum(trialsPerDay);
     for i=1:length(trialsPerDay)
         plot([trialsCompletedBy(i),trialsCompletedBy(i)], [stepYTop,axMax],'color',[.9,.9,.9])

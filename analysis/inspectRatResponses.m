@@ -123,8 +123,8 @@ contextInfo=[subject '; ' datestr(min(d.date),22) ' to ' datestr(max(d.date),22)
 shortTitle=[subject ' ' datestr(max(d.date),6)];
 
 %per day analysis
-[trialsPerDay correctPerDay]=makeDailyRaster(d.correct,d.date,d.date>0,smoothingWidth,60*12,subject,0,handles,subplotParams,0,0);  %in terms of ALL trials correction and kills, RETURN trialsPerDay
-[goodTrialsPerDay correctPerDay]=makeDailyRaster(d.correct,d.date,goods,smoothingWidth,60*12,subject,0,handles,subplotParams,0,0);
+[trialsPerDay correctPerDay]=makeDailyRaster(d.correct,d.response,d.date,d.date>0,smoothingWidth,60*12,subject,0,handles,subplotParams,0,0);  %in terms of ALL trials correction and kills, RETURN trialsPerDay
+[goodTrialsPerDay correctPerDay]=makeDailyRaster(d.correct,d.response,d.date,goods,smoothingWidth,60*12,subject,0,handles,subplotParams,0,0);
 
 if p.plotTrialsPerDay
     doPlot('plotTrialsPerDay',d,handles(find(strcmp('plotTrialsPerDay',whichPlots))),subplotParams.y, subplotParams.x, subplotParams.index)
@@ -136,10 +136,21 @@ if p.plotTrialsPerDay
     title(shortTitle)
 end
 
-if p.plotResponseDensity || p.plotResponseRaster
-    hInd=[find(strcmp('plotResponseDensity',whichPlots)) find(strcmp('plotResponseRaster',whichPlots))];
+if p.plotResponseDensity 
+    hInd=[find(strcmp('plotResponseDensity',whichPlots))];
     figure(handles(hInd)); subplot(subplotParams.y, subplotParams.x, subplotParams.index);
-    junk=makeDailyRaster(d.correct(goods),d.date(goods),smoothingWidth,5,subject,1,handles,subplotParams,plotResponseDensity,plotResponseRaster); %in terms of good trials, PLOT NOT SAVED
+    plotResponseDensity=1;
+    plotResponseRaster=0;
+    junk=makeDailyRaster(d.correct,d.response,d.date,goods,smoothingWidth,5,subject,1,handles,subplotParams,plotResponseDensity,plotResponseRaster); %in terms of good trials, PLOT NOT SAVED
+end
+
+if  p.plotResponseRaster
+    hInd=[find(strcmp('plotResponseRaster',whichPlots))];
+    figure(handles(hInd)); subplot(subplotParams.y, subplotParams.x, subplotParams.index);
+    plotResponseDensity=0;
+    plotResponseRaster=1;
+    %[trialsPerDay
+    junk=makeDailyRaster(d.correct,d.response,d.date,goods,smoothingWidth,5,subject,1,handles,subplotParams,plotResponseDensity,plotResponseRaster); %in terms of good trials, PLOT NOT SAVED
 end
 
 %[d.correctInRow runEnds
@@ -475,27 +486,27 @@ end
 if p.plotEvenMoreLickAndRT
     %reaction time sorted by contrast
     figure
-    r1=histc(threshedResponseTime(goods & d.targetContrast==0    & d.date>now-10),[0:threshold/50:threshold]);
-    r2=histc(threshedResponseTime(goods & d.targetContrast==0.5  & d.date>now-10),[0:threshold/50:threshold]);
-    r3=histc(threshedResponseTime(goods & d.targetContrast==0.75 & d.date>now-10),[0:threshold/50:threshold]);
-    r4=histc(threshedResponseTime(goods & d.targetContrast==1    & d.date>now-10),[0:threshold/50:threshold]);
+    r1=histc(threshedResponseTime(goods & d.targetContrast==0    ),[0:threshold/50:threshold]);
+    r2=histc(threshedResponseTime(goods & d.targetContrast==0.5  ),[0:threshold/50:threshold]);
+    r3=histc(threshedResponseTime(goods & d.targetContrast==0.75 ),[0:threshold/50:threshold]);
+    r4=histc(threshedResponseTime(goods & d.targetContrast==1    ),[0:threshold/50:threshold]);
     bar([r1/sum(r1); r2/sum(r2); r3/sum(r3); r4/sum(r4) ]')
     
     %num licks sorted by contrast
     
-    L1=histc(single(d.numRequestLicks(goods & d.targetContrast==0    & d.date>now-10)),[0:12]);
-    L2=histc(single(d.numRequestLicks(goods & d.targetContrast==0.5    & d.date>now-10)),[0:12]);
-    L3=histc(single(d.numRequestLicks(goods & d.targetContrast==1    & d.date>now-10)),[0:12]);
+    L1=histc(single(d.numRequests(goods & d.targetContrast==0   )),[0:12]);
+    L2=histc(single(d.numRequests(goods & d.targetContrast==0.5 )),[0:12]);
+    L3=histc(single(d.numRequests(goods & d.targetContrast==1   )),[0:12]);
     bar([L1/sum(L1); L2/sum(L2); L3/sum(L3)]')
     
     %this explains the jaggies: takes longer BECAUSE doing hastily doing more center licks
     figure
     these=goods & d.targetContrast==0   & d.date>now-10;
-    plot(single(d.numRequestLicks(these))-0.2,threshedResponseTime(these),'.', 'MarkerSize',5,'color',[.2,.8,.2]); hold on
+    plot(single(d.numRequests(these))-0.2,threshedResponseTime(these),'.', 'MarkerSize',5,'color',[.2,.8,.2]); hold on
     these=goods & d.targetContrast==0.5 & d.date>now-10;
-    plot(single(d.numRequestLicks(these)),    threshedResponseTime(these),'.', 'MarkerSize',5,'color',[.8,.2,.2])
+    plot(single(d.numRequests(these)),    threshedResponseTime(these),'.', 'MarkerSize',5,'color',[.8,.2,.2])
     these=goods & d.targetContrast==1   & d.date>now-10;
-    plot(single(d.numRequestLicks(these))+0.2,threshedResponseTime(these),'.', 'MarkerSize',5,'color',[.2,.2,.8]); hold off
+    plot(single(d.numRequests(these))+0.2,threshedResponseTime(these),'.', 'MarkerSize',5,'color',[.2,.2,.8]); hold off
     axis( [1 12 0 10])
 end
 
@@ -524,7 +535,7 @@ if p.plotMotorResponsePattern
         %find(~manualKill & ~dualResponse),
         disp(['Doing motor response pattern number' num2str(i)])
         plot(frequency(i,:),'color',color(i,:))  % not perfectly aligned with trials
-        title(sprintf('Response Pattern Frequency, past %d trials, %s',smoothingWidth*5,contextInfo))
+        title(sprintf('Response Pattern Frequency, past %d trials, %s',smoothingWidth*5,char(contextInfo)))
         ylabel('Frequency'); xlabel('Trial');
     end
     axis( [1 max([totalTrials 2]) 0 0.25])
@@ -1202,6 +1213,8 @@ if p.plotPerformancePerDaysTrial
         plot(mn,'k')
     end
     maxTrials=max([size(perfPerDay,2) 2])
+    axMin=0.3;
+    axMax=1;
     axis( [1 maxTrials axMin axMax])
     
     set(gca,'YTickLabel','50%|85%|100%')

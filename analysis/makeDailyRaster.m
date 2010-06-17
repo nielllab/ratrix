@@ -1,4 +1,4 @@
-function [trialsPerDay correctPerDay]=makeDailyRaster(correct,date,which,smoothingWidthForPerformance,minsPerBin,subject,usingPerformance,handles,subplotParams,plotResponseDensity,plotResponseRaster,savePath)
+function [trialsPerDay correctPerDay]=makeDailyRaster(correct,response,date,which,smoothingWidthForPerformance,minsPerBin,subject,usingPerformance,handles,subplotParams,plotResponseDensity,plotResponseRaster,savePath)
 %[trialsPerDay correctPerDay]=makeDailyRaster(d.correct,d.date);
 %[trialsPerDay correctPerDay]=makeDailyRaster(d.correct,d.date,[],100,60*12,subject,1,1,savePath);
 %junk=makeDailyRaster(d.correct,d.date,goods,smoothingWidth,5,subject,1,handles,subplotParams,plotResponseDensity,plotResponseRaster); %in terms of good trials, PLOT NOT SAVED
@@ -38,6 +38,7 @@ if numTrials>0
     %make sure the bins come from the same time bin, regardless which are selected for analysis
          correct=[correct(1) correct(which) correct(end)];
          date=[date(1) date(which) date(end)]; 
+         response=[response(1) response(which) response(end)]; % only used for raster dots now. not core
       
     
     
@@ -52,7 +53,7 @@ if numTrials>0
         disp(['calculating dates in daily raster for ' num2str(numTrials) ' trials'])
     end
 
-    empty=zeros(1,numTrials);
+    empty=zeros(1,length(date));
 
     [year month day hour minute seconds]=datevec(date);
     absDay=datenum(year, month, day);
@@ -152,11 +153,17 @@ if numTrials>0
 
 
     if plotResponseRaster
-        error('turned off.. handle figures  better')
+        %error('turned off.. handle figures  better')
         contextInfo=[subject ' between ' datestr(min(date),22) ' and ' datestr(max(date),22)];
         correct=logical(correct);
-        hold off; plot(pctTime(correct),    dayAfterStart(dayIndex(correct)),'g.');
-        hold on;  plot(pctTime(~correct),0.2+dayAfterStart(dayIndex(~correct)),'r.'); title(['Right and Wrong Raster for ' contextInfo])
+        response=response-2; %making it -/+ 1 for left/right
+        hold on; plot(pctTime( correct),0.1*response( correct)+dayAfterStart(dayIndex( correct)),'g.');
+        hold on;  plot(pctTime(~correct),0.1*response(~correct)+dayAfterStart(dayIndex(~correct)),'r.'); 
+        %plot(pctTime(~response),0.1+dayAfterStart(dayIndex(~response==1)),'r.'); %after the -2 these are the rightwards
+        title(['Right and Wrong Raster for ' contextInfo])
+        
+
+        
         xlabel('Time of Day')
         ylabel(['Days after ' datestr(max(date),22)])
         set(gca,'YTick',[0 max(dayAfterStart)])

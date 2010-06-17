@@ -83,10 +83,12 @@ switch method
         %er=erfinv(1-alpha/2)*sqrt(var);
         %er=erfinv(1-alpha/2)*sqrt(var); % used erf before Jan 1st 2009
         er=norminv(1 - alpha/2, 0, 1).*sqrt(var); % used after looking at ztest.m... is this right?
+        %er=norminv(1 - alpha/2, 0, sqrt(var)); % same thing
    
         CI(1,:)=delta-er;
         CI(2,:)=delta+er;  
     case 'agrestiCaffo'
+        
         %similar to wald, but deals with small numbers more gracefully
         %add one positive and one negative observation
         x1=x1+1;

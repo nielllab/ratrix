@@ -74,7 +74,7 @@ imWidthFrac=imWidth/(n+1);  % normalized to figure width
 imHeightFrac=imWidthFrac*imSize(1)/imSize(2); % normalized to figure height
 imHeight=imHeightFrac*ht; % normalized to figure height, units of y axis
 
-textBelowBarTop=ht/25; %in yaxis pctCorrect units, how do I calculate this, given that figures rescale?
+textBelowBarTop=ht/20; %in yaxis pctCorrect units, how do I calculate this, given that figures rescale?
 
 
 hold on

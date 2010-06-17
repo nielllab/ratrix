@@ -54,14 +54,12 @@ if ~exist('removeNonTilted','var') || isempty(removeNonTilted)
     removeNonTilted=true;
 end
 
-
-
-
 %for output
 params.settings.conditionType=conditionType;
 params.settings.filterType=filterType;
 params.settings.dateRange=dateRange;
 params.settings.goodTrialType=goodTrialType;
+
 
 numRealSubjects=length(subjects);
 %add shuffle
@@ -168,8 +166,11 @@ for i=1:numRealSubjects
         if any(abs(meanPct-pctThisContrast(2:end))>meanPct*0.1)
             warning('greater than 10% count different between contrast conditions')
         end
-        if abs((pctThisContrast(1)-sum(pctThisContrast(2:end))))>0.05 & ~special138_139data(d)
+        if abs((pctThisContrast(1)-sum(pctThisContrast(2:end))))>0.05 & ~special138_139data(d) & ~(ismember(d.info.subject{1},{'234','231'}) && all(d.step==16))
             error('every contrast should have a no-contrast pair: check assumption about the distribution of contrasts')
+            %some RT analysis have biases with slower (and not present in those analysis) 
+            %consider skipping if any of cell filterType.type contains
+            %'responseSpeed' or  'responseSpeedPercentile'
         end
         
     end
@@ -290,7 +291,7 @@ for i=1:numRealSubjects
             firstInd=min(find(conditionInds(j,:)));
             if  ~isempty(firstInd)
                 switch conditionType
-                    case {'16flanks','8flanks','8flanks+','allRelativeTFOrientationMag','8flanks+&nfMix','8flanks+&nfBlock','8flanks+&nfMix&nfBlock'}
+                    case {'16flanks','8flanks','8flanks+','allRelativeTFOrientationMag','8flanks+&nfMix','8flanks+&nfBlock','8flanks+&nfMix&nfBlock','8flanks+&thirds','8flanks+&tenths'}
                         params.factors.targetOrientation(i,j)=d.targetOrientation(firstInd);
                         params.factors.flankerOrientation(i,j)=d.flankerOrientation(firstInd);
                         params.factors.flankerPosAngle(i,j)=d.flankerPosAngle(firstInd);
@@ -383,7 +384,7 @@ for i=1:numRealSubjects
                     case 'FAs'
                         [stats(i,j,k)  CI(i,j,k,:)]=binofit(numFAs,numCRs+numFAs);
                     case 'RT'
-                        [params.RT.mean(i,j,1:numRTcategories) params.RT.std(i,j,1:numRTcategories) params.RT.fast(i,j,1:numRTcategories) params.RT.CI(i,j,1:numRTcategories,1:2) names.rtCategories]=getResponseStats(d,these,rtCategories);
+                        [params.RT.mean(i,j,1:numRTcategories) params.RT.std(i,j,1:numRTcategories) params.RT.fast(i,j,1:numRTcategories) params.RT.CI(i,j,1:numRTcategories,1:2) names.rtCategories params.RT.raw{i,j}]=getResponseStats(d,these,rtCategories);
                         stats(i,j,k)=params.RT.fast(i,j,find(strcmp('no',names.rtCategories)))-params.RT.fast(i,j,find(strcmp('yes',names.rtCategories)));
                         CI(i,j,k,:)=nan;
                     otherwise

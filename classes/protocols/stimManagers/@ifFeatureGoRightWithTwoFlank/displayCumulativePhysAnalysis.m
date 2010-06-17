@@ -38,7 +38,7 @@ numInstances=numCycles/numConditions; % these 2 terms are the same
     
 
 plotsRequested={'ratePerCondition','PSTH'};
-plotsRequested={'raster','viewSort'}; 
+%plotsRequested={'raster','viewSort'}; 
 if ~exist('plotsRequested','var') || isempty(plotsRequested)
     plotsRequested=c.plotsRequested;
 end

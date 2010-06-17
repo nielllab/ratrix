@@ -30,9 +30,9 @@ for i=1:length(categories)
         case 'all'
             thisCategory=ones(size(d.date));
         case 'correct'
-            thisCategory=d.correct;
+            thisCategory=d.correct==1;
         case 'incorrect'
-            thisCategory=~d.correct;
+            thisCategory=d.correct~=1;
         case 'yes'
             thisCategory=d.yes==1;
         case 'no'

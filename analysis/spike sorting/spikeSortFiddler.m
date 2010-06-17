@@ -8,8 +8,9 @@ stimClassToAnalyze={'all'}; timeRangePerTrialSecs=[0 Inf];
 % path='\\132.239.158.183\rlab_storage\pmeier\backup\devNeuralData_090310'; %b/c i can't see datanet_storage folder on .179
 % path='\\132.239.158.183\rlab_storage\pmeier\backup\neuralData_090505';
 % path='C:\Documents and Settings\rlab\Desktop\neural';
-%path='H:\datanetOutput'  % local
-path='\\132.239.158.179\datanet_storage'
+%path='\\132.239.158.179\datanet_storage' % streaming to C:
+path='H:\datanetOutput'  % local
+
 path='\\132.239.158.179\datanetOutput'  %on the G drive remote
 path='C:\Documents and Settings\rlab\My Documents\work\physiology data'  %on the G drive remote
 % path='C:\Documents and Settings\rlab\My Documents\work\physiology data'  %local computer

@@ -267,7 +267,7 @@ for k=1:numSubjects
                     end
                     
                     
-                    theDiff=params.mcmc.samples{k,cMatrix{i,1},statInd}-params.mcmc.samples{k,cMatrix{i,2},statInd};
+                    theDiff=params.mcmc.samples{subjectInd,cMatrix{i,1},statInd}-params.mcmc.samples{subjectInd,cMatrix{i,2},statInd};
                     deltas(i,j,k)=median(theDiff);
                     sorted=sort(theDiff);
                     ciInds=round(size(sorted,2).*[alpha/2 1-alpha/2]);
@@ -302,7 +302,7 @@ for k=1:numSubjects
                     xlabelStrings{j}=sprintf('change in %s',statTypes{j});
                     
                     %figure; hist(sampleDiff,100);  xlabel('p1-p2'); ylabel('count');
-                    title(sprintf('one rat- all %d samples  [%2.2f %2.2f]',length(sampleDiff),sorted(ciInds)));
+                    %title(sprintf('one rat- all %d samples  [%2.2f %2.2f]',length(sampleDiff),sorted(ciInds)));
                     %set(gca,'xtickLabel',[-5 -2.5 0 ],'xtick',[-5 -2.5 0 ],'yTick',[0 20 40], 'yTickLabel',[0 20 40])
                     %cleanUpFigure
                 otherwise
@@ -392,6 +392,16 @@ for i=1:numComparison
         
         [junk sigTTest(i,j)] = ttest(popStats,0,.05,'both');
         sigSignRank(i,j) = signrank(popStats,0);
+        [friedmanTest(i,j) table fstats]= friedman(params.stats(:,[cMatrix{i,[1 2]}],statInd),1,'off')
+        
+        %         %temp hack for mult compare on a known kind
+        %         kind=[9 10 11 12];
+        %         [junk table fstats]= friedman(params.stats(:,kind,statInd),1,'off');
+        %         [c,m,h,nms] = multcompare(fstats,'ctype','hsd','display','off');
+        %         kids=sort(find(ismember(kind,[cMatrix{i,[1 2]}])))
+        %         comparison=find(c(:,1)==kids(1) & c(:,2)==kids(2));
+        %         friedmanTest(i,j)= ~( c(comparison,3)>0 || c(comparison,5)<0) % the ~ makes it mimck a low p value when true and a high one when false
+        
         if length(popStats)>=4
             nonNormal(i,j)=lillietest(popStats);
         else
@@ -545,7 +555,7 @@ for j=1:numStats
                 thisMark=plot(deltas(i,j,subjectInd), yVal,mark, 'markerSize', 7, 'color', color);
                 
                 set(thisMark,'Marker',getMarkerSymbolForSubject(subjects(k)));
-                if ismember(labeledNames(k),{'r6','r7'})
+                if addNames && ismember(labeledNames(k),{'r6','r7'}) 
                     set(thisMark,'MarkerFaceColor',color);  %filled solid
                 else
                     set(thisMark,'MarkerFaceColor',[1 1 1]);  %open
@@ -595,15 +605,29 @@ for j=1:numStats
                 plot(delta(i,j), populationYVal, '.', 'markerSize', 7, 'color', color);
             end
             
-            if nonNormal(i,j)
-                %show t-test for reference, but include sign rank
-                %sigMsg=sprintf('p= %s 1-tail t-test\np= %s sign rank test',prettySciNotation(sigTTest(i,j)) ,prettySciNotation(sigSignRank(i,j) ));
-                sigMsg=sprintf('p= %s 1ttt\np= %s srt',prettySciNotation(sigTTest(i,j)) ,prettySciNotation(sigSignRank(i,j) ));
+            forceFriedmans=false;
+            if forceFriedmans
+                %sigMsg=sprintf('p= %s 1ttt\np= %s ft',prettySciNotation(sigTTest(i,j)) ,prettySciNotation(friedmanTest(i,j) ));
+                if friedmanTest(i,j) < 0.05
+                    sigMsg='*'
+                else
+                    sigMsg='';
+                end
             else
-                %t-test is good enough cuz it passed lille test
-                %sigMsg=sprintf('p= %s 1-tail t-test',prettySciNotation(sigTTest(i,j)));
-                %sigMsg=sprintf('p=%s',prettySciNotation(sigTTest(i,j)));
-                sigMsg=sprintf('%s',prettySciNotation(sigTTest(i,j)));
+                if nonNormal(i,j)
+                    %show t-test for reference, but include sign rank
+                    %sigMsg=sprintf('p= %s 1-tail t-test\np= %s sign rank test',prettySciNotation(sigTTest(i,j)) ,prettySciNotation(sigSignRank(i,j) ));
+                    sigMsg=sprintf('p= %s 1ttt\np= %s srt',prettySciNotation(sigTTest(i,j)) ,prettySciNotation(sigSignRank(i,j) ));
+                else
+                    %t-test is good enough cuz it passed lille test
+                    %sigMsg=sprintf('p= %s 1-tail t-test',prettySciNotation(sigTTest(i,j)));
+                    %sigMsg=sprintf('p=%s',prettySciNotation(sigTTest(i,j)));
+                    sigMsg=sprintf('%s',prettySciNotation(sigTTest(i,j)));
+                end
+            end
+            addLillie=false;
+            if addLillie && nonNormal(i,j)
+                sigMsg=[sigMsg '-notNorm'];
             end
             
             disp(sigMsg);

@@ -87,7 +87,8 @@ else
         out.actualFlankerOnsetTime=ones(1,length(trialRecords))*nan;
         for i=1:length(trialRecords)
             
-           if trialRecords(i).stimDetails.flankerOnOff(2)==21 && trialRecords(i).stimDetails.targetOnOff(2)==26
+           if 0 && ~isnan(trialRecords(i).stimDetails.flankerOnOff) && isnan(trialRecords(i).stimDetails.targetOnOff) ...
+                   && trialRecords(i).stimDetails.flankerOnOff(2)==21 && trialRecords(i).stimDetails.targetOnOff(2)==26
                warning('breaking here to inspect 231''s data, and method to calculate actualFlankerOnsetTime')
                keyboard
            end

@@ -5,9 +5,10 @@ close all;
 
 if ~exist('figID','var') || isempty(figID)
     figID=[ 2 3 4 6]; % 6
-    %figID=[3];  % test one of them
+    figID=[5];  % test one of them
     figID=[4 9];  % test one of them
-    figID=[4];  % test one of them
+    %figID=[2 4 5 7];  % sup fig ROC d' vs pct correct
+    figID=[1];  % test one of them
 end
 
 if ~exist('dateRange','var')
@@ -17,7 +18,7 @@ end
 if ~exist('statTypes','var')
     statTypes={'pctCorrect','CRs','FAs','hits','dpr','yes','crit','dprimeMCMC','criterionMCMC'}; % full, requires WINBUGs to be installed... try without MCMC if you need to
     statTypes={'pctCorrect','CRs','FAs','hits','dpr','yes','crit'}; % faster, but no error bars on dprim stats
-    statTypes={'pctCorrect','CRs','FAs','hits','dpr','yes','crit','pctCorrectMCMC'}; % try's the MCMC : confirm: 1) rank order of subjects, 2)which comparison, 3) MCMC params
+    %statTypes={'pctCorrect','CRs','FAs','hits','dpr','yes','crit','pctCorrectMCMC'}; % try's the MCMC : confirm: 1) rank order of subjects, 2)which comparison, 3) MCMC params
 end
 
 if ~exist('subjects','var')
@@ -149,7 +150,7 @@ if doFig1
         or,or,or,0.6,0,0.5,1/5 ,0,64;...  0.6 target contrast is used to render close perception of linearized contrast
         or,or,or,0.6,0,0.5,1/5 ,0,32;...
         or,or,or,0.6,0,0.5,1/16,0,32;...
-        or,or,or,0.6,0.6*0.1,0.5,1/16,3,32;...
+        or,or,or,0.6,0.6*0.2,0.5,1/16,3,32;...
         or,or,or,0.6,0.6*0.4,0.5,1/16,3,32}
     steps=[5:10];
     borderColors=jet(12);
@@ -370,25 +371,30 @@ for f=1:length(figID)
             or=[-1 1]*(or);
             sweptImageValues={or,or,or,1,1};
             borderColor=[.9 0 0; 0 .8 .8 ; 0 .8 .8 ; .2 .2 .2; .2 .2 .2; 0 .8 .8 ; 0 .8 .8 ; .9 0 0];
+            borderColor(:)=0;  %its been scrambled, not fixed yet
             montageSize=[1 4];
-            montageReorder=[1 5 2 6]; %[1 4 2 3]; old prioriized position, this new hold target orientation constant
+            montageReorder=[1 2 6 5]; %[1 5 2 6]; %[1 4 2 3]; old prioriized position, this new hold target orientation constant
             barImageOrder=montageReorder;
             rocReorder=[1 5];
             barGroups={}; % add grouped labels
             
             filter{1}.type='9.4';                   % use flanker present at contrast .4 with target at contratst 1.0, and no flanks mixed in to the nf analysis
             conditionType='8flanks+';               % lump popout and non-popout groups
-            useConds={'colin','para','changeFlank','changeTarget'};  % display these conditions
-            condRename={'col','par','pop_1','pop_2'};% rename them this way
-            colors=[.9 0 0; .2 .2 .2; 0 .8 .8 ; 0 .8 .8 ];                     % assign these colors
+            %useConds={'colin','para','changeFlank','changeTarget'};  % display these conditions
+            %condRename={'col','par','pop_1','pop_2'};% rename them this way
+            useConds={'colin','changeFlank','changeTarget','para'};  % display these conditions
+            condRename={'col','pop_1','pop_2','par'};   % rename them this way
+            colors=[.9 0 0; 0 .8 .8 ; 0 .8 .8 ; .2 .2 .2];  %[.1 .2 .5] old hybrid color            
             %cMatrix={[1],[2]};                      % emphasize this comparison, calculate it from first arrow
-            arrows={'para','colin'};          % arrows from A-->B
+            arrows={'changeFlank','colin'};          % arrows from A-->B
             ROCuseConds=arrows;
             
-            %switch to 6 subplots:
-            subPlotOrder=[1 3 5];
-            sx=2;sy=3;
-            settings.PaperPosition=[.5 .5 3.5 5];
+            
+
+            %%switch to 6 subplots:
+            %subPlotOrder=[1 3 5];
+            %sx=2;sy=3;
+            %settings.PaperPosition=[.5 .5 3.5 5];
         case 5
             %phase
             sweptImageParameters={'flankerOrientation','targetOrientation','flankerPosAngle','targetContrast','flankerContrast','flankerPhase'}; % why does contrast have to be last?
@@ -770,7 +776,12 @@ for f=1:length(figID)
     viewPopulationMeanAndCI=false;
     yScaling=[60 10 30 0]%[50 25 25 0];
     padFraction=0;
-    [delta deltaCI deltas deltaCIs]=viewFlankerComparison(names,params,cMatrix,{'pctCorrectMCMC'},subjects,diffEdges,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors, displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction)
+    
+    %normal
+    [delta deltaCI deltas deltaCIs]=viewFlankerComparison(names,params,cMatrix,{'pctCorrect'},subjects,diffEdges,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors, displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction)
+        
+    % pctCorrectMCMC
+    %[delta deltaCI deltas deltaCIs]=viewFlankerComparison(names,params,cMatrix,{'pctCorrectMCMC'},subjects,diffEdges,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors, displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction)
     
     %VIEW THE SHUFFLES EXPLICITLY
     %addNames=assignLabeledNames(names.subjects);
@@ -794,47 +805,88 @@ for f=1:length(figID)
         case 2
             subplot(2,2,1); settings.alphaLabel='a'; cleanUpFigure(gca,settings)
             subplot(2,2,2); settings.alphaLabel='b'; cleanUpFigure(gca,settings)
-            subplot(2,2,3); settings.alphaLabel='c'; cleanUpFigure(gca,settings)
+            subplot(2,2,3); 
+            settings=rmfield(settings,'alphaLabel'); cleanUpFigure(gca,settings)
+            %settings.alphaLabel='c'; cleanUpFigure(gca,settings)
 
-             ys=ylim; xs=xlim; fractionOutOfCorner=[1.5 1.1]; %these fractions work for tiff's but not figs or bmp's
-            x=xs(1)+fractionOutOfCorner(1)*range(xs);
-            y=ys(1)+fractionOutOfCorner(2)*range(ys);
-              text(x,y, 'd',...
+ 
+            %dunno why this hack is more even than the measured thing
+             x=-24;
+              text(-24,47, 'c',...
                 'fontSize',settings.fontSize,'HorizontalAlignment','right','VerticalAlignment','bottom','fontweight','b');
         
+            
+            
             modelAxis=subplot(2,2,4); 
-            modelImagePath='\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\pmeier\flankerSupport\ppt figures in progress\TIFF_models5';
-            im=imread(fullfile(modelImagePath,'modelsAlone5-contrastNorm.tif'));
+            %modelImagePath='\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\pmeier\flankerSupport\ppt figures in progress\TIFF_models5';
+            %im=imread(fullfile(modelImagePath,'modelsAlone5-contrastNorm.tif'));
+            
+            modelImagePath='\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\pmeier\flankerSupport\ppt figures in progress\TIFF_Models9';
+            im=imread(fullfile(modelImagePath,'modelsAlone6.tif'));
+           
             imshow(im(:,:,1:3));
             set(modelAxis,'Position',[0.54 0.0 0.4 0.5])
-
+            
             set(modelAxis,'Visible','off','box','off')
             
-            %saveFigs(savePath,figureType,allFigID,resolution,renderer);
-            %h=8
-         
-        case 4
-            %
-            singleAxis=subplot(3,2,1); settings.alphaLabel='a'; cleanUpFigure(gca,settings)
-            groupAxis=subplot(3,2,3); settings.alphaLabel='b'; cleanUpFigure(gca,settings)
-            compareAxis=subplot(3,2,5); settings.alphaLabel='c'; cleanUpFigure(gca,settings)
-            
-            singleAxis=subplot(3,2,1);
-            ys=ylim; xs=xlim; fractionOutOfCorner=[1.4 1.1]; %these fractions work for tiff's but not figs or bmp's
+            subplot(2,2,3); 
+            ys=ylim; xs=xlim; fractionOutOfCorner=[1.5 1.1]; %these fractions work for tiff's but not figs or bmp's
             x=xs(1)+fractionOutOfCorner(1)*range(xs);
             y=ys(1)+fractionOutOfCorner(2)*range(ys);
-              text(x,y, 'd',...
+            text(x,y, 'd',...
                 'fontSize',settings.fontSize,'HorizontalAlignment','right','VerticalAlignment','bottom','fontweight','b');
-        
             
-            %SUBPLOT: model
-            modelAxis=subplot(1,2,2); 
-            modelImagePath='\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\pmeier\flankerSupport\ppt figures in progress\TIFF_models5';
-            im=imread(fullfile(modelImagePath,'modelsAlone5-full.tif'));
-            imshow(im(:,:,1:3));
-            set(modelAxis,'Position',[0.54 0.03 0.4 0.9])
-            %axis square;
-            set(modelAxis,'Visible','off','box','off')
+            h=8
+           %saveFigs(savePath,figureType,allFigID,resolution,renderer);
+
+        case 4
+            %
+            
+            compareAxis2=subplot(2,2,4); 
+            arrows={'para','colin'};          % arrows from A-->B
+            cMatrix{1}=find(strcmp(names.conditions,arrows{1,2}));
+            cMatrix{2}=find(strcmp(names.conditions,arrows{1,1}));
+            cMatrixNames{1}=condRename{find(strcmp(useConds,arrows{1,1}))};
+            cMatrixNames{2}=condRename{find(strcmp(useConds,arrows{1,2}))};
+            [delta deltaCI deltas deltaCIs]=viewFlankerComparison(names,params,cMatrix,{'pctCorrect'},subjects,diffEdges,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors, displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction)
+            
+            plot(diffEdges(1),diff(ylim)*(1-((yScaling(1)+yScaling(2)/2))/100),'ws','MarkerFaceColor',[1 1 1])
+            if includeTitles;  title('difference in % correct'); end
+            xlabel(sprintf('P(%s) - P(%s)', cMatrixNames{2},cMatrixNames{1}))
+            ylabel('count     rat ID    ');
+            axis square;
+            cleanUpFigure(figID(f),settings)
+            
+            singleAxis=subplot(2,2,1); settings.alphaLabel='a'; cleanUpFigure(gca,settings)
+            groupAxis=subplot(2,2,2); settings.alphaLabel='b'; cleanUpFigure(gca,settings)
+            compareAxis=subplot(2,2,3); settings.alphaLabel='c'; cleanUpFigure(gca,settings)
+            compareAxis2=subplot(2,2,4); settings.alphaLabel='d'; cleanUpFigure(gca,settings)
+          
+            
+
+          
+            
+            %             singleAxis=subplot(3,2,1); settings.alphaLabel='a'; cleanUpFigure(gca,settings)
+            %             groupAxis=subplot(3,2,3); settings.alphaLabel='b'; cleanUpFigure(gca,settings)
+            %             compareAxis=subplot(3,2,5); settings.alphaLabel='c'; cleanUpFigure(gca,settings)
+            %
+            %             singleAxis=subplot(3,2,1);
+            %             ys=ylim; xs=xlim; fractionOutOfCorner=[1.4 1.1]; %these fractions work for tiff's but not figs or bmp's
+            %             x=xs(1)+fractionOutOfCorner(1)*range(xs);
+            %             y=ys(1)+fractionOutOfCorner(2)*range(ys);
+            %               text(x,y, 'd',...
+            %                 'fontSize',settings.fontSize,'HorizontalAlignment','right','VerticalAlignment','bottom','fontweight','b');
+            %
+            
+            
+            %             %SUBPLOT: model
+            %             modelAxis=subplot(1,2,2);
+            %             modelImagePath='\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\pmeier\flankerSupport\ppt figures in progress\TIFF_models5';
+            %             im=imread(fullfile(modelImagePath,'modelsAlone5-full.tif'));
+            %             imshow(im(:,:,1:3));
+            %             set(modelAxis,'Position',[0.54 0.03 0.4 0.9])
+            %             %axis square;
+            %             set(modelAxis,'Visible','off','box','off')
 
         otherwise
             %old generic labeling
@@ -968,32 +1020,38 @@ for f=1:length(figID)
         
     end
     
-    if addFig7
+    if addFig7 && ismember(figID(f),[2 4 5])
         %%
         figure(7)
-        if figID(f)
-            ff=figID(f)-2; % main figs
-        else
-            ff=figID(f)-11   % supp stuff not plotted at the same time
+        %%
+        switch figID(f)
+            case 2
+                ff=0;
+            case 4
+                ff=1;
+            case 5
+                ff=2;
         end
+   
         doLegend=false;
         doCurve=false;
         doYesLine=false;
         doCorrectLine=false;
         sideText=false; %?
         doErrorBars=3; %ellipse
-        displaySignificance=true;
+        displaySignificance=false;
         addNames= [];
         arrows{3}=4;
         
-        rocIDs(ff+1)=subplot(4,2,(2*ff)+1); doHitFAScatter(stats,CI,names,params,subjects,ROCuseConds,doLegend,doCurve,doYesLine,doCorrectLine,sideText,doErrorBars,arrows)
+        rocIDs(ff+1)=subplot(3,3,(3*ff)+1); doHitFAScatter(stats,CI,names,params,subjects,ROCuseConds,doLegend,doCurve,doYesLine,doCorrectLine,sideText,doErrorBars,arrows)
         xlabel([])
-        set(gca,'XTickLabel',{'0','False Alarm Rate','1'})
-        title(sprintf('%s -> %s', cMatrixNames{1},cMatrixNames{2}))
+        set(gca,'XTickLabel',{'0','False Alarms','1'})
+        %title(sprintf('%s -> %s', cMatrixNames{1},cMatrixNames{2}))
         addCornerAxis();
         settings.LineWidth=1;
         settings.fontSize=12;
-        settings.alphaLabel=sprintf('%s',[97+ff]); cleanUpFigure(gca,settings); settings.alphaLabel=[];
+        settings.box='on';
+        %settings.alphaLabel=sprintf('%s',[97+ff]); cleanUpFigure(gca,settings); settings.alphaLabel=[];
         settings.fontSize=13;
         settings.textObjectFontSize=7;
         
@@ -1012,20 +1070,28 @@ for f=1:length(figID)
         %         subplot(8,4,(ff*8)+7); viewFlankerComparison(names,params,cMatrix,{'yes'},subjects,diffEdges,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors,displaySignificance); axis square;
         %         subplot(8,4,(ff*8)+8); viewFlankerComparison(names,params,cMatrix,{'dpr'},subjects,[],alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors,displaySignificance); axis square;
         
-        subplot(8,6,(ff*12)+4); viewFlankerComparison(names,params,cMatrix,{'pctCorrect'},subjects,diffEdges,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors,displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction); cleanMiniStat('correct')
-        subplot(8,6,(ff*12)+5); viewFlankerComparison(names,params,cMatrix,{'yes'},subjects,diffEdges,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors,displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction); cleanMiniStat('yes')
-        subplot(8,6,(ff*12)+6); viewFlankerComparison(names,params,cMatrix,{'hits'},subjects,diffEdges,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors,displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction); cleanMiniStat('hit')
-        if any(ismember(names.stats,'dprimeMCMC')) && any(ismember(names.stats,'criterionMCMC'))
-            subplot(8,6,(ff*12)+10); viewFlankerComparison(names,params,cMatrix,{'dprimeMCMC'},subjects,dprimeDiffRange,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors,displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction); cleanMiniStat('d''')
-            subplot(8,6,(ff*12)+11); viewFlankerComparison(names,params,cMatrix,{'criterionMCMC'},subjects,critDiffRange,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors,displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction); cleanMiniStat('criterion')
+        %MANY (use with rocIDs(ff+1)=subplot(4,2,(2*ff)+1))
+        %         subplot(8,6,(ff*12)+4); viewFlankerComparison(names,params,cMatrix,{'pctCorrect'},subjects,diffEdges,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors,displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction); cleanMiniStat('correct')
+        %         subplot(8,6,(ff*12)+5); viewFlankerComparison(names,params,cMatrix,{'yes'},subjects,diffEdges,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors,displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction); cleanMiniStat('yes')
+        %         subplot(8,6,(ff*12)+6); viewFlankerComparison(names,params,cMatrix,{'hits'},subjects,diffEdges,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors,displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction); cleanMiniStat('hit')
+        %         if any(ismember(names.stats,'dprimeMCMC')) && any(ismember(names.stats,'criterionMCMC'))
+        %             subplot(8,6,(ff*12)+10); viewFlankerComparison(names,params,cMatrix,{'dprimeMCMC'},subjects,dprimeDiffRange,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors,displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction); cleanMiniStat('d''')
+        %             subplot(8,6,(ff*12)+11); viewFlankerComparison(names,params,cMatrix,{'criterionMCMC'},subjects,critDiffRange,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors,displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction); cleanMiniStat('criterion')
+        %         else
+        %             subplot(8,6,(ff*12)+10); viewFlankerComparison(names,params,cMatrix,{'dpr'},subjects,dprimeDiffRange,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors,displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction); cleanMiniStat('d''')
+        %             subplot(8,6,(ff*12)+11); viewFlankerComparison(names,params,cMatrix,{'crit'},subjects,critDiffRange,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors,displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction); cleanMiniStat('criterion')
+        %         end
+        %         subplot(8,6,(ff*12)+12); viewFlankerComparison(names,params,cMatrix,{'FAs'},subjects,diffEdges,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors,displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction); cleanMiniStat('FA')
+        
+        % FEW (use with use with rocIDs(ff+1)=subplot(4,3,(2*ff)+1))
+        subplot(3,3,(ff*3)+2); viewFlankerComparison(names,params,cMatrix,{'pctCorrect'},subjects,diffEdges,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors,displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction); cleanMiniStat('correct')
+        if any(ismember(names.stats,'dprimeMCMC'))
+            subplot(3,3,(ff*3)+3); viewFlankerComparison(names,params,cMatrix,{'dprimeMCMC'},subjects,dprimeDiffRange,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors,displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction); cleanMiniStat('d''')
         else
-            subplot(8,6,(ff*12)+10); viewFlankerComparison(names,params,cMatrix,{'dpr'},subjects,dprimeDiffRange,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors,displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction); cleanMiniStat('d''')
-            subplot(8,6,(ff*12)+11); viewFlankerComparison(names,params,cMatrix,{'crit'},subjects,critDiffRange,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors,displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction); cleanMiniStat('criterion')
+            subplot(3,3,(ff*3)+3); viewFlankerComparison(names,params,cMatrix,{'dpr'},subjects,dprimeDiffRange,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors,displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction); cleanMiniStat('d''')
         end
-        subplot(8,6,(ff*12)+12); viewFlankerComparison(names,params,cMatrix,{'FAs'},subjects,diffEdges,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors,displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction); cleanMiniStat('FA')
         
-        
-        set(gcf,'Position',[0 40 700 1040])
+        set(gcf,'Position',[0 40 900 900])
         
     end
 end
@@ -1033,6 +1099,11 @@ end
 if addFig7
     
     %cleanUpFigure(rocIDs,settings)
+    for i=1:9
+        subplot(3,3,i); settings.alphaLabel=sprintf('%s',[96+i]); 
+        cleanUpFigure(gca,settings); 
+    end
+    settings.alphaLabel=[];
 end
 
 if addFig8
@@ -1161,10 +1232,11 @@ end
 if addFig9 && figID(f)==4
    figure(9)
     settings.PaperPosition=[.5 .5 3.5 5];
-   cMatrix={[9],[12];[11],[10];[9],[11];[10],[12];[9],[10];[11],[12]}
+   %cMatrix={[9],[12];[11],[10];[9],[11];[10],[12];[9],[10];[11],[12]}
+      cMatrix={[9],[10];[11],[12];[9],[12];[11],[10];[9],[11];[10],[12]}
   for si=1:6;
       subplot(3,2,si);
-      displaySignificance=true;
+      displaySignificance=false;
     viewFlankerComparison(names,params,cMatrix(si,:),{'pctCorrect'},subjects,diffEdges,alpha,doFigAndSub,addTrialNums,addNames,multiComparePerPlot,objectColors, displaySignificance,labelAxis,encodeSideRule,viewPopulationMeanAndCI,yScaling,padFraction)
     
     cMatrixNames{1}=condRename{find(strcmp(useConds,names.conditions{cMatrix{si,2}}))};
@@ -1183,14 +1255,22 @@ if addFig9 && figID(f)==4
     ylabel('count     rat ID    ');
     axis square;
   end
-          set(gcf,'Position',[0 40 600 640])
+  set(gcf,'Position',[0 40 600 640])
+  settings.alphaLabel=[];
   cleanUpFigure(gcf,settings)
+  subplot(3,2,1); settings.alphaLabel='a'; cleanUpFigure(gca,settings)
+  subplot(3,2,2); settings.alphaLabel='b'; cleanUpFigure(gca,settings)
+  subplot(3,2,3); settings.alphaLabel='c'; cleanUpFigure(gca,settings)
+  subplot(3,2,4); settings.alphaLabel='d'; cleanUpFigure(gca,settings)
+  subplot(3,2,5); settings.alphaLabel='e'; cleanUpFigure(gca,settings)
+  subplot(3,2,6); settings.alphaLabel='f'; cleanUpFigure(gca,settings)
+
   %% 
 end
 
 clearvars -except savePath figureType allFigID resolution renderer  % save memory for rendering / printing high resolution
 saveFigs(savePath,figureType,allFigID,resolution,renderer);
-
+% saveFigs('C:\Documents and Settings\rlab\Desktop\graphs',{'-dtiffn','png'},7,800,{'-opengl'})
 done=1;
 
 

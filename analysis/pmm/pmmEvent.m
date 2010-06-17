@@ -22,6 +22,8 @@ switch id
         %Mar.16,2008=datestr(ceil(d.date(max(find(d.targetContrast>0 & d.targetContrast<.7)))),22)
     case 'endToggle'
         date=datenum('Apr.13,2009')
+    case 'changeStimDurationMales' %targetOnOff now 1 21 (was breifly shorter)
+        date=datenum('May.05,2009');%datestr(now,21)  
     case 'firstBlocking'
         date=datenum('May.11,2009')
     case 'startBlocking10rats'

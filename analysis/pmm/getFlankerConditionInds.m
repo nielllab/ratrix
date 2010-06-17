@@ -1,7 +1,6 @@
 function [conditionInds names haveData colors d restrictedSubset]=getFlankerConditionInds(d,restrictedSubset,types);
 
 
-
 if ~exist('d', 'var') || isempty(d)
     d=getToyData({'detection'});
 end
@@ -73,7 +72,46 @@ end
         end
  end
 
-hasNF=strfind(types,'&nfBlock');
+
+ 
+ hasThirds=~isempty(strfind(types,'&thirds'));
+ hasTenths=~isempty(strfind(types,'&tenths'));
+ if hasThirds || hasTenths
+     
+     if ~isempty(strfind(types,'&nfBlock'));
+         error('bad mix of temporal fraction with nf block')
+     end
+     
+     if hasThirds & ~hasTenths
+         numB=3;
+         strLoc=strfind(types,'&thirds');
+         fractionType='thirds';
+     elseif hasTenths
+         numB=10;
+         strLoc=strfind(types,'&tenths');
+         fractionType='tenths';
+     else
+         error('should never')
+     end
+     
+     types(strLoc:strLoc+6)=[];
+     [c1 nm1 junk col1 d restrictedSubset]=getFlankerConditionInds(d,restrictedSubset,types);
+     types='skip';
+     [fractionConds fractionNames]=getFlankerConditionInds(d,restrictedSubset,fractionType);
+     numConds=size(c1,1);
+
+     conditionInds=nan(numB*numConds,size(c1,2));
+     for b=1:numB
+         for i=1:numConds
+             id=(b-1)*numConds+i;
+             conditionInds(id,:) =c1(i,:) & fractionConds(b,:);
+             colors(id,1:3)=col1(i,:);
+             names{id}=[nm1{i} '-b' num2str(b)];
+         end
+     end
+ end
+ 
+ hasNF=strfind(types,'&nfBlock');
 % this is a sneaky process where we "add in" the data for the same rat from
 % what is likely to be another step.  we have to update the data d and the
 % restrictedSubset to be analyzed  (likely to be the goods)
@@ -149,7 +187,8 @@ if ~isempty(hasNF)
         f=fields(d2);
         missed=f(~ismember(f,fields(d)))
         acceptableToMiss={'pixPerCyc','responseTime','actualRewardDuration','proposedPenaltyDuration','proposedRewardDuration','phantomContrast',...
-            'toggleStim','blockID','trialThisBlock','discrimStartRaw','preResponseStartRaw','trialStartRaw'}; % these might have removed b/c they are nans in later data, or nans in earlier data
+            'toggleStim','blockID','trialThisBlock','discrimStartRaw','preResponseStartRaw','trialStartRaw'...
+               'discrimStart','expectedPreRequestDurSec','responseWindowStartSec','responseWindowStopSec'}; % these might have removed b/c they are nans in later data, or nans in earlier data
         if all(ismember(missed,acceptableToMiss)) % these are fields that I have sanction its okay to be out of sync.  will be nanned on the missing side
             for i=1:length(missed)
                 d.(missed{i})=nan(size(d.date));
@@ -216,6 +255,26 @@ switch types
         conditionInds=ones(1,length(d.date));
         names = {'all'};
         colors=[ 0,0,0]; %black
+    case {'thirds','tenths'}
+        conditionInds=zeros(1,length(d.date));
+        ranked=find(restrictedSubset);
+        switch types
+            case 'thirds'
+                numB=3;
+            case 'tenths'
+                numB=10;
+        end
+
+        int=length(ranked)/numB;
+        for i=1:numB
+            ss=1+floor((i-1)*int);
+            ee=floor(i*int);
+            conditionInds(i,ranked(ss:ee))=1;
+        end
+        if length(d.date)>1 & ranked<numB*10
+            numTrialsHere=length(ranked)
+            error('all non-toy data must have at least 10 in each block for splitting')
+        end
     case 'fourFlankers'
         warning('only good for VH, not diagonal')
         VV=  d.targetOrientation==0 & d.flankerOrientation==0;
@@ -723,7 +782,19 @@ switch types
                 conditionInds(length(tps)*(i-1)+j,:)= d.targetPhase==tps(j) & c1(i,:);
                 names = [names, {[n1{i} '-p' num2str(j)]}];
             end
-        end 
+        end
+        col1=col1';
+        colors=reshape(repmat(col1(:),1,length(tps))',[],3);
+    case 'allTargetContrastAndPhase'
+        [c1 n1 j col1]=getFlankerConditionInds(d,restrictedSubset,'allTargetContrasts');
+        
+        tps=unique(d.targetPhase(~isnan(d.targetPhase)));
+        for i=1:length(n1)
+            for j=1:length(tps)
+                conditionInds(length(tps)*(i-1)+j,:)= d.targetPhase==tps(j) & c1(i,:);
+                names = [names, {[n1{i} '-p' num2str(j)]}];
+            end
+        end
         col1=col1';
         colors=reshape(repmat(col1(:),1,length(tps))',[],3);
     otherwise
@@ -734,7 +805,6 @@ end
 
 
 %disp(sprintf('\t all \tcolinear \t orthogonal\t orthogonal2 \tparallel \tnumTrials'))
-
 
 for j=1:size(conditionInds,1)
     conditionInds(j,:)= restrictedSubset & conditionInds(j,:);

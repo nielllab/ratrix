@@ -139,20 +139,34 @@ montage(images,'DisplayRange',[0 255],'Size',[2 8]); % or [2 2] if
 title('sample stimuli')
 
 %%
-figure
+figure(12)
 subplot(1,2,1)
 montage(images(:,:,:,[5 1]),'DisplayRange',[0 255],'Size',[1 2]);
-title('colinear example')
-xlabel('left = no                   right = yes')
+%title('colinear example')
+xlabel('left = no                 right = yes')
+
 
 subplot(1,2,2)
-montage(images(:,:,:,[1 3 2 4 9 11 10 12 ]),'DisplayRange',[0 255],'Size',[2 4]);
-title('stimulus grouping')
+%montage(images(:,:,:,[1 3 2 4 9 11 10 12 ]),'DisplayRange',[0 255],'Size',[2 4]);
+montage(images(:,:,:,[ 9 11 2 4 1 3 10 12]),'DisplayRange',[0 255],'Size',[2 4]);
+%title('stimulus grouping')
 set(gca,'xTick',diff(get(gca,'Xlim'))*[1:4]/5)
 set(gca,'xTickLabel',diff(get(gca,'Xlim'))*[1:4]/5)
-xlabel('col              po1                po2              par')
+xlabel('col       pop_1        pop_2        par')
 %set(gca,'xTickLabel',{'col','po1','po2','par'})
+%
+subplot(1,2,1)
+settings.alphaLabel='a'
+cleanUpFigure(gca,settings)
 
+subplot(1,2,2)
+settings.alphaLabel='b'
+cleanUpFigure(gca,settings)
+
+        settings.fontSize=12;
+    savePath='C:\Documents and Settings\rlab\Desktop\graphs';
+    figureType={'-dtiffn','png'};  renderer= {'-opengl'}; resolution=1200; % paper print quality
+    saveFigs(savePath,figureType,gcf,resolution,renderer);
 %%
 figure
 w=9; h=2
@@ -560,7 +574,7 @@ fieldNames={'trialNumber',{''};...
     'stdGaussMask',{'stimDetails','stdGaussMask'};...
     'flankerPosAngle',{'stimDetails','flankerPosAngle'};...
     };
-compileTrialRecords([],fieldNames,false,,getSubDirForRack(1),getCompiledDirForRack(-1))
+compileTrialRecords([],fieldNames,false,xxx,getSubDirForRack(1),getCompiledDirForRack(-1))
 
 
 %% see reaction time differences

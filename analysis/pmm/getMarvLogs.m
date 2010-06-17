@@ -1291,4 +1291,35 @@ eventLog{eventNum}.comment ='patternRats get delay before SOA';
 eventLog{eventNum}.details.from = [12 12 12 12 12]; 
 eventLog{eventNum}.details.to   = [17 17 17 17 17];  
 
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Feb.01,2010');%datestr(now,21)
+eventLog{eventNum}.eventName ={'moveStation'};
+eventLog{eventNum}.subject ={'227'};
+eventLog{eventNum}.stationID ={'1F'}; 
+eventLog{eventNum}.issuedBy ='pmm';  
+eventLog{eventNum}.comment ='227 moved station from 1D-->1F; remains on the same watter lines in the middle of the male room'; 
+eventLog{eventNum}.details.from = {'1D'}; 
+eventLog{eventNum}.details.to   = {'1F'};  
 
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Feb.01,2010');%datestr(now,21)
+eventLog{eventNum}.eventName ={'startTrialsAgain'};
+eventLog{eventNum}.subject ={'229'};
+eventLog{eventNum}.stationID ={'1F'}; 
+eventLog{eventNum}.issuedBy ='pmm';  
+eventLog{eventNum}.comment ='back from free water, was off so duc could use him, but '; 
+eventLog{eventNum}.details.from = []; 
+eventLog{eventNum}.details.to   = [];  
+
+
+%2 rats on station 1F have a problem with water
+
+eventNum = eventNum +1;  
+eventLog{eventNum}.date =datenum('Mar.06,2010');%datestr(now,21)
+eventLog{eventNum}.eventName ={'pctCorretionTrailsIncreased'};
+eventLog{eventNum}.subject ={'229'};
+eventLog{eventNum}.stationID ={'1F'}; 
+eventLog{eventNum}.issuedBy ='pmm';  
+eventLog{eventNum}.comment ='back from free water, was off so duc could use him, but '; 
+eventLog{eventNum}.details.from = [0]; 
+eventLog{eventNum}.details.to   = [0.1];  

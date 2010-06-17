@@ -1,6 +1,5 @@
 classdef detectionModel
     properties
-        
         %contrasts used
         tc=[0 0.25 0.5 0.75 1];
         fc=[0 0.25 0.5 0.75 1];
@@ -20,19 +19,20 @@ classdef detectionModel
         baseline=0.05; % additive offset of effective contrastEnvelope (some response for zero contrast; like internal noise)
         nodeDistribution='absGauss'; %gauss
         combinationRule='max' %mean, sum, max, LL, sampleGEV
-        optimalCritMethod='fitGev'; %raw, fitGev, 
+        optimalCritMethod='fitGev'; %raw, fitGev,
         
         %model fitting params
-        sdtDistributionType='gaussian';  %gaussian, eqVarGaussian, %gev
-        critLearningRate='fit';  %'zero','one','fit' ;fit uses erf 0-->1
-        signalCombination = 'simulationFitResults';         %'linearIndependant','divisiveNormalization', 'simulationFitResults'
+        parameterSource = 'parametericSDT'; %'simulationFitResults';
+        modelFeatures={'alpha','tm','fm'}; % by listing dn values (i.e. 'c50'), it becomes dn, gev, etc...
+        modelValues=[1 1 0.8];
+        critLearningRate='fit';  %'zero','one','fit' ;fit uses erf 0-->1;  the model feature alpha will be overpowered if 'zero' or 'one'
         
-        %contrastFunction='bothLinear'; %'bothPower', 'independantPower'
         mcmcModel='noneWorkingNow.txt'; %'GEV-linearTFcontrast.txt'
         
         %infrastructure
         savePath='C:\Documents and Settings\rlab\Desktop\detectionModels'
-        modelName='fastManualHunt' %% LL, fixedEye, fitAttnfixedEye
+        modelName='simple-231'; %
+        %other old models: fastManualHunt,LL, fixedEye, fitAttnfixedEye
         
         %for histograms of the signal & boundary for fminsearch
         edges=[];
@@ -62,174 +62,477 @@ classdef detectionModel
             %default contructor uses no params
             p=p.init;
             p=p.setViewPlots('allOn'); %'dynamicTesting'
-            p.manualHuntTrail(); %do first thing automatically
+            %p.manualHuntTrail(); %do first thing automatically
             %p.testBed();%
             %p.intuitionTest()
-            %p.runAndSaveModelBatchSTD();
-            p.modelCompareForPoster();
+            
+            p=p.testDiffusionModel();
+                        
+ 
+            %p.runAndSaveModelBatchSTD({'unequal var yoked plus bias','unequal var ind plus bias'});
+            %p.modelCompareForPoster({'simple','fixed crit','slow adapting','unequal var yoked','variance scales','unequal var ind'},'231');
+            %p.modelCompareForPoster({'simple plus bias','fixed crit plus bias','slow adapting plus bias','unequal var yoked plus bias','variance scales plus bias','unequal var ind plus bias'},'231');
+            %p.modelCompareForPoster({'fixed crit','slow adapting','variance scales','unequal var yoked','unequal var ind'},'231');
+            
+            %p=p.searchSearch();
+            %p.modelName='searchSearch_20100608T174740'; %72 models
+            %p=p.load;
+            %p.modelCompareForPoster(p.cache.namesOfModels)
         end
-        function modelCompareForPoster(p,namesOfModels)
-            if ~exist('namesOfModels','var') || isempty(namesOfModels)
-                namesOfModels={'simple','fixed crit','slow adapting','unequal var','single power law','power law contrast','dn','dn-2gamma','dn-unequalVar','gevg'}
-                namesOfModels={'dn','dn-2gamma'};
-
-                
-                
+        function p=testDiffusionModel(p)
+            minX=-1;
+            maxX=1;
+            minT=.5;
+            maxT=2;
+            nT=100; 
+            nX=101;
+            time=linspace(minT,maxT,nT);
+            xVals=linspace(minX,maxX,nX);
+            
+            starts=[.7 -0.2];
+            
+            switch 'flat'
+                case 'flat'
+                    yesBound=ones(1,nT);
+                    noBound=-ones(1,nT);
+                case 'linear'
+                    boundPerSecond=.5;
+                    yesBound=1-(time-minT)*boundPerSecond;
+                    boundPerSecond=0;
+                    noBound=-1+(time-minT)*boundPerSecond;
+                case 'fit'
+                    for i=1:nT
+                        %relate desnity of rate crossing from diffution
+                        %model to real rate data...  might be cart before horse
+                        boundarySlope(i,1)=xxx; 
+                    end
+                    yesBound=1-cumsum(boundarySlope(:,1));
+                    noBound=-1+cumsum(boundarySlope(:,2));
             end
             
-            subject='234'
             
-            for i=1:length(namesOfModels)
-                p.modelName=[namesOfModels{i} '-' subject];
-                fprintf('doing %s (%d of %d)\n',namesOfModels{i},1,length(namesOfModels))
-                p=p.load()
-                figure;
-                AIC(i)=p.viewModel;
+            numStarts=length(starts);
+            filtSz=ceil(nX); hwDown=ceil(filtSz/2); hwUp=filtSz-hwDown;
+            temperature=ceil(nT/15); % diffusion speed is temperature is with of this kernal                      
+            %drift would be like a mean bias to the gauss, do this better
+            %using a gaussian function with mean
+            kernal=fspecial('gauss',[1 filtSz ],temperature);
+            downDrift=0;
+            kernal=[zeros(1,downDrift) kernal]
+            
+            %init
+            x=zeros(nX,nT,numStarts);
+            conditionalDensity=x;
+            %noBoundDensity=zeros(nX+filtSz-1,nT,numStarts);
+            yesRate=zeros(nT,numStarts);
+            noRate=zeros(nT,numStarts);
+            for s=1:numStarts
+                
+                if starts(s)>0
+                    startInd=nT-min(find(xVals>starts(s)))+1;
+                else
+                    startInd=nT-max(find(xVals<starts(s)))+1;
+                end
+                x(startInd,1,s)=0.5; % 50% of probability mass (cuz half trials have a target)
+                pAlive(1,s)=0.5;
+                for i=2:nT
+                    x(:,i,s)=conv(x(:,i-1,s),kernal,'same');
+                    full=conv(x(:,i-1,s),kernal,'full');
+                    
+                    %ERROR CHECK NOT NEEDED EVERY TIME, BUT GOOD FOR DEBUGGING
+                    %                     f=full(hwUp+1:end-hwDown+1);
+                    %                     n=reshape(x(:,i,s),[],1);
+                    %                     if ~all(size(f)==size(n)) || ~all(f==n)
+                    %                         [size(full,1) nX size(f,1) size(n,1)]
+                    %                         [filtSz hwDown+hwUp hwDown hwUp]
+                    %                         f-n
+                    %                         figure; plot([f n])
+                    %                         error('bad')
+                    %                     end
+                    
+                    upAdj=nX-min(find(xVals>=yesBound(i)));
+                    downAdj=max(find(xVals<=noBound(i)))-1;
+                    topInd=hwUp+upAdj;
+                    bottomInd=hwDown+downAdj;
+                    x(1:upAdj,i,s)=0;
+                    x(end-downAdj:end,i,s)=0;
+                    yesRate(i,s)=sum(full(1:topInd));
+                    noRate(i,s)=sum(full(end-bottomInd:end));
+                    
+                    conditionalDensity(:,i,s)=x(:,i,s)/max(x(:,i,s));
+                    %noBoundDensity(:,i,s)=full/max(full);
+                    pAlive(i,s)=sum(full(topInd+1:end-bottomInd+1));
+                    
+                end
             end
             
             figure;
-            for i=1:6
-                bar(i,AIC(i),'faceColor',[.8 .8 .8]); hold on
+            nP=4;
+            subplot(nP,1,2); 
+            im=conditionalDensity(:,:,[2 1]);  % 1st 2 [S+ S-]
+            im(:,:,3)=0; % make like an image
+            imagesc(im.^4,'XData',time,'YData',xVals); hold on
+            plot([0 nT+1],(nX([1 1])+1)/2,'k-')
+            [cm c]=contour(time,xVals,x(:,:,1),2.^-[9 13],'LineColor',[0 .8 0]);
+            plot(cm(1,40:100),cm(2,40:100),'m')
+            plot(time,-yesBound,'w')
+            plot(time,-noBound,'w')
+            %[cm c]=contour(time,xVals,x(:,:,2),2.^-[9 13],'LineColor',[.8 0 0]); % too cluttered to do both
+            set(gca,'xtick',[minT maxT],'ytick',[minX maxX]) 
+            
+            highP=max([yesRate(:); noRate(:)]);
+            highPu=highP*1.1-mod(highP*1.1,.001);
+            subplot(nP,1,1);
+            plot(time,yesRate(:,1),'g',time,yesRate(:,2),'r');
+            set(gca,'xtick',[],'ytick',[0 highPu],'ytickLabel',[0 highPu],'ylim',[0 highPu],'xlim',[minT maxT])
+            ylabel('p(y)'); legend({'hit','fa'})
+            subplot(nP,1,3);
+            plot(time,-noRate(:,1),'m',time,-noRate(:,2),'c');
+            set(gca,'xtick',[],'ytick',[-highPu 0],'ytickLabel',[-highPu 0],'ylim',[-highPu 0],'xlim',[minT maxT])
+            ylabel('p(n)'); legend({'miss','cr'},'Location','SouthEast')
+            set(gca,'xtick',[minT maxT],'xlim',[minT maxT]); xlabel('time (sec)'); 
+            
+            subplot(nP,1,4); 
+            hit=sum(yesRate(:,1))*2;
+            fa =sum(yesRate(:,2))*2;
+            plot(fa,hit,'.r'); hold on
+            quartTime=(maxT-minT)*1/4;
+            ss=linspace(minT,minT+3*quartTime,10);
+            ee=ss+quartTime;
+            for w=1:length(ss)
+                which=time>=ss(w) & time<ee(w);
+                rate=     sum([sum(yesRate(which,:)) sum(noRate(which,:))]);  % without conditioning per catergory
+                sigRate=  sum([sum(yesRate(which,1)) sum(noRate(which,1))]); 
+                noSigRate=sum([sum(yesRate(which,2)) sum(noRate(which,2))]); 
+                hits(w)=sum(yesRate(which,1))/sigRate; 
+                fas (w)=sum(yesRate(which,2))/noSigRate;
+                pctCor(w)=sum([sum(yesRate(which,1)) sum(noRate(which,2))])/rate;
             end
-            for i=7:8
-                bar(i,AIC(i),'faceColor',[1 .8 .6]);
+            plot(fas,hits,'.','color',[.8 .8 .8]); hold on
+            plot([0 1],[0 1],'k-')
+            axis square
+            set(gca,'xtick',[],'ytick',[])
+            xlabel('FAs'); ylabel('hits')
+            legend({'avg','quartile'},'Location','SouthEastOutside')
+
+            
+            %subplot(nP,1,4); plot(time,pAlive); ylabel('remaining')
+            %set(gca,'xtick',[minT maxT],'xlim',[minT maxT])
+            %xlabel('time (sec)'); legend({'T+','T-'})
+            
+            cleanUpFigure
+            set(gcf,'Position',[10 300 350 600])
+            j=1;
+
+            figure
+            plot(mean([ss; ee])-minT,pctCor,'ko'); hold on
+            axis([0 maxT-minT 0 1])
+            plot(xlim,[.5 .5],'k')
+            set(gca,'xtick',xlim,'xticklabel',{'fast','slow'},'ytick',[0 .5 1])
+            cleanUpFigure
+        end
+        function p=searchSearch(p,x,subjects)
+            if ~exist('x','var') || isempty(x)
+                %                 x.subjects={'231','234'};
+                %                 x.alpha={'0','1','fit'};
+                %                 x.bias={'no','cost','costGuess','costYes|guess'}
+                %                 x.var={'no','yoked','ind','scales'}
+                %                 x.gamma={'no','yoked','ind'}
+                %                 x.plus={'dn','gev'}
+                
+                %                  x.subjects={'231','234'};
+                %                 x.alpha={'0','1','fit'};
+                %                 x.bias={'no','cost'};
+                %                 x.var={'no','yoked','ind'};
+                %                 x.gamma={'no','yoked','ind'};
+                %                 x.plus={'no','dn'};
+                
+                x.subjects={'231','234'};
+                x.alpha={'fit'};
+                x.bias={'no','cost'};
+                x.var={'no','ind','scales'};
+                x.gamma={'no','yoked','ind'};
+                x.plus={'no','dn'};
+                
+                
+                %                 x.subjects={'231','234'};
+                %                 x.alpha={'0','1','fit'};
+                %                 x.bias={'cost'};
+                %                 x.var={'no','scales'};
+                %                 x.gamma={'no'};
+                %                 x.plus={'no'};
             end
-            for i=9:length(AIC)
-                bar(i,AIC(i),'faceColor',[.8 .8 1]);
+            
+            if exist('subjects','var') && ~isempty(subjects)
+                x.subjects=subjects;
             end
             
+            baseFeatures={'alpha','tm','fm'}; % all have this
+            nm=p.getSearchSearchModelNames(x);
+            p.cache.namesOfModels=nm;
+            count=0;
+            for sub=1:length(x.subjects)
+                p=loadDataFromServer(p,x.subjects(sub));
+                for a=1:length(x.alpha)
+                    for b=1:length(x.bias)
+                        for v=1:length(x.var)
+                            for g=1:length(x.gamma)
+                                for pl=1:length(x.plus)
+                                    count=count+1;
+                                    if 1 %count>43 % pickup where last left off, TRUE starts fresh
+                                        features=baseFeatures;
+                                        x0=[0.5 1 1];
+                                        disp(sprintf('%d/%d doing %s',count,length(nm),nm{count}))
+                                        
+                                        switch x.alpha{a}
+                                            case '0'
+                                                p.critLearningRate='zero';
+                                            case '1'
+                                                p.critLearningRate='one';
+                                            case 'fit'
+                                                p.critLearningRate='fit';
+                                        end
+                                        
+                                        switch x.bias{b}
+                                            case 'no'
+                                            case 'cost'
+                                                features{end+1}='bias';
+                                                x0(end+1)=0;
+                                            case 'costGuess'
+                                                features{end+1}='bias';
+                                                features{end+1}='guess1';
+                                                x0(end+1)=0;
+                                                x0(end+1)=0; % fraction? exp?
+                                            case 'costYes|guess'
+                                                features{end+1}='bias';
+                                                features{end+1}='guess1';
+                                                features{end+1}='yes|guess1';
+                                                x0(end+1)=0;
+                                                x0(end+1)=0; % fraction? exp?
+                                                x0(end+1)=0; % fraction? exp?
+                                        end
+                                        
+                                        switch x.var{v}
+                                            case 'no'
+                                            case 'yoked'
+                                                features{end+1}='sigma';
+                                                x0(end+1)=1;
+                                            case 'scales'
+                                                features{end+1}='sigmaPerMean';
+                                                x0(end+1)=1;
+                                            case 'ind'
+                                                features{end+1}='ts';
+                                                features{end+1}='fs';
+                                                x0(end+1:end+2)=[1 1];
+                                        end
+                                        
+                                        switch x.gamma{g}
+                                            case 'no'
+                                            case 'yoked'
+                                                features{end+1}='gamma';
+                                                x0(end+1)=1;
+                                            case 'ind'
+                                                features{end+1}='gammaT';
+                                                features{end+1}='gammaF';
+                                                x0(end+1:end+2)=[1 1];
+                                        end
+                                        
+                                        switch x.plus{pl}
+                                            case 'dn'
+                                                features{end+1}='c50';
+                                                features{end+1}='fallOff';
+                                                x0(end+1:end+2)=[1 1];
+                                            case 'gev'
+                                                features{end+1}='kappa';
+                                                x0(end+1)=[0.3];
+                                                error('not yet')
+                                            case 'gevS'
+                                                features{end+1}='kappa';
+                                                features{end+1}='tk';
+                                                features{end+1}='tf';
+                                                x0(end+1:end+3)=[0.3 1 1];
+                                                error('not yet')
+                                        end
+                                        
+                                        if gcf>10
+                                            close all
+                                        end
+                                        
+                                        %run this model and save it
+                                        p.modelFeatures=features;
+                                        p=fitSubjectDataWithSDT(p,x0);
+                                        p.modelName=nm{count};
+                                        p.save
+                                        
+                                        %view it
+                                        figure;
+                                        AIC(count)=p.viewModel;
+                                        title(nm{count})
+                                        settings=[];
+                                        settings.LineWidth=3;
+                                        settings.AxisLineWidth=3;
+                                        settings.fontSize=20;
+                                        cleanUpFigure(gcf,settings)
+                                        fprintf('%2.2f',AIC(count))
+                                        
+                                        %continually save group search info
+                                        p.cache.AIC=AIC;
+                                        p.cache.groupModelParams{count}=p.cache.modelParams;
+                                        p.modelName=sprintf('tempOngoingSearch_%s',datestr(now,30));
+                                        p.save
+                                    else
+                                        p.modelName='tempOngoingSearch_20100608T163949';
+                                        p=p.load;
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+            p.modelName=sprintf('searchSearch_%s',datestr(now,30));
+            p.save
+        end
             
-            
-            data=p.getDataFromSubjectCache;
-            nckLL=sum(p.logNchoosekPerCondition(data));
-            dataLL=p.logLiklihood(data,data.hit,data.fa,data.miss,data.cr)+nckLL;
-            plot([0 length(AIC)+1],-dataLL([1 1]),'k-')
-            ylabel('-log (liklihood)+2n')
-            set(gca,'yTick',[0 round(-dataLL) 1000],'ylim',[0 1000],'xlim',[0 length(AIC)+1])
-            %set(gca,'xTickLabel',p.cache.namesOfModels) % leave for poster?
-            set(gca,'xTick',[])
-            settings.AxisLineWidth=3;
-            settings.fontSize=20;
-            cleanUpFigure(gcf,settings)
-            
-            warning('here')
-            keyboard
-            
+        function names=getSearchSearchModelNames(p,x)
+            names={};
+            for sub=1:length(x.subjects)
+                for a=1:length(x.alpha)
+                    for b=1:length(x.bias)
+                        for v=1:length(x.var)
+                            for g=1:length(x.gamma)
+                                for p=1:length(x.plus)
+                                    nm=x.subjects{sub};
+                                    nm=[nm '-a_' x.alpha{a}(1)];
+                                    if ~strcmp(x.bias{b},'no')
+                                        nm=[nm '-b_' x.bias{b}];
+                                    end
+                                    if ~strcmp(x.var{v},'no')
+                                        nm=[nm '-v_' x.var{v}];
+                                    end
+                                    if ~strcmp(x.gamma{g},'no')
+                                        nm=[nm '-g_' x.gamma{g}];
+                                    end
+                                    if ~strcmp(x.plus{p},'no')
+                                        nm=[nm '-' x.plus{p}];
+                                    end
+                                    names{end+1}=nm;
+                                    %disp(nm)
+                                end
+                            end
+                        end
+                    end
+                end
+            end
         end
         function runAndSaveModelBatchSTD(p,namesOfModels)
             if ~isfield(p.cache,'subjectData')
-                p=loadDataFromServer(p,{'234'}); 
+                p=loadDataFromServer(p,{'231'});
             end
             if ~exist('namesOfModels','var') || isempty(namesOfModels)
-                namesOfModels={'simple','fixed crit','slow adapting','unequal var','single power law','power law contrast','divisive norm','dn bias','divisive norm3','gevg'}
+                namesOfModels={'simple','fixed crit','slow adapting','unequal var yoked','single power law','power law contrast','divisive norm','dn bias','divisive norm3','gevg'}
                 %namesOfModels={'dn','dn-2gamma','dn-unequalVar'};
                 %namesOfModels={'dn-unequalVar'};
+                namesOfModels={'unequal var yoked','single power law','power law contrast','dn','dn bias','divisive norm3','gevg'}
             end
+            
+            p.parameterSource = 'parametericSDT';
             
             for i=1:length(namesOfModels)
                 p.modelName=[namesOfModels{i} '-' p.cache.subjectData.names.subjects{1}];
                 fprintf('doing %s (%d of %d)\n',namesOfModels{i},1,length(namesOfModels))
                 switch namesOfModels{i}
                     case 'simple'
-                        p.sdtDistributionType='eqVarGaussian';
+                        %eqVarGaussian
                         p.critLearningRate='one';
-                        p.signalCombination = 'linearIndependant';
+                        p.modelFeatures={'alpha','tm','fm'};
                         x0=[1 1.4 2.4];
-                   case 'gevk'
-                        p.sdtDistributionType='gev';
-                        p.critLearningRate='fit';
-                        p.signalCombination = 'linearIndependant';
-                        x0=[.5 1.4 2.4 1 1 0.3]; %  k0
-                    case 'gev'
-                        p.sdtDistributionType='gev';
-                        p.critLearningRate='fit';
-                        p.signalCombination = 'linearIndependant';
-                        x0=[.5 1.4 2.4 1 1 -.3 0 0]; %  +a linear coeff for kappa
-                    case 'gevg'
-                        p.sdtDistributionType='gev';
-                        p.critLearningRate='fit';
-                        p.signalCombination = 'linearIndependant';
-                        x0=[.85 3.7 7.8 1 5 0.8 0.03 0.00 1.4 2.4]; %  +gammas
+                    case 'simple plus bias'
+                        %eqVarGaussian
+                        p.critLearningRate='one';
+                        p.modelFeatures={'alpha','tm','fm','bias'};
+                        x0=[1 1.4 2.4 0];
                     case 'fixed crit'
-                        p.sdtDistributionType='eqVarGaussian';
                         p.critLearningRate='zero';
-                        p.signalCombination = 'linearIndependant';
+                        p.modelFeatures={'alpha','tm','fm'};
                         x0=[0 1.4 2.4];
+                    case 'fixed crit plus bias'
+                        p.critLearningRate='zero';
+                        p.modelFeatures={'alpha','tm','fm','bias'};
+                        x0=[0 1.4 2.4 0];
                     case 'slow adapting'
-                        p.sdtDistributionType='eqVarGaussian';
                         p.critLearningRate='fit';
-                        p.signalCombination = 'linearIndependant';
-                        x0=[.5 1.4 2.4];
-                    case 'unequal var'
-                        p.sdtDistributionType='gaussian';
+                        p.modelFeatures={'alpha','tm','fm'};
+                        x0=[.73 1.13 1.73];
+                        x0=[.77 1.41 2.42];
+                    case 'slow adapting plus bias'
                         p.critLearningRate='fit';
-                        p.signalCombination = 'linearIndependant';
+                        p.modelFeatures={'alpha','tm','fm','bias'};
+                        x0=[.73 1.13 1.73];
+                        x0=[.1 1.41 .2 0];
+                    case 'variance scales'
+                        p.critLearningRate='fit';
+                        p.modelFeatures={'alpha','tm','fm','sigmaPerMean'};
+                        x0=[1 2 700 -7]; % fails to converge. fm explodes, e^sigmaPerMean plummets
+                    case 'variance scales plus bias'
+                        p.critLearningRate='fit';
+                        p.modelFeatures={'alpha','tm','fm','sigmaPerMean','bias'};
+                        
+                        x0=[.86 2.5 5.4 -1 -0.06]; % 231
+                        x0=[1 2 700 -7 0]; % fails to converge. fm explodes, e^sigmaPerMean plummets
+                    case 'unequal var yoked'
+                        p.critLearningRate='fit';
+                        p.modelFeatures={'alpha','tm','fm','sigma'};
+                        x0=[.5 1.4 2.4 2];
+                    case 'unequal var yoked plus bias'
+                        p.critLearningRate='fit';
+                        p.modelFeatures={'alpha','tm','fm','sigma','bias'};
+                        x0=[.5 1.4 2.4 2 0];
+                    case 'unequal var ind'
+                        p.critLearningRate='fit';
+                        p.modelFeatures={'alpha','tm','fm','ts','fs'};
                         x0=[.5 1.4 2.4 2 2];
-                    case 'single power law'
-                        p.sdtDistributionType='gaussian';
+                    case 'unequal var ind plus bias'
                         p.critLearningRate='fit';
-                        p.signalCombination = 'linearIndependant';
+                        p.modelFeatures={'alpha','tm','fm','ts','fs','bias'};
+                        x0=[.5 1.4 2.4 2 2 0];
+                    case 'single power law'
+                        p.critLearningRate='fit';
+                        p.modelFeatures={'alpha','tm','fm','ts','fs','gamma'};
                         x0= [.81 1.96 5.67 -0.35 3.17 0.99];  % good for learning..include gamma
                     case 'power law contrast'
-                        p.sdtDistributionType='gaussian';
                         p.critLearningRate='fit';
-                        p.signalCombination = 'linearIndependant';
-                        x0= [.81 1.96 5.67 -0.35 3.17 0.99 2.36];  % good for learning..include gamma x2   
+                        p.modelFeatures={'alpha','tm','fm','ts','fs','gammaT','gammaF'};
+                        x0= [.81 1.96 5.67 -0.35 3.17 0.99 2.36];  % good for learning..include gamma x2
                     case 'dn'
-                        p.sdtDistributionType='gaussian';
                         p.critLearningRate='fit';
-                        p.signalCombination='divisiveNormalization';
-                        x0= [.6 1 1 1 1 1.6 ]; 
-                    case 'dn-falloff'
-                        p.sdtDistributionType='gaussian';
+                        p.modelFeatures={'alpha','tm','fm','bias','c50','gamma'};
+                        x0= [.6 1 1 nan nan 1.6 ];
+                    case 'dn-fallOff'
                         p.critLearningRate='fit';
-                        p.signalCombination='divisiveNormalization';
-                        x0= [1 1 .6 .5 2 .3 1]; %MM with linear gamma=1, no variance
+                        p.modelFeatures={'alpha','tm','fm','bias','c50','fallOff'};
+                        x0= [.6 1 1 nan nan 1.6 1];
                     case 'dn-2gamma'
-                        p.sdtDistributionType='gaussian';
                         p.critLearningRate='fit';
-                        p.signalCombination='divisiveNormalization';
-                        x0= [.6 2 3 1 0.3 1.64 -0.8 1.64 ]; %MM with linear gamma=1, no variance
+                        p.modelFeatures={'alpha','tm','fm','bias','c50','fallOff','gammaT','gammaF'};
+                        %x0= [.6 2 3 1 0.3 1.64 -0.8 1.64 ]; %MM with linear gamma=1, no variance
+                        x0= [.6 1 1 nan nan 1.6 1];
                     case 'dn-unequalVar'
-                        p.sdtDistributionType='gaussian';
-                        p.critLearningRate='fit';
                         p.signalCombination='divisiveNormalization';
-                        x0= [1 1 .6 .5 2 .3 2 .5 .5]; %MM with linear gamma=1, no variance
-                        %6 has 1 gamma
-                        %7 has falloff
-                        %8  gamma 2
-                        %9,10  sigma also             
-%                     case 'divisive norm lin'
-%                         p.sdtDistributionType='gaussian';
-%                         p.critLearningRate='fit';
-%                         p.signalCombination='divisiveNormalization';
-%                         x0= [.81 1 2 .5 2 ]; %MM with linear gamma=1, no variance
-%                     case 'divisive norm'
-%                         p.sdtDistributionType='gaussian';
-%                         p.critLearningRate='fit';
-%                         p.signalCombination='divisiveNormalization';
-%                         x0= [.73 2 4.5 .3 .4 1.7]; %MM with single gamma, no variance or bias 
-%                     case 'dn bias'
-%                         p.sdtDistributionType='gaussian';
-%                         p.critLearningRate='fit';
-%                         p.signalCombination='divisiveNormalization';
-%                         x0= [.73 2 4.5 .3 .4 1.7 1  ]; %MM with one gamma, bias
-%                     case 'divisive norm3'
-%                         p.sdtDistributionType='gaussian';
-%                         p.critLearningRate='fit';
-%                         p.signalCombination='divisiveNormalization';
-%                         x0= [.73 2 4.5 .3 .4 1.7 1 0 0 ]; %MM with one gamma, bias, 2 sigmas
-%                         
-                        %                     case 'divisive norm3'
-                        %                         p.sdtDistributionType='gaussian';
-                        %                         p.critLearningRate='fit';
-                        %                         p.signalCombination='divisiveNormalization';
-                        %                         x0= [73 2 4.5 .3 .4 1.7 0 0 ]; %MM with one gamma, 2 variance
-                        %                      case 'divisive norm4'
-                        %                         p.sdtDistributionType='gaussian';
-                        %                         p.critLearningRate='fit';
-                        %                         p.signalCombination='divisiveNormalization';
-                        %                         x0= [73 2 4.5 .3 .4 1.7 1.7 ]; %MM with two gammas, no variance
+                        p.modelFeatures={'alpha','tm','fm','bias','c50','fallOff','gammaT','gammaF','ts','fs'};
+                        x0= [.6 1 1 1 .5 2 .3 2 .5 .5];
+                    case 'gevk'
+                        p.critLearningRate='fit';
+                        p.modelFeatures={'alpha','tm','fm','ts','fs','kappa'};
+                        x0=[.5 1.4 2.4 1 1 0.3]; %  k0
+                    case 'gev'
+                        p.critLearningRate='fit';
+                        p.modelFeatures={'alpha','tm','fm','ts','fs','kappa','tk','fk'};
+                        x0=[.5 1.4 2.4 1 1 -.3 0 0]; %  +a linear coeff for kappa
+                    case 'gevg'
+                        p.critLearningRate='fit';
+                        p.modelFeatures={'alpha','tm','fm','ts','fs','kappa','tk','fk','gammaT','gammaF'};
+                        x0=[.85 3.7 7.8 1 5 0.8 0.03 0.00 1.4 2.4]; %  +gammas
                     otherwise
                         namesOfModels{i}
                         error('bad')
@@ -237,27 +540,28 @@ classdef detectionModel
                 p=fitSubjectDataWithSDT(p,x0);
                 figure;
                 p.save
-                                
+                
                 AIC(i)=p.viewModel;
+                title(namesOfModels{i})
                 
                 p.cache.groupModelParams{i}=p.cache.modelParams;
                 figure;
                 p.edges=linspace(-2,10,100)
                 
-%                 figure
-%                 p.plotModelFeatures(.75,[0 0.75],{'sig&Noise'})
-%                 subplot(2,1,1); set(gca,'ytick',[],'xTick',[]); axis([-2 10 0 .5])
-%                 ylabel('probability')
-%                 subplot(2,1,2); set(gca,'ytick',[],'xTick',[]); axis([-2 10 0 .5])
-%                 
+                %                 figure
+                %                 p.plotModelFeatures(.75,[0 0.75],{'sig&Noise'})
+                %                 subplot(2,1,1); set(gca,'ytick',[],'xTick',[]); axis([-2 10 0 .5])
+                %                 ylabel('probability')
+                %                 subplot(2,1,2); set(gca,'ytick',[],'xTick',[]); axis([-2 10 0 .5])
+                %
                 settings=[];
                 settings.LineWidth=3;
                 settings.AxisLineWidth=3;
                 settings.fontSize=20;
                 cleanUpFigure(gcf,settings)
-
+                
                 %also get distribtuion of two contrast
-
+                
             end
             
             p.cache.AIC=AIC;
@@ -265,17 +569,89 @@ classdef detectionModel
             p.modelName='modelGroup';
             p.save;
             
- 
+            
+        end
+        function modelCompareForPoster(p,namesOfModels,subject)
+            if ~exist('namesOfModels','var') || isempty(namesOfModels)
+                namesOfModels={'simple','fixed crit','slow adapting','unequal var','single power law','power law contrast','dn','dn-2gamma','dn-unequalVar','gevg'}
+            end
+            
+            if ~exist('subject','var') || isempty(subject)
+                subject='234'
+            end
+            
+            if length(namesOfModels)<=10 % only plot each one if 10 models or less
+                for i=1:length(namesOfModels)
+                    if strcmp(namesOfModels{i}(1:2),'23')
+                        %model starts with subjects name... load it (subj var will be ignored)
+                        p.modelName=namesOfModels{i};
+                    else
+                        %model does not start with subjects name... [append the name of the subject and then load it]
+                        p.modelName=[namesOfModels{i} '-' subject];
+                    end
+                    fprintf('doing %s (%d of %d)\n',namesOfModels{i},1,length(namesOfModels))
+                    p=p.load()
+                    figure;
+                    AIC(i)=p.viewModel(true,namesOfModels{i});
+                end
+            else %get the AIC from the last one in the list
+                    if strcmp(namesOfModels{end}(1:2),'23') % this should be a better function
+                        %model starts with subjects name... load it (subj var will be ignored)
+                        p.modelName=namesOfModels{end};
+                    else
+                        %model does not start with subjects name... [append the name of the subject and then load it]
+                        p.modelName=[namesOfModels{end} '-' subject];
+                    end
+                    p=p.load()
+                    AIC=p.cache.AIC;
+            end
+            
+            figure; hold on
+            coloring='default';
+            switch coloring
+                case 'cosyne2010poster'
+                    for i=1:6
+                        bar(i,AIC(i),'faceColor',[.8 .8 .8]);
+                    end
+                    for i=7:8
+                        bar(i,AIC(i),'faceColor',[1 .8 .6]);
+                    end
+                    for i=9:length(AIC)
+                        bar(i,AIC(i),'faceColor',[.8 .8 1]);
+                    end
+                    maxY=1000;
+                otherwise % default grey
+                    for i=1:length(AIC)
+                        bar(i,AIC(i),'faceColor',[.8 .8 .8]);
+                        text(i,0,namesOfModels{i},'Rotation',90)
+                    end
+                    yl=ylim;
+                    maxY=yl(2);
+                    maxY=1200;
+            end
+            
+            data=p.getDataFromSubjectCache;
+            nckLL=sum(p.logNchoosekPerCondition(data));
+            dataLL=p.logLiklihood(data,data.hit,data.fa,data.miss,data.cr)+nckLL;
+            plot([0 length(AIC)+1],-dataLL([1 1]),'k-')
+            ylabel('-log (liklihood)+2n')
+            set(gca,'yTick',[0 round(-dataLL) maxY],'ylim',[0 maxY],'xlim',[0 length(AIC)+1])
+            %set(gca,'xTickLabel',p.cache.namesOfModels) % leave for poster?
+            set(gca,'xTick',[])
+            settings.AxisLineWidth=3;
+            settings.fontSize=20;
+            cleanUpFigure(gcf,settings)
+            
         end
         function manualHuntTrail(p)
-            % %SETUP 
-%             p=loadDataFromServer(p,{'234'});
-%             p=p.setViewPlots('none');
-%             p.signalCombination = 'simulationFitResults';
-%             p.sdtDistributionType='gev';
-%             optimalCritMethod='fitGev';
-%             p.critLearningRate='fit';
-%             p.save
+            % %SETUP
+            %             p=loadDataFromServer(p,{'234'});
+            %             p=p.setViewPlots('none');
+            %             p.signalCombination = 'simulationFitResults';
+            %             p.sdtDistributionType='gev';
+            %             optimalCritMethod='fitGev';
+            %             p.critLearningRate='fit';
+            %             p.save
             p=p.load
             %keyboard
             %%
@@ -284,11 +660,11 @@ classdef detectionModel
             x=[.75 0.51 5.6 3.1]; % LL -841 / 2100 / -854 / 2600
             x=[.79 0.41 5.68 2.06]; % LL -591 / 944
             x=[.79 0.35 5.68 2.06]; % LL -437
-                        
+            
             p.baseline=x(2);
             p.nodesPerSpaceUnit=x(3);  % could be mm; can mean units target width when stdT=1
             p.stdEye=x(4);
-          
+            
             p=p.runSimulation();
             p.current.tc=p.tc;
             p.current.fc=p.fc;
@@ -298,22 +674,22 @@ classdef detectionModel
             p.cache.modelParams=x;
             %p.cache.modelParams(1)=alpha;
             figure; p.viewModel();
-
+            
             %figure; p.plotModelFeatures([],[],{'sig&Noise'}); cleanUpFigure
             
             %%
-             p.cache.modelParams(1)=.80;
+            p.cache.modelParams(1)=.80;
             figure; p.viewModel();
             
             %% run one and see ROC
-      
+            
             
             %p=p.runSimulation();
-
-            %p.save
-
             
-             
+            %p.save
+            
+            
+            
             [alpha er]=fitLearningRateToSubjectDataGivenSimulationResults(p)
             p.cache.modelParams=alpha;
             
@@ -339,18 +715,18 @@ classdef detectionModel
             %figure; p.plotModelFeatures(p.current.tc,p.current.fc,{'sig&Noise'}); cleanUpFigure
             %figure; p.plotModelFeatures([],[],{'sig&Noise'}); cleanUpFigure
             %% try a big fit
-%             p=loadDataFromServer(p,{'234'});
-%             p=p.setViewPlots('none');
-%             p.signalCombination = 'simulationFitResults';
-%             p.sdtDistributionType='gev';
-%             optimalCritMethod='fitGev';
-%             p.critLearningRate='fit';
-%             p.save
-%             p=p.load   
-%             
-%             p=p.fitSubjectDataWithSimulation;
-%             xx=p.load; %load the last results which were *saved* in the search! backup load in case
-%             keyboard
+            %             p=loadDataFromServer(p,{'234'});
+            %             p=p.setViewPlots('none');
+            %             p.signalCombination = 'simulationFitResults';
+            %             p.sdtDistributionType='gev';
+            %             optimalCritMethod='fitGev';
+            %             p.critLearningRate='fit';
+            %             p.save
+            %             p=p.load
+            %
+            %             p=p.fitSubjectDataWithSimulation;
+            %             xx=p.load; %load the last results which were *saved* in the search! backup load in case
+            %             keyboard
             
             %% go ahead and look at the best one
             p.modelName='firstBigFit-nc1'
@@ -408,13 +784,13 @@ classdef detectionModel
             %p=p.runSimulation();
             %p=loadDataFromServer(p,{'234'});
             %p.save
-
-             p=p.setViewPlots('none');
-             p.signalCombination = 'simulationFitResults';
-             p.sdtDistributionType='gev';
-             optimalCritMethod='fitGev'; 
-             p.critLearningRate='fit';
-             
+            
+            p=p.setViewPlots('none');
+            p.signalCombination = 'simulationFitResults';
+            p.sdtDistributionType='gev';
+            optimalCritMethod='fitGev';
+            p.critLearningRate='fit';
+            
             [alpha er]=fitLearningRateToSubjectDataGivenSimulationResults(p)
             p.cache.modelParams=alpha;
             
@@ -447,7 +823,7 @@ classdef detectionModel
             %% try bayesian (stopped cuz i don't know how to fit optimal crit in winbugs script)
             %p=p.loadDataFromServer;
             %p=p.doMCMC;
-             
+            
             %% do a fit of SDT
             %p=p.loadDataFromServer;
             %p=p.fitSubjectDataWithSDT
@@ -520,38 +896,17 @@ classdef detectionModel
                 error('may have issues with relating model to the subject data becuase different contrast values')
             end
             
-            tic
-            switch p.sdtDistributionType  % maybe the model name sets the other params?
-                case 'eqVarGaussian'
-                    if ~exist('x0','var') || isempty(x0)
-                        x0=[.7 1.4 2.4];  % good for learning
-                    end
-
-                    [x er]=fminsearch(@(x)gaussLinearSimpleMLErrorFun(p,x,data,params),x0); %get trapped with
-                    p=p.setGaussDistParamsFromModelFit(x);
-                case 'gaussian'
-                    if ~exist('x0','var') || isempty(x0)
-                        x0= [0  1 .1 -0.2 0 ];  % when no learning
-                        x0= [.7 2 4 -0.2 1.6 ];  % good for learning'
-                        
-                        x0= [.81 1.96 5.67 -0.35 3.17 0.99 2.36];  % good for learning..include gamma
-                        x0= [.81 1.96 5.67 -0.35 3.17 0.99 2.36 3 3 3 3 1 1];  % 2 rat model
-                    end
-                    [x er]=fminsearch(@(x)gaussLinearSimpleMLErrorFun(p,x,data,params),x0); %
-                    %lb=[-100  -100 -100 -100 -100];
-                    %ub=[100  100  100  100  100];
-                    %[x er]=fminbnd(@(x)gaussMLErrorFun(p,x,data,params),lb,ub);
-                    %%sometimes way left of the whole distibution
-                    p=p.setGaussDistParamsFromModelFit(x);
-                case 'gev'
-                    if ~exist('x0','var') || isempty(x0)
-                        x0=[.5 2.7 38 0.6 2 .6 .2]
-                        %x0=[.5 2.7 38 0.6 2 0.01 0.01 -0.3] plus kappa0
-                    end
-
-                    [x er]=fminsearch(@(x)gevLinearSimpleMLErrorFun(p,x,data,params),x0); %get trapped with
-                    p=p.setDistParamsFromModelFit(x);
+            if ~exist('x0','var') || isempty(x0)
+                x0= [.7 2 4 -0.2 1.6 ];  % example parameters, may not fit with current
+                %lb=[-100  -100 -100 -100 -100];
+                %ub=[100  100  100  100  100];
+                %[x er]=fminbnd(@(x)gaussMLErrorFun(p,x,data,params),lb,ub); %sometimes way left of the whole distibution
+                x0=nan(1,length(p.modelFeatures)); %allow default for all of them
             end
+            
+            [x er]=fminsearch(@(x)gaussLinearSimpleMLErrorFun(p,x,data,params),x0); %get trapped with
+            p=p.setGaussDistParamsFromModelFit(x);
+            
             
             if flag~=1
                 p.current
@@ -597,174 +952,154 @@ classdef detectionModel
             end
             x=nckS+nckN;
         end
-        function [p, muS muN sigmaS sigmaN shapeS shapeN]=getLinearMuSigma(p,x,tcs,fcs);
+        
+        function [p, muS,muN,sigmaS,sigmaN,shapeS,shapeN]=getSDTparams(p,x,tcs,fcs)
+            % this generalizes and replaces: getLinearMuSigma, getNonLinearMuSigma
+            % but not: getSimulationFitMuSigma
+            %
+            %an IDEA: [p, params]=getSDTparams(p,x,tcs,fcs); pushParamsIntoWorkSpace(params)
             
-            %default if not defined
-            shapeS=[];
-            shapeN=[];
-            switch p.sdtDistributionType
-                case 'eqVarGaussian'
-                    tm=x(2); fm=x(3);
-                    muS=tcs*tm+fcs*fm;
-                    muN=fcs*fm;
-                    sigmaS=ones(1,length(tcs));
-                    sigmaN=ones(1,length(tcs));
-                case 'gaussian'
-                    tm=x(2); fm=x(3); ts=x(4); fs=x(5);
-                    if length(x)==6
-                        %same contrast exponent
-                        gammaT=x(6);
-                        gammaF=x(6);
-                    elseif length(x)>6
-                        %independant exponent
-                        gammaT=x(6);
-                        gammaF=x(7);
-                    else
-                        %linear
-                        gammaT=1;
-                        gammaF=1;
-                    end
-                    
-                    muS=tcs.^gammaT*tm+fcs.^gammaF*fm;
-                    muN=fcs.^gammaF*fm;
-                    sigmaS=max(1+tcs.^gammaT*ts+fcs.^gammaF*fs,0.001);
-                    sigmaN=max(1+fcs.^gammaF*fs,0.001);
-                case 'gev'
-                    tm=x(2); fm=x(3); ts=x(4); fs=x(5);
-                    %shape is bounded between -1 and 1
-                   %should be... bounded, but isnt.
-                    
-                   if length(x)>=6
-                       kappa=x(6);
-                   else
-                       kappa=-0.3;
-                   end
-                   
-                   if length(x)>=7
-                       tk=x(7);
-                   else
-                       tk=0;
-                   end
-                   
-                   if length(x)>=8
-                       fk=x(8);
-                   else
-                       fk=0;
-                   end
-                   
-                   if length(x)==9
-                       %same contrast exponent
-                       gammaT=x(9);
-                       gammaF=x(9);
-                   elseif length(x)>9
-                       %independant exponent
-                       gammaT=x(9);
-                       gammaF=x(10);
-                   else
-                       %linear
-                       gammaT=1;
-                       gammaF=1;
-                   end
-                   
-                   tcs=tcs.^gammaT;
-                   fcs=fcs.^gammaF;
-                   
-                    muS=tcs*tm+fcs*fm;
-                    muN=fcs*fm;
-                    sigmaS=max(1+tcs*ts+fcs*fs,0.001);
-                    sigmaN=max(1+fcs*fs,0.001);
-                    shapeS=kappa+tcs*tk+fcs*fk;
-                    shapeN=kappa+fcs*fk;
-
-                otherwise
-                    error('bad')
+            features=p.modelFeatures;
+            
+            if length(x)~=length(features)
+                features
+                x
+                [length(features) length(x)]
+                error('number of initial params must match the number of features')
             end
+            
+            %default
+            tm=1; % basic sdt
+            fm=1;
+            ts=0; % no influence on sigma
+            fs=0;
+            gammaT=1; % no gamma -- linear
+            gammaF=1;
+            
+            addGevShape=p.isGEV();
+            if addGevShape
+                kappa=-0.3;
+                tk=0;
+                fk=0;
+            end
+            
+            doDivisiveNorm=any(ismember(features,{'c50','fallOff','noSigNoiseStd'}));
+            if doDivisiveNorm
+                c50=1;
+                fallOff=10; %1 ~ exp^large= no fallOff, normalize to full screen, not locally
+                noSigNoiseStd=1; % crazy variance changing: ones(1,length(tce))./(c50+(tcs + 2*fallOff*fcs).^((gammaT+gammaF)/2));  % maybe this should be learned in the dn mode, bc all signal (muN) changes are with respect to it.. curvature under 1...
+            end
+            
+            dependantFeatures=[]; dx=[];
+            for i=1:length(features)
+                if ~isnan(x(i)) % nans will allow inputs to be default to the above
+                    switch features{i}
+                        case {'tm','fm','ts','fs','gammaT','gammaF','kappa','tk','fk','c50'}
+                            cmd=sprintf('%s=x(i);',features{i});
+                            try
+                                eval(cmd);
+                            catch ex
+                                cmd
+                                getReport(ex)
+                                error('cmd failed')
+                            end
+                        case {'alpha'}
+                            % alpha is an acceptable model feature, but it's not actually used in this function
+                        case {'gamma'}
+                            gammaT=x(i);
+                            gammaF=x(i);
+                            if any(ismember(features,{'gammaT','gammaF'}))
+                                error('can''t define general and t/f specific value for the same parameter!')
+                            end
+                        case {'sigma'}
+                            ts=x(i);
+                            fs=x(i);
+                            if any(ismember(features,{'ts','fs'}))
+                                error('can''t define general and t/f specific value for the same parameter!')
+                            end
+                        case {'bias'}
+                            p.relativeMissCost=exp(x(i));
+                            %log(miss/hit)=b
+                        case {'sigmaPerMean'}
+                            dependantFeatures{end+1}=features{i};
+                            dx(end+1)=exp(x(i)); % negative would be nonsense
+                        case {'fallOff'}
+                            fallOff=1/(1+exp(-x(i))); %sigmoid bounds between 0 and 1
+                            %(this could be a gaussian falloff, but a single value is equvalent to search through, when we only have 1 radius implimented)
+                        otherwise
+                            features{i}
+                            error('unsupported feature')
+                    end
+                end
+            end
+            
+            for i=1:length(dependantFeatures)
+                switch dependantFeatures{i}
+                    case {'sigmaPerMean'}
+                        sigmaPerMean=dx(i);
+                        ts=tm*sigmaPerMean;
+                        fs=fm*sigmaPerMean;
+                        if any(ismember(features,{'ts','fs','sigma'}))
+                            error('can''t define a ratio and a search value over the same parameter!')
+                        end
+                end
+            end
+            
+            if doDivisiveNorm
+                t=tcs;%for debug
+                f=fcs;
+                tcs=tcs.^gammaT./(c50+(fcs + 2*fallOff*tcs).^(gammaT));
+                fcs=fcs.^gammaF./(c50+(fcs + fallOff*tcs).^(gammaF)); % ignoring the effect of the other flanker
+                %close all; figure; plot(tcs,'g'); hold on; plot(fcs,'r')
+                if any(imag(tcs)~=0) || any(imag(fcs)~=0)
+                    t
+                    tcs
+                    fallOff
+                    warning('contrast can''t be complex')
+                    keyboard
+                end
+                
+                
+                %THIS IS AN INTERESTING OPTION I NEVER TESTED:
+                %fcb=fcs+baseline;
+                %fce=fcb.^gammaF./(c50+(fcs + fallOff*tcs).^((gammaT+gammaF)/2));
+                %is  enables ZERO CONTRAST FLANKERS to still have a noise floor signal (mu>0) that targets can modify
+                % could also consider a small reduction in the sigma...
+                % but thats complicated and should link about variane
+                % going with mean and effects to combat it
+                %noSigNoiseStd=1; % crazy variance changing: ones(1,length(tce))./(c50+(tcs + 2*fallOff*fcs).^((gammaT+gammaF)/2));  % maybe this should be learned in the dn mode, bc all signal (muN) changes are with respect to it.. curvature under 1...
+            else
+                tcs=tcs.^gammaT;
+                fcs=fcs.^gammaF;
+            end
+            
+            %MEANS
+            muS=tcs*tm+fcs*fm;
+            muN=fcs*fm;
+            
+            %SIGMAS
+            if doDivisiveNorm
+                sigmaS=max(noSigNoiseStd+tcs*ts+fcs*fs,0.001);
+                sigmaN=max(noSigNoiseStd+fcs*fs,0.001);
+            else
+                sigmaS=max(1+tcs*ts+fcs*fs,0.001);
+                sigmaN=max(1+fcs*fs,0.001);
+            end
+            
+            %SHAPE
+            if addGevShape
+                shapeS=kappa+tcs*tk+fcs*fk;
+                shapeN=kappa+fcs*fk;
+                %shape is bounded between -1 and 1
+                %should be... bounded, but isnt.
+            else
+                shapeS=[];
+                shapeN=[];
+            end
+            
         end
-        function [p, muS muN sigmaS sigmaN shapeS shapeN]=getNonLinearMuSigma(p,x,tcs,fcs);
-            %default if not defined
-            shapeS=[];
-            shapeN=[];
-            switch p.sdtDistributionType
-                case 'gaussian'
-                    tm=x(2); fm=x(3);
-                                    
-                    if length(x)>=4
-                        p.relativeMissCost=x(4);
-                    end
-                                              
-                    if length(5)>=5
-                        c50=x(5);
-                    else
-                        c50=1;
-                    end
-                    
-                    if length(x)>=6
-                        %same contrast exponent
-                        gammaT=x(6);
-
-                    else
-                        gammaT=1;
-                        gammaF=1;
-                    end
-
-                    if length(x)>=7
-                        fallOff=exp(x(7));
-                    else
-                        fallOff=1; %1= no falloff, normalize to full screen, not locally
-                    end
-                    
-                    if length(x)>=8
-                        gammaF=x(8);
-                    else
-                        gammaF=gammaT;
-                    end
-                    
-                    if  length(x)>=9
-                        ts=x(9);
-                    else
-                        ts=0; 
-                    end
-                    
-                    if  length(x)>=10
-                        fs=x(10);
-                    else
-                        fs=0;
-                    end
-
-                    %effective flanker and target contrast,
-                    %first gamma'd,
-                    %then normalized by local contrast
-                    %tce=tcs.^gammaT./(c50+(fcs + 2*fallOff*tcs).^((gammaT+gammaF)/2));  
-                    %fce=fcs.^gammaF./(c50+(fcs + fallOff*tcs).^((gammaT+gammaF)/2)); % ignoring the effect of the other flanker
-                    
-                    
-                    tce=tcs.^gammaT./(c50+(fcs + 2*fallOff*tcs).^(gammaT));
-                    fce=fcs.^gammaF./(c50+(fcs + fallOff*tcs).^(gammaF)); % ignoring the effect of the other flanker
-                    
-                    
-                    %close all; figure; plot(tce,'g'); hold on; plot(fce,'r')
-                    
-
-                    %THIS IS AN INTERESTING OPTION I NEVER TESTED:
-                    %fcb=fcs+baseline;
-                    %fce=fcb.^gammaF./(c50+(fcs + fallOff*tcs).^((gammaT+gammaF)/2));
-                    %is  enables ZERO CONTRAST FLANKERS to still have a noise floor signal (mu>0) that targets can modify
-                    % could also consider a small reduction in the sigma...
-                    % but thats complicated and should link about variane
-                    % going with mean and effects to combat it
-                    %noSigNoiseStd=1; % crazy variance changing: ones(1,length(tce))./(c50+(tcs + 2*fallOff*fcs).^((gammaT+gammaF)/2));  % maybe this should be learned in the dn mode, bc all signal (muN) changes are with respect to it.. curvature under 1...
-                    
-                    
-                    muS=tce*tm+fce*fm;
-                    muN=fce*fm;
-                    noSigNoiseStd=1; % crazy variance changing: ones(1,length(tce))./(c50+(tcs + 2*fallOff*fcs).^((gammaT+gammaF)/2));  % maybe this should be learned in the dn mode, bc all signal (muN) changes are with respect to it.. curvature under 1...
-                    sigmaS=max(noSigNoiseStd+tce*ts+fce*fs,0.001);
-                    sigmaN=max(noSigNoiseStd+fce*fs,0.001);
-                otherwise
-                    p.sdtDistributionType
-                    error('never defined other sdtDistributionType for non gaussian')
-            end
-        end   
+        
+        
         function [p, muS,muN,sigmaS,sigmaN,shapeS,shapeN]=getSimulationFitMuSigma(p,x,tcs,fcs);
             
             %preallocate
@@ -786,7 +1121,7 @@ classdef detectionModel
                             sigmaN(which)=p.cache.xn(fInd(f),tInd(t),2);
                             shapeS(which)=p.cache.xs(fInd(f),tInd(t),1);
                             shapeN(which)=p.cache.xn(fInd(f),tInd(t),1);
-                        case 'gaussian' 
+                        case 'gaussian'
                             error('not yet')
                         otherwise
                             p.optimalCritMethod
@@ -798,32 +1133,39 @@ classdef detectionModel
         function [hit fa miss cr adjustedCrit critUsed params]=getRatesAndCriteria(p,x,tcs,fcs,params,anchorCriteria)
             
             %the model parameter relationships
-            switch p.signalCombination
-                case 'linearIndependant'
-                    [p,muS,muN,sigmaS,sigmaN,shapeS,shapeN]=getLinearMuSigma(p,x,tcs,fcs);
-                case 'divisiveNormalization' 
-                    [p,muS,muN,sigmaS,sigmaN,shapeS,shapeN]=getNonLinearMuSigma(p,x,tcs,fcs);
+            switch p.parameterSource
+                case 'parametericSDT'
+                    [p,muS,muN,sigmaS,sigmaN,shapeS,shapeN]=getSDTparams(p,x,tcs,fcs);
+                    %                 case 'linearIndependant'
+                    %                     [p,muS,muN,sigmaS,sigmaN,shapeS,shapeN]=getSDTparams(p,x,tcs,fcs);
+                    %                 case 'divisiveNormalization'
+                    %                     [p,muS,muN,sigmaS,sigmaN,shapeS,shapeN]=getSDTparams(p,x,tcs,fcs);
                 case 'simulationFitResults'
                     [p,muS,muN,sigmaS,sigmaN,shapeS,shapeN]=getSimulationFitMuSigma(p,x,tcs,fcs);
                 case 'simulationFitResultsSplined'
                     %maybe
                     error('not yet')
-            end 
+            end
             
             adjustedCrit=nan(1,length(muS));
             for i=1:length(muS);   %the optimal (unbiased) criteria per condition
-                if length(x)>11
-                    %in current code this must be both rats, with bias term for each
-                    sID=params.subjectID(i)~=params.subjectID(1)+1; % evaluates to 1 and 2 for 1st and 2nd rat (not good for n rats)
-                    p.relativeMissCost=x(11+sID);
+                if p.hasBiasFeature() %length(x)>11
+                    try
+                        %in current code this must be both rats, with bias term for each
+                        sID=params.subjectID(i)~=params.subjectID(1)+1; % evaluates to 1 and 2 for 1st and 2nd rat (not good for n rats)
+                        biasID=find(strcmp(p.modelFeatures,'bias'));
+                        p.relativeMissCost=exp(x(biasID+sID-1));
+                        %log(miss/hit)=b
+                    catch ex
+                        getReport(ex)
+                        keyboard
+                    end
                 end
-                switch p.sdtDistributionType
-                    case {'gaussian','eqVarGaussian'}
-                        adjustedCrit(i)=p.fitCriterionFromGaussParams([muN(i) sigmaN(i)],[muS(i) sigmaS(i)]);
-                    case 'gev'
-                        adjustedCrit(i)=p.fitCriterionFromEvdParams([shapeN(i) sigmaN(i) muN(i)],[shapeS(i) sigmaS(i) muS(i)]);
-                    otherwise
-                        error('bad')
+                
+                if p.isGEV
+                    adjustedCrit(i)=p.fitCriterionFromEvdParams([shapeN(i) sigmaN(i) muN(i)],[shapeS(i) sigmaS(i) muS(i)]);
+                else
+                    adjustedCrit(i)=p.fitCriterionFromGaussParams([muN(i) sigmaN(i)],[muS(i) sigmaS(i)]);
                 end
             end
             
@@ -839,23 +1181,20 @@ classdef detectionModel
             %                 %the optimal (unbiased) criteria
             %                critUnbiased(i)=p.fitCriterionFromGaussParams([muN(i) sigmaN(i)],[muS(i) sigmaS(i)]);
             %             end
-
+            
             fractionLearned=p.getCritLearningRate(x(1));
             critUsed=adjustedCrit*fractionLearned+anchorCriteria*(1-fractionLearned);
             
-            switch p.sdtDistributionType
-                case {'gaussian','eqVarGaussian'}
-                    miss=normcdf(critUsed,muS,sigmaS); hit=1-miss;
-                    cr=normcdf(critUsed,muN,sigmaN); fa=1-cr;
-                case 'gev'
-                    miss=gevcdf(critUsed,shapeS,sigmaS,muS); hit=1-miss;
-                    cr=gevcdf(critUsed,shapeN,sigmaN,muN); fa=1-cr;
-                otherwise
-                    error('bad')
+            if p.isGEV
+                miss=gevcdf(critUsed,shapeS,sigmaS,muS); hit=1-miss;
+                cr=gevcdf(critUsed,shapeN,sigmaN,muN); fa=1-cr;
+            else
+                miss=normcdf(critUsed,muS,sigmaS); hit=1-miss;
+                cr=normcdf(critUsed,muN,sigmaN); fa=1-cr;
             end
-
+            
             [hit fa miss cr] = p.adjustForGuessingAndBias(x,params,hit,fa,miss,cr);
-
+            
             params.anchorCriteria=anchorCriteria;
             params.muS=muS;
             params.muN=muN;
@@ -910,12 +1249,13 @@ classdef detectionModel
             doPlot=rand<0.05;
             doPlot=0;
             if doPlot
-                p.viewOnGoingFit(hit,miss,fa,cr,data,x,params,[1 2],true)
+                p.viewOnGoingFit(hit,miss,fa,cr,data,x,params,[1 2],true);
                 
                 figure(3);
                 for i=1:params.numTc*params.numFc;
                     subplot(params.numTc,params.numFc,i); hold off
-                    loc=linspace(-10,10,100);
+                    loc=linspace(-5,5,100);
+                    % loc=linspace(-10,10,100);
                     plot(loc,normpdf(loc,params.muS(i),params.sigmaS(i)),'g'); hold on
                     plot(loc,normpdf(loc,params.muN(i),params.sigmaN(i)),'r')
                     
@@ -926,10 +1266,14 @@ classdef detectionModel
                     xlabel(sprintf('tc:%2.2f fc:%2.2f',params.tcs(i),params.fcs(i)) )
                     
                 end
-                set(gcf,'position',[800 100 750 750])
+                set(gcf,'position',[800 100 750 750]);
                 drawnow
             end
-            disp(toc) % just to know things are running, and how long per pass
+%             if rand<0.05
+%                 fprintf('%2.2f',er)
+%             else
+%                 fprintf('.')
+%             end
         end
         function AIC=viewOnGoingFit(p,hit,miss,fa,cr,data,x,params,handles,includeSubjectData)
             
@@ -940,7 +1284,7 @@ classdef detectionModel
                 set(gcf,'position',[50 900 500 200])
             end
             
-            figure(handles(1)); hold off 
+            figure(handles(1)); hold off
             plot([0 1],[0 1],'k'); hold on
             if includeSubjectData
                 plot(data.fa,data.hit,'.k');
@@ -955,26 +1299,22 @@ classdef detectionModel
             % plot one criterion curve
             cInd=length(params.muS)-p.numTc+1; %full contrast no flank ind
             
-            
-            
-            switch p.sdtDistributionType
-                case {'gaussian','eqVarGaussian'}
-                    n=20;
-                    critSweep=linspace(-1,3,n);
-                    [tempParams numSubs]=p.adjustSubjectsIndex(params,n);
-                    h=1-normcdf(repmat(critSweep,1,numSubs),params.muS(cInd),params.sigmaS(cInd));
-                    f=1-normcdf(repmat(critSweep,1,numSubs),params.muN(cInd),params.sigmaN(cInd));
-                    
-                case 'gev'
-                    n=30;
-                    %critSweep=linspace(-3,2,n);
-                    critSweep=linspace(.1,.7,n);
-                    [tempParams numSubs]=p.adjustSubjectsIndex(params,n);
-                    h=1-gevcdf(repmat(critSweep,1,numSubs),params.shapeS(cInd),params.sigmaS(cInd),params.muS(cInd));
-                    f=1-gevcdf(repmat(critSweep,1,numSubs),params.shapeN(cInd),params.sigmaN(cInd),params.muN(cInd)); 
-                otherwise
-                    error('bad')
+            if p.isGEV
+                n=30;
+                %critSweep=linspace(-3,2,n);
+                critSweep=linspace(.1,.7,n);
+                [tempParams numSubs]=p.adjustSubjectsIndex(params,n);
+                h=1-gevcdf(repmat(critSweep,1,numSubs),params.shapeS(cInd),params.sigmaS(cInd),params.muS(cInd));
+                f=1-gevcdf(repmat(critSweep,1,numSubs),params.shapeN(cInd),params.sigmaN(cInd),params.muN(cInd));
+            else
+                %'gaussian'
+                n=20;
+                critSweep=linspace(-1,3,n);
+                [tempParams numSubs]=p.adjustSubjectsIndex(params,n);
+                h=1-normcdf(repmat(critSweep,1,numSubs),params.muS(cInd),params.sigmaS(cInd));
+                f=1-normcdf(repmat(critSweep,1,numSubs),params.muN(cInd),params.sigmaN(cInd));
             end
+            
             [h f] = p.adjustForGuessingAndBias(x,tempParams,h,f);
             plot(f,h,'color',[0.8 0.8 0.8])
             
@@ -984,9 +1324,9 @@ classdef detectionModel
                 
                 %fcs=linspace(-0.5,3,n); % watch it fall to zero for "negative flanker contrast"
                 fcs=repmat(linspace(0,5,n),1,numSubs); % watch it fall to zero for "negative flanker contrast"
-
+                
                 tcs=p.tc(i)*ones(1,n*numSubs);  % subject-model same contrast assumption was previously checked
-                %[muS muN sigmaS sigmaN]=getLinearMuSigma(p,x,tcs,fcs);
+                %[muS muN sigmaS sigmaN]=getSDTparams(p,x,tcs,fcs);
                 [h f]=p.getRatesAndCriteria(x,tcs,fcs,modParams,params.anchorCriteria);
                 if i==params.numTc+1
                     plot(f,h,'r')
@@ -1001,7 +1341,7 @@ classdef detectionModel
                 tcs=repmat(logspace(0.001,10,n),1,numSubs);
                 tcs=repmat(logspace(-3,1,n),1,numSubs);
                 fcs=p.fc(i)*ones(1,n*numSubs);  % subject-model same contrast assumption was previously checked
-                %[muS muN sigmaS sigmaN]=getLinearMuSigma(p,x,tcs,fcs);
+                %[muS muN sigmaS sigmaN]=getSDTparams(p,x,tcs,fcs);
                 [h f]=p.getRatesAndCriteria(x,tcs,fcs,modParams,params.anchorCriteria);
                 if i==1
                     plot(f,h,'b')
@@ -1024,6 +1364,8 @@ classdef detectionModel
             switch numSubs
                 case 1
                     %nothing to do
+                    first=params.subjectID(1);
+                    params.subjectID=[repmat(first,1,n)]; % overwrite for the new size
                 case 2
                     %get the values
                     first=params.subjectID(1);
@@ -1045,160 +1387,69 @@ classdef detectionModel
             end
             AIC=2*numParams-(params.modelLL+nckLL);
             
-            switch p.sdtDistributionType  % maybe the model name sets the other params?
-                case 'gaussian'
-                    
-                    switch p.signalCombination
-                        case 'divisiveNormalization'
-                                names={'\alpha','\mu_t','\mu_f'};
-                                values=[p.getCritLearningRate(x(1)) x(2:3)];
-                                
-                                if length(x)>=4
-                                    names{end+1}='b';
-                                    values(4)=x(4);
-                                end
-                                %p.relativeMissCost=x(4);
-                                    
-                                if length(x)>=5
-                                    names{end+1}='C_{50}';
-                                    values(5)=x(5);
-                                end
-                                %c50=x(5);
-                                
-                                if length(x)>=6
-                                    names{end+1}='\gamma';
-                                    values(6)=x(6);
-                                end
-                                %gammaT=x(6);
-                                
-                                %fallOff=x(7);
-                                if length(x)>=7
-                                    names{end+1}='\lambda';
-                                    values(7)=exp(x(7));
-                                end
-                                
-                                
-                                if length(x)>=8
-                                    names{end-1}='\gamma_t';
-                                    names{end+1}='\gamma_f';
-                                    values(8)=x(8);
-                                end
-                                %gammaF=x(8);
-                                
-                                
-                                if length(x)>=9
-                                    names{end+1}='\sigma_t';
-                                    values(9)=x(9);
-                                end
-                                %ts=x(9);
-                                
-                                if length(x)>=10
-                                    names{end+1}='\sigma_f';
-                                    values(10)=x(10);
-                                end
-                                 %fs=x(10);
-                                 
-%                                 if length(x)==8
-%                                     names{end+1}='\sigma_C';
-%                                     values(8)=x(8);
-%                                 elseif length(x)>7
-%                                     names{end+1}='\sigma_t';
-%                                     names{end+1}='\sigma_f';
-%                                     values(7:8)=x(7:8);
-%                                 end
-                                    
-                        otherwise
-                            
-                            if length(x)==1
-                                names={'\alpha'};
-                                values=p.getCritLearningRate(x(1));
-                            else
-                                names={'\alpha','\mu_t','\mu_f','\sigma_t','\sigma_f'};
-                                values=[p.getCritLearningRate(x(1)) x(2:5)];
-                            end
-                            
-                            if length(x)==6
-                                names{end+1}='\gamma';
-                                values(6)=x(6);
-                            elseif length(x)>6
-                                names{end+1}='\gamma_t';
-                                names{end+1}='\gamma_f';
-                                values(6:7)=x(6:7);
-                            end
-                            
-                            if length(x)==8
-                                error('not yet')
-                            elseif length(x)==11
-                                error('not yet')
-                            elseif length(x)==11
-                                error('not yet')
-                            elseif length(x)==13
-                                names{end+1}='g_1'; %8
-                                names{end+1}='g_2'; %9
-                                names{end+1}='y|g_1';%10
-                                names{end+1}='y|g_2';%11
-                                names{end+1}='b_1';%12
-                                names{end+1}='b_2';%13
-                                values(8:11)=[1 1 1 1]./(1+exp(x(8:11)));
-                                values(12:13)=x(12:13);
-                            end
-                    end
-                     
-                case 'eqVarGaussian'
-                    names={'\alpha','\mu_t','\mu_f','\sigma_t','\sigma_f'};
-                    values=[p.getCritLearningRate(x(1)) x(2:end) 0 0];
-                case 'gev'
-                    
-                    names={'\alpha'};
-                    values=p.getCritLearningRate(x(1));
-                    switch p.signalCombination
-                        case {'linearIndependant','divisiveNormalization'}
-                            names={'\alpha','\mu_t','\mu_f','\sigma_t','\sigma_f'};
-                            values=[p.getCritLearningRate(x(1)) x(2:5)];
-                            
-                            if length(x)>=6
-                                names{end+1}='\kappa_0';
-                                values(6)=x(6);
-                            end
-                            
-                            
-                            if length(x)>=7
-                                names{end+1}='\kappa_t';
-                                values(7)=x(7);
-                            end
-                            
-                            if length(x)>=8
-                                names{end+1}='\kappa_f';
-                                values(8)=x(8);
-                            end
-                            
-                            if length(x)>=9
-                                names{end+1}='\gamma_t';
-                                values(9)=x(9);
-                            end
-                            
-                            if length(x)>=10
-                                names{end+1}='\gamma_f';
-                                values(10)=x(10);
-                            end
-                          
-                        case 'simulationFitResults'
-                            if length(x)>=2
-                                names{end+1}='baseline';
-                                values(end+1)=x(2);
-                            end
-                            if length(x)>=3
-                                names{end+1}='D';
-                                values(end+1)=x(3);
-                            end
-                            if length(x)>=4
-                                names{end+1}='\sigma_{gaze}';
-                                values(end+1)=x(4);
-                            end
-                    end
-                    
-                otherwise
-                    error
+            features=p.modelFeatures;
+            for i=1:length(features)
+                values(i)=x(i); % default just trace the value... some features over write this with a transform
+                switch features{i}
+                    case 'alpha'
+                        values(i)=p.getCritLearningRate(x(1));
+                        names{i}='\alpha';
+                    case 'tm'
+                        names{i}='\mu_t';
+                    case 'fm'
+                        names{i}='\mu_f';
+                    case 'ts'
+                        names{i}='\sigma_t';
+                    case 'fs'
+                        names{i}='\sigma_f';
+                    case 'sigma'
+                        names{i}='\sigma';
+                    case 'sigmaPerMean'
+                        names{i}='log \sigma:\mu';
+                        %values(i)=x(i);
+                    case 'bias'
+                        names{i}='b';
+                        values(i)=x(i);
+                    case 'c50'
+                        names{i}='C_{50}';
+                    case 'gamma'
+                        names{i}='\gamma';
+                    case 'gammaT'
+                        names{i}='\gamma_t';
+                    case 'gammaF'
+                        names{i}='\gamma_f';
+                    case 'fallOff'
+                        names{i}='\lambda';
+                        values(i)=1/(1+exp(-x(i)));
+                    case 'kappa'
+                        names{i}='\kappa_0';
+                    case 'tk'
+                        names{i}='\kappa_t';
+                    case 'fk'
+                        names{i}='\kappa_f';
+                    case {'guess1','guess2','yes|guess1','yes|guess2'}
+                        error('not yet')
+                        %elseif length(x)==13
+                        %    names{end+1}='g_1'; %8
+                        %    names{end+1}='g_2'; %9
+                        %    names{end+1}='y|g_1';%10
+                        %    names{end+1}='y|g_2';%11
+                        %    names{end+1}='b_1';%12
+                        %    names{end+1}='b_2';%13
+                        %    values(8:11)=[1 1 1 1]./(1+exp(x(8:11)));
+                        %    values(12:13)=x(12:13);
+                        %end
+                        %HISTORICALLY HAS ONLY RUN WITH DN
+                    case 'baseline'
+                        names{i}='baseline';
+                    case 'D'
+                        names{i}='D';
+                    case 'gazeStd'
+                        names{i}='\sigma_{gaze}';
+                    otherwise
+                        features{i}
+                        error('bad feature')
+                end
             end
             
             str='';
@@ -1216,16 +1467,19 @@ classdef detectionModel
             text(1-gutter,gutter,str,'VerticalAlignment','bottom','HorizontalAlignment','right')
             
         end
-        function AIC=viewModel(p,includeSubjectData,x)
+        function AIC=viewModel(p,includeSubjectData,titleName)
             if ~exist('includeSubjectData','var') || isempty(includeSubjectData)
                 includeSubjectData=true;
             end
+            if ~exist('titleName','var') || isempty(titleName)
+                titleName='';
+            end
             
-%             if ~exist('x','var') || isempty(x)
-%                 x=p.cache.gauss.modelParams;  % hmm default will error if gev was used...
-%             end
+            %             if ~exist('x','var') || isempty(x)
+            %                 x=p.cache.gauss.modelParams;  % hmm default will error if gev was used...
+            %             end
             
-            x=p.cache.modelParams; 
+            x=p.cache.modelParams;
             [data params]=p.getDataFromSubjectCache;
             [hit fa miss cr adjustedCrit critUsed params]=getRatesAndCriteria(p,x,params.tcs,params.fcs,params);
             params.modelLL=p.logLiklihood(data,hit,fa,miss,cr); % raw unadjusted before nchoosek
@@ -1243,6 +1497,7 @@ classdef detectionModel
             settings.textObjectFontSize=12;
             settings.fontSize=20;
             settings.MarkerSize=12;
+            title(titleName)
             cleanUpFigure(gcf,settings)
             
         end
@@ -1254,40 +1509,40 @@ classdef detectionModel
                     %warning('here')
                     %keyboard
                     % see below
-                                [data params]=p.getDataFromSubjectCache
-                                [hit fa miss cr adjustedCrit critUsed params]=p.getRatesAndCriteria(x,params.tcs,params.fcs,params);
-
-                                % avoid dirty solution below
-                                p.cache.gev.modelParams=x;
-                                p.cache.gev.crit=nan(p.numFc,p.numTc); %need to size it and jump over zero contrast targets
-                                p.cache.gev.xs=nan(p.numFc,p.numTc,2); %need to size it and jump over zero contrast targets
-                                p.cache.gev.xn=nan(p.numFc,p.numTc,2); %need to size it and jump over zero contrast targets
-                                p.cache.gev.crit(:,2:end)=reshape(adjustedCrit,params.numFc,params.numTc);
-                                p.cache.gev.xs(:,2:end,3)=reshape(params.muS,params.numFc,params.numTc);
-                                p.cache.gev.xs(:,2:end,2)=reshape(params.sigmaS,params.numFc,params.numTc);
-                                p.cache.gev.xs(:,2:end,1)=reshape(params.shapeS,params.numFc,params.numTc);
-                                p.cache.gev.xn(:,2:end,3)=reshape(params.muN,params.numFc,params.numTc);
-                                p.cache.gev.xn(:,2:end,2)=reshape(params.sigmaN,params.numFc,params.numTc);
-                                p.cache.gev.xn(:,2:end,1)=reshape(params.shapeN,params.numFc,params.numTc);
-                                
-                                %set the "no" signal one to be overlapping with the weakest
-                                %signal (not correct but its least intrusive to the plot)
-                                p.cache.gev.xn(:,1,:)=p.cache.gev.xn(:,2,:);
-                                p.cache.gev.xs(:,1,:)=p.cache.gev.xs(:,2,:);
-                                p.cache.gev.crit(:,1)=p.cache.gev.crit(:,2);
-                                
-                                p.cache.modelParams=x;
-
-                                
+                    [data params]=p.getDataFromSubjectCache
+                    [hit fa miss cr adjustedCrit critUsed params]=p.getRatesAndCriteria(x,params.tcs,params.fcs,params);
+                    
+                    % avoid dirty solution below
+                    p.cache.gev.modelParams=x;
+                    p.cache.gev.crit=nan(p.numFc,p.numTc); %need to size it and jump over zero contrast targets
+                    p.cache.gev.xs=nan(p.numFc,p.numTc,2); %need to size it and jump over zero contrast targets
+                    p.cache.gev.xn=nan(p.numFc,p.numTc,2); %need to size it and jump over zero contrast targets
+                    p.cache.gev.crit(:,2:end)=reshape(adjustedCrit,params.numFc,params.numTc);
+                    p.cache.gev.xs(:,2:end,3)=reshape(params.muS,params.numFc,params.numTc);
+                    p.cache.gev.xs(:,2:end,2)=reshape(params.sigmaS,params.numFc,params.numTc);
+                    p.cache.gev.xs(:,2:end,1)=reshape(params.shapeS,params.numFc,params.numTc);
+                    p.cache.gev.xn(:,2:end,3)=reshape(params.muN,params.numFc,params.numTc);
+                    p.cache.gev.xn(:,2:end,2)=reshape(params.sigmaN,params.numFc,params.numTc);
+                    p.cache.gev.xn(:,2:end,1)=reshape(params.shapeN,params.numFc,params.numTc);
+                    
+                    %set the "no" signal one to be overlapping with the weakest
+                    %signal (not correct but its least intrusive to the plot)
+                    p.cache.gev.xn(:,1,:)=p.cache.gev.xn(:,2,:);
+                    p.cache.gev.xs(:,1,:)=p.cache.gev.xs(:,2,:);
+                    p.cache.gev.crit(:,1)=p.cache.gev.crit(:,2);
+                    
+                    p.cache.modelParams=x;
+                    
+                    
                 otherwise
-                 error('not yet')
+                    error('not yet')
             end
         end
         function p=setGaussDistParamsFromModelFit(p,x)
             
             
             temp=p.relativeMissCost;
-            p.relativeMissCost=x(1);
+            p.relativeMissCost=exp(x(1));
             tm=x(2);
             fm=x(3);
             if x>3
@@ -1424,7 +1679,7 @@ classdef detectionModel
             p.cache.mcmc=mcmc;
         end
         function intuitionTest(p)
-
+            
             p.modelName='modelGroup'
             p=p.load
             
@@ -1433,23 +1688,23 @@ classdef detectionModel
             [hit fa miss cr adjustedCrit critUsed params]=p.getRatesAndCriteria(x,params.tcs,params.fcs,params);
             params.modelLL=p.logLiklihood(data,hit,fa,miss,cr);
             p.viewOnGoingFit(hit,miss,fa,cr,data,x,params,[1 2],true)
-                
-                figure(3);
-                for i=1:params.numTc*params.numFc;
-                    subplot(params.numTc,params.numFc,i); hold off
-                    loc=linspace(-5,5,100);
-                    plot(loc,normpdf(loc,params.muS(i),params.sigmaS(i)),'g'); hold on
-                    plot(loc,normpdf(loc,params.muN(i),params.sigmaN(i)),'r')
-                    
-                    plot(params.anchorCriteria([1 1]),ylim,'m')
-                    plot(critUsed([i i]),ylim,'k')
-                    set(gca,'xtick',[],'ytick',[],'ylim',[0 1])
-                    plot(adjustedCrit([i i]),ylim,'r--')
-                    xlabel(sprintf('tc:%2.2f fc:%2.2f',params.tcs(i),params.fcs(i)) )
-                end
-                         
             
-            p.cache.modelParams=x; 
+            figure(3);
+            for i=1:params.numTc*params.numFc;
+                subplot(params.numTc,params.numFc,i); hold off
+                loc=linspace(-5,5,100);
+                plot(loc,normpdf(loc,params.muS(i),params.sigmaS(i)),'g'); hold on
+                plot(loc,normpdf(loc,params.muN(i),params.sigmaN(i)),'r')
+                
+                plot(params.anchorCriteria([1 1]),ylim,'m')
+                plot(critUsed([i i]),ylim,'k')
+                set(gca,'xtick',[],'ytick',[],'ylim',[0 1])
+                plot(adjustedCrit([i i]),ylim,'r--')
+                xlabel(sprintf('tc:%2.2f fc:%2.2f',params.tcs(i),params.fcs(i)) )
+            end
+            
+            
+            p.cache.modelParams=x;
             p.viewModel(false)
             
             %%
@@ -1612,7 +1867,7 @@ classdef detectionModel
                                         %plot([xs(1) xs(1)],ylim,'g')
                                         crit=p.crit(fInds(f),tInds(t));
                                         plot(crit([1 1]),ylim,'k')
-                   
+                                        
                                     case {'gev'}
                                         
                                         xn=p.cache.gev.xn(fInds(f),tInds(t),:);
@@ -1736,7 +1991,7 @@ classdef detectionModel
                         
                         switch dataSource
                             case 'modelSamples'
-                                numHit=sum(p.cache.dv(fInd(f),tInd(t),:)>p.crit(fInd(f),tInd(t))); 
+                                numHit=sum(p.cache.dv(fInd(f),tInd(t),:)>p.crit(fInd(f),tInd(t)));
                                 numFA=sum(p.cache.dv(fInd(f),tIndNoSig,:)>p.crit(fInd(f),tInd(t)));
                                 [hit hitCI]=binofit(numHit,p.numIttn);
                                 [fa faCI]=binofit(numFA,p.numIttn);
@@ -2072,7 +2327,7 @@ classdef detectionModel
                 tIndNoSig
                 error('missing an ind')
             end
-        end   
+        end
         function [p crit er]=fitCriteria(p)
             [fInd tInd tIndNoSig]=p.getContrastIndsFromCurrentOrArg();
             
@@ -2113,11 +2368,11 @@ classdef detectionModel
                             end
                             
                             [crit er]=p.fitCriterionFromEvdParams(xn,xs);
-
+                            
                             if p.viewPlot.critEvdFit
                                 plot(crit([1 1]),ylim,'k')
                             end
-   
+                            
                             p.cache.erLastCritSearch(fInd(f),tInd(t))=er;
                             %p.current.crit=crit;  %store in current for active seaching process (do i need this?)
                             p.cache.gev.crit(fInd(f),tInd(t))=crit;
@@ -2137,30 +2392,30 @@ classdef detectionModel
             %THIS DOES TO ADJUST FOR ALPHA IS NOT NEEDED... ITS GOT PUSHED
             %TO THE COMMMON LOCATION OF GET CRITERIA AND RATES, SHARED WITH
             %OTHER MODELS
-%             switch p.optimalCritMethod
-%                 case {'fitGevWithAlphaLearning'} %fitGaussWithAlphaLearning
-%                     crits=p.cache.gev.crit(:,2:end); % don't include the noise with self "crit"
-%                     anchorCriteria=mean(crits(:));
-%                     fractionLearned=getCritLearningRate(p,p.current.learningAlpha); %hard code here for right now [0 1 or fit=0.5]
-%                     p.crit(:,2:end)=crits*fractionLearned+anchorCriteria*(1-fractionLearned);
-%                     
-%                     for f=1:length(fInd)
-%                         for t=1:length(tInd)   
-% 
-%                             %this is not needed, but nice to keep in sync
-%                             %(could axe if slow)
-%                             xn=p.cache.xn(fInd(f),tInd(t),1:3);
-%                             xs=p.cache.xs(fInd(f),tInd(t),1:3);
-%                             p.cache.erLastCritSearch(fInd(f),tInd(t))=evdErrorFun(p,p.crit(fInd(f),tInd(t)),xn,xs,p.relativeMissCost);
-%                             
-%                             %p.current.crit=crit;  %store in current for active seaching process (do i need this?)
-%                             %p.cache.gev.crit(fInd(f),tInd(t))=critUsed;
-%                             
-%                         end
-%                     end
-%                 otherwise
-%                     %dont modify with alpha
-%             end
+            %             switch p.optimalCritMethod
+            %                 case {'fitGevWithAlphaLearning'} %fitGaussWithAlphaLearning
+            %                     crits=p.cache.gev.crit(:,2:end); % don't include the noise with self "crit"
+            %                     anchorCriteria=mean(crits(:));
+            %                     fractionLearned=getCritLearningRate(p,p.current.learningAlpha); %hard code here for right now [0 1 or fit=0.5]
+            %                     p.crit(:,2:end)=crits*fractionLearned+anchorCriteria*(1-fractionLearned);
+            %
+            %                     for f=1:length(fInd)
+            %                         for t=1:length(tInd)
+            %
+            %                             %this is not needed, but nice to keep in sync
+            %                             %(could axe if slow)
+            %                             xn=p.cache.xn(fInd(f),tInd(t),1:3);
+            %                             xs=p.cache.xs(fInd(f),tInd(t),1:3);
+            %                             p.cache.erLastCritSearch(fInd(f),tInd(t))=evdErrorFun(p,p.crit(fInd(f),tInd(t)),xn,xs,p.relativeMissCost);
+            %
+            %                             %p.current.crit=crit;  %store in current for active seaching process (do i need this?)
+            %                             %p.cache.gev.crit(fInd(f),tInd(t))=critUsed;
+            %
+            %                         end
+            %                     end
+            %                 otherwise
+            %                     %dont modify with alpha
+            %             end
             
         end
         function [crit er]=fitCriterionFromEvdParams(p,xn,xs)
@@ -2210,13 +2465,13 @@ classdef detectionModel
         end
         function er=gaussSTDErrorFun(p,crit,xn,xs,relativeMissCost)
             try
-            er=(1-normcdf(crit,xn(1),xn(2)))+normcdf(crit,xs(1),xs(2))*relativeMissCost;
-            er=er/2;
+                er=(1-normcdf(crit,xn(1),xn(2)))+normcdf(crit,xs(1),xs(2))*relativeMissCost;
+                er=er/2;
             catch
                 warning('here')
                 keyboard
             end
-        end    
+        end
         function p=fitSubjectDataWithSimulation(p)
             [data params]=p.getDataFromSubjectCache;
             if any(unique([0 params.tcs])~=p.tc) || any(unique(params.fcs)~=p.fc)
@@ -2237,7 +2492,7 @@ classdef detectionModel
             x0mean=[.5 .35 6 2];
             x0var=[.2 .2 2 1];
             lb=[0 0 2 .8];
-                  
+            
             numRuns=50;
             p.cache.x0=[];
             p.cache.modelHistory=[];
@@ -2255,7 +2510,7 @@ classdef detectionModel
             end
         end
         function er=simulationMLErrorFun(p,x,data,params)
-
+            
             alpha=x(1);  % this is not USED but FIT AGAIN inside this function
             if length(x)>=2
                 p.baseline=x(2);
@@ -2280,14 +2535,14 @@ classdef detectionModel
             toc
             [hit fa miss cr adjustedCrit critUsed params]=p.getRatesAndCriteria(x,params.tcs,params.fcs,params);
             params.modelLL=p.logLiklihood(data,hit,fa,miss,cr);
-            %er=-2*params.modelLL; 
+            %er=-2*params.modelLL;
             
             [alpha er]=p.fitLearningRateToSubjectDataGivenSimulationResults(data,params);
             %%save the best as you go...
             %p.cache.modelParams=[alpha  x(2:end)];
             %p.save
-           
-         
+            
+            
             doPlot=rand<0.05;
             doPlot=0;
             if doPlot
@@ -2318,9 +2573,9 @@ classdef detectionModel
         end
         function [alpha er]=fitLearningRateToSubjectDataGivenSimulationResults(p,data,params)
             if ~exist('data','var') || isempty(data)
-                 [data params]=p.getDataFromSubjectCache;
+                [data params]=p.getDataFromSubjectCache;
             end
-     
+            
             if ~strcmp(p.critLearningRate,'fit')
                 error('must be in fit mode to work... other wise wasting your time cuz its locked to 0 or 1')
             end
@@ -2332,7 +2587,7 @@ classdef detectionModel
                 otherwise
                     p.optimalCritMethod
             end
-
+            
             
             %THIS IS DONE ONCE OUTSIDE
             %tic
@@ -2342,10 +2597,10 @@ classdef detectionModel
             %p=fitCriteria(p); % also fits the xn and xs, se we can just use the params
             %fprintf('took %2.2f sec',toc)
             
-            p.signalCombination='simulationFitResults'; % we won't actually combine the signals, we chose use the parametric fits of the exact same contrasts as we ran in the sim
-                        
+            p.parameterSource='simulationFitResults'; % we won't actually combine the signals, we chose use the parametric fits of the exact same contrasts as we ran in the sim
+            
             alpha0=0.5; %start at 0.5
-            [alpha er]=fminsearch(@(alpha)learningRateMLErrorFun(p,alpha,data,params),alpha0);     
+            [alpha er]=fminsearch(@(alpha)learningRateMLErrorFun(p,alpha,data,params),alpha0);
         end
         function er=learningRateMLErrorFun(p,alpha,data,params)
             %p.current.learningAlpha=alpha; not needed anymore
@@ -2354,7 +2609,7 @@ classdef detectionModel
             
             %the liklihood
             params.modelLL=p.logLiklihood(data,hit,fa,miss,cr);
-            er=-2*params.modelLL; 
+            er=-2*params.modelLL;
             
             toc
             doPlot=rand<0.05;
@@ -2363,24 +2618,24 @@ classdef detectionModel
                 includeSubjectData=true;
                 p.viewOnGoingFit(hit,miss,fa,cr,data,x,params,[4],includeSubjectData);
                 
-%                 figure(3);
-%                 for i=1:params.numTc*params.numFc;
-%                     subplot(params.numTc,params.numFc,i); hold off
-%                     loc=linspace(.2,.5,100);
-%                     %plot(loc,normpdf(loc,params.muS(i),params.sigmaS(i)),'g'); hold on
-%                     %plot(loc,normpdf(loc,params.muN(i),params.sigmaN(i)),'
-%                     %r')
-%                     plot(loc,gevpdf(loc,params.shapeS(i),params.sigmaS(i),params.muS(i)),'g'); hold on
-%                     plot(loc,gevpdf(loc,params.shapeN(i),params.sigmaN(i),params.muN(i)),'r')
-%                     
-%                     set(gca,'xtick',[],'ytick',[],'ylim',[0  12],'xlim',[.2  .5])
-%                     plot(params.anchorCriteria([1 1]),ylim,'m')
-%                     plot(critUsed([i i]),ylim,'k')
-%                     plot(adjustedCrit([i i]),ylim,'r--')
-%                     xlabel(sprintf('tc:%2.2f fc:%2.2f',params.tcs(i),params.fcs(i)) )
-%                     
-%                 end
-%                 set(gcf,'position',[800 100 750 750])
+                %                 figure(3);
+                %                 for i=1:params.numTc*params.numFc;
+                %                     subplot(params.numTc,params.numFc,i); hold off
+                %                     loc=linspace(.2,.5,100);
+                %                     %plot(loc,normpdf(loc,params.muS(i),params.sigmaS(i)),'g'); hold on
+                %                     %plot(loc,normpdf(loc,params.muN(i),params.sigmaN(i)),'
+                %                     %r')
+                %                     plot(loc,gevpdf(loc,params.shapeS(i),params.sigmaS(i),params.muS(i)),'g'); hold on
+                %                     plot(loc,gevpdf(loc,params.shapeN(i),params.sigmaN(i),params.muN(i)),'r')
+                %
+                %                     set(gca,'xtick',[],'ytick',[],'ylim',[0  12],'xlim',[.2  .5])
+                %                     plot(params.anchorCriteria([1 1]),ylim,'m')
+                %                     plot(critUsed([i i]),ylim,'k')
+                %                     plot(adjustedCrit([i i]),ylim,'r--')
+                %                     xlabel(sprintf('tc:%2.2f fc:%2.2f',params.tcs(i),params.fcs(i)) )
+                %
+                %                 end
+                %                 set(gcf,'position',[800 100 750 750])
                 drawnow
                 
             end
@@ -2426,6 +2681,16 @@ classdef detectionModel
             p=p.runSimulation([p.current.tc 0],p.current.fc); %run this on only the current tc & fc, plus corresponding noise distribution
             [p critJunk er]=p.fitCriteria(); % this only uses the current...
             
+        end
+        function out=isGEV(p)
+            out=any(ismember(p.modelFeatures,{'tk','fk','kappa'}));
+        end
+        function out=hasBiasFeature(p)
+            out=any(ismember(p.modelFeatures,{'bias'}));
+        end
+        
+        function out=hasGuessing(p)
+            out=any(ismember(p.modelFeatures,{'guess1','guess2','yes|guess1','yes|guess2'}));
         end
         function doBatch(p)
             params={'stdEye',[3]};
@@ -2500,7 +2765,7 @@ classdef detectionModel
             set(gca,'xtick',[],'ytick',[])
         end
         function p=loadDataFromServer(p,subjects);
- 
+            
             %subjects={'234','231'} % all colin, many target contrasts on 12, or many flanker onctrasts on 15, or joint contrast on colinear on 16
             %conditionType='allBlockIDs';
             %filter{1}.type='16';
@@ -2537,16 +2802,16 @@ classdef detectionModel
         function  [data params]=getDataFromSubjectCache(p)
             data=p.cache.raw;
             %data(i)=p.cache.subjectData(i).params.raw)
-
+            
             
             data.numSig=data.numHits+data.numMisses;
             data.numNoSig=data.numFAs+data.numCRs;
             data.hit=data.numHits./(data.numHits+data.numMisses);
             data.miss=data.numMisses./(data.numHits+data.numMisses);
             data.fa=data.numFAs./(data.numFAs+data.numCRs);
-            data.cr=data.numCRs./(data.numFAs+data.numCRs); 
+            data.cr=data.numCRs./(data.numFAs+data.numCRs);
             
-             %pre-compute params for speed and orderliness
+            %pre-compute params for speed and orderliness
             params.tcs=[]; params.fcs=[];
             params.subjectID=data.subjectID;
             for i=1:length(p.cache.subjectData)
@@ -2558,69 +2823,57 @@ classdef detectionModel
             params.numFc=length(unique(params.fcs));
         end
         function  [hit fa miss cr] = adjustForGuessingAndBias(p,x,params,hit,fa,miss,cr);
-            if strcmp(p.sdtDistributionType,'gev')
-                %skip
-            else
-                if length(x)==8
-                    %in current code this must be a 1 global guess (pGuess)
-                    % (prob one rat)
-                    if strcmp(p.signalCombination, 'divisiveNormalization')
-                        %do nothing
-                    else
-                        error('not yet')
-                        %in old code this would have been global guesses and guess bias (pGuess and pYesGivenGuess)
-                        % (prob one rat)
-                    end
-                elseif length(x)==9
-                    
-                    switch p.signalCombination
-                        case 'divisiveNormalization'
-                            %do nothing, its a sigma
-                        otherwise
-                            error('not yet')
-                            %in old code this would have been global guesses and guess bias (pGuess and pYesGivenGuess)
-                            % (prob one rat)
-                    end
-                    
-                elseif length(x)>9
-                    %in current code this must be both rats, a guessing term for each
-                    sIDs=unique(params.subjectID);
-                    if length(sIDs)~=2
-                        error('code only written for 2 rats at most')
-                        %^'notably this is all about the indexing of the
-                        %parameters..if ever expanding, consider a way of
-                        %dynamically naming value pairs of the parameters, so
-                        %that the right names get picked and used out of the
-                        %list 'y1' for yes guessing of rat 3  or 'g2' for
-                        %global guessing of rat 2
-                    end
-                    for i=1:length(sIDs)
-                        which=params.subjectID==sIDs(i);
-                        %adjust for guessing
-                        pGuess=x(7+i); % 8th and 9th param, per 2 subjects
-                        pYesGivenGuess=x(9+i); % 10th and 11th param, per 2 subjects
-                        pGuess=1/(1+exp(pGuess));  % sigmoid to bound
-                        pYesGivenGuess=1/(1+exp(pYesGivenGuess));  % sigmoid to bound
-                        
-                        %yes
-                        hit(which)=(1-pGuess)*(hit(which))+pGuess*(pYesGivenGuess);
-                        fa(which)=(1-pGuess)*(fa(which))+pGuess*(pYesGivenGuess);
-                        %no
-                        if nargout==3
-                            error('only hit and fa, or all 4, not 3');
-                        end
-                        if nargout==4
-                            miss(which)=(1-pGuess)*(miss(which))+pGuess*(1-pYesGivenGuess);
-                            cr(which)=(1-pGuess)*(cr(which))+pGuess*(1-pYesGivenGuess);
-                            %check that things are normal
-                            if ~(all(1-(miss+hit)<10^-10) && all(1-(cr+fa)<10^-10))
-                                error('something wrong.. hits and miss should sum to 1')
-                            end
-                        end
-                    end
-                end
-
+            
+            if p.isGEV
+                error('never tested')
+                % why can't we do this with GEV... we prob could is just never been
+                % tested, though some previous comments make is seem like there might
+                % be problems, could have been parameter organization now solved.
             end
-        end
+            
+            if p.hasGuessing
+                %in current code this must be both rats, a guessing term for each
+                sIDs=unique(params.subjectID);
+                if length(sIDs)~=2
+                    error('code only written for 2 rats at most')
+                    %^'notably this is all about the indexing of the
+                    %parameters..if ever expanding, consider a way of
+                    %dynamically naming value pairs of the parameters, so
+                    %that the right names get picked and used out of the
+                    %list 'y1' for yes guessing of rat 3  or 'g2' for
+                    %global guessing of rat 2
+                end
+                for i=1:length(sIDs)
+                    which=params.subjectID==sIDs(i);
+                    
+                    
+                    %adjust for guessing - this could be updated to reflect
+                    %new feature names
+                    %
+                    %guessID=find(strcmp(p.modelFeatures,['guess' num2str(i)]))
+                    
+                    pGuess=x(7+i); % 8th and 9th param, per 2 subjects
+                    pYesGivenGuess=x(9+i); % 10th and 11th param, per 2 subjects
+                    pGuess=1/(1+exp(pGuess));  % sigmoid to bound
+                    pYesGivenGuess=1/(1+exp(pYesGivenGuess));  % sigmoid to bound
+                    
+                    %yes
+                    hit(which)=(1-pGuess)*(hit(which))+pGuess*(pYesGivenGuess);
+                    fa(which)=(1-pGuess)*(fa(which))+pGuess*(pYesGivenGuess);
+                    %no
+                    if nargout==3
+                        error('only hit and fa, or all 4, not 3');
+                    end
+                    if nargout==4
+                        miss(which)=(1-pGuess)*(miss(which))+pGuess*(1-pYesGivenGuess);
+                        cr(which)=(1-pGuess)*(cr(which))+pGuess*(1-pYesGivenGuess);
+                        %check that things are normal
+                        if ~(all(1-(miss+hit)<10^-10) && all(1-(cr+fa)<10^-10))
+                            error('something wrong.. hits and miss should sum to 1')
+                        end
+                    end
+                end %for
+            end %if
+        end % function
     end % methods
 end % classdef

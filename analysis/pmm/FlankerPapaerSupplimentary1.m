@@ -34,7 +34,7 @@ params.colors(whichHighlighted,:)=repmat(highlightColor,sum(whichHighlighted),1)
 
 %%
 figure(17); hold on
-subplot(1,4,2); hold on
+subplot(1,4,3); hold on
 for i=1:length(subjects)
     subInd=find(strcmp(subjects{i},names.subjects));
     statInd=find(strcmp('pctCorrect',names.stats));
@@ -56,7 +56,7 @@ plot([-7 7],[.5 .5],'color',chanceLineColor);
 
 axis([0 1.1 .4 1]);
 set(gca,'xTick',[0 .5 1])
-set(gca,'xTickLabel',{'0','0.5','1'})
+set(gca,'xTickLabel',{'0','50%','100%'})
 set(gca,'yTick',[.5 .75 1])
 set(gca,'yTickLabel',[.5 .75 1])
 xlabel('target contrast')
@@ -77,7 +77,7 @@ dateRange=[0 pmmEvent('endToggle')];
 %filter{1}.type='preFlankerStep'; % may include learning
 %filter{1}.type='preFlankerStep.matchTrials.1'; % no bias of mean, but higher variance
 filter{1}.type='preFlankerStep.last400'; % may reduce variance, but mean is suspect... 228 lacks enough trilas
-[nfstats nfCI nfnames nfparams]=getFlankerStats(subjects,'noFlank',{'hits','CRs','yes','pctCorrect'},filter,dateRange);
+[nfstats nfCI nfnames nfparams]=getFlankerStats(subjects,'noFlank',{'hits','CRs','yes','pctCorrect'},filter,dateRange,[],[],removeNonTilted);
 params.colors(:,:)=.8;  % overwrite color with gray
 values = params.factors.flankerContrast(1,:);
 whichHighlighted=abs(values-0.4)<0.01;
@@ -85,7 +85,9 @@ params.colors(whichHighlighted,:)=repmat(highlightColor,sum(whichHighlighted),1)
 
 %%
 %figure
-subplot(1,4,3);
+subplot(1,4,2);
+
+%%
 hold on
     
 for i=1:length(subjects)
@@ -113,7 +115,7 @@ plot([-.25 1],[.5 .5],'color',chanceLineColor);
 plot([0 0],[0 .5],'color',chanceLineColor);
 axis([0 .45 .4 1]);
 set(gca,'xTick',[0 .2 .4])
-set(gca,'xTickLabel',{'0','.2','.4'})
+set(gca,'xTickLabel',{'0','20%','40%'})
 set(gca,'yTick',[.5 .75 1])
 set(gca,'yTickLabel',[.5 .75 1])
 xlabel('flanker contrast')
@@ -304,8 +306,8 @@ end
 
 %text(1.2,stats(subInd,condInds(end),statInd),assignLabeledNames(subjects(i)))
 axis([0 2 .4 1]);
-set(gca,'xTick',[0 .22 1 2])
-set(gca,'xTickLabel',{'0','0.22','1','2'})
+set(gca,'xTick',[0 1 2])
+set(gca,'xTickLabel',{'0','1','2'})
 set(gca,'yTick',[.5 .75 1])
 set(gca,'yTickLabel',[.5 .75 1])
 xlabel('spatial freqency (cyc/deg)')

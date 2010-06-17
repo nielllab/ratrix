@@ -10,7 +10,7 @@ numDays = size(trialsPerDay,2);
 trialsAtEndOfDay = cumsum(trialsPerDay);
 trialsAtStartOfDay = [1 trialsAtEndOfDay+1];
 msecOpenTimePerDay = zeros(1,numDays);
-correctInRow=d.correctInRow;
+correctInRow=d.correctInRow;  %consider updating to nCorrectInARowCandidate?
 correctInRow(correctInRow>maxN)=maxN;
 
 uniqueRunLengths=unique(correctInRow)

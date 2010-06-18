@@ -14,9 +14,12 @@ for i=1:length(fields)
             result=length(LUT);
         end
         indices(i)=result;
+    elseif isempty(fields{i}) 
+        % don't add the empty set, tho it is a number according to matlab
+        indices(i)=nan;
     elseif isnumeric(fields{i})
         result=find(cellfun(@(x) isnumeric(x)&&all(x==fields{i}), LUT));
-        if isempty(result) % did not find in LUT - ADD
+        if isempty(result) % did not find in LUT - ADD 
             LUT{end+1} = fields{i};
             result=length(LUT);
         end

@@ -8,6 +8,7 @@ function [out newLUT]=extractDetailFields(sm,basicRecords,trialRecords,LUTparams
 
 newLUT=LUTparams.compiledLUT;
 
+
 acceptableTmIndices = find(ismember(LUTparams.compiledLUT,{'nAFC','cuedGoNoGo'}));
 if ~isempty(acceptableTmIndices) && ~all(ismember([basicRecords.trialManagerClass],acceptableTmIndices))
     warning('only works for nAFC trial managers or cuedGoNoGo')
@@ -97,17 +98,25 @@ else
                 if isfield(trialRecords(i),'phaseRecords') && ~isempty(trialRecords(i).phaseRecords)
                     % toggle mode
                     if trialRecords(i).stimDetails.toggleStim
-                        tries=trialRecords(i).phaseRecords(1).responseDetails.tries{end};
-                        tries=[tries trialRecords(i).phaseRecords(2).responseDetails.tries];
-                        times=[0 trialRecords(i).phaseRecords(2).responseDetails.times]; % start of phase is when we assume toggle started
-                        nominalIFI=trialRecords(i).phaseRecords(2).responseDetails.nominalIFI;
-                        dropIFI=0;
-                        if any(trialRecords(i).phaseRecords(2).responseDetails.misses==1)
-                            dropIFI=trialRecords(i).phaseRecords(2).responseDetails.missIFIs(1)-nominalIFI;
+                        if ~isempty(trialRecords(i).phaseRecords(1).responseDetails.tries)
+                            tries=trialRecords(i).phaseRecords(1).responseDetails.tries{end};
+                            tries=[tries trialRecords(i).phaseRecords(2).responseDetails.tries];
+                            times=[0 trialRecords(i).phaseRecords(2).responseDetails.times]; % start of phase is when we assume toggle started
+                            nominalIFI=trialRecords(i).phaseRecords(2).responseDetails.nominalIFI;
+                            dropIFI=0;
+                            if any(trialRecords(i).phaseRecords(2).responseDetails.misses==1)
+                                dropIFI=trialRecords(i).phaseRecords(2).responseDetails.missIFIs(1)-nominalIFI;
+                            end
+                            [out.actualTargetOnSecs(i) out.actualTargetOnsetTime(i) out.actualFlankerOnSecs(i) ...
+                                out.actualFlankerOnsetTime(i)] = ...
+                                getDurationsAndOnsetTimesFromToggleMode(cell2mat(tries'),times,nominalIFI,dropIFI);
+                        else
+                            % no request therefore no stim happened
+                            out.actualTargetOnSecs(i)=0;
+                            out.actualTargetOnsetTime(i)=nan;
+                            out.actualFlankerOnSecs(i)=0;
+                            out.actualFlankerOnsetTime(i)=nan;
                         end
-                        [out.actualTargetOnSecs(i) out.actualTargetOnsetTime(i) out.actualFlankerOnSecs(i) ...
-                            out.actualFlankerOnsetTime(i)] = ...
-                            getDurationsAndOnsetTimesFromToggleMode(cell2mat(tries'),times,nominalIFI,dropIFI);
                     else % timed mode
                         tm= trialRecords(i).trialManager.trialManager;
                         if isfield(tm,'dropFrames')

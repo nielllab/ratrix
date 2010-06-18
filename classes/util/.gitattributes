@@ -163,3 +163,5 @@ trialRecordProcessing/getExpectedPreRequestDurSec.m -text
 trialRecordProcessing/getResponseWindowStart.m -text
 trialRecordProcessing/getResponseWindowStop.m -text
 analysis/getCommentStringFromEventsData.m -text
+trialRecordProcessing/getPhaseLabelPerLick.m -text
+trialRecordProcessing/getDiffFromFirstRequestToNextResponse.m -text

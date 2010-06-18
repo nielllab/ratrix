@@ -33,6 +33,8 @@ if ~isempty(fieldPath) % fieldPath should only be empty in the 'numRequests' and
     fieldPath=fieldPath{end}; % fieldPath is now just a string
 end
 
+isPhased=isfield(trialRecords,'phaseRecords') && ~isempty(trialRecords(1).phaseRecords);
+
 try
     switch ensureMode
         case 'scalar'
@@ -74,16 +76,22 @@ try
         case 'NthValue'
             if ~isempty(ensureType)
                 %get nth value of matrix
-                cellValues={trialRecords.(fieldPath)};
-                cellNth=repmat({ensureType},1,(length(trialRecords)));
-                out = cell2mat(cellfun(@takeNthValue,cellValues ,cellNth, 'UniformOutput',false));
-                if size(out)~=size(trialRecords)
+                if isfield(trialRecords,fieldPath)
+                    cellValues={trialRecords.(fieldPath)};   
+                    cellNth=repmat({ensureType},1,(length(trialRecords)));
+                    out = cell2mat(cellfun(@takeNthValue,cellValues ,cellNth, 'UniformOutput',false));
+                else
+                    out=nan(size(trialRecords));
+                    warning(sprintf('field missing and Nan''d: %s',fieldPath))
+                end
+                if any(size(out)~=size(trialRecords))
                     cellValues
                     out
                     size(out)
                     size(trialRecords)
                     error('should have one value per trial! failed!  maybe nans emptys in values?')
                 end
+       
             else
                 error('should have one value per trial! failed! and nthValue is undefined')
             end
@@ -116,10 +124,11 @@ try
             trialStart= cellfun(@(x) x(1),phaseStarts,'UniformOutput',false);
             out=cell2mat(trialStart);
         case {'responseTime','firstIRI','numRequests', 'lickTimesInCell','lickTimesInMatrix'}
-            if isfield(trialRecords,'phaseRecords')
+            if isPhased
                 % this has to be a cell array b/c phaseRecords aren't always the same across trials
                 times = cellfun(@getTimesPhased,{trialRecords.phaseRecords},'UniformOutput',false);
                 tries = cellfun(@getTriesPhased,{trialRecords.phaseRecords},'UniformOutput',false);
+                phaseLabelPerLick = cellfun(@getPhaseLabelPerLick,{trialRecords.phaseRecords},'UniformOutput',false);
                 discrimPhaseStart = cellfun(@getDiscrimPhaseStart,{trialRecords.phaseRecords},'UniformOutput',false);
             else
                 % this has to be a cell array b/c times aren't always there across trials
@@ -150,8 +159,11 @@ try
                 case 'responseTime'
                     % could add a feature to check that all prior licks were only
                     % center licks... and error if not. but that would be slow.
-                    out = cell2mat(cellfun(@diffFirstRequestLastResponse,times,tries,requestPorts,responsePorts,...
-                        'UniformOutput',false));
+                    if isPhased
+                        out = cell2mat(cellfun(@getDiffFromFirstRequestToNextResponse,times,tries,requestPorts,responsePorts,phaseLabelPerLick,'UniformOutput',false));
+                    else
+                        out = cell2mat(cellfun(@diffFirstRequestLastResponse,times,tries,requestPorts,responsePorts,'UniformOutput',false));
+                    end
                 case 'firstIRI'
                     % elapsed time between first two requests
                     out = cell2mat(cellfun(@diffFirstTwoRequests,times,tries,requestPorts,'UniformOutput',false));
@@ -195,7 +207,7 @@ try
                     out=lickTimesMatrix;
             end
         case 'actualRewardDuration'
-            if isfield(trialRecords,'phaseRecords')
+            if isPhased
                 out = cell2mat(cellfun(@getRewardDursPhased,{trialRecords.phaseRecords},'UniformOutput',false));
             elseif isfield(trialRecords,'actualRewardDuration') % non-phased case
                 out = cell2mat(cellfun(@getRewardDursNonphased,{trialRecords.actualRewardDuration},'UniformOutput',false));
@@ -203,7 +215,7 @@ try
                 out=NaN*ones(1,length(trialRecords));
             end
         case 'proposedRewardDuration'
-            if isfield(trialRecords,'phaseRecords')
+            if isPhased
                 out = cell2mat(cellfun(@getProposedRewardPhased,{trialRecords.phaseRecords},'UniformOutput',false));
             elseif isfield(trialRecords,'proposedRewardSizeULorMS') % non-phased case
                 out = cell2mat(cellfun(@getProposedRewardNonphased,{trialRecords.proposedRewardSizeULorMS},'UniformOutput',false));
@@ -211,7 +223,7 @@ try
                 out=NaN*ones(1,length(trialRecords));
             end
         case 'proposedPenaltyDuration'
-            if isfield(trialRecords,'phaseRecords')
+            if isPhased
                 out = cell2mat(cellfun(@getProposedPenaltyPhased,{trialRecords.phaseRecords},'UniformOutput',false));
             elseif isfield(trialRecords,'proposedMsPenalty') % non-phased case
                 out = cell2mat(cellfun(@getProposedPenaltyNonphased,{trialRecords.proposedMsPenalty},'UniformOutput',false));
@@ -249,7 +261,11 @@ end
 end % end function
 
 function out=takeNthValue(values,N)
-out=values(N);
+if length(values)>=N
+    out=values(N);
+else
+   out=nan; 
+end
 end
 
 function out = getNumTries(responseDetails)
@@ -293,7 +309,6 @@ else
     end
 end
 end
-
 
 function out=diffFirstRequestLastResponse(times,tries,requestPorts,responsePorts)
 out=nan;

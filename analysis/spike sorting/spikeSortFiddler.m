@@ -4,7 +4,7 @@
 %% twiddle the params and sort it
 close all
 
-stimClassToAnalyze={'all'}; timeRangePerTrialSecs=[0 Inf];
+
 % path='\\132.239.158.183\rlab_storage\pmeier\backup\devNeuralData_090310'; %b/c i can't see datanet_storage folder on .179
 % path='\\132.239.158.183\rlab_storage\pmeier\backup\neuralData_090505';
 % path='C:\Documents and Settings\rlab\Desktop\neural';
@@ -14,6 +14,8 @@ path='H:\datanetOutput'  % local
 path='\\132.239.158.179\datanetOutput'  %on the G drive remote
 path='C:\Documents and Settings\rlab\My Documents\work\physiology data'  %on the G drive remote
 % path='C:\Documents and Settings\rlab\My Documents\work\physiology data'  %local computer
+
+
 
 if 1 %use filteredThresh
     spikeDetectionParams=[];
@@ -80,115 +82,6 @@ frameThresholds.errorBound = 0.6;   %fractional difference of ifi that will caus
 % this largish value of .6 allows really short frames after drops to not cause errors.  the other way around this is to crank up the drop bound beyond 1.5 but I think thats too dangerous
 
 
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[1]};%natural grating drives it %%5.30.2010
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[4]};%TRF - great!
-
-
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[30]};%SF
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[25]};%ffflank
-
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[5 14]};%error in analysis
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[15 21]};%error in analysis
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[38 44]};%sparse bright
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[46 50]};%ffgwn
-
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[66]};%trf DUPPED
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[93 110   ]};%6x8 bin DUPPED
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[70 91]};%3x4 bin DUPPED
-
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[70 73]};%ffFlanker
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[75]};%ffFlanker contrast - gamma
-% subjectID = '231'; channels={1}; cellBoundary={'trialRange',[79 83]};%ffFlanker contrast - lin
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[81 87]};%ffFlanker contrast - lin
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[90]};%ffFlanker contrast - closer to screen (15)
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[91]};%ffFlanker contrast - closer to screen (15)
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[93 94]};%ffFlanker contrast - 128 ppc - has an error?
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[96]};%confirm cell in there with hammer
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[99]};%luminance ff flankers drive it. (step 7)
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[103 105]};%fff contr drive it weakly. (step 40)
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[106 109]};%fff contr drive it weakly. (step 40)
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[106 124]};%fff contr drive it weakly. (step 40)
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[125]};%
-
-%NEW CELL
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[127 129]};%nat grating
-
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[134]};%trf
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[140]};%sparse dark
-%manual stuff
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[149]};%seems quite suppressed by some gratings
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[149]};%seems quite suppressed by some gratings
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[152 154]};%ffgwn
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[158]};%trf! - may be good but skipped
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[162 163 ]};%bin grid-
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[167]};%fff
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[168]};%fff
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[169 172]};%fff
-
-%NEW CELL
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[269]};%trf
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[271 272]};%fffc
-
-%NEW CELL
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[292]};%trf
-%trying to tune it in
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[295]};%trf
-
-%NEW CELL
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[356]};%trf
-
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[361 368]};%fffc
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[370]};%sf
-
-subjectID = '231'; channels={1}; cellBoundary={'trialRange',[361 368]};%fffc
-subjectID = '231'; channels={1}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[361 362]};%fffc
-subjectID = '231'; channels={1}; thrV=[-0.08 Inf]; cellBoundary={'trialRange',[362]};%fffc
-
-
-%NEW DAY CELL
-%DUPPED DATA
-subjectID = '231'; channels={1}; thrV=[-0.2 Inf]; cellBoundary={'trialRange',[432 437]};%trf 341 +
-subjectID = '231'; channels={1}; thrV=[-0.2 Inf]; cellBoundary={'trialRange',[439 445]};%gwn has STA, spikes def visual, though tonic mode may be adding noise?
-subjectID = '231'; channels={1}; thrV=[-0.2 Inf]; cellBoundary={'trialRange',[447 455]};%bin 
-subjectID = '231'; channels={1}; thrV=[-0.2 Inf]; cellBoundary={'trialRange',[456]};%fff, something pushes through silent mode
-subjectID = '231'; channels={1}; thrV=[-0.2 Inf]; cellBoundary={'trialRange',[457]};%sf, something pushes through silent mode
-subjectID = '231'; channels={1}; thrV=[-0.2 Inf]; cellBoundary={'trialRange',[460]};%or, oscilates at first, then held off
-subjectID = '231'; channels={1}; thrV=[-0.2 Inf]; cellBoundary={'trialRange',[462 465]};%sparse bright, ocation burst then tonic, esp at start flash
-subjectID = '231'; channels={1}; thrV=[-0.2 Inf]; cellBoundary={'trialRange',[462 472]};%sparse bright, ocation burst then tonic
-subjectID = '231'; channels={1}; thrV=[-0.2 Inf]; cellBoundary={'trialRange',[475 495]};%fffc,
-subjectID = '231'; channels={1}; thrV=[-0.2 Inf]; cellBoundary={'trialRange',[474]};%fffc, 5 burst tonic cycles, NOTE: smaller spikes exist about 1/3 the size
-subjectID = '231'; channels={1}; thrV=[-0.07 Inf]; cellBoundary={'trialRange',[474]};%fffc, 5 burst tonic cycles, NOTE: smaller spikes exist about 1/3 the size
-subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[497]};%anulus
-
-%ANOTHER DUP
-subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[436]};%anulus, centered over the rf
-subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[437]};%eye fixed
-
-%NEXT DUP
-subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[433]};%anulus, centered over the rf
-
-subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[443]};%fc, some bursts caused by some of the stim. high SNR
-subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[446]};%fc, some bursts caused by some of the stim. high SNR
-
-subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[ ]};%fffc, some bursts caused by some of the stim. high SNR
-
-subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[456]};%radii
-subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[458]};%annuli
-subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[459]};%flankers 1 phase=
-subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[461]};%bipartite for XY
-subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[463]};%bipartite for XY
-
-
-subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[472 484]};%ffgwn - iso 2
-subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[499 502]};%ffgwn - iso 0.75, till 506?
-
-subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[508]};%fc- iso 0.75
-% some dups 508-510
-subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[511 519]};%ffgwn- iso 0.75
-subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[528 529]};%ffgwn- iso 0.25 % lost cell?
-subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[538 540]};%ffgwn- iso 0.25 % lost cell?
-subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[592]};%ffgwn- wake
-
 % %LGN - 16 ch - 
 % subjectID = '356'; channels={[2:6 9:11]}; thrV=[-0.02 Inf]; cellBoundary={'trialRange',[8]};%ffgwn- LGN
 % %subjectID = '356'; channels={[11 10 2 3]}; thrV=[-0.02 Inf]; cellBoundary={'trialRange',[110]};%ffgwn- LGN
@@ -212,15 +105,20 @@ subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[5
 % subjectID = '356'; channels={[6]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[432 444]};  % has a different spatial!
 % subjectID = '356'; channels={[9]}; thrV=[-0.06 Inf]; cellBoundary={'trialRange',[432 442]};  % this is a bit weaker, same lower center location
 % subjectID = '356'; channels={[6]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[377 380]}; %3 cells, stronger response to lower contrast delayed??
+% subjectID = '356'; channels={[6]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[377]}; %3 cells, stronger response to lower contrast delayed??
 % subjectID = '356'; channels={[6]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[485]}; %fffc about 3 trials near here 482-485ish?
 % subjectID = '356'; channels={[6]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[492 498]}; %fffc
 % subjectID = '356'; channels={[10]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[492 498]}; %fffc - probably 2 cells lumped into 1 anay
 % subjectID = '356'; channels={[2]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[492 498]}; %fffc 
-subjectID = '356'; channels={[1],[2]}; thrV=[-0.01 Inf]; cellBoundary={'trialRange',[551]};
+% subjectID = '356'; channels={[1],[2]}; thrV=[-0.06 Inf]; cellBoundary={'trialRange',[550]};
 %%
 spikeSortingParams.postProcessing= 'treatAllAsSpike'; %'biggestAverageAmplitudeCluster';  %'largestNonNoiseClusterOnly',  
 spikeDetectionParams.sampleLFP = false; %true;
 spikeDetectionParams.LFPSamplingRateHz =500;
+spikeSortingParams.plotSortingForTesting =false;
+
+stimClassToAnalyze={'all'}; timeRangePerTrialSecs=[0 Inf];
+
 switch spikeDetectionParams.method
     case 'oSort'
         spikeDetectionParams.detectionMethod=3; % 1 -> from power signal, 2 threshold positive, 3 threshold negative, 4 threshold abs, 5 wavelet
@@ -234,12 +132,27 @@ usePhotoDiodeSpikes=0;
 %spikeDetectionParams.method='activeSortingParametersThisAnalysis';  % will override this files choices with the active params for this *subject*
 %spikeSortingParams.method='klustaModel';  NEED TO NOT DELETE THE MODEL FOLDER FILE>>>
 
+%% SET THE ANALYSIS MODE HERE
+analysisMode = 'overwriteAll';
+% analysisMode = 'viewFirst';
+% analysisMode = 'detectAndSortOnFirst'; %without user interaction
+% analysisMode = 'detectAndSortOnAll'; %without user interaction
+% analysisMode = 'interactiveDetectAndSortOnFirst'; %with user interaction
+% analysisMode = 'interactiveDetectAndSortOnAll'; %with user interaction
+% analysisMode = 'viewContinuous';
+% analysisMode = 'viewLast';
+% analysisMode = 'analyzeAtEnd';
+% analysisMode = 'viewAnalysisOnly';
+
+makeBackup = false;
+analyzeBoundaryRange(subjectID, path, cellBoundary, channels,spikeDetectionParams, spikeSortingParams,...
+        timeRangePerTrialSecs,stimClassToAnalyze,analysisMode,usePhotoDiodeSpikes,[],frameThresholds,makeBackup)
+
 analyzeTrials = false;
 if analyzeTrials
     analysisManagerByChunk(subjectID, path, cellBoundary, channels,spikeDetectionParams, spikeSortingParams,...
-        timeRangePerTrialSecs,stimClassToAnalyze,overwriteAll,usePhotoDiodeSpikes,[],frameThresholds,[])
-else
-    viewAllSpikesByChannel(subjectID, path, cellBoundary, spikeDetectionParams, spikeSortingParams)
+        timeRangePerTrialSecs,stimClassToAnalyze,overwriteAll,usePhotoDiodeSpikes,[],frameThresholds)
+    optimizeSortingByChannel(subjectID, path, cellBoundary, channels,spikeDetectionParams, spikeSortingParams, ...
+        timeRangePerTrialSecs,stimClassToAnalyze,overwriteAll,usePhotoDiodeSpikes)
 end
 %edit historicalSpikeFiddlerCalls
-

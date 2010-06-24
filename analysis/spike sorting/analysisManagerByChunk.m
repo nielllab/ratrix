@@ -1,5 +1,5 @@
 function quit = analysisManagerByChunk(subjectID, path, cellBoundary,spikeChannelsAnalyzed,spikeDetectionParams, spikeSortingParams,...
-    timeRangePerTrialSecs,stimClassToAnalyze,overwriteAll,usePhotoDiodeSpikes,plottingParams,frameThresholds,paramUtil)
+    timeRangePerTrialSecs,stimClassToAnalyze,overwriteAll,usePhotoDiodeSpikes,plottingParams,frameThresholds)
 % 4/14/09 - for now, lets assume this function only processes a single trial
 %	- one neuralRecords.mat file, with many chunks
 %	- one stimRecords.mat file, specific to this trial

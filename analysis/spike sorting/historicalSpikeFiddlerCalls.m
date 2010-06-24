@@ -496,4 +496,116 @@ subjectID = '305'; channels={1}; cellBoundary={'trialRange',[100]};% [260 272] f
 % subjectID = '342'; channels={[1]}; cellBoundary={'trialRange',[90 95]};%bin not much there
 % subjectID = '342'; channels={[1 2 3 4]}; cellBoundary={'trialRange',[96]};%grating test
 
+
+%% subject is 231
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[1]};%natural grating drives it %%5.30.2010
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[4]};%TRF - great!
+
+
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[30]};%SF
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[25]};%ffflank
+
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[5 14]};%error in analysis
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[15 21]};%error in analysis
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[38 44]};%sparse bright
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[46 50]};%ffgwn
+
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[66]};%trf DUPPED
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[93 110   ]};%6x8 bin DUPPED
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[70 91]};%3x4 bin DUPPED
+
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[70 73]};%ffFlanker
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[75]};%ffFlanker contrast - gamma
+% subjectID = '231'; channels={1}; cellBoundary={'trialRange',[79 83]};%ffFlanker contrast - lin
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[81 87]};%ffFlanker contrast - lin
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[90]};%ffFlanker contrast - closer to screen (15)
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[91]};%ffFlanker contrast - closer to screen (15)
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[93 94]};%ffFlanker contrast - 128 ppc - has an error?
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[96]};%confirm cell in there with hammer
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[99]};%luminance ff flankers drive it. (step 7)
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[103 105]};%fff contr drive it weakly. (step 40)
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[106 109]};%fff contr drive it weakly. (step 40)
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[106 124]};%fff contr drive it weakly. (step 40)
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[125]};%
+
+%NEW CELL
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[127 129]};%nat grating
+
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[134]};%trf
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[140]};%sparse dark
+%manual stuff
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[149]};%seems quite suppressed by some gratings
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[149]};%seems quite suppressed by some gratings
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[152 154]};%ffgwn
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[158]};%trf! - may be good but skipped
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[162 163 ]};%bin grid-
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[167]};%fff
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[168]};%fff
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[169 172]};%fff
+
+%NEW CELL
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[269]};%trf
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[271 272]};%fffc
+
+%NEW CELL
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[292]};%trf
+%trying to tune it in
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[295]};%trf
+
+%NEW CELL
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[356]};%trf
+
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[361 368]};%fffc
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[370]};%sf
+
+subjectID = '231'; channels={1}; cellBoundary={'trialRange',[361 368]};%fffc
+subjectID = '231'; channels={1}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[361 362]};%fffc
+subjectID = '231'; channels={1}; thrV=[-0.08 Inf]; cellBoundary={'trialRange',[362]};%fffc
+
+
+%NEW DAY CELL
+%DUPPED DATA
+subjectID = '231'; channels={1}; thrV=[-0.2 Inf]; cellBoundary={'trialRange',[432 437]};%trf 341 +
+subjectID = '231'; channels={1}; thrV=[-0.2 Inf]; cellBoundary={'trialRange',[439 445]};%gwn has STA, spikes def visual, though tonic mode may be adding noise?
+subjectID = '231'; channels={1}; thrV=[-0.2 Inf]; cellBoundary={'trialRange',[447 455]};%bin 
+subjectID = '231'; channels={1}; thrV=[-0.2 Inf]; cellBoundary={'trialRange',[456]};%fff, something pushes through silent mode
+subjectID = '231'; channels={1}; thrV=[-0.2 Inf]; cellBoundary={'trialRange',[457]};%sf, something pushes through silent mode
+subjectID = '231'; channels={1}; thrV=[-0.2 Inf]; cellBoundary={'trialRange',[460]};%or, oscilates at first, then held off
+subjectID = '231'; channels={1}; thrV=[-0.2 Inf]; cellBoundary={'trialRange',[462 465]};%sparse bright, ocation burst then tonic, esp at start flash
+subjectID = '231'; channels={1}; thrV=[-0.2 Inf]; cellBoundary={'trialRange',[462 472]};%sparse bright, ocation burst then tonic
+subjectID = '231'; channels={1}; thrV=[-0.2 Inf]; cellBoundary={'trialRange',[475 495]};%fffc,
+subjectID = '231'; channels={1}; thrV=[-0.2 Inf]; cellBoundary={'trialRange',[474]};%fffc, 5 burst tonic cycles, NOTE: smaller spikes exist about 1/3 the size
+subjectID = '231'; channels={1}; thrV=[-0.07 Inf]; cellBoundary={'trialRange',[474]};%fffc, 5 burst tonic cycles, NOTE: smaller spikes exist about 1/3 the size
+subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[497]};%anulus
+
+%ANOTHER DUP
+subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[436]};%anulus, centered over the rf
+subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[437]};%eye fixed
+
+%NEXT DUP
+subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[433]};%anulus, centered over the rf
+
+subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[443]};%fc, some bursts caused by some of the stim. high SNR
+subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[446]};%fc, some bursts caused by some of the stim. high SNR
+
+subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[ ]};%fffc, some bursts caused by some of the stim. high SNR
+
+subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[456]};%radii
+subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[458]};%annuli
+subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[459]};%flankers 1 phase=
+subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[461]};%bipartite for XY
+subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[463]};%bipartite for XY
+
+
+subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[472 484]};%ffgwn - iso 2
+subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[499 502]};%ffgwn - iso 0.75, till 506?
+
+subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[508]};%fc- iso 0.75
+% some dups 508-510
+subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[511 519]};%ffgwn- iso 0.75
+subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[528 529]};%ffgwn- iso 0.25 % lost cell?
+subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[538 540]};%ffgwn- iso 0.25 % lost cell?
+subjectID = '231'; channels={1}; thrV=[-0.18 Inf]; cellBoundary={'trialRange',[592]};%ffgwn- wake
+
+
 end

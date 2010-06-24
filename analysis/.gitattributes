@@ -489,3 +489,5 @@ pmm/waldExamples.m -text
 pmm/oneTimeActionLocalCompile.m -text
 pmm/qDoesNumLicksPredictChoice.m -text
 pmm/testAnova.m -text
+spike[!!-~]sorting/optimizeSortingByChannel.m -text
+/analyzeBoundaryRange.m -text

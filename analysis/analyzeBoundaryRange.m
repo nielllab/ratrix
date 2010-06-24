@@ -33,8 +33,8 @@ else
     %error check
     if ~(iscell(trodes))
         error('must be a cell of groups of channels');
-    elseif ~all(size(trodes{1})==[1 1])
-            warning('going to try multiple leads in analysis...');
+    elseif length(trodes)>1
+        warning('going to try multiple leads in analysis...');
     end
         
 end
@@ -42,12 +42,31 @@ end
 % activeParamFile = fullfile('\\132.239.158.179\datanet_storage\',subjectID,'activeSortingParams.mat');
 
 % create the analysisPath and see if it exists
-analysisPath = createAnalysisPathString(boundaryRange,path,subjectID)
+[analysisPath analysisDirForRange]= createAnalysisPathString(boundaryRange,path,subjectID)
 prevAnalysisExists =  exist(analysisPath,'dir');
 
-% shouldwe backup the analysis
+% shouldwe backup the analysis?
+if prevAnalysisExists && makeBackup
+    backupPath = fullfile(path,subjectID,'analysis','backups',sprintf('analysisDirForRange-%s',datestr(now,30)));
+    makedir(backupPath);
+    [succ,msg,msgID] = moviefile(analysisPath, backupPath);  % includes all subdirectory regardless of permissions
+    if ~succ
+        msg
+        error('failed to move existing files')
+    end
+end
+    
 
 % make initial assumptions about spike detection and sorting parameters
+% but first make sure that the variables exist.
+if ~exist('spikeDetectionParams','var')
+    spikeDetectionParams = [];
+end
+
+if ~exist('spikeSortingParams','var')
+    spikeSortingParams = [];    
+end
+
 switch analysisMode 
     case {'overwriteAll','detectAndSortOnFirst','detectAndSortOnOnAll','interactiveDetectAndSortOnFirst','interactiveDetectAndSortOnAll'}
         % if a previous analysis exists, delete it
@@ -253,11 +272,25 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function analysisPath = createAnalysisPathString(boundaryRange,path,subjectID)
+function [analysisPath analysisDirForRange]= createAnalysisPathString(boundaryRange,path,subjectID)
 if boundaryRange(1)==boundaryRange(3)
     analysisDirForRange = sprintf('%d',boundaryRange(1));
 else
     analysisDirForRange = sprintf('%d-%d',boundaryRange(1),boundaryRange(3));
 end
 analysisPath = fullfile(path,subjectID,'analysis',analysisDirForRange);
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [detectionAndSortingParamsValidated spikeDetectionParams spikeSortingParams] = ...
+    validateAndSetDetectionAndSortingParams(spikeDetectionParams,spikeSortingParams,trodes,channelAnalysisMode,neuralRecords)
+% This deals with the logic of when spikeDetectionParams and
+% spikeSortingParams are set. When the trodes are pre-specified, then this
+% function is called without neuralData. Else, neuralData is required.
+
+switch channelAnalysisMode
+    case 'onlySomeChannels'
+        
+        
 end

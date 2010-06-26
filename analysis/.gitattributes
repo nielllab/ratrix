@@ -491,3 +491,5 @@ pmm/qDoesNumLicksPredictChoice.m -text
 pmm/testAnova.m -text
 spike[!!-~]sorting/optimizeSortingByChannel.m -text
 /analyzeBoundaryRange.m -text
+/detectSpikesFromNeuralData.m -text
+/sortSpikes.m -text

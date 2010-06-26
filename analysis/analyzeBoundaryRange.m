@@ -21,7 +21,7 @@ end
 if ~exist('cellBoundary','var') || isempty(cellBoundary)
     error('cellBoundary must be a valid input argument - default value is too dangerous here!');
 else 
-    [boundaryRange maskOn maskType maskRange] = validateCellBoundary(cellBoundary);
+    [boundaryRange maskInfo] = validateCellBoundary(cellBoundary);
 end
 
 % spikeChannelsAnalyzed
@@ -38,8 +38,6 @@ else
     end
         
 end
-
-% activeParamFile = fullfile('\\132.239.158.179\datanet_storage\',subjectID,'activeSortingParams.mat');
 
 % create the analysisPath and see if it exists
 [analysisPath analysisDirForRange]= createAnalysisPathString(boundaryRange,path,subjectID)
@@ -67,8 +65,10 @@ if ~exist('spikeSortingParams','var')
     spikeSortingParams = [];    
 end
 
+%createAnalysisPaths here
 switch analysisMode 
-    case {'overwriteAll','detectAndSortOnFirst','detectAndSortOnOnAll','interactiveDetectAndSortOnFirst','interactiveDetectAndSortOnAll'}
+    case {'overwriteAll','detectAndSortOnFirst','detectAndSortOnOnAll','interactiveDetectAndSortOnFirst',...
+            'interactiveDetectAndSortOnAll', 'analyzeAtEnd'}
         % if a previous analysis exists, delete it
         if prevAnalysisExists
             [succ,msg,msgID] = rmdir(analysisPathForTrial,'s');  % includes all subdirectory regardless of permissions
@@ -82,29 +82,19 @@ switch analysisMode
         mkdir(analysisPath);
         % lets save the analysis boundaries in a file called analysisBoundary
         analysisBoundaryFile = fullfile(analysisPath,'analysisBoundary.mat');
-        save(analysisBoundaryFile,'boundaryRange','maskOn','maskType','maskRange');
+        save(analysisBoundaryFile,'boundaryRange','maskInfo');
         % lets see if spikeDetection and spikeSorting is specified for all trodesNums
-        [spikeDetectionParams spikeSortingParams] = validateAndSetDetectionAndSortingParams(spikeDetectionParams,...
+        [validatedParams spikeDetectionParams spikeSortingParams] = validateAndSetDetectionAndSortingParams(spikeDetectionParams,...
             spikeSortingParams,channelAnalysisMode,trodes);
+        % save spikeDetection and spikeSorting params to analysispath
+        detectionAndSortingParamFile = fullfile(analysisPath,'detectionAndSortingParams.mat');
+        save(detectionAndSortingParamFile,'spikeSortingParams','spikeDetectionParams');
+    case {'viewAnalysisOnly'}
+        % do nothing
+    otherwise
+        error('unknown analysisMode: ''%s''',analysisMode)
 end
 
-
-if ~exist('spikeDetectionParams','var') || isempty(spikeDetectionParams)
-    spikeDetectionParams.method='oSort';
-    spikeDetectionParams.ISIviolationMS=2;
-elseif strcmp(spikeDetectionParams.method,'activeSortingParameters')
-    % get spikeDetectionParams from activeSortingParameters.mat
-    spikeDetectionParams=load(activeParamFile,'spikeDetectionParams');
-elseif strcmp(spikeDetectionParams.method,'activeSortingParametersThisAnalysis')
-    %will load below
-end
-
-if ~exist('spikeSortingParams','var') || isempty(spikeSortingParams)
-    spikeSortingParams.method='oSort';
-elseif strcmp(spikeSortingParams.method,'activeSortingParameters')
-    % get spikeSortingParams from activeSortingParameters.mat
-    spikeSortingParams=load(activeParamFile,'spikeSortingParams');
-end
 
 if ~exist('timeRangePerTrialSecs','var') || isempty(timeRangePerTrialSecs)
     timeRangePerTrialSecs = [0 Inf]; %all
@@ -161,28 +151,93 @@ switch analysisMode
         [detect sort inspect interactive analyze viewAnalysis] = deal(true, true, true, true, false,  true);
     case 'viewAnalysisOnly'
         [detect sort inspect interactive analyze viewAnalysis] = deal(false, false, false, false, false,  true);
+    case 'interactiveDetectAndSortOnFirst'
+        [detect sort inspect interactive analyze viewAnalysis] = deal(true, true, false, true, false,  false);
+    case 'interactiveDetectAndSortOnAll'
+        [detect sort inspect interactive analyze viewAnalysis] = deal(true, false, false, false, false,  false);
+    case 'analyzeAtEnd'
+        [detect sort inspect interactive analyze viewAnalysis] = deal(true, true, false, false, false,  false);
     otherwise
         error(sprintf('analysisMode: ''%s'' not supported',analysisMode));
 end
+logicals.detect = detect;
+logicals.sort = sort;
+logicals.inspect = inspect;
+logicals.interactive = interactive;
+logicals.analyze = analyze;
+logicals.viewAnalysis = viewAnalysis;
+
+% above logicals will change over the course of the analysis
 %% MAKE SURE EVERYTHING REQUIRED FOR THE ANALYSIS GIVEN THE ANALYSIS MODE EXIST
 
 done = false;
 currentTrialNum = boundaryRange(1);
+analyzeChunk = true;
 
 while ~done
-    if detect
-        % detect spikes
-        % now logic for switching the status of detect
-    end   
-    if sort
-        % sort spikes
-        % now logic for switching status of sort
-    end
-    if analyze
-        % analyze spikes
-        % now logic for switching analyze
+    % how many chunks exist for currentTrialNum?
+    %% find the neuralRecords
+    dirStr=fullfile(neuralRecordsPath,sprintf('neuralRecords_%d-*.mat',currentTrialNum));
+    d=dir(dirStr);
+    if length(d)==1
+        neuralRecordFilename=d(1).name;
+        % get the timestamp
+        [matches tokens] = regexpi(d(1).name, 'neuralRecords_(\d+)-(.*)\.mat', 'match', 'tokens');
+        if length(matches) ~= 1
+            %         warning('not a neuralRecord file name');
+        else
+            timestamp = tokens{1}{2};
+            currentTrialStartTime=datenumFor30(timestamp);
+        end
+        neuralRecordExists = true;
+    elseif length(d)>1
+        disp('duplicates present. skipping trial');
+        neuralRecordExists = false;
+    else
+        disp('didnt find anything in d. skipping trial');
+        neuralRecordExists = false;
     end
     
+    if neuralRecordExists
+        % setup filenames and paths -- could be a function...
+        stimRecordLocation = fullfile(path,subjectID,'stimRecords',sprintf('stimRecords_%d-%s.mat',currentTrial,timestamp));
+        neuralRecordLocation = fullfile(path,subjectID,'neuralRecords',sprintf('neuralRecords_%d-%s.mat',currentTrial,timestamp));
+        
+        % look at the neuralRecord and see if there are any new chunks to process
+        disp('checking chunk names... may be slow remotely...'); tic;
+        chunkNames=who('-file',neuralRecordLocation);
+        fprintf(' %2.2f seconds',toc)
+        chunksAvailable=[];
+        for i=1:length(chunkNames)
+            [matches tokens] = regexpi(chunkNames{i}, 'chunk(\d+)', 'match', 'tokens');
+            if length(matches) ~= 1
+                continue;
+            else
+                chunkN = str2double(tokens{1}{1});
+                chunksAvailable(end+1)=chunkN;
+            end
+        end
+    end
+    for currentChunkInd = chunksAvailable
+        analyzeChunk = verifyAnalysisForChunk(path, subjectID, boundaryRange, maskInfo, stimClassToAnalyze, currentTrialNum, neuralRecordExists);
+        if analyzeChunk
+            if detect
+                % load the neuralRecords/chunk
+                
+                % detect spikes
+                [spikes spikeWaveforms spikeTimestamps] = detectSpikesFromNeuralData(neuralData,neuralDataTimes,spikeDetectionParams,analysisPath);
+                % now logic for switching the status of detect
+            end
+            if sort
+                % sort spikes
+                % now logic for switching status of sort
+            end
+            if analyze
+                % analyze spikes
+                % now logic for switching analyze
+            end
+        end
+    end
     % logic for changing status of done
 end
 
@@ -191,7 +246,7 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [boundaryRange maskOn maskType maskRange] =validateCellBoundary(cellBoundary)
+function [boundaryRange maskInfo] =validateCellBoundary(cellBoundary)
 if iscell(cellBoundary) && length(cellBoundary)==2
     boundaryType = cellBoundary{1};
     switch boundaryType
@@ -222,9 +277,9 @@ if iscell(cellBoundary) && length(cellBoundary)==2
         otherwise
             error('bad type of cellBoundary!');
     end
-    maskType = 'none';
-    maskON = false;
-    maskRange = [];
+    maskInfo.maskType = 'none';
+    maskInfo.maskON = false;
+    maskInfo.maskRange = [];
 elseif iscell(cellBoundary) && length(cellBoundary)==4
     boundaryType = cellBoundary{1};
     switch boundaryType
@@ -265,7 +320,9 @@ elseif iscell(cellBoundary) && length(cellBoundary)==4
         otherwise
             error('mask type is not supported');
     end
-    maskON = true;
+    maskInfo.maskType = maskType;
+    maskInfo.maskRange = maskRange;
+    maskInfo.maskON = true;
 else
     error('bad cellBoundary input');
 end
@@ -309,13 +366,10 @@ switch channelAnalysisMode
         % channels we want to analyze are.
         % make sure that channelConfiguration exists
         if ~exist('channelConfiguration','var') || isempty(channelConfiguration)
-            warning('channelConfiguration is needed for channelAnalysisMode:''%s''',channelAnalysisMode);
-            channelConfigurationExists = false;
-        else
-            channelConfigurationExists = true;
+            warning('channelConfiguration is needed for channelAnalysisMode:''%s''. returning input values for params',channelAnalysisMode);
+            return;
         end
         
-        if channelConfigurationExists
         % what does the neuralData say about trode info?
         trodesFromNeuralData = {};
         % find the physInds
@@ -327,15 +381,9 @@ switch channelAnalysisMode
         
         if ~exist('trodes','var') || isempty(trodes)
             trodes = trodeFromNeuralData;
-        else
-            if ~isequal(trodes,trodesFromNeuralData)
-                trodes
-                trodesFromNeuralData
-                error('the data input to the function and the data supposed to be present in neuraldata do not match');
-            end
         end
         numTrodes = length(trodes);
-        end
+        
     otherwise
         error('channelAnalysisMode: ''%s'' is not supported',channelAnalysisMode);
 end
@@ -426,4 +474,32 @@ switch length(spikeSortingParams)
         error('given parameter length for spikeSortingParams and number of trodes do not match')
 end
 detectionAndSortingParamsValidated = true;            
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function analyzeChunk = verifyAnalysisForChunk(path, subjectID, boundaryRange, maskInfo, ...
+    stimClassToAnalyze, trialNum, neuralRecordExists)
+
+analyzeChunk = true;
+trialClass = getClassForTrial(path, subjectID, currentTrialNum);    
+if (currentTrialNum<boundaryRange(1) || currentTrialNum>boundaryRange(3)) ||...
+        (~strcmpi(stimClassToAnalyze, 'all') && ~any(strcmpi(stimClassToAnalyze, trialClass)))||...
+        ~neuralRecordExists    
+    analyzeChunk = false;    
+end
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function trialClass = getClassForTrial(path, subjectID, currentTrialNum)
+stimRecordsPath = fullfile(path,subjectId,'stimRecords');
+stimRecordName = sprintf('stimRecord_%d-*',trialNum);
+d = dir(fullfile(stimRecordsPath,stimRecordName));
+if length(d)>1
+    error('duplicates present.');
+end
+stimRecordName = d.name;
+load(fullfile(stimRecordsPath,stimRecordName),'stimManagerClass')
+trialClass = stimManagerClass;
 end

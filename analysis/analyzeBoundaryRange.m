@@ -175,6 +175,7 @@ currentTrialNum = boundaryRange(1);
 analyzeChunk = true;
 
 while ~done
+    disp(sprintf('analyzing trial number: %d',currentTrialNum));
     % how many chunks exist for currentTrialNum?
     %% find the neuralRecords
     dirStr=fullfile(neuralRecordsPath,sprintf('neuralRecords_%d-*.mat',currentTrialNum));
@@ -217,14 +218,30 @@ while ~done
                 chunksAvailable(end+1)=chunkN;
             end
         end
+        chunksAvailable = sort(chunksAvailable);
     end
+    
     for currentChunkInd = chunksAvailable
         analyzeChunk = verifyAnalysisForChunk(path, subjectID, boundaryRange, maskInfo, stimClassToAnalyze, currentTrialNum, neuralRecordExists);
         if analyzeChunk
             if detect
-                % load the neuralRecords/chunk
+                % load and validate neuralRecords (check if faster if function is inline)
+                neuralRecord = getNeuralRecordForCurrentTrialAndChunk(neuralRecordLocation,currentChunkInd);
                 
-                % detect spikes
+                if ~validatedParams
+                    % happens when no the number of channels is unknown
+                    [validatedParams spikeDetectionParams spikeSortingParams] = ...
+                        validateAndSetDetectionAndSortingParams(spikeDetectionParams,...
+                        spikeSortingParams,channelAnalysisMode,[],neuralRecord.ai_parameters.channelConfiguration)
+                    if ~validatedParams
+                    % is params not validated here, something is fishy
+                        error('something wrong with parameters given in');
+                    end
+                    % save spikeDetection and spikeSorting params to analysispath
+                    detectionAndSortingParamFile = fullfile(analysisPath,'detectionAndSortingParams.mat');
+                    save(detectionAndSortingParamFile,'spikeSortingParams','spikeDetectionParams');
+                end    
+                % loop through trodes and detect spikes
                 [spikes spikeWaveforms spikeTimestamps] = detectSpikesFromNeuralData(neuralData,neuralDataTimes,spikeDetectionParams,analysisPath);
                 % now logic for switching the status of detect
             end
@@ -502,4 +519,35 @@ end
 stimRecordName = d.name;
 load(fullfile(stimRecordsPath,stimRecordName),'stimManagerClass')
 trialClass = stimManagerClass;
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function neuralRecord = getNeuralRecordForCurrentTrialAndChunk(neuralRecordLocation,currentChunkInd)
+chunkStr=sprintf('chunk%d',currentChunkInd);
+
+disp(sprintf('%s from %s'),chunkStr,neuralRecordLocation); tic;
+neuralRecord=stochasticLoad(neuralRecordLocation,{chunkStr,'samplingRate'});
+temp=neuralRecord.samplingRate;
+neuralRecord=neuralRecord.(chunkStr);
+neuralRecord.samplingRate=temp;
+disp(sprintf(' %2.2f seconds',toc));
+
+% reconstitute neuralDataTimes from start/end based on samplingRate
+neuralRecord.neuralDataTimes=linspace(neuralRecord.neuralDataTimes(1),neuralRecord.neuralDataTimes(end),size(neuralRecord.neuralData,1))';
+
+% check if calculated samplingRate is close to expected samplingRate
+if any(abs(((unique(diff(neuralRecord.neuralDataTimes))-(1/neuralRecord.samplingRate))/(1/neuralRecord.samplingRate)))>10^-7)
+    samplingRateInterval=(1/neuralRecord.samplingRate)
+    foundSamplesSpaces=unique(diff(neuralRecord.neuralDataTimes))
+    error('error on the length of one of the frames lengths was more than 1/ ten millionth')
+end
+
+%check channel configuration is good for requestedAnalysis
+if ~isfield(neuralRecord,'ai_parameters')
+    neuralRecord.ai_parameters.channelConfiguration={'framePulse','photodiode','phys1'};
+    if size(neuralRecord.neuralData,2)~=3
+        error('only expect old unlabeled data with 3 channels total... check assumptions')
+    end
+end
 end

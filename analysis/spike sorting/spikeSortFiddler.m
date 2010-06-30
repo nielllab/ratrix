@@ -97,6 +97,7 @@ frameThresholds.errorBound = 0.6;   %fractional difference of ifi that will caus
 % subjectID = '356'; channels={[2 9:11]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[345]};%3 cells, gwn
 % %LONG PAUSE, but same 3 cells/ location
 % subjectID = '356'; channels={[2]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[397 401]};%3 cells, gwn
+subjectID = '356'; channels={[2]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[397]};%3 cells, gwn
 % subjectID = '356'; channels={[10]}; thrV=[-0.06 Inf]; cellBoundary={'trialRange',[397 403]};
 % %subjectID = '356'; channels={[9]}; thrV=[-0.07 Inf]; cellBoundary={'trialRange',[397 403]};
 % %subjectID = '356'; channels={[6]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[397 403]}; % has different temporal shape
@@ -144,6 +145,7 @@ analysisMode = 'overwriteAll';
 % analysisMode = 'analyzeAtEnd';
 % analysisMode = 'viewAnalysisOnly';
 
+  
 makeBackup = false;
 analyzeBoundaryRange(subjectID, path, cellBoundary, channels,spikeDetectionParams, spikeSortingParams,...
         timeRangePerTrialSecs,stimClassToAnalyze,analysisMode,usePhotoDiodeSpikes,[],frameThresholds,makeBackup)

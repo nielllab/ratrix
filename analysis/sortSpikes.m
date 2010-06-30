@@ -1,4 +1,4 @@
-function [assignedClusters rankedClusters] = sortSpikes(spikes, spikeWaveforms, spikeTimestamps, spikeSortingParams)
+function [assignedClusters rankedClusters] = sortSpikesDetected(spikes, spikeWaveforms, spikeTimestamps, spikeSortingParams)
 
 % =====================================================================================================================
 % BEGIN SPIKE SORTING
@@ -453,4 +453,103 @@ if spikeSortingParams.plotSortingForTesting % view plots (for testing)
     %     [d,residuals1,residuals2,Rsquare1, Rsquare2] =
     %     figureClusterOverlap(allSpikesDecorrelated, allSpikesOrig, assigned, clNr1, clNr2,plabel ,mode , {'b','r'})
 end
+end
+
+function kk=klustaModelTextToStruct(modelFile)
+
+fid=fopen(modelFile,'r');  % this is only the first one!
+if fid==-1
+    modelFile
+    error('bad file')
+end
+kk.headerJunk= fgetl(fid);
+ranges= str2num(fgetl(fid));
+sz=str2num(fgetl(fid));
+kk.numDims=sz(1);
+kk.numClust=sz(2);
+kk.numOtherThing=sz(3); % this is not num features? 
+kk.ranges=reshape(ranges,[],kk.numDims);
+kk.mean=nan(kk.numClust,kk.numDims);
+xx.cov=nan(kk.numDims,kk.numDims,kk.numClust);
+for c=1:kk.numClust
+    clustHeader=str2num(fgetl(fid));
+    if clustHeader(1)~=c-1
+        %just double check
+        error('wrong cluster')
+    end
+    kk.mean(c,:)=str2num(fgetl(fid));
+    kk.weight(c)=clustHeader(2);
+    for i=1:kk.numDims
+        kk.cov(i,:,c)=str2num(fgetl(fid));
+    end
+end
+fclose(fid);
+end
+
+function assignments=clusterFeaturesWithKlustaModel(kk,features,distanceMethod,verifyAgainst)
+
+%%
+
+%normalize from 0-->1 extrema of training set
+F=features;
+n=size(F,1);
+for d=1:kk.numDims
+    F(:,d)=F(:,d)-kk.ranges(1,d);
+    F(:,d)=F(:,d)/diff(kk.ranges(:,d));      
+end
+
+switch distanceMethod
+    case 'mvnpdf'
+        %calculate the probability that each point belongs to each cluster
+        %OLD GUESS USING MVNPDF 
+        thisMean=kk.mean; % verified empirically to be the mean per cluster after normalization
+        p=nan(size(features,1),kk.numClust);
+        for c=1:kk.numClust
+            chol=reshape(kk.cov(:,:,c),[kk.numDims kk.numDims]);
+            thisCov=chol*chol';
+            p(:,c)=mvnpdf(F,kk.mean(c,:),thisCov);
+        end
+        [junk assignments]=max(p,[],2);
+        distnce=abs(log(p));
+        %distnce=abs(log(p)-log(repmat(kk.weight,n,1)));
+        %[junk assignments]=max(distnce,[],2);
+    case 'mah'
+        %mimick Mahalanobis stuff in Klusta
+        %calculate the distance from each point to each cluster
+        invcov = cov(features)\eye( size(features,2)); % see pdist
+        %Y = pdistmex(features','mah',invcov); % why fail mex?
+        mahal = nan(size(features,1),kk.numClust);
+        for c = 1:kk.numClust
+            del = repmat(kk.mean(c,:),size(features,1),1) - features;
+            mahal(:,c)= sqrt(sum((del*invcov).*del,2));
+            
+            chol=reshape(kk.cov(:,:,c),[kk.numDims kk.numDims]);
+            LogRootDet(c)=sum(log(diag(chol)));
+            distnce(:,c)=mahal(:,c)/2+log(kk.weight(c))-LogRootDet(c); %WHAT?
+            % does klust calc an overall goodness of fit of all points?
+            % and how does the weight relate to the classification?
+            distnce(:,c)=mahal(:,c)%+log(kk.weight(c))/2; %;%-LogRootDet(c)+
+        end
+        %distnce(:,1)=Inf;
+        [junk assignments]=min(distnce,[],2);
+end
+
+if exist('verifyAgainst','var')
+    figure;
+    subplot(1,2,1); plot(distnce,'.')
+    subplot(1,2,2); hold on
+    colors=jet(kk.numClust);
+    darker=colors*.6;
+    for c=1:kk.numClust
+        which=verifyAgainst==c;
+        plot3(F(which,1),F(which,2),F(which,3),'.','color',colors(c,:));
+        which=assignments==c;
+        plot3(F(which,1),F(which,2),F(which,3),'o','color',colors(c,:));
+        plot3(kk.mean(c,1),kk.mean(c,2),kk.mean(c,3),'+','MarkerSize',20,'color',darker(c,:))
+        
+        which=verifyAgainst==c;
+        plot3(mean(F(which,1)),mean(F(which,2)),mean(F(which,3)),'o','MarkerSize',20,'color',darker(c,:))
+    end
+end
+%%
 end

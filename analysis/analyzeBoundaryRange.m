@@ -241,10 +241,15 @@ while ~done
                 % loop through trodes and detect spikes
                 for trodeNum = 1:length(trodes)
                     spikeDetectionParams(trodeNum).samplingFreq = neuralRecord.samplingRate; % spikeDetectionParams needs samplingRate
-                    [currentSpikeRecord(trodeNum).spikes currentSpikeRecord(trodeNum).spikeWaveforms ...
-                        currentSpikeRecord(trodeNum).spikeTimestamps] = detectSpikesFromNeuralData...
+                    [spikes spikeWaveforms spikeTimestamps] = detectSpikesFromNeuralData...
                         (neuralRecord.neuralData(:,trodes{trodeNum}), neuralRecord.neuralDataTimes, spikeDetectionParams(trodeNum));
-                    currentSpikeRecord(trodeNum).trodeChans = trodes{trodeNum};
+                    % update currentSpikeRecords
+                    trodeStr = sprintf('trode%d',trodeNum);
+                    currentSpikeRecord.(trodeStr).trodeChans        = trodes{trodeNum};
+                    currentSpikeRecord.(trodeStr).spikes            = spikes;
+                    currentSpikeRecord.(trodeStr).spikeWaveforms    = spikeWaveforms;
+                    currentSpikeRecord.(trodeStr).spikeTimestamps   = spikeTimestamps;
+                    currentSpikeRecord.(trodeStr).
                 end
                 cumulativeSpikeRecord = updateCumulativeSpikeRecords(currentSpikeRecord,cumulativeSpikeRecord,currentTrialNum,currentChunkInd);
                 
@@ -274,239 +279,6 @@ while ~done
 end
 
 end
-    
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [boundaryRange maskInfo] =validateCellBoundary(cellBoundary)
-if iscell(cellBoundary) && length(cellBoundary)==2
-    boundaryType = cellBoundary{1};
-    switch boundaryType
-        case 'trialRange'
-            if any(~isnumeric(cellBoundary{2}))
-                error('invalid parameters for trialRange cellBoundary');
-            end
-            switch length(cellBoundary{2})
-                case 2
-                    %okay, thats normal
-                case 1
-                    %start trial is the stop trial
-                    cellBoundary{2}=[cellBoundary{2} cellBoundary{2}];
-                otherwise
-                    error('must be length 2 for [start stop] or a single trial number')
-            end
-            boundaryRange=[cellBoundary{2}(1) 1 cellBoundary{2}(2) Inf]; % [startTrial startChunk endTrial endChunk]
-        case 'trialAndChunkRange'
-            if ~iscell(cellBoundary{2}) || length(cellBoundary{2})~=2 || length(cellBoundary{2}{1})~=2 || length(cellBoundary{2}{2})~=2
-                error('trialAndChunkRange cellBoundary must be in format {''trialAndChunkRange'',{[startTrial startChunk], [endTrial endChunk]}}');
-            end
-            boundaryRange=[cellBoundary{2}{1}(1) cellBoundary{2}{1}(2) cellBoundary{2}{2}(1) cellBoundary{2}{2}(2)]; % [startTrial startChunk endTrial endChunk]
-        case 'physLog'
-            boundaryRange = getCellBoundaryFromEventLog(subjectID,cellBoundary{2},neuralRecordsPath);
-            startSysTime=boundaryRange(3);
-            endSysTime=boundaryRange(6);
-            boundaryRange=boundaryRange([1 2 4 5]);
-        otherwise
-            error('bad type of cellBoundary!');
-    end
-    maskInfo.maskType = 'none';
-    maskInfo.maskON = false;
-    maskInfo.maskRange = [];
-elseif iscell(cellBoundary) && length(cellBoundary)==4
-    boundaryType = cellBoundary{1};
-    switch boundaryType
-        case 'trialRange'
-            if any(~isnumeric(cellBoundary{2}))
-                error('invalid parameters for trialRange cellBoundary');
-            end
-            switch length(cellBoundary{2})
-                case 2
-                    %okay, thats normal
-                case 1
-                    %start trial is the stop trial
-                    cellBoundary{2}=[cellBoundary{2} cellBoundary{2}];
-                otherwise
-                    error('must be length 2 for [start stop] or a single trial number')
-            end
-            boundaryRange=[cellBoundary{2}(1) 1 cellBoundary{2}(2) Inf]; % [startTrial startChunk endTrial endChunk]
-        case 'trialAndChunkRange'
-            if ~iscell(cellBoundary{2}) || length(cellBoundary{2})~=2 || length(cellBoundary{2}{1})~=2 || length(cellBoundary{2}{2})~=2
-                error('trialAndChunkRange cellBoundary must be in format {''trialAndChunkRange'',{[startTrial startChunk], [endTrial endChunk]}}');
-            end
-            boundaryRange=[cellBoundary{2}{1}(1) cellBoundary{2}{1}(2) cellBoundary{2}{2}(1) cellBoundary{2}{2}(2)]; % [startTrial startChunk endTrial endChunk]
-        case 'physLog'
-            boundaryRange = getCellBoundaryFromEventLog(subjectID,cellBoundary{2},neuralRecordsPath);
-            startSysTime=boundaryRange(3);
-            endSysTime=boundaryRange(6);
-            boundaryRange=boundaryRange([1 2 4 5]);
-        otherwise
-            error('bad type of cellBoundary!');
-    end
-    maskType = cellBoundary{3};
-    switch maskType
-        case 'trialMask'
-            if any(~isnumeric(cellBoundary{4}))
-                error('invalid parameters for maskRange');
-            end
-            maskRange = cellBoundary{4};
-        otherwise
-            error('mask type is not supported');
-    end
-    maskInfo.maskType = maskType;
-    maskInfo.maskRange = maskRange;
-    maskInfo.maskON = true;
-else
-    error('bad cellBoundary input');
-end
-end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [analysisPath analysisDirForRange]= createAnalysisPathString(boundaryRange,path,subjectID)
-if boundaryRange(1)==boundaryRange(3)
-    analysisDirForRange = sprintf('%d',boundaryRange(1));
-else
-    analysisDirForRange = sprintf('%d-%d',boundaryRange(1),boundaryRange(3));
-end
-analysisPath = fullfile(path,subjectID,'analysis',analysisDirForRange);
-end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [detectionAndSortingParamsValidated spikeDetectionParams spikeSortingParams] = ...
-    validateAndSetDetectionAndSortingParams(spikeDetectionParams,spikeSortingParams,channelAnalysisMode,trodes,channelConfiguration)
-% This deals with the logic of when spikeDetectionParams and
-% spikeSortingParams are set. When the trodes are pre-specified, then this
-% function is called without channelConfiguration. Else, channelConfiguration
-% is required.
-
-if ~exist('spikeDetectionParams','var') || ~exist('spikeSortingParams','var')
-    error('spikeDetectionParams and spikeSortingParams should exist here');
-end
-    
-detectionAndSortingParamsValidated = false;
-switch channelAnalysisMode
-    case 'onlySomeChannels'
-        % here trodes data should exist and this determines how many
-        % channels. 
-        if ~exist('trodes','var')|| isempty(trodes)
-            error('channelAnalysisMode:''%s'' requires the variable trode',channelAnalysisMode);
-        end
-        numTrodes = length(trodes);
-    case 'allPhysChannels'
-        % it typically comes in here only when we dont know what the
-        % channels we want to analyze are.
-        % make sure that channelConfiguration exists
-        if ~exist('channelConfiguration','var') || isempty(channelConfiguration)
-            warning('channelConfiguration is needed for channelAnalysisMode:''%s''. returning input values for params',channelAnalysisMode);
-            return;
-        end
-        
-        % what does the neuralData say about trode info?
-        trodesFromNeuralData = {};
-        % find the physInds
-        allPhysInds = find(~cellfun(@isempty, strfind(channelConfiguration,'phys')));
-        for thisPhysInd = allPhysInds
-            tokens = regexpi(channelConfiguration{thisPhysInd},'phys(\d+)','tokens');
-            trodesFromNeuralData{end+1} = str2num(tokens{1}{1});
-        end
-        
-        if ~exist('trodes','var') || isempty(trodes)
-            trodes = trodesFromNeuralData;
-        end
-        numTrodes = length(trodes);
-        
-    otherwise
-        error('channelAnalysisMode: ''%s'' is not supported',channelAnalysisMode);
-end
-
-% now we have all the trode nums. if spikeDetection and spikesortingParams 
-% have same length as numTrodes, return them; if spikeSortingParams and
-% spikeDetectionParams are empty, create standard ones; if they
-% have length 1, repmat.
-
-% spikeDetectionParams
-switch length(spikeDetectionParams)
-    case 0
-        % provide standard values
-        % spikeDetectionParams
-        spikeDetectionParams.method = 'oSort';
-        spikeDetectionParams.ISIviolationMS=2;
-        spikeDetectionParams = repmat(spikeDetectionParams,numTrodes,1);
-        for i = 1:numTrodes
-            spikeDetectionParams(i).trodeChans = trodes{i};
-        end
-    case 1
-        % either we are given active paramfile location or we are given the param file
-        % spikeDetectionParams
-        if strcmp(spikeDetectionParams.method,'activeSortingParams')
-            % get the active paramfile and error check
-            spikeDetectionParams = load(spikeDetectionParams.activeParamLocation,'spikeDetectionParams');
-            % error check. right now only check for number of leads.
-            % maybe later check for trodeChans
-            if length(spikeDetectionParams) ~= numTrodes
-                spikeDetectionParams
-                numTrodes
-                error('activeParamLocation does not have spikeDetectionParams with the right number of trodes');
-            end
-        else
-            % here just repmat, and name the trodes
-            spikeDetectionParams = repmat(spikeDetectionParams,numTrodes,1);
-            % error check. right now only check for number of leads.
-            % maybe later check for trodeChans
-            for i = 1:numTrodes
-                spikeDetectionParams(i).trodeChans = trodes{i};
-            end
-        end
-        
-    case numTrodes
-        % do nothing
-    otherwise
-        spikeDetectionParams        
-        numTrodes
-        error('given parameter length for spikeDetectionParams and number of trodes do not match')
-end
-
-% spikeSortingParams
-switch length(spikeSortingParams)
-    case 0
-        % provide standard values
-        spikeSortingParams.method = 'oSort';
-        spikeSortingParams = repmat(spikeSortingParams,numTrodes,1)
-        for i = 1:numTrodes
-            spikeSortingParams(i).trodeChans = trodes{i};
-        end
-    case 1
-        % either we are given active paramfile location or we are given the param file
-        % spikeDetectionParams
-        if strcmp(spikeSortingParams.method,'activeSortingParams')
-            % get the active paramfile and error check
-            spikeSortingParams = load(spikeSortingParams.activeParamLocation,'spikeSortingParams');
-            % error check. right now only check for number of leads.
-            % maybe later check for trodeChans
-            if length(spikeSortingParams) ~= numTrodes
-                spikeSortingParams
-                numTrodes
-                error('activeParamLocation does not have spikeSortingParams with the right number of trodes');
-            end
-        else
-            % here just repmat, and name the trodes
-            spikeSortingParams = repmat(spikeSortingParams,numTrodes,1);
-            % error check. right now only check for number of leads.
-            % maybe later check for trodeChans
-            for i = 1:numTrodes
-                spikeSortingParams(i).trodeChans = trodes{i};
-            end
-        end        
-    case numTrodes
-        % do nothing
-    otherwise
-        spikeSortingParams
-        numTrodes
-        error('given parameter length for spikeSortingParams and number of trodes do not match')
-end
-detectionAndSortingParamsValidated = true;            
-end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -520,21 +292,6 @@ if (currentTrialNum<boundaryRange(1) || currentTrialNum>boundaryRange(3)) ||...
         ~neuralRecordExists    
     analyzeChunk = false;    
 end
-end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function trialClass = getClassForTrial(path, subjectID, currentTrialNum)
-stimRecordsPath = fullfile(path,subjectID,'stimRecords');
-stimRecordName = sprintf('stimRecords_%d-*.mat',currentTrialNum);
-d = dir(fullfile(stimRecordsPath,stimRecordName));
-if length(d)>1
-    error('duplicates present.');
-end
-
-stimRecordName = d.name;
-load(fullfile(stimRecordsPath,stimRecordName),'stimManagerClass')
-trialClass = stimManagerClass;
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -570,19 +327,7 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function cumulativeSpikeRecords = getSpikeRecords(analysisPath)
-spikeRecordFile = fullfile(analysisPath,'cumulativeSpikeRecord.mat')
-if exist(spikeRecordFile,'file')
-    temp = stochasticLoad(analysisPath,'cumulativeSpikeRecord');
-    cumulativeSpikeRecords = temp.cumulativeSpikeRecords;
-else
-    cumulativeSpikeRecords = [];
+function detectSpikes = updateDetectSpikesStatus(detectSpikes,analysisMode,currentTrialNum,...
+    currentChunkInd,boundaryRange,chunksAvailable)
+detectSpikes = true;
 end
-end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-function detectSpikes = updateDetectSpikesStatus(detectSpikes,analysisMode,currentTrialNum,currentChunkInd,boundaryRange,chunksAvailable)
-

@@ -43,7 +43,7 @@ end
 [analysisPath analysisDirForRange]= createAnalysisPathString(boundaryRange,path,subjectID)
 prevAnalysisExists =  exist(analysisPath,'dir');
 
-% shouldwe backup the analysis?
+% should we backup the analysis?
 if prevAnalysisExists && makeBackup
     backupPath = fullfile(path,subjectID,'analysis','backups',sprintf('analysisDirForRange-%s',datestr(now,30)));
     makedir(backupPath);
@@ -71,7 +71,7 @@ switch analysisMode
             'interactiveDetectAndSortOnAll', 'analyzeAtEnd'}
         % if a previous analysis exists, delete it
         if prevAnalysisExists
-            [succ,msg,msgID] = rmdir(analysisPathForTrial,'s');  % includes all subdirectory regardless of permissions
+            [succ,msg,msgID] = rmdir(analysisPath,'s');  % includes all subdirectory regardless of permissions
             if ~succ
                 msg
                 error('failed to remove existing files when running with ''overwriteAll=true''')
@@ -79,16 +79,10 @@ switch analysisMode
             prevAnalysisExists = false;
         end
         % recreate the analysis file
-        mkdir(analysisPath);
-        % lets save the analysis boundaries in a file called analysisBoundary
-        analysisBoundaryFile = fullfile(analysisPath,'analysisBoundary.mat');
-        save(analysisBoundaryFile,'boundaryRange','maskInfo');
+        mkdir(analysisPath);        
         % lets see if spikeDetection and spikeSorting is specified for all trodesNums
         [validatedParams spikeDetectionParams spikeSortingParams] = validateAndSetDetectionAndSortingParams(spikeDetectionParams,...
-            spikeSortingParams,channelAnalysisMode,trodes);
-        % save spikeDetection and spikeSorting params to analysispath
-        detectionAndSortingParamFile = fullfile(analysisPath,'detectionAndSortingParams.mat');
-        save(detectionAndSortingParamFile,'spikeSortingParams','spikeDetectionParams');
+            spikeSortingParams,channelAnalysisMode,trodes);        
     case {'viewAnalysisOnly'}
         % do nothing
     otherwise
@@ -141,31 +135,30 @@ if ~exist('frameThresholds','var') || isempty(frameThresholds)
     frameThresholds.dropsAcceptableFirstNFrames=2; % first 2 frames won't kill the default quality test               
 end
 
+% lets save the analysis boundaries in a file called analysisBoundary
+analysisBoundaryFile = fullfile(analysisPath,'analysisBoundary.mat');
+save(analysisBoundaryFile,'boundaryRange','maskInfo','trodes','spikeDetectionParams','spikeSortingParams',...
+    'timeRangePerTrialSecs','stimClassToAnalyze','analysisMode','usePhotoDiodeSpikes','plottingParams','frameThresholds');
+        
 %% ANALYSIS LOGICALS SET HERE FOR FIRST PASS
 switch analysisMode
     case 'overwriteAll'
-        [detect sort inspect interactive analyze viewAnalysis] = deal(true, true, true, false, true,  true);
+        [detectSpikes sortSpikes inspect interactive analyze viewAnalysis] = deal(true, true, true, false, true,  true);
     case 'viewFirst'
-        [detect sort inspect interactive analyze viewAnalysis] = deal(false, false, true, false, false,  false);
+        [detectSpikes sortSpikes inspect interactive analyze viewAnalysis] = deal(false, false, true, false, false,  false);
     case 'buildOnFirst'
-        [detect sort inspect interactive analyze viewAnalysis] = deal(true, true, true, true, false,  true);
+        [detectSpikes sortSpikes inspect interactive analyze viewAnalysis] = deal(true, true, true, true, false,  true);
     case 'viewAnalysisOnly'
-        [detect sort inspect interactive analyze viewAnalysis] = deal(false, false, false, false, false,  true);
+        [detectSpikes sortSpikes inspect interactive analyze viewAnalysis] = deal(false, false, false, false, false,  true);
     case 'interactiveDetectAndSortOnFirst'
-        [detect sort inspect interactive analyze viewAnalysis] = deal(true, true, false, true, false,  false);
+        [detectSpikes sortSpikes inspect interactive analyze viewAnalysis] = deal(true, true, false, true, false,  false);
     case 'interactiveDetectAndSortOnAll'
-        [detect sort inspect interactive analyze viewAnalysis] = deal(true, false, false, false, false,  false);
+        [detectSpikes sortSpikes inspect interactive analyze viewAnalysis] = deal(true, false, false, false, false,  false);
     case 'analyzeAtEnd'
-        [detect sort inspect interactive analyze viewAnalysis] = deal(true, true, false, false, false,  false);
+        [detectSpikes sortSpikes inspect interactive analyze viewAnalysis] = deal(true, true, false, false, false,  false);
     otherwise
         error(sprintf('analysisMode: ''%s'' not supported',analysisMode));
 end
-logicals.detect = detect;
-logicals.sort = sort;
-logicals.inspect = inspect;
-logicals.interactive = interactive;
-logicals.analyze = analyze;
-logicals.viewAnalysis = viewAnalysis;
 
 % above logicals will change over the course of the analysis
 %% MAKE SURE EVERYTHING REQUIRED FOR THE ANALYSIS GIVEN THE ANALYSIS MODE EXIST
@@ -201,13 +194,13 @@ while ~done
     
     if neuralRecordExists
         % setup filenames and paths -- could be a function...
-        stimRecordLocation = fullfile(path,subjectID,'stimRecords',sprintf('stimRecords_%d-%s.mat',currentTrial,timestamp));
-        neuralRecordLocation = fullfile(path,subjectID,'neuralRecords',sprintf('neuralRecords_%d-%s.mat',currentTrial,timestamp));
+        stimRecordLocation = fullfile(path,subjectID,'stimRecords',sprintf('stimRecords_%d-%s.mat',currentTrialNum,timestamp));
+        neuralRecordLocation = fullfile(path,subjectID,'neuralRecords',sprintf('neuralRecords_%d-%s.mat',currentTrialNum,timestamp));
         
         % look at the neuralRecord and see if there are any new chunks to process
         disp('checking chunk names... may be slow remotely...'); tic;
         chunkNames=who('-file',neuralRecordLocation);
-        fprintf(' %2.2f seconds',toc)
+        fprintf(' %2.2f seconds\n',toc)
         chunksAvailable=[];
         for i=1:length(chunkNames)
             [matches tokens] = regexpi(chunkNames{i}, 'chunk(\d+)', 'match', 'tokens');
@@ -224,7 +217,7 @@ while ~done
     for currentChunkInd = chunksAvailable
         analyzeChunk = verifyAnalysisForChunk(path, subjectID, boundaryRange, maskInfo, stimClassToAnalyze, currentTrialNum, neuralRecordExists);
         if analyzeChunk
-            if detect
+            if detectSpikes
                 % load and validate neuralRecords (check if faster if function is inline)
                 neuralRecord = getNeuralRecordForCurrentTrialAndChunk(neuralRecordLocation,currentChunkInd);
                 
@@ -232,30 +225,52 @@ while ~done
                     % happens when no the number of channels is unknown
                     [validatedParams spikeDetectionParams spikeSortingParams] = ...
                         validateAndSetDetectionAndSortingParams(spikeDetectionParams,...
-                        spikeSortingParams,channelAnalysisMode,[],neuralRecord.ai_parameters.channelConfiguration)
+                        spikeSortingParams,channelAnalysisMode,[],neuralRecord.ai_parameters.channelConfiguration);
                     if ~validatedParams
                     % is params not validated here, something is fishy
                         error('something wrong with parameters given in');
                     end
-                    % save spikeDetection and spikeSorting params to analysispath
-                    detectionAndSortingParamFile = fullfile(analysisPath,'detectionAndSortingParams.mat');
-                    save(detectionAndSortingParamFile,'spikeSortingParams','spikeDetectionParams');
-                end    
+                    trodes = {spikeDetectionParams.trodeChans};
+                    % save spikeDetection and spikeSorting params to analysisBoundaryFile
+                    save(analysisBoundaryFile,'spikeSortingParams','spikeDetectionParams','trodes','-append');
+                end
+                
+                % where to save the spikes
+                cumulativeSpikeRecord = getSpikeRecords(analysisPath);
+                currentSpikeRecord = [];
                 % loop through trodes and detect spikes
-                [spikes spikeWaveforms spikeTimestamps] = detectSpikesFromNeuralData(neuralData,neuralDataTimes,spikeDetectionParams,analysisPath);
-                % now logic for switching the status of detect
+                for trodeNum = 1:length(trodes)
+                    spikeDetectionParams(trodeNum).samplingFreq = neuralRecord.samplingRate; % spikeDetectionParams needs samplingRate
+                    [currentSpikeRecord(trodeNum).spikes currentSpikeRecord(trodeNum).spikeWaveforms ...
+                        currentSpikeRecord(trodeNum).spikeTimestamps] = detectSpikesFromNeuralData...
+                        (neuralRecord.neuralData(:,trodes{trodeNum}), neuralRecord.neuralDataTimes, spikeDetectionParams(trodeNum));
+                    currentSpikeRecord(trodeNum).trodeChans = trodes{trodeNum};
+                end
+                cumulativeSpikeRecord = updateCumulativeSpikeRecords(currentSpikeRecord,cumulativeSpikeRecord,currentTrialNum,currentChunkInd);
+                
+                % now logic for switching the status of detectSpikes
+                detectSpikes = updateDetectSpikesStatus(detectSpikes,analysisMode,currentTrialNum,currentChunkInd,boundaryRange,chunksAvailable);
             end
-            if sort
+            
+            if sortSpikes
                 % sort spikes
-                % now logic for switching status of sort
+                for trodeNum = 1:length(trodes)
+                    [assigned rank] = sortSpikesDetected(spikes, spikeWaveforms, spikeTimestamps, spikeSortingParams, analysisPath);
+                end
+                % now logic for switching status of sortSpikes
             end
+            
             if analyze
                 % analyze spikes
                 % now logic for switching analyze
             end
         end
     end
+    currentTrialNum = currentTrialNum+1;
     % logic for changing status of done
+    if currentTrialNum>boundaryRange(3)
+        done = true;
+    end
 end
 
 end
@@ -397,7 +412,7 @@ switch channelAnalysisMode
         end
         
         if ~exist('trodes','var') || isempty(trodes)
-            trodes = trodeFromNeuralData;
+            trodes = trodesFromNeuralData;
         end
         numTrodes = length(trodes);
         
@@ -496,7 +511,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function analyzeChunk = verifyAnalysisForChunk(path, subjectID, boundaryRange, maskInfo, ...
-    stimClassToAnalyze, trialNum, neuralRecordExists)
+    stimClassToAnalyze, currentTrialNum, neuralRecordExists)
 
 analyzeChunk = true;
 trialClass = getClassForTrial(path, subjectID, currentTrialNum);    
@@ -510,12 +525,13 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function trialClass = getClassForTrial(path, subjectID, currentTrialNum)
-stimRecordsPath = fullfile(path,subjectId,'stimRecords');
-stimRecordName = sprintf('stimRecord_%d-*',trialNum);
+stimRecordsPath = fullfile(path,subjectID,'stimRecords');
+stimRecordName = sprintf('stimRecords_%d-*.mat',currentTrialNum);
 d = dir(fullfile(stimRecordsPath,stimRecordName));
 if length(d)>1
     error('duplicates present.');
 end
+
 stimRecordName = d.name;
 load(fullfile(stimRecordsPath,stimRecordName),'stimManagerClass')
 trialClass = stimManagerClass;
@@ -526,7 +542,7 @@ end
 function neuralRecord = getNeuralRecordForCurrentTrialAndChunk(neuralRecordLocation,currentChunkInd)
 chunkStr=sprintf('chunk%d',currentChunkInd);
 
-disp(sprintf('%s from %s'),chunkStr,neuralRecordLocation); tic;
+disp(sprintf('%s from %s',chunkStr,neuralRecordLocation)); tic;
 neuralRecord=stochasticLoad(neuralRecordLocation,{chunkStr,'samplingRate'});
 temp=neuralRecord.samplingRate;
 neuralRecord=neuralRecord.(chunkStr);
@@ -551,3 +567,22 @@ if ~isfield(neuralRecord,'ai_parameters')
     end
 end
 end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function cumulativeSpikeRecords = getSpikeRecords(analysisPath)
+spikeRecordFile = fullfile(analysisPath,'cumulativeSpikeRecord.mat')
+if exist(spikeRecordFile,'file')
+    temp = stochasticLoad(analysisPath,'cumulativeSpikeRecord');
+    cumulativeSpikeRecords = temp.cumulativeSpikeRecords;
+else
+    cumulativeSpikeRecords = [];
+end
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+function detectSpikes = updateDetectSpikesStatus(detectSpikes,analysisMode,currentTrialNum,currentChunkInd,boundaryRange,chunksAvailable)
+

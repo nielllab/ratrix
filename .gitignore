@@ -117,3 +117,7 @@ classes/util/trialRecordProcessing/extractFieldAndEnsure.asv
 classes/util/trialRecordProcessing/getCorrectExtractedFromField.asv
 classes/util/matlaby/blueToRed.asv
 classes/util/misc/getLgnCoordinates.asv
+analysis/spike[!!-~]sorting/KlustaKwik/temp.fet.1
+analysis/spike[!!-~]sorting/KlustaKwik/temp.klg.1
+analysis/spike[!!-~]sorting/KlustaKwik/temp.model.1
+analysis/analyzeBoundaryRange.asv

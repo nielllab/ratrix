@@ -496,3 +496,8 @@ spike[!!-~]sorting/optimizeSortingByChannel.m -text
 util/updateCumulativeSpikeRecords.m -text
 util/intelligentFieldnames.m -text
 /sortSpikesDetected.m -text
+util/getSpikeRecords.m -text
+util/validateAndSetDetectionAndSortingParams.m -text
+util/createAnalysisPathString.m -text
+util/getClassForTrial.m -text
+util/validateCellBoundary.m -text

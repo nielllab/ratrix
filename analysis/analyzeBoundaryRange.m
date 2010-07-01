@@ -30,7 +30,11 @@ if ~exist('trodes','var') || isempty(trodes)
     trodes={}; % default all phys channels one by one. will be set when we know how many channels
 else
     channelAnalysisMode = 'onlySomeChannels';
-    %error check
+    % the default state of trode is based on ascending order of the first lead in trode
+    disp('the input is ');
+    [vals order] = sort(cellfun(@(v)v(1),trodes));
+    trodes = trodes(order)
+    % error check
     if ~(iscell(trodes))
         error('must be a cell of groups of channels');
     elseif length(trodes)>1
@@ -171,65 +175,29 @@ while ~done
     disp(sprintf('analyzing trial number: %d',currentTrialNum));
     % how many chunks exist for currentTrialNum?
     %% find the neuralRecords
-    dirStr=fullfile(neuralRecordsPath,sprintf('neuralRecords_%d-*.mat',currentTrialNum));
-    d=dir(dirStr);
-    if length(d)==1
-        neuralRecordFilename=d(1).name;
-        % get the timestamp
-        [matches tokens] = regexpi(d(1).name, 'neuralRecords_(\d+)-(.*)\.mat', 'match', 'tokens');
-        if length(matches) ~= 1
-            %         warning('not a neuralRecord file name');
-        else
-            timestamp = tokens{1}{2};
-            currentTrialStartTime=datenumFor30(timestamp);
-        end
-        neuralRecordExists = true;
-    elseif length(d)>1
-        disp('duplicates present. skipping trial');
-        neuralRecordExists = false;
-    else
-        disp('didnt find anything in d. skipping trial');
-        neuralRecordExists = false;
-    end
-    
+    [neuralRecordsExist timestamp] = findNeuralRecordsLocation(neuralRecordsPath, currentTrialNum)
+        
+    chunksAvailable = [];
     if neuralRecordExists
-        % setup filenames and paths -- could be a function...
         stimRecordLocation = fullfile(path,subjectID,'stimRecords',sprintf('stimRecords_%d-%s.mat',currentTrialNum,timestamp));
         neuralRecordLocation = fullfile(path,subjectID,'neuralRecords',sprintf('neuralRecords_%d-%s.mat',currentTrialNum,timestamp));
-        
-        % look at the neuralRecord and see if there are any new chunks to process
-        disp('checking chunk names... may be slow remotely...'); tic;
-        chunkNames=who('-file',neuralRecordLocation);
-        fprintf(' %2.2f seconds\n',toc)
-        chunksAvailable=[];
-        for i=1:length(chunkNames)
-            [matches tokens] = regexpi(chunkNames{i}, 'chunk(\d+)', 'match', 'tokens');
-            if length(matches) ~= 1
-                continue;
-            else
-                chunkN = str2double(tokens{1}{1});
-                chunksAvailable(end+1)=chunkN;
-            end
-        end
-        chunksAvailable = sort(chunksAvailable);
+        chunksAvailable = getDetailsFromNeuralRecords(neuralRecordLocation,'numChunks');
+    else
+        disp(sprintf('skipping analysis for trial %d',currentTrialNum));
     end
-    
     for currentChunkInd = chunksAvailable
         analyzeChunk = verifyAnalysisForChunk(path, subjectID, boundaryRange, maskInfo, stimClassToAnalyze, currentTrialNum, neuralRecordExists);
         if analyzeChunk
+            % initialize currentSpikeRecord to empty at the beginning of each chunk
+            currentSpikeRecord = [];
             if detectSpikes
-                % load and validate neuralRecords (check if faster if function is inline)
-                neuralRecord = getNeuralRecordForCurrentTrialAndChunk(neuralRecordLocation,currentChunkInd);
-                
+                % load and validate neuralRecords
+                neuralRecord = getNeuralRecordForCurrentTrialAndChunk(neuralRecordLocation,currentChunkInd);                
                 if ~validatedParams
-                    % happens when no the number of channels is unknown
+                    % happens when the number of channels is unknown
                     [validatedParams spikeDetectionParams spikeSortingParams] = ...
                         validateAndSetDetectionAndSortingParams(spikeDetectionParams,...
                         spikeSortingParams,channelAnalysisMode,[],neuralRecord.ai_parameters.channelConfiguration);
-                    if ~validatedParams
-                    % is params not validated here, something is fishy
-                        error('something wrong with parameters given in');
-                    end
                     trodes = {spikeDetectionParams.trodeChans};
                     % save spikeDetection and spikeSorting params to analysisBoundaryFile
                     save(analysisBoundaryFile,'spikeSortingParams','spikeDetectionParams','trodes','-append');
@@ -237,22 +205,21 @@ while ~done
                 
                 % where to save the spikes
                 cumulativeSpikeRecord = getSpikeRecords(analysisPath);
-                currentSpikeRecord = [];
                 % loop through trodes and detect spikes
                 for trodeNum = 1:length(trodes)
-                    spikeDetectionParams(trodeNum).samplingFreq = neuralRecord.samplingRate; % spikeDetectionParams needs samplingRate
-                    [spikes spikeWaveforms spikeTimestamps] = detectSpikesFromNeuralData...
-                        (neuralRecord.neuralData(:,trodes{trodeNum}), neuralRecord.neuralDataTimes, spikeDetectionParams(trodeNum));
-                    % update currentSpikeRecords
-                    trodeStr = sprintf('trode%d',trodeNum);
-                    currentSpikeRecord.(trodeStr).trodeChans        = trodes{trodeNum};
-                    currentSpikeRecord.(trodeStr).spikes            = spikes;
-                    currentSpikeRecord.(trodeStr).spikeWaveforms    = spikeWaveforms;
-                    currentSpikeRecord.(trodeStr).spikeTimestamps   = spikeTimestamps;
-                    currentSpikeRecord.(trodeStr).
+                    currTrode = trodes{trodeNum};
+                    currNeuralData = neuralRecord.neuralData(:,currTrode);
+                    currNeuralDataTimes = neuralRecord.neuralDataTimes;
+                    currSamplingRate = neuralRecords.samplingRate;
+                    currSpikeDetectionParams = spikeDetectionParams(trodeNum);
+                    currentSpikeRecord = detectSpikeForTrode(currentSpikeRecord,currentTrode, trodeNum,...
+                        currNeuralData,currNeuralDataTimes,currSamplingRate,currSpikeDetectionParams,...
+                        currentTrialNum, currentchunkInd)
                 end
-                cumulativeSpikeRecord = updateCumulativeSpikeRecords(currentSpikeRecord,cumulativeSpikeRecord,currentTrialNum,currentChunkInd);
-                
+                updateParams.updateMode = 'detectSpikes'
+                cumulativeSpikeRecord = updateCumulativeSpikeRecords(updateParams,currentSpikeRecord,cumulativeSpikeRecord,currentTrialNum,currentChunkInd);
+                cumulativeSpikeRecordFile = fullfile(analysisPath,'cumulativeSpikeRecord.mat');
+                save(cumulativeSpikeRecordFile,'cumulativeSpikeRecord','-append');
                 % now logic for switching the status of detectSpikes
                 detectSpikes = updateDetectSpikesStatus(detectSpikes,analysisMode,currentTrialNum,currentChunkInd,boundaryRange,chunksAvailable);
             end
@@ -260,6 +227,7 @@ while ~done
             if sortSpikes
                 % sort spikes
                 for trodeNum = 1:length(trodes)
+
                     [assigned rank] = sortSpikesDetected(spikes, spikeWaveforms, spikeTimestamps, spikeSortingParams, analysisPath);
                 end
                 % now logic for switching status of sortSpikes
@@ -282,14 +250,44 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SOME FUNCTIONS TO MAKE CODE EASIER TO READ
+function [neuralRecordExists timestamp] = findNeuralRecordsLocation(neuralRecordsPath, currentTrialNum)
+dirStr=fullfile(neuralRecordsPath,sprintf('neuralRecords_%d-*.mat',currentTrialNum));
+d=dir(dirStr);
+neuralRecordExists = false;
+timestamp = '';
+if length(d)==1
+    neuralRecordFilename=d(1).name;
+    % get the timestamp
+    [matches tokens] = regexpi(d(1).name, 'neuralRecords_(\d+)-(.*)\.mat', 'match', 'tokens');
+    if length(matches) ~= 1
+        %         warning('not a neuralRecord file name');
+    else
+        timestamp = tokens{1}{2};
+    end
+    neuralRecordExists = true;
+elseif length(d)>1
+    disp('duplicates present. skipping trial');
+else
+    disp('didnt find anything in d. skipping trial');
+end
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function analyzeChunk = verifyAnalysisForChunk(path, subjectID, boundaryRange, maskInfo, ...
-    stimClassToAnalyze, currentTrialNum, neuralRecordExists)
+    stimClassToAnalyze, currentTrialNum)
 
 analyzeChunk = true;
 trialClass = getClassForTrial(path, subjectID, currentTrialNum);    
 if (currentTrialNum<boundaryRange(1) || currentTrialNum>boundaryRange(3)) ||...
-        (~strcmpi(stimClassToAnalyze, 'all') && ~any(strcmpi(stimClassToAnalyze, trialClass)))||...
-        ~neuralRecordExists    
+        (~strcmpi(stimClassToAnalyze, 'all') && ~any(strcmpi(stimClassToAnalyze, trialClass)))
     analyzeChunk = false;    
 end
 end
@@ -300,10 +298,8 @@ function neuralRecord = getNeuralRecordForCurrentTrialAndChunk(neuralRecordLocat
 chunkStr=sprintf('chunk%d',currentChunkInd);
 
 disp(sprintf('%s from %s',chunkStr,neuralRecordLocation)); tic;
-neuralRecord=stochasticLoad(neuralRecordLocation,{chunkStr,'samplingRate'});
-temp=neuralRecord.samplingRate;
-neuralRecord=neuralRecord.(chunkStr);
-neuralRecord.samplingRate=temp;
+neuralRecord = getDetailsFromNeuralRecords(neuralRecordLocation,chunkStr);
+neuralRecord.samplingRate = getDetailsFromNeuralRecords(neuralRecordLocation,'samplingRate');
 disp(sprintf(' %2.2f seconds',toc));
 
 % reconstitute neuralDataTimes from start/end based on samplingRate
@@ -327,7 +323,35 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function currentSpikeRecord = detectSpikeForTrode(currentSpikeRecord,trode,trodeNum,neuralData,neuralDataTimes,...
+    samplingRate,spikeDetectionParams,trialNum,chunkInd)
+spikeDetectionParams.samplingFreq = samplingRate; % spikeDetectionParams needs samplingRate
+[spikes spikeWaveforms spikeTimestamps] = detectSpikesFromNeuralData(neuralData, neuralDataTimes, spikeDetectionParams);
+
+% update currentSpikeRecords
+trodeStr = sprintf('trode%d',trodeNum);
+currentSpikeRecord.(trodeStr).trodeChans        = trode;
+currentSpikeRecord.(trodeStr).spikes            = spikes;
+currentSpikeRecord.(trodeStr).spikeWaveforms    = spikeWaveforms;
+currentSpikeRecord.(trodeStr).spikeTimestamps   = spikeTimestamps;
+% fill in details about trial and chunk
+currentSpikeRecord.(trodeStr).chunkID = chunkInd*ones(size(spikes));
+currentSpikeRecord.(trodeStr).trialNum = trialNum*ones(size(spikes));
+end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% LOGICALS DEALT WITH HERE
 function detectSpikes = updateDetectSpikesStatus(detectSpikes,analysisMode,currentTrialNum,...
     currentChunkInd,boundaryRange,chunksAvailable)
 detectSpikes = true;
 end
+
+

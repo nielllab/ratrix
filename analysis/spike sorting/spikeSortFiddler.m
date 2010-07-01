@@ -113,7 +113,7 @@ subjectID = '356'; channels={[2]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',
 % subjectID = '356'; channels={[2]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[492 498]}; %fffc 
 % subjectID = '356'; channels={[1],[2]}; thrV=[-0.06 Inf]; cellBoundary={'trialRange',[550]};
 %%
-spikeSortingParams.postProcessing= 'treatAllAsSpike'; %'biggestAverageAmplitudeCluster';  %'largestNonNoiseClusterOnly',  
+spikeSortingParams.postProcessing= 'treatAllNonNoiseAsSpike'; %'treatAllAsSpike'; %'biggestAverageAmplitudeCluster';  %'largestNonNoiseClusterOnly',  
 spikeDetectionParams.sampleLFP = false; %true;
 spikeDetectionParams.LFPSamplingRateHz =500;
 spikeSortingParams.plotSortingForTesting =false;

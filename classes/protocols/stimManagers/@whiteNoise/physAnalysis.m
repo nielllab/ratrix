@@ -605,7 +605,7 @@ try
     set(gcf,'Name','LFP Analysis','NumberTitle','off');
 %     ST_LFPTime = linspace(-1000,1000,length(cumulativedata.cumulativeST_LFPA));
 %     plot(ST_LFPTime,cumulativedata.cumulativeST_LFPA,'LineWidth',2);
-    imagesc([-1000 1000],[1 14,],squeeze(cumulativedata.cumulativeST_LFPA)');colorbar;
+    imagesc([-1000 1000],[1 14],squeeze(cumulativedata.cumulativeST_LFPA)');colorbar;
 %     hold on;
 %     plot(ST_LFPTime,cumulativedata.cumulativeST_LFPA+sqrt(cumulativedata.cumulativeST_LFPV));
 %     plot(ST_LFPTime,cumulativedata.cumulativeST_LFPA-sqrt(cumulativedata.cumulativeST_LFPV));

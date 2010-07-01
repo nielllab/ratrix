@@ -121,3 +121,6 @@ analysis/spike[!!-~]sorting/KlustaKwik/temp.fet.1
 analysis/spike[!!-~]sorting/KlustaKwik/temp.klg.1
 analysis/spike[!!-~]sorting/KlustaKwik/temp.model.1
 analysis/analyzeBoundaryRange.asv
+analysis/spike[!!-~]sorting/*.asv
+analysis/spike[!!-~]sorting/historicalSpikeFiddlerCalls.asv
+classes/protocols/stimManagers/util/hs_err_pid5324.log

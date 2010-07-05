@@ -502,3 +502,5 @@ util/createAnalysisPathString.m -text
 util/getClassForTrial.m -text
 util/validateCellBoundary.m -text
 util/getDetailsFromNeuralRecords.m -text
+util/setFilterParamsForAnalysisMode.m -text
+/filterSpikeRecords.m -text

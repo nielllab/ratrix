@@ -140,6 +140,7 @@ if ~exist('frameThresholds','var') || isempty(frameThresholds)
 end
 
 % lets save the analysis boundaries in a file called analysisBoundary
+% analysisoundaryFile should have everything required to recreate the analysis. 
 analysisBoundaryFile = fullfile(analysisPath,'analysisBoundary.mat');
 save(analysisBoundaryFile,'boundaryRange','maskInfo','trodes','spikeDetectionParams','spikeSortingParams',...
     'timeRangePerTrialSecs','stimClassToAnalyze','analysisMode','usePhotoDiodeSpikes','plottingParams','frameThresholds');
@@ -175,7 +176,7 @@ while ~done
     disp(sprintf('analyzing trial number: %d',currentTrialNum));
     % how many chunks exist for currentTrialNum?
     %% find the neuralRecords
-    [neuralRecordsExist timestamp] = findNeuralRecordsLocation(neuralRecordsPath, currentTrialNum)
+    [neuralRecordsExist timestamp] = findNeuralRecordsLocation(neuralRecordsPath, currentTrialNum);
         
     chunksAvailable = [];
     if neuralRecordExists
@@ -225,6 +226,12 @@ while ~done
             end
             
             if sortSpikes
+                % upload cumulativeSpikeRecord if necessary
+                if ~exist('cumulativeSpikeRecord','var')
+                    cumulativeSpikeRecord = getSpikeRecords(analysisPath);
+                end
+                filterParams = setFilterParamsForAnalysisMode(analysisMode, currentTrialNum, currentChunkInd, boundaryRange);
+                filteredSpikeRecord = filterSpikeRecords(filterParams,cumulativeSpikeRecords);
                 % sort spikes
                 for trodeNum = 1:length(trodes)
 

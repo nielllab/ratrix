@@ -8,8 +8,9 @@ if ~isempty(dynamicSweep)
         case 'ordered'
             %nothing to do
         case 'random'
-            if ~(isnumeric(dynamicSweep.sweepMode{2}) & size(dynamicSweep.sweepMode{2})==[1 1])
-                error('second argument 2 dynamic sweepMode must be a random seed')
+            if ~(isnumeric(dynamicSweep.sweepMode{2}) && all(size(dynamicSweep.sweepMode{2})==[1 1])) ...
+                    &&  ~(ischar(dynamicSweep.sweepMode{2}) && strcmp(dynamicSweep.sweepMode{2},'clock'))
+                error('second argument 2 dynamic sweepMode must be a random seed, or the string ''clock''')
             end
         case 'manual'
             %error('not yet');

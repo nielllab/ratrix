@@ -84,20 +84,27 @@ details.protocolSettings=datenum(stimulus.protocolSettings);
 
 
 %setup for first trial...
-if ~stimIsCached(stimulus)
-    if isDynamicRender(stimulus)
+if isDynamicRender(stimulus)
+    if ~stimIsCached(stimulus)
+        %LUT ONLY ON FIRST TRIAL
         stimulus=inflate(stimulus,{'dynamicSweepValues','LUT'});
+        setSeed(stimulus, 'seedFromClock');
         %dynamic renders will get cache stim after PTB screen size is set
     else
-        stimulus=inflate(stimulus,{'all'});
+        %swept values randomized each trial, 'clock' may set it
+        stimulus=inflate(stimulus,{'dynamicSweepValues'});
     end
-    setSeed(stimulus, 'seedFromClock');
     updateSM=true;
 else
-    updateSM=false;
+    if ~stimIsCached(stimulus)
+        stimulus=inflate(stimulus,{'all'});
+        setSeed(stimulus, 'seedFromClock');
+        updateSM=true;
+    else
+        updateSM=false;
+    end
 end
-
-
+    
 a=rand('seed');
 b=randn('seed');
 details.randomMethod='seedFromClock';

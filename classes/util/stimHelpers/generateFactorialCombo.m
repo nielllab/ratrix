@@ -156,7 +156,11 @@ switch type
     case 'random'
         % mode should be {'random',[seed]}
         if length(mode)==2
-            seed=mode{2};
+            if isnumeric(mode{2})
+                seed=mode{2};
+            elseif ischar(mode{2}) && strcmp(mode{2},'clock')
+                seed=sum(100*clock);
+            end
         elseif length(mode)==1
             warning('using default seed of 1 in random mode');
             seed=1;

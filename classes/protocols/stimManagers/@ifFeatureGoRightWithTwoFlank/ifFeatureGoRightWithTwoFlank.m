@@ -213,8 +213,11 @@ switch nargin
                         p.stdGaussMask=1/16;
                         p.stdGaussMask=1/8;
                         p.pixPerCycs=32;
-                        p.pixPerCycs=128; %768
-                        p.pixPerCycs=180; %768
+                        %p.pixPerCycs=128; %768
+                        %p.pixPerCycs=180; %768
+                        
+                        ;
+                                                
                         %                         p.targetOnOff=int32([40 60]);
                         %                          p.flankerOnOff=int32([40 60]);
                         p.targetOnOff=int32([200 220]);
@@ -227,19 +230,27 @@ switch nargin
                         p.flankerOrientations = [pi/12];
                         p.flankerPosAngle = [pi/12];
 
+                        %temp
+                        p.stdGaussMask=1/4;
+                        p.pixPerCycs=64
+                        p.pixPerCycs=128
+                        
+                        
                         %p.showText=false;
                         locationMode=3;
                         switch locationMode
                             case 1
                                 RFdataSource='\\132.239.158.179\datanet_storage';
                                 p.fitRF = RFestimator({'spatialWhiteNoise','fitGaussian',{1}},{'spatialWhiteNoise','fitGaussian',{1}},[],RFdataSource,[now-100 Inf]);
-                            case 2
+                            case 2 %ERRORS >> NEEDS FIXING
                                 RFdataSource='\\132.239.158.179\datanet_storage'; % not actually used for lastDynamicSettings
                                 p.fitRF = RFestimator({'gratingWithChangeableAnnulusCenter','lastDynamicSettings',[]},{'gratingWithChangeableAnnulusCenter','lastDynamicSettings',[]},[],RFdataSource,[now-100 Inf]);
                             otherwise
-                                p.xPositionPercent=.5;% 5/12; %0.3;
-                                p.yPositionPercent=.5; %5/8; %0.7;
-                                p.stdGaussMask=1/16;
+                                p.xPositionPercent=.6;% 5/12; %0.3;
+                                p.yPositionPercent=.45; %5/8; %0.7;
+                                p.xPositionPercent=5/9;
+                                p.yPositionPercent=3/7; 
+                                p.stdGaussMask=1/10;
                                 p.fitRF=[];
                         end
                         
@@ -252,7 +263,7 @@ switch nargin
                         p.renderMode='dynamic-precachedInsertion'; % dynamic-maskTimesGrating, dynamic-onePatchPerPhase,or dynamic-onePatch
                         
                         %p.dynamicSweep.sweepMode={'ordered'};
-                        p.dynamicSweep.sweepMode={'random',1};
+                        p.dynamicSweep.sweepMode={'random','clock'}; % repeats on a trial are the same, but across trials will be different
                         p.dynamicSweep.sweptValues=[];
                         p.typeOfLUT='2009Trinitron255GrayBoxInterpBkgnd.5';
                         p.typeOfLUT= 'useThisMonitorsUncorrectedGamma';
@@ -273,7 +284,7 @@ switch nargin
                                 p.flankerContrast=[0 .25 .5 .75 1];
                                 p.goLeftContrast=[0 .25 .5 .75 1];
                                 p.goRightContrast=[0 .25 .5 .75 1];
-                                p.dynamicSweep.numRepeats=3;
+                                p.dynamicSweep.numRepeats=1;
 
                                 p.dynamicSweep.sweptParameters={'targetContrast','flankerContrast','phase'};% 'flankerOrientations'}%,'flankerOffset','flankerPosAngle'};
 
@@ -284,7 +295,7 @@ switch nargin
                                 p.goRightContrast=[0 .25 .5 .75 1];
                                 p.dynamicSweep.numRepeats=6;
 
-                                p.phase=pi/2;
+                                p.phase=0;% pi/2;
                                 p.dynamicSweep.sweptParameters={'targetContrast','flankerContrast'};% 'flankerOrientations'}%,'flankerOffset','flankerPosAngle'};  
                             case 'flankersMatterPhys'
                                 p.flankerContrast=[0 1];
@@ -306,16 +317,24 @@ switch nargin
                                 p.targetOnOff=int32([40 60]);
                                 p.flankerOnOff=int32([40 60]);
                                 p.dynamicSweep.sweptParameters={'phase'};
-                                p.dynamicSweep.numRepeats=6;  
+                                p.dynamicSweep.numRepeats=40;
+                                p.xPositionPercent=.5;
+                                p.yPositionPercent=.5;
                             case 'physFullFieldContrast'
                                 p.stdGaussMask=Inf;
                                 p.flankerContrast=0;
                                 p.targetOnOff=int32([40 60]);
                                 p.flankerOnOff=int32([40 60]);
+                                
+                                %  p.targetOnOff=int32([200 220]);
+                                %  p.flankerOnOff=int32([200 220]);
+                                
+                                p.xPositionPercent=.5;
+                                p.yPositionPercent=.5;
 
                                 p.goLeftContrast=[0 .25 .5 .75 1];
                                 p.goRightContrast=[0 .25 .5 .75 1];
-                                p.dynamicSweep.numRepeats=6;
+                                p.dynamicSweep.numRepeats=4;
                                 p.dynamicSweep.sweptParameters={'targetContrast','phase'};% 'flankerOrientations'}%,'flankerOffset','flankerPosAngle'};    
                         end
                     case {'horizontalVerticalCalib','horizontalVerticalSFCalib','calibFlankerLocationOrientation','calibFlankerPresence'}

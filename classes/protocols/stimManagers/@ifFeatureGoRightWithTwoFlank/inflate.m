@@ -45,8 +45,8 @@ for i=1:length(parts)
             %mask=getFeaturePatchStim(patchX,patchY,'squareGrating-variableOrientationAndPhase',0,0,[radius 1000 0 0 1 s.thresh 1/2 1/2],0);
             
             
-            % %circMask=double(mask>0.01);
-            % %staticParams(1)=Inf;
+            circMask=double(mask>0.01);
+            staticParams(1)=Inf;
             
             flankerStim=1; % just a place holder, may get overwritten
             s.cache.flankerStim= uint8(double(intmax('uint8'))*(flankerStim));
@@ -225,19 +225,19 @@ for i=1:length(parts)
                         %             cache{5}.features=(distractorFlankerStim-s.mean)*2;
                         
                         %CIRC MASK
-                        %  %cache as double, range -.5 to .5
-                        %             cache{1}.features=repmat(circMask,[1 1 size(goRightStim,3) size(goRightStim,4)]).*(goRightStim-s.mean);
-                        %             cache{2}.features=repmat(circMask,[1 1 size(goLeftStim,3) size(goLeftStim,4)]).*(goLeftStim-s.mean);
-                        %             cache{3}.features=repmat(circMask,[1 1 size(flankerStim,3) size(flankerStim,4)]).*(flankerStim-s.mean);
-                        %             cache{4}.features=distractorStim-s.mean;  %not circ mask here, cuz not needed... its empty -pmm hack
-                        %             cache{5}.features=distractorFlankerStim-s.mean;
+                         %cache as double, range -.5 to .5
+                                    cache{1}.features=repmat(circMask,[1 1 size(goRightStim,3) size(goRightStim,4)]).*(goRightStim-s.mean);
+                                    cache{2}.features=repmat(circMask,[1 1 size(goLeftStim,3) size(goLeftStim,4)]).*(goLeftStim-s.mean);
+                                    cache{3}.features=repmat(circMask,[1 1 size(flankerStim,3) size(flankerStim,4)]).*(flankerStim-s.mean);
+                                    cache{4}.features=distractorStim-s.mean;  %not circ mask here, cuz not needed... its empty -pmm hack
+                                    cache{5}.features=distractorFlankerStim-s.mean;
                         
-                        %cache as double, range -.5 to .5
-                        cache{1}.features=(goRightStim-s.mean);
-                        cache{2}.features=(goLeftStim-s.mean);
-                        cache{3}.features=(flankerStim-s.mean);
-                        cache{4}.features=distractorStim-s.mean;  %not circ mask here, cuz not needed... its empty -pmm hack
-                        cache{5}.features=distractorFlankerStim-s.mean;
+%                         %cache as double, range -.5 to .5
+%                         cache{1}.features=(goRightStim-s.mean);
+%                         cache{2}.features=(goLeftStim-s.mean);
+%                         cache{3}.features=(flankerStim-s.mean);
+%                         cache{4}.features=distractorStim-s.mean;  %not circ mask here, cuz not needed... its empty -pmm hack
+%                         cache{5}.features=distractorFlankerStim-s.mean;
                         
                        
                         %             %gratings range from [-0.5  1.5]...wierd
@@ -301,11 +301,11 @@ for i=1:length(parts)
             
         case 'dynamicSweepValues'
             if ~isempty(s.dynamicSweep)
-                if isempty(s.dynamicSweep.sweptValues)
-                    %fill them once, but then don't mess with them
+                %if isempty(s.dynamicSweep.sweptValues)
+                    %fill them every trial, same if seed is set, random per trial if seed is 'clock'
                     s.dynamicSweep.sweptValues=generateFlankerFactorialCombo(s, s.dynamicSweep.sweptParameters, s.dynamicSweep.sweepMode, struct(s));
-                    updateSM=true;
-                end
+                    %updateSM=true;
+                %end
             end
             
             

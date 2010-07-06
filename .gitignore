@@ -124,3 +124,4 @@ analysis/analyzeBoundaryRange.asv
 analysis/spike[!!-~]sorting/*.asv
 analysis/spike[!!-~]sorting/historicalSpikeFiddlerCalls.asv
 classes/protocols/stimManagers/util/hs_err_pid5324.log
+analysis/util/*.asv

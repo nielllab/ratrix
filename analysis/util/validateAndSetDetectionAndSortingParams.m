@@ -45,86 +45,106 @@ switch channelAnalysisMode
         error('channelAnalysisMode: ''%s'' is not supported',channelAnalysisMode);
 end
 
-% now we have all the trode nums. if spikeDetection and spikesortingParams 
-% have same length as numTrodes, return them; if spikeSortingParams and
-% spikeDetectionParams are empty, create standard ones; if they
-% have length 1, repmat.
+% spikeSorting and spikeDetection params are going to be structures named
+% after the trodesStrs
 
-% spikeDetectionParams
+%% spikeDetectionParams
 switch length(spikeDetectionParams)
     case 0
         % provide standard values
         % spikeDetectionParams
-        spikeDetectionParams.method = 'oSort';
-        spikeDetectionParams.ISIviolationMS=2;
-        spikeDetectionParams = repmat(spikeDetectionParams,numTrodes,1);
+        temp.method = 'oSort';
+        temp.ISIviolationMS=2;
         for i = 1:numTrodes
-            spikeDetectionParams(i).trodeChans = trodes{i};
+            trodeStr = createTrodeName(trodes{i});
+            spikeDetectionParams.(trodeStr) = temp;
+            spikeDetectionParams.(trodeStr).trodeChans = trodes{i};
         end
     case 1
         % either we are given active paramfile location or we are given the param file
         % spikeDetectionParams
         if strcmp(spikeDetectionParams.method,'activeSortingParams')
             % get the active paramfile and error check
-            spikeDetectionParams = load(spikeDetectionParams.activeParamLocation,'spikeDetectionParams');
-            % error check. right now only check for number of leads.
-            % maybe later check for trodeChans
-            if length(spikeDetectionParams) ~= numTrodes
-                spikeDetectionParams
-                numTrodes
-                error('activeParamLocation does not have spikeDetectionParams with the right number of trodes');
+             temp = load(spikeDetectionParams.activeParamLocation,'spikeDetectionParams');
+             spikeDetectionParams = temp.spikeDetectionParams;
+            % error check if the trodes are the same
+            trodes = sort(trodes);
+            paramTrodes = sort(fieldnames(spikeDetectionParams));
+            if ~all(strcmp(trodes,paramTrodes))
+                error('trodes from input and trodes from activeParam file do not match');
             end
         else
             % here just repmat, and name the trodes
-            spikeDetectionParams = repmat(spikeDetectionParams,numTrodes,1);
-            % error check. right now only check for number of leads.
-            % maybe later check for trodeChans
+            temp = repmat(spikeDetectionParams,numTrodes,1);
+            spikeDetectionParams = [];
             for i = 1:numTrodes
-                spikeDetectionParams(i).trodeChans = trodes{i};
+                trodeStr = createTrodeName(trodes{i});
+                spikeDetectionParams.(trodeStr) = temp(i);
+                spikeDetectionParams.(trodeStr).trodeChans = trodes{i};
             end
         end
-        
-    case numTrodes
-        % do nothing
+     case numTrodes
+        % make the spikeDetectionParams into a structure instead of an
+        % array of structures
+        temp = spikeDetectionParams;
+        spikeDetectionParams = [];
+        for i = 1:numTrodes
+            trodeStr = createTrodeName(trodes{i});
+            spikeDetectionParams.(trodeStr) = temp(i);
+            spikeDetectionParams.(trodeStr).trodeChans = trodes{i};
+        end
     otherwise
         spikeDetectionParams        
         numTrodes
         error('given parameter length for spikeDetectionParams and number of trodes do not match')
 end
 
-% spikeSortingParams
+%% spikeSortingParams
 switch length(spikeSortingParams)
     case 0
         % provide standard values
-        spikeSortingParams.method = 'oSort';
-        spikeSortingParams = repmat(spikeSortingParams,numTrodes,1)
+        temp.method = 'oSort';
+        spikeSortingParams = [];
         for i = 1:numTrodes
-            spikeSortingParams(i).trodeChans = trodes{i};
+            trodeStr = createTrodeName(trodes{i});
+            spikeSortingParams.(trodeStr) = temp;
+            spikeSortingParams.(trodeStr).trodeChans = trodes{i};
         end
     case 1
         % either we are given active paramfile location or we are given the param file
         % spikeDetectionParams
+                % either we are given active paramfile location or we are given the param file
+        % spikeDetectionParams
         if strcmp(spikeSortingParams.method,'activeSortingParams')
             % get the active paramfile and error check
-            spikeSortingParams = load(spikeSortingParams.activeParamLocation,'spikeSortingParams');
-            % error check. right now only check for number of leads.
-            % maybe later check for trodeChans
-            if length(spikeSortingParams) ~= numTrodes
-                spikeSortingParams
-                numTrodes
-                error('activeParamLocation does not have spikeSortingParams with the right number of trodes');
+             temp = load(spikeSortingParams.activeParamLocation,'spikeSortingParams');
+             spikeSortingParams = temp.spikeSortingParams;
+            % error check if the trodes are the same
+            trodes = sort(trodes);
+            paramTrodes = sort(fieldnames(spikeSortingParams));
+            if ~all(strcmp(trodes,paramTrodes))
+                error('trodes from input and trodes from activeParam file do not match');
             end
         else
             % here just repmat, and name the trodes
-            spikeSortingParams = repmat(spikeSortingParams,numTrodes,1);
-            % error check. right now only check for number of leads.
-            % maybe later check for trodeChans
+            temp = repmat(spikeSortingParams,numTrodes,1);
+            spikeSortingParams = [];
             for i = 1:numTrodes
-                spikeSortingParams(i).trodeChans = trodes{i};
+                trodeStr = createTrodeName(trodes{i});
+                spikeSortingParams.(trodeStr) = temp(i);
+                spikeSortingParams.(trodeStr).trodeChans = trodes{i};
             end
         end        
     case numTrodes
-        % do nothing
+        % make the spikeSortingParams into a structure instead of an
+        % array of structures
+        temp = spikeSortingParams;
+        spikeSortingParams = [];
+        for i = 1:numTrodes
+            trodeStr = createTrodeName(trodes{i});
+            spikeSortingParams.(trodeStr) = temp(i);
+            spikeSortingParams.(trodeStr).trodeChans = trodes{i};
+        end
     otherwise
         spikeSortingParams
         numTrodes

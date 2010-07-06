@@ -1,8 +1,8 @@
 function spikeRecords = getSpikeRecords(analysisPath)
-spikeRecordFile = fullfile(analysisPath,'cumulativeSpikeRecord.mat')
+spikeRecordFile = fullfile(analysisPath,'spikeRecords.mat')
 if exist(spikeRecordFile,'file')
-    temp = stochasticLoad(spikeRecordFile,'cumulativeSpikeRecord');
-    spikeRecords = temp.cumulativeSpikeRecords;
+    temp = stochasticLoad(spikeRecordFile,'spikeRecords');
+    spikeRecords = temp.spikeRecords;
 else
     spikeRecords = [];
 end

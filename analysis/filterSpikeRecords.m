@@ -1,24 +1,29 @@
-function  filteredSpikeRecord = filterSpikeRecords(filterParams,cumulativeSpikeRecords)
+function  filteredSpikeRecord = filterSpikeRecords(filterParams,spikeRecords)
 if ~exist('filterParams','var') || isempty(filterParams)
     error('filterParams is necessary for filtering spikeRecords');
 end
 filteredSpikeRecord = [];
 switch filterParams.filterMode
     case 'thisTrialAndChunkOnly'
+        %% thisTrialAndChunkOnly
         trialNum = filterParams.trialNum;
         chunkInd = filterParams.chunkInd;
-        trodesInRecord = fieldnames(cumulativeSpikeRecords);
+        trodesInRecord = fieldnames(spikeRecords);
         trodesInRecord = trodesInCurrent(~cellfun(@isempty,regexp(trodesInCurrent,'^trode')));
         for trodeNum = 1:length(trodesInRecord)
             currTrode = trodesInRecord{trodeNum};
-            filteredSpikeRecord.(currTrode).trodeChans = cumulativeSpikeRecords.(currTrode).trodeChans;
-            which = (cumulativeSpikeRecords.(currTrode).trialNum==trialNum);
-            filteredSpikeRecord.(currTrode).spikes = cumulativeSpikeRecords.(currTrode).spikes(which);
-            filteredSpikeRecord.(currTrode).spikeTimestamps = cumulativeSpikeRecords.(currTrode).spikeTimestamps(which);
-            filteredSpikeRecord.(currTrode).spikeWaveforms = cumulativeSpikeRecords.(currTrode).spikeWaveforms(which);
+            filteredSpikeRecord.(currTrode).trodeChans = spikeRecords.(currTrode).trodeChans;
+            which = (spikeRecords.(currTrode).trialNum==trialNum) && (spikeRecords.(currTrode).chunkInd==chunkInd);
+            filteredSpikeRecord.(currTrode).spikes = spikeRecords.(currTrode).spikes(which);
+            filteredSpikeRecord.(currTrode).spikeTimestamps = spikeRecords.(currTrode).spikeTimestamps(which);
+            filteredSpikeRecord.(currTrode).spikeWaveforms = spikeRecords.(currTrode).spikeWaveforms(which);
         end
+        %% END
     otherwise
-        error('unknown filterMode');
+        %% otherwise
+        filterParams.filterMode
+        error('unsupported filterMode');
+        %% end
 end
             
 end

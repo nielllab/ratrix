@@ -1,8 +1,6 @@
 function spikeRecords = updateSpikeRecords(updateParams,currentSpikeRecord,spikeRecords)
-% This function is going to assume that the over all "shape" of
-% currentSpikeRecord and cumulativeSpikeRecord will not undergo substantial
-% change. All currentSpikeRecords will have the following structure
-% currentSpikeRecords.
+% All spikeRecords will have the following structure
+%       spikeRecords.
 % ********************* trode specific *********************
 %                    (trodeStr).  n=1,2,3,....
 %                               trodeChans *
@@ -13,8 +11,12 @@ function spikeRecords = updateSpikeRecords(updateParams,currentSpikeRecord,spike
 %                               spikeTimestamps
 %                               spikeWaveforms
 %                               trialNum
-%                               chunkID
+%                               chunkInd
 %                               assignedClusters
+%                               spikeModel.
+%                                          featureDetails
+%                                          clusteringMethod
+%                                          clusteringModel
 % ********************* frame specific *********************
 %                    frameIndices
 %                    frameTimes
@@ -53,12 +55,12 @@ switch updateParams.updateMode
         trodesInCurrent = trodesInCurrent(~cellfun(@isempty,regexp(trodesInCurrent,'^trode')));
         for currentTrode = trodesInCurrent % loop through all the trode fields
             trodeInfo = currentSpikeRecord.(currentTrode{:});
-            if ~isfield(cumulativeSpikeRecords,currentTrode{:}) % the analysis was never run for the trode 
-                cumulativeSpikeRecords.(currentTrode{:}) = currentSpikeRecord.(currentTrode{:});
+            if ~isfield(spikeRecords,currentTrode{:}) % the analysis was never run for the trode 
+                spikeRecords.(currentTrode{:}) = currentSpikeRecord.(currentTrode{:});
             else % prev analysis exists. check if the trodeChans are identical
-                if(cumulativeSpikeRecords.(currentTrode{:}).trodeChans ~= ...
+                if(spikeRecords.(currentTrode{:}).trodeChans ~= ...
                         currentSpikeRecord.(currentTrode{:}).trodeChans)
-                    cumulativeSpikeRecords.(currentTrode{:}).trodeChans
+                    spikeRecords.(currentTrode{:}).trodeChans
                     currentSpikeRecord.(currentTrode{:}).trodeChans
                     error('attempting to update analyses for different trodes.');
                 end
@@ -68,26 +70,26 @@ switch updateParams.updateMode
                 fieldsToBeUpdated = fieldsToBeUpdated(~ismember(fieldsToBeUpdated,{nonUpdatedFields{:},specialFields{:}}));
                 % support for most fields which are spike num dependent
                 for currentUpdateField = fieldsToBeUpdated
-                    if ~exist(cumulativeSpikeRecords.(currentTrode{:}).(currentUpdateField{:}))
-                        cumulativeSpikeRecords.(currentTrode{:}).(currentUpdateField{:}) = ...
+                    if ~exist(spikeRecords.(currentTrode{:}).(currentUpdateField{:}))
+                        spikeRecords.(currentTrode{:}).(currentUpdateField{:}) = ...
                             currentSpikeRecord.(currentTrode{:}).(currentUpdateField{:});
                     else
-                        cumulativeSpikeRecords.(currentTrode{:}).(currentUpdateField{:}) = [...
-                            cumulativeSpikeRecords.(currentTrode{:}).(currentUpdateField{:});...
+                        spikeRecords.(currentTrode{:}).(currentUpdateField{:}) = [...
+                            spikeRecords.(currentTrode{:}).(currentUpdateField{:});...
                             currentSpikeRecord.(currentTrode{:}).(currentUpdateField{:})];
                     end
                 end
                 % support for LFPRecord
                 if isfield(currentSpikeRecord.(currentTrode{:}),'LFPRecord')
-                    if ~isfield(cumulativeSpikeRecords.(currentTrode{:}),'LFPRecord')
-                        cumulativeSpikeRecords.(currentTrode{:}).LFPRecord = ...
+                    if ~isfield(spikeRecords.(currentTrode{:}),'LFPRecord')
+                        spikeRecords.(currentTrode{:}).LFPRecord = ...
                             currentSpikeRecord.(currentTrode{:}).LFPRecord;
                     else
-                        cumulativeSpikeRecords.(currentTrode{:}).LFPRecord.LFPData = ...
-                            [cumulativeSpikeRecords.(currentTrode{:}).LFPRecord.LFPData;...
+                        spikeRecords.(currentTrode{:}).LFPRecord.LFPData = ...
+                            [spikeRecords.(currentTrode{:}).LFPRecord.LFPData;...
                             currentSpikeRecord.(currentTrode{:}).LFPRecord.LFPData];
-                        cumulativeSpikeRecords.(currentTrode{:}).LFPRecord.LFPDataTimes = ...
-                            [cumulativeSpikeRecords.(currentTrode{:}).LFPRecord.LFPDataTimes;...
+                        spikeRecords.(currentTrode{:}).LFPRecord.LFPDataTimes = ...
+                            [spikeRecords.(currentTrode{:}).LFPRecord.LFPDataTimes;...
                             currentSpikeRecord.(currentTrode{:}).LFPRecord.LFPDataTimes]
                     end
                 end

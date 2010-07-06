@@ -1,4 +1,4 @@
-function filterParams = setFilterParamsForAnalysisMode(analysisMode, trialNum, chunkInd, boundaryRange)
+function filterParams = setFilterParamsForAnalysisMode(analysisMode, trialNum, chunkInd, analysisBoundaryFile)
 switch analysisMode
     case 'overwriteAll'
         filterParams.filterMode = 'thisTrialAndChunkOnly';

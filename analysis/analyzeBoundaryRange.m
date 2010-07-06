@@ -16,24 +16,18 @@ if ~isdir(neuralRecordsPath)
     neuralRecordsPaths
     error('unable to find directory to neuralRecords');
 end
-
-% cellBoundary with support for masking
+    %% cellBoundary with support for masking
 if ~exist('cellBoundary','var') || isempty(cellBoundary)
     error('cellBoundary must be a valid input argument - default value is too dangerous here!');
 else 
     [boundaryRange maskInfo] = validateCellBoundary(cellBoundary);
 end
-
-% spikeChannelsAnalyzed
+    %% spikeChannelsAnalyzed
 if ~exist('trodes','var') || isempty(trodes)
     channelAnalysisMode = 'allPhysChannels';
     trodes={}; % default all phys channels one by one. will be set when we know how many channels
 else
     channelAnalysisMode = 'onlySomeChannels';
-    % the default state of trode is based on ascending order of the first lead in trode
-    disp('the input is ');
-    [vals order] = sort(cellfun(@(v)v(1),trodes));
-    trodes = trodes(order)
     % error check
     if ~(iscell(trodes))
         error('must be a cell of groups of channels');
@@ -42,12 +36,10 @@ else
     end
         
 end
-
-% create the analysisPath and see if it exists
+    %% create the analysisPath and see if it exists
 [analysisPath analysisDirForRange]= createAnalysisPathString(boundaryRange,path,subjectID)
 prevAnalysisExists =  exist(analysisPath,'dir');
-
-% should we backup the analysis?
+    %% should we backup the analysis?
 if prevAnalysisExists && makeBackup
     backupPath = fullfile(path,subjectID,'analysis','backups',sprintf('analysisDirForRange-%s',datestr(now,30)));
     makedir(backupPath);
@@ -57,19 +49,22 @@ if prevAnalysisExists && makeBackup
         error('failed to make backup')
     end
 end
-    
-
-% make initial assumptions about spike detection and sorting parameters
-% but first make sure that the variables exist.
+    %% validate spikeDetection and spikeSorting Params
 if ~exist('spikeDetectionParams','var')
     spikeDetectionParams = [];
 end
 
 if ~exist('spikeSortingParams','var')
-    spikeSortingParams = [];    
+    spikeSortingParams = [];
 end
+[validatedParams spikeDetectionParams spikeSortingParams] = validateAndSetDetectionAndSortingParams(spikeDetectionParams,...
+    spikeSortingParams,channelAnalysisMode,trodes); 
 
-%createAnalysisPaths here
+if strcmp(channelAnalysisMode,'onlySomeChannels')
+    spikeSortingParams = spikeSortingParams(order);
+    spikeDetectionParams = spikeDetectionParams(order);
+end
+    %% createAnalysisPaths here
 switch analysisMode 
     case {'overwriteAll','detectAndSortOnFirst','detectAndSortOnOnAll','interactiveDetectAndSortOnFirst',...
             'interactiveDetectAndSortOnAll', 'analyzeAtEnd'}
@@ -83,17 +78,13 @@ switch analysisMode
             prevAnalysisExists = false;
         end
         % recreate the analysis file
-        mkdir(analysisPath);        
-        % lets see if spikeDetection and spikeSorting is specified for all trodesNums
-        [validatedParams spikeDetectionParams spikeSortingParams] = validateAndSetDetectionAndSortingParams(spikeDetectionParams,...
-            spikeSortingParams,channelAnalysisMode,trodes);        
+        mkdir(analysisPath);
     case {'viewAnalysisOnly'}
         % do nothing
     otherwise
         error('unknown analysisMode: ''%s''',analysisMode)
 end
-
-
+    %% timeRangePerTrialSecs
 if ~exist('timeRangePerTrialSecs','var') || isempty(timeRangePerTrialSecs)
     timeRangePerTrialSecs = [0 Inf]; %all
 else
@@ -107,7 +98,7 @@ else
         %do we throw out the first pulse?
     end
 end
-
+    %% stimClassToAnalyze
 if ~exist('stimClassToAnalyze','var') || isempty(stimClassToAnalyze)
     stimClassToAnalyze='all';
 else
@@ -116,35 +107,33 @@ else
         error('must be a cell of chars of SM classes or ''all'' ')
     end
 end
-
+    %% usePhotoDiodeSpikes
 if ~exist('usePhotoDiodeSpikes','var') || isempty(usePhotoDiodeSpikes)
     usePhotoDiodeSpikes=false;
 end
-
-if ~exist('overwriteAll','var') || isempty(overwriteAll)
-    overwriteAll=false;
-end
-
-
+    %% plottingParams
 if ~exist('plottingParams','var') || isempty(plottingParams)
     plottingParams.showSpikeAnalysis = true;
     plottingParams.showLFPAnalysis = true;
     plottingParams.plotSortingForTesting = true;
 end
-
+    %% frameThresholds
 if ~exist('frameThresholds','var') || isempty(frameThresholds)
     frameThresholds.dropBound = 1.5;   %smallest fractional length of ifi that will cause the long tail to be called a drop(s)
     frameThresholds.warningBound = 0.1; %fractional difference that will cause a warning, (after drop adjusting)
     frameThresholds.errorBound = 0.5;   %fractional difference of ifi that will cause an error (after drop adjusting)
     frameThresholds.dropsAcceptableFirstNFrames=2; % first 2 frames won't kill the default quality test               
 end
+%% END ERROR CHECKING
 
+
+
+%% SAVE ANALYSISBOUNDARIES
 % lets save the analysis boundaries in a file called analysisBoundary
 % analysisoundaryFile should have everything required to recreate the analysis. 
 analysisBoundaryFile = fullfile(analysisPath,'analysisBoundary.mat');
 save(analysisBoundaryFile,'boundaryRange','maskInfo','trodes','spikeDetectionParams','spikeSortingParams',...
     'timeRangePerTrialSecs','stimClassToAnalyze','analysisMode','usePhotoDiodeSpikes','plottingParams','frameThresholds');
-        
 %% ANALYSIS LOGICALS SET HERE FOR FIRST PASS
 switch analysisMode
     case 'overwriteAll'
@@ -171,13 +160,13 @@ end
 done = false;
 currentTrialNum = boundaryRange(1);
 analyzeChunk = true;
-
+%% LOOP THROUGH TRIALS 
 while ~done
     disp(sprintf('analyzing trial number: %d',currentTrialNum));
     % how many chunks exist for currentTrialNum?
-    %% find the neuralRecords
+    %% find the neuralRecords location
     [neuralRecordsExist timestamp] = findNeuralRecordsLocation(neuralRecordsPath, currentTrialNum);
-        
+    %% find the stim record locations and available chunks for processing
     chunksAvailable = [];
     if neuralRecordExists
         stimRecordLocation = fullfile(path,subjectID,'stimRecords',sprintf('stimRecords_%d-%s.mat',currentTrialNum,timestamp));
@@ -186,13 +175,20 @@ while ~done
     else
         disp(sprintf('skipping analysis for trial %d',currentTrialNum));
     end
+    %% snippeting
+    snippet = [];
+    snippetTimes = [];
+    %% LOOP THROUGH CHUNKS
     for currentChunkInd = chunksAvailable
-        analyzeChunk = verifyAnalysisForChunk(path, subjectID, boundaryRange, maskInfo, stimClassToAnalyze, currentTrialNum, neuralRecordExists);
+        %% check if we need to analyze chunk based on input requirements
+        analyzeChunk = neuralRecordExists && verifyAnalysisForChunk(stimRecordLocation, boundaryRange, maskInfo, stimClassToAnalyze, currentTrialNum);
+        %% done
         if analyzeChunk
-            % initialize currentSpikeRecord to empty at the beginning of each chunk
-            currentSpikeRecord = [];
+            %% SPIKE DETECTION
             if detectSpikes
-                % load and validate neuralRecords
+                % initialize currentSpikeRecord to empty         
+                currentSpikeRecord = [];
+                %% load and validate neuralRecords and detection and sorting parameters
                 neuralRecord = getNeuralRecordForCurrentTrialAndChunk(neuralRecordLocation,currentChunkInd);                
                 if ~validatedParams
                     % happens when the number of channels is unknown
@@ -203,49 +199,110 @@ while ~done
                     % save spikeDetection and spikeSorting params to analysisBoundaryFile
                     save(analysisBoundaryFile,'spikeSortingParams','spikeDetectionParams','trodes','-append');
                 end
-                
-                % where to save the spikes
-                cumulativeSpikeRecord = getSpikeRecords(analysisPath);
-                % loop through trodes and detect spikes
-                for trodeNum = 1:length(trodes)
-                    currTrode = trodes{trodeNum};
-                    currNeuralData = neuralRecord.neuralData(:,currTrode);
-                    currNeuralDataTimes = neuralRecord.neuralDataTimes;
-                    currSamplingRate = neuralRecords.samplingRate;
-                    currSpikeDetectionParams = spikeDetectionParams(trodeNum);
-                    currentSpikeRecord = detectSpikeForTrode(currentSpikeRecord,currentTrode, trodeNum,...
-                        currNeuralData,currNeuralDataTimes,currSamplingRate,currSpikeDetectionParams,...
-                        currentTrialNum, currentchunkInd)
+                %% find the indices of neuralRecords
+                photoInd=find(strcmp(neuralRecord.ai_parameters.channelConfiguration,'photodiode'));
+                pulseInd=find(strcmp(neuralRecord.ai_parameters.channelConfiguration,'framePulse'));
+                allPhysInds = find(~cellfun(@isempty, strfind(neuralRecord.ai_parameters.channelConfiguration,'phys')));
+                %% filter neuralData (timeRangePerTrialSecs, snippets)
+                neuralRecord = filterNeuralRecords(neuralRecords,timeRangePerTrialSecs)
+                neuralRecord = addSnippetToNeuralData(neuralRecord,snippet,snippetTimes);
+                %% get the cumulativeSpikeRecord
+                spikeRecord = getSpikeRecords(analysisPath);
+                %% get Frame details
+                temp = stochasticLoad(stimRecordLocation,'refreshRate');
+                ifi = 1/temp.refreshRate;
+                currentSpikeRecords =  getFrameDetails(neuralRecord,pulseInd,frameThresholds,ifi,currentTrialNum,currentChunkInd);
+                %% create snippet for next chunk
+                [snippet snippetTimes neuralRecord] = createSnippetFromNeuralRecords(spikeRecord)
+                %% set updateMode='detectSpikes' and update cumulativeSpikeRecord
+                updateParams.updateMode = 'frameAnalysis'
+                spikeRecord = updateSpikeRecords(updateParams,currentSpikeRecord,cumulativeSpikeRecord,currentTrialNum,currentChunkInd);
+                spikeRecordsFile = fullfile(analysisPath,'spikeRecords.mat');
+                save(spikeRecordsFile,'spikeRecord','-append');                
+                %% detect relevant spikes (photoDiode or physChans)
+                if usePhotoDiodeSpikes
+                    currentSpikeRecord = detectPhotoDiodeSpikes(neuralRecord, photoInd,currentSpikeRecord);
+                    updateParams.updateMode = 'photoDiodeSpikes';
+                else
+                    for trodeNum = 1:length(trodes)
+                        currTrode = trodes{trodeNum};
+                        currTrodeName = createTrodeName(currTrode);
+                        % which physInds???
+                        thesePhysInds = getPhysIndsForTrodeChans(neuralData.ai_parameter.channelConfiguration,currTrode);
+                        currNeuralData = neuralRecord.neuralData(:,thesePhysInds);
+                        currNeuralDataTimes = neuralRecord.neuralDataTimes;
+                        currSamplingRate = neuralRecords.samplingRate;
+                        currSpikeDetectionParams = spikeDetectionParams.(currTrodeName);
+                        currentSpikeRecord = detectSpikeForTrode(currentSpikeRecord,currTrode, trodeNum,...
+                            currNeuralData,currNeuralDataTimes,currSamplingRate,currSpikeDetectionParams,...
+                            currentTrialNum, currentchunkInd)
+                    end
+                    updateParams.updateMode = 'physSpikes'
                 end
-                updateParams.updateMode = 'detectSpikes'
-                cumulativeSpikeRecord = updateCumulativeSpikeRecords(updateParams,currentSpikeRecord,cumulativeSpikeRecord,currentTrialNum,currentChunkInd);
-                cumulativeSpikeRecordFile = fullfile(analysisPath,'cumulativeSpikeRecord.mat');
-                save(cumulativeSpikeRecordFile,'cumulativeSpikeRecord','-append');
-                % now logic for switching the status of detectSpikes
-                detectSpikes = updateDetectSpikesStatus(detectSpikes,analysisMode,currentTrialNum,currentChunkInd,boundaryRange,chunksAvailable);
-            end
-            
+                %% update cumulativeSpikeRecord                
+                spikeRecord = updateSpikeRecords(updateParams,currentSpikeRecord,cumulativeSpikeRecord,currentTrialNum,currentChunkInd);
+                spikeRecordsFile = fullfile(analysisPath,'spikeRecords.mat');
+                save(spikeRecordsFile,'spikeRecord','-append');
+                %% now logic for switching the status of detectSpikes
+                detectUpdateParams = [];
+                detectUpdateParams.analysisMode = analysisMode;
+                detectUpdateParams.trialNum = currentTrialNum;
+                detectUpdateParams.chunkInd = currentChunkInd;
+                detectUpdateParams.boundaryRange = boundaryRange;
+                detectUpdateParams.chunksAvailable = chunksAvailable;
+                detectSpikes = updateDetectSpikesStatus(detectUpdateParams);
+            end            
+            %% SPIKE SORTING
             if sortSpikes
-                % upload cumulativeSpikeRecord if necessary
-                if ~exist('cumulativeSpikeRecord','var')
-                    cumulativeSpikeRecord = getSpikeRecords(analysisPath);
+                % initialize currentSpikeRecord to empty
+                currentSpikeRecord = [];
+                %% upload spikeRecord if necessary
+                if ~exist('spikeRecords','var')
+                    spikeRecord = getSpikeRecords(analysisPath);
                 end
-                filterParams = setFilterParamsForAnalysisMode(analysisMode, currentTrialNum, currentChunkInd, boundaryRange);
+                %% get the relevant spikes only
+                filterParams = setFilterParamsForAnalysisMode(analysisMode, currentTrialNum, currentChunkInd, analysisBoundaryFile);
                 filteredSpikeRecord = filterSpikeRecords(filterParams,cumulativeSpikeRecords);
-                % sort spikes
+                %% do we have a model file?
+                % it either already exists in spikeSortingParams(sent as an active param file) 
+                % or was updated during the course of analysis.
+                [spikeModel modelExists] = getSpikeModel(spikeRecord,spikeSortingParams);                
+                %% loop through the trodes and sort spikes
                 for trodeNum = 1:length(trodes)
-
-                    [assigned rank] = sortSpikesDetected(spikes, spikeWaveforms, spikeTimestamps, spikeSortingParams, analysisPath);
+                    trodeStr = createTrodeName(trodes{trodeNum});
+                    currTrode = trodes{trodeNum};
+                    currSpikes = filteredSpikeRecord.(trodeStr).spikes;
+                    currSpikeWaveforms = filteredSpikeRecord.(trodeStr).spikeWaveforms;
+                    currSpikeTimestamps = filteredSpikeRecord.(trodeStr).spikeTimestamps;
+                    currSpikeSortingParams = spikeSortingParams(trodeNum);
+                    if modelExists
+                        currSpikeSortingParams.method = 'klustaModel';
+                    end
+                    currentSpikeRecord = sortSpikesForTrode(currentSpikeRecord,currTrode,trodeNum,...
+                        currSpikes, currSpikeWaveforms,currSpikeTimestamps, currSpikeSortingParams, spikeModel);
                 end
-                % now logic for switching status of sortSpikes
+                %% need to update sorted spikes
+                updateParams.updateMode = 'sortSpikes'
+                spikeRecord = updateSpikeRecords(updateParams,currentSpikeRecord,cumulativeSpikeRecord,currentTrialNum,currentChunkInd);
+                spikeRecordsFile = fullfile(analysisPath,'spikeRecords.mat');
+                save(spikeRecordsFile,'spikeRecord','-append');
+                %% now logic for switching status of sortSpikes
+                sortUpdateParams = [];
+                sortUpdateParams.analysisMode = analysisMode;
+                sortUpdateParams.trialNum = currentTrialNum;
+                sortUpdateParams.chunkInd = currentChunkInd;
+                sortUpdateParams.boundaryRange = boundaryRange;
+                sortUpdateParams.chunksAvailable = chunksAvailable;
+                sortSpikes = updateSortSpikesStatus(sortUpdateParams);
             end
-            
+            %% ANALYSIS ON SPIKES
             if analyze
                 % analyze spikes
                 % now logic for switching analyze
             end
         end
     end
+    %% done        
     currentTrialNum = currentTrialNum+1;
     % logic for changing status of done
     if currentTrialNum>boundaryRange(3)
@@ -253,6 +310,27 @@ while ~done
     end
 end
 
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% LOGICALS DEALT WITH HERE
+function detectSpikes = updateDetectSpikesStatus(updateParams)
+if ~exist('updateParams','var') || isempty(updateParams) || ~isfield(updateParams,'updateMode') || isempty(updateParams.updateMode)
+    error('make sure updateParams exists and updateMode is specified');
+end
+switch updateParams.updateMode
+    case 'overwriteAll'
+        detectSpikes = true;
+    otherwise
+        error('unknown updateMode');
+end
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -288,11 +366,12 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function analyzeChunk = verifyAnalysisForChunk(path, subjectID, boundaryRange, maskInfo, ...
+function analyzeChunk = verifyAnalysisForChunk(stimRecordLocation, boundaryRange, maskInfo, ...
     stimClassToAnalyze, currentTrialNum)
 
 analyzeChunk = true;
-trialClass = getClassForTrial(path, subjectID, currentTrialNum);    
+temp = stochasticLoad(stimRecordLocation,{'stimManagerClass'});
+trialClass = temp.stimManagerClass;
 if (currentTrialNum<boundaryRange(1) || currentTrialNum>boundaryRange(3)) ||...
         (~strcmpi(stimClassToAnalyze, 'all') && ~any(strcmpi(stimClassToAnalyze, trialClass)))
     analyzeChunk = false;    
@@ -330,13 +409,34 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function thesePhysChannelInds = getPhysIndsForTrodeChans(channelConfiguration,currTrode)
+chansRequired=unique(currTrode);
+for c=1:length(chansRequired)
+    chansRequiredLabel{c}=['phys' num2str(chansRequired(c))];
+end
+
+if any(~ismember(chansRequiredLabel,channelConfiguration))
+    chansRequiredLabel
+    channelConfiguration
+    error(sprintf('requested analysis on channels %s but thats not available',char(setdiff(chansRequiredLabel,neuralRecord.ai_parameters.channelConfiguration))))
+end
+thesePhysChannelLabels = {};
+thesePhysChannelInds = [];
+for c=1:length(currTrode)
+    thesePhysChannelLabels{c}=['phys' num2str(currTrode(c))];
+    thesePhysChannelInds(c)=find(ismember(channelConfiguration,thesePhysChannelLabels{c}));
+end
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function currentSpikeRecord = detectSpikeForTrode(currentSpikeRecord,trode,trodeNum,neuralData,neuralDataTimes,...
     samplingRate,spikeDetectionParams,trialNum,chunkInd)
 spikeDetectionParams.samplingFreq = samplingRate; % spikeDetectionParams needs samplingRate
 [spikes spikeWaveforms spikeTimestamps] = detectSpikesFromNeuralData(neuralData, neuralDataTimes, spikeDetectionParams);
 
 % update currentSpikeRecords
-trodeStr = sprintf('trode%d',trodeNum);
+trodeStr = createTrodeName(trode);
 currentSpikeRecord.(trodeStr).trodeChans        = trode;
 currentSpikeRecord.(trodeStr).spikes            = spikes;
 currentSpikeRecord.(trodeStr).spikeWaveforms    = spikeWaveforms;
@@ -346,19 +446,51 @@ currentSpikeRecord.(trodeStr).chunkID = chunkInd*ones(size(spikes));
 currentSpikeRecord.(trodeStr).trialNum = trialNum*ones(size(spikes));
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function spikeRecord = detectPhotoDiodeSpikes(neuralRecord, photoInd, spikeRecord)
+[spikeRecord.spikes spikeRecord.spikeWaveforms spikeRecord.photoDiode]=...
+    getSpikesFromPhotodiode(neuralRecord.neuralData(:,photoInd),...
+    neuralRecord.neuralDataTimes, spikeRecord.correctedFrameIndices,neuralRecord.samplingRate);
+spikeRecord.spikeTimestamps = neuralRecord.neuralDataTimes(spikeRecord.spikes);
+spikeRecord.assignedClusters=[ones(1,length(spikeRecord.spikeTimestamps))]';
+spikeRecord.processedClusters=spikeRecord.assignedClusters'; % select all of them as belonging to a processed group
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% LOGICALS DEALT WITH HERE
-function detectSpikes = updateDetectSpikesStatus(detectSpikes,analysisMode,currentTrialNum,...
-    currentChunkInd,boundaryRange,chunksAvailable)
-detectSpikes = true;
+function currentSpikeRecord = sortSpikesForTrode(currentSpikeRecord,currTrode,trodeNum,...
+    currSpikes, currSpikeWaveforms,currSpikeTimestamps, currSpikeSortingParams, spikeModel)
+trodeStr = createTrodeName(currTrode);
+if isstruct(spikeModel) && isfield(spikeModel,trodeStr)
+    currSpikeModel = spikeModel.(trodeStr);
+else
+    currSpikeModel = [];
 end
+[assignedClusters rankedClusters currSpikeModel] = sortSpikesDetected(currSpikes,...
+    currSpikeWaveforms, currSpikeTimestamps, currSpikeSortingParams, currSpikeModel);
+spikeDetails = postProcessSpikeClusters(assignedClusters,...
+    rankedClusters,currSpikeSortingParams,currSpikeWaveforms);
+
+currentSpikeRecord.(trodeStr).spikeModel = currSpikeModel;
+currentSpikeRecord.(trodeStr).assignedClusters = assignedClusters;
+currentSpikeRecord.(trodeStr).rankedClusters = rankedClusters;
+currentSpikeRecord.(trodeStr).processedClusters = spikeDetails.processedClusters;
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function spikeRecord =  getFrameDetails(neuralRecord,pulseInd,frameThresholds,ifi,trialNum,chunkInd)
+[spikeRecord.frameIndices spikeRecord.frameTimes spikeRecord.frameLengths spikeRecord.correctedFrameIndices...
+    spikeRecord.correctedFrameTimes spikeRecord.correctedFrameLengths spikeRecord.stimInds spikeRecord.passedQualityTest] = ...
+    getFrameTimes(neuralRecord.neuralData(:,pulseInd),neuralRecord.neuralDataTimes,neuralRecord.samplingRate,...
+    frameThresholds.dropBound, frameThresholds.warningBound, frameThresholds.errorBound,ifi, frameThresholds.dropsAcceptableFirstNFrames);
+spikeRecord.chunkIDForCorrectedFrames=ones(length(spikeRecord.stimInds),1)*chunkInd;
+spikeRecord.chunkIDForFrames=ones(size(spikeRecord.frameIndices,1),1)*chunkInd;
+spikeRecord.trialNumForCorrectedFrames=ones(length(spikeRecord.stimInds),1)*trialNum;
+spikeRecord.trialNumForFrames=ones(size(spikeRecord.frameIndices,1),1)*trialNum;
+end
+
+
 
 

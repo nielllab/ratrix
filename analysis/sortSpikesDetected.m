@@ -1,7 +1,7 @@
-function [assignedClusters rankedClusters] = sortSpikesDetected(spikes, spikeWaveforms, spikeTimestamps, spikeSortingParams, analysisPath)
+function [assignedClusters rankedClusters spikeModel] = sortSpikesDetected(spikes, spikeWaveforms, spikeTimestamps, spikeSortingParams, spikeModel)
 
 % =====================================================================================================================
-% BEGIN SPIKE SORTING
+%% BEGIN SPIKE SORTING
 % Inputs are spikeTimestamps, spikeWaveforms
 
 % check for a spike sorting method
@@ -198,7 +198,7 @@ switch upper(spikeSortingMethod)
         tempDir=fullfile(getRatrixPath,'analysis','spike sorting','KlustaKwik');
         cd(tempDir);
         
-        [features nrDatapoints] = calculateFeatures(spikeWaveforms,spikeSortingParams.features);
+        [features nrDatapoints spikeModel.featureDetails] = calculateFeatures(spikeWaveforms,spikeSortingParams.features);
         
         % write the feature file
         fid = fopen('temp.fet.1','w+');
@@ -248,16 +248,20 @@ switch upper(spikeSortingMethod)
         rankedClusters(end+1)=1; % move noise cluster '1' to end
         fclose(fid);
         
-        % now move files from the Klusta directory (temp) to analysisPath
-        d=dir;
-        for i=1:length(d)
-            [matches tokens] = regexpi(d(i).name, 'temp\..*', 'match');
-            if length(matches) ~= 1
-                %         warning('not a neuralRecord file name');
-            else
-                [successM messageM messageIDM]=movefile(d(i).name,fullfile(analysisPath,d(i).name));
-            end
-        end
+%         % now move files from the Klusta directory (temp) to analysisPath
+%         d=dir;
+%         for i=1:length(d)
+%             [matches tokens] = regexpi(d(i).name, 'temp\..*', 'match');
+%             if length(matches) ~= 1
+%                 %         warning('not a neuralRecord file name');
+%             else
+%                 [successM messageM messageIDM]=movefile(d(i).name,fullfile(analysisPath,d(i).name));
+%             end
+%         end
+        % create the model files from the model file
+        modelFilePath = fullfile(tempDir,'temp.model.1');
+        spikeModel.clusteringModel = klustaModelTextToStruct(modelFilePath);
+        spikeModel.clusteringMethod = 'KlustaKwik';
         
         
         % change back to original directory
@@ -268,7 +272,11 @@ switch upper(spikeSortingMethod)
             myAssign=clusterFeaturesWithKlustaModel(kk,features,'mvnpdf',assignedClusters) % plot verification
         end
     case 'KLUSTAMODEL'
-        kk=klustaModelTextToStruct(fullfile(fileparts(analysisPath),'model'));
+        if ~strcmp(upper(spikeModel.clusteringMethod),'KLUSTAKWIK')
+            error('unsupported clustering method')
+        end
+        klustaModel = spikeModel.clusteringModel;
+        [features nrDatapoints] = useFeatures(spikeWaveforms,spikeSortingParams.features,spikeModel.featureDetails)
         assignedClusters=clusterFeaturesWithKlustaModel(kk,features,'mvnpdf');
         
         rankedClusters = unique(assignedClusters);
@@ -289,7 +297,7 @@ end
 
 % output of spike sorting should be assignedCluster and rankedClusters
 % assignedCluster is a 1xN vector, which is the assigned cluster number for each spike (numbers are arbitrary)
-
+%% plotting for testing
 if spikeSortingParams.plotSortingForTesting % view plots (for testing)
     
     switch upper(spikeSortingMethod)

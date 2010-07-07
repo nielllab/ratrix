@@ -19,3 +19,4 @@
 /getSVNCheckMode.m -text
 /getSVNRevNum.m -text
 /getSVNRevURL.m -text
+/getStepName.m -text

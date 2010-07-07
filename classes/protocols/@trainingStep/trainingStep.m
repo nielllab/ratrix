@@ -30,7 +30,7 @@ switch nargin
         else
             error('Input argument is not a trainingStep object')
         end
-    case 6
+    case {6,7}
         % create object using specified values
         if isa(varargin{1},'trialManager') && isa(varargin{2},'stimManager') && isa(varargin{3},'criterion') && isa(varargin{4},'scheduler')
             t.trialManager = varargin{1};
@@ -54,6 +54,16 @@ switch nargin
                 t.svnRevNum=0;
             end
             
+            if nargin>=7
+                if ischar(varargin{7})
+                    t.stepName=varargin{7};
+                else
+                    error('name must be a character string')
+                end
+            else
+                t.stepName='';
+            end
+         
             t.previousSchedulerState=0;
             t.trialNum=0;
             t.sessionRecords =[];

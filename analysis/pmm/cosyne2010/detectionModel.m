@@ -89,17 +89,33 @@ classdef detectionModel
             time=linspace(minT,maxT,nT);
             xVals=linspace(minX,maxX,nX);
             
-            starts=[.7 -0.2];
+            starts=[.6 -0.2];
             
-            switch 'flat'
+            switch 'sig'
                 case 'flat'
                     yesBound=ones(1,nT);
                     noBound=-ones(1,nT);
                 case 'linear'
-                    boundPerSecond=.5;
-                    yesBound=1-(time-minT)*boundPerSecond;
                     boundPerSecond=0;
+                    yesBound=1-(time-minT)*boundPerSecond;
+                    boundPerSecond=.5;
                     noBound=-1+(time-minT)*boundPerSecond;
+                case 'quad'
+                    stopTime=1.3;
+                    htOfQuad=1; % asside from 1, this is not handled corrcetly, it doesn't trade off with the width that would be if that hieght were normalized
+                    scale=htOfQuad/(stopTime-minT)
+                    remainingTime=stopTime-time;
+                    remainingTime(remainingTime<0)=0;
+                    yesBound=sqrt(remainingTime*scale);
+                    noBound=-yesBound;
+
+                case 'sig'
+                    location=1;
+                    timeScale=5;
+                    sig=ones(size(time))./(1+exp((time-location).*timeScale));
+                    yesBound=sig;
+                    noBound=-sig;
+                    figure; plot(time,yesBound,'g',time,noBound,'r')
                 case 'fit'
                     for i=1:nT
                         %relate desnity of rate crossing from diffution
@@ -213,7 +229,7 @@ classdef detectionModel
             axis square
             set(gca,'xtick',[],'ytick',[])
             xlabel('FAs'); ylabel('hits')
-            legend({'avg','quartile'},'Location','SouthEastOutside')
+            legend({'all','quartile'},'Location','SouthEastOutside')
 
             
             %subplot(nP,1,4); plot(time,pAlive); ylabel('remaining')

@@ -248,7 +248,7 @@ elseif any(strcmp(swept,'targetContrast'))...
         && any(strcmp(swept,'phase'))...
         && size(swept,2)==2;
     conditionType='allTargetContrastAndPhase';
-    conditionType='allTargetContrasts';
+    %conditionType='allTargetContrasts';
     %conditionType='allPhases' %need both, i think
     [conditionInds conditionNames haveData colors]=getFlankerConditionInds(d,[],conditionType);
 else
@@ -278,6 +278,9 @@ for i=1:numConditions
     for j=1:length(f)
         firstInstance=min(find(conditionInds(i,:)));
         value=d.(f{j})(firstInstance);
+        if length(unique(d.(f{j})(find(conditionInds(i,:)))))~=1
+            error('more than 1 unique value in a condition is an error')
+        end
         if isempty(value)
             value=nan;
         end
@@ -468,16 +471,39 @@ if plotEyes
     end
 end
 %%
+% old%
+% fullRate=events./(possibleEvents*ifi);
+% fullPhotodiode=photodiode(2:end,:,:);
+% rate=reshape(sum(events)./(sum(possibleEvents)*ifi),numTrialTypes,numUniqueFrames); % combine repetitions
+% if numRepeats>2
+%     rateSEM=reshape(std(events(1:end-1,:,:)./(possibleEvents(1:end-1,:,:)*ifi)),numTrialTypes,numUniqueFrames)/sqrt(numRepeats-1);
+%     photodiodeSEM=reshape(std(photodiode(1:end-1,:,:)),numTrialTypes,numUniqueFrames)/sqrt(numRepeats-1);
+% else
+%     rateSEM=nan(size(rate));
+%     photodiodeSEM=nan(size(rate));
+% end
+% photodiode=reshape(mean(photodiode(2:end,:,:),1),numTrialTypes,numUniqueFrames); % combine repetitions
+% %
+
 fullRate=events./(possibleEvents*ifi);
-fullPhotodiode=photodiode(2:end,:,:);
-rate=reshape(sum(events)./(sum(possibleEvents)*ifi),numTrialTypes,numUniqueFrames); % combine repetitions
+if numRepeats>2
+    % don't remove if there is only 1
+    fullPhotodiode=photodiode(2:end,:,:);
+else
+    fullPhotodiode=photodiode;
+end
+rate=reshape(sum(events,1)./(sum(possibleEvents,1)*ifi),numTrialTypes,numUniqueFrames); % combine repetitions
 
 if numRepeats>2
     rateSEM=reshape(std(events(1:end-1,:,:)./(possibleEvents(1:end-1,:,:)*ifi)),numTrialTypes,numUniqueFrames)/sqrt(numRepeats-1);
     photodiodeSEM=reshape(std(photodiode(1:end-1,:,:)),numTrialTypes,numUniqueFrames)/sqrt(numRepeats-1);
+    
+    photodiode=reshape(mean(photodiode(2:end,:,:),1),numTrialTypes,numUniqueFrames); % combine repetitions
 else
     rateSEM=nan(size(rate));
     photodiodeSEM=nan(size(rate));
+    
+    photodiode=reshape(mean(photodiode,1),numTrialTypes,numUniqueFrames); % combine repetitions
 end
 
 noStimDur=min([s.targetOnOff s.flankerOnOff]);
@@ -485,7 +511,7 @@ shift=floor(noStimDur/2);
 shiftedFrameOrder=[(1+shift):numUniqueFrames  1:shift];
 
 %%
-photodiode=reshape(mean(photodiode(2:end,:,:),1),numTrialTypes,numUniqueFrames); % combine repetitions
+
 %%
 %reshapeRate but half the means screen in front and half behind
 % maybe do this b4 on all of them
@@ -504,6 +530,8 @@ if plotRasterDensity
     figure(parameters.trialNumber);
     sub=find(strcmp(plotsRequested','rasterDensity'));
     subplot(h,w,sub); hold on;
+    %[junk sortIDs]=sort(conditionPerCycle)
+    %imagesc(flipud(rasterDensity(sortIDs,:)));  colormap(gray)
     imagesc(flipud(rasterDensity));  colormap(gray)
     yTickVal=(numRepeats/2)+[0:numConditions-1]*numRepeats;
     set(gca,'YTickLabel',fliplr(conditionNames),'YTick',yTickVal);
@@ -533,7 +561,9 @@ try
     spike.times=spikeRecord.spikeTimestamps(thisCluster)';
     onsetFrame=diff([0; targetIsOn])>0;
     cycleOnset=spikeRecord.correctedFrameTimes(onsetFrame,1); % the time that the target starts
-
+    repStartFrame=diff([0; repetition])>0;
+    repStartTime=spikeRecord.correctedFrameTimes(repStartFrame,1); % the time that the rep starts
+    
     %REMOVE SPIKES THAT ARE BEFORE THE FIRST STIM OF THE TRIAL BY MORE THAN ~ 200ms
     timeToTarget=double(s.targetOnOff(1))*ifi/2;
     tooEarly=spike.times<cycleOnset(1)-timeToTarget;
@@ -541,6 +571,7 @@ try
     
     %INIT AND SET PROPERTIES FOR EACH SPIKE
     spike.relTimes=zeros(size(spike.times));
+    spike.relRepTimes=zeros(size(spike.times));
     spike.frame=zeros(size(spike.times));
     spike.cycle=zeros(size(spike.times));
     spike.condition=zeros(size(spike.times));
@@ -550,6 +581,7 @@ try
         spike.relTimes(i)=spike.times(i)-cycleOnset(spike.cycle(i)); % the relative time to the target onset of this cycle
         spike.condition(i)=find(conditionInds(:,spike.frame(i))); % what condition this spike occurred in
         spike.repetition(i)=repetition(spike.frame(i)); % what rep this spike occurred in
+        spike.relRepTimes(i)=spike.times(i)-repStartTime(spike.repetition(i)); % the relative time to the rep onset of this cycle
     end
     % save trial infor per spike b/c going to have info across many trials
     spike.trial=parameters.trialNumber(ones(1,length(spike.times)))

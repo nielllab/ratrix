@@ -504,13 +504,16 @@ util/validateCellBoundary.m -text
 util/getDetailsFromNeuralRecords.m -text
 util/setFilterParamsForAnalysisMode.m -text
 /filterSpikeRecords.m -text
+spike[!!-~]sorting/ssf.m -text
 spike[!!-~]sorting/setupParamsForAnalysis.m -text
+pmm/lesionTrialRecord.m -text
+pmm/addResponsePattern.m -text
 util/updateSpikeRecords.m -text
 util/filterNeuralRecords.m -text
+util/addSnippetToNeuralData.m -text
 util/useFeatures.m -text
 util/klustaModelTextToStruct.m -text
 util/updateSpikeRecord.m -text
-util/addSnippetToNeuralData.m -text
 util/getSpikeModel.m -text
 util/calculateFeatures.m -text
 util/createTrodeName.m -text

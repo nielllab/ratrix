@@ -448,6 +448,21 @@ for i=1:length(ids)
             % END COMPILE PROCESS
             % ================================================
         end % end for each trainingStep loop
+        
+        % sometimes useful for debuggging or recompiling all, when errors may happen
+        buildAsYouGo=false;
+        if buildAsYouGo
+            compiledDetails=allDetails;
+            maxTrialDone=max([compiledDetails.trialNums]);
+            save(fullfile(compiledRecordsDirectory,sprintf('%s.compiledTrialRecords.%d-%d.mat',ids{i},ranges{i}(1,1),maxTrialDone)),'compiledDetails','compiledTrialRecords','compiledLUT');
+        end
+        
+        if any(cellfun(@isempty,compiledLUT))
+            warning('empty found in LUT! - WHY? debug it!')
+            %the empty will cause errors down the line... all cells must be char
+            compiledLUT
+            keyboard
+        end
     end
     
     % delete old compiledDetails file if we added records

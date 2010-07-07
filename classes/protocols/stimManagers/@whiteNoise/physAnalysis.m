@@ -303,7 +303,7 @@ try
     
     % now get the spikeTriggeredLFPs
     try
-        LFPs = zeros(length(spikes),ceil((sum(timeWindowMsLFP)/1000)*mean(LFPRecord.LFPSamplingRateHz)),size(LFPRecord.data,2));
+        %LFPs = zeros(length(spikes),ceil((sum(timeWindowMsLFP)/1000)*mean(LFPRecord.LFPSamplingRateHz)),size(LFPRecord.data,2));
     catch ex
         getReport(ex)
         memory
@@ -312,25 +312,25 @@ try
         
     processedSpikeTimeStamps = spikeRecord.spikeTimestamps(thisCluster);
     unprocessedSpikeNum = [];
-    for currSpikeNum = 1:length(spikes)
-        currTimeStamp = processedSpikeTimeStamps(currSpikeNum);
-        if ((currTimeStamp-(timeWindowMsLFP(1)/1000))<min(spikeRecord.spikeTimestamps))...
-                ||((currTimeStamp+(timeWindowMsLFP(2)/1000))>max(spikeRecord.spikeTimestamps))
-            % only process those LFP samples where you are guaranteed that
-            % the neural signal exists in the LFPRecord for that chunk!
-            unprocessedSpikeNum = [unprocessedSpikeNum currSpikeNum];
-            
-        else
-            relevantLFPRecord = LFPRecord.data((LFPRecord.dataTimes>(currTimeStamp-(timeWindowMsLFP(1)/1000)))&...
-                (LFPRecord.dataTimes<(currTimeStamp+(timeWindowMsLFP(2)/1000))),:);
-            LFPs(currSpikeNum,:,:) = resample(relevantLFPRecord,ceil((sum(timeWindowMsLFP)/1000)*mean(LFPRecord.LFPSamplingRateHz)),...
-                length(relevantLFPRecord));
-        end
-    end
-    LFPs(unprocessedSpikeNum,:,:) = [];
-    ST_LFPA = mean(LFPs,1);
-    ST_LFPV = var(LFPs,0,1);
-    numSpikesForLFP = size(LFPs,1);
+%     for currSpikeNum = 1:length(spikes)
+%         currTimeStamp = processedSpikeTimeStamps(currSpikeNum);
+%         if ((currTimeStamp-(timeWindowMsLFP(1)/1000))<min(spikeRecord.spikeTimestamps))...
+%                 ||((currTimeStamp+(timeWindowMsLFP(2)/1000))>max(spikeRecord.spikeTimestamps))
+%             % only process those LFP samples where you are guaranteed that
+%             % the neural signal exists in the LFPRecord for that chunk!
+%             unprocessedSpikeNum = [unprocessedSpikeNum currSpikeNum];
+%             
+%         else
+%             relevantLFPRecord = LFPRecord.data((LFPRecord.dataTimes>(currTimeStamp-(timeWindowMsLFP(1)/1000)))&...
+%                 (LFPRecord.dataTimes<(currTimeStamp+(timeWindowMsLFP(2)/1000))),:);
+%             LFPs(currSpikeNum,:,:) = resample(relevantLFPRecord,ceil((sum(timeWindowMsLFP)/1000)*mean(LFPRecord.LFPSamplingRateHz)),...
+%                 length(relevantLFPRecord));
+%         end
+%     end
+%     LFPs(unprocessedSpikeNum,:,:) = [];
+%     ST_LFPA = mean(LFPs,1);
+%     ST_LFPV = var(LFPs,0,1);
+%     numSpikesForLFP = size(LFPs,1);
         
     
     % now we should have our analysisdata for all "pieces"
@@ -359,23 +359,22 @@ try
         cumulativedata.cumulativeNumSpikes = analysisdata.numSpikes;
         cumulativedata.cumulativeTrialNumbers=parameters.trialNumber;
         cumulativedata.cumulativeChunkIDs=parameters.chunkID;
-        cumulativedata.cumulativeST_LFPA = ST_LFPA;
-        cumulativedata.cumulativeST_LFPV = ST_LFPV;
-        cumulativedata.numSpikesForLFP = numSpikesForLFP;
+        %cumulativedata.cumulativeST_LFPA = ST_LFPA;
+        %cumulativedata.cumulativeST_LFPV = ST_LFPV;
+        %cumulativedata.numSpikesForLFP = numSpikesForLFP;
         analysisdata.singleChunkTemporalRecord=[];
         addSingleTrial=true;
     elseif isempty(find(parameters.trialNumber==cumulativedata.cumulativeTrialNumbers&...
             parameters.chunkID==cumulativedata.cumulativeChunkIDs))
         %only for new trials or new chunks
         [cumulativedata.cumulativeSTA cumulativedata.cumulativeSTV cumulativedata.cumulativeNumSpikes ...
-            cumulativedata.cumulativeTrialNumbers cumulativedata.cumulativeChunkIDs cumulativedata.cumulativeST_LFPA ...
-            cumulativedata.cumulativeST_LFPV cumulativedata.numSpikesForLFP] = ...
+            cumulativedata.cumulativeTrialNumbers cumulativedata.cumulativeChunkIDs] = ... %% cumulativedata.cumulativeST_LFPA ...
+            ...cumulativedata.cumulativeST_LFPV cumulativedata.numSpikesForLFP] = ...
             updateCumulative(cumulativedata.cumulativeSTA,cumulativedata.cumulativeSTV,cumulativedata.cumulativeNumSpikes,...
-            cumulativedata.cumulativeTrialNumbers,cumulativedata.cumulativeChunkIDs,cumulativedata.cumulativeST_LFPA,...
-            cumulativedata.cumulativeST_LFPV, cumulativedata.numSpikesForLFP,...
+            cumulativedata.cumulativeTrialNumbers,cumulativedata.cumulativeChunkIDs,...,cumulativedata.cumulativeST_LFPA,...
+            1,1,1,...%cumulativedata.cumulativeST_LFPV, cumulativedata.numSpikesForLFP,...
             analysisdata.STA,analysisdata.STV,analysisdata.numSpikes,...
-            analysisdata.trialNumber,analysisdata.chunkID,ST_LFPA,...
-            ST_LFPV,numSpikesForLFP);
+            analysisdata.trialNumber,analysisdata.chunkID,1,1,1); %ST_LFPA,ST_LFPV,numSpikesForLFP);
         
         addSingleTrial=true;
     else % repeat sweep through same trial
@@ -601,11 +600,11 @@ try
         
     end
     
-    figure(min(cumulativedata.cumulativeTrialNumbers)+1000);
-    set(gcf,'Name','LFP Analysis','NumberTitle','off');
+    %figure(min(cumulativedata.cumulativeTrialNumbers)+1000);
+   % set(gcf,'Name','LFP Analysis','NumberTitle','off');
 %     ST_LFPTime = linspace(-1000,1000,length(cumulativedata.cumulativeST_LFPA));
 %     plot(ST_LFPTime,cumulativedata.cumulativeST_LFPA,'LineWidth',2);
-    imagesc([-1000 1000],[1 14],squeeze(cumulativedata.cumulativeST_LFPA)');colorbar;
+    %imagesc([-1000 1000],[1 14],squeeze(cumulativedata.cumulativeST_LFPA)');colorbar;
 %     hold on;
 %     plot(ST_LFPTime,cumulativedata.cumulativeST_LFPA+sqrt(cumulativedata.cumulativeST_LFPV));
 %     plot(ST_LFPTime,cumulativedata.cumulativeST_LFPA-sqrt(cumulativedata.cumulativeST_LFPV));

@@ -71,7 +71,7 @@ for i=1:length(categories)
             keyboard
         end
     else
-        [mnResp(i) stdResp(i) ciResp(i,1:2)]=deal(nan);
+        [mnResp(i) stdResp(i) ciResp(i,1:2) fastResp(i)]=deal(nan);
     end
     if doPlot
         hold on;

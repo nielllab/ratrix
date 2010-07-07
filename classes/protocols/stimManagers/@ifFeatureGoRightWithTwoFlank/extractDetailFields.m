@@ -24,6 +24,7 @@ else
 
         [out.correctResponseIsLeft newLUT] = extractFieldAndEnsure(stimDetails,{'correctResponseIsLeft'},'scalar',newLUT);
         [out.targetContrast newLUT] = extractFieldAndEnsure(stimDetails,{'targetContrast'},'scalar',newLUT);
+        [out.phantomContrast newLUT] = extractFieldAndEnsure(stimDetails,{'phantomContrast'},'scalar',newLUT);
         [out.targetOrientation newLUT] = extractFieldAndEnsure(stimDetails,{'targetOrientation'},'scalar',newLUT);
         [out.flankerContrast newLUT] = extractFieldAndEnsure(stimDetails,{'flankerContrast'},'scalar',newLUT);
 %         out.correctResponseIsLeft=getDetail(trialRecords,'correctResponseIsLeft');

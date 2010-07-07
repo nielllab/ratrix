@@ -20,7 +20,7 @@ else
 end
 
 
-rSz=size(responses,2);
+rSz=length(responses);
 pattern=zeros(lengthHistory,rSz+(lengthHistory-1));
 for i=1:lengthHistory
   pattern(i,i:rSz+i-1)=responses;
@@ -31,14 +31,15 @@ pattern=pattern(:,lengthHistory:end-(lengthHistory-1))';
 p=findAllPatterns(lengthHistory);
 
 %this adds on one of each unique type
-pattern(end+1:end+size(p,1),:)=p;
-
+pattern(end+1:end+size(p,1),:)=p; % wil garauntee on of each type so that numerical ID means the same thing even if type "2" happens to be absent from this data set
 [uniques ind patternType]=unique(pattern,'rows');
+pattern(end-size(p,1)+1:end,:)=[]; %remove what we added
+patternType(end-size(p,1)+1:end)=[];  %remove what we added
+patternType=[nan(lengthHistory-1,1); patternType]; % front pad the trials that did not have enough history
 
 edges=[0:max(patternType)]+0.5;
 n=histc(patternType,edges);
-count=n(1:end-1)'-1;  %(subtracts the 
-
+count=n(1:end-1)'-1;  %subtracts the one we added on
 
 if plotOn
     hSz=size(count,2)/2;

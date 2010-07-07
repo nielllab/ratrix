@@ -166,7 +166,10 @@ for i=1:numRealSubjects
         if any(abs(meanPct-pctThisContrast(2:end))>meanPct*0.1)
             warning('greater than 10% count different between contrast conditions')
         end
-        if abs((pctThisContrast(1)-sum(pctThisContrast(2:end))))>0.05 & ~special138_139data(d) & ~(ismember(d.info.subject{1},{'234','231'}) && all(d.step==16))
+        if abs((pctThisContrast(1)-sum(pctThisContrast(2:end))))>0.05 & ~special138_139data(d) & ~(ismember(d.info.subject{1},{'234','231'}) && all(d.step==16)) & ~(ismember(d.info.subject{1},{'227', '229', '230', '232', '233'}) && all(d.step==12))
+            %old block temp used during reaction time testing b4 bug fix: & ~(ismember(d.info.subject{1},{'234','231'}) && all(d.step==16))
+            d.info.subject{1}
+            pctThisContrast
             error('every contrast should have a no-contrast pair: check assumption about the distribution of contrasts')
             %some RT analysis have biases with slower (and not present in those analysis) 
             %consider skipping if any of cell filterType.type contains
@@ -181,14 +184,20 @@ for i=1:numRealSubjects
     %get indices of each condition type
     [conditionInds names.conditions haveData params.colors d goods]=getFlankerConditionInds(d,goods,conditionType);
     
-    for n=1:length(names.conditions)
-        if ~strcmp(preConditionNames{n},names.conditions{n})
-            preConditionNames
-            names.conditions
-            preConditionNames{n}
-            names.conditions{n}
-            error('not all rats can be garaunteed to have the same conditions!')
-            % probably b/c all mode allows the name and the extact value to be dynamic.
+    if ismember(conditionType,{'blockIDsByTargetContrast'})
+        warning(sprintf('skipped check for a dynamic type: %s',conditionType))
+        %skip check on some dynamic types
+        numConditions=length(names.conditions);
+    else
+        for n=1:length(names.conditions)
+            if ~strcmp(preConditionNames{n},names.conditions{n})
+                preConditionNames
+                names.conditions
+                preConditionNames{n}
+                names.conditions{n}
+                error('not all rats can be garaunteed to have the same conditions!')
+                % probably b/c all mode allows the name and the extact value to be dynamic.
+            end
         end
     end
     
@@ -324,7 +333,7 @@ for i=1:numRealSubjects
                         params.factors.flankerPhase(i,j)=d.flankerPhase(firstInd);
                     case {'allFlankerContrasts','fiveFlankerContrasts','noFlank&nfBlock','noFlank','flankOrNot','hasFlank&nfMix&nfBlock','fiveFlankerContrastsFullRange'}
                         params.factors.flankerContrast(i,j)=d.flankerContrast(firstInd);
-                    case {'allTargetContrasts'}
+                    case {'allTargetContrasts','blockIDsByTargetContrast'}
                         params.factors.targetContrast(i,j)=d.targetContrast(firstInd);
                     case {'allPhantomTargetContrastsCombined'}
                         params.factors.phantomTargetContrastCombined(i,j)=d.phantomTargetContrastCombined(firstInd);
@@ -333,7 +342,9 @@ for i=1:numRealSubjects
                         params.factors.pixPerCycs(i,j)=d.pixPerCycs(firstInd);
                     case {'allBlockIDs','allBlockSegments'}
                         params.factors.blockID(i,j)=d.blockID(firstInd);
-                        params.factors.targetContrast(i,j)=max(d.targetContrast(firstInd),d.phantomContrast(firstInd));
+                        %params.factors.targetContrast(i,j)=max(d.targetContrast(firstInd),d.phantomContrast(firstInd)); %%temp
+                        params.factors.targetContrast(i,j)=max(d.targetContrast(find(conditionInds(j,:))));
+
                         params.factors.flankerContrast(i,j)=d.flankerContrast(firstInd);
                         params.factors.SOA(i,j)=round(100*(d.actualFlankerOnsetTime(firstInd)-d.actualTargetOnsetTime(firstInd))) ;
                     case {'allBlockIDs&2Phases'}

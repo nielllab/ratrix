@@ -353,7 +353,11 @@ switch types
         for i=1:numBlocks
             conditionInds(i,:)= d.blockID==blocks(i); 
             intstanceID=min(find(conditionInds(i,:)));
-            contrast=max([d.phantomContrast(intstanceID); d.targetContrast(intstanceID)]);
+            if ismember('phantomContast',fields(d)) && ~isnan(intstanceID)
+                contrast=max([d.phantomContrast(intstanceID); d.targetContrast(intstanceID)]);
+            else
+                contrast=max(d.targetContrast(find(conditionInds(i,:))));
+            end
             if d.targetOrientation(intstanceID)==d.flankerOrientation(intstanceID) && d.targetOrientation(intstanceID)==d.flankerPosAngle(intstanceID)
                 colors(i,:)=brighten([.3 0 0],contrast);
                 nameStr='colin';
@@ -370,6 +374,23 @@ switch types
             end
             names = [names, {sprintf('%s-%2.2f-%2.2f',nameStr,contrast,d.flankerContrast(intstanceID))}];
         end
+    case 'blockIDsByTargetContrast'
+        [tempConditionInds tempNames tempHaveData tempColors]=getFlankerConditionInds(d,restrictedSubset,'allBlockIDs');
+        
+        tc=nan;
+        for i=1:length(tempNames)
+            loc=min(strfind(tempNames{i},'-'));
+            tc(i)=str2num(tempNames{i}(loc+1:loc+4));
+        end
+        uTc=unique(tc);
+        numTc=length(uTc);
+        conditionInds=nan(numTc,length(d.date));
+        for i=1:numTc
+            conditionInds(i,:)=sum(tempConditionInds(uTc(i)==tc,:));
+            names{i}=sprintf('tc-%2.2f',uTc(i));
+        end
+        colors=jet(numTc);
+        haveData=find(sum(conditionInds,2)>0);
     case 'allSOAs'
         SOA=round(100*(d.actualFlankerOnsetTime-d.actualTargetOnsetTime));  %round to nearest frame if 100hz
         SOAs=unique((SOA(~isnan(SOA))));
@@ -795,7 +816,7 @@ switch types
                 names = [names, {[n1{i} '-p' num2str(j)]}];
             end
         end
-        col1=col1';
+        %col1=col1';
         colors=reshape(repmat(col1(:),1,length(tps))',[],3);
     otherwise
         types

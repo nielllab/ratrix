@@ -212,10 +212,6 @@ if ~exist('frameThresholds','var') || isempty(frameThresholds)
 end
 
 
-if ~exist('paramUtil','var') || isempty(paramUtil)
-   paramUtil=[]; % don't do anything
-end
-
 % ==========================================================================================
 
 % some counters
@@ -579,10 +575,6 @@ while ~quit
                         withinTimeRange=timeSinceTrialStart>=timeRangePerTrialSecs(1) & timeSinceTrialStart<=timeRangePerTrialSecs(2);
                         neuralRecord.neuralData=neuralRecord.neuralData(withinTimeRange,:);
                         neuralRecord.neuralDataTimes=neuralRecord.neuralDataTimes(withinTimeRange);
-                    end
-                    
-                    if ~isempty(paramUtil)
-                        useSpikeThreshParamUtil(paramUtil,neuralRecord,spikeDetectionParams,spikeSortingParams,photoInd,pulseInd,thesePhysChannelInds)
                     end
                     
                     

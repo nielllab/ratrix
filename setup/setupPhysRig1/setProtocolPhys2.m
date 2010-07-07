@@ -412,86 +412,83 @@ svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
 svnCheckMode='session';
 
 %common "search and characterization"
-ts{1}= trainingStep(ap,  fakeTRF,     repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);       %temporal response function
-ts{2}= trainingStep(ap,  ffgwn,       repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);       %full field gaussian white noise
-ts{3}= trainingStep(ap,  bin,         repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);       %binary noise grid
-ts{4}= trainingStep(ap,  fakeTRF10,   numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %temporal response function
-ts{5}= trainingStep(ap,  ffgwn,       numTrialsDoneCriterion(10), noTimeOff(), svnRev, svnCheckMode); %full field gaussian white noise
-ts{6}= trainingStep(ap,  bin,         numTrialsDoneCriterion(10), noTimeOff(), svnRev, svnCheckMode); %binary noise grid
-ts{7} = trainingStep(ap, fFF,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %flankers with giant target
-ts{8} = trainingStep(ap, sfGratings,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %gratings: spatial frequency (should it be before annulus?)
-ts{9} = trainingStep(ap, orGratings,   repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %gratings: orientation
+ts{1}= trainingStep(ap,  fakeTRF,     repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode,'trf');      %temporal response function
+ts{2}= trainingStep(ap,  ffgwn,       repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode,'ffgwn');       %full field gaussian white noise
+ts{3}= trainingStep(ap,  bin6x8,      repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode,'bin6x8');       %binary noise grid
+ts{4}= trainingStep(ap,  fakeTRF10,   numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode,'trf10');  %temporal response function
+ts{5}= trainingStep(ap,  ffgwn,       numTrialsDoneCriterion(10), noTimeOff(), svnRev, svnCheckMode,'ffgwn'); %full field gaussian white noise
+ts{6}= trainingStep(ap,  bin,         numTrialsDoneCriterion(10), noTimeOff(), svnRev, svnCheckMode,'bin6x8'); %binary noise grid
+ts{7} = trainingStep(ap, fFF,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode,'fff');  %flankers with giant target
+ts{8} = trainingStep(ap, sfGratings,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode,'sf');  %gratings: spatial frequency (should it be before annulus?)
+ts{9} = trainingStep(ap, orGratings,   repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode,'or');  %gratings: orientation
 
 %check if it drives
-ts{10}= trainingStep(ap, sparseBrighter,repeatIndefinitely(),noTimeOff(),svnRev, svnCheckMode);  %
-ts{11}= trainingStep(ap, horizBars,   repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %
-ts{12}= trainingStep(ap, vertBars,    repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %
-ts{13}= trainingStep(ap, gwn,         repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %
-ts{14}= trainingStep(ap, sparseDark,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
-ts{15}= trainingStep(ap, sparseBright,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
+ts{10}= trainingStep(ap, sparseBrighter,repeatIndefinitely(),noTimeOff(),svnRev, svnCheckMode,'sprsBW');        %
+ts{11}= trainingStep(ap, horizBars,   repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode,'hbar');          %
+ts{12}= trainingStep(ap, vertBars,    repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode,'vbar');          %
+ts{13}= trainingStep(ap, gwn,         repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode,'gwn6x8');        %
+ts{14}= trainingStep(ap, sparseDark,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode,'sprsDrk');  %
+ts{15}= trainingStep(ap, sparseBright,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode,'sprsBri');  %
 
 %search tools
-ts{16}= trainingStep(ap, darkBox,     numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
-ts{17}= trainingStep(ap, brighterBox, numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %
-ts{18}= trainingStep(ap, horizBar,    numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %
-ts{19}= trainingStep(ap, vertBar,     numTrialsDoneCriterion(5), noTimeOff(), svnRev, svnCheckMode);  %
-ts{20}= trainingStep(ap, flickeringBox,numTrialsDoneCriterion(2),noTimeOff(), svnRev, svnCheckMode);  %
-ts{21}= trainingStep(ap, localizedBin,repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %
-ts{22}= trainingStep(ap, bin,         repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
+ts{16}= trainingStep(ap, darkBox,     numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode,'darkBox');    %
+ts{17}= trainingStep(ap, brighterBox, numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode,'BriBox');     %
+ts{18}= trainingStep(ap, horizBar,    numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode,'hbarMouse');  %
+ts{19}= trainingStep(ap, vertBar,     numTrialsDoneCriterion(5), noTimeOff(), svnRev, svnCheckMode,'vbarMouse');  %
+ts{20}= trainingStep(ap, flickeringBox,numTrialsDoneCriterion(2),noTimeOff(), svnRev, svnCheckMode,'flkrMouse');  %
+ts{21}= trainingStep(ap, localizedBin,repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode,'miniGrid');        %
+ts{22}= trainingStep(ap, bin6x8,         repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode,'bin6x8');  % catch and repeat here forever
 
 %might get crude RF estimate and use:
-ts{23} = trainingStep(ap, manAnGratings,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: annulus size
-ts{24} = trainingStep(ap, anGratings,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: annulus size
-ts{25} = trainingStep(ap, flankers,    repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  %flankers
-ts{26} = trainingStep(ap, anGratings,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: annulus size
-ts{27} = trainingStep(ap, biField,     numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %bipartite field for X-Y classification
+ts{23} = trainingStep(ap, manAnGratings,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode,'manulus');  %gratings: annulus size
+ts{24} = trainingStep(ap, anGratings,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode,'annuli');  %gratings: annulus size
+ts{25} = trainingStep(ap, flankers,    repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode,'flankers');  %flankers
+ts{26} = trainingStep(ap, anGratings,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode,'annuli');  %gratings: annulus size
+ts{27} = trainingStep(ap, biField,     numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode,'biField');  %bipartite field for X-Y classification
 
 %xtra stuff might want:
-%ts{26} = trainingStep(ap, dynGrating,  repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %tailored to this cell
-%ts{27} = trainingStep(ap, hateren,     repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %hateren
-ts{28} = trainingStep(ap, fTestFlicker,repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
-ts{29} = trainingStep(ap, searchGratings,repeatIndefinitely(),    noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
-ts{30} = trainingStep(ap, bigSlowSquare,repeatIndefinitely(),    noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
+%ts{26} = trainingStep(ap, dynGrating,  repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode,'dynGrating');  %tailored to this cell
+%ts{27} = trainingStep(ap, hateren,     repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode,'hateren');  %hateren
+ts{28} = trainingStep(ap, fTestFlicker,repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode,'flkr');  %flankersTestFlicker
+ts{29} = trainingStep(ap, searchGratings,repeatIndefinitely(),    noTimeOff(), svnRev, svnCheckMode,'gratings');  
+ts{30} = trainingStep(ap, bigSlowSquare,repeatIndefinitely(),    noTimeOff(), svnRev, svnCheckMode,'bss');  
 
-ts{31} = trainingStep(ap, bin3x4,repeatIndefinitely(),    noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
-ts{32} = trainingStep(ap, bin6x8,repeatIndefinitely(),    noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
-ts{33} = trainingStep(ap, bin12x16,repeatIndefinitely(),    noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
-ts{34} = trainingStep(ap, bin24x32,repeatIndefinitely(),    noTimeOff(), svnRev, svnCheckMode);  %flankersTestFlicker
+ts{31} = trainingStep(ap, bin3x4,  repeatIndefinitely(),    noTimeOff(), svnRev, svnCheckMode,'bin3x4');  
+ts{32} = trainingStep(ap, bin6x8,  repeatIndefinitely(),    noTimeOff(), svnRev, svnCheckMode,'bin6x8');  
+ts{33} = trainingStep(ap, bin12x16,repeatIndefinitely(),    noTimeOff(), svnRev, svnCheckMode,'bin12x16');  
+ts{34} = trainingStep(ap, bin24x32,repeatIndefinitely(),    noTimeOff(), svnRev, svnCheckMode,'bin24x32');  
+ts{35}= trainingStep(ap, bin48x64, repeatIndefinitely(),    noTimeOff(), svnRev, svnCheckMode,'bin48x64');  % catch and repeat here forever
 
-ts{35}= trainingStep(ap, bin48x64,    repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
-ts{36}= trainingStep(ap, binOther,    repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
-ts{37}= trainingStep(ap, ffbin,       repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
-ts{38}= trainingStep(ap, cmr,         repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
-
-
+ts{36}= trainingStep(ap, binOther,    repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode,'binOther');  % catch and repeat here forever
+ts{37}= trainingStep(ap, ffbin,       repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode,'ffbin');  % catch and repeat here forever
+ts{38}= trainingStep(ap, cmr,         repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode,'cmr');  % catch and repeat here forever
 
 
-
-ts{39}= trainingStep(ap, fFF,         repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
-ts{40}= trainingStep(ap, fFFContrast, repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
-ts{41}= trainingStep(ap, fContrast,   repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
-ts{42}= trainingStep(ap, natGrating,   repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
+ts{39}= trainingStep(ap, fFF,         repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode,'fff');  % catch and repeat here forever
+ts{40}= trainingStep(ap, fFFContrast, repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode,'fffc');  % catch and repeat here forever
+ts{41}= trainingStep(ap, fContrast,   repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode,'fc');  % catch and repeat here forever
+ts{42}= trainingStep(ap, natGrating,   repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode,'natGrat');  % catch and repeat here forever
 
 
 %removed things b/c not used enough:
-% ts{10}= trainingStep(afc, radGratings, numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode);  %gratings: radius
-% ts{11}= trainingStep(afc, cntrGratings,numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %gratings: contrast
-% ts{2} = trainingStep(fd2, crf,       numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %contrast response
-% ts{20}= trainingStep(afc, gaussNoise,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
-% ts{22}= trainingStep(afc, trf,         numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %temporal reponse
-% ts{24}= trainingStep(ap, gaussNoise,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %unfilteredNoise discrim
-% ts{25}= trainingStep(ap, ffSearch,    numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  %full field search
+% ts{10}= trainingStep(ap, radGratings, numTrialsDoneCriterion(2), noTimeOff(), svnRev, svnCheckMode,'radii');  %gratings: radius
+% ts{43}= trainingStep(ap, crf,       numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode,'crfe');  %contrast response, eriks
+% ts{11}= trainingStep(ap, cntrGratings,numTrialsDoneCriterion(1),noTimeOff(), svnRev, svnCheckMode,'cGrat');  %gratings: contrast
+% ts{20}= trainingStep(afc, gaussNoise,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode,'gn2afc');  %unfilteredNoise discrim
+% ts{24}= trainingStep(ap, gaussNoise,  numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode,'gn');  %unfilteredNoise stim
+% ts{22}= trainingStep(afc, trf,         numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode,'trfe');  %temporal reponse, eriks
+% ts{25}= trainingStep(ap, ffSearch,    numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode,'ffs');  %full field search
 
 %common "acclimate a rat":
-% ts{26}   = trainingStep(afc, goToSide, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %go to side
-% ts{27}  = trainingStep(fd,  freeStim, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %stochastic free drinks
-% ts{28}  = trainingStep(fd2, freeStim, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %free drinks
+% ts{26}   = trainingStep(afc, goToSide, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode,'g2s');   %go to side
+% ts{27}  = trainingStep(fd,  freeStim, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode, 'sfd');    %stochastic free drinks
+% ts{28}  = trainingStep(fd2, freeStim, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode, 'fd');     %free drinks
 
 %other ideas:
-%ts{29} = trainingStep(ap, ffGauss,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %fullfieldFlicker Gaussian
-% ts{31} = trainingStep(ap, rptUnq,   repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %rpt/unq
-% ts{32} = trainingStep(ap, orNoise,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %filteredNoise discrim
-% ts{33} = trainingStep(ap, binNoise, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);   %unfilteredNoise discrim
+%ts{29} = trainingStep(ap, ffGauss,   repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode,'ffgwne');   %fullfieldFlicker Gaussian
+% ts{31} = trainingStep(ap, rptUnq,   repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode,'rue');   %rpt/unq
+% ts{32} = trainingStep(ap, orNoise,  repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode,'orNoisee');   %filteredNoise discrim
+% ts{33} = trainingStep(ap, binNoise, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode,'bine');   %unfilteredNoise discrim
 
 
 %% make and set it

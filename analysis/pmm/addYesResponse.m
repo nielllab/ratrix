@@ -134,3 +134,4 @@ else
     d.yes=[];
     type='unknown';
 end
+d.info.yesType=type;

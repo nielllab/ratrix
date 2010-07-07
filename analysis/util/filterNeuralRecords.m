@@ -1,4 +1,4 @@
-function neuralRecord = filterNeuralRecords(neuralRecords,timeRangePerTrialSecs,snippet,snippetTimes)
+function neuralRecord = filterNeuralRecords(neuralRecord,timeRangePerTrialSecs)
 % avoid making big variables to filter the data if you can...
 if timeRangePerTrialSecs(1)==0 & timeRangePerTrialSecs(2)> diff(neuralRecord.neuralDataTimes([1 end]))% use all
     % do nothing, b/c using all

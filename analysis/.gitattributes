@@ -517,3 +517,7 @@ util/updateSpikeRecord.m -text
 util/getSpikeModel.m -text
 util/calculateFeatures.m -text
 util/createTrodeName.m -text
+util/getPhotoDiode.m -text
+util/createSnippetFromNeuralRecords.m -text
+util/getPhysAnalysis.m -text
+util/getSpikesFromPhotodiode.m -text

@@ -1,9 +1,14 @@
-function spikeRecords = getSpikeRecords(analysisPath)
-spikeRecordFile = fullfile(analysisPath,'spikeRecords.mat')
-if exist(spikeRecordFile,'file')
-    temp = stochasticLoad(spikeRecordFile,'spikeRecords');
-    spikeRecords = temp.spikeRecords;
-else
-    spikeRecords = [];
+function spikeRecord = getSpikeRecords(analysisPath,analysisMode)
+spikeRecordFile = fullfile(analysisPath,'spikeRecord.mat')
+switch analysisMode
+    case 'overwriteAll'
+        if exist(spikeRecordFile,'file')
+            temp = stochasticLoad(spikeRecordFile,{'spikeRecord'});
+            spikeRecord = temp.spikeRecord;
+        else
+            spikeRecord = [];
+        end
+    otherwise
+        error('unsupported analysisMode');
 end
 end

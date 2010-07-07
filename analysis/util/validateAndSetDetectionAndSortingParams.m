@@ -73,6 +73,8 @@ switch length(spikeDetectionParams)
             if ~all(strcmp(trodes,paramTrodes))
                 error('trodes from input and trodes from activeParam file do not match');
             end
+        elseif strcmp(spikeSortingParams.method,'useSpikeModelFromPreviousAnalysis')
+            % do nothing to the spikesortingparams. just return the value
         else
             % here just repmat, and name the trodes
             temp = repmat(spikeDetectionParams,numTrodes,1);

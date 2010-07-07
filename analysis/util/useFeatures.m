@@ -28,17 +28,14 @@ for fInd=1:length(featureList)
                     score = w*details.wavePC1.pc;
                     features=[features score(:,1)]; % first PC only
                     nrDatapoints=nrDatapoints+1;
-                    details.wavePC1.pc = pc(:,1);
                 case 'wavePC2'
                     score = w*details.wavePC2.pc;
                     features=[features score(:,2)]; % 2nd PC only
                     nrDatapoints=nrDatapoints+1;
-                    details.wavePC2.pc = pc(:,1:2);
                 case 'wavePC123'
                     score = w*details.wavePC123.pc;
                     features=[features score(:,1:3)]; % first 3
                     nrDatapoints=nrDatapoints+3;
-                    details.wavePC123.pc = pc(:,1:3);
             end
         case 'energy'
             score=sqrt(sum(data(:,:).^2,2))./sqrt(size(data,2));

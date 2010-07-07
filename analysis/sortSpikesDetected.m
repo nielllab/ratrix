@@ -244,7 +244,7 @@ switch upper(spikeSortingMethod)
         end
         clusterCounts=sortrows(clusterCounts,-2);
         rankedClusters=rankedClusters(clusterCounts(:,1));
-        %rankedClusters(rankedClusters==1)=[];  % how do we know that 1 is the noise cluster,  does k.kwik enforce or is it a guess based on num samples.
+        rankedClusters(rankedClusters==1)=[];  % how do we know that 1 is the noise cluster,  does k.kwik enforce or is it a guess based on num samples.
         rankedClusters(end+1)=1; % move noise cluster '1' to end
         fclose(fid);
         
@@ -277,7 +277,7 @@ switch upper(spikeSortingMethod)
         end
         klustaModel = spikeModel.clusteringModel;
         [features nrDatapoints] = useFeatures(spikeWaveforms,spikeSortingParams.features,spikeModel.featureDetails)
-        assignedClusters=clusterFeaturesWithKlustaModel(kk,features,'mvnpdf');
+        assignedClusters=clusterFeaturesWithKlustaModel(klustaModel,features,'mvnpdf');
         
         rankedClusters = unique(assignedClusters);
             rankedClusters = unique(assignedClusters);
@@ -288,7 +288,8 @@ switch upper(spikeSortingMethod)
         end
         clusterCounts=sortrows(clusterCounts,-2);
         rankedClusters=rankedClusters(clusterCounts(:,1));
-        rankedClusters(end+1)=1
+        rankedClusters(rankedClusters==1)=[];  % how do we know that 1 is the noise cluster,  does k.kwik enforce or is it a guess based on num samples.
+        rankedClusters(end+1)=1;
    
     otherwise
         spikeSortingMethod

@@ -10,11 +10,11 @@ spikeModel = [];
 modelExists = false;
 % find the trodes in spikeRecord
 trodesInRecord = fieldnames(spikeRecord);
-trodesInRecord = trodesInCurrent(~cellfun(@isempty,regexp(trodesInCurrent,'^trode')));
+trodesInRecord = trodesInRecord(~cellfun(@isempty,regexp(trodesInRecord,'^trode')));
 for trodeNum = 1:length(trodesInRecord)
-    if exist(spikeRecord.(trodesInRecord{trodeNum}).spikeModel)
+    if isfield(spikeRecord.(trodesInRecord{trodeNum}),'spikeModel')
         modelExists(trodeNum) = true;
-        spikeModel.(trodesInRecord{trodeNum}) = cumulativeSpikeRecord.(trodesInRecord{trodeNum}).spikeModel;
+        spikeModel.(trodesInRecord{trodeNum}) = spikeRecord.(trodesInRecord{trodeNum}).spikeModel;
     else
         modelExists(trodeNum) = false;
     end
@@ -23,8 +23,8 @@ end
 if ~all(modelExists)
     spikeModel = [];
     modelExists = false;
-    if strcmp(spikeSortingParams.method,'useSpikeModelFromPreviousAnalysis')
-        boundaryRangeStr = sprintf('%d-%d',spikeSortingParams.boundaryRange(1),spikeSortingParams.boundaryRange(2));
+    if isfield(spikeSortingParams,'method') && strcmp(spikeSortingParams.method,'useSpikeModelFromPreviousAnalysis')
+        boundaryRangeStr = sprintf('%d-%d',spikeSortingParams.modelBoundaryRange(1),spikeSortingParams.modelBoundaryRange(2));
         prevSpikeRecordPath = fullfile(spikeSortingParams.path,spikeSortingParams.subjectID,'analysis',boundaryRangeStr,'spikeRecord.mat')
         temp = stochasticLoad(prevSpikeRecordPath,'spikeRecord');
         prevSpikeRecord = temp.spikeRecord;

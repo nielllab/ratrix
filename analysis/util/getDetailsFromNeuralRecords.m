@@ -20,13 +20,14 @@ if ~exist(neuralRecordLocation,'file')
     error('neuralRecordLocation is not a file')
 end
 
-if ~ischar(requestedDetails)
+if ~iscell(requestedDetails)
     requestedDetails
-    error('requestedDetails should be a string')
+    error('requestedDetails should be a cell')
 end
 
 % actual stuff.
-temp = stochasticLoad(neuralRecordLocation,requestedDetails);
+maxAttempts = 5;
+temp = stochasticLoad(neuralRecordLocation,requestedDetails,maxAttempts);
 fieldsTemp = fieldnames(temp);
 
 requestedDetailsType = OTHER;
@@ -34,14 +35,14 @@ if strcmp(requestedDetails,'numChunks')
     requestedDetailsType = NUM_CHUNKS;
 elseif strcmp(requestedDetails,'samplingRate')
     requestedDetailsType = SAMPLING_RATE;
-elseif strfind(requestedDetails,'chunk')==1
+elseif strfind(requestedDetails{:},'chunk')==1
     requestedDetailsType = SPECIFIC_CHUNK;
 end
 
 switch requestedDetailsType
     case NUM_CHUNKS
         if isempty(fieldsTemp)
-            warning('neuralRecordLocation: \n''%s'' \ndoes not have requestedDetails: \n''%s''',neuralRecordLocation,requestedDetails);
+            warning('neuralRecordLocation: \n''%s'' \ndoes not have requestedDetails: \n''%s''',neuralRecordLocation,requestedDetails{1});
             warning('going to find number of chunks and appending information to \n''%s''',neuralRecordLocation)
             
             disp('checking chunk names... may be slow remotely...'); tic;
@@ -56,10 +57,13 @@ switch requestedDetailsType
                     chunkN = str2double(tokens{1}{1});
                     details(end+1)=chunkN;
                 end
-            end            
+            end  
+            % now save numChunks in neuralRecords
+            numChunks = details;
+            save(neuralRecordLocation,'numChunks','-append');
         else            
             details = temp.numChunks;
-            deails = sort(details);
+            details = sort(details);
         end
     case SAMPLING_RATE
         if isempty(fieldsTemp)
@@ -71,7 +75,7 @@ switch requestedDetailsType
         if isempty(fieldsTemp)
             error('requested chunk : ''%s'' not found in neuralRecords',requestedDetails);
         else
-            details = temp.(requestedDetails);
+            details = temp.(requestedDetails{:});
         end
     case OTHER
         error('unknown details requested');

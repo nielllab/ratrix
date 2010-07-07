@@ -3,7 +3,7 @@ switch analysisMode
     case 'overwriteAll'
         filterParams.filterMode = 'thisTrialAndChunkOnly';
         filterParams.trialNum = trialNum;
-        filterParams.chunkInd = chunkInd;
+        filterParams.chunkID = chunkInd;
     otherwise
         error('unknown analysisMode');
 end

@@ -15,11 +15,10 @@ path='C:\Documents and Settings\rlab\My Documents\work\physiology data'  %on the
 % path='C:\Documents and Settings\rlab\My Documents\work\physiology data'  %local computer
 
 %% spikeDetectionParams
-spikeDetectionParams.method = 'filteredThreshold'; %'oSort'; %
+spikeDetectionParams.method = 'filteredThresh'; %'oSort'; %
 % fill in the details
 switch spikeDetectionParams.method
     case 'filteredThresh' %use filteredThresh
-        spikeDetectionParams=[];
         spikeDetectionParams.freqLowHi = [200 10000];
         spikeDetectionParams.threshHoldVolts = [-0.1 Inf];
         spikeDetectionParams.waveformWindowMs= 1.5;
@@ -28,7 +27,6 @@ switch spikeDetectionParams.method
         spikeDetectionParams.peakAlignment = 'filtered'; % 'raw'
         spikeDetectionParams.returnedSpikes = 'filtered'; % 'raw'
     case 'oSort'
-        spikeDetectionParams=[];
         % spikeDetectionParams.samplingFreq=samplingRate; % don't define if using analysis manager, just for temp testing of getSpikesFromNeuralData
         % Wn = [300 4000]/(spikeDetectionParams.samplingFreq/2); % default to bandpass 300Hz - 4000Hz
         % [b,a] = butter(4,Wn); Hd=[]; Hd{1}=b; Hd{2}=a;
@@ -73,7 +71,8 @@ switch  spikeSortingParams.method
         spikeSortingParams.maxDistance=30; %(optional) maxDistance parameter passed in to osort's assignToWaveform method; set the thrshold for inclusion to a cluster based on MSE between waveforms, units: std [3-20]
         spikeSortingParams.envelopeSize=10; %(optional) parameter passed in to osort's assignToWaveform method; additionally must fall withing mean +/- envelopeSize*std (i think at every timepoint of waveform); [0.5-3]; set large (>100) for negnigable influence
     case 'useSpikeModelFromPreviousAnalysis'
-        % nothing now
+        % do nothing now look below for details.
+        
     otherwise
         error('unsupported spikeSorting method');
 end
@@ -138,7 +137,7 @@ switch spikeSortingParams.method
     case 'useSpikeModelFromPreviousAnalysis'
         spikeSortingParams.subjectID = subjectID;
         spikeSortingParams.path = path;
-        spikeSortingParams.previousBoundaryRange = []; %% need to specify this here
+        spikeSortingParams.modelBoundaryRange = []; %% need to specify this here
 end
         
 %% historical logicals not currently in use
@@ -158,13 +157,18 @@ analysisMode = 'overwriteAll';
 % analysisMode = 'viewLast';
 % analysisMode = 'analyzeAtEnd';
 % analysisMode = 'viewAnalysisOnly';
+% analysisMode = 'onlyDetectSpikes';
+% analysisMode = 'onlySortSpikes';
+% analysisMode = 'interactiveOnlyDetectSpikes';
+% analysisMode = 'interactiveOnlySortSpikes';
+% analysisMode = 'usePhotoDiodeSpikes';
 
 %% backup?
 makeBackup = false;
 
 %% actual call to analysis
 analyzeBoundaryRange(subjectID, path, cellBoundary, channels,spikeDetectionParams, spikeSortingParams,...
-        timeRangePerTrialSecs,stimClassToAnalyze,analysisMode,usePhotoDiodeSpikes,[],frameThresholds,makeBackup)
+        timeRangePerTrialSecs,stimClassToAnalyze,analysisMode,[],frameThresholds,makeBackup)
 
 %% earlier calls for analysis
 analyzeTrials = false;

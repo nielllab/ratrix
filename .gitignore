@@ -125,3 +125,13 @@ analysis/spike[!!-~]sorting/*.asv
 analysis/spike[!!-~]sorting/historicalSpikeFiddlerCalls.asv
 classes/protocols/stimManagers/util/hs_err_pid5324.log
 analysis/util/*.asv
+setup/setupBS/physSetups/*.asv
+analysis/spike[!!-~]sorting/KlustaKwik/*.1
+analysis/analysisScripts/305/*.asv
+analysis/bsriram/analysisEnabling/*.asv
+analysis/bsriram/nonStandard/*.asv
+classes/protocols/stimManagers/@filteredNoise/*.asv
+classes/protocols/stimManagers/@gratings/*.asv
+classes/protocols/stimManagers/@whiteNoise/*.asv
+classes/util/stimHelpers/*.asv
+classes/util/analysis/*.asv

@@ -3,7 +3,8 @@ function physiologyServer()
 
 global ai;
 
-% ========================================================================================
+% =========================================================================
+% ===============
 f2=[];
 a2=[];
 data=[];
@@ -18,7 +19,7 @@ fWidth=2*margin+10*fieldWidth;
 fHeight=margin+25*oneRowHeight+margin;
 
 ai_parameters=[];
-ai_parameters.numChans=16;  % 3 or 16
+ai_parameters.numChans=3;  % 3 or 16
 ai_parameters.sampRate=40000;
 ai_parameters.inputRanges=repmat([-1 6],ai_parameters.numChans,1);
 ai_parameters.channelConfiguration={'framePulse','photodiode'};
@@ -37,8 +38,8 @@ ampModeStrs = {'','Rec','Imp','Stim'}; defaultModeIndex = 2;
 
 
 clientIPStrs={'132.239.158.180','132.239.158.179'};  % now we use 180... why was it set to only 179 before november 2009?
-ratIDStrs={'356','test1','342','230','calib','306','305','257','252','250','demo1','fan_demo1','131','303','138','262','261','249'};
-ratProtocolStrs={'setProtocolPhys2','setProtocolPhys3','ctxCharPtcl','ctxQckNDirtyPtcl','flankerCalibProtocol'};
+ratIDStrs={'demo1','231','356','342','230','calib','test1','306','305','257','252','250','fan_demo1','131','303','138','262','261','249'};
+ratProtocolStrs={'setProtocolPhys2','','setProtocolPhys3','ctxCharPtcl','ctxQckNDirtyPtcl','flankerCalibProtocol'};
 experimenterStrs={'','pmeier','bsriram','dnguyen','eflister'};
 electrodeMakeStrs={'FHC','MPI','gentner','neuronexus'};
 electrodeModelStrs={'','UEWMCGLEEN3M','UEWMCGLECN3M','UEWMCGTECN3M','WE3PT35.0A3-ME4925','1x16-100um-413um2'};  
@@ -89,7 +90,7 @@ withdrawalStrs={[],'none','sluggish','quick'};
 breathPerMinStrs={[],'24-','30','36','42','48','54','60','66','72','78+'};
 breathTypeStrs={[],'normal','arrhythmic','wheezing','hooting'};
 
-displayModeStrs={'full','condensed'};
+displayModeStrs={'condensed','stims','full'};
 
 % indices for event types
 defaultIndex=1;
@@ -1349,8 +1350,8 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
         runningLoop=true;
         keepLooping=true;
         
-        %storepath=fullfile('G:\pmeier\datanetOutput',ratIDStrs{get(ratIDField,'Value')});
-        storepath=fullfile('\\132.239.158.179\datanet_storage',ratIDStrs{get(ratIDField,'Value')});
+        storepath=fullfile('\\132.239.158.179\datanetOutput',ratIDStrs{get(ratIDField,'Value')});
+        %storepath=fullfile('\\132.239.158.179\datanet_storage',ratIDStrs{get(ratIDField,'Value')});
         % check that neuralRecords,eyeRecord,stimRecords folders exist
         if ~isdir(fullfile(storepath,'neuralRecords'))
             mkdir(fullfile(storepath,'neuralRecords'));
@@ -1485,6 +1486,8 @@ toggleTrialsButton = uicontrol(f,'Style','togglebutton','String',runningT,'Visib
                                     startTime=chunkClock;
                                     events_data(end).eventParams.trialNumber=retval(j).trialNumber;
                                     events_data(end).eventParams.stimManagerClass=retval(j).stimManagerClass;
+                                    events_data(end).eventParams.stepName=retval(j).stepName;
+                                    events_data(end).eventParams.stepNumber=retval(j).stepNumber;
                                 case 'trial end' 
                                     allowTimeupChunkAdvancementCheck=false;
                                     %this will prevent a short empty chunk the length of the save duration from

@@ -8,7 +8,7 @@ lastPosition=[0 0 0];
 firstTrialNumOfInterval=1;
 firstStartTimeOfInterval=[];
 lastTrialNum=1;
-lastStimClass='unknown';
+lastTrialType='unknown'; % we used to display stim class, but now use stepName
 lastEventType=[];
 lastTrialIntervalInd=[];
 newP=true;
@@ -81,7 +81,94 @@ switch mode
             end
             dispStrs{end+1}=str;
         end
-        
+    case 'stims'
+        strEvents='';
+        lastTrialTime=0;
+        cellCount=0;
+        for i=1:length(toShow)
+            if ~isempty(toShow(i).eventType)  % why do we need this... might be an error witrh stopped cell
+                  switch toShow(i).eventType
+                     case {'comment'}
+                        str=toShow(i).comment;
+                        strEvents=[strEvents '; ' str];
+                    case {'comment','top of fluid','top of brain','ctx cell','hipp cell','deadzone','theta chatter','visual hash','visual cell',...
+                            'electrode bend','clapping','rat obs','anesth check'}
+                        str=toShow(i).eventType;
+                        if ~strcmp(toShow(i).comment,'')
+                            str=[str ', ' toShow(i).comment];
+                        end
+                        strEvents=[strEvents '; ' str];
+                    case {'trial end'}
+                        %do nothing
+                    case {'trial start'}
+
+                        if strcmp(toShow(i).eventType,'trial start')
+                            if isfield(toShow(i).eventParams,'stepName')
+                                trialType=toShow(i).eventParams.stepName;
+                            else
+                                %old records don't have stepName listed
+                                %and instead display by stim manager class
+                                trialType=toShow(i).eventParams.stimManagerClass;
+                            end
+                            if strcmp(trialType,lastTrialType)
+                                % same step still 
+                                str=sprintf('%s%s[%d %d]%s%s',datestr(firstStartTimeOfInterval,'HH:MM'),fixedTab,firstTrialNumOfInterval,...
+                                    toShow(i).eventParams.trialNumber,fixedTab,trialType);
+                                dispStrs{lastTrialIntervalInd}=str;
+                            else
+                                % new stim class
+                                firstTrialNumOfInterval=toShow(i).eventParams.trialNumber;
+                                firstStartTimeOfInterval=toShow(i).time;
+                                str=sprintf('%s%s[%d %d]%s%s',datestr(toShow(i).time,'HH:MM'),fixedTab,firstTrialNumOfInterval,...
+                                    toShow(i).eventParams.trialNumber,fixedTab,trialType);
+                                
+                                %(toShow(i).time-lastTrialTime)*(24*60*60)
+                                if 0%(toShow(i).time-lastTrialTime)*(24*60*60)<15 % 15 seconds is deemed short
+                                    %str=[str fixedTab 'short'];
+                                    %BLANK IT OUT
+                                    %toShow(i).eventParams.trialNumber
+                                    str=['shortTrial'];% char(32*ones(1,length(str)-10))]; % a bunch of spaces
+                                    dispStrs{end+1}=str;
+                                else
+                                    if lastTrialNum~=0 % dont display the first 'interval' of unknown
+                                        %dispStrs{end+1}=str;
+                                        numberIndentSpaces=40;
+                                        textWrapLength=110;
+                                        [junk wrappedTextCells]=wrapText([str strEvents],'',textWrapLength,numberIndentSpaces);
+                                        for ii=1:length(wrappedTextCells)%:-1:1
+                                            dispStrs{end+1}=wrappedTextCells{ii}; % always add a new str to display
+                                        end
+                                        strEvents='';
+                                    end
+                                end
+                                lastTrialIntervalInd=length(dispStrs);
+                            end
+                            lastTrialNum=toShow(i).eventParams.trialNumber;
+                            lastTrialTime=toShow(i).time;
+                            lastTrialType=trialType;
+                        end
+                      case {'cell start'}
+                          %str=toShow(i).eventType; % consider a cell counter 
+                          cellCount=cellCount+1;
+                          str=sprintf('*** CELL %d ***',cellCount);
+                          dispStrs{end+1}='';
+                          dispStrs{end+1}=str;
+                      case {'cell stop'}
+                          dispStrs{end+1}='';
+                      otherwise
+                          toShow(i)
+                          error('unrecognized event type');
+                  end
+            end
+        end
+        removeLines=[];
+        for i=1:length(dispStrs)
+            if strcmp(dispStrs{i},'shortTrial')
+                removeLines=[removeLines i];
+            end
+        end
+        dispStrs(removeLines)=[]; % get rid of the short trials (probably KTs or dup removal)
+        %dispStrs=fliplr(dispStrs); % do not flip text to be reverse chronological
     case 'condensed'
         for i=1:length(toShow)
             if ~isempty(toShow(i).eventType)  % why do we need this... might be an error witrh stopped cell
@@ -146,29 +233,38 @@ switch mode
                         lastP=toShow(i).penetrationNum;
                         lastPosition=thisPosition;
                         newP=false;
-                        for i=length(wrappedTextCells):-1:1
-                            dispStrs{end+1}=wrappedTextCells{i}; % always add a new str to display
+                        for ii=length(wrappedTextCells):-1:1
+                            dispStrs{end+1}=wrappedTextCells{ii}; % always add a new str to display
                         end
                     case {'trial start','trial end'}
+
                         if strcmp(toShow(i).eventType,'trial start')
-                            if strcmp(toShow(i).eventParams.stimManagerClass,lastStimClass)
-                                % same stim still
+                            
+                            if isfield(toShow(i).eventParams,'stepName')
+                                trialType=toShow(i).eventParams.stepName;
+                            else
+                                %old records don't have stepName listed
+                                %and instead display by stim manager class
+                                trialType=toShow(i).eventParams.stimManagerClass;
+                            end
+                            if strcmp(trialType,lastTrialType)
+                                % same step still 
                                 str=sprintf('%s%str%d-%d%s%s',datestr(firstStartTimeOfInterval,'HH:MM'),fixedTab,firstTrialNumOfInterval,...
-                                    toShow(i).eventParams.trialNumber,fixedTab,toShow(i).eventParams.stimManagerClass);
+                                    toShow(i).eventParams.trialNumber,fixedTab,trialType);
                                 dispStrs{lastTrialIntervalInd}=str;
                             else
                                 % new stim class
                                 firstTrialNumOfInterval=toShow(i).eventParams.trialNumber;
                                 firstStartTimeOfInterval=toShow(i).time;
                                 str=sprintf('%s%str%d-%d%s%s',datestr(toShow(i).time,'HH:MM'),fixedTab,firstTrialNumOfInterval,...
-                                    toShow(i).eventParams.trialNumber,fixedTab,toShow(i).eventParams.stimManagerClass);
+                                    toShow(i).eventParams.trialNumber,fixedTab,trialType);
                                 if lastTrialNum~=0 % dont display the first 'interval' of unknown
                                     dispStrs{end+1}=str;
                                 end
                                 lastTrialIntervalInd=length(dispStrs);
                             end
                             lastTrialNum=toShow(i).eventParams.trialNumber;
-                            lastStimClass=toShow(i).eventParams.stimManagerClass;
+                            lastTrialType=trialType;
                         end
                     case {'cell start','cell stop'}
                         % these only have an eventType, time, eventNumber, and trialNumber

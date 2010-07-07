@@ -476,6 +476,8 @@ ts{39}= trainingStep(ap, fFF,         repeatIndefinitely(),      noTimeOff(), sv
 ts{40}= trainingStep(ap, fFFContrast, repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode,'fffc');  % catch and repeat here forever
 ts{41}= trainingStep(ap, fContrast,   repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode,'fc');  % catch and repeat here forever
 ts{42}= trainingStep(ap, natGrating,  repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode,'natGrat');  % catch and repeat here forever
+ts{43}= trainingStep(ap, radGratings, repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode,'radii');  % catch and repeat here forever
+ts{44}= trainingStep(ap, sparseBrighter24x32, repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode,'sprsBw24x32');  % catch and repeat here forever
 
 
 %removed things b/c not used enough:

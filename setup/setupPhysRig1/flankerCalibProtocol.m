@@ -175,7 +175,7 @@ ffgwn = whiteNoise({'gaussian',gray,std},background,method,stimLocation,stixelSi
 ffbin = whiteNoise({'binary',0,1,.5},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 %big grid - gaussian and many sparse types
-stixelSize = [16,16]; %[8 8] [32 32] [xPix yPix]
+stixelSize = [128,128]; %[8 8] [32 32] [xPix yPix]
 numFrames=2000;   %1000 if limited mempry for trig 4 large stims
 gwn = whiteNoise({'gaussian',gray,std},background,method,stimLocation,stixelSize,searchSubspace,5,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 bin = whiteNoise({'binary',0,1,.5},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
@@ -220,8 +220,8 @@ svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
 svnCheckMode='session';
 
 %calib stim
-ts{1}= trainingStep(ap, bin,        repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
-ts{2}= trainingStep(ap, hvCalib,    repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
+ts{1}= trainingStep(ap, bin,       repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
+ts{2}= trainingStep(ap, hvCalib,    numTrialsDoneCriterion(1), noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
 ts{3}= trainingStep(ap, floCalib,   repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
 ts{4}= trainingStep(ap, fpCalib,    repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
 ts{5}= trainingStep(ap, sfGratings,    repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode);  % catch and repeat here forever
@@ -233,7 +233,7 @@ ts{9}= trainingStep(ap, hvSFCalib,    repeatIndefinitely(), noTimeOff(), svnRev,
 %% make and set it
 
 p=protocol('practice phys',ts);
-stepNum=uint8(9);
+stepNum=uint8(1);
 
 for i=1:length(subjIDs)
     subj=getSubjectFromID(r,subjIDs{i});

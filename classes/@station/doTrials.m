@@ -85,12 +85,13 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
                             checkRecording(s.eyeTracker);
                         else
                             %figure out where to save eyeTracker data
-                            if ~isempty(s.datanet)
+                            if ~isempty(s.datanet) % NOTE:  this path should reslove at IP level if shared on a external drive
                                 eyeDataPath = fullfile(getStorePath(s.datanet), 'eyeRecords');
                             else
                                 %right now its hard coded when no datanet
                                 %maybe put it with trial records in the permanent store?
                                 eyeDataPath = fullfile('\\132.239.158.179','datanet_storage', getID(subject), 'eyeRecords');
+                                eyeDataPath = fullfile('\\132.239.158.179','datanetOutput', getID(subject), 'eyeRecords'); % this is a shared folder on the G: external
                             end
 
                             if isempty(trialRecords)

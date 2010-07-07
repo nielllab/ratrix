@@ -101,7 +101,14 @@ location = RFestimator({'gratingWithChangeableAnnulusCenter','lastDynamicSetting
 anGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
     waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance,doCombos,changeableAnnulusCenter);
 
+radii=[0.02 0.05 .1 .2 .3 .4 .5 2]; % radii of the grating
+annuli=[0];
+radGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radii,annuli,location,...
+    waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance,doCombos,changeableAnnulusCenter);
+
+
 changeableAnnulusCenter=true;
+annuli=[0.02 0.05 .1 .2 .3 .4 .5 2]; % annulus of the grating
 location=[.5 .5];
 manAnGratings = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radius,annuli,location,...
     waveform,normalizationMethod,mean,thresh,numRepeats,maxWidth,maxHeight,scaleFactor,interTrialLuminance,doCombos,changeableAnnulusCenter);
@@ -273,7 +280,8 @@ prm=getDefaultParameters(ifFeatureGoRightWithTwoFlank, 'goToSide','1_0','Oct.09,
 % bipartiteField
 receptiveFieldLocation = location; %as in annuli
 receptiveFieldLocation = [.5 .5];
-frequencies = [ 4 8 16 32 64];
+receptiveFieldLocation = RFestimator({'gratingWithChangeableAnnulusCenter','lastDynamicSettings',[]},{'gratingWithChangeableAnnulusCenter','lastDynamicSettings',[]},[],RFdataSource,[now-100 Inf]);                         
+frequencies = [2 4 8 16 32 64];
 duration = 4;
 repetitions=4;
 scaleFactor=0;
@@ -315,6 +323,7 @@ sparseness=0.05; %sparseness
 sparseBright=whiteNoise({'binary',0.5,1,sparseness},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 sparseDark=whiteNoise({'binary',0,0.5,1-sparseness},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 sparseBrighter=whiteNoise({'binary',0,1,sparseness},background,method,stimLocation,stixelSize,searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+sparseBrighter24x32 = whiteNoise({'binary',0,1,sparseness},background,method,stimLocation,[32 32],searchSubspace,numFrames,changeable,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 % bars are black and white sparsely white like sparseBrighter
 barSize=stixelSize; barSize(1)=maxWidth;
@@ -463,11 +472,10 @@ ts{36}= trainingStep(ap, binOther,    repeatIndefinitely(),      noTimeOff(), sv
 ts{37}= trainingStep(ap, ffbin,       repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode,'ffbin');  % catch and repeat here forever
 ts{38}= trainingStep(ap, cmr,         repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode,'cmr');  % catch and repeat here forever
 
-
 ts{39}= trainingStep(ap, fFF,         repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode,'fff');  % catch and repeat here forever
 ts{40}= trainingStep(ap, fFFContrast, repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode,'fffc');  % catch and repeat here forever
 ts{41}= trainingStep(ap, fContrast,   repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode,'fc');  % catch and repeat here forever
-ts{42}= trainingStep(ap, natGrating,   repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode,'natGrat');  % catch and repeat here forever
+ts{42}= trainingStep(ap, natGrating,  repeatIndefinitely(),      noTimeOff(), svnRev, svnCheckMode,'natGrat');  % catch and repeat here forever
 
 
 %removed things b/c not used enough:
@@ -495,7 +503,7 @@ ts{42}= trainingStep(ap, natGrating,   repeatIndefinitely(),      noTimeOff(), s
 
 
 p=protocol('practice phys',ts);
-stepNum=42;
+stepNum=2;
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

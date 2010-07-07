@@ -8,6 +8,11 @@ function tsName = generateStepName(ts,ratrixSVN,ptbSVN)
 
 tsName = [getNameFragment(ts.trialManager) '_' getNameFragment(ts.stimManager) '_' getNameFragment(ts.criterion) '_' getNameFragment(ts.scheduler)];
 
+usersNameOfWholeStep=getStepName(ts); % optional name is used by physiology and could be used by ratrix protocols.  defaults to '' when unspecified.
+if ~strcmp(usersNameOfWholeStep,'')
+    tsName=[usersNameOfWholeStep '_' tsName];
+end
+
 % append ratrix and ptb svn info
 tsName = [tsName '_' ratrixSVN '_' ptbSVN];
 

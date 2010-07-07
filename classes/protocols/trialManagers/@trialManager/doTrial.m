@@ -229,6 +229,8 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                     cparams.time=datenum(trialRecords(trialInd).date);
                     cparams.trialNumber=trialRecords(trialInd).trialNumber;
                     cparams.stimManagerClass=trialRecords(trialInd).stimManagerClass;
+                    cparams.stepName=getStepName(ts);
+                    cparams.stepNumber=t;
                     commands.arg=cparams;
                     [gotAck] = sendCommandAndWaitForAck(getDatanet(station), commands);
 

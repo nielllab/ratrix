@@ -52,6 +52,8 @@ try
             retval(end).stimFilename = fullfile(datanet.storepath,'stimRecords',cparams.stimFilename);
             retval(end).trialNumber=cparams.trialNumber;
             retval(end).stimManagerClass=cparams.stimManagerClass;
+            retval(end).stepName=cparams.stepName;
+            retval(end).stepNumber=cparams.stepNumber;
             fprintf('got trial start command from ratrix\n')
 		case constants.stimToDataCommands.S_TRIAL_END_EVENT_CMD
 			% mark end of trial - how do we add an event to events_data, which is all the way out in physiologyServer?

@@ -9,6 +9,8 @@ out=nan;
 %last=find(cell2mat(cellfun(@(x) ~any(isnan(x))&&any(x(responsePorts)==1),tries,'UniformOutput',false)),1,'last');
 
 debuggerOn=false;  % this is useful for people would want to inspect types of nans, could become an optional arg if used
+%nan's are caused on a smallish fraction of the trials
+
 
 try
     

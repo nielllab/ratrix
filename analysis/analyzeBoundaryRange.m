@@ -380,7 +380,23 @@ while ~done
                 analyzeUpdateParams.boundaryRange = boundaryRange;
                 analyzeUpdateParams.chunksAvailable = chunksAvailable;
                 analyze = updateAnalyzeStatus(analyzeUpdateParams);
+            end            
+        end
+        %% VIEW ANALYSIS
+        if viewAnalysis
+            %% load physAnalysis if necessary and get the relevant cumulativedata
+            if ~exist('physAnalysis','var')
+                physAnalysis = getPhysAnalysis(analysisPath,analysisMode);
             end
+            indexForCurrentTrial = getAnalysisIndexForTrial(currentTrialNum,physAnalysis);
+            if indexForCurrentTrial==0
+                error('analysis was not done! please make sure analysis exists before calling viewAnalysis')
+            else
+                [cumulativedata, trialRange, stimClass, stepName] = deal(physAnalysis{indexForCurrentTrial}{:});
+            end
+            %% find number of trodes in cumulative data
+            %% create necessary figures
+            %% loop through trodes and plot
         end
     end
     %% done        
@@ -481,7 +497,8 @@ analyzeChunk = true;
 temp = stochasticLoad(stimRecordLocation,{'stimManagerClass'});
 trialClass = temp.stimManagerClass;
 if (currentTrialNum<boundaryRange(1) || currentTrialNum>boundaryRange(3)) ||...
-        (~strcmpi(stimClassToAnalyze, 'all') && ~any(strcmpi(stimClassToAnalyze, trialClass)))
+        (~strcmpi(stimClassToAnalyze, 'all') && ~any(strcmpi(stimClassToAnalyze, trialClass)))||...
+        (maskInfo.maskON && strcmp(maskInfo.maskType,'trialMask') && any(maskInfo.maskRange==currentTrialNum))    
     analyzeChunk = false;    
 end
 end
@@ -733,4 +750,18 @@ else
     trialRange = currentTrialNum;
 end
 physAnalysis{position} = {cumulativedata,trialRange,stimManagerClass,stepName};
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function index = getAnalysisIndexForTrial(trialNum,physAnalysis)
+lengthAnalysis = length(physAnalysis);
+index = 0;
+for currIndex = 1:lengthAnalysis
+    currTrialRange = physAnalysis{currIndex}{2};
+    if trialNum>=currTrialRange(1) && trialNum<=currTrialRange(end)
+        index = currIndex;
+        return;
+    end
+end
 end

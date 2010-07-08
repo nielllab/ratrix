@@ -64,3 +64,4 @@
 /setPixPerCycs.m -text
 /isDynamicRender.m -text
 /displayCumulativePhysAnalysis.m -text
+/enableCumulativePhysAnalysis.m -text

@@ -1,4 +1,4 @@
-function physAnalysisFile = getPhysAnalysis(analysisPath,analysisMode)
+function physAnalysis = getPhysAnalysis(analysisPath,analysisMode)
 physAnalysisFile = fullfile(analysisPath,'physAnalysis.mat')
 switch analysisMode
     case 'overwriteAll'
@@ -6,7 +6,7 @@ switch analysisMode
             temp = stochasticLoad(spikeRecordFile,{'physAnalysis'});
             physAnalysis = temp.physAnalysis;
         else
-            physAnalysis = [];
+            physAnalysis = {};
         end
     otherwise
         error('unsupported analysisMode');

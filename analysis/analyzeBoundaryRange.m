@@ -123,6 +123,11 @@ if ~exist('frameThresholds','var') || isempty(frameThresholds)
     frameThresholds.errorBound = 0.5;   %fractional difference of ifi that will cause an error (after drop adjusting)
     frameThresholds.dropsAcceptableFirstNFrames=2; % first 2 frames won't kill the default quality test               
 end
+    %% eyeRecordPath
+eyeRecordPath = fullfile(path,subjectID,'eyeRecord');
+if ~isdir(eyeRecordPath)
+    mkdir(eyeRecordPath);
+end
 %% END ERROR CHECKING
 
 %% SAVE ANALYSISBOUNDARIES
@@ -208,7 +213,7 @@ while ~done
                 %% get Frame details
                 temp = stochasticLoad(stimRecordLocation,{'refreshRate'});
                 ifi = 1/temp.refreshRate;
-                currentSpikeRecord =  getFrameDetails(neuralRecord,pulseInd,frameThresholds,ifi,currentTrialNum,...
+                currentSpikeRecord =  getFrameDetails(neuralRecord,pulseInd,photoInd,frameThresholds,ifi,currentTrialNum,...
                     currentChunkInd);
                 %% create snippet for next chunk
                 [snippet snippetTimes neuralRecord chunkHasFrames] = createSnippetFromNeuralRecords(currentSpikeRecord,...
@@ -293,7 +298,7 @@ while ~done
                         currSpikeSortingParams = spikeSortingParams.(trodeStr);
                     end
                     currentSpikeRecord = sortSpikesForTrode(currentSpikeRecord,currTrode,trodeNum,...
-                        currSpikes, currSpikeWaveforms,currSpikeTimestamps, currSpikeSortingParams, spikeModel);
+                        currSpikes, currSpikeWaveforms,currSpikeTimestamps, currSpikeSortingParams, spikeModel,currentTrialNum,currentChunkInd);
                 end
                 %% update cumulativeSpikeRecord
                 updateParams.updateMode = 'sortSpikes';
@@ -314,14 +319,14 @@ while ~done
                 sortUpdateParams.chunksAvailable = chunksAvailable;
                 sortSpikes = updateSortSpikesStatus(sortUpdateParams);
             end
-            %% ANALYSIS ON SPIKES
+            %% ANALYSIS ON SPIKERECORD
             if analyze
-                %% initialize analysisdata
+                %% initialize analysisdata,stimRecord,and a stimManager obj
                 analysisdata = []; %analysis data is set to null to begin with
-                %% upload physAnalysis if necessary
-                if ~exist('physAnalysis','var')
-                    physAnalysisFile = getPhysAnalysis(analysisPath,analysisMode);
-                end
+                stimRecords = stochasticLoad(stimRecordLocation);
+                trialClass = stimRecords.stimManagerClass; 
+                evalStr = sprintf('sm = %s();',trialClass);
+                eval(evalStr);
                 %% upload spikeRecord if necessary and filter
                 if ~exist('spikeRecord','var')
                     spikeRecord = getSpikeRecords(analysisPath,analysisMode);
@@ -334,40 +339,47 @@ while ~done
                 quality = getQualityForSpikeRecord(filteredSpikeRecord);
                 temp = stochasticLoad(neuralRecordLocation,{'samplingRate'});
                 quality.samplingRate = temp.samplingRate
-                %% worthPhysAnalysis?
-                trialClass = getClassForTrial(stimRecordLocation); 
-                evalStr = sprintf('sm = %s();',trialClass);
-                eval(evalStr);
+                %% worthPhysAnalysis?                
                 analysisExists = false;
                 overwriteAll = true;
                 isLastChunkInTrial = (currentChunkInd==max(chunksAvailable));
-                doAnalysis = worthPhysAnalysis(sm,quality,analysisExists,overWriteAll,isLastChunkInTrial);
-                %% call to physAnalysis
+                doAnalysis = worthPhysAnalysis(sm,quality,analysisExists,overwriteAll,isLastChunkInTrial);
+                %% IF OKAY TO ANALYZE
                 if doAnalysis
+                    %% upload physAnalysis if necessary and get the latest cumulativedata
+                    if ~exist('physAnalysis','var')
+                        physAnalysis = getPhysAnalysis(analysisPath,analysisMode);
+                    end
+                    [cumulativedata,trialRange,stimManagerClass,stepName,replaceCumulative] = getRelevantCumulativeData...
+                        (physAnalysis,stimRecords,sm);
+                    %% get parameters and eye data
                     physAnalysisParameters=getNeuralRecordParameters(neuralRecordLocation,stimRecordLocation,subjectID,...
                             currentTrialNum,currentChunkInd,timestamp,filteredSpikeRecord,spikeDetectionParams);
-                    eyeData=getEyeRecords(eyeRecordPath, currentTrial,timestamp);
-                    % create the necessary figures
-                    
+                    eyeData=getEyeRecords(eyeRecordPath, currentTrialNum,timestamp);
+                    %% loop through trodes
                     for trodeNum = 1:length(trodes)
-                        trodeStr = createTrodeName(trodes{trodeNum});
                         currTrode = trodes{trodeNum};
-                        currSpikes = filteredSpikeRecord.(trodeStr).spikes;
-                        currSpikeWaveforms = filteredSpikeRecord.(trodeStr).spikeWaveforms;
-                        currSpikeTimestamps = filteredSpikeRecord.(trodeStr).spikeTimestamps;
-                        if modelExists
-                            currSpikeSortingParams.method = 'klustaModel';
-                        else
-                            currSpikeSortingParams = spikeSortingParams.(trodeStr);
-                        end
-                        currentSpikeRecord = sortSpikesForTrode(currentSpikeRecord,currTrode,trodeNum,...
-                            currSpikes, currSpikeWaveforms,currSpikeTimestamps, currSpikeSortingParams, spikeModel);
+                        cumulativedata = analyzeCurrentTrode(currTrode,filteredSpikeRecord,...
+                            stimRecords,physAnalysisParameters,cumulativedata,eyeData,currentTrialNum,currentChunkInd);                        
                     end
-                    [analysisdata cumulativedata] = physAnalysis(sm,filteredSpikeRecord,...
-                        stimRecord.stimulusDetails,plotParameters,neuralRecord.parameters,cumulativedata,eyeData,LFPRecord);
+                    %% update physAnalysis and save it
+                    physAnalysis = updatePhysAnalysis(physAnalysis,cumulativedata,replaceCumulative,trialRange,...
+                        stimManagerClass,stepName,currentTrialNum);
+                    physAnalysisFile=fullfile(analysisPath,'physAnalysis.mat');
+                    if exist(physAnalysisFile,'file')
+                        save(physAnalysisFile,'physAnalysis','-append');
+                    else
+                        save(physAnalysisFile,'physAnalysis');
+                    end
                 end
-                %%
                 %% now logic for switching status of analyze
+                analyzeUpdateParams = [];
+                analyzeUpdateParams.analysisMode = analysisMode;
+                analyzeUpdateParams.trialNum = currentTrialNum;
+                analyzeUpdateParams.chunkInd = currentChunkInd;
+                analyzeUpdateParams.boundaryRange = boundaryRange;
+                analyzeUpdateParams.chunksAvailable = chunksAvailable;
+                analyze = updateAnalyzeStatus(analyzeUpdateParams);
             end
         end
     end
@@ -416,6 +428,19 @@ switch updateParams.analysisMode
 end
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function analyze = updateAnalyzeStatus(updateParams)
+if ~exist('updateParams','var') || isempty(updateParams) || ~isfield(updateParams,'analysisMode') || isempty(updateParams.analysisMode)
+    error('make sure updateParams exists and analysisMode is specified');
+end
+switch updateParams.analysisMode
+    case 'overwriteAll'
+        analyze = true;
+    otherwise
+        error('unknown updateMode');
+end
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -525,8 +550,8 @@ currentSpikeRecord.(trodeStr).spikes            = spikes;
 currentSpikeRecord.(trodeStr).spikeWaveforms    = spikeWaveforms;
 currentSpikeRecord.(trodeStr).spikeTimestamps   = spikeTimestamps;
 % fill in details about trial and chunk
-currentSpikeRecord.(trodeStr).chunkID = chunkInd*ones(size(spikes));
-currentSpikeRecord.(trodeStr).trialNum = trialNum*ones(size(spikes));
+currentSpikeRecord.(trodeStr).chunkIDForDetectedSpikes = chunkInd*ones(size(spikes));
+currentSpikeRecord.(trodeStr).trialNumForDetectedSpikes = trialNum*ones(size(spikes));
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -543,7 +568,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function currentSpikeRecord = sortSpikesForTrode(currentSpikeRecord,currTrode,trodeNum,...
-    currSpikes, currSpikeWaveforms,currSpikeTimestamps, currSpikeSortingParams, spikeModel)
+    currSpikes, currSpikeWaveforms,currSpikeTimestamps, currSpikeSortingParams, spikeModel,trialNum,chunkID)
 trodeStr = createTrodeName(currTrode);
 if isstruct(spikeModel) && isfield(spikeModel,trodeStr)
     currSpikeModel = spikeModel.(trodeStr);
@@ -559,11 +584,13 @@ currentSpikeRecord.(trodeStr).spikeModel = currSpikeModel;
 currentSpikeRecord.(trodeStr).assignedClusters = assignedClusters;
 currentSpikeRecord.(trodeStr).rankedClusters = rankedClusters;
 currentSpikeRecord.(trodeStr).processedClusters = spikeDetails.processedClusters';
+currentSpikeRecord.(trodeStr).trialNumForSortedSpikes = trialNum*ones(size(assignedClusters));
+currentSpikeRecord.(trodeStr).chunkIDForSortedSpikes = chunkID*ones(size(assignedClusters));
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function spikeRecord =  getFrameDetails(neuralRecord,pulseInd,frameThresholds,ifi,trialNum,chunkInd)
+function spikeRecord =  getFrameDetails(neuralRecord,pulseInd,photoInd,frameThresholds,ifi,trialNum,chunkInd)
 [spikeRecord.frameIndices spikeRecord.frameTimes spikeRecord.frameLengths spikeRecord.correctedFrameIndices...
     spikeRecord.correctedFrameTimes spikeRecord.correctedFrameLengths spikeRecord.stimInds spikeRecord.passedQualityTest] = ...
     getFrameTimes(neuralRecord.neuralData(:,pulseInd),neuralRecord.neuralDataTimes,neuralRecord.samplingRate,...
@@ -580,7 +607,7 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function quality = getQualityForSpikeRecord(spikeRecord);
+function quality = getQualityForSpikeRecord(spikeRecord)
 quality.passedQualityTest=spikeRecord.passedQualityTest;
 quality.chunkHasFrames=spikeRecord.chunkHasFrames;
 quality.frameIndices=spikeRecord.frameIndices;
@@ -624,4 +651,86 @@ for currTrode = trodesInRecord'
     temp = stochasticLoad(stimRecordLocation,{'refreshRate'});
     parameters.(currTrode{:}).refreshRate = temp.refreshRate;
 end
-end                  
+end    
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [cumulativedata,trialRange,stimManagerClass,stepName, replaceCumulative] = getRelevantCumulativeData...
+    (physAnalysis,stimRecords,sm)
+if ~isempty(physAnalysis) % some analysis already exists
+    [prevCumulativedata,prevTrialRange,prevStimManagerClass,prevStepName] = deal(physAnalysis{end}{:});
+else
+    prevCumulativedata = [];
+    prevTrialRange = [];
+    prevStimManagerClass = [];
+    prevStepName = [];
+end
+if strcmp(prevStepName,getStepName(stimRecords,sm)) && enableCumulativePhysAnalysis(sm)
+    cumulativedata = prevCumulativedata;
+    trialRange = prevTrialRange;
+    stimManagerClass = prevStimManagerClass;
+    stepName = prevStepName;
+    replaceCumulative = true;
+else
+    cumulativedata = [];
+    trialRange = [];
+    stimManagerClass = stimRecords.stimManagerClass;
+    stepName = getStepName(stimRecords,sm);
+    replaceCumulative = false;
+end
+end
+                
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function stepName = getStepName(stimRecords,sm)
+if isfield(stimRecords.stimulusDetails,'stepName')
+    stepName = stimRecords.stimulusDetails.stimName;
+else
+    stepName = commonNameForStim(sm,stimRecords.stimulusDetails);
+end
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function cumulativedata = analyzeCurrentTrode(currTrode,filteredSpikeRecord,stimRecords,...
+    physAnalysisParameters,cumulativedata,eyeData,trialNum,chunkID)
+
+trodeStr = createTrodeName(currTrode);
+if isfield(cumulativedata,trodeStr)
+    cumulativeForTrode = cumulativedata.(trodeStr);
+else
+    cumulativeForTrode = [];
+end
+currParams = physAnalysisParameters.(trodeStr);
+
+filterParams.filterMode = 'onlyThisTrodeAndFlatten';
+filterParams.trodeStr = trodeStr;
+spikeRecordForTrode = filterSpikeRecords(filterParams,filteredSpikeRecord);
+spikeRecordForTrode.currentChunk = chunkID;
+stimDetails = stimRecords.stimulusDetails;
+
+trialClass = stimRecords.stimManagerClass;
+evalStr = sprintf('sm = %s();',trialClass);
+eval(evalStr);
+
+plotParameters.showSpikeAnalysis = false;
+%plotParameters.plotHandle = physAnalysisParameters.plotHandle;
+LFPRecord = [];
+[analysisForTrode cumulativeForTrode] = physAnalysis(sm,spikeRecordForTrode,stimDetails,plotParameters,...
+    currParams,cumulativeForTrode,eyeData,LFPRecord);
+cumulativedata.(trodeStr) = cumulativeForTrode;
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function physAnalysis = updatePhysAnalysis(physAnalysis,cumulativedata,replaceCumulative,...
+    trialRange,stimManagerClass,stepName,currentTrialNum)
+if replaceCumulative
+    position = length(physAnalysis);
+    trialRange(2) = currentTrialNum;
+else
+    position = length(physAnalysis)+1;
+    trialRange = currentTrialNum;
+end
+physAnalysis{position} = {cumulativedata,trialRange,stimManagerClass,stepName};
+end

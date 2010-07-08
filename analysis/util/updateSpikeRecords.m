@@ -114,10 +114,10 @@ switch updateParams.updateMode
                 end
                 nonUpdatedFields = {'trodeChans'};
                 specialFields = {'LFPRecord','spikes'};
-                fieldsToBeUpdated = fieldnames(currentSpikeRecord.(currentTrode{:}));
+                fieldsToBeUpdated = {'spikes','spikeWaveforms','spikeTimestamps','chunkIDForDetectedSpikes','trialNumForDetectedSpikes'};
                 fieldsToBeUpdated = fieldsToBeUpdated(~ismember(fieldsToBeUpdated,{nonUpdatedFields{:},specialFields{:}}));
                 % support for most fields which are spike num dependent
-                for currentUpdateField = fieldsToBeUpdated'
+                for currentUpdateField = fieldsToBeUpdated
                     if ~isfield(spikeRecord.(currentTrode{:}),currentUpdateField{:})
                         spikeRecord.(currentTrode{:}).(currentUpdateField{:}) = ...
                             currentSpikeRecord.(currentTrode{:}).(currentUpdateField{:});
@@ -150,6 +150,12 @@ switch updateParams.updateMode
                     spikeRecord.(currentTrode{:}).spikes = [spikeRecord.(currentTrode{:}).spikes ; adjustedValues];                    
                 end
                 
+                % support for 'trodeChans'
+                if isfield(currentSpikeRecord.(currentTrode{:}),'trodeChans')
+                    if ~isfield(spikeRecord.(currentTrode{:}),'trodeChans')
+                        spikeRecord.(currentTrode{:}).trodeChans = currentSpikeRecord.(currentTrode{:}).trodeChans;
+                    end
+                end                
             end
         end        
     case 'photoDiodeSpikes'
@@ -158,9 +164,11 @@ switch updateParams.updateMode
         
     case 'sortSpikes'
         if updateParams.updateSpikeModel
-            fieldsToUpdate = {'assignedClusters','rankedClusters','processedClusters','spikeModel'};
+            fieldsToUpdate = {'assignedClusters','rankedClusters','processedClusters',...
+                'trialNumForSortedSpikes','chunkIDForSortedSpikes','spikeModel'};
         else
-            fieldsToUpdate = {'assignedClusters','rankedClusters','processedClusters'};
+            fieldsToUpdate = {'assignedClusters','rankedClusters','processedClusters',...
+                'trialNumForSortedSpikes','chunkIDForSortedSpikes'};
         end
         trodesInCurrent = fieldnames(currentSpikeRecord);
         trodesInCurrent = trodesInCurrent(~cellfun(@isempty,regexp(trodesInCurrent,'^trode')));

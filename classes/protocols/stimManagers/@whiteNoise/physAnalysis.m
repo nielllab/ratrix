@@ -14,19 +14,25 @@ else
 end
 
 try
-    % to save memory, only do analysis on spikeRecord.currentChunk's data
-    which=find(spikeRecord.chunkID==spikeRecord.currentChunk);
+    % only analyze currentChunk's data for spikes
+    which=find(spikeRecord.chunkIDForDetectedSpikes==spikeRecord.currentChunk);
+    % get the relevant spikes
     spikeRecord.spikes=spikeRecord.spikes(which);
     spikeRecord.spikeTimestamps=spikeRecord.spikeTimestamps(which);
     spikeRecord.spikeWaveforms=spikeRecord.spikeWaveforms(which,:);
     spikeRecord.assignedClusters=spikeRecord.assignedClusters(which,:);
-    spikeRecord.chunkID=spikeRecord.chunkID(which);
+    spikeRecord.processedClusters = spikeRecord.processedClusters(which);
+    spikeRecord.chunkIDForDetectedSpikes=spikeRecord.chunkIDForDetectedSpikes(which);
+    
+    % only analyze currentChunk's data for corrected Frames
     which=find(spikeRecord.chunkIDForCorrectedFrames==spikeRecord.currentChunk);
     spikeRecord.correctedFrameIndices=spikeRecord.correctedFrameIndices(which,:);
     spikeRecord.stimInds=spikeRecord.stimInds(which);
-    which=find(spikeRecord.chunkIDForDetails==spikeRecord.currentChunk);
-    %spikeRecord.photoDiode=spikeRecord.photoDiode(which);  % HACK! we need this, right?
-    spikeRecord.spikeDetails=spikeRecord.spikeDetails(which);
+    %spikeRecord.photoDiode=spikeRecord.photoDiode(which);  % HACK! we need this, right?  
+    
+    % this part is no longer necessary as "spikeDetails is removed from all analyses
+%     which=find(spikeRecord.chunkID==spikeRecord.currentChunk);  
+%     spikeRecord.spikeDetails=spikeRecord.spikeDetails(which);
     
     if size(spikeRecord.correctedFrameIndices,1)==0 || size(spikeRecord.spikes,1)==0
         %if this chunk has either no spikes or no stim frames, then return the cumulative data as is
@@ -52,17 +58,18 @@ try
     %CHOOSE CLUSTER
     allSpikes=spikeRecord.spikes; %all waveforms
     waveInds=allSpikes; % location of all waveforms
-    if isstruct(spikeRecord.spikeDetails) && ismember({'processedClusters'},fields(spikeRecord.spikeDetails))
-        if length([spikeRecord.spikeDetails.processedClusters])~=length(waveInds)
-            length([spikeRecord.spikeDetails.processedClusters])
-            length(waveInds)
-            error('spikeDetails does not correspond to the spikeRecord''s spikes');
-        end
-        thisCluster=[spikeRecord.spikeDetails.processedClusters]==1;
-    else
-        thisCluster=logical(ones(size(waveInds)));
-        %use all (photodiode uses this)
-    end
+    thisCluster = (spikeRecord.processedClusters==1)
+%     if isstruct(spikeRecord.spikeDetails) && ismember({'processedClusters'},fields(spikeRecord.spikeDetails))
+%         if length([spikeRecord.spikeDetails.processedClusters])~=length(waveInds)
+%             length([spikeRecord.spikeDetails.processedClusters])
+%             length(waveInds)
+%             error('spikeDetails does not correspond to the spikeRecord''s spikes');
+%         end
+%         thisCluster=[spikeRecord.spikeDetails.processedClusters]==1;
+%     else
+%         thisCluster=logical(ones(size(waveInds)));
+%         %use all (photodiode uses this)
+%     end
     allSpikes(~thisCluster)=[]; % remove spikes that dont belong to thisCluster
     
     

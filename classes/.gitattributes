@@ -282,3 +282,5 @@ protocols/stimManagers/@whiteNoise/commonNameForStim.m -text
 protocols/stimManagers/@whiteNoise/compareStimRecords.m -text
 protocols/reinforcementManagers/@reinforcementManager/calcEarlyPenalty.m -text
 protocols/stimManagers/util/compareStimRecords.m -text
+protocols/stimManagers/@gratings/worthPhysAnalysis.m -text
+protocols/stimManagers/@whiteNoise/enableCumulativePhysAnalysis.m -text

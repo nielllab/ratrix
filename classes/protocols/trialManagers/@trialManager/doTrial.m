@@ -68,7 +68,8 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             
             trialRecords(trialInd).subjectsInBox = getSubjectIDsForBoxID(r,getBoxIDForSubjectID(r,getID(subject)));
             trialRecords(trialInd).trialManager = structize(decache(trialManager));
-            trialRecords(trialInd).stimManagerClass = class(stimManager);
+            trialRecords(trialInd).stimManagerClass = class(stimManager);            
+            trialRecords(trialInd).stepName = getStepName(ts);
             trialRecords(trialInd).trialManagerClass = class(trialManager);
             trialRecords(trialInd).scheduler = structize(getScheduler(ts));
             trialRecords(trialInd).criterion = structize(getCriterion(ts));
@@ -238,11 +239,12 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                     trialStartTime=datestr(trialRecords(trialInd).date, 30);
                     trialNum=trialRecords(trialInd).trialNumber;
                     stimManagerClass=trialRecords(trialInd).stimManagerClass;
+                    stepName=trialRecords(trialInd).stepName;
                     frameDropCorner=trialManager.frameDropCorner;
 
                     try
                         stim_path = fullfile(getStorePath(getDatanet(station)), 'stimRecords');
-                        save(fullfile(stim_path,cparams.stimFilename),'ratID','trialStartTime','trialNum','stimManagerClass','stimulusDetails','frameDropCorner','refreshRate');
+                        save(fullfile(stim_path,cparams.stimFilename),'ratID','trialStartTime','trialNum','stimManagerClass','stimulusDetails','frameDropCorner','refreshRate','stepName');
                     catch ex
                         warningStr=sprintf('unable to save to %s',stim_path);
                         error(warningStr);

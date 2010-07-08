@@ -494,7 +494,7 @@ switch upper(spikeSortingMethod)
                 if ~ischar(tline),   break,   end
                 assignedClusters = [assignedClusters;str2num(tline)];
             end
-        catch
+        catch ex
             warning('huh? no .clu?')
             keyboard
         end

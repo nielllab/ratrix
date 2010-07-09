@@ -284,3 +284,4 @@ protocols/reinforcementManagers/@reinforcementManager/calcEarlyPenalty.m -text
 protocols/stimManagers/util/compareStimRecords.m -text
 protocols/stimManagers/@gratings/worthPhysAnalysis.m -text
 protocols/stimManagers/@whiteNoise/enableCumulativePhysAnalysis.m -text
+protocols/stimManagers/@whiteNoise/displayCumulativePhysAnalysis.m -text

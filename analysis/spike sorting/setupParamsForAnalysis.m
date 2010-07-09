@@ -11,7 +11,7 @@ close all
 %path='\\132.239.158.179\datanet_storage' % streaming to C:
 path='H:\datanetOutput'  % local
 path='\\132.239.158.179\datanetOutput'  %on the G drive remote
-path='C:\Documents and Settings\rlab\My Documents\work\physiology data'  %on the G drive remote
+% path='C:\Documents and Settings\rlab\My Documents\work\physiology data'  %on the G drive remote
 % path='C:\Documents and Settings\rlab\My Documents\work\physiology data'  %local computer
 
 %% spikeDetectionParams
@@ -92,22 +92,27 @@ frameThresholds.errorBound = 0.6;   %fractional difference of ifi that will caus
 % subjectID = '356'; channels={[11 4]}; thrV=[-0.09 Inf]; cellBoundary={'trialRange',[110 118]};%ffgwn- LGN - no temporal STA on these chans (but phys 12 & 15?)
 % subjectID = '356'; channels={[8]}; thrV=[-0.09 Inf]; cellBoundary={'trialRange',[110]};%guess 8 is 15? - gets the monitor intensity, 0 lag
 % subjectID = '356'; channels={[6]}; thrV=[-0.03 Inf]; cellBoundary={'trialRange',[110 118]};%chart says 6 is 15, this has an STA! yay!
-% 
+%% multiple cells gwn 
 % %3 cells - these leads may or may not have the same cells on them, given their spacing of 50um
 % subjectID = '356'; channels={[2:6]}; thrV=[-0.03 Inf]; cellBoundary={'trialRange',[345 354]};%3 cells, gwn
 % subjectID = '356'; channels={[2 9:11]}; thrV=[-0.03 Inf]; cellBoundary={'trialRange',[345 354]};%3 cells, gwn
 % %subjectID = '356'; channels={[2:6]}; thrV=[-0.03 Inf]; cellBoundary={'trialRange',[377 380]};%3 cells
 % subjectID = '356'; channels={[2 9:11]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[345]};%3 cells, gwn
 % %LONG PAUSE, but same 3 cells/ location
-% subjectID = '356'; channels={[2]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[397 401]};%3 cells, gwn
-subjectID = '356'; channels={[2]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[397]};%3 cells, gwn
-% subjectID = '356'; channels={[10]}; thrV=[-0.06 Inf]; cellBoundary={'trialRange',[397 403]};
+
+% % subjectID = '356'; channels={[2]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[397 401]};%3 cells, gwn
+% % subjectID = '356'; channels={[10]}; thrV=[-0.06 Inf]; cellBoundary={'trialRange',[397 403]};
 % %subjectID = '356'; channels={[9]}; thrV=[-0.07 Inf]; cellBoundary={'trialRange',[397 403]};
 % %subjectID = '356'; channels={[6]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[397 403]}; % has different temporal shape
+subjectID = '356'; channels={[2],[6],[10],[9]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[397 403]};%3 cells, gwn
+
 % %subjectID = '356'; channels={[2]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[432]}; %
+%% spatial
 % subjectID = '356'; channels={[10]}; thrV=[-0.06 Inf]; cellBoundary={'trialRange',[432 444]}; % has spatial, upper right
 % subjectID = '356'; channels={[6]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[432 444]};  % has a different spatial!
 % subjectID = '356'; channels={[9]}; thrV=[-0.06 Inf]; cellBoundary={'trialRange',[432 442]};  % this is a bit weaker, same lower center location
+subjectID = '356'; channels={[10],[6],[9]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[432 442]};  % this is a bit weaker, same lower center location ** errors at snippeting
+
 % subjectID = '356'; channels={[6]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[377 380]}; %3 cells, stronger response to lower contrast delayed??
 % subjectID = '356'; channels={[6]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[377]}; %3 cells, stronger response to lower contrast delayed??
 % subjectID = '356'; channels={[6]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[485]}; %fffc about 3 trials near here 482-485ish?
@@ -116,7 +121,8 @@ subjectID = '356'; channels={[2]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',
 % subjectID = '356'; channels={[2]}; thrV=[-0.05 Inf]; cellBoundary={'trialRange',[492 498]}; %fffc 
 % subjectID = '356'; channels={[1],[2]}; thrV=[-0.06 Inf]; cellBoundary={'trialRange',[550]};
 
-
+%% 231
+subjectID = '231'; channels={1}; thrV=[-0.3 Inf];cellBoundary={'trialRange',[1363]};%fffc, animal moves and brain state changes ** still errors @ snippeting
 
 %% stimClassToAnalyze and timeRangeForTrialSecs
 stimClassToAnalyze={'all'}; timeRangePerTrialSecs=[0 Inf];
@@ -162,6 +168,7 @@ analysisMode = 'overwriteAll';
 % analysisMode = 'interactiveOnlyDetectSpikes';
 % analysisMode = 'interactiveOnlySortSpikes';
 % analysisMode = 'usePhotoDiodeSpikes';
+% analysisMode = 'onlyAnalyze';
 
 %% backup?
 makeBackup = false;

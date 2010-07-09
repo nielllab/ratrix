@@ -135,3 +135,4 @@ classes/protocols/stimManagers/@gratings/*.asv
 classes/protocols/stimManagers/@whiteNoise/*.asv
 classes/util/stimHelpers/*.asv
 classes/util/analysis/*.asv
+classes/protocols/stimManagers/@whiteNoise/physAnalysis1.m

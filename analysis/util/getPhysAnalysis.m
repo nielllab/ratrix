@@ -1,9 +1,9 @@
 function physAnalysis = getPhysAnalysis(analysisPath,analysisMode)
 physAnalysisFile = fullfile(analysisPath,'physAnalysis.mat')
 switch analysisMode
-    case 'overwriteAll'
+    case {'overwriteAll','onlyAnalyze'}
         if exist(physAnalysisFile,'file')
-            temp = stochasticLoad(spikeRecordFile,{'physAnalysis'});
+            temp = stochasticLoad(physAnalysisFile,{'physAnalysis'});
             physAnalysis = temp.physAnalysis;
         else
             physAnalysis = {};

@@ -11,6 +11,6 @@ else
     stimRecordName = d.name;
     stimRecordfile = fullfile(stimRecordsPath,stimRecordName);
 end
-load(stimRecordfile,'stimManagerClass')
+load(stimRecordFile,'stimManagerClass')
 trialClass = stimManagerClass;
 end

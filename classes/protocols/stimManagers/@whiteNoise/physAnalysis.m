@@ -57,8 +57,9 @@ try
     
     %CHOOSE CLUSTER
     allSpikes=spikeRecord.spikes; %all waveforms
+    allSpikeWaveforms = spikeRecord.spikeWaveforms;
     waveInds=allSpikes; % location of all waveforms
-    thisCluster = (spikeRecord.processedClusters==1)
+    thisCluster = (spikeRecord.processedClusters==1);
 %     if isstruct(spikeRecord.spikeDetails) && ismember({'processedClusters'},fields(spikeRecord.spikeDetails))
 %         if length([spikeRecord.spikeDetails.processedClusters])~=length(waveInds)
 %             length([spikeRecord.spikeDetails.processedClusters])
@@ -71,6 +72,7 @@ try
 %         %use all (photodiode uses this)
 %     end
     allSpikes(~thisCluster)=[]; % remove spikes that dont belong to thisCluster
+    relevantSpikeWaveforms = allSpikeWaveforms(thisCluster,:);
     
     
     % xtra user paramss
@@ -296,13 +298,12 @@ try
         partialdata.numSpikes = numSpikes;
         partialdata.trialNumber=parameters.trialNumber;
         partialdata.chunkID=parameters.chunkID;
+        partialdata.spikeWaveforms = relevantSpikeWaveforms; 
         
         if isempty(analysisdata) %first piece
             analysisdata=partialdata;
         else % not the first piece of analysisdata
-            [analysisdata.STA analysisdata.STV analysisdata.numSpikes junk] = ...
-                updateCumulative(analysisdata.STA,analysisdata.STV,analysisdata.numSpikes,analysisdata.trialNumber,analysisdata.chunkID,...
-                partialdata.STA,partialdata.STV,partialdata.numSpikes,partialdata.trialNumber,partialdata.chunkID);
+            [analysisdata] = updateCumulative(analysisdata,partialdata);
         end
         
     end %loop over safe "pieces"
@@ -363,6 +364,7 @@ try
         cumulativedata=[];
         cumulativedata.cumulativeSTA = analysisdata.STA;
         cumulativedata.cumulativeSTV = analysisdata.STV;
+        cumulativedata.cumulativeSpikeWaveforms = analysisdata.spikeWaveforms;
         cumulativedata.cumulativeNumSpikes = analysisdata.numSpikes;
         cumulativedata.cumulativeTrialNumbers=parameters.trialNumber;
         cumulativedata.cumulativeChunkIDs=parameters.chunkID;
@@ -373,15 +375,16 @@ try
         addSingleTrial=true;
     elseif isempty(find(parameters.trialNumber==cumulativedata.cumulativeTrialNumbers&...
             parameters.chunkID==cumulativedata.cumulativeChunkIDs))
+        cumulativedata = updateCumulative(cumulativedata,analysisdata);
         %only for new trials or new chunks
-        [cumulativedata.cumulativeSTA cumulativedata.cumulativeSTV cumulativedata.cumulativeNumSpikes ...
-            cumulativedata.cumulativeTrialNumbers cumulativedata.cumulativeChunkIDs] = ... %% cumulativedata.cumulativeST_LFPA ...
-            ...cumulativedata.cumulativeST_LFPV cumulativedata.numSpikesForLFP] = ...
-            updateCumulative(cumulativedata.cumulativeSTA,cumulativedata.cumulativeSTV,cumulativedata.cumulativeNumSpikes,...
-            cumulativedata.cumulativeTrialNumbers,cumulativedata.cumulativeChunkIDs,...,cumulativedata.cumulativeST_LFPA,...
-            1,1,1,...%cumulativedata.cumulativeST_LFPV, cumulativedata.numSpikesForLFP,...
-            analysisdata.STA,analysisdata.STV,analysisdata.numSpikes,...
-            analysisdata.trialNumber,analysisdata.chunkID,1,1,1); %ST_LFPA,ST_LFPV,numSpikesForLFP);
+%         [cumulativedata.cumulativeSTA cumulativedata.cumulativeSTV cumulativedata.cumulativeNumSpikes ...
+%             cumulativedata.cumulativeTrialNumbers cumulativedata.cumulativeChunkIDs] = ... %% cumulativedata.cumulativeST_LFPA ...
+%             ...cumulativedata.cumulativeST_LFPV cumulativedata.numSpikesForLFP] = ...
+%             updateCumulative(cumulativedata.cumulativeSTA,cumulativedata.cumulativeSTV,cumulativedata.cumulativeNumSpikes,...
+%             cumulativedata.cumulativeTrialNumbers,cumulativedata.cumulativeChunkIDs,...,cumulativedata.cumulativeST_LFPA,...
+%             1,1,1,...%cumulativedata.cumulativeST_LFPV, cumulativedata.numSpikesForLFP,...
+%             analysisdata.STA,analysisdata.STV,analysisdata.numSpikes,...
+%             analysisdata.trialNumber,analysisdata.chunkID,1,1,1); %ST_LFPA,ST_LFPV,numSpikesForLFP);
         
         addSingleTrial=true;
     else % repeat sweep through same trial
@@ -394,6 +397,7 @@ try
         analysisdata.singleChunkTemporalRecord(1,:)=...
             getTemporalSignal(analysisdata.STA,analysisdata.STV,analysisdata.numSpikes,'bright');
     end
+    cumulativedata.lastAnalysis = analysisdata;
     
     % cumulative
     [brightSignal brightCI brightInd]=getTemporalSignal(cumulativedata.cumulativeSTA,cumulativedata.cumulativeSTV,cumulativedata.cumulativeNumSpikes,'bright');
@@ -704,42 +708,75 @@ if ~new % only  check if they are the same distribution
 end
 end
 
-function [cSTA cSTV cNumSpikes cTrialNumbers cChunkIDs cST_LFPA cST_LFPV cNumSpikesForLFP] = updateCumulative(cSTA,cSTV,...
-    cNumSpikes,cTrialNumbers,cChunkIDs,cST_LFPA,cST_LFPV,cNumSpikesForLFP,STA,STV,numSpikes,trialNumbers,chunkID,ST_LFPA,...
-    ST_LFPV,numSpikesForLFP)
-% only update the cumulatives if the partials are NOT nan (arithmetic w/ nans wipes out any valid numbers)
-if ~any(isnan(STA(:)))
-    cSTA=(cSTA*cNumSpikes + STA*numSpikes) / (cNumSpikes + numSpikes);
-else
-    warning('found NaNs in partial STA - did not update cumulative STA')
-end
-if ~any(isnan(STV(:)))
-    cSTV=(cSTV*cNumSpikes + STV*numSpikes) / (cNumSpikes + numSpikes);
-else
-    warning('found NaNs in partial STV - did not update cumulative STV');
+% function [cSTA cSTV cNumSpikes cSpikeWaveforms cTrialNumbers cChunkIDs cST_LFPA cST_LFPV cNumSpikesForLFP] = updateCumulative(cSTA,cSTV,...
+%     cNumSpikes,cSpikeWaveforms,cTrialNumbers,cChunkIDs,cST_LFPA,cST_LFPV,cNumSpikesForLFP,STA,STV,numSpikes,trialNumbers,chunkID,ST_LFPA,...
+%     ST_LFPV,numSpikesForLFP)
+
+function cumulative = updateCumulative(cumulative,partial)
+
+fieldsInPartial = {'STA','STV','numSpikes','spikeWaveforms','trialNumber','chunkID','ST_LFPA','ST_LFPV','numSpikesForLFP'};
+fieldsInCumulative = {'cumulativeSTA','cumulativeSTV','cumulativeNumSpikes','cumulativeSpikeWaveforms','cumulativeTrialNumbers',...
+    'cumulativeChunkIDs','cumulativeST_LFPA','cumulativeST_LFPV','cumulativeNumSpikesForLFP'};
+
+fieldsThatGetUpdated = {'STA','STV','ST_LFPA','ST_LFPV'};
+fieldsThatGetStackedOn = {'spikeWaveforms','trialNumber','chunkID'};
+fieldsThatGetSummed = {'numSpikes','numSpikesForLFP'};
+
+for currField = fieldsInPartial
+    if isfield(partial,currField{:})
+        if any(strcmp(currField,fieldsThatGetUpdated)) && ~any(isnan(partial.(currField{:})(:)))
+            index = find(strcmp(currField,fieldsInPartial));
+            cumulative.(fieldsInCumulative{index}) = ...
+                (cumulative.(fieldsInCumulative{index})*cumulative.cumulativeNumSpikes + ...
+                partial.(fieldsInPartial{index})*partial.numSpikes)/(cumulative.cumulativeNumSpikes+partial.numSpikes);
+        end
+        if any(strcmp(currField,fieldsThatGetStackedOn)) && ~any(isnan(partial.(currField{:})(:)))
+            index = find(strcmp(currField,fieldsInPartial));
+            cumulative.(fieldsInCumulative{index}) = ...
+                [cumulative.(fieldsInCumulative{index});partial.(fieldsInPartial{index})];
+        end
+        if any(strcmp(currField,fieldsThatGetSummed)) && ~any(isnan(partial.(currField{:})(:)))
+            index = find(strcmp(currField,fieldsInPartial));
+            cumulative.(fieldsInCumulative{index}) = ...
+                cumulative.(fieldsInCumulative{index})+ partial.(fieldsInPartial{index});
+        end
+    end
 end
 
-if exist('cST_LFPA','var') % updateCumulative is also used for piece-wise data
-    if ~any(isnan(ST_LFPA(:)))
-        cST_LFPA=(cST_LFPA*cNumSpikesForLFP + ST_LFPA*numSpikesForLFP) / (cNumSpikesForLFP + numSpikesForLFP);
-    else
-        warning('found NaNs in partial cST_LFPA - did not update cumulative ST_LFPA')
-    end
-    if ~any(isnan(ST_LFPV(:)))
-        cST_LFPV=(cST_LFPV*cNumSpikesForLFP + ST_LFPV*numSpikesForLFP) / (cNumSpikesForLFP + numSpikesForLFP);
-    else
-        warning('found NaNs in partial ST_LFPV - did not update cumulative ST_LFPV');
-    end
-    cNumSpikesForLFP = cNumSpikesForLFP + numSpikesForLFP;
-else
-    cST_LFPA = [];
-    cST_LFPV = [];
-    cNumSpikesForLFP = [];
-end
 
-cNumSpikes=cNumSpikes + numSpikes;
-cTrialNumbers=[cTrialNumbers trialNumbers];
-cChunkIDs=[cChunkIDs chunkID];
+% % only update the cumulatives if the partials are NOT nan (arithmetic w/ nans wipes out any valid numbers)
+% if ~any(isnan(STA(:)))
+%     cSTA=(cSTA*cNumSpikes + STA*numSpikes) / (cNumSpikes + numSpikes);
+% else
+%     warning('found NaNs in partial STA - did not update cumulative STA')
+% end
+% if ~any(isnan(STV(:)))
+%     cSTV=(cSTV*cNumSpikes + STV*numSpikes) / (cNumSpikes + numSpikes);
+% else
+%     warning('found NaNs in partial STV - did not update cumulative STV');
+% end
+% 
+% if exist('cST_LFPA','var') % updateCumulative is also used for piece-wise data
+%     if ~any(isnan(ST_LFPA(:)))
+%         cST_LFPA=(cST_LFPA*cNumSpikesForLFP + ST_LFPA*numSpikesForLFP) / (cNumSpikesForLFP + numSpikesForLFP);
+%     else
+%         warning('found NaNs in partial cST_LFPA - did not update cumulative ST_LFPA')
+%     end
+%     if ~any(isnan(ST_LFPV(:)))
+%         cST_LFPV=(cST_LFPV*cNumSpikesForLFP + ST_LFPV*numSpikesForLFP) / (cNumSpikesForLFP + numSpikesForLFP);
+%     else
+%         warning('found NaNs in partial ST_LFPV - did not update cumulative ST_LFPV');
+%     end
+%     cNumSpikesForLFP = cNumSpikesForLFP + numSpikesForLFP;
+% else
+%     cST_LFPA = [];
+%     cST_LFPV = [];
+%     cNumSpikesForLFP = [];
+% end
+% 
+% cNumSpikes=cNumSpikes + numSpikes;
+% cTrialNumbers=[cTrialNumbers trialNumbers];
+% cChunkIDs=[cChunkIDs chunkID];
 end
 
 

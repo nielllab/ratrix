@@ -74,7 +74,7 @@ switch analysisMode
         end
         % recreate the analysis file
         mkdir(analysisPath);
-    case {'viewAnalysisOnly'}
+    case {'viewAnalysisOnly','onlyAnalyze'}
         % do nothing
     otherwise
         error('unknown analysisMode: ''%s''',analysisMode)
@@ -124,7 +124,7 @@ if ~exist('frameThresholds','var') || isempty(frameThresholds)
     frameThresholds.dropsAcceptableFirstNFrames=2; % first 2 frames won't kill the default quality test               
 end
     %% eyeRecordPath
-eyeRecordPath = fullfile(path,subjectID,'eyeRecord');
+eyeRecordPath = fullfile(path,subjectID,'eyeRecords');
 if ~isdir(eyeRecordPath)
     mkdir(eyeRecordPath);
 end
@@ -152,6 +152,8 @@ switch analysisMode
         [detectSpikes sortSpikes inspect interactive analyze viewAnalysis] = deal(true, false, false, false, false,  false);
     case 'analyzeAtEnd'
         [detectSpikes sortSpikes inspect interactive analyze viewAnalysis] = deal(true, true, false, false, false,  false);
+    case 'onlyAnalyze'
+        [detectSpikes sortSpikes inspect interactive analyze viewAnalysis] = deal(false, false, false, false, true,  true);
     otherwise
         error(sprintf('analysisMode: ''%s'' not supported',analysisMode));
 end
@@ -260,15 +262,7 @@ while ~done
                     save(spikeRecordFile,'spikeRecord','-append');
                 else
                     save(spikeRecordFile,'spikeRecord');
-                end
-                %% now logic for switching the status of detectSpikes
-                detectUpdateParams = [];
-                detectUpdateParams.analysisMode = analysisMode;
-                detectUpdateParams.trialNum = currentTrialNum;
-                detectUpdateParams.chunkInd = currentChunkInd;
-                detectUpdateParams.boundaryRange = boundaryRange;
-                detectUpdateParams.chunksAvailable = chunksAvailable;
-                detectSpikes = updateDetectSpikesStatus(detectUpdateParams);
+                end                
             end            
             %% SPIKE SORTING
             if sortSpikes
@@ -309,15 +303,7 @@ while ~done
                     save(spikeRecordFile,'spikeRecord','-append');
                 else
                     save(spikeRecordFile,'spikeRecord');
-                end
-                %% now logic for switching status of sortSpikes
-                sortUpdateParams = [];
-                sortUpdateParams.analysisMode = analysisMode;
-                sortUpdateParams.trialNum = currentTrialNum;
-                sortUpdateParams.chunkInd = currentChunkInd;
-                sortUpdateParams.boundaryRange = boundaryRange;
-                sortUpdateParams.chunksAvailable = chunksAvailable;
-                sortSpikes = updateSortSpikesStatus(sortUpdateParams);
+                end               
             end
             %% ANALYSIS ON SPIKERECORD
             if analyze
@@ -371,37 +357,81 @@ while ~done
                     else
                         save(physAnalysisFile,'physAnalysis');
                     end
-                end
-                %% now logic for switching status of analyze
-                analyzeUpdateParams = [];
-                analyzeUpdateParams.analysisMode = analysisMode;
-                analyzeUpdateParams.trialNum = currentTrialNum;
-                analyzeUpdateParams.chunkInd = currentChunkInd;
-                analyzeUpdateParams.boundaryRange = boundaryRange;
-                analyzeUpdateParams.chunksAvailable = chunksAvailable;
-                analyze = updateAnalyzeStatus(analyzeUpdateParams);
+                end                
             end            
         end
         %% VIEW ANALYSIS
-        if viewAnalysis
-            %% load physAnalysis if necessary and get the relevant cumulativedata
-            if ~exist('physAnalysis','var')
-                physAnalysis = getPhysAnalysis(analysisPath,analysisMode);
-            end
-            indexForCurrentTrial = getAnalysisIndexForTrial(currentTrialNum,physAnalysis);
-            if indexForCurrentTrial==0
+        %% load physAnalysis if necessary and get the relevant cumulativedata and stimRecords
+        if ~exist('physAnalysis','var')
+            physAnalysis = getPhysAnalysis(analysisPath,analysisMode);
+        end
+        indexForCurrentTrial = getAnalysisIndexForTrial(currentTrialNum,physAnalysis);
+        if indexForCurrentTrial==0
+            stimClass = getClassForTrial(stimRecordLocation);
+            evalStr = sprintf('sm = %s',stimClass);
+            eval(evalStr);
+            if enableChunkedPhysAnalysis(sm) || (~enableChunkedPhysAnalysis(sm)&&(currentChunkInd==max(chunksAvailable)))
                 error('analysis was not done! please make sure analysis exists before calling viewAnalysis')
             else
-                [cumulativedata, trialRange, stimClass, stepName] = deal(physAnalysis{indexForCurrentTrial}{:});
+                analysisAvailable = false;
             end
-            %% find number of trodes in cumulative data
-            %% create necessary figures
-            %% loop through trodes and plot
+        else
+            [cumulativedata, trialRange, stimClass, stepName] = deal(physAnalysis{indexForCurrentTrial}{:});
+            stimRecords = stochasticLoad(stimRecordLocation); % any detail that can be used across trial should exist in the current trial!
+            analysisAvailable = true;
         end
+        if viewAnalysis && analysisAvailable
+            %% find number of trodes in cumulative data
+            trodesInAnalysis = fieldnames(cumulativedata);
+            trodesInAnalysis = trodesInAnalysis(~cellfun(@isempty,regexp(trodesInAnalysis,'^trode')));
+            requestedTrodes = cellfun(@(currTrode)createTrodeName(currTrode),trodes,'UniformOutput',false);
+            if ~isempty(setdiff(requestedTrodes,trodesInAnalysis))
+                trodesWithoutAnalysis = setdiff(requestedTrodes,trodesInAnalysis)
+                error('some requested trodes have no analysis done for them');
+            end 
+            %% loop through trodes and plot
+            if ~exist('figureList')
+                figureList = {};
+                % figureList~{{stimManagerClass,stepName,trialRange,figInfo.(trodeStr) = figNum},{},{}}
+            end
+            for trodeNum = 1:length(trodes)
+                trodeStr = createTrodeName(trodes{trodeNum});
+                [figNum figureList] = getRelevantFigForPlotting(figureList,trialRange, stimClass, stepName,trodeStr);
+                plotAnalysisForTrode(figNum,figureList{end},cumulativedata,stimRecords,trodes{trodeNum});
+            end
+        end
+        %% now logic for switching the status of detectSpikes
+        detectUpdateParams = [];
+        detectUpdateParams.analysisMode = analysisMode;
+        detectUpdateParams.trialNum = currentTrialNum;
+        detectUpdateParams.chunkInd = currentChunkInd;
+        detectUpdateParams.boundaryRange = boundaryRange;
+        detectUpdateParams.chunksAvailable = chunksAvailable;
+        detectSpikes = updateDetectSpikesStatus(detectUpdateParams);
+        
+        %% now logic for switching status of sortSpikes
+        sortUpdateParams = [];
+        sortUpdateParams.analysisMode = analysisMode;
+        sortUpdateParams.trialNum = currentTrialNum;
+        sortUpdateParams.chunkInd = currentChunkInd;
+        sortUpdateParams.boundaryRange = boundaryRange;
+        sortUpdateParams.chunksAvailable = chunksAvailable;
+        sortSpikes = updateSortSpikesStatus(sortUpdateParams);
+        
+        %% now logic for switching status of analyze
+        analyzeUpdateParams = [];
+        analyzeUpdateParams.analysisMode = analysisMode;
+        analyzeUpdateParams.trialNum = currentTrialNum;
+        analyzeUpdateParams.chunkInd = currentChunkInd;
+        analyzeUpdateParams.boundaryRange = boundaryRange;
+        analyzeUpdateParams.chunksAvailable = chunksAvailable;
+        analyze = updateAnalyzeStatus(analyzeUpdateParams);
+        
     end
-    %% done        
+    %% done      
+    
+    %% logic for changing status of done
     currentTrialNum = currentTrialNum+1;
-    % logic for changing status of done
     if currentTrialNum>boundaryRange(3)
         done = true;
     end
@@ -425,6 +455,8 @@ end
 switch updateParams.analysisMode
     case 'overwriteAll'
         detectSpikes = true;
+    case 'onlyAnalyze'
+        detectSpikes = false;
     otherwise
         error('unknown updateMode');
 end
@@ -439,6 +471,8 @@ end
 switch updateParams.analysisMode
     case 'overwriteAll'
         sortSpikes = true;
+    case 'onlyAnalyze'
+        sortSpikes = false;
     otherwise
         error('unknown updateMode');
 end
@@ -452,6 +486,8 @@ if ~exist('updateParams','var') || isempty(updateParams) || ~isfield(updateParam
 end
 switch updateParams.analysisMode
     case 'overwriteAll'
+        analyze = true;
+    case 'onlyAnalyze'
         analyze = true;
     otherwise
         error('unknown updateMode');
@@ -599,7 +635,7 @@ spikeDetails = postProcessSpikeClusters(assignedClusters,...
 
 currentSpikeRecord.(trodeStr).spikeModel = currSpikeModel;
 currentSpikeRecord.(trodeStr).assignedClusters = assignedClusters;
-currentSpikeRecord.(trodeStr).rankedClusters = rankedClusters;
+currentSpikeRecord.(trodeStr).rankedClusters = {rankedClusters};
 currentSpikeRecord.(trodeStr).processedClusters = spikeDetails.processedClusters';
 currentSpikeRecord.(trodeStr).trialNumForSortedSpikes = trialNum*ones(size(assignedClusters));
 currentSpikeRecord.(trodeStr).chunkIDForSortedSpikes = chunkID*ones(size(assignedClusters));
@@ -764,4 +800,58 @@ for currIndex = 1:lengthAnalysis
         return;
     end
 end
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [figNum figureList] = getRelevantFigForPlotting(figureList,trialRange, stimClass, stepName,trodeStr)
+if isempty(figureList)
+    figNum = 1;
+    figInfo.(trodeStr) = figNum;
+    figureList = {{stimClass,stepName,trialRange,figInfo}};
+else
+    if strcmp(figureList{end}{2},stepName)
+        if isfield(figureList{end}{4},trodeStr)
+            figInfo = figureList{end}{4};
+            figNum = figInfo.(trodeStr);
+        else
+            figInfo = figureList{end}{4};
+            trodesInFigList = fieldnames(figInfo);
+            maxFigNum = 0;
+            for trodeName = trodesInFigList'
+                maxFigNum = max(maxFigNum,figInfo.(trodeName{:}));
+            end
+            figNum = maxFigNum +1;
+            figInfo.(trodeStr) = figNum;
+            figureList{end}{4} = figInfo;
+        end
+    else
+        figInfo = figureList{end}{4};
+        trodesInFigList = fieldnames(figInfo);
+        maxFigNum = 0;
+        for trodeName = trodesInFigList'
+            maxFigNum = max(maxFigNum,figInfo.(trodeName{:}));
+        end
+        figNum = maxFigNum +1;
+        figInfo=[];
+        figInfo.(trodeStr) = figNum;
+        figureList{end+1} = {stimClass,stepName,trialRange,figInfo};
+    end
+end
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function plotAnalysisForTrode(figNum,figureInfo,cumulativedata,stimRecords,trode)
+trodeStr = createTrodeName(trode);
+parameters.stimRecords = stimRecords;
+parameters.figHandle = figNum;
+parameters.stepName = figureInfo{2};
+parameters.trialRange = figureInfo{3};
+parameters.trodeName = sprintf('trodeChans: %s',mat2str(trode));
+stimManagerClass = figureInfo{1};
+evalStr = sprintf('sm = %s;',stimManagerClass);
+eval(evalStr);
+currCumulativedata = cumulativedata.(trodeStr);
+displayCumulativePhysAnalysis(sm,currCumulativedata,parameters);
 end

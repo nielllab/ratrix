@@ -136,3 +136,8 @@ classes/protocols/stimManagers/@whiteNoise/*.asv
 classes/util/stimHelpers/*.asv
 classes/util/analysis/*.asv
 classes/protocols/stimManagers/@whiteNoise/physAnalysis1.m
+setup/setProtocolMINIMAL.m
+setup/*.asv
+analysis/*.asv
+bootstrap/*.asv
+bootstrap/AmpLow.fig

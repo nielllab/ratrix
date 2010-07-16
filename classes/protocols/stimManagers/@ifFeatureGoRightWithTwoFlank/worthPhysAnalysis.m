@@ -20,6 +20,9 @@ else
     qualityOK=quality.passedQualityTest;
 end
 
+ warning('force quality true!!!')
+ qualityOK=true;
+
 retval=qualityOK && ...
     (isLastChunkInTrial || enableChunkedPhysAnalysis(sm)) &&...    
     (overwriteAll || ~analysisExists);

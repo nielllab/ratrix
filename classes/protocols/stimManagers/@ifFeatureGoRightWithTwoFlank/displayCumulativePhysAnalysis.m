@@ -37,8 +37,10 @@ numInstances=numCycles/numConditions; % these 2 terms are the same
     displayHeight=nthOccurence(c.spike.cycle)+(c.spike.condition-1)*numInstances;
     
 
-plotsRequested={'ratePerCondition','PSTH'};
-%plotsRequested={'raster','viewSort'}; 
+plotsRequested={'ratePerCondition','PSTH','PSTH_context'};
+%plotsRequested={'raster','viewSort','PSTH_context'}; 
+plotsRequested={'PSTH_context'; 'PSTH'};
+%plotsRequested={'PSTH'};
 if ~exist('plotsRequested','var') || isempty(plotsRequested)
     plotsRequested=c.plotsRequested;
 end
@@ -228,10 +230,12 @@ if showPSTH
     for i=1:numConditions
         spTm=c.spike.relTimes(c.spike.condition==i);
         countPerTrial=sum(c.spike.condition==i)/numTrials;
+        if countPerTrial>0
         [fi,ti] = ksdensity(spTm,'width',.01);
         plot(ti*1000,fi*countPerTrial/c.targetOnOff(2),'color',c.colors(i,:));
         plot(spTm*1000,-i+0.5*(rand(1,length(spTm))-0.5),'.','color',brighten(c.colors(i,:),-0.9));
         histc(spTm,[])
+        end
     end
     xlabel('time (msec)');
     timeToTarget=c.targetOnOff(1)*c.ifi/2;
@@ -244,6 +248,41 @@ if showPSTH
     set(gca,'yLim',[-(numConditions+1) yl(2)])
     set(gca,'yTickLabel',[0 yl(2)],'yTick',[0 yl(2)]);
 end
+
+%%
+showPSTH_context=any(ismember(plotsRequested(:),'PSTH_context'));
+if showPSTH_context
+    sub=find(strcmp(plotsRequested','PSTH_context'));
+    subplot(h,w,sub); hold on;
+    unqTrials=unique(c.spike.trial);
+    numTrials=length(unqTrials);
+    numRepeats=max(c.spike.repetition);
+    minTrial=min(c.spike.trial);
+    adjTrial=c.spike.trial-minTrial;
+    cumulativeRep=adjTrial*numRepeats+c.spike.repetition;
+    for i=1:numConditions
+        spTm=c.spike.relRepTimes(c.spike.condition==i);
+        countPerTrial=sum(c.spike.condition==i)/numTrials;
+        if countPerTrial>0
+        [fi,ti] = ksdensity(spTm,'width',.01);
+        time=1*20; 
+        plot(ti,fi*countPerTrial/time,'color',c.colors(i,:));
+        plot(spTm,-cumulativeRep(c.spike.condition==i),'.','color',brighten(c.colors(i,:),-0.9));
+        %histc(spTm,[])
+        end
+    end
+     xlabel('time (sec)');
+%     timeToTarget=c.targetOnOff(1)*c.ifi/2;
+%     xvals=1000*[ -timeToTarget 0  (c.targetOnOff*c.ifi)-timeToTarget];
+%     set(gca,'xLim',xvals([1 4]))
+%     set(gca,'XTickLabel',xvals,'XTick',xvals);
+%         
+     ylabel('rate');
+     yl=ylim;
+     set(gca,'yLim',[-(max(cumulativeRep)+1) yl(2)])
+     set(gca,'yTickLabel',[0 yl(2)],'yTick',[0 yl(2)]);
+end
+
 
 
 cleanUpFigure

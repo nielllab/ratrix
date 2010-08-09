@@ -378,11 +378,10 @@ for i=1:numRealSubjects
                         stats(i,j,k)=dprime(d.response(conditionInds(j,:)),d.correctAnswerID(conditionInds(j,:)),'presentVal',presentVal,'absentVal',absentVal,'silent');
                         CI(i,j,k,:)=nan;
                     case {'crit'}
-                        
                         [junk more]=dprime(d.response(conditionInds(j,:)),d.correctAnswerID(conditionInds(j,:)),'presentVal',presentVal,'absentVal',absentVal,'silent');
-                        stats(i,j,k)= -(norminv(more.hitsPercent/100)+norminv(more.falseAlarmsPercent/100))/2;  %cr =-(norminv(h)+norminv(f))/2;
-                        CI(i,j,k,:)=nan;
-                        
+                        %cr =-(norminv(h)+norminv(f))/2;
+                        stats(i,j,k)=-(norminv(numHits/(numHits+numMisses))+norminv(numFAs/(numCRs+numFAs)))/2;
+                        CI(i,j,k,:)=nan; 
                     case {'criterionMCMC', 'biasMCMC', 'dprimeMCMC','pctCorrectMCMC'}
                         stats(i,j,k)=nan;
                         CI(i,j,k,:)=nan;

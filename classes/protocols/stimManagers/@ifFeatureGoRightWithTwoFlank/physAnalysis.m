@@ -13,7 +13,7 @@ plotsRequested={'viewSort','viewDrops','rasterDensity';
     'plotEyes','spikeAlignment','raster';
     'meanPhotoTargetSpike','PSTH','ratePerCondition'};
 
-plotsRequested={'viewSort','ratePerCondition';
+plotsRequested={'rasterDensity','photodiodeAlignment';
     'raster', 'PSTH'};
 
 [h w]=size(plotsRequested);
@@ -346,7 +346,9 @@ end
 %         end
 %     end
 % end
-
+%% precalc usefull
+        onsetFrame=diff([0; targetIsOn])>0;
+        [conditionPerCycle junk]=find(conditionInds(:,onsetFrame));
 
 %% NEW
 %sweptID
@@ -372,9 +374,11 @@ for i=1:numRepeats
                 error(sprintf('count should be at least 1!, [i j k] = [%d %d %d]',i,j,k))
             end
             %tOn(i,j,k)=mean(targetIsOn(which)>0.5); where is should be on
-            %in last repeat density = 0, for parsing and avoiding misleading half data
+            %in last repeat density = 0, for parsing and avoiding
+            %misleading half data
             if numRepeats~=i
-                y=(j-1)*(numRepeats)+i;
+                %y=(j-1)*(numRepeats)+i; % linear in order displayed
+                y=(conditionPerCycle(j)-1)*(numRepeats)+i; %unscambled to the order in conditiondInds
                 rasterDensity(y,k)=events(i,j,k)./possibleEvents(i,j,k);
                 photodiodeRaster(y,k)=photodiode(i,j,k);
                 %tOn2(y,k)=tOn(i,j,k); where is should be on
@@ -388,17 +392,6 @@ end
 
 rasterDensity(isnan(rasterDensity))=0;
 photodiodeRaster(photodiodeRaster==0.1)=mean(photodiodeRaster(:)); photodiodeRaster(1)=mean(photodiodeRaster(:));  % a known problem from drops
-
-photodiodeAlignment=any(ismember(plotsRequested(:),'photodiodeAlignment'));
-if photodiodeAlignment
-    figure(parameters.trialNumber);
-    sub=find(strcmp(plotsRequested','photodiodeAlignment'));
-    subplot(h,w,sub)
-    imagesc(photodiodeRaster);  colormap(gray);
-    %imagesc(tOn2); where is should be on
-    %imagesc(targetIsOnMatrix);
-end
-
 
 %NOT USING THIS ANYMORE ... use 'rasterDensity' to plotRasterDensity ...
 %that will work with the cumulative display, this won't
@@ -433,13 +426,6 @@ if meanPhotoTargetSpike
     title(sprintf('spikes: %d',sum(spikeCount)))
 end
 
-if  ( photodiodeAlignment || meanPhotoTargetSpike)
-    if addToCumulativeData
-        cumulativedata.photodiodeRaster=[cumulativedata.photodiodeRaster; photodiodeRaster];
-    else %reset
-        cumulativedata.photodiodeRaster=photodiodeRaster;
-    end
-end
     
 plotEyes=any(ismember(plotsRequested(:),'plotEyes'));
 if plotEyes
@@ -521,7 +507,7 @@ rasterDensity=rasterDensity(:,shiftedFrameOrder);
 fullPhotodiode=fullPhotodiode(:,:,shiftedFrameOrder);
 photodiode=photodiode(:,shiftedFrameOrder);
 photodiodeSEM=photodiodeSEM(:,shiftedFrameOrder);
-
+photodiodeRaster=photodiodeRaster(:,shiftedFrameOrder);
 
 
 %%
@@ -538,9 +524,11 @@ if plotRasterDensity
     ylabel([swept]);
     
     xlabel('time (msec)');
-    set(gca,'XTickLabel',xvals,'XTick',xloc);
+    %set(gca,'XTickLabel',xvals,'XTick',xloc);
     
-    
+    xloc=[0.5  double(shiftedFrameOrder(end)) double(shiftedFrameOrder(end)+diff(s.targetOnOff)) double(s.targetOnOff(2))+0.5];
+    timeToTarget=double(s.targetOnOff(1))*ifi/2;
+    xvals=[ -timeToTarget 0 (double(s.targetOnOff)*ifi)-timeToTarget];
     plot(xloc([2 2]),[0.5 size(rasterDensity,1)+0.5],'g')
     plot(xloc([3 3]),[0.5 size(rasterDensity,1)+0.5],'g')
     
@@ -551,6 +539,25 @@ if plotRasterDensity
         cumulativedata.rasterDensity=[cumulativedata.rasterDensity; rasterDensity];
     else %reset
         cumulativedata.rasterDensity=rasterDensity;
+    end
+end
+
+%%
+photodiodeAlignment=any(ismember(plotsRequested(:),'photodiodeAlignment'));
+if photodiodeAlignment
+    figure(parameters.trialNumber);
+    sub=find(strcmp(plotsRequested','photodiodeAlignment'));
+    subplot(h,w,sub)
+    imagesc(photodiodeRaster);  colormap(gray);
+    %imagesc(tOn2); where is should be on
+    %imagesc(targetIsOnMatrix);
+end
+
+if  ( photodiodeAlignment || meanPhotoTargetSpike)
+    if addToCumulativeData
+        cumulativedata.photodiodeRaster=[cumulativedata.photodiodeRaster; photodiodeRaster];
+    else %reset
+        cumulativedata.photodiodeRaster=photodiodeRaster;
     end
 end
 

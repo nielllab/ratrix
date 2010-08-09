@@ -118,7 +118,6 @@ borderColor(4,3)=.8;
 antiAliasing=true;
 useSymbolicFlanker=false;
 [images]=getStimSweep(sweptImageParameters,sweptImageValues,borderColor,[],'column',false,antiAliasing,useSymbolicFlanker);
-
 inds=fliplr(reshape([1:20],4,5)'); inds=inds(:);
 
 figure; montage(images(:,:,:,inds),'DisplayRange',[0,255], 'Size',[4 5]);

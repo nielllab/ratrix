@@ -31,7 +31,7 @@ classdef detectionModel
         
         %infrastructure
         savePath='C:\Documents and Settings\rlab\Desktop\detectionModels'
-        modelName='simple-231'; %
+        modelName='simple-234'; %
         %other old models: fastManualHunt,LL, fixedEye, fitAttnfixedEye
         
         %for histograms of the signal & boundary for fminsearch
@@ -58,27 +58,444 @@ classdef detectionModel
         %   attentionEnvelope
     end
     methods
-        function p=detectionModel()
+        function p=detectionModel(name)
             %default contructor uses no params
             p=p.init;
             p=p.setViewPlots('allOn'); %'dynamicTesting'
-            %p.manualHuntTrail(); %do first thing automatically
+            if exist('name','var')
+                p.modelName=name; 
+                p=p.load;
+            end
             %p.testBed();%
-            %p.intuitionTest()
+               
+
+            %p.modelName='searchSearch_20100728T134944'; p=p.load() %basic, 234 w/ gaussVe & alpha: 1,0,fit
+%                                     x.alpha={'1','0','fit'};
+%                                     x.bias={'no'}; % ,'no','cost' LLR
+%                                     x.pdf={'gaussVe'} % 'gaussVs','gaussVi'
+%                                     x.gamma={'no'};
+%                                     x.plus={'no'};
+%                                     p=p.searchSearch(x,{'234'});
+%                                     p.modelCompareForPoster(p.cache.namesOfModels)
             
-            p=p.testDiffusionModel();
-                        
- 
-            %p.runAndSaveModelBatchSTD({'unequal var yoked plus bias','unequal var ind plus bias'});
-            %p.modelCompareForPoster({'simple','fixed crit','slow adapting','unequal var yoked','variance scales','unequal var ind'},'231');
-            %p.modelCompareForPoster({'simple plus bias','fixed crit plus bias','slow adapting plus bias','unequal var yoked plus bias','variance scales plus bias','unequal var ind plus bias'},'231');
-            %p.modelCompareForPoster({'fixed crit','slow adapting','variance scales','unequal var yoked','unequal var ind'},'231');
+%         p.modelName='searchSearch_20100805T121258'; p=p.load() %basic, 234 w/ gaussVe & alpha: 1,0,fit, has power contrast, 2*f
+%                                     x.alpha={'1','0','fit'};
+%                                     x.bias={'no'}; % ,'no','cost' LLR
+%                                     x.pdf={'gaussVe'} % 'gaussVs','gaussVi'
+%                                     x.gamma={'yoked'};
+%                                     x.plus={'no'};
+%                                     p=p.searchSearch(x,{'234'});
+%                                    p.modelCompareForPoster(p.cache.namesOfModels)
+
+
+%p.modelName='searchSearch_20100729T104405'; p=p.load() %234 3 pdfs: Vi,Vs, gam
+%p.modelName='searchSearch_20100729T125010'; p=p.load() %234 3 pdfs: Ve,Vs, gam  all w/ dn
+%p.modelName='searchSearch_20100729T131352'; p=p.load() %231 3 pdfs: Ve,Vs, gam  all w/ dn
+
+% x.alpha={'fit'};
+% x.bias={'no'}; % ,'no','cost' LLR
+% x.pdf={'gaussVe','gaussVs','gam'} % 'gaussVs','gaussVi'
+% x.gamma={'yoked'};
+% x.plus={'dn'};
+% p=p.searchSearch(x,{'231'});
+% p.modelCompareForPoster(p.cache.namesOfModels)
+
+
+%p.modelName='searchSearch_20100726T224704'; p=p.load() % one ittn
+    %p.modelName=''; p=p.load() % 10 ittn
+%     
+%     x.alpha={'0','fit'}; %fit
+%     x.bias={'no','cost'}; % ,'no','cost' LLR
+%     x.var={'scales'};
+%     x.pdf={'gaussVe','gaussVs','gaussVi','exp','gam','logn'}
+%     x.gamma={'yoked'};
+%     x.plus={'no','dn'};
+%     p=p.searchSearch(x,{'231','234'},10);
+    
+%p.plotBICvsParams()
+
+% p.modelName='searchSearch_20100730T210643'; p=p.load() % 231, dn x10
+% n.alpha={'fit'}; %fit 96,1
+% n.bias={'no','cost'}; % ,'no','cost' LLR
+% n.var={'scales'};
+% n.pdf={'gaussVe'}%,'gaussVs','gaussVi','exp','gam','logn'}
+% n.gamma={'yoked'};
+% n.plus={'dn'};
+% n.subjects={'231'};
+% nm=p.getSearchSearchModelNames(n);
+% % p=p.searchSearch(n,{'231'},10);
+% %p.plotModelWithDistribution(nm)
+% p.modelCompareForPoster(nm,[])
+%                 
+% p.modelName=('231-gaussVe-a_f-b_cost-dn'); p=p.load;
+% p.viewModel
+
+
+%p.modelName='searchSearch_20100804T175103'; p=p.load() % 234, dn x10
+% n.alpha={'fit'}; %fit 96,1
+% n.bias={'cost'}; % 
+% n.var={'scales'};
+% n.pdf={'gaussVe'}
+% n.gamma={'yoked'};
+% n.plus={'dn'};
+% n.subjects={'234'};
+% p=p.searchSearch(n,{'234'},10);
+
+
+
+if 1
+    %p.modelName='searchSearch_20100726T224704'; p=p.load() % one ittn
+    %p.modelName='searchSearch_20100801T122349'; p=p.load() % 96x10, wrong dn
+    
+%     x.alpha={'0','1','fit'}; %fit
+%     x.bias={'no','cost'}; % ,'no','cost' LLR
+%     x.var={'scales'};
+%     x.pdf={'gaussVe','gaussVs','gaussVi','exp','gam','logn'}
+%     x.gamma={'yoked'};
+%     x.plus={'no','dn'};
+%     p=p.searchSearch(x,{'231','234'},10);
+    
+
+    % p.modelName='searchSearch_20100805T093642'; p=p.load() % 48x10, gamma pdf has bug
+
+    %p.modelName=''; p=p.load() % 48x10, use LLR, no bug
+    p.modelName='tempOngoingSearch_20100808T001247'; p=p.load() %48x10, parttial
+    x.alpha={'fit'}; %fit
+    x.bias={'no','cost'}; % ,'no','cost' LLR
+    x.var={'scales'};
+    x.pdf={'gaussVe','gaussVs','gaussVi','exp','gam','logn'}
+    x.gamma={'yoked'};
+    x.plus={'no','dn'};
+    p=p.searchSearch(x,{'231','234'},10);
+
+                p.plotBICvsParams()
+                
+                n.alpha={'0','fit'}; %fit
+                n.bias={'no','cost'}; % ,'no','cost' LLR
+                n.var={'scales'};
+                n.pdf={'gaussVe','gaussVs','gaussVi','exp','gam','logn'}
+                n.gamma={'yoked'};
+                n.plus={'no','dn'};
+                n.subjects={'231','234'};
+                nm=p.getSearchSearchModelNames(n);
+                
+                
+                figure
+                rng=[325 600];
+                subplot(2,3,1); sc=[]; sc.alpha={'0','fit'};
+                p.scatterPerFeature(n,sc,rng); title('alpha')
+                
+                subplot(2,3,2); sc=[]; sc.bias={'no','cost'};
+                p.scatterPerFeature(n,sc,rng); title('bias')
+                
+                subplot(2,3,3); sc=[]; sc.plus={'no','dn'};
+                p.scatterPerFeature(n,sc,rng); title('dn')
+                
+                subplot(2,3,4); sc=[]; sc.pdf={'gaussVe','gam'};
+                p.scatterPerFeature(n,sc,rng); title('vs. gaussVs')
+                
+                subplot(2,3,5); sc=[]; sc.pdf={'exp','gam'};
+                p.scatterPerFeature(n,sc,rng); title('vs. gam')
+                
+                subplot(2,3,6); sc=[]; sc.pdf={'gaussVi','gam'};
+                p.scatterPerFeature(n,sc,rng); title('vs. logn')
+                
+                nm=p.getSearchSearchModelNames(n);
+                p.modelCompareForPoster(nm)
+                
+                
+                n.alpha={'fit'}; %fit
+                n.bias={'no','cost'}; % ,'no','cost' LLR
+                n.pdf={'gaussVs','gaussVi','gam'};
+                n.gamma={'yoked'};
+                n.plus={'dn'};
+                n.subjects={'231','234'};
+                nm=p.getSearchSearchModelNames(n);
+                p.modelCompareForPoster(nm,[])
+                
+                n.alpha={'fit'}; %fit
+                n.bias={'no'}; % ,'no','cost' LLR
+                n.pdf={'gam'};
+                n.gamma={'yoked'};
+                n.plus={'dn'};
+                n.subjects={'231','234'};
+                nm=p.getSearchSearchModelNames(n);
+                p.modelCompareForPoster(nm,[],false,false)
+                
+                
+            end
             
-            %p=p.searchSearch();
-            %p.modelName='searchSearch_20100608T174740'; %72 models
-            %p=p.load;
-            %p.modelCompareForPoster(p.cache.namesOfModels)
+            
         end
+        
+        function plotBICvsParams(p,includedFeatures)
+            if ~exist('includedFeatures','var') || isempty(includedFeatures)
+                ln=length(p.cache.namesOfModels);
+                [nm{1:ln/2,1}]=deal(p.cache.namesOfModels{1:ln/2});
+                [nm{:,2}]=deal(p.cache.namesOfModels{1+ln/2:end});
+                %warning: assumes 2 rats... bad stuff if not true
+                subjects={'231','234'};
+            else
+                nm=p.getSearchSearchModelNames(includedFeatures);
+                %need to split by subject here
+            end
+            
+            
+            modsPerSubj=length(p.cache.namesOfModels)/length(subjects);
+            
+            figure; hold on
+            for s=1:length(subjects)
+                for i=1:modsPerSubj
+                    ind=find(strcmp(nm{i,s},p.cache.groupModelNames));
+                    AIC(i,s)=min(p.cache.AIC(:,ind));
+                    BIC(i,s)=min(p.cache.BIC(:,ind));
+                    LL(i,s)=max(p.cache.LL(:,ind));
+                    numParams(i,s)=length(p.cache.groupModelFeatures{ind});
+                end
+            end
+            
+           numTrials=sum(p.cache.raw.numAttempt);
+           %num trials is not specific to rat, meaning that adjust could be off by 0.1*numParams nats
+           % 231:  log(33674) --> 10.42 nats        234:  log(29478) --> 10.3 nats
+           %[BIC LL]=p.AIC2BIC(AIC,numParams,numTrials);
+           
+           [junk ranked] =sort(sum(BIC')) % best average BIC across the rats
+           topN=5;
+           which=repmat((ranked(1:topN)),length(subjects),1)'+repmat(modsPerSubj*([1:length(subjects)]-1),topN,1);
+           
+           
+           
+           subplot(1,2,1); hold on
+           plot(numParams,-LL,'k.')
+           plot(numParams(which(1,:)),-LL(which(1,:)),'r.')
+           x=2:10;
+           expectedDecreaseLine=275-(log(numTrials))*x;
+           plot(x,expectedDecreaseLine,'k')
+           set(gca,'ytick',[0 137 500 1000 2000])
+           set(gca,'xtick',[4:9])
+           ylabel('-log(liklihood)')
+           xlabel('# params (k)')
+           
+           subplot(1,2,2); hold on
+           %plot(numParams,BIC,'k.')
+           plot(numParams(:,1),mean(BIC'),'ko')
+           bestPossibleLine=2*137+(log(numTrials))*x;
+           plot(x,bestPossibleLine,'k')
+           xlabel('# params (k)')
+           
+           set(gca,'ylim',[200 800],'ytick',[200 400 600])
+           ylabel('-log(liklihood) + 2k*log(n)')
+           set(gca,'xtick',[4:9])
+           
+              
+           %the 2nd to 5th place
+           %plot(numParams(which),BIC(which),'b.')
+           plot(numParams(which),mean(BIC(which(:,1),:)'),'bo')
+
+           %the best in red
+           %plot(numParams(which(1,:)),BIC(which(1,:)),'r.')
+           plot(numParams(which(1)),mean(BIC(which(1,:))),'ro')
+           
+           for i=1:topN
+               text(numParams(which(i,1)),mean(BIC(which(i,1),:)'),p.cache.namesOfModels{which(i,1)}(5:end))
+           end
+
+            cleanUpFigure
+            
+        end
+        
+        function [BIC LL]=AIC2BIC(p,AIC,numParams,numTrials)
+           LL=AIC-2*numParams;
+           BIC=LL+2*numParams.*(log(numTrials)); 
+        end
+        function scatterPerFeature(p,includedFeatures,scatterFeature,range)
+            metric='BIC';
+            
+            sc=fields(scatterFeature);
+            
+            if length(sc)>1
+                char(sc)
+                error('only one scatter feature at a time')
+            else
+                %turn to char
+                sc=char(sc);
+            end
+            
+            if length(scatterFeature.(sc))>2
+                scatterFeature.(sc)
+                error('only 2 options at once')
+            end
+            
+            includedFeatures.(sc)=scatterFeature.(sc)(1);
+            nmX=p.getSearchSearchModelNames(includedFeatures);
+            for i=1:length(nmX)
+                indsX(i)=find(strcmp(nmX{i},p.cache.groupModelNames));
+            end
+            
+            includedFeatures.(sc)=scatterFeature.(sc)(2);
+            nmY=p.getSearchSearchModelNames(includedFeatures);
+            for i=1:length(nmY)
+                indsY(i)=find(strcmp(nmY{i},p.cache.groupModelNames));
+            end
+            
+            switch metric
+                case 'BIC'
+                    x=p.cache.BIC(indsX);
+                    y=p.cache.BIC(indsY);
+%                     numParams=cellfun(@length,p.cache.groupModelFeatures(indsX),'UniformOutput', true);
+%                     x=p.AIC2BIC(p.cache.AIC(indsX),numParams,sum(p.cache.raw.numAttempt));
+%                     
+%                     numParams=cellfun(@length,p.cache.groupModelFeatures(indsY),'UniformOutput', true);
+%                     y=p.AIC2BIC(p.cache.AIC(indsY),numParams,sum(p.cache.raw.numAttempt));
+                case 'AIC'
+                    x=p.cache.AIC(indsX);
+                    y=p.cache.AIC(indsY); 
+                otherwise
+                    error('bad')
+            end
+            modelFailX=p.cache.modelFitSuccess(indsX)~=1;
+            modelFailY=p.cache.modelFitSuccess(indsY)~=1;
+            
+                    
+            hold off; plot(x,y,'b.'); hold on
+            for i=1:length(nmX)
+               %text(x(i),y(i),nmX{i}) 
+            end
+            plot(x(modelFailX | modelFailY),y(modelFailX | modelFailY),'r.')
+            
+            if ~exist('range','var') || isempty(range)
+                mn=min([x y]);
+                mx=max([x y]);
+            else
+                mn=range(1);
+                mx=range(2);
+            end
+            plot([mn mx],[mn mx],'k')
+            axis([mn mx mn mx])
+            xlabel(sprintf('%s=%s (%s)',sc,scatterFeature.(sc){1},metric))
+            ylabel(sprintf('%s=%s (%s)',sc,scatterFeature.(sc){2},metric))
+        end
+        function plotMCMC(p)
+            hold on
+            tcs=p.cache.subjectData.params.factors.targetContrast;
+            fcs=p.cache.subjectData.params.factors.flankerContrast;
+            colors=0.8*ones(length(tcs),3);
+            colors(fcs==0,[1 2])=0;
+            colors(tcs==1,[2 3])=0;
+
+            
+            for i=1:length(p.modelFeatures)
+                switch p.modelFeatures{i}  
+                    case {'alpha','tm','fm'}
+                        x(i)=median(p.cache.mcmc.samples.(p.modelFeatures{i}));
+                    otherwise
+                        p.modelFeatures{i}
+                        error('not handled here!')
+                end
+            end
+            p.cache.modelParams=x;
+            p.viewModel(true)
+            
+            for t=2:p.numTc
+                for f=1:p.numFc
+                    cInd=find(p.tc(t)==tcs & p.fc(f)==fcs);
+                    plot(p.cache.mcmc.samples.f(1,:,cInd),p.cache.mcmc.samples.h(1,:,cInd),'.','color',colors(cInd,:));
+                end
+            end
+            
+        end
+        function p=doMCMC(p)
+            %mcmcFile=fullfile(getRatrixPath, 'analysis', 'matbugs', 'BayesSDT','BayesSDT_v2.txt');
+            
+            n=length(p.cache.raw.numHits);
+            burnin=500;
+            nsamples=burnin+p.numIttn;
+            
+            %cd(p.savePath) may cause problems
+            
+            %temp faster
+            nsamples=100; burnin=50;
+            
+            ww=2;
+            switch ww
+                case 1%test
+                    %                     prevDir=pwd;
+                    %                     cd(fullfile(getRatrixPath, 'analysis', 'matbugs', 'BayesSDT'));
+                    %                      mcmcFile=fullfile(pwd,'test.txt');
+                    %                     init0.d = zeros(n,1);
+                    %                     init0.c = zeros(n,1);
+                    %                     datastruct = struct('H',p.cache.raw.numHits ,'F',p.cache.raw.numFAs,'M',p.cache.raw.numMisses,'C',p.cache.raw.numCRs,...
+                    %                         'TC',p.cache.subjectData.params.factors.targetContrast,'FC',p.cache.subjectData.params.factors.targetContrast,...
+                    %                         'NDATASETS',n);
+                    %                     [samples, stats, structarray] = matbugs(datastruct, ...
+                    %                         mcmcFile, ...
+                    %                         'init', init0, ...
+                    %                         'nChains', 1, ...
+                    %                         'view', 0, 'nburnin', 0, 'nsamples', nsamples, ...
+                    %                         'thin', 1, 'DICstatus', 0, 'refreshrate',10, ...
+                    %                         'monitorParams', {'d','c','h','f','kf','kt','crit','mu'}, ...
+                    %                         'Bugdir', 'C:/Program Files/WinBUGS14')
+                    %                     cd(prevDir); %return to where you were
+                    
+                case 2
+                    prevDir=pwd;
+                    cd(fullfile(getRatrixPath, 'analysis', 'matbugs', 'BayesSDT'));
+                    %mcmcFile=fullfile(pwd,'BayesSDT_v2.txt');
+                    mcmcFile=fullfile(pwd,'test.txt');
+                    p.modelFeatures={'alpha','tm','fm'};
+                    init0=[];
+                    init0.tm = 0;
+                    init0.fm = 0;
+                    datastruct = struct('H',p.cache.raw.numHits ,'F',p.cache.raw.numFAs,'M',p.cache.raw.numMisses,'C',p.cache.raw.numCRs,...
+                        'TC',p.cache.subjectData.params.factors.targetContrast,'FC',p.cache.subjectData.params.factors.targetContrast,...
+                        'NDATASETS',n);
+                    
+                    [mcmc.samples, mcmc.stats, mcmc.structarray] = matbugs(datastruct,mcmcFile, 'init', init0, 'nChains', 1, 'view', 0, 'nburnin', 0, 'nsamples', nsamples, 'thin', 1, 'DICstatus', 0, 'refreshrate',10, 'monitorParams', {'c','h','f','m','muS','muN','tm','fm','alpha'}, 'Bugdir', 'C:/Program Files/WinBUGS14');
+                                p.cache.mcmc=mcmc; figure; p.plotMCMC; %temp
+                    
+                    cd(prevDir); %return to where you were
+                    
+
+                                
+                case 2.5 % a backup that works
+                    
+                    prevDir=pwd;
+                    cd(fullfile(getRatrixPath, 'analysis', 'matbugs', 'BayesSDT'));
+                    %mcmcFile=fullfile(pwd,'BayesSDT_v2.txt');
+                    mcmcFile=fullfile(pwd,'test1.txt');
+                    init0.d = zeros(n,1);
+                    init0.c = zeros(n,1);
+                    datastruct = struct('H',p.cache.raw.numHits ,'F',p.cache.raw.numFAs,'M',p.cache.raw.numMisses,'C',p.cache.raw.numCRs,...
+                        'TC',p.cache.subjectData.params.factors.targetContrast,'FC',p.cache.subjectData.params.factors.targetContrast,...
+                        'NDATASETS',n);
+                    [mcmc.samples, mcmc.stats, mcmc.structarray] = matbugs(datastruct, ...
+                        mcmcFile, ...
+                        'init', init0, ...
+                        'nChains', 1, ...
+                        'view', 0, 'nburnin', 0, 'nsamples', nsamples, ...
+                        'thin', 1, 'DICstatus', 0, 'refreshrate',10, ...
+                        'monitorParams', {'d','c','h','f','k','b'}, ...
+                        'Bugdir', 'C:/Program Files/WinBUGS14')
+                    cd(prevDir); %return to where you were
+                case 3
+                    mcmcFile=fullfile(pwd,p.mcmcModel); %
+                    datastruct = struct('H',p.cache.raw.numHits ,'F',p.cache.raw.numFAs,'M',p.cache.raw.numMisses,'C',p.cache.raw.numCRs,...
+                        ...'TC',p.cache.subjectData.params.factors.targetContrast*4,'FC',p.cache.subjectData.params.factors.targetContrast*4,...
+                        'NDATASETS',n);
+                    
+                    [mcmc.samples, mcmc.stats, mcmc.structarray] = matbugs(datastruct, ...
+                        mcmcFile, ...
+                        'init', init0, ...
+                        'nChains', 1, ...
+                        'view', 0, 'nburnin', burnin, 'nsamples', nsamples, ...
+                        'thin', 1, 'DICstatus', 0, 'refreshrate',10, ...
+                        'monitorParams', {'kt','kf','ut','uf','st','sf','crit'}, ...
+                        'Bugdir', 'C:/Program Files/WinBUGS14');
+            end
+            
+            p.cache.mcmc=mcmc;
+        end
+        
         function p=testDiffusionModel(p)
             minX=-1;
             maxX=1;
@@ -247,7 +664,7 @@ classdef detectionModel
             set(gca,'xtick',xlim,'xticklabel',{'fast','slow'},'ytick',[0 .5 1])
             cleanUpFigure
         end
-        function p=searchSearch(p,x,subjects)
+        function p=searchSearch(p,x,subjects,numIttn)
             if ~exist('x','var') || isempty(x)
                 %                 x.subjects={'231','234'};
                 %                 x.alpha={'0','1','fit'};
@@ -263,12 +680,12 @@ classdef detectionModel
                 %                 x.gamma={'no','yoked','ind'};
                 %                 x.plus={'no','dn'};
                 
-                x.subjects={'231','234'};
-                x.alpha={'fit'};
-                x.bias={'no','cost'};
-                x.var={'no','ind','scales'};
-                x.gamma={'no','yoked','ind'};
-                x.plus={'no','dn'};
+                %                 x.subjects={'231','234'};
+                %                 x.alpha={'fit'};
+                %                 x.bias={'no','cost'};
+                %                 x.var={'no','ind','scales'};
+                %                 x.gamma={'no','yoked','ind'};
+                %                 x.plus={'no','dn'};
                 
                 
                 %                 x.subjects={'231','234'};
@@ -277,29 +694,109 @@ classdef detectionModel
                 %                 x.var={'no','scales'};
                 %                 x.gamma={'no'};
                 %                 x.plus={'no'};
+                
+                
+%                 x.subjects={'231','234'};
+%                 x.alpha={'no','fit'}; %fit
+%                 x.bias={'no','cost'}; % ,'no','cost' LLR
+%                 x.var={'no'};
+%                 x.pdf={'gam','exp','logn'}; %'exp','gauss','logn',
+%                 x.gamma={'no'} %,'yoked'};
+%                 x.plus={'no'};
+                
+                x.subjects={'231','234'};
+                x.alpha={'0','fit'}; %fit
+                x.bias={'no','cost'}; % ,'no','cost' LLR
+                x.var={'scales'};
+                x.pdf={'gauss','exp','gam','logn'}; %'gauss','exp','gam','logn',
+                x.gamma={'yoked'};
+                x.plus={'no','dn'};
             end
+            
+            
+            p.cache.modelFitSuccess=[];
+            p.cache.BIC=[];
+            p.cache.AIC=[];
+            p.cache.LL=[];
+            p.cache.groupModelParams=[];
+            p.cache.groupModelNames=[];
+            p.cache.groupModelFeatures=[];
+            p.cache.groupModelParamsHistory=[];
             
             if exist('subjects','var') && ~isempty(subjects)
                 x.subjects=subjects;
             end
             
-            baseFeatures={'alpha','tm','fm'}; % all have this
+            if ~exist('numIttn','var') || isempty(numIttn)
+                numIttn=1;
+            end
+            
+            
+            baseFeatures={'alpha'}; % all have this
             nm=p.getSearchSearchModelNames(x);
             p.cache.namesOfModels=nm;
             count=0;
+            
+            
             for sub=1:length(x.subjects)
                 p=loadDataFromServer(p,x.subjects(sub));
-                for a=1:length(x.alpha)
-                    for b=1:length(x.bias)
-                        for v=1:length(x.var)
+                for pd=1:length(x.pdf)
+                    for a=1:length(x.alpha)
+                        for b=1:length(x.bias)
                             for g=1:length(x.gamma)
                                 for pl=1:length(x.plus)
                                     count=count+1;
-                                    if 1 %count>43 % pickup where last left off, TRUE starts fresh
+                                    disp(sprintf('%d/%d doing %s',count,length(nm),nm{count}))
+                                    if count>4 % pickup where last left off, TRUE starts fresh
                                         features=baseFeatures;
-                                        x0=[0.5 1 1];
-                                        disp(sprintf('%d/%d doing %s',count,length(nm),nm{count}))
+                                        x0=[0.5];
+
                                         
+                                        features{end+1}='tm';
+                                        features{end+1}='fm';
+                                        x0(end+1)=1;
+                                        x0(end+1)=1;
+                                        switch x.pdf{pd}
+                                            case 'gaussVe'
+                                                % no more params
+                                            case 'gaussVy'
+                                                features{end+1}='sigma';
+                                                x0(end+1)=1;
+                                            case 'gaussVs'
+                                                features{end+1}='sigmaPerMean';
+                                                x0(end+1)=1;
+                                            case 'gaussVi'
+                                                features{end+1}='ts';
+                                                features{end+1}='fs';
+                                                x0(end+1:end+2)=[1 1];
+                                            case 'exp'
+                                                features{end+1}='expBase';
+                                                x0(end+1)=1;
+                                            case 'gam'
+                                                features{end+1}='gamShape';
+                                                %features{end+1}='gamBase';
+                                                %x0(end+1)=1;
+                                                x0(end+1)=1;
+                                            case 'logn'
+                                                %features{end+1}='lognSigma';
+                                                features{end+1}='lognBase';
+                                                %x0(end+1)=1;
+                                                x0(end+1)=1;
+                                            case 'gev'
+                                                features{end+1}='kappa';
+                                                x0(end+1)=[0.3];
+                                                error('not yet')
+                                            case 'gevS'
+                                                features{end+1}='kappa';
+                                                features{end+1}='tk';
+                                                features{end+1}='tf';
+                                                x0(end+1:end+3)=[0.3 1 1];
+                                                error('not yet')
+                                            otherwise 
+                                                x.pdf{pd}
+                                                error('bad pdf')
+                                        end
+                                                                                                                     
                                         switch x.alpha{a}
                                             case '0'
                                                 p.critLearningRate='zero';
@@ -307,6 +804,9 @@ classdef detectionModel
                                                 p.critLearningRate='one';
                                             case 'fit'
                                                 p.critLearningRate='fit';
+                                            otherwise
+                                                x.alpha{a}
+                                                error('bad')
                                         end
                                         
                                         switch x.bias{b}
@@ -328,19 +828,6 @@ classdef detectionModel
                                                 x0(end+1)=0; % fraction? exp?
                                         end
                                         
-                                        switch x.var{v}
-                                            case 'no'
-                                            case 'yoked'
-                                                features{end+1}='sigma';
-                                                x0(end+1)=1;
-                                            case 'scales'
-                                                features{end+1}='sigmaPerMean';
-                                                x0(end+1)=1;
-                                            case 'ind'
-                                                features{end+1}='ts';
-                                                features{end+1}='fs';
-                                                x0(end+1:end+2)=[1 1];
-                                        end
                                         
                                         switch x.gamma{g}
                                             case 'no'
@@ -358,44 +845,41 @@ classdef detectionModel
                                                 features{end+1}='c50';
                                                 features{end+1}='fallOff';
                                                 x0(end+1:end+2)=[1 1];
-                                            case 'gev'
-                                                features{end+1}='kappa';
-                                                x0(end+1)=[0.3];
-                                                error('not yet')
-                                            case 'gevS'
-                                                features{end+1}='kappa';
-                                                features{end+1}='tk';
-                                                features{end+1}='tf';
-                                                x0(end+1:end+3)=[0.3 1 1];
-                                                error('not yet')
                                         end
                                         
                                         if gcf>10
-                                            close all
+                                            close all 
                                         end
                                         
                                         %run this model and save it
                                         p.modelFeatures=features;
-                                        p=fitSubjectDataWithSDT(p,x0);
+                                        [p suc BIC AIC LL]=fitSubjectDataWithSDT(p,x0,numIttn);
+                                        
+                                        %continually save indiv model and group search info
+                                        p.cache.modelFitSuccess(:,count)=suc;
+                                        p.cache.BIC(:,count)=BIC;
+                                        p.cache.AIC(:,count)=AIC;
+                                        p.cache.LL(:,count)=LL;
+                                        p.cache.groupModelParams{count}=p.cache.modelParams;
+                                        p.cache.groupModelNames{count}=nm{count};
+                                        p.cache.groupModelFeatures{count}=p.modelFeatures;
+                                        p.cache.groupModelParamsHistory{count}=p.cache.modelParamsHistory;
+                                        
                                         p.modelName=nm{count};
+                                        p.save
+                                        p.modelName=sprintf('tempOngoingSearch_%s',datestr(now,30));
                                         p.save
                                         
                                         %view it
-                                        figure;
-                                        AIC(count)=p.viewModel;
+                                        figure; p.viewModel;
                                         title(nm{count})
                                         settings=[];
                                         settings.LineWidth=3;
                                         settings.AxisLineWidth=3;
                                         settings.fontSize=20;
                                         cleanUpFigure(gcf,settings)
-                                        fprintf('%2.2f',AIC(count))
-                                        
-                                        %continually save group search info
-                                        p.cache.AIC=AIC;
-                                        p.cache.groupModelParams{count}=p.cache.modelParams;
-                                        p.modelName=sprintf('tempOngoingSearch_%s',datestr(now,30));
-                                        p.save
+                                        fprintf('%2.2f\n',min(AIC))
+                              
                                     else
                                         p.modelName='tempOngoingSearch_20100608T163949';
                                         p=p.load;
@@ -409,24 +893,22 @@ classdef detectionModel
             p.modelName=sprintf('searchSearch_%s',datestr(now,30));
             p.save
         end
-            
+        
         function names=getSearchSearchModelNames(p,x)
             names={};
             for sub=1:length(x.subjects)
-                for a=1:length(x.alpha)
-                    for b=1:length(x.bias)
-                        for v=1:length(x.var)
+                for pd= 1:length(x.pdf)
+                    for a=1:length(x.alpha)
+                        for b=1:length(x.bias)
                             for g=1:length(x.gamma)
                                 for p=1:length(x.plus)
                                     nm=x.subjects{sub};
+                                    nm=[nm '-' x.pdf{pd}];
                                     nm=[nm '-a_' x.alpha{a}(1)];
                                     if ~strcmp(x.bias{b},'no')
                                         nm=[nm '-b_' x.bias{b}];
                                     end
-                                    if ~strcmp(x.var{v},'no')
-                                        nm=[nm '-v_' x.var{v}];
-                                    end
-                                    if ~strcmp(x.gamma{g},'no')
+                                    if ~strcmp(x.gamma{g},'yoked')
                                         nm=[nm '-g_' x.gamma{g}];
                                     end
                                     if ~strcmp(x.plus{p},'no')
@@ -481,6 +963,10 @@ classdef detectionModel
                         p.modelFeatures={'alpha','tm','fm'};
                         x0=[.73 1.13 1.73];
                         x0=[.77 1.41 2.42];
+                    case 'exponential'
+                        p.critLearningRate='fit';
+                        p.modelFeatures={'alpha','exp'};
+                        x0=[.73 1.13];
                     case 'slow adapting plus bias'
                         p.critLearningRate='fit';
                         p.modelFeatures={'alpha','tm','fm','bias'};
@@ -553,7 +1039,7 @@ classdef detectionModel
                         namesOfModels{i}
                         error('bad')
                 end
-                p=fitSubjectDataWithSDT(p,x0);
+                [p ]=fitSubjectDataWithSDT(p,x0);
                 figure;
                 p.save
                 
@@ -587,7 +1073,7 @@ classdef detectionModel
             
             
         end
-        function modelCompareForPoster(p,namesOfModels,subject)
+        function modelCompareForPoster(p,namesOfModels,subject,turnOffDetails,turnOffBarPlot)
             if ~exist('namesOfModels','var') || isempty(namesOfModels)
                 namesOfModels={'simple','fixed crit','slow adapting','unequal var','single power law','power law contrast','dn','dn-2gamma','dn-unequalVar','gevg'}
             end
@@ -596,54 +1082,105 @@ classdef detectionModel
                 subject='234'
             end
             
-            if length(namesOfModels)<=10 % only plot each one if 10 models or less
+             if ~exist('turnOffDetails','var') || isempty(turnOffDetails)
+                turnOffDetails=true;
+             end
+            
+             if ~exist('turnOffBarPlot','var') || isempty(turnOffBarPlot)
+                 turnOffBarPlot=false;
+             end
+             
+            if length(namesOfModels)<=18 && ~turnOffDetails% only plot each one if 10 models or less
                 for i=1:length(namesOfModels)
+                    fprintf('doing %s (%d of %d)\n',namesOfModels{i},i,length(namesOfModels))
+                    
                     if strcmp(namesOfModels{i}(1:2),'23')
                         %model starts with subjects name... load it (subj var will be ignored)
+                        subject=namesOfModels{i}(1:3);
                         p.modelName=namesOfModels{i};
                     else
                         %model does not start with subjects name... [append the name of the subject and then load it]
                         p.modelName=[namesOfModels{i} '-' subject];
                     end
-                    fprintf('doing %s (%d of %d)\n',namesOfModels{i},1,length(namesOfModels))
-                    p=p.load()
-                    figure;
-                    AIC(i)=p.viewModel(true,namesOfModels{i});
+                    
+                    if ~all(str2num(subject)==p.cache.raw.subjectID)
+                        pp=p.load();
+                        p.cache.raw=pp.cache.raw;
+                        p.cache.subjectData=pp.cache.subjectData;
+                    elseif length(unique(p.cache.raw.subjectID))>1
+                        error('have not handled >1 rats')
+                    end
+                    
+                    ind=find(strcmp(namesOfModels{i},p.cache.groupModelNames));
+                    if isempty(ind)
+                        % if its not stored in this object, then we load it
+                        % in from the outside.
+                        % this provided back compatibility, and allows for
+                        % combining across different search runs...
+                        pp=p.load();
+                        figure; set(gcf,'Name',['D: ' namesOfModels{i}])
+                        pp.plotDistributions(pp.tc(2:end),pp.fc)
+                        
+                        figure; set(gcf,'Name',['M: ' namesOfModels{i}])
+                        AIC(i)=pp.viewModel(true,namesOfModels{i});
+                    else
+   
+
+                        figure; set(gcf,'Name',['D: ' namesOfModels{i}])
+                        p.plotDistributions(p.tc(2:end),p.fc,p.cache.groupModelFeatures{ind},p.cache.groupModelParams{ind})
+                        
+                        figure; set(gcf,'Name',['M: ' namesOfModels{i}])
+                        AIC(i)=p.viewModel(true,namesOfModels{i},p.cache.groupModelFeatures{ind},p.cache.groupModelParams{ind});
+                        modelFitSuccess(i)=p.cache.modelFitSuccess(ind)==1;
+                    end
+    
                 end
             else %get the AIC from the last one in the list
-                    if strcmp(namesOfModels{end}(1:2),'23') % this should be a better function
-                        %model starts with subjects name... load it (subj var will be ignored)
-                        p.modelName=namesOfModels{end};
+                for i=1:length(namesOfModels)
+                    ind=find(strcmp(namesOfModels{i},p.cache.groupModelNames));    
+                    if ~isempty(ind)
+                        inds(i)=ind;
                     else
-                        %model does not start with subjects name... [append the name of the subject and then load it]
-                        p.modelName=[namesOfModels{end} '-' subject];
+                        badname=namesOfModels{i}
+                        error('expected name to be on list but its not... check features')
                     end
-                    p=p.load()
-                    AIC=p.cache.AIC;
+                end
+                [bestAICs bestRunInds]=min(p.cache.AIC(:,inds),[],1);
+                matrixInds=sub2ind(size(p.cache.AIC),bestRunInds,inds);
+                AIC=p.cache.AIC(matrixInds);
+                modelFitSuccess=p.cache.modelFitSuccess(matrixInds)==1;
             end
             
-            figure; hold on
-            coloring='default';
-            switch coloring
-                case 'cosyne2010poster'
-                    for i=1:6
-                        bar(i,AIC(i),'faceColor',[.8 .8 .8]);
-                    end
-                    for i=7:8
-                        bar(i,AIC(i),'faceColor',[1 .8 .6]);
-                    end
-                    for i=9:length(AIC)
-                        bar(i,AIC(i),'faceColor',[.8 .8 1]);
-                    end
-                    maxY=1000;
-                otherwise % default grey
-                    for i=1:length(AIC)
-                        bar(i,AIC(i),'faceColor',[.8 .8 .8]);
-                        text(i,0,namesOfModels{i},'Rotation',90)
-                    end
-                    yl=ylim;
-                    maxY=yl(2);
-                    maxY=1200;
+            if ~turnOffBarPlot
+                figure; hold on
+                coloring='default';
+                switch coloring
+                    case 'cosyne2010poster'
+                        for i=1:6
+                            bar(i,AIC(i),'faceColor',[.8 .8 .8]);
+                        end
+                        for i=7:8
+                            bar(i,AIC(i),'faceColor',[1 .8 .6]);
+                        end
+                        for i=9:length(AIC)
+                            bar(i,AIC(i),'faceColor',[.8 .8 1]);
+                        end
+                        maxY=1000;
+                    otherwise % default grey
+                        for i=1:length(AIC)
+                            if modelFitSuccess(i)
+                                bar(i,AIC(i),'faceColor',[.8 .8 .8]);
+                            else
+                                bar(i,AIC(i),'faceColor',[.8 0 0]); % red if not converged
+                            end
+                            text(i,0,namesOfModels{i},'Rotation',90)
+                        end
+                        yl=ylim;
+                        maxY=yl(2);
+                        %maxY=2500;
+                end
+            else
+                maxY=1000;
             end
             
             data=p.getDataFromSubjectCache;
@@ -721,6 +1258,48 @@ classdef detectionModel
             figure; plotROC(p,[],[],'modelSamples',true)
         end
         function testBed(p)
+            
+            
+            %             xn=[1 6]
+            %             xs=[1 7]
+            %             p.modelFeatures{end+1}='gamShape';%'gamShape' expBase
+            %             [critLLR er]=p.fitCriterionFromLLR(xn,xs)
+            %             [critOLD er]=p.fitCriterionFromGammaParams(xn,xs)
+%                         x=linspace(1,50,100);
+%                         figure; hold on
+%                         plot(x,gampdf(x,xs(1),xs(2)),'k')
+%                         plot(x,gampdf(x,xn(1),xn(2)),'b')
+            
+
+            %p.manualHuntTrail();
+             
+             
+            %p.intuitionTest()
+            %p=p.testDiffusionModel();
+                        
+            %p.runAndSaveModelBatchSTD({'unequal var yoked plus bias','unequal var ind plus bias'});
+            %p.modelCompareForPoster({'simple','fixed crit','slow adapting','unequal var yoked','variance scales','unequal var ind'},'231');
+            %p.modelCompareForPoster({'simple plus bias','fixed crit plus bias','slow adapting plus bias','unequal var yoked plus bias','variance scales plus bias','unequal var ind plus bias'},'231');
+            %p.modelCompareForPoster({'fixed crit','slow adapting','variance scales','unequal var yoked','unequal var ind'},'231');
+            
+            
+                        
+            %      [data params]=p.getDataFromSubjectCache; % unused idea
+            %      [x er]=fminsearch(@(x)gaussLinearSimpleMLErrorFun(p,x,data,params),x0)
+            
+
+            
+            %p=p.loadDataFromServer({'234'});
+            %p=p.doMCMC;
+            %p.plotMCMC;
+            
+            %p.modelName='searchSearch_20100719T163036'
+            %p=p.load; p.modelCompareForPoster(p.cache.namesOfModels)
+            
+            %p.modelName='searchSearch_20100608T174740'; %72 models
+            %p=p.load;
+            %p.modelCompareForPoster(p.cache.namesOfModels)
+            
             
             %p.intuitionTest
             %% load previous model same name
@@ -901,9 +1480,9 @@ classdef detectionModel
             end
             
         end
-        function p=fitSubjectDataWithSDT(p,x0)
+        function [p flg BIC AIC LL]=fitSubjectDataWithSDT(p,x0,numIttn)
             [data params]=p.getDataFromSubjectCache;
-            
+ 
             if any(unique([0 params.tcs])~=p.tc) || any(unique(params.fcs)~=p.fc)
                 unique([0 params.tcs])
                 unique(params.fcs)
@@ -920,16 +1499,50 @@ classdef detectionModel
                 x0=nan(1,length(p.modelFeatures)); %allow default for all of them
             end
             
-            [x er]=fminsearch(@(x)gaussLinearSimpleMLErrorFun(p,x,data,params),x0); %get trapped with
-            p=p.setGaussDistParamsFromModelFit(x);
-            
-            
-            if flag~=1
-                p.current
-                warning('bad fit..why?')
-                keyboard
+            if ~exist('numIttn','var') || isempty(numIttn)
+                numIttn=1;
             end
             
+            X=nan(length(x0),numIttn);
+            for i=1:numIttn
+                if i>1
+                   x0=x.*2.^(6*(rand(size(x))-0.5)); %multiply by something in the range [1/8 8]
+                   %.*(0.5+rand(size(x)));
+                   %initialize with multiplicative noise from previous state
+                end
+                
+                [x er(i) flg(i)]=fminsearch(@(x)gaussLinearSimpleMLErrorFun(p,x,data,params),x0); %get trapped with
+                
+                fprintf('.')
+                numParams=length(x);
+                switch p.critLearningRate
+                    case 'one'
+                        x(1)=1;
+                        numParams=numParams-1;
+                    case 'zero'
+                        x(1)=0;
+                        numParams=numParams-1;
+                end
+
+                X(:,i)=x;
+                [hit fa miss cr adjustedCrit critUsed params]=p.getRatesAndCriteria(x,params.tcs,params.fcs,params);
+                LL(i)=p.logLiklihood(data,hit,fa,miss,cr)+sum(p.logNchoosekPerCondition(data));
+                AIC(i)=2*numParams-2*(LL(i));
+                BIC(i)=numParams*log(sum(data.numAttempt))-2*LL(i);
+                
+                if flg(i)~=1
+                    p.current
+                    warning('bad fit..why?')
+                end
+            end
+            
+            best=find(er==min(er));
+            x=X(:,best(1))';
+            p.cache.modelParams=x;
+            p.cache.modelParamsHistory=X;
+            %p=p.setGaussDistParamsFromModelFit(x);  % this should
+            %acount for non-guass like logn & gam, but does not...
+                
             %p.plotROC([],[],'subject');
             %p.plotROC([],[],'gauss');
             %p.save; bad idea b/c params get stuck
@@ -985,20 +1598,28 @@ classdef detectionModel
             end
             
             %default
+            m0=0; %no contrast is zero mean by default
             tm=1; % basic sdt
             fm=1;
             ts=0; % no influence on sigma
             fs=0;
-            gammaT=1; % no gamma -- linear
-            gammaF=1;
+            gammaT=0; % no gamma -- linear -- exp(0)=1
+            gammaF=0;
             
-            addGevShape=p.isGEV();
-            if addGevShape
+            %default things that may not be searched
+            if p.isGEV
                 kappa=-0.3;
                 tk=0;
                 fk=0;
+            elseif p.isGammaDistribution
+                gamShape=1;
+                gamBase=1;
+            elseif p.isLognDistribution
+                lognSigma=1;
+                lognBase=1; %principle?
             end
             
+
             doDivisiveNorm=any(ismember(features,{'c50','fallOff','noSigNoiseStd'}));
             if doDivisiveNorm
                 c50=1;
@@ -1010,7 +1631,7 @@ classdef detectionModel
             for i=1:length(features)
                 if ~isnan(x(i)) % nans will allow inputs to be default to the above
                     switch features{i}
-                        case {'tm','fm','ts','fs','gammaT','gammaF','kappa','tk','fk','c50'}
+                        case {'tm','fm','ts','fs','kappa','tk','fk','expBase','lognBase','gamBase','gamShape','lognSigma'}
                             cmd=sprintf('%s=x(i);',features{i});
                             try
                                 eval(cmd);
@@ -1021,9 +1642,13 @@ classdef detectionModel
                             end
                         case {'alpha'}
                             % alpha is an acceptable model feature, but it's not actually used in this function
+                        case {'gammaT','gammaF','c50'}
+                                %[0 inf] based on exponential fit
+                                cmd=sprintf('%s=exp(x(i));',features{i});
+                                eval(cmd);
                         case {'gamma'}
-                            gammaT=x(i);
-                            gammaF=x(i);
+                            gammaT=exp(x(i));
+                            gammaF=exp(x(i));
                             if any(ismember(features,{'gammaT','gammaF'}))
                                 error('can''t define general and t/f specific value for the same parameter!')
                             end
@@ -1035,7 +1660,7 @@ classdef detectionModel
                             end
                         case {'bias'}
                             p.relativeMissCost=exp(x(i));
-                            %log(miss/hit)=b
+                            %log(miss/fa)=b
                         case {'sigmaPerMean'}
                             dependantFeatures{end+1}=features{i};
                             dx(end+1)=exp(x(i)); % negative would be nonsense
@@ -1049,6 +1674,7 @@ classdef detectionModel
                 end
             end
             
+        
             for i=1:length(dependantFeatures)
                 switch dependantFeatures{i}
                     case {'sigmaPerMean'}
@@ -1061,15 +1687,26 @@ classdef detectionModel
                 end
             end
             
+
             if doDivisiveNorm
-                t=tcs;%for debug
+                t=tcs;
                 f=fcs;
-                tcs=tcs.^gammaT./(c50+(fcs + 2*fallOff*tcs).^(gammaT));
-                fcs=fcs.^gammaF./(c50+(fcs + fallOff*tcs).^(gammaF)); % ignoring the effect of the other flanker
+                
+                %OLD -fixed Aug4,2010
+                % tcs=t.^gammaT./(c50+(f + 2*fallOff*t).^(gammaT));
+                % fcs=f.^gammaF./(c50+(f + fallOff*t).^(gammaF)); % ignoring the effect of the other flanker
+                
+                %NEW 
+                tcs=t.^gammaT./(c50+(t + 2*fallOff*f).^(gammaT));
+                fcs=2*f.^gammaF./(c50+(f + fallOff*t).^(gammaF)); % ignoring the effect of the other flanker
+                
+                
                 %close all; figure; plot(tcs,'g'); hold on; plot(fcs,'r')
                 if any(imag(tcs)~=0) || any(imag(fcs)~=0)
                     t
                     tcs
+                    f
+                    fcs
                     fallOff
                     warning('contrast can''t be complex')
                     keyboard
@@ -1089,21 +1726,43 @@ classdef detectionModel
                 fcs=fcs.^gammaF;
             end
             
-            %MEANS
-            muS=tcs*tm+fcs*fm;
-            muN=fcs*fm;
+            if p.isExponentialDistribution
+                m0=expBase;
+            elseif p.isGammaDistribution
+                m0=gamBase;
+            elseif p.isLognDistribution
+                m0=lognBase;
+            end
             
+            %MEANS
+            muS=m0+tcs*tm+fcs*fm;
+            muN=m0+fcs*fm;
+
+            minMu=0.01;
+            if p.isExponentialDistribution || p.isGammaDistribution || p.isLognDistribution
+                muN(muN<minMu)=minMu;
+                muS(muS<minMu)=minMu;
+            end
+
             %SIGMAS
-            if doDivisiveNorm
-                sigmaS=max(noSigNoiseStd+tcs*ts+fcs*fs,0.001);
-                sigmaN=max(noSigNoiseStd+fcs*fs,0.001);
+            if ~p.isLognDistribution
+                if doDivisiveNorm
+                    sigmaS=max(noSigNoiseStd+tcs*ts+fcs*fs,0.001);
+                    sigmaN=max(noSigNoiseStd+fcs*fs,0.001);
+                else
+                    sigmaS=max(1+tcs*ts+fcs*fs,0.001);
+                    sigmaN=max(1+fcs*fs,0.001);
+                end
             else
-                sigmaS=max(1+tcs*ts+fcs*fs,0.001);
-                sigmaN=max(1+fcs*fs,0.001);
+                sigmaS=lognSigma*ones(size(tcs));
+                sigmaN=lognSigma*ones(size(tcs));;
             end
             
             %SHAPE
-            if addGevShape
+            if p.isGammaDistribution
+                shapeS=gamShape*ones(size(tcs));
+                shapeN=gamShape*ones(size(tcs));;
+            elseif p.isGEV 
                 shapeS=kappa+tcs*tk+fcs*fk;
                 shapeN=kappa+fcs*fk;
                 %shape is bounded between -1 and 1
@@ -1125,7 +1784,7 @@ classdef detectionModel
             sigmaN=nan(1,length(tcs));
             shapeS=nan(1,length(tcs));  % also default for guass which doe not use shape
             shapeN=nan(1,length(tcs));
-            [fInd tInd tIndNoSig]=getContrastIndsFromCurrentOrArg(p);
+            [tInd fInd tIndNoSig]=getContrastIndsFromCurrentOrArg(p);
             for f=1:p.numFc
                 for t=1:p.numTc
                     which=tcs==p.tc(tInd(t)) & fcs==p.fc(fInd(f));
@@ -1158,6 +1817,8 @@ classdef detectionModel
                     %                     [p,muS,muN,sigmaS,sigmaN,shapeS,shapeN]=getSDTparams(p,x,tcs,fcs);
                 case 'simulationFitResults'
                     [p,muS,muN,sigmaS,sigmaN,shapeS,shapeN]=getSimulationFitMuSigma(p,x,tcs,fcs);
+                case 'getMedianMCMCMuSigma'
+                    hj=1
                 case 'simulationFitResultsSplined'
                     %maybe
                     error('not yet')
@@ -1179,11 +1840,29 @@ classdef detectionModel
                 end
                 
                 if p.isGEV
-                    adjustedCrit(i)=p.fitCriterionFromEvdParams([shapeN(i) sigmaN(i) muN(i)],[shapeS(i) sigmaS(i) muS(i)]);
+                    %adjustedCrit(i)=p.fitCriterionFromEvdParams([shapeN(i) sigmaN(i) muN(i)],[shapeS(i) sigmaS(i) muS(i)]);
+                    xn=[shapeN(i) sigmaN(i) muN(i)];
+                    xs=[shapeS(i) sigmaS(i) muS(i)];
+                elseif p.isExponentialDistribution
+                    %adjustedCrit(i)=p.fitCriterionFromExpParams([muN(i)],[muS(i)]);
+                    xn=[muN(i)];
+                    xs=[muS(i)];
+                elseif p.isGammaDistribution
+                    %adjustedCrit(i)=p.fitCriterionFromGammaParams([muN(i) shapeN(i)],[muS(i) shapeS(i)]); % WAS WRONG ORDER BEFORE
+                    xn=[shapeN(i) muN(i)];
+                    xs=[shapeS(i) muS(i)];
+                elseif p.isLognDistribution
+                    %adjustedCrit(i)=p.fitCriterionFromLognParams([muN(i) sigmaN(i)],[muS(i) sigmaS(i)]);
+                    xn=[muN(i) sigmaN(i)];
+                    xs=[muS(i) sigmaS(i)];
                 else
-                    adjustedCrit(i)=p.fitCriterionFromGaussParams([muN(i) sigmaN(i)],[muS(i) sigmaS(i)]);
+                    %adjustedCrit(i)=p.fitCriterionFromGaussParams([muN(i) sigmaN(i)],[muS(i) sigmaS(i)]);
+                    xn=[muN(i) sigmaN(i)];
+                    xs=[muS(i) sigmaS(i)];
                 end
+                adjustedCrit(i)=p.fitCriterionFromLLR(xn,xs);
             end
+
             
             if ~exist('anchorCriteria','var') || isempty(anchorCriteria)
                 anchorCriteria=mean(adjustedCrit);
@@ -1204,6 +1883,15 @@ classdef detectionModel
             if p.isGEV
                 miss=gevcdf(critUsed,shapeS,sigmaS,muS); hit=1-miss;
                 cr=gevcdf(critUsed,shapeN,sigmaN,muN); fa=1-cr;
+            elseif p.isExponentialDistribution
+                miss=expcdf(critUsed,muS); hit=1-miss;
+                cr=expcdf(critUsed,muN); fa=1-cr;
+            elseif p.isGammaDistribution                  
+                miss=gamcdf(critUsed,shapeS,muS); hit=1-miss;
+                cr=gamcdf(critUsed,shapeN,muN); fa=1-cr;
+            elseif p.isLognDistribution
+                miss=logncdf(critUsed,muS,sigmaS); hit=1-miss; % check sigma vs shape
+                cr=logncdf(critUsed,muN,sigmaN); fa=1-cr;
             else
                 miss=normcdf(critUsed,muS,sigmaS); hit=1-miss;
                 cr=normcdf(critUsed,muN,sigmaN); fa=1-cr;
@@ -1262,7 +1950,7 @@ classdef detectionModel
             params.modelLL=p.logLiklihood(data,hit,fa,miss,cr);
             er=-2*params.modelLL; % + a constant for the data
             
-            doPlot=rand<0.05;
+            doPlot=rand<0.01;
             doPlot=0;
             if doPlot
                 p.viewOnGoingFit(hit,miss,fa,cr,data,x,params,[1 2],true);
@@ -1270,19 +1958,34 @@ classdef detectionModel
                 figure(3);
                 for i=1:params.numTc*params.numFc;
                     subplot(params.numTc,params.numFc,i); hold off
-                    loc=linspace(-5,5,100);
-                    % loc=linspace(-10,10,100);
-                    plot(loc,normpdf(loc,params.muS(i),params.sigmaS(i)),'g'); hold on
-                    plot(loc,normpdf(loc,params.muN(i),params.sigmaN(i)),'r')
-                    
+                    if p.isGammaDistribution
+                        loc=linspace(0,30,100);
+                        plot(loc,lognpdf(loc,params.muS(i),params.shapeS(i)),'g'); hold on
+                        plot(loc,lognpdf(loc,params.muN(i),params.shapeN(i)),'r')   
+                        set(gca,'xtick',[],'ytick',[],'ylim',[0 .2])
+                    elseif p.isLognDistribution
+                        loc=linspace(0,10,100);
+                        plot(loc,lognpdf(loc,params.muS(i),params.sigmaS(i)),'g'); hold on
+                        plot(loc,lognpdf(loc,params.muN(i),params.sigmaN(i)),'r')
+                    elseif p.isExponentialDistribution
+                        loc=linspace(0,10,100);
+                        plot(loc,exppdf(loc,params.muS(i)),'g'); hold on
+                        plot(loc,exppdf(loc,params.muN(i)),'r')
+                        set(gca,'xtick',[],'ytick',[],'ylim',[0 .2])
+                    else
+                        loc=linspace(-5,5,100);
+                        plot(loc,normpdf(loc,params.muS(i),params.sigmaS(i)),'g'); hold on
+                        plot(loc,normpdf(loc,params.muN(i),params.sigmaN(i)),'r')    
+                    end
+               
                     plot(params.anchorCriteria([1 1]),ylim,'m')
                     plot(critUsed([i i]),ylim,'k')
-                    set(gca,'xtick',[],'ytick',[],'ylim',[0 .4])
+
                     plot(adjustedCrit([i i]),ylim,'r--')
                     xlabel(sprintf('tc:%2.2f fc:%2.2f',params.tcs(i),params.fcs(i)) )
                     
                 end
-                set(gcf,'position',[800 100 750 750]);
+                %set(gcf,'position',[649   508   606   579]); %[800 100 750 750]);
                 drawnow
             end
 %             if rand<0.05
@@ -1291,25 +1994,33 @@ classdef detectionModel
 %                 fprintf('.')
 %             end
         end
-        function AIC=viewOnGoingFit(p,hit,miss,fa,cr,data,x,params,handles,includeSubjectData)
+        function AIC=viewOnGoingFit(p,hit,miss,fa,cr,data,x,params,handles,includeSubjectData,includeFitText,includeParamText)
+            
+            if ~exist('includeFitText','var') || isempty(includeFitText)
+                includeFitText=true;
+            end
+            
+            if ~exist('includeParamText','var') || isempty(includeParamText)
+                includeParamText=true;
+            end
             
             if 0 % not used now
-                figure(handles(2)); hold off
+                axes(handles(2)); hold off
                 plot(log(hit.^data.numHits.*miss.^data.numMisses),'g-'); hold on
                 plot(log(fa.^data.numFAs.*cr.^data.numCRs),'r-');
                 set(gcf,'position',[50 900 500 200])
             end
             
-            figure(handles(1)); hold off
+            axes(handles(1)); hold off
             plot([0 1],[0 1],'k'); hold on
             if includeSubjectData
                 plot(data.fa,data.hit,'.k');
                 plot(data.fa(1:5:16),data.hit(1:5:16),'.b');
                 
                 
-                plot(fa,hit,'ok');
-                plot(fa(end-params.numTc:end),hit(end-params.numTc:end),'or');
-                plot(fa(1:5:16),hit(1:5:16),'ob');
+                plot(fa,hit,'.k');
+                plot(fa(end-params.numTc:end),hit(end-params.numTc:end),'.r');
+                plot(fa(1:5:16),hit(1:5:16),'.b');
             end
             
             % plot one criterion curve
@@ -1322,6 +2033,24 @@ classdef detectionModel
                 [tempParams numSubs]=p.adjustSubjectsIndex(params,n);
                 h=1-gevcdf(repmat(critSweep,1,numSubs),params.shapeS(cInd),params.sigmaS(cInd),params.muS(cInd));
                 f=1-gevcdf(repmat(critSweep,1,numSubs),params.shapeN(cInd),params.sigmaN(cInd),params.muN(cInd));
+            elseif p.isExponentialDistribution
+                n=40;
+                critSweep=linspace(0,3,n);
+                [tempParams numSubs]=p.adjustSubjectsIndex(params,n);
+                h=1-expcdf(repmat(critSweep,1,numSubs),params.muS(cInd));
+                f=1-expcdf(repmat(critSweep,1,numSubs),params.muN(cInd));
+            elseif p.isGammaDistribution    
+                 n=40;
+                critSweep=linspace(0,3,n);
+                [tempParams numSubs]=p.adjustSubjectsIndex(params,n);
+                h=1-gamcdf(repmat(critSweep,1,numSubs),params.muS(cInd),params.shapeS(cInd));
+                f=1-gamcdf(repmat(critSweep,1,numSubs),params.muN(cInd),params.shapeN(cInd));
+            elseif p.isLognDistribution
+                n=40;
+                critSweep=linspace(0,3,n);
+                [tempParams numSubs]=p.adjustSubjectsIndex(params,n);
+                h=1-logncdf(repmat(critSweep,1,numSubs),params.muS(cInd),params.sigmaS(cInd));
+                f=1-logncdf(repmat(critSweep,1,numSubs),params.muN(cInd),params.sigmaN(cInd));  
             else
                 %'gaussian'
                 n=20;
@@ -1371,7 +2100,7 @@ classdef detectionModel
             axis square
             set(gca,'xTick',[0 1],'xTickLabel',[0  1],'yTick',[0  1],'yTickLabel',[0  1])
             
-            AIC=writeParameterValues(p,x,data,params);
+            AIC=writeParameterValues(p,x,data,params,includeFitText,includeParamText);
             set(gcf,'position',[50 100 750 750])
             drawnow
         end
@@ -1393,7 +2122,7 @@ classdef detectionModel
             
             
         end
-        function AIC=writeParameterValues(p,x,data,params)
+        function AIC=writeParameterValues(p,x,data,params,includeFitText,includeParamText)
             
             nckLL=sum(p.logNchoosekPerCondition(data));
             numParams=length(x);
@@ -1401,7 +2130,9 @@ classdef detectionModel
                 % if alpha (learning rate) was not fit, don't count it
                 numParams=numParams-1;
             end
-            AIC=2*numParams-(params.modelLL+nckLL);
+            %AIC=2*numParams-(params.modelLL+nckLL); %OLD
+            AIC=2*numParams-2*(params.modelLL+nckLL); %NEW
+            BIC=2*log(sum(data.numAttempt))-2*(params.modelLL+nckLL); %NEW
             
             features=p.modelFeatures;
             for i=1:length(features)
@@ -1428,12 +2159,16 @@ classdef detectionModel
                         values(i)=x(i);
                     case 'c50'
                         names{i}='C_{50}';
+                        values(i)=exp(x(i));
                     case 'gamma'
                         names{i}='\gamma';
+                        values(i)=exp(x(i));
                     case 'gammaT'
                         names{i}='\gamma_t';
+                        values(i)=exp(x(i));
                     case 'gammaF'
                         names{i}='\gamma_f';
+                        values(i)=exp(x(i));
                     case 'fallOff'
                         names{i}='\lambda';
                         values(i)=1/(1+exp(-x(i)));
@@ -1462,6 +2197,14 @@ classdef detectionModel
                         names{i}='D';
                     case 'gazeStd'
                         names{i}='\sigma_{gaze}';
+                    case 'expBase'
+                        names{i}='\tau_0';
+                    case {'gamBase','lognBase'}
+                        names{i}='\mu_0';
+                    case 'gamShape'
+                        names{i}='\gamma_{shape}';
+                    case 'lognSigma'
+                        names{i}='\sigma_{logn}';
                     otherwise
                         features{i}
                         error('bad feature')
@@ -1469,21 +2212,26 @@ classdef detectionModel
             end
             
             str='';
-            for i=1:length(names)
-                str=[str sprintf('%s:  %2.2f\n',names{i},values(i))];
+            if includeParamText
+                for i=1:length(names)
+                    str=[str sprintf('%s:  %2.2f\n',names{i},values(i))];
+                end
             end
             
             %add liklihood display
-            str=[str sprintf('\n')];
-            str=[str sprintf('%s:  %2.2f\n','LL_{model}',params.modelLL+nckLL)];
-            str=[str sprintf('%s:  %2.2f\n','LL_{data}', params.dataLL+nckLL) ];
-            str=[str sprintf('%s:  %2.2f\n','AIC', AIC)];
+            if includeFitText
+                str=[str sprintf('\n')];
+                %str=[str sprintf('%s:  %2.2f\n','LL_{model}',params.modelLL+nckLL)];
+                %str=[str sprintf('%s:  %2.2f\n','LL_{data}', params.dataLL+nckLL) ];
+                %str=[str sprintf('%s:  %2.2f\n','AIC', AIC)];
+                str=[str sprintf('%s:  %2.2f','BIC', BIC)];
+            end
             
             gutter=0.05;
             text(1-gutter,gutter,str,'VerticalAlignment','bottom','HorizontalAlignment','right')
             
         end
-        function AIC=viewModel(p,includeSubjectData,titleName)
+        function [AIC BIC]=viewModel(p,includeSubjectData,titleName,modelFeatures,modelParams,includeFitText,includeParamText)
             if ~exist('includeSubjectData','var') || isempty(includeSubjectData)
                 includeSubjectData=true;
             end
@@ -1491,16 +2239,37 @@ classdef detectionModel
                 titleName='';
             end
             
+            if ~exist('modelFeatures','var') || isempty(modelFeatures)
+                modelFeatures=p.modelFeatures; % nonfunctional but what is meant
+            else
+                p.modelFeatures=modelFeatures; % sets the field
+            end
+            
+            if ~exist('modelParams','var') || isempty(modelParams)
+                modelParams=p.cache.modelParams;
+            end
+                       
+            if ~exist('includeFitText','var') || isempty(includeFitText)
+               includeFitText=true; 
+            end
+            
+            if ~exist('includeParamText','var') || isempty(includeParamText)
+                includeParamText=true;
+            end
+            
+
+            
             %             if ~exist('x','var') || isempty(x)
             %                 x=p.cache.gauss.modelParams;  % hmm default will error if gev was used...
             %             end
             
-            x=p.cache.modelParams;
+            x=modelParams;
             [data params]=p.getDataFromSubjectCache;
             [hit fa miss cr adjustedCrit critUsed params]=getRatesAndCriteria(p,x,params.tcs,params.fcs,params);
             params.modelLL=p.logLiklihood(data,hit,fa,miss,cr); % raw unadjusted before nchoosek
             
-            AIC=p.viewOnGoingFit(hit,miss,fa,cr,data,x,params,gcf,true);
+            AIC=p.viewOnGoingFit(hit,miss,fa,cr,data,x,params,gca,~includeSubjectData,includeFitText,includeParamText); 
+            BIC=p.AIC2BIC(AIC,length(x),sum(data.numAttempt));
             if includeSubjectData
                 includeArrows=false;
                 p.plotROC([],[],'subject',includeArrows);
@@ -1602,98 +2371,7 @@ classdef detectionModel
             
             p.cache.modelParams=x;
         end
-        function p=doMCMC(p)
-            %mcmcFile=fullfile(getRatrixPath, 'analysis', 'matbugs', 'BayesSDT','BayesSDT_v2.txt');
-            
-            n=length(p.cache.raw.numHits);
-            burnin=500;
-            nsamples=burnin+p.numIttn;
-            
-            %cd(p.savePath) may cause problems
-            
-            %temp faster
-            nsamples=100; burnin=50;
-            
-            ww=2;
-            switch ww
-                case 1%test
-                    %                     prevDir=pwd;
-                    %                     cd(fullfile(getRatrixPath, 'analysis', 'matbugs', 'BayesSDT'));
-                    %                      mcmcFile=fullfile(pwd,'test.txt');
-                    %                     init0.d = zeros(n,1);
-                    %                     init0.c = zeros(n,1);
-                    %                     datastruct = struct('H',p.cache.raw.numHits ,'F',p.cache.raw.numFAs,'M',p.cache.raw.numMisses,'C',p.cache.raw.numCRs,...
-                    %                         'TC',p.cache.subjectData.params.factors.targetContrast,'FC',p.cache.subjectData.params.factors.targetContrast,...
-                    %                         'NDATASETS',n);
-                    %                     [samples, stats, structarray] = matbugs(datastruct, ...
-                    %                         mcmcFile, ...
-                    %                         'init', init0, ...
-                    %                         'nChains', 1, ...
-                    %                         'view', 0, 'nburnin', 0, 'nsamples', nsamples, ...
-                    %                         'thin', 1, 'DICstatus', 0, 'refreshrate',10, ...
-                    %                         'monitorParams', {'d','c','h','f','kf','kt','crit','mu'}, ...
-                    %                         'Bugdir', 'C:/Program Files/WinBUGS14')
-                    %                     cd(prevDir); %return to where you were
-                    
-                case 2
-                    error('where i left off')
-                    prevDir=pwd;
-                    cd(fullfile(getRatrixPath, 'analysis', 'matbugs', 'BayesSDT'));
-                    %mcmcFile=fullfile(pwd,'BayesSDT_v2.txt');
-                    mcmcFile=fullfile(pwd,'test.txt');
-                    init0.d = zeros(n,1);
-                    init0.c = zeros(n,1);
-                    datastruct = struct('H',p.cache.raw.numHits ,'F',p.cache.raw.numFAs,'M',p.cache.raw.numMisses,'C',p.cache.raw.numCRs,...
-                        'TC',p.cache.subjectData.params.factors.targetContrast,'FC',p.cache.subjectData.params.factors.targetContrast,...
-                        'NDATASETS',n);
-                    [samples, stats, structarray] = matbugs(datastruct, ...
-                        mcmcFile, ...
-                        'init', init0, ...
-                        'nChains', 1, ...
-                        'view', 0, 'nburnin', 0, 'nsamples', nsamples, ...
-                        'thin', 1, 'DICstatus', 0, 'refreshrate',10, ...
-                        'monitorParams', {'d','c','h','f','kt','kf','gev'}, ...
-                        'Bugdir', 'C:/Program Files/WinBUGS14')
-                    cd(prevDir); %return to where you were
-                case 2.5 % a backup that works
-                    
-                    prevDir=pwd;
-                    cd(fullfile(getRatrixPath, 'analysis', 'matbugs', 'BayesSDT'));
-                    %mcmcFile=fullfile(pwd,'BayesSDT_v2.txt');
-                    mcmcFile=fullfile(pwd,'test1.txt');
-                    init0.d = zeros(n,1);
-                    init0.c = zeros(n,1);
-                    datastruct = struct('H',p.cache.raw.numHits ,'F',p.cache.raw.numFAs,'M',p.cache.raw.numMisses,'C',p.cache.raw.numCRs,...
-                        'TC',p.cache.subjectData.params.factors.targetContrast,'FC',p.cache.subjectData.params.factors.targetContrast,...
-                        'NDATASETS',n);
-                    [samples, stats, structarray] = matbugs(datastruct, ...
-                        mcmcFile, ...
-                        'init', init0, ...
-                        'nChains', 1, ...
-                        'view', 0, 'nburnin', 0, 'nsamples', nsamples, ...
-                        'thin', 1, 'DICstatus', 0, 'refreshrate',10, ...
-                        'monitorParams', {'d','c','h','f','k','b'}, ...
-                        'Bugdir', 'C:/Program Files/WinBUGS14')
-                    cd(prevDir); %return to where you were
-                case 3
-                    mcmcFile=fullfile(pwd,p.mcmcModel); %
-                    datastruct = struct('H',p.cache.raw.numHits ,'F',p.cache.raw.numFAs,'M',p.cache.raw.numMisses,'C',p.cache.raw.numCRs,...
-                        ...'TC',p.cache.subjectData.params.factors.targetContrast*4,'FC',p.cache.subjectData.params.factors.targetContrast*4,...
-                        'NDATASETS',n);
-                    
-                    [mcmc.samples, mcmc.stats, mcmc.structarray] = matbugs(datastruct, ...
-                        mcmcFile, ...
-                        'init', init0, ...
-                        'nChains', 1, ...
-                        'view', 0, 'nburnin', burnin, 'nsamples', nsamples, ...
-                        'thin', 1, 'DICstatus', 0, 'refreshrate',10, ...
-                        'monitorParams', {'kt','kf','ut','uf','st','sf','crit'}, ...
-                        'Bugdir', 'C:/Program Files/WinBUGS14');
-            end
-            
-            error('GOT TO MCMC END FINE')
-            p.cache.mcmc=mcmc;
-        end
+
         function intuitionTest(p)
             
             p.modelName='modelGroup'
@@ -1766,6 +2444,109 @@ classdef detectionModel
             end
             %p.crit(:,:)= mean(p.crit(:));
         end
+        function plotDistributions(p,tc,fc,modelFeatures,modelParams,noiseColor,signalColor)
+            % depends on p.cache.modelParams and p.modelFeatures
+            if ~exist('tc','var') || isempty(tc)
+                tc= p.tc(2:end);
+            end
+            if ~exist('fc','var') || isempty(fc)
+                fc= p.fc;
+            end
+            
+            if ~exist('modelFeatures','var') || isempty(modelFeatures)
+                modelFeatures= p.modelFeatures; % this is not needed, but its what we mean
+            else
+                p.modelFeatures=modelFeatures;
+            end
+            
+            if ~exist('noiseColor','var') || isempty(noiseColor)
+                noiseColor=[1 0 0];
+            end
+            
+             if ~exist('signalColor','var') || isempty(signalColor)
+                signalColor=[0 1 0];
+             end
+            
+              if ~exist('modelParams','var') || isempty(modelParams)
+                modelParams=p.cache.modelParams;
+            end
+            
+            %calculate fInds and tInds from requested tc and fc
+            tInds=find(ismember(p.tc,tc));
+            fInds=find(ismember(p.fc,fc));
+            if any(~ismember(tc,p.tc)) || any(~ismember(fc,p.fc))
+                p.tc
+                p.fc
+                tc
+                fc;
+                error('bad contrast choice')
+            end
+            
+            w=length(fInds);
+            h=length(tInds);
+            onlyOne=length(fInds)==1 && length(tInds)==1;
+            
+
+            [data params]=getDataFromSubjectCache(p);
+            [hit fa miss cr adjustedCrit critUsed params]=p.getRatesAndCriteria(modelParams,params.tcs,params.fcs,params);
+                   
+            for f=1:length(fInds)
+                for t=1:length(tInds)
+
+                    plotInd=(t-1)*length(fInds)+f; %fine
+                    if  ~onlyOne
+                        subplot(h,w,plotInd);
+                        ind=(h-t)*length(fInds)+f; % old
+                        %ind=(p.numTc-tInds(t))*p.numFc+fInds(f); %better? i thought so, handles request on subsets, but wrong
+                        %flipTc=[0 fliplr(p.tc(2:end))];
+                    else
+                        ind=find(params.tcs==p.tc(tInds(t)) & params.fcs==p.fc(fInds(f)));     % new... seems okay
+                    end
+                    hold on;
+                    
+                    if p.isGammaDistribution
+                        loc=linspace(0,30,100);
+                        s=gampdf(loc,params.muS(ind),params.shapeS(ind)); 
+                        n=gampdf(loc,params.muN(ind),params.shapeN(ind));
+                        set(gca,'xtick',[],'ytick',[],'ylim',[0 .3])
+                    elseif p.isLognDistribution
+                        loc=linspace(0,20,100);
+                        s=lognpdf(loc,params.muS(ind),params.sigmaS(ind));
+                        n=lognpdf(loc,params.muN(ind),params.sigmaN(ind));
+                    elseif p.isExponentialDistribution
+                        loc=linspace(0,10,100);
+                        s=exppdf(loc,params.muS(ind));
+                        n=exppdf(loc,params.muN(ind));
+                        set(gca,'xtick',[],'ytick',[],'ylim',[0 .2])
+                    else
+                        loc=linspace(-5,5,100);
+                        s=normpdf(loc,params.muS(ind),params.sigmaS(ind));
+                        n=normpdf(loc,params.muN(ind),params.sigmaN(ind));
+                    end
+                    
+                    plot(loc,s,'color',signalColor); hold on
+                    plot(loc,n,'color',noiseColor)
+                    %plot(loc,log(s./n),'k')
+                    
+                    if any(strcmp(p.critLearningRate,{'zero'})) %'fit',
+                        plot(params.anchorCriteria([1 1]),ylim,'k-.')
+                    end
+                    
+                    if any(strcmp(p.critLearningRate,{'fit'}))
+                        plot(critUsed([ind ind]),ylim,'k')
+                    end
+                    
+                    if any(strcmp(p.critLearningRate,{'one'})) %'fit',
+                        plot(adjustedCrit([ind ind]),ylim,'k--')
+                    end
+                    xlabel(sprintf('C_T=%g,  C_F=%g',params.tcs(ind),params.fcs(ind)) )
+                    %disp(mat2str([params.tcs(ind) params.fcs(ind)]))
+                end
+                
+            end
+        end
+        
+        
         function h=plotModelFeatures(p,tc,fc,features,weight,gutter)
             if ~exist('tc','var') || isempty(tc)
                 tc= p.tc;
@@ -1799,12 +2580,15 @@ classdef detectionModel
             bounds=bounds/sum(bounds(1:end-1));  %end -1 lets the top gutter not exist
             height=bounds(1,2:end);
             bounds=reshape(cumsum(bounds(:)),2,[])';  %'
-            h=length(fInds);
+            h=length(fInds); 
             w=length(tInds);
+
             
             for f=1:length(fInds)
                 for t=1:length(tInds)
-                    subplot(h,w,(f-1)*length(tInds)+t); hold on;
+                    ind=(f-1)*length(tInds)+t; %old
+                    subplot(h,w,ind); 
+                    hold on;
                     
                     % set currrent tc and fc
                     p.current.tc=p.tc(tInds(t));
@@ -1869,39 +2653,43 @@ classdef detectionModel
                             case 'P-P'
                                 error('not yet')
                             case 'sig&Noise'
-                                switch p.sdtDistributionType
-                                    case {'eqVarGaussian','gaussian'}
-                                        xn=p.cache.gauss.xn(fInds(f),tInds(t),:);
-                                        xs=p.cache.gauss.xs(fInds(f),tInds(t),:);
-                                        
-                                        ys=normpdf(p.edges,xs(1),xs(2));
-                                        yn=normpdf(p.edges,xn(1),xn(2));
-                                        plot(p.edges,yn,'r');
-                                        plot(p.edges,ys,'g');
-                                        
-                                        %plot([xn(1) xn(1)],ylim,'r')
-                                        %plot([xs(1) xs(1)],ylim,'g')
-                                        crit=p.crit(fInds(f),tInds(t));
-                                        plot(crit([1 1]),ylim,'k')
-                                        
-                                    case {'gev'}
-                                        
-                                        xn=p.cache.gev.xn(fInds(f),tInds(t),:);
-                                        xs=p.cache.gev.xs(fInds(f),tInds(t),:);
-                                        
-                                        ys=gevpdf(p.edges,xs(1),xs(2),xs(3));
-                                        yn=gevpdf(p.edges,xn(1),xn(2),xn(3));
-                                        plot(p.edges,yn,'r');
-                                        plot(p.edges,ys,'g');
-                                        
-                                        %plot([xn(3) xn(3)],ylim,'r')
-                                        %plot([xs(3) xs(3)],ylim,'g')
-                                        crit=p.crit(fInds(f),tInds(t));
-                                        plot(crit([1 1]),ylim,'k')
-                                        %set(gca,'xlim',[0 0.2],'ylim',[0 150])
-                                    otherwise
-                                        error
-                                end
+                                
+                                error('not coded... call plotDistributions')
+     
+% OLD
+%                                 switch p.sdtDistributionType
+%                                     case {'eqVarGaussian','gaussian'}
+%                                         xn=p.cache.gauss.xn(fInds(f),tInds(t),:);
+%                                         xs=p.cache.gauss.xs(fInds(f),tInds(t),:);
+%                                         
+%                                         ys=normpdf(p.edges,xs(1),xs(2));
+%                                         yn=normpdf(p.edges,xn(1),xn(2));
+%                                         plot(p.edges,yn,'r');
+%                                         plot(p.edges,ys,'g');
+%                                         
+%                                         %plot([xn(1) xn(1)],ylim,'r')
+%                                         %plot([xs(1) xs(1)],ylim,'g')
+%                                         crit=p.crit(fInds(f),tInds(t));
+%                                         plot(crit([1 1]),ylim,'k')
+%                                         
+%                                     case {'gev'}
+%                                         
+%                                         xn=p.cache.gev.xn(fInds(f),tInds(t),:);
+%                                         xs=p.cache.gev.xs(fInds(f),tInds(t),:);
+%                                         
+%                                         ys=gevpdf(p.edges,xs(1),xs(2),xs(3));
+%                                         yn=gevpdf(p.edges,xn(1),xn(2),xn(3));
+%                                         plot(p.edges,yn,'r');
+%                                         plot(p.edges,ys,'g');
+%                                         
+%                                         %plot([xn(3) xn(3)],ylim,'r')
+%                                         %plot([xs(3) xs(3)],ylim,'g')
+%                                         crit=p.crit(fInds(f),tInds(t));
+%                                         plot(crit([1 1]),ylim,'k')
+%                                         %set(gca,'xlim',[0 0.2],'ylim',[0 150])
+%                                     otherwise
+%                                         error
+%                                 end
                             case 'evFit'
                                 signal=permute(p.cache.dv(fInds(f),tInds(t),:),[3 2 1]);
                                 xs=p.cache.xs(fInds(f),tInds(t),:);  % could fit it fresh and store it if its not there
@@ -1985,7 +2773,7 @@ classdef detectionModel
             addCritLines=false;
             
             %setup
-            [fInd tInd tIndNoSig]=p.getContrastIndsFromCurrentOrArg(tc,fc);
+            [tInd fInd tIndNoSig]=p.getContrastIndsFromCurrentOrArg(tc,fc);
             tInd=setdiff(tInd,tIndNoSig);
             
             %map to standard format (uses non-local plotter)
@@ -2003,8 +2791,8 @@ classdef detectionModel
             for s=subjectInds
                 for t=1:length(tInd)
                     for f=1:length(fInd)
-                        subCondInd=(s-1)*(length(fInd)*length(tInd))+(t-1)*length(fInd)+f;
-                        
+                        %subCondInd=(s-1)*(p.numFc*p.numTc)+(tInd(t)-1)*p.numFc+fInd(f);
+                        subCondInd=(s-1)*(p.numFc*p.numTc)+(tInd(t)-2)*p.numFc+fInd(f); % -2 CUZ SKIPPING TC=0
                         switch dataSource
                             case 'modelSamples'
                                 numHit=sum(p.cache.dv(fInd(f),tInd(t),:)>p.crit(fInd(f),tInd(t)));
@@ -2030,13 +2818,24 @@ classdef detectionModel
                                 [hit hitCI]=binofit(numHit,numSigs);
                                 [fa faCI]=binofit(numFA,numNoSigs);
                                 cc=[.8 .8 .8];
+                                
+                                targetColors=customColorMap([0 1], [.6 .6 .8; .1 .1 .9],4);
+                                flankerColors=customColorMap([0 .3 1], [ .1 .1 .9;  .6 .2 .5;  .8 .2 .2],5);
                                 if t==length(tInd)
-                                    cc=[.8 0 0];
+                                   cc=flankerColors(f,:);
                                 end
                                 if f==1
-                                    
-                                    cc=[0 0 .8];
+                                   cc=targetColors(t,:);
                                 end
+                                
+                                
+                                %if t==length(tInd)
+                                %    cc=[.8 0 0];
+                                %end
+                                %if f==1
+                                %    
+                                %    cc=[0 0 .8];
+                                %end
                                 
                                 %  MIDDLE CROSS IDEA
                                 % if t==2
@@ -2327,15 +3126,15 @@ classdef detectionModel
                 end
             end
         end
-        function [fInd tInd tIndNoSig]=getContrastIndsFromCurrentOrArg(p,tc,fc)
+        function [tInd fInd tIndNoSig]=getContrastIndsFromCurrentOrArg(p,tc,fc)
             if ~exist('tc','var') || isempty(tc)
                 tc= p.current.tc;
             end
             if ~exist('fc','var') || isempty(fc)
                 fc= p.current.fc;
             end
-            fInd=find(fc==p.fc);
-            tInd=find(tc==p.tc);
+            fInd=find(ismember(p.fc,fc));
+            tInd=find(ismember(p.tc,tc));
             tIndNoSig=find(0==p.tc);
             if any([isempty(fInd) isempty(tInd) isempty(tIndNoSig)])
                 fInd
@@ -2345,7 +3144,7 @@ classdef detectionModel
             end
         end
         function [p crit er]=fitCriteria(p)
-            [fInd tInd tIndNoSig]=p.getContrastIndsFromCurrentOrArg();
+            [tInd fInd tIndNoSig]=p.getContrastIndsFromCurrentOrArg();
             
             for f=1:length(fInd)
                 for t=1:length(tInd)
@@ -2475,18 +3274,60 @@ classdef detectionModel
                 keyboard
             end
         end
+        
+        function [crit er]=fitCriterionFromExpParams(p,xn,xs)
+            optim=[];
+            c0=1;
+            [crit er flag]=fminsearch(@(c)expSTDErrorFun(p,c,xn,xs,p.relativeMissCost),c0,optim);
+            %[crit er flag]=fminbnd(@(c) gaussSTDErrorFun(p,c,xn,xs,p.relativeMissCost),LB,UB);
+            if flag~=1
+                error('bad fit..why?')
+                keyboard
+            end
+        end
+        
+        function [crit er]=fitCriterionFromGammaParams(p,xn,xs)
+            optim=[];
+            c0=1;
+            [crit er flag]=fminsearch(@(c)gamSTDErrorFun(p,c,xn,xs,p.relativeMissCost),c0,optim);
+            %[crit er flag]=fminbnd(@(c) gaussSTDErrorFun(p,c,xn,xs,p.relativeMissCost),LB,UB);
+            if flag~=1
+                error('bad fit..why?')
+                keyboard
+            end
+        end
+                
+        function [crit er]=fitCriterionFromLognParams(p,xn,xs)
+            optim=[];
+            c0=1;
+            [crit er flag]=fminsearch(@(c)lognSTDErrorFun(p,c,xn,xs,p.relativeMissCost),c0,optim);
+            if flag~=1
+                c0
+                warning('bad fit..why?')
+                %keyboard
+                er=nan
+            end
+        end
+        
         function er=evdErrorFun(p,crit,xn,xs,relativeMissCost)
             er=(1-gevcdf(crit,xn(1),xn(2),xn(3)))+gevcdf(crit,xs(1),xs(2),xs(3))*relativeMissCost;
             er=er/2;
         end
         function er=gaussSTDErrorFun(p,crit,xn,xs,relativeMissCost)
-            try
-                er=(1-normcdf(crit,xn(1),xn(2)))+normcdf(crit,xs(1),xs(2))*relativeMissCost;
-                er=er/2;
-            catch
-                warning('here')
-                keyboard
-            end
+            er=(1-normcdf(crit,xn(1),xn(2)))+normcdf(crit,xs(1),xs(2))*relativeMissCost;
+            er=er/2;
+        end
+        function er=expSTDErrorFun(p,crit,xn,xs,relativeMissCost)
+            er=(1-expcdf(crit,xn(1)))+expcdf(crit,xs(1))*relativeMissCost;
+            er=er/2;
+        end
+        function er=gamSTDErrorFun(p,crit,xn,xs,relativeMissCost)
+            er=(1-gamcdf(crit,xn(1),xn(2)))+gamcdf(crit,xs(1),xs(2))*relativeMissCost;
+            er=er/2;
+        end
+        function er=lognSTDErrorFun(p,crit,xn,xs,relativeMissCost)
+            er=(1-logncdf(crit,xn(1),xn(2)))+logncdf(crit,xs(1),xs(2))*relativeMissCost;
+            er=er/2;
         end
         function p=fitSubjectDataWithSimulation(p)
             [data params]=p.getDataFromSubjectCache;
@@ -2701,6 +3542,15 @@ classdef detectionModel
         function out=isGEV(p)
             out=any(ismember(p.modelFeatures,{'tk','fk','kappa'}));
         end
+        function out=isExponentialDistribution(p)
+            out=any(ismember(p.modelFeatures,{'expBase'}));
+        end
+        function out=isGammaDistribution(p)
+            out=any(ismember(p.modelFeatures,{'gamShape','gamBase'}));
+        end
+        function out=isLognDistribution(p)
+            out=any(ismember(p.modelFeatures,{'lognSigma','lognBase'}));
+        end
         function out=hasBiasFeature(p)
             out=any(ismember(p.modelFeatures,{'bias'}));
         end
@@ -2780,6 +3630,37 @@ classdef detectionModel
             cleanUpFigure
             set(gca,'xtick',[],'ytick',[])
         end
+        
+        function [p data params]=ifDataNotThereLoadFromServerAndFillCache(p,subjects);
+            if length(unique(p.cache.raw.subjectID))>1
+                error('have not handled >1 rats')
+            elseif length(subjects)>1
+                error('have not handled >1 rats')
+            elseif ~all(str2num(subjects{1})==p.cache.raw.subjectID)
+                pp=p.load();
+                if all(str2num(subjects{1})==pp.cache.raw.subjectID)
+                    %load from model if possible
+                    p.cache.raw=pp.cache.raw;
+                    p.cache.subjectData=pp.cache.subjectData;
+                else
+                    %load from server when needed
+                    p=loadDataFromServer(p,subjects);
+                end
+            end
+            [data params]=getDataFromSubjectCache(p);
+        end
+        
+        function nms=getSubjectsNamesFromModelStr(p,str)
+           if 0 %both there
+               error('not handled yet')
+               nms={'231','234'};
+           elseif strcmp(str(1:3),'231')
+               nms={'231'};
+           elseif strcmp(str(1:3),'234')
+               nms={'234'};
+           end
+        end
+        
         function p=loadDataFromServer(p,subjects);
             
             %subjects={'234','231'} % all colin, many target contrasts on 12, or many flanker onctrasts on 15, or joint contrast on colinear on 16
@@ -2891,5 +3772,110 @@ classdef detectionModel
                 end %for
             end %if
         end % function
+        function axisHandles=plotModelWithDistribution(p,modelIDs)
+            
+            n=length(p.cache.groupModelNames);
+            if ~exist('modelIDs','var') || isempty(modelIDs)
+                modelIDs=1:n;
+            elseif iscell(modelIDs)
+                modelStrs=modelIDs;
+                modelIDs=[];
+                for j=1:length(modelStrs)
+                    %for loop helps preserve order
+                    modelIDs(j)=find(ismember(p.cache.groupModelNames,modelStrs{j}));
+                end
+                modelIDs
+            elseif all(iswholenumber(modelIDs) & modelIDs<=n)
+                %okay
+            else
+                error('bad... must be ints of available models or cell of strings of the names')
+            end
+            numModels=length(modelIDs);
+            
+            if numModels>5
+                numModels
+                error('thats too many models')
+            end
+            
+            for j=1:numModels
+                modelID=modelIDs(j);
+                
+                p=ifDataNotThereLoadFromServerAndFillCache(p,p.getSubjectsNamesFromModelStr(p.cache.groupModelNames{modelID}))
+                
+                
+                axisHandles(1+(j-1)*4)=subplot(2,numModels,j);
+                includeFitText=true;
+                includeParamText=false;
+                p.modelFeatures=p.cache.groupModelFeatures{modelID};
+                p.cache.modelValues=p.cache.groupModelParams{modelID};
+                if p.cache.modelValues(1)==1
+                    p.critLearningRate='one';
+                elseif p.cache.modelValues(1)==0;
+                    p.critLearningRate='zero';
+                else
+                    p.critLearningRate='fit';
+                end
+                p.viewModel(true,'',p.cache.groupModelFeatures{modelID},p.cache.groupModelParams{modelID},includeFitText,includeParamText);
+                xlabel(''); ylabel('');
+                
+                
+                tcs=[.5 1 1];
+                fcs=[0 0 1];
+                colors=[0.43 0.43 0.83; .1 .1 .9;  .8 .2 .2 ];
+                for i=1:3 % num contexts
+                    axisHandles(1+i+(j-1)*4)=subplot(6,numModels,j+(i+2)*numModels); hold on
+                    p.plotDistributions(tcs(i),fcs(i),p.cache.groupModelFeatures{modelID},p.cache.groupModelParams{modelID},[0 0 0],colors(i,:));
+                    if p.isGammaDistribution
+                        axis([0 10 0 0.5])
+                    else
+                        axis([-3 5 0 0.5])
+                    end
+                    set(gca,'xtick',[],'ytick',[])
+                end
+                %xlabel('decision variable')
+            end %models
+        end %function
+        
+        function type=getPdfType(p)
+           if p.isGammaDistribution
+               type='gam';
+           elseif p.isExponentialDistribution
+               type='exp';
+           elseif p.isLognDistribution
+               type='logn';
+           elseif p.isGEV
+               type='gev';
+           else
+               type='norm';
+           end
+        end
+        
+        function [crit er]=fitCriterionFromLLR(p,xn,xs)
+            optim=[];
+            c0=1;
+            [crit er flag]=fminsearch(@(c)LLRerr(p,p.getPdfType,c,xn,xs,log(p.relativeMissCost)),c0,optim);
+            if flag~=1
+                warning('bad fit..why?')
+                %keyboard
+            end
+        end 
+        
+        function er=LLRerr(p,pdfType,crit,xn,xs,LLR_desired)
+            switch length(xn)
+                case 1
+                    sp=pdf(pdfType,crit,xs(1)); %signal probability
+                    np=pdf(pdfType,crit,xn(1)); %noise probability
+                case 2
+                    sp=pdf(pdfType,crit,xs(1),xs(2)); %signal probability
+                    np=pdf(pdfType,crit,xn(1),xn(2)); %noise probability
+                case 3
+                    sp=pdf(pdfType,crit,xs(1),xs(2),xs(3)); %signal probability
+                    np=pdf(pdfType,crit,xn(1),xn(2),xn(3)); %noise probability
+                otherwise
+                    error('too many params')
+            end
+            LLR=log(sp/np);
+            er=(LLR_desired-LLR)^2;
+        end %function
     end % methods
 end % classdef

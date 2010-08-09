@@ -165,3 +165,4 @@ trialRecordProcessing/getResponseWindowStop.m -text
 analysis/getCommentStringFromEventsData.m -text
 trialRecordProcessing/getPhaseLabelPerLick.m -text
 trialRecordProcessing/getDiffFromFirstRequestToNextResponse.m -text
+matlaby/customColorMap.m -text

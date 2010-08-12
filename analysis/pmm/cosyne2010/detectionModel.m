@@ -30,7 +30,8 @@ classdef detectionModel
         mcmcModel='noneWorkingNow.txt'; %'GEV-linearTFcontrast.txt'
         
         %infrastructure
-        savePath='C:\Documents and Settings\rlab\Desktop\detectionModels'
+        %savePath='C:\Documents and Settings\rlab\Desktop\detectionModels'
+        savePath='\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\pmeier\detectionModels'
         modelName='simple-234'; %
         %other old models: fastManualHunt,LL, fixedEye, fitAttnfixedEye
         
@@ -143,7 +144,7 @@ classdef detectionModel
 
 
 
-if 1
+if 0
     %p.modelName='searchSearch_20100726T224704'; p=p.load() % one ittn
     %p.modelName='searchSearch_20100801T122349'; p=p.load() % 96x10, wrong dn
     
@@ -158,14 +159,25 @@ if 1
 
     % p.modelName='searchSearch_20100805T093642'; p=p.load() % 48x10, gamma pdf has bug
 
-    %p.modelName=''; p=p.load() % 48x10, use LLR, no bug
-    p.modelName='tempOngoingSearch_20100808T001247'; p=p.load() %48x10, parttial
+
+    %p.modelName='tempOngoingSearch_20100808T001247'; p=p.load() %48x10,
+    %parttial - did not wirk to continue...
+    %p.modelName='searchSearch_20100810T145838'; p=p.load() % 48x2, use LLR, no bug
     x.alpha={'fit'}; %fit
     x.bias={'no','cost'}; % ,'no','cost' LLR
     x.var={'scales'};
     x.pdf={'gaussVe','gaussVs','gaussVi','exp','gam','logn'}
     x.gamma={'yoked'};
     x.plus={'no','dn'};
+    %p=p.searchSearch(x,{'231','234'},2);
+    
+    %p.modelName=''; p=p.load() % 10x10, use LLR, no bug
+    x.alpha={'fit'}; %fit
+    x.bias={'cost'}; % ,'no','cost' LLR
+    x.var={'scales'};
+    x.pdf={'gaussVe','gaussVs','exp','gam','logn'}
+    x.gamma={'yoked'};
+    x.plus={'dn'};
     p=p.searchSearch(x,{'231','234'},10);
 
                 p.plotBICvsParams()
@@ -747,7 +759,7 @@ if 1
                                 for pl=1:length(x.plus)
                                     count=count+1;
                                     disp(sprintf('%d/%d doing %s',count,length(nm),nm{count}))
-                                    if count>4 % pickup where last left off, TRUE starts fresh
+                                    if 1%count>4 % pickup where last left off, TRUE starts fresh
                                         features=baseFeatures;
                                         x0=[0.5];
 
@@ -848,27 +860,32 @@ if 1
                                         end
                                         
                                         if gcf>10
-                                            close all 
+                                            close all
                                         end
                                         
                                         %run this model and save it
                                         p.modelFeatures=features;
                                         [p suc BIC AIC LL]=fitSubjectDataWithSDT(p,x0,numIttn);
                                         
-                                        %continually save indiv model and group search info
-                                        p.cache.modelFitSuccess(:,count)=suc;
-                                        p.cache.BIC(:,count)=BIC;
-                                        p.cache.AIC(:,count)=AIC;
-                                        p.cache.LL(:,count)=LL;
-                                        p.cache.groupModelParams{count}=p.cache.modelParams;
-                                        p.cache.groupModelNames{count}=nm{count};
-                                        p.cache.groupModelFeatures{count}=p.modelFeatures;
-                                        p.cache.groupModelParamsHistory{count}=p.cache.modelParamsHistory;
+                                        try
+                                            %continually save indiv model and group search info
+                                            p.cache.modelFitSuccess(:,count)=suc;
+                                            p.cache.BIC(:,count)=BIC;
+                                            p.cache.AIC(:,count)=AIC;
+                                            p.cache.LL(:,count)=LL;
+                                            p.cache.groupModelParams{count}=p.cache.modelParams;
+                                            p.cache.groupModelNames{count}=nm{count};
+                                            p.cache.groupModelFeatures{count}=p.modelFeatures;
+                                            p.cache.groupModelParamsHistory{count}=p.cache.modelParamsHistory;
+                                        catch ex
+                                            warning('here')
+                                            keyboard
+                                        end
                                         
                                         p.modelName=nm{count};
                                         p.save
-                                        p.modelName=sprintf('tempOngoingSearch_%s',datestr(now,30));
-                                        p.save
+                                        %p.modelName=sprintf('tempOngoingSearch_%s',datestr(now,30));
+                                        %p.save
                                         
                                         %view it
                                         figure; p.viewModel;
@@ -1698,7 +1715,8 @@ if 1
                 
                 %NEW 
                 tcs=t.^gammaT./(c50+(t + 2*fallOff*f).^(gammaT));
-                fcs=2*f.^gammaF./(c50+(f + fallOff*t).^(gammaF)); % ignoring the effect of the other flanker
+                fcs=2*f.^gammaF./(c50+(f + fallOff*t + fallOff^2*f).^(gammaF)); % including the effect of the other flanker
+                %fcs=2*f.^gammaF./(c50+(f + fallOff*t).^(gammaF)); % ignoring the effect of the other flanker
                 
                 
                 %close all; figure; plot(tcs,'g'); hold on; plot(fcs,'r')

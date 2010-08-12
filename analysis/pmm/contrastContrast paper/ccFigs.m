@@ -338,7 +338,7 @@ subplot(2,2,4); title('subject 2 - with bias')
 cleanUpFigure
 %% pdf
 
-
+p=detectionModel('searchSearch_20100810T145838'); % 48x2, use LLR, no bug
 n.alpha={'fit'}; 
 n.bias={'cost'}; 
 n.var={'scales'};

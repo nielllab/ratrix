@@ -31,7 +31,7 @@ classdef detectionModel
         
         %infrastructure
         %savePath='C:\Documents and Settings\rlab\Desktop\detectionModels'
-        savePath='\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\pmeier\detectionModels'
+        savePath='\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\pmeier\detectionModels\175'
         modelName='simple-234'; %
         %other old models: fastManualHunt,LL, fixedEye, fitAttnfixedEye
         
@@ -144,7 +144,7 @@ classdef detectionModel
 
 
 
-if 0
+if 1
     %p.modelName='searchSearch_20100726T224704'; p=p.load() % one ittn
     %p.modelName='searchSearch_20100801T122349'; p=p.load() % 96x10, wrong dn
     
@@ -1592,9 +1592,9 @@ if 0
         end
         function x=logNchoosekPerCondition(p,data)
             for i=1:length(data.numHits)
-                turnOffWarning=true;
-                nckS(i)=log(nchoosek(data.numSig(i),data.numHits(i),turnOffWarning));
-                nckN(i)=log(nchoosek(data.numNoSig(i),data.numFAs(i),turnOffWarning));
+                %turnOffWarning=true;
+                nckS(i)=log(nchoosek(data.numSig(i),data.numHits(i)));
+                nckN(i)=log(nchoosek(data.numNoSig(i),data.numFAs(i)));
             end
             x=nckS+nckN;
         end

@@ -6,9 +6,6 @@ function s=fillLUT(s,method,linearizedRange,plotOn);
 %edf wants to migrate this to a ststion method  - this code is redundant
 %for each stim -- ACK!
 
-if ~exist('linearizedRange','var') || isempty(linearizedRange)
-    linearizedRange = [0 1];
-end
 
 if ~exist('plotOn','var')
     plotOn=0;

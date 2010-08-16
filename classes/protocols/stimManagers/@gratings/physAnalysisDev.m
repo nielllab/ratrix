@@ -1,36 +1,32 @@
-function [analysisdata cumulativedata] = physAnalysis(stimManager,spikeRecord,stimulusDetails,plotParameters,parameters,cumulativedata,eyeData,LFPRecord)
+function [analysisdata cumulativedata] = physAnalysisDev(stimManager,spikeRecord,stimulusDetails,plotParameters,parameters,cumulativedata,eyeData,LFPRecord)
 
 %initalize analysisdata
 analysisdata.analysisdone = false;
 
 % processed clusters and spikes
 theseSpikes = logical(spikeRecord.processedClusters);
-spikesThis=spikeRecord.spikes(theseSpikes);
-spikeWaveformsThis = spikeRecord.spikeWaveforms(theseSpikes,:);
-spikeTimestampsThis = spikeRecord.spikeTimestamps(theseSpikes);
+spikes=spikeRecord.spikes(theseSpikes);
+spikeWaveforms = spikeRecord.spikeWaveforms(theseSpikes,:);
+spikeTimestamps = spikeRecord.spikeTimestamps(theseSpikes);
 
 %SET UP RELATION stimInd <--> frameInd
-numStimFramesThis=max(spikeRecord.stimInds);
+numStimFrames=max(spikeRecord.stimInds);
 analyzeDrops=true;
 if analyzeDrops
-    stimFramesThis=spikeRecord.stimInds;
-    correctedFrameIndicesThis=spikeRecord.correctedFrameIndices;
+    stimFrames=spikeRecord.stimInds;
+    correctedFrameIndices=spikeRecord.correctedFrameIndices;
 else
-    stimFramesThis=1:numStimFrames;
-    firstFramePerStimIndThis=~[0 diff(spikeRecord.stimInds)==0];
-    correctedFrameIndicesThis=spikeRecord.correctedFrameIndices(firstFramePerStimInd);
+    stimFrames=1:numStimFrames;
+    firstFramePerStimInd=~[0 diff(spikeRecord.stimInds)==0];
+    correctedFrameIndices=spikeRecord.correctedFrameIndices(firstFramePerStimInd);
 end
 
-trialsThis = repmat(parameters.trialNumber,length(stimFramesThis),1);
-if ~isfield(stimulusDetails,'method')
-    mode = {'ordered',[]};
-else
-    mode = {stimulusDetails.method,stimulusDetails.seed};
-end
+trials = repmat(parameters.trialNumber,length(stimFrames),1);
+
 % get the stimulusCombo
 if stimulusDetails.doCombos==1
     comboMatrix = generateFactorialCombo({stimulusDetails.spatialFrequencies,stimulusDetails.driftfrequencies,stimulusDetails.orientations,...
-        stimulusDetails.contrasts,stimulusDetails.phases,stimulusDetails.durations,stimulusDetails.radii,stimulusDetails.annuli},[],[],mode);
+        stimulusDetails.contrasts,stimulusDetails.phases,stimulusDetails.durations,stimulusDetails.radii,stimulusDetails.annuli});
     pixPerCycsThis=comboMatrix(1,:);
     driftfrequenciesThis=comboMatrix(2,:);
     orientationsThis=comboMatrix(3,:);

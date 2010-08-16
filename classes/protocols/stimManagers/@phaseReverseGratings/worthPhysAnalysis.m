@@ -10,15 +10,13 @@ function retval = worthPhysAnalysis(sm,quality,analysisExists,overwriteAll,isLas
 %retval=quality.passedQualityTest;
 
 
-% keyboard
+
 if length(quality.passedQualityTest)>1
     %if many chunks, the last one might have no frames or spikes, but the
     %analysis should still complete if the the previous chunks are all
     %good. to be very thourough, a stim manager may wish to confirm that
     %the reason for last chunk failing, if it did, is an acceptable reason.
     qualityOK=all(quality.passedQualityTest(1:end-1));
-    warning('setting qualityOK to true here');
-    qualityOK = true;
 else
     qualityOK=quality.passedQualityTest;
 end

@@ -21,14 +21,16 @@ if length(quality.passedQualityTest)>1 && ~enableChunkedPhysAnalysis(sm)
 else
     %if there is only one, or you will try to analyze each chunk as you get it, then only check this one
     qualityOK=quality.passedQualityTest(end);
-        
-    if quality.passedQualityTest(end)==0
-       if size(quality.chunkIDForCorrectedFrames,1)==0
-           %known error... some recording can extend beyond last frame
-           disp('failed quality b/c no stim frames this chunk')
-       else
-           warning('failed quality for unknown reason')
-    end
+    warning('forcing qualityOK to true');
+    qualityOK = true;
+%     if quality.passedQualityTest(end)==0
+%        if size(find(quality.chunkIDForCorrectedFrames==quality.chunkID(end)),1)==0
+%            %known error... some recording can extend beyond last frame
+%            disp('failed quality b/c no stim frames this chunk')
+%        else
+%            keyboard
+%            warning('failed quality for unknown reason')
+%     end
 end
 
 retval=qualityOK && ...

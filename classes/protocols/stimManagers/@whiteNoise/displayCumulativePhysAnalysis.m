@@ -1,9 +1,16 @@
 function displayCumulativePhysAnalysis(sm,cumulativedata,parameters)
 % allows for display without recomputation
+
+% make sure data exists
+if isempty(cumulativedata)
+    warning('NOT DISPLAYING INFO FOR TRIAL %d BECAUSE CUMULATIVE DATA IS EMPTY',parameters.trialRange(end));
+    return
+end
 analysisdata = cumulativedata.lastAnalysis;
 analysisdata.singleChunkTemporalRecord(1,:)=...
     getTemporalSignal(analysisdata.STA,analysisdata.STV,analysisdata.numSpikes,'bright');
 
+% stimulus info
 stimulusDetails = parameters.stimRecords.stimulusDetails;
 whiteVal=255;
 spatialSmoothingOn=true;
@@ -60,25 +67,33 @@ end
 rng=[min(cumulativedata.cumulativeSTA(:)) max(cumulativedata.cumulativeSTA(:))];
 
 % 11/25/08 - update GUI
-%figure(plotParameters.handle); % make the figure current and then plot into it
-
-% figureName = [num2str(min(cumulativedata.cumulativeTrialNumbers)) '-' num2str(max(cumulativedata.cumulativeTrialNumbers))];
-figureName = sprintf('%s on %s. trialRange :%s',parameters.stepName,parameters.trodeName,mat2str(parameters.trialRange));
-figure(parameters.figHandle);
-set(gcf,'Name',figureName); % trialBased is better
-set(gcf,'Units','pixels');
-set(gcf,'position',[100 100 800 700]);
-
-% size(analysisdata.cumulativeSTA)
+% create the figure and name it
+if length(parameters.trialRange)>1
+    figureName = sprintf('%s on %s. trialRange :%d -> %d',parameters.stepName,parameters.trodeName,min(parameters.trialRange),max(parameters.trialRange));
+else
+    figureName = sprintf('%s on %s. trialRange :%d',parameters.stepName,parameters.trodeName,parameters.trialRange);
+end
+figure(parameters.figHandle)
+set(gcf,'NumberTitle','off','Name',figureName,'Units','pixels','position',[100 100 800 700]);
 
 
-% or use analysisdata.STA?
+% is it a spatial signal? or fullfield?
 doSpatial=~(size(cumulativedata.cumulativeSTA,1)==1 & size(cumulativedata.cumulativeSTA,2)==1); % if spatial dimentions exist
 
 % %% spatial signal (best via bright)
 if doSpatial
-    
-    contextInd=brightInd;
+    oP = get(gcf,'OuterPosition');
+    set(gcf,'OuterPosition',[oP(1) oP(2) 2*oP(3) oP(4)]);
+    % change here for which context
+    contextType = 'dark';%'bright'; 'dark';
+    switch contextType
+        case 'dark'
+            contextInd = darkInd;
+        case 'bright'
+            contextInd = brightInd;
+        otherwise
+            error('unknown context type');
+    end
     
     %fit model to best spatial
     stdThresh=1;
@@ -104,13 +119,18 @@ if doSpatial
     [bigSpots sigPixels]=getSignificantSTASpots(cumulativedata.cumulativeSTA(:,:,contextInd(3)),cumulativedata.cumulativeNumSpikes,meanLuminanceStimulus,stdStimulus,ones(3),3,0.05);
     [bigIndY bigIndX]=find(bigSpots~=0);
     [sigIndY sigIndX]=find(sigPixels~=0);
-    subplot(2,2,1)
-    %     im=single(squeeze(analysisdata.cumulativeSTA(:,:,contextInd(3))));
-    %    imagesc(squeeze(cumulativedata.cumulativeSTA(:,:,contextInd(3))),rng);
-    im=single(squeeze(cumulativedata.cumulativeSTA(:,:,contextInd(3))));
     
+    % clear the figure and start anew
+    clf(parameters.figHandle);
+    
+    % cumulative modulation
+    cumuModAx = subplot(2,4,1);
+    im=single(squeeze(cumulativedata.cumulativeSTA(:,:,contextInd(3))));
     if spatialSmoothingOn
         im=imfilter(im,filt,'replicate','same');
+    end
+    if rng(1)==rng(2)
+        rng = [0 255];
     end
     imagesc(im,rng);
     %colorbar; %colormap(blueToRed(meanLuminanceStimulus,rng));
@@ -123,13 +143,17 @@ if doSpatial
     xlabel(sprintf('cumulative (%d.%d --> %d.%d)',...
         minTrial,min(cumulativedata.cumulativeChunkIDs(find(cumulativedata.cumulativeTrialNumbers==minTrial))),...
         maxTrial,max(cumulativedata.cumulativeChunkIDs(find(cumulativedata.cumulativeTrialNumbers==maxTrial)))));
-    fnplt(e1,1,'g'); fnplt(e2,1,'g'); fnplt(e3,1,'g'); % plot elipses
+    fnplt(e1,1,'g'); fnplt(e2,1,'g'); fnplt(e3,1,'g'); % plot ellipses
     
-    
-    subplot(2,2,2)
-    
+    % latest trial modulation
+    singTrModAx = subplot(2,4,2);    
     %hold off; imagesc(squeeze(STA(:,:,contextInd(3))),[min(STA(:)) max(STA(:))]);
-    hold off; imagesc(squeeze(analysisdata.STA(:,:,contextInd(3))),[min(analysisdata.STA(:)) max(analysisdata.STA(:))]);
+    if ~(min(analysisdata.STA(:))==max(analysisdata.STA(:)))
+        hold off; imagesc(squeeze(analysisdata.STA(:,:,contextInd(3))),[min(analysisdata.STA(:)) max(analysisdata.STA(:))]);
+    else
+        warning('hard coding some stuff here...')
+        hold off; imagesc(squeeze(analysisdata.STA(:,:,contextInd(3))),[0 255]);
+    end
     hold on; plot(brightInd(2), brightInd(1),'y+')
     hold on; plot(darkInd(2)  , darkInd(1),'y-')
     %colorbar;
@@ -140,32 +164,31 @@ if doSpatial
     
     xlabel(sprintf('this trial/chunk (%d-%d)',analysisdata.trialNumber,analysisdata.chunkID))
     
-    subplot(2,2,3)
-end
-
-timeMs=linspace(-timeWindowMsStim(1),timeWindowMsStim(2),size(cumulativedata.cumulativeSTA,3));
-ns=length(timeMs);
-hold off; plot(timeWindowFramesStim([1 1])+1, [0 whiteVal],'k');
-hold on;  plot([1 ns],meanLuminance([1 1])*whiteVal,'k')
-% try
-%     plot([1:ns], analysisdata.singleChunkTemporalRecord, 'color',[.8 .8 1])
-% catch
-%     keyboard
-% end
-fh=fill([1:ns fliplr([1:ns])]',[darkCI(:,1); flipud(darkCI(:,2))],'b'); set(fh,'edgeAlpha',0,'faceAlpha',.5)
-fh=fill([1:ns fliplr([1:ns])]',[brightCI(:,1); flipud(brightCI(:,2))],'r'); set(fh,'edgeAlpha',0,'faceAlpha',.5)
-plot([1:ns], darkSignal(:)','b')
-plot([1:ns], brightSignal(:)','r')
-
-peakFrame=find(brightSignal==max(brightSignal(:)));
-timeInds=[1 peakFrame(end) timeWindowFramesStim(1)+1 size(cumulativedata.cumulativeSTA,3)];
-set(gca,'XTickLabel',unique(timeMs(timeInds)),'XTick',unique(timeInds),'XLim',minmax(timeInds));
-set(gca,'YLim',[minmax([analysisdata.singleChunkTemporalRecord(:)' darkCI(:)' brightCI(:)'])+[-5 5]])
-ylabel('RGB(gunVal)')
-xlabel('msec')
-if doSpatial
-    subplot(2,2,4)
+    % draw the temporal for the relevant only
+    relevantTempOnlyAx = subplot(2,4,5);
+    timeMs=linspace(-timeWindowMsStim(1),timeWindowMsStim(2),size(cumulativedata.cumulativeSTA,3));
+    ns=length(timeMs);
+    hold off; plot(timeWindowFramesStim([1 1])+1, [0 whiteVal],'k');
+    hold on;  plot([1 ns],meanLuminance([1 1])*whiteVal,'k')
+    % try
+    %     plot([1:ns], analysisdata.singleChunkTemporalRecord, 'color',[.8 .8 1])
+    % catch
+    %     keyboard
+    % end
+    fh=fill([1:ns fliplr([1:ns])]',[darkCI(:,1); flipud(darkCI(:,2))],'b'); set(fh,'edgeAlpha',0,'faceAlpha',.5)
+    fh=fill([1:ns fliplr([1:ns])]',[brightCI(:,1); flipud(brightCI(:,2))],'r'); set(fh,'edgeAlpha',0,'faceAlpha',.5)
+    plot([1:ns], darkSignal(:)','b')
+    plot([1:ns], brightSignal(:)','r')
     
+    peakFrame=find(brightSignal==max(brightSignal(:)));
+    timeInds=[1 peakFrame(end) timeWindowFramesStim(1)+1 size(cumulativedata.cumulativeSTA,3)];
+    set(gca,'XTickLabel',unique(timeMs(timeInds)),'XTick',unique(timeInds),'XLim',minmax(timeInds));
+    set(gca,'YLim',[minmax([analysisdata.singleChunkTemporalRecord(:)' darkCI(:)' brightCI(:)'])+[-5 5]])
+    ylabel('RGB(gunVal)')
+    xlabel('msec')
+
+    % xtraPlot
+    xtraPlotax = subplot(2,4,[3 4 7 8]);
     switch xtraPlot{1}
         case 'montage'
             % montage(reshape(cumulativedata.cumulativeSTA,[size(cumulativedata.STA,1) size(cumulativedata.STA,2) 1 size(cumulativedata.STA,3) ] ), 'DisplayRange',rng)
@@ -195,7 +218,7 @@ if doSpatial
             
             %user controls these somehow... params?
             eyeToMonitorMm=330;
-            contextSize=2;
+            contextSize=3;
             pixelPad=0.1; %fractional pad 0-->0.5
             
             
@@ -258,7 +281,43 @@ if doSpatial
             error('bad xtra plot request')
     end
     
+    waveFormAx = subplot(2,4,6);
+    % now draw the spike waveforms
+    plot(cumulativedata.cumulativeSpikeWaveforms','r')
+    set(waveFormAx,'XTick',[],'Ytick',[]);
+    axis tight
+    
+else
+    % full field!
+    clf(parameters.figHandle);
+    temporalonlyAx = axes;
+    timeMs=linspace(-timeWindowMsStim(1),timeWindowMsStim(2),size(cumulativedata.cumulativeSTA,3));
+    ns=length(timeMs);
+    hold off; plot(timeWindowFramesStim([1 1])+1, [0 whiteVal],'k');
+    hold on;  plot([1 ns],meanLuminance([1 1])*whiteVal,'k')
+    % try
+    %     plot([1:ns], analysisdata.singleChunkTemporalRecord, 'color',[.8 .8 1])
+    % catch
+    %     keyboard
+    % end
+    fh=fill([1:ns fliplr([1:ns])]',[darkCI(:,1); flipud(darkCI(:,2))],'b'); set(fh,'edgeAlpha',0,'faceAlpha',.5)
+    fh=fill([1:ns fliplr([1:ns])]',[brightCI(:,1); flipud(brightCI(:,2))],'r'); set(fh,'edgeAlpha',0,'faceAlpha',.5)
+    plot([1:ns], darkSignal(:)','b')
+    plot([1:ns], brightSignal(:)','r')
+    
+    peakFrame=find(brightSignal==max(brightSignal(:)));
+    timeInds=[1 peakFrame(end) timeWindowFramesStim(1)+1 size(cumulativedata.cumulativeSTA,3)];
+    set(gca,'XTickLabel',unique(timeMs(timeInds)),'XTick',unique(timeInds),'XLim',minmax(timeInds));
+    set(gca,'YLim',[minmax([analysisdata.singleChunkTemporalRecord(:)' darkCI(:)' brightCI(:)'])+[-5 5]])
+    ylabel('RGB(gunVal)')
+    xlabel('msec')
+    % now draw the spike waveforms
+    waveAx = axes('Position',[0.91 0.91 0.08 0.08]);
+    plot(cumulativedata.cumulativeSpikeWaveforms','r')
+    set(waveAx,'XTick',[],'Ytick',[]);
+    axis tight
 end
+
 end
 function [sig CI ind]=getTemporalSignal(STA,STV,numSpikes,selection)
 switch class(selection)

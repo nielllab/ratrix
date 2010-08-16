@@ -2,7 +2,7 @@ function s=gratings(varargin)
 % GRATINGS  class constructor.
 % s = gratings(pixPerCycs,driftfrequencies,orientations,phases,contrasts,durations,radii,annuli,location,
 %       waveform,normalizationMethod,mean,thresh,numRepeats,
-%       maxWidth,maxHeight,scaleFactor,interTrialLuminance[,doCombos],doPhaseInversion)
+%       maxWidth,maxHeight,scaleFactor,interTrialLuminance[,doCombos])
 % Each of the following arguments is a 1xN vector, one element for each of N gratings
 % pixPerCycs - specified as in orientedGabors
 % driftfrequency - specified in cycles per second for now; the rate at which the grating moves across the screen
@@ -28,7 +28,7 @@ function s=gratings(varargin)
 %   - if false, then takes unique selection of these parameters (they all have to be same length)
 %   - in future, handle a cell array for this flag that customizes the
 %   combo selection process.. if so, update analysis too
-% doPhaseInversion - the gratings is no longer a traveling wave and is instead a standing wave.
+
 
 s.pixPerCycs = [];
 s.driftfrequencies = [];
@@ -51,6 +51,8 @@ s.LUT =[];
 s.LUTbits=0;
 
 s.doCombos=true;
+s.ordering.method = 'ordered';
+s.ordering.seed = [];
 
 switch nargin
     case 0
@@ -67,8 +69,20 @@ switch nargin
         
         % create object using specified values
         % check for doCombos argument first (it decides other error checking)
-        if nargin>18 && islogical(varargin{19})
-            s.doCombos=varargin{19};
+        if nargin>18
+
+            if islogical(varargin{19})
+                s.doCombos=varargin{19};
+                s.ordering.method = 'ordered';
+                s.ordering.seed = [];
+            elseif iscell(varargin{19}) && (length(varargin{19})==3)
+                s.doCombos = varargin{19}{1}; if ~islogical(varargin{19}{1}), error('doCombos should be a logical'), end;
+                s.ordering.method = varargin{19}{2}; if ~ismember(varargin{19}{2},{'twister','state','seed'}), error('unknown ordering method'), end;
+                s.ordering.seed = varargin{19}{3}; if (~(ischar(varargin{19}{3})&&strcmp(varargin{19}{3},'clock'))&&(~isnumeric(varargin{19}{3}))), ...
+                        error('seed should either be a number or set to ''clock'''), end;
+            else
+                error('unknown way to specify doCombos. its either just a logical or a cell length 3.');
+            end
         end
         % pixPerCycs
         if isvector(varargin{1}) && isnumeric(varargin{1})

@@ -59,6 +59,11 @@ searchSubspace = stimulus.searchSubspace;
 numFrames = stimulus.numFrames;
 distribution = stimulus.distribution;
 patternType=stimulus.patternType;
+randomizer = stimulus.randomizer.method;
+initialSeed = stimulus.randomizer.seed;
+if ischar(initialSeed) && strcmp(initiialSeed,'clock')
+    initialSeed = sum(100*clock);
+end
 %calculate spatialDim
 spatialDim=stimulus.spatialDim;% =ceil([requestedStimLocation(3)-requestedStimLocation(1) requestedStimLocation(4)-requestedStimLocation(2)]./stixelSize);
  
@@ -138,8 +143,10 @@ stim = [];
 stim.height = min(height,getMaxHeight(stimulus));
 stim.width = min(width,getMaxWidth(stimulus));
 % set seed values
-rand('state',sum(100*clock)); % initialize randn to random starting state
+oldSeed = rand(randomizer);
+rand(randomizer,initialSeed);
 stim.seedValues = ceil(rand(1,numFrames)*1000000);
+rand(oldSeed);
 
 discrimStim=[];
 discrimStim.stimulus=stim;
@@ -148,6 +155,8 @@ discrimStim.scaleFactor=scaleFactor;
 discrimStim.startFrame=0;
 discrimStim.autoTrigger=[];
 discrimStim.framesUntilTimeout=numFrames;
+discrimStim.randomizer = randomizer;
+discrimStim.seed = initialSeed;
 
 preRequestStim=[];
 preRequestStim.stimulus=interTrialLuminance;
@@ -157,12 +166,14 @@ preRequestStim.startFrame=0;
 preRequestStim.autoTrigger=[];
 preRequestStim.punishResponses=false;
 
+
 preResponseStim=discrimStim;
 preResponseStim.punishResponses=false;
 
 % details.big = {'expert', stim.seedValues}; % store in 'big' so it gets written to file
 % variables to be stored for recalculation of stimulus from seed value for rand generator
 details.strategy='expert';
+details.randomizer = randomizer;
 details.seedValues=stim.seedValues;
 details.spatialDim = spatialDim;
 details.stixelSize = stixelSize;

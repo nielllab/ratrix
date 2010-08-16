@@ -1,4 +1,10 @@
 function [analysisdata cumulativedata] = physAnalysis(stimManager,spikeRecord,stimulusDetails,plotParameters,parameters,cumulativedata,eyeData,LFPRecord)
+% stimManager is the stimulus manager
+% spikes is an index into neural data samples of the time of a spike
+% correctedFrameIndices is an nx2 array of frame start and stop indices - [start stop], n = number of frames
+% stimulusDetails are the stimDetails from calcStim (hopefully they contain
+% all the information needed to reconstruct stimData)
+% plotParameters - currently not used
 
 %initalize analysisdata
 analysisdata.analysisdone = false;
@@ -29,8 +35,8 @@ else
 end
 % get the stimulusCombo
 if stimulusDetails.doCombos==1
-    comboMatrix = generateFactorialCombo({stimulusDetails.spatialFrequencies,stimulusDetails.driftfrequencies,stimulusDetails.orientations,...
-        stimulusDetails.contrasts,stimulusDetails.phases,stimulusDetails.durations,stimulusDetails.radii,stimulusDetails.annuli},[],[],mode);
+    comboMatrix = generateFactorialCombo({stimulusDetails.spatialFrequencies,stimulusDetails.frequencies,stimulusDetails.orientations,...
+        stimulusDetails.contrasts,stimulusDetails.startPhases,stimulusDetails.durations,stimulusDetails.radii,stimulusDetails.annuli},[],[],mode);
     pixPerCycsThis=comboMatrix(1,:);
     driftfrequenciesThis=comboMatrix(2,:);
     orientationsThis=comboMatrix(3,:);

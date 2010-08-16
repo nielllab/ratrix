@@ -83,7 +83,7 @@ try
     % timeWindowMs
     timeWindowMsStim=[300 50]; % parameter [300 50]
     timeWindowMsLFP =[1000 1000]; 
-    
+
     % refreshRate - try to retrieve from neuralRecord (passed from stim computer)
     if isfield(parameters, 'refreshRate')
         refreshRate = parameters.refreshRate;
@@ -91,7 +91,7 @@ try
         error('dont use default refreshRate');
         refreshRate = 100;
     end
-    
+
     % calculate the number of frames in the window for each spike
     timeWindowFramesStim=ceil(timeWindowMsStim*(refreshRate/1000));
     
@@ -111,7 +111,7 @@ try
             switch stimulusDetails.distribution.type
                 case 'gaussian'
                     std = stimulusDetails.distribution.std;
-                    meanLuminance = stimulusDetails.distribution.meanLuminance;
+                    meanLuminance = stimulusDetails.distribution.meanLuminance;                            
                 case 'binary'
                     p=stimulusDetails.distribution.probability;
                     hiLoDiff=(stimulusDetails.distribution.hiVal-stimulusDetails.distribution.lowVal);
@@ -253,7 +253,6 @@ try
         % triggers = zeros(stim_width, stim_height, # of window frames per spike, number of spikes)
         %initialize trigger with mean values for temporal border padding
 
-
         
         try
             triggers=meanValue(ones(size(stimData,1),size(stimData,2),sum(timeWindowFramesStim)+1,numSpikes)); % +1 is for the frame that is on the spike
@@ -299,6 +298,12 @@ try
         partialdata.trialNumber=parameters.trialNumber;
         partialdata.chunkID=parameters.chunkID;
         partialdata.spikeWaveforms = relevantSpikeWaveforms; 
+        
+        partialdata.timeWindowMsStim = timeWindowMsStim;
+        partialdata.timeWindowMsLFP = timeWindowMsLFP;
+        partialdata.refreshRate =  refreshRate;
+        partialdata.std = std;
+        partialdata.meanLuminance = meanLuminance;
         
         if isempty(analysisdata) %first piece
             analysisdata=partialdata;
@@ -348,13 +353,15 @@ try
     
     
     if isempty(allSpikes) 
-        analysisdata.STA=meanValue(ones(size(stimData,1),size(stimData,2),sum(timeWindowFrames)+1));
+        analysisdata.STA=meanValue(ones(size(stimData,1),size(stimData,2),sum(timeWindowFramesStim)+1));
         analysisdata.STV=zeros(size(analysisdata.STA));
         analysisdata.numSpikes=0;
+        analysisdata.trialNumber = parameters.trialNumber;
+        analysisdata.chunkID = parameters.chunkID;
     end
     
     try
-        x=isempty(cumulativedata) || ~isfield(cumulativedata, 'cumulativeSTA')  || ~all(size(analysisdata.STA)==size(cumulativedata.cumulativeSTA)) %first trial through with these parameters
+        x=isempty(cumulativedata) || ~isfield(cumulativedata, 'cumulativeSTA')  || ~all(size(analysisdata.STA)==size(cumulativedata.cumulativeSTA)); %first trial through with these parameters
     catch
         warning('here')
         keyboard
@@ -364,8 +371,13 @@ try
         cumulativedata=[];
         cumulativedata.cumulativeSTA = analysisdata.STA;
         cumulativedata.cumulativeSTV = analysisdata.STV;
-        cumulativedata.cumulativeSpikeWaveforms = analysisdata.spikeWaveforms;
+        
         cumulativedata.cumulativeNumSpikes = analysisdata.numSpikes;
+        if analysisdata.numSpikes
+            cumulativedata.cumulativeSpikeWaveforms = analysisdata.spikeWaveforms;
+        else
+            cumulativedata.cumulativeSpikeWaveforms = [];
+        end
         cumulativedata.cumulativeTrialNumbers=parameters.trialNumber;
         cumulativedata.cumulativeChunkIDs=parameters.chunkID;
         %cumulativedata.cumulativeST_LFPA = ST_LFPA;
@@ -404,7 +416,7 @@ try
     [darkSignal darkCI darkInd]=getTemporalSignal(cumulativedata.cumulativeSTA,cumulativedata.cumulativeSTV,cumulativedata.cumulativeNumSpikes,'dark');
     
     rng=[min(cumulativedata.cumulativeSTA(:)) max(cumulativedata.cumulativeSTA(:))];
-    
+
     % 11/25/08 - update GUI
     %figure(plotParameters.handle); % make the figure current and then plot into it
     if plotParameters.showSpikeAnalysis
@@ -418,7 +430,7 @@ try
     
     
     % or use analysisdata.STA?
-    doSpatial=~(size(STA,1)==1 & size(STA,2)==1); % if spatial dimentions exist
+    doSpatial=~(size(analysisdata.STA,1)==1 & size(analysisdata.STA,2)==1); % if spatial dimentions exist
     
     % %% spatial signal (best via bright)
     if doSpatial
@@ -514,100 +526,101 @@ try
         ylabel('RGB(gunVal)')
         xlabel('msec')
     end
-    if doSpatial
-            subplot(2,2,4)
-            
-            switch xtraPlot{1}
-                case 'montage'
-                    % montage(reshape(cumulativedata.cumulativeSTA,[size(cumulativedata.STA,1) size(cumulativedata.STA,2) 1 size(cumulativedata.STA,3) ] ), 'DisplayRange',rng)
-                    montage(reshape(cumulativedata.cumulativeSTA,[size(STA,1) size(STA,2) 1 size(STA,3) ] ),'DisplayRange',rng)
-                    colormap(blueToRed(meanLuminanceStimulus,rng,true));
-                    % %% spatial signal (all)
-                    % for i=1:
-                    % subplot(4,n,2*n+i)
-                    % imagesc(STA(:,:,i),'range',[min(STA(:)) min(STA(:))]);
-                    % end
-                    
-                    if max(parameters.trialNumber)==318
-                        keyboard
-                    end
-                case 'eyes'
-                    
-                    figure(parameters.trialNumber)
-                    if exist('ellipses','var')
-                        plotEyeElipses(eyeSig,ellipses,within,true);
-                    else
-                        msg=sprintf('no good eyeData on trial %d\n will analyze all data',parameters.trialNumber)
-                        text(.5,.5, msg)
-                    end
-                case 'spaceTimeContext'
-                    %uses defaults on phys monitor may 2009, might not be up to
-                    %date after changes in hardware
-                    
-                    %user controls these somehow... params?
-                    eyeToMonitorMm=330;
-                    contextSize=2;
-                    pixelPad=0.1; %fractional pad 0-->0.5
-                    
-                    
-                    %stimRect=[500 1000 800 1200]; %need to get this stuff!
-                    stimRect=[0 0 stimulusDetails.width stimulusDetails.height]; %need to get this! now forcing full screen
-                    stimRectFraction=stimRect./[stimulusDetails.width stimulusDetails.height stimulusDetails.width stimulusDetails.height];
-                    [vRes hRes]=getAngularResolutionFromGeometry(size(STA,2),size(STA,1),eyeToMonitorMm,stimRectFraction);
-                    contextResY=vRes(contextInd(1),contextInd(2));
-                    contextResX=hRes(contextInd(1),contextInd(2));
-                    
-                    
-                    contextOffset=-contextSize:1:contextSize;
-                    n=length(contextOffset); % 2*c+1
-                    contextIm=ones(n,n)*meanLuminanceStimulus;
-                    selection=nan(n,n);
-                    maxAmp=max(abs(meanLuminanceStimulus-rng))*2; %normalize to whatever lobe is larger: positive or negative
-                    hold off; plot(0,0,'.')
-                    hold on
-                    for i=1:n
-                        yInd=contextInd(1)+contextOffset(i);
-                        for j=1:n
-                            xInd=contextInd(2)+contextOffset(j);
-                            if xInd>0 && xInd<=size(STA,2) && yInd>0 && yInd<=size(STA,1)
-                                %make the image
-                                selection(i,j)=sub2ind(size(STA),yInd,xInd,contextInd(3));
-                                contextIm(i,j)=cumulativedata.cumulativeSTA(selection(i,j));
-                                %get temporal signal
-                                [stixSig stixCI stixtInd]=getTemporalSignal(cumulativedata.cumulativeSTA,cumulativedata.cumulativeSTV,cumulativedata.cumulativeNumSpikes,selection(i,j));
-                                yVals{i,j}=((1-pixelPad*2)   *  (stixSig(:)-meanLuminanceStimulus)/maxAmp)  +  n-i+1; % pad, normalize, and then postion in grid
-                                xVals{i,j}=linspace(j-.5+pixelPad,j+.5-pixelPad,length(stixSig(:)));
-                                
-                            end
+        
+    if plotParameters.showSpikeAnalysis&&doSpatial
+        subplot(2,2,4)
+        
+        switch xtraPlot{1}
+            case 'montage'
+                % montage(reshape(cumulativedata.cumulativeSTA,[size(cumulativedata.STA,1) size(cumulativedata.STA,2) 1 size(cumulativedata.STA,3) ] ), 'DisplayRange',rng)
+                montage(reshape(cumulativedata.cumulativeSTA,[size(STA,1) size(STA,2) 1 size(STA,3) ] ),'DisplayRange',rng)
+                colormap(blueToRed(meanLuminanceStimulus,rng,true));
+                % %% spatial signal (all)
+                % for i=1:
+                % subplot(4,n,2*n+i)
+                % imagesc(STA(:,:,i),'range',[min(STA(:)) min(STA(:))]);
+                % end
+                
+                if max(parameters.trialNumber)==318
+                    keyboard
+                end
+            case 'eyes'
+                
+                figure(parameters.trialNumber)
+                if exist('ellipses','var')
+                    plotEyeElipses(eyeSig,ellipses,within,true);
+                else
+                    msg=sprintf('no good eyeData on trial %d\n will analyze all data',parameters.trialNumber)
+                    text(.5,.5, msg)
+                end
+            case 'spaceTimeContext'
+                %uses defaults on phys monitor may 2009, might not be up to
+                %date after changes in hardware
+                
+                %user controls these somehow... params?
+                eyeToMonitorMm=330;
+                contextSize=2;
+                pixelPad=0.1; %fractional pad 0-->0.5
+                
+                
+                %stimRect=[500 1000 800 1200]; %need to get this stuff!
+                stimRect=[0 0 stimulusDetails.width stimulusDetails.height]; %need to get this! now forcing full screen
+                stimRectFraction=stimRect./[stimulusDetails.width stimulusDetails.height stimulusDetails.width stimulusDetails.height];
+                [vRes hRes]=getAngularResolutionFromGeometry(size(STA,2),size(STA,1),eyeToMonitorMm,stimRectFraction);
+                contextResY=vRes(contextInd(1),contextInd(2));
+                contextResX=hRes(contextInd(1),contextInd(2));
+                
+                
+                contextOffset=-contextSize:1:contextSize;
+                n=length(contextOffset); % 2*c+1
+                contextIm=ones(n,n)*meanLuminanceStimulus;
+                selection=nan(n,n);
+                maxAmp=max(abs(meanLuminanceStimulus-rng))*2; %normalize to whatever lobe is larger: positive or negative
+                hold off; plot(0,0,'.')
+                hold on
+                for i=1:n
+                    yInd=contextInd(1)+contextOffset(i);
+                    for j=1:n
+                        xInd=contextInd(2)+contextOffset(j);
+                        if xInd>0 && xInd<=size(STA,2) && yInd>0 && yInd<=size(STA,1)
+                            %make the image
+                            selection(i,j)=sub2ind(size(STA),yInd,xInd,contextInd(3));
+                            contextIm(i,j)=cumulativedata.cumulativeSTA(selection(i,j));
+                            %get temporal signal
+                            [stixSig stixCI stixtInd]=getTemporalSignal(cumulativedata.cumulativeSTA,cumulativedata.cumulativeSTV,cumulativedata.cumulativeNumSpikes,selection(i,j));
+                            yVals{i,j}=((1-pixelPad*2)   *  (stixSig(:)-meanLuminanceStimulus)/maxAmp)  +  n-i+1; % pad, normalize, and then postion in grid
+                            xVals{i,j}=linspace(j-.5+pixelPad,j+.5-pixelPad,length(stixSig(:)));
+                            
                         end
                     end
-                    
-                    % plot the image
-                    imagesc(flipud(contextIm),rng)
-                    colormap(blueToRed(meanLuminanceStimulus,rng,true));
-                    
-                    %plot the temporal signal
-                    for i=1:n
-                        for j=1:n
-                            if ~isnan(selection(i,j))
-                                plot(xVals{i,j},yVals{i,j},'y')
-                            end
+                end
+                
+                % plot the image
+                imagesc(flipud(contextIm),rng)
+                colormap(blueToRed(meanLuminanceStimulus,rng,true));
+                
+                %plot the temporal signal
+                for i=1:n
+                    for j=1:n
+                        if ~isnan(selection(i,j))
+                            plot(xVals{i,j},yVals{i,j},'y')
                         end
                     end
-                    
-                    % we only take the degrees of the selected pixel.
-                    %neighbors may differ by a few % depending how big they are,
-                    %geometery, etc.
-                    
-                    
-                    axis([.5 n+.5 .5 n+.5])
-                    set(gca,'xTick',[]); set(gca,'yTick',[])
-                    xlabel(sprintf('%2.1f deg/pix',contextResX));
-                    ylabel(sprintf('%2.1f deg/pix',contextResY));
-                    
-                otherwise
-                    error('bad xtra plot request')
-            end
+                end
+                
+                % we only take the degrees of the selected pixel.
+                %neighbors may differ by a few % depending how big they are,
+                %geometery, etc.
+                
+                
+                axis([.5 n+.5 .5 n+.5])
+                set(gca,'xTick',[]); set(gca,'yTick',[])
+                xlabel(sprintf('%2.1f deg/pix',contextResX));
+                ylabel(sprintf('%2.1f deg/pix',contextResY));
+                
+            otherwise
+                error('bad xtra plot request')
+        end
         
     end
     
@@ -627,9 +640,8 @@ catch ex
     rethrow(ex)
     keyboard
 end
-end
 % drawnow
-
+end
 
 
 
@@ -714,17 +726,18 @@ end
 
 function cumulative = updateCumulative(cumulative,partial)
 
-fieldsInPartial = {'STA','STV','numSpikes','spikeWaveforms','trialNumber','chunkID','ST_LFPA','ST_LFPV','numSpikesForLFP'};
+fieldsInPartial = {'STA','STV','numSpikes','spikeWaveforms','trialNumber','chunkID','ST_LFPA','ST_LFPV','numSpikesForLFP','timeWindowMsStim','timeWindowMsLFP','refreshRate','std','meanLuminance'};
 fieldsInCumulative = {'cumulativeSTA','cumulativeSTV','cumulativeNumSpikes','cumulativeSpikeWaveforms','cumulativeTrialNumbers',...
-    'cumulativeChunkIDs','cumulativeST_LFPA','cumulativeST_LFPV','cumulativeNumSpikesForLFP'};
+    'cumulativeChunkIDs','cumulativeST_LFPA','cumulativeST_LFPV','cumulativeNumSpikesForLFP','timeWindowMsStim','timeWindowMsLFP','refreshRate','std','meanLuminance'};
 
 fieldsThatGetUpdated = {'STA','STV','ST_LFPA','ST_LFPV'};
 fieldsThatGetStackedOn = {'spikeWaveforms','trialNumber','chunkID'};
 fieldsThatGetSummed = {'numSpikes','numSpikesForLFP'};
+fieldsThatAreSetOnce = {'timeWindowMsStim','timeWindowMsLFP','refreshRate','std','meanLuminance'};
 
 for currField = fieldsInPartial
     if isfield(partial,currField{:})
-        if any(strcmp(currField,fieldsThatGetUpdated)) && ~any(isnan(partial.(currField{:})(:)))
+        if any(strcmp(currField,fieldsThatGetUpdated)) && ~any(isnan(partial.(currField{:})(:))) && (cumulative.cumulativeNumSpikes+partial.numSpikes)
             index = find(strcmp(currField,fieldsInPartial));
             cumulative.(fieldsInCumulative{index}) = ...
                 (cumulative.(fieldsInCumulative{index})*cumulative.cumulativeNumSpikes + ...
@@ -739,6 +752,10 @@ for currField = fieldsInPartial
             index = find(strcmp(currField,fieldsInPartial));
             cumulative.(fieldsInCumulative{index}) = ...
                 cumulative.(fieldsInCumulative{index})+ partial.(fieldsInPartial{index});
+        end
+        if any(strcmp(currField,fieldsThatAreSetOnce)) && ~isfield(cumulative,currField{:})
+            index = find(strcmp(currField,fieldsInPartial));
+            cumulative.(fieldsInCumulative{index}) = partial.(fieldsInPartial{index});
         end
     end
 end
@@ -778,5 +795,4 @@ end
 % cTrialNumbers=[cTrialNumbers trialNumbers];
 % cChunkIDs=[cChunkIDs chunkID];
 end
-
 

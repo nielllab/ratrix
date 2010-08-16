@@ -10,23 +10,6 @@ displaySize
 [LUT stimulus updateSM]=getLUT(stimulus,LUTbits);
 [resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60],32,getMaxWidth(stimulus),getMaxHeight(stimulus));
 
-OLED=false;
-if OLED
-    error('forced to 60 Hz... do you realize that?')
-    desiredWidth=800;
-    desiredHeight=600;
-    desiredHertz=60;
-    ratrixEnforcedColor=32;
-    resolutionIndex=find(([resolutions.height]==desiredHeight) & ([resolutions.width]==desiredWidth) & ([resolutions.pixelSize]==ratrixEnforcedColor) & ([resolutions.hz]==desiredHertz));
-    height=resolutions(resolutionIndex).height
-    width=resolutions(resolutionIndex).width
-    hz=resolutions(resolutionIndex).hz
-    if getMaxWidth(stimulus)~=desiredWidth
-        getMaxWidth(stimulus)
-        desiredWidth
-        error('not expected for OLED')
-    end
-end
 if isnan(resolutionIndex)
     resolutionIndex=1;
 end
@@ -57,9 +40,9 @@ width = min(width,getMaxWidth(stimulus));
 numFrequencies = length(stimulus.pixPerCycs);
 numContrasts = length(stimulus.contrasts);
 details.spatialFrequencies=stimulus.pixPerCycs; % 1/7/09 - renamed from pixPerCycs to spatialFrequencies (to avoid clashing with compile process)
-details.driftfrequencies=stimulus.driftfrequencies;
+details.frequencies=stimulus.frequencies;
 details.orientations=stimulus.orientations;
-details.phases=stimulus.phases;
+details.startPhases=stimulus.startPhases;
 details.contrasts=stimulus.contrasts;
 if isa(stimulus.location,'RFestimator')
     if size(trialRecords(end).subjectsInBox,2)==1
@@ -78,11 +61,12 @@ details.numRepeats=stimulus.numRepeats;
 details.doCombos=stimulus.doCombos;
 details.method = stimulus.ordering.method;
 details.seed = stimulus.ordering.seed;
-if ischar(details.seed)&&strcmp(details.seed,'clock')
+if ischar(details.seed) && strcmp(details.seed,'clock')
     details.seed = sum(100*clock);
 end
 details.changeableAnnulusCenter=stimulus.changeableAnnulusCenter;
 details.waveform=stimulus.waveform;
+details.phaseform = stimulus.phaseform;
 details.width=width;
 details.height=height;
 
@@ -110,16 +94,16 @@ stim.location=details.location;
 stim.numRepeats=details.numRepeats;
 stim.waveform=details.waveform;
 stim.changeableAnnulusCenter=details.changeableAnnulusCenter;
-
+stim.phaseform = details.phaseform;
 
 % details has the parameters before combos, stim should have them after combos are taken
 if stimulus.doCombos
     % do combos here
     mode = {details.method,details.seed};
-    comboMatrix = generateFactorialCombo({details.spatialFrequencies,details.driftfrequencies,details.orientations,...
-        details.contrasts,details.phases,details.durations,details.radii,details.annuli},[],[],mode);
+    comboMatrix = generateFactorialCombo({details.spatialFrequencies,details.frequencies,details.orientations,...
+        details.contrasts,details.startPhases,details.durations,details.radii,details.annuli},[],[],mode);
     stim.pixPerCycs=comboMatrix(1,:);
-    stim.driftfrequencies=comboMatrix(2,:);
+    stim.frequencies=comboMatrix(2,:);
     stim.orientations=comboMatrix(3,:);
     stim.contrasts=comboMatrix(4,:); %starting phases in radians
     stim.phases=comboMatrix(5,:);
@@ -128,7 +112,7 @@ if stimulus.doCombos
     stim.annuli=comboMatrix(8,:);
 else
     stim.pixPerCycs=details.spatialFrequencies;
-    stim.driftfrequencies=details.driftfrequencies;
+    stim.frequencies=details.driftfrequencies;
     stim.orientations=details.orientations;
     stim.contrasts=details.contrasts;
     stim.phases=details.phases;

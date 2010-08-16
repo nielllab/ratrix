@@ -16,6 +16,7 @@ s.spatialDim=[];
 s.patternType=[];
 s.LUT=[];
 s.LUTbits=0;
+s.randomizer = struct;
 
 switch nargin
     case 0
@@ -41,7 +42,7 @@ switch nargin
         
         switch s.distribution.type
             case 'gaussian'
-                if length(varargin{1})==3
+                if length(varargin{1})>=3
                     % meanLuminance
                     if isscalar(varargin{1}{2})
                         s.distribution.meanLuminance = varargin{1}{2};
@@ -55,7 +56,20 @@ switch nargin
                         error('std must be a scalar');
                     end
                 else
-                    error('gaussian must have 3 arguments: ditribution name, mean and std')
+                    error('provide atleast three inputs for distribution');
+                end
+                if length(varargin{1})==5
+                    % randomizer
+                    if ischar(varargin{1}{4}) && ismember(varargin{1}{4},{'twister','seed','state'})
+                        s.randomizer.method = varargin{1}{4};
+                    end
+                    % seeding
+                    if isnumeric(varargin{1}{5}) || (ischar(varargin{1}{5})&&(strcmp(varargin{1}{5},'clock')))
+                        s.randomizer.seed = varargin{1}{5};
+                    end                        
+                else
+                    s.randomizer.method = 'state';
+                    s.randomizer.seed = 'clock';
                 end
             case 'binary'
                 if length(varargin{1})==4

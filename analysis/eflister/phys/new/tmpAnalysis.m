@@ -52,7 +52,7 @@ if ... %
 ...%        ismember(stimType,{'gaussian'}) && ismember(rec.date,datenum({'04.15.09'},'mm.dd.yy')) && rec.chunks.cell_Z==47.34 % good example gauss for testing - chunk1-code1-acf4f35b54186cd6055697b58718da28e7b2bf80-t2042.385-4641
 ...%        selectRecordings('gauss',stimType,data)
 ...%        ismember(stimType,{'gaussian'}) && ismember(rec.date,datenum({'04.24.09'},'mm.dd.yy')) && rec.chunks.cell_Z==52.48 % good example gauss for testing w/aligned bursts
-data.mins>=3
+data.mins>=3 && ~ismember(stimType,{'junk'})
 % ...    
 % ...    % current sinusoidal status
 %         data.mins>=3 && ismember(stimType,{'sinusoid','sinusoid(new)'})  ... %squarefreqs
@@ -3835,8 +3835,8 @@ if ~isempty(trialStartTimes) && length(trialStartTimes>1)
         block=block'-min(block(:));
         block=block/max(block(:));
         end                
-        
-        [psth bpsth fpsth pbins psthRng bpsthRng fpsthRng psthBounds bpsthBounds]=doPsth(rasters,bursts,.1,timestep,maxTime,.95,1000);
+
+        [psth bpsth fpsth pbins psthRng bpsthRng fpsthRng psthBounds bpsthBounds]=doPsth(rasters,bursts,.1,max(timestep,.01),maxTime,.95,1000);
         
         subplot(n,1,3)
         alpha=.2;
@@ -4162,13 +4162,17 @@ bpsthsB=psths;
     end
 
     function out=resample(drep,num)
+        if ~isempty(drep)
         picks=cumsum(drep(ceil(rand(1,ceil(3*num*maxTime/mean(drep)))*length(drep))));
         ind=find(picks>num*maxTime,1);
         if isempty(ind)
             error('ran out')
         end
         out={rem(picks(1:ind),maxTime)}; %sort not necessary
-
+        else
+            out={};
+        end
+        
         if false
         out={};
         begin=1;

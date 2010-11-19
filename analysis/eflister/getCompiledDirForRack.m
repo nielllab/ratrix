@@ -10,6 +10,8 @@ switch rackNum
         out='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\behavior\pmeierTrialRecords\compiled';
     case 5 
         out='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\behavior\prTrialRecords\compiled';
+    case 6 
+        out='\\reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\behavior\standAloneRecords\sarah standalone\CompiledTrialRecords';
     case 101
         out='\\Reinagel-lab.ad.ucsd.edu\rlab\Rodent-Data\behavior\rig1TrialRecords\compiled';
     case 103

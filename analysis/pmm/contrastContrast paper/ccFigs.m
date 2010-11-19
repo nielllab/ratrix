@@ -93,7 +93,7 @@ axis([-3 5 0 0.5])
 set(gca,'xtick',[],'ytick',[])
 
 subplot(4,2,4); hold on
-d=stats(1 , which(end) ,strcmp(names.stats,'dpr'));
+d=stats(1 , which(end) ,strcmp(names.stats,'dpr'))
 crit=stats(1 , which(end) ,strcmp(names.stats,'crit'));
 critLine=norminv(stats(1 , which(end) ,strcmp(names.stats,'CRs')));
 critLine2=norminv(1-stats(1 , which(end) ,strcmp(names.stats,'hits')),d,1);
@@ -258,26 +258,102 @@ subplot(2,2,4); settings.alphaLabel='e'; cleanUpFigure(gca,settings)
 %%  calculate for tcs & fcs
 dateRange= [pmmEvent('231&234-jointSweep')+1 pmmEvent('231-test200msecDelay')]; filter{1}.type='16';
 %[stats CI names params]=getFlankerStats({'234'},'allBlockSegments',{'hits','CRs','dpr'},filter,dateRange); 
-[stats CI names params]=getFlankerStats({'231','234'},'allBlockIDs',{'hits','CRs','dpr','crit'},filter,dateRange); % dprimeMCMC
-
-%% Joint
+[stats CI names params]=getFlankerStats({'234'},'allBlockIDs',{'hits','CRs','dpr','crit'},filter,dateRange); % dprimeMCMC
 
 c=names.conditions;
-k=2;             k=1;
+k=2;             k=3;
 arrows={c{1},c{6},k; c{6},c{11},k; c{11},c{16},k;...
     c{2},c{7},k; c{7},c{12},k; c{12},c{17},k;...
     c{3},c{8},k; c{8},c{13},k; c{13},c{18},k;...
     c{4},c{9},k; c{9},c{14},k; c{14},c{19},k;...
     c{5},c{10},k; c{10},c{15},k; c{15},c{20},k};
+
 arrows={c{1},c{2},k; c{2},c{3},k; c{3},c{4},k; c{4},c{5},k;...
     c{6},c{7},k; c{7},c{8},k; c{8},c{9},k; c{9},c{10},k;...
     c{11},c{12},k; c{12},c{13},k; c{13},c{14},k; c{14},c{15},k;...
     c{16},c{17},k; c{17},c{18},k; c{18},c{19},k; c{19},c{20},k};
 
+
 params.colors(:)=.8;
 params.colors([1:5:20],:)=customColorMap([0 1], [.6 .6 .8; .1 .1 .9],4); % overwrite target
 params.colors([16:20],:)=customColorMap([0 .3 1], [ .1 .1 .9;  .6 .2 .5;  .8 .2 .2],5); %flankers
+type_colors=params.colors
+type_tcs=params.factors.targetContrast;
+type_fcs=params.factors.flankerContrast;
+figure(4)
+subplot(1,2,1)
 doHitFAScatter(stats,CI,names,params,{'234'},[],0,0,0,0,0,1,arrows);  % note bias - say yes more when close
+
+
+[stats CI names params]=getFlankerStats({'234'},'allBlockSegments',{'hits','CRs','dpr','crit'},filter,dateRange);
+tcs=params.factors.targetContrast;
+fcs=params.factors.flankerContrast; 
+subplot(2,4,3)
+for t=1:numTc
+    for f=1:numFc
+        which=find(tcs==tc(t) & fcs==fc(f)); a=sqrt(length(which));
+        y(f)=mean(stats(1,which,3)); er(f)=std(stats(1,which,3))/a;
+        whichColor=find(type_tcs==tc(t) & type_fcs==fc(f));
+        plot(fc([f f]),y(f)+[-er(f) er(f)],'color',type_colors(whichColor,:)); hold on
+    end
+    plot(fc,y,'k')
+end
+axis([-.1 1.1 -.2 3]); 
+
+subplot(2,4,7)
+for t=1:numTc
+    for f=1:numFc
+        which=find(tcs==tc(t) & fcs==fc(f)); a=sqrt(length(which));
+        y(f)=mean(stats(1,which,4)); er(f)=std(stats(1,which,4))/a;
+        whichColor=find(type_tcs==tc(t) & type_fcs==fc(f));
+        plot(fc([f f]),y(f)+[-er(f) er(f)],'color',type_colors(whichColor,:)); hold on
+        %n(whichColor)=length(which)
+    end
+    plot(fc,y,'k')
+end
+axis([-.1 1.1 -1 1]); set(gca,'ytick',[-1 0 1])
+
+
+[stats CI names params]=getFlankerStats({'231'},'allBlockSegments',{'hits','CRs','dpr','crit'},filter,dateRange);
+tcs=params.factors.targetContrast;
+fcs=params.factors.flankerContrast;
+
+subplot(2,4,4)
+for t=1:numTc
+    for f=1:numFc
+        which=find(tcs==tc(t) & fcs==fc(f)); 
+        v=stats(1,which,3); v(isinf(v))=[]; a=sqrt(length(v));
+        y(f)=mean(v); er(f)=std(v)/a;
+        whichColor=find(type_tcs==tc(t) & type_fcs==fc(f));
+        plot(fc([f f]),y(f)+[-er(f) er(f)],'color',type_colors(whichColor,:)); hold on
+    end
+    plot(fc,y,'k')
+end
+axis([-.1 1.1 -.2 3]); 
+
+subplot(2,4,8)
+for t=1:numTc
+    for f=1:numFc
+        which=find(tcs==tc(t) & fcs==fc(f)); a=sqrt(length(which));
+        v=stats(1,which,4); v(isinf(v))=[]; a=sqrt(length(v));
+        y(f)=mean(v); er(f)=std(v)/a;
+        whichColor=find(type_tcs==tc(t) & type_fcs==fc(f));
+        plot(fc([f f]),y(f)+[-er(f) er(f)],'color',type_colors(whichColor,:)); hold on
+    end
+    plot(fc,y,'k')
+end
+axis([-.1 1.1 -1 1]); set(gca,'ytick',[-1 0 1])
+
+cleanUpFigure(gcf,settings)
+settings=[];
+subplot(1,2,1); settings.alphaLabel='a'; cleanUpFigure(gca,settings)
+subplot(2,4,3); ylabel('d'''); xlabel('C_F'); settings.alphaLabel='b'; cleanUpFigure(gca,settings)
+subplot(2,4,4);  xlabel('C_F'); settings.alphaLabel='c'; cleanUpFigure(gca,settings) %ylabel('d''');
+subplot(2,4,7); ylabel('bias criterion'); xlabel('C_F'); settings.alphaLabel='d'; cleanUpFigure(gca,settings)
+subplot(2,4,8);  xlabel('C_F'); settings.alphaLabel='e'; cleanUpFigure(gca,settings) %ylabel('bias criterion');
+set(gcf,'Position',[-2 133 1043 510])
+
+
 %% alpha
 figure
 
@@ -303,16 +379,20 @@ cleanUpFigure
 
 modelIDs=[]
 settings=[];
-p=detectionModel('searchSearch_20100801T122349'); %96x10
-modelIDs=[53 55 5 7]+1;
+%p=detectionModel('searchSearch_20100801T122349'); %96x10
+%modelIDs=[53 55 5 7]+1;
+
+% p.modelName='searchSearch_20100805T093642'; p=p.load() % 48x10, now incompatible with current model rules
+% nm={'234-gaussVe-a_f-dn','234-gaussVe-a_f-b_cost-dn','231-gaussVe-a_f-dn','231-gaussVe-a_f-b_cost-dn'}
+% for i=1:4
+%     modelIDs(i)=strmatch(nm{i},p.cache.groupModelNames)
+% end
+
+p=detectionModel('searchSearch_20100820T034322'); %bias comparison x40 
+modelIDs=[3 4 1 2];
+
 
 %%
-p.modelName='searchSearch_20100805T093642'; p=p.load() % 48x10 
-nm={'234-gaussVe-a_f-dn','234-gaussVe-a_f-b_cost-dn','231-gaussVe-a_f-dn','231-gaussVe-a_f-b_cost-dn'}
-for i=1:4
-    modelIDs(i)=strmatch(nm{i},p.cache.groupModelNames)
-end
-
 figure;
 for i=1:4
     subplot(2,2,i);
@@ -342,7 +422,7 @@ p=detectionModel('searchSearch_20100810T145838'); % 48x2, use LLR, no bug
 n.alpha={'fit'}; 
 n.bias={'cost'}; 
 n.var={'scales'};
-n.pdf={'gaussVe','gaussVs','gaussVi','exp','gam'} % 'logn'
+n.pdf={'gaussVe','gaussVs','exp','gam','logn'}  
 n.gamma={'yoked'};
 n.plus={'dn'};
 
@@ -350,9 +430,127 @@ n.subjects={'234','231'};
 %subplot(2,1,1); title('subject 1') 
 p.modelCompareForPoster(p.getSearchSearchModelNames(n))
 
+
+n.pdf={'gaussVe'}%'gaussVs','gam'}  
+p=detectionModel('searchSearch_20100813T023729'); % 10x10, use LLR, no bug
+p.modelCompareForPoster(p.getSearchSearchModelNames(n),[],0,1)
+
+
+
 % n.subjects={'231'};
 % %subplot(2,1,2); title('subject 2')
 % p.modelCompareForPoster(p.getSearchSearchModelNames(n))
+
+%% parameter compare -Vs
+close all
+p=detectionModel('searchSearch_20100813T023729'); % 10x10, use LLR, no bug
+values=p.parameterErrorbars('231-gaussVs-a_f-b_cost-dn')
+set(gca,'ylim',[-.5 10],'xtick',[1:8],'xtick',[],'xticklabel',[])
+
+
+modelID=find(strcmp(p.cache.namesOfModels,'231-gaussVs-a_f-b_cost-dn'));
+featureNames=p.cache.groupModelFeatures{modelID}
+nm=p.getSymbolNames(featureNames);
+value=median(values)
+for i=1:length(nm)
+    text(i,-1.5,nm{i},'HorizontalAlignment','center')
+    text(i,-2.2,num2str(value(i),'%4.2f'),'HorizontalAlignment','center')
+end
+%% parameter compare -Ve 231
+close all
+p=detectionModel('searchSearch_20100816T145446');  %231dnx10x50
+values=p.parameterErrorbars;
+set(gca,'ylim',[-.5 10],'xticklabel',[])
+
+nm=p.getSymbolNames(p.modelFeatures);
+value=median(values);
+for i=1:length(nm)
+    text(i,-1.5,nm{i},'HorizontalAlignment','center')
+    text(i,-2.2,num2str(value(i),'%4.2f'),'HorizontalAlignment','center')
+end
+
+%%
+p=detectionModel('searchSearch_20100813T193828'); % 10x10, use LLR, no bug
+p.modelCompareForPoster({'234-gaussVe-a_f'},[],0)
+
+%% check good model
+close all
+figure
+p=detectionModel('searchSearch_20100814T141515');  %234dnx10x50
+p.modelCompareForPoster({'234-gaussVe-a_f-b_cost-dn'},[],0,0)
+
+p=detectionModel('searchSearch_20100816T145446');  %231dnx10x50
+p.modelCompareForPoster({'231-gaussVe-a_f-b_cost-dn'},[],0,0)
+%set(gca,'ylim',[-5 40])
+
+%% best models viewed
+p=detectionModel('searchSearch_20100814T141515');  %234dnx10x50
+subplot(1,2,1); values=p.parameterErrorbars;
+set(gca,'ylim',[-0.5 7],'xticklabel',[])
+ylabel('parameter value')
+
+nm=p.getSymbolNames(p.modelFeatures);
+value=median(values);
+%value=p.constrainValues(p.cache.modelParams',p.modelFeatures,1)
+for i=1:length(nm)
+    text(i,-1.5,nm{i},'HorizontalAlignment','center')
+    text(i,-2.0,num2str(value(i),'%4.2f'),'HorizontalAlignment','center')
+end
+
+p=detectionModel('searchSearch_20100816T145446');  %231dnx10x50
+subplot(1,2,2); values=p.parameterErrorbars;
+set(gca,'ylim',[-0.5 7],'xticklabel',[])
+
+nm=p.getSymbolNames(p.modelFeatures);
+value=median(values);
+%value=p.constrainValues(p.cache.modelParams',p.modelFeatures,1)
+for i=1:length(nm)
+    text(i,-1.5,nm{i},'HorizontalAlignment','center')
+    text(i,-2.0,num2str(value(i),'%4.2f'),'HorizontalAlignment','center')
+end
+
+%% check error
+values=p.constrainValues(p.cache.groupModelParamsHistory{modelID},p.cache.groupModelFeatures{modelID},0);
+
+
+%% scatter-correlation of params
+figure
+p=detectionModel('searchSearch_20100814T141515');  %234dnx10x50
+subplot(2,2,1); [t f]=p.parameterScattergram([],[2 3]); %axis([0 6 0 6]); 
+w1=t./f; %w1(w1<0)=[];
+subplot(4,2,5); e=linspace(1,8,20); hist(w1,e)
+%p.parameterScattergram([],[4 5])
+xlabel('\mu_T / \mu_F')
+
+p=detectionModel('searchSearch_20100816T145446');  %231dnx10x50
+subplot(2,2,2); [t f]=p.parameterScattergram([],[2 3]); %axis([0 6 0 6])
+w2=t./f; w2(w2<0)=nan;
+
+subplot(4,2,7); e=linspace(1,8,20); hist(w2,e)
+xlabel('\mu_T / \mu_F')
+%p.parameterScattergram([],[4 5])
+
+
+subplot(2,2,4); 
+plot([.5 2.5],[1 1],'k');  hold on
+ylabel('\mu_T / \mu_F')
+cleanUpFigure
+b=boxplot([w1 w2],{'s1','s2'},'color',[0 0 0]);
+set(b,'MarkerEdgeColor',[1 1 1])
+set(gca,'ylim',[0 5],'ytick',[0:5])
+%% FA signif
+p=detectionModel('searchSearch_20100814T141515');  %234dnx10x50
+p=detectionModel('searchSearch_20100816T145446');  %231dnx10x50
+[data params]=p.getDataFromSubjectCache;
+ind1=find(params.tcs==0.25 & params.fcs==0);
+ind2=find(params.tcs==1 & params.fcs==0);
+n1=data.numNoSig(ind1);
+n2=data.numNoSig(ind2);
+x1=data.numCRs(ind1);
+x2=data.numCRs(ind2);
+[delta CI]=diffOfBino(x1,x2,n1,n2,'agrestiCaffo',0.05)
+[delta CI]=diffOfBino(x1,x2,n1,n2,'agrestiCaffo',0.01)
+[delta CI]=diffOfBino(x1,x2,n1,n2,'agrestiCaffo',0.00001)
 
 %% the ones shown
 p.modelCompareForPoster({'234-gaussVe-a_0','234-gaussVe-a_f','234-gaussVe-a_f-dn','234-gaussVe-a_f-b_cost-dn',...

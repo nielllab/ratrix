@@ -345,6 +345,8 @@ subjectID = '231'; channels={1}; thrV=[-0.3 Inf]; cellBoundary={'trialRange',[13
 
 subjectID = '231'; channels={1}; thrV=[-0.08 Inf]; cellBoundary={'trialRange',[1217 1218 ]} %1224
 subjectID = '231'; channels={1}; thrV=[-0.08 Inf]; cellBoundary={'trialRange',[1235 1243]};%fffc, randomized to clock once per trial, 4 reps
+
+subjectID = '231'; channels={1}; thrV=[-0.15 Inf]; cellBoundary={'trialRange',[475 485]};%495]};%fffc,
 %%
 spikeSortingParams.postProcessing= 'treatAllAsSpike'; %'biggestAverageAmplitudeCluster';  %'largestNonNoiseClusterOnly',  
 spikeDetectionParams.sampleLFP = false; %true;
@@ -357,7 +359,7 @@ switch spikeDetectionParams.method
         spikeDetectionParams.threshHoldVolts=thrV;
         %spikeDetectionParams.threshHoldVolts=[]; spikeDetectionParams.bottomTopCrossingRate=[4 4]
 end
-overwriteAll=1; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
+overwriteAll=0; % if not set, analysis wont sort spikes again, do we need?: 0=do if not there, and write, 1= do always and overwrite, 2= do always, only write if not there or user confirm?
 usePhotoDiodeSpikes=0;
 %spikeDetectionParams.method='activeSortingParametersThisAnalysis';  % will override this files choices with the active params for this *subject*
 %spikeSortingParams.method='klustaModel';  NEED TO NOT DELETE THE MODEL FOLDER FILE>>>

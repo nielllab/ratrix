@@ -305,3 +305,5 @@ protocols/stimManagers/@gratings/physAnalysisDeprecated.m -text
 protocols/stimManagers/@gratings/displayCumulativePhysAnalysis.m -text
 protocols/stimManagers/@gratings/enableCumulativePhysAnalysis.m -text
 protocols/stimManagers/@gratings/physAnalysisDev.m -text
+protocols/stimManagers/@gratings/whichStimForThisPort.m -text
+protocols/stimManagers/@gratings/errorStim.m -text

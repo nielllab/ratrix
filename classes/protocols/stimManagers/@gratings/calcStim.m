@@ -49,6 +49,7 @@ else
 end
 [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass,allowRepeats);
 
+
 % =====================================================================================================
 
 % set up params for computeGabors
@@ -111,7 +112,6 @@ stim.numRepeats=details.numRepeats;
 stim.waveform=details.waveform;
 stim.changeableAnnulusCenter=details.changeableAnnulusCenter;
 
-
 % details has the parameters before combos, stim should have them after combos are taken
 if stimulus.doCombos
     % do combos here
@@ -141,12 +141,17 @@ end
 unsortedUniques=stim.radii(sort(length(stim.radii)+1 - b));
 [garbage stim.maskInds]=ismember(stim.radii,unsortedUniques);
 
+if ismember(trialManagerClass,{'nAFC'})
+    %overwrite this trials orientation with the appropriate one 
+    stim=whichStimForThisPort(stimulus,stim,targetPorts);
+end
+
 % now make our cell array of masks and the maskInd vector that indexes into the masks for each combination of params
 % compute mask only once if radius is not infinite
 stim.masks=cell(1,length(unsortedUniques));
 for i=1:length(unsortedUniques)
     if unsortedUniques(i)==Inf
-        stim.masks{i}=[];
+        mask=[];
     else
         mask=[];
         maskParams=[unsortedUniques(i) 999 0 0 ...
@@ -158,8 +163,8 @@ for i=1:length(unsortedUniques)
 
         % necessary to make use of PTB alpha blending: 1 - 
         mask(:,:,2) = 1 - mask(:,:,2); % 0 = transparent, 255=opaque (opposite of our mask)
-        stim.masks{i}=mask;
     end
+    stim.masks{i}=mask;
 end
 % convert from annuli=[0.8 0.8 0.6 1.2 0.7] to [1 1 2 3 4] (stupid unique automatically sorts when we dont want to)
 [a b] = unique(fliplr(stim.annuli)); 
@@ -169,17 +174,22 @@ unsortedUniques=stim.annuli(sort(length(stim.annuli)+1 - b));
 annulusCenter=stim.location;
 stim.annuliMatrices=cell(1,length(unsortedUniques));
 for i=1:length(unsortedUniques)
-    annulus=[];
-    annulusRadius=unsortedUniques(i);
-    annulusRadiusInPixels=sqrt((height/2)^2 + (width/2)^2)*annulusRadius;
-    annulusCenterInPixels=[width height].*annulusCenter; % measured from top left corner; % result is [x y]
-    % center=[256 712];
-    %     center=[50 75];
-    [x,y]=meshgrid(-width/2:width/2,-height/2:height/2);
-    annulus(:,:,1)=ones(height,width,1)*stimulus.mean;
-    bool=(x+width/2-annulusCenterInPixels(1)).^2+(y+height/2-annulusCenterInPixels(2)).^2 < (annulusRadiusInPixels+0.5).^2;
-    annulus(:,:,2)=bool(1:height,1:width);
-    stim.annuliMatrices{i}=annulus;
+    if unsortedUniques(i)==0
+        annulus(:,:,1)=ones(height,width,1)*stimulus.mean;
+        annulus(:,:,2)=zeros(height,width,1)>1;
+    else
+        annulus=[];
+        annulusRadius=unsortedUniques(i);
+        annulusRadiusInPixels=sqrt((height/2)^2 + (width/2)^2)*annulusRadius;
+        annulusCenterInPixels=[width height].*annulusCenter; % measured from top left corner; % result is [x y]
+        % center=[256 712];
+        %     center=[50 75];
+        [x,y]=meshgrid(-width/2:width/2,-height/2:height/2);
+        annulus(:,:,1)=ones(height,width,1)*stimulus.mean;
+        bool=(x+width/2-annulusCenterInPixels(1)).^2+(y+height/2-annulusCenterInPixels(2)).^2 < (annulusRadiusInPixels+0.5).^2;
+        annulus(:,:,2)=bool(1:height,1:width);
+    end
+     stim.annuliMatrices{i}=annulus;
 end
 
 if isinf(stim.numRepeats)

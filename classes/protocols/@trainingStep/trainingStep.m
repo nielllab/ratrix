@@ -14,7 +14,7 @@ switch nargin
         t.criterion = criterion();
         t.scheduler = scheduler();
 
-
+        t.stepName='';
         t.previousSchedulerState=0;
         t.trialNum=0;
         t.sessionRecords =[];

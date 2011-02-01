@@ -92,13 +92,23 @@ if ~exist('mode','var') || isempty(mode)
     type='ordered'; %pmm fixed 01/10/09
 elseif iscell(mode)
     % check that mode is a valid mode - so far just {'ordered'}
-    if length(mode)==1 && strcmp(mode{1}, 'ordered')
+    if  strcmp(mode{1}, 'ordered')
         % 'ordered' mode
         type='ordered';
+        switch length(mode)
+            case 1
+                %okay
+            case 2
+                %check that 2nd param (might be an attempted "seed") is empty
+                if ~isempty(mode{2})
+                    error('won''t be able to use the 2nd passed param')
+                end
+            otherwise
+                error('too many parameters')
+        end
     elseif strcmp(mode{1}, 'random')
         % 'random' mode
         type='random';
-    else
         mode
         error('invalid mode specified');
     end

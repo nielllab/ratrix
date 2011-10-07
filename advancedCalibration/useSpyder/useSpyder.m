@@ -45,7 +45,7 @@ close all
 Screen('Preference', 'SkipSyncTests',0);
 
 p = mfilename('fullpath');
-[pathstr, name, ext, versn] = fileparts(p);
+[pathstr, name, ext] = fileparts(p);
 addpath(genpath(pathstr))
 
 if ~exist('screenNum','var') || isempty(screenNum)

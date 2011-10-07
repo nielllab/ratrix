@@ -2,7 +2,7 @@
 
 function analysis
 if ~isdeployed
-[pathstr, name, ext, versn] = fileparts(mfilename('fullpath'));
+[pathstr, name, ext] = fileparts(mfilename('fullpath'));
 addpath(fullfile(fileparts(fileparts(pathstr)),'bootstrap'))
 %addpath('C:\Documents and Settings\rlab\Desktop\phil analysys')
 end

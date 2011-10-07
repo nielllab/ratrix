@@ -9,7 +9,7 @@ if ~exist('serverName','var') || isempty(serverName)
     serverName=getServerNameFromIP;
 end
 
-[pathstr, name, ext, versn] = fileparts(mfilename('fullpath'));
+[pathstr, name, ext] = fileparts(mfilename('fullpath'));
 addpath(fullfile(fileparts(pathstr),'bootstrap'))
 setupEnvironment;
 

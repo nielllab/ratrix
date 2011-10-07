@@ -166,7 +166,7 @@ if false
     exclude=true;
 end
 
-[pathstr, name, ext, versn] = fileparts(mfilename('fullpath'));
+[pathstr, name, ext] = fileparts(mfilename('fullpath'));
 addpath(fullfile(fileparts(fileparts(fileparts(fileparts(pathstr)))),'bootstrap'));
 setupEnvironment;
 

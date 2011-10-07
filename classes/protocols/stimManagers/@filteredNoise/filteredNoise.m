@@ -115,7 +115,11 @@ switch nargin
                             error('seed must be scalar uint32 or ''new''')
                         end
 
-                    elseif all(size(in.distribution)==[1 4]) && ismember(in.distribution{4},{'ptile','normalized'}) && any([exist([tmp.special '.txt'],'file') exist([tmp.special '.mat'],'file')]==2)
+                    elseif all(size(in.distribution)==[1 4]) && ismember(in.distribution{4},{'ptile','normalized'})
+                        if ~any([exist([tmp.special '.txt'],'file') exist([tmp.special '.mat'],'file')]==2)
+                            warning('filePath muts be a string containing a file name visible on the network (either .txt or .mat, extension omitted, .txt loadable via load()')                            
+                        end
+                        
                         tmp.origHz=in.distribution{2};
                         tmp.clipVal=in.distribution{3};
                         tmp.clipType=in.distribution{4};
@@ -132,7 +136,7 @@ switch nargin
                             error('clipVal must be real scalar 0<=x<=1')
                         end
                     else
-                        error('cell vector distribution must be one of {''gaussian'',clipPercent},  {''sinusoidalFlicker'',[temporalFreqs],[contrasts],gapSecs}, {filePath, origHz, clipVal, clipType} (filePath a string containing a file name (either .txt or .mat, extension omitted, .txt loadable via load()), clipType in {''ptile'',''normalized''}')
+                        error('cell vector distribution must be one of {''gaussian'',clipPercent},  {''sinusoidalFlicker'',[temporalFreqs],[contrasts],gapSecs}, {filePath, origHz, clipVal, clipType}, clipType in {''ptile'',''normalized''}')
                     end
                     varargin{1}(j).distribution=tmp;
                 else

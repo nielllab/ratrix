@@ -7,7 +7,7 @@ if usejava('jvm')
     % finalizeDBPaths is called to actually do the work
     jdbcFile = 'classes12_g.jar';
     cpathFile = 'cpath.jar';
-    [dbPath, name, ext, versn] = fileparts(mfilename('fullpath'));
+    [dbPath, name, ext] = fileparts(mfilename('fullpath'));
     jdbcPath = fullfile(dbPath,jdbcFile);
     cpathPath = fullfile(dbPath,cpathFile);
     

@@ -1,7 +1,7 @@
 function [out refreshRate vendorData]=accessSpyder
 
 p = mfilename('fullpath');
-[pathstr, name, ext, versn] = fileparts(p);
+[pathstr, name, ext] = fileparts(p);
 
 libpath=fullfile(pathstr,'spyder API');%'C:\Documents and Settings\rlab\Desktop\Spyder_Win_SDK_2.1\Spyder_Win_SDK_2.1\API\';
 libname='CVSpyder';

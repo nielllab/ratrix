@@ -37,7 +37,7 @@ for f=1:length(subDirs)
     filePath=subDirs(f).dir;
     fileName=subDirs(f).file;
 
-    [fp,fn,fe,fv]=fileparts(fileName);
+    [fp,fn,fe]=fileparts(fileName);
     try
         tr=load(fullfile(filePath,fileName)); %this is safe cuz it's local
     catch ex

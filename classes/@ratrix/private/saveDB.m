@@ -3,7 +3,7 @@ function saveDB(r,alsoReplaceSubjectData)
 disp(sprintf('saving db'))
 startTime=GetSecs();
 
-[pathstr, name, ext, versn] = fileparts(r.dbpath);
+[pathstr, name, ext] = fileparts(r.dbpath);
 
 if ~isempty(pathstr) && ~isempty(name)
 

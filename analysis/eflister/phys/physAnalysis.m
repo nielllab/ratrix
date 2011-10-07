@@ -61,7 +61,7 @@ drawStims=1;
 % this makes loading the stimulus faster for the future
 % you should then call doAnalysis, which works on this file
 
-[pathstr, name, ext, versn] = fileparts(mfilename('fullpath'));
+[pathstr, name, ext] = fileparts(mfilename('fullpath'));
 addpath(fullfile(fileparts(fileparts(fileparts(pathstr))),'bootstrap'))
 setupEnvironment;
 

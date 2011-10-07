@@ -115,16 +115,17 @@ background=0;
 ypos=0;
 ims=dir(fullfile(imageDir,'*.png'));
 if isempty(ims)
-    error('couldn''t find image directory')
+    warning('couldn''t find image directory')
+    imageStim = discrimStim;
+else
+    trialDistribution={};
+    for i=1:floor(length(ims)/2)
+        [junk n1 junk]=fileparts(ims(i).name);
+        [junk n2 junk]=fileparts(ims(length(ims)-(i-1)).name);
+        trialDistribution{end+1}={{n1 n2} 1};
+    end
+    imageStim = images(imageDir,ypos,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,trialDistribution,'normal',[1 1],false,[0 0],false,.5);
 end
-
-trialDistribution={};
-for i=1:floor(length(ims)/2)
-    [junk n1 junk junk]=fileparts(ims(i).name);
-    [junk n2 junk junk]=fileparts(ims(length(ims)-(i-1)).name);
-    trialDistribution{end+1}={{n1 n2} 1};
-end
-imageStim = images(imageDir,ypos,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,trialDistribution,'normal',[1 1],false,[0 0],false,.5);
 
 d=2; %decrease to broaden
 gran=100;
@@ -202,11 +203,15 @@ unfilteredNoise=filteredNoise(noiseSpec,maxWidth,maxHeight,scaleFactor,interTria
 
 
 [a b]=getMACaddress;
+x.InstalledBoardIds=[];
 if ispc
-    x=daqhwinfo('nidaq');
-else
-    x.InstalledBoardIds=[];
+    try
+        x=daqhwinfo('nidaq');
+    catch e
+        e
+    end
 end
+
 if a && ismember(b,{'0014225E4685','0018F35DF141'}) && length(x.InstalledBoardIds)>0
     led=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,{'off'},false,'LED','center');
 else
@@ -266,8 +271,8 @@ ts9 = trainingStep(led, fullfieldFlicker,  repeatIndefinitely(), noTimeOff(), sv
 ts10 = trainingStep(led, crftrf,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %crf/trf
 ts11 = trainingStep(led, search,  repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode); %search
 
-p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts4, ts6, ts7, ts8, ts9, ts10, ts11});
-stepNum=uint8(2);
+p=protocol('gabor test',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8, ts9, ts10, ts11});
+stepNum=uint8(6);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

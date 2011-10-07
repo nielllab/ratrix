@@ -17,7 +17,7 @@
 
 function [libname refreshRate]=openSpyder(displayType)
 p = mfilename('fullpath');
-[pathstr, name, ext, versn] = fileparts(p);
+[pathstr, name, ext] = fileparts(p);
 
 libpath=fullfile(pathstr,'spyderAPI'); %in osx, this path must not have spaces (at least in intel/2007a
 libname='CVSpyder';

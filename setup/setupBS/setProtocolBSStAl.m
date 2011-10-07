@@ -136,8 +136,8 @@ end
 
 trialDistribution={};
 for i=1:floor(length(ims)/2)
-    [junk n1 junk junk]=fileparts(ims(i).name);
-    [junk n2 junk junk]=fileparts(ims(length(ims)-(i-1)).name);
+    [junk n1 junk]=fileparts(ims(i).name);
+    [junk n2 junk]=fileparts(ims(length(ims)-(i-1)).name);
     trialDistribution{end+1}={{n1 n2} 1};
 end
 imageStim = images(imageDir,ypos,background,maxWidth,maxHeight,scaleFactor,interTrialLuminance,trialDistribution,'normal',[1 1],false,[0 0],false,.5);

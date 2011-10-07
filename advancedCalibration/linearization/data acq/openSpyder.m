@@ -1,6 +1,6 @@
 function [libname refreshRate]=openSpyder(displayType)
 p = mfilename('fullpath');
-[pathstr, name, ext, versn] = fileparts(p);
+[pathstr, name, ext] = fileparts(p);
 
 libpath=fullfile(pathstr,'spyder API');
 libname='CVSpyder';

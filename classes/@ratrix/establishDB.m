@@ -6,7 +6,7 @@ else
     error('dataPath should be a fully resolved path string')
 end
 
-[pathstr, name, ext, versn] = fileparts(fullfile(r.serverDataPath, filesep));  %i call it a
+[pathstr, name, ext] = fileparts(fullfile(r.serverDataPath, filesep));  %i call it a
 %bug that fileparts assumes the last piece is a file if it doesn't terminate with a filesep
 %should check that it's an actual file or actual directory.
 

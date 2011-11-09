@@ -673,7 +673,7 @@ while ~done && ~quit;
     % =========================================================================
     % all trial logic follows
 
-    if ~paused
+    if ~paused && msRewardOwed+msRequestRewardOwed<=0
         ports=readPorts(station);
     end
     doValves=0*ports;
@@ -682,7 +682,7 @@ while ~done && ~quit;
     [keyIsDown,secs,keyCode]=KbCheck; % do this check outside of function to save function call overhead
     timestamps.kbCheckDone=GetSecs;
 
-    if keyIsDown
+    if keyIsDown %bug: by overwriting ports here, you will overwrite any stochastic reward
         [didAPause paused done trialRecords(trialInd).result doValves ports didValves didHumanResponse manual ...
             doPuff pressingM pressingP,timestamps.kbOverhead,timestamps.kbInit,timestamps.kbKDown] ...
             = handleKeyboard(tm, keyCode, didAPause, paused, done, trialRecords(trialInd).result, doValves, ports, didValves, didHumanResponse, ...
@@ -696,7 +696,8 @@ while ~done && ~quit;
         if ~isempty(autoTrigger) && ~any(ports)
             for j=1:2:length(autoTrigger)
                 if rand<autoTrigger{j}
-                    ports(autoTrigger{j+1}) = 1;
+                    winner = randi(length(autoTrigger{j+1})); %no one verifies these are legit port numbers :(
+                    ports(autoTrigger{j+1}(winner)) = 1;
                     didStochasticResponse=true; %edf: shouldn't this only be if one was tripped?
                     break;
                 end

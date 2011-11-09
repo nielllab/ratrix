@@ -39,10 +39,12 @@ end
 [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass,allowRepeats);
 
 targets = ismember(responsePorts,targetPorts);
-mid = ceil(length(targets)/2);
 
-lefts = sum(targets(1:mid));
-rights = sum(targets(mid:end));
+leftMid = floor(length(targets)/2);
+rightMid = 1+ceil(length(targets)/2);
+
+lefts = sum(targets(1:leftMid));
+rights = sum(targets(rightMid:end));
 
 if lefts==rights
     static=true;

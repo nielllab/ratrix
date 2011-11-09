@@ -101,7 +101,7 @@ switch class(trialManager)
         
         autoTrigger=[];
         if strcmp(class(trialManager),'freeDrinks')
-            autoTrigger = {trialManager.freeDrinkLikelihood targetPorts};
+            autoTrigger = {getFreeDrinkLikelihood(trialManager) targetPorts};
         end
         
 		stimSpecs{i} = stimSpec(discrimStim.stimulus,criterion,discrimStim.stimType,discrimStim.startFrame,...

@@ -22,7 +22,7 @@ msAirpuff                 =msPenalty;
 constantRewards=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 
 allowRepeats=false;
-freeDrinkLikelihood=0.003;
+freeDrinkLikelihood=0.008;
 fd = freeDrinks(sm,freeDrinkLikelihood,allowRepeats,constantRewards);
 
 freeDrinkLikelihood=0;
@@ -58,7 +58,7 @@ ts2 = trainingStep(fd2,    dots, repeatIndefinitely(), noTimeOff(), svnRev,svnCh
 ts3 = trainingStep(nafcTM, dots, repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode);  %coherent dots
 
 p=protocol('mouse dots',{ts1, ts2, ts3});
-stepNum=uint8(1);
+stepNum=uint8(3);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

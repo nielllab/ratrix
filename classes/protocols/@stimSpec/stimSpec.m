@@ -23,10 +23,11 @@ function spec=stimSpec(varargin)
 %                               advances to the special 'frame timeout' phase - see above
 %                               if empty, then hold this phase indefinitely until a port transition is triggered
 %                               or we transition due to the strategy of 'cache' or 'timedFrames'.
-% autoTrigger               a cell array of values {pA, portA, pB, portB,...} where pA specifies the probability of stochastically triggering
-%                            	portA, and pB specifies the probability of triggering portB, etc
+% autoTrigger               a cell array of values {pA, [ports1], pB, [ports2],...} where pA specifies the probability of stochastically triggering
+%                            	exactly one (randomly chosen w/uniform probability) of [ports1], and pB specifies the probability of triggering exactly one of [ports2], etc
 %                           	this is done for every frame of the stimulus (loop of runRealTimeLoop), and the execution order is whatever comes first
-%                               in this cell array (ie pA is tried, then pB, and so forth)
+%                               in this cell array (ie pA is tried, then pB, and so forth).  
+%                               (actually, right now, this constructor limits you to just {pA, [ports1]}, but runRealTimeLoop would interpret additional pairs correctly)
 % scaleFactor               the scaleFactor associated with this phase - see stimManager.calcStim()'s scaleFactor output for details
 % isFinalPhase              a flag if this is the final phase of the trial (defaults to zero)
 % hz                        if trialManager.displayMethod = 'ptb':
@@ -148,17 +149,17 @@ switch nargin
             error('framesUntilTransition must be a real scalar or empty')
         end
         % autoTrigger
-        if iscell(varargin{6})
+        if iscell(varargin{6}) && isvector(varargin{6}) && length(varargin{6})==2
             stoD = varargin{6};
-            if isreal(stoD{1}) && stoD{1} >= 0 && stoD{1} < 1 && isvector(stoD{2})
+            if isreal(stoD{1}) && stoD{1} >= 0 && stoD{1} <= 1 && isvector(stoD{2}) && isreal(stoD{2}) %should also check that they are valid port numbers
                 spec.autoTrigger = varargin{6};
             else
-                error('distribution must be a real number in [0,1) and port must be a vector');
+                error('distribution must be a real number in [0,1] and port must be a vector of reals');
             end
         elseif isempty(varargin{6})
             'do nothing here b/c we do not want any auto requests';
         else
-            error('autoTrigger must be a cell array');
+            error('autoTrigger must be a 2 element cell array');
         end
         % scaleFactor
         if (length(varargin{7})==2 && all(varargin{7}>0)) || (length(varargin{7})==1 && varargin{7}==0)

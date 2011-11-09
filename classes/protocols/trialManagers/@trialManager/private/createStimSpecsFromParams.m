@@ -21,6 +21,13 @@ function [stimSpecs startingStimSpecInd] = createStimSpecsFromParams(trialManage
 
 % should the stimSpecs we return be dependent on the trialManager class? - i think so...because autopilot does not have reinforcement, but for now nAFC/freeDrinks are the same...
 
+% edf saw that autoTriggering (stochastic free drinks) was being passed in
+% from stimManagers, rather than trialManagers. 11.08.11
+% 'punishResponses' is probably also wrong
+if any(cellfun(@(x) isfield(x,'autoTrigger'),{preRequestStim,preResponseStim,discrimStim}))
+    error('do not set autoTriggers in calcStim; should only come from freeDrinks trialManager')
+end
+
 % check for empty preRequestStim/preResponseStim and compare to values in trialManager.delayManager/responseWindow
 % if not compatible, ERROR
 % nAFC should not be allowed to have an empty preRequestStim (but freeDrinks can)
@@ -60,7 +67,7 @@ switch class(trialManager)
 				criterion={[],i+1,requestPorts,i+1};
 			end
 			stimSpecs{i} = stimSpec(preRequestStim.stimulus,criterion,preRequestStim.stimType,preRequestStim.startFrame,...
-			framesUntilOnset,preRequestStim.autoTrigger,preRequestStim.scaleFactor,0,hz,'pre-request','pre-request',preRequestStim.punishResponses,false);
+			framesUntilOnset,[],preRequestStim.scaleFactor,0,hz,'pre-request','pre-request',preRequestStim.punishResponses,false);
 			i=i+1;
             if isempty(requestPorts) && isempty(framesUntilOnset)
                 error('cannot have empty requestPorts with no auto-request!');
@@ -74,7 +81,7 @@ switch class(trialManager)
 				criterion={[],i+1};
 			end
 			stimSpecs{i} = stimSpec(preResponseStim.stimulus,criterion,preResponseStim.stimType,preResponseStim.startFrame,...
-			responseWindow(1),preResponseStim.autoTrigger,preResponseStim.scaleFactor,0,hz,'pre-response','pre-response',preResponseStim.punishResponses,false);
+			responseWindow(1),[],preResponseStim.scaleFactor,0,hz,'pre-response','pre-response',preResponseStim.punishResponses,false);
 			i=i+1;
 		end
 		% required discrim phase
@@ -92,8 +99,13 @@ switch class(trialManager)
             end
         end
         
+        autoTrigger=[];
+        if strcmp(class(trialManager),'freeDrinks')
+            autoTrigger = {trialManager.freeDrinkLikelihood targetPorts};
+        end
+        
 		stimSpecs{i} = stimSpec(discrimStim.stimulus,criterion,discrimStim.stimType,discrimStim.startFrame,...
-			framesUntilTimeout,discrimStim.autoTrigger,discrimStim.scaleFactor,0,hz,'discrim','discrim',false,true,indexPulses); % do not punish responses here
+			framesUntilTimeout,autoTrigger,discrimStim.scaleFactor,0,hz,'discrim','discrim',false,true,indexPulses); % do not punish responses here
         
         i=i+1;
 		% required reinforcement phase

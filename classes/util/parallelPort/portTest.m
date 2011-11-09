@@ -1,14 +1,28 @@
 function portTest
 
 %DO NOT CHANGE THIS -- SWAPPERS USE IT TO CHECK COMPONENTS!!!
-
 addr='0378';
+%addr='E800';
+%addr='E480';
 valves=[6 7 8];
 sensors=[4 2 3];
-closed=char('0'*ones(1,8));
+
+states = '01';
+
+flipParity = true;
+if flipParity
+    c=2;
+else
+    c=1;
+end
+
+c=states(c);
+
+closed=char(states(1)*ones(1,8));
 lastBlockedSensors=sensors;
+
 while true
-    out=dec2bin(lptread(hex2dec(addr)+1),8)=='0';
+    out=dec2bin(lptread(hex2dec(addr)+1),8)==c;
     this=out(sensors); 
     if ~all(this==lastBlockedSensors)
         clc
@@ -16,15 +30,17 @@ while true
         'hit space to quit, or 1-2-3 to activate valves L-C-R'
     end
     
-    [blah blah codes]=KbCheck;
+    [~, ~, codes]=KbCheck;
     if codes(KbName('space'))
         lptwrite(hex2dec(addr),bin2dec(closed));
         break
     end
     
     t=closed;
-    t(valves(codes(cellfun(@KbName,{'1!' '2@' '3#'})) | out(sensors)))='1';
+    t(valves(codes(cellfun(@KbName,{'1!' '2@' '3#'})) | out(sensors)))=states(2);
     lptwrite(hex2dec(addr),bin2dec(t));
+    
+    %dec2bin(lptread(hex2dec(addr)),8)
 end
 
 

@@ -38,27 +38,28 @@ else
 end
 [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass,allowRepeats);
 
-if length(targetPorts)==1
-    if targetPorts == 1
-        % animal should go left
-        dotDirection = pi
-    elseif targetPorts == 3
-        dotDirection = 0
-    else
-        error('Zah?  This should never happen!')
-    end
+targets = ismember(responsePorts,targetPorts);
+mid = ceil(length(targets)/2);
+
+lefts = sum(targets(1:mid));
+rights = sum(targets(mid:end));
+
+if lefts==rights
+    static=true;
+    dotDirection=-1;
+    selectedDuration=1/hz;
+else
     static=false;
+    if lefts>rights
+        dotDirection = pi;
+    else
+        dotDirection = 0;
+    end
     if length(s.movie_duration)==2
         selectedDuration = s.movie_duration(1) + rand(1)*(s.movie_duration(2)-s.movie_duration(1));
     else
         selectedDuration = s.movie_duration;
     end
-else
-    % if more than one target port, then we can only have a static image!
-    warning('more than one target port found by coherentDots calcStim - calculating a static dots image ONLY!');
-    static=true;
-    dotDirection=-1;
-    selectedDuration=1/hz;
 end
 
 num_frames = floor(hz * selectedDuration);
@@ -184,14 +185,12 @@ discrimStim.stimulus=out;
 discrimStim.stimType=type;
 discrimStim.scaleFactor=scaleFactor;
 discrimStim.startFrame=0;
-discrimStim.autoTrigger=[];
 
 preRequestStim=[];
 preRequestStim.stimulus=interTrialLuminance;
 preRequestStim.stimType='loop';
 preRequestStim.scaleFactor=0;
 preRequestStim.startFrame=0;
-preRequestStim.autoTrigger=[];
 preRequestStim.punishResponses=false;
 
 preResponseStim=discrimStim;

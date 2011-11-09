@@ -267,6 +267,12 @@ function [out assignedSoFar]=assignPins(pins,dir,baseAddr,dontMatch,pinGroupName
 				out(cNum).decAddr=baseAddr+double(spec(2));
 				out(cNum).bitLoc=spec(1);
 				out(cNum).inv=logical(spec(3));
+                
+                %move this somewhere sensible!
+                [a b]=getMACaddress;
+                if strcmp(b,'F46D04EFE0FF') && strcmp(pinGroupName,'sensorPins')
+                    out(cNum).inv = ~out(cNum).inv;
+                end
 			else
 				error('pin not available for that dir')
 			end

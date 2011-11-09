@@ -128,6 +128,13 @@ stationSpec.portSpec.phasePins                = int8(16);
 stationSpec.portSpec.stimPins                 = int8(17);
 stationSpec.portSpec.indexPins                = int8(8);
 
+if a
+    switch b
+        case 'F46D04EFE0FF'
+            stationSpec.portSpec.valveSpec=int8(3); %mini-3-way-lickometer only uses center valve
+    end
+end
+
 if ismac
     stationSpec.portSpec = int8(3);
 elseif ispc

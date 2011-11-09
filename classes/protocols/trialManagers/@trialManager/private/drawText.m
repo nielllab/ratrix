@@ -25,8 +25,11 @@ switch textType
             else
                 phaseTypeDisplay=phaseType;
             end
-            [garbage,yTextPos] = Screen('DrawText',window,sprintf('priority:%g %s stimInd:%d frame:%d drops:%d(%d) stim:%s, phaseInd:%d strategy:%s',Priority(),trialLabel,i,frameNum,numDrops,numApparentDrops,txtLabel,phaseInd,phaseTypeDisplay),xTextPos,yTextPos,brightness*ones(1,3));
+            [garbage,yTextPos] = Screen('DrawText',window,sprintf('prty:%g %s stmInd:%d frm:%d drps:%d(%d), phsInd:%d strtgy:%s',Priority(),trialLabel,i,frameNum,numDrops,numApparentDrops,phaseInd,phaseTypeDisplay),xTextPos,yTextPos,brightness*ones(1,3));
             yTextPos=yTextPos+1.5*normBoundsRect(4);
+            
+            [garbage,yTextPos] = Screen('DrawText',window,sprintf('stim:%s',txtLabel),xTextPos,yTextPos,brightness*ones(1,3));
+            yTextPos=yTextPos+1.5*normBoundsRect(4);            
             
             [garbage,yTextPos] = Screen('DrawText',window,sprintf('ptb:%s',ptbVersion),xTextPos,yTextPos,brightness*ones(1,3));
             yTextPos=yTextPos+1.5*normBoundsRect(4);

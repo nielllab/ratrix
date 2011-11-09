@@ -29,7 +29,7 @@ s.replayMode='loop';
 s.LUT=[];
 s.LUTbits=0;
 
-screen_zoom = [6 6]
+screen_zoom = [6 6];
 
 switch nargin
 case 0 

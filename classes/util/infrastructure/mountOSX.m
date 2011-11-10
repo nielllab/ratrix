@@ -1,4 +1,4 @@
-function mountOSX(targ,loc)
+function mountOSX(targ,loc,login,pw)
 if ismac
     if ~exist('targ','var')
         targ='/Volumes/rlab';
@@ -6,14 +6,21 @@ if ismac
     if ~exist('loc','var')
         loc='@132.239.158.181/rlab ';
     end
-    
+    if ~exist('login','var')
+        login='rodent';
+    end
+    if ~exist('pw','var')
+        pw='1Mouse';
+    end
+
+
     [stat res]=system('mount');
     if stat==0
         if isempty(findstr(res,sprintf('%son %s',loc,targ)))
             
             [status,message,messageid] = mkdir(targ);
             if status
-                [stat res]=system(sprintf('mount -o nodev,nosuid -t smbfs //rodent:1Mouse%s %s',loc,targ));
+                [stat res]=system(sprintf('mount -o nodev,nosuid -t smbfs //%s:%s%s %s',login,pw,loc,targ));
                 if stat~=0
                     stat
                     res

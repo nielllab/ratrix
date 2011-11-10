@@ -53,12 +53,15 @@ dots=coherentDots(textureSize(1),textureSize(2),numDots,coherence,speed,contrast
 svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
 svnCheckMode='session';
 
-ts1 = trainingStep(fd,     dots, repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode);  %stochastic free drinks
-ts2 = trainingStep(fd2,    dots, repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode);  %free drinks
-ts3 = trainingStep(nafcTM, dots, repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode);  %coherent dots
+trialsPerMinute = 7;
+minutes = .5;
+numTriggers = 20;
+ts1 = trainingStep(fd,     dots, rateCriterion(trialsPerMinute,minutes), noTimeOff(), svnRev,svnCheckMode);  %stochastic free drinks
+ts2 = trainingStep(fd2,    dots, numTrialsDoneCriterion(numTriggers)   , noTimeOff(), svnRev,svnCheckMode);  %free drinks
+ts3 = trainingStep(nafcTM, dots, repeatIndefinitely()                  , noTimeOff(), svnRev,svnCheckMode);  %coherent dots
 
 p=protocol('mouse dots',{ts1, ts2, ts3});
-stepNum=uint8(3);
+stepNum=uint8(1);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

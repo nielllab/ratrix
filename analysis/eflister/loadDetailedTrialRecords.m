@@ -44,9 +44,16 @@ end
 %cast all vectors to be doubles (for back compatibility, in case they were logicals) pmm
 existingFields=fields(compiledTrialRecords);
 for i=1:length(existingFields)
-    if ~strcmp(class(compiledTrialRecords.(existingFields{i})),'double') && ~iscell(compiledTrialRecords.(existingFields{i}))
+    %edf asks: why don't we like logicals?  why don't we test for logicals directly?
+    %edf notes: structs are cells!  cuz matlab is awesome.
+    c=compiledTrialRecords.(existingFields{i});
+    if ~isa(c,'double') && ~iscell(compiledTrialRecords.(existingFields{i}))
+        if ~any(cellfun(@(f)f(c),{@isinteger,@islogical}))
+            class(c)
+            warning('expecting ints or logicals')
+        end
         compiledTrialRecords.(existingFields{i})=double(compiledTrialRecords.(existingFields{i}));
         disp(existingFields{i})
-        warning('found a non-double vector, casting it as double')
+        warning('found a non-double vector, casting it as double') %edf asks: how do you know its a vector?
     end
 end

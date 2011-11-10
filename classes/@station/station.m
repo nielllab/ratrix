@@ -139,12 +139,12 @@ function s=station(varargin)
 			else
 				error('if response method is not parallel port, sensorPins should be integer >0 that is number of ports, and valvePins should either be empty or have that number of elements')
 			end
-		elseif strcmp(s.responseMethod,'parallelPort') && (length(s.valvePins)==length(s.sensorPins) || isempty(s.valvePins)) && length(s.sensorPins)>0
+		elseif strcmp(s.responseMethod,'parallelPort') && (length(s.valvePins)==length(s.sensorPins) || isempty(s.valvePins) || isscalar(s.valvePins)) && length(s.sensorPins)>0
 			s.numPorts=length(s.sensorPins);
 			
 			[s.sensorPins assignedSoFar]=assignPins(s.sensorPins,'read',s.decPPortAddr,[],'sensorPins');
 		else
-			error('if responseMethod is parallelPort, sensorPins and valvePins must be same length and have at least one element (or valvePins can be empty).  if responseMethod is not parallelPort, sensorPins must be scalar integer >0 that is number of ports.')
+			error('if responseMethod is parallelPort, sensorPins and valvePins must be same length and have at least one element (or valvePins can be empty or have one element).  if responseMethod is not parallelPort, sensorPins must be scalar integer >0 that is number of ports.')
 		end
 
 		[s.valvePins assignedSoFar]=assignPins(s.valvePins,'write',s.decPPortAddr,assignedSoFar,'valvePins');
@@ -267,6 +267,12 @@ function [out assignedSoFar]=assignPins(pins,dir,baseAddr,dontMatch,pinGroupName
 				out(cNum).decAddr=baseAddr+double(spec(2));
 				out(cNum).bitLoc=spec(1);
 				out(cNum).inv=logical(spec(3));
+                
+                %move this somewhere sensible!
+                [a b]=getMACaddress;
+                if strcmp(b,'F46D04EFE0FF') && strcmp(pinGroupName,'sensorPins')
+                    out(cNum).inv = ~out(cNum).inv;
+                end
 			else
 				error('pin not available for that dir')
 			end

@@ -1,7 +1,6 @@
 %should replace compileTrialRecords, but of course will break lots of graphing -- will need to update graphing code
 function compileDetailedRecords(server_name,ids,recompile,source,destination)
 
-
 %compileDetailedRecords({'demo1'},'C:\Documents and Settings\rlab\Desktop\ratrixData\PermanentTrialRecordStore','C:\Documents and Settings\rlab\Desktop\ratrixData\CompiledTrialRecords');
 
 % switch type

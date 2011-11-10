@@ -1,4 +1,4 @@
-function replicateTrialRecords(paths,deleteOnSuccess, recordInOracle)
+function replicateTrialRecords(paths,deleteOnSuccess, recordInOracle, source)
 % This function transforms the raw, local trialRecords file into the formatted permanent-store trialRecords file.
 % Does the following:
 %   1) calls collectTrialRecords to format from {tr1,tr2,tr3,etc} to vectorized format
@@ -9,7 +9,7 @@ function replicateTrialRecords(paths,deleteOnSuccess, recordInOracle)
 input_paths = paths;
 
 subDirs=struct([]);
-boxDirs=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData','Boxes');
+boxDirs=fullfile(source,'Boxes');;%fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData','Boxes'); %edf 11.08.11
 boxDirsToCheck=dir(boxDirs);
 for b=1:length(boxDirsToCheck)
     boxDir=boxDirsToCheck(b).name;

@@ -1,7 +1,7 @@
 function standAloneRun(ratrixPath,setupFile,subjectID,recordInOracle,backupToServer)
 %standAloneRun([ratrixPath],[setupFile],[subjectID],[recordInOracle],[backupToServer])
 %
-% ratrixPath (optional, string path to preexisting ratrix 'db.mat' file)
+% ratrixPath (optional, string path to preexisting ratrix ServerData directory (contains 'db.mat' file))
 % defaults to checking for db.mat in ...\<ratrix install directory>\..\ratrixData\ServerData\
 % if none present, makes new ratrix located there, with a dummy subject
 %
@@ -43,21 +43,22 @@ else
     error('backupToServer must be logical or a valid path')
 end
 
-if exist('ratrixPath','var') && ~isempty(ratrixPath)
-    if isdir(ratrixPath)
-        rx=ratrix(ratrixPath,0);
-    else
-        ratrixPath
-        error('if ratrixPath supplied, it must be a path to a preexisting ratrix ''db.mat'' file')
-    end
-else
+if ~exist('ratrixPath','var') || isempty(ratrixPath) 
     dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
-    defaultLoc=fullfile(dataPath, 'ServerData');
+else 
+    dataPath=ratrixPath;
+end
+
+serverDataPath=fullfile(dataPath, 'ServerData');
+
+if isdir(serverDataPath)
+    rx=ratrix(serverDataPath,0);
+else
+    defaultLoc=serverDataPath;
     d=dir(fullfile(defaultLoc, 'db.mat'));
 
     if length(d)==1
         rx=ratrix(defaultLoc,0);
-        fprintf('loaded ratrix from default location\n')
     else
         try
             [success mac]=getMACaddress();
@@ -148,7 +149,7 @@ try
         replicationPaths={getStandAlonePath(rx)};
     end
 
-    replicateTrialRecords(replicationPaths,deleteOnSuccess, recordInOracle);
+    replicateTrialRecords(replicationPaths,deleteOnSuccess, recordInOracle,fileparts(getStandAlonePath(rx)));
 
     s=getSubjectFromID(rx,subjectID);
 
@@ -161,7 +162,7 @@ try
     rx=doTrials(st(1),rx,0,[],~recordInOracle); %0 means keep running trials til something stops you (quit, error, etc)
     [rx ids] = emptyAllBoxes(rx,'done running trials in standAloneRun',auth);
 
-    replicateTrialRecords(replicationPaths,deleteOnSuccess, recordInOracle);
+    replicateTrialRecords(replicationPaths,deleteOnSuccess, recordInOracle,fileparts(getStandAlonePath(rx)));
     compilePath=fullfile(fileparts(getStandAlonePath(rx)),'CompiledTrialRecords');       
     mkdir(compilePath);
 %     compileTrialRecords([],[],[],{subjectID},getStandAlonePath(rx),compilePath);

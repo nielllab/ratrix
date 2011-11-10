@@ -29,8 +29,15 @@ if ~isempty(trialRecords)
                 % this has to be a cell array b/c times aren't always there across trials
                 times = cellfun(@getTimesNonphased,{trialRecords.responseDetails},'UniformOutput',false);
             end
-            firstLick=cell2mat(cellfun(@getFirstLick,times,'UniformOutput',false));
-            
+            firstLickC=cellfun(@getFirstLick,times,'UniformOutput',false);
+            thresh = 0.03; %30 ms
+            try
+                firstLick=cell2mat(firstLickC);
+                tooFast = firstLick < thresh; %edf asks: why are we filtering these out?
+            catch e
+                %last times can be {{nan}}, eg on stochastic free drinks
+                tooFast = cellfun(@(x) iscell(x) || x<thresh,firstLickC);
+            end
             %             %ToDo: how can we get rid of this for loop? -pmm
             %             for i=1:numTrialsAnalyzed
             %                 trialInd=i;
@@ -45,8 +52,7 @@ if ~isempty(trialRecords)
             %             end
             
             %firstLick = 999* ones(size(trialRecords));
-            thresh = 0.03; %30 ms
-            tooFast = firstLick < thresh; %edf asks: why are we filtering these out?
+
             ignore = stochastic | tooFast | humanResponse | forcedRewards;
             
             %for testing:
@@ -62,10 +68,10 @@ if ~isempty(trialRecords)
         otherwise
             error('unknown trialRecords type')
     end
-        
+    
     trialsPerMin = sum(dates > (now - c.consecutiveMins/(24*60)))/c.consecutiveMins;
     graduate = trialsPerMin > c.trialsPerMin;
-
+    
 end
 
 if graduate

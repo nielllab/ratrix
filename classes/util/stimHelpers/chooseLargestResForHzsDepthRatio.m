@@ -18,7 +18,7 @@ for i=1:length(hzs)
     ind=inds(ind);
     if length(ind)>1
         warning('didn''t find unique ind')
-        ind=inds(1);
+        ind=ind(1);
     end
     if length(ind)==1
         height = resolutions(ind).height;

@@ -9,7 +9,7 @@ thisStep=[trialRecords.trainingStepNum]==trialRecords(end).trainingStepNum;
 trialsUsed=trialRecords(thisStep&thisSession);
 
 graduate=0;
-if ~isempty(trialRecords)
+if ~isempty(trialsUsed)
     %get the correct vector
     switch recordType
         case 'largeData'
@@ -22,12 +22,12 @@ if ~isempty(trialRecords)
             numTrialsAnalyzed=length(trialsUsed);
             firstLick=nan(1,numTrialsAnalyzed);
             
-            if isfield(trialRecords,'phaseRecords')
+            if isfield(trialsUsed,'phaseRecords')
                 % this has to be a cell array b/c phaseRecords aren't always the same across trials
-                times = cellfun(@getRelativeTimesPhased,{trialRecords.phaseRecords},'UniformOutput',false);
+                times = cellfun(@getRelativeTimesPhased,{trialsUsed.phaseRecords},'UniformOutput',false);
             else
                 % this has to be a cell array b/c times aren't always there across trials
-                times = cellfun(@getTimesNonphased,{trialRecords.responseDetails},'UniformOutput',false);
+                times = cellfun(@getTimesNonphased,{trialsUsed.responseDetails},'UniformOutput',false);
             end
             firstLickC=cellfun(@getFirstLick,times,'UniformOutput',false);
             thresh = 0.03; %30 ms
@@ -53,7 +53,7 @@ if ~isempty(trialRecords)
             
             %firstLick = 999* ones(size(trialRecords));
 
-            ignore = stochastic | tooFast | humanResponse | forcedRewards;
+            ignore = stochastic | tooFast | humanResponse | forcedRewards; %what about multiple port error?
             
             %for testing:
             %             if any(size(trialRecords,2)>10)
@@ -62,7 +62,12 @@ if ~isempty(trialRecords)
             %                 ignore
             %             end
             
+            try
             dates = dates(~ignore);
+            catch
+                sca
+                keyboard
+            end
         case 'circularBuffer'
             error('not written yet');
         otherwise

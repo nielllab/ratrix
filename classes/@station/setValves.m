@@ -6,8 +6,8 @@ if strcmp(s.responseMethod,'parallelPort')
         % temporary hack -- right now we rely on the fact that no one
         % (including the station) accesses the valves except through 
         % setValves and getValves, but we can't guarantee this.
-        if length(valves)~=length(s.valvePins)
-            if isscalar(s.valvePins)
+        if length(valves)~=length(s.valvePins.pinNums)
+            if isscalar(s.valvePins.pinNums)
                 valves=any(valves); %route all rewards to single valve
             else
                 error('bad valve vector')

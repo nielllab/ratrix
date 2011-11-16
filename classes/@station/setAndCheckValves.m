@@ -7,8 +7,8 @@ end
 % temporary hack -- right now we rely on the fact that no one
 % (including the station) accesses the valves except through
 % setValves and getValves, but we can't guarantee this.
-if length(station.valvePins)~=station.numPorts
-    if isscalar(station.valvePins)
+if length(station.valvePins.pinNums)~=station.numPorts
+    if isscalar(station.valvePins.pinNums)
         barebones=true;
     else
         error('bad valve vector')

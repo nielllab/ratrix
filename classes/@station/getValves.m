@@ -4,7 +4,7 @@ if strcmp(s.responseMethod,'parallelPort')
     status=fastDec2Bin(lptread(s.valvePins.decAddr));
     
     valves=status(s.valvePins.bitLocs)=='1'; %need to set parity in station, assumes normally closed valves
-    valves(s.valvePins.invs)=~valves(s.valvePins.invs);
+    valves(s.valvePins.invs)=~valves(s.valvePins.invs); %dangerous line if all s.valvePins.invs are 0 -- we get empties
     
     % temporary hack -- right now we rely on the fact that no one
     % (including the station) accesses the valves except through

@@ -10,9 +10,9 @@ responseOptions = union(targetOptions, distractorOptions);
 
 originalPriority = Priority;
 
-%ListenChar(2); 
+%ListenChar(2);
 %FlushEvents('keyDown');
-%edf moved these to station.doTrials() so that we don't get garbage sent to matlab windows from between-trial keypresses.  
+%edf moved these to station.doTrials() so that we don't get garbage sent to matlab windows from between-trial keypresses.
 %however, whether they're here or there, we still seem to get garbage -- figure out why!
 %something wrong with flushevents?
 
@@ -46,7 +46,7 @@ try
         ratrixVersion='no network connection';
         ratrixSVNInfo = ratrixVersion;
     end
-
+    
     frameDropCorner = setCLUTandFrameDropCorner(tm, window, station, LUT, frameDropCorner);
     
     for i=1:length(stimSpecs)
@@ -55,53 +55,55 @@ try
         type = getStimType(spec);
         metaPixelSize = getScaleFactor(spec);
         framesUntilTransition = getFramesUntilTransition(spec);
-
+        
         [phaseData{i}.loop phaseData{i}.trigger phaseData{i}.frameIndexed phaseData{i}.timeIndexed ...
             phaseData{i}.indexedFrames phaseData{i}.timedFrames phaseData{i}.strategy phaseData{i}.toggleStim] = determineStrategy(tm, stim, type, responseOptions, framesUntilTransition);
         
         [phaseData{i}.floatprecision stim] = determineColorPrecision(tm, stim, phaseData{i}.strategy);
         stimSpecs{i}=setStim(spec,stim);
-
+        
         if window>0
             phaseData{i}.destRect = determineDestRect(tm, window, station, metaPixelSize, stim, phaseData{i}.strategy);
-
+            
             phaseData{i}.textures = cacheTextures(tm, phaseData{i}.strategy, stim, window, phaseData{i}.floatprecision);
         else
-
+            
             phaseData{i}.destRect=[];
             phaseData{i}.textures=[];
-
+            
         end
-    end 
-
+    end
+    
     [interTrialPrecision interTrialLuminance] = determineColorPrecision(tm, interTrialLuminance, 'static');
-        
+    
     [tm quit trialRecords eyeData eyeDataFrameInds gaze frameDropCorner station] ...
         = runRealTimeLoop(tm, window, ifi, stimSpecs, startingStimSpecInd, phaseData, stimManager, ...
         targetOptions, distractorOptions, requestOptions, interTrialLuminance, interTrialPrecision, ...
         station, manual,timingCheckPct,textLabel,rn,subID,stimID,protocolStr,ptbVersion,ratrixVersion,trialLabel,msAirpuff, ...
         originalPriority, verbose,eyeTracker,frameDropCorner,trialRecords);
-
+    
 catch ex
     disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
-
-	securePins(station);
+    
+    securePins(station);
     
     Screen('CloseAll');
     Priority(originalPriority);
     ShowCursor(0);
-    FlushEvents('mouseUp','mouseDown','keyDown','autoKey','update');
+    if usejava('desktop')
+        FlushEvents('mouseUp','mouseDown','keyDown','autoKey','update');
+    end
     ListenChar(0);
-
-	if IsWin
-		daqreset;
-	end
-
+    
+    if IsWin
+        daqreset;
+    end
+    
     if ~isempty(eyeTracker)
         cleanUp(eyeTracker);
     end
-
+    
     trialRecords(end).response=sprintf('error_in_StimOGL: %s',ex.message);
-
+    
     rethrow(ex);
 end

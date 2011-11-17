@@ -36,7 +36,7 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
         if n>=0
 
             ListenChar(2);
-            if usejava('jvm')
+            if usejava('desktop') && usejava('jvm') %jvm still true if started with -nojvm?
                 FlushEvents('keyDown');
             end
             
@@ -162,7 +162,9 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
 
 
             close all
-            FlushEvents('mouseUp','mouseDown','keyDown','autoKey','update');
+            if usejava('desktop')
+                FlushEvents('mouseUp','mouseDown','keyDown','autoKey','update');
+            end
             ListenChar(0);
         else
             error('n must be >= 0')

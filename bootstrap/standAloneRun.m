@@ -43,9 +43,9 @@ else
     error('backupToServer must be logical or a valid path')
 end
 
-if ~exist('ratrixPath','var') || isempty(ratrixPath) 
+if ~exist('ratrixPath','var') || isempty(ratrixPath)
     dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
-else 
+else
     dataPath=ratrixPath;
 end
 
@@ -56,7 +56,7 @@ if isdir(serverDataPath)
 else
     defaultLoc=serverDataPath;
     d=dir(fullfile(defaultLoc, 'db.mat'));
-
+    
     if length(d)==1
         rx=ratrix(defaultLoc,0);
     else
@@ -68,7 +68,7 @@ else
         catch
             mac='000000000000';
         end
-
+        
         machines={{'1U',mac,[1 1 1]}};
         rx=createRatrixWithDefaultStations(machines,dataPath,'localTimed');
         permStorePath=fullfile(dataPath,'PermanentTrialRecordStore');
@@ -131,7 +131,7 @@ if exist('setupFile','var') && ~isempty(setupFile)
         setupFile
         error('if setupFile supplied, it must be the name of a setProtocol file on the path (typically in the setup directory)')
     end
-
+    
     su=str2func(setupFile); %weird, str2func does not check for existence!
     rx=su(rx,{subjectID});
     %was:  r=feval(setupFile, r,{getID(sub)});
@@ -141,31 +141,31 @@ if exist('setupFile','var') && ~isempty(setupFile)
 end
 
 try
-    deleteOnSuccess = true; 
+    deleteOnSuccess = true;
     
     if backupToServer
         replicationPaths={getStandAlonePath(rx),xtraServerBackupPath};
     else
         replicationPaths={getStandAlonePath(rx)};
     end
-
+    
     replicateTrialRecords(replicationPaths,deleteOnSuccess, recordInOracle,fileparts(getStandAlonePath(rx)));
-
+    
     s=getSubjectFromID(rx,subjectID);
-
+    
     [rx ids] = emptyAllBoxes(rx,'starting trials in standAloneRun',auth);
     boxIDs=getBoxIDs(rx);
-    rx=putSubjectInBox(rx,subjectID,boxIDs(1),auth);    
+    rx=putSubjectInBox(rx,subjectID,boxIDs(1),auth);
     b=getBoxIDForSubjectID(rx,getID(s));
     st=getStationsForBoxID(rx,b);
     %struct(st(1))
     rx=doTrials(st(1),rx,0,[],~recordInOracle); %0 means keep running trials til something stops you (quit, error, etc)
     [rx ids] = emptyAllBoxes(rx,'done running trials in standAloneRun',auth);
-
+    
     replicateTrialRecords(replicationPaths,deleteOnSuccess, recordInOracle,fileparts(getStandAlonePath(rx)));
-    compilePath=fullfile(fileparts(getStandAlonePath(rx)),'CompiledTrialRecords');       
+    compilePath=fullfile(fileparts(getStandAlonePath(rx)),'CompiledTrialRecords');
     mkdir(compilePath);
-%     compileTrialRecords([],[],[],{subjectID},getStandAlonePath(rx),compilePath);
+    %     compileTrialRecords([],[],[],{subjectID},getStandAlonePath(rx),compilePath);
     compileDetailedRecords([],{subjectID},[],getStandAlonePath(rx),compilePath);
     subjectAnalysis(compilePath);
     cleanup;
@@ -177,6 +177,8 @@ end
 
 function cleanup
 sca
-FlushEvents('mouseUp','mouseDown','keyDown','autoKey','update');
+if usejava('desktop')
+    FlushEvents('mouseUp','mouseDown','keyDown','autoKey','update');
+end
 ListenChar(0)
 ShowCursor(0)

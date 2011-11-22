@@ -10,8 +10,8 @@ end
 
 sm=makeStandardSoundManager();
 
-rewardSizeULorMS          =50;
-requestRewardSizeULorMS   =10;
+rewardSizeULorMS          =20;
+requestRewardSizeULorMS   =20;
 requestMode               ='first';
 msPenalty                 =1000;
 fractionOpenTimeSoundIsOn =1;
@@ -50,18 +50,27 @@ textureSize=10*[w,h];
 zoom=[maxWidth maxHeight]./textureSize;
 dots=coherentDots(textureSize(1),textureSize(2),numDots,coherence,speed,contrast,dotSize,duration,zoom,maxWidth,maxHeight,percentCorrectionTrials);
 
+requestRewardSizeULorMS = 0;
+msPenalty               = 1000;
+noRequest=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
+nrTM=nAFC(sm,percentCorrectionTrials,noRequest,eyeController,{'off'},dropFrames,'ptb','center'); %this percentCorrectionTrials should currently do nothing (need to fix)
+
 svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
 svnCheckMode='session';
 
 trialsPerMinute = 7;
 minutes = .5;
 numTriggers = 20;
-ts1 = trainingStep(fd,     dots, rateCriterion(trialsPerMinute,minutes), noTimeOff(), svnRev,svnCheckMode);  %stochastic free drinks
-ts2 = trainingStep(fd2,    dots, numTrialsDoneCriterion(numTriggers)   , noTimeOff(), svnRev,svnCheckMode);  %free drinks
-ts3 = trainingStep(nafcTM, dots, repeatIndefinitely()                  , noTimeOff(), svnRev,svnCheckMode);  %coherent dots
+ts1 = trainingStep(fd,  dots, rateCriterion(trialsPerMinute,minutes), noTimeOff(), svnRev,svnCheckMode);  %stochastic free drinks
+ts2 = trainingStep(fd2, dots, numTrialsDoneCriterion(numTriggers)   , noTimeOff(), svnRev,svnCheckMode);  %free drinks
 
-p=protocol('mouse dots',{ts1, ts2, ts3});
-stepNum=uint8(1);
+trialsPerMinute = 7;
+minutes = 2;
+ts3 = trainingStep(nafcTM, dots, rateCriterion(trialsPerMinute,minutes), noTimeOff(), svnRev,svnCheckMode);  %coherent dots
+ts4 = trainingStep(nrTM  , dots, repeatIndefinitely()                  , noTimeOff(), svnRev,svnCheckMode);  %coherent dots
+
+p=protocol('mouse dots',{ts1, ts2, ts3, ts4});
+stepNum=uint8(3);
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

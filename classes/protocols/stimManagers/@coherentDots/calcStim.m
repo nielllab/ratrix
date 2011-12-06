@@ -67,7 +67,7 @@ end
 num_frames = floor(hz * selectedDuration);
 
 alldotsxy = [rand(s.num_dots,1)*(s.screen_width-1)+1 ...
-              rand(s.num_dots,1)*(s.screen_height-1)+1];
+    rand(s.num_dots,1)*(s.screen_height-1)+1];
 dot_history = zeros(s.num_dots,2,num_frames);
 
 dots_movie = uint8(zeros(s.screen_height, s.screen_width, num_frames));
@@ -123,7 +123,7 @@ if ~static
     
     vx = selectedSpeed*cos(dotDirection);
     vy = selectedSpeed*sin(dotDirection);
-
+    
     for i=1:num_frames
         frame = zeros(s.screen_height,s.screen_width);
         frame(sub2ind(size(frame),floor(alldotsxy(:,2)),floor(alldotsxy(:,1)))) = 1;
@@ -131,13 +131,13 @@ if ~static
         frame(frame > 0) = 255;
         dots_movie(:,:,i) = uint8(frame);
         dot_history(:,:,i) = alldotsxy;
-
+        
         % Randomly find who's going to be coherent and who isn't
         move_coher = rand(s.num_dots,1) < selectedCoherence;
         move_randomly = ~move_coher;
-
+        
         num_out = sum(move_randomly);
-
+        
         if (num_out ~= s.num_dots)
             alldotsxy(move_coher,1) = alldotsxy(move_coher,1) + vx;
             alldotsxy(move_coher,2) = alldotsxy(move_coher,2) + vy;
@@ -146,7 +146,7 @@ if ~static
             alldotsxy(move_randomly,:) = [rand(num_out,1)*(s.screen_width-1)+1 ...
                 rand(num_out,1)*(s.screen_height-1)+1];
         end
-
+        
         overboard = alldotsxy(:,1) > s.screen_width | alldotsxy(:,2) > s.screen_height | ...
             floor(alldotsxy(:,1)) <= 0 | floor(alldotsxy(:,2)) <= 0;
         num_out = sum(overboard);
@@ -154,11 +154,23 @@ if ~static
             alldotsxy(overboard,:) = [rand(num_out,1)*(s.screen_width-1)+1 ...
                 rand(num_out,1)*(s.screen_height-1)+1];
         end
-
+        
     end
 end
 
 out = dots_movie*selectedContrast;
+
+switch dotDirection
+    case -1 %static
+        % do nothing
+    case pi %go left
+        out(:,1+round(s.screen_width*s.sideDisplay):end,:)=0;
+    case 0 %go right
+        out(:,1:round(s.screen_width*(1-s.sideDisplay)),:)=0;
+    otherwise
+        error('unrecognized direction')
+end
+
 if strcmp(stimulus.replayMode,'loop')
     type='loop';
 elseif strcmp(stimulus.replayMode,'once')
@@ -181,6 +193,8 @@ details.selectedDotSize = selectedDotSize;
 details.selectedContrast = selectedContrast;
 details.selectedSpeed = selectedSpeed;
 details.selectedDuration = selectedDuration;
+
+details.sideDisplay=s.sideDisplay;
 
 discrimStim=[];
 discrimStim.stimulus=out;

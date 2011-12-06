@@ -48,7 +48,7 @@ catch
     disp('no network connection detected - using local compiled directory only');
     
     apath = fullfile(fileparts(fileparts(getRatrixPath())),'ratrixData','compiledTrialRecords');
-    apath = '\\mtrix1\Users\nlab\Desktop\mouseData\CompiledTrialRecords\'; %edf temp
+    apath = '\\mtrix2\Users\nlab\Desktop\mouseData\CompiledTrialRecords\'; %edf temp
     
     standAlone = true;
     bySubject = true;

@@ -1,13 +1,11 @@
-
 function [performances colors]=calculateSmoothedPerformances(correct,windowSizes,smoothingMethod,colorMethod)
 %returns local calculation of probability correct for a range of window sizes
 %current smoothingMethod is default 'boxcar' or 'symetricBoxcar'
-%current colorMethod is 'BWpowerlaw' 
+%current colorMethod is 'BWpowerlaw'
 %06xxxx edf written
 %070216 pmm turned into a util
 %080526 pmm changed default boxcar filter to be historical rather than symetric
 %090430 pmm added some defaults
-
 
 if ~exist('smoothingMethod','var') || isempty(smoothingMethod)
     smoothingMethod='boxcar';
@@ -28,11 +26,8 @@ switch smoothingMethod
         historicalFilter=0;
 end
 
-
-
 totalTrials=size(correct,1);
 performances=zeros(totalTrials,length(windowSizes));
-
 
 %BOXCAR METHOD
 runningVals=windowSizes;
@@ -43,10 +38,8 @@ for i = 1:totalTrials
         if length(before)>=runningVals(j)
             lastCorrects = before((length(before)-runningVals(j)+1):end);
             performances(i,j) = sum(lastCorrects)/runningVals(j);
-
         else
-            performances(i,j) = NaN;
-
+            performances(i,j) = NaN;            
         end
     end
 end
@@ -70,9 +63,9 @@ end
 for i=1:length(runningVals)
     Q=.95; %min val
     A=-3; %how fast we get from 0 to min val
-
+    
     C=(length(runningVals)^(-A))-1;
-
+    
     if C>0
         B=Q+(Q/C);
         M=-Q/C;
@@ -80,7 +73,6 @@ for i=1:length(runningVals)
     else
         fix(i) = 0;
     end
-
+    
     colors(i,:)=zeros(1,3)+fix(i);
 end
-

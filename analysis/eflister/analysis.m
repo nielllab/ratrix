@@ -41,11 +41,15 @@ apath = fullfile(fileparts(fileparts(getRatrixPath())),'ratrixData','compiledTri
 % hmm...
 standAlone = false;
 try
+    error('do local') %edf temp
     conn=dbConn();
     closeConn(conn);
 catch
     disp('no network connection detected - using local compiled directory only');
+    
     apath = fullfile(fileparts(fileparts(getRatrixPath())),'ratrixData','compiledTrialRecords');
+    apath = '\\mtrix1\Users\nlab\Desktop\mouseData\CompiledTrialRecords\'; %edf temp
+    
     standAlone = true;
     bySubject = true;
 end

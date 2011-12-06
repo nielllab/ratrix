@@ -76,7 +76,8 @@ for i=1:size(subjectIDs,2)
         catch ex
             warning('probably the stim manager does not have that method')
             getReport(ex)
-            keyboard
+                out{count,9}=nan;
+                out{count,10}=nan;
         end
 
 

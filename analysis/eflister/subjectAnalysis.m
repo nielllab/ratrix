@@ -1,4 +1,5 @@
 function subjectAnalysis(compiledFileDir)
+close all
 
 apath=compiledFileDir;
 
@@ -17,7 +18,7 @@ end
 
 fs=[];
 
-typeStrs={'performance','trials per day','trial rate','bias'}; %'weight' waiting for resolution of http://132.239.158.177/trac/rlab_hardware/ticket/79
+typeStrs={'perfBias','performance','trials per day','trial rate','bias'}; %'weight' waiting for resolution of http://132.239.158.177/trac/rlab_hardware/ticket/79
 filterTypeIndex=1;
 subStrIndex=1;
 

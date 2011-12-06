@@ -83,6 +83,7 @@ else
                     records=getRecords(compiledFileDir,selection.subjects{i,j,k});
                     compiledFileDir=origCompiledFileDir;
                     hold on
+                    %keyboard -- not getting any local records...
                     doAnalysisPlot(records,selection.subjects{i,j,k},selection.type, selection.filter, selection.filterVal, selection.filterParam,includeKeyboard);
                     title(gca,sprintf('%s - %s: %s',selection.type,selection.subjects{i,j,k},datestr(now,0)))
                 end

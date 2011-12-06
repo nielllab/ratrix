@@ -249,6 +249,8 @@ else
         processedRecords.info.subject={subjectID};
 
         switch type
+            case 'perfBias'
+                doPlot('perfBias',processedRecords,[],[],[],[],[],~includeKeyboard);
             case 'trials per day'
                 doPlot('plotTrialsPerDay',processedRecords,[],[],[],[],[],~includeKeyboard);
             case 'performance'

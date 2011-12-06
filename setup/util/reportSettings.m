@@ -1,7 +1,11 @@
-function reportSettings
-clc
+function reportSettings(r)
+if ~exist('r','var') || isempty(r)
+    r=init;
+end
 
-r=init;
+if ~isa(r,'ratrix')
+    error('need a ratrix')
+end
 
 ids=getSubjectIDs(r);
 
@@ -11,22 +15,37 @@ if ~isempty(ids)
     stations=getStationsForServer(conn,getServerNameFromIP);
     closeConn(conn);
     rrs=[rrs{:}];
-    rackNums=[rrs.rackID];
     stations=[stations{:}];
-    stationIDs=[num2str([stations.rack_id]') [stations.station_id]'];
-    stationIDs=mat2cell(stationIDs,ones(1,size(stationIDs,1)));
+    
+    if ~isempty(rrs)
+        rackNums=[rrs.rackID];
+        stationIDs=[num2str([stations.rack_id]') [stations.station_id]'];
+        stationIDs=mat2cell(stationIDs,ones(1,size(stationIDs,1)));
+        networked=true;
+    else
+        rackNums=1;
+        stations={'1'};
+        stationIDs={'1'};
+        subjects=reshape(ids,1,1,[]);
+        heats=ids;
+        networked=false;
+    end
+
     for rackNum=1:length(rackNums)
-
-        [heats stations subjects]=getRatLayout(rackNums(rackNum));
-        %subjects is ids in {row,col,heat}
-        %stations is ids in {row, col}
-
+        
+        if networked
+            [heats stations subjects]=getRatLayout(rackNums(rackNum));
+            %subjects is ids in {row,col,heat}
+            %stations is ids in {row, col}
+        end
+        
         maxLen=0;
         for i=1:length(heats)
             if length(heats{i})>maxLen
                 maxLen=length(heats{i});
             end
         end
+        
         for rowNum=1:size(stations,1)
             for colNum=1:size(stations,2)
                 if ~isempty(stations{rowNum,colNum}) && ismember(stations{rowNum,colNum},stationIDs) %have to check for empties cuz of 3G being renamed to 4A
@@ -34,9 +53,9 @@ if ~isempty(ids)
                     for h=1:length(heats)
                         fprintf('\theat: %s',[heats{h} repmat(' ',1,maxLen-length(heats{h}))])
                         sub=subjects{rowNum,colNum,h};
-
+                        
                         fprintf('\tsub: %s',sub)
-
+                        
                         if isempty(sub)
                             fprintf('none\n');
                         else
@@ -48,21 +67,21 @@ if ~isempty(ids)
                                         error('found multiple subj')
                                     end
                                     found=true;
-
+                                    
                                     s = getSubjectFromID(r,ratID);
                                     [p t]=getProtocolAndStep(s);
                                     if ~isempty(p)
                                         tm=getTrialManager(getTrainingStep(p,t));
                                         sm=getStimManager(getTrainingStep(p,t));
                                         fprintf('\t%s(%d/%d)\ttrlMgr:%s\t',getName(p),t,getNumTrainingSteps(p),class(tm));
-
-
+                                        
+                                        
                                         [junk rewardSizeULorMS requestRewardSizeULorMS msPenalty] = calcReinforcement(getReinforcementManager(tm),[]);
                                         fprintf('reward:%g pnlty:%g\n',rewardSizeULorMS,msPenalty)
                                     else
                                         fprintf('\t\t\t%s has no protocol\n',ratID);
                                     end
-
+                                    
                                 end
                             end
                             if ~found

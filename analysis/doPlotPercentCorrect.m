@@ -67,7 +67,7 @@ end
 
 if ~exist('conditionInds','var') | isempty(conditionInds)
     plotByCondition=0;
-
+    
 else
     plotByCondition=1;
     if isa(conditionInds,'cell')
@@ -94,7 +94,7 @@ if addSteps
     stepYCenter=axMin+stepFractionalY*(axMax-axMin); %maybe at chance? =0.5
     stepYTop=stepYCenter+stepHeight/2;
     stepYBottom=stepYCenter-stepHeight/2;
-
+    
     steps=unique(d.step);
     if any(isnan(steps))
         steps=steps(1:min(find(isnan(steps)))) %only allow one nan
@@ -116,7 +116,7 @@ if addSteps
         hr=rectangle('Position',[stepStart, stepYBottom, stepWidth+eps, stepHeight],'FaceColor',[stepColor],'EdgeColor',[1 1 1]);
         h=text(stepStart, stepYCenter, stepTitle);
     end
-
+    
     %only some have this
     haveShapedValue=any(strcmp(fields(d),'currentShapedValue')) && ~all(isnan(d.currentShapedValue));
     haveBlocks=any(strcmp(fields(d),'blockID')) && ~all(isnan(d.blockID));
@@ -136,7 +136,7 @@ if addSteps
         elseif haveBlocks
             sVals=d.blockID;
         end
-
+        
         %this determines all the starting and ending points for continuous parameter values ignoring nans in the begining middle or end
         sValStart=find([0 (diff(sVals)~=0)] & ~isnan(sVals));
         sValEnd=find([(diff(sVals)~=0) 0] & ~isnan(sVals));
@@ -146,7 +146,7 @@ if addSteps
         if ~isnan(sVals(end))
             sValEnd=[sValEnd length(sVals)];
         end
-
+        
         %shapedParameterIndicator
         colors=[.8 .8 .8; .9 .9 .9];
         numColors=size(colors,1);
@@ -163,7 +163,35 @@ if addSteps
     end
 end
 
+doPerfBias=true;
+if doPerfBias
+    alpha=.05;
+    c={'r' 'k'};
+    
+    perfBiasData.perf.phat=[];
+    perfBiasData.perf.pci=[];
+    perfBiasData.bias.phat=[];
+    perfBiasData.bias.pci=[];
+    
+    trialNums=find(which);
+    for i=smoothingWidth:length(trialNums)
+        these=trialNums(i-smoothingWidth+1:i);
+        correct=sum(d.correct(these));
+        right=sum(d.response(these)==3);
+        [phat pci]=binofit([correct right],smoothingWidth*ones(1,2),alpha);
+        
+        ind=1;
+        perfBiasData.perf.phat(end+1)=phat(ind);
+        perfBiasData.perf.pci(end+1,:)=pci(ind,:);
+        
+        ind=2;
+        perfBiasData.bias.phat(end+1)=phat(ind);
+        perfBiasData.bias.pci(end+1,:)=pci(ind,:);
+    end
+    makePerfBiasPlot(trialNums(smoothingWidth:end),perfBiasData,c);
+end
 
+%keyboard %error: all d.correctionTrial is nan!  why?  must fix!
 if plotCorrectionTrialsToo
     %plot correction trial correct
     goodCTs=getGoods(d,'justCorrectionTrials');
@@ -178,13 +206,14 @@ if plotAfterErrorsToo
     plot(find(goodAEs),performance,'color',[0.8,1,.9]) %light green
 end
 
-
 %plot MAIN good performance
 [performanceOnGood colors]=calculateSmoothedPerformances(d.correct(which)',smoothingWidth,'boxcar','powerlawBW');
-plot(find(which),performanceOnGood,'color',[0,0,0], 'linewidth', 2)
+if ~doPerfBias
+    plot(find(which),performanceOnGood,'color',[0,0,0], 'linewidth', 2)
+end
 performanceOutput=performanceOnGood;
 
-if haveBlocks    
+if haveBlocks
     plot(find(which),performanceOnGood,'color',[.8,.8,.8], 'linewidth', 2);  %grey out all
     
     %then plot each block indpendantly (only averages within block avoids transitions due to block difficulty change)
@@ -193,7 +222,7 @@ if haveBlocks
         thisBlock(1:sValStart(i)-1)=0;  % only do the ones in this block; remove w/ logical filter
         thisBlock(sValEnd(i)+1:end)=0;  % same for after
         [thisBlockPerformance]=calculateSmoothedPerformances(d.correct(thisBlock)',smoothingWidth,'boxcar','powerlawBW');
-        plot(find(thisBlock),thisBlockPerformance,'color',[0,0,0], 'linewidth', 2)  
+        plot(find(thisBlock),thisBlockPerformance,'color',[0,0,0], 'linewidth', 2)
     end
     %performanceOutput=nans(1,sum(which)); Init, not used
     %performanceOutput=[]; % blocks never needed... could calculate it in principle
@@ -223,11 +252,11 @@ end
 
 if markTrialsToThreshold
     indexInPerformance=min(find(performanceOnGood>threshold) );
-
+    
     if size(indexInPerformance,1)>0  % if any there (avoids "empty Matrix" & "[]"  failing)
         indexInPerformance=min(find(performanceOnGood>threshold & (d.step(which)> 4)') ); % find the first trial after first 3 steps -- should really act on it being nACF
     end
-
+    
     if size(indexInPerformance,1)>0
         trialsToThreshold=min(find(indexInPerformance==cumsum(which)  ));
         daysToThreshold=min(find(trialsCompletedBy>trialsToThreshold));
@@ -244,20 +273,20 @@ end
 
 %add on manual change
 if addManualChangeMarker
-
+    
     %default location
     markerHeight=axMin+0.05;
-
+    
     if exist('stepYTop','var')
         %if steps exist move it above that
         markerHeight=stepYCenter+stepHeight;
     end
-
+    
     if exist('blockHeight','var')
         %if currentshaped value indicator exists, move it up
         markerHeight=markerHeight+blockHeight;
     end
-
+    
     if ismember('manualVersion',fields(d))
         manualVersion=d.manualVersion;
         manualVersion(isnan(manualVersion))=-1;
@@ -267,7 +296,7 @@ if addManualChangeMarker
         h=plot(afterChange,repmat(markerHeight,1,numChanges), 'x','Color', [0 0 .8]);
         set(h, 'markerSize',6,'LineWidth', 2);
     end
-
+    
     %Could trace out the manualVersioni number, but adds too much clutter,
     %with little valuable info
     includeManaulVersionNumber=0;

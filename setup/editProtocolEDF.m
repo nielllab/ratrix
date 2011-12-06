@@ -6,8 +6,8 @@ addpath(fullfile(fileparts(pathstr),'bootstrap'))
 setupEnvironment;
 
 if ~exist('r','var') || isempty(r)
-    %dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
-    dataPath='\\mtrix2\Users\nlab\Desktop\mouseData\';
+    dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'mouseData',filesep);
+    %dataPath='\\mtrix2\Users\nlab\Desktop\mouseData\';
     r=ratrix(fullfile(dataPath, 'ServerData'),0);
 end
 

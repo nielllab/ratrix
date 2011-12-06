@@ -1,5 +1,5 @@
 function out=getBitSpecForPinNum(pinNum)
-pportSpec=int8([... %[bitNum,regOffset,inv]
+pportSpec=uint8([... %[bitNum,regOffset,inv]
     8 2 1; %1
     8 0 0; %2
     7 0 0; %3

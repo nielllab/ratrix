@@ -50,11 +50,17 @@ msAirpuff                 = msPenalty;
 rm=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 
 subs=getSubjectsFromIDs(r,subIDs);
+
+juvs={'e1rt','e2rt','e1lt','e2lt'};
+adus={'n5rt','n5rn','n5lt','n8lt'};
+
 for i=1:length(subs)
     [p t]=getProtocolAndStep(subs{i});
     if ~isempty(p)
         ts=getTrainingStep(p,getNumTrainingSteps(p));
-        p=addTrainingStep(p,setReinforcementParam(ts,'reinforcementManager',rm));
+        
+        ts2 = setStimManager(ts, setCoherence(setDur(setSideDisplay(getStimManager(ts),.5),10),1));
+        p=addTrainingStep(p,setReinforcementParam(ts2,'reinforcementManager',rm));
         
         p = changeStep(p, setCriterion(ts,numTrialsDoneCriterion(400)), uint8(getNumTrainingSteps(p)-1));
         

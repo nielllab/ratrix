@@ -25,6 +25,7 @@ s.dot_size = 9;              % Width of dots in pixels
 s.movie_duration = 2;         % in seconds
 s.pctCorrectionTrials=.5;
 s.replayMode='loop';
+s.sideDisplay=1;
 
 s.LUT=[];
 s.LUTbits=0;

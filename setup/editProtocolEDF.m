@@ -59,8 +59,8 @@ for i=1:length(subs)
     if ~isempty(p)
         ts=getTrainingStep(p,getNumTrainingSteps(p));
         
-        ts = setStimManager(ts, setCoherence(setDur(setSideDisplay(getStimManager(ts),.5),10),1));
-        p=addTrainingStep(p,setReinforcementParam(ts,'reinforcementManager',rm));
+        ts2 = setStimManager(ts, setCoherence(setDur(setSideDisplay(getStimManager(ts),.5),10),1));
+        p=addTrainingStep(p,setReinforcementParam(ts2,'reinforcementManager',rm));
         
         p = changeStep(p, setCriterion(ts,numTrialsDoneCriterion(400)), uint8(getNumTrainingSteps(p)-1));
         

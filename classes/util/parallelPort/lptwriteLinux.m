@@ -4,9 +4,10 @@ if ~exist('slowChecks','var') || isempty(slowChecks)
 end
 
 if ~exist('addrs','var') || isempty(addrs)
-    addrs=zeros(port,'uint64');
+    addrs=zeros(size(port),'uint64');
 end
 
+useSscanf=true; %maybe textscan is faster?
 pportDir='/proc/sys/dev/parport/';
 
 if slowChecks
@@ -31,8 +32,6 @@ if slowChecks
     if s~=0
         error('couldn''t dev')
     end
-    
-    useSscanf=true;
     
     ports=uint8([]);
     
@@ -110,5 +109,8 @@ for i=1:length(ports)
     end
 end
 
-lptwriteLinux(ports,addrs,pins,vals);
+bitSpecs=getBitSpecForPinNum(pins); %[bitNum,regOffset,inv]
+vals(bitSpecs(:,3))=~vals(bitSpecs(:,3));
+
+lptwriteLinux([ports(:) addrs(:)],[bitSpecs(:,1:2) vals(:)]);
 end

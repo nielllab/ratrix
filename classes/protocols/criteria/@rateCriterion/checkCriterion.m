@@ -1,5 +1,11 @@
 function [graduate, details] = checkCriterion(c,subject,trainingStep,trialRecords)
 
+% unlikely in practice...
+totalNeeded=c.consecutiveMins*c.trialsPerMin;
+if trialRecords(end).trialNumber > totalNeeded && length(trialRecords) < totalNeeded
+    error('criterion is longer than the circular buffer set in @station/doTrials (roughly line 76) -- how architect?')
+end
+
 %determine what type trialRecord are
 recordType='largeData'; %circularBuffer
 
@@ -52,7 +58,7 @@ if ~isempty(trialsUsed)
             %             end
             
             %firstLick = 999* ones(size(trialRecords));
-
+            
             ignore = stochastic | tooFast | humanResponse | forcedRewards; %what about multiple port error?
             
             %for testing:
@@ -63,7 +69,7 @@ if ~isempty(trialsUsed)
             %             end
             
             try
-            dates = dates(~ignore);
+                dates = dates(~ignore);
             catch
                 sca
                 keyboard
@@ -73,7 +79,7 @@ if ~isempty(trialsUsed)
         otherwise
             error('unknown trialRecords type')
     end
-    
+
     trialsPerMin = sum(dates > (now - c.consecutiveMins/(24*60)))/c.consecutiveMins;
     graduate = trialsPerMin > c.trialsPerMin;
     

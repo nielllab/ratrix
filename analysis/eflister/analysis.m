@@ -2,9 +2,9 @@
 
 function analysis
 if ~isdeployed
-[pathstr, name, ext] = fileparts(mfilename('fullpath'));
-addpath(fullfile(fileparts(fileparts(pathstr)),'bootstrap'))
-%addpath('C:\Documents and Settings\rlab\Desktop\phil analysys')
+    [pathstr, name, ext] = fileparts(mfilename('fullpath'));
+    addpath(fullfile(fileparts(fileparts(pathstr)),'bootstrap'))
+    %addpath('C:\Documents and Settings\rlab\Desktop\phil analysys')
 end
 
 clc
@@ -15,9 +15,9 @@ close all
 format long g
 
 if ~isdeployed
-warning('off','MATLAB:dispatcher:nameConflict')
-addpath(RemoveSVNPaths(genpath(getRatrixPath)));
-warning('on','MATLAB:dispatcher:nameConflict')
+    warning('off','MATLAB:dispatcher:nameConflict')
+    addpath(RemoveSVNPaths(genpath(getRatrixPath)));
+    warning('on','MATLAB:dispatcher:nameConflict')
 end
 
 if isdeployed
@@ -57,65 +57,65 @@ end
 % =============================================================
 % in-line function that is called to initialize data, and also when server is changed
 % will not get called in standalone mode
-function getStationInfo
-    conn=dbConn;
-    %s=getStations(conn)
-    class(selection.server)
-    selection.server
-    s=getStationsForServer(conn,selection.server);
-
-    % ====================================
-    % 10/3/08 - do some processing here on s, so that we make the row field independent of the rack (for erik's server, we just put the rows one after another)
-    racks_used = s{1}.rack_id;
-    rows_in_this_rack = s{1}.row;
-    row_counter = 1;
-%         max_row_so_far = s{1}.row;
-    for i=1:length(s)
-%             racks_used
-%             s{i}.rack_id
-        if isempty(find(racks_used == s{i}.rack_id)) % if this rack hasnt been used yet
-%                 fprintf('found new rack %d\n', s{i}.rack_id)
-            racks_used(end+1) = s{i}.rack_id; 
-            rows_in_this_rack(1) = s{i}.row;
-            row_counter = row_counter + 1;
-        else
-            % this rack is already in racks_used
-            if isempty(find(rows_in_this_rack == s{i}.row)) % if this row hasnt been seen in this rack, increment row_counter
-                rows_in_this_rack(end+1) = s{i}.row;
-%                     fprintf('found a new row %d\n', s{i}.row)
-                row_counter = row_counter+1;
+    function getStationInfo
+        conn=dbConn;
+        %s=getStations(conn)
+        class(selection.server)
+        selection.server
+        s=getStationsForServer(conn,selection.server);
+        
+        % ====================================
+        % 10/3/08 - do some processing here on s, so that we make the row field independent of the rack (for erik's server, we just put the rows one after another)
+        racks_used = s{1}.rack_id;
+        rows_in_this_rack = s{1}.row;
+        row_counter = 1;
+        %         max_row_so_far = s{1}.row;
+        for i=1:length(s)
+            %             racks_used
+            %             s{i}.rack_id
+            if isempty(find(racks_used == s{i}.rack_id)) % if this rack hasnt been used yet
+                %                 fprintf('found new rack %d\n', s{i}.rack_id)
+                racks_used(end+1) = s{i}.rack_id;
+                rows_in_this_rack(1) = s{i}.row;
+                row_counter = row_counter + 1;
             else
-%                     fprintf('row %d already in rack %d\n', s{i}.row, s{i}.rack_id)
+                % this rack is already in racks_used
+                if isempty(find(rows_in_this_rack == s{i}.row)) % if this row hasnt been seen in this rack, increment row_counter
+                    rows_in_this_rack(end+1) = s{i}.row;
+                    %                     fprintf('found a new row %d\n', s{i}.row)
+                    row_counter = row_counter+1;
+                else
+                    %                     fprintf('row %d already in rack %d\n', s{i}.row, s{i}.rack_id)
+                end
             end
+            % now that we have row_counter set properly, assign it
+            s{i}.row = row_counter;
+            
         end
-        % now that we have row_counter set properly, assign it
-        s{i}.row = row_counter;
-
+        
+        % ====================================
+        
+        
+        %         for i=1:length(s)
+        %             row = s{i}.row
+        %         end
+        % ====================================
+        stationStrs={'all stations'};
+        stationIds=stationStrs;
+        numRows=0;
+        numCols=0;
+        for i=1:length(s)
+            %s{i}
+            stationStrs{end+1}=['station ' num2str(s{i}.rack_id) s{i}.station_id ' (' s{i}.mac ')'];
+            stationIds{end+1}=s{i}.station_id;
+            numRows=max(numRows,s{i}.row);
+            numCols=max(numCols,s{i}.col);
+            %station=getStation(conn,s{i}.rack_id,s{i}.station_id)
+            %station=getStationFromMac(conn,s{i}.mac)
+        end
+        selection.station=stationIds{1};
+        closeConn(conn);
     end
-
-    % ====================================
-
-
-%         for i=1:length(s)
-%             row = s{i}.row
-%         end
-    % ====================================
-    stationStrs={'all stations'};
-    stationIds=stationStrs;
-    numRows=0;
-    numCols=0;
-    for i=1:length(s)
-        %s{i}
-        stationStrs{end+1}=['station ' num2str(s{i}.rack_id) s{i}.station_id ' (' s{i}.mac ')'];
-        stationIds{end+1}=s{i}.station_id;
-        numRows=max(numRows,s{i}.row);
-        numCols=max(numCols,s{i}.col);
-        %station=getStation(conn,s{i}.rack_id,s{i}.station_id)
-        %station=getStationFromMac(conn,s{i}.mac)
-    end
-    selection.station=stationIds{1};
-    closeConn(conn);
-end
 
 
 % =============================================================
@@ -155,8 +155,8 @@ if ~standAlone
     bySubjectIndex = length(serverStrs); % this holds the value of the serverM button that points to "by subject"
     selection.server=serverStrs{defaultServerStrIndex};
     lastServer=selection.server;
-
-
+    
+    
     % populate subjectStrs
     subjectUINs = {};
     subjects = getAllSubjects(conn);
@@ -164,9 +164,9 @@ if ~standAlone
         remoteSubjectStrs{end+1}=subjects{i}.subjectID;
         subjectUINs{end+1}=subjects{i}.subject_uin;
     end
-
-
-
+    
+    
+    
     heats=getHeats(conn);
     for i=1:length(heats)
         if ~ismember(heats{i}.name,{'Test','Black'})
@@ -175,9 +175,9 @@ if ~standAlone
     end
     selection.heat=heatStrs{1};
     closeConn(conn);
-
-
-
+    
+    
+    
     selection.station='';
     stationStrs={};
     stationIds={};
@@ -197,13 +197,18 @@ end
 d=dir(apath);
 for ind=1:length(d)
     [matches tokens] = regexpi(d(ind).name,'(.*)\.compiledTrialRecords\.\d+-\d+\.mat','match','tokens');
-    if ~isempty(matches) && length(tokens{1})==1
+    if ~isempty(matches) && length(tokens{1})==1 && isempty(strfind(tokens{1}{:},'test'))
         % we found a compiledTrialRecord
         localSubjectStrs{end+1}=tokens{1}{1};
     end
 end
+
 % set defaults
 if standAlone
+    if length(localSubjectStrs) >= 2
+        localSubjectStrs{end+1}='every';
+    end
+    
     % in standalone mode, set subjectStrs to be local subjects
     subjectStrs=localSubjectStrs;
 else
@@ -222,7 +227,6 @@ if ~isempty(subjectStrs)
 else
     selection.subjects={};
 end
-
 
 % =============================================================
 % start drawing UI
@@ -251,16 +255,16 @@ serverM = uicontrol(f,'Style','popupmenu',...
             set(heatM,'Enable','on','Visible','on');
             set(stationM,'Enable','on','Visible','on');
             set(testM,'Enable','on','Visible','on');
-%             set(typeM,'Enable','on');
+            %             set(typeM,'Enable','on');
             bySubject = false;
             
             selection.server=serverStrs{get(serverM,'Value')};
-    %         if selection.server~=lastServer
+            %         if selection.server~=lastServer
             if ~strcmp(selection.server, lastServer)
                 getStationInfo
                 set(stationM ,'String',stationStrs,'Value',1)
-%                 apath=getCompiledDirForServer(selection.server); %10/3/08 - apath is now subject-specific, so useless to set here
-
+                %                 apath=getCompiledDirForServer(selection.server); %10/3/08 - apath is now subject-specific, so useless to set here
+                
                 lastServer=selection.server;
             end
             
@@ -279,6 +283,7 @@ serverM = uicontrol(f,'Style','popupmenu',...
             bySubject = true;
             set(subjectM,'Value',1);
             
+            keyboard
             % if this is bySubject
             if get(serverM,'Value')==bySubjectIndex
                 typeStrs={'all','performance','trials per day','trial rate','weight','bias'};
@@ -331,6 +336,11 @@ subjectM = uicontrol(f,'Style','popupmenu',...
         if get(serverM,'Value')==localIndex
             selection.subjects{1,1,1}=localSubjectStrs{get(subjectM,'Value')};
             selection.titles{1,1,1}=localSubjectStrs{get(subjectM,'Value')};
+            
+            if strcmp(selection.subjects{1,1,1},'every')
+                selection.subjects=localSubjectStrs(1:end-1);
+                selection.titles{1,1,1}=sprintf('%d subjects',length(selection.subjects));
+            end
         else
             selection.subjects{1,1,1}=subjectStrs{get(subjectM,'Value')};
             selection.titles{1,1,1}=subjectStrs{get(subjectM,'Value')};
@@ -422,58 +432,62 @@ set(f,'Visible','on')
 selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject,show_test_subjects);
 end
 
-    function out=getRow(s,assign)
+function out=getRow(s,assign)
 
-        done=false;
-        for i=1:length(s)
-            if strcmp(s{i}.station_id,assign.station_id) && s{i}.rack_id == assign.rack_id
-                if done
-                    s{i}
-                    assign
-                    error('found multiple stations for that id')
-                end
-                out=s{i}.row;
-                done=true;
-            end
+done=false;
+for i=1:length(s)
+    if strcmp(s{i}.station_id,assign.station_id) && s{i}.rack_id == assign.rack_id
+        if done
+            s{i}
+            assign
+            error('found multiple stations for that id')
         end
-        if ~done
-            error('didn''t find station for that id')
-        end
-
+        out=s{i}.row;
+        done=true;
     end
+end
+if ~done
+    error('didn''t find station for that id')
+end
 
-    function out=getCol(s,assign)
+end
 
-        done=false;
-        for i=1:length(s)
-            if strcmp(s{i}.station_id,assign.station_id) && s{i}.rack_id == assign.rack_id
-                if done
-                    error('found multiple stations for that id')
-                end
-                out=s{i}.col;
-                done=true;
-            end
+function out=getCol(s,assign)
+
+done=false;
+for i=1:length(s)
+    if strcmp(s{i}.station_id,assign.station_id) && s{i}.rack_id == assign.rack_id
+        if done
+            error('found multiple stations for that id')
         end
-        if ~done
-            error('didn''t find station for that id')
-        end
+        out=s{i}.col;
+        done=true;
     end
+end
+if ~done
+    error('didn''t find station for that id')
+end
+end
 
 function selection=calcplot(selection,heatStrs,numRows,numCols,s,bySubject,show_test_subjects)
 
 
 % if by subject, all you need to do is assign the title (subjects is already assigned)
 if bySubject
-    selection.titles = {[selection.subjects{1,1,1}]};
+    if length(selection.subjects)>1
+        selection.titles{1,1,1} = sprintf('%d subjects',length(selection.subjects));
+    else
+        selection.titles = {[selection.subjects{1,1,1}]};
+    end
 else
-% not by subject - do the usual
+    % not by subject - do the usual
     conn=dbConn;
     selection.subjects={};
     selection.titles={};
     if strcmp(selection.heat,'all heats')
-
+        
         if strcmp(selection.station,'all stations')
-
+            
             for k=1:length(heatStrs)-1
                 for i=1:numRows
                     for j=1:numCols
@@ -489,7 +503,7 @@ else
                 end
             end
         end
-
+        
         for i=1:length(heatStrs)
             if ~strcmp(heatStrs{i},'all heats')
                 if strcmp(selection.station,'all stations')
@@ -510,20 +524,20 @@ else
         end
     else
         assignments=getAssignmentsForServer(conn,selection.server,selection.heat,show_test_subjects);
-
+        
         if strcmp(selection.station,'all stations') %specific heat, all stations
             %selection.subjects={};
             selection.titles={[selection.heat ' heat: all stations']};
             for j=1:length(assignments)
                 selection.subjects{1,getRow(s,assignments{j}),getCol(s,assignments{j})}=assignments{j}.subject_id;
             end
-
+            
         else %specific heat, specific station
-
+            
             done=false;
             selection.titles={['station ' selection.station ': ' selection.heat ' heat']};
             for j=1:length(assignments)
-
+                
                 if strcmp(assignments{j}.station_id,selection.station)
                     if done
                         error('found multiple subjects for that station and heat')
@@ -535,18 +549,14 @@ else
             if ~done
                 warning('couldn''t find subject for that station and heat')
             end
-
+            
         end
     end
-
+    
     closeConn(conn);
     selection
     permute(selection.subjects,[2 3 1])
-
+    
 end
 
 end % end function
-
-
-
-

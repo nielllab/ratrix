@@ -114,7 +114,7 @@ if addSteps
         stepEnd=max(whichTrialsThisStep);
         stepWidth=stepEnd-stepStart;
         hr=rectangle('Position',[stepStart, stepYBottom, stepWidth+eps, stepHeight],'FaceColor',[stepColor],'EdgeColor',[1 1 1]);
-        h=text(stepStart, stepYCenter, stepTitle);
+        h=text(stepStart, stepYCenter, ['\bf' stepTitle]);
     end
     
     %only some have this
@@ -230,16 +230,28 @@ end
 
 %add on day transitions
 if dayTransitionsOn
-    [trialsPerDay]=makeDailyRaster(d.correct,d.response,d.date);  %in terms of ALL trials correction and kills, RETURN trialsPerDay
-    trialsCompletedBy=cumsum(trialsPerDay);
-    for i=1:length(trialsPerDay)
+    [trialsPerDay, ~, dates]=makeDailyRaster(d.correct,d.response,d.date);  %in terms of ALL trials correction and kills, RETURN trialsPerDay
+    trialsCompletedBy=[0 cumsum(trialsPerDay)];
+    for i=2:length(trialsCompletedBy)
         plot([trialsCompletedBy(i),trialsCompletedBy(i)], [stepYTop,axMax],'color',[.9,.9,.9])
+        if trialsPerDay(i-1)>15
+            day=datenum([num2str(dates(trialsCompletedBy(i),1)) '/' num2str(dates(trialsCompletedBy(i),2)) '/' num2str(dates(trialsCompletedBy(i),3))]);
+            dayStr=datestr(day,'ddd');
+            if i==2 || diff(dates(trialsCompletedBy(i-1:i),1))
+                monthStr=[datestr(day,'mmm') ' '];
+            else
+                monthStr='';
+            end
+            anno=sprintf('%s \\bf%s%d \\rm%d',dayStr,monthStr,dates(trialsCompletedBy(i),2),trialsPerDay(i-1));
+            text(mean(trialsCompletedBy(i-1:i)),stepYTop*1.5,anno,'FontSize',9,'Rotation',90,'FontName','FixedWidth');
+        end
     end
 end
 
-% add on thresholdd
-plot([0,totalTrials], [threshold,threshold],'color',[.8,.8,.8])
-
+if false
+    % add on thresholdd
+    plot([0,totalTrials], [threshold,threshold],'color',[.8,.8,.8])
+end
 
 if plotByCondition
     %one more plot for each provided context

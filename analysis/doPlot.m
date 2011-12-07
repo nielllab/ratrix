@@ -196,7 +196,7 @@ switch plotType
         
         smoothingWidth=50;
         threshold=0.85;
-        axMin=0.3;
+        axMin=0;
         axMax=1;
         dayTransitionsOn=1;
         addSteps=1;
@@ -216,24 +216,31 @@ switch plotType
         
         axis( [1 max([totalTrials 2]) axMin axMax])
         
-        set(gca,'YTickLabel',sprintf('50%%|%2.0f%%|100%%',threshold*100))
-        set(gca,'YTick',[.5 threshold 1])
+        if false
+            set(gca,'YTickLabel',sprintf('0%%|50%%|%2.0f%%|100%%',threshold*100))
+            set(gca,'YTick',[0 .5 threshold 1])
+        else
+            set(gca,'YTickLabel','0%|50%|100%')
+            set(gca,'YTick',[0 .5 1])
+        end
         
         if totalTrials<=0
             totalTrials=1;
         end
         
-        set(gca,'XTick',[0 totalTrials])
-        set(gca,'XTickLabel',[num2str(0) '|' num2str(totalTrials)])
+        if false
+            set(gca,'XTick',[0 totalTrials])
+            set(gca,'XTickLabel',[num2str(0) '|' num2str(totalTrials)])
+        end
         
         %legend Handling
         typesPlotted = get(gcf,'UserData');
-        if ~any(ismember(typesPlotted,plotType))
+        if ~any(ismember(typesPlotted,plotType)) && false
             legend(legendStrs, 'Location','NorthWest');
             typesPlotted{end+1}=plotType;
             set(gcf,'UserData',typesPlotted);
         end
-        
+                
     case 'perfBias'
         
         keyboard
@@ -241,23 +248,23 @@ switch plotType
         alpha=.05;
         c={'r' 'k'};
         
-%         totalAlones=sum(trials);
-%         correctAlones=sum(trials & detailRecords.correct);
-%         responseRightAlones=sum(trials & detailRecords.response==3);
-%         [phat pci]=binofit([correctAlones responseRightAlones],[totalAlones totalAlones],alpha);
-%         
-%         ind=1;
-%         type.alone.perf.phat(end+1)=phat(ind);
-%         type.alone.perf.pci(end+1,:)=pci(ind,:);
-%         
-%         ind=2;
-%         type.alone.bias.phat(end+1)=phat(ind);
-%         type.alone.bias.pci(end+1,:)=pci(ind,:);
-%         
-%         type.sessions.alone(end+1)=i;
-%         
-%         
-%         makePerfBiasPlot(visual.sessions.alone,visual.alone,c);
+        %         totalAlones=sum(trials);
+        %         correctAlones=sum(trials & detailRecords.correct);
+        %         responseRightAlones=sum(trials & detailRecords.response==3);
+        %         [phat pci]=binofit([correctAlones responseRightAlones],[totalAlones totalAlones],alpha);
+        %
+        %         ind=1;
+        %         type.alone.perf.phat(end+1)=phat(ind);
+        %         type.alone.perf.pci(end+1,:)=pci(ind,:);
+        %
+        %         ind=2;
+        %         type.alone.bias.phat(end+1)=phat(ind);
+        %         type.alone.bias.pci(end+1,:)=pci(ind,:);
+        %
+        %         type.sessions.alone(end+1)=i;
+        %
+        %
+        %         makePerfBiasPlot(visual.sessions.alone,visual.alone,c);
         
     case 'plotLickAndRT'
         

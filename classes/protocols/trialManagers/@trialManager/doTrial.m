@@ -212,7 +212,8 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             
             pStr=[trialRecords(trialInd).protocolName '(' num2str(trialRecords(trialInd).protocolVersion.manualVersion) 'm:' num2str(trialRecords(trialInd).protocolVersion.autoVersion) 'a)' ' step:' num2str(trialRecords(trialInd).trainingStepNum) '/' num2str(trialRecords(trialInd).numStepsInProtocol) ];
             
-            trialLabel=sprintf('session:%d trial:%d (%d)',sessionNumber,sum(trialRecords(trialInd).sessionNumber == [trialRecords.sessionNumber]),trialRecords(trialInd).trialNumber);
+            thisSession=trialRecords(trialInd).sessionNumber == [trialRecords.sessionNumber];
+            trialLabel=sprintf('trial:%d(%d)(%d) session:%d',sum([trialRecords(thisSession).trainingStepNum]==trialRecords(trialInd).trainingStepNum),sum(thisSession),trialRecords(trialInd).trialNumber,sessionNumber);
             
             if ~isempty(getDatanet(station))
 				% 4/11/09 - also save the stimRecord here, before trial starts (but just the stimManagerClass)

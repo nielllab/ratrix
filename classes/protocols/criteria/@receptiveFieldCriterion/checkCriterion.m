@@ -3,6 +3,8 @@ function [graduate, details] = checkCriterion(c,subject,trainingStep,trialRecord
 % maybe add confident pixels and bounded region support to RFestimators...
 % then just use one of those in here
 
+warning('this criterion doesn''t know to be worried about a short circular buffer set in @station/doTrials (roughly line 76) -- how architect?')
+
 %init
 details=[];
 graduate=false;

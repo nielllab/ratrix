@@ -1,5 +1,9 @@
 function [graduate details] = checkCriterion(c,subject,trainingStep,trialRecords)
 
+if any(trialRecords(end).trialNumber > c.consecutiveTrials) && any(length(trialRecords) < c.consecutiveTrials) %this needs to be smarter -- c.consecutiveTrials may have elements both shorter and longer than the buffer
+    error('criterion is longer than the circular buffer set in @station/doTrials (roughly line 76) -- how architect?')
+end
+
 fieldNames = fields(trialRecords);
 
 trialsThisStep=[trialRecords.trainingStepNum]==trialRecords(end).trainingStepNum;

@@ -45,7 +45,7 @@ coherence=.95;
 speed=.75;
 contrast=1;
 dotSize=5;
-duration=1;
+duration=10;
 textureSize=10*[w,h];
 zoom=[maxWidth maxHeight]./textureSize;
 dots=coherentDots(textureSize(1),textureSize(2),numDots,coherence,speed,contrast,dotSize,duration,zoom,maxWidth,maxHeight,percentCorrectionTrials);
@@ -71,25 +71,31 @@ ts4 = trainingStep(nrTM  , dots,  numTrialsDoneCriterion(400)          , noTimeO
 
 msPenalty = 3000;
 longPenalty=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
-lpTM=nAFC(sm,percentCorrectionTrials,longPenalty,eyeController,{'off'},dropFrames,'ptb','center'); %this percentCorrectionTrials should currently do nothing (need to fix)
+lpTM=nAFC(sm,percentCorrectionTrials,longPenalty,eyeController,{'off'},dropFrames,'ptb','center',[],[],[300 inf]); %this percentCorrectionTrials should currently do nothing (need to fix)
 ts5 = trainingStep(lpTM  , dots, repeatIndefinitely()                  , noTimeOff(), svnRev,svnCheckMode);  %coherent dots
 
 p=protocol('mouse dots',{ts1, ts2, ts3, ts4, ts5});
 
-%not the right way to do this
-if strcmp(subjIDs,'all')
-    subjIDs=getSubjectIDs(r);
-end
-
-for i=1:length(subjIDs),
-    subj=getSubjectFromID(r,subjIDs{i});
-    switch subjIDs{i}
-        case {'e1rt','e2rt','e1lt','e2lt'}
-            stepNum=uint8(5);
-        case {'n5rt','n5rn','n5lt','n8lt'}
-            stepNum=uint8(1);            
-        otherwise
-            break %this won't work cuz standAloneRun will try to run the subject after this
-    end
+if true
+    stepNum=uint8(5);
+    subj=getSubjectFromID(r,subjIDs{1});
     [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolMouse','edf');
+else
+    %not the right way to do this
+    if strcmp(subjIDs,'all')
+        subjIDs=getSubjectIDs(r);
+    end
+    
+    for i=1:length(subjIDs),
+        subj=getSubjectFromID(r,subjIDs{i});
+        switch subjIDs{i}
+            case {'e1rt','e2rt','e1lt','e2lt'}
+                stepNum=uint8(5);
+            case {'n5rt','n5rn','n5lt','n8lt'}
+                stepNum=uint8(1);
+            otherwise
+                break %this won't work cuz standAloneRun will try to run the subject after this
+        end
+        [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolMouse','edf');
+    end
 end

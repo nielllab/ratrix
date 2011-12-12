@@ -42,8 +42,8 @@ fractionPenaltySoundIsOn  = 1;
 scalar                    = 1;
 
 requestRewardSizeULorMS   = 0;
-rewardSizeULorMS          = 50;
-msPenalty                 = 5000;
+rewardSizeULorMS          = 90;
+msPenalty                 = 7000;
 
 msAirpuff                 = msPenalty;
 
@@ -59,13 +59,28 @@ for i=1:length(subs)
     if ~isempty(p)
         ts=getTrainingStep(p,getNumTrainingSteps(p));
         
-        ts2 = setStimManager(ts, setCoherence(setDur(setSideDisplay(getStimManager(ts),.5),10),1));
-        p=addTrainingStep(p,setReinforcementParam(ts2,'reinforcementManager',rm));
+        if any(getID(subs{i})=='l')
+            ts = setTrialManager(ts, setResponseWindow(getTrialManager(ts), [300 inf]));
+        end
         
-        p = changeStep(p, setCriterion(ts,numTrialsDoneCriterion(400)), uint8(getNumTrainingSteps(p)-1));
+        ts = setReinforcementParam(ts,'reinforcementManager',rm);
+        ts = setCriterion(ts,performanceCriterion(.85,int32(200)));
+        p = changeStep(p, ts, uint8(getNumTrainingSteps(p)));
         
+        ts2 = setStimManager(ts, setSideDisplay(getStimManager(ts),1));
+        p=addTrainingStep(p, setCriterion(ts2,repeatIndefinitely));
+
         [~, r]=setProtocolAndStep(subs{i},p,true,true,false,t,r,comment,auth);
-        %    [~, r]=setReinforcementParam(subs{i},'reinforcementManager',rm,6,r,comment,auth);
+                    
+        if false
+            ts2 = setStimManager(ts, setCoherence(setDur(setSideDisplay(getStimManager(ts),.5),10),1));
+            p=addTrainingStep(p,setReinforcementParam(ts2,'reinforcementManager',rm));
+            
+            p = changeStep(p, setCriterion(ts,numTrialsDoneCriterion(400)), uint8(getNumTrainingSteps(p)-1));
+            
+            [~, r]=setProtocolAndStep(subs{i},p,true,true,false,t,r,comment,auth);
+            %    [~, r]=setReinforcementParam(subs{i},'reinforcementManager',rm,6,r,comment,auth);
+        end
     end
 end
 

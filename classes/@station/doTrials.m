@@ -73,7 +73,7 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
 
                 % This is a hard coded trial records filter
                 % Need to decide where to parameterize this
-                filter = {'lastNTrials',int32(100)};
+                filter = {'lastNTrials',int32(500)};
 
                 % Load a subset of the previous trial records based on the given filter
                 [trialRecords localRecordsIndex sessionNumber] = getTrialRecordsForSubjectID(r,getID(subject),filter, trustOsRecordFiles);

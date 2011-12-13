@@ -37,6 +37,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <linux/parport.h>
 #include <linux/ppdev.h>
 
+/*
+ * lptwriteLinuxMex([ports(:) addr(:)],[bitSpecs(:,1:2) vals(:)])
+*/
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
     double *port, *value;

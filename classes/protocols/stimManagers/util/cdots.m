@@ -16,8 +16,7 @@ function [movie dotsxy]=cdots(nDots,width,height,nFrames,coherence,speed,directi
 % for i=1:size(m,3)
 %   imagesc(m(:,:,i))
 %   axis equal
-%   drawnow
-%   pause(.1)
+%   pause(.01)
 % end
 
 jump = rand(nFrames, nDots) > coherence;
@@ -38,6 +37,5 @@ dotsxy = 1 + round(mod(dotsxy,ones(size(dotsxy))) .* repmat(reshape([width heigh
 
 movie = zeros(height,width,nFrames);
 movie(sub2ind(size(movie),dotsxy(:,:,2),dotsxy(:,:,1),repmat(1:nFrames,nDots,1)')) = 1;
-movie = convn(movie,shape,'same');
-movie(movie~=0) = 1;
+movie = convn(movie,shape,'same') ~= 0;
 end

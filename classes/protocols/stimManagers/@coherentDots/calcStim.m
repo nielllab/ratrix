@@ -137,9 +137,10 @@ end
 shape = ones(selectedDotSize);
 
 %% Draw those dots!
-
-original = false;
-if original
+wrap = false;
+if wrap % prevent spatial buildup in direction of motion
+    [dots_movie alldotsxy] = cdots(s.num_dots,s.screen_width,s.screen_height,num_frames,selectedCoherence,selectedSpeed,dotDirection,shape);   
+else
     alldotsxy = [rand(s.num_dots,1)*(s.screen_width-1)+1 ...
         rand(s.num_dots,1)*(s.screen_height-1)+1];
     dot_history = zeros(s.num_dots,2,num_frames);
@@ -193,26 +194,6 @@ if original
             
         end
     end
-else %this does wrapping to prevent spatial buildup in direction of motion
-    dots_movie = zeros(s.screen_height, s.screen_width, num_frames);
-    alldotsxy = zeros(s.num_dots, 2, num_frames);
-    jump = true(1,s.num_dots);
-    d = repmat(selectedSpeed*cellfun(@(f) f(dotDirection),{@cos @sin}),s.num_dots,1);
-    dims = repmat([s.screen_width s.screen_height]-1,s.num_dots,1);
-    
-    for i=1:num_frames
-        if i ~= 1
-            alldotsxy(:,:,i)=alldotsxy(:,:,i-1);
-        end
-        alldotsxy(jump,:,i) = rand(sum(jump),2).*dims(1:sum(jump),:);
-        alldotsxy(:,:,i) = mod(alldotsxy(:,:,i) + d,dims);
-        
-        dots_movie(sub2ind(size(dots_movie),round(alldotsxy(:,2,i)+1),round(alldotsxy(:,1,i)+1),i*ones(s.num_dots,1))) = 1;
-        dots_movie(:,:,i) = conv2(dots_movie(:,:,i),shape,'same');
-        
-        jump = rand(1,s.num_dots) > selectedCoherence;
-    end
-    dots_movie(dots_movie > 0) = 1;
 end
 
 out = dots_movie*selectedContrast;

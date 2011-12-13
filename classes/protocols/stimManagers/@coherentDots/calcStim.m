@@ -1,6 +1,40 @@
 function [stimulus updateSM resolutionIndex preRequestStim preResponseStim discrimStim LUT targetPorts distractorPorts ...
     details interTrialLuminance text indexPulses imagingTasks] = ...
     calcStim(stimulus,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
+
+% Reinagel, Mankin, Calhoun 2008 SFN Poster: http://biology.ucsd.edu/labs/reinagel/SpeedAccuracyPoster2009.pdf
+%
+% "In the visual random dot motion task, subjects discriminate which of two directions the majority of dots are moving."
+% as originally coded and used in the poster, this is false.
+% dots build up towards the edge of the screen in the direction of motion.
+% thus, the task can be solved by detecting more dots (contrast) on that side of the screen, completely independent of motion.
+% this is because dots that fall off a screen boundary move to a random position on the screen, rather than wrapping around
+% (see http://www.shadlen.org/Code/VCRDM README)
+% consider how many dots are on each side of the screen at time t:
+%   new dots are balanced on both sides of the screen.
+%   but on the side in the direction of motion, it has all dots that started there and haven't yet fallen off
+%   PLUS all the dots that have moved there from the opposite side.
+
+% also, the stim figure in the poster is false -- it shows every dot moving the same distance, in varying directions
+% as coded, dots that are chosen to move incoherently move to a random position on the screen, NOT a fixed distance in a random direction.
+% this matches newsome's original strategy (but his figures also correctly represent this, though they imply a small max distance, not total random new location)
+
+% newsome's first description of the task: http://neurosci.info/courses/vision2/Extrastriate/Newsome_pare_1988.pdf
+% used PDP-11 (!) code from tony movshon -- would be great to see original
+% is silent regarding dots that fall off the end of the screen
+% their examples, however, show that such dots are not replaced at a random screen location, but appear on the edge opposite the direction of motion
+% http://monkeybiz.stanford.edu/movies/100coh_circle.qt
+
+% shadlen, newsome's student, DOES do wrap-around correction (VCRDM is his)
+
+% newsome quotes these previously existing dot stimuli, which DO do wrap-around correction (i need to verify that):
+% 1) morgan and ward 80 Conditions for motion flow in dynamic visual noise. Vision Res. 20: 431-435
+% 2) nakayama and tyler 81 Psychophysical isolation of movement sensitivty by removal of familiar position cues. Vision Res. 21: 427-433.
+%    http://visionlab.harvard.edu/members/ken/Ken%20papers%20for%20web%20page/024NKTylerVisionR1981.pdf
+% 3) williams and sekuler 84 Coherent global motion percepts from stochastic local omtions. Vision Res. 24: 55-62.
+%    (DOES keep distance uniform)
+%    http://people.brandeis.edu/~sekuler/papers/williamsSekuler_coherentPerceptRDC_VisRes1984.pdf
+
 % 1/30/09 - trialRecords now includes THIS trial
 s = stimulus;
 indexPulses=[];
@@ -66,12 +100,6 @@ end
 
 num_frames = floor(hz * selectedDuration);
 
-alldotsxy = [rand(s.num_dots,1)*(s.screen_width-1)+1 ...
-    rand(s.num_dots,1)*(s.screen_height-1)+1];
-dot_history = zeros(s.num_dots,2,num_frames);
-
-dots_movie = uint8(zeros(s.screen_height, s.screen_width, num_frames));
-
 % ===================================================================================
 % 11/20/08 - fli
 % do all random picking here (from coherence, size, contrast, speed as necessary)
@@ -110,52 +138,81 @@ shape = ones(selectedDotSize);
 
 %% Draw those dots!
 
-frame = zeros(s.screen_height,s.screen_width);
-frame(sub2ind(size(frame),floor(alldotsxy(:,2)),floor(alldotsxy(:,1)))) = 1;
-frame = conv2(frame,shape,'same');
-frame(frame > 0) = 255;
-dot_history(:,:,1) = alldotsxy;
-dots_movie(:,:,1) = uint8(frame);
-% alldotsxy(:,1);
-% alldotsxy(:,2);
-
-if ~static
+original = false;
+if original
+    alldotsxy = [rand(s.num_dots,1)*(s.screen_width-1)+1 ...
+        rand(s.num_dots,1)*(s.screen_height-1)+1];
+    dot_history = zeros(s.num_dots,2,num_frames);
     
-    vx = selectedSpeed*cos(dotDirection);
-    vy = selectedSpeed*sin(dotDirection);
+    dots_movie = uint8(zeros(s.screen_height, s.screen_width, num_frames));
+    
+    frame = zeros(s.screen_height,s.screen_width);
+    frame(sub2ind(size(frame),floor(alldotsxy(:,2)),floor(alldotsxy(:,1)))) = 1;
+    frame = conv2(frame,shape,'same');
+    frame(frame > 0) = 255;
+    dot_history(:,:,1) = alldotsxy;
+    dots_movie(:,:,1) = uint8(frame);
+    % alldotsxy(:,1);
+    % alldotsxy(:,2);
+    
+    if ~static
+        
+        vx = selectedSpeed*cos(dotDirection);
+        vy = selectedSpeed*sin(dotDirection);
+        
+        for i=1:num_frames
+            frame = zeros(s.screen_height,s.screen_width);
+            frame(sub2ind(size(frame),floor(alldotsxy(:,2)),floor(alldotsxy(:,1)))) = 1;
+            frame = conv2(frame,shape,'same');
+            frame(frame > 0) = 255;
+            dots_movie(:,:,i) = uint8(frame);
+            dot_history(:,:,i) = alldotsxy;
+            
+            % Randomly find who's going to be coherent and who isn't
+            move_coher = rand(s.num_dots,1) < selectedCoherence;
+            move_randomly = ~move_coher;
+            
+            num_out = sum(move_randomly);
+            
+            if (num_out ~= s.num_dots)
+                alldotsxy(move_coher,1) = alldotsxy(move_coher,1) + vx;
+                alldotsxy(move_coher,2) = alldotsxy(move_coher,2) + vy;
+            end
+            if (num_out)
+                alldotsxy(move_randomly,:) = [rand(num_out,1)*(s.screen_width-1)+1 ...
+                    rand(num_out,1)*(s.screen_height-1)+1];
+            end
+            
+            overboard = alldotsxy(:,1) > s.screen_width | alldotsxy(:,2) > s.screen_height | ...
+                floor(alldotsxy(:,1)) <= 0 | floor(alldotsxy(:,2)) <= 0;
+            num_out = sum(overboard);
+            if (num_out)
+                alldotsxy(overboard,:) = [rand(num_out,1)*(s.screen_width-1)+1 ...
+                    rand(num_out,1)*(s.screen_height-1)+1];
+            end
+            
+        end
+    end
+else %this does wrapping to prevent spatial buildup in direction of motion
+    dots_movie = zeros(s.screen_height, s.screen_width, num_frames);
+    alldotsxy = zeros(s.num_dots, 2, num_frames);
+    jump = true(1,s.num_dots);
+    d = repmat(selectedSpeed*cellfun(@(f) f(dotDirection),{@cos @sin}),s.num_dots,1);
+    dims = repmat([s.screen_width s.screen_height]-1,s.num_dots,1);
     
     for i=1:num_frames
-        frame = zeros(s.screen_height,s.screen_width);
-        frame(sub2ind(size(frame),floor(alldotsxy(:,2)),floor(alldotsxy(:,1)))) = 1;
-        frame = conv2(frame,shape,'same');
-        frame(frame > 0) = 255;
-        dots_movie(:,:,i) = uint8(frame);
-        dot_history(:,:,i) = alldotsxy;
-        
-        % Randomly find who's going to be coherent and who isn't
-        move_coher = rand(s.num_dots,1) < selectedCoherence;
-        move_randomly = ~move_coher;
-        
-        num_out = sum(move_randomly);
-        
-        if (num_out ~= s.num_dots)
-            alldotsxy(move_coher,1) = alldotsxy(move_coher,1) + vx;
-            alldotsxy(move_coher,2) = alldotsxy(move_coher,2) + vy;
+        if i ~= 1
+            alldotsxy(:,:,i)=alldotsxy(:,:,i-1);
         end
-        if (num_out)
-            alldotsxy(move_randomly,:) = [rand(num_out,1)*(s.screen_width-1)+1 ...
-                rand(num_out,1)*(s.screen_height-1)+1];
-        end
+        alldotsxy(jump,:,i) = rand(sum(jump),2).*dims(1:sum(jump),:);
+        alldotsxy(:,:,i) = mod(alldotsxy(:,:,i) + d,dims);
         
-        overboard = alldotsxy(:,1) > s.screen_width | alldotsxy(:,2) > s.screen_height | ...
-            floor(alldotsxy(:,1)) <= 0 | floor(alldotsxy(:,2)) <= 0;
-        num_out = sum(overboard);
-        if (num_out)
-            alldotsxy(overboard,:) = [rand(num_out,1)*(s.screen_width-1)+1 ...
-                rand(num_out,1)*(s.screen_height-1)+1];
-        end
+        dots_movie(sub2ind(size(dots_movie),round(alldotsxy(:,2,i)+1),round(alldotsxy(:,1,i)+1),i*ones(s.num_dots,1))) = 1;
+        dots_movie(:,:,i) = conv2(dots_movie(:,:,i),shape,'same');
         
+        jump = rand(1,s.num_dots) > selectedCoherence;
     end
+    dots_movie(dots_movie > 0) = 1;
 end
 
 out = dots_movie*selectedContrast;

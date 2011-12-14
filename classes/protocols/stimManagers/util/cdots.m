@@ -1,4 +1,4 @@
-function [movie dotsxy]=cdots(nDots,width,height,nFrames,coherence,speed,direction,shape)
+function [movie dotsxy]=cdots(nDots,width,height,nFrames,coherence,speed,direction,shape,uniformSpeed)
 % example:
 %
 % nDots     = 75;
@@ -12,7 +12,8 @@ function [movie dotsxy]=cdots(nDots,width,height,nFrames,coherence,speed,directi
 %              1 0 1; ...
 %              0 1 0; ...
 %             ];
-% m = cdots(nDots,width,height,nFrames,coherence,speed,direction,shape);
+% uniformSpeed = true;
+% m = cdots(nDots,width,height,nFrames,coherence,speed,direction,shape,controlSpeed);
 % for i=1:size(m,3)
 %   imagesc(m(:,:,i))
 %   axis equal
@@ -26,9 +27,19 @@ inds = find(jump);
 dotsxy = zeros(nFrames, nDots, 2);
 dotsxy([inds inds+(nFrames*nDots)]) = rand(1,2*length(inds));
 
-d = reshape(speed*cellfun(@(f) f(direction),{@cos @sin}),[1 1 2]);
+speed = reshape(speed * [height/width 1],[1 1 2]);
+d = speed .* components(direction);
+
+    function out=components(angle)
+        out = reshape(cell2mat(cellfun(@(f) f(angle(:)),{@cos @sin},'UniformOutput',false)),[1 numel(angle) 2]);
+    end
 
 for i=2:nFrames
+    if uniformSpeed
+        inds = jump(i,:);
+        dotsxy(i,inds,:) = dotsxy(i-1,inds,:) + repmat(speed,1,sum(inds)).*components(2*pi*dotsxy(i,inds,1));
+    end
+    
     inds = ~jump(i,:);
     dotsxy(i,inds,:) = dotsxy(i-1,inds,:) + repmat(d,[1 sum(inds) 1]);
 end

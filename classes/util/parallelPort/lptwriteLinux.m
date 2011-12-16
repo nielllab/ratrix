@@ -30,9 +30,9 @@ function lptwriteLinux(pins,vals,slowChecks,port,addr)
 % if their drivers are installed.  on fedora 15, i found both were
 % installed by default.
 %
-% lptwriteLinux requires the corresponding compiled mex file.  for fastest
-% operation, you could call it directly, but it does no input validation, 
-% and depends on formatting provided by getBitSpecForPinNum.
+% lptwriteLinux requires the corresponding compiled mex file (lptwriteLinuxMex).  
+% for fastest operation, you could call it directly, but it does no input 
+% validation, and depends on formatting provided by getBitSpecForPinNum.
 %
 % Examples:
 % lptwriteLinux(uint8([1 10 15]),[true false true])
@@ -168,9 +168,9 @@ end
 bitSpecs=getBitSpecForPinNum(pins); %[bitNum,regOffset,inv]
 vals(logical(bitSpecs(:,3)))=~vals(logical(bitSpecs(:,3)));
 
-w=warning('off', 'MATLAB:concatenation:integerInteraction');
-lptwriteLinuxMex(uint64([ports(:) addr(:)]),uint8([bitSpecs(:,1:2) vals(:)]));
-warning(w.state, 'MATLAB:concatenation:integerInteraction');
+% w=warning('off', 'MATLAB:concatenation:integerInteraction');
+lptwriteLinuxMex([uint64(ports(:)) uint64(addr(:))],uint8([bitSpecs(:,1:2) vals(:)]));
+% warning(w.state, 'MATLAB:concatenation:integerInteraction');
 end
 
 function out=getBitSpecForPinNum(pinNum)

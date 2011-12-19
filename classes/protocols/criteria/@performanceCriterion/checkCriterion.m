@@ -1,4 +1,8 @@
-function [graduate details] = checkCriterion(c,subject,trainingStep,trialRecords)
+function [graduate details pct] = checkCriterion(c,subject,trainingStep,trialRecords,playTone)
+
+if ~exist('playTone','var') || isempty(playTone)
+    playTone=true;
+end
 
 if any(trialRecords(end).trialNumber > c.consecutiveTrials) && any(length(trialRecords) < c.consecutiveTrials) %this needs to be smarter -- c.consecutiveTrials may have elements both shorter and longer than the buffer
     error('criterion is longer than the circular buffer set in @station/doTrials (roughly line 76) -- how architect?')
@@ -64,7 +68,7 @@ which= trialsThisStep & ~stochastic & ~humanResponse & ~forcedRewards;
 [graduate whichCriteria correct]=aboveThresholdPerformance(c.consecutiveTrials,c.pctCorrect,trialRecords(which));
 
 %play graduation tone
-if graduate
+if graduate && playTone
     beep;
     waitsecs(.2);
     beep;
@@ -79,4 +83,8 @@ if graduate
         details.correct = correct;
         details.whichCriteria = whichCriteria;
     end
+end
+
+if isscalar(c.consecutiveTrials)
+    pct = sum(correct(end-c.consecutiveTrials:end))/c.consecutiveTrials;
 end

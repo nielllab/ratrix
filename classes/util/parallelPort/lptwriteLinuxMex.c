@@ -39,13 +39,14 @@
 
 #define NUM_ADDRESS_COLS 2
 #define NUM_DATA_COLS 3
+#define ADDR_BASE "/dev/parport"
 
 /*
  * lptwriteLinuxMex([ports(:) addr(:)],[bitSpecs(:,1:2) vals(:)])
  */
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-    int numAddresses, numVals, i, result;
+    int numAddresses, numVals, i, result, addrStrLen;
     double *portOLD, *valueOLD;
     
     uint64_T *addresses; /* mxUINT64_CLASS */
@@ -53,6 +54,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     
     uint64_T address, port;
     uint8_T bitNum, regOffset, value;
+    
+    char *addrStr;
     
     /* Check for proper number of arguments. */
     if (nrhs != 2) {
@@ -87,13 +90,27 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     
     /*  */
     
+    addrStrLen = strlen(ADDR_BASE)+1; /* is one enough? */
+    addrStr = (char *)mxMalloc(addrStrLen);
+    if (addrStr==NULL) {
+        mexErrMsgTxt("couldn't allocate addrStr")
+    }
+    
     for (i = 0; i < numAddresses; i++) {
         port      = addresses[i];
         address   = addresses[i+numAddresses];
         
         printf("addr %d: %d, %d\n", i, address, port);
+        
+        if (snprintf(addrStr,"%s%d",ADDR_BASE,address)!=addrStrLen) {
+            mexErrMsgTxt("bad addrStr snprintf")
+        }
+        printf("%s\n",addrStr);
+        
         /* printf("%s\n\n",sprintf("/dev/parport%d",address)); */
     }
+    
+    mxFree(addrStr);
     
     printf("\n\ndata:\n");
     for (i = 0; i < numVals; i++) {
@@ -107,6 +124,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             mexErrMsgTxt("bitNum must be 1-8, regOffset must be 0-2, value must be 0-1.");
         }
     }
+    
+    /*
+     * mwIndex mxCalcSingleSubscript(const mxArray *pm, mwSize nsubs, mwIndex *subs)
+     */
     
     if false {
         /*PPDEV doesn't require root, is supposed to be faster, and is address-space safe, but only available in later kernels >=2.4?*/
@@ -131,8 +152,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         /*  if (size != 1) mexErrMsgTxt("supplied value wasn't one byte"); */
         
         /*  int bytes_written = write(parportfd,value,size);
-    printf("bytes_written: %d\n",bytes_written);
-    if (bytes_written != size) mexErrMsgTxt("written size not correct"); */
+         * printf("bytes_written: %d\n",bytes_written);
+         * if (bytes_written != size) mexErrMsgTxt("written size not correct"); */
         
         result = ioctl(parportfd,PPWDATA,valueOLD);
         printf("ioctl PPWDATA: %d\n",result);

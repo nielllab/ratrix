@@ -28,6 +28,7 @@
 #include "mex.h"
 
 #include <sys/io.h>
+#include <string.h>
 
 #include <fcntl.h>
 #include <sys/types.h>
@@ -57,14 +58,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     
     char *addrStr;
     
-    /* Check for proper number of arguments. */
     if (nrhs != 2) {
         mexErrMsgTxt("Two input arguments required.");
-    } else if (nlhs > 0) {
+    } 
+    
+    if (nlhs > 0) {
         mexErrMsgTxt("Too many output arguments.");
     }
     
-    /* The input must be real numeric matrices with at least one row.*/
     for (i = 0; i < 2; i++) {
         if (mxGetNumberOfDimensions(prhs[i])!=2 || mxIsComplex(prhs[i]) || !mxIsNumeric(prhs[i]) || mxGetM(prhs[i])<1) {
             mexErrMsgTxt("Input must be real numeric matrices with at least one row.");
@@ -84,30 +85,30 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     
     /* mxGetElementSize */
     
-    /* Assign pointers to each input. */
     addresses = mxGetData(prhs[0]);
     data = mxGetData(prhs[1]);
-    
-    /*  */
-    
+        
     addrStrLen = strlen(ADDR_BASE)+1; /* is one enough? */
     addrStr = (char *)mxMalloc(addrStrLen);
     if (addrStr==NULL) {
-        mexErrMsgTxt("couldn't allocate addrStr")
+        mexErrMsgTxt("couldn't allocate addrStr");
     }
     
     for (i = 0; i < numAddresses; i++) {
-        port      = addresses[i];
-        address   = addresses[i+numAddresses];
+        port    = addresses[i];
+        address = addresses[i+numAddresses];
         
         printf("addr %d: %d, %d\n", i, address, port);
         
-        if (snprintf(addrStr,"%s%d",ADDR_BASE,address)!=addrStrLen) {
-            mexErrMsgTxt("bad addrStr snprintf")
+        if (false) { /* snprintf isn't doing the appending, even though it's returning the right number of bytes copied */
+            if (snprintf(addrStr,addrStrLen,"%s%d",ADDR_BASE,port)!=addrStrLen) {
+                printf("%d\t%d\t%s\n",snprintf(addrStr,addrStrLen,"%s%d",ADDR_BASE,address),addrStrLen,addrStr);
+                mexErrMsgTxt("bad addrStr snprintf");
+            }
+        } else {
+            addrStrLen=sprintf(addrStr,"%s%d",ADDR_BASE,port);            
         }
-        printf("%s\n",addrStr);
-        
-        /* printf("%s\n\n",sprintf("/dev/parport%d",address)); */
+        printf("%d\t%s\n",addrStrLen,addrStr);
     }
     
     mxFree(addrStr);

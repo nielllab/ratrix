@@ -169,7 +169,7 @@ bitSpecs=getBitSpecForPinNum(pins); %[bitNum,regOffset,inv]
 vals(logical(bitSpecs(:,3)))=~vals(logical(bitSpecs(:,3)));
 
 % w=warning('off', 'MATLAB:concatenation:integerInteraction');
-lptwriteLinuxMex([uint64(ports(:)) uint64(addr(:))],uint8([bitSpecs(:,1:2) vals(:)]));
+lptwriteLinuxMex([uint64(ports(:)) uint64(addr(:))],[bitSpecs(:,1:2) uint8(vals(:))]);
 % warning(w.state, 'MATLAB:concatenation:integerInteraction');
 end
 

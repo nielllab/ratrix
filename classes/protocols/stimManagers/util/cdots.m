@@ -34,7 +34,7 @@ d = speed .* components(direction);
         out = reshape(cell2mat(cellfun(@(f) f(angle(:)),{@cos @sin},'UniformOutput',false)),[1 numel(angle) 2]);
     end
 
-for i=2:nFrames
+for i=2:nFrames %use cumsum to eliminate loop
     if uniformSpeed
         inds = jump(i,:);
         dotsxy(i,inds,:) = dotsxy(i-1,inds,:) + repmat(speed,1,sum(inds)).*components(2*pi*dotsxy(i,inds,1));

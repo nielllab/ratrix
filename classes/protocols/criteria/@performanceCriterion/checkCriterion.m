@@ -68,13 +68,15 @@ which= trialsThisStep & ~stochastic & ~humanResponse & ~forcedRewards;
 [graduate whichCriteria correct]=aboveThresholdPerformance(c.consecutiveTrials,c.pctCorrect,trialRecords(which));
 
 %play graduation tone
-if graduate && playTone
-    beep;
-    waitsecs(.2);
-    beep;
-    waitsecs(.2);
-    beep;
-
+if graduate 
+    if playTone
+        beep;
+        waitsecs(.2);
+        beep;
+        waitsecs(.2);
+        beep;
+    end
+    
     if (nargout > 1)
         details.date = now;
         details.criteria = c;
@@ -83,8 +85,12 @@ if graduate && playTone
         details.correct = correct;
         details.whichCriteria = whichCriteria;
     end
+else
+    details=[];
 end
 
-if isscalar(c.consecutiveTrials)
+if isscalar(c.consecutiveTrials) && c.consecutiveTrials<=length(correct)
     pct = sum(correct(end-c.consecutiveTrials:end))/c.consecutiveTrials;
+else
+    pct = sum(correct)/length(correct);
 end

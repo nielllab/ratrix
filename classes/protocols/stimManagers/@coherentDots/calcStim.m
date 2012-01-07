@@ -137,9 +137,9 @@ end
 shape = ones(selectedDotSize);
 
 %% Draw those dots!
-wrap = false;
+wrap = true;
 if wrap % prevent spatial buildup in direction of motion
-    [dots_movie alldotsxy] = cdots(s.num_dots,s.screen_width,s.screen_height,num_frames,selectedCoherence,selectedSpeed,dotDirection,shape);   
+    [dots_movie alldotsxy] = cdots(s.num_dots,s.screen_width,s.screen_height,num_frames,selectedCoherence,selectedSpeed/s.screen_height,dotDirection,shape,false);
 else
     alldotsxy = [rand(s.num_dots,1)*(s.screen_width-1)+1 ...
         rand(s.num_dots,1)*(s.screen_height-1)+1];
@@ -198,16 +198,19 @@ end
 
 out = dots_movie*selectedContrast;
 
+shift = round((s.position-.5)*s.screen_width/2);
 switch dotDirection
     case -1 %static
-        % do nothing
+        shift = 0;
     case pi %go left
         out(:,1+round(s.screen_width*s.sideDisplay):end,:)=0;
+        shift = -shift;
     case 0 %go right
         out(:,1:round(s.screen_width*(1-s.sideDisplay)),:)=0;
     otherwise
         error('unrecognized direction')
 end
+out=circshift(out,[0 shift 0]);
 
 if strcmp(stimulus.replayMode,'loop')
     type='loop';

@@ -34,8 +34,12 @@ if ~isempty(trialRecords)
                 if isfield(td,'correct')
                     correct=[td.correct];
                 end
-            else
+            elseif isfield(trialRecords,'correct')
                 correct=[trialRecords.correct];
+            elseif isscalar(trialRecords) %first trial?
+                correct=false;
+            else
+                error('huh?')
             end
             %todo
             %'WARNING': make sure to limit this to this session

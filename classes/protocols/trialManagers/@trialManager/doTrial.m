@@ -213,7 +213,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             pStr=[trialRecords(trialInd).protocolName '(' num2str(trialRecords(trialInd).protocolVersion.manualVersion) 'm:' num2str(trialRecords(trialInd).protocolVersion.autoVersion) 'a)' ' step:' num2str(trialRecords(trialInd).trainingStepNum) '/' num2str(trialRecords(trialInd).numStepsInProtocol) ];
             
             thisSession=trialRecords(trialInd).sessionNumber == [trialRecords.sessionNumber];
-            nPerf=50;
+            nPerf=uint8(50);
             [~, ~, pct] = checkCriterion(performanceCriterion(1,nPerf),subject,ts,trialRecords,false);
             trialLabel=sprintf('%d%%(%d) trial:%d(%d)(%d) session:%d',round(100*pct),nPerf,sum([trialRecords(thisSession).trainingStepNum]==trialRecords(trialInd).trainingStepNum),sum(thisSession),trialRecords(trialInd).trialNumber,sessionNumber);
             

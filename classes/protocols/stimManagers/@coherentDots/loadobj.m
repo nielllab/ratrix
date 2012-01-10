@@ -11,7 +11,7 @@ else % a is an old version
     end
     
     if ~isfield(a,'shapeMethod')
-        a.shapeMethod=[];
+        a.shapeMethod='';
     end
         
     a=orderfields(a,struct(coherentDots));
@@ -25,6 +25,8 @@ else % a is an old version
     dots=coherentDots(a.screen_width,a.screen_height,a.num_dots,a.coherence,a.speed,a.contrast,a.dot_size,a.movie_duration, ...
         struct(a.stimManager).scaleFactor,struct(a.stimManager).maxWidth,struct(a.stimManager).maxHeight, ...
         a.pctCorrectionTrials,a.replayMode,double(struct(a.stimManager).interTrialLuminance)/double(intmax('uint8')));
+    
+    dots=setShapeMethod(setPosition(setSideDisplay(dots,a.sideDisplay),a.position),a.shapeMethod);
     
     check(struct(dots),a);
     a=dots;

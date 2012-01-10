@@ -66,9 +66,9 @@ which= trialsThisStep & ~stochastic & ~humanResponse & ~forcedRewards;
 %play graduation tone
 if graduate
     beep;
-    waitsecs(.2);
+    WaitSecs(.2);
     beep;
-    waitsecs(.2);
+    WaitSecs(.2);
     beep;
 
     if (nargout > 1)

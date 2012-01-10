@@ -199,15 +199,40 @@ end
 out = dots_movie*selectedContrast;
 
 pStr='';
+sStr='';
 switch s.shapeMethod
     case ''
         %do nothing
     case 'position'
         if s.position>0 && length(trialRecords)>=2
             thisSession = trialRecords(end).sessionNumber == [trialRecords.sessionNumber];
-            dets = [trialRecords.stimDetails];
-            thisShapedValue = [[dets.currentShapedValue] == s.position false];
-            nPerf=uint8(5);
+            
+            if false
+                for i=1:length(trialRecords) %ugh! how avoid this?
+                    if ~isfield(trialRecords(i).stimDetails,'currentShapedValue')
+                        trialRecords(i).stimDetails.currentShapedValue=nan;
+                    end
+                end
+                
+                try
+                    dets = [trialRecords.stimDetails];
+                catch
+                    sca
+                    keyboard
+                end
+                
+                thisShapedValue = [[dets.currentShapedValue] == s.position false];
+            end
+            
+            %ugh! how avoid this? have to do this in case previous trialRecords with different details exist
+            thisShapedValue=false(1,length(trialRecords));
+            for i=1:length(trialRecords)-1 
+                if isfield(trialRecords(i).stimDetails,'currentShapedValue')
+                    thisShapedValue(i)=trialRecords(i).stimDetails.currentShapedValue == s.position;
+                end
+            end            
+            
+            nPerf=uint8(50);
             [g, ~, pct] = checkCriterion(performanceCriterion(.8,nPerf),[],[],trialRecords(thisSession & thisShapedValue),false);
             
             if g
@@ -219,6 +244,7 @@ switch s.shapeMethod
             pStr=sprintf('(%g%%)',round(100*pct));
         end
         details.currentShapedValue=s.position;
+        sStr=sprintf('shaping: %g',details.currentShapedValue);
     otherwise
         error('unrecognized shapeMethod')
 end
@@ -281,5 +307,5 @@ preResponseStim.punishResponses=false;
 if (strcmp(trialManagerClass,'nAFC') || strcmp(trialManagerClass,'goNoGo')) && details.correctionTrial
     text='correction trial!';
 else
-    text=sprintf('shaping: %g%s coherence: %g dot_size: %g contrast: %g speed: %g',details.currentShapedValue,pStr,selectedCoherence,selectedDotSize,selectedContrast,selectedSpeed);
+    text=sprintf('%s%s coherence: %g dot_size: %g contrast: %g speed: %g',sStr,pStr,selectedCoherence,selectedDotSize,selectedContrast,selectedSpeed);
 end

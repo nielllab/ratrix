@@ -15,7 +15,7 @@ if ~isa(r,'ratrix')
     error('need a ratrix')
 end
 
-if ~exist('setNums','var') || isempty(stepNums)
+if ~exist('stepNums','var') || isempty(stepNums)
     stepNums='all';
 end
 
@@ -36,18 +36,20 @@ if ~exist('comment','var')
     comment='';
 end
 
-requestMode               = 'first';
-fractionOpenTimeSoundIsOn = 1;
-fractionPenaltySoundIsOn  = 1;
-scalar                    = 1;
-
-requestRewardSizeULorMS   = 0;
-rewardSizeULorMS          = 90;
-msPenalty                 = 7000;
-
-msAirpuff                 = msPenalty;
-
-rm=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
+if false
+    requestMode               = 'first';
+    fractionOpenTimeSoundIsOn = 1;
+    fractionPenaltySoundIsOn  = 1;
+    scalar                    = 1;
+    
+    requestRewardSizeULorMS   = 0;
+    rewardSizeULorMS          = 90;
+    msPenalty                 = 7000;
+    
+    msAirpuff                 = msPenalty;
+    
+    rm=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
+end
 
 subs=getSubjectsFromIDs(r,subIDs);
 
@@ -59,19 +61,24 @@ for i=1:length(subs)
     if ~isempty(p)
         ts=getTrainingStep(p,getNumTrainingSteps(p));
         
-        if any(getID(subs{i})=='l')
-            ts = setTrialManager(ts, setResponseWindow(getTrialManager(ts), [300 inf]));
+        p=addTrainingStep(p,setStimManager(ts, setShapeMethod(setPosition(setSideDisplay(getStimManager(ts),.5),.5),'position')));        
+        [~, r]=setProtocolAndStep(subs{i},p,true,true,false,t+1,r,comment,auth);
+            
+        if false
+            if any(getID(subs{i})=='l')
+                ts = setTrialManager(ts, setResponseWindow(getTrialManager(ts), [300 inf]));
+            end
+            
+            ts = setReinforcementParam(ts,'reinforcementManager',rm);
+            ts = setCriterion(ts,performanceCriterion(.85,int32(200)));
+            p = changeStep(p, ts, uint8(getNumTrainingSteps(p)));
+            
+            ts2 = setStimManager(ts, setSideDisplay(getStimManager(ts),1));
+            p=addTrainingStep(p, setCriterion(ts2,repeatIndefinitely));
+            
+            [~, r]=setProtocolAndStep(subs{i},p,true,true,false,t,r,comment,auth);
         end
         
-        ts = setReinforcementParam(ts,'reinforcementManager',rm);
-        ts = setCriterion(ts,performanceCriterion(.85,int32(200)));
-        p = changeStep(p, ts, uint8(getNumTrainingSteps(p)));
-        
-        ts2 = setStimManager(ts, setSideDisplay(getStimManager(ts),1));
-        p=addTrainingStep(p, setCriterion(ts2,repeatIndefinitely));
-
-        [~, r]=setProtocolAndStep(subs{i},p,true,true,false,t,r,comment,auth);
-                    
         if false
             ts2 = setStimManager(ts, setCoherence(setDur(setSideDisplay(getStimManager(ts),.5),10),1));
             p=addTrainingStep(p,setReinforcementParam(ts2,'reinforcementManager',rm));

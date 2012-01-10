@@ -198,6 +198,31 @@ end
 
 out = dots_movie*selectedContrast;
 
+pStr='';
+switch s.shapeMethod
+    case ''
+        %do nothing
+    case 'position'
+        if s.position>0 && length(trialRecords)>=2
+            thisSession = trialRecords(end).sessionNumber == [trialRecords.sessionNumber];
+            dets = [trialRecords.stimDetails];
+            thisShapedValue = [[dets.currentShapedValue] == s.position false];
+            nPerf=uint8(5);
+            [g, ~, pct] = checkCriterion(performanceCriterion(.8,nPerf),[],[],trialRecords(thisSession & thisShapedValue),false);
+            
+            if g
+                stimulus.position = s.position-.1;
+                updateSM = true;
+                s = stimulus;
+            end
+            
+            pStr=sprintf('(%g%%)',round(100*pct));
+        end
+        details.currentShapedValue=s.position;
+    otherwise
+        error('unrecognized shapeMethod')
+end
+
 shift = round((s.position-.5)*s.screen_width/2);
 switch dotDirection
     case -1 %static
@@ -256,5 +281,5 @@ preResponseStim.punishResponses=false;
 if (strcmp(trialManagerClass,'nAFC') || strcmp(trialManagerClass,'goNoGo')) && details.correctionTrial
     text='correction trial!';
 else
-    text=sprintf('coherence: %g dot_size: %g contrast: %g speed: %g',selectedCoherence,selectedDotSize,selectedContrast,selectedSpeed);
+    text=sprintf('shaping: %g%s coherence: %g dot_size: %g contrast: %g speed: %g',details.currentShapedValue,pStr,selectedCoherence,selectedDotSize,selectedContrast,selectedSpeed);
 end

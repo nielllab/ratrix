@@ -9,6 +9,10 @@ else % a is an old version
     if ~isfield(a,'position')
         a.position=.5;
     end
+    
+    if ~isfield(a,'shapeMethod')
+        a.shapeMethod=[];
+    end
         
     a=orderfields(a,struct(coherentDots));
     

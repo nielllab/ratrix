@@ -67,10 +67,17 @@ if warnStatus
         '''containedForcedRewards'',''didStochasticResponse'' and ''didHumanResponse'' in trialRecords to remove this warning']);
 end
 
-which= trialsThisStep & ~stochastic & ~humanResponse & ~forcedRewards;
+dets=[trialRecords.stimDetails];
+correction=[dets.correctionTrial];
+
+which= trialsThisStep & ~stochastic & ~humanResponse & ~forcedRewards & ~correction;
 
 % modified to allow human responses to count towards graduation (performanceCriterion)
-% which= trialsThisStep & ~stochastic & ~forcedRewards;
+% which= trialsThisStep & ~stochastic & ~forcedRewards & ~correction;
+
+if all(humanResponse)
+    warning('you are probably testing with the keyboard and we are throwing out those responses and you are confused')
+end
 
 [graduate whichCriteria correct]=aboveThresholdPerformance(c.consecutiveTrials,c.pctCorrect,trialRecords(which));
 
@@ -99,7 +106,7 @@ else
 end
 
 if isscalar(c.consecutiveTrials) && c.consecutiveTrials<=length(correct)
-    pct = sum(correct(end-c.consecutiveTrials+1:end))/c.consecutiveTrials;
+    pct = sum(correct(end-c.consecutiveTrials+1:end))/double(c.consecutiveTrials);
 else
     pct = sum(correct)/length(correct);
 end

@@ -232,8 +232,7 @@ switch s.shapeMethod
                 end
             end            
             
-            nPerf=uint8(50);
-            [g, ~, pct] = checkCriterion(performanceCriterion(.8,nPerf),[],[],trialRecords(thisSession & thisShapedValue),false);
+            [g, ~, pct] = checkCriterion(performanceCriterion(.8,uint8(50)),[],[],trialRecords(thisSession & thisShapedValue),false);
             
             if g
                 stimulus.position = s.position-.1;

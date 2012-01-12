@@ -67,8 +67,17 @@ if warnStatus
         '''containedForcedRewards'',''didStochasticResponse'' and ''didHumanResponse'' in trialRecords to remove this warning']);
 end
 
-dets=[trialRecords.stimDetails];
-correction=[dets.correctionTrial];
+try
+    dets=[trialRecords.stimDetails];
+    correction=[dets.correctionTrial];
+catch %stimDetails may have changed
+    correction=false(1,length(trialRecords));
+    for i=1:length(trialRecords)
+        try %stimDetails.correctionTrial may not exist (and for sure won't on the last one, the current trial)
+            correction(i)=trialRecords(i).stimDetails.correctionTrial;
+        end
+    end
+end
 
 which= trialsThisStep & ~stochastic & ~humanResponse & ~forcedRewards & ~correction;
 
@@ -106,7 +115,10 @@ else
 end
 
 if isscalar(c.consecutiveTrials) && c.consecutiveTrials<=length(correct)
-    pct = sum(correct(end-c.consecutiveTrials+1:end))/double(c.consecutiveTrials);
+    pct = sum(correct(end-double(c.consecutiveTrials)+1:end))/double(c.consecutiveTrials);
+    %the first cast of c.consecutiveTrials is necessary due to a matlab bug
+    %see request 1-GC4PFP
+    % http://www.mathworks.com/support/service_requests/Service_Request_Detail.do?ID=578687
 else
     pct = sum(correct)/length(correct);
 end

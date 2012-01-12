@@ -68,8 +68,13 @@ if warnStatus
 end
 
 try
-    dets=[trialRecords.stimDetails];
-    correction=[dets.correctionTrial];
+    dets=[trialRecords.stimDetails]; % will lose last one (current trial), cuz its stimDetails is []
+    correction=[[dets.correctionTrial] false];
+    
+    if length(correction)~=length(trialRecords)
+        error('huh?')
+    end
+    
 catch %stimDetails may have changed
     correction=false(1,length(trialRecords));
     for i=1:length(trialRecords)

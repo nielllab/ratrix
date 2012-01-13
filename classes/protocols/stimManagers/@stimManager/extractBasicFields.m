@@ -59,9 +59,9 @@ bloat=false;
 [out.criterionClass compiledLUT]                             =extractFieldAndEnsure(trialRecords,{'criterionClass'},'scalarLUT',compiledLUT);
 [out.reinforcementManagerClass compiledLUT]                  =extractFieldAndEnsure(trialRecords,{'reinforcementManagerClass'},'scalarLUT',compiledLUT);
 
-try
-[out.scaleFactor compiledLUT]                                =extractFieldAndEnsure(trialRecords,{'scaleFactor'},'equalLengthVects',compiledLUT);
-[out.type compiledLUT]                                       =extractFieldAndEnsure(trialRecords,{'type'},'mixed',compiledLUT);
+try %these are currently showing up all nans, why?
+    [out.scaleFactor compiledLUT]                                =extractFieldAndEnsure(trialRecords,{'scaleFactor'},'equalLengthVects',compiledLUT);
+    [out.type compiledLUT]                                       =extractFieldAndEnsure(trialRecords,{'type'},'mixed',compiledLUT);
 catch e
     getReport(e)
     warning('bailing on scaleFactor and type')
@@ -86,18 +86,25 @@ end
 % need a try-catch here because this is potentially dangerous (stimDetails may not be the same for all trials, in which case this will error
 % from the vector indexing
 try
-    if strcmp(LUTlookup(compiledLUT,unique(out.trialManagerClass)),'nAFC')
+    if strcmp(LUTlookup(compiledLUT,unique(out.trialManagerClass)),'nAFC') %this is failing -- compiledLUT is empty and we're getting "23" for unique TM class!  thus correction trials is always nan
         [out.correctionTrial compiledLUT]                            =extractFieldAndEnsure(trialRecords,{'stimDetails','correctionTrial'},'scalar',compiledLUT);
     else
         out.correctionTrial=ones(1,length(trialRecords))*nan;
     end
 catch
     out.correctionTrial=ones(1,length(trialRecords))*nan;
-end    
+end
+
+try
+    [out.currentShapedValue compiledLUT]                     =extractFieldAndEnsure(trialRecords,{'stimDetails','currentShapedValue'},'scalar',compiledLUT);
+catch
+    out.currentShapedValue=nan(1,length(trialRecords));
+end
+
 % 1/14/09 - added numRequestLicks and firstILI
 [out.numRequests compiledLUT]                                =extractFieldAndEnsure(trialRecords,{},'numRequests',compiledLUT);
 [out.firstIRI compiledLUT]                                   =extractFieldAndEnsure(trialRecords,{},'firstIRI',compiledLUT);
-[out.responseTime compiledLUT]                               =extractFieldAndEnsure(trialRecords,{},'responseTime',compiledLUT);
+[out.responseTime compiledLUT]                               =extractFieldAndEnsure(trialRecords,{},'responseTime',compiledLUT); %currently showing up all nans, why?
 [out.actualRewardDuration compiledLUT]                       =extractFieldAndEnsure(trialRecords,{},'actualRewardDuration',compiledLUT);
 [out.proposedRewardDuration compiledLUT]                       =extractFieldAndEnsure(trialRecords,{},'proposedRewardDuration',compiledLUT);
 [out.proposedPenaltyDuration compiledLUT]                       =extractFieldAndEnsure(trialRecords,{},'proposedPenaltyDuration',compiledLUT);
@@ -121,12 +128,12 @@ if isfield(x,'responseWindowMs') && ~isempty(x.responseWindowMs) && ~isinf(x.res
     [out.preResponseStartRaw compiledLUT]= extractFieldAndEnsure(trialRecords,{},'preResponseStartRaw',compiledLUT);
     [out.discrimStartRaw compiledLUT]= extractFieldAndEnsure(trialRecords,{},'discrimStartRaw',compiledLUT);
     [out.trialStartRaw compiledLUT]= extractFieldAndEnsure(trialRecords,{},'trialStartRaw',compiledLUT);
-
-    [out.expectedPreRequestDurSec compiledLUT]= extractFieldAndEnsure(trialRecords,{},'expectedPreRequestDurSec',compiledLUT);     
+    
+    [out.expectedPreRequestDurSec compiledLUT]= extractFieldAndEnsure(trialRecords,{},'expectedPreRequestDurSec',compiledLUT);
     [out.responseWindowStartSec compiledLUT]= extractFieldAndEnsure(trialRecords,{},'responseWindowStartSec',compiledLUT);
     [out.responseWindowStopSec compiledLUT]= extractFieldAndEnsure(trialRecords,{},'responseWindowStopSec',compiledLUT);
     [out.discrimStart compiledLUT] = extractFieldAndEnsure(trialRecords,{},'discrimStart',compiledLUT); % prob want this too
-
+    
 else
     % this may error if rats run on something else after a goNoGo task... leaving the
     %field undefined... might have to define cells of nan's for all rats,
@@ -134,8 +141,8 @@ else
     %[out.lickTimes]=nans
     %[out.discrimStart]=nans
 end
-    
-    
+
+
 % out.numRequests=ones(1,length(trialRecords))*nan;
 % for i=1:length(trialRecords)
 %     if isfield(trialRecords(i),'responseDetails') && isfield(trialRecords(i).responseDetails,'tries') && ...
@@ -151,7 +158,7 @@ end
 %     end
 % end
 try
-verifyAllFieldsNCols(out,length(trialRecords));
+    verifyAllFieldsNCols(out,length(trialRecords));
 catch
     keyboard
 end
@@ -282,6 +289,3 @@ else
     out=-1;
 end
 end % end function
-
-
-

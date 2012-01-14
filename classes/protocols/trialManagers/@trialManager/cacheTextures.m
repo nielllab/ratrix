@@ -37,7 +37,7 @@ switch strategy
         
     case 'noCache'
         %pass
-    case 'expert'
+    case {'expert','dynamic'}
         % no caching of textures should happen
     otherwise
         error('unrecognized strategy')

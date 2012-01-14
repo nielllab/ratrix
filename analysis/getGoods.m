@@ -14,12 +14,18 @@ if ~exist('type', 'var') || isempty(type)
 end
 
 if ismember('correctionTrial',fields(d))
+    if all(isnan(d.correctionTrial))
+        warning('correctionTrial is all nans -- pretending no correction trials')
+    end
     CTs=(d.correctionTrial==1);
 else
     CTs=zeros(size(d.correct)); %freeDrinks never defined this
 end
 
 if ismember('responseTime', fields(d))
+    if all(isnan(d.correctionTrial))
+        warning('responseTime is all nans -- pretending no tooFasts')
+    end
     tooFast=d.responseTime<0.02; % remove those too fast to be a rat (water block)
 else
     tooFast=zeros(size(d.date));

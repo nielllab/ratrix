@@ -64,7 +64,7 @@ else
             strategy = 'textureCache';
             loop = 1;
         case 'dynamic'
-            error('dynamic type not yet implemented')
+            strategy='dynamic';
         case 'expert' %callback stimManager.drawExpertFrame() to call ptb drawing methods, but leave frame labels, framedrop corner, and 'drawingfinished' to stimOGL
             strategy='expert';
         otherwise

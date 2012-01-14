@@ -2,7 +2,18 @@ function a = loadobj(a)
 if isa(a,'coherentDots')
     % do nothing
 else % a is an old version
-    a.sideDisplay=1;
+    if ~isfield(a,'sideDisplay')
+        a.sideDisplay=1;
+    end
+    
+    if ~isfield(a,'position')
+        a.position=.5;
+    end
+    
+    if ~isfield(a,'shapeMethod')
+        a.shapeMethod='';
+    end
+        
     a=orderfields(a,struct(coherentDots));
     
     % a = class(a,'coherentDots');%,stimManager);  %according to doc (page 1-66 of http://www.mathworks.com/help/pdf_doc/matlab/pre-version_7.6_oop.pdf),
@@ -15,8 +26,11 @@ else % a is an old version
         struct(a.stimManager).scaleFactor,struct(a.stimManager).maxWidth,struct(a.stimManager).maxHeight, ...
         a.pctCorrectionTrials,a.replayMode,double(struct(a.stimManager).interTrialLuminance)/double(intmax('uint8')));
     
+    dots=setShapeMethod(setPosition(setSideDisplay(dots,a.sideDisplay),a.position),a.shapeMethod);
+    
     check(struct(dots),a);
     a=dots;
+end
 end
 
 function check(f1,f2)
@@ -37,4 +51,5 @@ for i=1:length(f)
     else
         check(struct(a),struct(b));
     end
+end
 end

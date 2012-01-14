@@ -57,21 +57,31 @@ adus={'n5rt','n5rn','n5lt','n8lt'};
 for i=1:length(subs)
     [p t]=getProtocolAndStep(subs{i});
     if ~isempty(p)
-        ts=getTrainingStep(p,getNumTrainingSteps(p));
-        
-        if any(getID(subs{i})=='l')
-            ts = setTrialManager(ts, setResponseWindow(getTrialManager(ts), [300 inf]));
+        for j=1:getNumTrainingSteps(p)
+            ts=getTrainingStep(p,j);
+            
+            if j==getNumTrainingSteps(p) || j==getNumTrainingSteps(p)-1
+                
+                if any(getID(subs{i})=='l') || true
+                    ts = setTrialManager(ts, setResponseWindow(getTrialManager(ts), [800 inf]));
+                end
+                
+                if false
+                    ts = setReinforcementParam(ts,'reinforcementManager',rm);
+                    ts = setCriterion(ts,performanceCriterion(.85,int32(200)));
+                end
+                
+                p = changeStep(p, ts, uint8(j));
+                
+                if false
+                    ts2 = setStimManager(ts, setSideDisplay(getStimManager(ts),1));
+                    p=addTrainingStep(p, setCriterion(ts2,repeatIndefinitely));
+                end
+                
+                [~, r]=setProtocolAndStep(subs{i},p,true,true,false,t,r,comment,auth);
+            end
         end
         
-        ts = setReinforcementParam(ts,'reinforcementManager',rm);
-        ts = setCriterion(ts,performanceCriterion(.85,int32(200)));
-        p = changeStep(p, ts, uint8(getNumTrainingSteps(p)));
-        
-        ts2 = setStimManager(ts, setSideDisplay(getStimManager(ts),1));
-        p=addTrainingStep(p, setCriterion(ts2,repeatIndefinitely));
-
-        [~, r]=setProtocolAndStep(subs{i},p,true,true,false,t,r,comment,auth);
-                    
         if false
             ts2 = setStimManager(ts, setCoherence(setDur(setSideDisplay(getStimManager(ts),.5),10),1));
             p=addTrainingStep(p,setReinforcementParam(ts2,'reinforcementManager',rm));

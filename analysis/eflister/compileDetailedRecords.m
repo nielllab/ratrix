@@ -1,6 +1,5 @@
 %should replace compileTrialRecords, but of course will break lots of graphing -- will need to update graphing code
 function compileDetailedRecords(server_name,ids,recompile,source,destination)
-
 %compileDetailedRecords({'demo1'},'C:\Documents and Settings\rlab\Desktop\ratrixData\PermanentTrialRecordStore','C:\Documents and Settings\rlab\Desktop\ratrixData\CompiledTrialRecords');
 
 % switch type
@@ -163,6 +162,8 @@ for i=1:length(ids)
             'response',...
             'responseTime',...
             'actualRewardDuration'};
+        %error('need to incorporate currentShapedValue if available...')
+        
         try
             [compiledTrialRecords compiledDetails compiledLUT]=loadDetailedTrialRecords(compiledFile,compiledRange,fieldNames);
         catch ex
@@ -171,7 +172,7 @@ for i=1:length(ids)
             % typically this means that old-style compiledRecords exist for this subject
             warning('error loading compiledRecord for %s, most likely because the compiled file is old-style for this subject - skipping!',ids{i});
             continue;
-        end            
+        end
         % set expectedTrialNumber
         expectedTrialNumber = compiledTrialRecords.trialNumber(end) + 1;
         % set classes
@@ -191,12 +192,12 @@ for i=1:length(ids)
         % why do this?
         for k=1:size(classes,2)
             classes{3,k}=[];
-        end      
+        end
         [matches tokens] = regexpi(subjectFiles{i}{j}, 'trialRecords_(\d+)-(\d+).*\.mat', 'match', 'tokens');
         rng=[str2num(tokens{1}{1}) str2num(tokens{1}{2})];
         if expectedTrialNumber ~= rng(1)
-%             dispStr=sprintf('skipping %d-%d where expected was %d\n',rng(1),rng(2),expectedTrialNumber);
-%             disp(dispStr);
+            %             dispStr=sprintf('skipping %d-%d where expected was %d\n',rng(1),rng(2),expectedTrialNumber);
+            %             disp(dispStr);
             continue;
         end
         addedRecords=true; % if we ever got passed the skip, then we added records and thus can delete compiledFile
@@ -214,8 +215,7 @@ for i=1:length(ids)
             fieldsInLUT=[];
         end
         tr=tr.trialRecords;
-
-
+        
         printFrameDropReports=false;
         if printFrameDropReports
             frameDropDir=fullfile(compiledRecordsDirectory,'framedropReports',ids{i});
@@ -229,38 +229,38 @@ for i=1:length(ids)
             end
             
             try
-            trialNums=[tr.trialNumber];
-            [frameDropFID frameDropMsg] = fopen(fullfile(frameDropDir,['framedrops.' ids{i} '.trials.' sprintf('%d-%d',trialNums(1),trialNums(end)) '.txt']), 'wt');
-
-            if frameDropFID==-1 || ~isempty(frameDropMsg)
-                frameDropMsg
-                error('couldn''t open framedrop file')
-            end
-            
-            for trNum=1:length(tr)
-                for phNum=1:length(tr(trNum).phaseRecords)
-                    thisRec=tr(trNum).phaseRecords(phNum).responseDetails;
-                    fprintf(frameDropFID,'framedrop report for trial %d phase %d:\n',trNum,phNum);
-                    
-                    for mNum=1:length(thisRec.misses)
-                        printDroppedFrameReport(frameDropFID,thisRec.missTimestamps(mNum),thisRec.misses(mNum),thisRec.missIFIs(mNum),tr(trNum).station.ifi,'caught');
-                    end
-                    if length(thisRec.misses) ~= length(thisRec.missTimestamps) || length(thisRec.misses) ~= length(thisRec.missIFIs)
-                        fprintf(frameDropFID,'hmm, %d misses, but %d miss timestamps and %d miss ifis\n',length(thisRec.misses),length(thisRec.missTimestamps),length(thisRec.missIFIs));
-                    end
-                    
-                    for mNum=1:length(thisRec.apparentMisses)
-                        printDroppedFrameReport(frameDropFID,thisRec.apparentMissTimestamps(mNum),thisRec.apparentMisses(mNum),thisRec.apparentMissIFIs(mNum),tr(trNum).station.ifi,'unnoticed');
-                    end                    
-                    if length(thisRec.apparentMisses) ~= length(thisRec.apparentMissTimestamps) || length(thisRec.apparentMisses) ~= length(thisRec.apparentMissIFIs)
-                        fprintf(frameDropFID,'hmm, %d apparent misses, but %d apparent miss timestamps and %d apparent miss ifis\n',length(thisRec.apparentMisses),length(thisRec.apparentMissTimestamps),length(thisRec.apparentMissIFIs));
-                    end
-                    
-                    fprintf(frameDropFID,'\n\n');
+                trialNums=[tr.trialNumber];
+                [frameDropFID frameDropMsg] = fopen(fullfile(frameDropDir,['framedrops.' ids{i} '.trials.' sprintf('%d-%d',trialNums(1),trialNums(end)) '.txt']), 'wt');
+                
+                if frameDropFID==-1 || ~isempty(frameDropMsg)
+                    frameDropMsg
+                    error('couldn''t open framedrop file')
                 end
-                fprintf(frameDropFID,'*********end of trial*******\n\n');
-            end
-            fclose(frameDropFID);
+                
+                for trNum=1:length(tr)
+                    for phNum=1:length(tr(trNum).phaseRecords)
+                        thisRec=tr(trNum).phaseRecords(phNum).responseDetails;
+                        fprintf(frameDropFID,'framedrop report for trial %d phase %d:\n',trNum,phNum);
+                        
+                        for mNum=1:length(thisRec.misses)
+                            printDroppedFrameReport(frameDropFID,thisRec.missTimestamps(mNum),thisRec.misses(mNum),thisRec.missIFIs(mNum),tr(trNum).station.ifi,'caught');
+                        end
+                        if length(thisRec.misses) ~= length(thisRec.missTimestamps) || length(thisRec.misses) ~= length(thisRec.missIFIs)
+                            fprintf(frameDropFID,'hmm, %d misses, but %d miss timestamps and %d miss ifis\n',length(thisRec.misses),length(thisRec.missTimestamps),length(thisRec.missIFIs));
+                        end
+                        
+                        for mNum=1:length(thisRec.apparentMisses)
+                            printDroppedFrameReport(frameDropFID,thisRec.apparentMissTimestamps(mNum),thisRec.apparentMisses(mNum),thisRec.apparentMissIFIs(mNum),tr(trNum).station.ifi,'unnoticed');
+                        end
+                        if length(thisRec.apparentMisses) ~= length(thisRec.apparentMissTimestamps) || length(thisRec.apparentMisses) ~= length(thisRec.apparentMissIFIs)
+                            fprintf(frameDropFID,'hmm, %d apparent misses, but %d apparent miss timestamps and %d apparent miss ifis\n',length(thisRec.apparentMisses),length(thisRec.apparentMissTimestamps),length(thisRec.apparentMissIFIs));
+                        end
+                        
+                        fprintf(frameDropFID,'\n\n');
+                    end
+                    fprintf(frameDropFID,'*********end of trial*******\n\n');
+                end
+                fclose(frameDropFID);
             catch ex
                 disp(['CAUGHT ERROR: ' getReport(ex,'extended')])
                 if frameDropFID~=-1
@@ -325,16 +325,16 @@ for i=1:length(ids)
                     classes{3,end}=[];
                     ind=size(classes,2);
                 end
-                 % this confusing term just means that we set the indices of trialRecords that belong to this class
-                 % to start indexing at 1, instead of wherever they might fall on the session's multiple trainingSteps
+                % this confusing term just means that we set the indices of trialRecords that belong to this class
+                % to start indexing at 1, instead of wherever they might fall on the session's multiple trainingSteps
                 classes{3,ind}(end+1)=k-(thisTsInds(1)-1);
             end
-
+            
             % it is very important that this function keep the same fieldNames in newBasicRecs as they were in trialRecords
             % because otherwise we don't know which fields are using the sessionLUT
             [newBasicRecs compiledLUT]=extractBasicFields(sm,tr(thisTsInds),compiledLUT);
             verifyAllFieldsNCols(newBasicRecs,length(tr(thisTsInds)));
-
+            
             % 12/18/08 - now update newBasicRecs as appropriate (shift LUT indices by the length of compiledLUT)
             % then add sessionLUT to compiledLUT
             newBasicRecsToUpdate=intersect(fieldsInLUT,fields(newBasicRecs));
@@ -346,7 +346,7 @@ for i=1:length(ids)
                     % exceeds MATLAB's maximum name length of 63 characters and has been truncated to
                     % 'trialManager.trialManager.reinforcementManager.reinforcementMan'.
                     % - maybe separate each element of fieldsInLUT (a fieldPath) into each step, and then build thisFieldValue from that
-
+                    
                     % 1/20/09 - split fieldsInLUT using \. as the delimiter, and then loop through each "step" in the path
                     % this addresses the comment from 1/2/09
                     pathToThisField = regexp(newBasicRecsToUpdate{n},'\.','split');
@@ -356,8 +356,8 @@ for i=1:length(ids)
                     end
                     thisFieldValues = sessionLUT(thisField);
                 catch
-%                     warningStr=sprintf('could not find %s in newBasicRecs - skipping',newBasicRecsToUpdate{n});
-%                     warning(warningStr);
+                    %                     warningStr=sprintf('could not find %s in newBasicRecs - skipping',newBasicRecsToUpdate{n});
+                    %                     warning(warningStr);
                     continue;
                 end
                 [indices compiledLUT] = addOrFindInLUT(compiledLUT, thisFieldValues);
@@ -365,20 +365,19 @@ for i=1:length(ids)
                     evalStr=sprintf('newBasicRecs.%s(nn) = indices(nn);',newBasicRecsToUpdate{n});
                     eval(evalStr); % set new indices
                 end
-    %             newBasicRecs.(fieldsInLUT{n}) = indices; % set new indices based on integrated LUT
+                %             newBasicRecs.(fieldsInLUT{n}) = indices; % set new indices based on integrated LUT
             end
             
             if isempty(compiledTrialRecords)
                 compiledTrialRecords=newBasicRecs;
             else
                 try
-                compiledTrialRecords=concatAllFields(compiledTrialRecords,newBasicRecs);
+                    compiledTrialRecords=concatAllFields(compiledTrialRecords,newBasicRecs);
                 catch
                     keyboard
                 end
             end
             for c=1:size(classes,2)
-
                 if length(classes{3,c})>0 %prevent subtle bug that is easy to write into extractDetailFields -- if you send zero trials to them, they may try to look deeper than the top level of fields, but they won't exist ('MATLAB:nonStrucReference') -- see example in crossModal.extractDetailFields()
                     %no way to guarantee that a stim manager's calcStim will make a stimDetails
                     %that includes all info its super class would have, so cannot call this
@@ -392,12 +391,10 @@ for i=1:length(ids)
                     [newRecs compiledLUT]=extractDetailFields(classes{2,c},colsFromAllFields(newBasicRecs,colInds),tr(thisTsInds),LUTparams);
                     % if extractDetailFields returns a stim-specific LUT, add it to our main compiledLUT
                     % 5/14/09 - this already happens b/c we pass in the compiledLUT to extractDetailFields!
-%                     if ~isempty(newLUT)
-%                         compiledLUT = [compiledLUT newLUT];
-%                     end
-
-
-
+                    %                     if ~isempty(newLUT)
+                    %                         compiledLUT = [compiledLUT newLUT];
+                    %                     end
+                    
                     verifyAllFieldsNCols(newRecs,length(classes{3,c}));
                     bailed=isempty(fieldnames(newRecs)); %extractDetailFields bailed for some reason (eg unimplemented or missing fields from old records)
                     
@@ -483,14 +480,13 @@ for i=1:length(ids)
         dispStr=sprintf('nothing to do for %s',ids{i});
         disp(dispStr);
     end
-   
-
-%     doPlot=true;
-%     if doPlot
-%         figure
-%         tmp=tmp(:,b);
-%         plot(tmp(1,:),tmp(2,:))
-%     end
+    
+    %     doPlot=true;
+    %     if doPlot
+    %         figure
+    %         tmp=tmp(:,b);
+    %         plot(tmp(1,:),tmp(2,:))
+    %     end
 end % end for each subject loop
 
 if ~exist('destination','var') || isempty(destination)
@@ -509,7 +505,7 @@ if isscalar(a) && isscalar(b) && isstruct(a) && isstruct(b)
     if all(ismember(fieldnames(b),fn)) && all(ismember(fn,fieldnames(b)))
         for k=1:length(fn)
             try
-            numRowsBNeeds=size(a.(fn{k}),1)-size(b.(fn{k}),1);
+                numRowsBNeeds=size(a.(fn{k}),1)-size(b.(fn{k}),1);
             catch
                 ple
                 keyboard
@@ -517,7 +513,7 @@ if isscalar(a) && isscalar(b) && isstruct(a) && isstruct(b)
             if iscell(b.(fn{k}))
                 if ~iscell(a.(fn{k})) && all(isnan(a.(fn{k})))
                     a.(fn{k})=cell(1,length(a.(fn{k})));
-
+                    
                     %turn nans into a cell
                     %a.(fn{k});
                     %warning('that point where its slow')
@@ -525,18 +521,18 @@ if isscalar(a) && isscalar(b) && isstruct(a) && isstruct(b)
                     %a.(fn{k})=x;
                     %keyboard
                     %[a.(fn{k}){:,end+1:end+size(b.(fn{k}),2)}]=deal(b.(fn{k}));
-
+                    
                     % %                     %other way
                     % %                     temp=cell(1,length(a.(fn{k}))+size(b.(fn{k}),2));
                     % %                     [temp{end-size(b.(fn{k}),2)+1:end}]=deal(b.(fn{k}){:});
                     % %                     a.(fn{k})=temp;
-
-
+                    
+                    
                 else
                     if numRowsBNeeds~=0
                         error('nan padding cells not yet implemented')
                     end
-
+                    
                 end
                 [a.(fn{k}){:,end+1:end+size(b.(fn{k}),2)}]=deal(b.(fn{k}));
             elseif ~iscell(a.(fn{k})) && ~iscell(b.(fn{k})) %anything else to check?  %isarray(a.(fn{k})) && isarray(b.(fn{k}))
@@ -573,9 +569,7 @@ else
     b
     error('a and b have to both be scalar struct')
 end
-
 end
-
 
 function recsToUpdate=getIntersectingFields(fieldsInLUT,recs)
 recsToUpdate={};
@@ -595,5 +589,4 @@ for i=1:length(fieldsInLUT)
         recsToUpdate{end+1}=fieldsInLUT{i};
     end
 end
-
 end

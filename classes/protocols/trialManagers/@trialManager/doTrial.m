@@ -136,7 +136,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             % test must a single string now - dont bother w/ complicated stuff here
 			if ~ischar(text)
 				error('text must be a string');
-			end
+            end            
             
             switch trialManager.displayMethod
                 case 'ptb'

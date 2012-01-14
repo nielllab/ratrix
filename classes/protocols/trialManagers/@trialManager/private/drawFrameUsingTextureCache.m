@@ -2,13 +2,13 @@ function drawFrameUsingTextureCache(tm, window, i, frameNum, stimSize, lastI, do
     xOrigTextPos, yNewTextPos, strategy,floatprecision)
 
 if window>=0
-    if i>0 && i <= stimSize
-        if i~=lastI || (dontclear~=1) %only draw if texture different from last one, or if every flip is redrawn
-            if strcmp(strategy,'noCache')
+    if (i>0 && i <= stimSize) || strcmp(strategy,'dynamic')
+        if i~=lastI || dontclear~=1 || strcmp(strategy,'dynamic') %only draw if texture different from last one, or if every flip is redrawn
+            if any(ismember(strategy,{'noCache','dynamic'}))
                 texture=Screen('MakeTexture', window, texture,0,0,floatprecision); %need floatprecision=0 for remotedesktop
             end
             Screen('DrawTexture', window, texture,[],destRect,[],filtMode);
-            if strcmp(strategy,'noCache')
+            if any(ismember(strategy,{'noCache','dynamic'}))
                 Screen('Close',texture);
             end
         else

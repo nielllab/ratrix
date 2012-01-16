@@ -195,7 +195,7 @@ end
 
 %keyboard %error: all d.correctionTrial is nan!  why?  must fix!
 %it's cuz of extractBasicFields line 89
-%note that they are making it into the compiledDetails of the compiled file -- how?
+%note that they are making it into the compiledDetails of the compiled file -- how? extractDetailFields...
 if ~all(isnan(d.correctionTrial))
     error('got some correction trials?')
 end

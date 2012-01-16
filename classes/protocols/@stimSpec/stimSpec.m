@@ -216,7 +216,7 @@ switch nargin
 
         if (isempty(spec.scaleFactor) || isempty(spec.stimulus)) && ~strcmp(spec.phaseType,'reinforced')  && ~strcmp(spec.phaseType,'earlyPenalty') && ~strcmp(spec.phaseType,'itl') 
             error('empty scaleFactor and stimulus allowed only for reinforced phaseType');
-            %should allow expert/dynamic to have empty stim
+            %should allow expert/dynamic to have empty stim, except this is currently how the destrec is set...
         end
         
         stimLen=size(spec.stimulus,3);

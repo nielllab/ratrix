@@ -13,6 +13,8 @@ switch nargin
         end
     case 5
         s = varargin{1};
+        s.initialPos=nan;
+        s.mouseIndices=nan;
         s = class(s,'ball',stimManager(varargin{2},varargin{3},varargin{4},varargin{5}));
     otherwise
         error('Wrong number of input arguments')

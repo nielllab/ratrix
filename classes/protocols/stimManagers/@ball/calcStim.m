@@ -6,7 +6,7 @@ indexPulses=[];
 imagingTasks=[];
 
 LUT=makeStandardLUT(LUTbits);
-updateSM=false;
+updateSM=true;
 
 [resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60],32,getMaxWidth(stimulus),getMaxHeight(stimulus));
 
@@ -22,7 +22,18 @@ if ~isempty(trialRecords) && length(trialRecords)>=2
 else
     lastRec=[];
 end
-details=struct;
+stimulus.initialPos=[width height]'/2;
+details.track=[stimulus.initialPos nan(2,60*60)];
+
+if isLinux
+    error('not yet written')
+    
+    [a,b,c]=GetMouseIndices; %use this to get non-virtual slave indices (http://tech.groups.yahoo.com/group/psychtoolbox/message/13259)
+    stimulus.mouseIndices=nan;
+end
+
+mouse(stimulus);
+
 [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass,allowRepeats);
 
 type='dynamic';

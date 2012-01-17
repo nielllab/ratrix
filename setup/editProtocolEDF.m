@@ -66,7 +66,7 @@ for i=1:length(subs)
             
         if false
             if any(getID(subs{i})=='l')
-                ts = setTrialManager(ts, setResponseWindow(getTrialManager(ts), [300 inf]));
+                ts = setTrialManager(ts, setResponseWindow(getTrialManager(ts), [800 inf]));
             end
             
             ts = setReinforcementParam(ts,'reinforcementManager',rm);

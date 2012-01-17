@@ -4,11 +4,12 @@ function drawFrameUsingTextureCache(tm, window, i, frameNum, stimSize, lastI, do
 if window>=0
     if (i>0 && i <= stimSize) || strcmp(strategy,'dynamic')
         if i~=lastI || dontclear~=1 || strcmp(strategy,'dynamic') %only draw if texture different from last one, or if every flip is redrawn
-            if any(ismember(strategy,{'noCache','dynamic'}))
+            loc = strcmp(strategy,'dynamic') || strcmp(strategy,'noCache');
+            if loc % any(ismember(strategy,{'noCache','dynamic'})) %this ismember is slow
                 texture=Screen('MakeTexture', window, texture,0,0,floatprecision); %need floatprecision=0 for remotedesktop
             end
             Screen('DrawTexture', window, texture,[],destRect,[],filtMode);
-            if any(ismember(strategy,{'noCache','dynamic'}))
+            if loc % any(ismember(strategy,{'noCache','dynamic'})) %this ismember is slow
                 Screen('Close',texture);
             end
         else

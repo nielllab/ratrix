@@ -562,7 +562,7 @@ while ~done && ~quit;
                         case 'noCache'
                             thisFrame=squeeze(stim(:,:,i));
                         case 'dynamic'
-                            [thisFrame doFramePulse expertCache phaseRecords(phaseNum).dynamicDetails textLabel i indexPulse]=moreStim(stimManager,stim,i,textLabel,destRect,expertCache,scheduledFrameNum,tm.dropFrames,phaseRecords(phaseNum).dynamicDetails);
+                            [thisFrame doFramePulse expertCache phaseRecords(phaseNum).dynamicDetails textLabel i indexPulse]=moreStim(stimManager,stim,i,textLabel,destRect,expertCache,scheduledFrameNum,tm.dropFrames,phaseRecords(phaseNum).dynamicDetails,trialRecords);
                             [floatprecision2 thisFrame] = determineColorPrecision(tm, thisFrame, strategy);
                             if floatprecision~=floatprecision2
                                 error('dynamic floatprecision records will be inaccurate')

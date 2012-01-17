@@ -1,33 +1,42 @@
-function [out doFramePulse cache dynamicDetails textLabel i indexPulse]=moreStim(s,stim,i,textLabel,destRect,cache,scheduledFrameNum,dropFrames,dynamicDetails)
+function [out doFramePulse cache dynamicDetails textLabel i indexPulse]=moreStim(s,stim,i,textLabel,destRect,cache,scheduledFrameNum,dropFrames,dynamicDetails,trialRecords)
 
 %add red line goal for water
 
-[x,y] = mouse(s);
-i=i+1;
-if i>1
-    dynamicDetails.track(:,i)=dynamicDetails.track(:,i-1)+[x y]';
+if isempty(dynamicDetails)
+    dynamicDetails=trialRecords(end).stimDetails;
+    dynamicDetails.times=dynamicDetails.track;
 end
 
-relPos=dynamicDetails.track(:,1:i)-dynamicDetails.track(:,i)+s.initialPos;
+p = deal(mouse(s));
+
+x=p(1);
+y=p(2);
+
+i=i+1;
+if i>size(dynamicDetails.track,2)
+    error('reallocate?')
+elseif i>1
+    dynamicDetails.track(:,i)=[x y]';
+    if ~IsOSX
+        dynamicDetails.track(:,i) = dynamicDetails.track(:,i) + dynamicDetails.track(:,i-1) - s.initialPos;
+    end
+end
+
+relPos=dynamicDetails.track(:,1:i)-repmat(dynamicDetails.track(:,i)-s.initialPos,1,i);
 
 out=true(size(stim));
-cellfun(@draw,mat2cell(round(relPos),2,ones(1,i)));
-    function draw(p)
-        if all(p>0) && all(p<=size(out)')
-            out(p(1),p(2))=false;
-        end
-    end
 
-if false
-    out=rand(size(stim))>.5;
-    
-    border=10;
-    out([1:border end-border:end],:)=false;
-    out(:,[1:border end-border:end])=false;
-end
+relPos=round(relPos./repmat(getScaleFactor(s)',1,i));
+relPos=relPos(:,all(relPos>0 & relPos<=repmat(fliplr(size(out))',1,size(relPos,2))));
+out(sub2ind(size(out),relPos(2,:),relPos(1,:)))=false;
 
 doFramePulse = true;
 indexPulse = true;
 
-textLabel = num2str([destRect getScaleFactor(s) i x y]);
+dynamicDetails.times(i)=GetSecs;
+
+if false
+    textLabel = num2str([destRect getScaleFactor(s) i x y scheduledFrameNum]); %num2str is slow
+end
+
 end

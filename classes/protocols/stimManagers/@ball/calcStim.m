@@ -25,7 +25,7 @@ end
 stimulus.initialPos=[width height]'/2;
 details.track=[stimulus.initialPos nan(2,60*60)];
 
-if isLinux
+if IsLinux
     error('not yet written')
     
     [a,b,c]=GetMouseIndices; %use this to get non-virtual slave indices (http://tech.groups.yahoo.com/group/psychtoolbox/message/13259)

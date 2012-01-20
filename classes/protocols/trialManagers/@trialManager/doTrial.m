@@ -140,7 +140,12 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             
             switch trialManager.displayMethod
                 case 'ptb'
-                    [station trialRecords(trialInd).resolution trialRecords(trialInd).imagingTasks]=setResolutionAndPipeline(station,resolutions(resInd),imagingTasks);
+                    if ~isnan(resInd)
+                        newRes=resolutions(resInd);
+                    else
+                        newRes=[];
+                    end
+                    [station trialRecords(trialInd).resolution trialRecords(trialInd).imagingTasks]=setResolutionAndPipeline(station,newRes,imagingTasks);
                 case 'LED'
                     trialRecords(trialInd).resolution.width=uint8(1);
                     trialRecords(trialInd).resolution.height=uint8(1);

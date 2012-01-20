@@ -223,6 +223,11 @@ Screen('Screens');
 if window>0
     standardFontSize=11;
     oldFontSize = Screen('TextSize',window,standardFontSize);
+    if IsLinux
+        font = 'nimbus mono l';
+        font = 'palladio';
+         Screen('TextFont',window,font); %otherwise we get Couldn't select the requested font with the requested font settings from X11 system!
+    end
     [normBoundsRect, offsetBoundsRect]= Screen('TextBounds', window, 'TEST');
 end
 

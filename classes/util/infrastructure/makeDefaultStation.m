@@ -135,7 +135,7 @@ if a
     end
 end
 
-if ismac
+if ismac || IsLinux
     stationSpec.portSpec = int8(3);
 elseif ispc
     %do nothing

@@ -8,11 +8,12 @@ imagingTasks=[];
 LUT=makeStandardLUT(LUTbits);
 updateSM=true;
 
-[resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60],32,getMaxWidth(stimulus),getMaxHeight(stimulus));
-
-if isnan(resolutionIndex)
-    resolutionIndex=1;
+if IsLinux
+    depth=24;
+else
+    depth=32;
 end
+[resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60],depth,getMaxWidth(stimulus),getMaxHeight(stimulus));
 
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);
@@ -25,11 +26,21 @@ end
 stimulus.initialPos=[width height]'/2;
 details.track=[stimulus.initialPos nan(2,60*60)];
 
-if IsLinux
-    error('not yet written')
+stimulus.mouseIndices=[];
+if IsLinux    
+    [a,b,c]=GetMouseIndices; % http://tech.groups.yahoo.com/group/psychtoolbox/message/13259
     
-    [a,b,c]=GetMouseIndices; %use this to get non-virtual slave indices (http://tech.groups.yahoo.com/group/psychtoolbox/message/13259)
-    stimulus.mouseIndices=nan;
+    for i = 1:length(c) % any way to reliably determine which mouse is which?  ie, who is plugged in to which port?  locationID/interfaceID?
+        if isempty(strfind(c{i}.product,'Virtual')) && ~isempty(strfind(c{i}.product,'USB Optical Mouse')) && ~isempty(strfind(c{i}.usageName,'slave pointer'))        
+            stimulus.mouseIndices = [stimulus.mouseIndices c{i}.index];
+            c{i}.locationID
+            c{i}.interfaceID
+        end
+    end
+    
+    if length(stimulus.mouseIndices) ~= 2
+        error('didn''t find exactly 2 mice on linux')
+    end
 end
 
 mouse(stimulus);

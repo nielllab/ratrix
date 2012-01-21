@@ -14,7 +14,7 @@ if IsLinux
         
         % WTF, must be master?
     else
-        SetMouse(s.initialPos(1),s.initialPos(2));
+        SetMouse(s.initialPos(1),s.initialPos(2)); %good enough, actually? :)
     end
     
 else

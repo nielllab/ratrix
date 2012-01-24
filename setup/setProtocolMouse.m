@@ -40,11 +40,11 @@ eyeController=[];
 dropFrames=false;
 nafcTM=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,{'off'},dropFrames,'ptb','center'); %this percentCorrectionTrials should currently do nothing (need to fix)
 
-numDots=75;
+numDots=round(75/15);
 coherence=1;
-speed=.75;
+speed=.75*9;
 contrast=1;
-dotSize=5;
+dotSize=5*4;
 duration=10;
 textureSize=10*[w,h];
 zoom=[maxWidth maxHeight]./textureSize;
@@ -82,7 +82,7 @@ ts6 = trainingStep(lpTM  , ballSM, repeatIndefinitely()                  , noTim
 p=protocol('mouse',{ts1, ts2, ts3, ts4, ts5, ts6});
 
 if true
-    stepNum=uint8(6);
+    stepNum=uint8(4);
     subj=getSubjectFromID(r,subjIDs{1});
     [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolMouse','edf');
 else

@@ -7,7 +7,7 @@ if IsWin
     if rc==0 && isMACaddress(mac)
         success=true;
     end
-elseif IsOSX
+elseif IsOSX || IsLinux
         compinfo = Screen('Computer');
         if isfield(compinfo, 'MACAddress')
             mac = compinfo.MACAddress;

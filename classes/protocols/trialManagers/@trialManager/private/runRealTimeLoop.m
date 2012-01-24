@@ -32,8 +32,9 @@ labelFrames = 1;            %print a frame ID on each frame (makes frame calcula
 textType = getShowText(tm);
 showText = ~strcmp(textType,'off'); %whether or not to call draw text to print any text on screen
 
-
-Screen('Preference', 'TextRenderer', 0);  % consider moving to station.startPTB
+if ~IsLinux || true %for some reason causes trouble finding font, even though supposed to be OS-specific faster method (seems to be fixed now)
+    Screen('Preference', 'TextRenderer', 0);  % consider moving to station.startPTB
+end
 Screen('Preference', 'TextAntiAliasing', 0); % consider moving to station.startPTB
 Screen('Preference', 'TextAlphaBlending', 0);
 
@@ -223,6 +224,18 @@ Screen('Screens');
 if window>0
     standardFontSize=11;
     oldFontSize = Screen('TextSize',window,standardFontSize);
+    if IsLinux        
+        Screen('TextStyle', window, 0); %otherwise defaults to bold italic!?!          
+        
+        font = 'nimbus mono l';
+        font = 'palladio';
+        font = 'fixed';
+        font = '-urw-nimbus mono l-bold-o-normal--0-0-0-0-p-0-iso8859-1';
+        % font = '-*-fixed-*-*-*-*-*-*-*-*-*-*-*-*';
+        Screen('TextFont',window,font); %otherwise we get Couldn't select the requested font with the requested font settings from X11 system!        
+        
+        Screen('TextStyle', window, 0); %otherwise defaults to bold italic!?!   only works if textrender 1?     
+    end
     [normBoundsRect, offsetBoundsRect]= Screen('TextBounds', window, 'TEST');
 end
 

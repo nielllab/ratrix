@@ -17,3 +17,4 @@ end
 plot(diff(x(1,:)))
 hold on
 plot(x(2:3,:)')
+mean(diff(x(1,:)))

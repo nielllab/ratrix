@@ -31,7 +31,7 @@ else % a is an old version
         a.pctCorrectionTrials,a.replayMode,double(struct(a.stimManager).interTrialLuminance)/double(intmax('uint8')));
     
     dots=setShapeMethod(setPosition(setSideDisplay(dots,a.sideDisplay),a.position),a.shapeMethod);
-    dots=setBackground(background);
+    dots=setBackground(dots,a.background);
     
     check(struct(dots),a);
     a=dots;

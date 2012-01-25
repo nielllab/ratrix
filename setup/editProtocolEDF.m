@@ -70,12 +70,23 @@ for i=1:length(subs)
             [~, r]=setProtocolAndStep(subs{i},p,true,true,false,t+1,r,comment,auth);
         end
         
-        if false
+        if true
+            dots = getStimManager(ts);
+            
             s.speed=1.5;
             s.contrast=.25;
-            s.dotSize=20;
-            s.numDots=5;
+            s.dot_size=20;
+            s.num_dots=5;
             dots=setDotParams(dots,s);
+            
+            background.contrastFactor=2;
+            background.sizeFactor=2;
+            background.densityFactor=10;
+            dots=setBackground(dots,background);
+            
+            ts = setStimManager(ts, dots);
+            p = changeStep(p, ts, uint8(getNumTrainingSteps(p)));
+            [~, r]=setProtocolAndStep(subs{i},p,true,true,false,t,r,comment,auth);
         end
         
         if false

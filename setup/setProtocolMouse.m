@@ -84,13 +84,14 @@ longPenalty=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,reque
 lpTM=nAFC(sm,percentCorrectionTrials,longPenalty,eyeController,{'off'},dropFrames,'ptb','center',[],[],[300 inf]); %this percentCorrectionTrials should currently do nothing (need to fix)
 ts5 = trainingStep(lpTM  , dots, repeatIndefinitely()                  , noTimeOff(), svnRev,svnCheckMode);  %coherent dots
 
-ballSM = ball(struct,maxWidth,maxHeight,zoom,.5);
-ts6 = trainingStep(lpTM  , ballSM, repeatIndefinitely()                  , noTimeOff(), svnRev,svnCheckMode);  %ball
+ballSM = trail(struct,maxWidth,maxHeight,zoom,.5);
+ballTM = ball(percentCorrectionTrials,sm,noRequest);
+ts6 = trainingStep(ballTM, ballSM, repeatIndefinitely()                  , noTimeOff(), svnRev,svnCheckMode);  %ball
 
 p=protocol('mouse',{ts1, ts2, ts3, ts4, ts5, ts6});
 
 if true
-    stepNum=uint8(4);
+    stepNum=uint8(6);
     subj=getSubjectFromID(r,subjIDs{1});
     [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolMouse','edf');
 else

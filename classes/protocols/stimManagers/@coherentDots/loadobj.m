@@ -13,6 +13,10 @@ else % a is an old version
     if ~isfield(a,'shapeMethod')
         a.shapeMethod='';
     end
+    
+    if ~isfield(a,'background')
+        a.background=[];
+    end
         
     a=orderfields(a,struct(coherentDots));
     
@@ -27,6 +31,7 @@ else % a is an old version
         a.pctCorrectionTrials,a.replayMode,double(struct(a.stimManager).interTrialLuminance)/double(intmax('uint8')));
     
     dots=setShapeMethod(setPosition(setSideDisplay(dots,a.sideDisplay),a.position),a.shapeMethod);
+    dots=setBackground(background);
     
     check(struct(dots),a);
     a=dots;

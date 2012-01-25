@@ -103,8 +103,7 @@ switch nargin
         end
 
         % stimType
-        if ischar(varargin{3}) && (strcmp(varargin{3}, 'loop') || ...
-                strcmp(varargin{3}, 'cache') || strcmp(varargin{3},'expert')) % handle single char arrays
+        if ischar(varargin{3}) && any(ismember(varargin{3},{'loop','cache','expert','dynamic'}))
             spec.stimType = varargin{3};
         elseif iscell(varargin{3})
             typeArray = varargin{3};
@@ -126,7 +125,7 @@ switch nargin
                 error('invalid specification of stimType in cell array format');
             end
         else
-            error('stimType must be trigger, loop, cache, timedFrames, indexedFrames, or expert');
+            error('stimType must be trigger, loop, cache, timedFrames, indexedFrames, expert, or dynamic');
         end
         % startFrame
         if isscalar(varargin{4}) && varargin{4}>=0
@@ -217,6 +216,7 @@ switch nargin
 
         if (isempty(spec.scaleFactor) || isempty(spec.stimulus)) && ~strcmp(spec.phaseType,'reinforced')  && ~strcmp(spec.phaseType,'earlyPenalty') && ~strcmp(spec.phaseType,'itl') 
             error('empty scaleFactor and stimulus allowed only for reinforced phaseType');
+            %should allow expert/dynamic to have empty stim, except this is currently how the destrec is set...
         end
         
         stimLen=size(spec.stimulus,3);

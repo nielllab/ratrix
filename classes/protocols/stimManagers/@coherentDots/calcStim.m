@@ -57,6 +57,10 @@ if isnan(resolutionIndex)
     resolutionIndex=1;
 end
 
+if hz==0 && ismac
+    hz = 60; %lame
+end
+
 
 % updateSM=0;     % For intertrial dependencies
 % isCorrection=0;     % For correction trials to force to switch sides
@@ -196,7 +200,21 @@ else
     end
 end
 
-out = dots_movie*selectedContrast;
+if ~isempty(stimulus.background)
+    [dots_movie2 alldotsxy2] = cdots(s.num_dots,s.screen_width,s.screen_height,num_frames,selectedCoherence,selectedSpeed/s.screen_height,dotDirection,shape,false);
+    out = dots_movie-dots_movie2;
+    
+    background =  cdots(s.num_dots*stimulus.background.densityFactor,s.screen_width,s.screen_height,1,selectedCoherence,selectedSpeed/s.screen_height,dotDirection,ones(selectedDotSize/stimulus.background.sizeFactor),false);
+    background2 = cdots(s.num_dots*stimulus.background.densityFactor,s.screen_width,s.screen_height,1,selectedCoherence,selectedSpeed/s.screen_height,dotDirection,ones(selectedDotSize/stimulus.background.sizeFactor),false);
+    background = repmat((background-background2)/stimulus.background.contrastFactor,[1,1,num_frames]);
+    
+    inds=find(out==0);
+    out(inds)=background(inds);
+    out = out-min(out(:));
+    out = selectedContrast*out/max(out(:));
+else
+    out = dots_movie*selectedContrast;
+end
 
 pStr='';
 sStr='';

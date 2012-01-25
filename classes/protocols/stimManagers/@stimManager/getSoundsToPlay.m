@@ -5,6 +5,8 @@ function soundsToPlay = getSoundsToPlay(stimManager, ports, lastPorts, phase, ph
 playLoopSounds={};
 playSoundSounds={};
 
+dOrP=strcmp(phaseType,'discrim') || strcmp(phaseType,'pre-response'); %ismember too slow
+
 % nAFC/goNoGo setup:
 if strcmp(trialManagerClass, 'nAFC') || strcmp(trialManagerClass,'goNoGo') || strcmp(trialManagerClass,'oddManOut') || strcmp(trialManagerClass,'cuedGoNoGo')
     % play trial start sound
@@ -14,7 +16,7 @@ if strcmp(trialManagerClass, 'nAFC') || strcmp(trialManagerClass,'goNoGo') || st
         (any(ports) && isempty(requestOptions))) 
         % play white noise (when responsePort triggered during phase 1)
         playLoopSounds{end+1} = 'trySomethingElseSound';
-    elseif ismember(phaseType,{'discrim','pre-response'}) && any(ports(requestOptions))  
+    elseif dOrP && any(ports(requestOptions))
         % play stim sound (when stim is requested during phase 2)
         playLoopSounds{end+1} = 'keepGoingSound';
     elseif strcmp(phaseType,'reinforced') && stepsInPhase <= 0 && trialDetails.correct
@@ -33,10 +35,10 @@ if strcmp(trialManagerClass, 'nAFC') || strcmp(trialManagerClass,'goNoGo') || st
 elseif strcmp(trialManagerClass, 'freeDrinks')
     if phase==1 && stepsInPhase <=0
         playSoundSounds{end+1} = {'trialStartSound', 50};
-    elseif ismember(phaseType,{'discrim','pre-response'}) && ~isempty(targetOptions) && any(ports(setdiff(1:length(ports), targetOptions))) % normal freeDrinks
+    elseif dOrP && ~isempty(targetOptions) && any(ports(setdiff(1:length(ports), targetOptions))) % normal freeDrinks
         % play white noise (when any port that is not a target is triggered)
         playLoopSounds{end+1} = 'trySomethingElseSound';
-    elseif ismember(phaseType,{'discrim','pre-response'}) && ~isempty(requestOptions) && any(ports(requestOptions)) % passiveViewing freeDrinks
+    elseif dOrP && ~isempty(requestOptions) && any(ports(requestOptions)) % passiveViewing freeDrinks
         % check that the requestMode and requestRewardDone also pass 
         % same logic as in the request reward handling, but for sound
         % play keepGoing sound?

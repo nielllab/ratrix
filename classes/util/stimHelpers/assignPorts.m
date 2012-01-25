@@ -38,7 +38,7 @@ switch TMclass
         end
 
         % determine correct port
-        if ~isempty(lastCorrect) && ~isempty(lastResult) && ~lastCorrect && length(lastTrialRec.targetPorts)==1 && (lastWasCorrection || rand<details.pctCorrectionTrials)
+        if any(ismember('pctCorrectionTrials',fields(details))) && ~isempty(lastCorrect) && ~isempty(lastResult) && ~lastCorrect && length(lastTrialRec.targetPorts)==1 && (lastWasCorrection || rand<details.pctCorrectionTrials)
             details.correctionTrial=1;
             %'correction trial!'
             targetPorts=lastTrialRec.targetPorts; % same ports are correct

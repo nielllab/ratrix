@@ -40,15 +40,19 @@ eyeController=[];
 dropFrames=false;
 nafcTM=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,{'off'},dropFrames,'ptb','center'); %this percentCorrectionTrials should currently do nothing (need to fix)
 
-numDots=75;
-coherence=.95;
-speed=.75;
-contrast=1;
-dotSize=5;
+coherence=1;
+
+speed=.75*2;
+contrast=1*.25;
+dotSize=5*4;
+numDots=round(75/15);
+
 duration=10;
 textureSize=10*[w,h];
 zoom=[maxWidth maxHeight]./textureSize;
 dots=coherentDots(textureSize(1),textureSize(2),numDots,coherence,speed,contrast,dotSize,duration,zoom,maxWidth,maxHeight,percentCorrectionTrials);
+
+dots=setShapeMethod(setPosition(setSideDisplay(dots,.5),.25),'position');
 
 requestRewardSizeULorMS = 0;
 msPenalty               = 1000;
@@ -67,6 +71,12 @@ ts2 = trainingStep(fd2, dots, numTrialsDoneCriterion(numTriggers)   , noTimeOff(
 trialsPerMinute = 6;
 minutes = 1;
 ts3 = trainingStep(nafcTM, dots, rateCriterion(trialsPerMinute,minutes), noTimeOff(), svnRev,svnCheckMode);  %coherent dots
+
+background.contrastFactor=2;
+background.sizeFactor=2;
+background.densityFactor=10;
+dots=setBackground(dots,background);
+
 ts4 = trainingStep(nrTM  , dots,  numTrialsDoneCriterion(400)          , noTimeOff(), svnRev,svnCheckMode);  %coherent dots
 
 msPenalty = 3000;
@@ -74,10 +84,13 @@ longPenalty=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,reque
 lpTM=nAFC(sm,percentCorrectionTrials,longPenalty,eyeController,{'off'},dropFrames,'ptb','center',[],[],[300 inf]); %this percentCorrectionTrials should currently do nothing (need to fix)
 ts5 = trainingStep(lpTM  , dots, repeatIndefinitely()                  , noTimeOff(), svnRev,svnCheckMode);  %coherent dots
 
-p=protocol('mouse dots',{ts1, ts2, ts3, ts4, ts5});
+ballSM = ball(struct,maxWidth,maxHeight,zoom,.5);
+ts6 = trainingStep(lpTM  , ballSM, repeatIndefinitely()                  , noTimeOff(), svnRev,svnCheckMode);  %ball
+
+p=protocol('mouse',{ts1, ts2, ts3, ts4, ts5, ts6});
 
 if true
-    stepNum=uint8(5);
+    stepNum=uint8(4);
     subj=getSubjectFromID(r,subjIDs{1});
     [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolMouse','edf');
 else

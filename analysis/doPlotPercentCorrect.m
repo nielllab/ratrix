@@ -125,7 +125,9 @@ if addSteps
         error('shouldn''t have both blocks and shaping at the same time!')
     end
     
-    if haveShapedValue || haveBlocks
+    if haveShapedValue
+        plot(d.currentShapedValue,'k');
+    elseif haveShapedValue || haveBlocks
         %add on parameter using currentShapedValue
         blockHeight=stepHeight;
         blockYCenter=stepYCenter+stepHeight;
@@ -192,6 +194,11 @@ if doPerfBias
 end
 
 %keyboard %error: all d.correctionTrial is nan!  why?  must fix!
+%it's cuz of extractBasicFields line 89
+%note that they are making it into the compiledDetails of the compiled file -- how? extractDetailFields...
+if ~all(isnan(d.correctionTrial))
+    error('got some correction trials?')
+end
 if plotCorrectionTrialsToo
     %plot correction trial correct
     goodCTs=getGoods(d,'justCorrectionTrials');

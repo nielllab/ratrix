@@ -4,17 +4,6 @@ if ~exist('barebones','var') || isempty(barebones)
     barebones=true;%false;
 end
 
-% temporary hack -- right now we rely on the fact that no one
-% (including the station) accesses the valves except through
-% setValves and getValves, but we can't guarantee this.
-if length(station.valvePins.pinNums)~=station.numPorts
-    if isscalar(station.valvePins.pinNums)
-        barebones=true;
-    else
-        error('bad valve vector')
-    end
-end
-
 %[endValveState valveErrorDetails]=setAndCheckValves(station, requestedValves,expectedValveState,valveErrorDetails,startTime,description)
 %
 %set the valves to the requested value
@@ -22,6 +11,17 @@ end
 %if not, it logs an error
 
 if strcmp(station.responseMethod,'parallelPort')
+    % temporary hack -- right now we rely on the fact that no one
+    % (including the station) accesses the valves except through
+    % setValves and getValves, but we can't guarantee this.
+    if length(station.valvePins.pinNums)~=station.numPorts  % on linux: Attempt to reference field of non-structure array.
+        if isscalar(station.valvePins.pinNums)
+            barebones=true;
+        else
+            error('bad valve vector')
+        end
+    end
+    
     if ~barebones
         %CHECK to see if the valves are as we expect
         beforeValveState=getValves(station);

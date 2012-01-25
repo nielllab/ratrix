@@ -61,15 +61,14 @@ for i=1:length(subs)
     if ~isempty(p)
         ts=getTrainingStep(p,getNumTrainingSteps(p));
         
-<<<<<<< HEAD
-        [~, r]=setReinforcementParam(subs{i},'reinforcementManager',rm,getNumTrainingSteps(p),r,comment,auth);
+        if false
+            [~, r]=setReinforcementParam(subs{i},'reinforcementManager',rm,getNumTrainingSteps(p),r,comment,auth);
+        end
         
-        if false        
+        if false
             p=addTrainingStep(p,setStimManager(ts, setShapeMethod(setPosition(setSideDisplay(getStimManager(ts),.5),.5),'position')));
             [~, r]=setProtocolAndStep(subs{i},p,true,true,false,t+1,r,comment,auth);
-=======
-        p=addTrainingStep(p,setStimManager(ts, setShapeMethod(setPosition(setSideDisplay(getStimManager(ts),.5),.5),'position')));        
-        [~, r]=setProtocolAndStep(subs{i},p,true,true,false,t+1,r,comment,auth);
+        end
         
         if false
             s.speed=1.5;
@@ -77,7 +76,6 @@ for i=1:length(subs)
             s.dotSize=20;
             s.numDots=5;
             dots=setDotParams(dots,s);
->>>>>>> origin/trunk
         end
         
         if false

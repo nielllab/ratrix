@@ -36,15 +36,15 @@ if ~exist('comment','var')
     comment='';
 end
 
-if false
+if true
     requestMode               = 'first';
     fractionOpenTimeSoundIsOn = 1;
     fractionPenaltySoundIsOn  = 1;
     scalar                    = 1;
     
     requestRewardSizeULorMS   = 0;
-    rewardSizeULorMS          = 90;
-    msPenalty                 = 7000;
+    rewardSizeULorMS          = 40;
+    msPenalty                 = 14000;
     
     msAirpuff                 = msPenalty;
     
@@ -61,9 +61,13 @@ for i=1:length(subs)
     if ~isempty(p)
         ts=getTrainingStep(p,getNumTrainingSteps(p));
         
-        p=addTrainingStep(p,setStimManager(ts, setShapeMethod(setPosition(setSideDisplay(getStimManager(ts),.5),.5),'position')));        
-        [~, r]=setProtocolAndStep(subs{i},p,true,true,false,t+1,r,comment,auth);
-            
+        [~, r]=setReinforcementParam(subs{i},'reinforcementManager',rm,getNumTrainingSteps(p),r,comment,auth);
+        
+        if false        
+            p=addTrainingStep(p,setStimManager(ts, setShapeMethod(setPosition(setSideDisplay(getStimManager(ts),.5),.5),'position')));
+            [~, r]=setProtocolAndStep(subs{i},p,true,true,false,t+1,r,comment,auth);
+        end
+        
         if false
             if any(getID(subs{i})=='l')
                 ts = setTrialManager(ts, setResponseWindow(getTrialManager(ts), [300 inf]));

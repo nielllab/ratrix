@@ -63,7 +63,15 @@ for i=1:length(subs)
         
         p=addTrainingStep(p,setStimManager(ts, setShapeMethod(setPosition(setSideDisplay(getStimManager(ts),.5),.5),'position')));        
         [~, r]=setProtocolAndStep(subs{i},p,true,true,false,t+1,r,comment,auth);
-            
+        
+        if false
+            s.speed=1.5;
+            s.contrast=.25;
+            s.dotSize=20;
+            s.numDots=5;
+            dots=setDotParams(dots,s);
+        end
+        
         if false
             if any(getID(subs{i})=='l')
                 ts = setTrialManager(ts, setResponseWindow(getTrialManager(ts), [800 inf]));

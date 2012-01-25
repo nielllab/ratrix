@@ -29,10 +29,17 @@ out=true(size(stim));
 relPos=round(relPos./repmat(getScaleFactor(s)',1,i));
 
     function out=count(x,y)
-        out = linspace(x,y,1+abs(diff([x y]))); % x:sign(diff([x y])):y %fails when x==y
+        % x:sign(diff([x y])):y %fails when x==y        
+        % out = linspace(x,y,1+abs(diff([x y]))); %linspace slow
+       
+        if x>y
+            out = x:-1:y;
+        else
+            out = x:y;
+        end
     end
 
-if true
+if true %continuous lines between points -- tough to vetcorize?
     d = diff(relPos,[],2);
     for j=2:i
         corners=relPos(:,j-[1 0]);
@@ -47,7 +54,7 @@ if true
             end
         end
     end
-else
+else %dot at each point
     relPos=relPos(:,all(relPos>0 & relPos<=repmat(fliplr(size(out))',1,size(relPos,2))));
     out(sub2ind(size(out),relPos(2,:),relPos(1,:)))=false;
 end

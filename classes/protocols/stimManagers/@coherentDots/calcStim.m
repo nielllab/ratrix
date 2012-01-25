@@ -200,19 +200,18 @@ else
     end
 end
 
-if true
-    sca
-    keyboard
-    
+if ~isempty(stimulus.background)
     [dots_movie2 alldotsxy2] = cdots(s.num_dots,s.screen_width,s.screen_height,num_frames,selectedCoherence,selectedSpeed/s.screen_height,dotDirection,shape,false);
     out = dots_movie-dots_movie2;
-    background = cdots(s.num_dots*13,s.screen_width,s.screen_height,1,selectedCoherence,selectedSpeed/s.screen_height,dotDirection,ones(selectedDotSize/2),false);
-    background2 = cdots(s.num_dots*13,s.screen_width,s.screen_height,1,selectedCoherence,selectedSpeed/s.screen_height,dotDirection,ones(selectedDotSize/2),false);
-    background = repmat((background-background2)/2,[1,1,num_frames]);
+    
+    background =  cdots(s.num_dots*stimulus.background.densityFactor,s.screen_width,s.screen_height,1,selectedCoherence,selectedSpeed/s.screen_height,dotDirection,ones(selectedDotSize/stimulus.background.sizeFactor),false);
+    background2 = cdots(s.num_dots*stimulus.background.densityFactor,s.screen_width,s.screen_height,1,selectedCoherence,selectedSpeed/s.screen_height,dotDirection,ones(selectedDotSize/stimulus.background.sizeFactor),false);
+    background = repmat((background-background2)/stimulus.background.contrastFactor,[1,1,num_frames]);
+    
     inds=find(out==0);
     out(inds)=background(inds);
     out = out-min(out(:));
-    out = out/max(out(:));
+    out = selectedContrast*out/max(out(:));
 else
     out = dots_movie*selectedContrast;
 end

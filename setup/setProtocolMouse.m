@@ -40,11 +40,13 @@ eyeController=[];
 dropFrames=false;
 nafcTM=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,{'off'},dropFrames,'ptb','center'); %this percentCorrectionTrials should currently do nothing (need to fix)
 
-numDots=round(75/15);
 coherence=1;
-speed=.75*9;
-contrast=1;
+
+speed=.75*2;
+contrast=1*.25;
 dotSize=5*4;
+numDots=round(75/15);
+
 duration=10;
 textureSize=10*[w,h];
 zoom=[maxWidth maxHeight]./textureSize;
@@ -69,6 +71,12 @@ ts2 = trainingStep(fd2, dots, numTrialsDoneCriterion(numTriggers)   , noTimeOff(
 trialsPerMinute = 6;
 minutes = 1;
 ts3 = trainingStep(nafcTM, dots, rateCriterion(trialsPerMinute,minutes), noTimeOff(), svnRev,svnCheckMode);  %coherent dots
+
+background.contrastFactor=2;
+background.sizeFactor=2;
+background.densityFactor=10;
+dots=setBackground(dots,background);
+
 ts4 = trainingStep(nrTM  , dots,  numTrialsDoneCriterion(400)          , noTimeOff(), svnRev,svnCheckMode);  %coherent dots
 
 msPenalty = 3000;

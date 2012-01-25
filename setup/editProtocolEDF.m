@@ -36,15 +36,15 @@ if ~exist('comment','var')
     comment='';
 end
 
-if false
+if true
     requestMode               = 'first';
     fractionOpenTimeSoundIsOn = 1;
     fractionPenaltySoundIsOn  = 1;
     scalar                    = 1;
     
     requestRewardSizeULorMS   = 0;
-    rewardSizeULorMS          = 90;
-    msPenalty                 = 7000;
+    rewardSizeULorMS          = 40;
+    msPenalty                 = 14000;
     
     msAirpuff                 = msPenalty;
     
@@ -61,15 +61,32 @@ for i=1:length(subs)
     if ~isempty(p)
         ts=getTrainingStep(p,getNumTrainingSteps(p));
         
-        p=addTrainingStep(p,setStimManager(ts, setShapeMethod(setPosition(setSideDisplay(getStimManager(ts),.5),.5),'position')));        
-        [~, r]=setProtocolAndStep(subs{i},p,true,true,false,t+1,r,comment,auth);
+        if false
+            [~, r]=setReinforcementParam(subs{i},'reinforcementManager',rm,getNumTrainingSteps(p),r,comment,auth);
+        end
         
         if false
+            p=addTrainingStep(p,setStimManager(ts, setShapeMethod(setPosition(setSideDisplay(getStimManager(ts),.5),.5),'position')));
+            [~, r]=setProtocolAndStep(subs{i},p,true,true,false,t+1,r,comment,auth);
+        end
+        
+        if true
+            dots = getStimManager(ts);
+            
             s.speed=1.5;
             s.contrast=.25;
-            s.dotSize=20;
-            s.numDots=5;
+            s.dot_size=20;
+            s.num_dots=5;
             dots=setDotParams(dots,s);
+            
+            background.contrastFactor=2;
+            background.sizeFactor=2;
+            background.densityFactor=10;
+            dots=setBackground(dots,background);
+            
+            ts = setStimManager(ts, dots);
+            p = changeStep(p, ts, uint8(getNumTrainingSteps(p)));
+            [~, r]=setProtocolAndStep(subs{i},p,true,true,false,t,r,comment,auth);
         end
         
         if false

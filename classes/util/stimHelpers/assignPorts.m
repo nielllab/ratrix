@@ -75,7 +75,7 @@ switch TMclass
         end
         distractorPorts=[];
         
-    case 'autopilot'
+    case {'autopilot','ball'}
         targetPorts=[];
         distractorPorts=[];
     case 'goNoGo'

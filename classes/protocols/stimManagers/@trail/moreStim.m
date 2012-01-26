@@ -29,9 +29,9 @@ out=true(size(stim));
 relPos=round(relPos./repmat(getScaleFactor(s)',1,i));
 
     function out=count(x,y)
-        % x:sign(diff([x y])):y %fails when x==y        
+        % x:sign(diff([x y])):y %fails when x==y
         % out = linspace(x,y,1+abs(diff([x y]))); %linspace slow
-       
+        
         if x>y
             out = x:-1:y;
         else
@@ -66,6 +66,10 @@ dynamicDetails.times(i)=GetSecs;
 
 if false
     textLabel = num2str([destRect getScaleFactor(s) i x y scheduledFrameNum]); %num2str is slow
+end
+
+if i>100
+    out=[];
 end
 
 end

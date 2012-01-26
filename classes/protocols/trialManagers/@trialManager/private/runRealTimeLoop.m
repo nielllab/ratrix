@@ -583,6 +583,12 @@ while ~done && ~quit;
                             if ndims(thisFrame)~=2 
                                 error('moreStim should return a single monochrome frame')
                             end
+                            if isempty(thisFrame)
+                                % framesUntilTransition=0;
+                                % handlePhasedTrialLogic -> transitionCriterion, framesUntilTransition, numFramesInStim, framesInPhase
+                                sca
+                                keyaboard
+                            end
                         otherwise
                             error('huh?')
                     end

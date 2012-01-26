@@ -586,7 +586,7 @@ while ~done && ~quit;
                             end
                             if isempty(thisFrame)
                                 %may screw up drawFrame...
-                                if isInf(numFramesInStim)
+                                if isinf(numFramesInStim)
                                     numFramesInStim = framesInPhase; %causes handlePhasedTrialLogic to transition to next phase
                                 else
                                     error('huh')

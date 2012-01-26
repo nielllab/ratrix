@@ -13,7 +13,7 @@ x=p(1);
 y=p(2);
 
 sounds={};
-target = 100;
+target = 20*sign(randn);
 
 i=i+1;
 
@@ -35,7 +35,7 @@ end
 
 out=[];
 
-if sign(target) * (dynamicDetails.track(:,i) - s.initialPos(1) - target) >= 0 %maybe don't want this initialPos subtracted?
+if sign(target) * (dynamicDetails.track(1,i) - s.initialPos(1) - target) >= 0 %maybe don't want this initialPos subtracted?
     dynamicDetails.result = 'correct';
     sounds={};
 elseif i >= size(dynamicDetails.track,2)
@@ -67,6 +67,12 @@ else
         relPos=relPos(:,all(relPos>0 & relPos<=repmat(fliplr(size(out))',1,size(relPos,2))));
         out(sub2ind(size(out),relPos(2,:),relPos(1,:)))=false;
     end    
+    
+    sf=getScaleFactor(s);
+    targetPos=round((target-dynamicDetails.track(1,i)-s.initialPos(1))/sf(1));
+    if targetPos>0 && targetPos<=size(out,2)
+        out(:,targetPos)=false;
+    end
 end
 
     function out=count(x,y)

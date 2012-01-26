@@ -5,7 +5,7 @@ function [tm done newSpecInd specInd updatePhase transitionedByTimeFlag transiti
     ports, lastPorts, station, specInd, phaseType, transitionCriterion, framesUntilTransition, numFramesInStim,...
     framesInPhase, isFinalPhase, trialDetails, stimDetails, result, ...
     stimManager, msRewardSound, mePenaltySound, targetOptions, distractorOptions, requestOptions, ...
-    playRequestSoundLoop, isRequesting, soundNames, lastSoundsLooped)
+    playRequestSoundLoop, isRequesting, soundNames, lastSoundsLooped, dynamicSounds)
 
 updatePhase=0;
 newSpecInd = specInd;
@@ -98,7 +98,7 @@ portSelectionDoneTime=GetSecs;
 % SOUNDS
 % changed from newSpecInd to specInd (cannot anticipate phase transition b/c it hasnt called updateTrialState to set correctness)
 soundsToPlay = getSoundsToPlay(stimManager, ports, lastPorts, specInd, phaseType, framesInPhase,msRewardSound, mePenaltySound, ...
-    targetOptions, distractorOptions, requestOptions, playRequestSoundLoop, class(tm), trialDetails, stimDetails);
+    targetOptions, distractorOptions, requestOptions, playRequestSoundLoop, class(tm), trialDetails, stimDetails, dynamicSounds);
 getSoundsTime=GetSecs;
 % soundsToPlay is a cell array of sound names {{playLoop sounds}, {playSound sounds}} to be played at current frame
 % validate soundsToPlay here (make sure they are all members of soundNames)

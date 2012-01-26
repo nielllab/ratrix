@@ -1,5 +1,5 @@
 function soundsToPlay = getSoundsToPlay(stimManager, ports, lastPorts, phase, phaseType, stepsInPhase,msRewardSound, msPenaltySound, ...
-    targetOptions, distractorOptions, requestOptions, playRequestSoundLoop, trialManagerClass, trialDetails, stimDetails)
+    targetOptions, distractorOptions, requestOptions, playRequestSoundLoop, trialManagerClass, trialDetails, stimDetails, dynamicSounds)
 % see doc in stimManager.calcStim.txt
 
 playLoopSounds={};
@@ -34,10 +34,7 @@ switch trialManagerClass
     case 'ball'
         switch phaseType
             case 'discrim'
-                if false %add something in trialDetails to indicate these?
-                    playLoopSounds{end+1} = 'trySomethingElseSound';
-                    playLoopSounds{end+1} = 'keepGoingSound';
-                end
+                [playLoopSounds{end+1:end+length(dynamicSounds)}]=dynamicSounds{:};
             case 'reinforced'
                 if stepsInPhase <=0
                     if trialDetails.correct

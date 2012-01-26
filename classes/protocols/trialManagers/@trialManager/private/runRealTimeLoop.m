@@ -552,6 +552,7 @@ while ~done && ~quit;
             % this will surely have drift errors...
             % note this does not take pausing into account -- edf thinks we should get rid of pausing
             
+            dynamicSounds={};
             switch strategy
                 case {'textureCache','noCache','dynamic'}
                     if ~strcmp(strategy,'dynamic')
@@ -575,7 +576,7 @@ while ~done && ~quit;
                         case 'noCache'
                             thisFrame=squeeze(stim(:,:,i));
                         case 'dynamic'
-                            [thisFrame doFramePulse expertCache phaseRecords(phaseNum).dynamicDetails textLabel i indexPulse]=moreStim(stimManager,stim,i,textLabel,destRect,expertCache,scheduledFrameNum,tm.dropFrames,phaseRecords(phaseNum).dynamicDetails,trialRecords);
+                            [thisFrame doFramePulse expertCache phaseRecords(phaseNum).dynamicDetails textLabel i indexPulse dynamicSounds]=moreStim(stimManager,stim,i,textLabel,destRect,expertCache,scheduledFrameNum,tm.dropFrames,phaseRecords(phaseNum).dynamicDetails,trialRecords);
                             [floatprecision2 thisFrame] = determineColorPrecision(tm, thisFrame, strategy);
                             if floatprecision~=floatprecision2
                                 error('dynamic floatprecision records will be inaccurate')
@@ -584,10 +585,12 @@ while ~done && ~quit;
                                 error('moreStim should return a single monochrome frame')
                             end
                             if isempty(thisFrame)
-                                % framesUntilTransition=0;
-                                % handlePhasedTrialLogic -> transitionCriterion, framesUntilTransition, numFramesInStim, framesInPhase
-                                sca
-                                keyaboard
+                                %may screw up drawFrame...
+                                if isInf(numFramesInStim)
+                                    numFramesInStim = framesInPhase; %causes handlePhasedTrialLogic to transition to next phase
+                                else
+                                    error('huh')
+                                end
                             end
                         otherwise
                             error('huh?')
@@ -772,7 +775,7 @@ while ~done && ~quit;
             ports, lastPorts, station, phaseInd, phaseType, transitionCriterion, framesUntilTransition, numFramesInStim, framesInPhase, isFinalPhase, ...
             trialRecords(trialInd).trialDetails, trialRecords(trialInd).stimDetails, trialRecords(trialInd).result, ...
             stimManager, msRewardSound, msPenaltySound, targetOptions, distractorOptions, requestOptions, ...
-            playRequestSoundLoop, isRequesting, soundNames, lastSoundsLooped);
+            playRequestSoundLoop, isRequesting, soundNames, lastSoundsLooped, dynamicSounds);
         
         % if goDirectlyToError, then reset newSpecInd to the first error phase in stimSpecs
         if goDirectlyToError

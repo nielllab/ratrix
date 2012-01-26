@@ -25,6 +25,7 @@ else
 end
 stimulus.initialPos=[width height]'/2;
 details.track=[stimulus.initialPos nan(2,60*60)];
+details.target = 300*sign(randn);
 
 stimulus.mouseIndices=[];
 if IsLinux    

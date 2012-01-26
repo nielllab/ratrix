@@ -576,7 +576,7 @@ while ~done && ~quit;
                         case 'noCache'
                             thisFrame=squeeze(stim(:,:,i));
                         case 'dynamic'
-                            [thisFrame doFramePulse expertCache phaseRecords(phaseNum).dynamicDetails textLabel i indexPulse dynamicSounds]=moreStim(stimManager,stim,i,textLabel,destRect,expertCache,scheduledFrameNum,tm.dropFrames,phaseRecords(phaseNum).dynamicDetails,trialRecords);
+                            [thisFrame doFramePulse expertCache phaseRecords(phaseNum).dynamicDetails textLabel i indexPulse dynamicSounds finish]=moreStim(stimManager,stim,i,textLabel,destRect,expertCache,scheduledFrameNum,tm.dropFrames,phaseRecords(phaseNum).dynamicDetails,trialRecords);
                             [floatprecision2 thisFrame] = determineColorPrecision(tm, thisFrame, strategy);
                             if floatprecision~=floatprecision2
                                 error('dynamic floatprecision records will be inaccurate')
@@ -584,8 +584,7 @@ while ~done && ~quit;
                             if ndims(thisFrame)~=2 
                                 error('moreStim should return a single monochrome frame')
                             end
-                            if isempty(thisFrame)
-                                %may screw up drawFrame...
+                            if finish
                                 if isinf(numFramesInStim)
                                     numFramesInStim = framesInPhase; %causes handlePhasedTrialLogic to transition to next phase
                                 else

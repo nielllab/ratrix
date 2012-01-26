@@ -1,11 +1,11 @@
-function [out doFramePulse cache dynamicDetails textLabel i indexPulse sounds]=moreStim(s,stim,i,textLabel,destRect,cache,scheduledFrameNum,dropFrames,dynamicDetails,trialRecords)
-
-%add red line goal for water
+function [out doFramePulse cache dynamicDetails textLabel i indexPulse sounds finish]=moreStim(s,stim,i,textLabel,destRect,cache,scheduledFrameNum,dropFrames,dynamicDetails,trialRecords)
 
 if isempty(dynamicDetails)
     dynamicDetails=trialRecords(end).stimDetails;
     dynamicDetails.times=dynamicDetails.track;
 end
+
+target = dynamicDetails.target;
 
 p = deal(mouse(s));
 
@@ -13,7 +13,6 @@ x=p(1);
 y=p(2);
 
 sounds={};
-target = 20*sign(randn);
 
 i=i+1;
 
@@ -30,49 +29,51 @@ elseif i > 1
             sounds={'keepGoingSound'};
         case -sign(target)
             sounds={'trySomethingElseSound'};
-    end    
+    end
 end
 
-out=[];
-
-if sign(target) * (dynamicDetails.track(1,i) - s.initialPos(1) - target) >= 0 %maybe don't want this initialPos subtracted?
+finish = false;
+if sign(target) * (dynamicDetails.track(1,i) - s.initialPos(1) - target) >= 0
     dynamicDetails.result = 'correct';
     sounds={};
+    finish = true;
 elseif i >= size(dynamicDetails.track,2)
     dynamicDetails.result = 'timeout';
     sounds={};
-else
-    relPos=dynamicDetails.track(:,1:i)-repmat(dynamicDetails.track(:,i)-s.initialPos,1,i);
-    
-    out=true(size(stim));
-    
-    relPos=round(relPos./repmat(getScaleFactor(s)',1,i));
-    
-    if true %continuous lines between points -- tough to vetcorize?
-        d = diff(relPos,[],2);
-        for j=2:i
-            corners=relPos(:,j-[1 0]);
-            if any(d(:,j-1)) && any(corners(:)>0 & corners(:)<=repmat(size(out)',2,1))
-                inds = count(corners(1,1),corners(1,end));
-                for k=1:length(inds)
-                    if inds(k)>0 && inds(k)<=size(out,2)
-                        ys = round(corners(2,1)+d(2,j-1)*(k-[1 0])/length(inds));
-                        ys = count(ys(1),ys(end));
-                        out(ys(ys>0 & ys<=size(out,1)),inds(k))=false;
-                    end
+    finish = true;
+end
+
+sf=getScaleFactor(s);
+
+out=true(size(stim));
+
+relPos=dynamicDetails.track(:,1:i)-repmat(dynamicDetails.track(:,i)-s.initialPos,1,i);
+relPos=round(relPos./repmat(sf',1,i));
+
+if true %continuous lines between points -- tough to vetcorize?
+    d = diff(relPos,[],2);
+    for j=2:i
+        corners=relPos(:,j-[1 0]);
+        if any(d(:,j-1)) && any(corners(:)>0 & corners(:)<=repmat(size(out)',2,1)) || j==2
+            inds = count(corners(1,1),corners(1,end));
+            for k=1:length(inds)
+                if inds(k)>0 && inds(k)<=size(out,2)
+                    ys = round(corners(2,1)+d(2,j-1)*(k-[1 0])/length(inds));
+                    ys = count(ys(1),ys(end));
+                    out(ys(ys>0 & ys<=size(out,1)),inds(k))=false;
                 end
             end
         end
-    else %dot at each point
-        relPos=relPos(:,all(relPos>0 & relPos<=repmat(fliplr(size(out))',1,size(relPos,2))));
-        out(sub2ind(size(out),relPos(2,:),relPos(1,:)))=false;
-    end    
-    
-    sf=getScaleFactor(s);
-    targetPos=round((target-dynamicDetails.track(1,i)-s.initialPos(1))/sf(1));
-    if targetPos>0 && targetPos<=size(out,2)
-        out(:,targetPos)=false;
     end
+else %dot at each point
+    relPos=relPos(:,all(relPos>0 & relPos<=repmat(fliplr(size(out))',1,size(relPos,2))));
+    out(sub2ind(size(out),relPos(2,:),relPos(1,:)))=false;
+end
+
+targetPos=round((target+2*s.initialPos(1)-dynamicDetails.track(1,i))/sf(1));
+
+if targetPos>0 && targetPos<=size(out,2)
+    out(:,targetPos)=false;
 end
 
     function out=count(x,y)
@@ -90,9 +91,5 @@ doFramePulse = true;
 indexPulse = true;
 
 dynamicDetails.times(i)=GetSecs;
-
-if false
-    textLabel = num2str([destRect getScaleFactor(s) i x y scheduledFrameNum]); %num2str is slow
-end
 
 end

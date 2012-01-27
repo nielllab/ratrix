@@ -84,7 +84,7 @@ longPenalty=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,reque
 lpTM=nAFC(sm,percentCorrectionTrials,longPenalty,eyeController,{'off'},dropFrames,'ptb','center',[],[],[300 inf]); %this percentCorrectionTrials should currently do nothing (need to fix)
 ts5 = trainingStep(lpTM  , dots, repeatIndefinitely()                  , noTimeOff(), svnRev,svnCheckMode);  %coherent dots
 
-ballSM = trail(struct,maxWidth,maxHeight,zoom,.5);
+ballSM = trail(struct,maxWidth,maxHeight,zoom,0);
 ballTM = ball(percentCorrectionTrials,sm,noRequest);
 ts6 = trainingStep(ballTM, ballSM, repeatIndefinitely()                  , noTimeOff(), svnRev,svnCheckMode);  %ball
 

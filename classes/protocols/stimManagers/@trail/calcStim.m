@@ -14,6 +14,9 @@ else
     depth=32;
 end
 [resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60],depth,getMaxWidth(stimulus),getMaxHeight(stimulus));
+if hz==0 %osx
+    hz=60;
+end
 
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);
@@ -24,7 +27,7 @@ else
     lastRec=[];
 end
 stimulus.initialPos=[width height]'/2;
-details.nFrames = 60*60;
+details.nFrames = 50; %30*hz;
 details.target = 300*sign(randn);
 
 stimulus.mouseIndices=[];
@@ -44,7 +47,7 @@ if IsLinux
     end
 end
 
-mouse(stimulus);
+mouse(stimulus,true);
 
 [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass,allowRepeats);
 

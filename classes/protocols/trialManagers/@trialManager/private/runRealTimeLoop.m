@@ -502,12 +502,7 @@ while ~done && ~quit;
     timestamps.phaseUpdated=GetSecs;
     doFramePulse=true;
     
-    if ~paused
-        if finish
-            sca
-            keyboard
-        end
-        
+    if ~paused        
         % here should be the function that also checks to see if we should assign trialRecords.correct
         % and trialRecords.response, and also does tm-specific reward checks (nAFC should check to update reward/airpuff
         % if first frame of a 'reinforced' phase)
@@ -588,23 +583,28 @@ while ~done && ~quit;
                             if floatprecision~=floatprecision2
                                 error('dynamic floatprecision records will be inaccurate')
                             end
-                            if ndims(thisFrame)~=2 
-                                error('moreStim should return a single monochrome frame')
+                            if ~ismember(ndims(thisFrame),[2 3])
+                                error('moreStim should return a single monochrome or RGB frame')
                             end
                             if finish
                                 if isinf(numFramesInStim)
                                     numFramesInStim = framesInPhase; %causes handlePhasedTrialLogic to transition to next phase
 
-                                    phaseRecords(1).dynamicDetails.result
-                                    %has to be transferred to one or more
-                                    %of these for updateTrialState to work
-                                    %who normally does this?
-                                    trialRecords(trialInd).result
-                                    trialRecords(trialInd).correct
-                                    trialRecords(trialInd).trialDetails.correct
-                                    
-                                    sca
-                                    keyboard
+                                    if strcmp(phaseType,'discrim') %hmmm, how else do this?  trialManager shouldn't know about discrim...
+                                        if isempty(trialRecords(trialInd).trialDetails.correct)
+                                            trialRecords(trialInd).trialDetails.correct = strcmp(phaseRecords(1).dynamicDetails.result,'correct'); %causes updateTrialState to do reward
+                                        else
+                                            error('huh')
+                                        end
+                                        if isempty(trialRecords(trialInd).result)
+                                            trialRecords(trialInd).result = phaseRecords(1).dynamicDetails.result; %causes handlePhasedTrialLogic to propogate nominal result
+                                            if ismember(trialRecords(trialInd).result,{'correct','timedout'})
+                                                trialRecords(trialInd).result='nominal';
+                                            end
+                                        else
+                                            error('huh')
+                                        end
+                                    end
                                 else
                                     error('huh')
                                 end

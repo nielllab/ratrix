@@ -1,42 +1,43 @@
 function [out doFramePulse cache dynamicDetails textLabel i indexPulse sounds finish]=moreStim(s,stim,i,textLabel,destRect,cache,scheduledFrameNum,dropFrames,dynamicDetails,trialRecords)
 
+doFramePulse = true;
+indexPulse = true;
+
 if isempty(dynamicDetails)
     dynamicDetails = trialRecords(end).stimDetails;
     dynamicDetails.track = [s.initialPos nan(2,dynamicDetails.nFrames)];
     dynamicDetails.times = dynamicDetails.track(1,:);
 end
 
-target = dynamicDetails.target;
-
-sounds={};
-
 i=i+1;
+
+dynamicDetails.times(i)=GetSecs;
 
 if i > 1
     dynamicDetails.track(:,i)=mouse(s)';
     if ~IsOSX
         dynamicDetails.track(:,i) = dynamicDetails.track(:,i) + dynamicDetails.track(:,i-1) - s.initialPos;
     end
-    
-    switch sign(diff(dynamicDetails.track(1,i-[1 0])))
-        case sign(target)
-            sounds={'keepGoingSound'};
-        case -sign(target)
-            sounds={'trySomethingElseSound'};
-    end
 end
 
+target = dynamicDetails.target;
+sounds={};
 finish = false;
 if sign(target) * (dynamicDetails.track(1,i) - s.initialPos(1) - target) >= 0
     dynamicDetails.result = 'correct';
-    sounds={};
     finish = true;
     dynamicDetails.times=dynamicDetails.times(1:i);
     dynamicDetails.track=dynamicDetails.track(:,1:i);
 elseif i >= size(dynamicDetails.track,2)
     dynamicDetails.result = 'timeout';
-    sounds={};
     finish = true;
+elseif i > 1
+    switch sign(diff(dynamicDetails.track(1,i-[1 0])))
+        case sign(target)
+            sounds={'keepGoingSound'};
+        case -sign(target)
+            sounds={'trySomethingElseSound'};
+    end    
 end
 
 sf=getScaleFactor(s);
@@ -46,7 +47,7 @@ out=true(size(stim));
 relPos=dynamicDetails.track(:,1:i)-repmat(dynamicDetails.track(:,i)-s.initialPos,1,i);
 relPos=round(relPos./repmat(sf',1,i));
 
-if true %continuous lines between points -- tough to vetcorize?
+if true %continuous lines between points -- tough to vetcorize? consider expert mode w/vectorized Screen('DrawLines')
     d = diff(relPos,[],2);
     for j=2:i
         corners=relPos(:,j-[1 0]);
@@ -82,10 +83,4 @@ end
             out = x:y;
         end
     end
-
-doFramePulse = true;
-indexPulse = true;
-
-dynamicDetails.times(i)=GetSecs;
-
 end

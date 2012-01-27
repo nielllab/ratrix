@@ -353,6 +353,8 @@ timestamps.phaseRecordsDone     = timestamps.lastFrameTime;
 timestamps.loopEnd              = timestamps.lastFrameTime;
 timestamps.prevPostFlipPulse    = timestamps.lastFrameTime;
 
+finish=false;
+
 %show stim -- be careful in this realtime loop!
 while ~done && ~quit;
     timestamps.loopStart=GetSecs;
@@ -501,6 +503,11 @@ while ~done && ~quit;
     doFramePulse=true;
     
     if ~paused
+        if finish
+            sca
+            keyboard
+        end
+        
         % here should be the function that also checks to see if we should assign trialRecords.correct
         % and trialRecords.response, and also does tm-specific reward checks (nAFC should check to update reward/airpuff
         % if first frame of a 'reinforced' phase)
@@ -587,6 +594,17 @@ while ~done && ~quit;
                             if finish
                                 if isinf(numFramesInStim)
                                     numFramesInStim = framesInPhase; %causes handlePhasedTrialLogic to transition to next phase
+
+                                    phaseRecords(1).dynamicDetails.result
+                                    %has to be transferred to one or more
+                                    %of these for updateTrialState to work
+                                    %who normally does this?
+                                    trialRecords(trialInd).result
+                                    trialRecords(trialInd).correct
+                                    trialRecords(trialInd).trialDetails.correct
+                                    
+                                    sca
+                                    keyboard
                                 else
                                     error('huh')
                                 end

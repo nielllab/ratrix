@@ -1,25 +1,19 @@
 function [out doFramePulse cache dynamicDetails textLabel i indexPulse sounds finish]=moreStim(s,stim,i,textLabel,destRect,cache,scheduledFrameNum,dropFrames,dynamicDetails,trialRecords)
 
 if isempty(dynamicDetails)
-    dynamicDetails=trialRecords(end).stimDetails;
-    dynamicDetails.times=dynamicDetails.track;
+    dynamicDetails = trialRecords(end).stimDetails;
+    dynamicDetails.track = [s.initialPos nan(2,dynamicDetails.nFrames)];
+    dynamicDetails.times = dynamicDetails.track(1,:);
 end
 
 target = dynamicDetails.target;
-
-p = deal(mouse(s));
-
-x=p(1);
-y=p(2);
 
 sounds={};
 
 i=i+1;
 
-if i == 1
-    % dynamicDetails.track(:,i) already set by calcStim
-elseif i > 1
-    dynamicDetails.track(:,i)=[x y]';
+if i > 1
+    dynamicDetails.track(:,i)=mouse(s)';
     if ~IsOSX
         dynamicDetails.track(:,i) = dynamicDetails.track(:,i) + dynamicDetails.track(:,i-1) - s.initialPos;
     end
@@ -37,6 +31,8 @@ if sign(target) * (dynamicDetails.track(1,i) - s.initialPos(1) - target) >= 0
     dynamicDetails.result = 'correct';
     sounds={};
     finish = true;
+    dynamicDetails.times=dynamicDetails.times(1:i);
+    dynamicDetails.track=dynamicDetails.track(:,1:i);
 elseif i >= size(dynamicDetails.track,2)
     dynamicDetails.result = 'timeout';
     sounds={};

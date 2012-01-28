@@ -584,30 +584,7 @@ while ~done && ~quit;
                                 error('dynamic floatprecision records will be inaccurate')
                             end
                             if ~ismember(ndims(thisFrame),[2 3])
-                                error('moreStim should return a single monochrome or RGB frame')
-                            end
-                            if finish
-                                if isinf(numFramesInStim)
-                                    numFramesInStim = framesInPhase; %causes handlePhasedTrialLogic to transition to next phase
-
-                                    if strcmp(phaseType,'discrim') %hmmm, how else do this?  trialManager shouldn't know about discrim...
-                                        if isempty(trialRecords(trialInd).trialDetails.correct)
-                                            trialRecords(trialInd).trialDetails.correct = strcmp(phaseRecords(1).dynamicDetails.result,'correct'); %causes updateTrialState to do reward
-                                        else
-                                            error('huh')
-                                        end
-                                        if isempty(trialRecords(trialInd).result)
-                                            trialRecords(trialInd).result = phaseRecords(1).dynamicDetails.result; %causes handlePhasedTrialLogic to propogate nominal result
-                                            if ismember(trialRecords(trialInd).result,{'correct','timedout'})
-                                                trialRecords(trialInd).result='nominal';
-                                            end
-                                        else
-                                            error('huh')
-                                        end
-                                    end
-                                else
-                                    error('huh')
-                                end
+                                error('moreStim should return a single monochrome or RGB frame') %will add rgba, just haven't tested...
                             end
                         otherwise
                             error('huh?')
@@ -615,12 +592,36 @@ while ~done && ~quit;
                     drawFrameUsingTextureCache(tm, window, i, frameNum, size(stim,3), lastI, dontclear, thisFrame, destRect, ...
                         filtMode, labelFrames, xOrigTextPos, yTextPos,strategy,floatprecision);
                 case 'expert'
-                    [doFramePulse expertCache phaseRecords(phaseNum).dynamicDetails textLabel i dontclear indexPulse] ...
+                    [doFramePulse expertCache phaseRecords(phaseNum).dynamicDetails textLabel i dontclear indexPulse dynamicSounds finish] ...
                         = drawExpertFrame(stimManager,stim,i,phaseStartTime,totalFrameNum,window,textLabel,...
                         destRect,filtMode,expertCache,ifi,scheduledFrameNum,tm.dropFrames,dontclear,...
-                        phaseRecords(phaseNum).dynamicDetails);
+                        phaseRecords(phaseNum).dynamicDetails,trialRecords);
                 otherwise
                     error('unrecognized strategy')
+            end
+            
+            if finish
+                if isinf(numFramesInStim)
+                    numFramesInStim = framesInPhase; %causes handlePhasedTrialLogic to transition to next phase
+                    
+                    if strcmp(phaseType,'discrim') %hmmm, how else do this?  trialManager shouldn't know about discrim...
+                        if isempty(trialRecords(trialInd).trialDetails.correct)
+                            trialRecords(trialInd).trialDetails.correct = strcmp(phaseRecords(1).dynamicDetails.result,'correct'); %causes updateTrialState to do reward
+                        else
+                            error('huh')
+                        end
+                        if isempty(trialRecords(trialInd).result)
+                            trialRecords(trialInd).result = phaseRecords(1).dynamicDetails.result; %causes handlePhasedTrialLogic to propogate nominal result
+                            if ismember(trialRecords(trialInd).result,{'correct','timedout'})
+                                trialRecords(trialInd).result='nominal';
+                            end
+                        else
+                            error('huh')
+                        end
+                    end
+                else
+                    error('huh')
+                end
             end
             
             setStatePins(station,'index',indexPulse);

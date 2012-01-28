@@ -1,56 +1,16 @@
 function [out doFramePulse cache dynamicDetails textLabel i indexPulse sounds finish]=moreStim(s,stim,i,textLabel,destRect,cache,scheduledFrameNum,dropFrames,dynamicDetails,trialRecords)
 
-doFramePulse = true;
-indexPulse = true;
-
-if isempty(dynamicDetails)
-    dynamicDetails = trialRecords(end).stimDetails;
-    dynamicDetails.track = nan(2,dynamicDetails.nFrames);
-    dynamicDetails.times = dynamicDetails.track(1,:);
-end
-
-p=mouse(s)';
-if i == 0 || any(diff([dynamicDetails.track(:,i) p],[],2))
-    i=i+1;
-    dynamicDetails.times(i)=GetSecs;
-    dynamicDetails.track(:,i)=p;
-    
-end
-
-if i > 1 && ~IsOSX
-    dynamicDetails.track(:,i) = dynamicDetails.track(:,i) + dynamicDetails.track(:,i-1) - s.initialPos;
-end
-
-target = dynamicDetails.target;
-sounds={};
-finish = false;
-if sign(target) * (dynamicDetails.track(1,i) - s.initialPos(1) - target) >= 0
-    dynamicDetails.result = 'correct';
-    finish = true;
-    dynamicDetails.times=dynamicDetails.times(1:i);
-    dynamicDetails.track=dynamicDetails.track(:,1:i);
-elseif i >= size(dynamicDetails.track,2)
-    dynamicDetails.result = 'timedout';
-    finish = true;
-elseif i > 1
-    switch sign(diff(dynamicDetails.track(1,i-[1 0])))
-        case sign(target)
-            sounds={'keepGoingSound'};
-        case -sign(target)
-            sounds={'trySomethingElseSound'};
-    end
-end
+[relPos, targetPos, sounds, finish, dynamicDetails, i, indexPulse, doFramePulse]=computeTrail(s, i, dynamicDetails, trialRecords);
 
 sf=getScaleFactor(s);
+relPos=round(relPos./repmat(sf',1,i));
+targetPos=round(targetPos/sf(1));
 
 lines=false(size(stim));
 dots=lines;
 wall=lines;
 
-relPos=dynamicDetails.track(:,1:i)-repmat(dynamicDetails.track(:,i)-s.initialPos,1,i);
-relPos=round(relPos./repmat(sf',1,i));
-
-%continuous lines between points -- tough to vetcorize? consider expert mode w/vectorized Screen('DrawLines')
+%continuous lines between points -- tough to vetcorize?
 d = diff(relPos,[],2);
 for j=2:i
     corners=relPos(:,j-[1 0]);
@@ -70,12 +30,12 @@ end
 relPos=relPos(:,all(relPos>0 & relPos<=repmat(fliplr(size(dots))',1,size(relPos,2))));
 dots(sub2ind(size(dots),relPos(2,:),relPos(1,:)))=true;
 
-targetPos=round((target+2*s.initialPos(1)-dynamicDetails.track(1,i))/sf(1));
-
+%target line
 if targetPos>0 && targetPos<=size(wall,2)
     wall(:,targetPos)=true;
 end
 
+%red wall, blue dots, white lines
 out(:,:,3) = dots | lines;
 out(:,:,2) = lines & ~dots;
 out(:,:,1) = (wall | lines) & ~dots;

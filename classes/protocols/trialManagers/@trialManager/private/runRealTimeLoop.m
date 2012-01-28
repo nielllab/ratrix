@@ -353,8 +353,6 @@ timestamps.phaseRecordsDone     = timestamps.lastFrameTime;
 timestamps.loopEnd              = timestamps.lastFrameTime;
 timestamps.prevPostFlipPulse    = timestamps.lastFrameTime;
 
-finish=false;
-
 %show stim -- be careful in this realtime loop!
 while ~done && ~quit;
     timestamps.loopStart=GetSecs;
@@ -400,6 +398,7 @@ while ~done && ~quit;
             [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).didStochasticResponse]= deal([]);
         end
         
+        finish=false;
         i=0;
         frameIndex=0;
         frameNum=1;
@@ -784,7 +783,7 @@ while ~done && ~quit;
     
     timestamps.enteringPhaseLogic=GetSecs;
     
-    if ~paused
+    if ~paused       
         [tm done newSpecInd phaseInd updatePhase transitionedByTimeFlag ...
             transitionedByPortFlag trialRecords(trialInd).result isRequesting lastSoundsLooped ...
             timestamps.logicGotSounds timestamps.logicSoundsDone timestamps.logicFramesDone ...

@@ -8,11 +8,11 @@ dontclear = 0;
 
 didBlend = false;
 
-width = 10; % default 1
+width  = 10; % default 1
 colors = []; % default white
 center = []; % positions are relative to "center" (default center is [0 0]).
-smooth = 1; % default 0, 1 requires Screen('BlendFunction')
-if smooth % do we really need it?  default of GL_ONE, GL_ZERO should just have overwrite semantics (see help PsychAlphaBlending)
+smooth = 1;  % default 0, 1 requires Screen('BlendFunction')
+if smooth
     [sourceFactorOld, destinationFactorOld]=Screen('BlendFunction', window, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     didBlend = true;
 end
@@ -20,7 +20,7 @@ end
 inds=repmat(2:size(relPos,2)-1,2,1);
 Screen('DrawLines', window, relPos(:,[1 inds(:)' end]), width, colors, center, smooth);
 
-[~, dacbits, reallutsize] = Screen('ReadNormalizedGammaTable', window); % probably slow to call ReadNormalizedGammaTable, and someone else must know so they can pass in clut length?
+[~, dacbits, reallutsize] = Screen('ReadNormalizedGammaTable', window); % probably slow, someone else must know so they can pass in clut length?
 if intmax(['uint' sprintf('%d',dacbits)]) ~= reallutsize-1
     error('huh?')
 end
@@ -38,7 +38,6 @@ Screen('DrawLine', window, color, targetPos, destRect(2), targetPos, destRect(4)
 if didBlend
     Screen('BlendFunction', window, sourceFactorOld, destinationFactorOld);
 end
-%error on timeout
 end
 
 % Support for 3D graphics rendering and for interfacing with external OpenGL code:

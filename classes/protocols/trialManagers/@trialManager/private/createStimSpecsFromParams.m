@@ -143,7 +143,7 @@ switch class(trialManager)
             else
                 criterion={[],i+1};
             end
-            stimSpecs{i} = stimSpec([],criterion,'cache',0,[],[],0,0,hz,'reinforced','reinforcement',false,false); % do not punish responses here
+            stimSpecs{i} = stimSpec([],criterion,'cache',0,[],[],0,strcmp(class(trialManager),'ball'),hz,'reinforced','reinforcement',false,false); % do not punish responses here
             i=i+1;
         end
         

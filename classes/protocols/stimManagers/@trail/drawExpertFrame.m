@@ -32,8 +32,7 @@ color = (reallutsize-1)*[0 0 1 1]; % default black
 Screen('DrawDots', window, relPos , width, color, center, type);
 
 color = (reallutsize-1)*[1 0 0 1]; % default black
-penWidth = 10; %default 1
-Screen('DrawLine', window, color, targetPos, destRect(2), targetPos, destRect(4), penWidth); %no smoothing?
+Screen('DrawLine', window, color, targetPos, destRect(2), targetPos, destRect(4), width); %no smoothing?
 
 if didBlend
     Screen('BlendFunction', window, sourceFactorOld, destinationFactorOld);

@@ -5,6 +5,7 @@ try
         w.FrameRate=fps;
     end
     open(w);
+    frames=reshape(frames,[size(frames,1) size(frames,2) 1 size(frames,3)]);
     writeVideo(w,frames);
     close(w);
 catch ex

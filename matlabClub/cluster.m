@@ -39,7 +39,7 @@ if false
     show(data*V(:,1:2)./repmat(S(1:2)',n*c,1),ids,{'svd 1','svd 2'});
 end
 
-d = diff([mean(data(ids==1,:)); mean(data(ids==2,:))]);
+d = diff(cell2mat(arrayfun(@(x) mean(data(ids==x,:)),[1; 2],'UniformOutput',false)));
 d = d'/norm(d);
 
 %kl = getKL(data,ids,d);
@@ -62,14 +62,12 @@ ylims = minmax(data(:,2));
         out = cellfun(@(f) f(in(:)),{@min @max});
     end
 
-nbins=100;
-
 for i = 1:c
-    color{i} = colors(ceil(size(colormap,1)*i/c),:);
+    color = colors(ceil(size(colormap,1)*i/c),:);
     
     subplot(2,2,3)
     d = data(ids==u(i),:);
-    plot(d(:,1),d(:,2),'.','Color',color{i});
+    plot(d(:,1),d(:,2),'.','Color',color);
     
     if i == 1
         xlim(xlims);
@@ -88,12 +86,11 @@ for i = 1:c
 end
 
     function clean
-        set(gca,'XTick',[])
-        set(gca,'YTick',[])
+        cellfun(@(x) set(gca,x,[]),{'XTick','YTick'});
     end
 
     function distPlot(col,lims,vert)
-        bins = linspace(lims(1),lims(2),nbins);
+        bins = linspace(lims(1),lims(2),100);
         h = hist(d(:,col),bins);
         if vert
             x=h;
@@ -104,7 +101,7 @@ end
             y=h;
             f=@xlim;
         end
-        plot(x,y,'Color',color{i});
+        plot(x,y,'Color',color);
         
         if i == 1
             f(lims);
@@ -116,8 +113,8 @@ end
 
 function out = getKL(data,ids,x0)
 u = unique(ids);
-if length(u)~=2 || ~all(ismember([1 2],u))
-    error('ids have to be 1 or 2')
+if length(u)~=2
+    error('need exactly 2 ids')
 end
 
 out = fminunc(@score,x0);
@@ -126,9 +123,8 @@ out = fminunc(@score,x0);
         d = data*x;
         m = minmax(d);
         
-        [a,bins] = hist(d(ids==1,:),linspace(m(1),m(2),100)');
-         b       = hist(d(ids==2,:),bins);
-        out = -kl([a; b]');
+        dists = cell2mat(arrayfun(@(x) hist(d(ids==x),linspace(m(1),m(2),100)),u,'UniformOutput',false));
+        out = -kl(dists');
     end
 end
 

@@ -1,4 +1,4 @@
-function frameDropCorner = setCLUTandFrameDropCorner(tm, window, station, LUT, frameDropCorner)
+function [frameDropCorner currentCLUT] = setCLUTandFrameDropCorner(tm, window, station, LUT, frameDropCorner)
 
 if window>=0
     [scrWidth scrHeight]=Screen('WindowSize', window);

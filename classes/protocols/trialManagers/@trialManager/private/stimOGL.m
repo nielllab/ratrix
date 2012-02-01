@@ -47,7 +47,7 @@ try
         ratrixSVNInfo = ratrixVersion;
     end
     
-    frameDropCorner = setCLUTandFrameDropCorner(tm, window, station, LUT, frameDropCorner);
+    [frameDropCorner currentCLUT] = setCLUTandFrameDropCorner(tm, window, station, LUT, frameDropCorner);
     
     for i=1:length(stimSpecs)
         spec = stimSpecs{i};
@@ -80,7 +80,7 @@ try
         = runRealTimeLoop(tm, window, ifi, stimSpecs, startingStimSpecInd, phaseData, stimManager, ...
         targetOptions, distractorOptions, requestOptions, interTrialLuminance, interTrialPrecision, ...
         station, manual,timingCheckPct,textLabel,rn,subID,stimID,protocolStr,ptbVersion,ratrixVersion,trialLabel,msAirpuff, ...
-        originalPriority, verbose,eyeTracker,frameDropCorner,trialRecords);
+        originalPriority, verbose,eyeTracker,frameDropCorner,trialRecords, currentCLUT);
     
 catch ex
     disp(['CAUGHT ERROR: ' getReport(ex,'extended')])

@@ -1,7 +1,7 @@
 function [doFramePulse expertCache dynamicDetails textLabel i dontclear indexPulse sounds finish] ...
     = drawExpertFrame(s,stim,i,phaseStartTime,totalFrameNum,window,textLabel,...
     destRect,filtMode,expertCache,ifi,scheduledFrameNum,dropFrames,dontclear,...
-    dynamicDetails,trialRecords)
+    dynamicDetails,trialRecords,currentCLUT)
 
 [relPos, targetPos, sounds, finish, dynamicDetails, i, indexPulse, doFramePulse]=computeTrail(s, i, dynamicDetails, trialRecords);
 dontclear = 0;
@@ -20,18 +20,17 @@ end
 inds=repmat(2:size(relPos,2)-1,2,1);
 Screen('DrawLines', window, relPos(:,[1 inds(:)' end]), width, colors, center, smooth);
 
-[~, dacbits, reallutsize] = Screen('ReadNormalizedGammaTable', window); % probably slow, someone else must know so they can pass in clut length?
-if intmax(['uint' sprintf('%d',dacbits)]) ~= reallutsize-1
-    error('huh?')
+if ~isfield('clutSize',expertCache)
+    expertCache.clutSize = size(currentCLUT,1)-1;
 end
 
 type = 2; % 0 (default) squares
           % 1 circles (with anti-aliasing) (requires Screen('BlendFunction'))
           % 2 circles (with high-quality anti-aliasing, if supported by your hardware)
-color = (reallutsize-1)*[0 0 1 1]; % default black
+color = expertCache.clutSize*[0 0 1 1]; % default black
 Screen('DrawDots', window, relPos , width, color, center, type);
 
-color = (reallutsize-1)*[1 0 0 1]; % default black
+color = expertCache.clutSize*[1 0 0 1]; % default black
 Screen('DrawLine', window, color, targetPos, destRect(2), targetPos, destRect(4), width); %no smoothing?
 
 if didBlend

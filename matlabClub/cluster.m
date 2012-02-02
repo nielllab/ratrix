@@ -3,6 +3,19 @@ clc
 close all
 
 if true
+    if ismac
+        file = '/Users/eflister/Desktop/waveformdata.mat'; % potential units: 5,6,11
+    else
+        file = '';
+    end
+    data = load(file);
+    ics = data.score;
+    
+    ids = data.idx == 6;
+    
+    dims = prod(arrayfun(@(x) size(data.X,x),[2 3]));
+    data = reshape(data.X,[size(data.X,1) dims]);
+else
     dims = 50;
     n = 1000;
     c = 2;
@@ -41,7 +54,7 @@ if false
 end
 
 % one good dimension is the one connecting the centroids of the clusters
-d = diff(cell2mat(arrayfun(@(x) mean(data(ids==x,:)),[1; 2],'UniformOutput',false)));
+d = diff(cell2mat(arrayfun(@(x) mean(data(ids==x,:)),unique(ids),'UniformOutput',false)));
 d = d'/norm(d);
 
 % http://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence
@@ -61,14 +74,12 @@ end
 u = unique(ids);
 c = length(u);
 
+dims = cell2mat(arrayfun(@(x) dims(:,x)/norm(dims(:,x)),1:size(dims,2),'UniformOutput',false));
+
 proj = data*dims;
 
 xlims = minmax(proj(:,1));
 ylims = minmax(proj(:,2));
-
-    function out = minmax(in)
-        out = cellfun(@(f) f(in(:)),{@min @max});
-    end
 
 fig = figure;
 colors = colormap;
@@ -79,7 +90,7 @@ for i = 1:c
     color = colors(ceil(size(colormap,1)*i/c),:);
     subplot(3,3,5)
     
-    h=scatter(d(:,1),d(:,2),150,repmat(color,size(d,1),1),'.');
+    h=scatter(d(:,1),d(:,2),1,repmat(color,size(d,1),1),'.');
     h=get(h,'Children');
     for j=1:length(h)
         set(h(j),'HitTest','on');
@@ -101,8 +112,6 @@ for i = 1:c
     subplot(3,3,6)
     distPlot(2,ylims,true);
 end
-
-%need clear button
 
     function clean
         cellfun(@(x) set(gca,x,[]),{'XTick','YTick'});
@@ -137,15 +146,23 @@ arrayfun(@dimPlot,[8 4],1:2);
         hold on
     end
 
-    function callback(src,evt,f,vect,color) 
+    function callback(src,evt,f,vect,color)
         figure(f);
         arrayfun(@(x)plotPoint(x,vect,color),[8 4]);
     end
 
+hs = [];
     function plotPoint(x,vect,color)
         subplot(3,3,x)
-        plot(vect/norm(vect),'Color',color)
+        hs(end+1) = plot(vect/norm(vect),'Color',color);
     end
+
+uicontrol('Style','pushbutton','String','clear','Units','normalized','Position',[.3 .3 .1 .1],'Callback',@clear);
+    function clear(src,evt)
+        delete(hs);
+        hs = [];
+    end
+set(fig,'Toolbar','figure');
 end
 
 function out = getKL(data,ids,x0)
@@ -168,4 +185,8 @@ end
 function out=kl(d)
 d=d+eps;%prevent nans/infs
 out=sum(d(:,1).*reallog(d(:,1)./d(:,2)));
+end
+
+function out = minmax(in)
+out = cellfun(@(f) f(in(:)),{@min @max});
 end

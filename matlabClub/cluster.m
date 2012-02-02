@@ -61,23 +61,30 @@ end
 u = unique(ids);
 c = length(u);
 
-data = data*dims;
+proj = data*dims;
 
-xlims = minmax(data(:,1));
-ylims = minmax(data(:,2));
+xlims = minmax(proj(:,1));
+ylims = minmax(proj(:,2));
 
     function out = minmax(in)
         out = cellfun(@(f) f(in(:)),{@min @max});
     end
 
+fig = figure;
 colors = colormap;
-f = figure;
 for i = 1:c
-    color = colors(ceil(size(colormap,1)*i/c),:);
+    inds = find(ids==u(i));
+    d = proj(inds,:);
     
+    color = colors(ceil(size(colormap,1)*i/c),:);
     subplot(3,3,5)
-    d = data(ids==u(i),:);
-    plot(f,d(:,1),d(:,2),'.','Color',color);
+    
+    h=scatter(d(:,1),d(:,2),150,repmat(color,size(d,1),1),'.');
+    h=get(h,'Children');
+    for j=1:length(h)
+        set(h(j),'HitTest','on');
+        set(h(j),'ButtonDownFcn',{@callback,fig,data(inds(j),:),color});
+    end
     
     if i == 1
         xlim(xlims);
@@ -95,6 +102,8 @@ for i = 1:c
     distPlot(2,ylims,true);
 end
 
+%need clear button
+
     function clean
         cellfun(@(x) set(gca,x,[]),{'XTick','YTick'});
     end
@@ -111,7 +120,7 @@ end
             y=h;
             f=@xlim;
         end
-        plot(f,x,y,'Color',color);
+        plot(x,y,'Color',color);
         
         if i == 1
             f(lims);
@@ -123,8 +132,19 @@ end
 arrayfun(@dimPlot,[8 4],1:2);
     function dimPlot(x,i)
         subplot(3,3,x)
-        plot(f,dims(:,i))
+        plot(dims(:,i))
         clean;
+        hold on
+    end
+
+    function callback(src,evt,f,vect,color) 
+        figure(f);
+        arrayfun(@(x)plotPoint(x,vect,color),[8 4]);
+    end
+
+    function plotPoint(x,vect,color)
+        subplot(3,3,x)
+        plot(vect/norm(vect),'Color',color)
     end
 end
 

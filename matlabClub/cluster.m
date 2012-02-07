@@ -6,15 +6,20 @@ if true
     if ismac
         file = '/Users/eflister/Desktop/waveformdata.mat'; % potential units: 5,6,11
     else
-        file = '';
+        file = 'C:\Users\nlab\Desktop\cluster\waveformdata.mat';
     end
     data = load(file);
     ics = data.score;
     
-    ids = data.idx == 6;
+    ids = data.idx == 11;
     
     dims = prod(arrayfun(@(x) size(data.X,x),[2 3]));
     data = reshape(data.X,[size(data.X,1) dims]);
+    
+    frac = .25;
+    sel = rand(size(ids))<frac;
+    ids = ids(sel);
+    data = data(sel,:);
 else
     dims = 50;
     n = 1000;
@@ -85,11 +90,18 @@ fig = figure;
 colors = colormap;
 for i = 1:c
     inds = find(ids==u(i));
+
+    color = colors(ceil(size(colormap,1)*i/c),:);
+
+    subplot(3,3,3)
+    plot(data(inds,:)','Color',color);
+    hold on
+    clean
+    axis tight
+    
     d = proj(inds,:);
     
-    color = colors(ceil(size(colormap,1)*i/c),:);
-    subplot(3,3,5)
-    
+    subplot(3,3,5)    
     h=scatter(d(:,1),d(:,2),1,repmat(color,size(d,1),1),'.');
     h=get(h,'Children');
     for j=1:length(h)

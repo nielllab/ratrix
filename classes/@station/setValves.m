@@ -4,7 +4,7 @@ if strcmp(s.responseMethod,'parallelPort')
         valves=logical(valves);
         
         % temporary hack -- right now we rely on the fact that no one
-        % (including the station) accesses the valves except through 
+        % (including the station) accesses the valves except through
         % setValves and getValves, but we can't guarantee this.
         if length(valves)~=length(s.valvePins.pinNums)
             if isscalar(s.valvePins.pinNums)

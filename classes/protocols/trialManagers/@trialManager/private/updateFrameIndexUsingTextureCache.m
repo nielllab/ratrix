@@ -84,6 +84,10 @@ else
     end
     
     if isempty(responseOptions) && i==stimSize
+        warning('this is killing ball rewards -- what is it for?')
+        sca
+        keyboard
+        
         done=1;
     end
     
@@ -92,6 +96,5 @@ else
     end
     didPulse=1;
 end
-
 
 end % end function

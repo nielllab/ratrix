@@ -123,7 +123,7 @@ function s=station(varargin)
 	end
 
 	if usingPport
-		if ismember(s.decPPortAddr,hex2dec({'B888','0378','FFF8'}))
+		if ismember(s.decPPortAddr,hex2dec({'B888','0378','FFF8','C800'}))
 			%pass
 		else
 			error('need a parallel port base address (should be ''0378'' (built-in) ''B888'' (pci) or ''FFF8'' (pcmcia)) -- under LPT ports in device manager, resources tab, I/O Range (first number is base address).');

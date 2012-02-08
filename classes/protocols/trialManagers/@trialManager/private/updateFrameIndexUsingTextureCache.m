@@ -83,11 +83,8 @@ else
         i=min(i+1,stimSize);
     end
     
-    if isempty(responseOptions) && i==stimSize
-        warning('this is killing ball rewards -- what is it for?')
-        sca
-        keyboard
-        
+    if isempty(responseOptions) && i==stimSize && ~isa(tm,'ball')
+        warning('this was killing ball rewards -- what is it for?  doesn''t autoplay work some other way, like using the stim spec transitions?')
         done=1;
     end
     

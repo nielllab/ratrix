@@ -8,7 +8,7 @@ dontclear = 0;
 
 didBlend = false;
 
-width  = 10; % default 1
+width  = 63; % default 1.  > 63 errors for DrawDots?  > ~10 seems to have no effect on lines?
 colors = []; % default white
 center = []; % positions are relative to "center" (default center is [0 0]).
 smooth = 1;  % default 0, 1 requires Screen('BlendFunction')
@@ -17,18 +17,32 @@ if smooth
     didBlend = true;
 end
 
-inds=repmat(2:size(relPos,2)-1,2,1);
-Screen('DrawLines', window, relPos(:,[1 inds(:)' end]), width, colors, center, smooth);
-
 if ~isfield('clutSize',expertCache)
     expertCache.clutSize = size(currentCLUT,1)-1;
+end
+
+color = expertCache.clutSize*ones(1,4);
+wallRect = destRect; %[left top right bottom]
+if dynamicDetails.target > 0
+    ind = 1;
+else
+    ind = 3;
+end
+wallRect(ind) = targetPos;
+if diff(wallRect([1 3])) > 0
+    Screen('FillRect', window, color, wallRect);
 end
 
 type = 2; % 0 (default) squares
           % 1 circles (with anti-aliasing) (requires Screen('BlendFunction'))
           % 2 circles (with high-quality anti-aliasing, if supported by your hardware)
-color = expertCache.clutSize*[0 0 1 1]; % default black
 Screen('DrawDots', window, relPos , width, color, center, type);
+
+inds = repmat(2:size(relPos,2)-1,2,1);
+Screen('DrawLines', window, relPos(:,[1 inds(:)' end]), width, colors, center, smooth);
+
+color = expertCache.clutSize*[0 0 1 1]; % default black
+Screen('DrawDots', window, relPos , 10, color, center, type);
 
 color = expertCache.clutSize*[1 0 0 1]; % default black
 Screen('DrawLine', window, color, targetPos, destRect(2), targetPos, destRect(4), width); %no smoothing?

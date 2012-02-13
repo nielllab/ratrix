@@ -1,5 +1,5 @@
 function lptWriteBits(decAddr,locs,vals)
-b64 = true;
+b64 = false;
 
 persistent ioObj; %declared outside of if block because warned it is inefficient otherwise
 if b64 %temporary hack to get 2p station running

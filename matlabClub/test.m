@@ -15,8 +15,8 @@ function x = s2c(x)
 % for n dimensions, in has columns r, phi1, phi2, ... phi(n-1)
 % 0 <= r, 0 <= phi1...phi(n-2) <= pi, 0 <= phi(n-1) < 2pi
 
-x(:,2:end-1) = mod(x(:,2:end-1),pi);
-x(:,end) = mod(x(:,end),2*pi);
+%x(:,2:end-1) = mod(x(:,2:end-1),pi);
+%x(:,end) = mod(x(:,end),2*pi);
 x = cumprod([x(:,1) sin(x(:,2:end))],2) .* [cos(x(:,2:end)) ones(size(x,1),1)];
 end
 
@@ -25,5 +25,11 @@ r = 1;
 mouse1 = [0    0 0 -1]; % yaw roll +x(yaw) +x(roll)
 mouse2 = [pi/2 0 0  0];
 
+dPitch = 
+dYaw = dx1*mouse1(3)/r + dy1*cos(mouse1(3))/r
+dRoll = 
 
+    function out = arclen(x)
+        out = x/r;
+    end
 end

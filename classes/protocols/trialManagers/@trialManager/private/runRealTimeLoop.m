@@ -224,17 +224,17 @@ Screen('Screens');
 if window>0
     standardFontSize=11;
     oldFontSize = Screen('TextSize',window,standardFontSize);
-    if IsLinux        
-        Screen('TextStyle', window, 0); %otherwise defaults to bold italic!?!          
+    if IsLinux
+        Screen('TextStyle', window, 0); %otherwise defaults to bold italic!?!
         
         font = 'nimbus mono l';
         font = 'palladio';
         font = 'fixed';
         font = '-urw-nimbus mono l-bold-o-normal--0-0-0-0-p-0-iso8859-1';
         % font = '-*-fixed-*-*-*-*-*-*-*-*-*-*-*-*';
-        Screen('TextFont',window,font); %otherwise we get Couldn't select the requested font with the requested font settings from X11 system!        
+        Screen('TextFont',window,font); %otherwise we get Couldn't select the requested font with the requested font settings from X11 system!
         
-        Screen('TextStyle', window, 0); %otherwise defaults to bold italic!?!   only works if textrender 1?     
+        Screen('TextStyle', window, 0); %otherwise defaults to bold italic!?!   only works if textrender 1?
     end
     [normBoundsRect, offsetBoundsRect]= Screen('TextBounds', window, 'TEST');
 end
@@ -501,7 +501,7 @@ while ~done && ~quit;
     timestamps.phaseUpdated=GetSecs;
     doFramePulse=true;
     
-    if ~paused        
+    if ~paused
         % here should be the function that also checks to see if we should assign trialRecords.correct
         % and trialRecords.response, and also does tm-specific reward checks (nAFC should check to update reward/airpuff
         % if first frame of a 'reinforced' phase)
@@ -783,7 +783,7 @@ while ~done && ~quit;
     
     timestamps.enteringPhaseLogic=GetSecs;
     
-    if ~paused       
+    if ~paused
         [tm done newSpecInd phaseInd updatePhase transitionedByTimeFlag ...
             transitionedByPortFlag trialRecords(trialInd).result isRequesting lastSoundsLooped ...
             timestamps.logicGotSounds timestamps.logicSoundsDone timestamps.logicFramesDone ...
@@ -887,7 +887,12 @@ while ~done && ~quit;
             if strcmp(class(ports),'double') %happens on osx, why?
                 ports=logical(ports);
             end
-            rewardValves(ports)=1;
+            
+            if ~isa(tm,'ball')
+                rewardValves(ports)=1;
+            else
+                rewardValves(:)=1; %where put this?
+            end
             
             %         if isempty(rewardPorts)
             %             rewardValves(requestOptions) = 1;

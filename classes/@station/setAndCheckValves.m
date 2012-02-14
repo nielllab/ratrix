@@ -1,4 +1,4 @@
-function [endValveState valveErrorDetails]=setAndCheckValves(station, requestedValves,expectedValveState,valveErrorDetails,startTime,description,barebones)
+function [endValveState valveErrorDetails]=setAndCheckValves(station,requestedValves,expectedValveState,valveErrorDetails,startTime,description,barebones)
 
 if ~exist('barebones','var') || isempty(barebones)
     barebones=true;%false;
@@ -56,8 +56,7 @@ if strcmp(station.responseMethod,'parallelPort')
     else
         endValveState=requestedValves;
     end
-    
-    
+        
 else
     if ~ismac
         warning('can''t check and set valves without parallel port')

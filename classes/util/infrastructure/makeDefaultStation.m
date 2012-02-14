@@ -128,7 +128,7 @@ stationSpec.portSpec.indexPins                = int8(8);
 
 if a
     switch b
-        case {'F46D04EFE0FF','5404A6EF6720'}
+        case {'F46D04EFE0FF','5404A6EF6720','14DAE971D50E'}
             stationSpec.portSpec.valveSpec=int8(3); %mini-3-way-lickometer and ball only use center valve
     end
 end

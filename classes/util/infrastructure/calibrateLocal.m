@@ -1,8 +1,6 @@
 function calibrateLocal( numReps, amts, timeBtw, requiredAccuracy )
 %ex: calibrateLocal( 10, [.03 .03 .03], .25, .1 )
 
-clc
-
 dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
 
 id               = '1U';

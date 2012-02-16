@@ -8,6 +8,8 @@ fact = 2;
 
 precision = .1;
 
+[pathstr, name, ext] = fileparts(mfilename('fullpath'));
+addpath(fullfile(fileparts(fileparts(fileparts(pathstr))),'bootstrap'));
 setupEnvironment;
 
 input('hit enter to prime the ports')

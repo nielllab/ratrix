@@ -1,7 +1,7 @@
 function calibrateStation
 mins = 5;
 gap = .25;
-num = ceil(mins*60/(3*4*gap));
+num = ceil(mins*60/(2*4*gap));
 
 base = .04;
 fact = 2;
@@ -21,7 +21,7 @@ fprintf('\nnow checking calibration fix factor %g\n',1/ratio);
 checkBoth(num,base,fact,gap,precision,start,ratio);
 end
 
-function [ratio left]=checkBoth(num,base,fact,gap,precision,start,fix)
+function [ratio left rate]=checkBoth(num,base,fact,gap,precision,start,fix)
 if ~exist('start','var') || isempty(start)
     start = input('\nenter the water level\n');
 end
@@ -40,8 +40,24 @@ ratio = (right*(fact + 1) - fact*start - left)/(start + fact*left - right*(fact 
 
 [n d] = rat(ratio);
 fprintf('\nfound R:L is %d:%d (%g%% off)\n',n,d, round(10000*(ratio-1))/100);
+
+start - right = base*num*(1 + fact/fix)     L=base*num, R=base*num/fix
+right - left = base*num*(fact*fix + 1)      L=base*num*fix, R=base*num
+
+base = .04
+fact = 2
+num = 100
+start = 10
+right = 9
+left = 8
+
+L = (right - start - fact*left + fact*right)/(fact^2 - 1); % L = base*num*rate
+rate = 10*L/(base*num); % ul/10ms
+fprintf('\nif measurements were in ml, then volume per 10ms on left side was %gul (that means 2ml in 150 rewards needs %dms each)\n',rate,round((2*10^4)/(150*rate)));
 end
 
+% algebra for the curious:
+%
 % syms L R fact start right left
 % a = L + fact*R - start + right
 % b = fact*L + R - right + left
@@ -58,6 +74,8 @@ end
 %
 % (right*(fact + 1) - fact*start - left)/(start + fact*left - right*(fact + 1))
 
+% and by hand:
+% 
 % L + fact*R = start - right
 % fact*L + R = right - left
 % --------------------------

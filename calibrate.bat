@@ -1,0 +1,1 @@
+matlab -nodesktop -nosplash -r "cd 'ratrix\classes\util\infrastructure';calibrateStation;"

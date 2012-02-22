@@ -95,6 +95,7 @@ threshLoS=uicontrol(f,'Style','slider','String','loThresh','Min',-1,'Max',0,'Sli
         hiCut=get(hiCutS,'Value');
         
         [b,a]=fir1(fOrd,2*[loCut hiCut]/sampRate);
+        data=double(data); %01.030.12 - filtfilt says it only takes doubles now.
         filt=filtfilt(b,a,data);
         filt=filt/max(abs(filt));
         

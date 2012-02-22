@@ -263,6 +263,8 @@ end
 
     function out = score(x)
         x = x/norm(x); % would be better to use polar coordinates and use fmincon on a hemi-hypersphere
+        % check http://en.wikipedia.org/wiki/N-sphere#Hyperspherical_coordinates
+        % and cart2sph for 3-space
         d = data*x;
         m = minmax(d);
         

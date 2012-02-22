@@ -1,3 +1,15 @@
+function test
+x=10*randn(10000,10);
+
+y = abs(s2c(c2s(x))-x);
+any(y(:)>10^-9)
+
+x = mod(x,pi);
+y = abs(c2s(s2c(x))-x);
+any(y(:)>10^-9)
+
+end
+
 function out = c2s(in)
 % cartesian to hyperspherical coordinates
 % http://en.wikipedia.org/wiki/N-sphere#Hyperspherical_coordinates

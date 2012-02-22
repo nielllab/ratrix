@@ -25,7 +25,10 @@ end
 
 function [ratio left rate]=checkBoth(num,base,fact,gap,precision,start,fix)
 if ~exist('start','var') || isempty(start)
+    start=[];
+    while isempty(start)
     start = input('\nenter the water level\n');
+    end
 end
 
 if ~exist('fix','var') || isempty(fix)
@@ -43,15 +46,15 @@ ratio = (right*(fact + 1) - fact*start - left)/(start + fact*left - right*(fact 
 [n d] = rat(ratio);
 fprintf('\nfound R:L is %d:%d (%g%% off)\n',n,d, round(10000*(ratio-1))/100);
 
-start - right = base*num*(1 + fact/fix)     L=base*num, R=base*num/fix
-right - left = base*num*(fact*fix + 1)      L=base*num*fix, R=base*num
-
-base = .04
-fact = 2
-num = 100
-start = 10
-right = 9
-left = 8
+% start - right = base*num*(1 + fact/fix)     L=base*num, R=base*num/fix
+% right - left = base*num*(fact*fix + 1)      L=base*num*fix, R=base*num
+% 
+% base = .04
+% fact = 2
+% num = 100
+% start = 10
+% right = 9
+% left = 8
 
 L = (right - start - fact*left + fact*right)/(fact^2 - 1); % L = base*num*rate
 rate = 10*L/(base*num); % ul/10ms

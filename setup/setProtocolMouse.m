@@ -91,9 +91,15 @@ ts6 = trainingStep(lpTM  , orientation, repeatIndefinitely()                  , 
 
 p=protocol('mouse orientation',{ts1, ts2, ts3, ts4, ts5, ts6});
 
-stepNum=uint8(1);
-
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});
+    
+    switch subjIDs{i}
+        case 'test'
+            stepNum=uint8(4);
+        otherwise
+            stepNum=uint8(1);
+    end
+    
     [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolMouse','edf');
 end

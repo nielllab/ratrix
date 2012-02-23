@@ -94,6 +94,12 @@ Subject
     sacDate   Date -- after litter DOB
     sacReason SacReason
     test      Bool
+--    weights   [WeightRec]
+
+WeightRec
+    weight    Weight
+    date      Date
+    subject   Subject
 
 Researcher
     firstName String
@@ -102,7 +108,7 @@ Researcher
     phone     Phone
 
 Cage
-    listOfSubjects, all different earIDs
+--    listOfSubjects, all different earIDs
 
 Cohort
     listOfSubjects

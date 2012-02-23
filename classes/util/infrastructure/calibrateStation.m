@@ -27,8 +27,12 @@ function [ratio left rate]=checkBoth(num,base,fact,gap,precision,start,fix)
 if ~exist('start','var') || isempty(start)
     start=[];
     while isempty(start)
-    start = input('\nenter the water level\n');
+        start = input('\nenter the water level\n');
     end
+end
+
+if ~all(cellfun(@(f)f(start),{@isscalar @isnumeric @isreal @(x)x>0}))
+    error('has to be a real positive scalar')
 end
 
 if ~exist('fix','var') || isempty(fix)
@@ -38,25 +42,38 @@ end
 calibrateLocal(num,base*[1 0 fact/fix],gap,precision);
 right = input('\nenter the water level\n');
 
+if ~all(cellfun(@(f)f(right),{@isscalar @isnumeric @isreal @(x)x>0 @(x)x<start}))
+    error('has to be a real scalar smaller than previous')
+end
+
 calibrateLocal(num,base*[fact*fix 0 1],gap,precision);
 left = input('\nenter the water level\n');
 
-ratio = (right*(fact + 1) - fact*start - left)/(start + fact*left - right*(fact + 1));
+if ~all(cellfun(@(f)f(left),{@isscalar @isnumeric @isreal @(x)x>0 @(x)x<right}))
+    error('has to be a real scalar smaller than previous')
+end
 
-[n d] = rat(ratio);
-fprintf('\nfound R:L is %d:%d (%g%% off)\n',n,d, round(10000*(ratio-1))/100);
-
-% start - right = base*num*(1 + fact/fix)     L=base*num, R=base*num/fix
-% right - left = base*num*(fact*fix + 1)      L=base*num*fix, R=base*num
-% 
 % base = .04
 % fact = 2
 % num = 100
-% start = 10
-% right = 9
-% left = 8
+% start = 37 % 40
+% right = 36.9 % 38
+% left = 36.4 % 37
 
-L = (right - start - fact*left + fact*right)/(fact^2 - 1); % L = base*num*rate
+R = (left - right - fact*right + fact*start)/(fact^2 - 1);
+L = (right - start - fact*left + fact*right)/(fact^2 - 1);
+
+if any([R L]<=0)
+    R
+    L
+    ratio
+    error('R and L should both be strictly positive -- one of the valves seems very clogged')
+end
+
+ratio = R/L;
+[n d] = rat(ratio);
+fprintf('\nfound R:L is %d:%d (%g%% off)\n',n,d, round(10000*(ratio-1))/100);
+
 rate = 10*L/(base*num); % ul/10ms
 fprintf('\nif measurements were in ml, then volume per 10ms on left side was %gul (that means 2ml in 150 rewards needs %dms each)\n',rate,round((2*10^4)/(150*rate)));
 end

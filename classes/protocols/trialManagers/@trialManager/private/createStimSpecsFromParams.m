@@ -25,6 +25,8 @@ function [stimSpecs startingStimSpecInd] = createStimSpecsFromParams(trialManage
 % from stimManagers, rather than trialManagers. 11.08.11
 % 'punishResponses' is probably also wrong
 if any(cellfun(@(x) isfield(x,'autoTrigger'),{preRequestStim,preResponseStim,discrimStim}))
+    sca
+    keyboard
     error('do not set autoTriggers in calcStim; should only come from freeDrinks trialManager')
 end
 

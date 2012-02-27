@@ -16,10 +16,15 @@ else
 end
 recordPath = fullfile(drive,'Users','nlab','Desktop','ballData','PermanentTrialRecordStore',subj);
 
+d=dir([recordPath '//..']);
+fprintf('available subjects:\n');
+{d([d.isdir] & ~ismember({d.name},{'.','..'})).name}
+
 files = dir(fullfile(recordPath,'trialRecords_*.mat'));
 
 bounds = cell2mat(cellfun(@(x)textscan(x,'trialRecords_%u-%u_%*s.mat','CollectOutput',true),{files.name}'));
-[bounds,ord] = sort(bounds(:,1));
+[~,ord] = sort(bounds(:,1));
+bounds = bounds(ord,:);
 files = files(ord);
 
 recNum = 0;
@@ -180,7 +185,7 @@ slidingAvg = savg(dur(~isnan(dur)),n);
         out = x(repmat((1:n)',1,length(x)-n+1)+repmat(0:length(x)-n,n,1));
     end
 
-pTiles = prctile(window(pad(dur,n,@nan),n),25*[-1 1]+50);
+pTiles = prctile(window(pad(dur(~isnan(dur)),n,@nan),n),25*[-1 0 1]+50);
 
 alpha=.05;
 [~, pci] = binofit(sum(window(res(res~=2),n)),n,alpha);
@@ -238,27 +243,30 @@ subplot(n,1,2)
 correctPlot(len); %can see occasional red k-q's with len < timeout
 hold on
 plot(trialNums,timeout,'k')
-ylims = [0 max(len)*1.5];
+ylims = [min(len) max(len)*1.5];
 ylabel('movements to crossing')
 standardPlot(@plot);
+set(gca,'YScale','log')
 
 subplot(n,1,3)
-if true
+if false
     p=@plot;
 else
-    p=@semilogy; %using semilogy causes transparency in next plot to fail!  using plot resolves it.
+    p=@semilogy; %using semilogy causes transparency in this AND next plot to fail!  using plot resolves it.  set(gca,'YScale','log') doesn't
 end
 p(trialNums,dur,'g.')
 hold on
+eps=min(dur(dur>0))/10;
+p(trialNums(dur==0),eps,'g+'); % semilogy on 0 fails (would rather draw these off axis, but how do this + survive figure resizing?)
 xd=trialNums(~isnan(dur));
-rangePlot(xd,pTiles);
-p(xd,slidingAvg,'k')
+pTiles(pTiles==0)=eps; 
+rangePlot(xd,pTiles([1 end],:));
+p(xd,pTiles(2,:),'y');
+p(xd,slidingAvg,'r')
 p(trialNums,nanmean(dur),'Color',grey);
-ylims = [min(dur(dur>0)) max(dur)*1.5]; % semilogy on 0 fails
+ylims = [eps max(dur)*1.5];
 ylabel('ms to crossing')
 standardPlot(p);
-a = gca;
-set(a,'YScale','log'); %preserves transparency?
 
 subplot(n,1,4)
 rangePlot(x,pci');

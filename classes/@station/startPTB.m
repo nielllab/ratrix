@@ -41,6 +41,8 @@ try
     %4) Be pretty verbose about information and hints to optimize your code and system.
     %5) Levels 5 and higher enable very verbose debugging output, mostly useful for debugging PTB itself, not generally useful for end-users.
     
+    Screen('Preference', 'Verbosity', 1); %edf's machine is stuck on  Microsofts OpenGL software renderer
+    
     preScreen=GetSecs();
     if isempty(imagingTasks)
         s.window = Screen('OpenWindow',s.screenNum,0);%,[],32,2);  %%color, rect, depth, buffers (none can be changed in basic version)

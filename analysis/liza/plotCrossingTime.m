@@ -16,15 +16,20 @@ else
 end
 recordPath = fullfile(drive,'Users','nlab','Desktop','ballData','PermanentTrialRecordStore',subj);
 
+d=dir([recordPath '//..']);
+fprintf('available subjects:\n');
+{d([d.isdir] & ~ismember({d.name},{'.','..'})).name}
+
 files = dir(fullfile(recordPath,'trialRecords_*.mat'));
 
 bounds = cell2mat(cellfun(@(x)textscan(x,'trialRecords_%u-%u_%*s.mat','CollectOutput',true),{files.name}'));
 [~,ord] = sort(bounds(:,1));
+bounds = bounds(ord,:);
 files = files(ord);
 
 recNum = 0;
 for i=1:length(files)
-    if bounds(ord(i),1) ~= recNum+1
+    if bounds(i,1) ~= recNum+1
         error('record file names indicate ordering problem')
     end
     
@@ -33,7 +38,7 @@ for i=1:length(files)
     records(recNum+1:newRecNum) = fullRecs(i).trialRecords; %extending this struct array is slow, that's why we normally use compiled records
     recNum = newRecNum;
     
-    if bounds(ord(i),2) ~= recNum
+    if bounds(i,2) ~= recNum
         error('record file names indicate ordering problem')
     end
     
@@ -172,13 +177,15 @@ slidingAvg = savg(dur(~isnan(dur)),n);
     end
 
     function out = pad(x,n,p)
-        out = [p(1,ceil((n-1)/2)) x p(1,floor((n-1)/2))];
+        n = (n-1)/2;
+        out = [p(1,ceil(n)) x p(1,floor(n))];
     end
 
     function out = window(x,n)
-        out = repmat((1:n)',1,length(x)-n+1)+repmat(0:length(x)-n,n,1);
-        out = x(out);
+        out = x(repmat((1:n)',1,length(x)-n+1)+repmat(0:length(x)-n,n,1));
     end
+
+pTiles = prctile(window(pad(dur(~isnan(dur)),n,@nan),n),25*[-1 0 1]+50);
 
 alpha=.05;
 [~, pci] = binofit(sum(window(res(res~=2),n)),n,alpha);
@@ -203,9 +210,11 @@ if ismac
     warning('haven''t picked a nice dot size for mac')
 end
 colormap([1 0 0;0 1 0]); %red for non-corrects, green for corrects
+grey = .65*ones(1,3);
+transparency=.2; %calling semilogy causes transparency to fail even on other axes!
 
 subplot(n,1,1)
-scatter(trialNums,cell2mat(actualRewards),dotSize,(res==1)+1)
+correctPlot(cell2mat(actualRewards));
 hold on
 plot(trialNums,intendedRewards,'k')
 ylims = [0 max(intendedRewards)*1.5];
@@ -217,36 +226,50 @@ standardPlot(@plot);
         ylim(ylims)
         xlim([1 length(records)])
         
-        grey = .75*ones(1,3);
         for i=1:length(sessions)
             f(sessions(i)*ones(1,2),ylims,'Color',grey)
         end
     end
 
+    function correctPlot(x)
+        scatter(trialNums,x,dotSize,(res==1)+1);
+    end
+
+    function rangePlot(x,y)
+        fill([x fliplr(x)],[y(1,:) fliplr(y(2,:))],'k','FaceAlpha',transparency,'LineStyle','none');
+    end
+
 subplot(n,1,2)
-scatter(trialNums,len,dotSize,(res==1)+1); %can see occasional red k-q's with len < timeout
+correctPlot(len); %can see occasional red k-q's with len < timeout
 hold on
 plot(trialNums,timeout,'k')
-ylims = [0 max(len)*1.5];
+ylims = [min(len) max(len)*1.5];
 ylabel('movements to crossing')
 standardPlot(@plot);
+set(gca,'YScale','log')
 
 subplot(n,1,3)
 if false
     p=@plot;
 else
-    p=@semilogy; %using semilogy causes transparency in next plot to fail!  using plot resolves it.
+    p=@semilogy; %using semilogy causes transparency in this AND next plot to fail!  using plot resolves it.  set(gca,'YScale','log') doesn't
 end
 p(trialNums,dur,'g.')
 hold on
-p(trialNums(~isnan(dur)),slidingAvg,'k')
-ylims = [min(dur(dur>0)) max(dur)*1.5]; % semilogy on 0 fails
+eps=min(dur(dur>0))/10;
+p(trialNums(dur==0),eps,'g+'); % semilogy on 0 fails (would rather draw these off axis, but how do this + survive figure resizing?)
+xd=trialNums(~isnan(dur));
+pTiles(pTiles==0)=eps; 
+rangePlot(xd,pTiles([1 end],:));
+p(xd,pTiles(2,:),'y');
+p(xd,slidingAvg,'r')
+p(trialNums,nanmean(dur),'Color',grey);
+ylims = [eps max(dur)*1.5];
 ylabel('ms to crossing')
 standardPlot(p);
 
 subplot(n,1,4)
-transparency=.2; %calling semilogy above causes transparency to fail!
-fill([x fliplr(x)],[pci(:,2)' flipud(pci(:,1))'],'k','FaceAlpha',transparency,'LineStyle','none');
+rangePlot(x,pci');
 hold on
 ylims = [0 1];
 ylabel('% correct')

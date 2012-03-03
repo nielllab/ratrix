@@ -8,6 +8,10 @@ accuracy = .1;
 addpath(fullfile(fileparts(fileparts(fileparts(pathstr))),'bootstrap'));
 setupEnvironment;
 
+input('hit enter to prime the ports (get all bubbles out of lines)')
+portTest;
+clc
+
 start = input('\nenter the water level (ml)\n');
 calibrateLocal( n, [0 duration 0], gap, accuracy );
 stop = input('\nenter the water level (ml)\n');

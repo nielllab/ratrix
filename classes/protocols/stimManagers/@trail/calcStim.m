@@ -47,8 +47,6 @@ if IsLinux
     end
 end
 
-mouse(stimulus,true);
-
 [targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass,allowRepeats);
 
 dims=[height width]./scaleFactor;

@@ -85,7 +85,14 @@ res = cellfun(@(x)f(x),{t.correct});
     end
 
 if ~all((res == 2) == (loc == 1))
-    error('manual kills didn''t line up with empty corrects')
+    %hmm, test's trial 2257 (last one in file 23) is set to manual kill, but got a 0 for correct, instead of an empty.  how?
+    inds = find((res == 2) ~= (loc == 1))
+    res(inds)
+    loc(inds)
+    u=unique(result);
+    u(loc(inds))
+    t(inds).correct
+    warning('manual kills didn''t line up with empty corrects')
 end
 
 %these trials each have two phases -- a discrimination phase followed by a reinforcement phase
@@ -172,8 +179,23 @@ dur(res~=1 | manualRewards)=nan; %get rid of trials that didn't end nominal corr
 n = 50;
 slidingAvg = savg(dur(~isnan(dur)),n);
 
+    function out = nanmeanMW(x) %my nanmean function shadows the stats toolbox one and is incompatible
+        % out = builtin('nanmean',x); %fails cuz toolboxes don't count as builtin
+        
+        fs = which('nanmean','-all');
+        ind = find(~cellfun(@isempty,strfind(fs,'stats')));
+        if ~isscalar(ind)
+            error('couldn''t find unique stats toolbox nanmean')
+        end
+        % out = feval(fs{ind},x); %fails cuz exceeds MATLAB's maximum name length of 63 characters
+        % f = str2func(fs{ind}); %paths aren't valid function names?
+        oldDir = cd(fileparts(fs{ind}));
+        out = nanmean(x);
+        cd(oldDir);
+    end
+
     function out = savg(x,n)
-        out = nanmean(window(pad(x,n,@nan),n));
+        out = nanmeanMW(window(pad(x,n,@nan),n));
     end
 
     function out = pad(x,n,p)
@@ -222,51 +244,75 @@ ylabel('reward size (ms)')
 title(subj)
 standardPlot(@plot);
 
-    function standardPlot(f)
-        ylim(ylims)
-        xlim([1 length(records)])
-        
+    function standardPlot(f,ticks)
         for i=1:length(sessions)
             f(sessions(i)*ones(1,2),ylims,'Color',grey)
         end
+        
+        if isequal(f,@semilogyEF) %they couldn't overload == ?
+            ylims = log(ylims);
+        end
+        
+        ylim(ylims)
+        xlim([1 length(records)])
+        
+        if exist('ticks','var')
+            set(gca,'YTick',log(ticks),'YTickLabel',ticks);
+        end
     end
 
-    function correctPlot(x)
+    function correctPlot(x,doLog)
+        if exist('doLog','var') && doLog
+            x=log(x);
+        end
         scatter(trialNums,x,dotSize,(res==1)+1);
     end
 
-    function rangePlot(x,y)
+    function rangePlot(x,y,doLog)
+        if exist('doLog','var') && doLog
+            y=log(y);
+        end
         fill([x fliplr(x)],[y(1,:) fliplr(y(2,:))],'k','FaceAlpha',transparency,'LineStyle','none');
     end
 
+    function semilogyEF(x,y,varargin)
+        plot(x,log(y),varargin{:});
+    end
+
 subplot(n,1,2)
-correctPlot(len); %can see occasional red k-q's with len < timeout
+if false
+    p=@plot;
+else
+    p=@semilogyEF; % set(gca,'YScale','log') screws up other plots' transparency
+end
+correctPlot(len,true); %can see occasional red k-q's with len < timeout
 hold on
-plot(trialNums,timeout,'k')
+p(trialNums,timeout,'k')
 ylims = [min(len) max(len)*1.5];
 ylabel('movements to crossing')
-standardPlot(@plot);
-set(gca,'YScale','log')
+standardPlot(p,[1 3 10 30 100 300]);
 
 subplot(n,1,3)
 if false
     p=@plot;
-else
+elseif false
     p=@semilogy; %using semilogy causes transparency in this AND next plot to fail!  using plot resolves it.  set(gca,'YScale','log') doesn't
+else
+    p=@semilogyEF;
 end
+eps=min(dur(dur>0))/10;
 p(trialNums,dur,'g.')
 hold on
-eps=min(dur(dur>0))/10;
 p(trialNums(dur==0),eps,'g+'); % semilogy on 0 fails (would rather draw these off axis, but how do this + survive figure resizing?)
 xd=trialNums(~isnan(dur));
-pTiles(pTiles==0)=eps; 
-rangePlot(xd,pTiles([1 end],:));
+pTiles(pTiles==0)=eps;
+rangePlot(xd,pTiles([1 end],:),true);
 p(xd,pTiles(2,:),'y');
 p(xd,slidingAvg,'r')
-p(trialNums,nanmean(dur),'Color',grey);
+p(trialNums,nanmeanMW(dur)*ones(1,length(trialNums)),'b');%,'Color',grey);
 ylims = [eps max(dur)*1.5];
 ylabel('ms to crossing')
-standardPlot(p);
+standardPlot(p,[.01 .03 .1 .3 1 3 10]*1000);
 
 subplot(n,1,4)
 rangePlot(x,pci');

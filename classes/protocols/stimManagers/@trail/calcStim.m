@@ -39,6 +39,7 @@ if IsLinux
             stimulus.mouseIndices = [stimulus.mouseIndices c{i}.index];
             c{i}.locationID
             c{i}.interfaceID
+            %check for expected mfg and resolution too
         end
     end
     

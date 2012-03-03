@@ -28,7 +28,7 @@ else
 end
 stimulus.initialPos=[width height]'/2;
 details.nFrames = 5*hz;
-details.target = 300*sign(randn);
+details.target = 750*sign(randn);
 
 stimulus.mouseIndices=[];
 if IsLinux

@@ -5,19 +5,28 @@ indexPulse = true;
 
 if isempty(dynamicDetails)
     dynamicDetails = trialRecords(end).stimDetails;
+    dynamicDetails.gain = .05 * ones(2,1);
     dynamicDetails.track = nan(2,dynamicDetails.nFrames);
     dynamicDetails.times = dynamicDetails.track(1,:);
 end
 
-p=mouse(s)';
+if i > 0    
+    if IsOSX
+        offset = s.initialPos;
+    else
+        offset = dynamicDetails.track(:,i);
+    end
+    
+    p = dynamicDetails.gain .* (mouse(s)' - s.initialPos) + offset;
+else
+    mouse(s,true);
+    p = s.initialPos;
+end
+
 if i == 0 || any(diff([dynamicDetails.track(:,i) p],[],2))
     i=i+1;
     dynamicDetails.times(i)=GetSecs;
-    dynamicDetails.track(:,i)=p;    
-end
-
-if i > 1 && ~IsOSX
-    dynamicDetails.track(:,i) = dynamicDetails.track(:,i) + dynamicDetails.track(:,i-1) - s.initialPos;
+    dynamicDetails.track(:,i)=p;
 end
 
 target = dynamicDetails.target;

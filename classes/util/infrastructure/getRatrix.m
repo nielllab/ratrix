@@ -1,7 +1,7 @@
 function r=getRatrix
 %get the default ratrix
 
-dbPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData','ServerData');
+dbPath=fullfile(fileparts(fileparts(getRatrixPath)),'mouseData','ServerData');
 d=dir(dbPath);
 if length(d)>1
     if ismember('db.mat',{d.name})

@@ -36,7 +36,7 @@ if ~exist('comment','var')
     comment='';
 end
 
-if true
+if false
     requestMode               = 'first';
     fractionOpenTimeSoundIsOn = 1;
     fractionPenaltySoundIsOn  = 1;
@@ -62,6 +62,10 @@ for i=1:length(subs)
         ts=getTrainingStep(p,getNumTrainingSteps(p));
         
         if false
+        setRewardULorMS(subs{i},30,1,comment,auth);
+        end
+        
+        if false
             [~, r]=setReinforcementParam(subs{i},'reinforcementManager',rm,getNumTrainingSteps(p),r,comment,auth);
         end
         
@@ -70,7 +74,7 @@ for i=1:length(subs)
             [~, r]=setProtocolAndStep(subs{i},p,true,true,false,t+1,r,comment,auth);
         end
         
-        if true
+        if false
             dots = getStimManager(ts);
             
             s.speed=1.5;

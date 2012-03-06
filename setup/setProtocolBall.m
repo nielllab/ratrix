@@ -33,10 +33,10 @@ zoom = [maxWidth maxHeight]./textureSize;
 svnRev = {'svn://132.239.158.177/projects/ratrix/trunk'};
 svnCheckMode = 'session';
 
-stim.gain = .05 * ones(2,1);
+stim.gain = .35 * ones(2,1);
 stim.targetDistance = 300;
 stim.timeoutSecs = 5;
-stim.slow = 10 * ones(2,1);
+stim.slow = [50; 100]; % 10 * ones(2,1);
 stim.slowSecs = 5;
 
 ballSM = trail(stim,maxWidth,maxHeight,zoom,0);

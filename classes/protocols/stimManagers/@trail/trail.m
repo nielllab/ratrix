@@ -44,7 +44,7 @@ end
                     error('timeoutSecs must be real numeric scalar >= 0')
                 end
             case 'slow'
-                if ~(isvector(x) && isnumeric(x) && isreal(x) && all(size(x)==[2 1] && all(x>=0)))
+                if ~(isvector(x) && isnumeric(x) && isreal(x) && all(size(x)==[2 1]) && all(x>=0))
                     error('gain must be real numeric 2-element column vector with elements >= 0')
                 end                
             case 'slowSecs'

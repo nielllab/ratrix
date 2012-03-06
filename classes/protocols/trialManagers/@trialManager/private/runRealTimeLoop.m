@@ -603,20 +603,25 @@ while ~done && ~quit;
                 if isinf(numFramesInStim)
                     numFramesInStim = framesInPhase; %causes handlePhasedTrialLogic to transition to next phase
                     
-                    if strcmp(phaseType,'discrim') %hmmm, how else do this?  trialManager shouldn't know about discrim...
-                        if isempty(trialRecords(trialInd).trialDetails.correct)
-                            trialRecords(trialInd).trialDetails.correct = strcmp(phaseRecords(1).dynamicDetails.result,'correct'); %causes updateTrialState to do reward
-                        else
-                            error('huh')
-                        end
-                        if isempty(trialRecords(trialInd).result)
-                            trialRecords(trialInd).result = phaseRecords(1).dynamicDetails.result; %causes handlePhasedTrialLogic to propogate nominal result
-                            if ismember(trialRecords(trialInd).result,{'correct','timedout'})
-                                trialRecords(trialInd).result='nominal';
+                    switch phaseType %hmmm, how else do this?  trialManager shouldn't know about this stuff...
+                        case 'pre-request'
+                            %do request reward
+                        case 'discrim'
+                            if isempty(trialRecords(trialInd).trialDetails.correct)
+                                trialRecords(trialInd).trialDetails.correct = strcmp(phaseRecords(phaseNum).dynamicDetails.result,'correct'); %causes updateTrialState to do reward
+                            else
+                                error('huh')
                             end
-                        else
+                            if isempty(trialRecords(trialInd).result)
+                                trialRecords(trialInd).result = phaseRecords(phaseNum).dynamicDetails.result; %causes handlePhasedTrialLogic to propogate nominal result
+                                if ismember(trialRecords(trialInd).result,{'correct','timedout'})
+                                    trialRecords(trialInd).result='nominal';
+                                end
+                            else
+                                error('huh')
+                            end
+                        otherwise
                             error('huh')
-                        end
                     end
                 else
                     error('huh')

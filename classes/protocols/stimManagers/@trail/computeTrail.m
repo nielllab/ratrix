@@ -1,4 +1,4 @@
-function [relPos, targetPos, sounds, finish, dynamicDetails, i, indexPulse, doFramePulse]=computeTrail(s, i, dynamicDetails, trialRecords)
+function [relPos, targetPos, sounds, finish, dynamicDetails, i, indexPulse, doFramePulse, textLabel]=computeTrail(s, i, dynamicDetails, trialRecords)
 
 doFramePulse = true;
 indexPulse = true;
@@ -49,4 +49,6 @@ end
 
 relPos=dynamicDetails.track(:,1:i)-repmat(dynamicDetails.track(:,i)-s.initialPos,1,i);
 targetPos=target+2*s.initialPos(1)-dynamicDetails.track(1,i);
+
+textLabel = sprintf('%g movements to go',dynamicDetails.nFrames - i);
 end

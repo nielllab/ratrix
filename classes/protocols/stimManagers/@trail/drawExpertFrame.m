@@ -6,14 +6,19 @@ function [doFramePulse expertCache dynamicDetails textLabel i dontclear indexPul
 dontclear = 0;
 
 width  = 63; % default 1.  > 63 errors for DrawDots?  > ~10 seems to have no effect on lines?
-colors = []; % default white
 center = []; % positions are relative to "center" (default center is [0 0]).
+centerWidth = 10;
+
+dotType = 2; % 0 (default) squares
+% 1 circles (with anti-aliasing) (requires Screen('BlendFunction'))
+% 2 circles (with high-quality anti-aliasing, if supported by your hardware)
 
 if ~isfield('clutSize',expertCache)
     expertCache.clutSize = size(currentCLUT,1)-1;
 end
-
-color = expertCache.clutSize*ones(1,4);
+white = expertCache.clutSize*ones(1,4);
+red = expertCache.clutSize*[1 0 0 1];
+blue = expertCache.clutSize*[0 0 1 1];
 
 didBlend = false;
 smooth = 1;  % default 0, 1 requires Screen('BlendFunction')
@@ -29,49 +34,53 @@ switch phaseRecords(phaseNum).phaseType
         indexPulse = true;
         
         if i > 0
-            if IsOSX
-                error('not yet implmeneted')
-            else
-                p = s.gain .* (mouse(s)' - s.initialPos) + s.initialPos;
-            end
+            p = s.gain .* (mouse(s)' - s.initialPos) + s.initialPos;
         else
             mouse(s,true);
             p = s.initialPos;
             dynamicDetails.slowTrack = []; %bad :(
-            slowStart = [];
+            expertCache.slowStart = [];
         end
         
         i = i+1;
         
-        dynamicDetails.slowTrack(end+1) = [GetSecs; p];
+        dynamicDetails.slowTrack(:,end+1) = [GetSecs; p];
         
         finish = false;
-        if all(p < s.slow)
+        if all(abs(p - s.initialPos) < s.slow)
             sounds={'keepGoingSound'};
-            if isempty(slowStart)
-                slowStart = dynamicDetails.slowTrack(1,end);
-            elseif dynamicDetails.slowTrack(1,end) - slowStart >= s.slowSecs
-                % set dynamicDetails.result?
+            if isempty(expertCache.slowStart)
+                expertCache.slowStart = dynamicDetails.slowTrack(1,end);
+            elseif dynamicDetails.slowTrack(1,end) - expertCache.slowStart >= s.slowSecs
+                %dynamicDetails.result = 'request'; %sets stopEarly?
                 finish = true;
             end
+            textLabel = sprintf('%.1f secs to go',s.slowSecs - (dynamicDetails.slowTrack(1,end) - expertCache.slowStart));
         else
-            slowStart = [];
+            expertCache.slowStart = [];
             sounds={'trySomethingElseSound'};
+            textLabel = 'slow down';
         end
         
-        textLabel = [textLabel num2str(s.slowSecs - (dynamicDetails.slowTrack(1,end) - slowStart)) 'secs to go'];
+        %why aren't sounds working?  is request reward?
+        %note: add in correction trials
         
-        %Screen('FillOval', windowPtr [,color] [,rect] [,perfectUpToMaxDiameter]); %default color white
-        %          If you know your ovals will never be
-        % bigger than a certain diameter, you can provide that diameter as a hint via
-        % 'perfectUpToMaxDiameter' to allow for some potential speedup when drawing filled
-        % ovals.
+        f = @(x) reshape(repmat(x,1,2),[1 4]);
         
-        %Screen('FrameOval', windowPtr [,color] [,rect] [,penWidth] ); %default color white
+        slowRect = f(s.slow) .* [-1 -1 1 1] + f(2*s.initialPos - p); % seems to be [left bottom right top]?
         
-    case 'discim'
+        %our slow constraint is actually rectangualar, but we draw ovals...
+        Screen('FillOval', window, white, slowRect, 2*max(s.slow));
         
-        [relPos, targetPos, sounds, finish, dynamicDetails, i, indexPulse, doFramePulse]=computeTrail(s, i, dynamicDetails, trialRecords);
+        Screen('FrameOval', window, red, slowRect, width);
+        
+        Screen('DrawDots', window, s.initialPos, width, white, center, dotType);
+        
+        Screen('DrawDots', window, s.initialPos, centerWidth, blue, center, dotType);
+        
+    case 'discrim'
+        
+        [relPos, targetPos, sounds, finish, dynamicDetails, i, indexPulse, doFramePulse, textLabel]=computeTrail(s, i, dynamicDetails, trialRecords);
         
         wallRect = destRect; %[left top right bottom]
         if dynamicDetails.target > 0
@@ -81,24 +90,21 @@ switch phaseRecords(phaseNum).phaseType
         end
         wallRect(ind) = targetPos;
         if diff(wallRect([1 3])) > 0
-            Screen('FillRect', window, color, wallRect);
+            Screen('FillRect', window, white, wallRect);
         end
         
-        type = 2; % 0 (default) squares
-        % 1 circles (with anti-aliasing) (requires Screen('BlendFunction'))
-        % 2 circles (with high-quality anti-aliasing, if supported by your hardware)
-        Screen('DrawDots', window, relPos , width, color, center, type);
+        Screen('DrawDots', window, relPos, width, white, center, dotType);
         
         inds = repmat(2:size(relPos,2)-1,2,1);
-        Screen('DrawLines', window, relPos(:,[1 inds(:)' end]), width, colors, center, smooth);
+        Screen('DrawLines', window, relPos(:,[1 inds(:)' end]), width, white, center, smooth);
         
-        color = expertCache.clutSize*[0 0 1 1]; % default black
-        Screen('DrawDots', window, relPos , 10, color, center, type);
+        Screen('DrawDots', window, relPos, centerWidth, blue, center, dotType);
         
-        color = expertCache.clutSize*[1 0 0 1]; % default black
-        Screen('DrawLine', window, color, targetPos, destRect(2), targetPos, destRect(4), width); %no smoothing?
+        Screen('DrawLine', window, red, targetPos, destRect(2), targetPos, destRect(4), width); %no smoothing?
         
     otherwise
+        phaseNum
+        phaseRecords(phaseNum)
         error('huh')
 end
 

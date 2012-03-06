@@ -27,8 +27,8 @@ else
     lastRec=[];
 end
 stimulus.initialPos=[width height]'/2;
-details.nFrames = 5*hz;
-details.target = 300*sign(randn);
+details.nFrames = stimulus.timeoutSecs*hz;
+details.target = stimulus.targetDistance*sign(randn);
 
 stimulus.mouseIndices=[];
 if IsLinux
@@ -66,11 +66,12 @@ discrimStim.stimType=type;
 discrimStim.scaleFactor=scaleFactor;
 discrimStim.startFrame=0;
 
-preRequestStim=[];
-preRequestStim.stimulus=interTrialLuminance;
-preRequestStim.stimType='loop';
-preRequestStim.scaleFactor=0;
-preRequestStim.startFrame=0;
+preRequestStim=discrimStim;
+% preRequestStim=[];
+% preRequestStim.stimulus=interTrialLuminance;
+% preRequestStim.stimType='loop';
+% preRequestStim.scaleFactor=0;
+% preRequestStim.startFrame=0;
 preRequestStim.punishResponses=false;
 
 preResponseStim=discrimStim;

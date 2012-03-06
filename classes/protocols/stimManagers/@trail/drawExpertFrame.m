@@ -1,51 +1,106 @@
 function [doFramePulse expertCache dynamicDetails textLabel i dontclear indexPulse sounds finish] ...
     = drawExpertFrame(s,stim,i,phaseStartTime,totalFrameNum,window,textLabel,...
     destRect,filtMode,expertCache,ifi,scheduledFrameNum,dropFrames,dontclear,...
-    dynamicDetails,trialRecords,currentCLUT)
+    dynamicDetails,trialRecords,currentCLUT,phaseRecords,phaseNum)
 
-[relPos, targetPos, sounds, finish, dynamicDetails, i, indexPulse, doFramePulse]=computeTrail(s, i, dynamicDetails, trialRecords);
 dontclear = 0;
-
-didBlend = false;
 
 width  = 63; % default 1.  > 63 errors for DrawDots?  > ~10 seems to have no effect on lines?
 colors = []; % default white
 center = []; % positions are relative to "center" (default center is [0 0]).
-smooth = 1;  % default 0, 1 requires Screen('BlendFunction')
-if smooth
-    [sourceFactorOld, destinationFactorOld]=Screen('BlendFunction', window, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    didBlend = true;
-end
 
 if ~isfield('clutSize',expertCache)
     expertCache.clutSize = size(currentCLUT,1)-1;
 end
 
 color = expertCache.clutSize*ones(1,4);
-wallRect = destRect; %[left top right bottom]
-if dynamicDetails.target > 0
-    ind = 1;
-else
-    ind = 3;
-end
-wallRect(ind) = targetPos;
-if diff(wallRect([1 3])) > 0
-    Screen('FillRect', window, color, wallRect);
+
+didBlend = false;
+smooth = 1;  % default 0, 1 requires Screen('BlendFunction')
+if smooth
+    [sourceFactorOld, destinationFactorOld]=Screen('BlendFunction', window, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    didBlend = true;
 end
 
-type = 2; % 0 (default) squares
-          % 1 circles (with anti-aliasing) (requires Screen('BlendFunction'))
-          % 2 circles (with high-quality anti-aliasing, if supported by your hardware)
-Screen('DrawDots', window, relPos , width, color, center, type);
-
-inds = repmat(2:size(relPos,2)-1,2,1);
-Screen('DrawLines', window, relPos(:,[1 inds(:)' end]), width, colors, center, smooth);
-
-color = expertCache.clutSize*[0 0 1 1]; % default black
-Screen('DrawDots', window, relPos , 10, color, center, type);
-
-color = expertCache.clutSize*[1 0 0 1]; % default black
-Screen('DrawLine', window, color, targetPos, destRect(2), targetPos, destRect(4), width); %no smoothing?
+switch phaseRecords(phaseNum).phaseType
+    case 'pre-request'
+        
+        doFramePulse = true;
+        indexPulse = true;
+        
+        if i > 0
+            if IsOSX
+                error('not yet implmeneted')
+            else
+                p = s.gain .* (mouse(s)' - s.initialPos) + s.initialPos;
+            end
+        else
+            mouse(s,true);
+            p = s.initialPos;
+            dynamicDetails.slowTrack = []; %bad :(
+            slowStart = [];
+        end
+        
+        i = i+1;
+        
+        dynamicDetails.slowTrack(end+1) = [GetSecs; p];
+        
+        finish = false;
+        if all(p < s.slow)
+            sounds={'keepGoingSound'};
+            if isempty(slowStart)
+                slowStart = dynamicDetails.slowTrack(1,end);
+            elseif dynamicDetails.slowTrack(1,end) - slowStart >= s.slowSecs
+                % set dynamicDetails.result?
+                finish = true;
+            end
+        else
+            slowStart = [];
+            sounds={'trySomethingElseSound'};
+        end
+        
+        textLabel = [textLabel num2str(s.slowSecs - (dynamicDetails.slowTrack(1,end) - slowStart)) 'secs to go'];
+        
+        %Screen('FillOval', windowPtr [,color] [,rect] [,perfectUpToMaxDiameter]); %default color white
+        %          If you know your ovals will never be
+        % bigger than a certain diameter, you can provide that diameter as a hint via
+        % 'perfectUpToMaxDiameter' to allow for some potential speedup when drawing filled
+        % ovals.
+        
+        %Screen('FrameOval', windowPtr [,color] [,rect] [,penWidth] ); %default color white
+        
+    case 'discim'
+        
+        [relPos, targetPos, sounds, finish, dynamicDetails, i, indexPulse, doFramePulse]=computeTrail(s, i, dynamicDetails, trialRecords);
+        
+        wallRect = destRect; %[left top right bottom]
+        if dynamicDetails.target > 0
+            ind = 1;
+        else
+            ind = 3;
+        end
+        wallRect(ind) = targetPos;
+        if diff(wallRect([1 3])) > 0
+            Screen('FillRect', window, color, wallRect);
+        end
+        
+        type = 2; % 0 (default) squares
+        % 1 circles (with anti-aliasing) (requires Screen('BlendFunction'))
+        % 2 circles (with high-quality anti-aliasing, if supported by your hardware)
+        Screen('DrawDots', window, relPos , width, color, center, type);
+        
+        inds = repmat(2:size(relPos,2)-1,2,1);
+        Screen('DrawLines', window, relPos(:,[1 inds(:)' end]), width, colors, center, smooth);
+        
+        color = expertCache.clutSize*[0 0 1 1]; % default black
+        Screen('DrawDots', window, relPos , 10, color, center, type);
+        
+        color = expertCache.clutSize*[1 0 0 1]; % default black
+        Screen('DrawLine', window, color, targetPos, destRect(2), targetPos, destRect(4), width); %no smoothing?
+        
+    otherwise
+        error('huh')
+end
 
 if didBlend
     Screen('BlendFunction', window, sourceFactorOld, destinationFactorOld);

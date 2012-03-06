@@ -261,14 +261,14 @@ standardPlot(@plot);
         end
     end
 
-    function correctPlot(x,doLog)
+    function correctPlot(x)
         if exist('doLog','var') && doLog
             x=log(x);
         end
         scatter(trialNums,x,dotSize,(res==1)+1);
     end
 
-    function rangePlot(x,y,doLog)
+    function rangePlot(x,y)
         if exist('doLog','var') && doLog
             y=log(y);
         end
@@ -282,10 +282,12 @@ standardPlot(@plot);
 subplot(n,1,2)
 if false
     p=@plot;
+    doLog = false;
 else
     p=@semilogyEF; % set(gca,'YScale','log') screws up other plots' transparency
+    doLog = true;
 end
-correctPlot(len,true); %can see occasional red k-q's with len < timeout
+correctPlot(len); %can see occasional red k-q's with len < timeout
 hold on
 p(trialNums,timeout,'k')
 ylims = [min(len) max(len)*1.5];
@@ -295,10 +297,13 @@ standardPlot(p,[1 3 10 30 100 300]);
 subplot(n,1,3)
 if false
     p=@plot;
+    doLog = false;
 elseif false
     p=@semilogy; %using semilogy causes transparency in this AND next plot to fail!  using plot resolves it.  set(gca,'YScale','log') doesn't
+    doLog = false;
 else
     p=@semilogyEF;
+    doLog = true;
 end
 eps=min(dur(dur>0))/10;
 p(trialNums,dur,'g.')
@@ -306,13 +311,14 @@ hold on
 p(trialNums(dur==0),eps,'g+'); % semilogy on 0 fails (would rather draw these off axis, but how do this + survive figure resizing?)
 xd=trialNums(~isnan(dur));
 pTiles(pTiles==0)=eps;
-rangePlot(xd,pTiles([1 end],:),true);
+rangePlot(xd,pTiles([1 end],:));
 p(xd,pTiles(2,:),'y');
 p(xd,slidingAvg,'r')
 p(trialNums,nanmeanMW(dur)*ones(1,length(trialNums)),'b');%,'Color',grey);
 ylims = [eps max(dur)*1.5];
 ylabel('ms to crossing')
 standardPlot(p,[.01 .03 .1 .3 1 3 10]*1000);
+doLog = false;
 
 subplot(n,1,4)
 rangePlot(x,pci');

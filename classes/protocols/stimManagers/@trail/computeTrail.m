@@ -5,7 +5,6 @@ indexPulse = true;
 
 if isempty(dynamicDetails)
     dynamicDetails = trialRecords(end).stimDetails;
-    dynamicDetails.gain = .05 * ones(2,1);
     dynamicDetails.track = nan(2,dynamicDetails.nFrames);
     dynamicDetails.times = dynamicDetails.track(1,:);
 end
@@ -17,7 +16,7 @@ if i > 0
         offset = dynamicDetails.track(:,i);
     end
     
-    p = dynamicDetails.gain .* (mouse(s)' - s.initialPos) + offset;
+    p = s.gain .* (mouse(s)' - s.initialPos) + offset;
 else
     mouse(s,true);
     p = s.initialPos;

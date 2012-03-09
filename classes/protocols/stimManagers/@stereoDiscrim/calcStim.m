@@ -1,5 +1,5 @@
 function [stimulus,updateSM,resolutionIndex,preRequestStim,preResponseStim,discrimStim,LUT,targetPorts,distractorPorts,...
-    details,interTrialLuminance,text,indexPulses,imagingTasks] =... 
+    details,interTrialLuminance,text,indexPulses,imagingTasks,sounds] =... 
     calcStim(stimulus,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
 % 1/3/0/09 - trialRecords now includes THIS trial
 %LUT = Screen('LoadCLUT', 0);
@@ -81,6 +81,8 @@ end
 sSound = soundClip('stimSoundBase','allOctaves',[stimulus.freq],20000);
 stimulus.stimSound = soundClip('stimSound','dualChannel',{sSound,details.leftAmplitude},{sSound,details.rightAmplitude});
 
+sounds={stimulus.stimSound};
+
 out=zeros(min(height,getMaxHeight(stimulus)),min(width,getMaxWidth(stimulus)),2);
 out(:,:,1)=stimulus.mean;
 out(:,:,2)=stimulus.mean;
@@ -90,14 +92,14 @@ discrimStim.stimulus=out;
 discrimStim.stimType=type;
 discrimStim.scaleFactor=scaleFactor;
 discrimStim.startFrame=0;
-discrimStim.autoTrigger=[];
+%discrimStim.autoTrigger=[];
 
 preRequestStim=[];
 preRequestStim.stimulus=interTrialLuminance;
 preRequestStim.stimType='loop';
 preRequestStim.scaleFactor=0;
 preRequestStim.startFrame=0;
-preRequestStim.autoTrigger=[];
+%preRequestStim.autoTrigger=[];
 preRequestStim.punishResponses=false;
 
 preResponseStim=discrimStim;

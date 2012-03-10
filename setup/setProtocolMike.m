@@ -34,7 +34,7 @@ scaleFactor = 0;
 interTrialLuminance = .5;
 
 freq = 20; 
-amps = [.5 1]; % For now bias completely in one direction
+amps = [0 1];
 stereoStim = stereoDiscrim(interTrialLuminance,freq,amps,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 svnRev = {'svn://132.239.158.177/projects/ratrix/trunk'};

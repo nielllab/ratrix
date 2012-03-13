@@ -24,7 +24,7 @@ interTrialLuminance = getInterTrialLuminance(stimulus);
 
 stimulus.initialPos=[width height]'/2;
 details.nFrames = stimulus.timeoutSecs*hz;
-details.target = stimulus.targetDistance*details.target;
+details.target = stimulus.targetDistance(1)*details.target;
 
 stimulus.mouseIndices=[];
 if IsLinux

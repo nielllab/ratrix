@@ -8,7 +8,7 @@ end
 %most of the work in this file does what CompileTrialRecords does
 
 %first, load the trial records and get them in the right order
-local = false;
+local = true;
 if local
     drive='C:';
 else

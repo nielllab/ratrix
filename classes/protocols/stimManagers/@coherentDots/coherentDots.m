@@ -1,7 +1,7 @@
 function s=coherentDots(varargin)
 % COHERENTDOTS  class constructor.
 % s=coherentDots(screen_width,screen_height,num_dots,coherence,speed,contrast,
-%   dot_size,movie_duration,screen_zoom,maxWidth,maxHeight,pctCorrectionTrials,[replayMode,interTrialLuminance])
+%   dot_size,movie_duration,screen_zoom,maxWidth,maxHeight,[replayMode,interTrialLuminance])
 %   screen_width - width of sourceRect (determines size of texture to make)
 %   screen_height - height of sourceRect (determines size of texture to make)
 %   num_dots - number of dots to draw
@@ -23,7 +23,6 @@ s.speed = 1;                  % How fast do our little dots move
 s.contrast = 1;               % contrast of the dots
 s.dot_size = 9;              % Width of dots in pixels
 s.movie_duration = 2;         % in seconds
-s.pctCorrectionTrials=.5;
 s.replayMode='loop';
 
 s.sideDisplay=1; %pct screen width to use
@@ -49,7 +48,7 @@ case 1
     else
         error('Input argument is not an coherentDots object')
     end
-case {12 13 14}
+case {12 13}
     % screen_width
     if (floor(varargin{1}) - varargin{1} < eps)
         s.screen_width = varargin{1};
@@ -132,14 +131,7 @@ case {12 13 14}
         error('screen_zoom must be a 1x2 array with integer values')
     end
     
-    % pctCorrectionTrials
-    if isscalar(varargin{12}) && varargin{12}<=1 && varargin{12}>=0
-        s.pctCorrectionTrials=varargin{12};
-    else
-        error('pctCorrectionTrials must be a scalar between 0 and 1');
-    end
-    
-    for i=13:14
+    for i=12:13
         if i <= nargin
             args{i}=varargin{i};
         else
@@ -148,9 +140,9 @@ case {12 13 14}
     end
     
     % replayMode
-    if ~isempty(args{13})
-        if ischar(args{13}) && (strcmp(args{13},'loop') || strcmp(args{13},'once'))
-            s.replayMode=args{13};
+    if ~isempty(args{12})
+        if ischar(args{12}) && (strcmp(args{12},'loop') || strcmp(args{12},'once'))
+            s.replayMode=args{12};
         else
             error('replay mode must be ''loop'' or ''once''');
         end
@@ -159,12 +151,12 @@ case {12 13 14}
     end
     
     % maxWidth, maxHeight, scale factor, intertrial luminance
-    if isempty(args{14})
+    if isempty(args{13})
         s = class(s,'coherentDots',stimManager(varargin{10},varargin{11},screen_zoom,uint8(0)));   
     else
         % check intertrial luminance
-        if args{14} >=0 && args{14} <= 1
-            s = class(s,'coherentDots',stimManager(varargin{10},varargin{11},screen_zoom,uint8(args{14}*intmax('uint8'))));
+        if args{13} >=0 && args{13} <= 1
+            s = class(s,'coherentDots',stimManager(varargin{10},varargin{11},screen_zoom,uint8(args{13}*intmax('uint8'))));
         else
             error('interTrialLuminance must be <=1 and >=0 - will be converted to a uint8 0-255');
         end

@@ -11,7 +11,7 @@ end
 sm=makeStandardSoundManager();
 
 rewardSizeULorMS          =150;
-requestRewardSizeULorMS   =0;
+requestRewardSizeULorMS   =150;
 requestMode               ='first';
 msPenalty                 =1000;
 fractionOpenTimeSoundIsOn =1;
@@ -33,7 +33,13 @@ zoom = [maxWidth maxHeight]./textureSize;
 svnRev = {'svn://132.239.158.177/projects/ratrix/trunk'};
 svnCheckMode = 'session';
 
-ballSM = trail(struct,maxWidth,maxHeight,zoom,0);
+stim.gain = .35 * ones(2,1);
+stim.targetDistance = 300;
+stim.timeoutSecs = .5;
+stim.slow = [50; 100]; % 10 * ones(2,1);
+stim.slowSecs = .5;
+
+ballSM = trail(stim,maxWidth,maxHeight,zoom,0);
 ballTM = ball(percentCorrectionTrials,sm,noRequest);
 ts1 = trainingStep(ballTM, ballSM, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %ball
 

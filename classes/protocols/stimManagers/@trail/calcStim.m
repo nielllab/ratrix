@@ -1,6 +1,6 @@
 function [stimulus updateSM resolutionIndex preRequestStim preResponseStim discrimStim LUT targetPorts distractorPorts ...
     details interTrialLuminance text indexPulses imagingTasks sounds] = ...
-    calcStim(stimulus,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
+    calcStim(stimulus,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords,targetPorts,distractorPorts,details,text)
 
 sounds = {};
 indexPulses=[];
@@ -22,14 +22,9 @@ end
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);
 
-if ~isempty(trialRecords) && length(trialRecords)>=2
-    lastRec=trialRecords(end-1);
-else
-    lastRec=[];
-end
 stimulus.initialPos=[width height]'/2;
 details.nFrames = stimulus.timeoutSecs*hz;
-details.target = stimulus.targetDistance*sign(randn);
+details.target = stimulus.targetDistance*details.target;
 
 stimulus.mouseIndices=[];
 if IsLinux
@@ -48,8 +43,6 @@ if IsLinux
         error('didn''t find exactly 2 mice on linux')
     end
 end
-
-[targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass,allowRepeats);
 
 dims=[height width]./scaleFactor;
 if true
@@ -77,5 +70,4 @@ preRequestStim.punishResponses=false;
 
 preResponseStim=discrimStim;
 preResponseStim.punishResponses=false;
-
-text='';
+end

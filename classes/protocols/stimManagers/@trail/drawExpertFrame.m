@@ -3,6 +3,8 @@ function [doFramePulse expertCache dynamicDetails textLabel i dontclear indexPul
     destRect,filtMode,expertCache,ifi,scheduledFrameNum,dropFrames,dontclear,...
     dynamicDetails,trialRecords,currentCLUT,phaseRecords,phaseNum)
 
+originalLabel = textLabel;
+
 dontclear = 0;
 
 width  = 63; % default 1.  > 63 errors for DrawDots?  > ~10 seems to have no effect on lines?
@@ -62,8 +64,7 @@ switch phaseRecords(phaseNum).phaseType
             textLabel = 'slow down';
         end
         
-        %why aren't sounds working?  is request reward?
-        %note: add in correction trials
+        %note: request rewards still not working...
         
         f = @(x) reshape(repmat(x,1,2),[1 4]);
         
@@ -110,6 +111,10 @@ end
 
 if didBlend
     Screen('BlendFunction', window, sourceFactorOld, destinationFactorOld);
+end
+
+if trialRecords(end).stimDetails.correctionTrial
+    textLabel = ['correction trial! ' textLabel];
 end
 end
 

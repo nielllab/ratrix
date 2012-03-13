@@ -34,7 +34,7 @@ svnRev = {'svn://132.239.158.177/projects/ratrix/trunk'};
 svnCheckMode = 'session';
 
 stim.gain = .35 * ones(2,1);
-stim.targetDistance = 300;
+stim.targetDistance = 300 * ones(1,2);
 stim.timeoutSecs = .5;
 stim.slow = [50; 100]; % 10 * ones(2,1);
 stim.slowSecs = .5;

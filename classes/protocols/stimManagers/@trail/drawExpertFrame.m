@@ -19,6 +19,7 @@ if ~isfield('clutSize',expertCache)
     expertCache.clutSize = size(currentCLUT,1)-1;
 end
 white = expertCache.clutSize*ones(1,4);
+grey = white*.5;
 red = expertCache.clutSize*[1 0 0 1];
 blue = expertCache.clutSize*[0 0 1 1];
 
@@ -81,7 +82,7 @@ switch phaseRecords(phaseNum).phaseType
         
     case 'discrim'
         
-        [relPos, targetPos, sounds, finish, dynamicDetails, i, indexPulse, doFramePulse, textLabel]=computeTrail(s, i, dynamicDetails, trialRecords);
+        [relPos, targetPos, wrongLoc, sounds, finish, dynamicDetails, i, indexPulse, doFramePulse, textLabel]=computeTrail(s, i, dynamicDetails, trialRecords);
         
         wallRect = destRect; %[left top right bottom]
         if dynamicDetails.target > 0
@@ -92,6 +93,19 @@ switch phaseRecords(phaseNum).phaseType
         wallRect(ind) = targetPos;
         if diff(wallRect([1 3])) > 0
             Screen('FillRect', window, white, wallRect);
+        end
+        
+        if ~isempty(wrongLoc)
+            midRect = destRect;
+            midRect(ind) = wrongLoc;
+            if dynamicDetails.target > 0
+                ind = 3;
+            else
+                ind = 1;
+            end
+            midRect(ind) = targetPos;
+            Screen('FillRect', window, grey, midRect);
+            Screen('DrawLine', window, blue, wrongLoc, destRect(2), wrongLoc, destRect(4), width); %no smoothing?
         end
         
         Screen('DrawDots', window, relPos, width, white, center, dotType);

@@ -45,8 +45,8 @@ end
                         error('gain must be real numeric 2-element column vector') %negative entries ok :)
                     end
                 case 'targetDistance'
-                    if ~(isscalar(x) && isnumeric(x) && isreal(x) && x>=0)
-                        error('targetDistance must be real numeric scalar >= 0')
+                    if ~(isvector(x) && isnumeric(x) && isreal(x) && all(x>=0) && numel(x)<=2)
+                        error('targetDistance must be real 1- or 2-element vector >= 0')
                     end
                 case 'timeoutSecs'
                     if ~(isscalar(x) && isnumeric(x) && isreal(x) && x>=0)

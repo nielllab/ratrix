@@ -614,7 +614,7 @@ while ~done && ~quit;
                             end
                             if isempty(trialRecords(trialInd).result)
                                 trialRecords(trialInd).result = phaseRecords(phaseNum).dynamicDetails.result; %causes handlePhasedTrialLogic to propogate nominal result
-                                if ismember(trialRecords(trialInd).result,{'correct','timedout'})
+                                if ismember(trialRecords(trialInd).result,{'correct','timedout','incorrect'})
                                     trialRecords(trialInd).result='nominal';
                                 end
                             else

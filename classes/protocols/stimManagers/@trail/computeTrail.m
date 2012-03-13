@@ -1,11 +1,10 @@
-function [relPos, targetPos, sounds, finish, dynamicDetails, i, indexPulse, doFramePulse]=computeTrail(s, i, dynamicDetails, trialRecords)
+function [relPos, targetPos, sounds, finish, dynamicDetails, i, indexPulse, doFramePulse, textLabel]=computeTrail(s, i, dynamicDetails, trialRecords)
 
 doFramePulse = true;
 indexPulse = true;
 
 if isempty(dynamicDetails)
     dynamicDetails = trialRecords(end).stimDetails;
-    dynamicDetails.gain = .05 * ones(2,1);
     dynamicDetails.track = nan(2,dynamicDetails.nFrames);
     dynamicDetails.times = dynamicDetails.track(1,:);
 end
@@ -17,7 +16,7 @@ if i > 0
         offset = dynamicDetails.track(:,i);
     end
     
-    p = dynamicDetails.gain .* (mouse(s)' - s.initialPos) + offset;
+    p = s.gain .* (mouse(s)' - s.initialPos) + offset;
 else
     mouse(s,true);
     p = s.initialPos;
@@ -50,4 +49,6 @@ end
 
 relPos=dynamicDetails.track(:,1:i)-repmat(dynamicDetails.track(:,i)-s.initialPos,1,i);
 targetPos=target+2*s.initialPos(1)-dynamicDetails.track(1,i);
+
+textLabel = sprintf('%g movements to go',dynamicDetails.nFrames - i);
 end

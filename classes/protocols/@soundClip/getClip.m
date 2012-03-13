@@ -45,6 +45,8 @@ if isempty(s.clip)
         s.clip(i,:)=s.clip(i,:)-mean(s.clip(i,:));
         s.clip(i,:)=s.clip(i,:)/max(abs(s.clip(i,:)))*s.amplitude(i);
     end
+    s.clip(isnan(s.clip))=0;
+    
     cacheUpdated=1;
 
 else

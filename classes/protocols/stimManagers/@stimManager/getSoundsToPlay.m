@@ -7,6 +7,14 @@ playSoundSounds={};
 
 dOrP=strcmp(phaseType,'discrim') || strcmp(phaseType,'pre-response'); %ismember too slow
 
+if strcmp(phaseType,'reinforced') && stepsInPhase <=0
+    if trialDetails.correct
+        playSoundSounds{end+1} = {'correctSound', msRewardSound};
+    else
+        playSoundSounds{end+1} = {'wrongSound', msPenaltySound};
+    end
+end
+
 % nAFC/goNoGo setup:
 switch trialManagerClass
     case {'nAFC','goNoGo','oddManOut','cuedGoNoGo'}
@@ -20,12 +28,6 @@ switch trialManagerClass
         elseif dOrP && any(ports(requestOptions))
             % play stim sound (when stim is requested during phase 2)
             playLoopSounds{end+1} = 'keepGoingSound';
-        elseif strcmp(phaseType,'reinforced') && stepsInPhase <= 0 && trialDetails.correct
-            % play correct sound
-            playSoundSounds{end+1} = {'correctSound', msRewardSound};
-        elseif strcmp(phaseType,'reinforced') && stepsInPhase <= 0 && ~trialDetails.correct
-            % play wrong sound
-            playSoundSounds{end+1} = {'wrongSound', msPenaltySound};
         elseif strcmp(phaseType,'earlyPenalty') %&& stepsInPhase <= 0 what does stepsInPhase do? I don't think we need this for this phase
             % play wrong sound
             playSoundSounds{end+1} = {'wrongSound', msPenaltySound};
@@ -33,16 +35,13 @@ switch trialManagerClass
         
     case 'ball'
         switch phaseType
-            case 'discrim'
+            case {'pre-request','discrim'}
                 [playLoopSounds{end+1:end+length(dynamicSounds)}]=dynamicSounds{:};
-            case 'reinforced'
-                if stepsInPhase <=0
-                    if trialDetails.correct
-                        playSoundSounds{end+1} = {'correctSound', msRewardSound};
-                    else
-                        playSoundSounds{end+1} = {'wrongSound', msPenaltySound};
-                    end
-                end
+            case 'pre-response'
+                % never happens -- what happened to this phase?
+                sca
+                keyboard
+                playLoopSounds{end+1} = 'keepGoingSound';
         end
         
         % freeDrinks setup

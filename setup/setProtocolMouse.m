@@ -38,7 +38,7 @@ maxHeight              = 1080;
 eyeController=[];
 
 dropFrames=false;
-nafcTM=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,{'off'},dropFrames,'ptb','center'); %this percentCorrectionTrials should currently do nothing (need to fix)
+nafcTM=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,{'off'},dropFrames,'ptb','center');
 
 textureSize=10*[w,h];
 zoom=[maxWidth maxHeight]./textureSize;
@@ -61,7 +61,7 @@ orientation = orientedGabors(pixPerCycs,targetOrientations,distractorOrientation
 requestRewardSizeULorMS = 0;
 msPenalty               = 1000;
 noRequest=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
-nrTM=nAFC(sm,percentCorrectionTrials,noRequest,eyeController,{'off'},dropFrames,'ptb','center'); %this percentCorrectionTrials should currently do nothing (need to fix)
+nrTM=nAFC(sm,percentCorrectionTrials,noRequest,eyeController,{'off'},dropFrames,'ptb','center');
 
 svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
 svnCheckMode='session';
@@ -83,7 +83,7 @@ ts4 = trainingStep(nrTM  , freeStim,  numTrialsDoneCriterion(400)          , noT
 %long penalty
 msPenalty = 3000;
 longPenalty=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
-lpTM=nAFC(sm,percentCorrectionTrials,longPenalty,eyeController,{'off'},dropFrames,'ptb','center',[],[],[300 inf]); %this percentCorrectionTrials should currently do nothing (need to fix)
+lpTM=nAFC(sm,percentCorrectionTrials,longPenalty,eyeController,{'off'},dropFrames,'ptb','center',[],[],[300 inf]);
 ts5 = trainingStep(lpTM  , freeStim, performanceCriterion(.85,int32(300))  , noTimeOff(), svnRev,svnCheckMode);
 
 %orientation discirm

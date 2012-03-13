@@ -310,7 +310,7 @@ portsDown=false(1,length(ports));
 pNum=0;
 
 trialRecords(trialInd).result=[]; %initialize
-trialRecords(trialInd).correct=[];
+trialRecords(trialInd).correct=[]; %who sets this?
 analogOutput=[];
 startTime=0;
 logIt=true;

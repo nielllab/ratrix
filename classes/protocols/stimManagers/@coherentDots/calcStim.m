@@ -1,5 +1,5 @@
 function [stimulus updateSM resolutionIndex preRequestStim preResponseStim discrimStim LUT targetPorts distractorPorts ...
-    details interTrialLuminance text indexPulses imagingTasks] = ...
+    details interTrialLuminance text indexPulses imagingTasks sounds] = ...
     calcStim(stimulus,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords,targetPorts,distractorPorts,details,text)
 
 % Reinagel, Mankin, Calhoun 2008 SFN Poster: http://biology.ucsd.edu/labs/reinagel/SpeedAccuracyPoster2009.pdf
@@ -36,6 +36,9 @@ function [stimulus updateSM resolutionIndex preRequestStim preResponseStim discr
 %    http://people.brandeis.edu/~sekuler/papers/williamsSekuler_coherentPerceptRDC_VisRes1984.pdf
 
 % 1/30/09 - trialRecords now includes THIS trial
+
+sounds={};
+
 s = stimulus;
 indexPulses=[];
 imagingTasks=[];

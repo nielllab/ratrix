@@ -96,9 +96,9 @@ for i=1:length(subjIDs),
     
     switch subjIDs{i}
         case 'test'
-            stepNum=uint8(4);
+            stepNum=uint8(3);
         otherwise
-            stepNum=uint8(1);
+            stepNum=uint8(3);
     end
     
     [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolMouse','edf');

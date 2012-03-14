@@ -91,7 +91,7 @@ ts6 = trainingStep(ballTM, ballSM, repeatIndefinitely()                  , noTim
 p=protocol('mouse',{ts1, ts2, ts3, ts4, ts5, ts6});
 
 if true
-    stepNum=uint8(6);
+    stepNum=uint8(3);
     subj=getSubjectFromID(r,subjIDs{1});
     [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolMouse','edf');
 else

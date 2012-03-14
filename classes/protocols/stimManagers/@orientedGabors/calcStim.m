@@ -1,6 +1,8 @@
 function [stimulus,updateSM,resolutionIndex,preRequestStim,preResponseStim,discrimStim,LUT,targetPorts,distractorPorts,...
-    details,interTrialLuminance,text,indexPulses,imagingTasks] =...
+    details,interTrialLuminance,text,indexPulses,imagingTasks,sounds] =...
     calcStim(stimulus,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords,targetPorts,distractorPorts,details,text)
+
+sounds={};
 
 % extend oriented gabors to have time-varying phase and contrast:
 % phase = cumsum(randn(1,len))

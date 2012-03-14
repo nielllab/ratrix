@@ -48,7 +48,7 @@ case 1
     else
         error('Input argument is not an coherentDots object')
     end
-case {12 13}
+case {11 12 13}
     % screen_width
     if (floor(varargin{1}) - varargin{1} < eps)
         s.screen_width = varargin{1};

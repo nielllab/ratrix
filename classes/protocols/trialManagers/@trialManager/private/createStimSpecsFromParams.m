@@ -57,15 +57,14 @@ i=1;
 addedPreResponsePhase=0;
 switch class(trialManager)
     case {'nAFC','freeDrinks','oddManOut','goNoGo','cuedGoNoGo','autopilot','ball'}
-        
-        if ~ismember(class(trialManager),{'autopilot','ball'})
+        if ~ismember(class(trialManager),{'autopilot'})
             % we need to figure out when the reinforcement phase is (in case we want to punish responses, we need to know which phase to transition to)
             if ~isempty(preResponseStim) && responseWindow(1)~=0
                 addedPreResponsePhase=addedPreResponsePhase+1;
             end
             
             % optional preOnset phase
-            if ~isempty(preRequestStim) &&  ismember(class(trialManager),{'nAFC','goNoGo','cuedGoNoGo'}) % only some classes have the pre-request phase if no delayManager in 'nAFC' class
+            if ~isempty(preRequestStim) && (ismember(class(trialManager),{'goNoGo','cuedGoNoGo'}) || isa(trialManager,'nAFC')) % only some classes have the pre-request phase if no delayManager in 'nAFC' class
                 if preRequestStim.punishResponses
                     if strcmp(class(trialManager),'cuedGoNoGo')
                         criterion={[],i+1,[targetPorts distractorPorts],i+3+addedPreResponsePhase};
@@ -83,7 +82,7 @@ switch class(trialManager)
                         framesUntilOnset,[],preRequestStim.scaleFactor,0,hz,'pre-request','pre-request',preRequestStim.punishResponses,false);
                 end
                 i=i+1;
-                if isempty(requestPorts) && isempty(framesUntilOnset)
+                if isempty(requestPorts) && isempty(framesUntilOnset) && ~isa(trialManager,'ball')
                     error('cannot have empty requestPorts with no auto-request!');
                 end
             end

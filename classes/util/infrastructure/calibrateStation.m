@@ -25,7 +25,10 @@ end
 
 function [ratio left rate]=checkBoth(num,base,fact,gap,precision,start,fix)
 if ~exist('start','var') || isempty(start)
-    start = input('\nenter the water level\n');
+    start=[];
+    while isempty(start)
+        start = input('\nenter the water level\n');
+    end
 end
 
 if ~all(cellfun(@(f)f(start),{@isscalar @isnumeric @isreal @(x)x>0}))

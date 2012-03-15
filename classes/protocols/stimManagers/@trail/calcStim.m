@@ -1,7 +1,8 @@
 function [stimulus updateSM resolutionIndex preRequestStim preResponseStim discrimStim LUT targetPorts distractorPorts ...
-    details interTrialLuminance text indexPulses imagingTasks] = ...
-    calcStim(stimulus,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
+    details interTrialLuminance text indexPulses imagingTasks sounds] = ...
+    calcStim(stimulus,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords,targetPorts,distractorPorts,details,text)
 
+sounds = {};
 indexPulses=[];
 imagingTasks=[];
 
@@ -21,14 +22,9 @@ end
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);
 
-if ~isempty(trialRecords) && length(trialRecords)>=2
-    lastRec=trialRecords(end-1);
-else
-    lastRec=[];
-end
 stimulus.initialPos=[width height]'/2;
-details.nFrames = 5*hz;
-details.target = 300*sign(randn);
+details.nFrames = stimulus.timeoutSecs*hz;
+details.target = stimulus.targetDistance(1)*details.target;
 
 stimulus.mouseIndices=[];
 if IsLinux
@@ -39,6 +35,7 @@ if IsLinux
             stimulus.mouseIndices = [stimulus.mouseIndices c{i}.index];
             c{i}.locationID
             c{i}.interfaceID
+            %check for expected mfg and resolution too
         end
     end
     
@@ -46,10 +43,6 @@ if IsLinux
         error('didn''t find exactly 2 mice on linux')
     end
 end
-
-mouse(stimulus,true);
-
-[targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass,allowRepeats);
 
 dims=[height width]./scaleFactor;
 if true
@@ -67,14 +60,14 @@ discrimStim.stimType=type;
 discrimStim.scaleFactor=scaleFactor;
 discrimStim.startFrame=0;
 
-preRequestStim=[];
-preRequestStim.stimulus=interTrialLuminance;
-preRequestStim.stimType='loop';
-preRequestStim.scaleFactor=0;
-preRequestStim.startFrame=0;
+preRequestStim=discrimStim;
+% preRequestStim=[];
+% preRequestStim.stimulus=interTrialLuminance;
+% preRequestStim.stimType='loop';
+% preRequestStim.scaleFactor=0;
+% preRequestStim.startFrame=0;
 preRequestStim.punishResponses=false;
 
 preResponseStim=discrimStim;
 preResponseStim.punishResponses=false;
-
-text='';
+end

@@ -1,4 +1,5 @@
 function r = setProtocolMike(r,subjIDs)
+%small change
 
 if ~isa(r,'ratrix')
     error('need a ratrix')

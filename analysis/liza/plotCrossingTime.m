@@ -7,7 +7,7 @@ end
 %once this is solved we'll load in a single compiled file from ...\ballData\CompiledTrialRecords\
 %most of the work in this file does what CompileTrialRecords does
 
-%first, load the trial records and get them in the right order
+%get trial records in the right order
 local = true;
 if local
     drive='C:';
@@ -33,9 +33,9 @@ for i=1:length(files)
         error('record file names indicate ordering problem')
     end
     
-    fullRecs(i) = load(fullfile(recordPath,files(i).name));
+    fullRecs(i) = load(fullfile(recordPath,files(i).name)); %loading files in this format is slow, that's why we normally use compiled records
     newRecNum = recNum + length(fullRecs(i).trialRecords);
-    records(recNum+1:newRecNum) = fullRecs(i).trialRecords; %extending this struct array is slow, that's why we normally use compiled records
+    records(recNum+1:newRecNum) = fullRecs(i).trialRecords; %extending this struct array is slow, another reason we normally use compiled records
     recNum = newRecNum;
     
     if bounds(i,2) ~= recNum
@@ -191,6 +191,7 @@ end
             end
         end
     end
+actualRewards = cell2mat(actualRewards);
 
 if ~all(cellfun(@(x,y)length(x)==size(y,2),times,track))
     error('times and track didn''t have same dimension')
@@ -207,7 +208,7 @@ times = cellfun(@fixTimes,times,'UniformOutput',false);
 dur = cellfun(@(x)1000*diff(x([1 end])),times);
 
 % i'm seeing a lot of trials (12%) that have only one timestamp
-if false %this shows that they position really is past the wall on the first timestamp
+if false %this shows that position really is past the wall on the first timestamp
     fprintf('%g%% trials have only one timestamp (%g%% of these were correct)\n',100*sum(len==1)/length(len),100*sum(len==1 & res==1)/sum(len==1));
     x=[track{len==1}];
     plot(x(1,:),x(2,:),'.')
@@ -242,7 +243,6 @@ if ~all(cellfun(@checkCorrect,results,mat2cell(res,1,ones(1,length(res)))))
 end
 
     function out=checkCorrect(x,y)
-        out = false;
         switch x
             case ''
                 out = y==2;
@@ -258,11 +258,14 @@ end
 %this is set whenever you hit k-ctrl-# to manually open valve
 manualRewards = [records.containedForcedRewards];
 
-dur(res~=1 | manualRewards)=nan; %get rid of trials that didn't end nominal correct with no manual rewards
+classes = nan(size(manualRewards));
+classes(res==0 & strcmp('incorrect',results) & ~manualRewards) = 1;
+classes(res==1 & strcmp('correct'  ,results) & ~manualRewards) = 2;
+classes(res==0 & strcmp('timedout' ,results) & ~manualRewards) = 3;
+
+cs = 1:3; % unique(classes(~isnan(classes))); %bug when you have no exemplars of one of the categories
 
 n = 50;
-slidingAvg = savg(dur(~isnan(dur)),n);
-
     function out = nanmeanMW(x) %my nanmean function shadows the stats toolbox one and is incompatible
         % out = builtin('nanmean',x); %fails cuz toolboxes don't count as builtin
         
@@ -291,11 +294,16 @@ slidingAvg = savg(dur(~isnan(dur)),n);
         out = x(repmat((1:n)',1,length(x)-n+1)+repmat(0:length(x)-n,n,1));
     end
 
-pTiles = prctile(window(pad(dur(~isnan(dur)),n,@nan),n),25*[-1 0 1]+50);
+for i=1:length(cs)
+    tDur{i} = classes==cs(i);
+    slidingAvg{i} = savg(dur(tDur{i}),n);
+    pTiles{i} = prctile(window(pad(dur(tDur{i}),n,@nan),n),25*[-1 0 1]+50);
+end
 
 alpha=.05;
-[~, pci] = binofit(sum(window(res(res~=2),n)),n,alpha);
-x=trialNums(res~=2);
+rInds = res~=2 & ~manualRewards;
+[~, pci] = binofit(sum(window(res(rInds),n)),n,alpha);
+x=trialNums(rInds);
 x=x(~isnan(pad(zeros(1,size(pci,1)),n,@nan)));
 
 %dig out the reward size we intended to give
@@ -315,20 +323,22 @@ if ismac
     dotSize=10; %usually has to be smaller on mac
     warning('haven''t picked a nice dot size for mac')
 end
-colormap([1 0 0;0 1 0]); %red for non-corrects, green for corrects
-grey = .65*ones(1,3);
-transparency=.2; %calling semilogy causes transparency to fail even on other axes!
+cm = [1 0 0;0 1 0;1 1 0]; %red for incorrects, green for corrects, yellow for timeouts
+colormap(cm);
+grey = .85*ones(1,3);
+transparency = .2; %calling semilogy causes transparency to fail even on other axes!
+head = 1.1;
 
 subplot(n,1,1)
-correctPlot(cell2mat(actualRewards));
+correctPlot(actualRewards);
 hold on
 plot(trialNums,intendedRewards,'k')
-ylims = [0 max(intendedRewards)*1.5];
+ylims = [0 max(actualRewards)*head];
 ylabel('reward size (ms)')
 title(subj)
 standardPlot(@plot);
 
-    function standardPlot(f,ticks)
+    function standardPlot(f,ticks,lines)
         for i=1:length(sessions)
             f(sessions(i)*ones(1,2),ylims,'Color',grey)
         end
@@ -342,25 +352,49 @@ standardPlot(@plot);
         
         if exist('ticks','var')
             set(gca,'YTick',log(ticks),'YTickLabel',ticks);
+            if exist('lines','var') && lines
+                f(trialNums,repmat(ticks,length(trialNums),1),'Color',grey);
+            end
         end
     end
 
     function correctPlot(x)
+        mask = ~isnan(classes);
+        
+        x = x(mask);
+        tns = trialNums(mask);
+        good = classes(mask);
+        
         if exist('doLog','var') && doLog
-            x=log(x);
+            z = log(fix0(x));
+            nzInds = x~=0;
+            x = log(x);
+        else
+            nzInds = true(size(x));
         end
-        scatter(trialNums,x,dotSize,(res==1)+1);
+        scatter(tns(nzInds),x(nzInds),dotSize,cm(good(nzInds),:),'o');
+        if ~all(nzInds)
+            hold on
+            scatter(tns(~nzInds),z*ones(1,sum(~nzInds)),dotSize,cm(good(~nzInds),:),'+');
+        end
     end
 
-    function rangePlot(x,y)
+    function rangePlot(x,y,c)
         if exist('doLog','var') && doLog
             y=log(y);
         end
-        fill([x fliplr(x)],[y(1,:) fliplr(y(2,:))],'k','FaceAlpha',transparency,'LineStyle','none');
+        if ~exist('c','var') || isempty(c)
+            c=zeros(1,3);
+        end
+        fill([x fliplr(x)],[y(1,:) fliplr(y(2,:))],c,'FaceAlpha',transparency,'LineStyle','none');
     end
 
     function semilogyEF(x,y,varargin)
         plot(x,log(y),varargin{:});
+    end
+
+    function x=fix0(x)
+        x=min(x(x~=0))/10;
     end
 
 subplot(n,1,2)
@@ -371,11 +405,11 @@ else
     p=@semilogyEF; % set(gca,'YScale','log') screws up other plots' transparency
     doLog = true;
 end
-correctPlot(len); %can see occasional red k-q's with len < timeout
+correctPlot(len); % k-q's res=2 often have len < timeout
 hold on
-p(trialNums,timeout,'k')
-ylims = [min(len) max(len)*1.5];
-ylabel('movements to crossing')
+p(trialNums,timeout,'k') %why does this seem to be under the scatter?
+ylims = [fix0(len) max(len)*head];
+ylabel('num positions')
 standardPlot(p,[1 3 10 30 100 300]);
 
 subplot(n,1,3)
@@ -389,26 +423,23 @@ else
     p=@semilogyEF;
     doLog = true;
 end
-eps=min(dur(dur>0))/10;
-p(trialNums,dur,'g.')
+eps2=fix0(dur(~isnan(classes)));
+correctPlot(dur);
 hold on
-if any(dur==0)
-    p(trialNums(dur==0),eps,'g+'); % semilogy on 0 fails (would rather draw these off axis, but how do this + survive figure resizing?)
+for i=1:length(cs)
+    xd=trialNums(classes==cs(i));
+    pTiles{i}(pTiles{i}==0)=eps2;
+    rangePlot(xd,pTiles{i}([1 end],:),cm(i,:));
 end
-xd=trialNums(~isnan(dur));
-pTiles(pTiles==0)=eps;
-rangePlot(xd,pTiles([1 end],:));
-p(xd,pTiles(2,:),'y');
-p(xd,slidingAvg,'r')
-p(trialNums,nanmeanMW(dur)*ones(1,length(trialNums)),'b');%,'Color',grey);
-ylims = [eps max(dur)*1.5];
-ylabel('ms to crossing')
-standardPlot(p,[.01 .03 .1 .3 1 3 10]*1000);
+ylims = [eps2 max(dur)*head];
+ylabel('ms')
+standardPlot(p,[.01 .03 .1 .3 1 3 10]*1000,true);
 doLog = false;
 
 subplot(n,1,4)
 rangePlot(x,pci');
 hold on
+plot(x,.5*ones(1,length(x)),'k')
 ylims = [0 1];
 ylabel('% correct')
 standardPlot(@plot);

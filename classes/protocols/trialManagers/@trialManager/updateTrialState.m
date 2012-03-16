@@ -21,31 +21,32 @@ else
     correct=[];
 end
 
-if ~isempty(result) && ischar(result) && strcmp(result,'timeout') && isempty(correct) && strcmp(getPhaseLabel(spec),'reinforcement')
-	correct=0;
-	result='timedout';
-	trialDetails=[];
-	trialDetails.correct=correct;
-elseif ~isempty(result) && ischar(result) && strcmp(result,'timeout') && isempty(correct) && strcmp(getPhaseLabel(spec),'itl') 
-    % timeout during 'itl' phase - neither correct nor incorrect (only happens when no stim is shown)
-    result='timedout';
-    trialDetails=[];
-else
-	trialDetails=[];
+trialDetails=[];
+if ~isempty(result) && ischar(result) && strcmp(result,'timeout') && isempty(correct)
+    if ismember(getPhaseLabel(spec),{'reinforcement','itl'})
+        % timeout during 'itl' phase - neither correct nor incorrect (only happens when no stim is shown)
+        result='timedout';
+        
+        if strcmp(getPhaseLabel(spec),'reinforcement')
+            trialDetails.correct=0;
+        end
+    end
 end
 
+sca
+keyboard
 
+%ball won't have request port
 if (any(ports(requestPorts)) && ~any(lastPorts(requestPorts))) && ... % if a request port is triggered
         ((strcmp(getRequestMode(getReinforcementManager(tm)),'nonrepeats') && ~any(ports&lastRequestPorts)) || ... % if non-repeat
         strcmp(getRequestMode(getReinforcementManager(tm)),'all') || ...  % all requests
         ~requestRewardDone) % first request
-
-    [rm garbage requestRewardSizeULorMS garbage garbage garbage garbage updateRM] =...
+    
+    [rm, ~, requestRewardSizeULorMS, ~, ~, ~, ~, updateRM] =...
         calcReinforcement(getReinforcementManager(tm),trialRecords, []);
     if updateRM
         tm=setReinforcementManager(tm,rm);
     end
 end
 
-
-end  % end function
+end

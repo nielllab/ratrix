@@ -317,6 +317,24 @@ logIt=true;
 lookForChange=false;
 punishResponses=[];
 
+if false
+    recordMovie = true;
+    if recordMovie
+        %         secsToRecord = 5;
+        %         maxFrames = ceil(secsToRecord * );
+        %         movieFrames = nan(maxFrames,3,w,h);
+        %    imageArray=Screen('GetImage', windowPtr [,rect] [,bufferName] [,floatprecision=0] [,nrchannels=3]); %slow!
+        
+        %this will require no prealloc and is fast!
+        %        moviePtr = Screen('CreateMovie', windowPtr, movieFile [, width][, height][, frameRate=30][, movieOptions]);
+        %        Screen('FinalizeMovie', moviePtr);
+        %        Screen('AddFrameToMovie', windowPtr [,rect] [,bufferName] [,moviePtr=0] [,frameduration=1]);
+        
+        %    else
+        %        movieFrames = [];
+    end
+end
+
 % =========================================================================
 % do first frame and  any stimulus onset synched actions
 % make sure everything after this point is preallocated

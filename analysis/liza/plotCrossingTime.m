@@ -8,15 +8,21 @@ end
 %most of the work in this file does what CompileTrialRecords does
 
 %get trial records in the right order
-local = true;
-if local
-    drive='C:';
+if ismac
+    recordPath = [filesep fullfile('Users','eflister')];
 else
-    drive='\\mtrix5';
+    local = true;
+    if local
+        drive='C:';
+    else
+        drive='\\mtrix5';
+    end
+    recordPath = fullfile(drive,'Users','nlab');
 end
-recordPath = fullfile(drive,'Users','nlab','Desktop','ballData','PermanentTrialRecordStore',subj);
 
-d=dir([recordPath '//..']);
+recordPath = fullfile(recordPath,'Desktop','ballData','PermanentTrialRecordStore',subj);
+
+d=dir(fileparts(recordPath));
 fprintf('available subjects:\n');
 {d([d.isdir] & ~ismember({d.name},{'.','..'})).name}
 
@@ -319,14 +325,9 @@ close all
 n = 4;
 
 dotSize=20;
-if ismac
-    dotSize=10; %usually has to be smaller on mac
-    warning('haven''t picked a nice dot size for mac')
-end
 cm = [1 0 0;0 1 0;1 1 0]; %red for incorrects, green for corrects, yellow for timeouts
-colormap(cm);
 grey = .85*ones(1,3);
-transparency = .2; %calling semilogy causes transparency to fail even on other axes!
+transparency = .2;
 head = 1.1;
 
 subplot(n,1,1)
@@ -390,6 +391,8 @@ standardPlot(@plot);
     end
 
     function semilogyEF(x,y,varargin)
+        %using semilogy causes transparency in this AND next plot to fail!  using plot resolves it.  set(gca,'YScale','log') doesn't
+        
         plot(x,log(y),varargin{:});
     end
 
@@ -398,31 +401,15 @@ standardPlot(@plot);
     end
 
 subplot(n,1,2)
-if false
-    p=@plot;
-    doLog = false;
-else
-    p=@semilogyEF; % set(gca,'YScale','log') screws up other plots' transparency
-    doLog = true;
-end
+doLog = true;
 correctPlot(len); % k-q's res=2 often have len < timeout
 hold on
-p(trialNums,timeout,'k') %why does this seem to be under the scatter?
+semilogyEF(trialNums,timeout,'k') %why does this seem to be under the scatter?
 ylims = [fix0(len) max(len)*head];
 ylabel('num positions')
-standardPlot(p,[1 3 10 30 100 300]);
+standardPlot(@semilogyEF,[1 3 10 30 100 300]);
 
 subplot(n,1,3)
-if false
-    p=@plot;
-    doLog = false;
-elseif false
-    p=@semilogy; %using semilogy causes transparency in this AND next plot to fail!  using plot resolves it.  set(gca,'YScale','log') doesn't
-    doLog = false;
-else
-    p=@semilogyEF;
-    doLog = true;
-end
 eps2=fix0(dur(~isnan(classes)));
 correctPlot(dur);
 hold on
@@ -433,7 +420,7 @@ for i=1:length(cs)
 end
 ylims = [eps2 max(dur)*head];
 ylabel('ms')
-standardPlot(p,[.01 .03 .1 .3 1 3 10]*1000,true);
+standardPlot(@semilogyEF,[.01 .03 .1 .3 1 3 10]*1000,true);
 doLog = false;
 
 subplot(n,1,4)

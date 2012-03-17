@@ -5,8 +5,8 @@ function standAloneRun(ratrixPath,setupFile,subjectID,recordInOracle,backupToSer
 % defaults to checking for db.mat in ...\<ratrix install directory>\..\ratrixData\ServerData\
 % if none present, makes new ratrix located there, with a dummy subject
 %
-% setupFile (optional, name of a setProtocol file on the path, typically in the setup directory)
-% defaults to 'setProtocolDEMO'
+% setupFile (optional, name or handle to a setProtocol file on the path, typically in the setup directory)
+% defaults to @setProtocolDEMO
 % if subject already exists in ratrix and has a protocol, default is no action
 %
 % subjectID (optional, must be string id of subject -- will add to ratrix if not already present)
@@ -129,22 +129,23 @@ if needToAddSubject
 end
 
 if (~exist('setupFile','var') || isempty(setupFile)) && ~isa(getProtocolAndStep(getSubjectFromID(rx,subjectID)),'protocol')
-    setupFile='setProtocolDEMO';
+    setupFile=@setProtocolDEMO;
 end
 
 if exist('setupFile','var') && ~isempty(setupFile)
-    x=what(fileparts(which(setupFile)));
-    if isempty(x) || isempty({x.m}) || ~any(ismember(lower({setupFile,[setupFile '.m']}),lower(x.m)))
-        setupFile
-        error('if setupFile supplied, it must be the name of a setProtocol file on the path (typically in the setup directory)')
+    if ischar(setupFile) && 2==exist(setupFile)
+        x=what(fileparts(which(setupFile)));
+        if isempty(x) || isempty({x.m}) || ~any(ismember(lower({setupFile,[setupFile '.m']}),lower(x.m)))
+            setupFile
+            error('if setupFile supplied, it must be the name of a setProtocol file on the path (typically in the setup directory)')
+        end        
+        su=str2func(setupFile); %weird, str2func does not check for existence!
+    elseif isa(setupFile,'function_handle')
+        su=setupFile;
+    else
+        error('setupFile must be string to setProtocol file on the path or a function handle')
     end
-    
-    su=str2func(setupFile); %weird, str2func does not check for existence!
     rx=su(rx,{subjectID});
-    %was:  r=feval(setupFile, r,{getID(sub)});
-    %but edf notes: eval is bad style
-    %http://www.mathworks.com/support/tech-notes/1100/1103.html
-    %http://blogs.mathworks.com/loren/2005/12/28/evading-eval/
 end
 
 if justDoSetup

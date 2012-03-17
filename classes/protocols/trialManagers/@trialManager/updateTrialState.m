@@ -33,8 +33,8 @@ if ~isempty(result) && ischar(result) && strcmp(result,'timeout') && isempty(cor
     end
 end
 
-sca
-keyboard
+% sca
+% keyboard
 
 %ball won't have request port
 if (any(ports(requestPorts)) && ~any(lastPorts(requestPorts))) && ... % if a request port is triggered

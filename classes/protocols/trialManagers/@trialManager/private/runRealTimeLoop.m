@@ -317,30 +317,27 @@ logIt=true;
 lookForChange=false;
 punishResponses=[];
 
-if false
-    recordMovie = true;
-    if recordMovie
-        %         secsToRecord = 5;
-        %         maxFrames = ceil(secsToRecord * );
-        %         movieFrames = nan(maxFrames,3,w,h);
-        %    imageArray=Screen('GetImage', windowPtr [,rect] [,bufferName] [,floatprecision=0] [,nrchannels=3]); %slow!
-        
-        %this will require no prealloc and is fast!
-        %        moviePtr = Screen('CreateMovie', windowPtr, movieFile [, width][, height][, frameRate=30][, movieOptions]);
-        %        Screen('FinalizeMovie', moviePtr);
-        %        Screen('AddFrameToMovie', windowPtr [,rect] [,bufferName] [,moviePtr=0] [,frameduration=1]);
-        
-        %    else
-        %        movieFrames = [];
-    end
-end
-
 % =========================================================================
 % do first frame and  any stimulus onset synched actions
 % make sure everything after this point is preallocated
 % efficiency is crticial from now on
 
 if window>0
+    if false %record movie of trial
+        movieFile = sprintf('%s%s.%d.%s.%s.%s.%s',[fullfile(fileparts(fileparts(getPath(station))),'PermanentTrialRecordStore',subID) filesep],subID,trialRecords(end).trialNumber,trialRecords(end).protocolName,trialRecords(end).trialManagerClass,stimID,datestr(trialRecords(end).date,'ddd-mmm-dd-yyyy-HH-MM-SS'));
+        %on osx, this is getting cut off to demo1.12.mouse.ball.trail.Fri#0
+        
+        %default is h.264 - what extension should we use?
+        
+        %for dynamic stims, this will be faster
+        %but for preallocated stims, consider writeAVI
+        %looks complicated to record the actual audio
+        moviePtr = Screen('CreateMovie', window, movieFile, [], [], 1/ifi,['EncodingQuality=' num2str(.01)]); %1.0 very slow
+        %still too slow on osx at .1 -- consider smaller window size?
+    else
+        moviePtr = [];
+    end
+    
     % draw interTrialLuminance first
     if true  % trunk should always leave this true, only false for a local test
         interTrialTex=Screen('MakeTexture', window, interTrialLuminance,0,0,interTrialPrecision); %need floatprecision=0 for remotedesktop
@@ -566,6 +563,10 @@ while ~done && ~quit;
     end
     
     if window>0
+        if ~isempty(moviePtr)
+            Screen('AddFrameToMovie', window, [], [], moviePtr, 1);
+        end
+        
         if ~paused
             scheduledFrameNum=ceil((GetSecs-firstVBLofPhase)/(framesPerUpdate*ifi)); %could include pessimism about the time it will take to get from here to the flip and how much advance notice flip needs
             % this will surely have drift errors...
@@ -1074,6 +1075,10 @@ while ~done && ~quit;
 end
 
 securePins(station);
+
+if ~isempty(moviePtr)
+    Screen('FinalizeMovie', moviePtr);
+end
 
 trialRecords(trialInd).phaseRecords=phaseRecords;
 % per-trial records, collected from per-phase stuff

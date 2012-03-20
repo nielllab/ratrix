@@ -317,13 +317,8 @@ logIt=true;
 lookForChange=false;
 punishResponses=[];
 
-% =========================================================================
-% do first frame and  any stimulus onset synched actions
-% make sure everything after this point is preallocated
-% efficiency is crticial from now on
-
 if window>0
-    if false %record movie of trial
+    if true %record movie of trial
         movieFile = sprintf('%s%s.%d.%s.%s.%s.%s',[fullfile(fileparts(fileparts(getPath(station))),'PermanentTrialRecordStore',subID) filesep],subID,trialRecords(end).trialNumber,trialRecords(end).protocolName,trialRecords(end).trialManagerClass,stimID,datestr(trialRecords(end).date,'ddd-mmm-dd-yyyy-HH-MM-SS'));
         %on osx, this is getting cut off to demo1.12.mouse.ball.trail.Fri#0
         
@@ -333,10 +328,15 @@ if window>0
         %but for preallocated stims, consider writeAVI
         %looks complicated to record the actual audio
         moviePtr = Screen('CreateMovie', window, movieFile, [], [], 1/ifi,['EncodingQuality=' num2str(.01)]); %1.0 very slow
-        %still too slow on osx at .1 -- consider smaller window size?
+        %still too slow on osx at .01 -- trying 800x500 at 8bit color
     else
         moviePtr = [];
     end
+
+    % =========================================================================
+    % do first frame and  any stimulus onset synched actions
+    % make sure everything after this point is preallocated
+    % efficiency is crticial from now on
     
     % draw interTrialLuminance first
     if true  % trunk should always leave this true, only false for a local test

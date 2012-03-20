@@ -1,4 +1,8 @@
-function [ind height width hz]=chooseLargestResForHzsDepthRatio(resolutions,hzs,depth,maxWidth,maxHeight)
+function [ind height width hz]=chooseLargestResForHzsDepthRatio(resolutions,hzs,depth,maxWidth,maxHeight,actuallySmallest)
+
+if ~exist('actuallySmallest','var') || isempty(actuallySmallest)
+    actuallySmallest=false;
+end
 
 if ismac
     hzs=union(hzs,0); %have to add zero for osx, cuz screen('resolutions') returns all hz as 0
@@ -14,7 +18,12 @@ for i=1:length(hzs)
     hz=hzs(i);
     inds=find([[resolutions.hz]==hz & [resolutions.pixelSize]==depth] & ([resolutions.width]./[resolutions.height])==ratio & [resolutions.width]<=maxWidth & [resolutions.height]<=maxHeight);
     pix=[resolutions(inds).height] .* [resolutions(inds).width];
-    ind=find(pix==max(pix));
+    if actuallySmallest
+        p=min(pix);
+    else
+        p=max(pix);
+    end
+    ind=find(pix==p);
     ind=inds(ind);
     if length(ind)>1
         warning('didn''t find unique ind')
@@ -35,3 +44,4 @@ height=x.height;
 width=x.width;
 hz=x.hz;
 warning('no match')
+end

@@ -1,4 +1,9 @@
-function s=startPTB(s,imagingTasks)
+function s=startPTB(s,imagingTasks,depth)
+if ~exist('depth','var') || isempty(depth)
+    depth=32;
+else
+    depth=8; %hardcoded for now cuz depth above comes from requested resolution, which may differ from desired value here
+end
 
 clear Screen;
 Screen('Screens');
@@ -45,7 +50,7 @@ try
     
     preScreen=GetSecs();
     if isempty(imagingTasks)
-        s.window = Screen('OpenWindow',s.screenNum,0);%,[],32,2);  %%color, rect, depth, buffers (none can be changed in basic version)
+        s.window = Screen('OpenWindow',s.screenNum,0,[],depth);%,2);  %%color, rect, depth, buffers (none can be changed in basic version)
     else
         warning('edf says: have you checked that the stopPTB will remove these tasks?  i see no evidence that you clean up after yourself if a later trial doesn''t want these things.  a clear Screen may help, but i want proof.  it''s not stated in ''help psychimaging'' -- worst case, ask mario.  also, i don''t see that you''ve been careful to make sure the pipeline details are recorded in the trial record.')
         %well, i guess it's relatively convincing that you get a unique window pointer out of it, so i'm downgrading to a warning...

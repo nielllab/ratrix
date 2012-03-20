@@ -25,21 +25,22 @@ if ismac
             for i=1:length(paths)
                 if ~exist(paths{i},'dir')
                     [a b c]=mkdir(paths{i});
-                end
-                if a~=1
-                    b
-                    c
-                    warning('couldn''t mkdir')
-                else
-                    [a b c]=copyfile(src,fullfile(paths{i},fn)); %not fullfiling like this might be why we sometimes make files when we think we're making dirs
+                    
                     if a~=1
                         b
                         c
-                        warning('couldn''t copy libportaudio')
-                    else
-                        good=true;
-                        break
+                        warning('couldn''t mkdir')
                     end
+                end
+                
+                [a b c]=copyfile(src,fullfile(paths{i},fn)); %not fullfiling like this might be why we sometimes make files when we think we're making dirs
+                if a~=1
+                    b
+                    c
+                    warning('couldn''t copy libportaudio')
+                else
+                    good=true;
+                    break
                 end
             end
             if ~good

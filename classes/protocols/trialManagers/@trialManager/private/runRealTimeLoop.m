@@ -317,12 +317,27 @@ logIt=true;
 lookForChange=false;
 punishResponses=[];
 
-% =========================================================================
-% do first frame and  any stimulus onset synched actions
-% make sure everything after this point is preallocated
-% efficiency is crticial from now on
-
 if window>0
+    if true %record movie of trial
+        movieFile = sprintf('%s%s.%d.%s.%s.%s.%s',[fullfile(fileparts(fileparts(getPath(station))),'PermanentTrialRecordStore',subID) filesep],subID,trialRecords(end).trialNumber,trialRecords(end).protocolName,trialRecords(end).trialManagerClass,stimID,datestr(trialRecords(end).date,'ddd-mmm-dd-yyyy-HH-MM-SS'));
+        %on osx, this is getting cut off to demo1.12.mouse.ball.trail.Fri#0
+        
+        %default is h.264 - what extension should we use?
+        
+        %for dynamic stims, this will be faster
+        %but for preallocated stims, consider writeAVI
+        %looks complicated to record the actual audio
+        moviePtr = Screen('CreateMovie', window, movieFile, [], [], 1/ifi,['EncodingQuality=' num2str(.01)]); %1.0 very slow
+        %still too slow on osx at .01 -- trying 800x500 at 8bit color
+    else
+        moviePtr = [];
+    end
+
+    % =========================================================================
+    % do first frame and  any stimulus onset synched actions
+    % make sure everything after this point is preallocated
+    % efficiency is crticial from now on
+    
     % draw interTrialLuminance first
     if true  % trunk should always leave this true, only false for a local test
         interTrialTex=Screen('MakeTexture', window, interTrialLuminance,0,0,interTrialPrecision); %need floatprecision=0 for remotedesktop
@@ -548,6 +563,10 @@ while ~done && ~quit;
     end
     
     if window>0
+        if ~isempty(moviePtr)
+            Screen('AddFrameToMovie', window, [], [], moviePtr, 1);
+        end
+        
         if ~paused
             scheduledFrameNum=ceil((GetSecs-firstVBLofPhase)/(framesPerUpdate*ifi)); %could include pessimism about the time it will take to get from here to the flip and how much advance notice flip needs
             % this will surely have drift errors...
@@ -1056,6 +1075,10 @@ while ~done && ~quit;
 end
 
 securePins(station);
+
+if ~isempty(moviePtr)
+    Screen('FinalizeMovie', moviePtr);
+end
 
 trialRecords(trialInd).phaseRecords=phaseRecords;
 % per-trial records, collected from per-phase stuff

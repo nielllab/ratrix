@@ -14,10 +14,13 @@ if IsLinux
 else
     depth=32;
 end
-[resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60],depth,getMaxWidth(stimulus),getMaxHeight(stimulus));
+depth=16; % if use 8, screen('openwindow') says it can't open at 8, but it can at 16 !??!
+[resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60],depth,getMaxWidth(stimulus),getMaxHeight(stimulus),true);
 if hz==0 %osx
     hz=60;
 end
+
+resolutions(resolutionIndex)
 
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);

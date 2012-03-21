@@ -318,7 +318,7 @@ lookForChange=false;
 punishResponses=[];
 
 if window>0
-    if true %record movie of trial
+    if false %record movie of trial
         movieFile = sprintf('%s%s.%d.%s.%s.%s.%s',[fullfile(fileparts(fileparts(getPath(station))),'PermanentTrialRecordStore',subID) filesep],subID,trialRecords(end).trialNumber,trialRecords(end).protocolName,trialRecords(end).trialManagerClass,stimID,datestr(trialRecords(end).date,'ddd-mmm-dd-yyyy-HH-MM-SS'));
         %on osx, this is getting cut off to demo1.12.mouse.ball.trail.Fri#0
         

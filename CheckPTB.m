@@ -10,6 +10,7 @@ d = 100; %(80kB)
 % http://ark.intel.com/products/52213
 
 AssertOpenGL;
+Screen('Preference', 'DefaultVideocaptureEngine', 3);
 try
     Screen('Preference', 'Verbosity', 4);
     Screen('Preference', 'VisualDebugLevel', 6);
@@ -28,6 +29,8 @@ try
     hz=Screen('NominalFrameRate', win, 1);
     ifi=Screen('GetFlipInterval', win);
     
+    moviePtr = Screen('CreateMovie', win, 'C:\test', [], [], 1/ifi, []);
+    
     n=ceil(numSecs*hz);
     t=nan(n,1);
     for i=1:n
@@ -36,18 +39,19 @@ try
         Screen('Close', tex);
         
         t(i) = Screen('Flip', win);
+        Screen('AddFrameToMovie', win, [], [], moviePtr, 1);
     end
+    
+    plot([diff(t) repmat([ifi 1./[hz res.hz]],n-1,1)])
+    title('ifis')
+    ylabel('secs')
+    xlabel('frame')
+    legend({'measured','checked','nominal','res'})
     
 catch e
     getReport(e)
 end
-
-plot([diff(t) repmat([ifi 1./[hz res.hz]],n-1,1)])
-title('ifis')
-ylabel('secs')
-xlabel('frame')
-legend({'measured','checked','nominal','res'})
-
+Screen('FinalizeMovie', moviePtr);
 Screen('CloseAll');
 Priority(0);
 end

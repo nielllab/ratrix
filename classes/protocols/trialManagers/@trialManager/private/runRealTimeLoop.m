@@ -320,19 +320,48 @@ punishResponses=[];
 if window>0
     if false %record movie of trial
         movieFile = sprintf('%s%s.%d.%s.%s.%s.%s',[fullfile(fileparts(fileparts(getPath(station))),'PermanentTrialRecordStore',subID) filesep],subID,trialRecords(end).trialNumber,trialRecords(end).protocolName,trialRecords(end).trialManagerClass,stimID,datestr(trialRecords(end).date,'ddd-mmm-dd-yyyy-HH-MM-SS'));
+        
+        % C:\Users\nlab\Desktop\ratrixData\PermanentTrialRecordStore\demo1\demo1.1.mouse.ball.trail.Tue-Mar-20-2012-22-23-56
+        % in win, showing up in cwd at:
+        % UsersnlabDesktopratrixDataPermanentTrialRecordStoredemo1demo1.2.mouse.ball.trail.Tue-Mar-20-2012-22-24-07
         %on osx, this is getting cut off to demo1.12.mouse.ball.trail.Fri#0
         
         %default is h.264 - what extension should we use?
+        %note ImagingStereoDemo demos .avi, .mov, .flv...  ask mario for ref...
         
         %for dynamic stims, this will be faster
-        %but for preallocated stims, consider writeAVI
-        %looks complicated to record the actual audio
-        moviePtr = Screen('CreateMovie', window, movieFile, [], [], 1/ifi,['EncodingQuality=' num2str(.01)]); %1.0 very slow
-        %still too slow on osx at .01 -- trying 800x500 at 8bit color
+        %but for preallocated stims, use writeAVI
+        if IsWin
+            str=[]; %works on win, not too slow!
+        else
+            str=['EncodingQuality=' num2str(.01)]; %works on osx, but 1.0 very slow
+            %still too slow on osx at .01 -- trying 800x500 at 8bit color
+        end
+        moviePtr = Screen('CreateMovie', window, movieFile, [], [], 1/ifi, str);
+                
+        %looks like C:\Users\nlab\Desktop\ptb src\PsychSourceGL\Source\Common\Screen\ScreenPreferenceState.c
+        %doesn't check for 64 vs. 32 bit win
+        %docs make it sound like qt is still default for 32bit win, but i
+        %couldn't get qt to work at all until i had gstreamer installed?        
+        % todo, try again w/qt - am i misremembering?
+        
+        %we should also record sound
+        %can use http://docs.psychtoolbox.org/OpenSlave with kPortAudioIsOutputCapture
+        %see http://tech.groups.yahoo.com/group/psychtoolbox/message/13249
+        % then add it as audio track to the movie...
+        %Screen('AddAudioBufferToMovie', moviePtr, audioBuffer); %not supported on osx..
+        %note, to do this, must add option string to createmovie:
+        % Add a sound track to the movie: 2 channel stereo, 48 kHz:
+        %        movie = Screen('CreateMovie', windowPtr, ['MyTestMovie.mov'], 512, 512, 30, ':CodecSettings=AddAudioTrack=2@48000');
+        %'audioBuffer' must be 'numChannels' rows by 'numSamples' columns double matrix
+        %Sample values must lie in the range between -1.0 and +1.0.
+        %The audio buffer is converted into a movie specific sound format and then
+        %appended to the audio samples already stored in the audio track.
+        
     else
         moviePtr = [];
     end
-
+    
     % =========================================================================
     % do first frame and  any stimulus onset synched actions
     % make sure everything after this point is preallocated

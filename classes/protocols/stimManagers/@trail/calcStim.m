@@ -22,7 +22,7 @@ if IsWin
     % PTB-ERROR: This will not work on Microsoft Windows operating systems.
 end
 
-[resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60],depth,getMaxWidth(stimulus),getMaxHeight(stimulus),true);
+[resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60],depth,getMaxWidth(stimulus),getMaxHeight(stimulus));%,true);
 if hz==0 %osx
     hz=60;
 end

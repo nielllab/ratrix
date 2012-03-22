@@ -16,7 +16,6 @@ d = 100; %(80kB)
 % also turn off catalyst a.i.
 
 AssertOpenGL;
-Screen('Preference', 'DefaultVideocaptureEngine', 3);
 try
     Screen('Preference', 'Verbosity', 4);
     Screen('Preference', 'VisualDebugLevel', 6);
@@ -34,9 +33,7 @@ try
     
     hz=Screen('NominalFrameRate', win, 1);
     ifi=Screen('GetFlipInterval', win);
-    
-    moviePtr = Screen('CreateMovie', win, 'C:\test', [], [], 1/ifi, []);
-    
+        
     n=ceil(numSecs*hz);
     t=nan(n,1);
     for i=1:n
@@ -45,7 +42,6 @@ try
         Screen('Close', tex);
         
         t(i) = Screen('Flip', win);
-        Screen('AddFrameToMovie', win, [], [], moviePtr, 1);
     end
     
     plot([diff(t) repmat([ifi 1./[hz res.hz]],n-1,1)])
@@ -57,7 +53,6 @@ try
 catch e
     getReport(e)
 end
-Screen('FinalizeMovie', moviePtr);
 Screen('CloseAll');
 Priority(0);
 end

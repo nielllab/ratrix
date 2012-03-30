@@ -65,7 +65,7 @@
 #define STATUS_BIT_6 PARPORT_STATUS_ACK
 #define STATUS_BIT_7 PARPORT_STATUS_BUSY
 
-void doPort(void *addr, bool mask[][NUM_BITS], bool vals[][NUM_BITS], bool writing) {
+void doPort(const void *addr, const bool mask[][NUM_BITS], const bool vals[][NUM_BITS], const bool writing, const uint8_T *out, const int i) {
     unsigned char b;
     int result, size = sizeof(b);
     
@@ -146,25 +146,24 @@ void doPort(void *addr, bool mask[][NUM_BITS], bool vals[][NUM_BITS], bool writi
         /* frob = (old & ~mask) | new; */
     }
     
+if (!writing && out!=NULL) {
+	out[2+i*NUM_REGISTERS]=31; /*find the bits in .m*/
+}
+
     /*
-    mxSetM (C and Fortran)Number of rows in array
-            mxSetN (C and Fortran)Set number of columns in array
-            mxSetDimensions (C and Fortran)
-            mxSetData (C and Fortran)Set pointer to datamxSetDimensions
-            mxLogical (C
-            mxCreateLogicalMatrix (C)
-     **/
+mwIndex mxCalcSingleSubscript(const mxArray *pm, mwSize nsubs, mwIndex *subs)
+     */
 }
 
 /*
  * ppLinuxMex([ports(:) addr(:)],[bitSpecs(:,1:2) vals(:)])
  */
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
+void mexFunction(const int nlhs, const mxArray *plhs[], const int nrhs, const mxArray *prhs[])
 {
     int numAddresses, numVals, i, j, result, addrStrLen;
     
     uint64_T *addresses;
-    uint8_T *data;
+    uint8_T *data,out;
     
     uint64_T address, port;
     uint8_T bitNum, regOffset, value;
@@ -182,7 +181,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             if (nlhs != 1) {
                 mexErrMsgTxt("exactly 1 output argument required when reading.");
             }
-            *plhs = mxCreateLogicalMatrix(NUM_BITS*NUM_REGISTERS,numAddresses);
+            *plhs = mxCreateNumericMatrix(NUM_REGISTERS,numAddresses,mxUINT8_CLASS,mxREAL);
+		out = mxGetData(plhs);
             break;
         case 2:
             writing = true;
@@ -218,7 +218,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                 mask[regOffset][bitNum] = true;
                 vals[regOffset][bitNum] = value;
             }
-            
+            out = NULL;
             break;
         default:
             mexErrMsgTxt("exactly 1-2 input arguments required.");
@@ -241,7 +241,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         port    = addresses[i];
         address = addresses[i+numAddresses];
         
-        if DEBUG printf("addr %d: %lu, %lu\n", i, address, port);
+        if DEBUG printf("addr %d: %" FMT64 "u, %" FMT64 "u\n", i, address, port);
         
         if USE_PPDEV {
             addrStrLen = strlen(ADDR_BASE) + (port == 0 ? 1 : 1 + floor(log10(port))); /* number digits in port */
@@ -250,7 +250,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                 mexErrMsgTxt("couldn't allocate addrStr");
             }
             
-            result = snprintf(addrStr,addrStrLen+1,"%s%lu",ADDR_BASE,port); /* +1 for null terminator */
+            result = snprintf(addrStr,addrStrLen+1,"%s%" FMT64 "u",ADDR_BASE,port); /* +1 for null terminator */
             if (result != addrStrLen) {
                 printf("%d\t%d\t%s\n",result,addrStrLen,addrStr);
                 mexErrMsgTxt("bad addrStr snprintf");
@@ -263,14 +263,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             addr = &address;
         }
         
-        doPort(addr,mask,vals,writing);
+        doPort(addr,mask,vals,writing,out,i);
         
         if USE_PPDEV {
             mxFree(addrStr);
         }
     }
-    
-    /* mxGetElementSize
-     * mwIndex mxCalcSingleSubscript(const mxArray *pm, mwSize nsubs, mwIndex *subs)
-     */
 }

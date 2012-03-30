@@ -1,8 +1,8 @@
 /*
- * lptwriteLinux.c
+ * ppLinuxMex.c
  *
- * Compile in MATLAB with mex lptwriteLinuxMex.c [-O] [-g] [-v]
- * For documentation see lptwriteLinux.m
+ * Compile in MATLAB with mex ppLinuxMex.c [-O] [-g] [-v]
+ * For documentation see ppLinux.m
  *
  * following: http://as6edriver.sourceforge.net/Parallel-Port-Programming-HOWTO/accessing.html
  * http://people.redhat.com/twaugh/parport/html/parportguide.html
@@ -29,6 +29,9 @@
 
 #include <sys/io.h>
 #include <string.h>
+#include <errno.h>
+
+#include <math.h>
 
 #include <fcntl.h>
 #include <sys/types.h>
@@ -40,33 +43,189 @@
 
 #define NUM_ADDRESS_COLS 2
 #define NUM_DATA_COLS 3
+
+#define NUM_REGISTERS 3
+#define NUM_BITS 8
+
 #define ADDR_BASE "/dev/parport"
 
+#define DEBUG true
+#define USE_PPDEV false
+
+#define ECR_OFFSET 0x402
+
+#define CONTROL_BIT_0 PARPORT_CONTROL_STROBE
+#define CONTROL_BIT_1 PARPORT_CONTROL_AUTOFD
+#define CONTROL_BIT_2 PARPORT_CONTROL_INIT
+#define CONTROL_BIT_3 PARPORT_CONTROL_SELECT
+
+#define STATUS_BIT_3 PARPORT_STATUS_ERROR
+#define STATUS_BIT_4 PARPORT_STATUS_SELECT
+#define STATUS_BIT_5 PARPORT_STATUS_PAPEROUT
+#define STATUS_BIT_6 PARPORT_STATUS_ACK
+#define STATUS_BIT_7 PARPORT_STATUS_BUSY
+
+void doPort(void *addr, bool mask[][NUM_BITS], bool vals[][NUM_BITS], bool writing) {
+    unsigned char b;
+    int result, size = sizeof(b);
+    
+    if DEBUG printf("size: %d\n",size);
+    if (size != 1) mexErrMsgTxt("supplied value wasn't one byte");
+    
+    if USE_PPDEV {
+        /*PPDEV doesn't require root, is supposed to be faster, and is address-space safe, but only available in later kernels >=2.4?*/
+        /*however, i seem to need to sudo matlab in order to open eg /dev/parport0 */
+        
+        /* note our design here is not as intended -- we should really keep some persistant state of the port for future calls instead of acquiring and releasing it for every call */
+        
+        int parportfd = open(addr, O_RDWR);
+        if (parportfd == -1) {
+            printf("%s %s\n",addr,strerror(errno));
+            mexErrMsgTxt("couldn't access port");
+        }
+        
+        /*bug: if the following error out, we won't close parportfd or free addrStr -- need some exception like error handling */
+        
+        /* PPEXCL call succeeds, but causes following calls to fail!?!
+         * then dmesg has: parport0: cannot grant exclusive access for device ppdev0
+         *                 ppdev0: failed to register device!
+         *
+         * web search suggests this is because lp is loaded -- implications of removing it?
+         */
+        /*
+         * result = ioctl(parportfd,PPEXCL);
+         * if (result != 0) {
+         * printf("ioctl PPEXCL: %d (%s)\n",result,strerror(errno));
+         * mexErrMsgTxt("couldn't get exclusive access to pport");
+         * }
+         */
+        
+        result = ioctl(parportfd,PPCLAIM);
+        if (result != 0) {
+            printf("ioctl PPCLAIM: %d (%s)\n",result,strerror(errno));
+            mexErrMsgTxt("couldn't claim pport");
+        }
+        
+        int mode = IEEE1284_MODE_BYTE; /* or would we want COMPAT? */
+        result = ioctl(parportfd,PPSETMODE,&mode);
+        if (result != 0) {
+            printf("ioctl PPSETMODE: %d (%s)\n",result,strerror(errno));
+            mexErrMsgTxt("couldn't set byte mode");
+        }
+        
+        result = ioctl(parportfd,PPWDATA,&b); /*PPWCONTROL(2),PPRCONTROL(2),PPRSTATUS(1),PPRDATA,PPDATADIR*/
+        if (result != 0) {
+            printf("ioctl PPWDATA: %d (%s)\n",result,strerror(errno));
+            mexErrMsgTxt("couldn't write to pport");
+        }
+        
+        result = ioctl(parportfd,PPRELEASE);
+        if (result != 0) {
+            printf("ioctl PPRELEASE: %d (%s)\n",result,strerror(errno));
+            mexErrMsgTxt("couldn't release pport");
+        }
+        
+        result = close(parportfd);
+        if (result != 0) {
+            printf("close: %d (%s)\n",result,strerror(errno));
+            mexErrMsgTxt("couldn't close port");
+        }
+        
+    } else {
+        
+        result = iopl(3); /* requires sudo, allows access to the entire address space with the associated risks.
+         * required for ECR. safer alternative: ioperm */
+        
+        if (result != 0) {
+            printf("iopl: %d (%s)\n",result,strerror(errno));
+            mexErrMsgTxt("couldn't claim address space");
+        }
+        outb(b,*(uint64_T *)addr); /*requires >= -O2 compiler optimization to inline this macro from io.h*/
+        
+        printf("in: %d %d %d",inb(*(uint64_T *)addr),inb(*(uint64_T *)addr+1),inb(*(uint64_T *)addr+2));
+        /* frob = (old & ~mask) | new; */
+    }
+    
+    /*
+    mxSetM (C and Fortran)Number of rows in array
+            mxSetN (C and Fortran)Set number of columns in array
+            mxSetDimensions (C and Fortran)
+            mxSetData (C and Fortran)Set pointer to datamxSetDimensions
+            mxLogical (C
+            mxCreateLogicalMatrix (C)
+     **/
+}
+
 /*
- * lptwriteLinuxMex([ports(:) addr(:)],[bitSpecs(:,1:2) vals(:)])
+ * ppLinuxMex([ports(:) addr(:)],[bitSpecs(:,1:2) vals(:)])
  */
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-    int numAddresses, numVals, i, result, addrStrLen;
-    double *portOLD, *valueOLD;
+    int numAddresses, numVals, i, j, result, addrStrLen;
     
-    uint64_T *addresses; /* mxUINT64_CLASS */
-    uint8_T *data; /* mxUINT8_CLASS */
+    uint64_T *addresses;
+    uint8_T *data;
     
     uint64_T address, port;
     uint8_T bitNum, regOffset, value;
     
+    bool writing, mask[NUM_REGISTERS][NUM_BITS], vals[NUM_REGISTERS][NUM_BITS];
+    
     char *addrStr;
+    void *addr;
+        
+        numAddresses = mxGetM(prhs[0]);
     
-    if (nrhs != 2) {
-        mexErrMsgTxt("Two input arguments required.");
-    } 
-    
-    if (nlhs > 0) {
-        mexErrMsgTxt("Too many output arguments.");
+    switch (nrhs) {
+        case 1:
+            writing = false;
+            if (nlhs != 1) {
+                mexErrMsgTxt("exactly 1 output argument required when reading.");
+            }
+            *plhs = mxCreateLogicalMatrix(NUM_BITS*NUM_REGISTERS,numAddresses);
+            break;
+        case 2:
+            writing = true;
+            if (nlhs != 0) {
+                mexErrMsgTxt("exactly 0 output arguments required when reading.");
+            }
+            if (mxGetN(prhs[1]) != NUM_DATA_COLS || !mxIsUint8(prhs[1])) {
+                mexErrMsgTxt("Second argument must be uint8 with three columns (bitNum, regOffset, value).");
+            }
+            
+            numVals = mxGetM(prhs[1]);
+            data = mxGetData(prhs[1]);
+            
+            if DEBUG printf("\n\ndata:\n");
+            
+            for (i = 0; i < NUM_BITS; i++) {
+                for (j = 0; j < NUM_REGISTERS; j++) {
+                    mask[j][i] = false; /* is this necessary? */
+                }
+            }
+            
+            for (i = 0; i < numVals; i++) {
+                bitNum    = data[i          ];
+                regOffset = data[i+  numVals];
+                value     = data[i+2*numVals];
+                
+                if DEBUG printf("\t%d, %d, %d\n", bitNum, regOffset, value);
+                
+                if (bitNum>8 || bitNum<1 || regOffset>2 || value>1) {
+                    mexErrMsgTxt("bitNum must be 1-8, regOffset must be 0-2, value must be 0-1.");
+                }
+                
+                mask[regOffset][bitNum] = true;
+                vals[regOffset][bitNum] = value;
+            }
+            
+            break;
+        default:
+            mexErrMsgTxt("exactly 1-2 input arguments required.");
+            break;
     }
     
-    for (i = 0; i < 2; i++) {
+    for (i = 0; i < nrhs; i++) {
         if (mxGetNumberOfDimensions(prhs[i])!=2 || mxIsComplex(prhs[i]) || !mxIsNumeric(prhs[i]) || mxGetM(prhs[i])<1) {
             mexErrMsgTxt("Input must be real numeric matrices with at least one row.");
         }
@@ -76,110 +235,42 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         mexErrMsgTxt("First argument must be uint64 two columns (portNum, address).");
     }
     
-    if (mxGetN(prhs[1])!=NUM_DATA_COLS || !mxIsUint8(prhs[1])) {
-        mexErrMsgTxt("Second argument must be uint8 with three columns (bitNum, regOffset, value).");
-    }
-    
-    numAddresses = mxGetM(prhs[0]);
-    numVals = mxGetM(prhs[1]);
-    
-    /* mxGetElementSize */
-    
     addresses = mxGetData(prhs[0]);
-    data = mxGetData(prhs[1]);
-        
-    addrStrLen = strlen(ADDR_BASE)+1; /* is one enough? */
-    addrStr = (char *)mxMalloc(addrStrLen);
-    if (addrStr==NULL) {
-        mexErrMsgTxt("couldn't allocate addrStr");
-    }
     
     for (i = 0; i < numAddresses; i++) {
         port    = addresses[i];
         address = addresses[i+numAddresses];
         
-        printf("addr %d: %d, %d\n", i, address, port);
+        if DEBUG printf("addr %d: %lu, %lu\n", i, address, port);
         
-        if (false) { /* snprintf isn't doing the appending, even though it's returning the right number of bytes copied */
-            if (snprintf(addrStr,addrStrLen,"%s%d",ADDR_BASE,port)!=addrStrLen) {
-                printf("%d\t%d\t%s\n",snprintf(addrStr,addrStrLen,"%s%d",ADDR_BASE,address),addrStrLen,addrStr);
+        if USE_PPDEV {
+            addrStrLen = strlen(ADDR_BASE) + (port == 0 ? 1 : 1 + floor(log10(port))); /* number digits in port */
+            addrStr = (char *)mxMalloc(addrStrLen);
+            if (addrStr==NULL) {
+                mexErrMsgTxt("couldn't allocate addrStr");
+            }
+            
+            result = snprintf(addrStr,addrStrLen+1,"%s%lu",ADDR_BASE,port); /* +1 for null terminator */
+            if (result != addrStrLen) {
+                printf("%d\t%d\t%s\n",result,addrStrLen,addrStr);
                 mexErrMsgTxt("bad addrStr snprintf");
             }
+            
+            if DEBUG printf("%d\t%s.\n",addrStrLen,addrStr);
+            
+            addr = addrStr;
         } else {
-            addrStrLen=sprintf(addrStr,"%s%d",ADDR_BASE,port);            
+            addr = &address;
         }
-        printf("%d\t%s\n",addrStrLen,addrStr);
-    }
-    
-    mxFree(addrStr);
-    
-    printf("\n\ndata:\n");
-    for (i = 0; i < numVals; i++) {
-        bitNum    = data[i          ];
-        regOffset = data[i+  numVals];
-        value     = data[i+2*numVals];
         
-        printf("\t%d, %d, %d\n", bitNum, regOffset, value);
+        doPort(addr,mask,vals,writing);
         
-        if (bitNum>8 || bitNum<1 || regOffset>2 || value>1) {
-            mexErrMsgTxt("bitNum must be 1-8, regOffset must be 0-2, value must be 0-1.");
+        if USE_PPDEV {
+            mxFree(addrStr);
         }
     }
     
-    /*
+    /* mxGetElementSize
      * mwIndex mxCalcSingleSubscript(const mxArray *pm, mwSize nsubs, mwIndex *subs)
      */
-    
-    if false {
-        /*PPDEV doesn't require root, is supposed to be faster, and is address-space safe, but only available in later kernels >=2.4?*/
-        int parportfd = open("/dev/parport0", O_RDWR); /* check this agrees with port address argument? */
-        if (parportfd == -1) mexErrMsgTxt("couldn't access /dev/parport0");
-        
-        result = ioctl(parportfd,PPEXCL);
-        printf("ioctl PPEXCL: %d\n",result);
-        if (result != 0) mexErrMsgTxt("couldn't get exclusive access to pport");
-        
-        result = ioctl(parportfd,PPCLAIM);
-        printf("ioctl PPCLAIM: %d\n",result);
-        /*  if (result != 0) mexErrMsgTxt("couldn't claim pport"); */
-        
-        int mode = IEEE1284_MODE_BYTE;
-        result = ioctl(parportfd,PPSETMODE,&mode);
-        printf("ioctl PPSETMODE: %d\n",result);
-        if (result != 0) mexErrMsgTxt("couldn't set byte mode");
-        
-        int size = sizeof(*valueOLD);
-        printf("size: %d\n",size);
-        /*  if (size != 1) mexErrMsgTxt("supplied value wasn't one byte"); */
-        
-        /*  int bytes_written = write(parportfd,value,size);
-         * printf("bytes_written: %d\n",bytes_written);
-         * if (bytes_written != size) mexErrMsgTxt("written size not correct"); */
-        
-        result = ioctl(parportfd,PPWDATA,valueOLD);
-        printf("ioctl PPWDATA: %d\n",result);
-        /*  if (result != 0) mexErrMsgTxt("couldn't write to pport"); */
-        
-        result = ioctl(parportfd,PPRELEASE);
-        printf("ioctl PPRELEASE: %d\n",result);
-        /*  if (result != 0) mexErrMsgTxt("couldn't release pport"); */
-        
-        close(parportfd);
-    }
-    
-    if false {
-        /* Assign pointers to each input and output. */
-        portOLD = mxGetData(prhs[0]);
-        valueOLD = mxGetData(prhs[1]); /* what ensures that this is only one byte?  why is it a double? */
-        
-        int size = sizeof(*valueOLD);
-        printf("size: %d\n",size);
-        /*  if (size != 1) mexErrMsgTxt("supplied value wasn't one byte"); */
-        
-        result = iopl(3); /* requires root access, allows access to the entire address space with the associated risks.
-         * required for ECR. alternative: ioperm */
-        printf("iopl: %d\n",result);
-        if (result != 0) mexErrMsgTxt("couldn't claim address space");
-        outb(*valueOLD,*portOLD);
-    }
 }

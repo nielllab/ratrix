@@ -30,6 +30,10 @@ if smooth
     didBlend = true;
 end
 
+    function out=f(x) %annonymous definition below causes huge frame drops, but only when there's lots of history?!
+        out=reshape(repmat(x,1,2),[1 4]);
+    end
+
 switch phaseRecords(phaseNum).phaseType
     case 'pre-request'
         
@@ -67,7 +71,7 @@ switch phaseRecords(phaseNum).phaseType
         
         %note: request rewards still not working...
         
-        f = @(x) reshape(repmat(x,1,2),[1 4]);
+        %f = @(x) reshape(repmat(x,1,2),[1 4]); %causes huge frame drops!
         
         slowRect = f(s.slow) .* [-1 -1 1 1] + f(2*s.initialPos - p); % seems to be [left bottom right top]?
         

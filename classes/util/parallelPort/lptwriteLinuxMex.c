@@ -44,15 +44,19 @@
 #define NUM_ADDRESS_COLS 2
 #define NUM_DATA_COLS 3
 
-#define NUM_REGISTERS 3
-#define NUM_BITS 8
-
 #define ADDR_BASE "/dev/parport"
 
 #define DEBUG true
 #define USE_PPDEV false
 
+#define DATA_OFFSET 0
+#define STATUS_OFFSET 1
+#define CONTROL_OFFSET 2
 #define ECR_OFFSET 0x402
+
+#define OFFSETS {DATA_OFFSET,STATUS_OFFSET,CONTROL_OFFSET,ECR_OFFSET}
+#define NUM_REGISTERS 4
+#define NUM_BITS 8
 
 #define CONTROL_BIT_0 PARPORT_CONTROL_STROBE
 #define CONTROL_BIT_1 PARPORT_CONTROL_AUTOFD
@@ -65,13 +69,21 @@
 #define STATUS_BIT_6 PARPORT_STATUS_ACK
 #define STATUS_BIT_7 PARPORT_STATUS_BUSY
 
-void doPort(const void *addr, const bool mask[][NUM_BITS], const bool vals[][NUM_BITS], const bool writing, const uint8_T *out, const int i) {
+/*
+typedef const bool boolByte[NUM_BITS]; /* silly ocd to be able to pass const multidim arrays (http://stackoverflow.com/a/1341860)*/
+       
+void printBits(const unsigned char b) {
+    int i;
+    for (i = 0; i < NUM_BITS; i++) {
+        printf("%c",b & 1<<i ? '1' : '0');
+    }
+}
+
+void doPort(const void * const addr, /*const boolByte * const*/ const unsigned char mask[NUM_REGISTERS], /*const boolByte * const*/ const unsigned char vals[NUM_REGISTERS], uint8_T * const out, const int n) {
+    uint64_T reg;
     unsigned char b;
-    int result, size = sizeof(b);
-    
-    if DEBUG printf("size: %d\n",size);
-    if (size != 1) mexErrMsgTxt("supplied value wasn't one byte");
-    
+    int result, i, offsets[NUM_REGISTERS]=OFFSETS; /*lame*/    
+        
     if USE_PPDEV {
         /*PPDEV doesn't require root, is supposed to be faster, and is address-space safe, but only available in later kernels >=2.4?*/
         /*however, i seem to need to sudo matlab in order to open eg /dev/parport0 */
@@ -135,57 +147,72 @@ void doPort(const void *addr, const bool mask[][NUM_BITS], const bool vals[][NUM
         
         result = iopl(3); /* requires sudo, allows access to the entire address space with the associated risks.
          * required for ECR. safer alternative: ioperm */
+        /*requires >= -O2 compiler optimization to inline inb/outb macros from io.h*/
         
         if (result != 0) {
             printf("iopl: %d (%s)\n",result,strerror(errno));
             mexErrMsgTxt("couldn't claim address space");
         }
-        outb(b,*(uint64_T *)addr); /*requires >= -O2 compiler optimization to inline this macro from io.h*/
         
-        printf("in: %d %d %d",inb(*(uint64_T *)addr),inb(*(uint64_T *)addr+1),inb(*(uint64_T *)addr+2));
-        /* frob = (old & ~mask) | new; */
+        for (i = 0; i < NUM_REGISTERS; i++) {
+            reg = *(uint64_T *)addr + offsets[i];
+            b = inb(reg);
+            
+            if (out==NULL) {
+                if (mask != 0) {
+                    if DEBUG printf("old %d: %u",i,b);
+                    b = (b & ~mask[i]) | vals[i]; /*frob*/
+                    if DEBUG printf(" -> %u",b);
+                    if (offsets[i] != ECR_OFFSET) outb(b,reg);
+                    if DEBUG printf(" -> %u\n",inb(reg));
+                }
+            } else {
+                out[i+n*NUM_REGISTERS] = b;
+            }
+        }
     }
     
-if (!writing && out!=NULL) {
-	out[2+i*NUM_REGISTERS]=31; /*find the bits in .m*/
-}
-
-    /*
-mwIndex mxCalcSingleSubscript(const mxArray *pm, mwSize nsubs, mwIndex *subs)
-     */
+    for (b=0; b<255; b++) {
+        printBits(b);
+        printf("\n");
+    }
 }
 
 /*
  * ppLinuxMex([ports(:) addr(:)],[bitSpecs(:,1:2) vals(:)])
  */
-void mexFunction(const int nlhs, const mxArray *plhs[], const int nrhs, const mxArray *prhs[])
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
     int numAddresses, numVals, i, j, result, addrStrLen;
     
     uint64_T *addresses;
-    uint8_T *data,out;
+    uint8_T *data, *out;
     
     uint64_T address, port;
     uint8_T bitNum, regOffset, value;
     
-    bool writing, mask[NUM_REGISTERS][NUM_BITS], vals[NUM_REGISTERS][NUM_BITS];
+    /*
+    bool mask[NUM_REGISTERS][NUM_BITS], vals[NUM_REGISTERS][NUM_BITS];
+     */
+    unsigned char mask[NUM_REGISTERS], vals[NUM_REGISTERS],pos;
     
     char *addrStr;
     void *addr;
-        
-        numAddresses = mxGetM(prhs[0]);
+    
+    numAddresses = mxGetM(prhs[0]);
     
     switch (nrhs) {
         case 1:
-            writing = false;
             if (nlhs != 1) {
                 mexErrMsgTxt("exactly 1 output argument required when reading.");
             }
             *plhs = mxCreateNumericMatrix(NUM_REGISTERS,numAddresses,mxUINT8_CLASS,mxREAL);
-		out = mxGetData(plhs);
+            if (*plhs==NULL) {
+                mexErrMsgTxt("couldn't allocate output");
+            }
+            out = mxGetData(*plhs);
             break;
         case 2:
-            writing = true;
             if (nlhs != 0) {
                 mexErrMsgTxt("exactly 0 output arguments required when reading.");
             }
@@ -193,16 +220,21 @@ void mexFunction(const int nlhs, const mxArray *plhs[], const int nrhs, const mx
                 mexErrMsgTxt("Second argument must be uint8 with three columns (bitNum, regOffset, value).");
             }
             
+            
+            for (j = 0; j < NUM_REGISTERS; j++) { /* are these guaranteed to have been initialized for us? */
+                mask[j] = 0;
+                vals[j] = 0;
+                /*
+                for (i = 0; i < NUM_BITS; i++) {
+                    mask[j][i] = false; 
+                }
+                 */
+            }
+            
             numVals = mxGetM(prhs[1]);
             data = mxGetData(prhs[1]);
             
             if DEBUG printf("\n\ndata:\n");
-            
-            for (i = 0; i < NUM_BITS; i++) {
-                for (j = 0; j < NUM_REGISTERS; j++) {
-                    mask[j][i] = false; /* is this necessary? */
-                }
-            }
             
             for (i = 0; i < numVals; i++) {
                 bitNum    = data[i          ];
@@ -215,9 +247,22 @@ void mexFunction(const int nlhs, const mxArray *plhs[], const int nrhs, const mx
                     mexErrMsgTxt("bitNum must be 1-8, regOffset must be 0-2, value must be 0-1.");
                 }
                 
+                pos = 1<<(bitNum-1);
+                mask[regOffset] |= pos;
+                if (value) vals[regOffset] |= pos;
+                
+                /*
                 mask[regOffset][bitNum] = true;
                 vals[regOffset][bitNum] = value;
+                 **/
             }
+            
+            if DEBUG {
+                for (j = 0; j < NUM_REGISTERS; j++) {
+                    printf("mask:%u val:%u\n",mask[j],vals[j]);
+                }
+            }
+            
             out = NULL;
             break;
         default:
@@ -263,7 +308,7 @@ void mexFunction(const int nlhs, const mxArray *plhs[], const int nrhs, const mx
             addr = &address;
         }
         
-        doPort(addr,mask,vals,writing,out,i);
+        doPort(addr,/*(boolByte *)*/mask,/*(boolByte *)*/vals,out,i);
         
         if USE_PPDEV {
             mxFree(addrStr);

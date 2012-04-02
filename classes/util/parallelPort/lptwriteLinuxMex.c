@@ -93,23 +93,23 @@ void doPort(
     
     uint64_T reg;
     unsigned char b;
-    int result, i, j, offsets[NUM_REGISTERS] = OFFSETS; /*lame*/
-    
-    if USE_PPDEV {
+    int result, i, j, parportfd, reader, writer, offsets[NUM_REGISTERS] = OFFSETS; /*lame*/
+            
+            if USE_PPDEV {
         /*PPDEV doesn't require root, is supposed to be faster, and is address-space safe, but only available in later kernels >=2.4?*/
         /*however, i seem to need to sudo matlab in order to open eg /dev/parport0 */
         
-        /* note our design here is not as intended -- we should really keep some persistant state of the port for future calls instead of acquiring and releasing it for every call */
+        /* note our design here is not fast -- we'd like to persist the state of the port for future calls instead of acquiring and releasing it for every call, but you aren't supposed to hold on to it for more than a second or so */
         
-        int parportfd = open(addr, O_RDWR);
+        parportfd = open(addr, O_RDWR);
         if (parportfd == -1) {
             printf("%s %s\n",addr,strerror(errno));
             mexErrMsgTxt("couldn't access port");
         }
         
-        /*bug: if the following error out, we won't close parportfd or free addrStr -- need some exception like error handling */
+        /*bug: if the following error out, we won't close parportfd or free addrStr -- need some exceptionish error handling */
         
-        /* PPEXCL call succeeds, but causes following calls to fail!?!
+        /* PPEXCL call succeeds, but causes following calls to fail
          * then dmesg has: parport0: cannot grant exclusive access for device ppdev0
          *                 ppdev0: failed to register device!
          *
@@ -135,13 +135,134 @@ void doPort(
             printf("ioctl PPSETMODE: %d (%s)\n",result,strerror(errno));
             mexErrMsgTxt("couldn't set byte mode");
         }
+            }
+    
+    if (!setup && !USE_PPDEV) {
+        if DEBUG printf("setting up access to pport\n");
         
-        result = ioctl(parportfd,PPWDATA,&b); /*PPWCONTROL(2),PPRCONTROL(2),PPRSTATUS(1),PPRDATA,PPDATADIR*/
+        /*requires >= -O2 compiler optimization to inline inb/outb macros from io.h*/
+        
+        result = iopl(3); /* requires sudo, allows access to the entire address space with the associated risks.*/
+        /* required for ECR. safer alternative: ioperm */
+        
         if (result != 0) {
-            printf("ioctl PPWDATA: %d (%s)\n",result,strerror(errno));
-            mexErrMsgTxt("couldn't write to pport");
+            printf("iopl: %d (%s)\n",result,strerror(errno));
+            mexErrMsgTxt("couldn't claim address space");
         }
         
+        setup = true;
+    }
+    
+    unsigned char test[9] = {
+        CONTROL_BIT_0,
+        CONTROL_BIT_1,
+        CONTROL_BIT_2,
+        CONTROL_BIT_3,
+        STATUS_BIT_3,
+        STATUS_BIT_4,
+        STATUS_BIT_5,
+        STATUS_BIT_6,
+        STATUS_BIT_7
+    };
+    for (i=0;i<9;i++){
+        printBits(test[i]);
+        printf("\n");
+    }
+    
+    for (i = 0; i < NUM_REGISTERS; i++) {
+        if (mask[i] != 0) {
+            switch (offsets[i]) {
+                case DATA_OFFSET:
+                    reader = PPRDATA; /*need PPDATADIR set non-zero*/
+                    writer = PPWDATA; /*need PPDATADIR set zero*/
+                    break;
+                case STATUS_OFFSET:
+                    reader = PPRSTATUS;
+                    break;
+                case CONTROL_OFFSET:
+                    reader = PPRCONTROL;
+                    writer = PPWCONTROL;
+                    break;
+                case ECR_OFFSET:
+                    if USE_PPDEV {
+                        mexErrMsgTxt("ECR not supported under PPDEV (figure out correct PPSETMODE)");
+                    }
+                    break;
+                default:
+                    mexErrMsgTxt("bad offset");
+                    break;
+            }
+            if USE_PPDEV {
+                result = ioctl(parportfd,reader,&b);
+                if (result != 0) {
+                    printf("ioctl PPR%d: %d (%s)\n",offsets[i],result,strerror(errno));
+                    mexErrMsgTxt("couldn't read pport");
+                }
+            } else {
+                reg = *(uint64_T *)addr + offsets[i];
+                b = inb(reg);
+            }
+            
+            if (out == NULL) {
+                switch (offsets[i]) {
+                    case STATUS_OFFSET:
+                        mexErrMsgTxt("can't write to status register");
+                        break;
+                    case CONTROL_OFFSET:
+                        for (j=4; j<=7; j++) {
+                            if (getBit(mask[i],j)) {
+                                mexErrMsgTxt("bad control bit for writing");
+                            }
+                        }
+                        break;
+                }
+                if DEBUG {
+                    printf("old %d:",i);
+                    printBits(b);
+                }
+                b = (b & ~mask[i]) | vals[i]; /*frob*/
+                if DEBUG {
+                    printf(" -> ");
+                    printBits(b);
+                }
+                if (offsets[i] != ECR_OFFSET && ENABLE_WRITE) {
+                    if USE_PPDEV {
+                        result = ioctl(parportfd,writer,&b);
+                        if (result != 0) {
+                            printf("ioctl PPW%d: %d (%s)\n",offsets[i],result,strerror(errno));
+                            mexErrMsgTxt("couldn't write pport");
+                        }
+                    } else {
+                        outb(b,reg);
+                    }
+                    if DEBUG {
+                        if USE_PPDEV {
+                            result = ioctl(parportfd,reader,&b);
+                            if (result != 0) {
+                                printf("ioctl PPR%d: %d (%s)\n",offsets[i],result,strerror(errno));
+                                mexErrMsgTxt("couldn't read pport");
+                            }
+                        } else {
+                            b = inb(reg);
+                        }
+                        printf(" -> ");
+                        printBits(b);
+                        printf("\n");
+                    }
+                } else {
+                    printf(" not actually writing to register, either writes disabled or ECR protection\n");
+                }
+            } else {
+                for (j = 0; j < numVals; j++) {
+                    if (data[j+numVals] == offsets[i]) {
+                        out[i+n*NUM_REGISTERS] = getBit(b,data[j]);
+                    }
+                }
+            }
+        }
+    }
+    
+    if USE_PPDEV {
         result = ioctl(parportfd,PPRELEASE);
         if (result != 0) {
             printf("ioctl PPRELEASE: %d (%s)\n",result,strerror(errno));
@@ -153,70 +274,7 @@ void doPort(
             printf("close: %d (%s)\n",result,strerror(errno));
             mexErrMsgTxt("couldn't close port");
         }
-        
     }
-    
-    if (!setup) {
-        if DEBUG printf("setting up access to pport\n");
-        
-        if USE_PPDEV {
-            /**/
-        } else {
-            /*requires >= -O2 compiler optimization to inline inb/outb macros from io.h*/
-            
-            result = iopl(3); /* requires sudo, allows access to the entire address space with the associated risks.*/
-            /* required for ECR. safer alternative: ioperm */
-            
-            if (result != 0) {
-                printf("iopl: %d (%s)\n",result,strerror(errno));
-                mexErrMsgTxt("couldn't claim address space");
-            }
-        }
-        setup = true;
-    }
-    
-    for (i = 0; i < NUM_REGISTERS; i++) {
-        if (mask[i] != 0) {
-            if USE_PPDEV {
-                /**/
-            } else {
-                reg = *(uint64_T *)addr + offsets[i];
-                b = inb(reg);
-            }
-            
-            if (out == NULL) {
-                if DEBUG {
-                    printf("old %d:",i);
-                    printBits(b);
-                }
-                b = (b & ~mask[i]) | vals[i]; /*frob*/
-                if DEBUG {
-                    printf(" -> ");
-                    printBits(b);
-                }
-                if USE_PPDEV {
-                    /**/
-                } else {
-                    if (offsets[i] != ECR_OFFSET && ENABLE_WRITE) outb(b,reg);
-                }
-                if DEBUG {
-                    printf(" -> ");
-                    if USE_PPDEV {
-                        /**/
-                    } else {
-                        printBits(inb(reg));
-                    }
-                    printf("\n");
-                }
-            } else {
-                for (j = 0; j < numVals; j++) {
-                    if (data[j+numVals] == offsets[i]) {
-                        out[i+n*NUM_REGISTERS] = getBit(b,data[j]);
-                    }
-                }
-            }
-        }
-    }    
 }
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])

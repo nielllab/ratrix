@@ -1,6 +1,6 @@
-function lptwriteLinux(pins,vals,slowChecks,port,addr)
+function pp(pins,vals,slowChecks,port,addr)
 
-% lptwriteLinux(pins,vals,[slowChecks],[port],[addr])
+% pp(pins,vals,[slowChecks],[port],[addr])
 %
 % set TTL levels on parallel port pins under linux
 %
@@ -19,24 +19,24 @@ function lptwriteLinux(pins,vals,slowChecks,port,addr)
 %
 % if multiple ports/addrs are supplied, the same set of vals/pins are used for each.
 %
-% if you want lptwriteLinux to be as fast as possible, supply both the port
+% if you want pp to be as fast as possible, supply both the port
 % and addr, and set slowChecks to false.
 %
 % the parallel port's pins are divided into three registers, and some pins
-% are logically inverted.  lptwriteLinux takes care of these details for
+% are logically inverted.  pp takes care of these details for
 % you.
 %
-% lptwriteLinux works for built-in as well as add-on (PCI) parallel ports
+% pp works for built-in as well as add-on (PCI) parallel ports
 % if their drivers are installed.  on fedora 15, i found both were
 % installed by default.
 %
-% lptwriteLinux requires the corresponding compiled mex file (lptwriteLinuxMex).
+% pp requires the corresponding compiled mex file (ppMex).
 % for fastest operation, you could call it directly, but it does no input
 % validation, and depends on formatting provided by getPinInfo.
 %
 % Examples:
-% lptwriteLinux(uint8([1 10 15]),[true false true])
-% lptwriteLinux(uint8([1 10 15]),[true false true],true,uint8(0),uint64(51200))
+% pp(uint8([1 10 15]),[true false true])
+% pp(uint8([1 10 15]),[true false true],true,uint8(0),uint64(51200))
 %
 % Author: Erik Flister, University Oregon, 2011 (C).
 
@@ -189,7 +189,7 @@ bitSpecs=getPinInfo(pins); %[bitNum,regOffset,inv]
 vals(logical(bitSpecs(:,3)))=~vals(logical(bitSpecs(:,3)));
 
 % w=warning('off', 'MATLAB:concatenation:integerInteraction');
-lptwriteLinuxMex([uint64(ports(:)) uint64(addr(:))],[bitSpecs(:,1:2) uint8(vals(:))]);
+ppMex([uint64(ports(:)) uint64(addr(:))],[bitSpecs(:,1:2) uint8(vals(:))]);
 % warning(w.state, 'MATLAB:concatenation:integerInteraction');
 end
 

@@ -8,7 +8,6 @@
  * http://people.redhat.com/twaugh/parport/html/parportguide.html
  *
  * Copyright (C) 2011 Erik Flister, University of Oregon, erik.flister@gmail.com
- * modified from lptwrite by Andreas Widmann
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

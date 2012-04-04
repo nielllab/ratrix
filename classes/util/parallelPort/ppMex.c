@@ -1,13 +1,16 @@
 /*
  * ppMex.c
  *
- * Compile in MATLAB with mex ppMex.c [-O] [-g] [-v]
+ * Compile in MATLAB: 
+ * > mex ppMex.c [-O] [-g] [-v]
+ *
  * For documentation see pp.m
  *
- * following: http://as6edriver.sourceforge.net/Parallel-Port-Programming-HOWTO/accessing.html
+ * following: 
+ * http://as6edriver.sourceforge.net/Parallel-Port-Programming-HOWTO/accessing.html
  * http://people.redhat.com/twaugh/parport/html/parportguide.html
  *
- * Copyright (C) 2011 Erik Flister, University of Oregon, erik.flister@gmail.com
+ * Copyright (C) 2011 Erik Flister, University of Oregon, erik.flister <at> gmail
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

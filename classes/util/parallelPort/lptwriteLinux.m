@@ -7,8 +7,8 @@ function lptwriteLinux(pins,vals,slowChecks,port,addr)
 % Arguments:
 % pins       integer vector of hardware pin nums to set
 % vals       logical vector same size as pins indicating TTL levels
-% slowChecks optional logical scalar (default true) 
-%               indicates whether to run extensive and slow input 
+% slowChecks optional logical scalar (default true)
+%               indicates whether to run extensive and slow input
 %               validation, checking all relevant OS information
 %               regarding the ports (that i could find)
 % port       optional integer vector indicating parallel port indices
@@ -30,9 +30,9 @@ function lptwriteLinux(pins,vals,slowChecks,port,addr)
 % if their drivers are installed.  on fedora 15, i found both were
 % installed by default.
 %
-% lptwriteLinux requires the corresponding compiled mex file (lptwriteLinuxMex).  
-% for fastest operation, you could call it directly, but it does no input 
-% validation, and depends on formatting provided by getBitSpecForPinNum.
+% lptwriteLinux requires the corresponding compiled mex file (lptwriteLinuxMex).
+% for fastest operation, you could call it directly, but it does no input
+% validation, and depends on formatting provided by getPinInfo.
 %
 % Examples:
 % lptwriteLinux(uint8([1 10 15]),[true false true])
@@ -69,6 +69,26 @@ if slowChecks
     if s~=0
         error('couldn''t dev')
     end
+    
+    [s drv]=unix('grep ppdev /proc/devices');
+    if s~=0
+        error('couldn''t proc')
+    end
+    
+    [s lsm]=unix('lsmod | grep ppdev');
+    if s~=0
+        error('couldn''t lsmod ppdev')
+    end
+    
+    [s lsmp]=unix('lsmod | grep parport');
+    if s~=0
+        error('couldn''t lsmod parport')
+    end
+    
+    [s iop]=unix('cat /proc/ioports | grep parport');
+    if s~=0
+        error('couldn''t ioports')
+    end
 end
 
 if slowChecks || ~exist('port','var') || isempty(port)
@@ -90,7 +110,7 @@ if slowChecks || ~exist('port','var') || isempty(port)
             end
         end
     end
-
+    
     if ~exist('port','var') || isempty(port)
         port=ports(1);
     end
@@ -98,7 +118,7 @@ if slowChecks || ~exist('port','var') || isempty(port)
     if ~isvector(port) || ~isinteger(port) || ~all(port>=0) || ~all(ismember(port,ports)) || length(unique(port))<length(port)
         error('port must be integer vector of valid port IDs with no duplicates')
     end
-        
+    
     ports=intersect(port,ports);
     if length(ports)<length(port)
         error('couldn''t find all ports')
@@ -110,7 +130,7 @@ end
 if ~exist('addr','var') || isempty(addr)
     addr=zeros(size(port),'uint64');
 end
-    
+
 if slowChecks
     if ~isvector(addr) || ~isinteger(addr) || ~all(addr>=0) || ~all(size(addr)==size(port))
         error('addr must be integer vector >=0 same size as port')
@@ -165,7 +185,7 @@ for i=1:length(ports)
     end
 end
 
-bitSpecs=getBitSpecForPinNum(pins); %[bitNum,regOffset,inv]
+bitSpecs=getPinInfo(pins); %[bitNum,regOffset,inv]
 vals(logical(bitSpecs(:,3)))=~vals(logical(bitSpecs(:,3)));
 
 % w=warning('off', 'MATLAB:concatenation:integerInteraction');
@@ -173,25 +193,25 @@ lptwriteLinuxMex([uint64(ports(:)) uint64(addr(:))],[bitSpecs(:,1:2) uint8(vals(
 % warning(w.state, 'MATLAB:concatenation:integerInteraction');
 end
 
-function out=getBitSpecForPinNum(pinNum)
+function out=getPinInfo(pinNum)
 pportSpec=uint8([... %[bitNum,regOffset,inv]
-    8 2 1; %1
-    8 0 0; %2
-    7 0 0; %3
-    6 0 0; %4
-    5 0 0; %5
+    0 2 1; %1
+    0 0 0; %2
+    1 0 0; %3
+    2 0 0; %4
+    3 0 0; %5
     4 0 0; %6
-    3 0 0; %7
-    2 0 0; %8
-    1 0 0; %9
-    2 1 0; %10
-    1 1 1; %11
-    3 1 0; %12
+    5 0 0; %7
+    6 0 0; %8
+    7 0 0; %9
+    6 1 0; %10
+    7 1 1; %11
+    5 1 0; %12
     4 1 0; %13
-    7 2 1; %14
-    5 1 0; %15
-    6 2 0; %16
-    5 2 1; %17
+    1 2 1; %14
+    3 1 0; %15
+    2 2 0; %16
+    3 2 1; %17
     ]);
 try
     out=pportSpec(pinNum,:);

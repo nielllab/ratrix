@@ -9,6 +9,8 @@ d = 100; %(80kB)
 % http://www.asus.com/Graphics_Cards/NVIDIA_Series/ENGT430DI1GD3LP
 % http://ark.intel.com/products/52213
 
+% jen's machine (AMD phenom II X4 975 4x?GHz, 16GB, ubuntu 11.10/64, integrated ati radeon hd 4250, 3.3.11005, r2012a) drops about 1 frame/sec when d = 525 (2.2 MB)
+
 % niell lab cheap stations (AMD athlon II X2 260 2x3.2GHz, 4GB, win7/32 sp1, integrated ati radeon hd 4250, 3.3.11554, r2011b)  drops about 1 frame/sec when d = 375 (1.125 MB)
 % http://www.asus.com/Motherboards/AMD_AM3Plus/M5A88M/
 % http://www.amd.com/us/products/desktop/processors/athlon-ii-x2/Pages/AMD-athlon-ii-x2-processor-model-numbers-feature-comparison.aspx

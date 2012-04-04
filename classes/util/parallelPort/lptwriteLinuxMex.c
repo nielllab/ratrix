@@ -47,8 +47,8 @@
 #define ADDR_BASE "/dev/parport"
 
 #define DEBUG true
-#define ENABLE_WRITE false
-#define USE_PPDEV false
+#define ENABLE_WRITE true
+#define USE_PPDEV false /* just sketched in atm */
 
 #define DATA_OFFSET 0
 #define STATUS_OFFSET 1
@@ -94,8 +94,8 @@ void doPort(
     uint64_T reg;
     unsigned char b;
     int result, i, j, parportfd, reader, writer, offsets[NUM_REGISTERS] = OFFSETS; /*lame*/
-            
-            if USE_PPDEV {
+    
+    if USE_PPDEV {
         /*PPDEV doesn't require root, is supposed to be faster, and is address-space safe, but only available in later kernels >=2.4?*/
         /*however, i seem to need to sudo matlab in order to open eg /dev/parport0 */
         
@@ -135,7 +135,7 @@ void doPort(
             printf("ioctl PPSETMODE: %d (%s)\n",result,strerror(errno));
             mexErrMsgTxt("couldn't set byte mode");
         }
-            }
+    }
     
     if (!setup && !USE_PPDEV) {
         if DEBUG printf("setting up access to pport\n");
@@ -151,22 +151,6 @@ void doPort(
         }
         
         setup = true;
-    }
-    
-    unsigned char test[9] = {
-        CONTROL_BIT_0,
-        CONTROL_BIT_1,
-        CONTROL_BIT_2,
-        CONTROL_BIT_3,
-        STATUS_BIT_3,
-        STATUS_BIT_4,
-        STATUS_BIT_5,
-        STATUS_BIT_6,
-        STATUS_BIT_7
-    };
-    for (i=0;i<9;i++){
-        printBits(test[i]);
-        printf("\n");
     }
     
     for (i = 0; i < NUM_REGISTERS; i++) {
@@ -355,11 +339,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             printf("\n");
         }
         
-        if (bitNum>8 || bitNum<1 || regOffset>2 || value>1) {
-            mexErrMsgTxt("bitNum must be 1-8, regOffset must be 0-2, value must be 0-1.");
+        if (bitNum>7 || regOffset>2 || value>1) {
+            mexErrMsgTxt("bitNum must be 0-7, regOffset must be 0-2, value must be 0-1.");
         }
         
-        pos = 1<<(bitNum-1);
+        pos = 1<<bitNum;
         mask[regOffset] |= pos;
         if (value) vals[regOffset] |= pos;
     }

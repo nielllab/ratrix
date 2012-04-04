@@ -32,7 +32,7 @@ labelFrames = 1;            %print a frame ID on each frame (makes frame calcula
 textType = getShowText(tm);
 showText = ~strcmp(textType,'off'); %whether or not to call draw text to print any text on screen
 
-if ~IsLinux || true %for some reason causes trouble finding font, even though supposed to be OS-specific faster method (seems to be fixed now)
+if ~IsLinux %|| true %for some reason causes trouble finding font, even though supposed to be OS-specific faster method (seems to be fixed now)
     Screen('Preference', 'TextRenderer', 0);  % consider moving to station.startPTB
 end
 Screen('Preference', 'TextAntiAliasing', 0); % consider moving to station.startPTB
@@ -223,7 +223,7 @@ Screen('Screens');
 
 if window>0
     standardFontSize=11;
-    oldFontSize = Screen('TextSize',window,standardFontSize);
+     oldFontSize = Screen('TextSize',window,standardFontSize);
     if IsLinux
         Screen('TextStyle', window, 0); %otherwise defaults to bold italic!?!
         

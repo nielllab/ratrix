@@ -26,6 +26,6 @@ if ismac
     % at some point, Psychtoolbox will not restore display settings automatically.
     
     for i=1:20
-        ShowCursor %seems to get stuck in multiple layers of hidecursor
+        ShowCursor; %seems to get stuck in multiple layers of hidecursor
     end
 end

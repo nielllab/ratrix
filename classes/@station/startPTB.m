@@ -1,11 +1,26 @@
 function s=startPTB(s,imagingTasks,depth)
 if ~exist('depth','var') || isempty(depth)
     depth=32;
-else
-    depth=8; %hardcoded for now cuz depth above comes from requested resolution, which may differ from desired value here
+%  else
+%      depth=8; %hardcoded for now cuz depth above comes from requested resolution, which may differ from desired value here
 end
 
 clear Screen;
+Screen('Preference', 'DefaultVideocaptureEngine', 3); %for recording.  3 -> gstreamer, 0 -> quicktime (may need to set for osx)
+% note: on linux, probably need to install plugins for h.264...
+%  Video or movie
+%   recording with high quality (DivX, H.264) will also require recent versions
+%   of additional plugin packages containing support for these formats. These
+%   are usually not installed by default due to licensing and patent clauses in
+%   place for some territories. You may want to specifically add them to your
+%   system depending on your format needs.
+%  
+%   On Debian 
+%  
+%       sudo apt-get install gstreamer0.10-plugins-bad-multiverse gstreamer0.10-plugins-ugly-multiverse
+%  
+
+
 Screen('Screens');
 try
     

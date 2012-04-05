@@ -21,30 +21,47 @@ if ismac
     
     if ~any(cellfun(@(x) exist(fullfile(x,fn),'file'),paths))
         if exist(src,'file')
-            good=false;
-            for i=1:length(paths)
-                if ~exist(paths{i},'dir')
+            ps = cellfun(@(x) exist(x,'dir'),paths);
+            good = false;
+            
+            if ~any(ps)
+                for i=1:length(paths)
                     [a b c]=mkdir(paths{i});
                     
                     if a~=1
                         b
                         c
                         warning('couldn''t mkdir')
+                    else
+                        good = true;
+                        break
+                    end
+                end
+            end
+            
+            if good
+                good = false;
+                
+                for i=1:length(paths)
+                    if exist(paths{i},'dir')
+                        [a b c]=copyfile(src,fullfile(paths{i},fn)); %not fullfiling like this might be why we sometimes make files when we think we're making dirs
+                        if a~=1
+                            b
+                            c
+                            warning('couldn''t copy libportaudio')
+                        else
+                            good = true;
+                            break
+                        end
                     end
                 end
                 
-                [a b c]=copyfile(src,fullfile(paths{i},fn)); %not fullfiling like this might be why we sometimes make files when we think we're making dirs
-                if a~=1
-                    b
-                    c
-                    warning('couldn''t copy libportaudio')
-                else
-                    good=true;
-                    break
+                if ~good
+                    error('couldn''t copy libportaudio')
                 end
-            end
-            if ~good
-                error('couldn''t copy libportaudio')
+            else
+                paths
+                error('couldn''t mkdir any good path for lipportaudio')
             end
         else
             error('can''t find libportaudio, maybe need updatepsychtoolbox')

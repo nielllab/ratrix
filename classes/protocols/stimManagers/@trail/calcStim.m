@@ -11,11 +11,18 @@ updateSM=true;
 
 if IsLinux
     depth=24;
-else
-    depth=32;
 end
-depth=16; % if use 8, screen('openwindow') says it can't open at 8, but it can at 16 !??!
-[resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60],depth,getMaxWidth(stimulus),getMaxHeight(stimulus),true);
+if ismac
+    depth=16; % if use 8, screen('openwindow') says it can't open at pixelSize 8, but it can do 16 at pixelSize 8 !??!
+end
+if IsWin
+    depth=32;
+    % if use lower:
+    % PTB-ERROR: Your display screen 0 is not running at the required color depth of at least 30 bit.
+    % PTB-ERROR: This will not work on Microsoft Windows operating systems.
+end
+
+[resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60],depth,getMaxWidth(stimulus),getMaxHeight(stimulus));%,true);
 if hz==0 %osx
     hz=60;
 end

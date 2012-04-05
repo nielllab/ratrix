@@ -3,7 +3,10 @@ function [tm trialDetails result spec rewardSizeULorMS requestRewardSizeULorMS .
     updateTrialState(tm, sm, result, spec, ports, lastPorts, ...
     targetPorts, requestPorts, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
     floatprecision, textures, destRect, ...
-    requestRewardDone, punishResponses)
+    requestRewardDone, punishResponses, request)
+if ~exist('request','var') || isempty(request)
+    request = false;
+end
 % This function is a TM base class method to update trial state before every flip.
 % Things done here include:
 % - check for request rewards
@@ -33,12 +36,8 @@ if ~isempty(result) && ischar(result) && strcmp(result,'timeout') && isempty(cor
     end
 end
 
-% sca
-% keyboard
-
-%ball won't have request port
-if (any(ports(requestPorts)) && ~any(lastPorts(requestPorts))) && ... % if a request port is triggered
-        ((strcmp(getRequestMode(getReinforcementManager(tm)),'nonrepeats') && ~any(ports&lastRequestPorts)) || ... % if non-repeat
+if (request || (any(ports(requestPorts)) && ~any(lastPorts(requestPorts)))) && ... % request port triggered
+        ((strcmp(getRequestMode(getReinforcementManager(tm)),'nonrepeats') && ~any(ports&lastRequestPorts)) || ... % non-repeat
         strcmp(getRequestMode(getReinforcementManager(tm)),'all') || ...  % all requests
         ~requestRewardDone) % first request
     

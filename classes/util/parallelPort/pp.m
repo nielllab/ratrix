@@ -46,8 +46,8 @@ function input = pp(pins,output,slowChecks,port,addr)
 % in this file.
 %
 % Examples:
-% vals = pp(uint8([1 2 10 3]                              ) % read some pins (slow)
-% vals = pp(uint8([1 2 10 3],[],false,uint8(0),uint64(888)) % read some pins (fast)
+% vals = pp(uint8([1 2 10 3]))                               % read some pins (slow)
+% vals = pp(uint8([1 2 10 3]),[],false,uint8(0),uint64(888)) % read some pins (fast)
 %
 % pp(uint8([16 4 8 1]),[true false true true])                            % write to some pins (slow)
 % pp(uint8([16 4 8 1]),[true false true true],false,uint8(0),uint64(888)) % write to some pins (slow -- validates port address for safety)
@@ -59,6 +59,10 @@ function input = pp(pins,output,slowChecks,port,addr)
 
 if ~exist('slowChecks','var') || isempty(slowChecks)
     slowChecks=true;
+end
+
+if ~exist('output','var')
+    output = logical([]);
 end
 
 useSscanf=true; %maybe textscan is faster?
@@ -73,7 +77,7 @@ if slowChecks
         error('pins must be integer vector 1<=pins<=17 with no duplicates')
     end
     
-    if ~islogical(output) || ~all(size(output)==size(pins))
+    if ~islogical(output) || (~isempty(output) && ~all(size(output)==size(pins)))
         error('output must be logical vector same size as pins')
     end
     
@@ -202,11 +206,18 @@ for i=1:length(ports)
     end
 end
 
-bitSpecs=getPinInfo(pins); %[bitNum,regOffset,inv]
-output(logical(bitSpecs(:,3)))=~output(logical(bitSpecs(:,3)));
+bitSpecs=getPinInfo(pins);
+inds = logical(bitSpecs(:,3));
+    function x = inv (x)        
+        x(inds) = ~x(inds);
+    end
+
+if ~isempty(output)
+    output = inv(output);
+end
 
 % w=warning('off', 'MATLAB:concatenation:integerInteraction');
-input = ppMex([uint64(ports(:)) uint64(addr(:))],[bitSpecs(:,1:2) uint8(output(:))]);
+input = inv(ppMex([uint64(ports(:)) uint64(addr(:))],[bitSpecs(:,1:2) uint8(output(:))]));
 % warning(w.state, 'MATLAB:concatenation:integerInteraction');
 end
 

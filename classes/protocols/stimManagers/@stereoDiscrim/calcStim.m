@@ -34,7 +34,13 @@ if lefts>rights
 elseif rights>lefts
     details.leftAmplitude = min(stimulus.amplitudes);
 end
-sSound = soundClip('stimSoundBase','allOctaves',[stimulus.freq],20000);
+
+switch stimulus.soundType
+    case {'allOctaves','tritones'}
+        sSound = soundClip('stimSoundBase','allOctaves',[stimulus.freq],20000);
+    case {'binaryWhiteNoise','gaussianWhiteNoise','uniformWhiteNoise','empty'}
+        sSound = soundClip('stimSoundBase',stimulus.soundType);
+end
 stimulus.stimSound = soundClip('stimSound','dualChannel',{sSound,details.leftAmplitude},{sSound,details.rightAmplitude});
 
 sounds={stimulus.stimSound};

@@ -34,9 +34,13 @@ scaleFactor = 0;
 
 interTrialLuminance = .5;
 
-freq = 20; 
-amps = [0 1];
-stereoStim = stereoDiscrim(interTrialLuminance,freq,amps,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+% soundType='allOctaves';
+soundType='uniformWhiteNoise';
+soundParams.freq = 20; 
+soundParams.amps = [0 1];
+% soundParams.duration=100;
+% stereoStim = stereoDiscrim(interTrialLuminance,freq,amps,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+stereoStim = stereoDiscrim(interTrialLuminance,soundType,soundParams,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 svnRev = {'svn://132.239.158.177/projects/ratrix/trunk'};
 svnCheckMode = 'session';

@@ -15,7 +15,6 @@ s.amplitudes = [];
 s.stimSound = []; % Sound to play for the stimulus
 s.audioStimulus = true;
 s.soundType='';
-
 switch nargin
     case 0
         % if no input arguments, create a default object
@@ -53,12 +52,20 @@ switch nargin
                 end
                 s.soundType=soundType;
             case {'binaryWhiteNoise','gaussianWhiteNoise','uniformWhiteNoise','empty'}
-                if length(soundParams.amps) == 2 && all(soundParams.amps>=0)
+               %note: I'm removing the "two stereo amplitudes" constraint
+               %to permit instensity discrimination -mw 04.05.2012
+                % if length(soundParams.amps) == 2 && all(soundParams.amps>=0)
                     s.amplitudes=soundParams.amps;
-                else
-                    error('require two stereo amplitudes and they must be >= 0')
-                end
+               % else
+               %     error('require two stereo amplitudes and they must be >= 0')
+               % end
                 s.soundType=soundType;
+                s.duration=soundParams.duration; %mw 04.05.2012
+                %passing through discrimination boundary for use by calcStim 
+                % -mw 04.05.2012
+                s.discrimBoundary=soundParams.discrimBoundary;
+                s.discrimSide=soundParams.discrimSide;
+
             case 'tone'
                 error('stereoDiscrim: tone not implemented yet')
                 s.soundType=soundType;

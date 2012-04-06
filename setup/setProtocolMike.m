@@ -9,7 +9,7 @@ if ~all(ismember(subjIDs,getSubjectIDs(r)))
     error('not all those subject IDs are in that ratrix')
 end
 
-sm=makeStandardSoundManager();
+sm=makeIntensityDiscrimSoundManager();
 
 rewardSizeULorMS          = 80;
 requestRewardSizeULorMS   = 0;
@@ -36,8 +36,14 @@ interTrialLuminance = .5;
 
 % soundType='allOctaves';
 soundType='uniformWhiteNoise';
-soundParams.freq = 20; 
-soundParams.amps = [0 1];
+soundParams.freq = [];
+soundParams.duration=50; %ms
+%soundParams.amps = [0 1]; %for stereoDiscrim (left or right)
+soundParams.amps = [.01:.01:1]; %for intensityDisrim
+soundParams.discrimBoundary=mean(soundParams.amps); %classification boundary for use by calcStim
+soundParams.discrimSide=1; %boolean. if true, stimuli < classification boundary go to left
+
+
 % soundParams.duration=100;
 % stereoStim = stereoDiscrim(interTrialLuminance,freq,amps,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 stereoStim = stereoDiscrim(interTrialLuminance,soundType,soundParams,maxWidth,maxHeight,scaleFactor,interTrialLuminance);

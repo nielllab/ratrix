@@ -24,15 +24,38 @@ switch trialManagerClass
         error('unknown trial manager class')
 end
 
-[lefts, rights] = getBalance(responsePorts,targetPorts);
-
-details.rightAmplitude = max(stimulus.amplitudes);
-details.leftAmplitude = max(stimulus.amplitudes);
-
-if lefts>rights
-    details.rightAmplitude = min(stimulus.amplitudes);
-elseif rights>lefts
-    details.leftAmplitude = min(stimulus.amplitudes);
+ discrimType= 'intensityDiscrim'
+switch discrimType
+    case 'intensityDiscrim'
+        [lefts, rights] = getBalance(responsePorts,targetPorts);
+                
+                
+if lefts>rights %choose a left stim
+            if stimulus.discrimSide %boolean, sidedness of boundary
+                details.Amplitude=RandSample(stimulus.amplitudes(find(stimulus.amplitudes<stimulus.discrimBoundary)));
+            else
+                details.Amplitude=RandSample(stimulus.amplitudes(find(stimulus.amplitudes>stimulus.discrimBoundary)));
+            end
+        elseif rights>lefts %choose a right stim
+            if stimulus.discrimSide
+                details.Amplitude=RandSample(stimulus.amplitudes(find(stimulus.amplitudes>stimulus.discrimBoundary)));
+            else
+                details.Amplitude=RandSample(stimulus.amplitudes(find(stimulus.amplitudes<stimulus.discrimBoundary)));
+            end
+        end
+        details.rightAmplitude = details.Amplitude;
+        details.leftAmplitude = details.Amplitude;
+    case 'stereoDiscrim'
+        [lefts, rights] = getBalance(responsePorts,targetPorts);
+        
+        details.rightAmplitude = max(stimulus.amplitudes);
+        details.leftAmplitude = max(stimulus.amplitudes);
+        
+        if lefts>rights
+            details.rightAmplitude = min(stimulus.amplitudes);
+        elseif rights>lefts
+            details.leftAmplitude = min(stimulus.amplitudes);
+        end
 end
 
 switch stimulus.soundType

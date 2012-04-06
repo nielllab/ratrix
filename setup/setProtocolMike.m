@@ -39,8 +39,13 @@ soundType='uniformWhiteNoise';
 soundParams.freq = [];
 soundParams.duration=50; %ms
 %soundParams.amps = [0 1]; %for stereoDiscrim (left or right)
-soundParams.amps = [.01:.01:1]; %for intensityDisrim
-soundParams.discrimBoundary=mean(soundParams.amps); %classification boundary for use by calcStim
+maxSPL=80; %measured max level attainable by speakers
+ampsdB=40:5:maxSPL; %requested amps in dB
+amplitudes=10.^((ampsdB -maxSPL)/20); %amplitudes = line level, 0 to 1
+soundParams.amps = amplitudes; %for intensityDisrim
+discrimBoundarydB=mean(ampsdB);
+discrimBoundary=10.^((discrimBoundarydB -maxSPL)/20);
+soundParams.discrimBoundary=discrimBoundary; %classification boundary for use by calcStim
 soundParams.discrimSide=1; %boolean. if true, stimuli < classification boundary go to left
 
 

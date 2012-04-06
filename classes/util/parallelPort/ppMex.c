@@ -1,12 +1,12 @@
 /*
  * ppMex.c
  *
- * Compile in MATLAB: 
+ * Compile in MATLAB:
  * > mex ppMex.c [-O] [-g] [-v]
  *
  * For documentation see pp.m
  *
- * following: 
+ * following:
  * http://as6edriver.sourceforge.net/Parallel-Port-Programming-HOWTO/accessing.html
  * http://people.redhat.com/twaugh/parport/html/parportguide.html
  *
@@ -72,13 +72,37 @@
 #define STATUS_BIT_7 PARPORT_STATUS_BUSY
 
 bool getBit(const unsigned char b, const unsigned char n) {
-    return b & 1<<n;
+    return (true && (b & 1<<n)); /* need a bona fide bool */
 }
 
 void printBits(const unsigned char b) {
     int i;
     for (i = 7; i >= 0; i--) {
         printf("%c",getBit(b,i) ? '1' : '0');
+    }
+}
+
+void ppd(const int parportfd, const int action, void * const b, const char * const msg) {
+    int result;
+    
+    if (b==NULL) {
+        result = ioctl(parportfd,action);
+    } else {
+        result = ioctl(parportfd,action,b);
+    }
+    
+    if (result != 0) {
+        printf("PPD ioctl %d: %d (%s)\n",action,result,strerror(errno));
+        mexErrMsgTxt(msg);
+    }
+}
+
+void read(const uint64_T reg, void * const b, const int parportfd, const int reader, const int o) {
+    if USE_PPDEV {
+        ppd(parportfd,reader,b,"couldn't read pport");
+        /*         printf("%d\n",o); */
+    } else {
+        *(unsigned char *)b = inb(reg);
     }
 }
 
@@ -89,7 +113,8 @@ void doPort(
         mxLogical * const out,
         const int n,
         const uint8_T * const data,
-        const int numVals
+        const int numVals,
+        const bool writing
         ) {
     static bool setup = false;
     
@@ -117,26 +142,12 @@ void doPort(
          *
          * web search suggests this is because lp is loaded -- implications of removing it?
          */
-        /*
-         * result = ioctl(parportfd,PPEXCL);
-         * if (result != 0) {
-         * printf("ioctl PPEXCL: %d (%s)\n",result,strerror(errno));
-         * mexErrMsgTxt("couldn't get exclusive access to pport");
-         * }
-         */
+        /* ppd(parportfd,PPEXCL,NULL,"couldn't get exclusive access to pport"); */
         
-        result = ioctl(parportfd,PPCLAIM);
-        if (result != 0) {
-            printf("ioctl PPCLAIM: %d (%s)\n",result,strerror(errno));
-            mexErrMsgTxt("couldn't claim pport");
-        }
+        ppd(parportfd,PPCLAIM,NULL,"couldn't claim pport");
         
         int mode = IEEE1284_MODE_BYTE; /* or would we want COMPAT? */
-        result = ioctl(parportfd,PPSETMODE,&mode);
-        if (result != 0) {
-            printf("ioctl PPSETMODE: %d (%s)\n",result,strerror(errno));
-            mexErrMsgTxt("couldn't set byte mode");
-        }
+        ppd(parportfd,PPSETMODE,&mode,"couldn't set byte mode");
     }
     
     if (!setup && !USE_PPDEV) {
@@ -178,18 +189,10 @@ void doPort(
                     mexErrMsgTxt("bad offset");
                     break;
             }
-            if USE_PPDEV {
-                result = ioctl(parportfd,reader,&b);
-                if (result != 0) {
-                    printf("ioctl PPR%d: %d (%s)\n",offsets[i],result,strerror(errno));
-                    mexErrMsgTxt("couldn't read pport");
-                }
-            } else {
-                reg = *(uint64_T *)addr + offsets[i];
-                b = inb(reg);
-            }
+            reg = *(uint64_T *)addr + offsets[i];
+            read(reg,&b,parportfd,reader,offsets[i]);
             
-            if (out == NULL) {
+            if (writing) {
                 switch (offsets[i]) {
                     case STATUS_OFFSET:
                         mexErrMsgTxt("can't write to status register");
@@ -213,35 +216,32 @@ void doPort(
                 }
                 if (offsets[i] != ECR_OFFSET && ENABLE_WRITE) {
                     if USE_PPDEV {
-                        result = ioctl(parportfd,writer,&b);
-                        if (result != 0) {
-                            printf("ioctl PPW%d: %d (%s)\n",offsets[i],result,strerror(errno));
-                            mexErrMsgTxt("couldn't write pport");
-                        }
+                        ppd(parportfd,writer,&b,"couldn't write pport");
+                        /* printf("%d\n",offsets[i]); */
                     } else {
                         outb(b,reg);
                     }
-                    if DEBUG {
-                        if USE_PPDEV {
-                            result = ioctl(parportfd,reader,&b);
-                            if (result != 0) {
-                                printf("ioctl PPR%d: %d (%s)\n",offsets[i],result,strerror(errno));
-                                mexErrMsgTxt("couldn't read pport");
-                            }
-                        } else {
-                            b = inb(reg);
+                    if (out != NULL || DEBUG) {
+                        read(reg,&b,parportfd,reader,offsets[i]);
+                        
+                        if DEBUG {
+                            printf(" -> ");
+                            printBits(b);
+                            printf("\n");
                         }
-                        printf(" -> ");
-                        printBits(b);
-                        printf("\n");
                     }
                 } else {
                     printf(" not actually writing to register, either writes disabled or ECR protection\n");
                 }
-            } else {
+            }
+            
+            if (out != NULL) {
                 for (j = 0; j < numVals; j++) {
                     if (data[j+numVals] == offsets[i]) {
-                        out[i+n*NUM_REGISTERS] = getBit(b,data[j]);
+                        out[j+n*numVals] = getBit(b,data[j]);
+                        if DEBUG {
+                            printf("wrote a %d\n",out[j+n*numVals]);
+                        }
                     }
                 }
             }
@@ -249,11 +249,7 @@ void doPort(
     }
     
     if USE_PPDEV {
-        result = ioctl(parportfd,PPRELEASE);
-        if (result != 0) {
-            printf("ioctl PPRELEASE: %d (%s)\n",result,strerror(errno));
-            mexErrMsgTxt("couldn't release pport");
-        }
+        ppd(parportfd,PPRELEASE,NULL,"couldn't release pport");
         
         result = close(parportfd);
         if (result != 0) {
@@ -263,8 +259,7 @@ void doPort(
     }
 }
 
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
-{
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     int numAddresses, numVals, i, j, result, addrStrLen;
     
     uint64_T *addresses;
@@ -278,6 +273,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     
     char *addrStr;
     void *addr;
+    
+    bool writing;
     
     if (nrhs != 2) {
         mexErrMsgTxt("exactly 2 arguments required");
@@ -305,24 +302,33 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     
     switch (mxGetN(prhs[1])) {
         case NUM_DATA_COLS - 1:
-            if (nlhs != 1) {
-                mexErrMsgTxt("exactly 1 output argument required when reading");
-            }
-            
+            writing = false;
+            break;
+        case NUM_DATA_COLS:
+            writing = true;
+            break;
+        default:
+            mexErrMsgTxt("second argument must have 2 (reading) or 3 columns (writing): bitNum, regOffset, [value]");
+            break;
+    }
+    
+    if DEBUG printf("%d lhs\n",nlhs);
+    switch (nlhs) {
+        case 1:
             *plhs = mxCreateLogicalMatrix(numVals,numAddresses);
             if (*plhs == NULL) {
                 mexErrMsgTxt("couldn't allocate output");
             }
             out = mxGetLogicals(*plhs);
             break;
-        case NUM_DATA_COLS:
-            if (nlhs != 0) {
-                mexErrMsgTxt("exactly 0 output arguments required when writing");
+        case 0:
+            if (!writing) {
+                mexErrMsgTxt("exactly 1 output argument required when reading");
             }
             out = NULL;
             break;
         default:
-            mexErrMsgTxt("second argument must have 2 (reading) or 3 columns (writing): bitNum, regOffset, [value]");
+            mexErrMsgTxt("at most 1 output argument allowed");
             break;
     }
     
@@ -331,13 +337,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     for (i = 0; i < numVals; i++) {
         bitNum    = data[i          ];
         regOffset = data[i+  numVals];
-        if (out == NULL) {
+        if (writing) {
             value = data[i+2*numVals];
         }
         
         if DEBUG {
             printf("\t%d, %d", bitNum, regOffset);
-            if (out == NULL) printf(" %d", value);
+            if (writing) printf(" %d", value);
             printf("\n");
         }
         
@@ -354,7 +360,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         for (j = 0; j < NUM_REGISTERS; j++) {
             printf("mask:");
             printBits(mask[j]);
-            if (out == NULL) {
+            if (writing) {
                 printf(" val:");
                 printBits(vals[j]);
             }
@@ -388,7 +394,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             addr = &address;
         }
         
-        doPort(addr, mask, vals, out, i, data, numVals);
+        doPort(addr, mask, vals, out, i, data, numVals, writing);
         
         if USE_PPDEV {
             mxFree(addrStr);

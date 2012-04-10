@@ -1,4 +1,10 @@
-function [sm updateCache]=cacheSounds(sm,station)
+function [sm updateCache]=cacheSounds(sm,station,sounds)
+if exist('sounds','var') && ~isempty(sounds)
+    for i=1:length(sounds) % can't use cellfun cuz need to fold in updated sm's as we go
+        sm = addSound(sm,sounds{i},station);
+    end
+end
+
 if isa(station,'station')
 
     updateCache=false;
@@ -88,7 +94,7 @@ if isa(station,'station')
 
         for i=1:length(sm.clips)
             sm.clips{i}=decache(sm.clips{i});
-        end
+        end        
     end
 else
     error('need a station')

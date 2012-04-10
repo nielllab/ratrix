@@ -3,6 +3,9 @@ function [graduate, details] = checkCriterion(c,subject,trainingStep,trialRecord
 % unlikely in practice...
 totalNeeded=c.consecutiveMins*c.trialsPerMin;
 if trialRecords(end).trialNumber > totalNeeded && length(trialRecords) < totalNeeded
+    trialRecords(end).trialNumber
+    length(trialRecords)
+    totalNeeded
     error('criterion is longer than the circular buffer set in @station/doTrials (roughly line 76) -- how architect?')
 end
 

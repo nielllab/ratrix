@@ -1,6 +1,26 @@
-function s=startPTB(s,imagingTasks)
+function s=startPTB(s,imagingTasks,depth)
+if ~exist('depth','var') || isempty(depth)
+    depth=32;
+%  else
+%      depth=8; %hardcoded for now cuz depth above comes from requested resolution, which may differ from desired value here
+end
 
 clear Screen;
+Screen('Preference', 'DefaultVideocaptureEngine', 3); %for recording.  3 -> gstreamer, 0 -> quicktime (may need to set for osx)
+% note: on linux, probably need to install plugins for h.264...
+%  Video or movie
+%   recording with high quality (DivX, H.264) will also require recent versions
+%   of additional plugin packages containing support for these formats. These
+%   are usually not installed by default due to licensing and patent clauses in
+%   place for some territories. You may want to specifically add them to your
+%   system depending on your format needs.
+%  
+%   On Debian 
+%  
+%       sudo apt-get install gstreamer0.10-plugins-bad-multiverse gstreamer0.10-plugins-ugly-multiverse
+%  
+
+
 Screen('Screens');
 try
     
@@ -13,7 +33,11 @@ try
     HideCursor;
     
     Screen('Preference', 'SkipSyncTests', 0);
+<<<<<<< HEAD
     Screen('Preference', 'SkipSyncTests', 1); %edf added 12.19.11 to right mtrix cuz lcd?
+=======
+    Screen('Preference', 'SkipSyncTests', 1); %edf added to left mouse station, why is this happening?!?
+>>>>>>> origin/trunk
     
     Screen('Preference', 'VisualDebugLevel', 6);
     %http://psychtoolbox.org/wikka.php?wakka=FaqWarningPrefs
@@ -41,9 +65,11 @@ try
     %4) Be pretty verbose about information and hints to optimize your code and system.
     %5) Levels 5 and higher enable very verbose debugging output, mostly useful for debugging PTB itself, not generally useful for end-users.
     
+    Screen('Preference', 'Verbosity', 1); %edf's machine is stuck on  Microsofts OpenGL software renderer
+    
     preScreen=GetSecs();
     if isempty(imagingTasks)
-        s.window = Screen('OpenWindow',s.screenNum,0);%,[],32,2);  %%color, rect, depth, buffers (none can be changed in basic version)
+        s.window = Screen('OpenWindow',s.screenNum,0,[],depth);%,2);  %%color, rect, depth, buffers (none can be changed in basic version)
     else
         warning('edf says: have you checked that the stopPTB will remove these tasks?  i see no evidence that you clean up after yourself if a later trial doesn''t want these things.  a clear Screen may help, but i want proof.  it''s not stated in ''help psychimaging'' -- worst case, ask mario.  also, i don''t see that you''ve been careful to make sure the pipeline details are recorded in the trial record.')
         %well, i guess it's relatively convincing that you get a unique window pointer out of it, so i'm downgrading to a warning...

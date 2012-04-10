@@ -123,7 +123,7 @@ function s=station(varargin)
 	end
 
 	if usingPport
-		if ismember(s.decPPortAddr,hex2dec({'B888','0378','FFF8'}))
+		if ismember(s.decPPortAddr,hex2dec({'B888','0378','FFF8','C800'}))
 			%pass
 		else
 			error('need a parallel port base address (should be ''0378'' (built-in) ''B888'' (pci) or ''FFF8'' (pcmcia)) -- under LPT ports in device manager, resources tab, I/O Range (first number is base address).');
@@ -270,7 +270,7 @@ function [out assignedSoFar]=assignPins(pins,dir,baseAddr,dontMatch,pinGroupName
                 
                 %move this somewhere sensible!
                 [a b]=getMACaddress;
-                if ismember(b,{'F46D04EFE0FF','F46D04EFE0E5'}) && strcmp(pinGroupName,'sensorPins')
+                if ismember(b,{'F46D04EFE0FF','F46D04EFE0E5','5404A6EF66C9'}) && strcmp(pinGroupName,'sensorPins')
                     out(cNum).inv = ~out(cNum).inv;
                 end
 			else

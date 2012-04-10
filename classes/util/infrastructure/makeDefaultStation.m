@@ -21,10 +21,7 @@ function st=makeDefaultStation(id,path,mac,physicalLocation,screenNum,rewardMeth
 % 16  control           i/o phasePulse
 % 17  control	inv     i/o stimPulse
 
-
-
 [a b]=getMACaddress;
-
 
 if ~exist('pportaddr','var') || isempty(pportaddr)
     pportaddr= '0378';
@@ -36,6 +33,8 @@ if ~exist('pportaddr','var') || isempty(pportaddr)
                 pportaddr='FFF8'; %the pcmcia add on card
             case '001372708179' %dell machine w/ati card
                 pportaddr='B888'; %the pci add on card
+            case 'BCAEC555FC4B' %2p machine
+                pportaddr='C800'; %pci add on
             otherwise
                 %pass
         end
@@ -47,9 +46,9 @@ if ~exist('rewardMethod','var') || isempty(rewardMethod)
 end
 
 if ~exist('screenNum','var') || isempty(screenNum)
-
+    
     screenNum=int8(0);
-
+    
     if length(Screen('Screens'))>1
         %[a b]=getMACaddress;
         if a
@@ -70,7 +69,7 @@ end
 
 if ~exist('soundOn','var') || isempty(soundOn)
     soundOn=true;
-
+    
     %[a b]=getMACaddress;
     if a
         switch b
@@ -109,7 +108,6 @@ if a
     end
 end
 
-
 stationSpec.id                                = id;
 stationSpec.path                              = path;
 stationSpec.MACaddress                        = mac;
@@ -130,8 +128,8 @@ stationSpec.portSpec.indexPins                = int8(8);
 
 if a
     switch b
-        case 'F46D04EFE0FF'
-            stationSpec.portSpec.valveSpec=int8(3); %mini-3-way-lickometer only uses center valve
+        case {'F46D04EFE0FF','5404A6EF6720','14DAE971D50E'}
+            stationSpec.portSpec.valveSpec=int8(3); %mini-3-way-lickometer and ball only use center valve
     end
 end
 
@@ -144,7 +142,7 @@ else
 end
 
 if ismember(stationSpec.id,{'3A','3B','3C','3D','3E','3F'}) || strcmp(rewardMethod,'localPump')
-
+    
     infTooFarPin=int8(1);
     wdrTooFarPin=int8(14);
     motorRunningPin= int8(11);
@@ -152,7 +150,7 @@ if ismember(stationSpec.id,{'3A','3B','3C','3D','3E','3F'}) || strcmp(rewardMeth
     rezValvePin = int8(5);  %valve 4
     eqDelay=0.3; %seems to be lowest that will work
     valveDelay=0.02;
-
+    
     pmp =localPump(...
         pump('COM1',...             %serPortAddr
         9.65,...                    %mmDiam
@@ -166,7 +164,7 @@ if ismember(stationSpec.id,{'3A','3B','3C','3D','3E','3F'}) || strcmp(rewardMeth
         0.1,...                     %mlOpportunisticRefill
         0.05),...                   %mlAntiRock
         rezValvePin,eqDelay,valveDelay);
-
+    
     stationSpec.rewardMethod='localPump';
     stationSpec.portSpec.valveSpec.valvePins=stationSpec.portSpec.valveSpec;
     stationSpec.portSpec.valveSpec.pumpObject=pmp;

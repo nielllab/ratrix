@@ -2,7 +2,7 @@ function [tm quit trialRecords eyeData eyeDataFrameInds gaze frameDropCorner sta
     = runRealTimeLoop(tm, window, ifi, stimSpecs, startingStimSpecInd, phaseData, stimManager, ...
     targetOptions, distractorOptions, requestOptions, interTrialLuminance, interTrialPrecision, ...
     station, manual,timingCheckPct,textLabel,rn,subID,stimID,protocolStr,ptbVersion,ratrixVersion,trialLabel,msAirpuff, ...
-    originalPriority, verbose, eyeTracker, frameDropCorner,trialRecords)
+    originalPriority, verbose, eyeTracker, frameDropCorner,trialRecords,currentCLUT)
 % This function does the real-time looping for stimulus presentation. The rough order of events per loop:
 %   - (possibly) update phase-specific information
 %   - call updateTrialState to set correctness and determine rewards
@@ -32,7 +32,7 @@ labelFrames = 1;            %print a frame ID on each frame (makes frame calcula
 textType = getShowText(tm);
 showText = ~strcmp(textType,'off'); %whether or not to call draw text to print any text on screen
 
-if ~IsLinux || true %for some reason causes trouble finding font, even though supposed to be OS-specific faster method (seems to be fixed now)
+if ~IsLinux %|| true %for some reason causes trouble finding font, even though supposed to be OS-specific faster method (seems to be fixed now)
     Screen('Preference', 'TextRenderer', 0);  % consider moving to station.startPTB
 end
 Screen('Preference', 'TextAntiAliasing', 0); % consider moving to station.startPTB
@@ -223,18 +223,18 @@ Screen('Screens');
 
 if window>0
     standardFontSize=11;
-    oldFontSize = Screen('TextSize',window,standardFontSize);
-    if IsLinux        
-        Screen('TextStyle', window, 0); %otherwise defaults to bold italic!?!          
+     oldFontSize = Screen('TextSize',window,standardFontSize);
+    if IsLinux
+        Screen('TextStyle', window, 0); %otherwise defaults to bold italic!?!
         
         font = 'nimbus mono l';
         font = 'palladio';
         font = 'fixed';
         font = '-urw-nimbus mono l-bold-o-normal--0-0-0-0-p-0-iso8859-1';
         % font = '-*-fixed-*-*-*-*-*-*-*-*-*-*-*-*';
-        Screen('TextFont',window,font); %otherwise we get Couldn't select the requested font with the requested font settings from X11 system!        
+        Screen('TextFont',window,font); %otherwise we get Couldn't select the requested font with the requested font settings from X11 system!
         
-        Screen('TextStyle', window, 0); %otherwise defaults to bold italic!?!   only works if textrender 1?     
+        Screen('TextStyle', window, 0); %otherwise defaults to bold italic!?!   only works if textrender 1?
     end
     [normBoundsRect, offsetBoundsRect]= Screen('TextBounds', window, 'TEST');
 end
@@ -310,19 +310,63 @@ portsDown=false(1,length(ports));
 pNum=0;
 
 trialRecords(trialInd).result=[]; %initialize
-trialRecords(trialInd).correct=[];
+trialRecords(trialInd).correct=[]; %who sets this?
 analogOutput=[];
 startTime=0;
 logIt=true;
 lookForChange=false;
 punishResponses=[];
 
-% =========================================================================
-% do first frame and  any stimulus onset synched actions
-% make sure everything after this point is preallocated
-% efficiency is crticial from now on
-
 if window>0
+    if false %record movie of trial
+        movieFile = sprintf('%s%s.%d.%s.%s.%s.%s',[fullfile(fileparts(fileparts(getPath(station))),'PermanentTrialRecordStore',subID) filesep],subID,trialRecords(end).trialNumber,trialRecords(end).protocolName,trialRecords(end).trialManagerClass,stimID,datestr(trialRecords(end).date,'ddd-mmm-dd-yyyy-HH-MM-SS'));
+        
+        % C:\Users\nlab\Desktop\ratrixData\PermanentTrialRecordStore\demo1\demo1.1.mouse.ball.trail.Tue-Mar-20-2012-22-23-56
+        % in win, showing up in cwd at:
+        % UsersnlabDesktopratrixDataPermanentTrialRecordStoredemo1demo1.2.mouse.ball.trail.Tue-Mar-20-2012-22-24-07
+        %on osx, this is getting cut off to demo1.12.mouse.ball.trail.Fri#0
+        
+        %default is h.264 - what extension should we use?
+        %note ImagingStereoDemo demos .avi, .mov, .flv...  ask mario for ref...
+        
+        %for dynamic stims, this will be faster
+        %but for preallocated stims, use writeAVI
+        if IsWin
+            str=[]; %works on win, not too slow!
+        else
+            str=['EncodingQuality=' num2str(.01)]; %works on osx, but 1.0 very slow
+            %still too slow on osx at .01 -- trying 800x500 at 8bit color
+        end
+        moviePtr = Screen('CreateMovie', window, movieFile, [], [], 1/ifi, str);
+                
+        %looks like C:\Users\nlab\Desktop\ptb src\PsychSourceGL\Source\Common\Screen\ScreenPreferenceState.c
+        %doesn't check for 64 vs. 32 bit win
+        %docs make it sound like qt is still default for 32bit win, but i
+        %couldn't get qt to work at all until i had gstreamer installed?        
+        % todo, try again w/qt - am i misremembering?
+        
+        %we should also record sound
+        %can use http://docs.psychtoolbox.org/OpenSlave with kPortAudioIsOutputCapture
+        %see http://tech.groups.yahoo.com/group/psychtoolbox/message/13249
+        % then add it as audio track to the movie...
+        %Screen('AddAudioBufferToMovie', moviePtr, audioBuffer); %not supported on osx..
+        %note, to do this, must add option string to createmovie:
+        % Add a sound track to the movie: 2 channel stereo, 48 kHz:
+        %        movie = Screen('CreateMovie', windowPtr, ['MyTestMovie.mov'], 512, 512, 30, ':CodecSettings=AddAudioTrack=2@48000');
+        %'audioBuffer' must be 'numChannels' rows by 'numSamples' columns double matrix
+        %Sample values must lie in the range between -1.0 and +1.0.
+        %The audio buffer is converted into a movie specific sound format and then
+        %appended to the audio samples already stored in the audio track.
+        
+    else
+        moviePtr = [];
+    end
+    
+    % =========================================================================
+    % do first frame and  any stimulus onset synched actions
+    % make sure everything after this point is preallocated
+    % efficiency is crticial from now on
+    
     % draw interTrialLuminance first
     if true  % trunk should always leave this true, only false for a local test
         interTrialTex=Screen('MakeTexture', window, interTrialLuminance,0,0,interTrialPrecision); %need floatprecision=0 for remotedesktop
@@ -398,6 +442,7 @@ while ~done && ~quit;
             [phaseRecords(nextPhaseRecordNum:nextPhaseRecordNum+phaseRecordAllocChunkSize).didStochasticResponse]= deal([]);
         end
         
+        finish=false;
         i=0;
         frameIndex=0;
         frameNum=1;
@@ -547,11 +592,16 @@ while ~done && ~quit;
     end
     
     if window>0
+        if ~isempty(moviePtr)
+            Screen('AddFrameToMovie', window, [], [], moviePtr, 1);
+        end
+        
         if ~paused
             scheduledFrameNum=ceil((GetSecs-firstVBLofPhase)/(framesPerUpdate*ifi)); %could include pessimism about the time it will take to get from here to the flip and how much advance notice flip needs
             % this will surely have drift errors...
             % note this does not take pausing into account -- edf thinks we should get rid of pausing
             
+            dynamicSounds={};
             switch strategy
                 case {'textureCache','noCache','dynamic'}
                     if ~strcmp(strategy,'dynamic')
@@ -575,13 +625,13 @@ while ~done && ~quit;
                         case 'noCache'
                             thisFrame=squeeze(stim(:,:,i));
                         case 'dynamic'
-                            [thisFrame doFramePulse expertCache phaseRecords(phaseNum).dynamicDetails textLabel i indexPulse]=moreStim(stimManager,stim,i,textLabel,destRect,expertCache,scheduledFrameNum,tm.dropFrames,phaseRecords(phaseNum).dynamicDetails,trialRecords);
+                            [thisFrame doFramePulse expertCache phaseRecords(phaseNum).dynamicDetails textLabel i indexPulse dynamicSounds finish]=moreStim(stimManager,stim,i,textLabel,destRect,expertCache,scheduledFrameNum,tm.dropFrames,phaseRecords(phaseNum).dynamicDetails,trialRecords);
                             [floatprecision2 thisFrame] = determineColorPrecision(tm, thisFrame, strategy);
                             if floatprecision~=floatprecision2
                                 error('dynamic floatprecision records will be inaccurate')
                             end
-                            if ndims(thisFrame)~=2 
-                                error('moreStim should return a single monochrome frame')
+                            if ~ismember(ndims(thisFrame),[2 3])
+                                error('moreStim should return a single monochrome or RGB frame') %will add rgba, just haven't tested...
                             end
                         otherwise
                             error('huh?')
@@ -589,12 +639,41 @@ while ~done && ~quit;
                     drawFrameUsingTextureCache(tm, window, i, frameNum, size(stim,3), lastI, dontclear, thisFrame, destRect, ...
                         filtMode, labelFrames, xOrigTextPos, yTextPos,strategy,floatprecision);
                 case 'expert'
-                    [doFramePulse expertCache phaseRecords(phaseNum).dynamicDetails textLabel i dontclear indexPulse] ...
+                    [doFramePulse expertCache phaseRecords(phaseNum).dynamicDetails textLabel i dontclear indexPulse dynamicSounds finish] ...
                         = drawExpertFrame(stimManager,stim,i,phaseStartTime,totalFrameNum,window,textLabel,...
                         destRect,filtMode,expertCache,ifi,scheduledFrameNum,tm.dropFrames,dontclear,...
-                        phaseRecords(phaseNum).dynamicDetails);
+                        phaseRecords(phaseNum).dynamicDetails,trialRecords,currentCLUT,phaseRecords,phaseNum);
                 otherwise
                     error('unrecognized strategy')
+            end
+            
+            if finish
+                if isinf(numFramesInStim)
+                    numFramesInStim = framesInPhase; %causes handlePhasedTrialLogic to transition to next phase
+                    
+                    switch phaseType %hmmm, how else do this?  trialManager shouldn't know about this stuff...
+                        case 'pre-request'
+                            %do request reward
+                        case 'discrim'
+                            if isempty(trialRecords(trialInd).trialDetails.correct)
+                                trialRecords(trialInd).trialDetails.correct = strcmp(phaseRecords(phaseNum).dynamicDetails.result,'correct'); %causes updateTrialState to do reward
+                            else
+                                error('huh')
+                            end
+                            if isempty(trialRecords(trialInd).result)
+                                trialRecords(trialInd).result = phaseRecords(phaseNum).dynamicDetails.result; %causes handlePhasedTrialLogic to propogate nominal result
+                                if ismember(trialRecords(trialInd).result,{'correct','timedout','incorrect'})
+                                    trialRecords(trialInd).result='nominal';
+                                end
+                            else
+                                error('huh')
+                            end
+                        otherwise
+                            error('huh')
+                    end
+                else
+                    error('huh')
+                end
             end
             
             setStatePins(station,'index',indexPulse);
@@ -766,7 +845,7 @@ while ~done && ~quit;
             ports, lastPorts, station, phaseInd, phaseType, transitionCriterion, framesUntilTransition, numFramesInStim, framesInPhase, isFinalPhase, ...
             trialRecords(trialInd).trialDetails, trialRecords(trialInd).stimDetails, trialRecords(trialInd).result, ...
             stimManager, msRewardSound, msPenaltySound, targetOptions, distractorOptions, requestOptions, ...
-            playRequestSoundLoop, isRequesting, soundNames, lastSoundsLooped);
+            playRequestSoundLoop, isRequesting, soundNames, lastSoundsLooped, dynamicSounds);
         
         % if goDirectlyToError, then reset newSpecInd to the first error phase in stimSpecs
         if goDirectlyToError
@@ -861,7 +940,12 @@ while ~done && ~quit;
             if strcmp(class(ports),'double') %happens on osx, why?
                 ports=logical(ports);
             end
-            rewardValves(ports)=1;
+            
+            if ~isa(tm,'ball')
+                rewardValves(ports)=1;
+            else
+                rewardValves(:)=1; %where put this?
+            end
             
             %         if isempty(rewardPorts)
             %             rewardValves(requestOptions) = 1;
@@ -1020,6 +1104,10 @@ while ~done && ~quit;
 end
 
 securePins(station);
+
+if ~isempty(moviePtr)
+    Screen('FinalizeMovie', moviePtr);
+end
 
 trialRecords(trialInd).phaseRecords=phaseRecords;
 % per-trial records, collected from per-phase stuff

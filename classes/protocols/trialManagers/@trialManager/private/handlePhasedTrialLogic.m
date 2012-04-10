@@ -5,7 +5,7 @@ function [tm done newSpecInd specInd updatePhase transitionedByTimeFlag transiti
     ports, lastPorts, station, specInd, phaseType, transitionCriterion, framesUntilTransition, numFramesInStim,...
     framesInPhase, isFinalPhase, trialDetails, stimDetails, result, ...
     stimManager, msRewardSound, mePenaltySound, targetOptions, distractorOptions, requestOptions, ...
-    playRequestSoundLoop, isRequesting, soundNames, lastSoundsLooped)
+    playRequestSoundLoop, isRequesting, soundNames, lastSoundsLooped, dynamicSounds)
 
 updatePhase=0;
 newSpecInd = specInd;
@@ -19,7 +19,7 @@ goDirectlyToError=false;
 % note that we will need to flag that this was done as "auto-request"
 if ~isempty(framesUntilTransition) && framesInPhase == framesUntilTransition - 1 % changed to framesUntilTransition-1 % 8/19/08
     % find the special 'timeout' transition (the port set should be empty)
-    newSpecInd = transitionCriterion{find(cellfun('isempty',transitionCriterion))+1}; 
+    newSpecInd = transitionCriterion{find(cellfun('isempty',transitionCriterion))+1};
     % this will always work as long as we guarantee the presence of this special indicator (checked in stimSpec constructor)
     updatePhase = 1;
     if isFinalPhase
@@ -28,22 +28,21 @@ if ~isempty(framesUntilTransition) && framesInPhase == framesUntilTransition - 1
     end
     %error('transitioned by time in phase %d', specInd);
     transitionedByTimeFlag = true;
-	if isempty(result)
-		result='timeout';
+    if isempty(result)
+        result='timeout';
         if isRequesting
             isRequesting=false;
         else
             isRequesting=true;
         end
-	end
+    end
 end
-
 
 % Check against transition by numFramesInStim (based on size of the stimulus in 'cache' or 'timedIndexed' mode)
 % in other modes, such as 'loop', this will never pass b/c numFramesInStim==Inf
 if framesInPhase==numFramesInStim
     % find the special 'timeout' transition (the port set should be empty)
-    newSpecInd = transitionCriterion{cellfun('isempty',transitionCriterion)+1}; 
+    newSpecInd = transitionCriterion{cellfun('isempty',transitionCriterion)+1};
     % this will always work as long as we guarantee the presence of this special indicator (checked in stimSpec constructor)
     updatePhase = 1;
     if isFinalPhase
@@ -74,15 +73,15 @@ for gcInd=1:2:length(transitionCriterion)-1
             updatePhase = 1;
         end
         transitionedByPortFlag = true;
-
+        
         % set result to the ports array when it is triggered during a phase transition (ie result will be whatever the last port to trigger
         %   a transition was)
         result = ports;
-
+        
         if length(find(ports))>1
             goDirectlyToError=true;
         end
-
+        
         % we should stop checking all the criteria if we already passed one (essentially first come first served)
         break;
     end
@@ -99,7 +98,7 @@ portSelectionDoneTime=GetSecs;
 % SOUNDS
 % changed from newSpecInd to specInd (cannot anticipate phase transition b/c it hasnt called updateTrialState to set correctness)
 soundsToPlay = getSoundsToPlay(stimManager, ports, lastPorts, specInd, phaseType, framesInPhase,msRewardSound, mePenaltySound, ...
-    targetOptions, distractorOptions, requestOptions, playRequestSoundLoop, class(tm), trialDetails, stimDetails);
+    targetOptions, distractorOptions, requestOptions, playRequestSoundLoop, class(tm), trialDetails, stimDetails, dynamicSounds);
 getSoundsTime=GetSecs;
 % soundsToPlay is a cell array of sound names {{playLoop sounds}, {playSound sounds}} to be played at current frame
 % validate soundsToPlay here (make sure they are all members of soundNames)
@@ -128,12 +127,10 @@ end
 
 soundsDoneTime=GetSecs;
 
-
 % set isRequesting when request port is hit according to these rules:
 %   if isRequesting was already 1, then set it to 0
 %   if isRequesting was 0, then set it to 1
 %   (basically flip the bit every time request port is hit)
-% 
 if any(ports(requestOptions)) && ~any(lastPorts(requestOptions))
     if isRequesting
         isRequesting=false;
@@ -143,4 +140,4 @@ if any(ports(requestOptions)) && ~any(lastPorts(requestOptions))
 end
 
 isRequestingDoneTime=GetSecs;
-end % end function
+end

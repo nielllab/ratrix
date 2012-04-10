@@ -1,6 +1,13 @@
 function [stimulus,updateSM,resolutionIndex,preRequestStim,preResponseStim,discrimStim,LUT,targetPorts,distractorPorts,...
-    details,interTrialLuminance,text,indexPulses,imagingTasks] =...
-    calcStim(stimulus,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
+    details,interTrialLuminance,text,indexPulses,imagingTasks,sounds] =...
+    calcStim(stimulus,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords,targetPorts,distractorPorts,details,text)
+
+sounds={};
+
+% extend oriented gabors to have time-varying phase and contrast:
+% phase = cumsum(randn(1,len))
+% contrast = cumsum(randn(1,len))
+
 % see ratrixPath\documentation\stimManager.calcStim.txt for argument specification (applies to calcStims of all stimManagers)
 % 1/3/0/09 - trialRecords now includes THIS trial
 indexPulses=[];
@@ -17,13 +24,6 @@ end
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);
 
-details.pctCorrectionTrials=.5; % need to change this to be passed in from trial manager
-if ~isempty(trialRecords) && length(trialRecords)>=2
-    lastRec=trialRecords(end-1);
-else
-    lastRec=[];
-end
-[targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass,allowRepeats);
 switch trialManagerClass
     case 'freeDrinks'
         type='loop';
@@ -78,25 +78,21 @@ if iscell(type) && strcmp(type{1},'trigger')
     out(:,:,2)=stimulus.mean;
 end
 
-if strcmp(trialManagerClass,'nAFC') && details.correctionTrial
-    text='correction trial!';
-else
-    text=sprintf('pixPerCyc: %g',details.pixPerCyc);
-end
+text = [text sprintf('pixPerCyc: %g',details.pixPerCyc)];
 
 discrimStim=[];
 discrimStim.stimulus=out;
 discrimStim.stimType=type;
 discrimStim.scaleFactor=scaleFactor;
 discrimStim.startFrame=0;
-discrimStim.autoTrigger=[];
+%discrimStim.autoTrigger=[];
 
 preRequestStim=[];
 preRequestStim.stimulus=interTrialLuminance;
 preRequestStim.stimType='loop';
 preRequestStim.scaleFactor=0;
 preRequestStim.startFrame=0;
-preRequestStim.autoTrigger=[];
+%preRequestStim.autoTrigger=[];
 preRequestStim.punishResponses=false;
 
 

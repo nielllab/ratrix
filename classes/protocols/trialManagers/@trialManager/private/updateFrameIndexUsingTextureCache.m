@@ -83,7 +83,8 @@ else
         i=min(i+1,stimSize);
     end
     
-    if isempty(responseOptions) && i==stimSize
+    if isempty(responseOptions) && i==stimSize && ~isa(tm,'ball')
+        warning('this was killing ball rewards -- what is it for?  doesn''t autoplay work some other way, like using the stim spec transitions?')
         done=1;
     end
     
@@ -92,6 +93,5 @@ else
     end
     didPulse=1;
 end
-
 
 end % end function

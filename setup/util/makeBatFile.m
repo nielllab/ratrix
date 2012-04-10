@@ -7,7 +7,7 @@ if fid <3 || ~isempty(message)
 end
 
 fprintf(fid,'set subj="''%s''"\n',subjectID);
-fprintf(fid,'"C:\\Program Files\\MATLAB\\R2011b\\bin\\matlab.exe" -nodesktop -nosplash -nojvm -r "cd ''C:\\Users\\nlab\\Desktop\\ratrix\\bootstrap'';standAloneRun(''%s'',[],%%subj%%);"',dataPath);
+fprintf(fid,'"C:\\Program Files\\MATLAB\\R2011b\\bin\\matlab.exe" -nodesktop -nosplash -nojvm -r "cd ''C:\\Users\\nlab\\Desktop\\ratrix\\bootstrap'';standAloneRun(''C:\\Users\\nlab\\Desktop\\wehrData'',[],%%subj%%);"');
 % datapath was ''C:\\Users\\nlab\\Desktop\\mouseData''
 
 if fclose(fid)~=0

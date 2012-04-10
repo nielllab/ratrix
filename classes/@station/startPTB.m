@@ -33,11 +33,8 @@ try
     HideCursor;
     
     Screen('Preference', 'SkipSyncTests', 0);
-<<<<<<< HEAD
     Screen('Preference', 'SkipSyncTests', 1); %edf added 12.19.11 to right mtrix cuz lcd?
-=======
-    Screen('Preference', 'SkipSyncTests', 1); %edf added to left mouse station, why is this happening?!?
->>>>>>> origin/trunk
+
     
     Screen('Preference', 'VisualDebugLevel', 6);
     %http://psychtoolbox.org/wikka.php?wakka=FaqWarningPrefs

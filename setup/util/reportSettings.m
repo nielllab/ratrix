@@ -78,6 +78,8 @@ if ~isempty(ids)
                                         
                                         [junk rewardSizeULorMS requestRewardSizeULorMS msPenalty] = calcReinforcement(getReinforcementManager(tm),[]);
                                         fprintf('reward:%g pnlty:%g\n',rewardSizeULorMS,msPenalty)
+                                        coherence=struct(sm).coherence
+                                        sideDisplay=struct(sm).sideDisplay
                                     else
                                         fprintf('\t\t\t%s has no protocol\n',ratID);
                                     end

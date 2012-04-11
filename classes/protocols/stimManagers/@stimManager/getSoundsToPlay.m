@@ -7,7 +7,7 @@ playSoundSounds={};
 
 dOrP=strcmp(phaseType,'discrim') || strcmp(phaseType,'pre-response'); %ismember too slow
 
-if strcmp(phaseType,'reinforced') && stepsInPhase <=0
+if strcmp(phaseType,'reinforced') && stepsInPhase <=0 && any(strcmp(trialManagerClass,{'ball','nAFC','goNoGo','oddManOut','cuedGoNoGo'}))
     if trialDetails.correct
         playSoundSounds{end+1} = {'correctSound', msRewardSound};
     else

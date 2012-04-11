@@ -23,6 +23,8 @@ else % a is an old version
         a.pctCorrectionTrials
         a = rmfield(a,'pctCorrectionTrials');
     end
+    
+    try
         
     a=orderfields(a,struct(coherentDots));
     
@@ -41,6 +43,9 @@ else % a is an old version
     
     check(struct(dots),a);
     a=dots;
+    catch ex
+    keyboard
+    end
 end
 end
 
@@ -49,7 +54,9 @@ f=fields(f1);
 for i=1:length(f)
     a=f1.(f{i});
     b=f2.(f{i});
-    if ~isobject(a)
+    if isstruct(a)
+        check(a,b);
+    elseif ~isobject(a)
         if ismember(f{i},{'LUT','LUTbits'})
             if ~isempty(a) && ~(isscalar(a) && a==0)
                 keyboard

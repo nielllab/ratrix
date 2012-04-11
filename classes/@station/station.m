@@ -270,7 +270,7 @@ function [out assignedSoFar]=assignPins(pins,dir,baseAddr,dontMatch,pinGroupName
                 
                 %move this somewhere sensible!
                 [a b]=getMACaddress;
-                if ismember(b,{'F46D04EFE0FF','F46D04EFE0E5','5404A6EF66C9'}) && strcmp(pinGroupName,'sensorPins')
+                if ismember(b,{'F46D04EFE0FF','F46D04EFE0E5','5404A6EF66C9','5404A6EF6726'}) && strcmp(pinGroupName,'sensorPins')
                     out(cNum).inv = ~out(cNum).inv;
                 end
 			else

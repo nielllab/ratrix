@@ -32,7 +32,7 @@ labelFrames = 1;            %print a frame ID on each frame (makes frame calcula
 textType = getShowText(tm);
 showText = ~strcmp(textType,'off'); %whether or not to call draw text to print any text on screen
 
-if ~IsLinux || true %for some reason causes trouble finding font, even though supposed to be OS-specific faster method (seems to be fixed now)
+if ~IsLinux %|| true %for some reason causes trouble finding font, even though supposed to be OS-specific faster method (seems to be fixed now)
     Screen('Preference', 'TextRenderer', 0);  % consider moving to station.startPTB
 end
 Screen('Preference', 'TextAntiAliasing', 0); % consider moving to station.startPTB
@@ -223,7 +223,7 @@ Screen('Screens');
 
 if window>0
     standardFontSize=11;
-    oldFontSize = Screen('TextSize',window,standardFontSize);
+     oldFontSize = Screen('TextSize',window,standardFontSize);
     if IsLinux
         Screen('TextStyle', window, 0); %otherwise defaults to bold italic!?!
         
@@ -310,19 +310,63 @@ portsDown=false(1,length(ports));
 pNum=0;
 
 trialRecords(trialInd).result=[]; %initialize
-trialRecords(trialInd).correct=[];
+trialRecords(trialInd).correct=[]; %who sets this?
 analogOutput=[];
 startTime=0;
 logIt=true;
 lookForChange=false;
 punishResponses=[];
 
-% =========================================================================
-% do first frame and  any stimulus onset synched actions
-% make sure everything after this point is preallocated
-% efficiency is crticial from now on
-
 if window>0
+    if false %record movie of trial
+        movieFile = sprintf('%s%s.%d.%s.%s.%s.%s',[fullfile(fileparts(fileparts(getPath(station))),'PermanentTrialRecordStore',subID) filesep],subID,trialRecords(end).trialNumber,trialRecords(end).protocolName,trialRecords(end).trialManagerClass,stimID,datestr(trialRecords(end).date,'ddd-mmm-dd-yyyy-HH-MM-SS'));
+        
+        % C:\Users\nlab\Desktop\ratrixData\PermanentTrialRecordStore\demo1\demo1.1.mouse.ball.trail.Tue-Mar-20-2012-22-23-56
+        % in win, showing up in cwd at:
+        % UsersnlabDesktopratrixDataPermanentTrialRecordStoredemo1demo1.2.mouse.ball.trail.Tue-Mar-20-2012-22-24-07
+        %on osx, this is getting cut off to demo1.12.mouse.ball.trail.Fri#0
+        
+        %default is h.264 - what extension should we use?
+        %note ImagingStereoDemo demos .avi, .mov, .flv...  ask mario for ref...
+        
+        %for dynamic stims, this will be faster
+        %but for preallocated stims, use writeAVI
+        if IsWin
+            str=[]; %works on win, not too slow!
+        else
+            str=['EncodingQuality=' num2str(.01)]; %works on osx, but 1.0 very slow
+            %still too slow on osx at .01 -- trying 800x500 at 8bit color
+        end
+        moviePtr = Screen('CreateMovie', window, movieFile, [], [], 1/ifi, str);
+                
+        %looks like C:\Users\nlab\Desktop\ptb src\PsychSourceGL\Source\Common\Screen\ScreenPreferenceState.c
+        %doesn't check for 64 vs. 32 bit win
+        %docs make it sound like qt is still default for 32bit win, but i
+        %couldn't get qt to work at all until i had gstreamer installed?        
+        % todo, try again w/qt - am i misremembering?
+        
+        %we should also record sound
+        %can use http://docs.psychtoolbox.org/OpenSlave with kPortAudioIsOutputCapture
+        %see http://tech.groups.yahoo.com/group/psychtoolbox/message/13249
+        % then add it as audio track to the movie...
+        %Screen('AddAudioBufferToMovie', moviePtr, audioBuffer); %not supported on osx..
+        %note, to do this, must add option string to createmovie:
+        % Add a sound track to the movie: 2 channel stereo, 48 kHz:
+        %        movie = Screen('CreateMovie', windowPtr, ['MyTestMovie.mov'], 512, 512, 30, ':CodecSettings=AddAudioTrack=2@48000');
+        %'audioBuffer' must be 'numChannels' rows by 'numSamples' columns double matrix
+        %Sample values must lie in the range between -1.0 and +1.0.
+        %The audio buffer is converted into a movie specific sound format and then
+        %appended to the audio samples already stored in the audio track.
+        
+    else
+        moviePtr = [];
+    end
+    
+    % =========================================================================
+    % do first frame and  any stimulus onset synched actions
+    % make sure everything after this point is preallocated
+    % efficiency is crticial from now on
+    
     % draw interTrialLuminance first
     if true  % trunk should always leave this true, only false for a local test
         interTrialTex=Screen('MakeTexture', window, interTrialLuminance,0,0,interTrialPrecision); %need floatprecision=0 for remotedesktop
@@ -548,6 +592,10 @@ while ~done && ~quit;
     end
     
     if window>0
+        if ~isempty(moviePtr)
+            Screen('AddFrameToMovie', window, [], [], moviePtr, 1);
+        end
+        
         if ~paused
             scheduledFrameNum=ceil((GetSecs-firstVBLofPhase)/(framesPerUpdate*ifi)); %could include pessimism about the time it will take to get from here to the flip and how much advance notice flip needs
             % this will surely have drift errors...
@@ -594,7 +642,7 @@ while ~done && ~quit;
                     [doFramePulse expertCache phaseRecords(phaseNum).dynamicDetails textLabel i dontclear indexPulse dynamicSounds finish] ...
                         = drawExpertFrame(stimManager,stim,i,phaseStartTime,totalFrameNum,window,textLabel,...
                         destRect,filtMode,expertCache,ifi,scheduledFrameNum,tm.dropFrames,dontclear,...
-                        phaseRecords(phaseNum).dynamicDetails,trialRecords,currentCLUT);
+                        phaseRecords(phaseNum).dynamicDetails,trialRecords,currentCLUT,phaseRecords,phaseNum);
                 otherwise
                     error('unrecognized strategy')
             end
@@ -603,20 +651,25 @@ while ~done && ~quit;
                 if isinf(numFramesInStim)
                     numFramesInStim = framesInPhase; %causes handlePhasedTrialLogic to transition to next phase
                     
-                    if strcmp(phaseType,'discrim') %hmmm, how else do this?  trialManager shouldn't know about discrim...
-                        if isempty(trialRecords(trialInd).trialDetails.correct)
-                            trialRecords(trialInd).trialDetails.correct = strcmp(phaseRecords(1).dynamicDetails.result,'correct'); %causes updateTrialState to do reward
-                        else
-                            error('huh')
-                        end
-                        if isempty(trialRecords(trialInd).result)
-                            trialRecords(trialInd).result = phaseRecords(1).dynamicDetails.result; %causes handlePhasedTrialLogic to propogate nominal result
-                            if ismember(trialRecords(trialInd).result,{'correct','timedout'})
-                                trialRecords(trialInd).result='nominal';
+                    switch phaseType %hmmm, how else do this?  trialManager shouldn't know about this stuff...
+                        case 'pre-request'
+                            %do request reward
+                        case 'discrim'
+                            if isempty(trialRecords(trialInd).trialDetails.correct)
+                                trialRecords(trialInd).trialDetails.correct = strcmp(phaseRecords(phaseNum).dynamicDetails.result,'correct'); %causes updateTrialState to do reward
+                            else
+                                error('huh')
                             end
-                        else
+                            if isempty(trialRecords(trialInd).result)
+                                trialRecords(trialInd).result = phaseRecords(phaseNum).dynamicDetails.result; %causes handlePhasedTrialLogic to propogate nominal result
+                                if ismember(trialRecords(trialInd).result,{'correct','timedout','incorrect'})
+                                    trialRecords(trialInd).result='nominal';
+                                end
+                            else
+                                error('huh')
+                            end
+                        otherwise
                             error('huh')
-                        end
                     end
                 else
                     error('huh')
@@ -1051,6 +1104,10 @@ while ~done && ~quit;
 end
 
 securePins(station);
+
+if ~isempty(moviePtr)
+    Screen('FinalizeMovie', moviePtr);
+end
 
 trialRecords(trialInd).phaseRecords=phaseRecords;
 % per-trial records, collected from per-phase stuff

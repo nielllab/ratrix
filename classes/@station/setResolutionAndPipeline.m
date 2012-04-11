@@ -5,7 +5,7 @@ newRes=oldRes;
 
 if ~isempty(res)
     
-    if res.pixelSize~=32
+    if res.pixelSize~=32 && false %why?
         if IsLinux
             if res.pixelSize~=24
                 error('must be 24 or 32 on linux')
@@ -64,7 +64,7 @@ if ~stopped && ~allImagingTasksSame(s.imagingTasks,imagingTasks)
 end
 
 if stopped
-    s=startPTB(s,imagingTasks);
+    s=startPTB(s,imagingTasks,res.pixelSize);
     imagingTasksApplied=imagingTasks; % is there a way to confirm they took effect?
 else
     imagingTasksApplied=s.imagingTasks; % propogate state into records

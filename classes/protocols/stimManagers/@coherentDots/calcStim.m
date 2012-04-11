@@ -1,6 +1,6 @@
 function [stimulus updateSM resolutionIndex preRequestStim preResponseStim discrimStim LUT targetPorts distractorPorts ...
-    details interTrialLuminance text indexPulses imagingTasks] = ...
-    calcStim(stimulus,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords)
+    details interTrialLuminance text indexPulses imagingTasks sounds] = ...
+    calcStim(stimulus,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords,targetPorts,distractorPorts,details,text)
 
 % Reinagel, Mankin, Calhoun 2008 SFN Poster: http://biology.ucsd.edu/labs/reinagel/SpeedAccuracyPoster2009.pdf
 %
@@ -36,6 +36,9 @@ function [stimulus updateSM resolutionIndex preRequestStim preResponseStim discr
 %    http://people.brandeis.edu/~sekuler/papers/williamsSekuler_coherentPerceptRDC_VisRes1984.pdf
 
 % 1/30/09 - trialRecords now includes THIS trial
+
+sounds={};
+
 s = stimulus;
 indexPulses=[];
 imagingTasks=[];
@@ -61,28 +64,13 @@ if hz==0 && ismac
     hz = 60; %lame
 end
 
-
 % updateSM=0;     % For intertrial dependencies
 % isCorrection=0;     % For correction trials to force to switch sides
 
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);
 
-details.pctCorrectionTrials=stimulus.pctCorrectionTrials; % need to change this to be passed in from trial manager
-if ~isempty(trialRecords) && length(trialRecords)>=2
-    lastRec=trialRecords(end-1);
-else
-    lastRec=[];
-end
-[targetPorts distractorPorts details]=assignPorts(details,lastRec,responsePorts,trialManagerClass,allowRepeats);
-
-targets = ismember(responsePorts,targetPorts);
-
-leftMid = floor(length(targets)/2);
-rightMid = 1+ceil(length(targets)/2);
-
-lefts = sum(targets(1:leftMid));
-rights = sum(targets(rightMid:end));
+[lefts, rights] = getBalance(responsePorts,targetPorts);
 
 if lefts==rights
     static=true;
@@ -244,11 +232,11 @@ switch s.shapeMethod
             
             %ugh! how avoid this? have to do this in case previous trialRecords with different details exist
             thisShapedValue=false(1,length(trialRecords));
-            for i=1:length(trialRecords)-1 
+            for i=1:length(trialRecords)-1
                 if isfield(trialRecords(i).stimDetails,'currentShapedValue')
                     thisShapedValue(i)=trialRecords(i).stimDetails.currentShapedValue == s.position;
                 end
-            end            
+            end
             
             [g, ~, pct] = checkCriterion(performanceCriterion(.8,uint8(50)),[],[],trialRecords(thisSession & thisShapedValue),false);
             
@@ -321,8 +309,5 @@ preRequestStim.punishResponses=false;
 preResponseStim=discrimStim;
 preResponseStim.punishResponses=false;
 
-if (strcmp(trialManagerClass,'nAFC') || strcmp(trialManagerClass,'goNoGo')) && details.correctionTrial
-    text='correction trial!';
-else
-    text=sprintf('%s%s coherence: %g dot_size: %g contrast: %g speed: %g',sStr,pStr,selectedCoherence,selectedDotSize,selectedContrast,selectedSpeed);
+text = [text sprintf('%s%s coherence: %g dot_size: %g contrast: %g speed: %g',sStr,pStr,selectedCoherence,selectedDotSize,selectedContrast,selectedSpeed)];
 end

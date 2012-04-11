@@ -17,6 +17,12 @@ else % a is an old version
     if ~isfield(a,'background')
         a.background=[];
     end
+    
+    if isfield(a,'pctCorrectionTrials')
+        warning('we have to get this over to the associated nafc somehow...')
+        a.pctCorrectionTrials
+        a = rmfield(a,'pctCorrectionTrials');
+    end
         
     a=orderfields(a,struct(coherentDots));
     
@@ -28,7 +34,7 @@ else % a is an old version
     % so we have to rebuild from scratch (really lame!)
     dots=coherentDots(a.screen_width,a.screen_height,a.num_dots,a.coherence,a.speed,a.contrast,a.dot_size,a.movie_duration, ...
         struct(a.stimManager).scaleFactor,struct(a.stimManager).maxWidth,struct(a.stimManager).maxHeight, ...
-        a.pctCorrectionTrials,a.replayMode,double(struct(a.stimManager).interTrialLuminance)/double(intmax('uint8')));
+        a.replayMode,double(struct(a.stimManager).interTrialLuminance)/double(intmax('uint8')));
     
     dots=setShapeMethod(setPosition(setSideDisplay(dots,a.sideDisplay),a.position),a.shapeMethod);
     dots=setBackground(dots,a.background);

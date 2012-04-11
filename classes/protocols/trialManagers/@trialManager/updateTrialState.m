@@ -3,7 +3,10 @@ function [tm trialDetails result spec rewardSizeULorMS requestRewardSizeULorMS .
     updateTrialState(tm, sm, result, spec, ports, lastPorts, ...
     targetPorts, requestPorts, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
     floatprecision, textures, destRect, ...
-    requestRewardDone, punishResponses)
+    requestRewardDone, punishResponses, request)
+if ~exist('request','var') || isempty(request)
+    request = false;
+end
 % This function is a TM base class method to update trial state before every flip.
 % Things done here include:
 % - check for request rewards
@@ -21,31 +24,28 @@ else
     correct=[];
 end
 
-if ~isempty(result) && ischar(result) && strcmp(result,'timeout') && isempty(correct) && strcmp(getPhaseLabel(spec),'reinforcement')
-	correct=0;
-	result='timedout';
-	trialDetails=[];
-	trialDetails.correct=correct;
-elseif ~isempty(result) && ischar(result) && strcmp(result,'timeout') && isempty(correct) && strcmp(getPhaseLabel(spec),'itl') 
-    % timeout during 'itl' phase - neither correct nor incorrect (only happens when no stim is shown)
-    result='timedout';
-    trialDetails=[];
-else
-	trialDetails=[];
+trialDetails=[];
+if ~isempty(result) && ischar(result) && strcmp(result,'timeout') && isempty(correct)
+    if ismember(getPhaseLabel(spec),{'reinforcement','itl'})
+        % timeout during 'itl' phase - neither correct nor incorrect (only happens when no stim is shown)
+        result='timedout';
+        
+        if strcmp(getPhaseLabel(spec),'reinforcement')
+            trialDetails.correct=0;
+        end
+    end
 end
 
-
-if (any(ports(requestPorts)) && ~any(lastPorts(requestPorts))) && ... % if a request port is triggered
-        ((strcmp(getRequestMode(getReinforcementManager(tm)),'nonrepeats') && ~any(ports&lastRequestPorts)) || ... % if non-repeat
+if (request || (any(ports(requestPorts)) && ~any(lastPorts(requestPorts)))) && ... % request port triggered
+        ((strcmp(getRequestMode(getReinforcementManager(tm)),'nonrepeats') && ~any(ports&lastRequestPorts)) || ... % non-repeat
         strcmp(getRequestMode(getReinforcementManager(tm)),'all') || ...  % all requests
         ~requestRewardDone) % first request
-
-    [rm garbage requestRewardSizeULorMS garbage garbage garbage garbage updateRM] =...
+    
+    [rm, ~, requestRewardSizeULorMS, ~, ~, ~, ~, updateRM] =...
         calcReinforcement(getReinforcementManager(tm),trialRecords, []);
     if updateRM
         tm=setReinforcementManager(tm,rm);
     end
 end
 
-
-end  % end function
+end

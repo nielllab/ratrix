@@ -3,130 +3,103 @@
 %switch
 function [targetPorts distractorPorts details]=assignPorts(details,lastTrialRec,responsePorts,TMclass,allowRepeats)
 
-% figure out if this is a correction trial
-lastResult=[];
-lastCorrect=[];
-lastWasCorrection=0;
+error('do not call this -- info should have been passed in to calcStim by trial manager')
+
+lastResult = [];
+lastCorrect = [];
+lastResponse = [];
+lastWasCorrection = false;
 
 switch TMclass
-    case {'nAFC' 'oddManOut'}
-        if ~isempty(lastTrialRec) % if there were previous trials
-            try
-                lastResult=find(lastTrialRec.result);
-            catch
-                lastResult=[];
+    case {'nAFC','oddManOut','ball'}
+        if ~isempty(lastTrialRec)
+            try % may not have result field
+                lastResult = find(lastTrialRec.result);
             end
-            if isfield(lastTrialRec,'trialDetails') && isfield(lastTrialRec.trialDetails,'correct')
-                lastCorrect=lastTrialRec.trialDetails.correct;
-            else
-                try
-                    lastCorrect=lastTrialRec.correct;
-                catch
-                    lastCorrect=[];
+            try % may not have trialDetails.correct field
+                lastCorrect = lastTrialRec.trialDetails.correct;
+            catch
+                try % may not have correct field
+                    lastCorrect = lastTrialRec.correct; %who normally sets this?  i can only find runRealTimeLoop.313 where it is inited to []
                 end
             end
-
-            if any(strcmp(fields(lastTrialRec.stimDetails),'correctionTrial'))
-                lastWasCorrection=lastTrialRec.stimDetails.correctionTrial;
-            else
-                lastWasCorrection=0;
+            
+            try % may not have correctionTrial field
+                lastWasCorrection = lastTrialRec.stimDetails.correctionTrial;
             end
-
+            
             if length(lastResult)>1
-                lastResult=lastResult(1);
+                lastResult = lastResult(1);
             end
         end
-
-        % determine correct port
-        if any(ismember('pctCorrectionTrials',fields(details))) && ~isempty(lastCorrect) && ~isempty(lastResult) && ~lastCorrect && length(lastTrialRec.targetPorts)==1 && (lastWasCorrection || rand<details.pctCorrectionTrials)
-            details.correctionTrial=1;
-            %'correction trial!'
-            targetPorts=lastTrialRec.targetPorts; % same ports are correct
+        
+        if any(ismember('pctCorrectionTrials',fields(details))) && ...
+                ~isempty(lastCorrect) && ...
+                ~isempty(lastResult) && ...
+                ~lastCorrect && ...
+                ((ismember(TMclass,{'nAFC','oddManOut'}) && length(lastTrialRec.targetPorts)==1) || ...
+                (strcmp(TMclass,'goNoGo')                && length(lastTrialRec.targetPorts)==3) || ...
+                (strcmp(TMclass,'ball')                  && length(lastTrialRec.targetPorts)==0)) && ...
+                (lastWasCorrection || rand<details.pctCorrectionTrials)
+            %correction trials are a very strange brew for goNoGo... i doubt its what we want...
+            
+            details.correctionTrial = 1;
+            targetPorts = lastTrialRec.targetPorts;
         else
-            details.correctionTrial=0;
-            targetPorts=responsePorts(ceil(rand*length(responsePorts))); %choose random response port to be correct answer
+            details.correctionTrial = 0;
+            if strcmp(TMclass,'goNoGo')
+                targetPorts = responsePorts; %choose all response port to be correct answer
+                %pmm:  these apear to be all "go" trials how do we get "no go" trials?
+                % i guess the idea of a "trial" is bankrupt in this mode
+                % the noGos are all the momement in time of waiting, which
+                % could be trials... as long as there is no auditory cue and/or
+                % flanker that is correlated with the noGo stimulus
+            else
+                targetPorts = responsePorts(ceil(rand*length(responsePorts)));
+            end
         end
-        distractorPorts=setdiff(responsePorts,targetPorts);
+        
+        distractorPorts = setdiff(responsePorts,targetPorts);
         
     case 'freeDrinks'
         if ~isempty(lastTrialRec)
             try
                 pNum = find(strcmp('reinforcement',{lastTrialRec.phaseRecords.phaseLabel}));
-                rDetails=lastTrialRec.phaseRecords(pNum-1).responseDetails;
-                lastResponse=find(rDetails.tries{end});
-            catch err
-                lastResponse=[];
+                rDetails = lastTrialRec.phaseRecords(pNum-1).responseDetails;
+                lastResponse = find(rDetails.tries{end});
             end
-%             sca
-%             keyboard
-%             pNum
-%             rDetails
-        else
-            lastResponse=[];
         end
-
+        
         if length(lastResponse)>1
-            lastResponse=lastResponse(1);
+            lastResponse = lastResponse(1);
         end
         if allowRepeats
-            targetPorts=responsePorts;
+            targetPorts = responsePorts;
         else
-            targetPorts=setdiff(responsePorts,lastResponse);   
+            targetPorts = setdiff(responsePorts,lastResponse);
         end
-        distractorPorts=[];
+        distractorPorts = [];
         
-    case {'autopilot','ball'}
-        targetPorts=[];
-        distractorPorts=[];
-    case 'goNoGo'
-                if ~isempty(lastTrialRec) % if there were previous trials
-            try
-                lastResult=find(lastTrialRec.result);
-            catch
-                lastResult=[];
-            end
-            if isfield(lastTrialRec,'trialDetails') && isfield(lastTrialRec.trialDetails,'correct')
-                lastCorrect=lastTrialRec.trialDetails.correct;
-            else
-                try
-                    lastCorrect=lastTrialRec.correct;
-                catch
-                    lastCorrect=[];
-                end
-            end
-
-            if any(strcmp(fields(lastTrialRec.stimDetails),'correctionTrial'))
-                lastWasCorrection=lastTrialRec.stimDetails.correctionTrial;
-            else
-                lastWasCorrection=0;
-            end
-
-            if length(lastResult)>1
-                lastResult=lastResult(1);
-            end
-        end
-
-        % determine correct port
-        if ~isempty(lastCorrect) && ~isempty(lastResult) && ~lastCorrect && length(lastTrialRec.targetPorts)==3 && (lastWasCorrection || rand<details.pctCorrectionTrials)
-            details.correctionTrial=1;
-            %correction trials are a very strange brew for goNoGo... i
-            %doubt its what we want... 
-            
-            %'correction trial!'
-            targetPorts=lastTrialRec.targetPorts; % same ports are correct
-        else
-            details.correctionTrial=0;
-            targetPorts=responsePorts; %choose all response port to be correct answer
-            %pmm:  these apear to be all "go" trials how do we get "no go" trials?
-            % i guess the idea of a "trial" is bankrupt in this mode
-            % the noGos are all the momement in time of waiting, which
-            % could be trials... as long as there is no auditory cue and/or
-            % flanker that is correlated with the noGo stimulus
-        end
-        distractorPorts=setdiff(responsePorts,targetPorts);
+    case 'autopilot'
+        %pass
         
     otherwise
         error('unknown TM class');
 end
 
-end % end function
+if ismember(TMclass,{'autopilot','ball'})
+    targetPorts = [];
+    distractorPorts = [];
+end
+
+if ismember(TMclass,{'ball'})
+    sca
+    keyboard
+    if details.correctionTrial
+        details.target = lastTrialRec.target; %.details?
+    else
+        details.target = sign(randn);
+    end
+end
+
+end

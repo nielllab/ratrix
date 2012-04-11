@@ -17,6 +17,12 @@ else % a is an old version
     if ~isfield(a,'background')
         a.background=[];
     end
+    
+    if isfield(a,'pctCorrectionTrials')
+        warning('we have to get this over to the associated nafc somehow...')
+        a.pctCorrectionTrials
+        a = rmfield(a,'pctCorrectionTrials');
+    end
         
     a=orderfields(a,struct(coherentDots));
     

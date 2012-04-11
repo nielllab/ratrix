@@ -149,7 +149,7 @@ if exist('setupFile','var') && ~isempty(setupFile)
 end
 
 if justDoSetup
-    makeBatFile(subjectID);
+    makeBatFile(subjectID,dataPath);
 end
 
 if ~justDoSetup

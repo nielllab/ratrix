@@ -35,7 +35,7 @@ if isempty(s.clip)
             s.amplitude(1) = s.leftAmplitude;
             s.amplitude(2) = s.rightAmplitude;
         case 'empty'
-            s.clip = zeros(1,s.numSamples);
+            s.clip = []; %zeros(1,s.numSamples);
         otherwise
             error('unknown soundClip type')
     end

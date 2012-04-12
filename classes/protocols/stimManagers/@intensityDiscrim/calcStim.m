@@ -54,7 +54,7 @@ switch stimulus.soundType
 end
 stimulus.stimSound = soundClip('stimSound','dualChannel',{sSound,details.leftAmplitude},{sSound,details.rightAmplitude});
 
-sounds={stimulus.stimSound};
+sounds={stimulus.stimSound setName(stimulus.stimSound,'correctSound') setName(stimulus.stimSound,'keepGoingSound')};
 
 out=zeros(min(height,getMaxHeight(stimulus)),min(width,getMaxWidth(stimulus)),2);
 out(:,:,1)=stimulus.mean;

@@ -6,8 +6,13 @@ soundsToPlay = getSoundsToPlay(stimManager.stimManager, ports, lastPorts, phase,
 
 if stepsInPhase <= 0 && ...
         ((strcmp(phaseType,'discrim') && strcmp(trialManagerClass,'nAFC')) || ...
-        (strcmp(phaseType,'reinforced') && strcmp(trialManagerClass,'freeDrinks'))) 
-    soundsToPlay{2}{end+1} = {'stimSound' stimManager.duration};    
+        (strcmp(phaseType,'reinforced') && strcmp(trialManagerClass,'freeDrinks')))
+    if ~all(cellfun(@isempty,soundsToPlay))
+        soundsToPlay
+        cellfun(@(x)disp(x),soundsToPlay)
+        warning('conflicting sounds...')
+    end
+    soundsToPlay={{},{}};
+    soundsToPlay{2}{end+1} = {'stimSound' stimManager.duration};
 end
-
 end

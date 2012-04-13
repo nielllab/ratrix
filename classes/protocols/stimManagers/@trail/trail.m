@@ -8,6 +8,8 @@ s.timeoutSecs = 1;
 s.slow = 10 * ones(2,1);
 s.slowSecs = 1;
 
+s.positional = nan;
+
 s.initialPos=nan;
 s.mouseIndices=nan;
 
@@ -23,7 +25,7 @@ switch nargin
     case 5
         d = varargin{1};
         
-        cellfun(@validateField,{'gain','targetDistance','timeoutSecs','slow','slowSecs'});
+        cellfun(@validateField,{'gain','targetDistance','timeoutSecs','slow','slowSecs','positional'});
         
         s = class(s,'trail',stimManager(varargin{2},varargin{3},varargin{4},varargin{5}));
     otherwise
@@ -59,6 +61,10 @@ end
                 case 'slowSecs'
                     if ~(isscalar(x) && isnumeric(x) && isreal(x) && x>=0)
                         error('slowSecs must be real numeric scalar >= 0')
+                    end
+                case 'positional'
+                    if ~(isscalar(x) && islogical(x))
+                        error('positional must be scalar logical')
                     end
                 otherwise
                     error('huh')

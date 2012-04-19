@@ -50,6 +50,14 @@ catch
     apath = fullfile(fileparts(fileparts(getRatrixPath())),'ratrixData','compiledTrialRecords');
     apath = '\\mtrix2\Users\nlab\Desktop\mouseData\CompiledTrialRecords\'; %edf temp
     
+    if ismac
+        mtrix='mtrix3';
+        try
+            mountOSX(sprintf('/Volumes/%s',mtrix), sprintf('@%s/Users', mtrix),'nlab','huestis238')
+        end
+        apath = sprintf('/Volumes/%s/nlab/Desktop/wehrData/CompiledTrialRecords/', mtrix); %mw temp
+    end
+
     standAlone = true;
     bySubject = true;
 end

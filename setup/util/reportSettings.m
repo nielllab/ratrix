@@ -30,7 +30,7 @@ if ~isempty(ids)
         heats=ids;
         networked=false;
     end
-
+    
     for rackNum=1:length(rackNums)
         
         if networked
@@ -78,6 +78,10 @@ if ~isempty(ids)
                                         
                                         [junk rewardSizeULorMS requestRewardSizeULorMS msPenalty] = calcReinforcement(getReinforcementManager(tm),[]);
                                         fprintf('reward:%g pnlty:%g\n',rewardSizeULorMS,msPenalty)
+                                        try
+                                            coherence=struct(sm).coherence
+                                            sideDisplay=struct(sm).sideDisplay
+                                        end
                                     else
                                         fprintf('\t\t\t%s has no protocol\n',ratID);
                                     end

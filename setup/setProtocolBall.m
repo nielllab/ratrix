@@ -38,6 +38,7 @@ stim.targetDistance = 300 * ones(1,2);
 stim.timeoutSecs = .5;
 stim.slow = [50; 100]; % 10 * ones(2,1);
 stim.slowSecs = .5;
+stim.positional = false;
 
 ballSM = trail(stim,maxWidth,maxHeight,zoom,0);
 ballTM = ball(percentCorrectionTrials,sm,noRequest);

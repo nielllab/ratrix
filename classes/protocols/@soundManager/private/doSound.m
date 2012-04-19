@@ -9,47 +9,57 @@ if isa(station,'station')
             end
         else
             
-            match=getClipInd(sm,soundName);
+            [match, type]=getClipInd(sm,soundName);
             sm=cacheSounds(sm,station);
             
-            if ~isLoop
-                reps=1;
-                
-                if duration>0
-                    reps=duration/sm.clipDurs(match);
-                end
-                
-                sm=stopPlayer(sm);
-            else
-                if duration==0 || (~isempty(sm.playing) && (sm.playing~=match || ~sm.looping))
+            if ~strcmp(type,'empty')
+                if ~isLoop
+                    reps=1;
+                    
+                    if duration>0
+                        reps=duration/sm.clipDurs(match);
+                    end
+                    
+                    %                 if any(sm.playing == getClipInd(sm,'stimSound'))
+                    %                     psychKeyboard %what should we do here!?!?!
+                    %                 end
+                    
+                    %                 if ~isempty(sm.playing) && ~strcmp(soundName,'stimSound')
+                    %                     psychKeyboard
+                    %                 end
+                    
                     sm=stopPlayer(sm);
-                end
-                
-                if duration~=0 && ~isempty(sm.playing) && sm.playing==match && sm.looping
-                    duration=0;
-                end
-                
-                reps=0;
-            end
-            
-            if duration~=0
-                
-                try
-                    PsychPortAudio('SetLoop',sm.player,sm.boundaries(match), sm.boundaries(match+1)-1);
-                    PsychPortAudio('Start', sm.player, reps);
-                catch e
-                    e
+                else
+                    if duration==0 || (~isempty(sm.playing) && (sm.playing~=match || ~sm.looping))
+                        sm=stopPlayer(sm);
+                    end
                     
-                    %TODO: debug me
-                    sm.player
-                    sm.playing
-                    sm.looping
+                    if duration~=0 && ~isempty(sm.playing) && sm.playing==match && sm.looping
+                        duration=0;
+                    end
                     
-                    warning('occurs on k+t -- trying to stop sound but already killed player')
+                    reps=0;
                 end
                 
-                sm.playing=match;
-                sm.looping=isLoop;
+                if duration~=0
+                    
+                    try
+                        PsychPortAudio('SetLoop',sm.player,sm.boundaries(match), sm.boundaries(match+1)-1);
+                        PsychPortAudio('Start', sm.player, reps);
+                    catch e
+                        e
+                        
+                        %TODO: debug me
+                        sm.player
+                        sm.playing
+                        sm.looping
+                        
+                        warning('occurs on k+t -- trying to stop sound but already killed player')
+                    end
+                    
+                    sm.playing=match;
+                    sm.looping=isLoop;
+                end
             end
         end
     end

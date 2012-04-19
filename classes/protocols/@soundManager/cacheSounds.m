@@ -1,7 +1,9 @@
 function [sm updateCache]=cacheSounds(sm,station,sounds)
+force = false;
 if exist('sounds','var') && ~isempty(sounds)
     for i=1:length(sounds) % can't use cellfun cuz need to fold in updated sm's as we go
         sm = addSound(sm,sounds{i},station);
+        force = true;
     end
 end
 
@@ -9,7 +11,7 @@ if isa(station,'station')
 
     updateCache=false;
 
-    if getSoundOn(station) && length(sm.boundaries)~=length(sm.clips)+1
+    if getSoundOn(station) && (force || length(sm.boundaries)~=length(sm.clips)+1)
         warning('recaching sounds, this is expensive')
 
         updateCache=true;
@@ -73,7 +75,7 @@ if isa(station,'station')
             switch size(clip,1)
                 case 1
                     clip(2,:) = clip(1,:);
-                case 2
+                case {0 2}
                     %pass
                 otherwise
                     error('max 2 channels')
@@ -94,7 +96,7 @@ if isa(station,'station')
 
         for i=1:length(sm.clips)
             sm.clips{i}=decache(sm.clips{i});
-        end        
+        end
     end
 else
     error('need a station')

@@ -88,6 +88,19 @@ switch phaseRecords(phaseNum).phaseType
         
         [relPos, targetPos, wrongLoc, sounds, finish, dynamicDetails, i, indexPulse, doFramePulse, textLabel]=computeTrail(s, i, dynamicDetails, trialRecords);
         
+        colorWalls = s.positional;
+        drawTrail = s.positional;
+        positionStim = s.positional;
+        
+        if ~positionStim
+            origTargetPos = targetPos;
+            targetPos = s.initialPos(1) + dynamicDetails.target;
+            if ~isempty(wrongLoc)
+                origWrongLoc = wrongLoc;
+                wrongLoc =  targetPos-sign(dynamicDetails.target)*diff(s.targetDistance.*[-1 1]);
+            end
+        end
+        
         wallRect = destRect; %[left top right bottom]
         if dynamicDetails.target > 0
             ind = 1;
@@ -109,17 +122,34 @@ switch phaseRecords(phaseNum).phaseType
             end
             midRect(ind) = targetPos;
             Screen('FillRect', window, grey, midRect);
-            Screen('DrawLine', window, blue, wrongLoc, destRect(2), wrongLoc, destRect(4), width); %no smoothing?
+            if colorWalls
+                Screen('DrawLine', window, blue, wrongLoc, destRect(2), wrongLoc, destRect(4), width); %no smoothing?
+            end
         end
         
-        Screen('DrawDots', window, relPos, width, white, center, dotType);
+        if drawTrail
+            Screen('DrawDots', window, relPos, width, white, center, dotType);
+            
+            inds = repmat(2:size(relPos,2)-1,2,1);
+            Screen('DrawLines', window, relPos(:,[1 inds(:)' end]), width, white, center, smooth);
+            
+            Screen('DrawDots', window, relPos, centerWidth, blue, center, dotType);
+        end
         
-        inds = repmat(2:size(relPos,2)-1,2,1);
-        Screen('DrawLines', window, relPos(:,[1 inds(:)' end]), width, white, center, smooth);
+        if colorWalls
+            Screen('DrawLine', window, red, targetPos, destRect(2), targetPos, destRect(4), width); %no smoothing?
+        end
         
-        Screen('DrawDots', window, relPos, centerWidth, blue, center, dotType);
-        
-        Screen('DrawLine', window, red, targetPos, destRect(2), targetPos, destRect(4), width); %no smoothing?
+        if ~positionStim
+            pos = destRect(4)*.1;
+            height = 20;
+            coords = [origTargetPos, pos, origWrongLoc, pos];
+            coords = [coords; cell2mat(arrayfun(@(x)[x,pos,x,pos]+[0,height,0,height].*[1,1,1,-1],[origTargetPos origWrongLoc s.initialPos(1)]','UniformOutput',false))];
+            
+            for rowNum=1:size(coords,1)
+                Screen('DrawLine', window, red, coords(rowNum,1),coords(rowNum,2),coords(rowNum,3),coords(rowNum,4), 10);
+            end
+        end
         
     otherwise
         phaseNum

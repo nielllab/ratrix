@@ -55,6 +55,20 @@ if IsLinux
 end
 
 dims=[height width]./scaleFactor;
+
+if isa(stimulus.stim,'stimManager')
+    if details.target > 0
+        subTargetPorts = max(responsePorts);
+        subDistractorPorts = min(responsePorts);
+    else
+        subTargetPorts = min(responsePorts);
+        subDistractorPorts = max(responsePorts);
+    end
+
+    [~, ~, ~, ~, ~, out.stim, ~, ~, ~, subDetails, ~, subText, ~, subImagingTasks, ~] = ...
+        calcStim(stimulus.stim,'subTrail',allowRepeats,resolutions(resolutionIndex),displaySize,LUTbits,responsePorts,totalPorts,trialRecords,subTargetPorts,subDistractorPorts,details,text);
+end
+
 if true
     type='expert';
     out.height=dims(1);

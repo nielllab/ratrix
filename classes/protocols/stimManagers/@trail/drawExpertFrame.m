@@ -1,7 +1,7 @@
 function [doFramePulse expertCache dynamicDetails textLabel i dontclear indexPulse sounds finish] ...
     = drawExpertFrame(s,stim,i,phaseStartTime,totalFrameNum,window,textLabel,...
     destRect,filtMode,expertCache,ifi,scheduledFrameNum,dropFrames,dontclear,...
-    dynamicDetails,trialRecords,currentCLUT,phaseRecords,phaseNum)
+    dynamicDetails,trialRecords,currentCLUT,phaseRecords,phaseNum,trialManager)
 
 originalLabel = textLabel;
 
@@ -88,6 +88,11 @@ switch phaseRecords(phaseNum).phaseType
         
         [relPos, targetPos, wrongLoc, sounds, finish, dynamicDetails, i, indexPulse, doFramePulse, textLabel]=computeTrail(s, i, dynamicDetails, trialRecords);
         
+        doWalls = true;
+        try
+            doWalls = length(size(stim.stim.stimulus))~=2;
+        end
+        
         colorWalls = s.positional;
         drawTrail = s.positional;
         positionStim = s.positional;
@@ -101,30 +106,70 @@ switch phaseRecords(phaseNum).phaseType
             end
         end
         
-        wallRect = destRect; %[left top right bottom]
-        if dynamicDetails.target > 0
-            ind = 1;
-        else
-            ind = 3;
-        end
-        wallRect(ind) = targetPos;
-        if diff(wallRect([1 3])) > 0
-            Screen('FillRect', window, white, wallRect);
-        end
-        
-        if ~isempty(wrongLoc)
-            midRect = destRect;
-            midRect(ind) = wrongLoc;
-            if dynamicDetails.target > 0
-                ind = 3;
-            else
+        if doWalls
+            wallRect = destRect; %[left top right bottom]
+            if dynamicDetails.target > 0  == ~strcmp(s.stim,'flip')
                 ind = 1;
+            else
+                ind = 3;
             end
-            midRect(ind) = targetPos;
-            Screen('FillRect', window, grey, midRect);
+            
+            if strcmp(s.stim,'flip')
+                wallRect(ind) = wrongLoc;
+            else
+                wallRect(ind) = targetPos;
+            end
+            
+            if diff(wallRect([1 3])) > 0
+                Screen('FillRect', window, white, wallRect);                
+            end
+            
+            if ~isempty(wrongLoc)
+                midRect = destRect;
+                midRect(ind) = wrongLoc;
+                if dynamicDetails.target > 0
+                    ind = 3;
+                else
+                    ind = 1;
+                end
+                midRect(ind) = targetPos;
+                Screen('FillRect', window, grey, midRect);
+                if colorWalls
+                    Screen('DrawLine', window, blue, wrongLoc, destRect(2), wrongLoc, destRect(4), width); %no smoothing?
+                end
+            end
+            
             if colorWalls
-                Screen('DrawLine', window, blue, wrongLoc, destRect(2), wrongLoc, destRect(4), width); %no smoothing?
+                Screen('DrawLine', window, red, targetPos, destRect(2), targetPos, destRect(4), width); %no smoothing?
             end
+        else
+            try
+                tex = dynamicDetails.tex;
+                bg = dynamicDetails.bg;
+            catch
+                if length(size(stim.stim.stimulus))==2
+                    [floatprecision tex] = determineColorPrecision(trialManager, stim.stim.stimulus, []);
+                    tex = Screen('MakeTexture', window, tex, [], [], floatprecision);
+                    dynamicDetails.tex = tex;
+                    
+                    [floatprecision bg] = determineColorPrecision(trialManager, getInterTrialLuminance(s.stim), []);
+                    bg = Screen('MakeTexture', window, bg, [], [], floatprecision);
+                    dynamicDetails.bg = bg;
+                else
+                    error('only supports single frames atm')
+                end
+            end
+            
+            if positionStim
+                Screen('DrawTexture', window, bg, [], destRect, [], filtMode);
+                
+                destinationRect = destRect;
+                destinationRect([1 3]) = destinationRect([1 3]) + targetPos - s.initialPos(1) - dynamicDetails.target;
+            else
+                destinationRect = [];
+            end
+            
+            Screen('DrawTexture', window, tex, [], destinationRect, [], filtMode);
         end
         
         if drawTrail
@@ -134,10 +179,6 @@ switch phaseRecords(phaseNum).phaseType
             Screen('DrawLines', window, relPos(:,[1 inds(:)' end]), width, white, center, smooth);
             
             Screen('DrawDots', window, relPos, centerWidth, blue, center, dotType);
-        end
-        
-        if colorWalls
-            Screen('DrawLine', window, red, targetPos, destRect(2), targetPos, destRect(4), width); %no smoothing?
         end
         
         if ~positionStim

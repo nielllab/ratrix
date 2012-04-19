@@ -2,7 +2,7 @@ function a = loadobj(a)
 if isa(a,'trail')
     % do nothing
 else % a is an old version    
-    fields = {'gain','targetDistance','timeoutSecs','slow','slowSecs','positional'}; %initialPos, mouseIndices
+    fields = {'gain','targetDistance','timeoutSecs','slow','slowSecs','positional','stim'}; %initialPos, mouseIndices
     
     for i=1:length(fields)
         if ~isfield(a,fields{i})

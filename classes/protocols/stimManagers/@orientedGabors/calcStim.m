@@ -25,13 +25,9 @@ scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);
 
 switch trialManagerClass
-    case 'freeDrinks'
+    case {'freeDrinks' 'autopilot' 'subTrail'}
         type='loop';
-    case 'nAFC'
-        type={'trigger',true};
-    case 'autopilot'
-        type='loop';
-    case 'goNoGo'
+    case {'nAFC' 'goNoGo'}
         type={'trigger',true};
     otherwise
         error('unsupported trialManagerClass');

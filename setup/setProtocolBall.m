@@ -33,6 +33,8 @@ zoom = [maxWidth maxHeight]./textureSize;
 svnRev = {'svn://132.239.158.177/projects/ratrix/trunk'};
 svnCheckMode = 'session';
 
+interTrialLuminance = .5;
+
 stim.gain = .35 * ones(2,1);
 stim.targetDistance = 300 * ones(1,2);
 stim.timeoutSecs = .5;
@@ -40,7 +42,19 @@ stim.slow = [50; 100]; % 10 * ones(2,1);
 stim.slowSecs = .5;
 stim.positional = false;
 
-ballSM = trail(stim,maxWidth,maxHeight,zoom,0);
+pixPerCycs             = [100];
+targetOrientations     = [pi/4];
+distractorOrientations = -targetOrientations;
+mean                   = .5;
+radius                 = .085;
+contrast               = 1;
+thresh                 = .00005;
+yPosPct                = .5;
+stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,zoom,interTrialLuminance);
+stim.stim = 'flip';
+%stim.stim=nan;
+
+ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
 ballTM = ball(percentCorrectionTrials,sm,noRequest);
 ts1 = trainingStep(ballTM, ballSM, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %ball
 

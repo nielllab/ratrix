@@ -9,6 +9,7 @@ s.slow = 10 * ones(2,1);
 s.slowSecs = 1;
 
 s.positional = nan;
+s.stim = [];
 
 s.initialPos=nan;
 s.mouseIndices=nan;
@@ -25,7 +26,7 @@ switch nargin
     case 5
         d = varargin{1};
         
-        cellfun(@validateField,{'gain','targetDistance','timeoutSecs','slow','slowSecs','positional'});
+        cellfun(@validateField,{'gain','targetDistance','timeoutSecs','slow','slowSecs','positional','stim'});
         
         s = class(s,'trail',stimManager(varargin{2},varargin{3},varargin{4},varargin{5}));
     otherwise
@@ -40,7 +41,7 @@ end
         end
         x = s.(f);
         
-        if ~isnan(x) %for now, nans coming from loadob ok...            
+        if (any(isobject(x)) || ~all(isnan(x))) %for now, nans coming from loadob ok...  can't isnan objects!?!?
             switch f
                 case 'gain'
                     if ~(isvector(x) && isnumeric(x) && isreal(x) && all(size(x)==[2 1]))
@@ -65,6 +66,10 @@ end
                 case 'positional'
                     if ~(isscalar(x) && islogical(x))
                         error('positional must be scalar logical')
+                    end
+                case 'stim'
+                    if ~((isa(x,'stimManager') && isscalar(x)) || isempty(x) || strcmp(x,'flip'))
+                        error('stim must be empty or a scalar stimManager or the string ''flip''')
                     end
                 otherwise
                     error('huh')

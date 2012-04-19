@@ -48,14 +48,15 @@ catch
     disp('no network connection detected - using local compiled directory only');
     
     apath = fullfile(fileparts(fileparts(getRatrixPath())),'ratrixData','compiledTrialRecords');
-    apath = '\\mtrix2\Users\nlab\Desktop\mouseData\CompiledTrialRecords\'; %edf temp
+        mtrix='mtrix2'; %box to use
+
+        apath = ['\\', mtrix,'\Users\nlab\Desktop\mouseData\CompiledTrialRecords\']; %edf temp
     
     if ismac
-        mtrix='mtrix3';
         try
-            mountOSX(sprintf('/Volumes/%s',mtrix), sprintf('@%s/Users', mtrix),'nlab','huestis238')
+            mountOSX(['/Volumes/',mtrix], ['@', mtrix ,'/Users'],'nlab','huestis238')
         end
-        apath = sprintf('/Volumes/%s/nlab/Desktop/wehrData/CompiledTrialRecords/', mtrix); %mw temp
+        apath = ['/Volumes/', mtrix, '/nlab/Desktop/wehrData/CompiledTrialRecords/']; %mw temp
     end
 
     standAlone = true;

@@ -70,6 +70,12 @@ discrimBoundary=10.^((discrimBoundarydB -maxSPL)/20);
 soundParams.discrimBoundary=discrimBoundary; %classification boundary for use by calcStim
 soundParams.discrimSide=1; %boolean. if true, stimuli < classification boundary go to left
 intensityStim = intensityDiscrim(interTrialLuminance,soundParams,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+%intensityStim is 40:5:80
+%EZ intensityStim is 50 80
+EZampsdB=[50 80];
+EZamplitudes=10.^((ampsdB -maxSPL)/20); %amplitudes = line level, 0 to 1
+EZsoundParams.amps = EZamplitudes; %for intensityDisrim
+EZintensityStim = intensityDiscrim(interTrialLuminance,EZsoundParams,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 requestRewardSizeULorMS = 0;
 msPenalty               = 1000;
@@ -82,26 +88,28 @@ svnCheckMode='session';
 trialsPerMinute = 7;
 minutes = .5;
 numTriggers = 20;
-ts1 = trainingStep(fd,  intensityStim, rateCriterion(trialsPerMinute,minutes), noTimeOff(), svnRev,svnCheckMode);  %stochastic free drinks
-ts2 = trainingStep(fd2, intensityStim, numTrialsDoneCriterion(numTriggers)   , noTimeOff(), svnRev,svnCheckMode);  %free drinks
+ts1 = trainingStep(fd,  EZintensityStim, rateCriterion(trialsPerMinute,minutes), noTimeOff(), svnRev,svnCheckMode);  %stochastic free drinks
+ts2 = trainingStep(fd2, EZintensityStim, numTrialsDoneCriterion(numTriggers)   , noTimeOff(), svnRev,svnCheckMode);  %free drinks
 
 %nafc
 trialsPerMinute = 6;
 minutes = 1;
-ts3 = trainingStep(nafcTM, intensityStim, rateCriterion(trialsPerMinute,minutes), noTimeOff(), svnRev,svnCheckMode);  %side discrim
+ts3 = trainingStep(nafcTM, EZintensityStim, rateCriterion(trialsPerMinute,minutes), noTimeOff(), svnRev,svnCheckMode);  %side discrim
 
 %no request reward
-ts4 = trainingStep(nrTM  , intensityStim,  numTrialsDoneCriterion(400)          , noTimeOff(), svnRev,svnCheckMode);
+ts4 = trainingStep(nrTM  , EZintensityStim,  numTrialsDoneCriterion(400)          , noTimeOff(), svnRev,svnCheckMode);
 
 %long penalty
 msPenalty = 3000;
 longPenalty=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 lpTM=nAFC(sm,percentCorrectionTrials,longPenalty,eyeController,{'off'},dropFrames,'ptb','center',[],[],[300 inf]);
-ts5 = trainingStep(lpTM  , intensityStim, repeatIndefinitely()  , noTimeOff(), svnRev,svnCheckMode);
+ts5 = trainingStep(lpTM  , EZintensityStim, performanceCriterion(.85, 200)  , noTimeOff(), svnRev,svnCheckMode);
+
+ts6 = trainingStep(lpTM  , intensityStim, repeatIndefinitely()  , noTimeOff(), svnRev,svnCheckMode);
 
 
 %p=protocol('mouse intensity discrimation',{ ts3, ts4, ts5});
-p=protocol('mouse intensity discrimation',{ts1, ts2, ts3, ts4, ts5});
+p=protocol('mouse intensity discrimation',{ts1, ts2, ts3, ts4, ts5 ts6});
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

@@ -74,6 +74,7 @@ intensityStim = intensityDiscrim(interTrialLuminance,soundParams,maxWidth,maxHei
 %EZ intensityStim is 50 80
 EZampsdB=[50 80];
 EZamplitudes=10.^((ampsdB -maxSPL)/20); %amplitudes = line level, 0 to 1
+EZsoundParams=soundParams;
 EZsoundParams.amps = EZamplitudes; %for intensityDisrim
 EZintensityStim = intensityDiscrim(interTrialLuminance,EZsoundParams,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
@@ -102,8 +103,8 @@ ts4 = trainingStep(nrTM  , EZintensityStim,  numTrialsDoneCriterion(400)        
 %long penalty
 msPenalty = 3000;
 longPenalty=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
-lpTM=nAFC(sm,percentCorrectionTrials,longPenalty,eyeController,{'off'},dropFrames,'ptb','center',[],[],[300 inf]);
-ts5 = trainingStep(lpTM  , EZintensityStim, performanceCriterion(.85, 200)  , noTimeOff(), svnRev,svnCheckMode);
+lpTM=nAFC(sm,percentCorrectionTrials,longPenalty,eyeController,{'off'},dropFrames,'ptb','center',[],[],[]);
+ts5 = trainingStep(lpTM  , EZintensityStim, performanceCriterion(.85, int8(200))  , noTimeOff(), svnRev,svnCheckMode);
 
 ts6 = trainingStep(lpTM  , intensityStim, repeatIndefinitely()  , noTimeOff(), svnRev,svnCheckMode);
 

@@ -64,8 +64,8 @@ end
                         error('slowSecs must be real numeric scalar >= 0')
                     end
                 case 'positional'
-                    if ~(isscalar(x) && islogical(x))
-                        error('positional must be scalar logical')
+                    if ~((isscalar(x) && islogical(x)) || (isvector(x) && ischar(x) && strcmp(x,'HUD')))
+                        error('positional must be scalar logical or string ''HUD''')
                     end
                 case 'stim'
                     if ~((isa(x,'stimManager') && isscalar(x)) || isempty(x) || strcmp(x,'flip'))

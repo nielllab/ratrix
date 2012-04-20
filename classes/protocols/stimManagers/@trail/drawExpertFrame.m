@@ -19,7 +19,7 @@ if ~isfield('clutSize',expertCache)
     expertCache.clutSize = size(currentCLUT,1)-1;
 end
 white = expertCache.clutSize*ones(1,4);
-grey = white*.5;
+grey = white.*[.5*ones(1,3) 1];
 red = expertCache.clutSize*[1 0 0 1];
 blue = expertCache.clutSize*[0 0 1 1];
 
@@ -93,9 +93,13 @@ switch phaseRecords(phaseNum).phaseType
             doWalls = length(size(stim.stim.stimulus))~=2;
         end
         
-        colorWalls = s.positional;
-        drawTrail = s.positional;
-        positionStim = s.positional;
+        positionStim = false;
+        if islogical(s.positional)
+            positionStim = s.positional;
+        end
+        
+        colorWalls = positionStim;
+        drawTrail = positionStim;
         
         if ~positionStim
             origTargetPos = targetPos;
@@ -108,10 +112,10 @@ switch phaseRecords(phaseNum).phaseType
         
         if doWalls
             wallRect = destRect; %[left top right bottom]
-            if dynamicDetails.target > 0  == ~strcmp(s.stim,'flip')
-                ind = 1;
-            else
+            if dynamicDetails.target > 0  == strcmp(s.stim,'flip')
                 ind = 3;
+            else
+                ind = 1;
             end
             
             if strcmp(s.stim,'flip')
@@ -126,13 +130,11 @@ switch phaseRecords(phaseNum).phaseType
             
             if ~isempty(wrongLoc)
                 midRect = destRect;
-                midRect(ind) = wrongLoc;
+                ind = [1 3];
                 if dynamicDetails.target > 0
-                    ind = 3;
-                else
-                    ind = 1;
+                    ind = fliplr(ind);
                 end
-                midRect(ind) = targetPos;
+                midRect(ind) = [targetPos wrongLoc];
                 Screen('FillRect', window, grey, midRect);
                 if colorWalls
                     Screen('DrawLine', window, blue, wrongLoc, destRect(2), wrongLoc, destRect(4), width); %no smoothing?
@@ -181,7 +183,7 @@ switch phaseRecords(phaseNum).phaseType
             Screen('DrawDots', window, relPos, centerWidth, blue, center, dotType);
         end
         
-        if ~positionStim
+        if ~positionStim && strcmp(s.positional,'HUD')
             pos = destRect(4)*.1;
             height = 20;
             coords = [origTargetPos, pos, origWrongLoc, pos];

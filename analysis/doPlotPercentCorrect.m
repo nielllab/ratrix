@@ -9,6 +9,10 @@ function  performanceOutput=doPlotPercentCorrect(d,which,smoothingWidth,threshol
 %   -->  why removed? b/c otherwise might make animals look better than they are
 %after error trials are always included from main performance (& optionally plotted seperately)
 %   -->   why NOT removed? b/c can only make animals look worse, and definitly belong if no CTs
+%         edf sez: should say "after errors that aren't CTs" -- plotting
+%         all after errors including CTs can inflate performance to
+%         (p+1)/(p+2) where p = pctCorrectionTrials, if animal switches
+%         after every error
 
 %conditionInds- an optional matrix that is numContext X numConditions logicals
 %  (can be used as a reference like correction trials, but context is provided by user)
@@ -110,11 +114,15 @@ if addSteps
             stepTitle=num2str(steps(i));
             whichTrialsThisStep=find(d.step==steps(i));
         end
-        stepStart=min(whichTrialsThisStep);
-        stepEnd=max(whichTrialsThisStep);
-        stepWidth=stepEnd-stepStart;
-        hr=rectangle('Position',[stepStart, stepYBottom, stepWidth+eps, stepHeight],'FaceColor',[stepColor],'EdgeColor',[1 1 1]);
-        h=text(stepStart, stepYCenter, ['\bf' stepTitle]);
+        
+        contiguousStarts = [0 find(diff(whichTrialsThisStep)>1) length(whichTrialsThisStep)];
+        for cbn = 1:length(contiguousStarts)-1            
+            stepStart=whichTrialsThisStep(contiguousStarts(cbn)+1);
+            stepEnd=whichTrialsThisStep(contiguousStarts(cbn+1));
+            stepWidth=stepEnd-stepStart;
+            hr=rectangle('Position',[stepStart, stepYBottom, stepWidth+eps, stepHeight],'FaceColor',[stepColor],'EdgeColor',[1 1 1]);
+            h=text(stepStart, stepYCenter, ['\bf' stepTitle]);
+        end
     end
     
     %only some have this
@@ -192,6 +200,10 @@ if doPerfBias
     end
     makePerfBiasPlot(trialNums(smoothingWidth:end),perfBiasData,c);
 end
+
+%change these to depend on p (pctCorrectionTrials), which we have to add to compiled records
+plot([0 max(1,totalTrials)],.6*ones(1,2),'k'); %(p+1)/(p+2) best possible by exploiting CTs
+plot([0 max(1,totalTrials)],.75*ones(1,2),'k'); %(p+1)/2 best possible on after errors by exploiting CTs
 
 %keyboard %error: all d.correctionTrial is nan!  why?  must fix!
 %it's cuz of extractBasicFields line 89

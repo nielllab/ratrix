@@ -1,7 +1,19 @@
-function r = setProtocolMouse(r,subjIDs)
+function r = setProtocolCMN(r,subjIDs)
+
+if ~exist('r','var') || isempty(r)
+    dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'mouseData',filesep);
+    %dataPath='\\mtrix2\Users\nlab\Desktop\mouseData\';
+    r=ratrix(fullfile(dataPath, 'ServerData'),0);
+end
 
 if ~isa(r,'ratrix')
     error('need a ratrix')
+end
+
+
+if ~exist('subjIDs','var') || isempty(subjIDs)
+    %    subIDs=intersect(getEDFids,getSubjectIDs(r));
+    subjIDs=getSubjectIDs(r);
 end
 
 if ~all(ismember(subjIDs,getSubjectIDs(r)))
@@ -111,9 +123,9 @@ for i=1:length(subjIDs),
     
     switch subjIDs{i}
         case 'test'
-            stepNum=uint8(6);
+            stepNum=uint8(5);
         otherwise
-            stepNum=uint8(6);
+            stepNum=uint8(5);
     end
     
     [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolMouse','edf');

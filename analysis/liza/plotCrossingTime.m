@@ -11,11 +11,11 @@ end
 if ismac
     recordPath = [filesep fullfile('Users','eflister')];
 else
-    local = true;
+    local = false;
     if local
         drive='C:';
     else
-        drive='\\mtrix5';
+        drive='\\jarmusch';%'\\mtrix5';
     end
     recordPath = fullfile(drive,'Users','nlab');
 end
@@ -62,6 +62,12 @@ sessions = find(d > .02); %this gives us session boundaries whenever there was a
 if ~all(d > 0)
     error('records don''t show increasing start times')
 end
+
+minPerChunk=50;
+chunkHrs=36;
+
+chunks=sessions-minPerChunk;
+chunks=sessions(diff(startTimes([[ones(sum(chunks<=0),1) chunks(chunks>0)] sessions+1]),[],2)>chunkHrs/24);
 
 %these session boundaries aren't useful, cuz you may have stopped and started right away again
 if ~all(diff([records.sessionNumber]) >= 0)
@@ -325,7 +331,7 @@ close all
 n = 4;
 
 dotSize=20;
-cm = [1 0 0;0 1 0;1 1 0]; %red for incorrects, green for corrects, yellow for timeouts
+cm = [1 0 0;0 1 0;.9 .9 0]; %red for incorrects, green for corrects, yellow for timeouts
 grey = .85*ones(1,3);
 transparency = .2;
 head = 1.1;
@@ -340,9 +346,8 @@ title(subj)
 standardPlot(@plot);
 
     function standardPlot(f,ticks,lines)
-        for i=1:length(sessions)
-            f(sessions(i)*ones(1,2),ylims,'Color',grey)
-        end
+        arrayfun(@(x)f(x*ones(1,2),ylims,'Color',grey   ),sessions);        
+        arrayfun(@(x)f(x*ones(1,2),ylims,'Color',[1 0 0]),chunks  );
         
         if isequal(f,@semilogyEF) %they couldn't overload == ?
             ylims = log(ylims);

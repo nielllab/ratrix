@@ -1,4 +1,6 @@
 function plotCrossingTime(subj)
+dbstop if error
+
 if ~exist('subj','var') || isempty(subj)
     subj = 'test';
 end
@@ -225,6 +227,25 @@ if false %this shows that position really is past the wall on the first timestam
     x=[track{len==1}];
     plot(x(1,:),x(2,:),'.')
 end
+
+%hack oom
+clear fullRecs
+records=rmfield(records,'phaseRecords');
+
+% clear t
+% clear fullRecs
+% d=fields(records);
+% for i=1:length(d)
+%     fullRecs={records.(d{i})};
+%     fullRecs=whos('fullRecs');
+%     t(i,1:2)={d{i},fullRecs.bytes};
+% end
+% clear fullRecs
+% for i=1:size(t,1)
+%     fullRecs(i) = t{i,2};
+% end
+% [~,d]=sort(fullRecs);
+% t = t(d,:)
 
 records = arrayfun(@fixStimDetails,records);
     function x=fixStimDetails(x)

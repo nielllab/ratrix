@@ -12,6 +12,7 @@ sounds={};
 % 1/3/0/09 - trialRecords now includes THIS trial
 indexPulses=[];
 imagingTasks=[];
+
 LUTbits
 displaySize
 [LUT stimulus updateSM]=getLUT(stimulus,LUTbits);
@@ -20,6 +21,9 @@ displaySize
 if isnan(resolutionIndex)
     resolutionIndex=1;
 end
+resolutions(resolutionIndex)
+
+
 
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);

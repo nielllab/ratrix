@@ -66,7 +66,7 @@ dist = 15;
 degpercm = atand((0.25*widthcm+1)/dist) - atand(0.25*widthcm/dist);
 pixperdeg = pixpercm/degpercm
 
-cpd=0.05
+cpd=0.1
 pixPerCycs = pixperdeg/cpd
 
 targetOrientations      =[0];
@@ -109,6 +109,7 @@ ts4 = trainingStep(nrTM  , freeStim,  numTrialsDoneCriterion(400)          , noT
 
 %long penalty
 msPenalty = 3000;
+rewardSizeULorMS=30;
 longPenalty=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 lpTM=nAFC(sm,percentCorrectionTrials,longPenalty,eyeController,{'off'},dropFrames,'ptb','center',[],[],[300 inf]);
 ts5 = trainingStep(lpTM  , freeStim, performanceCriterion(.85,int32(300))  , noTimeOff(), svnRev,svnCheckMode);
@@ -120,13 +121,17 @@ p=protocol('mouse orientation',{ts1, ts2, ts3, ts4, ts5, ts6});
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});
+
+    % set to defined step    
+%     switch subjIDs{i}
+%         case 'test'
+%             stepNum=uint8(5);
+%         otherwise
+%             stepNum=uint8(5);
+%     end
     
-    switch subjIDs{i}
-        case 'test'
-            stepNum=uint8(5);
-        otherwise
-            stepNum=uint8(5);
-    end
+    % keep on current step
+    [currentp stepNum]=getProtocolAndStep(subj);
     
     [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolMouse','edf');
 end

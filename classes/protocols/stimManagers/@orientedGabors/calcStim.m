@@ -32,7 +32,8 @@ switch trialManagerClass
     case {'freeDrinks' 'autopilot' 'subTrail'}
         type='loop';
     case {'nAFC' 'goNoGo'}
-        type={'trigger',true};
+        %type={'trigger',true};
+        type ='static';
     otherwise
         error('unsupported trialManagerClass');
 end

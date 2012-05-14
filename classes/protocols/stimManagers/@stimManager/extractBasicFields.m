@@ -117,31 +117,40 @@ end
 % this would be reasonable: any(strcmp(trialRecords(1).trialManagerClass,{'cuedGoNoGo','goNoGo'}))
 % but only have the ID of the trialManger=26 without the LUT, thus using the
 % presense of the responseWindowMs instead
-x=trialRecords(1).trialManager.trialManager;
-if isfield(x,'responseWindowMs') && ~isempty(x.responseWindowMs) && ~isinf(x.responseWindowMs(2))
-    %OLD
-    %[out.lickTimes compiledLUT] = extractFieldAndEnsure(trialRecords,{},'lickTimesInCell',compiledLUT); % wrt discrimStart
-    %[out.discrimStart compiledLUT] = extractFieldAndEnsure(trialRecords,{},'discrimStart',compiledLUT); % wrt trial start
+try
+    x=trialRecords(1).trialManager.trialManager;
     
-    %NEW
-    [out.lickTimes compiledLUT]= extractFieldAndEnsure(trialRecords,{},'lickTimesInMatrix',compiledLUT);
-    [out.preResponseStartRaw compiledLUT]= extractFieldAndEnsure(trialRecords,{},'preResponseStartRaw',compiledLUT);
-    [out.discrimStartRaw compiledLUT]= extractFieldAndEnsure(trialRecords,{},'discrimStartRaw',compiledLUT);
-    [out.trialStartRaw compiledLUT]= extractFieldAndEnsure(trialRecords,{},'trialStartRaw',compiledLUT);
+    if isfield(x,'responseWindowMs') && ~isempty(x.responseWindowMs) && ~isinf(x.responseWindowMs(2))
+        %OLD
+        %[out.lickTimes compiledLUT] = extractFieldAndEnsure(trialRecords,{},'lickTimesInCell',compiledLUT); % wrt discrimStart
+        %[out.discrimStart compiledLUT] = extractFieldAndEnsure(trialRecords,{},'discrimStart',compiledLUT); % wrt trial start
+        
+        %NEW
+        [out.lickTimes compiledLUT]= extractFieldAndEnsure(trialRecords,{},'lickTimesInMatrix',compiledLUT);
+        [out.preResponseStartRaw compiledLUT]= extractFieldAndEnsure(trialRecords,{},'preResponseStartRaw',compiledLUT);
+        [out.discrimStartRaw compiledLUT]= extractFieldAndEnsure(trialRecords,{},'discrimStartRaw',compiledLUT);
+        [out.trialStartRaw compiledLUT]= extractFieldAndEnsure(trialRecords,{},'trialStartRaw',compiledLUT);
+        
+        [out.expectedPreRequestDurSec compiledLUT]= extractFieldAndEnsure(trialRecords,{},'expectedPreRequestDurSec',compiledLUT);
+        [out.responseWindowStartSec compiledLUT]= extractFieldAndEnsure(trialRecords,{},'responseWindowStartSec',compiledLUT);
+        [out.responseWindowStopSec compiledLUT]= extractFieldAndEnsure(trialRecords,{},'responseWindowStopSec',compiledLUT);
+        [out.discrimStart compiledLUT] = extractFieldAndEnsure(trialRecords,{},'discrimStart',compiledLUT); % prob want this too
+        
+    else
+        % this may error if rats run on something else after a goNoGo task... leaving the
+        %field undefined... might have to define cells of nan's for all rats,
+        %but trying to avoid that
+        %[out.lickTimes]=nans
+        %[out.discrimStart]=nans
+    end
+catch
+    %edf doesn't understand the above.  but looks like record hasn't yet been lut-inflated
     
-    [out.expectedPreRequestDurSec compiledLUT]= extractFieldAndEnsure(trialRecords,{},'expectedPreRequestDurSec',compiledLUT);
-    [out.responseWindowStartSec compiledLUT]= extractFieldAndEnsure(trialRecords,{},'responseWindowStartSec',compiledLUT);
-    [out.responseWindowStopSec compiledLUT]= extractFieldAndEnsure(trialRecords,{},'responseWindowStopSec',compiledLUT);
-    [out.discrimStart compiledLUT] = extractFieldAndEnsure(trialRecords,{},'discrimStart',compiledLUT); % prob want this too
-    
-else
-    % this may error if rats run on something else after a goNoGo task... leaving the
-    %field undefined... might have to define cells of nan's for all rats,
-    %but trying to avoid that
-    %[out.lickTimes]=nans
-    %[out.discrimStart]=nans
+    %     trialRecords(1).trialManager
+    % ans =
+    %             nAFC: [1x1 struct]
+    %     originalType: 24
 end
-
 
 % out.numRequests=ones(1,length(trialRecords))*nan;
 % for i=1:length(trialRecords)

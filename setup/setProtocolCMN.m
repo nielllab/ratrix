@@ -2,7 +2,7 @@ function r = setProtocolCMN(r,subjIDs)
 
 if ~exist('r','var') || isempty(r)
     dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'mouseData',filesep);
-    %dataPath='\\mtrix2\Users\nlab\Desktop\mouseData\';
+    dataPath='C:\Users\nlab\Desktop\mouseData\';
     r=ratrix(fullfile(dataPath, 'ServerData'),0);
 end
 

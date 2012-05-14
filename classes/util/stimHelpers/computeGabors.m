@@ -91,6 +91,9 @@ for i=1:numGabors
                 % and it should match the phase of the sine version.  we
                 % couldn't just sign(sin()) cuz of numerical instability.
                 %                               -the management
+                % here is the problem you are trying to avoid -> 
+                % doubles fall at unreliable places wrt sin's zero crossings
+                % plot(sign(sin((0:40)*pi)))
                 sqPhase = phase(i) + (ceil(abs(phase(i)/(2*pi)))+1)*2*pi;
                 
                 % POSSIBLE Error!!!!! Do we need this? It has never been used

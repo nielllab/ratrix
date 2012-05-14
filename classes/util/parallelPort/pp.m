@@ -50,8 +50,8 @@ function input = pp(pins,output,slowChecks,port,addr)
 % vals = pp(uint8([1 2 10 3]),[],false,uint8(0),uint64(888)) % read some pins (fast)
 %
 % pp(uint8([16 4 8 1]),[true false true true])                            % write to some pins (slow)
-% pp(uint8([16 4 8 1]),[true false true true],false,uint8(0),uint64(888)) % write to some pins (slow -- validates port address for safety)
-% pp(uint8([16 4 8 1]),[true false true true],true ,uint8(0),uint64(888)) % write to some pins (fast -- dangerous if addr is incorrect)
+% pp(uint8([16 4 8 1]),[true false true true],true, uint8(0),uint64(888)) % write to some pins (slow -- validates port address for safety)
+% pp(uint8([16 4 8 1]),[true false true true],false,uint8(0),uint64(888)) % write to some pins (fast -- dangerous if addr is incorrect)
 %
 % vals = pp(uint8([16 4 8 1]),[true false true true]) % write some pins, then immediately read from them, hopefully verifying what you wrote
 %

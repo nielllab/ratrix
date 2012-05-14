@@ -21,6 +21,7 @@ c = [.4 .65]; %normalized x y
 c = snip/2+rand(1,2).*(1-snip);
 t = -pi/6 - pi/12; %radians, positive = ccw
 t = 10^6*randn;
+%c = .5*ones(1,2);
 
 s = ceil(snip.*d); %width height
 
@@ -79,7 +80,7 @@ subplot(n,m,g(1,1))
 plot(c(1),c(2),'go')
 rect(x,c,s,t,'g',1);
 
-[p tp fig3 P r] = xcorrn(zs(x),zs(y),g2(2),g2(3),n,m,fig);
+[p tp fig3 P r cgrid cgrid2] = xcorrn(zs(x),zs(y),g2(2),g2(3),n,m,fig);
 [p tp]
 [center t]
 
@@ -87,7 +88,8 @@ fig2=figure;
 subplot(2,1,1)
 merge(x,y,p,tp);
 
-[tpo, po] = optimize(zs(x),zs(y),tp);
+[tpo, po, tries] = optimize(zs(x),zs(y),tp);
+
 figure(fig2)
 subplot(2,1,2)
 merge(x,y,po,tpo);
@@ -114,13 +116,24 @@ p3(c,t,'go',10);
     end
 
 wrap(t,0,2*pi)
+
+figure
+plot(tries(:,1),tries(:,2),'Color',.75*ones(1,3))
+hold on
+plot(tries(:,1),tries(:,2),'kx')
+plot(rs,-squeeze(max(max(cgrid,[],1),[],2)),'bs')
+plot(rs,-squeeze(max(max(cgrid2,[],1),[],2)),'rs')
+plot(tpo,tries(find(tries(:,1)==tpo),2),'ro')
+plot(wrap(tp,0,2*pi),tries(find(tries(:,1)==wrap(tp,0,2*pi)),2),'bo')
+%keyboard
 end
 
 function in=wrap(in,min,range)
 in = in-range*floor((in-min)/range);
 end
 
-function [out,p]=optimize(x,y,tp)
+function [out,p,rs]=optimize(x,y,tp)
+rs = [];
 
     function out=score(t)
         r = rect(y,fliplr(size(y)+1)/2,fliplr(size(y)),-t);
@@ -129,11 +142,13 @@ function [out,p]=optimize(x,y,tp)
         out = -out;
         [i j] = ind2sub(size(c),p);
         p = [j i];
+        rs(end+1,:) = [t out];
     end
 
 problem.objective=@score;
 problem.lb=0;
 problem.ub=2*pi;
+tp = wrap(tp,problem.lb,problem.ub-problem.lb);
 
 if false %faster to use bounds than constraints, even though we can't give good initial point, but then gets stuck in local mins
     problem.options=optimset(optimset('fminbnd'),optimset('FunValCheck','on','Display','iter','PlotFcns',{@optimplotx,@optimplotfval}));
@@ -160,7 +175,8 @@ if exitflag~=1
 end
 output.message
 out
-wrap(tp,problem.lb,problem.ub-problem.lb)
+%wrap(tp,problem.lb,problem.ub-problem.lb)
+tp
 
 if score(tp)<score(out) %careful! we depend on side effect of score(out) setting final value for p!
     warning('fmin* returned worse point than initial value!') %added this once i saw a case where this should trip
@@ -195,12 +211,12 @@ x = x-min(x(:));
 x = x/max(x(:));
 end
 
-function [p tp fig2 P r]=xcorrn(a,b,f1,f2,fn,fm,fig)
+function [p tp fig2 P r c c3]=xcorrn(a,b,f1,f2,fn,fm,fig)
 % conv2(a, rot90(conj(b),2)) %sig proc tbx implementation
 fig2 = [];
 P = [];
 
-n = 12;
+n = 100; %15; %20; %12; %how does optimize seem to know what we picked here?
 
 r = linspace(0,-2*pi,n+1);
 %r=r(1:end-1);
@@ -209,18 +225,39 @@ a(:,:,2:n+1)=rect(a,(fliplr(size(a))+1)/2,fliplr(size(a)),r(2:end));
 fprintf('correlating...\n')
 br = rot90(b,2);
 if false
-    c = convn(a, br, 'same');
+    tic
+    c1 = convn(a, br, 'same');
+    %c3=...
+    toc
 else %sadly faster
-    c = nan(size(a));
+tic
+    c2 = nan(size(a));
+    c3 = c2;
     for i=1:size(a,3)
-        c(:,:,i)=conv2(a(:,:,i), br, 'same');
+        c2(:,:,i)=conv2(a(:,:,i), br, 'same');
+        c3(:,:,i)=conv2(a(:,:,1), rot90(rect(b,(fliplr(size(b))+1)/2,fliplr(size(b)),-r(i)),2), 'same');
     end
+    toc
 end
 fprintf('done convn\n')
+if exist('c1','var')
+    if all(c1(:)==c2(:))
+        c=c1;
+    else
+        error('convs didn''t match')
+    end
+else
+    c=c2;
+end
 
 [yp,xp,zp]=ind2sub(size(c),find(c==max(c(:)),1,'first'));
 tp = r(zp);
 p=rot([xp yp],tp,fliplr(([size(a,1) size(a,2)]+1)/2));
+
+[~,~,zt]=ind2sub(size(c3),find(c3==max(c3(:)),1,'first'));
+if zt~=zp
+    warning('rotation disagreement')
+end
 
 if true
     subplot(fn,fm,f1)
@@ -229,7 +266,7 @@ if true
     subplot(fn,fm,f2)
     strip(c)
     
-    fig2 = figure;
+    fig2 = figure;  
     P = contour3(c);
     
     plot3(xp,yp,P(zp),'co')

@@ -91,6 +91,9 @@ for i=1:numGabors
                 % and it should match the phase of the sine version.  we
                 % couldn't just sign(sin()) cuz of numerical instability.
                 %                               -the management
+                % here is the problem you are trying to avoid -> 
+                % doubles fall at unreliable places wrt sin's zero crossings
+                % plot(sign(sin((0:40)*pi)))
                 sqPhase = phase(i) + (ceil(abs(phase(i)/(2*pi)))+1)*2*pi;
                 
                 % POSSIBLE Error!!!!! Do we need this? It has never been used
@@ -229,7 +232,17 @@ for i=1:numGabors
     
     if radius(i)~=Inf  %only compute gaussian mask if you need to
         mask=zeros(ySize,xSize);
-        mask(1:xSize*ySize)=mvnpdf([reshape(repmat((-ySize/2:(-ySize/2 + ySize -1))',1,xSize),xSize*ySize,1) reshape(repmat(-xSize/2:(-xSize/2+xSize-1),ySize,1),xSize*ySize,1)],[yPosPct(i)*ySize-ySize/2 xPosPct(i)*xSize-xSize/2],(radius(i)*diag([normalizedLength normalizedLength])).^2);
+        %gaussian mask
+        %mask(1:xSize*ySize)=mvnpdf([reshape(repmat((-ySize/2:(-ySize/2 + ySize -1))',1,xSize),xSize*ySize,1) reshape(repmat(-xSize/2:(-xSize/2+xSize-1),ySize,1),xSize*ySize,1)],[yPosPct(i)*ySize-ySize/2 xPosPct(i)*xSize-xSize/2],(radius(i)*diag([normalizedLength normalizedLength])).^2);
+       
+        %hard circular mask
+        xcoords =  reshape(repmat(-xSize/2:(-xSize/2+xSize-1),ySize,1),xSize*ySize,1);     
+        ycoords = reshape(repmat((-ySize/2:(-ySize/2 + ySize -1))',1,xSize),xSize*ySize,1);
+        
+        xcenter = xPosPct(i)*xSize-xSize/2;
+        ycenter = yPosPct(i)*ySize-ySize/2;
+        
+        mask(1:xSize*ySize)=double(((xcoords - xcenter).^2 + (ycoords - ycenter).^2)<((radius(i)*normalizedLength)^2));
         
         %THIS IS AN OLD LINE OF CODE  - used to send sigma as co-std rather than co-variance
         %mask(1:xSize*ySize)=mvnpdf([reshape(repmat((-ySize/2:(-ySize/2 +

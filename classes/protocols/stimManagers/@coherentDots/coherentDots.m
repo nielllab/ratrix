@@ -27,7 +27,7 @@ s.replayMode='loop';
 
 s.sideDisplay=1; %pct screen width to use
 s.position=.5; %.5 is center, 0 is in movement direction
-s.shapeMethod=[];
+s.shapeMethod='';
 s.background=[];
 
 s.LUT=[];

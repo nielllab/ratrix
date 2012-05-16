@@ -1,4 +1,5 @@
 function mountOSX(targ,loc,login,pw)
+
 if ismac
     if ~exist('targ','var')
         targ='/Volumes/rlab';
@@ -16,7 +17,7 @@ if ismac
 
     [stat res]=system('mount');
     if stat==0
-        if isempty(findstr(res,sprintf('%son %s',loc,targ)))
+        if isempty(findstr(res,sprintf('%s on %s',loc,targ)))
             
             [status,message,messageid] = mkdir(targ);
             if status

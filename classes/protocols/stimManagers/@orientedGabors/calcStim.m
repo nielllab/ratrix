@@ -39,7 +39,7 @@ end
     end
 
 if strcmp(stimulus.distractorOrientations,'abstract') && iscell(stimulus.targetOrientations) && length(targetPorts)==1
-    details.orientations = pickN(stimulus.targetOrientations{targetPorts},1);
+    details.orientations = pickN(stimulus.targetOrientations{targetPorts},1)';
     details.xPosPcts=.5;
     numGabors=1;
 else    
@@ -49,7 +49,7 @@ else
     
     if ~isempty(stimulus.distractorOrientations)
         numGabors=numGabors+length(distractorPorts);
-        details.orientations = [details.orientations; pickN(stimulus.distractorOrientations,length(distractorPorts))];
+        details.orientations = [details.orientations; pickN(stimulus.distractorOrientations,length(distractorPorts))'];
         distractorLocs=distractorPorts;
     end
     

@@ -44,11 +44,12 @@ switch nargin
             error('pixPerCycs must all be > 0')
         end
 
-        if all(isnumeric(varargin{2})) && all(isnumeric(varargin{3}))
+        if all(cellfun(@(f) all(cellfun(@(x) f(x) || isempty(x),{varargin{2} varargin{3}})),{@isreal @isvector @isnumeric})) || ...
+            (strcmp(varargin{3},'abstract') && all(cellfun(@(f)f(varargin{2}),{@iscell @isvector})) && all(cellfun(@(f) all(cellfun(@(x) f(x) || isempty(x),varargin{2})),{@isreal @isvector @isnumeric})))
             s.targetOrientations=varargin{2};
             s.distractorOrientations=varargin{3};
         else
-            error('target and distractor orientations must be numbers')
+            error('target and distractor orientations must be real numeric vectors or, if distractor orientations is ''abstract'', target orientations must be a cell vector of real numeric vectors')
         end
 
         if varargin{4} >= 0 && varargin{4}<=1

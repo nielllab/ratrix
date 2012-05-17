@@ -73,6 +73,8 @@ targetOrientations = 0;
 distractorOrientations = pi/2;
 orientation = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
+abstract = orientedGabors(pixPerCycs,{distractorOrientations [] targetOrientations},'abstract',mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
 requestRewardSizeULorMS = 0;
 msPenalty               = 1000;
 noRequest=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
@@ -104,7 +106,10 @@ ts5 = trainingStep(lpTM  , freeStim, performanceCriterion(.85,int32(300))  , noT
 %orientation discirm
 ts6 = trainingStep(lpTM  , orientation, repeatIndefinitely()                  , noTimeOff(), svnRev,svnCheckMode);
 
-p=protocol('mouse orientation',{ts1, ts2, ts3, ts4, ts5, ts6});
+%abstract rule
+ts7 = trainingStep(lpTM  , abstract,    repeatIndefinitely()                  , noTimeOff(), svnRev,svnCheckMode);
+
+p=protocol('mouse orientation',{ts1 ts2 ts3 ts4 ts5 ts6 ts7});
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

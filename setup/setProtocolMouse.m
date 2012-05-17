@@ -109,7 +109,7 @@ ts6 = trainingStep(lpTM  , orientation, repeatIndefinitely()                  , 
 %abstract rule
 ts7 = trainingStep(lpTM  , abstract,    repeatIndefinitely()                  , noTimeOff(), svnRev,svnCheckMode);
 
-p=protocol('mouse orientation',{ts1 ts2 ts3 ts4 ts5 ts6 ts7});
+p=protocol('mouse orientation',{ts1 ts2 ts3 ts4 ts5 ts6});% ts7});
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

@@ -7,9 +7,11 @@ setupEnvironment;
 
 if ~exist('r','var') || isempty(r)
     %dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
-
     %dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'mouseData',filesep);
-    dataPath='\\mtrix4\Users\nlab\Desktop\mouseData\';
+    
+    mtrix=3;
+    dataPath=['\\mtrix' num2str(mtrix) '\Users\nlab\Desktop\mouseData\'];
+    
     r=ratrix(fullfile(dataPath, 'ServerData'),0);
 end
 
@@ -63,18 +65,25 @@ for i=1:length(subs)
     if ~isempty(p)
         ts=getTrainingStep(p,getNumTrainingSteps(p));
         
-        if true            
+        if true
             sm = getStimManager(ts);
-            p=addTrainingStep(p,setStimManager(ts,setOrientations(sm,{getDistractorOrientations(sm) [] getTargetOrientations(sm)},'abstract')));
-            
-            ts = setCriterion(ts,performanceCriterion(.85,int32(200)));
-            p = changeStep(p, ts, uint8(t));
+            switch mtrix
+                case 3
+                    p=addTrainingStep(p,setStimManager(ts,setOrientations(sm,{getDistractorOrientations(sm) [] getTargetOrientations(sm)},'abstract')));
+                case 4
+                    tilt=pi/4;
+                    p=addTrainingStep(p,setStimManager(ts,setOrientations(sm,tilt,-tilt)));
+                otherwise
+                    error('bad mtrix')
+            end
+            ts = setCriterion(ts,performanceCriterion(.9,int32(200)));
+            p = changeStep(p, ts, uint8(getNumTrainingSteps(p)-1));
             
             [~, r]=setProtocolAndStep(subs{i},p,true,true,false,t,r,comment,auth);
         end
         
         if false
-        setRewardULorMS(subs{i},30,1,comment,auth);
+            setRewardULorMS(subs{i},30,1,comment,auth);
         end
         
         if false

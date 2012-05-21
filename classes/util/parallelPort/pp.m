@@ -186,6 +186,10 @@ for i=1:length(ports)
             if count==1 && isempty(errmsg) && ~isempty(a)
                 a=uint64(a);
             else
+                a
+                count
+                errmsg
+                [s a]=unix([base 'base-addr'])
                 error('bad addr')
             end
         else

@@ -204,16 +204,19 @@ end
                 error('duplicate phase!')
             end
         end
-        
-        function out = doField(x,f)
-            if isfield(x,f)
-                out = x.(f);
-            else
-                out = [];
-            end
-        end
     end
 actualRewards = cell2mat(actualRewards);
+
+    function out = doField(x,f,d)
+        if ~exist('d','var')
+            d = [];
+        end
+        if isfield(x,f)
+            out = x.(f);
+        else
+            out = d;
+        end
+    end
 
 if ~all(cellfun(@(x,y)length(x)==size(y,2),times,track))
     error('times and track didn''t have same dimension')
@@ -273,21 +276,15 @@ targetLocation = [s.target];
 %TODO: flag correction trials (different marker on plot?)
 correctionTrial = [s.correctionTrial];
 
-gain = cell2mat(cellfun(@(x)sm(x,'gain',nan(2,1)),{records.stimManager},'UniformOutput',false));
-    function out=sm(in,f,d)
-        if isfield(in,f)
-            out=in.(f);
-        else
-            out=d;
-        end
-    end
+gain = cell2mat(cellfun(@(x)doField(x,'gain',nan(2,1)),{records.stimManager},'UniformOutput',false));
 
-stim = cellfun(@(x)sm(x,'stim',nan),{records.stimManager},'UniformOutput',false);
+stim = cellfun(@(x)doField(x,'stim',nan),{records.stimManager},'UniformOutput',false);
 
 for i=1:size(bounds,1)
     if ismember('stimManager.stim',fullRecs(i).fieldsInLUT)
         for x=bounds(i,1):bounds(i,2)
-            if all(cellfun(@(f)f(stim{x}),{@isscalar @isreal})) && stim{x}>0 && stim{x}<=length(fullRecs(i).sessionLUT) && mod(stim{x},1)==0 % mod(.,1)==0 checks for float integers
+            if isscalar(stim{x}) && isreal(stim{x}) && stim{x}>0 && stim{x}<=length(fullRecs(i).sessionLUT) && mod(stim{x},1)==0 % mod(.,1)==0 checks for float integers
+                %all(cellfun(@(f)f(stim{x}),{@isscalar @isreal})) %too slow
                 stim{x}=fullRecs(i).sessionLUT{stim{x}};
             else
                 stim{x}
@@ -299,14 +296,6 @@ for i=1:size(bounds,1)
     end
 end
 flip = strcmp(stim,'flip');
-
-    function out=ite(t,i,e)
-        if t
-            out=i;
-        else
-            out=e;
-        end
-    end
 
 if ~all(cellfun(@(x,y)isempty(x) || x==y,nFrames,mat2cell(timeout,1,ones(1,length(timeout))))) % this was the limit on the trial length -- the # of position changes
     error('nFrames didn''t match timeout')

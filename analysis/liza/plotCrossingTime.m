@@ -411,11 +411,11 @@ ylabel('reward size (ms)')
 title(subj)
 standardPlot(@plot,[],false,true);
 
-    function standardPlot(f,ticks,lines,dates)
+    function standardPlot(f,ticks,lines,dates,xticks)
         arrayfun(@(x)f(x*ones(1,2),ylims,'Color',grey   ),sessions);
         arrayfun(@(x)f(x*ones(1,2),ylims,'Color',[1 0 0]),chunks  );
         
-        if exist('dates','var') && dates
+        if exist('dates','var') && ~isempty(dates) && dates
             tn = [0; sessions]+1;
             ds = diff([tn-1; length(startTimes)]);
             ss = datevec(startTimes(tn));
@@ -448,9 +448,14 @@ standardPlot(@plot,[],false,true);
                 ltics = ticks;
             end
             set(gca,'YTick',ltics,'YTickLabel',ticks);
-            if exist('lines','var') && lines
+            if exist('lines','var') && ~isempty(lines) && lines
                 f(trialNums,repmat(ticks,length(trialNums),1),'Color',grey);
             end
+        end
+        
+        if ~exist('xticks','var') || isempty(xticks) || ~xticks
+            set(gca,'xtick',[])
+            set(gca,'xticklabel',[]) %otherwise, x10^4 can show up (see http://www.mathworks.com/matlabcentral/answers/4515-removing-ticks)
         end
     end
 
@@ -498,7 +503,7 @@ standardPlot(@plot,[],false,true);
     end
 
     function x=fix0(x)
-        x=min(x(x~=0))/10;
+        x=min(x(x~=0))/2;
     end
 
 subplot(n,1,2)
@@ -519,7 +524,7 @@ for i=1:length(cs)
     pTiles{i}(pTiles{i}==0)=eps2;
     rangePlot(xd,pTiles{i}([1 end],:),cm(i,:));
 end
-ylims = [eps2 max(dur)*head];
+ylims = [eps2 prctile(dur,99)*head];
 ylabel('ms')
 standardPlot(@semilogyEF,[.01 .03 .1 .3 1 3 10]*1000,true);
 doLog = false;
@@ -532,7 +537,23 @@ plot(x,.5*ones(1,length(x)),'k')
 plot(trialNums(flip),.5,'bo')
 ylims = [0 1];
 ylabel('% correct(r) rightward(k)')
-standardPlot(@plot);
+standardPlot(@plot,[],[],[],true);
 
 xlabel('trial')
+
+if IsWin
+    fn=fullfile('\\reichardt','figures',subj,datestr(now,30));
+    [s, mess, messid] = mkdir(fileparts(fn));
+    if s~=1
+        s
+        mess
+        messid
+        error('couldn''t mkdir')
+    end
+    set(gcf,'position',[0,200,max(400,length(x)/10),n*200]) % [left, bottom, width, height]
+    saveas(gcf,[fn '.fig']);
+    plot2svg([fn '.svg'],gcf);
+else
+    error('haven''t handled non-win uploading to webserver yet')
+end
 end

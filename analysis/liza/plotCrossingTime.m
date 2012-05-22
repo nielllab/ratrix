@@ -398,14 +398,23 @@ n = 4;
 
 cm = [1 0 0;0 1 0;.9 .9 0]; %red for incorrects, green for corrects, yellow for timeouts
 grey = .85*ones(1,3);
-transparency = .2;
 head = 1.1;
 dotSize = 4;
+
+doBlack = true;
+if doBlack
+    colordef black
+    transparency = .5;
+    bw = 'w';
+else
+    transparency = .2;
+    bw = 'k';
+end
 
 subplot(n,1,1)
 correctPlot(actualRewards);
 hold on
-plot(trialNums,intendedRewards,'k')
+plot(trialNums,intendedRewards,bw)
 ylims = [0 max(actualRewards)*head];
 ylabel('reward size (ms)')
 title(subj)
@@ -532,8 +541,8 @@ doLog = false;
 subplot(n,1,4)
 rangePlot(x,pci','r');
 hold on
-rangePlot(sidex,sidepci','k');
-plot(x,.5*ones(1,length(x)),'k')
+rangePlot(sidex,sidepci',bw);
+plot(x,.5*ones(1,length(x)),bw)
 plot(trialNums(flip),.5,'bo')
 ylims = [0 1];
 ylabel('% correct(r) rightward(k)')
@@ -552,7 +561,18 @@ if IsWin
     end
     set(gcf,'position',[0,200,max(400,length(x)/10),n*200]) % [left, bottom, width, height]
     saveas(gcf,[fn '.fig']);
+    
+    set(gcf, 'InvertHardCopy', 'off'); %preserves black background when colordef black
+    
     plot2svg([fn '.svg'],gcf);
+    
+    % print() seems to pick a size independent of the figure size (how?)
+    % "When you print to a file, the file name must have fewer than 128 characters, including path name."
+    % http://www.mathworks.com/access/helpdesk/help/techdoc/ref/print.html#f30-534567
+    dpi=300;
+    print(gcf,'-dpng',['-r' num2str(dpi)],'-opengl',[fn '.' num2str(dpi) '.png']); %opengl for transparency -- probably unnecessary cuz seems to be automatically set when needed
+    
+    saveas(gcf,[fn '.png']); %resolution not controllable
 else
     error('haven''t handled non-win uploading to webserver yet')
 end

@@ -417,7 +417,7 @@ hold on
 plot(trialNums,intendedRewards,bw)
 ylims = [0 max(actualRewards)*head];
 ylabel('reward size (ms)')
-title(subj)
+title([subj ' -- ' datestr(now,'ddd, mmm dd HH:MM PM')])
 standardPlot(@plot,[],false,true);
 
     function standardPlot(f,ticks,lines,dates,xticks)
@@ -559,6 +559,7 @@ if IsWin
         messid
         error('couldn''t mkdir')
     end
+    set(gcf,'Visible','off') %otherwise screen size limits figure size
     set(gcf,'Position',[0,200,max(400,length(x)/10),n*200]) % [left, bottom, width, height]
     set(gcf,'PaperPositionMode','auto'); %causes print to respect figure size
     set(gcf,'InvertHardCopy','off'); %preserves black background when colordef black
@@ -569,8 +570,25 @@ if IsWin
     % "When you print to a file, the file name must have fewer than 128 characters, including path name."
     % http://www.mathworks.com/access/helpdesk/help/techdoc/ref/print.html#f30-534567
     dpi=300;
-    print(gcf,'-dpng',['-r' num2str(dpi)],'-opengl',[fn '.' num2str(dpi) '.png']); %opengl for transparency -- probably unnecessary cuz seems to be automatically set when needed
-    saveas(gcf,[fn '.png']); %resolution not controllable
+    sfx = 'png';
+    latest = [fn '.' num2str(dpi) '. ' sfx];
+    try %print/saveas for png doesn't work over remote desktop
+        print(gcf,'-dpng',['-r' num2str(dpi)],'-opengl',latest); %opengl for transparency -- probably unnecessary cuz seems to be automatically set when needed
+        saveas(gcf,[fn '.' sfx]); %resolution not controllable
+    catch
+        sfx = 'svg';
+        latest = [fn '.' sfx];
+    end
+    
+    [status,message,messageid] = copyfile(latest,fullfile(fileparts(latest),['latest.' sfx]));
+    if status~=1
+        status
+        message
+        messageid
+        error('couldn''t copy')
+    end
+    
+    set(gcf,'Visible','on')
 else
     error('haven''t handled non-win uploading to webserver yet')
 end

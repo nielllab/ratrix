@@ -7,6 +7,7 @@ s.targetDistance = 100;
 s.timeoutSecs = 1;
 s.slow = 10 * ones(2,1);
 s.slowSecs = 1;
+s.cue = false;
 
 s.positional = nan;
 s.stim = [];
@@ -26,7 +27,7 @@ switch nargin
     case 5
         d = varargin{1};
         
-        cellfun(@validateField,{'gain','targetDistance','timeoutSecs','slow','slowSecs','positional','stim'});
+        cellfun(@validateField,{'gain','targetDistance','timeoutSecs','slow','slowSecs','positional','stim','cue'});
         
         s = class(s,'trail',stimManager(varargin{2},varargin{3},varargin{4},varargin{5}));
     otherwise
@@ -70,6 +71,10 @@ end
                 case 'stim'
                     if ~((isa(x,'stimManager') && isscalar(x)) || isempty(x) || strcmp(x,'flip'))
                         error('stim must be empty or a scalar stimManager or the string ''flip''')
+                    end
+                case 'cue'
+                    if ~all(cellfun(@(f)f(x),{@islogical @isscalar}))
+                        error('cue must be logical scalaer')
                     end
                 otherwise
                     error('huh')

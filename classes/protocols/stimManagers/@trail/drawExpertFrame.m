@@ -19,9 +19,10 @@ if ~isfield('clutSize',expertCache)
     expertCache.clutSize = size(currentCLUT,1)-1;
 end
 white = expertCache.clutSize*ones(1,4);
-grey = white.*[.5*ones(1,3) 1];
-red = expertCache.clutSize*[1 0 0 1];
-blue = expertCache.clutSize*[0 0 1 1];
+black = white.*[zeros(1,3)   1];
+grey  = white.*[.5*ones(1,3) 1];
+red   = white.*[1 0 0        1];
+blue  = white.*[0 0 1        1];
 
 didBlend = false;
 smooth = 1;  % default 0, 1 requires Screen('BlendFunction')
@@ -119,13 +120,18 @@ switch phaseRecords(phaseNum).phaseType
             end
             
             if strcmp(s.stim,'flip')
+                if isempty(wrongLoc)
+                    error('can''t flip without a wrongLoc')
+                end
                 wallRect(ind) = wrongLoc;
+                cueColor = black;
             else
                 wallRect(ind) = targetPos;
+                cueColor = white;
             end
             
             if diff(wallRect([1 3])) > 0
-                Screen('FillRect', window, white, wallRect);                
+                Screen('FillRect', window, white, wallRect);
             end
             
             if ~isempty(wrongLoc)
@@ -143,6 +149,16 @@ switch phaseRecords(phaseNum).phaseType
             
             if colorWalls
                 Screen('DrawLine', window, red, targetPos, destRect(2), targetPos, destRect(4), width); %no smoothing?
+            end
+            
+            if s.cue
+                if exist('midRect','var')
+                    cueRect = midRect;
+                    cueRect([1 3]) = cueRect([1 3])+[1 -1].*width/2;
+                else
+                    error('can''t have cue without wrongLoc')
+                end
+                Screen('FillRect', window, cueColor, cueRect);
             end
         else
             try

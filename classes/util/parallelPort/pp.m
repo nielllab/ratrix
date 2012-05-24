@@ -184,10 +184,14 @@ for i=1:length(ports)
     if addr(i)==0 || slowChecks
         [s a]=unix([base 'base-addr']);
         if s~=0
-            error('couldn''t cat base-adddr')
+            error('couldn''t cat base-addr')
         end
         if useSscanf
-            [a, count, errmsg] = sscanf(a, '%u 0');
+            [a, count, errmsg] = sscanf(a, '%u %*u'); 
+            % the second number is always 0 for me (ubuntu 11/fedora 15), 
+            % but kkd reported a 1912 on parport0 for his machine (ubuntu 12.04).  
+            % according to http://www.kernel.org/doc/Documentation/parport.txt 
+            % this is just another address for the port?  what's it for?
             if count==1 && isempty(errmsg) && ~isempty(a)
                 a=uint64(a);
             else
@@ -198,7 +202,7 @@ for i=1:length(ports)
                 error('bad addr')
             end
         else
-            a = textscan(a, '%u64 0');
+            a = textscan(a, '%u64 %*u64');
             if ~isempty(a{1})
                 a=a{1};
             else

@@ -1,8 +1,26 @@
-function plotCrossingTime(subj)
+function plotCrossingTime(subj,drive)
 dbstop if error
 
 if ~exist('subj','var') || isempty(subj)
     subj = 'test';
+end
+
+if ~exist('drive','var') || isempty(drive)
+    local = false;
+    if local
+        drive='C:';
+    else
+        drive='\\mtrix5';
+        %drive = '\\jarmusch';
+    end    
+end
+
+if IsWin
+    recordPath = fullfile(drive,'Users','nlab');
+elseif ismac && local
+    recordPath = [filesep fullfile('Users','eflister')];
+else
+    error('unsupported')
 end
 
 %for some reason, compiling these records is failing
@@ -10,19 +28,6 @@ end
 %most of the work in this file does what CompileTrialRecords does
 
 %get trial records in the right order
-if ismac
-    recordPath = [filesep fullfile('Users','eflister')];
-else
-    local = false;
-    if local
-        drive='C:';
-    else
-        drive='\\mtrix5';
-        %drive = '\\jarmusch';
-    end
-    recordPath = fullfile(drive,'Users','nlab');
-end
-
 recordPath = fullfile(recordPath,'Desktop','ballData','PermanentTrialRecordStore',subj);
 
 d=dir(fileparts(recordPath));
@@ -543,53 +548,14 @@ rangePlot(x,pci','r');
 hold on
 rangePlot(sidex,sidepci',bw);
 plot(x,.5*ones(1,length(x)),bw)
-plot(trialNums(flip),.5,'bo')
+if any(flip)
+    plot(trialNums(flip),.5,'bo')
+end
 ylims = [0 1];
 ylabel('% correct(r) rightward(k)')
 standardPlot(@plot,[],[],[],true);
 
 xlabel('trial')
 
-if IsWin
-    fn=fullfile('\\reichardt','figures',subj,datestr(now,30));
-    [s, mess, messid] = mkdir(fileparts(fn));
-    if s~=1
-        s
-        mess
-        messid
-        error('couldn''t mkdir')
-    end
-    set(gcf,'Visible','off') %otherwise screen size limits figure size
-    set(gcf,'Position',[0,200,max(400,length(x)/10),n*200]) % [left, bottom, width, height]
-    set(gcf,'PaperPositionMode','auto'); %causes print to respect figure size
-    set(gcf,'InvertHardCopy','off'); %preserves black background when colordef black
-    
-    saveas(gcf,[fn '.fig']);
-    plot2svg([fn '.svg'],gcf);
-    
-    % "When you print to a file, the file name must have fewer than 128 characters, including path name."
-    % http://www.mathworks.com/access/helpdesk/help/techdoc/ref/print.html#f30-534567
-    dpi=300;
-    sfx = 'png';
-    latest = [fn '.' num2str(dpi) '. ' sfx];
-    try %print/saveas for png doesn't work over remote desktop
-        print(gcf,'-dpng',['-r' num2str(dpi)],'-opengl',latest); %opengl for transparency -- probably unnecessary cuz seems to be automatically set when needed
-        saveas(gcf,[fn '.' sfx]); %resolution not controllable
-    catch
-        sfx = 'svg';
-        latest = [fn '.' sfx];
-    end
-    
-    [status,message,messageid] = copyfile(latest,fullfile(fileparts(latest),['latest.' sfx]));
-    if status~=1
-        status
-        message
-        messageid
-        error('couldn''t copy')
-    end
-    
-    set(gcf,'Visible','on')
-else
-    error('haven''t handled non-win uploading to webserver yet')
-end
+uploadFig(gcf,subj,length(x)/10,n*200);
 end

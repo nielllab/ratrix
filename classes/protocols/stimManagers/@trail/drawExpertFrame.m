@@ -19,10 +19,10 @@ if ~isfield('clutSize',expertCache)
     expertCache.clutSize = size(currentCLUT,1)-1;
 end
 white = expertCache.clutSize*ones(1,4);
-black = white.*[zeros(1,3)   1];
-grey  = white.*[.5*ones(1,3) 1];
-red   = white.*[1 0 0        1];
-blue  = white.*[0 0 1        1];
+black =       white.*[zeros(1,3)   1];
+grey  = round(white.*[.5*ones(1,3) 1]);
+red   =       white.*[1 0 0        1];
+blue  =       white.*[0 0 1        1];
 
 didBlend = false;
 smooth = 1;  % default 0, 1 requires Screen('BlendFunction')
@@ -99,7 +99,7 @@ switch phaseRecords(phaseNum).phaseType
             positionStim = s.positional;
         end
         
-        colorWalls = positionStim;
+        colorWalls = positionStim && ~s.cue;
         drawTrail = positionStim;
         
         if ~positionStim
@@ -110,6 +110,8 @@ switch phaseRecords(phaseNum).phaseType
                 wrongLoc =  targetPos-sign(dynamicDetails.target)*diff(s.targetDistance.*[-1 1]);
             end
         end
+        
+        trailColor = white;
         
         if doWalls
             wallRect = destRect; %[left top right bottom]
@@ -128,6 +130,7 @@ switch phaseRecords(phaseNum).phaseType
             else
                 wallRect(ind) = targetPos;
                 cueColor = white;
+                trailColor = black;
             end
             
             if diff(wallRect([1 3])) > 0
@@ -154,7 +157,7 @@ switch phaseRecords(phaseNum).phaseType
             if s.cue
                 if exist('midRect','var')
                     cueRect = midRect;
-                    cueRect([1 3]) = cueRect([1 3])+[1 -1].*width/2;
+                    cueRect([1 3]) = cueRect([1 3])+[1 -1].*width;
                 else
                     error('can''t have cue without wrongLoc')
                 end
@@ -191,10 +194,10 @@ switch phaseRecords(phaseNum).phaseType
         end
         
         if drawTrail
-            Screen('DrawDots', window, relPos, width, white, center, dotType);
+            Screen('DrawDots', window, relPos, width, trailColor, center, dotType);
             
             inds = repmat(2:size(relPos,2)-1,2,1);
-            Screen('DrawLines', window, relPos(:,[1 inds(:)' end]), width, white, center, smooth);
+            Screen('DrawLines', window, relPos(:,[1 inds(:)' end]), width, trailColor, center, smooth);
             
             Screen('DrawDots', window, relPos, centerWidth, blue, center, dotType);
         end

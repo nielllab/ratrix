@@ -1,5 +1,7 @@
 function fs=analysisPlotter(selection,compiledFileDir,includeKeyboard)
 
+colordef black
+
 % if ~isdeployed
 % addpath('C:\Documents and Settings\rlab\Desktop\phil analysys');
 % end

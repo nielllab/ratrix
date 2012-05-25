@@ -9,7 +9,7 @@ if IsWin
         error('couldn''t mkdir')
     end
     set(f,'Visible','off') %otherwise screen size limits figure size
-    set(f,'Position',[0,200,max(400,width),max(400,height)]) % [left, bottom, width, height]
+    set(f,'Position',[0,200,max(400,width),max(200,height)]) % [left, bottom, width, height]
     set(f,'PaperPositionMode','auto'); %causes print to respect figure size
     set(f,'InvertHardCopy','off'); %preserves black background when colordef black
     

@@ -1,11 +1,22 @@
-function makeConfPlot(x,d,c)
+function makeConfPlot(x,d,c,doBlack)
 if ~isempty(x)
+
+    if exist('doBlack','var') && ~isempty(doBlack) && doBlack
+        transparency = .5;
+        bw = 'w';               
+    else
+        transparency = .2;
+        bw = 'k';
+    end
+    
+    if strcmp(c,'k')
+        c=bw;
+    end
+    
     chance=.5;
-    plot([1 max(x)],chance*ones(1,2),'k');
+    plot([1 max(x)],chance*ones(1,2),bw);
     hold on
-    
-    transparency=.2;
-    
+        
     fill([x x(length(x):-1:1)],[d.pci(:,2)' d.pci(length(x):-1:1,1)'],c,'FaceAlpha',transparency,'LineStyle','none');
     
     if false

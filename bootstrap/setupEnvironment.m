@@ -8,7 +8,7 @@ clc
 format long g
 format compact
 
-colordef white
+colordef black
 
 lasterror('reset')
 lastwarn('')

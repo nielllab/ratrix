@@ -1,5 +1,5 @@
 function niellLabReport
-doBall=false;
+doBall=true;
 doBox=true;
 
 if doBall
@@ -9,6 +9,7 @@ if doBall
             'ly02' 
             'ly05' 
             'ly06' 
+            'ly09'
             }
         }
 
@@ -17,6 +18,7 @@ if doBall
             'ly01' %grating
             'ly03' %grating
             'ly04' %wall cue flip
+            'ly08' %wall cue flip
             }
         }
     };
@@ -107,7 +109,6 @@ if doBox
     selection.filterVal=[];
     selection.filterParam=[];
 
-    colordef white
     tic
     cellfun(@(x) cellfun(@(y) cellfun(@(z) g(x{1},y{1},z), y{2}) ,x{2}) ,recs);
     toc
@@ -115,15 +116,12 @@ end
 close all
 
     function g(box,d,subj)        
-        compiledFileDir = ['\\' box '\Users\nlab\Desktop\' d 'Data\CompiledTrialRecords\'];
         selection.subjects = {subj};
         selection.titles = selection.subjects;
         close all
-        f=analysisPlotter(selection,compiledFileDir,false);
+        f = analysisPlotter(selection,['\\' box '\Users\nlab\Desktop\' d 'Data\CompiledTrialRecords\'],false);
         width = get(get(f,'Children'),'XLim');
-        width = width(2)/10;
-        height = 200;
-        uploadFig(f,subj,width,height);
+        uploadFig(f,subj,width(2)/10,200);
     end
 
 end

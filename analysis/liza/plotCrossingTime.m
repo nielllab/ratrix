@@ -12,7 +12,7 @@ if ~exist('drive','var') || isempty(drive)
     else
         drive='\\mtrix5';
         %drive = '\\jarmusch';
-    end    
+    end
 end
 
 if IsWin
@@ -159,6 +159,9 @@ end
                     slowT = doField(x(i).dynamicDetails,'slowTrack');
                     if ~isempty(slowT)
                         slowT = slowT(1,:); %for now we just consider time, not space
+                        if ~all(diff(slowT)>0) || any(isnan(slowT))
+                            error('slow timestamps not increasing or has nans')
+                        end
                     end
                 case 'discrim'
                     setPhase(2);
@@ -239,6 +242,9 @@ end
 
 dur = getDurFromT(times);
 stopDur = getDurFromT(stopTimes);
+if ~all(find(stopDur<=0) == find(cellfun(@isempty,stopTimes)))
+    error('some stopDurs had nonempty stopTimes')
+end
 
 % i'm seeing a lot of trials (12%) that have only one timestamp
 if false %this shows that position really is past the wall on the first timestamp
@@ -375,7 +381,7 @@ n = 50;
 
 for i=1:length(cs)
     tDur{i} = classes==cs(i);
-    slidingAvg{i} = savg(dur(tDur{i}),n);
+    % slidingAvg{i} = savg(dur(tDur{i}),n);
     pTiles{i} = prctile(window(pad(dur(tDur{i}),n,@nan),n),25*[-1 0 1]+50);
 end
 
@@ -399,7 +405,7 @@ ifis = [s.ifi];
 
 %plot some stuff!
 close all
-n = 4;
+sps = 4;
 
 cm = [1 0 0;0 1 0;.9 .9 0]; %red for incorrects, green for corrects, yellow for timeouts
 grey = .85*ones(1,3);
@@ -416,7 +422,7 @@ else
     bw = 'k';
 end
 
-subplot(n,1,1)
+subplot(sps,1,1)
 correctPlot(actualRewards);
 hold on
 plot(trialNums,intendedRewards,bw)
@@ -426,6 +432,11 @@ title([subj ' -- ' datestr(now,'ddd, mmm dd HH:MM PM')])
 standardPlot(@plot,[],false,true);
 
     function standardPlot(f,ticks,lines,dates,xticks)
+        if length(ylims)>2
+            yvals=ylims;
+            ylims=[1 length(ylims)];
+        end
+        
         arrayfun(@(x)f(x*ones(1,2),ylims,'Color',grey   ),sessions);
         arrayfun(@(x)f(x*ones(1,2),ylims,'Color',[1 0 0]),chunks  );
         
@@ -456,13 +467,21 @@ standardPlot(@plot,[],false,true);
         xlim([1 length(records)])
         
         if exist('ticks','var') && ~isempty(ticks)
-            if isequal(f,@semilogyEF) %they couldn't overload == ?
-                ltics = log(ticks);
+            if ~exist('yvals','var')
+                if isequal(f,@semilogyEF) %they couldn't overload == ?
+                    ltics = log(ticks);
+                else
+                    ltics = ticks;
+                end
             else
-                ltics = ticks;
+                ltics=interp1(yvals,1:length(yvals),ticks);
             end
             set(gca,'YTick',ltics,'YTickLabel',ticks);
+            
             if exist('lines','var') && ~isempty(lines) && lines
+                if exist('yvals','var')
+                    error('not implemented')
+                end
                 f(trialNums,repmat(ticks,length(trialNums),1),'Color',grey);
             end
         end
@@ -500,19 +519,21 @@ standardPlot(@plot,[],false,true);
         end
     end
 
-    function rangePlot(x,y,c)
+    function rangePlot(x,y,c,t)
+        if ~exist('t','var') || isempty(t)
+            t=transparency;
+        end
         if exist('doLog','var') && doLog
             y=log(y);
         end
         if ~exist('c','var') || isempty(c)
             c=zeros(1,3);
         end
-        fill([x fliplr(x)],[y(1,:) fliplr(y(2,:))],c,'FaceAlpha',transparency,'LineStyle','none');
+        fill([x fliplr(x)],[y(1,:) fliplr(y(2,:))],c,'FaceAlpha',t,'LineStyle','none');
     end
 
     function semilogyEF(x,y,varargin)
         %using semilogy causes transparency in this AND next plot to fail!  using plot resolves it.  set(gca,'YScale','log') doesn't
-        
         plot(x,log(y),varargin{:});
     end
 
@@ -520,16 +541,46 @@ standardPlot(@plot,[],false,true);
         x=min(x(x~=0))/2;
     end
 
-subplot(n,1,2)
+subplot(sps,1,2)
 doLog = true;
 eps2 = min(stopDur(stopDur>0));
-semilogyEF(trialNums(stopDur>0),stopDur(stopDur>0),'.','MarkerSize',dotSize)
-ylims = [eps2 max(stopDur)*head];
-hold on
-ylabel('stopping time')
-standardPlot(@semilogyEF,[100 1000 10000 30000],false,true);
 
-subplot(n,1,3)
+stopType = 'ptile';
+switch stopType
+    case 'density'
+        k=100;
+        bins = logspace(log10(eps2),log10(max(stopDur(:))),k);
+        s = histc(window(pad(stopDur,n,@nan),n),bins);
+        imagesc(log(s))
+        axis xy
+    case 'ptile'
+        k=20;
+        s = prctile(window(pad(stopDur,n,@nan),n),linspace(0,100,k));
+        
+        eps2=min(s(s>0));
+        s(s<=0)=eps2/10;
+        
+        cmj = colormap('jet');
+        for i=1:size(s,1)-1
+            rangePlot(trialNums,s(i+[0 1],:),cmj(ceil(size(cmj,1)*i/(size(s,1)-1)),:),1);
+            hold on
+        end
+    otherwise
+        semilogyEF(trialNums(stopDur>0),stopDur(stopDur>0),'.','MarkerSize',dotSize)
+end
+switch stopType
+    case 'density'
+        ylims = bins;
+        plotter = @plot;
+    otherwise
+        ylims = [eps2 max(stopDur)*head];
+        plotter = @semilogyEF;
+end
+hold on
+standardPlot(plotter,[100 1000 10000 30000]);
+ylabel('stopping time')
+
+subplot(sps,1,3)
 eps2=fix0(dur(~isnan(classes)));
 correctPlot(dur);
 hold on
@@ -543,7 +594,7 @@ ylabel('ms')
 standardPlot(@semilogyEF,[.01 .03 .1 .3 1 3 10]*1000,true);
 doLog = false;
 
-subplot(n,1,4)
+subplot(sps,1,4)
 rangePlot(x,pci','r');
 hold on
 rangePlot(sidex,sidepci',bw);
@@ -557,5 +608,5 @@ standardPlot(@plot,[],[],[],true);
 
 xlabel('trial')
 
-uploadFig(gcf,subj,length(x)/10,n*200);
+uploadFig(gcf,subj,length(x)/10,sps*200);
 end

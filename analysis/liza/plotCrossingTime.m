@@ -1,4 +1,7 @@
 function plotCrossingTime(subj,drive)
+addpath(fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))),'bootstrap'));
+setupEnvironment;
+
 dbstop if error
 
 if ~exist('subj','var') || isempty(subj)
@@ -554,16 +557,24 @@ switch stopType
         imagesc(log(s))
         axis xy
     case 'ptile'
-        k=20;
+        cmj = colormap('jet');
+        cmj = [cmj;flipud(cmj)];
+        k = size(cmj,1);
         s = prctile(window(pad(stopDur,n,@nan),n),linspace(0,100,k));
         
         eps2=min(s(s>0));
         s(s<=0)=eps2/10;
-        
-        cmj = colormap('jet');
-        for i=1:size(s,1)-1
-            rangePlot(trialNums,s(i+[0 1],:),cmj(ceil(size(cmj,1)*i/(size(s,1)-1)),:),1);
-            hold on
+                
+        if false %patch
+            for i=1:size(s,1)-1
+                rangePlot(trialNums,s(i+[0 1],:),cmj(ceil(size(cmj,1)*i/(size(s,1)-1)),:),1);
+                hold on
+            end
+        else %contour
+            for i=ceil(linspace(1,size(s,1),11))
+                semilogyEF(trialNums,s(i,:),'Color',cmj(ceil(size(cmj,1)*i/size(s,1)),:));
+                hold on
+            end
         end
     otherwise
         semilogyEF(trialNums(stopDur>0),stopDur(stopDur>0),'.','MarkerSize',dotSize)

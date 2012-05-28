@@ -1,5 +1,5 @@
 function setupMice
-names = {'wehrTest','3337'};
+names = {'3350'};
 %names = {'test','j10lt','j10ln','j8lt','j8ln'};
 %names = {'test','j10rt','j8rt','j7rt','j6rt'};
 

@@ -103,7 +103,7 @@ switch nargin
         end
 
         % stimType
-        if ischar(varargin{3}) && any(ismember(varargin{3},{'loop','cache','expert','dynamic'}))
+        if ischar(varargin{3}) && any(ismember(varargin{3},{'static','loop','cache','expert','dynamic'}))
             spec.stimType = varargin{3};
         elseif iscell(varargin{3})
             typeArray = varargin{3};
@@ -125,7 +125,7 @@ switch nargin
                 error('invalid specification of stimType in cell array format');
             end
         else
-            error('stimType must be trigger, loop, cache, timedFrames, indexedFrames, expert, or dynamic');
+            error('stimType must be static, trigger, loop, cache, timedFrames, indexedFrames, expert, or dynamic');
         end
         % startFrame
         if isscalar(varargin{4}) && varargin{4}>=0

@@ -1,7 +1,19 @@
-function r = setProtocolMouse(r,subjIDs)
+function r = setProtocolCMN(r,subjIDs)
+
+if ~exist('r','var') || isempty(r)
+    dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'mouseData',filesep);
+    %dataPath='\\mtrix2\Users\nlab\Desktop\mouseData\';
+    r=ratrix(fullfile(dataPath, 'ServerData'),0);
+end
 
 if ~isa(r,'ratrix')
     error('need a ratrix')
+end
+
+
+if ~exist('subjIDs','var') || isempty(subjIDs)
+    %    subIDs=intersect(getEDFids,getSubjectIDs(r));
+    subjIDs=getSubjectIDs(r);
 end
 
 if ~all(ismember(subjIDs,getSubjectIDs(r)))
@@ -54,7 +66,7 @@ dist = 15;
 degpercm = atand((0.25*widthcm+1)/dist) - atand(0.25*widthcm/dist);
 pixperdeg = pixpercm/degpercm
 
-cpd=0.05
+cpd=0.1
 pixPerCycs = pixperdeg/cpd
 
 targetOrientations      =[0];
@@ -72,8 +84,6 @@ freeStim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,m
 targetOrientations = 0;
 distractorOrientations = pi/2;
 orientation = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-
-abstract = orientedGabors(pixPerCycs,{distractorOrientations [] targetOrientations},'abstract',mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 requestRewardSizeULorMS = 0;
 msPenalty               = 1000;
@@ -99,6 +109,7 @@ ts4 = trainingStep(nrTM  , freeStim,  numTrialsDoneCriterion(400)          , noT
 
 %long penalty
 msPenalty = 3000;
+rewardSizeULorMS=30;
 longPenalty=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 lpTM=nAFC(sm,percentCorrectionTrials,longPenalty,eyeController,{'off'},dropFrames,'ptb','center',[],[],[300 inf]);
 ts5 = trainingStep(lpTM  , freeStim, performanceCriterion(.85,int32(300))  , noTimeOff(), svnRev,svnCheckMode);
@@ -106,20 +117,21 @@ ts5 = trainingStep(lpTM  , freeStim, performanceCriterion(.85,int32(300))  , noT
 %orientation discirm
 ts6 = trainingStep(lpTM  , orientation, repeatIndefinitely()                  , noTimeOff(), svnRev,svnCheckMode);
 
-%abstract rule
-ts7 = trainingStep(lpTM  , abstract,    repeatIndefinitely()                  , noTimeOff(), svnRev,svnCheckMode);
-
-p=protocol('mouse orientation',{ts1 ts2 ts3 ts4 ts5 ts6});% ts7});
+p=protocol('mouse orientation',{ts1, ts2, ts3, ts4, ts5, ts6});
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});
+
+    % set to defined step    
+%     switch subjIDs{i}
+%         case 'test'
+%             stepNum=uint8(5);
+%         otherwise
+%             stepNum=uint8(5);
+%     end
     
-    switch subjIDs{i}
-        case 'test'
-            stepNum=uint8(6);
-        otherwise
-            stepNum=uint8(6);
-    end
+    % keep on current step
+    [currentp stepNum]=getProtocolAndStep(subj);
     
     [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolMouse','edf');
 end

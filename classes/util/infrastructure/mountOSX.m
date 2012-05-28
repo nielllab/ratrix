@@ -1,10 +1,11 @@
 function mountOSX(targ,loc,login,pw)
+
 if ismac
     if ~exist('targ','var')
         targ='/Volumes/rlab';
     end
     if ~exist('loc','var')
-        loc='@132.239.158.181/rlab ';
+        loc='@132.239.158.181/rlab';
     end
     if ~exist('login','var')
         login='rodent';
@@ -16,7 +17,7 @@ if ismac
 
     [stat res]=system('mount');
     if stat==0
-        if isempty(findstr(res,sprintf('%son %s',loc,targ)))
+        if isempty(findstr(res,sprintf('%s on %s',loc,targ)))
             
             [status,message,messageid] = mkdir(targ);
             if status
@@ -24,7 +25,7 @@ if ismac
                 if stat~=0
                     stat
                     res
-                    error('couldn''t mount rlab')
+                    error('couldn''t mount')
                 end
             else
                 targ

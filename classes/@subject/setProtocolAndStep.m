@@ -34,6 +34,7 @@ if isa(p,'protocol') && isa(r,'ratrix') && ~isempty(getSubjectFromID(r,s.id)) &&
             end
             s.protocolVersion.date=datevec(now);
             s.protocolVersion.author=auth;
+            %consider recording comment here so we don't have to parse the text log?
             
             r=updateSubjectProtocol(r,s,comment,auth,thisIsANewProtocol,thisIsANewTrainingStep,thisIsANewStepNum);
             

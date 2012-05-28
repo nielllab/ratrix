@@ -19,9 +19,10 @@ if ~isfield('clutSize',expertCache)
     expertCache.clutSize = size(currentCLUT,1)-1;
 end
 white = expertCache.clutSize*ones(1,4);
-grey = white*.5;
-red = expertCache.clutSize*[1 0 0 1];
-blue = expertCache.clutSize*[0 0 1 1];
+black =       white.*[zeros(1,3)   1];
+grey  = round(white.*[.5*ones(1,3) 1]);
+red   =       white.*[1 0 0        1];
+blue  =       white.*[0 0 1        1];
 
 didBlend = false;
 smooth = 1;  % default 0, 1 requires Screen('BlendFunction')
@@ -93,9 +94,13 @@ switch phaseRecords(phaseNum).phaseType
             doWalls = length(size(stim.stim.stimulus))~=2;
         end
         
-        colorWalls = s.positional;
-        drawTrail = s.positional;
-        positionStim = s.positional;
+        positionStim = false;
+        if islogical(s.positional)
+            positionStim = s.positional;
+        end
+        
+        colorWalls = positionStim && ~s.cue;
+        drawTrail = positionStim;
         
         if ~positionStim
             origTargetPos = targetPos;
@@ -106,33 +111,39 @@ switch phaseRecords(phaseNum).phaseType
             end
         end
         
+        trailColor = white;
+        
         if doWalls
             wallRect = destRect; %[left top right bottom]
-            if dynamicDetails.target > 0  == ~strcmp(s.stim,'flip')
-                ind = 1;
-            else
+            if dynamicDetails.target > 0  == strcmp(s.stim,'flip')
                 ind = 3;
+            else
+                ind = 1;
             end
             
             if strcmp(s.stim,'flip')
+                if isempty(wrongLoc)
+                    error('can''t flip without a wrongLoc')
+                end
                 wallRect(ind) = wrongLoc;
+                cueColor = black;
             else
                 wallRect(ind) = targetPos;
+                cueColor = white;
+                trailColor = black;
             end
             
             if diff(wallRect([1 3])) > 0
-                Screen('FillRect', window, white, wallRect);                
+                Screen('FillRect', window, white, wallRect);
             end
             
             if ~isempty(wrongLoc)
                 midRect = destRect;
-                midRect(ind) = wrongLoc;
+                ind = [1 3];
                 if dynamicDetails.target > 0
-                    ind = 3;
-                else
-                    ind = 1;
+                    ind = fliplr(ind);
                 end
-                midRect(ind) = targetPos;
+                midRect(ind) = [targetPos wrongLoc];
                 Screen('FillRect', window, grey, midRect);
                 if colorWalls
                     Screen('DrawLine', window, blue, wrongLoc, destRect(2), wrongLoc, destRect(4), width); %no smoothing?
@@ -141,6 +152,16 @@ switch phaseRecords(phaseNum).phaseType
             
             if colorWalls
                 Screen('DrawLine', window, red, targetPos, destRect(2), targetPos, destRect(4), width); %no smoothing?
+            end
+            
+            if s.cue
+                if exist('midRect','var')
+                    cueRect = midRect;
+                    cueRect([1 3]) = cueRect([1 3])+[1 -1].*width;
+                else
+                    error('can''t have cue without wrongLoc')
+                end
+                Screen('FillRect', window, cueColor, cueRect);
             end
         else
             try
@@ -173,15 +194,15 @@ switch phaseRecords(phaseNum).phaseType
         end
         
         if drawTrail
-            Screen('DrawDots', window, relPos, width, white, center, dotType);
+            Screen('DrawDots', window, relPos, width, trailColor, center, dotType);
             
             inds = repmat(2:size(relPos,2)-1,2,1);
-            Screen('DrawLines', window, relPos(:,[1 inds(:)' end]), width, white, center, smooth);
+            Screen('DrawLines', window, relPos(:,[1 inds(:)' end]), width, trailColor, center, smooth);
             
             Screen('DrawDots', window, relPos, centerWidth, blue, center, dotType);
         end
         
-        if ~positionStim
+        if ~positionStim && strcmp(s.positional,'HUD')
             pos = destRect(4)*.1;
             height = 20;
             coords = [origTargetPos, pos, origWrongLoc, pos];

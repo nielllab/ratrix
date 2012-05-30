@@ -13,8 +13,8 @@ if ~exist('drive','var') || isempty(drive)
     if local
         drive='C:';
     else
-        drive='\\mtrix5';
-        %drive = '\\jarmusch';
+        %drive='\\mtrix5';
+        drive = '\\jarmusch';
     end
 end
 
@@ -290,8 +290,11 @@ targetLocation = [s.target];
 %TODO: flag correction trials (different marker on plot?)
 correctionTrial = [s.correctionTrial];
 
-gain = cell2mat(cellfun(@(x)doField(x,'gain',nan(2,1)),{records.stimManager},'UniformOutput',false));
 
+gain = cell2mat(cellfun(@(x)doField(x,'gain',nan(2,1)),{records.stimManager},'UniformOutput',false));
+stoppingSpeed = cell2mat(cellfun(@(x)doField(x,'slow',nan(2,1)),{records.stimManager},'UniformOutput',false));
+stoppingTime = cell2mat(cellfun(@(x)doField(x,'slowSecs',nan(1,1)),{records.stimManager},'UniformOutput',false));
+wallDist = cell2mat(cellfun(@(x)doField(x,'targetDistance',nan(1,1)),{records.stimManager},'UniformOutput',false));
 stim = cellfun(@(x)doField(x,'stim',nan),{records.stimManager},'UniformOutput',false);
 
 for i=1:size(bounds,1)
@@ -620,4 +623,41 @@ standardPlot(@plot,[],[],[],true);
 xlabel('trial')
 
 uploadFig(gcf,subj,length(x)/10,sps*200);
+
+plotSettings=1;
+if plotSettings
+    figure
+    subplot(4,1,1);
+    plot(gain(1,:),'g')
+    hold on
+     plot(gain(2,:),'y')
+    ylims = [0 max(max(gain))*head];
+    ylabel('gain')
+    title([subj ' -- ' datestr(now,'ddd, mmm dd HH:MM PM')])
+    standardPlot(@plot,[],false);
+    
+    subplot(4,1,2);
+    plot(stoppingSpeed(1,:),'g')
+    hold on
+    plot(stoppingSpeed(2,:),'y')
+    ylims = [0 max(max(stoppingSpeed))*head];
+    ylabel('stopping speed')
+    standardPlot(@plot,[],false);
+    
+    subplot(4,1,3);
+    plot(stoppingTime,'g');
+    hold on
+    ylims = [0 max(stoppingTime)*head];
+    ylabel('stopping time (secs)')
+    standardPlot(@plot,[],false);
+    
+    subplot(4,1,4);
+    plot(wallDist,'g')
+    hold on
+    ylims = [0 max(wallDist)*head];
+    ylabel('wall distance')
+    standardPlot(@plot,[],[],[],true);
+
+end
+
 end

@@ -46,7 +46,7 @@ if ~all(cellfun(@(f)f(right),{@isscalar @isnumeric @isreal @(x)x>0 @(x)x<start})
     error('has to be a real scalar smaller than previous')
 end
 
-calibrateLocal(num,base*[fact*fix 0 1],gap,precision);
+calibrateLocal(num,base*[fact 0 1/fix],gap,precision);
 left = input('\nenter the water level\n');
 
 if ~all(cellfun(@(f)f(left),{@isscalar @isnumeric @isreal @(x)x>0 @(x)x<right}))

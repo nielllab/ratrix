@@ -35,7 +35,7 @@ function input = pp(pins,output,slowChecks,port,addr)
 % you wrote, not input from external equipment.  use the status or control
 % register (pins 1, 14, 16-17) to read input.
 %
-% pp works for built-in as well as add-on (PCI) parallel ports
+% pp works for built-in as well as add-on (PCI/PCMCIA) parallel ports
 % if their drivers are installed.  on fedora 15, i found both to be
 % installed by default.
 %
@@ -44,6 +44,11 @@ function input = pp(pins,output,slowChecks,port,addr)
 % for fastest operation, you could call ppMex directly, but it does no input
 % validation, and depends on formatting provided by getPinInfo as performed 
 % in this file.
+%
+% ppMex is currently configured to use iopl/inb/outb, which require root
+% (ie, you need to start matlab with sudo).  we may someday switch to ppdev,
+% which is not supposed to require root, but the current prototype ppdev code 
+% seems to need it to read /dev/parport* anyway.
 %
 % Examples:
 % vals = pp(uint8([1 2 10 3]))                               % read some pins (slow)
@@ -69,8 +74,8 @@ useSscanf=true; %maybe textscan is faster?
 pportDir='/proc/sys/dev/parport/';
 
 if slowChecks
-    if ~isunix
-        error('only runs on unix')
+    if ~isunix || ismac %IsLinux probably more appropriate, but requires psychtoolbox
+        error('only runs on linux')
     end
     
     if ~isvector(pins) || ~isinteger(pins) || ~all(pins>0) || ~all(pins<=17) || length(unique(pins))<length(pins)
@@ -179,17 +184,25 @@ for i=1:length(ports)
     if addr(i)==0 || slowChecks
         [s a]=unix([base 'base-addr']);
         if s~=0
-            error('couldn''t cat base-adddr')
+            error('couldn''t cat base-addr')
         end
         if useSscanf
-            [a, count, errmsg] = sscanf(a, '%u 0');
+            [a, count, errmsg] = sscanf(a, '%u %*u'); 
+            % the second number is always 0 for me (ubuntu 11/fedora 15), 
+            % but kkd reported a 1912 on parport0 for his machine (ubuntu 12.04).  
+            % according to http://www.kernel.org/doc/Documentation/parport.txt 
+            % this is just another address for the port?  what's it for?
             if count==1 && isempty(errmsg) && ~isempty(a)
                 a=uint64(a);
             else
+                a
+                count
+                errmsg
+                [s a]=unix([base 'base-addr'])
                 error('bad addr')
             end
         else
-            a = textscan(a, '%u64 0');
+            a = textscan(a, '%u64 %*u64');
             if ~isempty(a{1})
                 a=a{1};
             else

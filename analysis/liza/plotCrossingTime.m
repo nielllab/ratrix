@@ -1,8 +1,29 @@
-function plotCrossingTime(subj)
+function plotCrossingTime(subj,drive)
+addpath(fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))),'bootstrap'));
+setupEnvironment;
+
 dbstop if error
 
 if ~exist('subj','var') || isempty(subj)
     subj = 'test';
+end
+
+if ~exist('drive','var') || isempty(drive)
+    local = false;
+    if local
+        drive='C:';
+    else
+        drive='\\mtrix5';
+        %drive = '\\jarmusch';
+    end
+end
+
+if IsWin
+    recordPath = fullfile(drive,'Users','nlab');
+elseif ismac && local
+    recordPath = [filesep fullfile('Users','eflister')];
+else
+    error('unsupported')
 end
 
 %for some reason, compiling these records is failing
@@ -10,19 +31,6 @@ end
 %most of the work in this file does what CompileTrialRecords does
 
 %get trial records in the right order
-if ismac
-    recordPath = [filesep fullfile('Users','eflister')];
-else
-    local = false;
-    if local
-        drive='C:';
-    else
-        drive='\\mtrix5';  
-        %drive = '\\jarmusch';
-    end
-    recordPath = fullfile(drive,'Users','nlab');
-end
-
 recordPath = fullfile(recordPath,'Desktop','ballData','PermanentTrialRecordStore',subj);
 
 d=dir(fileparts(recordPath));
@@ -30,6 +38,10 @@ fprintf('available subjects:\n');
 {d([d.isdir] & ~ismember({d.name},{'.','..'})).name}
 
 files = dir(fullfile(recordPath,'trialRecords_*.mat'));
+
+if isempty(files)
+    error('no records for that subject')
+end
 
 bounds = cell2mat(cellfun(@(x)textscan(x,'trialRecords_%u-%u_%*s.mat','CollectOutput',true),{files.name}'));
 [~,ord] = sort(bounds(:,1));
@@ -61,7 +73,7 @@ end
 
 startTimes = datenum(cell2mat({records.date}'));
 d = diff(startTimes);
-sessions = find(d > .02); %this gives us session boundaries whenever there was a half hour gap in the trial start times
+sessions = find(d > .5/24); %this gives us session boundaries whenever there was a half hour gap in the trial start times
 if ~all(d > 0)
     error('records don''t show increasing start times')
 end
@@ -122,7 +134,7 @@ end
         end
         
         phasesDone = false(1,3);
-        slowT=[]; %%% 
+        slowT=[];
         
         for i=1:length(x)
             if ~all(phasesDone(2:i-1))
@@ -147,14 +159,13 @@ end
             switch x(i).phaseType
                 case 'pre-request'
                     setPhase(1);
-                    track = doField(x(i).dynamicDetails,'slowTrack');
-                    if ~isempty(track)
-                        slowT = track(1,:);
-                    else
-                        slowT=[];
+                    slowT = doField(x(i).dynamicDetails,'slowTrack');
+                    if ~isempty(slowT)
+                        slowT = slowT(1,:); %for now we just consider time, not space
+                        if ~all(diff(slowT)>0) || any(isnan(slowT))
+                            error('slow timestamps not increasing or has nans')
+                        end
                     end
-                    % TODO: here's where you should add analysis of the "slow" track
-                    % load in the track from this phase following example from the discrim phase below
                 case 'discrim'
                     setPhase(2);
                     
@@ -204,25 +215,26 @@ end
                 error('duplicate phase!')
             end
         end
-        
-        function out = doField(x,f)
-            if isfield(x,f)
-                out = x.(f);
-            else
-                out = [];
-            end
-        end
     end
 actualRewards = cell2mat(actualRewards);
+
+    function out = doField(x,f,d)
+        if ~exist('d','var')
+            d = [];
+        end
+        if isfield(x,f)
+            out = x.(f);
+        else
+            out = d;
+        end
+    end
 
 if ~all(cellfun(@(x,y)length(x)==size(y,2),times,track))
     error('times and track didn''t have same dimension')
 end
 
     function d = getDurFromT(t)
-        %no entry was made if there was no motion (and there were missed frames), so the raw number of entries slightly distorts actual duration
-        len = cellfun(@length,t);
-         t = cellfun(@fixTimes,t,'UniformOutput',false);
+        t = cellfun(@fixTimes,t,'UniformOutput',false);
         function x=fixTimes(x)
             if isempty(x)
                 x=[0 0]; %diff(0) is [];
@@ -232,8 +244,10 @@ end
     end
 
 dur = getDurFromT(times);
-
 stopDur = getDurFromT(stopTimes);
+if ~all(find(stopDur<=0) == find(cellfun(@isempty,stopTimes)))
+    error('some stopDurs had nonempty stopTimes')
+end
 
 % i'm seeing a lot of trials (12%) that have only one timestamp
 if false %this shows that position really is past the wall on the first timestamp
@@ -242,9 +256,8 @@ if false %this shows that position really is past the wall on the first timestam
     plot(x(1,:),x(2,:),'.')
 end
 
-
 %hack oom
-clear fullRecs
+fullRecs=rmfield(fullRecs,'trialRecords');
 records=rmfield(records,'phaseRecords');
 
 % clear t
@@ -265,7 +278,7 @@ records=rmfield(records,'phaseRecords');
 records = arrayfun(@fixStimDetails,records);
     function x=fixStimDetails(x)
         if ~isfield(x.stimDetails,'correctionTrial')
-            x.stimDetails.correctionTrial = [];
+            x.stimDetails.correctionTrial = nan; %earlier version didn't have correction trials
         end
     end
 
@@ -273,6 +286,30 @@ records = arrayfun(@fixStimDetails,records);
 s = [records.stimDetails];
 timeout = [s.nFrames];
 targetLocation = [s.target];
+
+%TODO: flag correction trials (different marker on plot?)
+correctionTrial = [s.correctionTrial];
+
+gain = cell2mat(cellfun(@(x)doField(x,'gain',nan(2,1)),{records.stimManager},'UniformOutput',false));
+
+stim = cellfun(@(x)doField(x,'stim',nan),{records.stimManager},'UniformOutput',false);
+
+for i=1:size(bounds,1)
+    if ismember('stimManager.stim',fullRecs(i).fieldsInLUT)
+        for x=bounds(i,1):bounds(i,2)
+            if isscalar(stim{x}) && isreal(stim{x}) && stim{x}>0 && stim{x}<=length(fullRecs(i).sessionLUT) && mod(stim{x},1)==0 % mod(.,1)==0 checks for float integers
+                %all(cellfun(@(f)f(stim{x}),{@isscalar @isreal})) %too slow
+                stim{x}=fullRecs(i).sessionLUT{stim{x}};
+            else
+                stim{x}
+                class(stim{x})
+                fullRecs(i).sessionLUT
+                error('LUT problem')
+            end
+        end
+    end
+end
+flip = strcmp(stim,'flip');
 
 if ~all(cellfun(@(x,y)isempty(x) || x==y,nFrames,mat2cell(timeout,1,ones(1,length(timeout))))) % this was the limit on the trial length -- the # of position changes
     error('nFrames didn''t match timeout')
@@ -312,7 +349,7 @@ classes(res==1 & strcmp('correct'  ,results) & ~manualRewards) = 2;
 classes(res==0 & strcmp('timedout' ,results) & ~manualRewards) = 3;
 
 choiceSide = (sign(targetLocation).*sign(classes-1.5) +1)/2;  %%% flip target side if you got it wrong, then 0 = left, 1=right
-choiceSide(classes==3)=NaN;
+choiceSide(classes==3)=nan;
 
 cs = 1:3; % unique(classes(~isnan(classes))); %bug when you have no exemplars of one of the categories
 
@@ -347,22 +384,19 @@ n = 50;
 
 for i=1:length(cs)
     tDur{i} = classes==cs(i);
-    slidingAvg{i} = savg(dur(tDur{i}),n);
+    % slidingAvg{i} = savg(dur(tDur{i}),n);
     pTiles{i} = prctile(window(pad(dur(tDur{i}),n,@nan),n),25*[-1 0 1]+50);
 end
 
-    function [x pci] = getPCI(alpha,inds,res)        
+    function [x pci] = getPCI(alpha,inds,res)
         [~, pci] = binofit(sum(window(res(inds),n)),n,alpha);
         x=trialNums(inds);
         x=x(~isnan(pad(zeros(1,size(pci,1)),n,@nan)));
     end
 
-
-rInds = res~=2 & ~manualRewards;
-[x pci] =getPCI(0.05,rInds,res);
-        
-sideInds = ~isnan(choiceSide);
-[sidex sidepci] = getPCI(0.05,sideInds,choiceSide);
+alpha=.05;
+[x pci] = getPCI(alpha,res~=2 & ~manualRewards,res);
+[sidex sidepci] = getPCI(alpha,~isnan(choiceSide),choiceSide);
 
 %dig out the reward size we intended to give
 r = [records.reinforcementManager];
@@ -372,37 +406,62 @@ intendedRewards = [r.rewardSizeULorMS];
 s = [records.station];
 ifis = [s.ifi];
 
-
 %plot some stuff!
 close all
-n = 5;
+sps = 4;
 
-dotSize=20;
 cm = [1 0 0;0 1 0;.9 .9 0]; %red for incorrects, green for corrects, yellow for timeouts
 grey = .85*ones(1,3);
-transparency = .2;
 head = 1.1;
+dotSize = 4;
 
-subplot(n,1,1)
+doBlack = true;
+if doBlack
+    colordef black
+    transparency = .5;
+    bw = 'w';
+else
+    transparency = .2;
+    bw = 'k';
+end
+
+subplot(sps,1,1)
 correctPlot(actualRewards);
 hold on
-plot(trialNums,intendedRewards,'k')
+plot(trialNums,intendedRewards,bw)
 ylims = [0 max(actualRewards)*head];
 ylabel('reward size (ms)')
-title(subj)
+title([subj ' -- ' datestr(now,'ddd, mmm dd HH:MM PM')])
 standardPlot(@plot,[],false,true);
 
-    function standardPlot(f,ticks,lines,dates)
-        arrayfun(@(x)f(x*ones(1,2),ylims,'Color',grey   ),sessions);        
+    function standardPlot(f,ticks,lines,dates,xticks)
+        if length(ylims)>2
+            yvals=ylims;
+            ylims=[1 length(ylims)];
+        end
+        
+        arrayfun(@(x)f(x*ones(1,2),ylims,'Color',grey   ),sessions);
         arrayfun(@(x)f(x*ones(1,2),ylims,'Color',[1 0 0]),chunks  );
         
+        if exist('dates','var') && ~isempty(dates) && dates
+            tn = [0; sessions]+1;
+            ds = diff([tn-1; length(startTimes)]);
+            ss = datevec(startTimes(tn));
+            for sess = 1:length(ds)
+                if ds(sess)>15
+                    ref = startTimes(tn(sess));
+                    dayStr=datestr(ref,'ddd');
+                    if sess==1 || diff(ss(sess+[-1 0],2))
+                        monthStr=[datestr(ref,'mmm') ' '];
+                    else
+                        monthStr='';
+                    end
+                    anno=sprintf('%s \\bf%s%d \\rm%d',dayStr,monthStr,ss(sess,3),ds(sess));
+                    text(tn(sess)+.5*ds(sess),0.1*ylims(2),anno,'FontSize',9,'Rotation',90,'FontName','FixedWidth');
+                end
+            end
+        end
         
-        datestr(startTimes(sessions+1))
-        if exist('dates','var') && dates
-            for sess = 1:length(sessions)    
-            text(sessions(sess)+50,0.1*ylims(2),datestr(startTimes(sessions(sess)+1),2),'FontSize',8,'Rotation',90,'FontName','FixedWidth');
-            end  
-        end 
         if isequal(f,@semilogyEF) %they couldn't overload == ?
             ylims = log(ylims);
         end
@@ -411,10 +470,28 @@ standardPlot(@plot,[],false,true);
         xlim([1 length(records)])
         
         if exist('ticks','var') && ~isempty(ticks)
-            set(gca,'YTick',log(ticks),'YTickLabel',ticks);
-            if exist('lines','var') && lines
+            if ~exist('yvals','var')
+                if isequal(f,@semilogyEF) %they couldn't overload == ?
+                    ltics = log(ticks);
+                else
+                    ltics = ticks;
+                end
+            else
+                ltics=interp1(yvals,1:length(yvals),ticks);
+            end
+            set(gca,'YTick',ltics,'YTickLabel',ticks);
+            
+            if exist('lines','var') && ~isempty(lines) && lines
+                if exist('yvals','var')
+                    error('not implemented')
+                end
                 f(trialNums,repmat(ticks,length(trialNums),1),'Color',grey);
             end
+        end
+        
+        if ~exist('xticks','var') || isempty(xticks) || ~xticks
+            set(gca,'XTick',[])
+            set(gca,'XTickLabel',[]) %otherwise, x10^4 can show up (see http://www.mathworks.com/matlabcentral/answers/4515-removing-ticks)
         end
     end
 
@@ -432,53 +509,89 @@ standardPlot(@plot,[],false,true);
         else
             nzInds = true(size(x));
         end
-        scatter(tns(nzInds),x(nzInds),dotSize,cm(good(nzInds),:),'.');
-        if ~all(nzInds)
+        
+        u=unique(good);
+        for i=1:length(u)
+            inds = nzInds & good==u(i);
+            plot(tns(inds),x(inds),'.','Color',cm(u(i),:),'MarkerSize',dotSize);
             hold on
-            scatter(tns(~nzInds),z*ones(1,sum(~nzInds)),dotSize,cm(good(~nzInds),:),'+');
+            if ~all(nzInds)
+                inds = ~nzInds & good==u(i);
+                plot(tns(inds),z*ones(1,sum(inds)),'+','Color',cm(u(i),:),'MarkerSize',dotSize);
+            end
         end
     end
 
-    function rangePlot(x,y,c)
+    function rangePlot(x,y,c,t)
+        if ~exist('t','var') || isempty(t)
+            t=transparency;
+        end
         if exist('doLog','var') && doLog
             y=log(y);
         end
         if ~exist('c','var') || isempty(c)
             c=zeros(1,3);
         end
-        fill([x fliplr(x)],[y(1,:) fliplr(y(2,:))],c,'FaceAlpha',transparency,'LineStyle','none');
+        fill([x fliplr(x)],[y(1,:) fliplr(y(2,:))],c,'FaceAlpha',t,'LineStyle','none');
     end
 
     function semilogyEF(x,y,varargin)
         %using semilogy causes transparency in this AND next plot to fail!  using plot resolves it.  set(gca,'YScale','log') doesn't
-        
         plot(x,log(y),varargin{:});
     end
 
     function x=fix0(x)
-        x=min(x(x~=0))/10;
+        x=min(x(x~=0))/2;
     end
-% 
-% subplot(n,1,2)
-% doLog = true;
-% correctPlot(len); % k-q's res=2 often have len < timeout
-% hold on
-% semilogyEF(trialNums,timeout,'k') %why does this seem to be under the scatter?
-% ylims = [fix0(len) max(len)*head];
-% ylabel('num positions')
-% standardPlot(@semilogyEF,[1 3 10 30 100 300]);
 
-doLog=true;
-subplot(n,1,2)
-eps2 = min(stopDur(stopDur>0))
-hold off
-scatter(trialNums(stopDur>0),log(stopDur(stopDur>0)),dotSize,'.')
-ylims = [eps2 max(stopDur)*head];
+subplot(sps,1,2)
+doLog = true;
+eps2 = min(stopDur(stopDur>0));
+
+stopType = 'ptile';
+switch stopType
+    case 'density'
+        k=100;
+        bins = logspace(log10(eps2),log10(max(stopDur(:))),k);
+        s = histc(window(pad(stopDur,n,@nan),n),bins);
+        imagesc(log(s))
+        axis xy
+    case 'ptile'
+        cmj = colormap('jet');
+        cmj = [cmj;flipud(cmj)];
+        k = size(cmj,1);
+        s = prctile(window(pad(stopDur,n,@nan),n),linspace(0,100,k));
+        
+        eps2=min(s(s>0));
+        s(s<=0)=eps2/10;
+                
+        if false %patch
+            for i=1:size(s,1)-1
+                rangePlot(trialNums,s(i+[0 1],:),cmj(ceil(size(cmj,1)*i/(size(s,1)-1)),:),1);
+                hold on
+            end
+        else %contour
+            for i=ceil(linspace(1,size(s,1),11))
+                semilogyEF(trialNums,s(i,:),'Color',cmj(ceil(size(cmj,1)*i/size(s,1)),:));
+                hold on
+            end
+        end
+    otherwise
+        semilogyEF(trialNums(stopDur>0),stopDur(stopDur>0),'.','MarkerSize',dotSize)
+end
+switch stopType
+    case 'density'
+        ylims = bins;
+        plotter = @plot;
+    otherwise
+        ylims = [eps2 max(stopDur)*head];
+        plotter = @semilogyEF;
+end
 hold on
+standardPlot(plotter,[100 1000 10000 30000]);
 ylabel('stopping time')
-standardPlot(@semilogyEF,[100 1000 10000 30000],false,true);
 
-subplot(n,1,3)
+subplot(sps,1,3)
 eps2=fix0(dur(~isnan(classes)));
 correctPlot(dur);
 hold on
@@ -487,27 +600,24 @@ for i=1:length(cs)
     pTiles{i}(pTiles{i}==0)=eps2;
     rangePlot(xd,pTiles{i}([1 end],:),cm(i,:));
 end
-ylims = [eps2 max(dur)*head];
+ylims = [eps2 prctile(dur,99)*head];
 ylabel('ms')
 standardPlot(@semilogyEF,[.01 .03 .1 .3 1 3 10]*1000,true);
 doLog = false;
 
-subplot(n,1,4)
-rangePlot(x,pci');
+subplot(sps,1,4)
+rangePlot(x,pci','r');
 hold on
-plot(x,.5*ones(1,length(x)),'k')
+rangePlot(sidex,sidepci',bw);
+plot(x,.5*ones(1,length(x)),bw)
+if any(flip)
+    plot(trialNums(flip),.5,'bo')
+end
 ylims = [0 1];
-ylabel('% correct')
-standardPlot(@plot);
-xlabel('trial')
-
-subplot(n,1,5)
-rangePlot(sidex,sidepci');
-hold on
-plot(x,.5*ones(1,length(x)),'k')
-ylims = [0 1];
-ylabel('% to right')
-standardPlot(@plot);
+ylabel('% correct(r) rightward(k)')
+standardPlot(@plot,[],[],[],true);
 
 xlabel('trial')
+
+uploadFig(gcf,subj,length(x)/10,sps*200);
 end

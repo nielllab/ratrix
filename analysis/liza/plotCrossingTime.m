@@ -17,8 +17,8 @@ else
     if local
         drive='C:';
     else
-        %drive='\\mtrix5';  
-        drive = '\\jarmusch';
+        drive='\\mtrix5';  
+        %drive = '\\jarmusch';
     end
     recordPath = fullfile(drive,'Users','nlab');
 end

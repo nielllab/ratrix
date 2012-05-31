@@ -1,5 +1,5 @@
 function niellLabReport
-doBall=true;
+doBall=false;
 doBox=true;
 
 if doBall
@@ -15,7 +15,7 @@ if doBall
 
         {'jarmusch'
             {
-            'ly01' %grating
+            'ly01' %grating (moved to mtrix6?)
             'ly03' %grating
             'ly04' %wall cue flip
             'ly08' %wall cue flip
@@ -41,6 +41,19 @@ if doBox
                     'n8lt' 
                     }
                 }
+                { {'mouse' '0512'} %spatial freq
+                    {
+                    'c1ln' 
+                    'c1lt' 
+                    'c2lt' 
+                    'c3ln' 
+                    }
+                }                
+                { 'wehr' %audio
+                    {
+                    '3499' %hasn't run yet?
+                    }
+                }
             }
         }
 
@@ -54,6 +67,14 @@ if doBox
                     'n5rt' 
                     }
                 }
+                { {'mouse' '0512'} %spatial freq
+                    {
+                    'c1rn' 
+                    'c1rt' 
+                    'c2rn' 
+                    'c2rt' 
+                    }
+                }  
                 { 'wehr' %audio
                     {
                     '3231' 
@@ -97,6 +118,7 @@ if doBox
                     {
                     '3236'
                     '3397'
+                    '3500'
                     }
                 }      
             }
@@ -119,7 +141,13 @@ close all
         selection.subjects = {subj};
         selection.titles = selection.subjects;
         close all
-        f = analysisPlotter(selection,['\\' box '\Users\nlab\Desktop\' d 'Data\CompiledTrialRecords\'],false);
+        if iscell(d)
+            s=d{2};
+            d=d{1};
+        else
+            s='';
+        end
+        f = analysisPlotter(selection,['\\' box '\Users\nlab\Desktop\' d 'Data' s '\CompiledTrialRecords\'],false);
         width = get(get(f,'Children'),'XLim');
         uploadFig(f,subj,width(2)/10,200);
     end

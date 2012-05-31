@@ -127,8 +127,8 @@ end
 %from the discrimination phase, we take the x,y,t track location measurements
 %entries in 'times' are in seconds, corresponding to x,y entries in 'track'
 %we also pull out some other info just to do some consistency checking later
-[actualRewards nFrames times targ track results stopTimes] = cellfun(@(x)g(x),{records.phaseRecords},'UniformOutput',false);
-    function [a n t targ track r slowT]=g(x)
+[actualRewards nFrames times targ track results stopTimes actualReqRewards] = cellfun(@(x)g(x),{records.phaseRecords},'UniformOutput',false);
+    function [a n t targ track r slowT q]=g(x)
         if ~any(length(x)==[2 3])
             error('expected 2 or 3 phases')
         end
@@ -174,6 +174,14 @@ end
                     targ  = doField(x(i).dynamicDetails,'target');
                     track = doField(x(i).dynamicDetails,'track');
                     r     = doField(x(i).dynamicDetails,'result');
+                    q = x(i).responseDetails.requestRewardDurationActual;
+                    if isempty(q)
+                        q=nan;
+                    elseif isscalar(q)
+                        q=q{1};
+                    else
+                        error('expected empty or scalar cell')
+                    end
                     
                     if ~all(diff(t(~isnan(t)))>0)
                         error('track timestamps aren''t increasing')
@@ -216,7 +224,8 @@ end
             end
         end
     end
-actualRewards = cell2mat(actualRewards);
+actualRewards    = cell2mat(actualRewards   );
+actualReqRewards = cell2mat(actualReqRewards);
 
     function out = doField(x,f,d)
         if ~exist('d','var')
@@ -290,12 +299,21 @@ targetLocation = [s.target];
 %TODO: flag correction trials (different marker on plot?)
 correctionTrial = [s.correctionTrial];
 
+    function out = extract(f,d,m,trans)
+        out = cellfun(@(x)doField(x,f,d),{records.stimManager},'UniformOutput',false);
+        if trans
+            out = out';
+        end
+        if m
+            out = cell2mat(out);
+        end
+    end
 
-gain = cell2mat(cellfun(@(x)doField(x,'gain',nan(2,1)),{records.stimManager},'UniformOutput',false));
-stoppingSpeed = cell2mat(cellfun(@(x)doField(x,'slow',nan(2,1)),{records.stimManager},'UniformOutput',false));
-stoppingTime = cell2mat(cellfun(@(x)doField(x,'slowSecs',nan(1,1)),{records.stimManager},'UniformOutput',false));
-wallDist = cell2mat(cellfun(@(x)doField(x,'targetDistance',nan(1,1)),{records.stimManager},'UniformOutput',false));
-stim = cellfun(@(x)doField(x,'stim',nan),{records.stimManager},'UniformOutput',false);
+gain          = extract('gain'          ,nan(2,1),true ,false); % cell2mat(cellfun(@(x)doField(x,'gain'          ,nan(2,1)),{records.stimManager},'UniformOutput',false));
+stoppingSpeed = extract('slow'          ,nan(2,1),true ,false); % cell2mat(cellfun(@(x)doField(x,'slow'          ,nan(2,1)),{records.stimManager},'UniformOutput',false));
+stoppingTime  = extract('slowSecs'      ,nan     ,true ,false); % cell2mat(cellfun(@(x)doField(x,'slowSecs'      ,nan     ),{records.stimManager},'UniformOutput',false));
+wallDist      = extract('targetDistance',nan(1,2),true ,true ); % cell2mat(cellfun(@(x)doField(x,'targetDistance',nan(1,2)),{records.stimManager},'UniformOutput',false)');
+stim          = extract('stim'          ,nan     ,false,false); %          cellfun(@(x)doField(x,'stim'          ,nan     ),{records.stimManager},'UniformOutput',false);
 
 for i=1:size(bounds,1)
     if ismember('stimManager.stim',fullRecs(i).fieldsInLUT)
@@ -432,7 +450,8 @@ subplot(sps,1,1)
 correctPlot(actualRewards);
 hold on
 plot(trialNums,intendedRewards,bw)
-ylims = [0 max(actualRewards)*head];
+plot(trialNums,actualReqRewards,'co','MarkerSize',dotSize)
+ylims = [0 max([actualRewards actualReqRewards])*head];
 ylabel('reward size (ms)')
 title([subj ' -- ' datestr(now,'ddd, mmm dd HH:MM PM')])
 standardPlot(@plot,[],false,true);
@@ -460,7 +479,7 @@ standardPlot(@plot,[],false,true);
                         monthStr='';
                     end
                     anno=sprintf('%s \\bf%s%d \\rm%d',dayStr,monthStr,ss(sess,3),ds(sess));
-                    text(tn(sess)+.5*ds(sess),0.1*ylims(2),anno,'FontSize',9,'Rotation',90,'FontName','FixedWidth');
+                    text(tn(sess)+.5*ds(sess),ylims(1)+0.1*range(ylims),anno,'FontSize',9,'Rotation',90,'FontName','FixedWidth');
                 end
             end
         end
@@ -567,7 +586,7 @@ switch stopType
         
         eps2=min(s(s>0));
         s(s<=0)=eps2/10;
-                
+        
         if false %patch
             for i=1:size(s,1)-1
                 rangePlot(trialNums,s(i+[0 1],:),cmj(ceil(size(cmj,1)*i/(size(s,1)-1)),:),1);
@@ -621,43 +640,37 @@ ylabel('% correct(r) rightward(k)')
 standardPlot(@plot,[],[],[],true);
 
 xlabel('trial')
-
 uploadFig(gcf,subj,length(x)/10,sps*200);
 
-plotSettings=1;
+    function out = getLims(in)
+        out = (range(in(:))+.1)*(head-1)*[-1 1] + cellfun(@(f) f(in(:)),{@min @max}); %+.1 ugly for when in is constant so range is zero
+    end
+
+plotSettings = true;
 if plotSettings
-    figure
-    subplot(4,1,1);
-    plot(gain(1,:),'g')
-    hold on
-     plot(gain(2,:),'y')
-    ylims = [0 max(max(gain))*head];
-    ylabel('gain')
-    title([subj ' -- ' datestr(now,'ddd, mmm dd HH:MM PM')])
-    standardPlot(@plot,[],false);
+    fig=figure;
+    d=3;
     
-    subplot(4,1,2);
-    plot(stoppingSpeed(1,:),'g')
-    hold on
-    plot(stoppingSpeed(2,:),'y')
-    ylims = [0 max(max(stoppingSpeed))*head];
-    ylabel('stopping speed')
-    standardPlot(@plot,[],false);
+    plots = {gain    ,'gain'           ;
+        stoppingSpeed,'stop speed'     ;
+        stoppingTime ,'stop time (s)'  ;
+        wallDist'    ,'target distance'};
     
-    subplot(4,1,3);
-    plot(stoppingTime,'g');
-    hold on
-    ylims = [0 max(stoppingTime)*head];
-    ylabel('stopping time (secs)')
-    standardPlot(@plot,[],false);
+    n = size(plots,1);
+    for i=1:n
+        subplot(n,1,i)
+        x=plot(trialNums,plots{i,1}');
+        arrayfun(@(x,y) set(x,'LineWidth',y),x,(d-1)+(d*(length(x)-1):-d:0)');
+        hold on
+        ylims = getLims(plots{i,1});
+        ylabel(plots{i,2})
+        standardPlot(@plot,[],[],i==1,i==n); %(f,ticks,lines,dates,xticks)
+        if i==1
+            title([subj ' -- ' datestr(now,'ddd, mmm dd HH:MM PM')])
+        end
+    end
     
-    subplot(4,1,4);
-    plot(wallDist,'g')
-    hold on
-    ylims = [0 max(wallDist)*head];
-    ylabel('wall distance')
-    standardPlot(@plot,[],[],[],true);
-
+    xlabel('trial')
+    uploadFig(fig,subj,max(trialNums)/10,sps*200,'params');
 end
-
 end

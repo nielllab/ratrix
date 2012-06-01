@@ -57,6 +57,7 @@ for i=1:length(files)
     fullRecs(i) = load(fullfile(recordPath,files(i).name)); %loading files in this format is slow, that's why we normally use compiled records
     newRecNum = recNum + length(fullRecs(i).trialRecords);
     records(recNum+1:newRecNum) = fullRecs(i).trialRecords; %extending this struct array is slow, another reason we normally use compiled records
+    fullRecs(i).trialRecords = []; %prevent oom
     recNum = newRecNum;
     
     if bounds(i,2) ~= recNum
@@ -266,7 +267,6 @@ if false %this shows that position really is past the wall on the first timestam
 end
 
 %hack oom
-fullRecs=rmfield(fullRecs,'trialRecords');
 records=rmfield(records,'phaseRecords');
 
 % clear t
@@ -309,11 +309,11 @@ correctionTrial = [s.correctionTrial];
         end
     end
 
-gain          = extract('gain'          ,nan(2,1),true ,false); % cell2mat(cellfun(@(x)doField(x,'gain'          ,nan(2,1)),{records.stimManager},'UniformOutput',false));
-stoppingSpeed = extract('slow'          ,nan(2,1),true ,false); % cell2mat(cellfun(@(x)doField(x,'slow'          ,nan(2,1)),{records.stimManager},'UniformOutput',false));
-stoppingTime  = extract('slowSecs'      ,nan     ,true ,false); % cell2mat(cellfun(@(x)doField(x,'slowSecs'      ,nan     ),{records.stimManager},'UniformOutput',false));
-wallDist      = extract('targetDistance',nan(1,2),true ,true ); % cell2mat(cellfun(@(x)doField(x,'targetDistance',nan(1,2)),{records.stimManager},'UniformOutput',false)');
-stim          = extract('stim'          ,nan     ,false,false); %          cellfun(@(x)doField(x,'stim'          ,nan     ),{records.stimManager},'UniformOutput',false);
+gain          = extract('gain'          ,nan(2,1),true ,false);
+stoppingSpeed = extract('slow'          ,nan(2,1),true ,false);
+stoppingTime  = extract('slowSecs'      ,nan     ,true ,false);
+wallDist      = extract('targetDistance',nan(1,2),true ,true ); %apparently we never had single entries here?
+stim          = extract('stim'          ,nan     ,false,false);
 
 for i=1:size(bounds,1)
     if ismember('stimManager.stim',fullRecs(i).fieldsInLUT)
@@ -450,7 +450,7 @@ subplot(sps,1,1)
 correctPlot(actualRewards);
 hold on
 plot(trialNums,intendedRewards,bw)
-plot(trialNums,actualReqRewards,'co','MarkerSize',dotSize)
+plot(trialNums,actualReqRewards,'m.','MarkerSize',dotSize)
 ylims = [0 max([actualRewards actualReqRewards])*head];
 ylabel('reward size (ms)')
 title([subj ' -- ' datestr(now,'ddd, mmm dd HH:MM PM')])
@@ -479,7 +479,7 @@ standardPlot(@plot,[],false,true);
                         monthStr='';
                     end
                     anno=sprintf('%s \\bf%s%d \\rm%d',dayStr,monthStr,ss(sess,3),ds(sess));
-                    text(tn(sess)+.5*ds(sess),ylims(1)+0.1*range(ylims),anno,'FontSize',9,'Rotation',90,'FontName','FixedWidth');
+                    text(tn(sess)+.5*ds(sess),ylims(1)+.1*range(ylims),anno,'FontSize',9,'Rotation',90,'FontName','FixedWidth');
                 end
             end
         end

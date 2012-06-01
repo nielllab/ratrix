@@ -1,5 +1,5 @@
 function niellLabReport
-doBall=false;
+doBall=true;
 doBox=true;
 
 if doBall
@@ -12,13 +12,17 @@ if doBall
             'ly09'
             }
         }
-
         {'jarmusch'
             {
-            'ly01' %grating (moved to mtrix6?)
+            % 'ly01' %grating (moved to mtrix6?)
             'ly03' %grating
             'ly04' %wall cue flip
             'ly08' %wall cue flip
+            }
+        }
+        {'mtrix6'
+            {
+            'ly01'
             }
         }
     };

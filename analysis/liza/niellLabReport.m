@@ -152,8 +152,10 @@ close all
             s='';
         end
         f = analysisPlotter(selection,['\\' box '\Users\nlab\Desktop\' d 'Data' s '\CompiledTrialRecords\'],false);
-        width = get(get(f,'Children'),'XLim');
-        uploadFig(f,subj,width(2)/10,200);
+        if ~isempty(f)
+            width = get(get(f,'Children'),'XLim');
+            uploadFig(f,subj,width(2)/10,200);
+        end
     end
 
 end

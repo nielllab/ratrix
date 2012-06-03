@@ -29,7 +29,7 @@ if IsWin
     % http://www.mathworks.com/access/helpdesk/help/techdoc/ref/print.html#f30-534567
     dpi=300;
     sfx = 'png';
-    latest = [fn '.' num2str(dpi) '. ' sfx];
+    latest = [fn '.' num2str(dpi) '.' sfx];
 %     try %print/saveas for png doesn't work over remote desktop (unless Visible is off?)
         print(f,'-dpng',['-r' num2str(dpi)],'-opengl',latest); %opengl for transparency -- probably unnecessary cuz seems to be automatically set when needed
         saveas(f,[fn '.' sfx]); %resolution not controllable

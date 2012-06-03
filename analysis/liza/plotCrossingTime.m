@@ -1,6 +1,6 @@
 function plotCrossingTime(subj,drive)
-addpath(fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))),'bootstrap'));
-setupEnvironment;
+%addpath(fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))),'bootstrap'));
+%setupEnvironment;
 
 dbstop if error
 
@@ -19,7 +19,7 @@ if ~exist('drive','var') || isempty(drive)
 end
 
 if IsWin
-    recordPath = fullfile(drive,'Users','nlab');
+    recordPath = fullfile(drive,'Users','nlab');    
 elseif ismac && local
     recordPath = [filesep fullfile('Users','eflister')];
 else
@@ -43,10 +43,25 @@ if isempty(files)
     error('no records for that subject')
 end
 
-bounds = cell2mat(cellfun(@(x)textscan(x,'trialRecords_%u-%u_%*s.mat','CollectOutput',true),{files.name}'));
+bounds = cell2mat(cellfun(@(x)textscan(x,'trialRecords_%u-%u_%uT%u-%uT%u.mat','CollectOutput',true),{files.name}'));
 [~,ord] = sort(bounds(:,1));
 bounds = bounds(ord,:);
 files = files(ord);
+
+if IsWin
+    fd = ['\\reichardt\figures\' subj];
+    d=dir([fd '\*.300.png']);
+    d=sort({d.name});
+    try %d may be empty
+        d=textscan(strtok(d{end},'.'),'%uT%u','CollectOutput',true);
+        d=d{1};
+        d = double(d) - double(bounds(end,5:6));
+        if d(1)>0 || (d(1)==0 && d(2)>0)
+            fprintf('skipping - latest figures already generated (%s)\n',fd)
+            return
+        end
+    end
+end
 
 recNum = 0;
 for i=1:length(files)
@@ -65,6 +80,13 @@ for i=1:length(files)
     end
     
     fprintf('done with %d of %d\n',i,length(files));
+end
+
+if IsWin && false %takes too long (95sec local) to save (.25GB on disk, 1.8GB in memory), loading slow (73sec local) too
+    tic
+    save([fd '\latest.mat'],'fullRecs','records');
+    toc
+    keyboard
 end
 
 trialNums = [records.trialNumber];
@@ -331,6 +353,7 @@ for i=1:size(bounds,1)
     end
 end
 flip = strcmp(stim,'flip');
+rnd  = strcmp(stim,'rand');
 
 if ~all(cellfun(@(x,y)isempty(x) || x==y,nFrames,mat2cell(timeout,1,ones(1,length(timeout))))) % this was the limit on the trial length -- the # of position changes
     error('nFrames didn''t match timeout')
@@ -634,6 +657,9 @@ rangePlot(sidex,sidepci',bw);
 plot(x,.5*ones(1,length(x)),bw)
 if any(flip)
     plot(trialNums(flip),.5,'bo')
+end
+if any(rnd)
+    plot(trialNums(rnd),.5,'go')
 end
 ylims = [0 1];
 ylabel('% correct(r) rightward(k)')

@@ -34,3 +34,5 @@ setupDBPaths();
 %<i think there used to be references to addJavaComponents here?>
 %ListenChar(2);
 %FlushEvents('keyDown');
+
+fixSystemTime;

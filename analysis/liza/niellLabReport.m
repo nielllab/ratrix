@@ -1,4 +1,7 @@
 function niellLabReport
+addpath(fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))),'bootstrap'));
+setupEnvironment;
+
 doBall=true;
 doBox=true;
 
@@ -103,6 +106,7 @@ if doBox
                     '3233' 
                     '3337' 
                     '3398'
+                    '3500'
                     }
                 }   
             }
@@ -122,7 +126,7 @@ if doBox
                     {
                     '3236'
                     '3397'
-                    '3500'
+                    % '3500' %moved to mtrix3?
                     }
                 }      
             }

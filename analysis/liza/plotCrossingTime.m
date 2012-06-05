@@ -1,8 +1,12 @@
-function plotCrossingTime(subj,drive)
+function plotCrossingTime(subj,drive,force)
 %addpath(fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))),'bootstrap'));
 %setupEnvironment;
 
 dbstop if error
+
+if ~exist('force','var') || isempty(force)
+    force = false;
+end
 
 if ~exist('subj','var') || isempty(subj)
     subj = 'test';
@@ -19,7 +23,7 @@ if ~exist('drive','var') || isempty(drive)
 end
 
 if IsWin
-    recordPath = fullfile(drive,'Users','nlab');    
+    recordPath = fullfile(drive,'Users','nlab');
 elseif ismac && local
     recordPath = [filesep fullfile('Users','eflister')];
 else
@@ -48,7 +52,7 @@ bounds = cell2mat(cellfun(@(x)textscan(x,'trialRecords_%u-%u_%uT%u-%uT%u.mat','C
 bounds = bounds(ord,:);
 files = files(ord);
 
-if IsWin
+if ~force && IsWin
     fd = ['\\reichardt\figures\' subj];
     d=dir([fd '\*.300.png']);
     d=sort({d.name});
@@ -121,9 +125,9 @@ end
 result = {records.result};
 [~,loc] = ismember(result,unique(result));
 
-%this is a record of correct (true) or incorrect (false), but should be empty on 'manual kill' trials
+%this is a record of correct (true) or incorrect (false), but may be empty on 'manual kill' trials (unless k-q during reinforcement phase)
 t = [records.trialDetails];
-res = cellfun(@(x)f(x),{t.correct});
+res = cellfun(@f,{t.correct});
     function out=f(x)
         if isempty(x)
             out = 2;
@@ -135,7 +139,9 @@ res = cellfun(@(x)f(x),{t.correct});
     end
 
 if ~all((res == 2) == (loc == 1))
-    %hmm, test's trial 2257 (last one in file 23) is set to manual kill, but got a 0 for correct, instead of an empty.  how?
+    %hmm, test's trial 2257 (last one in file 23) is set to manual kill,
+    %but got a 0 for correct, instead of an empty.  maybe k-q during
+    %penalty timeout?
     inds = find((res == 2) ~= (loc == 1))
     res(inds)
     loc(inds)
@@ -148,10 +154,9 @@ end
 %these trials each have 2-3 phases -- a possible "slow" phase, a discrimination phase, and a reinforcement phase
 %we take the actual measured reward duration from the reinforcement phase (currently quantized to frame boundaries)
 %from the discrimination phase, we take the x,y,t track location measurements
-%entries in 'times' are in seconds, corresponding to x,y entries in 'track'
 %we also pull out some other info just to do some consistency checking later
-[actualRewards nFrames times targ track results stopTimes actualReqRewards] = cellfun(@(x)g(x),{records.phaseRecords},'UniformOutput',false);
-    function [a n t targ track r slowT q]=g(x)
+[actualRewards nFrames targ track results slowTrack actualReqRewards] = cellfun(@g,{records.phaseRecords},'UniformOutput',false);
+    function [a n targ track r slowT q]=g(x)
         if ~any(length(x)==[2 3])
             error('expected 2 or 3 phases')
         end
@@ -184,8 +189,7 @@ end
                     setPhase(1);
                     slowT = doField(x(i).dynamicDetails,'slowTrack');
                     if ~isempty(slowT)
-                        slowT = slowT(1,:); %for now we just consider time, not space
-                        if ~all(diff(slowT)>0) || any(isnan(slowT))
+                        if ~all(diff(slowT(1,:))>0) || any(isnan(slowT(:)))
                             error('slow timestamps not increasing or has nans')
                         end
                     end
@@ -223,9 +227,8 @@ end
                         if length(find(diff(isnan(t)))) > 1
                             error('should be at most one transition from non-nans to nans')
                         end
-                        t=t(~isnan(t));
-                        track=track(:,~isnan(t));
                     end
+                    track=[t(~isnan(t));track(:,~isnan(t))];
                 case 'reinforced'
                     setPhase(3);
                     
@@ -261,25 +264,15 @@ actualReqRewards = cell2mat(actualReqRewards);
         end
     end
 
-if ~all(cellfun(@(x,y)length(x)==size(y,2),times,track))
-    error('times and track didn''t have same dimension')
-end
-
+dur     = cellfun(@getDurFromT,track    );
+stopDur = cellfun(@getDurFromT,slowTrack);
     function d = getDurFromT(t)
-        t = cellfun(@fixTimes,t,'UniformOutput',false);
-        function x=fixTimes(x)
-            if isempty(x)
-                x=[0 0]; %diff(0) is [];
-            end
+        if isempty(t)
+            d=0;
+        else
+            d=diff(t(1,[1 end]));
         end
-        d = cellfun(@(x)1000*diff(x([1 end])),t);
     end
-
-dur = getDurFromT(times);
-stopDur = getDurFromT(stopTimes);
-if ~all(find(stopDur<=0) == find(cellfun(@isempty,stopTimes)))
-    error('some stopDurs had nonempty stopTimes')
-end
 
 % i'm seeing a lot of trials (12%) that have only one timestamp
 if false %this shows that position really is past the wall on the first timestamp
@@ -355,47 +348,26 @@ end
 flip = strcmp(stim,'flip');
 rnd  = strcmp(stim,'rand');
 
-if ~all(cellfun(@(x,y)isempty(x) || x==y,nFrames,mat2cell(timeout,1,ones(1,length(timeout))))) % this was the limit on the trial length -- the # of position changes
+if ~all(cellfun(@(x,y)isempty(x) || x==y,nFrames,num2cell(timeout))) % this was the limit on the trial length -- the # of position changes
     error('nFrames didn''t match timeout')
 end
 
-if ~all(cellfun(@(x,y)isempty(x) || x==y,targ,mat2cell(targetLocation,1,ones(1,length(targetLocation)))))
+if ~all(cellfun(@(x,y)isempty(x) || x==y,targ,num2cell(targetLocation)))
     error('targetLocation and targ didn''t match')
 end
-
-if ~all(cellfun(@isempty,results) == (res == 2))
-    error('empty results didn''t line up with manual kills')
-end
-
-if ~all(cellfun(@checkCorrect,results,mat2cell(res,1,ones(1,length(res)))))
-    error('correct/incorrect/timedout results didn''t line up with correctness')
-end
-
-    function out=checkCorrect(x,y)
-        switch x
-            case ''
-                out = y==2;
-            case 'correct'
-                out = y==1;
-            case {'incorrect','timedout'}
-                out = y==0;
-            otherwise
-                error('unexpected result')
-        end
-    end
 
 %this is set whenever you hit k-ctrl-# to manually open valve
 manualRewards = [records.containedForcedRewards];
 
-classes = nan(size(manualRewards));
-classes(res==0 & strcmp('incorrect',results) & ~manualRewards) = 1;
-classes(res==1 & strcmp('correct'  ,results) & ~manualRewards) = 2;
-classes(res==0 & strcmp('timedout' ,results) & ~manualRewards) = 3;
+if any(~ismember(results,{'incorrect','correct','timedout',''}))
+    error('unexpected dynamicDetails.result')
+end
+if any( strcmp(results,'')~=(res==2) | ismember(results,{'incorrect','timedout'})~=(res==0) | strcmp(results,'correct')~=(res==1) )
+    error('dynamicDetails.result didn''t line up with trialDetails.correct')
+end
 
-choiceSide = (sign(targetLocation).*sign(classes-1.5) +1)/2;  %%% flip target side if you got it wrong, then 0 = left, 1=right
-choiceSide(classes==3)=nan;
-
-cs = 1:3; % unique(classes(~isnan(classes))); %bug when you have no exemplars of one of the categories
+targRight = sign(targetLocation)>0;
+choiceRight = (targRight & strcmp(results,'correct')) | (~targRight & strcmp(results,'incorrect'));
 
 n = 50;
     function out = nanmeanMW(x) %my nanmean function shadows the stats toolbox one and is incompatible
@@ -426,21 +398,20 @@ n = 50;
         out = x(repmat((1:n)',1,length(x)-n+1)+repmat(0:length(x)-n,n,1));
     end
 
-for i=1:length(cs)
-    tDur{i} = classes==cs(i);
-    % slidingAvg{i} = savg(dur(tDur{i}),n);
-    pTiles{i} = prctile(window(pad(dur(tDur{i}),n,@nan),n),25*[-1 0 1]+50);
+[goodResults,classes] = ismember(results,{'incorrect','correct','timedout'});
+for i=1:max(classes)
+    pTiles{i} = prctile(window(pad(dur(classes==i),n,@nan),n),25*[-1 0 1]+50);
 end
 
-    function [x pci] = getPCI(alpha,inds,res)
+    function [x pci] = binoConf(alpha,inds,res)
         [~, pci] = binofit(sum(window(res(inds),n)),n,alpha);
         x=trialNums(inds);
         x=x(~isnan(pad(zeros(1,size(pci,1)),n,@nan)));
     end
 
 alpha=.05;
-[x pci] = getPCI(alpha,res~=2 & ~manualRewards,res);
-[sidex sidepci] = getPCI(alpha,~isnan(choiceSide),choiceSide);
+[perfX perfC] = binoConf(alpha,~(strcmp(results,'') | manualRewards),res        );
+[biasX biasC] = binoConf(alpha,~ismember(results,{'','timedout'})   ,choiceRight);
 
 %dig out the reward size we intended to give
 r = [records.reinforcementManager];
@@ -454,27 +425,33 @@ ifis = [s.ifi];
 close all
 sps = 4;
 
-cm = [1 0 0;0 1 0;.9 .9 0]; %red for incorrects, green for corrects, yellow for timeouts
-grey = .85*ones(1,3);
+h = [];
+
+cm = [1 0 0;0 1 0;1 1 0]; %red for incorrects, green for corrects, yellow for timeouts
 head = 1.1;
 dotSize = 4;
 
 doBlack = true;
 if doBlack
     colordef black
+    grey = .25*ones(1,3);
+    
     transparency = .5;
     bw = 'w';
 else
+    colordef white
+    grey = .85*ones(1,3);
+    cm = .9*cm;
     transparency = .2;
     bw = 'k';
 end
 
-subplot(sps,1,1)
+h(end+1) = subplot(sps,1,1);
 correctPlot(actualRewards);
 hold on
 plot(trialNums,intendedRewards,bw)
 plot(trialNums,actualReqRewards,'m.','MarkerSize',dotSize)
-ylims = [0 max([actualRewards actualReqRewards])*head];
+ylims = [-1 max([actualRewards actualReqRewards])*head];
 ylabel('reward size (ms)')
 title([subj ' -- ' datestr(now,'ddd, mmm dd HH:MM PM')])
 standardPlot(@plot,[],false,true);
@@ -541,11 +518,9 @@ standardPlot(@plot,[],false,true);
     end
 
     function correctPlot(x)
-        mask = ~isnan(classes);
-        
-        x = x(mask);
-        tns = trialNums(mask);
-        good = classes(mask);
+        x = x(goodResults);
+        tns = trialNums(goodResults);
+        good = classes(goodResults);
         
         if exist('doLog','var') && doLog
             z = log(fix0(x));
@@ -589,7 +564,7 @@ standardPlot(@plot,[],false,true);
         x=min(x(x~=0))/2;
     end
 
-subplot(sps,1,2)
+h(end+1) = subplot(sps,1,2);
 doLog = true;
 eps2 = min(stopDur(stopDur>0));
 
@@ -607,8 +582,8 @@ switch stopType
         k = size(cmj,1);
         s = prctile(window(pad(stopDur,n,@nan),n),linspace(0,100,k));
         
-        eps2=min(s(s>0));
-        s(s<=0)=eps2/10;
+        eps2=eps2/head; %min(s(s>0))/head;
+        %s(s<=0)=eps2;
         
         if false %patch
             for i=1:size(s,1)-1
@@ -633,40 +608,56 @@ switch stopType
         plotter = @semilogyEF;
 end
 hold on
-standardPlot(plotter,[100 1000 10000 30000]);
-ylabel('stopping time')
+standardPlot(plotter,[.1 .3 1 3 10 30],true);
+ylabel('stop time (s)')
 
-subplot(sps,1,3)
-eps2=fix0(dur(~isnan(classes)));
+h(end+1) = subplot(sps,1,3);
+eps2=fix0(dur(goodResults));
 correctPlot(dur);
 hold on
-for i=1:length(cs)
-    xd=trialNums(classes==cs(i));
+for i=1:length(pTiles)
     pTiles{i}(pTiles{i}==0)=eps2;
-    rangePlot(xd,pTiles{i}([1 end],:),cm(i,:));
+    rangePlot(trialNums(i==classes),pTiles{i}([1 end],:),cm(i,:));
 end
 ylims = [eps2 prctile(dur,99)*head];
-ylabel('ms')
-standardPlot(@semilogyEF,[.01 .03 .1 .3 1 3 10]*1000,true);
+ylabel('response time (s)')
+standardPlot(@semilogyEF,[.01 .03 .1 .3 1 3 10],true);
 doLog = false;
 
-subplot(sps,1,4)
-rangePlot(x,pci','r');
+h(end+1) = subplot(sps,1,4);
+rangePlot(perfX,perfC','r');
 hold on
-rangePlot(sidex,sidepci',bw);
-plot(x,.5*ones(1,length(x)),bw)
+rangePlot(biasX,biasC',bw);
+plot(trialNums,.5*ones(1,length(trialNums)),bw)
 if any(flip)
-    plot(trialNums(flip),.5,'bo')
+    plot(trialNums(flip),.5,'b+')
 end
 if any(rnd)
-    plot(trialNums(rnd),.5,'go')
+    plot(trialNums(rnd),.5,'g+')
 end
 ylims = [0 1];
-ylabel('% correct(r) rightward(k)')
+ylabel('% correct(r) rightward(w)')
 standardPlot(@plot,[],[],[],true);
 
 xlabel('trial')
-uploadFig(gcf,subj,length(x)/10,sps*200);
+linkaxes(h,'x');
+
+uploadFig(gcf,subj,max(trialNums)/10,sps*200);
+
+if false
+    keyboard
+    
+    figure
+    sps = 3;
+    for i=1:numTrials
+        subplot(sps,1,1)
+        hold on
+        subplot(sps,1,2+(1+sign(targetLocation(i)))/2)
+        hold on
+    end
+    
+    keyboard
+end
 
     function out = getLims(in)
         out = (range(in(:))+.1)*(head-1)*[-1 1] + cellfun(@(f) f(in(:)),{@min @max}); %+.1 ugly for when in is constant so range is zero
@@ -683,8 +674,9 @@ if plotSettings
         wallDist'    ,'target distance'};
     
     n = size(plots,1);
+    h = [];
     for i=1:n
-        subplot(n,1,i)
+        h(i) = subplot(n,1,i);
         x=plot(trialNums,plots{i,1}');
         arrayfun(@(x,y) set(x,'LineWidth',y),x,(d-1)+(d*(length(x)-1):-d:0)');
         hold on
@@ -697,6 +689,7 @@ if plotSettings
     end
     
     xlabel('trial')
+    linkaxes(h,'x');
     uploadFig(fig,subj,max(trialNums)/10,sps*200,'params');
 end
 end

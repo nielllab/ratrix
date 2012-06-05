@@ -5,7 +5,7 @@ function plotCrossingTime(subj,drive,force)
 dbstop if error
 
 if ~exist('force','var') || isempty(force)
-    force = false;
+    force = true;
 end
 
 if ~exist('subj','var') || isempty(subj)
@@ -329,6 +329,7 @@ stoppingSpeed = extract('slow'          ,nan(2,1),true ,false);
 stoppingTime  = extract('slowSecs'      ,nan     ,true ,false);
 wallDist      = extract('targetDistance',nan(1,2),true ,true ); %apparently we never had single entries here?
 stim          = extract('stim'          ,nan     ,false,false);
+initP         = extract('initialPos'    ,nan(2,1),true ,false);
 
 for i=1:size(bounds,1)
     if ismember('stimManager.stim',fullRecs(i).fieldsInLUT)
@@ -644,19 +645,57 @@ linkaxes(h,'x');
 
 uploadFig(gcf,subj,max(trialNums)/10,sps*200);
 
-if false
-    keyboard
-    
-    figure
-    sps = 3;
-    for i=1:numTrials
-        subplot(sps,1,1)
-        hold on
-        subplot(sps,1,2+(1+sign(targetLocation(i)))/2)
-        hold on
+    function doTrack(f,t,n,i,c,invert)
+        xs = i+(t(1,:)-t(1,1))*f;
+        if exist('invert','var') && ~isempty(invert)
+            xs = xs-diff(xs([1 end]));
+        end
+                
+        for j=2:size(t,1)
+            subplot(sps,1,n+j-2)
+            ys = t(j,:)-initP(j-1,i);
+            if exist('invert','var') && ~isempty(invert)
+                ys = cumsum(ys); %this hides some bad noise and clipping -> investigate...
+                ys = ys-ys(end);
+            end
+            plot(xs,ys,'Color',c)
+            hold on
+        end              
+    end
+
+plotTracks = false;
+if plotTracks %very slow, but if we vectorize plot, we have to resample time
+    fig=figure;
+    sps = 3*2;
+    slowFact = .1;
+    trackFact = 1;
+    for i=trialNums(goodResults)        
+        if targRight(i)
+            w=2;
+        else
+            w=0;
+        end
+        doTrack(slowFact ,slowTrack{i},1  ,i,'m'             ,true);
+        doTrack(trackFact,track{i}    ,3+w,i,cm(classes(i),:)     );
     end
     
-    keyboard
+    h=[];
+    ylabels={'stop x','stop y','left x','left y','right x','right y'};
+    for i=1:sps
+        h(end+1)=subplot(sps,1,i);
+        ylabel(ylabels{i});
+        ylims = get(h(end),'YLim');
+        standardPlot(@plot,[],[],[],i==sps);
+        switch i
+            case 1
+                title([subj ' -- ' datestr(now,'ddd, mmm dd HH:MM PM')])
+            case 2
+                xlabel(sprintf('slow time %gs',1/slowFact));
+        end
+    end
+    xlabel(sprintf('trial (track time %gs)',1/trackFact));
+    linkaxes(h,'x');
+    uploadFig(fig,subj,max(trialNums)/10,sps*200,'tracks');
 end
 
     function out = getLims(in)

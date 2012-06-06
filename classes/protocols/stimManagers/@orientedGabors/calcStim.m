@@ -63,7 +63,7 @@ details.phases=rand(numGabors,1)*2*pi;
 details.contrast=pickN(stimulus.contrasts,1);
 
 params = [repmat([stimulus.radius details.pixPerCyc],numGabors,1) details.phases details.orientations repmat([details.contrast stimulus.thresh],numGabors,1) details.xPosPcts repmat([stimulus.yPosPct],numGabors,1)];
-out(:,:,1)=computeGabors(params,stimulus.mean,min(width,getMaxWidth(stimulus)),min(height,getMaxHeight(stimulus)),stimulus.waveform, stimulus.normalizedSizeMethod,0);
+out(:,:,1)=computeGabors(params,stimulus.mean,min(width,getMaxWidth(stimulus)),min(height,getMaxHeight(stimulus)),stimulus.waveform, stimulus.normalizedSizeMethod,0,stimulus.mask);
 if iscell(type) && strcmp(type{1},'trigger')
     out(:,:,2)=stimulus.mean;
 end

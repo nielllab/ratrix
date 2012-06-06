@@ -133,7 +133,7 @@ if a
     end
 end
 
-if ismac || IsLinux
+if ismac || IsLinux || strcmp(b,'08002700F8DC')
     stationSpec.portSpec = int8(3);
 elseif ispc
     %do nothing

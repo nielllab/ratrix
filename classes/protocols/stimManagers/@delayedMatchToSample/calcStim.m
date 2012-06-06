@@ -12,11 +12,34 @@ imagingTasks=[];
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);
 
-type={'timedFrames' [frameTimes]};
+cueLatency = 0;
+cueDuration = inf;
+targetLatency = 0;
+
+frameTimes = [cueLatency];
+type={'timedFrames' frameTimes};
 %	frameTimes is: 
 %       a vector of length equal to number of frames (size(stim,3)))
 %       all integers > 0 representing the number or refreshes to display each frame
 %       a zero in the final entry means hold display of last frame (in which case union(targetPorts distractorPorts) must not be empty)
+
+%composite single frame stimmanagers (generalize to looping stimmanagers later):
+%should all make same size frame
+%instead of alpha blending, for now just have nans for transparent spots
+%layering is:
+%-background (for now just assume itl)
+%-cue
+%-target
+%-distractor
+%-mask
+
+%   0 = trial start
+%   y = cue latency (after 0)
+%   c = cue duration (after y)
+%   t = target latency (after 0)
+%   d = distractor latency (after 0)
+%   m = mask latency (after y+c)
+%   b = mask duration (after y+c+m)
 
 numFreqs=length(stimulus.pixPerCycs);
 details.pixPerCyc=stimulus.pixPerCycs(ceil(rand*numFreqs));

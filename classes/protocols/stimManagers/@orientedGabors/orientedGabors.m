@@ -1,6 +1,6 @@
 function s=orientedGabors(varargin)
 % ORIENTEDGABORS  class constructor.
-% s = orientedGabors([pixPerCycs],[targetOrientations],[distractorOrientations],mean,radius,contrasts,thresh,yPositionPercent,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[waveform],[normalizedSizeMethod])
+% s = orientedGabors([pixPerCycs],[targetOrientations],[distractorOrientations],mean,radius,contrasts,thresh,yPositionPercent,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[waveform],[normalizedSizeMethod],[mask],[displayDistCM])
 % orientations in radians
 % mean, contrasts, yPositionPercent normalized (0 <= value <= 1)
 % radius is the std dev of the enveloping gaussian, (by default in normalized units of the diagonal of the stim region)
@@ -20,7 +20,7 @@ s.LUT =[];
 s.LUTbits=0;
 s.waveform='square';
 s.normalizedSizeMethod='normalizeDiagonal';
-
+s.mask='gaussian';
 
 switch nargin
     case 0
@@ -35,7 +35,7 @@ switch nargin
         else
             error('Input argument is not an orientedGabors object')
         end
-    case {12 14}
+    case arrayfun(@(x){x},12:16)
         % create object using specified values
 
         if all(varargin{1})>0
@@ -81,24 +81,34 @@ switch nargin
         else
             error('yPositionPercent must be numeric')
         end
-
-        if nargin==14
-            if ~isempty(varargin{13})
-                if ismember(varargin{13},{'sine', 'square', 'none'})
-                    s.waveform=varargin{13};
-                else
-                    error('waveform must be ''sine'', ''square'', or ''none''')
-                end
-            end
-            if ~isempty(varargin{14})
-                if ismember(varargin{14},{'normalizeVertical', 'normalizeHorizontal', 'normalizeDiagonal' , 'none'})
-                    s.normalizedSizeMethod=varargin{14};
-                else
-                    error('normalizeMethod must be ''normalizeVertical'', ''normalizeHorizontal'', or ''normalizeDiagonal'', or ''none''')
-                end
+        
+        if nargin>=13 && ~isempty(varargin{13})
+            if ismember(varargin{13},{'sine', 'square', 'none'})
+                s.waveform=varargin{13};
+            else
+                error('waveform must be ''sine'', ''square'', or ''none''')
             end
         end
-
+        
+        if nargin>=14 && ~isempty(varargin{14})
+            if ismember(varargin{14},{'normalizeVertical', 'normalizeHorizontal', 'normalizeDiagonal' , 'none'})
+                s.normalizedSizeMethod=varargin{14};
+            else
+                error('normalizeMethod must be ''normalizeVertical'', ''normalizeHorizontal'', or ''normalizeDiagonal'', or ''none''')
+            end
+        end
+        
+        if nargin>=15 && ~isempty(varargin{15})
+            if ismember(varargin{15},{'gaussian', 'rectangular', 'elliptical', 'circular', 'none'})
+                s.mask=varargin{15};
+            else
+                error('normalizeMethod must be ''gaussian'', ''rectangular'', ''elliptical'', ''circular'', or ''none''')
+            end
+        end
+        
+        16 
+        d1=10,d2=5,d1/tand(90-2.5-atand(d2/d1))-d2 %cm per half cycle
+        
         s = class(s,'orientedGabors',stimManager(varargin{9},varargin{10},varargin{11},varargin{12}));
 
     otherwise

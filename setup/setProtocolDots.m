@@ -33,6 +33,9 @@ percentCorrectionTrials=.5;
 maxWidth               = 1920;
 maxHeight              = 1080;
 
+% maxWidth               = 1280;
+% maxHeight              = 1024;
+
 [w,h]=rat(maxWidth/maxHeight);
 
 eyeController=[];
@@ -43,16 +46,17 @@ nafcTM=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,{'off'},dro
 coherence=1;
 
 speed=.75*2;
-contrast=1*.25;
-dotSize=5*4;
+contrast=1;%*.25;
+dotSize=4;
 numDots=round(75/15);
 
 duration=10;
 textureSize=10*[w,h];
 zoom=[maxWidth maxHeight]./textureSize;
+textureSize(1) = floor(textureSize(1)*.7);
 dots=coherentDots(textureSize(1),textureSize(2),numDots,coherence,speed,contrast,dotSize,duration,zoom,maxWidth,maxHeight);
 
-dots=setShapeMethod(setPosition(setSideDisplay(dots,.5),.25),'position');
+%dots=setShapeMethod(setPosition(setSideDisplay(dots,.5),.25),'position');
 
 requestRewardSizeULorMS = 0;
 msPenalty               = 1000;

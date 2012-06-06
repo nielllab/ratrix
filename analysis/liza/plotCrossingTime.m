@@ -645,56 +645,111 @@ linkaxes(h,'x');
 
 uploadFig(gcf,subj,max(trialNums)/10,sps*200);
 
-    function doTrack(f,t,n,i,c,invert)
-        xs = i+(t(1,:)-t(1,1))*f;
-        if exist('invert','var') && ~isempty(invert)
-            xs = xs-diff(xs([1 end]));
-        end
-                
-        for j=2:size(t,1)
-            subplot(sps,1,n+j-2)
-            ys = t(j,:)-initP(j-1,i);
-            if exist('invert','var') && ~isempty(invert)
-                ys = cumsum(ys); %this hides some bad noise and clipping -> investigate...
-                ys = ys-ys(end);
-            end
-            plot(xs,ys,'Color',c)
-            hold on
-        end              
+%     function doTrack(f,t,n,i,c,invert)
+%         xs = i+(t(1,:)-t(1,1))*f;
+%         if exist('invert','var') && ~isempty(invert)
+%             xs = xs-diff(xs([1 end]));
+%         end
+%                 
+%         for j=2:size(t,1)
+%             subplot(sps,1,n+j-2)
+%             ys = t(j,:)-initP(j-1,i);
+%             if exist('invert','var') && ~isempty(invert)
+%                 ys = cumsum(ys); %this hides some bad noise and clipping -> investigate...
+%                 ys = ys-ys(end);
+%             end
+%             plot(xs,ys,'Color',c)
+%             hold on
+%         end              
+%     end
+
+    function [ts,xys] = doTrack(t,i,f)
+        ts = i+(t(1,:)'-t(1,1))*f;
+        xys = t(2:3,:)'-repmat(initP(:,i)',size(t,2),1);
     end
 
-plotTracks = false;
-if plotTracks %very slow, but if we vectorize plot, we have to resample time
+    function out=interleave(in,p)
+        out = cell2mat(cellfun(@(x)[x p],in,'UniformOutput',false));
+    end
+
+plotTracks = true;
+if plotTracks
     fig=figure;
     sps = 3*2;
     slowFact = .1;
     trackFact = 1;
-    for i=trialNums(goodResults)        
-        if targRight(i)
-            w=2;
-        else
-            w=0;
-        end
-        doTrack(slowFact ,slowTrack{i},1  ,i,'m'             ,true);
-        doTrack(trackFact,track{i}    ,3+w,i,cm(classes(i),:)     );
+    
+    stops = interleave(slowTrack,nan(3,1),@processTrack);
+    resps = interleave(    track,nan(3,1),@processTrack);
+    
+    plot(stops(1,:),stops(2,:),'m')
+    keyboard
+     
+%     stops = nan(max(cellfun(@(x)size(x,2),slowTrack)),3,trialNums(end));
+%     resps = nan(max(cellfun(@(x)size(x,2),track    )),3,trialNums(end));
+    
+    for i=trialNums(goodResults)   
+        [ts,xys] = doTrack(slowTrack{i},i,slowFact);
+        ts = ts-diff(ts([1 end]));
+        xys = cumsum(xys); %this hides some bad noise and clipping -> investigate...
+        xys = xys-repmat(xys(end,:),size(xys,1),1);        
+        stops(1:length(ts),:,i) = [ts xys];
+        
+        [ts,xys] = doTrack(track{i}    ,i,trackFact);      
+        resps(1:length(ts),:,i) = [ts xys];
+        
+        %wait -can put nans between!
+        
+%         if targRight(i)
+%             w=2;
+%         else
+%             w=0;
+%         end
+%         doTrack(slowFact ,slowTrack{i},1  ,i,'m'             ,true);
+%         doTrack(trackFact,track{i}    ,3+w,i,cm(classes(i),:)     );
     end
+    
+    stopLen = ceil(size(stops,1)*.1);
     
     h=[];
     ylabels={'stop x','stop y','left x','left y','right x','right y'};
     for i=1:sps
         h(end+1)=subplot(sps,1,i);
-        ylabel(ylabels{i});
-        ylims = get(h(end),'YLim');
-        standardPlot(@plot,[],[],[],i==sps);
         switch i
             case 1
                 title([subj ' -- ' datestr(now,'ddd, mmm dd HH:MM PM')])
             case 2
                 xlabel(sprintf('slow time %gs',1/slowFact));
+            case num2cell(3:6)
+                xs = resps;
         end
+        switch i
+            case {1 2}
+                c = 'm';
+                filt = true(size(targRight));
+                xs = stops;
+                xs = xs(1:stopLen,:,:); %otherwise nans oom us
+                j = i+1;
+            case {3 4}
+                c = 'g';
+                filt = ~targRight;                
+                j = i-1;
+            case {5 6}
+                c = 'r';
+                filt = targRight;
+                j = i-3;
+        end
+        
+        plot(squeeze(xs(:,1,filt)),squeeze(xs(:,j,filt)),'Color',c); %still need to add correctness coloring
+        hold on
+        ylabel(ylabels{i});
+        ylims = get(h(end),'YLim');
+        standardPlot(@plot,[],[],[],i==sps);
     end
     xlabel(sprintf('trial (track time %gs)',1/trackFact));
     linkaxes(h,'x');
+    
+    keyboard
     uploadFig(fig,subj,max(trialNums)/10,sps*200,'tracks');
 end
 

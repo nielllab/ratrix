@@ -1,4 +1,4 @@
-function out=computeGabors(params,mean,width,height,waveform,normalizeMethod,cornerMarkerOn,normalize)
+function out=computeGabors(params,mean,width,height,waveform,normalizeMethod,cornerMarkerOn,normalize,maskType)
 
 % params = [.3 16 0 pi/6 1 0.001 1/2 1/2 ];
 % grating=computeGabors(params,0.5,200,200,'square','normalizeVertical',1);
@@ -57,6 +57,10 @@ numGabors = size(params,1);
 
 xSize=width;
 ySize=height;
+
+d(:,:,1) = repmat( 0:xSize-1  ,ySize,1    );
+d(:,:,2) = repmat((0:ySize-1)',1    ,xSize);
+p=2;
 
 img = zeros(numGabors,ySize,xSize);
 biggest=max(xSize,ySize);
@@ -232,21 +236,38 @@ for i=1:numGabors
     
     if radius(i)~=Inf  %only compute gaussian mask if you need to
         mask=zeros(ySize,xSize);
-        %gaussian mask
-        %mask(1:xSize*ySize)=mvnpdf([reshape(repmat((-ySize/2:(-ySize/2 + ySize -1))',1,xSize),xSize*ySize,1) reshape(repmat(-xSize/2:(-xSize/2+xSize-1),ySize,1),xSize*ySize,1)],[yPosPct(i)*ySize-ySize/2 xPosPct(i)*xSize-xSize/2],(radius(i)*diag([normalizedLength normalizedLength])).^2);
-       
-        %hard circular mask
-        xcoords =  reshape(repmat(-xSize/2:(-xSize/2+xSize-1),ySize,1),xSize*ySize,1);     
-        ycoords = reshape(repmat((-ySize/2:(-ySize/2 + ySize -1))',1,xSize),xSize*ySize,1);
         
-        xcenter = xPosPct(i)*xSize-xSize/2;
-        ycenter = yPosPct(i)*ySize-ySize/2;
-        
-        mask(1:xSize*ySize)=double(((xcoords - xcenter).^2 + (ycoords - ycenter).^2)<((radius(i)*normalizedLength)^2));
-        
-        %THIS IS AN OLD LINE OF CODE  - used to send sigma as co-std rather than co-variance
-        %mask(1:xSize*ySize)=mvnpdf([reshape(repmat((-ySize/2:(-ySize/2 +
-        %ySize -1))',1,xSize),xSize*ySize,1) reshape(repmat(-xSize/2:(-xSize/2+xSize-1),ySize,1),xSize*ySize,1)],[yPosPct(i)*ySize-ySize/2 xPosPct(i)*xSize-xSize/2],(radius(i)*diag([normalizedLength normalizedLength])));
+        if ~exist('maskType','var') || isempty(maskType)
+            maskType = 'gaussian';
+        elseif isscalar(maskType) && isnan(maskType)
+            maskType = 'circular'; %so cris can pull w/o regenerating
+        end
+        switch maskType
+            case 'gaussian' %TODO: generalize to non-diagonal covariance
+                mask(1:xSize*ySize)=mvnpdf([reshape(repmat((-ySize/2:(-ySize/2 + ySize -1))',1,xSize),xSize*ySize,1) reshape(repmat(-xSize/2:(-xSize/2+xSize-1),ySize,1),xSize*ySize,1)],[yPosPct(i)*ySize-ySize/2 xPosPct(i)*xSize-xSize/2],(radius(i)*diag([normalizedLength normalizedLength])).^2);
+                %THIS IS AN OLD LINE OF CODE  - used to send sigma as co-std rather than co-variance
+                %mask(1:xSize*ySize)=mvnpdf([reshape(repmat((-ySize/2:(-ySize/2 +
+                %ySize -1))',1,xSize),xSize*ySize,1) reshape(repmat(-xSize/2:(-xSize/2+xSize-1),ySize,1),xSize*ySize,1)],[yPosPct(i)*ySize-ySize/2 xPosPct(i)*xSize-xSize/2],(radius(i)*diag([normalizedLength normalizedLength])));
+                
+            case 'rectangular'
+                error('not yet implemented')
+            case 'elliptical'
+                error('not yet implemented')
+            case 'circular'
+%                 xcoords =  reshape(repmat(-xSize/2:(-xSize/2+xSize-1),ySize,1),xSize*ySize,1);
+%                 ycoords = reshape(repmat((-ySize/2:(-ySize/2 + ySize -1))',1,xSize),xSize*ySize,1);
+%                 
+%                 xcenter = xPosPct(i)*xSize-xSize/2;
+%                 ycenter = yPosPct(i)*ySize-ySize/2;
+%                 
+%                 mask(1:xSize*ySize)=double(((xcoords - xcenter).^2 + (ycoords - ycenter).^2)<((radius(i)*normalizedLength)^2));
+
+                mask = sum(abs(d-repmat(reshape([xPosPct(i) yPosPct(i)].*([xSize ySize]-1),[1 1 2]),ySize,xSize)).^p,3).^(1/p) <= radius(i)*normalizedLength;
+            case 'none'
+                mask = ones(size(mask));
+            otherwise
+                error('unrecognized mask')
+        end
         
         mask=mask/max(max(mask));
         masked = rotated'.*mask;

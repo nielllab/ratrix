@@ -1,8 +1,12 @@
-function plotCrossingTime(subj,drive)
-addpath(fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))),'bootstrap'));
-setupEnvironment;
+function plotCrossingTime(subj,drive,force)
+%addpath(fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))),'bootstrap'));
+%setupEnvironment;
 
 dbstop if error
+
+if ~exist('force','var') || isempty(force)
+    force = true;
+end
 
 if ~exist('subj','var') || isempty(subj)
     subj = 'test';
@@ -43,10 +47,25 @@ if isempty(files)
     error('no records for that subject')
 end
 
-bounds = cell2mat(cellfun(@(x)textscan(x,'trialRecords_%u-%u_%*s.mat','CollectOutput',true),{files.name}'));
+bounds = cell2mat(cellfun(@(x)textscan(x,'trialRecords_%u-%u_%uT%u-%uT%u.mat','CollectOutput',true),{files.name}'));
 [~,ord] = sort(bounds(:,1));
 bounds = bounds(ord,:);
 files = files(ord);
+
+if ~force && IsWin
+    fd = ['\\reichardt\figures\' subj];
+    d=dir([fd '\*.300.png']);
+    d=sort({d.name});
+    try %d may be empty
+        d=textscan(strtok(d{end},'.'),'%uT%u','CollectOutput',true);
+        d=d{1};
+        d = double(d) - double(bounds(end,5:6));
+        if d(1)>0 || (d(1)==0 && d(2)>0)
+            fprintf('skipping - latest figures already generated (%s)\n',fd)
+            return
+        end
+    end
+end
 
 recNum = 0;
 for i=1:length(files)
@@ -57,6 +76,7 @@ for i=1:length(files)
     fullRecs(i) = load(fullfile(recordPath,files(i).name)); %loading files in this format is slow, that's why we normally use compiled records
     newRecNum = recNum + length(fullRecs(i).trialRecords);
     records(recNum+1:newRecNum) = fullRecs(i).trialRecords; %extending this struct array is slow, another reason we normally use compiled records
+    fullRecs(i).trialRecords = []; %prevent oom
     recNum = newRecNum;
     
     if bounds(i,2) ~= recNum
@@ -64,6 +84,13 @@ for i=1:length(files)
     end
     
     fprintf('done with %d of %d\n',i,length(files));
+end
+
+if IsWin && false %takes too long (95sec local) to save (.25GB on disk, 1.8GB in memory), loading slow (73sec local) too
+    tic
+    save([fd '\latest.mat'],'fullRecs','records');
+    toc
+    keyboard
 end
 
 trialNums = [records.trialNumber];
@@ -98,9 +125,9 @@ end
 result = {records.result};
 [~,loc] = ismember(result,unique(result));
 
-%this is a record of correct (true) or incorrect (false), but should be empty on 'manual kill' trials
+%this is a record of correct (true) or incorrect (false), but may be empty on 'manual kill' trials (unless k-q during reinforcement phase)
 t = [records.trialDetails];
-res = cellfun(@(x)f(x),{t.correct});
+res = cellfun(@f,{t.correct});
     function out=f(x)
         if isempty(x)
             out = 2;
@@ -112,7 +139,9 @@ res = cellfun(@(x)f(x),{t.correct});
     end
 
 if ~all((res == 2) == (loc == 1))
-    %hmm, test's trial 2257 (last one in file 23) is set to manual kill, but got a 0 for correct, instead of an empty.  how?
+    %hmm, test's trial 2257 (last one in file 23) is set to manual kill,
+    %but got a 0 for correct, instead of an empty.  maybe k-q during
+    %penalty timeout?
     inds = find((res == 2) ~= (loc == 1))
     res(inds)
     loc(inds)
@@ -125,10 +154,9 @@ end
 %these trials each have 2-3 phases -- a possible "slow" phase, a discrimination phase, and a reinforcement phase
 %we take the actual measured reward duration from the reinforcement phase (currently quantized to frame boundaries)
 %from the discrimination phase, we take the x,y,t track location measurements
-%entries in 'times' are in seconds, corresponding to x,y entries in 'track'
 %we also pull out some other info just to do some consistency checking later
-[actualRewards nFrames times targ track results stopTimes] = cellfun(@(x)g(x),{records.phaseRecords},'UniformOutput',false);
-    function [a n t targ track r slowT]=g(x)
+[actualRewards nFrames targ track results slowTrack actualReqRewards] = cellfun(@g,{records.phaseRecords},'UniformOutput',false);
+    function [a n targ track r slowT q]=g(x)
         if ~any(length(x)==[2 3])
             error('expected 2 or 3 phases')
         end
@@ -161,8 +189,7 @@ end
                     setPhase(1);
                     slowT = doField(x(i).dynamicDetails,'slowTrack');
                     if ~isempty(slowT)
-                        slowT = slowT(1,:); %for now we just consider time, not space
-                        if ~all(diff(slowT)>0) || any(isnan(slowT))
+                        if ~all(diff(slowT(1,:))>0) || any(isnan(slowT(:)))
                             error('slow timestamps not increasing or has nans')
                         end
                     end
@@ -174,6 +201,14 @@ end
                     targ  = doField(x(i).dynamicDetails,'target');
                     track = doField(x(i).dynamicDetails,'track');
                     r     = doField(x(i).dynamicDetails,'result');
+                    q = x(i).responseDetails.requestRewardDurationActual;
+                    if isempty(q)
+                        q=nan;
+                    elseif isscalar(q)
+                        q=q{1};
+                    else
+                        error('expected empty or scalar cell')
+                    end
                     
                     if ~all(diff(t(~isnan(t)))>0)
                         error('track timestamps aren''t increasing')
@@ -192,9 +227,8 @@ end
                         if length(find(diff(isnan(t)))) > 1
                             error('should be at most one transition from non-nans to nans')
                         end
-                        t=t(~isnan(t));
-                        track=track(:,~isnan(t));
                     end
+                    track=[t(~isnan(t));track(:,~isnan(t))];
                 case 'reinforced'
                     setPhase(3);
                     
@@ -216,7 +250,8 @@ end
             end
         end
     end
-actualRewards = cell2mat(actualRewards);
+actualRewards    = cell2mat(actualRewards   );
+actualReqRewards = cell2mat(actualReqRewards);
 
     function out = doField(x,f,d)
         if ~exist('d','var')
@@ -229,25 +264,15 @@ actualRewards = cell2mat(actualRewards);
         end
     end
 
-if ~all(cellfun(@(x,y)length(x)==size(y,2),times,track))
-    error('times and track didn''t have same dimension')
-end
-
+dur     = cellfun(@getDurFromT,track    );
+stopDur = cellfun(@getDurFromT,slowTrack);
     function d = getDurFromT(t)
-        t = cellfun(@fixTimes,t,'UniformOutput',false);
-        function x=fixTimes(x)
-            if isempty(x)
-                x=[0 0]; %diff(0) is [];
-            end
+        if isempty(t)
+            d=0;
+        else
+            d=diff(t(1,[1 end]));
         end
-        d = cellfun(@(x)1000*diff(x([1 end])),t);
     end
-
-dur = getDurFromT(times);
-stopDur = getDurFromT(stopTimes);
-if ~all(find(stopDur<=0) == find(cellfun(@isempty,stopTimes)))
-    error('some stopDurs had nonempty stopTimes')
-end
 
 % i'm seeing a lot of trials (12%) that have only one timestamp
 if false %this shows that position really is past the wall on the first timestamp
@@ -257,7 +282,6 @@ if false %this shows that position really is past the wall on the first timestam
 end
 
 %hack oom
-fullRecs=rmfield(fullRecs,'trialRecords');
 records=rmfield(records,'phaseRecords');
 
 % clear t
@@ -290,12 +314,22 @@ targetLocation = [s.target];
 %TODO: flag correction trials (different marker on plot?)
 correctionTrial = [s.correctionTrial];
 
+    function out = extract(f,d,m,trans)
+        out = cellfun(@(x)doField(x,f,d),{records.stimManager},'UniformOutput',false);
+        if trans
+            out = out';
+        end
+        if m
+            out = cell2mat(out);
+        end
+    end
 
-gain = cell2mat(cellfun(@(x)doField(x,'gain',nan(2,1)),{records.stimManager},'UniformOutput',false));
-stoppingSpeed = cell2mat(cellfun(@(x)doField(x,'slow',nan(2,1)),{records.stimManager},'UniformOutput',false));
-stoppingTime = cell2mat(cellfun(@(x)doField(x,'slowSecs',nan(1,1)),{records.stimManager},'UniformOutput',false));
-wallDist = cell2mat(cellfun(@(x)doField(x,'targetDistance',nan(1,1)),{records.stimManager},'UniformOutput',false));
-stim = cellfun(@(x)doField(x,'stim',nan),{records.stimManager},'UniformOutput',false);
+gain          = extract('gain'          ,nan(2,1),true ,false);
+stoppingSpeed = extract('slow'          ,nan(2,1),true ,false);
+stoppingTime  = extract('slowSecs'      ,nan     ,true ,false);
+wallDist      = extract('targetDistance',nan(1,2),true ,true ); %apparently we never had single entries here?
+stim          = extract('stim'          ,nan     ,false,false);
+initP         = extract('initialPos'    ,nan(2,1),true ,false);
 
 for i=1:size(bounds,1)
     if ismember('stimManager.stim',fullRecs(i).fieldsInLUT)
@@ -313,48 +347,28 @@ for i=1:size(bounds,1)
     end
 end
 flip = strcmp(stim,'flip');
+rnd  = strcmp(stim,'rand');
 
-if ~all(cellfun(@(x,y)isempty(x) || x==y,nFrames,mat2cell(timeout,1,ones(1,length(timeout))))) % this was the limit on the trial length -- the # of position changes
+if ~all(cellfun(@(x,y)isempty(x) || x==y,nFrames,num2cell(timeout))) % this was the limit on the trial length -- the # of position changes
     error('nFrames didn''t match timeout')
 end
 
-if ~all(cellfun(@(x,y)isempty(x) || x==y,targ,mat2cell(targetLocation,1,ones(1,length(targetLocation)))))
+if ~all(cellfun(@(x,y)isempty(x) || x==y,targ,num2cell(targetLocation)))
     error('targetLocation and targ didn''t match')
 end
-
-if ~all(cellfun(@isempty,results) == (res == 2))
-    error('empty results didn''t line up with manual kills')
-end
-
-if ~all(cellfun(@checkCorrect,results,mat2cell(res,1,ones(1,length(res)))))
-    error('correct/incorrect/timedout results didn''t line up with correctness')
-end
-
-    function out=checkCorrect(x,y)
-        switch x
-            case ''
-                out = y==2;
-            case 'correct'
-                out = y==1;
-            case {'incorrect','timedout'}
-                out = y==0;
-            otherwise
-                error('unexpected result')
-        end
-    end
 
 %this is set whenever you hit k-ctrl-# to manually open valve
 manualRewards = [records.containedForcedRewards];
 
-classes = nan(size(manualRewards));
-classes(res==0 & strcmp('incorrect',results) & ~manualRewards) = 1;
-classes(res==1 & strcmp('correct'  ,results) & ~manualRewards) = 2;
-classes(res==0 & strcmp('timedout' ,results) & ~manualRewards) = 3;
+if any(~ismember(results,{'incorrect','correct','timedout',''}))
+    error('unexpected dynamicDetails.result')
+end
+if any( strcmp(results,'')~=(res==2) | ismember(results,{'incorrect','timedout'})~=(res==0) | strcmp(results,'correct')~=(res==1) )
+    error('dynamicDetails.result didn''t line up with trialDetails.correct')
+end
 
-choiceSide = (sign(targetLocation).*sign(classes-1.5) +1)/2;  %%% flip target side if you got it wrong, then 0 = left, 1=right
-choiceSide(classes==3)=nan;
-
-cs = 1:3; % unique(classes(~isnan(classes))); %bug when you have no exemplars of one of the categories
+targRight = sign(targetLocation)>0;
+choiceRight = (targRight & strcmp(results,'correct')) | (~targRight & strcmp(results,'incorrect'));
 
 n = 50;
     function out = nanmeanMW(x) %my nanmean function shadows the stats toolbox one and is incompatible
@@ -385,21 +399,20 @@ n = 50;
         out = x(repmat((1:n)',1,length(x)-n+1)+repmat(0:length(x)-n,n,1));
     end
 
-for i=1:length(cs)
-    tDur{i} = classes==cs(i);
-    % slidingAvg{i} = savg(dur(tDur{i}),n);
-    pTiles{i} = prctile(window(pad(dur(tDur{i}),n,@nan),n),25*[-1 0 1]+50);
+[goodResults,classes] = ismember(results,{'incorrect','correct','timedout'});
+for i=1:max(classes)
+    pTiles{i} = prctile(window(pad(dur(classes==i),n,@nan),n),25*[-1 0 1]+50);
 end
 
-    function [x pci] = getPCI(alpha,inds,res)
+    function [x pci] = binoConf(alpha,inds,res)
         [~, pci] = binofit(sum(window(res(inds),n)),n,alpha);
         x=trialNums(inds);
         x=x(~isnan(pad(zeros(1,size(pci,1)),n,@nan)));
     end
 
 alpha=.05;
-[x pci] = getPCI(alpha,res~=2 & ~manualRewards,res);
-[sidex sidepci] = getPCI(alpha,~isnan(choiceSide),choiceSide);
+[perfX perfC] = binoConf(alpha,~(strcmp(results,'') | manualRewards),res        );
+[biasX biasC] = binoConf(alpha,~ismember(results,{'','timedout'})   ,choiceRight);
 
 %dig out the reward size we intended to give
 r = [records.reinforcementManager];
@@ -413,26 +426,33 @@ ifis = [s.ifi];
 close all
 sps = 4;
 
-cm = [1 0 0;0 1 0;.9 .9 0]; %red for incorrects, green for corrects, yellow for timeouts
-grey = .85*ones(1,3);
+h = [];
+
+cm = [1 0 0;0 1 0;1 1 0]; %red for incorrects, green for corrects, yellow for timeouts
 head = 1.1;
 dotSize = 4;
 
 doBlack = true;
 if doBlack
     colordef black
+    grey = .25*ones(1,3);
+    
     transparency = .5;
     bw = 'w';
 else
+    colordef white
+    grey = .85*ones(1,3);
+    cm = .9*cm;
     transparency = .2;
     bw = 'k';
 end
 
-subplot(sps,1,1)
+h(end+1) = subplot(sps,1,1);
 correctPlot(actualRewards);
 hold on
 plot(trialNums,intendedRewards,bw)
-ylims = [0 max(actualRewards)*head];
+plot(trialNums,actualReqRewards,'m.','MarkerSize',dotSize)
+ylims = [-1 max([actualRewards actualReqRewards])*head];
 ylabel('reward size (ms)')
 title([subj ' -- ' datestr(now,'ddd, mmm dd HH:MM PM')])
 standardPlot(@plot,[],false,true);
@@ -460,7 +480,7 @@ standardPlot(@plot,[],false,true);
                         monthStr='';
                     end
                     anno=sprintf('%s \\bf%s%d \\rm%d',dayStr,monthStr,ss(sess,3),ds(sess));
-                    text(tn(sess)+.5*ds(sess),0.1*ylims(2),anno,'FontSize',9,'Rotation',90,'FontName','FixedWidth');
+                    text(tn(sess)+.5*ds(sess),ylims(1)+.1*range(ylims),anno,'FontSize',9,'Rotation',90,'FontName','FixedWidth');
                 end
             end
         end
@@ -499,11 +519,9 @@ standardPlot(@plot,[],false,true);
     end
 
     function correctPlot(x)
-        mask = ~isnan(classes);
-        
-        x = x(mask);
-        tns = trialNums(mask);
-        good = classes(mask);
+        x = x(goodResults);
+        tns = trialNums(goodResults);
+        good = classes(goodResults);
         
         if exist('doLog','var') && doLog
             z = log(fix0(x));
@@ -547,7 +565,7 @@ standardPlot(@plot,[],false,true);
         x=min(x(x~=0))/2;
     end
 
-subplot(sps,1,2)
+h(end+1) = subplot(sps,1,2);
 doLog = true;
 eps2 = min(stopDur(stopDur>0));
 
@@ -565,9 +583,9 @@ switch stopType
         k = size(cmj,1);
         s = prctile(window(pad(stopDur,n,@nan),n),linspace(0,100,k));
         
-        eps2=min(s(s>0));
-        s(s<=0)=eps2/10;
-                
+        eps2=eps2/head; %min(s(s>0))/head;
+        %s(s<=0)=eps2;
+        
         if false %patch
             for i=1:size(s,1)-1
                 rangePlot(trialNums,s(i+[0 1],:),cmj(ceil(size(cmj,1)*i/(size(s,1)-1)),:),1);
@@ -591,73 +609,126 @@ switch stopType
         plotter = @semilogyEF;
 end
 hold on
-standardPlot(plotter,[100 1000 10000 30000]);
-ylabel('stopping time')
+standardPlot(plotter,[.1 .3 1 3 10 30],true);
+ylabel('stop time (s)')
 
-subplot(sps,1,3)
-eps2=fix0(dur(~isnan(classes)));
+h(end+1) = subplot(sps,1,3);
+eps2=fix0(dur(goodResults));
 correctPlot(dur);
 hold on
-for i=1:length(cs)
-    xd=trialNums(classes==cs(i));
+for i=1:length(pTiles)
     pTiles{i}(pTiles{i}==0)=eps2;
-    rangePlot(xd,pTiles{i}([1 end],:),cm(i,:));
+    rangePlot(trialNums(i==classes),pTiles{i}([1 end],:),cm(i,:));
 end
 ylims = [eps2 prctile(dur,99)*head];
-ylabel('ms')
-standardPlot(@semilogyEF,[.01 .03 .1 .3 1 3 10]*1000,true);
+ylabel('response time (s)')
+standardPlot(@semilogyEF,[.01 .03 .1 .3 1 3 10],true);
 doLog = false;
 
-subplot(sps,1,4)
-rangePlot(x,pci','r');
+h(end+1) = subplot(sps,1,4);
+rangePlot(perfX,perfC','r');
 hold on
-rangePlot(sidex,sidepci',bw);
-plot(x,.5*ones(1,length(x)),bw)
+rangePlot(biasX,biasC',bw);
+plot(trialNums,.5*ones(1,length(trialNums)),bw)
 if any(flip)
-    plot(trialNums(flip),.5,'bo')
+    plot(trialNums(flip),.5,'b+')
+end
+if any(rnd)
+    plot(trialNums(rnd),.5,'g+')
 end
 ylims = [0 1];
-ylabel('% correct(r) rightward(k)')
+ylabel('% correct(r) rightward(w)')
 standardPlot(@plot,[],[],[],true);
 
 xlabel('trial')
+linkaxes(h,'x');
 
-uploadFig(gcf,subj,length(x)/10,sps*200);
+uploadFig(gcf,subj,max(trialNums)/10,sps*200);
 
-plotSettings=1;
-if plotSettings
-    figure
-    subplot(4,1,1);
-    plot(gain(1,:),'g')
-    hold on
-     plot(gain(2,:),'y')
-    ylims = [0 max(max(gain))*head];
-    ylabel('gain')
-    title([subj ' -- ' datestr(now,'ddd, mmm dd HH:MM PM')])
-    standardPlot(@plot,[],false);
-    
-    subplot(4,1,2);
-    plot(stoppingSpeed(1,:),'g')
-    hold on
-    plot(stoppingSpeed(2,:),'y')
-    ylims = [0 max(max(stoppingSpeed))*head];
-    ylabel('stopping speed')
-    standardPlot(@plot,[],false);
-    
-    subplot(4,1,3);
-    plot(stoppingTime,'g');
-    hold on
-    ylims = [0 max(stoppingTime)*head];
-    ylabel('stopping time (secs)')
-    standardPlot(@plot,[],false);
-    
-    subplot(4,1,4);
-    plot(wallDist,'g')
-    hold on
-    ylims = [0 max(wallDist)*head];
-    ylabel('wall distance')
-    standardPlot(@plot,[],[],[],true);
+    function doTrack(f,t,n,i,c,invert)
+        xs = i+(t(1,:)-t(1,1))*f;
+        if exist('invert','var') && ~isempty(invert)
+            xs = xs-diff(xs([1 end]));
+        end
+                
+        for j=2:size(t,1)
+            subplot(sps,1,n+j-2)
+            ys = t(j,:)-initP(j-1,i);
+            if exist('invert','var') && ~isempty(invert)
+                ys = cumsum(ys); %this hides some bad noise and clipping -> investigate...
+                ys = ys-ys(end);
+            end
+            plot(xs,ys,'Color',c)
+            hold on
+        end              
+    end
 
+plotTracks = false;
+if plotTracks %very slow, but if we vectorize plot, we have to resample time
+    fig=figure;
+    sps = 3*2;
+    slowFact = .1;
+    trackFact = 1;
+    for i=trialNums(goodResults)        
+        if targRight(i)
+            w=2;
+        else
+            w=0;
+        end
+        doTrack(slowFact ,slowTrack{i},1  ,i,'m'             ,true);
+        doTrack(trackFact,track{i}    ,3+w,i,cm(classes(i),:)     );
+    end
+    
+    h=[];
+    ylabels={'stop x','stop y','left x','left y','right x','right y'};
+    for i=1:sps
+        h(end+1)=subplot(sps,1,i);
+        ylabel(ylabels{i});
+        ylims = get(h(end),'YLim');
+        standardPlot(@plot,[],[],[],i==sps);
+        switch i
+            case 1
+                title([subj ' -- ' datestr(now,'ddd, mmm dd HH:MM PM')])
+            case 2
+                xlabel(sprintf('slow time %gs',1/slowFact));
+        end
+    end
+    xlabel(sprintf('trial (track time %gs)',1/trackFact));
+    linkaxes(h,'x');
+    uploadFig(fig,subj,max(trialNums)/10,sps*200,'tracks');
 end
 
+    function out = getLims(in)
+        out = (range(in(:))+.1)*(head-1)*[-1 1] + cellfun(@(f) f(in(:)),{@min @max}); %+.1 ugly for when in is constant so range is zero
+    end
+
+plotSettings = true;
+if plotSettings
+    fig=figure;
+    d=3;
+    
+    plots = {gain    ,'gain'           ;
+        stoppingSpeed,'stop speed'     ;
+        stoppingTime ,'stop time (s)'  ;
+        wallDist'    ,'target distance'};
+    
+    n = size(plots,1);
+    h = [];
+    for i=1:n
+        h(i) = subplot(n,1,i);
+        x=plot(trialNums,plots{i,1}');
+        arrayfun(@(x,y) set(x,'LineWidth',y),x,(d-1)+(d*(length(x)-1):-d:0)');
+        hold on
+        ylims = getLims(plots{i,1});
+        ylabel(plots{i,2})
+        standardPlot(@plot,[],[],i==1,i==n); %(f,ticks,lines,dates,xticks)
+        if i==1
+            title([subj ' -- ' datestr(now,'ddd, mmm dd HH:MM PM')])
+        end
+    end
+    
+    xlabel('trial')
+    linkaxes(h,'x');
+    uploadFig(fig,subj,max(trialNums)/10,sps*200,'params');
+end
 end

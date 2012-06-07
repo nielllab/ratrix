@@ -115,13 +115,18 @@ switch phaseRecords(phaseNum).phaseType
         
         if doWalls
             wallRect = destRect; %[left top right bottom]
-            if dynamicDetails.target > 0  == strcmp(s.stim,'flip')
+            
+            if ~isfield(dynamicDetails,'parity')
+                dynamicDetails.parity = strcmp(s.stim,'flip') || (strcmp(s.stim,'rand') && rand>.5);
+            end
+            
+            if dynamicDetails.target > 0 == dynamicDetails.parity
                 ind = 3;
             else
                 ind = 1;
             end
             
-            if strcmp(s.stim,'flip')
+            if dynamicDetails.parity
                 if isempty(wrongLoc)
                     error('can''t flip without a wrongLoc')
                 end
@@ -162,6 +167,8 @@ switch phaseRecords(phaseNum).phaseType
                     error('can''t have cue without wrongLoc')
                 end
                 Screen('FillRect', window, cueColor, cueRect);
+            elseif strcmp(s.stim,'rand')
+                error('cues should be enabled for randomized stim')
             end
         else
             try

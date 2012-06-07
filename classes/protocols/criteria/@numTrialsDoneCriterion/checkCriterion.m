@@ -2,6 +2,9 @@ function [graduate details] = checkCriterion(c,subject,trainingStep,trialRecords
 % this criterion will graduate if we have done a certain number of trials in this trainingStep
 
 if trialRecords(end).trialNumber > c.numTrialsNeeded && length(trialRecords) < c.numTrialsNeeded
+    length(trialRecords)
+    trialRecords(end).trialNumber
+    c.numTrialsNeeded
     error('criterion is longer than the circular buffer set in @station/doTrials (roughly line 76) -- how architect?')
 end
 

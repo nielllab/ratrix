@@ -50,7 +50,7 @@ elseif ~isempty(wrongPos) && sign(target) * (wrongPos - s.initialPos(1)) >= 0
     dynamicDetails.result = 'incorrect';
     finish = true;
     trim;
-elseif i > 1
+elseif i > 1 && s.soundClue
     if sign(diff(dynamicDetails.track(1,i-[1 0]))) == sign(target)
         sounds={'keepGoingSound'};
     else

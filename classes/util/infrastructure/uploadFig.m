@@ -1,6 +1,12 @@
-function uploadFig(f,subj,width,height)
+function uploadFig(f,subj,width,height,qual)
+if ~exist('qual','var') || isempty(qual)
+    qual='';
+else
+    qual=['.' qual];
+end
+
 if IsWin
-    fn=fullfile('\\reichardt','figures',subj,datestr(now,30));
+    fn=fullfile('\\reichardt','figures',subj,[datestr(now,30) qual]);
     [s, mess, messid] = mkdir(fileparts(fn));
     if s~=1
         s
@@ -23,26 +29,26 @@ if IsWin
     % http://www.mathworks.com/access/helpdesk/help/techdoc/ref/print.html#f30-534567
     dpi=300;
     sfx = 'png';
-    latest = [fn '.' num2str(dpi) '. ' sfx];
-    try %print/saveas for png doesn't work over remote desktop (unless Visible is off?)
+    latest = [fn '.' num2str(dpi) '.' sfx];
+%     try %print/saveas for png doesn't work over remote desktop (unless Visible is off?)
         print(f,'-dpng',['-r' num2str(dpi)],'-opengl',latest); %opengl for transparency -- probably unnecessary cuz seems to be automatically set when needed
         saveas(f,[fn '.' sfx]); %resolution not controllable
-    catch
-        if doSVG
-            sfx = 'svg';
-            latest = [fn '.' sfx];
-        end
-    end
+%     catch
+%         if doSVG
+%             sfx = 'svg';
+%             latest = [fn '.' sfx];
+%         end
+%     end
     
-    try
-        [status,message,messageid] = copyfile(latest,fullfile(fileparts(latest),['latest.' sfx]));
+%     try
+        [status,message,messageid] = copyfile(latest,fullfile(fileparts(latest),['latest' qual '.' sfx]));
         if status~=1
             status
             message
             messageid
             error('couldn''t copy')
         end
-    end
+%     end
     
     set(f,'Visible','on')
 else

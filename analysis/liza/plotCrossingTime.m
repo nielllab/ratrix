@@ -711,7 +711,7 @@ if plotTracks
         hold on
         standardPlot(@plot,[],[],i==2,i==sps);
         
-        cellfun(@(x)plot(x{1}(1,:),x{1}(2,:),'Color',x{2}),xs);
+        cellfun(@(x)plot(x{1}(1,:),x{1}(2,:),'Color',x{2}),xs(~cellfun(@(x)isempty(x{1}),xs)));
         
         switch i
             case 1

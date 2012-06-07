@@ -20,7 +20,8 @@ s.LUT =[];
 s.LUTbits=0;
 s.waveform='square';
 s.normalizedSizeMethod='normalizeDiagonal';
-
+s.setRewardStimOn=0;
+s.rewardOnDuration=0;
 
 switch nargin
     case 0
@@ -35,7 +36,7 @@ switch nargin
         else
             error('Input argument is not an orientedGabors object')
         end
-    case {12 14}
+    case {12 14 16}
         % create object using specified values
 
         if all(varargin{1})>0
@@ -82,7 +83,7 @@ switch nargin
             error('yPositionPercent must be numeric')
         end
 
-        if nargin==14
+        if nargin>=14
             if ~isempty(varargin{13})
                 if ismember(varargin{13},{'sine', 'square', 'none'})
                     s.waveform=varargin{13};
@@ -98,7 +99,14 @@ switch nargin
                 end
             end
         end
-
+        if nargin==16;
+            if isnumeric(varargin{15}) & varargin{15}==1
+                s.setRewardStimOn=1;
+            end
+            if isnumeric(varargin{15})
+                s.rewardOnDuration = varargin{16};
+            end
+        end
         s = class(s,'orientedGabors',stimManager(varargin{9},varargin{10},varargin{11},varargin{12}));
 
     otherwise

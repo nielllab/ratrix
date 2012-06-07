@@ -144,8 +144,9 @@ switch class(trialManager)
             else
                 criterion={[],i+1};
             end
-            stimSpecs{i} = stimSpec([],criterion,'cache',0,[],[],0,strcmp(class(trialManager),'ball'),hz,'reinforced','reinforcement',false,false); % do not punish responses here
-            i=i+1;
+           % stimSpecs{i} = stimSpec([],criterion,'cache',0,[],[],0,strcmp(class(trialManager),'ball'),hz,'reinforced','reinforcement',false,false); % do not punish responses here
+              stimSpecs{i} = stimSpec(discrimStim.stimulus,criterion,'cache',0,[],[],discrimStim.scaleFactor,strcmp(class(trialManager),'ball'),hz,'reinforced','reinforcement',false,false); % do not punish responses here
+          i=i+1;
         end
         
         if strcmp(class(trialManager),'cuedGoNoGo')

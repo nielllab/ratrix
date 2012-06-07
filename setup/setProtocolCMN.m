@@ -62,11 +62,11 @@ zoom=[maxWidth maxHeight]./textureSize;
 widthpix = 1980;
 widthcm = 50;
 pixpercm = widthpix/widthcm;
-dist = 15;
+dist = 20;
 degpercm = atand((0.25*widthcm+1)/dist) - atand(0.25*widthcm/dist);
 pixperdeg = pixpercm/degpercm
 
-cpd=0.1
+cpd=0.16
 pixPerCycs = pixperdeg/cpd
 
 targetOrientations      =[0];
@@ -78,12 +78,12 @@ thresh                  =.00005;
 yPosPct                 =.5;
 scaleFactor            = 0; %[1 1];
 interTrialLuminance     =.5;
-freeStim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+freeStim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[],[],1,500);
 
 %distractorOrientations=-targetOrientations;
 targetOrientations = 0;
 distractorOrientations = pi/2;
-orientation = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+orientation = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[],[],1,500);
 
 requestRewardSizeULorMS = 0;
 msPenalty               = 1000;
@@ -119,8 +119,8 @@ ts3 = trainingStep(nafcTM, freeStim, rateCriterion(trialsPerMinute,minutes), noT
 ts4 = trainingStep(nrTM  , freeStim,  numTrialsDoneCriterion(400)          , noTimeOff(), svnRev,svnCheckMode);
 
 %long penalty
-msPenalty = 3000;
-rewardSizeULorMS=30;
+msPenalty = 6000;
+rewardSizeULorMS=60;
 longPenalty=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 lpTM=nAFC(sm,percentCorrectionTrials,longPenalty,eyeController,{'off'},dropFrames,'ptb','center',[],[],[300 inf]);
 ts5 = trainingStep(lpTM  , freeStim, performanceCriterion(.85,int32(300))  , noTimeOff(), svnRev,svnCheckMode);
@@ -134,15 +134,15 @@ for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});
 
     % set to defined step    
-%     switch subjIDs{i}
-%         case 'test'
-%             stepNum=uint8(5);
-%         otherwise
-%             stepNum=uint8(5);
-%     end
+    switch subjIDs{i}
+        case 'test'
+            stepNum=uint8(5);
+        otherwise
+            stepNum=uint8(5);
+    end
     
     % keep on current step
-    [currentp stepNum]=getProtocolAndStep(subj);
+    %[currentp stepNum]=getProtocolAndStep(subj);
     
     [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolMouse','edf');
 end

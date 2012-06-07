@@ -8,6 +8,7 @@ if ~exist('request','var') || isempty(request)
     request = false;
 end
 
+
 % This function is a tm-specific method to update trial state before every flip.
 % Things done here include:
 %   - set trialRecords.correct and trialRecords.result as necessary
@@ -76,10 +77,17 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) &&
         msPuff=0;
         msPenalty=0;
         msPenaltySound=0;
-        
+       
+      
+        if strcmp(class(sm),'orientedGabors')
+          [rewardStimOn rewardStimDuration] = getRewardStimParams(sm);  
+        else
+            rewardStimOn=0; rewardStimDuration=0;
+        end
         if window>0
+            
             if isempty(framesUntilTransition)
-                framesUntilTransition = ceil((rewardSizeULorMS/1000)/ifi);
+                framesUntilTransition = ceil((max(rewardSizeULorMS,rewardStimDuration)/1000)/ifi);
             end
             numCorrectFrames=ceil((rewardSizeULorMS/1000)/ifi);
 
@@ -94,8 +102,18 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) &&
         else
             error('huh?')
         end
-        spec=setFramesUntilTransition(spec,framesUntilTransition);
-        [cStim correctScale] = correctStim(sm,numCorrectFrames);
+       
+        spec=setFramesUntilTransition(spec,framesUntilTransition);      
+       
+        [cStimDef correctScale] = correctStim(sm,numCorrectFrames)
+        cStim=getStim(spec);
+
+        correctScale=getScaleFactor(spec);
+        if ~rewardStimOn
+            cStim(:) = cStimDef*256; %%% scalar and array stimulus seem to be on different ranges (0-1 vs 0-255) cmn
+        end
+
+
         spec=setScaleFactor(spec,correctScale);
         strategy='noCache';
         if window>0
@@ -108,6 +126,8 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) &&
             error('huh?')
         end
         spec=setStim(spec,cStim);
+
+        
     else
         rewardSizeULorMS=0;
         msRewardSound=0;

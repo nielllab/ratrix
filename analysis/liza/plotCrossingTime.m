@@ -104,6 +104,7 @@ sessions = find(d > .5/24); %this gives us session boundaries whenever there was
 if ~all(d > 0)
     error('records don''t show increasing start times')
 end
+gaps = d(sessions);
 
 minPerChunk=50;
 chunkHrs=36;
@@ -448,14 +449,14 @@ else
 end
 
 h(end+1) = subplot(sps,1,1);
-correctPlot(actualRewards);
 hold on
+ylims = [-1 max([actualRewards actualReqRewards])*head];
+standardPlot(@plot,[],false,true);
+correctPlot(actualRewards);
 plot(trialNums,intendedRewards,bw)
 plot(trialNums,actualReqRewards,'m.','MarkerSize',dotSize)
-ylims = [-1 max([actualRewards actualReqRewards])*head];
 ylabel('reward size (ms)')
 title([subj ' -- ' datestr(now,'ddd, mmm dd HH:MM PM')])
-standardPlot(@plot,[],false,true);
 
     function standardPlot(f,ticks,lines,dates,xticks)
         if length(ylims)>2
@@ -463,8 +464,8 @@ standardPlot(@plot,[],false,true);
             ylims=[1 length(ylims)];
         end
         
-        arrayfun(@(x)f(x*ones(1,2),ylims,'Color',grey   ),sessions);
-        arrayfun(@(x)f(x*ones(1,2),ylims,'Color',[1 0 0]),chunks  );
+        arrayfun(@(x,y)f(x*ones(1,2),ylims,'Color',grey,'LineWidth',.5+2*y),sessions,gaps);
+        %arrayfun(@(x)f(x*ones(1,2),ylims,'Color',[1 0 0]),chunks  );
         
         if exist('dates','var') && ~isempty(dates) && dates
             tn = [0; sessions]+1;
@@ -566,6 +567,7 @@ standardPlot(@plot,[],false,true);
     end
 
 h(end+1) = subplot(sps,1,2);
+hold on
 doLog = true;
 eps2 = min(stopDur(stopDur>0));
 
@@ -575,8 +577,6 @@ switch stopType
         k=100;
         bins = logspace(log10(eps2),log10(max(stopDur(:))),k);
         s = histc(window(pad(stopDur,n,@nan),n),bins);
-        imagesc(log(s))
-        axis xy
     case 'ptile'
         cmj = colormap('jet');
         cmj = [cmj;flipud(cmj)];
@@ -585,20 +585,6 @@ switch stopType
         
         eps2=eps2/head; %min(s(s>0))/head;
         %s(s<=0)=eps2;
-        
-        if false %patch
-            for i=1:size(s,1)-1
-                rangePlot(trialNums,s(i+[0 1],:),cmj(ceil(size(cmj,1)*i/(size(s,1)-1)),:),1);
-                hold on
-            end
-        else %contour
-            for i=ceil(linspace(1,size(s,1),11))
-                semilogyEF(trialNums,s(i,:),'Color',cmj(ceil(size(cmj,1)*i/size(s,1)),:));
-                hold on
-            end
-        end
-    otherwise
-        semilogyEF(trialNums(stopDur>0),stopDur(stopDur>0),'.','MarkerSize',dotSize)
 end
 switch stopType
     case 'density'
@@ -608,26 +594,44 @@ switch stopType
         ylims = [eps2 max(stopDur)*head];
         plotter = @semilogyEF;
 end
-hold on
 standardPlot(plotter,[.1 .3 1 3 10 30],true);
+switch stopType
+    case 'density'
+        imagesc(log(s))
+        axis xy
+    case 'ptile'
+        if false %patch
+            for i=1:size(s,1)-1
+                rangePlot(trialNums,s(i+[0 1],:),cmj(ceil(size(cmj,1)*i/(size(s,1)-1)),:),1);
+            end
+        else %contour
+            for i=ceil(linspace(1,size(s,1),11))
+                semilogyEF(trialNums,s(i,:),'Color',cmj(ceil(size(cmj,1)*i/size(s,1)),:));
+            end
+        end
+    otherwise
+        semilogyEF(trialNums(stopDur>0),stopDur(stopDur>0),'.','MarkerSize',dotSize)
+end
 ylabel('stop time (s)')
 
 h(end+1) = subplot(sps,1,3);
-eps2=fix0(dur(goodResults));
-correctPlot(dur);
 hold on
+eps2=fix0(dur(goodResults));
+ylims = [eps2 prctile(dur,99)*head];
+standardPlot(@semilogyEF,[.01 .03 .1 .3 1 3 10],true);
+correctPlot(dur);
 for i=1:length(pTiles)
     pTiles{i}(pTiles{i}==0)=eps2;
     rangePlot(trialNums(i==classes),pTiles{i}([1 end],:),cm(i,:));
 end
-ylims = [eps2 prctile(dur,99)*head];
 ylabel('response time (s)')
-standardPlot(@semilogyEF,[.01 .03 .1 .3 1 3 10],true);
 doLog = false;
 
 h(end+1) = subplot(sps,1,4);
-rangePlot(perfX,perfC','r');
 hold on
+ylims = [0 1];
+standardPlot(@plot,[],[],[],true);
+rangePlot(perfX,perfC','r');
 rangePlot(biasX,biasC',bw);
 plot(trialNums,.5*ones(1,length(trialNums)),bw)
 if any(flip)
@@ -636,9 +640,7 @@ end
 if any(rnd)
     plot(trialNums(rnd),.5,'g+')
 end
-ylims = [0 1];
 ylabel('% correct(r) rightward(w)')
-standardPlot(@plot,[],[],[],true);
 
 xlabel('trial')
 linkaxes(h,'x');
@@ -670,14 +672,23 @@ if plotTracks
     slowFact = .1;
     trackFact = 1;
     
-    stops = cellfun(@(x,i)processTrack(x,i,slowFact ,true ),slowTrack,num2cell(trialNums),'UniformOutput',false);
-    resps = cellfun(@(x,i)processTrack(x,i,trackFact,false),    track,num2cell(trialNums),'UniformOutput',false);
+    these=1;
+    justLast=true;
+    if justLast
+        try %might not be any sessions yet
+            these=sessions(end-1);
+        end
+    end
+    these=these:trialNums(end);
+    
+    stops = cellfun(@(x,i)processTrack(x,i,slowFact ,true ),slowTrack(these),num2cell(these),'UniformOutput',false);
+    resps = cellfun(@(x,i)processTrack(x,i,trackFact,false),    track(these),num2cell(these),'UniformOutput',false);
     
     h=[];
     ylabels={'stop x','stop y','left x','left y','right x','right y'};
     for i=1:sps
         h(end+1)=subplot(sps,1,i);
-
+        
         switch i
             case {1 2}
                 xs = {{cellfun(@(x)x([1 i+1],:),stops,'UniformOutput',false),'m'}};
@@ -690,14 +701,18 @@ if plotTracks
                         j=3;
                         filt = targRight;
                 end
-                xs = cellfun(@(c){cellfun(@(x)x([1 i-j],:),resps(filt & classes==c),'UniformOutput',false) cm(c,:)},num2cell(unique(classes(goodResults))),'UniformOutput',false);
+                xs = cellfun(@(c){cellfun(@(x)x([1 i-j],:),resps(filt(these) & classes(these)==c),'UniformOutput',false) cm(c,:)},num2cell(unique(classes(goodResults))),'UniformOutput',false);
         end
         
+        ylims = cell2mat(cellfun(@(x)cell2mat(cellfun(@(y)cell2mat(cellfun(@(f)f(y(2,:)),{@min @max}','UniformOutput',false)),x{1},'UniformOutput',false)),xs,'UniformOutput',false));
+        ylims = arrayfun(@(p,i)prctile(ylims(i,:),p),[0 100]+5*[1 -1],1:2);
         xs = cellfun(@(x){interleave(x{1},nan(2,1)) x{2:end}},xs,'UniformOutput',false);
-        plot(trialNums,0,'Color',grey);
+        plot(these,0,'Color',grey);
         hold on
+        standardPlot(@plot,[],[],i==2,i==sps);
+        
         cellfun(@(x)plot(x{1}(1,:),x{1}(2,:),'Color',x{2}),xs);
-
+        
         switch i
             case 1
                 title([subj ' -- ' datestr(now,'ddd, mmm dd HH:MM PM')])
@@ -706,13 +721,12 @@ if plotTracks
         end
         
         ylabel(ylabels{i});
-        ylims = get(h(end),'YLim');
-        standardPlot(@plot,[],[],[],i==sps);
     end
     
     xlabel(sprintf('trial (track time %gs)',1/trackFact));
     linkaxes(h,'x');
-    uploadFig(fig,subj,max(trialNums)/10,sps*200,'tracks');
+    xlim(these([1 end]));
+    uploadFig(fig,subj,range(these)*10,sps*200,'tracks');
 end
 
     function out = getLims(in)
@@ -733,12 +747,12 @@ if plotSettings
     h = [];
     for i=1:n
         h(i) = subplot(n,1,i);
-        x=plot(trialNums,plots{i,1}');
-        arrayfun(@(x,y) set(x,'LineWidth',y),x,(d-1)+(d*(length(x)-1):-d:0)');
         hold on
         ylims = getLims(plots{i,1});
-        ylabel(plots{i,2})
         standardPlot(@plot,[],[],i==1,i==n); %(f,ticks,lines,dates,xticks)
+        x=plot(trialNums,plots{i,1}');
+        arrayfun(@(x,y) set(x,'LineWidth',y),x,(d-1)+(d*(length(x)-1):-d:0)');
+        ylabel(plots{i,2})
         if i==1
             title([subj ' -- ' datestr(now,'ddd, mmm dd HH:MM PM')])
         end

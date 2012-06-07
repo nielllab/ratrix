@@ -18,8 +18,8 @@ if IsWin
     set(f,'PaperPositionMode','auto'); %causes print to respect figure size
     set(f,'InvertHardCopy','off'); %preserves black background when colordef black
     
-    sfx = '.fig';
-    latest = [fn sfx];
+    sfx = 'fig';
+    latest = [fn '.' sfx];
     saveas(f,latest);
     lqf = ['latest' qual '.'];
     [status,message,messageid] = copyfile(latest,fullfile(fileparts(latest),[lqf sfx]));
@@ -32,6 +32,12 @@ if IsWin
     
     set(f,'Visible','off') %otherwise screen size limits figure size
     set(f,'Position',[0,200,max(400,width),max(200,height)]) % [left, bottom, width, height]
+    pos=get(f,'Position');
+    if pos(3)~=width
+        pos(3)
+        width
+        warning('width maxed out')
+    end
     
     doSVG=false;
     if doSVG

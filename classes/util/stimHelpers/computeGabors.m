@@ -79,10 +79,11 @@ for i=1:numGabors
     
     oldMethod=0;
     if oldMethod
-        
+
         %tiny=10^(-10); % with this value, its safe with biggest<166,000 but not biggest>167,000
         %line=contrast(i)*sin(phase(i)-tiny + (0:biggest*2)*(2*pi)/pixPerCyc(i))/2;
         switch waveform
+ 
             case 'sine'
                 line = sin(phase(i)  + (0:biggest*2)*(2*pi)/pixPerCyc(i))/2;
             case 'square'
@@ -185,9 +186,10 @@ for i=1:numGabors
         
         
     else %currentMethod
-        
-        
-        
+                
+        if pixPerCyc(i)==Inf  %%% for constant luminance, don't use random phase 
+            phase(i)=pi/2;    %%% phase is set to full luminance, so contrast should be used to modulate instead
+        end
         %%
         
         %calculate the effective frequency in the vertical and horizontal directions

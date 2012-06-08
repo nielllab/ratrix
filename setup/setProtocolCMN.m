@@ -66,24 +66,26 @@ dist = 20;
 degpercm = atand((0.25*widthcm+1)/dist) - atand(0.25*widthcm/dist);
 pixperdeg = pixpercm/degpercm
 
-cpd=0.16
+cpd=0.16;
 pixPerCycs = pixperdeg/cpd
 
 targetOrientations      =[0];
 distractorOrientations  =[];
-mean                    =.5;
+mean                    =0.5;
 radius                  =.4;
-contrast                =1;
+contrast                =-1;
 thresh                  =.00005;
 yPosPct                 =.5;
 scaleFactor            = 0; %[1 1];
-interTrialLuminance     =.5;
-freeStim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[],[],1,500);
+interTrialLuminance     =0.5;
+keepStimOn              =1;
+stimOnDuration          =500;; %ms
+freeStim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[],[],keepStimOn,stimOnDuration);
 
 %distractorOrientations=-targetOrientations;
 targetOrientations = 0;
 distractorOrientations = pi/2;
-orientation = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[],[],1,500);
+orientation = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[],[],keepStimOn,stimOnDuration);
 
 requestRewardSizeULorMS = 0;
 msPenalty               = 1000;

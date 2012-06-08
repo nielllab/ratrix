@@ -79,11 +79,9 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) &&
         msPenaltySound=0;
        
       
-        if strcmp(class(sm),'orientedGabors')
-          [rewardStimOn rewardStimDuration] = getRewardStimParams(sm);  
-        else
-            rewardStimOn=0; rewardStimDuration=0;
-        end
+
+        [rewardStimOn rewardStimDuration] = getRewardStimParams(sm);  
+    
         if window>0
             
             if isempty(framesUntilTransition)
@@ -101,20 +99,15 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) &&
             numCorrectFrames=ceil(getHz(spec)*rewardSizeULorMS/1000);
         else
             error('huh?')
-        end
+        end 
        
-        spec=setFramesUntilTransition(spec,framesUntilTransition);      
-       
-        [cStimDef correctScale] = correctStim(sm,numCorrectFrames)
-        cStim=getStim(spec);
-
-        correctScale=getScaleFactor(spec);
-        if ~rewardStimOn
-            cStim(:) = cStimDef*256; %%% scalar and array stimulus seem to be on different ranges (0-1 vs 0-255) cmn
+        if rewardStimOn
+            cStim=getStim(spec);
+            correctScale=getScaleFactor(spec);  
+        else  
+            [cStim correctScale] = correctStim(sm,numCorrectFrames)
         end
-
-
-        spec=setScaleFactor(spec,correctScale);
+        
         strategy='noCache';
         if window>0
             [floatprecision cStim] = determineColorPrecision(tm, cStim, strategy);
@@ -125,7 +118,10 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) &&
         else
             error('huh?')
         end
-        spec=setStim(spec,cStim);
+          % need to recompute stim since it can change size depending on
+          % what correctStim is
+         spec = stimSpec(cStim,getTransitions(spec),'cache',0,framesUntilTransition,[],correctScale,0,getHz(spec),'reinforced','reinforcement',false,false); % do not punish responses here
+
 
         
     else
@@ -163,7 +159,10 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) &&
         else
             error('huh?')
         end
-        spec=setStim(spec,eStim);
+          % need to recompute stim since it can change size depending on
+          % what errorStim is
+        spec = stimSpec(eStim,getTransitions(spec),'cache',0,framesUntilTransition,[],errorScale,0,getHz(spec),'reinforced','reinforcement',false,false); % do not punish responses here
+
     end
     
 end % end reward handling

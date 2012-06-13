@@ -1,7 +1,21 @@
-function [out scale] = correctStim(stimManager,numFrames)
-%if nAFC, consider showing last frame of discriminandum for something like
-%2x the reward duration or something
+function [out type startFrame scale numFrames] = correctStim(sm,numFrames,ifi,tm)
+%would really like to add flexibility here to do something like blink the
+%stim in synchrony with some beeps
 
-scale=0;
+%also, we'd rather have the option here to reuse textures already loaded
+%onto the gpu back before the trial started, if we don't want to do something based on
+%what actually happened in the trial
 
-out = double(getInterTrialLuminance(stimManager));
+switch class(tm)
+    case 'nAFC'
+        out        = getStim       (sm.correctStim);
+        type       = getStimType   (sm.correctStim);
+        startFrame = getStartFrame (sm.correctStim);
+        scale      = getScaleFactor(sm.correctStim);
+        numFrames  = ceil(getReinfAssocSecs(sm)/ifi);
+    otherwise %old way
+        out        = double(getInterTrialLuminance(sm));
+        type       = 'static';
+        startFrame = 1;
+        scale      = 0;
+end

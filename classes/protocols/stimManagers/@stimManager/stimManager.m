@@ -1,6 +1,9 @@
 function s=stimManager(varargin)
 % STIMMANAGER  class constructor. ABSTRACT CLASS -- DO NOT INSTANTIATE
 % s = stimManager(maxWidth,maxHeight,scaleFactor,interTrialLuminance)
+
+s.correctStim=[];
+
 switch nargin
     case 0
         % if no input arguments, create a default object

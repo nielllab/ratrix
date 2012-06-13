@@ -194,9 +194,10 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             
             checkPorts(trialManager,trialRecords(trialInd).targetPorts,trialRecords(trialInd).distractorPorts);
             
-            [stimSpecs startingStimSpecInd] = createStimSpecsFromParams(trialManager,preRequestStim,preResponseStim,discrimStim,...
+            [stimSpecs startingStimSpecInd newSM] = createStimSpecsFromParams(trialManager,preRequestStim,preResponseStim,discrimStim,...
 				trialRecords(trialInd).targetPorts,trialRecords(trialInd).distractorPorts,getRequestPorts(trialManager,getNumPorts(station)),...
-				trialRecords(trialInd).interTrialLuminance,refreshRate,indexPulses);
+				trialRecords(trialInd).interTrialLuminance,refreshRate,indexPulses,newSM);
+            updateSM=true;
 
             validateStimSpecs(stimSpecs);
 

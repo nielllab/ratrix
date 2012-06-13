@@ -37,22 +37,22 @@ end
     targetPorts, requestPorts, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
     floatprecision, textures, destRect, ...
     requestRewardDone, punishResponses,request);
-if isempty(possibleTimeout)		
-	if ~isempty(result) && ~ischar(result) && isempty(correct) && strcmp(getPhaseLabel(spec),'reinforcement')
-		resp=find(result);
-		if length(resp)==1
-			correct = ismember(resp,targetPorts);
-			if punishResponses % this means we got a response, but we want to punish, not reward
-				correct=0; % we could only get here if we got a response (not by request or anything else), so it should always be correct=0
-			end
-			result = 'nominal';
-		else
-			correct = 0;
-			result = 'multiple ports';
-		end
-	end
+if isempty(possibleTimeout)
+    if ~isempty(result) && ~ischar(result) && isempty(correct) && strcmp(getPhaseLabel(spec),'reinforcement')
+        resp=find(result);
+        if length(resp)==1
+            correct = ismember(resp,targetPorts);
+            if punishResponses % this means we got a response, but we want to punish, not reward
+                correct=0; % we could only get here if we got a response (not by request or anything else), so it should always be correct=0
+            end
+            result = 'nominal';
+        else
+            correct = 0;
+            result = 'multiple ports';
+        end
+    end
 else
-	correct=possibleTimeout.correct;
+    correct=possibleTimeout.correct;
 end
 
 % ========================================================
@@ -82,7 +82,7 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) &&
                 framesUntilTransition = ceil((rewardSizeULorMS/1000)/ifi);
             end
             numCorrectFrames=ceil((rewardSizeULorMS/1000)/ifi);
-
+            
         elseif strcmp(getDisplayMethod(tm),'LED')
             if isempty(framesUntilTransition)
                 framesUntilTransition=ceil(getHz(spec)*rewardSizeULorMS/1000);
@@ -94,14 +94,22 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) &&
         else
             error('huh?')
         end
+        
+        [cStim cType cStartFrame cScale framesUntilTransition] = correctStim(sm,numCorrectFrames,ifi,tm);
+        
         spec=setFramesUntilTransition(spec,framesUntilTransition);
-        [cStim correctScale] = correctStim(sm,numCorrectFrames);
-        spec=setScaleFactor(spec,correctScale);
+        spec=setScaleFactor(spec,cScale);
+        
+        if ismember(cType,{'static','cache','loop'}) || (iscell(cType) && all(size(cType)==[1 2]) && ismember(cType{1},{'trigger','timedFrames','indexedFrames'}))
+            spec=setType(spec,cType); %needs to be compatible with fixed framesUntilTransition -- how deal with dynamic/expert/etc?
+        end
+        spec=setStartFrame(spec,cStartFrame);
+        
         strategy='noCache';
         if window>0
             [floatprecision cStim] = determineColorPrecision(tm, cStim, strategy);
             textures = cacheTextures(tm,strategy,cStim,window,floatprecision);
-            destRect = determineDestRect(tm, window, station, correctScale, cStim, strategy);
+            destRect = determineDestRect(tm, window, station, cScale, cStim, strategy);
         elseif strcmp(getDisplayMethod(tm),'LED')
             floatprecision=[];
         else
@@ -118,7 +126,7 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) &&
                 framesUntilTransition = ceil((msPenalty/1000)/ifi);
             end
             numErrorFrames=ceil((msPenalty/1000)/ifi);
-
+            
         elseif strcmp(getDisplayMethod(tm),'LED')
             if isempty(framesUntilTransition)
                 framesUntilTransition=ceil(getHz(spec)*msPenalty/1000);

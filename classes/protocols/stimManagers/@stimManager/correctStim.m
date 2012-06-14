@@ -8,11 +8,19 @@ function [out type startFrame scale numFrames] = correctStim(sm,numFrames,ifi,tm
 
 switch class(tm)
     case 'nAFC'
-        out        = getStim       (sm.correctStim);
+        dur =   getReinfAssocSecs(sm);
+        if dur>0
+            out        = getStim       (sm.correctStim);
         type       = getStimType   (sm.correctStim);
         startFrame = getStartFrame (sm.correctStim);
         scale      = getScaleFactor(sm.correctStim);
         numFrames  = ceil(getReinfAssocSecs(sm)/ifi);
+        else
+                  out        = double(getInterTrialLuminance(sm));
+        type       = 'static';
+        startFrame = 1;
+        scale      = 0;
+        end
     otherwise %old way
         out        = double(getInterTrialLuminance(sm));
         type       = 'static';

@@ -1,4 +1,4 @@
-function [out type startFrame scale numFrames] = correctStim(sm,numFrames,ifi,tm)
+function [out type startFrame scale numFrames] = correctStim(sm,numFrames,ifi,tm, lastFrame)
 %would really like to add flexibility here to do something like blink the
 %stim in synchrony with some beeps
 
@@ -11,15 +11,19 @@ switch class(tm)
         dur =   getReinfAssocSecs(sm);
         if dur>0
             out        = getStim       (sm.correctStim);
-        type       = getStimType   (sm.correctStim);
-        startFrame = getStartFrame (sm.correctStim);
-        scale      = getScaleFactor(sm.correctStim);
-        numFrames  = ceil(getReinfAssocSecs(sm)/ifi);
+            type       = getStimType   (sm.correctStim);
+            scale      = getScaleFactor(sm.correctStim);
+            numFrames  = ceil(dur/ifi);
+            if ~isempty(lastFrame)
+                startFrame = lastFrame;
+            else
+                startFrame = getStartFrame (sm.correctStim);
+            end
         else
-                  out        = double(getInterTrialLuminance(sm));
-        type       = 'static';
-        startFrame = 1;
-        scale      = 0;
+             out        = double(getInterTrialLuminance(sm));
+            type        = 'static';
+            startFrame = 1;
+            scale      = 0;
         end
     otherwise %old way
         out        = double(getInterTrialLuminance(sm));

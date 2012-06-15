@@ -443,6 +443,11 @@ while ~done && ~quit;
         end
         
         finish=false;
+        if exist('i','var')
+            lastFrame=i;
+        else
+            lastFrame=0;
+        end
         i=0;
         frameIndex=0;
         frameNum=1;
@@ -488,6 +493,7 @@ while ~done && ~quit;
         
         % =========================================================================
         
+
         framesInPhase = 0;
         if ~isempty(getStartFrame(spec))
             i=getStartFrame(spec);
@@ -555,7 +561,7 @@ while ~done && ~quit;
             updateTrialState(tm, stimManager, trialRecords(trialInd).result, spec, ports, lastPorts, ...
             targetOptions, requestOptions, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
             floatprecision, textures, destRect, ...
-            requestRewardDone, punishLastResponse);
+            requestRewardDone, punishLastResponse,[], lastFrame);
         
         if rewardSizeULorMS~=0
             doRequestReward=false;
@@ -600,6 +606,7 @@ while ~done && ~quit;
             scheduledFrameNum=ceil((GetSecs-firstVBLofPhase)/(framesPerUpdate*ifi)); %could include pessimism about the time it will take to get from here to the flip and how much advance notice flip needs
             % this will surely have drift errors...
             % note this does not take pausing into account -- edf thinks we should get rid of pausing
+            i
             
             dynamicSounds={};
             switch strategy

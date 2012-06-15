@@ -3,10 +3,11 @@ function [tm trialDetails result spec rewardSizeULorMS requestRewardSizeULorMS .
     updateTrialState(tm, sm, result, spec, ports, lastPorts, ...
     targetPorts, requestPorts, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
     floatprecision, textures, destRect, ...
-    requestRewardDone, punishResponses,request)
+    requestRewardDone, punishResponses,request, lastFrame)
 if ~exist('request','var') || isempty(request)
     request = false;
 end
+
 
 % This function is a tm-specific method to update trial state before every flip.
 % Things done here include:
@@ -95,7 +96,7 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) &&
             error('huh?')
         end
         
-        [cStim cType cStartFrame cScale framesUntilTransition] = correctStim(sm,numCorrectFrames,ifi,tm);
+        [cStim cType cStartFrame cScale framesUntilTransition] = correctStim(sm,numCorrectFrames,ifi,tm, lastFrame);
         
         spec=setFramesUntilTransition(spec,framesUntilTransition);
         spec=setScaleFactor(spec,cScale);
@@ -104,6 +105,7 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) &&
             spec=setType(spec,cType); %needs to be compatible with fixed framesUntilTransition -- how deal with dynamic/expert/etc?
         end
         spec=setStartFrame(spec,cStartFrame);
+        cStartFrame
         
         strategy='noCache';
         if window>0
@@ -116,6 +118,7 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) &&
             error('huh?')
         end
         spec=setStim(spec,cStim);
+        
     else
         rewardSizeULorMS=0;
         msRewardSound=0;

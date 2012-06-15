@@ -1,6 +1,10 @@
-function niellLabReport
+function niellLabReport(force)
 addpath(fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))),'bootstrap'));
 setupEnvironment;
+
+if ~exist('force','var') || isempty(force)
+    force = false;
+end
 
 doBall=true;
 doBox=true;
@@ -31,7 +35,7 @@ if doBall
     };
 
     tic
-    cellfun(@(x) cellfun(@(y)plotCrossingTime(y,['\\' x{1}]),x{2}),recs);
+    cellfun(@(x) cellfun(@(y)plotCrossingTime(y,['\\' x{1}],force),x{2}),recs);
     toc
 end
 
@@ -147,6 +151,9 @@ close all
 
     function g(box,d,subj)        
         selection.subjects = {subj};
+%         if strcmp(subj,'c1ln')
+%             keyboard
+%         end
         selection.titles = selection.subjects;
         close all
         if iscell(d)

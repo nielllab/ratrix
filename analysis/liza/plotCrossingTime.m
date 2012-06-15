@@ -590,11 +590,14 @@ switch stopType
     case 'density'
         ylims = bins;
         plotter = @plot;
+        ytop = ylims(end);
     otherwise
         ylims = [eps2 max(stopDur)*head];
         plotter = @semilogyEF;
+        ytop = log(ylims(end));
 end
 standardPlot(plotter,[.1 .3 1 3 10 30],true);
+scatter(trialNums,.9*ytop*ones(size(trialNums)),dotSize,hsv2rgb([mod(-.25-startTimes,1) ones(length(trialNums),2)]),'+');
 switch stopType
     case 'density'
         imagesc(log(s))

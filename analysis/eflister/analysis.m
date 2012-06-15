@@ -50,8 +50,9 @@ catch
     
     mtrix=['mtrix' num2str(input('which box?'))];%'mtrix4'; %box to use
     
-    %apath = ['\\',mtrix,'\Users\nlab\Desktop\mouseData\CompiledTrialRecords\']; %edf temp
-    apath = ['\\',mtrix,'\Users\nlab\Desktop\wehrData\CompiledTrialRecords\']; %edf temp
+    apath = ['\\',mtrix,'\Users\nlab\Desktop\mouseData\CompiledTrialRecords\']; %edf temp
+    apath = ['\\',mtrix,'\Users\nlab\Desktop\mouseData0512\CompiledTrialRecords\']; %edf temp    
+    %apath = ['\\',mtrix,'\Users\nlab\Desktop\wehrData\CompiledTrialRecords\']; %edf temp
     
     if ismac
         mountOSX(['/Volumes/',mtrix], ['@', mtrix ,'/Users'],'nlab','huestis238');

@@ -151,6 +151,9 @@ close all
 
     function g(box,d,subj)        
         selection.subjects = {subj};
+%         if strcmp(subj,'c1ln')
+%             keyboard
+%         end
         selection.titles = selection.subjects;
         close all
         if iscell(d)

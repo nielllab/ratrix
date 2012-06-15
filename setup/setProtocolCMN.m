@@ -99,6 +99,17 @@ numTriggers = 20;
 ts1 = trainingStep(fd,  freeStim, rateCriterion(trialsPerMinute,minutes), noTimeOff(), svnRev,svnCheckMode);  %stochastic free drinks
 ts2 = trainingStep(fd2, freeStim, numTrialsDoneCriterion(numTriggers)   , noTimeOff(), svnRev,svnCheckMode);  %free drinks
 
+% %%% try next time
+% %%% free drips
+% trialsPerMinute = 10;
+% minutes = 60;  %%% basically 10 triggered trials period
+% ts1 = trainingStep(fd,  freeStim, rateCriterion(trialsPerMinute,minutes), noTimeOff(), svnRev,svnCheckMode);  %stochastic free drinks
+% 
+% %%% turn off stochastic drips
+% trialsPerMinute = 7;
+% minutes = 0.5;  %%% now go for speed
+% ts2 = trainingStep(fd2,  freeStim, rateCriterion(trialsPerMinute,minutes), noTimeOff(), svnRev,svnCheckMode);  %stochastic free drinks
+
 %nafc
 trialsPerMinute = 6;
 minutes = 1;

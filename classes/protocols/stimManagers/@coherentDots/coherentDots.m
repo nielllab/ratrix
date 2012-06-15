@@ -156,7 +156,7 @@ case {11 12 13}
     else
         % check intertrial luminance
         if args{13} >=0 && args{13} <= 1
-            s = class(s,'coherentDots',stimManager(varargin{10},varargin{11},screen_zoom,uint8(args{13}*intmax('uint8'))));
+            s = class(s,'coherentDots',stimManager(varargin{10},varargin{11},screen_zoom,args{13}));
         else
             error('interTrialLuminance must be <=1 and >=0 - will be converted to a uint8 0-255');
         end

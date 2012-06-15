@@ -24,6 +24,8 @@ if IsWin
         'or, from dos prompt with admin privledges, ''net start w32time'''
         'also, w32tm has to be run in a dos prompt started by right click->run as administrator -- not sure how to do that from matlab'
         'seems running matlab as admin is enough, or disabling uac as we do for porttalk anyway...'
+        'if you get The following error occurred: The specified module could not be found. (0x8007007E)'
+        'get hotfix at http://support.microsoft.com/kb/978714 (some kind of 32/64 bit dll confusion)'
         error('system time sync failed')
     else
         if ~strcmp(b,sprintf('Sending resync command to local computer\nThe command completed successfully.\n'))

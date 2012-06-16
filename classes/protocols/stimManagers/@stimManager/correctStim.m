@@ -1,4 +1,4 @@
-function [out type startFrame scale numFrames] = correctStim(sm,numFrames,ifi,tm, lastFrame)
+function [out type startFrame scale numFrames] = correctStim(sm,numFrames,ifi,tm,lastFrame)
 %would really like to add flexibility here to do something like blink the
 %stim in synchrony with some beeps
 
@@ -6,28 +6,17 @@ function [out type startFrame scale numFrames] = correctStim(sm,numFrames,ifi,tm
 %onto the gpu back before the trial started, if we don't want to do something based on
 %what actually happened in the trial
 
-switch class(tm)
-    case 'nAFC'
-        dur =   getReinfAssocSecs(sm);
-        if dur>0
-            out        = getStim       (sm.correctStim);
-            type       = getStimType   (sm.correctStim);
-            scale      = getScaleFactor(sm.correctStim);
-            numFrames  = ceil(dur/ifi);
-            if ~isempty(lastFrame)
-                startFrame = lastFrame;
-            else
-                startFrame = getStartFrame (sm.correctStim);
-            end
-        else
-             out        = double(getInterTrialLuminance(sm));
-            type        = 'static';
-            startFrame = 1;
-            scale      = 0;
-        end
-    otherwise %old way
-        out        = double(getInterTrialLuminance(sm));
-        type       = 'static';
-        startFrame = 1;
-        scale      = 0;
+dur = getReinfAssocSecs(sm);
+
+if dur > 0 % && strcmp(class(tm),'nAFC')
+    out        = getStim       (sm.correctStim);
+    type       = getStimType   (sm.correctStim);
+    startFrame = lastFrame;    
+    scale      = getScaleFactor(sm.correctStim);
+    numFrames  = ceil(dur/ifi);
+else %old way
+    out        = double(getInterTrialLuminance(sm));
+    type       = 'static';
+    startFrame = 1;
+    scale      = 0;
 end

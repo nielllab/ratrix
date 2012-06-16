@@ -223,7 +223,7 @@ Screen('Screens');
 
 if window>0
     standardFontSize=11;
-     oldFontSize = Screen('TextSize',window,standardFontSize);
+    oldFontSize = Screen('TextSize',window,standardFontSize);
     if IsLinux
         Screen('TextStyle', window, 0); %otherwise defaults to bold italic!?!
         
@@ -338,11 +338,11 @@ if window>0
             %still too slow on osx at .01 -- trying 800x500 at 8bit color
         end
         moviePtr = Screen('CreateMovie', window, movieFile, [], [], 1/ifi, str);
-                
+        
         %looks like C:\Users\nlab\Desktop\ptb src\PsychSourceGL\Source\Common\Screen\ScreenPreferenceState.c
         %doesn't check for 64 vs. 32 bit win
         %docs make it sound like qt is still default for 32bit win, but i
-        %couldn't get qt to work at all until i had gstreamer installed?        
+        %couldn't get qt to work at all until i had gstreamer installed?
         % todo, try again w/qt - am i misremembering?
         
         %we should also record sound
@@ -443,11 +443,6 @@ while ~done && ~quit;
         end
         
         finish=false;
-        if exist('i','var')
-            lastFrame=i;
-        else
-            lastFrame=0;
-        end
         i=0;
         frameIndex=0;
         frameNum=1;
@@ -493,14 +488,14 @@ while ~done && ~quit;
         
         % =========================================================================
         
-
         framesInPhase = 0;
-        if ~isempty(getStartFrame(spec))
-            i=getStartFrame(spec);
-            framesInPhase=i;
-        end
         
         if ischar(strategy) && strcmp(strategy,'cache')
+            if ~isempty(getStartFrame(spec)) %would like to get rid of this -- note we have to redo it below to catch correctStim
+                i=getStartFrame(spec);
+                framesInPhase=i;
+            end
+            error('this looks wrong -- should be size(stim,3)?')
             numFramesInStim = size(stim)-i;
         elseif timeIndexed
             if timedFrames(end)==0
@@ -561,7 +556,7 @@ while ~done && ~quit;
             updateTrialState(tm, stimManager, trialRecords(trialInd).result, spec, ports, lastPorts, ...
             targetOptions, requestOptions, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
             floatprecision, textures, destRect, ...
-            requestRewardDone, punishLastResponse,[], lastFrame);
+            requestRewardDone, punishLastResponse,[], lastI);
         
         if rewardSizeULorMS~=0
             doRequestReward=false;
@@ -576,6 +571,13 @@ while ~done && ~quit;
         framesUntilTransition=getFramesUntilTransition(spec);
         stim=getStim(spec);
         scaleFactor=getScaleFactor(spec);
+        
+        if framesInPhase==0 %needs rearchitecting!
+            if ~isempty(getStartFrame(spec))
+                i=getStartFrame(spec);
+                framesInPhase=i;
+            end
+        end
         
         if requestRewardSizeULorMS~=0
             doRequestReward=true;
@@ -606,7 +608,6 @@ while ~done && ~quit;
             scheduledFrameNum=ceil((GetSecs-firstVBLofPhase)/(framesPerUpdate*ifi)); %could include pessimism about the time it will take to get from here to the flip and how much advance notice flip needs
             % this will surely have drift errors...
             % note this does not take pausing into account -- edf thinks we should get rid of pausing
-            i
             
             dynamicSounds={};
             switch strategy
@@ -1135,14 +1136,12 @@ if ~isempty(analogOutput)
     delete(analogOutput); %should pass back to caller and preserve for next trial so intertrial works and can avoid contruction costs
 end
 
-
 if ~containedExpertPhase
     Screen('Close'); %leaving off second argument closes all textures but leaves windows open
 else
     %maybe once this was per phase, but now its per trial
     expertPostTrialCleanUp(stimManager);
 end
-
 
 Priority(originalPriority);
 

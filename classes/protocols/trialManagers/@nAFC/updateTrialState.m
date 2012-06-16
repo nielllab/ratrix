@@ -97,7 +97,7 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) &&
         
         [cStim cType cStartFrame cScale framesUntilTransition] = correctStim(sm,numCorrectFrames,ifi,tm,lastFrame);
         
-        spec=setFramesUntilTransition(spec,framesUntilTransition);
+        spec=setFramesUntilTransition(spec,max(numCorrectFrames,framesUntilTransition));
         spec=setScaleFactor(spec,cScale);
         
         if ismember(cType,{'static','cache','loop'}) || (iscell(cType) && all(size(cType)==[1 2]) && ismember(cType{1},{'trigger','timedFrames','indexedFrames'}))

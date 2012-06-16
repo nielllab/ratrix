@@ -493,7 +493,7 @@ while ~done && ~quit;
         if ischar(strategy) && strcmp(strategy,'cache')
             if ~isempty(getStartFrame(spec)) %would like to get rid of this -- note we have to redo it below to catch correctStim
                 i=getStartFrame(spec);
-                framesInPhase=i;
+                framesInPhase=i; %wtf?
             end
             error('this looks wrong -- should be size(stim,3)?')
             numFramesInStim = size(stim)-i;
@@ -575,9 +575,10 @@ while ~done && ~quit;
         if framesInPhase==0 %needs rearchitecting!
             if ~isempty(getStartFrame(spec))
                 i=getStartFrame(spec);
-                framesInPhase=i;
+                % framesInPhase=i; %what was this for?
             end
         end
+        %[framesUntilTransition i framesInPhase phaseNum]
         
         if requestRewardSizeULorMS~=0
             doRequestReward=true;

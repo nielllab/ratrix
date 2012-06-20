@@ -230,8 +230,9 @@ if didBlend
     Screen('BlendFunction', window, sourceFactorOld, destinationFactorOld);
 end
 
-if trialRecords(end).stimDetails.correctionTrial
-    textLabel = ['correction trial! ' textLabel];
+ctStr = 'correction trial!';
+if trialRecords(end).stimDetails.correctionTrial && isempty(strfind(textLabel,ctStr))
+    textLabel = [ctStr ' ' textLabel ' ' originalLabel];
 end
 end
 

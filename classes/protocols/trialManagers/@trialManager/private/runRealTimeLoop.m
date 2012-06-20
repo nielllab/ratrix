@@ -581,6 +581,9 @@ while ~done && ~quit;
         framesUntilTransition=getFramesUntilTransition(spec);
         stim=getStim(spec);
         scaleFactor=getScaleFactor(spec);
+        if strcmp(getStimType(spec),'expert')
+            strategy=getStimType(spec);
+        end
         
         if framesInPhase==0 %needs rearchitecting!
             if ~isempty(getStartFrame(spec))
@@ -663,6 +666,7 @@ while ~done && ~quit;
                         destRect,filtMode,expertCache,ifi,scheduledFrameNum,tm.dropFrames,dontclear,...
                         phaseRecords(phaseNum).dynamicDetails,trialRecords,currentCLUT,phaseRecords,phaseNum,tm);
                 otherwise
+                    strategy
                     error('unrecognized strategy')
             end
             

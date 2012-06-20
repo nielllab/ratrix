@@ -3,33 +3,27 @@ function [doFramePulse expertCache dynamicDetails textLabel i dontclear indexPul
     destRect,filtMode,expertCache,ifi,scheduledFrameNum,dropFrames,dontclear,...
     dynamicDetails,trialRecords,currentCLUT,phaseRecords,phaseNum,trialManager)
 
-originalLabel = textLabel;
-
 dontclear = 0;
-
-if ~isfield(expertCache,'clutSize')
-    expertCache.clutSize = size(currentCLUT,1)-1;
-end
-white = expertCache.clutSize*ones(1,4);
-black =       white.*[zeros(1,3)   1];
-grey  = round(white.*[.5*ones(1,3) 1]);
 
 filt = 0; % 0 = Nearest neighbour filtering, 1 = Bilinear filtering (default)
 
 if ~isfield(expertCache,'tex')
     [floatprecision tex] = determineColorPrecision(trialManager,1,[]);
     expertCache.tex = Screen('MakeTexture',window,tex,[],[],floatprecision);
+    
+    expertCache.r = ScaleRect(SetRect(0,0,1,1),trialRecords(end).stimDetails.selectedDotSize,trialRecords(end).stimDetails.selectedDotSize);
 end
 
-if ~isfield(expertCache,'r')
-    expertCache.r = ScaleRect(SetRect(0,0,1,1),trialRecords(end).stimDetails.selectedDotSize,trialRecords(end).stimDetails.selectedDotSize);
+if ~isfield(dynamicDetails,'xys') && strcmp(phaseRecords(phaseNum).phaseType,'reinforced')
+    %might want to condition on trialRecords(end).trialDetails.correct
+    dynamicDetails.xys=phaseRecords(phaseNum-1).dynamicDetails.xys(end,:,:);
 end
 
 switch phaseRecords(phaseNum).phaseType
     case 'pre-request'
         error('huh')
         
-    case 'discrim'
+    case {'discrim' 'reinforced'}
         doFramePulse = true;
         indexPulse = true;
         finish = false;
@@ -54,7 +48,8 @@ switch phaseRecords(phaseNum).phaseType
         error('huh')
 end
 
-if trialRecords(end).stimDetails.correctionTrial
-    textLabel = ['correction trial! ' textLabel];
+ctStr = 'correction trial!';
+if trialRecords(end).stimDetails.correctionTrial && isempty(strfind(textLabel,ctStr))
+    textLabel = [ctStr ' ' textLabel];
 end
 end

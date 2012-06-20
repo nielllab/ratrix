@@ -131,17 +131,17 @@ pStr='';
 sStr='';
 
 if strcmp(s.replayMode,'expert')
-        if ~isempty(s.background) || ~isempty(s.shapeMethod) || s.position~=.5 || s.sideDisplay~=1 || selectedContrast~=1 || ~all(shape(:)==1) || ~all(size(shape)==round(selectedDotSize))
-            s.background
-            s.shapeMethod
-            s.position
-            s.sideDisplay
-            selectedContrast
-            shape
-            selectedDotSize
-            
-            error('not implemented for expert yet')
-        end
+    if ~isempty(s.background) || ~isempty(s.shapeMethod) || s.position~=.5 || s.sideDisplay~=1 || selectedContrast~=1 || ~all(shape(:)==1) || ~all(size(shape)==round(selectedDotSize))
+        s.background
+        s.shapeMethod
+        s.position
+        s.sideDisplay
+        selectedContrast
+        shape
+        selectedDotSize
+        
+        error('not implemented for expert yet')
+    end
     
     if ~all(scaleFactor==1) || selectedDuration~=inf
         error('must have scalefactor=ones and duration=inf for expert')
@@ -152,13 +152,10 @@ if strcmp(s.replayMode,'expert')
     end
     
     alldotsxy = [];
-    out = nan;
     
-    if false
-        dims=[height width]./scaleFactor;
-        out.height=dims(1);
-        out.width=dims(2);
-    end
+    dims=[height width]./scaleFactor;
+    out.height=dims(1);
+    out.width=dims(2);
 else
     %% Draw those dots!
     wrap = true;

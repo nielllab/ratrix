@@ -397,6 +397,16 @@ timestamps.phaseRecordsDone     = timestamps.lastFrameTime;
 timestamps.loopEnd              = timestamps.lastFrameTime;
 timestamps.prevPostFlipPulse    = timestamps.lastFrameTime;
 
+doProfile = false;
+if doProfile
+    blah=profile('status');
+    if strcmp(blah.ProfilerStatus,'on')
+        sca
+        profile viewer
+        keyboard
+    end
+end
+
 %show stim -- be careful in this realtime loop!
 while ~done && ~quit;
     timestamps.loopStart=GetSecs;
@@ -1110,6 +1120,10 @@ while ~done && ~quit;
     end
     
     timestamps.loopEnd=GetSecs;
+end
+
+if doProfile
+    profile on
 end
 
 securePins(station);

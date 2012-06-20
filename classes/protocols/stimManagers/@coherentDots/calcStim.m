@@ -1,6 +1,6 @@
-function [stimulus updateSM resolutionIndex preRequestStim preResponseStim discrimStim LUT targetPorts distractorPorts ...
+function [s updateSM resolutionIndex preRequestStim preResponseStim discrimStim LUT targetPorts distractorPorts ...
     details interTrialLuminance text indexPulses imagingTasks sounds] = ...
-    calcStim(stimulus,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords,targetPorts,distractorPorts,details,text)
+    calcStim(s,trialManagerClass,allowRepeats,resolutions,displaySize,LUTbits,responsePorts,totalPorts,trialRecords,targetPorts,distractorPorts,details,text)
 
 % Reinagel, Mankin, Calhoun 2008 SFN Poster: http://biology.ucsd.edu/labs/reinagel/SpeedAccuracyPoster2009.pdf
 %
@@ -39,7 +39,6 @@ function [stimulus updateSM resolutionIndex preRequestStim preResponseStim discr
 
 sounds={};
 
-s = stimulus;
 indexPulses=[];
 imagingTasks=[];
 %LUT = Screen('LoadCLUT', 0);
@@ -52,9 +51,9 @@ imagingTasks=[];
 % numColors=2^LUTBitDepth; maxColorID=numColors-1; fraction=1/(maxColorID);
 % ramp=[0:fraction:1];
 % LUT= [ramp;ramp;ramp]';
-[LUT stimulus updateSM]=getLUT(stimulus,LUTbits);
+[LUT s updateSM]=getLUT(s,LUTbits);
 
-[resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60],32,getMaxWidth(stimulus),getMaxHeight(stimulus));
+[resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60 59],32,getMaxWidth(s),getMaxHeight(s));
 
 if isnan(resolutionIndex)
     resolutionIndex=1;
@@ -67,8 +66,8 @@ end
 % updateSM=0;     % For intertrial dependencies
 % isCorrection=0;     % For correction trials to force to switch sides
 
-scaleFactor = getScaleFactor(stimulus);
-interTrialLuminance = getInterTrialLuminance(stimulus);
+scaleFactor = getScaleFactor(s);
+interTrialLuminance = getInterTrialLuminance(s);
 
 [lefts, rights] = getBalance(responsePorts,targetPorts);
 
@@ -126,158 +125,192 @@ end
 % ===================================================================================
 %shape = zeros(dot_size,2);
 % Make a square shape
-shape = ones(selectedDotSize);
-
-%% Draw those dots!
-wrap = true;
-if wrap % prevent spatial buildup in direction of motion
-    [dots_movie alldotsxy] = cdots(s.num_dots,s.screen_width,s.screen_height,num_frames,selectedCoherence,selectedSpeed/s.screen_height,dotDirection,shape,false);
-else
-    alldotsxy = [rand(s.num_dots,1)*(s.screen_width-1)+1 ...
-        rand(s.num_dots,1)*(s.screen_height-1)+1];
-    dot_history = zeros(s.num_dots,2,num_frames);
-    
-    dots_movie = uint8(zeros(s.screen_height, s.screen_width, num_frames));
-    
-    frame = zeros(s.screen_height,s.screen_width);
-    frame(sub2ind(size(frame),floor(alldotsxy(:,2)),floor(alldotsxy(:,1)))) = 1;
-    frame = conv2(frame,shape,'same');
-    frame(frame > 0) = 255;
-    dot_history(:,:,1) = alldotsxy;
-    dots_movie(:,:,1) = uint8(frame);
-    % alldotsxy(:,1);
-    % alldotsxy(:,2);
-    
-    if ~static
-        
-        vx = selectedSpeed*cos(dotDirection);
-        vy = selectedSpeed*sin(dotDirection);
-        
-        for i=1:num_frames
-            frame = zeros(s.screen_height,s.screen_width);
-            frame(sub2ind(size(frame),floor(alldotsxy(:,2)),floor(alldotsxy(:,1)))) = 1;
-            frame = conv2(frame,shape,'same');
-            frame(frame > 0) = 255;
-            dots_movie(:,:,i) = uint8(frame);
-            dot_history(:,:,i) = alldotsxy;
-            
-            % Randomly find who's going to be coherent and who isn't
-            move_coher = rand(s.num_dots,1) < selectedCoherence;
-            move_randomly = ~move_coher;
-            
-            num_out = sum(move_randomly);
-            
-            if (num_out ~= s.num_dots)
-                alldotsxy(move_coher,1) = alldotsxy(move_coher,1) + vx;
-                alldotsxy(move_coher,2) = alldotsxy(move_coher,2) + vy;
-            end
-            if (num_out)
-                alldotsxy(move_randomly,:) = [rand(num_out,1)*(s.screen_width-1)+1 ...
-                    rand(num_out,1)*(s.screen_height-1)+1];
-            end
-            
-            overboard = alldotsxy(:,1) > s.screen_width | alldotsxy(:,2) > s.screen_height | ...
-                floor(alldotsxy(:,1)) <= 0 | floor(alldotsxy(:,2)) <= 0;
-            num_out = sum(overboard);
-            if (num_out)
-                alldotsxy(overboard,:) = [rand(num_out,1)*(s.screen_width-1)+1 ...
-                    rand(num_out,1)*(s.screen_height-1)+1];
-            end
-            
-        end
-    end
-end
-
-if ~isempty(stimulus.background)
-    [dots_movie2 alldotsxy2] = cdots(s.num_dots,s.screen_width,s.screen_height,num_frames,selectedCoherence,selectedSpeed/s.screen_height,dotDirection,shape,false);
-    out = dots_movie-dots_movie2;
-    
-    background =  cdots(s.num_dots*stimulus.background.densityFactor,s.screen_width,s.screen_height,1,selectedCoherence,selectedSpeed/s.screen_height,dotDirection,ones(selectedDotSize/stimulus.background.sizeFactor),false);
-    background2 = cdots(s.num_dots*stimulus.background.densityFactor,s.screen_width,s.screen_height,1,selectedCoherence,selectedSpeed/s.screen_height,dotDirection,ones(selectedDotSize/stimulus.background.sizeFactor),false);
-    background = repmat((background-background2)/stimulus.background.contrastFactor,[1,1,num_frames]);
-    
-    inds=find(out==0);
-    out(inds)=background(inds);
-    out = out-min(out(:));
-    out = selectedContrast*out/max(out(:));
-else
-    out = dots_movie*selectedContrast;
-end
+shape = ones(round(selectedDotSize));
 
 pStr='';
 sStr='';
-switch s.shapeMethod
-    case ''
-        %do nothing
-    case 'position'
-        if s.position>0 && length(trialRecords)>=2
-            thisSession = trialRecords(end).sessionNumber == [trialRecords.sessionNumber];
+
+if strcmp(s.replayMode,'expert')
+        if ~isempty(s.background) || ~isempty(s.shapeMethod) || s.position~=.5 || s.sideDisplay~=1 || selectedContrast~=1 || ~all(shape(:)==1) || ~all(size(shape)==round(selectedDotSize))
+            s.background
+            s.shapeMethod
+            s.position
+            s.sideDisplay
+            selectedContrast
+            shape
+            selectedDotSize
             
-            if false
-                for i=1:length(trialRecords) %ugh! how avoid this?
-                    if ~isfield(trialRecords(i).stimDetails,'currentShapedValue')
-                        trialRecords(i).stimDetails.currentShapedValue=nan;
+            error('not implemented for expert yet')
+        end
+    
+    if ~all(scaleFactor==1) || selectedDuration~=inf
+        error('must have scalefactor=ones and duration=inf for expert')
+    end
+    
+    if static
+        selectedSpeed=0;
+    end
+    
+    alldotsxy = [];
+    out = nan;
+    
+    if false
+        dims=[height width]./scaleFactor;
+        out.height=dims(1);
+        out.width=dims(2);
+    end
+else
+    %% Draw those dots!
+    wrap = true;
+    if wrap % prevent spatial buildup in direction of motion
+        [dots_movie alldotsxy] = cdots(s.num_dots,s.screen_width,s.screen_height,num_frames,selectedCoherence,selectedSpeed/s.screen_height,dotDirection,shape,false);
+    else
+        alldotsxy = [rand(s.num_dots,1)*(s.screen_width-1)+1 ...
+            rand(s.num_dots,1)*(s.screen_height-1)+1];
+        dot_history = zeros(s.num_dots,2,num_frames);
+        
+        dots_movie = uint8(zeros(s.screen_height, s.screen_width, num_frames));
+        
+        frame = zeros(s.screen_height,s.screen_width);
+        frame(sub2ind(size(frame),floor(alldotsxy(:,2)),floor(alldotsxy(:,1)))) = 1;
+        frame = conv2(frame,shape,'same');
+        frame(frame > 0) = 255;
+        dot_history(:,:,1) = alldotsxy;
+        dots_movie(:,:,1) = uint8(frame);
+        % alldotsxy(:,1);
+        % alldotsxy(:,2);
+        
+        if ~static
+            
+            vx = selectedSpeed*cos(dotDirection);
+            vy = selectedSpeed*sin(dotDirection);
+            
+            for i=1:num_frames
+                frame = zeros(s.screen_height,s.screen_width);
+                frame(sub2ind(size(frame),floor(alldotsxy(:,2)),floor(alldotsxy(:,1)))) = 1;
+                frame = conv2(frame,shape,'same');
+                frame(frame > 0) = 255;
+                dots_movie(:,:,i) = uint8(frame);
+                dot_history(:,:,i) = alldotsxy;
+                
+                % Randomly find who's going to be coherent and who isn't
+                move_coher = rand(s.num_dots,1) < selectedCoherence;
+                move_randomly = ~move_coher;
+                
+                num_out = sum(move_randomly);
+                
+                if (num_out ~= s.num_dots)
+                    alldotsxy(move_coher,1) = alldotsxy(move_coher,1) + vx;
+                    alldotsxy(move_coher,2) = alldotsxy(move_coher,2) + vy;
+                end
+                if (num_out)
+                    alldotsxy(move_randomly,:) = [rand(num_out,1)*(s.screen_width-1)+1 ...
+                        rand(num_out,1)*(s.screen_height-1)+1];
+                end
+                
+                overboard = alldotsxy(:,1) > s.screen_width | alldotsxy(:,2) > s.screen_height | ...
+                    floor(alldotsxy(:,1)) <= 0 | floor(alldotsxy(:,2)) <= 0;
+                num_out = sum(overboard);
+                if (num_out)
+                    alldotsxy(overboard,:) = [rand(num_out,1)*(s.screen_width-1)+1 ...
+                        rand(num_out,1)*(s.screen_height-1)+1];
+                end
+                
+            end
+        end
+    end
+    
+    if ~isempty(s.background)
+        [dots_movie2 alldotsxy2] = cdots(s.num_dots,s.screen_width,s.screen_height,num_frames,selectedCoherence,selectedSpeed/s.screen_height,dotDirection,shape,false);
+        out = dots_movie-dots_movie2;
+        
+        background =  cdots(s.num_dots*s.background.densityFactor,s.screen_width,s.screen_height,1,selectedCoherence,selectedSpeed/s.screen_height,dotDirection,ones(selectedDotSize/s.background.sizeFactor),false);
+        background2 = cdots(s.num_dots*s.background.densityFactor,s.screen_width,s.screen_height,1,selectedCoherence,selectedSpeed/s.screen_height,dotDirection,ones(selectedDotSize/s.background.sizeFactor),false);
+        background = repmat((background-background2)/s.background.contrastFactor,[1,1,num_frames]);
+        
+        inds=find(out==0);
+        out(inds)=background(inds);
+        out = out-min(out(:));
+        out = selectedContrast*out/max(out(:));
+    else
+        out = dots_movie*selectedContrast;
+    end
+    
+    switch s.shapeMethod
+        case ''
+            %do nothing
+        case 'position'
+            if s.position>0 && length(trialRecords)>=2
+                thisSession = trialRecords(end).sessionNumber == [trialRecords.sessionNumber];
+                
+                if false
+                    for i=1:length(trialRecords) %ugh! how avoid this?
+                        if ~isfield(trialRecords(i).stimDetails,'currentShapedValue')
+                            trialRecords(i).stimDetails.currentShapedValue=nan;
+                        end
+                    end
+                    
+                    try
+                        dets = [trialRecords.stimDetails];
+                    catch
+                        sca
+                        keyboard
+                    end
+                    
+                    thisShapedValue = [[dets.currentShapedValue] == s.position false];
+                end
+                
+                %ugh! how avoid this? have to do this in case previous trialRecords with different details exist
+                thisShapedValue=false(1,length(trialRecords));
+                for i=1:length(trialRecords)-1
+                    if isfield(trialRecords(i).stimDetails,'currentShapedValue')
+                        thisShapedValue(i)=trialRecords(i).stimDetails.currentShapedValue == s.position;
                     end
                 end
                 
-                try
-                    dets = [trialRecords.stimDetails];
-                catch
-                    sca
-                    keyboard
+                [g, ~, pct] = checkCriterion(performanceCriterion(.8,uint8(50)),[],[],trialRecords(thisSession & thisShapedValue),false);
+                
+                if g
+                    s.position = s.position-.1;
+                    updateSM = true;
                 end
                 
-                thisShapedValue = [[dets.currentShapedValue] == s.position false];
+                pStr=sprintf('(%g%%)',round(100*pct));
             end
-            
-            %ugh! how avoid this? have to do this in case previous trialRecords with different details exist
-            thisShapedValue=false(1,length(trialRecords));
-            for i=1:length(trialRecords)-1
-                if isfield(trialRecords(i).stimDetails,'currentShapedValue')
-                    thisShapedValue(i)=trialRecords(i).stimDetails.currentShapedValue == s.position;
-                end
-            end
-            
-            [g, ~, pct] = checkCriterion(performanceCriterion(.8,uint8(50)),[],[],trialRecords(thisSession & thisShapedValue),false);
-            
-            if g
-                stimulus.position = s.position-.1;
-                updateSM = true;
-                s = stimulus;
-            end
-            
-            pStr=sprintf('(%g%%)',round(100*pct));
-        end
-        details.currentShapedValue=s.position;
-        sStr=sprintf('shaping: %g',details.currentShapedValue);
+            details.currentShapedValue=s.position;
+            sStr=sprintf('shaping: %g',details.currentShapedValue);
+        otherwise
+            error('unrecognized shapeMethod')
+    end
+    
+    shift = round((s.position-.5)*s.screen_width/2);
+    switch dotDirection
+        case -1 %static
+            shift = 0;
+        case pi %go left
+            out(:,1+round(s.screen_width*s.sideDisplay):end,:)=0;
+            shift = -shift;
+        case 0 %go right
+            out(:,1:round(s.screen_width*(1-s.sideDisplay)),:)=0;
+        otherwise
+            error('unrecognized direction')
+    end
+    out=circshift(out,[0 shift 0]);
+end
+
+switch s.replayMode
+    case 'loop'
+        type='loop';
+    case 'once'
+        type='cache';
+        out(:,:,end+1)=0;
+    case 'expert'
+        type='expert';
     otherwise
-        error('unrecognized shapeMethod')
+        error('unknown replayMode');
 end
 
-shift = round((s.position-.5)*s.screen_width/2);
-switch dotDirection
-    case -1 %static
-        shift = 0;
-    case pi %go left
-        out(:,1+round(s.screen_width*s.sideDisplay):end,:)=0;
-        shift = -shift;
-    case 0 %go right
-        out(:,1:round(s.screen_width*(1-s.sideDisplay)),:)=0;
-    otherwise
-        error('unrecognized direction')
-end
-out=circshift(out,[0 shift 0]);
-
-if strcmp(stimulus.replayMode,'loop')
-    type='loop';
-elseif strcmp(stimulus.replayMode,'once')
-    type='cache';
-    out(:,:,end+1)=0;
-else
-    error('unknown replayMode');
-end
-
-% details.stimStruct = structize(stimulus);
+% details.stimStruct = structize(s);
 details.dotDirection = dotDirection;
 details.dotxy = alldotsxy;
 details.coherence = s.coherence;

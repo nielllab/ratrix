@@ -15,7 +15,7 @@ dotType = 2; % 0 (default) squares
 % 1 circles (with anti-aliasing) (requires Screen('BlendFunction'))
 % 2 circles (with high-quality anti-aliasing, if supported by your hardware)
 
-if ~isfield('clutSize',expertCache)
+if ~isfield(expertCache,'clutSize')
     expertCache.clutSize = size(currentCLUT,1)-1;
 end
 white = expertCache.clutSize*ones(1,4);

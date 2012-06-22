@@ -44,13 +44,9 @@ if IsWin
         plot2svg([fn '.svg'],f);
     end
     
-    % "When you print to a file, the file name must have fewer than 128 characters, including path name."
-    % http://www.mathworks.com/access/helpdesk/help/techdoc/ref/print.html#f30-534567
-    dpi=300;
     sfx = 'png';
-    latest = [fn '.' num2str(dpi) '.' sfx];
-    print(f,'-dpng',['-r' num2str(dpi)],'-opengl',latest); %opengl for transparency -- probably unnecessary cuz seems to be automatically set when needed
-    saveas(f,[fn '.' sfx]); %resolution not controllable
+    latest = [fn '.' sfx];
+    saveas(f,latest); %resolution not controllable
     
     [status,message,messageid] = copyfile(latest,fullfile(fileparts(latest),[lqf sfx]));
     if status~=1
@@ -58,6 +54,38 @@ if IsWin
         message
         messageid
         error('couldn''t copy')
+    end
+    
+    try
+        dpi=300;
+        latest = [fn '.' num2str(dpi) '.' sfx];
+        % "When you print to a file, the file name must have fewer than 128 characters, including path name."
+        % http://www.mathworks.com/access/helpdesk/help/techdoc/ref/print.html#f30-534567
+        print(f,'-dpng',['-r' num2str(dpi)],'-opengl',latest); %opengl for transparency -- probably unnecessary cuz seems to be automatically set when needed
+        
+        [status,message,messageid] = copyfile(latest,fullfile(fileparts(latest),[lqf sfx]));
+        if status~=1
+            status
+            message
+            messageid
+            error('couldn''t copy')
+        end
+    catch
+        warning('print OOM''d')
+        %         Error using hardcopy
+        % Out of memory. Type HELP MEMORY for your options.
+        %
+        % Error in C:\Program Files\MATLAB\R2011b\toolbox\matlab\graphics\hardcopy.p>hardcopy (line 28)
+        %
+        %
+        % Error in render (line 142)
+        %             pj.Return = hardcopy( inputargs{:} );
+        %
+        % Error in print>LocalPrint (line 280)
+        %                 pj = render(pj,pj.Handles{i});
+        %
+        % Error in print (line 237)
+        %     LocalPrint(pj);
     end
     
     set(f,'Visible','on')

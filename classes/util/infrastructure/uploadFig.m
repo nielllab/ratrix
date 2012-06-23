@@ -70,7 +70,8 @@ if IsWin
             messageid
             error('couldn''t copy')
         end
-    catch
+    catch ex
+        getReport(ex)
         warning('print OOM''d')
         %         Error using hardcopy
         % Out of memory. Type HELP MEMORY for your options.
@@ -89,7 +90,8 @@ if IsWin
     end
     
     set(f,'Visible','on')
+    close all %otherwise we oom
 else
-    error('haven''t handled non-win uploading to webserver yet')
+    warning('haven''t handled non-win uploading to webserver yet')
 end
 end

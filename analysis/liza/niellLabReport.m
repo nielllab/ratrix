@@ -1,6 +1,7 @@
 function niellLabReport(force)
 addpath(fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))),'bootstrap'));
 setupEnvironment;
+dbstop if error
 
 if ~exist('force','var') || isempty(force)
     force = false;

@@ -25,9 +25,40 @@ end
 
 if IsWin
     compiledDir = '\\reichardt\figures';
-    compiledFile = compileBall(subj,drive,force,compiledDir);
-    if ~isempty(compiledFile)
-        makePlots(subj,compiledFile);
+    
+    doCompile = true;
+    if doCompile
+        try
+%             d = dir(fullfile(compiledDir,subj,'compiled*.mat'));
+%             if isempty(d)
+                compiledFile = compileBall(subj,drive,force,compiledDir);
+%             else
+%                 compiledFile = '';
+%             end
+        catch ex
+            getReport(ex)
+            warning('bailing on compiling %s',subj)
+        end
+    else
+        compiledFile = '';
+        d = dir(fullfile(compiledDir,subj,'compiled*.mat'));
+        
+        if ~isempty(d)
+            vals = cell2mat(cellfun(@(x)textscan(x,'compiled_1-%u_%uT%u.mat','CollectOutput',true),{d.name}'));
+            vals = num2str(vals(:,[2 3]));
+            [~, ord]=sort(str2num(reshape(vals(vals~=' '),[length(d) 14])));
+            compiledFile = fullfile(compiledDir,subj,d(max(ord)).name);
+        end
+    end
+    
+    doPlot = true;
+    if ~isempty(compiledFile) && doPlot
+        try
+            makePlots(subj,compiledFile);
+        catch ex
+            getReport(ex)
+            warning('bailing on plotting %s',subj)
+        end
     end
 else
     error('only win so far')
@@ -397,7 +428,7 @@ data=struct(...
     'track'          ,                 track              ...
     );
 
-compiledFile = fullfile(compiledDir,subj,sprintf('compiled.%d-%d.%s.mat',trialNums(1),trialNums(end),datestr(now,30)));
+compiledFile = fullfile(compiledDir,subj,sprintf('compiled_%d-%d_%s.mat',trialNums(1),trialNums(end),datestr(now,30)));
 tic
 save(compiledFile,'data');
 toc

@@ -29,26 +29,13 @@ if IsWin
     doCompile = true;
     if doCompile
         try
-%             d = dir(fullfile(compiledDir,subj,'compiled*.mat'));
-%             if isempty(d)
-                compiledFile = compileBall(subj,drive,force,compiledDir);
-%             else
-%                 compiledFile = '';
-%             end
+            compiledFile = compileBall(subj,drive,force,compiledDir);
         catch ex
             getReport(ex)
             warning('bailing on compiling %s',subj)
         end
     else
-        compiledFile = '';
-        d = dir(fullfile(compiledDir,subj,'compiled*.mat'));
-        
-        if ~isempty(d)
-            vals = cell2mat(cellfun(@(x)textscan(x,'compiled_1-%u_%uT%u.mat','CollectOutput',true),{d.name}'));
-            vals = num2str(vals(:,[2 3]));
-            [~, ord]=sort(str2num(reshape(vals(vals~=' '),[length(d) 14])));
-            compiledFile = fullfile(compiledDir,subj,d(max(ord)).name);
-        end
+        compiledFile = getCompiledFile(compiledDir,subj);
     end
     
     doPlot = true;
@@ -62,6 +49,22 @@ if IsWin
     end
 else
     error('only win so far')
+end
+end
+
+function [compiledFile, lastTrial]=getCompiledFile(compiledDir,subj)
+compiledFile = '';
+lastTrial = 0;
+
+d = dir(fullfile(compiledDir,subj,'compiled*.mat'));
+
+if ~isempty(d)
+    vals = cell2mat(cellfun(@(x)textscan(x,'compiled_1-%u_%uT%u.mat','CollectOutput',true),{d.name}'));
+    trials = vals(:,1);
+    vals = num2str(vals(:,[2 3]));
+    [~, ord]=sort(str2num(reshape(vals(vals~=' '),[length(d) 14])));
+    compiledFile = fullfile(compiledDir,subj,d(max(ord)).name);
+    lastTrial = trials(max(ord));
 end
 end
 
@@ -110,6 +113,12 @@ if ~force && IsWin
             fprintf('skipping - latest figures already generated (%s)\n',fd)
             return
         end
+    end
+    
+    [compiledFile,lastTrial] = getCompiledFile(compiledDir,subj);
+    if bounds(end,2)<=lastTrial
+        fprintf('skipping - latest trials already compiled (%s)\n',fd)
+        return
     end
 end
 

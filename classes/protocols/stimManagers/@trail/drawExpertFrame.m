@@ -138,7 +138,21 @@ switch phaseRecords(phaseNum).phaseType
                 trailColor = black;
             end
             
-            if diff(wallRect([1 3])) > 0
+            if ~isempty(s.dms)
+                if ~s.cue
+                    error('can''t have dms without cue')
+                end
+                t = dynamicDetails.times(i) - phaseStartTime;
+                if t < s.dms.targetLatency
+                    Screen('FillRect', window, grey, destRect);
+                    dontclear = 1; %true makes SCREEN('DrawingFinished') barf
+                    if finish
+                        dynamicDetails.result = 'tooEarly';
+                    end
+                end
+            end
+            
+            if diff(wallRect([1 3])) > 0 && (isempty(s.dms) || t >= s.dms.targetLatency) %for now assume targetLatency = distractorLatency
                 Screen('FillRect', window, white, wallRect);
             end
             
@@ -160,13 +174,15 @@ switch phaseRecords(phaseNum).phaseType
             end
             
             if s.cue
-                if exist('midRect','var')
-                    cueRect = midRect;
-                    cueRect([1 3]) = cueRect([1 3])+[1 -1].*width;
-                else
-                    error('can''t have cue without wrongLoc')
+                if isempty(s.dms) || (t >= s.dms.cueLatency && t <= s.dms.cueLatency + s.dms.cueDuration)
+                    if exist('midRect','var')
+                        cueRect = midRect;
+                        cueRect([1 3]) = cueRect([1 3])+[1 -1].*width;
+                    else
+                        error('can''t have cue without wrongLoc')
+                    end
+                    Screen('FillRect', window, cueColor, cueRect);
                 end
-                Screen('FillRect', window, cueColor, cueRect);
             elseif strcmp(s.stim,'rand')
                 error('cues should be enabled for randomized stim')
             end

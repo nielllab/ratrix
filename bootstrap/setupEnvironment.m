@@ -14,7 +14,8 @@ lasterror('reset')
 lastwarn('')
 
 warning('off','MATLAB:dispatcher:nameConflict')
-addpath(RemoveSVNPaths(genpath(getRatrixPath)));
+addpath(fullfile(getRatrixPath,'classes','util','infrastructure')); %for deGitify
+addpath(deGitify(RemoveSVNPaths(genpath(getRatrixPath))));
 warning('on','MATLAB:dispatcher:nameConflict')
 
 %intwarning('on'); $edf removed cuz 2011b eliminated intwarning

@@ -58,6 +58,10 @@ stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,
 stim.stim = 'flip';
 stim.stim='rand';
 %stim.stim=nan;
+stim.dms.targetLatency = 1;
+stim.dms.cueLatency = 0;
+stim.dms.cueDuration = .5;
+stim.dms = [];
 
 ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
 ballTM = ball(percentCorrectionTrials,sm,noRequest);

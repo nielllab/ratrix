@@ -432,6 +432,20 @@ compiledFile = fullfile(compiledDir,subj,sprintf('compiled_%d-%d_%s.mat',trialNu
 tic
 save(compiledFile,'data');
 toc
+
+%existing compiled records have these fields in compiledTrialRecords (all 1 x n double)
+% trialNumber
+% date
+% correct                 %all in [0 1 nan]
+% result                  %all in [0 1]
+% containedManualPokes    %all 0
+% didHumanResponse        %all in [0 1]
+% containedForcedRewards  %all in [0 1]
+% correctionTrial         %all nans?
+% actualRewardDuration
+% proposedRewardDuration
+% proposedPenaltyDuration
+% response                %all in [-1 1], almost always -1
 end
 
 function makePlots(subj,compiledFile)

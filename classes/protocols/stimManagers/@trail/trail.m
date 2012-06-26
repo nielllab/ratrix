@@ -12,6 +12,7 @@ s.soundClue = false;
 
 s.positional = nan;
 s.stim = [];
+s.dms = [];
 
 s.initialPos=nan;
 s.mouseIndices=nan;
@@ -28,7 +29,7 @@ switch nargin
     case 5
         d = varargin{1};
         
-        cellfun(@validateField,{'gain','targetDistance','timeoutSecs','slow','slowSecs','positional','stim','cue','soundClue'});
+        cellfun(@validateField,{'gain','targetDistance','timeoutSecs','slow','slowSecs','positional','stim','cue','soundClue','dms'});
         
         s = class(s,'trail',stimManager(varargin{2},varargin{3},varargin{4},varargin{5}));
     otherwise
@@ -43,7 +44,7 @@ end
         end
         x = s.(f);
         
-        if (any(isobject(x)) || ~all(isnan(x))) %for now, nans coming from loadobj ok...  can't isnan objects!?!?
+        if (any(isobject(x)) || any(isstruct(x)) || ~all(isnan(x))) %for now, nans coming from loadobj ok...  can't isnan objects/structs!?!?
             switch f
                 case 'gain'
                     if ~(isvector(x) && isnumeric(x) && isreal(x) && all(size(x)==[2 1]))
@@ -76,7 +77,11 @@ end
                 case {'cue' 'soundClue'}
                     if ~all(cellfun(@(f)f(x),{@islogical @isscalar}))
                         error('cue and soundClue must be logical scalaer')
-                    end                 
+                    end  
+                case 'dms'
+                    if ~(isempty(x) || (isstruct(x) && all(cellfun(@(xf) isscalar(x.(xf)) && isreal(x.(xf)) && x.(xf)>=0 ,{'targetLatency','cueLatency','cueDuration'}))))
+                        error('dms must be empty or struct with fields targetLatency, cueLatency, and cueDuration, all scalar reals >=0')
+                    end
                 otherwise
                     error('huh')
             end

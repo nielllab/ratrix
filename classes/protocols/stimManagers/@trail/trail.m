@@ -79,7 +79,7 @@ end
                         error('cue and soundClue must be logical scalaer')
                     end  
                 case 'dms'
-                    if ~(isempty(x) || (isstruct(x) && all(cellfun(@(xf) isscalar(x.(xf)) && isreal(x.(xf)) && x.(xf)>=0 ,{'targetLatency','cueLatency','cueDuration'}))))
+                    if ~(isempty(x) || (isstruct(x) && all(cellfun(@(xf) all(cellfun(@(xff) xff(x.(xf)),{@isscalar @isreal @(x) x>=0 })),{'targetLatency','cueLatency','cueDuration'}))))
                         error('dms must be empty or struct with fields targetLatency, cueLatency, and cueDuration, all scalar reals >=0')
                     end
                 otherwise

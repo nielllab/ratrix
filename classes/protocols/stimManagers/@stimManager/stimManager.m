@@ -2,7 +2,8 @@ function s=stimManager(varargin)
 % STIMMANAGER  class constructor. ABSTRACT CLASS -- DO NOT INSTANTIATE
 % s = stimManager(maxWidth,maxHeight,scaleFactor,interTrialLuminance)
 
-s.correctStim=[];
+s.correctStim = [];
+s.reinfAssocSecs = 0;
 
 switch nargin
     case 0

@@ -3,6 +3,7 @@ function plotCrossingTime(subj,drive,force)
 %setupEnvironment;
 
 dbstop if error
+close all
 
 if ~exist('force','var') || isempty(force)
     force = false;
@@ -23,12 +24,60 @@ if ~exist('drive','var') || isempty(drive)
 end
 
 if IsWin
+    compiledDir = '\\reichardt\figures';
+    
+    doCompile = true;
+    if doCompile
+        try
+            compiledFile = compileBall(subj,drive,force,compiledDir);
+        catch ex
+            getReport(ex)
+            warning('bailing on compiling %s',subj)
+        end
+    else
+        compiledFile = getCompiledFile(compiledDir,subj);
+    end
+    
+    doPlot = true;
+    if ~isempty(compiledFile) && doPlot
+        try
+            makePlots(subj,compiledFile);
+        catch ex
+            getReport(ex)
+            warning('bailing on plotting %s',subj)
+        end
+    end
+else
+    error('only win so far')
+end
+end
+
+function [compiledFile, lastTrial]=getCompiledFile(compiledDir,subj)
+compiledFile = '';
+lastTrial = 0;
+
+d = dir(fullfile(compiledDir,subj,'compiled*.mat'));
+
+if ~isempty(d)
+    vals = cell2mat(cellfun(@(x)textscan(x,'compiled_1-%u_%uT%u.mat','CollectOutput',true),{d.name}'));
+    trials = vals(:,1);
+    vals = num2str(vals(:,[2 3]));
+    [~, ord]=sort(str2num(reshape(vals(vals~=' '),[length(d) 14])));
+    compiledFile = fullfile(compiledDir,subj,d(max(ord)).name);
+    lastTrial = trials(max(ord));
+end
+end
+
+function compiledFile = compileBall(subj,drive,force,compiledDir)
+if IsWin
     recordPath = fullfile(drive,'Users','nlab');
 elseif ismac && local
     recordPath = [filesep fullfile('Users','eflister')];
 else
     error('unsupported')
 end
+
+compiledFile = '';
 
 %for some reason, compiling these records is failing
 %once this is solved we'll load in a single compiled file from ...\ballData\CompiledTrialRecords\
@@ -65,6 +114,12 @@ if ~force && IsWin
             return
         end
     end
+    
+    [compiledFile,lastTrial] = getCompiledFile(compiledDir,subj);
+    if bounds(end,2)<=lastTrial
+        fprintf('skipping - latest trials already compiled (%s)\n',fd)
+        return
+    end
 end
 
 recNum = 0;
@@ -99,18 +154,9 @@ if ~all(diff(trialNums) == 1)
 end
 
 startTimes = datenum(cell2mat({records.date}'));
-d = diff(startTimes);
-sessions = find(d > .5/24); %this gives us session boundaries whenever there was a half hour gap in the trial start times
-if ~all(d > 0)
+if ~all(diff(startTimes) > 0)
     error('records don''t show increasing start times')
 end
-gaps = d(sessions);
-
-minPerChunk=50;
-chunkHrs=36;
-
-chunks=sessions-minPerChunk;
-chunks=sessions(diff(startTimes([[ones(sum(chunks<=0),1) chunks(chunks>0)] sessions+1]),[],2)>chunkHrs/24);
 
 %these session boundaries aren't useful, cuz you may have stopped and started right away again
 if ~all(diff([records.sessionNumber]) >= 0)
@@ -265,16 +311,6 @@ actualReqRewards = cell2mat(actualReqRewards);
         end
     end
 
-dur     = cellfun(@getDurFromT,track    );
-stopDur = cellfun(@getDurFromT,slowTrack);
-    function d = getDurFromT(t)
-        if isempty(t)
-            d=0;
-        else
-            d=diff(t(1,[1 end]));
-        end
-    end
-
 % i'm seeing a lot of trials (12%) that have only one timestamp
 if false %this shows that position really is past the wall on the first timestamp
     fprintf('%g%% trials have only one timestamp (%g%% of these were correct)\n',100*sum(len==1)/length(len),100*sum(len==1 & res==1)/sum(len==1));
@@ -367,53 +403,10 @@ end
 if any( strcmp(results,'')~=(res==2) | ismember(results,{'incorrect','timedout'})~=(res==0) | strcmp(results,'correct')~=(res==1) )
     error('dynamicDetails.result didn''t line up with trialDetails.correct')
 end
+results(res==2)={'quit'};
 
 targRight = sign(targetLocation)>0;
 choiceRight = (targRight & strcmp(results,'correct')) | (~targRight & strcmp(results,'incorrect'));
-
-n = 50;
-    function out = nanmeanMW(x) %my nanmean function shadows the stats toolbox one and is incompatible
-        % out = builtin('nanmean',x); %fails cuz toolboxes don't count as builtin
-        
-        fs = which('nanmean','-all');
-        ind = find(~cellfun(@isempty,strfind(fs,'stats')));
-        if ~isscalar(ind)
-            error('couldn''t find unique stats toolbox nanmean')
-        end
-        % out = feval(fs{ind},x); %fails cuz exceeds MATLAB's maximum name length of 63 characters
-        % f = str2func(fs{ind}); %paths aren't valid function names?
-        oldDir = cd(fileparts(fs{ind}));
-        out = nanmean(x);
-        cd(oldDir);
-    end
-
-    function out = savg(x,n)
-        out = nanmeanMW(window(pad(x,n,@nan),n));
-    end
-
-    function out = pad(x,n,p)
-        n = (n-1)/2;
-        out = [p(1,ceil(n)) x p(1,floor(n))];
-    end
-
-    function out = window(x,n)
-        out = x(repmat((1:n)',1,length(x)-n+1)+repmat(0:length(x)-n,n,1));
-    end
-
-[goodResults,classes] = ismember(results,{'incorrect','correct','timedout'});
-for i=1:max(classes)
-    pTiles{i} = prctile(window(pad(dur(classes==i),n,@nan),n),25*[-1 0 1]+50);
-end
-
-    function [x pci] = binoConf(alpha,inds,res)
-        [~, pci] = binofit(sum(window(res(inds),n)),n,alpha);
-        x=trialNums(inds);
-        x=x(~isnan(pad(zeros(1,size(pci,1)),n,@nan)));
-    end
-
-alpha=.05;
-[perfX perfC] = binoConf(alpha,~(strcmp(results,'') | manualRewards),res        );
-[biasX biasC] = binoConf(alpha,~ismember(results,{'','timedout'})   ,choiceRight);
 
 %dig out the reward size we intended to give
 r = [records.reinforcementManager];
@@ -423,8 +416,86 @@ intendedRewards = [r.rewardSizeULorMS];
 s = [records.station];
 ifis = [s.ifi];
 
-%plot some stuff!
+data=struct(...
+    'trialNum'       , num2cell(uint32(trialNums)      ), ...
+    'startTime'      , num2cell(       startTimes'     ), ...
+    'result'         ,                 results          , ...
+    'choiceRight'    , num2cell(       choiceRight     ), ...
+    'targRight'      , num2cell(       targRight       ), ...
+    'flip'           , num2cell(       flip            ), ...
+    'rnd'            , num2cell(       rnd             ), ...
+    'gain'           , num2cell(       gain         , 1), ...
+    'stoppingTime'   , num2cell(       stoppingTime    ), ...
+    'stoppingSpeed'  , num2cell(       stoppingSpeed, 1), ...
+    'intendedReward' , num2cell(       intendedRewards ), ...
+    'actualReward'   , num2cell(       actualRewards   ), ...
+    'actualReqReward', num2cell(       actualReqRewards), ...
+    'manualReward'   , num2cell(       manualRewards   ), ...
+    'initP'          , num2cell(       initP        , 1), ...
+    'wallDist'       , num2cell(       wallDist'    , 1), ...
+    'slowTrack'      ,                 slowTrack        , ...
+    'track'          ,                 track              ...
+    );
+
+compiledFile = fullfile(compiledDir,subj,sprintf('compiled_%d-%d_%s.mat',trialNums(1),trialNums(end),datestr(now,30)));
+tic
+save(compiledFile,'data');
+toc
+
+%existing compiled records have these fields in compiledTrialRecords (all 1 x n double)
+% trialNumber
+% date
+% correct                 %all in [0 1 nan]
+% result                  %all in [0 1]
+% containedManualPokes    %all 0
+% didHumanResponse        %all in [0 1]
+% containedForcedRewards  %all in [0 1]
+% correctionTrial         %all nans?
+% actualRewardDuration
+% proposedRewardDuration
+% proposedPenaltyDuration
+% response                %all in [-1 1], almost always -1
+end
+
+function makePlots(subj,compiledFile)
 close all
+
+data = load(compiledFile);
+data = data.data;
+
+trialNums        = [data.trialNum       ];
+startTimes       = [data.startTime      ];
+results          = {data.result         };
+choiceRight      = [data.choiceRight    ];
+targRight        = [data.targRight      ];
+flip             = [data.flip           ];
+rnd              = [data.rnd            ];
+gain             = [data.gain           ];
+stoppingTime     = [data.stoppingTime   ];
+stoppingSpeed    = [data.stoppingSpeed  ];
+intendedRewards  = [data.intendedReward ];
+actualRewards    = [data.actualReward   ];
+actualReqRewards = [data.actualReqReward];
+manualRewards    = [data.manualReward   ];
+initP            = [data.initP          ];
+wallDist         = [data.wallDist       ];
+slowTrack        = {data.slowTrack      };
+track            = {data.track          };
+
+clear data;
+
+d = diff(startTimes)';
+sessions = find(d > .5/24); %this gives us session boundaries whenever there was a half hour gap in the trial start times
+gaps = d(sessions);
+
+minPerChunk=50;
+chunkHrs=36;
+
+chunks=sessions-minPerChunk;
+chunks=sessions(diff(startTimes([[ones(sum(chunks<=0),1) chunks(chunks>0)] sessions+1]),[],2)>chunkHrs/24);
+
+[goodResults,classes] = ismember(results,{'incorrect','correct','timedout'});
+
 sps = 4;
 
 h = [];
@@ -437,7 +508,6 @@ doBlack = true;
 if doBlack
     colordef black
     grey = .25*ones(1,3);
-    
     transparency = .5;
     bw = 'w';
 else
@@ -491,7 +561,7 @@ title([subj ' -- ' datestr(now,'ddd, mmm dd HH:MM PM')])
         end
         
         ylim(ylims)
-        xlim([1 length(records)])
+        xlim([1 length(trialNums)])
         
         if exist('ticks','var') && ~isempty(ticks)
             if ~exist('yvals','var')
@@ -566,10 +636,49 @@ title([subj ' -- ' datestr(now,'ddd, mmm dd HH:MM PM')])
         x=min(x(x~=0))/2;
     end
 
+    function out = nanmeanMW(x) %my nanmean function shadows the stats toolbox one and is incompatible
+        % out = builtin('nanmean',x); %fails cuz toolboxes don't count as builtin
+        
+        fs = which('nanmean','-all');
+        ind = find(~cellfun(@isempty,strfind(fs,'stats')));
+        if ~isscalar(ind)
+            error('couldn''t find unique stats toolbox nanmean')
+        end
+        % out = feval(fs{ind},x); %fails cuz exceeds MATLAB's maximum name length of 63 characters
+        % f = str2func(fs{ind}); %paths aren't valid function names?
+        oldDir = cd(fileparts(fs{ind}));
+        out = nanmean(x);
+        cd(oldDir);
+    end
+
+    function out = savg(x,n)
+        out = nanmeanMW(window(pad(x,n,@nan),n));
+    end
+
+    function out = pad(x,n,p)
+        n = (n-1)/2;
+        out = [p(1,ceil(n)) x p(1,floor(n))];
+    end
+
+    function out = window(x,n)
+        out = x(repmat((1:n)',1,length(x)-n+1)+repmat(0:length(x)-n,n,1));
+    end
+
+dur     = cellfun(@getDurFromT,track    );
+stopDur = cellfun(@getDurFromT,slowTrack);
+    function d = getDurFromT(t)
+        if isempty(t)
+            d=0;
+        else
+            d=diff(t(1,[1 end]));
+        end
+    end
+
 h(end+1) = subplot(sps,1,2);
 hold on
 doLog = true;
 eps2 = min(stopDur(stopDur>0));
+n = 50;
 
 stopType = 'ptile';
 switch stopType
@@ -597,7 +706,7 @@ switch stopType
         ytop = log(ylims(end));
 end
 standardPlot(plotter,[.1 .3 1 3 10 30],true);
-scatter(trialNums,.9*ytop*ones(size(trialNums)),dotSize,hsv2rgb([mod(-.25-startTimes,1) ones(length(trialNums),2)]),'+');
+scatter(trialNums,.9*ytop*ones(size(trialNums)),dotSize,hsv2rgb([mod(-.25-startTimes',1) ones(length(trialNums),2)]),'+');
 switch stopType
     case 'density'
         imagesc(log(s))
@@ -617,6 +726,10 @@ switch stopType
 end
 ylabel('stop time (s)')
 
+for i=1:max(classes)
+    pTiles{i} = prctile(window(pad(dur(classes==i),n,@nan),n),25*[-1 0 1]+50);
+end
+
 h(end+1) = subplot(sps,1,3);
 hold on
 eps2=fix0(dur(goodResults));
@@ -629,6 +742,16 @@ for i=1:length(pTiles)
 end
 ylabel('response time (s)')
 doLog = false;
+
+    function [x pci] = binoConf(alpha,inds,res)
+        [~, pci] = binofit(sum(window(res(inds),n)),n,alpha);
+        x=trialNums(inds);
+        x=x(~isnan(pad(zeros(1,size(pci,1)),n,@nan)));
+    end
+
+alpha=.05;
+[perfX perfC] = binoConf(alpha,~(strcmp(results,'quit') | manualRewards),strcmp(results,'correct'));
+[biasX biasC] = binoConf(alpha,~ismember(results,{'quit','timedout'})   ,choiceRight              );
 
 h(end+1) = subplot(sps,1,4);
 hold on
@@ -655,7 +778,7 @@ uploadFig(gcf,subj,max(trialNums)/10,sps*200);
 
     function out = processTrack(t,i,f,v)
         if ~isempty(t)
-            ts = i+(t(1,:)-t(1,1))*f;
+            ts = double(i)+(t(1,:)-t(1,1))*f;
             xys = t(2:3,:)-repmat(initP(:,i),1,size(t,2));
             if v
                 ts = ts-diff(ts([1 end]));

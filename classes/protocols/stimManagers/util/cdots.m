@@ -1,4 +1,5 @@
-function [movie dotsxy]=cdots(nDots,width,height,nFrames,coherence,speed,direction,shape,uniformSpeed)
+function [movie dotsxy]=cdots(nDots,width,height,nFrames,coherence,speed,direction,shape,uniformSpeed,xys)
+
 % example:
 %
 % nDots     = 75;
@@ -20,11 +21,32 @@ function [movie dotsxy]=cdots(nDots,width,height,nFrames,coherence,speed,directi
 %   pause(.01)
 % end
 
+if ~exist('xys','var')
+    xys=[];
+else %got some existing dots, just compute next frame
+    if ~isempty(nDots) && nDots~=size(xys,2)
+        error('nDots must be number cols of xys when xys supplied')
+    end
+    nDots = size(xys,2);
+    
+    if ~isempty(nFrames) && nFrames~=1
+        error('nFrames must be 1 when xys supplied')
+    end
+    nFrames = 2;
+    
+    if size(xys,1)~=1 || size(xys,3)~=2
+        error('bad xys')
+    end
+end
+
 jump = rand(nFrames, nDots) > coherence;
-jump(1,:) = true;
+jump(1,:) = isempty(xys);
 inds = find(jump);
 
 dotsxy = zeros(nFrames, nDots, 2);
+if ~isempty(xys)
+    dotsxy(1,:,:) = xys;
+end
 dotsxy([inds inds+(nFrames*nDots)]) = rand(1,2*length(inds));
 
 speed = reshape(speed * [height/width 1],[1 1 2]);
@@ -44,9 +66,21 @@ for i=2:nFrames %use cumsum to eliminate loop
     dotsxy(i,inds,:) = dotsxy(i-1,inds,:) + repmat(d,[1 sum(inds) 1]);
 end
 
-dotsxy = 1 + round(mod(dotsxy,ones(size(dotsxy))) .* repmat(reshape([width height]-1,[1 1 2]),nFrames,nDots));
+dotsxy = mod(dotsxy,ones(size(dotsxy)));
 
-movie = zeros(height,width,nFrames);
-movie(sub2ind(size(movie),dotsxy(:,:,2),dotsxy(:,:,1),repmat(1:nFrames,nDots,1)')) = 1;
-movie = convn(movie,shape,'same') ~= 0;
+if isempty(xys)
+    dotsxy = 1 + round(dotsxy .* repmat(reshape([width height]-1,[1 1 2]),nFrames,nDots));
+    movie = zeros(height,width,nFrames);
+    movie(sub2ind(size(movie),dotsxy(:,:,2),dotsxy(:,:,1),repmat(1:nFrames,nDots,1)')) = 1;
+    if false
+        movie = convn(movie,shape,'same') ~= 0;
+    else %convn not in fourier domain, so it's slow
+        for i=1:nFrames
+            movie(:,:,i) = conv2(movie(:,:,i),shape,'same') ~= 0;
+        end
+    end
+else
+    dotsxy = squeeze(dotsxy(end,:,:));
+    movie = [];
+end
 end

@@ -397,6 +397,16 @@ timestamps.phaseRecordsDone     = timestamps.lastFrameTime;
 timestamps.loopEnd              = timestamps.lastFrameTime;
 timestamps.prevPostFlipPulse    = timestamps.lastFrameTime;
 
+doProfile = false;
+if doProfile
+    blah=profile('status');
+    if strcmp(blah.ProfilerStatus,'on')
+        sca
+        profile viewer
+        keyboard
+    end
+end
+
 %show stim -- be careful in this realtime loop!
 while ~done && ~quit;
     timestamps.loopStart=GetSecs;
@@ -571,6 +581,9 @@ while ~done && ~quit;
         framesUntilTransition=getFramesUntilTransition(spec);
         stim=getStim(spec);
         scaleFactor=getScaleFactor(spec);
+        if strcmp(getStimType(spec),'expert')
+            strategy=getStimType(spec);
+        end
         
         if framesInPhase==0 %needs rearchitecting!
             if ~isempty(getStartFrame(spec))
@@ -653,6 +666,7 @@ while ~done && ~quit;
                         destRect,filtMode,expertCache,ifi,scheduledFrameNum,tm.dropFrames,dontclear,...
                         phaseRecords(phaseNum).dynamicDetails,trialRecords,currentCLUT,phaseRecords,phaseNum,tm);
                 otherwise
+                    strategy
                     error('unrecognized strategy')
             end
             
@@ -671,7 +685,7 @@ while ~done && ~quit;
                             end
                             if isempty(trialRecords(trialInd).result)
                                 trialRecords(trialInd).result = phaseRecords(phaseNum).dynamicDetails.result; %causes handlePhasedTrialLogic to propogate nominal result
-                                if ismember(trialRecords(trialInd).result,{'correct','timedout','incorrect'})
+                                if ismember(trialRecords(trialInd).result,{'correct','timedout','incorrect','tooEarly'})
                                     trialRecords(trialInd).result='nominal';
                                 end
                             else
@@ -1110,6 +1124,10 @@ while ~done && ~quit;
     end
     
     timestamps.loopEnd=GetSecs;
+end
+
+if doProfile
+    profile on
 end
 
 securePins(station);

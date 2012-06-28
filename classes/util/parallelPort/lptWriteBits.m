@@ -5,6 +5,13 @@ if false && locs==7 && vals
     keyboard
 end
 
+% from http://stackoverflow.com/questions/7519321/determine-if-running-x64-or-x86-operating-system-in-matlab
+% dos('set PROCESSOR_ARCHITECTURE')
+% PROCESSOR_ARCHITECTURE=x86 
+% 
+% dos('set PROCESSOR_ARCHITEW6432')
+% PROCESSOR_ARCHITEW6432=AMD64 
+
 b64 = false;
 
 persistent ioObj; %declared outside of if block because warned it is inefficient otherwise

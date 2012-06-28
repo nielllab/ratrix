@@ -11,10 +11,13 @@ if IsWin
     end
     
     [a b] = dos('net start w32time');
-    if a<0
-        a
-        b
-        error('couldn''t start w32time')
+    if a~=0
+        if isempty(strfind(b,'has already been started'))
+            a
+            b
+            'if access is denied, run matlab as admin'
+            error('couldn''t start w32time')
+        end
     end
     
     [a b]=dos(cmd);

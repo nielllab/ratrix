@@ -100,16 +100,18 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) &&
         spec=setFramesUntilTransition(spec,max(numCorrectFrames,framesUntilTransition));
         spec=setScaleFactor(spec,cScale);
         
-        if ismember(cType,{'static','cache','loop'}) || (iscell(cType) && all(size(cType)==[1 2]) && ismember(cType{1},{'trigger','timedFrames','indexedFrames'}))
+        %if ismember(cType,{'static','cache','loop'}) || (iscell(cType) && all(size(cType)==[1 2]) && ismember(cType{1},{'trigger','timedFrames','indexedFrames'}))
             spec=setType(spec,cType); %needs to be compatible with fixed framesUntilTransition -- how deal with dynamic/expert/etc?
-        end
+        %end
         spec=setStartFrame(spec,cStartFrame);
         
         strategy='noCache';
         if window>0
-            [floatprecision cStim] = determineColorPrecision(tm, cStim, strategy);
-            textures = cacheTextures(tm,strategy,cStim,window,floatprecision);
-            destRect = determineDestRect(tm, window, station, cScale, cStim, strategy);
+            if ~strcmp(cType,'expert')
+                [floatprecision cStim] = determineColorPrecision(tm, cStim, strategy);
+                textures = cacheTextures(tm,strategy,cStim,window,floatprecision);
+                destRect = determineDestRect(tm, window, station, cScale, cStim, strategy);
+            end
         elseif strcmp(getDisplayMethod(tm),'LED')
             floatprecision=[];
         else

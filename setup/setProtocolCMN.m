@@ -59,7 +59,7 @@ zoom=[maxWidth maxHeight]./textureSize;
 %%% pixPerCycs              =[100];
 
 %%% calculate pixPerCycs based on parameters for current monitors
-widthpix = 1980;
+widthpix = 1920;
 widthcm = 50;
 pixpercm = widthpix/widthcm;
 dist = 15;
@@ -69,7 +69,7 @@ pixperdeg = pixpercm/degpercm
 cpd=0.1
 pixPerCycs = pixperdeg/cpd
 
-targetOrientations      =[0];
+targetOrientations      =[pi/4];
 distractorOrientations  =[];
 mean                    =.5;
 radius                  =.4;
@@ -81,9 +81,13 @@ interTrialLuminance     =.5;
 freeStim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 %distractorOrientations=-targetOrientations;
-targetOrientations = 0;
-distractorOrientations = pi/2;
+targetOrientations = pi/4;
+distractorOrientations = -pi/4;
 orientation = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
+targetOrientations = linspace(0,pi/4,7);
+distractorOrientations =-targetOrientations;
+orientationThresh = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 requestRewardSizeULorMS = 0;
 msPenalty               = 1000;
@@ -126,22 +130,23 @@ lpTM=nAFC(sm,percentCorrectionTrials,longPenalty,eyeController,{'off'},dropFrame
 ts5 = trainingStep(lpTM  , freeStim, performanceCriterion(.85,int32(300))  , noTimeOff(), svnRev,svnCheckMode);
 
 %orientation discirm
-ts6 = trainingStep(lpTM  , orientation, repeatIndefinitely()                  , noTimeOff(), svnRev,svnCheckMode);
+ts6 = trainingStep(lpTM  , orientation, performanceCriterion(.85,int32(300))                 , noTimeOff(), svnRev,svnCheckMode);
 
-p=protocol('mouse orientation',{ts1, ts2, ts3, ts4, ts5, ts6});
+ts7 = trainingStep(lpTM  , orientationThresh, repeatIndefinitely()                  , noTimeOff(), svnRev,svnCheckMode);
+p=protocol('mouse orientation',{ts1, ts2, ts3, ts4, ts5, ts6,ts7});
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});
 
     % set to defined step    
 %     switch subjIDs{i}
-%         case 'test'
-%             stepNum=uint8(5);
+%         case 'test4'
+%             stepNum=uint8(7);
 %         otherwise
 %             stepNum=uint8(5);
 %     end
     
-    % keep on current step
+     %keep on current step
     [currentp stepNum]=getProtocolAndStep(subj);
     
     [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolMouse','edf');

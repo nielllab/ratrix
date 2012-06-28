@@ -38,7 +38,7 @@ textureSize=10*[h,h];
 zoom=[maxHeight maxHeight]./textureSize;
 
 %%% calculate pixPerCycs based on parameters for current monitors
-widthpix = 1980;
+widthpix = 1920;
 widthcm = 50;
 pixpercm = maxWidth/widthcm;
 dist = 20;
@@ -53,19 +53,19 @@ eyeController=[];
 coherence=1;
 contrast=1;
 
-speed_degpersec = 30;
-size_deg = 10;
-density = 0.04;
+speed_degpersec = [80];
+size_deg = [20];
+density = [0.1];
 
-speed = speed_degpersec*pixperdeg*(1/hz)/zoom(1);
+speed = speed_degpersec*pixperdeg*(1/hz)/zoom(1)
 dotSize = round(size_deg*pixperdeg/zoom(1))
-numDots = round(density*(norm(textureSize).^2)/(dotSize^2))
+numDots = round(density*textureSize(1)*textureSize(2)./(dotSize.^2))
 % speed=.75*2;
 % contrast=1*.25;
 % dotSize=5*4;
 % numDots=round(75/15);
 
-duration=10;
+duration=2;
 
 dots=coherentDots(textureSize(1),textureSize(2),numDots,coherence,speed,contrast,dotSize,duration,zoom,maxWidth,maxHeight,[],0.5);
 

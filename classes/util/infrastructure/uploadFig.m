@@ -15,7 +15,7 @@ if IsWin
         error('couldn''t mkdir')
     end
     
-    set(f,'PaperPositionMode','auto'); %causes print to respect figure size
+    set(f,'PaperPositionMode','auto'); %causes print/saveas to respect figure size
     set(f,'InvertHardCopy','off'); %preserves black background when colordef black
     
     sfx = 'fig';

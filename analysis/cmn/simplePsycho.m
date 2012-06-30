@@ -7,18 +7,14 @@ field = 'orientations';
 path = '\\mtrix4\Users\nlab\Desktop\mouseData\CompiledTrialRecords\';
 
 d = dir([path '*.compiledTrialRecords.*.mat']);
-subs = cellfun(@(x)textscan(x,'%s.compiledTrialRecords.%*u-%*u.mat'),{d.name}','UniformOutput',false);
-subs = subs(~strfind(subs,'test'));
+subs = strtok({d.name}, '.');
+subs = subs(cellfun(@isempty,strfind(subs,'test')));
 
-% j10ln
-% j10lt
-% j8ln
-% j8lt
-
-cellfun(@(x,y)sessionPsyco(y,x.name,field),cellfun(@(x)dir([path x '.compiledTrialRecords.*.mat']),subs,'UniformOutput',false),subs);
+cellfun(@(x,y)sessionPsyco(y,[path x.name],field),cellfun(@(x)dir([path x '.compiledTrialRecords.*.mat']),subs,'UniformOutput',false),subs);
 end
 
 function sessionPsyco(sub,file,field)
+keyboard
 ctr = load(file);
 
 vals = ctr.compiledDetails.(field)(1,:); %hmm, this will depend on field's structure

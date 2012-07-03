@@ -7,38 +7,16 @@ if ~exist('force','var') || isempty(force)
     force = false;
 end
 
-doBall=true;
+path = '\\mtrix4\Users\nlab\Desktop\mouseData\CompiledTrialRecords\';
+simplePsycho('orientations','deg orientation difference',uint8(7  ),@(x)arrayfun(@(x)num2str(prec(2*x*180/pi,1)),x,'UniformOutput',false),false,path);
+simplePsycho('pixPerCyc'   ,'pixels per cycle'          ,uint8(6:8),@(x)arrayfun(@(x)num2str(prec(x         ,1)),x,'UniformOutput',false),true ,path);
+
+    function out=prec(in,n)
+        out = round(in*10^n)/10^n;
+    end
+
 doBox=true;
-
-if doBall
-    recs = {...
-        {'mtrix5' %wall cue flip
-            {
-            'ly02' 
-            'ly05' 
-            'ly06' 
-            'ly09'
-            }
-        }
-        {'jarmusch'
-            {
-            % 'ly01' %grating (moved to mtrix6?)
-            'ly03' %grating
-            'ly04' %wall cue flip
-            'ly08' %wall cue flip
-            }
-        }
-        {'mtrix6'
-            {
-            'ly01'
-            }
-        }
-    };
-
-    tic
-    cellfun(@(x) cellfun(@(y)plotCrossingTime(y,['\\' x{1}],force),x{2}),recs);
-    toc
-end
+doBall=true;
 
 if doBox
     recs = {...
@@ -138,7 +116,6 @@ if doBox
         }
     };
 
-
     selection.type = 'performance';
     selection.filter = 'all';
     selection.filterVal=[];
@@ -148,6 +125,37 @@ if doBox
     cellfun(@(x) cellfun(@(y) cellfun(@(z) g(x{1},y{1},z), y{2}) ,x{2}) ,recs);
     toc
 end
+
+if doBall
+    recs = {...
+        {'mtrix5' %wall cue flip
+            {
+            'ly02' 
+            'ly05' 
+            'ly06' 
+            'ly09'
+            }
+        }
+        {'jarmusch'
+            {
+            % 'ly01' %grating (moved to mtrix6?)
+            'ly03' %grating
+            'ly04' %wall cue flip
+            'ly08' %wall cue flip
+            }
+        }
+        {'mtrix6'
+            {
+            'ly01'
+            }
+        }
+    };
+
+    tic
+    cellfun(@(x) cellfun(@(y)plotCrossingTime(y,['\\' x{1}],force),x{2}),recs);
+    toc
+end
+
 close all
 
     function g(box,d,subj)        

@@ -1,21 +1,16 @@
-function simplePsycho
+function simplePsycho(field,leg,step,xticklab,logx,path)
 if ~IsWin
     error('win only for now')
 end
 
-field = 'orientations';
-step = uint8(7);
-%date = [2012 6 17];
-date = [];
-path = '\\mtrix4\Users\nlab\Desktop\mouseData\CompiledTrialRecords\';
-%path = 'C:\eflister\ctr\';
+date = []; %[2012 6 17];
 
 d = dir(fullfile(path,'*.compiledTrialRecords.*.mat'));
 d = {d(cellfun(@isempty,strfind({d.name},'test'))).name};
-cellfun(@(x)sessionPsycho(strtok(x,'.'),fullfile(path,x),field,step,date),d);
+cellfun(@(x)sessionPsycho(strtok(x,'.'),fullfile(path,x),field,step,date,xticklab,logx,leg),d);
 end
 
-function sessionPsycho(sub,file,field,step,date)
+function sessionPsycho(sub,file,field,step,date,xticklab,logx,leg)
 close all
 ctr = load(file);
 
@@ -33,14 +28,14 @@ if true %remove correction trials
 end
 
 if ~isempty(step)
-    trials = intersect(trials,find(step==ctr.compiledTrialRecords.step));
+    trials = intersect(trials,find(ismember(ctr.compiledTrialRecords.step,step)));
 end
 
 if ~isempty(date)
     trials = intersect(trials,find(datenum(date)<=ctr.compiledTrialRecords.date));
 end
 
-u = unique(vals(~isnan(vals))); %unique sorts
+u = unique(vals(trials)); %unique sorts
 if length(u)>length(vals)/10
     error('haven''t written bucketing yet')
 else
@@ -53,29 +48,73 @@ offset = linspace(-1,1,length(sessions)-1)*min(diff(u))/3;
 
 colordef black
 
-colors = colormap('jet'); %opens figure? :(
+colors = colormap('hsv'); %opens figure? :(
 cinds = round(linspace(1,size(colors,1),length(offset)));
+
+xlims = u([1 end])+[-1 1]*min(diff(u))/3;
+if logx
+    pf = @semilogx;
+    xlims(end)=xlims(end)*4/3;
+else
+    pf = @plot;
+end
 
 alpha=.05;
 d = 10;
 
-for i=1:length(offset)
-    these = cellfun(@(x)x(x>=sessions(i) & x<sessions(i+1) & ismember(x,trials)),vals,'UniformOutput',false);
-    if any(cellfun(@(x)any(isnan(ctr.compiledTrialRecords.correct(x))),these))
-        cellfun(@(x)x(isnan(ctr.compiledTrialRecords.correct(x))),these,'UniformOutput',false)
-        error('huh?')
+doBino(trials,true);
+doBino(trials,false);
+
+    function doBino(trials,removeAfterErrors)
+        if removeAfterErrors
+            trials = trials(trials~=1);
+            afterCorrects = trials(ctr.compiledTrialRecords.correct(trials-1) == 1); % ==1 cuz nans
+            pac = round(100*(1 - length(afterCorrects)/length(trials)));
+            trials = afterCorrects;
+        end
+        
+        for i=1:length(offset)
+            these = cellfun(@(x)x(x>=sessions(i) & x<sessions(i+1) & ismember(x,trials)),vals,'UniformOutput',false);
+            if any(cellfun(@(x)any(isnan(ctr.compiledTrialRecords.correct(x))),these))
+                cellfun(@(x)x(isnan(ctr.compiledTrialRecords.correct(x))),these,'UniformOutput',false)
+                error('huh?')
+            end
+            n = cellfun(@length,these);
+            [~, pci] = binofit(cellfun(@(x)sum(ctr.compiledTrialRecords.correct(x)),these),n,alpha);
+            if removeAfterErrors
+                params={'Color',colors(cinds(i),:)};
+            else
+                params={'wx','MarkerSize',2};
+            end
+            enoughs = n>=d;
+            if any(enoughs) % we don't get logrithmic axis if we plot all empties
+                lgofst=ones(size(u));
+                if logx
+                    lgofst=50*lgofst.*u/max(u);
+                end
+                
+                pf(u+offset(i).*lgofst,n/sum(n),'x','Color',colors(cinds(i),:),'MarkerSize',2);
+                hold on
+                pf(repmat(u(enoughs)+offset(i).*lgofst(enoughs),2,1),pci(enoughs,:)',params{:});
+            end
+        end
     end
-    n = cellfun(@length,these);
-    [~, pci] = binofit(cellfun(@(x)sum(ctr.compiledTrialRecords.correct(x)),these),n,alpha);
-    plot(repmat(u(n>=d)+offset(i),2,1),pci(n>=d,:)','Color',colors(cinds(i),:));
-    hold on
-end
 
 title([sub ' ' datestr(ctr.compiledTrialRecords.date(trials(end)),'ddd, mmm dd')])
-ylim([0 1])
+ylim([0 1]);
+xlim(xlims);
 set(gca,'XTick',u);
-plot(u([1 end])+offset([1 end]),.5*ones(1,2),'w');
-uploadFig(gcf,sub,length(u)*length(sessions)*3,200,'psycho');
+plot(xlims,.5*ones(1,2),'Color',.5*ones(1,3));
+plot(xlims,ones(1,2)/length(u),'Color',.5*ones(1,3));
+xPos = min(u);
+yPos = .25;
+textSize = 5;
+text(xPos,yPos,'correction trials removed','FontSize',textSize);
+text(xPos,yPos-textSize/100,sprintf('x''s include after errors (%g%% more trials, should decrease performance and tighten range)',pac),'FontSize',textSize)
+ylabel('% correct')
+xlabel(leg)
+set(gca,'XTickLabel',xticklab(u));
+uploadFig(gcf,sub,length(u)*length(sessions)*3,200,[field '.psycho']);
 end
 
 function uploadFigMini(f,subj,width,height,qual)

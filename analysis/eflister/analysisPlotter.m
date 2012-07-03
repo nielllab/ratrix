@@ -53,11 +53,11 @@ else
         d=dir([compiledFileDir selection.subjects{1} '.compiledTrialRecords.1-*.mat']);
         
         fd = ['\\reichardt\figures\' selection.subjects{1} '\'];
-        d2=dir([fd '*.fig']);
+        d2=dir([fd 'latest.fig']);
         d2=sort({d2.name});
         try %d or d2 may be empty
             d=textscan(d.name,[selection.subjects{1} '.compiledTrialRecords.1-%u.fig']);
-            fd = [fd d2{end}];
+            fd = [fd d2{end}]
             x=open(fd);
             y=get(get(x,'Children'),'XLim');
             
@@ -67,6 +67,7 @@ else
                 return
             else
                 close(x);
+                fprintf('doing %s\n',fd);
             end
         end
     end

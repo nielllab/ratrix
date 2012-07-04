@@ -11,6 +11,11 @@ path = '\\mtrix4\Users\nlab\Desktop\mouseData\CompiledTrialRecords\';
 simplePsycho('orientations','deg orientation difference',uint8(7  ),@(x)arrayfun(@(x)num2str(prec(2*x*180/pi,1)),x,'UniformOutput',false),false,path);
 simplePsycho('pixPerCyc'   ,'pixels per cycle'          ,uint8(6:8),@(x)arrayfun(@(x)num2str(prec(x         ,1)),x,'UniformOutput',false),true ,path);
 
+path = '\\mtrix1\Users\nlab\Desktop\mouseData0512\CompiledTrialRecords\';
+simplePsycho('pixPerCyc'   ,'pixels per cycle'          ,uint8(6:8),@(x)arrayfun(@(x)num2str(prec(x         ,1)),x,'UniformOutput',false),true ,path);
+path = '\\mtrix2\Users\nlab\Desktop\mouseData0512\CompiledTrialRecords\';
+simplePsycho('pixPerCyc'   ,'pixels per cycle'          ,uint8(6:8),@(x)arrayfun(@(x)num2str(prec(x         ,1)),x,'UniformOutput',false),true ,path);
+
     function out=prec(in,n)
         out = round(in*10^n)/10^n;
     end

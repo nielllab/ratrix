@@ -44,11 +44,18 @@ end
 
 %session boundaries whenever there was a half hour gap in the trial start times
 sessions = trials([1 find(diff(ctr.compiledTrialRecords.date(trials)) > .5/24) end]);
-offset = linspace(-1,1,length(sessions)-1)*min(diff(u))/3;
+
+offset = linspace(-1,1,length(sessions)-1);
+lgofst = ones(size(u));
+if logx
+    lgofst = (max(diff(u))/10)*lgofst.*u/max(u);
+else
+    offset = offset*min(diff(u))/3;
+end
 
 colordef black
 
-colors = colormap('hsv'); %opens figure? :(
+colors = colormap('jet'); %opens figure? :(
 cinds = round(linspace(1,size(colors,1),length(offset)));
 
 xlims = u([1 end])+[-1 1]*min(diff(u))/3;
@@ -88,11 +95,6 @@ doBino(trials,false);
             end
             enoughs = n>=d;
             if any(enoughs) % we don't get logrithmic axis if we plot all empties
-                lgofst=ones(size(u));
-                if logx
-                    lgofst=50*lgofst.*u/max(u);
-                end
-                
                 pf(u+offset(i).*lgofst,n/sum(n),'x','Color',colors(cinds(i),:),'MarkerSize',2);
                 hold on
                 pf(repmat(u(enoughs)+offset(i).*lgofst(enoughs),2,1),pci(enoughs,:)',params{:});

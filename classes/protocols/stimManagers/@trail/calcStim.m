@@ -30,13 +30,11 @@ if hz==0 %osx
     hz=60;
 end
 
-resolutions(resolutionIndex)
-
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);
 
 stimulus.initialPos=[width height]'/2;
-details.nFrames = stimulus.timeoutSecs*hz;
+details.nFrames = ceil(stimulus.timeoutSecs*hz);
 details.target = stimulus.targetDistance(1)*details.target;
 
 stimulus.mouseIndices=[];

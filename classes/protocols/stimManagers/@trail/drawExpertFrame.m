@@ -100,7 +100,7 @@ switch phaseRecords(phaseNum).phaseType
         end
         
         colorWalls = positionStim && ~s.cue;
-        drawTrail = positionStim;
+        drawTrail = positionStim && isempty(s.dms);
         
         if ~positionStim
             origTargetPos = targetPos;
@@ -149,6 +149,9 @@ switch phaseRecords(phaseNum).phaseType
                     if finish
                         dynamicDetails.result = 'tooEarly';
                     end
+                else
+                    %shouldn't be necessary, but ptb bug: the above fillrect grey screws up dontclear = 0
+                    Screen('FillRect', window, black, destRect);
                 end
             end
             

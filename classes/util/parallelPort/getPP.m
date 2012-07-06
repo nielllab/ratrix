@@ -2,7 +2,10 @@ function [ppOut matlab64Out win64Out b64Out] = getPP
 persistent noPP;
 if isempty(noPP)
     [~,b] = getMACaddress;
-    noPP = ismember(b,{'08002700F8DC'}); %erik's dev machine has no pp :(
+    noPP = ismember(b,{...
+        '08002700F8DC',... % erik's dev machine has no pp :(
+        '08002700D40D' ... % sue's vaio
+        });
 end
 
 ppOut = ~noPP;
@@ -77,7 +80,7 @@ if any(cellfun(@isempty,{matlab64 win64 b64}))
         end
         
         %temporary hack to get 2p station running
-        if win64
+        if ppOut && win64
             if ~matlab64
                 b64 = io32;
                 status = io32(b64);

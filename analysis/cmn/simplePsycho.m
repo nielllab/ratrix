@@ -59,6 +59,7 @@ if false
     colors = colormap('jet'); %opens figure? :(
 else
     if true %perceptually uniform blue -> red, constant luminance/chroma
+        %note not truly perceptually uniform, cuz at a given C and L, some H's are out of gamut (see fig 5 http://magnaview.nl/documents/MagnaView-M_Wijffelaars-Generating_color_palettes_using_intuitive_parameters.pdf)
         colors = [repmat([70 100],length(offset),1) 360*linspace(.9,.02,length(offset))'];
     else %increasing chroma, constant luminance
         colors = [50*ones(length(offset),1) linspace(0,100,length(offset))' .05*360*ones(length(offset),1)];

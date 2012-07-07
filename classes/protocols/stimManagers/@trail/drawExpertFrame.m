@@ -145,7 +145,7 @@ switch phaseRecords(phaseNum).phaseType
                 %t = dynamicDetails.times(i) - phaseStartTime; %no good -- i only updates if there was movement
                 t = GetSecs - phaseStartTime;
                 if t < s.dms.targetLatency
-                    Screen('FillRect', window, grey, destRect);
+                    Screen('FillRect', window, grey, destRect); %ptb bug: fillrecting whole screen redefines clear color
                     dontclear = 1; %true makes SCREEN('DrawingFinished') barf
                     if finish
                         dynamicDetails.result = 'tooEarly';
@@ -252,7 +252,7 @@ end
 
 ctStr = 'correction trial!';
 if trialRecords(end).stimDetails.correctionTrial && isempty(strfind(textLabel,ctStr))
-    textLabel = [ctStr ' ' textLabel ' ' originalLabel];
+    textLabel = [ctStr ' ' textLabel];% ' ' originalLabel]; %adding original label grows forever
 end
 end
 

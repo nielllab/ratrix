@@ -87,7 +87,7 @@ doBino(trials,false);
                 error('huh?')
             end
             n = cellfun(@length,these);
-            [~, pci] = binofit(cellfun(@(x)sum(ctr.compiledTrialRecords.correct(x)),these),n,alpha);
+            [p, pci] = binofit(cellfun(@(x)sum(ctr.compiledTrialRecords.correct(x)),these),n,alpha);
             if removeAfterErrors
                 params={'Color',colors(cinds(i),:)};
             else
@@ -98,6 +98,9 @@ doBino(trials,false);
                 pf(u+offset(i).*lgofst,n/sum(n),'x','Color',colors(cinds(i),:),'MarkerSize',2);
                 hold on
                 pf(repmat(u(enoughs)+offset(i).*lgofst(enoughs),2,1),pci(enoughs,:)',params{:});
+                if removeAfterErrors
+                    pf(u,p,params{:});
+                end
             end
         end
     end

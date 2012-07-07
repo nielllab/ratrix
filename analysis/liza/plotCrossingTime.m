@@ -397,10 +397,10 @@ end
 %this is set whenever you hit k-ctrl-# to manually open valve
 manualRewards = [records.containedForcedRewards];
 
-if any(~ismember(results,{'incorrect','correct','timedout',''}))
+if any(~ismember(results,{'incorrect','correct','timedout','tooEarly',''}))
     error('unexpected dynamicDetails.result')
 end
-if any( strcmp(results,'')~=(res==2) | ismember(results,{'incorrect','timedout'})~=(res==0) | strcmp(results,'correct')~=(res==1) )
+if any( strcmp(results,'')~=(res==2) | ismember(results,{'incorrect','timedout','tooEarly'})~=(res==0) | strcmp(results,'correct')~=(res==1) )
     error('dynamicDetails.result didn''t line up with trialDetails.correct')
 end
 results(res==2)={'quit'};
@@ -494,13 +494,17 @@ chunkHrs=36;
 chunks=sessions-minPerChunk;
 chunks=sessions(diff(startTimes([[ones(sum(chunks<=0),1) chunks(chunks>0)] sessions+1]),[],2)>chunkHrs/24);
 
-[goodResults,classes] = ismember(results,{'incorrect','correct','timedout'});
+[goodResults,classes] = ismember(results,{'incorrect','correct','timedout','tooEarly'});
 
 sps = 4;
 
 h = [];
 
-cm = [1 0 0;0 1 0;1 1 0]; %red for incorrects, green for corrects, yellow for timeouts
+cm = [1  0 0;... % red    for incorrects
+      0  1 0;... % green  for corrects
+      1  1 0;... % yellow for timeouts
+      1 .5 0 ... % orange for tooEarlies
+      ];
 head = 1.1;
 dotSize = 4;
 

@@ -109,7 +109,7 @@ doBino(trials,false);
                 hold on
                 pf(repmat(u(enoughs)+offset(i).*lgofst(enoughs),2,1),pci(enoughs,:)',params{:});
                 if removeAfterErrors
-                    pf(u,p,params{:});
+                    pf(u(enoughs),p(enoughs),params{:});
                 end
             end
         end

@@ -1,5 +1,8 @@
 function compileAudioMice
-clc
+addpath(fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))),'bootstrap'));
+setupEnvironment;
+dbstop if error
+
 if ~IsWin
     error('haven''t xplatformed yet')
 end

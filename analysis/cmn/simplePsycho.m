@@ -55,7 +55,16 @@ end
 
 colordef black
 
-colors = colormap('jet'); %opens figure? :(
+if false
+    colors = colormap('jet'); %opens figure? :(
+else
+    if true %perceptually uniform blue -> red, constant luminance/chroma
+        colors = [repmat([70 100],length(offset),1) 360*linspace(.9,.02,length(offset))'];
+    else %increasing chroma, constant luminance
+        colors = [50*ones(length(offset),1) linspace(0,100,length(offset))' .05*360*ones(length(offset),1)];
+    end
+    colors = applycform(applycform(colors,makecform('lch2lab')),makecform('lab2srgb'));
+end
 cinds = round(linspace(1,size(colors,1),length(offset)));
 
 xlims = u([1 end])+[-1 1]*min(diff(u))/3;

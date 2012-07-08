@@ -351,10 +351,13 @@ targetLocation = [s.target];
 %TODO: flag correction trials (different marker on plot?)
 correctionTrial = [s.correctionTrial];
 
-    function out = extract(f,d,m,trans)
+    function out = extract(f,d,m,trans,e)
         out = cellfun(@(x)doField(x,f,d),{records.stimManager},'UniformOutput',false);
         if trans
             out = out';
+        end
+        if exist('e','var')
+            out(cellfun(@isempty,out))={e};
         end
         if m
             out = cell2mat(out);
@@ -371,7 +374,7 @@ initP         = extract('initialPos'    ,nan(2,1),true ,false);
 dmsNan.targetLatency = nan;
 dmsNan.cueLatency    = nan;
 dmsNan.cueDuration   = nan;
-dms           = extract('dms'           ,dmsNan  ,true ,false);
+dms           = extract('dms'           ,dmsNan  ,true ,false,dmsNan);
 
 for i=1:size(bounds,1)
     if ismember('stimManager.stim',fullRecs(i).fieldsInLUT)
@@ -510,7 +513,8 @@ chunks=sessions(diff(startTimes([[ones(sum(chunks<=0),1) chunks(chunks>0)] sessi
 
 [goodResults,classes] = ismember(results,{'incorrect','correct','timedout','tooEarly'});
 
-cm = [1  0 0;... % red    for incorrects
+cm = [...
+    1  0 0;... % red    for incorrects
     0  1 0;... % green  for corrects
     1  1 0;... % yellow for timeouts
     1 .5 0 ... % orange for tooEarlies
@@ -901,9 +905,11 @@ if plotSettings
         h(i) = subplot(n,1,i);
         hold on
         ylims = getLims(plots{i,1});
-        standardPlot(@plot,[],[],i==1,i==n); %(f,ticks,lines,dates,xticks)
-        x=plot(trialNums,plots{i,1}');
-        arrayfun(@(x,y) set(x,'LineWidth',y),x,(d-1)+(d*(length(x)-1):-d:0)');
+        if ~any(isnan(ylims))
+            standardPlot(@plot,[],[],i==1,i==n); %(f,ticks,lines,dates,xticks)
+            x=plot(trialNums,plots{i,1}');
+            arrayfun(@(x,y) set(x,'LineWidth',y),x,(d-1)+(d*(length(x)-1):-d:0)');
+        end
         ylabel(plots{i,2})
         if i==1
             title([subj ' -- ' datestr(now,'ddd, mmm dd HH:MM PM')])

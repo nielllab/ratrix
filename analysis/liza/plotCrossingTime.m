@@ -496,10 +496,6 @@ chunks=sessions(diff(startTimes([[ones(sum(chunks<=0),1) chunks(chunks>0)] sessi
 
 [goodResults,classes] = ismember(results,{'incorrect','correct','timedout','tooEarly'});
 
-sps = 4;
-
-h = [];
-
 cm = [1  0 0;... % red    for incorrects
       0  1 0;... % green  for corrects
       1  1 0;... % yellow for timeouts
@@ -521,6 +517,9 @@ else
     transparency = .2;
     bw = 'k';
 end
+
+sps = 4;
+h = [];
 
 h(end+1) = subplot(sps,1,1);
 hold on
@@ -797,8 +796,7 @@ uploadFig(gcf,subj,max(trialNums)/10,sps*200);
 
 plotTracks = true;
 if plotTracks
-    fig=figure;
-    sps = 3*2;
+
     slowFact = .1;
     trackFact = 1;
     
@@ -815,7 +813,9 @@ if plotTracks
     resps = cellfun(@(x,i)processTrack(x,i,trackFact,false),    track(these),num2cell(these),'UniformOutput',false);
     
     h=[];
-    ylabels={'stop x','stop y','left x','left y','right x','right y'};
+    ylabels = {'stop x','stop y','left x','left y','right x','right y'};
+    sps = length(ylabels);
+    fig = figure;
     for i=1:sps
         h(end+1)=subplot(sps,1,i);
         
@@ -890,6 +890,6 @@ if plotSettings
     
     xlabel('trial')
     linkaxes(h,'x');
-    uploadFig(fig,subj,max(trialNums)/10,sps*200,'params');
+    uploadFig(fig,subj,max(trialNums)/10,n*200,'params');
 end
 end

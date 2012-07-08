@@ -368,6 +368,11 @@ wallDist      = extract('targetDistance',nan(1,2),true ,true ); %apparently we n
 stim          = extract('stim'          ,nan     ,false,false);
 initP         = extract('initialPos'    ,nan(2,1),true ,false);
 
+dmsNan.targetLatency = nan;
+dmsNan.cueLatency    = nan;
+dmsNan.cueDuration   = nan;
+dms           = extract('dms'           ,dmsNan  ,true ,false);
+
 for i=1:size(bounds,1)
     if ismember('stimManager.stim',fullRecs(i).fieldsInLUT)
         for x=bounds(i,1):bounds(i,2)
@@ -437,6 +442,12 @@ data=struct(...
     'track'          ,                 track              ...
     );
 
+cellfun(@(f)combineStructs(dms,f),fields(dmsNan));
+
+    function combineStructs(in,f)
+        [data.(f)] = in.(f);
+    end
+
 compiledFile = fullfile(compiledDir,subj,sprintf('compiled_%d-%d_%s.mat',trialNums(1),trialNums(end),datestr(now,30)));
 tic
 save(compiledFile,'data');
@@ -481,6 +492,9 @@ initP            = [data.initP          ];
 wallDist         = [data.wallDist       ];
 slowTrack        = {data.slowTrack      };
 track            = {data.track          };
+targetLatency    = [data.targetLatency  ];
+cueLatency       = [data.cueLatency     ];
+cueDuration      = [data.cueDuration    ];
 
 clear data;
 
@@ -497,10 +511,10 @@ chunks=sessions(diff(startTimes([[ones(sum(chunks<=0),1) chunks(chunks>0)] sessi
 [goodResults,classes] = ismember(results,{'incorrect','correct','timedout','tooEarly'});
 
 cm = [1  0 0;... % red    for incorrects
-      0  1 0;... % green  for corrects
-      1  1 0;... % yellow for timeouts
-      1 .5 0 ... % orange for tooEarlies
-      ];
+    0  1 0;... % green  for corrects
+    1  1 0;... % yellow for timeouts
+    1 .5 0 ... % orange for tooEarlies
+    ];
 head = 1.1;
 dotSize = 4;
 
@@ -769,6 +783,11 @@ end
 if any(rnd)
     plot(trialNums(rnd),.5,'g+')
 end
+dms = any(~isnan([targetLatency;cueLatency;cueDuration]));
+if any(dms)
+    plot(trialNums(dms),.5,'+','Color',[1 .5 0]);
+end
+
 ylabel('% correct(r) rightward(w)')
 
 xlabel('trial')
@@ -796,7 +815,7 @@ uploadFig(gcf,subj,max(trialNums)/10,sps*200);
 
 plotTracks = true;
 if plotTracks
-
+    
     slowFact = .1;
     trackFact = 1;
     
@@ -868,10 +887,13 @@ if plotSettings
     fig=figure;
     d=3;
     
-    plots = {gain    ,'gain'           ;
+    plots = {
+        gain         ,'gain'           ;
         stoppingSpeed,'stop speed'     ;
         stoppingTime ,'stop time (s)'  ;
-        wallDist'    ,'target distance'};
+        wallDist'    ,'target distance';
+        [cueDuration; targetLatency],'cue dur / targ lat (s)';
+        };
     
     n = size(plots,1);
     h = [];

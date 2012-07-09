@@ -25,6 +25,7 @@ end
 
 if IsWin
     compiledDir = '\\reichardt\figures';
+    compiledFile = getCompiledFile(compiledDir,subj);
     
     doCompile = true;
     if doCompile
@@ -33,9 +34,7 @@ if IsWin
         catch ex
             getReport(ex)
             warning('bailing on compiling %s',subj)
-        end
-    else
-        compiledFile = getCompiledFile(compiledDir,subj);
+        end        
     end
     
     doPlot = true;
@@ -61,8 +60,7 @@ d = dir(fullfile(compiledDir,subj,'compiled*.mat'));
 if ~isempty(d)
     vals = cell2mat(cellfun(@(x)textscan(x,'compiled_1-%u_%uT%u.mat','CollectOutput',true),{d.name}'));
     trials = vals(:,1);
-    vals = num2str(vals(:,[2 3]));
-    [~, ord]=sort(str2num(reshape(vals(vals~=' '),[length(d) 14])));
+    [~, ord]=sortrows(vals(:,[2 3]));
     compiledFile = fullfile(compiledDir,subj,d(max(ord)).name);
     lastTrial = trials(max(ord));
 end
@@ -645,7 +643,9 @@ title([subj ' -- ' datestr(now,'ddd, mmm dd HH:MM PM')])
         if ~exist('c','var') || isempty(c)
             c=zeros(1,3);
         end
-        fill([x fliplr(x)],[y(1,:) fliplr(y(2,:))],c,'FaceAlpha',t,'LineStyle','none');
+        if length(x)>1
+            fill([x fliplr(x)],[y(1,:) fliplr(y(2,:))],c,'FaceAlpha',t,'LineStyle','none');
+        end
     end
 
     function semilogyEF(x,y,varargin)

@@ -131,7 +131,7 @@ pStr='';
 sStr='';
 
 if strcmp(s.replayMode,'expert')
-    if ~isempty(s.background) || ~isempty(s.shapeMethod) || s.position~=.5 || s.sideDisplay~=1 || selectedContrast~=1 || ~all(shape(:)==1) || ~all(size(shape)==round(selectedDotSize))
+    if (~isempty(s.background) || ~all(structfun(@(x)x==0,s.background)) || ~isempty(s.shapeMethod) || s.position~=.5 || s.sideDisplay~=1 || selectedContrast~=1 || ~all(shape(:)==1) || ~all(size(shape)==round(selectedDotSize))
         s.background
         s.shapeMethod
         s.position

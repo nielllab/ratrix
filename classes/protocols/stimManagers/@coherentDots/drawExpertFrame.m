@@ -66,7 +66,7 @@ switch phaseRecords(phaseNum).phaseType
                 trialRecords(end).stimDetails.selectedSpeed/s.screen_height,trialRecords(end).stimDetails.dotDirection,[],false,dynamicDetails.xys(end,:,:));
         end
         
-        xy = squeeze(dynamicDetails.xys(end,:,:)).*repmat([s.screen_width s.screen_height],s.num_dots,1);
+        xy = squeeze(dynamicDetails.xys(end,:,:)).*repmat([s.screen_width s.screen_height],length(expertCache.colors),1);
         
         if ~isempty(s.background)
             Screen('DrawTexture',window,expertCache.bgt,[],destRect,[],filt);

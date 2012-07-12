@@ -69,6 +69,10 @@ switch phaseRecords(phaseNum).phaseType
         xy = squeeze(dynamicDetails.xys(end,:,:)).*repmat([s.screen_width s.screen_height],length(expertCache.colors),1);
         
         if ~isempty(s.background)
+            if any(isnan(destRect))
+                sca
+                keyboard
+            end
             Screen('DrawTexture',window,expertCache.bgt,[],destRect,[],filt);
             dontclear = 1;
         end

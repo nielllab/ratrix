@@ -29,11 +29,7 @@ switch nargin
             error('maxWidth and maxHeight must be positive')
         end
         
-        if (length(varargin{3})==2 && all(varargin{3}>0)) || (length(varargin{3})==1 && varargin{3}==0)
-            s.scaleFactor=varargin{3};
-        else
-            error('scale factor is either 0 (for scaling to full screen) or [width height] positive values')
-        end
+        s=setScaleFactor(varargin{3});
         
         if varargin{4}>=0 && varargin{4}<=1
             s.interTrialLuminance=varargin{4};

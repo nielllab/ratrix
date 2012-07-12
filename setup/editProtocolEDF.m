@@ -6,11 +6,11 @@ addpath(fullfile(fileparts(pathstr),'bootstrap'))
 setupEnvironment;
 
 if ~exist('r','var') || isempty(r)
-    %dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
+    dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
     %dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'mouseData',filesep);
     
-    mtrix=3;
-    dataPath=['\\mtrix' num2str(mtrix) '\Users\nlab\Desktop\mouseData\'];
+    %mtrix=3;
+    %dataPath=['\\mtrix' num2str(mtrix) '\Users\nlab\Desktop\mouseData\'];
     
     r=ratrix(fullfile(dataPath, 'ServerData'),0);
 end
@@ -66,6 +66,12 @@ for i=1:length(subs)
         ts=getTrainingStep(p,getNumTrainingSteps(p));
         
         if true
+            ts = getTrainingStep(p,t);
+            p = changeStep(p,setStimManager(ts,setReinfAssocSecs(switchToExpertDots(getStimManager(ts)),1)),t);
+            [~, r] = setProtocolAndStep(subs{i},p,true,true,false,t,r,comment,auth);
+        end
+        
+        if false
             sm = getStimManager(ts);
             switch mtrix
                 case 3

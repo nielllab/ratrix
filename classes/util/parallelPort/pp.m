@@ -102,34 +102,36 @@ elseif isunix && ~ismac %IsLinux probably more appropriate, but requires psychto
     useSscanf=true; %maybe textscan is faster?
     pportDir='/proc/sys/dev/parport/';
     
-    [s dmesg]=unix('dmesg | grep parport');
-    if s~=0
-        error('couldn''t dmesg')
-    end
-    
-    [s dev]=unix('ls -al /dev | grep parport');
-    if s~=0
-        error('couldn''t dev')
-    end
-    
-    [s drv]=unix('grep ppdev /proc/devices');
-    if s~=0
-        error('couldn''t proc')
-    end
-    
-    [s lsm]=unix('lsmod | grep ppdev');
-    if s~=0
-        error('couldn''t lsmod ppdev')
-    end
-    
-    [s lsmp]=unix('lsmod | grep parport');
-    if s~=0
-        error('couldn''t lsmod parport')
-    end
-    
-    [s iop]=unix('cat /proc/ioports | grep parport');
-    if s~=0
-        error('couldn''t ioports')
+    if slowChecks
+        [s dmesg]=unix('dmesg | grep parport');
+        if s~=0
+            error('couldn''t dmesg')
+        end
+        
+        [s dev]=unix('ls -al /dev | grep parport');
+        if s~=0
+            error('couldn''t dev')
+        end
+        
+        [s drv]=unix('grep ppdev /proc/devices');
+        if s~=0
+            error('couldn''t proc')
+        end
+        
+        [s lsm]=unix('lsmod | grep ppdev');
+        if s~=0
+            error('couldn''t lsmod ppdev')
+        end
+        
+        [s lsmp]=unix('lsmod | grep parport');
+        if s~=0
+            error('couldn''t lsmod parport')
+        end
+        
+        [s iop]=unix('cat /proc/ioports | grep parport');
+        if s~=0
+            error('couldn''t ioports')
+        end
     end
     
     if slowChecks || ~exist('port','var') || isempty(port)

@@ -38,6 +38,9 @@ switch phaseRecords(phaseNum).phaseType
                 %for 'reinforced,' might want to condition on trialRecords(end).trialDetails.correct
                 dynamicDetails.xys=phaseRecords(phaseNum-1).dynamicDetails.xys(end,:,:);
             else
+                %would be better to do all this initializing before the
+                %request lick, but we don't get called for pre-request phase, why?
+                
                 [floatprecision tex] = determineColorPrecision(trialManager,1,[]);
                 expertCache.tex = Screen('MakeTexture',window,tex,[],[],floatprecision);
                 

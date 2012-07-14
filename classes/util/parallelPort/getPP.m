@@ -118,9 +118,19 @@ if any(cellfun(@isempty,{matlab64 win64 b64}))
         end
     end
     
-    matlab64
-    win64
-    b64
+    if matlab64
+        if ~strcmp(computer,'PCWIN64')
+            error('mismatch')
+        end
+    else
+        if ~strcmp(computer,'PCWIN')
+            error('mismatch')
+        end
+    end
+    
+    %     matlab64
+    %     win64
+    %     b64
 end
 
 matlab64Out = matlab64;

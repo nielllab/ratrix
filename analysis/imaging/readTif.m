@@ -3,11 +3,8 @@ function out = readTif(in)
 addpath(fullfile(fileparts(pathstr),'bootstrap'))
 setupEnvironment;
 
-fullfile(fileparts(pathstr),'bootstrap')
-
 dbstop if error
 colordef white
-colormap jet %gray %opens figure :(
 close all
 
 mf = [in '.mat'];
@@ -43,17 +40,21 @@ b = whos('out');
 disp(['movie is ' num2str(b.bytes/1000/1000/1000) ' GB'])
 
 %rect = [950 600 500 650]; %left top width height
-rect = [950 450 800 900];
+%rect = [950 450 800 900];
+%rect = [1 1 500 100];
 
-if false
+if true
     doDetailed = false;
     if doDetailed
         frames = detailedTif(intf);
     else
+        colormap gray
         imagesc(mean(double(out),3));
+        axis equal
+        title('select ROI by dragging mouse, double click on it when done')
+        h = imrect('PositionConstraintFcn',makeConstrainToRectFcn('imrect',get(gca,'XLim'),get(gca,'YLim'))); %also consdier rbbox, dragrect, getrect, others?
+        rect = round(wait(h)); %left top width height     
     end
-    hold on
-    plot(rect(1)+rect(3)*[0 0 1 1 0],rect(2)+rect(4)*[0 1 1 0 0],'r-')
 end
 
 out = doNormalize(out(rect(2)+(0:rect(4)-1),rect(1)+(0:rect(3)-1),:));
@@ -141,7 +142,7 @@ f = figure('MenuBar','none','Toolbar','figure','Name','image analysis','NumberTi
 
 sph = uipanel(f,'title','controls','Units','pixels','Position',[border 2*border+bHeight aWidth spHeight]);
 
-ah = axes('Parent',f,'Units','pixels','Position',[border 3*border+spHeight+bHeight aWidth aHeight]);
+ah = axes('Parent',f,'XTick',[],'YTick',[],'Units','pixels','Position',[border 3*border+spHeight+bHeight aWidth aHeight]);
 bh = uicontrol(f,'Style','togglebutton','String','play','callback',@buttonC,'Units','pixels','Position',[fWidth-border-bWidth border bWidth bHeight]);
 
 %sliderstep doesn't seem to be working
@@ -154,6 +155,7 @@ frameS=sliderPanelHoriz(sph,{'title','frame'},{'min',1,'max',size(in,4),'SliderS
         end
         %disp(['showing ' num2str(i)])
         image(in(:,:,:,i),'Parent',ah);
+        set(ah,'XTick',[],'YTick',[]);
     end
 
     function buttonC(src,evt)
@@ -203,7 +205,7 @@ toc
 end
 
 function in = prctileNormalize(in,p)
-doDiff = true; %to see blood flow
+doDiff = false; %to see blood flow
 if doDiff
     in = in(:,:,51:end);
 end

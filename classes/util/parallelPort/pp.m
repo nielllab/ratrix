@@ -14,7 +14,6 @@ function input = pp(pins,output,slowChecks,port,addr)
 %               validation, checking all relevant OS information
 %               regarding the ports (that i could find)
 %               if set to false when writing to incorrect addr, you could damage your OS
-%               (required true on windows)
 % port       optional integer vector indicating parallel port indices
 %               defaults to first port found in /proc/sys/dev/parport/
 %               (set to [] for windows)
@@ -89,8 +88,6 @@ if ispc
         else
             error('unrecognized address -- only single address allowed on windows')
         end
-    else
-        error('must enable slowchecks on windows')
     end
     
     [wp, ~, ~, ioObj] = getPP; %TODO: make getPP ptb independent

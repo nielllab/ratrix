@@ -3,13 +3,14 @@ setRatrixPath;
 dbstop if error
 
 refresh = 1000;
-numSecs = 5;
+numSecs = 10;
 
 n = refresh*numSecs;
 
 rec = nan(1,n);
 
-p.n = round(.75*n/refresh/struct(pco).rate);
+p.rate = 1000; %1/struct(pco).rate
+p.n = round(.75*numSecs*p.rate);
 p.addr = getPPaddr;
 p = init(pco(p));
 
@@ -18,7 +19,7 @@ disp('starting')
 pri = Priority(MaxPriority('GetSecs','KbCheck'));
 t = GetSecs;
 for i=1:n
-    [p,rec(i)] = exec(p);
+    [p,rec(i)] = exec(p,true);
     
     while GetSecs < t + 1/refresh
         %spin
@@ -53,9 +54,9 @@ legend({'busy' 'ack' 'next'});
 linkaxes(h,'x');
 xlim([1 struct(p).n]);
 xlabel('exposure')
-title(sprintf('rate %g (effective) %g (nominal) hz', 1/median(diff(t(1,:))), 1/struct(p).rate))
+title(sprintf('rate %g (effective) %g (nominal) hz', 1/median(diff(t(1,1:find(isnan(t(1,:)),1)-1))), 1/struct(p).rate))
 
-h(end+1) = subplot(s,1,3);
+subplot(s,1,3);
 plot(1000*rec','x-')
 hold on
 plot([1 n],zeros(1,2),'w-')

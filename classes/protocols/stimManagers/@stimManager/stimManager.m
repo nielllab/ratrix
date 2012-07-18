@@ -5,12 +5,14 @@ function s=stimManager(varargin)
 s.correctStim = [];
 s.reinfAssocSecs = 0;
 
+s.scaleFactor=[];
+
 switch nargin
     case 0
         % if no input arguments, create a default object
         s.maxWidth=0;
         s.maxHeight=0;
-        s.scaleFactor=[];
+        
         s.interTrialLuminance=0;
         s = class(s,'stimManager');
     case 1
@@ -29,7 +31,6 @@ switch nargin
             error('maxWidth and maxHeight must be positive')
         end
         
-        s=setScaleFactor(varargin{3});
         
         if varargin{4}>=0 && varargin{4}<=1
             s.interTrialLuminance=varargin{4};
@@ -38,6 +39,9 @@ switch nargin
         end
         
         s = class(s,'stimManager');
+        
+        s=setScaleFactor(s,varargin{3});
+        
     otherwise
         error('Wrong number of input arguments')
 end

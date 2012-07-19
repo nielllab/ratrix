@@ -11,17 +11,20 @@ did = false;
 out = inf;
 
 if p.ind>0
-    out = GetSecs - p.record(5,p.ind) - p.rate;
+    when = p.record(5,p.ind) + p.rate;
+    out = GetSecs - when;
+else
+    when = 0;
 end
 
-if out>=0 && p.ind<p.n && ~(dontWait && busy(p))    
+if out>=-p.msTolerance && p.ind<p.n && ~(dontWait && busy(p))    
     did = true;
     p.ind = p.ind+1;
     
     disp(['doing ' num2str(p.ind)])
     p.record([2 4],p.ind) = 0;
     
-    p.record(1,p.ind) = GetSecs;
+    p.record(1,p.ind) = WaitSecs('UntilTime', when);
     while ~dontWait && busy(p)
         p.record(2,p.ind) = p.record(2,p.ind) + 1;
     end

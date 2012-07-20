@@ -6,9 +6,18 @@ c = 50;
 
 stamps = in(1:h,1:w*c,:);
 
+if true
+    figure
+    t = 22;
+    x = in(1,1:t,:);
+    imagesc(reshape(permute(x,[1 3 2]),[n t]))
+    colormap gray
+    cellfun(@(f)f(x(:)),{@min @max})
+end
+
 if false
     figure
-    imagesc(reshape(permute(stamps,[1 3 2]),[h*n,w*c]))
+    imagesc(reshape(permute(stamps,[1 3 2]),[h*n w*c]))
     axis equal
     colormap gray
 end
@@ -18,7 +27,7 @@ inds = inds(inds>0);
 inds = inds(1:end-1);
 
 f = 9;
-lib = stamps(:,inds(9)+[0:w-1],1:10);
+lib = stamps(:,inds(f)+(0:w-1),1:10);
 
 if false
     figure
@@ -29,6 +38,8 @@ end
 
 out = nan(n,length(inds));
 
+disp('reading timestamps')
+tic
 for i = 1:n
     for j = 1:length(inds)
         this = stamps(:,inds(j)+(0:w-1),i);
@@ -38,15 +49,16 @@ for i = 1:n
         end
     end
 end
+toc
 
 out(out==10)=0;
 
 hrs = 22:23;
-min = 25:26;
+mn = 25:26;
 sec = 28:29;
 frc = 31:36;
 
-t = sum(cell2mat(cellfun(@convert,{hrs min sec frc},'UniformOutput',false)) .* repmat([60*60 60 1 10^-length(frc)],size(out,1),1),2);
+t = sum(cell2mat(cellfun(@convert,{hrs mn sec frc},'UniformOutput',false)) .* repmat([60*60 60 1 10^-length(frc)],size(out,1),1),2);
 
     function x = convert(x)
         d = length(x);

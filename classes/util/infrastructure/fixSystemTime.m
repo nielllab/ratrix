@@ -3,7 +3,7 @@ if ~exist('wait','var') || isempty(wait)
     wait = true;
 end
 
-if IsWin
+if ispc
     cmd = 'w32tm /resync';
     if ~wait
         cmd = [cmd ' /nowait'];

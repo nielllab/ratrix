@@ -1,5 +1,5 @@
 function out = readTif(in)
-[pathstr, name, ext] = fileparts(fileparts(fileparts(mfilename('fullpath'))));
+[pathstr, name, ext] = fileparts(fileparts(mfilename('fullpath')));
 addpath(fullfile(fileparts(pathstr),'bootstrap'))
 setupEnvironment;
 

@@ -19,7 +19,7 @@ if doPsycho
     path = '\\mtrix1\Users\nlab\Desktop\mouseData0512\CompiledTrialRecords\';
     simplePsycho('pixPerCyc'   ,'pixels per cycle'          ,uint8(6:8),@(x)arrayfun(@(x)num2str(prec(x         ,1)),x,'UniformOutput',false),true ,path);
     path = '\\mtrix2\Users\nlab\Desktop\mouseData0512\CompiledTrialRecords\';
-    simplePsycho('pixPerCyc'   ,'pixels per cycle'          ,uint8(6:8),@(x)arrayfun(@(x)num2str(prec(x         ,1)),x,'UniformOutput',false),true ,path);
+    simplePsycho('pixPerCyc'   ,'pixels per cycle'          ,uint8(6:9),@(x)arrayfun(@(x)num2str(prec(x         ,1)),x,'UniformOutput',false),true ,path);
     
     compileAudioMice;
 end

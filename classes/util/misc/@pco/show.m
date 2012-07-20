@@ -18,7 +18,9 @@ arrayfun(@(x,y) set(x,'LineWidth',y),x,(d-1)+(d*(length(x)-1):-d:0)');
 
 ylabel('spins')
 legend({'busy' 'ack'})
-ylim([-1 head*max(data(:))+1]);
+if any(~isnan(data(:)))
+    ylim([-1 head*max(data(:))+1]);
+end
 
 h(end+1) = subplot(s,1,2);
 data = diff([t([1 3 5],1:end-1); t(1,2:end)])'*1000;

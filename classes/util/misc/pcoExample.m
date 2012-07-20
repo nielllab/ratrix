@@ -49,7 +49,7 @@ switch b
     case 'BCAEC555FC4B' %2p machine
         pportaddr = 'C800'; %pci add on (not C480)
     otherwise
-        pportaddr = '0348';
+        pportaddr = '0378';
 end
 
 out = pportaddr;

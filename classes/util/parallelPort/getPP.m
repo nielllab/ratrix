@@ -53,8 +53,11 @@ if any(cellfun(@isempty,{matlab64 win64 b64}))
                                 error('couldn''t PROCESSOR_ARCHITEW6432')
                             end
                         else
-                            a
-                            b
+                            if isempty(strfind(b,'not defined')) || a~=1
+                                a
+                                b
+                                error('unexpected')
+                            end
                             win64 = false;
                         end
                         

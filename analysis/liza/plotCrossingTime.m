@@ -23,7 +23,7 @@ if ~exist('drive','var') || isempty(drive)
     end
 end
 
-if IsWin
+if ispc
     compiledDir = '\\reichardt\figures';
     compiledFile = getCompiledFile(compiledDir,subj);
     
@@ -67,7 +67,7 @@ end
 end
 
 function compiledFile = compileBall(subj,drive,force,compiledDir)
-if IsWin
+if ispc
     recordPath = fullfile(drive,'Users','nlab');
 elseif ismac && local
     recordPath = [filesep fullfile('Users','eflister')];
@@ -99,7 +99,7 @@ bounds = cell2mat(cellfun(@(x)textscan(x,'trialRecords_%u-%u_%uT%u-%uT%u.mat','C
 bounds = bounds(ord,:);
 files = files(ord);
 
-if ~force && IsWin
+if ~force && ispc
     fd = ['\\reichardt\figures\' subj];
     d=dir([fd '\*.300.png']);
     d=sort({d.name});
@@ -139,7 +139,7 @@ for i=1:length(files)
     fprintf('done with %d of %d\n',i,length(files));
 end
 
-if IsWin && false %takes too long (95sec local) to save (.25GB on disk, 1.8GB in memory), loading slow (73sec local) too
+if ispc && false %takes too long (95sec local) to save (.25GB on disk, 1.8GB in memory), loading slow (73sec local) too
     tic
     save([fd '\latest.mat'],'fullRecs','records');
     toc

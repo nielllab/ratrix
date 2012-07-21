@@ -5,7 +5,7 @@ else
     qual=['.' qual];
 end
 
-if IsWin
+if ispc
     fn=fullfile('\\reichardt','figures',subj,[datestr(now,30) qual]);
     [s, mess, messid] = mkdir(fileparts(fn));
     if s~=1

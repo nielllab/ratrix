@@ -3,7 +3,7 @@ addpath(fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))),'bootstr
 setupEnvironment;
 dbstop if error
 
-if ~IsWin
+if ~ispc
     error('haven''t xplatformed yet')
 end
 

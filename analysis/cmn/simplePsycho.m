@@ -1,5 +1,5 @@
 function simplePsycho(field,leg,step,xticklab,logx,path)
-if ~IsWin
+if ~ispc
     error('win only for now')
 end
 

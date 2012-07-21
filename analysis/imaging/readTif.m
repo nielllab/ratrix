@@ -8,7 +8,8 @@ colordef white
 close all
 
 if ~exist('in','var') || isempty(in)
-    [f,p] = uigetfile({'*.tif'; '*.tiff'; '*.mat'},'choose pco data');
+    %[f,p] = uigetfile({'*.tif'; '*.tiff'; '*.mat'},'choose pco data');
+    [f,p] = uigetfile('C:\Users\nlab\Desktop\data\','choose pco data');
     [a b] = fileparts(fullfile(p,f));
     in = fullfile(a,b);
 end

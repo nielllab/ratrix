@@ -141,3 +141,4 @@ setup/*.asv
 analysis/*.asv
 bootstrap/*.asv
 bootstrap/AmpLow.fig
+*.*~

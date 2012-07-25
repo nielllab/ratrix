@@ -17,6 +17,7 @@ goDirectlyToError=false;
 % Check against framesUntilTransition - Transition BY TIME
 % if we are at grad by time, then manually set port to the correct one
 % note that we will need to flag that this was done as "auto-request"
+% edf sez: it's not just autorequests, correctstim, etc use this
 if ~isempty(framesUntilTransition) && framesInPhase == framesUntilTransition - 1 % changed to framesUntilTransition-1 % 8/19/08
     % find the special 'timeout' transition (the port set should be empty)
     newSpecInd = transitionCriterion{find(cellfun('isempty',transitionCriterion))+1};

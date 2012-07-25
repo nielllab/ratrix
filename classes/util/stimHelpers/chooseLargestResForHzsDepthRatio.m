@@ -26,6 +26,8 @@ for i=1:length(hzs)
     ind=find(pix==p);
     ind=inds(ind);
     if length(ind)>1
+        ind
+        arrayfun(@(x)disp(x),resolutions(ind))
         warning('didn''t find unique ind')
         ind=ind(1);
     end

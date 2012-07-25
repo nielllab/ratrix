@@ -5,7 +5,7 @@ if ismac
         targ='/Volumes/rlab';
     end
     if ~exist('loc','var')
-        loc='@132.239.158.181/rlab ';
+        loc='@132.239.158.181/rlab';
     end
     if ~exist('login','var')
         login='rodent';
@@ -25,7 +25,7 @@ if ismac
                 if stat~=0
                     stat
                     res
-                    error('couldn''t mount rlab')
+                    error('couldn''t mount')
                 end
             else
                 targ

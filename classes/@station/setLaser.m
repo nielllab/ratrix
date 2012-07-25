@@ -1,3 +1,3 @@
 function setLaser(s,state)
-    pp(uint8(s.laserPin),state,[],[],s.decPPortAddr); %probably recast to hex
+    pp(s.laserPins,repmat(state,1,length(s.laserPins)),false,[],s.decPPortAddr); %does this work when pins is empty?
 end

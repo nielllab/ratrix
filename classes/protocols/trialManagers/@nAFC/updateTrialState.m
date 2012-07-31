@@ -97,9 +97,6 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) &&
         
         [cStim cType cStartFrame cScale framesUntilTransition] = correctStim(sm,numCorrectFrames,ifi,tm,lastFrame);
         
-        sca
-        keyboard
-        
         spec=setFramesUntilTransition(spec,max(numCorrectFrames,framesUntilTransition));
         spec=setScaleFactor(spec,cScale);
         
@@ -113,8 +110,10 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) &&
             if ~strcmp(cType,'expert')
                 [floatprecision cStim] = determineColorPrecision(tm, cStim, strategy);
                 textures = cacheTextures(tm,strategy,cStim,window,floatprecision);
-                destRect = determineDestRect(tm, window, station, cScale, cStim, strategy);
+            else
+                strategy='expert';
             end
+            destRect = determineDestRect(tm, window, station, cScale, cStim, strategy);
         elseif strcmp(getDisplayMethod(tm),'LED')
             floatprecision=[];
         else

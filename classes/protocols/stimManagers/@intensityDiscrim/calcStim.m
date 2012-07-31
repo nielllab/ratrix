@@ -46,6 +46,15 @@ end
 details.rightAmplitude = details.Amplitude;
 details.leftAmplitude = details.Amplitude;
 
+%decide randomly if we issue a laser pulse on this trial or not
+if rand>0.5
+    details.laserON=1;
+else
+    details.laserON=0;
+end
+details.laser_duration=.5; %seconds
+details.laser_start_time=Inf; 
+
 switch stimulus.soundType
     case {'allOctaves','tritones'}
         sSound = soundClip('stimSoundBase','allOctaves',[stimulus.freq],20000);

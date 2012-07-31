@@ -54,6 +54,9 @@ switch stimulus.soundType
 end
 stimulus.stimSound = soundClip('stimSound','dualChannel',{sSound,details.leftAmplitude},{sSound,details.rightAmplitude});
 
+%do not want this line when laser enabled!
+%parameterize it as "multi" and "reinforce"?
+%make sure to figure out the falsed out stuff in getSoundsToPlay
 sounds={stimulus.stimSound setName(stimulus.stimSound,'correctSound') setName(stimulus.stimSound,'keepGoingSound')};
 
 out=zeros(min(height,getMaxHeight(stimulus)),min(width,getMaxWidth(stimulus)),2);

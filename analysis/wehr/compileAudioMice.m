@@ -13,7 +13,7 @@ ctrPath = '\\reichardt\figures\audio\';
         {'mtrix1'
             {
              '3499'
-             %'3513' %new
+             '3513' %new
             }
         }
 
@@ -28,9 +28,9 @@ ctrPath = '\\reichardt\figures\audio\';
             {
              %'3233' %abandoned?
              '3337' 
-             %'3398' %abandoned?
+             '3398' %abandoned?
              '3500'
-             %'3515' %new
+             '3515' %new
             }
         }
 
@@ -39,7 +39,7 @@ ctrPath = '\\reichardt\figures\audio\';
              '3236'
              '3397'
              %'3500' %moved to mtrix3
-             %'3516' %new
+             '3516' %new
             }
         }
     };

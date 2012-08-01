@@ -8,7 +8,7 @@ if pp && strcmp(s.responseMethod,'parallelPort')
         status=fastDec2Bin(double(io32(ioObj,s.sensorPins.decAddr)));
     end
     
-    ports=status(s.sensorPins.bitLocs)=='0'; %need to set parity in station, assumes sensors emit +5V for unbroken beams
+    ports=status(s.sensorPins.bitLocs)=='1'; %need to set parity in station, assumes sensors emit +5V for unbroken beams
     ports(s.sensorPins.invs)=~ports(s.sensorPins.invs);
 else
     if false && ~ismac

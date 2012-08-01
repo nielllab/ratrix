@@ -59,16 +59,24 @@ subs=getSubjectsFromIDs(r,subIDs);
 
 juvs={'e1rt','e2rt','e1lt','e2lt'};
 adus={'n5rt','n5rn','n5lt','n8lt'};
+motion = {'j10rt','j8rt','j7rt','j6rt'};
 
 for i=1:length(subs)
     [p t]=getProtocolAndStep(subs{i});
     if ~isempty(p)
         ts=getTrainingStep(p,getNumTrainingSteps(p));
         
-        if true
+        if ismember(subs{i},motion)            
             ts = getTrainingStep(p,t);
             p = changeStep(p,setStimManager(ts,setReinfAssocSecs(switchToExpertDots(getStimManager(ts)),1)),t);
-            [~, r] = setProtocolAndStep(subs{i},p,true,true,false,t,r,comment,auth);
+            
+            o = getProtocolAndStep('test');
+            o = getTrainingStep(o,getNumTrainingSteps(o));
+            p = changeStep(p,setCriterion(o,performanceCriterion(.8,int32(300))),t-1);
+            
+            [~, r] = setProtocolAndStep(subs{i},p,true,true,false,t-1,r,comment,auth);
+            
+            setRewardULorMS(getID(subs{i}),40); %all steps, down from 60
         end
         
         if false
@@ -89,7 +97,7 @@ for i=1:length(subs)
         end
         
         if false
-            setRewardULorMS(subs{i},30,1,comment,auth);
+            setRewardULorMS(subs{i},30,1,comment,auth); %didn't we need to id sub?
         end
         
         if false

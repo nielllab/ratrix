@@ -7,8 +7,8 @@ elseif isstruct(a) % a is an old version
     end    
     
     try
-        %a = class(orderfields(a,struct(station)),'station'); %love you mw (mathworks, not mike wehr ;)
-        a = class(a,'station');
+        a = class(orderfields(a,struct(station)),'station'); %love you mw (mathworks, not mike wehr ;)
+        %a = class(a,'station');
     catch ex
         keyboard
     end

@@ -93,13 +93,35 @@ if true
     end
 end
 
-out = doNormalize(out(rect(2)+(0:rect(4)-1),rect(1)+(0:rect(3)-1),:));
+%out = doNormalize(out(rect(2)+(0:rect(4)-1),rect(1)+(0:rect(3)-1),:));
+
+out = out(rect(2)+(0:rect(4)-1),rect(1)+(0:rect(3)-1),:);
+%keyboard
+m = repmat(mean(double(out),3),[1 1 size(out,3)]);
+dfof = (double(out)-m)./m;
+
+figure
+sig = mean(mean(dfof,1),2);
+subplot(2,1,1)
+plot(squeeze(sig))
+subplot(2,1,2)
+plot(linspace(0,10,length(squeeze(sig))),log(abs(fft(squeeze(sig)))))
+
+keyboard
+
+minD = min(dfof(:));
+dfof = dfof-minD;
+dfof = dfof/max(dfof(:));
+
+
+
+dfof = doNormalize(dfof);
 
 if true
-    chooseParams(out);
+    chooseParams(dfof);
 end
 
-makeAVI = false;
+makeAVI = true;
 if makeAVI
     writeAVI(in,out);
 end
@@ -113,6 +135,7 @@ if false
 else
     p = .5;%.00001;
     p = [40 .5];
+    p = [.1 .1];
     in = prctileNormalize(in,p.*[1 -1]+[0 1]*100);
 end
 

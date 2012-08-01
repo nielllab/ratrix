@@ -123,15 +123,15 @@ if any(cellfun(@isempty,{matlab64 win64 b64}))
                 warning('ptb isn''t going to work on matlab64 on win')
             end
         end
-    end
-    
-    if matlab64
-        if ~strcmp(computer,'PCWIN64')
-            error('mismatch')
-        end
-    else
-        if ~strcmp(computer,'PCWIN')
-            error('mismatch')
+        
+        if matlab64
+            if ~strcmp(computer,'PCWIN64')
+                error('mismatch')
+            end
+        else
+            if ~strcmp(computer,'PCWIN')
+                error('mismatch')
+            end
         end
     end
     

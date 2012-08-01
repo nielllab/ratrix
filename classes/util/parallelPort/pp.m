@@ -93,7 +93,9 @@ if ispc
     [wp, ~, ~, ioObj] = getPP; %TODO: make getPP ptb independent
     
     if ~wp
-        error('getPP says you have no parallel port')
+        fprintf('tried to set pins %s\n',num2str(pins))
+        warning('getPP says you have no parallel port')
+        return
     end
 elseif isunix && ~ismac %IsLinux probably more appropriate, but requires psychtoolbox
     useSscanf=true; %maybe textscan is faster?
@@ -234,6 +236,11 @@ elseif isunix && ~ismac %IsLinux probably more appropriate, but requires psychto
     end
 else
     error('only linux and windows supported')
+end
+
+if isempty(pins)
+    input = [];
+    return
 end
 
 if slowChecks

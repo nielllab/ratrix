@@ -3,6 +3,8 @@ function r=setReinforcementParam(param,ids,val,stepNum,comment,auth)
 r=getRatrix;
 if ~exist('ids','var') || isempty(ids)
     ids=getSubjectIDs(r);
+elseif ~iscellstr(ids)
+    error('ids must be cellstr')
 end
 subs=getSubjectsFromIDs(r,ids);
 

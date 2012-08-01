@@ -5,9 +5,13 @@ function [compiledTrialRecords compiledDetails compiledLUT]=loadDetailedTrialRec
 %12/5/08 - also returns LUT for dynamic caching
 
 fprintf('\nloading %s...\n',compiledFile);
+try
 t=GetSecs;
+end
 ctr=load(compiledFile);
+try
 fprintf('elapsed time: %g\n',GetSecs-t)
+end
 compiledTrialRecords=ctr.compiledTrialRecords;
 if isfield(ctr,'compiledDetails')
     compiledDetails=ctr.compiledDetails;

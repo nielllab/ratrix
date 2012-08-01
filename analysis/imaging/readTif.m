@@ -7,16 +7,25 @@ dbstop if error
 colordef white
 close all
 
-if ~exist('in','var') || isempty(in)
-    %[f,p] = uigetfile({'*.tif'; '*.tiff'; '*.mat'},'choose pco data');
-    [f,p] = uigetfile('C:\Users\nlab\Desktop\data\','choose pco data');
+if ~exist('in','var') || isempty(in)    
+    [f,p] = uigetfile({'*.tif'; '*.tiff'; '*.mat'},'choose pco data');
+    %'C:\Users\nlab\Desktop\macro\real\'
+    %[f,p] = uigetfile('C:\Users\nlab\Desktop\data\','choose pco data');
+    
+    if f==0
+        out = [];
+        return
+    end
+    
     [a b] = fileparts(fullfile(p,f));
     in = fullfile(a,b);
 end
 
-intf = [in '.tif'];
-info = imfinfo(intf);
-n = length(info);
+try
+    intf = [in '.tif'];
+    info = imfinfo(intf);
+    n = length(info);
+end
 
 mf = [in '.mat'];
 if exist(mf,'file')
@@ -46,7 +55,9 @@ end
 b = whos('out');
 disp(['movie is ' num2str(b.bytes/1000/1000/1000) ' GB'])
 
-readStamps(out);
+try
+    readStamps(out);
+end
 
 %rect = [950 600 500 650]; %left top width height
 %rect = [950 450 800 900];
@@ -72,7 +83,7 @@ if plotTags
     xlabel('frame')
     linkaxes(h,'x');
     
-    if ~all(ismember(i,[17    19    20    21    22   453   454   455]))
+    if ~all(ismember(i,[15 17    19    20    21    22  23 453   454   455]))
         i
         warning('unexpected byte variability')
     end
@@ -85,21 +96,77 @@ if true
     else
         figure
         colormap gray
-        imagesc(mean(double(out),3));
+        stampHeight = 10;
+        imagesc(mean(double(out(stampHeight:end,:,:)),3));
         axis equal
         title('select ROI by dragging mouse, double click on it when done')
         h = imrect('PositionConstraintFcn',makeConstrainToRectFcn('imrect',get(gca,'XLim'),get(gca,'YLim'))); %also consdier rbbox, dragrect, getrect, others?
-        rect = round(wait(h)); %left top width height
+        rect = round(wait(h)) + [0 stampHeight 0 0]; %left top width height %top, not bottom, cuz imagesc
     end
 end
 
-out = doNormalize(out(rect(2)+(0:rect(4)-1),rect(1)+(0:rect(3)-1),:));
+out = out(rect(2)+(0:rect(4)-1),rect(1)+(0:rect(3)-1),:);
+%out = doNormalize(out(rect(2)+(0:rect(4)-1),rect(1)+(0:rect(3)-1),:));
+
+out = out(rect(2)+(0:rect(4)-1),rect(1)+(0:rect(3)-1),:);
+%keyboard
+m = repmat(mean(double(out),3),[1 1 size(out,3)]);
+dfof = (double(out)-m)./m;
+
+figure
+sig = mean(mean(dfof,1),2);
+subplot(2,1,1)
+plot(squeeze(sig))
+subplot(2,1,2)
+plot(linspace(0,10,length(squeeze(sig))),log(abs(fft(squeeze(sig)))))
+
+keyboard
+
+minD = min(dfof(:));
+dfof = dfof-minD;
+dfof = dfof/max(dfof(:));
+
+
+
+dfof = doNormalize(dfof);
+
+disp('indexing')
+tic
+x = cumsum(hist(out(:),0:double(intmax('uint16'))))/numel(out);
+toc
+range = (find(x==0,1,'last') : find(x==1,1,'first'));
+cRange = range/double(intmax('uint16'));
+figure
+clipH = plot(x(range),cRange);
+ylim(cRange([1 end]))
+h = imrect('PositionConstraintFcn',@vertRange);
+pos = [0 0 1 1];
+pRange = cRange([find(x(range)>.05,1,'first') find(x(range)<.95,1,'last')]);
+pos(2) = pRange(1);
+pos(4) = pRange(2)-pRange(1);
+setConstrainedPosition(h,pos);
+%clip = wait(h);
+
+    function out = vertRange(in)
+        out = in;  %left bottom width height
+        out([1 3]) = [0 1];
+        
+        if out(2) > cRange(end)
+            out(2) = cRange(end);
+        elseif out(2) < cRange(1)
+            out(2) = cRange(1);
+        end
+        
+        out(4) = min(cRange(end)-out(2),out(4));
+    end
+
+keyboard
 
 if true
-    chooseParams(out);
+    chooseParams(dfof);
 end
 
-makeAVI = false;
+makeAVI = true;
 if makeAVI
     writeAVI(in,out);
 end
@@ -113,6 +180,7 @@ if false
 else
     p = .5;%.00001;
     p = [40 .5];
+    p = [.1 .1];
     in = prctileNormalize(in,p.*[1 -1]+[0 1]*100);
 end
 

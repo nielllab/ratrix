@@ -119,7 +119,7 @@ for i=1:length(subjIDs),
         case 'test'
             stepNum=uint8(1);
         otherwise
-            stepNum=uint8(1);
+            stepNum=uint8(4);
     end
     
     [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolWehr','edf');

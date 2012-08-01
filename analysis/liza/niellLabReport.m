@@ -17,7 +17,7 @@ if doPsycho
     simplePsycho('pixPerCyc'   ,'pixels per cycle'          ,uint8(6:8),@(x)arrayfun(@(x)num2str(prec(x         ,1)),x,'UniformOutput',false),true ,path);
     
     path = '\\mtrix1\Users\nlab\Desktop\mouseData0512\CompiledTrialRecords\';
-    simplePsycho('pixPerCyc'   ,'pixels per cycle'          ,uint8(6:8),@(x)arrayfun(@(x)num2str(prec(x         ,1)),x,'UniformOutput',false),true ,path);
+    simplePsycho('pixPerCyc'   ,'pixels per cycle'          ,uint8(6:9),@(x)arrayfun(@(x)num2str(prec(x         ,1)),x,'UniformOutput',false),true ,path);
     path = '\\mtrix2\Users\nlab\Desktop\mouseData0512\CompiledTrialRecords\';
     simplePsycho('pixPerCyc'   ,'pixels per cycle'          ,uint8(6:9),@(x)arrayfun(@(x)num2str(prec(x         ,1)),x,'UniformOutput',false),true ,path);
     
@@ -51,7 +51,8 @@ if doBox
                 }                
                 { 'wehr' %audio
                     {
-                    '3499' %hasn't run yet?
+                    '3499' %current
+                    '3513' %current
                     }
                 }
             }
@@ -78,7 +79,7 @@ if doBox
                 { 'wehr' %audio
                     {
                     '3231' 
-                    '3350' 
+                    '3350' %current
                     }
                 }
             }
@@ -96,10 +97,11 @@ if doBox
                 }
                 { 'wehr' %audio
                     {
-                    '3233' 
+                    '3233' %abandoned?
                     '3337' 
-                    '3398'
-                    '3500'
+                    '3398' %abandoned?
+                    '3500' %current
+                    '3515' %current
                     }
                 }   
             }
@@ -120,6 +122,7 @@ if doBox
                     '3236'
                     '3397'
                     % '3500' %moved to mtrix3?
+                    '3516' %current
                     }
                 }      
             }

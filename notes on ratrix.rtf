@@ -1,0 +1,54 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1038\cocoasubrtf360
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\margl1440\margr1440\vieww9900\viewh13620\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
+
+\f0\fs24 \cf0 to do: \
+install psychtoolbox and get ratrix running first\
+\
+install git, find a link to the binary on code.google.com\
+need to restart shells (terminal), try which git to check \
+install smartgit, a git client, just google it\
+use smartgit to checkout ratrix from code.google.com\
+\
+change calcstim so that it isn't hard coded for all octaves,\
+instead mikeprotocol sends it the type and parameters of the sound\
+\
+watch and mimic stimulus.freq, that gets passed to  calcstim\
+\
+soundclip has list of legal sounds and parameters\
+\
+standalone run launches a session, pass it empty for path (it will create a data folder beside ratrix), my protocol string for setupfile, [] everything else\
+\
+how to handle duration ?\
+right now, stimulus is on for as long as nose is poked, up to 500 ms\
+then correct/incorrect sound is played for a fixed duration\
+then if you keep in the choice port too long, a bad sound comes on and stays on\
+\
+standAloneRun([], 'setProtocolMike')\
+use k-q to exit, k-2 center, k-3 right, k-1 left\
+\
+getting a strange error like "Undefined function or method 'RemoveSVNPaths"?\
+PTB only runs on 32-bit matlab, run matlab 2010a\
+\
+if cursor is annoyingly disappearing after a run, execute\
+ShowCursor a couple times\
+\
+there is currently a bug where both the discriminanda and the cue-tones are fighting, erik will solve that bug\
+\
+duration is currently  set in stereoDiscrim/getSoundsToPlay\
+create a parameter like frequency to set that\
+\
+I should copy makeStandardSoundManager so I can choose which cue sounds to play\
+\
+calcStim is where the trial logic happens\
+nAFC decides randomly which port is the right answer (target port). It then calls calcStim which comes up with an appropriate stimulus.\
+I will add a switch to do either stereodiscrim or intensity discrim depending on a parameter in setProtocol\
+\
+4-10-12\
+Erik and I created a new stimManager class called intensityDiscrim, now completely separate from stereoDiscrim (it was getting silly to keep them together).\
+\
+how to add a new mouse?\
+edit /Users/mikewehr/Documents/Analysis/ratrix/setup/util/setupMice\
+change the mouse ID to what you want and execute the file}

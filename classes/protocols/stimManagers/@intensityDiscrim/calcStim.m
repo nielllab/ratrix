@@ -46,6 +46,15 @@ end
 details.rightAmplitude = details.Amplitude;
 details.leftAmplitude = details.Amplitude;
 
+%decide randomly if we issue a laser pulse on this trial or not
+if rand>0.5
+    details.laserON=1;
+else
+    details.laserON=0;
+end
+details.laser_duration=.5; %seconds
+details.laser_start_time=Inf; 
+
 switch stimulus.soundType
     case {'allOctaves','tritones'}
         sSound = soundClip('stimSoundBase','allOctaves',[stimulus.freq],20000);
@@ -54,6 +63,9 @@ switch stimulus.soundType
 end
 stimulus.stimSound = soundClip('stimSound','dualChannel',{sSound,details.leftAmplitude},{sSound,details.rightAmplitude});
 
+%do not want this line when laser enabled!
+%parameterize it as "multi" and "reinforce"?
+%make sure to figure out the falsed out stuff in getSoundsToPlay
 sounds={stimulus.stimSound setName(stimulus.stimSound,'correctSound') setName(stimulus.stimSound,'keepGoingSound')};
 
 out=zeros(min(height,getMaxHeight(stimulus)),min(width,getMaxWidth(stimulus)),2);

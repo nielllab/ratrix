@@ -8,9 +8,11 @@ s.timeoutSecs = 1;
 s.slow = 10 * ones(2,1);
 s.slowSecs = 1;
 s.cue = false;
+s.soundClue = false;
 
 s.positional = nan;
 s.stim = [];
+s.dms = [];
 
 s.initialPos=nan;
 s.mouseIndices=nan;
@@ -27,7 +29,7 @@ switch nargin
     case 5
         d = varargin{1};
         
-        cellfun(@validateField,{'gain','targetDistance','timeoutSecs','slow','slowSecs','positional','stim','cue'});
+        cellfun(@validateField,{'gain','targetDistance','timeoutSecs','slow','slowSecs','positional','stim','cue','soundClue','dms'});
         
         s = class(s,'trail',stimManager(varargin{2},varargin{3},varargin{4},varargin{5}));
     otherwise
@@ -42,7 +44,7 @@ end
         end
         x = s.(f);
         
-        if (any(isobject(x)) || ~all(isnan(x))) %for now, nans coming from loadob ok...  can't isnan objects!?!?
+        if (any(isobject(x)) || any(isstruct(x)) || ~all(isnan(x))) %for now, nans coming from loadobj ok...  can't isnan objects/structs!?!?
             switch f
                 case 'gain'
                     if ~(isvector(x) && isnumeric(x) && isreal(x) && all(size(x)==[2 1]))
@@ -69,12 +71,16 @@ end
                         error('positional must be scalar logical or string ''HUD''')
                     end
                 case 'stim'
-                    if ~((isa(x,'stimManager') && isscalar(x)) || isempty(x) || strcmp(x,'flip'))
-                        error('stim must be empty or a scalar stimManager or the string ''flip''')
+                    if ~((isa(x,'stimManager') && isscalar(x)) || isempty(x) || ismember(x,{'flip','rand'}))
+                        error('stim must be empty or a scalar stimManager or the string ''flip'' or ''rand''')
                     end
-                case 'cue'
+                case {'cue' 'soundClue'}
                     if ~all(cellfun(@(f)f(x),{@islogical @isscalar}))
-                        error('cue must be logical scalaer')
+                        error('cue and soundClue must be logical scalaer')
+                    end  
+                case 'dms'
+                    if ~(isempty(x) || (isstruct(x) && all(cellfun(@(xf) all(cellfun(@(xff) xff(x.(xf)),{@isscalar @isreal @(x) x>=0 })),{'targetLatency','cueLatency','cueDuration'}))))
+                        error('dms must be empty or struct with fields targetLatency, cueLatency, and cueDuration, all scalar reals >=0')
                     end
                 otherwise
                     error('huh')

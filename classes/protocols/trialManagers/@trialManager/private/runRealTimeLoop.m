@@ -223,7 +223,7 @@ Screen('Screens');
 
 if window>0
     standardFontSize=11;
-     oldFontSize = Screen('TextSize',window,standardFontSize);
+    oldFontSize = Screen('TextSize',window,standardFontSize);
     if IsLinux
         Screen('TextStyle', window, 0); %otherwise defaults to bold italic!?!
         
@@ -338,11 +338,11 @@ if window>0
             %still too slow on osx at .01 -- trying 800x500 at 8bit color
         end
         moviePtr = Screen('CreateMovie', window, movieFile, [], [], 1/ifi, str);
-                
+        
         %looks like C:\Users\nlab\Desktop\ptb src\PsychSourceGL\Source\Common\Screen\ScreenPreferenceState.c
         %doesn't check for 64 vs. 32 bit win
         %docs make it sound like qt is still default for 32bit win, but i
-        %couldn't get qt to work at all until i had gstreamer installed?        
+        %couldn't get qt to work at all until i had gstreamer installed?
         % todo, try again w/qt - am i misremembering?
         
         %we should also record sound
@@ -396,6 +396,16 @@ timestamps.serverCommDone       = timestamps.lastFrameTime;
 timestamps.phaseRecordsDone     = timestamps.lastFrameTime;
 timestamps.loopEnd              = timestamps.lastFrameTime;
 timestamps.prevPostFlipPulse    = timestamps.lastFrameTime;
+
+doProfile = false;
+if doProfile
+    blah=profile('status');
+    if strcmp(blah.ProfilerStatus,'on')
+        sca
+        profile viewer
+        keyboard
+    end
+end
 
 %show stim -- be careful in this realtime loop!
 while ~done && ~quit;
@@ -489,12 +499,13 @@ while ~done && ~quit;
         % =========================================================================
         
         framesInPhase = 0;
-        if ~isempty(getStartFrame(spec))
-            i=getStartFrame(spec);
-            framesInPhase=i;
-        end
         
         if ischar(strategy) && strcmp(strategy,'cache')
+            if ~isempty(getStartFrame(spec)) %would like to get rid of this -- note we have to redo it below to catch correctStim
+                i=getStartFrame(spec);
+                framesInPhase=i; %wtf?
+            end
+            error('this looks wrong -- should be size(stim,3)?')
             numFramesInStim = size(stim)-i;
         elseif timeIndexed
             if timedFrames(end)==0
@@ -555,7 +566,7 @@ while ~done && ~quit;
             updateTrialState(tm, stimManager, trialRecords(trialInd).result, spec, ports, lastPorts, ...
             targetOptions, requestOptions, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
             floatprecision, textures, destRect, ...
-            requestRewardDone, punishLastResponse);
+            requestRewardDone, punishLastResponse,[], lastI);
         
         if rewardSizeULorMS~=0
             doRequestReward=false;
@@ -570,6 +581,17 @@ while ~done && ~quit;
         framesUntilTransition=getFramesUntilTransition(spec);
         stim=getStim(spec);
         scaleFactor=getScaleFactor(spec);
+        if strcmp(getStimType(spec),'expert')
+            strategy=getStimType(spec);
+        end
+        
+        if framesInPhase==0 %needs rearchitecting!
+            if ~isempty(getStartFrame(spec))
+                i=getStartFrame(spec);
+                % framesInPhase=i; %what was this for?
+            end
+        end
+        %[framesUntilTransition i framesInPhase phaseNum]
         
         if requestRewardSizeULorMS~=0
             doRequestReward=true;
@@ -644,6 +666,7 @@ while ~done && ~quit;
                         destRect,filtMode,expertCache,ifi,scheduledFrameNum,tm.dropFrames,dontclear,...
                         phaseRecords(phaseNum).dynamicDetails,trialRecords,currentCLUT,phaseRecords,phaseNum,tm);
                 otherwise
+                    strategy
                     error('unrecognized strategy')
             end
             
@@ -662,7 +685,7 @@ while ~done && ~quit;
                             end
                             if isempty(trialRecords(trialInd).result)
                                 trialRecords(trialInd).result = phaseRecords(phaseNum).dynamicDetails.result; %causes handlePhasedTrialLogic to propogate nominal result
-                                if ismember(trialRecords(trialInd).result,{'correct','timedout','incorrect'})
+                                if ismember(trialRecords(trialInd).result,{'correct','timedout','incorrect','tooEarly'})
                                     trialRecords(trialInd).result='nominal';
                                 end
                             else
@@ -840,7 +863,7 @@ while ~done && ~quit;
         [tm done newSpecInd phaseInd updatePhase transitionedByTimeFlag ...
             transitionedByPortFlag trialRecords(trialInd).result isRequesting lastSoundsLooped ...
             timestamps.logicGotSounds timestamps.logicSoundsDone timestamps.logicFramesDone ...
-            timestamps.logicPortsDone timestamps.logicRequestingDone goDirectlyToError] ...
+            timestamps.logicPortsDone timestamps.logicRequestingDone goDirectlyToError trialRecords(trialInd).stimDetails] ...
             = handlePhasedTrialLogic(tm, done, ...
             ports, lastPorts, station, phaseInd, phaseType, transitionCriterion, framesUntilTransition, numFramesInStim, framesInPhase, isFinalPhase, ...
             trialRecords(trialInd).trialDetails, trialRecords(trialInd).stimDetails, trialRecords(trialInd).result, ...
@@ -1103,6 +1126,10 @@ while ~done && ~quit;
     timestamps.loopEnd=GetSecs;
 end
 
+if doProfile
+    profile on
+end
+
 securePins(station);
 
 if ~isempty(moviePtr)
@@ -1128,14 +1155,12 @@ if ~isempty(analogOutput)
     delete(analogOutput); %should pass back to caller and preserve for next trial so intertrial works and can avoid contruction costs
 end
 
-
 if ~containedExpertPhase
     Screen('Close'); %leaving off second argument closes all textures but leaves windows open
 else
     %maybe once this was per phase, but now its per trial
     expertPostTrialCleanUp(stimManager);
 end
-
 
 Priority(originalPriority);
 

@@ -42,6 +42,7 @@ stim.slow = [50; 100]; % 10 * ones(2,1);
 stim.slowSecs = .5;
 stim.positional = false;
 stim.cue = true;
+stim.soundClue = true;
 
 pixPerCycs             = [300]; %*10^9;
 targetOrientations     = [-1 1]*pi/4;
@@ -55,7 +56,12 @@ stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,
 %stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,[-1 1]  ,thresh,yPosPct,maxWidth,maxHeight,zoom,interTrialLuminance,'none', 'normalizeDiagonal');
 
 stim.stim = 'flip';
+stim.stim='rand';
 %stim.stim=nan;
+stim.dms.targetLatency = 1;
+stim.dms.cueLatency = 0;
+stim.dms.cueDuration = .5;
+stim.dms = [];
 
 ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
 ballTM = ball(percentCorrectionTrials,sm,noRequest);

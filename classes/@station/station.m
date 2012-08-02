@@ -24,6 +24,7 @@ function s=station(varargin)
 	%       portSpec.stimPins
 	%       portSpec.indexPins
 	%       portSpec.eyePuffPins
+    %       portSpec.laserPins
 	% stationSpec.datanet
 	% stationSpec.eyeTracker
 
@@ -45,6 +46,7 @@ function s=station(varargin)
 	s.stimPins=[];
 	s.indexPins=[];
 	s.eyePuffPins=[];
+    s.laserPins=[];
 
 	s.localPump=[];
 	s.localPumpInited=false;
@@ -73,7 +75,7 @@ function s=station(varargin)
 					s.responseMethod='keyboard';
 					s.numPorts=in.portSpec;
 					needToInit=true;
-				elseif isstruct(in.portSpec) && all(ismember({'parallelPortAddress','valveSpec','sensorPins','indexPins','framePins','stimPins','phasePins','eyePuffPins'},fields(in.portSpec))) %with parallel port
+				elseif isstruct(in.portSpec) && all(ismember({'parallelPortAddress','valveSpec','sensorPins','indexPins','framePins','stimPins','phasePins','eyePuffPins','laserPins'},fields(in.portSpec))) %with parallel port
 					s.responseMethod='parallelPort';
 					s.decPPortAddr=hex2dec(in.portSpec.parallelPortAddress);
 
@@ -93,7 +95,7 @@ function s=station(varargin)
 						error('sensorPins must be vector of integers')
 					end
 
-					optionalPins={'indexPins','framePins','phasePins','stimPins','eyePuffPins'};
+					optionalPins={'indexPins','framePins','phasePins','stimPins','eyePuffPins','laserPins'};
 
 					for eNum=1:length(optionalPins)
 						eVal=in.portSpec.(optionalPins{eNum});

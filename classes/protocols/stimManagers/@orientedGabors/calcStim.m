@@ -42,8 +42,8 @@ if strcmp(stimulus.distractorOrientations,'abstract') && iscell(stimulus.targetO
     details.orientations = pickN(stimulus.targetOrientations{targetPorts},1)';
     details.xPosPcts=.5;
     numGabors=1;
-else    
-    details.orientations = pickN(stimulus.targetOrientations,length(targetPorts));
+else
+    details.orientations = pickN(stimulus.targetOrientations,length(targetPorts))';
     numGabors=length(targetPorts);
     distractorLocs=[];
     

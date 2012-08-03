@@ -49,7 +49,11 @@ else
     
     if ~isempty(stimulus.distractorOrientations)
         numGabors=numGabors+length(distractorPorts);
-        details.orientations = [details.orientations; pickN(stimulus.distractorOrientations,length(distractorPorts))'];
+        if true %parameterize matchOrientations flag
+            details.orientations = [details.orientations; stimulus.distractorOrientations(find(stimulus.targetOrientations==details.orientations))'];
+        else    
+            details.orientations = [details.orientations; pickN(stimulus.distractorOrientations,length(distractorPorts))'];
+        end
         distractorLocs=distractorPorts;
     end
     

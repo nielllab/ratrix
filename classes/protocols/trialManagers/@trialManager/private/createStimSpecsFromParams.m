@@ -1,5 +1,5 @@
-function [stimSpecs startingStimSpecInd] = createStimSpecsFromParams(trialManager,preRequestStim,preResponseStim,discrimStim,...
-    targetPorts,distractorPorts,requestPorts,interTrialLuminance,hz,indexPulses)
+function [stimSpecs startingStimSpecInd sm] = createStimSpecsFromParams(trialManager,preRequestStim,preResponseStim,discrimStim,...
+    targetPorts,distractorPorts,requestPorts,interTrialLuminance,hz,indexPulses,sm)
 %	INPUTS:
 %		trialManager - the trialManager object (contains the delayManager and responseWindow params)
 %		preRequestStim - a struct containing params for the preOnset phase
@@ -134,6 +134,8 @@ switch class(trialManager)
         
         stimSpecs{i} = stimSpec(discrimStim.stimulus,criterion,discrimStim.stimType,discrimStim.startFrame,...
             framesUntilTimeout,autoTrigger,discrimStim.scaleFactor,0,hz,'discrim','discrim',false,true,indexPulses); % do not punish responses here
+        
+        sm = setCorrectStim(sm,stimSpecs{i});
         
         i=i+1;
         

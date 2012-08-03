@@ -24,7 +24,6 @@ if isdeployed
     javaaddpath('analysis_mcr/Documents and Settings/rlab/Desktop/ratrix/db/classes12_g.jar')
 end
 
-
 % =============================================================
 % flag for skipping calcplot stuff - if by subject, we already have our assignment picked out
 bySubject = false;
@@ -49,10 +48,14 @@ catch
     
     apath = fullfile(fileparts(fileparts(getRatrixPath())),'ratrixData','compiledTrialRecords');
     
-    mtrix='mtrix4'; %box to use
-    
-    apath = ['\\',mtrix,'\Users\nlab\Desktop\mouseData\CompiledTrialRecords\']; %edf temp
-    apath = ['\\',mtrix,'\Users\nlab\Desktop\wehrData\CompiledTrialRecords\']; %edf temp
+    m=input('which box?');
+    mtrix=['mtrix' num2str(m)];%'mtrix4'; %box to use
+    if m==1 | m==2
+      apath = ['\\',mtrix,'\Users\nlab\Desktop\mouseData0512\CompiledTrialRecords\']; %edf temp
+    else
+      apath = ['\\',mtrix,'\Users\nlab\Desktop\mouseData\CompiledTrialRecords\']; %edf temp  
+    end
+    %apath = ['\\',mtrix,'\Users\nlab\Desktop\wehrData\CompiledTrialRecords\']; %edf temp
     
     if ismac
         mountOSX(['/Volumes/',mtrix], ['@', mtrix ,'/Users'],'nlab','huestis238');

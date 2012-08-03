@@ -4,13 +4,14 @@ function editProtocolEDF(r,subIDs,stepNums,comment,auth)
 [pathstr, name, ext] = fileparts(mfilename('fullpath'));
 addpath(fullfile(fileparts(pathstr),'bootstrap'))
 setupEnvironment;
+dbstop if error
 
 if ~exist('r','var') || isempty(r)
     %dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
-    %dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'mouseData',filesep);
+    dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'mouseData',filesep);
     
-    mtrix=3;
-    dataPath=['\\mtrix' num2str(mtrix) '\Users\nlab\Desktop\mouseData\'];
+    %mtrix=3;
+    %dataPath=['\\mtrix' num2str(mtrix) '\Users\nlab\Desktop\mouseData\'];
     
     r=ratrix(fullfile(dataPath, 'ServerData'),0);
 end
@@ -59,13 +60,28 @@ subs=getSubjectsFromIDs(r,subIDs);
 
 juvs={'e1rt','e2rt','e1lt','e2lt'};
 adus={'n5rt','n5rn','n5lt','n8lt'};
+motion = {'j8rt','j7rt','j6rt'}; %'j10rt' already done
 
 for i=1:length(subs)
     [p t]=getProtocolAndStep(subs{i});
     if ~isempty(p)
         ts=getTrainingStep(p,getNumTrainingSteps(p));
         
-        if true
+        if ismember(getID(subs{i}),motion)            
+            ts = getTrainingStep(p,t);
+            p = changeStep(p,setStimManager(ts,setReinfAssocSecs(switchToExpertDots(getStimManager(ts)),1)),t);
+
+            o = getProtocolAndStep(getSubjectsFromIDs(r,'test'));
+            o = getTrainingStep(o,getNumTrainingSteps(o));
+            p = changeStep(p,setCriterion(o,performanceCriterion(.8,int32(300))),t-1);
+            
+            [~, r] = setProtocolAndStep(subs{i},p,true,true,false,t-1,r,comment,auth);
+            
+            r = setRewardULorMS({getID(subs{i})},40); %all steps, down from 60
+            fprintf('did %s\n',getID(subs{i}))
+        end
+        
+        if false
             sm = getStimManager(ts);
             switch mtrix
                 case 3
@@ -83,7 +99,7 @@ for i=1:length(subs)
         end
         
         if false
-            setRewardULorMS(subs{i},30,1,comment,auth);
+            setRewardULorMS(subs{i},30,1,comment,auth); %didn't we need to id sub?
         end
         
         if false

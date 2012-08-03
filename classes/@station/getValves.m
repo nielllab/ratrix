@@ -1,7 +1,13 @@
 function valves =getValves(s)
-if strcmp(s.responseMethod,'parallelPort')
+[pp, ~, ~, ioObj] = getPP;
+
+if pp && strcmp(s.responseMethod,'parallelPort')
     
-    status=fastDec2Bin(lptread(s.valvePins.decAddr));
+    if isnan(ioObj)
+        status=fastDec2Bin(lptread(s.valvePins.decAddr));
+    else
+        status=fastDec2Bin(double(io32(ioObj,s.valvePins.decAddr)));
+    end
     
     valves=status(s.valvePins.bitLocs)=='1'; %need to set parity in station, assumes normally closed valves
     valves(s.valvePins.invs)=~valves(s.valvePins.invs); %dangerous line if all s.valvePins.invs are 0 -- we get empties
@@ -16,9 +22,9 @@ if strcmp(s.responseMethod,'parallelPort')
             error('bad valve vector')
         end
     end
-            
+    
 else
-    if ~ismac
+    if false && ~ismac
         warning('can''t read ports without parallel port')
     end
     valves=false(1,s.numPorts);%*s.valvePins.bitLocs;

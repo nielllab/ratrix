@@ -115,8 +115,9 @@ if isa(r,'ratrix') && (isempty(rn) || isa(rn,'rnet'))
                         doTrial(subject,r,s,rn,trialRecords,sessionNumber);
                     % Cut off a trial record as we increment trials, IFF we
                     % still have remote records (because we need to keep all
-                    % local records to properly save the local .mat)
-                    if localRecordsIndex > 1
+                    % local records to properly save the local .mat)                    
+                    length(trialRecords)
+                    if localRecordsIndex > 1 %shouldn't we also check that they're longer than line 76?
                         trialRecords = trialRecords(2:end);
                     end
                     % Now update the local index (eventually all of the records

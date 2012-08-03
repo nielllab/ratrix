@@ -1,11 +1,15 @@
 function setupMice
+[pathstr, name, ext] = fileparts(mfilename('fullpath'));
+addpath(fullfile(fileparts(fileparts(pathstr)),'bootstrap'));
+setupEnvironment
+
 %names = {'3350'};
 %names = {'test','j10lt','j10ln','j8lt','j8ln'};
 %names = {'test','j10rt','j8rt','j7rt','j6rt'};
 
 %names = {'c2rt','c1rt'};
 %names = {'c2rn','c1rn'};
-names = {'c1rt'};
+names = {'3691'};
 
 lab = 'wehr';
 

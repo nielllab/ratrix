@@ -1,22 +1,31 @@
 function setupMice
-names = {'wehrTest'}
-% , '3231',...
-%     '3236',...
-%         '3321',...
-%         '3337',...
-%         '3350',...
-%         '3397',...
-%         '3499',...
-%         '3500',...
-%         '3513',...
-%         '3515',...
-%         '3516',...
-%  };
+[pathstr, name, ext] = fileparts(mfilename('fullpath'));
+addpath(fullfile(fileparts(fileparts(pathstr)),'bootstrap'));
+setupEnvironment
+
+%names = {'3350'};
 %names = {'test','j10lt','j10ln','j8lt','j8ln'};
 %names = {'test','j10rt','j8rt','j7rt','j6rt'};
 
-ratrixPath = 'C:\Users\nlab\Desktop\wehrData';
-for i=1:length(names)
-    standAloneRun(ratrixPath,'setProtocolWehr',names{i},[],[],true)
+%names = {'c2rt','c1rt'};
+%names = {'c2rn','c1rn'};
+names = {'3691'};
+
+lab = 'wehr';
+
+switch lab
+    case 'wehr'
+        ratrixPath = 'C:\Users\nlab\Desktop\wehrData';
+        p = 'setProtocolWehr';
+    case 'niell'
+        ratrixPath = 'C:\Users\nlab\Desktop\mouseData0512';
+        p = 'setProtocolCMN';
+    otherwise
+        error('huh?')
 end
+
+for i=1:length(names)
+    standAloneRun(ratrixPath,p,names{i},[],[],true)
+end
+
 end

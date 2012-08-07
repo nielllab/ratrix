@@ -37,7 +37,8 @@ end
 subs=getSubjectsFromIDs(r,subIDs);
 
 for i=1:length(subs)
-    [~, r]=setReinforcementParam(subs{i},'rewardULorMS',30,stepNums,r,comment,auth);
+%    [~, r]=setReinforcementParam(subs{i},'rewardULorMS',30,stepNums,r,comment,auth);
+    [~, r]=setReinforcementParam(subs{i},'msPenalty',10000,stepNums,r,comment,auth);
 end
 
 reportSettings(r)

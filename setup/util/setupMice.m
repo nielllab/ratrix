@@ -9,9 +9,10 @@ setupEnvironment
 
 %names = {'c2rt','c1rt'};
 %names = {'c2rn','c1rn'};
-names = {'3691'};
+%names = {'3691'};
+names = {'c4rt','c5rt','c4rn','c5rn'}
 
-lab = 'wehr';
+lab = 'niell'
 
 switch lab
     case 'wehr'
@@ -19,7 +20,7 @@ switch lab
         p = 'setProtocolWehr';
     case 'niell'
         ratrixPath = 'C:\Users\nlab\Desktop\mouseData0512';
-        p = 'setProtocolCMN';
+        p = 'setProtocolAbstOrient';
     otherwise
         error('huh?')
 end

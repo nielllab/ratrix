@@ -45,7 +45,7 @@ constantRewards=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,r
 % free drinks with drip
 allowRepeats=false;
 %freeDrinkLikelihood=0.004;
-freeDrinkLikelihood=1/(60*30); %%% on average, once every 30 secs. == .0005, ~10x less than before
+freeDrinkLikelihood=1/(60*15); %%% on average, once every 30 secs. == .001, ~4x less than before
 fd = freeDrinks(sm,freeDrinkLikelihood,allowRepeats,constantRewards);
 
 % free drinks no drip
@@ -134,9 +134,8 @@ abstractSF = orientedGabors(pixperdeg./cpd,{distractorOrientations [] targetOrie
 
 %%% try this time
 %%% free drips
-trialsPerMinute = 15;
-minutes = 60;  %%% basically 15 triggered trials in a 1hr session (use rate rather than numTrials, since rate only counts triggered, not drips)
-ts1 = trainingStep(fd,  freeStim_sm, rateCriterion(trialsPerMinute,minutes), noTimeOff(), svnRev,svnCheckMode);  %stochastic free drinks
+numTriggers = 20;
+ts1 = trainingStep(fd,  freeStim_sm, numTrialsDoneCriterion(numTriggers) , noTimeOff(), svnRev,svnCheckMode);  %stochastic free drinks
 
 %%% turn off stochastic drips
 trialsPerMinute = 7;

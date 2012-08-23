@@ -25,8 +25,8 @@ svnCheckMode='session';
 
 sm=makeStandardSoundManager();
 
-rewardSizeULorMS          =60;
-requestRewardSizeULorMS   =60;
+rewardSizeULorMS          =80;
+requestRewardSizeULorMS   =80;
 requestMode               ='first';
 msPenalty                 =1000;
 fractionOpenTimeSoundIsOn =1;
@@ -67,9 +67,14 @@ nrTM=nAFC(sm,percentCorrectionTrials,noRequest,eyeController,{'off'},dropFrames,
 
 % 2AFC with long penalty
 msPenalty = 6000;
-rewardSizeULorMS=60;
 longPenalty=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 lpTM=nAFC(sm,percentCorrectionTrials,longPenalty,eyeController,{'off'},dropFrames,'ptb','center',[],[],[300 inf]);
+
+% 2AFC with long penalty &smaller reward (once performance >50%)
+rewardSizeULorMS=60;
+longPenalty=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
+lpsrTM=nAFC(sm,percentCorrectionTrials,longPenalty,eyeController,{'off'},dropFrames,'ptb','center',[],[],[300 inf]);
+
 
 
 %%% calculate pixPerCycs based on parameters for current monitors
@@ -108,6 +113,12 @@ targetOrientations = 0;
 distractorOrientations = pi/2;
 orientation = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
+%%% stim  - go to target with distractor
+targetOrientations = pi/4;
+distractorOrientations = -pi/4;
+orientationOblique = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
+
 % pixel calibration midline stim
 degpercm = atand(1/dist);
 pixperdeg = pixpercm/degpercm;
@@ -118,7 +129,7 @@ abstract = orientedGabors(pixPerCycs,{distractorOrientations [] targetOrientatio
 
 %%% abstract orientation - psychometric curve for orientiation difference
 targetOrientations  = pi/4 - linspace(0,pi/4,7);
-distractorOrientations = pi/4 + linspace(0,pi/4,7);
+distractorOrientations = -targetOrientations;
 abstractOrient = orientedGabors(pixperdeg./cpd,{distractorOrientations [] targetOrientations},'abstract',mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 %%% abstract orientation - psychometric curve for SF
@@ -154,33 +165,38 @@ ts4 = trainingStep(nrTM  , freeStim,  numTrialsDoneCriterion(400)          , noT
 ts5 = trainingStep(lpTM  , freeStim, performanceCriterion(.85,int32(300))  , noTimeOff(), svnRev,svnCheckMode);
 
 %orientation discrim (with distractor)
-ts6 = trainingStep(lpTM  , orientation, repeatIndefinitely()                   , noTimeOff(), svnRev,svnCheckMode);
+ts6 = trainingStep(lpsrTM  , orientation, performanceCriterion(.85,int32(300))                , noTimeOff(), svnRev,svnCheckMode);
+
+%orientation discrim (oblique)
+ts7 = trainingStep(lpsrTM  , orientationOblique, repeatIndefinitely()                   , noTimeOff(), svnRev,svnCheckMode);
+
 
 %abstract - orientation discrim
-ts7 = trainingStep(lpTM  , abstract,    repeatIndefinitely()                  , noTimeOff(), svnRev,svnCheckMode);
+ts8 = trainingStep(lpsrTM  , abstract,    repeatIndefinitely()                  , noTimeOff(), svnRev,svnCheckMode);
+
 
 % abstract - SF psychometric curve
-ts8 = trainingStep(lpTM  , abstractSF,    repeatIndefinitely()                  , noTimeOff(), svnRev,svnCheckMode);
+ts9 = trainingStep(lpsrTM  , abstractSF,    repeatIndefinitely()                  , noTimeOff(), svnRev,svnCheckMode);
 
 % abstract - orientation pyschometric curve
-ts9 = trainingStep(lpTM  , abstractOrient,    repeatIndefinitely()                  , noTimeOff(), svnRev,svnCheckMode);
+ts10 = trainingStep(lpsrTM  , abstractOrient,    repeatIndefinitely()                  , noTimeOff(), svnRev,svnCheckMode);
 
-p=protocol('mouse orientation',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8,ts9});
+p=protocol('mouse orientation',{ts1, ts2, ts3, ts4, ts5, ts6, ts7, ts8,ts9,ts10});
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});
 
-    % set to defined step    
-    switch subjIDs{i}
-        case 'test'
-            stepNum=uint8(1);
-        otherwise
-            stepNum=uint8(1);
-    end
+%     % set to defined step    
+%     switch subjIDs{i}
+%         case 'test'
+%             stepNum=uint8(1);
+%         otherwise
+%             stepNum=uint8(1);
+%     end
   
    
    % keep on current step
-   %[currentp stepNum]=getProtocolAndStep(subj);
+   [currentp stepNum]=getProtocolAndStep(subj);
     
     stepNum
    

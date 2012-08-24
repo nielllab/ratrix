@@ -449,7 +449,15 @@ cellfun(@(f)combineStructs(dms,f),fields(dmsNan));
         [data.(f)] = in.(f);
     end
 
-compiledFile = fullfile(compiledDir,subj,sprintf('compiled_%d-%d_%s.mat',trialNums(1),trialNums(end),datestr(now,30)));
+d = fullfile(compiledDir,subj);
+[status,message,messageid] = mkdir(d);
+if status ~= 1
+    status
+    message
+    messageid
+    error('couldn''t mkdir')
+end
+compiledFile = fullfile(d,sprintf('compiled_%d-%d_%s.mat',trialNums(1),trialNums(end),datestr(now,30)));
 tic
 save(compiledFile,'data');
 toc

@@ -15,7 +15,13 @@ close all
 ctr = load(file);
 
 vals = nan(size(ctr.compiledTrialRecords.trialNumber));
+try
 vals(ctr.compiledDetails.trialNums) = ctr.compiledDetails.records.(field)(1,:); %hmm, this will depend on field's structure
+catch
+    file
+    warning('not doing psycho for this file')
+    return
+end
 trials = find(all(~isnan([vals;ctr.compiledTrialRecords.correct])));
 
 if ~all(isnan(ctr.compiledTrialRecords.correctionTrial)) %weird, i thought i moved these to here?
@@ -43,7 +49,13 @@ else
 end
 
 %session boundaries whenever there was a half hour gap in the trial start times
+try
 sessions = trials([1 find(diff(ctr.compiledTrialRecords.date(trials)) > .5/24) end]);
+catch
+    file
+    warning('not doing psycho for this file')
+    return
+end
 
 offset = linspace(-1,1,length(sessions)-1);
 lgofst = ones(size(u));
@@ -68,7 +80,14 @@ else
 end
 cinds = round(linspace(1,size(colors,1),length(offset)));
 
+try
 xlims = u([1 end])+[-1 1]*min(diff(u))/3;
+catch
+    file
+    warning('not doing psycho for this file')
+    return
+end
+
 if logx
     pf = @semilogx;
     xlims(end)=xlims(end)*4/3;

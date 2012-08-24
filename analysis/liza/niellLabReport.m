@@ -18,8 +18,11 @@ if doPsycho
     
     path = '\\mtrix1\Users\nlab\Desktop\mouseData0512\CompiledTrialRecords\';
     simplePsycho('pixPerCyc'   ,'pixels per cycle'          ,uint8(6:9),@(x)arrayfun(@(x)num2str(prec(x         ,1)),x,'UniformOutput',false),true ,path);
+    simplePsycho('orientations','deg'                       ,uint8(  9),@(x)arrayfun(@(x)num2str(       x*180/pi   ),x,'UniformOutput',false),false,path);
+    
     path = '\\mtrix2\Users\nlab\Desktop\mouseData0512\CompiledTrialRecords\';
     simplePsycho('pixPerCyc'   ,'pixels per cycle'          ,uint8(6:9),@(x)arrayfun(@(x)num2str(prec(x         ,1)),x,'UniformOutput',false),true ,path);
+    simplePsycho('orientations','deg'                       ,uint8(  9),@(x)arrayfun(@(x)num2str(       x*180/pi   ),x,'UniformOutput',false),false,path);
     
     compileAudioMice;
 end
@@ -74,12 +77,17 @@ if doBox
                     'c1rt' 
                     'c2rn' 
                     'c2rt' 
+                    'c4rn' %new
+                    'c4rt' %new
+                    'c5rn' %new
+                    'c5rt' %new
                     }
                 }  
                 { 'wehr' %audio
                     {
                     '3231' 
                     '3350' %current
+                    '3691' %?
                     }
                 }
             }
@@ -102,6 +110,7 @@ if doBox
                     '3398' %abandoned?
                     '3500' %current
                     '3515' %current
+                    '3694' %?
                     }
                 }   
             }
@@ -147,6 +156,9 @@ if doBall
             'ly05' 
             'ly06' 
             'ly09'
+            'ly14' %new
+            'ly11' %new
+            'jbw03' %new
             }
         }
         {'jarmusch'
@@ -155,11 +167,16 @@ if doBall
             'ly03' %grating
             'ly04' %wall cue flip
             'ly08' %wall cue flip
+            'ly12' %new
             }
         }
         {'mtrix6'
             {
             'ly01'
+            'jbw01' %new
+            'jbw02' %new
+            'ly10' %new
+            'ly13' %new
             }
         }
     };

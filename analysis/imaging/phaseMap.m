@@ -1,8 +1,8 @@
-function [map cycmap full_im]= phaseMap(im,t,period,binning);
+function [map cycmap full_im]= phaseMap(im,framerate,period,binning);
 if ~exist('binning','var') | isempty(binning)
     binning=1;
 end
-perFrames = round(period/median(diff(t)))
+perFrames = round(period*framerate)
 map =0;
 
 length(im)

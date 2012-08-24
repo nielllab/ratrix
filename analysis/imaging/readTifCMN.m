@@ -106,43 +106,76 @@ if false
     out = out(rect(2)+(0:rect(4)-1),rect(1)+(0:rect(3)-1),:);
 end
 
+sizestruct = whos('out');
+shrinkfactor = 1.5*10^9 / sizestruct.bytes
+if shrinkfactor<1
+    out = out(:,:,1:floor(shrinkfactor*size(out,3)));
+end
+size(out)
 
+out = out(:,:,101:end);  %%% avoid transients of first cycle
 %out = doNormalize(out(rect(2)+(0:rect(4)-1),rect(1)+(0:rect(3)-1),:));
 
 %out = out(rect(2)+(0:rect(4)-1),rect(1)+(0:rect(3)-1),:);
 %keyboard
+% for f=1:size(im,3)
+% out= imresize(out(:,:,f),binning,'box');
+% end
+
 m = repmat(mean(double(out),3),[1 1 size(out,3)]);
 dfof = (double(out)-m)./m;
-
+clear m
 
 movPeriod =10;
 binning=0.125;
+framerate=10;
+img = out(:,:,1);
 
-[map cycMap fullMov] =phaseMap(dfof,frameT,movPeriod,binning);
+[map cycMap fullMov] =phaseMap(dfof,framerate,movPeriod,binning);
 map(isnan(map))=0;
 mapFig(map)
+
+
+t0 = linspace(1,size(cycMap,3),10);
+figure
+for t = 1:9;
+    subplot(3,3,t);
+    imagesc(squeeze(mean(cycMap(:,:,t0(t):t0(t+1)-1),3)),[-0.02 0.02]);
+    colormap(gray);
+end
 
 map = map-mean(map(:));
 mapFig(map)
 
+in
+
     function mapFig(mapIn)
         figure
-        subplot(2,2,1);
+      
+        
+        subplot(2,2,1)
+        imagesc(squeeze(out(:,:,1)),[prctile(img(:),5) prctile(img(:),95)])
+        colormap(gray)
+        freezeColors
+          
+        subplot(2,2,2);
         ampMax = prctile(abs(mapIn(:)),95);
         imagesc(abs(mapIn),[0 ampMax])
         colormap(gray)
-        freezeColors
         colorbar
+      
+    
         
-        subplot(2,2,2);
-        ph = angle(mapIn);
-        ph(ph<0) = ph(ph<0)+2*pi;
-        imagesc(ph,[0 2*pi])
-        colormap(hsv)
-        colorbar
+%         subplot(2,2,2);
+%         ph = angle(mapIn);
+%         ph(ph<0) = ph(ph<0)+2*pi;
+%         imagesc(ph,[0 2*pi])
+%         colormap(hsv)
+%         colorbar
         
         subplot(2,2,3)
         imshow(polarMap(mapIn));
+
         
         subplot(2,2,4)
         plot(mapIn(:),'.','MarkerSize',2)
@@ -150,27 +183,67 @@ mapFig(map)
         axis square
     end
 
+
 mapfig=figure
-imshow(polarMap(map));
+imshow(polarMap(map),'InitialMagnification','fit');
+colormap(hsv);
+colorbar
 done=0;
-while ~done
+
+for i=1:10
     figure(mapfig)
     [y x] = ginput(1);
     y = round(y); x= round(x);
     figure
     subplot(2,2,1)
     plot(squeeze(fullMov(x,y,:)));
+    xlim([0 length(fullMov)]); 
     subplot(2,2,2);
     spect = abs(fft(squeeze(fullMov(x,y,:))));
     fftPts = 2:length(spect)/2;
     loglog((fftPts-1)/length(spect),spect(fftPts));
     subplot(2,2,3);
-    plot(squeeze(cycMap(x,y,:)));
+    plot(squeeze(cycMap(x,y,:))); ylim([-0.03 0.03]);
 end
 
-    
+
+%obs = reshape(fullMov,size(fullMov,1)*size(fullMov,2),size(fullMov,3));
+obs = reshape(cycMap,size(cycMap,1)*size(cycMap,2),size(cycMap,3));
+obs(isnan(obs))=0;
+
+tic
+[u s v] = svd(obs);
+toc
+
+for i = 1:10
+    figure
+    subplot(1,2,1);
+    imagesc(reshape(u(:,i),size(fullMov,1),size(fullMov,2)));
+    axis square
+    colormap(gray); colorbar
+    subplot(1,2,2);
+    plot(v(:,i))
+end
+
+
 keyboard
 
+% s_clean = s;
+% s_clean(2,2)=0;
+% 
+% obs_clean = u*s_clean*v';
+% 
+% im_clean = reshape(obs_clean,size(cycMap,1),size(cycMap,2),size(cycMap,3));
+% t0 = linspace(1,size(cycMap,3),10);
+% figure
+% for t = 1:9;
+%     subplot(3,3,t);
+%     imagesc(squeeze(mean(im_clean(:,:,t0(t):t0(t+1)-1),3)),[-0.01 0.01]);
+%     colormap(gray);
+% end
+
+
+keyboard
 figure
 sig = mean(mean(dfof,1),2);
 subplot(2,1,1)

@@ -127,7 +127,7 @@ dfof = (double(out)-m)./m;
 clear m
 
 movPeriod =10;
-binning=0.125;
+binning=0.25;
 framerate=10;
 img = out(:,:,1);
 
@@ -164,18 +164,8 @@ in
         colormap(gray)
         colorbar
       
-    
-        
-%         subplot(2,2,2);
-%         ph = angle(mapIn);
-%         ph(ph<0) = ph(ph<0)+2*pi;
-%         imagesc(ph,[0 2*pi])
-%         colormap(hsv)
-%         colorbar
-        
         subplot(2,2,3)
         imshow(polarMap(mapIn));
-
         
         subplot(2,2,4)
         plot(mapIn(:),'.','MarkerSize',2)
@@ -189,11 +179,13 @@ imshow(polarMap(map),'InitialMagnification','fit');
 colormap(hsv);
 colorbar
 done=0;
-
-for i=1:10
+while ~done
     figure(mapfig)
-    [y x] = ginput(1);
-    y = round(y); x= round(x);
+    [y x b] = ginput(1);
+    if b==3 %%%% right click
+        done=1;
+    else
+        y = round(y); x= round(x);
     figure
     subplot(2,2,1)
     plot(squeeze(fullMov(x,y,:)));
@@ -204,6 +196,8 @@ for i=1:10
     loglog((fftPts-1)/length(spect),spect(fftPts));
     subplot(2,2,3);
     plot(squeeze(cycMap(x,y,:))); ylim([-0.03 0.03]);
+    end
+    
 end
 
 
@@ -224,6 +218,15 @@ for i = 1:10
     subplot(1,2,2);
     plot(v(:,i))
 end
+
+figure
+for i = 1:length(fullMov,3);
+    imagesc(fullMov(:,:,i),[-0.05 0.05]);
+    colormap(gray);
+    axis equal;
+    mov(i) = getframe(gcf);
+end
+
 
 
 keyboard

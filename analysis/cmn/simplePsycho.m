@@ -11,7 +11,10 @@ cellfun(@(x)sessionPsycho(strtok(x,'.'),fullfile(path,x),field,step,date,xtickla
 end
 
 function sessionPsycho(sub,file,field,step,date,xticklab,logx,leg)
-close all
+sub
+if strcmp(sub,'j10ln')
+    keyboard
+end
 ctr = load(file);
 
 vals = nan(size(ctr.compiledTrialRecords.trialNumber));
@@ -45,7 +48,7 @@ end
 %session boundaries whenever there was a half hour gap in the trial start times
 sessions = trials([1 find(diff(ctr.compiledTrialRecords.date(trials)) > .5/24) end]);
 offset = linspace(-1,1,length(sessions)-1)*min(diff(u))/3;
-
+figure
 colordef black
 
 colors = colormap('hsv'); %opens figure? :(
@@ -114,7 +117,7 @@ text(xPos,yPos-textSize/100,sprintf('x''s include after errors (%g%% more trials
 ylabel('% correct')
 xlabel(leg)
 set(gca,'XTickLabel',xticklab(u));
-uploadFig(gcf,sub,length(u)*length(sessions)*3,200,[field '.psycho']);
+%uploadFig(gcf,sub,length(u)*length(sessions)*3,200,[field '.psycho']);
 end
 
 function uploadFigMini(f,subj,width,height,qual)

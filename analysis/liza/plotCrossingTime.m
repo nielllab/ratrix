@@ -23,8 +23,9 @@ if ~exist('drive','var') || isempty(drive)
     end
 end
 
-if IsWin
+if ispc
     compiledDir = '\\reichardt\figures';
+    compiledFile = getCompiledFile(compiledDir,subj);
     
     doCompile = true;
     if doCompile
@@ -33,9 +34,7 @@ if IsWin
         catch ex
             getReport(ex)
             warning('bailing on compiling %s',subj)
-        end
-    else
-        compiledFile = getCompiledFile(compiledDir,subj);
+        end        
     end
     
     doPlot = true;
@@ -61,15 +60,14 @@ d = dir(fullfile(compiledDir,subj,'compiled*.mat'));
 if ~isempty(d)
     vals = cell2mat(cellfun(@(x)textscan(x,'compiled_1-%u_%uT%u.mat','CollectOutput',true),{d.name}'));
     trials = vals(:,1);
-    vals = num2str(vals(:,[2 3]));
-    [~, ord]=sort(str2num(reshape(vals(vals~=' '),[length(d) 14])));
+    [~, ord]=sortrows(vals(:,[2 3]));
     compiledFile = fullfile(compiledDir,subj,d(max(ord)).name);
     lastTrial = trials(max(ord));
 end
 end
 
 function compiledFile = compileBall(subj,drive,force,compiledDir)
-if IsWin
+if ispc
     recordPath = fullfile(drive,'Users','nlab');
 elseif ismac && local
     recordPath = [filesep fullfile('Users','eflister')];
@@ -101,7 +99,7 @@ bounds = cell2mat(cellfun(@(x)textscan(x,'trialRecords_%u-%u_%uT%u-%uT%u.mat','C
 bounds = bounds(ord,:);
 files = files(ord);
 
-if ~force && IsWin
+if ~force && ispc
     fd = ['\\reichardt\figures\' subj];
     d=dir([fd '\*.300.png']);
     d=sort({d.name});
@@ -141,7 +139,7 @@ for i=1:length(files)
     fprintf('done with %d of %d\n',i,length(files));
 end
 
-if IsWin && false %takes too long (95sec local) to save (.25GB on disk, 1.8GB in memory), loading slow (73sec local) too
+if ispc && false %takes too long (95sec local) to save (.25GB on disk, 1.8GB in memory), loading slow (73sec local) too
     tic
     save([fd '\latest.mat'],'fullRecs','records');
     toc
@@ -351,10 +349,13 @@ targetLocation = [s.target];
 %TODO: flag correction trials (different marker on plot?)
 correctionTrial = [s.correctionTrial];
 
-    function out = extract(f,d,m,trans)
+    function out = extract(f,d,m,trans,e)
         out = cellfun(@(x)doField(x,f,d),{records.stimManager},'UniformOutput',false);
         if trans
             out = out';
+        end
+        if exist('e','var')
+            out(cellfun(@isempty,out))={e};
         end
         if m
             out = cell2mat(out);
@@ -367,6 +368,11 @@ stoppingTime  = extract('slowSecs'      ,nan     ,true ,false);
 wallDist      = extract('targetDistance',nan(1,2),true ,true ); %apparently we never had single entries here?
 stim          = extract('stim'          ,nan     ,false,false);
 initP         = extract('initialPos'    ,nan(2,1),true ,false);
+
+dmsNan.targetLatency = nan;
+dmsNan.cueLatency    = nan;
+dmsNan.cueDuration   = nan;
+dms           = extract('dms'           ,dmsNan  ,true ,false,dmsNan);
 
 for i=1:size(bounds,1)
     if ismember('stimManager.stim',fullRecs(i).fieldsInLUT)
@@ -397,10 +403,10 @@ end
 %this is set whenever you hit k-ctrl-# to manually open valve
 manualRewards = [records.containedForcedRewards];
 
-if any(~ismember(results,{'incorrect','correct','timedout',''}))
+if any(~ismember(results,{'incorrect','correct','timedout','tooEarly',''}))
     error('unexpected dynamicDetails.result')
 end
-if any( strcmp(results,'')~=(res==2) | ismember(results,{'incorrect','timedout'})~=(res==0) | strcmp(results,'correct')~=(res==1) )
+if any( strcmp(results,'')~=(res==2) | ismember(results,{'incorrect','timedout','tooEarly'})~=(res==0) | strcmp(results,'correct')~=(res==1) )
     error('dynamicDetails.result didn''t line up with trialDetails.correct')
 end
 results(res==2)={'quit'};
@@ -437,7 +443,21 @@ data=struct(...
     'track'          ,                 track              ...
     );
 
-compiledFile = fullfile(compiledDir,subj,sprintf('compiled_%d-%d_%s.mat',trialNums(1),trialNums(end),datestr(now,30)));
+cellfun(@(f)combineStructs(dms,f),fields(dmsNan));
+
+    function combineStructs(in,f)
+        [data.(f)] = in.(f);
+    end
+
+d = fullfile(compiledDir,subj);
+[status,message,messageid] = mkdir(d);
+if status ~= 1
+    status
+    message
+    messageid
+    error('couldn''t mkdir')
+end
+compiledFile = fullfile(d,sprintf('compiled_%d-%d_%s.mat',trialNums(1),trialNums(end),datestr(now,30)));
 tic
 save(compiledFile,'data');
 toc
@@ -481,6 +501,9 @@ initP            = [data.initP          ];
 wallDist         = [data.wallDist       ];
 slowTrack        = {data.slowTrack      };
 track            = {data.track          };
+targetLatency    = [data.targetLatency  ];
+cueLatency       = [data.cueLatency     ];
+cueDuration      = [data.cueDuration    ];
 
 clear data;
 
@@ -494,13 +517,14 @@ chunkHrs=36;
 chunks=sessions-minPerChunk;
 chunks=sessions(diff(startTimes([[ones(sum(chunks<=0),1) chunks(chunks>0)] sessions+1]),[],2)>chunkHrs/24);
 
-[goodResults,classes] = ismember(results,{'incorrect','correct','timedout'});
+[goodResults,classes] = ismember(results,{'incorrect','correct','timedout','tooEarly'});
 
-sps = 4;
-
-h = [];
-
-cm = [1 0 0;0 1 0;1 1 0]; %red for incorrects, green for corrects, yellow for timeouts
+cm = [...
+    1  0 0;... % red    for incorrects
+    0  1 0;... % green  for corrects
+    1  1 0;... % yellow for timeouts
+    1 .5 0 ... % orange for tooEarlies
+    ];
 head = 1.1;
 dotSize = 4;
 
@@ -517,6 +541,9 @@ else
     transparency = .2;
     bw = 'k';
 end
+
+sps = 4;
+h = [];
 
 h(end+1) = subplot(sps,1,1);
 hold on
@@ -624,7 +651,9 @@ title([subj ' -- ' datestr(now,'ddd, mmm dd HH:MM PM')])
         if ~exist('c','var') || isempty(c)
             c=zeros(1,3);
         end
-        fill([x fliplr(x)],[y(1,:) fliplr(y(2,:))],c,'FaceAlpha',t,'LineStyle','none');
+        if length(x)>1
+            fill([x fliplr(x)],[y(1,:) fliplr(y(2,:))],c,'FaceAlpha',t,'LineStyle','none');
+        end
     end
 
     function semilogyEF(x,y,varargin)
@@ -766,6 +795,11 @@ end
 if any(rnd)
     plot(trialNums(rnd),.5,'g+')
 end
+dms = any(~isnan([targetLatency;cueLatency;cueDuration]));
+if any(dms)
+    plot(trialNums(dms),.5,'+','Color',[1 .5 0]);
+end
+
 ylabel('% correct(r) rightward(w)')
 
 xlabel('trial')
@@ -793,8 +827,7 @@ uploadFig(gcf,subj,max(trialNums)/10,sps*200);
 
 plotTracks = true;
 if plotTracks
-    fig=figure;
-    sps = 3*2;
+    
     slowFact = .1;
     trackFact = 1;
     
@@ -811,7 +844,9 @@ if plotTracks
     resps = cellfun(@(x,i)processTrack(x,i,trackFact,false),    track(these),num2cell(these),'UniformOutput',false);
     
     h=[];
-    ylabels={'stop x','stop y','left x','left y','right x','right y'};
+    ylabels = {'stop x','stop y','left x','left y','right x','right y'};
+    sps = length(ylabels);
+    fig = figure;
     for i=1:sps
         h(end+1)=subplot(sps,1,i);
         
@@ -864,10 +899,13 @@ if plotSettings
     fig=figure;
     d=3;
     
-    plots = {gain    ,'gain'           ;
+    plots = {
+        gain         ,'gain'           ;
         stoppingSpeed,'stop speed'     ;
         stoppingTime ,'stop time (s)'  ;
-        wallDist'    ,'target distance'};
+        wallDist'    ,'target distance';
+        [cueDuration; targetLatency],'cue dur / targ lat (s)';
+        };
     
     n = size(plots,1);
     h = [];
@@ -875,9 +913,11 @@ if plotSettings
         h(i) = subplot(n,1,i);
         hold on
         ylims = getLims(plots{i,1});
-        standardPlot(@plot,[],[],i==1,i==n); %(f,ticks,lines,dates,xticks)
-        x=plot(trialNums,plots{i,1}');
-        arrayfun(@(x,y) set(x,'LineWidth',y),x,(d-1)+(d*(length(x)-1):-d:0)');
+        if ~any(isnan(ylims))
+            standardPlot(@plot,[],[],i==1,i==n); %(f,ticks,lines,dates,xticks)
+            x=plot(trialNums,plots{i,1}');
+            arrayfun(@(x,y) set(x,'LineWidth',y),x,(d-1)+(d*(length(x)-1):-d:0)');
+        end
         ylabel(plots{i,2})
         if i==1
             title([subj ' -- ' datestr(now,'ddd, mmm dd HH:MM PM')])
@@ -886,6 +926,6 @@ if plotSettings
     
     xlabel('trial')
     linkaxes(h,'x');
-    uploadFig(fig,subj,max(trialNums)/10,sps*200,'params');
+    uploadFig(fig,subj,max(trialNums)/10,n*200,'params');
 end
 end

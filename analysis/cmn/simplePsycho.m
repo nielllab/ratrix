@@ -1,5 +1,5 @@
 function simplePsycho(field,leg,step,xticklab,logx,path)
-if ~IsWin
+if ~ispc
     error('win only for now')
 end
 
@@ -11,14 +11,17 @@ cellfun(@(x)sessionPsycho(strtok(x,'.'),fullfile(path,x),field,step,date,xtickla
 end
 
 function sessionPsycho(sub,file,field,step,date,xticklab,logx,leg)
-sub
-if strcmp(sub,'j10ln')
-    keyboard
-end
+close all
 ctr = load(file);
 
 vals = nan(size(ctr.compiledTrialRecords.trialNumber));
+try
 vals(ctr.compiledDetails.trialNums) = ctr.compiledDetails.records.(field)(1,:); %hmm, this will depend on field's structure
+catch
+    file
+    warning('not doing psycho for this file')
+    return
+end
 trials = find(all(~isnan([vals;ctr.compiledTrialRecords.correct])));
 
 if ~all(isnan(ctr.compiledTrialRecords.correctionTrial)) %weird, i thought i moved these to here?
@@ -46,15 +49,45 @@ else
 end
 
 %session boundaries whenever there was a half hour gap in the trial start times
+try
 sessions = trials([1 find(diff(ctr.compiledTrialRecords.date(trials)) > .5/24) end]);
-offset = linspace(-1,1,length(sessions)-1)*min(diff(u))/3;
-figure
+catch
+    file
+    warning('not doing psycho for this file')
+    return
+end
+
+offset = linspace(-1,1,length(sessions)-1);
+lgofst = ones(size(u));
+if logx
+    lgofst = (max(diff(u))/10)*lgofst.*u/max(u);
+else
+    offset = offset*min(diff(u))/3;
+end
+
 colordef black
 
-colors = colormap('hsv'); %opens figure? :(
+if false
+    colors = colormap('jet'); %opens figure? :(
+else
+    if true %perceptually uniform blue -> red, constant luminance/chroma
+        %note not truly perceptually uniform, cuz at a given C and L, some H's are out of gamut (see fig 5 http://magnaview.nl/documents/MagnaView-M_Wijffelaars-Generating_color_palettes_using_intuitive_parameters.pdf)
+        colors = [repmat([70 100],length(offset),1) 360*linspace(.87,.05,length(offset))'];
+    else %increasing chroma, constant luminance
+        colors = [50*ones(length(offset),1) linspace(0,100,length(offset))' .05*360*ones(length(offset),1)];
+    end
+    colors = applycform(applycform(colors,makecform('lch2lab')),makecform('lab2srgb'));
+end
 cinds = round(linspace(1,size(colors,1),length(offset)));
 
+try
 xlims = u([1 end])+[-1 1]*min(diff(u))/3;
+catch
+    file
+    warning('not doing psycho for this file')
+    return
+end
+
 if logx
     pf = @semilogx;
     xlims(end)=xlims(end)*4/3;
@@ -83,7 +116,7 @@ doBino(trials,false);
                 error('huh?')
             end
             n = cellfun(@length,these);
-            [~, pci] = binofit(cellfun(@(x)sum(ctr.compiledTrialRecords.correct(x)),these),n,alpha);
+            [p, pci] = binofit(cellfun(@(x)sum(ctr.compiledTrialRecords.correct(x)),these),n,alpha);
             if removeAfterErrors
                 params={'Color',colors(cinds(i),:)};
             else
@@ -91,14 +124,12 @@ doBino(trials,false);
             end
             enoughs = n>=d;
             if any(enoughs) % we don't get logrithmic axis if we plot all empties
-                lgofst=ones(size(u));
-                if logx
-                    lgofst=50*lgofst.*u/max(u);
-                end
-                
                 pf(u+offset(i).*lgofst,n/sum(n),'x','Color',colors(cinds(i),:),'MarkerSize',2);
                 hold on
                 pf(repmat(u(enoughs)+offset(i).*lgofst(enoughs),2,1),pci(enoughs,:)',params{:});
+                if removeAfterErrors
+                    pf(u(enoughs),p(enoughs),params{:});
+                end
             end
         end
     end
@@ -117,7 +148,7 @@ text(xPos,yPos-textSize/100,sprintf('x''s include after errors (%g%% more trials
 ylabel('% correct')
 xlabel(leg)
 set(gca,'XTickLabel',xticklab(u));
-%uploadFig(gcf,sub,length(u)*length(sessions)*3,200,[field '.psycho']);
+uploadFig(gcf,sub,length(u)*length(sessions)*3,200,[field '.psycho']);
 end
 
 function uploadFigMini(f,subj,width,height,qual)

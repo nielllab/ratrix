@@ -7,16 +7,29 @@ if ~exist('force','var') || isempty(force)
     force = false;
 end
 
-path = '\\mtrix4\Users\nlab\Desktop\mouseData\CompiledTrialRecords\';
-simplePsycho('orientations','deg orientation difference',uint8(7  ),@(x)arrayfun(@(x)num2str(prec(2*x*180/pi,1)),x,'UniformOutput',false),false,path);
-simplePsycho('pixPerCyc'   ,'pixels per cycle'          ,uint8(6:8),@(x)arrayfun(@(x)num2str(prec(x         ,1)),x,'UniformOutput',false),true ,path);
+doBox    = true;
+doBall   = true;
+doPsycho = true;
+
+if doPsycho
+    path = '\\mtrix4\Users\nlab\Desktop\mouseData\CompiledTrialRecords\';
+    simplePsycho('orientations','deg orientation difference',uint8(7  ),@(x)arrayfun(@(x)num2str(prec(2*x*180/pi,1)),x,'UniformOutput',false),false,path);
+    simplePsycho('pixPerCyc'   ,'pixels per cycle'          ,uint8(6:8),@(x)arrayfun(@(x)num2str(prec(x         ,1)),x,'UniformOutput',false),true ,path);
+    
+    path = '\\mtrix1\Users\nlab\Desktop\mouseData0512\CompiledTrialRecords\';
+    simplePsycho('pixPerCyc'   ,'pixels per cycle'          ,uint8(6:9),@(x)arrayfun(@(x)num2str(prec(x         ,1)),x,'UniformOutput',false),true ,path);
+    simplePsycho('orientations','deg'                       ,uint8(  9),@(x)arrayfun(@(x)num2str(       x*180/pi   ),x,'UniformOutput',false),false,path);
+    
+    path = '\\mtrix2\Users\nlab\Desktop\mouseData0512\CompiledTrialRecords\';
+    simplePsycho('pixPerCyc'   ,'pixels per cycle'          ,uint8(6:9),@(x)arrayfun(@(x)num2str(prec(x         ,1)),x,'UniformOutput',false),true ,path);
+    simplePsycho('orientations','deg'                       ,uint8(  9),@(x)arrayfun(@(x)num2str(       x*180/pi   ),x,'UniformOutput',false),false,path);
+    
+    compileAudioMice;
+end
 
     function out=prec(in,n)
         out = round(in*10^n)/10^n;
     end
-
-doBox=true;
-doBall=true;
 
 if doBox
     recs = {...
@@ -41,7 +54,8 @@ if doBox
                 }                
                 { 'wehr' %audio
                     {
-                    '3499' %hasn't run yet?
+                    '3499' %current
+                    '3513' %current
                     }
                 }
             }
@@ -63,12 +77,17 @@ if doBox
                     'c1rt' 
                     'c2rn' 
                     'c2rt' 
+                    'c4rn' %new
+                    'c4rt' %new
+                    'c5rn' %new
+                    'c5rt' %new
                     }
                 }  
                 { 'wehr' %audio
                     {
                     '3231' 
-                    '3350' 
+                    '3350' %current
+                    '3691' %?
                     }
                 }
             }
@@ -86,10 +105,12 @@ if doBox
                 }
                 { 'wehr' %audio
                     {
-                    '3233' 
+                    '3233' %abandoned?
                     '3337' 
-                    '3398'
-                    '3500'
+                    '3398' %abandoned?
+                    '3500' %current
+                    '3515' %current
+                    '3694' %?
                     }
                 }   
             }
@@ -110,6 +131,7 @@ if doBox
                     '3236'
                     '3397'
                     % '3500' %moved to mtrix3?
+                    '3516' %current
                     }
                 }      
             }
@@ -134,6 +156,9 @@ if doBall
             'ly05' 
             'ly06' 
             'ly09'
+            'ly14' %new
+            'ly11' %new
+            'jbw03' %new
             }
         }
         {'jarmusch'
@@ -142,11 +167,16 @@ if doBall
             'ly03' %grating
             'ly04' %wall cue flip
             'ly08' %wall cue flip
+            'ly12' %new
             }
         }
         {'mtrix6'
             {
             'ly01'
+            'jbw01' %new
+            'jbw02' %new
+            'ly10' %new
+            'ly13' %new
             }
         }
     };

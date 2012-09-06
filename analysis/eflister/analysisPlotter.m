@@ -49,7 +49,7 @@ if strcmp(selection.type,'all')
     %     for i = size(selection.subjects,1)
     
 else
-    if IsWin && strcmp(selection.type,'performance') && strcmp(selection.filter,'all') && isscalar(selection.subjects)
+    if ispc && strcmp(selection.type,'performance') && strcmp(selection.filter,'all') && isscalar(selection.subjects)
         d=dir([compiledFileDir selection.subjects{1} '.compiledTrialRecords.1-*.mat']);
         
         fd = ['\\reichardt\figures\' selection.subjects{1} '\'];
@@ -59,7 +59,13 @@ else
             d=textscan(d.name,[selection.subjects{1} '.compiledTrialRecords.1-%u.fig']);
             fd = [fd d2{end}]
             x=open(fd);
-            y=get(get(x,'Children'),'XLim');
+
+            kids = get(x,'Children');
+            as = find(strcmp('axes',get(kids,'Type')));
+            if ~isscalar(as)
+                error('huh')
+            end
+            y=get(kids(as),'XLim');
             
             if y(2)==d{1}
                 set(x,'Visible','on');
@@ -157,9 +163,13 @@ for i=1:length(d)
             er
         else
             fprintf('loading file')
+            try
             t=GetSecs();
+            end
             ctr=load(fullfile(compiledFileDir,d(i).name));
+            try
             fprintf('\ttime elapsed: %g\n',GetSecs-t)
+            end
             records=ctr.compiledTrialRecords;
         end
     end

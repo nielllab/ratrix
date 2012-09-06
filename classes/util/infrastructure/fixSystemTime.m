@@ -3,7 +3,7 @@ if ~exist('wait','var') || isempty(wait)
     wait = true;
 end
 
-if IsWin
+if ispc
     cmd = 'w32tm /resync';
     if ~wait
         cmd = [cmd ' /nowait'];
@@ -34,9 +34,13 @@ if IsWin
         if ~strcmp(b,sprintf('Sending resync command to local computer\nThe command completed successfully.\n'))
             a
             b
-            'if you got: The computer did not resync because the required time change was too big.'
-            'see http://www.smattie.com/2012/03/13/how-to-fix-clock-drift-in-cloud-environments-not-joined-to-ad-domain/'
-            error('system time sync failed')
+            if ~isempty(strfind(b,'The computer did not resync because no time data was available.'))
+                warning('this happened once, but i don''t know how to fix it -- even manually hitting "update now" under "internet time settings" doesn''t help')
+            else
+                'if you got: The computer did not resync because the required time change was too big.'
+                'see http://www.smattie.com/2012/03/13/how-to-fix-clock-drift-in-cloud-environments-not-joined-to-ad-domain/'
+                error('system time sync failed')
+            end
         end
     end
 else

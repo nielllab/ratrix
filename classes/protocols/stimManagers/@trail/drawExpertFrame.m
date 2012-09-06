@@ -5,8 +5,6 @@ function [doFramePulse expertCache dynamicDetails textLabel i dontclear indexPul
 
 originalLabel = textLabel;
 
-dontclear = 0;
-
 width  = 63; % default 1.  > 63 errors for DrawDots?  > ~10 seems to have no effect on lines?
 center = []; % positions are relative to "center" (default center is [0 0]).
 centerWidth = 10;
@@ -23,6 +21,13 @@ black =       white.*[zeros(1,3)   1];
 grey  = round(white.*[.5*ones(1,3) 1]);
 red   =       white.*[1 0 0        1];
 blue  =       white.*[0 0 1        1];
+
+if true %shouldn't be necessary, but ptb bug: a fillrect grey below screws up dontclear = 0
+    dontclear = 1;
+    Screen('FillRect', window, black, destRect);
+else
+    dontclear = 0;
+end
 
 didBlend = false;
 smooth = 1;  % default 0, 1 requires Screen('BlendFunction')
@@ -100,7 +105,7 @@ switch phaseRecords(phaseNum).phaseType
         end
         
         colorWalls = positionStim && ~s.cue;
-        drawTrail = positionStim;
+        drawTrail = positionStim && isempty(s.dms);
         
         if ~positionStim
             origTargetPos = targetPos;
@@ -142,10 +147,10 @@ switch phaseRecords(phaseNum).phaseType
                 if ~s.cue
                     error('can''t have dms without cue')
                 end
-                t = dynamicDetails.times(i) - phaseStartTime;
+                t = GetSecs - phaseStartTime; %have to GetSecs instead of dynamicDetails.times(i) cuz i only updates if there was movement
                 if t < s.dms.targetLatency
-                    Screen('FillRect', window, grey, destRect);
-                    dontclear = 1; %true makes SCREEN('DrawingFinished') barf
+                    Screen('FillRect', window, grey, destRect); %ptb bug: fillrecting whole screen redefines clear color
+                    dontclear = 1;
                     if finish
                         dynamicDetails.result = 'tooEarly';
                     end
@@ -248,7 +253,7 @@ end
 
 ctStr = 'correction trial!';
 if trialRecords(end).stimDetails.correctionTrial && isempty(strfind(textLabel,ctStr))
-    textLabel = [ctStr ' ' textLabel ' ' originalLabel];
+    textLabel = [ctStr ' ' textLabel];% ' ' originalLabel]; %adding original label grows forever
 end
 end
 

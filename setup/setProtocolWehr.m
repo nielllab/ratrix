@@ -61,7 +61,7 @@ nafcTM=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,{'off'},dro
 soundParams.soundType='uniformWhiteNoise';
 soundParams.freq = [];
 soundParams.duration=50; %ms
-maxSPL=80; %measured max level attainable by speakers
+maxSPL=80; %measured max level attainable by speakers; in reality, seems to be 67.5dB at head, 74.6dB 1" from earbuds
 ampsdB=40:5:maxSPL; %requested amps in dB
 amplitudes=10.^((ampsdB -maxSPL)/20); %amplitudes = line level, 0 to 1
 soundParams.amps = amplitudes; %for intensityDisrim
@@ -73,7 +73,7 @@ intensityStim = intensityDiscrim(interTrialLuminance,soundParams,maxWidth,maxHei
 %intensityStim is 40:5:80
 %EZ intensityStim is 50 80
 EZampsdB=[50 80];
-EZamplitudes=10.^((ampsdB -maxSPL)/20); %amplitudes = line level, 0 to 1
+EZamplitudes=10.^((EZampsdB -maxSPL)/20); %amplitudes = line level, 0 to 1
 EZsoundParams=soundParams;
 EZsoundParams.amps = EZamplitudes; %for intensityDisrim
 EZintensityStim = intensityDiscrim(interTrialLuminance,EZsoundParams,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
@@ -119,7 +119,7 @@ for i=1:length(subjIDs),
         case 'test'
             stepNum=uint8(1);
         otherwise
-            stepNum=uint8(1);
+            stepNum=uint8(4);
     end
     
     [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolWehr','edf');

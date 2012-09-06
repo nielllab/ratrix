@@ -3,7 +3,7 @@ function [tm trialDetails result spec rewardSizeULorMS requestRewardSizeULorMS .
     updateTrialState(tm, sm, result, spec, ports, lastPorts, ...
     targetPorts, requestPorts, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
     floatprecision, textures, destRect, ...
-    requestRewardDone, punishResponses)
+    requestRewardDone, punishResponses, request, lastFrame)
 % This function is a tm-specific method to update trial state before every flip.
 % Things done here include:
 %   - set trialRecords.correct and trialRecords.result as necessary
@@ -26,7 +26,7 @@ msPenaltySound=0;
     updateTrialState(tm.trialManager, sm, result, spec, ports, lastPorts, ...
     targetPorts, requestPorts, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
     floatprecision, textures, destRect, ...
-    requestRewardDone,punishResponses);
+    requestRewardDone,punishResponses,request);
 if ~isempty(result) && ~ischar(result)
 	resp=find(result);
 	if length(resp)==1
@@ -83,21 +83,31 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && framesInPhase==0
         else
             error('huh?')
         end
-        spec=setFramesUntilTransition(spec,framesUntilTransition);
-        [cStim correctScale] = correctStim(sm,numCorrectFrames);
-        spec=setScaleFactor(spec,correctScale);
+        
+        [cStim cType cStartFrame cScale framesUntilTransition] = correctStim(sm,numCorrectFrames,ifi,tm,lastFrame);
+        
+        spec=setFramesUntilTransition(spec,max(numCorrectFrames,framesUntilTransition));
+        spec=setScaleFactor(spec,cScale);
+        
+        %if ismember(cType,{'static','cache','loop'}) || (iscell(cType) && all(size(cType)==[1 2]) && ismember(cType{1},{'trigger','timedFrames','indexedFrames'}))
+            spec=setType(spec,cType); %needs to be compatible with fixed framesUntilTransition -- how deal with dynamic/expert/etc?
+        %end
+        spec=setStartFrame(spec,cStartFrame);
+        
         strategy='noCache';
         if window>0
-            [floatprecision cStim] = determineColorPrecision(tm, cStim, strategy);
-            textures = cacheTextures(tm,strategy,cStim,window,floatprecision);
-            destRect = determineDestRect(tm, window, station, correctScale, cStim, strategy);
+            if ~strcmp(cType,'expert')
+                [floatprecision cStim] = determineColorPrecision(tm, cStim, strategy);
+                textures = cacheTextures(tm,strategy,cStim,window,floatprecision);
+                destRect = determineDestRect(tm, window, station, cScale, cStim, strategy);
+            end
         elseif strcmp(getDisplayMethod(tm),'LED')
             floatprecision=[];
         else
             error('huh?')
         end
-        spec=setStim(spec,cStim);
-    
+        spec=setStim(spec,cStim);         
+                        
     elseif ~correct
         % this only happens when multiple ports are triggered
         rewardSizeULorMS=0;

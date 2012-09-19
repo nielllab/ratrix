@@ -5,22 +5,29 @@ function [soundsToPlay stimDetails] = getSoundsToPlay(stimManager, ports, lastPo
     targetOptions, distractorOptions, requestOptions, playRequestSoundLoop, trialManagerClass, trialDetails, stimDetails, dynamicSounds, station);
 
 %only enable this if you aren't using keepGoingSound as the discriminandum
-if false && strcmp(phaseType,'discrim') && strcmp(trialManagerClass,'nAFC')
+%ie, setting to true will give a single timed presentation of 'stimSound'
+%setting to false is better for learning -- 'keepGoingSound' will play as long and as often as the center beam is broken
+stimDetails.overrideSoundCues = true;
+
+if stimDetails.overrideSoundCues && strcmp(phaseType,'discrim') && strcmp(trialManagerClass,'nAFC')
     if ~all(cellfun(@isempty,soundsToPlay))
-        soundsToPlay
-        cellfun(@(x)disp(x),soundsToPlay)
-        warning('removing conflicting sounds from discrim phase...')
+%         soundsToPlay
+%         cellfun(@(x)disp(x),soundsToPlay)
+%         warning('removing conflicting sounds from discrim phase...')
         soundsToPlay={{},{}};
     end
 end
 
-if stimDetails.laserON && stepsInPhase <= 0 && ...
+if stepsInPhase <= 0 && ...
         ((strcmp(phaseType,'discrim') && strcmp(trialManagerClass,'nAFC')) || ...
         (strcmp(phaseType,'reinforced') && strcmp(trialManagerClass,'freeDrinks')))
+    
     soundsToPlay{2}{end+1} = {'stimSound' stimManager.duration};
-
-    setLaser(station,true);
-    stimDetails.laser_start_time = GetSecs;    
+    
+    if stimDetails.laserON
+        setLaser(station,true);
+        stimDetails.laser_start_time = GetSecs;
+    end
 end
 
 if GetSecs-stimDetails.laser_start_time > stimDetails.laser_duration

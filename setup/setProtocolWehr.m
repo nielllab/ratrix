@@ -70,13 +70,23 @@ discrimBoundary=10.^((discrimBoundarydB -maxSPL)/20);
 soundParams.discrimBoundary=discrimBoundary; %classification boundary for use by calcStim
 soundParams.discrimSide=1; %boolean. if true, stimuli < classification boundary go to left
 intensityStim = intensityDiscrim(interTrialLuminance,soundParams,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-%intensityStim is 40:5:80
+
 %EZ intensityStim is 50 80
+%intensityStim is 40:5:80
+%Hard intensityStim is  50 55 57 59 60 61 63 65 70 
+ 
+
 EZampsdB=[50 80];
 EZamplitudes=10.^((EZampsdB -maxSPL)/20); %amplitudes = line level, 0 to 1
 EZsoundParams=soundParams;
 EZsoundParams.amps = EZamplitudes; %for intensityDisrim
 EZintensityStim = intensityDiscrim(interTrialLuminance,EZsoundParams,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
+HardampsdB=[50 55 57 59 60 61 63 65 70];
+Hardamplitudes=10.^((HardampsdB -maxSPL)/20); %amplitudes = line level, 0 to 1
+HardsoundParams=soundParams;
+HardsoundParams.amps = Hardamplitudes; %for intensityDisrim
+HardintensityStim = intensityDiscrim(interTrialLuminance,HardsoundParams,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 requestRewardSizeULorMS = 0;
 msPenalty               = 1000;
@@ -104,13 +114,15 @@ ts4 = trainingStep(nrTM  , EZintensityStim,  numTrialsDoneCriterion(400)        
 msPenalty = 3000;
 longPenalty=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 lpTM=nAFC(sm,percentCorrectionTrials,longPenalty,eyeController,{'off'},dropFrames,'ptb','center',[],[],[]);
-ts5 = trainingStep(lpTM  , EZintensityStim, performanceCriterion(.85, int8(200))  , noTimeOff(), svnRev,svnCheckMode);
+ts5 = trainingStep(lpTM  , EZintensityStim, performanceCriterion(.85, int8(200)), noTimeOff(), svnRev,svnCheckMode);
 
-ts6 = trainingStep(lpTM  , intensityStim, repeatIndefinitely()  , noTimeOff(), svnRev,svnCheckMode);
+ts6 = trainingStep(lpTM  , intensityStim, performanceCriterion(.85, int8(200)), noTimeOff(), svnRev,svnCheckMode);
+
+ts7 = trainingStep(lpTM  , HardintensityStim, repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode);
 
 
 %p=protocol('mouse intensity discrimation',{ ts3, ts4, ts5});
-p=protocol('mouse intensity discrimation',{ts1, ts2, ts3, ts4, ts5 ts6});
+p=protocol('mouse intensity discrimation',{ts1, ts2, ts3, ts4, ts5 ts6 ts7});
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});
@@ -119,7 +131,7 @@ for i=1:length(subjIDs),
         case 'test'
             stepNum=uint8(1);
         otherwise
-            stepNum=uint8(4);
+            stepNum=uint8(6);
     end
     
     [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolWehr','edf');

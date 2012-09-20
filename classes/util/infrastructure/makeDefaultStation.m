@@ -125,6 +125,7 @@ stationSpec.eyeTracker                        = et;
 stationSpec.portSpec.phasePins                = int8(16);
 stationSpec.portSpec.stimPins                 = int8(17);
 stationSpec.portSpec.indexPins                = int8(8);
+stationSpec.portSpec.laserPins                = uint8([]);
 
 if a
     switch b

@@ -765,7 +765,7 @@ while ~done && ~quit;
     end
     
     % =========================================================================
-    
+        
     if ~isempty(eyeTracker)
         if ~checkRecording(eyeTracker)
             sca
@@ -1090,6 +1090,10 @@ while ~done && ~quit;
     lastAirpuffTime = GetSecs();
     
     % =========================================================================
+    
+    if isfield(trialRecords(trialInd),'pco')
+        trialRecords(trialInd).pco = exec(trialRecords(trialInd).pco);
+    end
     
     if updatePhase
         phaseRecords(phaseNum).transitionedByPortResponse = transitionedByPortFlag;

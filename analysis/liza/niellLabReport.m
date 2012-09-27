@@ -33,6 +33,21 @@ end
 
 if doBox
     recs = {...
+        {'wehr-ratrix1'
+            {
+                 { 'wehr' %audio
+                    {
+                    '3513'
+                    '3516'
+                    '3350'
+                    '3515'
+                    '3499'
+                    '3500'
+                    }
+                }
+            }
+        }        
+    
         {'mtrix1'
             {
                 { 'mouse' %drifiting dots single lickometer
@@ -54,8 +69,8 @@ if doBox
                 }                
                 { 'wehr' %audio
                     {
-                    '3499' %current
-                    '3513' %current
+%                    '3499' %current
+%                    '3513' %current
                     }
                 }
             }
@@ -86,7 +101,7 @@ if doBox
                 { 'wehr' %audio
                     {
                     '3231' 
-                    '3350' %current
+ %                   '3350' %current
                     '3691' %?
                     }
                 }
@@ -108,8 +123,8 @@ if doBox
                     '3233' %abandoned?
                     '3337' 
                     '3398' %abandoned?
-                    '3500' %current
-                    '3515' %current
+%                    '3500' %current
+%                    '3515' %current
                     '3694' %?
                     }
                 }   
@@ -131,7 +146,7 @@ if doBox
                     '3236'
                     '3397'
                     % '3500' %moved to mtrix3?
-                    '3516' %current
+%                    '3516' %current
                     }
                 }      
             }

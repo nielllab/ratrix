@@ -67,7 +67,7 @@ else
             end
             y=get(kids(as),'XLim');
             
-            if y(2)==d{1}
+            if y(2)==d{1} && ~strcmp(selection.subjects{1},'c1ln')
                 set(x,'Visible','on');
                 fprintf('skipping - latest figures already generated (%s)\n',fd)
                 return
@@ -171,6 +171,10 @@ for i=1:length(d)
             fprintf('\ttime elapsed: %g\n',GetSecs-t)
             end
             records=ctr.compiledTrialRecords;
+%            keyboard
+            %c1ln is showing 'response' field with way too few 3's and way
+            %too many -1's.  why?  where does this field get set?  seems to
+            %derive from 'result' field, which is sometimes a port vector
         end
     end
 end

@@ -104,7 +104,7 @@ else
 end
 
 figure
-plot(diff(t)*1000)
+plot(diff(t)*1000,'LineWidth',2)
 xlabel('frame')
 ylabel('ms')
 end

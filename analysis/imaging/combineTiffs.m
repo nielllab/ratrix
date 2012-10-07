@@ -22,18 +22,18 @@ recs = {{'jbw01',{{[1 192],'jbw01 go to grating run 1','jbw01r1'}}}};
 
 %%%%%%%%%%%%%%%%%%%%% new way (\\landis\Users\nlab\Desktop\data\)
 
-date = '9-24-12';
-recs = {{'jbw01',{{[213 982],'.','jbw01r1'}}}}; % 54690 (91.15 mins)
+% date = '9-24-12';
+% recs = {{'jbw01',{{[213 982],'.','jbw01r1'}}}}; % 54690 (91.15 mins) %timing screws up around 4300th frame/50th trial
 % recs = {{'jbw03',{{[1 665]  ,'.','jbw03r1'}}}}; % 63882 (106.47 mins)
 % recs = {{'wg2'  ,{{[1 511]  ,'.','wg2r1'  }}}}; % 28631 (47.7183 mins)
 % 
 % date = '9-25-12';
-% recs = {{'jbw01',{{[983 1463],'.','jbw01run1'}}}}; % 51296 (85.4933 mins)
+% recs = {{'jbw01',{{[983 1463],'.','jbw01run1'}}}}; % 51296 (85.4933 mins) %timing screws up early
 % recs = {{'jbw03',{{[667 962] ,'.','jbw03r1'  }}}}; % 30610 (51.0167 mins)
 % recs = {{'wg2'  ,{{[512 815] ,'.','wg2r1'    }}}}; % 26261 (43.7683 mins)
 % 
-% date = '9-26-12';
-% recs = {{'jbw01',{{[1464 2205],'.','jbw01r1'}}}}; % 32136 (53.56 mins)
+date = '9-26-12';
+recs = {{'jbw01',{{[1464 2205],'.','jbw01r1'}}}}; % 32136 (53.56 mins) %timing screws up around 4270
 % recs = {{'wg2'  ,{{[816 1223] ,'.','wg2run' }}}}; % 37047 (61.745 mins)
 
 behaviorPath = '\\lee\Users\nlab\Desktop\ballData';
@@ -122,34 +122,89 @@ clear ids
 d = diff(t');
 
 frameDur = median(d);
-boundary = 5*frameDur;
-trials = [1 1+find(d>boundary)];
 
-figure
-subplot(2,1,1)
-bins = linspace(0,2,200);
-n = hist(d,bins);
-n = log(n);
-n(isinf(n)) = 0;
-plot(bins,n)
-hold on
-plot(boundary*ones(1,2),[0 max(n)],'r')
-plot(frameDur*ones(1,2),[0 max(n)],'b')
-title(sprintf('%d (imaging) vs. %d (behavior)',length(trials),length(trialRecs)))
-xlabel('secs')
-set(gca,'YTick',[])
-
-subplot(2,1,2)
 bRecs = getTrigTimes({trialRecs.pco});
 if any(cellfun(@isempty,bRecs))
     error('bad recs')
 end
 
+if false %this method no good
+    boundary = 5*frameDur;
+    trials = [1 1+find(d>boundary)];
+    
+    figure
+    subplot(2,1,1)
+    bins = linspace(0,2,200);
+    n = hist(d,bins);
+    n = log(n);
+    n(isinf(n)) = 0;
+    plot(bins,n)
+    hold on
+    plot(boundary*ones(1,2),[0 max(n)],'r')
+    plot(frameDur*ones(1,2),[0 max(n)],'b')
+    title(sprintf('%d (imaging) vs. %d (behavior)',length(trials),length(trialRecs)))
+    xlabel('secs')
+    set(gca,'YTick',[])
+    
+    subplot(2,1,2)    
+    hold on
+    arrayfun(@(x)plot(x*ones(1,2),[0 boundary],'b'),trials)
+    plot(diff([bRecs{:}]),'r','LineWidth',3)
+    plot(d)
+    ylim([0 boundary])
+end
+
+
+% align the times:  apparently some of the requested exposures recorded in
+% the trial records don't wind up getting actually saved as tiffs, so d is
+% missing some of what bRecs has...
+
+reqs = diff([bRecs{:}]);
+fixed = nan(1,length(reqs)+1);
+
+current = 1;
+for i=1:length(d)
+    fixer = 0;
+    while abs(d(i)-sum(reqs(current+(0:fixer)))) > .05*frameDur
+        fixer = fixer + 1;
+        if current + fixer > length(reqs)
+            error('bad')
+        end
+    end
+    current = current + fixer;        
+    fixed(current) = d(i);  
+    current = current + 1;
+end
+
+
+figure
 hold on
-arrayfun(@(x)plot(x*ones(1,2),[0 boundary],'b'),trials)
-plot(diff([bRecs{:}]),'r','LineWidth',3)
-plot(d)
-ylim([0 boundary])
+v = .01;
+
+d = {};
+bFrames = {};
+for i = 1:length(bRecs)
+    reqs = diff(bRecs{i});
+    plot(reqs+v*i,'r','LineWidth',3);
+    
+    %try
+        d{i} = fixed(length([bRecs{1:i-1}]) + (1:length(bRecs{i})));
+                
+        plot(d{i}(1:end-1)+v*i)
+
+        if ~isempty(find([abs(reqs-d{i}(1:end-1))>.05*frameDur false] & ~isnan(d{i}) & ~isnan([nan d{i}(1:end-1)]),1,'first'))
+            error('bad')
+        end
+        
+        bFrames{i} = bRecs{i}(~isnan(d{i}));
+    %end
+end
+% ylim([frameDur v*200])
+% xlim([0 200])
+
+if length([bFrames{:}]) > size(data,3) %we probably miss the last one
+    error('bad')
+end
 
 s = [trialRecs.stimDetails];
 targ = sign([s.target]);
@@ -178,14 +233,19 @@ pts = [-.8 2];
 pts = linspace(pts(1),pts(2),1+round(diff(pts)/frameDur));
 ptLs = numNice(pts,.01);
 
-trials = [36 172];
+%trials = [36 172];
+trials = [1 length(onsets)];
 
 fig = figure;
 hold on
 arrayfun(@(x)plot(x*ones(1,1+diff(trials)),trials(1):trials(end),'o','Color',[.5*ones(1,2) 0]),pts); %'y' ,'LineWidth',3 [.75 .25 0]
-for i=1:length(onsets)
+for i=1:length(onsets)    
     if i<=length(bRecs)
         plot(bRecs{i}-onsets(i),i,'w+')
+        misses = setdiff(bRecs{i},bFrames{i});
+        if ~isempty(misses)
+        plot(misses-onsets(i),i,'+','Color',[1 .5 0])
+        end
     end
     
     s = starts(:,i)-onsets(i);
@@ -209,17 +269,20 @@ xlims = [-2 3];
 xlim(xlims)
 ylabel('trial')
 xlabel('secs since discrim onset')
-keyboard
 saveFig(fig,[pre '.sync'],[0 0 diff(xlims)*200 length(onsets)*5]); % [left, bottom, width, height]
 
 trials = trials(1):trials(2);
 pts = repmat(pts,length(trials),1)+repmat(onsets(trials)',1,length(pts));
 im = nan([size(pts,1) size(pts,2) size(data,1) size(data,2)]); %trials * t * h * w
+
+b = whos('im');
+fprintf('target is %gGB\n',b.bytes/1000/1000/1000)
+
 fprintf('interpolating...\n')
 tic
 for i=1:length(trials)
-    frames = length([bRecs{1:trials(i)-1}]) + (1:length(bRecs{trials(i)}));
-    im(i,:,:,:) = interp1(bRecs{trials(i)},double(permute(data(:,:,frames),[3 1 2])),pts(i,:));
+    frames = length([bFrames{1:trials(i)-1}]) + (1:length(bFrames{trials(i)}));
+    im(i,:,:,:) = interp1(bFrames{trials(i)},double(permute(data(:,:,frames),[3 1 2])),pts(i,:));
     fprintf('%g%% done\n',100*i/length(trials));
 end
 toc
@@ -285,13 +348,21 @@ saveFig(fig,s(~ismember(s,'|\/<>*?":')),[0 0 1920 1200]); % [left, bottom, width
 end
 
 function out = phaseStarts(rec)
+try
 r = [rec.responseDetails];
 out = [r.startTime];
+catch %only some have totalFrames?  why?
+    for i=1:length(rec)
+        out(i) = rec(i).responseDetails.startTime;
+    end
+end
+
 % rec.dynamicDetails %contains tracks
 
 %almost same as phaseLabel - just has 'reinforcement' instead of 'reinforced'
 labels = {rec.phaseType};
-goods = cellfun(@strcmp,labels,{'pre-request', 'discrim', 'reinforced'});
+expected = {'pre-request', 'discrim', 'reinforced'};
+goods = cellfun(@strcmp,labels,expected);
 if ~all(goods)
     e = cellfun(@isempty,labels);
     f = find(e,1,'first');
@@ -301,6 +372,10 @@ if ~all(goods)
         rec.phaseType
         error('bad phases')
     end
+end
+
+if length(out)~=length(expected)
+    error('bad')
 end
 end
 

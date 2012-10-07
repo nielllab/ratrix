@@ -21,9 +21,15 @@ imagingPath = 'C:\Users\nlab\Desktop\jbw01\';
 recs = {{'jbw01',{{[1 192],'jbw01 go to grating run 1','jbw01r1'}}}};
 
 %%%%%%%%%%%%%%%%%%%%% new way (\\landis\Users\nlab\Desktop\data\)
+<<<<<<< HEAD
 
 % date = '9-24-12';
 % recs = {{'jbw01',{{[213 982],'.','jbw01r1'}}}}; % 54690 (91.15 mins) %timing screws up around 4300th frame/50th trial
+=======
+if false
+date = '9-24-12';
+recs = {{'jbw01',{{[213 982],'.','jbw01r1'}}}}; % 54690 (91.15 mins)
+>>>>>>> f1692cf5ff841f4e23dff42bc836ec1158ed6dab
 % recs = {{'jbw03',{{[1 665]  ,'.','jbw03r1'}}}}; % 63882 (106.47 mins)
 % recs = {{'wg2'  ,{{[1 511]  ,'.','wg2r1'  }}}}; % 28631 (47.7183 mins)
 % 
@@ -38,6 +44,7 @@ recs = {{'jbw01',{{[1464 2205],'.','jbw01r1'}}}}; % 32136 (53.56 mins) %timing s
 
 behaviorPath = '\\lee\Users\nlab\Desktop\ballData';
 imagingPath = fullfile('C:\Users\nlab\Desktop\data',date,recs{1}{1});
+end
 
 cellfun(@(x)cellfun(@(y)f(x{1},y),x{2},'UniformOutput',false),recs,'UniformOutput',false);
     function f(x,y)
@@ -344,7 +351,13 @@ end
 axes('Position',[0 0 1 1],'Xlim',[0 1],'Ylim',[0 1],'Visible','off','Units','normalized'); %'Box','off','clipping','off'
 text(0.5, .98, ['\bf ' s], 'HorizontalAlignment', 'center', 'VerticalAlignment', 'top')
 
-saveFig(fig,s(~ismember(s,'|\/<>*?":')),[0 0 1920 1200]); % [left, bottom, width, height]
+s = s(~ismember(s,'|\/<>*?":'));
+saveFig(fig,s,[0 0 1920 1200]); % [left, bottom, width, height]
+
+m(m<lims(1))=lims(1);
+m(m>lims(2))=lims(2);
+m = (m-lims(1))./diff(lims);
+writeAVI(m,fullfile('C:\Users\nlab\Desktop\analysis',[s '.avi']));%,fps)
 end
 
 function out = phaseStarts(rec)

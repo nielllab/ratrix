@@ -1,4 +1,4 @@
-function data = combineTiffs
+function combineTiffs
 dbstop if error
 
 addpath('C:\Users\nlab\Desktop\ratrix\bootstrap');
@@ -8,56 +8,44 @@ if ~ispc
     error('win only for now')
 end
 
-behaviorPath = 'C:\Users\nlab\Desktop\jbw01\ballData';
-imagingPath = 'C:\Users\nlab\Desktop\jbw01\';
-
-% {{subj,{{trials,imDir,imBase}
-%         {trials,imDir,imBase}
-%         {trials,imDir,imBase}}},
-%  {subj,{...}},
-%  {subj,{...}}};
-
-% \\landis\Users\nlab\Desktop\data\9-21-12\jbw01 go to grating run 1\
-recs = {{'jbw01',{{[1 192],'jbw01 go to grating run 1','jbw01r1'}}}};
-
-%%%%%%%%%%%%%%%%%%%%% new way (\\landis\Users\nlab\Desktop\data\)
-<<<<<<< HEAD
-
-% date = '9-24-12';
-% recs = {{'jbw01',{{[213 982],'.','jbw01r1'}}}}; % 54690 (91.15 mins) %timing screws up around 4300th frame/50th trial
-=======
-if false
-date = '9-24-12';
-recs = {{'jbw01',{{[213 982],'.','jbw01r1'}}}}; % 54690 (91.15 mins)
->>>>>>> f1692cf5ff841f4e23dff42bc836ec1158ed6dab
-% recs = {{'jbw03',{{[1 665]  ,'.','jbw03r1'}}}}; % 63882 (106.47 mins)
-% recs = {{'wg2'  ,{{[1 511]  ,'.','wg2r1'  }}}}; % 28631 (47.7183 mins)
-% 
-% date = '9-25-12';
-% recs = {{'jbw01',{{[983 1463],'.','jbw01run1'}}}}; % 51296 (85.4933 mins) %timing screws up early
-% recs = {{'jbw03',{{[667 962] ,'.','jbw03r1'  }}}}; % 30610 (51.0167 mins)
-% recs = {{'wg2'  ,{{[512 815] ,'.','wg2r1'    }}}}; % 26261 (43.7683 mins)
-% 
-date = '9-26-12';
-recs = {{'jbw01',{{[1464 2205],'.','jbw01r1'}}}}; % 32136 (53.56 mins) %timing screws up around 4270
-% recs = {{'wg2'  ,{{[816 1223] ,'.','wg2run' }}}}; % 37047 (61.745 mins)
-
 behaviorPath = '\\lee\Users\nlab\Desktop\ballData';
-imagingPath = fullfile('C:\Users\nlab\Desktop\data',date,recs{1}{1});
-end
+imagingPath = 'C:\Users\nlab\Desktop\data'; %\\landis (accessing local via network path is slow)
+recs = {
+    {'jbw01' {
+           {[1     192],[36 172],'9-21-12\jbw01 go to grating run 1','jbw01r1'  }
+           {[213   982],[      ],'9-24-12\jbw01'                    ,'jbw01r1'  } % 54690 (91.15 mins) %timing screws up around 4300th frame/50th trial
+           {[983  1463],[      ],'9-25-12\jbw01'                    ,'jbw01run1'} % 51296 (85.4933 mins) %timing screws up early
+           {[1464 2205],[      ],'9-26-12\jbw01'                    ,'jbw01r1'  } % 32136 (53.56 mins) %timing screws up around 4270
+        }
+    }
+    
+    {'jbw03' {
+           {[1   665],[],'9-24-12\jbw03','jbw03r1'} % 63882 (106.47 mins)
+           {[667 962],[],'9-25-12\jbw03','jbw03r1'} % 30610 (51.0167 mins)
+        }
+    }
+    
+    {'wg02' {
+            {[1    511],[],'9-24-12\wg2','wg2r1' } % 28631 (47.7183 mins)
+            {[512  815],[],'9-25-12\wg2','wg2r1' } % 26261 (43.7683 mins)
+            {[816 1223],[],'9-26-12\wg2','wg2run'} % 37047 (61.745 mins)
+        }
+    }
+};
 
-cellfun(@(x)cellfun(@(y)f(x{1},y),x{2},'UniformOutput',false),recs,'UniformOutput',false);
-    function f(x,y)
-        rng = sprintf('%d-%d',y{1}(1),y{1}(2));
+cellfun(@(r)cellfun(@(s)f(r{1},s),r{2},'UniformOutput',false),recs,'UniformOutput',false);
+    function f(subj,r)
+        rng = sprintf('%d-%d',r{1}(1),r{1}(2));
         biAnalysis(...
-            fullfile(behaviorPath,'PermanentTrialRecordStore',x,['trialRecords_' rng '_*.mat']),...
-            fullfile(imagingPath,y{2},y{3}),...
-            [x '.' rng]...
+            fullfile(behaviorPath,'PermanentTrialRecordStore',subj,['trialRecords_' rng '_*.mat']),...
+            fullfile(imagingPath,r{3},r{4}),...
+            [subj '.' rng],...
+            r{2}...
             );
     end
 end
 
-function biAnalysis(bPath,iPath,pre)
+function biAnalysis(bPath,iPath,pre,goodTrials)
 ids = dir([iPath '_*.tif']);
 bds = dir(bPath);
 
@@ -65,7 +53,7 @@ if ~isscalar(bds)
     error('hmmm...')
 end
 
-maxGB = 4;
+maxGB = 1;
 
 bytesPerPix = 2;
 pixPerFrame = maxGB*1000*1000*1000/length(ids)/bytesPerPix;
@@ -153,7 +141,7 @@ if false %this method no good
     xlabel('secs')
     set(gca,'YTick',[])
     
-    subplot(2,1,2)    
+    subplot(2,1,2)
     hold on
     arrayfun(@(x)plot(x*ones(1,2),[0 boundary],'b'),trials)
     plot(diff([bRecs{:}]),'r','LineWidth',3)
@@ -172,14 +160,14 @@ fixed = nan(1,length(reqs)+1);
 current = 1;
 for i=1:length(d)
     fixer = 0;
-    while abs(d(i)-sum(reqs(current+(0:fixer)))) > .05*frameDur
+    while i>1 && abs(d(i)-sum(reqs(current+(0:fixer)))) > .05*frameDur
         fixer = fixer + 1;
         if current + fixer > length(reqs)
             error('bad')
         end
     end
-    current = current + fixer;        
-    fixed(current) = d(i);  
+    current = current + fixer;
+    fixed(current) = d(i);
     current = current + 1;
 end
 
@@ -195,15 +183,15 @@ for i = 1:length(bRecs)
     plot(reqs+v*i,'r','LineWidth',3);
     
     %try
-        d{i} = fixed(length([bRecs{1:i-1}]) + (1:length(bRecs{i})));
-                
-        plot(d{i}(1:end-1)+v*i)
-
-        if ~isempty(find([abs(reqs-d{i}(1:end-1))>.05*frameDur false] & ~isnan(d{i}) & ~isnan([nan d{i}(1:end-1)]),1,'first'))
-            error('bad')
-        end
-        
-        bFrames{i} = bRecs{i}(~isnan(d{i}));
+    d{i} = fixed(length([bRecs{1:i-1}]) + (1:length(bRecs{i})));
+    
+    plot(d{i}(1:end-1)+v*i)
+    
+    if ~isempty(find([abs(reqs-d{i}(1:end-1))>.05*frameDur false] & ~isnan(d{i}) & ~isnan([nan d{i}(1:end-1)]),1,'first'))
+        error('bad')
+    end
+    
+    bFrames{i} = bRecs{i}(~isnan(d{i}));
     %end
 end
 % ylim([frameDur v*200])
@@ -240,18 +228,21 @@ pts = [-.8 2];
 pts = linspace(pts(1),pts(2),1+round(diff(pts)/frameDur));
 ptLs = numNice(pts,.01);
 
-%trials = [36 172];
-trials = [1 length(onsets)];
+if isempty(goodTrials)
+    trials = [1 length(onsets)];
+else
+    trials = goodTrials;
+end
 
 fig = figure;
 hold on
 arrayfun(@(x)plot(x*ones(1,1+diff(trials)),trials(1):trials(end),'o','Color',[.5*ones(1,2) 0]),pts); %'y' ,'LineWidth',3 [.75 .25 0]
-for i=1:length(onsets)    
+for i=1:length(onsets)
     if i<=length(bRecs)
         plot(bRecs{i}-onsets(i),i,'w+')
         misses = setdiff(bRecs{i},bFrames{i});
         if ~isempty(misses)
-        plot(misses-onsets(i),i,'+','Color',[1 .5 0])
+            plot(misses-onsets(i),i,'+','Color',[1 .5 0])
         end
     end
     
@@ -289,7 +280,11 @@ fprintf('interpolating...\n')
 tic
 for i=1:length(trials)
     frames = length([bFrames{1:trials(i)-1}]) + (1:length(bFrames{trials(i)}));
-    im(i,:,:,:) = interp1(bFrames{trials(i)},double(permute(data(:,:,frames),[3 1 2])),pts(i,:));
+    if ~isempty(frames)
+        im(i,:,:,:) = interp1(bFrames{trials(i)},double(permute(data(:,:,frames),[3 1 2])),pts(i,:));
+    elseif i~=length(trials)
+        error('huh?')
+    end
     fprintf('%g%% done\n',100*i/length(trials));
 end
 toc
@@ -310,8 +305,6 @@ clear m im
 
 show(nanmeanMW(dfof),ptLs,[pre '.all trials (dF/F)'],[1 99]);
 show(nanmeanMW(dfof(targ(trials)>0,:,:,:)) - nanmeanMW(dfof(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right (dF/F)'],[1 99]);
-
-keyboard
 end
 
 function saveFig(f,fn,pos)
@@ -357,16 +350,20 @@ saveFig(fig,s,[0 0 1920 1200]); % [left, bottom, width, height]
 m(m<lims(1))=lims(1);
 m(m>lims(2))=lims(2);
 m = (m-lims(1))./diff(lims);
-writeAVI(m,fullfile('C:\Users\nlab\Desktop\analysis',[s '.avi']));%,fps)
+writeAVI(m,fullfile('C:\Users\nlab\Desktop\analysis',s));%,fps)
 end
 
 function out = phaseStarts(rec)
 try
-r = [rec.responseDetails];
-out = [r.startTime];
+    r = [rec.responseDetails];
+    out = [r.startTime];
 catch %only some have totalFrames?  why?
     for i=1:length(rec)
-        out(i) = rec(i).responseDetails.startTime;
+        s =  rec(i).responseDetails.startTime;
+        if isempty(s)
+            s = nan;
+        end
+        out(i) = s;
     end
 end
 
@@ -380,6 +377,13 @@ if ~all(goods)
     e = cellfun(@isempty,labels);
     f = find(e,1,'first');
     if all(e(f:end))
+        if length(out)>=f
+            if all(isnan(out(f:end)))
+                out = out(1:f-1);
+            else
+                error('bad')
+            end
+        end
         out = [out nan(1,length(labels)-f+1)];
     else
         rec.phaseType

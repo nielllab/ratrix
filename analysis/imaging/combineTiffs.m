@@ -13,9 +13,9 @@ imagingPath = 'C:\Users\nlab\Desktop\data'; %\\landis (accessing local via netwo
 recs = {
     {'jbw01' {
            {[1     192],[36 172],'9-21-12\jbw01 go to grating run 1','jbw01r1'  }
-           {[213   982],[      ],'9-24-12\jbw01'                    ,'jbw01r1'  } % 54690 (91.15 mins) %timing screws up around 4300th frame/50th trial
-           {[983  1463],[      ],'9-25-12\jbw01'                    ,'jbw01run1'} % 51296 (85.4933 mins) %timing screws up early
-           {[1464 2205],[      ],'9-26-12\jbw01'                    ,'jbw01r1'  } % 32136 (53.56 mins) %timing screws up around 4270
+           {[213   982],[10 670],'9-24-12\jbw01'                    ,'jbw01r1'  } % 54690 (91.15 mins) %timing screws up around 4300th frame/50th trial
+           {[983  1463],[ 1 165],'9-25-12\jbw01'                    ,'jbw01run1'} % 51296 (85.4933 mins) %timing screws up early
+           {[1464 2205],[20 720],'9-26-12\jbw01'                    ,'jbw01r1'  } % 32136 (53.56 mins) %timing screws up around 4270
         }
     }
     
@@ -26,15 +26,16 @@ recs = {
     }
     
     {'wg02' {
-            {[1    511],[],'9-24-12\wg2','wg2r1' } % 28631 (47.7183 mins)
-            {[512  815],[],'9-25-12\wg2','wg2r1' } % 26261 (43.7683 mins)
-            {[816 1223],[],'9-26-12\wg2','wg2run'} % 37047 (61.745 mins)
+            {[1    511],[     ],'9-24-12\wg2','wg2r1' } % 28631 (47.7183 mins)
+            {[512  815],[1 270],'9-25-12\wg2','wg2r1' } % 26261 (43.7683 mins)
+            {[816 1223],[1 325],'9-26-12\wg2','wg2run'} % 37047 (61.745 mins)
         }
     }
 };
 
 cellfun(@(r)cellfun(@(s)f(r{1},s),r{2},'UniformOutput',false),recs,'UniformOutput',false);
     function f(subj,r)
+        close all
         rng = sprintf('%d-%d',r{1}(1),r{1}(2));
         biAnalysis(...
             fullfile(behaviorPath,'PermanentTrialRecordStore',subj,['trialRecords_' rng '_*.mat']),...
@@ -46,6 +47,8 @@ cellfun(@(r)cellfun(@(s)f(r{1},s),r{2},'UniformOutput',false),recs,'UniformOutpu
 end
 
 function biAnalysis(bPath,iPath,pre,goodTrials)
+fprintf('doing %s\n',bPath)
+
 ids = dir([iPath '_*.tif']);
 bds = dir(bPath);
 
@@ -118,6 +121,16 @@ d = diff(t');
 
 frameDur = median(d);
 
+%very ad hoc -- is this right?
+%takes care of when imaging starts before behavior
+%but why do we get that first image then -- shouldn't be triggered til behavior starts?
+%eg, jbw03 667-962 and wg02 1-511 have d(1)~70
+if d(1)>1.5*frameDur
+    d = d(2:end);
+    t = t(2:end);
+    data = data(:,:,2:end);
+end
+
 bRecs = getTrigTimes({trialRecs.pco});
 if any(cellfun(@isempty,bRecs))
     error('bad recs')
@@ -154,21 +167,25 @@ end
 % the trial records don't wind up getting actually saved as tiffs, so d is
 % missing some of what bRecs has...
 
+tol = .05*frameDur;
+
 reqs = diff([bRecs{:}]);
 fixed = nan(1,length(reqs)+1);
 
 current = 1;
 for i=1:length(d)
-    fixer = 0;
-    while i>1 && abs(d(i)-sum(reqs(current+(0:fixer)))) > .05*frameDur
-        fixer = fixer + 1;
-        if current + fixer > length(reqs)
-            error('bad')
+    if current <= length(reqs)
+        fixer = 0;
+        while i>1 && abs(d(i)-sum(reqs(current+(0:fixer)))) > tol
+            fixer = fixer + 1;
+            if current + fixer > length(reqs)
+                error('bad')
+            end
         end
+        current = current + fixer;
+        fixed(current) = d(i);
+        current = current + 1;
     end
-    current = current + fixer;
-    fixed(current) = d(i);
-    current = current + 1;
 end
 
 
@@ -187,7 +204,7 @@ for i = 1:length(bRecs)
     
     plot(d{i}(1:end-1)+v*i)
     
-    if ~isempty(find([abs(reqs-d{i}(1:end-1))>.05*frameDur false] & ~isnan(d{i}) & ~isnan([nan d{i}(1:end-1)]),1,'first'))
+    if ~isempty(find([abs(reqs-d{i}(1:end-1))>tol false] & ~isnan(d{i}) & ~isnan([nan d{i}(1:end-1)]),1,'first'))
         error('bad')
     end
     
@@ -200,6 +217,13 @@ end
 if length([bFrames{:}]) > size(data,3) %we probably miss the last one
     error('bad')
 end
+
+figure
+tmp = [bFrames{:}];
+len = min(cellfun(@length,{tmp t}));
+plot(diff(tmp(1:len))-diff(t(1:len)')) %no one should be off  by more than .5ms (3 for first), but we get a couple dozen per trial, something about correction/alignment above is wrong?
+hold on
+plot(find(~ismember([bRecs{:}],tmp)),0,'o','Color',[1 .5 0]) %not quite right -- lines them up by bRecs rather than the smaller bFrames, but shows that the errors are always by camera drops
 
 s = [trialRecs.stimDetails];
 targ = sign([s.target]);
@@ -236,13 +260,13 @@ end
 
 fig = figure;
 hold on
-arrayfun(@(x)plot(x*ones(1,1+diff(trials)),trials(1):trials(end),'o','Color',[.5*ones(1,2) 0]),pts); %'y' ,'LineWidth',3 [.75 .25 0]
+arrayfun(@(x)plot(x*ones(1,1+diff(trials)),trials(1):trials(end),'+','Color',[.5*ones(1,2) 0]),pts); %'y' ,'LineWidth',3 [.75 .25 0]
 for i=1:length(onsets)
     if i<=length(bRecs)
-        plot(bRecs{i}-onsets(i),i,'w+')
+        plot(bRecs{i}-onsets(i),i,'w.','MarkerSize',1)
         misses = setdiff(bRecs{i},bFrames{i});
         if ~isempty(misses)
-            plot(misses-onsets(i),i,'+','Color',[1 .5 0])
+            plot(misses-onsets(i),i,'o','Color',[1 .5 0])
         end
     end
     
@@ -276,12 +300,17 @@ im = nan([size(pts,1) size(pts,2) size(data,1) size(data,2)]); %trials * t * h *
 b = whos('im');
 fprintf('target is %gGB\n',b.bytes/1000/1000/1000)
 
+fprintf('permuting...\n')
+tic
+data = permute(data,[3 1 2]); %possible oom
+toc
+
 fprintf('interpolating...\n')
 tic
 for i=1:length(trials)
     frames = length([bFrames{1:trials(i)-1}]) + (1:length(bFrames{trials(i)}));
     if ~isempty(frames)
-        im(i,:,:,:) = interp1(bFrames{trials(i)},double(permute(data(:,:,frames),[3 1 2])),pts(i,:));
+        im(i,:,:,:) = interp1(bFrames{trials(i)},double(data(frames,:,:)),pts(i,:));
     elseif i~=length(trials)
         error('huh?')
     end

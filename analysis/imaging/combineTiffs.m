@@ -199,7 +199,6 @@ for i = 1:length(bRecs)
     reqs = diff(bRecs{i});
     plot(reqs+v*i,'r','LineWidth',3);
     
-    %try
     d{i} = fixed(length([bRecs{1:i-1}]) + (1:length(bRecs{i})));
     
     plot(d{i}(1:end-1)+v*i)
@@ -209,7 +208,6 @@ for i = 1:length(bRecs)
     end
     
     bFrames{i} = bRecs{i}(~isnan(d{i}));
-    %end
 end
 % ylim([frameDur v*200])
 % xlim([0 200])
@@ -226,12 +224,20 @@ hold on
 plot(find(~ismember([bRecs{:}],tmp)),0,'o','Color',[1 .5 0]) %not quite right -- lines them up by bRecs rather than the smaller bFrames, but shows that the errors are always by camera drops
 
 s = [trialRecs.stimDetails];
+f = find(arrayfun(@(x)isempty(x.target),s),1,'first');
+if ~isempty(f) && f~=length(s)
+        error('bad targets')
+end
 targ = sign([s.target]);
 
 % trialRecs.stimDetails should have phase/orientation, (orientedGabors saves it)
 % but trail (the ball stimManager) doesn't save details from the stimManager it uses...
 
 s = [trialRecs.trialDetails];
+f = find(arrayfun(@(x)isempty(x.correct),s),1,'first');
+if ~isempty(f) && f~=length(s)
+        error('bad corrects')
+end
 correct = [s.correct];
 
 starts = cell2mat(cellfun(@phaseStarts,{trialRecs.phaseRecords}','UniformOutput',false))';
@@ -252,21 +258,55 @@ pts = [-.8 2];
 pts = linspace(pts(1),pts(2),1+round(diff(pts)/frameDur));
 ptLs = numNice(pts,.01);
 
-if isempty(goodTrials)
+if isempty(goodTrials) || true %heh
     trials = [1 length(onsets)];
 else
     trials = goodTrials;
 end
 
+trials = trials(1):trials(2);
+
+stoppedWithin = 5; %2
+respondedWithin = 3; %1
+onlyCorrect = true;
+noAfterErrors = true;
+worstFactor = 1; %.1
+
+afterErrors = [false ~correct(1:end-1)];
+
+misses = cellfun(@setdiff,bRecs,bFrames,'UniformOutput',false);
+worsts = cellfun(@(x)max(diff(x)),bFrames,'UniformOutput',false);
+d = diff(cellfun(@isempty,worsts));
+f = find(d,1);
+if ~isempty(f) && any(d(f+1:end)~=0)
+        error('bad bFrames')
+end
+worsts = cell2mat(worsts);
+
+trials = trials(trials<=length(worsts));
+
+d = diff(starts);
+
+trials = trials( ...
+    d(1,trials)<=stoppedWithin              & ...
+    d(2,trials)<=respondedWithin            & ... 
+    (~onlyCorrect | correct(trials))        & ...
+    (~noAfterErrors | ~afterErrors(trials)) & ...
+    cellfun(@isempty,misses(trials))        & ...
+    worsts(trials)<=frameDur*(1+worstFactor)  ...
+    );
+
 fig = figure;
 hold on
-arrayfun(@(x)plot(x*ones(1,1+diff(trials)),trials(1):trials(end),'+','Color',[.5*ones(1,2) 0]),pts); %'y' ,'LineWidth',3 [.75 .25 0]
+for i = 1:length(trials)
+plot(pts(pts<=bFrames{trials(i)}(end)-onsets(trials(i))),trials(i),'y+')
+end
+
 for i=1:length(onsets)
     if i<=length(bRecs)
         plot(bRecs{i}-onsets(i),i,'w.','MarkerSize',1)
-        misses = setdiff(bRecs{i},bFrames{i});
-        if ~isempty(misses)
-            plot(misses-onsets(i),i,'o','Color',[1 .5 0])
+        if ~isempty(misses{i})
+            plot(misses{i}-onsets(i),i,'o','Color',[1 .5 0])
         end
     end
     
@@ -293,7 +333,6 @@ ylabel('trial')
 xlabel('secs since discrim onset')
 saveFig(fig,[pre '.sync'],[0 0 diff(xlims)*200 length(onsets)*5]); % [left, bottom, width, height]
 
-trials = trials(1):trials(2);
 pts = repmat(pts,length(trials),1)+repmat(onsets(trials)',1,length(pts));
 im = nan([size(pts,1) size(pts,2) size(data,1) size(data,2)]); %trials * t * h * w
 
@@ -337,10 +376,16 @@ show(nanmeanMW(dfof(targ(trials)>0,:,:,:)) - nanmeanMW(dfof(targ(trials)<0,:,:,:
 end
 
 function saveFig(f,fn,pos)
+targ = 'C:\Users\nlab\Desktop\analysis';
+[status,message,messageid] = mkdir(targ);
+if status~=1
+    error('bad mkdir')
+end
+
 set(f,'PaperPositionMode','auto'); %causes print/saveas to respect figure size
 set(f,'InvertHardCopy','off'); %preserves black background when colordef black
 set(f,'Position',pos) % [left, bottom, width, height]
-saveas(f,fullfile('C:\Users\nlab\Desktop\analysis',[fn '.png']));
+saveas(f,fullfile(targ,[fn '.png']));
 
 if false
     dpi=300;

@@ -266,11 +266,11 @@ end
 
 trials = trials(1):trials(2);
 
-stoppedWithin = 5; %2
-respondedWithin = 3; %1
+stoppedWithin = 2; %2
+respondedWithin = 1.5; %1
 onlyCorrect = true;
 noAfterErrors = true;
-worstFactor = 1; %.1
+worstFactor = .7; %.1
 
 afterErrors = [false ~correct(1:end-1)];
 
@@ -296,6 +296,8 @@ trials = trials( ...
     worsts(trials)<=frameDur*(1+worstFactor)  ...
     );
 
+c = getUniformSpectrum(normalize(onsets));
+
 fig = figure;
 hold on
 for i = 1:length(trials)
@@ -311,21 +313,21 @@ for i=1:length(onsets)
     end
     
     s = starts(:,i)-onsets(i);
-    plot(s(1),i,'c+')
+    plot(s(1),i,'+','Color',c(i,:))
     
     if targ(i)>0
-        c = 'b';
+        cm = 'b';
     else
-        c = 'm';
+        cm = 'm';
     end
-    plot(s(2),i,[c '+'])
+    plot(s(2),i,[cm '+'])
     
     if correct(i)
-        c = 'g';
+        cm = 'g';
     else
-        c = 'r';
+        cm = 'r';
     end
-    plot(s(3),i,[c '+'])
+    plot(s(3),i,[cm '+'])
 end
 xlims = [-2 3];
 xlim(xlims)
@@ -344,6 +346,30 @@ tic
 data = permute(data,[3 1 2]); %possible oom
 toc
 
+figure
+bins = linspace(0,double(intmax('uint16')),1000);
+for i=1:length(onsets)
+    semilogy(bins,hist(reshape(double(data(i,:,:)),[1 size(data,2)*size(data,3)]),bins),'Color',c(i,:))
+    hold on %kills log axis if issued earlier
+end
+xlim([0 max(bins)])
+title('pixel values')
+
+x = .92;
+h = .8;
+% [left, bottom, width, height]
+a = axes('Position',[x (1-h)/2 (1-x)/2 h],'Units','normalized');
+
+hold on
+for i=1:length(onsets)
+    plot([-1 1],(onsets(i)*ones(1,2)-onsets(1))/60,'Color',c(i,:))
+end
+title('mins')
+ylim([0 (onsets(end)-onsets(1))/60])
+set(a,'XTickLabel',[])
+set(a,'Box','off')
+set(a,'YAxisLocation','right')
+
 fprintf('interpolating...\n')
 tic
 for i=1:length(trials)
@@ -357,22 +383,71 @@ for i=1:length(trials)
 end
 toc
 
-clear data
+% clear data
 
 %need nanmean from fullfile(matlabroot,'toolbox','stats','stats')
 %but \ratrix\analysis\eflister\phys\new\helpers\ is shadowing it...
 
-show(nanmeanMW(im),ptLs,[pre '.all trials (raw)'],[50 99]);
-show(nanmeanMW(im(targ(trials)>0,:,:,:)) - nanmeanMW(im(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right (raw)'],[1 99]);
+show(nanmeanMW(im),ptLs,[pre '.all trials (raw)'],[50 99],@cb);
+show(nanmeanMW(im(targ(trials)>0,:,:,:)) - nanmeanMW(im(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right (raw)'],[1 99],@cb);
 
 m = squeeze(nanmeanMW(squeeze(nanmeanMW(im)))); %does this order matter?
 m = permute(repmat(m,[1 1 size(im,1) size(im,2)]),[3 4 1 2]);
 dfof = (im-m)./m;
 
-clear m im
+clear m 
+%clear im
 
-show(nanmeanMW(dfof),ptLs,[pre '.all trials (dF/F)'],[1 99]);
-show(nanmeanMW(dfof(targ(trials)>0,:,:,:)) - nanmeanMW(dfof(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right (dF/F)'],[1 99]);
+show(nanmeanMW(dfof),ptLs,[pre '.all trials (dF/F)'],[1 99],@cb);
+show(nanmeanMW(dfof(targ(trials)>0,:,:,:)) - nanmeanMW(dfof(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right (dF/F)'],[1 99],@cb);
+
+    function cb(in)
+        figure
+        
+        xb = [max(ptLs(1),-stoppedWithin) min(ptLs(end),respondedWithin)];
+        
+        n = 5;
+        subplot(n,1,1)
+        plotPix(1:length(onsets),'all');
+        
+        subplot(n,1,2)
+        plotPix(trials,'good',true);
+        
+        subplot(n,1,3)
+        al = plotPix(trials(targ(trials)>0),'good lefts',true); %haven't checkec parity of targ
+                
+        subplot(n,1,4)
+        ar = plotPix(trials(targ(trials)<0),'good rights',true); %haven't checkec parity of targ
+        
+        subplot(n,1,5)
+        hold on
+        plot(ptLs,[ar-nanmeanMW(ar,2); al-nanmeanMW(ar,2)]','w','LineWidth',2)
+        plot(ptLs,al-ar,'r','LineWidth',2)
+        plot(ptLs,zeros(1,length(ptLs)),'Color',.5*ones(1,3),'LineWidth',2)
+        xlim(xb)
+        
+        xlabel('seconds since discrim onset')
+        
+        function avg = plotPix(which,lab,doAvg)
+            hold on
+            arrayfun(@(i)plot(bFrames{i}-onsets(i),data(length([bFrames{1:i-1}])+(1:length(bFrames{i})),in(1,2),in(1,1)),'Color',c(i,:)),which);
+            xlim(xb)            
+            
+            if exist('doAvg','var') && doAvg
+                avg = nanmeanMW(im(ismember(trials,which),:,in(1,2),in(1,1)));
+                plot(ptLs,avg,'w','LineWidth',2)
+            end
+            
+            title(lab)
+        end
+    end
+
+keyboard
+end
+
+function in = normalize(in)
+in = in-min(in);
+in = in/max(in);
 end
 
 function saveFig(f,fn,pos)
@@ -400,14 +475,17 @@ function out = numNice(in,t)
 out = round(in/t)*t;
 end
 
-function show(m,pts,s,c)
+function show(m,pts,s,c,cb)
 m = permute(m,[3 4 2 1]);
 lims = prctile(m(:),c);
 d = ceil(sqrt(size(m,3)));
 fig = figure;
 for i=1:size(m,3)
     subplot(ceil(size(m,3)/d),d,i)
-    imagesc(m(:,:,i),lims)
+    x = imagesc(m(:,:,i),lims);
+
+    set(x,'ButtonDownFcn',@(x,y)cb(round(get(get(x,'Parent'),'CurrentPoint'))))
+
     xlabel(['t = ' num2str(pts(i)) ' s'])
     set(gca,'XTick',[])
     set(gca,'YTick',[])

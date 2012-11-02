@@ -7,13 +7,13 @@ function s=CNM(varargin)
 % =========================
 % mean - Mean brightness
 % soundParams.soundType = {'allOctaves','tritones', 'binaryWhiteNoise','gaussianWhiteNoise','uniformWhiteNoise','empty'} (valid sound clip types)
-% soundParams.freq - (Fundamental) frequency of sound to play
+% soundParams.freqs - (Fundamental) frequencies of sounds to play
 % soundParams.duration sound duration in ms
-% soundParams.amps - sound amplitude
+% soundParams.amp - sound amplitude
 
 s.mean = 0;
 s.freq = 0;
-s.amplitudes = [];
+s.amplitude = [];
 s.duration = [];
 s.stimSound = []; % Sound to play for the stimulus
 s.audioStimulus = true;
@@ -42,8 +42,8 @@ switch nargin
         s.soundType=soundParams.soundType;
         
         %error checking on soundParams and assign to s:
-        if all(soundParams.amps>=0) & all(soundParams.amps<=1)
-            s.amplitudes=soundParams.amps;
+        if all(soundParams.amp>=0) & all(soundParams.amp<=1)
+            s.amplitudes=soundParams.amp;
         else
             error(' amplitudes  must be 0 <= x <= 1')
         end
@@ -55,8 +55,8 @@ switch nargin
         
         switch s.soundType
             case {'allOctaves','tritones'}
-                if soundParams.freq > 0
-                    s.freq=soundParams.freq;
+                if soundParams.freqs > 0
+                    s.freq=soundParams.freqs;
                 else
                     error('freq must be > 0')
                 end
@@ -64,9 +64,9 @@ switch nargin
             case {'binaryWhiteNoise','gaussianWhiteNoise','uniformWhiteNoise','empty'}
                 %no specific error checking here
             case 'tone'
-                error('intensityDiscrim: tone not implemented yet')
+                error('CNM: tone not implemented yet')
             otherwise
-                error('intensityDiscrim: soundType not recognized')
+                error('CNM: soundType not recognized')
         end
         
         s = class(s,'CNM',stimManager(varargin{3},varargin{4},varargin{5},varargin{6}));

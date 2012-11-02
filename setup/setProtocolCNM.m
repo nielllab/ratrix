@@ -18,6 +18,7 @@ fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =msPenalty;
+responseLockoutMs         =0;
 
 constantRewards=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 
@@ -28,10 +29,11 @@ fd = freeDrinks(sm,freeDrinkLikelihood,allowRepeats,constantRewards);
 freeDrinkLikelihood=0;
 fd2 = freeDrinks(sm,freeDrinkLikelihood,allowRepeats,constantRewards);
 
-percentCorrectionTrials=.5;
+%percentCorrectionTrials=.5;
+percentCorrectionTrials=0;
 
 maxWidth               = 1920;
-maxHeight              = 1080;
+maxHeight              = 1080; 
 interTrialLuminance = .5;
 scaleFactor = 0;
 
@@ -40,7 +42,8 @@ scaleFactor = 0;
 eyeController=[];
 
 dropFrames=false;
-nafcTM=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,{'off'},dropFrames,'ptb','center');
+%nafcTM=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,{'off'},dropFrames,'ptb','center');
+gNGTM=goNoGo(sm,percentCorrectionTrials,responseLockoutMs,constantRewards,eyeController,{'off'},dropFrames,'ptb','center');
 % 
 % textureSize=10*[w,h];
 % zoom=[maxWidth maxHeight]./textureSize;
@@ -58,20 +61,21 @@ nafcTM=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,{'off'},dro
 % freeStim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 %stim params for free drinks
-soundParams.soundType='allOctaves'; %should put in pure tones later one mw 10-2012
-soundParams.freqs = [300 450];
+soundParams.soundType='allOctaves'; %should put in pure tones later on mw 10-2012
+soundParams.freqs = [300 ];
 soundParams.duration=10000; %ms
 maxSPL=80; %measured max level attainable by speakers
 ampdB=60; %requested amps in dB
 amplitude=10.^((ampdB -maxSPL)/20); %amplitudes = line level, 0 to 1
-soundParams.amp = amplitude; %for intensityDisrim
+soundParams.amp = amplitude; %for intensityDiscrim
 
 CNMStim = CNM(interTrialLuminance,soundParams,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 requestRewardSizeULorMS = 0;
 msPenalty               = 1000;
 noRequest=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
-nrTM=nAFC(sm,percentCorrectionTrials,noRequest,eyeController,{'off'},dropFrames,'ptb','center');
+%nrTM=nAFC(sm,percentCorrectionTrials,noRequest,eyeController,{'off'},dropFrames,'ptb','center');
+nrGNGTM=goNoGo(sm,percentCorrectionTrials,responseLockoutMs,noRequest,eyeController,{'off'},dropFrames,'ptb','center');
 
 svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
 svnCheckMode='session';
@@ -85,10 +89,10 @@ ts2 = trainingStep(fd2, CNMStim, numTrialsDoneCriterion(numTriggers)   , noTimeO
 %nafc
 trialsPerMinute = 6;
 minutes = 1;
-ts3 = trainingStep(nafcTM, CNMStim, rateCriterion(trialsPerMinute,minutes), noTimeOff(), svnRev,svnCheckMode);  %side discrim
+ts3 = trainingStep(gNGTM, CNMStim, rateCriterion(trialsPerMinute,minutes), noTimeOff(), svnRev,svnCheckMode);  %side discrim
 
 %no request reward
-ts4 = trainingStep(nrTM  , CNMStim,  numTrialsDoneCriterion(400)          , noTimeOff(), svnRev,svnCheckMode);
+ts4 = trainingStep(nrGNGTM  , CNMStim,  numTrialsDoneCriterion(400)          , noTimeOff(), svnRev,svnCheckMode);
 
 %long penalty
 msPenalty = 3000;

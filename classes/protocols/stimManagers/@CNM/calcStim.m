@@ -18,7 +18,7 @@ interTrialLuminance = getInterTrialLuminance(stimulus);
 switch trialManagerClass
     case 'freeDrinks'
         type='cache';
-    case 'nAFC'
+    case 'goNoGo'
         type='loop';%int32([10 10]); % This is 'timedFrames'
     otherwise
         error('unknown trial manager class')

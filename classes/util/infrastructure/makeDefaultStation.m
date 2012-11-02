@@ -132,7 +132,7 @@ if a
             stationSpec.portSpec.valveSpec=int8(3); %mini-3-way-lickometer and ball only use center valve
         case {'08002700D40D','C860005FBB51'} %aldis' station 
             stationSpec.laserPin = uint8(9);
-            stationSpec.framePin = %remove
+            %stationSpec.framePin = [];%remove
     end
 end
 

@@ -62,7 +62,7 @@ gNGTM=goNoGo(sm,percentCorrectionTrials,responseLockoutMs,constantRewards,eyeCon
 
 %stim params for free drinks
 soundParams.soundType='allOctaves'; %should put in pure tones later on mw 10-2012
-soundParams.freqs = [300 ];
+soundParams.freqs = [300 450];
 soundParams.duration=10000; %ms
 maxSPL=80; %measured max level attainable by speakers
 ampdB=60; %requested amps in dB
@@ -97,10 +97,10 @@ ts4 = trainingStep(nrGNGTM  , CNMStim,  numTrialsDoneCriterion(400)          , n
 %long penalty
 msPenalty = 3000;
 longPenalty=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
-lpTM=nAFC(sm,percentCorrectionTrials,longPenalty,eyeController,{'off'},dropFrames,'ptb','center',[],[],[]);
-ts5 = trainingStep(lpTM  , CNMStim, performanceCriterion(.85, int8(200))  , noTimeOff(), svnRev,svnCheckMode);
+lpGNGTM=goNoGo(sm,percentCorrectionTrials,responseLockoutMs,longPenalty,eyeController,{'off'},dropFrames,'ptb','center',[],[],[]);
+ts5 = trainingStep(lpGNGTM, CNMStim, performanceCriterion(.85, int8(200))  , noTimeOff(), svnRev,svnCheckMode);
 
-ts6 = trainingStep(lpTM  , CNMStim, repeatIndefinitely()  , noTimeOff(), svnRev,svnCheckMode);
+ts6 = trainingStep(lpGNGTM, CNMStim, repeatIndefinitely()  , noTimeOff(), svnRev,svnCheckMode);
 
 
 p=protocol('mouse CNM task',{ts1, ts2, ts3, ts4, ts5 ts6});

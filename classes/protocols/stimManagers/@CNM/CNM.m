@@ -56,7 +56,7 @@ switch nargin
         switch s.soundType
             case {'allOctaves','tritones'}
                 if soundParams.freqs > 0
-                    s.freq=soundParams.freqs;
+                    s.freqs=soundParams.freqs;
                 else
                     error('freq must be > 0')
                 end

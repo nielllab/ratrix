@@ -13,6 +13,8 @@ else
         [out.pctCorrectionTrials newLUT] = extractFieldAndEnsure(stimDetails,{'pctCorrectionTrials'},'scalar',newLUT);
         
         [out.amp newLUT] = extractFieldAndEnsure(stimDetails,{'Amplitude'},'scalar',newLUT);
+        [out.laserON newLUT] = extractFieldAndEnsure(stimDetails,{'laserON'},'scalar',newLUT);
+        [out.laser_duration newLUT] = extractFieldAndEnsure(stimDetails,{'laser_duration'},'scalar',newLUT);
         
         % 12/16/08 - this stuff might be common to many stims
         % should correctionTrial be here in compiledDetails (whereas it was originally in compiledTrialRecords)

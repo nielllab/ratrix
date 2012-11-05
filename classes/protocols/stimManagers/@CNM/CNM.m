@@ -43,7 +43,7 @@ switch nargin
         
         %error checking on soundParams and assign to s:
         if all(soundParams.amp>=0) & all(soundParams.amp<=1)
-            s.amplitudes=soundParams.amp;
+            s.amplitude=soundParams.amp;
         else
             error(' amplitudes  must be 0 <= x <= 1')
         end

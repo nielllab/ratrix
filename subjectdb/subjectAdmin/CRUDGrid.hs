@@ -11,6 +11,7 @@ module CRUDGrid
     , formDelete
     , formNewGet
     , formNewPost
+    , showFieldByID
     ) where
 
 import Import
@@ -18,6 +19,15 @@ import Control.Arrow
 import Control.Monad
 import Data.Maybe
 import Prelude (head)
+
+showFieldByID r s f id = do
+    x <- lift $ s . f . fromJust <$> (runDB $ get id)
+    [whamlet|
+$maybe route <- r
+    <a href=@{route id}> #{x}
+$nothing
+    #{x} 
+|]
 
 type ID m p = Key (YesodPersistBackend m) p
 
@@ -30,6 +40,7 @@ data Routes m p =
 
 data Grid s m p c = 
     Grid { title       :: Text
+         , opts        :: [SelectOpt p] -- need some way to sort on indirect fields
          , allowDelete :: Bool
          , defaultNew  :: Maybe p
          , routes      :: Routes m p
@@ -39,7 +50,7 @@ data Grid s m p c =
 data GridField s m p c = forall t. (PersistField t) =>
   GridField { heading  :: c -> String
             , extract  :: p -> t
-            , display  :: t -> String
+            , display  :: Either (t -> String) (t -> GWidget s m ())
             , editable :: Maybe (Editable s m t p)
             }
 
@@ -60,6 +71,7 @@ groupGet, formNewGet, formNewPost
             , Yesod m
             , RenderMessage m FormMessage
             , PersistEntityBackend p ~ YesodPersistBackend m
+            , Show p
             )
          => Grid s m p c
          -> GHandler s m RepHtml
@@ -78,6 +90,7 @@ formGet, formPost, formDelete
             , Yesod m
             , RenderMessage m FormMessage
             , PersistEntityBackend p ~ YesodPersistBackend m
+            , Show p
             )
          => Grid s m p c
          -> ID m p
@@ -105,6 +118,7 @@ gridForm :: ( Bounded c
             , Yesod m
             , RenderMessage m FormMessage
             , PersistEntityBackend p ~ YesodPersistBackend m
+            , Show p
             )
          => Bool
          -> Grid s m p c
@@ -116,7 +130,7 @@ gridForm run g sel = do
         goGroup = redirect $ groupR rts
         postR   = (const (newR rts) ||| (indR rts . fromJust)) sel 
 
-    items <- runDB $ selectList [] []
+    items <- runDB . selectList [] $ opts g
     -- liftIO . mapM_ (putStrLn . show) $ entityKey <$> items 
 
     let False <> _ = Nothing
@@ -183,7 +197,7 @@ makeRow fields allowDelete allowEdit i = do
         raw    = [whamlet|
 $forall (_, f) <- fields
     <td>
-        #{disp f i}
+        ^{disp f i}
 $# -- TODO: if no fields editable, don't show this (or render action column, or allow item routes)
 $maybe indR <- allowEdit
     <td>
@@ -226,7 +240,7 @@ makeGrid postR sel fields rows w e = do
 |]
     [whamlet|
 ^{style}
-<table>
+<table style="border-spacing: 20px 0; border-collapse: separate">
     <thead>
         <tr>
             $forall (c, f) <- fields
@@ -247,7 +261,7 @@ makeGrid postR sel fields rows w e = do
                 ^{form}
 |]
 
-mini (GridField _ extract display _) = display . extract
+mini (GridField _ extract display _) = ((((\x -> [whamlet|#{x}|]) .) ||| id) display) . extract
 
 editForm :: ( PersistEntity p
             , PersistQuery (YesodPersistBackend m) (GHandler s m)
@@ -257,6 +271,7 @@ editForm :: ( PersistEntity p
             , Eq c
             , PersistEntityBackend p ~ YesodPersistBackend m
             , RenderMessage m FormMessage
+            , Show p
             ) 
          => Route m
          -> [(c, GridField s m p c)]
@@ -266,6 +281,7 @@ editForm :: ( PersistEntity p
                       , GWidget s m ()
                       )
 editForm groupR fields this extra = do
+    liftIO $ print this
     (rs, vs) <- getDefaultedViews fields this
     let getView = fromJust . (`lookup` vs)
         w = [whamlet|
@@ -282,7 +298,7 @@ $forall (c, f) <- fields
                     $maybe err <- fvErrors view
                         <div .errors >#{err}
         $nothing
-            #{mini f this}
+            ^{mini f this}
 <td>
     <input type="submit" value="save">
 <td>

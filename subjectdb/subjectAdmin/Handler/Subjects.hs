@@ -106,7 +106,7 @@ updateSub stations x = do
         [id] -> runDB $ replace id sub
 -}
     match <- runDB . getBy . UniqueSubject $ subjectName sub
-    runDB $ maybe (const () <$> insert sub) (flip replace sub . entityKey) match
+    runDB $ maybe (void $ insert sub) (flip replace sub . entityKey) match
 
 selectKeysList :: ( PersistEntity p
                   , PersistQuery b m
@@ -193,12 +193,13 @@ data SubjectColumn = Station | Dir | Name | Reward
    deriving (Eq, Show, Bounded, Enum)
 
 subjectGrid :: Grid s App Subject SubjectColumn
-subjectGrid = Grid "Subjects" False Nothing (Routes SubjectR SubjectsR undefined undefined) $ \c -> case c of 
-    Station -> GridField show subjectStation show -- (T.unpack . stationRecName . entityVal . fromJust . runDB . get)
-                                                      Nothing
-    Dir     -> GridField show subjectDir     T.unpack Nothing
-    Name    -> GridField show subjectName    T.unpack Nothing
-    Reward  -> GridField show subjectReward  show   . Just $ Editable rewardField SubjectReward True (\x y -> y{subjectReward = x})
+subjectGrid = Grid "Subjects" [Asc SubjectStation, Asc SubjectDir, Asc SubjectName] False Nothing (Routes SubjectR SubjectsR undefined undefined) $ \c -> case c of 
+    Station -> GridField show subjectStation -- (Left show) 
+                                             (Right $ showFieldByID Nothing T.unpack stationRecName)
+                                                             Nothing
+    Dir     -> GridField show subjectDir     (Left T.unpack) Nothing
+    Name    -> GridField show subjectName    (Left T.unpack) Nothing
+    Reward  -> GridField show subjectReward  (Left show)   . Just $ Editable rewardField SubjectReward True (\x y -> y{subjectReward = x})
 
 rewardField :: Field s App Double
 rewardField = checkBool (>= 0) rewardMsg doubleField

@@ -1,7 +1,7 @@
 Default: &defaults
   host: "*4" # any IPv4 host
   port: 3000
-  approot: "http://reichardt.uoregon.edu:3000"
+  approot: "http://reichardt.uoregon.edu:3001"
   copyright: nlab 2012
   #analytics: UA-YOURCODE
 

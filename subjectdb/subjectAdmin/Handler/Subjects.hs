@@ -1,64 +1,68 @@
 module Handler.Subjects where
 
 import Import
-import CRUDGrid
-import qualified Data.Text as T
+import Prelude (last)
 import Data.Maybe
-import System.FilePath
+import Data.List hiding (insert)
 import Data.List.Split
+import GHC.Exts
+import qualified Data.Text as T
 -- import Data.Text.IO (readFile)
-import System.Process
 import Control.Monad
+import Control.Arrow
+import System.Exit
+import System.Process
+--import System.FilePath
 import Text.Parsec
 import Text.ParserCombinators.Parsec.Number
 import Text.Parsec.String
 import Data.Char
-import Control.Arrow
-import System.Exit
-import Data.List (intercalate, nub, (\\))
+import CRUDGrid
 import qualified Data.Conduit as C
 import qualified Data.Conduit.List as CL
-import Prelude (last)
-import Data.Function
-import Data.List hiding (insert)
-import GHC.Exts
 
 type SubjectParse = (Text, Text, Text, Double, Double)
 
 info :: Parser [SubjectParse]
 info = do
-    manyTill anyChar . try . onLine $ string "BEGIN OUTPUT"
+    void . manyTill anyChar . try . onLine $ string "BEGIN OUTPUT"
     manyTill good eof
 
 good :: Parser SubjectParse
 good = skipTill bad . try . onLine $ do
     station <- word
     dir <- between (char '"') (char '"') . many $ satisfy (\x -> and $ [isPrint, (/='"')] <*> [x])
-    spaces1
+    void $ spaces1
     subj <- word
-    string "reward:"
+    void $ string "reward:"
     reward <- fractional3 False
-    spaces1
-    string "pnlty:"
+    void $ spaces1
+    void $ string "pnlty:"
     penalty <- fractional3 False
     return (station, T.pack dir, subj, reward, penalty)
 
+bad :: Parser String
 bad = choice $ startLine <$> ["umount", "none for"]
 
+startLine :: String -> Parser String
 startLine x = string x >> tilLine anyChar
     
 word :: Parser Text
 word = T.pack <$> (manyTill anyChar $ try spaces1)
 
+spaces1 :: Parser ()
 spaces1 = skipMany1 space
 
+tilLine :: Parser a -> Parser [a]
 tilLine x = manyTill x $ try newline
 
+onLine :: Parser a -> Parser a
 onLine x = do
     out <- x
-    newline
+    void $ newline
     return out
 
+skipTill :: Parser a -> Parser b -> Parser b
 skipTill x end = end <|> (x >> skipTill x end)
 
 populate :: ( PersistQuery (YesodPersistBackend m) (GHandler s m)
@@ -84,27 +88,42 @@ $forall d <- dupes
 <br>
 |]
 
+findDups :: Ord b => (a -> b) -> [a] -> ([[a]], [a])
 findDups f = (second concat) . partition ((> 1) . length) . groupWith f
 
+getAll :: ( Eq a
+          , PersistEntity val
+          , YesodPersist m
+          , PersistQuery (YesodPersistBackend m) (GHandler s m)
+          , PersistEntityBackend val ~ YesodPersistBackend m
+          ) 
+       => (val -> a)
+       -> [a]
+       -> GHandler s m ([(a, Key (YesodPersistBackend m) val)], [a])
 getAll f xs = do
     old <- runDB $ selectList [] []
     let newVals = nub $ xs
         oldVals = f . entityVal <$> old
         news = newVals \\ oldVals    
---    liftIO $ mapM_ print news
     return (zip oldVals $ entityKey <$> old, news)
 
+updateSub :: ( YesodPersist m
+             , PersistUnique (YesodPersistBackend m) (GHandler s m)
+             ) 
+          => [(Text, Key (YesodPersistBackend m) (StationRecGeneric (YesodPersistBackend m)))]
+          -> SubjectParse
+          -> GHandler s m ()
 updateSub stations x = do
     let sub = Subject (getSubject x)
                       (getReward x)
                       (fromJust $ lookup (getStation x) stations)
                       $ getDir x
-{-
+    {-
     match <- runDB $ selectKeysList [SubjectName ==. subjectName sub]
     case match of
         []   -> void . runDB $ insert sub
         [id] -> runDB $ replace id sub
--}
+    -}
     match <- runDB . getBy . UniqueSubject $ subjectName sub
     runDB $ maybe (void $ insert sub) (flip replace sub . entityKey) match
 
@@ -115,10 +134,17 @@ selectKeysList :: ( PersistEntity p
                -> b m [Key b p]
 selectKeysList f = C.runResourceT $ selectKeys f [] C.$$ CL.consume
 
+getStation :: SubjectParse -> Text
 getStation (x,_,_,_,_) = x
-getSubject(_,_,x,_,_) = x
-getReward(_,_,_,x,_) = x
-getDir(_,x,_,_,_) = x
+
+getDir     :: SubjectParse -> Text
+getDir     (_,x,_,_,_) = x
+
+getSubject :: SubjectParse -> Text
+getSubject (_,_,x,_,_) = x
+
+getReward  :: SubjectParse -> Double
+getReward  (_,_,_,x,_) = x
 
 getPopulateR ::
             ( PersistQuery (YesodPersistBackend m) (GHandler s m)
@@ -129,15 +155,15 @@ getPopulateR ::
          => GHandler s m RepHtml
 getPopulateR = defaultLayout $ do
     (report, success, entries) <- liftIO $ do
---      (exitcode, stdout, stderr) <- readProcessWithExitCode "octave" ["--no-window-system", "--no-site-file", "-q", "-p" ++ rPath] ("GetSecs," ++ cmds)
+--      (exitcode, stdout, stderr) <- readProcessWithExitCode "octave" ["--no-window-system", "--no-site-file", "-q", "-p" ++ rPath] cmds
         (exitcode, stdout, stderr) <- readProcessWithExitCode "matlab" ["-nojvm", "-nodesktop", "-nodisplay", "-nosplash"] cmds
-
         let entries = parse info "" stdout
             success = ((const False ||| const True) entries) && exitcode == ExitSuccess && null stderr
-            report = splitOn "\n" $ "exit:\n" ++ (show exitcode) ++ 
-                                "\n\nstderr:\n" ++ stderr ++ 
-                                "\n\nparse:\n" ++ ((show ||| unlines . (show <$>)) entries) ++ 
-                                "\n\nstdout:\n" ++ (numLines stdout)
+            report = splitOn "\n" $ 
+                        "exit:\n" ++ (show exitcode) ++ 
+                        "\n\nstderr:\n" ++ stderr ++ 
+                        "\n\nparse:\n" ++ ((show ||| unlines . (show <$>)) entries) ++ 
+                        "\n\nstdout:\n" ++ (numLines stdout)
         return (report, success, (undefined ||| id) entries)
     when success $ populate entries
     [whamlet|
@@ -146,41 +172,19 @@ $forall s <- report
 |]
     setTitle "populate"
 
-numLines = unlines . zipWith (\x -> ((show x ++ ":") ++)) [1..] . lines
+numLines :: String -> String
+numLines = unlines . zipWith (\x -> ((show x ++ ":") ++)) ([1..]::[Int]) . lines
 
+rPath :: String --Text
 rPath = "\"/home/nlab/ratrix/bootstrap\""
+
+cmds :: String -- Text
 cmds = concat
-    [ "cd /home/nlab/ratrix/bootstrap,"
+    [ "cd " ++ rPath ++ ","
     , "setupEnvironment,"
     , "collectInfo,"
     , "quit"
     ]
-
-{-
-matlab -nodisplay -nosplash -nojvm -nodesktop -r "GetSecs,cd('/home/nlab/ratrix/bootstrap'),setupEnvironment,collectInfo,quit"
--}
-
-{-
-mntpt = "/mnt/tmp"
-cmds = concat [ "system 'sudo mkdir " ++ mntpt ++ "',"
-              , "system 'sudo mount.cifs //184.171.85.60/Users " ++ mntpt ++ " -o username=workgroup/nlab,password=huestis238',"
-              , "dir " ++ mntpt ++ "/nlab/Desktop/mouseData/ServerData,"
-              , "system 'sudo umount " ++ mntpt ++ "',"
-              , "system 'sudo rmdir " ++ mntpt ++ "'"
-              ]
--}
-
-{-
-"-logfile", log, "-sd", matlabDir
-
-  --exec-path PATH        Set path for executing subprograms.  
-  --path PATH, -p PATH    Add PATH to head of function search path.
-
-  --traditional           Set variables for closer MATLAB compatibility.
-
-  FILE                    Execute commands from FILE.  Exit when done
-                          unless --persist is also specified.
--}
 
 getSubjectsR :: Handler RepHtml
 getSubjectsR = groupGet subjectGrid
@@ -194,8 +198,7 @@ data SubjectColumn = Station | Dir | Name | Reward
 
 subjectGrid :: Grid s App Subject SubjectColumn
 subjectGrid = Grid "Subjects" [Asc SubjectStation, Asc SubjectDir, Asc SubjectName] False Nothing (Routes SubjectR SubjectsR undefined undefined) $ \c -> case c of 
-    Station -> GridField show subjectStation -- (Left show) 
-                                             (Right $ showFieldByID Nothing T.unpack stationRecName)
+    Station -> GridField show subjectStation (Right $ showFieldByID Nothing T.unpack stationRecName)
                                                              Nothing
     Dir     -> GridField show subjectDir     (Left T.unpack) Nothing
     Name    -> GridField show subjectName    (Left T.unpack) Nothing

@@ -1,0 +1,24 @@
+Default: &defaults
+  user: postgres
+  password: password
+  host: reichardt.uoregon.edu
+  port: 5433
+  database: subjectAdmin
+  poolsize: 10
+
+Development:
+  <<: *defaults
+
+Testing:
+  database: subjectAdmin_test
+  <<: *defaults
+
+Staging:
+  database: subjectAdmin_staging
+  poolsize: 100
+  <<: *defaults
+
+Production:
+  database: subjectAdmin_production
+  poolsize: 100
+  <<: *defaults

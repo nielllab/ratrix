@@ -25,4 +25,4 @@ catch ex
 end
 
 [rewardSizeULorMS requestRewardSizeULorMS msPenalty msPuff msRewardSound msPenaltySound] = ...
-    calcCommonValues(r,r.rewardSizeULorMS,getRequestRewardSizeULorMS(r),subject);
+    calcCommonValues(r,r.rewardSizeULorMS,getRequestRewardSizeULorMS(r));

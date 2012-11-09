@@ -7,10 +7,10 @@ setupEnvironment;
 
 if ~exist('r','var') || isempty(r)
     %dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'ratrixData',filesep);
-    %dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'mouseData',filesep);
+    dataPath=fullfile(fileparts(fileparts(getRatrixPath)),'mouseData',filesep);
     
-    mtrix=3;
-    dataPath=['\\mtrix' num2str(mtrix) '\Users\nlab\Desktop\mouseData\'];
+    mtrix=4;
+    %dataPath=['\\mtrix' num2str(mtrix) '\Users\nlab\Desktop\mouseData\'];
     
     r=ratrix(fullfile(dataPath, 'ServerData'),0);
 end

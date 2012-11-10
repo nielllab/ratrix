@@ -125,11 +125,15 @@ stationSpec.eyeTracker                        = et;
 stationSpec.portSpec.phasePins                = int8(16);
 stationSpec.portSpec.stimPins                 = int8(17);
 stationSpec.portSpec.indexPins                = int8(8);
+stationSpec.portSpec.laserPins                = uint8([]);
 
 if a
     switch b
         case {'F46D04EFE0FF','5404A6EF6720','14DAE971D50E'}
             stationSpec.portSpec.valveSpec=int8(3); %mini-3-way-lickometer and ball only use center valve
+        case {'08002700D40D','C860005FBB51'} % sue's vaio, aldis' station
+            stationSpec.portSpec.laserPins = uint8(9);
+            stationSpec.portSpec.framePins = [];
     end
 end
 

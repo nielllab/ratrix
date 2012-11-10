@@ -198,7 +198,7 @@ if doPerfBias
         perfBiasData.bias.phat(end+1)=phat(ind);
         perfBiasData.bias.pci(end+1,:)=pci(ind,:);
     end
-    makePerfBiasPlot(trialNums(smoothingWidth:end),perfBiasData,c);
+    makePerfBiasPlot(trialNums(smoothingWidth:end),perfBiasData,c,true);
 end
 
 %change these to depend on p (pctCorrectionTrials), which we have to add to compiled records
@@ -222,7 +222,7 @@ if plotAfterErrorsToo
     %plot after errors
     goodAEs=getGoods(d,'justAfterError');
     [performance colors]=calculateSmoothedPerformances(d.correct(goodAEs)',smoothingWidth,'boxcar','powerlawBW');
-    plot(find(goodAEs),performance,'color',[0.8,1,.9]) %light green
+    plot(find(goodAEs),performance,'color',[0 .5 0]);%,[0.8,1,.9]) %light green
 end
 
 %plot MAIN good performance

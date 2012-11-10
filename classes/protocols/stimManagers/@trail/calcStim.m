@@ -13,7 +13,10 @@ if IsLinux
     depth=24;
 end
 if ismac
+    depth=32;
+    if false %this was for trying to record stim in real time, screws up my grey?
     depth=16; % if use 8, screen('openwindow') says it can't open at pixelSize 8, but it can do 16 at pixelSize 8 !??!
+    end
 end
 if IsWin
     depth=32;
@@ -27,13 +30,11 @@ if hz==0 %osx
     hz=60;
 end
 
-resolutions(resolutionIndex)
-
 scaleFactor = getScaleFactor(stimulus);
 interTrialLuminance = getInterTrialLuminance(stimulus);
 
 stimulus.initialPos=[width height]'/2;
-details.nFrames = stimulus.timeoutSecs*hz;
+details.nFrames = ceil(stimulus.timeoutSecs*hz);
 details.target = stimulus.targetDistance(1)*details.target;
 
 stimulus.mouseIndices=[];

@@ -194,9 +194,10 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             
             checkPorts(trialManager,trialRecords(trialInd).targetPorts,trialRecords(trialInd).distractorPorts);
             
-            [stimSpecs startingStimSpecInd] = createStimSpecsFromParams(trialManager,preRequestStim,preResponseStim,discrimStim,...
+            [stimSpecs startingStimSpecInd newSM] = createStimSpecsFromParams(trialManager,preRequestStim,preResponseStim,discrimStim,...
 				trialRecords(trialInd).targetPorts,trialRecords(trialInd).distractorPorts,getRequestPorts(trialManager,getNumPorts(station)),...
-				trialRecords(trialInd).interTrialLuminance,refreshRate,indexPulses);
+				trialRecords(trialInd).interTrialLuminance,refreshRate,indexPulses,newSM);
+            updateSM=true;
 
             validateStimSpecs(stimSpecs);
 
@@ -267,6 +268,11 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                         error(warningStr);
                     end
                 end
+            end
+            
+            p = getPCO(station);
+            if ~isempty(p)                
+                trialRecords(trialInd).pco = init(p);
             end
             
             if isfield(stimulusDetails, 'big') % edf: why did this used to also test for isstruct(stimulusDetails) ?

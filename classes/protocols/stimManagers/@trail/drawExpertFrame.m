@@ -5,8 +5,6 @@ function [doFramePulse expertCache dynamicDetails textLabel i dontclear indexPul
 
 originalLabel = textLabel;
 
-dontclear = 0;
-
 width  = 63; % default 1.  > 63 errors for DrawDots?  > ~10 seems to have no effect on lines?
 center = []; % positions are relative to "center" (default center is [0 0]).
 centerWidth = 10;
@@ -15,13 +13,21 @@ dotType = 2; % 0 (default) squares
 % 1 circles (with anti-aliasing) (requires Screen('BlendFunction'))
 % 2 circles (with high-quality anti-aliasing, if supported by your hardware)
 
-if ~isfield('clutSize',expertCache)
+if ~isfield(expertCache,'clutSize')
     expertCache.clutSize = size(currentCLUT,1)-1;
 end
 white = expertCache.clutSize*ones(1,4);
-grey = white.*[.5*ones(1,3) 1];
-red = expertCache.clutSize*[1 0 0 1];
-blue = expertCache.clutSize*[0 0 1 1];
+black =       white.*[zeros(1,3)   1];
+grey  = round(white.*[.5*ones(1,3) 1]);
+red   =       white.*[1 0 0        1];
+blue  =       white.*[0 0 1        1];
+
+if true %shouldn't be necessary, but ptb bug: a fillrect grey below screws up dontclear = 0
+    dontclear = 1;
+    Screen('FillRect', window, black, destRect);
+else
+    dontclear = 0;
+end
 
 didBlend = false;
 smooth = 1;  % default 0, 1 requires Screen('BlendFunction')
@@ -98,8 +104,8 @@ switch phaseRecords(phaseNum).phaseType
             positionStim = s.positional;
         end
         
-        colorWalls = positionStim;
-        drawTrail = positionStim;
+        colorWalls = positionStim && ~s.cue;
+        drawTrail = positionStim && isempty(s.dms);
         
         if ~positionStim
             origTargetPos = targetPos;
@@ -110,22 +116,49 @@ switch phaseRecords(phaseNum).phaseType
             end
         end
         
+        trailColor = white;
+        
         if doWalls
             wallRect = destRect; %[left top right bottom]
-            if dynamicDetails.target > 0  == strcmp(s.stim,'flip')
+            
+            if ~isfield(dynamicDetails,'parity')
+                dynamicDetails.parity = strcmp(s.stim,'flip') || (strcmp(s.stim,'rand') && rand>.5);
+            end
+            
+            if dynamicDetails.target > 0 == dynamicDetails.parity
                 ind = 3;
             else
                 ind = 1;
             end
             
-            if strcmp(s.stim,'flip')
+            if dynamicDetails.parity
+                if isempty(wrongLoc)
+                    error('can''t flip without a wrongLoc')
+                end
                 wallRect(ind) = wrongLoc;
+                cueColor = black;
             else
                 wallRect(ind) = targetPos;
+                cueColor = white;
+                trailColor = black;
             end
             
-            if diff(wallRect([1 3])) > 0
-                Screen('FillRect', window, white, wallRect);                
+            if ~isempty(s.dms)
+                if ~s.cue
+                    error('can''t have dms without cue')
+                end
+                t = GetSecs - phaseStartTime; %have to GetSecs instead of dynamicDetails.times(i) cuz i only updates if there was movement
+                if t < s.dms.targetLatency
+                    Screen('FillRect', window, grey, destRect); %ptb bug: fillrecting whole screen redefines clear color
+                    dontclear = 1;
+                    if finish
+                        dynamicDetails.result = 'tooEarly';
+                    end
+                end
+            end
+            
+            if diff(wallRect([1 3])) > 0 && (isempty(s.dms) || t >= s.dms.targetLatency) %for now assume targetLatency = distractorLatency
+                Screen('FillRect', window, white, wallRect);
             end
             
             if ~isempty(wrongLoc)
@@ -143,6 +176,20 @@ switch phaseRecords(phaseNum).phaseType
             
             if colorWalls
                 Screen('DrawLine', window, red, targetPos, destRect(2), targetPos, destRect(4), width); %no smoothing?
+            end
+            
+            if s.cue
+                if isempty(s.dms) || (t >= s.dms.cueLatency && t <= s.dms.cueLatency + s.dms.cueDuration)
+                    if exist('midRect','var')
+                        cueRect = midRect;
+                        cueRect([1 3]) = cueRect([1 3])+[1 -1].*width;
+                    else
+                        error('can''t have cue without wrongLoc')
+                    end
+                    Screen('FillRect', window, cueColor, cueRect);
+                end
+            elseif strcmp(s.stim,'rand')
+                error('cues should be enabled for randomized stim')
             end
         else
             try
@@ -175,10 +222,10 @@ switch phaseRecords(phaseNum).phaseType
         end
         
         if drawTrail
-            Screen('DrawDots', window, relPos, width, white, center, dotType);
+            Screen('DrawDots', window, relPos, width, trailColor, center, dotType);
             
             inds = repmat(2:size(relPos,2)-1,2,1);
-            Screen('DrawLines', window, relPos(:,[1 inds(:)' end]), width, white, center, smooth);
+            Screen('DrawLines', window, relPos(:,[1 inds(:)' end]), width, trailColor, center, smooth);
             
             Screen('DrawDots', window, relPos, centerWidth, blue, center, dotType);
         end
@@ -204,8 +251,9 @@ if didBlend
     Screen('BlendFunction', window, sourceFactorOld, destinationFactorOld);
 end
 
-if trialRecords(end).stimDetails.correctionTrial
-    textLabel = ['correction trial! ' textLabel];
+ctStr = 'correction trial!';
+if trialRecords(end).stimDetails.correctionTrial && isempty(strfind(textLabel,ctStr))
+    textLabel = [ctStr ' ' textLabel];% ' ' originalLabel]; %adding original label grows forever
 end
 end
 

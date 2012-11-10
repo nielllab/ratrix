@@ -2,7 +2,7 @@ function a = loadobj(a)
 if isa(a,'trail')
     % do nothing
 else % a is an old version    
-    fields = {'gain','targetDistance','timeoutSecs','slow','slowSecs','positional','stim'}; %initialPos, mouseIndices
+    fields = {'gain','targetDistance','timeoutSecs','slow','slowSecs','positional','stim','cue','soundClue','dms'}; %initialPos, mouseIndices
     
     for i=1:length(fields)
         if ~isfield(a,fields{i})
@@ -18,9 +18,23 @@ else % a is an old version
     % and we are left with structs
     
     % so we have to rebuild from scratch (really lame!)
-    t=trail(a,struct(a.stimManager).maxWidth,struct(a.stimManager).maxHeight, ...
-        struct(a.stimManager).scaleFactor,double(struct(a.stimManager).interTrialLuminance)/double(intmax('uint8')));
-
+    
+    if false %why was i changing interTrialLuminance?  how did this ever work?
+        t=trail(a,struct(a.stimManager).maxWidth,struct(a.stimManager).maxHeight, ...
+            struct(a.stimManager).scaleFactor,double(struct(a.stimManager).interTrialLuminance)/double(intmax('uint8')));
+    else
+        itl = struct(a.stimManager).interTrialLuminance;
+        if 0<=itl && itl<=1
+            t=trail(a,struct(a.stimManager).maxWidth,struct(a.stimManager).maxHeight, ...
+                struct(a.stimManager).scaleFactor,itl);
+        else
+            itl
+            class(itl)
+            keyboard
+            error('here''s why?')
+        end
+    end
+    
     
 % stim.gain = .35 * ones(2,1);
 % stim.targetDistance = 300;

@@ -156,7 +156,7 @@ void doPort(
         /*requires >= -O2 compiler optimization to inline inb/outb macros from io.h*/
         
         result = iopl(3); /* requires sudo, allows access to the entire address space with the associated risks.*/
-        /* required for ECR. safer alternative: ioperm */
+        /* required for ECR. safer alternative: ioperm, but probably prevents access to PCI/PCMCIA add-on ports */
         
         if (result != 0) {
             printf("iopl: %d (%s)\n",result,strerror(errno));

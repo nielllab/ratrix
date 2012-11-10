@@ -36,7 +36,8 @@ switch kind
     case 0
         %nothing
     case 1
-        Screen('FillRect',window,200*ones(1,3));
+        %ptb bug: sets our background color!
+        %Screen('FillRect',window,200*ones(1,3));
     otherwise
         kind
         error('unrecognized kind')

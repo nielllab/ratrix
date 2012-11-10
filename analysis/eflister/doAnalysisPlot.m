@@ -254,6 +254,7 @@ else
             case 'trials per day'
                 doPlot('plotTrialsPerDay',processedRecords,[],[],[],[],[],~includeKeyboard);
             case 'performance'
+%                keyboard
                 doPlot('percentCorrect',processedRecords,[],[],[],[],[],~includeKeyboard);
             case 'bias'
                 doPlot('plotBias',processedRecords,[],[],[],[],[],~includeKeyboard);

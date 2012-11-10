@@ -103,6 +103,7 @@ switch nargin
         end
 
         % stimType
+        % rearchitect to put validation in setType
         if ischar(varargin{3}) && any(ismember(varargin{3},{'static','loop','cache','expert','dynamic'}))
             spec.stimType = varargin{3};
         elseif iscell(varargin{3})
@@ -127,12 +128,15 @@ switch nargin
         else
             error('stimType must be static, trigger, loop, cache, timedFrames, indexedFrames, expert, or dynamic');
         end
+        
         % startFrame
+        % rearchitect to put validation in setStartFrame
         if isscalar(varargin{4}) && varargin{4}>=0
             spec.startFrame=varargin{4};
         else
             error('startFrame must be >=0');
         end
+        
         % framesUntilTransition
         if isscalar(varargin{5}) && varargin{5} > 0
             spec.framesUntilTransition = varargin{5};

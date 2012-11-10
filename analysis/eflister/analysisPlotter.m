@@ -1,4 +1,5 @@
 function fs=analysisPlotter(selection,compiledFileDir,includeKeyboard)
+colordef black
 
 % if ~isdeployed
 % addpath('C:\Documents and Settings\rlab\Desktop\phil analysys');
@@ -48,6 +49,35 @@ if strcmp(selection.type,'all')
     %     for i = size(selection.subjects,1)
     
 else
+    if ispc && strcmp(selection.type,'performance') && strcmp(selection.filter,'all') && isscalar(selection.subjects)
+        d=dir([compiledFileDir selection.subjects{1} '.compiledTrialRecords.1-*.mat']);
+        
+        fd = ['\\reichardt\figures\' selection.subjects{1} '\'];
+        d2=dir([fd 'latest.fig']);
+        d2=sort({d2.name});
+        try %d or d2 may be empty
+            d=textscan(d.name,[selection.subjects{1} '.compiledTrialRecords.1-%u.fig']);
+            fd = [fd d2{end}]
+            x=open(fd);
+
+            kids = get(x,'Children');
+            as = find(strcmp('axes',get(kids,'Type')));
+            if ~isscalar(as)
+                error('huh')
+            end
+            y=get(kids(as),'XLim');
+            
+            if y(2)==d{1} && ~strcmp(selection.subjects{1},'c1ln')
+                set(x,'Visible','on');
+                fprintf('skipping - latest figures already generated (%s)\n',fd)
+                return
+            else
+                close(x);
+                fprintf('doing %s\n',fd);
+            end
+        end
+    end
+    
     for i=1:size(selection.subjects,1)
         fs(end+1)=figure('Name',[selection.titles{i} '    ' selection.type],'NumberTitle','off');
         
@@ -133,10 +163,18 @@ for i=1:length(d)
             er
         else
             fprintf('loading file')
+            try
             t=GetSecs();
+            end
             ctr=load(fullfile(compiledFileDir,d(i).name));
+            try
             fprintf('\ttime elapsed: %g\n',GetSecs-t)
+            end
             records=ctr.compiledTrialRecords;
+%            keyboard
+            %c1ln is showing 'response' field with way too few 3's and way
+            %too many -1's.  why?  where does this field get set?  seems to
+            %derive from 'result' field, which is sometimes a port vector
         end
     end
 end

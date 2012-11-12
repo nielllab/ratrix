@@ -95,15 +95,16 @@ t = sum(cell2mat(cellfun(@convert,{hrs mn sec frc},'UniformOutput',false)) .* re
     end
 
 if any(isnan(t))
-    error('bad')
-end
-
-if any(abs(t-bSecs)>10^-10) %why aren't these exact?  they differ by 8x10^-12
-    error('bad')
+    warning('ascii stamps didn''t work, returning binaries')
+    t = bSecs;
+else
+    if any(abs(t-bSecs)>10^-10) %why aren't these exact?  they differ by 8x10^-12
+        error('bad')
+    end
 end
 
 figure
-plot(diff(t)*1000)
+plot(diff(t)*1000,'LineWidth',2)
 xlabel('frame')
 ylabel('ms')
 end

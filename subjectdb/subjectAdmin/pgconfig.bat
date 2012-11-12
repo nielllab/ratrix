@@ -1,0 +1,1 @@
+"C:\Program Files\PostgreSQL\9.2\bin\pg_config.exe"

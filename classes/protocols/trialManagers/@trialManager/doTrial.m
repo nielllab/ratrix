@@ -270,6 +270,11 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 end
             end
             
+            p = getPCO(station);
+            if ~isempty(p)                
+                trialRecords(trialInd).pco = init(p);
+            end
+            
             if isfield(stimulusDetails, 'big') % edf: why did this used to also test for isstruct(stimulusDetails) ?
                 stimulusDetails = rmfield(stimulusDetails, 'big');
 

@@ -153,7 +153,23 @@ end
 
 startTimes = datenum(cell2mat({records.date}'));
 if ~all(diff(startTimes) > 0)
-    error('records don''t show increasing start times')
+    r = find(diff(startTimes)<=0);
+    for i=1:length(r)
+        inds = r(i)+[0:2]
+        records(inds).date
+    end
+    
+    if false
+        figure
+        plot(startTimes)
+        xlim([r(1) r(end)]+100*[-1 1])
+        ylim(startTimes(r(1))+.02*[-1 1])
+        keyboard
+    end
+    
+    %ok to soften from error to warning?  seems windows time service has
+    %hiccups (see //mtrix6 ly13 on 09.09.12)
+    warning('records don''t show increasing start times')
 end
 
 %these session boundaries aren't useful, cuz you may have stopped and started right away again
@@ -419,8 +435,12 @@ r = [records.reinforcementManager];
 intendedRewards = [r.rewardSizeULorMS];
 
 %interframe intervals (in secs, should be 1/60 for 60Hz)
-s = [records.station];
-ifis = [s.ifi];
+try
+    s = [records.station];
+    ifis = [s.ifi];
+catch %later stations added a field 'laserPins'    
+    ifis = cellfun(@(x)x.ifi,{records.station});
+end
 
 data=struct(...
     'trialNum'       , num2cell(uint32(trialNums)      ), ...

@@ -1,0 +1,10 @@
+/static/cpm_packages/
+/static/tmp
+/dist
+*.asv
+*.fig
+*.log
+*~
+*.1
+*.mat
+*.DS_Store

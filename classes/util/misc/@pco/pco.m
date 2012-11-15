@@ -17,6 +17,9 @@ p.rate = 30;
 p.n    = 100;
 p.msTolerance = 1;
 
+p.LEDs = [5 6]; %[green blue]
+p.LEDf = @(n) 1+(mod(n,3)>0);
+
 pFields = fields(p);
 
 switch nargin
@@ -53,6 +56,7 @@ end
 p.addr = hex2dec(p.addr);
 p.trig = uint8(p.trig);
 p.busy = uint8(p.busy);
+p.LEDs = uint8(p.LEDs);
 p.rate = 1/p.rate;
 p.msTolerance = p.msTolerance/1000;
 

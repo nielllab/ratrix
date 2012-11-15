@@ -3,6 +3,10 @@ if isempty(p.record)
     error('must call init first')
 end
 
+if ~busy(p)
+    leds(p,[]);
+end
+
 if ~exist('dontWait','var') || isempty(dontWait)
     dontWait = false;
 end

@@ -2,8 +2,8 @@ function [r rewardSizeULorMS requestRewardSizeULorMS msPenalty msPuff msRewardSo
     calcReinforcement(r,trialRecords, subject)
 
 updateRM=0;
-
-try
+tic
+try %this takes ~80ms and happens on every request and reward, consider just doing it once at the beginning of sessions?
     conn = dbConn;
     name = subject{1};
     q = ['SELECT reward FROM subject WHERE name=''' name ''''];
@@ -23,6 +23,6 @@ catch ex
     end
     fprintf('bailing on db reward\n')
 end
-
+toc
 [rewardSizeULorMS requestRewardSizeULorMS msPenalty msPuff msRewardSound msPenaltySound] = ...
     calcCommonValues(r,r.rewardSizeULorMS,getRequestRewardSizeULorMS(r));

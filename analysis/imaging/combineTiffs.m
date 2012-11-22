@@ -12,20 +12,20 @@ behaviorPath = '\\lee\Users\nlab\Desktop\ballData';
 imagingPath = 'C:\Users\nlab\Desktop\data'; %\\landis (accessing local via network path is slow)
 recs = {
     {'jbw01' {
-           {[1     192],[36 172],'9-21-12\jbw01 go to grating run 1','jbw01r1'  }
-           {[213   982],[10 670],'9-24-12\jbw01'                    ,'jbw01r1'  } % 54690 (91.15 mins) %timing screws up around 4300th frame/50th trial
-           {[983  1463],[ 1 165],'9-25-12\jbw01'                    ,'jbw01run1'} % 51296 (85.4933 mins) %timing screws up early
-           {[1464 2205],[20 720],'9-26-12\jbw01'                    ,'jbw01r1'  } % 32136 (53.56 mins) %timing screws up around 4270
+            {[1     192],[36 172],'9-21-12\jbw01 go to grating run 1','jbw01r1'  }
+            {[213   982],[10 670],'9-24-12\jbw01'                    ,'jbw01r1'  } % 54690 (91.15 mins) %timing screws up around 4300th frame/50th trial
+            {[983  1463],[ 1 165],'9-25-12\jbw01'                    ,'jbw01run1'} % 51296 (85.4933 mins) %timing screws up early
+            {[1464 2205],[20 720],'9-26-12\jbw01'                    ,'jbw01r1'  } % 32136 (53.56 mins) %timing screws up around 4270
         }
     }
     
     {'jbw03' {
-           {[1   665],[],'9-24-12\jbw03','jbw03r1'} % 63882 (106.47 mins)
-           {[667 962],[],'9-25-12\jbw03','jbw03r1'} % 30610 (51.0167 mins)
+            {[1   665],[],'9-24-12\jbw03','jbw03r1'} % 63882 (106.47 mins)
+            {[667 962],[],'9-25-12\jbw03','jbw03r1'} % 30610 (51.0167 mins)
         }
     }
     
-    {'wg02' {
+    {'wg02'  {
             {[1    511],[     ],'9-24-12\wg2','wg2r1' } % 28631 (47.7183 mins)
             {[512  815],[1 270],'9-25-12\wg2','wg2r1' } % 26261 (43.7683 mins)
             {[816 1223],[1 325],'9-26-12\wg2','wg2run'} % 37047 (61.745 mins)
@@ -98,7 +98,7 @@ else
             error('hmmm')
         end
         frame = imread(fullfile(d,fn));
-        data(:,:,i) = imresize(frame((stampHeight+1):end,:),sz); %is imresize smart about unity?
+        data(:,:,i) = imresize(frame((stampHeight+1):end,:),sz); %is imresize smart about unity?  how do our data depend on method?  (we use default 'bicubic' -- "weighted average of local 4x4" (w/antialiasing) -- we can specify kernel if desired)
         stamps(:,:,i) = frame(1:stampHeight,1:size(stamps,2));
     end
     toc
@@ -254,10 +254,6 @@ if ~isempty(f)
     end
 end
 
-pts = [-.8 2];
-pts = linspace(pts(1),pts(2),1+round(diff(pts)/frameDur));
-ptLs = numNice(pts,.01);
-
 if isempty(goodTrials) || true %heh
     trials = [1 length(onsets)];
 else
@@ -266,8 +262,8 @@ end
 
 trials = trials(1):trials(2);
 
-stoppedWithin = 2; %2
-respondedWithin = 1.5; %1
+stoppedWithin = 4; %2
+respondedWithin = [.5 1.5]; %1
 onlyCorrect = true;
 noAfterErrors = true;
 worstFactor = .7; %.1
@@ -289,7 +285,8 @@ d = diff(starts);
 
 trials = trials( ...
     d(1,trials)<=stoppedWithin              & ...
-    d(2,trials)<=respondedWithin            & ... 
+    d(2,trials)<=respondedWithin(2)         & ... 
+    d(2,trials)>=respondedWithin(1)         & ...
     (~onlyCorrect | correct(trials))        & ...
     (~noAfterErrors | ~afterErrors(trials)) & ...
     cellfun(@isempty,misses(trials))        & ...
@@ -297,6 +294,10 @@ trials = trials( ...
     );
 
 c = getUniformSpectrum(normalize(onsets));
+
+pts = [-.8 respondedWithin(1)];
+pts = linspace(pts(1),pts(2),1+round(diff(pts)/frameDur));
+ptLs = numNice(pts,.01);
 
 fig = figure;
 hold on
@@ -341,12 +342,31 @@ im = nan([size(pts,1) size(pts,2) size(data,1) size(data,2)]); %trials * t * h *
 b = whos('im');
 fprintf('target is %gGB\n',b.bytes/1000/1000/1000)
 
+fig = figure;
+numPix = 50;
+pix = reshape(data,[size(data,1)*size(data,2) size(data,3)]);
+[~, ord] = sort(rand(1,size(pix,1)));
+subplot(3,1,1)
+plot((t-t(1))/60,pix(ord(1:numPix),:))
+xlabel('mins')
+ylabel('pixel values')
+title('raw')
+
+subplot(3,1,2)
+title('fit')
+
+subplot(3,1,3)
+title('detrended + scaled')
+
+saveFig(fig,[pre '.detrend'],[0 0 500 1000]); % [left, bottom, width, height]
+
+
 fprintf('permuting...\n')
 tic
 data = permute(data,[3 1 2]); %possible oom
 toc
 
-figure
+fig = figure;
 bins = linspace(0,double(intmax('uint16')),1000);
 for i=1:length(onsets)
     semilogy(bins,hist(reshape(double(data(i,:,:)),[1 size(data,2)*size(data,3)]),bins),'Color',c(i,:))
@@ -370,6 +390,8 @@ set(a,'XTickLabel',[])
 set(a,'Box','off')
 set(a,'YAxisLocation','right')
 
+saveFig(fig,[pre '.pix'],[0 0 500 500]); % [left, bottom, width, height]
+
 fprintf('interpolating...\n')
 tic
 for i=1:length(trials)
@@ -388,23 +410,23 @@ toc
 %need nanmean from fullfile(matlabroot,'toolbox','stats','stats')
 %but \ratrix\analysis\eflister\phys\new\helpers\ is shadowing it...
 
-show(nanmeanMW(im),ptLs,[pre '.all trials (raw)'],[50 99],@cb);
-show(nanmeanMW(im(targ(trials)>0,:,:,:)) - nanmeanMW(im(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right (raw)'],[1 99],@cb);
+show(nanmedianMW(im),ptLs,[pre '.all trials (raw)'],[50 99],@cb);
+show(nanmedianMW(im(targ(trials)>0,:,:,:)) - nanmedianMW(im(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right (raw)'],[1 99],@cb);
 
-m = squeeze(nanmeanMW(squeeze(nanmeanMW(im)))); %does this order matter?
+m = squeeze(nanmedianMW(squeeze(nanmedianMW(im)))); %does this order matter?
 m = permute(repmat(m,[1 1 size(im,1) size(im,2)]),[3 4 1 2]);
 dfof = (im-m)./m;
 
 clear m 
 %clear im
 
-show(nanmeanMW(dfof),ptLs,[pre '.all trials (dF/F)'],[1 99],@cb);
-show(nanmeanMW(dfof(targ(trials)>0,:,:,:)) - nanmeanMW(dfof(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right (dF/F)'],[1 99],@cb);
+show(nanmedianMW(dfof),ptLs,[pre '.all trials (dF/F)'],[1 99],@cb);
+show(nanmedianMW(dfof(targ(trials)>0,:,:,:)) - nanmedianMW(dfof(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right (dF/F)'],[1 99],@cb);
 
     function cb(in)
         figure
         
-        xb = [max(ptLs(1),-stoppedWithin) min(ptLs(end),respondedWithin)];
+        xb = [max(ptLs(1),-stoppedWithin) min(ptLs(end),respondedWithin(1))];
         
         n = 5;
         subplot(n,1,1)
@@ -421,7 +443,7 @@ show(nanmeanMW(dfof(targ(trials)>0,:,:,:)) - nanmeanMW(dfof(targ(trials)<0,:,:,:
         
         subplot(n,1,5)
         hold on
-        plot(ptLs,[ar-nanmeanMW(ar,2); al-nanmeanMW(ar,2)]','w','LineWidth',2)
+        plot(ptLs,[ar-nanmedianMW(ar,2); al-nanmedianMW(ar,2)]','w','LineWidth',2)
         plot(ptLs,al-ar,'r','LineWidth',2)
         plot(ptLs,zeros(1,length(ptLs)),'Color',.5*ones(1,3),'LineWidth',2)
         xlim(xb)
@@ -434,15 +456,13 @@ show(nanmeanMW(dfof(targ(trials)>0,:,:,:)) - nanmeanMW(dfof(targ(trials)<0,:,:,:
             xlim(xb)            
             
             if exist('doAvg','var') && doAvg
-                avg = nanmeanMW(im(ismember(trials,which),:,in(1,2),in(1,1)));
+                avg = nanmedianMW(im(ismember(trials,which),:,in(1,2),in(1,1)));
                 plot(ptLs,avg,'w','LineWidth',2)
             end
             
             title(lab)
         end
     end
-
-keyboard
 end
 
 function in = normalize(in)

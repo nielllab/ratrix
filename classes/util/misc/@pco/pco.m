@@ -17,7 +17,7 @@ p.rate = 30;
 p.n    = 100;
 p.msTolerance = 1;
 
-p.LEDs = [5 6]; %[green blue]
+p.LEDs = [5 3]; %[5 6]; %[green blue]
 p.LEDf = @(n) 1+(mod(n,3)>0);
 
 pFields = fields(p);
@@ -76,6 +76,8 @@ p = class(p,'pco');
         end
         
         switch f
+            case {'LEDs' 'LEDf'}
+                %pass
             case 'addr'
                 if bad(v,{@ischar @isvector @(x)size(x,1)==1})
                     error('addr must be single hex string')

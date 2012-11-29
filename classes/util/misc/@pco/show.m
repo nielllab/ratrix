@@ -31,5 +31,12 @@ legend({'busy' 'ack' 'next'});
 linkaxes(h,'x');
 xlim([1 struct(p).n]);
 xlabel('exposure')
-title(sprintf('rate %g (effective) %g (nominal) hz', 1/median(diff(t(1,1:find(isnan(t(1,:)),1)-1))), 1/struct(p).rate))
+
+eff = find(isnan(t(1,:)),1);
+if isempty(eff)
+    eff = size(t,2);
+else
+    eff = eff-1;
+end
+title(sprintf('rate %g (effective) %g (nominal) hz', 1/median(diff(t(1,1:eff))), 1/struct(p).rate))
 end

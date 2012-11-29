@@ -3,6 +3,10 @@ if isempty(p.record)
     error('must call init first')
 end
 
+if ~busy(p)
+    leds(p,[]);
+end
+
 if ~exist('dontWait','var') || isempty(dontWait)
     dontWait = false;
 end
@@ -21,7 +25,7 @@ if out>=-p.msTolerance && p.ind<p.n && ~(dontWait && busy(p))
     did = true;
     p.ind = p.ind+1;
     
-    disp(['doing ' num2str(p.ind)])
+    % disp(['doing ' num2str(p.ind)])
     p.record([2 4],p.ind) = 0;
     
     p.record(1,p.ind) = WaitSecs('UntilTime', when);
@@ -30,7 +34,7 @@ if out>=-p.msTolerance && p.ind<p.n && ~(dontWait && busy(p))
     end
     
     p.record(3,p.ind) = GetSecs;
-    trig(p,true);
+    p = trig(p,true);
     
     while ~busy(p) %pco always ack's our trig immediately with a busy, but if it took a while, we could bail here
         p.record(4,p.ind) = p.record(4,p.ind) + 1;

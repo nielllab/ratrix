@@ -21,7 +21,7 @@ if ~exist('in','var') || isempty(in)
     in = fullfile(a,b);
 end
 
-multiTif=0;
+multiTif=1;
 
 if multiTif
    
@@ -114,7 +114,7 @@ if false
 end
 
 sizestruct = whos('out');
-shrinkfactor = 0.75*10^9 / sizestruct.bytes
+shrinkfactor = 1.5*10^9 / sizestruct.bytes
 if shrinkfactor<1
     out = out(:,:,1:floor(shrinkfactor*size(out,3)));
 end

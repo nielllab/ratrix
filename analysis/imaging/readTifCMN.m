@@ -21,6 +21,13 @@ if ~exist('in','var') || isempty(in)
     in = fullfile(a,b);
 end
 
+multiTif=0;
+
+if multiTif
+   
+    in(1:end-5)
+    [out frameT]=readMultiTif(in(1:end-5));
+else    
 try
     intf = [in '.tif'];
     info = imfinfo(intf);
@@ -107,7 +114,7 @@ if false
 end
 
 sizestruct = whos('out');
-shrinkfactor = 1.5*10^9 / sizestruct.bytes
+shrinkfactor = 0.75*10^9 / sizestruct.bytes
 if shrinkfactor<1
     out = out(:,:,1:floor(shrinkfactor*size(out,3)));
 end
@@ -121,6 +128,8 @@ out = out(:,:,101:end);  %%% avoid transients of first cycle
 % for f=1:size(im,3)
 % out= imresize(out(:,:,f),binning,'box');
 % end
+
+end
 
 m = repmat(mean(double(out),3),[1 1 size(out,3)]);
 dfof = (double(out)-m)./m;

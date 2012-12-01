@@ -1,6 +1,7 @@
 function combineTiffs
 dbstop if error
 
+% add path for bootstrap which gets everything setup
 addpath('C:\Users\nlab\Desktop\ratrix\bootstrap');
 setupEnvironment;
 
@@ -8,6 +9,8 @@ if ~ispc
     error('win only for now')
 end
 
+% loads records for behavior and imaging for mice you choose
+% separate blocks because imaging data is on multiple drives right now
 behaviorPath = '\\lee\Users\nlab\Desktop\ballData';
 imagingPath = 'C:\Users\nlab\Desktop\data'; %\\landis (accessing local via network path is slow)
 recs = {
@@ -54,34 +57,41 @@ recs = {
 
 imagingPath = 'F:\data'; %\\landis (accessing local via network path is slow)
 recs = {
-    {'GCam13LN' {     
-            {[2   194],[],'112012\GCam13LN'   ,'GCam13LN'}    
-            {[204 474],[],'112112\GCam13LN'   ,'GCam13LN'}
-            {[510 577],[],'112212\GCam13LN\r2','GCam13LN'}
-            {[579 785],[],'112312\GCam13LN'   ,'GCam13LN'} 
+%     {'GCam13LN' {               
+%             {[984  1190],[],'112612\GCam13LN'   ,'GCam13LN'}
+%     
+%     
+%             {[786   848],[],'112512\GCam13LN'   ,'GCam13LN'}
+%             {[850   983],[],'112512\GCam13LN\r2','GCam13LN'}            
+% %            {[984  1190],[],'112612\GCam13LN'   ,'GCam13LN'} %sync problem line 219
+%             {[1191 1405],[],'112712\GCam13LN'   ,'GCam13LN'}            
+%             {[1406 1652],[],'112812\GCam13LN'   ,'GCam13LN'}                        
+%         }
+%     }
     
-            {[786   848],[],'112512\GCam13LN'   ,'GCam13LN'}
-            {[850   983],[],'112512\GCam13LN\r2','GCam13LN'}            
-            {[984  1190],[],'112612\GCam13LN'   ,'GCam13LN'}
-            {[1191 1405],[],'112712\GCam13LN'   ,'GCam13LN'}            
-            {[1406 1652],[],'112812\GCam13LN'   ,'GCam13LN'}                        
-        }
-    }
+    {'GCam13TT' {            
+%            {[644   855],[],'112512\GCam13TT'   ,'GCam13TT'} %sync problem line 219
+            {[858  1085],[],'112612\GCam13TT'   ,'GCam13TT'} %sync problem line 219    
     
-    {'GCam13TT' {         
-            {[8   257],[],'112012\GCam13TT','GCam13TT'}
-            {[258 353],[],'112112\GCam13TT','GCam13TT'}
-            {[354 496],[],'112212\GCam13TT','GCam13TT'}
-            {[498 621],[],'112312\GCam13TT','GCam13TT'}  
-    
-            {[644   855],[],'112512\GCam13TT'   ,'GCam13TT'} 
-            {[858  1085],[],'112612\GCam13TT'   ,'GCam13TT'} 
+%            {[644   855],[],'112512\GCam13TT'   ,'GCam13TT'} %sync problem line 219
+%            {[858  1085],[],'112612\GCam13TT'   ,'GCam13TT'} %sync problem line 219
             {[1116 1321],[],'112712\GCam13TT\r2','GCam13TT'}
             {[1322 1710],[],'112812\GCam13TT\'  ,'GCam13TT'}
         }
     }    
 };
 
+imagingPath = 'C:\Users\nlab\Desktop\imaging data';
+imagingPath = '\\landis\data';
+recs = {
+     {'GCam13LN' {               
+            {[1406 1652],[],'112812\GCam13LN'   ,'GCam13LN'}  % GCam13LN_120_128_32679                   
+         }
+     }   
+};
+
+% cellfun makes sure data is in manageable and consistent form? 
+% fullfile combines all relevant info into 1 filename for both behavior and imaging
 cellfun(@(r)cellfun(@(s)f(r{1},s),r{2},'UniformOutput',false),recs,'UniformOutput',false);
     function f(subj,r)
         close all
@@ -95,9 +105,11 @@ cellfun(@(r)cellfun(@(s)f(r{1},s),r{2},'UniformOutput',false),recs,'UniformOutpu
     end
 end
 
+% biAnalysis will handle both behavior (B) and imaging (I) data
 function biAnalysis(bPath,iPath,pre,goodTrials)
 fprintf('doing %s\n',bPath)
 
+% save directory info for B and I
 ids = dir([iPath '_*.tif']);
 bds = dir(bPath);
 
@@ -105,6 +117,7 @@ if ~isscalar(bds)
     error('hmmm...')
 end
 
+% set values for I data storage limits and pixels
 maxGB = 1;
 
 bytesPerPix = 2;
@@ -117,6 +130,8 @@ if scale<1
     sz = round(sqrt(scale)*sz);
 end
 
+% gets I data and alligns w/B data?
+iPath = 'C:\Users\nlab\Desktop\imaging data\112812\GCam13LN\GCam13LN';
 mfn = [iPath '_' sprintf('%d_%d_%d',sz(1),sz(2),length(ids)) '.mat'];
 if exist(mfn,'file')
     fprintf('loading preshrunk\n')
@@ -166,6 +181,8 @@ else
 end
 clear ids
 
+keyboard
+
 d = diff(t');
 
 frameDur = median(d);
@@ -180,7 +197,8 @@ if d(1)>1.5*frameDur
     data = data(:,:,2:end);
 end
 
-[bRecs, ledInds] = getTrigTimes({trialRecs.pco});
+% gets trigger times for each I frame and assigns to B recs?
+bRecs = getTrigTimes({trialRecs.pco});
 if any(cellfun(@isempty,bRecs))
     error('bad recs')
 end
@@ -216,7 +234,7 @@ end
 % the trial records don't wind up getting actually saved as tiffs, so d is
 % missing some of what bRecs has...
 
-tol = .15*frameDur; %was .05, but 112612\GCam13TT 858-1085 needs more
+tol = .05*frameDur;
 
 reqs = diff([bRecs{:}]);
 fixed = nan(1,length(reqs)+1);
@@ -231,11 +249,12 @@ for i=1:length(d)
             errRec(end+1) = d(i)-sum(reqs(current+(0:fixer)));
             
             fixer = fixer + 1;
-            if current + fixer > length(reqs) || errRec(end) < -tol
+            if current + fixer > length(reqs)
                 warning('bad')
                 
                 figure
-                plot([errRec' tol*repmat([1 -1],length(errRec),1)])
+                plot([errRec tol*repmat([1 -1],length(errRec),1)])
+                keyboard
                 
                 bad = true;
                 break
@@ -251,7 +270,7 @@ for i=1:length(d)
 end
 
 
-fig = figure;
+figure
 hold on
 v = .01;
 
@@ -269,15 +288,13 @@ for i = 1:length(bRecs)
         error('bad')
     end
     
-    bFrames{i} =   bRecs{i}(~isnan(d{i}));
-    %ledInds{i} = ledInds{i}(~isnan(d{i}));
+    bFrames{i} = bRecs{i}(~isnan(d{i}));
 end
-ylim(frameDur + [0 v*1.05*length(bRecs)]);
-xlim([0 max([cellfun(@length,bRecs) cellfun(@length,d)])]);
-saveFig(fig,[pre '.align'],[0 0 1600 800]); % [left, bottom, width, height]
+% ylim([frameDur v*200])
+% xlim([0 200])
 
 if bad
-    keyboard
+keyboard
 end
 
 if length([bFrames{:}]) > size(data,3) %we probably miss the last one
@@ -294,7 +311,7 @@ plot(find(~ismember([bRecs{:}],tmp)),0,'o','Color',[1 .5 0]) %not quite right --
 s = [trialRecs.stimDetails];
 f = find(arrayfun(@(x)isempty(x.target),s),1,'first');
 if ~isempty(f) && f~=length(s)
-    error('bad targets')
+        error('bad targets')
 end
 targ = sign([s.target]);
 
@@ -304,10 +321,11 @@ targ = sign([s.target]);
 s = [trialRecs.trialDetails];
 f = find(arrayfun(@(x)isempty(x.correct),s),1,'first');
 if ~isempty(f) && f~=length(s)
-    error('bad corrects')
+        error('bad corrects')
 end
 correct = [s.correct];
 
+% gets start times
 starts = cell2mat(cellfun(@phaseStarts,{trialRecs.phaseRecords}','UniformOutput',false))';
 onsets = starts(2,:);
 
@@ -330,6 +348,7 @@ end
 
 trials = trials(1):trials(2);
 
+% params for filtering below
 stoppedWithin = 4; %2
 respondedWithin = [.5 1.5]; %1
 onlyCorrect = true;
@@ -343,7 +362,7 @@ worsts = cellfun(@(x)max(diff(x)),bFrames,'UniformOutput',false);
 d = diff(cellfun(@isempty,worsts));
 f = find(d,1);
 if ~isempty(f) && any(d(f+1:end)~=0)
-    error('bad bFrames')
+        error('bad bFrames')
 end
 worsts = cell2mat(worsts);
 
@@ -351,9 +370,10 @@ trials = trials(trials<=length(worsts));
 
 d = diff(starts);
 
+% filters out trials of interest
 trials = trials( ...
     d(1,trials)<=stoppedWithin              & ...
-    d(2,trials)<=respondedWithin(2)         & ...
+    d(2,trials)<=respondedWithin(2)         & ... 
     d(2,trials)>=respondedWithin(1)         & ...
     (~onlyCorrect | correct(trials))        & ...
     (~noAfterErrors | ~afterErrors(trials)) & ...
@@ -369,14 +389,15 @@ ptLs = numNice(pts,.01);
 
 fig = figure;
 hold on
+
+% sync graph
 for i = 1:length(trials)
-    plot(pts(pts<=bFrames{trials(i)}(end)-onsets(trials(i))),trials(i),'y+')
+plot(pts(pts<=bFrames{trials(i)}(end)-onsets(trials(i))),trials(i),'y+')
 end
 
 for i=1:length(onsets)
     if i<=length(bRecs)
-        plot(bRecs{i}(ledInds{i} == 1)-onsets(i),i,'g.','MarkerSize',1)
-        plot(bRecs{i}(ledInds{i} == 2)-onsets(i),i,'b.','MarkerSize',1)        
+        plot(bRecs{i}-onsets(i),i,'w.','MarkerSize',1)
         if ~isempty(misses{i})
             plot(misses{i}-onsets(i),i,'o','Color',[1 .5 0])
         end
@@ -411,6 +432,7 @@ im = nan([size(pts,1) size(pts,2) size(data,1) size(data,2)]); %trials * t * h *
 b = whos('im');
 fprintf('target is %gGB\n',b.bytes/1000/1000/1000)
 
+% pix graph
 fig = figure;
 numPix = 50;
 pix = reshape(data,[size(data,1)*size(data,2) size(data,3)]);
@@ -475,23 +497,25 @@ end
 toc
 
 if ~isempty(trials)
-    % clear data
-    
-    %need nanmean from fullfile(matlabroot,'toolbox','stats','stats')
-    %but \ratrix\analysis\eflister\phys\new\helpers\ is shadowing it...
-    
-    show(nanmedianMW(im),ptLs,[pre '.all trials (raw)'],[50 99],@cb);
-    show(nanmedianMW(im(targ(trials)>0,:,:,:)) - nanmedianMW(im(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right (raw)'],[1 99],@cb);
-    
-    m = squeeze(nanmedianMW(squeeze(nanmedianMW(im)))); %does this order matter?
-    m = permute(repmat(m,[1 1 size(im,1) size(im,2)]),[3 4 1 2]);
-    dfof = (im-m)./m;
-    
-    clear m
-    %clear im
-    
-    show(nanmedianMW(dfof),ptLs,[pre '.all trials (dF/F)'],[1 99],@cb);
-    show(nanmedianMW(dfof(targ(trials)>0,:,:,:)) - nanmedianMW(dfof(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right (dF/F)'],[1 99],@cb);
+% clear data
+
+%need nanmean from fullfile(matlabroot,'toolbox','stats','stats')
+%but \ratrix\analysis\eflister\phys\new\helpers\ is shadowing it...
+
+
+% subtracts left from right
+show(nanmedianMW(im),ptLs,[pre '.all trials (raw)'],[50 99],@cb);
+show(nanmedianMW(im(targ(trials)>0,:,:,:)) - nanmedianMW(im(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right (raw)'],[1 99],@cb);
+
+m = squeeze(nanmedianMW(squeeze(nanmedianMW(im)))); %does this order matter?
+m = permute(repmat(m,[1 1 size(im,1) size(im,2)]),[3 4 1 2]);
+dfof = (im-m)./m;
+
+clear m 
+%clear im
+
+show(nanmedianMW(dfof),ptLs,[pre '.all trials (dF/F)'],[1 99],@cb);
+show(nanmedianMW(dfof(targ(trials)>0,:,:,:)) - nanmedianMW(dfof(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right (dF/F)'],[1 99],@cb);
 end
 
     function cb(in)
@@ -508,7 +532,7 @@ end
         
         subplot(n,1,3)
         al = plotPix(trials(targ(trials)>0),'good lefts',true); %haven't checkec parity of targ
-        
+                
         subplot(n,1,4)
         ar = plotPix(trials(targ(trials)<0),'good rights',true); %haven't checkec parity of targ
         
@@ -524,7 +548,7 @@ end
         function avg = plotPix(which,lab,doAvg)
             hold on
             arrayfun(@(i)plot(bFrames{i}-onsets(i),data(length([bFrames{1:i-1}])+(1:length(bFrames{i})),in(1,2),in(1,1)),'Color',c(i,:)),which);
-            xlim(xb)
+            xlim(xb)            
             
             if exist('doAvg','var') && doAvg
                 avg = nanmedianMW(im(ismember(trials,which),:,in(1,2),in(1,1)));
@@ -570,31 +594,31 @@ function show(m,pts,s,c,cb)
 m = permute(m,[3 4 2 1]);
 lims = prctile(m(:),c);
 if ~any(isnan(lims))
-    d = ceil(sqrt(size(m,3)));
-    fig = figure;
-    for i=1:size(m,3)
-        subplot(ceil(size(m,3)/d),d,i)
-        x = imagesc(m(:,:,i),lims);
-        
-        set(x,'ButtonDownFcn',@(x,y)cb(round(get(get(x,'Parent'),'CurrentPoint'))))
-        
-        xlabel(['t = ' num2str(pts(i)) ' s'])
-        set(gca,'XTick',[])
-        set(gca,'YTick',[])
-        axis equal
-        axis tight
-    end
-    %colormap
-    axes('Position',[0 0 1 1],'Xlim',[0 1],'Ylim',[0 1],'Visible','off','Units','normalized'); %'Box','off','clipping','off'
-    text(0.5, .98, ['\bf ' s], 'HorizontalAlignment', 'center', 'VerticalAlignment', 'top')
-    
-    s = s(~ismember(s,'|\/<>*?":'));
-    saveFig(fig,s,[0 0 1920 1200]); % [left, bottom, width, height]
-    
-    m(m<lims(1))=lims(1);
-    m(m>lims(2))=lims(2);
-    m = (m-lims(1))./diff(lims);
-    writeAVI(m,fullfile('C:\Users\nlab\Desktop\analysis',s));%,fps)
+d = ceil(sqrt(size(m,3)));
+fig = figure;
+for i=1:size(m,3)
+    subplot(ceil(size(m,3)/d),d,i)
+    x = imagesc(m(:,:,i),lims);
+
+    set(x,'ButtonDownFcn',@(x,y)cb(round(get(get(x,'Parent'),'CurrentPoint'))))
+
+    xlabel(['t = ' num2str(pts(i)) ' s'])
+    set(gca,'XTick',[])
+    set(gca,'YTick',[])
+    axis equal
+    axis tight
+end
+%colormap
+axes('Position',[0 0 1 1],'Xlim',[0 1],'Ylim',[0 1],'Visible','off','Units','normalized'); %'Box','off','clipping','off'
+text(0.5, .98, ['\bf ' s], 'HorizontalAlignment', 'center', 'VerticalAlignment', 'top')
+
+s = s(~ismember(s,'|\/<>*?":'));
+saveFig(fig,s,[0 0 1920 1200]); % [left, bottom, width, height]
+
+m(m<lims(1))=lims(1);
+m(m>lims(2))=lims(2);
+m = (m-lims(1))./diff(lims);
+writeAVI(m,fullfile('C:\Users\nlab\Desktop\analysis',s));%,fps)
 else
     fprintf('bailing on %s, tight trial filter?\n',s)
 end
@@ -643,27 +667,19 @@ if length(out)~=length(expected)
 end
 end
 
-function [a,b] = getTrigTimes(pcos)
+function out = getTrigTimes(pcos)
 out = cellfun(@check,cellfun(@get,pcos,'UniformOutput',false),'UniformOutput',false);
 
-[a, b] = cellfun(@split,out,'UniformOutput',false);
-
-    function [a,b]=split(in)
-        a = in(1,:);
-        b = in(2,:);
-    end
-
     function out=check(in)
-        %[timeWanted busySpins timeTrig ackSpins timeAck ledInd]' x n
-        want = [3 6];
+        %[timeWanted busySpins timeTrig ackSpins timeAck]' x n
         spins = in([2 4],:);
         
-        if ~any(isnan(spins(:)))
-            out = in(want,:);
+        if  ~any(isnan(spins(:)))
+            out = in(3,:);
         else
             ind = find(any(diff(isnan(spins),[],2)));
             if isscalar(ind) && ~any(any(isnan(spins(:,1:ind)))) && all(all(isnan(spins(:,ind+1:end))))
-                out = in(want,1:ind);
+                out = in(3,1:ind);
             else
                 error('bad spins')
             end

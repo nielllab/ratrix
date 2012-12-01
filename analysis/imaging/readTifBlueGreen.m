@@ -23,6 +23,9 @@ if ~exist('in','var') || isempty(in)
 end
 
 multiTif=0;
+psfilename = [in '.ps']
+if exist(psfilename,'file')==2;delete(psfilename);end
+
 
 if multiTif
     [out frameT]=readMultiTif(in(1:end-5));
@@ -135,15 +138,14 @@ for LED=1:3
     frms = 1:size(out,3);
     if LED==blue
         LEDfrms = frms(frms/4 ~= round(frms/4));
-        keyboard
-        LEDout = interp1(LEDfrms,shiftdim(double(out(:,:,LEDfrms)),2),frms);
+        LEDout = interp1(LEDfrms,shiftdim(double(out(:,:,LEDfrms)),2),frms,'linear','extrap');
         LEDout = shiftdim(LEDout,1);
         m = repmat(mean(double(LEDout),3),[1 1 size(LEDout,3)]);
         dfof{LED} = (double(LEDout)-m)./m;
         clear m
     elseif LED==green
         LEDfrms = frms(frms/4 == round(frms/4));
-         LEDout = interp1(LEDfrms,shiftdim(double(out(:,:,LEDfrms)),2),frms);
+         LEDout = interp1(LEDfrms,shiftdim(double(out(:,:,LEDfrms)),2),frms,'linear','extrap');
         LEDout = shiftdim(LEDout,1);
         m = repmat(mean(double(LEDout),3),[1 1 size(LEDout,3)]);
         dfof{LED} = (double(LEDout)-m)./m;
@@ -161,7 +163,9 @@ for LED=1:3
     map(isnan(map))=0;
     mapFig(map)
     
-    
+  
+     
+            
     t0 = linspace(1,size(cycMap,3),10);
     figure
     for t = 1:9;
@@ -172,6 +176,9 @@ for LED=1:3
     
     map = map-mean(map(:));
     mapFig(map)
+    
+      set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilename,'-append');
     
     in
      
@@ -197,11 +204,15 @@ for LED=1:3
             loglog((fftPts-1)/length(spect),spect(fftPts));
             subplot(2,2,3);
             plot(squeeze(cycMap(x,y,:))); ylim([-0.03 0.03]);
+               set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilename,'-append');
         end
         
     end
     
 end  %%%LED
+ps2pdf('psfile', psfilename, 'pdffile', [psfilename(1:(end-2)) 'pdf']);
+delete(psfilename);
 
 function mapFig(mapIn)
     figure

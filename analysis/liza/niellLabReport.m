@@ -192,8 +192,17 @@ if doBall
             'jbw02' %new
             'ly10' %new
             'ly13' %new
+            'ly15'
+            'jbw04'
+            'wg2'
             }
         }
+        {'lee'
+            {
+            'gcam13ln'
+            'gcam13tt'
+            }
+        }        
     };
 
     tic

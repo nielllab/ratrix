@@ -1,7 +1,8 @@
 function combineTiffs
 dbstop if error
 
-addpath('C:\Users\nlab\Desktop\ratrix\bootstrap');
+p = mfilename('fullpath');
+addpath(fullfile(fileparts(fileparts(fileparts(p))),'bootstrap'))
 setupEnvironment;
 
 if ~ispc
@@ -33,26 +34,7 @@ recs = {
     }
 };
 
-imagingPath = 'E:\data'; %\\landis (accessing local via network path is slow)
-recs = {
-    {'GCam13LN' {
-            {[2   194],[],'112012\GCam13LN'   ,'GCam13LN'}    
-            {[204 474],[],'112112\GCam13LN'   ,'GCam13LN'}
-            {[510 577],[],'112212\GCam13LN\r2','GCam13LN'}
-            {[579 785],[],'112312\GCam13LN'   ,'GCam13LN'}                            
-        }
-    }
-    
-    {'GCam13TT' {
-            {[8   257],[],'112012\GCam13TT','GCam13TT'}
-            {[258 353],[],'112112\GCam13TT','GCam13TT'}
-            {[354 496],[],'112212\GCam13TT','GCam13TT'}
-            {[498 621],[],'112312\GCam13TT','GCam13TT'}            
-        }
-    }    
-};
-
-imagingPath = 'F:\data'; %\\landis (accessing local via network path is slow)
+imagingPath = 'E:\widefield data';
 recs = {
     {'GCam13LN' {     
             {[2   194],[],'112012\GCam13LN'   ,'GCam13LN'}    
@@ -64,7 +46,9 @@ recs = {
             {[850   983],[],'112512\GCam13LN\r2','GCam13LN'}            
             {[984  1190],[],'112612\GCam13LN'   ,'GCam13LN'}
             {[1191 1405],[],'112712\GCam13LN'   ,'GCam13LN'}            
-            {[1406 1652],[],'112812\GCam13LN'   ,'GCam13LN'}                        
+            {[1406 1652],[],'112812\GCam13LN'   ,'GCam13LN'}
+            {[1664 1874],[],'113012\GCam13LN\r3','GCam13LN'}
+            {[1875 2159],[],'120112\GCam13LN'   ,'GCam13LN'}
         }
     }
     
@@ -78,6 +62,8 @@ recs = {
             {[858  1085],[],'112612\GCam13TT'   ,'GCam13TT'} 
             {[1116 1321],[],'112712\GCam13TT\r2','GCam13TT'}
             {[1322 1710],[],'112812\GCam13TT\'  ,'GCam13TT'}
+            {[1712 1816],[],'113012\GCam13TT\'  ,'GCam13TT'}
+            {[1817 2005],[],'120112\GCam13TT\'  ,'GCam13TT'}
         }
     }    
 };
@@ -98,7 +84,30 @@ end
 function biAnalysis(bPath,iPath,pre,goodTrials)
 fprintf('doing %s\n',bPath)
 
+if exist(fullfile('C:\Users\nlab\Desktop\analysis',[pre '.sync.png']),'file')
+    fprintf('skipping, already done\n')
+    return
+end
+
 ids = dir([iPath '_*.tif']);
+if isempty(ids)
+    dest = fileparts(iPath);
+    b = dest;
+    [~,b] = strtok(b,filesep);
+    [~,b] = strtok(b,filesep);
+    src = ['\\landis\data' b];
+    fprintf('copying %s to %s (takes forever)\n',src,dest);
+    dirOverview(src);
+    [status,message,messageid] = copyfile(src,dest);
+    if status~=1
+        status
+        message
+        messageid
+        error('copy fail')
+    end
+    ids = dir([iPath '_*.tif']);
+end
+
 bds = dir(bPath);
 
 if ~isscalar(bds)

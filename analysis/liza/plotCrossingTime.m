@@ -91,6 +91,7 @@ fprintf('available subjects:\n');
 files = dir(fullfile(recordPath,'trialRecords_*.mat'));
 
 if isempty(files)
+    keyboard
     error('no records for that subject')
 end
 
@@ -535,7 +536,16 @@ minPerChunk=50;
 chunkHrs=36;
 
 chunks=sessions-minPerChunk;
-chunks=sessions(diff(startTimes([[ones(sum(chunks<=0),1) chunks(chunks>0)] sessions+1]),[],2)>chunkHrs/24);
+
+ones(sum(chunks<=0),1)
+chunks(chunks>0)
+sessions+1
+
+try
+    chunks=sessions(diff(startTimes([[ones(sum(chunks<=0),1) chunks(chunks>0)] sessions+1]),[],2)>chunkHrs/24);
+catch
+    fprintf('bad chunks \n')
+end
 
 [goodResults,classes] = ismember(results,{'incorrect','correct','timedout','tooEarly'});
 

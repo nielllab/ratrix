@@ -1,8 +1,7 @@
 function combineTiffs
 dbstop if error
 
-% add path for bootstrap which gets everything setup
-addpath('C:\Users\nlab\Desktop\ratrix\bootstrap');
+addpath('C:\brk\ratrix\bootstrap');
 setupEnvironment;
 
 if ~ispc
@@ -10,7 +9,8 @@ if ~ispc
 end
 
 % loads records for behavior and imaging for mice you choose
-% separate blocks because imaging data is on multiple drives right now
+% separate blocks because imaging data is on multiple drives right now;
+% last block overwrites all previous
 behaviorPath = '\\lee\Users\nlab\Desktop\ballData';
 imagingPath = 'C:\Users\nlab\Desktop\data'; %\\landis (accessing local via network path is slow)
 recs = {
@@ -81,14 +81,32 @@ recs = {
     }    
 };
 
-imagingPath = 'C:\Users\nlab\Desktop\imaging data';
 imagingPath = '\\landis\data';
 recs = {
-     {'GCam13LN' {               
-            {[1406 1652],[],'112812\GCam13LN'   ,'GCam13LN'}  % GCam13LN_120_128_32679                   
+     {'GCam13LN' {   
+            %{[2   194],[],'112012\GCam13LN'   ,'GCam13LN'}    
+            {[204 474],[],'112112\GCam13LN'   ,'GCam13LN'}
+            %{[510 577],[],'112212\GCam13LN\r2','GCam13LN'}
+            %{[579 785],[],'112312\GCam13LN'   ,'GCam13LN'}
+            %{[1406 1652],[],'112812\GCam13LN'   ,'GCam13LN'}                     
          }
-     }   
+         
+     }  
+%      {'GCam13TT' {
+%             {[8   257],[],'112012\GCam13TT','GCam13TT'}
+%             {[258 353],[],'112112\GCam13TT','GCam13TT'}
+%             {[354 496],[],'112212\GCam13TT','GCam13TT'}
+%             {[498 621],[],'112312\GCam13TT','GCam13TT'}
+%             {[644   855],[],'112512\GCam13TT'   ,'GCam13TT'} %sync problem line 219
+%             {[858  1085],[],'112612\GCam13TT'   ,'GCam13TT'} %sync problem line 219
+%             {[1116 1321],[],'112712\GCam13TT\r2','GCam13TT'}
+%             {[1322 1710],[],'112812\GCam13TT\'  ,'GCam13TT'}
+%         }
+%         
+%     }
 };
+
+
 
 % cellfun makes sure data is in manageable and consistent form? 
 % fullfile combines all relevant info into 1 filename for both behavior and imaging
@@ -131,7 +149,7 @@ if scale<1
 end
 
 % gets I data and alligns w/B data?
-iPath = 'C:\Users\nlab\Desktop\imaging data\112812\GCam13LN\GCam13LN';
+iPath = 'C:\brk\img data\112112\GCam13LN\GCam13LN';
 mfn = [iPath '_' sprintf('%d_%d_%d',sz(1),sz(2),length(ids)) '.mat'];
 if exist(mfn,'file')
     fprintf('loading preshrunk\n')
@@ -180,8 +198,6 @@ else
     clear stamps
 end
 clear ids
-
-keyboard
 
 d = diff(t');
 
@@ -276,6 +292,8 @@ v = .01;
 
 d = {};
 bFrames = {};
+
+% FIG 1: ALLIGNMENT (of what?)
 for i = 1:length(bRecs)
     reqs = diff(bRecs{i});
     plot(reqs+v*i,'r','LineWidth',3);
@@ -301,6 +319,7 @@ if length([bFrames{:}]) > size(data,3) %we probably miss the last one
     error('bad')
 end
 
+% FIG 2: BAD FRAMES?
 figure
 tmp = [bFrames{:}];
 len = min(cellfun(@length,{tmp t}));
@@ -357,6 +376,8 @@ worstFactor = .7; %.1
 
 afterErrors = [false ~correct(1:end-1)];
 
+% misses are when frames are taken, but we don't get them
+% worsts are when exposures are so late we drop them
 misses = cellfun(@setdiff,bRecs,bFrames,'UniformOutput',false);
 worsts = cellfun(@(x)max(diff(x)),bFrames,'UniformOutput',false);
 d = diff(cellfun(@isempty,worsts));
@@ -371,16 +392,25 @@ trials = trials(trials<=length(worsts));
 d = diff(starts);
 
 % filters out trials of interest
+
+% trials = trials( ...
+%     d(1,trials)<=stoppedWithin              & ...
+%     d(2,trials)<=respondedWithin(2)         & ... 
+%     d(2,trials)>=respondedWithin(1)         & ...
+%     (~onlyCorrect | correct(trials))        & ...
+%     (~noAfterErrors | ~afterErrors(trials)) & ...
+%     cellfun(@isempty,misses(trials))        & ...
+%     worsts(trials)<=frameDur*(1+worstFactor)  ...
+%     );
+
+
+% remove a bunch of filters to capture baseline performance
 trials = trials( ...
-    d(1,trials)<=stoppedWithin              & ...
-    d(2,trials)<=respondedWithin(2)         & ... 
-    d(2,trials)>=respondedWithin(1)         & ...
-    (~onlyCorrect | correct(trials))        & ...
-    (~noAfterErrors | ~afterErrors(trials)) & ...
     cellfun(@isempty,misses(trials))        & ...
     worsts(trials)<=frameDur*(1+worstFactor)  ...
     );
 
+% creates color spectrum blue-red
 c = getUniformSpectrum(normalize(onsets));
 
 pts = [-.8 respondedWithin(1)];
@@ -390,22 +420,26 @@ ptLs = numNice(pts,.01);
 fig = figure;
 hold on
 
-% sync graph
+% FIG 3: SYNC
+% yellow +s for trials that pass thru filters above
 for i = 1:length(trials)
 plot(pts(pts<=bFrames{trials(i)}(end)-onsets(trials(i))),trials(i),'y+')
 end
 
 for i=1:length(onsets)
     if i<=length(bRecs)
+% white dots for each frame, alligned by onset
         plot(bRecs{i}-onsets(i),i,'w.','MarkerSize',1)
         if ~isempty(misses{i})
+% orange circles for misses
             plot(misses{i}-onsets(i),i,'o','Color',[1 .5 0])
         end
     end
-    
+% blue-red +s over all trials to mark how long it took the mouse to stop    
     s = starts(:,i)-onsets(i);
     plot(s(1),i,'+','Color',c(i,:))
-    
+
+% blue or magenta +s at trial onset depending on???
     if targ(i)>0
         cm = 'b';
     else
@@ -432,7 +466,8 @@ im = nan([size(pts,1) size(pts,2) size(data,1) size(data,2)]); %trials * t * h *
 b = whos('im');
 fprintf('target is %gGB\n',b.bytes/1000/1000/1000)
 
-% pix graph
+% FIG 4: DETREND pixel values over time
+% if all one color in places, wok was probably knocked
 fig = figure;
 numPix = 50;
 pix = reshape(data,[size(data,1)*size(data,2) size(data,3)]);
@@ -457,6 +492,7 @@ tic
 data = permute(data,[3 1 2]); %possible oom
 toc
 
+% FIG 5: PIX histogram of pixel brightness w/blue-red spectrum showing time
 fig = figure;
 bins = linspace(0,double(intmax('uint16')),1000);
 for i=1:length(onsets)
@@ -502,9 +538,11 @@ if ~isempty(trials)
 %need nanmean from fullfile(matlabroot,'toolbox','stats','stats')
 %but \ratrix\analysis\eflister\phys\new\helpers\ is shadowing it...
 
-
-% subtracts left from right
+% FIG 6: ALL TRIALS RAW
 show(nanmedianMW(im),ptLs,[pre '.all trials (raw)'],[50 99],@cb);
+
+% FIG 7: LEFT V. RIGHT RAW
+% subtracts left from right
 show(nanmedianMW(im(targ(trials)>0,:,:,:)) - nanmedianMW(im(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right (raw)'],[1 99],@cb);
 
 m = squeeze(nanmedianMW(squeeze(nanmedianMW(im)))); %does this order matter?
@@ -514,7 +552,11 @@ dfof = (im-m)./m;
 clear m 
 %clear im
 
+% FIG 8: ALL TRIALS DFOF
 show(nanmedianMW(dfof),ptLs,[pre '.all trials (dF/F)'],[1 99],@cb);
+
+% FIG 9: LEFT V. RIGHT DFOF
+% subtracts left from right
 show(nanmedianMW(dfof(targ(trials)>0,:,:,:)) - nanmedianMW(dfof(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right (dF/F)'],[1 99],@cb);
 end
 

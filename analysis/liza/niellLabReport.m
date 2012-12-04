@@ -7,6 +7,8 @@ if ~exist('force','var') || isempty(force)
     force = false;
 end
 
+combineTiffs;
+
 doBox    = true;
 doBall   = true;
 doPsycho = true;

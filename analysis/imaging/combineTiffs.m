@@ -33,32 +33,13 @@ recs = {
     }
 };
 
-imagingPath = 'E:\data'; %\\landis (accessing local via network path is slow)
-recs = {
-    {'GCam13LN' {
-            {[2   194],[],'112012\GCam13LN'   ,'GCam13LN'}    
-            {[204 474],[],'112112\GCam13LN'   ,'GCam13LN'}
-            {[510 577],[],'112212\GCam13LN\r2','GCam13LN'}
-            {[579 785],[],'112312\GCam13LN'   ,'GCam13LN'}                            
-        }
-    }
-    
-    {'GCam13TT' {
-            {[8   257],[],'112012\GCam13TT','GCam13TT'}
-            {[258 353],[],'112112\GCam13TT','GCam13TT'}
-            {[354 496],[],'112212\GCam13TT','GCam13TT'}
-            {[498 621],[],'112312\GCam13TT','GCam13TT'}            
-        }
-    }    
-};
-
 imagingPath = 'F:\data'; %\\landis (accessing local via network path is slow)
 recs = {
     {'GCam13LN' {     
-            {[2   194],[],'112012\GCam13LN'   ,'GCam13LN'}    
-            {[204 474],[],'112112\GCam13LN'   ,'GCam13LN'}
-            {[510 577],[],'112212\GCam13LN\r2','GCam13LN'}
-            {[579 785],[],'112312\GCam13LN'   ,'GCam13LN'} 
+            {[2   194],[],'112012\GCam13LN'   ,'GCam13LN'} %originally in landis E:\data   
+            {[204 474],[],'112112\GCam13LN'   ,'GCam13LN'} %originally in landis E:\data  
+            {[510 577],[],'112212\GCam13LN\r2','GCam13LN'} %originally in landis E:\data  
+            {[579 785],[],'112312\GCam13LN'   ,'GCam13LN'} %originally in landis E:\data  
     
             {[786   848],[],'112512\GCam13LN'   ,'GCam13LN'}
             {[850   983],[],'112512\GCam13LN\r2','GCam13LN'}            
@@ -69,10 +50,10 @@ recs = {
     }
     
     {'GCam13TT' {         
-            {[8   257],[],'112012\GCam13TT','GCam13TT'}
-            {[258 353],[],'112112\GCam13TT','GCam13TT'}
-            {[354 496],[],'112212\GCam13TT','GCam13TT'}
-            {[498 621],[],'112312\GCam13TT','GCam13TT'}  
+            {[8   257],[],'112012\GCam13TT','GCam13TT'} %originally in landis E:\data  
+            {[258 353],[],'112112\GCam13TT','GCam13TT'} %originally in landis E:\data  
+            {[354 496],[],'112212\GCam13TT','GCam13TT'} %originally in landis E:\data  
+            {[498 621],[],'112312\GCam13TT','GCam13TT'} %originally in landis E:\data  
     
             {[644   855],[],'112512\GCam13TT'   ,'GCam13TT'} 
             {[858  1085],[],'112612\GCam13TT'   ,'GCam13TT'} 
@@ -80,6 +61,15 @@ recs = {
             {[1322 1710],[],'112812\GCam13TT\'  ,'GCam13TT'}
         }
     }    
+};
+
+imagingPath = 'C:\Users\nlab\Desktop\imaging data';
+imagingPath = '\\landis\data';
+recs = {
+	     {'GCam13LN' {
+	            {[1406 1652],[],'112812\GCam13LN'   ,'GCam13LN'}  % GCam13LN_120_128_32679
+	         }
+	     }
 };
 
 cellfun(@(r)cellfun(@(s)f(r{1},s),r{2},'UniformOutput',false),recs,'UniformOutput',false);
@@ -118,6 +108,7 @@ if scale<1
 end
 
 mfn = [iPath '_' sprintf('%d_%d_%d',sz(1),sz(2),length(ids)) '.mat'];
+iPath = 'C:\Users\nlab\Desktop\imaging data\112812\GCam13LN\GCam13LN';
 if exist(mfn,'file')
     fprintf('loading preshrunk\n')
     tic
@@ -257,6 +248,7 @@ v = .01;
 
 d = {};
 bFrames = {};
+frameLeds = {};
 for i = 1:length(bRecs)
     reqs = diff(bRecs{i});
     plot(reqs+v*i,'r','LineWidth',3);
@@ -270,7 +262,7 @@ for i = 1:length(bRecs)
     end
     
     bFrames{i} =   bRecs{i}(~isnan(d{i}));
-    %ledInds{i} = ledInds{i}(~isnan(d{i}));
+    frameLeds{i} = ledInds{i}(~isnan(d{i}));
 end
 ylim(frameDur + [0 v*1.05*length(bRecs)]);
 xlim([0 max([cellfun(@length,bRecs) cellfun(@length,d)])]);
@@ -365,7 +357,6 @@ c = getUniformSpectrum(normalize(onsets));
 
 pts = [-.8 respondedWithin(1)];
 pts = linspace(pts(1),pts(2),1+round(diff(pts)/frameDur));
-ptLs = numNice(pts,.01);
 
 fig = figure;
 hold on
@@ -405,6 +396,19 @@ ylabel('trial')
 xlabel('secs since discrim onset')
 saveFig(fig,[pre '.sync'],[0 0 diff(xlims)*200 length(onsets)*5]); % [left, bottom, width, height]
 
+leds = {'green' 'blue'};
+cellfun(@w,leds,num2cell(1:length(leds)),'UniformOutput',false);
+    function w(lab,ind)        
+        thisBFrames = cellfun(@(x,y)x(y == ind),bFrames,frameLeds,'UniformOutput',false);
+        these = [frameLeds{:}] == ind;
+        thisData = data(:,:,these);
+        thisT = t(these);
+        widefieldAnalysis(trials,pts,onsets,thisData,thisT,thisBFrames,[pre '.' lab],c,targ,stoppedWithin,respondedWithin);
+    end
+end
+
+function widefieldAnalysis(trials,pts,onsets,data,t,bFrames,pre,c,targ,stoppedWithin,respondedWithin)
+ptLs = numNice(pts,.01);
 pts = repmat(pts,length(trials),1)+repmat(onsets(trials)',1,length(pts));
 im = nan([size(pts,1) size(pts,2) size(data,1) size(data,2)]); %trials * t * h * w
 
@@ -416,7 +420,7 @@ numPix = 50;
 pix = reshape(data,[size(data,1)*size(data,2) size(data,3)]);
 [~, ord] = sort(rand(1,size(pix,1)));
 subplot(3,1,1)
-plot((t-t(1))/60,pix(ord(1:numPix),:))
+plot((t-t(1))/60,pix(ord(1:numPix),:)) % this line dies sometimes on 2011b?
 xlabel('mins')
 ylabel('pixel values')
 title('raw')

@@ -19,6 +19,7 @@ fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =msPenalty;
 responseLockoutMs         =0;
+Delay = constantDelay(2000);
 
 constantRewards=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 
@@ -43,7 +44,7 @@ eyeController=[];
 
 dropFrames=false;
 %nafcTM=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,{'off'},dropFrames,'ptb','center');
-gNGTM=goNoGo(sm,percentCorrectionTrials,responseLockoutMs,constantRewards,eyeController,{'off'},dropFrames,'ptb','center');
+gNGTM=goNoGo(sm,percentCorrectionTrials,responseLockoutMs,constantRewards,eyeController,{'off'},dropFrames,'ptb','none',[],Delay);
 % 
 % textureSize=10*[w,h];
 % zoom=[maxWidth maxHeight]./textureSize;
@@ -63,7 +64,7 @@ gNGTM=goNoGo(sm,percentCorrectionTrials,responseLockoutMs,constantRewards,eyeCon
 %stim params for free drinks
 soundParams.soundType='allOctaves'; %should put in pure tones later on mw 10-2012
 soundParams.freqs = [300 450];
-soundParams.duration=10000; %ms
+soundParams.duration=1000; %ms
 maxSPL=80; %measured max level attainable by speakers
 ampdB=60; %requested amps in dB
 amplitude=10.^((ampdB -maxSPL)/20); %amplitudes = line level, 0 to 1
@@ -77,7 +78,7 @@ noRequest=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,request
 %nrTM=nAFC(sm,percentCorrectionTrials,noRequest,eyeController,{'off'},dropFrames,'ptb','center');
 nrGNGTM=goNoGo(sm,percentCorrectionTrials,responseLockoutMs,noRequest,eyeController,{'off'},dropFrames,'ptb','center');
 
-svnRev={'svn://132.239.158.177/projects/ratrix/trunk'};
+svnRev={'svn://132.239.158.177/projects/ratrix/CNM'};
 svnCheckMode='session';
 
 trialsPerMinute = 7;
@@ -103,7 +104,8 @@ ts5 = trainingStep(lpGNGTM, CNMStim, performanceCriterion(.85, int8(200))  , noT
 ts6 = trainingStep(lpGNGTM, CNMStim, repeatIndefinitely()  , noTimeOff(), svnRev,svnCheckMode);
 
 
-p=protocol('mouse CNM task',{ts1, ts2, ts3, ts4, ts5 ts6});
+p=protocol('mouse CNM task',{ts1, ts2, ts3, ts4, ts5 ts6}); %normal setup
+%p=protocol('mouse CNM task',{ts3, ts2, ts1, ts4, ts5 ts6}); %to test CNM/goNoGo
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

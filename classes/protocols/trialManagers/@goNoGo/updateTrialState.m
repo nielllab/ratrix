@@ -146,7 +146,7 @@ end % end reward handling
 
 trialDetails.correct=correct;
 
-trialDetails
-struct(spec)
+trialDetails;
+struct(spec);
 
 end  % end function

@@ -113,6 +113,9 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             [trialRecords(trialInd).targetPorts, trialRecords(trialInd).distractorPorts, stimulusDetails, text] = ...
                 assignPorts(trialManager,trialRecords,getResponsePorts(trialManager,getNumPorts(station)));
             
+             trialRecords(trialInd).targetPorts = [2]
+d = stimulusDetails
+            
             [newSM, ...
                 updateSM, ...
                 resInd, ...
@@ -141,6 +144,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 trialRecords(trialInd).distractorPorts, ...
                 stimulusDetails, ...
                 text);
+            d1 = stimulusDetails
             
             % test must a single string now - dont bother w/ complicated stuff here
 			if ~ischar(text)
@@ -277,6 +281,7 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             end
             
             trialRecords(trialInd).stimDetails = stimulusDetails;
+            r = trialRecords(trialInd).stimDetails
             
             % stopEarly could potentially be set by the datanet's handleCommands (if server tells this client to shutdown
             % while we are in doTrial)

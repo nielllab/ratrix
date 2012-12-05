@@ -69,6 +69,8 @@ switch stimulus.soundType
     case {'binaryWhiteNoise','gaussianWhiteNoise','uniformWhiteNoise','empty'}
         sSound = soundClip('stimSoundBase',stimulus.soundType);
 end
+
+
 stimulus.stimSound = soundClip('stimSound','dualChannel',{sSound,details.leftAmplitude},{sSound,details.rightAmplitude});
 
 sounds={stimulus.stimSound setName(stimulus.stimSound,'correctSound') setName(stimulus.stimSound,'keepGoingSound')};
@@ -91,6 +93,8 @@ preRequestStim.scaleFactor=0;
 preRequestStim.startFrame=0;
 %preRequestStim.autoTrigger=[];
 preRequestStim.punishResponses=false;
+%preRequestStim=[];
+
 
 preResponseStim=discrimStim;
 preResponseStim.punishResponses=false;

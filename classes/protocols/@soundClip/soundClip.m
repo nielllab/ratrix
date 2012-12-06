@@ -9,6 +9,7 @@ t.msMinSoundDuration = 100;
 t.numSamples = t.sampleRate*t.msLength/1000;
 t.amplitude = 1.0; % Not currently specified by default
 t.fundamentalFreqs = [];
+t.freq = [];
 t.maxFreq = 0;
 t.name = '';
 t.clip = [];
@@ -34,23 +35,52 @@ switch nargin
         if ismember(varargin{2},{'binaryWhiteNoise','gaussianWhiteNoise','uniformWhiteNoise','empty'})
             t.fundamentalFreqs = [];
             t.maxFreq = 0;
-
+            
             if ischar(varargin{1})
                 t.name=varargin{1};
             else
                 error('name wasn''t a string')
             end
-
+            
             t.clip = [];
             t.description = varargin{2};
-
+            
             t.type = varargin{2};
-
-
+            
+            
             t = class(t,'soundClip');
         else
             error('type for 2 args must be binaryWhiteNoise gaussianWhiteNoise uniformWhiteNoise empty')
         end
+    case 3 %tone or CNMToneTrain
+        if ischar(varargin{1})
+            t.name=varargin{1};
+        else
+            error('name wasn''t a string')
+        end
+        t.clip = [];
+        % create object using specified values
+        if ismember(varargin{2},{'tone', 'CNMToneTrain'})
+            if ~all(varargin{3}>0) 
+                error('pass in Freq  > 0')
+            end
+            t.freq = varargin{3};
+            switch(varargin{2})
+                case 'tone'
+                    t.description = ['pure tone ' num2str(t.freq) ' Hz'];
+                    t.type = varargin{2};
+                case 'CNMToneTrain'
+                    t.description = ['CNMToneTrain, start: ' num2str(t.freq(1)) ' end: ' num2str(t.freq(2)) ' Hz, n=',num2str(t.freq(3)) ,' tones'];
+                    t.type = varargin{2};
+                otherwise
+                    error('Should never happen!!: soundClip type already validated as tone')
+            end
+        else
+            error('type for 3 args must be tone')
+        end
+        
+        t = class(t,'soundClip');
+        
     case 4
         if ischar(varargin{1})
             t.name=varargin{1};
@@ -86,7 +116,7 @@ switch nargin
             end
             if left{2} <0 || right{2} <0
                 error('Cell argument {soundClip,amplitude} with amplitude >= 0')
-            end                
+            end
             t.leftSoundClip = left{1};
             t.leftAmplitude = left{2};
             t.rightSoundClip = right{1};
@@ -97,9 +127,9 @@ switch nargin
         else
             error('type for 4 args must be allOctaves, tritones, or dualChannel')
         end
-
+        
         t = class(t,'soundClip');
-
+        
     otherwise
         error('Wrong number of input arguments')
 end

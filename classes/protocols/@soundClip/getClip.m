@@ -26,6 +26,29 @@ if isempty(s.clip)
             freqs=unique(outFreqs);
             raw=repmat(2*pi*[0:s.numSamples]/s.numSamples,length(freqs),1);
             s.clip = sum(sin(diag(freqs)*raw));
+            
+        case 'tone'
+            t=1:s.numSamples;
+            t=t/s.sampleRate;
+            tone=sin(2*pi*t*s.freq);
+            s.clip = tone;
+        case 'CNMToneTrain'
+            %train of pure tones, all at start freq, except last one is at
+            %end freq. duration and isi specified in setProtocolCNM
+            startfreq=s.freq(1);
+            endfreq=s.freq(2);
+            numtones=s.freq(3);
+            t=1:s.numSamples;
+            t=t/s.sampleRate;
+            starttone=sin(2*pi*t*startfreq);
+            endtone=sin(2*pi*t*endfreq);
+            silence=zeros(1, 4410);
+            train=[];
+            for i=1:numtones
+            train=[train starttone silence];
+            end    
+            train=[train endtone];
+            s.clip = train;
 
         case 'tritones'
             s.clip = getClip(soundClip('annonymous','allOctaves',[s.fundamentalFreqs tritones(s.fundamentalFreqs)],s.maxFreq));

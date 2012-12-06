@@ -63,8 +63,13 @@ switch nargin
                 
             case {'binaryWhiteNoise','gaussianWhiteNoise','uniformWhiteNoise','empty'}
                 %no specific error checking here
-            case 'tone'
-                error('CNM: tone not implemented yet')
+            case {'tone', 'CNMToneTrain'}
+                if soundParams.freqs > 0
+                    s.freqs=soundParams.freqs;
+                else
+                    error('freq must be > 0')
+                end
+
             otherwise
                 error('CNM: soundType not recognized')
         end

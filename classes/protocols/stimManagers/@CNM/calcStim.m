@@ -31,11 +31,16 @@ end
 % pick a random number of tones in package between 3 and 5 (for now)
 details.numTones=RandSample(3:5);
 
+%override total stimulus duration
+stimulus.duration=(details.numTones+1)*(500+100)-100;
+
 % pick a random starting tone 
 if rand>0.5
     details.startTone=1; %either freq 1 or freq 2
+    details.endTone=2; %the other one from startTone
 else
     details.startTone=2;
+    details.endTone=1; %the other one from startTone
 end
 
 % if lefts>rights %choose a left stim
@@ -68,12 +73,19 @@ switch stimulus.soundType
         sSound = soundClip('stimSoundBase','allOctaves',[stimulus.freqs(details.startTone)],20000);
     case {'binaryWhiteNoise','gaussianWhiteNoise','uniformWhiteNoise','empty'}
         sSound = soundClip('stimSoundBase',stimulus.soundType);
+    case {'tone'}
+        sSound = soundClip('stimSoundBase','tone',[stimulus.freqs(details.startTone)]) ;
+    case {'CNMToneTrain'}
+        sSound = soundClip('stimSoundBase','CNMToneTrain',[stimulus.freqs(details.startTone) stimulus.freqs(details.endTone) details.numTones]) ;
 end
 
+mycorrectSound=soundClip('stimSoundBase','allOctaves',100,20000);
+mykeepGoingSound=soundClip('stimSoundBase','allOctaves',800,20000);
 
 stimulus.stimSound = soundClip('stimSound','dualChannel',{sSound,details.leftAmplitude},{sSound,details.rightAmplitude});
 
-sounds={stimulus.stimSound setName(stimulus.stimSound,'correctSound') setName(stimulus.stimSound,'keepGoingSound')};
+%sounds={stimulus.stimSound setName(stimulus.stimSound,'correctSound') setName(stimulus.stimSound,'keepGoingSound')};
+sounds={stimulus.stimSound setName(mycorrectSound,'correctSound') setName(mykeepGoingSound,'keepGoingSound')};
 
 out=zeros(min(height,getMaxHeight(stimulus)),min(width,getMaxWidth(stimulus)),2);
 out(:,:,1)=stimulus.mean;

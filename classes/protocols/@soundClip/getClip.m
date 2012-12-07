@@ -38,11 +38,14 @@ if isempty(s.clip)
             startfreq=s.freq(1);
             endfreq=s.freq(2);
             numtones=s.freq(3);
+            isi=s.freq(4);
+            toneDuration=s.freq(5);
+            s.numSamples = s.sampleRate*toneDuration/1000;
             t=1:s.numSamples;
             t=t/s.sampleRate;
             starttone=sin(2*pi*t*startfreq);
             endtone=sin(2*pi*t*endfreq);
-            silence=zeros(1, 4410);
+            silence=zeros(1, 44.1*isi);
             train=[];
             for i=1:numtones
             train=[train starttone silence];

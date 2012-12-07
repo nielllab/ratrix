@@ -18,7 +18,7 @@ fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =msPenalty;
-responseLockoutMs         =0;
+responseLockoutMs         =1000;
 Delay = constantDelay(100);
 
 constantRewards=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
@@ -44,7 +44,8 @@ eyeController=[];
 
 dropFrames=false;
 %nafcTM=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,{'off'},dropFrames,'ptb','center');
-gNGTM=goNoGo(sm,percentCorrectionTrials,responseLockoutMs,constantRewards,eyeController,{'off'},dropFrames,'ptb','none',[],Delay);
+gNGTM=goNoGo(sm,percentCorrectionTrials,responseLockoutMs,constantRewards,eyeController,{'off'},dropFrames,'ptb','none',[],Delay, []);
+%delaymanager sets the delay in each trial before stimulus presentation
 % 
 % textureSize=10*[w,h];
 % zoom=[maxWidth maxHeight]./textureSize;
@@ -62,10 +63,11 @@ gNGTM=goNoGo(sm,percentCorrectionTrials,responseLockoutMs,constantRewards,eyeCon
 % freeStim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 %stim params for free drinks
-soundParams.soundType='CNMToneTrain'; %should put in pure tones later on mw 10-2012
-soundParams.freqs = [1000 1500];
-soundParams.duration=1000; %ms duration of each tone in a CNMToneTrain
-soundParams.isi=200; %ms, time between tones in a CNMToneTrain
+soundParams.soundType='CNMToneTrain'; %new soundType for CNM stimulus
+soundParams.freqs = [1000 1500]; %the two possible frequencies
+soundParams.duration=[]; %ms, total duration of stimSound-calculated in calcstim
+soundParams.isi=500; %ms, time between tones in a CNMToneTrain
+soundParams.toneDuration=1000; %ms, duration of each tone in a CNMToneTrain
 maxSPL=80; %measured max level attainable by speakers
 ampdB=60; %requested amps in dB
 amplitude=10.^((ampdB -maxSPL)/20); %amplitudes = line level, 0 to 1

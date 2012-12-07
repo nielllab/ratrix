@@ -6,15 +6,19 @@ function s=CNM(varargin)
 % Description of arguments:
 % =========================
 % mean - Mean brightness
-% soundParams.soundType = {'allOctaves','tritones', 'binaryWhiteNoise','gaussianWhiteNoise','uniformWhiteNoise','empty'} (valid sound clip types)
+% soundParams.soundType = {'allOctaves','tritones', 'binaryWhiteNoise','gaussianWhiteNoise','uniformWhiteNoise','tone','CNMToneTrain','empty'} (valid sound clip types)
 % soundParams.freqs - (Fundamental) frequencies of sounds to play
 % soundParams.duration sound duration in ms
 % soundParams.amp - sound amplitude
+% soundParams.isi - ms, time between tones in a CNMToneTrain
+% soundParams.toneDuration - ms, duration of each tone in a CNMToneTrain
 
 s.mean = 0;
-s.freq = 0;
+s.freqs = 0;
 s.amplitude = [];
+s.toneDuration = [];
 s.duration = [];
+s.isi = [];
 s.stimSound = []; % Sound to play for the stimulus
 s.audioStimulus = true;
 s.soundType='';
@@ -66,6 +70,8 @@ switch nargin
             case {'tone', 'CNMToneTrain'}
                 if soundParams.freqs > 0
                     s.freqs=soundParams.freqs;
+                    s.isi=soundParams.isi;
+                    s.toneDuration=soundParams.toneDuration;
                 else
                     error('freq must be > 0')
                 end

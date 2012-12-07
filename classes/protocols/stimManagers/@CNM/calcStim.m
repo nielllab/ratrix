@@ -32,7 +32,7 @@ end
 details.numTones=RandSample(3:5);
 
 %override total stimulus duration
-stimulus.duration=(details.numTones+1)*(500+100)-100;
+stimulus.duration=(details.numTones+1)*(stimulus.toneDuration+stimulus.isi)-stimulus.isi;
 
 % pick a random starting tone 
 if rand>0.5
@@ -76,7 +76,7 @@ switch stimulus.soundType
     case {'tone'}
         sSound = soundClip('stimSoundBase','tone',[stimulus.freqs(details.startTone)]) ;
     case {'CNMToneTrain'}
-        sSound = soundClip('stimSoundBase','CNMToneTrain',[stimulus.freqs(details.startTone) stimulus.freqs(details.endTone) details.numTones]) ;
+        sSound = soundClip('stimSoundBase','CNMToneTrain',[stimulus.freqs(details.startTone) stimulus.freqs(details.endTone) details.numTones stimulus.isi stimulus.toneDuration]) ;
 end
 
 mycorrectSound=soundClip('stimSoundBase','allOctaves',100,20000);
@@ -96,6 +96,7 @@ discrimStim.stimulus=out;
 discrimStim.stimType=type;
 discrimStim.scaleFactor=scaleFactor;
 discrimStim.startFrame=0;
+discrimStim.punishResponses=true;
 %discrimStim.autoTrigger=[];
 
 preRequestStim=[];
@@ -108,5 +109,7 @@ preRequestStim.punishResponses=false;
 %preRequestStim=[];
 
 
-preResponseStim=discrimStim;
-preResponseStim.punishResponses=false;
+preResponseStim=preRequestStim;
+preResponseStim.stimType='loop';
+%preResponseStim.autoTrigger=[];
+preResponseStim.punishResponses=true;

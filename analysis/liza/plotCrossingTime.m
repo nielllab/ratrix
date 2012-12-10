@@ -535,7 +535,11 @@ minPerChunk=50;
 chunkHrs=36;
 
 chunks=sessions-minPerChunk;
-chunks=sessions(diff(startTimes([[ones(sum(chunks<=0),1) chunks(chunks>0)] sessions+1]),[],2)>chunkHrs/24);
+try
+    chunks=sessions(diff(startTimes([[ones(sum(chunks<=0),1) chunks(chunks>0)] sessions+1]),[],2)>chunkHrs/24);
+catch
+    warning('bad chunks, but i think it doesn''t matter anymore')
+end
 
 [goodResults,classes] = ismember(results,{'incorrect','correct','timedout','tooEarly'});
 

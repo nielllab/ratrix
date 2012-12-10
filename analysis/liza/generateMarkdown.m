@@ -18,7 +18,7 @@ if outh<=2
     ohth
     error('couldn''t fopen')
 end
-fprintf(outh,intercolate(md2,'\n'));
+fprintf(outh,intercolate(md,'\n'));
 outh = fclose(outh);
 if outh~=0
     outh
@@ -160,11 +160,17 @@ out = {
     '    - mtrix6'
    ['        ' imgLink('ly10')]
    ['        ' imgLink('ly13')]   
+   ['        ' imgLink('ly15')]      
     '- grating'
     '    - mtrix5'
    ['        ' imgLink('jbw03')]  
     '    - mtrix6'
    ['        ' imgLink('jbw01')]   
    ['        ' imgLink('jbw02')]   
+   ['        ' imgLink('jbw04')]     
+   ['        ' imgLink('wg2'  )]    
+    '    - lee'
+   ['        ' imgLink('gcam13ln')]   
+   ['        ' imgLink('gcam13tt')]   
    };
 end

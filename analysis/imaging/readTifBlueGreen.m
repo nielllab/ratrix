@@ -179,6 +179,22 @@ for LED=1:3
     
       set(gcf, 'PaperPositionMode', 'auto');
             print('-dpsc',psfilename,'-append');
+     
+            normalize=0;
+   if normalize
+            mapfig=figure
+    imshow(polarMap(map),'InitialMagnification','fit');
+        colormap(hsv);
+    colorbar
+    axis on 
+    [x y] = ginput(2)
+    %keyboard
+    submap = map(y(1):y(2),x(1):x(2));
+    figure
+    imshow(polarMap(submap))
+    map=map-mean(submap(:));
+    mapFig(map);
+   end
     
     in
      

@@ -22,7 +22,8 @@ if ~exist('in','var') || isempty(in)
     in = fullfile(a,b);
 end
 
-multiTif=0;
+multiTif=1; %%% multi tif = lots of tif files
+
 psfilename = [in '.ps']
 if exist(psfilename,'file')==2;delete(psfilename);end
 
@@ -246,6 +247,8 @@ function mapFig(mapIn)
     
     subplot(2,2,3)
     imshow(polarMap(mapIn));
+%     imagesc(angle(mapIn))
+%     colormap(hsv)
     
     subplot(2,2,4)
     plot(mapIn(:),'.','MarkerSize',2)

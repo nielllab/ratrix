@@ -4,7 +4,7 @@ ids = dir([iPath '_*.tif'])
 
 
 
-maxGB = 1;
+maxGB = .75;
 
 bytesPerPix = 2;
 pixPerFrame = maxGB*1000*1000*1000/length(ids)/bytesPerPix;

@@ -24,7 +24,7 @@ blue  =       white.*[0 0 1        1];
 
 if true %shouldn't be necessary, but ptb bug: a fillrect grey below screws up dontclear = 0
     dontclear = 1;
-    Screen('FillRect', window, black, destRect);
+    Screen('FillRect', window, grey, destRect);
 else
     dontclear = 0;
 end

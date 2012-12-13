@@ -7,6 +7,8 @@ if ~exist('force','var') || isempty(force)
     force = false;
 end
 
+combineTiffs;
+
 doBox    = true;
 doBall   = true;
 doPsycho = true;
@@ -192,8 +194,17 @@ if doBall
             'jbw02' %new
             'ly10' %new
             'ly13' %new
+            'ly15'
+            'jbw04'
+            'wg2'
             }
         }
+        {'lee'
+            {
+            'gcam13ln'
+            'gcam13tt'
+            }
+        }        
     };
 
     tic

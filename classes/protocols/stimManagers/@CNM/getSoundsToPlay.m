@@ -30,6 +30,12 @@ if stepsInPhase <= 0 && ...
 %    end
 end
 
+if stepsInPhase <= 0 && ...
+        ((strcmp(phaseType,'earlyPenalty') && strcmp(trialManagerClass,'goNoGo'))) 
+    soundsToPlay{2}{end+1} = {'earlywrongSound' 200};
+    
+end
+
 %if GetSecs-stimDetails.laser_start_time > stimDetails.laser_duration
  %   setLaser(station,false);
 %end

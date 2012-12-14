@@ -285,7 +285,6 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             end
             
             trialRecords(trialInd).stimDetails = stimulusDetails;
-            r = trialRecords(trialInd).stimDetails
             
             % stopEarly could potentially be set by the datanet's handleCommands (if server tells this client to shutdown
             % while we are in doTrial)

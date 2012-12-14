@@ -8,18 +8,18 @@ if ~all(ismember(subjIDs,getSubjectIDs(r)))
     error('not all those subject IDs are in that ratrix')
 end
 
-sm=makeIntensityDiscrimSoundManager(); %we can just use this one mw 10-23-2012
+sm=makeCNMSoundManager(); %we can just use this one mw 10-23-2012
 
 rewardSizeULorMS          =80;
 requestRewardSizeULorMS   =80;
 requestMode               ='first';
-msPenalty                 =1000;
+msPenalty                 =20;
 fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
-msAirpuff                 =msPenalty;
-responseLockoutMs         =1000;
-Delay = constantDelay(100);
+msAirpuff                 =0;
+responseLockoutMs = 0;
+Delay = constantDelay(20);
 
 constantRewards=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 
@@ -67,7 +67,9 @@ soundParams.soundType='CNMToneTrain'; %new soundType for CNM stimulus
 soundParams.freqs = [1000 1500]; %the two possible frequencies
 soundParams.duration=[]; %ms, total duration of stimSound-calculated in calcstim
 soundParams.isi=500; %ms, time between tones in a CNMToneTrain
-soundParams.toneDuration=1000; %ms, duration of each tone in a CNMToneTrain
+soundParams.toneDuration=500; %ms, duration of each tone in a CNMToneTrain
+soundParams.startfreq = randi(2, 1, 1);
+
 maxSPL=80; %measured max level attainable by speakers
 ampdB=60; %requested amps in dB
 amplitude=10.^((ampdB -maxSPL)/20); %amplitudes = line level, 0 to 1
@@ -76,7 +78,7 @@ soundParams.amp = amplitude; %for intensityDiscrim
 CNMStim = CNM(interTrialLuminance,soundParams,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 requestRewardSizeULorMS = 0;
-msPenalty               = 1000;
+msPenalty               = 20;
 noRequest=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 %nrTM=nAFC(sm,percentCorrectionTrials,noRequest,eyeController,{'off'},dropFrames,'ptb','center');
 nrGNGTM=goNoGo(sm,percentCorrectionTrials,responseLockoutMs,noRequest,eyeController,{'off'},dropFrames,'ptb','center');

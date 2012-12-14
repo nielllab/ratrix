@@ -12,12 +12,15 @@ newSpecInd = specInd;
 transitionedByTimeFlag = false;
 transitionedByPortFlag = false;
 goDirectlyToError=false;
+duration = getDurations(stimManager);
+frameWindowStart = (duration(1) - duration(2))*30/1000;
 
 % ===================================================
 % Check against framesUntilTransition - Transition BY TIME
 % if we are at grad by time, then manually set port to the correct one
 % note that we will need to flag that this was done as "auto-request"
 if ~isempty(framesUntilTransition) && framesInPhase == framesUntilTransition - 1 % changed to framesUntilTransition-1 % 8/19/08
+    tic
     % find the special 'timeout' transition (the port set should be empty)
     newSpecInd = transitionCriterion{find(cellfun('isempty',transitionCriterion))+1};
     % this will always work as long as we guarantee the presence of this special indicator (checked in stimSpec constructor)
@@ -36,6 +39,7 @@ if ~isempty(framesUntilTransition) && framesInPhase == framesUntilTransition - 1
             isRequesting=true;
         end
     end
+    toc
 end
 
 % Check against transition by numFramesInStim (based on size of the stimulus in 'cache' or 'timedIndexed' mode)
@@ -53,6 +57,7 @@ end
 
 framesDoneTime=GetSecs;
 
+
 % Check for transition by port selection
 for gcInd=1:2:length(transitionCriterion)-1
     if ~isempty(transitionCriterion{gcInd}) && any(logical(ports(transitionCriterion{gcInd})))
@@ -66,7 +71,18 @@ for gcInd=1:2:length(transitionCriterion)-1
         else
             % move to the next phase as specified by graduationCriterion
             %      specInd = transitionCriterion{gcInd+1};
+            
             newSpecInd = transitionCriterion{gcInd+1};
+            
+            if phaseType == 'discrim' 
+                if framesInPhase > frameWindowStart
+            newSpecInd = transitionCriterion{gcInd+1};
+                else 
+                newSpecInd = transitionCriterion{gcInd+3}; %too early- go to early penalty phase
+                end 
+            end 
+            
+            
             %             if (specInd == newSpecInd)
             %                 error('same indices at %d', specInd);
             %             end

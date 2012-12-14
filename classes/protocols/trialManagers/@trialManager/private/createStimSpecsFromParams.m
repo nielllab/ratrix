@@ -110,7 +110,12 @@ switch class(trialManager)
         end
         
         % required discrim phase
-        criterion={[],i+1,[targetPorts distractorPorts],i+1};
+        if strcmp(class(trialManager),'goNoGo')
+                criterion={[],i+1,[targetPorts distractorPorts],i+1,[],i+2};
+            else
+                criterion={[],i+1,[targetPorts distractorPorts],i+1};
+        end
+        
         if isinf(responseWindow(2))
             framesUntilTimeout=[];
         else
@@ -139,7 +144,7 @@ switch class(trialManager)
         
         if ~strcmp(class(trialManager),'autopilot')
             % required reinforcement phase
-            if strcmp(class(trialManager),'cuedGoNoGo')
+            if strcmp(class(trialManager),'goNoGo')
                 criterion={[],i+2};
             else
                 criterion={[],i+1};
@@ -148,12 +153,12 @@ switch class(trialManager)
             i=i+1;
         end
         
-        if strcmp(class(trialManager),'cuedGoNoGo')
+        if strcmp(class(trialManager),'goNoGo')
             %required early response penalty phase
             criterion={[],i+1};
             %stimulus=[]?,transitions=criterion,stimType='cache',startFrame=0,framesUntilTransition=[]? or earlyResponsePenaltyFrames, autoTrigger=,scaleFactor=0,isFinalPhase=0,hz,phaseType='earlyPenalty',phaseLabel='earlyPenalty',punishResponses=false,[isStim]=false,[indexPulses]=false)
             %maybe could calc eStim here? or pass [] and calc later
-            stimSpecs{i} = stimSpec([],criterion,'cache',0,1,[],0,0,hz,'earlyPenalty','earlyPenalty',false,false); % do not punish responses here
+            stimSpecs{i} = stimSpec(interTrialLuminance,criterion,'cache',0,200,[],0,0,hz,'earlyPenalty','earlyPenalty',false,false); % do not punish responses here
             i=i+1;
         end
         

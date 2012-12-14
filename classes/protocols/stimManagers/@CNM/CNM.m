@@ -19,6 +19,7 @@ s.amplitude = [];
 s.toneDuration = [];
 s.duration = [];
 s.isi = [];
+s.startfreq = [];
 s.stimSound = []; % Sound to play for the stimulus
 s.audioStimulus = true;
 s.soundType='';
@@ -72,6 +73,7 @@ switch nargin
                     s.freqs=soundParams.freqs;
                     s.isi=soundParams.isi;
                     s.toneDuration=soundParams.toneDuration;
+                    s.startfreq = soundParams.startfreq;
                 else
                     error('freq must be > 0')
                 end

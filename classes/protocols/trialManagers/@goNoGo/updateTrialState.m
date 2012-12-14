@@ -35,7 +35,7 @@ end
     requestRewardDone, punishResponses);
 if isempty(possibleTimeout)
 	if ~isempty(result) && ~ischar(result) && isempty(correct) && strcmp(getPhaseLabel(spec),'reinforcement')
-		resp=find(result);
+		resp=find(result)
 		if length(resp)==1
 			correct = ismember(resp,targetPorts);
             if punishResponses % this means we got a response, but we want to punish, not reward
@@ -59,6 +59,13 @@ framesUntilTransition=getFramesUntilTransition(spec);
 % - call calcReinforcement(RM)
 % - update msRewardOwed/msAirpuffOwed as necessary (depending on correctness and TM class)
 % - call errorStim(SM), correctStim(SM) as necessary and fill in the stimSpec's stimulus field
+
+if ~isempty(phaseType) && strcmp(phaseType,'earlyPenalty') && framesInPhase==0
+    %      [rm rewardSizeULorMS=0 garbage msPenalty msPuff=0 msRewardSound=0 msPenaltySound updateRM] =...
+    %         calcEarlyPenalty(getReinforcementManager(tm),trialRecords, []);
+    trialRecords(end).trialDetails.correct = 0;
+    result = 'nominal';
+end
 
 if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) && framesInPhase==0
     % we only check to do rewards on the first frame of the 'reinforced' phase

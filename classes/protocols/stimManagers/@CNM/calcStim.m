@@ -9,7 +9,7 @@ LUT=makeStandardLUT(LUTbits);
 
 [resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60],32,getMaxWidth(stimulus),getMaxHeight(stimulus));
 
-updateSM=0;
+updateSM=1;
 toggleStim=true;
 
 scaleFactor = getScaleFactor(stimulus);
@@ -34,14 +34,13 @@ details.numTones=RandSample(3:5);
 %override total stimulus duration
 stimulus.duration=(details.numTones+1)*(stimulus.toneDuration+stimulus.isi)-stimulus.isi;
 
-% pick a random starting tone 
-if rand>0.5
-    details.startTone=1; %either freq 1 or freq 2
-    details.endTone=2; %the other one from startTone
-else
-    details.startTone=2;
-    details.endTone=1; %the other one from startTone
-end
+
+% pick a starting tone and then update stimulus.startfreq to the next value
+details.startTone = stimulus.startfreq 
+x = [2 1];
+stimulus.startfreq = x(details.startTone);
+details.endTone = x(details.startTone);
+    
 
 % if lefts>rights %choose a left stim
 %     if stimulus.discrimSide %boolean, sidedness of boundary
@@ -96,7 +95,7 @@ discrimStim.stimulus=out;
 discrimStim.stimType=type;
 discrimStim.scaleFactor=scaleFactor;
 discrimStim.startFrame=0;
-discrimStim.punishResponses=true;
+discrimStim.punishResponses=false;
 %discrimStim.autoTrigger=[];
 
 preRequestStim=[];
@@ -107,6 +106,9 @@ preRequestStim.startFrame=0;
 %preRequestStim.autoTrigger=[];
 preRequestStim.punishResponses=false;
 %preRequestStim=[];
+
+earlyPenaltyStim=preRequestStim;
+earlyPenaltyStim.stimType='cache';
 
 
 preResponseStim=preRequestStim;

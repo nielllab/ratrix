@@ -68,6 +68,21 @@ recs = {
     }    
 };
 
+imagingPath = '\\landis\data'; % 'C:\Users\nlab\Desktop\imaging data';
+recs = {
+    {'GCam13LN' { 
+            {[2160 2423],[],'120212\GCam13LN'   ,'GCam13LN'}
+        }
+    }
+};
+
+recs = {
+    {'GCam13TT' { 
+             {[1116 1321],[],'112712\GCam13TT\r2','GCam13TT'}
+        }
+    }
+};
+
 cellfun(@(r)cellfun(@(s)f(r{1},s),r{2},'UniformOutput',false),recs,'UniformOutput',false);
     function f(subj,r)
         close all
@@ -126,6 +141,8 @@ if scale<1
     sz = round(sqrt(scale)*sz);
 end
 
+iPath = 'C:\Users\nlab\Desktop\imaging data\120212\GCam13LN\GCam13LN';
+iPath = 'C:\Users\nlab\Desktop\imaging data\112712\GCam13TT\r2\GCam13TT';
 mfn = [iPath '_' sprintf('%d_%d_%d',sz(1),sz(2),length(ids)) '.mat'];
 if exist(mfn,'file')
     fprintf('loading preshrunk\n')
@@ -423,6 +440,77 @@ cellfun(@w,leds,num2cell(1:length(leds)),'UniformOutput',false);
         thisT = t(these);
         widefieldAnalysis(trials,pts,onsets,thisData,thisT,thisBFrames,[pre '.' lab],c,targ,stoppedWithin,respondedWithin);
     end
+
+
+if true
+    i=1;
+    frames = length([bFrames{1:trials(i)-1}]) + (1:length(bFrames{trials(i)}));
+    ledInds = [frameLeds{:}];
+    these = double(squeeze(data(:,:,frames)));
+    lims = prctile(these(:),[1 99]); % cellfun(@(f) f(data(:)),{@min @max});
+    figure
+    k = ceil(length(frames)/4);
+    for i=1:length(frames)
+        subplot(k,4,i)
+        imagesc(double(squeeze(data(:,:,frames(i)))));%,lims)
+        title(leds{ledInds(frames(i))})
+        set(gca,'xtick',[])
+        set(gca,'ytick',[])
+        axis equal
+        axis tight
+    end
+    
+    
+    inds = frames(ledInds(frames) == 1);
+    theseT = t(inds);
+    these = double(squeeze(data(:,:,inds)));
+    m = nanmedianMW(these,3);
+    m = repmat(m,[1 1 size(these,3)]);
+    dfof = (these-m)./m;    
+    figure
+    k = ceil(sqrt(size(dfof,3)));
+    for i=1:size(dfof,3)
+        subplot(k,k,i)
+        
+        imagesc(dfof(:,:,i));
+
+        set(gca,'xtick',[])
+        set(gca,'ytick',[])
+        axis equal
+        axis tight
+    end    
+    
+    figure
+    for i=1:size(these,3)
+        subplot(k,k,i)
+        
+        imagesc(these(:,:,i),[0 2^16]);
+
+        set(gca,'xtick',[])
+        set(gca,'ytick',[])
+        axis equal
+        axis tight
+    end       
+    
+    figure
+    d = diff(these,[],3);
+    lims = prctile(d(:),[1 99]);
+    for i=1:size(d,3)
+        subplot(k,k,i)
+        
+        imagesc(d(:,:,i),lims);
+
+        set(gca,'xtick',[])
+        set(gca,'ytick',[])
+        axis equal
+        axis tight
+    end      
+    
+    figure
+    plot(theseT,reshape(these,[size(these,1)*size(these,2) size(these,3)]))
+    
+    keyboard
+end
 end
 
 function widefieldAnalysis(trials,pts,onsets,data,t,bFrames,pre,c,targ,stoppedWithin,respondedWithin)

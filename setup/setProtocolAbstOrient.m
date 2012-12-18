@@ -112,12 +112,14 @@ freeStim = setReinfAssocSecs(freeStim,1);
 targetOrientations = 0;
 distractorOrientations = pi/2;
 orientation = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+orientation=setReinfAssocSecs(orientation,1);
+
 
 %%% stim  - go to target with distractor
 targetOrientations = pi/4;
 distractorOrientations = -pi/4;
 orientationOblique = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
-
+orientationOblique=setReinfAssocSecs(orientationOblique,1);
 
 % pixel calibration midline stim
 degpercm = atand(1/dist);
@@ -126,6 +128,7 @@ pixPerCycs = pixperdeg/cpd;
 
 %%% abstract orientation (e.g. vert = go left, horiz = go right)
 abstract = orientedGabors(pixPerCycs,{distractorOrientations [] targetOrientations},'abstract',mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+abstract = setReinfAssocSecs(abstract,1);
 
 %%% abstract orientation - psychometric curve for orientiation difference
 targetOrientations  = pi/4 - linspace(0,pi/4,7);

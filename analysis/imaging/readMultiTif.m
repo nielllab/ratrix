@@ -4,7 +4,7 @@ ids = dir([iPath '_*.tif'])
 
 
 
-maxGB = 1;
+maxGB = .75;
 
 bytesPerPix = 2;
 pixPerFrame = maxGB*1000*1000*1000/length(ids)/bytesPerPix;
@@ -35,13 +35,13 @@ else
     data = zeros(sz(1),sz(2),length(ids),'uint16');
     stamps = zeros(stampHeight,300,length(ids),'uint16');
     
-    [d,base] = fileparts(iPath);
+    [d,base, ext] = fileparts(iPath);
     tic
     for i=1:length(ids) %something in this loop is leaking
         if rand>.95
             fprintf('%d\t%d\t%g%% done\n',i,length(ids),100*i/length(ids))
         end
-        fn = sprintf('%s_%04d.tif',base,i);
+        fn = sprintf('%s_%04d.tif',[base ext],i);
         if ~ismember(fn,{ids.name})
             error('hmmm')
         end

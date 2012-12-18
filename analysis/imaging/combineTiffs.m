@@ -49,6 +49,9 @@ recs = {
             {[1406 1652],[],'112812\GCam13LN'   ,'GCam13LN'}
             {[1664 1874],[],'113012\GCam13LN\r3','GCam13LN'}
             {[1875 2159],[],'120112\GCam13LN'   ,'GCam13LN'}
+            {[2160 2423],[],'120212\GCam13LN'   ,'GCam13LN'}
+            {[2424 2743],[],'120312\GCam13LN'   ,'GCam13LN'}
+            {[2744 2960],[],'120412\GCam13LN'   ,'GCam13LN'}
         }
     }
     
@@ -64,23 +67,11 @@ recs = {
             {[1322 1710],[],'112812\GCam13TT\'  ,'GCam13TT'}
             {[1712 1816],[],'113012\GCam13TT\'  ,'GCam13TT'}
             {[1817 2005],[],'120112\GCam13TT\'  ,'GCam13TT'}
+            {[2007 2276],[],'120212\GCam13TT\'  ,'GCam13TT'}
+            {[2277 2584],[],'120312\GCam13TT\'  ,'GCam13TT'}
+            {[2585 2939],[],'120412\GCam13TT\'  ,'GCam13TT'}
         }
     }    
-};
-
-imagingPath = '\\landis\data'; % 'C:\Users\nlab\Desktop\imaging data';
-recs = {
-    {'GCam13LN' { 
-            {[2160 2423],[],'120212\GCam13LN'   ,'GCam13LN'}
-        }
-    }
-};
-
-recs = {
-    {'GCam13TT' { 
-             {[1116 1321],[],'112712\GCam13TT\r2','GCam13TT'}
-        }
-    }
 };
 
 cellfun(@(r)cellfun(@(s)f(r{1},s),r{2},'UniformOutput',false),recs,'UniformOutput',false);
@@ -113,7 +104,7 @@ if isempty(ids)
     src = ['\\landis\data' b];
     fprintf('copying %s to %s (takes forever)\n',src,dest);
     dirOverview(src);
-    [status,message,messageid] = copyfile(src,dest);
+    [status,message,messageid] = copyfile(src,dest,'f'); %f shouldn't be necessary, but i get a read-only error w/o it
     if status~=1
         status
         message
@@ -141,8 +132,6 @@ if scale<1
     sz = round(sqrt(scale)*sz);
 end
 
-iPath = 'C:\Users\nlab\Desktop\imaging data\120212\GCam13LN\GCam13LN';
-iPath = 'C:\Users\nlab\Desktop\imaging data\112712\GCam13TT\r2\GCam13TT';
 mfn = [iPath '_' sprintf('%d_%d_%d',sz(1),sz(2),length(ids)) '.mat'];
 if exist(mfn,'file')
     fprintf('loading preshrunk\n')
@@ -390,7 +379,7 @@ trials = trials( ...
 
 c = getUniformSpectrum(normalize(onsets));
 
-pts = [-.8 respondedWithin(1)];
+pts = [-.8 respondedWithin(1)]; %-1.5*frameDur]; %last frame suspect -- if reinforcement phase ends before exposure does, probably turns led off prematurely
 pts = linspace(pts(1),pts(2),1+round(diff(pts)/frameDur));
 
 fig = figure;
@@ -402,7 +391,7 @@ end
 for i=1:length(onsets)
     if i<=length(bRecs)
         plot(bRecs{i}(ledInds{i} == 1)-onsets(i),i,'g.','MarkerSize',1)
-        plot(bRecs{i}(ledInds{i} == 2)-onsets(i),i,'b.','MarkerSize',1)        
+        plot(bRecs{i}(ledInds{i} == 2)-onsets(i),i,'b.','MarkerSize',1)
         if ~isempty(misses{i})
             plot(misses{i}-onsets(i),i,'o','Color',[1 .5 0])
         end
@@ -431,18 +420,44 @@ ylabel('trial')
 xlabel('secs since discrim onset')
 saveFig(fig,[pre '.sync'],[0 0 diff(xlims)*200 length(onsets)*5]); % [left, bottom, width, height]
 
+bFrames   =   bFrames(  1:length(correct));
+frameLeds = frameLeds(  1:length(correct));
+misses    =    misses(  1:length(correct));
+targ      =      targ(  1:length(correct));
+starts    =    starts(:,1:length(correct));
+
+%last frame suspect -- if reinforcement phase ends before exposure does, turns led off prematurely
+if true    
+    bad = cumsum(cellfun(@length,bFrames));
+
+    bFrames   = cellfun(@(x)x(1:end-1),  bFrames,'UniformOutput',false);
+    frameLeds = cellfun(@(x)x(1:end-1),frameLeds,'UniformOutput',false);
+    
+    data(:,:,bad) = [];
+    t(bad) = [];
+    
+    bad = length([bFrames{:}]);
+    data(:,:,bad+1:end) = [];
+    t(       bad+1:end) = [];
+
+    misses; %ok?
+        
+    if ~isempty(trials)
+        pts(pts > min(cellfun(@(x,y)x(end)-y,bFrames(trials),num2cell(onsets(trials))))) = [];
+    end
+end
+
 leds = {'green' 'blue'};
 cellfun(@w,leds,num2cell(1:length(leds)),'UniformOutput',false);
-    function w(lab,ind)        
+    function w(lab,ind)
         thisBFrames = cellfun(@(x,y)x(y == ind),bFrames,frameLeds,'UniformOutput',false);
         these = [frameLeds{:}] == ind;
         thisData = data(:,:,these);
         thisT = t(these);
-        widefieldAnalysis(trials,pts,onsets,thisData,thisT,thisBFrames,[pre '.' lab],c,targ,stoppedWithin,respondedWithin);
+        widefieldAnalysis(trials,pts,onsets,thisData,thisT,thisBFrames,[pre '.' lab],c,targ,stoppedWithin,respondedWithin,misses,starts,correct);
     end
 
-
-if true
+if false
     i=1;
     frames = length([bFrames{1:trials(i)-1}]) + (1:length(bFrames{trials(i)}));
     ledInds = [frameLeds{:}];
@@ -461,36 +476,44 @@ if true
     end
     
     
-    inds = frames(ledInds(frames) == 1);
+    inds = frames(ledInds(frames) == 2);
     theseT = t(inds);
     these = double(squeeze(data(:,:,inds)));
     m = nanmedianMW(these,3);
     m = repmat(m,[1 1 size(these,3)]);
-    dfof = (these-m)./m;    
+    dfof = (these-m)./m;
     figure
     k = ceil(sqrt(size(dfof,3)));
     for i=1:size(dfof,3)
         subplot(k,k,i)
         
         imagesc(dfof(:,:,i));
-
+        
         set(gca,'xtick',[])
         set(gca,'ytick',[])
         axis equal
         axis tight
-    end    
+        
+        if i==1
+            title('dfof')
+        end
+    end
     
     figure
     for i=1:size(these,3)
         subplot(k,k,i)
         
         imagesc(these(:,:,i),[0 2^16]);
-
+        
         set(gca,'xtick',[])
         set(gca,'ytick',[])
         axis equal
         axis tight
-    end       
+        
+        if i==1
+            title('raw (same scale)')
+        end
+    end
     
     figure
     d = diff(these,[],3);
@@ -499,21 +522,29 @@ if true
         subplot(k,k,i)
         
         imagesc(d(:,:,i),lims);
-
+        
         set(gca,'xtick',[])
         set(gca,'ytick',[])
         axis equal
         axis tight
-    end      
+        
+        if i==1
+            title('diff (same scale)')
+        end
+    end
     
     figure
-    plot(theseT,reshape(these,[size(these,1)*size(these,2) size(these,3)]))
+    traces = reshape(these,[size(these,1)*size(these,2) size(these,3)]);
+    plot(theseT-theseT(1),traces)
+    
+    figure
+    plot(theseT-theseT(1),traces(rand(size(traces,1),1)>.99,:))
     
     keyboard
 end
 end
 
-function widefieldAnalysis(trials,pts,onsets,data,t,bFrames,pre,c,targ,stoppedWithin,respondedWithin)
+function widefieldAnalysis(trials,pts,onsets,data,t,bFrames,pre,c,targ,stoppedWithin,respondedWithin,misses,starts,correct)
 ptLs = numNice(pts,.01);
 pts = repmat(pts,length(trials),1)+repmat(onsets(trials)',1,length(pts));
 im = nan([size(pts,1) size(pts,2) size(data,1) size(data,2)]); %trials * t * h * w
@@ -521,24 +552,87 @@ im = nan([size(pts,1) size(pts,2) size(data,1) size(data,2)]); %trials * t * h *
 b = whos('im');
 fprintf('target is %gGB\n',b.bytes/1000/1000/1000)
 
+figure
+hold on
+plot(t-t(1),'r','LineWidth',3)
+bs = [bFrames{:}];
+plot(bs-bs(1))
+
 fig = figure;
+h = [];
 numPix = 50;
 pix = reshape(data,[size(data,1)*size(data,2) size(data,3)]);
 [~, ord] = sort(rand(1,size(pix,1)));
-subplot(3,1,1)
-plot((t-t(1))/60,pix(ord(1:numPix),:)) % this line dies sometimes on 2011b?
+h(end+1) = subplot(2,1,1);
+hold on
+alpha = .1;
+ms = [misses{:}];
+behaviorKey;
+
+    function behaviorKey
+        arrayfun(@plotPhases,1:length(bFrames))
+        arrayfun(@plotMisses,ms)
+    end
+
+    function plotPhases(tNum)
+        fillPhase(starts(1,tNum),starts(2,tNum),[1 1 1]);
+        fillPhase(starts(2,tNum),starts(3,tNum),[1 1 0]);
+        if correct(tNum)
+            tc = [0 1 0];
+        else
+            tc = [1 0 0];
+        end
+        fillPhase(starts(3,tNum),bFrames{tNum}(end),tc);
+    end
+
+    function fillPhase(start,stop,col)
+        if stop>start %drops may cause bFrames to not contain frames after a phase start
+            fill(([start start stop stop]-bs(1))/60,2^16*[0 1 1 0],col,'FaceAlpha',alpha)
+        end
+    end
+
+    function plotMisses(in)
+        plot((in-bs(1))*ones(1,2)/60,[0 2^16],'Color',[1 .5 0])
+        % can't have alpha on line, and dominates otherwise
+        % fillPhase(in,in+.05,[1 .5 0]);
+    end
+
+plot((bs-bs(1))/60,pix(ord(1:numPix),:)) % this line dies sometimes on 2011b?
 xlabel('mins')
 ylabel('pixel values')
 title('raw')
 
-subplot(3,1,2)
-title('fit')
+h(end+1) = subplot(2,1,2);
+hold on
+behaviorKey;
+title('after drops and error stim removed') %both cause spikes
+bads = false(size(bs));
+for i=1:length(ms)
+    bads(find((bs-ms(i))>0,1,'first')) = true;
+end
+for i=1:length(correct)
+    if ~correct(i)
+        bads(bs >= starts(3,i) & bs <= bFrames{i}(end)) = true;
+    end
+end
 
-subplot(3,1,3)
-title('detrended + scaled')
+pix = double(pix(ord(1:numPix),:));
+pix(:,bads) = nan;
+plot((bs-bs(1))/60,pix)
+ylim([0 max(pix(:))])
 
-saveFig(fig,[pre '.detrend'],[0 0 500 1000]); % [left, bottom, width, height]
+linkaxes(h,'x');
 
+if false
+    subplot(3,1,2)
+    title('fit')
+    
+    subplot(3,1,3)
+    title('detrended + scaled')
+    saveFig(fig,[pre '.detrend'],[0 0 500 1000]); % [left, bottom, width, height]
+else
+    saveFig(fig,[pre '.detrend'],[0 0 2000 500]); % [left, bottom, width, height]
+end
 
 fprintf('permuting...\n')
 tic
@@ -669,6 +763,10 @@ if false
     % "When you print to a file, the file name must have fewer than 128 characters, including path name."
     % http://www.mathworks.com/access/helpdesk/help/techdoc/ref/print.html#f30-534567
     print(f,'-dpng',['-r' num2str(dpi)],'-opengl',latest); %opengl for transparency -- probably unnecessary cuz seems to be automatically set when needed
+end
+
+if isempty(strfind(fn,'trials')) % these take up half a gig each
+    saveas(f,fullfile(targ,[fn '.fig']));
 end
 end
 

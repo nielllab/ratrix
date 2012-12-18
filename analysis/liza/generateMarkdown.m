@@ -140,17 +140,20 @@ end
 
 function out = md
 out = {
+    
     '- orientation'
     '    - mtrix2'
    ['        ' imgLink('c4rn')]
    ['        ' imgLink('c4rt')]
    ['        ' imgLink('c5rn')]
    ['        ' imgLink('c5rt')]
+   
     '- audio intensity'
     '    - mtrix2'
    ['        ' imgLink('3691')]
     '    - mtrix3'
    ['        ' imgLink('3694')]  
+   
     '- ball dms'
     '    - mtrix5'
    ['        ' imgLink('ly14')]
@@ -161,16 +164,39 @@ out = {
    ['        ' imgLink('ly10')]
    ['        ' imgLink('ly13')]   
    ['        ' imgLink('ly15')]      
+   
     '- grating'
-    '    - mtrix5'
-   ['        ' imgLink('jbw03')]  
+%     '    - mtrix5'
+%    ['        ' imgLink('jbw03')]  
     '    - mtrix6'
-   ['        ' imgLink('jbw01')]   
+%    ['        ' imgLink('jbw01')]   
    ['        ' imgLink('jbw02')]   
    ['        ' imgLink('jbw04')]     
-   ['        ' imgLink('wg2'  )]    
-    '    - lee'
-   ['        ' imgLink('gcam13ln')]   
-   ['        ' imgLink('gcam13tt')]   
+%    ['        ' imgLink('wg2'  )]    
+%     '    - lee'
+%    ['        ' imgLink('gcam13ln')]   
+%    ['        ' imgLink('gcam13tt')]   
+
+    '- orient'
+    '    - mtrix5'
+   ['        ' imgLink('gcam13ln')]
+   ['        ' imgLink('jbw03')]
+    '    - jarmusch'
+   ['        ' imgLink('gcam13tt')]  
+    '    - mtrix6'
+   ['        ' imgLink('wg2')]
+   ['        ' imgLink('jbw01')]   
+
+    '- whatwhere'
+    '    - mtrix5'
+   ['        ' imgLink('gcam20tt')]
+   ['        ' imgLink('gcam21rt')]
+    '    - jarmusch'
+   ['        ' imgLink('gcam17tt')]  
+   ['        ' imgLink('wg4lt')]  
+   '    - mtrix6'
+   ['        ' imgLink('gcam17rn')]
+   ['        ' imgLink('wg4rt')]      
+   
    };
 end

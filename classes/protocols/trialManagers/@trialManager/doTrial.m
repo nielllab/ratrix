@@ -143,13 +143,14 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 trialRecords(trialInd).distractorPorts, ...
                 stimulusDetails, ...
                 text);
+            if strcmp(class(newSM), 'CNM') || strcmp(class(newSM), 'freeCNM')
             durations = getDurations(newSM); %[duration toneDuration isi]
             %rWMs = [(durations(1) - durations(2)) durations(1)]; %from beginning of last tone to its end
             % rWMs = [(durations(1) - durations(2))/2 (durations(3) + durations(1))/2]; %dividing by 2 makes the timeout happen at the correct time... why?
              rWMs = [0 (durations(1))/2 + durations(3)/4];
              trialManager = setResponseWindow(trialManager, rWMs);
            %trialManager = setResponseWindow(trialManager,[0 2000] );
-            
+            end
             % test must a single string now - dont bother w/ complicated stuff here
 			if ~ischar(text)
 				error('text must be a string');

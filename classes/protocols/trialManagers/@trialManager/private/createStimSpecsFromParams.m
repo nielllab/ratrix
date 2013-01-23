@@ -56,7 +56,7 @@ startingStimSpecInd=1;
 i=1;
 addedPreResponsePhase=0;
 switch class(trialManager)
-    case {'nAFC','freeDrinks','oddManOut','goNoGo','cuedGoNoGo','autopilot','ball'}
+    case {'nAFC','freeDrinks','oddManOut','goNoGo','freeGoNoGo','cuedGoNoGo','autopilot','ball'}
         if ~ismember(class(trialManager),{'autopilot'})
             % we need to figure out when the reinforcement phase is (in case we want to punish responses, we need to know which phase to transition to)
             if ~isempty(preResponseStim) && responseWindow(1)~=0
@@ -64,7 +64,7 @@ switch class(trialManager)
             end
             
             % optional preOnset phase
-            if ~isempty(preRequestStim) && (ismember(class(trialManager),{'goNoGo','cuedGoNoGo'}) || isa(trialManager,'nAFC')) % only some classes have the pre-request phase if no delayManager in 'nAFC' class
+            if ~isempty(preRequestStim) && (ismember(class(trialManager),{'goNoGo','freeGoNoGo','cuedGoNoGo'}) || isa(trialManager,'nAFC')) % only some classes have the pre-request phase if no delayManager in 'nAFC' class
                 if preRequestStim.punishResponses
                     if strcmp(class(trialManager),'cuedGoNoGo')
                         criterion={[],i+1,[targetPorts distractorPorts],i+3+addedPreResponsePhase};
@@ -111,10 +111,15 @@ switch class(trialManager)
         
         % required discrim phase
         if strcmp(class(trialManager),'goNoGo')
-                criterion={[],i+1,[targetPorts distractorPorts],i+1,[],i+2};
+                criterion={[],i+1,[targetPorts distractorPorts],i+1,[],i+2}; %if early response, i+2 will take to phase 4
             else
                 criterion={[],i+1,[targetPorts distractorPorts],i+1};
         end
+        
+        if strcmp(class(trialManager),'freeGoNoGo')
+                criterion={[],i+1}; %responses don't matter, go to phase 3 no matter what
+        end
+        
         
         if isinf(responseWindow(2))
             framesUntilTimeout=[];
@@ -142,7 +147,7 @@ switch class(trialManager)
         
         i=i+1;
         
-        if ~strcmp(class(trialManager),'autopilot')
+        if ~strcmp(class(trialManager),'autopilot') && ~strcmp(class(trialManager),'freeGoNoGo')
             % required reinforcement phase
             if strcmp(class(trialManager),'goNoGo')
                 criterion={[],i+2};
@@ -162,7 +167,17 @@ switch class(trialManager)
             i=i+1;
         end
         
-        if ~strcmp(class(trialManager),'ball')
+        if strcmp(class(trialManager),'freeGoNoGo')
+            %for fGNG, this phase will always follow the discrim phase and
+            %is the final phase - plays the 2nd tone
+            criterion={[],i+1};
+            %stimulus=[]?,transitions=criterion,stimType='cache',startFrame=0,framesUntilTransition=[]? or earlyResponsePenaltyFrames, autoTrigger=,scaleFactor=0,isFinalPhase=0,hz,phaseType='earlyPenalty',phaseLabel='earlyPenalty',punishResponses=false,[isStim]=false,[indexPulses]=false)
+            %maybe could calc eStim here? or pass [] and calc later
+            stimSpecs{i} = stimSpec(interTrialLuminance,criterion,'cache',0,200,[],0,1,hz,'earlyPenalty','earlyPenalty',false,false); % do not punish responses here
+            i=i+1;
+        end
+        
+        if ~strcmp(class(trialManager),'ball') && ~strcmp(class(trialManager),'freeGoNoGo')
             % required final ITL phase
             criterion={[],i+1};
             if strcmp(class(trialManager),'cuedGoNoGo')

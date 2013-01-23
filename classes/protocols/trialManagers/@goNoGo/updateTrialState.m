@@ -63,7 +63,8 @@ framesUntilTransition=getFramesUntilTransition(spec);
 if ~isempty(phaseType) && strcmp(phaseType,'earlyPenalty') && framesInPhase==0
     %      [rm rewardSizeULorMS=0 garbage msPenalty msPuff=0 msRewardSound=0 msPenaltySound updateRM] =...
     %         calcEarlyPenalty(getReinforcementManager(tm),trialRecords, []);
-    trialRecords(end).trialDetails.correct = 0;
+    trialRecords(end).trialDetails.correct = 0; %%if there is an early response in goNoGo, classify as incorrect
+    correct = 0;
     result = 'nominal';
 end
 

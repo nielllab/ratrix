@@ -52,7 +52,7 @@ switch nargin
         else
             error('type for 2 args must be binaryWhiteNoise gaussianWhiteNoise uniformWhiteNoise empty')
         end
-    case 3 %tone or CNMToneTrain
+    case 3 %tone or CNMToneTrain or freeCNMToneTrain
         if ischar(varargin{1})
             t.name=varargin{1};
         else
@@ -60,7 +60,7 @@ switch nargin
         end
         t.clip = [];
         % create object using specified values
-        if ismember(varargin{2},{'tone', 'CNMToneTrain'})
+        if ismember(varargin{2},{'tone', 'CNMToneTrain', 'freeCNMToneTrain'})
             if ~all(varargin{3}>0) 
                 error('pass in Freq  > 0')
             end
@@ -72,6 +72,9 @@ switch nargin
                 case 'CNMToneTrain'
                     t.description = ['CNMToneTrain, start: ' num2str(t.freq(1)) ' end: ' num2str(t.freq(2)) ' Hz, n=',num2str(t.freq(3)) ,' tones'];
                     t.type = varargin{2};
+                case 'freeCNMToneTrain'
+                    t.description = ['freeCNMToneTrain, start: ' num2str(t.freq(1)) 'Hz, n=',num2str(t.freq(3)) ,' tones'];
+                    t.type = varargin{2};    
                 otherwise
                     error('Should never happen!!: soundClip type already validated as tone')
             end

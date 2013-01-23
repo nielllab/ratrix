@@ -52,7 +52,26 @@ if isempty(s.clip)
             end    
             train=[train endtone];
             s.clip = train;
-
+        case 'freeCNMToneTrain'
+            %train of pure tones, all at start freq
+            %duration and isi specified in setProtocolCNM
+            startfreq=s.freq(1);
+            endfreq=s.freq(2);
+            numtones=s.freq(3);
+            isi=s.freq(4);
+            toneDuration=s.freq(5);
+            s.numSamples = s.sampleRate*toneDuration/1000;
+            t=1:s.numSamples;
+            t=t/s.sampleRate;
+            starttone=sin(2*pi*t*startfreq);
+            endtone=sin(2*pi*t*endfreq);
+            silence=zeros(1, 44.1*isi);
+            train=[];
+            for i=1:numtones-1
+            train=[train starttone silence];
+            end    
+            train=[train starttone];
+            s.clip = train;
         case 'tritones'
             s.clip = getClip(soundClip('annonymous','allOctaves',[s.fundamentalFreqs tritones(s.fundamentalFreqs)],s.maxFreq));
         case 'dualChannel'

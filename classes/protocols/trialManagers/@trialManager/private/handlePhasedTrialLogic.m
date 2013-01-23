@@ -12,8 +12,6 @@ newSpecInd = specInd;
 transitionedByTimeFlag = false;
 transitionedByPortFlag = false;
 goDirectlyToError=false;
-duration = getDurations(stimManager);
-frameWindowStart = (duration(1) - duration(2))*30/1000;
 
 % ===================================================
 % Check against framesUntilTransition - Transition BY TIME
@@ -74,11 +72,13 @@ for gcInd=1:2:length(transitionCriterion)-1
             
             newSpecInd = transitionCriterion{gcInd+1};
             
-            if phaseType == 'discrim' 
+            if strcmp(phaseType,'discrim') && strcmp(class(tm), 'goNoGo')
+                duration = getDurations(stimManager);
+                frameWindowStart = (duration(1) - duration(2))*30/1000;
                 if framesInPhase > frameWindowStart
             newSpecInd = transitionCriterion{gcInd+1};
                 else 
-                newSpecInd = transitionCriterion{gcInd+3}; %too early- go to early penalty phase
+                    newSpecInd = transitionCriterion{gcInd+3}; %too early- go to early penalty phase
                 end 
             end 
             

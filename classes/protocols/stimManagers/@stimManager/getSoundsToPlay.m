@@ -17,7 +17,7 @@ end
 
 % nAFC/goNoGo setup:
 switch trialManagerClass
-    case {'nAFC','goNoGo','oddManOut','cuedGoNoGo'}
+    case {'nAFC','goNoGo','freeGoNoGo','oddManOut','cuedGoNoGo'}
         % play trial start sound
         if phase==1 && stepsInPhase <=0
             playSoundSounds{end+1} = {'trialStartSound', 50};

@@ -40,6 +40,9 @@ toc
 if g>.3
     setpref('Internet','SMTP_Server','smtp.uoregon.edu')
     setpref('Internet','E_mail','ratrix@uoregon.edu')
+    if ~exist('name','var')
+        name = 'NONAME';
+    end
     emailStr=sprintf('RATRIX: db access for %s (%s): %g (%s)',name,s,g,num2str(cell2mat(r)));
     sendmail('erik.flister@gmail.com',emailStr,'slow db access');
 end

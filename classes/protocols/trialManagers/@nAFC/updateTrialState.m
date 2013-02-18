@@ -96,9 +96,9 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) &&
         end
         
         [cStim cType cStartFrame cScale framesUntilTransition] = correctStim(sm,numCorrectFrames,ifi,tm,lastFrame);
-        
-        sca
-        keyboard
+%         
+%         sca
+%         keyboard
         
         spec=setFramesUntilTransition(spec,max(numCorrectFrames,framesUntilTransition));
         spec=setScaleFactor(spec,cScale);

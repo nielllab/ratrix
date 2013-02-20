@@ -45,3 +45,6 @@ setupDBPaths();
 %FlushEvents('keyDown');
 
 fixSystemTime;
+try
+    removeLibusb;
+end

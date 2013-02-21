@@ -1,11 +1,15 @@
 function [ppOut matlab64Out win64Out b64Out] = getPP
 persistent noPP;
 if isempty(noPP)
-    [~,b] = getMACaddress;
-    noPP = ismember(b,{...
-        '08002700F8DC',... % erik's dev machine has no pp :(
-        '08002700D40D' ... % sue's vaio
-        });
+    try
+        [~,b] = getMACaddress;
+        noPP = ismember(b,{...
+            '08002700F8DC',... % erik's dev machine has no pp :(
+            '08002700D40D' ... % sue's vaio
+            });
+    catch
+        noPP = true;
+    end
 end
 
 ppOut = ~noPP;
@@ -20,7 +24,7 @@ if any(cellfun(@isempty,{matlab64 win64 b64}))
     win64 = false;
     b64 = nan;
     
-    if IsWin
+    if ispc
         % from http://stackoverflow.com/questions/7519321/determine-if-running-x64-or-x86-operating-system-in-matlab
         
         [a b] = dos('set PROCESSOR_ARCHITECTURE');
@@ -53,8 +57,11 @@ if any(cellfun(@isempty,{matlab64 win64 b64}))
                                 error('couldn''t PROCESSOR_ARCHITEW6432')
                             end
                         else
-                            a
-                            b
+                            if isempty(strfind(b,'not defined')) || a~=1
+                                a
+                                b
+                                error('unexpected')
+                            end
                             win64 = false;
                         end
                         
@@ -113,18 +120,18 @@ if any(cellfun(@isempty,{matlab64 win64 b64}))
                     end
                 end
             else
-                error('ptb isn''t going to work on matlab64 on win')
+                warning('ptb isn''t going to work on matlab64 on win')
             end
         end
-    end
-    
-    if matlab64
-        if ~strcmp(computer,'PCWIN64')
-            error('mismatch')
-        end
-    else
-        if ~strcmp(computer,'PCWIN')
-            error('mismatch')
+        
+        if matlab64
+            if ~strcmp(computer,'PCWIN64')
+                error('mismatch')
+            end
+        else
+            if ~strcmp(computer,'PCWIN')
+                error('mismatch')
+            end
         end
     end
     

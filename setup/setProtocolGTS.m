@@ -19,6 +19,21 @@ fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =msPenalty;
 
+% sca
+% keyboard
+
+if ~isscalar(subjIDs)
+    error('expecting exactly one subject')
+end
+switch subjIDs{1}
+    case 'gcam13tt'
+        requestRewardSizeULorMS = 0;
+   case 'gcam13ln'
+        requestRewardSizeULorMS = 0;
+    otherwise
+        warning('unrecognized mouse, using defaults')
+end
+
 noRequest = constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 
 percentCorrectionTrials = .5;

@@ -61,7 +61,7 @@ if nargin < 3 || isempty(p);p=0.05/N;end;
 if nargin < 4 || isempty(plt); plt='n'; end;
 if nargin < 5; f0=[]; end;
 params.tapers=dpsschk(tapers,N,Fs); % calculate the tapers
-[Fval,A,f,sig] = ftestc(data,params,p,plt);
+[Fval,A,f,sig] = ftestc(data,params,p,plt)
 if isempty(f0);
    fmax=findpeaks(Fval,sig);
    freqs=cell(1,C);

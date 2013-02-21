@@ -42,7 +42,7 @@ if (request || (any(ports(requestPorts)) && ~any(lastPorts(requestPorts)))) && .
         ~requestRewardDone) % first request
     
     [rm, ~, requestRewardSizeULorMS, ~, ~, ~, ~, updateRM] =...
-        calcReinforcement(getReinforcementManager(tm),trialRecords, []);
+        calcReinforcement(getReinforcementManager(tm),trialRecords, trialRecords(end).subjectsInBox); %subject hack
     if updateRM
         tm=setReinforcementManager(tm,rm);
     end

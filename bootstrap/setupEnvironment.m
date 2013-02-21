@@ -15,7 +15,15 @@ lastwarn('')
 
 warning('off','MATLAB:dispatcher:nameConflict')
 addpath(fullfile(getRatrixPath,'classes','util','infrastructure')); %for deGitify
-addpath(deGitify(RemoveSVNPaths(genpath(getRatrixPath))));
+addpath(fullfile(getRatrixPath,'classes','util','parallelPort')); %for getPP
+
+[~, matlab64] = getPP;
+
+if matlab64
+    addpath(deGitify(genpath(getRatrixPath)));
+else
+    addpath(deGitify(RemoveSVNPaths(genpath(getRatrixPath))));
+end
 warning('on','MATLAB:dispatcher:nameConflict')
 
 %intwarning('on'); $edf removed cuz 2011b eliminated intwarning
@@ -26,7 +34,7 @@ warning('on','MATLAB:dispatcher:nameConflict')
 
 clearJavaComponents();
 closeAllSerials
-if IsWin
+if ispc
     daqreset
 end
 
@@ -37,3 +45,6 @@ setupDBPaths();
 %FlushEvents('keyDown');
 
 fixSystemTime;
+try
+    removeLibusb;
+end

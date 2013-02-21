@@ -15,6 +15,10 @@ p.trig = 7;
 p.busy = 15;
 p.rate = 30;
 p.n    = 100;
+p.msTolerance = 1;
+
+p.LEDs = [5 3]; %[5 6]; %[green blue]
+p.LEDf = @(n) 1+(mod(n,3)>0);
 
 pFields = fields(p);
 
@@ -52,7 +56,9 @@ end
 p.addr = hex2dec(p.addr);
 p.trig = uint8(p.trig);
 p.busy = uint8(p.busy);
+p.LEDs = uint8(p.LEDs);
 p.rate = 1/p.rate;
+p.msTolerance = p.msTolerance/1000;
 
 %init
 p.slowChecks = false;
@@ -70,6 +76,8 @@ p = class(p,'pco');
         end
         
         switch f
+            case {'LEDs' 'LEDf'}
+                %pass
             case 'addr'
                 if bad(v,{@ischar @isvector @(x)size(x,1)==1})
                     error('addr must be single hex string')
@@ -94,6 +102,10 @@ p = class(p,'pco');
             case 'n'
                 if bad(v,{@isreal @isnumeric @isscalar @isfinite @(x)x>=0 @(x)mod(x,1)==0})
                     error('bad n')
+                end
+            case 'msTolerance'
+                if bad(v,{@isreal @isnumeric @isscalar @(x)x>=0 @(x)x<=10})
+                    error('bad tolerance')
                 end
             otherwise
                 error('huh')

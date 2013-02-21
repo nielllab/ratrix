@@ -765,7 +765,7 @@ while ~done && ~quit;
     end
     
     % =========================================================================
-    
+        
     if ~isempty(eyeTracker)
         if ~checkRecording(eyeTracker)
             sca
@@ -863,7 +863,7 @@ while ~done && ~quit;
         [tm done newSpecInd phaseInd updatePhase transitionedByTimeFlag ...
             transitionedByPortFlag trialRecords(trialInd).result isRequesting lastSoundsLooped ...
             timestamps.logicGotSounds timestamps.logicSoundsDone timestamps.logicFramesDone ...
-            timestamps.logicPortsDone timestamps.logicRequestingDone goDirectlyToError] ...
+            timestamps.logicPortsDone timestamps.logicRequestingDone goDirectlyToError trialRecords(trialInd).stimDetails] ...
             = handlePhasedTrialLogic(tm, done, ...
             ports, lastPorts, station, phaseInd, phaseType, transitionCriterion, framesUntilTransition, numFramesInStim, framesInPhase, isFinalPhase, ...
             trialRecords(trialInd).trialDetails, trialRecords(trialInd).stimDetails, trialRecords(trialInd).result, ...
@@ -1090,6 +1090,10 @@ while ~done && ~quit;
     lastAirpuffTime = GetSecs();
     
     % =========================================================================
+    
+    if isfield(trialRecords(trialInd),'pco')
+        trialRecords(trialInd).pco = exec(trialRecords(trialInd).pco);
+    end
     
     if updatePhase
         phaseRecords(phaseNum).transitionedByPortResponse = transitionedByPortFlag;

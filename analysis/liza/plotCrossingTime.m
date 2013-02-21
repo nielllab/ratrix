@@ -23,7 +23,7 @@ if ~exist('drive','var') || isempty(drive)
     end
 end
 
-if IsWin
+if ispc
     compiledDir = '\\reichardt\figures';
     compiledFile = getCompiledFile(compiledDir,subj);
     
@@ -67,7 +67,7 @@ end
 end
 
 function compiledFile = compileBall(subj,drive,force,compiledDir)
-if IsWin
+if ispc
     recordPath = fullfile(drive,'Users','nlab');
 elseif ismac && local
     recordPath = [filesep fullfile('Users','eflister')];
@@ -99,7 +99,7 @@ bounds = cell2mat(cellfun(@(x)textscan(x,'trialRecords_%u-%u_%uT%u-%uT%u.mat','C
 bounds = bounds(ord,:);
 files = files(ord);
 
-if ~force && IsWin
+if ~force && ispc
     fd = ['\\reichardt\figures\' subj];
     d=dir([fd '\*.300.png']);
     d=sort({d.name});
@@ -139,7 +139,7 @@ for i=1:length(files)
     fprintf('done with %d of %d\n',i,length(files));
 end
 
-if IsWin && false %takes too long (95sec local) to save (.25GB on disk, 1.8GB in memory), loading slow (73sec local) too
+if ispc && false %takes too long (95sec local) to save (.25GB on disk, 1.8GB in memory), loading slow (73sec local) too
     tic
     save([fd '\latest.mat'],'fullRecs','records');
     toc
@@ -153,7 +153,23 @@ end
 
 startTimes = datenum(cell2mat({records.date}'));
 if ~all(diff(startTimes) > 0)
-    error('records don''t show increasing start times')
+    r = find(diff(startTimes)<=0);
+    for i=1:length(r)
+        inds = r(i)+[0:2]
+        records(inds).date
+    end
+    
+    if false
+        figure
+        plot(startTimes)
+        xlim([r(1) r(end)]+100*[-1 1])
+        ylim(startTimes(r(1))+.02*[-1 1])
+        keyboard
+    end
+    
+    %ok to soften from error to warning?  seems windows time service has
+    %hiccups (see //mtrix6 ly13 on 09.09.12)
+    warning('records don''t show increasing start times')
 end
 
 %these session boundaries aren't useful, cuz you may have stopped and started right away again
@@ -419,8 +435,12 @@ r = [records.reinforcementManager];
 intendedRewards = [r.rewardSizeULorMS];
 
 %interframe intervals (in secs, should be 1/60 for 60Hz)
-s = [records.station];
-ifis = [s.ifi];
+try
+    s = [records.station];
+    ifis = [s.ifi];
+catch %later stations added a field 'laserPins'    
+    ifis = cellfun(@(x)x.ifi,{records.station});
+end
 
 data=struct(...
     'trialNum'       , num2cell(uint32(trialNums)      ), ...
@@ -449,7 +469,15 @@ cellfun(@(f)combineStructs(dms,f),fields(dmsNan));
         [data.(f)] = in.(f);
     end
 
-compiledFile = fullfile(compiledDir,subj,sprintf('compiled_%d-%d_%s.mat',trialNums(1),trialNums(end),datestr(now,30)));
+d = fullfile(compiledDir,subj);
+[status,message,messageid] = mkdir(d);
+if status ~= 1
+    status
+    message
+    messageid
+    error('couldn''t mkdir')
+end
+compiledFile = fullfile(d,sprintf('compiled_%d-%d_%s.mat',trialNums(1),trialNums(end),datestr(now,30)));
 tic
 save(compiledFile,'data');
 toc
@@ -507,7 +535,11 @@ minPerChunk=50;
 chunkHrs=36;
 
 chunks=sessions-minPerChunk;
-chunks=sessions(diff(startTimes([[ones(sum(chunks<=0),1) chunks(chunks>0)] sessions+1]),[],2)>chunkHrs/24);
+try
+    chunks=sessions(diff(startTimes([[ones(sum(chunks<=0),1) chunks(chunks>0)] sessions+1]),[],2)>chunkHrs/24);
+catch
+    warning('bad chunks, but i think it doesn''t matter anymore')
+end
 
 [goodResults,classes] = ismember(results,{'incorrect','correct','timedout','tooEarly'});
 

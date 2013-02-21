@@ -3,17 +3,17 @@ addpath(fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))),'bootstr
 setupEnvironment;
 dbstop if error
 
-if ~IsWin
+if ~ispc
     error('haven''t xplatformed yet')
 end
 
 ctrPath = '\\reichardt\figures\audio\';
 
-    recs = {...
+    recs = {...                    
         {'mtrix1'
             {
              '3499'
-             %'3513' %new
+             '3513' %new
             }
         }
 
@@ -28,9 +28,9 @@ ctrPath = '\\reichardt\figures\audio\';
             {
              %'3233' %abandoned?
              '3337' 
-             %'3398' %abandoned?
+             '3398' %abandoned?
              '3500'
-             %'3515' %new
+             '3515' %new
             }
         }
 
@@ -39,14 +39,33 @@ ctrPath = '\\reichardt\figures\audio\';
              '3236'
              '3397'
              %'3500' %moved to mtrix3
-             %'3516' %new
+             '3516' %new
             }
         }
     };
 
 cellfun(@(x)compile(x{:},ctrPath),recs);
-
 simplePsycho('amp','amp',uint8(5:6),@(x)arrayfun(@(x)[num2str(prec(100*x,1)) '%'],x,'UniformOutput',false),true,ctrPath);
+
+
+
+    ctrPath = '\\reichardt\figures\wehr-ratrix1-audio\';
+
+    recs = {...                    
+        {'wehr-ratrix1'
+                    {
+                    '3513'
+                    '3516'
+                    '3350'
+                    '3515'
+                    '3499'
+                    '3500'
+                    }
+        }
+   };
+
+cellfun(@(x)compile(x{:},ctrPath),recs);
+simplePsycho('amp','amp',uint8(5:7),@(x)arrayfun(@(x)[num2str(prec(100*x,1)) '%'],x,'UniformOutput',false),true,ctrPath);
 end
 
 function compile(srv,subs,ctrPath)

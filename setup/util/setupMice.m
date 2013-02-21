@@ -10,9 +10,9 @@ setupEnvironment
 %names = {'c2rt','c1rt'};
 %names = {'c2rn','c1rn'};
 %names = {'3691'};
-names = {'3827'}
+names = {'c4rt','c5rt','c4rn','c5rn'}
 
-lab = 'wehr'
+lab = 'niell'
 
 switch lab
     case 'wehr'

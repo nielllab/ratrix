@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 function r = setProtocolHvV(r,subjIDs)
 
 if ~isa(r,'ratrix')
@@ -92,6 +93,8 @@ stepNum=uint8(1);
 subj=getSubjectFromID(r,subjIDs{1});
 [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'LY01 (40,80), R=36','edf');
 =======
+=======
+>>>>>>> 176271a... horizontal vs vertical center pres with stop rewards
 function r = setProtocolHvV(r,subjIDs)
 
 if ~isa(r,'ratrix')
@@ -184,5 +187,8 @@ stim.stim = orientedGabors(pixPerCycs,{distractorOrientations [] targetOrientati
 stepNum=uint8(1);
 subj=getSubjectFromID(r,subjIDs{1});
 [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'LY01 (40,80), R=36','edf');
+<<<<<<< HEAD
 >>>>>>> 2649a41... horizontal vs vertical center pres with stop rewards
+=======
+>>>>>>> 176271a... horizontal vs vertical center pres with stop rewards
 end

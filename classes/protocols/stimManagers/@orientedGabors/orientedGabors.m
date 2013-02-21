@@ -1,8 +1,8 @@
 function s=orientedGabors(varargin)
 % ORIENTEDGABORS  class constructor.
-% s = orientedGabors([pixPerCycs],[targetOrientations],[distractorOrientations],mean,radius,contrasts,thresh,yPositionPercent,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[waveform],[normalizedSizeMethod],[xPosPct])
+% s = orientedGabors([pixPerCycs],[targetOrientations],[distractorOrientations],mean,radius,contrasts,thresh,yPositionPercent,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[waveform],[normalizedSizeMethod])
 % orientations in radians
-% mean, contrasts, yPositionPercent, xPosPct normalized (0 <= value <= 1)
+% mean, contrasts, yPositionPercent normalized (0 <= value <= 1)
 % radius is the std dev of the enveloping gaussian, (by default in normalized units of the diagonal of the stim region)
 % thresh is in normalized luminance units, the value below which the stim should not appear
 
@@ -16,12 +16,11 @@ s.contrasts = 0;
 s.thresh = 0;
 s.yPosPct = 0;
 
-
 s.LUT =[];
 s.LUTbits=0;
 s.waveform='square';
 s.normalizedSizeMethod='normalizeDiagonal';
-s.xPosPct=[];
+
 
 switch nargin
     case 0
@@ -36,7 +35,7 @@ switch nargin
         else
             error('Input argument is not an orientedGabors object')
         end
-    case {12 14 15}
+    case {12 14}
         % create object using specified values
 
         if all(varargin{1})>0
@@ -83,7 +82,7 @@ switch nargin
             error('yPositionPercent must be numeric')
         end
 
-        if nargin>=14
+        if nargin==14
             if ~isempty(varargin{13})
                 if ismember(varargin{13},{'sine', 'square', 'none'})
                     s.waveform=varargin{13};
@@ -99,16 +98,7 @@ switch nargin
                 end
             end
         end
-        if nargin>=15
-            if ~isempty(varargin{15})
-               
-                if all(varargin{15})>=0 && all(varargin{15})<=1
-                    s.xPosPct=varargin{15};
-                else
-                    error('x positions must be between 0 and 1')
-                end
-            end
-        end
+
         s = class(s,'orientedGabors',stimManager(varargin{9},varargin{10},varargin{11},varargin{12}));
 
     otherwise

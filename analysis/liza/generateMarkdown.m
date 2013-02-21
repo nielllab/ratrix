@@ -15,10 +15,10 @@ out = 'C:\Users\nlab\Desktop\currentBehavior.md';
 
 outh = fopen(out,'wt');
 if outh<=2
-    ohth
+    outh
     error('couldn''t fopen')
 end
-fprintf(outh,intercolate(md,'\n'));
+fprintf(outh,intercolate(md3,'\n'));
 outh = fclose(outh);
 if outh~=0
     outh
@@ -26,12 +26,24 @@ if outh~=0
 end
 
 if upload
-    server = inputEF('server'  ,'reichardt.uoregon.edu');
-    id     = inputEF('id'      ,'784');
-    login  = inputEF('login'   ,'eflister');
+    server = inputEF('server'                     ,'reichardt.uoregon.edu');
+    id     = inputEF('id (new or 784 for BLTest)' ,'784');
+    login  = inputEF('login'                      ,'eflister');
     pw     = inputEF('password');
     
-    cmd = ['BlogLiterately --blog http://' server '/blog/xmlrpc.php --user ' login ' --password ' pw ' --title "BLTest" --publish --page --postid ' id ' ' out];
+    cmd = ['BlogLiterately --blog http://' server '/blog/xmlrpc.php --user ' login ' --password ' pw ' --publish --page'];
+    
+    switch id
+        case 'new'
+            title = inputEF('title');
+        case '784'
+            title = 'BLTest';
+            cmd = [cmd ' --postid ' id];
+            
+        otherwise
+            error('bad id')
+    end
+    cmd = [cmd ' --title "' title '" ' out];
     
     [status result] = system(cmd);
     if status~=0
@@ -139,8 +151,7 @@ out = {
 end
 
 function out = md
-out = {
-    
+out = {    
     '- orientation'
     '    - mtrix2'
    ['        ' imgLink('c4rn')]
@@ -194,6 +205,31 @@ out = {
     '    - jarmusch'
    ['        ' imgLink('gcam17tt')]  
    ['        ' imgLink('wg4lt')]  
+   '    - mtrix6'
+   ['        ' imgLink('gcam17rn')]
+   ['        ' imgLink('wg4rt')]      
+   
+   };
+end
+
+function out = md3
+out = {
+    '- orient'
+    '    - mtrix5'
+   ['        ' imgLink('gcam13ln')]
+   ['        ' imgLink('jbw03')]
+    '    - jarmusch'
+   ['        ' imgLink('gcam13tt')]  
+    '    - mtrix6'
+   ['        ' imgLink('wg2')]
+   ['        ' imgLink('jbw01')]   
+
+    '- whatwhere'
+    '    - mtrix5'
+   ['        ' imgLink('gcam20tt')]
+   ['        ' imgLink('gcam21rt')]
+    '    - jarmusch'
+   ['        ' imgLink('gcam17tt')]  
    '    - mtrix6'
    ['        ' imgLink('gcam17rn')]
    ['        ' imgLink('wg4rt')]      

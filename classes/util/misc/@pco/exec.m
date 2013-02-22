@@ -3,9 +3,14 @@ if isempty(p.record)
     error('must call init first')
 end
 
-if ~busy(p)
-    leds(p,[]);
-end
+%%% this line turns leds off once busy goes down
+%%% which is too early
+%%% commneting out should leave LEDs on until next trigger
+%%% could be more light efficient and turn off after exposure is done
+%%% but that could get messy -cmn 01/13
+% if ~busy(p)
+%     leds(p,[]);
+% end
 
 if ~exist('dontWait','var') || isempty(dontWait)
     dontWait = false;

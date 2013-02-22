@@ -1,14 +1,21 @@
-function setupEnvironment
+function setupEnvironment(lite)
+if ~exist('lite','var') || isempty(lite)
+    lite = false;
+end
 
-close all
-clear classes
-clear java
-clear mex
+if ~lite
+    close all
+    clear java
+    colordef black
+    
+    clear classes
+    clear mex
+end
+
+
 clc
 format long g
 format compact
-
-colordef black
 
 lasterror('reset')
 lastwarn('')

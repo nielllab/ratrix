@@ -22,7 +22,9 @@ grey  = round(white.*[.5*ones(1,3) 1]);
 red   =       white.*[1 0 0        1];
 blue  =       white.*[0 0 1        1];
 
-if true %shouldn't be necessary, but ptb bug: a fillrect grey below screws up dontclear = 0
+if strcmp(phaseRecords(phaseNum).phaseType,'reinforced')
+    dontclear = 1;
+elseif true %shouldn't be necessary, but ptb bug: a fillrect grey below screws up dontclear = 0
     dontclear = 1;
     Screen('FillRect', window, grey, destRect);
 else
@@ -241,6 +243,15 @@ switch phaseRecords(phaseNum).phaseType
             end
         end
         
+    case 'reinforced'
+        % leave up last discrim frame       
+
+         sounds = {};
+         finish = false;
+         indexPulse = false;
+         doFramePulse = false;
+         textLabel
+
     otherwise
         phaseNum
         phaseRecords(phaseNum)

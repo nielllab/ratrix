@@ -176,6 +176,9 @@ if doBall
             'ly14' %new
             'ly11' %new
             'jbw03' %new
+            'gcam21rt'
+            'gcam20tt'
+            'gcam13ln'
             }
         }
         {'jarmusch'
@@ -185,6 +188,10 @@ if doBall
             'ly04' %wall cue flip
             'ly08' %wall cue flip
             'ly12' %new
+            'gcam13tt'
+            'gcam17tt'
+            % 'gcam18lt' %who dat?
+            'wg4lt'
             }
         }
         {'mtrix6'
@@ -197,14 +204,17 @@ if doBall
             'ly15'
             'jbw04'
             'wg2'
+            'gcam17rn'
+            'wg4rt'
             }
         }
-        {'lee'
-            {
-            'gcam13ln'
-            'gcam13tt'
-            }
-        }        
+% these guys are on non-imaging rigs right now        
+%         {'lee'
+%             {
+%             'gcam13ln'
+%             'gcam13tt'
+%             }
+%         }        
     };
 
     tic

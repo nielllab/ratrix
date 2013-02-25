@@ -1,4 +1,4 @@
-function r = setProtocolMouse(r,subjIDs)
+function r = setProtocolHvV(r,subjIDs)
 
 if ~isa(r,'ratrix')
     error('need a ratrix')
@@ -50,7 +50,7 @@ svnCheckMode = 'session';
 
 interTrialLuminance = .5;
 
-stim.gain = 1.4 * ones(2,1);
+stim.gain = 0.7 * ones(2,1);
 stim.targetDistance = 500 * ones(1,2);
 stim.timeoutSecs = 10;
 stim.slow = [40; 80]; % 10 * ones(2,1);
@@ -60,24 +60,32 @@ stim.cue = true;
 stim.soundClue = false;
 
 pixPerCycs             = [100]; %*10^9;
-targetOrientations     = [-1 1]*pi/4;
+targetOrientations     = 0
 distractorOrientations = []; %-targetOrientations;
 mean                   = .5;
 radius                 = .35;
 contrast               = 1;
 thresh                 = .00005;
 yPosPct                = .5;
-stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,zoom,interTrialLuminance);
-%stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,[-1 1]  ,thresh,yPosPct,maxWidth,maxHeight,zoom,interTrialLuminance,'none', 'normalizeDiagonal');
+scaleFactor            = 0; %[1 1];
 
-%stim.stim = 'flip';
-%stim.stim=nan;
+% stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,zoom,interTrialLuminance);
+% ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
+%;
+% ts1 = trainingStep(ballTM, ballSM, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %ball
 
-ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
-ballTM = ball(percentCorrectionTrials,sm,noRequest);
-ts1 = trainingStep(ballTM, ballSM, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %ball
+%%% abstract orientation (e.g. 0 = go left, pi = go right)
+targetOrientations = 0;
+distractorOrientations = pi;
 
-p=protocol('mouse',{ts1});
+stim.stim = orientedGabors(pixPerCycs,{distractorOrientations [] targetOrientations},'abstract',mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+ ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
+ ballTM = ball(percentCorrectionTrials,sm,noRequest);
+ 
+ ts1 = trainingStep(ballTM, ballSM, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %ball
+ 
+ p=protocol('mouse',{ts1});
+%p=protocol('mouse',{ts1,ts2});
 
 stepNum=uint8(1);
 subj=getSubjectFromID(r,subjIDs{1});

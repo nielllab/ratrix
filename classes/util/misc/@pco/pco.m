@@ -17,8 +17,10 @@ p.rate = 30;
 p.n    = 100;
 p.msTolerance = 1;
 
-p.LEDs = [5 3]; %[5 6]; %[green blue]
-p.LEDf = @(n) 1+(mod(n,3)>0);
+p.LEDs = [5 6]; %[green blue]
+p.LEDf = @(n) 1+(mod(n,4)>0);  %%% 3 blue, one green
+%p.LEDf = @(n) 1;  %%% green
+%p.LEDf = @(n) 2;  %%% blue
 
 pFields = fields(p);
 

@@ -26,10 +26,16 @@ if ~isscalar(subjIDs)
     error('expecting exactly one subject')
 end
 switch subjIDs{1}
-    case 'gcam13tt'
-        requestRewardSizeULorMS = 0;
-   case 'gcam13ln'
-        requestRewardSizeULorMS = 0;
+   case 'gcam17tt'
+        requestRewardSizeULorMS = 25;
+   case 'gcam17rn'
+        requestRewardSizeULorMS = 25;
+   case 'gcam20tt'
+        requestRewardSizeULorMS = 25;
+   case 'gcam21rt'
+        requestRewardSizeULorMS = 25;
+   case 'wg4rt'
+        requestRewardSizeULorMS = 25;        
     otherwise
         warning('unrecognized mouse, using defaults')
 end
@@ -81,6 +87,9 @@ distractorOrientations = pi;
 stim.stim = orientedGabors(pixPerCycs,{distractorOrientations [] targetOrientations},'abstract',mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
  ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
  ballTM = ball(percentCorrectionTrials,sm,noRequest);
+ 
+ ballSM = setReinfAssocSecs(trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance),1);
+ %change stim to stay on for 1 sec after
  
  ts1 = trainingStep(ballTM, ballSM, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %ball
  

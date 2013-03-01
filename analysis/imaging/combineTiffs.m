@@ -36,43 +36,60 @@ recs = {
 
 imagingPath = 'E:\widefield data';
 recs = {
-    {'GCam13LN' {     
-            {[2   194],[],'112012\GCam13LN'   ,'GCam13LN'} %originally in landis E:\data   
-            {[204 474],[],'112112\GCam13LN'   ,'GCam13LN'} %originally in landis E:\data  
-            {[510 577],[],'112212\GCam13LN\r2','GCam13LN'} %originally in landis E:\data  
-            {[579 785],[],'112312\GCam13LN'   ,'GCam13LN'} %originally in landis E:\data  
+%     {'GCam13LN' {     
+%             {[2   194],[],'112012\GCam13LN'   ,'GCam13LN'} %originally in landis E:\data   
+%             {[204 474],[],'112112\GCam13LN'   ,'GCam13LN'} %originally in landis E:\data  
+%             {[510 577],[],'112212\GCam13LN\r2','GCam13LN'} %originally in landis E:\data  
+%             {[579 785],[],'112312\GCam13LN'   ,'GCam13LN'} %originally in landis E:\data  
+%     
+%             {[786   848],[],'112512\GCam13LN'   ,'GCam13LN'}
+%             {[850   983],[],'112512\GCam13LN\r2','GCam13LN'}            
+%              {[984  1190],[],'112612\GCam13LN'   ,'GCam13LN'}
+%              {[1191 1405],[],'112712\GCam13LN'   ,'GCam13LN'}            
+%             {[1406 1652],[],'112812\GCam13LN'   ,'GCam13LN'}
+%             {[1664 1874],[],'113012\GCam13LN\r3','GCam13LN'}
+%             {[1875 2159],[],'120112\GCam13LN'   ,'GCam13LN'}
+%             {[2160 2423],[],'120212\GCam13LN'   ,'GCam13LN'}
+%             {[2424 2743],[],'120312\GCam13LN'   ,'GCam13LN'}
+%             {[2744 2960],[],'120412\GCam13LN'   ,'GCam13LN'}
+%         }
+%     }
     
-            {[786   848],[],'112512\GCam13LN'   ,'GCam13LN'}
-            {[850   983],[],'112512\GCam13LN\r2','GCam13LN'}            
-            {[984  1190],[],'112612\GCam13LN'   ,'GCam13LN'}
-            {[1191 1405],[],'112712\GCam13LN'   ,'GCam13LN'}            
-            {[1406 1652],[],'112812\GCam13LN'   ,'GCam13LN'}
-            {[1664 1874],[],'113012\GCam13LN\r3','GCam13LN'}
-            {[1875 2159],[],'120112\GCam13LN'   ,'GCam13LN'}
-            {[2160 2423],[],'120212\GCam13LN'   ,'GCam13LN'}
-            {[2424 2743],[],'120312\GCam13LN'   ,'GCam13LN'}
-            {[2744 2960],[],'120412\GCam13LN'   ,'GCam13LN'}
+    {'GCam13TT' {         
+%             {[8   257],[],'112012\GCam13TT','GCam13TT'} %originally in landis E:\data  
+%             {[258 353],[],'112112\GCam13TT','GCam13TT'} %originally in landis E:\data  
+%              {[354 496],[],'112212\GCam13TT','GCam13TT'} %originally in landis E:\data  
+%             {[498 621],[],'112312\GCam13TT','GCam13TT'} %originally in landis E:\data  
+%     
+%             {[644   855],[],'112512\GCam13TT'   ,'GCam13TT'} 
+             {[858  1085],[],'112612\GCam13TT'   ,'GCam13TT'} 
+             {[1116 1321],[],'112712\GCam13TT\r2','GCam13TT'}
+%             {[1322 1710],[],'112812\GCam13TT\'  ,'GCam13TT'}
+%             {[1712 1816],[],'113012\GCam13TT\'  ,'GCam13TT'}
+             {[1817 2005],[],'120112\GCam13TT\'  ,'GCam13TT'}
+%             {[2007 2276],[],'120212\GCam13TT\'  ,'GCam13TT'}
+%             {[2277 2584],[],'120312\GCam13TT\'  ,'GCam13TT'}
+%             {[2585 2939],[],'120412\GCam13TT\'  ,'GCam13TT'}
+        }
+    }    
+};
+
+imagingPath = 'D:\Widefield (12-10-12+)';
+
+recs = {
+    {'GCam13LN' {      
+            {[3314 3766],[],'022213\gcam13ln\gcam13ln_r1\gcam13ln_r1','gcam13ln_r1'}    % expanded from pcoraw          
         }
     }
     
     {'GCam13TT' {         
-            {[8   257],[],'112012\GCam13TT','GCam13TT'} %originally in landis E:\data  
-            {[258 353],[],'112112\GCam13TT','GCam13TT'} %originally in landis E:\data  
-            {[354 496],[],'112212\GCam13TT','GCam13TT'} %originally in landis E:\data  
-            {[498 621],[],'112312\GCam13TT','GCam13TT'} %originally in landis E:\data  
-    
-            {[644   855],[],'112512\GCam13TT'   ,'GCam13TT'} 
-            {[858  1085],[],'112612\GCam13TT'   ,'GCam13TT'} 
-            {[1116 1321],[],'112712\GCam13TT\r2','GCam13TT'}
-            {[1322 1710],[],'112812\GCam13TT\'  ,'GCam13TT'}
-            {[1712 1816],[],'113012\GCam13TT\'  ,'GCam13TT'}
-            {[1817 2005],[],'120112\GCam13TT\'  ,'GCam13TT'}
-            {[2007 2276],[],'120212\GCam13TT\'  ,'GCam13TT'}
-            {[2277 2584],[],'120312\GCam13TT\'  ,'GCam13TT'}
-            {[2585 2939],[],'120412\GCam13TT\'  ,'GCam13TT'}
+             {[3070 3215],[],'022213\gcam13tt_r1','gcam13tt.r1'}
+             {[3216 3566],[],'022213\gcam13tt_r2\gcam13tt_r2','gcam13tt_r2'}     % expanded from pcoraw   -- should be first to have long reward stim
         }
     }    
 };
+
+% dirOverview(imagingPath)
 
 cellfun(@(r)cellfun(@(s)f(r{1},s),r{2},'UniformOutput',false),recs,'UniformOutput',false);
     function f(subj,r)
@@ -89,6 +106,7 @@ end
 
 function biAnalysis(bPath,iPath,pre,goodTrials)
 fprintf('doing %s\n',bPath)
+dirOverview(fileparts(iPath))
 
 if exist(fullfile('C:\Users\nlab\Desktop\analysis',[pre '.sync.png']),'file')
     fprintf('skipping, already done\n')
@@ -124,7 +142,12 @@ maxGB = 1;
 
 bytesPerPix = 2;
 pixPerFrame = maxGB*1000*1000*1000/length(ids)/bytesPerPix;
-sz = size(imread([iPath '_0001.tif']));
+try
+    sz = size(imread([iPath '_0001.tif']));
+catch
+    sz = size(imread([iPath '_000001.tif']));
+    sz = sz(1:2);
+end
 stampHeight = 20;
 sz(1) = sz(1)-stampHeight;
 scale = pixPerFrame/prod(sz);
@@ -151,7 +174,12 @@ else
     data = zeros(sz(1),sz(2),length(ids),'uint16');
     stamps = zeros(stampHeight,300,length(ids),'uint16');
     
-    [d,base] = fileparts(iPath);
+    if ~any(iPath=='.')
+        [d,base] = fileparts(iPath);
+    else
+        [d,base,tmp] = fileparts(iPath);
+        base = [base tmp];
+    end
     tic
     for i=1:length(ids) %something in this loop is leaking
         if rand>.95
@@ -159,9 +187,20 @@ else
         end
         fn = sprintf('%s_%04d.tif',base,i);
         if ~ismember(fn,{ids.name})
-            error('hmmm')
+            fn = sprintf('%s_%06d.tif',base,i);
+            if ~ismember(fn,{ids.name})
+                error('hmmm')
+            end
         end
         frame = imread(fullfile(d,fn));
+        if ndims(frame)==3 %converting pcoraw to rgb tiff, but r,g,b all slightly different?
+           if i==1
+               warning('need to fix: why aren''t r,g,b all same?')
+           end
+            frame = frame(:,:,1);
+        else
+            error('hmmm')
+        end
         data(:,:,i) = imresize(frame((stampHeight+1):end,:),sz); %is imresize smart about unity?  how do our data depend on method?  (we use default 'bicubic' -- "weighted average of local 4x4" (w/antialiasing) -- we can specify kernel if desired)
         stamps(:,:,i) = frame(1:stampHeight,1:size(stamps,2));
     end
@@ -347,7 +386,7 @@ end
 trials = trials(1):trials(2);
 
 stoppedWithin = 4; %2
-respondedWithin = [.5 1.5]; %1
+respondedWithin = [.3 1]; %[.5 2]; %1
 onlyCorrect = true;
 noAfterErrors = true;
 worstFactor = .7; %.1
@@ -366,7 +405,6 @@ worsts = cell2mat(worsts);
 trials = trials(trials<=length(worsts));
 
 d = diff(starts);
-
 trials = trials( ...
     d(1,trials)<=stoppedWithin              & ...
     d(2,trials)<=respondedWithin(2)         & ...
@@ -374,6 +412,7 @@ trials = trials( ...
     (~onlyCorrect | correct(trials))        & ...
     (~noAfterErrors | ~afterErrors(trials)) & ...
     cellfun(@isempty,misses(trials))        & ...
+    ...% targ(trials)>0                          & ...
     worsts(trials)<=frameDur*(1+worstFactor)  ...
     );
 
@@ -385,7 +424,9 @@ pts = linspace(pts(1),pts(2),1+round(diff(pts)/frameDur));
 fig = figure;
 hold on
 for i = 1:length(trials)
-    plot(pts(pts<=bFrames{trials(i)}(end)-onsets(trials(i))),trials(i),'y+')
+    if any(pts<=bFrames{trials(i)}(end)-onsets(trials(i)))
+        plot(pts(pts<=bFrames{trials(i)}(end)-onsets(trials(i))),trials(i),'y+')
+    end
 end
 
 for i=1:length(onsets)
@@ -457,7 +498,7 @@ cellfun(@w,leds,num2cell(1:length(leds)),'UniformOutput',false);
         widefieldAnalysis(trials,pts,onsets,thisData,thisT,thisBFrames,[pre '.' lab],c,targ,stoppedWithin,respondedWithin,misses,starts,correct);
     end
 
-if false
+if true
     i=1;
     frames = length([bFrames{1:trials(i)-1}]) + (1:length(bFrames{trials(i)}));
     ledInds = [frameLeds{:}];
@@ -540,7 +581,7 @@ if false
     figure
     plot(theseT-theseT(1),traces(rand(size(traces,1),1)>.99,:))
     
-    keyboard
+    %keyboard
 end
 end
 
@@ -805,6 +846,7 @@ if ~any(isnan(lims))
     writeAVI(m,fullfile('C:\Users\nlab\Desktop\analysis',s));%,fps)
 else
     fprintf('bailing on %s, tight trial filter?\n',s)
+    keyboard
 end
 end
 

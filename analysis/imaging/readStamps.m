@@ -38,7 +38,21 @@ if true
     x = in(1,1:t,:);
     f = dec2bin(x,16);
     if any(any(f(:,1:8)~='0'))
-        error('bad bcd')
+        %for some reason saving pcoraws uses bits 7-14 instead of 9-16
+        f = f(:,[15:16 1:14]);
+        
+        if any(any(f(:,1:8)~='0'))
+            imagesc(double(f))
+            figure
+            hist(double(x(:)))
+            figure
+            imagesc(squeeze(x)')
+            figure
+            imagesc(squeeze(x)'>intmax('uint8'))
+            
+            keyboard
+            error('bad bcd')
+        end
     end
     x = reshape([bin2dec(f(:,9:12)) bin2dec(f(:,13:16))]*10.^[1 0]',[t n])';
     bSecs = x(:,9:14)*[60*60 60 1 .01 .0001 .000001]';

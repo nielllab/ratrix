@@ -75,16 +75,15 @@ recs = {
 };
 
 imagingPath = 'D:\Widefield (12-10-12+)';
-
 recs = {
     {'GCam13LN' {      
-            {[3314 3766],[],'022213\gcam13ln\gcam13ln_r1\gcam13ln_r1','gcam13ln_r1'}    % expanded from pcoraw          
+            {[3314 3766],[],'022213\gcam13ln\gcam13ln_r1\gcam13ln_r1_e','gcam13ln_r1'}    % expanded from pcoraw          
         }
     }
     
     {'GCam13TT' {         
              {[3070 3215],[],'022213\gcam13tt_r1','gcam13tt.r1'}
-             {[3216 3566],[],'022213\gcam13tt_r2\gcam13tt_r2','gcam13tt_r2'}     % expanded from pcoraw   -- should be first to have long reward stim
+             {[3216 3566],[],'022213\gcam13tt_r2\gcam13tt_r2g','gcam13tt_r2'}     % expanded from pcoraw   -- should be first to have long reward stim
         }
     }    
 };
@@ -107,7 +106,7 @@ end
 function biAnalysis(bPath,iPath,pre,goodTrials)
 fprintf('doing %s\n',bPath)
 dirOverview(fileparts(iPath))
-
+%keyboard
 if exist(fullfile('C:\Users\nlab\Desktop\analysis',[pre '.sync.png']),'file')
     fprintf('skipping, already done\n')
     return
@@ -193,13 +192,22 @@ else
             end
         end
         frame = imread(fullfile(d,fn));
-        if ndims(frame)==3 %converting pcoraw to rgb tiff, but r,g,b all slightly different?
-           if i==1
-               warning('need to fix: why aren''t r,g,b all same?')
-           end
-            frame = frame(:,:,1);
-        else
-            error('hmmm')
+        switch ndims(frame)
+            case 3 %converting pcoraw to rgb tiff, but r,g,b all slightly different?
+                if i==1
+                    warning('need to fix: why aren''t r,g,b all same?')
+                end
+                %frame = frame(:,:,1);
+                frame = sum(double(frame),3); %documented to sum rgb anywhere?  only thing that makes timestamps work...
+                if any(frame(:)>intmax('uint16'))
+                    error('hmmm')
+                else
+                    frame = uint16(frame);
+                end
+            case 2
+                %pass
+            otherwise
+                error('hmmm')
         end
         data(:,:,i) = imresize(frame((stampHeight+1):end,:),sz); %is imresize smart about unity?  how do our data depend on method?  (we use default 'bicubic' -- "weighted average of local 4x4" (w/antialiasing) -- we can specify kernel if desired)
         stamps(:,:,i) = frame(1:stampHeight,1:size(stamps,2));

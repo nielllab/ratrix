@@ -220,10 +220,15 @@ out = {
    ['        ' imgLink('jbw03')]
     '    - jarmusch'
    ['        ' imgLink('gcam13tt')]  
+   ['        ' imgLink('gcam19tt')]
     '    - mtrix6'
    ['        ' imgLink('wg2')]
    ['        ' imgLink('jbw01')]   
-
+    '    - mtrix11'
+   ['        ' imgLink('gcam30lt')] 
+    '    - mtrix13'
+   ['        ' imgLink('gcam30rn')] 
+   
     '- whatwhere'
     '    - mtrix5'
    ['        ' imgLink('gcam20tt')]
@@ -233,6 +238,10 @@ out = {
    '    - mtrix6'
    ['        ' imgLink('gcam17rn')]
    ['        ' imgLink('wg4rt')]      
+    '    - mtrix11'
+   ['        ' imgLink('gcam28lt')] 
+    '    - mtrix13'
+   ['        ' imgLink('gcam25rt')] 
    
    };
 end

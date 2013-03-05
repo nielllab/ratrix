@@ -27,15 +27,22 @@ if ~isscalar(subjIDs)
 end
 switch subjIDs{1}
    case 'gcam17tt'
-        requestRewardSizeULorMS = 25;
+        requestRewardSizeULorMS = 0;
    case 'gcam17rn'
-        requestRewardSizeULorMS = 25;
+        requestRewardSizeULorMS = 0;
    case 'gcam20tt'
-        requestRewardSizeULorMS = 25;
+        requestRewardSizeULorMS = 0;
    case 'gcam21rt'
-        requestRewardSizeULorMS = 25;
+        requestRewardSizeULorMS = 0;
    case 'wg4rt'
-        requestRewardSizeULorMS = 25;        
+        requestRewardSizeULorMS = 0; 
+   case 'gcam30lt'
+        requestRewardSizeULorMS = 0;
+   case 'gcam30rn'
+        requestRewardSizeULorMS = 0; 
+   case 'gcam19tt'
+        requestRewardSizeULorMS = 0;
+       
     otherwise
         warning('unrecognized mouse, using defaults')
 end

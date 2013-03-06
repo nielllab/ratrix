@@ -123,6 +123,7 @@ if ~force && ispc
     end
 end
 
+lcf = [];
 if ~isempty(compiledFile)
     fprintf('loading %s\n',compiledFile)
     lcf = load(compiledFile);
@@ -131,6 +132,7 @@ end
 
 recNum = 0;
 theseRecs = 0;
+records = [];
 for i=1:length(files)
     if bounds(i,1) ~= recNum+1
         error('record file names indicate ordering problem')
@@ -162,6 +164,10 @@ if ispc && false %takes too long (95sec local) to save (.25GB on disk, 1.8GB in 
 end
 
 %keyboard
+if isempty(records)
+    fprintf('no new records\n')
+    return
+end
 
 trialNums = [records.trialNumber];
 if ~all(diff(trialNums) == 1)
@@ -486,7 +492,7 @@ cellfun(@(f)combineStructs(dms,f),fields(dmsNan));
         [data.(f)] = in.(f);
     end
 
-if lcf(end).trialNum +1 ~= data(1).trialNum || lcf(end).startTime > data(1).startTime
+if ~isempty(lcf) && (lcf(end).trialNum +1 ~= data(1).trialNum || lcf(end).startTime > data(1).startTime)
     error('new rec nums don''t match up with end of old ones')
 end
 

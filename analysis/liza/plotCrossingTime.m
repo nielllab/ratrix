@@ -84,11 +84,13 @@ end
 %most of the work in this file does what CompileTrialRecords does
 
 %get trial records in the right order
-recordPath = fullfile(recordPath,'Desktop','ballData','PermanentTrialRecordStore',subj);
+recordPath = fullfile(recordPath,'Desktop','ballData','PermanentTrialRecordStore',subj)
 
 d=dir(fileparts(recordPath));
+if false
 fprintf('available subjects:\n');
 {d([d.isdir] & ~ismember({d.name},{'.','..'})).name}
+end
 
 files = dir(fullfile(recordPath,'trialRecords_*.mat'));
 
@@ -131,7 +133,6 @@ end
 
 recNum = 0;
 theseRecs = 0;
-records = [];
 for i=1:length(files)
     if bounds(i,1) ~= recNum+1
         error('record file names indicate ordering problem')
@@ -163,7 +164,7 @@ if ispc && false %takes too long (95sec local) to save (.25GB on disk, 1.8GB in 
 end
 
 %keyboard
-if isempty(records)
+if ~exist('records','var')
     fprintf('no new records\n')
     return
 end

@@ -35,7 +35,14 @@ switch subjIDs{1}
    case 'gcam21rt'
         requestRewardSizeULorMS = 0;
    case 'wg4rt'
-        requestRewardSizeULorMS = 0;        
+        requestRewardSizeULorMS = 0; 
+   case 'gcam30lt'
+        requestRewardSizeULorMS = 0;
+   case 'gcam30rn'
+        requestRewardSizeULorMS = 0; 
+   case 'gcam19tt'
+        requestRewardSizeULorMS = 0;
+       
     otherwise
         warning('unrecognized mouse, using defaults')
 end

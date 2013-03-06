@@ -56,7 +56,6 @@ compiledFile = '';
 lastTrial = 0;
 
 d = dir(fullfile(compiledDir,subj,'compiled*.mat'));
-
 if ~isempty(d)
     vals = cell2mat(cellfun(@(x)textscan(x,'compiled_1-%u_%uT%u.mat','CollectOutput',true),{d.name}'));
     trials = vals(:,1);
@@ -500,7 +499,8 @@ if status ~= 1
     messageid
     error('couldn''t mkdir')
 end
-compiledFile = fullfile(d,sprintf('compiled_%d-%d_%s.mat',trialNums(1),trialNums(end),datestr(now,30)));
+
+compiledFile = fullfile(d,sprintf('compiled_%d-%d_%s.mat',data(1).trialNum,data(end).trialNum,datestr(now,30)));
 tic
 save(compiledFile,'data');
 toc

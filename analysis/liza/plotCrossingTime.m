@@ -56,13 +56,14 @@ compiledFile = '';
 lastTrial = 0;
 
 d = dir(fullfile(compiledDir,subj,'compiled*.mat'));
-
 if ~isempty(d)
     vals = cell2mat(cellfun(@(x)textscan(x,'compiled_1-%u_%uT%u.mat','CollectOutput',true),{d.name}'));
     trials = vals(:,1);
     [~, ord]=sortrows(vals(:,[2 3]));
-    compiledFile = fullfile(compiledDir,subj,d(max(ord)).name);
-    lastTrial = trials(max(ord));
+   %compiledFile = fullfile(compiledDir,subj,d(max(ord)).name);
+    compiledFile = fullfile(compiledDir,subj,d(ord(end)).name);
+   %lastTrial = trials(max(ord));
+    lastTrial = trials(ord(end));
 end
 end
 
@@ -75,18 +76,21 @@ else
     error('unsupported')
 end
 
-compiledFile = '';
+%compiledFile = '';
+[compiledFile,lastTrial] = getCompiledFile(compiledDir,subj);
 
 %for some reason, compiling these records is failing
 %once this is solved we'll load in a single compiled file from ...\ballData\CompiledTrialRecords\
 %most of the work in this file does what CompileTrialRecords does
 
 %get trial records in the right order
-recordPath = fullfile(recordPath,'Desktop','ballData','PermanentTrialRecordStore',subj);
+recordPath = fullfile(recordPath,'Desktop','ballData','PermanentTrialRecordStore',subj)
 
 d=dir(fileparts(recordPath));
+if false
 fprintf('available subjects:\n');
 {d([d.isdir] & ~ismember({d.name},{'.','..'})).name}
+end
 
 files = dir(fullfile(recordPath,'trialRecords_*.mat'));
 
@@ -109,34 +113,47 @@ if ~force && ispc
         d = double(d) - double(bounds(end,5:6));
         if d(1)>0 || (d(1)==0 && d(2)>0)
             fprintf('skipping - latest figures already generated (%s)\n',fd)
+            compiledFile = [];
             return
         end
     end
     
-    [compiledFile,lastTrial] = getCompiledFile(compiledDir,subj);
     if bounds(end,2)<=lastTrial
         fprintf('skipping - latest trials already compiled (%s)\n',fd)
         return
     end
 end
 
+lcf = [];
+if ~isempty(compiledFile)
+    fprintf('loading %s\n',compiledFile)
+    lcf = load(compiledFile);
+    lcf = lcf.data;
+end
+
 recNum = 0;
+theseRecs = 0;
 for i=1:length(files)
     if bounds(i,1) ~= recNum+1
         error('record file names indicate ordering problem')
     end
     
-    fullRecs(i) = load(fullfile(recordPath,files(i).name)); %loading files in this format is slow, that's why we normally use compiled records
-    newRecNum = recNum + length(fullRecs(i).trialRecords);
-    records(recNum+1:newRecNum) = fullRecs(i).trialRecords; %extending this struct array is slow, another reason we normally use compiled records
-    fullRecs(i).trialRecords = []; %prevent oom
-    recNum = newRecNum;
-    
-    if bounds(i,2) ~= recNum
-        error('record file names indicate ordering problem')
-    end
-    
-    fprintf('done with %d of %d\n',i,length(files));
+    if recNum >= lastTrial
+        fullRecs(i) = load(fullfile(recordPath,files(i).name)); %loading files in this format is slow, that's why we normally use compiled records
+        newRecNum = theseRecs + length(fullRecs(i).trialRecords);
+        records(theseRecs+1:newRecNum) = fullRecs(i).trialRecords; %extending this struct array is slow, another reason we normally use compiled records
+        fullRecs(i).trialRecords = []; %prevent oom
+        theseRecs = newRecNum;
+        recNum = newRecNum + lastTrial;
+        fprintf('done with %d of %d\n',i,length(files));
+
+        if bounds(i,2) ~= recNum
+            error('record file names indicate ordering problem')
+        end
+        
+    else
+        recNum = bounds(i,2);
+    end        
 end
 
 if ispc && false %takes too long (95sec local) to save (.25GB on disk, 1.8GB in memory), loading slow (73sec local) too
@@ -144,6 +161,12 @@ if ispc && false %takes too long (95sec local) to save (.25GB on disk, 1.8GB in 
     save([fd '\latest.mat'],'fullRecs','records');
     toc
     keyboard
+end
+
+%keyboard
+if ~exist('records','var')
+    fprintf('no new records\n')
+    return
 end
 
 trialNums = [records.trialNumber];
@@ -469,6 +492,12 @@ cellfun(@(f)combineStructs(dms,f),fields(dmsNan));
         [data.(f)] = in.(f);
     end
 
+if ~isempty(lcf) && (lcf(end).trialNum +1 ~= data(1).trialNum || lcf(end).startTime > data(1).startTime)
+    error('new rec nums don''t match up with end of old ones')
+end
+
+data = [lcf data];
+
 d = fullfile(compiledDir,subj);
 [status,message,messageid] = mkdir(d);
 if status ~= 1
@@ -477,7 +506,8 @@ if status ~= 1
     messageid
     error('couldn''t mkdir')
 end
-compiledFile = fullfile(d,sprintf('compiled_%d-%d_%s.mat',trialNums(1),trialNums(end),datestr(now,30)));
+
+compiledFile = fullfile(d,sprintf('compiled_%d-%d_%s.mat',data(1).trialNum,data(end).trialNum,datestr(now,30)));
 tic
 save(compiledFile,'data');
 toc

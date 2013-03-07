@@ -63,6 +63,9 @@ stim.dms.cueLatency = 0;
 stim.dms.cueDuration = .5;
 stim.dms = [];
 
+%stim to stay on 1 sec after answer
+ballSM = setReinfAssocSecs(trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance),1);
+
 ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
 ballTM = ball(percentCorrectionTrials,sm,noRequest);
 ts1 = trainingStep(ballTM, ballSM, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %ball

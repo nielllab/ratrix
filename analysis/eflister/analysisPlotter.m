@@ -67,7 +67,7 @@ else
             end
             y=get(kids(as),'XLim');
             
-            if y(2)==d{1} && ~strcmp(selection.subjects{1},'c1ln')
+            if y(2)==d{1} % && ~ismember(selection.subjects{1},{'c1ln','e1lt'})
                 set(x,'Visible','on');
                 fprintf('skipping - latest figures already generated (%s)\n',fd)
                 return

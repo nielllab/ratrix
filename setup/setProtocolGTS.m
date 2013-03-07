@@ -1,4 +1,4 @@
-function r = setProtocolMouse(r,subjIDs)
+function r = setProtocolGTS(r,subjIDs)
 
 if ~isa(r,'ratrix')
     error('need a ratrix')
@@ -26,10 +26,13 @@ if ~isscalar(subjIDs)
     error('expecting exactly one subject')
 end
 switch subjIDs{1}
-    case 'gcam13tt'
+   case 'gcam25rt'
+        rewardSizeULorMS          =140;
         requestRewardSizeULorMS = 0;
-   case 'gcam13ln'
+   case 'gcam28lt'
+        rewardSizeULorMS          =140;
         requestRewardSizeULorMS = 0;
+      
     otherwise
         warning('unrecognized mouse, using defaults')
 end
@@ -72,6 +75,10 @@ stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,
 
 %stim.stim = 'flip';
 %stim.stim=nan;
+
+%stim to stay on 1 sec after answer
+ballSM = setReinfAssocSecs(trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance),1);
+
 
 ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
 ballTM = ball(percentCorrectionTrials,sm,noRequest);

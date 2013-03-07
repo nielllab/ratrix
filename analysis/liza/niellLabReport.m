@@ -7,7 +7,7 @@ if ~exist('force','var') || isempty(force)
     force = false;
 end
 
-combineTiffs;
+%combineTiffs;
 
 doBox    = true;
 doBall   = true;
@@ -192,6 +192,7 @@ if doBall
             'gcam17tt'
             % 'gcam18lt' %who dat?
             'wg4lt'
+            'gcam19tt'
             }
         }
         {'mtrix6'
@@ -208,6 +209,18 @@ if doBall
             'wg4rt'
             }
         }
+        {'mtrix11'
+            {
+            'gcam28lt'
+            'gcam30lt'
+            }
+        }      
+        {'mtrix13'
+            {
+            'gcam25rt'
+            'gcam30rn'
+            }
+        }        
 % these guys are on non-imaging rigs right now        
 %         {'lee'
 %             {
@@ -239,7 +252,7 @@ close all
         end
         f = analysisPlotter(selection,['\\' box '\Users\nlab\Desktop\' d 'Data' s '\CompiledTrialRecords\'],false);
         if ~isempty(f)
-            width = get(get(f,'Children'),'XLim');
+            width = get(gca,'XLim'); % get(get(f,'Children'),'XLim');
             uploadFig(f,subj,width(2)/10,200);
         end
     end

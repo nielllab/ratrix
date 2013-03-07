@@ -1,4 +1,4 @@
-function t = readStamps(in)
+function [t,drops] = readStamps(in)
 w = 6;
 h = 7;
 n = size(in,3);
@@ -56,6 +56,8 @@ if true
     end
     x = reshape([bin2dec(f(:,9:12)) bin2dec(f(:,13:16))]*10.^[1 0]',[t n])';
     bSecs = x(:,9:14)*[60*60 60 1 .01 .0001 .000001]';
+    
+    drops = x(:,1:4)*10.^(2*(3 : -1 : 0))';
 end
 
 if false
@@ -103,6 +105,9 @@ frc = 31:36;
 
 t = sum(cell2mat(cellfun(@convert,{hrs mn sec frc},'UniformOutput',false)) .* repmat([60*60 60 1 10^-length(frc)],size(out,1),1),2);
 
+num = 3:9;
+num = convert(num);
+
     function x = convert(x)
         d = length(x);
         x = sum(out(:,x).*repmat(10.^(d-1 : -1 : 0),size(out,1),1),2);
@@ -114,6 +119,10 @@ if any(isnan(t))
 else
     if any(abs(t-bSecs)>10^-10) %why aren't these exact?  they differ by 8x10^-12
         error('bad')
+    end
+    
+    if ~all(num==drops)
+        error('ascii and binary frame nums didn''t match')
     end
 end
 

@@ -11,6 +11,7 @@ end
 
 behaviorPath = '\\lee\Users\nlab\Desktop\ballData';
 imagingPath = 'C:\Users\nlab\Desktop\data'; %\\landis (accessing local via network path is slow)
+imagingPath = 'E:\widefield data';
 recs = {
     {'jbw01' {
             {[1     192],[36 172],'9-21-12\jbw01 go to grating run 1','jbw01r1'  }
@@ -36,10 +37,10 @@ recs = {
 
 imagingPath = 'E:\widefield data';
 recs = {
-%     {'GCam13LN' {     
+     {'GCam13LN' {     
 %             {[2   194],[],'112012\GCam13LN'   ,'GCam13LN'} %originally in landis E:\data   
-%             {[204 474],[],'112112\GCam13LN'   ,'GCam13LN'} %originally in landis E:\data  
-%             {[510 577],[],'112212\GCam13LN\r2','GCam13LN'} %originally in landis E:\data  
+             {[204 474],[],'112112\GCam13LN'   ,'GCam13LN'} %originally in landis E:\data  
+             {[510 577],[],'112212\GCam13LN\r2','GCam13LN'} %originally in landis E:\data  
 %             {[579 785],[],'112312\GCam13LN'   ,'GCam13LN'} %originally in landis E:\data  
 %     
 %             {[786   848],[],'112512\GCam13LN'   ,'GCam13LN'}
@@ -52,21 +53,21 @@ recs = {
 %             {[2160 2423],[],'120212\GCam13LN'   ,'GCam13LN'}
 %             {[2424 2743],[],'120312\GCam13LN'   ,'GCam13LN'}
 %             {[2744 2960],[],'120412\GCam13LN'   ,'GCam13LN'}
-%         }
-%     }
+         }
+     }
     
     {'GCam13TT' {         
 %             {[8   257],[],'112012\GCam13TT','GCam13TT'} %originally in landis E:\data  
-%             {[258 353],[],'112112\GCam13TT','GCam13TT'} %originally in landis E:\data  
-%              {[354 496],[],'112212\GCam13TT','GCam13TT'} %originally in landis E:\data  
+             {[258 353],[],'112112\GCam13TT','GCam13TT'} %originally in landis E:\data  
+              {[354 496],[],'112212\GCam13TT','GCam13TT'} %originally in landis E:\data  
 %             {[498 621],[],'112312\GCam13TT','GCam13TT'} %originally in landis E:\data  
 %     
 %             {[644   855],[],'112512\GCam13TT'   ,'GCam13TT'} 
-             {[858  1085],[],'112612\GCam13TT'   ,'GCam13TT'} 
-             {[1116 1321],[],'112712\GCam13TT\r2','GCam13TT'}
+%              {[858  1085],[],'112612\GCam13TT'   ,'GCam13TT'} 
+%              {[1116 1321],[],'112712\GCam13TT\r2','GCam13TT'}
 %             {[1322 1710],[],'112812\GCam13TT\'  ,'GCam13TT'}
 %             {[1712 1816],[],'113012\GCam13TT\'  ,'GCam13TT'}
-             {[1817 2005],[],'120112\GCam13TT\'  ,'GCam13TT'}
+%              {[1817 2005],[],'120112\GCam13TT\'  ,'GCam13TT'}
 %             {[2007 2276],[],'120212\GCam13TT\'  ,'GCam13TT'}
 %             {[2277 2584],[],'120312\GCam13TT\'  ,'GCam13TT'}
 %             {[2585 2939],[],'120412\GCam13TT\'  ,'GCam13TT'}
@@ -155,7 +156,7 @@ if scale<1
 end
 
 mfn = [iPath '_' sprintf('%d_%d_%d',sz(1),sz(2),length(ids)) '.mat'];
-if exist(mfn,'file')
+if exist(mfn,'file') && false
     fprintf('loading preshrunk\n')
     tic
     f = load(mfn);
@@ -164,6 +165,8 @@ if exist(mfn,'file')
     data = f.data;
     t = f.t;
     trialRecs = f.trialRecs;
+    stamps = f.stamps;
+    drops = f.drops;
     
     clear f
 else
@@ -214,18 +217,28 @@ else
     end
     toc
     
-    t = readStamps(stamps);
+    [t,drops] = readStamps(stamps);
     
     f = load(fullfile(fileparts(bPath),bds.name));
     trialRecs = f.trialRecords;
     
     fprintf('saving...\n')
     tic
-    save(mfn,'data','t','trialRecs','-v7.3') %7.3 required for >2GB vars
+    save(mfn,'data','t','trialRecs','stamps','drops','-v7.3') %7.3 required for >2GB vars
     toc
-    
-    clear stamps
 end
+
+fig = figure;
+plot(diff(drops)-1)
+xlabel('frame')
+lab = sprintf('%d dropped frames',drops(end)-length(ids));
+title(lab)
+saveFig(fig,[pre '.drops'],[0 0 500 200]); % [left, bottom, width, height]
+
+if ~all(drops' == 1:length(ids))
+    warning(lab)
+end
+
 clear ids
 
 d = diff(t');
@@ -497,16 +510,38 @@ if true
 end
 
 leds = {'green' 'blue'};
+
+fprintf('clustering leds...\n')
+tic
+[ledC, fig] = ledCluster(data);
+toc
+saveFig(fig,[pre '.led'],[0 0 1000 1000]); % [left, bottom, width, height]
+
+flatLEDs = [frameLeds{:}];
+problem = flatLEDs ~= ledC;
+if any(problem)
+    fig = figure
+    plot(find(problem),ledC(problem),'cx')
+    hold on
+    plot(find(problem),flatLEDs(problem),'rx')
+    title('led problems')        
+    legend({'cluster','record'})
+    xlabel('frame')
+    set(gca,'YTick',1:length(leds))
+    set(gca,'YTickLabel',leds)
+    saveFig(fig,[pre '.led.problems'],[0 0 1000 300]); % [left, bottom, width, height]
+end
+
 cellfun(@w,leds,num2cell(1:length(leds)),'UniformOutput',false);
     function w(lab,ind)
         thisBFrames = cellfun(@(x,y)x(y == ind),bFrames,frameLeds,'UniformOutput',false);
-        these = [frameLeds{:}] == ind;
+        these = flatLEDs == ind;
         thisData = data(:,:,these);
         thisT = t(these);
         widefieldAnalysis(trials,pts,onsets,thisData,thisT,thisBFrames,[pre '.' lab],c,targ,stoppedWithin,respondedWithin,misses,starts,correct);
     end
 
-if true
+if true && ~isempty(trials)
     i=1;
     frames = length([bFrames{1:trials(i)-1}]) + (1:length(bFrames{trials(i)}));
     ledInds = [frameLeds{:}];

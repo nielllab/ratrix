@@ -37,10 +37,13 @@ switch subjIDs{1}
    case 'wg4rt'
         requestRewardSizeULorMS = 0; 
    case 'gcam30lt'
+        rewardSizeULorMS          =140;
         requestRewardSizeULorMS = 0;
    case 'gcam30rn'
         requestRewardSizeULorMS = 0; 
+        rewardSizeULorMS          =140;
    case 'gcam19tt'
+        rewardSizeULorMS          =140;
         requestRewardSizeULorMS = 0;
        
     otherwise

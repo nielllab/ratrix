@@ -39,7 +39,9 @@ if upload
         case '784'
             title = 'BLTest';
             cmd = [cmd ' --postid ' id];
-            
+        case '856'
+            title = 'joe behavior'
+            cmd = [cmd ' --postid ' id];
         otherwise
             error('bad id')
     end

@@ -90,9 +90,9 @@ scaleFactor            = 0; %[1 1];
 %;
 % ts1 = trainingStep(ballTM, ballSM, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %ball
 
-%%% abstract orientation (e.g. 0 = go left, pi = go right)
+%%% abstract orientation (e.g. 0 = go left, pi/2 = go right)
 targetOrientations = 0;
-distractorOrientations = pi;
+distractorOrientations = pi/2;
 
 stim.stim = orientedGabors(pixPerCycs,{distractorOrientations [] targetOrientations},'abstract',mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
  ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);

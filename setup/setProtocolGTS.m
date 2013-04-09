@@ -30,13 +30,13 @@ switch subjIDs{1}
         requestRewardSizeULorMS = 0;
    case 'gcam29ln'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS          =130;
+        rewardSizeULorMS          =100;
    case 'gcam32tt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS          =130;
+        rewardSizeULorMS          =100;
    case 'gcam32ln'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS          =130;
+        rewardSizeULorMS          =100;
       
     otherwise
         warning('unrecognized mouse, using defaults')
@@ -68,7 +68,7 @@ stim.cue = true;
 stim.soundClue = false;
 
 pixPerCycs             = [100]; %*10^9;
-targetOrientations     = [-1 1]*pi/4;
+targetOrientations     = [0 1]*pi/2;
 distractorOrientations = []; %-targetOrientations;
 mean                   = .5;
 radius                 = .35;

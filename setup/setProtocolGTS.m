@@ -68,7 +68,7 @@ stim.cue = true;
 stim.soundClue = false;
 
 pixPerCycs             = [100]; %*10^9;
-targetOrientations     = [-1 1]*pi/4;
+targetOrientations     = [0 1]*pi/2;
 distractorOrientations = []; %-targetOrientations;
 mean                   = .5;
 radius                 = .35;

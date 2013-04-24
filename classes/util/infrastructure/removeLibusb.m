@@ -2,7 +2,7 @@ function removeLibusb
 if ~IsWin
     error('can only remove libusb from win')
 end
-[a,b]=dos('pnputil -e');
+[a,b]=dos('pnputil -e'); %sometimes says not recognized, even when i can manually run at dos prompt, is path different?
 if a~=0
     a
     b

@@ -15,7 +15,7 @@ imagingTasks=[];
 
 displaySize
 [LUT stimulus updateSM]=getLUT(stimulus,LUTbits);
-[resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60],32,getMaxWidth(stimulus),getMaxHeight(stimulus));
+[resolutionIndex height width hz]=chooseLargestResForHzsDepthRatio(resolutions,[100 60 59],32,getMaxWidth(stimulus),getMaxHeight(stimulus));
 
 if isnan(resolutionIndex)
     resolutionIndex=1;
@@ -66,7 +66,14 @@ details.pixPerCyc=pickN(stimulus.pixPerCycs,1);
 details.phases=rand(numGabors,1)*2*pi;
 details.contrast=pickN(stimulus.contrasts,1);
 
-params = [repmat([stimulus.radius details.pixPerCyc],numGabors,1) details.phases details.orientations repmat([details.contrast stimulus.thresh],numGabors,1) details.xPosPcts repmat([stimulus.yPosPct],numGabors,1)];
+shift = repmat(.5,2,numGabors);
+rot = [cos(stimulus.axis) -sin(stimulus.axis); sin(stimulus.axis) cos(stimulus.axis)];
+pos = rot*([details.xPosPcts'; repmat(pickN(stimulus.pos,1),1,numGabors)] - shift) + shift;
+
+details.xPosPcts = pos(1,:)';
+details.yPosPcts = pos(2,:)';
+
+params = [repmat([stimulus.radius details.pixPerCyc],numGabors,1) details.phases details.orientations repmat([details.contrast stimulus.thresh],numGabors,1) details.xPosPcts details.yPosPcts];
 out(:,:,1)=computeGabors(params,stimulus.mean,min(width,getMaxWidth(stimulus)),min(height,getMaxHeight(stimulus)),stimulus.waveform, stimulus.normalizedSizeMethod,0);
 if iscell(type) && strcmp(type{1},'trigger')
     out(:,:,2)=stimulus.mean;

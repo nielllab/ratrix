@@ -2,10 +2,15 @@ function removeLibusb
 if ~IsWin
     error('can only remove libusb from win')
 end
-[a,b]=dos('pnputil -e'); %sometimes says not recognized, even when i can manually run at dos prompt, is path different?
+[a,b]=dos('pnputil -e'); 
 if a~=0
     a
     b
+
+    if 2~=exist('C:\Windows\System32\PnPutil.exe')
+        warning('matlab can''t see C:\Windows\System32\PnPutil.exe -- this happens sometimes even when that file exists and you can run pnputil at the dos prompt -- why?')
+    end
+    
     error('pnputil fail')
 end
 x={};

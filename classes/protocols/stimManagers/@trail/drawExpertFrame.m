@@ -26,7 +26,17 @@ if strcmp(phaseRecords(phaseNum).phaseType,'reinforced')
     dontclear = 1;
 elseif true %shouldn't be necessary, but ptb bug: a fillrect grey below screws up dontclear = 0
     dontclear = 1;
-    Screen('FillRect', window, grey, destRect);
+    if isa(s.stim,'stimManager')
+        [fp, itl] = determineColorPrecision(trialManager, getInterTrialLuminance(s.stim), []); %is this slow?  cache it.
+        if fp ~= 0
+            error('haven''t fully solved this')
+        end
+        fill = [repmat(itl,1,3) expertCache.clutSize];
+    else
+        fill = black;
+    end
+    % should add a check that fill is black if we're doing dms -- we depend on that
+    Screen('FillRect', window, fill, destRect);
 else
     dontclear = 0;
 end
@@ -244,14 +254,14 @@ switch phaseRecords(phaseNum).phaseType
         end
         
     case 'reinforced'
-        % leave up last discrim frame       
-
-         sounds = {};
-         finish = false;
-         indexPulse = false;
-         doFramePulse = false;
-         textLabel
-
+        % leave up last discrim frame
+        
+        sounds = {};
+        finish = false;
+        indexPulse = false;
+        doFramePulse = false;
+        textLabel
+        
     otherwise
         phaseNum
         phaseRecords(phaseNum)

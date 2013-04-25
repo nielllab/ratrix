@@ -213,12 +213,20 @@ if doBall
             {
             'gcam28lt'
             'gcam30lt'
+            'gcam33lt'
+            'gcam32ln'            
             }
         }      
+        {'mtrix12'
+            {
+            'gcam29ln'           
+            }
+        }         
         {'mtrix13'
             {
             'gcam25rt'
             'gcam30rn'
+            'gcam32tt'
             }
         }        
 % these guys are on non-imaging rigs right now        

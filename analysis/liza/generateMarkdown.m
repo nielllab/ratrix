@@ -26,9 +26,9 @@ if outh~=0
 end
 
 if upload
-    server = inputEF('server'                     ,'reichardt.uoregon.edu');
-    id     = inputEF('id (new or 784 for BLTest)' ,'784');
-    login  = inputEF('login'                      ,'eflister');
+    server = inputEF('server'                        ,'reichardt.uoregon.edu');
+    id     = inputEF('id (new, 784/BLTest, 856/joe)' ,'856');
+    login  = inputEF('login'                         ,'eflister');
     pw     = inputEF('password');
     
     cmd = ['BlogLiterately --blog http://' server '/blog/xmlrpc.php --user ' login ' --password ' pw ' --publish --page'];
@@ -228,6 +228,7 @@ out = {
    ['        ' imgLink('jbw01')]   
     '    - mtrix11'
    ['        ' imgLink('gcam30lt')] 
+   ['        ' imgLink('gcam33lt')] 
     '    - mtrix13'
    ['        ' imgLink('gcam30rn')] 
    
@@ -242,8 +243,11 @@ out = {
    ['        ' imgLink('wg4rt')]      
     '    - mtrix11'
    ['        ' imgLink('gcam28lt')] 
+   ['        ' imgLink('gcam32ln')] 
+   '    - mtrix12'
+   ['        ' imgLink('gcam29ln')]    
     '    - mtrix13'
    ['        ' imgLink('gcam25rt')] 
-   
+   ['        ' imgLink('gcam32tt')]    
    };
 end

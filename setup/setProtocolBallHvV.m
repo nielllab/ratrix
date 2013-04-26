@@ -32,7 +32,7 @@ switch subjIDs{1}
         requestRewardSizeULorMS = 0;
    case 'gcam20tt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        =120;
+        rewardSizeULorMS        =100;
    case 'gcam21rt'
         requestRewardSizeULorMS = 0;
    case 'wg4rt'
@@ -83,8 +83,19 @@ mean                   = .5;
 radius                 = .35;
 contrast               = 1;
 thresh                 = .00005;
-yPosPct                = .5;
+normalizedPosition      = [0.25 0.75];
 scaleFactor            = 0; %[1 1];
+axis                   = pi/2;
+
+
+
+
+
+
+
+% s = orientedGabors([pixPerCycs],[targetOrientations],[distractorOrientations],mean,radius,contrasts,thresh,normalizedPosition,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[waveform],[normalizedSizeMethod],[axis])
+% orientations in radians
+% mean, contrasts, normalizedPosition (0 <= value <= 1)
 
 % stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,zoom,interTrialLuminance);
 % ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
@@ -95,7 +106,7 @@ scaleFactor            = 0; %[1 1];
 targetOrientations = 0;
 distractorOrientations = pi/2;
 
-stim.stim = orientedGabors(pixPerCycs,{distractorOrientations [] targetOrientations},'abstract',mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+stim.stim = orientedGabors(pixPerCycs,{distractorOrientations [] targetOrientations},'abstract',mean,radius,contrast,thresh,normalizedPosition,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[],[],axis);
  ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
  ballTM = ball(percentCorrectionTrials,sm,noRequest);
  

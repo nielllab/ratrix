@@ -46,6 +46,8 @@ for i=1:length(f)
                 keyboard
                 error('bad conversion')
             end
+        elseif iscell(a) || iscell(b)
+            cellfun(@(x,y)genericCheck(x,y),a,b);
         elseif ~all(a==b)
             keyboard
             error('bad conversion')
@@ -53,5 +55,18 @@ for i=1:length(f)
     else
         check(struct(a),struct(b));
     end
+end
+end
+
+function genericCheck(a,b)
+if isstruct(a)
+    check(a,b);
+elseif isobject(a)
+    check(struct(a),struct(b));
+elseif iscell(a)
+    cellfun(@(x,y)genericCheck(x,y),a,b);
+elseif ~all(a(:)==b(:))
+    keyboard
+    error('bad conversion')
 end
 end

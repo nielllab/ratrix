@@ -1,4 +1,4 @@
-function dfof  = readTifBlueGreen(in);
+function [dfof responseMap responseMapNorm] = readTifBlueGreen(in);
 [pathstr, name, ext] = fileparts(fileparts(mfilename('fullpath')));
 addpath(fullfile(fileparts(pathstr),'bootstrap'))
 setupEnvironment;
@@ -66,7 +66,7 @@ for LED=1:3
     mapFig(map)
     
     
-    
+    responseMap{LED}=map;
     
     t0 = linspace(1,size(cycMap,3),10);
     figure
@@ -79,7 +79,7 @@ for LED=1:3
     map = map-mean(map(:));
     mapFig(map)
     
-    
+    responseMapNorm{LED}=map;
     
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfilename,'-append');

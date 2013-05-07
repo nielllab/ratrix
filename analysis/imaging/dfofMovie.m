@@ -2,8 +2,8 @@ clear all
 pack
 
 [f,p] = uiputfile('*.avi','dfof cycle average movie file');
-dfof = readTifBlueGreen;
-
+[dfof map mapNorm]= readTifBlueGreen;
+save(fullfile(p,[f(1:end-4) 'maps.mat']),'map','mapNorm')
 dfof_bg=dfof{3};
 clear dfof;
 

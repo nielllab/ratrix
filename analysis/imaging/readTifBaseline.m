@@ -1,4 +1,4 @@
-function [dfof responseMap responseMapNorm] = readTifBlueGreen(in);
+function [dfof responseMap responseMapNorm] = readTifBaseline(in);
 [pathstr, name, ext] = fileparts(fileparts(mfilename('fullpath')));
 addpath(fullfile(fileparts(pathstr),'bootstrap'))
 setupEnvironment;
@@ -9,6 +9,9 @@ close all
 
 choosePix =0; %%% option to manually select pixels for timecourse analysis
 maxGB = 0.5; %%% size to reduce data down to
+
+%%%for xy=1:2 option to combine x and y maps
+for xy=1
 
 if ~exist('in','var') || isempty(in)
     [f,p] = uigetfile({'*.tif'; '*.tiff'; '*.mat'},'choose pco data');
@@ -65,7 +68,24 @@ for LED=1:3
     map(isnan(map))=0;
     mapFig(map)
     
+    stepMap = zeros(size(cycMap,1),size(cycMap,2),3);
+    stepMap(:,:,1) = mean(cycMap(:,:,26:50),3)-mean(cycMap(:,:,10:25),3);
+    stepMap(:,:,2)= mean(cycMap(:,:,76:100),3)-mean(cycMap(:,:,60:75),3);
     
+    figure
+    imshow(imresize(stepMap,4)./prctile(stepMap(:),99));
+set(gcf, 'PaperPositionMode', 'auto');
+print('-dpsc',psfilename,'-append');
+    
+    
+    if xy==1
+        xyMap = zeros(size(cycMap,1),size(cycMap,2),4);
+        xyMap(:,:,1) = mean(cycMap(:,:,26:50),3)-mean(cycMap(:,:,1:25),3);
+        xyMap(:,:,2)= mean(cycMap(:,:,76:100),3)-mean(cycMap(:,:,51:75),3);
+    else
+            xyMap(:,:,3) = mean(cycMap(:,:,26:50),3)-mean(cycMap(:,:,1:25),3);
+        xyMap(:,:,4)= mean(cycMap(:,:,76:100),3)-mean(cycMap(:,:,51:75),3);
+    end
     responseMap{LED}=map;
     
     t0 = linspace(1,size(cycMap,3),10);
@@ -149,6 +169,24 @@ for LED=1:3
     
     
 end  %%%LED
+
+clear in
+end %%% xy
+
+%%% option to combine x and y maps
+% shapeMap = reshape(xyMap,size(xyMap,1)*size(xyMap,2),4);
+% outReshape = zeros(size(shapeMap,1),3);
+% [val peakchan] = max(shapeMap,[],2);
+% outReshape(peakchan==1,1)=val(peakchan==1);
+% outReshape(peakchan==2,1)=0.5*val(peakchan==2);
+% outReshape(peakchan==2,2)=0.5*val(peakchan==2);
+% outReshape(peakchan==3,2)=val(peakchan==3);
+% outReshape(peakchan==4,3)=val(peakchan==4);
+% 
+% outXY= reshape(outReshape,size(xyMap(:,:,1:3)));
+% figure
+% imshow(outXY*30);
+
 ps2pdf('psfile', psfilename, 'pdffile', [psfilename(1:(end-2)) 'pdf']);
 delete(psfilename);
 

@@ -80,7 +80,7 @@ switch nargin
         end
         
         s.pos = varargin{8};
-        if all(cellfun(@(f)f(s.pos),{@isvector,@isreal,@isnumeric,@(x)~isempty(x),@(x)all(cellfun(@(g)all(g(x)),{@(x)x>=0 && x<=1}))}))
+        if all(cellfun(@(f)f(s.pos),{@isvector,@isreal,@isnumeric,@(x)~isempty(x),@(x)all(cellfun(@(g)all(g(x)),{@(x)x>=0 & x<=1}))}))
             %pass
         else
             error('position must be real numeric vector -- elements 0<=x<=1')

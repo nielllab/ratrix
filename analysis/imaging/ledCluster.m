@@ -2,20 +2,27 @@ function [out, fig] = ledCluster(data)
 sz = size(data);
 sz = sz(1:2);
 
-%todo: eliminate this unnecessary large copy
-d = reshape(permute(data,[3 1 2]),size(data,3),[]);
+ex = rand(1,size(data,3))<.05;
 
-ex = rand(1,size(d,1))<.05;
-
-x = double(d(ex,:));
+x = double(reshape(permute(data(:,:,ex),[3 1 2]),sum(ex),[]));
 
 m = mean(x);
 g = std(x) + eps;
 [u,s,v] = svd((x-repmat(m,size(x,1),1))./repmat(g,size(x,1),1),'econ');
 
-t = nan(size(d,1),2);
-for i=1:size(d,1)
-    t(i,:) = ((double(d(i,:))-m)./g)*v(:,1:2);
+t = nan(size(data,3),2);
+
+optimize_space = false;
+if optimize_space
+    for i=1:size(data,3)
+        t(i,:) = ((double(reshape(data(:,:,i),1,[]))-m)./g)*v(:,1:2);
+    end
+else %speed up by doing reshape all at once, but requires space to copy input
+    d = reshape(permute(data,[3 1 2]),size(data,3),[]);
+    
+    for i=1:size(data,3)
+        t(i,:) = ((double(d(i,:))-m)./g)*v(:,1:2);
+    end
 end
 
 n = t/s(1:2,1:2);

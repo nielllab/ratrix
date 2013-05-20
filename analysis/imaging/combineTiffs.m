@@ -89,6 +89,55 @@ recs = {
     }    
 };
 
+recs = {
+    {'Gcam25RT' {      
+            {[117 315],[],'043013\Gcam25-RT_behavior'                   ,'Gcam25-RT_behavior_GTS'} 
+            {[319 523],[],'050313\Gcam25-RT_behavior\Gcam25-RT_behavior','Gcam25-RT_behavior_GTS'}             
+        }
+    }
+    
+    {'Gcam32LN' {         
+             {[1   203],[],'043013\Gcam32-LN_behavior','Gcam32_LN_behavior_GTS'}    
+%             {[204 419],[],'050313\Gcam32-LN_behavior','Gcam32-LN_behavior_GTS'}       %tight filter          
+        }
+    }    
+    
+    {'Gcam32TT' {      
+%            {[1  61 ],[],'043013\Gcam32-TT_behavior'               ,'Gcam32-TT_behavior_GTS'}          
+            {[62  274],[],'043013\Gcam32-TT_behavior\behavior_GTS_2','Gcam32-TT_behavior_GTS'}         
+            {[275 515],[],'050313\Gcam32-TT_behavior\'              ,'Gcam32-TT_behavior_GTS'}                     
+        }
+    }    
+
+    {'Gcam17RN' {      
+            {[1    95],[],'050113\Gcam17-RN_behavior','Gcam17-RN_behavior_HVV'} 
+            {[102 293],[],'050213\Gcam17-RN_behavior','Gcam17-RN_behavior_HVV'}             
+        }
+    }
+%     
+%     {'Gcam20TT' {      
+%             {[1 176],[],'050113\Gcam20-TT_behavior','Gcam20-TT_behavior_HvV'} 
+%         }
+%     } 
+%     
+    {'Gcam21RT' {      
+            {[19  155],[],'050113\Gcam21-RT_behavior','Gcam21-RT_behavior_HvV'} % hmm, last trial too few yellow frames
+            {[156 372],[],'050213\Gcam21-RT_behavior','Gcam21-RT_behavior_HVV'}             
+        }
+    }
+    
+    {'Gcam30LT' {      
+            {[1   216],[],'050113\Gcam30-LT_behavior','Gcam30-LT_behavior_HVV'}  % really bad performance
+            {[217 429],[],'050213\Gcam30-LT_behavior','Gcam30-LT_behavior_HVV'}  
+        }
+    }
+%     
+%     {'Gcam33LT' {      
+%             {[1 137],[],'050113\Gcam33-LT_behavior\Gcam33-LT_behavior_HVV','Gcam33-LT_behavior_HVV_2'} 
+%         }
+%     }
+};
+
 % dirOverview(imagingPath)
 
 cellfun(@(r)cellfun(@(s)f(r{1},s),r{2},'UniformOutput',false),recs,'UniformOutput',false);
@@ -113,23 +162,56 @@ if exist(fullfile('C:\Users\nlab\Desktop\analysis',[pre '.sync.png']),'file')
     return
 end
 
-ids = dir([iPath '_*.tif']);
-if isempty(ids)
-    dest = fileparts(iPath);
-    b = dest;
-    [~,b] = strtok(b,filesep);
-    [~,b] = strtok(b,filesep);
-    src = ['\\landis\data' b];
-    fprintf('copying %s to %s (takes forever)\n',src,dest);
-    dirOverview(src);
-    [status,message,messageid] = copyfile(src,dest,'f'); %f shouldn't be necessary, but i get a read-only error w/o it
-    if status~=1
-        status
-        message
-        messageid
-        error('copy fail')
-    end
+if verLessThan('matlab', '8.1') %2013a
+    warning('use 2013a, or else loading tiffs is slow/can''t read bigtiffs (2012b?)')
+end
+
+pr = [iPath '.pcoraw'];
+% pr = 'D:\Widefield (12-10-12+)\022213\gcam13ln\gcam13ln_r1\gcam13ln_r1.pcoraw'; %31GB %timestamps screwed up around frame 9600+?
+% pr = 'D:\Widefield (12-10-12+)\022213\gcam13tt_r2\gcam13tt_r2.pcoraw'; %12GB %timestamps screwed up after frame ~10k?
+doPcoraw = isscalar(dir(pr));
+if doPcoraw
+    fprintf('imfinfo on pcoraw\n')
+    tic
+    ids = imfinfo(pr);
+    toc
+
+    cds = nan(1,length(ids));
+    
+    sz = cellfun(@(x)unique([ids.(x)]),{'Height','Width'});
+    if numel(sz)~=2
+        error('bad unique')
+    end    
+%     sz = cellfun(@(x)t.getTag(x),{'ImageLength' 'ImageWidth'});
+else
+    warning('pcoraw preferred')
+    
     ids = dir([iPath '_*.tif']);
+    if isempty(ids)
+        keyboard
+        dest = fileparts(iPath);
+        b = dest;
+        [~,b] = strtok(b,filesep);
+        [~,b] = strtok(b,filesep);
+        src = ['\\landis\data' b];
+        fprintf('copying %s to %s (takes forever)\n',src,dest);
+        dirOverview(src);
+        [status,message,messageid] = copyfile(src,dest,'f'); %f shouldn't be necessary, but i get a read-only error w/o it
+        if status~=1
+            status
+            message
+            messageid
+            error('copy fail')
+        end
+        ids = dir([iPath '_*.tif']);
+    end
+    
+    try
+        sz = size(imread([iPath '_0001.tif']));
+    catch
+        sz = size(imread([iPath '_000001.tif']));
+        sz = sz(1:2);
+    end
 end
 
 bds = dir(bPath);
@@ -142,12 +224,7 @@ maxGB = 1;
 
 bytesPerPix = 2;
 pixPerFrame = maxGB*1000*1000*1000/length(ids)/bytesPerPix;
-try
-    sz = size(imread([iPath '_0001.tif']));
-catch
-    sz = size(imread([iPath '_000001.tif']));
-    sz = sz(1:2);
-end
+
 stampHeight = 20;
 sz(1) = sz(1)-stampHeight;
 scale = pixPerFrame/prod(sz);
@@ -156,7 +233,7 @@ if scale<1
 end
 
 mfn = [iPath '_' sprintf('%d_%d_%d',sz(1),sz(2),length(ids)) '.mat'];
-if exist(mfn,'file') && false
+if exist(mfn,'file')
     fprintf('loading preshrunk\n')
     tic
     f = load(mfn);
@@ -175,26 +252,43 @@ else
     
     data = zeros(sz(1),sz(2),length(ids),'uint16');
     stamps = zeros(stampHeight,300,length(ids),'uint16');
-    
-    if ~any(iPath=='.')
-        [d,base] = fileparts(iPath);
+        
+    if doPcoraw
+        warning('off', 'MATLAB:imagesci:tiffmexutils:libtiffWarning')
+        t = Tiff(pr,'r');
     else
-        [d,base,tmp] = fileparts(iPath);
-        base = [base tmp];
+        if ~any(iPath=='.')
+            [d,base] = fileparts(iPath);
+        else
+            [d,base,tmp] = fileparts(iPath);
+            base = [base tmp];
+        end
     end
     tic
     for i=1:length(ids) %something in this loop is leaking
         if rand>.95
             fprintf('%d\t%d\t%g%% done\n',i,length(ids),100*i/length(ids))
         end
-        fn = sprintf('%s_%04d.tif',base,i);
-        if ~ismember(fn,{ids.name})
-            fn = sprintf('%s_%06d.tif',base,i);
+        if doPcoraw            
+            frame = t.read();
+            % have to use Tiff object (faster anyway) -- imread dies on bigtiffs at high frame numbers with:
+            % Error using rtifc
+            % TIFF library error - 'TIFFFetchDirectory:  Sanity check on directory count failed, this is probably not a valid IFD offset.'            
+            
+            if i < length(ids)
+                cds(i) = t.currentDirectory; %wraps around as a uint16
+                t.nextDirectory();
+            end            
+        else
+            fn = sprintf('%s_%04d.tif',base,i);
             if ~ismember(fn,{ids.name})
-                error('hmmm')
+                fn = sprintf('%s_%06d.tif',base,i);
+                if ~ismember(fn,{ids.name})
+                    error('hmmm')
+                end
             end
+            frame = imread(fullfile(d,fn));
         end
-        frame = imread(fullfile(d,fn));
         switch ndims(frame)
             case 3 %converting pcoraw to rgb tiff, but r,g,b all slightly different?
                 if i==1
@@ -217,8 +311,18 @@ else
     end
     toc
     
-    [t,drops] = readStamps(stamps);
+%     figure
+%     plot(diff(cds))
     
+    if doPcoraw
+        if false 
+            t.close(); %on huge pcoraw this crashes matlab!
+        end
+        warning('on', 'MATLAB:imagesci:tiffmexutils:libtiffWarning')
+    end
+    
+    [t,drops] = readStamps(stamps);
+        
     f = load(fullfile(fileparts(bPath),bds.name));
     trialRecs = f.trialRecords;
     
@@ -231,7 +335,8 @@ end
 fig = figure;
 plot(diff(drops)-1)
 xlabel('frame')
-lab = sprintf('%d dropped frames',drops(end)-length(ids));
+numDrops = drops(end)-length(ids);
+lab = sprintf('%d dropped frames',numDrops);
 title(lab)
 saveFig(fig,[pre '.drops'],[0 0 500 200]); % [left, bottom, width, height]
 
@@ -415,6 +520,13 @@ worstFactor = .7; %.1
 afterErrors = [false ~correct(1:end-1)];
 
 misses = cellfun(@setdiff,bRecs,bFrames,'UniformOutput',false);
+
+if length([misses{:}]) ~= 1+numDrops %we gurantee one drop at the end? -- verify this...
+         error('drop calculation error')
+%    warning('drop calculation error')
+% Gcam21RT [19 155] 050113 has lots of drops at the end that screw this up -- switch to warning seemed ok but i didn't check carefully
+end
+
 worsts = cellfun(@(x)max(diff(x)),bFrames,'UniformOutput',false);
 d = diff(cellfun(@isempty,worsts));
 f = find(d,1);
@@ -520,7 +632,7 @@ saveFig(fig,[pre '.led'],[0 0 1000 1000]); % [left, bottom, width, height]
 flatLEDs = [frameLeds{:}];
 problem = flatLEDs ~= ledC;
 if any(problem)
-    fig = figure
+    fig = figure;
     plot(find(problem),ledC(problem),'cx')
     hold on
     plot(find(problem),flatLEDs(problem),'rx')

@@ -34,7 +34,7 @@ if ispc
         catch ex
             getReport(ex)
             warning('bailing on compiling %s',subj)
-        end        
+        end
     end
     
     doPlot = true;
@@ -60,9 +60,9 @@ if ~isempty(d)
     vals = cell2mat(cellfun(@(x)textscan(x,'compiled_1-%u_%uT%u.mat','CollectOutput',true),{d.name}'));
     trials = vals(:,1);
     [~, ord]=sortrows(vals(:,[2 3]));
-   %compiledFile = fullfile(compiledDir,subj,d(max(ord)).name);
+    %compiledFile = fullfile(compiledDir,subj,d(max(ord)).name);
     compiledFile = fullfile(compiledDir,subj,d(ord(end)).name);
-   %lastTrial = trials(max(ord));
+    %lastTrial = trials(max(ord));
     lastTrial = trials(ord(end));
 end
 end
@@ -88,8 +88,8 @@ recordPath = fullfile(recordPath,'Desktop','ballData','PermanentTrialRecordStore
 
 d=dir(fileparts(recordPath));
 if false
-fprintf('available subjects:\n');
-{d([d.isdir] & ~ismember({d.name},{'.','..'})).name}
+    fprintf('available subjects:\n');
+    {d([d.isdir] & ~ismember({d.name},{'.','..'})).name}
 end
 
 files = dir(fullfile(recordPath,'trialRecords_*.mat'));
@@ -146,14 +146,14 @@ for i=1:length(files)
         theseRecs = newRecNum;
         recNum = newRecNum + lastTrial;
         fprintf('done with %d of %d\n',i,length(files));
-
+        
         if bounds(i,2) ~= recNum
             error('record file names indicate ordering problem')
         end
         
     else
         recNum = bounds(i,2);
-    end        
+    end
 end
 
 if ispc && false %takes too long (95sec local) to save (.25GB on disk, 1.8GB in memory), loading slow (73sec local) too
@@ -415,15 +415,27 @@ dms           = extract('dms'           ,dmsNan  ,true ,false,dmsNan);
 
 for i=1:size(bounds,1)
     if ismember('stimManager.stim',fullRecs(i).fieldsInLUT)
-        for x=bounds(i,1):bounds(i,2)
-            if isscalar(stim{x}) && isreal(stim{x}) && stim{x}>0 && stim{x}<=length(fullRecs(i).sessionLUT) && mod(stim{x},1)==0 % mod(.,1)==0 checks for float integers
-                %all(cellfun(@(f)f(stim{x}),{@isscalar @isreal})) %too slow
-                stim{x}=fullRecs(i).sessionLUT{stim{x}};
-            else
-                stim{x}
-                class(stim{x})
-                fullRecs(i).sessionLUT
-                error('LUT problem')
+        if ~ismember(subj,{'ly15' 'ly11'})
+            warning('weird, thought only ly11/ly15 have this (but don''t know why we don''t see lots of LUTed stims), was never debugged')
+        end
+        for x = (bounds(i,1):bounds(i,2)) - (bounds(end,2) - length(stim)) %blech!  haven't verified all the assumptions for this
+            try
+                if isscalar(stim{x}) && isreal(stim{x}) && stim{x}>0 && stim{x}<=length(fullRecs(i).sessionLUT) && mod(stim{x},1)==0 % mod(.,1)==0 checks for float integers
+                    %all(cellfun(@(f)f(stim{x}),{@isscalar @isreal})) %too slow
+                    stim{x}=fullRecs(i).sessionLUT{stim{x}};
+                    if ~strcmp(stim{x},'rand')
+                        stim{x}
+                        warning('weird, have only ever seen this for rand on ly11/ly15 -- why aren''t other values LUTed?')
+                    end
+                else
+                    stim{x}
+                    class(stim{x})
+                    fullRecs(i).sessionLUT
+                    error('LUT problem')
+                end
+            catch ex
+                getReport(ex)
+                keyboard
             end
         end
     end
@@ -461,7 +473,7 @@ intendedRewards = [r.rewardSizeULorMS];
 try
     s = [records.station];
     ifis = [s.ifi];
-catch %later stations added a field 'laserPins'    
+catch %later stations added a field 'laserPins'
     ifis = cellfun(@(x)x.ifi,{records.station});
 end
 

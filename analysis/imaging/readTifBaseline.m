@@ -59,6 +59,12 @@ for LED=1:3
         dfof{LED} = dfof{blue}-dfof{green};
     end
     
+    dx=25;
+    if LED==blue | LED==green
+        pix = LEDout(dx:dx:end,dx:dx:end,:);
+        figure
+        plot(reshape(pix,size(pix,1)*size(pix,2),size(pix,3))')
+    end
     movPeriod =10;
     binning=0.25;
     framerate=10;
@@ -72,6 +78,10 @@ for LED=1:3
     stepMap(:,:,1) = mean(cycMap(:,:,26:50),3)-mean(cycMap(:,:,10:25),3);
     stepMap(:,:,2)= mean(cycMap(:,:,76:100),3)-mean(cycMap(:,:,60:75),3);
     
+    
+    stepMap(:,:,1) = mean(cycMap(:,:,26:35),3)-mean(cycMap(:,:,10:25),3);
+    stepMap(:,:,2)= mean(cycMap(:,:,76:85),3)-mean(cycMap(:,:,60:75),3);
+    
     figure
     imshow(imresize(stepMap,4)./prctile(stepMap(:),99));
 set(gcf, 'PaperPositionMode', 'auto');
@@ -82,6 +92,7 @@ print('-dpsc',psfilename,'-append');
         xyMap = zeros(size(cycMap,1),size(cycMap,2),4);
         xyMap(:,:,1) = mean(cycMap(:,:,26:50),3)-mean(cycMap(:,:,1:25),3);
         xyMap(:,:,2)= mean(cycMap(:,:,76:100),3)-mean(cycMap(:,:,51:75),3);
+        
     else
             xyMap(:,:,3) = mean(cycMap(:,:,26:50),3)-mean(cycMap(:,:,1:25),3);
         xyMap(:,:,4)= mean(cycMap(:,:,76:100),3)-mean(cycMap(:,:,51:75),3);
@@ -95,6 +106,9 @@ print('-dpsc',psfilename,'-append');
         imagesc(squeeze(mean(cycMap(:,:,t0(t):t0(t+1)-1),3)),[-0.02 0.02]);
         colormap(gray);
     end
+   
+    
+    
     
     map = map-mean(map(:));
     mapFig(map)

@@ -56,6 +56,15 @@ for LED=1:3
         dfof{LED} = dfof{blue}-dfof{green};
     end
     
+    
+        
+    dx=25;
+    if LED==blue | LED==green
+        pix = LEDout(dx:dx:end,dx:dx:end,:);
+        figure
+        plot(reshape(pix,size(pix,1)*size(pix,2),size(pix,3))')
+    end
+    
     movPeriod =10;
     binning=0.25;
     framerate=10;

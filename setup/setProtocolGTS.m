@@ -10,8 +10,8 @@ end
 
 sm=makeStandardSoundManager();
 
-rewardSizeULorMS          =100;
-requestRewardSizeULorMS   =100;
+rewardSizeULorMS          =80;
+requestRewardSizeULorMS   =80;
 requestMode               ='first';
 msPenalty                 =3500;
 fractionOpenTimeSoundIsOn =1;
@@ -28,16 +28,16 @@ end
 switch subjIDs{1}
    case 'gcam25rt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 80;
+        rewardSizeULorMS        = 60;
    case 'gcam29ln'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS          =100;
+        rewardSizeULorMS          =80;
    case 'gcam32tt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 80;
+        rewardSizeULorMS        = 60;
    case 'gcam32ln'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS          =100;
+        rewardSizeULorMS          =80;
       
     otherwise
         warning('unrecognized mouse, using defaults')

@@ -10,7 +10,7 @@ end
 
 sm=makeStandardSoundManager();
 
-rewardSizeULorMS          =100;
+rewardSizeULorMS          =80;
 requestRewardSizeULorMS   =0;
 requestMode               ='first';
 msPenalty                 =3500;

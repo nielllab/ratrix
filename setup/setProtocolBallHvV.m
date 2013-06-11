@@ -10,8 +10,8 @@ end
 
 sm=makeStandardSoundManager();
 
-rewardSizeULorMS          =100;
-requestRewardSizeULorMS   =100;
+rewardSizeULorMS          =80;
+requestRewardSizeULorMS   =80;
 requestMode               ='first';
 msPenalty                 =3500;
 fractionOpenTimeSoundIsOn =1;
@@ -32,7 +32,6 @@ switch subjIDs{1}
         requestRewardSizeULorMS = 0;
    case 'gcam20tt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        =100;
    case 'gcam21rt'
         requestRewardSizeULorMS = 0;
    case 'wg4rt'
@@ -45,7 +44,7 @@ switch subjIDs{1}
         requestRewardSizeULorMS = 0;  
    case 'gcam33lt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        =120;
+
        
     otherwise
         warning('unrecognized mouse, using defaults')

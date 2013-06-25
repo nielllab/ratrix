@@ -74,7 +74,7 @@ svnCheckMode = 'session';
 
 interTrialLuminance = .5;
 
-stim.gain = 1.4 * ones(2,1);
+stim.gain = 0.7 * ones(2,1);
 stim.targetDistance = 500 * ones(1,2);
 stim.timeoutSecs = 10;
 stim.slow = [40; 80]; % 10 * ones(2,1);

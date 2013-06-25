@@ -1,4 +1,4 @@
-function r = setProtocolGTS(r,subjIDs)
+function r = setProtocolGTS_vertical(r,subjIDs)
 
 if ~isa(r,'ratrix')
     error('need a ratrix')

@@ -1,4 +1,4 @@
-function r = setProtocolHvV(r,subjIDs)
+function r = setProtocolHvV_vertical(r,subjIDs)
 
 if ~isa(r,'ratrix')
     error('need a ratrix')

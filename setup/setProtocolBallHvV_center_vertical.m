@@ -1,4 +1,4 @@
-function r = setProtocolHvV_vertical(r,subjIDs)
+function r = setProtocolHvV_center_vertical(r,subjIDs)
 
 if ~isa(r,'ratrix')
     error('need a ratrix')
@@ -11,7 +11,7 @@ end
 sm=makeStandardSoundManager();
 
 rewardSizeULorMS          =80;
-requestRewardSizeULorMS   =0;
+requestRewardSizeULorMS   =80;
 requestMode               ='first';
 msPenalty                 =3500;
 fractionOpenTimeSoundIsOn =1;
@@ -25,64 +25,60 @@ msAirpuff                 =msPenalty;
 if ~isscalar(subjIDs)
     error('expecting exactly one subject')
 end
- switch subjIDs{1}
-%       case 'gcam33lt'
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        =80;
-%    case 'sg4lt'
-%          requestRewardSizeULorMS = 0;
-%          rewardSizeULorMS        = 100;
-%    case 'gcam17rn'
-%         requestRewardSizeULorMS = 0;
-%           rewardSizeULorMS        =80;
-%    case 'gcam21rt'
-%         requestRewardSizeULorMS = 0;
-%           rewardSizeULorMS        =80;
-%    case 'wg4rt'
-%         requestRewardSizeULorMS = 0; 
-%           rewardSizeULorMS        =80;
-%    case 'gcam30lt'
-%         requestRewardSizeULorMS = 0;
-%           rewardSizeULorMS        =80;
-%    case 'gcam30rn'
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 100;
-%   case 'g54a11rt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;
-%   case 'g54a11tt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;
-%   case 'gcam35lt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;
-%    case 'gcam39rt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;
-%    case 'gcam39tt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;
-%    case 'gcam53rt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;
-%    case 'gcam53ln'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;
-%   case 'gcam43lt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;
-%    case 'gcam43rt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;
-%    case 'gcam45tt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;
-%    case 'gcam40lt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;
-%    case 'gcam44lt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;
+switch subjIDs{1}
+      case 'gcam33lt'
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        =80;
+   case 'sg4lt'
+         requestRewardSizeULorMS = 0;
+         rewardSizeULorMS        = 100;
+   case 'gcam17rn'
+        requestRewardSizeULorMS = 0;
+   case 'gcam21rt'
+        requestRewardSizeULorMS = 0;
+   case 'wg4rt'
+        requestRewardSizeULorMS = 0; 
+   case 'gcam30lt'
+        requestRewardSizeULorMS = 0;
+   case 'gcam30rn'
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 100;
+  % case 'g54a11rt'
+   %     requestRewardSizeULorMS = 0;
+    %    rewardSizeULorMS        = 100;
+  % case 'g54a11tt'
+   %     requestRewardSizeULorMS = 0;
+    %    rewardSizeULorMS        = 100;
+  % case 'gcam35lt'
+   %     requestRewardSizeULorMS = 0;
+    %    rewardSizeULorMS        = 100;
+   %case 'gcam39rt'
+    %    requestRewardSizeULorMS = 0;
+    %    rewardSizeULorMS        = 100;
+   %case 'gcam39tt'
+    %    requestRewardSizeULorMS = 0;
+     %   rewardSizeULorMS        = 100;
+   %case 'gcam53rt'
+    %    requestRewardSizeULorMS = 0;
+    %    rewardSizeULorMS        = 100;
+   %case 'gcam53ln'
+    %    requestRewardSizeULorMS = 0;
+     %   rewardSizeULorMS        = 100;
+  % case 'gcam43lt'
+   %     requestRewardSizeULorMS = 0;
+    %    rewardSizeULorMS        = 100;
+   %case 'gcam43rt'
+    %    requestRewardSizeULorMS = 0;
+    %    rewardSizeULorMS        = 100;
+   %case 'gcam45tt'
+    %    requestRewardSizeULorMS = 0;
+     %   rewardSizeULorMS        = 100;
+   %case 'gcam40lt'
+    %    requestRewardSizeULorMS = 0;
+    %    rewardSizeULorMS        = 100;
+   %case 'gcam44lt'
+    %    requestRewardSizeULorMS = 0;
+     %   rewardSizeULorMS        = 100;
 
        
     otherwise
@@ -121,7 +117,7 @@ mean                   = .5;
 radius                 = .35;
 contrast               = 1;
 thresh                 = .00005;
-normalizedPosition      = [0.25 0.75];
+normalizedPosition      = [.5];
 scaleFactor            = 0; %[1 1];
 axis                   = pi/2;
 

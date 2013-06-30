@@ -2,10 +2,13 @@ clear all
 pack
 
 [f,p] = uiputfile('*.avi','dfof cycle average movie file');
+
 [dfof map mapNorm]= readTifBlueGreen;
-save(fullfile(p,[f(1:end-4) 'maps.mat']),'map','mapNorm')
+save(fullfile(p,[f(1:end-4) 'maps.mat']),'map','mapNorm','-v7.3')
 dfof_bg=dfof{3};
 clear dfof;
+
+
 
 startframe =200;
 cyc_period = 100;
@@ -14,7 +17,9 @@ for i = 1:cyc_period;
     cycle_mov(:,:,i) = mean(dfof_bg(:,:,i+startframe:cyc_period:end),3);
 end
 
-baseline = prctile(cycle_mov,5,3);
+save(fullfile(p,[f(1:end-4) 'maps.mat']),'cycle_mov','-append')
+
+baseline = prctile(cycle_mov,2,3);
 
 for i = 1:cyc_period;
     cycle_mov(:,:,i)=cycle_mov(:,:,i) - baseline;
@@ -36,29 +41,55 @@ open(vid);
 writeVideo(vid,mov);
 close(vid)
 
-%%% raw movie
-% small_mov = dfof_bg(4:4:end,4:4:end,4:4:end);
-% lowthresh = prctile(small_mov(:),2.5);
-% lowthresh = prctile(small_mov(:),97.5);
 
-% clear mov
-% figure
-% for i = 1:size(dfof_bg,3);
-%     imagesc(imresize(dfof_bg(:,:,i),0.5,'box'),[lowthresh upperthresh]);
-%     colormap(gray);
-%     axis equal;
-%     mov(i) = getframe(gcf);
-% end
-% 
-% [f,p] = uiputfile('*.avi','dfof movie file');
-% 
-% vid = VideoWriter(fullfile(p,f));
-% vid.FrameRate=50;
-% open(vid);
-% writeVideo(vid,mov(1:3000));
-% close(vid)
+[f,p] = uigetfile('*.mat','stim object file');
+load(fullfile(p,f));
+figure
+plot(stimRec.pos)
 
-%clear mov
+posx = cumsum(stimRec.pos(:,1)-900);
+posy = cumsum(stimRec.pos(:,2)-500);
+frameT = 0.1:0.1:300;
+vx = diff(interp1(stimRec.ts(1:9000)-stimRec.ts(1),posx(1:9000),frameT));
+vy = diff(interp1(stimRec.ts(1:9000)-stimRec.ts(1),posy(1:9000),frameT));
+vx(end+1)=0; vy(end+1)=0;
+
+figure
+plot(vx); hold on; plot(vy,'g');
+sp = sqrt(vx.^2 + vy.^2);
+
+
+%% raw movie
+small_mov = dfof_bg(4:4:end,4:4:end,4:4:end);
+lowthresh = prctile(small_mov(:),2);
+upperthresh = prctile(small_mov(:),98);
+
+clear mov
+figure
+for i = 1:size(dfof_bg,3);
+    imagesc(imresize(dfof_bg(:,:,i),0.5,'box'),[lowthresh upperthresh]);
+    colormap(gray);
+    hold on
+    
+       if sp(i)<500
+       plot(15,15,'ro','Markersize',8,'Linewidth',8);
+   else
+       plot(15,15,'go','Markersize',8,'Linewidth',8); 
+   end
+    axis equal;
+    mov(i) = getframe(gcf);
+
+end
+
+[f,p] = uiputfile('*.avi','dfof movie file');
+
+vid = VideoWriter(fullfile(p,f));
+vid.FrameRate=50;
+open(vid);
+writeVideo(vid,mov(1:3000));
+close(vid)
+
+clear mov
 
 
 % %%% use svd to get rid of artifacts

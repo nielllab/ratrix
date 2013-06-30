@@ -7,7 +7,7 @@ dbstop if error
 colordef white
 close all
 
-choosePix =0; %%% option to manually select pixels for timecourse analysis
+choosePix =1; %%% option to manually select pixels for timecourse analysis
 maxGB = 0.5; %%% size to reduce data down to
 
 %%%for xy=1:2 option to combine x and y maps
@@ -59,6 +59,12 @@ for LED=1:3
         dfof{LED} = dfof{blue}-dfof{green};
     end
     
+    display('median filtering ...')
+    tic
+    LEDfilt = medfilt1(dfof{LED},100,[],3);
+    toc
+    
+    keyboard
     dx=25;
     if LED==blue | LED==green
         pix = LEDout(dx:dx:end,dx:dx:end,:);
@@ -75,8 +81,8 @@ for LED=1:3
     mapFig(map)
     
     stepMap = zeros(size(cycMap,1),size(cycMap,2),3);
-    stepMap(:,:,1) = mean(cycMap(:,:,26:50),3)-mean(cycMap(:,:,10:25),3);
-    stepMap(:,:,2)= mean(cycMap(:,:,76:100),3)-mean(cycMap(:,:,60:75),3);
+%     stepMap(:,:,1) = mean(cycMap(:,:,26:50),3)-mean(cycMap(:,:,10:25),3);
+%     stepMap(:,:,2)= mean(cycMap(:,:,76:100),3)-mean(cycMap(:,:,60:75),3);
     
     
     stepMap(:,:,1) = mean(cycMap(:,:,26:35),3)-mean(cycMap(:,:,10:25),3);

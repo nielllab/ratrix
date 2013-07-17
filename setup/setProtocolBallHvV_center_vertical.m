@@ -26,9 +26,9 @@ if ~isscalar(subjIDs)
     error('expecting exactly one subject')
 end
 switch subjIDs{1}
-      case 'gcam33lt'
+   case 'gcam33lt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        =80;
+        rewardSizeULorMS        = 100;
    case 'sg4lt'
          requestRewardSizeULorMS = 0;
          rewardSizeULorMS        = 100;

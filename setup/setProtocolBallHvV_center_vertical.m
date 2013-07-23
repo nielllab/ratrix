@@ -26,23 +26,58 @@ if ~isscalar(subjIDs)
     error('expecting exactly one subject')
 end
 switch subjIDs{1}
-      case 'gcam33lt'
+   case 'gcam33lt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        =80;
+        rewardSizeULorMS        = 100;
    case 'sg4lt'
          requestRewardSizeULorMS = 0;
          rewardSizeULorMS        = 100;
    case 'gcam17rn'
         requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 100;
    case 'gcam21rt'
         requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 100;
    case 'wg4rt'
         requestRewardSizeULorMS = 0; 
    case 'gcam30lt'
         requestRewardSizeULorMS = 0;
    case 'gcam30rn'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 100;
+        requestRewardSizeULorMS = 30;
+        rewardSizeULorMS        = 120;
+   case 'gcam35lt'
+        requestRewardSizeULorMS = 30;
+        rewardSizeULorMS        = 120;    
+   case 'gcam39rt'
+        requestRewardSizeULorMS = 30;
+        rewardSizeULorMS        = 120;
+   case 'gcam39tt'
+        requestRewardSizeULorMS = 30;
+        rewardSizeULorMS        = 120; 
+   case 'gcam40lt'
+        requestRewardSizeULorMS = 30;
+        rewardSizeULorMS        = 120;
+   case 'gcam43lt'
+        requestRewardSizeULorMS = 30;
+        rewardSizeULorMS        = 120;
+   case 'gcam44lt'
+        requestRewardSizeULorMS = 30;
+        rewardSizeULorMS        = 120;
+   case 'gcam45tt'
+        requestRewardSizeULorMS = 30;
+        rewardSizeULorMS        = 120;
+   case 'gcam53ln'
+        requestRewardSizeULorMS = 30;
+        rewardSizeULorMS        = 120;
+   case 'gcam53rt'
+        requestRewardSizeULorMS = 30;
+        rewardSizeULorMS        = 120;  
+   case 'g54a11rt'
+        requestRewardSizeULorMS = 30;
+        rewardSizeULorMS        = 120;   
+   case 'g54a11tt'
+        requestRewardSizeULorMS = 30;
+        rewardSizeULorMS        = 120;     
   % case 'g54a11rt'
    %     requestRewardSizeULorMS = 0;
     %    rewardSizeULorMS        = 100;

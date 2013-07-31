@@ -13,7 +13,7 @@ maxGB = 0.5; %%% size to reduce data down to
 if ~exist('in','var') || isempty(in)
     [f,p] = uigetfile({'*.tif'; '*.tiff'; '*.mat'},'choose pco data');
     %'C:\Users\nlab\Desktop\macro\real\'
-    %[f,p] = uigetfile('C:\Users\nlab\Desktop\data\','choose pco data');   
+    %[f,p] = uigetfile('C:\Users\nlab\Desktop\data\','choose pco data');
     if f==0
         out = [];
         return
@@ -33,7 +33,7 @@ if exist(psfilename,'file')==2;delete(psfilename);end
 figure(pca_fig)
 set(gcf, 'PaperPositionMode', 'auto');
 print('-dpsc',psfilename,'-append');
-    
+
 
 blue=1; green=2; split=3;
 for LED=1:3
@@ -57,7 +57,7 @@ for LED=1:3
     end
     
     
-        
+    
     dx=25;
     if LED==blue | LED==green
         pix = LEDout(dx:dx:end,dx:dx:end,:);
@@ -109,6 +109,17 @@ for LED=1:3
         mapFig(map);
     end
     
+    stepMap = zeros(size(cycMap,1),size(cycMap,2),3);
+    stepMap(:,:,1) = mean(cycMap(:,:,26:35),3)-mean(cycMap(:,:,10:25),3);
+    stepMap(:,:,2)= mean(cycMap(:,:,76:85),3)-mean(cycMap(:,:,60:75),3);
+    
+    figure
+    set(gcf,'Name','baseline map');
+    imshow(imresize(stepMap,4)./prctile(stepMap(:),99));
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfilename,'-append');
+    
+    
     
     mapfig=figure
     imshow(polarMap(map),'InitialMagnification','fit');
@@ -132,26 +143,26 @@ for LED=1:3
             [x y] = ind2sub(size(map),max_ind);
         end
         
-            y = round(y); x= round(x);
-            figure
-            subplot(2,2,1)
-            plot(squeeze(fullMov(x,y,:)));
-            xlim([0 length(fullMov)]);
-            subplot(2,2,2);
-            spect = abs(fft(squeeze(fullMov(x,y,:))));
-            fftPts = 2:length(spect)/2;
-            loglog((fftPts-1)/length(spect),spect(fftPts));
-            subplot(2,2,3);
-            plot(squeeze(cycMap(x,y,:))); ylim([-0.03 0.03]);
-            subplot(2,2,4);
-             imshow(polarMap(map),'InitialMagnification','fit');
-    colormap(hsv);
-    colorbar
-    hold on
-    plot(y,x,'*');
-            set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfilename,'-append');
-  
+        y = round(y); x= round(x);
+        figure
+        subplot(2,2,1)
+        plot(squeeze(fullMov(x,y,:)));
+        xlim([0 length(fullMov)]);
+        subplot(2,2,2);
+        spect = abs(fft(squeeze(fullMov(x,y,:))));
+        fftPts = 2:length(spect)/2;
+        loglog((fftPts-1)/length(spect),spect(fftPts));
+        subplot(2,2,3);
+        plot(squeeze(cycMap(x,y,:))); ylim([-0.03 0.03]);
+        subplot(2,2,4);
+        imshow(polarMap(map),'InitialMagnification','fit');
+        colormap(hsv);
+        colorbar
+        hold on
+        plot(y,x,'*');
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfilename,'-append');
+        
         
     end
     

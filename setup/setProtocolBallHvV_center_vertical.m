@@ -28,13 +28,13 @@ end
 switch subjIDs{1}
    case 'gcam33lt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 80;
+        rewardSizeULorMS        = 90;
    case 'sg4lt'
          requestRewardSizeULorMS = 0;
          rewardSizeULorMS        = 100;
    case 'gcam17rn'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 80;
+        rewardSizeULorMS        = 90;
    case 'gcam21rt'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 100;

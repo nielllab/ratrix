@@ -59,10 +59,10 @@ for LED=1:3
         dfof{LED} = dfof{blue}-dfof{green};
     end
     
-    display('median filtering ...')
-    tic
-    LEDfilt = medfilt1(dfof{LED},100,[],3);
-    toc
+%     display('median filtering ...')
+%     tic
+%     LEDfilt = medfilt1(dfof{LED},100,[],3);
+%     toc
     
     keyboard
     dx=25;

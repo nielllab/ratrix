@@ -34,32 +34,32 @@ switch subjIDs{1}
          rewardSizeULorMS        = 100;
    case 'gcam17rn'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 80;
+        rewardSizeULorMS        = 60;
    case 'gcam21rt'
         requestRewardSizeULorMS = 10;
-        rewardSizeULorMS        = 90;
+        rewardSizeULorMS        = 70;
    case 'wg4rt'
         requestRewardSizeULorMS = 0; 
    case 'gcam30lt'
         requestRewardSizeULorMS = 0;
    case 'gcam30rn'
         requestRewardSizeULorMS = 10;
-        rewardSizeULorMS        = 90;
+        rewardSizeULorMS        = 70;
    case 'gcam35lt'
         requestRewardSizeULorMS = 10;
         rewardSizeULorMS        = 70;    
    case 'gcam39rt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 110;
+        rewardSizeULorMS        = 100;
    case 'gcam39tt'
         requestRewardSizeULorMS = 10;
-        rewardSizeULorMS        = 90; 
+        rewardSizeULorMS        = 80; 
    case 'gcam40lt'
-        requestRewardSizeULorMS = 0;
+        requestRewardSizeULorMS = 10;
         rewardSizeULorMS        = 100;
    case 'gcam43lt'
         requestRewardSizeULorMS = 10;
-        rewardSizeULorMS        = 90;
+        rewardSizeULorMS        = 60;
    case 'gcam44lt'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 90;
@@ -67,8 +67,8 @@ switch subjIDs{1}
         requestRewardSizeULorMS = 10;
         rewardSizeULorMS        = 90;
    case 'gcam53ln'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 90;
+        requestRewardSizeULorMS = 10;
+        rewardSizeULorMS        = 70;
    case 'gcam53rt'
         requestRewardSizeULorMS = 30;
         rewardSizeULorMS        = 80;  
@@ -76,7 +76,7 @@ switch subjIDs{1}
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 90;   
    case 'g54a11tt'
-        requestRewardSizeULorMS = 20;
+        requestRewardSizeULorMS = 10;
         rewardSizeULorMS        = 90;     
   % case 'g54a11rt'
    %     requestRewardSizeULorMS = 0;

@@ -34,7 +34,7 @@ switch subjIDs{1}
          rewardSizeULorMS        = 100;
    case 'gcam17rn'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 50;
+        rewardSizeULorMS        = 40;
    case 'gcam21rt'
         requestRewardSizeULorMS = 5;
         rewardSizeULorMS        = 70;
@@ -42,9 +42,10 @@ switch subjIDs{1}
         requestRewardSizeULorMS = 0; 
    case 'gcam30lt'
         requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 90;
    case 'gcam30rn'
         requestRewardSizeULorMS = 5;
-        rewardSizeULorMS        = 70;
+        rewardSizeULorMS        = 60;
    case 'gcam35lt'
         requestRewardSizeULorMS = 10;
         rewardSizeULorMS        = 70;    
@@ -53,31 +54,31 @@ switch subjIDs{1}
 %         rewardSizeULorMS        = 100;
    case 'gcam39tt'
         requestRewardSizeULorMS = 5;
-        rewardSizeULorMS        = 70; 
+        rewardSizeULorMS        = 60; 
    case 'gcam40lt'
-        requestRewardSizeULorMS = 20;
+        requestRewardSizeULorMS = 10;
         rewardSizeULorMS        = 70;
    case 'gcam43lt'
         requestRewardSizeULorMS = 5;
-        rewardSizeULorMS        = 50;
+        rewardSizeULorMS        = 40;
    case 'gcam44lt'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 80;
    case 'gcam45tt'
         requestRewardSizeULorMS = 5;
-        rewardSizeULorMS        = 70;
+        rewardSizeULorMS        = 60;
    case 'gcam53ln'
         requestRewardSizeULorMS = 5;
-        rewardSizeULorMS        = 70;
+        rewardSizeULorMS        = 60;
    case 'gcam53rt'
         requestRewardSizeULorMS = 30;
         rewardSizeULorMS        = 80;  
    case 'g54a11rt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 90;   
+        requestRewardSizeULorMS = 10;
+        rewardSizeULorMS        = 80;   
    case 'g54a11tt'
         requestRewardSizeULorMS = 5;
-        rewardSizeULorMS        = 70;     
+        rewardSizeULorMS        = 60;     
    case 'gcam25rt'
         requestRewardSizeULorMS = 10;
         rewardSizeULorMS        = 80;

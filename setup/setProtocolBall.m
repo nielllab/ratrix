@@ -1,4 +1,4 @@
-function r = setProtocolMouse(r,subjIDs)
+function r = setProtocolBall(r,subjIDs)
 
 if ~isa(r,'ratrix')
     error('need a ratrix')

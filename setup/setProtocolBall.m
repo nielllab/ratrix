@@ -56,7 +56,7 @@ stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,
 %stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,[-1 1]  ,thresh,yPosPct,maxWidth,maxHeight,zoom,interTrialLuminance,'none', 'normalizeDiagonal');
 
 stim.stim = 'flip';
-stim.stim='rand';
+%stim.stim='rand';
 %stim.stim=nan;
 stim.dms.targetLatency = 1;
 stim.dms.cueLatency = 0;

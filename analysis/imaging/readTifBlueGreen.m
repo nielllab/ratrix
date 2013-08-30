@@ -7,7 +7,7 @@ dbstop if error
 colordef white
 close all
 
-choosePix =0; %%% option to manually select pixels for timecourse analysis
+choosePix =1; %%% option to manually select pixels for timecourse analysis
 maxGB = 0.5; %%% size to reduce data down to
 
 if ~exist('in','var') || isempty(in)
@@ -30,9 +30,15 @@ basename = in(1:end-5)
 psfilename = [basename '.ps']
 if exist(psfilename,'file')==2;delete(psfilename);end
 
+figure
+plot(diff(frameT));
+set(gcf, 'PaperPositionMode', 'auto');
+print('-dpsc',psfilename,'-append');
+
 figure(pca_fig)
 set(gcf, 'PaperPositionMode', 'auto');
 print('-dpsc',psfilename,'-append');
+
 
 
 blue=1; green=2; split=3;
@@ -63,10 +69,12 @@ for LED=1:3
         pix = LEDout(dx:dx:end,dx:dx:end,:);
         figure
         plot(reshape(pix,size(pix,1)*size(pix,2),size(pix,3))')
+        set(gcf, 'PaperPositionMode', 'auto');
+print('-dpsc',psfilename,'-append');
     end
     
     movPeriod =10;
-    binning=0.25;
+    binning=0.125;
     framerate=10;
     img = out(:,:,1);
     
@@ -153,7 +161,7 @@ for LED=1:3
         fftPts = 2:length(spect)/2;
         loglog((fftPts-1)/length(spect),spect(fftPts));
         subplot(2,2,3);
-        plot(squeeze(cycMap(x,y,:))); ylim([-0.03 0.03]);
+        plot(squeeze(cycMap(x,y,:))); ylim([-0.01 0.01]);
         subplot(2,2,4);
         imshow(polarMap(map),'InitialMagnification','fit');
         colormap(hsv);

@@ -41,9 +41,9 @@ end
 %    case 'wg4rt'
 %         requestRewardSizeULorMS = 0; 
 %           rewardSizeULorMS        =80;
-%    case 'gcam30lt'
-%         requestRewardSizeULorMS = 0;
-%           rewardSizeULorMS        =80;
+   case 'gcam30lt'
+        requestRewardSizeULorMS = 0;
+          rewardSizeULorMS        =80;
 %    case 'gcam30rn'
 %         requestRewardSizeULorMS = 0;
 %         rewardSizeULorMS        = 100;

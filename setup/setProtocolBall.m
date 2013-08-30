@@ -8,16 +8,29 @@ if ~all(ismember(subjIDs,getSubjectIDs(r)))
     error('not all those subject IDs are in that ratrix')
 end
 
+
 sm=makeStandardSoundManager();
 
-rewardSizeULorMS          =150;
-requestRewardSizeULorMS   =150;
+rewardSizeULorMS          =80;
+requestRewardSizeULorMS   =30;
 requestMode               ='first';
 msPenalty                 =1000;
 fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =msPenalty;
+
+switch subjIDs{1}
+   case 'gcam33lt'
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 70;
+   case 'sg4lt'
+         requestRewardSizeULorMS = 0;
+         rewardSizeULorMS        = 100;
+   case 'gcam17rn'
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 40;
+
 
 noRequest = constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 
@@ -35,7 +48,7 @@ svnCheckMode = 'session';
 
 interTrialLuminance = .5;
 
-stim.gain = .35 * ones(2,1);
+stim.gain = .7 * ones(2,1);
 stim.targetDistance = 300 * ones(1,2);
 stim.timeoutSecs = .5;
 stim.slow = [50; 100]; % 10 * ones(2,1);

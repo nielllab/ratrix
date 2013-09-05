@@ -29,44 +29,44 @@ switch subjIDs{1}
    case 'gcam33lt'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 70;
-   case 'sg4lt'
-         requestRewardSizeULorMS = 0;
-         rewardSizeULorMS        = 100;
+%    case 'sg4lt'
+%          requestRewardSizeULorMS = 0;
+%          rewardSizeULorMS        = 100;
    case 'gcam17rn'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 40;
+        rewardSizeULorMS        = 30;
    case 'gcam21rt'
-        requestRewardSizeULorMS = 5;
-        rewardSizeULorMS        = 70;
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 60;
    case 'wg4rt'
         requestRewardSizeULorMS = 0; 
    case 'gcam30lt'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 80;
    case 'gcam30rn'
-        requestRewardSizeULorMS = 5;
+        requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 60;
    case 'gcam35lt'
-        requestRewardSizeULorMS = 5;
+        requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 60;    
 %    case 'gcam39rt'
 %         requestRewardSizeULorMS = 0;
 %         rewardSizeULorMS        = 100;
    case 'gcam39tt'
-        requestRewardSizeULorMS = 5;
+        requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 50; 
    case 'gcam40lt'
-        requestRewardSizeULorMS = 10;
+        requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 60;
   % case 'gcam43lt'
 %         requestRewardSizeULorMS = 0;
 %         rewardSizeULorMS        = 40;
    case 'gcam44lt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 60;
+        rewardSizeULorMS        = 45;
    case 'gcam45tt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 50;
+        rewardSizeULorMS        = 35;
    case 'gcam53ln'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 45;
@@ -74,10 +74,10 @@ switch subjIDs{1}
         requestRewardSizeULorMS = 30;
         rewardSizeULorMS        = 80;  
    case 'g54a11rt'
-        requestRewardSizeULorMS = 10;
+        requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 80;   
    case 'g54a11tt'
-        requestRewardSizeULorMS = 5;
+        requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 60;     
    case 'gcam25rt'
         requestRewardSizeULorMS = 0;

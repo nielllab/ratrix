@@ -161,7 +161,7 @@ print('-dpsc',psfilename,'-append');
         fftPts = 2:length(spect)/2;
         loglog((fftPts-1)/length(spect),spect(fftPts));
         subplot(2,2,3);
-        plot(squeeze(cycMap(x,y,:))); ylim([-0.01 0.01]);
+        plot(squeeze(cycMap(x,y,:))); ylim([-0.125 0.125]);
         subplot(2,2,4);
         imshow(polarMap(map),'InitialMagnification','fit');
         colormap(hsv);

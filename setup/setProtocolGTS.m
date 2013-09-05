@@ -10,7 +10,7 @@ end
 
 sm=makeStandardSoundManager();
 
-rewardSizeULorMS          =80;
+rewardSizeULorMS          =20;
 requestRewardSizeULorMS   =80;
 requestMode               ='first';
 msPenalty                 =3500;
@@ -36,11 +36,11 @@ switch subjIDs{1}
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 70;
    case 'gcam32ln'
-        requestRewardSizeULorMS = 5;
-        rewardSizeULorMS        = 70;
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 55;
    case 'gcam50lt'
-        requestRewardSizeULorMS = 5;
-        rewardSizeULorMS        = 60;
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 50;
    case 'gcam50tt'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 65;
@@ -48,12 +48,12 @@ switch subjIDs{1}
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 50;
    case 'gcam51ln'
-        requestRewardSizeULorMS = 5;
+        requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 30;
  
    case 'gcam39rt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 70;
+       rewardSizeULorMS        = 60;
      
       
     otherwise

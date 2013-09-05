@@ -10,8 +10,8 @@ end
 
 sm=makeStandardSoundManager();
 
-rewardSizeULorMS          =20;
-requestRewardSizeULorMS   =80;
+rewardSizeULorMS          =80;
+requestRewardSizeULorMS   =20;
 requestMode               ='first';
 msPenalty                 =3500;
 fractionOpenTimeSoundIsOn =1;
@@ -50,11 +50,16 @@ switch subjIDs{1}
    case 'gcam51ln'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 30;
- 
    case 'gcam39rt'
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 60;
-     
+
+   case 'bfly53ln'
+       requestRewardSizeULorMS = 30;
+       rewardSizeULorMS        = 80; 
+   case 'bfly24lt'
+       requestRewardSizeULorMS = 5;
+       rewardSizeULorMS        = 80;
       
     otherwise
         warning('unrecognized mouse, using defaults')
@@ -94,10 +99,7 @@ contrast               = 1;
 thresh                 = .00005;
 yPosPct                = .5;
 stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,zoom,interTrialLuminance);
-%stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,[-1 1]  ,thresh,yPosPct,maxWidth,maxHeight,zoom,interTrialLuminance,'none', 'normalizeDiagonal');
 
-%stim.stim = 'flip';
-%stim.stim=nan;
 
 %stim to stay on 1 sec after answer
 ballSM = setReinfAssocSecs(trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance),1);

@@ -21,15 +21,13 @@ scalar                    =1;
 msAirpuff                 =msPenalty;
 
 switch subjIDs{1}
-   case 'gcam33lt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 70;
-   case 'sg4lt'
-         requestRewardSizeULorMS = 0;
-         rewardSizeULorMS        = 100;
-   case 'gcam17rn'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 40;
+   case 'bfly21rt'
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 80;
+   case 'bfly24lt'
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 80;     
+      
 
 
 noRequest = constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
@@ -49,15 +47,15 @@ svnCheckMode = 'session';
 interTrialLuminance = .5;
 
 stim.gain = .7 * ones(2,1);
-stim.targetDistance = 300 * ones(1,2);
+stim.targetDistance = 500 * ones(1,2);
 stim.timeoutSecs = .5;
-stim.slow = [50; 100]; % 10 * ones(2,1);
-stim.slowSecs = .5;
+stim.slow = [40; 80]; % 10 * ones(2,1);
+stim.slowSecs = 1;
 stim.positional = false;
-stim.cue = true;
-stim.soundClue = true;
+stim.cue = false;
+stim.soundClue = false;
 
-pixPerCycs             = [300]; %*10^9;
+pixPerCycs             = [100]; %*10^9;
 targetOrientations     = [-1 1]*pi/4;
 distractorOrientations = []; %-targetOrientations;
 mean                   = .5;

@@ -47,15 +47,15 @@ svnCheckMode = 'session';
 interTrialLuminance = .5;
 
 stim.gain = .7 * ones(2,1);
-stim.targetDistance = 500 * ones(1,2);
+stim.targetDistance = 400 * ones(1,2);
 stim.timeoutSecs = .5;
 stim.slow = [40; 80]; % 10 * ones(2,1);
 stim.slowSecs = 1;
 stim.positional = false;
-stim.cue = false;
-stim.soundClue = false;
+stim.cue = true;
+stim.soundClue = true;
 
-pixPerCycs             = [100]; %*10^9;
+pixPerCycs             = [300]; %*10^9;
 targetOrientations     = [-1 1]*pi/4;
 distractorOrientations = []; %-targetOrientations;
 mean                   = .5;

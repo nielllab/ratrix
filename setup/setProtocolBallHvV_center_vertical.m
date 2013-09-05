@@ -11,7 +11,7 @@ end
 sm=makeStandardSoundManager();
 
 rewardSizeULorMS          =80;
-requestRewardSizeULorMS   =80;
+requestRewardSizeULorMS   =20;
 requestMode               ='first';
 msPenalty                 =3500;
 fractionOpenTimeSoundIsOn =1;
@@ -107,7 +107,7 @@ stim.slow = [40; 80]; % 10 * ones(2,1);
 stim.slowSecs = 1;
 stim.positional = false;
 stim.cue = true;
-stim.soundClue = false;
+stim.soundClue = true;
 
 pixPerCycs             = [100]; %*10^9;
 targetOrientations     = 0

@@ -29,7 +29,7 @@ end
 
    case 'gcam30lt'
         requestRewardSizeULorMS = 0;
-          rewardSizeULorMS        =70;
+          rewardSizeULorMS        =60;
 
        
     otherwise

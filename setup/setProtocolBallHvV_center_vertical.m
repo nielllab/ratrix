@@ -56,12 +56,12 @@ switch subjIDs{1}
 %    case 'gcam53ln'  %%back to easy task
 %         requestRewardSizeULorMS = 0;
 %         rewardSizeULorMS        = 60; 
-%    case 'g54a11rt'   %%back to easy task
+   case 'g54a11rt'   %%back to easy task
+         requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 80;   
+%    case 'g54a11tt'  %%back to easy task
 %         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 80;   
-   case 'g54a11tt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 60;     
+%         rewardSizeULorMS        = 60;     
    case 'gcam25rt'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 75;

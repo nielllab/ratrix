@@ -38,9 +38,9 @@ switch subjIDs{1}
    case 'gcam32ln'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 60;
-   case 'gcam50lt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 50;
+%    case 'gcam50lt'  %%back to easy task
+%         requestRewardSizeULorMS = 0;
+%         rewardSizeULorMS        = 60;
    case 'gcam50tt'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 70;
@@ -53,13 +53,12 @@ switch subjIDs{1}
    case 'gcam39rt'
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 60;
-
-   case 'bfly53ln'
-       requestRewardSizeULorMS = 30;
-       rewardSizeULorMS        = 80; 
-   case 'bfly24lt'
-       requestRewardSizeULorMS = 5;
-       rewardSizeULorMS        = 80;
+%    case 'bfly24lt'
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 80;
+%     case 'g625ln'
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 80;
       
     otherwise
         warning('unrecognized mouse, using defaults')

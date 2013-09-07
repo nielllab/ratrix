@@ -29,57 +29,46 @@ switch subjIDs{1}
    case 'gcam33lt'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 70;
-%    case 'sg4lt'
-%          requestRewardSizeULorMS = 0;
-%          rewardSizeULorMS        = 100;
-   case 'gcam17rn'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 30;
-   case 'gcam21rt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 60;
-   case 'wg4rt'
-        requestRewardSizeULorMS = 0; 
+%    case 'gcam17rn'  %%retired
+%         requestRewardSizeULorMS = 0;
+%         rewardSizeULorMS        = 30;
    case 'gcam30lt'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 80;
    case 'gcam30rn'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 60;
-   case 'gcam35lt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 60;    
+        rewardSizeULorMS        = 60;  
 %    case 'gcam39rt'
 %         requestRewardSizeULorMS = 0;
 %         rewardSizeULorMS        = 100;
    case 'gcam39tt'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 50; 
-   case 'gcam40lt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 60;
+%    case 'gcam40lt'  %%back to easy task
+%         requestRewardSizeULorMS = 0;
+%         rewardSizeULorMS        = 60;
    case 'gcam44lt'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 45;
    case 'gcam45tt'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 45;
-   case 'gcam53ln'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 45; 
-   case 'g54a11rt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 80;   
+%    case 'gcam53ln'  %%back to easy task
+%         requestRewardSizeULorMS = 0;
+%         rewardSizeULorMS        = 60; 
+%    case 'g54a11rt'   %%back to easy task
+%         requestRewardSizeULorMS = 0;
+%         rewardSizeULorMS        = 80;   
    case 'g54a11tt'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 60;     
    case 'gcam25rt'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 70;
-   case 'bfly21rt'
-       requestRewardSizeULorMS = 5;
-       rewardSizeULorMS        = 80;
-       
+%    case 'bfly21rt'
+%        requestRewardSizeULorMS = 5;
+%        rewardSizeULorMS        = 80;
+%        
     otherwise
         warning('unrecognized mouse, using defaults')
 end

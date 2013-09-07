@@ -37,7 +37,7 @@ switch subjIDs{1}
         rewardSizeULorMS        = 70;
    case 'gcam32ln'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 60;
+        rewardSizeULorMS        = 65;
 %    case 'gcam50lt'  %%back to easy task
 %         requestRewardSizeULorMS = 0;
 %         rewardSizeULorMS        = 60;

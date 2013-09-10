@@ -37,7 +37,7 @@ switch subjIDs{1}
         rewardSizeULorMS        = 80;
    case 'gcam30rn'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 60;  
+        rewardSizeULorMS        = 65;  
 %    case 'gcam39rt'  %%moved to GTS
 %         requestRewardSizeULorMS = 0;
 %         rewardSizeULorMS        = 100;
@@ -49,7 +49,7 @@ switch subjIDs{1}
 %         rewardSizeULorMS        = 60;
    case 'gcam44lt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 55;
+        rewardSizeULorMS        = 60;
    case 'gcam45tt'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 55;

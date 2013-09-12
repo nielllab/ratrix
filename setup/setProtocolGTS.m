@@ -34,16 +34,16 @@ switch subjIDs{1}
 %         rewardSizeULorMS          =80;
    case 'gcam32tt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 55;
+        rewardSizeULorMS        = 50;
    case 'gcam32ln'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 60;
+        rewardSizeULorMS        = 55;
 %    case 'gcam50lt'  %%back to easy task
 %         requestRewardSizeULorMS = 0;
 %         rewardSizeULorMS        = 60;
    case 'gcam50tt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 70;
+        rewardSizeULorMS        = 60;
    case 'gcam46tt'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 40;
@@ -52,7 +52,7 @@ switch subjIDs{1}
         rewardSizeULorMS        = 30;
    case 'gcam39rt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 55;
+       rewardSizeULorMS        = 50;
 %    case 'bfly24lt'
 %        requestRewardSizeULorMS = 0;
 %        rewardSizeULorMS        = 80;

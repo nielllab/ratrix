@@ -35,40 +35,41 @@ switch subjIDs{1}
 %    case 'gcam30lt'
 %         requestRewardSizeULorMS = 0;
 %         rewardSizeULorMS        = 80;
-   case 'gcam30rn'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 50;  
+    
 %    case 'gcam39rt'  %%moved to GTS
 %         requestRewardSizeULorMS = 0;
 %         rewardSizeULorMS        = 100;
    case 'gcam39tt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 40; 
+        rewardSizeULorMS        = 50; 
    case 'gcam40lt'  
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 60;
+        rewardSizeULorMS        = 50;
    case 'gcam44lt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 50;
-   case 'gcam45tt'
-        requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 55;
-%    case 'gcam53ln'  %%back to easy task
+%    case 'gcam45tt'
 %         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 60; 
-%    case 'g54a11rt'   %%back to easy task
-%          requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 80;   
-%    case 'g54a11tt'  %%back to easy task
+%         rewardSizeULorMS        = 55; 
+%    case 'gcam25rt'
 %         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 60;     
-   case 'gcam25rt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 50;
+%         rewardSizeULorMS        = 50;
+%    case 'gcam30rn'
+%         requestRewardSizeULorMS = 0;
+%         rewardSizeULorMS        = 50;      
 %    case 'bfly21rt'
 %        requestRewardSizeULorMS = 5;
 %        rewardSizeULorMS        = 80;
 %        
+   case 'g54a11tt'   
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 80;
+   case 'g54a11rt'   
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 85;    
+   case 'gcam53ln'
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 80; 
     otherwise
         warning('unrecognized mouse, using defaults')
 end

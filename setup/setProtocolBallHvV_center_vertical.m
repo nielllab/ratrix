@@ -69,7 +69,7 @@ switch subjIDs{1}
         rewardSizeULorMS        = 85;    
    case 'gcam53ln'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 80; 
+        rewardSizeULorMS        = 70; 
     otherwise
         warning('unrecognized mouse, using defaults')
 end

@@ -61,7 +61,7 @@ switch subjIDs{1}
 %        rewardSizeULorMS        = 80;
    case 'bfly53ln'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 65;
+       rewardSizeULorMS        = 70;
       
     otherwise
         warning('unrecognized mouse, using defaults')

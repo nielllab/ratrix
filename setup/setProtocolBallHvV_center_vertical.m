@@ -32,11 +32,8 @@ switch subjIDs{1}
 %    case 'gcam17rn'  %%retired
 %         requestRewardSizeULorMS = 0;
 %         rewardSizeULorMS        = 30;
-%    case 'gcam30lt'
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 80;
-    
-%    case 'gcam39rt'  %%moved to GTS
+
+%     case 'gcam39rt'  %%moved to GTS
 %         requestRewardSizeULorMS = 0;
 %         rewardSizeULorMS        = 100;
    case 'gcam39tt'
@@ -61,9 +58,7 @@ switch subjIDs{1}
 %        requestRewardSizeULorMS = 5;
 %        rewardSizeULorMS        = 80;
 %        
-   case 'g54a11tt'   
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 80;
+   
    case 'g54a11rt'   
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 85;    

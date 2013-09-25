@@ -26,38 +26,34 @@ if ~isscalar(subjIDs)
     error('expecting exactly one subject')
 end
 switch subjIDs{1}
-   case 'gcam33lt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 85;
-%    case 'gcam17rn'  %%retired
+    
+    case 'bfly24lt'
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 70;
+    case 'g625ln'
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 70; 
+       
+    case 'g54b9lt'
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 70;   
+    case 'g54ba1lt'
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 80;   
+       
+%    case 'gcam33lt'
 %         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 30;
+%         rewardSizeULorMS        = 85;
 
-%     case 'gcam39rt'  %%moved to GTS
+%    case 'gcam39tt'
 %         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 100;
-   case 'gcam39tt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 50; 
+%         rewardSizeULorMS        = 50; 
    case 'gcam40lt'  
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 50;
+        rewardSizeULorMS        = 55;
    case 'gcam44lt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 45;
-%    case 'gcam45tt'
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 55; 
-%    case 'gcam25rt'
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 50;
-%    case 'gcam30rn'
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 50;      
-%    case 'bfly21rt'
-%        requestRewardSizeULorMS = 5;
-%        rewardSizeULorMS        = 80;
-%        
+        rewardSizeULorMS        = 45;  
    
    case 'g54a11rt'   
         requestRewardSizeULorMS = 0;

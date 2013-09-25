@@ -24,12 +24,20 @@ switch subjIDs{1}
     case 'bfly21rt'
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 85;
-    case 'bfly24lt'
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 60;
-    case 'g625ln'
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 55;   
+%     case 'bfly24lt'
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 60;
+%     case 'g625ln'
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 55; 
+%        
+%     case 'g54b9lt'
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 65;   
+%     case 'g54ba1lt'
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 70;   
+%        
 %     case 'gcam40lt'  
 %         requestRewardSizeULorMS = 0;
 %         rewardSizeULorMS        = 50;
@@ -38,23 +46,19 @@ switch subjIDs{1}
 %         requestRewardSizeULorMS = 0;
 %         rewardSizeULorMS        = 85;    
 
-    case 'g54b9lt'
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 65;
+   
     case 'g54b8tt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 70;   
-    case 'g54ba1lt'
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 70;  
+       rewardSizeULorMS        = 60;   
+   
        
     case 'g54aa7tt'
-       requestRewardSizeULorMS = 40;
-       rewardSizeULorMS        = 80;  
+       requestRewardSizeULorMS = 5;
+       rewardSizeULorMS        = 90;  
        
     case 'g54aa7lt'
-       requestRewardSizeULorMS = 40;
-       rewardSizeULorMS        = 80;  
+       requestRewardSizeULorMS = 5;
+       rewardSizeULorMS        = 90;  
 
         
     otherwise

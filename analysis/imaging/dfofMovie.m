@@ -86,7 +86,7 @@ end
 vid = VideoWriter(fullfile(p,f));
 vid.FrameRate=50;
 open(vid);
-writeVideo(vid,mov(1:3000));
+writeVideo(vid,mov(1:end));
 close(vid)
 
 clear mov

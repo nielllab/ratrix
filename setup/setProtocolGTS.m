@@ -26,21 +26,14 @@ if ~isscalar(subjIDs)
     error('expecting exactly one subject')
 end
 switch subjIDs{1}
-%    case 'gcam25rt'
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 60;
-%    case 'gcam29ln'
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS          =80;
+
    case 'gcam32tt'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 30;
    case 'gcam32ln'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 40;
-%    case 'gcam50lt'  %%back to easy task
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 60;
+        rewardSizeULorMS        = 35;
+
    case 'gcam50tt'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 55;
@@ -52,7 +45,7 @@ switch subjIDs{1}
         rewardSizeULorMS        = 27.5;
    case 'gcam39rt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 50;
+       rewardSizeULorMS        = 45;
 %    case 'bfly24lt'
 %        requestRewardSizeULorMS = 0;
 %        rewardSizeULorMS        = 80;
@@ -61,7 +54,7 @@ switch subjIDs{1}
 %        rewardSizeULorMS        = 80;
    case 'bfly53ln'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 75;
+       rewardSizeULorMS        = 65;
       
     otherwise
         warning('unrecognized mouse, using defaults')

@@ -1,4 +1,4 @@
-function [dfof responseMap responseMapNorm] = readTifBlueGreen(in);
+function [dfof responseMap responseMapNorm] = readTifGreen(in);
 [pathstr, name, ext] = fileparts(fileparts(mfilename('fullpath')));
 addpath(fullfile(fileparts(pathstr),'bootstrap'))
 setupEnvironment;
@@ -42,27 +42,31 @@ print('-dpsc',psfilename,'-append');
 
 
 blue=1; green=2; split=3;
-for LED=1:3
-    frms = 1:size(out,3);
-    if LED==blue
-        LEDfrms = find(idx==blue);
-        LEDout = interp1(LEDfrms,shiftdim(double(out(:,:,LEDfrms)),2),frms,'linear','extrap');
-        LEDout = shiftdim(LEDout,1);
-        m = repmat(mean(double(LEDout),3),[1 1 size(LEDout,3)]);
-        dfof{LED} = (double(LEDout)-m)./m;
-        clear m
-    elseif LED==green
-        LEDfrms = find(idx==green);
-        LEDout = interp1(LEDfrms,shiftdim(double(out(:,:,LEDfrms)),2),frms,'linear','extrap');
-        LEDout = shiftdim(LEDout,1);
-        m = repmat(mean(double(LEDout),3),[1 1 size(LEDout,3)]);
-        dfof{LED} = (double(LEDout)-m)./m;
-        clear m
-    elseif LED==split
-        dfof{LED} = dfof{blue}-dfof{green};
-    end
-    
-    
+for LED=1:1
+%     frms = 1:size(out,3);
+%     if LED==blue
+%         LEDfrms = find(idx==blue);
+%         LEDout = interp1(LEDfrms,shiftdim(double(out(:,:,LEDfrms)),2),frms,'linear','extrap');
+%         LEDout = shiftdim(LEDout,1);
+%         m = repmat(mean(double(LEDout),3),[1 1 size(LEDout,3)]);
+%         dfof{LED} = (double(LEDout)-m)./m;
+%         clear m
+%     elseif LED==green
+%         LEDfrms = find(idx==green);
+%         LEDout = interp1(LEDfrms,shiftdim(double(out(:,:,LEDfrms)),2),frms,'linear','extrap');
+%         LEDout = shiftdim(LEDout,1);
+%         m = repmat(mean(double(LEDout),3),[1 1 size(LEDout,3)]);
+%         dfof{LED} = (double(LEDout)-m)./m;
+%         clear m
+%     elseif LED==split
+%         dfof{LED} = dfof{blue}-dfof{green};
+%     end
+LEDout = out;
+
+
+    m = repmat(mean(double(LEDout),3),[1 1 size(LEDout,3)]);
+    dfof{LED} =(double(LEDout)-m)./m;
+    clear m
     
     dx=25;
     if LED==blue | LED==green
@@ -161,7 +165,7 @@ print('-dpsc',psfilename,'-append');
         fftPts = 2:length(spect)/2;
         loglog((fftPts-1)/length(spect),spect(fftPts));
         subplot(2,2,3);
-        plot(squeeze(cycMap(x,y,:))); ylim([-0.125 0.125]);
+        plot(squeeze(cycMap(x,y,:))); ylim([-0.005 0.005]);
         subplot(2,2,4);
         imshow(polarMap(map),'InitialMagnification','fit');
         colormap(hsv);

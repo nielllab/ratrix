@@ -26,96 +26,41 @@ if ~isscalar(subjIDs)
     error('expecting exactly one subject')
 end
 switch subjIDs{1}
-   case 'gcam33lt'
+    
+    case 'bfly24lt'
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 70;
+    case 'g625ln'
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 70; 
+       
+    case 'g54b9lt'
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 70;   
+    case 'g54ba1lt'
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 80;   
+       
+%    case 'gcam33lt'
+%         requestRewardSizeULorMS = 0;
+%         rewardSizeULorMS        = 85;
+
+%    case 'gcam39tt'
+%         requestRewardSizeULorMS = 0;
+%         rewardSizeULorMS        = 50; 
+   case 'gcam40lt'  
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 100;
-   case 'sg4lt'
-         requestRewardSizeULorMS = 0;
-         rewardSizeULorMS        = 100;
-   case 'gcam17rn'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 100;
-   case 'gcam21rt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 100;
-   case 'wg4rt'
-        requestRewardSizeULorMS = 0; 
-   case 'gcam30lt'
-        requestRewardSizeULorMS = 0;
-   case 'gcam30rn'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 130;
-   case 'gcam35lt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 120;    
-   case 'gcam39rt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 130;
-   case 'gcam39tt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 120; 
-   case 'gcam40lt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 130;
-   case 'gcam43lt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 120;
+        rewardSizeULorMS        = 55;
    case 'gcam44lt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 120;
-   case 'gcam45tt'
+        rewardSizeULorMS        = 45;  
+   
+   case 'g54a11rt'   
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 120;
+        rewardSizeULorMS        = 85;    
    case 'gcam53ln'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 120;
-   case 'gcam53rt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 120;  
-   case 'g54a11rt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 130;   
-   case 'g54a11tt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 120;     
-  % case 'g54a11rt'
-   %     requestRewardSizeULorMS = 0;
-    %    rewardSizeULorMS        = 100;
-  % case 'g54a11tt'
-   %     requestRewardSizeULorMS = 0;
-    %    rewardSizeULorMS        = 100;
-  % case 'gcam35lt'
-   %     requestRewardSizeULorMS = 0;
-    %    rewardSizeULorMS        = 100;
-   %case 'gcam39rt'
-    %    requestRewardSizeULorMS = 0;
-    %    rewardSizeULorMS        = 100;
-   %case 'gcam39tt'
-    %    requestRewardSizeULorMS = 0;
-     %   rewardSizeULorMS        = 100;
-   %case 'gcam53rt'
-    %    requestRewardSizeULorMS = 0;
-    %    rewardSizeULorMS        = 100;
-   %case 'gcam53ln'
-    %    requestRewardSizeULorMS = 0;
-     %   rewardSizeULorMS        = 100;
-  % case 'gcam43lt'
-   %     requestRewardSizeULorMS = 0;
-    %    rewardSizeULorMS        = 100;
-   %case 'gcam43rt'
-    %    requestRewardSizeULorMS = 0;
-    %    rewardSizeULorMS        = 100;
-   %case 'gcam45tt'
-    %    requestRewardSizeULorMS = 0;
-     %   rewardSizeULorMS        = 100;
-   %case 'gcam40lt'
-    %    requestRewardSizeULorMS = 0;
-    %    rewardSizeULorMS        = 100;
-   %case 'gcam44lt'
-    %    requestRewardSizeULorMS = 0;
-     %   rewardSizeULorMS        = 100;
-
-       
+        rewardSizeULorMS        = 55; 
     otherwise
         warning('unrecognized mouse, using defaults')
 end
@@ -143,7 +88,7 @@ stim.slow = [40; 80]; % 10 * ones(2,1);
 stim.slowSecs = 1;
 stim.positional = false;
 stim.cue = true;
-stim.soundClue = false;
+stim.soundClue = true;
 
 pixPerCycs             = [100]; %*10^9;
 targetOrientations     = 0

@@ -49,7 +49,9 @@ if true
             imagesc(squeeze(x)')
             figure
             imagesc(squeeze(x)'>intmax('uint8'))
-            
+            t = nan; drops=nan;
+            display('bad bcd')
+            return
             keyboard
             error('bad bcd')
         end

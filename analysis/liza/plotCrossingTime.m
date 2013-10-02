@@ -67,6 +67,13 @@ if ~isempty(d)
 end
 end
 
+function subj = fixSubj(subj)
+wf = '-widefield';
+if strcmp(subj,[subj(1:end-length(wf)) wf])
+    subj = subj(1:end-length(wf));
+end
+end
+
 function compiledFile = compileBall(subj,drive,force,compiledDir)
 if ispc
     recordPath = fullfile(drive,'Users','nlab');
@@ -84,7 +91,7 @@ end
 %most of the work in this file does what CompileTrialRecords does
 
 %get trial records in the right order
-recordPath = fullfile(recordPath,'Desktop','ballData','PermanentTrialRecordStore',subj)
+recordPath = fullfile(recordPath,'Desktop','ballData','PermanentTrialRecordStore',fixSubj(subj))
 
 d=dir(fileparts(recordPath));
 if false

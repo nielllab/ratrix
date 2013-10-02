@@ -179,6 +179,11 @@ if doBall
             'gcam21rt'
             'gcam20tt'
             'gcam13ln'
+            'g54a11tt'
+            'gcam40lt'
+            'gcam46tt'
+            'g625ln' %hvv
+            'g54aa7lt' %hvv            
             }
         }
         {'jarmusch'
@@ -193,6 +198,10 @@ if doBall
             % 'gcam18lt' %who dat?
             'wg4lt'
             'gcam19tt'
+            'gcam44lt'
+            'gcam45tt'      
+            'g54a11rt' %hvv
+            'g54ba1lt' %hvv            
             }
         }
         {'mtrix6'
@@ -207,6 +216,12 @@ if doBall
             'wg2'
             'gcam17rn'
             'wg4rt'
+            % 'gg5411rt'
+            'gcam53rt'
+            'gcam53ln'
+            'gcam51ln'  
+            'bfly24lt' %hvv
+            'bfly53ln' %gts            
             }
         }
         {'mtrix11'
@@ -214,12 +229,19 @@ if doBall
             'gcam28lt'
             'gcam30lt'
             'gcam33lt'
-            'gcam32ln'            
+            'gcam32ln'     
+            'g54aa7tt'  %gts
             }
         }      
         {'mtrix12'
             {
-            'gcam29ln'           
+            'gcam29ln' 
+            'gcam39tt'
+            'gcam39rt'
+            'gcam43lt'
+            'gcam50lt'  
+            'g54b8tt' %hvv
+            'g54b9lt' %hvv
             }
         }         
         {'mtrix13'
@@ -227,6 +249,9 @@ if doBall
             'gcam25rt'
             'gcam30rn'
             'gcam32tt'
+            'gcam35lt'
+            %'gcam50tt'  
+            'bfly21rt' %gts
             }
         }        
 % these guys are on non-imaging rigs right now        
@@ -235,7 +260,8 @@ if doBall
 %             'gcam13ln'
 %             'gcam13tt'
 %             }
-%         }        
+%         }      
+        doWidefield('lee')
     };
 
     tic
@@ -244,6 +270,12 @@ if doBall
 end
 
 close all
+
+    function out = doWidefield(drive)
+        d = dir(['\\' drive '\Users\nlab\Desktop\ballData\PermanentTrialRecordStore']);
+        d = d([d.isdir] & cellfun(@(x)x(1)~='.',{d.name}));
+        out = {drive cellfun(@(x)[x '-widefield'],{d.name},'UniformOutput',false)};
+    end
 
     function g(box,d,subj)        
         selection.subjects = {subj};

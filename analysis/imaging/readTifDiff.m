@@ -1,4 +1,4 @@
-function [dfof responseMap responseMapNorm] = readTifBlueGreen(in);
+function [dfof responseMap responseMapNorm] = readTifDiff(in);
 [pathstr, name, ext] = fileparts(fileparts(mfilename('fullpath')));
 addpath(fullfile(fileparts(pathstr),'bootstrap'))
 setupEnvironment;
@@ -9,22 +9,43 @@ close all
 
 choosePix =1; %%% option to manually select pixels for timecourse analysis
 maxGB = 0.5; %%% size to reduce data down to
+imcolor= {'green','red'};
 
-if ~exist('in','var') || isempty(in)
-    [f,p] = uigetfile({'*.tif'; '*.tiff'; '*.mat'},'choose pco data');
-    %'C:\Users\nlab\Desktop\macro\real\'
-    %[f,p] = uigetfile('C:\Users\nlab\Desktop\data\','choose pco data');
-    if f==0
-        out = [];
-        return
+for chan=1:2
+    if ~exist('in','var') || isempty(in)
+        
+        [f,p] = uigetfile({'*.tif'; '*.tiff'; '*.mat'},sprintf('choose %s pco data',imcolor{chan}));
+        %'C:\Users\nlab\Desktop\macro\real\'
+        %[f,p] = uigetfile('C:\Users\nlab\Desktop\data\','choose pco data');
+        if f==0
+            out = [];
+            return
+        end
+        
+        [a b] = fileparts(fullfile(p,f));
+        in = fullfile(a,b);
+        
     end
-    
-    [a b] = fileparts(fullfile(p,f));
-    in = fullfile(a,b);
+    basename = in(1:end-5)
+    clear in
+    [data frameT idx pca_fig]=readSyncMultiTif(basename,maxGB);
+    data = double(data);
+    mn = mean(data,3);
+    figure
+    imagesc(mn); colormap(gray);
+    figure
+    plot(diff(frameT)*1000);
+    title(sprintf('channel %d',chan))
+    display('normalizing to mean');
+     LEDout{chan}=data;
+     if chan==1;
+         LEDout{3}=data;
+     end
+    for f=1:size(data,3);
+        data(:,:,f)=(data(:,:,f)-mn)./mn;
+    end
+    dfof{chan}=data; clear data;
 end
-basename = in(1:end-5)
-
-[out frameT idx pca_fig]=readSyncMultiTif(basename,maxGB);
 
 
 psfilename = [basename '.ps']
@@ -43,22 +64,7 @@ print('-dpsc',psfilename,'-append');
 
 blue=1; green=2; split=3;
 for LED=1:3
-    frms = 1:size(out,3);
-    if LED==blue
-        LEDfrms = find(idx==blue);
-        LEDout = interp1(LEDfrms,shiftdim(double(out(:,:,LEDfrms)),2),frms,'linear','extrap');
-        LEDout = shiftdim(LEDout,1);
-        m = repmat(mean(double(LEDout),3),[1 1 size(LEDout,3)]);
-        dfof{LED} = (double(LEDout)-m)./m;
-        clear m
-    elseif LED==green
-        LEDfrms = find(idx==green);
-        LEDout = interp1(LEDfrms,shiftdim(double(out(:,:,LEDfrms)),2),frms,'linear','extrap');
-        LEDout = shiftdim(LEDout,1);
-        m = repmat(mean(double(LEDout),3),[1 1 size(LEDout,3)]);
-        dfof{LED} = (double(LEDout)-m)./m;
-        clear m
-    elseif LED==split
+    if LED==split
         dfof{LED} = dfof{blue}-dfof{green};
     end
     
@@ -66,16 +72,18 @@ for LED=1:3
     
     dx=25;
     if LED==blue | LED==green
-        pix = LEDout(dx:dx:end,dx:dx:end,:);
+        pix = LEDout{LED}(dx:dx:end,dx:dx:end,:);
         figure
         plot(reshape(pix,size(pix,1)*size(pix,2),size(pix,3))')
         set(gcf, 'PaperPositionMode', 'auto');
-print('-dpsc',psfilename,'-append');
+        print('-dpsc',psfilename,'-append');
     end
     
-    movPeriod =10;
+    out =dfof{LED};
+   
+    movPeriod =5;
     binning=0.125;
-    framerate=10;
+    framerate=60;
     img = out(:,:,1);
     
     [map cycMap fullMov] =phaseMap(dfof{LED},framerate,movPeriod,binning);
@@ -136,41 +144,48 @@ print('-dpsc',psfilename,'-append');
     done=0;
     
     
-    while ~done
-        figure(mapfig)
-        if choosePix
-            [y x b] = ginput(1);
-            if b==3 %%%% right click
+    cycMapAll{LED} = cycMap;
+    if LED==3;
+        while ~done
+            figure(mapfig)
+            if choosePix
+                [y x b] = ginput(1);
+                if b==3 %%%% right click
+                    done=1;
+                    break;
+                end
+            elseif ~choosePix
                 done=1;
-                break;
+                
+                [m max_ind]= max(abs(map(:)))
+                [x y] = ind2sub(size(map),max_ind);
             end
-        elseif ~choosePix
-            done=1;
             
-            [m max_ind]= max(abs(map(:)))
-            [x y] = ind2sub(size(map),max_ind);
+            y = round(y); x= round(x);
+            figure
+            subplot(2,2,1)
+            plot(squeeze(fullMov(x,y,:)));
+            xlim([0 length(fullMov)]);
+            subplot(2,2,2);
+%             spect = abs(fft(squeeze(fullMov(x,y,:))));
+%             fftPts = 2:length(spect)/2;
+%             loglog((fftPts-1)/length(spect),spect(fftPts));
+plot(squeeze(dfof{1}(x,y,:)),squeeze(dfof{2}(x,y,:)),'.');
+axis equal
+            subplot(2,2,3);
+            % plot(squeeze(cycMap(x,y,:))); ylim([-0.125 0.125]);
+            plot(squeeze(cycMapAll{1}(x,y,:)),'g');hold on
+            plot(squeeze(cycMapAll{2}(x,y,:)),'r'); plot(squeeze(cycMapAll{3}(x,y,:)),'k');
+            ylim([-0.01 0.01]);
+            subplot(2,2,4);
+            imshow(polarMap(map),'InitialMagnification','fit');
+            colormap(hsv);
+            colorbar
+            hold on
+            plot(y,x,'*');
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilename,'-append');
         end
-        
-        y = round(y); x= round(x);
-        figure
-        subplot(2,2,1)
-        plot(squeeze(fullMov(x,y,:)));
-        xlim([0 length(fullMov)]);
-        subplot(2,2,2);
-        spect = abs(fft(squeeze(fullMov(x,y,:))));
-        fftPts = 2:length(spect)/2;
-        loglog((fftPts-1)/length(spect),spect(fftPts));
-        subplot(2,2,3);
-        plot(squeeze(cycMap(x,y,:))); ylim([-0.125 0.125]);
-        subplot(2,2,4);
-        imshow(polarMap(map),'InitialMagnification','fit');
-        colormap(hsv);
-        colorbar
-        hold on
-        plot(y,x,'*');
-        set(gcf, 'PaperPositionMode', 'auto');
-        print('-dpsc',psfilename,'-append');
-        
         
     end
     
@@ -184,8 +199,8 @@ delete(psfilename);
         figure
         
         subplot(2,2,1)
-        imagesc(squeeze(LEDout(:,:,1)),[prctile(img(:),5) prctile(img(:),95)])
-        colormap(gray)
+        imagesc(squeeze(LEDout{LED}(:,:,1)))
+        colormap(gray); axis equal
         freezeColors
         
         subplot(2,2,2);

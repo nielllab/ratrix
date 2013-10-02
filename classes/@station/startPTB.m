@@ -33,7 +33,7 @@ try
     HideCursor;
     
     Screen('Preference', 'SkipSyncTests', 0);
-    %Screen('Preference', 'SkipSyncTests', 1); %edf added 12.19.11 to right mtrix cuz lcd?
+    Screen('Preference', 'SkipSyncTests', 1); %edf added 12.19.11 to right mtrix cuz lcd?
 
     
     Screen('Preference', 'VisualDebugLevel', 6);

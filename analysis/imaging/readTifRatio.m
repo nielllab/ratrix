@@ -1,4 +1,4 @@
-function [dfof responseMap responseMapNorm] = readTifBlueGreen(in);
+function [dfof responseMap responseMapNorm] = readTifRatio(in);
 [pathstr, name, ext] = fileparts(fileparts(mfilename('fullpath')));
 addpath(fullfile(fileparts(pathstr),'bootstrap'))
 setupEnvironment;
@@ -10,8 +10,10 @@ close all
 choosePix =1; %%% option to manually select pixels for timecourse analysis
 maxGB = 0.5; %%% size to reduce data down to
 
+for chan=1:2
 if ~exist('in','var') || isempty(in)
-    [f,p] = uigetfile({'*.tif'; '*.tiff'; '*.mat'},'choose pco data');
+
+      [f,p] = uigetfile({'*.tif'; '*.tiff'; '*.mat'},'choose pco data');
     %'C:\Users\nlab\Desktop\macro\real\'
     %[f,p] = uigetfile('C:\Users\nlab\Desktop\data\','choose pco data');
     if f==0
@@ -21,12 +23,22 @@ if ~exist('in','var') || isempty(in)
     
     [a b] = fileparts(fullfile(p,f));
     in = fullfile(a,b);
+ 
 end
 basename = in(1:end-5)
-
-[out frameT idx pca_fig]=readSyncMultiTif(basename,maxGB);
-
-
+clear in
+[data frameT idx pca_fig]=readSyncMultiTif(basename,maxGB);
+data = double(data);
+mn = mean(data,3);
+figure
+imagesc(mn); colormap(gray);
+display('normalizing to mean');
+for f=1:size(data,3);
+    data(:,:,f)=data(:,:,f)./mn;
+end
+norm_data{chan}=data; clear data;
+end
+out = norm_data{1}./norm_data{2};
 psfilename = [basename '.ps']
 if exist(psfilename,'file')==2;delete(psfilename);end
 
@@ -42,27 +54,31 @@ print('-dpsc',psfilename,'-append');
 
 
 blue=1; green=2; split=3;
-for LED=1:3
-    frms = 1:size(out,3);
-    if LED==blue
-        LEDfrms = find(idx==blue);
-        LEDout = interp1(LEDfrms,shiftdim(double(out(:,:,LEDfrms)),2),frms,'linear','extrap');
-        LEDout = shiftdim(LEDout,1);
-        m = repmat(mean(double(LEDout),3),[1 1 size(LEDout,3)]);
-        dfof{LED} = (double(LEDout)-m)./m;
-        clear m
-    elseif LED==green
-        LEDfrms = find(idx==green);
-        LEDout = interp1(LEDfrms,shiftdim(double(out(:,:,LEDfrms)),2),frms,'linear','extrap');
-        LEDout = shiftdim(LEDout,1);
-        m = repmat(mean(double(LEDout),3),[1 1 size(LEDout,3)]);
-        dfof{LED} = (double(LEDout)-m)./m;
-        clear m
-    elseif LED==split
-        dfof{LED} = dfof{blue}-dfof{green};
-    end
-    
-    
+for LED=1:1
+%     frms = 1:size(out,3);
+%     if LED==blue
+%         LEDfrms = find(idx==blue);
+%         LEDout = interp1(LEDfrms,shiftdim(double(out(:,:,LEDfrms)),2),frms,'linear','extrap');
+%         LEDout = shiftdim(LEDout,1);
+%         m = repmat(mean(double(LEDout),3),[1 1 size(LEDout,3)]);
+%         dfof{LED} = (double(LEDout)-m)./m;
+%         clear m
+%     elseif LED==green
+%         LEDfrms = find(idx==green);
+%         LEDout = interp1(LEDfrms,shiftdim(double(out(:,:,LEDfrms)),2),frms,'linear','extrap');
+%         LEDout = shiftdim(LEDout,1);
+%         m = repmat(mean(double(LEDout),3),[1 1 size(LEDout,3)]);
+%         dfof{LED} = (double(LEDout)-m)./m;
+%         clear m
+%     elseif LED==split
+%         dfof{LED} = dfof{blue}-dfof{green};
+%     end
+LEDout = out;
+
+
+    m = repmat(mean(double(LEDout),3),[1 1 size(LEDout,3)]);
+    dfof{LED} =(double(LEDout)-m)./m;
+    clear m
     
     dx=25;
     if LED==blue | LED==green
@@ -161,7 +177,7 @@ print('-dpsc',psfilename,'-append');
         fftPts = 2:length(spect)/2;
         loglog((fftPts-1)/length(spect),spect(fftPts));
         subplot(2,2,3);
-        plot(squeeze(cycMap(x,y,:))); ylim([-0.125 0.125]);
+        plot(squeeze(cycMap(x,y,:))); ylim([-0.005 0.005]);
         subplot(2,2,4);
         imshow(polarMap(map),'InitialMagnification','fit');
         colormap(hsv);

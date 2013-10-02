@@ -5,6 +5,7 @@ ids = dir([iPath '_*.tif'])
 bytesPerPix = 2;
 pixPerFrame = maxGB*1000*1000*1000/length(ids)/bytesPerPix;
 sz = size(imread([iPath '_0001.tif']));
+origW = sz(2);
 stampHeight = 20;
 sz(1) = sz(1)-stampHeight;
 scale = pixPerFrame/prod(sz);
@@ -37,7 +38,8 @@ else
     % fprintf('requesting %g GB memory\n',length(ids)*prod(sz)*bytesPerPix/1000/1000/1000)
     
     data = zeros(sz(1),sz(2),length(ids),'uint16');
-    stamps = zeros(stampHeight,300,length(ids),'uint16');
+    %stamps = zeros(stampHeight,300,length(ids),'uint16'); %%%300?
+    stamps = zeros(stampHeight,origW,length(ids),'uint16');
     
     [d,base, ext] = fileparts(iPath);
     tic
@@ -54,9 +56,11 @@ else
         stamps(:,:,i) = frame(1:stampHeight,1:size(stamps,2));
     end
     toc
-    
+    try
     t = readStamps(stamps);
-    
+    catch
+        t = readStamps(flipdim(stamps,2));
+    end
     maxGBsaved = maxGB;
     fprintf('saving...\n')
     tic

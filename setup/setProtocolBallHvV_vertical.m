@@ -26,64 +26,17 @@ if ~isscalar(subjIDs)
     error('expecting exactly one subject')
 end
  switch subjIDs{1}
-%       case 'gcam33lt'
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        =80;
-%    case 'sg4lt'
-%          requestRewardSizeULorMS = 0;
-%          rewardSizeULorMS        = 100;
-%    case 'gcam17rn'
-%         requestRewardSizeULorMS = 0;
-%           rewardSizeULorMS        =80;
-%    case 'gcam21rt'
-%         requestRewardSizeULorMS = 0;
-%           rewardSizeULorMS        =80;
-%    case 'wg4rt'
-%         requestRewardSizeULorMS = 0; 
-%           rewardSizeULorMS        =80;
-%    case 'gcam30lt'
-%         requestRewardSizeULorMS = 0;
-%           rewardSizeULorMS        =80;
-%    case 'gcam30rn'
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 100;
-%   case 'g54a11rt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;
-%   case 'g54a11tt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;
-%   case 'gcam35lt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;
-%    case 'gcam39rt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;
-%    case 'gcam39tt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;
-%    case 'gcam53rt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;
-%    case 'gcam53ln'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;
-%   case 'gcam43lt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;
-%    case 'gcam43rt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;
-%    case 'gcam45tt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;
-%    case 'gcam40lt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;
-%    case 'gcam44lt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;
 
+  
+   case 'gcam45tt'
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 60; 
+   case 'gcam25rt'
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 50;
+   case 'gcam30rn'
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 66; 
        
     otherwise
         warning('unrecognized mouse, using defaults')

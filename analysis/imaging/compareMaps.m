@@ -1,3 +1,6 @@
+clear all
+close all
+
 filetype = {'control map','DOI map'};
 for doi = 1:2
     [f,p] = uigetfile('*.mat',filetype{doi});

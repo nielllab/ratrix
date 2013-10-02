@@ -2,7 +2,8 @@ function [t,drops] = readStamps(in)
 w = 6;
 h = 7;
 n = size(in,3);
-c = 50;
+%c = 50; %% too big for some images
+c=20;
 
 stamps = in(1:h,1:w*c,:);
 
@@ -49,8 +50,7 @@ if true
             imagesc(squeeze(x)')
             figure
             imagesc(squeeze(x)'>intmax('uint8'))
-            
-            keyboard
+            t = nan; drops=nan;
             error('bad bcd')
         end
     end
@@ -59,6 +59,10 @@ if true
     
     drops = x(:,1:4)*10.^(2*(3 : -1 : 0))';
 end
+
+%%% no need to do ascii? and it doesn't work on small images
+t=bSecs;
+return;
 
 if false
     figure

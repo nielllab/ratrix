@@ -1,4 +1,4 @@
-function r = setProtocolBall(r,subjIDs)
+function r = setProtocolGoToBlack(r,subjIDs)
 
 if ~isa(r,'ratrix')
     error('need a ratrix')
@@ -8,44 +8,50 @@ if ~all(ismember(subjIDs,getSubjectIDs(r)))
     error('not all those subject IDs are in that ratrix')
 end
 
-
 sm=makeStandardSoundManager();
 
 rewardSizeULorMS          =80;
-requestRewardSizeULorMS   =30;
+requestRewardSizeULorMS   =0;
 requestMode               ='first';
-msPenalty                 =1000;
+msPenalty                 =3500;
 fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =msPenalty;
 
+
 switch subjIDs{1}
-   case 'bfly21rt'
-       requestRewardSizeULorMS = 20;
-       rewardSizeULorMS        = 80;
-   case 'bfly24lt'
-       requestRewardSizeULorMS = 20;
-       rewardSizeULorMS        = 80;
-    case 'g625ln'
-       requestRewardSizeULorMS = 20;
-       rewardSizeULorMS        = 80;   
-    case 'gcam40lt'  
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 60;
-    case 'g54a11tt'   
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 80; 
-    case 'gcam53ln'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 60;    
-    case 'gcam50lt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 60;
+    case 'bfly21rt'
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 70;
+  
+    case 'gcam33lt'
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 55;   
+       
+    case 'gcam39tt'
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 55;   
+     
+   
+    case 'g54b8tt'
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 55;   
+   
+       
+    case 'g54aa7tt'
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 70;  
+       
+    case 'g54aa7lt'
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 65;  
+
         
     otherwise
         warning('unrecognized mouse, using defaults')
-end     
+end;     
+
 
 
 noRequest = constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
@@ -64,16 +70,16 @@ svnCheckMode = 'session';
 
 interTrialLuminance = .5;
 
-stim.gain = .7 * ones(2,1);
-stim.targetDistance = 450 * ones(1,2);
-stim.timeoutSecs = 5;
+stim.gain = 0.7 * ones(2,1);
+stim.targetDistance = 455 * ones(1,2);
+stim.timeoutSecs = 10;
 stim.slow = [40; 80]; % 10 * ones(2,1);
 stim.slowSecs = 1;
-stim.positional = false;
+stim.positional = true;
 stim.cue = true;
-stim.soundClue = true;
+stim.soundClue = false;
 
-pixPerCycs             = [100]; %*10^9;
+pixPerCycs             = [300]; %*10^9;
 targetOrientations     = [-1 1]*pi/4;
 distractorOrientations = []; %-targetOrientations;
 mean                   = .5;
@@ -84,16 +90,14 @@ yPosPct                = .5;
 stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,zoom,interTrialLuminance);
 %stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,[-1 1]  ,thresh,yPosPct,maxWidth,maxHeight,zoom,interTrialLuminance,'none', 'normalizeDiagonal');
 
-stim.stim = 'flip';
-%stim.stim='rand';
+
+stim.stim='flip';
 %stim.stim=nan;
-stim.dms.targetLatency = 1;
+stim.dms.targetLatency = .5;
 stim.dms.cueLatency = 0;
-stim.dms.cueDuration = .5;
+stim.dms.cueDuration = inf;
 stim.dms = [];
 
-%stim to stay on 1 sec after answer
-ballSM = setReinfAssocSecs(trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance),1);
 
 ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
 ballTM = ball(percentCorrectionTrials,sm,noRequest);

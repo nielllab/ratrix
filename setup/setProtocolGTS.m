@@ -11,7 +11,7 @@ end
 sm=makeStandardSoundManager();
 
 rewardSizeULorMS          =80;
-requestRewardSizeULorMS   =80;
+requestRewardSizeULorMS   =20;
 requestMode               ='first';
 msPenalty                 =3500;
 fractionOpenTimeSoundIsOn =1;
@@ -26,33 +26,35 @@ if ~isscalar(subjIDs)
     error('expecting exactly one subject')
 end
 switch subjIDs{1}
-   case 'gcam25rt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 80;
-   case 'gcam29ln'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS          =80;
+
    case 'gcam32tt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 80;
+        rewardSizeULorMS        = 30;
    case 'gcam32ln'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 80;
-  case 'gcam50lt'
-       requestRewardSizeULorMS = 30;
-       rewardSizeULorMS        = 120;
+        rewardSizeULorMS        = 35;
+
    case 'gcam50tt'
-       requestRewardSizeULorMS = 30;
-       rewardSizeULorMS        = 120;
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 45;
    case 'gcam46tt'
-       requestRewardSizeULorMS = 30;
-       rewardSizeULorMS        = 120;
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 30;
    case 'gcam51ln'
-       requestRewardSizeULorMS = 30;
-       rewardSizeULorMS        = 120;
-   case 'gcam51lt'
-       requestRewardSizeULorMS = 60;
-       rewardSizeULorMS        = 100;
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 27.5;
+   case 'gcam39rt'
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 40;
+%    case 'bfly24lt'
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 80;
+%     case 'g625ln'
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 80;
+   case 'bfly53ln'
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 80;
       
     otherwise
         warning('unrecognized mouse, using defaults')
@@ -92,10 +94,7 @@ contrast               = 1;
 thresh                 = .00005;
 yPosPct                = .5;
 stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,zoom,interTrialLuminance);
-%stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,[-1 1]  ,thresh,yPosPct,maxWidth,maxHeight,zoom,interTrialLuminance,'none', 'normalizeDiagonal');
 
-%stim.stim = 'flip';
-%stim.stim=nan;
 
 %stim to stay on 1 sec after answer
 ballSM = setReinfAssocSecs(trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance),1);

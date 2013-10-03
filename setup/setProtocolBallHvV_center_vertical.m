@@ -36,31 +36,35 @@ switch subjIDs{1}
        
     case 'g54b9lt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100;   
+       rewardSizeULorMS        = 90;   
     case 'g54ba1lt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100;   
+       rewardSizeULorMS        = 90;   
        
-%    case 'gcam33lt'
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 85;
+   case 'gcam33lt'
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 65;
 
-%    case 'gcam39tt'
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 50; 
+   case 'gcam39tt'
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 65; 
    case 'gcam40lt'  
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 55;
+        rewardSizeULorMS        = 50;
    case 'gcam44lt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 55;  
+        rewardSizeULorMS        = 50; 
+        
+   case 'g54b8tt'
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 70;  
    
-%    case 'g54a11rt'   
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 100;    
+   case 'g54a11rt'   
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 90;    
    case 'gcam53ln'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 55; 
+        rewardSizeULorMS        = 50; 
     otherwise
         warning('unrecognized mouse, using defaults')
 end

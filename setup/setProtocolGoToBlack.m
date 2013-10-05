@@ -23,7 +23,7 @@ msAirpuff                 =msPenalty;
 switch subjIDs{1}
     case 'bfly21rt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 70;
+       rewardSizeULorMS        = 80;
   
 %     case 'gcam33lt'           move to HvV
 %        requestRewardSizeULorMS = 0;
@@ -41,11 +41,11 @@ switch subjIDs{1}
        
     case 'g54aa7tt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 55;  
+       rewardSizeULorMS        = 45;  
        
     case 'g54aa7lt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 50;  
+       rewardSizeULorMS        = 40;  
 
         
     otherwise

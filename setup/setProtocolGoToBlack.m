@@ -39,13 +39,13 @@ switch subjIDs{1}
 %        rewardSizeULorMS        = 55;   
    
        
-    case 'g54aa7tt'
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 45;  
+%     case 'g54aa7tt'
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 45;  
        
-    case 'g54aa7lt'
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;  
+%     case 'g54aa7lt'
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 40;  
 
         
     otherwise

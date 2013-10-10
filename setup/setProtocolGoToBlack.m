@@ -27,7 +27,7 @@ switch subjIDs{1}
        
     case 'g625ln'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 75; 
+       rewardSizeULorMS        = 70; 
   
 %     case 'gcam33lt'           move to HvV
 %        requestRewardSizeULorMS = 0;

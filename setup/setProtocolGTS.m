@@ -27,6 +27,14 @@ if ~isscalar(subjIDs)
 end
 switch subjIDs{1}
 
+   case 'bfly21rt'
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 80;
+       
+   case 'g625ln'
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 70; 
+       
    case 'g54aa7tt'
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 90;

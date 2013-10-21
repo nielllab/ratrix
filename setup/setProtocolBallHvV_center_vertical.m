@@ -27,40 +27,43 @@ if ~isscalar(subjIDs)
 end
 switch subjIDs{1}
     
+       case 'g54aa7lt'
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 60;
+    
     case 'bfly24lt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 85;
-    case 'g625ln'
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 90; 
-       
-    case 'g54b9lt'
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100;   
-    case 'g54ba1lt'
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100;   
-       
+       rewardSizeULorMS        = 60;
+%     case 'g625ln'
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 85; 
+     
+    
+%        
 %    case 'gcam33lt'
 %         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 85;
+%         rewardSizeULorMS        = 55;
 
-%    case 'gcam39tt'
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 50; 
+   case 'gcam39tt'
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 30; 
    case 'gcam40lt'  
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 55;
+        rewardSizeULorMS        = 35;
    case 'gcam44lt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 55;  
+        rewardSizeULorMS        = 35; 
+        
+   case 'g54b8tt'
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 60;  
    
-%    case 'g54a11rt'   
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 100;    
+   case 'g54a11rt'   
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 60;    
    case 'gcam53ln'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 55; 
+        rewardSizeULorMS        = 35; 
     otherwise
         warning('unrecognized mouse, using defaults')
 end

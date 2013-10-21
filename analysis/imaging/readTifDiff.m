@@ -81,7 +81,7 @@ for LED=1:3
     
     out =dfof{LED};
    
-    movPeriod =5;
+    movPeriod =10;
     binning=0.125;
     framerate=60;
     img = out(:,:,1);
@@ -126,8 +126,8 @@ for LED=1:3
     end
     
     stepMap = zeros(size(cycMap,1),size(cycMap,2),3);
-    stepMap(:,:,1) = mean(cycMap(:,:,26:35),3)-mean(cycMap(:,:,10:25),3);
-    stepMap(:,:,2)= mean(cycMap(:,:,76:85),3)-mean(cycMap(:,:,60:75),3);
+    stepMap(:,:,1) = mean(cycMap(:,:,27:30),3)-mean(cycMap(:,:,1:25),3);
+    stepMap(:,:,2)= mean(cycMap(:,:,77:80),3)-mean(cycMap(:,:,61:75),3);
     
     figure
     set(gcf,'Name','baseline map');

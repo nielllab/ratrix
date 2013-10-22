@@ -26,7 +26,7 @@ figure
 imagesc(peakmax{2}-peakmax{1},[-0.05 0.05]);
 title('amplitude difference');
 
-keyboard
+
 
 
 dual_mov = zeros(size(mov{1},1),size(mov{1},2),3,size(cycle_mov,3));

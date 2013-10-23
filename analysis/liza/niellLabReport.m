@@ -169,12 +169,14 @@ if doBall
     recs = {...
         {'mtrix5' %wall cue flip
             {
-            'ly02' 
-            'ly05' 
-            'ly06' 
-            'ly09'
-            'ly14' %new
-            'ly11' %new
+%             'ly02' 
+%             'ly05' 
+%             'ly06' 
+%             'ly09'
+%             'ly14' %new
+%             'ly11' %new
+            'ly42'
+            'ly48'
             'jbw03' %new
             'gcam21rt'
             'gcam20tt'
@@ -189,10 +191,12 @@ if doBall
         {'jarmusch'
             {
             % 'ly01' %grating (moved to mtrix6?)
-            'ly03' %grating
-            'ly04' %wall cue flip
-            'ly08' %wall cue flip
-            'ly12' %new
+%             'ly03' %grating
+%             'ly04' %wall cue flip
+%             'ly08' %wall cue flip
+%             'ly12' %new
+            'ly43'
+            'ly49'
             'gcam13tt'
             'gcam17tt'
             % 'gcam18lt' %who dat?
@@ -206,7 +210,8 @@ if doBall
         }
         {'mtrix6'
             {
-            'ly01'
+%            'ly01'
+            'ly45'
             'jbw01' %new
             'jbw02' %new
             'ly10' %new
@@ -226,15 +231,19 @@ if doBall
         }
         {'mtrix11'
             {
+            'ly47'
             'gcam28lt'
             'gcam30lt'
             'gcam33lt'
             'gcam32ln'     
             'g54aa7tt'  %gts
+            'gcam50tt' %gts
             }
         }      
         {'mtrix12'
             {
+            'ly46'
+            'ly52'
             'gcam29ln' 
             'gcam39tt'
             'gcam39rt'
@@ -246,6 +255,8 @@ if doBall
         }         
         {'mtrix13'
             {
+            'ly44'
+            'ly50'
             'gcam25rt'
             'gcam30rn'
             'gcam32tt'

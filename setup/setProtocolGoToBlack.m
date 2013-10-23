@@ -21,21 +21,21 @@ msAirpuff                 =msPenalty;
 
 
 switch subjIDs{1}
-%     case 'bfly21rt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 90;
-%        
-%     case 'g625ln'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 70; 
+    case 'g54bb2'
+       requestRewardSizeULorMS = 40;
+       rewardSizeULorMS        = 80;
+       
+    case 'bfly6.8rt'
+       requestRewardSizeULorMS = 40;
+       rewardSizeULorMS        = 80; 
   
-%     case 'gcam33lt'           move to HvV
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 55;   
-%        
-%     case 'gcam39tt'           move to HvV
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 55;   
+    case 'bfly1a.4lt'          
+       requestRewardSizeULorMS = 40;
+       rewardSizeULorMS        = 80;   
+       
+    case 'bfly4.7rt'          
+       requestRewardSizeULorMS = 40;
+       rewardSizeULorMS        = 80;   
      
    
 %     case 'g54b8tt'            move to HvV

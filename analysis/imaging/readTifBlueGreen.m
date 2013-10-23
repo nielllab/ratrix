@@ -28,7 +28,7 @@ basename = in(1:end-5)
 [out frameT idx pca_fig]=readSyncMultiTif(basename,maxGB);
 
 
-psfilename = [basename '.ps']
+psfilename = [basename '.ps'];
 if exist(psfilename,'file')==2;delete(psfilename);end
 
 figure

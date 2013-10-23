@@ -7,7 +7,30 @@ for doi = 1:2
     load(fullfile(p,f),'cycle_mov');
     mov{doi} = cycle_mov;
 end
-dual_mov = zeros(size(cycle_mov,1),size(cycle_mov,2),3,size(cycle_mov,3));
+
+if any(size(mov{1})~=size(mov{2}))
+    for f = 1:size(mov{1},3)
+        mov_resize(:,:,f) = imresize(mov{2}(:,:,f),[size(mov{1},1) size(mov{1},2)]);
+    end
+    mov{2}=mov_resize;
+end
+
+
+for doi=1:2;
+    [peakmax{doi} peaktime{doi}] = max(mov{doi},[],3);
+end
+figure
+imagesc(peaktime{2}-peaktime{1},[-5 5]);
+title('latency difference')
+figure
+imagesc(peakmax{2}-peakmax{1},[-0.05 0.05]);
+title('amplitude difference');
+
+
+
+
+dual_mov = zeros(size(mov{1},1),size(mov{1},2),3,size(cycle_mov,3));
+
 dual_mov(:,:,1,:) = mov{1};
 dual_mov(:,:,2,:) = mov{2};
 

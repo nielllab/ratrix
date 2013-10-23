@@ -33,10 +33,10 @@ end
         rewardSizeULorMS        = 60; 
    case 'gcam25rt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 50;
+        rewardSizeULorMS        = 45;
    case 'gcam30rn'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 66; 
+        rewardSizeULorMS        = 55; 
        
     otherwise
         warning('unrecognized mouse, using defaults')

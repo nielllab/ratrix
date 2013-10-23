@@ -7,8 +7,9 @@ dbstop if error
 colordef white
 close all
 
-choosePix =1; %%% option to manually select pixels for timecourse analysis
+choosePix =0; %%% option to manually select pixels for timecourse analysis
 maxGB = 0.5; %%% size to reduce data down to
+
 
 if ~exist('in','var') || isempty(in)
     [f,p] = uigetfile({'*.tif'; '*.tiff'; '*.mat'},'choose pco data');
@@ -27,7 +28,7 @@ basename = in(1:end-5)
 [out frameT idx pca_fig]=readSyncMultiTif(basename,maxGB);
 
 
-psfilename = [basename '.ps']
+psfilename = [basename '.ps'];
 if exist(psfilename,'file')==2;delete(psfilename);end
 
 figure
@@ -46,14 +47,18 @@ for LED=1:3
     frms = 1:size(out,3);
     if LED==blue
         LEDfrms = find(idx==blue);
-        LEDout = interp1(LEDfrms,shiftdim(double(out(:,:,LEDfrms)),2),frms,'linear','extrap');
-        LEDout = shiftdim(LEDout,1);
+        tic
+        LEDout = double(interp1(LEDfrms,shiftdim(single(out(:,:,LEDfrms)),2),frms,'linear','extrap'));
+       toc
+       LEDout = shiftdim(LEDout,1);
         m = repmat(mean(double(LEDout),3),[1 1 size(LEDout,3)]);
         dfof{LED} = (double(LEDout)-m)./m;
         clear m
     elseif LED==green
         LEDfrms = find(idx==green);
-        LEDout = interp1(LEDfrms,shiftdim(double(out(:,:,LEDfrms)),2),frms,'linear','extrap');
+        tic
+        LEDout = double(interp1(LEDfrms,shiftdim(single(out(:,:,LEDfrms)),2),frms,'linear','extrap'));
+        toc
         LEDout = shiftdim(LEDout,1);
         m = repmat(mean(double(LEDout),3),[1 1 size(LEDout,3)]);
         dfof{LED} = (double(LEDout)-m)./m;
@@ -62,6 +67,7 @@ for LED=1:3
         dfof{LED} = dfof{blue}-dfof{green};
     end
     
+
     
     
     dx=25;
@@ -123,7 +129,7 @@ print('-dpsc',psfilename,'-append');
     
     figure
     set(gcf,'Name','baseline map');
-    imshow(imresize(stepMap,4)./prctile(stepMap(:),99));
+    imshow(imresize(stepMap,1/binning)./prctile(stepMap(:),99));
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfilename,'-append');
     

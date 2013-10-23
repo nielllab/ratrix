@@ -3,25 +3,51 @@ pack
 
 [f,p] = uiputfile('*.avi','dfof cycle average movie file');
 
-%[dfof map mapNorm]= readTifBlueGreen;
-% use_chan=3;
-[dfof map mapNorm]= readTifRatio;
-use_chan=1;
+[dfof map mapNorm]= readTifBlueGreen;
+use_chan=3;
+% [dfof map mapNorm]= readTifRatio;
+% use_chan=1;
 save(fullfile(p,[f(1:end-4) 'maps.mat']),'map','mapNorm','-v7.3')
 dfof_bg=dfof{use_chan};
 clear dfof;
 
-
+% dt=0.1;
+% t = 0:2999;
+% t = t*dt;
+% tau1=0.01;
+% tau2=0.7;
+% 
+% impulse = (1-exp(-t/tau1)).*exp(-t/tau2);
+% %impulse = exp(-t/tau2);
+% impulsefft = fft(impulse);
+% figure
+% plot(abs(impulsefft));
+% inv_impulsefft = 1./impulsefft;
+% inv_impulse = ifft(inv_impulsefft);
+% figure
+% plot(inv_impulse);
+% 
+% inv_impulsefft = reshape(inv_impulsefft,[1 1 length(inv_impulsefft)]);
+% inv_impulse_rep = repmat(inv_impulsefft,[size(dfof_bg,1) size(dfof_bg,2) 1]);
+% clear df_decon;
+% df_decon = ifft(fft(dfof_bg,[],3).*inv_impulse_rep,[],3);
+% clear inv_impulse_rep
+% 
+% dfof_bg_bk = dfof_bg;
+% dfof_bg = df_decon;
 
 startframe =200;
 cyc_period = 100;
 cycle_mov = zeros(size(dfof_bg,1),size(dfof_bg,2),cyc_period);
+cycle_mov_std = zeros(size(dfof_bg,1),size(dfof_bg,2),cyc_period);
 for i = 1:cyc_period;
     cycle_mov(:,:,i) = mean(dfof_bg(:,:,i+startframe:cyc_period:end),3);
+    cycle_mov_std(:,:,i) = std(dfof_bg(:,:,i+startframe:cyc_period:end),[],3);
 end
 
-save(fullfile(p,[f(1:end-4) 'maps.mat']),'cycle_mov','-append')
+save(fullfile(p,[f(1:end-4) 'maps.mat']),'cycle_mov','cycle_mov_std','-append')
 
+keyboard
 baseline = prctile(cycle_mov,2,3);
 
 for i = 1:cyc_period;
@@ -29,7 +55,7 @@ for i = 1:cyc_period;
 end
 
 lowthresh = prctile(cycle_mov(:),1)
-upperthresh = 1.5*prctile(cycle_mov(:),99)
+upperthresh = 2*prctile(cycle_mov(:),99)
 figure
 for i = 1:size(cycle_mov,3);
     imagesc(imresize(cycle_mov(:,:,i),0.5,'box'),[lowthresh upperthresh]);
@@ -43,6 +69,7 @@ vid.FrameRate=25;
 open(vid);
 writeVideo(vid,mov);
 close(vid)
+keyboard
 
 use_speed=0;
 

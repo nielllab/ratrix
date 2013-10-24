@@ -16,88 +16,13 @@ imagingPath = 'E:\widefield data';
 
 %%% record format - subject name (which suffices to find behavior data'
 %%% followed by one cell for each imaging session
-%%% {[trial numbers] ...
+%%% {[trial numbers] ... find this from PermanentTrialRecordStore
 %%% [trials within this sesion to use]
 %%% [imaging path]
 %%% [ imaging filenames]
 
-recs = {
-    {'jbw01' {
-    {[1     192],[36 172],'9-21-12\jbw01 go to grating run 1','jbw01r1'  }
-    {[213   982],[10 670],'9-24-12\jbw01'                    ,'jbw01r1'  } % 54690 (91.15 mins) %timing screws up around 4300th frame/50th trial
-    {[983  1463],[ 1 165],'9-25-12\jbw01'                    ,'jbw01run1'} % 51296 (85.4933 mins) %timing screws up early
-    {[1464 2205],[20 720],'9-26-12\jbw01'                    ,'jbw01r1'  } % 32136 (53.56 mins) %timing screws up around 4270
-    }
-    }
-    
-    {'jbw03' {
-    {[1   665],[],'9-24-12\jbw03','jbw03r1'} % 63882 (106.47 mins)
-    {[667 962],[],'9-25-12\jbw03','jbw03r1'} % 30610 (51.0167 mins)
-    }
-    }
-    
-    {'wg02'  {
-    {[1    511],[     ],'9-24-12\wg2','wg2r1' } % 28631 (47.7183 mins)
-    {[512  815],[1 270],'9-25-12\wg2','wg2r1' } % 26261 (43.7683 mins)
-    {[816 1223],[1 325],'9-26-12\wg2','wg2run'} % 37047 (61.745 mins)
-    }
-    }
-    };
 
 imagingPath = 'E:\widefield data';
-recs = {
-    {'GCam13LN' {
-    %             {[2   194],[],'112012\GCam13LN'   ,'GCam13LN'} %originally in landis E:\data
-    {[204 474],[],'112112\GCam13LN'   ,'GCam13LN'} %originally in landis E:\data
-    {[510 577],[],'112212\GCam13LN\r2','GCam13LN'} %originally in landis E:\data
-    %             {[579 785],[],'112312\GCam13LN'   ,'GCam13LN'} %originally in landis E:\data
-    %
-    %             {[786   848],[],'112512\GCam13LN'   ,'GCam13LN'}
-    %             {[850   983],[],'112512\GCam13LN\r2','GCam13LN'}
-    %              {[984  1190],[],'112612\GCam13LN'   ,'GCam13LN'}
-    %              {[1191 1405],[],'112712\GCam13LN'   ,'GCam13LN'}
-    %             {[1406 1652],[],'112812\GCam13LN'   ,'GCam13LN'}
-    %             {[1664 1874],[],'113012\GCam13LN\r3','GCam13LN'}
-    %             {[1875 2159],[],'120112\GCam13LN'   ,'GCam13LN'}
-    %             {[2160 2423],[],'120212\GCam13LN'   ,'GCam13LN'}
-    %             {[2424 2743],[],'120312\GCam13LN'   ,'GCam13LN'}
-    %             {[2744 2960],[],'120412\GCam13LN'   ,'GCam13LN'}
-    }
-    }
-    
-    {'GCam13TT' {
-    %             {[8   257],[],'112012\GCam13TT','GCam13TT'} %originally in landis E:\data
-    {[258 353],[],'112112\GCam13TT','GCam13TT'} %originally in landis E:\data
-    {[354 496],[],'112212\GCam13TT','GCam13TT'} %originally in landis E:\data
-    %             {[498 621],[],'112312\GCam13TT','GCam13TT'} %originally in landis E:\data
-    %
-    %             {[644   855],[],'112512\GCam13TT'   ,'GCam13TT'}
-    %              {[858  1085],[],'112612\GCam13TT'   ,'GCam13TT'}
-    %              {[1116 1321],[],'112712\GCam13TT\r2','GCam13TT'}
-    %             {[1322 1710],[],'112812\GCam13TT\'  ,'GCam13TT'}
-    %             {[1712 1816],[],'113012\GCam13TT\'  ,'GCam13TT'}
-    %              {[1817 2005],[],'120112\GCam13TT\'  ,'GCam13TT'}
-    %             {[2007 2276],[],'120212\GCam13TT\'  ,'GCam13TT'}
-    %             {[2277 2584],[],'120312\GCam13TT\'  ,'GCam13TT'}
-    %             {[2585 2939],[],'120412\GCam13TT\'  ,'GCam13TT'}
-    }
-    }
-    };
-
-imagingPath = 'D:\Widefield (12-10-12+)';
-imagingPath = 'C:\data\imaging';
-recs = {
-    {'GCam13LN' {
-    {[3314 3766],[],'022213\gcam13ln\gcam13ln_r1\gcam13ln_r1_e','gcam13ln_r1'}    % expanded from pcoraw
-    }
-    }
-    
-    {'GCam13TT' {
-    {[3070 3215],[],'022213\gcam13tt_r1','gcam13tt.r1'}
-    {[3216 3566],[],'022213\gcam13tt_r2\gcam13tt_r2g','gcam13tt_r2'}     % expanded from pcoraw   -- should be first to have long reward stim
-    }
-    }
-    };
 
 recs = {
     {'Gcam25RT' {
@@ -146,6 +71,22 @@ recs = {
                 {[1 137],[],'050113\Gcam33-LT_behavior\Gcam33-LT_behavior_HVV','Gcam33-LT_behavior_HVV_2'}
             }
         }
+    };
+
+
+imagingPath = 'C:\data\imaging';
+recs = {
+    {'gcam51LN' {
+    {[36 222],[],'090613 GTS Behavior\G51-LN_r2_behavior_setProtocolGTS_4x4bin_53ms_vertical','G51-LN_r2_behavior_setProtocolGTS_4x4bin_53ms_vertical'}    
+    }
+    }
+    
+    
+    {'g625ln' {
+    {[61 237],[],'092013 DOI\G62-5-LN_DOI and behavior\G625_LN_Behavior_GoToBlack_DOI_at_start','G625_LN_Behavior_GoToBlack_DOI_at_start'}
+   
+    }
+    }
     };
 
 % dirOverview(imagingPath)

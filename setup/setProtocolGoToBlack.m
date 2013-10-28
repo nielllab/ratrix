@@ -22,30 +22,24 @@ msAirpuff                 =msPenalty;
 
 switch subjIDs{1}
     case 'g54bb2'
-       requestRewardSizeULorMS = 10;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 80;
        
     case 'bfly6.8rt'
-       requestRewardSizeULorMS = 10;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 80; 
   
     case 'bfly1a.4lt'          
-       requestRewardSizeULorMS = 10;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 80;   
        
     case 'bfly4.7rt'          
-       requestRewardSizeULorMS = 10;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 80;   
-     
-   
-%     case 'g54b8tt'            move to HvV
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 55;   
-   
        
-%     case 'g54aa7tt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 45;  
+    case 'g625ln'
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 60;  
        
 %     case 'g54aa7lt'
 %        requestRewardSizeULorMS = 0;

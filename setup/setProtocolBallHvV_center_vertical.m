@@ -33,7 +33,7 @@ switch subjIDs{1}
     
     case 'bfly24lt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 55;
+       rewardSizeULorMS        = 50;
        
     case 'gcam45tt'
         requestRewardSizeULorMS = 0;
@@ -63,7 +63,7 @@ switch subjIDs{1}
         rewardSizeULorMS        = 80;    
    case 'gcam53ln'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 35; 
+        rewardSizeULorMS        = 30; 
     otherwise
         warning('unrecognized mouse, using defaults')
 end

@@ -6,15 +6,20 @@ function s=CNM(varargin)
 % Description of arguments:
 % =========================
 % mean - Mean brightness
-% soundParams.soundType = {'allOctaves','tritones', 'binaryWhiteNoise','gaussianWhiteNoise','uniformWhiteNoise','empty'} (valid sound clip types)
-% soundParams.freq - (Fundamental) frequency of sound to play
+% soundParams.soundType = {'allOctaves','tritones', 'binaryWhiteNoise','gaussianWhiteNoise','uniformWhiteNoise','tone','CNMToneTrain','empty'} (valid sound clip types)
+% soundParams.freqs - (Fundamental) frequencies of sounds to play
 % soundParams.duration sound duration in ms
-% soundParams.amps - sound amplitude
+% soundParams.amp - sound amplitude
+% soundParams.isi - ms, time between tones in a CNMToneTrain
+% soundParams.toneDuration - ms, duration of each tone in a CNMToneTrain
 
 s.mean = 0;
-s.freq = 0;
-s.amplitudes = [];
+s.freqs = 0;
+s.amplitude = [];
+s.toneDuration = [];
 s.duration = [];
+s.isi = [];
+s.startfreq = [];
 s.stimSound = []; % Sound to play for the stimulus
 s.audioStimulus = true;
 s.soundType='';
@@ -42,8 +47,8 @@ switch nargin
         s.soundType=soundParams.soundType;
         
         %error checking on soundParams and assign to s:
-        if all(soundParams.amps>=0) & all(soundParams.amps<=1)
-            s.amplitudes=soundParams.amps;
+        if all(soundParams.amp>=0) & all(soundParams.amp<=1)
+            s.amplitude=soundParams.amp;
         else
             error(' amplitudes  must be 0 <= x <= 1')
         end
@@ -55,18 +60,26 @@ switch nargin
         
         switch s.soundType
             case {'allOctaves','tritones'}
-                if soundParams.freq > 0
-                    s.freq=soundParams.freq;
+                if soundParams.freqs > 0
+                    s.freqs=soundParams.freqs;
                 else
                     error('freq must be > 0')
                 end
                 
             case {'binaryWhiteNoise','gaussianWhiteNoise','uniformWhiteNoise','empty'}
                 %no specific error checking here
-            case 'tone'
-                error('intensityDiscrim: tone not implemented yet')
+            case {'tone', 'CNMToneTrain'}
+                if soundParams.freqs > 0
+                    s.freqs=soundParams.freqs;
+                    s.isi=soundParams.isi;
+                    s.toneDuration=soundParams.toneDuration;
+                    s.startfreq = soundParams.startfreq;
+                else
+                    error('freq must be > 0')
+                end
+
             otherwise
-                error('intensityDiscrim: soundType not recognized')
+                error('CNM: soundType not recognized')
         end
         
         s = class(s,'CNM',stimManager(varargin{3},varargin{4},varargin{5},varargin{6}));

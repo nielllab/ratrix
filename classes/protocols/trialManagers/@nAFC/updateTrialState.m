@@ -64,6 +64,16 @@ framesUntilTransition=getFramesUntilTransition(spec);
 % - update msRewardOwed/msAirpuffOwed as necessary (depending on correctness and TM class)
 % - call errorStim(SM), correctStim(SM) as necessary and fill in the stimSpec's stimulus field
 
+
+if ~isempty(phaseType) && strcmp(phaseType,'earlyPenalty') && framesInPhase==0
+    %      [rm rewardSizeULorMS=0 garbage msPenalty msPuff=0 msRewardSound=0 msPenaltySound updateRM] =...
+    %         calcEarlyPenalty(getReinforcementManager(tm),trialRecords, []);
+    trialRecords(end).trialDetails.correct = 0; %%if there is an early response in goNoGo, classify as incorrect
+    correct = 0;
+    result = 'multiple ports'; %need better solution - CO 4-14
+end
+
+
 if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) && framesInPhase==0
     % we only check to do rewards on the first frame of the 'reinforced' phase
     [rm rewardSizeULorMS garbage msPenalty msPuff msRewardSound msPenaltySound updateRM] =...

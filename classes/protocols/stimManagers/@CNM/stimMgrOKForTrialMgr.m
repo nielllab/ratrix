@@ -3,7 +3,7 @@ if isa(tm,'trialManager')
     switch class(tm)
         case 'freeDrinks'
             out=1;
-        case 'nAFC'
+        case 'goNoGo'
             out=1;
         otherwise
             out=0;

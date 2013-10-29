@@ -26,7 +26,116 @@ if isempty(s.clip)
             freqs=unique(outFreqs);
             raw=repmat(2*pi*[0:s.numSamples]/s.numSamples,length(freqs),1);
             s.clip = sum(sin(diag(freqs)*raw));
+            
+        case 'tone'
+            t=1:s.numSamples;
+            t=t/s.sampleRate;
+            tone=sin(2*pi*t*s.freq);
+            s.clip = tone;
+        case 'CNMToneTrain'
+            %train of pure tones, all at start freq, except last one is at
+            %end freq. duration and isi specified in setProtocolCNM
+            startfreq=s.freq(1);
+            endfreq=s.freq(2);
+            numtones=s.freq(3);
+            isi=s.freq(4);
+            toneDuration=s.freq(5);
+            s.numSamples = s.sampleRate*toneDuration/1000;
+            t=1:s.numSamples;
+            t=t/s.sampleRate;
+            starttone=sin(2*pi*t*startfreq);
+            endtone=sin(2*pi*t*endfreq);
+            silence=zeros(1, 44.1*isi);
+            train=[];
+            for i=1:numtones
+            train=[train starttone silence];    
+            end
+            train=[train endtone];
 
+            s.clip = train;
+        case 'freeCNMToneTrain'
+            %train of pure tones, all at start freq
+            %duration and isi specified in setProtocolCNM
+            startfreq=s.freq(1);
+            endfreq=s.freq(2);
+            numtones=s.freq(3);
+            isi=s.freq(4);
+            toneDuration=s.freq(5);
+            s.numSamples = s.sampleRate*toneDuration/1000;
+            t=1:s.numSamples;
+            t=t/s.sampleRate;
+            starttone=sin(2*pi*t*startfreq);
+            %endtone=sin(2*pi*t*endfreq);
+            silence=zeros(1, s.sampleRate*isi/1000);
+            train=[];
+            for i=1:numtones-1
+            train=[train starttone silence];
+            end    
+            train=[train starttone];
+            s.clip = train;
+        case 'wmToneWN'
+            startsound=s.freq(1); %if 0, tone first, if 1, WN first
+            endsound=s.freq(2); %if 0, tone 2nd, if 1, WN 2nd 
+            freq=s.freq(3);
+            isi=s.freq(4);
+            toneDuration=s.freq(5);
+            s.numSamples = s.sampleRate*toneDuration/1000;
+            t=1:s.numSamples;
+            t=t/s.sampleRate;
+            tone=sin(2*pi*t*freq);
+            WN = randn(1,s.numSamples);
+            if startsound
+                starttone = tone;
+            else
+                starttone = WN;
+            end
+            if endsound
+                endtone = tone;
+            else
+                endtone = WN;
+            end
+            silence=zeros(1, s.sampleRate*isi/1000);
+            train=[];
+            train=[train starttone silence];    
+            train=[train endtone];
+            
+            s.clip = train;
+            
+        case 'wmReadWav'
+            s.clip = s.freq;
+            a = s.sampleRate;
+
+        case 'phonemeWav'
+            [sad, fs] = wavread('C:\Users\nlab\Desktop\ratrixSounds\phonemes\sadshifted-allie.wav'); %left
+            [dad, fs] = wavread('C:\Users\nlab\Desktop\ratrixSounds\phonemes\dadshifted-allie.wav'); %right
+            if s.freq
+                s.clip = sad.';
+            else 
+                s.clip = dad.';
+            end
+
+            
+        case 'warblestackWav'  
+            startsound=s.freq(1); %if 0, warble first, if 1, WN first
+            endsound=s.freq(2); %if 0, tone 2nd, if 1, WN 2nd 
+            isi=s.freq(4);
+            [warble, fs] = wavread('C:\Users\nlab\Desktop\ratrixSounds\WMsounds\warble_stack.wav');
+            [harmonic, fs] = wavread('C:\Users\nlab\Desktop\ratrixSounds\WMsounds\harmonic_stack.wav');
+            if startsound
+                starttone = warble.';
+            else
+                starttone = harmonic.';
+            end
+            if endsound
+                endtone = warble.';
+            else
+                endtone = harmonic.';
+            end
+            silence=zeros(1, s.sampleRate*isi/1000);
+            train=[];
+            train=[train starttone silence];    
+            train=[train endtone];
+            s.clip = train;
         case 'tritones'
             s.clip = getClip(soundClip('annonymous','allOctaves',[s.fundamentalFreqs tritones(s.fundamentalFreqs)],s.maxFreq));
         case 'dualChannel'

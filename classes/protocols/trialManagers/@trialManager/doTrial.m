@@ -20,6 +20,7 @@ function [trialManager updateTM newSM updateSM stopEarly trialRecords station] .
 %   trialRecords - the updated trial records
 %   station - the (potentially modified) station object
 
+
 verbose=1;
 updateTM=false;
 stopEarly=0;
@@ -112,7 +113,20 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             
             [trialRecords(trialInd).targetPorts, trialRecords(trialInd).distractorPorts, stimulusDetails, text] = ...
                 assignPorts(trialManager,trialRecords,getResponsePorts(trialManager,getNumPorts(station)));
+             if strcmp(class(trialManager), 'goNoGo')
+             trialRecords(trialInd).targetPorts = [2];
+             end
+             
             
+             if strcmp(class(trialManager), 'freeGoNoGo') 
+                 if getEarlyP(trialManager)
+             trialRecords(trialInd).targetPorts = [2];
+                 else 
+                     trialRecords(trialInd).targetPorts = [];
+                 end
+             end
+             
+             
             [newSM, ...
                 updateSM, ...
                 resInd, ...
@@ -141,6 +155,35 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                 trialRecords(trialInd).distractorPorts, ...
                 stimulusDetails, ...
                 text);
+            
+            
+            if strcmp(class(newSM), 'CNM')
+            durations = getDurations(newSM); %[duration toneDuration isi]
+            %rWMs = [(durations(1) - durations(2)) durations(1)]; %from beginning of last tone to its end
+            % rWMs = [(durations(1) - durations(2))/2 (durations(3) + durations(1))/2]; %dividing by 2 makes the timeout happen at the correct time... why?
+             rWMs = [0 (durations(1))/2 + durations(3)/4 + durations(2)/2];
+             trialManager = setResponseWindow(trialManager, rWMs);
+           %trialManager = setResponseWindow(trialManager,[0 2000] );
+            end
+            
+            if strcmp(class(newSM), 'freeCNM')
+            durations = getDurations(newSM); %[duration toneDuration isi]
+            %rWMs = [(durations(1) - durations(2)) durations(1)]; %from beginning of last tone to its end
+            % rWMs = [(durations(1) - durations(2))/2 (durations(3) + durations(1))/2]; %dividing by 2 makes the timeout happen at the correct time... why?
+             rWMs = [0 (durations(1))/2 + durations(3)/4];
+             trialManager = setResponseWindow(trialManager, rWMs);
+           %trialManager = setResponseWindow(trialManager,[0 2000] );
+            end
+            
+%              if strcmp(class(newSM), 'CNMafc')
+%             durations = getDurations(newSM); %[duration toneDuration isi]
+%             %rWMs = [(durations(1) - durations(2)) durations(1)]; %from beginning of last tone to its end
+%             % rWMs = [(durations(1) - durations(2))/2 (durations(3) + durations(1))/2]; %dividing by 2 makes the timeout happen at the correct time... why?
+%              rWMs = [0 10001];
+%              trialManager = setResponseWindow(trialManager, rWMs);
+%            %trialManager = setResponseWindow(trialManager,[0 2000] );
+%             end
+            
             
             % test must a single string now - dont bother w/ complicated stuff here
 			if ~ischar(text)
@@ -194,10 +237,9 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
             
             checkPorts(trialManager,trialRecords(trialInd).targetPorts,trialRecords(trialInd).distractorPorts);
             
-            [stimSpecs startingStimSpecInd newSM] = createStimSpecsFromParams(trialManager,preRequestStim,preResponseStim,discrimStim,...
+            [stimSpecs startingStimSpecInd sm] = createStimSpecsFromParams(trialManager,preRequestStim,preResponseStim,discrimStim,...
 				trialRecords(trialInd).targetPorts,trialRecords(trialInd).distractorPorts,getRequestPorts(trialManager,getNumPorts(station)),...
-				trialRecords(trialInd).interTrialLuminance,refreshRate,indexPulses,newSM);
-            updateSM=true;
+				trialRecords(trialInd).interTrialLuminance,refreshRate,indexPulses, newSM);
 
             validateStimSpecs(stimSpecs);
 
@@ -268,11 +310,6 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                         error(warningStr);
                     end
                 end
-            end
-            
-            p = getPCO(station);
-            if ~isempty(p)                
-                trialRecords(trialInd).pco = init(p);
             end
             
             if isfield(stimulusDetails, 'big') % edf: why did this used to also test for isstruct(stimulusDetails) ?

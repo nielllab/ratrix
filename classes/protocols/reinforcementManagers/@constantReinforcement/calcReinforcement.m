@@ -43,7 +43,7 @@ if g>.3
     if ~exist('name','var')
         name = 'NONAME';
     end
-    emailStr=sprintf('RATRIX: db access for %s (%s): %g (%s)',name,s,g,num2str(cell2mat(r)));
-    sendmail('erik.flister@gmail.com',emailStr,'slow db access');
+%    emailStr=sprintf('RATRIX: db access for %s (%s): %g (%s)',name,s,g,num2str(cell2mat(r)));
+ %   sendmail('erik.flister@gmail.com',emailStr,'slow db access');
 end
 end

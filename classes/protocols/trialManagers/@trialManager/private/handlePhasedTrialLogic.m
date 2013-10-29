@@ -7,6 +7,7 @@ function [tm done newSpecInd specInd updatePhase transitionedByTimeFlag transiti
     stimManager, msRewardSound, mePenaltySound, targetOptions, distractorOptions, requestOptions, ...
     playRequestSoundLoop, isRequesting, soundNames, lastSoundsLooped, dynamicSounds)
 
+
 updatePhase=0;
 newSpecInd = specInd;
 transitionedByTimeFlag = false;
@@ -17,7 +18,6 @@ goDirectlyToError=false;
 % Check against framesUntilTransition - Transition BY TIME
 % if we are at grad by time, then manually set port to the correct one
 % note that we will need to flag that this was done as "auto-request"
-% edf sez: it's not just autorequests, correctstim, etc use this
 if ~isempty(framesUntilTransition) && framesInPhase == framesUntilTransition - 1 % changed to framesUntilTransition-1 % 8/19/08
     % find the special 'timeout' transition (the port set should be empty)
     newSpecInd = transitionCriterion{find(cellfun('isempty',transitionCriterion))+1};
@@ -54,6 +54,7 @@ end
 
 framesDoneTime=GetSecs;
 
+
 % Check for transition by port selection
 for gcInd=1:2:length(transitionCriterion)-1
     if ~isempty(transitionCriterion{gcInd}) && any(logical(ports(transitionCriterion{gcInd})))
@@ -67,7 +68,57 @@ for gcInd=1:2:length(transitionCriterion)-1
         else
             % move to the next phase as specified by graduationCriterion
             %      specInd = transitionCriterion{gcInd+1};
+            
             newSpecInd = transitionCriterion{gcInd+1};
+            
+            if strcmp(phaseType,'discrim') && strcmp(class(tm), 'freeGoNoGo')
+                earlyP = getEarlyP(tm);
+                if earlyP
+                     newSpecInd = 4;
+                end
+            end
+            
+            
+            if strcmp(phaseType,'discrim') && strcmp(class(tm), 'goNoGo')
+                duration = getDurations(stimManager);
+                frameWindowStart = (duration(1) - duration(2))*30/1000;
+                if framesInPhase > frameWindowStart
+            newSpecInd = transitionCriterion{gcInd+1};
+                else 
+                    newSpecInd = transitionCriterion{gcInd+3}; %too early- go to early penalty phase
+                end 
+            end 
+            
+            if strcmp(phaseType,'discrim') && strcmp(class(stimManager), 'CNMafc')
+                duration = getDurations(stimManager);
+                frameWindowStart = (duration(2)+duration(3)/2)*30/1000;
+                if framesInPhase > frameWindowStart
+            newSpecInd = transitionCriterion{gcInd+1};
+                else 
+                    newSpecInd = transitionCriterion{gcInd+3}; %too early- go to early penalty phase
+                end 
+            end 
+            
+            if strcmp(phaseType,'discrim') && strcmp(class(stimManager), 'audWM')
+                duration = getDurations(stimManager);
+                frameWindowStart = (duration(2)+duration(3)/2)*30/1000;
+                if framesInPhase > frameWindowStart
+            newSpecInd = transitionCriterion{gcInd+1};
+                else 
+                    newSpecInd = transitionCriterion{gcInd+3}; %too early- go to early penalty phase
+                end 
+            end 
+            
+            if strcmp(phaseType,'discrim') && strcmp(class(stimManager), 'audReadWav')
+                duration = getDurations(stimManager);
+                frameWindowStart = (duration(2)+duration(3)/2)*30/1000;
+                if framesInPhase > frameWindowStart
+            newSpecInd = transitionCriterion{gcInd+1};
+                else 
+                    newSpecInd = transitionCriterion{gcInd+3}; %too early- go to early penalty phase
+                end 
+            end 
+            
             %             if (specInd == newSpecInd)
             %                 error('same indices at %d', specInd);
             %             end
@@ -98,7 +149,7 @@ portSelectionDoneTime=GetSecs;
 % =================================================
 % SOUNDS
 % changed from newSpecInd to specInd (cannot anticipate phase transition b/c it hasnt called updateTrialState to set correctness)
-[soundsToPlay,stimDetails] = getSoundsToPlay(stimManager, ports, lastPorts, specInd, phaseType, framesInPhase,msRewardSound, mePenaltySound, ...
+soundsToPlay = getSoundsToPlay(stimManager, ports, lastPorts, specInd, phaseType, framesInPhase,msRewardSound, mePenaltySound, ...
     targetOptions, distractorOptions, requestOptions, playRequestSoundLoop, class(tm), trialDetails, stimDetails, dynamicSounds, station);
 getSoundsTime=GetSecs;
 % soundsToPlay is a cell array of sound names {{playLoop sounds}, {playSound sounds}} to be played at current frame

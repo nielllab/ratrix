@@ -41,6 +41,7 @@ else
                 %(especially when strategy is noCache and we make each texture during each frame)
                 floatprecision=0;
                 warning('off','MATLAB:intConvertNonIntVal')
+                a = size(stim)
                 stim=uint8(stim*double(intmax('uint8')));
                 warning('on','MATLAB:intConvertNonIntVal')
             end

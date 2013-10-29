@@ -3,7 +3,7 @@ function [tm trialDetails result spec rewardSizeULorMS requestRewardSizeULorMS .
     updateTrialState(tm, sm, result, spec, ports, lastPorts, ...
     targetPorts, requestPorts, lastRequestPorts, framesInPhase, trialRecords, window, station, ifi, ...
     floatprecision, textures, destRect, ...
-    requestRewardDone, punishResponses)
+    requestRewardDone, punishResponses, request, lastFrame)
 % This function is a tm-specific method to update trial state before every flip.
 % Things done here include:
 %   - set trialRecords.correct and trialRecords.result as necessary
@@ -35,7 +35,7 @@ end
     requestRewardDone, punishResponses);
 if isempty(possibleTimeout)
 	if ~isempty(result) && ~ischar(result) && isempty(correct) && strcmp(getPhaseLabel(spec),'reinforcement')
-		resp=find(result);
+		resp=find(result)
 		if length(resp)==1
 			correct = ismember(resp,targetPorts);
             if punishResponses % this means we got a response, but we want to punish, not reward
@@ -59,6 +59,14 @@ framesUntilTransition=getFramesUntilTransition(spec);
 % - call calcReinforcement(RM)
 % - update msRewardOwed/msAirpuffOwed as necessary (depending on correctness and TM class)
 % - call errorStim(SM), correctStim(SM) as necessary and fill in the stimSpec's stimulus field
+
+if ~isempty(phaseType) && strcmp(phaseType,'earlyPenalty') && framesInPhase==0
+    %      [rm rewardSizeULorMS=0 garbage msPenalty msPuff=0 msRewardSound=0 msPenaltySound updateRM] =...
+    %         calcEarlyPenalty(getReinforcementManager(tm),trialRecords, []);
+    trialRecords(end).trialDetails.correct = 0; %%if there is an early response in goNoGo, classify as incorrect
+    correct = 0;
+    result = 'nominal';
+end
 
 if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) && framesInPhase==0
     % we only check to do rewards on the first frame of the 'reinforced' phase
@@ -97,7 +105,8 @@ if ~isempty(phaseType) && strcmp(phaseType,'reinforced') && ~isempty(correct) &&
         if window>0
             [floatprecision cStim] = determineColorPrecision(tm, cStim, strategy);
             textures = cacheTextures(tm,strategy,cStim,window,floatprecision);
-            destRect = determineDestRect(tm, window, station, correctScale, cStim, strategy);
+            %destRect = determineDestRect(tm, window, station, correctScale, cStim, strategy);
+            destRect = determineDestRect(tm, window, station, 0, cStim, strategy);
         elseif strcmp(getDisplayMethod(tm),'LED')
             floatprecision=[];
         else
@@ -146,7 +155,7 @@ end % end reward handling
 
 trialDetails.correct=correct;
 
-trialDetails
-struct(spec)
+trialDetails;
+struct(spec);
 
 end  % end function

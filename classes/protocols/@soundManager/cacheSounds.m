@@ -47,7 +47,7 @@ if isa(station,'station')
             buffsize=[];
         end
 
-        sampleRate=44100;
+        sampleRate=88200;
         sm.player= PsychPortAudio('Open',[],[],latclass,sampleRate,2,buffsize);
 
         s=PsychPortAudio('GetStatus',sm.player);
@@ -60,6 +60,8 @@ if isa(station,'station')
         end
 
         buff=[];
+        
+        a = soundNames
 
         for i=1:length(soundNames)
             [clip clipSampleRate sm updateSMCache] = getSound(sm,soundNames{i});
@@ -88,6 +90,7 @@ if isa(station,'station')
             sm.clipDurs(i)=size(clip,2)/sampleRate;
         end
         sm.boundaries(end+1)=size(buff,2);
+        [a, b] = size(buff)
 
         PsychPortAudio('FillBuffer', sm.player, buff);
 

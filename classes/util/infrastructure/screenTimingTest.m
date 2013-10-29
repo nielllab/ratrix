@@ -28,7 +28,7 @@ dontclear = 0;
 
 timingCheckPct = .02;
 
-sampRate=44100;
+sampRate=88200;
 latclass=1;
 buffsize=1250;
 

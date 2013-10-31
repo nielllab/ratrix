@@ -34,7 +34,7 @@ switch subjIDs{1}
        
    case 'g54aa7tt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 60;
+       rewardSizeULorMS        = 55;
     
     case 'gcam32tt'
         requestRewardSizeULorMS = 0;

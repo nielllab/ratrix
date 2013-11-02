@@ -29,10 +29,6 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 60; 
   
-    case 'bfly1a.4lt'          
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 80;   
-       
     case 'bfly4.7rt'          
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 60;   
@@ -41,14 +37,7 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 80;  
        
-       case 'g62.8lt' (GTS)
-       requestRewardSizeULorMS = 40;
-       rewardSizeULorMS        = 80;
-       
-       case 'g54b12rt' (GTS)
-       requestRewardSizeULorMS = 40;
-       rewardSizeULorMS        = 80;
-       
+    
 %     case 'g54aa7lt'
 %        requestRewardSizeULorMS = 0;
 %        rewardSizeULorMS        = 40;  

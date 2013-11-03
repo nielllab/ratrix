@@ -34,9 +34,23 @@ end
    case 'gcam25rt'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 45;
-   case 'gcam30rn'
+        
+   case 'bfly24lt'
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 80;
+       
+   case 'gcam40lt'  
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 60; 
+        rewardSizeULorMS        = 80;
+  
+   case 'gcam44lt'
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 80; 
+        
+   case 'gcam53ln'
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 80;          
+        
        
     otherwise
         warning('unrecognized mouse, using defaults')

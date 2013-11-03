@@ -29,10 +29,7 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 40; 
   
-    case 'bfly4.7rt'          
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 30;   
-       
+      
    
        
             

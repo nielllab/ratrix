@@ -27,11 +27,11 @@ switch subjIDs{1}
        
     case 'bfly6.8rt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40; 
+       rewardSizeULorMS        = 50; 
        
     case 'g54b8tt'   
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 60;
+       rewardSizeULorMS        = 40;
   
       
    

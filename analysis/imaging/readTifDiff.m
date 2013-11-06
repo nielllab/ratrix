@@ -7,6 +7,10 @@ dbstop if error
 colordef white
 close all
 
+framerate = input('acquistion framerate : ');
+movPeriod = input('stimulus period (usually 5 or 10 secs): ');
+
+
 choosePix =1; %%% option to manually select pixels for timecourse analysis
 maxGB = 0.5; %%% size to reduce data down to
 imcolor= {'green','red'};
@@ -65,7 +69,7 @@ print('-dpsc',psfilename,'-append');
 blue=1; green=2; split=3;
 for LED=1:3
     if LED==split
-        dfof{LED} = dfof{blue}-dfof{green};
+        dfof{LED} = 2*dfof{green}-dfof{blue};
     end
     
     
@@ -81,9 +85,10 @@ for LED=1:3
     
     out =dfof{LED};
    
-    movPeriod =10;
+%     movPeriod =5;
+%     framerate=10;
     binning=0.125;
-    framerate=60;
+   
     img = out(:,:,1);
     
     [map cycMap fullMov] =phaseMap(dfof{LED},framerate,movPeriod,binning);
@@ -126,8 +131,8 @@ for LED=1:3
     end
     
     stepMap = zeros(size(cycMap,1),size(cycMap,2),3);
-    stepMap(:,:,1) = mean(cycMap(:,:,27:30),3)-mean(cycMap(:,:,1:25),3);
-    stepMap(:,:,2)= mean(cycMap(:,:,77:80),3)-mean(cycMap(:,:,61:75),3);
+%     stepMap(:,:,1) = mean(cycMap(:,:,27:30),3)-mean(cycMap(:,:,1:25),3);
+%     stepMap(:,:,2)= mean(cycMap(:,:,77:80),3)-mean(cycMap(:,:,61:75),3);
     
     figure
     set(gcf,'Name','baseline map');
@@ -143,9 +148,37 @@ for LED=1:3
     colorbar
     done=0;
     
-    
     cycMapAll{LED} = cycMap;
+    
+    if LED==3
+    keyboard
+    timescale = (1:size(cycMapAll{1},3))/framerate;
+     baseline = mean(cycMapAll{3}(:,:,round((movPeriod/2 + (-0.2:0.02:0.1))*framerate)),3);
+    moviepoints = -0.5:(1/framerate):1;
+     
+    figure
+    for i = 1:length(moviepoints);
+         if framerate<=10
+             subplot(4,4,i)
+         elseif framerate<=30
+             subplot(6,8,i)
+         elseif framerate<=60
+             subplot(8,12,i)
+         end
+         imagesc(cycMapAll{3}(:,:,round((movPeriod/2 + moviepoints(i))*framerate))-baseline,[-1 5]*10^-3);
+       if i==1; title(sprintf('framerate %dmsec',round(1000/framerate))); end
+       axis off
+    end
+     
+    end
+    
+    
     if LED==3;
+        mapfig=figure
+    
+        imagesc(cycMapAll{3}(:,:,round((movPeriod/2 + 0.3)*framerate))-cycMapAll{3}(:,:,round((movPeriod/2+0.1)*framerate)))
+    
+        
         while ~done
             figure(mapfig)
             if choosePix
@@ -173,16 +206,22 @@ for LED=1:3
 plot(squeeze(dfof{1}(x,y,:)),squeeze(dfof{2}(x,y,:)),'.');
 axis equal
             subplot(2,2,3);
+            timescale = (1:size(cycMapAll{1},3))/framerate;
             % plot(squeeze(cycMap(x,y,:))); ylim([-0.125 0.125]);
-            plot(squeeze(cycMapAll{1}(x,y,:)),'g');hold on
-            plot(squeeze(cycMapAll{2}(x,y,:)),'r'); plot(squeeze(cycMapAll{3}(x,y,:)),'k');
+            plot(timescale,squeeze(cycMapAll{1}(x,y,:)),'g');hold on
+            plot(timescale,squeeze(cycMapAll{2}(x,y,:)),'r'); plot(timescale,squeeze(cycMapAll{3}(x,y,:)),'k');
             ylim([-0.01 0.01]);
             subplot(2,2,4);
-            imshow(polarMap(map),'InitialMagnification','fit');
-            colormap(hsv);
-            colorbar
-            hold on
-            plot(y,x,'*');
+%             imshow(polarMap(map),'InitialMagnification','fit');
+%             colormap(hsv);
+%             colorbar
+%             hold on
+%             plot(y,x,'*');
+            params.Fs = framerate;
+            params.tapers = [3 5];
+            params.fpass = [0 framerate/2-1];
+            [S t f] = mtspecgramc(cycMapAll{3}(x,y,:),[1 0.1],params);
+            imagesc(S');
             set(gcf, 'PaperPositionMode', 'auto');
             print('-dpsc',psfilename,'-append');
         end

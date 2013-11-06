@@ -7,6 +7,10 @@ dbstop if error
 colordef white
 close all
 
+framerate = input('acquistion framerate : ');
+movPeriod = input('stimulus period (usually 5 or 10 secs): ');
+
+
 choosePix =1; %%% option to manually select pixels for timecourse analysis
 maxGB = 0.5; %%% size to reduce data down to
 imcolor= {'green','red'};
@@ -81,9 +85,10 @@ for LED=1:3
     
     out =dfof{LED};
    
-    movPeriod =5;
+%     movPeriod =5;
+%     framerate=10;
     binning=0.125;
-    framerate=10;
+   
     img = out(:,:,1);
     
     [map cycMap fullMov] =phaseMap(dfof{LED},framerate,movPeriod,binning);

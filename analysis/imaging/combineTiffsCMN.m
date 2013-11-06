@@ -80,14 +80,14 @@ recs = {
     {[36 222],[],'090613 GTS Behavior\G51-LN_r2_behavior_setProtocolGTS_4x4bin_53ms_vertical','G51-LN_r2_behavior_setProtocolGTS_4x4bin_53ms_vertical'}    
     }
     }
-    
+    %%% go to stimulus (top=right, bottom=left)
     
     {'g625ln' {
     {[61 237],[],'092013 DOI\G62-5-LN_DOI and behavior\G625_LN_Behavior_GoToBlack_DOI_at_start','G625_LN_Behavior_GoToBlack_DOI_at_start'}
    
     }
     }
-    };
+    }; %%% black on top = go right, black on bottom = go left
 
 % dirOverview(imagingPath)
 

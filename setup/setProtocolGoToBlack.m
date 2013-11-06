@@ -22,36 +22,21 @@ msAirpuff                 =msPenalty;
 
 switch subjIDs{1}
     case 'g54bb2'
-       requestRewardSizeULorMS = 40;
-       rewardSizeULorMS        = 80;
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 50;
        
     case 'bfly6.8rt'
-       requestRewardSizeULorMS = 40;
-       rewardSizeULorMS        = 80; 
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 50; 
+       
+    case 'g54b8tt'   
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 40;
   
-    case 'bfly1a.4lt'          
-       requestRewardSizeULorMS = 40;
-       rewardSizeULorMS        = 80;   
-       
-    case 'bfly4.7rt'          
-       requestRewardSizeULorMS = 40;
-       rewardSizeULorMS        = 80;   
-     
-   
-%     case 'g54b8tt'            move to HvV
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 55;   
+      
    
        
-%     case 'g54aa7tt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 45;  
-       
-%     case 'g54aa7lt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 40;  
-
-        
+            
     otherwise
         warning('unrecognized mouse, using defaults')
 end;     

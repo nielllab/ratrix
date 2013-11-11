@@ -41,7 +41,7 @@ end
        
    case 'gcam40lt'  
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 60;
+        rewardSizeULorMS        = 55;
   
    case 'gcam44lt'
         requestRewardSizeULorMS = 0;

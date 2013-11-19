@@ -49,7 +49,7 @@ end
         
    case 'gcam53ln'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 40;          
+        rewardSizeULorMS        = 35;          
         
        
     otherwise

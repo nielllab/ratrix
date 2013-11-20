@@ -40,9 +40,9 @@ switch subjIDs{1}
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 90;    
         
-   case 'bfly4.7rt'          
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 80;       
+%    case 'bfly4.7rt'          
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 80;       
       
    case 'g54b8tt'   
        requestRewardSizeULorMS = 0;

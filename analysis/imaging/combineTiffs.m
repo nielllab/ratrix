@@ -12,6 +12,15 @@ end
 behaviorPath = '\\lee\Users\nlab\Desktop\ballData';
 imagingPath = 'C:\Users\nlab\Desktop\data'; %\\landis (accessing local via network path is slow)
 imagingPath = 'E:\widefield data';
+
+%%% my understanding of record formt (cmn)
+%%% record format - subject name (which suffices to find behavior data'
+%%% followed by one cell for each imaging session
+%%% {[trial numbers] ... find this from PermanentTrialRecordStore
+%%% [trials within this sesion to use]
+%%% [imaging path]
+%%% [ imaging filenames]
+
 recs = {
     {'jbw01' {
             {[1     192],[36 172],'9-21-12\jbw01 go to grating run 1','jbw01r1'  }
@@ -89,57 +98,75 @@ recs = {
     }    
 };
 
-recs = {
-    {'Gcam25RT' {      
-            {[117 315],[],'043013\Gcam25-RT_behavior'                   ,'Gcam25-RT_behavior_GTS'} 
-            {[319 523],[],'050313\Gcam25-RT_behavior\Gcam25-RT_behavior','Gcam25-RT_behavior_GTS'}             
-        }
-    }
-    
-    {'Gcam32LN' {         
-             {[1   203],[],'043013\Gcam32-LN_behavior','Gcam32_LN_behavior_GTS'}    
-%             {[204 419],[],'050313\Gcam32-LN_behavior','Gcam32-LN_behavior_GTS'}       %tight filter          
-        }
-    }    
-    
-    {'Gcam32TT' {      
-%            {[1  61 ],[],'043013\Gcam32-TT_behavior'               ,'Gcam32-TT_behavior_GTS'}          
-            {[62  274],[],'043013\Gcam32-TT_behavior\behavior_GTS_2','Gcam32-TT_behavior_GTS'}         
-            {[275 515],[],'050313\Gcam32-TT_behavior\'              ,'Gcam32-TT_behavior_GTS'}                     
-        }
-    }    
 
-    {'Gcam17RN' {      
-            {[1    95],[],'050113\Gcam17-RN_behavior','Gcam17-RN_behavior_HVV'} 
-            {[102 293],[],'050213\Gcam17-RN_behavior','Gcam17-RN_behavior_HVV'}             
-        }
+recs = {
+    {'Gcam25RT' {
+    {[117 315],[],'043013\Gcam25-RT_behavior'                   ,'Gcam25-RT_behavior_GTS'}
+    {[319 523],[],'050313\Gcam25-RT_behavior\Gcam25-RT_behavior','Gcam25-RT_behavior_GTS'}
     }
-%     
-%     {'Gcam20TT' {      
-%             {[1 176],[],'050113\Gcam20-TT_behavior','Gcam20-TT_behavior_HvV'} 
-%         }
-%     } 
-%     
-    {'Gcam21RT' {      
-            {[19  155],[],'050113\Gcam21-RT_behavior','Gcam21-RT_behavior_HvV'} % hmm, last trial too few yellow frames
-            {[156 372],[],'050213\Gcam21-RT_behavior','Gcam21-RT_behavior_HVV'}             
-        }
     }
     
-    {'Gcam30LT' {      
-            {[1   216],[],'050113\Gcam30-LT_behavior','Gcam30-LT_behavior_HVV'}  % really bad performance
-            {[217 429],[],'050213\Gcam30-LT_behavior','Gcam30-LT_behavior_HVV'}  
-        }
+    {'Gcam32LN' {
+    {[1   203],[],'043013\Gcam32-LN_behavior','Gcam32_LN_behavior_GTS'}
+    %             {[204 419],[],'050313\Gcam32-LN_behavior','Gcam32-LN_behavior_GTS'}       %tight filter
     }
-%     
-%     {'Gcam33LT' {      
-%             {[1 137],[],'050113\Gcam33-LT_behavior\Gcam33-LT_behavior_HVV','Gcam33-LT_behavior_HVV_2'} 
+    }
+    
+    {'Gcam32TT' {
+    %            {[1  61 ],[],'043013\Gcam32-TT_behavior'               ,'Gcam32-TT_behavior_GTS'}
+   % {[62  274],[],'043013\Gcam32-TT_behavior\','Gcam32-TT_behavior_GTS'}
+    {[275 515],[],'050313\Gcam32-TT_behavior\'              ,'Gcam32-TT_behavior_GTS'}
+    }
+    }
+    
+%         {'Gcam17RN' {
+%                 {[1    95],[],'050113\Gcam17-RN_behavior','Gcam17-RN_behavior_HVV'}
+%                 {[102 293],[],'050213\Gcam17-RN_behavior','Gcam17-RN_behavior_HVV'}
+%             }
 %         }
-%     }
-};
+%     
+        {'Gcam20TT' {
+                {[1 176],[],'050113\Gcam20-TT_behavior','Gcam20-TT_behavior_HvV'}
+            }
+        }
+    
+        {'Gcam21RT' {
+              %  {[19  155],[],'050113\Gcam21-RT_behavior','Gcam21-RT_behavior_HvV'} % hmm, last trial too few yellow frames
+                {[156 372],[],'050213\Gcam21-RT_behavior','Gcam21-RT_behavior_HVV'}
+            }
+        }
+    
+        {'Gcam30LT' {
+                {[1   216],[],'050113\Gcam30-LT_behavior','Gcam30-LT_behavior_HVV'}  % really bad performance
+                {[217 429],[],'050213\Gcam30-LT_behavior','Gcam30-LT_behavior_HVV'}
+            }
+        }
+    
+        {'Gcam33LT' {
+                {[1 137],[],'050113\Gcam33-LT_behavior\Gcam33-LT_behavior_HVV','Gcam33-LT_behavior_HVV_2'}
+            }
+        }
+    };
+
+
+imagingPath = 'C:\data\imaging';
+recs = {
+    {'gcam51LN' {
+    {[36 222],[],'090613 GTS Behavior\G51-LN_r2_behavior_setProtocolGTS_4x4bin_53ms_vertical','G51-LN_r2_behavior_setProtocolGTS_4x4bin_53ms_vertical'}    
+    }
+    }
+    %%% go to stimulus (top=right, bottom=left)
+    
+    {'g625ln' {
+    {[61 237],[],'092013 DOI\G62-5-LN_DOI and behavior\G625_LN_Behavior_GoToBlack_DOI_at_start','G625_LN_Behavior_GoToBlack_DOI_at_start'}
+   
+    }
+    }
+    }; %%% black on top = go right, black on bottom = go left
 
 % dirOverview(imagingPath)
 
+%%% apply function biAnalysis to each
 cellfun(@(r)cellfun(@(s)f(r{1},s),r{2},'UniformOutput',false),recs,'UniformOutput',false);
     function f(subj,r)
         close all
@@ -166,6 +193,7 @@ if verLessThan('matlab', '8.1') %2013a
     warning('use 2013a, or else loading tiffs is slow/can''t read bigtiffs (2012b?)')
 end
 
+%%% read image data
 pr = [iPath '.pcoraw'];
 % pr = 'D:\Widefield (12-10-12+)\022213\gcam13ln\gcam13ln_r1\gcam13ln_r1.pcoraw'; %31GB %timestamps screwed up around frame 9600+?
 % pr = 'D:\Widefield (12-10-12+)\022213\gcam13tt_r2\gcam13tt_r2.pcoraw'; %12GB %timestamps screwed up after frame ~10k?
@@ -175,14 +203,14 @@ if doPcoraw
     tic
     ids = imfinfo(pr);
     toc
-
+    
     cds = nan(1,length(ids));
     
     sz = cellfun(@(x)unique([ids.(x)]),{'Height','Width'});
     if numel(sz)~=2
         error('bad unique')
-    end    
-%     sz = cellfun(@(x)t.getTag(x),{'ImageLength' 'ImageWidth'});
+    end
+    %     sz = cellfun(@(x)t.getTag(x),{'ImageLength' 'ImageWidth'});
 else
     warning('pcoraw preferred')
     
@@ -252,7 +280,7 @@ else
     
     data = zeros(sz(1),sz(2),length(ids),'uint16');
     stamps = zeros(stampHeight,300,length(ids),'uint16');
-        
+    
     if doPcoraw
         warning('off', 'MATLAB:imagesci:tiffmexutils:libtiffWarning')
         t = Tiff(pr,'r');
@@ -269,16 +297,16 @@ else
         if rand>.95
             fprintf('%d\t%d\t%g%% done\n',i,length(ids),100*i/length(ids))
         end
-        if doPcoraw            
+        if doPcoraw
             frame = t.read();
             % have to use Tiff object (faster anyway) -- imread dies on bigtiffs at high frame numbers with:
             % Error using rtifc
-            % TIFF library error - 'TIFFFetchDirectory:  Sanity check on directory count failed, this is probably not a valid IFD offset.'            
+            % TIFF library error - 'TIFFFetchDirectory:  Sanity check on directory count failed, this is probably not a valid IFD offset.'
             
             if i < length(ids)
                 cds(i) = t.currentDirectory; %wraps around as a uint16
                 t.nextDirectory();
-            end            
+            end
         else
             fn = sprintf('%s_%04d.tif',base,i);
             if ~ismember(fn,{ids.name})
@@ -311,18 +339,18 @@ else
     end
     toc
     
-%     figure
-%     plot(diff(cds))
+    %     figure
+    %     plot(diff(cds))
     
     if doPcoraw
-        if false 
+        if false
             t.close(); %on huge pcoraw this crashes matlab!
         end
         warning('on', 'MATLAB:imagesci:tiffmexutils:libtiffWarning')
     end
     
     [t,drops] = readStamps(stamps);
-        
+    
     f = load(fullfile(fileparts(bPath),bds.name));
     trialRecs = f.trialRecords;
     
@@ -515,16 +543,16 @@ stoppedWithin = 4; %2
 respondedWithin = [.3 1]; %[.5 2]; %1
 onlyCorrect = true;
 noAfterErrors = true;
-worstFactor = .7; %.1
+worstFactor = .7; %.1  %%%???
 
 afterErrors = [false ~correct(1:end-1)];
 
 misses = cellfun(@setdiff,bRecs,bFrames,'UniformOutput',false);
 
 if length([misses{:}]) ~= 1+numDrops %we gurantee one drop at the end? -- verify this...
-         error('drop calculation error')
-%    warning('drop calculation error')
-% Gcam21RT [19 155] 050113 has lots of drops at the end that screw this up -- switch to warning seemed ok but i didn't check carefully
+    error('drop calculation error')
+    %    warning('drop calculation error')
+    % Gcam21RT [19 155] 050113 has lots of drops at the end that screw this up -- switch to warning seemed ok but i didn't check carefully
 end
 
 worsts = cellfun(@(x)max(diff(x)),bFrames,'UniformOutput',false);
@@ -601,9 +629,9 @@ targ      =      targ(  1:length(correct));
 starts    =    starts(:,1:length(correct));
 
 %last frame suspect -- if reinforcement phase ends before exposure does, turns led off prematurely
-if true    
+if true
     bad = cumsum(cellfun(@length,bFrames));
-
+    
     bFrames   = cellfun(@(x)x(1:end-1),  bFrames,'UniformOutput',false);
     frameLeds = cellfun(@(x)x(1:end-1),frameLeds,'UniformOutput',false);
     
@@ -613,9 +641,9 @@ if true
     bad = length([bFrames{:}]);
     data(:,:,bad+1:end) = [];
     t(       bad+1:end) = [];
-
+    
     misses; %ok?
-        
+    
     if ~isempty(trials)
         pts(pts > min(cellfun(@(x,y)x(end)-y,bFrames(trials),num2cell(onsets(trials))))) = [];
     end
@@ -636,7 +664,7 @@ if any(problem)
     plot(find(problem),ledC(problem),'cx')
     hold on
     plot(find(problem),flatLEDs(problem),'rx')
-    title('led problems')        
+    title('led problems')
     legend({'cluster','record'})
     xlabel('frame')
     set(gca,'YTick',1:length(leds))
@@ -644,14 +672,26 @@ if any(problem)
     saveFig(fig,[pre '.led.problems'],[0 0 1000 300]); % [left, bottom, width, height]
 end
 
-cellfun(@w,leds,num2cell(1:length(leds)),'UniformOutput',false);
-    function w(lab,ind)
-        thisBFrames = cellfun(@(x,y)x(y == ind),bFrames,frameLeds,'UniformOutput',false);
-        these = flatLEDs == ind;
-        thisData = data(:,:,these);
-        thisT = t(these);
-        widefieldAnalysis(trials,pts,onsets,thisData,thisT,thisBFrames,[pre '.' lab],c,targ,stoppedWithin,respondedWithin,misses,starts,correct);
-    end
+
+for ind = 1:length(leds)
+  lab=leds{ind}; 
+    thisBFrames = cellfun(@(x,y)x(y == ind),bFrames,frameLeds,'UniformOutput',false);
+    these = flatLEDs == ind;
+    thisData = data(:,:,these);
+    thisT = t(these);
+    [im{ind} dfof{ind}] = widefieldAnalysis(trials,pts,onsets,thisData,thisT,thisBFrames,[pre '.' lab],c,targ,stoppedWithin,respondedWithin,misses,starts,correct);
+end
+
+bg = dfof{2}-dfof{1};
+bg_med = squeeze(nanmedianMW(bg));
+figure
+for tpts = 1:size(bg_med,1)
+    subplot(3,4,tpts)
+    imagesc(squeeze(bg_med(tpts,:,:)),[-0.02 0.02]);
+    axis off
+end
+title([pre 'bg dfof'])
+keyboard
 
 if true && ~isempty(trials)
     i=1;
@@ -740,7 +780,13 @@ if true && ~isempty(trials)
 end
 end
 
-function widefieldAnalysis(trials,pts,onsets,data,t,bFrames,pre,c,targ,stoppedWithin,respondedWithin,misses,starts,correct)
+function [im dfof]= widefieldAnalysis(trials,pts,onsets,data,t,bFrames,pre,c,targ,stoppedWithin,respondedWithin,misses,starts,correct)
+%%% my understanding of parameters (cmn)
+%%% trials = trial numbers to use, pts = timepts relatvie to stim onset,
+%%% onsets = onset time for stim, data = all image frames, t= frametime
+%%% bframes=frametimes for each trial, pre = file prefix, c= colormap,
+%%% targ = target side(-1 1),
+
 ptLs = numNice(pts,.01);
 pts = repmat(pts,length(trials),1)+repmat(onsets(trials)',1,length(pts));
 im = nan([size(pts,1) size(pts,2) size(data,1) size(data,2)]); %trials * t * h * w
@@ -793,10 +839,10 @@ behaviorKey;
         % fillPhase(in,in+.05,[1 .5 0]);
     end
 
-plot((bs-bs(1))/60,pix(ord(1:numPix),:)) % this line dies sometimes on 2011b?
-xlabel('mins')
-ylabel('pixel values')
-title('raw')
+% plot((bs-bs(1))/60,pix(ord(1:numPix),:)) % this line dies sometimes on 2011b?
+% xlabel('mins')
+% ylabel('pixel values')
+% title('raw')
 
 h(end+1) = subplot(2,1,2);
 hold on
@@ -887,11 +933,35 @@ if ~isempty(trials)
     m = permute(repmat(m,[1 1 size(im,1) size(im,2)]),[3 4 1 2]);
     dfof = (im-m)./m;
     
+
+    
     clear m
     %clear im
     
     show(nanmedianMW(dfof),ptLs,[pre '.all trials (dF/F)'],[1 99],@cb);
     show(nanmedianMW(dfof(targ(trials)>0,:,:,:)) - nanmedianMW(dfof(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right (dF/F)'],[1 99],@cb);
+    
+        for tr = 1:size(im,1);
+        baseline = squeeze(nanmedianMW(im(tr,ptLs<0,:,:),2));
+        for fr = 1:size(im,2)
+            dfof(tr,fr,:,:) = (squeeze(im(tr,fr,:,:))-baseline)./baseline;
+        end
+        end
+    
+            show(nanmedianMW(dfof),ptLs,[pre '.all trials baseline(dF/F)'],[1 99],@cb);
+    show(nanmedianMW(dfof(targ(trials)>0,:,:,:)) - nanmedianMW(dfof(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right baseline(dF/F)'],[1 99],@cb);
+    
+    
+%     for i = 1:length(trials)
+%         figure
+%         for a=1:size(im,2)
+%             subplot(3,4,a)
+%             imagesc(squeeze(dfof(i,a,:,:)),[-0.02 0.02])
+%         end
+%     end
+%     
+%     keyboard
+    
 end
 
     function cb(in)

@@ -48,13 +48,13 @@ end
 save(fullfile(p,[f(1:end-4) 'maps.mat']),'cycle_mov','cycle_mov_std','-append')
 
 keyboard
-baseline = prctile(cycle_mov,2,3);
+baseline = prctile(cycle_mov,2,1);
+% 
+% for i = 1:cyc_period;
+%     cycle_mov(:,:,i)=cycle_mov(:,:,i) - baseline;
+% end
 
-for i = 1:cyc_period;
-    cycle_mov(:,:,i)=cycle_mov(:,:,i) - baseline;
-end
-
-lowthresh = prctile(cycle_mov(:),1)
+lowthresh = prctile(cycle_mov(:),3)
 upperthresh = 2*prctile(cycle_mov(:),99)
 figure
 for i = 1:size(cycle_mov,3);
@@ -93,24 +93,29 @@ if f~=0
 end;
 
 %% raw movie
+
+
+[f,p] = uiputfile('*.avi','dfof movie file');
 small_mov = dfof_bg(4:4:end,4:4:end,4:4:end);
 lowthresh = prctile(small_mov(:),2);
-upperthresh = prctile(small_mov(:),98);
+upperthresh = 1.5*prctile(small_mov(:),98);
 
 clear mov
 figure
-mov_length = size(dfof_bg,3)
+mov_length = size(dfof_bg,3);
+mov_length=400
 for i = 1:mov_length;
-    imagesc(imresize(dfof_bg(:,:,i),0.5,'box'),[lowthresh upperthresh]);
+i
+    imagesc(imresize(dfof_bg(:,:,i+300),0.5,'box'),[lowthresh upperthresh]);
     colormap(gray);
-    hold on
-    if use_speed
-        if sp(i)<500
-            plot(15,15,'ro','Markersize',8,'Linewidth',8);
-        else
-            plot(15,15,'go','Markersize',8,'Linewidth',8);
-        end
-    end
+%    hold on
+%     if use_speed
+%         if sp(i)<500
+%             plot(15,15,'ro','Markersize',8,'Linewidth',8);
+%         else
+%             plot(15,15,'go','Markersize',8,'Linewidth',8);
+%         end
+%     end
     axis equal;
     if i==1;
         mov(mov_length) = getframe(gcf); %%%% initializes structure array
@@ -119,10 +124,9 @@ for i = 1:mov_length;
     
 end
 
-[f,p] = uiputfile('*.avi','dfof movie file');
 
 vid = VideoWriter(fullfile(p,f));
-vid.FrameRate=50;
+vid.FrameRate=25;
 open(vid);
 writeVideo(vid,mov(1:end));
 close(vid)

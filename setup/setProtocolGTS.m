@@ -67,12 +67,12 @@ switch subjIDs{1}
        
    case 'g625ln'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 90;  
+       rewardSizeULorMS        = 80;  
        
        
    case 'g54bb2'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 50;
+       rewardSizeULorMS        = 45;
        
     
          

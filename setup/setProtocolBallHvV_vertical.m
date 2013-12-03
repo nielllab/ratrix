@@ -37,16 +37,13 @@ end
         
    case 'bfly24lt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 50;
+       rewardSizeULorMS        = 45;
        
    case 'gcam40lt'  
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 50;
+        rewardSizeULorMS        = 45;
   
-   case 'gcam44lt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 45; 
-        
+           
    case 'gcam53ln'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 35;          

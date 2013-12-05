@@ -51,6 +51,8 @@ for chan=1:2
     dfof{chan}=data; clear data;
 end
 
+%%% perform spatial realignment???
+
 
 psfilename = [basename '.ps']
 if exist(psfilename,'file')==2;delete(psfilename);end
@@ -68,19 +70,17 @@ print('-dpsc',psfilename,'-append');
 
 blue=1; green=2; split=3;
 for LED=1:3
-    if LED==split
-        %dfof{LED} = (1/0.36)*dfof{green}-dfof{blue};
-       % dfof{LED} = dfof{green}-dfof{blue};
-       dfof{3} = zeros(size(dfof{1}));
-       for i = 1:size(dfof{green},1);
-           i
-           for j=1:size(dfof{green},2);
-               [c s] = princomp([squeeze(dfof{1}(i,j,:)) squeeze(dfof{2}(i,j,:))]); 
-           dfof{3}(i,j,:) =s(:,2);
-           end
-       end
-       
-       
+    if LED==split   %%% any combination of chan 1 & 2 that you want!
+        %dfof{LED} = (1/0.36)*dfof{green}-dfof{blue}; %%%
+        % dfof{LED} = dfof{green}-dfof{blue};  %%% ratio
+        dfof{3} = zeros(size(dfof{1}));
+        for i = 1:size(dfof{green},1);
+            i
+            for j=1:size(dfof{green},2);
+                [c s] = princomp([squeeze(dfof{1}(i,j,:)) squeeze(dfof{2}(i,j,:))]);
+                dfof{3}(i,j,:) =s(:,2);
+            end
+        end
     end
     
     
@@ -96,9 +96,6 @@ for LED=1:3
     
     out =dfof{LED};
     
-    %     movPeriod =5;
-    %     framerate=10;
-   % binning=0.125;
     binning = 1/16;
     img = out(:,:,1);
     
@@ -106,10 +103,11 @@ for LED=1:3
     map(isnan(map))=0;
     mapFig(map)
     
-    binMov{LED}=fullMov;
+    binMov{LED}=fullMov;  %%% binned version of dfof for each channel
     
-    responseMap{LED}=map;
+    responseMap{LED}=map;  %%% polar map for each channel
     
+    %%% dfof timecourse
     t0 = linspace(1,size(cycMap,3),10);
     figure
     for t = 1:9;
@@ -126,6 +124,8 @@ for LED=1:3
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfilename,'-append');
     
+    %%% option to normalize to a defined region
+    %%% we don't use this
     normalize=0;
     if normalize
         mapfig=figure
@@ -142,11 +142,12 @@ for LED=1:3
         mapFig(map);
     end
     
-
+    
     done=0;
     
-    cycMapAll{LED} = cycMap;
+    cycMapAll{LED} = cycMap;  %%% cycle averaged binned movie for 3 channels
     
+    %%% compute movie around stim onset
     if LED==3
         
         timescale = (1:size(cycMapAll{1},3))/framerate;
@@ -166,8 +167,9 @@ for LED=1:3
             if i==1; title(sprintf('framerate %dmsec',round(1000/framerate))); end
             axis off
             
-            
         end
+        
+        %%%display blood vessel map and evoked activity map
         figure
         subplot(1,2,1)
         imagesc(squeeze(LEDout{1}(:,:,1)))
@@ -179,16 +181,21 @@ for LED=1:3
     end
     
     
-    if LED==3;
+    if LED==3; %%% select pixels and plot timecourse
+        
+        %%% map of response right after stimulus in 3 channels
         figure
         for i=1:3
             respmap(:,:,i) = cycMapAll{i}(:,:,round((movPeriod/2 + 0.3)*framerate))-cycMapAll{i}(:,:,round((movPeriod/2+0.1)*framerate))
             subplot(2,2,i);
             imagesc(respmap(:,:,i),[-5 5]*10^-3);
         end
+        
+        %%% difference map, used for selecting points
         mapfig=figure;
         imagesc(respmap(:,:,3))
         
+        %%% select map points for pixel analysis
         npts=0
         while ~done
             figure(mapfig)
@@ -207,17 +214,19 @@ for LED=1:3
             npts=npts+1;
             y = round(y); x= round(x);
             figure
+            
+            %%% timecourse for this pixel
             subplot(2,2,1)
             plot(squeeze(fullMov(x,y,:)));
             xlim([0 length(fullMov)]);
+            
+            %%% red vs green for this pixel, plus regression
             subplot(2,2,2);
-            %             spect = abs(fft(squeeze(fullMov(x,y,:))));
-            %             fftPts = 2:length(spect)/2;
-            %             loglog((fftPts-1)/length(spect),spect(fftPts));
             plot(squeeze(binMov{1}(x,y,:)),squeeze(binMov{2}(x,y,:)),'.');
             [r m b] = regression(squeeze(binMov{1}(x,y,:))',squeeze(binMov{2}(x,y,:))')
             title(sprintf('r=%0.2f m=%0.2f b=%0.2f',r,m,b));
             
+            %%% cycle avg timecourse for 3 channels
             axis equal
             subplot(2,2,3);
             timescale = (1:size(cycMapAll{1},3))/framerate;
@@ -225,17 +234,18 @@ for LED=1:3
             plot(timescale,squeeze(cycMapAll{1}(x,y,:)),'g');hold on
             plot(timescale,squeeze(cycMapAll{2}(x,y,:)),'r'); plot(timescale,squeeze(cycMapAll{3}(x,y,:)),'k');
             ylim([-0.01 0.01]);
+            
+            %%% time frequency analysis
             subplot(2,2,4);
-            %             imshow(polarMap(map),'InitialMagnification','fit');
-            %             colormap(hsv);
-            %             colorbar
-            %             hold on
-            %             plot(y,x,'*');
             params.Fs = framerate;
             params.tapers = [2 3];
             params.fpass = [0 framerate/2-1];
             [S t f] = mtspecgramc(squeeze(cycMapAll{3}(x,y,:)),[0.5 0.1],params);
             imagesc(S',[0 prctile(S(:),85)]);
+            axis xy
+            xlabel('frames');
+            ylabel('hz')
+            
             set(gcf, 'PaperPositionMode', 'auto');
             print('-dpsc',psfilename,'-append');
             resp(npts,:) = squeeze(mean(mean(respmap(x-1:x+1,y-1:y+1,:),2),1));
@@ -246,64 +256,58 @@ for LED=1:3
             resp
             resp_std
             
+            %%% time frequency for entire recording duration at this pixel
             figure
             subplot(1,2,1)
             params.Fs = framerate;
             params.tapers = [2 3];
             params.fpass = [0 framerate/2-1];
             [S t f] = mtspecgramc(squeeze(binMov{3}(x,y,:)),[3 1],params);
-             imagesc(S',[0 prctile(S(:),90)]);
-             axis xy
+            imagesc(S',[0 prctile(S(:),90)]);
+            axis xy
             subplot(1,2,2);
-             plot(f,mean(S,1));
-             
-             
-             gr= squeeze(binMov{1}(x,y,:)); red = squeeze(binMov{2}(x,y,:)); rgdiff= squeeze(binMov{3}(x,y,:));
-             frqs = (1:length(gr))/(length(gr)/framerate);
-             
-             figure
-             [c s] = princomp([gr  red]);
-             subplot(2,2,1)
-             plot(frqs,abs(fft(gr))'.*(1:length(gr)),'g'); hold on; plot(frqs,abs(fft(red))'.*(1:length(gr)),'r');
-               
-                 xlim([0 frqs(end)/2])
-             
-             subplot(2,2,2); hold on
-               plot(frqs,abs(fft(s(:,1))'.*(1:length(gr))),'b');
-              plot(frqs,abs(fft(s(:,2))'.*(1:length(gr))),'g');
-                  xlim([0 frqs(end)/2])
-             
-         
+            plot(f,mean(S,1));
             
-             subplot(2,2,3);
-             plot(cycAvgSig(gr,framerate*movPeriod),'g');
-             hold on
-             plot(cycAvgSig(red,framerate*movPeriod),'r');
-             plot(squeeze(cycMapAll{3}(x,y,:)),'k');
-             
-             
-             c = 'bg';
-             subplot(2,2,4);
-             for i = 1:2
-                 sig = cycAvgSig(s(:,i),framerate*movPeriod);
-                 plot(timescale,sig/max(abs(sig)),c(i));
-             hold on
-             end
-             
-             
-             keyboard
-             
+            
+            gr= squeeze(binMov{1}(x,y,:)); red = squeeze(binMov{2}(x,y,:)); rgdiff= squeeze(binMov{3}(x,y,:));
+            frqs = (1:length(gr))/(length(gr)/framerate);
+            
+            %%% FFT of raw red/green
+            figure
+            [c s] = princomp([gr  red]);
+            subplot(2,2,1)
+            plot(frqs,abs(fft(gr))'.*(1:length(gr)),'g'); hold on; plot(frqs,abs(fft(red))'.*(1:length(gr)),'r');
+            
+            xlim([0 frqs(end)/2])
+            
+            %%% FFT of PCA components
+            subplot(2,2,2); hold on
+            plot(frqs,abs(fft(s(:,1))'.*(1:length(gr))),'b');
+            plot(frqs,abs(fft(s(:,2))'.*(1:length(gr))),'g');
+            xlim([0 frqs(end)/2])
+            
+            
+            %%%% timecourse of 3 components
+            subplot(2,2,3);
+            plot(cycAvgSig(gr,framerate*movPeriod),'g');
+            hold on
+            plot(cycAvgSig(red,framerate*movPeriod),'r');
+            plot(squeeze(cycMapAll{3}(x,y,:)),'k');
+            
+            %%% timecourse of 2 PCA components
+            c = 'bg';
+            subplot(2,2,4);
+            for i = 1:2
+                sig = cycAvgSig(s(:,i),framerate*movPeriod);
+                plot(timescale,sig/max(abs(sig)),c(i));
+                hold on
+            end
+            
         end
-        
     end
-    
-    
     
 end  %%%LED
 
-
-            
-            
 meanresp=mean(resp,1)
 resp_err=mean(resp_std,1)
 

@@ -183,11 +183,11 @@ end
 function biAnalysis(bPath,iPath,pre,goodTrials)
 fprintf('doing %s\n',bPath)
 dirOverview(fileparts(iPath))
-%keyboard
-if exist(fullfile('C:\Users\nlab\Desktop\analysis',[pre '.sync.png']),'file')
-    fprintf('skipping, already done\n')
-    return
-end
+%%keyboard
+% if exist(fullfile('C:\Users\nlab\Desktop\analysis',[pre '.sync.png']),'file')
+%     fprintf('skipping, already done\n')
+%     return
+% end
 
 if verLessThan('matlab', '8.1') %2013a
     warning('use 2013a, or else loading tiffs is slow/can''t read bigtiffs (2012b?)')
@@ -216,7 +216,7 @@ else
     
     ids = dir([iPath '_*.tif']);
     if isempty(ids)
-        keyboard
+        %keyboard
         dest = fileparts(iPath);
         b = dest;
         [~,b] = strtok(b,filesep);
@@ -486,7 +486,7 @@ xlim([0 max([cellfun(@length,bRecs) cellfun(@length,d)])]);
 saveFig(fig,[pre '.align'],[0 0 1600 800]); % [left, bottom, width, height]
 
 if bad
-    keyboard
+    %keyboard
 end
 
 if length([bFrames{:}]) > size(data,3) %we probably miss the last one
@@ -540,12 +540,14 @@ end
 trials = trials(1):trials(2);
 
 stoppedWithin = 4; %2
-respondedWithin = [.3 1]; %[.5 2]; %1
-onlyCorrect = true;
-noAfterErrors = true;
+respondedWithin = [.8 2]; %[.4 1]; %1
+onlyCorrect = false;
+noAfterErrors = false;
 worstFactor = .7; %.1  %%%???
 
 afterErrors = [false ~correct(1:end-1)];
+
+
 
 misses = cellfun(@setdiff,bRecs,bFrames,'UniformOutput',false);
 
@@ -579,7 +581,8 @@ trials = trials( ...
 
 c = getUniformSpectrum(normalize(onsets));
 
-pts = [-.8 respondedWithin(1)]; %-1.5*frameDur]; %last frame suspect -- if reinforcement phase ends before exposure does, probably turns led off prematurely
+%pts = [-.8 respondedWithin(1)]; %-1.5*frameDur]; %last frame suspect -- if reinforcement phase ends before exposure does, probably turns led off prematurely
+pts = [-.5 respondedWithin(1)];
 pts = linspace(pts(1),pts(2),1+round(diff(pts)/frameDur));
 
 fig = figure;
@@ -622,6 +625,8 @@ ylabel('trial')
 xlabel('secs since discrim onset')
 saveFig(fig,[pre '.sync'],[0 0 diff(xlims)*200 length(onsets)*5]); % [left, bottom, width, height]
 
+%keyboard
+
 bFrames   =   bFrames(  1:length(correct));
 frameLeds = frameLeds(  1:length(correct));
 misses    =    misses(  1:length(correct));
@@ -644,6 +649,7 @@ if true
     
     misses; %ok?
     
+    %%% only calculate points up to the shortest response
     if ~isempty(trials)
         pts(pts > min(cellfun(@(x,y)x(end)-y,bFrames(trials),num2cell(onsets(trials))))) = [];
     end
@@ -683,101 +689,10 @@ for ind = 1:length(leds)
 end
 
 bg = dfof{2}-dfof{1};
-bg_med = squeeze(nanmedianMW(bg));
-figure
-for tpts = 1:size(bg_med,1)
-    subplot(3,4,tpts)
-    imagesc(squeeze(bg_med(tpts,:,:)),[-0.02 0.02]);
-    axis off
-end
-title([pre 'bg dfof'])
-keyboard
 
-if true && ~isempty(trials)
-    i=1;
-    frames = length([bFrames{1:trials(i)-1}]) + (1:length(bFrames{trials(i)}));
-    ledInds = [frameLeds{:}];
-    these = double(squeeze(data(:,:,frames)));
-    lims = prctile(these(:),[1 99]); % cellfun(@(f) f(data(:)),{@min @max});
-    figure
-    k = ceil(length(frames)/4);
-    for i=1:length(frames)
-        subplot(k,4,i)
-        imagesc(double(squeeze(data(:,:,frames(i)))));%,lims)
-        title(leds{ledInds(frames(i))})
-        set(gca,'xtick',[])
-        set(gca,'ytick',[])
-        axis equal
-        axis tight
-    end
-    
-    
-    inds = frames(ledInds(frames) == 2);
-    theseT = t(inds);
-    these = double(squeeze(data(:,:,inds)));
-    m = nanmedianMW(these,3);
-    m = repmat(m,[1 1 size(these,3)]);
-    dfof = (these-m)./m;
-    figure
-    k = ceil(sqrt(size(dfof,3)));
-    for i=1:size(dfof,3)
-        subplot(k,k,i)
-        
-        imagesc(dfof(:,:,i));
-        
-        set(gca,'xtick',[])
-        set(gca,'ytick',[])
-        axis equal
-        axis tight
-        
-        if i==1
-            title('dfof')
-        end
-    end
-    
-    figure
-    for i=1:size(these,3)
-        subplot(k,k,i)
-        
-        imagesc(these(:,:,i),[0 2^16]);
-        
-        set(gca,'xtick',[])
-        set(gca,'ytick',[])
-        axis equal
-        axis tight
-        
-        if i==1
-            title('raw (same scale)')
-        end
-    end
-    
-    figure
-    d = diff(these,[],3);
-    lims = prctile(d(:),[1 99]);
-    for i=1:size(d,3)
-        subplot(k,k,i)
-        
-        imagesc(d(:,:,i),lims);
-        
-        set(gca,'xtick',[])
-        set(gca,'ytick',[])
-        axis equal
-        axis tight
-        
-        if i==1
-            title('diff (same scale)')
-        end
-    end
-    
-    figure
-    traces = reshape(these,[size(these,1)*size(these,2) size(these,3)]);
-    plot(theseT-theseT(1),traces)
-    
-    figure
-    plot(theseT-theseT(1),traces(rand(size(traces,1),1)>.99,:))
-    
-    %keyboard
-end
+ show(nanmedianMW(bg),pts,[pre 'blue-green dfof'],[1 99],@cb);
+
+keyboard
 end
 
 function [im dfof]= widefieldAnalysis(trials,pts,onsets,data,t,bFrames,pre,c,targ,stoppedWithin,respondedWithin,misses,starts,correct)
@@ -787,6 +702,8 @@ function [im dfof]= widefieldAnalysis(trials,pts,onsets,data,t,bFrames,pre,c,tar
 %%% bframes=frametimes for each trial, pre = file prefix, c= colormap,
 %%% targ = target side(-1 1),
 
+display('starting widefield analysis')
+%keyboard
 ptLs = numNice(pts,.01);
 pts = repmat(pts,length(trials),1)+repmat(onsets(trials)',1,length(pts));
 im = nan([size(pts,1) size(pts,2) size(data,1) size(data,2)]); %trials * t * h * w
@@ -810,11 +727,16 @@ hold on
 alpha = .1;
 ms = [misses{:}];
 behaviorKey;
-
+title('grey = stopping; yellow=response; red = error stim')
     function behaviorKey
         arrayfun(@plotPhases,1:length(bFrames))
         arrayfun(@plotMisses,ms)
     end
+
+%%% grey = stopping phase
+%%% yellow = response phase
+%%% red = error stim phase
+%%% green = correct response phase (but duration=0)
 
     function plotPhases(tNum)
         fillPhase(starts(1,tNum),starts(2,tNum),[1 1 1]);
@@ -829,12 +751,12 @@ behaviorKey;
 
     function fillPhase(start,stop,col)
         if stop>start %drops may cause bFrames to not contain frames after a phase start
-            fill(([start start stop stop]-bs(1))/60,2^16*[0 1 1 0],col,'FaceAlpha',alpha)
+            fill(([start start stop stop]-bs(1)),2^16*[0 1 1 0],col,'FaceAlpha',alpha)
         end
     end
 
     function plotMisses(in)
-        plot((in-bs(1))*ones(1,2)/60,[0 2^16],'Color',[1 .5 0])
+        plot((in-bs(1))*ones(1,2),[0 2^16],'Color',[1 .5 0])
         % can't have alpha on line, and dominates otherwise
         % fillPhase(in,in+.05,[1 .5 0]);
     end
@@ -860,7 +782,7 @@ end
 
 pix = double(pix(ord(1:numPix),:));
 pix(:,bads) = nan;
-plot((bs-bs(1))/60,pix)
+plot((bs-bs(1)),pix)
 ylim([0 max(pix(:))])
 
 linkaxes(h,'x');
@@ -906,41 +828,48 @@ set(a,'Box','off')
 set(a,'YAxisLocation','right')
 
 saveFig(fig,[pre '.pix'],[0 0 500 500]); % [left, bottom, width, height]
-
+% figure
+% nrows = ceil(sqrt(length(trials)));
 fprintf('interpolating...\n')
 tic
 for i=1:length(trials)
-    frames = length([bFrames{1:trials(i)-1}]) + (1:length(bFrames{trials(i)}));
+    frames = length([bFrames{1:trials(i)-1}]) + (1:length(bFrames{trials(i)}))
     if ~isempty(frames)
         im(i,:,:,:) = interp1(bFrames{trials(i)},double(data(frames,:,:)),pts(i,:));
+%         subplot(nrows,nrows,i);
+% plot(bFrames{trials(i)},double(data(frames,100,100)),'o');
+% hold on
+% plot(pts(i,:),im(i,:,100,100));
     elseif i~=length(trials)
         error('huh?')
     end
     fprintf('%g%% done\n',100*i/length(trials));
 end
-toc
 
+
+toc
+%keyboard
 if ~isempty(trials)
     % clear data
     
     %need nanmean from fullfile(matlabroot,'toolbox','stats','stats')
     %but \ratrix\analysis\eflister\phys\new\helpers\ is shadowing it...
     
-    show(nanmedianMW(im),ptLs,[pre '.all trials (raw)'],[50 99],@cb);
-    show(nanmedianMW(im(targ(trials)>0,:,:,:)) - nanmedianMW(im(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right (raw)'],[1 99],@cb);
-    
-    m = squeeze(nanmedianMW(squeeze(nanmedianMW(im)))); %does this order matter?
-    m = permute(repmat(m,[1 1 size(im,1) size(im,2)]),[3 4 1 2]);
-    dfof = (im-m)./m;
-    
-
-    
-    clear m
-    %clear im
-    
-    show(nanmedianMW(dfof),ptLs,[pre '.all trials (dF/F)'],[1 99],@cb);
-    show(nanmedianMW(dfof(targ(trials)>0,:,:,:)) - nanmedianMW(dfof(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right (dF/F)'],[1 99],@cb);
-    
+%     show(nanmedianMW(im),ptLs,[pre '.all trials (raw)'],[50 99],@cb);
+%     show(nanmedianMW(im(targ(trials)>0,:,:,:)) - nanmedianMW(im(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right (raw)'],[1 99],@cb);
+%     
+%     m = squeeze(nanmedianMW(squeeze(nanmedianMW(im)))); %does this order matter?
+%     m = permute(repmat(m,[1 1 size(im,1) size(im,2)]),[3 4 1 2]);
+%     dfof = (im-m)./m;
+%     
+% 
+%     
+%     clear m
+%     %clear im
+%     
+%     show(nanmedianMW(dfof),ptLs,[pre '.all trials (dF/F)'],[1 99],@cb);
+%     show(nanmedianMW(dfof(targ(trials)>0,:,:,:)) - nanmedianMW(dfof(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right (dF/F)'],[1 99],@cb);
+%     
         for tr = 1:size(im,1);
         baseline = squeeze(nanmedianMW(im(tr,ptLs<0,:,:),2));
         for fr = 1:size(im,2)
@@ -949,8 +878,9 @@ if ~isempty(trials)
         end
     
             show(nanmedianMW(dfof),ptLs,[pre '.all trials baseline(dF/F)'],[1 99],@cb);
-    show(nanmedianMW(dfof(targ(trials)>0,:,:,:)) - nanmedianMW(dfof(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right baseline(dF/F)'],[1 99],@cb);
-    
+    show(nanmedianMW(dfof(targ(trials)>0,:,:,:)) ,ptLs,[pre '.left baseline(dF/F)'],[1 99],@cb);
+        show( nanmedianMW(dfof(targ(trials)<0,:,:,:)),ptLs,[pre '. right baseline(dF/F)'],[1 99],@cb);
+ show(nanmedianMW(dfof(targ(trials)>0,:,:,:)) - nanmedianMW(dfof(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right baseline(dF/F)'],[1 99],@cb);
     
 %     for i = 1:length(trials)
 %         figure
@@ -960,7 +890,7 @@ if ~isempty(trials)
 %         end
 %     end
 %     
-%     keyboard
+%     %keyboard
     
 end
 
@@ -991,6 +921,30 @@ end
         
         xlabel('seconds since discrim onset')
         
+        
+        figure        
+        subplot(2,2,1);
+        plotdF(1:size(dfof,1),'all');
+        
+  subplot(2,2,2);
+  plotdF(targ(trials)<0,'left');
+  
+  subplot(2,2,3)
+  plotdF(targ(trials)>0,'right');
+  
+  subplot(2,2,4)
+  plot(ptLs,nanmedianMW(dfof(targ(trials)<0,:,in(1,2),in(1,1))),'g'); hold on
+   plot(ptLs,nanmedianMW(dfof(targ(trials)>0,:,in(1,2),in(1,1))),'r'); 
+   plot(ptLs,nanmedianMW(dfof(targ(trials)<0,:,in(1,2),in(1,1))) - nanmedianMW(dfof(targ(trials)>0,:,in(1,2),in(1,1))),'Linewidth',3); 
+  
+        function plotdF(which,lab);
+
+           plot(ptLs,dfof(which,:,in(1,2),in(1,1))');
+            hold on
+            plot(ptLs,nanmedianMW(dfof(which,:,in(1,2),in(1,1))),'LineWidth',3);
+            title(lab);
+        end
+            
         function avg = plotPix(which,lab,doAvg)
             hold on
             arrayfun(@(i)plot(bFrames{i}-onsets(i),data(length([bFrames{1:i-1}])+(1:length(bFrames{i})),in(1,2),in(1,1)),'Color',c(i,:)),which);
@@ -1043,6 +997,8 @@ end
 function show(m,pts,s,c,cb)
 m = permute(m,[3 4 2 1]);
 lims = prctile(m(:),c);
+limMax = max(abs(lims));
+lims=[-limMax limMax];
 if ~any(isnan(lims))
     d = ceil(sqrt(size(m,3)));
     fig = figure;
@@ -1058,7 +1014,7 @@ if ~any(isnan(lims))
         axis equal
         axis tight
     end
-    %colormap
+    colorbar
     axes('Position',[0 0 1 1],'Xlim',[0 1],'Ylim',[0 1],'Visible','off','Units','normalized'); %'Box','off','clipping','off'
     text(0.5, .98, ['\bf ' s], 'HorizontalAlignment', 'center', 'VerticalAlignment', 'top')
     
@@ -1071,7 +1027,7 @@ if ~any(isnan(lims))
     writeAVI(m,fullfile('C:\Users\nlab\Desktop\analysis',s));%,fps)
 else
     fprintf('bailing on %s, tight trial filter?\n',s)
-    keyboard
+    %keyboard
 end
 end
 

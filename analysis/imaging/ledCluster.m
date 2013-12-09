@@ -1,53 +1,83 @@
 function [out, fig] = ledCluster(data)
-sz = size(data);
-sz = sz(1:2);
 
-ex = rand(1,size(data,3))<.05;
-
-x = double(reshape(permute(data(:,:,ex),[3 1 2]),sum(ex),[]));
-
-m = mean(x);
-g = std(x) + eps;
-[u,s,v] = svd((x-repmat(m,size(x,1),1))./repmat(g,size(x,1),1),'econ');
-
-t = nan(size(data,3),2);
-
-optimize_space = false;
-if optimize_space
-    for i=1:size(data,3)
-        t(i,:) = ((double(reshape(data(:,:,i),1,[]))-m)./g)*v(:,1:2);
-    end
-else %speed up by doing reshape all at once, but requires space to copy input
-    d = reshape(permute(data,[3 1 2]),size(data,3),[]);
+if false
+    sz = size(data);
+    sz = sz(1:2);
     
-    for i=1:size(data,3)
-        t(i,:) = ((double(d(i,:))-m)./g)*v(:,1:2);
+    ex = rand(1,size(data,3))<.05;
+    
+    x = double(reshape(permute(data(:,:,ex),[3 1 2]),sum(ex),[]));
+    
+    m = mean(x);
+    g = std(x) + eps;
+    [u,s,v] = svd((x-repmat(m,size(x,1),1))./repmat(g,size(x,1),1),'econ');
+    
+    t = nan(size(data,3),2);
+    
+    optimize_space = false;
+    if optimize_space
+        for i=1:size(data,3)
+            t(i,:) = ((double(reshape(data(:,:,i),1,[]))-m)./g)*v(:,1:2);
+        end
+    else %speed up by doing reshape all at once, but requires space to copy input
+        d = reshape(permute(data,[3 1 2]),size(data,3),[]);
+        
+        for i=1:size(data,3)
+            t(i,:) = ((double(d(i,:))-m)./g)*v(:,1:2);
+        end
     end
+    
+    n = t/s(1:2,1:2);
+    
+    k=2;
+    obj = gmdistribution.fit(n,k);
+    idx = cluster(obj,n);
+    
+    [~,ord] = sort(obj.PComponents,'descend');
+    
+    fig = figure;
+    subplot(2,2,2)
+    hold on
+    arrayfun(@(x,y)plot(n(idx==ord(x),1),n(idx==ord(x),2),[y '.']),1:k,'bg');
+    plot(u(:,1),u(:,2),'rx')
+    axis equal
+    
+    subplot(2,2,3)
+    imagesc(mean(data,3))
+    subplot(2,2,1)
+    imagesc(reshape(v(:,2),sz))
+    subplot(2,2,4)
+    imagesc(reshape(v(:,1),sz))
+    
+    out = ord(idx);
+else
+    %%% assign blue and green frames based on clustering
+    
+    %subsample data to make pca calculation manageable
+    shrunkdata = data(10:10:end,10:10:end,:);
+    shrunkdata = reshape(shrunkdata,[size(shrunkdata,1)*size(shrunkdata,2) size(shrunkdata,3)]);
+    
+    %%% calculate pca and cluster on them
+    [coeff score latent] = princomp(double(shrunkdata)');
+    idx = kmeans(score(:,1),2);
+    
+    %%% blue is the larger cluster
+    if sum(idx==2)>sum(idx==1);
+        bl = find(idx==2); gr= find(idx==1);
+    else
+        bl = find(idx==1); gr = find(idx==2);
+    end
+    %%% get rid of outliers
+    bl = bl(abs(zscore(score(bl)))<5); gr = gr(abs(zscore(score(gr)))<5);
+    idx = nan(size(idx)); idx(bl)=2;  idx(gr)=1;
+    out = idx';
+    %%% plot a figure for sanity check
+    fig=figure
+    hold on
+    plot(score(:,1),score(:,2),'ko');
+    plot(score(bl,1),score(bl,2),'bo');
+    plot(score(gr,1),score(gr,2),'go');
 end
-
-n = t/s(1:2,1:2);
-
-k=2;
-obj = gmdistribution.fit(n,k);
-idx = cluster(obj,n);
-
-[~,ord] = sort(obj.PComponents,'descend');
-
-fig = figure;
-subplot(2,2,2)
-hold on
-arrayfun(@(x,y)plot(n(idx==ord(x),1),n(idx==ord(x),2),[y '.']),1:k,'bg');
-plot(u(:,1),u(:,2),'rx')
-axis equal
-
-subplot(2,2,3)
-imagesc(mean(data,3))
-subplot(2,2,1)
-imagesc(reshape(v(:,2),sz))
-subplot(2,2,4)
-imagesc(reshape(v(:,1),sz))
-
-out = ord(idx);
 end
 
 function scratch

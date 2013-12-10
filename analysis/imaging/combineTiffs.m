@@ -151,11 +151,11 @@ recs = {
 
 imagingPath = 'C:\data\imaging';
 recs = {
-    {'gcam51LN' {
-    {[36 222],[],'090613 GTS Behavior\G51-LN_r2_behavior_setProtocolGTS_4x4bin_53ms_vertical','G51-LN_r2_behavior_setProtocolGTS_4x4bin_53ms_vertical'}    
-    }
-    }
-    %%% go to stimulus (top=right, bottom=left)
+%     {'gcam51LN' {
+%     {[36 222],[],'090613 GTS Behavior\G51-LN_r2_behavior_setProtocolGTS_4x4bin_53ms_vertical','G51-LN_r2_behavior_setProtocolGTS_4x4bin_53ms_vertical'}    
+%     }
+%     }
+%     %%% go to stimulus (top=right, bottom=left)
     
     {'g625ln' {
     {[61 237],[],'092013 DOI\G62-5-LN_DOI and behavior\G625_LN_Behavior_GoToBlack_DOI_at_start','G625_LN_Behavior_GoToBlack_DOI_at_start'}
@@ -540,7 +540,7 @@ end
 trials = trials(1):trials(2);
 
 stoppedWithin = 4; %2
-respondedWithin = [.8 2]; %[.4 1]; %1
+respondedWithin = [2 3]; %[.4 1]; %1
 onlyCorrect = false;
 noAfterErrors = false;
 worstFactor = .7; %.1  %%%???
@@ -692,8 +692,10 @@ bg = dfof{2}-dfof{1};
 
  show(nanmedianMW(bg),pts,[pre 'blue-green dfof'],[1 99],@cb);
 
+ [f p] = uiputfile('*.mat','output file');
+ save(fullfile(p,f),'bg','targ','correct','trials','pts')
 keyboard
-end
+end %%% biAnalysis
 
 function [im dfof]= widefieldAnalysis(trials,pts,onsets,data,t,bFrames,pre,c,targ,stoppedWithin,respondedWithin,misses,starts,correct)
 %%% my understanding of parameters (cmn)

@@ -233,6 +233,7 @@ for LED=1:3
             % plot(squeeze(cycMap(x,y,:))); ylim([-0.125 0.125]);
             plot(timescale,squeeze(cycMapAll{1}(x,y,:)),'g');hold on
             plot(timescale,squeeze(cycMapAll{2}(x,y,:)),'r'); plot(timescale,squeeze(cycMapAll{3}(x,y,:)),'k');
+             plot(timescale,squeeze(cycMapAll{2}(x,y,:))- squeeze(cycMapAll{1}(x,y,:)),'y');  %%%diff
             ylim([-0.01 0.01]);
             
             %%% time frequency analysis

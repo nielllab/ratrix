@@ -34,7 +34,7 @@ switch subjIDs{1}
        
    case 'g54aa7tt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 35;
+       rewardSizeULorMS        = 32.5;
     
    case 'gcam32tt'
         requestRewardSizeULorMS = 0;
@@ -46,7 +46,7 @@ switch subjIDs{1}
 
    case 'gcam50tt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 25;
+        rewardSizeULorMS        = 22.5;
    
    case 'gcam46tt'
         requestRewardSizeULorMS = 0;
@@ -58,9 +58,9 @@ switch subjIDs{1}
         
    case 'gcam39rt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 25;
+       rewardSizeULorMS        = 22.5;
        
-   case 'g62b.4ln'
+   case 'g62b4ln'
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 70;
       
@@ -70,16 +70,16 @@ switch subjIDs{1}
        
    case 'g54b12rt' 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 50;
+       rewardSizeULorMS        = 40;
        
    case 'g625ln'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100;  
+       rewardSizeULorMS        = 90;  
        
        
    case 'g54bb2'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 30;
+       rewardSizeULorMS        = 40;
        
     
          

@@ -30,7 +30,8 @@ end
   
 %    case 'gcam45tt'
 %         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 60; 
+%         rewardSizeULorMS        = 60;
+
    case 'gcam25rt'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 32.5;
@@ -39,9 +40,9 @@ end
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 40;
        
-   case 'gcam44lt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 50;
+%    case 'gcam44lt' %changed back to HvV_center_vertical 12/10/13
+%         requestRewardSizeULorMS = 0;
+%         rewardSizeULorMS        = 50;
        
    case 'gcam40lt'  
         requestRewardSizeULorMS = 0;

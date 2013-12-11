@@ -540,7 +540,7 @@ end
 trials = trials(1):trials(2);
 
 stoppedWithin = 4; %2
-respondedWithin = [2 3]; %[.4 1]; %1
+respondedWithin = [0.4 5]; %[.4 1]; %1
 onlyCorrect = false;
 noAfterErrors = false;
 worstFactor = .7; %.1  %%%???
@@ -582,7 +582,7 @@ trials = trials( ...
 c = getUniformSpectrum(normalize(onsets));
 
 %pts = [-.8 respondedWithin(1)]; %-1.5*frameDur]; %last frame suspect -- if reinforcement phase ends before exposure does, probably turns led off prematurely
-pts = [-.5 respondedWithin(1)];
+pts = [-1 respondedWithin(1)];
 pts = linspace(pts(1),pts(2),1+round(diff(pts)/frameDur));
 
 fig = figure;
@@ -689,11 +689,11 @@ for ind = 1:length(leds)
 end
 
 bg = dfof{2}-dfof{1};
-
+bg_im = im{2}-im{1};
  show(nanmedianMW(bg),pts,[pre 'blue-green dfof'],[1 99],@cb);
 
  [f p] = uiputfile('*.mat','output file');
- save(fullfile(p,f),'bg','targ','correct','trials','pts')
+ save(fullfile(p,f),'bg','bg_im','targ','correct','trials','pts','onsets','starts')
 keyboard
 end %%% biAnalysis
 
@@ -872,8 +872,11 @@ if ~isempty(trials)
 %     show(nanmedianMW(dfof),ptLs,[pre '.all trials (dF/F)'],[1 99],@cb);
 %     show(nanmedianMW(dfof(targ(trials)>0,:,:,:)) - nanmedianMW(dfof(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right (dF/F)'],[1 99],@cb);
 %     
+
+        baseline = squeeze(prctile(double(data(round(size(data,1)*0.25):end,:,:)),20));
+        
         for tr = 1:size(im,1);
-        baseline = squeeze(nanmedianMW(im(tr,ptLs<0,:,:),2));
+        %baseline = squeeze(nanmedianMW(im(tr,ptLs<0,:,:),2));
         for fr = 1:size(im,2)
             dfof(tr,fr,:,:) = (squeeze(im(tr,fr,:,:))-baseline)./baseline;
         end

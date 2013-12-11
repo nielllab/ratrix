@@ -22,7 +22,13 @@ msAirpuff                 =msPenalty;
 
 switch subjIDs{1}
    
-  
+     case 'g62b1lt'     %started GoToBlack 12/10/13     
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 85; 
+       
+     case 'g54a11rt'   %switched from HvV to GoToBlack 12/10/13
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 80;  
   
 
    

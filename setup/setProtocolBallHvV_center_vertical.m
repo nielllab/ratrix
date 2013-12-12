@@ -37,7 +37,7 @@ switch subjIDs{1}
     
    case 'gcam39tt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 30;    
+        rewardSizeULorMS        = 25;    
       
 %    case 'g54a11rt'   %changed to GoToBlack 12/10/13
 %         requestRewardSizeULorMS = 0;

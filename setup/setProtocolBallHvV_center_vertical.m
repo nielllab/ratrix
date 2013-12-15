@@ -33,7 +33,7 @@ switch subjIDs{1}
    
    case 'gcam44lt'  %changed back 12/10/13
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 45; 
+        rewardSizeULorMS        = 50; 
     
    case 'gcam39tt'
         requestRewardSizeULorMS = 0;
@@ -45,11 +45,11 @@ switch subjIDs{1}
         
    case 'bfly4.7rt'          
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 65;    
+       rewardSizeULorMS        = 70;    
    
    case 'g62b3rt'          
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 85; 
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 90; 
   
 %    case 'g62b1lt'       %changed to GoToBlack 12/10/13   
 %        requestRewardSizeULorMS = 0;
@@ -57,7 +57,7 @@ switch subjIDs{1}
       
    case 'g54b8tt'   
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;   
+       rewardSizeULorMS        = 50;   
        
     otherwise
         warning('unrecognized mouse, using defaults')

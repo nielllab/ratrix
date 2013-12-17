@@ -27,8 +27,8 @@ switch subjIDs{1}
        rewardSizeULorMS        = 90; 
        
      case 'g54a11rt'   %switched from HvV to GoToBlack 12/10/13
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 80;  
+       requestRewardSizeULorMS = 10;
+       rewardSizeULorMS        = 90;  
   
 
    

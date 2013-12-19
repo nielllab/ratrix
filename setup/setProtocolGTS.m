@@ -61,7 +61,7 @@ switch subjIDs{1}
        rewardSizeULorMS        = 25;
        
    case 'g62b4ln'
-       requestRewardSizeULorMS = 20;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 90;
       
    case 'g62.8lt' 
@@ -72,14 +72,14 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 40;
        
-   case 'g625ln'
-       requestRewardSizeULorMS = 10;
-       rewardSizeULorMS        = 100;  
+%    case 'g625ln' % Switched GTB 12/19/13
+%        requestRewardSizeULorMS = 10;
+%        rewardSizeULorMS        = 100;  
+%        
        
-       
-   case 'g54bb2'
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 55;
+%    case 'g54bb2' % Switched GTB 12/19/13
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 55;
        
     
          

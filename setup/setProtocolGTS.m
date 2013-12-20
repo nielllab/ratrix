@@ -27,42 +27,18 @@ if ~isscalar(subjIDs)
 end
 switch subjIDs{1}
 
-      
-%    case 'g625ln'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100; 
-       
+        
    case 'g54aa7tt'
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 32.5;
     
-   case 'gcam32tt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 17.5;
-        
-   case 'gcam32ln'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 27.5;
-
-   case 'gcam50tt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 20;
-   
-   case 'gcam46tt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 20;
-  
    case 'gcam51ln'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 20;
+        rewardSizeULorMS        = 18.5;
         
-   case 'gcam39rt'
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 25;
-       
    case 'g62b4ln'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 90;
+       rewardSizeULorMS        = 100;
       
    case 'g62.8lt' 
        requestRewardSizeULorMS = 0;

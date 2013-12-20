@@ -28,10 +28,6 @@ end
  switch subjIDs{1}
 
   
-%    case 'gcam45tt'
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 60;
-
    case 'gcam25rt'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 30;
@@ -44,15 +40,7 @@ end
 %         requestRewardSizeULorMS = 0;
 %         rewardSizeULorMS        = 50;
        
-   case 'gcam40lt'  
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 50;
-  
            
-   case 'gcam53ln'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 25;          
-        
        
     otherwise
         warning('unrecognized mouse, using defaults')

@@ -24,7 +24,7 @@ switch subjIDs{1}
    
      case 'g62b1lt'     %started GoToBlack 12/10/13   
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 90; 
+       rewardSizeULorMS        = 100; 
        
      case 'g54a11rt'   %switched from HvV 12/10/13
        requestRewardSizeULorMS = 0;
@@ -40,7 +40,7 @@ switch subjIDs{1}
        
      case 'g54b8tt' %Switched from HvV 12/19/13
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 60;   
+       rewardSizeULorMS        = 55;   
        
 
    

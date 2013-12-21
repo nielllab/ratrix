@@ -30,7 +30,7 @@ switch subjIDs{1}
         
    case 'g54aa7tt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 32.5;
+       rewardSizeULorMS        = 35;
     
    case 'gcam51ln'
         requestRewardSizeULorMS = 0;
@@ -46,7 +46,7 @@ switch subjIDs{1}
        
    case 'g54b12rt' 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;
+       rewardSizeULorMS        = 50;
        
 %    case 'g625ln' % Switched GTB 12/19/13
 %        requestRewardSizeULorMS = 10;

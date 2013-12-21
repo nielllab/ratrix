@@ -96,8 +96,9 @@ stim.dms.cueLatency = 0;
 stim.dms.cueDuration = inf;
 stim.dms = [];
 
-
-ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
+ ballSM = setReinfAssocSecs(trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance),1);
+ %change stim to stay on for 1 sec after
+ 
 ballTM = ball(percentCorrectionTrials,sm,noRequest);
 ts1 = trainingStep(ballTM, ballSM, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %ball
 

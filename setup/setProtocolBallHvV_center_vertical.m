@@ -114,7 +114,7 @@ targetOrientations = pi/2;
 distractorOrientations = 0;
 
 stim.stim = orientedGabors(pixPerCycs,{distractorOrientations [] targetOrientations},'abstract',mean,radius,contrast,thresh,normalizedPosition,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[],[],axis);
- ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
+
  ballTM = ball(percentCorrectionTrials,sm,noRequest);
  
  ballSM = setReinfAssocSecs(trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance),1);

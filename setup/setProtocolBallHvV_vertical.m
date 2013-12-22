@@ -28,30 +28,19 @@ end
  switch subjIDs{1}
 
   
-%    case 'gcam45tt'
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 60; 
    case 'gcam25rt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 32.5;
+        rewardSizeULorMS        = 30;
         
    case 'bfly24lt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;
+       rewardSizeULorMS        = 45;
        
-   case 'gcam44lt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 50;
+%    case 'gcam44lt' %changed back to HvV_center_vertical 12/10/13
+%         requestRewardSizeULorMS = 0;
+%         rewardSizeULorMS        = 50;
        
-   case 'gcam40lt'  
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 40;
-  
            
-   case 'gcam53ln'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 30;          
-        
        
     otherwise
         warning('unrecognized mouse, using defaults')

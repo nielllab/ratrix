@@ -11,7 +11,7 @@ end
 sm=makeStandardSoundManager();
 
 rewardSizeULorMS          =80;
-requestRewardSizeULorMS   =80;
+requestRewardSizeULorMS   =5;
 requestMode               ='first';
 msPenalty                 =3500;
 fractionOpenTimeSoundIsOn =1;
@@ -31,33 +31,28 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 40;
    
-%    case 'gcam44lt'
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 45; 
+   case 'gcam44lt'  %changed back 12/10/13
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 60; 
     
-   case 'gcam39tt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 30;    
+
       
-   case 'g54a11rt'   
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 80;    
+%    case 'g54a11rt'   %changed to GoToBlack 12/10/13
+%         requestRewardSizeULorMS = 0;
+%         rewardSizeULorMS        = 80;    
         
-   case 'bfly4.7rt'          
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 65;    
-   
+
    case 'g62b3rt'          
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 70; 
+       rewardSizeULorMS        = 100; 
   
-   case 'g62b1lt'          
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 70; 
+%    case 'g62b1lt'       %changed to GoToBlack 12/10/13   
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 70; 
       
-   case 'g54b8tt'   
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;   
+%    case 'g54b8tt' % Switched to GTB 12/19/13  
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 60;   
        
     otherwise
         warning('unrecognized mouse, using defaults')
@@ -119,7 +114,7 @@ targetOrientations = pi/2;
 distractorOrientations = 0;
 
 stim.stim = orientedGabors(pixPerCycs,{distractorOrientations [] targetOrientations},'abstract',mean,radius,contrast,thresh,normalizedPosition,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[],[],axis);
- ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
+
  ballTM = ball(percentCorrectionTrials,sm,noRequest);
  
  ballSM = setReinfAssocSecs(trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance),1);

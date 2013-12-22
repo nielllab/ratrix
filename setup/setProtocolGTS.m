@@ -27,59 +27,35 @@ if ~isscalar(subjIDs)
 end
 switch subjIDs{1}
 
-      
-%    case 'g625ln'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100; 
-       
+        
    case 'g54aa7tt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 32.5;
+       rewardSizeULorMS        = 35;
     
-   case 'gcam32tt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 22.5;
-        
-   case 'gcam32ln'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 27.5;
-
-   case 'gcam50tt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 22.5;
-   
-   case 'gcam46tt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 20;
-  
    case 'gcam51ln'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 20;
+        rewardSizeULorMS        = 18.5;
         
-   case 'gcam39rt'
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 22.5;
-       
    case 'g62b4ln'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 70;
+       rewardSizeULorMS        = 100;
       
    case 'g62.8lt' 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 50;
+       rewardSizeULorMS        = 35;
        
    case 'g54b12rt' 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;
+       rewardSizeULorMS        = 50;
        
-   case 'g625ln'
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 90;  
+%    case 'g625ln' % Switched GTB 12/19/13
+%        requestRewardSizeULorMS = 10;
+%        rewardSizeULorMS        = 100;  
+%        
        
-       
-   case 'g54bb2'
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;
+%    case 'g54bb2' % Switched GTB 12/19/13
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 55;
        
     
          
@@ -127,7 +103,7 @@ stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,
 ballSM = setReinfAssocSecs(trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance),1);
 
 
-ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
+
 ballTM = ball(percentCorrectionTrials,sm,noRequest);
 ts1 = trainingStep(ballTM, ballSM, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %ball
 

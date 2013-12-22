@@ -29,7 +29,7 @@ switch subjIDs{1}
     
     case 'g54aa7lt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;
+       rewardSizeULorMS        = 25;
    
    case 'gcam44lt'  %changed back 12/10/13
         requestRewardSizeULorMS = 0;
@@ -44,7 +44,7 @@ switch subjIDs{1}
 
    case 'g62b3rt'          
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100; 
+       rewardSizeULorMS        = 90; 
   
 %    case 'g62b1lt'       %changed to GoToBlack 12/10/13   
 %        requestRewardSizeULorMS = 0;

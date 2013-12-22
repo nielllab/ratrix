@@ -13,7 +13,7 @@ sm=makeStandardSoundManager();
 rewardSizeULorMS          =80;
 requestRewardSizeULorMS   =5;
 requestMode               ='first';
-msPenalty                 =3500;
+msPenalty                 =3500;     %consider changing this also in future
 fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
@@ -29,7 +29,7 @@ switch subjIDs{1}
     
     case 'g54aa7lt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;
+       rewardSizeULorMS        = 25;
    
    case 'gcam44lt'  %changed back 12/10/13
         requestRewardSizeULorMS = 0;
@@ -44,7 +44,7 @@ switch subjIDs{1}
 
    case 'g62b3rt'          
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100; 
+       rewardSizeULorMS        = 115; 
   
 %    case 'g62b1lt'       %changed to GoToBlack 12/10/13   
 %        requestRewardSizeULorMS = 0;
@@ -97,19 +97,6 @@ axis                   = pi/2;
 
 
 
-
-
-
-% s = orientedGabors([pixPerCycs],[targetOrientations],[distractorOrientations],mean,radius,contrasts,thresh,normalizedPosition,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[waveform],[normalizedSizeMethod],[axis])
-% orientations in radians
-% mean, contrasts, normalizedPosition (0 <= value <= 1)
-
-% stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,zoom,interTrialLuminance);
-% ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
-%;
-% ts1 = trainingStep(ballTM, ballSM, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %ball
-
-%%% abstract orientation (e.g. 0 = go left, pi/2 = go right)
 targetOrientations = pi/2;
 distractorOrientations = 0;
 

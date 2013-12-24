@@ -14,7 +14,7 @@ sm=makeStandardSoundManager();
 rewardSizeULorMS          =80;
 requestRewardSizeULorMS   =30;
 requestMode               ='first';
-msPenalty                 =1000;
+msPenalty                 =3000;
 fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
@@ -72,6 +72,7 @@ stim.slowSecs = 1;
 stim.positional = false;
 stim.cue = true;
 stim.soundClue = true;
+stim.stopHUD = false;
 
 pixPerCycs             = [100]; %*10^9;
 targetOrientations     = [-1 1]*pi/4;
@@ -93,9 +94,9 @@ stim.dms.cueDuration = .5;
 stim.dms = [];
 
 %stim to stay on 1 sec after answer
-ballSM = setReinfAssocSecs(trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance),1);
+ballSM = setReinfAssocSecs(trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance),msPenalty/1000);
 
-ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
+%ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
 ballTM = ball(percentCorrectionTrials,sm,noRequest);
 ts1 = trainingStep(ballTM, ballSM, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %ball
 

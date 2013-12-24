@@ -111,6 +111,7 @@ stim.slowSecs = 1;
 stim.positional = false;
 stim.cue = true;
 stim.soundClue = false;
+stim.stopHUD = false;
 
 pixPerCycs             = [100]; %*10^9;
 targetOrientations     = [0 1]*pi/2;
@@ -127,7 +128,7 @@ stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,
 ballSM = setReinfAssocSecs(trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance),1);
 
 
-ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
+%ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
 ballTM = ball(percentCorrectionTrials,sm,noRequest);
 ts1 = trainingStep(ballTM, ballSM, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %ball
 
@@ -135,5 +136,5 @@ p=protocol('mouse',{ts1});
 
 stepNum=uint8(1);
 subj=getSubjectFromID(r,subjIDs{1});
-[subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'LY01 (40,80), R=36','edf');
+[subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'???','edf');
 end

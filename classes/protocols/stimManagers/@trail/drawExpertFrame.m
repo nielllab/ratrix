@@ -28,14 +28,22 @@ elseif true %shouldn't be necessary, but ptb bug: a fillrect grey below screws u
     dontclear = 1;
     if isa(s.stim,'stimManager')
         [fp, itl] = determineColorPrecision(trialManager, getInterTrialLuminance(s.stim), []); %is this slow?  cache it.
-        if fp ~= 0
-            error('haven''t fully solved this')
-        end
-        fill = [repmat(itl,1,3) expertCache.clutSize];
     else
-        fill = black;
+        [fp, itl] = determineColorPrecision(trialManager, getInterTrialLuminance(s), []); %hm, grey doesn't work for "go to black" (stim = flip)
+        if ~isempty(s.dms) && (fp~=0 || itl~=0)
+            fp
+            itl
+            warning('fp or itl not good for dms, overriding')
+            fp = 0;
+            itl = 0; %is this best?  depend on black when dms?
+        end
     end
-    % should add a check that fill is black if we're doing dms -- we depend on that
+    
+    if fp ~= 0
+        error('haven''t fully solved this')
+    end
+    fill = [repmat(itl,1,3) expertCache.clutSize];
+    
     Screen('FillRect', window, fill, destRect);
 else
     dontclear = 0;
@@ -89,18 +97,21 @@ switch phaseRecords(phaseNum).phaseType
         
         %note: request rewards still not working...
         
-        %f = @(x) reshape(repmat(x,1,2),[1 4]); %causes huge frame drops!
-        
-        slowRect = f(s.slow) .* [-1 -1 1 1] + f(2*s.initialPos - p); % seems to be [left bottom right top]?
-        
-        %our slow constraint is actually rectangualar, but we draw ovals...
-        Screen('FillOval', window, white, slowRect, 2*max(s.slow));
-        
-        Screen('FrameOval', window, red, slowRect, width);
-        
-        Screen('DrawDots', window, s.initialPos, width, white, center, dotType);
-        
-        Screen('DrawDots', window, s.initialPos, centerWidth, blue, center, dotType);
+        if isnan(s.stopHUD) || s.stopHUD
+            
+            %f = @(x) reshape(repmat(x,1,2),[1 4]); %causes huge frame drops!
+            
+            slowRect = f(s.slow) .* [-1 -1 1 1] + f(2*s.initialPos - p); % seems to be [left bottom right top]?
+            
+            %our slow constraint is actually rectangualar, but we draw ovals...
+            Screen('FillOval', window, white, slowRect, 2*max(s.slow));
+            
+            Screen('FrameOval', window, red, slowRect, width);
+            
+            Screen('DrawDots', window, s.initialPos, width, white, center, dotType);
+            
+            Screen('DrawDots', window, s.initialPos, centerWidth, blue, center, dotType);
+        end
         
     case 'discrim'
         

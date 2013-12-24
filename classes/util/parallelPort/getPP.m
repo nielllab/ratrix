@@ -5,7 +5,8 @@ if isempty(noPP)
         [~,b] = getMACaddress;
         noPP = ismember(b,{...
             '08002700F8DC',... % erik's dev machine has no pp :(
-            '08002700D40D' ... % sue's vaio
+            '08002700D40D',... % sue's vaio
+            '0800270058E1' %wait, this is erik's dev machine, what is that other one?
             });
     catch
         noPP = true;

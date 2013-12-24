@@ -13,7 +13,7 @@ sm=makeStandardSoundManager();
 rewardSizeULorMS          =80;
 requestRewardSizeULorMS   =0;
 requestMode               ='first';
-msPenalty                 =3500;
+msPenalty                 =3500;       %consider changing this also in future
 fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
@@ -24,7 +24,7 @@ switch subjIDs{1}
    
      case 'g62b1lt'     %started GoToBlack 12/10/13   
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 95; 
+       rewardSizeULorMS        = 115; %changed by joe 12/23/13
        
      case 'g54a11rt'   %switched from HvV 12/10/13
        requestRewardSizeULorMS = 0;
@@ -36,7 +36,7 @@ switch subjIDs{1}
        
      case 'g625ln' % Switched from GTS 12/19/13
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 85;  
+       rewardSizeULorMS        = 95;  %changed by joe 12/23/13
        
      case 'g54b8tt' %Switched from HvV 12/19/13
        requestRewardSizeULorMS = 0;

@@ -14,6 +14,10 @@ if dur > 0 % && strcmp(class(tm),'nAFC')
     startFrame = lastFrame;    
     scale      = getScaleFactor(sm.correctStim);
     numFrames  = ceil(dur/ifi);
+    
+    %consider adding an itl at the end so that the last stim frame doesn't
+    %stay up during indefinitely long calculation of next trial
+    
 else %old way
     out        = double(getInterTrialLuminance(sm));
     type       = 'static';

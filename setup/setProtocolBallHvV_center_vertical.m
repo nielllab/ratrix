@@ -29,11 +29,11 @@ switch subjIDs{1}
     
     case 'g54aa7lt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 25;
+       rewardSizeULorMS        = 22; %changed by joe from 25 12/25/13
    
    case 'gcam44lt'  %changed back 12/10/13
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 60; 
+        rewardSizeULorMS        = 40; %changed by joe from 60 to 45 12/25/13. changed again afer session on 12/'25/13 to 40
     
 
       
@@ -42,9 +42,9 @@ switch subjIDs{1}
 %         rewardSizeULorMS        = 80;    
         
 
-   case 'g62b3rt'          
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 115; 
+%    case 'g62b3rt'          %changed to GoToBlack 12/25/13
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 115; 
   
 %    case 'g62b1lt'       %changed to GoToBlack 12/10/13   
 %        requestRewardSizeULorMS = 0;

@@ -32,7 +32,11 @@ switch subjIDs{1}
   
      case 'g54bb2' % Switched from GTS 12/19/13
        requestRewardSizeULorMS = 0;
+<<<<<<< HEAD
        rewardSizeULorMS        = 50;  %changed from 55 by joe 12/25/13
+=======
+       rewardSizeULorMS        = 45;  %changed from 55 by joe 12/25/13
+>>>>>>> cffe15b57a58931ac5c094f045abc00dde285656
        
      case 'g625ln' % Switched from GTS 12/19/13
        requestRewardSizeULorMS = 0;
@@ -40,16 +44,23 @@ switch subjIDs{1}
        
      case 'g54b8tt' %Switched from HvV 12/19/13
        requestRewardSizeULorMS = 0;
+<<<<<<< HEAD
        rewardSizeULorMS        = 50;   %changed from 55 by joe 12/25/13
+=======
+       rewardSizeULorMS        = 45;   %changed from 55 by joe 12/25/13
+>>>>>>> cffe15b57a58931ac5c094f045abc00dde285656
        
 
       case 'g62b3rt'           %started GoToBlack 12/25?/13 from HvV
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 115; 
+<<<<<<< HEAD
        
        case 'g62b7lt'           %started GoToBlack 12/29/13 
        requestRewardSizeULorMS = 20;
        rewardSizeULorMS        = 115; 
+=======
+>>>>>>> cffe15b57a58931ac5c094f045abc00dde285656
        
             
     otherwise

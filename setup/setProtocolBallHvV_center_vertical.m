@@ -33,11 +33,8 @@ switch subjIDs{1}
    
    case 'gcam44lt'  %changed back 12/10/13
         requestRewardSizeULorMS = 0;
-<<<<<<< HEAD
-        rewardSizeULorMS        = 40; %changed by joe from 60 to 45 12/25/13. changed again afer session on 12/'25/13 to 40
-=======
-        rewardSizeULorMS        = 45; %changed by joe from 60 12/25/13
->>>>>>> cffe15b57a58931ac5c094f045abc00dde285656
+        rewardSizeULorMS        = 40; 
+
     
 
       

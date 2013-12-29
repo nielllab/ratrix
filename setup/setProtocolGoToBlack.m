@@ -47,6 +47,10 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 115; 
        
+       case 'g62b7lt'           %started GoToBlack 12/29/13 
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 115; 
+       
             
     otherwise
         warning('unrecognized mouse, using defaults')

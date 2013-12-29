@@ -56,6 +56,10 @@ switch subjIDs{1}
 %    case 'g54bb2' % Switched GTB 12/19/13
 %        requestRewardSizeULorMS = 0;
 %        rewardSizeULorMS        = 55;
+
+case 'g62b7rt'
+       requestRewardSizeULorMS = 20; %started GTS on 12/29/13
+       rewardSizeULorMS        = 115; 
        
     
          

@@ -48,7 +48,7 @@ switch subjIDs{1}
        
    case 'g54b12rt' 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 42.5;   %changed from 50 by joe 12/25/13
+       rewardSizeULorMS        = 55;
 
        
 %    case 'g625ln' % Switched GTB 12/19/13

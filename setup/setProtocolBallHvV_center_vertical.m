@@ -29,11 +29,11 @@ switch subjIDs{1}
     
     case 'g54aa7lt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 22; %changed by joe from 25 12/25/13
+       rewardSizeULorMS        = 25;
    
    case 'gcam44lt'  %changed back 12/10/13
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 40; 
+        rewardSizeULorMS        = 50; 
 
     
 

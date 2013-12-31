@@ -30,11 +30,11 @@ end
   
    case 'gcam25rt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 30;
+        rewardSizeULorMS        = 50;
         
    case 'bfly24lt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 41.5;  %changed by joe from 45 12/25/13
+       rewardSizeULorMS        = 45;  
        
 %    case 'gcam44lt' %changed back to HvV_center_vertical 12/10/13
 %         requestRewardSizeULorMS = 0;

@@ -39,16 +39,20 @@ switch subjIDs{1}
         
    case 'g62b4ln'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 77.5;  %changed from 90 by joe 12/25/13
+       rewardSizeULorMS        = 70;  
 
       
    case 'g62.8lt' 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 35;
+       rewardSizeULorMS        = 32.5;
        
    case 'g54b12rt' 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 55;
+       rewardSizeULorMS        = 50;
+       
+       case 'bfly1.5alt' 
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 115;
 
        
 %    case 'g625ln' % Switched GTB 12/19/13
@@ -60,9 +64,9 @@ switch subjIDs{1}
 %        requestRewardSizeULorMS = 0;
 %        rewardSizeULorMS        = 55;
 
-case 'g62b7rt'
-       requestRewardSizeULorMS = 20; %started GTS on 12/29/13
-       rewardSizeULorMS        = 115; 
+% case 'g62b7rt' %FDIC 12/30/13
+%        requestRewardSizeULorMS = 20; %started GTS on 12/29/13
+%        rewardSizeULorMS        = 115; 
        
     
          

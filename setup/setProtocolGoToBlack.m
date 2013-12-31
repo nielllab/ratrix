@@ -22,35 +22,39 @@ msAirpuff                 =msPenalty;
 
 switch subjIDs{1}
    
+    case 'bfly1.5att' 
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 115;
+       
      case 'g62b1lt'     %started GoToBlack 12/10/13   
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 115;
+       rewardSizeULorMS        = 100;
        
      case 'g54a11rt'   %switched from HvV 12/10/13
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 90;  
+       rewardSizeULorMS        = 100;  
   
      case 'g54bb2' % Switched from GTS 12/19/13
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 60;
+       rewardSizeULorMS        = 70;
 
        
      case 'g625ln' % Switched from GTS 12/19/13
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 105;  %changed by joe 12/25/13
+       rewardSizeULorMS        = 100;  
        
      case 'g54b8tt' %Switched from HvV 12/19/13
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 50;   %changed from 55 by joe 12/25/13
+       rewardSizeULorMS        = 50;   
 
 
       case 'g62b3rt'           %started GoToBlack 12/25?/13 from HvV
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100; 
+       rewardSizeULorMS        = 90; 
        
        case 'g62b7lt'           %started GoToBlack 12/29/13 
-       requestRewardSizeULorMS = 20;
-       rewardSizeULorMS        = 115; 
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 125; 
 
        
             

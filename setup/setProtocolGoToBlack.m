@@ -50,7 +50,7 @@ switch subjIDs{1}
 
       case 'g62b3rt'           %started GoToBlack 12/25?/13 from HvV
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 90; 
+       rewardSizeULorMS        = 80; 
        
        case 'g62b7lt'           %started GoToBlack 12/29/13 
        requestRewardSizeULorMS = 0;

@@ -30,7 +30,7 @@ end
   
    case 'gcam25rt'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 50;
+        rewardSizeULorMS        = 60;
         
    case 'bfly24lt'
        requestRewardSizeULorMS = 0;

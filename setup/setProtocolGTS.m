@@ -48,11 +48,11 @@ switch subjIDs{1}
        
    case 'g54b12rt' 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 45;
+       rewardSizeULorMS        = 60;
        
        case 'bfly1.5alt' 
-       requestRewardSizeULorMS = 20;
-       rewardSizeULorMS        = 115;
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 130;
 
        
 %    case 'g625ln' % Switched GTB 12/19/13

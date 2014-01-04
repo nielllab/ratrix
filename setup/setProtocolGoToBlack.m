@@ -23,16 +23,16 @@ msAirpuff                 =msPenalty;
 switch subjIDs{1}
    
     case 'bfly1.5att' 
-       requestRewardSizeULorMS = 20;
-       rewardSizeULorMS        = 115;
-       
-     case 'g62b1lt'     %started GoToBlack 12/10/13   
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 90;
+       rewardSizeULorMS        = 130;
        
-     case 'g54a11rt'   %switched from HvV 12/10/13
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100;  
+%      case 'g62b1lt'     %moved to HvV_center 1/4/14   
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 115;
+       
+%      case 'g54a11rt'   %retired 1/4/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 100;  
   
 %      case 'g54bb2' % Switched from GTS 12/19/13
 %        requestRewardSizeULorMS = 0;
@@ -41,20 +41,20 @@ switch subjIDs{1}
        
      case 'g625ln' % Switched from GTS 12/19/13
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100;  
+       rewardSizeULorMS        = 115;  
        
-     case 'g54b8tt' %Switched from HvV 12/19/13
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 50;   
+%      case 'g54b8tt' %retired 1/4/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 50;   
 
 
-      case 'g62b3rt'           %started GoToBlack 12/25?/13 from HvV
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 85; 
+%       case 'g62b3rt'           %switched to HvV_center 1/4/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 85; 
        
        case 'g62b7lt'           %started GoToBlack 12/29/13 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 125; 
+       rewardSizeULorMS        = 130; 
 
        
             

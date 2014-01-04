@@ -27,27 +27,29 @@ if ~isscalar(subjIDs)
 end
 switch subjIDs{1}
     
-    case 'g54aa7lt'
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 27.5;
+%     case 'g54aa7lt' %changed to HvV 1/4/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 60;
    
-   case 'gcam44lt'  %changed back 12/10/13
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 50; 
+%    case 'gcam44lt'  %changed to HvV 1/4/14
+%         requestRewardSizeULorMS = 0;
+%         rewardSizeULorMS        = 45; 
 % case 'bfly1.5att' 
 %        requestRewardSizeULorMS = 20;
 %        rewardSizeULorMS        = 115;
     
-
+case 'g62b1lt'     %moved to HvV_center 1/4/14   
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 115;
       
 %    case 'g54a11rt'   %changed to GoToBlack 12/10/13
 %         requestRewardSizeULorMS = 0;
 %         rewardSizeULorMS        = 80;    
         
 
-%    case 'g62b3rt'          %changed to GoToBlack 12/25/13
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 115; 
+   case 'g62b3rt'          %changed 1/4/14
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 115; 
   
 %    case 'g62b1lt'       %changed to GoToBlack 12/10/13   
 %        requestRewardSizeULorMS = 0;

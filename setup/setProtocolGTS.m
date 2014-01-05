@@ -10,8 +10,8 @@ end
 
 sm=makeStandardSoundManager();
 
-rewardSizeULorMS          =80;
-requestRewardSizeULorMS   =20;
+rewardSizeULorMS          =130;
+requestRewardSizeULorMS   =0;
 requestMode               ='first';
 msPenalty                 =3500;          %consider changing this also in future
 fractionOpenTimeSoundIsOn =1;
@@ -50,7 +50,7 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 60;
        
-       case 'bfly1.5aLT' 
+       case 'bfly1.5alt' 
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 130;
 

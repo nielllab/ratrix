@@ -22,7 +22,7 @@ msAirpuff                 =msPenalty;
 
 switch subjIDs{1}
    
-    case 'bfly1.5att' 
+    case 'bfly1a.5tt' 
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 130;
        

@@ -30,29 +30,35 @@ switch subjIDs{1}
         
    case 'g54aa7tt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 30; 
+       rewardSizeULorMS        = 30;
+       msPenalty                 =3500; 
 
     
    case 'gcam51ln'
         requestRewardSizeULorMS = 0;
         rewardSizeULorMS        = 17;
+        msPenalty                 =3500; 
         
    case 'g62b4ln'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 55;  
+       rewardSizeULorMS        = 55;
+       msPenalty                 =3500; 
 
       
    case 'g62.8lt' 
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 32.5;
+       msPenalty                 =3500; 
        
    case 'g54b12rt' 
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 60;
+       msPenalty                 =3500; 
        
    case 'bfly1a.5lt' 
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 130;
+       msPenalty                 =3500; 
 
        
 %    case 'g625ln' % Switched GTB 12/19/13

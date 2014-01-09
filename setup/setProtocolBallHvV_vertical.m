@@ -43,7 +43,7 @@ end
         
    case 'bfly24lt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 50; 
+       rewardSizeULorMS        = 55; 
        msPenalty                 =3500; 
        
 

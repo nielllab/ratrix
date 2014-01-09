@@ -42,7 +42,7 @@ switch subjIDs{1}
        
      case 'g625ln' % Switched from GTS 12/19/13
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 115;
+       rewardSizeULorMS        = 120;
        msPenalty               =3500;
        
 %      case 'g54b8tt' %retired 1/4/14

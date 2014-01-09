@@ -41,7 +41,7 @@ switch subjIDs{1}
         
    case 'g62b4ln'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 55;
+       rewardSizeULorMS        = 45;
        msPenalty                 =3500; 
 
       
@@ -71,7 +71,7 @@ switch subjIDs{1}
 %        rewardSizeULorMS        = 55;
 
 % case 'g62b7rt' %FDIC 12/30/13
-%        requestRewardSizeULorMS = 20; %started GTS on 12/29/13
+%        requestRewardSizeULorMS = 20; 
 %        rewardSizeULorMS        = 115; 
        
     

@@ -41,7 +41,7 @@ switch subjIDs{1}
         
    case 'g62b4ln'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 45;
+       rewardSizeULorMS        = 55;
        msPenalty                 =3500; 
 
       
@@ -50,18 +50,13 @@ switch subjIDs{1}
        rewardSizeULorMS        = 55;
        msPenalty                 =3500; 
        
-   case 'g54b12rt' 
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 60;
-       msPenalty                 =3500; 
-       
    case 'bfly1a.5lt' 
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 130;
        msPenalty                 =3500; 
  case 'g62b.5lt'           %started GoToBlack 1/9/14 
-       requestRewardSizeULorMS = 20
-       rewardSizeULorMS        = 130; 
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 120; 
        msPenalty               =3500;
        
 %    case 'g625ln' % Switched GTB 12/19/13

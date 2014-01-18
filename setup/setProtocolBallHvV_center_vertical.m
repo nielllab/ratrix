@@ -40,8 +40,8 @@ switch subjIDs{1}
     
 case 'g62b1lt'     %moved to HvV_center 1/4/14   
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 140;
-       msPenalty                 =3600; 
+       rewardSizeULorMS        = 150;
+       msPenalty                 =3500; 
       
 %    case 'g54a11rt'   %changed to GoToBlack 12/10/13
 %         requestRewardSizeULorMS = 0;

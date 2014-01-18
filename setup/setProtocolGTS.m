@@ -32,7 +32,7 @@ switch subjIDs{1}
    case 'g54aa7tt'
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 22.5;
-       msPenalty                 =3500; 
+       msPenalty                 =3000; 
         stim.stopHUD = false; 
     
    case 'gcam51ln'
@@ -63,7 +63,7 @@ switch subjIDs{1}
    case 'g625ln' % Switched 1/17/14
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 150;  
-       msPenalty               =3700;
+       msPenalty               =4000;
        
        
 %    case 'g54bb2' % Switched GTB 12/19/13

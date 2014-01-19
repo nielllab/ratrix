@@ -33,7 +33,7 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 22.5;
        msPenalty                 =3000; 
-        stim.stopHUD = false; 
+       stim.stopHUD = false; 
     
    case 'gcam51ln'
         requestRewardSizeULorMS = 0;

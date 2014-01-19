@@ -55,6 +55,7 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 100;
        msPenalty                 =3500; 
+       
  case 'g62b.5lt'           %started GoToBlack 1/9/14 
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 120; 
@@ -80,7 +81,7 @@ switch subjIDs{1}
         warning('unrecognized mouse, using defaults')
 end
 
-noRequest = constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
+% noRequest = constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 
 percentCorrectionTrials = .5;
 

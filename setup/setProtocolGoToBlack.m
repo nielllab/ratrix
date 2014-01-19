@@ -24,7 +24,7 @@ switch subjIDs{1}
    
     case 'bfly1.5att' 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100;
+       rewardSizeULorMS        = 90;
        msPenalty               =3500;
        
 %      case 'g62b1lt'     %moved to HvV_center 1/4/14   
@@ -56,12 +56,17 @@ switch subjIDs{1}
        
        case 'g62b7lt'           %started GoToBlack 12/29/13 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 90; 
+       rewardSizeULorMS        = 80; 
        msPenalty               =3500;
  case 'g62c.2rt'           %started GoToBlack 1/10/14 
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 115; 
        msPenalty               =3500;
+        case 'g62b.5lt'           %started GoToBlack 1/19/14 
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 120; 
+       msPenalty               =3500;
+
        
             
     otherwise

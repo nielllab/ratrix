@@ -31,9 +31,9 @@ switch subjIDs{1}
         
    case 'g54aa7tt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 22.5;
-       msPenalty                 =3000; 
-        stim.stopHUD = false; 
+       rewardSizeULorMS        = 27;
+       msPenalty                 =3500; 
+       
     
    case 'gcam51ln'
         requestRewardSizeULorMS = 0;
@@ -53,12 +53,13 @@ switch subjIDs{1}
        
    case 'bfly1a.5lt' 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100;
+       rewardSizeULorMS        = 90;
        msPenalty                 =3500; 
- case 'g62b.5lt'           %started GoToBlack 1/9/14 
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 120; 
-       msPenalty               =3500;
+       
+%  case 'g62b.5lt'           %started GoToBlack 1/9/14 
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 120; 
+%        msPenalty               =3500;
        
    case 'g625ln' % Switched 1/17/14
        requestRewardSizeULorMS = 0;

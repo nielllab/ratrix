@@ -47,7 +47,7 @@ switch subjIDs{1}
         
    case 'g62b4ln'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 65;
+       rewardSizeULorMS        = 80;
        msPenalty                 =3500; 
 
       
@@ -68,7 +68,7 @@ switch subjIDs{1}
        
    case 'g625ln' % Switched 1/17/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 150;  
+       rewardSizeULorMS        = 200;  
        msPenalty               =4000;
        
        

@@ -30,7 +30,7 @@ switch subjIDs{1}
 
    case 'bfly1a.5tt' 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 130;
+       rewardSizeULorMS        = 110;
        msPenalty               =3500; 
        
        
@@ -53,12 +53,12 @@ switch subjIDs{1}
       
    case 'g62.8lt' 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 45;
+       rewardSizeULorMS        = 50;
        msPenalty                 =3500; 
        
    case 'bfly1a.5lt' 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 90;
+       rewardSizeULorMS        = 80;
        msPenalty                 =3500; 
        
 %  case 'g62b.5lt'           %started GoToBlack 1/9/14 

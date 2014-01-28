@@ -59,7 +59,7 @@ if avoidPP % cache the read/write masks, only use one register each, use lptread
 end
 
 slow = false;
-prof = true;
+prof = false;
 expectedHz = 20 * 1000; % 300000;
 len = expectedHz*durMins*60;
 times = nan(1,len); %13GB for 90 mins @ 300kHz

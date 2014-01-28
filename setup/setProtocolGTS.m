@@ -61,10 +61,10 @@ switch subjIDs{1}
        rewardSizeULorMS        = 80;
        msPenalty                 =3500; 
        
-%  case 'g62b.5lt'           %started 1/28/14 
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 140; 
-%        msPenalty               =3500;
+ case 'g62b.5lt'           %started 1/28/14 
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 140; 
+       msPenalty               =3500;
        
    case 'g625ln' % Switched 1/17/14
        requestRewardSizeULorMS = 0;

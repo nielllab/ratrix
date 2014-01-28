@@ -55,7 +55,7 @@ case 'g62b1lt'     %moved to HvV_center 1/4/14
 
    case 'g62b3rt'          %changed 1/4/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 60; 
+       rewardSizeULorMS        = 90; 
        msPenalty               = 3600; 
   
 %    case 'g62b1lt'       %changed to GoToBlack 12/10/13   

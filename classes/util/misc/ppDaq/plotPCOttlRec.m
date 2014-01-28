@@ -1,4 +1,7 @@
 function plotPCOttlRec(f)
+dbstop if error
+close all
+
 if ~exist('f','var')
     base = fullfile('C:\','data','pcoTTLrecords');
     d = dir(fullfile(base,'*T*.mat'));
@@ -26,15 +29,17 @@ out = nan(length(x.times),length(x.cams)+1);
 tn = 1;
 b = [max(x.rec(1+(1:length(x.cams)),:),[],1) ; max(x.rec(2+length(x.cams):end,:),[],1)];
 for t=1:length(x.times)
-    if tn<=size(x.rec,2) %haven't verified this is legit
+    if tn <= size(x.rec,2) %haven't verified this is legit
         if x.times(t) > b(2,tn)
             tn = tn + 1;
         end
         
-        out(t,1) = x.times(t) >= x.rec(1,tn) && x.times(t) < b(1,tn);
-        
-        for i=1:length(x.cams)
-            out(t,i+1) = x.times(t) >= x.rec(1+i,tn) && x.times(t) < x.rec(1+length(x.cams)+i,tn);
+        if tn <= size(x.rec,2) %haven't verified this is legit
+            out(t,1) = x.times(t) >= x.rec(1,tn) && x.times(t) < b(1,tn);
+            
+            for i=1:length(x.cams)
+                out(t,i+1) = x.times(t) >= x.rec(1+i,tn) && x.times(t) < x.rec(1+length(x.cams)+i,tn);
+            end
         end
     end
 end
@@ -115,7 +120,6 @@ if length(x.cams)==2
         );
 end
 
-keyboard
 if false
     linkaxes(h,'x') %destroys previous y links!  :(  even linkprop won't work cuz the link object is singleton and links properties across all members
 end

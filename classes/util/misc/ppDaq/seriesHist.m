@@ -1,6 +1,6 @@
 function out = seriesHist(x,y,f,r,t,lab,ylab,xlab)
-if ~isvector(x) || ~(size(y,1)==length(x) || (isvector(y) && length(y)==length(x)))
-    error('x must be vector, length equal to number of rows in y')
+if ~isvector(x) || ~(size(y,1)==length(x) || (isvector(y) && length(y)==length(x))) || isempty(x)
+    error('x must be nonempty vector, length equal to number of rows in y')
 end
 
 lims = cellfun(@(f) f(y(:)),{@min @max});

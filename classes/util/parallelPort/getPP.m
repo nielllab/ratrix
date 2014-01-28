@@ -18,7 +18,7 @@ persistent matlab64;
 persistent win64;
 persistent b64;
 
-if any(cellfun(@isempty,{matlab64 win64 b64}))
+if isempty(matlab64) || isempty(win64) || isempty(b64) % slower: any(cellfun(@isempty,{matlab64 win64 b64}))
     
     matlab64 = false;
     win64 = false;

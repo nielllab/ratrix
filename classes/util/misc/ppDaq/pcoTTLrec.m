@@ -2,15 +2,20 @@ function pcoTTLrec
 old = cd('C:\Users\nlab\Desktop\ratrix\bootstrap');
 setupEnvironment;
 cd(old);
-dbstop if error
+
+if false
+    dbstop if error %doesn't seem to slow us down?
+end
 
 durMins = .5;
 writeDelayMs = 14; % if no binning, must be >[8,14,16] to avoid dma error (grabber<->memory) and frame drops (raid too slow?)
 
-cams = struct('trig',cellfun(@uint8,{7  5 },'UniformOutput',false), ... % could all share one trig
-    'busy',cellfun(@uint8,{15 11},'UniformOutput',false));
+cams = struct('trig',cellfun(@uint8,{7  5 },'UniformOutput',false), ... % could all share one trig (currently actually do share 7)
+              'busy',cellfun(@uint8,{15 11},'UniformOutput',false));
 % cams(1)=gondry
 % cams(2)=woody
+
+leds = uint8(5);
 
 ttls = []; %5:8;
 % 8   data              i/o indexPulse
@@ -24,21 +29,23 @@ addr = hex2dec('0378');
 
 avoidPP = true; % faster when true, but only works on win32
 if avoidPP % cache the read/write masks, only use one register each, use lptread/lptwrite
-    if any([cams.trig] > 9 || any([cams.trig] < 2)) %#ok<BDSCA>
+    if any([cams.trig] > 9) || any([cams.trig] < 2)
         error('bad trig pin')
     end
     
-    trigFalse = 0;
-    trigTrue = dec2bin(trigFalse,8);
-    trigTrue([cams.trig])='1';
-    trigTrue = bin2dec(trigTrue);
+    trigFalse = dec2bin(0,8);
+    trigFalse(leds      -1) = '1'; % -1 for pins2-9
+    trigTrue = trigFalse;    
+    trigTrue([cams.trig]-1) = '1'; % -1 for pins2-9
+    trigFalse = bin2dec(fliplr(trigFalse)); % flip for reasons :)
+    trigTrue  = bin2dec(fliplr(trigTrue )); % flip for reasons :)
     
     busyRead(10).bit = 6;
     busyRead(11).bit = 7;
     busyRead(12).bit = 5;
     busyRead(13).bit = 4;
     busyRead(15).bit = 3;
-    
+      
     statusReg = find(~cellfun(@isempty,{busyRead.bit}));
     if any(~ismember([[cams.busy] ttls], statusReg))
         error('bad busy or ttl pin')
@@ -47,13 +54,13 @@ if avoidPP % cache the read/write masks, only use one register each, use lptread
     [busyRead(:).inv] = deal(false);
     busyRead(11).inv = true;
     
-    readBusy = [busyRead([cams.busy]).bit];
+    readBusy = 8 - [busyRead([cams.busy]).bit]; % 8 - for reasons :)
     busyInv = [busyRead([cams.busy]).inv];
 end
 
 slow = false;
 prof = false;
-expectedHz = 300000;
+expectedHz = 20 * 1000; % 300000;
 len = expectedHz*durMins*60;
 times = nan(1,len); %13GB for 90 mins @ 300kHz
 
@@ -83,6 +90,13 @@ wait = nan;
 KbName('UnifyKeyNames')
 k = zeros(1,256);
 k(KbName('q')) = 1;
+% check w/mario if any way to use w/kbqueue...
+% ListenChar(2); % When used on Windows Vista or later (Vista, Windows-7, Windows-8, ...)
+%   with Matlab's Java GUI, you cannot use any KbQueue functions at the same
+%   time, ie., KbQueueCreate/Start/Stop/Check/Wait as well as KbWaitTrigger,
+%   KbEventFlush, KbEventAvail, and KbEventGet are off limits after any call
+%   to ListenChar, ListenChar(1), ListenChar(2), FlushEvents, CharAvail or
+%   GetChar.
 KbQueueCreate([],k);
 KbQueueStart;
 
@@ -98,7 +112,7 @@ times(i) = GetSecs;
 endT = times(i) + durMins*60;
 last = times(i);
 
-while ~KbQueueCheck && times(i) < endT
+while ~KbQueueCheck && times(i) < endT %KbQueueCheck is bottleneck, about 4x longer than GetSecs, more than half in IsOSX, ask mario if can speed up
     i = i + 1;
     if i > len
         error('exceded prealloc')
@@ -156,7 +170,6 @@ while ~KbQueueCheck && times(i) < endT
         
         if false
             %is there a flush or something?  these aren't coming out cuz of priority?
-            %fprintf('%d:%d mins remaining\n',f,round((m - f)*60));
             
             %consider disp etc
             s = sprintf('%d:%d remaining\n',f,round((m - f)*60));
@@ -187,7 +200,7 @@ end
     function out = getBusy
         if avoidPP
             out = fastDec2Bin(lptread(addr + 1));
-            out = out(readBusy);
+            out = out(readBusy) == '1';
             out(busyInv) = ~out(busyInv);
         else
             out = pp([cams.busy],[],slow,[],addr);
@@ -198,10 +211,18 @@ if prof
     profile off
 end
 
+% turn off LED
+if avoidPP
+    lptwrite(addr,0);
+else
+    pp(leds,false,slow,[],addr);
+end
+
 Priority(p);
 
 KbQueueStop;
 KbQueueRelease;
+% ListenChar(0);
 
 rec = rec(:,1:recN) - times(1);
 times = times(1:i) - times(1);

@@ -1,4 +1,4 @@
-13function r = setProtocolHvV_vertical(r,subjIDs)
+function r = setProtocolHvV_vertical(r,subjIDs)
 
 if ~isa(r,'ratrix')
     error('need a ratrix')
@@ -34,8 +34,8 @@ end
        
      case 'gcam44lt'  %changed 1/4/14
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 130; 
-        msPenalty                 =5500; 
+        rewardSizeULorMS        = 150; 
+        msPenalty                 =4500; 
         
 %    case 'gcam25rt' %retired 1/4/14
 %         requestRewardSizeULorMS = 0;

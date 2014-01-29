@@ -36,7 +36,7 @@ switch subjIDs{1}
        
    case 'g54aa7tt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 27;
+       rewardSizeULorMS        = 30;
        msPenalty                 =3500; 
        
     

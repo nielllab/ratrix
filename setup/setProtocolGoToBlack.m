@@ -56,10 +56,10 @@ switch subjIDs{1}
 %        rewardSizeULorMS        = 85; 
        
 
- case 'g62c.2rt'           %started GoToBlack 1/10/14 
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 90; 
-       msPenalty               =3500;
+%  case 'g62c.2rt'           %switched to HvV_center 1/30/14 
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 90; 
+%        msPenalty               =3500;
 
        
             

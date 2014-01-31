@@ -8,7 +8,8 @@ if false
 end
 
 durMins = .5;
-writeDelayMs = 14; % if no binning, must be >[8,14,16] to avoid dma error (grabber<->memory) and frame drops (raid too slow?)
+writeDelayMs = 0.5; % if no binning + not pcoraw, must be >[8,14,16] to avoid dma error (grabber<->memory) and frame drops (raid too slow?)
+%measured 0.4 at no binning on pcoraw does DMA error/drop, but 0.5 does not.
 
 cams = struct('trig',cellfun(@uint8,{7  5 },'UniformOutput',false), ... % could all share one trig (currently actually do share 7)
               'busy',cellfun(@uint8,{15 11},'UniformOutput',false));
@@ -88,21 +89,29 @@ f = 0;
 wait = nan;
 
 KbName('UnifyKeyNames')
-k = zeros(1,256);
-k(KbName('q')) = 1;
-% check w/mario if any way to use w/kbqueue...
-% ListenChar(2); % When used on Windows Vista or later (Vista, Windows-7, Windows-8, ...)
-%   with Matlab's Java GUI, you cannot use any KbQueue functions at the same
-%   time, ie., KbQueueCreate/Start/Stop/Check/Wait as well as KbWaitTrigger,
-%   KbEventFlush, KbEventAvail, and KbEventGet are off limits after any call
-%   to ListenChar, ListenChar(1), ListenChar(2), FlushEvents, CharAvail or
-%   GetChar.
-KbQueueCreate([],k);
-KbQueueStart;
+useKbQueue = true; %KbQueue quite a bit faster than KbCheck, but can't ListenChar(2)
+if useKbQueue
+    k = zeros(1,256);
+    k(KbName('q')) = 1;
+    % check w/mario if any way to use w/kbqueue...
+    % ListenChar(2); % When used on Windows Vista or later (Vista, Windows-7, Windows-8, ...)
+    %   with Matlab's Java GUI, you cannot use any KbQueue functions at the same
+    %   time, ie., KbQueueCreate/Start/Stop/Check/Wait as well as KbWaitTrigger,
+    %   KbEventFlush, KbEventAvail, and KbEventGet are off limits after any call
+    %   to ListenChar, ListenChar(1), ListenChar(2), FlushEvents, CharAvail or
+    %   GetChar.
+    KbQueueCreate([],k);
+    KbQueueStart;
+    KbQueueCheck; %warm
+else
+    k = KbName('q');
+    ListenChar(2);
+    [keyDown, ~, keyCode] = KbCheck;
+end
 
 fprintf('recording for %g mins (hit q to quit early)\n',durMins);
 
-p = Priority(MaxPriority('GetSecs'));
+p = Priority(MaxPriority('GetSecs','KbQueueCheck','KbCheck'));
 
 if prof
     profile on
@@ -112,7 +121,7 @@ times(i) = GetSecs;
 endT = times(i) + durMins*60;
 last = times(i);
 
-while ~KbQueueCheck && times(i) < endT %KbQueueCheck is bottleneck, about 4x longer than GetSecs, more than half in IsOSX, ask mario if can speed up
+while ((useKbQueue && ~KbQueueCheck) || ~(useKbQueue || (keyDown && keyCode(k)))) && times(i) < endT %KbQueueCheck is bottleneck, about 4x longer than GetSecs, more than half in IsOSX, ask mario if can speed up
     i = i + 1;
     if i > len
         error('exceded prealloc')
@@ -183,6 +192,10 @@ while ~KbQueueCheck && times(i) < endT %KbQueueCheck is bottleneck, about 4x lon
         
         last = times(i);
     end
+    
+    if ~useKbQueue
+        [keyDown, ~, keyCode] = KbCheck;
+    end
 end
 
     function trig(s)
@@ -220,9 +233,13 @@ end
 
 Priority(p);
 
-KbQueueStop;
-KbQueueRelease;
-% ListenChar(0);
+if useKbQueue
+    KbQueueStop;
+    KbQueueRelease;
+    % ListenChar(0);
+else
+    ListenChar(0);
+end
 
 rec = rec(:,1:recN) - times(1);
 times = times(1:i) - times(1);

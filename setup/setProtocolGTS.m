@@ -13,11 +13,12 @@ sm=makeStandardSoundManager();
 rewardSizeULorMS          =80;
 requestRewardSizeULorMS   =20;
 requestMode               ='first';
-msPenalty                 =3500;
+msPenalty                 =3500;          %consider changing this also in future
 fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =msPenalty;
+%stim.stopHUD = false; %stop period heads up display... false = off
 
 % sca
 % keyboard
@@ -27,59 +28,57 @@ if ~isscalar(subjIDs)
 end
 switch subjIDs{1}
 
-      
-%    case 'g625ln'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100; 
+   case 'bfly1a.5tt' 
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 90;
+       msPenalty               =3500; 
+       
        
    case 'g54aa7tt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 32.5;
+       rewardSizeULorMS        = 35;
+       msPenalty                 =3500; 
+       
     
-   case 'gcam32tt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 22.5;
-        
-   case 'gcam32ln'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 27.5;
-
-   case 'gcam50tt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 22.5;
-   
-   case 'gcam46tt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 18.5;
-  
    case 'gcam51ln'
         requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 20;
+        rewardSizeULorMS        = 17;
+        msPenalty                 =3500; 
         
-   case 'gcam39rt'
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 22.5;
-       
    case 'g62b4ln'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 70;
+       rewardSizeULorMS        = 75;
+       msPenalty                 =3500; 
+
       
    case 'g62.8lt' 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;
+       rewardSizeULorMS        = 60;
+       msPenalty                 =3500; 
        
-   case 'g54b12rt' 
+   case 'bfly1a.5lt' 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;
+       rewardSizeULorMS        = 90;
+       msPenalty                 =3500; 
        
-   case 'g625ln'
+   case 'g62b.5lt'           %started 1/28/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 90;  
+       rewardSizeULorMS        = 150; 
+       msPenalty               =3500;
        
-       
-   case 'g54bb2'
+   case 'g625ln' % Switched 1/17/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;
+       rewardSizeULorMS        = 180;  
+       msPenalty               =4000;
+       
+       
+%    case 'g54bb2' % Switched GTB 12/19/13
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 55;
+
+% case 'g62b7rt' %FDIC 12/30/13
+%        requestRewardSizeULorMS = 20; 
+%        rewardSizeULorMS        = 115; 
        
     
          
@@ -127,7 +126,7 @@ stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,
 ballSM = setReinfAssocSecs(trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance),1);
 
 
-ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
+
 ballTM = ball(percentCorrectionTrials,sm,noRequest);
 ts1 = trainingStep(ballTM, ballSM, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %ball
 

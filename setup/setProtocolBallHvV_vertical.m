@@ -27,32 +27,28 @@ if ~isscalar(subjIDs)
 end
  switch subjIDs{1}
 
-  
-%    case 'gcam45tt'
+  case 'g54aa7lt'
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 80;
+       msPenalty                 =4000; 
+       
+     case 'gcam44lt'  %changed 1/4/14
+        requestRewardSizeULorMS = 0;
+        rewardSizeULorMS        = 170; 
+        msPenalty                 =4000; 
+        
+%    case 'gcam25rt' %retired 1/4/14
 %         requestRewardSizeULorMS = 0;
 %         rewardSizeULorMS        = 60;
-
-   case 'gcam25rt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 32.5;
         
    case 'bfly24lt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;
+       rewardSizeULorMS        = 80; 
+       msPenalty                 =3500; 
        
-%    case 'gcam44lt' %changed back to HvV_center_vertical 12/10/13
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 50;
+
        
-   case 'gcam40lt'  
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 40;
-  
            
-   case 'gcam53ln'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 30;          
-        
        
     otherwise
         warning('unrecognized mouse, using defaults')
@@ -100,21 +96,13 @@ axis                   = pi/2;
 
 
 
-% s = orientedGabors([pixPerCycs],[targetOrientations],[distractorOrientations],mean,radius,contrasts,thresh,normalizedPosition,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[waveform],[normalizedSizeMethod],[axis])
-% orientations in radians
-% mean, contrasts, normalizedPosition (0 <= value <= 1)
-
-% stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,zoom,interTrialLuminance);
-% ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
-%;
-% ts1 = trainingStep(ballTM, ballSM, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %ball
 
 %%% abstract orientation (e.g. 0 = go left, pi/2 = go right)
 targetOrientations = pi/2;
 distractorOrientations = 0;
 
 stim.stim = orientedGabors(pixPerCycs,{distractorOrientations [] targetOrientations},'abstract',mean,radius,contrast,thresh,normalizedPosition,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[],[],axis);
- ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
+%  ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
  ballTM = ball(percentCorrectionTrials,sm,noRequest);
  
  ballSM = setReinfAssocSecs(trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance),1);

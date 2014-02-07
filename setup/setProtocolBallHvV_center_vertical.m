@@ -13,7 +13,7 @@ sm=makeStandardSoundManager();
 rewardSizeULorMS          =80;
 requestRewardSizeULorMS   =5;
 requestMode               ='first';
-msPenalty                 =3500;
+msPenalty                 =3500;     %consider changing this also in future
 fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
@@ -27,37 +27,49 @@ if ~isscalar(subjIDs)
 end
 switch subjIDs{1}
     
-    case 'g54aa7lt'
+case 'g62b7lt'           %started HvV_cent 1/21/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;
-   
-   case 'gcam44lt'  %changed back 12/10/13
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 45; 
+       rewardSizeULorMS        = 120; 
+       msPenalty               =4000;    
     
-   case 'gcam39tt'
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 30;    
+%     case 'g54aa7lt' %changed to HvV 1/4/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 60;
+   
+%    case 'gcam44lt'  %changed to HvV 1/4/14
+%         requestRewardSizeULorMS = 0;
+%         rewardSizeULorMS        = 45; 
+% case 'bfly1.5att' 
+%        requestRewardSizeULorMS = 20;
+%        rewardSizeULorMS        = 115;
+    
+case 'g62b1lt'     %moved to HvV_center 1/4/14   
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 170;
+       msPenalty                 =3700; 
       
 %    case 'g54a11rt'   %changed to GoToBlack 12/10/13
 %         requestRewardSizeULorMS = 0;
 %         rewardSizeULorMS        = 80;    
         
-   case 'bfly4.7rt'          
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 65;    
-   
-   case 'g62b3rt'          
+
+   case 'g62b3rt'          %changed 1/4/14
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 70; 
+       msPenalty               = 3600; 
   
 %    case 'g62b1lt'       %changed to GoToBlack 12/10/13   
 %        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 70; 
+%        rewardSizeULorMS        = ; 
       
-   case 'g54b8tt'   
+%    case 'g54b8tt' % Switched to GTB 12/19/13  
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 60;   
+
+ case 'g62c.2rt'           %changed 1/30/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;   
+       rewardSizeULorMS        = 130; 
+       msPenalty               =3500;
        
     otherwise
         warning('unrecognized mouse, using defaults')
@@ -102,24 +114,11 @@ axis                   = pi/2;
 
 
 
-
-
-
-% s = orientedGabors([pixPerCycs],[targetOrientations],[distractorOrientations],mean,radius,contrasts,thresh,normalizedPosition,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[waveform],[normalizedSizeMethod],[axis])
-% orientations in radians
-% mean, contrasts, normalizedPosition (0 <= value <= 1)
-
-% stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,zoom,interTrialLuminance);
-% ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
-%;
-% ts1 = trainingStep(ballTM, ballSM, repeatIndefinitely(), noTimeOff(), svnRev, svnCheckMode); %ball
-
-%%% abstract orientation (e.g. 0 = go left, pi/2 = go right)
 targetOrientations = pi/2;
 distractorOrientations = 0;
 
 stim.stim = orientedGabors(pixPerCycs,{distractorOrientations [] targetOrientations},'abstract',mean,radius,contrast,thresh,normalizedPosition,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[],[],axis);
- ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);
+
  ballTM = ball(percentCorrectionTrials,sm,noRequest);
  
  ballSM = setReinfAssocSecs(trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance),1);

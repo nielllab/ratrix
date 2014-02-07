@@ -540,7 +540,7 @@ end
 trials = trials(1):trials(2);
 
 stoppedWithin = 4; %2
-respondedWithin = [0.4 5]; %[.4 1]; %1
+respondedWithin = [0.8 5]; %[.4 1]; %1
 onlyCorrect = false;
 noAfterErrors = false;
 worstFactor = .7; %.1  %%%???

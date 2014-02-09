@@ -28,37 +28,26 @@ end
 
 details.toneFreq = stimulus.freqs;
 details.numTones=1;
+
+details.isi=RandSample(stimulus.isi); %randomly chooses an isi from the possibilities (1 or more)
+
+
+
+
+
 %override total stimulus duration
-stimulus.duration=(details.numTones+1)*(stimulus.toneDuration+stimulus.isi)-stimulus.isi;
-% a = trialRecords(end-1);
-% c = [];
-% r = [];
-% try
-% c = a.trialDetails.correct;
-% end
-% 
-% try
-% r = a.result;
-% end
+stimulus.duration=(details.numTones+1)*(stimulus.toneDuration+details.isi)-details.isi;
+
 
 
 % pick a random starting tone and then update stimulus.startfreq to the next value
 details.startTone = RandSample(0:1); 
 
 x = [1 0];
-% if ~c
-%     if strcmp(r,'nominal')   
-%     details.startTone = x(stimulus.startfreq);
-%     end
-% end
-% stimulus.startfreq = x(details.startTone);
-% details.endTone = x(details.startTone);
+
     
 [lefts, rights] = getBalance(responsePorts,targetPorts);
-l = lefts;
-r = rights;
-rp = responsePorts;
-tp = targetPorts;
+
 
 if lefts>rights %choose a left stim (change)
     details.endTone = x(details.startTone+1);
@@ -91,7 +80,7 @@ switch stimulus.soundType
     case {'tone'}
         sSound = soundClip('stimSoundBase','tone',[stimulus.freqs(details.startTone)]) ;
     case {'wmToneWN'}
-        sSound = soundClip('stimSoundBase','wmToneWN',[details.startTone details.endTone details.toneFreq stimulus.isi stimulus.toneDuration]) ;
+        sSound = soundClip('stimSoundBase','wmToneWN',[details.startTone details.endTone details.toneFreq details.isi stimulus.toneDuration]) ;
     case {'warblestackWav'} %reads files-currently specified in getClip
         details.toneFreq = 1;
         sSound = soundClip('stimSoundBase','warblestackWav',[details.startTone details.endTone details.toneFreq stimulus.isi stimulus.toneDuration]) ;

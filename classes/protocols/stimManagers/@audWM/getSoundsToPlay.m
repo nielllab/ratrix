@@ -29,11 +29,21 @@ if stepsInPhase <= 0 && ...
 %    end
 end
 
+if stepsInPhase <= 0 && ...
+         ((strcmp(phaseType,'earlyPenalty') && strcmp(trialManagerClass,'nAFC'))) 
+     soundsToPlay{2}{end+1} = {'stimSound' 1}; 
+     %when in early penalty - stop playing normal sounds - this loads the
+     %soundsToPlay with a 1ms sound - there is probably a less hacky way to
+     %do this
+end
+
 % if stepsInPhase <= 0 && ...
-%         ((strcmp(phaseType,'earlyPenalty') && strcmp(trialManagerClass,'nAFC'))) 
-%     soundsToPlay{2}{end+1} = {'earlywrongSound' 200};
-%     
-% end
+%          ((strcmp(phaseType,'itl') && strcmp(trialManagerClass,'nAFC'))) 
+%      soundsToPlay={{},{}};
+%      
+%  end
+
+
 %above is to play white noise following an early response
 %disabled for the white noise vs freq WM task
 

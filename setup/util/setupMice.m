@@ -30,7 +30,8 @@ setupEnvironment
 %names = {'3579', '3580', '3578', '3582'}
 %names = {'70459' , '70461'}
 %names = {'3813', '3814', '3815'}
-names = {'51008', '51009', '47899', '47800' }
+names = {'VD-47899', 'VD-51008'}
+%names = {'delaytest'}
 lab = 'wehrCNM'
 
 switch lab
@@ -43,7 +44,7 @@ switch lab
  %       p = 'setProtocolPhonemeBackup';
  %p = 'setProtocolWMStackWarbleBackup'
  %       p = 'setProtocolWMStackWarble';   
-  p = 'setProtocolWMToneWN'
+  p = 'setProtocolWMToneWNVariableDelay'
     case 'niell'
         ratrixPath = 'C:\Users\nlab\Desktop\mouseData0512';
         p = 'setProtocolAbstOrient';

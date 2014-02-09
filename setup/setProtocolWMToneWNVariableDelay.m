@@ -1,4 +1,4 @@
-function r = setProtocolWMToneWN(r,subjIDs)
+function r = setProtocolWMToneWNVariableDelay(r,subjIDs)
 
 if ~isa(r,'ratrix')
     error('need a ratrix')
@@ -58,11 +58,11 @@ dropFrames=false;
 nafcTM=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,{'off'},dropFrames,'ptb','center');
 
 %stim params for free drinks
-soundParams.soundType='wmToneWN'; %new soundType for CNM stimulus
-soundParams.freqs = [8000]; %the two possible frequencies
+soundParams.soundType='wmToneWN'; %soundType that creates tones and WN with an isi
+soundParams.freqs = [8000]; %tone frequency
 soundParams.duration=[]; %ms, total duration of stimSound-calculated in calcstim
-soundParams.isi=1; %ms, time between tones in a CNMToneTrain
-soundParams.toneDuration=250; %ms, duration of each tone in a CNMToneTrain
+soundParams.isi=[0 125 250 500 1000]; %ms, time between tones - can vary in this protocol
+soundParams.toneDuration=250; %ms, duration of each tone 
 
 
 maxSPL=80; %measured max level attainable by speakers
@@ -70,14 +70,18 @@ ampdB=60; %requested amps in dB
 amplitude=10.^((ampdB -maxSPL)/20); %amplitudes = line level, 0 to 1
 soundParams.amp = amplitude; %for intensityDiscrim
 
-CNMStimEZ = audWM(interTrialLuminance,soundParams,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+StimEZ = audWM(interTrialLuminance,soundParams,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 
-soundParams.isi = 250;
-CNMStimMedium = audWM(interTrialLuminance,soundParams,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
-soundParams.isi = 500;
-CNMStimHard =audWM(interTrialLuminance,soundParams,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+StimMedium = audWM(interTrialLuminance,soundParams,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
+
+
+
+StimHard =audWM(interTrialLuminance,soundParams,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
+
+
 
 svnRev={'svn://132.239.158.177/projects/ratrix/AWM'};
 svnCheckMode='session';
@@ -88,7 +92,7 @@ numTriggers = 20;
 
 ts1 = trainingStep(fd,  freeStim, rateCriterion(trialsPerMinute,minutes), noTimeOff(), svnRev,svnCheckMode);  %stochastic free drinks
 ts2 = trainingStep(fd2, freeStim, numTrialsDoneCriterion(numTriggers)   , noTimeOff(), svnRev,svnCheckMode);  %free drinks
-ts3 = trainingStep(nafcTM, CNMStimEZ, rateCriterion(trialsPerMinute,minutes), noTimeOff(), svnRev,svnCheckMode);
+ts3 = trainingStep(nafcTM, StimEZ, rateCriterion(trialsPerMinute,minutes), noTimeOff(), svnRev,svnCheckMode);
 
 
 requestRewardSizeULorMS = 0;
@@ -98,18 +102,18 @@ nrTM=nAFC(sm,percentCorrectionTrials,noRequest,eyeController,{'off'},dropFrames,
 
 
 
-ts4 = trainingStep(nrTM  , CNMStimEZ,  performanceCriterion(.85, int8(200))       , noTimeOff(), svnRev,svnCheckMode);
+ts4 = trainingStep(nrTM  , StimEZ,  performanceCriterion(.85, int8(200))       , noTimeOff(), svnRev,svnCheckMode);
 
 msPenalty = 3000;
 longPenalty=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 lpTM=nAFC(sm,percentCorrectionTrials,longPenalty,eyeController,{'off'},dropFrames,'ptb','center',[],[],[]);
 
-ts5 = trainingStep(lpTM  , CNMStimMedium, repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode);
+ts5 = trainingStep(lpTM  , StimMedium, repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode);
 
-ts6 = trainingStep(lpTM  , CNMStimHard, performanceCriterion(.85, int8(200)), noTimeOff(), svnRev,svnCheckMode);
+ts6 = trainingStep(lpTM  , StimHard, performanceCriterion(.85, int8(200)), noTimeOff(), svnRev,svnCheckMode);
 
 %p=protocol('mouse CNM task',{ts1, ts2, ts3, ts4, ts5 ts6}); %normal setup
-p=protocol('mouse WM task WN vs tone',{ts1, ts2, ts3, ts4, ts5 ts6}); %to test CNM/goNoGo
+p=protocol('mouse WM task WN vs tone VD',{ts1, ts2, ts3, ts4, ts5 ts6}); %to test CNM/goNoGo
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});

@@ -29,7 +29,7 @@ end
 switch subjIDs{1}
 
    case 'g6w2tt' 
-       requestRewardSizeULorMS = 0;
+       requestRewardSizeULorMS = 10;
        rewardSizeULorMS        = 150;
        msPenalty               =3500; 
     

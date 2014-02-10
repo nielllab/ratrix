@@ -28,6 +28,16 @@ if ~isscalar(subjIDs)
 end
 switch subjIDs{1}
 
+   case 'g6w2tt' 
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 130;
+       msPenalty               =3500; 
+    
+   case 'g6w1lt' 
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 130;
+       msPenalty               =3500; 
+    
    case 'bfly1a.5tt' 
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 90;

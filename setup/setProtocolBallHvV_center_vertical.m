@@ -45,7 +45,7 @@ case 'g62b7lt'           %started HvV_cent 1/21/14
     
 case 'g62b1lt'     %moved to HvV_center 1/4/14   
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 170;
+       rewardSizeULorMS        = 140;
        msPenalty                 =3700; 
       
 %    case 'g54a11rt'   %changed to GoToBlack 12/10/13
@@ -53,10 +53,10 @@ case 'g62b1lt'     %moved to HvV_center 1/4/14
 %         rewardSizeULorMS        = 80;    
         
 
-   case 'g62b3rt'          %changed 1/4/14
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 60; 
-       msPenalty               = 3600; 
+%    case 'g62b3rt'          %changed 2/14/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 60; 
+%        msPenalty               = 3600; 
   
 %    case 'g62b1lt'       %changed to GoToBlack 12/10/13   
 %        requestRewardSizeULorMS = 0;
@@ -68,7 +68,7 @@ case 'g62b1lt'     %moved to HvV_center 1/4/14
 
  case 'g62c.2rt'           %changed 1/30/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 140; 
+       rewardSizeULorMS        = 120; 
        msPenalty               =3500;
        
     otherwise

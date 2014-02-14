@@ -123,4 +123,24 @@ end
 if false
     linkaxes(h,'x') %destroys previous y links!  :(  even linkprop won't work cuz the link object is singleton and links properties across all members
 end
+
+figure
+chans = unique([x.ttlRec.chan]);
+for i = 1:length(chans)
+    inds = [x.ttlRec.chan] == chans(i);
+    % stepPlot(x.ttlRec(inds).time,x.ttlRec(inds).state,i) % struct array 10x less efficient (in space, dunno bout time)
+    stepPlot(x.ttlRec.time(inds),x.ttlRec.state(inds),i)
+end
+end
+
+function stepPlot(x,y,o)
+if ~all(cellfun(@isvector,{x y})) || length(x)~=length(y) || any(diff(y)==0) || ~all(cellfun(@(f) f(o),{@isscalar @isreal}))
+    error('bad args')
+end
+s = .8;
+for j = 1:length(x)-1
+    plot(x([j j+1]),s*y(j*ones(1,2))+o-1)
+    hold on
+    plot(x(j+1*ones(1,2)),s*y([j j+1])+o-1)
+end
 end

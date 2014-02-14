@@ -7,22 +7,22 @@ if true
     dbstop if error %doesn't seem to slow us down?
 end
 
-durMins = .5;
+durMins = 2;
 writeDelayMs = 0.5; % if no binning + not pcoraw, must be >[8,14,16] to avoid dma error (grabber<->memory) and frame drops (raid too slow?)
 %measured 0.4 at no binning on pcoraw does DMA error/drop, but 0.5 does not.
 
 cams = struct('trig',cellfun(@uint8,{7  5 },'UniformOutput',false), ... % could all share one trig (currently actually do share 7)
-              'busy',cellfun(@uint8,{15 11},'UniformOutput',false));
+    'busy',cellfun(@uint8,{15 11},'UniformOutput',false));
 % cams(1)=gondry
 % cams(2)=woody
 
 leds = uint8(5);
 
 ttls = [10 12 13];
-% 8   data              i/o indexPulse
-% 9   data              i/o framePulse
-% 16  control           i/o phasePulse
-% 17  control	inv     i/o stimPulse
+% [] <- 8   data              i/o indexPulse
+% 10 <- 9   data              i/o framePulse
+% 12 <- 16  control           i/o phasePulse
+% 13 <- 17  control	inv       i/o stimPulse
 
 nCams = length(cams);
 
@@ -36,7 +36,7 @@ if avoidPP % cache the read/write masks, only use one register each, use lptread
     
     trigFalse = dec2bin(0,8);
     trigFalse(leds      -1) = '1'; % -1 for pins2-9
-    trigTrue = trigFalse;    
+    trigTrue = trigFalse;
     trigTrue([cams.trig]-1) = '1'; % -1 for pins2-9
     trigFalse = bin2dec(fliplr(trigFalse)); % flip for reasons :)
     trigTrue  = bin2dec(fliplr(trigTrue )); % flip for reasons :)
@@ -46,7 +46,7 @@ if avoidPP % cache the read/write masks, only use one register each, use lptread
     busyRead(12).bit = 5;
     busyRead(13).bit = 4;
     busyRead(15).bit = 3;
-      
+    
     statusReg = find(~cellfun(@isempty,{busyRead.bit}));
     if any(~ismember([[cams.busy] ttls], statusReg))
         error('bad busy or ttl pin')
@@ -57,7 +57,7 @@ if avoidPP % cache the read/write masks, only use one register each, use lptread
     
     readBusy = 8 - [busyRead([cams.busy]).bit]; % 8 - for reasons :)
     readTTLs = 8 - [busyRead(ttls       ).bit]; % 8 - for reasons :)
-    busyInv =         [busyRead([cams.busy]).inv];    
+    busyInv =         [busyRead([cams.busy]).inv];
     ttlsInv = logical([busyRead(ttls       ).inv]); %lame -- if empty, converts to double
 end
 
@@ -73,7 +73,7 @@ rec = nan(1+2*nCams,recLen); % [trigT busyHiCam1...busyHiCamN busyLoCam1...busyL
 recN = 0;
 
 ttlRecLen = length(ttls)*recLen;
-ttlRec.times = nan(1,ttlRecLen);
+ttlRec.time = nan(1,ttlRecLen); %would rather this were a struct array than scalar, but 10x less efficient to do so (in space, dunno bout time)
 ttlRec.state = false(1,ttlRecLen);
 ttlRec.chan = zeros(1,ttlRecLen,'uint8');
 ttlRecN = 0;
@@ -82,6 +82,8 @@ exp = false;
 trig(false);
 newTTLs = readStatus;
 currTTLs = newTTLs(1+length(cams):end);
+diffTTLs = [];
+ttlInd = nan;
 
 i = 1;
 GetSecs; %warm
@@ -178,14 +180,28 @@ while ((useKbQueue && ~KbQueueCheck) || ~(useKbQueue || (keyDown && keyCode(k)))
         end
     end
     
-    for ttlInd = find(newTTLs ~= currTTLs)
-        ttlRecN = ttlRecN + 1;
-        if ttlRecN <= ttlRecLen
-            ttlRec.times(ttlRecN) = times(i);
-            ttlRec.state(ttlRecN) = newTTLs(ttlInd);
-            ttlRec.chan(ttlRecN) = ttls(ttlInd);        
-        else
-            error('exceded prealloc')
+    if true
+        diffTTLs = find(newTTLs ~= currTTLs);
+        if ~isempty(diffTTLs)
+            ttlRecN = ttlRecN + (1:length(diffTTLs)); %wow parens necessary: 1 + 1:1 = [] !!
+            if ttlRecN(end) > ttlRecLen
+                error('exceded prealloc')
+            end
+            ttlRec.time(ttlRecN) = times(i);
+            ttlRec.state(ttlRecN) = newTTLs(diffTTLs);
+            ttlRec.chan(ttlRecN) = ttls(diffTTLs);
+            ttlRecN = ttlRecN(end);
+        end
+    else
+        for ttlInd = find(newTTLs ~= currTTLs)
+            ttlRecN = ttlRecN + 1;
+            if ttlRecN <= ttlRecLen
+                ttlRec.time(ttlRecN) = times(i);
+                ttlRec.state(ttlRecN) = newTTLs(ttlInd);
+                ttlRec.chan(ttlRecN) = ttls(ttlInd);
+            else
+                error('exceded prealloc')
+            end
         end
     end
     currTTLs = newTTLs;

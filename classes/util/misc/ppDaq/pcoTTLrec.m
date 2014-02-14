@@ -3,26 +3,26 @@ old = cd('C:\Users\nlab\Desktop\ratrix\bootstrap');
 setupEnvironment;
 cd(old);
 
-if false
+if true
     dbstop if error %doesn't seem to slow us down?
 end
 
-durMins = .5;
+durMins = 2;
 writeDelayMs = 0.5; % if no binning + not pcoraw, must be >[8,14,16] to avoid dma error (grabber<->memory) and frame drops (raid too slow?)
 %measured 0.4 at no binning on pcoraw does DMA error/drop, but 0.5 does not.
 
 cams = struct('trig',cellfun(@uint8,{7  5 },'UniformOutput',false), ... % could all share one trig (currently actually do share 7)
-              'busy',cellfun(@uint8,{15 11},'UniformOutput',false));
+    'busy',cellfun(@uint8,{15 11},'UniformOutput',false));
 % cams(1)=gondry
 % cams(2)=woody
 
 leds = uint8(5);
 
-ttls = []; %5:8;
-% 8   data              i/o indexPulse
-% 9   data              i/o framePulse
-% 16  control           i/o phasePulse
-% 17  control	inv     i/o stimPulse
+ttls = [10 12 13];
+% [] <- 8   data              i/o indexPulse
+% 10 <- 9   data              i/o framePulse
+% 12 <- 16  control           i/o phasePulse
+% 13 <- 17  control	inv       i/o stimPulse
 
 nCams = length(cams);
 
@@ -36,7 +36,7 @@ if avoidPP % cache the read/write masks, only use one register each, use lptread
     
     trigFalse = dec2bin(0,8);
     trigFalse(leds      -1) = '1'; % -1 for pins2-9
-    trigTrue = trigFalse;    
+    trigTrue = trigFalse;
     trigTrue([cams.trig]-1) = '1'; % -1 for pins2-9
     trigFalse = bin2dec(fliplr(trigFalse)); % flip for reasons :)
     trigTrue  = bin2dec(fliplr(trigTrue )); % flip for reasons :)
@@ -46,7 +46,7 @@ if avoidPP % cache the read/write masks, only use one register each, use lptread
     busyRead(12).bit = 5;
     busyRead(13).bit = 4;
     busyRead(15).bit = 3;
-      
+    
     statusReg = find(~cellfun(@isempty,{busyRead.bit}));
     if any(~ismember([[cams.busy] ttls], statusReg))
         error('bad busy or ttl pin')
@@ -56,7 +56,9 @@ if avoidPP % cache the read/write masks, only use one register each, use lptread
     busyRead(11).inv = true;
     
     readBusy = 8 - [busyRead([cams.busy]).bit]; % 8 - for reasons :)
-    busyInv = [busyRead([cams.busy]).inv];
+    readTTLs = 8 - [busyRead(ttls       ).bit]; % 8 - for reasons :)
+    busyInv =         [busyRead([cams.busy]).inv];
+    ttlsInv = logical([busyRead(ttls       ).inv]); %lame -- if empty, converts to double
 end
 
 slow = false;
@@ -71,15 +73,17 @@ rec = nan(1+2*nCams,recLen); % [trigT busyHiCam1...busyHiCamN busyLoCam1...busyL
 recN = 0;
 
 ttlRecLen = length(ttls)*recLen;
-ttlRec.times = nan(1,ttlRecLen);
+ttlRec.time = nan(1,ttlRecLen); %would rather this were a struct array than scalar, but 10x less efficient to do so (in space, dunno bout time)
 ttlRec.state = false(1,ttlRecLen);
 ttlRec.chan = zeros(1,ttlRecLen,'uint8');
 ttlRecN = 0;
-%currTTL = read(ttls);
 
 exp = false;
 trig(false);
-getBusy; %warm (later use to set currTTL)
+newTTLs = readStatus;
+currTTLs = newTTLs(1+length(cams):end);
+diffTTLs = [];
+ttlInd = nan;
 
 i = 1;
 GetSecs; %warm
@@ -129,7 +133,10 @@ while ((useKbQueue && ~KbQueueCheck) || ~(useKbQueue || (keyDown && keyCode(k)))
         times(i) = GetSecs;
     end
     
-    busy = getBusy;
+    busy = readStatus;
+    newTTLs = busy(1+length(cams):end);
+    busy = busy(1:length(cams));
+    
     if exp
         for c = 1:nCams
             if isnan(rec(1+c,recN))
@@ -173,6 +180,32 @@ while ((useKbQueue && ~KbQueueCheck) || ~(useKbQueue || (keyDown && keyCode(k)))
         end
     end
     
+    if true
+        diffTTLs = find(newTTLs ~= currTTLs);
+        if ~isempty(diffTTLs)
+            ttlRecN = ttlRecN + (1:length(diffTTLs)); %wow parens necessary: 1 + 1:1 = [] !!
+            if ttlRecN(end) > ttlRecLen
+                error('exceded prealloc')
+            end
+            ttlRec.time(ttlRecN) = times(i);
+            ttlRec.state(ttlRecN) = newTTLs(diffTTLs);
+            ttlRec.chan(ttlRecN) = ttls(diffTTLs);
+            ttlRecN = ttlRecN(end);
+        end
+    else
+        for ttlInd = find(newTTLs ~= currTTLs)
+            ttlRecN = ttlRecN + 1;
+            if ttlRecN <= ttlRecLen
+                ttlRec.time(ttlRecN) = times(i);
+                ttlRec.state(ttlRecN) = newTTLs(ttlInd);
+                ttlRec.chan(ttlRecN) = ttls(ttlInd);
+            else
+                error('exceded prealloc')
+            end
+        end
+    end
+    currTTLs = newTTLs;
+    
     if times(i) - last > 5
         m = (endT - times(i))/60;
         f = floor(m);
@@ -210,13 +243,13 @@ end
         end
     end
 
-    function out = getBusy
+    function out = readStatus
         if avoidPP
             out = fastDec2Bin(lptread(addr + 1));
-            out = out(readBusy) == '1';
-            out(busyInv) = ~out(busyInv);
+            out = out([readBusy readTTLs]) == '1';
+            out([busyInv ttlsInv]) = ~out([busyInv ttlsInv]);
         else
-            out = pp([cams.busy],[],slow,[],addr);
+            out = pp([[cams.busy] ttls],[],slow,[],addr);
         end
     end
 
@@ -243,6 +276,7 @@ end
 
 rec = rec(:,1:recN) - times(1);
 times = times(1:i) - times(1);
+ttlRec = ttlRec(1:ttlRecN);
 
 f = fullfile('C:\','data','pcoTTLrecords');
 [status,message,messageid] = mkdir(f);
@@ -255,7 +289,7 @@ end
 f = fullfile(f,[datestr(now,30) '.mat']);
 fprintf('saving as %s\n',f);
 tic
-save(f,'cams','rec','times','writeDelayMs','-v7.3'); % >=7.3 req for >2GB
+save(f,'cams','rec','times','writeDelayMs','ttlRec','-v7.3'); % >=7.3 req for >2GB
 toc
 
 if prof

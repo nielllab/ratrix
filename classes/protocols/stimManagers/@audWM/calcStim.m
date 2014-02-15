@@ -32,9 +32,6 @@ details.numTones=1;
 details.isi=RandSample(stimulus.isi); %randomly chooses an isi from the possibilities (1 or more)
 
 
-
-
-
 %override total stimulus duration
 stimulus.duration=(details.numTones+1)*(stimulus.toneDuration+details.isi)-details.isi;
 

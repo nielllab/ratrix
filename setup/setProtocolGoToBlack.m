@@ -13,7 +13,7 @@ sm=makeStandardSoundManager();
 rewardSizeULorMS          =80;
 requestRewardSizeULorMS   =0;
 requestMode               ='first';
-msPenalty                 =3500;
+msPenalty                 =3500;       %consider changing this also in future
 fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
@@ -22,28 +22,47 @@ msAirpuff                 =msPenalty;
 
 switch subjIDs{1}
    
-     case 'g62b1lt'     %started GoToBlack 12/10/13   
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100; 
+
        
-     case 'g54a11rt'   %switched from HvV 12/10/13
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 90;  
+       case 'g6w5rt'     %started 2/17/14  
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 160;
+        msPenalty               =3500;
+        
+       case 'g62b8tt'     %started 2/17/14  
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 160;
+        msPenalty               =3500;
+        
+%      case 'g54a11rt'   %retired 1/4/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 100;  
   
-     case 'g54bb2' % Switched from GTS 12/19/13
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 55;
+%      case 'g54bb2' % Switched from GTS 12/19/13
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 70;
+
        
-     case 'g625ln' % Switched from GTS 12/19/13
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 80;  
+%      case 'g625ln' % Switched from GTS 12/19/13
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 130;
+%        msPenalty               =3500;
        
-     case 'g54b8tt' %Switched from HvV 12/19/13
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 55;   
+%      case 'g54b8tt' %retired 1/4/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 50;   
+
+
+%       case 'g62b3rt'           %switched to HvV_center 1/4/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 85; 
        
 
-   
+%  case 'g62c.2rt'           %switched to HvV_center 1/30/14 
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 90; 
+%        msPenalty               =3500;
+
        
             
     otherwise

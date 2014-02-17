@@ -28,7 +28,7 @@ x=cellfun(@getinf,x,'UniformOutput',false);
             end
         end
     end
-x=[x{:}]
+x=[x{:}];
 if ~isempty(x)
     cellfun(@doit,x);
 end

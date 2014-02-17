@@ -32,11 +32,11 @@ for chan=1:2
     end
     try
        basename = in(1:end-7);
-       sz = size(imread([iPath '_000001.tif']));
+       sz = size(imread([basename '_000001.tif']));
     namelength=6;
     catch
                basename = in(1:end-5);
-       sz = size(imread([iPath '_0001.tif']));
+       sz = size(imread([basename '_0001.tif']));
     namelength=4;
     end
     clear in

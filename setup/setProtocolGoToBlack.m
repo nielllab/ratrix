@@ -22,16 +22,17 @@ msAirpuff                 =msPenalty;
 
 switch subjIDs{1}
    
-%    case 'g62b.5lt'       switched to gts 1/28/14
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 90; 
-%        msPenalty               =3500;
+   case 'g62b8tt'       %started 2/17/14
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 160; 
+       msPenalty               =3500;
 
        
-%      case 'g62b1lt'     %moved to HvV_center 1/4/14   
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 115;
-       
+     case 'g6w5rt'     %started 2/17/14  
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 160;
+        msPenalty               =3500;
+        
 %      case 'g54a11rt'   %retired 1/4/14
 %        requestRewardSizeULorMS = 0;
 %        rewardSizeULorMS        = 100;  

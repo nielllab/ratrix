@@ -34,13 +34,13 @@ end
      
   case 'g54aa7lt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100;
+       rewardSizeULorMS        = 90;
        msPenalty                 =4250; 
        
-     case 'gcam44lt'  %changed 1/4/14
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 180; 
-        msPenalty                 =4250; 
+%      case 'gcam44lt'  %changed 1/4/14
+%         requestRewardSizeULorMS = 0;
+%         rewardSizeULorMS        = 180; 
+%         msPenalty                 =4250; 
         
 %    case 'gcam25rt' %retired 1/4/14
 %         requestRewardSizeULorMS = 0;
@@ -48,8 +48,8 @@ end
         
    case 'bfly24lt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 70; 
-       msPenalty                 =3500; 
+       rewardSizeULorMS        = 80; 
+       msPenalty                 =3700; 
        
 
        

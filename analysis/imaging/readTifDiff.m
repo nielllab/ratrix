@@ -326,10 +326,12 @@ meanresp=mean(resp,1)
 resp_err=mean(resp_std,1)
 
 datafilename=[psfilename(1:end-3) 'resp2.mat'];
-save(datafilename,'meanresp','resp_err');
+save(datafilename,'meanresp','resp_err', 'cycMapAll');
+
+
 
 ps2pdf('psfile', psfilename, 'pdffile', [psfilename(1:(end-2)) 'pdf']);
-delete(psfilename);
+delete(psfilename);  
 
     function mapFig(mapIn)
         figure

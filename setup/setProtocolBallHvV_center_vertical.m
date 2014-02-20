@@ -43,10 +43,10 @@ case 'g62b7lt'           %started HvV_cent 1/21/14
 %        requestRewardSizeULorMS = 20;
 %        rewardSizeULorMS        = 115;
     
-case 'g62b1lt'     %moved to HvV_center 1/4/14   
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 130;
-       msPenalty                 =3700; 
+% case 'g62b1lt'     %changed to HvV 2/19/14   
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 130;
+%        msPenalty                 =3700; 
       
 %    case 'g54a11rt'   %changed to GoToBlack 12/10/13
 %         requestRewardSizeULorMS = 0;

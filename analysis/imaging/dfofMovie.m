@@ -47,7 +47,7 @@ end
 
 save(fullfile(p,[f(1:end-4) 'maps.mat']),'cycle_mov','cycle_mov_std','-append')
 
-keyboard
+
 baseline = prctile(cycle_mov,2,1);
 % 
 % for i = 1:cyc_period;
@@ -69,7 +69,7 @@ vid.FrameRate=25;
 open(vid);
 writeVideo(vid,mov);
 close(vid)
-keyboard
+
 
 use_speed=0;
 
@@ -108,14 +108,14 @@ for i = 1:mov_length;
 i
     imagesc(imresize(dfof_bg(:,:,i+300),0.5,'box'),[lowthresh upperthresh]);
     colormap(gray);
-%    hold on
-%     if use_speed
-%         if sp(i)<500
-%             plot(15,15,'ro','Markersize',8,'Linewidth',8);
-%         else
-%             plot(15,15,'go','Markersize',8,'Linewidth',8);
-%         end
-%     end
+   hold on
+    if use_speed
+        if sp(i)<500
+            plot(15,15,'ro','Markersize',8,'Linewidth',8);
+        else
+            plot(15,15,'go','Markersize',8,'Linewidth',8);
+        end
+    end
     axis equal;
     if i==1;
         mov(mov_length) = getframe(gcf); %%%% initializes structure array

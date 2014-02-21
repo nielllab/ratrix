@@ -30,9 +30,22 @@ for chan=1:2
         in = fullfile(a,b);
         
     end
-    basename = in(1:end-5)
+    try
+       basename = in(1:end-7);
+       sz = size(imread([basename '_000001.tif']));
+    namelength=6;
+    catch
+               basename = in(1:end-5);
+       sz = size(imread([basename '_0001.tif']));
+    namelength=4;
+    end
     clear in
-    [data frameT idx pca_fig]=readSyncMultiTif(basename,maxGB);
+    if chan==1
+        fl = 1;
+    else
+        fl=0;
+    end;
+    [data frameT idx pca_fig]=readSyncMultiTif(basename,maxGB,fl,namelength);
     data = double(data);
     mn = mean(data,3);
     figure
@@ -313,10 +326,12 @@ meanresp=mean(resp,1)
 resp_err=mean(resp_std,1)
 
 datafilename=[psfilename(1:end-3) 'resp2.mat'];
-save(datafilename,'meanresp','resp_err');
+save(datafilename,'meanresp','resp_err', 'cycMapAll');
+
+
 
 ps2pdf('psfile', psfilename, 'pdffile', [psfilename(1:(end-2)) 'pdf']);
-delete(psfilename);
+delete(psfilename);  
 
     function mapFig(mapIn)
         figure

@@ -27,15 +27,20 @@ if ~isscalar(subjIDs)
 end
  switch subjIDs{1}
 
+  case 'g62b3rt'          %changed 2/14/14
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 90; 
+       msPenalty               = 3600; 
+     
   case 'g54aa7lt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100;
-       msPenalty                 =3500; 
+       rewardSizeULorMS        = 90;
+       msPenalty                 =4250; 
        
-     case 'gcam44lt'  %changed 1/4/14
-        requestRewardSizeULorMS = 0;
-        rewardSizeULorMS        = 90; 
-        msPenalty                 =4500; 
+%      case 'gcam44lt'  %changed 1/4/14
+%         requestRewardSizeULorMS = 0;
+%         rewardSizeULorMS        = 180; 
+%         msPenalty                 =4250; 
         
 %    case 'gcam25rt' %retired 1/4/14
 %         requestRewardSizeULorMS = 0;
@@ -44,7 +49,7 @@ end
    case 'bfly24lt'
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 80; 
-       msPenalty                 =3500; 
+       msPenalty                 =3700; 
        
 
        

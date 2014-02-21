@@ -263,12 +263,22 @@ if ~isempty(output)
     output = inv(output);
 end
 
+    function [out1, out2, out3] = unique(in) %is this faster than builtin?
+        st = sort(in);
+        out1 = st([true diff(st)>0]);
+        out2 = nan;
+        out3 = nan(size(in));
+        for i = 1:length(out1) %vectorize me!
+            out3(in == out1(i)) = i;
+        end
+    end
+
 if ispc
     if nargout>0
         input = nan(length(pins),1);
     end
     
-    [offsets, ~, vInds] = unique(bitSpecs(:,2));
+    [offsets, ~, vInds] = unique(bitSpecs(:,2)); %builtin unique is slow
     for i = 1:length(offsets)
         a = addr + double(offsets(i));
         these = vInds == i;

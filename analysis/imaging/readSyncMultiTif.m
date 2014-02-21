@@ -1,10 +1,20 @@
-function [data t idx pca_fig] = readSyncMultiTif(iPath, maxGB);
+function [data t idx pca_fig] = readSyncMultiTif(iPath, maxGB,fl,namelength);
 
 ids = dir([iPath '_*.tif'])
 
+if exist('fl','var') && fl==1
+    flipim = 1;
+else
+    flipim=0;
+end
+
 bytesPerPix = 2;
 pixPerFrame = maxGB*1000*1000*1000/length(ids)/bytesPerPix;
-sz = size(imread([iPath '_0001.tif']));
+if namelength==6;
+    sz = size(imread([iPath '_000001.tif']));
+elseif namelength==4
+    sz = size(imread([iPath '_0001.tif']));
+end
 origW = sz(2);
 stampHeight = 20;
 sz(1) = sz(1)-stampHeight;
@@ -47,11 +57,19 @@ else
         if rand>.99
             fprintf('%d\t%d\t%g%% done\n',i,length(ids),100*i/length(ids))
         end
-        fn = sprintf('%s_%04d.tif',[base ext],i);
+        if namelength==6
+            fn = sprintf('%s_%06d.tif',[base ext],i);
+        elseif namelength==4
+            fn = sprintf('%s_%04d.tif',[base ext],i);
+        end
         if ~ismember(fn,{ids.name})
             error('hmmm')
         end
-        frame = imread(fullfile(d,fn));
+       if flipim
+           frame = flipdim((imread(fullfile(d,fn))),2);
+       else
+           frame = (imread(fullfile(d,fn)));
+       end
         data(:,:,i) = imresize(frame((stampHeight+1):end,:),sz); %is imresize smart about unity?  how do our data depend on method?  (we use default 'bicubic' -- "weighted average of local 4x4" (w/antialiasing) -- we can specify kernel if desired)
         stamps(:,:,i) = frame(1:stampHeight,1:size(stamps,2));
     end

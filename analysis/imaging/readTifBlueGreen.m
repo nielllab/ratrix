@@ -23,9 +23,21 @@ if ~exist('in','var') || isempty(in)
     [a b] = fileparts(fullfile(p,f));
     in = fullfile(a,b);
 end
-basename = in(1:end-5)
 
-[out frameT idx pca_fig]=readSyncMultiTif(basename,maxGB);
+    try
+       basename = in(1:end-7);
+       sz = size(imread([basename '_000001.tif']));
+    namelength=6;
+    catch
+               basename = in(1:end-5);
+       sz = size(imread([basename '_0001.tif']));
+    namelength=4;
+    end
+    clear in
+        fl = 0;  %flip image? 1 = yes 0 = no
+  
+
+[out frameT idx pca_fig]=readSyncMultiTif(basename,maxGB,fl,namelength);
 
 
 psfilename = [basename '.ps'];

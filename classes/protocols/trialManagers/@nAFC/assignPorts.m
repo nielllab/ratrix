@@ -34,6 +34,8 @@ if ~isempty(lastCorrect) && ...
         (lastWasCorrection || rand<trialManager.percentCorrectionTrials)
     
     details.correctionTrial = 1;
+    details.startTone=lastRec.stimDetails.startTone;
+    details.endTone=lastRec.stimDetails.endTone;
     targetPorts = lastRec.targetPorts;
     text = 'correction trial!';
 else

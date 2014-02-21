@@ -189,7 +189,7 @@ switch class(trialManager)
             criterion={[],i+1};
             %stimulus=[]?,transitions=criterion,stimType='cache',startFrame=0,framesUntilTransition=[]? or earlyResponsePenaltyFrames, autoTrigger=,scaleFactor=0,isFinalPhase=0,hz,phaseType='earlyPenalty',phaseLabel='earlyPenalty',punishResponses=false,[isStim]=false,[indexPulses]=false)
             %maybe could calc eStim here? or pass [] and calc later
-            stimSpecs{i} = stimSpec(interTrialLuminance,criterion,'cache',0,60,[],0,0,hz,'earlyPenalty','earlyPenalty',false,false); % do not punish responses here
+            stimSpecs{i} = stimSpec(interTrialLuminance,criterion,'cache',0,180,[],0,0,hz,'earlyPenalty','earlyPenalty',false,false); % do not punish responses here
             i=i+1;
         end 
         

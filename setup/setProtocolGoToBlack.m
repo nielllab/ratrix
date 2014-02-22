@@ -21,21 +21,8 @@ msAirpuff                 =msPenalty;
 
 
 switch subjIDs{1}
-<<<<<<< HEAD
-   
-<<<<<<< HEAD
-<<<<<<< HEAD
-    case 'bfly1.5att' 
-=======
-   case 'g62b.5lt'           
->>>>>>> c369f66013c9a93701349978e7267f76ffb2d0ac
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 150; 
-       msPenalty               =3500;
-=======
->>>>>>> d8bf1ba75d15b4065af4c76ac6f8605b2b9d5612
 
-=======
+ 
     
         case 'g62b9tt'     %started 2/22/14  
        requestRewardSizeULorMS = 20;
@@ -50,7 +37,7 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 20;
        rewardSizeULorMS        = 160;
         msPenalty               =3500;
->>>>>>> 2c8276b925b0b61e2dc16f536662df9c49435805
+
        
        case 'g6w5rt'     %started 2/17/14  
        requestRewardSizeULorMS = 0;

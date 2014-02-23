@@ -29,7 +29,7 @@ switch subjIDs{1}
     
 case 'g62b7lt'           %started HvV_cent 1/21/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 90; 
+       rewardSizeULorMS        = 80; 
        msPenalty               =4000;    
     
 %     case 'g54aa7lt' %changed to HvV 1/4/14

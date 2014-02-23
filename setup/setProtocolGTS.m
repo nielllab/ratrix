@@ -40,7 +40,7 @@ switch subjIDs{1}
     
    case 'bfly1a.5tt' 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100;
+       rewardSizeULorMS        = 120;
        msPenalty               =3500; 
        
        
@@ -63,7 +63,7 @@ switch subjIDs{1}
       
    case 'g62.8lt' 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 65;
+       rewardSizeULorMS        = 80;
        msPenalty                 =3500; 
        
    case 'bfly1a.5lt' 

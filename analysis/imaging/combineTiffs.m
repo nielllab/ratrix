@@ -150,26 +150,63 @@ imagingPath = 'E:\widefield data';
 
 
 imagingPath = 'C:\data\imaging';
-recs = {
-%     {'gcam51LN' {
-%     {[36 222],[],'090613 GTS Behavior\G51-LN_r2_behavior_setProtocolGTS_4x4bin_53ms_vertical','G51-LN_r2_behavior_setProtocolGTS_4x4bin_53ms_vertical'}    
-%     }
-%     }
-%     %%% go to stimulus (top=right, bottom=left)
-    
-%     {'g625ln' {
-%     {[61 237],[],'092013 DOI\G62-5-LN_DOI and behavior\G625_LN_Behavior_GoToBlack_DOI_at_start','G625_LN_Behavior_GoToBlack_DOI_at_start'}
+% recs = {
+% %     {'gcam51LN' {
+% %     {[36 222],[],'090613 GTS Behavior\G51-LN_r2_behavior_setProtocolGTS_4x4bin_53ms_vertical','G51-LN_r2_behavior_setProtocolGTS_4x4bin_53ms_vertical'}    
+% %     }
+% %     }
+% %     %%% go to stimulus (top=right, bottom=left)
+%     
+% %     {'g625ln' {
+% %     {[61 237],[],'092013 DOI\G62-5-LN_DOI and behavior\G625_LN_Behavior_GoToBlack_DOI_at_start','G625_LN_Behavior_GoToBlack_DOI_at_start'}
+% %    
+% %     }
+% %     }
+%     
+%       {'g62.8lt' {
+%     {[1 157],[],'Behavior data 12-24-13+\122413 G62.8-LT GTS Behavior','G62.8-LT_GTS_50ms_exp_1x1bin'}
 %    
 %     }
 %     }
-    
+%    
+%     }; %%% black on top = go right, black on bottom = go left
+% 
+
+imagingPath = 'C:\data\imaging';
+recs = {
+
       {'g62.8lt' {
-    {[1 157],[],'Behavior data 12-24-13+\122413 G62.8-LT GTS Behavior','G62.8-LT_GTS_50ms_exp_1x1bin'}
-   
+   % {[422 672],[],'021914 G628-LT GTS Behavior','G628-LT_run1_GTS_behavior_15ms_exp'}
+      {[673 896],[],'022014 G628-LT GTS Behavior','022014 G628-LT GTS Behavior'}
     }
     }
    
     }; %%% black on top = go right, black on bottom = go left
+
+% imagingPath = 'C:\data\imaging';
+% recs = {
+% 
+%       {'g62b4ln' {
+%    % {[422 672],[],'021914 G628-LT GTS Behavior','G628-LT_run1_GTS_behavior_15ms_exp'}
+%       {[1 298],[],'022114 G62B.4-LN GTS Behavior','G62B.4-LN_run1_GTS_behavior_15msexp'}
+%     }
+%     }
+%    
+%     }; %%% black on top = go right, black on bottom = go left
+% 
+
+
+% imagingPath = 'C:\data\imaging';
+% recs = {
+% 
+%       {'g62b7lt' {
+%    % {[422 672],[],'021914 G628-LT GTS Behavior','G628-LT_run1_GTS_behavior_15ms_exp'}
+%       {[1 176],[],'022314 G62B.7-LT HvV_center Behavior\G62B.7-LT_run1_HvV_center_Behavior_15msexp','G62B.7-LT_run1_HvV_center_Behavior_15msexp'}
+%     }
+%     }
+%    
+%     }; %%% black on top = go right, black on bottom = go left
+% 
 
 % dirOverview(imagingPath)
 
@@ -547,8 +584,8 @@ end
 trials = trials(1):trials(2);
 
 stoppedWithin = 4; %2
-respondedWithin = [0.8 5]; %[.4 1]; %1
-onlyCorrect = false;
+respondedWithin = [0.3 0.6]; %[.4 1]; %1
+onlyCorrect = true;
 noAfterErrors = false;
 worstFactor = .7; %.1  %%%???
 
@@ -589,7 +626,7 @@ trials = trials( ...
 c = getUniformSpectrum(normalize(onsets));
 
 %pts = [-.8 respondedWithin(1)]; %-1.5*frameDur]; %last frame suspect -- if reinforcement phase ends before exposure does, probably turns led off prematurely
-pts = [-1 respondedWithin(1)];
+pts = [-0.8 respondedWithin(1)+1.3];
 pts = linspace(pts(1),pts(2),1+round(diff(pts)/frameDur));
 
 fig = figure;
@@ -686,7 +723,7 @@ if any(problem)
 end
 
 
-for ind = 1:length(leds)
+for ind = 2:length(leds)
   lab=leds{ind}; 
     thisBFrames = cellfun(@(x,y)x(y == ind),bFrames,frameLeds,'UniformOutput',false);
     these = flatLEDs == ind;
@@ -695,10 +732,14 @@ for ind = 1:length(leds)
     [im{ind} dfof{ind}] = widefieldAnalysis(trials,pts,onsets,thisData,thisT,thisBFrames,[pre '.' lab],c,targ,stoppedWithin,respondedWithin,misses,starts,correct);
 end
 
+
+
 bg = dfof{2}-dfof{1};
 bg_im = im{2}-im{1};
  show(nanmedianMW(bg),pts,[pre 'blue-green dfof'],[1 99],@cb);
 
+  show(deconvg6s((nanmedianMW(bg)),0.1),pts,[pre 'blue-green deconv dfof'],[1 99.5],@cb);
+ 
  [f p] = uiputfile('*.mat','output file');
  save(fullfile(p,f),'bg','bg_im','targ','correct','trials','pts','onsets','starts')
 keyboard
@@ -726,6 +767,51 @@ plot(t-t(1),'r','LineWidth',3)
 bs = [bFrames{:}];
 plot(bs-bs(1))
 
+display('making movie')
+%%% put movie in here
+%%% data = movie; subtract off prctile
+%%% add patch of color to indicate phases
+%%% use immovie
+
+start = min(find(bs-bs(1)>600));
+nframes=2000;
+
+movdata = zeros(size(data,1),size(data,2),3,nframes);
+im_med = prctile(double(data(:,:,start:start+nframes-1)),20,3);
+for f = 1:nframes
+    f
+    for col = 1:3
+        movdata(:,:,col,f) = (double(data(:,:,f+start)) - im_med)./im_med;
+    end
+end
+
+movdata = movdata*3+0.2;
+movdata(movdata<0)=0; movdata(movdata>1)=1;
+
+t = bs(start+1:start+nframes);
+
+xpos =1:10; ypos=1:10;
+for i = 1:length(bFrames);
+    frames = find(t>=starts(1,i) & t<starts(2,i));
+    movdata(xpos, ypos,:,frames)=0;
+    frames = find(t>=starts(2,i) & t<starts(3,i));
+    movdata(xpos,ypos,1:2,frames)=1;
+    frames = find(t>=starts(3,i) & t<=bFrames{i}(end));
+    if correct(i)
+        movdata(xpos,ypos,2,frames)=1;
+    else
+         movdata(xpos,ypos,1,frames)=1;
+    end
+end
+mov = immovie(movdata);
+
+vid = VideoWriter(sprintf('%sdFoFmovie.avi',pre));
+vid.FrameRate=15;
+open(vid);
+writeVideo(vid,mov);
+close(vid)
+
+
 fig = figure;
 h = [];
 numPix = 50;
@@ -733,10 +819,10 @@ pix = reshape(data,[size(data,1)*size(data,2) size(data,3)]);
 [~, ord] = sort(rand(1,size(pix,1)));
 h(end+1) = subplot(2,1,1);
 hold on
-alpha = .1;
+alpha = .5;
 ms = [misses{:}];
 behaviorKey;
-title('grey = stopping; yellow=response; red = error stim')
+title('grey = stopping; yellow=response period; green = correct; red = error')
     function behaviorKey
         arrayfun(@plotPhases,1:length(bFrames))
         arrayfun(@plotMisses,ms)
@@ -778,16 +864,16 @@ title('grey = stopping; yellow=response; red = error stim')
 h(end+1) = subplot(2,1,2);
 hold on
 behaviorKey;
-title('after drops and error stim removed') %both cause spikes
+title('after drops and error stim NOT removed') %both cause spikes
 bads = false(size(bs));
 for i=1:length(ms)
     bads(find((bs-ms(i))>0,1,'first')) = true;
 end
-for i=1:length(correct)
-    if ~correct(i)
-        bads(bs >= starts(3,i) & bs <= bFrames{i}(end)) = true;
-    end
-end
+% for i=1:length(correct)
+%     if ~correct(i)
+%         bads(bs >= starts(3,i) & bs <= bFrames{i}(end)) = true;
+%     end
+% end
 
 pix = double(pix(ord(1:numPix),:));
 pix(:,bads) = nan;
@@ -864,7 +950,7 @@ if ~isempty(trials)
     %need nanmean from fullfile(matlabroot,'toolbox','stats','stats')
     %but \ratrix\analysis\eflister\phys\new\helpers\ is shadowing it...
     
-%     show(nanmedianMW(im),ptLs,[pre '.all trials (raw)'],[50 99],@cb);
+     show(nanmedianMW(im),ptLs,[pre '.all trials (raw)'],[50 99],@cb);
 %     show(nanmedianMW(im(targ(trials)>0,:,:,:)) - nanmedianMW(im(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right (raw)'],[1 99],@cb);
 %     
 %     m = squeeze(nanmedianMW(squeeze(nanmedianMW(im)))); %does this order matter?
@@ -879,11 +965,12 @@ if ~isempty(trials)
 %     show(nanmedianMW(dfof),ptLs,[pre '.all trials (dF/F)'],[1 99],@cb);
 %     show(nanmedianMW(dfof(targ(trials)>0,:,:,:)) - nanmedianMW(dfof(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right (dF/F)'],[1 99],@cb);
 %     
-
-        baseline = squeeze(prctile(double(data(round(size(data,1)*0.25):end,:,:)),20));
+        % single baseline (20th percentile)
+       % baseline = squeeze(prctile(double(data(round(size(data,1)*0.25):end,:,:)),20));
         
         for tr = 1:size(im,1);
-        %baseline = squeeze(nanmedianMW(im(tr,ptLs<0,:,:),2));
+        %%% baseline for each trail
+            baseline = squeeze(nanmedianMW(im(tr,ptLs<0,:,:),2));
         for fr = 1:size(im,2)
             dfof(tr,fr,:,:) = (squeeze(im(tr,fr,:,:))-baseline)./baseline;
         end
@@ -891,9 +978,19 @@ if ~isempty(trials)
     
             show(nanmedianMW(dfof),ptLs,[pre '.all trials baseline(dF/F)'],[1 99],@cb);
     show(nanmedianMW(dfof(targ(trials)>0,:,:,:)) ,ptLs,[pre '.left baseline(dF/F)'],[1 99],@cb);
-        show( nanmedianMW(dfof(targ(trials)<0,:,:,:)),ptLs,[pre '. right baseline(dF/F)'],[1 99],@cb);
- show(nanmedianMW(dfof(targ(trials)>0,:,:,:)) - nanmedianMW(dfof(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right baseline(dF/F)'],[1 99],@cb);
-    
+     
+    ldecon = deconvg6s(nanmedianMW(dfof(targ(trials)>0,:,:,:)),0.1);
+        show(ldecon ,ptLs,[pre '.left deconv(dF/F)'],[1 99.5],@cb);
+
+        
+    show( nanmedianMW(dfof(targ(trials)<0,:,:,:)),ptLs,[pre '. right baseline(dF/F)'],[1 99],@cb);
+ rdecon = deconvg6s(nanmedianMW(dfof(targ(trials)<0,:,:,:)),0.1);
+ 
+        show(deconvg6s(nanmedianMW(dfof(targ(trials)<0,:,:,:)),0.1) ,ptLs,[pre '.right deconv(dF/F)'],[1 99.5],@cb);
+
+    show(nanmedianMW(dfof(targ(trials)>0,:,:,:)) - nanmedianMW(dfof(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right baseline(dF/F)'],[1 99],@cb);
+        show(ldecon - rdecon,ptLs,[pre '.left vs right decon(dF/F)'],[1 99],@cb);
+
 %     for i = 1:length(trials)
 %         figure
 %         for a=1:size(im,2)
@@ -1031,7 +1128,8 @@ if ~any(isnan(lims))
     text(0.5, .98, ['\bf ' s], 'HorizontalAlignment', 'center', 'VerticalAlignment', 'top')
     
     s = s(~ismember(s,'|\/<>*?":'));
-    saveFig(fig,s,[0 0 1920 1200]); % [left, bottom, width, height]
+    % commented save
+    %    saveFig(fig,s,[0 0 1920 1200]); % [left, bottom, width, height]
     
     m(m<lims(1))=lims(1);
     m(m>lims(2))=lims(2);

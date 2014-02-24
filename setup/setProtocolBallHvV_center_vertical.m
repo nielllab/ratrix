@@ -29,7 +29,7 @@ switch subjIDs{1}
     
 case 'g62b7lt'           %started HvV_cent 1/21/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100; 
+       rewardSizeULorMS        = 80; 
        msPenalty               =4000;    
     
 %     case 'g54aa7lt' %changed to HvV 1/4/14
@@ -43,10 +43,10 @@ case 'g62b7lt'           %started HvV_cent 1/21/14
 %        requestRewardSizeULorMS = 20;
 %        rewardSizeULorMS        = 115;
     
-case 'g62b1lt'     %moved to HvV_center 1/4/14   
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 130;
-       msPenalty                 =3700; 
+% case 'g62b1lt'     %changed to HvV 2/19/14   
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 130;
+%        msPenalty                 =3700; 
       
 %    case 'g54a11rt'   %changed to GoToBlack 12/10/13
 %         requestRewardSizeULorMS = 0;
@@ -68,7 +68,7 @@ case 'g62b1lt'     %moved to HvV_center 1/4/14
 
  case 'g62c.2rt'           %changed 1/30/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100; 
+       rewardSizeULorMS        = 90; 
        msPenalty               =3500;
        
     otherwise

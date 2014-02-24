@@ -21,16 +21,29 @@ msAirpuff                 =msPenalty;
 
 
 switch subjIDs{1}
-   
-
-       
-       case 'g6w5rt'     %started 2/17/14  
+    
+        case 'g62b9tt'     %started 2/22/14  
        requestRewardSizeULorMS = 20;
        rewardSizeULorMS        = 160;
         msPenalty               =3500;
         
-       case 'g62b8tt'     %started 2/17/14  
+        case 'g62h2tt'     %started 2/22/14  
        requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 160;
+        msPenalty               =3500;
+        
+        case 'g62h2lt'     %started 2/22/14  
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 160;
+        msPenalty               =3500;
+       
+       case 'g6w5rt'     %started 2/17/14  
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 160;
+        msPenalty               =3500;
+        
+       case 'g62b8tt'     %started 2/17/14  
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 160;
         msPenalty               =3500;
         

@@ -7,7 +7,7 @@ dbstop if error
 colordef white
 close all
 
-choosePix =1; %%% option to manually select pixels for timecourse analysis
+choosePix =0; %%% option to manually select pixels for timecourse analysis
 maxGB = 0.5; %%% size to reduce data down to
 
 if ~exist('in','var') || isempty(in)
@@ -22,9 +22,20 @@ if ~exist('in','var') || isempty(in)
     [a b] = fileparts(fullfile(p,f));
     in = fullfile(a,b);
 end
-basename = in(1:end-5)
 
-[out frameT idx pca_fig]=readSyncMultiTif(basename,maxGB);
+    try
+       basename = in(1:end-7);
+       sz = size(imread([basename '_000001.tif']));
+    namelength=6;
+    catch
+               basename = in(1:end-5);
+       sz = size(imread([basename '_0001.tif']));
+    namelength=4;
+    end
+    clear in
+        fl = 0;  %flip image? 1 = yes 0 = no
+
+[out frameT idx pca_fig]=readSyncMultiTif(basename,maxGB,fl,namelength);
 
 
 psfilename = [basename '.ps']
@@ -79,7 +90,9 @@ print('-dpsc',psfilename,'-append');
     
     movPeriod =10;
     binning=0.125;
-    framerate=10;
+    %framerate=10;
+    framerate=20;
+    
     img = out(:,:,1);
     
     [map cycMap fullMov] =phaseMap(dfof{LED},framerate,movPeriod,binning);
@@ -165,7 +178,7 @@ print('-dpsc',psfilename,'-append');
         fftPts = 2:length(spect)/2;
         loglog((fftPts-1)/length(spect),spect(fftPts));
         subplot(2,2,3);
-        plot(squeeze(cycMap(x,y,:))); ylim([-0.005 0.005]);
+        plot(squeeze(cycMap(x,y,:))); ylim([-0.125 0.125]);
         subplot(2,2,4);
         imshow(polarMap(map),'InitialMagnification','fit');
         colormap(hsv);

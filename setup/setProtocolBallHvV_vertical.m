@@ -35,7 +35,7 @@ end
   case 'g62b3rt'          %changed 2/14/14
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 75; 
-       msPenalty               = 4000; 
+       msPenalty               = 3750; 
      
 %   case 'g54aa7lt'
 %        requestRewardSizeULorMS = 0;

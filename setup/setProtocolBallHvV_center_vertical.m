@@ -45,7 +45,7 @@ switch subjIDs{1}
         case 'g62c.2rt'           %changed 1/30/14 
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 70; 
-       msPenalty               =3750;
+       msPenalty               =4000;
        
 %     case 'g54aa7lt' %changed to HvV 1/4/14
 %        requestRewardSizeULorMS = 0;

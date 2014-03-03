@@ -3,15 +3,34 @@ function img = deconvg6s(frames, dt);
 t = (0:9)*dt;
 tau = [0.18 0.55];
 psf = (1-exp(-t/tau(1))).*exp(-t/tau(2));
-psf = [zeros(1,9) psf];
-figure
-plot(psf)
+psf = psf/sum(psf);
+% figure
+% plot(psf)
+
+if ndims(frames)==3
+    nd=3;
+    fr = zeros(1,size(frames,1),size(frames,2),size(frames,3));
+    fr(1,:,:,:)=frames;
+    frames=fr;
+else
+    nd=4;
+end
+
+dlength = size(frames,2);
 
 img = zeros(size(frames));
+display('deconvolving ...');
+tic
 for x = 1:size(frames,3)
-    x
+    
     for y = 1:size(frames,4)
         d = deconvlucy(squeeze(frames(1,:,x,y)),psf);
-        img(1,:,x,y) = d;
+        img(1,1:dlength-5,x,y) = d(6:dlength);
     end
 end
+toc
+
+if nd==3
+   img = squeeze(img);
+end
+

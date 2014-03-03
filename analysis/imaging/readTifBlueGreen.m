@@ -1,4 +1,4 @@
-function [dfof responseMap responseMapNorm] = readTifBlueGreen(in);
+function [dfof responseMap responseMapNorm cycMap] = readTifBlueGreen(in);
 [pathstr, name, ext] = fileparts(fileparts(mfilename('fullpath')));
 addpath(fullfile(fileparts(pathstr),'bootstrap'))
 setupEnvironment;
@@ -6,6 +6,9 @@ setupEnvironment;
 dbstop if error
 colordef white
 close all
+movPeriod =10;
+binning=0.5;
+framerate=10;
 
 choosePix =0; %%% option to manually select pixels for timecourse analysis
 maxGB = 0.5; %%% size to reduce data down to
@@ -24,18 +27,18 @@ if ~exist('in','var') || isempty(in)
     in = fullfile(a,b);
 end
 
-    try
-       basename = in(1:end-7);
-       sz = size(imread([basename '_000001.tif']));
+try
+    basename = in(1:end-7);
+    sz = size(imread([basename '_000001.tif']));
     namelength=6;
-    catch
-               basename = in(1:end-5);
-       sz = size(imread([basename '_0001.tif']));
+catch
+    basename = in(1:end-5);
+    sz = size(imread([basename '_0001.tif']));
     namelength=4;
-    end
-    clear in
-        fl = 0;  %flip image? 1 = yes 0 = no
-  
+end
+clear in
+fl = 0;  %flip image? 1 = yes 0 = no
+
 
 [out frameT idx pca_fig]=readSyncMultiTif(basename,maxGB,fl,namelength);
 
@@ -61,8 +64,8 @@ for LED=1:3
         LEDfrms = find(idx==blue);
         tic
         LEDout = double(interp1(LEDfrms,shiftdim(single(out(:,:,LEDfrms)),2),frms,'linear','extrap'));
-       toc
-       LEDout = shiftdim(LEDout,1);
+        toc
+        LEDout = shiftdim(LEDout,1);
         m = repmat(mean(double(LEDout),3),[1 1 size(LEDout,3)]);
         dfof{LED} = (double(LEDout)-m)./m;
         clear m
@@ -77,9 +80,11 @@ for LED=1:3
         clear m
     elseif LED==split
         dfof{LED} = dfof{blue}-dfof{green};
+        
+     
     end
     
-
+    
     
     
     dx=25;
@@ -88,15 +93,17 @@ for LED=1:3
         figure
         plot(reshape(pix,size(pix,1)*size(pix,2),size(pix,3))')
         set(gcf, 'PaperPositionMode', 'auto');
-print('-dpsc',psfilename,'-append');
+        print('-dpsc',psfilename,'-append');
     end
     
-    movPeriod =10;
-    binning=0.125;
-    framerate=10;
+    
     img = out(:,:,1);
     
-    [map cycMap fullMov] =phaseMap(dfof{LED},framerate,movPeriod,binning);
+    [rawmap rawcycMap fullMov] =phaseMap(dfof{LED},framerate,movPeriod,binning);
+    rawmap(isnan(rawmap))=0;
+    mapFig(rawmap)
+    
+    [map cycMap fullMov] =deconPhaseMap(dfof{LED},framerate,movPeriod,binning);
     map(isnan(map))=0;
     mapFig(map)
     
@@ -180,6 +187,8 @@ print('-dpsc',psfilename,'-append');
         loglog((fftPts-1)/length(spect),spect(fftPts));
         subplot(2,2,3);
         plot(squeeze(cycMap(x,y,:))); ylim([-0.125 0.125]);
+        hold on
+        plot(squeeze(rawcycMap(x,y,:)),'g'); ylim([-0.125 0.125]);
         subplot(2,2,4);
         imshow(polarMap(map),'InitialMagnification','fit');
         colormap(hsv);
@@ -195,7 +204,7 @@ print('-dpsc',psfilename,'-append');
     
     
 end  %%%LED
-ps2pdf('psfile', psfilename, 'pdffile', [psfilename(1:(end-2)) 'pdf']);
+%ps2pdf('psfile', psfilename, 'pdffile', [psfilename(1:(end-2)) 'pdf'],'gscommand','C:\Program Files\gs\gs9.10\bin');
 delete(psfilename);
 
     function mapFig(mapIn)

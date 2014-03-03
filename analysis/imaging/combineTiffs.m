@@ -182,31 +182,66 @@ recs = {
     }
    
     }; %%% black on top = go right, black on bottom = go left
-
+% 
 % imagingPath = 'C:\data\imaging';
 % recs = {
 % 
 %       {'g62b4ln' {
-%    % {[422 672],[],'021914 G628-LT GTS Behavior','G628-LT_run1_GTS_behavior_15ms_exp'}
+% 
 %       {[1 298],[],'022114 G62B.4-LN GTS Behavior','G62B.4-LN_run1_GTS_behavior_15msexp'}
 %     }
 %     }
 %    
 %     }; %%% black on top = go right, black on bottom = go left
-% 
+% % 
 
 
 % imagingPath = 'C:\data\imaging';
 % recs = {
 % 
 %       {'g62b7lt' {
-%    % {[422 672],[],'021914 G628-LT GTS Behavior','G628-LT_run1_GTS_behavior_15ms_exp'}
-%       {[1 176],[],'022314 G62B.7-LT HvV_center Behavior\G62B.7-LT_run1_HvV_center_Behavior_15msexp','G62B.7-LT_run1_HvV_center_Behavior_15msexp'}
+%  
+%      {[1 176],[],'022314 G62B.7-LT HvV_center Behavior\G62B.7-LT_run1_HvV_center_Behavior_15msexp','G62B.7-LT_run1_HvV_center_Behavior_15msexp'}
+%      %   {[177 469],[],'022514 G62B.7-LT HvV_center Behavior\G62B.7-LT_run1_HvV_center_Behavior_15msexp','G62B.7-LT_run1_HvV_center_Behavior_15msexp'}
+%   }
+%     }
+%    
+%     }; %%% vert vs hors = left vs right
+
+
+imagingPath = 'C:\data\imaging';
+recs = {
+
+      {'g62b3rt' {
+      {[1 157],[],'022814 G62B.3-RT HvV Behavior\G62B.3-RT_run1_HvV_Behavior_15msexp','G62B.3-RT_run1_HvV_Behavior_15msexp'}
+    }
+    }
+   
+    }; %%% vert vs horiz in either top or bottom
+
+imagingPath = 'C:\data\imaging';
+recs = {
+
+%       {'g62b.5lt' {
+%       {[1 198],[1 190],'030114 G62B.5-LT GTS Behavior (Fstop 8)\G62B.5-LT_run1_GTS_behavior_Fstop_8_50msexp','G62B.5-LT_run1_GTS_behavior_Fstop_8_50msexp'}
 %     }
 %     }
 %    
-%     }; %%% black on top = go right, black on bottom = go left
-% 
+         {'g62b7lt' {
+      {[470 739],[],'030114 G62B.7-LT HvV_center Behavior\G62B.7-LT_run1_HvV_center_behavior_Fstop5.6_50msexp','G62B.7-LT_run1_HvV_center_behavior_Fstop5.6_50msexp'}
+    }
+    }
+         {'g62b3rt' {
+      {[158 340],[],'030114 G62B.3-RT HvV Behavior\G62B.3-RT_run1_HvV_behavior_Fstop_5.6_50msexp','G62B.3-RT_run1_HvV_behavior_Fstop_5.6_50msexp'}
+    }
+    }
+         {'g62b4ln' {
+      {[583 748],[],'030114 G62B.4-LN GTS Behavior (Top Fstop-11)\G62B.4-LN_run4_GTS_Behavior_topFstop-11_30msexp','G62B.4-LN_run4_GTS_Behavior_topFstop-11_30msexp'}
+    }
+    }
+    }; %%% vert vs horiz in either top or bottom
+
+
 
 % dirOverview(imagingPath)
 
@@ -510,6 +545,13 @@ v = .01;
 d = {};
 bFrames = {};
 frameLeds = {};
+
+% bRnew = {};
+% for i = 1:length(bRecs)-1  %%% hacky way to remove last record which is sometimes faulty
+%     bRnew{i} = bRecs{i};
+% end
+% bRecs=bRnew; clear bRnew;
+
 for i = 1:length(bRecs)
     reqs = diff(bRecs{i});
     plot(reqs+v*i,'r','LineWidth',3);
@@ -626,7 +668,7 @@ trials = trials( ...
 c = getUniformSpectrum(normalize(onsets));
 
 %pts = [-.8 respondedWithin(1)]; %-1.5*frameDur]; %last frame suspect -- if reinforcement phase ends before exposure does, probably turns led off prematurely
-pts = [-0.8 respondedWithin(1)+1.3];
+pts = [-0.5 respondedWithin(1)+1.3];
 pts = linspace(pts(1),pts(2),1+round(diff(pts)/frameDur));
 
 fig = figure;
@@ -723,7 +765,7 @@ if any(problem)
 end
 
 
-for ind = 2:length(leds)
+for ind = 1:length(leds)
   lab=leds{ind}; 
     thisBFrames = cellfun(@(x,y)x(y == ind),bFrames,frameLeds,'UniformOutput',false);
     these = flatLEDs == ind;
@@ -740,9 +782,12 @@ bg_im = im{2}-im{1};
 
   show(deconvg6s((nanmedianMW(bg)),0.1),pts,[pre 'blue-green deconv dfof'],[1 99.5],@cb);
  
- [f p] = uiputfile('*.mat','output file');
- save(fullfile(p,f),'bg','bg_im','targ','correct','trials','pts','onsets','starts')
-keyboard
+% [f p] = uiputfile('*.mat','output file');
+ save([iPath(1:end-15) 'behav data.mat'],'bg','bg_im','targ','correct','trials','pts','onsets','starts')
+
+
+
+
 end %%% biAnalysis
 
 function [im dfof]= widefieldAnalysis(trials,pts,onsets,data,t,bFrames,pre,c,targ,stoppedWithin,respondedWithin,misses,starts,correct)
@@ -774,7 +819,7 @@ display('making movie')
 %%% use immovie
 
 start = min(find(bs-bs(1)>600));
-nframes=2000;
+nframes=min(2000,size(data,3)-start-5);
 
 movdata = zeros(size(data,1),size(data,2),3,nframes);
 im_med = prctile(double(data(:,:,start:start+nframes-1)),20,3);
@@ -928,7 +973,7 @@ saveFig(fig,[pre '.pix'],[0 0 500 500]); % [left, bottom, width, height]
 fprintf('interpolating...\n')
 tic
 for i=1:length(trials)
-    frames = length([bFrames{1:trials(i)-1}]) + (1:length(bFrames{trials(i)}))
+    frames = length([bFrames{1:trials(i)-1}]) + (1:length(bFrames{trials(i)}));
     if ~isempty(frames)
         im(i,:,:,:) = interp1(bFrames{trials(i)},double(data(frames,:,:)),pts(i,:));
 %         subplot(nrows,nrows,i);
@@ -977,19 +1022,19 @@ if ~isempty(trials)
         end
     
             show(nanmedianMW(dfof),ptLs,[pre '.all trials baseline(dF/F)'],[1 99],@cb);
-    show(nanmedianMW(dfof(targ(trials)>0,:,:,:)) ,ptLs,[pre '.left baseline(dF/F)'],[1 99],@cb);
-     
-    ldecon = deconvg6s(nanmedianMW(dfof(targ(trials)>0,:,:,:)),0.1);
-        show(ldecon ,ptLs,[pre '.left deconv(dF/F)'],[1 99.5],@cb);
-
-        
-    show( nanmedianMW(dfof(targ(trials)<0,:,:,:)),ptLs,[pre '. right baseline(dF/F)'],[1 99],@cb);
- rdecon = deconvg6s(nanmedianMW(dfof(targ(trials)<0,:,:,:)),0.1);
- 
-        show(deconvg6s(nanmedianMW(dfof(targ(trials)<0,:,:,:)),0.1) ,ptLs,[pre '.right deconv(dF/F)'],[1 99.5],@cb);
-
-    show(nanmedianMW(dfof(targ(trials)>0,:,:,:)) - nanmedianMW(dfof(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right baseline(dF/F)'],[1 99],@cb);
-        show(ldecon - rdecon,ptLs,[pre '.left vs right decon(dF/F)'],[1 99],@cb);
+%     show(nanmedianMW(dfof(targ(trials)>0,:,:,:)) ,ptLs,[pre '.left baseline(dF/F)'],[1 99],@cb);
+%      
+%     ldecon = deconvg6s(nanmedianMW(dfof(targ(trials)>0,:,:,:)),0.1);
+%         show(ldecon ,ptLs,[pre '.left deconv(dF/F)'],[1 99.5],@cb);
+% 
+%         
+%     show( nanmedianMW(dfof(targ(trials)<0,:,:,:)),ptLs,[pre '. right baseline(dF/F)'],[1 99],@cb);
+%  rdecon = deconvg6s(nanmedianMW(dfof(targ(trials)<0,:,:,:)),0.1);
+%  
+%         show(deconvg6s(nanmedianMW(dfof(targ(trials)<0,:,:,:)),0.1) ,ptLs,[pre '.right deconv(dF/F)'],[1 99.5],@cb);
+% 
+%     show(nanmedianMW(dfof(targ(trials)>0,:,:,:)) - nanmedianMW(dfof(targ(trials)<0,:,:,:)),ptLs,[pre '.left vs right baseline(dF/F)'],[1 99],@cb);
+%         show(ldecon - rdecon,ptLs,[pre '.left vs right decon(dF/F)'],[1 99],@cb);
 
 %     for i = 1:length(trials)
 %         figure

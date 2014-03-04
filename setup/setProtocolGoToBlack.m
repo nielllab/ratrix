@@ -95,7 +95,7 @@ maxHeight = 1080;
 textureSize = 10*[w,h];
 zoom = [maxWidth maxHeight]./textureSize;
 
-svnRev = {'svn://132.239.158.177/projects/ratrix/trunk'};
+svnRev = {}; %{'svn://132.239.158.177/projects/ratrix/trunk'};
 svnCheckMode = 'session';
 
 interTrialLuminance = .5;

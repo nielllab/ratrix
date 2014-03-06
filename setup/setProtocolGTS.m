@@ -28,42 +28,19 @@ if ~isscalar(subjIDs)
 end
 switch subjIDs{1}
 
-%    case 'g6w2tt' 
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 170;
-%        msPenalty               =3500; 
-%     
-%    case 'g6w1lt' 
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 170;
-%        msPenalty               =3500; 
-    
-   case 'bfly1a.5tt' 
+    case 'bfly1a.5tt' 
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 90;
        msPenalty               =3500; 
        
-       
-%    case 'g54aa7tt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 35;
-%        msPenalty                 =3500; 
-       
-    
-%    case 'gcam51ln'
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 17;
-%         msPenalty                 =3500; 
-        
    case 'g62b4ln'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 65;
+       rewardSizeULorMS        = 60;
        msPenalty               =3500; 
 
-      
    case 'g62.8lt' 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 80;
+       rewardSizeULorMS        = 70;
        msPenalty               =3500; 
        
    case 'bfly1a.5lt' 
@@ -81,11 +58,33 @@ switch subjIDs{1}
        rewardSizeULorMS        = 180;  
        msPenalty               =4000;
        
-       
+%    case 'g6w2tt' 
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 170;
+%        msPenalty               =3500; 
+%     
+%    case 'g6w1lt' 
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 170;
+%        msPenalty               =3500; 
+%        
+%        
+%    case 'g54aa7tt'
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 35;
+%        msPenalty                 =3500; 
+%        
+%     
+%    case 'gcam51ln'
+%         requestRewardSizeULorMS = 0;
+%         rewardSizeULorMS        = 17;
+%         msPenalty                 =3500; 
+%         
+%  
 %    case 'g54bb2' % Switched GTB 12/19/13
 %        requestRewardSizeULorMS = 0;
 %        rewardSizeULorMS        = 55;
-
+% 
 % case 'g62b7rt' %FDIC 12/30/13
 %        requestRewardSizeULorMS = 20; 
 %        rewardSizeULorMS        = 115; 

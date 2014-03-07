@@ -28,10 +28,6 @@ if ~isscalar(subjIDs)
 end
 switch subjIDs{1}
 
-    case 'bfly1a.5tt' 
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 90;
-       msPenalty               =3500; 
        
    case 'g62b4ln'
        requestRewardSizeULorMS = 0;
@@ -41,12 +37,7 @@ switch subjIDs{1}
    case 'g62.8lt' 
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 70;
-       msPenalty               =3500; 
-       
-   case 'bfly1a.5lt' 
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 60;
-       msPenalty               =3500; 
+       msPenalty               =3500;  
        
    case 'g62b.5lt'           %started 1/28/14 
        requestRewardSizeULorMS = 0;
@@ -58,15 +49,26 @@ switch subjIDs{1}
        rewardSizeULorMS        = 180;  
        msPenalty               =4000;
        
+    case 'g6w1lt' % started 3/7/14
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 170;
+       msPenalty               =3500;
+       
+%    case 'bfly1a.5lt' 
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 60;
+%        msPenalty               =3500;
+       
+%     case 'bfly1a.5tt' 
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 90;
+%        msPenalty               =3500; 
+
+
 %    case 'g6w2tt' 
 %        requestRewardSizeULorMS = 0;
 %        rewardSizeULorMS        = 170;
-%        msPenalty               =3500; 
-%     
-%    case 'g6w1lt' 
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 170;
-%        msPenalty               =3500; 
+%        msPenalty               =3500;  
 %        
 %        
 %    case 'g54aa7tt'

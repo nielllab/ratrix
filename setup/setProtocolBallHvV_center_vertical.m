@@ -30,17 +30,17 @@ switch subjIDs{1}
        case 'g62h2lt'     %started 2/22/14  
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 120;
-        msPenalty              =4100;
+        msPenalty              =4200;
         
        case 'g62b9tt'     %started 3/8/14  
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 120;
-        msPenalty              =4000;
+        msPenalty              =4200;
     
        case 'g62h2tt'     %started 3/5/14
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 100;
-        msPenalty              =3500;
+        msPenalty              =4200;
         
       case 'g62c.2rt'           %changed 1/30/14 
        requestRewardSizeULorMS = 0;

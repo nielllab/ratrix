@@ -23,7 +23,7 @@ msAirpuff                 =msPenalty;
 switch subjIDs{1}
     
         case 'g62h1tt'     %switched HvV Center 3/8/14 
-       requestRewardSizeULorMS = 0;
+       requestRewardSizeULorMS = 20;
        rewardSizeULorMS        = 150;
         msPenalty              =3750;
 

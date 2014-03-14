@@ -36,22 +36,22 @@ switch subjIDs{1}
 
    case 'g62.8lt' 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 80;
-       msPenalty               =3750;  
+       rewardSizeULorMS        = 90;
+       msPenalty               =4200;  
        
    case 'g62b.5lt'           %started 1/28/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 110; 
+       rewardSizeULorMS        = 100; 
        msPenalty               =3750;
        
-   case 'g625ln' % Switched 1/17/14
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 180;  
-       msPenalty               =4000;
-       
+%    case 'g625ln' % Switched 1/17/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 180;  
+%        msPenalty               =4000;
+%        
     case 'g6w1lt' % started 3/7/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 140;
+       rewardSizeULorMS        = 125;
        msPenalty               =3500;
        
 %    case 'bfly1a.5lt' 

@@ -29,12 +29,12 @@ end
 
   case 'g62b1lt'     %moved to HvV_vertical 2/19/14   
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 90;
+       rewardSizeULorMS        = 80;
        msPenalty               =4200; 
      
   case 'g62b3rt'          %changed 2/14/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 55; 
+       rewardSizeULorMS        = 50; 
        msPenalty               = 3750; 
      
 %   case 'g54aa7lt'

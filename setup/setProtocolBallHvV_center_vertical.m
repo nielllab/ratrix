@@ -150,6 +150,22 @@ axis                   = pi/2;
 targetOrientations = pi/2;
 distractorOrientations = 0;
 
+%for creating psychometric curves (contrast and orientation
+switch subjIDs{1}
+        
+     case 'g62c.2rt'           %set variable parameters
+            contrast               = [.01, .05, .1, .25, .5, 1];
+
+        
+     case 'g62b7lt'            %set variable parameters
+   targetOrientations = [(-pi/4)+pi/2,(-pi/8)+pi/2, (-pi/16)+pi/2, 0+pi/2, (pi/16)+pi/2, (pi/8)+pi/2, (pi/4)+pi/2];
+   distractorOrientations = [(-pi/4),(-pi/8), (-pi/16), 0, (pi/16), (pi/8), (pi/4)];
+   
+    otherwise
+        warning('unrecognized mouse, using defaults')
+end
+
+
 stim.stim = orientedGabors(pixPerCycs,{distractorOrientations [] targetOrientations},'abstract',mean,radius,contrast,thresh,normalizedPosition,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[],[],axis);
 
  ballTM = ball(percentCorrectionTrials,sm,noRequest);

@@ -388,6 +388,7 @@ for i=1:length(ids)
                     LUTparams=[];
                     LUTparams.lastIndex=length(compiledLUT);
                     LUTparams.compiledLUT=compiledLUT;
+                    LUTparams.sessionLUT = sessionLUT;
                     [newRecs compiledLUT]=extractDetailFields(classes{2,c},colsFromAllFields(newBasicRecs,colInds),tr(thisTsInds),LUTparams);
                     % if extractDetailFields returns a stim-specific LUT, add it to our main compiledLUT
                     % 5/14/09 - this already happens b/c we pass in the compiledLUT to extractDetailFields!

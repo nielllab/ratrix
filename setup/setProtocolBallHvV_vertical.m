@@ -29,12 +29,12 @@ end
 
   case 'g62b1lt'     %moved to HvV_vertical 2/19/14   
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 110;
+       rewardSizeULorMS        = 80;
        msPenalty               =4200; 
      
   case 'g62b3rt'          %changed 2/14/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 65; 
+       rewardSizeULorMS        = 50; 
        msPenalty               = 3750; 
      
 %   case 'g54aa7lt'
@@ -75,7 +75,7 @@ maxHeight = 1080;
 textureSize = 10*[w,h];
 zoom = [maxWidth maxHeight]./textureSize;
 
-svnRev = {'svn://132.239.158.177/projects/ratrix/trunk'};
+svnRev = {}; %{'svn://132.239.158.177/projects/ratrix/trunk'};
 svnCheckMode = 'session';
 
 interTrialLuminance = .5;
@@ -103,13 +103,29 @@ axis                   = pi/2;
 
 
 
-
-
-
-
 %%% abstract orientation (e.g. 0 = go left, pi/2 = go right)
 targetOrientations = pi/2;
 distractorOrientations = 0;
+
+
+%for creating psychometric curves (contrast and orientation
+switch subjIDs{1}
+        
+      case 'g62b1lt'     %set variable parameters 
+            contrast               = [.01, .05, .1, .25, .5, 1];
+
+        
+       case 'g62b3rt'           %set variable parameters 
+   %targetOrientations = [(-pi/4)+pi/2,(-pi/8)+pi/2, (-pi/16)+pi/2, 0+pi/2, (pi/16)+pi/2, (pi/8)+pi/2, (pi/4)+pi/2];
+      targetOrientations = [(-pi/4)+(pi/2),(-pi/8)+(pi/2),(-3*pi/16)+(pi/2), (-pi/16)+(pi/2), 0+(pi/2)];
+   distractorOrientations = [0, (pi/16), (pi/8), (3*pi/16), (pi/4)];
+   %distractorOrientations = [(-pi/4),(-pi/8), (-pi/16), 0, (pi/16), (pi/8), (pi/4)];
+   
+    otherwise
+        warning('unrecognized mouse, using defaults')
+end
+
+
 
 stim.stim = orientedGabors(pixPerCycs,{distractorOrientations [] targetOrientations},'abstract',mean,radius,contrast,thresh,normalizedPosition,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[],[],axis);
 %  ballSM = trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance);

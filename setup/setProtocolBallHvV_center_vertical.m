@@ -27,25 +27,46 @@ if ~isscalar(subjIDs)
 end
 switch subjIDs{1}
     
+       case 'g62h2lt'     %started 2/22/14  
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 120;
+        msPenalty              =4200;
+        
+       case 'g62b9tt'     %started 3/8/14  
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 110;
+        msPenalty              =4200;
+    
+       case 'g62h2tt'     %started 3/5/14
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 100;
+        msPenalty              =4200;
+        
+      case 'g62c.2rt'           %changed 1/30/14 
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 75; 
+       msPenalty               =4000;
+
+    
      case 'g62b8tt'     %started 2/24/14  
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 130;
+       rewardSizeULorMS        = 85;
         msPenalty              =4200;
         
     case 'g62b7lt'           %started HvV_cent 1/21/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 65; 
+       rewardSizeULorMS        = 55; 
        msPenalty               =4000;    
        
        case 'g6w5rt'     %started 2/17/14  
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 140;
-        msPenalty              =4100;
+       rewardSizeULorMS        = 90;
+        msPenalty              =4200;
     
-        case 'g62c.2rt'           %changed 1/30/14 
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 65; 
-       msPenalty               =4100;
+%         case 'g62c.2rt'           %changed 1/30/14 
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 60; 
+%        msPenalty               =4100;
        
 %     case 'g54aa7lt' %changed to HvV 1/4/14
 %        requestRewardSizeULorMS = 0;
@@ -81,10 +102,7 @@ switch subjIDs{1}
 %        requestRewardSizeULorMS = 0;
 %        rewardSizeULorMS        = 60;   
 
- case 'g62c.2rt'           %changed 1/30/14 
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 90; 
-       msPenalty               =3500;
+ 
        
     otherwise
         warning('unrecognized mouse, using defaults')
@@ -101,7 +119,7 @@ maxHeight = 1080;
 textureSize = 10*[w,h];
 zoom = [maxWidth maxHeight]./textureSize;
 
-svnRev = {'svn://132.239.158.177/projects/ratrix/trunk'};
+svnRev = {}; %{'svn://132.239.158.177/projects/ratrix/trunk'};
 svnCheckMode = 'session';
 
 interTrialLuminance = .5;
@@ -131,6 +149,22 @@ axis                   = pi/2;
 
 targetOrientations = pi/2;
 distractorOrientations = 0;
+
+%for creating psychometric curves (contrast and orientation
+switch subjIDs{1}
+        
+     case 'g62c.2rt'           %set variable parameters
+            contrast               = [.01, .05, .1, .25, .5, 1];
+
+        
+     case 'g62b7lt'            %set variable parameters
+   targetOrientations = [(-pi/4)+(pi/2),(-pi/8)+(pi/2),(-3*pi/16)+(pi/2), (-pi/16)+(pi/2), 0+(pi/2)];
+   distractorOrientations = [0, (pi/16), (pi/8), (3*pi/16), (pi/4)];
+   
+    otherwise
+        warning('unrecognized mouse, using defaults')
+end
+
 
 stim.stim = orientedGabors(pixPerCycs,{distractorOrientations [] targetOrientations},'abstract',mean,radius,contrast,thresh,normalizedPosition,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[],[],axis);
 

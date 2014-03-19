@@ -37,22 +37,22 @@ writeVideo(vid,mov);
 close(vid)
 
 
-keyboard
-lowthresh = prctile(cycle_mov(:),3)
-upperthresh = 2*prctile(cycle_mov(:),99)
-figure
-for i = 1:size(cycle_mov,3);
-    imagesc(imresize(cycle_mov(:,:,i),0.5,'box'),[lowthresh upperthresh]);
-    colormap(gray);
-    axis equal;
-    mov(i) = getframe(gcf);
-end
-
-vid = VideoWriter(fullfile(p,f));
-vid.FrameRate=25;
-open(vid);
-writeVideo(vid,mov);
-close(vid)
+% keyboard
+% lowthresh = prctile(cycle_mov(:),3)
+% upperthresh = 2*prctile(cycle_mov(:),99)
+% figure
+% for i = 1:size(cycle_mov,3);
+%     imagesc(imresize(cycle_mov(:,:,i),0.5,'box'),[lowthresh upperthresh]);
+%     colormap(gray);
+%     axis equal;
+%     mov(i) = getframe(gcf);
+% end
+% 
+% vid = VideoWriter(fullfile(p,f));
+% vid.FrameRate=25;
+% open(vid);
+% writeVideo(vid,mov);
+% close(vid)
 
 
 use_speed=0;
@@ -67,15 +67,55 @@ if f~=0
     posx = cumsum(stimRec.pos(:,1)-900);
     posy = cumsum(stimRec.pos(:,2)-500);
     frameT = 0.1:0.1:300;
-    vx = diff(interp1(stimRec.ts(1:9000)-stimRec.ts(1),posx(1:9000),frameT));
-    vy = diff(interp1(stimRec.ts(1:9000)-stimRec.ts(1),posy(1:9000),frameT));
+    vx = diff(interp1(stimRec.ts(1:end-1000)-stimRec.ts(1),posx(1:end-1000),frameT));
+    vy = diff(interp1(stimRec.ts(1:end-1000)-stimRec.ts(1),posy(1:end-1000),frameT));
     vx(end+1)=0; vy(end+1)=0;
     
     figure
     plot(vx); hold on; plot(vy,'g');
     sp = sqrt(vx.^2 + vy.^2);
+    figure
+    plot(sp)
 end;
 
+
+for i=1:100;
+    sp_avg(i) = nanmeanMW(sp(i:100:end)');
+    sp_med(i) = nanmedianMW(sp(i:100:end)');
+end
+sp_all = reshape(sp,[100 30]);
+figure
+plot(0.1:0.1:10,sp_all)
+title('all speeds')
+figure
+plot(0.1:0.1:10,sp_avg)
+title('mean speed')
+ylim([0 1500])
+figure
+plot(0.1:0.1:10,sp_med)
+title('median speed')
+ylim([0 1500])
+
+thresh = [ 400 ];
+for i = 1:1
+stop_img = median(dfof_bg(:,:,sp<thresh(i)),3);
+mov_img = median(dfof_bg(:,:,sp>thresh(i)),3);
+
+figure
+subplot(2,2,1);
+imagesc(stop_img,[-0.2 0.2]);
+subplot(2,2,2);
+imagesc(mov_img,[-0.2 0.2]);
+subplot(2,2,3);
+imagesc(mov_img-stop_img,[-0.2 0.2]);
+end
+
+map = mov_img-stop_img;
+
+[f p] =uiputfile('*.mat','move map file');
+save(fullfile(p,f),'map');
+
+keyboard
 %% raw movie
 
 

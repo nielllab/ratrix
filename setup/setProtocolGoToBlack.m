@@ -27,7 +27,7 @@ switch subjIDs{1}
        rewardSizeULorMS        = 170;
         msPenalty              =4000;
         
-        case 'g62g4ln'     %started 3/17/14 
+        case 'g62g4lt'     %started 3/17/14 
        requestRewardSizeULorMS = 20;
        rewardSizeULorMS        = 170;
         msPenalty              =4000;

@@ -89,7 +89,7 @@ stim.positional = false;
 stim.cue = true;
 stim.soundClue = false;
 
-pixPerCycs             = [100]; %*10^9;
+pixPerCycs             = [100 125 150]; %*10^9;
 targetOrientations     = 0
 distractorOrientations = []; %-targetOrientations;
 mean                   = .5;

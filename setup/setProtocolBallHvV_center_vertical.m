@@ -55,7 +55,7 @@ switch subjIDs{1}
         
     case 'g62b7lt'           %started HvV_cent 1/21/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 55; 
+       rewardSizeULorMS        = 50; 
        msPenalty               =4000;    
        
        case 'g6w5rt'     %started 2/17/14  
@@ -133,7 +133,7 @@ stim.positional = false;
 stim.cue = true;
 stim.soundClue = true;
 
-pixPerCycs             = [100]; %*10^9;
+pixPerCycs             = [100 125 150]; %*10^9;
 targetOrientations     = 0
 distractorOrientations = []; %-targetOrientations;
 mean                   = .5;

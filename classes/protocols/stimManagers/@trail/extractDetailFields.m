@@ -35,9 +35,7 @@ else
             catch
                 error('if we have subDetails, stim should have been a stimManager')
             end
-        end
-        
-        keyboard
+        end                
         
         %         sms = [trialRecords.stimManager];
         %         smt = unique([sms.originalType]);

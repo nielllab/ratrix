@@ -2,8 +2,12 @@ function [out newLUT]=extractDetailFields(sm,basicRecords,trialRecords,LUTparams
 newLUT=LUTparams.compiledLUT;
 
 nAFCindex = find(strcmp(LUTparams.compiledLUT,'nAFC'));
+if isempty(nAFCindex) %
+    nAFCindex = find(strcmp(LUTparams.compiledLUT,'ball'));
+end
+
 if isempty(nAFCindex) || (~isempty(nAFCindex) && ~all([basicRecords.trialManagerClass]==nAFCindex))
-    warning('only works for nAFC trial manager')
+    warning('only works for nAFC or ball trial manager')
     out=struct;
 else
 

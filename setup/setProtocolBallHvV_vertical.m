@@ -29,12 +29,12 @@ end
 
   case 'g62b1lt'     %moved to HvV_vertical 2/19/14   
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 80;
-       msPenalty               =4200; 
+       rewardSizeULorMS        = 85;
+       msPenalty               =4300; 
      
   case 'g62b3rt'          %changed 2/14/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 50; 
+       rewardSizeULorMS        = 45; 
        msPenalty               = 3750; 
      
 %   case 'g54aa7lt'
@@ -89,7 +89,7 @@ stim.positional = false;
 stim.cue = true;
 stim.soundClue = false;
 
-pixPerCycs             = [100]; %*10^9;
+pixPerCycs             = [100 125 150]; %*10^9;
 targetOrientations     = 0
 distractorOrientations = []; %-targetOrientations;
 mean                   = .5;

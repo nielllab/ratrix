@@ -44,7 +44,7 @@ switch subjIDs{1}
     
        case 'g62h2tt'     %started 3/5/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 90;
+       rewardSizeULorMS        = 80;
         msPenalty              =4300;
         
       case 'g62c.2rt'           %changed 1/30/14 
@@ -55,7 +55,7 @@ switch subjIDs{1}
     
      case 'g62b8tt'     %started 2/24/14  
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 85;
+       rewardSizeULorMS        = 75;
         msPenalty              =4200;
         
     case 'g62b7lt'           %started HvV_cent 1/21/14 
@@ -67,6 +67,11 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 80;
         msPenalty              =4200;
+        
+           case 'g62g4lt'     %started 3/17/14 
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 160;
+        msPenalty              =4000;
     
 %         case 'g62c.2rt'           %changed 1/30/14 
 %        requestRewardSizeULorMS = 0;
@@ -156,19 +161,19 @@ targetOrientations = pi/2;
 distractorOrientations = 0;
 
 %for creating psychometric curves (contrast and orientation
-switch subjIDs{1}
-        
-     case 'g62c.2rt'           %set variable parameters
-            contrast               = [.01, .05, .1, .25, .5, 1];
-
-        
-     case 'g62b7lt'            %set variable parameters
-   targetOrientations = [(-pi/4)+(pi/2),(-pi/8)+(pi/2),(-3*pi/16)+(pi/2), (-pi/16)+(pi/2), 0+(pi/2)];
-   distractorOrientations = [0, (pi/16), (pi/8), (3*pi/16), (pi/4)];
-   
-    otherwise
-        warning('unrecognized mouse, using defaults')
-end
+% switch subjIDs{1}
+%         
+%      case 'g62c.2rt'           %set variable parameters
+%             contrast               = [.01, .05, .1, .25, .5, 1];
+% 
+%         
+%      case 'g62b7lt'            %set variable parameters
+%    targetOrientations = [(-pi/4)+(pi/2),(-pi/8)+(pi/2),(-3*pi/16)+(pi/2), (-pi/16)+(pi/2), 0+(pi/2)];
+%    distractorOrientations = [0, (pi/16), (pi/8), (3*pi/16), (pi/4)];
+%    
+%     otherwise
+%         warning('unrecognized mouse, using defaults')
+% end
 
 
 stim.stim = orientedGabors(pixPerCycs,{distractorOrientations [] targetOrientations},'abstract',mean,radius,contrast,thresh,normalizedPosition,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[],[],axis);

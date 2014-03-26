@@ -108,22 +108,22 @@ targetOrientations = pi/2;
 distractorOrientations = 0;
 
 
-%for creating psychometric curves (contrast and orientation
-switch subjIDs{1}
-        
-      case 'g62b1lt'     %set variable parameters 
-            contrast               = [.01, .05, .1, .25, .5, 1];
-
-        
-       case 'g62b3rt'           %set variable parameters 
-   %targetOrientations = [(-pi/4)+pi/2,(-pi/8)+pi/2, (-pi/16)+pi/2, 0+pi/2, (pi/16)+pi/2, (pi/8)+pi/2, (pi/4)+pi/2];
-      targetOrientations = [(-pi/4)+(pi/2),(-pi/8)+(pi/2),(-3*pi/16)+(pi/2), (-pi/16)+(pi/2), 0+(pi/2)];
-   distractorOrientations = [0, (pi/16), (pi/8), (3*pi/16), (pi/4)];
-   %distractorOrientations = [(-pi/4),(-pi/8), (-pi/16), 0, (pi/16), (pi/8), (pi/4)];
-   
-    otherwise
-        warning('unrecognized mouse, using defaults')
-end
+% %for creating psychometric curves (contrast and orientation
+% switch subjIDs{1}
+%         
+%       case 'g62b1lt'     %set variable parameters 
+%             contrast               = [.01, .05, .1, .25, .5, 1];
+% 
+%         
+%        case 'g62b3rt'           %set variable parameters 
+%    %targetOrientations = [(-pi/4)+pi/2,(-pi/8)+pi/2, (-pi/16)+pi/2, 0+pi/2, (pi/16)+pi/2, (pi/8)+pi/2, (pi/4)+pi/2];
+%       targetOrientations = [(-pi/4)+(pi/2),(-pi/8)+(pi/2),(-3*pi/16)+(pi/2), (-pi/16)+(pi/2), 0+(pi/2)];
+%    distractorOrientations = [0, (pi/16), (pi/8), (3*pi/16), (pi/4)];
+%    %distractorOrientations = [(-pi/4),(-pi/8), (-pi/16), 0, (pi/16), (pi/8), (pi/4)];
+%    
+%     otherwise
+%         warning('unrecognized mouse, using defaults')
+% end
 
 
 

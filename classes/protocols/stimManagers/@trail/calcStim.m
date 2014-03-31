@@ -66,7 +66,7 @@ if isa(stimulus.stim,'stimManager')
         subDistractorPorts = max(responsePorts);
     end
 
-    [~, ~, ~, ~, ~, out.stim, ~, ~, ~, subDetails, ~, subText, ~, subImagingTasks, ~] = ...
+    [~, ~, ~, ~, ~, out.stim, ~, ~, ~, details.subDetails, ~, subText, ~, subImagingTasks, ~] = ...
         calcStim(stimulus.stim,'subTrail',allowRepeats,resolutions(resolutionIndex),displaySize,LUTbits,responsePorts,totalPorts,trialRecords,subTargetPorts,subDistractorPorts,details,text);
 end
 

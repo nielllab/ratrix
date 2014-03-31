@@ -51,8 +51,8 @@ switch subjIDs{1}
 %        
     case 'g6w1lt' % started 3/7/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 80;
-       msPenalty               =3700;
+       rewardSizeULorMS        = 70;
+       msPenalty               =3800;
        
 %    case 'bfly1a.5lt' 
 %        requestRewardSizeULorMS = 0;

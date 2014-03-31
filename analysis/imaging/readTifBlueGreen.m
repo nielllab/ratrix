@@ -204,7 +204,7 @@ for LED=1:3
     
     
 end  %%%LED
-%ps2pdf('psfile', psfilename, 'pdffile', [psfilename(1:(end-2)) 'pdf'],'gscommand','C:\Program Files\gs\gs9.10\bin');
+ps2pdf('psfile', psfilename, 'pdffile', [psfilename(1:(end-2)) 'pdf'],'gscommand','C:\Program Files\gs\gs9.10\bin');
 delete(psfilename);
 
     function mapFig(mapIn)

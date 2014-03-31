@@ -36,27 +36,6 @@ end
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 40; 
        msPenalty               = 3700; 
-     
-%   case 'g54aa7lt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 90;
-%        msPenalty                 =4250; 
-       
-%      case 'gcam44lt'  %changed 1/4/14
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 180; 
-%         msPenalty                 =4250; 
-        
-%    case 'gcam25rt' %retired 1/4/14
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 60;
-        
-%    case 'bfly24lt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 80; 
-%        msPenalty                 =4000; 
-       
-
        
            
        
@@ -113,14 +92,14 @@ distractorOrientations = 0;
 %         
 %       case 'g62b1lt'     %set variable parameters 
 %             contrast               = [.01, .05, .1, .25, .5, 1];
-% 
+% percentCorrectionTrials = .1;
 %         
 %        case 'g62b3rt'           %set variable parameters 
 %    %targetOrientations = [(-pi/4)+pi/2,(-pi/8)+pi/2, (-pi/16)+pi/2, 0+pi/2, (pi/16)+pi/2, (pi/8)+pi/2, (pi/4)+pi/2];
 %       targetOrientations = [(-pi/4)+(pi/2),(-pi/8)+(pi/2),(-3*pi/16)+(pi/2), (-pi/16)+(pi/2), 0+(pi/2)];
 %    distractorOrientations = [0, (pi/16), (pi/8), (3*pi/16), (pi/4)];
 %    %distractorOrientations = [(-pi/4),(-pi/8), (-pi/16), 0, (pi/16), (pi/8), (pi/4)];
-%    
+%    percentCorrectionTrials = .1;
 %     otherwise
 %         warning('unrecognized mouse, using defaults')
 % end

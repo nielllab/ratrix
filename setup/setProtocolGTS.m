@@ -28,7 +28,7 @@ if ~isscalar(subjIDs)
 end
 switch subjIDs{1}
 
-   case 'bfly1a.13rt.3rn'
+   case 'bfly1a.13rt'
        requestRewardSizeULorMS = 20;
        rewardSizeULorMS        = 140;
        msPenalty               =4200;   

@@ -29,8 +29,8 @@ switch subjIDs{1}
     
        case 'g62h1tt'     %started 3/24/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 80;
-        msPenalty              =4200;
+       rewardSizeULorMS        = 70;
+        msPenalty              =3900;
         
        case 'g62h2lt'     %started 2/22/14  
        requestRewardSizeULorMS = 0;
@@ -38,7 +38,7 @@ switch subjIDs{1}
         msPenalty              =4200;
         
        case 'g62b9tt'     %started 3/8/14  
-       requestRewardSizeULorMS = 5;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 100;
         msPenalty              =4200;
     
@@ -49,7 +49,7 @@ switch subjIDs{1}
         
       case 'g62c.2rt'           %changed 1/30/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 60; 
+       rewardSizeULorMS        = 55; 
        msPenalty               =4200;
 
     
@@ -70,8 +70,8 @@ switch subjIDs{1}
         
            case 'g62g4lt'     %started 3/17/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 90;
-        msPenalty              =4200;
+       rewardSizeULorMS        = 80;
+        msPenalty              =3900;
     
 
  

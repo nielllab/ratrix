@@ -29,48 +29,48 @@ switch subjIDs{1}
     
        case 'g62h1tt'     %started 3/24/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 70;
+       rewardSizeULorMS        = 60;
         msPenalty              =3900;
         
        case 'g62h2lt'     %started 2/22/14  
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 105;
-        msPenalty              =4200;
+        msPenalty              =4300;
         
        case 'g62b9tt'     %started 3/8/14  
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100;
-        msPenalty              =4200;
+       rewardSizeULorMS        = 90;
+        msPenalty              =4300;
     
        case 'g62h2tt'     %started 3/5/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 50;
+       rewardSizeULorMS        = 40;
         msPenalty              =4300;
         
       case 'g62c.2rt'           %changed 1/30/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 55; 
-       msPenalty               =4200;
+       rewardSizeULorMS        = 45; 
+       msPenalty               =4100;
 
     
      case 'g62b8tt'     %started 2/24/14  
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 50;
-        msPenalty              =4200;
+       rewardSizeULorMS        = 40;
+        msPenalty              =4100;
         
     case 'g62b7lt'           %started HvV_cent 1/21/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 30; 
-       msPenalty               =4100;    
+       rewardSizeULorMS        = 25; 
+       msPenalty               =4000;    
        
        case 'g6w5rt'     %started 2/17/14  
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 60;
-        msPenalty              =4200;
+       rewardSizeULorMS        = 50;
+        msPenalty              =4100;
         
            case 'g62g4lt'     %started 3/17/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 80;
+       rewardSizeULorMS        = 70;
         msPenalty              =3900;
     
 

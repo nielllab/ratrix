@@ -10,7 +10,7 @@ movPeriod =10;
 binning=0.5;
 framerate=10;
 
-choosePix =0; %%% option to manually select pixels for timecourse analysis
+choosePix =1; %%% option to manually select pixels for timecourse analysis
 maxGB = 0.5; %%% size to reduce data down to
 
 

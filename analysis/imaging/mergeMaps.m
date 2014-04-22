@@ -5,8 +5,10 @@ maplist = {'visualstepmaps.mat','whiskersmaps.mat','rundark2 map.mat'}
 %maplist = {'topoxmaps','topoxRunmap'}
 
 
+figure
 
 for c = 1:length(maplist);
+subplot(2,2,c)
 load(maplist{c});
 c
 if length(map)==3
@@ -18,10 +20,17 @@ if c ==1
     overlayMap = zeros(size(m,1),size(m,2),3);
 end
 amp = abs(m);
-size(amp)
+size(amp);
+if c>1
+amp = amp-prctile(amp(:),40);
+else 
+    amp = amp-prctile(amp(:),1);
+end
+amp(amp<0)=0;
 amp = amp/prctile(amp(:),98);
+imshow(amp);
 overlayMap(:,:,c)=imresize(amp,[size(overlayMap,1) size(overlayMap,2)]);
 end
-figure
+subplot(2,2,4)
 
 imshow(overlayMap)

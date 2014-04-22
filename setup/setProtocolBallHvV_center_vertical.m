@@ -27,80 +27,52 @@ if ~isscalar(subjIDs)
 end
 switch subjIDs{1}
     
+       case 'g62h1tt'     %started 3/24/14
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 50;
+        msPenalty              =3900;
+        
        case 'g62h2lt'     %started 2/22/14  
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 120;
-        msPenalty              =4200;
+       rewardSizeULorMS        = 95;
+        msPenalty              =4300;
         
        case 'g62b9tt'     %started 3/8/14  
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 110;
-        msPenalty              =4200;
+       rewardSizeULorMS        = 90;
+        msPenalty              =4300;
     
        case 'g62h2tt'     %started 3/5/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100;
-        msPenalty              =4200;
+       rewardSizeULorMS        = 40;
+        msPenalty              =4300;
         
       case 'g62c.2rt'           %changed 1/30/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 75; 
-       msPenalty               =4000;
+       rewardSizeULorMS        = 40; 
+       msPenalty               =4100;
 
     
      case 'g62b8tt'     %started 2/24/14  
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 85;
-        msPenalty              =4200;
+       rewardSizeULorMS        = 35;
+        msPenalty              =4100;
         
     case 'g62b7lt'           %started HvV_cent 1/21/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 55; 
+       rewardSizeULorMS        = 25; 
        msPenalty               =4000;    
        
        case 'g6w5rt'     %started 2/17/14  
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 90;
+       rewardSizeULorMS        = 30;
         msPenalty              =4200;
-    
-%         case 'g62c.2rt'           %changed 1/30/14 
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 60; 
-%        msPenalty               =4100;
-       
-%     case 'g54aa7lt' %changed to HvV 1/4/14
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 60;
-   
-%    case 'gcam44lt'  %changed to HvV 1/4/14
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 45; 
-% case 'bfly1.5att' 
-%        requestRewardSizeULorMS = 20;
-%        rewardSizeULorMS        = 115;
-    
-% case 'g62b1lt'     %changed to HvV 2/19/14   
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 130;
-%        msPenalty                 =3700; 
-      
-%    case 'g54a11rt'   %changed to GoToBlack 12/10/13
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 80;    
         
-
-%    case 'g62b3rt'          %changed 2/14/14
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 60; 
-%        msPenalty               = 3600; 
-  
-%    case 'g62b1lt'       %changed to GoToBlack 12/10/13   
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = ; 
-      
-%    case 'g54b8tt' % Switched to GTB 12/19/13  
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 60;   
+           case 'g62g4lt'     %started 3/17/14 
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 60;
+        msPenalty              =4100;
+    
 
  
        
@@ -133,7 +105,7 @@ stim.positional = false;
 stim.cue = true;
 stim.soundClue = true;
 
-pixPerCycs             = [100]; %*10^9;
+pixPerCycs             = [100 125 150]; %*10^9;
 targetOrientations     = 0
 distractorOrientations = []; %-targetOrientations;
 mean                   = .5;
@@ -146,24 +118,25 @@ axis                   = pi/2;
 
 
 
-
+%%% abstract orientation (e.g. 0 = go left, pi/2 = go right)
 targetOrientations = pi/2;
 distractorOrientations = 0;
 
-%for creating psychometric curves (contrast and orientation
-switch subjIDs{1}
-        
-     case 'g62c.2rt'           %set variable parameters
-            contrast               = [.01, .05, .1, .25, .5, 1];
+%for creating psychometric curves (contrast and orientation)
+% switch subjIDs{1}
+%         
+%      case 'g62c.2rt'           %set variable parameters
+%             contrast               = [.01, .05, .1, .25, .5, 1];
+% percentCorrectionTrials = .1;
+%         
+%      case 'g62b7lt'            %set variable parameters
+%    targetOrientations = [(-pi/4)+(pi/2),(-pi/8)+(pi/2),(-3*pi/16)+(pi/2), (-pi/16)+(pi/2), 0+(pi/2)];
+%    distractorOrientations = [0, (pi/16), (pi/8), (3*pi/16), (pi/4)];
+%    percentCorrectionTrials = .1;
+%     otherwise
+%         warning('unrecognized mouse, using defaults')
+% end
 
-        
-     case 'g62b7lt'            %set variable parameters
-   targetOrientations = [(-pi/4)+(pi/2),(-pi/8)+(pi/2),(-3*pi/16)+(pi/2), (-pi/16)+(pi/2), 0+(pi/2)];
-   distractorOrientations = [0, (pi/16), (pi/8), (3*pi/16), (pi/4)];
-   
-    otherwise
-        warning('unrecognized mouse, using defaults')
-end
 
 
 stim.stim = orientedGabors(pixPerCycs,{distractorOrientations [] targetOrientations},'abstract',mean,radius,contrast,thresh,normalizedPosition,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[],[],axis);

@@ -22,15 +22,15 @@ msAirpuff                 =msPenalty;
 
 switch subjIDs{1}
     
-        case 'g62h1tt'     %
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 170;
-        msPenalty              =4000;
+%         case 'g62h1tt'     %
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 170;
+%         msPenalty              =4000;
         
-        case 'g62g4ln'     %started 3/17/14 
-       requestRewardSizeULorMS = 20;
-       rewardSizeULorMS        = 170;
-        msPenalty              =4000;
+%         case 'g62g4lt'     %switched 3/26/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 180;
+%         msPenalty              =4000;
 
 %         case 'g62b9tt'     %switched HvV Center 3/8/14  
 %        requestRewardSizeULorMS = 0;

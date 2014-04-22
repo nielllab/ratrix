@@ -29,34 +29,13 @@ end
 
   case 'g62b1lt'     %moved to HvV_vertical 2/19/14   
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 80;
-       msPenalty               =4200; 
+       rewardSizeULorMS        = 50;
+       msPenalty               =4000; 
      
   case 'g62b3rt'          %changed 2/14/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 50; 
-       msPenalty               = 3750; 
-     
-%   case 'g54aa7lt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 90;
-%        msPenalty                 =4250; 
-       
-%      case 'gcam44lt'  %changed 1/4/14
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 180; 
-%         msPenalty                 =4250; 
-        
-%    case 'gcam25rt' %retired 1/4/14
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 60;
-        
-%    case 'bfly24lt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 80; 
-%        msPenalty                 =4000; 
-       
-
+       rewardSizeULorMS        = 25; 
+       msPenalty               = 3800; 
        
            
        
@@ -89,7 +68,7 @@ stim.positional = false;
 stim.cue = true;
 stim.soundClue = false;
 
-pixPerCycs             = [100]; %*10^9;
+pixPerCycs             = [100 125 150]; %*10^9;
 targetOrientations     = 0
 distractorOrientations = []; %-targetOrientations;
 mean                   = .5;
@@ -108,22 +87,22 @@ targetOrientations = pi/2;
 distractorOrientations = 0;
 
 
-%for creating psychometric curves (contrast and orientation
-switch subjIDs{1}
-        
-      case 'g62b1lt'     %set variable parameters 
-            contrast               = [.01, .05, .1, .25, .5, 1];
-
-        
-       case 'g62b3rt'           %set variable parameters 
-   %targetOrientations = [(-pi/4)+pi/2,(-pi/8)+pi/2, (-pi/16)+pi/2, 0+pi/2, (pi/16)+pi/2, (pi/8)+pi/2, (pi/4)+pi/2];
-      targetOrientations = [(-pi/4)+(pi/2),(-pi/8)+(pi/2),(-3*pi/16)+(pi/2), (-pi/16)+(pi/2), 0+(pi/2)];
-   distractorOrientations = [0, (pi/16), (pi/8), (3*pi/16), (pi/4)];
-   %distractorOrientations = [(-pi/4),(-pi/8), (-pi/16), 0, (pi/16), (pi/8), (pi/4)];
-   
-    otherwise
-        warning('unrecognized mouse, using defaults')
-end
+% %for creating psychometric curves (contrast and orientation
+% switch subjIDs{1}
+%         
+%       case 'g62b1lt'     %set variable parameters 
+%             contrast               = [.01, .05, .1, .25, .5, 1];
+% percentCorrectionTrials = .1;
+%         
+%        case 'g62b3rt'           %set variable parameters 
+%    %targetOrientations = [(-pi/4)+pi/2,(-pi/8)+pi/2, (-pi/16)+pi/2, 0+pi/2, (pi/16)+pi/2, (pi/8)+pi/2, (pi/4)+pi/2];
+%       targetOrientations = [(-pi/4)+(pi/2),(-pi/8)+(pi/2),(-3*pi/16)+(pi/2), (-pi/16)+(pi/2), 0+(pi/2)];
+%    distractorOrientations = [0, (pi/16), (pi/8), (3*pi/16), (pi/4)];
+%    %distractorOrientations = [(-pi/4),(-pi/8), (-pi/16), 0, (pi/16), (pi/8), (pi/4)];
+%    percentCorrectionTrials = .1;
+%     otherwise
+%         warning('unrecognized mouse, using defaults')
+% end
 
 
 

@@ -34,7 +34,7 @@ switch subjIDs{1}
         
        case 'g62h2lt'     %started 2/22/14  
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 105;
+       rewardSizeULorMS        = 95;
         msPenalty              =4300;
         
        case 'g62b9tt'     %started 3/8/14  
@@ -65,13 +65,13 @@ switch subjIDs{1}
        
        case 'g6w5rt'     %started 2/17/14  
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;
-        msPenalty              =4100;
+       rewardSizeULorMS        = 30;
+        msPenalty              =4200;
         
            case 'g62g4lt'     %started 3/17/14 
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 60;
-        msPenalty              =3900;
+        msPenalty              =4100;
     
 
  

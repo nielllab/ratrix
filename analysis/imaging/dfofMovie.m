@@ -64,13 +64,12 @@ use_speed=0;
 if f~=0
     use_speed=1;
     load(fullfile(p,f));
-    figure
-    plot(stimRec.pos)
+%     figure
+%     plot(stimRec.pos)
     
     mouseT = stimRec.ts- stimRec.ts(1);
     figure
     plot(diff(mouseT));
-    keyboard
     
     dt = diff(mouseT);
     use = [1>0; dt>0];

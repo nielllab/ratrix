@@ -103,10 +103,14 @@ for LED=1:3
     rawmap(isnan(rawmap))=0;
     mapFig(rawmap)
     
-    [map cycMap fullMov] =deconPhaseMap(dfof{LED},framerate,movPeriod,binning);
+    if LED==split
+        [map cycMap fullMov] =deconPhaseMap(dfof{LED},framerate,movPeriod,binning);
     map(isnan(map))=0;
     mapFig(map)
-    
+    else
+        map = rawmap;
+        cycMap = rawcycMap;
+    end
     
     responseMap{LED}=map;
     
@@ -204,7 +208,11 @@ for LED=1:3
     
     
 end  %%%LED
-ps2pdf('psfile', psfilename, 'pdffile', [psfilename(1:(end-2)) 'pdf'],'gscommand','C:\Program Files\gs\gs9.10\bin');
+try
+   ps2pdf('psfile', psfilename, 'pdffile', [psfilename(1:(end-2)) 'pdf']);
+catch
+    display('couldnt generate pdf');
+end
 delete(psfilename);
 
     function mapFig(mapIn)

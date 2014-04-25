@@ -22,6 +22,22 @@ msAirpuff                 =msPenalty;
 
 switch subjIDs{1}
     
+    
+    case 'bfly1a.13rt'
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 180;
+       msPenalty               =4000;   
+       
+   case 'bfly3a.3rn'
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 180;
+       msPenalty               =4000; 
+       
+   case 'bfly2b.3rt'
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 180;
+       msPenalty               =4000; 
+    
 %         case 'g62h1tt'     %
 %        requestRewardSizeULorMS = 0;
 %        rewardSizeULorMS        = 170;

@@ -7,6 +7,7 @@ fname = 'C:\data\imaging\031814 gcamp6 orientation\orientations spot2 256 1ms003
 
 % fname = 'C:\data\imaging\080813 gcamp 6 test\spot1 step binary002.tif'
 % fname = 'C:\data\imaging\080813 gcamp 6 test\spot1_bars of 8 orientations 3hz scan 256 lines004.tif'
+fname = 'C:\data\imaging\042314 J135 Gcamp6 LP\spot3 step binary 256^2 1ms006.tif'
 
 inf = imfinfo(fname)
 
@@ -59,7 +60,7 @@ dfofInterp = shiftdim(dfofInterp,1);
 %     mov(f)=getframe(gcf);
 % end
 
-cycLength=20;
+cycLength=10;
 cycFrames =cycLength/dt; 
 map=0; clear cycAvg mov
 
@@ -68,7 +69,7 @@ figure
 for f = 1:cycFrames;
     cycAvg(:,:,f) = mean(dfofInterp(:,:,f:cycFrames:end),3);
     map = map + cycAvg(:,:,f)*exp(2*pi*sqrt(-1)*f/cycFrames);
-    imagesc(cycAvg(:,:,f),[-0.1 1]); colormap gray
+    imagesc(cycAvg(:,:,f),[-0.1 2]); colormap gray
     mov(f)=getframe(gcf);
 end
 

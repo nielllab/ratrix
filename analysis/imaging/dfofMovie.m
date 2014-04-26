@@ -5,8 +5,11 @@ pack
 
 [dfof map mapNorm cycMap]= readTifBlueGreen;
 use_chan=3;
-% [dfof map mapNorm]= readTifRatio;
+
+% [dfof map mapNorm]= readTifGreen;
 % use_chan=1;
+% [dfof map mapNorm]= readTifRatio;
+% use_chan=3;
 save(fullfile(p,[f(1:end-4) 'maps.mat']),'map','mapNorm','-v7.3')
 dfof_bg=dfof{use_chan};
 clear dfof;
@@ -61,14 +64,22 @@ use_speed=0;
 if f~=0
     use_speed=1;
     load(fullfile(p,f));
-    figure
-    plot(stimRec.pos)
+%     figure
+%     plot(stimRec.pos)
     
-    posx = cumsum(stimRec.pos(:,1)-900);
-    posy = cumsum(stimRec.pos(:,2)-500);
+    mouseT = stimRec.ts- stimRec.ts(1);
+    figure
+    plot(diff(mouseT));
+    
+    dt = diff(mouseT);
+    use = [1>0; dt>0];
+    mouseT=mouseT(use);
+    
+    posx = cumsum(stimRec.pos(use,1)-900);
+    posy = cumsum(stimRec.pos(use,2)-500);
     frameT = 0.1:0.1:300;
-    vx = diff(interp1(stimRec.ts(1:end-1000)-stimRec.ts(1),posx(1:end-1000),frameT));
-    vy = diff(interp1(stimRec.ts(1:end-1000)-stimRec.ts(1),posy(1:end-1000),frameT));
+    vx = diff(interp1(mouseT,posx,frameT));
+    vy = diff(interp1(mouseT,posy,frameT));
     vx(end+1)=0; vy(end+1)=0;
     
     figure

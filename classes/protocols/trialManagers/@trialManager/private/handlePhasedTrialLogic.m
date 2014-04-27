@@ -103,7 +103,7 @@ for gcInd=1:2:length(transitionCriterion)-1
                 duration = getDurations(stimManager);
                 isi=stimDetails.isi;
                 %frameWindowStart = (duration(2)+duration(3)/2)*30/1000;
-                frameWindowStart = (duration(2)+isi)*60/1000;
+                frameWindowStart = (duration(2)+isi)*30/1000;
                 f=framesInPhase;
                 if framesInPhase > frameWindowStart;
             newSpecInd = transitionCriterion{gcInd+1};
@@ -152,7 +152,7 @@ portSelectionDoneTime=GetSecs;
 % =================================================
 % SOUNDS
 % changed from newSpecInd to specInd (cannot anticipate phase transition b/c it hasnt called updateTrialState to set correctness)
-soundsToPlay = getSoundsToPlay(stimManager, ports, lastPorts, specInd, phaseType, framesInPhase,msRewardSound, mePenaltySound, ...
+[soundsToPlay, stimDetails] = getSoundsToPlay(stimManager, ports, lastPorts, specInd, phaseType, framesInPhase,msRewardSound, mePenaltySound, ...
     targetOptions, distractorOptions, requestOptions, playRequestSoundLoop, class(tm), trialDetails, stimDetails, dynamicSounds, station);
 getSoundsTime=GetSecs;
 % soundsToPlay is a cell array of sound names {{playLoop sounds}, {playSound sounds}} to be played at current frame

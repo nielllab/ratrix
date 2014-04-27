@@ -24,38 +24,50 @@ switch trialManagerClass
         error('unknown trial manager class')
 end
 
+details.laserON=0; %set to be 0, modify if necessary
+
 % %decide randomly if we issue a laser pulse on this trial or not
-% details.laserON = rand>0.9; %laser is on for 10% of trials
-% details.laser_duration=.5; %seconds
-% details.laser_start_time=Inf; 
+if ~isempty(stimulus.freq) %stimulus.freq empty for phoneme, [1] for phonemelaser [w1 w2] for multi-interval
+    
+    if stimulus.freq(1)==1 %1 specifies silencing for the entire phoneme duration
+        details.laserON = rand>.9; %laser is on for 10% of trials
+        details.laser_duration=.5; %seconds
+        details.laser_start_time=Inf; 
+        details.laser_off_time=Inf;
+    
+ 
+    else %multiple timepoints
+        %stimulus.freq = [start1 start2] - multiple laser timepoints (in ms from onset of stimulus)
+        %laser_ratio = length(stimulus.freq)*.1; %10% for each laser condition
+        %details.laserON = rand> (1-laser_ratio); %
+        details.laserON = rand>.8;
+        details.laser_start_window=RandSample([0 .14]); %randomly choose one of the start points
+        %details.laser_duration=(stimulus.freq(2)-stimulus.freq(1))*.001; %spacing between start times determines the interval length
+        details.laser_duration=.14;
+        details.laser_start_time=Inf; 
+        details.laser_wait_start_time=Inf;
+        details.laser_off_time=Inf;
+    end
+    
+
+end
+
+
+
+if stimulus.duration==50  %stimulus.freq empty for phoneme, [1] for phonemelaser 
+    %special case for laserCal
+ details.laserON = 1; %laser is on for 10% of trials
+ details.laser_duration=30; %seconds
+ details.laser_start_time=Inf; 
+ details.laser_off_time=Inf;
+end
+
+
+
 details.toneFreq = []; 
 
-if strcmp(stimulus.soundType, 'wmReadWav')
-[wav1, fs1] = wavread(getWav1(stimulus));
-[wav2, fs2] = wavread(getWav2(stimulus));
-wav1 = wav1.';
-wav2 = wav2.';
-
-
-[lefts, rights] = getBalance(responsePorts,targetPorts);
-
-%default case (e.g. rights==lefts )
-
-if lefts>rights %choose a left stim (wav1)
-    details.toneFreq = wav1;
-elseif rights>lefts %choose a right stim (wav2)
-    details.toneFreq = wav2;
-end
-
-if lefts == rights %left
-    details.toneFreq = wav1;
-end
-
-end
-
-
-
-if strcmp(stimulus.soundType, 'phonemeWav') %files specified in getClip-just need to indicate sad/dad
+if strcmp(stimulus.soundType, 'phonemeWav') && isempty(stimulus.freq) %files specified in getClip-just need to indicate sad/dad
+    %this code works for no laser condition - below for laser 
 [lefts, rights] = getBalance(responsePorts,targetPorts);
 
 %default case (e.g. rights==lefts )
@@ -69,6 +81,29 @@ if lefts == rights %left
     details.toneFreq = 1;
 end
 end
+
+
+if ~isempty(stimulus.freq) %laser assignment - random stimulus for laser trials
+    
+        [lefts, rights] = getBalance(responsePorts,targetPorts);
+
+%default case (e.g. rights==lefts )
+
+if lefts>rights %choose a left stim (wav1)
+    details.toneFreq = 1;
+elseif rights>lefts %choose a right stim (wav2)
+    details.toneFreq = 0;
+end
+
+if lefts == rights %left
+    details.toneFreq = 1;
+end
+
+    if details.laserON %randomly reward by choosing random stimulus
+    details.toneFreq=RandSample(0:1);
+    end
+end
+        
 
 details.rightAmplitude = stimulus.amplitude;
 details.leftAmplitude = stimulus.amplitude;

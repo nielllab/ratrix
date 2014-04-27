@@ -107,7 +107,10 @@ if isempty(s.clip)
 
         case 'phonemeWav'
             [sad, fs] = wavread('C:\Users\nlab\Desktop\ratrixSounds\phonemes\sadshifted-allie.wav'); %left
-            [dad, fs] = wavread('C:\Users\nlab\Desktop\ratrixSounds\phonemes\dadshifted-allie.wav'); %right
+            %[dad, fs] =wavread('C:\Users\nlab\Desktop\ratrixSounds\phonemes\dadshifted-allie.wav'); %right 
+            %old stimulus - not ideally aligned - changed to new file with
+            %50ms silence added to beginning of dad
+            [dad, fs] = wavread('C:\Users\nlab\Desktop\ratrixSounds\phonemes\dadshifted-allie-aligned.wav'); %right
             if s.freq
                 s.clip = sad.';
             else 

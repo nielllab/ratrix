@@ -24,8 +24,9 @@ if strcmp(s.responseMethod,'parallelPort')
 				thisState=state(ones(1,length(pins.pinNums)));
 				thisState(pins.invs)=~thisState(pins.invs);
 				lptWriteBits(pins.decAddr,pins.bitLocs,thisState);
-			else
-				warning('station asked to set optional state pins it doesn''t have')
+			%else
+			%	warning('station asked to set optional state pins it doesn''t have')
+            %warning removed-not sure if it matters - CO 3-18-14
 			end
 		end
 	end 

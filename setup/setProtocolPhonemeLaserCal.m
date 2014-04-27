@@ -1,4 +1,4 @@
-function r = setProtocolPhoneme(r,subjIDs)
+function r = setProtocolPhonemeLaserCal(r,subjIDs)
 
 if ~isa(r,'ratrix')
     error('need a ratrix')
@@ -28,7 +28,7 @@ fd = freeDrinks(sm,freeDrinkLikelihood,allowRepeats,constantRewards);
 freeDrinkLikelihood=0;
 fd2 = freeDrinks(sm,freeDrinkLikelihood,allowRepeats,constantRewards);
 
-percentCorrectionTrials=.5;
+percentCorrectionTrials=0;
 
 maxWidth               = 1920;
 maxHeight              = 1080;
@@ -58,15 +58,14 @@ nafcTM=nAFC(sm,percentCorrectionTrials,constantRewards,eyeController,{'off'},dro
 % freeStim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 %stim params for free drinks
-soundParams.soundType='wmReadWav';
-soundParams.freq = [];
-soundParams.duration=500; %ms
+soundParams.soundType='phonemeWav';
+soundParams.freq = [1];
+soundParams.duration=50; %ms
 maxSPL=80; %measured max level attainable by speakers; in reality, seems to be 67.5dB at head, 74.6dB 1" from earbuds
 ampsdB=60; %requested amps in dB
 amplitude=10.^((ampsdB -maxSPL)/20); %amplitudes = line level, 0 to 1
 soundParams.amp = amplitude; %for intensityDisrim
-soundParams.wav1 = 'C:\Users\nlab\Desktop\ratrixSounds\phonemes\sadshifted-allie.wav';
-soundParams.wav2 = 'C:\Users\nlab\Desktop\ratrixSounds\phonemes\dadshifted-allie.wav';
+
 phonemeStim = phonemeDiscrim(interTrialLuminance,soundParams,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 
@@ -104,7 +103,7 @@ ts7 = trainingStep(lpTM  , phonemeStim, repeatIndefinitely(), noTimeOff(), svnRe
 
 
 %p=protocol('mouse intensity discrimation',{ ts3, ts4, ts5});
-p=protocol('mouse phoneme discrimination',{ts1, ts2, ts3, ts4, ts5 ts6 ts7});
+p=protocol('mouse phoneme discrimination LASER',{ts1, ts2, ts3, ts4, ts5 ts6 ts7});
 
 for i=1:length(subjIDs),
     subj=getSubjectFromID(r,subjIDs{i});
@@ -116,5 +115,5 @@ for i=1:length(subjIDs),
             stepNum=uint8(6);
     end
     
-    [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolPhoneme','edf');
+    [subj r]=setProtocolAndStep(subj,p,true,false,true,stepNum,r,'call to setProtocolPhonemeLaserCal','edf');
 end

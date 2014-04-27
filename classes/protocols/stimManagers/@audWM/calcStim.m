@@ -38,23 +38,93 @@ stimulus.duration=(details.numTones+1)*(stimulus.toneDuration+details.isi)-detai
 
 
 % pick a random starting tone and then update stimulus.startfreq to the next value
-details.startTone = RandSample(0:1); 
 
-x = [1 0];
+if details.correctionTrial==0 %randomly decide stimuli if not a correction trial
+    %if it is a correction trial, assignports determines the stimulus  
+    
+    stim=RandSample(1:4);
+    if stim==1
+    details.startTone=0; %TT
+     details.endTone=0;
+     targetPorts=3;
+     distractorPorts=1;
+    end
+     if stim==2
+    details.startTone=0; %TW
+     details.endTone=1;
+     targetPorts=1;
+     distractorPorts=3;
+     end
+     if stim==3
+    details.startTone=1; %WT
+     details.endTone=0;
+     targetPorts=1;
+     distractorPorts=3;
+     end
+     if stim==4
+    details.startTone=1; %WW
+     details.endTone=1;
+     targetPorts=3;
+     distractorPorts=1;
+     end
+end
+    
+    
+% stim=RandSample(1:10); %this chooses stimuli randomly, with Tone/Tone given 40% weight
+% 
+% if stim==1 || stim==2 || stim==3 || stim==4 % 40% Tone/tone
+%     details.startTone=0;
+%     details.endTone=0;
+%     targetPorts=3;
+%     distractorPorts=1;
+% end
+% 
+% if stim==5 || stim==6 || stim==7 || stim==8 || stim==9 % 25% W/T and T/W
+%    
+% if rand>.5    
+%     details.startTone=0;
+%     details.endTone=1;   
+%     targetPorts=1;
+%     distractorPorts=3;
+% else
+%     details.startTone=1;
+%     details.endTone=0;
+%     targetPorts=1;
+%     distractorPorts=3;
+% end
+% 
+%     
+% end
+%       
+% if stim==10 % 10% W/W
+%     details.startTone=1;
+%     details.endTone=1; 
+%     targetPorts=3;
+%     distractorPorts=1;
+% end
 
     
-[lefts, rights] = getBalance(responsePorts,targetPorts);
+%end
 
 
-if lefts>rights %choose a left stim (change)
-    details.endTone = x(details.startTone+1);
-elseif rights>lefts %choose a right stim (no change)
-    details.endTone = details.startTone;
-end
+% details.startTone = RandSample(0:1); %below is original determination of stimuli 
+% 
+% x = [1 0];
+% 
+%     
+% [lefts, rights] = getBalance(responsePorts,targetPorts);
+% 
+% 
+% if lefts>rights %choose a left stim (change)
+%     details.endTone = x(details.startTone+1);
+% elseif rights>lefts %choose a right stim (no change)
+%     details.endTone = details.startTone;
+% end
+% 
+% if lefts == rights
+%     details.endTone = x(details.startTone+1);
+% end
 
-if lefts == rights
-    details.endTone = x(details.startTone+1);
-end
 
  details.rightAmplitude = stimulus.amplitude;
  details.leftAmplitude = stimulus.amplitude;

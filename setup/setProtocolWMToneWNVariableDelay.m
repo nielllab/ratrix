@@ -62,6 +62,7 @@ soundParams.soundType='wmToneWN'; %soundType that creates tones and WN with an i
 soundParams.freqs = [8000]; %tone frequency
 soundParams.duration=[]; %ms, total duration of stimSound-calculated in calcstim
 soundParams.isi=[1 125 250 500 1000]; %ms, time between tones - can vary in this protocol
+soundParams.isi=250;
 soundParams.toneDuration=250; %ms, duration of each tone 
 
 
@@ -107,7 +108,7 @@ ts4 = trainingStep(nrTM  , StimEZ,  performanceCriterion(.85, int8(200))       ,
 msPenalty = 3000;
 longPenalty=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 
-percentCorrectionTrials=0;
+percentCorrectionTrials=0.5;
 
 lpTM=nAFC(sm,percentCorrectionTrials,longPenalty,eyeController,{'off'},dropFrames,'ptb','center',[],[],[]);
 

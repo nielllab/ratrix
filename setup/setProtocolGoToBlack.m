@@ -26,7 +26,7 @@ switch subjIDs{1}
     case 'bfly1a.13rt'
        requestRewardSizeULorMS = 30;
        rewardSizeULorMS        = 200;
-       msPenalty               =4000;   
+       msPenalty               =4000;  
        
    case 'bfly3a.3rn'
        requestRewardSizeULorMS = 30;

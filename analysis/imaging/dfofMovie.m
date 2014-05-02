@@ -23,7 +23,9 @@ for i = 1:cyc_period;
     cycle_mov_std(:,:,i) = std(dfof_bg(:,:,i+startframe:cyc_period:end),[],3);
 end
 
-save(fullfile(p,[f(1:end-4) 'maps.mat']),'cycle_mov','cycle_mov_std','cycMap','-append')
+
+mapfilename =fullfile(p,[f(1:end-4) 'maps.mat']);
+save(mapfilename,'cycle_mov','cycle_mov_std','cycMap','-append')
 
 baseline = prctile(cycle_mov,5,3);
 cycle_mov = cycle_mov - repmat(baseline,[1 1 size(cycle_mov,3)]);
@@ -121,10 +123,10 @@ subplot(2,2,3);
 imagesc(mov_img-stop_img,[-0.2 0.2]);
 end
 
-map = mov_img-stop_img;
+movemap = mov_img-stop_img;
 
 [f p] =uiputfile('*.mat','move map file');
-save(fullfile(p,f),'map');
+save(mapfilename,'movemap','sp','-append');
 
 keyboard
 %% raw movie

@@ -128,47 +128,47 @@ movemap = mov_img-stop_img;
 [f p] =uiputfile('*.mat','move map file');
 save(mapfilename,'movemap','sp','-append');
 
-keyboard
+
 %% raw movie
 
 
-[f,p] = uiputfile('*.avi','dfof movie file');
-small_mov = dfof_bg(4:4:end,4:4:end,4:4:end);
-lowthresh = prctile(small_mov(:),2);
-upperthresh = 1.5*prctile(small_mov(:),98);
-
-clear mov
-figure
-mov_length = size(dfof_bg,3);
-mov_length=400
-for i = 1:mov_length;
-i
-    imagesc(imresize(dfof_bg(:,:,i+300),0.5,'box'),[lowthresh upperthresh]);
-    colormap(gray);
-   hold on
-    if use_speed
-        if sp(i)<500
-            plot(15,15,'ro','Markersize',8,'Linewidth',8);
-        else
-            plot(15,15,'go','Markersize',8,'Linewidth',8);
-        end
-    end
-    axis equal;
-    if i==1;
-        mov(mov_length) = getframe(gcf); %%%% initializes structure array
-    end
-    mov(i) = getframe(gcf);
-    
-end
-
-
-vid = VideoWriter(fullfile(p,f));
-vid.FrameRate=25;
-open(vid);
-writeVideo(vid,mov(1:end));
-close(vid)
-
-clear mov
+% [f,p] = uiputfile('*.avi','dfof movie file');
+% small_mov = dfof_bg(4:4:end,4:4:end,4:4:end);
+% lowthresh = prctile(small_mov(:),2);
+% upperthresh = 1.5*prctile(small_mov(:),98);
+% 
+% clear mov
+% figure
+% mov_length = size(dfof_bg,3);
+% mov_length=400
+% for i = 1:mov_length;
+% i
+%     imagesc(imresize(dfof_bg(:,:,i+300),0.5,'box'),[lowthresh upperthresh]);
+%     colormap(gray);
+%    hold on
+%     if use_speed
+%         if sp(i)<500
+%             plot(15,15,'ro','Markersize',8,'Linewidth',8);
+%         else
+%             plot(15,15,'go','Markersize',8,'Linewidth',8);
+%         end
+%     end
+%     axis equal;
+%     if i==1;
+%         mov(mov_length) = getframe(gcf); %%%% initializes structure array
+%     end
+%     mov(i) = getframe(gcf);
+%     
+% end
+% 
+% 
+% vid = VideoWriter(fullfile(p,f));
+% vid.FrameRate=25;
+% open(vid);
+% writeVideo(vid,mov(1:end));
+% close(vid)
+% 
+% clear mov
 
 
 % %%% use svd to get rid of artifacts

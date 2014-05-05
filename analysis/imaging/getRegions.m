@@ -145,7 +145,7 @@ for f = 1:length(files)
             ylim([10 140]);
         end
     
-    save([outpathname expname '_topography.mat'],'div','norm_grad','map_all','grad_all','amp_all');
+    save([outpathname expname '_topography.mat'],'div','norm_grad','map_all','grad_all','amp_all','merge');
     saveas(mapsfig,[outpathname expname 'topo.fig'],'fig')
     %     figure
     %     imshow(ones(size(merge)));

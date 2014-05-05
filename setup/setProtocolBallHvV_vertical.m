@@ -34,7 +34,7 @@ end
      
   case 'g62b3rt'          %changed 2/14/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 20; 
+       rewardSizeULorMS        = 30; 
        msPenalty               = 3800; 
        
            

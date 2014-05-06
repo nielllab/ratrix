@@ -6,7 +6,7 @@ pack
 [dfof map mapNorm cycMap]= readTifBlueGreen;
 use_chan=3;
 
-% [dfof map mapNorm]= readTifGreen;
+% [dfof map mapNorm cycMap]= readTifGreen;
 % use_chan=1;
 % [dfof map mapNorm]= readTifRatio;
 % use_chan=3;

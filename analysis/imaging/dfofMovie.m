@@ -6,7 +6,7 @@ pack
 [dfof map mapNorm cycMap]= readTifBlueGreen;
 use_chan=3;
 
-% [dfof map mapNorm]= readTifGreen;
+% [dfof map mapNorm cycMap]= readTifGreen;
 % use_chan=1;
 % [dfof map mapNorm]= readTifRatio;
 % use_chan=3;
@@ -23,7 +23,9 @@ for i = 1:cyc_period;
     cycle_mov_std(:,:,i) = std(dfof_bg(:,:,i+startframe:cyc_period:end),[],3);
 end
 
-save(fullfile(p,[f(1:end-4) 'maps.mat']),'cycle_mov','cycle_mov_std','cycMap','-append')
+
+mapfilename =fullfile(p,[f(1:end-4) 'maps.mat']);
+save(mapfilename,'cycle_mov','cycle_mov_std','cycMap','-append')
 
 baseline = prctile(cycle_mov,5,3);
 cycle_mov = cycle_mov - repmat(baseline,[1 1 size(cycle_mov,3)]);
@@ -121,52 +123,52 @@ subplot(2,2,3);
 imagesc(mov_img-stop_img,[-0.2 0.2]);
 end
 
-map = mov_img-stop_img;
+movemap = mov_img-stop_img;
 
 [f p] =uiputfile('*.mat','move map file');
-save(fullfile(p,f),'map');
+save(mapfilename,'movemap','sp','-append');
 
-keyboard
+
 %% raw movie
 
 
-[f,p] = uiputfile('*.avi','dfof movie file');
-small_mov = dfof_bg(4:4:end,4:4:end,4:4:end);
-lowthresh = prctile(small_mov(:),2);
-upperthresh = 1.5*prctile(small_mov(:),98);
-
-clear mov
-figure
-mov_length = size(dfof_bg,3);
-mov_length=400
-for i = 1:mov_length;
-i
-    imagesc(imresize(dfof_bg(:,:,i+300),0.5,'box'),[lowthresh upperthresh]);
-    colormap(gray);
-   hold on
-    if use_speed
-        if sp(i)<500
-            plot(15,15,'ro','Markersize',8,'Linewidth',8);
-        else
-            plot(15,15,'go','Markersize',8,'Linewidth',8);
-        end
-    end
-    axis equal;
-    if i==1;
-        mov(mov_length) = getframe(gcf); %%%% initializes structure array
-    end
-    mov(i) = getframe(gcf);
-    
-end
-
-
-vid = VideoWriter(fullfile(p,f));
-vid.FrameRate=25;
-open(vid);
-writeVideo(vid,mov(1:end));
-close(vid)
-
-clear mov
+% [f,p] = uiputfile('*.avi','dfof movie file');
+% small_mov = dfof_bg(4:4:end,4:4:end,4:4:end);
+% lowthresh = prctile(small_mov(:),2);
+% upperthresh = 1.5*prctile(small_mov(:),98);
+% 
+% clear mov
+% figure
+% mov_length = size(dfof_bg,3);
+% mov_length=400
+% for i = 1:mov_length;
+% i
+%     imagesc(imresize(dfof_bg(:,:,i+300),0.5,'box'),[lowthresh upperthresh]);
+%     colormap(gray);
+%    hold on
+%     if use_speed
+%         if sp(i)<500
+%             plot(15,15,'ro','Markersize',8,'Linewidth',8);
+%         else
+%             plot(15,15,'go','Markersize',8,'Linewidth',8);
+%         end
+%     end
+%     axis equal;
+%     if i==1;
+%         mov(mov_length) = getframe(gcf); %%%% initializes structure array
+%     end
+%     mov(i) = getframe(gcf);
+%     
+% end
+% 
+% 
+% vid = VideoWriter(fullfile(p,f));
+% vid.FrameRate=25;
+% open(vid);
+% writeVideo(vid,mov(1:end));
+% close(vid)
+% 
+% clear mov
 
 
 % %%% use svd to get rid of artifacts

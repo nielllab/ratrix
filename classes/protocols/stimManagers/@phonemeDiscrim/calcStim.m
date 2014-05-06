@@ -82,6 +82,24 @@ if lefts == rights %left
 end
 end
 
+if strcmp(stimulus.soundType, 'phonemeWavReversedReward') && isempty(stimulus.freq) %files specified in getClip-just need to indicate sad/dad
+    %this code works for no laser condition - below for laser 
+    %same as above for now, duplicated for future potential modifications
+    %CO 5-6
+[lefts, rights] = getBalance(responsePorts,targetPorts);
+
+%default case (e.g. rights==lefts )
+
+if lefts>rights %choose a left stim (wav1)
+    details.toneFreq = 1;
+elseif rights>lefts %choose a right stim (wav2)
+    details.toneFreq = 0;
+end
+if lefts == rights %left
+    details.toneFreq = 1;
+end
+end
+
 
 if ~isempty(stimulus.freq) %laser assignment - random stimulus for laser trials
     
@@ -120,6 +138,8 @@ switch stimulus.soundType
         sSound = soundClip('stimSoundBase','wmReadWav', [details.toneFreq]);
     case {'phonemeWav'}
         sSound = soundClip('stimSoundBase','phonemeWav', [details.toneFreq]);
+    case {'phonemeWavReversedReward'}
+        sSound = soundClip('stimSoundBase','phonemeWav', [details.toneFreq]);    
 end
 stimulus.stimSound = soundClip('stimSound','dualChannel',{sSound,details.leftAmplitude},{sSound,details.rightAmplitude});
 

@@ -60,7 +60,7 @@ switch nargin
         end
         t.clip = [];
         % create object using specified values
-        if ismember(varargin{2},{'tone', 'CNMToneTrain', 'freeCNMToneTrain','wmToneWN', 'wmReadWav', 'phonemeWav', 'warblestackWav'} ) 
+        if ismember(varargin{2},{'tone', 'CNMToneTrain', 'freeCNMToneTrain','wmToneWN', 'wmReadWav', 'phonemeWav', 'warblestackWav','phonemeWavReversedReward'} ) 
             if ~all(varargin{3}>0) 
 %                error('pass in Freq  > 0') %commented out to allow isi of 0 
             end 
@@ -83,6 +83,9 @@ switch nargin
                     t.type = varargin{2};  
                 case 'phonemeWav'
                     t.description = ['phonemeWav'];
+                    t.type = varargin{2}; 
+                case 'phonemeWavReversedReward'
+                    t.description = ['phonemeWavReversedReward'];
                     t.type = varargin{2}; 
                 case 'warblestackWav'
                     t.description = ['warblestackWav'];

@@ -117,6 +117,20 @@ if isempty(s.clip)
                 s.clip = dad.';
             end
 
+        case 'phonemeWavReversedReward'
+            [sad, fs] = wavread('C:\Users\nlab\Desktop\ratrixSounds\phonemes\sadshifted-allie.wav'); %left
+            %[dad, fs] =wavread('C:\Users\nlab\Desktop\ratrixSounds\phonemes\dadshifted-allie.wav'); %right 
+            %old stimulus - not ideally aligned - changed to new file with
+            %50ms silence added to beginning of dad
+            %reversed rewards for this soundType - to test stimulus vs
+            %motor effect of laser
+            [dad, fs] = wavread('C:\Users\nlab\Desktop\ratrixSounds\phonemes\dadshifted-allie-aligned.wav'); %right
+            if s.freq
+                s.clip = dad.';
+            else 
+                s.clip = sad.';
+            end
+            
             
         case 'warblestackWav'  
             startsound=s.freq(1); %if 0, warble first, if 1, WN first

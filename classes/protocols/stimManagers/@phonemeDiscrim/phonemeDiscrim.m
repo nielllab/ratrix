@@ -74,7 +74,9 @@ switch nargin
                 s.wav2 = soundParams.wav2;
                 
             case 'phonemeWav'
-        
+            
+            case 'phonemeWavReversedReward'
+                
             otherwise
                 error('intensityDiscrim: soundType not recognized')
         end

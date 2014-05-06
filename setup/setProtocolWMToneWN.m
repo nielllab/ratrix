@@ -73,10 +73,10 @@ soundParams.amp = amplitude; %for intensityDiscrim
 CNMStimEZ = audWM(interTrialLuminance,soundParams,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 
-soundParams.isi = 250;
+soundParams.isi = 100;
 CNMStimMedium = audWM(interTrialLuminance,soundParams,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
-soundParams.isi = 500;
+soundParams.isi = 250;
 CNMStimHard =audWM(interTrialLuminance,soundParams,maxWidth,maxHeight,scaleFactor,interTrialLuminance);
 
 svnRev={'svn://132.239.158.177/projects/ratrix/AWM'};
@@ -98,15 +98,15 @@ nrTM=nAFC(sm,percentCorrectionTrials,noRequest,eyeController,{'off'},dropFrames,
 
 
 
-ts4 = trainingStep(nrTM  , CNMStimEZ,  performanceCriterion(.85, int8(200))       , noTimeOff(), svnRev,svnCheckMode);
+ts4 = trainingStep(nrTM  , CNMStimEZ,  performanceCriterion(.80, int8(200))       , noTimeOff(), svnRev,svnCheckMode);
 
 msPenalty = 3000;
 longPenalty=constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 lpTM=nAFC(sm,percentCorrectionTrials,longPenalty,eyeController,{'off'},dropFrames,'ptb','center',[],[],[]);
 
-ts5 = trainingStep(lpTM  , CNMStimMedium, repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode);
+ts5 = trainingStep(lpTM  , CNMStimMedium, performanceCriterion(.80, int8(200)), noTimeOff(), svnRev,svnCheckMode);
 
-ts6 = trainingStep(lpTM  , CNMStimHard, performanceCriterion(.85, int8(200)), noTimeOff(), svnRev,svnCheckMode);
+ts6 = trainingStep(lpTM  , CNMStimHard, repeatIndefinitely(), noTimeOff(), svnRev,svnCheckMode);
 
 %p=protocol('mouse CNM task',{ts1, ts2, ts3, ts4, ts5 ts6}); %normal setup
 p=protocol('mouse WM task WN vs tone',{ts1, ts2, ts3, ts4, ts5 ts6}); %to test CNM/goNoGo

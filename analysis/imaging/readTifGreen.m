@@ -1,4 +1,4 @@
-function [dfof responseMap responseMapNorm] = readTifGreen(in);
+function [dfof responseMap responseMapNorm cycMap] = readTifGreen(in);
 [pathstr, name, ext] = fileparts(fileparts(mfilename('fullpath')));
 addpath(fullfile(fileparts(pathstr),'bootstrap'))
 setupEnvironment;
@@ -91,7 +91,7 @@ print('-dpsc',psfilename,'-append');
     movPeriod =10;
     binning=0.125;
     framerate=10;
-    %framerate=20;
+%     framerate=20;
     
     img = out(:,:,1);
     

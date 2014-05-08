@@ -6,11 +6,12 @@
 % [f p ] =uigetfile('*.tif','image file')
 % imraw = imread(fullfile(p,f));
 
+opengl software
 
 for f = 1:length(files)
     if length(files{f})>=4 && ~isempty(files{f}{4})
         load([pathname files{f}{4}]); %%% behavior
-        load( [outpathname expname '_topography.mat']); %%% topography
+        load( [outpathname files{f}{1} '_topography.mat']); %%% topography
         
         basemap =merge;
         titles = {'all trials','left trials','right trials','left-right','correct','incorrect','correct-incorrect'};

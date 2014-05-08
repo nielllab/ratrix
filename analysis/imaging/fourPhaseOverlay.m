@@ -1,8 +1,10 @@
+opengl software
+
 for f = 1:length(files)
     for m = 1:2;
         if length(files{f})>=4 && ~isempty(files{f}{4+m})
             load([pathname files{f}{4+m}]); %%% behavior
-            load( [outpathname expname '_topography.mat']); %%% topography
+            load( [outpathname files{f}{1} '_topography.mat']); %%% topography
             clear resp
             
             merge = imresize(merge,[size(cycMap,1) size(cycMap,2)]);

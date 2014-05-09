@@ -92,7 +92,9 @@ for f = 1:length(files)
 map{f}= getRegions(files(f),pathname,outpathname);
 end
 for f = 1:length(map);
-    [imfit{f} xshift(f) yshift(f)] = alignMaps(map([1 f]));
+    [imfit{f} allxshift(f) allyshift(f) allzoom(f)] = alignMaps(map([1 f]));
+    xshift = allxshift(f); yshift = allyshift(f); zoom = allzoom(f);
+    save( [outpathname files(f).subj files(f).expt '_topography.mat'],'xshift','yshift','zoom','-append');
 end
 
 

@@ -1,9 +1,22 @@
-clear all
-pack
+function dfofMovie(in);
 
-[f,p] = uiputfile('*.avi','dfof cycle average movie file');
 
-[dfof map mapNorm cycMap]= readTifBlueGreen;
+%[f,p] = uiputfile('*.avi','dfof cycle average movie file');
+if ~exist('in','var') || isempty(in);
+[f,p] = uigetfile({'*.tif'; '*.tiff'; '*.mat'},'choose pco data');
+datafile = fullfile(p,f(1:end-4));
+mapfilename =fullfile(p,[f(1:end-4) 'maps.mat']);
+datadir = p;
+else
+    mapfilename = in;
+[datadir mapfile] = fileparts(in);
+fs = dir([datadir '\*.tif*']);
+f = fs(1).name;
+datafile = fullfile(datadir,f(1:end-4));
+end
+
+[dfof map mapNorm cycMap]= readTifBlueGreen(datafile);
+f
 use_chan=3;
 
 % [dfof map mapNorm]= readTifGreen;
@@ -11,7 +24,7 @@ use_chan=3;
 % [dfof map mapNorm]= readTifRatio;
 % use_chan=3;
 dfof_bg=dfof{use_chan};
-save(fullfile(p,[f(1:end-4) 'maps.mat']),'map','mapNorm','dfof_bg','-v7.3')
+save(mapfilename,'map','mapNorm','dfof_bg','-v7.3')
 
 clear dfof;
 
@@ -25,7 +38,7 @@ for i = 1:cyc_period;
 end
 
 
-mapfilename =fullfile(p,[f(1:end-4) 'maps.mat']);
+
 save(mapfilename,'cycle_mov','cycle_mov_std','cycMap','-append')
 
 baseline = prctile(cycle_mov,5,3);
@@ -63,10 +76,11 @@ close(vid)
 
 use_speed=0;
 
-[f,p] = uigetfile('*.mat','stim object file');
-if f~=0
+fs = dir([datadir '\stim*.mat']);
+
+if ~isempty(fs)
     use_speed=1;
-    load(fullfile(p,f));
+    load(fullfile(datadir,fs(1).name));
 %     figure
 %     plot(stimRec.pos)
     

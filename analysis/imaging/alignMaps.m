@@ -1,15 +1,19 @@
-function [imfit xshift yshift] = alignmaps(map);
+function [imfit xshift yshift zoom] = alignmaps(map);
 
 figure
 
+
 for i=1:2;
-    subplot(2,2,i)
+    zoom(i) = 260/size(map{i},1);
+      map{i} = imresize(map{i},zoom(i));
+      subplot(2,2,i)
     imagesc(map{i}(:,:,3));
+  
 end
 
-[dx dy] = meshgrid(-20:20,-20:20);
+[dx dy] = meshgrid(-40:40,-40:40);
 
-imrange = -40:40;
+imrange = -80:80;
 x0 = round(size(map{1},1)/2)
 y0 = round(size(map{1},2)/2)
 
@@ -43,4 +47,5 @@ subplot(2,2,c+1);
 imshow(imrgb);
 end
 imfit = imfit{2};
+zoom = zoom(2);
         

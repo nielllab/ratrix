@@ -1,11 +1,15 @@
-close all
+function [gradmapAll merge]= getRegions(expfile, pathname, outpathname)
+
 maptype = {'topox','topoy'};
 
-for f = 1:length(files)
     
-    expname = files{f}{1};
+    expname = [expfile.subj expfile.expt];
     for m = 1:2
-        load([pathname files{f}{m+1}])
+        if m==1
+            load([pathname expfile.topox])
+        elseif m==2
+            load([pathname expfile.topoy])
+        end
         
         map = map{3};
         map_all{m} = map;
@@ -32,7 +36,10 @@ for f = 1:length(files)
         
         gradmap = grad.*amp./abs(grad);
         gradmap(isnan(gradmap))=0;
-        
+        size(gradmap)
+  
+        gradmapAll(:,:,1+(m-1)*2) = real(gradmap);
+        gradmapAll(:,:,2+(m-1)*2) = imag(gradmap);
         %         figure
         %         imshow(polarMap(gradmap));
         %         title(sprintf('gradient %s',maptype{m}));
@@ -185,21 +192,4 @@ for f = 1:length(files)
 end
 
 
-% [f p] =uigetfile('*.mat','map file');
-% load(fullfile(p,f));
-%
-% figure
-% imshow(polarMap(map{3},95));
-% xlim([20 150]);
-% ylim([10 140]);
-%
-%
-% figure
-% imshow(polarMap(map{3},95));
-% hold on
-% h=imshow(borders>0.3);
-% transp = borders>0.3;
-% set(h,'AlphaData',transp*0.5);
-% xlim([20 150]);
-% ylim([10 140]);
 

@@ -2,6 +2,8 @@ for f = 1:length(files)
     for m = 1:2;
         if length(files{f})>=4 && ~isempty(files{f}{4+m})
             load([pathname files{f}{4+m}]); %%% behavior
+            
+            expname = files{f}{1}
             load( [outpathname expname '_topography.mat']); %%% topography
             clear resp
             
@@ -12,16 +14,30 @@ for f = 1:length(files)
                 resp(:,:,i) = mean(cycMap(:,:,(1:10)+(i-1)*25),3)-base;
             end
             meanresp = mean(resp,3);
-            amp = meanresp/0.05;
+            amp = meanresp/0.015;
             amp(amp>1)=1;
-            transp = amp>0.25;
+            transp = amp>0.25; %%% transparency
             amp = repmat(amp,[1 1 3]);
+           
             figure
             
             subplot(2,2,1)
             imshow(merge);
-            title(expname);
-            
+           if m==1
+               title([expname 'grating'])
+               
+               if size(cycMap,3)<101
+                  display('grating needs to be 10.1 secs');
+               else
+                   
+                   display('gratings are fine')
+               end
+               
+               
+           else
+              title([expname 'looming']) ;
+           end
+           
             subplot(2,2,2);
             imshow(merge);
             im =amp.* mat2im((resp(:,:,1)-resp(:,:,4))./(resp(:,:,4)+resp(:,:,1)),jet,[-1 1]);

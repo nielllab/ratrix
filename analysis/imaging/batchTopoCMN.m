@@ -1,4 +1,5 @@
 clear all
+close all
 
 pathname = 'C:\data\imaging\';
 
@@ -17,7 +18,19 @@ files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
 
 n=n+1;
+files(n).subj = 'g62b7lt';
+files(n).expt = '022314';
+files(n).topox =  '022314 G62B.7-LT HvV_center Behavior\022314 G62B.7-LT passive veiwing\G62B.7-LT_run2_topoX_15ms\topox_dfofmaps.mat'; 
+files(n).topoy = '022314 G62B.7-LT HvV_center Behavior\022314 G62B.7-LT passive veiwing\G62B.7-LT_run3_topoY_15ms\g62b4ln_topoymaps.mat';
+files(n).behav = '';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = '';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
 
+n=n+1;
 files(n).subj = 'g62hltt';
 files(n).expt = '042414';
 files(n).topox =  '042414g62h1tt passive mapping\042414 g62h1tt maps\G62H1TT_run1_topox_fstop5.6_exp50msmaps.mat'; 
@@ -31,13 +44,6 @@ files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
 
 
-% %     {'042414g62hltt vert'...
-% %     '042414g62h1tt passive mapping\042414 g62h1tt maps\G62H1TT_run1_topox_fstop5.6_exp50msmaps.mat' ...
-% %     '042414g62h1tt passive mapping\042414 g62h1tt maps\G62H1TT_run2_topoy_fstop5.6_exp50msmaps.mat'...
-% %     ''...
-% %    '042414g62h1tt passive mapping\G62H1TT_run3_gratingsSFTF_fstop5.6_exp50ms\G62H1TT_run3_gratingsSFTF_fstop5.6_exp50msmaps.mat'...
-% %    '042414g62h1tt passive mapping\042414 g62h1tt maps\G62H1TT_run4_looming_fstop5.6_exp50msmaps.mat' ...
-% %    }
 
 
 % files = { ...
@@ -83,15 +89,20 @@ files(n).notes = 'good imaging session';
 outpathname = 'C:\data\imaging\widefield compilation\'
 
 for f = 1:length(files)
-getRegions(files(f),pathname,outpathname);
+map{f}= getRegions(files(f),pathname,outpathname);
+end
+for f = 1:length(map);
+    [imfit{f} xshift(f) yshift(f)] = alignMaps(map([1 f]));
 end
 
-for f = 1:length(files)
-overlayMaps(files(f),pathname,outpathname);
-end
-for f = 1:length(files)
-fourPhaseOverlay(files(f),pathname,outpathname,'loom');
-end
-for f = 1:length(files)
-fourPhaseOverlay(files(f),pathname,outpathname,'grating');
-end
+
+% 
+% for f = 1:length(files)
+% overlayMaps(files(f),pathname,outpathname);
+% end
+% for f = 1:length(files)
+% fourPhaseOverlay(files(f),pathname,outpathname,'loom');
+% end
+% for f = 1:length(files)
+% fourPhaseOverlay(files(f),pathname,outpathname,'grating');
+% end

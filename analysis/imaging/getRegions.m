@@ -1,4 +1,4 @@
-function getRegions(expfile, pathname, outpathname)
+function gradmapAll = getRegions(expfile, pathname, outpathname)
 close all
 maptype = {'topox','topoy'};
 
@@ -36,7 +36,10 @@ maptype = {'topox','topoy'};
         
         gradmap = grad.*amp./abs(grad);
         gradmap(isnan(gradmap))=0;
-        
+        size(gradmap)
+  
+        gradmapAll(:,:,1+(m-1)*2) = real(gradmap);
+        gradmapAll(:,:,2+(m-1)*2) = imag(gradmap);
         %         figure
         %         imshow(polarMap(gradmap));
         %         title(sprintf('gradient %s',maptype{m}));

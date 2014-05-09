@@ -5,7 +5,7 @@ opengl software
 expname = [expfile.subj expfile.expt];
 if isfield(expfile,exptype) &&  ~isempty(getfield(expfile, exptype))
     load([pathname getfield(expfile,exptype)]); %%% behavior
-    load( [outpathname expname '_topography.mat']); %%% topography
+    load( [outpathname expnamet '_topography.mat']); %%% topography
     clear resp
     
     merge = imresize(merge,[size(cycMap,1) size(cycMap,2)]);

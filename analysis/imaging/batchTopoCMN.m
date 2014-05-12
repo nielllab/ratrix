@@ -86,22 +86,75 @@ files(n).notes = 'good imaging session';
 % %      }
 %      
 %     }
+
+% %%% batch dfofMovie
+% datapathname = '...';
+% for f = 1:length(files);
+%     try
+%         dfofMovie([datapathname files(f).topox]);
+%     catch
+%         sprintf('could do %s',file(f).topox)
+%     end
+%     try
+%         dfofMovie([datapathname files(f).topoy]);
+%     catch
+%         sprintf('could do %s',file(f).topoy)
+%     end
+%     try
+%         dfofMovie([datapathname files(f).grating]);
+%     catch
+%         sprintf('could do %s',file(f).grating)
+%     end
+%     try
+%         dfofMovie([datapathname files(f).loom]);
+%     catch
+%         sprintf('could do %s',file(f).loom)
+%     end
+% end
+    
 outpathname = 'C:\data\imaging\widefield compilation\'
 
+%%% calculate gradients and regions
 for f = 1:length(files)
-map{f}= getRegions(files(f),pathname,outpathname);
+[map{f} merge{f}]= getRegions(files(f),pathname,outpathname);
 end
+
+%%% align gradient maps to first file
 for f = 1:length(map);
     [imfit{f} allxshift(f) allyshift(f) allzoom(f)] = alignMaps(map([1 f]));
     xshift = allxshift(f); yshift = allyshift(f); zoom = allzoom(f);
     save( [outpathname files(f).subj files(f).expt '_topography.mat'],'xshift','yshift','zoom','-append');
 end
 
+avgmap=0;
+for f= 1:length(files)
 
-% 
-% for f = 1:length(files)
-% overlayMaps(files(f),pathname,outpathname);
-% end
+ m = shiftImage(merge{f},allxshift(f),allyshift(f),allzoom(f),80);
+ figure
+ imshow(m);
+ avgmap = avgmap+m;
+end
+figure
+imshow(avgmap/length(files));
+    
+
+% %%% overlay behavior on top of topomaps
+nb=0; avgbehav=0;
+for f = 1:length(files)
+try
+    behav{f} = overlayMaps(files(f),pathname,outpathname);
+    if ~isempty(behav(f));
+        b = shiftdim(behav{f},1);
+        b = shiftImage(b,allxshift(f),allyshift(f),allzoom(f),80);
+        avgbehav = avgbehav+b;
+        nb= nb+1;
+    end
+catch
+sprintf('couldnt do behav on %d',f)
+end
+end
+
+% %%% analyze 4-phase data (e.g. looming and grating)
 % for f = 1:length(files)
 % fourPhaseOverlay(files(f),pathname,outpathname,'loom');
 % end

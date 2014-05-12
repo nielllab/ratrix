@@ -1,5 +1,5 @@
-function gradmapAll = getRegions(expfile, pathname, outpathname)
-close all
+function [gradmapAll merge]= getRegions(expfile, pathname, outpathname)
+
 maptype = {'topox','topoy'};
 
     

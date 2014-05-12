@@ -1,4 +1,4 @@
-function overlayMaps(expfile,pathname,outpathname)
+function data = overlayMaps(expfile,pathname,outpathname)
 
 opengl software
 if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
@@ -89,7 +89,9 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
         %saveas(gcf,fullfile(pb,fname),'jpg')
     end
 end
+data = squeeze(decon);
 end
+
 
 % deconInterp = interp1(1:size(all_decon,1),all_decon,1:0.25:size(all_decon,1));
 % deconInterp = permute(squeeze(deconInterp),[2 3 1]);

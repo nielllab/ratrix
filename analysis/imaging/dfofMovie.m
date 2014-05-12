@@ -5,7 +5,7 @@ function dfofMovie(in);
 if ~exist('in','var') || isempty(in);
 [f,p] = uigetfile({'*.tif'; '*.tiff'; '*.mat'},'choose pco data');
 datafile = fullfile(p,f(1:end-4));
-mapfilename =fullfile(p,[f(1:end-4) 'maps.mat']);
+mapfilename =fullfile(p,[f(1:end-8) 'maps.mat'])
 datadir = p;
 else
     mapfilename = in;

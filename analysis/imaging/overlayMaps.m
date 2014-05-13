@@ -67,14 +67,14 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
             if i==4 | i==7
                 hbehav = imshow(mat2im(data,jet,[-0.15 0.15]));
             else
-                hbehav = imshow(mat2im(data,hot,[0 0.2]));
+                hbehav = imshow(mat2im(data,hot,[0 0.05]));
             end
             transp = zeros(size(data));
             if i==4 | i  ==7
                 % transp(abs(data)>0.02)=0.75;
                 transp=1;
             else
-                transp(abs(data)>0.05)=1;
+                transp(abs(data)>0.01)=1;
                 %transp=1;
             end
             set(hbehav,'AlphaData',transp);

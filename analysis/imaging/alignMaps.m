@@ -1,17 +1,22 @@
-function [imfit xshift yshift zoom] = alignmaps(map);
-
+function [imfit xshift yshift zoom] = alignmaps(map,merge,label);
+if ~exist('label','var');
+    label = [];
+end
 figure
 
 
 for i=1:2;
     zoom(i) = 260/size(map{i},1);
       map{i} = imresize(map{i},zoom(i));
+      merge{i} = imresize(merge{i},zoom(i));
       subplot(2,2,i)
-    imagesc(map{i}(:,:,3));
-  
+    imshow(merge{i});
+  if i==2
+      title(label)      
+  end
 end
 
-[dx dy] = meshgrid(-40:40,-40:40);
+[dx dy] = meshgrid(-45:2:45,-60:2:60);
 
 imrange = -80:80;
 x0 = round(size(map{1},1)/2)
@@ -21,7 +26,7 @@ im = map{1}(imrange+x0,imrange+y0,:);
 match = zeros(size(dx));
 
 for x = 1:size(dx,1);
-    for y = 1:size(dy,1);
+    for y = 1:size(dy,2);
         imshift = map{2}(imrange + x0 +dx(x,y),imrange + y0 +dy(x,y),:);
         match(x,y) = sum(im(:).*imshift(:));
     end

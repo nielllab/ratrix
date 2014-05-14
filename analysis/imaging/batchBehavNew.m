@@ -1,0 +1,653 @@
+clear all
+close all
+
+pathname = 'G:\compiled behavior\';
+
+n=1;
+files(n).subj = 'g62c2rt';
+files(n).expt = '050814';
+files(n).topox =  '050814 g62c2rt\g62c.2rt_run1_topox_fstop5.6_exp50msmaps.mat'; 
+files(n).topoy = '050814 g62c2rt\g62c.2rt_run2_topoy_fstop5.6_exp50msmaps.mat';
+files(n).behav = '';
+files(n).grating = '050814 g62c2rt\g62c.2rt_run4_widefieldgratings_fstop5.6_exp50ms_maps.mat';
+files(n).loom = 'g62c.2rt_run3_looming_fstop5.6_exp50ms_maps.mat';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_center';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'bad behavior session - green led LEFT ON';%readTiff behavior analysis failed 
+
+
+n=n+1;
+files(n).subj = 'g62b3rt';
+files(n).expt = '050814';
+files(n).topox =  '050814 g62b3rt\G62b3-rt_run1_topoX_50ms_Fstop_8_maps.mat'; 
+files(n).topoy = '050814 g62b3rt\G62b3-rt_run2_topoY_50ms_Fstop_8_maps.mat';
+files(n).behav = '050814 g62b3rt\G62B3-RT_run1_HvV_behavibehav data.mat';
+files(n).grating = '050814 g62b3rt\G62b3-rt_run4_widefieldgratings_50ms_Fstop_8_maps.mat';
+files(n).loom = '050814 g62b3rt\G62b3-rt_run3_looming_50ms_Fstop_8_maps.mat';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_vertical';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+files(n).subj = 'g62b1lt';
+files(n).expt = '050814';
+files(n).topox =  '050814 g62b1lt\G62B1-LT_run1_topoX_50ms_Fstop5_6_maps.mat'; 
+files(n).topoy = '050814 g62b1lt\G62B1-LT_run2_topoY_50ms_Fstop5_6_maps.mat';
+files(n).behav = '050814 g62b1lt\G62B1-LT_run1_HvV_behaviobehav data.mat';
+files(n).grating = '050814 g62b1lt\G62B1-LT_run4_widefield_gratings_50ms_Fstop5_g_maps.mat';
+files(n).loom = '050814 g62b1lt\G62B1-LT_run3_looming_50ms_Fstop5_g_maps.mat';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_vertical';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+files(n).subj = 'g62h1tt';
+files(n).expt = '050614';
+files(n).topox =  '050614 g62h1tt\g62h.1tt_run1_topox_fstop5.6_exp50ms_maps.mat'; 
+files(n).topoy = '050614 g62h1tt\g62h.1tt_run2_topoy_fstop5.6_exp50ms_maps.mat';
+files(n).behav = ''; %add this in
+files(n).grating = '050614 g62h1tt\g62h.1tt_run4_widefieldgratings_fstop5.6_exp50ms_maps.mat';
+files(n).loom = '050614 g62h1tt\g62h.1tt_run3_looming_fstop5.6_exp50ms_maps.mat';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_center';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'read tiff failed to analyze';%behavior analysis failed
+
+
+n=n+1;
+files(n).subj = 'g62b1lt';
+files(n).expt = '050614';
+files(n).topox =  '050614 g62b1lt\g62b.1LT_run1_topox_fstop5.6_exp50ms_maps.mat'; 
+files(n).topoy = '050614 g62b1lt\g62b.1LT_run2_topoy_fstop5.6_exp50ms_maps.mat';
+files(n).behav = '050614 g62b1lt\G62B.1LT_run1_HvV_Vertical_fbehav data.mat';
+files(n).grating = '050614 g62b1lt\g62b.1LT_run4_widefieldgratings_fstop5.6_exp50ms_maps.mat';
+files(n).loom = '050614 g62b1lt\g62b.1LT_run3_looming_fstop5.6_exp50ms_maps.mat';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_vertical';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+
+n=n+1;
+files(n).subj = 'g62c2rt';
+files(n).expt = '050414';
+files(n).topox =  '050414 g62c2rt\G62C2-RT_run1_topoX_50ms_F_8maps.mat'; 
+files(n).topoy = '050414 g62c2rt\G62C2-RT_run2_topoY_50ms_F_8maps.mat';
+files(n).behav = '050414 g62c2rt\G62C2-RT_run2_HvV_center_behavior_5behav data.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_center';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session first half'; % light block hat tiped towards end of session (after ~frame14200)
+n=n+1;
+
+files(n).subj = 'g62g4lt';
+files(n).expt = '050414';
+files(n).topox =  '050414 g62g4lt\g62g.4lt_run1_topox_fstop5.6_exp50msmaps.mat'; 
+files(n).topoy = '050414 g62g4lt\g62g.4lt_run2_topoy_fstop5.6_exp50msmaps.mat';
+files(n).behav = '050414 g62g4lt\g62g.4ln_run1_HvV_center_fbehav data.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_center';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+files(n).subj = 'g6w1lt';
+files(n).expt = '050414';
+files(n).topox =  '050414 g6w1lt\G6W1-LT_run1_topoX_50ms_F5_6maps.mat'; 
+files(n).topoy = '050414 g6w1lt\G6W1-LT_run2_topoY_50ms_F5_6maps.mat';
+files(n).behav = '050414 g6w1lt\G6W1-LT_run1_GTS_behavior_5behav data.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'gts';
+files(n).label = 'wfs1 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+files(n).subj = 'g62b5lt';
+files(n).expt = '050314';
+files(n).topox =  '050314 g62b5lt\G62b5-lt_run1_topoX_50ms_f-8maps.mat'; 
+files(n).topoy = '050314 g62b5lt\G62b5-lt_run2_topoY_50ms_f-8maps.mat';
+files(n).behav = '050314 g62b5lt\G62B5-LT_run1_GTS_behavior_behav data.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'gts';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+files(n).subj = 'g62b4ln';
+files(n).expt = '050314';
+files(n).topox =  '050314 g62b4ln\G62B4-LN_run1_topoX_50ms_F_8maps.mat'; 
+files(n).topoy = '050314 g62b4ln\G62B4-LN_run2_topoY_50ms_F_8maps.mat';
+files(n).behav = '050314 g62b4ln\G62B4-LN_run1_GTS_behavior_5behav data.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'gts';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+files(n).subj = 'g62b1lt';
+files(n).expt = '050214';
+files(n).topox =  '050214 g62b1lt\g62B.1LT_run1_topox_fstpo5.6_exp50msmaps.mat'; 
+files(n).topoy = '050214 g62b1lt\g62b.1lt_run2_topoy_fstop5.6_exp50msmaps.mat';
+files(n).behav = '050214 g62b1lt\g62b.1lt_run1_HvV_vertical_fbehav data.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_vertical';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+files(n).subj = 'g62b7lt';
+files(n).expt = '042914';
+files(n).topox =  '042914 g62b7lt\g62b.7lt_run1_topox_vert_fstop5.6_exp50msmaps.mat'; 
+files(n).topoy = '042914 g62b7lt\g62b.7lt_run2_topoy_vert_fstop5.6_exp50msmaps.mat';
+files(n).behav = '042914 g62b7lt\g62b.7lt_run1_hvv_center_fbehav data.mat';
+files(n).grating = '042914 g62b7lt\g62b.7lt_run4_widefieldgratings_vert_fstop5.6_exp50msmaps.mat';
+files(n).loom = '042914 g62b7lt\g62b.7lt_run3_looming_vert_fstop5.6_exp50msmaps.mat';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_center';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+files(n).subj = 'g62b7lt';
+files(n).expt = '042914';
+files(n).topox =  '042914 g62b7lt\g62b.7lt_run5_topox_horiz_fstop5.6_exp50msmaps.mat'; 
+files(n).topoy = '042914 g62b7lt\g62b.7lt_run6_topoy_horiz_fstop5.6_exp50msmaps.mat';
+files(n).behav = '042914 g62b7lt\g62b.7lt_run1_hvv_center_fbehav data.mat';
+files(n).grating = '042914 g62b7lt\g62b.7lt_run7_widefieldgratings_horiz_fstop5.6_exp50msmaps.mat';
+files(n).loom = '';
+files(n).monitor = 'land';
+files(n).task = 'HvV_center';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+files(n).subj = 'g62h1tt';
+files(n).expt = '042414';
+files(n).topox =  '042414 g62h1tt\G62H1TT_run1_topox_fstop5.6_exp50msmaps.mat'; 
+files(n).topoy = '042414 g62h1tt\G62H1TT_run2_topoy_fstop5.6_exp50msmaps.mat';
+files(n).behav = '042414 g62h1tt\G62h.1tt_run1_HvV_center_fbehav data.mat';
+files(n).grating = '042414 g62h1tt\G62H1TT_run3_gratingsSFTF_fstop5.6_exp50msmaps.mat';
+files(n).loom = '042414 g62h1tt\G62H1TT_run4_looming_fstop5.6_exp50msmaps.mat';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_center';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+files(n).subj = 'g62h1tt';
+files(n).expt = '042414';
+files(n).topox =  '042414 g62h1tt\G62H1TT_run5_topox_landscape_fstop5.6_exp50msmaps.mat'; 
+files(n).topoy = '042414 g62h1tt\G62H1TT_run6_topoy_landscape_fstop5.6_exp50msmaps.mat';
+files(n).behav = '042414 g62h1tt\G62h.1tt_run1_HvV_center_fbehav data.mat';
+files(n).grating = '042414 g62h1tt\G62H1TT_run7_gratingsSFTF_landscape_fstop5.6_exp50msmaps.mat';
+files(n).loom = '042414 g62h1tt\G62H1TT_run8_looming_landscape_fstop5.6_exp50msmaps.mat';
+files(n).monitor = 'land';
+files(n).task = '';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+files(n).subj = 'g62b8tt';
+files(n).expt = '042414';
+files(n).topox =  '042414 g62b8tt\G62b.8TT_run1_topox_fstop5.6_exp50msmaps.mat'; %green led off for topox (works ok still)
+files(n).topoy = '042414 g62b8tt\G62b.8TT_run2_topoy_fstop5.6_exp50msmaps.mat'; %shadow in green channel for topoy
+files(n).behav = '042414 g62b8tt\g62B.8TT_run1_HvV_center_fbehav data.mat';%shadow in green channel for looming
+files(n).grating = '042414 g62b8tt\G62b.8TT_run4_widefieldfgratings_fstop5.6_exp50msmaps.mat';
+files(n).loom = '042414 g62b8tt\G62b.8TT_run3_looming_fstop5.6_exp50msmaps.mat';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_center';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session only first half; '; % light block hat tiped towards end of session (after ~frame1300)
+
+n=n+1;
+files(n).subj = 'g62b8tt';
+files(n).expt = '042414';
+files(n).topox =  '042414 g62b8tt\G62b.8TT_run5_topox_horizontal_fstop5.6_exp50msmaps.mat'; 
+files(n).topoy = '042414 g62b8tt\G62b.8TT_run6_topoy_horizontal_fstop5.6_exp50msmaps.mat';
+files(n).behav = '042414 g62b8tt\g62B.8TT_run1_HvV_center_fbehav data.mat';
+files(n).grating = '';
+files(n).loom = '042414 g62b8tt\G62b.8TT_run7_looming_horizontal_fstop5.6_exp50msmaps.mat';
+files(n).monitor = 'land';
+files(n).task = 'HvV_center';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session only first half'; % light block hat tiped towards end of session (after ~frame1300)
+
+n=n+1;
+files(n).subj = 'g62b7lt';
+files(n).expt = '042414';
+files(n).topox =  '042414 g62b7lt\G62B.7LT_run1_topox_vertical_fstop5.6_exp50msmaps.mat'; 
+files(n).topoy = '042414 g62b7lt\G62B.7LT_run2_topoy_vertical_fstop5.6_exp50msmaps.mat';
+files(n).behav = '042414 g62b7lt\G62B.7LT_run1_HvV_center_fbehav data.mat';
+files(n).grating = '042414 g62b7lt\G62B.7LT_run3_widefieldgratings_vertical_fstop5.6_exp50msmaps.mat';
+files(n).loom = '042414 g62b7lt\G62B.7LT_run4_looming__vertical_fstop5.6_exp50maps.mat';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_center';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+files(n).subj = 'g62b7lt';
+files(n).expt = '042414';
+files(n).topox =  '042414 g62b7lt\G62B.7LT_run6_topox_horizontal_fstop5.6_exp50msmaps.mat'; 
+files(n).topoy = '042414 g62b7lt\G62B.7LT_run7_topoy_horizontal_fstop5.6_exp50msmaps.mat';
+files(n).behav = '042414 g62b7lt\G62B.7LT_run1_HvV_center_fbehav data.mat';
+files(n).grating = '';
+files(n).loom = '042414 g62b7lt\G62B.7LT_run5_looming_horizontal_fstop5.6_exp50msmaps.mat';
+files(n).monitor = 'land';
+files(n).task = 'HvV_center';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+files(n).subj = 'g62b7lt';
+files(n).expt = '042214';
+files(n).topox =  '042214 g62b7lt\G62B.7LT_run1_topox_fstop5.6_exp50msmaps.mat'; 
+files(n).topoy = '042214 g62b7lt\G62B.7LT_run2_topoy_fstop5.6_exp50msmaps.mat';
+files(n).behav = '042214 g62b7lt\G62b7lt_run1_HvV_center_fbehav data.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_center';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session'; %behavior only 9999 images
+
+n=n+1;
+files(n).subj = 'g62g4lt';
+files(n).expt = '042114';
+files(n).topox =  '042114 g62g4lt\g62g.4lt_run1_topoxmaps.mat'; 
+files(n).topoy = '042114 g62g4lt\g62g.4lt_run2_topoymaps.mat';
+files(n).behav = '042114 g62g4lt\g62g.4lt_run1_HvV_center_5behav data.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'gts';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session - monitor upside down?'; % topo x map is reversed (ran topox-rev?)
+
+n=n+1;
+files(n).subj = 'g62b8tt';
+files(n).expt = '042114';
+files(n).topox =  '042114 g62b8tt\G62B8TT_run1_Topox+50msExp_5.6fstopmaps.mat'; 
+files(n).topoy = '042114 g62b8tt\G62B8TT_run2_Topoy_50msExp_5.6fstopmaps.mat';
+files(n).behav = '042114 g62b8tt\G62B8TT_run1_HvV_center_behav data.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_center';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session'; 
+
+n=n+1;
+files(n).subj = 'g62g4lt';
+files(n).expt = '041814';
+files(n).topox =  '041814 g62g4lt\G62G4-LT_run1_topoX_50ms_F5.6maps.mat'; 
+files(n).topoy = '041814 g62g4lt\G62G4-LT_run2_topoY_50ms_F5.6maps.mat';
+files(n).behav = '041814 g62g4lt\041814_G62G4-LT_run1_HvV_center_50ms_F5.6_shabehav data.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_center';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session'; %poor performance
+
+n=n+1;
+files(n).subj = 'g62b8tt';
+files(n).expt = '041814';
+files(n).topox =  '041814 g62b8tt\G62B8tt_run1_topoX_50ms_F5.6maps.mat'; 
+files(n).topoy = '041814 g62b8tt\G62B8tt_run2_topoY_50ms_F5.6maps.mat';
+files(n).behav = '041814 g62b8tt\G62B.8-TT_run1_HvV_center_5behav data.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_center';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+files(n).subj = 'g62c2rt';
+files(n).expt = '031114';
+files(n).topox =  '031114 g62c2rt\G62C.2-RT_run1_topoX_F_4_50msexpmaps.mat'; 
+files(n).topoy = '031114 g62c2rt\G62C.2-RT_run2_topoY_F_4_50msexpmaps.mat';
+files(n).behav = '031114 g62c2rt\G62C.2-RT_run1_HvV_center_behavbehav data.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_center';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+files(n).subj = 'g62b7lt';
+files(n).expt = '031114';
+files(n).topox =  '031114 g62b7lt\G62B.7-LT_run1_topoX_F_4_50msexpmaps.mat'; 
+files(n).topoy = '031114 g62b7lt\G62B.7-LT_run2_topoY_F_4_50msexpmaps.mat';
+files(n).behav = '031114 g62b7lt\G62B.7-LT_run1_HvV_center_behaviorbehav data.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_center';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+files(n).subj = 'g62b3rt';
+files(n).expt = '031114';
+files(n).topox =  '031114 g62b3rt\G62B.3-RT_run1_topoX_F_4_50msexpmaps.mat'; 
+files(n).topoy = '031114 g62b3rt\G62B.3-RT_run2_topoY_F_4_50msexpmaps.mat';
+files(n).behav = '031114 g62b3rt\G62B.3-RT_run1_HvV_behavbehav data.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_vertical';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+files(n).subj = 'g62b1lt';
+files(n).expt = '031114';
+files(n).topox =  '031114 g62b1lt\G62B.1-LT_run1_topoX_F_5.6_50msexpmaps.mat'; 
+files(n).topoy = '031114 g62b1lt\G62B.1-LT_run2_topoY_F_5.6_50msexpmaps.mat';
+files(n).behav = '031114 g62b1lt\G62B.1-LT_run1_HvV_behavior_Fsbehav data.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_vertical';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+files(n).subj = 'g62b5lt';
+files(n).expt = '030614';
+files(n).topox =  '030614 g62b5lt\G62B.5-LT_run1_topoX_F_4_50msexpmaps.mat'; 
+files(n).topoy = '030614 g62b5lt\G62B.5-LT_run2_topoY_F_4_50msexpmaps.mat';
+files(n).behav = '030614 g62b5lt\G62B.5-LT_run1_GTS_behavbehav data.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'gts';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+files(n).subj = 'g62b3rt';
+files(n).expt = '030614';
+files(n).topox =  '030614 g62b3rt\G62B.3-RT_run1_topoX_F_4_50msexpmaps.mat'; 
+files(n).topoy = '030614 g62b3rt\G62B.3-RT_run2_topoY_F_4_50msexpmaps.mat';
+files(n).behav = '030614 g62b3rt\G62B.3-RT_run1_HvV_behaviorbehav data.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_vertical';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session'; %poor performance
+
+n=n+1;
+files(n).subj = 'g628lt';
+files(n).expt = '030214';
+files(n).topox =  '030214 g628lt\G62.8-LT_run1_topoX_Fstop_5.6_50msexpmaps.mat'; 
+files(n).topoy = '030214 g628lt\G62.8-LT_run2_topoY_Fstop_5.6_50msexpmaps.mat';
+files(n).behav = '';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'gts';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'could not analyze behavior imaging session (combine tiffs). good session '; %not sure what problem is (video writer)
+
+n=n+1;
+files(n).subj = 'g62b7lt';
+files(n).expt = '030214';
+files(n).topox =  '030214 g62b7lt\030214 G62B.7-LT_run1_topoX_Fstop8_50msexpmaps.mat'; 
+files(n).topoy = '030214 g62b7lt\030214 G62B.7-LT_run2_topoY_Fstop8_50msexpmaps.mat';
+files(n).behav = '030214 g62b7lt\G62B.7-LT_run1_HvV_center_behavior_behav data.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_center';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';  
+
+n=n+1;
+files(n).subj = 'g62b3rt';
+files(n).expt = '030214';
+files(n).topox =  '030214 g62b3rt\G62B.3-RT_run4_topoX_F_8_50msexp_hat_fell_off_earliermaps.mat'; 
+files(n).topoy =  '030214 g62b3rt\G62B.3-RT_run3_topoY_F_8_50msexp_hat_fell_off_earliermaps.mat';
+files(n).behav = '030214 g62b3rt\G62B.3-RT_run1_HvV_behaviorbehav data.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_vertical';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+files(n).subj = 'g62b7lt';
+files(n).expt = '030114';
+files(n).topox =  '030114 g62b7lt\G62B.7-LT_run1_topoX_Fstop_5.6_50msexpmaps.mat'; 
+files(n).topoy = '030114 g62b7lt\G62B.7-LT_run2_topoY_Fstop_5.6_50msexpmaps.mat';
+files(n).behav = '030114 g62b7lt\G62B.7-LT_run1_HvV_center_behavior_Fbehav data.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_center';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+files(n).subj = 'g62b5lt';
+files(n).expt = '030114';
+files(n).topox =  '030114 g62b5lt\G62B.5_LT_run2_topoX_Fstop_8_50msexpmaps.mat'; 
+files(n).topoy = '030114 g62b5lt\G62B.5_LT_run3_topoY_Fstop_8_50msexpmaps.mat';
+files(n).behav = '';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'gts';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'no behavior imaging session'; %camware took a few extra frames (cant analyze)
+
+n=n+1;
+files(n).subj = 'g62b4ln';
+files(n).expt = '030114';
+files(n).topox =  '030114 g62b4ln\G62B.4-LN_run1_TopoX_Fstop_11_30msexpmaps.mat'; 
+files(n).topoy = '030114 g62b4ln\G62B.4-LN_run3_TopoY_Fstop_5.6_30msexpmaps.mat';
+files(n).behav = '030114 g62b4ln\G62B.4-LN_run4_GTS_Behavior_topFbehav data.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'gts';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+files(n).subj = 'g62b3rt';
+files(n).expt = '030114';
+files(n).topox =  '030114 g62b3rt\G62B.3-RT_run1_topoX_Fstop5.6_50msexpmaps.mat'; 
+files(n).topoy = '030114 g62b3rt\G62B.3-RT_run2_topoY_Fstop5.6_50msexpmaps.mat';
+files(n).behav = '030114 g62b3rt\G62B.3-RT_run1_HvV_behavior_Fsbehav data.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_vertical';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+files(n).subj = 'g62b3rt';
+files(n).expt = '022814';
+files(n).topox =  '022814 g62b3rt\G62B.3-RT_run2_topoXmaps.mat'; 
+files(n).topoy = '022814 g62b3rt\G62B.3-RT_run3_topoYmaps.mat';
+files(n).behav = '022814 g62b3rt\G62B.3-RT_run1_HvV_Bbehav data.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_vertical';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+files(n).subj = 'g62b7lt';
+files(n).expt = '022514';
+files(n).topox =  '022514 g62b7lt\G62B7-LT_run1_TopoXmaps.mat'; 
+files(n).topoy = '022514 g62b7lt\G62B7-LT_run2_TopoYmaps.mat';
+files(n).behav = '022514 g62b7lt\G62B.7-LT_run1_HvV_center_Bbehav data.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_center';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+files(n).subj = 'g62b7lt';
+files(n).expt = '022314';
+files(n).topox =  '022314 g62b7lt\G62B.7-LT_run2_topoX_15msmaps.mat'; 
+files(n).topoy = '022314 g62b7lt\G62B.7-LT_run3_topoY_15msmaps.mat';
+files(n).behav = '022314 g62b7lt\G62B.7-LT_run1_HvV_center_Bbehav data.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_center';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'couldnt do behavior analysis overlay; good imaging session';%couldnt do behavior overlay
+
+n=n+1;
+files(n).subj = 'g62b4ln';
+files(n).expt = '022114';
+files(n).topox =  '022114 g62b4ln\G62B.4-LN_run2_topoX_15msexpmaps.mat'; 
+files(n).topoy = '022114 g62b4ln\G62B.4-LN_run4_topoY_15msexpmaps.mat';
+files(n).behav = '022114 g62b4ln\G62B.4-LN_run1_GTS_bbehav data.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'gts';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'couldnt do behavior analysis overlay; good imaging session';%couldnt do behavior overlay
+
+n=n+1;
+files(n).subj = 'g628lt';
+files(n).expt = '021914';
+files(n).topox =  '021914 g628lt\G628-LT_run2_topoX_15ms_expmaps.mat'; 
+files(n).topoy = '021914 g628lt\G628-LT_run3_topoY_15ms_expmaps.mat';
+files(n).behav = '021914 g628lt\G628-LT_run1_GTS_behavior_15ms_exp.pcoraw_115_138_31311_8_540_1_640_1_31311.mat';
+files(n).grating = '';
+files(n).loom = '';
+files(n).monitor = 'vert';
+files(n).task = 'gts';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'pco raw files for behavior, low resolution'; %couldnt do behavior analysis overlay
+
+% n=n+1;
+% files(n).subj = '';
+% files(n).expt = '';
+% files(n).topox =  ''; 
+% files(n).topoy = '';
+% files(n).behav = '';
+% files(n).grating = '';
+% files(n).loom = '';
+% files(n).monitor = 'vert';
+% files(n).task = '';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good imaging session';
+
+
+% %%% batch dfofMovie
+% datapathname = '...';
+% for f = 1:length(files);
+%     try
+%         dfofMovie([datapathname files(f).topox]);
+%     catch
+%         sprintf('could do %s',file(f).topox)
+%     end
+%     try
+%         dfofMovie([datapathname files(f).topoy]);
+%     catch
+%         sprintf('could do %s',file(f).topoy)
+%     end
+%     try
+%         dfofMovie([datapathname files(f).grating]);
+%     catch
+%         sprintf('could do %s',file(f).grating)
+%     end
+%     try
+%         dfofMovie([datapathname files(f).loom]);
+%     catch
+%         sprintf('could do %s',file(f).loom)
+%     end
+% end
+    
+outpathname = 'G:\compiled behavior\behavior topos\';
+
+
+use = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session') &  strcmp({files.label},'camk2 gc6'))
+%use = 1: length(files)
+%%% calculate gradients and regions
+clear map merge
+for f = 1:length(use)
+   f
+[map{f} merge{f}]= getRegions(files(use(f)),pathname,outpathname);
+end
+
+%%% align gradient maps to first file
+for f = 1:length(map);
+    [imfit{f} allxshift(f) allyshift(f) allzoom(f)] = alignMaps(map([1 f]), merge([1 f]), [files(use(f)).subj ' ' files(use(f)).expt ' ' files(use(f)).monitor] );
+    xshift = allxshift(f); yshift = allyshift(f); zoom = allzoom(f);
+    save( [outpathname files(f).subj files(f).expt '_topography.mat'],'xshift','yshift','zoom','-append');
+end
+
+avgmap=0;
+for f= 1:length(use)
+
+ m = shiftImage(merge{f},allxshift(f),allyshift(f),allzoom(f),80);
+ sum(isnan(m(:)))
+ 
+ sum(isnan(merge{f}(:)))
+ figure
+ imshow(m);
+ avgmap = avgmap+m;
+ title( [files(use(f)).subj ' ' files(use(f)).expt ' ' files(use(f)).monitor] );
+end
+figure
+imshow(avgmap/length(use));
+    
+
+% %%% overlay behavior on top of topomaps
+nb=0; avgbehav=0; clear behav
+for f = 1:length(use)
+try
+    behav{f} = overlayMaps(files(use(f)),pathname,outpathname);
+        if ~isempty(behav(f));
+        b = shiftdim(behav{f},1);
+        b = shiftImage(b,allxshift(f),allyshift(f),allzoom(f),60);
+        avgbehav = avgbehav+b;
+        nb= nb+1;
+    end
+    catch
+sprintf('couldnt do behav on %d',f)
+end
+
+
+end
+
+%%% analyze 4-phase data (e.g. looming and grating)
+for f = 1:length(use)
+fourPhaseOverlay(files(use(f)),pathname,outpathname,'loom');
+end
+for f = 1:length(use)
+fourPhaseOverlay(files(use(f)),pathname,outpathname,'grating');
+end

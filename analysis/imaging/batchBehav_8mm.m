@@ -1,7 +1,7 @@
 clear all
 close all
 
-pathname = 'G:\compiled behavior\';
+pathname = 'G:\compiled 8mm\';
 datapath = 'd\Widefield (12-10-12+)\data 62713+\';
 
 n=1;
@@ -18,7 +18,7 @@ files(n).darkness = '050914 g62c5tt\G62C5-TT_run10_darkness_50ms_Fstop_8_maps.ma
 files(n).monitor = '2 screens land';
 files(n).task = '';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'good imaging session'; %also auditory and aud-vis stim this day 
 files(n).step_binarydata = '050914 G62C5-TT 8mm\G62C5-TT_run4_step_binary_50ms_Fstop_8\G62C5-TT_run4_step_binary_50ms_Fstop_8';
 files(n).topoxdata =  '050914 G62C5-TT 8mm\G62C5-TT_run1_2screens(flipped)_topooX_50ms_Fstop_8\G62C5-TT_run1_2screens(flipped)_topooX_50ms_Fstop_8';
 files(n).topoydata = '050914 G62C5-TT 8mm\G62C5-TT_run3_2screens_topoY_50ms_Fstop_8\G62C5-TT_run2_2screens_topoY_50ms_Fstop_8';
@@ -122,7 +122,7 @@ files(n).darkness = '050114 g62h4rn\G62H.4-RN_run13_darkness_50ms_exp_F5.6maps.m
 files(n).monitor = '2 screens vert'; 
 files(n).task = '';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'good imaging session';%also air whisker stim and auditory
 files(n).step_binarydata = '050114 Gcamp6 8mm G62H.4-RN\G62H.4-RN_run1_2screens_vert_step_binary_50ms_exp_F5.6\G62H.4-RN_run1_2screens_vert_step_binary_50ms_exp';
 files(n).topoxdata =  '050114 Gcamp6 8mm G62H.4-RN\G62H.4-RN_run2_2screens_vert_topoX_50ms_exp_F5.6\G62H.4-RN_run2_2screens_vert_topoX_50ms_exp';
 files(n).topoydata = '050114 Gcamp6 8mm G62H.4-RN\G62H.4-RN_run3_2screens_vert_topoY_50ms_exp_F5.6\G62H.4-RN_run3_2screens_vert_topoY_50ms_exp';
@@ -141,7 +141,7 @@ files(n).darkness = '050114 g62h4rn\G62H.4-RN_run13_darkness_50ms_exp_F5.6maps.m
 files(n).monitor = '2 screens land'; 
 files(n).task = '';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'good imaging session'; %also air whisker stim and auditory
 files(n).step_binarydata = '050114 Gcamp6 8mm G62H.4-RN\G62H.4-RN_run5_2screens_landscape_step_binary_50ms_exp_F5.6\G62H.4-RN_run5_2screens_landscape_step_binary_50ms_exp';
 files(n).topoxdata =  '050114 Gcamp6 8mm G62H.4-RN\G62H.4-RN_run6_2screens_landscape_topoX_50ms_exp_F5.6\G62H.4-RN_run6_2screens_landscape_topoX_50ms_exp';
 files(n).topoydata = '050114 Gcamp6 8mm G62H.4-RN\G62H.4-RN_run8_2screens_landscape_topoY_50ms_exp_F5.6\G62H.4-RN_run8_2screens_landscape_topoY_50ms_exp';
@@ -149,24 +149,22 @@ files(n).whiskerdata = '050114 Gcamp6 8mm G62H.4-RN\G62H.4-RN_run9_whisker_50ms_
 files(n).darknessdata = '050114 Gcamp6 8mm G62H.4-RN\G62H.4-RN_run13_darkness_50ms_exp_F5.6\G62H.4-RN_run13_darkness_50ms_exp';
 
 
-% n=n+1;
-% files(n).subj = 'g62g1ln';
-% files(n).expt = '031914';
-% files(n).windowsize = '8mm';
-% files(n).topox =  '';
-% files(n).topoy = '';
-% files(n).behav = '';
-% files(n).grating = '';
-% files(n).loom = '';
-% files(n).whisker = '';
-% files(n).darkness = '';
-% files(n).monitor = '2 screens vert';
-% files(n).task = '';
-% files(n).label = 'camk2 gc6';
-% files(n).notes = 'good imaging session'; %some with blinders %not yet analyzed dfoff
-% files(n).step_binarydata = '031914 Gcamp6 8mm blinders\G62G.1-LN_run8_step_binary_2screens_50msexp_F_11\G62G.1-LN_run8_step_binary_2screens_50msexp_F_11';
-% files(n).whiskerdata = '031914 Gcamp6 8mm blinders\G62G.1-LN_run5_whiskers_w_blinders_50msexp_F_11\G62G.1-LN_run5_whiskers_w_blinders_50msexp_F_11';
-% files(n).darknessdata = '';
+n=n+1;
+files(n).subj = 'g62g1ln';
+files(n).expt = '031914';
+files(n).windowsize = '8mm';
+files(n).step_binary = '031914 g62g1ln\G62G.1-LN_run8_step_binary_2screens_50msexp_F_11maps.mat';
+files(n).whisker = '031914 g62g1ln\G62G.1-LN_run2_whiskers_w_blinders_50msexp_F_11maps.mat';
+%files(n).whisker = '031914 g62g1ln\G62G.1-LN_run5_whiskers_w_blinders_50msexp_F_11maps.mat';
+files(n).darkness = '031914 g62g1ln\G62G.1-LN_run1_darkness_w_blinders_50msexp_F_11maps.mat';
+files(n).monitor = '2 screens vert';
+files(n).task = '';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session'; %some runs with blinders, didnt seem very effective 
+files(n).step_binarydata = '031914 Gcamp6 8mm blinders\G62G.1-LN_run8_step_binary_2screens_50msexp_F_11\G62G.1-LN_run8_step_binary_2screens_50msexp_F_11';
+files(n).whiskerdata = '031914 Gcamp6 8mm blinders\G62G.1-LN_run2_whiskers_w_blinders_50msexp_F_11\G62G.1-LN_run2_whiskers_w_blinders_50msexp_F_11';
+%files(n).whiskerdata = '031914 Gcamp6 8mm blinders\G62G.1-LN_run5_whiskers_w_blinders_50msexp_F_11\G62G.1-LN_run5_whiskers_w_blinders_50msexp_F_11';
+files(n).darknessdata = '031914 Gcamp6 8mm blinders\G62G.1-LN_run1_darkness_w_blinders_50msexp_F_11\G62G.1-LN_run1_darkness_w_blinders_50msexp_F_11';
 
 
 n=n+1;
@@ -176,21 +174,15 @@ files(n).windowsize = '8mm';
 files(n).step_binary = '022814 g62g1ln\G62G.1-LN_run5_visual_step_binarymaps.mat';
 files(n).topox =  '';
 files(n).topoy = '';
-files(n).behav = '';
-files(n).grating = '';
-files(n).loom = '';
 files(n).whisker = '022814 g62g1ln\G62G.1-LN_run4_whiskersmaps.mat';
 files(n).darkness = '022814 g62g1ln\G62G.1-LN_run3_darkness_2_goodmaps.mat';
 files(n).monitor = '2 screens vert';
 files(n).task = '';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'good imaging session'; %also tried some auditory stim
 files(n).step_binarydata = '022814 Gcamp6 8mm window aud\G62G.1-LN_run5_visual_step_binary\G62G.1-LN_run5_visual_step_binary';
 files(n).topoxdata =  '';
 files(n).topoydata = '';
-files(n).behavdata = '';
-files(n).gratingdata = '';
-files(n).loomdata = '';
 files(n).topoxreversedata = '';
 files(n).whiskerdata = '022814 Gcamp6 8mm window aud\G62G.1-LN_run4_whiskers\G62G.1-LN_run4_whiskers';
 files(n).darknessdata = '022814 Gcamp6 8mm window aud\G62G.1-LN_run3_darkness_2_good\G62G.1-LN_run3_darkness_2';
@@ -213,13 +205,10 @@ files(n).baseline_patchy = '022414 g62g1ln\G62G.1-LN_run6_baseline_patchY_2scree
 files(n).monitor = '2 screens vert';
 files(n).task = '';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'good imaging session'; %there is also 20hz data for step binary and topox
 files(n).step_binarydata = '022414 8mm window Gcamp6\G62G.1-LN_run1_step_binary_2screens_10Hz_15msexp\G62G.1-LN_run1_step_binary_2screens_10Hz_15msexp';
 files(n).topoxdata =  '022414 8mm window Gcamp6\G62G.1-LN_run2_TopoX_2screens_10Hz_15msexp\G62G.1-LN_run2_TopoX_2screens_10Hz_15msexp';
 files(n).topoydata = '022414 8mm window Gcamp6\G62G.1-LN_run4_TopoY_2screens_10Hz_15msexp\G62G.1-LN_run4_TopoY_2screens_10Hz_15msexp';
-files(n).behavdata = '';
-files(n).gratingdata = '';
-files(n).loomdata = '';
 files(n).topoxreversedata = '022414 8mm window Gcamp6\G62G.1-LN_run3_TopoX_reverse_2screens_10Hz_15msexp\G62G.1-LN_run3_TopoX_reverse_2screens_10Hz_15msexp';
 files(n).whiskerdata = '022414 8mm window Gcamp6\G62G.1-LN_run9_whisker_stim_10Hz_3000frame\G62G.1-LN_run9_whisker_stim_10Hz_3000frame';
 files(n).baseline_patchxdata = '022414 8mm window Gcamp6\G62G.1-LN_run5_baseline_patchX_2screens_10Hz_15msexp\G62G.1-LN_run5_baseline_patchX_2screens_10Hz_15msexp';
@@ -278,7 +267,7 @@ files(n).baseline_patchydata = '022414 8mm window Gcamp6\G62G.1-LN_run6_baseline
 %     end
 % end
    
-outpathname = 'G:\compiled behavior\behavior topos\';
+outpathname = 'G:\compiled 8mm\8mm overlays\';
 
 
 %use = find(strcmp({files.monitor},'vert') & strcmp({files.task},'HvV_center')& strcmp({files.notes},'good imaging session'))

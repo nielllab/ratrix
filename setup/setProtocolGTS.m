@@ -28,20 +28,20 @@ if ~isscalar(subjIDs)
 end
 switch subjIDs{1}
 
-%    case 'bfly1a.13rt'  %started on GoToBlack 4/26/14
-%        requestRewardSizeULorMS = 20;
-%        rewardSizeULorMS        = 180;
-%        msPenalty               =4000;   
-%        
-%    case 'bfly3a.3rn'  %started on GoToBlack 4/26/14
-%        requestRewardSizeULorMS = 20;
-%        rewardSizeULorMS        = 180;
-%        msPenalty               =4000; 
-%        
-%    case 'bfly2b.3rt'  %started on GoToBlack 4/26/14
-%        requestRewardSizeULorMS = 20;
-%        rewardSizeULorMS        = 180;
-%        msPenalty               =4000; 
+    case 'bfly1a.13rt'
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 180;
+       msPenalty               =4000;  
+       
+   case 'bfly3a.3rn'
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 180;
+       msPenalty               =4000; 
+       
+   case 'bfly2b.3rt'
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 180;
+       msPenalty               =4000; 
        
    case 'g62b4ln'
        requestRewardSizeULorMS = 0;
@@ -55,7 +55,7 @@ switch subjIDs{1}
        
    case 'g62b.5lt'           %started 1/28/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 110; 
+       rewardSizeULorMS        = 120; 
        msPenalty               =4100;
        
 %    case 'g625ln' % Switched 1/17/14
@@ -65,7 +65,7 @@ switch subjIDs{1}
 %        
     case 'g6w1lt' % started 3/7/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;
+       rewardSizeULorMS        = 35;
        msPenalty               =3900;
        
 %    case 'bfly1a.5lt' 

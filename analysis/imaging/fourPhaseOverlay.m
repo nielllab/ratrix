@@ -1,12 +1,18 @@
-function fourPhaseOverlay(expfile,pathname,outpathname, exptype)
+function resp = fourPhaseOverlay(expfile,pathname,outpathname, exptype)
 
 opengl software
 
 expname = [expfile.subj expfile.expt];
 if isfield(expfile,exptype) &&  ~isempty(getfield(expfile, exptype))
-    load([pathname getfield(expfile,exptype)]); %%% behavior
-    load( [outpathname expnamet '_topography.mat']); %%% topography
+    load([pathname getfield(expfile,exptype)],'cycMap'); %%% behavior
+    load( [outpathname expfile.subj expfile.expt '_topography.mat']); %%% topography
     clear resp
+    
+    if size(cycMap,3)~=101 & strcmp(exptype,'grating')
+        sprintf('couldnt do gratings size ~= 101 %s',[expfile.subj expfile.expt]);
+        resp=[];
+        return;
+    end
     
     merge = imresize(merge,[size(cycMap,1) size(cycMap,2)]);
     
@@ -23,7 +29,7 @@ if isfield(expfile,exptype) &&  ~isempty(getfield(expfile, exptype))
     
     subplot(2,2,1)
     imshow(merge);
-    title(expname);
+    title([expname ' ' exptype]);
     
     subplot(2,2,2);
     imshow(merge);

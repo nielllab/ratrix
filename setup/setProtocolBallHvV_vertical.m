@@ -27,6 +27,21 @@ if ~isscalar(subjIDs)
 end
  switch subjIDs{1}
 
+  case 'g62h1tt'     %started 5/16/14
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 70;
+        msPenalty              =4200;
+
+  case 'g62c.2rt'           %changed 5/16/14
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 70; 
+       msPenalty               =4200;
+       
+  case 'g62b7lt'           %changed 5/16/14
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 70; 
+       msPenalty               =4200;    
+
   case 'g62b1lt'     %moved to HvV_vertical 2/19/14   
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 40;

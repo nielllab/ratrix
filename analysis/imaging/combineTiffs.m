@@ -247,6 +247,7 @@ recs = {
 
 %          {'g6w1lt' {
 %          {[1 360],[],'050414 G6W1-LT GTS behavior\G6W1-LT_run1_GTS_behavior_50msexp_fstop5_6','G6W1-LT_run1_GTS_behavior_50msexp_fstop5_6'}
+%%          {[361 610],[],'',''}  %bad run - motion artifact (headplate not secure)
 %     }
 %     }  
 %     
@@ -259,7 +260,8 @@ recs = {
 % 
 % %      {[422 672],[],'021914 G628-LT GTS Behavior','G628-LT_run1_GTS_behavior_15ms_exp0'}
 %       {[673 896],[],'022014 G628-LT GTS Behavior','022014 G628-LT GTS Behavior'}
-% %     {[897 1187],[],'030214 G62.8-LT GTS behavior\G62.8-LT_run1_GTS_behavior_Fstop_5.6_50ms_exposure','G62.8-LT_run1_GTS_behavior_Fstop_5.6_50ms_exposure'}
+% %reanalize?     {[897 1187],[],'030214 G62.8-LT GTS behavior\G62.8-LT_run1_GTS_behavior_Fstop_5.6_50ms_exposure','G62.8-LT_run1_GTS_behavior_Fstop_5.6_50ms_exposure'}%video writer didnt work
+% 
 %      }
 %      }
 %        
@@ -267,12 +269,16 @@ recs = {
 % %      {[1 198],[],'030114 G62B.5-LT GTS Behavior (Fstop 8)\G62B.5-LT_run1_GTS_behavior_Fstop_8_50msexp','G62B.5-LT_run1_GTS_behavior_Fstop_8_50msexp'}     
 %      {[199 381],[],'030614 G62B.5-LT GTS behavior\G62B.5-LT_run1_GTS_behavior_F_4_50msexp','G62B.5-LT_run1_GTS_behavior_F_4_50msexp'}
 %       {[382 576],[],'050314 G62B5-LT GTS behavior\G62B5-LT_run1_GTS_behavior_50msexp_Fstop-8','G62B5-LT_run1_GTS_behavior_50msexp_Fstop-8'}
+%%        {[577 588],[],'',''}  %G62C.2 ran on these trials (different protocol)
+%%        {[589 621],[],'',''}  %Bad run - having trouble with air pressure (no passive viewing)
 %     }
 %     }    
 %     
-%          {'g62b1lt' {
+%           {'g62b1lt' {
 %       {[1 208],[],'031114 G62B.1-RT HvV Behavior\G62B.1-LT_run1_HvV_behavior_Fstop_5.6_50msexp','G62B.1-LT_run1_HvV_behavior_Fstop_5.6_50msexp'}     
 %       {[209 477],[],'050214 G62b.1 LT HvV_vertical behavior\g62b.7lt_run1_HvV_vertical_fstop5.6_exp50ms','g62b.7lt_run1_HvV_vertical_fstop5.6_exp50ms'}
+%         {[478 693],[],'050614 G62B.1 LT HvV_Vertical Behavior\G62B.1LT_run1_HvV_Vertical_fstop5.6_exp50ms','G62B.1LT_run1_HvV_Vertical_fstop5.6_exp50ms'}
+%         {[694 903],[],'050814 G62B1-LT HvV Behavior\G62B1-LT_run1_HvV_behavior_50ms_Fstop5_6','G62B1-LT_run1_HvV_behavior_50ms_Fstop5_6'}
 %     }
 %     }    
 %     
@@ -283,6 +289,7 @@ recs = {
 %       {[573 774],[],'030614 G62B.3-RT HvV behavior\G62B.3-RT_run1_HvV_behavior_Fstop4_50msexp','G62B.3-RT_run1_HvV_behavior_Fstop4_50msexp'}
 %       {[775 1000],[],'031114 G62B.3-RT HvV Behavior\G62B.3-RT_run1_HvV_behavior_F_4_50msexp','G62B.3-RT_run1_HvV_behavior_F_4_50msexp'}
 %%        {[1001 1104],[],'050414 G62b3-RT HvV behavior (movement artifact)\G62b3-rt_run1_HvV_behavior_50msexp_Fstop_8','G62b3-rt_run1_HvV_behavior_50msexp_Fstop_8'}  %%movement artifact(headplate not secure)
+%         {[1105 1363],[],'050814 G62b3-rt HvV behavior\G62B3-RT_run1_HvV_behavior_50ms_Fstop_8','G62B3-RT_run1_HvV_behavior_50ms_Fstop_8'}
 %     }
 %     }    
 %     
@@ -323,6 +330,7 @@ recs = {
 %       {[1 194],[],'031114 G62C.2-RT HvV_center Behavior\G62C.2-RT_run1_HvV_center_behavior_F_4_50msexp','G62C.2-RT_run1_HvV_center_behavior_F_4_50msexp'}  
 %%        {[195 195],[],'050414 G62C2_RT HvV_center Behavior\G62C2-RT_run1_HvV_center_behavior_50ms_exp_fstop_8_NO BLUE','G62C2-RT_run1_HvV_center_behavior_50ms_exp_fstop_8'}  %no blue led
 %        {[196 415],[],'050414 G62C2_RT HvV_center Behavior\G62C2-RT_run2_HvV_center_behavior_50ms_exp_fstop_8','G62C2-RT_run2_HvV_center_behavior_50ms_exp_fstop_8'}
+%%         {[416 667],[],'050814 G62c.2 rt HvV_center Behavior\g62c.2rt_run2_HvV_center_fstop5.6_exp50ms','g62c.2rt_run2_HvV_center_fstop5.6_exp50ms'} %green LED left on for all of behavior %error in analysis
 %     }
 %     }    
 %     
@@ -333,10 +341,11 @@ recs = {
 %     }
 %     }   
 %     
-%         {'g62h1tt' {
+        {'g62h1tt' {
 %       {[1 151],[],'042414 g62h.1tt HvV_center behavior\G62h.1tt_run1_HvV_center_fstop5.6_exp50ms','G62h.1tt_run1_HvV_center_fstop5.6_exp50ms'}     
-%     }
-%     }     
+        {[152 330],[],'050614 G62H.1TT HvV Center Behavior\g62h.1tt_run1_HvV_center_fstop5.6_exp50ms','g62h.1tt_run1_HvV_center_fstop5.6_exp50ms'}  %hmm..analysis error
+    }
+    }     
     
     
     

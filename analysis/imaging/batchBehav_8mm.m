@@ -243,45 +243,58 @@ files(n).baseline_patchydata = '022414 8mm window Gcamp6\G62G.1-LN_run6_baseline
 
 
 %%% batch dfofMovie
-
-for f = 1:length(files(n));
+errmsg= [];errRpt = [];
+nerr=0;
+for f = 1:length(files);
     f
     tic
     
     try
         dfofMovie([datapathname files(f).topoxdata]);
-    catch
-        sprintf('couldnt do %s',files(f).topoxdata)
+    catch exc
+        nerr=nerr+1;
+        errmsg{nerr}= sprintf('couldnt do %s',files(f).topoxdata)
+        errRpt{nerr}=getReport(exc,'extended')
     end
     try
         dfofMovie([datapathname files(f).topoydata]);
-    catch
-        sprintf('couldnt do %s',files(f).topoydata)
+    catch exc
+        nerr=nerr+1;
+        errmsg{nerr}=sprintf('couldnt do %s',files(f).topoydata)
+        errRpt{nerr}=getReport(exc,'extended')
     end
     try
         dfofMovie([datapathname files(f).whiskerdata]);
-    catch
-        sprintf('couldnt do %s',files(f).whiskerdata)
+    catch exc
+        nerr=nerr+1;
+        errmsg{nerr}=sprintf('couldnt do %s',files(f).whiskerdata)
+         errRpt{nerr}=getReport(exc,'extended')
     end
     try
         dfofMovie([datapathname files(f).darknessdata]);
-    catch
-        sprintf('couldnt do %s',file(f).darknessdata)
+    catch exc
+        nerr=nerr+1;
+        errmsg{nerr}=sprintf('couldnt do %s',files(f).darknessdata)
+         errRpt{nerr}=getReport(exc,'extended')
     end
     try
         dfofMovie([datapathname files(f).step_binarydata]);
     catch
-        sprintf('couldnt do %s',file(f).step_binarydata)
+        nerr=nerr+1;
+        errmsg{nerr}=sprintf('couldnt do %s',files(f).step_binarydata)
+        errRpt{nerr}= getReport(exc,'extended')
     end
     try
         dfofMovie([datapathname files(f).topoxreversedata]);
-    catch
-        sprintf('couldnt do %s',file(f).topoxreversedata)
+    catch exc
+        nerr=nerr+1;
+        errmsg{nerr}=sprintf('couldnt do %s',files(f).topoxreversedata)
+         errRpt{nerr}=getReport(exc,'extended')
     end
     
     toc
 end
-   
+ errmsg  
 outpathname = 'G:\compiled 8mm\8mm overlays\';
 
 

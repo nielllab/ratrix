@@ -795,7 +795,7 @@ files(n).behavdata = '021914 G628-LT GTS Behavior\G628-LT_run1_GTS_behavior_15ms
 
 %%% batch dfofMovie
 
-for f = 1:length(files(f));
+for f = 1:length(files(n));
     f
     tic
     try

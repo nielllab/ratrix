@@ -1,6 +1,12 @@
-maplist = {'visualstepmaps.mat','whiskersmaps.mat','auditory_whitemaps.mat'}
-maplist = {'visualstepmaps.mat','whiskersmaps.mat','audmovemap.mat'}
-maplist = {'visualstepmaps.mat','whiskersmaps.mat','rundark2 map.mat'}
+function mergemaps(map1,map2,map3,pathname,label);
+maplist{1} = map1;
+maplist{2}=map2;
+maplist{3}=map3;
+
+
+% maplist = {'visualstepmaps.mat','whiskersmaps.mat','auditory_whitemaps.mat'}
+% maplist = {'visualstepmaps.mat','whiskersmaps.mat','audmovemap.mat'}
+% maplist = {'visualstepmaps.mat','whiskersmaps.mat','rundark2 map.mat'}
 %maplist = {'audmovemap.mat','auditory_whitemaps.mat'}%
 %maplist = {'topoxmaps','topoxRunmap'}
 
@@ -9,7 +15,9 @@ figure
 
 for c = 1:length(maplist);
 subplot(2,2,c)
-load(maplist{c});
+% load([pathname maplist{c}],'map');
+
+map = maplist{c};
 c
 if length(map)==3
     m=map{3};
@@ -34,3 +42,4 @@ end
 subplot(2,2,4)
 
 imshow(overlayMap)
+title(label)

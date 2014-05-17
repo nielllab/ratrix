@@ -2,7 +2,7 @@ clear all
 close all
 
 pathname = 'G:\compiled behavior\';
-datapath = 'G:\Behavior data 12-24-13+';
+datapathname = 'G:\Behavior data 12-24-13+';
 
 n=1;
 files(n).subj = 'g62c2rt';
@@ -793,6 +793,34 @@ files(n).behavdata = '021914 G628-LT GTS Behavior\G628-LT_run1_GTS_behavior_15ms
 
 
 
+%%% batch dfofMovie
+
+for f = 1:length(files(n));
+    f
+    tic
+    try
+        dfofMovie([datapathname files(f).topoxdata]);
+    catch
+        sprintf('couldnt do %s',files(f).topox)
+    end
+    try
+        dfofMovie([datapathname files(f).topoydata]);
+    catch
+        sprintf('couldnt do %s',files(f).topoydata)
+    end
+    try
+        dfofMovie([datapathname files(f).gratingdata]);
+    catch
+        sprintf('couldnt do %s',files(f).gratingdata)
+    end
+    try
+        dfofMovie([datapathname files(f).loomdata]);
+    catch
+        sprintf('couldnt do %s',file(f).loomdata)
+    end
+
+    toc
+end
 % %%% batch dfofMovie
 % datapathname = '...';
 % for f = 1:length(files);

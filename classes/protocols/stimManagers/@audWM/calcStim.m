@@ -139,6 +139,8 @@ end
 % details.laser_duration=.5; %seconds
 % details.laser_start_time=Inf; 
 
+details.responseTime=0;
+
 switch stimulus.soundType
     case {'allOctaves','tritones'}
         sSound = soundClip('stimSoundBase','allOctaves',[stimulus.freqs(details.startTone)],20000);

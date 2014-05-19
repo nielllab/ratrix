@@ -26,6 +26,8 @@ end
 
 details.laserON=0; %set to be 0, modify if necessary
 
+details.responseTime=0;
+
 % %decide randomly if we issue a laser pulse on this trial or not
 if ~isempty(stimulus.freq) %stimulus.freq empty for phoneme, [1] for phonemelaser [w1 w2] for multi-interval
     

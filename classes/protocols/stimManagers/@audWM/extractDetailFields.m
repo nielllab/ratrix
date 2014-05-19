@@ -10,6 +10,7 @@ newLUT=LUTparams.compiledLUT;
         [out.numTones newLUT] = extractFieldAndEnsure(stimDetails,{'numTones'},'scalar',newLUT);
         [out.isi newLUT] = extractFieldAndEnsure(stimDetails,{'isi'},'scalar',newLUT);
         [out.correctionTrial newLUT] = extractFieldAndEnsure(stimDetails,{'correctionTrial'},'scalar',newLUT);
+        [out.responseTime newLUT] = extractFieldAndEnsure(stimDetails,{'responseTime'},'scalar',newLUT);
         % 12/16/08 - this stuff might be common to many stims
         % should correctionTrial be here in compiledDetails (whereas it was originally in compiledTrialRecords)
         % or should extractBasicRecs be allowed to access stimDetails to get correctionTrial?

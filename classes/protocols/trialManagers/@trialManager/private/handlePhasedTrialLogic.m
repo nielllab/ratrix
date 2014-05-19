@@ -71,40 +71,39 @@ for gcInd=1:2:length(transitionCriterion)-1
             
             newSpecInd = transitionCriterion{gcInd+1};
             
-            if strcmp(phaseType,'discrim') && strcmp(class(tm), 'freeGoNoGo')
-                earlyP = getEarlyP(tm);
-                if earlyP
-                     newSpecInd = 4;
-                end
-            end
+%             if strcmp(phaseType,'discrim') && strcmp(class(tm), 'freeGoNoGo')
+%                 earlyP = getEarlyP(tm);
+%                 if earlyP
+%                      newSpecInd = 4;
+%                 end
+%             end
             
             
-            if strcmp(phaseType,'discrim') && strcmp(class(tm), 'goNoGo')
-                duration = getDurations(stimManager);
-                frameWindowStart = (duration(1) - duration(2))*30/1000;
-                if framesInPhase > frameWindowStart
-            newSpecInd = transitionCriterion{gcInd+1};
-                else 
-                    newSpecInd = transitionCriterion{gcInd+3}; %too early- go to early penalty phase
-                end 
-            end 
-            
-            if strcmp(phaseType,'discrim') && strcmp(class(stimManager), 'CNMafc')
-                duration = getDurations(stimManager);
-                frameWindowStart = (duration(2)+duration(3)/2)*30/1000;
-                if framesInPhase > frameWindowStart
-            newSpecInd = transitionCriterion{gcInd+1};
-                else 
-                    newSpecInd = transitionCriterion{gcInd+3}; %too early- go to early penalty phase
-                end 
-            end 
+%             if strcmp(phaseType,'discrim') && strcmp(class(tm), 'goNoGo')
+%                 duration = getDurations(stimManager);
+%                 frameWindowStart = (duration(1) - duration(2))*30/1000;
+%                 if framesInPhase > frameWindowStart
+%             newSpecInd = transitionCriterion{gcInd+1};
+%                 else 
+%                     newSpecInd = transitionCriterion{gcInd+3}; %too early- go to early penalty phase
+%                 end 
+%             end 
+%             
+%             if strcmp(phaseType,'discrim') && strcmp(class(stimManager), 'CNMafc')
+%                 duration = getDurations(stimManager);
+%                 frameWindowStart = (duration(2)+duration(3)/2)*30/1000;
+%                 if framesInPhase > frameWindowStart
+%             newSpecInd = transitionCriterion{gcInd+1};
+%                 else 
+%                     newSpecInd = transitionCriterion{gcInd+3}; %too early- go to early penalty phase
+%                 end 
+%             end 
             
             if strcmp(phaseType,'discrim') && strcmp(class(stimManager), 'audWM')
                 duration = getDurations(stimManager);
                 isi=stimDetails.isi;
                 %frameWindowStart = (duration(2)+duration(3)/2)*30/1000;
                 frameWindowStart = (duration(2)+isi)*30/1000;
-                f=framesInPhase;
                 if framesInPhase > frameWindowStart;
             newSpecInd = transitionCriterion{gcInd+1};
                 else 
@@ -112,15 +111,24 @@ for gcInd=1:2:length(transitionCriterion)-1
                 end 
             end 
             
-            if strcmp(phaseType,'discrim') && strcmp(class(stimManager), 'audReadWav')
-                duration = getDurations(stimManager);
-                frameWindowStart = (duration(2)+duration(3)/2)*30/1000;
-                if framesInPhase > frameWindowStart
-            newSpecInd = transitionCriterion{gcInd+1};
-                else 
-                    newSpecInd = transitionCriterion{gcInd+3}; %too early- go to early penalty phase
-                end 
-            end 
+            
+            if strcmp(phaseType,'discrim') && strcmp(class(stimManager), 'audWM')
+               stimDetails.responseTime=GetSecs; 
+            end
+            
+            if strcmp(phaseType,'discrim') && strcmp(class(stimManager), 'phonemeDiscrim')
+               stimDetails.responseTime=GetSecs; 
+            end
+            
+%             if strcmp(phaseType,'discrim') && strcmp(class(stimManager), 'audReadWav')
+%                 duration = getDurations(stimManager);
+%                 frameWindowStart = (duration(2)+duration(3)/2)*30/1000;
+%                 if framesInPhase > frameWindowStart
+%             newSpecInd = transitionCriterion{gcInd+1};
+%                 else 
+%                     newSpecInd = transitionCriterion{gcInd+3}; %too early- go to early penalty phase
+%                 end 
+%             end 
             
             %             if (specInd == newSpecInd)
             %                 error('same indices at %d', specInd);

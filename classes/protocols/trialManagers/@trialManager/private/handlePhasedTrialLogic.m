@@ -111,6 +111,15 @@ for gcInd=1:2:length(transitionCriterion)-1
                 end 
             end 
             
+%             if strcmp(phaseType,'pre-request') && strcmp(class(stimManager), 'audWM')
+%                stimDetails.soundONTime=GetSecs; 
+%                                   
+%                   %%currently being  performed in getsoundstoplay
+%             end
+%             
+%             if strcmp(phaseType,'pre-request') && strcmp(class(stimManager), 'phonemeDiscrim')
+%                stimDetails.soundONTime=GetSecs; 
+%             end
             
             if strcmp(phaseType,'discrim') && strcmp(class(stimManager), 'audWM')
                stimDetails.responseTime=GetSecs; 

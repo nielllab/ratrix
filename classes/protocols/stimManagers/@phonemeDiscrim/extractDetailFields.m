@@ -21,6 +21,7 @@ else
         [out.laser_off_time newLUT] = extractFieldAndEnsure(stimDetails,{'laser_off_time'},'scalar',newLUT);
         [out.laser_wait_start_time newLUT] = extractFieldAndEnsure(stimDetails,{'laser_wait_start_time'},'scalar',newLUT);
         [out.responseTime newLUT] = extractFieldAndEnsure(stimDetails,{'responseTime'},'scalar',newLUT);
+        [out.soundONTime newLUT] = extractFieldAndEnsure(stimDetails,{'soundONTime'},'scalar',newLUT);
         % 12/16/08 - this stuff might be common to many stims
         % should correctionTrial be here in compiledDetails (whereas it was originally in compiledTrialRecords)
         % or should extractBasicRecs be allowed to access stimDetails to get correctionTrial?

@@ -21,6 +21,8 @@ end
 if stepsInPhase <= 0 && ...
         ((strcmp(phaseType,'discrim') && strcmp(trialManagerClass,'nAFC')))
     
+    stimDetails.soundONTime=GetSecs;
+    
     soundsToPlay{2}{end+1} = {'stimSound' stimManager.duration};
     
 %    if stimDetails.laserON

@@ -140,6 +140,7 @@ end
 % details.laser_start_time=Inf; 
 
 details.responseTime=0;
+details.soundONTime=0;
 
 switch stimulus.soundType
     case {'allOctaves','tritones'}

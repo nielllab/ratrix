@@ -29,7 +29,7 @@ end
 
   case 'g62h1tt'     %started 5/16/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 70;
+       rewardSizeULorMS        = 80;
         msPenalty              =4200;
 
   case 'g62c.2rt'           %changed 5/16/14

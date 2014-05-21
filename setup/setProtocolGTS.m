@@ -27,6 +27,21 @@ if ~isscalar(subjIDs)
     error('expecting exactly one subject')
 end
 switch subjIDs{1}
+    
+%      case 'g62c6lt' % switched GoToBlack 5/21/14
+%        requestRewardSizeULorMS = 20;
+%        rewardSizeULorMS        = 160;
+%        msPenalty               =4000;
+%        
+%      case 'g62c6tt' % switched GoToBlack 5/21/14
+%        requestRewardSizeULorMS = 20;
+%        rewardSizeULorMS        = 160;
+%        msPenalty               =4000;
+       
+     case 'g6w1lt' % started 3/7/14
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 35;
+       msPenalty               =3900;
 
     case 'bfly1a.13rt'
        requestRewardSizeULorMS = 0;
@@ -45,7 +60,7 @@ switch subjIDs{1}
        
    case 'g62b4ln'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 110;
+       rewardSizeULorMS        = 130;
        msPenalty               =4000; 
 
    case 'g62.8lt' 

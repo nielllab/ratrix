@@ -6,13 +6,14 @@ if ~exist('in','var') || isempty(in);
     [f,p] = uigetfile({'*.tif'; '*.tiff'; '*.mat'},'choose pco data');
     datafile = fullfile(p,f(1:end-4));
     mapfilename =fullfile(p,[f(1:end-8) 'maps.mat'])
-    datadir = p;
+    
 else
     datafile = [in '_0001'];
     mapfilename = [in 'maps.mat'];
-    [datadir fname] = fileparts(datafile);
+    [p f] = fileparts(datafile);
 
 end
+datadir = p;
 
 [dfof map mapNorm cycMap]= readTifBlueGreen(datafile);
 

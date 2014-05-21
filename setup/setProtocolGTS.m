@@ -28,15 +28,15 @@ if ~isscalar(subjIDs)
 end
 switch subjIDs{1}
     
-     case 'g62c6lt' % started 5/20/14
-       requestRewardSizeULorMS = 20;
-       rewardSizeULorMS        = 160;
-       msPenalty               =4000;
-       
-     case 'g62c6tt' % started 5/20/14
-       requestRewardSizeULorMS = 20;
-       rewardSizeULorMS        = 160;
-       msPenalty               =4000;
+%      case 'g62c6lt' % switched GoToBlack 5/21/14
+%        requestRewardSizeULorMS = 20;
+%        rewardSizeULorMS        = 160;
+%        msPenalty               =4000;
+%        
+%      case 'g62c6tt' % switched GoToBlack 5/21/14
+%        requestRewardSizeULorMS = 20;
+%        rewardSizeULorMS        = 160;
+%        msPenalty               =4000;
        
      case 'g6w1lt' % started 3/7/14
        requestRewardSizeULorMS = 0;

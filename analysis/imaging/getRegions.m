@@ -114,8 +114,8 @@ maptype = {'topox','topoy'};
     
     subplot(2,4,2)
     imshow(imresize(merge,mag));
-                xlim([20 150]);
-            ylim([10 140]);
+%                 xlim([20 150]);
+%             ylim([10 140]);
             
     for m= 1:2
         subplot(2,4,4*(m-1)+1)
@@ -123,8 +123,9 @@ maptype = {'topox','topoy'};
         if m==1
             title([expfile.subj ' ' expfile.expt ' ' expfile.monitor])
         end
-        xlim([20 140]*mag);
-        ylim([10 130]*mag);
+        axis equal
+%         xlim([20 140]*mag);
+%         ylim([10 130]*mag);
     end
     
     for m = 1:2
@@ -132,8 +133,8 @@ maptype = {'topox','topoy'};
         imshow(imresize(merge,mag));
         hold on
         quiver(rangex*mag, rangey*mag, 10*real(norm_grad{m}(rangex,rangey)),10*imag(norm_grad{m}(rangex,rangey)),'w')
-        xlim([20 140]*mag);
-        ylim([10 130]*mag);
+%         xlim([20 140]*mag);
+%         ylim([10 130]*mag);
     end
     
     for m= 1:2
@@ -141,8 +142,8 @@ maptype = {'topox','topoy'};
         imshow(polarMap(map_all{m},90));
         hold on
         quiver(rangex, rangey, 10*real(norm_grad{m}(rangex,rangey)),10*imag(norm_grad{m}(rangex,rangey)),'w')
-        xlim([20 140]*mag);
-        ylim([10 130]*mag);
+%         xlim([20 140]*mag);
+%         ylim([10 130]*mag);
     end
     
         for m= 2:2
@@ -152,8 +153,9 @@ maptype = {'topox','topoy'};
             h=imagesc(borders,[0 1]);
             transp = borders>0.3;
             set(h,'AlphaData',transp);
-            xlim([20 150]);
-            ylim([10 140]);
+            axis equal
+%             xlim([20 150]);
+%             ylim([10 140]);
         end
     
     save([outpathname expname '_topography.mat'],'div','norm_grad','map_all','grad_all','amp_all','merge');

@@ -3,20 +3,20 @@ function dfofMovie(in);
 
 %[f,p] = uiputfile('*.avi','dfof cycle average movie file');
 if ~exist('in','var') || isempty(in);
-[f,p] = uigetfile({'*.tif'; '*.tiff'; '*.mat'},'choose pco data');
-datafile = fullfile(p,f(1:end-4));
-mapfilename =fullfile(p,[f(1:end-8) 'maps.mat'])
-datadir = p;
+    [f,p] = uigetfile({'*.tif'; '*.tiff'; '*.mat'},'choose pco data');
+    datafile = fullfile(p,f(1:end-4));
+    mapfilename =fullfile(p,[f(1:end-8) 'maps.mat'])
+    
 else
-    mapfilename = in;
-[datadir mapfile] = fileparts(in);
-fs = dir([datadir '\*.tif*']);
-f = fs(1).name;
-datafile = fullfile(datadir,f(1:end-4));
+    datafile = [in '_0001'];
+    mapfilename = [in 'maps.mat'];
+    [p f] = fileparts(datafile);
+
 end
+datadir = p;
 
 [dfof map mapNorm cycMap]= readTifBlueGreen(datafile);
-f
+
 use_chan=3;
 
 % [dfof map mapNorm]= readTifGreen;
@@ -66,7 +66,7 @@ close(vid)
 %     axis equal;
 %     mov(i) = getframe(gcf);
 % end
-% 
+%
 % vid = VideoWriter(fullfile(p,f));
 % vid.FrameRate=25;
 % open(vid);
@@ -81,8 +81,8 @@ fs = dir([datadir '\stim*.mat']);
 if ~isempty(fs)
     use_speed=1;
     load(fullfile(datadir,fs(1).name));
-%     figure
-%     plot(stimRec.pos)
+    %     figure
+    %     plot(stimRec.pos)
     
     mouseT = stimRec.ts- stimRec.ts(1);
     figure
@@ -94,7 +94,7 @@ if ~isempty(fs)
     
     posx = cumsum(stimRec.pos(use,1)-900);
     posy = cumsum(stimRec.pos(use,2)-500);
-    frameT = 0.1:0.1:300;
+    frameT = 0.1:0.1:max(mouseT);
     vx = diff(interp1(mouseT,posx,frameT));
     vy = diff(interp1(mouseT,posy,frameT));
     vx(end+1)=0; vy(end+1)=0;
@@ -104,54 +104,56 @@ if ~isempty(fs)
     sp = sqrt(vx.^2 + vy.^2);
     figure
     plot(sp)
-end;
-
-
-for i=1:100;
-    sp_avg(i) = nanmeanMW(sp(i:100:end)');
-    sp_med(i) = nanmedianMW(sp(i:100:end)');
+    
+    
+    
+    for i=1:100;
+        sp_avg(i) = nanmeanMW(sp(i:100:end)');
+        sp_med(i) = nanmedianMW(sp(i:100:end)');
+    end
+    sp_all = reshape(sp,[100 30]);
+    figure
+    plot(0.1:0.1:10,sp_all)
+    title('all speeds')
+    figure
+    plot(0.1:0.1:10,sp_avg)
+    title('mean speed')
+    ylim([0 1500])
+    figure
+    plot(0.1:0.1:10,sp_med)
+    title('median speed')
+    ylim([0 1500])
+    
+    thresh = [ 400 ];
+    for i = 1:1
+        stop_img = median(dfof_bg(:,:,sp<thresh(i)),3);
+        mov_img = median(dfof_bg(:,:,sp>thresh(i)),3);
+        
+        figure
+        subplot(2,2,1);
+        imagesc(stop_img,[-0.2 0.2]);
+        subplot(2,2,2);
+        imagesc(mov_img,[-0.2 0.2]);
+        subplot(2,2,3);
+        imagesc(mov_img-stop_img,[-0.2 0.2]);
+    end
+    
+    movemap = mov_img-stop_img;
+    
+    %[f p] =uiputfile('*.mat','move map file');
+    save(mapfilename,'movemap','sp','-append');
 end
-sp_all = reshape(sp,[100 30]);
-figure
-plot(0.1:0.1:10,sp_all)
-title('all speeds')
-figure
-plot(0.1:0.1:10,sp_avg)
-title('mean speed')
-ylim([0 1500])
-figure
-plot(0.1:0.1:10,sp_med)
-title('median speed')
-ylim([0 1500])
 
-thresh = [ 400 ];
-for i = 1:1
-stop_img = median(dfof_bg(:,:,sp<thresh(i)),3);
-mov_img = median(dfof_bg(:,:,sp>thresh(i)),3);
-
-figure
-subplot(2,2,1);
-imagesc(stop_img,[-0.2 0.2]);
-subplot(2,2,2);
-imagesc(mov_img,[-0.2 0.2]);
-subplot(2,2,3);
-imagesc(mov_img-stop_img,[-0.2 0.2]);
-end
-
-movemap = mov_img-stop_img;
-
-%[f p] =uiputfile('*.mat','move map file');
-save(mapfilename,'movemap','sp','-append');
-% 
+%
 % keyboard
 % %% raw movie
-% 
-% 
+%
+%
 % [f,p] = uiputfile('*.avi','dfof movie file');
 % small_mov = dfof_bg(4:4:end,4:4:end,4:4:end);
 % lowthresh = prctile(small_mov(:),2);
 % upperthresh = 1.5*prctile(small_mov(:),98);
-% 
+%
 % clear mov
 % figure
 % mov_length = size(dfof_bg,3);
@@ -173,19 +175,19 @@ save(mapfilename,'movemap','sp','-append');
 %         mov(mov_length) = getframe(gcf); %%%% initializes structure array
 %     end
 %     mov(i) = getframe(gcf);
-%     
+%
 % end
-% 
-% 
+%
+%
 % vid = VideoWriter(fullfile(p,f));
 % vid.FrameRate=25;
 % open(vid);
 % writeVideo(vid,mov(1:end));
 % close(vid)
-% 
+%
 % clear mov
-% 
-% 
+%
+%
 % % %%% use svd to get rid of artifacts
 % %
 % % sz = size(imresize(squeeze(dfof_bg(:,:,1)),0.5));

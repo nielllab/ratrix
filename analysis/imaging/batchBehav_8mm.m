@@ -1,8 +1,8 @@
 clear all
 close all
-
+opengl software
 pathname = 'G:\compiled 8mm\';
-datapath = 'd\Widefield (12-10-12+)\data 62713+\';
+datapathname = 'D:\Widefield (12-10-12+)\data 62713+\';
 
 n=1;
 files(n).subj = 'g62c5tt';
@@ -205,7 +205,7 @@ files(n).baseline_patchy = '022414 g62g1ln\G62G.1-LN_run6_baseline_patchY_2scree
 files(n).monitor = '2 screens vert';
 files(n).task = '';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session'; %there is also 20hz data for step binary and topox
+files(n).notes = 'good imaging session - too much binning'; %there is also 20hz data for step binary and topox; rerun dfof with less binning
 files(n).step_binarydata = '022414 8mm window Gcamp6\G62G.1-LN_run1_step_binary_2screens_10Hz_15msexp\G62G.1-LN_run1_step_binary_2screens_10Hz_15msexp';
 files(n).topoxdata =  '022414 8mm window Gcamp6\G62G.1-LN_run2_TopoX_2screens_10Hz_15msexp\G62G.1-LN_run2_TopoX_2screens_10Hz_15msexp';
 files(n).topoydata = '022414 8mm window Gcamp6\G62G.1-LN_run4_TopoY_2screens_10Hz_15msexp\G62G.1-LN_run4_TopoY_2screens_10Hz_15msexp';
@@ -242,41 +242,97 @@ files(n).baseline_patchydata = '022414 8mm window Gcamp6\G62G.1-LN_run6_baseline
 
 
 
-% %%% batch dfofMovie
-% datapathname = '...';
-% for f = 1:length(files);
-%     try
-%         dfofMovie([datapathname files(f).topox]);
-%     catch
-%         sprintf('could do %s',file(f).topox)
-%     end
-%     try
-%         dfofMovie([datapathname files(f).topoy]);
-%     catch
-%         sprintf('could do %s',file(f).topoy)
-%     end
-%     try
-%         dfofMovie([datapathname files(f).grating]);
-%     catch
-%         sprintf('could do %s',file(f).grating)
-%     end
-%     try
-%         dfofMovie([datapathname files(f).loom]);
-%     catch
-%         sprintf('could do %s',file(f).loom)
-%     end
-% end
-   
+%%% batch dfofMovie
+errmsg= [];errRpt = [];
+nerr=0;
+for f = 1:length(files);
+    f
+    tic
+    
+    try
+        dfofMovie([datapathname files(f).topoxdata]);
+    catch exc
+        nerr=nerr+1;
+        errmsg{nerr}= sprintf('couldnt do %s',files(f).topoxdata)
+        errRpt{nerr}=getReport(exc,'extended')
+    end
+    try
+        dfofMovie([datapathname files(f).topoydata]);
+    catch exc
+        nerr=nerr+1;
+        errmsg{nerr}=sprintf('couldnt do %s',files(f).topoydata)
+        errRpt{nerr}=getReport(exc,'extended')
+    end
+    try
+        dfofMovie([datapathname files(f).whiskerdata]);
+    catch exc
+        nerr=nerr+1;
+        errmsg{nerr}=sprintf('couldnt do %s',files(f).whiskerdata)
+         errRpt{nerr}=getReport(exc,'extended')
+    end
+    try
+        dfofMovie([datapathname files(f).darknessdata]);
+    catch exc
+        nerr=nerr+1;
+        errmsg{nerr}=sprintf('couldnt do %s',files(f).darknessdata)
+         errRpt{nerr}=getReport(exc,'extended')
+    end
+    try
+        dfofMovie([datapathname files(f).step_binarydata]);
+    catch
+        nerr=nerr+1;
+        errmsg{nerr}=sprintf('couldnt do %s',files(f).step_binarydata)
+        errRpt{nerr}= getReport(exc,'extended')
+    end
+    try
+        dfofMovie([datapathname files(f).topoxreversedata]);
+    catch exc
+        nerr=nerr+1;
+        errmsg{nerr}=sprintf('couldnt do %s',files(f).topoxreversedata)
+         errRpt{nerr}=getReport(exc,'extended')
+    end
+    
+    toc
+end
+ errmsg  
 outpathname = 'G:\compiled 8mm\8mm overlays\';
 
 
 %use = find(strcmp({files.monitor},'vert') & strcmp({files.task},'HvV_center')& strcmp({files.notes},'good imaging session'))
-use = 1: length(files)
+for i = 1:length(files);
+    if ~isempty(files(i).topox) & strcmp(files(i).notes,'good imaging session')
+        used(i)=1;
+    else
+       used(i)=0;
+    end
+end
+
+    use = find(used)
 
 
 %%% calculate gradients and regions
 for f = 1:length(use)
 [map{f} merge{f}]= getRegions(files(use(f)),pathname,outpathname);
+end
+
+for i = 1:length(files);
+    if ~isempty(files(i).step_binary) & ~isempty(files(i).whisker) &  ~isempty(files(i).darkness) & strcmp(files(i).notes,'good imaging session')
+        used(i)=1;
+    else
+       used(i)=0;
+    end
+end
+
+    use = find(used)
+
+for f = 1:length(use)
+load([pathname files(use(f)).darkness],'movemap');
+load([pathname files(use(f)).step_binary],'map');
+map1 = map;
+load([pathname files(use(f)).whisker],'map');
+map2= map;
+
+mergeMaps(map1,map2,movemap, pathname, [files(use(f)).subj files(use(f)).expt files(use(f)).monitor])
 end
 
 

@@ -40,7 +40,7 @@ switch subjIDs{1}
        
      case 'g6w1lt' % started 3/7/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 35;
+       rewardSizeULorMS        = 30;
        msPenalty               =3900;
 
     case 'bfly1a.13rt'
@@ -70,7 +70,7 @@ switch subjIDs{1}
        
    case 'g62b.5lt'           %started 1/28/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 120; 
+       rewardSizeULorMS        = 130; 
        msPenalty               =4100;
        
 %    case 'g625ln' % Switched 1/17/14

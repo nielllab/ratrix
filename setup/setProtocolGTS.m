@@ -45,18 +45,18 @@ switch subjIDs{1}
 
     case 'bfly1a.13rt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 180;
-       msPenalty               =4000;  
+       rewardSizeULorMS        = 160;
+       msPenalty               =4100;  
        
    case 'bfly3a.3rn'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 180;
-       msPenalty               =4000; 
+       rewardSizeULorMS        = 160;
+       msPenalty               =4100; 
        
    case 'bfly2b.3rt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 180;
-       msPenalty               =4000; 
+       rewardSizeULorMS        = 160;
+       msPenalty               =4100; 
        
    case 'g62b4ln'
        requestRewardSizeULorMS = 0;
@@ -70,8 +70,8 @@ switch subjIDs{1}
        
    case 'g62b.5lt'           %started 1/28/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 130; 
-       msPenalty               =4100;
+       rewardSizeULorMS        = 150; 
+       msPenalty               =4200;
        
 %    case 'g625ln' % Switched 1/17/14
 %        requestRewardSizeULorMS = 0;
@@ -151,7 +151,7 @@ stim.positional = false;
 stim.cue = true;
 stim.soundClue = false;
 
-pixPerCycs             = [100 125 150]; %*10^9;
+pixPerCycs             = [100 150 200]; %*10^9;
 targetOrientations     = [0 1]*pi/2;
 distractorOrientations = []; %-targetOrientations;
 mean                   = .5;

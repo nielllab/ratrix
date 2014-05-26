@@ -6,9 +6,9 @@ maptype = {'topox','topoy'};
     expname = [expfile.subj expfile.expt];
     for m = 1:2
         if m==1
-            load([pathname expfile.topox])
+            load([pathname expfile.topox],'map')
         elseif m==2
-            load([pathname expfile.topoy])
+            load([pathname expfile.topoy],'map')
         end
         
         map = map{3};
@@ -44,7 +44,10 @@ maptype = {'topox','topoy'};
         %         imshow(polarMap(gradmap));
         %         title(sprintf('gradient %s',maptype{m}));
         
-        grad_all{m} = grad; amp_all{m}=amp;  norm_grad{m} = grad./abs(grad);
+        
+        absnorm = abs(grad);       
+        absnorm(absnorm==0)=10^6;
+        grad_all{m} = grad; amp_all{m}=amp;  norm_grad{m} = grad./absnorm;
         
         %         figure
         %         imshow(polarMap(gradmap));
@@ -70,6 +73,7 @@ maptype = {'topox','topoy'};
     merge(:,:,1) = ampscale.*(0.75*(real(norm_grad{1}) + 1)*0.5 + 0.25*(imag(norm_grad{2}) + 1)*0.5) ;
     merge(:,:,2) = ampscale.*(0.75*(imag(norm_grad{1}) + 1)*0.5 + 0.25*(imag(norm_grad{2}) + 1)*0.5);
     merge(:,:,3) = ampscale.*(0.75*(real(norm_grad{2}) + 1)*0.5+ 0.25*(imag(norm_grad{2}) + 1)*0.5);
+ 
     
     % merge(:,:,1) = ampscale.*(real(norm_grad{1}) + 1)*0.5 ;
     % merge(:,:,2) = ampscale.*(imag(norm_grad{1}) + 1)*0.5;
@@ -110,17 +114,18 @@ maptype = {'topox','topoy'};
     
     subplot(2,4,2)
     imshow(imresize(merge,mag));
-                xlim([20 150]);
-            ylim([10 140]);
+%                 xlim([20 150]);
+%             ylim([10 140]);
             
     for m= 1:2
         subplot(2,4,4*(m-1)+1)
         imshow(polarMap(map_all{m},90))
         if m==1
-            title(expname)
+            title([expfile.subj ' ' expfile.expt ' ' expfile.monitor])
         end
-        xlim([20 140]*mag);
-        ylim([10 130]*mag);
+        axis equal
+%         xlim([20 140]*mag);
+%         ylim([10 130]*mag);
     end
     
     for m = 1:2
@@ -128,8 +133,8 @@ maptype = {'topox','topoy'};
         imshow(imresize(merge,mag));
         hold on
         quiver(rangex*mag, rangey*mag, 10*real(norm_grad{m}(rangex,rangey)),10*imag(norm_grad{m}(rangex,rangey)),'w')
-        xlim([20 140]*mag);
-        ylim([10 130]*mag);
+%         xlim([20 140]*mag);
+%         ylim([10 130]*mag);
     end
     
     for m= 1:2
@@ -137,8 +142,8 @@ maptype = {'topox','topoy'};
         imshow(polarMap(map_all{m},90));
         hold on
         quiver(rangex, rangey, 10*real(norm_grad{m}(rangex,rangey)),10*imag(norm_grad{m}(rangex,rangey)),'w')
-        xlim([20 140]*mag);
-        ylim([10 130]*mag);
+%         xlim([20 140]*mag);
+%         ylim([10 130]*mag);
     end
     
         for m= 2:2
@@ -148,8 +153,9 @@ maptype = {'topox','topoy'};
             h=imagesc(borders,[0 1]);
             transp = borders>0.3;
             set(h,'AlphaData',transp);
-            xlim([20 150]);
-            ylim([10 140]);
+            axis equal
+%             xlim([20 150]);
+%             ylim([10 140]);
         end
     
     save([outpathname expname '_topography.mat'],'div','norm_grad','map_all','grad_all','amp_all','merge');

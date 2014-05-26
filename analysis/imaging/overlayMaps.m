@@ -80,8 +80,8 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
             set(hbehav,'AlphaData',transp);
             if t ==6
                 title(titles{i});
-            else
-                % title(sprintf('t=%0.2f',pts(use_pts(t))));
+            elseif t ==1
+                 title([expfile.subj ' ' expfile.expt ' ' expfile.task]);
             end
         end
         %    fname = [fb(1:end-14) '_' titles{i} '.fig']

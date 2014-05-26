@@ -1,7 +1,7 @@
 clear all
 close all
 opengl software
-pathname = 'G:\compiled 8mm\';
+pathname = 'I:\compiled 8mm\';
 datapathname = 'D:\Widefield (12-10-12+)\data 62713+\';
 
 n=1;
@@ -245,7 +245,9 @@ files(n).baseline_patchydata = '022414 8mm window Gcamp6\G62G.1-LN_run6_baseline
 %%% batch dfofMovie
 errmsg= [];errRpt = [];
 nerr=0;
-for f = 1:length(files);
+%for f = 1:length(files);
+
+for f = 1:length(files)
     f
     tic
     
@@ -294,8 +296,8 @@ for f = 1:length(files);
     
     toc
 end
- errmsg  
-outpathname = 'G:\compiled 8mm\8mm overlays\';
+ errRpt{:} 
+outpathname = 'I:\compiled 8mm\8mm overlays\';
 
 
 %use = find(strcmp({files.monitor},'vert') & strcmp({files.task},'HvV_center')& strcmp({files.notes},'good imaging session'))

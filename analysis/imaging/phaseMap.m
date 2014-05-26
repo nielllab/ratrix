@@ -2,14 +2,16 @@ function [map cycmap full_im]= phaseMap(im,framerate,period,binning);
 if ~exist('binning','var') | isempty(binning)
     binning=1;
 end
-perFrames = round(period*framerate)
+perFrames = round(period*framerate);
 map =0;
 
-length(im)
-nframes = floor(length(im)/perFrames)*perFrames
+length(im);
+nframes = floor(length(im)/perFrames)*perFrames;
 cycmap = zeros(ceil(size(im,1)*binning),ceil(size(im,2)*binning),perFrames);
 if binning~=1
     full_im = zeros(ceil(size(im,1)*binning),ceil(size(im,2)*binning),size(im,3));
+else
+    full_im=im;
 end
 
 for f = 1:nframes

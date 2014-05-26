@@ -7,11 +7,11 @@ dbstop if error
 colordef white
 close all
 movPeriod =10;
-binning=0.5;
+binning=1.5;
 framerate=10;
 
 choosePix =0; %%% option to manually select pixels for timecourse analysis
-maxGB = 1.5; %%% size to reduce data down to
+maxGB = 1.50; %%% size to reduce data down to
 
 
 if ~exist('in','var') || isempty(in)
@@ -36,6 +36,7 @@ catch
     sz = size(imread([basename '_0001.tif']));
     namelength=4;
 end
+basename
 clear in
 fl = 0;  %flip image? 1 = yes 0 = no
 

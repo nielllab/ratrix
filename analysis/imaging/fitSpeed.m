@@ -23,25 +23,106 @@ df_nomove = dfof_bg - repmat(alpha,[1 1 length(sp)]).* repmat(s,[size(dfof_bg,1)
    f=figure
    imshow(polarMap(rawmap));
    
-   [rawmap rawcycMap fullMov] =phaseMap(df_nomove,10,10,0.9999);
-    rawmap(isnan(rawmap))=0;
+   [rawmapnomove rawcycMapnomove fullMov] =phaseMap(df_nomove,10,10,0.9999);
+    rawmapnomove(isnan(rawmapnomove))=0;
    f=figure
-   imshow(polarMap(rawmap));
+   imshow(polarMap(rawmapnomove));
 
 
+   t = 1:3000;
+   tround = ceil((mod(t-1,100)+1)/10)
+   
+   warning off
+   df = imresize(dfof_bg,0.5);
+   
+   betamap = zeros(size(df,1),size(df,2));
+   alphamap = betamap;
+   phasemap = betamap;
+   ampmap = betamap;
+  clear tcourse
+  for t = 1:10;
+       tcourse(t,:) = conv(double(tround==t),ones(10,1)/10,'same');
+   end
+%    tcourse(1,1:5)=1;
+%    tcourse(10,95:100)=1;
+   tcourse = tcourse-0.1;
+   figure
+   imagesc(tcourse)
+       clear err b
+   for x = 1:size(df,1)
+      x
+      tic
+      for y = 1:size(df,2)
+          
+           for beta = 1:10;
+               
+               resp = squeeze(df(x,y,:))';
+               p(1,:) = double(sp_smooth>thresh);
+               for t= 1:10;
+                   p(1+t,:) = (1+ (beta/4)*double(sp_smooth>thresh)).*tcourse(t,:);
+               end
+               p(12,:)=1;
+               [b{beta} bint r] = regress(resp',p');
+               err(beta) = norm(r);
+           end
+           [m ind] = min(err);
+           betamap(x,y) = (1+ (ind/4));
+           alphamap(x,y) = b{ind}(1);
+           [m ind] = max(b{beta}(2:11));
+           phasemap(x,y) = ind;
+          ampmap(x,y)=m- min(b{beta}(2:11));
+      end
+       toc
+   end
+   
+ 
+   figure
+   imagesc(betamap);
+   figure
+   imagesc(alphamap);
+   figure
+   imagesc(phasemap);
+  f= figure
+   imagesc(ampmap);
+  
+ 
    
 for i =1:10;
     figure(f)
     [y x] = ginput(1); x= round(x); y= round(y);
     figure
     plot(squeeze(dfof_bg(x,y,:))); hold on
-    plot((sp_smooth>thresh)*alpha(x,y),'r');,
- figure
- plot(squeeze(dfof_bg(x,y,:)) - (sp_smooth>thresh)'*alpha(x,y),'b')
- hold on
- plot(squeeze(df_nomove(x,y,:)),'g')
+    plot((sp_smooth>thresh)*alpha(x,y),'r');
+     plot(squeeze(df_nomove(x,y,:)),'g');
+     legend('raw','movment','no move')
  
+   
+     tic
+     for beta = 1:10;
+        
+         resp = squeeze(dfof_bg(x,y,:))';
+         p(1,:) = double(sp_smooth>thresh);
+         for t= 1:10;
+             p(1+t,:) = (1+ ((beta)/4)*double(sp_smooth>thresh)).*(double(tround==t)-0.1);
+         end
+         p(12,:)=1;
+         [b{beta} bint r] = regress(resp',p');               
+        err(beta) = norm(r);
+     end
+    toc
+     [m ind] = min(err);
+     params = b{ind}
+     beta = (ind)/4
+     
+       figure
+         plot(p'*params);
+         hold on
+         plot(resp,'g')
+
  figure
- plot(squeeze(rawcycMap(x,y,:)));
+ plot(squeeze(rawcycMap(x,y,5:10:100)));
+ hold on
+ plot(squeeze(rawcycMapnomove(x,y,5:10:100)),'r');
+ plot(params(2:11),'g')
 end
     

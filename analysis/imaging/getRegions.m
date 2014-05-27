@@ -1,5 +1,6 @@
 function [gradmapAll merge]= getRegions(expfile, pathname, outpathname)
 
+opengl software
 maptype = {'topox','topoy'};
 
     
@@ -66,18 +67,22 @@ maptype = {'topox','topoy'};
     
     merge = zeros(size(map,1),size(map,2),3);
     
-    %     merge(:,:,1) = ampscale.*(0.66*(real(norm_grad{1}) + 1)*0.5 + 0.33*(imag(norm_grad{2}) + 1)*0.5) ;
-    %     merge(:,:,2) = ampscale.*((imag(norm_grad{1}) + 1)*0.5 );
-    %     merge(:,:,3) = ampscale.*(0.66*(real(norm_grad{2}) + 1)*0.5+ 0.33*(imag(norm_grad{2}) + 1)*0.5);
+%         merge(:,:,1) = ampscale.*(0.66*(real(norm_grad{1}) + 1)*0.5 + 0.33*(imag(norm_grad{2}) + 1)*0.5) ;
+%         merge(:,:,2) = ampscale.*((imag(norm_grad{1}) + 1)*0.5 );
+%         merge(:,:,3) = ampscale.*(0.66*(real(norm_grad{2}) + 1)*0.5+ 0.33*(imag(norm_grad{2}) + 1)*0.5);
+%     
+%     merge(:,:,1) = ampscale.*(0.75*(real(norm_grad{1}) + 1)*0.5 + 0.25*(imag(norm_grad{2}) + 1)*0.5) ;
+%     merge(:,:,2) = ampscale.*(0.75*(imag(norm_grad{1}) + 1)*0.5 + 0.25*(imag(norm_grad{2}) + 1)*0.5);
+%     merge(:,:,3) = ampscale.*(0.75*(real(norm_grad{2}) + 1)*0.5+ 0.25*(imag(norm_grad{2}) + 1)*0.5);
+%  
+   
     
-    merge(:,:,1) = ampscale.*(0.75*(real(norm_grad{1}) + 1)*0.5 + 0.25*(imag(norm_grad{2}) + 1)*0.5) ;
-    merge(:,:,2) = ampscale.*(0.75*(imag(norm_grad{1}) + 1)*0.5 + 0.25*(imag(norm_grad{2}) + 1)*0.5);
-    merge(:,:,3) = ampscale.*(0.75*(real(norm_grad{2}) + 1)*0.5+ 0.25*(imag(norm_grad{2}) + 1)*0.5);
- 
+    merge(:,:,1) = ampscale.*(real(norm_grad{1}) + 1)*0.5 ;
+    merge(:,:,2) = ampscale.*(imag(norm_grad{1}) + 1)*0.5;
+    merge(:,:,3) = ampscale.*(imag(norm_grad{2}) + 1)*0.5;
+    figure
+    imshow(merge)
     
-    % merge(:,:,1) = ampscale.*(real(norm_grad{1}) + 1)*0.5 ;
-    % merge(:,:,2) = ampscale.*(imag(norm_grad{1}) + 1)*0.5;
-    % merge(:,:,3) = ampscale.*(real(norm_grad{2}) + 1)*0.5;
     
     %     figure
     %     imshow(merge)
@@ -158,6 +163,7 @@ maptype = {'topox','topoy'};
 %             ylim([10 140]);
         end
     
+     
     save([outpathname expname '_topography.mat'],'div','norm_grad','map_all','grad_all','amp_all','merge');
     saveas(mapsfig,[outpathname expname 'topo.fig'],'fig')
     %     figure

@@ -1173,6 +1173,7 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 
 use = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session') &  strcmp({files.label},'camk2 gc6')&  strcmp({files.task},'HvV_center') &strcmp({files.subj},'g62b7lt'))
 
+use = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session') &  strcmp({files.label},'camk2 gc6'))
 
 %use = 1: length(files)
 %%% calculate gradients and regions
@@ -1182,17 +1183,20 @@ for f = 1:length(use)
     [map{f} merge{f}]= getRegions(files(use(f)),pathname,outpathname);
 end
 
+
+keyboard
+
 %%% align gradient maps to first file
 for f = 1:length(use); %changed from 1:length(map)
     [imfit{f} allxshift(f) allyshift(f) allzoom(f)] = alignMaps(map([1 f]), merge([1 f]), [files(use(f)).subj ' ' files(use(f)).expt ' ' files(use(f)).monitor] );
     xshift = allxshift(f); yshift = allyshift(f); zoom = allzoom(f);
-    save( [outpathname files(f).subj files(f).expt '_topography.mat'],'xshift','yshift','zoom','-append');
+    save( [outpathname files(use(f)).subj files(use(f)).expt '_topography.mat'],'xshift','yshift','zoom','-append');
 end
 
 avgmap=0;
 for f= 1:length(use) ;
     
-    m = shiftImage(merge{f},allxshift(f),allyshift(f),allzoom(f),100);
+    m = shiftImage(merge{f},allxshift(f)-18,allyshift(f)-18,allzoom(f),80);
     sum(isnan(m(:)))
     
     sum(isnan(merge{f}(:)))

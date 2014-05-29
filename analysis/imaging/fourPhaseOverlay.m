@@ -17,14 +17,14 @@ if isfield(expfile,exptype) &&  ~isempty(getfield(expfile, exptype))
         return;
     end
     
-    merge = imresize(merge,[size(cycMap,1) size(cycMap,2)]);
+    merge = imresize(merge,[size(cycMap,1) size(cycMap,2)])*3;
     
     base = mean(cycMap(:,:,[20:24 45:49 70:74 95:99]),3);
     for i = 1:4
         resp(:,:,i) = mean(cycMap(:,:,(1:10)+(i-1)*25),3)-base;
     end
     meanresp = mean(resp,3);
-    amp = meanresp/0.05;
+    amp = meanresp/0.02;
     amp(amp>1)=1;
     transp = amp>0.25;
     
@@ -35,7 +35,7 @@ if isfield(expfile,exptype) &&  ~isempty(getfield(expfile, exptype))
     
     subplot(2,2,1)
    % imshow(merge);
-   imagesc(meanresp,[0 0.05]);
+   imagesc(meanresp,[0 0.02]);
     title([expname ' ' exptype]);
     
     subplot(2,2,2);

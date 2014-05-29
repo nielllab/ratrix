@@ -1,4 +1,4 @@
-function [gradmapAll merge]= getRegions(expfile, pathname, outpathname)
+function [norm_grad amp_all map_all gradmapAll merge]= getRegions(expfile, pathname, outpathname)
 
 opengl software
 maptype = {'topox','topoy'};

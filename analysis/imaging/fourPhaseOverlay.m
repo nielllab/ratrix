@@ -3,13 +3,16 @@ function resp = fourPhaseOverlay(expfile,pathname,outpathname, exptype)
 opengl software
 
 expname = [expfile.subj expfile.expt];
+isfield(expfile,exptype)
+~isempty(getfield(expfile, exptype))
+
 if isfield(expfile,exptype) &&  ~isempty(getfield(expfile, exptype))
     load([pathname getfield(expfile,exptype)],'cycMap'); %%% behavior
     load( [outpathname expfile.subj expfile.expt '_topography.mat']); %%% topography
     clear resp
     
     if size(cycMap,3)~=101 & strcmp(exptype,'grating')
-        sprintf('couldnt do gratings size ~= 101 %s',[expfile.subj expfile.expt]);
+        sprintf('couldnt do gratings size ~= 101 %s',[expfile.subj expfile.expt])
         resp=[];
         return;
     end
@@ -24,11 +27,15 @@ if isfield(expfile,exptype) &&  ~isempty(getfield(expfile, exptype))
     amp = meanresp/0.05;
     amp(amp>1)=1;
     transp = amp>0.25;
+    
+    amp(amp>0)=1;
+    transp=1;
     amp = repmat(amp,[1 1 3]);
     figure
     
     subplot(2,2,1)
-    imshow(merge);
+   % imshow(merge);
+   imagesc(meanresp,[0 0.05]);
     title([expname ' ' exptype]);
     
     subplot(2,2,2);
@@ -54,6 +61,8 @@ if isfield(expfile,exptype) &&  ~isempty(getfield(expfile, exptype))
     h = imshow(im);
     set(h,'AlphaData',transp);
     title('1+3 vs 2 + 4')
+else
+    resp=[];
 end
 
 end

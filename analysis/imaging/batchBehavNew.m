@@ -286,7 +286,7 @@ files(n).topoy = '051414 g62b7lt\g62b.7lt_run2_topoy_fstop5.6_exp50msmaps.mat';
 files(n).topoydata = '051414 G62B.7LT Passive Viewing\g62b.7lt_run2_topoy_fstop5.6_exp50ms\g62b.7lt_run2_topoy_fstop5.6_exp50ms';
 files(n).behav = '051414 g62b7lt\g62b.7lt_run1_hvV_centerbehav data.mat';
 files(n).behavdata = '051414 g62B.7LT HvV_center Behavior\g62b.7lt_run1_hvV_center_fstop5.6_exp50\g62b.7lt_run1_hvV_center_fstop5.6_exp50';
-files(n).grating = '051414 g62b7l\g62b.7lt_run4_widefieldgratings_fstop5.6_exp50msmaps.mat';
+files(n).grating = '051414 g62b7lt\g62b.7lt_run4_widefieldgratings_fstop5.6_exp50msmaps.mat';
 files(n).gratingdata = '051414 G62B.7LT Passive Viewing\g62b.7lt_run4_widefieldgratings_fstop5.6_exp50ms\g62b.7lt_run4_widefieldgratings_fstop5.6_exp50ms';
 files(n).loom = '051414 g62b7lt\g62b.7lt_run3_looming_fstop5.6_exp50msmaps.mat';
 files(n).loomdata = '051414 G62B.7LT Passive Viewing\g62b.7lt_run3_looming_fstop5.6_exp50ms\g62b.7lt_run3_looming_fstop5.6_exp50ms';
@@ -391,7 +391,7 @@ files(n).subj = 'g62h1tt';
 files(n).expt = '050614';
 files(n).topox =  '050614 g62h1tt\g62h.1tt_run1_topox_fstop5.6_exp50ms_maps.mat';
 files(n).topoy = '050614 g62h1tt\g62h.1tt_run2_topoy_fstop5.6_exp50ms_maps.mat';
-files(n).behav = '050614 g62h1tt\g62h.1tt_run1_HvV_center_fbehav data.mat'; 
+files(n).behav = '050614 g62h1tt\g62h.1tt_run1_HvV_center_fbehav data.mat';
 files(n).grating = '050614 g62h1tt\g62h.1tt_run4_widefieldgratings_fstop5.6_exp50ms_maps.mat';
 files(n).loom = '050614 g62h1tt\g62h.1tt_run3_looming_fstop5.6_exp50ms_maps.mat';
 files(n).monitor = 'vert';
@@ -1111,7 +1111,7 @@ files(n).behavdata = '021914 G628-LT GTS Behavior\G628-LT_run1_GTS_behavior_15ms
 % % files(n).task = '';
 % % files(n).label = 'camk2 gc6';
 % % files(n).notes = 'good imaging session';
-% % 
+% %
 % % files(n).topoxdata = '';
 % % files(n).topoydata = '';
 % % files(n).behavdata = '';
@@ -1121,16 +1121,16 @@ files(n).behavdata = '021914 G628-LT GTS Behavior\G628-LT_run1_GTS_behavior_15ms
 % movemapfiles
 % keyboard
 
-% 
-% %%% batch dfofMovie
-% errmsg= [];errRpt = {};
-% nerr=0;
-% %for f = 1:length(files);
-% 
-% for f = 1:length(files)
-%     f
-%     tic
-%     
+%
+%%% batch dfofMovie
+errmsg= [];errRpt = {};
+nerr=0;
+%for f = 1:length(files);
+
+for f = 1:length(files)
+    f
+    tic
+
 %     try
 %         dfofMovie([datapathname files(f).topoxdata]);
 %     catch exc
@@ -1152,21 +1152,22 @@ files(n).behavdata = '021914 G628-LT GTS Behavior\G628-LT_run1_GTS_behavior_15ms
 %         errmsg{nerr}=sprintf('couldnt do %s',files(f).loomdata)
 %          errRpt{nerr}=getReport(exc,'extended')
 %     end
-%     try
-%         dfofMovie([datapathname files(f).gratingdata]);
-%     catch exc
-%         nerr=nerr+1;
-%         errmsg{nerr}=sprintf('couldnt do %s',files(f).gratingdata)
-%          errRpt{nerr}=getReport(exc,'extended')
-%     end
-% 
-%     
+    try
+        dfofMovie([datapathname files(f).gratingdata]);
+    catch exc
+        nerr=nerr+1;
+        errmsg{nerr}=sprintf('couldnt do %s',files(f).gratingdata)
+         errRpt{nerr}=getReport(exc,'extended')
+    end
+
+
 %     for e = 1:nerr
 %         errRpt{e}
 %     end
-%     toc
-% end
-%  errRpt{:} ;
+    toc
+end
+ errRpt
+keyboard
 
 outpathname = 'I:\compiled behavior\behavior topos\';
 
@@ -1180,11 +1181,9 @@ use = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging 
 clear map merge
 for f = 1:length(use)
     f
-    [map{f} merge{f}]= getRegions(files(use(f)),pathname,outpathname);
+    [grad{f} amp{f} map_all{f} map{f} merge{f}]= getRegions(files(use(f)),pathname,outpathname);
 end
 
-
-keyboard
 
 %%% align gradient maps to first file
 for f = 1:length(use); %changed from 1:length(map)
@@ -1193,32 +1192,125 @@ for f = 1:length(use); %changed from 1:length(map)
     save( [outpathname files(use(f)).subj files(use(f)).expt '_topography.mat'],'xshift','yshift','zoom','-append');
 end
 
-avgmap=0;
+avgmap=0; meangrad{1}=0; meangrad{2}=0; meanpolar{1} = 0; meanpolar{2}=0;meanamp=0;
 for f= 1:length(use) ;
+    f
     
-    m = shiftImage(merge{f},allxshift(f)-18,allyshift(f)-18,allzoom(f),80);
-    sum(isnan(m(:)))
+    if allxshift(f)>-20
+        m = shiftImage(merge{f},allxshift(f)-25,allyshift(f)-25,allzoom(f),80);
+        sum(isnan(m(:)))
+        
+        sum(isnan(merge{f}(:)))
+        figure
+        imshow(m);
+        avgmap = avgmap+m;
+        title( [files(use(f)).subj ' ' files(use(f)).expt ' ' files(use(f)).monitor] );
+        
+        for ind = 1:2
+            gradshift{ind} = shiftImage(real(grad{f}{ind}),allxshift(f)-25,allyshift(f)-25,allzoom(f),80);
+            gradshift{ind} = gradshift{ind} + sqrt(-1)* shiftImage(imag(grad{f}{ind}),allxshift(f)-25,allyshift(f)-25,allzoom(f),80);
+            meangrad{ind} = meangrad{ind} + gradshift{ind};
+            ampshift = shiftImage(amp{f}{2},allxshift(f)-25,allyshift(f)-25,allzoom(f),80);
+            meanamp = meanamp+ ampshift;
+            
+            polarshift{ind} = shiftImage(real(map_all{f}{ind}),allxshift(f)-25,allyshift(f)-25,allzoom(f),80);
+            polarshift{ind} = polarshift{ind} + sqrt(-1)* shiftImage(imag(map_all{f}{ind}),allxshift(f)-25,allyshift(f)-25,allzoom(f),80);
+            meanpolar{ind} = meanpolar{ind} + polarshift{ind};
+            
+            
+            
+            
+        end
+    end
     
-    sum(isnan(merge{f}(:)))
-    figure
-    imshow(m);
-    avgmap = avgmap+m;
-    title( [files(use(f)).subj ' ' files(use(f)).expt ' ' files(use(f)).monitor] );
 end
 avgmap = avgmap/length(use);
 figure
 imshow(avgmap);
 title('average topo  map');
+meangrad{1} = meangrad{1}/length(use); meangrad{2} = meangrad{2}/length(use);
+meanpolar{1} = meanpolar{1}/length(use); meanpolar{2} = meanpolar{2}/length(use);
 
+figure
+for m=1:2
+    subplot(1,2,m);
+    imshow(polarMap(meanpolar{m}));
+end
+
+dx=3;
+rangex = dx:dx:size(meangrad{1},1); rangey = dx:dx:size(meangrad{1},2);
+figure
+for m = 1:2
+    subplot(1,2,m)
+    imshow(imresize(avgmap,1));
+    hold on
+    quiver(rangex,rangey,  10*real(meangrad{m}(rangex,rangey)),10*imag(meangrad{m}(rangex,rangey)),'w')
+
+end
+
+figure
+meanmov{1}=zeros(size(avgmap,1),size(avgmap,2),100); meanmov{2}=meanmov{1};
+for f = 1:length(use)
+   f
+   if allxshift(f)>-20
+        for ind = 1:2
+        if ind==1
+            load([pathname files(use(f)).topox],'cycMap');
+        elseif ind==2
+            load([pathname files(use(f)).topoy],'cycMap');
+        end
+        %cycMap = cycle_mov;
+        for frm = 1:size(cycMap,3)
+            imshow(avgmap);
+            im = imresize(squeeze(cycMap(:,:,frm)),1);
+            imshift = shiftImage(im,allxshift(f)-25,allyshift(f)-25,allzoom(f),80);
+            meanmov{ind}(:,:,frm) = meanmov{ind}(:,:,frm) +imshift;
+        end
+        end
+    end
+end
+
+meanmov{1} = meanmov{1}/length(use);meanmov{2} = meanmov{2}/length(use);
+
+
+figure
+
+for m = 1:2
+    clear mov
+    for frm = 1:size(cycMap,3)
+        imshow(avgmap);
+        imshift = meanmov{m}(:,:,frm);
+        hold on
+        h=imshow(mat2im(imshift,jet,[0 0.1]));
+        transp = zeros(size(imshift));
+        transp(imshift>0.02)=1;
+        set(h,'Alphadata',transp);
+        mov(frm) = getframe(gcf);
+        hold off
+        mov(f)=getframe(gcf);
+    end
+    if m==1
+        vid = VideoWriter('topoxavg.avi');
+    else
+        vid =VideoWriter('topoyavg.avi');
+    end
+    vid.FrameRate=25;
+    open(vid);
+    writeVideo(vid,mov);
+    close(vid)
+end
+
+keyboard
 
 % %%% overlay behavior on top of topomaps
- clear behav
+clear behav
 %matlabpool
 for f = 1:length(use)
+    f
     try
         behav{f} = overlayMaps(files(use(f)),pathname,outpathname);
     catch
-                sprintf('couldnt do behav on %d',f)
+        sprintf('couldnt do behav on %d',f)
     end
     
 end
@@ -1226,13 +1318,13 @@ end
 
 nb=0; avgbehav=0;
 for f= 1:length(use)
-        if ~isempty(behav(f));
-            b = shiftdim(behav{f},1);
-            zoom = 260/size(b,1);
-            b = shiftImage(b,allxshift(f),allyshift(f),zoom,100);
-            avgbehav = avgbehav+b;
-            nb= nb+1;
-        end
+    if ~isempty(behav(f));
+        b = shiftdim(behav{f},1);
+        zoom = 260/size(b,1);
+        b = shiftImage(b,allxshift(f)-25,allyshift(f)-25,zoom,80);
+        avgbehav = avgbehav+b;
+        nb= nb+1;
+    end
 end
 avgbehav = avgbehav/nb;
 
@@ -1244,9 +1336,9 @@ for t= 1:22
     imshow(avgmap);
     hold on
     data = squeeze(avgbehav(:,:,t));
-    h = imshow(mat2im(data,jet,[-0.15 0.15]));
-   transp = zeros(size(squeeze(avgmap(:,:,1))));
-   transp(abs(data)>0.02)=1;
+    h = imshow(mat2im(data,jet,[0 0.15]));
+    transp = zeros(size(squeeze(avgmap(:,:,1))));
+    transp(abs(data)>0.01)=1;
     set(h,'AlphaData',transp);
     
 end
@@ -1256,8 +1348,12 @@ for f = 1:length(use)
     loom_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'loom');
 end
 
-
+fourPhaseAvg(loom_resp,allxshift-25,allyshift-25,zoom, 80, avgmap);
 
 for f = 1:length(use)
-    grating_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'grating');
+ f
+ grating_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'grating');
 end
+
+
+fourPhaseAvg(grating_resp,allxshift-25,allyshift-25,zoom, 80, avgmap);

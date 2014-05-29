@@ -1,3 +1,6 @@
+close all
+clear all
+
 n=1;
 files(n).subj = 'G62h1tt';
 files(n).expt = '052214';
@@ -38,18 +41,18 @@ files(n).notes= '';
 files(n).size= '256x256';
 
 
-n=n+1;
-files(n).subj = 'G62h1tt';
-files(n).expt = '052214';
-files(n).dir = 'C:\data\imaging\052214 Gcamp6 running area\G62h1-TT';
-files(n).region = 'running area';
-files(n).site=1;
-files(n).zoom=1;
-files(n).images = 'running area - darkness stim - zoom1003.tif';
-files(n).stimobj = 'running area - darkness stim - zoom1003_stim_obj.mat';
-files(n).stim = 'darkness';
-files(n).notes= '';
-files(n).size= '256x256';
+% n=n+1;
+% files(n).subj = 'G62h1tt';
+% files(n).expt = '052214';
+% files(n).dir = 'C:\data\imaging\052214 Gcamp6 running area\G62h1-TT';
+% files(n).region = 'running area';
+% files(n).site=1;
+% files(n).zoom=1;
+% files(n).images = 'running area - darkness stim - zoom1003.tif';
+% files(n).stimobj = 'running area - darkness stim - zoom1003_stim_obj.mat';
+% files(n).stim = 'darkness';
+% files(n).notes= 'only 250 frames, stimobj is short';
+% files(n).size= '256x256';
 
 n=n+1;
 files(n).subj = 'G62h1tt';
@@ -61,7 +64,7 @@ files(n).zoom=1;
 files(n).images = 'running area - darkness stim - zoom2002.tif';
 files(n).stimobj = 'running area - darkness stim - zoom2002_stim_obj.mat';
 files(n).stim = 'darkness';
-files(n).notes= '';
+files(n).notes= 'only 250 frames, stimobj is short';
 files(n).size= '256x256';
 
 n=n+1;
@@ -303,18 +306,18 @@ files(n).notes= '';
 files(n).size= '256x128';
 
 
-n=n+1;
-files(n).subj = 'g62b7lt';
-files(n).expt = '052414';
-files(n).dir = 'C:\data\imaging\52414 Gcamp6\G62B7-LT';
-files(n).region = 'running area';
-files(n).site=1;
-files(n).zoom=1;
-files(n).images = 'Runnin area  (neuropil)- darkness- zoom1001.tif';
-files(n).stimobj = 'Runnin area  (neuropil)- darkness- zoom1001_stim_obj.mat';
-files(n).stim = 'darkness';
-files(n).notes= '';
-files(n).size= '256x256';
+% n=n+1;
+% files(n).subj = 'g62b7lt';
+% files(n).expt = '052414';
+% files(n).dir = 'C:\data\imaging\52414 Gcamp6\G62B7-LT';
+% files(n).region = 'running area';
+% files(n).site=1;
+% files(n).zoom=1;
+% files(n).images = 'Runnin area  (neuropil)- darkness- zoom1001.tif';
+% files(n).stimobj = 'Runnin area  (neuropil)- darkness- zoom1001_stim_obj.mat';
+% files(n).stim = 'darkness';
+% files(n).notes= 'no mouse data';
+% files(n).size= '256x256';
 
 
 
@@ -346,46 +349,46 @@ files(n).stim = 'stepbinary';
 files(n).notes= '';
 files(n).size= '256x256';
 
-n=n+1;
-files(n).subj = 'g62b7lt';
-files(n).expt = '052414';
-files(n).dir = 'C:\data\imaging\52414 Gcamp6\G62B7-LT';
-files(n).region = 'v1';
-files(n).site=2;
-files(n).zoom=1;
-files(n).images = 'V1 (neuropil)- Darkness- zoom1004.tif';
-files(n).stimobj = 'V1 (neuropil)- Darkness- zoom1004_stim_obj.mat';
-files(n).stim = 'darkness';
-files(n).notes= '';
-files(n).size= '256x256';
+% n=n+1;
+% files(n).subj = 'g62b7lt';
+% files(n).expt = '052414';
+% files(n).dir = 'C:\data\imaging\52414 Gcamp6\G62B7-LT';
+% files(n).region = 'v1';
+% files(n).site=2;
+% files(n).zoom=1;
+% files(n).images = 'V1 (neuropil)- Darkness- zoom1004.tif';
+% files(n).stimobj = 'V1 (neuropil)- Darkness- zoom1004_stim_obj.mat';
+% files(n).stim = 'darkness';
+% files(n).notes= 'no mouse data';
+% files(n).size= '256x256';
 
 
+% 
+% n=n+1;
+% files(n).subj = 'g62b7lt';
+% files(n).expt = '052414';
+% files(n).dir = 'C:\data\imaging\52414 Gcamp6\G62B7-LT';
+% files(n).region = 'v1';
+% files(n).site=3;
+% files(n).zoom=1;
+% files(n).images = 'V1 (layer2)- Darkness- zoom1005.tif';
+% files(n).stimobj = 'V1 (layer2)- Darkness- zoom1005_stim_obj.mat';
+% files(n).stim = 'darkness';
+% files(n).notes= 'no mouse data';
+% files(n).size= '256x256';
 
-n=n+1;
-files(n).subj = 'g62b7lt';
-files(n).expt = '052414';
-files(n).dir = 'C:\data\imaging\52414 Gcamp6\G62B7-LT';
-files(n).region = 'v1';
-files(n).site=3;
-files(n).zoom=1;
-files(n).images = 'V1 (layer2)- Darkness- zoom1005.tif';
-files(n).stimobj = 'V1 (layer2)- Darkness- zoom1005_stim_obj.mat';
-files(n).stim = 'darkness';
-files(n).notes= '';
-files(n).size= '256x256';
-
-n=n+1;
-files(n).subj = 'g62b7lt';
-files(n).expt = '052414';
-files(n).dir = 'C:\data\imaging\52414 Gcamp6\G62B7-LT';
-files(n).region = 'v1';
-files(n).site=3;
-files(n).zoom=2;
-files(n).images = 'V1 (layer2)-Darkness- zoom2008.tif';
-files(n).stimobj = 'V1 (layer2)-Darkness- zoom2008_stim_obj.mat';
-files(n).stim = 'darkness';
-files(n).notes= '';
-files(n).size= '256x256';
+% n=n+1;
+% files(n).subj = 'g62b7lt';
+% files(n).expt = '052414';
+% files(n).dir = 'C:\data\imaging\52414 Gcamp6\G62B7-LT';
+% files(n).region = 'v1';
+% files(n).site=3;
+% files(n).zoom=2;
+% files(n).images = 'V1 (layer2)-Darkness- zoom2008.tif';
+% files(n).stimobj = 'V1 (layer2)-Darkness- zoom2008_stim_obj.mat';
+% files(n).stim = 'darkness';
+% files(n).notes= 'no mouse data';
+% files(n).size= '256x256';
 
 
 n=n+1;
@@ -562,10 +565,22 @@ files(n).size= '256x256';
 
 use = find(strcmp({files.stim},'darkness'))
 
-% for f = use
-%     running2p(fullfile(files(f).dir,files(f).images),fullfile(files(f).dir,files(f).stimobj));
-% end
-% 
+for f = use(1:1)
+   f
+  
+    label = sprintf('%s %s %s %s site %d zoom %d',files(f).subj, files(f).expt,files(f).region, files(f).stim, files(f).site, files(f).zoom)
+    
+   %try
+       running2p(fullfile(files(f).dir,files(f).images),fullfile(files(f).dir,files(f).stimobj),label);
+%    catch exc
+%        display([exc.message])
+%        display(['in ' label])
+%    end
+end
+
+
+keyboard
+
 % for f=use
 %     r = sbxalign(fullfile(files(f).dir,files(f).images),1:600);
 %     figure
@@ -579,6 +594,9 @@ use = find(strcmp({files.stim},'darkness'))
 
 use = find(strcmp({files.stim},'stepbinary'))
 for f = use
-   periodic2p(fullfile(files(f).dir,files(f).images),fullfile(files(f).dir,files(f).stimobj),10);
+      label = sprintf('%s %s %s %s site %d zoom %d',files(f).subj, files(f).expt,files(f).region, files(f).stim, files(f).site, files(f).zoom)
+
+  periodic2p(fullfile(files(f).dir,files(f).images),fullfile(files(f).dir,files(f).stimobj),10, label);
 end
+
 

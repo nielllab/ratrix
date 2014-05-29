@@ -6,7 +6,7 @@ setupEnvironment;
 dbstop if error
 colordef white
 close all
-movPeriod =10;
+movPeriod =101;
 binning=1.5;
 framerate=10;
 
@@ -57,7 +57,7 @@ set(gcf, 'PaperPositionMode', 'auto');
 print('-dpsc',psfilename,'-append');
 
 
-
+keyboard
 blue=1; green=2; split=3;
 for LED=1:3
     frms = 1:size(out,3);
@@ -96,9 +96,10 @@ for LED=1:3
         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfilename,'-append');
     end
+    clear pix
     
-    
-    img = out(:,:,1);
+  
+    keyboard
     
     [rawmap rawcycMap fullMov] =phaseMap(dfof{LED},framerate,movPeriod,binning);
     rawmap(isnan(rawmap))=0;
@@ -164,6 +165,7 @@ for LED=1:3
     colormap(hsv);
     colorbar
     done=0;
+    keyboard
     
     
     while ~done

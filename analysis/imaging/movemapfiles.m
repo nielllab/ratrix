@@ -1,10 +1,10 @@
-for t = 1:6
+for t = 1:1
 for f = 1:length(files);
 f
 
 if t==1
-    type = 'topox';
-typedata = 'topoxdata';
+    type = 'grating';
+typedata = 'gratingdata';
 elseif t==2
 type = 'topoy';
 typedata = 'topoydata';

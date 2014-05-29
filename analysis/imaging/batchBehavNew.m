@@ -1127,47 +1127,47 @@ errmsg= [];errRpt = {};
 nerr=0;
 %for f = 1:length(files);
 
-for f = 1:length(files)
-    f
-    tic
-
+% for f = 1:length(files)
+%     f
+%     tic
+% 
+% %     try
+% %         dfofMovie([datapathname files(f).topoxdata]);
+% %     catch exc
+% %         nerr=nerr+1;
+% %         errmsg{nerr}= sprintf('couldnt do %s',files(f).topoxdata)
+% %         errRpt{nerr}=getReport(exc,'extended')
+% %     end
+% %     try
+% %         dfofMovie([datapathname files(f).topoydata]);
+% %     catch exc
+% %         nerr=nerr+1;
+% %         errmsg{nerr}=sprintf('couldnt do %s',files(f).topoydata)
+% %         errRpt{nerr}=getReport(exc,'extended')
+% %     end
+% %     try
+% %         dfofMovie([datapathname files(f).loomdata]);
+% %     catch exc
+% %         nerr=nerr+1;
+% %         errmsg{nerr}=sprintf('couldnt do %s',files(f).loomdata)
+% %          errRpt{nerr}=getReport(exc,'extended')
+% %     end
 %     try
-%         dfofMovie([datapathname files(f).topoxdata]);
+%         dfofMovie([datapathname files(f).gratingdata]);
 %     catch exc
 %         nerr=nerr+1;
-%         errmsg{nerr}= sprintf('couldnt do %s',files(f).topoxdata)
-%         errRpt{nerr}=getReport(exc,'extended')
-%     end
-%     try
-%         dfofMovie([datapathname files(f).topoydata]);
-%     catch exc
-%         nerr=nerr+1;
-%         errmsg{nerr}=sprintf('couldnt do %s',files(f).topoydata)
-%         errRpt{nerr}=getReport(exc,'extended')
-%     end
-%     try
-%         dfofMovie([datapathname files(f).loomdata]);
-%     catch exc
-%         nerr=nerr+1;
-%         errmsg{nerr}=sprintf('couldnt do %s',files(f).loomdata)
+%         errmsg{nerr}=sprintf('couldnt do %s',files(f).gratingdata)
 %          errRpt{nerr}=getReport(exc,'extended')
 %     end
-    try
-        dfofMovie([datapathname files(f).gratingdata]);
-    catch exc
-        nerr=nerr+1;
-        errmsg{nerr}=sprintf('couldnt do %s',files(f).gratingdata)
-         errRpt{nerr}=getReport(exc,'extended')
-    end
-
-
-%     for e = 1:nerr
-%         errRpt{e}
-%     end
-    toc
-end
- errRpt
-keyboard
+% 
+% 
+% %     for e = 1:nerr
+% %         errRpt{e}
+% %     end
+%     toc
+% end
+%  errRpt
+% keyboard
 
 outpathname = 'I:\compiled behavior\behavior topos\';
 
@@ -1302,46 +1302,46 @@ end
 
 keyboard
 
-% %%% overlay behavior on top of topomaps
-clear behav
-%matlabpool
-for f = 1:length(use)
-    f
-    try
-        behav{f} = overlayMaps(files(use(f)),pathname,outpathname);
-    catch
-        sprintf('couldnt do behav on %d',f)
-    end
-    
-end
-%matlabpool close
-
-nb=0; avgbehav=0;
-for f= 1:length(use)
-    if ~isempty(behav(f));
-        b = shiftdim(behav{f},1);
-        zoom = 260/size(b,1);
-        b = shiftImage(b,allxshift(f)-25,allyshift(f)-25,zoom,80);
-        avgbehav = avgbehav+b;
-        nb= nb+1;
-    end
-end
-avgbehav = avgbehav/nb;
-
-
-
-figure
-for t= 1:22
-    subplot(5,5,t);
-    imshow(avgmap);
-    hold on
-    data = squeeze(avgbehav(:,:,t));
-    h = imshow(mat2im(data,jet,[0 0.15]));
-    transp = zeros(size(squeeze(avgmap(:,:,1))));
-    transp(abs(data)>0.01)=1;
-    set(h,'AlphaData',transp);
-    
-end
+% % %%% overlay behavior on top of topomaps
+% clear behav
+% %matlabpool
+% for f = 1:length(use)
+%     f
+%     try
+%         behav{f} = overlayMaps(files(use(f)),pathname,outpathname);
+%     catch
+%         sprintf('couldnt do behav on %d',f)
+%     end
+%     
+% end
+% %matlabpool close
+% 
+% nb=0; avgbehav=0;
+% for f= 1:length(use)
+%     if ~isempty(behav(f));
+%         b = shiftdim(behav{f},1);
+%         zoom = 260/size(b,1);
+%         b = shiftImage(b,allxshift(f)-25,allyshift(f)-25,zoom,80);
+%         avgbehav = avgbehav+b;
+%         nb= nb+1;
+%     end
+% end
+% avgbehav = avgbehav/nb;
+% 
+% 
+% 
+% figure
+% for t= 1:22
+%     subplot(5,5,t);
+%     imshow(avgmap);
+%     hold on
+%     data = squeeze(avgbehav(:,:,t));
+%     h = imshow(mat2im(data,jet,[0 0.15]));
+%     transp = zeros(size(squeeze(avgmap(:,:,1))));
+%     transp(abs(data)>0.01)=1;
+%     set(h,'AlphaData',transp);
+%     
+% end
 
 %%% analyze 4-phase data (e.g. looming and grating)
 for f = 1:length(use)
@@ -1356,4 +1356,4 @@ for f = 1:length(use)
 end
 
 
-fourPhaseAvg(grating_resp,allxshift-25,allyshift-25,zoom, 80, avgmap);
+fourPhaseAvg(grating_resp,allxshift-25,allyshift-25,zoom*0.7, 80, avgmap);

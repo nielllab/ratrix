@@ -19,7 +19,7 @@ transp = zeros(size(avg));
 
    meanresp = mean(resp,3);
     amp = meanresp/0.1;
-    amp(amp>0.28)=1;
+    amp(amp>0.2)=1;
     transp = amp>0.28;
     amp = repmat(amp,[1 1 3]);
 

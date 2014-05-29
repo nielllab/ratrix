@@ -6,8 +6,8 @@ setupEnvironment;
 dbstop if error
 colordef white
 close all
-movPeriod =101;
-binning=1.5;
+movPeriod =10;
+binning=0.5;
 framerate=10;
 
 choosePix =0; %%% option to manually select pixels for timecourse analysis
@@ -57,7 +57,7 @@ set(gcf, 'PaperPositionMode', 'auto');
 print('-dpsc',psfilename,'-append');
 
 
-keyboard
+
 blue=1; green=2; split=3;
 for LED=1:3
     frms = 1:size(out,3);
@@ -84,10 +84,8 @@ for LED=1:3
         
      
     end
-    
-    
-    
-    
+
+    img = out(:,:,1);
     dx=25;
     if LED==blue | LED==green
         pix = LEDout(dx:dx:end,dx:dx:end,:);
@@ -97,9 +95,7 @@ for LED=1:3
         print('-dpsc',psfilename,'-append');
     end
     clear pix
-    
-  
-    keyboard
+ 
     
     [rawmap rawcycMap fullMov] =phaseMap(dfof{LED},framerate,movPeriod,binning);
     rawmap(isnan(rawmap))=0;
@@ -165,8 +161,7 @@ for LED=1:3
     colormap(hsv);
     colorbar
     done=0;
-    keyboard
-    
+
     
     while ~done
         figure(mapfig)

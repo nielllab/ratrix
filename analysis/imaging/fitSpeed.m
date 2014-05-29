@@ -1,3 +1,6 @@
+function fitSpeed(fname);
+load(fname,'sp','dfof_bg');
+dbstop if error
 conv_range=10;
 thresh =30;
 sp_smooth = conv(sp,[zeros(conv_range+1,1); ones(conv_range,1)]/conv_range,'same');
@@ -7,6 +10,8 @@ plot(sp);
 hold on
 plot(sp_smooth,'g')
 
+dfof_bg=dfof_bg(:,:,1:length(sp));
+
 alpha = mean(dfof_bg(:,:,sp_smooth>thresh),3)-mean(dfof_bg(:,:,sp_smooth<thresh),3);
 f= figure
 imagesc(alpha);
@@ -15,21 +20,23 @@ imagesc(alpha);
 clear s
 s(1,1,:) = sp_smooth>thresh;
 
+
+
 df_nomove = dfof_bg - repmat(alpha,[1 1 length(sp)]).* repmat(s,[size(dfof_bg,1) size(dfof_bg,2) 1]);
 
 
-[rawmap rawcycMap fullMov] =phaseMap(dfof_bg,10,10,0.9999);
+[rawmap rawcycMap fullMov] =phaseMap(dfof_bg,10,10,1);
     rawmap(isnan(rawmap))=0;
    f=figure
    imshow(polarMap(rawmap));
    
-   [rawmapnomove rawcycMapnomove fullMov] =phaseMap(df_nomove,10,10,0.9999);
+   [rawmapnomove rawcycMapnomove fullMov] =phaseMap(df_nomove,10,10,1);
     rawmapnomove(isnan(rawmapnomove))=0;
    f=figure
    imshow(polarMap(rawmapnomove));
 
 
-   t = 1:3000;
+   t = 1:length(sp);
    tround = ceil((mod(t-1,100)+1)/10)
    
    warning off
@@ -58,8 +65,8 @@ df_nomove = dfof_bg - repmat(alpha,[1 1 length(sp)]).* repmat(s,[size(dfof_bg,1)
                
                resp = squeeze(df(x,y,:))';
                p(1,:) = double(sp_smooth>thresh);
-               for t= 1:10;
-                   p(1+t,:) = (1+ (beta/4)*double(sp_smooth>thresh)).*tcourse(t,:);
+               for t= 1:5;
+                   p(1+t,:) = (1+ (beta/2)*double(sp_smooth>thresh)).*tcourse(t,:);
                end
                p(12,:)=1;
                [b{beta} bint r] = regress(resp',p');
@@ -78,12 +85,16 @@ df_nomove = dfof_bg - repmat(alpha,[1 1 length(sp)]).* repmat(s,[size(dfof_bg,1)
  
    figure
    imagesc(betamap);
+   title('beta = gain')
    figure
    imagesc(alphamap);
+   title('alpha = running offset')
    figure
    imagesc(phasemap);
+   title('response phase');
   f= figure
    imagesc(ampmap);
+   title('response amplitude')
   
  
    

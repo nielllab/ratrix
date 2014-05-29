@@ -7,11 +7,11 @@ maptype = {'topox','topoy'};
     expname = [expfile.subj expfile.expt];
     for m = 1:2
         if m==1
-            load([pathname expfile.topox],'map')
+            load([pathname expfile.topox],'mapNorm')
         elseif m==2
-            load([pathname expfile.topoy],'map')
+            load([pathname expfile.topoy],'mapNorm')
         end
-        
+        map=mapNorm;
         map = map{3};
         map_all{m} = map;
         ph = angle(map);
@@ -117,13 +117,13 @@ maptype = {'topox','topoy'};
     rangex = dx:dx:size(norm_grad{1},1);
     rangey = dx:dx:size(norm_grad{1},1);
     
-    subplot(2,4,2)
+    subplot(2,2,2)
     imshow(imresize(merge,mag));
 %                 xlim([20 150]);
 %             ylim([10 140]);
             
     for m= 1:2
-        subplot(2,4,4*(m-1)+1)
+        subplot(2,2,2*(m-1)+1)
         imshow(polarMap(map_all{m},90))
         if m==1
             title([expfile.subj ' ' expfile.expt ' ' expfile.monitor])
@@ -133,35 +133,29 @@ maptype = {'topox','topoy'};
 %         ylim([10 130]*mag);
     end
     
-    for m = 1:2
-        subplot(2,4,4*(m-1)+3)
-        imshow(imresize(merge,mag));
-        hold on
-        quiver(rangex*mag, rangey*mag, 10*real(norm_grad{m}(rangex,rangey)),10*imag(norm_grad{m}(rangex,rangey)),'w')
-%         xlim([20 140]*mag);
-%         ylim([10 130]*mag);
-    end
+%     for m = 1:2
+%         subplot(2,4,4*(m-1)+3)
+%         imshow(imresize(merge,mag));
+%         hold on
+%         quiver(rangex*mag, rangey*mag, 10*real(norm_grad{m}(rangex,rangey)),10*imag(norm_grad{m}(rangex,rangey)),'w')
+% %         xlim([20 140]*mag);
+% %         ylim([10 130]*mag);
+%     end
+%     
+%     for m= 1:2
+%         subplot(2,4,4*(m-1)+4)
+%         imshow(polarMap(map_all{m},90));
+%         hold on
+%         quiver(rangex, rangey, 10*real(norm_grad{m}(rangex,rangey)),10*imag(norm_grad{m}(rangex,rangey)),'w')
+% %         xlim([20 140]*mag);
+% %         ylim([10 130]*mag);
+%     end
     
-    for m= 1:2
-        subplot(2,4,4*(m-1)+4)
-        imshow(polarMap(map_all{m},90));
-        hold on
-        quiver(rangex, rangey, 10*real(norm_grad{m}(rangex,rangey)),10*imag(norm_grad{m}(rangex,rangey)),'w')
-%         xlim([20 140]*mag);
-%         ylim([10 130]*mag);
-    end
-    
-        for m= 2:2
-      subplot(2,4,6)
-            imshow(polarMap(map_all{m},90));
-            hold on
-            h=imagesc(borders,[0 1]);
-            transp = borders>0.3;
-            set(h,'AlphaData',transp);
-            axis equal
-%             xlim([20 150]);
-%             ylim([10 140]);
-        end
+        
+      subplot(2,2,4)
+      ampmap=amp_all{2};
+      imagesc(ampmap,[0 prctile(ampmap(:),98)]);
+     
     
      
     save([outpathname expname '_topography.mat'],'div','norm_grad','map_all','grad_all','amp_all','merge');

@@ -1,7 +1,7 @@
 clear all
 close all
 opengl software
-pathname = 'G:\compiled 8mm\';
+pathname = 'I:\compiled 8mm\';
 datapathname = 'D:\Widefield (12-10-12+)\data 62713+\';
 
 n=1;
@@ -245,59 +245,63 @@ files(n).baseline_patchydata = '022414 8mm window Gcamp6\G62G.1-LN_run6_baseline
 %%% batch dfofMovie
 errmsg= [];errRpt = [];
 nerr=0;
-for f = 1:length(files);
-    f
-    tic
-    
-    try
-        dfofMovie([datapathname files(f).topoxdata]);
-    catch exc
-        nerr=nerr+1;
-        errmsg{nerr}= sprintf('couldnt do %s',files(f).topoxdata)
-        errRpt{nerr}=getReport(exc,'extended')
-    end
-    try
-        dfofMovie([datapathname files(f).topoydata]);
-    catch exc
-        nerr=nerr+1;
-        errmsg{nerr}=sprintf('couldnt do %s',files(f).topoydata)
-        errRpt{nerr}=getReport(exc,'extended')
-    end
-    try
-        dfofMovie([datapathname files(f).whiskerdata]);
-    catch exc
-        nerr=nerr+1;
-        errmsg{nerr}=sprintf('couldnt do %s',files(f).whiskerdata)
-         errRpt{nerr}=getReport(exc,'extended')
-    end
-    try
-        dfofMovie([datapathname files(f).darknessdata]);
-    catch exc
-        nerr=nerr+1;
-        errmsg{nerr}=sprintf('couldnt do %s',files(f).darknessdata)
-         errRpt{nerr}=getReport(exc,'extended')
-    end
-    try
-        dfofMovie([datapathname files(f).step_binarydata]);
-    catch
-        nerr=nerr+1;
-        errmsg{nerr}=sprintf('couldnt do %s',files(f).step_binarydata)
-        errRpt{nerr}= getReport(exc,'extended')
-    end
-    try
-        dfofMovie([datapathname files(f).topoxreversedata]);
-    catch exc
-        nerr=nerr+1;
-        errmsg{nerr}=sprintf('couldnt do %s',files(f).topoxreversedata)
-         errRpt{nerr}=getReport(exc,'extended')
-    end
-    
-    toc
-end
- errmsg  
-outpathname = 'G:\compiled 8mm\8mm overlays\';
 
 
+%for f = 1:length(files)
+% for f = 1:1
+% 
+%     f
+%     tic
+%     
+%     try
+%         dfofMovie([datapathname files(f).topoxdata]);
+%     catch exc
+%         nerr=nerr+1;
+%         errmsg{nerr}= sprintf('couldnt do %s',files(f).topoxdata)
+%         errRpt{nerr}=getReport(exc,'extended')
+%     end
+%     try
+%         dfofMovie([datapathname files(f).topoydata]);
+%     catch exc
+%         nerr=nerr+1;
+%         errmsg{nerr}=sprintf('couldnt do %s',files(f).topoydata)
+%         errRpt{nerr}=getReport(exc,'extended')
+%     end
+%     try
+%         dfofMovie([datapathname files(f).whiskerdata]);
+%     catch exc
+%         nerr=nerr+1;
+%         errmsg{nerr}=sprintf('couldnt do %s',files(f).whiskerdata)
+%          errRpt{nerr}=getReport(exc,'extended')
+%     end
+%     try
+%         dfofMovie([datapathname files(f).darknessdata]);
+%     catch exc
+%         nerr=nerr+1;
+%         errmsg{nerr}=sprintf('couldnt do %s',files(f).darknessdata)
+%          errRpt{nerr}=getReport(exc,'extended')
+%     end
+%     try
+%         dfofMovie([datapathname files(f).step_binarydata]);
+%     catch
+%         nerr=nerr+1;
+%         errmsg{nerr}=sprintf('couldnt do %s',files(f).step_binarydata)
+%         errRpt{nerr}= getReport(exc,'extended')
+%     end
+%     try
+%         dfofMovie([datapathname files(f).topoxreversedata]);
+%     catch exc
+%         nerr=nerr+1;
+%         errmsg{nerr}=sprintf('couldnt do %s',files(f).topoxreversedata)
+%          errRpt{nerr}=getReport(exc,'extended')
+%     end
+%     
+%     toc
+% end
+%  errRpt{:} 
+ outpathname = 'I:\compiled 8mm\8mm overlays\';
+% 
+%keyboard
 %use = find(strcmp({files.monitor},'vert') & strcmp({files.task},'HvV_center')& strcmp({files.notes},'good imaging session'))
 for i = 1:length(files);
     if ~isempty(files(i).topox) & strcmp(files(i).notes,'good imaging session')
@@ -326,7 +330,11 @@ end
     use = find(used)
 
 for f = 1:length(use)
-load([pathname files(use(f)).darkness],'movemap');
+f
+load([pathname files(use(f)).darkness],'sp','dfof_bg');
+movemap =mean(dfof_bg(:,:,sp>400),3)- mean(dfof_bg(:,:,sp<400),3);
+figure
+imagesc(movemap);
 load([pathname files(use(f)).step_binary],'map');
 map1 = map;
 load([pathname files(use(f)).whisker],'map');

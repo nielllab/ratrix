@@ -11,7 +11,7 @@ binning=0.5;
 framerate=10;
 
 choosePix =0; %%% option to manually select pixels for timecourse analysis
-maxGB = 1.5; %%% size to reduce data down to
+maxGB = 1.50; %%% size to reduce data down to
 
 
 if ~exist('in','var') || isempty(in)
@@ -36,6 +36,7 @@ catch
     sz = size(imread([basename '_0001.tif']));
     namelength=4;
 end
+basename
 clear in
 fl = 0;  %flip image? 1 = yes 0 = no
 
@@ -83,10 +84,8 @@ for LED=1:3
         
      
     end
-    
-    
-    
-    
+
+    img = out(:,:,1);
     dx=25;
     if LED==blue | LED==green
         pix = LEDout(dx:dx:end,dx:dx:end,:);
@@ -95,9 +94,8 @@ for LED=1:3
         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfilename,'-append');
     end
-    
-    
-    img = out(:,:,1);
+    clear pix
+ 
     
     [rawmap rawcycMap fullMov] =phaseMap(dfof{LED},framerate,movPeriod,binning);
     rawmap(isnan(rawmap))=0;
@@ -163,7 +161,7 @@ for LED=1:3
     colormap(hsv);
     colorbar
     done=0;
-    
+
     
     while ~done
         figure(mapfig)

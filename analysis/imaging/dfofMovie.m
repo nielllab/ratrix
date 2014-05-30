@@ -23,9 +23,12 @@ use_chan=3;
 % use_chan=1;
 % [dfof map mapNorm]= readTifRatio;
 % use_chan=3;
-dfof_bg=dfof{use_chan};
+dfof_bg= single(dfof{use_chan});
+display('saving')
+tic
 save(mapfilename,'map','mapNorm','dfof_bg','-v7.3')
-
+toc
+dfof_bg= dfof{use_chan};
 clear dfof;
 
 startframe =200;
@@ -94,7 +97,7 @@ if ~isempty(fs)
     
     posx = cumsum(stimRec.pos(use,1)-900);
     posy = cumsum(stimRec.pos(use,2)-500);
-    frameT = 0.1:0.1:max(mouseT);
+    frameT = 0.1:0.1:290;
     vx = diff(interp1(mouseT,posx,frameT));
     vy = diff(interp1(mouseT,posy,frameT));
     vx(end+1)=0; vy(end+1)=0;
@@ -107,22 +110,22 @@ if ~isempty(fs)
     
     
     
-    for i=1:100;
-        sp_avg(i) = nanmeanMW(sp(i:100:end)');
-        sp_med(i) = nanmedianMW(sp(i:100:end)');
-    end
-    sp_all = reshape(sp,[100 30]);
-    figure
-    plot(0.1:0.1:10,sp_all)
-    title('all speeds')
-    figure
-    plot(0.1:0.1:10,sp_avg)
-    title('mean speed')
-    ylim([0 1500])
-    figure
-    plot(0.1:0.1:10,sp_med)
-    title('median speed')
-    ylim([0 1500])
+%     for i=1:100;
+%         sp_avg(i) = nanmeanMW(sp(i:100:end)');
+%         sp_med(i) = nanmedianMW(sp(i:100:end)');
+%     end
+%     sp_all = reshape(sp,[100 30]);
+%     figure
+%     plot(0.1:0.1:10,sp_all)
+%     title('all speeds')
+%     figure
+%     plot(0.1:0.1:10,sp_avg)
+%     title('mean speed')
+%     ylim([0 1500])
+%     figure
+%     plot(0.1:0.1:10,sp_med)
+%     title('median speed')
+%     ylim([0 1500])
     
     thresh = [ 400 ];
     for i = 1:1

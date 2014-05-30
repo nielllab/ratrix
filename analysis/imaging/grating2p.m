@@ -9,6 +9,8 @@ fname = 'C:\data\imaging\031814 gcamp6 orientation\orientations spot2 256 1ms003
 % fname = 'C:\data\imaging\080813 gcamp 6 test\spot1_bars of 8 orientations 3hz scan 256 lines004.tif'
 fname = 'C:\data\imaging\042314 J135 Gcamp6 LP\spot3 step binary 256^2 1ms006.tif'
 
+fname = 'V1 - step binary stim - zoom2010.tif'
+
 inf = imfinfo(fname)
 
 img = imread(fname,1);

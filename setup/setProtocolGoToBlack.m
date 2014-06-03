@@ -24,12 +24,12 @@ switch subjIDs{1}
     
      case 'g62c6lt' % switched GoToBlack 5/21/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 180;
+       rewardSizeULorMS        = 160;
        msPenalty               =4000;
        
      case 'g62c6tt' % switched GoToBlack 5/21/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 160;
+       rewardSizeULorMS        = 140;
        msPenalty               =4000;
     
 %     case 'bfly1a.13rt'

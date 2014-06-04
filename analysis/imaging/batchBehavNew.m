@@ -1199,7 +1199,7 @@ for f = 1:length(use); %changed from 1:length(map)
     save( [outpathname files(use(f)).subj files(use(f)).expt '_topography.mat'],'xshift','yshift','zoom','-append');
 end
 %
-x0 =-30; y0=-30; sz = 80;
+x0 =-25; y0=0; sz = 100;
 %x0 =0; y0=0; sz = 80;
 avgmap=0; meangrad{1}=0; meangrad{2}=0; meanpolar{1} = 0; meanpolar{2}=0;meanamp=0;
 for f= 1:length(use) ;

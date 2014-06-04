@@ -1,13 +1,18 @@
-function avg = fourPhaseAvg(resp,shiftx,shifty,zoom,sz, merge)% %%% overlay behavior on top of topomaps
+function avg = fourPhaseAvg(resp,shiftx,shifty,shifttheta,zoom,sz, merge)% %%% overlay behavior on top of topomaps
 nb=0; avg=0; clear behav
+sz
 for f = 1:length(resp)
  
 
         if ~isempty(resp{f});
        
-            b = shiftImage(resp{f},shiftx(f),shifty(f),zoom,sz);
+           try 
+               b = shiftImageRotate(resp{f},shiftx(f),shifty(f),shifttheta(f),zoom,sz);
             avg= avg+b;
             nb= nb+1;
+           catch
+               display('out of range')
+           end
         end
 
 end
@@ -19,7 +24,7 @@ transp = zeros(size(avg));
 
    meanresp = mean(resp,3);
     amp = meanresp/0.1;
-    amp(amp>0.2)=1;
+    amp(amp>0.05)=1;
     transp = amp>0.28;
     amp = repmat(amp,[1 1 3]);
 

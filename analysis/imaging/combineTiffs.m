@@ -277,16 +277,18 @@ recs = {
 %     }
 %     }    
 %     
-%           {'g62b1lt' {
+          {'g62b1lt' {
 %       {[1 208],[],'031114 G62B.1-RT HvV Behavior\G62B.1-LT_run1_HvV_behavior_Fstop_5.6_50msexp','G62B.1-LT_run1_HvV_behavior_Fstop_5.6_50msexp'}     
 %       {[209 477],[],'050214 G62b.1 LT HvV_vertical behavior\g62b.7lt_run1_HvV_vertical_fstop5.6_exp50ms','g62b.7lt_run1_HvV_vertical_fstop5.6_exp50ms'}
 %         {[478 693],[],'050614 G62B.1 LT HvV_Vertical Behavior\G62B.1LT_run1_HvV_Vertical_fstop5.6_exp50ms','G62B.1LT_run1_HvV_Vertical_fstop5.6_exp50ms'}
 %         {[694 903],[],'050814 G62B1-LT HvV Behavior\G62B1-LT_run1_HvV_behavior_50ms_Fstop5_6','G62B1-LT_run1_HvV_behavior_50ms_Fstop5_6'}
 %         {[904 1195],[],'052014 G62b.1LT HvV_vertical behavior\62b.1lt_run1_hvv_vertical_fstop11_exp50ms','62b.1lt_run1_hvv_vertical_fstop11_exp50ms'}
-%     }
-%     }    
+        {[1196 1519],[],'052014 G62b.1LT HvV_vertical behavior\62b.1lt_run1_hvv_vertical_fstop11_exp50ms','62b.1lt_run1_hvv_vertical_fstop11_exp50ms'}
+    }
+    }    
 %     
-         {'g62b3rt' {
+  
+%       {'g62b3rt' {
 %       {[1 157],[],'022814 G62B.3-RT HvV Behavior\G62B.3-RT_run1_HvV_Behavior_15msexp','G62B.3-RT_run1_HvV_Behavior_15msexp'}     
 %       {[158 340],[],'030114 G62B.3-RT HvV Behavior\G62B.3-RT_run1_HvV_behavior_Fstop_5.6_50msexp','G62B.3-RT_run1_HvV_behavior_Fstop_5.6_50msexp' }
 %       {[341 572],[],'030214 G62B.3-RT HvV behavior\G62B.3-RT_run1_HvV_behavior_Fstop8_50msexp','G62B.3-RT_run1_HvV_behavior_Fstop8_50msexp'}
@@ -295,9 +297,9 @@ recs = {
 %%        {[1001 1104],[],'050414 G62b3-RT HvV behavior (movement artifact)\G62b3-rt_run1_HvV_behavior_50msexp_Fstop_8','G62b3-rt_run1_HvV_behavior_50msexp_Fstop_8'}  %%movement artifact(headplate not secure)
 %         {[1105 1363],[],'050814 G62b3-rt HvV behavior\G62B3-RT_run1_HvV_behavior_50ms_Fstop_8','G62B3-RT_run1_HvV_behavior_50ms_Fstop_8'}
 %         {[1364 1584],[],'051514 G62b.3 RT HvV Behavior\g62b.3rt_run1_HvV_vertical_fstop5.6_exp50ms','g62b.3rt_run1_HvV_vertical_fstop5.6_exp50ms'}
-        {[1585 1893],[1585 1885],'051714 G62B.3RT HvV_vertical Behavior','g62b.3rt_run1_hvv_vertical_fstop11_exp50ms'}
-    }
-    }    
+%         {[1585 1893],[1585 1885],'051714 G62B.3RT HvV_vertical Behavior','g62b.3rt_run1_hvv_vertical_fstop11_exp50ms'}
+%     }
+%     }    
 %     
 %          {'g62b4ln' {
 %       {[1 298],[],'022114 G62B.4-LN GTS Behavior','G62B.4-LN_run1_GTS_behavior_15msexp'}     

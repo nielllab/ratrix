@@ -9,15 +9,15 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
     titles = {'all trials','left trials','right trials','left-right','correct','incorrect','correct-incorrect'};
     
     resp_time = starts(3,trials)-starts(2,trials);
-    figure
-    hist(resp_time,0.3:0.02:0.6)
+%     figure
+%     hist(resp_time,0.3:0.02:0.6)
     oldbg = bg;
-    minbg = min(bg,[],2);
-    bg = bg-repmat(minbg,[1 size(bg,2) 1 1]);
+%     minbg = min(bg,[],2);
+%     bg = bg-repmat(minbg,[1 size(bg,2) 1 1]);
     
     for i =1:1
         if i==1
-            decon = deconvg6s(nanmedianMW(bg(targ(trials)<2&resp_time>0.4 & resp_time<0.5,:,:,:)),0.1);
+            decon = deconvg6s(nanmedianMW(bg(correct(trials)==1&targ(trials)<2&resp_time>0.3 & resp_time<0.6,:,:,:)),0.1);
             all_decon=squeeze(decon);
         elseif i==2
             decon = deconvg6s(nanmedianMW(bg(targ(trials)<0,:,:,:)),0.1);
@@ -55,7 +55,7 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
         end
         
         figure
-        use_pts=find(pts>=0);
+        use_pts=find(pts>=0)
         for t=1:6
             subplot(2,3,t);
             if i~=4 & i~=7

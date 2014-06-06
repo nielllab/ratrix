@@ -41,37 +41,37 @@ switch subjIDs{1}
      case 'g6w1lt' % started 3/7/14
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 35;
-       msPenalty               =4000;
+       msPenalty               =4100;
 
     case 'bfly1a.13rt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 130;
-       msPenalty               =4100;  
+       rewardSizeULorMS        = 110;
+       msPenalty               =4200;  
        
    case 'bfly3a.3rn'
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 130;
-       msPenalty               =4100; 
+       msPenalty               =4200; 
        
    case 'bfly2b.3rt'
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 100;
-       msPenalty               =4100; 
+       msPenalty               =4200; 
        
    case 'g62b4ln'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 130;
-       msPenalty               =4000; 
+       rewardSizeULorMS        = 120;
+       msPenalty               =4100; 
 
    case 'g62.8lt' 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 50;
+       rewardSizeULorMS        = 45;
        msPenalty               =4200;  
        
    case 'g62b.5lt'           %started 1/28/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 130; 
-       msPenalty               =4200;
+       rewardSizeULorMS        = 110; 
+       msPenalty               =4300;
        
 %    case 'g625ln' % Switched 1/17/14
 %        requestRewardSizeULorMS = 0;

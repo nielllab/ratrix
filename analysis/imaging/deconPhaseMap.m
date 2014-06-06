@@ -27,6 +27,7 @@ for f = 1:nframes
        
 end
 
+
 xymin = prctile(cycmap,2,3);
 for f = 1:perFrames;
     cycmap(:,:,f) = cycmap(:,:,f)-xymin;

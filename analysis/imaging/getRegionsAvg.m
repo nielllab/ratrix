@@ -1,20 +1,12 @@
-function [norm_grad amp_all map_all gradmapAll merge]= getRegions(expfile, pathname, outpathname)
+function [norm_grad amp_all map_all gradmapAll merge]= getRegionsAvg(avgmap)
 
 opengl software
-if strcmp(expfile.monitor,'vert')
-    maptype = {'topox','topoy'}
-elseif strcmp(expfile.monitor,'land')
-     maptype = {'topoy','topox'}
-end
 
-    
-    expname = [expfile.subj expfile.expt];
+ 
     for m = 1:2
    
-            load([pathname getfield(expfile,maptype{m})],'mapNorm')
-
-        map=mapNorm;
-        map = map{3};
+   
+        map =avgmap{m};
         map_all{m} = map;
         ph = angle(map);
        % keyboard
@@ -27,10 +19,7 @@ end
         %         title(sprintf('polarmap %s',maptype{m}));
         
         [dx dy] = gradient(ph);
-        if strcmp(expfile.monitor,'land') && m==1
-            dx=-dx;
-            dy = -dy;
-        end
+
         grad = dx + sqrt(-1)*dy;
         grad_amp = abs(grad);
         
@@ -114,9 +103,7 @@ end
     for m= 1:2
         subplot(2,2,2*(m-1)+1)
         imshow(polarMap(map_all{m},90))
-        if m==1
-            title([expfile.subj ' ' expfile.expt ' ' expfile.monitor])
-        end
+ 
         axis equal
 %         xlim([20 140]*mag);
 %         ylim([10 130]*mag);
@@ -145,10 +132,7 @@ end
       ampmap=(amp_all{2}+amp_all{1})/2;
       imagesc(ampmap,[0 prctile(ampmap(:),98)]);
      
-    
-     
-    save([outpathname expname '_topography.mat'],'div','norm_grad','map_all','grad_all','amp_all','merge');
-    saveas(mapsfig,[outpathname expname 'topo.fig'],'fig')
+
     %     figure
     %     imshow(ones(size(merge)));
     %     hold on

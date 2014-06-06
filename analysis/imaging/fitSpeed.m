@@ -1,5 +1,7 @@
-function fitSpeed(fname);
-load(fname,'sp','dfof_bg');
+% function fitSpeed(fname);
+% load(fname,'sp','dfof_bg');
+
+
 dbstop if error
 conv_range=10;
 thresh =30;
@@ -10,7 +12,7 @@ plot(sp);
 hold on
 plot(sp_smooth,'g')
 
-dfof_bg=dfof_bg(:,:,1:length(sp));
+dfof_bg=double(dfof_bg(:,:,1:length(sp)));
 
 alpha = mean(dfof_bg(:,:,sp_smooth>thresh),3)-mean(dfof_bg(:,:,sp_smooth<thresh),3);
 f= figure
@@ -35,6 +37,15 @@ df_nomove = dfof_bg - repmat(alpha,[1 1 length(sp)]).* repmat(s,[size(dfof_bg,1)
    f=figure
    imshow(polarMap(rawmapnomove));
 
+   for i = 1:3
+       figure
+       imagesc(df_nomove(:,:,1));
+       [y x] = ginput(1); x= round(x); y= round(y);
+       figure
+       plot(squeeze(df_nomove(x,y,:)));
+       hold on
+       plot(squeeze(dfof_bg(x,y,:)),'g');
+   end
 
    t = 1:length(sp);
    tround = ceil((mod(t-1,100)+1)/10)
@@ -55,7 +66,7 @@ df_nomove = dfof_bg - repmat(alpha,[1 1 length(sp)]).* repmat(s,[size(dfof_bg,1)
    tcourse = tcourse-0.1;
    figure
    imagesc(tcourse)
-       clear err b
+       clear err b p
    for x = 1:size(df,1)
       x
       tic

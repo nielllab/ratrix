@@ -4,8 +4,406 @@ dbstop if error
 pathname = 'I:\compiled behavior\';
 datapathname = 'G:\Behavior data 12-24-13+\';
 
-
 n=1;
+
+files(n).subj = 'g62b1lt';
+files(n).expt = '060814';
+files(n).topox =  '';
+files(n).topoxdata = '';
+files(n).topoy = '';
+files(n).topoydata = '';
+files(n).behav = '';
+files(n).behavdata = '';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = 'HvV';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+
+files(n).subj = 'g62b4ln';
+files(n).expt = '060814';
+files(n).topox =  '';
+files(n).topoxdata = '';
+files(n).topoy = '';
+files(n).topoydata = '';
+files(n).behav = '';
+files(n).behavdata = '';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = 'GTS';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+
+files(n).subj = 'g62b4ln';
+files(n).expt = '060714';
+files(n).topox =  '';
+files(n).topoxdata = '';
+files(n).topoy = '';
+files(n).topoydata = '';
+files(n).behav = '';
+files(n).behavdata = '';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = 'GTS';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+
+files(n).subj = 'g62b5lt';
+files(n).expt = '060714';
+files(n).topox =  '';
+files(n).topoxdata = '';
+files(n).topoy = '';
+files(n).topoydata = '';
+files(n).behav = '';
+files(n).behavdata = '';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = 'GTS';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+
+files(n).subj = 'g62c6tt';
+files(n).expt = '060614';
+files(n).topox =  '';
+files(n).topoxdata = '';
+files(n).topoy = '';
+files(n).topoydata = '';
+files(n).behav = '';
+files(n).behavdata = '';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = 'naive';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+
+files(n).subj = 'g62c6lt';
+files(n).expt = '060614';
+files(n).topox =  '';
+files(n).topoxdata = '';
+files(n).topoy = '';
+files(n).topoydata = '';
+files(n).behav = '';
+files(n).behavdata = '';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = 'naive';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+
+files(n).subj = 'g62b4ln';
+files(n).expt = '060614';
+files(n).topox =  '';
+files(n).topoxdata = '';
+files(n).topoy = '';
+files(n).topoydata = '';
+files(n).behav = '';
+files(n).behavdata = '';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = 'GTS';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+
+files(n).subj = 'g62c6tt';
+files(n).expt = '053014';
+files(n).topox =  '';
+files(n).topoxdata = '';
+files(n).topoy = '';
+files(n).topoydata = '';
+files(n).behav = '';
+files(n).behavdata = '';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = 'naive';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+
+files(n).subj = 'G62c6lt';
+files(n).expt = '053014';
+files(n).topox =  '';
+files(n).topoxdata = '';
+files(n).topoy = '';
+files(n).topoydata = '';
+files(n).behav = '';
+files(n).behavdata = '';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = 'naive';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+
+files(n).subj = 'g62b1lt';
+files(n).expt = '053014';
+files(n).topox =  '';
+files(n).topoxdata = '';
+files(n).topoy = '';
+files(n).topoydata = '';
+files(n).behav = '';
+files(n).behavdata = '';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = 'HvV';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+
+files(n).subj = 'g62c6lt';
+files(n).expt = '052914';
+files(n).topox =  '';
+files(n).topoxdata = '';
+files(n).topoy = '';
+files(n).topoydata = '';
+files(n).behav = '';
+files(n).behavdata = '';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = 'naive';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session, passive files mislabled g62c.2';
+
+n=n+1;
+
+files(n).subj = 'g62c6tt';
+files(n).expt = '052914';
+files(n).topox =  '';
+files(n).topoxdata = '';
+files(n).topoy = '';
+files(n).topoydata = '';
+files(n).behav = '';
+files(n).behavdata = '';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = 'naive';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+
+files(n).subj = 'g62b1lt';
+files(n).expt = '052914';
+files(n).topox =  '';
+files(n).topoxdata = '';
+files(n).topoy = '';
+files(n).topoydata = '';
+files(n).behav = '';
+files(n).behavdata = '';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = 'HvV';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+
+files(n).subj = 'g62c6lt';
+files(n).expt = '052514';
+files(n).topox =  '';
+files(n).topoxdata = '';
+files(n).topoy = '';
+files(n).topoydata = '';
+files(n).behav = '';
+files(n).behavdata = '';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = 'naive';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+
+files(n).subj = 'g62b4ln';
+files(n).expt = '052514';
+files(n).topox =  '';
+files(n).topoxdata = '';
+files(n).topoy = '';
+files(n).topoydata = '';
+files(n).behav = '';
+files(n).behavdata = '';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = 'GTS';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+
+files(n).subj = 'G62b1lt';
+files(n).expt = '052514';
+files(n).topox =  '';
+files(n).topoxdata = '';
+files(n).topoy = '';
+files(n).topoydata = '';
+files(n).behav = '';
+files(n).behavdata = '';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = 'HvV';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+
+files(n).subj = 'g628lt';
+files(n).expt = '052414';
+files(n).topox =  '';
+files(n).topoxdata = '';
+files(n).topoy = '';
+files(n).topoydata = '';
+files(n).behav = '';
+files(n).behavdata = '';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = 'GTS';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+
+files(n).subj = 'g62c6lt';
+files(n).expt = '052414';
+files(n).topox =  '';
+files(n).topoxdata = '';
+files(n).topoy = '';
+files(n).topoydata = '';
+files(n).behav = '';
+files(n).behavdata = '';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = 'naive';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+
+files(n).subj = 'G62b6tt';
+files(n).expt = '052414';
+files(n).topox =  '';
+files(n).topoxdata = '';
+files(n).topoy = '';
+files(n).topoydata = '';
+files(n).behav = '';
+files(n).behavdata = '';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = 'naive';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session..passive folder naemd g62b.5tt';
+
+n=n+1;
+
+files(n).subj = 'G62b4ln';
+files(n).expt = '052414';
+files(n).topox =  '';
+files(n).topoxdata = '';
+files(n).topoy = '';
+files(n).topoydata = '';
+files(n).behav = '';
+files(n).behavdata = '';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = 'GTS';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+
+files(n).subj = 'G62b5lt';
+files(n).expt = '052014';
+files(n).topox =  '';
+files(n).topoxdata = '';
+files(n).topoy = '';
+files(n).topoydata = '';
+files(n).behav = '';
+files(n).behavdata = '';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = 'GTS';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
 
 files(n).subj = 'g62b1lt';
 files(n).expt = '052014';

@@ -37,14 +37,17 @@ df_nomove = dfof_bg - repmat(alpha,[1 1 length(sp)]).* repmat(s,[size(dfof_bg,1)
    f=figure
    imshow(polarMap(rawmapnomove));
 
-   for i = 1:3
-       figure
+   dffig = figure
        imagesc(df_nomove(:,:,1));
+   
+   for i = 1:5
+       figure(f)
        [y x] = ginput(1); x= round(x); y= round(y);
        figure
        plot(squeeze(df_nomove(x,y,:)));
        hold on
        plot(squeeze(dfof_bg(x,y,:)),'g');
+       plot(0.4*sp/max(sp),'r')
    end
 
    t = 1:length(sp);

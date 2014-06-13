@@ -35,7 +35,7 @@ switch subjIDs{1}
        
      case 'g62c6tt' % switched GTS 6/8/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 180;
+       rewardSizeULorMS        = 170;
        msPenalty               =4200;
        
      case 'g6w1lt' % started 3/7/14
@@ -45,22 +45,22 @@ switch subjIDs{1}
 
     case 'bfly1a.13rt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100;
+       rewardSizeULorMS        = 90;
        msPenalty               =4200;  
        
    case 'bfly3a.3rn'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 110;
+       rewardSizeULorMS        = 100;
        msPenalty               =4200; 
        
    case 'bfly2b.3rt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 70;
+       rewardSizeULorMS        = 60;
        msPenalty               =4200; 
        
    case 'g62b4ln'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100;
+       rewardSizeULorMS        = 110;
        msPenalty               =4100; 
 
 %    case 'g62.8lt' 

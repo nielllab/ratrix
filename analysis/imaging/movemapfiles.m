@@ -1,4 +1,4 @@
-for t = 1:1
+for t = 4:4
 for f = 1:length(files);
 f
 
@@ -9,11 +9,11 @@ elseif t==2
 type = 'topoy';
 typedata = 'topoydata';
 elseif t==3
-type = 'darkness';
-typedata = 'darknessdata';
+type = 'loom';
+typedata = 'loomdata';
 elseif t==4
-type = 'whisker';
-typedata = 'whiskerdata';
+type = 'topox';
+typedata = 'topoxdata';
 elseif t==5
 type = 'step_binary';
 typedata = 'step_binarydata';

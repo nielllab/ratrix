@@ -28,50 +28,50 @@ if ~isscalar(subjIDs)
 end
 switch subjIDs{1}
     
-%      case 'g62c6lt' % switched GoToBlack 5/21/14
-%        requestRewardSizeULorMS = 20;
-%        rewardSizeULorMS        = 160;
-%        msPenalty               =4000;
-%        
-%      case 'g62c6tt' % switched GoToBlack 5/21/14
-%        requestRewardSizeULorMS = 20;
-%        rewardSizeULorMS        = 160;
-%        msPenalty               =4000;
+     case 'g62c6lt' % switched GTS 6/8/14
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 180;
+       msPenalty               =4200;
+       
+     case 'g62c6tt' % switched GTS 6/8/14
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 150;
+       msPenalty               =4200;
        
      case 'g6w1lt' % started 3/7/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 35;
-       msPenalty               =4000;
+       rewardSizeULorMS        = 20;
+       msPenalty               =4200;
 
     case 'bfly1a.13rt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 130;
-       msPenalty               =4100;  
+       rewardSizeULorMS        = 80;
+       msPenalty               =4200;  
        
    case 'bfly3a.3rn'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 130;
-       msPenalty               =4100; 
+       rewardSizeULorMS        = 90;
+       msPenalty               =4200; 
        
    case 'bfly2b.3rt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100;
-       msPenalty               =4100; 
+       rewardSizeULorMS        = 50;
+       msPenalty               =4200; 
        
    case 'g62b4ln'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 130;
-       msPenalty               =4000; 
+       rewardSizeULorMS        = 110;
+       msPenalty               =4100; 
 
-   case 'g62.8lt' 
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 50;
-       msPenalty               =4200;  
-       
+%    case 'g62.8lt' 
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 45;
+%        msPenalty               =4200;  
+%        
    case 'g62b.5lt'           %started 1/28/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 130; 
-       msPenalty               =4200;
+       rewardSizeULorMS        = 80; 
+       msPenalty               =4300;
        
 %    case 'g625ln' % Switched 1/17/14
 %        requestRewardSizeULorMS = 0;

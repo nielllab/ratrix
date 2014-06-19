@@ -21,15 +21,22 @@ dlength = size(frames,2);
 img = zeros(size(frames));
 display('deconvolving ...');
 
+imgdecon = cell(size(frames,4),1);
+tic
+
+parfor y = 1:size(frames,4)
 for x = 1:size(frames,3)
     
-    for y = 1:size(frames,4)
+    
         d = deconvlucy(squeeze(frames(1,:,x,y)),psf);
-        img(1,1:dlength-5,x,y) = d(6:dlength);
+        imgdecon{y}(1,1:dlength-5,x) = d(6:dlength);
     end
 end
 
-keyboard
+
+img(1,1:dlength-5,:,:) = shiftdim(cell2mat(imgdecon),1);
+toc
+
 if nd==3
    img = squeeze(img);
 end

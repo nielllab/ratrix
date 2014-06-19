@@ -20,8 +20,8 @@ alltheta = -10:5:10;
 [dx dy dtheta] = meshgrid(-45:2:45,-60:2:60, alltheta);
 
 imrange = -80:80;
-x0 = round(size(map{1},1)/2)
-y0 = round(size(map{1},2)/2)
+x0 = round(size(map{1},1)/2);
+y0 = round(size(map{1},2)/2);
 
 im = map{1}(imrange+x0,imrange+y0,:);
 match = zeros(size(dx));
@@ -45,9 +45,9 @@ subplot(2,2,3)
 imagesc(match(:,:,round(length(alltheta)/2)))
 
 [m ind] = max(match(:));
-xshift = dx(ind)
-yshift = dy(ind)
-thetashift = dtheta(ind)
+xshift = dx(ind);
+yshift = dy(ind);
+thetashift = dtheta(ind);
 
 
 imfit{1} = map{1}(imrange+x0,imrange+y0,:);

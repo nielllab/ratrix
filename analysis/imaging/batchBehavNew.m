@@ -1,7 +1,7 @@
 clear all
 close all
 dbstop if error
-pathname = 'I:\compiled behavior\';
+pathname = 'D:\compiled behavior\';
 datapathname = 'G:\Behavior data 12-24-13+\';
 
 
@@ -1170,7 +1170,7 @@ nerr=0;
 %  errRpt
 % keyboard
 
-outpathname = 'I:\compiled behavior\behavior topos\';
+outpathname = 'D:\compiled behavior\behavior topos\';
 
 
 %use = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session') &  strcmp({files.label},'camk2 gc6')&  strcmp({files.task},'HvV_center') &strcmp({files.subj},'g62b7lt'))
@@ -1180,8 +1180,13 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 
 %use = find(strcmp({files.monitor},'land')&     strcmp({files.label},'camk2 gc6'))
 
-use = find(strcmp({files.monitor},'vert')&  strcmp({files.notes},'good imaging session')  &    strcmp({files.label},'camk2 gc6') &  strcmp({files.task},'HvV_center'))
+alluse = find(strcmp({files.monitor},'vert')&  strcmp({files.notes},'good imaging session')  &    strcmp({files.label},'camk2 gc6') &  strcmp({files.task},'HvV_center'))
 
+allsubj = unique({files(alluse).subj})
+for s = 1:1
+allsubj{s}
+%use = intersect(alluse,find(strcmp({files.subj},allsubj{s})))    
+use = alluse;
 %use = 1: length(files)
 %%% calculate gradients and regions
 clear map merge
@@ -1199,21 +1204,22 @@ for f = 1:length(use); %changed from 1:length(map)
     save( [outpathname files(use(f)).subj files(use(f)).expt '_topography.mat'],'xshift','yshift','zoom','-append');
 end
 %
-x0 =-25; y0=0; sz = 100;
+x0 =-10; y0=0; sz = 95;
 %x0 =0; y0=0; sz = 80;
 avgmap=0; meangrad{1}=0; meangrad{2}=0; meanpolar{1} = 0; meanpolar{2}=0;meanamp=0;
 for f= 1:length(use) ;
     f
     
-    if allxshift(f)>-20
+    if allxshift(f)>-50
         m = shiftImageRotate(merge{f},allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
         sum(isnan(m(:)))
         
         sum(isnan(merge{f}(:)))
-        figure
-        imshow(m);
         avgmap = avgmap+m;
-        title( [files(use(f)).subj ' ' files(use(f)).expt ' ' files(use(f)).monitor] );
+        
+%         figure
+%         imshow(m);        
+%         title( [files(use(f)).subj ' ' files(use(f)).expt ' ' files(use(f)).monitor] );
         
         for ind = 1:2
             gradshift{ind} = shiftImageRotate(real(grad{f}{ind}),allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
@@ -1240,26 +1246,27 @@ figure
 for m=1:2
     subplot(1,2,m);
     imshow(polarMap(meanpolar{m},80));
+    title(allsubj{s})
 end
 
 
-divmap = getDivergenceMap(meanpolar);
-figure
-imagesc(divmap); axis equal
+% divmap = getDivergenceMap(meanpolar);
+% figure
+% imagesc(divmap); axis equal
+% 
+% figure
+% imagesc(divmap.*abs(meanpolar{1})); axis equal
 
-figure
-imagesc(divmap.*abs(meanpolar{1})); axis equal
-
-dx=4;
-rangex = dx:dx:size(meangrad{1},1); rangey = dx:dx:size(meangrad{1},2);
-figure
-for m = 1:2
-    subplot(1,2,m)
-    imshow(imresize(avgmap,1));
-    hold on
-    quiver(rangex,rangey,  10*real(meangrad{m}(rangex,rangey)),10*imag(meangrad{m}(rangex,rangey)),'w')
-
-end
+% dx=4;
+% rangex = dx:dx:size(meangrad{1},1); rangey = dx:dx:size(meangrad{1},2);
+% figure
+% for m = 1:2
+%     subplot(1,2,m)
+%     imshow(imresize(avgmap,1));
+%     hold on
+%     quiver(rangex,rangey,  10*real(meangrad{m}(rangex,rangey)),10*imag(meangrad{m}(rangex,rangey)),'w')
+% 
+% end
 
 % figure
 % meanmov{1}=zeros(size(avgmap,1),size(avgmap,2),100); meanmov{2}=meanmov{1};
@@ -1319,29 +1326,56 @@ end
 
 % %%% overlay behavior on top of topomaps
 clear behav
-%matlabpool
-for f = 1:length(use)
- %for f =1:1
-     f
-    try
-        behav{f} = overlayMaps(files(use(f)),pathname,outpathname);
-    catch
-        sprintf('couldnt do behav on %d',f)
-    end
-    
-end
-%matlabpool close
+for f = 1:length(use); behav{f}=[]; end;
 
-allsubj = unique({files(use).subj})
-for s = 1:length(allsubj)
-    
-    s
+matlabpool open
+tic
+clear correct ntrials
+for f = 1:length(use)
+    [behav{f} correct(f) ntrials(f)] = overlayMaps(files(use(f)),pathname,outpathname,1);
+end
+toc
+matlabpool close
+sprintf('subj %s correct %f trials %f',allsubj{s},mean(correct),mean(ntrials))
+
+% for f = 1:length(use)
+%  %for f =1:1
+%      f
+%    % try
+%          try
+%         clear movemap
+%     [pathname files(use(f)).topoy]
+%     load([pathname files(use(f)).topoy],'movemap');
+%     figure
+%     imagesc(movemap,[-0.1 0.1])
+%     movemap = movemap-mean(movemap(:));
+%          
+%        norunbehav = behav{f};
+%        zm = size(norunbehav,3)/size(movemap,2);
+%        movemap = imresize(movemap,zm);
+%        movemap = movemap/sqrt(sum(movemap(:).*movemap(:)));
+%        for t = 1:size(norunbehav,1)
+%            data = squeeze(norunbehav(t,:,:));
+%            data = data-mean(data(:));
+%            runcomponent = sum(sum(data.*movemap));
+%            norunbehav(t,:,:) = squeeze(norunbehav(t,:,:)) - runcomponent * movemap;
+%        end
+%        behavNoRun{f} = norunbehav;
+%     catch
+%         display('no movemap')
+%         close(gcf)
+%     end 
+% 
+% end
+% 
+
+    %behav=behavNoRun;
+
     allsubj{s}
 nb=0; avgbehav=0;
 for f= 1:length(use)
 %for f= 1:1
     if ~isempty(behav(f)) & strcmp(files(use(f)).subj,allsubj{s}) & allxshift(f)>-20;
-       f
        b = shiftdim(behav{f},1);
         zoom = 260/size(b,1);
         b = shiftImageRotate(b,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
@@ -1353,32 +1387,34 @@ avgbehav = avgbehav/nb;
 
 
 
+
 figure
 for t= 4:12
     subplot(3,3,t-3);
     imshow(avgmap);
     hold on
     data = squeeze(avgbehav(:,:,t));
-    h = imshow(mat2im(data,hot,[0 0.2]));
+  
+    h = imshow(mat2im(data,jet,[0 0.15]));
     transp = zeros(size(squeeze(avgmap(:,:,1))));
-    transp(abs(data)>0.05)=1;
+    transp(abs(data)>=0.00)=1;
     set(h,'AlphaData',transp);
     
 end
 title(allsubj{s})
 end
 
-%%% analyze 4-phase data (e.g. looming and grating)
-for f = 1:length(use)
-    loom_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'loom');
-end
-
-fourPhaseAvg(loom_resp,allxshift+x0,allyshift+y0,allthetashift,zoom, sz, avgmap);
-
-for f = 1:length(use)
- f
- grating_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'grating');
-end
-
-
-fourPhaseAvg(grating_resp,allxshift+x0,allyshift+y0, allthetashift,zoom*0.57, sz, avgmap);
+% %%% analyze 4-phase data (e.g. looming and grating)
+% for f = 1:length(use)
+%     loom_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'loom');
+% end
+% 
+% fourPhaseAvg(loom_resp,allxshift+x0,allyshift+y0,allthetashift,zoom, sz, avgmap);
+% 
+% for f = 1:length(use)
+%  f
+%  grating_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'grating');
+% end
+% 
+% 
+% fourPhaseAvg(grating_resp,allxshift+x0,allyshift+y0, allthetashift,zoom*0.57, sz, avgmap);

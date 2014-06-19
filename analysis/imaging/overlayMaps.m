@@ -1,41 +1,63 @@
-function data = overlayMaps(expfile,pathname,outpathname)
-
+function [data percentCorrect numtrials] = overlayMaps(expfile,pathname,outpathname,showImg)
+if ~exist('showImg','var')
+    showImg=0;
+end
 opengl software
 if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
     load([pathname expfile.behav]); %%% behavior
     load( [outpathname expfile.subj expfile.expt '_topography.mat']); %%% topography
     
+    resp_time = starts(3,:)-starts(2,:);
+    tr = find(resp_time>0.5 & resp_time>0.6);
+    percentCorrect = sum(correct(tr))/length(tr);
+    sprintf('correct = %f',percentCorrect)
+    
     basemap =merge;
     titles = {'all trials','left trials','right trials','left-right','correct','incorrect','correct-incorrect'};
     
+
+    
     resp_time = starts(3,trials)-starts(2,trials);
-%     figure
-%     hist(resp_time,0.3:0.02:0.6)
+    correct=correct(trials);
+    targ=targ(trials);
+
+    
+    %     figure
+    %     hist(resp_time,0.3:0.02:0.6)
     oldbg = bg;
-%     minbg = min(bg,[],2);
-%     bg = bg-repmat(minbg,[1 size(bg,2) 1 1]);
+        minbg = min(bg,[],2);
+        bg = bg-repmat(minbg,[1 size(bg,2) 1 1]);
     
     for i =1:1
         if i==1
-            decon = deconvg6s(nanmedianMW(bg(correct(trials)==1&targ(trials)<2&resp_time>0.3 & resp_time<0.6,:,:,:)),0.1);
+            useTrials = find(correct==1&targ<2&resp_time>0.5 & resp_time<0.6);
+            numtrials = length(useTrials);
+            decon = deconvg6sParallel(nanmedianMW(bg(useTrials,:,:,:)),0.1);
             all_decon=squeeze(decon);
         elseif i==2
-            decon = deconvg6s(nanmedianMW(bg(targ(trials)<0,:,:,:)),0.1);
+            decon = deconvg6s(nanmedianMW(bg(targ<0,:,:,:)),0.1);
         elseif i==3
-            decon = deconvg6s(nanmedianMW(bg(targ(trials)>0,:,:,:)),0.1);
+            decon = deconvg6s(nanmedianMW(bg(targ>0,:,:,:)),0.1);
         elseif i ==4
-            decon = deconvg6s(nanmedianMW(bg(targ(trials)>0,:,:,:)),0.1) - deconvg6s(nanmedianMW(bg(targ(trials)<0,:,:,:)),0.1);
+            numtrials = 1;
+            decon = deconvg6sParallel(nanmedianMW(bg(targ>0,:,:,:)),0.1) - deconvg6sParallel(nanmedianMW(bg(targ<0,:,:,:)),0.1);
         elseif i==5
             
-            decon = deconvg6s(nanmedianMW(bg(correct(trials)==1,:,:,:)),0.1) ;
+            decon = deconvg6s(nanmedianMW(bg(correct==1,:,:,:)),0.1) ;
         elseif i==6
-            decon = deconvg6s(nanmedianMW(bg(correct(trials)==0,:,:,:)),0.1)
+            decon = deconvg6s(nanmedianMW(bg(correct==0,:,:,:)),0.1)
         elseif i==7
-            
-            decon = deconvg6s(nanmedianMW(bg(correct(trials)==1,:,:,:)),0.1) - deconvg6s(nanmedianMW(bg(correct(trials)==0,:,:,:)),0.1);
+             if ~isempty(bg(correct==0&targ<2&resp_time>0.3 & resp_time<0.6,:,:,:))
+                 decon = deconvg6s(nanmedianMW(bg(correct==1&targ<2&resp_time>0.3 & resp_time<0.6,:,:,:)),0.1)-deconvg6s(nanmedianMW(bg(correct==0&targ<2&resp_time>0.3 & resp_time<0.6,:,:,:)),0.1);
+             else
+                 display('no wrong trials')
+                  error;
+                  decon = deconvg6s(nanmedianMW(bg(correct(trials)==1&targ(trials)<2&resp_time>0.3 & resp_time<0.6,:,:,:)),0.1);
+             end
+           % decon = deconvg6s(nanmedianMW(bg(correct(trials)==1,:,:,:)),0.1) - deconvg6s(nanmedianMW(bg(correct(trials)==0,:,:,:)),0.1);
         end
         use_pts=find(pts>=0);
-        if i==0
+        if i==0 & showImg
             figure
             subplot(2,2,1)
             imshow(polarMapTest(basemap));
@@ -54,40 +76,45 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
             imshow(mat2im(data,jet,[-0.15 0.15]));
         end
         
-        figure
-        use_pts=find(pts>=0)
-        for t=1:6
-            subplot(2,3,t);
-            if i~=4 & i~=7
-                himg = imshow((basemap));
+        if showImg
+            figure
+            
+            use_pts=find(pts>=0);
+            for t=1:6
+                data = imresize(squeeze(decon(1,use_pts(t),:,:)),size(squeeze(basemap(:,:,1))));
+                subplot(2,3,t);
+                if i~=4 & i~=7
+                    himg = imshow((basemap));
+                end
+                % set(himg,'alphadata',0.5)
+                hold on
+                
+                if i==4 | i==7
+                    hbehav = imshow(mat2im(data,jet,[-0.15 0.15]));
+                else
+                    hbehav = imshow(mat2im(data,hot,[0 0.2]));
+                end
+                transp = zeros(size(data));
+                if i==4 | i  ==7
+                    % transp(abs(data)>0.02)=0.75;
+                    transp=1;
+                else
+                    transp(abs(data)>0.0)=1; %% was 0.05
+                    %transp=1;
+                end
+                set(hbehav,'AlphaData',transp);
+                if t ==6
+                    title(titles{i});
+                elseif t ==1
+                    title([expfile.subj ' ' expfile.expt ' ' expfile.task]);
+                end
             end
-            % set(himg,'alphadata',0.5)
-            hold on
-            data = imresize(squeeze(decon(1,use_pts(t),:,:)),size(squeeze(basemap(:,:,1))));
-            if i==4 | i==7
-                hbehav = imshow(mat2im(data,jet,[-0.15 0.15]));
-            else
-                hbehav = imshow(mat2im(data,hot,[0 0.2]));
-            end
-            transp = zeros(size(data));
-            if i==4 | i  ==7
-                % transp(abs(data)>0.02)=0.75;
-                transp=1;
-            else
-                transp(abs(data)>0.05)=1;
-                %transp=1;
-            end
-            set(hbehav,'AlphaData',transp);
-            if t ==6
-                title(titles{i});
-            elseif t ==1
-                 title([expfile.subj ' ' expfile.expt ' ' expfile.task]);
-            end
+            %    fname = [fb(1:end-14) '_' titles{i} '.fig']
+            %     saveas(gcf,fullfile('c:\data\imaging\figs',fname),'fig')
+            %saveas(gcf,fullfile(pb,fname),'jpg')
         end
-        %    fname = [fb(1:end-14) '_' titles{i} '.fig']
-        %     saveas(gcf,fullfile('c:\data\imaging\figs',fname),'fig')
-        %saveas(gcf,fullfile(pb,fname),'jpg')
     end
+    
 end
 data = squeeze(decon);
 end

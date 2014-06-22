@@ -1,6 +1,7 @@
 function shiftimg = shiftImage(img,xshift,yshift, zoom, width);
 xshift
 yshift
+display('using old shiftImage')
 img_range = -width:width;
 img = imresize(img,zoom,'bilinear');
 x0 = round(size(img,1)/2);

@@ -5,6 +5,8 @@ end
 perFrames = round(period*framerate);
 map =0;
 
+im = im(:,:,perFrames+1:end);
+
 length(im);
 nframes = floor(length(im)/perFrames)*perFrames;
 cycmap = zeros(ceil(size(im,1)*binning),ceil(size(im,2)*binning),perFrames);
@@ -33,7 +35,7 @@ for f = 1:perFrames;
     cycmap(:,:,f) = cycmap(:,:,f)-xymin;
 end
 repcycmap = repmat(cycmap,[1 1 3]);
-dcycmap = squeeze(deconvg6s(shiftdim(repcycmap,2),0.1));
+dcycmap = squeeze(deconvg6sParallel(shiftdim(repcycmap,2),0.1));
 dcycmap = dcycmap(perFrames+1:2*perFrames,:,:)*perFrames/nframes;
 
 for f=1:perFrames

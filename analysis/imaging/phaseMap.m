@@ -5,6 +5,8 @@ end
 perFrames = round(period*framerate);
 map =0;
 
+im = im(:,:,perFrames+1:end);
+
 length(im);
 nframes = floor(length(im)/perFrames)*perFrames;
 cycmap = zeros(ceil(size(im,1)*binning),ceil(size(im,2)*binning),perFrames);

@@ -49,8 +49,9 @@ allsubj{s}
 nb=0; avgbehav=0;
 for f= 1:length(use)
     %for f= 1:1
-    if ~isempty(behav(f)) & strcmp(files(use(f)).subj,allsubj{s}) & allxshift(f)>-20;
-        b = shiftdim(behav{f},1);
+    if ~isempty(behav{f})  & allxshift(f)>-20 % & strcmp(files(use(f)).subj,allsubj{s}) ;
+      f
+      b = shiftdim(behav{f},1);
         zoom = 260/size(b,1);
         b = shiftImageRotate(b,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
         avgbehav = avgbehav+b;
@@ -60,8 +61,8 @@ end
 avgbehav = avgbehav/nb;
 
 figure
-for t= 4:12
-    subplot(3,3,t-3);
+for t= 1:16  %10:18
+    subplot(4,4,t);
     imshow(avgmap);
     hold on
     data = squeeze(avgbehav(:,:,t));

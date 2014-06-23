@@ -1,4 +1,6 @@
 function [data percentCorrect numtrials] = overlayMaps(expfile,pathname,outpathname,showImg)
+
+dbstop if error
 if ~exist('showImg','var')
     showImg=0;
 end
@@ -8,9 +10,37 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
     load( [outpathname expfile.subj expfile.expt '_topography.mat']); %%% topography
     
     resp_time = starts(3,:)-starts(2,:);
+    stop_time = starts(2,:)-starts(1,:);
     tr = find(resp_time>0.5 & resp_time>0.6);
     percentCorrect = sum(correct(tr))/length(tr);
+ 
+    
+    percentIncorrect = sum(~correct(tr))/length(tr);
     sprintf('correct = %f',percentCorrect)
+    
+    clear histcorrect
+    for d = 1:10;
+        histcorrect(d) = mean(correct(resp_time>(d-1)/10 & resp_time<d/10));
+    end
+    histcorrect(15) = mean(correct(resp_time>1.5));
+    histcorrect(isnan(histcorrect))=0;
+    figure
+    plot(0.05:0.1:1.5,histcorrect);
+    xlabel('response time')
+    ylim([ 0 1])
+    
+    hold on
+    h = hist(resp_time,0.05:0.1:1.5);
+    plot(0.05:0.1:1.5,h/sum(h),'k');
+    
+%         for d = 1:20;
+%         histcorrect(d) = mean(correct(stop_time>(d-1)/2 & stop_time<d/2));
+%     end
+%         figure
+%         histcorrect(isnan(histcorrect))=0;
+%     plot(0.5:0.5:10,histcorrect);
+%     xlabel('stopping time')
+%  
     
     basemap =merge;
     titles = {'all trials','left trials','right trials','left-right','correct','incorrect','correct-incorrect'};
@@ -18,6 +48,7 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
 
     
     resp_time = starts(3,trials)-starts(2,trials);
+    stop_time = stop_time(trials);
     correct=correct(trials);
     targ=targ(trials);
 
@@ -25,14 +56,32 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
     %     figure
     %     hist(resp_time,0.3:0.02:0.6)
     oldbg = bg;
-        minbg = min(bg,[],2);
+       % minbg = min(bg,[],2);
+        % minbg = nanmedianMW(bg(:,pts>=-0.5 & pts<0,:,:),2);
+        minbg = min(bg(:,pts>=-0.5 & pts<=0,:,:),[],2);
         bg = bg-repmat(minbg,[1 size(bg,2) 1 1]);
     
     for i =1:1
         if i==1
-            useTrials = find(correct==1&targ<2&resp_time>0.5 & resp_time<0.6);
-            numtrials = length(useTrials);
-            decon = deconvg6sParallel(nanmedianMW(bg(useTrials,:,:,:)),0.1);
+            useTrials = find(correct==1&resp_time>0.3 & resp_time<0.6 & stop_time<1.1);
+            for j =1:5
+                tr = ceil(rand*length(useTrials));
+                figure
+                for fr = 1:24
+                    subplot(4,6,fr);
+                    imagesc(squeeze(bg(useTrials(tr),fr,:,:)),[0 0.15]);
+                    axis off
+                end
+            end
+          %  keyboard
+            numtrials = length(useTrials)
+            %keyboard
+           if numtrials==0
+               data=[];
+               return
+           end
+           
+               decon = deconvg6sParallel(nanmedianMW(bg(useTrials,4:end,:,:)),0.1);
             all_decon=squeeze(decon);
         elseif i==2
             decon = deconvg6s(nanmedianMW(bg(targ<0,:,:,:)),0.1);
@@ -56,7 +105,7 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
              end
            % decon = deconvg6s(nanmedianMW(bg(correct(trials)==1,:,:,:)),0.1) - deconvg6s(nanmedianMW(bg(correct(trials)==0,:,:,:)),0.1);
         end
-        use_pts=find(pts>=0);
+        use_pts=find(pts>=0)-3;
         if i==0 & showImg
             figure
             subplot(2,2,1)
@@ -79,7 +128,7 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
         if showImg
             figure
             
-            use_pts=find(pts>=0);
+            use_pts=find(pts>=0)-3;
             for t=1:6
                 data = imresize(squeeze(decon(1,use_pts(t),:,:)),size(squeeze(basemap(:,:,1))));
                 subplot(2,3,t);
@@ -92,7 +141,7 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
                 if i==4 | i==7
                     hbehav = imshow(mat2im(data,jet,[-0.15 0.15]));
                 else
-                    hbehav = imshow(mat2im(data,hot,[0 0.2]));
+                    hbehav = imshow(mat2im(data,jet,[0 0.2]));
                 end
                 transp = zeros(size(data));
                 if i==4 | i  ==7

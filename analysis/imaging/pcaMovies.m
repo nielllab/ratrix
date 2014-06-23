@@ -1,5 +1,5 @@
 function pcaMovies(fname,label)
-load(fname,'dfof_bg')
+load(fname,'dfof_bg','sp')
 
 
 sz = size(imresize(squeeze(dfof_bg(:,:,1)),0.25));

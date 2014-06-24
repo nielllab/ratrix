@@ -59,7 +59,7 @@ end
 
 if stimulus.duration==50  %stimulus.freq empty for phoneme, [1] for phonemelaser 
     %special case for laserCal
- details.laserON = 1; %laser is on for 10% of trials
+ details.laserON = 1; %laser is on for all trials
  details.laser_duration=30; %seconds
  details.laser_start_time=Inf; 
  details.laser_off_time=Inf;
@@ -110,7 +110,7 @@ if ~isempty(stimulus.freq) %laser assignment - random stimulus for laser trials
 
 %default case (e.g. rights==lefts )
 
-if lefts>rights %choose a left stim (wav1)
+if lefts>rights %choose a left stim (wav1) %%%this is flipped to wav2 for pwRR soundType
     details.toneFreq = 1;
 elseif rights>lefts %choose a right stim (wav2)
     details.toneFreq = 0;

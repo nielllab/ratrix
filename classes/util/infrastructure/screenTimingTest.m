@@ -290,6 +290,7 @@ try
             if timestamps.frameTime-timestamps.VBL>.3*ifi
                 %this occurs when my osx laptop runs on battery power
                 fprintf('frameNum %g: long delay inside flip after the swap-- ft-vbl:%g%% of ifi, now-vbl:%g\n',frameNum,100*(timestamps.frameTime-timestamps.VBL)/ifi,GetSecs-timestamps.VBL)
+                fprintf('3')    
             end
 
             headroom=1000*(timestamps.lastVBL + ifi - timestamps.drawingFinished);

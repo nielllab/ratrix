@@ -48,6 +48,7 @@ timestamps.postFlipPulse=GetSecs;
 if timestamps.ft-timestamps.vbl>.15*ifi
     %this occurs when my osx laptop runs on battery power
     fprintf('long delay inside flip after the swap-- ft-vbl:%.15g%% of ifi, now-vbl:%.15g\n',(timestamps.ft-timestamps.vbl)/ifi,GetSecs-timestamps.vbl)
+    fprintf('2')
 end
 
 end % end function

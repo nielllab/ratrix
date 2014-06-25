@@ -2,9 +2,9 @@ function [norm_grad amp_all map_all gradmapAll merge]= getRegions(expfile, pathn
 
 opengl software
 if strcmp(expfile.monitor,'vert')
-    maptype = {'topox','topoy'}
+    maptype = {'topox','topoy'};
 elseif strcmp(expfile.monitor,'land')
-     maptype = {'topoy','topox'}
+     maptype = {'topoy','topox'};
 end
 
     
@@ -46,7 +46,7 @@ end
         
         gradmap = grad.*amp./abs(grad);
         gradmap(isnan(gradmap))=0;
-        size(gradmap)
+        size(gradmap);
   
         gradmapAll(:,:,1+(m-1)*2) = real(gradmap);
         gradmapAll(:,:,2+(m-1)*2) = imag(gradmap);

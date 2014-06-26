@@ -1,4 +1,4 @@
-for t = 4:4
+for t = 1:length(t)
 for f = 1:length(files);
 f
 
@@ -15,11 +15,17 @@ elseif t==4
 type = 'topox';
 typedata = 'topoxdata';
 elseif t==5
-type = 'step_binary';
-typedata = 'step_binarydata';
+type = 'stepbinary';
+typedata = 'stepbinary';
 elseif t==6
 type = 'topoxreverse';
 typedata = 'topoxreversedata';
+elseif t==7
+type = 'auditory';
+typedata = 'auditory';
+elseif t==8
+type = 'darkness';
+typedata = 'darkness';
 end
 exist([pathname getfield(files(f),type)],'file');
 type

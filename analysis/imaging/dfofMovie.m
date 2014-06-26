@@ -16,7 +16,7 @@ end
 datadir = p;
 
 [dfof map mapNorm cycMap]= readTifBlueGreen(datafile);
-keyboard
+%keyboard
 use_chan=3;
 
 % [dfof map mapNorm]= readTifGreen;

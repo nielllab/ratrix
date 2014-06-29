@@ -55,7 +55,7 @@ switch subjIDs{1}
 %        
    case 'bfly2b.3rt'
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 30;
+       rewardSizeULorMS        = 40;
        msPenalty               =4200; 
 %        
 %    case 'g62b4ln'

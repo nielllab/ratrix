@@ -305,73 +305,73 @@ recs = {
 %         {[1585 1893],[1585 1885],'051714 G62B.3RT HvV_vertical Behavior','g62b.3rt_run1_hvv_vertical_fstop11_exp50ms'}
 %     }
 %     }    
-    
-         {'g62b4ln' {
-%     {[1 298],[],'022114 G62B.4-LN GTS Behavior','G62B.4-LN_run1_GTS_behavior_15msexp'}     
-%      {[299 558],[],'022414 G62B.4-LN GTS Behavior','G62B.4-LN_run1_GTS_Behavior_15msexp_only_blue_1.5secCorrectStim'} %%light off for first 13 frames
-% %     {[559 572],[],'030114 G62B.4-LN GTS Behavior (Top Fstop-11)\G62B.4-LN_run1_GTS_Behavior_topFstop-11_30msexp_badNoWaterReward','G62B.4-LN_run1_GTS_Behavior_topFstop-11_30msexp'}  % no water reward
-% %    {[573 573],[],'030114 G62B.4-LN GTS Behavior (Top Fstop-11)\G62B.4-LN_run2_GTS_Behavior_topFstop-11_30msexp_bad_LEDtrouble','G62B.4-LN_run2_GTS_Behavior_topFstop-11_30msexp'}  %led trouble (both 0n)
-% %     {[574 582],[],'030114 G62B.4-LN GTS Behavior (Top Fstop-11)\G62B.4-LN_run3_GTS_Behavior_topFstop-11_30msexp_Bad_LEDtrouble','G62B.4-LN_run3_GTS_Behavior_topFstop-11_30msexp'}  %led trouble
-%     {[583 748],[],'030114 G62B.4-LN GTS Behavior (Top Fstop-11)\G62B.4-LN_run4_GTS_Behavior_topFstop-11_30msexp','G62B.4-LN_run4_GTS_Behavior_topFstop-11_30msexp'}
-%      {[749 1015],[],'050314 G62b4-LN_ GTS behavior\G62B4-LN_run1_GTS_behavior_50ms_exp_fstop_8','G62B4-LN_run1_GTS_behavior_50ms_exp_fstop_8'}
-        {[1016 1254],[],'051914 G62b4-LN GTS behavior\G62b4-ln_GTS_behavior_50ms_Fstop_11','G62b4-ln_GTS_behavior_50ms_Fstop_11'}
-         {[1255 1397],[],'052414 g62b.4ln gts behavior\g62b.4ln_run1_gts_fstop11_exp50ms','g62b.4ln_run1_gts_fstop11_exp50ms'}
-%      {[1398 1496],[],'051914',''}BAD
-         {[1497 1788],[],'060614 g62b.4LN gts behavior\g62b4ln_run1_gts_fstop11_exp50ms','g62b4ln_run1_gts_fstop11_exp50ms'}
-         {[1789 2154],[],'060714 g62b,4ln gts behavior\g62b.4ln_run1_gts_spatial200_fstop11_exp50ms','g62b.4ln_run1_gts_spatial200_fstop11_exp50ms'}
-         {[2155 2342],[],'060814 g62b.4ln gts behavior 400spatial\g62b.4ln_run1_gts_fstop11_spatial400_exp50ms','g62b.4ln_run1_gts_fstop11_spatial400_exp50ms'}
-    }
-    }      
-           {'g62b7lt' {
-      {[1 176],[],'022314 G62B.7-LT HvV_center Behavior\G62B.7-LT_run1_HvV_center_Behavior_15msexp','G62B.7-LT_run1_HvV_center_Behavior_15msexp'}     
-      {[177 469],[],'022514 G62B.7-LT HvV_center Behavior\G62B.7-LT_run1_HvV_center_Behavior_15msexp','G62B.7-LT_run1_HvV_center_Behavior_15msexp'}
-      {[470 739],[],'030114 G62B.7-LT HvV_center Behavior\G62B.7-LT_run1_HvV_center_behavior_Fstop5.6_50msexp','G62B.7-LT_run1_HvV_center_behavior_Fstop5.6_50msexp'}
-      {[740 1031],[],'030214 G62B.7-LT HvV_center behavior\G62B.7-LT_run1_HvV_center_behavior_Fstop_8_50msexp','G62B.7-LT_run1_HvV_center_behavior_Fstop_8_50msexp'}
-%      {[1032 1154],[],'030614 G62B.7-LT HvV_center Behavior\G62B.7_run1_HvV_center_behavior_Fstop_4_50msexp','G62B.7_run1_HvV_center_behavior_Fstop_4_50msexp'}
-%     {[1155 1176],[],'030614 G62B.7-LT HvV_center Behavior\G62B.7_run2_HvV_center_behavior_Fstop_4_50msexp','G62B.7_run2_HvV_center_behavior_Fstop_4_50msexp'}
-      {[1177 1451],[],'031114 G62B.7-LT HvV_center Behavior\G62B.7-LT_run1_HvV_center_behavior_Fstop4_50msexp','G62B.7-LT_run1_HvV_center_behavior_Fstop4_50msexp'}
-      {[1452 1558],[],'042214 g62b.7 LT HvV_center_behavior\G62b7lt_run1_HvV_center_fstop5.6_exp50ms_only9999images','G62b7lt_run1_HvV_center_fstop5.6_exp50ms'}   
-      {[1559 1946],[],'042414 G62B.7LT HvV_center Behavior\G62B.7LT_run1_HvV_center_fstop5.6_exp50ms','G62B.7LT_run1_HvV_center_fstop5.6_exp50ms'}
-%       %{[1947 2062],[],'file deleted 042914'}
-%       %{[2063 2063],[],'file deleted 042914'}
-       {[2064 2182],[],'042914 G62B.7 LT Behavior HvV Center\g62b.7lt_run1_hvv_center_fstop5.6_exp50ms','g62b.7lt_run1_hvv_center_fstop5.6_exp50ms'}
-       {[2183 2438],[],'051414 g62B.7LT HvV_center Behavior\g62b.7lt_run1_hvV_center_fstop5.6_exp50','g62b.7lt_run1_hvV_center_fstop5.6_exp50'}
-    }
-    }
-    
-        {'g62b8tt' {
-      {[1 388],[],'041814 G62B.8-tt HvV_center Behavior\G62B.8-TT_run1_HvV_center_50msexp_5.6Fstop','G62B.8-TT_run1_HvV_center_50msexp_5.6Fstop'}     
-      {[389 649],[],'042114 G62B8-TT HvV_center Behavior','G62B8TT_run1_HvV_center_50msexp_5.6fstp'} 
-     {[650 953],[650 775],'042414 G62b.8TT HvV_center Behavior\g62B.8TT_run1_HvV_center_fstop5.6_exp50ms_lightblockconetipperatendoftrial','g62B.8TT_run1_HvV_center_fstop5.6_exp50ms'}  %% light block hat tiped towards end of session
-%multiTiff      {[954 1213],[],'051614 G62b8-TT HvV_center Behavior\G62B8-TT_run1_HvV_center_behavior_50ms_F_11','G62B8-TT_run1_HvV_center_behavior_50ms'}  %MultiTif file *(can we analyze?)
-        {[1214 1675],[],'051714 G62B.8TT HvV_center Behavior\g62B.8TT_run1_hvv_center_fstop11_exp50ms','g62B.8TT_run1_hvv_center_fstop11_exp50ms'}
-   }
-   }      
-    
-        {'g62c.2rt' {
-      {[1 194],[],'031114 G62C.2-RT HvV_center Behavior\G62C.2-RT_run1_HvV_center_behavior_F_4_50msexp','G62C.2-RT_run1_HvV_center_behavior_F_4_50msexp'}  
-%        {[195 195],[],'050414 G62C2_RT HvV_center Behavior\G62C2-RT_run1_HvV_center_behavior_50ms_exp_fstop_8_NO BLUE','G62C2-RT_run1_HvV_center_behavior_50ms_exp_fstop_8'}  %no blue led
-       {[196 415],[196 300],'050414 G62C2_RT HvV_center Behavior\G62C2-RT_run2_HvV_center_behavior_50ms_exp_fstop_8','G62C2-RT_run2_HvV_center_behavior_50ms_exp_fstop_8'}%% light block hat tiped towards end of session
-%         {[416 667],[],'050814 G62c.2 rt HvV_center Behavior\g62c.2rt_run2_HvV_center_fstop5.6_exp50ms','g62c.2rt_run2_HvV_center_fstop5.6_exp50ms'} %green LED left on for all of behavior %error in analysis
-        {[668 876],[],'051614 G62c2-rt HvV_center Behavior\G62c-rt_run1_HvV_center_behavior_50msexp_Fstop_8','G62c-rt_run1_HvV_center_behavior_50msexp_Fstop_8'}
-    }
-    }    
-    
-         {'g62g4lt' {
-      {[1 214],[],'041814 G62G.4-LT HvV_center behavior\041814_G62G4-LT_run1_HvV_center_50ms_F5.6_shadowGreenChannel','041814_G62G4-LT_run1_HvV_center_50ms_F5.6_shadowGreenChannel'}     
-      {[215 383],[],'042114 g62g.4-lt HvV_center behavior\g62g.4lt_run1_HvV_center_50msexp_5.6fstop','g62g.4lt_run1_HvV_center_50msexp_5.6fstop'} 
-       {[384 585],[],'050414 G62G.4 LT HvV_center behavior\g62g.4ln_run1_HvV_center_fstop5.6_exp50ms','g62g.4ln_run1_HvV_center_fstop5.6_exp50ms'} 
-        {[586 806],[],'051614 G62G.4LT HvV Behavior\g62g,4lt_run1_hvv_center_fstop11_exp50ms','g62g,4lt_run1_hvv_center_fstop11_exp50ms'} 
-        {[807 915],[],'051814 g62g.4lt HvV Center behavior\g62g,4lt_run1_hvvcenter_fstop11_exp50ms','g62g,4lt_run1_hvvcenter_fstop11_exp50ms'} 
-    }
-    }   
-    
-        {'g62h1tt' {
-       {[1 151],[],'042414 g62h.1tt HvV_center behavior\G62h.1tt_run1_HvV_center_fstop5.6_exp50ms','G62h.1tt_run1_HvV_center_fstop5.6_exp50ms'}     
-         {[152 330],[],'050614 G62H.1TT HvV Center Behavior\g62h.1tt_run1_HvV_center_fstop5.6_exp50ms','g62h.1tt_run1_HvV_center_fstop5.6_exp50ms'}  
-%hmm        {[331 564],[],'051414 G62H.1TT HvV_center Behavior\g62h.1tt_run1_HvV_center_fstop5.6_exp50ms','g62h.1tt_run1_HvV_center_fstop5.6_exp50ms'} % couldnt analyze?
-    }
-    }     
+%     
+%          {'g62b4ln' {
+%      {[1 298],[],'022114 G62B.4-LN GTS Behavior','G62B.4-LN_run1_GTS_behavior_15msexp'}     
+%       {[299 558],[300 558],'022414 G62B.4-LN GTS Behavior','G62B.4-LN_run1_GTS_Behavior_15msexp_only_blue_1.5secCorrectStim'} %%light off for first 13 frames
+% % %     {[559 572],[],'030114 G62B.4-LN GTS Behavior (Top Fstop-11)\G62B.4-LN_run1_GTS_Behavior_topFstop-11_30msexp_badNoWaterReward','G62B.4-LN_run1_GTS_Behavior_topFstop-11_30msexp'}  % no water reward
+% % %    {[573 573],[],'030114 G62B.4-LN GTS Behavior (Top Fstop-11)\G62B.4-LN_run2_GTS_Behavior_topFstop-11_30msexp_bad_LEDtrouble','G62B.4-LN_run2_GTS_Behavior_topFstop-11_30msexp'}  %led trouble (both 0n)
+% % %     {[574 582],[],'030114 G62B.4-LN GTS Behavior (Top Fstop-11)\G62B.4-LN_run3_GTS_Behavior_topFstop-11_30msexp_Bad_LEDtrouble','G62B.4-LN_run3_GTS_Behavior_topFstop-11_30msexp'}  %led trouble
+%      {[583 748],[],'030114 G62B.4-LN GTS Behavior (Top Fstop-11)\G62B.4-LN_run4_GTS_Behavior_topFstop-11_30msexp','G62B.4-LN_run4_GTS_Behavior_topFstop-11_30msexp'}
+%       {[749 1015],[],'050314 G62b4-LN_ GTS behavior\G62B4-LN_run1_GTS_behavior_50ms_exp_fstop_8','G62B4-LN_run1_GTS_behavior_50ms_exp_fstop_8'}
+%         {[1016 1254],[],'051914 G62b4-LN GTS behavior\G62b4-ln_GTS_behavior_50ms_Fstop_11','G62b4-ln_GTS_behavior_50ms_Fstop_11'}
+%          {[1255 1397],[],'052414 g62b.4ln gts behavior\g62b.4ln_run1_gts_fstop11_exp50ms','g62b.4ln_run1_gts_fstop11_exp50ms'}
+% %%      {[1398 1496],[],'051914',''}BAD
+%          {[1497 1788],[],'060614 g62b.4LN gts behavior\g62b4ln_run1_gts_fstop11_exp50ms','g62b4ln_run1_gts_fstop11_exp50ms'}
+%          {[1789 2154],[],'060714 g62b,4ln gts behavior\g62b.4ln_run1_gts_spatial200_fstop11_exp50ms','g62b.4ln_run1_gts_spatial200_fstop11_exp50ms'}
+%          {[2155 2342],[],'060814 g62b.4ln gts behavior 400spatial\g62b.4ln_run1_gts_fstop11_spatial400_exp50ms','g62b.4ln_run1_gts_fstop11_spatial400_exp50ms'}
+%     }
+%     }      
+%            {'g62b7lt' {
+%       {[1 176],[],'022314 G62B.7-LT HvV_center Behavior\G62B.7-LT_run1_HvV_center_Behavior_15msexp','G62B.7-LT_run1_HvV_center_Behavior_15msexp'}     
+%       {[177 469],[],'022514 G62B.7-LT HvV_center Behavior\G62B.7-LT_run1_HvV_center_Behavior_15msexp','G62B.7-LT_run1_HvV_center_Behavior_15msexp'}
+%       {[470 739],[],'030114 G62B.7-LT HvV_center Behavior\G62B.7-LT_run1_HvV_center_behavior_Fstop5.6_50msexp','G62B.7-LT_run1_HvV_center_behavior_Fstop5.6_50msexp'}
+%       {[740 1031],[],'030214 G62B.7-LT HvV_center behavior\G62B.7-LT_run1_HvV_center_behavior_Fstop_8_50msexp','G62B.7-LT_run1_HvV_center_behavior_Fstop_8_50msexp'}
+% %      {[1032 1154],[],'030614 G62B.7-LT HvV_center Behavior\G62B.7_run1_HvV_center_behavior_Fstop_4_50msexp','G62B.7_run1_HvV_center_behavior_Fstop_4_50msexp'}
+% %     {[1155 1176],[],'030614 G62B.7-LT HvV_center Behavior\G62B.7_run2_HvV_center_behavior_Fstop_4_50msexp','G62B.7_run2_HvV_center_behavior_Fstop_4_50msexp'}
+%       {[1177 1451],[],'031114 G62B.7-LT HvV_center Behavior\G62B.7-LT_run1_HvV_center_behavior_Fstop4_50msexp','G62B.7-LT_run1_HvV_center_behavior_Fstop4_50msexp'}
+%       {[1452 1558],[],'042214 g62b.7 LT HvV_center_behavior\G62b7lt_run1_HvV_center_fstop5.6_exp50ms_only9999images','G62b7lt_run1_HvV_center_fstop5.6_exp50ms'}   
+%       {[1559 1946],[],'042414 G62B.7LT HvV_center Behavior\G62B.7LT_run1_HvV_center_fstop5.6_exp50ms','G62B.7LT_run1_HvV_center_fstop5.6_exp50ms'}
+% %       %{[1947 2062],[],'file deleted 042914'}
+% %       %{[2063 2063],[],'file deleted 042914'}
+%        {[2064 2182],[],'042914 G62B.7 LT Behavior HvV Center\g62b.7lt_run1_hvv_center_fstop5.6_exp50ms','g62b.7lt_run1_hvv_center_fstop5.6_exp50ms'}
+%        {[2183 2438],[],'051414 g62B.7LT HvV_center Behavior\g62b.7lt_run1_hvV_center_fstop5.6_exp50','g62b.7lt_run1_hvV_center_fstop5.6_exp50'}
+%     }
+%     }
+%     
+%         {'g62b8tt' {
+%       {[1 388],[],'041814 G62B.8-tt HvV_center Behavior\G62B.8-TT_run1_HvV_center_50msexp_5.6Fstop','G62B.8-TT_run1_HvV_center_50msexp_5.6Fstop'}     
+%       {[389 649],[],'042114 G62B8-TT HvV_center Behavior','G62B8TT_run1_HvV_center_50msexp_5.6fstp'} 
+%      {[650 953],[650 775],'042414 G62b.8TT HvV_center Behavior\g62B.8TT_run1_HvV_center_fstop5.6_exp50ms_lightblockconetipperatendoftrial','g62B.8TT_run1_HvV_center_fstop5.6_exp50ms'}  %% light block hat tiped towards end of session
+% %multiTiff      {[954 1213],[],'051614 G62b8-TT HvV_center Behavior\G62B8-TT_run1_HvV_center_behavior_50ms_F_11','G62B8-TT_run1_HvV_center_behavior_50ms'}  %MultiTif file *(can we analyze?)
+%         {[1214 1675],[],'051714 G62B.8TT HvV_center Behavior\g62B.8TT_run1_hvv_center_fstop11_exp50ms','g62B.8TT_run1_hvv_center_fstop11_exp50ms'}
+%    }
+%    }      
+%     
+%         {'g62c.2rt' {
+%       {[1 194],[],'031114 G62C.2-RT HvV_center Behavior\G62C.2-RT_run1_HvV_center_behavior_F_4_50msexp','G62C.2-RT_run1_HvV_center_behavior_F_4_50msexp'}  
+% %        {[195 195],[],'050414 G62C2_RT HvV_center Behavior\G62C2-RT_run1_HvV_center_behavior_50ms_exp_fstop_8_NO BLUE','G62C2-RT_run1_HvV_center_behavior_50ms_exp_fstop_8'}  %no blue led
+%        {[196 415],[196 300],'050414 G62C2_RT HvV_center Behavior\G62C2-RT_run2_HvV_center_behavior_50ms_exp_fstop_8','G62C2-RT_run2_HvV_center_behavior_50ms_exp_fstop_8'}%% light block hat tiped towards end of session
+% %         {[416 667],[],'050814 G62c.2 rt HvV_center Behavior\g62c.2rt_run2_HvV_center_fstop5.6_exp50ms','g62c.2rt_run2_HvV_center_fstop5.6_exp50ms'} %green LED left on for all of behavior %error in analysis
+%         {[668 876],[],'051614 G62c2-rt HvV_center Behavior\G62c-rt_run1_HvV_center_behavior_50msexp_Fstop_8','G62c-rt_run1_HvV_center_behavior_50msexp_Fstop_8'}
+%     }
+%     }    
+%     
+%          {'g62g4lt' {
+%       {[1 214],[],'041814 G62G.4-LT HvV_center behavior\041814_G62G4-LT_run1_HvV_center_50ms_F5.6_shadowGreenChannel','041814_G62G4-LT_run1_HvV_center_50ms_F5.6_shadowGreenChannel'}     
+%       {[215 383],[],'042114 g62g.4-lt HvV_center behavior\g62g.4lt_run1_HvV_center_50msexp_5.6fstop','g62g.4lt_run1_HvV_center_50msexp_5.6fstop'} 
+%        {[384 585],[],'050414 G62G.4 LT HvV_center behavior\g62g.4ln_run1_HvV_center_fstop5.6_exp50ms','g62g.4ln_run1_HvV_center_fstop5.6_exp50ms'} 
+%         {[586 806],[],'051614 G62G.4LT HvV Behavior\g62g,4lt_run1_hvv_center_fstop11_exp50ms','g62g,4lt_run1_hvv_center_fstop11_exp50ms'} 
+%         {[807 915],[],'051814 g62g.4lt HvV Center behavior\g62g,4lt_run1_hvvcenter_fstop11_exp50ms','g62g,4lt_run1_hvvcenter_fstop11_exp50ms'} 
+%     }
+%     }   
+%     
+%         {'g62h1tt' {
+%        {[1 151],[],'042414 g62h.1tt HvV_center behavior\G62h.1tt_run1_HvV_center_fstop5.6_exp50ms','G62h.1tt_run1_HvV_center_fstop5.6_exp50ms'}     
+%          {[152 330],[],'050614 G62H.1TT HvV Center Behavior\g62h.1tt_run1_HvV_center_fstop5.6_exp50ms','g62h.1tt_run1_HvV_center_fstop5.6_exp50ms'}  
+% %hmm        {[331 564],[],'051414 G62H.1TT HvV_center Behavior\g62h.1tt_run1_HvV_center_fstop5.6_exp50ms','g62h.1tt_run1_HvV_center_fstop5.6_exp50ms'} % couldnt analyze?
+%     }
+%     }     
     
     
     

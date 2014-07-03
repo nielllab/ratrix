@@ -20,6 +20,21 @@ for f = 1:length(files)
         errmsg{nerr}=sprintf('couldnt do %s',files(f).topoydata)
         errRpt{nerr}=getReport(exc,'extended')
     end
+    
+%     try
+%         dfofMovie([datapathname files(f).stepbinary]);
+%     catch exc
+%         nerr=nerr+1;
+%         errmsg{nerr}=sprintf('couldnt do %s',files(f).stepbinary)
+%          errRpt{nerr}=getReport(exc,'extended')
+%     end  
+%     try
+%         dfofMovie([datapathname files(f).auditory]);
+%     catch exc
+%         nerr=nerr+1;
+%         errmsg{nerr}=sprintf('couldnt do %s',files(f).auditory)
+%          errRpt{nerr}=getReport(exc,'extended')
+%     end  
 %     try
 %         dfofMovie([datapathname files(f).loomdata]);
 %     catch exc
@@ -33,14 +48,7 @@ for f = 1:length(files)
 %         nerr=nerr+1;
 %         errmsg{nerr}=sprintf('couldnt do %s',files(f).gratingdata)
 %          errRpt{nerr}=getReport(exc,'extended')
-%     end
-%     try
-%         dfofMovie([datapathname files(f).auditory]);
-%     catch exc
-%         nerr=nerr+1;
-%         errmsg{nerr}=sprintf('couldnt do %s',files(f).auditory)
-%          errRpt{nerr}=getReport(exc,'extended')
-%     end       
+%     end     
 %     try
 %         dfofMovie([datapathname files(f).darkness]);
 %     catch exc
@@ -48,13 +56,7 @@ for f = 1:length(files)
 %         errmsg{nerr}=sprintf('couldnt do %s',files(f).darkness)
 %          errRpt{nerr}=getReport(exc,'extended')
 %     end    
-%     try
-%         dfofMovie([datapathname files(f).stepbinary]);
-%     catch exc
-%         nerr=nerr+1;
-%         errmsg{nerr}=sprintf('couldnt do %s',files(f).stepbinary)
-%          errRpt{nerr}=getReport(exc,'extended')
-%     end  
+ 
     
 
 %     for e = 1:nerr

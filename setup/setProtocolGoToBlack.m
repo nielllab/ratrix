@@ -27,6 +27,11 @@ switch subjIDs{1}
        rewardSizeULorMS        = 180;
        msPenalty               =4100;
        
+     case 'g62k.2rt' % Started GoToBlack 6/30/14
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 180;
+       msPenalty               =4100;
+       
      case 'g62f.8lt' % Started GoToBlack 6/30/14
        requestRewardSizeULorMS = 20;
        rewardSizeULorMS        = 180;

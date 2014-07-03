@@ -29,7 +29,7 @@ for x = 1:size(frames,3)
     end
 end
 
-keyboard
+%keyboard
 if nd==3
    img = squeeze(img);
 end

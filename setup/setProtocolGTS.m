@@ -32,16 +32,26 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 150;
        msPenalty               =4200;
+    
+     case 'g62b.5lt'           %started 1/28/14 
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 55; 
+       msPenalty               =4300;
+       
+     case 'bfly2b.3rt'
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 40;
+       msPenalty               =4200; 
        
      case 'g62c6tt' % switched GTS 6/8/14
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 60;
        msPenalty               =4200;
-       
-     case 'g6w1lt' % started 3/7/14
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 20;
-       msPenalty               =4200;
+%        
+%      case 'g6w1lt' % started 3/7/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 20;
+%        msPenalty               =4200;
 
 %     case 'bfly1a.13rt'
 %        requestRewardSizeULorMS = 0;
@@ -53,11 +63,7 @@ switch subjIDs{1}
 %        rewardSizeULorMS        = 100;
 %        msPenalty               =4200; 
 %        
-   case 'bfly2b.3rt'
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;
-       msPenalty               =4200; 
-%        
+
 %    case 'g62b4ln'
 %        requestRewardSizeULorMS = 0;
 %        rewardSizeULorMS        = 110;
@@ -68,10 +74,7 @@ switch subjIDs{1}
 %        rewardSizeULorMS        = 45;
 %        msPenalty               =4200;  
 %        
-   case 'g62b.5lt'           %started 1/28/14 
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 60; 
-       msPenalty               =4300;
+
        
 %    case 'g625ln' % Switched 1/17/14
 %        requestRewardSizeULorMS = 0;

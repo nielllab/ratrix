@@ -178,7 +178,7 @@ datapathname = 'G:\Behavior data 12-24-13+\';  % files(n).spatialfreq = '100';
 % files(n).task = 'GTS';
 % files(n).spatialfreq = '100';
 % files(n).label = 'camk2 gc6';
-% files(n).notes = 'good imaging session';
+% files(n).notes = 'good imaging session'; %running combinetiffs again
 % 
 % n=n+1;
 % files(n).subj = 'g62b1rt';
@@ -312,7 +312,7 @@ datapathname = 'G:\Behavior data 12-24-13+\';  % files(n).spatialfreq = '100';
 % files(n).topoxdata = '061714 g62b.8 passive viewing\g62b8_run1_topox_fstpo11_exp50\g62b8_run1_topox_fstpo11_exp50';
 % files(n).topoy = '';
 % files(n).topoydata = '061714 g62b.8 passive viewing\g62b8_run3_topoy_fstpo11_exp50\g62b8_run3_topoy_fstpo11_exp50';
-% files(n).behav = '';
+% files(n).behav = '';%couldnt analyze behavior?
 % files(n).behavdata = '061714 g62b.8 HvV Vertical behavior\g62b.8_run1_HVVvertical_fstop11_exp50ms\g62b.8_run1_HVVvertical_fstop11_exp50ms';
 % files(n).grating = '';
 % files(n).gratingdata = '';
@@ -328,7 +328,7 @@ datapathname = 'G:\Behavior data 12-24-13+\';  % files(n).spatialfreq = '100';
 % files(n).task = 'HvV';
 % files(n).spatialfreq = '100';
 % files(n).label = 'camk2 gc6';
-% files(n).notes = 'good imaging session';
+% files(n).notes = 'good imaging session; combineTiff couldnt analyze behavior';
 % 
 % n=n+1;
 % files(n).subj = 'g62b4ln';
@@ -455,25 +455,25 @@ datapathname = 'G:\Behavior data 12-24-13+\';  % files(n).spatialfreq = '100';
 % files(n).label = 'camk2 gc6';
 % files(n).notes = 'good imaging session';   %Lightblock cone tipped during passive viewing
 % 
-% n=n+1;
-% 
-% files(n).subj = 'g62b1lt';
-% files(n).expt = '060814';
-% files(n).topox =  '';
-% files(n).topoxdata = '060814 g62b.1lt passive viewing\g62b.1lt_run1_topox_fstop11_exp50ms\g62b.1lt_run1_topox_fstop11_exp50ms';
-% files(n).topoy = '';
-% files(n).topoydata = '060814 g62b.1lt passive viewing\g62b.1lt_run2_topoy_fstop11_exp50ms\g62b.1lt_run2_topoy_fstop11_exp50ms';
-% files(n).behav = ''; %no behavior file
-% files(n).behavdata = '060814 g62b.1lt hvv vertical 400 spatial\g62b.1lt_run1_hvvvertical_fstop11_exp50ms\g62b.1lt_run1_hvvvertical_fstop11_exp50ms';
-% files(n).grating = '';
-% files(n).gratingdata = '';
-% files(n).loom = '';
-% files(n).loomdata = '';
-% files(n).monitor = 'vert';
-% files(n).task = 'HvV';
-% files(n).spatialfreq = '400';
-% files(n).label = 'camk2 gc6';
-% files(n).notes = 'good imaging session'; %no behav mat
+% % n=n+1;
+% % 
+% % files(n).subj = 'g62b1lt';
+% % files(n).expt = '060814';
+% % files(n).topox =  '';
+% % files(n).topoxdata = '060814 g62b.1lt passive viewing\g62b.1lt_run1_topox_fstop11_exp50ms\g62b.1lt_run1_topox_fstop11_exp50ms';
+% % files(n).topoy = '';
+% % files(n).topoydata = '060814 g62b.1lt passive viewing\g62b.1lt_run2_topoy_fstop11_exp50ms\g62b.1lt_run2_topoy_fstop11_exp50ms';
+% % files(n).behav = ''; %no behavior file
+% % files(n).behavdata = '060814 g62b.1lt hvv vertical 400 spatial\g62b.1lt_run1_hvvvertical_fstop11_exp50ms\g62b.1lt_run1_hvvvertical_fstop11_exp50ms';
+% % files(n).grating = '';
+% % files(n).gratingdata = '';
+% % files(n).loom = '';
+% % files(n).loomdata = '';
+% % files(n).monitor = 'vert';
+% % files(n).task = 'HvV';
+% % files(n).spatialfreq = '400';
+% % files(n).label = 'camk2 gc6';
+% % files(n).notes = 'poor performance'; 
 % 
 % n=n+1;
 % 
@@ -966,7 +966,7 @@ files(n).notes = 'good imaging session'; %passive folder named g62b.5tt
 % files(n).topoydata = '051714 G62B.3RT Passive Viewing\g62b,3rt_run2_topoy_fstop11_exp50ms\g62b,3rt_run2_topoy_fstop11_exp50ms';
 % files(n).behav = '051714 G62B.3RT HvV_vertical Behavior\g62b.3rt_run1_hvv_vertical_behav data.mat';
 % files(n).behavdata = '051714 G62B.3RT HvV_vertical Behavior\g62b.3rt_run1_hvv_vertical_fstop11_exp50ms';
-% files(n).grating = '';
+% files(n).grating = ''; % can't locate file
 % files(n).gratingdata = '051714 G62B.3RT Passive Viewing\g62b,3rt_run4_widefieldgratings_fstop11_exp50ms\';
 % files(n).loom = '051714 g62b3rt\g62b,3rt_run3_looming_fstop11_exp50msmaps.mat';
 % files(n).loomdata = '051714 G62B.3RT Passive Viewing\g62b,3rt_run3_looming_fstop11_exp50ms\g62b,3rt_run3_looming_fstop11_exp50ms';
@@ -1474,7 +1474,7 @@ files(n).notes = 'good imaging session'; %passive folder named g62b.5tt
 % files(n).notes = 'good imaging session';
 % files(n).topoxdata = '042914 G62B.7 LT Passive Viewing\g62b.7lt_run5_topox_horiz_fstop5.6_exp50ms\g62b.7lt_run5_topox_horiz_fstop5.6_exp50ms';
 % files(n).topoydata = '042914 G62B.7 LT Passive Viewing\g62b.7lt_run6_topoy_horiz_fstop5.6_exp50ms\g62b.7lt_run6_topoy_horiz_fstop5.6_exp50ms';
-% files(n).gratingdata = '';
+% files(n).gratingdata = '042914 G62B.7 LT Passive Viewing\g62b.7lt_run7_widefieldgratings_horiz_fstop5.6_exp50ms\g62b.7lt_run7_widefieldgratings_horiz_fstop5.6_exp50ms';
 % files(n).loomdata = '';
 % files(n).behavdata = '042914 G62B.7 LT Behavior HvV Center\g62b.7lt_run1_hvv_center_fstop5.6_exp50ms\g62b.7lt_run1_hvv_center_fstop5.6_exp50ms';
 % 
@@ -1804,24 +1804,24 @@ files(n).notes = 'good imaging session'; %passive folder named g62b.5tt
 % files(n).loomdata = '';
 % files(n).behavdata = '030614 G62B.3-RT HvV behavior\G62B.3-RT_run1_HvV_behavior_Fstop4_50msexp\G62B.3-RT_run1_HvV_behavior_Fstop4_50msexp';
 % 
-% n=n+1;
-% files(n).subj = 'g628lt';
-% files(n).expt = '030214';
-% files(n).topox =  '030214 g628lt\G62.8-LT_run1_topoX_Fstop_5.6_50msexpmaps.mat';
-% files(n).topoy = '030214 g628lt\G62.8-LT_run2_topoY_Fstop_5.6_50msexpmaps.mat';
-% files(n).behav = '';
-% files(n).grating = '';
-% files(n).loom = '';
-% files(n).monitor = 'vert';
-% files(n).task = 'GTS';
-% files(n).spatialfreq = '100';
-% files(n).label = 'camk2 gc6';
-% files(n).notes = 'could not analyze behavior imaging session (combine tiffs). good session '; %not sure what problem is (video writer)
-% files(n).topoxdata = '030214 G62.8-LT passive viewing\G62.8-LT_run1_topoX_Fstop_5.6_50msexp\G62.8-LT_run1_topoX_Fstop_5.6_50msexp';
-% files(n).topoydata = '030214 G62.8-LT passive viewing\G62.8-LT_run2_topoY_Fstop_5.6_50msexp\G62.8-LT_run2_topoY_Fstop_5.6_50msexp';
-% files(n).gratingdata = '';
-% files(n).loomdata = '';
-% files(n).behavdata = '030214 G62.8-LT GTS behavior\G62.8-LT_run1_GTS_behavior_Fstop_5.6_50ms_exposure/G62.8-LT_run1_GTS_behavior_Fstop_5.6_50ms_exposure';
+% % n=n+1;
+% % files(n).subj = 'g628lt';
+% % files(n).expt = '030214';
+% % files(n).topox =  '030214 g628lt\G62.8-LT_run1_topoX_Fstop_5.6_50msexpmaps.mat';
+% % files(n).topoy = '030214 g628lt\G62.8-LT_run2_topoY_Fstop_5.6_50msexpmaps.mat';
+% % files(n).behav = '';
+% % files(n).grating = '';
+% % files(n).loom = '';
+% % files(n).monitor = 'vert';
+% % files(n).task = 'GTS';
+% % files(n).spatialfreq = '100';
+% % files(n).label = 'camk2 gc6';
+% % files(n).notes = 'could not analyze behavior imaging session (combine tiffs). good session '; %not sure what problem is (video writer)
+% % files(n).topoxdata = '030214 G62.8-LT passive viewing\G62.8-LT_run1_topoX_Fstop_5.6_50msexp\G62.8-LT_run1_topoX_Fstop_5.6_50msexp';
+% % files(n).topoydata = '030214 G62.8-LT passive viewing\G62.8-LT_run2_topoY_Fstop_5.6_50msexp\G62.8-LT_run2_topoY_Fstop_5.6_50msexp';
+% % files(n).gratingdata = '';
+% % files(n).loomdata = '';
+% % files(n).behavdata = '030214 G62.8-LT GTS behavior\G62.8-LT_run1_GTS_behavior_Fstop_5.6_50ms_exposure/G62.8-LT_run1_GTS_behavior_Fstop_5.6_50ms_exposure';
 % 
 % 
 % n=n+1;

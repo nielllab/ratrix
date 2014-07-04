@@ -396,19 +396,19 @@ recs = {
 %     }     
 %     }
 %
-       {'g62c6tt' {  
-      {[148 310],[],'052414 g62c.5tt neive\g62c6tt_run1_neive_fstop11_exp50ms','g62c6tt_run1_neive_fstop11_exp50ms'} 
-      {[603 721],[],'052914 g62c6tt nieve behavior\g62c6tt_run1_nieve_fstop11_exp50ms','g62c6tt_run1_nieve_fstop11_exp50ms'} 
-      {[722 847],[],'053014 g62c.6tt nieve behavior\g62c6tt_run1_nieve_fstop11_exp50ms','g62c6tt_run1_nieve_fstop11_exp50ms'}   
-%bad optical mouse problem  {[1092 1131],[],'060614 g62c.6tt nieve behavior\g62c.6tt_run1_nieve_fstop11_exp50ms','g62c.6tt_run1_nieve_fstop11_exp50ms'} 
-       {[1132 1197],[],'060614 g62c.6tt nieve behavior\g62c.6tt_run2_nieve_fstop11_exp50ms','g62c.6tt_run2_nieve_fstop11_exp50ms'} 
-    }
-    }     
+%        {'g62c6tt' {  
+%       {[148 310],[],'052414 g62c.5tt neive\g62c6tt_run1_neive_fstop11_exp50ms','g62c6tt_run1_neive_fstop11_exp50ms'} 
+%       {[603 721],[],'052914 g62c6tt nieve behavior\g62c6tt_run1_nieve_fstop11_exp50ms','g62c6tt_run1_nieve_fstop11_exp50ms'} 
+%       {[722 847],[],'053014 g62c.6tt nieve behavior\g62c6tt_run1_nieve_fstop11_exp50ms','g62c6tt_run1_nieve_fstop11_exp50ms'}   
+% %bad optical mouse problem  {[1092 1131],[],'060614 g62c.6tt nieve behavior\g62c.6tt_run1_nieve_fstop11_exp50ms','g62c.6tt_run1_nieve_fstop11_exp50ms'} 
+%        {[1132 1197],[],'060614 g62c.6tt nieve behavior\g62c.6tt_run2_nieve_fstop11_exp50ms','g62c.6tt_run2_nieve_fstop11_exp50ms'} 
+%     }
+%     }     
         {'g62c6lt' {
-       {[11 147],[],'052414 g62c.6lt neive behavior\g62c6lt_run1_neive_fstop11_exp50ms','g62c6lt_run1_neive_fstop11_exp50ms'}
-       {[311 453],[],'052514 g62c6lt nieve behavior\g62c6lt_run1_nieve_fstop11_exp50ms','g62c6lt_run1_nieve_fstop11_exp50ms'}
-       {[454 602],[],'052914 G62c.6 LT nieve behavior\g62c6lt_run1_nieve_fstsop11_exp50ms','g62c6lt_run1_nieve_fstsop11_exp50ms'}
-       {[848 1091],[],'053014 g62c6lt passive viewing\g62c6lt_run1_topox_fstop11_exp50ms','g62c6lt_run1_nieve_fstop11_exp50ms'}
+%        {[11 147],[],'052414 g62c.6lt neive behavior\g62c6lt_run1_neive_fstop11_exp50ms','g62c6lt_run1_neive_fstop11_exp50ms'}
+%        {[311 453],[],'052514 g62c6lt nieve behavior\g62c6lt_run1_nieve_fstop11_exp50ms','g62c6lt_run1_nieve_fstop11_exp50ms'}
+%        {[454 602],[475 602],'052914 G62c.6 LT nieve behavior\g62c6lt_run1_nieve_fstsop11_exp50ms','g62c6lt_run1_nieve_fstsop11_exp50ms'}
+       {[848 1091],[],'053014 g62c.6lt nieve behavior\g62c6lt_run1_nieve_fstop11_exp50ms','g62c6lt_run1_nieve_fstop11_exp50ms'}
        {[1198 1318],[],'060614 g62c.6lt nieve behavior\g62c6lt_run1_nieve_fstop11_exp50ms','g62c6lt_run1_nieve_fstop11_exp50ms'} 
      }
     }

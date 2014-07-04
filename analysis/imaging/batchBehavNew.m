@@ -279,7 +279,7 @@ files(n).monitor = 'vert';
 files(n).task = 'GTS';
 files(n).spatialfreq = '100';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session, may be slight shadow';
+files(n).notes = 'good imaging session'; 
 
 n=n+1;
 files(n).subj = 'g62b5lt';
@@ -599,7 +599,7 @@ files(n).notes = 'good imaging session';   %Lightblock cone tipped during passiv
 % files(n).task = 'naive';
 % files(n).spatialfreq = '100';
 % files(n).label = 'camk2 gc6';
-% files(n).notes = 'good imaging session, passive files mislabled g62c.2lt';
+% files(n).notes = 'good imaging session'; %passive files mislabled g62c.2lt
 % 
 % n=n+1;
 % 
@@ -679,7 +679,7 @@ files(n).notes = 'good imaging session';   %Lightblock cone tipped during passiv
 % % files(n).task = 'GTS';
 % % files(n).spatialfreq = '100';
 % % files(n).label = 'camk2 gc6';
-% % files(n).notes = 'bad imaging session';
+% % files(n).notes = 'poor imaging session';
 % 
 % n=n+1;
 % 
@@ -763,7 +763,7 @@ files(n).notes = 'good imaging session';   %Lightblock cone tipped during passiv
 % files(n).task = 'naive';
 % files(n).spatialfreq = '100';
 % files(n).label = 'camk2 gc6';
-% files(n).notes = 'good imaging session..passive folder named g62b.5tt';
+% files(n).notes = 'good imaging session'; %passive folder named g62b.5tt
 % 
 % n=n+1;
 % 
@@ -803,7 +803,7 @@ files(n).notes = 'good imaging session';   %Lightblock cone tipped during passiv
 % % files(n).task = 'GTS';
 % % files(n).spatialfreq = '100';
 % % files(n).label = 'camk2 gc6';
-% % files(n).notes = 'bad imaging session, no passive viewing';
+% % files(n).notes = 'poor imaging session, no passive viewing';
 % 
 % n=n+1;
 % 
@@ -862,7 +862,7 @@ files(n).notes = 'good imaging session';   %Lightblock cone tipped during passiv
 % % files(n).task = 'HvV_center';
 % files(n).spatialfreq = '100';
 % % files(n).label = 'camk2 gc6';
-% % files(n).notes = 'poor behavior session no passive viewing';
+% % files(n).notes = 'poor imaging session, no passive viewing';
 % 
 % n=n+1;
 % files(n).subj = 'g62b8tt';
@@ -900,7 +900,7 @@ files(n).notes = 'good imaging session';   %Lightblock cone tipped during passiv
 % files(n).task = 'HvV';
 % files(n).spatialfreq = '100';
 % files(n).label = 'camk2 gc6';
-% files(n).notes = 'good behavior session'; %froze at end when attempted to quit?????????
+% files(n).notes = 'good behavior session'; %behavior froze at end when attempted to quit?????????
 % 
 % n=n+1;
 % files(n).subj = 'g628lt';
@@ -1416,7 +1416,7 @@ files(n).notes = 'good imaging session';   %Lightblock cone tipped during passiv
 % files(n).task = 'HvV_center';
 % files(n).spatialfreq = '100';
 % files(n).label = 'camk2 gc6';
-% files(n).notes = 'good imaging session returns empty from behav';
+% files(n).notes = 'good imaging session';  %%returns empty from behavior
 % files(n).topoxdata = '042414 G62H.1TT Passive Viewing\G62H1TT_run1_topox_fstop5.6_exp50ms\G62H1TT_run1_topox_fstop5.6_exp50ms';
 % files(n).topoydata = '042414 G62H.1TT Passive Viewing\G62H1TT_run2_topoy_fstop5.6_exp50ms\G62H1TT_run2_topoy_fstop5.6_exp50ms';
 % files(n).gratingdata = '042414 G62H.1TT Passive Viewing\G62H1TT_run3_gratingsSFTF_fstop5.6_exp50ms\G62H1TT_run3_gratingsSFTF_fstop5.6_exp50ms';
@@ -1454,7 +1454,7 @@ files(n).notes = 'good imaging session';   %Lightblock cone tipped during passiv
 % files(n).task = 'HvV_center';
 % files(n).spatialfreq = '100';
 % files(n).label = 'camk2 gc6';
-% files(n).notes = 'good imaging session light block tipped '; % light block hat tiped towards end of session (after ~frame1300)
+% files(n).notes = 'good imaging session'; % light block hat tiped towards end of session (after ~frame1300)
 % files(n).topoxdata = '042414 G62B.8TT Passive Viewing\G62b.8TT_run1_topox_fstop5.6_exp50ms\G62b.8TT_run1_topox_fstop5.6_exp50ms';
 % files(n).topoydata = '042414 G62B.8TT Passive Viewing\G62b.8TT_run2_topoy_fstop5.6_exp50ms\G62b.8TT_run2_topoy_fstop5.6_exp50ms';
 % files(n).gratingdata = '042414 G62B.8TT Passive Viewing\G62b.8TT_run4_widefieldfgratings_fstop5.6_exp50ms\G62b.8TT_run4_widefieldfgratings_fstop5.6_exp50ms';
@@ -1541,7 +1541,7 @@ files(n).notes = 'good imaging session';   %Lightblock cone tipped during passiv
 % n=n+1;
 % files(n).subj = 'g62g4lt';
 % files(n).expt = '042114';
-% files(n).topox =  '042114 g62g4lt\g62g.4lt_run1_topoxmaps.mat'; %topoX reverse
+% files(n).topoxreverse =  '042114 g62g4lt\g62g.4lt_run1_topoxmaps.mat'; %topoX reverse
 % files(n).topoy = '042114 g62g4lt\g62g.4lt_run2_topoymaps.mat';
 % files(n).behav = '042114 g62g4lt\g62g.4lt_run1_HvV_center_5behav data.mat';
 % files(n).grating = '';
@@ -1550,8 +1550,8 @@ files(n).notes = 'good imaging session';   %Lightblock cone tipped during passiv
 % files(n).task = 'GTS';
 % files(n).spatialfreq = '100';
 % files(n).label = 'camk2 gc6';
-% files(n).notes = 'good imaging session - no topoX?'; % topo x map is reversed (ran topox-rev?)
-% files(n).topoxdata = '042114 G26g.4_lt Passive Viewing\g62g.4lt_run1_topox\G26g.4lt_run1_topox';
+% files(n).notes = 'good imaging session - topoX reverse?'; % topo x map is reversed (ran topox-rev?)
+% files(n).topoxdatareverse = '042114 G26g.4_lt Passive Viewing\g62g.4lt_run1_topox\G26g.4lt_run1_topox';
 % files(n).topoydata = '042114 G26g.4_lt Passive Viewing\g62g.4lt_run2_topoy\g62g.4lt_run2_topoy';
 % files(n).gratingdata = '';
 % files(n).loomdata = '';

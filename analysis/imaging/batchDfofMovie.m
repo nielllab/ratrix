@@ -6,20 +6,20 @@ for f = 1:length(files)
     f
     tic
 
-%     try
-%         dfofMovie([datapathname files(f).topoxdata]);
-%     catch exc
-%         nerr=nerr+1;
-%         errmsg{nerr}= sprintf('couldnt do %s',files(f).topoxdata)
-%         errRpt{nerr}=getReport(exc,'extended')
-%     end
-%     try
-%         dfofMovie([datapathname files(f).topoydata]);
-%     catch exc
-%         nerr=nerr+1;
-%         errmsg{nerr}=sprintf('couldnt do %s',files(f).topoydata)
-%         errRpt{nerr}=getReport(exc,'extended')
-%     end
+    try
+        dfofMovie([datapathname files(f).topoxdata]);
+    catch exc
+        nerr=nerr+1;
+        errmsg{nerr}= sprintf('couldnt do %s',files(f).topoxdata)
+        errRpt{nerr}=getReport(exc,'extended')
+    end
+    try
+        dfofMovie([datapathname files(f).topoydata]);
+    catch exc
+        nerr=nerr+1;
+        errmsg{nerr}=sprintf('couldnt do %s',files(f).topoydata)
+        errRpt{nerr}=getReport(exc,'extended')
+    end
     
     try
         dfofMovie([datapathname files(f).stepbinarydata]);
@@ -35,14 +35,14 @@ for f = 1:length(files)
         errmsg{nerr}=sprintf('couldnt do %s',files(f).auditorydata)
          errRpt{nerr}=getReport(exc,'extended')
     end  
-%     try
-%         dfofMovie([datapathname files(f).loomdata]);
-%     catch exc
-%         nerr=nerr+1;
-%         errmsg{nerr}=sprintf('couldnt do %s',files(f).loomdata)
-%          errRpt{nerr}=getReport(exc,'extended')
-%     end
-%    end     
+    try
+        dfofMovie([datapathname files(f).loomdata]);
+    catch exc
+        nerr=nerr+1;
+        errmsg{nerr}=sprintf('couldnt do %s',files(f).loomdata)
+         errRpt{nerr}=getReport(exc,'extended')
+    end
+   end     
     try
         dfofMovie([datapathname files(f).darknessdata]);
     catch exc

@@ -362,7 +362,7 @@ recs = {
 %      {[650 953],[650 775],'042414 G62b.8TT HvV_center Behavior\g62B.8TT_run1_HvV_center_fstop5.6_exp50ms_lightblockconetipperatendoftrial','g62B.8TT_run1_HvV_center_fstop5.6_exp50ms'}  %% light block hat tiped towards end of session
 % %multiTiff      {[954 1213],[],'051614 G62b8-TT HvV_center Behavior\G62B8-TT_run1_HvV_center_behavior_50ms_F_11','G62B8-TT_run1_HvV_center_behavior_50ms'}  %MultiTif file *(can we analyze?)
 %         {[1214 1675],[],'051714 G62B.8TT HvV_center Behavior\g62B.8TT_run1_hvv_center_fstop11_exp50ms','g62B.8TT_run1_hvv_center_fstop11_exp50ms'}
-%% hmm check        {[1676 1942],[],'061714 g62b.8 HvV Vertical behavior\g62b.8_run1_HVVvertical_fstop11_exp50ms','g62b.8_run1_HVVvertical_fstop11_exp50ms'} % couldnt analyze?
+%hmm error(drops?) check pls       {[1676 1942],[1679 1940],'061714 g62b.8 HvV Vertical behavior\g62b.8_run1_HVVvertical_fstop11_exp50ms','g62b.8_run1_HVVvertical_fstop11_exp50ms'} % couldnt analyze?
 %         {[1943 2163],[],'062014 g62b.8 hvv vertical behavior\g62b8_run1_hvvverical_fstop11_exp50ms','g62b8_run1_hvvverical_fstop11_exp50ms'}
 %           {[2164 2428],[],'070314 g62b8tt hvv behavior\g62b8tt_run1_hvv_fstop11_exp50ms','g62b8tt_run1_hvv_fstop11_exp50ms'}
 %    }
@@ -390,7 +390,7 @@ recs = {
 %        {'g62h1tt' {
 %        {[1 151],[],'042414 g62h.1tt HvV_center behavior\G62h.1tt_run1_HvV_center_fstop5.6_exp50ms','G62h.1tt_run1_HvV_center_fstop5.6_exp50ms'}     
 %          {[152 330],[],'050614 G62H.1TT HvV Center Behavior\g62h.1tt_run1_HvV_center_fstop5.6_exp50ms','g62h.1tt_run1_HvV_center_fstop5.6_exp50ms'}  
-% %hmm        {[331 564],[],'051414 G62H.1TT HvV_center Behavior\g62h.1tt_run1_HvV_center_fstop5.6_exp50ms','g62h.1tt_run1_HvV_center_fstop5.6_exp50ms'} % couldnt analyze?
+%hmm error(drops?) check pls      {[331 564],[331 560],'051414 G62H.1TT HvV_center Behavior\g62h.1tt_run1_HvV_center_fstop5.6_exp50ms','g62h.1tt_run1_HvV_center_fstop5.6_exp50ms'} % couldnt analyze?
 % %           {[565 569],[],'s',''} errors
 %           {[570 773],[],'070314 g62h1tt hvv center behavior 200spatial\g62h1tt_run4_hvv_center_fstop11_exp50ms','g62h1tt_run4_hvv_center_fstop11_exp50ms'}
 %     }     

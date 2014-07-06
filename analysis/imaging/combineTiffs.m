@@ -412,8 +412,18 @@ recs = {
 %        {[1198 1318],[],'060614 g62c.6lt nieve behavior\g62c6lt_run1_nieve_fstop11_exp50ms','g62c6lt_run1_nieve_fstop11_exp50ms'} 
 %      }
 %     }
-    
-    
+%        {'g62g6lt' { 
+%        {[1],[],'',''}
+%      }
+%     }
+%        {'g62k2rt' { 
+%        {[1],[],'',''}
+%      }
+%     }
+%        {'g62k1rt' { 
+%        {[1],[],'',''}
+%      }
+%     }
  
     }; %%% vert vs horiz in either top or bottom
 

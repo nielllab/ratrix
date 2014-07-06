@@ -2,8 +2,8 @@ clear all
 close all
 dbstop if error
 pathname = 'I:\compiled behavior\';
-datapathname = 'G:\Behavior data 12-24-13+\';  
-
+datapathname = 'G:\Behavior data 12-24-13+\';  %some in archived behavior
+%%datapathname = 'H:\archived widefield behavior (12-24-13 to 4-29-14)\';
 
 % n=n+1;
 % files(n).subj = 'g62b8tt';
@@ -719,11 +719,11 @@ datapathname = 'G:\Behavior data 12-24-13+\';
 % 
 % files(n).subj = 'g62c6lt';
 % files(n).expt = '052514';
-% files(n).topox =  '';
+% files(n).topox =  '052514 g62c6lt\g62c6lt_run1_topox_fstop11_exp50msmaps.mat';
 % files(n).topoxdata = '052514 g62c6lt passive\g62c6lt_run1_topox_fstop11_exp50ms\g62c6lt_run1_topox_fstop11_exp50ms';
-% files(n).topoy = '';
+% files(n).topoy = '052514 g62c6lt\g62c6lt_run2_topoy_fstop11_exp50msmaps.mat';
 % files(n).topoydata = '052514 g62c6lt passive\g62c6lt_run2_topoy_fstop11_exp50ms\g62c6lt_run2_topoy_fstop11_exp50ms';
-% files(n).behav = '';
+% files(n).behav = '052514 g62c6lt\g62c6lt_run1_nieve_behav data.mat';
 % files(n).behavdata = '052514 g62c6lt nieve behavior\g62c6lt_run1_nieve_fstop11_exp50ms\g62c6lt_run1_nieve_fstop11_exp50ms';
 % files(n).grating = '';
 % files(n).gratingdata = '';
@@ -791,7 +791,7 @@ datapathname = 'G:\Behavior data 12-24-13+\';
 % files(n).behavdata = '052414 g628lt gts behavior\g628lt_run1_gts_fstop11_exp50ms\g628lt_run1_gts_fstop11_exp50ms';
 % files(n).grating = '';
 % files(n).gratingdata = '';
-% files(n).loom = '';
+% files(n).loom = '052414 g628lt\G628_run4_looming_50msexp_f_11_maps.mat';
 % files(n).loomdata = '052414 G628 Passive Viewing\G628_run5_looming_50msexp_f_11\G628_run4_looming_50msexp_f_11';
 % files(n).monitor = 'vert';
 % files(n).task = 'GTS';

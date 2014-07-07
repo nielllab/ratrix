@@ -413,17 +413,17 @@ recs = {
 %      }
 %     }
 %        {'g62g6lt' { 
-%        {[1],[],'',''}
+%        {[1 112],[],'070614 g62g6lt naive behavior\g62g6lt_run1_naive_fstop11_exp50ms','g62g6lt_run1_naive_fstop11_exp50ms'}
 %      }
 %     }
 %        {'g62k2rt' { 
-%        {[1],[],'',''}
+%        {[1 176],[],'070614 g62k2rt Naive behavior\g62k2rt_run1_naive_fstop11_exp50ms','g62k2rt_run1_naive_fstop11_exp50ms'}
 %      }
 %     }
-%        {'g62k1rt' { 
-%        {[1],[],'',''}
-%      }
-%     }
+       {'g62k1rt' { 
+      {[1 151],[],'070714 G62K1-RT Naive behavior\G62K.1-rt_naive_behavior_50msexp_Fstop11','G62K.1-rt_naive_behavior_50msexp_Fstop11'}
+     }
+    }
  
     }; %%% vert vs horiz in either top or bottom
 

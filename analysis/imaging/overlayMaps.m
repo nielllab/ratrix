@@ -33,14 +33,18 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
     h = hist(resp_time,0.05:0.1:1.5);
     plot(0.05:0.1:1.5,h/sum(h),'k');
     
-%         for d = 1:20;
-%         histcorrect(d) = mean(correct(stop_time>(d-1)/2 & stop_time<d/2));
-%     end
-%         figure
-%         histcorrect(isnan(histcorrect))=0;
-%     plot(0.5:0.5:10,histcorrect);
-%     xlabel('stopping time')
-%  
+        for d = 1:20;
+        histcorrect(d) = mean(correct(stop_time>(d-1)/2 & stop_time<d/2));
+    end
+        figure
+        histcorrect(isnan(histcorrect))=0;
+    plot(0.5:0.5:10,histcorrect);
+    xlabel('stopping time')
+    hold on
+       h = hist(stop_time,0.5:0.5:10);
+    plot(0.5:0.5:10,h/sum(h),'k');%  
+    
+    keyboard
     
     basemap =merge;
     titles = {'all trials','left trials','right trials','left-right','correct','incorrect','correct-incorrect'};

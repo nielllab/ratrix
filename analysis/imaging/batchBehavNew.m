@@ -3,21 +3,22 @@ close all
 dbstop if error
 pathname = 'I:\compiled behavior\';
 datapathname = 'G:\Behavior data 12-24-13+\';  %some in archived behavior
-%%datapathname = 'H:\archived widefield behavior (12-24-13 to 4-29-14)\';
+%datapathname = 'H:\archived widefield behavior (12-24-13 to 4-29-14)\';
+outpathname = 'I:\compiled behavior\behavior topos\';
 
 n=1;
-files(n).subj = 'g62k1rt';
+files(n).subj = 'g62k2rt';
 files(n).expt = '070714';
-files(n).topox =  '070714 g62k1rt\G62K1-rt_run1_topoX_50ms_exp_Fstop11maps.mat';
-files(n).topoxdata = '070714 G62K1-RT passive viewing\G62K1-rt_run1_topoX_50ms_exp_Fstop11\G62K1-rt_run1_topoX_50ms_exp_Fstop11';
-files(n).topoy = '070714 g62k1rt\G62K1-rt_run2_topoY_50ms_exp_Fstop11maps.mat';
-files(n).topoydata = '070714 G62K1-RT passive viewing\G62K1-rt_run2_topoY_50ms_exp_Fstop11\G62K1-rt_run2_topoY_50ms_exp_Fstop11';
+files(n).topox =  '';
+files(n).topoxdata = '070714 g62k2rt passive behavior\g62k2rt_run1_topox_fstop11_exp50ms\g62k2rt_run1_topox_fstop11_exp50ms';
+files(n).topoy = '';
+files(n).topoydata = '070714 g62k2rt passive behavior\g62k2rt_run2_topoy_fstop11_exp50ms\g62k2rt_run2_topoy_fstop11_exp50ms';
 files(n).behav = '';
-files(n).behavdata = '070714 G62K1-RT Naive behavior\G62K.1-rt_naive_behavior_50msexp_Fstop11\G62K.1-rt_naive_behavior_50msexp_Fstop11';
+files(n).behavdata = '070714 g62k2rt naive behavior\g62k2rt_run1_naive_fstop11_exp50ms\g62k2rt_run1_naive_fstop11_exp50ms';
 files(n).grating = '';
 files(n).gratingdata = '';
 files(n).stepbinary = '';
-files(n).stepbinarydata = '';
+files(n).stepbinarydata = '070714 g62k2rt passive behavior\g62k2rt_run3_stepbinary_fstop11_exp50ms\g62k2rt_run3_stepbinary_fstop11_exp50ms';
 files(n).auditory = '';
 files(n).auditorydata = '';
 files(n).darkness = '';
@@ -28,20 +29,21 @@ files(n).monitor = 'vert';
 files(n).task = 'naive';
 files(n).spatialfreq = '100';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session; combine tiffs error'; %hmm
+files(n).notes = 'good imaging session'; 
+
 n=n+1;
-files(n).subj = 'g62g6lt';
-files(n).expt = '070614';
-files(n).topox =  '070614 g62g6lt\g62g6lt_run1_topox_fstop11_exp50msmaps.mat';
-files(n).topoxdata = '070614 g62g6lt passive viewing\g62g6lt_run1_topox_fstop11_exp50ms\g62g6lt_run1_topox_fstop11_exp50ms';
-files(n).topoy = '070614 g62g6lt\g62g6lt_run2_topoy_fstop11_exp50msmaps.mat';
-files(n).topoydata = '070614 g62g6lt passive viewing\g62g6lt_run2_topoy_fstop11_exp50ms\g62g6lt_run2_topoy_fstop11_exp50ms';
-files(n).behav = '070614 g62g6lt\g62g6lt_run1_naive_behav data.mat';
-files(n).behavdata = '070614 g62g6lt naive behavior\g62g6lt_run1_naive_fstop11_exp50ms\g62g6lt_run1_naive_fstop11_exp50ms';
+files(n).subj = 'g62h1tt';
+files(n).expt = '070714';
+files(n).topox =  '';
+files(n).topoxdata = '070714 g62h1tt passive viewing\g62h1tt_run1_topox_fstop11_exp50ms\g62h1tt_run1_topox_fstop11_exp50ms';
+files(n).topoy = '';
+files(n).topoydata = '070714 g62h1tt passive viewing\g62h1tt_run2_topoy_fstop11_exp50ms\g62h1tt_run2_topoy_fstop11_exp50ms';
+files(n).behav = '';
+files(n).behavdata = '070714 g62h1tt hvv center behavior\g62h1tt_run2_hvvcenter_fstop11_exp50ms_200spatial\g62h1tt_run2_hvvcenter_fstop11_exp50ms_200spatial';
 files(n).grating = '';
 files(n).gratingdata = '';
-files(n).stepbinary = '070614 g62g6lt\g62g6lt_run3_stepbinary_fstop11_exp50msmaps.mat';
-files(n).stepbinarydata = '070614 g62g6lt passive viewing\g62g6lt_run3_stepbinary_fstop11_exp50ms\g62g6lt_run3_stepbinary_fstop11_exp50ms';
+files(n).stepbinary = '';
+files(n).stepbinarydata = '070714 g62h1tt passive viewing\g62h1tt_run3_stepbinary_fstop11_exp50ms\g62h1tt_run3_stepbinary_fstop11_exp50ms';
 files(n).auditory = '';
 files(n).auditorydata = '';
 files(n).darkness = '';
@@ -49,24 +51,24 @@ files(n).darknessdata = '';
 files(n).loom = '';
 files(n).loomdata = '';
 files(n).monitor = 'vert';
-files(n).task = 'naive';
-files(n).spatialfreq = '100';
+files(n).task = 'HvV_center';
+files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'good imaging session'; 
 
 n=n+1;
-files(n).subj = 'g62k2rt';
-files(n).expt = '070614';
-files(n).topox =  '070614 g62k2rt\g62k2rt_run1_topox_fstop11_exp50maps.mat';
-files(n).topoxdata = '070614 g62k2rt passive viewing\g62k2rt_run1_topox_fstop11_exp50\g62k2rt_run1_topox_fstop11_exp50';
-files(n).topoy = '070614 g62k2rt\g62k2rt_run2_topoy_fstop11_exp50maps.mat';
-files(n).topoydata = '070614 g62k2rt passive viewing\g62k2rt_run2_topoy_fstop11_exp50\g62k2rt_run2_topoy_fstop11_exp50';
-files(n).behav = '070614 g62k2rt\g62k2rt_run1_naive_behav data.mat';
-files(n).behavdata = '070614 g62k2rt Naive behavior\g62k2rt_run1_naive_fstop11_exp50ms\g62k2rt_run1_naive_fstop11_exp50ms';
+files(n).subj = 'g62b7lt';
+files(n).expt = '070714';
+files(n).topox =  '';
+files(n).topoxdata = '070714 g62b7lt passive viewing\g62b7lt_run1_topox_fstop11_exp50ms\g62b7lt_run1_topox_fstop11_exp50ms';
+files(n).topoy = '';
+files(n).topoydata = '070714 g62b7lt passive viewing\g62b7lt_run2_topoy_fstop11_exp50ms\g62b7lt_run2_topoy_fstop11_exp50ms';
+files(n).behav = '';
+files(n).behavdata = '070714 g62b7lt hvv center behavior\g62b7lt_run1_hvvcenter_200spatial_exp50ms\g62b7lt_run1_hvvcenter_200spatial_exp50ms';
 files(n).grating = '';
 files(n).gratingdata = '';
-files(n).stepbinary = '070614 g62k2rt\g62k2rt_run3_stepbinary_fstop11_exp50maps.mat';
-files(n).stepbinarydata = '070614 g62k2rt passive viewing\g62k2rt_run3_stepbinary_fstop11_exp50\g62k2rt_run3_stepbinary_fstop11_exp50';
+files(n).stepbinary = '';
+files(n).stepbinarydata = '070714 g62b7lt passive viewing\g62b7lt_run3_stepbinary_fstop11_exp50ms\g62b7lt_run3_stepbinary_fstop11_exp50ms';
 files(n).auditory = '';
 files(n).auditorydata = '';
 files(n).darkness = '';
@@ -74,11 +76,86 @@ files(n).darknessdata = '';
 files(n).loom = '';
 files(n).loomdata = '';
 files(n).monitor = 'vert';
-files(n).task = '';
-files(n).spatialfreq = '100';
+files(n).task = 'HvV_center';
+files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'good imaging session'; 
 
+% n=n+1;
+% files(n).subj = 'g62k1rt';
+% files(n).expt = '070714';
+% files(n).topox =  '070714 g62k1rt\G62K1-rt_run1_topoX_50ms_exp_Fstop11maps.mat';
+% files(n).topoxdata = '070714 G62K1-RT passive viewing\G62K1-rt_run1_topoX_50ms_exp_Fstop11\G62K1-rt_run1_topoX_50ms_exp_Fstop11';
+% files(n).topoy = '070714 g62k1rt\G62K1-rt_run2_topoY_50ms_exp_Fstop11maps.mat';
+% files(n).topoydata = '070714 G62K1-RT passive viewing\G62K1-rt_run2_topoY_50ms_exp_Fstop11\G62K1-rt_run2_topoY_50ms_exp_Fstop11';
+% files(n).behav = '';
+% files(n).behavdata = '070714 G62K1-RT Naive behavior\G62K.1-rt_naive_behavior_50msexp_Fstop11\G62K.1-rt_naive_behavior_50msexp_Fstop11';
+% files(n).grating = '';
+% files(n).gratingdata = '';
+% files(n).stepbinary = '';
+% files(n).stepbinarydata = '';
+% files(n).auditory = '';
+% files(n).auditorydata = '';
+% files(n).darkness = '';
+% files(n).darknessdata = '';
+% files(n).loom = '';
+% files(n).loomdata = '';
+% files(n).monitor = 'vert';
+% files(n).task = 'naive';
+% files(n).spatialfreq = '100';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good imaging session; combine tiffs error'; %hmm
+% 
+% n=n+1;
+% files(n).subj = 'g62g6lt';
+% files(n).expt = '070614';
+% files(n).topox =  '070614 g62g6lt\g62g6lt_run1_topox_fstop11_exp50msmaps.mat';
+% files(n).topoxdata = '070614 g62g6lt passive viewing\g62g6lt_run1_topox_fstop11_exp50ms\g62g6lt_run1_topox_fstop11_exp50ms';
+% files(n).topoy = '070614 g62g6lt\g62g6lt_run2_topoy_fstop11_exp50msmaps.mat';
+% files(n).topoydata = '070614 g62g6lt passive viewing\g62g6lt_run2_topoy_fstop11_exp50ms\g62g6lt_run2_topoy_fstop11_exp50ms';
+% files(n).behav = '070614 g62g6lt\g62g6lt_run1_naive_behav data.mat';
+% files(n).behavdata = '070614 g62g6lt naive behavior\g62g6lt_run1_naive_fstop11_exp50ms\g62g6lt_run1_naive_fstop11_exp50ms';
+% files(n).grating = '';
+% files(n).gratingdata = '';
+% files(n).stepbinary = '070614 g62g6lt\g62g6lt_run3_stepbinary_fstop11_exp50msmaps.mat';
+% files(n).stepbinarydata = '070614 g62g6lt passive viewing\g62g6lt_run3_stepbinary_fstop11_exp50ms\g62g6lt_run3_stepbinary_fstop11_exp50ms';
+% files(n).auditory = '';
+% files(n).auditorydata = '';
+% files(n).darkness = '';
+% files(n).darknessdata = '';
+% files(n).loom = '';
+% files(n).loomdata = '';
+% files(n).monitor = 'vert';
+% files(n).task = 'naive';
+% files(n).spatialfreq = '100';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good imaging session';
+% 
+% n=n+1;
+% files(n).subj = 'g62k2rt';
+% files(n).expt = '070614';
+% files(n).topox =  '070614 g62k2rt\g62k2rt_run1_topox_fstop11_exp50maps.mat';
+% files(n).topoxdata = '070614 g62k2rt passive viewing\g62k2rt_run1_topox_fstop11_exp50\g62k2rt_run1_topox_fstop11_exp50';
+% files(n).topoy = '070614 g62k2rt\g62k2rt_run2_topoy_fstop11_exp50maps.mat';
+% files(n).topoydata = '070614 g62k2rt passive viewing\g62k2rt_run2_topoy_fstop11_exp50\g62k2rt_run2_topoy_fstop11_exp50';
+% files(n).behav = '070614 g62k2rt\g62k2rt_run1_naive_behav data.mat';
+% files(n).behavdata = '070614 g62k2rt Naive behavior\g62k2rt_run1_naive_fstop11_exp50ms\g62k2rt_run1_naive_fstop11_exp50ms';
+% files(n).grating = '';
+% files(n).gratingdata = '';
+% files(n).stepbinary = '070614 g62k2rt\g62k2rt_run3_stepbinary_fstop11_exp50maps.mat';
+% files(n).stepbinarydata = '070614 g62k2rt passive viewing\g62k2rt_run3_stepbinary_fstop11_exp50\g62k2rt_run3_stepbinary_fstop11_exp50';
+% files(n).auditory = '';
+% files(n).auditorydata = '';
+% files(n).darkness = '';
+% files(n).darknessdata = '';
+% files(n).loom = '';
+% files(n).loomdata = '';
+% files(n).monitor = 'vert';
+% files(n).task = '';
+% files(n).spatialfreq = '100';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good imaging session';
+% 
 % n=n+1;
 % files(n).subj = 'g62b8tt';
 % files(n).expt = '070314';
@@ -153,7 +230,7 @@ files(n).notes = 'good imaging session';
 % files(n).spatialfreq = '200';
 % files(n).label = 'camk2 gc6';
 % files(n).notes = 'good imaging session'; %stop reward was on for behavior
-
+% 
 % n=n+1;
 % files(n).subj = 'g62b5lt';
 % files(n).expt = '062614';
@@ -2117,297 +2194,34 @@ files(n).notes = 'good imaging session';
 
 
 
-% % n=n+1;
-% % files(n).subj = '';
-% % files(n).expt = '';
-% % files(n).topox =  '';
-% % files(n).topoxdata = '';
-% % files(n).topoy = '';
-% % files(n).topoydata = '';
-% % files(n).behav = '';
-% % files(n).behavdata = '';
-% % files(n).grating = '';
-% % files(n).gratingdata = '';
-% % files(n).stepbinary = '';
-% % files(n).stepbinarydata = '';
-% % files(n).auditory = '';
-% % files(n).auditorydata = '';
-% % files(n).darkness = '';
-% % files(n).darknessdata = '';
-% % files(n).loom = '';
-% % files(n).loomdata = '';
-% % files(n).monitor = 'vert';
-% % files(n).task = '';
-% % files(n).spatialfreq = '100';
-% % files(n).label = 'camk2 gc6';
-% % files(n).notes = 'good imaging session';
+% n=n+1;
+% files(n).subj = '';
+% files(n).expt = '';
+% files(n).topox =  '';
+% files(n).topoxdata = '';
+% files(n).topoy = '';
+% files(n).topoydata = '';
+% files(n).behav = '';
+% files(n).behavdata = '';
+% files(n).grating = '';
+% files(n).gratingdata = '';
+% files(n).stepbinary = '';
+% files(n).stepbinarydata = '';
+% files(n).auditory = '';
+% files(n).auditorydata = '';
+% files(n).darkness = '';
+% files(n).darknessdata = '';
+% files(n).loom = '';
+% files(n).loomdata = '';
+% files(n).monitor = 'vert';
+% files(n).task = '';
+% files(n).spatialfreq = '100';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good imaging session';
 
-% % files(n).topoxdata = '';
-% % files(n).topoydata = '';
-% % files(n).behavdata = '';
-% % files(n).gratingdata = '';
-% % files(n).loomdata = '';
+% files(n).topoxdata = '';
+% files(n).topoydata = '';
+% files(n).behavdata = '';
+% files(n).gratingdata = '';
+% files(n).loomdata = '';
 
-% % movemapfiles
-% % keyboard
-% 
-% %
-% %%% batch dfofMovie
-% errmsg= [];errRpt = {};
-% nerr=0;
-% %for f = 1:length(files);
-% 
-% % for f = 1:length(files)
-% %     f
-% %     tic
-% % 
-% % %     try
-% % %         dfofMovie([datapathname files(f).topoxdata]);
-% % %     catch exc
-% % %         nerr=nerr+1;
-% % %         errmsg{nerr}= sprintf('couldnt do %s',files(f).topoxdata)
-% % %         errRpt{nerr}=getReport(exc,'extended')
-% % %     end
-% % %     try
-% % %         dfofMovie([datapathname files(f).topoydata]);
-% % %     catch exc
-% % %         nerr=nerr+1;
-% % %         errmsg{nerr}=sprintf('couldnt do %s',files(f).topoydata)
-% % %         errRpt{nerr}=getReport(exc,'extended')
-% % %     end
-% % %     try
-% % %         dfofMovie([datapathname files(f).loomdata]);
-% % %     catch exc
-% % %         nerr=nerr+1;
-% % %         errmsg{nerr}=sprintf('couldnt do %s',files(f).loomdata)
-% % %          errRpt{nerr}=getReport(exc,'extended')
-% % %     end
-% %     try
-% %         dfofMovie([datapathname files(f).gratingdata]);
-% %     catch exc
-% %         nerr=nerr+1;
-% %         errmsg{nerr}=sprintf('couldnt do %s',files(f).gratingdata)
-% %          errRpt{nerr}=getReport(exc,'extended')
-% %     end
-% % 
-% % 
-% % %     for e = 1:nerr
-% % %         errRpt{e}
-% % %     end
-% %     toc
-% % end
-% %  errRpt
-% % keyboard
-% 
-% outpathname = 'I:\compiled behavior\behavior topos\';
-% 
-% 
-% %use = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session') &  strcmp({files.label},'camk2 gc6')&  strcmp({files.task},'HvV_center') &strcmp({files.subj},'g62b7lt'))
-% 
-% %use = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session') )
-% 
-% 
-% %use = find(strcmp({files.monitor},'land')&     strcmp({files.label},'camk2 gc6'))
-% 
-% use = find(strcmp({files.monitor},'vert')&  strcmp({files.notes},'good imaging session')  &    strcmp({files.label},'camk2 gc6') &  strcmp({files.task},'HvV_center'))
-% 
-% %use = 1: length(files)
-% %%% calculate gradients and regions
-% clear map merge
-% for f = 1:length(use)
-%     f
-%     [grad{f} amp{f} map_all{f} map{f} merge{f}]= getRegions(files(use(f)),pathname,outpathname);
-% end
-% 
-% 
-% %%% align gradient maps to first file
-% for f = 1:length(use); %changed from 1:length(map)
-% %    for f = 1:1
-%     [imfit{f} allxshift(f) allyshift(f) allthetashift(f) allzoom(f)] = alignMapsRotate(map([1 f]), merge([1 f]), [files(use(f)).subj ' ' files(use(f)).expt ' ' files(use(f)).monitor] );
-%     xshift = allxshift(f); yshift = allyshift(f); thetashift = allthetashift(f); zoom = allzoom(f);
-%     save( [outpathname files(use(f)).subj files(use(f)).expt '_topography.mat'],'xshift','yshift','zoom','-append');
-% end
-% %
-% x0 =-25; y0=0; sz = 100;
-% %x0 =0; y0=0; sz = 80;
-% avgmap=0; meangrad{1}=0; meangrad{2}=0; meanpolar{1} = 0; meanpolar{2}=0;meanamp=0;
-% for f= 1:length(use) ;
-%     f
-%     
-%     if allxshift(f)>-20
-%         m = shiftImageRotate(merge{f},allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
-%         sum(isnan(m(:)))
-%         
-%         sum(isnan(merge{f}(:)))
-%         figure
-%         imshow(m);
-%         avgmap = avgmap+m;
-%         title( [files(use(f)).subj ' ' files(use(f)).expt ' ' files(use(f)).monitor] );
-%         
-%         for ind = 1:2
-%             gradshift{ind} = shiftImageRotate(real(grad{f}{ind}),allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
-%             gradshift{ind} = gradshift{ind} + sqrt(-1)* shiftImageRotate(imag(grad{f}{ind}),allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
-%             meangrad{ind} = meangrad{ind} + gradshift{ind};
-%             ampshift = shiftImageRotate(amp{f}{2},allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
-%             meanamp = meanamp+ ampshift;
-%             
-%             polarshift{ind} = shiftImageRotate(real(map_all{f}{ind}),allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
-%             polarshift{ind} = polarshift{ind} + sqrt(-1)* shiftImageRotate(imag(map_all{f}{ind}),allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
-%             meanpolar{ind} = meanpolar{ind} + polarshift{ind};
-%    end
-%     end
-%     
-% end
-% avgmap = avgmap/length(use);
-% figure
-% imshow(avgmap);
-% title('average topo  map');
-% meangrad{1} = meangrad{1}/length(use); meangrad{2} = meangrad{2}/length(use);
-% meanpolar{1} = meanpolar{1}/length(use); meanpolar{2} = meanpolar{2}/length(use);
-% 
-% figure
-% for m=1:2
-%     subplot(1,2,m);
-%     imshow(polarMap(meanpolar{m},80));
-% end
-% 
-% 
-% divmap = getDivergenceMap(meanpolar);
-% figure
-% imagesc(divmap); axis equal
-% 
-% figure
-% imagesc(divmap.*abs(meanpolar{1})); axis equal
-% 
-% dx=4;
-% rangex = dx:dx:size(meangrad{1},1); rangey = dx:dx:size(meangrad{1},2);
-% figure
-% for m = 1:2
-%     subplot(1,2,m)
-%     imshow(imresize(avgmap,1));
-%     hold on
-%     quiver(rangex,rangey,  10*real(meangrad{m}(rangex,rangey)),10*imag(meangrad{m}(rangex,rangey)),'w')
-% 
-% end
-% 
-% % figure
-% % meanmov{1}=zeros(size(avgmap,1),size(avgmap,2),100); meanmov{2}=meanmov{1};
-% % for f = 1:length(use)
-% %    f
-% %    if allxshift(f)>-20
-% %         for ind = 1:2
-% %         if ind==1
-% %             load([pathname files(use(f)).topox],'cycMap');
-% %         elseif ind==2
-% %             load([pathname files(use(f)).topoy],'cycMap');
-% %         end
-% %         %cycMap = cycle_mov;
-% %         for frm = 1:size(cycMap,3)
-% %             imshow(avgmap);
-% %             im = imresize(squeeze(cycMap(:,:,frm)),1);
-% %             imshift = shiftImage(im,allxshift(f)+x0,allyshift(f)+y0,allzoom(f),sz);
-% %             meanmov{ind}(:,:,frm) = meanmov{ind}(:,:,frm) +imshift;
-% %         end
-% %         end
-% %     end
-% % end
-% % 
-% % meanmov{1} = meanmov{1}/length(use);meanmov{2} = meanmov{2}/length(use);
-% % 
-% % 
-% % figure
-% % 
-% % for m = 1:2
-% %     clear mov
-% %     for frm = 1:size(cycMap,3)
-% %         imshow(avgmap);
-% %         imshift = meanmov{m}(:,:,frm);
-% %         hold on
-% %         h=imshow(mat2im(imshift,jet,[0 0.1]));
-% %         transp = zeros(size(imshift));
-% %         transp(imshift>0.02)=1;
-% %         set(h,'Alphadata',transp);
-% %         mov(frm) = getframe(gcf);
-% %         hold off
-% %         mov(f)=getframe(gcf);
-% %     end
-% %     if m==1
-% %         vid = VideoWriter('topoxavg.avi');
-% %     else
-% %         vid =VideoWriter('topoyavg.avi');
-% %     end
-% %     vid.FrameRate=25;
-% %     open(vid);
-% %     writeVideo(vid,mov);
-% %     close(vid)
-% % end
-% % 
-% % keyboard
-% 
-% 
-% 
-% % %%% overlay behavior on top of topomaps
-% clear behav
-% %matlabpool
-% for f = 1:length(use)
-%  %for f =1:1
-%      f
-%     try
-%         behav{f} = overlayMaps(files(use(f)),pathname,outpathname);
-%     catch
-%         sprintf('couldnt do behav on %d',f)
-%     end
-%     
-% end
-% %matlabpool close
-% 
-% allsubj = unique({files(use).subj})
-% for s = 1:length(allsubj)
-%     
-%     s
-%     allsubj{s}
-% nb=0; avgbehav=0;
-% for f= 1:length(use)
-% %for f= 1:1
-%     if ~isempty(behav(f)) & strcmp(files(use(f)).subj,allsubj{s}) & allxshift(f)>-20;
-%        f
-%        b = shiftdim(behav{f},1);
-%         zoom = 260/size(b,1);
-%         b = shiftImageRotate(b,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
-%         avgbehav = avgbehav+b;
-%         nb= nb+1;
-%     end
-% end
-% avgbehav = avgbehav/nb;
-% 
-% 
-% 
-% figure
-% for t= 4:12
-%     subplot(3,3,t-3);
-%     imshow(avgmap);
-%     hold on
-%     data = squeeze(avgbehav(:,:,t));
-%     h = imshow(mat2im(data,hot,[0 0.2]));
-%     transp = zeros(size(squeeze(avgmap(:,:,1))));
-%     transp(abs(data)>0.05)=1;
-%     set(h,'AlphaData',transp);
-%     
-% end
-% title(allsubj{s})
-% end
-% 
-% %%% analyze 4-phase data (e.g. looming and grating)
-% for f = 1:length(use)
-%     loom_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'loom');
-% end
-% 
-% fourPhaseAvg(loom_resp,allxshift+x0,allyshift+y0,allthetashift,zoom, sz, avgmap);
-% 
-% for f = 1:length(use)
-%  f
-%  grating_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'grating');
-% end
-% 
-% 
-% fourPhaseAvg(grating_resp,allxshift+x0,allyshift+y0, allthetashift,zoom*0.57, sz, avgmap);

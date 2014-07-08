@@ -362,7 +362,7 @@ recs = {
 %      {[650 953],[650 775],'042414 G62b.8TT HvV_center Behavior\g62B.8TT_run1_HvV_center_fstop5.6_exp50ms_lightblockconetipperatendoftrial','g62B.8TT_run1_HvV_center_fstop5.6_exp50ms'}  %% light block hat tiped towards end of session
 % %multiTiff      {[954 1213],[],'051614 G62b8-TT HvV_center Behavior\G62B8-TT_run1_HvV_center_behavior_50ms_F_11','G62B8-TT_run1_HvV_center_behavior_50ms'}  %MultiTif file *(can we analyze?)
 %         {[1214 1675],[],'051714 G62B.8TT HvV_center Behavior\g62B.8TT_run1_hvv_center_fstop11_exp50ms','g62B.8TT_run1_hvv_center_fstop11_exp50ms'}
-%% hmm check        {[1676 1942],[],'061714 g62b.8 HvV Vertical behavior\g62b.8_run1_HVVvertical_fstop11_exp50ms','g62b.8_run1_HVVvertical_fstop11_exp50ms'} % couldnt analyze?
+%hmm error(drops?) check pls       {[1676 1942],[1679 1940],'061714 g62b.8 HvV Vertical behavior\g62b.8_run1_HVVvertical_fstop11_exp50ms','g62b.8_run1_HVVvertical_fstop11_exp50ms'} % couldnt analyze?
 %         {[1943 2163],[],'062014 g62b.8 hvv vertical behavior\g62b8_run1_hvvverical_fstop11_exp50ms','g62b8_run1_hvvverical_fstop11_exp50ms'}
 %           {[2164 2428],[],'070314 g62b8tt hvv behavior\g62b8tt_run1_hvv_fstop11_exp50ms','g62b8tt_run1_hvv_fstop11_exp50ms'}
 %    }
@@ -390,30 +390,40 @@ recs = {
 %        {'g62h1tt' {
 %        {[1 151],[],'042414 g62h.1tt HvV_center behavior\G62h.1tt_run1_HvV_center_fstop5.6_exp50ms','G62h.1tt_run1_HvV_center_fstop5.6_exp50ms'}     
 %          {[152 330],[],'050614 G62H.1TT HvV Center Behavior\g62h.1tt_run1_HvV_center_fstop5.6_exp50ms','g62h.1tt_run1_HvV_center_fstop5.6_exp50ms'}  
-% %hmm        {[331 564],[],'051414 G62H.1TT HvV_center Behavior\g62h.1tt_run1_HvV_center_fstop5.6_exp50ms','g62h.1tt_run1_HvV_center_fstop5.6_exp50ms'} % couldnt analyze?
+%hmm error(drops?) check pls      {[331 564],[331 560],'051414 G62H.1TT HvV_center Behavior\g62h.1tt_run1_HvV_center_fstop5.6_exp50ms','g62h.1tt_run1_HvV_center_fstop5.6_exp50ms'} % couldnt analyze?
 % %           {[565 569],[],'s',''} errors
 %           {[570 773],[],'070314 g62h1tt hvv center behavior 200spatial\g62h1tt_run4_hvv_center_fstop11_exp50ms','g62h1tt_run4_hvv_center_fstop11_exp50ms'}
 %     }     
 %     }
 %
-       {'g62c6tt' {  
-      {[148 310],[],'052414 g62c.5tt neive\g62c6tt_run1_neive_fstop11_exp50ms','g62c6tt_run1_neive_fstop11_exp50ms'} 
-      {[603 721],[],'052914 g62c6tt nieve behavior\g62c6tt_run1_nieve_fstop11_exp50ms','g62c6tt_run1_nieve_fstop11_exp50ms'} 
-      {[722 847],[],'053014 g62c.6tt nieve behavior\g62c6tt_run1_nieve_fstop11_exp50ms','g62c6tt_run1_nieve_fstop11_exp50ms'}   
-%bad optical mouse problem  {[1092 1131],[],'060614 g62c.6tt nieve behavior\g62c.6tt_run1_nieve_fstop11_exp50ms','g62c.6tt_run1_nieve_fstop11_exp50ms'} 
-       {[1132 1197],[],'060614 g62c.6tt nieve behavior\g62c.6tt_run2_nieve_fstop11_exp50ms','g62c.6tt_run2_nieve_fstop11_exp50ms'} 
-    }
-    }     
-        {'g62c6lt' {
-       {[11 147],[],'052414 g62c.6lt neive behavior\g62c6lt_run1_neive_fstop11_exp50ms','g62c6lt_run1_neive_fstop11_exp50ms'}
-       {[311 453],[],'052514 g62c6lt nieve behavior\g62c6lt_run1_nieve_fstop11_exp50ms','g62c6lt_run1_nieve_fstop11_exp50ms'}
-       {[454 602],[],'052914 G62c.6 LT nieve behavior\g62c6lt_run1_nieve_fstsop11_exp50ms','g62c6lt_run1_nieve_fstsop11_exp50ms'}
-       {[848 1091],[],'053014 g62c6lt passive viewing\g62c6lt_run1_topox_fstop11_exp50ms','g62c6lt_run1_nieve_fstop11_exp50ms'}
-       {[1198 1318],[],'060614 g62c.6lt nieve behavior\g62c6lt_run1_nieve_fstop11_exp50ms','g62c6lt_run1_nieve_fstop11_exp50ms'} 
+%        {'g62c6tt' {  
+%       {[148 310],[],'052414 g62c.5tt neive\g62c6tt_run1_neive_fstop11_exp50ms','g62c6tt_run1_neive_fstop11_exp50ms'} 
+%       {[603 721],[],'052914 g62c6tt nieve behavior\g62c6tt_run1_nieve_fstop11_exp50ms','g62c6tt_run1_nieve_fstop11_exp50ms'} 
+%       {[722 847],[],'053014 g62c.6tt nieve behavior\g62c6tt_run1_nieve_fstop11_exp50ms','g62c6tt_run1_nieve_fstop11_exp50ms'}   
+% %bad optical mouse problem  {[1092 1131],[],'060614 g62c.6tt nieve behavior\g62c.6tt_run1_nieve_fstop11_exp50ms','g62c.6tt_run1_nieve_fstop11_exp50ms'} 
+%        {[1132 1197],[],'060614 g62c.6tt nieve behavior\g62c.6tt_run2_nieve_fstop11_exp50ms','g62c.6tt_run2_nieve_fstop11_exp50ms'} 
+%     }
+%     }     
+%         {'g62c6lt' {
+%        {[11 147],[],'052414 g62c.6lt neive behavior\g62c6lt_run1_neive_fstop11_exp50ms','g62c6lt_run1_neive_fstop11_exp50ms'}
+%        {[311 453],[],'052514 g62c6lt nieve behavior\g62c6lt_run1_nieve_fstop11_exp50ms','g62c6lt_run1_nieve_fstop11_exp50ms'}
+%        {[454 602],[475 602],'052914 G62c.6 LT nieve behavior\g62c6lt_run1_nieve_fstsop11_exp50ms','g62c6lt_run1_nieve_fstsop11_exp50ms'}
+%        {[848 1091],[],'053014 g62c.6lt nieve behavior\g62c6lt_run1_nieve_fstop11_exp50ms','g62c6lt_run1_nieve_fstop11_exp50ms'}
+%        {[1198 1318],[],'060614 g62c.6lt nieve behavior\g62c6lt_run1_nieve_fstop11_exp50ms','g62c6lt_run1_nieve_fstop11_exp50ms'} 
+%      }
+%     }
+%        {'g62g6lt' { 
+%        {[1 112],[],'070614 g62g6lt naive behavior\g62g6lt_run1_naive_fstop11_exp50ms','g62g6lt_run1_naive_fstop11_exp50ms'}
+%      }
+%     }
+%        {'g62k2rt' { 
+%        {[1 176],[],'070614 g62k2rt Naive behavior\g62k2rt_run1_naive_fstop11_exp50ms','g62k2rt_run1_naive_fstop11_exp50ms'}
+%      }
+%     }
+       {'g62k1rt' { 
+      {[1 151],[],'070714 G62K1-RT Naive behavior\G62K.1-rt_naive_behavior_50msexp_Fstop11','G62K.1-rt_naive_behavior_50msexp_Fstop11'}
      }
     }
-    
-    
  
     }; %%% vert vs horiz in either top or bottom
 

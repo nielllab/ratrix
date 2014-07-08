@@ -18,6 +18,7 @@ fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =msPenalty;
+pixPerCycs                = [100 150 200]; %*10^9;
 
 % sca
 % keyboard
@@ -32,21 +33,25 @@ end
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 22.5;
         msPenalty              =4300;
+        pixPerCycs             = [100 150 200]; %*10^9;
 
   case 'g62c.2rt'           %changed 5/16/14
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 25; 
        msPenalty               =4300;
+       pixPerCycs             = [100 150 200]; %*10^9;
        
    case 'g62b1lt'     %moved to HvV_vertical 2/19/14   
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 30;
-       msPenalty               =4200; 
+       rewardSizeULorMS        = 35;
+       msPenalty               =4200;
+       pixPerCycs             = [100 150 200]; %*10^9;
      
   case 'g62b3rt'          %changed 2/14/14
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 20; 
        msPenalty               = 4200; 
+       pixPerCycs             = [100 150 200]; %*10^9;
        
        
 %   case 'g62h1tt'     %started 5/16/14
@@ -95,7 +100,6 @@ stim.positional = false;
 stim.cue = true;
 stim.soundClue = false;
 
-pixPerCycs             = [100 150 200]; %*10^9;
 targetOrientations     = 0
 distractorOrientations = []; %-targetOrientations;
 mean                   = .5;

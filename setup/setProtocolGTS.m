@@ -37,7 +37,7 @@ switch subjIDs{1}
     
      case 'g62b.5lt'           %started 1/28/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 55; 
+       rewardSizeULorMS        = 65; 
        msPenalty               =4300;
        pixPerCycs             = [100 150 200]; %*10^9;
        

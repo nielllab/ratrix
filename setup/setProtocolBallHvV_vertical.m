@@ -43,7 +43,7 @@ end
        
    case 'g62b1lt'     %moved to HvV_vertical 2/19/14   
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 30;
+       rewardSizeULorMS        = 35;
        msPenalty               =4200;
        pixPerCycs             = [100 150 200]; %*10^9;
      

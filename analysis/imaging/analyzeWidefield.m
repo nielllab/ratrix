@@ -1,4 +1,4 @@
-filelistWhatWhere;
+batchBehavNew;
 
 %%% batchDfofMovie
 
@@ -8,7 +8,7 @@ filelistWhatWhere;
 %use = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session') )
 %use = find(strcmp({files.monitor},'land')&     strcmp({files.label},'camk2 gc6'))
 
-alluse = find(strcmp({files.monitor},'vert')&  strcmp({files.notes},'good imaging session')  &    strcmp({files.label},'camk2 gc6') &  strcmp({files.task},'HvV_center'))
+alluse = find(strcmp({files.monitor},'vert')&  strcmp({files.notes},'good imaging session')  &    strcmp({files.label},'camk2 gc6') &  strcmp({files.task},'HvV_center') &strcmp({files.spatialfreq},'200'))
 allsubj = unique({files(alluse).subj})
 
 for s = 1:1

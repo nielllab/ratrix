@@ -1,4 +1,5 @@
-batchBehavNew;
+batchBehavNew;    %batchPassive
+
 
 %%% batchDfofMovie
 
@@ -8,7 +9,8 @@ batchBehavNew;
 %use = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session') )
 %use = find(strcmp({files.monitor},'land')&     strcmp({files.label},'camk2 gc6'))
 
-alluse = find(strcmp({files.monitor},'vert')&  strcmp({files.notes},'good imaging session')  &    strcmp({files.label},'camk2 gc6') &  strcmp({files.task},'HvV_center') &strcmp({files.spatialfreq},'200'))
+%alluse = find(strcmp({files.monitor},'vert')&  strcmp({files.notes},'good imaging session')  &    strcmp({files.label},'camk2 gc6') &  strcmp({files.task},'HvV_center') &strcmp({files.spatialfreq},'200'))
+alluse = find(strcmp({files.monitor},'vert')&  strcmp({files.notes},'good imaging session')  &    strcmp({files.label},'camk2 gc6'))
 allsubj = unique({files(alluse).subj})
 
 for s = 1:1
@@ -22,7 +24,7 @@ x0 =-10; y0=0; sz = 95;
 doTopography;
 
 % %%% overlay behavior on top of topomaps
-doBehavior;
+%doBehavior;
 
 % %%% analyze looming
 % for f = 1:length(use)

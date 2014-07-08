@@ -18,6 +18,7 @@ fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =msPenalty;
+pixPerCycs                = [100 150 200]; %*10^9;
 %stim.stopHUD = false; %stop period heads up display... false = off
 
 % sca
@@ -32,21 +33,25 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 150;
        msPenalty               =4200;
+       pixPerCycs             = [100 150 200]; %*10^9;
     
      case 'g62b.5lt'           %started 1/28/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 55; 
+       rewardSizeULorMS        = 65; 
        msPenalty               =4300;
+       pixPerCycs             = [100 150 200]; %*10^9;
        
      case 'bfly2b.3rt'
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 40;
        msPenalty               =4200; 
+       pixPerCycs             = [100 150 200]; %*10^9;
        
      case 'g62c6tt' % switched GTS 6/8/14
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 60;
        msPenalty               =4200;
+       pixPerCycs             = [100 150 200]; %*10^9;
 %        
 %      case 'g6w1lt' % started 3/7/14
 %        requestRewardSizeULorMS = 0;
@@ -154,7 +159,6 @@ stim.positional = false;
 stim.cue = true;
 stim.soundClue = false;
 
-pixPerCycs             = [100 150 200]; %*10^9;
 targetOrientations     = [0 1]*pi/2;
 distractorOrientations = []; %-targetOrientations;
 mean                   = .5;

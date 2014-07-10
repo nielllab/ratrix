@@ -4,7 +4,82 @@ dbstop if error
 pathname = 'I:\compiled behavior\';
 datapathname = 'G:\Behavior data 12-24-13+\';  %some in archived behavior
 %datapathname = 'H:\archived widefield behavior (12-24-13 to 4-29-14)\';
+
 outpathname = 'I:\compiled behavior\behavior topos\';
+
+n=1;
+files(n).subj = 'g62b7lt';
+files(n).expt = '070814';
+files(n).topox =  '';
+files(n).topoxdata = '070814 g62b7lt passive viewing\g62b7lt_run1_topox_fstop8_Exp_50ms\g62b7lt_run1_topox_fstop8_Exp';
+files(n).topoy = '';
+files(n).topoydata = '070814 g62b7lt passive viewing\g62b7lt_run2_topoy_fstop8_Exp_50ms\g62b7lt_run2_topoy_fstop8_Exp';
+files(n).behav = '';
+files(n).behavdata = '070814 G62B7-LT HvV_center behavior 200SF\G62B7-LT_run1_HvV_center_behavior_50ms_F_8_200SF\G62B7-LT_run1_HvV_center_behavior_50ms_F_8_200SF';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).stepbinary = '';
+files(n).stepbinarydata = '070814 g62b7lt passive viewing\g62b7lt_run3_stepbinary_fstop8_Exp_50ms\g62b7lt_run3_stepbinary_fstop8';
+files(n).auditory = '';
+files(n).auditorydata = '';
+files(n).darkness = '';
+files(n).darknessdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = 'HvV_center';
+files(n).spatialfreq = '200';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session'; %performance not great
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 % n=1;
 % files(n).subj = 'g62k2rt';
@@ -106,15 +181,370 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 % files(n).label = 'camk2 gc6';
 % files(n).notes = 'good imaging session'; %performance not great
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 % n=n+1;
 % files(n).subj = 'g62g6lt';
 % files(n).expt = '070814';
+
+
 % files(n).topox =  '';
 % files(n).topoxdata = '070814 G62G6-LT passive viewing\G62G6-LT_run1_topoX_50ms_F_8\G62G6-LT_run1_topoX_50ms_F_8';
+
 % files(n).topoy = '';
 % files(n).topoydata = '070814 G62G6-LT passive viewing\G62G6-LT_run2_topoY_50ms_F_8\G62G6-LT_run2_topoY_50ms_F_8';
+
 % files(n).behav = '';
 % files(n).behavdata = '070814 G62G6-LT Naive behavior\G62G6-LT_run1_naive_behavior_50ms_exp_F_8\G62G6-LT_run1_naive_behavior_50ms_exp_F_8';
+
 % files(n).grating = '';
 % files(n).gratingdata = '';
 % files(n).stepbinary = '';
@@ -127,11 +557,187 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 % files(n).loomdata = '';
 % files(n).monitor = 'vert';
 % files(n).task = 'naive';
+
+% files(n).spatialfreq = '100';
 % files(n).spatialfreq = '200';
 % files(n).label = 'camk2 gc6';
 % files(n).notes = 'good imaging session';
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 % n=n+1;
+% files(n).subj = 'g62k1rt';
+% files(n).expt = '070814';
+% files(n).topox =  '';
+% files(n).topoxdata = '070814 G62K1-rt passive viewing\G62K1-rt_run1_topoX_50ms_F_8\G62K1-rt_run1_topoX_50ms_F_8';
+% files(n).topoy = '';
+% files(n).topoydata = '070814 G62K1-rt passive viewing\G62K1-rt_run2_topoY_50ms_F_8\G62K1-rt_run2_topoY_50ms_F_8';
+% files(n).behav = '';
+% files(n).behavdata = '070814 G62K.1-RT Naive behavior\G62K.1-rt_run1_naive_behavior_50ms_exp_Fstop8\G62K.1-rt_run1_naive_behavior_50ms_exp_Fstop8';
+% files(n).grating = '';
+% files(n).gratingdata = '';
+% files(n).stepbinary = '';
+% files(n).stepbinarydata = '';
+% files(n).auditory = '';
+% files(n).auditorydata = '';
+% files(n).darkness = '';
+% files(n).darknessdata = '';
+% files(n).loom = '';
+% files(n).loomdata = '';
+% files(n).monitor = 'vert';
+% files(n).task = 'naive';
+% files(n).spatialfreq = '100';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good imaging session';
 % files(n).subj = 'g62k1rt';
 % files(n).expt = '070814';
 % files(n).topox =  '';
@@ -159,12 +765,18 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 % n=n+1;
 % files(n).subj = 'g62k2rt';
 % files(n).expt = '070714';
+
+
 % files(n).topox =  '';
 % files(n).topoxdata = '070714 g62k2rt passive behavior\g62k2rt_run1_topox_fstop11_exp50ms\g62k2rt_run1_topox_fstop11_exp50ms';
+
 % files(n).topoy = '';
 % files(n).topoydata = '070714 g62k2rt passive behavior\g62k2rt_run2_topoy_fstop11_exp50ms\g62k2rt_run2_topoy_fstop11_exp50ms';
 % files(n).behav = '';
 % files(n).behavdata = '070714 g62k2rt naive behavior\g62k2rt_run1_naive_fstop11_exp50ms\g62k2rt_run1_naive_fstop11_exp50ms';
+
+
+
 % files(n).grating = '';
 % files(n).gratingdata = '';
 % files(n).stepbinary = '';
@@ -776,6 +1388,268 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 % % files(n).label = 'camk2 gc6';
 % % files(n).notes = 'poor performance'; 
 % 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 % n=n+1;
 % 
 % files(n).subj = 'g62b4ln';
@@ -1026,6 +1900,12 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 % files(n).topoydata = '052514 g62c6lt passive\g62c6lt_run2_topoy_fstop11_exp50ms\g62c6lt_run2_topoy_fstop11_exp50ms';
 % files(n).behav = '052514 g62c6lt\g62c6lt_run1_nieve_behav data.mat';
 % files(n).behavdata = '052514 g62c6lt nieve behavior\g62c6lt_run1_nieve_fstop11_exp50ms\g62c6lt_run1_nieve_fstop11_exp50ms';
+
+
+
+
+
+
 % files(n).grating = '';
 % files(n).gratingdata = '';
 % files(n).loom = '';
@@ -1100,6 +1980,112 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 % files(n).label = 'camk2 gc6';
 % files(n).notes = 'good imaging session';
 % 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 % n=n+1;
 % 
 % files(n).subj = 'g62c6lt';
@@ -1183,6 +2169,7 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 % n=n+1;
 % 
 % files(n).subj = 'g62b1lt';
+
 % files(n).expt = '052014';
 % files(n).topox =  '052014 g62b1lt\g62b1lt_run1_topox_fstop11_exp50msmaps.mat';
 % files(n).topoxdata = '052014 G62b.1LT Passive Viewing\g62b1lt_run1_topox_fstop11_exp50ms\g62b1lt_run1_topox_fstop11_exp50ms';
@@ -1210,6 +2197,12 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 % files(n).topoydata = '051914 G62b4-LN passive viewing\G62b4-LN_run2_topoY_50ms_exp_F_11\G62b4-LN_run2_topoY_50ms_exp_F_11';
 % files(n).behav = '051914 g62b4ln\G62b4-ln_GTS_behaviobehav data.mat';
 % files(n).behavdata = '051914 G62b4-LN GTS behavior\G62b4-ln_GTS_behavior_50ms_Fstop_11\G62b4-ln_GTS_behavior_50ms_Fstop_11';
+
+
+
+
+
+
 % files(n).grating = '';
 % files(n).gratingdata = '';
 % files(n).loom = '';
@@ -1239,6 +2232,48 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 % % files(n).label = 'camk2 gc6';
 % % files(n).notes = 'poor imaging session, no passive viewing';
 % 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 % n=n+1;
 % files(n).subj = 'g62b8tt';
 % files(n).expt = '051714';
@@ -1324,6 +2359,13 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 % files(n).topoydata = '051614 G62c2-rt passive viewing\G62c2-rt_run4_topoY_landscape_50ms_F_8\G62c2-rt_run4_topoY_landscape_50ms_F_8';
 % files(n).behav = '051614 g62c2rt\G62c-rt_run1_HvV_center_behavior_behav data.mat';
 % files(n).behavdata = '051614 G62c2-rt HvV_center Behavior\G62c-rt_run1_HvV_center_behavior_50msexp_Fstop_8\G62c-rt_run1_HvV_center_behavior_50msexp_Fstop_8';
+
+
+
+
+
+
+
 % files(n).grating = '';
 % files(n).gratingdata = '';
 % files(n).loom = '';
@@ -1350,11 +2392,167 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 % files(n).monitor = 'vert';
 % files(n).task = 'HvV_center';
 % files(n).spatialfreq = '100';
+
 % files(n).label = 'camk2 gc6';
 % files(n).notes = 'good imaging session';
 % 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 % n=n+1;
 % files(n).subj = 'g62b8tt';
+
 % files(n).expt = '051614';
 % files(n).topox =  '051614 g62b8tt\g62b.8tt_run7_topoxlandscape_fstop11_exp50msmaps.mat';
 % files(n).topoxdata = '051614 G62B.8TT Passive Viewing\g62b.8tt_run7_topoxlandscape_fstop11_exp50ms\g62b.8tt_run7_topoxlandscape_fstop11_exp50ms';
@@ -1362,8 +2560,15 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 % files(n).topoydata = '051614 G62B.8TT Passive Viewing\g62b.8tt_run8_topoylandscape_fstop11_exp50ms\g62b.8tt_run8_topoylandscape_fstop11_exp50ms';
 % files(n).behav = ''; %no analysis multi tiff
 % files(n).behavdata = '051614 G62b8-TT HvV_center Behavior\G62B8-TT_run1_HvV_center_behavior_50ms_F_11\G62B8-TT_run1_HvV_center_behavior_50ms_F_11';
+
+
+
+
+
+
 % files(n).grating = '';
 % files(n).gratingdata = '';
+
 % files(n).loom = '';
 % files(n).loomdata = '';
 % files(n).monitor = 'land';
@@ -1385,6 +2590,7 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 % files(n).gratingdata = '051614 G62B.8TT Passive Viewing\g62b.8tt_run6_widefieldgratings_fstop11_exp50ms\g62b.8tt_run6_widefieldgratings_fstop11_exp50ms';
 % files(n).loom = '051614 g62b8tt\g62b.8tt_run5_looming_fstop11_exp50msmaps.mat';
 % files(n).loomdata = '051614 G62B.8TT Passive Viewing\g62b.8tt_run5_looming_fstop11_exp50ms\g62b.8tt_run5_looming_fstop11_exp50ms';
+
 % files(n).monitor = 'vert';
 % files(n).task = 'HvV_center';
 % files(n).spatialfreq = '100';
@@ -1426,10 +2632,90 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 % files(n).monitor = 'vert';
 % files(n).task = 'GTS';
 % files(n).spatialfreq = '100';
+
 % files(n).label = 'camk2 gc6';
 % files(n).notes = 'good imaging session'; %mislabled files as g62b.5 good run though
 % 
 % 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 % n=n+1;
 % files(n).subj = 'g62b3rt';
 % files(n).expt = '051514';
@@ -1547,6 +2833,7 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 % 
 % n=n+1;
 % files(n).subj = 'g62b3rt';
+
 % files(n).expt = '050814';
 % files(n).topox =  '050814 g62b3rt\G62b3-rt_run1_topoX_50ms_Fstop_8_maps.mat';
 % files(n).topoy = '050814 g62b3rt\G62b3-rt_run2_topoY_50ms_Fstop_8_maps.mat';
@@ -1629,6 +2916,12 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 % files(n).topox =  '050414 g62c2rt\G62C2-RT_run1_topoX_50ms_F_8maps.mat';
 % files(n).topoy = '050414 g62c2rt\G62C2-RT_run2_topoY_50ms_F_8maps.mat';
 % files(n).behav = '050414 g62c2rt\G62C2-RT_run2_HvV_center_behavior_5behav data.mat';
+
+
+
+
+
+
 % files(n).grating = '';
 % files(n).loom = '';
 % files(n).monitor = 'vert';
@@ -1652,6 +2945,8 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 % files(n).loom = '';
 % files(n).stepbinary = '050414 g62g4lt\g62g.4lt_run3_stepbinary_fstop5.6_exp50msmaps.mat';
 % files(n).stepbinarydata = '050414 G62g.4LT Passive Viewing\g62g.4lt_run3_stepbinary_fstop5.6_exp50ms\g62g.4lt_run3_stepbinary_fstop5.6_exp50ms';
+
+
 % files(n).monitor = 'vert';
 % files(n).task = 'HvV_center';
 % files(n).spatialfreq = '100';
@@ -1701,12 +2996,22 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 % files(n).loomdata = '';
 % files(n).behavdata = '050314 G62B5-LT GTS behavior\G62B5-LT_run1_GTS_behavior_50msexp_Fstop-8\G62B5-LT_run1_GTS_behavior_50msexp_Fstop-8';
 % 
+
+
 % n=n+1;
 % files(n).subj = 'g62b4ln';
 % files(n).expt = '050314';
 % files(n).topox =  '050314 g62b4ln\G62B4-LN_run1_topoX_50ms_F_8maps.mat';
 % files(n).topoy = '050314 g62b4ln\G62B4-LN_run2_topoY_50ms_F_8maps.mat';
 % files(n).behav = '050314 g62b4ln\G62B4-LN_run1_GTS_behavior_5behav data.mat';
+
+
+
+
+
+
+
+
 % files(n).grating = '';
 % files(n).loom = '';
 % files(n).monitor = 'vert';
@@ -1932,6 +3237,8 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 % files(n).loomdata = '';
 % files(n).behavdata = '042114 g62g.4-lt HvV_center behavior\g62g.4lt_run1_HvV_center_50msexp_5.6fstop\g62g.4lt_run1_HvV_center_50msexp_5.6fstop';
 % 
+
+
 % n=n+1;
 % files(n).subj = 'g62b8tt';
 % files(n).expt = '042114';
@@ -1997,6 +3304,17 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 % files(n).behav = '031114 g62c2rt\G62C.2-RT_run1_HvV_center_behavbehav data.mat';
 % files(n).grating = '';
 % files(n).loom = '';
+
+
+
+
+
+
+
+
+
+
+
 % files(n).monitor = 'vert';
 % files(n).task = 'HvV_center';
 % files(n).spatialfreq = '100';
@@ -2008,6 +3326,569 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 % files(n).loomdata = '';
 % files(n).behavdata = '031114 G62C.2-RT HvV_center Behavior\G62C.2-RT_run1_HvV_center_behavior_F_4_50msexp\G62C.2-RT_run1_HvV_center_behavior_F_4_50msexp';
 % 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 % n=n+1;
 % files(n).subj = 'g62b7lt';
 % files(n).expt = '031114';
@@ -2127,6 +4008,7 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 % 
 % n=n+1;
 % files(n).subj = 'g62b7lt';
+
 % files(n).expt = '030214';
 % files(n).topox =  '030214 g62b7lt\030214 G62B.7-LT_run1_topoX_Fstop8_50msexpmaps.mat';
 % files(n).topoy = '030214 g62b7lt\030214 G62B.7-LT_run2_topoY_Fstop8_50msexpmaps.mat';
@@ -2187,6 +4069,8 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 % files(n).expt = '030114';
 % files(n).topox =  '030114 g62b5lt\G62B.5_LT_run2_topoX_Fstop_8_50msexpmaps.mat';
 % files(n).topoy = '030114 g62b5lt\G62B.5_LT_run3_topoY_Fstop_8_50msexpmaps.mat';
+
+
 % files(n).behav = '';
 % files(n).grating = '';
 % files(n).loom = '';
@@ -2199,18 +4083,227 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 % files(n).notes = 'no behavior imaging session'; %camware took a few extra frames (cant analyze)
 % files(n).topoxdata = '030114 G62B.5-LT passive veiwing\G62B.5_LT_run2_topoX_Fstop_8_50msexp\G62B.5_LT_run2_topoX_Fstop_8_50msexp';
 % files(n).topoydata = '030114 G62B.5-LT passive veiwing\G62B.5_LT_run3_topoY_Fstop_8_50msexp\G62B.5_LT_run3_topoY_Fstop_8_50msexp';
+
+
+
 % files(n).gratingdata = '';
 % files(n).loomdata = '';
 % files(n).behavdata = '030114 G62B.5-LT GTS Behavior (Fstop 8)\G62B.5-LT_run1_GTS_behavior_Fstop_8_50msexp\G62B.5-LT_run1_GTS_behavior_Fstop_8_50msexp';
 % 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 % n=n+1;
 % files(n).subj = 'g62b4ln';
 % files(n).expt = '030114';
 % files(n).topox =  '030114 g62b4ln\G62B.4-LN_run1_TopoX_Fstop_11_30msexpmaps.mat';
 % files(n).topoy = '030114 g62b4ln\G62B.4-LN_run3_TopoY_Fstop_5.6_30msexpmaps.mat';
 % files(n).behav = '030114 g62b4ln\G62B.4-LN_run4_GTS_Behavior_topFbehav data.mat';
+
+
+
+
+
 % files(n).grating = '';
 % files(n).loom = '';
+
+
 % files(n).monitor = 'vert';
 % files(n).task = 'GTS';
 % files(n).spatialfreq = '100';
@@ -2218,6 +4311,9 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 % files(n).notes = 'good imaging session';
 % files(n).topoxdata = '030114 G62B.4-LN Passive viewing (F-stop diff)\G62B.4-LN_run1_TopoX_Fstop_11_30msexp\G62B.4-LN_run1_TopoX_Fstop_11_30msexp';
 % files(n).topoydata = '030114 G62B.4-LN Passive viewing (F-stop diff)\G62B.4-LN_run3_TopoY_Fstop_5.6_30msexp\G62B.4-LN_run3_TopoY_Fstop_5.6_30msexp';
+
+
+
 % files(n).gratingdata = '';
 % files(n).loomdata = '';
 % files(n).behavdata = '030114 G62B.4-LN GTS Behavior (Top Fstop-11)\G62B.4-LN_run4_GTS_Behavior_topFstop-11_30msexp\G62B.4-LN_run4_GTS_Behavior_topFstop-11_30msexp';
@@ -2344,6 +4440,7 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 
 
 
+
 % n=n+1;
 % files(n).subj = '';
 % files(n).expt = '';
@@ -2369,9 +4466,38 @@ outpathname = 'I:\compiled behavior\behavior topos\';
 % files(n).label = 'camk2 gc6';
 % files(n).notes = 'good imaging session';
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 % files(n).topoxdata = '';
 % files(n).topoydata = '';
 % files(n).behavdata = '';
 % files(n).gratingdata = '';
 % files(n).loomdata = '';
+
+
+
+
+
 

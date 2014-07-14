@@ -31,13 +31,13 @@ end
         
    case 'g62b8tt'     %started 5/22/14  
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 22.5;
+       rewardSizeULorMS        = 27.5;
         msPenalty              =4000;
         pixPerCycs             = [100 150 200]; %*10^9;
 
   case 'g62c.2rt'           %changed 5/16/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 25; 
+       rewardSizeULorMS        = 30; 
        msPenalty               =4000;
        pixPerCycs             = [100 150 200]; %*10^9;
        

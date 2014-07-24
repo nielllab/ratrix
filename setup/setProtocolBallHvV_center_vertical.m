@@ -35,13 +35,13 @@ switch subjIDs{1}
     
     case 'g62f.8lt' % Started  7/12/14
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 160;
+       rewardSizeULorMS        = 150;
        msPenalty               =4100;
     
     case 'g62g4lt'     %switched full 5/22/14 
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 40;
-        msPenalty              =4000;
+        msPenalty              =4100;
         pixPerCycs             = [100 125 150]; %*10^9;
 %         
 %    case 'g62b8tt'     %switched full 5/22/14  
@@ -52,7 +52,7 @@ switch subjIDs{1}
        case 'g62h1tt'     %started 3/24/14
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 25;
-        msPenalty              =3900;
+        msPenalty              =4000;
         pixPerCycs             = [100 125 150]; %*10^9;
         
 %        case 'g62h2lt'     %started 2/22/14  
@@ -77,7 +77,7 @@ switch subjIDs{1}
 
     case 'g62b7lt'           %started HvV_cent 1/21/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 30; 
+       rewardSizeULorMS        = 25; 
        msPenalty               =4000;
        pixPerCycs             = [100 125 150]; %*10^9;
        

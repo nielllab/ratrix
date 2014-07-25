@@ -38,7 +38,7 @@ switch subjIDs{1}
        
      case 'g62j.5rt' % Started GoToBlack 7/10/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 140;
+       rewardSizeULorMS        = 130;
        msPenalty               =4100;
        
      case 'g62e.12rt' % Started GoToBlack 7/10/14

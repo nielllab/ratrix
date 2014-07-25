@@ -44,12 +44,11 @@ for f = 1:0
     %
 end
 %behav=behavNoRun;
-
 allsubj{s}
 nb=0; avgbehav=0;
 for f= 1:length(use)
     %for f= 1:1
-    if ~isempty(behav{f})  & allxshift(f)>-20 % & strcmp(files(use(f)).subj,allsubj{s}) ;
+    if ~isempty(behav{f})% & strcmp(files(use(f)).subj,allsubj{s}) ;
       f
       b = shiftdim(behav{f},1);
         zoom = 260/size(b,1);
@@ -63,15 +62,18 @@ avgbehav = avgbehav/nb;
 figure
 for t= 1:16  %10:18
     subplot(4,4,t);
-    imshow(avgmap);
+    %imshow(avgmap);
     hold on
     data = squeeze(avgbehav(:,:,t));
     
     h = imshow(mat2im(data,jet,[0 0.15]));
-    transp = zeros(size(squeeze(avgmap(:,:,1))));
-    transp(abs(data)>=0.00)=1;
-    set(h,'AlphaData',transp);
+    
+    imwrite(mat2im(data,jet,[0 0.15]),sprintf('behav_wrong3-4%d%s',t,'.tif'),'tif')
+%     transp = zeros(size(squeeze(avgmap(:,:,1))));
+%     transp(abs(data)>=0.00)=1;
+%     set(h,'AlphaData',transp);
     
 end
 title(allsubj{s})
+
 

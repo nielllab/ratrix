@@ -285,7 +285,7 @@ recs = {
 %     } 
 %     } 
 %     
-%           {'g62b1lt' {
+          {'g62b1lt' {
 %        {[1 208],[],'031114 G62B.1-RT HvV Behavior\G62B.1-LT_run1_HvV_behavior_Fstop_5.6_50msexp','G62B.1-LT_run1_HvV_behavior_Fstop_5.6_50msexp'}     
 %       {[209 477],[],'050214 G62b.1 LT HvV_vertical behavior\g62b.1lt_run1_HvV_vertical_fstop5.6_exp50ms','g62b.7lt_run1_HvV_vertical_fstop5.6_exp50ms'}
 %         {[478 693],[],'050614 G62B.1 LT HvV_Vertical Behavior\G62B.1LT_run1_HvV_Vertical_fstop5.6_exp50ms','G62B.1LT_run1_HvV_Vertical_fstop5.6_exp50ms'}
@@ -298,11 +298,12 @@ recs = {
 %     {[2281 2615],[],'061114 g62b.1lt hvv behavior\g62b.1lt_run1_hvv_fstop11_spatial400_exp50ms','g62b.1lt_run1_hvv_fstop11_spatial400_exp50ms'}
 %     {[2616 2897],[],'062114 g62b1lt hvv behavior\g62b1lt_run1_hvv_fstop11_exp50ms','g62b1lt_run1_hvv_fstop11_exp50ms'}
 %     {[2898 3047],[],'062214 g62b.1 hvv behavior\g62b.1_run1_hvv_fstop11_exp50ms','g62b.1_run1_hvv_fstop11_exp50ms'}
-%     }
-%     }    
+        {[3048 3387],[],'072314 g62b1rt hvv behavior\g62b1rt_run1_hvv_fstop11_exp50ms','g62b1rt_run1_hvv_fstop11_exp50ms'} 
+    }
+    }    
 %     
 %   
-%       {'g62b3rt' {
+          {'g62b3rt' {
 %       {[1 157],[],'022814 G62B.3-RT HvV Behavior\G62B.3-RT_run1_HvV_Behavior_15msexp','G62B.3-RT_run1_HvV_Behavior_15msexp'}     
 %       {[158 340],[],'030114 G62B.3-RT HvV Behavior\G62B.3-RT_run1_HvV_behavior_Fstop_5.6_50msexp','G62B.3-RT_run1_HvV_behavior_Fstop_5.6_50msexp' }
 %       {[341 572],[],'030214 G62B.3-RT HvV behavior\G62B.3-RT_run1_HvV_behavior_Fstop8_50msexp','G62B.3-RT_run1_HvV_behavior_Fstop8_50msexp'}
@@ -316,8 +317,9 @@ recs = {
 %         {[2141 2269],[],'062014 g62b.3 rt hvv vertical behavior\g62b3rt_run1_hvv_fstop11_exp50ms','g62b3rt_run1_hvv_fstop11_exp50ms'}
 %         {[2270 2270],[],'No Data'}
 %         {[2271 2491],[],'062614 g62b3rt hvv behavior\g62b3rt_run2_spatial200_gts_fstop11_exp50ms','g62b3lt_run1_spatial200_gts_fstop11_exp50ms'}
-%      }
-%      }    
+            {[2492 2809],[],'072314 g62b3rt hvv behavior\g62b3rt_run1_hvv_fstop11_exp50ms_200spatial','g62b3rt_run1_hvv_fstop11_exp50ms_200spatial'}
+     }
+     }    
 %     
 %          {'g62b4ln' {
 %      {[1 298],[],'022114 G62B.4-LN GTS Behavior','G62B.4-LN_run1_GTS_behavior_15msexp'}     

@@ -37,14 +37,13 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
         histcorrect(d) = mean(correct(stop_time>(d-1)/2 & stop_time<d/2));
     end
         figure
-        histcorrect(isnan(histcorrect))=0;
-    plot(0.5:0.5:10,histcorrect);
-    xlabel('stopping time')
-    hold on
-       h = hist(stop_time,0.5:0.5:10);
-    plot(0.5:0.5:10,h/sum(h),'k');%  
-    
-    keyboard
+%         histcorrect(isnan(histcorrect))=0;
+%     plot(0.5:0.5:10,histcorrect);
+%     xlabel('stopping time')
+%     hold on
+%        h = hist(stop_time,0.5:0.5:10);
+%     plot(0.5:0.5:10,h/sum(h),'k');%  
+
     
     basemap =merge;
     titles = {'all trials','left trials','right trials','left-right','correct','incorrect','correct-incorrect'};
@@ -67,16 +66,16 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
     
     for i =1:1
         if i==1
-            useTrials = find(correct==1&resp_time>0.3 & resp_time<0.6 & stop_time<1.1);
-            for j =1:5
-                tr = ceil(rand*length(useTrials));
-                figure
-                for fr = 1:24
-                    subplot(4,6,fr);
-                    imagesc(squeeze(bg(useTrials(tr),fr,:,:)),[0 0.15]);
-                    axis off
-                end
-            end
+            useTrials = find(correct==0&resp_time>0.35 & resp_time<0.45 );
+%             for j =1:5
+%                 tr = ceil(rand*length(useTrials));
+%                 figure
+%                 for fr = 1:24
+%                     subplot(4,6,fr);
+%                     imagesc(squeeze(bg(useTrials(tr),fr,:,:)),[0 0.15]);
+%                     axis off
+%                 end
+%             end
           %  keyboard
             numtrials = length(useTrials)
             %keyboard

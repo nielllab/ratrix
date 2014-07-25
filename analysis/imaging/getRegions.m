@@ -11,9 +11,11 @@ end
     expname = [expfile.subj expfile.expt];
     for m = 1:2
    
-            load([pathname getfield(expfile,maptype{m})],'mapNorm')
+            load([pathname getfield(expfile,maptype{m})],'map')
 
-        map=mapNorm;
+       if exist('mapNorm','var')
+           map=mapNorm;
+       end
         map = map{3};
         map_all{m} = map;
         ph = angle(map);
@@ -35,7 +37,7 @@ end
         grad_amp = abs(grad);
         
         dx(grad_amp>1)=0; dy(grad_amp>1)=0;
-       dx = medfilt2(dx,[3 3]); dy = medfilt2(dy, [3 3]);
+       dx = medfilt2(dx,[3 3]); dy = medfilt2(dy, [5 5]); % was [3 3]
         
         grad = dx + sqrt(-1)*dy;
         

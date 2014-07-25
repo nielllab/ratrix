@@ -298,7 +298,7 @@ recs = {
 %     {[2281 2615],[],'061114 g62b.1lt hvv behavior\g62b.1lt_run1_hvv_fstop11_spatial400_exp50ms','g62b.1lt_run1_hvv_fstop11_spatial400_exp50ms'}
 %     {[2616 2897],[],'062114 g62b1lt hvv behavior\g62b1lt_run1_hvv_fstop11_exp50ms','g62b1lt_run1_hvv_fstop11_exp50ms'}
 %     {[2898 3047],[],'062214 g62b.1 hvv behavior\g62b.1_run1_hvv_fstop11_exp50ms','g62b.1_run1_hvv_fstop11_exp50ms'}
-        {[3048 3387],[],'072314 g62b1rt hvv behavior\g62b1rt_run1_hvv_fstop11_exp50ms','g62b1rt_run1_hvv_fstop11_exp50ms'}
+        {[3048 3387],[],'072314 g62b1rt hvv behavior\g62b1rt_run1_hvv_fstop11_exp50ms','g62b1rt_run1_hvv_fstop11_exp50ms'} 
     }
     }    
 %     

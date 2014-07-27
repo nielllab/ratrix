@@ -49,7 +49,7 @@ switch subjIDs{1}
        
      case 'g62c6tt' % switched GTS 6/8/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;
+       rewardSizeULorMS        = 30;
        msPenalty               =4200;
        pixPerCycs             = [100 150 200]; %*10^9;
 

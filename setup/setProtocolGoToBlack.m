@@ -28,12 +28,12 @@ switch subjIDs{1}
        
      case 'g62j.4rt' % Started GoToBlack 7/10/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 130;
+       rewardSizeULorMS        = 100;
        msPenalty               =4100;
        
      case 'g62j.5tt' % Started GoToBlack 7/10/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 110;
+       rewardSizeULorMS        = 90;
        msPenalty               =4100;
        
      case 'g62j.5rt' % Started GoToBlack 7/10/14
@@ -43,7 +43,7 @@ switch subjIDs{1}
        
      case 'g62e.12rt' % Started GoToBlack 7/10/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 180;
+       rewardSizeULorMS        = 150;
        msPenalty               =4100;
      
     
@@ -64,7 +64,7 @@ switch subjIDs{1}
        
      case 'g62g.6lt' % Started GoToBlack 6/30/14
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 70;
+       rewardSizeULorMS        = 50;
        msPenalty               =4400;
 %        
 %      case 'g62c6tt' % switched GoToBlack 5/21/14

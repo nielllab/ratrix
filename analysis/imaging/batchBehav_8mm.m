@@ -315,9 +315,7 @@ end
 
 
 %%% calculate gradients and regions
-for f = 1:length(use)
-[map{f} merge{f}]= getRegions(files(use(f)),pathname,outpathname);
-end
+
 
 for i = 1:length(files);
     if ~isempty(files(i).step_binary) & ~isempty(files(i).whisker) &  ~isempty(files(i).darkness) & strcmp(files(i).notes,'good imaging session')

@@ -62,10 +62,10 @@ switch subjIDs{1}
 %        rewardSizeULorMS        = 120;
 %        msPenalty               =4100;
        
-     case 'g62g.6lt' % Started GoToBlack 6/30/14
-       requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 50;
-       msPenalty               =4400;
+%      case 'g62g.6lt' % Started GoToBlack 6/30/14
+%        requestRewardSizeULorMS = 00;
+%        rewardSizeULorMS        = 50;
+%        msPenalty               =4400;
 %        
 %      case 'g62c6tt' % switched GoToBlack 5/21/14
 %        requestRewardSizeULorMS = 0;

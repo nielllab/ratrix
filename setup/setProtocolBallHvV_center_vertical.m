@@ -30,7 +30,7 @@ switch subjIDs{1}
     
     case 'g62k.1rt' % Started 7/12/14
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 160;
+       rewardSizeULorMS        = 140;
        msPenalty               =4100;
     
     case 'g62f.8lt' % Started  7/12/14
@@ -43,6 +43,12 @@ switch subjIDs{1}
        rewardSizeULorMS        = 30;
         msPenalty              =4200;
         pixPerCycs             = [100 125 150]; %*10^9;
+        
+     case 'g62g.6lt' % Started GoToBlack 6/30/14
+       requestRewardSizeULorMS = 00;
+       rewardSizeULorMS        = 80;
+       msPenalty               =4400;
+
 %         
 %    case 'g62b8tt'     %switched full 5/22/14  
 %        requestRewardSizeULorMS = 0;

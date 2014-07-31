@@ -11,8 +11,8 @@ binning=0.5;
 framerate=10;
 
 choosePix =0; %%% option to manually select pixels for timecourse analysis
-maxGB = 1.50; %%% size to reduce data down to
-
+maxGB = 1.50*binning.^2; %%% size to reduce data down to
+binning=1;
 
 if ~exist('in','var') || isempty(in)
     [f,p] = uigetfile({'*.tif'; '*.tiff'; '*.mat'},'choose pco data');
@@ -59,6 +59,8 @@ print('-dpsc',psfilename,'-append');
 
 
 blue=1; green=2; split=3;
+figure
+plot(idx);
 for LED=1:3
     frms = 1:size(out,3);
     if LED==blue

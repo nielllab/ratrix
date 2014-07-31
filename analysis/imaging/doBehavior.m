@@ -1,4 +1,5 @@
 %doBehavior
+close all
 
 clear behav
 for f = 1:length(use); behav{f}=[]; end;
@@ -60,15 +61,15 @@ end
 avgbehav = avgbehav/nb;
 
 figure
-for t= 1:16  %10:18
-    subplot(4,4,t);
+for t= 1:6  %10:18
+    subplot(2,3,t);
     %imshow(avgmap);
     hold on
-    data = squeeze(avgbehav(:,:,t));
+    data = squeeze(avgbehav(:,:,t+7));
     
     h = imshow(mat2im(data,jet,[0 0.15]));
     
-    imwrite(mat2im(data,jet,[0 0.15]),sprintf('behav_wrong3-4%d%s',t,'.tif'),'tif')
+    imwrite(mat2im(data,jet,[0 0.15]),sprintf('behav_left3-4%d%s',t,'.tif'),'tif')
 %     transp = zeros(size(squeeze(avgmap(:,:,1))));
 %     transp(abs(data)>=0.00)=1;
 %     set(h,'AlphaData',transp);

@@ -5,7 +5,8 @@ end
 perFrames = round(period*framerate);
 map =0;
 
-im = im(:,:,perFrames+1:end);
+%im = im(:,:,perFrames+1:end);
+im(:,:,1:perFrames)=[];
 
 length(im);
 nframes = floor(length(im)/perFrames)*perFrames;

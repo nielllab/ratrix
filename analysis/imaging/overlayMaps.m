@@ -66,7 +66,7 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
     
     for i =1:1
         if i==1
-            useTrials = find(correct==0&resp_time>0.35 & resp_time<0.45 );
+            useTrials = find(correct==1&resp_time>0.35 & resp_time<0.45 & targ==-1);
 %             for j =1:5
 %                 tr = ceil(rand*length(useTrials));
 %                 figure

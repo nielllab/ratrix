@@ -21,10 +21,10 @@ msAirpuff                 =msPenalty;
 
 
 switch subjIDs{1}
-     case 'g62j.4tt' % Started GoToBlack 7/10/14
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 110;
-       msPenalty               =4100;
+%      case 'g62j.4tt' % Switched to GTS 7/31/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 110;
+%        msPenalty               =4100;
        
 %      case 'g62j.4rt' % Switched to GTS 7/27/14
 %        requestRewardSizeULorMS = 0;
@@ -36,14 +36,14 @@ switch subjIDs{1}
 %        rewardSizeULorMS        = 90;
 %        msPenalty               =4100;
        
-     case 'g62j.5rt' % Started GoToBlack 7/10/14
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 110;
-       msPenalty               =4100;
-       
+%      case 'g62j.5rt' % Switched HvV_center_vertical 7/31/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 110;
+%        msPenalty               =4100;
+%        
      case 'g62e.12rt' % Started GoToBlack 7/10/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 150;
+       rewardSizeULorMS        = 120;
        msPenalty               =4100;
      
     

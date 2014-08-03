@@ -41,11 +41,11 @@ switch subjIDs{1}
 %        rewardSizeULorMS        = 110;
 %        msPenalty               =4100;
 %        
-     case 'g62e.12rt' % Started GoToBlack 7/10/14
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 120;
-       msPenalty               =4100;
-     
+%      case 'g62e.12rt' % Switched GTS 8/2/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 120;
+%        msPenalty               =4100;
+%      
     
 %      case 'g62k.1rt' % Switched HvV_center 7/12/14
 %        requestRewardSizeULorMS = 00;

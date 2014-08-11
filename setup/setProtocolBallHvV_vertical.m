@@ -37,7 +37,7 @@ end
 
   case 'g62c.2rt'           %changed 5/16/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 30; 
+       rewardSizeULorMS        = 35; 
        msPenalty               =4000;
        pixPerCycs             = [100 150 200]; %*10^9;
        

@@ -21,66 +21,57 @@ msAirpuff                 =msPenalty;
 
 
 switch subjIDs{1}
-     case 'g62j.4tt' % Started GoToBlack 7/10/14
-       requestRewardSizeULorMS = 20;
-       rewardSizeULorMS        = 180;
-       msPenalty               =4100;
+%      case 'g62j.4tt' % Switched to GTS 7/31/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 110;
+%        msPenalty               =4100;
        
-     case 'g62j.4rt' % Started GoToBlack 7/10/14
-       requestRewardSizeULorMS = 20;
-       rewardSizeULorMS        = 180;
-       msPenalty               =4100;
+%      case 'g62j.4rt' % Switched to GTS 7/27/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 100;
+%        msPenalty               =4100;
+%        
+%      case 'g62j.5tt' % Switched to GTS 7/27/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 90;
+%        msPenalty               =4100;
        
-     case 'g62j.5tt' % Started GoToBlack 7/10/14
-       requestRewardSizeULorMS = 20;
-       rewardSizeULorMS        = 180;
-       msPenalty               =4100;
-       
-     case 'g62j.5rt' % Started GoToBlack 7/10/14
-       requestRewardSizeULorMS = 20;
-       rewardSizeULorMS        = 180;
-       msPenalty               =4100;
-       
-     case 'g62e.12rt' % Started GoToBlack 7/10/14
-       requestRewardSizeULorMS = 20;
-       rewardSizeULorMS        = 180;
-       msPenalty               =4100;
-     
+%      case 'g62j.5rt' % Switched HvV_center_vertical 7/31/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 110;
+%        msPenalty               =4100;
+%        
+%      case 'g62e.12rt' % Switched GTS 8/2/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 120;
+%        msPenalty               =4100;
+%      
     
 %      case 'g62k.1rt' % Switched HvV_center 7/12/14
 %        requestRewardSizeULorMS = 00;
 %        rewardSizeULorMS        = 120;
 %        msPenalty               =4100;
        
-     case 'g62k.2rt' % Started GoToBlack 6/30/14
-       requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 180;
-       msPenalty               =4100;
+%      case 'g62k.2rt' % Switched GTS 8/6/14
+%        requestRewardSizeULorMS = 00;
+%        rewardSizeULorMS        = 180;
+%        msPenalty               =4200;
        
 %      case 'g62f.8lt' % Switched HvV_center 7/12/14
 %        requestRewardSizeULorMS = 00;
 %        rewardSizeULorMS        = 120;
 %        msPenalty               =4100;
        
-     case 'g62g.6lt' % Started GoToBlack 6/30/14
-       requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 140;
-       msPenalty               =4100;
+%      case 'g62g.6lt' % Started GoToBlack 6/30/14
+%        requestRewardSizeULorMS = 00;
+%        rewardSizeULorMS        = 50;
+%        msPenalty               =4400;
 %        
 %      case 'g62c6tt' % switched GoToBlack 5/21/14
 %        requestRewardSizeULorMS = 0;
 %        rewardSizeULorMS        = 100;
 %        msPenalty               =4100;
-    
-%     case 'bfly1a.13rt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 160;
-%        msPenalty               =4000;  
-%        
-%    case 'bfly3a.3rn'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 160;
-%        msPenalty               =4000; 
+   
 %        
 %    case 'bfly2b.3rt'
 %        requestRewardSizeULorMS = 0;
@@ -96,50 +87,12 @@ switch subjIDs{1}
 %        requestRewardSizeULorMS = 0;
 %        rewardSizeULorMS        = 180;
 %         msPenalty              =4000;
-
-%         case 'g62b9tt'     %switched HvV Center 3/8/14  
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 70;
-%         msPenalty              =4000;
-        
-%         case 'g62h2lt'     %switched HvV Center 3/8/14 
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 90;
-%         msPenalty              =4100;
-        
-%         case 'g62h2tt'     %started 2/22/14  
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 80;
-%         msPenalty              =3500;
-        
-%        case 'g6w5rt'     %started 2/17/14  
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 160;
-%         msPenalty               =3500;
         
 %        case 'g62b8tt'     %started 2/17/14  
 %        requestRewardSizeULorMS = 0;
 %        rewardSizeULorMS        = 160;
 %         msPenalty               =3500;
         
-%      case 'g54a11rt'   %retired 1/4/14
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;  
-  
-%      case 'g54bb2' % Switched from GTS 12/19/13
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 70;
-
-       
-%      case 'g625ln' % Switched from GTS 12/19/13
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 130;
-%        msPenalty               =3500;
-       
-%      case 'g54b8tt' %retired 1/4/14
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 50;   
-
 
 %       case 'g62b3rt'           %switched to HvV_center 1/4/14
 %        requestRewardSizeULorMS = 0;

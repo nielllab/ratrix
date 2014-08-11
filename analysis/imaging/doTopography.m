@@ -9,13 +9,16 @@ end
 %%% align gradient maps to first file
 for f = 1:length(use); %changed from 1:length(map)
 %    for f = 1:1
-    [imfit{f} allxshift(f) allyshift(f) allthetashift(f) allzoom(f)] = alignMapsRotate(map([1 f]), merge([1 f]), [files(use(f)).subj ' ' files(use(f)).expt ' ' files(use(f)).monitor] );
+    [imfit{f} allxshift(f) allyshift(f) allthetashift(f) allzoom(f)] = alignMapsRotate(map([length(use) f]), merge([length(use) f]), [files(use(f)).subj ' ' files(use(f)).expt ' ' files(use(f)).monitor] );
     xshift = allxshift(f); yshift = allyshift(f); thetashift = allthetashift(f); zoom = allzoom(f);
     save( [outpathname files(use(f)).subj files(use(f)).expt '_topography.mat'],'xshift','yshift','zoom','-append');
 end
 %
 
-%x0 =0; y0=0; sz = 80;
+close all
+
+%x0 =0; y0=10; sz = 100;
+nx = 2; ny=4;
 avgmap=0; meangrad{1}=0; meangrad{2}=0; meanpolar{1} = 0; meanpolar{2}=0;meanamp=0;
 for f= 1:length(use) ;
     f
@@ -27,20 +30,51 @@ for f= 1:length(use) ;
         sum(isnan(merge{f}(:)))
         avgmap = avgmap+m;
         
-%         figure
-%         imshow(m);        
-%         title( [files(use(f)).subj ' ' files(use(f)).expt ' ' files(use(f)).monitor] );
+        figure
+        subplot(nx,ny,2)
+        imshow(m);        
+        title( [files(use(f)).subj ' ' files(use(f)).expt ' ' files(use(f)).monitor] );
+        
+        imblue=zeros(100,100); imgreen=zeros(100,100);
+        try
+            imblue = imread([datapathname files(use(f)).topoxdata '_0001.tif']);
+            imgreen = imread([datapathname files(use(f)).topoxdata '_0004.tif']);
+        catch
+            imblue = imread([altdatapathname files(use(f)).topoxdata '_0001.tif']);
+            imgreen = imread([altdatapathname files(use(f)).topoxdata '_0004.tif']);
+        end    
+        subplot(nx,ny,3)
+
+        imagesc( shiftImageRotate(imblue,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),0.5,sz));
+        colormap(gray)
+        axis off; axis equal
+        
+        subplot(nx,ny,7)
+        imagesc( shiftImageRotate(imgreen,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),0.5,sz));
+        axis off; axis equal
+        colormap(gray)
         
         for ind = 1:2
             gradshift{ind} = shiftImageRotate(real(grad{f}{ind}),allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
             gradshift{ind} = gradshift{ind} + sqrt(-1)* shiftImageRotate(imag(grad{f}{ind}),allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
             meangrad{ind} = meangrad{ind} + gradshift{ind};
             ampshift = shiftImageRotate(amp{f}{2},allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
+            subplot(nx,ny,6)
+            imagesc(ampshift,[0 0.05]); axis off; axis equal
             meanamp = meanamp+ ampshift;
             
             polarshift{ind} = shiftImageRotate(real(map_all{f}{ind}),allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
             polarshift{ind} = polarshift{ind} + sqrt(-1)* shiftImageRotate(imag(map_all{f}{ind}),allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
-            meanpolar{ind} = meanpolar{ind} + polarshift{ind};
+           subplot(nx,ny,1+(ind-1)*ny); 
+            imshow(polarMap(polarshift{ind},95));
+           meanpolar{ind} = meanpolar{ind} + polarshift{ind};
+           subplot(nx,ny,4+(ind-1)*ny);
+            dx=4;
+         rangex = dx:dx:size(gradshift{1},1); rangey = dx:dx:size(gradshift{1},2);
+             
+         imshow(ones(size(gradshift{ind}))); hold on
+         quiver( rangex,rangey,10*real(gradshift{ind}(rangex,rangey)),10*imag(gradshift{ind}(rangex,rangey)))
+
    end
     end
     
@@ -57,12 +91,14 @@ for m=1:2
     subplot(1,2,m);
     imshow(polarMap(meanpolar{m},80));
     title(allsubj{s})
+    im = polarMap(meanpolar{m},80);
+    imwrite(im,sprintf('polarmap%d%s', m,'.tif'), 'tif')
 end
 
 
-% divmap = getDivergenceMap(meanpolar);
-% figure
-% imagesc(divmap); axis equal
+divmap = getDivergenceMap(meanpolar);
+figure
+imagesc(divmap); axis equal
 % 
 % figure
 % imagesc(divmap.*abs(meanpolar{1})); axis equal

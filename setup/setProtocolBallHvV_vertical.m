@@ -31,26 +31,26 @@ end
         
    case 'g62b8tt'     %started 5/22/14  
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 22.5;
-        msPenalty              =4300;
+       rewardSizeULorMS        = 25;
+        msPenalty              =4000;
         pixPerCycs             = [100 150 200]; %*10^9;
 
   case 'g62c.2rt'           %changed 5/16/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 25; 
-       msPenalty               =4300;
+       rewardSizeULorMS        = 35; 
+       msPenalty               =4000;
        pixPerCycs             = [100 150 200]; %*10^9;
        
    case 'g62b1lt'     %moved to HvV_vertical 2/19/14   
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 35;
-       msPenalty               =4200;
+       rewardSizeULorMS        = 30;
+       msPenalty               =4000;
        pixPerCycs             = [100 150 200]; %*10^9;
      
   case 'g62b3rt'          %changed 2/14/14
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 20; 
-       msPenalty               = 4200; 
+       msPenalty               = 4000; 
        pixPerCycs             = [100 150 200]; %*10^9;
        
        

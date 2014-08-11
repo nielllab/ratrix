@@ -285,7 +285,7 @@ recs = {
 %     } 
 %     } 
 %     
-%           {'g62b1lt' {
+          {'g62b1lt' {
 %        {[1 208],[],'031114 G62B.1-RT HvV Behavior\G62B.1-LT_run1_HvV_behavior_Fstop_5.6_50msexp','G62B.1-LT_run1_HvV_behavior_Fstop_5.6_50msexp'}     
 %       {[209 477],[],'050214 G62b.1 LT HvV_vertical behavior\g62b.1lt_run1_HvV_vertical_fstop5.6_exp50ms','g62b.7lt_run1_HvV_vertical_fstop5.6_exp50ms'}
 %         {[478 693],[],'050614 G62B.1 LT HvV_Vertical Behavior\G62B.1LT_run1_HvV_Vertical_fstop5.6_exp50ms','G62B.1LT_run1_HvV_Vertical_fstop5.6_exp50ms'}
@@ -298,11 +298,12 @@ recs = {
 %     {[2281 2615],[],'061114 g62b.1lt hvv behavior\g62b.1lt_run1_hvv_fstop11_spatial400_exp50ms','g62b.1lt_run1_hvv_fstop11_spatial400_exp50ms'}
 %     {[2616 2897],[],'062114 g62b1lt hvv behavior\g62b1lt_run1_hvv_fstop11_exp50ms','g62b1lt_run1_hvv_fstop11_exp50ms'}
 %     {[2898 3047],[],'062214 g62b.1 hvv behavior\g62b.1_run1_hvv_fstop11_exp50ms','g62b.1_run1_hvv_fstop11_exp50ms'}
-%     }
-%     }    
+        {[3048 3387],[],'072314 g62b1rt hvv behavior\g62b1rt_run1_hvv_fstop11_exp50ms','g62b1rt_run1_hvv_fstop11_exp50ms'} 
+    }
+    }    
 %     
 %   
-%       {'g62b3rt' {
+          {'g62b3rt' {
 %       {[1 157],[],'022814 G62B.3-RT HvV Behavior\G62B.3-RT_run1_HvV_Behavior_15msexp','G62B.3-RT_run1_HvV_Behavior_15msexp'}     
 %       {[158 340],[],'030114 G62B.3-RT HvV Behavior\G62B.3-RT_run1_HvV_behavior_Fstop_5.6_50msexp','G62B.3-RT_run1_HvV_behavior_Fstop_5.6_50msexp' }
 %       {[341 572],[],'030214 G62B.3-RT HvV behavior\G62B.3-RT_run1_HvV_behavior_Fstop8_50msexp','G62B.3-RT_run1_HvV_behavior_Fstop8_50msexp'}
@@ -316,8 +317,10 @@ recs = {
 %         {[2141 2269],[],'062014 g62b.3 rt hvv vertical behavior\g62b3rt_run1_hvv_fstop11_exp50ms','g62b3rt_run1_hvv_fstop11_exp50ms'}
 %         {[2270 2270],[],'No Data'}
 %         {[2271 2491],[],'062614 g62b3rt hvv behavior\g62b3rt_run2_spatial200_gts_fstop11_exp50ms','g62b3lt_run1_spatial200_gts_fstop11_exp50ms'}
-%      }
-%      }    
+          {[2492 2809],[],'072314 g62b3rt hvv behavior\g62b3rt_run1_hvv_fstop11_exp50ms_200spatial','g62b3rt_run1_hvv_fstop11_exp50ms_200spatial'}
+          {[2810 3045],[],'072414 g62b3rt hvv behavior\g62b3rt_run1_fstop8.5_exp60_hvv','g62b3rt_run1_fstop8.5_exp60_hvv'}
+     }
+     }    
 %     
 %          {'g62b4ln' {
 %      {[1 298],[],'022114 G62B.4-LN GTS Behavior','G62B.4-LN_run1_GTS_behavior_15msexp'}     
@@ -340,7 +343,7 @@ recs = {
 %     }
 %     }      
 %
-%              {'g62b7lt' {
+             {'g62b7lt' {
 %       {[1 176],[],'022314 G62B.7-LT HvV_center Behavior\G62B.7-LT_run1_HvV_center_Behavior_15msexp','G62B.7-LT_run1_HvV_center_Behavior_15msexp'}     
 %       {[177 469],[],'022514 G62B.7-LT HvV_center Behavior\G62B.7-LT_run1_HvV_center_Behavior_15msexp','G62B.7-LT_run1_HvV_center_Behavior_15msexp'}
 %       {[470 739],[],'030114 G62B.7-LT HvV_center Behavior\G62B.7-LT_run1_HvV_center_behavior_Fstop5.6_50msexp','G62B.7-LT_run1_HvV_center_behavior_Fstop5.6_50msexp'}
@@ -356,8 +359,10 @@ recs = {
 %        {[2183 2438],[],'051414 g62B.7LT HvV_center Behavior\g62b.7lt_run1_hvV_center_fstop5.6_exp50','g62b.7lt_run1_hvV_center_fstop5.6_exp50'}
 %      {[2439 2685],[],'070714 g62b7lt hvv center behavior\g62b7lt_run1_hvvcenter_200spatial_exp50ms','g62b7lt_run1_hvvcenter_200spatial_exp50ms'}
 %      {[2686 2917],[],'070814 G62B7-LT HvV_center behavior 200SF\G62B7-LT_run1_HvV_center_behavior_50ms_F_8_200SF','G62B7-LT_run1_HvV_center_behavior_50ms_F_8_200SF'}
-%         }
-%         }
+     {[2918 3312],[],'072514 g62b7lt hvv center behavior\g62b7lt_run1_hvvcenter_fstop8_exp60_sf200','g62b7lt_run1_hvvcenter_fstop8_exp60_sf200'}
+% %      {[3313 3313],[],'',''} Test to retrieve last data
+        }
+        }
 %     
 %         {'g62b8tt' {
 %       {[1 388],[],'041814 G62B.8-tt HvV_center Behavior\G62B.8-TT_run1_HvV_center_50msexp_5.6Fstop','G62B.8-TT_run1_HvV_center_50msexp_5.6Fstop'}     
@@ -381,19 +386,19 @@ recs = {
 %     }
 %     }    
 %     
-%         {'g62g4lt' {
+        {'g62g4lt' {
 %       {[1 214],[],'041814 G62G.4-LT HvV_center behavior\041814_G62G4-LT_run1_HvV_center_50ms_F5.6_shadowGreenChannel','041814_G62G4-LT_run1_HvV_center_50ms_F5.6_shadowGreenChannel'}     
 %       {[215 383],[],'042114 g62g.4-lt HvV_center behavior\g62g.4lt_run1_HvV_center_50msexp_5.6fstop','g62g.4lt_run1_HvV_center_50msexp_5.6fstop'} 
 %        {[384 585],[],'050414 G62G.4 LT HvV_center behavior\g62g.4ln_run1_HvV_center_fstop5.6_exp50ms','g62g.4ln_run1_HvV_center_fstop5.6_exp50ms'} 
 %         {[586 806],[],'051614 G62G.4LT HvV Behavior\g62g,4lt_run1_hvv_center_fstop11_exp50ms','g62g,4lt_run1_hvv_center_fstop11_exp50ms'} 
 %         {[807 915],[],'051814 g62g.4lt HvV Center behavior\g62g,4lt_run1_hvvcenter_fstop11_exp50ms','g62g,4lt_run1_hvvcenter_fstop11_exp50ms'} 
 %      {[916 1104],[],'070314 g62g4lt hvv center behavior 200spatial\g62g4lt_run1_hvv_fstop11_exp50_200spatial','g62g4lt_run1_hvv_fstop11_exp50_200spatial'} 
-%      }
-%      }   
+     {[1105 1217],[],'072814 g62g4lt hvv center behavior\g62g4lt_run1_hvvcenter_fstop8_exp60_sf200','g62g4lt_run1_hvvcenter_fstop8_exp60_sf200'} %poor performance
+     }
+     }   
 %     
 %      
-%         {'g62h1tt' {
-
+        {'g62h1tt' {
 %        {[1 151],[],'042414 g62h.1tt HvV_center behavior\G62h.1tt_run1_HvV_center_fstop5.6_exp50ms','G62h.1tt_run1_HvV_center_fstop5.6_exp50ms'}     
 %          {[152 330],[],'050614 G62H.1TT HvV Center Behavior\g62h.1tt_run1_HvV_center_fstop5.6_exp50ms','g62h.1tt_run1_HvV_center_fstop5.6_exp50ms'}  
 %%hmm error(timestamps?)   {[331 564],[],'051414 G62H.1TT HvV_center Behavior\g62h.1tt_run1_HvV_center_fstop5.6_exp50ms','g62h.1tt_run1_HvV_center_fstop5.6_exp50ms'} % couldnt analyze?
@@ -404,10 +409,11 @@ recs = {
 % % BAD    {[998 1029],[],'070814',''} errors
 % % BAD    {[1030 1126],[],'070814',''} errors
 %            {[1127 1501],[],'070814 g62h1tt hvv center behavior\g62h1tt_run1_fstop8_exp50ms_spatial200','g62h1tt_run1_fstop8_exp50ms_spatial200'} 
-%     }     
-%     }
+           {[1502 1836],[],'072514 g62h1tt hvv center behavior\g62h1tt_run1_hvvcenter_fstop8_exp60','g62h1tt_run1_hvvcenter_fstop8_exp60'} 
+    }     
+    }
 %
-%        {'g62c6tt' {  
+%        {'g62c6tt' {  %naive
 %       {[148 310],[],'052414 g62c.5tt neive\g62c6tt_run1_neive_fstop11_exp50ms','g62c6tt_run1_neive_fstop11_exp50ms'} 
 %       {[603 721],[],'052914 g62c6tt nieve behavior\g62c6tt_run1_nieve_fstop11_exp50ms','g62c6tt_run1_nieve_fstop11_exp50ms'} 
 %       {[722 847],[],'053014 g62c.6tt nieve behavior\g62c6tt_run1_nieve_fstop11_exp50ms','g62c6tt_run1_nieve_fstop11_exp50ms'}   
@@ -415,6 +421,10 @@ recs = {
 %        {[1132 1197],[],'060614 g62c.6tt nieve behavior\g62c.6tt_run2_nieve_fstop11_exp50ms','g62c.6tt_run2_nieve_fstop11_exp50ms'} 
 %      }
 %     }     
+      {'g62c6ttgts' { %gts
+      {[1 274],[],'072814 g62c6tt gts behavior\g62c6tt_run2_fstop8_exp60_sf200','g62c6tt_run2_fstop8_exp60_sf200'} 
+     }
+    }
 %
 %         {'g62c6lt' {
 %        {[11 147],[],'052414 g62c.6lt neive behavior\g62c6lt_run1_neive_fstop11_exp50ms','g62c6lt_run1_neive_fstop11_exp50ms'}
@@ -443,6 +453,16 @@ recs = {
 %     {[152 293],[],'070814 G62K.1-RT Naive behavior\G62K.1-rt_run1_naive_behavior_50ms_exp_Fstop8','G62K.1-rt_run1_naive_behavior_50ms_exp_Fstop8'}
 %     }
 %     }
+% 
+       {'g62j5rt' { 
+    {[1 181],[],'072514 g62j5rt naive behavior\g62j5rt_run1_naive_fstop8_exp60','g62j5rt_run1_naive_fstop8_exp60'}
+    }
+    }
+% 
+        {'g62j4rt' { 
+    {[1 152],[],'072514 g62j4rt naive behavior\g62j4rt_run1_naive_fstop8_exp60','g62j4rt_run1_naive_fstop8_exp60'}
+    }
+    }
 
     }; %%% vert vs horiz in either top or bottom
 

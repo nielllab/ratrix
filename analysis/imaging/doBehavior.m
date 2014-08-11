@@ -1,4 +1,5 @@
 %doBehavior
+close all
 
 clear behav
 for f = 1:length(use); behav{f}=[]; end;
@@ -44,12 +45,11 @@ for f = 1:0
     %
 end
 %behav=behavNoRun;
-
 allsubj{s}
 nb=0; avgbehav=0;
 for f= 1:length(use)
     %for f= 1:1
-    if ~isempty(behav{f})  & allxshift(f)>-20 % & strcmp(files(use(f)).subj,allsubj{s}) ;
+    if ~isempty(behav{f})% & strcmp(files(use(f)).subj,allsubj{s}) ;
       f
       b = shiftdim(behav{f},1);
         zoom = 260/size(b,1);
@@ -61,17 +61,57 @@ end
 avgbehav = avgbehav/nb;
 
 figure
-for t= 1:16  %10:18
-    subplot(4,4,t);
-    imshow(avgmap);
+for t= 1:6  %10:18
+    subplot(2,3,t);
+    %imshow(avgmap);
     hold on
-    data = squeeze(avgbehav(:,:,t));
+    data = squeeze(avgbehav(:,:,t+7));
     
     h = imshow(mat2im(data,jet,[0 0.15]));
-    transp = zeros(size(squeeze(avgmap(:,:,1))));
-    transp(abs(data)>=0.00)=1;
-    set(h,'AlphaData',transp);
+    
+    imwrite(mat2im(data,jet,[0 0.15]),sprintf('behav_left3-4%d%s',t,'.tif'),'tif')
+%     transp = zeros(size(squeeze(avgmap(:,:,1))));
+%     transp(abs(data)>=0.00)=1;
+%     set(h,'AlphaData',transp);
     
 end
 title(allsubj{s})
+
+clear mov
+
+for t = 1:12
+    data = squeeze(avgbehav(:,:,t+3));
+    
+   
+  mov(:,:,:,t) = mat2im(data,jet,[0 0.15]);
+end
+mov = immovie(mov);
+vid = VideoWriter('g62b7lt correct behave.avi');
+vid.FrameRate=10;
+open(vid);
+writeVideo(vid,mov);
+close(vid)
+
+
+data = avgbehav(:,:,3:16);
+data = shiftdim(data,2);
+t = 1:14;
+t_interp = 1:0.25:14;
+data_interp = interp1(t,data,t_interp);
+clear mov
+data_interp(data_interp<0.05)=0;
+for t = 1:length(t_interp);
+    mov(:,:,:,t) = mat2im(squeeze(data_interp(t,:,:)),gray,[0 0.15]);
+end
+mov = immovie(mov);
+vid = VideoWriter('g62b7lt correct behave interp gray.avi');
+vid.FrameRate=40;
+open(vid);
+writeVideo(vid,mov);
+close(vid)
+
+
+
+
+
 

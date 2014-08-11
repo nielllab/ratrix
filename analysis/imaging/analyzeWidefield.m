@@ -1,4 +1,5 @@
 batchBehavNew;
+close all
 
 %%% batchDfofMovie
 
@@ -8,8 +9,14 @@ batchBehavNew;
 %use = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session') )
 %use = find(strcmp({files.monitor},'land')&     strcmp({files.label},'camk2 gc6'))
 
-alluse = find(strcmp({files.monitor},'vert')&  strcmp({files.notes},'good imaging session')  &    strcmp({files.label},'camk2 gc6') &  strcmp({files.task},'HvV_center') &strcmp({files.spatialfreq},'200'))
+ alluse = find(strcmp({files.monitor},'vert')&  strcmp({files.notes},'good imaging session')  &    strcmp({files.label},'camk2 gc6') &  strcmp({files.task},'HvV_center') &strcmp({files.spatialfreq},'100') & strcmp({files.subj},'g62b7lt'))
+ allsubj = unique({files(alluse).subj})
+%alluse = find(strcmp({files.monitor},'vert')&  strcmp({files.notes},'good imaging session')  &    strcmp({files.label},'camk2 gc6')  &strcmp({files.spatialfreq},'100'))
+%alluse = alluse(end-38:end)
+
 allsubj = unique({files(alluse).subj})
+
+
 
 for s = 1:1
 allsubj{s}
@@ -18,7 +25,7 @@ use = alluse;
 
 %%% calculate gradients and regions
 clear map merge
-x0 =-10; y0=0; sz = 95;
+x0 =10; y0=30; sz = 120;
 doTopography;
 
 % %%% overlay behavior on top of topomaps

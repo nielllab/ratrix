@@ -1,10 +1,23 @@
 clear all
 close all
 dbstop if error
-pathname = 'I:\compiled behavior\';
+
+[~, host] = system('hostname')
+if strcmp(host(1:end-1),'treehorn')    %%% system appends an extra character after name
+    pathname = 'D:\compiled behavior\';
+datapathname = 'C:\data\imaging\';  %some in archived behavior
+altdatapathname = [];
+outpathname = 'D:\compiled behavior\behavior topos\';
+elseif strcmp(host(1:end-1),'coen')
+    pathname = 'I:\compiled behavior\';
 datapathname = 'G:\Behavior data 12-24-13+\';  %some in archived behavior
-datapathname = 'H:\archived widefield behavior (12-24-13 to 4-29-14)\';
+altdatapathname = 'H:\archived widefield behavior (12-24-13 to 4-29-14)\';
 outpathname = 'I:\compiled behavior\behavior topos\';
+else
+    display('need to add path info to batch file')
+    break
+end
+
 
 n=1;
 files(n).subj = 'g62b7lt';
@@ -382,14 +395,12 @@ files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';  %%mediocre performance around 70% 
 
 % n=n+1;
-<<<<<<< HEAD
 % files(n).subj = 'g62b3rt';
 % files(n).expt = '062014';
 % files(n).topox =  '';
 % files(n).topoxdata = '';
 % files(n).topoy = '';
 % files(n).topoydata = '';
-=======
 % files(n).subj = 'g62g6lt';
 % files(n).expt = '070814';
 % files(n).topox =  '';
@@ -521,7 +532,6 @@ files(n).notes = 'good imaging session';  %%mediocre performance around 70%
 % files(n).topoxdata = '070714 G62K1-RT passive viewing\G62K1-rt_run1_topoX_50ms_exp_Fstop11\G62K1-rt_run1_topoX_50ms_exp_Fstop11';
 % files(n).topoy = '070714 g62k1rt\G62K1-rt_run2_topoY_50ms_exp_Fstop11maps.mat';
 % files(n).topoydata = '070714 G62K1-RT passive viewing\G62K1-rt_run2_topoY_50ms_exp_Fstop11\G62K1-rt_run2_topoY_50ms_exp_Fstop11';
->>>>>>> 6d48bedc10edf0b39d2c4a5f3d34e49bbc8f7a2b
 % files(n).behav = '';
 % files(n).behavdata = '';
 % files(n).grating = '';

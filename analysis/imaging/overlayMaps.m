@@ -7,6 +7,9 @@ end
 opengl software
 if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
     load([pathname expfile.behav]); %%% behavior
+   
+    
+    keyboard
     load( [outpathname expfile.subj expfile.expt '_topography.mat']); %%% topography
     
     resp_time = starts(3,:)-starts(2,:);
@@ -55,6 +58,7 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
     correct=correct(trials);
     targ=targ(trials);
 
+    save([outpathname expfile.subj expfile.expt '_behavdata.mat'],'resp_time','stop_time','correct','targ')
     
     %     figure
     %     hist(resp_time,0.3:0.02:0.6)
@@ -66,7 +70,7 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
     
     for i =1:1
         if i==1
-            useTrials = find(correct==1&resp_time>0.35 & resp_time<0.45 & targ==-1);
+            useTrials = find(correct==1&resp_time>0.35 & resp_time<0.65 );
 %             for j =1:5
 %                 tr = ceil(rand*length(useTrials));
 %                 figure

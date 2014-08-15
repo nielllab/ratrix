@@ -1,6 +1,7 @@
-function pcaMovies(fname,label)
-load(fname,'dfof_bg','sp')
+% function pcaMovies(fname,label)
+% load(fname,'dfof_bg','sp')
 
+label='test'
 
 sz = size(imresize(squeeze(dfof_bg(:,:,1)),0.25));
 downsamp = zeros(sz(1),sz(2),size(dfof_bg,3));
@@ -22,17 +23,45 @@ toc
 
 spatial=figure; title(label)
 temporal=figure; title(label)
-for i = 1:4
+for i = 1:16
     figure(spatial)
-    subplot(2,2,i);
+    subplot(4,4,i);
     range = max(abs(u(:,i)));
 
     imagesc(reshape(u(:,i),size(obs_mov,1),size(obs_mov,2)),[-range range]);
     axis equal; axis off
     %colormap(gray);
     figure(temporal);
-    subplot(2,2,i);
+    subplot(4,4,i);
     plot(v(:,i))
+  %  xlim([0 100])
+    axis off
+end
+
+
+baseline = prctile(obs(:,:),1,2);
+obs_pos= zeros(size(obs));
+for t = 1:size(obs,2);
+    obs_pos(:,t) = obs(:,t)-baseline; 
+end
+obs_pos(obs_pos<0)=0;
+
+nx=3; ny=3;
+[u v] = nnmf(obs_pos,nx*ny);
+
+spatial=figure; title(label)
+temporal=figure; title(label)
+for i = 1:nx*ny
+    figure(spatial)
+    subplot(nx,ny,i);
+    range = max(abs(u(:,i)));
+
+    imagesc(reshape(u(:,i),size(obs_mov,1),size(obs_mov,2)),[-range range]);
+    axis equal; axis off
+    %colormap(gray);
+    figure(temporal);
+    subplot(nx,ny,i);
+    plot(v(i,:))
   %  xlim([0 100])
     axis off
 end

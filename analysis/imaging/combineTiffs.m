@@ -386,15 +386,16 @@ recs = {
 %     }
 %     }    
 %     
-%         {'g62g4lt' {
+        {'g62g4lt' {
 %       {[1 214],[],'041814 G62G.4-LT HvV_center behavior\041814_G62G4-LT_run1_HvV_center_50ms_F5.6_shadowGreenChannel','041814_G62G4-LT_run1_HvV_center_50ms_F5.6_shadowGreenChannel'}     
 %       {[215 383],[],'042114 g62g.4-lt HvV_center behavior\g62g.4lt_run1_HvV_center_50msexp_5.6fstop','g62g.4lt_run1_HvV_center_50msexp_5.6fstop'} 
 %        {[384 585],[],'050414 G62G.4 LT HvV_center behavior\g62g.4ln_run1_HvV_center_fstop5.6_exp50ms','g62g.4ln_run1_HvV_center_fstop5.6_exp50ms'} 
 %         {[586 806],[],'051614 G62G.4LT HvV Behavior\g62g,4lt_run1_hvv_center_fstop11_exp50ms','g62g,4lt_run1_hvv_center_fstop11_exp50ms'} 
 %         {[807 915],[],'051814 g62g.4lt HvV Center behavior\g62g,4lt_run1_hvvcenter_fstop11_exp50ms','g62g,4lt_run1_hvvcenter_fstop11_exp50ms'} 
 %      {[916 1104],[],'070314 g62g4lt hvv center behavior 200spatial\g62g4lt_run1_hvv_fstop11_exp50_200spatial','g62g4lt_run1_hvv_fstop11_exp50_200spatial'} 
-%      }
-%      }   
+     {[1105 1217],[],'072814 g62g4lt hvv center behavior\g62g4lt_run1_hvvcenter_fstop8_exp60_sf200','g62g4lt_run1_hvvcenter_fstop8_exp60_sf200'} %poor performance
+     }
+     }   
 %     
 %      
         {'g62h1tt' {
@@ -412,7 +413,7 @@ recs = {
     }     
     }
 %
-%        {'g62c6tt' {  
+%        {'g62c6tt' {  %naive
 %       {[148 310],[],'052414 g62c.5tt neive\g62c6tt_run1_neive_fstop11_exp50ms','g62c6tt_run1_neive_fstop11_exp50ms'} 
 %       {[603 721],[],'052914 g62c6tt nieve behavior\g62c6tt_run1_nieve_fstop11_exp50ms','g62c6tt_run1_nieve_fstop11_exp50ms'} 
 %       {[722 847],[],'053014 g62c.6tt nieve behavior\g62c6tt_run1_nieve_fstop11_exp50ms','g62c6tt_run1_nieve_fstop11_exp50ms'}   
@@ -420,6 +421,10 @@ recs = {
 %        {[1132 1197],[],'060614 g62c.6tt nieve behavior\g62c.6tt_run2_nieve_fstop11_exp50ms','g62c.6tt_run2_nieve_fstop11_exp50ms'} 
 %      }
 %     }     
+      {'g62c6ttgts' { %gts
+      {[1 274],[],'072814 g62c6tt gts behavior\g62c6tt_run2_fstop8_exp60_sf200','g62c6tt_run2_fstop8_exp60_sf200'} 
+     }
+    }
 %
 %         {'g62c6lt' {
 %        {[11 147],[],'052414 g62c.6lt neive behavior\g62c6lt_run1_neive_fstop11_exp50ms','g62c6lt_run1_neive_fstop11_exp50ms'}

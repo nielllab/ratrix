@@ -58,6 +58,22 @@ open(vid);
 writeVideo(vid,mov);
 close(vid)
 
+dfshort = (double(dfof_bg(:,:,:)));
+dfshort = imresize(dfshort,0.5,'method','box');
+baseline = prctile(dfshort,3,3);
+cycle_mov = dfshort - repmat(baseline,[1 1 size(dfshort,3)]);
+lowthresh= prctile(cycle_mov(:),2);
+upperthresh = prctile(cycle_mov(:),98)*1.25;
+cycMov= mat2im(cycle_mov,gray,[lowthresh upperthresh]);
+mov = immovie(permute(cycMov,[1 2 4 3]));
+vid = VideoWriter(fullfile(p,[f '_RAW']));
+% mov = immovie(permute(shiftmov,[1 2 4 3]));
+% vid = VideoWriter('bilateralS1.avi');
+vid.FrameRate=25;
+open(vid);
+writeVideo(vid,mov);
+close(vid)
+
 
 % keyboard
 % lowthresh = prctile(cycle_mov(:),3)

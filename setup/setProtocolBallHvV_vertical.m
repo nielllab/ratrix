@@ -28,6 +28,18 @@ if ~isscalar(subjIDs)
 end
  switch subjIDs{1}
      
+   case 'g62b7lt'           %Started full 8/14/14
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 80; 
+       msPenalty               =4000;
+       pixPerCycs             = [100 125 150]; %*10^9;
+         
+     
+   case 'g62h1tt'     %Started Full 8/15/14
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 80;
+        msPenalty              =4000;
+        pixPerCycs             = [100 125 150]; %*10^9;  
         
    case 'g62b8tt'     %started 5/22/14  
        requestRewardSizeULorMS = 0;
@@ -35,7 +47,7 @@ end
         msPenalty              =4000;
         pixPerCycs             = [100 150 200]; %*10^9;
 
-  case 'g62c.2rt'           %changed 5/16/14
+  case 'g62c.2rt'           %Switched Back _center 8/15/14
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 35; 
        msPenalty               =4000;

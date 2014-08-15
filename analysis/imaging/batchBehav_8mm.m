@@ -341,6 +341,10 @@ map2= map;
 mergeMaps(map1,map2,movemap, pathname, [files(use(f)).subj files(use(f)).expt files(use(f)).monitor])
 end
 
+for f = 7:7
+    load([pathname files(f).step_binary],'sp','dfof_bg');
+    
+end
 
 
 

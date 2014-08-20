@@ -21,13 +21,16 @@ dlength = size(frames,2);
 img = zeros(size(frames));
 display('deconvolving ...');
 
-for x = 1:size(frames,3)
-    
-    for y = 1:size(frames,4)
-        d = deconvlucy(squeeze(frames(1,:,x,y)),psf);
-        img(1,1:dlength-5,x,y) = d(6:dlength);
-    end
-end
+% for x = 1:size(frames,3)
+%     
+%     for y = 1:size(frames,4)
+%         d = deconvlucy(squeeze(frames(1,:,x,y)),psf);
+%         img(1,1:dlength-5,x,y) = d(6:dlength);
+%     end
+% end
+
+img = deconvlucy(frames,psf);
+img = img(:,6:end,:,:);
 
 %keyboard
 if nd==3

@@ -105,9 +105,9 @@ for LED=1:3
     
     if LED==split
        tic
-       matlabpool open
+      
         [map cycMap fullMov] =deconPhaseMap(dfof{LED},framerate,movPeriod,binning);
-        matlabpool close
+       
         toc
     map(isnan(map))=0;
     mapFig(map)

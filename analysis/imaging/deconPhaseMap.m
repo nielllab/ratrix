@@ -36,7 +36,7 @@ for f = 1:perFrames;
     cycmap(:,:,f) = cycmap(:,:,f)-xymin;
 end
 repcycmap = repmat(cycmap,[1 1 3]);
-dcycmap = squeeze(deconvg6sParallel(shiftdim(repcycmap,2),0.1));
+dcycmap = squeeze(deconvg6s(shiftdim(repcycmap,2),0.1));
 dcycmap = dcycmap(perFrames+1:2*perFrames,:,:)*perFrames/nframes;
 
 for f=1:perFrames

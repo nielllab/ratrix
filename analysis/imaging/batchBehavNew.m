@@ -1,4 +1,4 @@
-clear all
+    clear all
 close all
 dbstop if error
 pathname = 'I:\compiled behavior\';
@@ -7,6 +7,31 @@ altdatapathname = 'H:\archived widefield behavior (12-24-13 to 4-29-14)\';
 outpathname = 'I:\compiled behavior\behavior topos\';
 
 n=1;
+files(n).expt = '081414';
+files(n).subj = 'g62c6ttgts';
+files(n).topox =  '';
+files(n).topoxdata = '';
+files(n).topoy = '';
+files(n).topoydata = '';
+files(n).behav = '';
+files(n).behavdata = '';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).stepbinary = '';
+files(n).stepbinarydata = '';
+files(n).auditory = '';
+files(n).auditorydata = '';
+files(n).darkness = '';
+files(n).darknessdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = 'gts';
+files(n).spatialfreq = '200'; 
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
 files(n).expt = '072914';
 files(n).subj = 'g62j4rt';
 files(n).topox =  '';
@@ -2132,7 +2157,7 @@ files(n).monitor = 'vert';
 files(n).task = 'HvV_center';
 files(n).spatialfreq = '100';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session'; %behavior only 9999 images
+files(n).notes = 'good imaging session - few trials'; %behavior only 9999 images
 files(n).topoxdata = '042214 G62B.7LT Passive Viewing\G62B.7LT_run1_topox_fstop5.6_exp50ms\G62B.7lt_run1_topox_fstop5.6_exp50ms';
 files(n).topoydata = '042214 G62B.7LT Passive Viewing\G62B.7LT_run2_topoy_fstop5.6_exp50ms\G62B.7LT_run2_topoy_fstop5.6_exp50ms';
 files(n).gratingdata = '';

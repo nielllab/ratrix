@@ -9,7 +9,8 @@ close all
 %use = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session') )
 %use = find(strcmp({files.monitor},'land')&     strcmp({files.label},'camk2 gc6'))
 
- alluse = find(strcmp({files.monitor},'vert')&  strcmp({files.notes},'good imaging session')  &    strcmp({files.label},'camk2 gc6') &  strcmp({files.task},'HvV_center') &strcmp({files.spatialfreq},'100') & strcmp({files.subj},'g62b7lt'))
+% & strcmp({files.subj},'g62b7lt')
+ alluse = find(strcmp({files.monitor},'vert')&  strcmp({files.notes},'good imaging session')  &    strcmp({files.label},'camk2 gc6') &  strcmp({files.task},'HvV_center') &strcmp({files.spatialfreq},'100')& strcmp({files.subj},'g62b7lt') )
  allsubj = unique({files(alluse).subj})
 %alluse = find(strcmp({files.monitor},'vert')&  strcmp({files.notes},'good imaging session')  &    strcmp({files.label},'camk2 gc6')  &strcmp({files.spatialfreq},'100'))
 %alluse = alluse(end-38:end)

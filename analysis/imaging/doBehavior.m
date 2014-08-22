@@ -4,14 +4,18 @@ close all
 clear behav
 for f = 1:length(use); behav{f}=[]; end;
 
-matlabpool open
+
 tic
 clear correct ntrials
+
 for f = 1:length(use)
-    [behav{f} correct(f) ntrials(f)] = overlayMaps(files(use(f)),pathname,outpathname,1);
+
+    [behav{f} correct(f) ntrials(f) nmf_spatial{f} nmf_temporal{f}] = overlayMaps(files(use(f)),pathname,outpathname,1);
 end
 toc
-matlabpool close
+
+
+%keyboard
 sprintf('subj %s correct %f trials %f',allsubj{s},mean(correct),mean(ntrials))
 
 %%% try to subtract running from behavior
@@ -46,12 +50,14 @@ for f = 1:0
 end
 %behav=behavNoRun;
 allsubj{s}
+for cond = 1:4
 nb=0; avgbehav=0;
-for f= 1:length(use)
+%for f= 1:length(use)
+for f =1:3
     %for f= 1:1
-    if ~isempty(behav{f})% & strcmp(files(use(f)).subj,allsubj{s}) ;
+    if ~isempty(behav{f}{cond})% & strcmp(files(use(f)).subj,allsubj{s}) ;
       f
-      b = shiftdim(behav{f},1);
+      b = shiftdim(behav{f}{cond},1);
         zoom = 260/size(b,1);
         b = shiftImageRotate(b,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
         avgbehav = avgbehav+b;
@@ -60,6 +66,9 @@ for f= 1:length(use)
 end
 avgbehav = avgbehav/nb;
 
+avgbehavCond{cond} = avgbehav;
+
+labels = {'correct','incorrect','left','right'};
 figure
 for t= 1:6  %10:18
     subplot(2,3,t);
@@ -75,7 +84,23 @@ for t= 1:6  %10:18
 %     set(h,'AlphaData',transp);
     
 end
-title(allsubj{s})
+title([allsubj{s} ' ' labels{cond}])
+end
+
+
+figure
+for t = 1:6
+    subplot(2,3,t);
+    data = squeeze(avgbehavCond{4}(:,:,t+7) - avgbehavCond{3}(:,:,t+7));
+    h= imshow(mat2im(data,jet,[-0.05 0.05]))
+end
+
+figure
+for t = 1:6
+    subplot(2,3,t);
+    data = squeeze(avgbehavCond{2}(:,:,t+7) - avgbehavCond{1}(:,:,t+7));
+    h= imshow(mat2im(data,jet,[-0.1 0.1]))
+end
 
 clear mov
 

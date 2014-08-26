@@ -16,7 +16,7 @@ end
 datadir = p;
 
 [dfof map mapNorm cycMap]= readTifBlueGreen(datafile);
-
+%keyboard
 use_chan=3;
 
 % [dfof map mapNorm]= readTifGreen;
@@ -29,7 +29,7 @@ tic
 save(mapfilename,'map','mapNorm','dfof_bg','-v7.3')
 toc
 dfof_bg= dfof{use_chan};
-clear dfof;
+%clear dfof;
 
 startframe =200;
 cyc_period = 100;
@@ -47,10 +47,26 @@ save(mapfilename,'cycle_mov','cycle_mov_std','cycMap','-append')
 baseline = prctile(cycle_mov,5,3);
 cycle_mov = cycle_mov - repmat(baseline,[1 1 size(cycle_mov,3)]);
 lowthresh= prctile(cycle_mov(:),2);
-upperthresh = prctile(cycle_mov(:),98);
+upperthresh = prctile(cycle_mov(:),98)*1.5;
 cycMov= mat2im(cycle_mov,gray,[lowthresh upperthresh]);
 mov = immovie(permute(cycMov,[1 2 4 3]));
 vid = VideoWriter(fullfile(p,f));
+% mov = immovie(permute(shiftmov,[1 2 4 3]));
+% vid = VideoWriter('bilateralS1.avi');
+vid.FrameRate=25;
+open(vid);
+writeVideo(vid,mov);
+close(vid)
+
+dfshort = (double(dfof_bg(:,:,:)));
+dfshort = imresize(dfshort,0.5,'method','box');
+baseline = prctile(dfshort,3,3);
+cycle_mov = dfshort - repmat(baseline,[1 1 size(dfshort,3)]);
+lowthresh= prctile(cycle_mov(:),2);
+upperthresh = prctile(cycle_mov(:),98)*1.25;
+cycMov= mat2im(cycle_mov,gray,[lowthresh upperthresh]);
+mov = immovie(permute(cycMov,[1 2 4 3]));
+vid = VideoWriter(fullfile(p,[f '_RAW']));
 % mov = immovie(permute(shiftmov,[1 2 4 3]));
 % vid = VideoWriter('bilateralS1.avi');
 vid.FrameRate=25;
@@ -87,12 +103,12 @@ if ~isempty(fs)
     %     figure
     %     plot(stimRec.pos)
     
-    mouseT = stimRec.ts- stimRec.ts(1);
+    mouseT = stimRec.ts- stimRec.ts(2)+0.0001; %%% first is sometimes off
     figure
     plot(diff(mouseT));
     
     dt = diff(mouseT);
-    use = [1>0; dt>0];
+    use = [1<0; dt>0];
     mouseT=mouseT(use);
     
     posx = cumsum(stimRec.pos(use,1)-900);
@@ -107,30 +123,31 @@ if ~isempty(fs)
     sp = sqrt(vx.^2 + vy.^2);
     figure
     plot(sp)
-    
-    
-    
-%     for i=1:100;
-%         sp_avg(i) = nanmeanMW(sp(i:100:end)');
-%         sp_med(i) = nanmedianMW(sp(i:100:end)');
-%     end
+    hold on 
+    plot(squeeze(mean(mean(dfof_bg,2),1))*30000,'g')
+    figure
+    plot(xcorr(sp,mean(mean(dfof_bg,2),1)))
+    for i=1:100;
+        sp_avg(i) = nanmeanMW(sp(i:100:end)');
+        sp_med(i) = nanmedianMW(sp(i:100:end)');
+    end
 %     sp_all = reshape(sp,[100 30]);
 %     figure
 %     plot(0.1:0.1:10,sp_all)
 %     title('all speeds')
-%     figure
-%     plot(0.1:0.1:10,sp_avg)
-%     title('mean speed')
-%     ylim([0 1500])
-%     figure
-%     plot(0.1:0.1:10,sp_med)
-%     title('median speed')
-%     ylim([0 1500])
+    figure
+    plot(0.1:0.1:10,sp_avg)
+    title('mean speed')
+    ylim([0 2500])
+    figure
+    plot(0.1:0.1:10,sp_med)
+    title('median speed')
+    ylim([0 1500])
     
-    thresh = [ 400 ];
+    thresh = [100 ];
     for i = 1:1
-        stop_img = median(dfof_bg(:,:,sp<thresh(i)),3);
-        mov_img = median(dfof_bg(:,:,sp>thresh(i)),3);
+        stop_img = mean(dfof_bg(:,:,sp<thresh(i)),3);
+        mov_img = mean(dfof_bg(:,:,sp>thresh(i)),3);
         
         figure
         subplot(2,2,1);
@@ -138,7 +155,7 @@ if ~isempty(fs)
         subplot(2,2,2);
         imagesc(mov_img,[-0.2 0.2]);
         subplot(2,2,3);
-        imagesc(mov_img-stop_img,[-0.2 0.2]);
+        imagesc(mov_img-stop_img,[-0.05 0.05]);
     end
     
     movemap = mov_img-stop_img;
@@ -146,6 +163,10 @@ if ~isempty(fs)
     %[f p] =uiputfile('*.mat','move map file');
     save(mapfilename,'movemap','sp','-append');
 end
+
+
+
+%keyboard
 
 %
 % keyboard

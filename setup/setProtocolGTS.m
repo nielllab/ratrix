@@ -18,6 +18,7 @@ fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =msPenalty;
+pixPerCycs                = [100 150 200]; %*10^9;
 %stim.stopHUD = false; %stop period heads up display... false = off
 
 % sca
@@ -28,98 +29,56 @@ if ~isscalar(subjIDs)
 end
 switch subjIDs{1}
     
-%      case 'g62c6lt' % switched GoToBlack 5/21/14
-%        requestRewardSizeULorMS = 20;
-%        rewardSizeULorMS        = 160;
-%        msPenalty               =4000;
-%        
-%      case 'g62c6tt' % switched GoToBlack 5/21/14
-%        requestRewardSizeULorMS = 20;
-%        rewardSizeULorMS        = 160;
-%        msPenalty               =4000;
-       
-     case 'g6w1lt' % started 3/7/14
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 30;
-       msPenalty               =3900;
-
-    case 'bfly1a.13rt'
-       requestRewardSizeULorMS = 0;
+    
+     case 'g62k.2rt' % Started GTS 8/6/14
+       requestRewardSizeULorMS = 00;
        rewardSizeULorMS        = 160;
-       msPenalty               =4100;  
-       
-   case 'bfly3a.3rn'
+       msPenalty               =4400;
+    
+     case 'g62e.12rt' % Started GTS 8/2/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 160;
-       msPenalty               =4100; 
-       
-   case 'bfly2b.3rt'
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 140;
-       msPenalty               =4100; 
-       
-   case 'g62b4ln'
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 130;
-       msPenalty               =4000; 
-
-   case 'g62.8lt' 
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 60;
-       msPenalty               =4200;  
-       
-   case 'g62b.5lt'           %started 1/28/14 
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 150; 
+       rewardSizeULorMS        = 100;
        msPenalty               =4200;
-       
-%    case 'g625ln' % Switched 1/17/14
+    
+%      case 'g62j.4tt' % Started GTS 7/31/14
 %        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 180;  
-%        msPenalty               =4000;
-%        
-    case 'g6w1lt' % started 3/7/14
+%        rewardSizeULorMS        = 120;
+%        msPenalty               =4100;
+       
+     case 'g62j.4rt' % Started GTS 7/27/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 35;
-       msPenalty               =3900;
+       rewardSizeULorMS        = 55;
+       msPenalty               =4300;
        
-%    case 'bfly1a.5lt' 
+%      case 'g62j.5tt' % Started GTS 7/27/14
 %        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 60;
-%        msPenalty               =3500;
+%        rewardSizeULorMS        = 120;
+%        msPenalty               =4100;
        
-%     case 'bfly1a.5tt' 
+%      case 'g62c6lt' % switched GTS 6/8/14
 %        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 90;
-%        msPenalty               =3500; 
+%        rewardSizeULorMS        = 150;
+%        msPenalty               =4200;
+%        pixPerCycs             = [100 150 200]; %*10^9;
+    
+     case 'g62b.5lt'           %started 1/28/14 
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 70; 
+       msPenalty               =4300;
+       pixPerCycs             = [100 150 200]; %*10^9;
+%        
+%      case 'bfly2b.3rt'
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 40;
+%        msPenalty               =4200; 
+%        pixPerCycs             = [100 150 200]; %*10^9;
+       
+     case 'g62c6tt' % switched GTS 6/8/14
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 20;
+       msPenalty               =4200;
+       pixPerCycs             = [100 150 200]; %*10^9;
 
-
-%    case 'g6w2tt' 
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 170;
-%        msPenalty               =3500;  
-%        
-%        
-%    case 'g54aa7tt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 35;
-%        msPenalty                 =3500; 
-%        
-%     
-%    case 'gcam51ln'
-%         requestRewardSizeULorMS = 0;
-%         rewardSizeULorMS        = 17;
-%         msPenalty                 =3500; 
-%         
-%  
-%    case 'g54bb2' % Switched GTB 12/19/13
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 55;
-% 
-% case 'g62b7rt' %FDIC 12/30/13
-%        requestRewardSizeULorMS = 20; 
-%        rewardSizeULorMS        = 115; 
-       
     
          
     otherwise
@@ -151,7 +110,6 @@ stim.positional = false;
 stim.cue = true;
 stim.soundClue = false;
 
-pixPerCycs             = [100 150 200]; %*10^9;
 targetOrientations     = [0 1]*pi/2;
 distractorOrientations = []; %-targetOrientations;
 mean                   = .5;

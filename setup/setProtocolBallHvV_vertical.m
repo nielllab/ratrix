@@ -18,6 +18,7 @@ fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =msPenalty;
+pixPerCycs                = [100 150 200]; %*10^9;
 
 % sca
 % keyboard
@@ -27,41 +28,59 @@ if ~isscalar(subjIDs)
 end
  switch subjIDs{1}
      
-   case 'g62g4lt'     %started 5/22/14 
+   case 'g62b7lt'           %Started full 8/14/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 80;
-        msPenalty              =4000;
+       rewardSizeULorMS        = 40; 
+       msPenalty               =4200;
+       pixPerCycs             = [100 125 150]; %*10^9;
+         
+     
+   case 'g62h1tt'     %Started Full 8/15/14
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 70;
+        msPenalty              =4300;
+        pixPerCycs             = [100 125 150]; %*10^9;  
         
    case 'g62b8tt'     %started 5/22/14  
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 80;
-        msPenalty              =4100;
-
-  case 'g62h1tt'     %started 5/16/14
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 70;
+       rewardSizeULorMS        = 20;
         msPenalty              =4200;
+        pixPerCycs             = [100 150 200]; %*10^9;
 
-  case 'g62c.2rt'           %changed 5/16/14
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 55; 
-       msPenalty               =4200;
+%   case 'g62c.2rt'           %Switched Back _center 8/15/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 35; 
+%        msPenalty               =4100;
+%        pixPerCycs             = [100 150 200]; %*10^9;
        
-  case 'g62b7lt'           %changed 5/16/14
+   case 'g62b1lt'     %moved to HvV_vertical 2/19/14   
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 55; 
-       msPenalty               =4200;    
-
-  case 'g62b1lt'     %moved to HvV_vertical 2/19/14   
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 30;
-       msPenalty               =4000; 
+       rewardSizeULorMS        = 35;
+       msPenalty               =4300;
+       pixPerCycs             = [100 150 200]; %*10^9;
      
   case 'g62b3rt'          %changed 2/14/14
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 20; 
-       msPenalty               = 3800; 
+       msPenalty               = 4200; 
+       pixPerCycs             = [100 150 200]; %*10^9;
        
+       
+%   case 'g62h1tt'     %started 5/16/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 45;
+%         msPenalty              =4300;
+
+       
+%   case 'g62b7lt'           %changed 5/16/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 45; 
+%        msPenalty               =4300;    
+
+%    case 'g62g4lt'     %started 5/22/14 
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 60;
+%         msPenalty              =4300;
            
        
     otherwise
@@ -93,7 +112,6 @@ stim.positional = false;
 stim.cue = true;
 stim.soundClue = false;
 
-pixPerCycs             = [100 150 200]; %*10^9;
 targetOrientations     = 0
 distractorOrientations = []; %-targetOrientations;
 mean                   = .5;

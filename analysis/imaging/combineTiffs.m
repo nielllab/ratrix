@@ -241,138 +241,239 @@ imagingPath = 'E:\widefield data';
 %     }
 %     }; %%% vert vs horiz in either top or bottom
 
+
+
+%imagingPath = 'H:\archived widefield behavior (12-24-13 to 4-29-14)';  %could insert try/catch?  for archived behavior files
 imagingPath = 'G:\Behavior data 12-24-13+';
 recs = {
 
 
 %          {'g6w1lt' {
 %          {[1 360],[],'050414 G6W1-LT GTS behavior\G6W1-LT_run1_GTS_behavior_50msexp_fstop5_6','G6W1-LT_run1_GTS_behavior_50msexp_fstop5_6'}
-%%          {[361 610],[],'',''}  %bad run - motion artifact (headplate not secure)
+% %bad          {[361 610],[],'',''}  %bad run - motion artifact (headplate not secure)
 %          {[611 855],[],'051614 g6w1LT GTS behavior\g6w1lt_run1_gts_fstop11_exp50ms','g6w1lt_run1_gts_fstop11_exp50ms'}%most likely bad - passive looks weird
 %     }
 %     }  
 %     
 %          {'g62.8lt' {
-% %      {[1 157],[],'122413 G62.8-LT GTS Behavior','G62.8-LT_GTS_50ms_exp_1x1bin'}     
-% %      {[158 159],[],'camera fail 122514'}
-% %      {[160 418],[],'122513 G628 GTS Behavior\122513 G62.8-LT GTS Behavior (run 5 after camera fail)','122513 G62.8-LT GTS Behavior'}  %%probably not right file?
-% %      {[419 421],[],'021914 '}
-% %      {[422 672],[],'021914 G628-LT GTS Behavior','G628-LT_run1_GTS_behavior_15ms_exp0'}
+% %bad      {[1 157],[],'122413 G62.8-LT GTS Behavior','G62.8-LT_GTS_50ms_exp_1x1bin'}     
+% %bad      {[158 159],[],'camera fail 122514'}
+% %bad      {[160 418],[],'122513 G628 GTS Behavior\122513 G62.8-LT GTS Behavior (run 5 after camera fail)','122513 G62.8-LT GTS Behavior'}  %%probably not right file?
+% %bad      {[419 421],[],'021914 '}
+% %bad      {[422 672],[],'021914 G628-LT GTS Behavior','G628-LT_run1_GTS_behavior_15ms_exp0'}
 %       {[673 896],[],'022014 G628-LT GTS Behavior','022014 G628-LT GTS Behavior'}
-%%not sure whats wrong    {[897 1187],[],'030214 G62.8-LT GTS behavior\G62.8-LT_run1_GTS_behavior_Fstop_5.6_50ms_exposure','G62.8-LT_run1_GTS_behavior_Fstop_5.6_50ms_exposure'}%video writer didnt work
+% %not sure whats wrong    {[897 1187],[],'030214 G62.8-LT GTS behavior\G62.8-LT_run1_GTS_behavior_Fstop_5.6_50ms_exposure','G62.8-LT_run1_GTS_behavior_Fstop_5.6_50ms_exposure'}%video writer didnt work
 %         {[1188 1436],[],'051515 G628-LT GTS behavior\g628lt_run1_gts_fstop5.6_exp50ms','g628lt_run1_gts_fstop5.6_exp50ms'} 
-%%        {[1437 1437],[],'Bad',''} 
+% %bad        {[1437 1437],[],'Bad',''} 
 %         {[1438 1663],[],'051714 G62.8 GTS Behavior\g62.8_run2_gts_fstop11_exp50ms','g62.8_run2_gts_fstop11_exp50ms'} 
+%           {[1664 1983],[],'052414 g628lt gts behavior\g628lt_run1_gts_fstop11_exp50ms','g628lt_run1_gts_fstop11_exp50ms'}
 %      }
 %      }
 %        
 %          {'g62b.5lt' {
-% %      {[1 198],[],'030114 G62B.5-LT GTS Behavior (Fstop 8)\G62B.5-LT_run1_GTS_behavior_Fstop_8_50msexp','G62B.5-LT_run1_GTS_behavior_Fstop_8_50msexp'}     
+% % camware xtra frames     {[1 198],[],'030114 G62B.5-LT GTS Behavior (Fstop 8)\G62B.5-LT_run1_GTS_behavior_Fstop_8_50msexp','G62B.5-LT_run1_GTS_behavior_Fstop_8_50msexp'}     
 %      {[199 381],[],'030614 G62B.5-LT GTS behavior\G62B.5-LT_run1_GTS_behavior_F_4_50msexp','G62B.5-LT_run1_GTS_behavior_F_4_50msexp'}
 %       {[382 576],[],'050314 G62B5-LT GTS behavior\G62B5-LT_run1_GTS_behavior_50msexp_Fstop-8','G62B5-LT_run1_GTS_behavior_50msexp_Fstop-8'}
-%%        {[577 588],[],'',''}  %G62C.2 ran on these trials (different protocol)
-%%        {[589 621],[],'',''}  %Bad run - having trouble with air pressure (no passive viewing)
-%%      {[622 655],[],'051514',''}  %Bad run - having trouble with no butt corral (no passive viewing)
-%%      {[656 700],[],'052014',''}  %Bad run - having trouble with no butt corral (no passive viewing)
-%     }
-%     }    
+% %bad        {[577 588],[],'',''}  %G62C.2 ran on these trials (different protocol)
+% %bad        {[589 621],[],'',''}  %Bad run - having trouble with air pressure (no passive viewing)
+% %bad      {[622 655],[],'051514',''}  %Bad run - having trouble with no butt corral (no passive viewing)
+% %bad      {[656 700],[],'052014',''}  %Bad run - having trouble with no butt corral (no passive viewing)
+%         {[701 822],[],'060714 g62b.5lt gts behavior\g62b.5lt_run1_gts_fstop11_exp50ms','g62b.5lt_run1_gts_fstop11_exp50ms'} 
+%     {[823 1007],[],'061314 g62b.5lt gts behavior\g62b.5lt_run1_gts_fstop11_exp50','g62b.5lt_run1_gts_fstop11_exp50'}
+%     {[1008 1135],[],'061614 g62b.5lt gts behavior\g62b.5lt_run1_gts_fstop11_exp50ms','g62b.5lt_run1_gts_fstop11_exp50ms'}
+%     {[1136 1219],[],'062614 g62b5lt gts behavior\g62b5lt_run1_gts_fstop11_exp50ms','g62b5lt_run1_gts_fstop11_exp50ms'}
+%     } 
+%     } 
 %     
 %           {'g62b1lt' {
-%       {[1 208],[],'031114 G62B.1-RT HvV Behavior\G62B.1-LT_run1_HvV_behavior_Fstop_5.6_50msexp','G62B.1-LT_run1_HvV_behavior_Fstop_5.6_50msexp'}     
-%       {[209 477],[],'050214 G62b.1 LT HvV_vertical behavior\g62b.7lt_run1_HvV_vertical_fstop5.6_exp50ms','g62b.7lt_run1_HvV_vertical_fstop5.6_exp50ms'}
+%        {[1 208],[],'031114 G62B.1-RT HvV Behavior\G62B.1-LT_run1_HvV_behavior_Fstop_5.6_50msexp','G62B.1-LT_run1_HvV_behavior_Fstop_5.6_50msexp'}     
+%       {[209 477],[],'050214 G62b.1 LT HvV_vertical behavior\g62b.1lt_run1_HvV_vertical_fstop5.6_exp50ms','g62b.7lt_run1_HvV_vertical_fstop5.6_exp50ms'}
 %         {[478 693],[],'050614 G62B.1 LT HvV_Vertical Behavior\G62B.1LT_run1_HvV_Vertical_fstop5.6_exp50ms','G62B.1LT_run1_HvV_Vertical_fstop5.6_exp50ms'}
 %         {[694 903],[],'050814 G62B1-LT HvV Behavior\G62B1-LT_run1_HvV_behavior_50ms_Fstop5_6','G62B1-LT_run1_HvV_behavior_50ms_Fstop5_6'}
 %         {[904 1195],[],'052014 G62b.1LT HvV_vertical behavior\62b.1lt_run1_hvv_vertical_fstop11_exp50ms','62b.1lt_run1_hvv_vertical_fstop11_exp50ms'}
+%         {[1196 1519],[],'052514 g62b.1 HvV vertical behavior\g62b.1lt_run1_hvvvertical_fstop11_exp50ms_200spatial','g62b.1lt_run1_hvvvertical_fstop11_exp50ms_200spatial'}
+%         {[1520 1800],[],'052914 g62b.1lt hvv vertical behavior\g62b.1lt_run1_hvvvertical_fstop11_exp50ms','g62b.1lt_run1_hvvvertical_fstop11_exp50ms'}
+%         {[1801 2078],[],'053014 g62b.1lt hvv vertical behavior\g62b.1lt_run1_hvvvertical_fstop11_exp50ms','g62b.1lt_run1_hvvvertical_fstop11_exp50ms'}
+%% poor performance %  {[2079 2280],[],'060814 g62b.1lt hvv vertical 400 spatial\g62b.1lt_run1_hvvvertical_fstop11_exp50ms','g62b.1lt_run1_hvvvertical_fstop11_exp50ms'}
+%     {[2281 2615],[],'061114 g62b.1lt hvv behavior\g62b.1lt_run1_hvv_fstop11_spatial400_exp50ms','g62b.1lt_run1_hvv_fstop11_spatial400_exp50ms'}
+%     {[2616 2897],[],'062114 g62b1lt hvv behavior\g62b1lt_run1_hvv_fstop11_exp50ms','g62b1lt_run1_hvv_fstop11_exp50ms'}
+%     {[2898 3047],[],'062214 g62b.1 hvv behavior\g62b.1_run1_hvv_fstop11_exp50ms','g62b.1_run1_hvv_fstop11_exp50ms'}
+%         {[3048 3387],[],'072314 g62b1rt hvv behavior\g62b1rt_run1_hvv_fstop11_exp50ms','g62b1rt_run1_hvv_fstop11_exp50ms'} 
 %     }
 %     }    
 %     
-         {'g62b3rt' {
+%   
+%           {'g62b3rt' {
 %       {[1 157],[],'022814 G62B.3-RT HvV Behavior\G62B.3-RT_run1_HvV_Behavior_15msexp','G62B.3-RT_run1_HvV_Behavior_15msexp'}     
 %       {[158 340],[],'030114 G62B.3-RT HvV Behavior\G62B.3-RT_run1_HvV_behavior_Fstop_5.6_50msexp','G62B.3-RT_run1_HvV_behavior_Fstop_5.6_50msexp' }
 %       {[341 572],[],'030214 G62B.3-RT HvV behavior\G62B.3-RT_run1_HvV_behavior_Fstop8_50msexp','G62B.3-RT_run1_HvV_behavior_Fstop8_50msexp'}
 %       {[573 774],[],'030614 G62B.3-RT HvV behavior\G62B.3-RT_run1_HvV_behavior_Fstop4_50msexp','G62B.3-RT_run1_HvV_behavior_Fstop4_50msexp'}
 %       {[775 1000],[],'031114 G62B.3-RT HvV Behavior\G62B.3-RT_run1_HvV_behavior_F_4_50msexp','G62B.3-RT_run1_HvV_behavior_F_4_50msexp'}
-%%        {[1001 1104],[],'050414 G62b3-RT HvV behavior (movement artifact)\G62b3-rt_run1_HvV_behavior_50msexp_Fstop_8','G62b3-rt_run1_HvV_behavior_50msexp_Fstop_8'}  %%movement artifact(headplate not secure)
+% %bad        {[1001 1104],[],'050414 G62b3-RT HvV behavior (movement artifact)\G62b3-rt_run1_HvV_behavior_50msexp_Fstop_8','G62b3-rt_run1_HvV_behavior_50msexp_Fstop_8'}  %%movement artifact(headplate not secure)
 %         {[1105 1363],[],'050814 G62b3-rt HvV behavior\G62B3-RT_run1_HvV_behavior_50ms_Fstop_8','G62B3-RT_run1_HvV_behavior_50ms_Fstop_8'}
 %         {[1364 1584],[],'051514 G62b.3 RT HvV Behavior\g62b.3rt_run1_HvV_vertical_fstop5.6_exp50ms','g62b.3rt_run1_HvV_vertical_fstop5.6_exp50ms'}
-        {[1585 1893],[1585 1885],'051714 G62B.3RT HvV_vertical Behavior','g62b.3rt_run1_hvv_vertical_fstop11_exp50ms'}
-    }
-    }    
+%         {[1585 1893],[1585 1885],'051714 G62B.3RT HvV_vertical Behavior','g62b.3rt_run1_hvv_vertical_fstop11_exp50ms'}
+%         {[1894 2140],[],'061214 g62b.3 rt hvv behavior\g62b3rt_run1_hvv_fstop11_exp50ms','g62b3rt_run1_hvv_fstop11_exp50ms'}
+%         {[2141 2269],[],'062014 g62b.3 rt hvv vertical behavior\g62b3rt_run1_hvv_fstop11_exp50ms','g62b3rt_run1_hvv_fstop11_exp50ms'}
+%         {[2270 2270],[],'No Data'}
+%         {[2271 2491],[],'062614 g62b3rt hvv behavior\g62b3rt_run2_spatial200_gts_fstop11_exp50ms','g62b3lt_run1_spatial200_gts_fstop11_exp50ms'}
+%           {[2492 2809],[],'072314 g62b3rt hvv behavior\g62b3rt_run1_hvv_fstop11_exp50ms_200spatial','g62b3rt_run1_hvv_fstop11_exp50ms_200spatial'}
+%           {[2810 3045],[],'072414 g62b3rt hvv behavior\g62b3rt_run1_fstop8.5_exp60_hvv','g62b3rt_run1_fstop8.5_exp60_hvv'}
+%      }
+%      }    
 %     
 %          {'g62b4ln' {
-%       {[1 298],[],'022114 G62B.4-LN GTS Behavior','G62B.4-LN_run1_GTS_behavior_15msexp'}     
-%       {[299 558],[],'022414 G62B.4-LN GTS Behavior','G62B.4-LN_run1_GTS_Behavior_15msexp_only_blue_1.5secCorrectStim'} %%light off for first 13 frames
-%  %     {[559 572],[],'030114 G62B.4-LN GTS Behavior (Top Fstop-11)\G62B.4-LN_run1_GTS_Behavior_topFstop-11_30msexp_badNoWaterReward','G62B.4-LN_run1_GTS_Behavior_topFstop-11_30msexp'}  % no water reward
-%  %    {[573 573],[],'030114 G62B.4-LN GTS Behavior (Top Fstop-11)\G62B.4-LN_run2_GTS_Behavior_topFstop-11_30msexp_bad_LEDtrouble','G62B.4-LN_run2_GTS_Behavior_topFstop-11_30msexp'}  %led trouble (both 0n)
-%  %     {[574 582],[],'030114 G62B.4-LN GTS Behavior (Top Fstop-11)\G62B.4-LN_run3_GTS_Behavior_topFstop-11_30msexp_Bad_LEDtrouble','G62B.4-LN_run3_GTS_Behavior_topFstop-11_30msexp'}  %led trouble
+%      {[1 298],[],'022114 G62B.4-LN GTS Behavior','G62B.4-LN_run1_GTS_behavior_15msexp'}     
+%       {[299 558],[300 558],'022414 G62B.4-LN GTS Behavior','G62B.4-LN_run1_GTS_Behavior_15msexp_only_blue_1.5secCorrectStim'} %%light off for first 13 frames
+% % %bad     {[559 572],[],'030114 G62B.4-LN GTS Behavior (Top Fstop-11)\G62B.4-LN_run1_GTS_Behavior_topFstop-11_30msexp_badNoWaterReward','G62B.4-LN_run1_GTS_Behavior_topFstop-11_30msexp'}  % no water reward
+% % %bad    {[573 573],[],'030114 G62B.4-LN GTS Behavior (Top Fstop-11)\G62B.4-LN_run2_GTS_Behavior_topFstop-11_30msexp_bad_LEDtrouble','G62B.4-LN_run2_GTS_Behavior_topFstop-11_30msexp'}  %led trouble (both 0n)
+% % %bad     {[574 582],[],'030114 G62B.4-LN GTS Behavior (Top Fstop-11)\G62B.4-LN_run3_GTS_Behavior_topFstop-11_30msexp_Bad_LEDtrouble','G62B.4-LN_run3_GTS_Behavior_topFstop-11_30msexp'}  %led trouble
 %      {[583 748],[],'030114 G62B.4-LN GTS Behavior (Top Fstop-11)\G62B.4-LN_run4_GTS_Behavior_topFstop-11_30msexp','G62B.4-LN_run4_GTS_Behavior_topFstop-11_30msexp'}
 %       {[749 1015],[],'050314 G62b4-LN_ GTS behavior\G62B4-LN_run1_GTS_behavior_50ms_exp_fstop_8','G62B4-LN_run1_GTS_behavior_50ms_exp_fstop_8'}
 %         {[1016 1254],[],'051914 G62b4-LN GTS behavior\G62b4-ln_GTS_behavior_50ms_Fstop_11','G62b4-ln_GTS_behavior_50ms_Fstop_11'}
+%          {[1255 1397],[],'052414 g62b.4ln gts behavior\g62b.4ln_run1_gts_fstop11_exp50ms','g62b.4ln_run1_gts_fstop11_exp50ms'}
+% %%bad      {[1398 1496],[],'051914',''}BAD
+%          {[1497 1788],[],'060614 g62b.4LN gts behavior\g62b4ln_run1_gts_fstop11_exp50ms','g62b4ln_run1_gts_fstop11_exp50ms'}
+%          {[1789 2154],[],'060714 g62b,4ln gts behavior\g62b.4ln_run1_gts_spatial200_fstop11_exp50ms','g62b.4ln_run1_gts_spatial200_fstop11_exp50ms'}
+%          {[2155 2342],[],'060814 g62b.4ln gts behavior 400spatial\g62b.4ln_run1_gts_fstop11_spatial400_exp50ms','g62b.4ln_run1_gts_fstop11_spatial400_exp50ms'}
+%         {[2343 2608],[],'061714 g62b.4 gts behavior','061714 g62b.4 gts behavior'}
+%         {[2609 2752],[],'062114 g62b4ln gts behavior\g62b4ln_run1_topox_fstop11_exp50ms','g62b4ln_run1_topox_fstop11_exp50ms'}
+%         {[2753 3053],[],'062214 g62b4ln gts behavior\g62b4ln_run1_fstop11_exp50ms_GTS','g62b4ln_run1_fstop11_exp50ms_GTS'}
+%         {[3054 3300],[],'062614 g62b4ln gts behavior\062614_run1_gts_20spatial_fstop11_exp50ms','062614_run1_gts_20spatial_fstop11_exp50ms'}
 %     }
 %     }      
-%            {'g62b7lt' {
+%
+%              {'g62b7lt' {
 %       {[1 176],[],'022314 G62B.7-LT HvV_center Behavior\G62B.7-LT_run1_HvV_center_Behavior_15msexp','G62B.7-LT_run1_HvV_center_Behavior_15msexp'}     
 %       {[177 469],[],'022514 G62B.7-LT HvV_center Behavior\G62B.7-LT_run1_HvV_center_Behavior_15msexp','G62B.7-LT_run1_HvV_center_Behavior_15msexp'}
 %       {[470 739],[],'030114 G62B.7-LT HvV_center Behavior\G62B.7-LT_run1_HvV_center_behavior_Fstop5.6_50msexp','G62B.7-LT_run1_HvV_center_behavior_Fstop5.6_50msexp'}
 %       {[740 1031],[],'030214 G62B.7-LT HvV_center behavior\G62B.7-LT_run1_HvV_center_behavior_Fstop_8_50msexp','G62B.7-LT_run1_HvV_center_behavior_Fstop_8_50msexp'}
-% %      {[1032 1154],[],'030614 G62B.7-LT HvV_center Behavior\G62B.7_run1_HvV_center_behavior_Fstop_4_50msexp','G62B.7_run1_HvV_center_behavior_Fstop_4_50msexp'}
-% %     {[1155 1176],[],'030614 G62B.7-LT HvV_center Behavior\G62B.7_run2_HvV_center_behavior_Fstop_4_50msexp','G62B.7_run2_HvV_center_behavior_Fstop_4_50msexp'}
+% %bad      {[1032 1154],[],'030614 G62B.7-LT HvV_center Behavior\G62B.7_run1_HvV_center_behavior_Fstop_4_50msexp','G62B.7_run1_HvV_center_behavior_Fstop_4_50msexp'}
+% %bad     {[1155 1176],[],'030614 G62B.7-LT HvV_center Behavior\G62B.7_run2_HvV_center_behavior_Fstop_4_50msexp','G62B.7_run2_HvV_center_behavior_Fstop_4_50msexp'}
 %       {[1177 1451],[],'031114 G62B.7-LT HvV_center Behavior\G62B.7-LT_run1_HvV_center_behavior_Fstop4_50msexp','G62B.7-LT_run1_HvV_center_behavior_Fstop4_50msexp'}
 %       {[1452 1558],[],'042214 g62b.7 LT HvV_center_behavior\G62b7lt_run1_HvV_center_fstop5.6_exp50ms_only9999images','G62b7lt_run1_HvV_center_fstop5.6_exp50ms'}   
 %       {[1559 1946],[],'042414 G62B.7LT HvV_center Behavior\G62B.7LT_run1_HvV_center_fstop5.6_exp50ms','G62B.7LT_run1_HvV_center_fstop5.6_exp50ms'}
-%%       %{[1947 2062],[],'file deleted 042914'}
-%%       %{[2063 2063],[],'file deleted 042914'}
+% %bad       %{[1947 2062],[],'file deleted 042914'}
+% %bad       %{[2063 2063],[],'file deleted 042914'}
 %        {[2064 2182],[],'042914 G62B.7 LT Behavior HvV Center\g62b.7lt_run1_hvv_center_fstop5.6_exp50ms','g62b.7lt_run1_hvv_center_fstop5.6_exp50ms'}
 %        {[2183 2438],[],'051414 g62B.7LT HvV_center Behavior\g62b.7lt_run1_hvV_center_fstop5.6_exp50','g62b.7lt_run1_hvV_center_fstop5.6_exp50'}
-%     }
-%     }
+%      {[2439 2685],[],'070714 g62b7lt hvv center behavior\g62b7lt_run1_hvvcenter_200spatial_exp50ms','g62b7lt_run1_hvvcenter_200spatial_exp50ms'}
+%      {[2686 2917],[],'070814 G62B7-LT HvV_center behavior 200SF\G62B7-LT_run1_HvV_center_behavior_50ms_F_8_200SF','G62B7-LT_run1_HvV_center_behavior_50ms_F_8_200SF'}
+%      {[2918 3312],[],'072514 g62b7lt hvv center behavior\g62b7lt_run1_hvvcenter_fstop8_exp60_sf200','g62b7lt_run1_hvvcenter_fstop8_exp60_sf200'}
+% %      {[3313 3313],[],'',''} Test to retrieve last data
+%         }
+%         }
 %     
 %         {'g62b8tt' {
 %       {[1 388],[],'041814 G62B.8-tt HvV_center Behavior\G62B.8-TT_run1_HvV_center_50msexp_5.6Fstop','G62B.8-TT_run1_HvV_center_50msexp_5.6Fstop'}     
 %       {[389 649],[],'042114 G62B8-TT HvV_center Behavior','G62B8TT_run1_HvV_center_50msexp_5.6fstp'} 
 %      {[650 953],[650 775],'042414 G62b.8TT HvV_center Behavior\g62B.8TT_run1_HvV_center_fstop5.6_exp50ms_lightblockconetipperatendoftrial','g62B.8TT_run1_HvV_center_fstop5.6_exp50ms'}  %% light block hat tiped towards end of session
-%%multiTiff      {[954 1213],[],'051614 G62b8-TT HvV_center Behavior\G62B8-TT_run1_HvV_center_behavior_50ms_F_11','G62B8-TT_run1_HvV_center_behavior_50ms'}  %MultiTif file *(can we analyze?)
+% %multiTiff      {[954 1213],[],'051614 G62b8-TT HvV_center Behavior\G62B8-TT_run1_HvV_center_behavior_50ms_F_11','G62B8-TT_run1_HvV_center_behavior_50ms'}  %MultiTif file *(can we analyze?)
 %         {[1214 1675],[],'051714 G62B.8TT HvV_center Behavior\g62B.8TT_run1_hvv_center_fstop11_exp50ms','g62B.8TT_run1_hvv_center_fstop11_exp50ms'}
+%%hmm error(timestamps?)   {[1676 1942],[],'061714 g62b.8 HvV Vertical behavior\g62b.8_run1_HVVvertical_fstop11_exp50ms','g62b.8_run1_HVVvertical_fstop11_exp50ms'} % couldnt analyze?
+%         {[1943 2163],[],'062014 g62b.8 hvv vertical behavior\g62b8_run1_hvvverical_fstop11_exp50ms','g62b8_run1_hvvverical_fstop11_exp50ms'}
+%           {[2164 2428],[],'070314 g62b8tt hvv behavior\g62b8tt_run1_hvv_fstop11_exp50ms','g62b8tt_run1_hvv_fstop11_exp50ms'}
+%            {[2429 2670],[],'070814 g62b8tt hvv vertical behavior\g62b8tt_run1_hvvvertical_fstop8_Exp50ms','g62b8tt_run1_hvvvertical_fstop8_Exp50ms'}
 %    }
-%    }      
+%     }      
 %     
 %         {'g62c.2rt' {
 %       {[1 194],[],'031114 G62C.2-RT HvV_center Behavior\G62C.2-RT_run1_HvV_center_behavior_F_4_50msexp','G62C.2-RT_run1_HvV_center_behavior_F_4_50msexp'}  
-%%        {[195 195],[],'050414 G62C2_RT HvV_center Behavior\G62C2-RT_run1_HvV_center_behavior_50ms_exp_fstop_8_NO BLUE','G62C2-RT_run1_HvV_center_behavior_50ms_exp_fstop_8'}  %no blue led
+% %bad        {[195 195],[],'050414 G62C2_RT HvV_center Behavior\G62C2-RT_run1_HvV_center_behavior_50ms_exp_fstop_8_NO BLUE','G62C2-RT_run1_HvV_center_behavior_50ms_exp_fstop_8'}  %no blue led
 %        {[196 415],[196 300],'050414 G62C2_RT HvV_center Behavior\G62C2-RT_run2_HvV_center_behavior_50ms_exp_fstop_8','G62C2-RT_run2_HvV_center_behavior_50ms_exp_fstop_8'}%% light block hat tiped towards end of session
-%%         {[416 667],[],'050814 G62c.2 rt HvV_center Behavior\g62c.2rt_run2_HvV_center_fstop5.6_exp50ms','g62c.2rt_run2_HvV_center_fstop5.6_exp50ms'} %green LED left on for all of behavior %error in analysis
+% %bad         {[416 667],[],'050814 G62c.2 rt HvV_center Behavior\g62c.2rt_run2_HvV_center_fstop5.6_exp50ms','g62c.2rt_run2_HvV_center_fstop5.6_exp50ms'} %green LED left on for all of behavior %error in analysis
 %         {[668 876],[],'051614 G62c2-rt HvV_center Behavior\G62c-rt_run1_HvV_center_behavior_50msexp_Fstop_8','G62c-rt_run1_HvV_center_behavior_50msexp_Fstop_8'}
 %     }
 %     }    
 %     
-%          {'g62g4lt' {
+%         {'g62g4lt' {
 %       {[1 214],[],'041814 G62G.4-LT HvV_center behavior\041814_G62G4-LT_run1_HvV_center_50ms_F5.6_shadowGreenChannel','041814_G62G4-LT_run1_HvV_center_50ms_F5.6_shadowGreenChannel'}     
 %       {[215 383],[],'042114 g62g.4-lt HvV_center behavior\g62g.4lt_run1_HvV_center_50msexp_5.6fstop','g62g.4lt_run1_HvV_center_50msexp_5.6fstop'} 
 %        {[384 585],[],'050414 G62G.4 LT HvV_center behavior\g62g.4ln_run1_HvV_center_fstop5.6_exp50ms','g62g.4ln_run1_HvV_center_fstop5.6_exp50ms'} 
 %         {[586 806],[],'051614 G62G.4LT HvV Behavior\g62g,4lt_run1_hvv_center_fstop11_exp50ms','g62g,4lt_run1_hvv_center_fstop11_exp50ms'} 
 %         {[807 915],[],'051814 g62g.4lt HvV Center behavior\g62g,4lt_run1_hvvcenter_fstop11_exp50ms','g62g,4lt_run1_hvvcenter_fstop11_exp50ms'} 
-%     }
-%     }   
+%      {[916 1104],[],'070314 g62g4lt hvv center behavior 200spatial\g62g4lt_run1_hvv_fstop11_exp50_200spatial','g62g4lt_run1_hvv_fstop11_exp50_200spatial'} 
+%      {[1105 1217],[],'072814 g62g4lt hvv center behavior\g62g4lt_run1_hvvcenter_fstop8_exp60_sf200','g62g4lt_run1_hvvcenter_fstop8_exp60_sf200'} %poor performance
+%      }
+%      }   
 %     
+%      
 %         {'g62h1tt' {
 %        {[1 151],[],'042414 g62h.1tt HvV_center behavior\G62h.1tt_run1_HvV_center_fstop5.6_exp50ms','G62h.1tt_run1_HvV_center_fstop5.6_exp50ms'}     
 %          {[152 330],[],'050614 G62H.1TT HvV Center Behavior\g62h.1tt_run1_HvV_center_fstop5.6_exp50ms','g62h.1tt_run1_HvV_center_fstop5.6_exp50ms'}  
-%%hmm        {[331 564],[],'051414 G62H.1TT HvV_center Behavior\g62h.1tt_run1_HvV_center_fstop5.6_exp50ms','g62h.1tt_run1_HvV_center_fstop5.6_exp50ms'} % couldnt analyze?
-%     }
+%%hmm error(timestamps?)   {[331 564],[],'051414 G62H.1TT HvV_center Behavior\g62h.1tt_run1_HvV_center_fstop5.6_exp50ms','g62h.1tt_run1_HvV_center_fstop5.6_exp50ms'} % couldnt analyze?
+% %           {[565 569],[],'s',''} errors
+%           {[570 773],[],'070314 g62h1tt hvv center behavior 200spatial\g62h1tt_run4_hvv_center_fstop11_exp50ms','g62h1tt_run4_hvv_center_fstop11_exp50ms'}
+% %           {[774 774],[],'s',''} errors
+%         {[775 997],[],'070714 g62h1tt hvv center behavior\g62h1tt_run2_hvvcenter_fstop11_exp50ms_200spatial','g62h1tt_run2_hvvcenter_fstop11_exp50ms_200spatial'}
+% % BAD    {[998 1029],[],'070814',''} errors
+% % BAD    {[1030 1126],[],'070814',''} errors
+%            {[1127 1501],[],'070814 g62h1tt hvv center behavior\g62h1tt_run1_fstop8_exp50ms_spatial200','g62h1tt_run1_fstop8_exp50ms_spatial200'} 
+%            {[1502 1836],[],'072514 g62h1tt hvv center behavior\g62h1tt_run1_hvvcenter_fstop8_exp60','g62h1tt_run1_hvvcenter_fstop8_exp60'} 
 %     }     
-    
-    
-    
-    
-    
- 
+%     }
+%
+%        {'g62c6tt' {  %naive
+%       {[148 310],[],'052414 g62c.5tt neive\g62c6tt_run1_neive_fstop11_exp50ms','g62c6tt_run1_neive_fstop11_exp50ms'} 
+%       {[603 721],[],'052914 g62c6tt nieve behavior\g62c6tt_run1_nieve_fstop11_exp50ms','g62c6tt_run1_nieve_fstop11_exp50ms'} 
+%       {[722 847],[],'053014 g62c.6tt nieve behavior\g62c6tt_run1_nieve_fstop11_exp50ms','g62c6tt_run1_nieve_fstop11_exp50ms'}   
+% %bad optical mouse problem  {[1092 1131],[],'060614 g62c.6tt nieve behavior\g62c.6tt_run1_nieve_fstop11_exp50ms','g62c.6tt_run1_nieve_fstop11_exp50ms'} 
+%        {[1132 1197],[],'060614 g62c.6tt nieve behavior\g62c.6tt_run2_nieve_fstop11_exp50ms','g62c.6tt_run2_nieve_fstop11_exp50ms'} 
+%      }
+%     }     
+      {'g62c6ttgts' { %gts
+%       {[1 274],[],'072814 g62c6tt gts behavior\g62c6tt_run2_fstop8_exp60_sf200','g62c6tt_run2_fstop8_exp60_sf200'} 
+      {[275 459],[],'081414 g62c6tt gts behavior\g62c6tt_run1_gts_fstop8.5_exp50_sf200','g62c6tt_run1_gts_fstop8.5_exp50_sf200'}
+     }
+    }
+%
+%         {'g62c6lt' {
+%        {[11 147],[],'052414 g62c.6lt neive behavior\g62c6lt_run1_neive_fstop11_exp50ms','g62c6lt_run1_neive_fstop11_exp50ms'}
+%        {[311 453],[],'052514 g62c6lt nieve behavior\g62c6lt_run1_nieve_fstop11_exp50ms','g62c6lt_run1_nieve_fstop11_exp50ms'}
+%        {[454 602],[475 602],'052914 G62c.6 LT nieve behavior\g62c6lt_run1_nieve_fstsop11_exp50ms','g62c6lt_run1_nieve_fstsop11_exp50ms'}
+%        {[848 1091],[],'053014 g62c.6lt nieve behavior\g62c6lt_run1_nieve_fstop11_exp50ms','g62c6lt_run1_nieve_fstop11_exp50ms'}
+%        {[1198 1318],[],'060614 g62c.6lt nieve behavior\g62c6lt_run1_nieve_fstop11_exp50ms','g62c6lt_run1_nieve_fstop11_exp50ms'} 
+%      }
+%     }
+%
+%        {'g62g6lt' { 
+%        {[1 112],[],'070614 g62g6lt naive behavior\g62g6lt_run1_naive_fstop11_exp50ms','g62g6lt_run1_naive_fstop11_exp50ms'}
+%     {[113 254],[],'070814 G62G6-LT Naive behavior\G62G6-LT_run1_naive_behavior_50ms_exp_F_8','G62G6-LT_run1_naive_behavior_50ms_exp_F_8'}
+%      }
+%     }
+%
+%         {'g62k2rt' { 
+%        {[1 176],[],'070614 g62k2rt Naive behavior\g62k2rt_run1_naive_fstop11_exp50ms','g62k2rt_run1_naive_fstop11_exp50ms'}
+%         {[177 271],[],'070714 g62k2rt naive behavior\g62k2rt_run1_naive_fstop11_exp50ms','g62k2rt_run1_naive_fstop11_exp50ms'}
+%         {[272 430],[],'070914 g62k2rt naive behavior\g62k2rt_run1_naive-fstop8_exp50','g62k2rt_run1_naive-fstop8_exp50'}
+%     }
+%     }
+%    
+%         {'g62k1rt' { 
+% %hmm error(timestamps?) {[1 151],[],'070714 G62K1-RT Naive behavior\G62K.1-rt_naive_behavior_50msexp_Fstop11','G62K.1-rt_naive_behavior_50msexp_Fstop11'}
+%     {[152 293],[],'070814 G62K.1-RT Naive behavior\G62K.1-rt_run1_naive_behavior_50ms_exp_Fstop8','G62K.1-rt_run1_naive_behavior_50ms_exp_Fstop8'}
+%     }
+%     }
+% 
+%        {'g62j5rt' { 
+%     {[1 181],[],'072514 g62j5rt naive behavior\g62j5rt_run1_naive_fstop8_exp60','g62j5rt_run1_naive_fstop8_exp60'}
+%     }
+%     }
+% 
+        {'g62j4rt' { 
+%     {[1 152],[],'072514 g62j4rt naive behavior\g62j4rt_run1_naive_fstop8_exp60','g62j4rt_run1_naive_fstop8_exp60'}
+% % no behavior data disk was full {[153 270],[],'',''}
+    {[271 374],[],'072914 g62j4rt naive behavior\g62j4rt_run1_naive_fstop5.6_exp50','g62j4rt_run1_naive_fstop5.6_exp50'}
+    }
+    }
+
     }; %%% vert vs horiz in either top or bottom
 
 % dirOverview(imagingPath)
 
 %%% apply function biAnalysis to each
 cellfun(@(r)cellfun(@(s)f(r{1},s),r{2},'UniformOutput',false),recs,'UniformOutput',false);
-    function f(subj,r)
+      function f(subj,r)
         close all
         rng = sprintf('%d-%d',r{1}(1),r{1}(2));
         biAnalysis(...
@@ -452,7 +553,7 @@ if ~isscalar(bds)
     error('hmmm...')
 end
 
-maxGB = 1;
+maxGB = 1.0;
 
 bytesPerPix = 2;
 pixPerFrame = maxGB*1000*1000*1000/length(ids)/bytesPerPix;
@@ -752,8 +853,8 @@ end
 
 trials = trials(1):trials(2);
 
-stoppedWithin = 4; %2
-respondedWithin = [0.3 0.6]; %[.4 1]; %1
+stoppedWithin = 5; %2
+respondedWithin = [0 3]; %[.4 1]; %1
 onlyCorrect = true;
 noAfterErrors = false;
 worstFactor = .7; %.1  %%%???
@@ -781,21 +882,29 @@ worsts = cell2mat(worsts);
 trials = trials(trials<=length(worsts));
 
 d = diff(starts);
+% trials = trials( ...
+%     d(1,trials)<=stoppedWithin              & ...
+%     d(2,trials)<=respondedWithin(2)         & ...
+%     d(2,trials)>=respondedWithin(1)         & ...
+%     (~onlyCorrect | correct(trials))        & ...
+%     (~noAfterErrors | ~afterErrors(trials)) & ...
+%     cellfun(@isempty,misses(trials))        & ...
+%     ...% targ(trials)>0                          & ...
+%     worsts(trials)<=frameDur*(1+worstFactor)  ...
+%     );
+
 trials = trials( ...
     d(1,trials)<=stoppedWithin              & ...
-    d(2,trials)<=respondedWithin(2)         & ...
-    d(2,trials)>=respondedWithin(1)         & ...
-    (~onlyCorrect | correct(trials))        & ...
-    (~noAfterErrors | ~afterErrors(trials)) & ...
-    cellfun(@isempty,misses(trials))        & ...
-    ...% targ(trials)>0                          & ...
+     d(2,trials)<=respondedWithin(2)         & ...
+     d(2,trials)>=respondedWithin(1)         & ...   
+     cellfun(@isempty,misses(trials))        & ...
     worsts(trials)<=frameDur*(1+worstFactor)  ...
     );
 
 c = getUniformSpectrum(normalize(onsets));
 
 %pts = [-.8 respondedWithin(1)]; %-1.5*frameDur]; %last frame suspect -- if reinforcement phase ends before exposure does, probably turns led off prematurely
-pts = [-0.5 respondedWithin(1)+1.3];
+pts = [-1 respondedWithin(1)+1.3];
 pts = linspace(pts(1),pts(2),1+round(diff(pts)/frameDur));
 
 fig = figure;
@@ -961,27 +1070,27 @@ movdata = movdata*3+0.2;
 movdata(movdata<0)=0; movdata(movdata>1)=1;
 
 t = bs(start+1:start+nframes);
-
-xpos =1:10; ypos=1:10;
-for i = 1:length(bFrames);
-    frames = find(t>=starts(1,i) & t<starts(2,i));
-    movdata(xpos, ypos,:,frames)=0;
-    frames = find(t>=starts(2,i) & t<starts(3,i));
-    movdata(xpos,ypos,1:2,frames)=1;
-    frames = find(t>=starts(3,i) & t<=bFrames{i}(end));
-    if correct(i)
-        movdata(xpos,ypos,2,frames)=1;
-    else
-         movdata(xpos,ypos,1,frames)=1;
-    end
-end
-mov = immovie(movdata);
-
-vid = VideoWriter(sprintf('%sdFoFmovie.avi',pre));
-vid.FrameRate=15;
-open(vid);
-writeVideo(vid,mov);
-close(vid)
+% 
+% xpos =1:10; ypos=1:10;
+% for i = 1:length(bFrames);
+%     frames = find(t>=starts(1,i) & t<starts(2,i));
+%     movdata(xpos, ypos,:,frames)=0;
+%     frames = find(t>=starts(2,i) & t<starts(3,i));
+%     movdata(xpos,ypos,1:2,frames)=1;
+%     frames = find(t>=starts(3,i) & t<=bFrames{i}(end));
+%     if correct(i)
+%         movdata(xpos,ypos,2,frames)=1;
+%     else
+%          movdata(xpos,ypos,1,frames)=1;
+%     end
+% end
+% mov = immovie(movdata);
+% 
+% vid = VideoWriter(sprintf('%sdFoFmovie.avi',pre));
+% vid.FrameRate=15;
+% open(vid);
+% writeVideo(vid,mov);
+% close(vid)
 
 
 fig = figure;

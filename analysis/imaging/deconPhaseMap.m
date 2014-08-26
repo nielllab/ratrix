@@ -5,6 +5,9 @@ end
 perFrames = round(period*framerate);
 map =0;
 
+%im = im(:,:,perFrames+1:end);
+im(:,:,1:perFrames)=[];
+
 length(im);
 nframes = floor(length(im)/perFrames)*perFrames;
 cycmap = zeros(ceil(size(im,1)*binning),ceil(size(im,2)*binning),perFrames);
@@ -26,6 +29,7 @@ for f = 1:nframes
        cycmap(:,:,mod(f,perFrames)+1)=cycmap(:,:,mod(f,perFrames)+1)+imframe;
        
 end
+
 
 xymin = prctile(cycmap,2,3);
 for f = 1:perFrames;

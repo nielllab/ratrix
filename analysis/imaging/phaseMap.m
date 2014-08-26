@@ -5,8 +5,11 @@ end
 perFrames = round(period*framerate);
 map =0;
 
+%im = im(:,:,perFrames+1:end);
+im(:,:,1:perFrames)=[]; %%% should be faster way of deleting first period
+
 length(im);
-nframes = floor(length(im)/perFrames)*perFrames;
+nframes = floor(size(im,3)/perFrames)*perFrames;
 cycmap = zeros(ceil(size(im,1)*binning),ceil(size(im,2)*binning),perFrames);
 if binning~=1
     full_im = zeros(ceil(size(im,1)*binning),ceil(size(im,2)*binning),size(im,3));

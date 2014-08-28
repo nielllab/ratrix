@@ -30,14 +30,14 @@ end
      
    case 'g62b7lt'           %Started full 8/14/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40; 
+       rewardSizeULorMS        = 35; 
        msPenalty               =4200;
        pixPerCycs             = [100 125 150]; %*10^9;
          
      
    case 'g62h1tt'     %Started Full 8/15/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 70;
+       rewardSizeULorMS        = 55;
         msPenalty              =4300;
         pixPerCycs             = [100 125 150]; %*10^9;  
         
@@ -55,7 +55,7 @@ end
        
    case 'g62b1lt'     %moved to HvV_vertical 2/19/14   
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 35;
+       rewardSizeULorMS        = 30;
        msPenalty               =4300;
        pixPerCycs             = [100 150 200]; %*10^9;
      

@@ -3,14 +3,24 @@
 
 label='test'
 
-sz = size(imresize(squeeze(dfof_bg(:,:,1)),0.25));
+sz = size(imresize(squeeze(dfof_bg(:,:,1)),0.125));
 downsamp = zeros(sz(1),sz(2),size(dfof_bg,3));
 for i = 1:size(dfof_bg,3);
-downsamp(:,:,i) = imresize(squeeze(dfof_bg(:,:,i)),0.25);
+downsamp(:,:,i) = imresize(squeeze(dfof_bg(:,:,i)),0.125);
 end
 
 obs_mov = downsamp;
+baseline = prctile(obs_mov,1,3);
+for t = 1:size(obs_mov,3)
+    obs_mov(:,:,t) = obs_mov(:,:,t)-baseline;
+end
+
+d = shiftdim(obs_mov,2); %%% puts time in frot
+d= shiftdim(d,-1); % pads a 1 in front
+obs_mov = (deconvg6s(d,.1));
 obs_mov(isnan(obs_mov))=0;
+obs_mov = squeeze(obs_mov);
+obs_mov = shiftdim(obs_mov,1);
 obs = reshape(obs_mov,size(obs_mov,1)*size(obs_mov,2),size(obs_mov,3));
 obs(isnan(obs))=0;
 
@@ -41,12 +51,13 @@ end
 
 baseline = prctile(obs(:,:),1,2);
 obs_pos= zeros(size(obs));
-for t = 1:size(obs,2);
-    obs_pos(:,t) = obs(:,t)-baseline; 
-end
+% for t = 1:size(obs,2);
+%     obs_pos(:,t) = obs(:,t)-baseline; 
+% end
+obs_pos=obs;
 obs_pos(obs_pos<0)=0;
 
-nx=3; ny=3;
+nx=4; ny=3;
 [u v] = nnmf(obs_pos,nx*ny);
 
 spatial=figure; title(label)
@@ -56,16 +67,22 @@ for i = 1:nx*ny
     subplot(nx,ny,i);
     range = max(abs(u(:,i)));
 
-    imagesc(reshape(u(:,i),size(obs_mov,1),size(obs_mov,2)),[-range range]);
+    imagesc(reshape(u(:,i),size(obs_mov,1),size(obs_mov,2)),[0 range]);
     axis equal; axis off
     %colormap(gray);
     figure(temporal);
     subplot(nx,ny,i);
-    plot(v(i,:))
+    plot(v(i,:)*range)
+    ylim([0 0.25])
   %  xlim([0 100])
-    axis off
+   % axis off%
 end
 
+[y id] = max(u,2);
+id = reshape(id,size(obs_mov,1),size(obs_mov,2));
+figure
+imagesc(id)
+colormap hsv
 figure
 plot(sp)
 title(sprintf('%s running',label))

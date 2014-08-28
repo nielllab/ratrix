@@ -79,7 +79,7 @@ files(n).monitor = 'vert';
 files(n).task = 'HvV_center';
 files(n).spatialfreq = '200'; 
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session'; %poor performance
+files(n).notes = 'poor performance'; %poor performance
 
 n=n+1;
 files(n).expt = '072814';
@@ -229,7 +229,7 @@ files(n).monitor = 'vert';
 files(n).task = 'HvV';
 files(n).spatialfreq = '150'; 
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';%poor performance
+files(n).notes = 'poor performance';%poor performance
 
 n=n+1;
 files(n).expt = '072314';
@@ -430,7 +430,7 @@ files(n).monitor = 'vert';
 files(n).task = 'HvV_center';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session'; %performance not great
+files(n).notes = 'performance not great'; %performance not great
 
 n=n+1;
 files(n).subj = 'g62b7lt';

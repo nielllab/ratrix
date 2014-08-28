@@ -25,14 +25,14 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
     end
     histcorrect(15) = mean(correct(resp_time>1.5));
     histcorrect(isnan(histcorrect))=0;
-%     figure
-%     plot(0.05:0.1:1.5,histcorrect);
-%     xlabel('response time')
-%     ylim([ 0 1])
-%     
-%     hold on
-%     h = hist(resp_time,0.05:0.1:1.5);
-%     plot(0.05:0.1:1.5,h/sum(h),'k');
+    figure
+    plot(0.05:0.1:1.5,histcorrect);
+    xlabel('response time')
+    ylim([ 0 1])
+    
+    hold on
+    h = hist(resp_time,0.05:0.1:1.5);
+    plot(0.05:0.1:1.5,h/sum(h),'k');
     
     for d = 1:20;
         
@@ -62,9 +62,9 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
     %     figure
     %     hist(resp_time,0.3:0.02:0.6)
     oldbg = bg;
-    % minbg = min(bg,[],2);
+     minbg = min(bg,[],2);
     % minbg = nanmedianMW(bg(:,pts>=-0.5 & pts<0,:,:),2);
-    minbg = min(bg(:,pts>=-0.5 & pts<=0,:,:),[],2);
+   % minbg = min(bg(:,pts>=-0.5 & pts<=0,:,:),[],2);
     bg = bg-repmat(minbg,[1 size(bg,2) 1 1]);
     
     
@@ -164,24 +164,40 @@ size(bg)
             
         end
         
-        figure
-        plot(allT(1:5,:)');
+    
         
         use = 1:ncomp;
+    
+        
+        figure
+        plot(allT(use,:)');
+        
         f=1;
         clear comps
      
-   %  cmap = [0 1 1; 0 1 0; 1 0 0 ; 1 1 0; 1 0 1;]
+   %  cmap = [0 1 1; 0 1 0; 1 0 0 ; 1 1 0; 1 0 1; 0 0 1; 0 0 0]
    
    cmap=hsv;
         for i = 1:length(use);
             im = reshape(nmf_spatial(:,use(i)),nx,ny);
+if i == 6
+    im = im*1.7;
+end
+if i == 2
+    im = im*0.8;
+end
+if i ==4
+    im = im*0.8;
+end
 
-          %  subplot(3,4,i); imagesc(im); axis off; axis equal
+if i ==5
+    im=im*1.0;
+end
+%  subplot(3,4,i); imagesc(im); axis off; axis equal
             comps(:,:,i) = im; %/max(im(:));
         end
         [amp ind] = max(comps,[],3);
-        amp = 1.*(amp-0.3); amp(amp<0)=0;
+        amp = 1.5*(amp-0.3); amp(amp<0)=0;
         overlay = mat2im(ind,cmap,[1 max(ind(:))+1]);
         for c = 1:3
             overlay(:,:,c) = overlay(:,:,c).*amp;
@@ -189,7 +205,7 @@ size(bg)
         
         figure
         imshow(permute(overlay,[1 2 3]))
-        keyboard
+   
         
         % keyboard
         %
@@ -214,7 +230,7 @@ size(bg)
     
     for i =1:4
         if i==1
-            useTrials = find(correct==1&resp_time>0.4 & resp_time<0.6 );
+            useTrials = find(correct==1&resp_time>0.4 & resp_time<0.7 );
             %             for j =1:5
             %                 tr = ceil(rand*length(useTrials));
             %                 figure
@@ -225,30 +241,16 @@ size(bg)
             %                 end
             %             end
             %  keyboard
-            numtrials = length(useTrials)
-            %keyboard
-            if numtrials==0
-                data=[];
-                return
-            end
-            
-            decon = deconvg6s(nanmedianMW(bg(useTrials,:,:,:)),0.1);
-            all_decon=squeeze(decon);
+
+
         elseif i==2
-            useTrials = find(correct==0&resp_time>0.4 & resp_time<0.6 );
-            
-            numtrials = length(useTrials)
-            decon = deconvg6s(nanmedianMW(bg(useTrials,:,:,:)),0.1);
+            useTrials = find(correct==0&resp_time>0.4 & resp_time<0.7 );
+
         elseif i==3
-            useTrials = find(correct==1&targ<0&resp_time>0.4 & resp_time<0.6 );
-            numtrials = length(useTrials)
-            decon = deconvg6s(nanmedianMW(bg(useTrials,:,:,:)),0.1);
+            useTrials = find(correct==1&targ<0&resp_time>0.4 & resp_time<0.7 );
         elseif i ==4
-            useTrials = find(correct==1&targ>0&resp_time>0.4 & resp_time<0.6 );
-            numtrials = length(useTrials)
-            decon = deconvg6s(nanmedianMW(bg(useTrials,:,:,:)),0.1);
+            useTrials = find(correct==1&targ>0&resp_time>0.4 & resp_time<0.7 );
         elseif i==5
-            
             decon = deconvg6s(nanmedianMW(bg(correct==1,:,:,:)),0.1) ;
         elseif i==6
             decon = deconvg6s(nanmedianMW(bg(correct==0,:,:,:)),0.1)
@@ -262,6 +264,13 @@ size(bg)
             end
             % decon = deconvg6s(nanmedianMW(bg(correct(trials)==1,:,:,:)),0.1) - deconvg6s(nanmedianMW(bg(correct(trials)==0,:,:,:)),0.1);
         end
+             numtrials = length(useTrials)
+            if numtrials==0          
+                alldata{i} = [];
+                break
+            end            
+            decon = deconvg6s(nanmedianMW(bg(useTrials,:,:,:)),0.1);
+        
         use_pts=find(pts>=0)-3;
         if i==0 & showImg
             figure

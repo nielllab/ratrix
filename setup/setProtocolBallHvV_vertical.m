@@ -30,7 +30,7 @@ end
      
    case 'g62b7lt'           %Started full 8/14/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 35; 
+       rewardSizeULorMS        = 30; 
        msPenalty               =4200;
        pixPerCycs             = [100 125 150]; %*10^9;
          

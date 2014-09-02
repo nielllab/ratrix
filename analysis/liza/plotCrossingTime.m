@@ -388,7 +388,26 @@ records = arrayfun(@fixStimDetails,records);
     end
 
 %verify the following info matches consistently
-s = [records.stimDetails];
+try
+    s = [records.stimDetails];
+catch ex
+    sd = arrayfun(@(x)isfield(x.stimDetails,'subDetails'),records);
+    if ~isscalar(unique(sd))
+        warning('some records.stimDetails have field subDetails, some don''t -- throwing away for now')
+        % ...\ratrix\classes\protocols\stimManagers\@trail\extractDetailFields.m
+        %probably need to be using stimManager's extractDetailFields ala compileDetailedRecords, why aren't we?
+        for rn = 1:length(records) % way to do with arrayfun?
+            if isfield(records(rn).stimDetails,'subDetails')
+                records(rn).stimDetails.subDetails
+                records(rn).stimDetails = rmfield(records(rn).stimDetails,'subDetails');
+            end
+        end
+        s = [records.stimDetails];
+    else
+        ex
+        keyboard
+    end
+end
 timeout = [s.nFrames];
 targetLocation = [s.target];
 

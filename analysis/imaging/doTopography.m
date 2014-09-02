@@ -15,7 +15,7 @@ for f = 1:length(use); %changed from 1:length(map)
 end
 %
 
-close all
+%close all
 
 %x0 =0; y0=10; sz = 100;
 nx = 2; ny=4;
@@ -99,20 +99,22 @@ end
 divmap = getDivergenceMap(meanpolar);
 figure
 imagesc(divmap); axis equal
+
+keyboard
 % 
 % figure
 % imagesc(divmap.*abs(meanpolar{1})); axis equal
 
-% dx=4;
-% rangex = dx:dx:size(meangrad{1},1); rangey = dx:dx:size(meangrad{1},2);
-% figure
-% for m = 1:2
-%     subplot(1,2,m)
-%     imshow(imresize(avgmap,1));
-%     hold on
-%     quiver(rangex,rangey,  10*real(meangrad{m}(rangex,rangey)),10*imag(meangrad{m}(rangex,rangey)),'w')
-% 
-% end
+dx=4;
+rangex = dx:dx:size(meangrad{1},1); rangey = dx:dx:size(meangrad{1},2);
+figure
+for m = 1:2
+    subplot(1,2,m)
+    imshow(imresize(avgmap,1));
+    hold on
+    quiver(rangex,rangey,  10*real(meangrad{m}(rangex,rangey)),10*imag(meangrad{m}(rangex,rangey)),'w')
+
+end
 
 % figure
 % meanmov{1}=zeros(size(avgmap,1),size(avgmap,2),100); meanmov{2}=meanmov{1};

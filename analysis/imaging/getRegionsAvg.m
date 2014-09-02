@@ -76,8 +76,8 @@ opengl software
    
     
     merge(:,:,1) = ampscale.*(real(norm_grad{1}) + 1)*0.5 ;
-    merge(:,:,2) = ampscale.*(imag(norm_grad{1}) + 1)*0.5;
-    merge(:,:,3) = ampscale.*(imag(norm_grad{2}) + 1)*0.5;
+    merge(:,:,2) = (ampscale.*(imag(norm_grad{1}) + 1)*0.5);
+    merge(:,:,3) = ampscale.*(imag(norm_grad{2}) + 1)*0.5 ;
  
 
     

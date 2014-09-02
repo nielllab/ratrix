@@ -185,7 +185,10 @@ if doBall
             'gcam40lt'
             'gcam46tt'
             'g625ln' %hvv
-            'g54aa7lt' %hvv            
+            'g54aa7lt' %hvv        
+            'g62h2lt' %hvv 8/27
+            'g62h1tt' %hvv 8/27
+            'bfly2b.3rt' %gts 8/27
             }
         }
         {'jarmusch'
@@ -205,7 +208,10 @@ if doBall
             'gcam44lt'
             'gcam45tt'      
             'g54a11rt' %hvv
-            'g54ba1lt' %hvv            
+            'g54ba1lt' %hvv    
+            'g62b7lt' %hvv 8/27 -- odd, this wasn't anywhere else before, but i have data compiled on reichardt already, wtf?
+            'g6w5rt' %hvv 8/27
+            'bfly1a.13rt'  %gts 8/27
             }
         }
         {'mtrix6'
@@ -226,7 +232,10 @@ if doBall
             'gcam53ln'
             'gcam51ln'  
             'bfly24lt' %hvv
-            'bfly53ln' %gts            
+            'bfly53ln' %gts  
+            'g62h2tt'  %hvv 8/27
+            'g62g4ln' %hvv 8/27
+            'g62.8lt' %gts 8/27
             }
         }
         {'mtrix11'
@@ -238,6 +247,9 @@ if doBall
             'gcam32ln'     
             'g54aa7tt'  %gts
             'gcam50tt' %gts
+            'g62b1lt' %hvv 8/27
+            'g62b8tt' %hvv 8/27
+            'g62b.5lt' %gts 8/27
             }
         }      
         {'mtrix12'
@@ -251,6 +263,9 @@ if doBall
             'gcam50lt'  
             'g54b8tt' %hvv
             'g54b9lt' %hvv
+            'g62c.2rt' %hvv 8/27
+            'g62b3rt' %hvv 8/27
+            'bfly3a.3rn' %gts 8/27
             }
         }         
         {'mtrix13'
@@ -263,6 +278,9 @@ if doBall
             'gcam35lt'
             %'gcam50tt'  
             'bfly21rt' %gts
+            'g62b9tt' %hvv 8/27
+            'g62b4ln' %gts 8/27
+            'g6w1lt' %gts 8/27
             }
         }        
 % these guys are on non-imaging rigs right now        

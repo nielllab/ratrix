@@ -7,6 +7,7 @@ datapathname = 'D:\Widefield (12-10-12+)\data 62713+\';
 outpathname = 'I:\compiled behavior\behavior topos\';
 
 
+
 n=1;
 files(n).subj = 'g62j4rt';
 files(n).expt = '070914';

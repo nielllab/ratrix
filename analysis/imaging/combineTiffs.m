@@ -285,7 +285,7 @@ recs = {
 %     } 
 %     } 
 %     
-%           {'g62b1lt' {
+          {'g62b1lt' {
 %        {[1 208],[],'031114 G62B.1-RT HvV Behavior\G62B.1-LT_run1_HvV_behavior_Fstop_5.6_50msexp','G62B.1-LT_run1_HvV_behavior_Fstop_5.6_50msexp'}     
 %       {[209 477],[],'050214 G62b.1 LT HvV_vertical behavior\g62b.1lt_run1_HvV_vertical_fstop5.6_exp50ms','g62b.7lt_run1_HvV_vertical_fstop5.6_exp50ms'}
 %         {[478 693],[],'050614 G62B.1 LT HvV_Vertical Behavior\G62B.1LT_run1_HvV_Vertical_fstop5.6_exp50ms','G62B.1LT_run1_HvV_Vertical_fstop5.6_exp50ms'}
@@ -298,9 +298,11 @@ recs = {
 %     {[2281 2615],[],'061114 g62b.1lt hvv behavior\g62b.1lt_run1_hvv_fstop11_spatial400_exp50ms','g62b.1lt_run1_hvv_fstop11_spatial400_exp50ms'}
 %     {[2616 2897],[],'062114 g62b1lt hvv behavior\g62b1lt_run1_hvv_fstop11_exp50ms','g62b1lt_run1_hvv_fstop11_exp50ms'}
 %     {[2898 3047],[],'062214 g62b.1 hvv behavior\g62b.1_run1_hvv_fstop11_exp50ms','g62b.1_run1_hvv_fstop11_exp50ms'}
-%         {[3048 3387],[],'072314 g62b1rt hvv behavior\g62b1rt_run1_hvv_fstop11_exp50ms','g62b1rt_run1_hvv_fstop11_exp50ms'} 
-%     }
-%     }    
+%         {[3048 3387],[],'072314 g62b1rt hvv behavior\g62b1rt_run1_hvv_fstop11_exp50ms','g62b1rt_run1_hvv_fstop11_exp50ms'}
+          {[3388 3529],[],'083114 g62b1lt hvv_vertical behavior\g62b1lt_run1_hvvvertical_fstop8.5_exp50ms','g62b1lt_run1_hvvvertical_fstop8.5_exp50ms'}
+          {[3530 3807],[3530 3650],'090214 g62b1lt HvV behavior\G62B1-LT_run1_HvV_50ms_Fstop8','G62B1-LT_run1_HvV_50ms_Fstop8'}  %light block occluded brain at frame 15272 of ~30000
+    }
+    }    
 %     
 %   
 %           {'g62b3rt' {
@@ -364,7 +366,7 @@ recs = {
 %         }
 %         }
 %     
-%         {'g62b8tt' {
+        {'g62b8tt' {
 %       {[1 388],[],'041814 G62B.8-tt HvV_center Behavior\G62B.8-TT_run1_HvV_center_50msexp_5.6Fstop','G62B.8-TT_run1_HvV_center_50msexp_5.6Fstop'}     
 %       {[389 649],[],'042114 G62B8-TT HvV_center Behavior','G62B8TT_run1_HvV_center_50msexp_5.6fstp'} 
 %      {[650 953],[650 775],'042414 G62b.8TT HvV_center Behavior\g62B.8TT_run1_HvV_center_fstop5.6_exp50ms_lightblockconetipperatendoftrial','g62B.8TT_run1_HvV_center_fstop5.6_exp50ms'}  %% light block hat tiped towards end of session
@@ -374,8 +376,11 @@ recs = {
 %         {[1943 2163],[],'062014 g62b.8 hvv vertical behavior\g62b8_run1_hvvverical_fstop11_exp50ms','g62b8_run1_hvvverical_fstop11_exp50ms'}
 %           {[2164 2428],[],'070314 g62b8tt hvv behavior\g62b8tt_run1_hvv_fstop11_exp50ms','g62b8tt_run1_hvv_fstop11_exp50ms'}
 %            {[2429 2670],[],'070814 g62b8tt hvv vertical behavior\g62b8tt_run1_hvvvertical_fstop8_Exp50ms','g62b8tt_run1_hvvvertical_fstop8_Exp50ms'}
-%    }
-%     }      
+             {[2671 2961],[],'082714 g62b8tt HvV behavior\G62B8-TT_run1_HvV_behavior_50ms_Fstop8','G62B8-TT_run1_HvV_behavior_50ms_Fstop8'}
+% %      {[2962 2964],[],'',''} Test to retrieve last data             
+             {[2965 3293],[],'082814 g62b8tt HvV behavior\G62B8-TT_run1_HvV_50ms_Fstop8','G62B8-TT_run1_HvV_50ms_Fstop8'}
+   }
+    }      
 %     
 %         {'g62c.2rt' {
 %       {[1 194],[],'031114 G62C.2-RT HvV_center Behavior\G62C.2-RT_run1_HvV_center_behavior_F_4_50msexp','G62C.2-RT_run1_HvV_center_behavior_F_4_50msexp'}  
@@ -424,6 +429,7 @@ recs = {
       {'g62c6ttgts' { %gts
 %       {[1 274],[],'072814 g62c6tt gts behavior\g62c6tt_run2_fstop8_exp60_sf200','g62c6tt_run2_fstop8_exp60_sf200'} 
       {[275 459],[],'081414 g62c6tt gts behavior\g62c6tt_run1_gts_fstop8.5_exp50_sf200','g62c6tt_run1_gts_fstop8.5_exp50_sf200'}
+       {[460 806],[],'083114 g62c6ttgts gts behavior\g62c6ttgts_run1_gts_fstop8.5_exp50ms','g62c6ttgts_run1_gts_fstop8.5_exp50ms'}
      }
     }
 %
@@ -464,6 +470,7 @@ recs = {
 %     {[1 152],[],'072514 g62j4rt naive behavior\g62j4rt_run1_naive_fstop8_exp60','g62j4rt_run1_naive_fstop8_exp60'}
 % % no behavior data disk was full {[153 270],[],'',''}
     {[271 374],[],'072914 g62j4rt naive behavior\g62j4rt_run1_naive_fstop5.6_exp50','g62j4rt_run1_naive_fstop5.6_exp50'}
+    {[375 509],[],'082714 g62j4rt gts behavior\g62j4rt_run1_gts_50msexp_Fstop8','g62j4rt_run1_gts_50msexp_Fstop8'}
     }
     }
 

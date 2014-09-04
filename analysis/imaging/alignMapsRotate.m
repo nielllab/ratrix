@@ -2,18 +2,21 @@ function [imfit xshift yshift thetashift zoom] = alignmaps(map,merge,label);
 if ~exist('label','var');
     label = [];
 end
-figure
-
+showImg =0;
+if showImg
+    figure
+end
 
 for i=1:2;
     zoom(i) = 260/size(map{i},1);
       map{i} = imresize(map{i},zoom(i));
       merge{i} = imresize(merge{i},zoom(i));
-      subplot(2,2,i)
+   if showImg   subplot(2,2,i)
     imshow(merge{i});
   if i==2
       title(label)      
   end
+   end
 end
 
 alltheta = -10:5:10;
@@ -40,9 +43,10 @@ for x = 1:size(dx,1);
 end
 end
 
-
+if showImg
 subplot(2,2,3)
 imagesc(match(:,:,round(length(alltheta)/2)))
+end
 
 [m ind] = max(match(:));
 xshift = dx(ind);
@@ -59,8 +63,10 @@ for c = [ 3]
 imrgb(:,:,1) = (imfit{1}(:,:,c) + 0.04)/0.1;
 imrgb(:,:,2) = (imfit{2}(:,:,c) + 0.04)/0.1;
 imrgb(:,:,3) = zeros(size(imrgb(:,:,1)));
-subplot(2,2,c+1);
+if showImg
+    subplot(2,2,c+1);
 imshow(imrgb);
+end
 end
 imfit = imfit{2};
 zoom = zoom(2);

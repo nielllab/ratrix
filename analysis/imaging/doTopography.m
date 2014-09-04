@@ -6,11 +6,17 @@ for f = 1:length(use)
     [grad{f} amp{f} map_all{f} map{f} merge{f}]= getRegions(files(use(f)),pathname,outpathname);
 end
 
+load('D:/referenceMap.mat','avgmap4d');
+
 %%% align gradient maps to first file
 for f = 1:length(use); %changed from 1:length(map)
 %    for f = 1:1
-    [imfit{f} allxshift(f) allyshift(f) allthetashift(f) allzoom(f)] = alignMapsRotate(map([length(use) f]), merge([length(use) f]), [files(use(f)).subj ' ' files(use(f)).expt ' ' files(use(f)).monitor] );
-    xshift = allxshift(f); yshift = allyshift(f); thetashift = allthetashift(f); zoom = allzoom(f);
+   % [imfit{f} allxshift(f) allyshift(f) allthetashift(f) allzoom(f)] = alignMapsRotate(map([length(use) f]), merge([length(use) f]), [files(use(f)).subj ' ' files(use(f)).expt ' ' files(use(f)).monitor] );
+   comparemaps{1}=avgmap4d;
+   comparemaps{2}=map{f};
+   [imfit{f} allxshift(f) allyshift(f) allthetashift(f) allzoom(f)] = alignMapsRotate(comparemaps
+   , merge([length(use) f]), [files(use(f)).subj ' ' files(use(f)).expt ' ' files(use(f)).monitor] );
+xshift = allxshift(f); yshift = allyshift(f); thetashift = allthetashift(f); zoom = allzoom(f);
     save( [outpathname files(use(f)).subj files(use(f)).expt '_topography.mat'],'xshift','yshift','zoom','-append');
 end
 %
@@ -18,8 +24,8 @@ end
 %close all
 
 %x0 =0; y0=10; sz = 100;
-nx = 2; ny=4;
-avgmap=0; meangrad{1}=0; meangrad{2}=0; meanpolar{1} = 0; meanpolar{2}=0;meanamp=0;
+nx = 2; ny=3;
+avgmap=0; meangrad{1}=0; meangrad{2}=0; meanpolar{1} = 0; meanpolar{2}=0;meanamp=0;avgmap4d=0;
 for f= 1:length(use) ;
     f
     
@@ -49,17 +55,22 @@ for f= 1:length(use) ;
         colormap(gray)
         axis off; axis equal
         
-        subplot(nx,ny,7)
+        subplot(nx,ny,6)
         imagesc( shiftImageRotate(imgreen,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),0.5,sz));
         axis off; axis equal
         colormap(gray)
+        
+        for ind=1:4
+        map4d(:,:,ind)=shiftImageRotate(squeeze(map{f}(:,:,ind)),allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
+        end
+        avgmap4d=avgmap4d+map4d;
         
         for ind = 1:2
             gradshift{ind} = shiftImageRotate(real(grad{f}{ind}),allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
             gradshift{ind} = gradshift{ind} + sqrt(-1)* shiftImageRotate(imag(grad{f}{ind}),allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
             meangrad{ind} = meangrad{ind} + gradshift{ind};
             ampshift = shiftImageRotate(amp{f}{2},allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
-            subplot(nx,ny,6)
+            subplot(nx,ny,5)
             imagesc(ampshift,[0 0.05]); axis off; axis equal
             meanamp = meanamp+ ampshift;
             
@@ -68,17 +79,18 @@ for f= 1:length(use) ;
            subplot(nx,ny,1+(ind-1)*ny); 
             imshow(polarMap(polarshift{ind},95));
            meanpolar{ind} = meanpolar{ind} + polarshift{ind};
-           subplot(nx,ny,4+(ind-1)*ny);
-            dx=4;
-         rangex = dx:dx:size(gradshift{1},1); rangey = dx:dx:size(gradshift{1},2);
-             
-         imshow(ones(size(gradshift{ind}))); hold on
-         quiver( rangex,rangey,10*real(gradshift{ind}(rangex,rangey)),10*imag(gradshift{ind}(rangex,rangey)))
+%            subplot(nx,ny,4+(ind-1)*ny);
+%             dx=4;
+%          rangex = dx:dx:size(gradshift{1},1); rangey = dx:dx:size(gradshift{1},2);
+%              
+%          imshow(ones(size(gradshift{ind}))); hold on
+%          quiver( rangex,rangey,10*real(gradshift{ind}(rangex,rangey)),10*imag(gradshift{ind}(rangex,rangey)))
 
    end
     end
     
 end
+avgmap4d=avgmap4d/length(use);
 avgmap = avgmap/length(use);
 figure
 imshow(avgmap);
@@ -91,30 +103,28 @@ for m=1:2
     subplot(1,2,m);
     imshow(polarMap(meanpolar{m},80));
     title(allsubj{s})
-    im = polarMap(meanpolar{m},80);
-    imwrite(im,sprintf('polarmap%d%s', m,'.tif'), 'tif')
+%     im = polarMap(meanpolar{m},80);
+%     imwrite(im,sprintf('polarmap%d%s', m,'.tif'), 'tif')
 end
 
-
-divmap = getDivergenceMap(meanpolar);
-figure
-imagesc(divmap); axis equal
-
-keyboard
 % 
+% divmap = getDivergenceMap(meanpolar);
+% figure
+% imagesc(divmap); axis equal
+
 % figure
 % imagesc(divmap.*abs(meanpolar{1})); axis equal
 
-dx=4;
-rangex = dx:dx:size(meangrad{1},1); rangey = dx:dx:size(meangrad{1},2);
-figure
-for m = 1:2
-    subplot(1,2,m)
-    imshow(imresize(avgmap,1));
-    hold on
-    quiver(rangex,rangey,  10*real(meangrad{m}(rangex,rangey)),10*imag(meangrad{m}(rangex,rangey)),'w')
-
-end
+% dx=4;
+% rangex = dx:dx:size(meangrad{1},1); rangey = dx:dx:size(meangrad{1},2);
+% figure
+% for m = 1:2
+%     subplot(1,2,m)
+%     imshow(imresize(avgmap,1));
+%     hold on
+%     quiver(rangex,rangey,  10*real(meangrad{m}(rangex,rangey)),10*imag(meangrad{m}(rangex,rangey)),'w')
+% 
+% end
 
 % figure
 % meanmov{1}=zeros(size(avgmap,1),size(avgmap,2),100); meanmov{2}=meanmov{1};

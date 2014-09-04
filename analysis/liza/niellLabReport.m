@@ -189,6 +189,7 @@ if doBall
             'g62h2lt' %hvv 8/27
             'g62h1tt' %hvv 8/27
             'bfly2b.3rt' %gts 8/27
+            'g62j.5rt' %hvv_c 8/29
             }
         }
         {'jarmusch'
@@ -212,6 +213,7 @@ if doBall
             'g62b7lt' %hvv 8/27 -- odd, this wasn't anywhere else before, but i have data compiled on reichardt already, wtf?
             'g6w5rt' %hvv 8/27
             'bfly1a.13rt'  %gts 8/27
+            'g62e.12rt' %gts 8/29
             }
         }
         {'mtrix6'
@@ -236,6 +238,8 @@ if doBall
             'g62h2tt'  %hvv 8/27
             'g62g4ln' %hvv 8/27
             'g62.8lt' %gts 8/27
+            'g62k.2rt' %gts 8/29
+            'g62j.4rt' %gts 8/29    
             }
         }
         {'mtrix11'
@@ -281,6 +285,8 @@ if doBall
             'g62b9tt' %hvv 8/27
             'g62b4ln' %gts 8/27
             'g6w1lt' %gts 8/27
+            'g62c6tt' %gts 8/29
+            'g62g.6lt' %hvv_c 8/29
             }
         }        
 % these guys are on non-imaging rigs right now        

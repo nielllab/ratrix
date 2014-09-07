@@ -2,7 +2,7 @@ function [imfit xshift yshift thetashift zoom] = alignmaps(map,merge,label);
 if ~exist('label','var');
     label = [];
 end
-showImg =0;
+showImg =1;
 if showImg
     figure
 end
@@ -20,9 +20,9 @@ for i=1:2;
 end
 
 alltheta = -10:5:10;
-[dx dy dtheta] = meshgrid(-45:2:45,-60:2:60, alltheta);
+[dx dy dtheta] = meshgrid(-54:2:54,-60:2:60, alltheta);
 
-imrange = -80:80;
+imrange = -75:75;
 x0 = round(size(map{1},1)/2);
 y0 = round(size(map{1},2)/2);
 

@@ -1,15 +1,15 @@
 %load(fname,'dfof_bg');
 %close all
-load('D:\grating5sf4tf_small');
+load('D:\grating3x5_2sf10min');
 imagerate=10;
 
-tf(tf==2)=1;
-sf(sf==0.02)=0.04;
-sf(sf==0.16)=0.32;
+% tf(tf==2)=1;
+% sf(sf==0.02)=0.04;
+% sf(sf==0.16)=0.32;
 imageT=(1:size(dfof_bg,3))/imagerate;
-img = imresize(double(dfof_bg),0.25,'method','box');
+img = imresize(double(dfof_bg),1,'method','box');
 
-%xpos=xpos(1:300); ypos=ypos(1:300); sf=sf(1:300); tf=tf(1:300);
+xpos=xpos(1:300); ypos=ypos(1:300); sf=sf(1:300); tf=tf(1:300);
 trials = length(sf)-1;
 % tic
 % img=deconvg6s(dfof_bg,1/imagerate);
@@ -23,17 +23,17 @@ nx=ceil(sqrt(acqdurframes));
 for f=1:acqdurframes
     cycavg(:,:,f) = mean(img(:,:,f:acqdurframes:end),3);
     subplot(nx,nx,f)
-    imagesc(squeeze(cycavg(:,:,f)),[-0.05 0.05])
+    imagesc(squeeze(cycavg(:,:,f)),[-0.02 0.02])
     %axis off
 end
 
-useframes = 7;
-base = 2;
-useframes = 9:14;
+useframes = 6:8;
 base = 1:3;
+% useframes =7:12;
+% base = 1:3;
 
-useframes = 8:10;
-base = 1:2;
+% useframes = 8:10;
+% base = 1:2;
 trialdata = zeros(size(img,1),size(img,2),trials+2);
 trialspeed = zeros(trials+2,1);
 for tr=1:trials;
@@ -51,13 +51,13 @@ if length(unique(xpos))>1
 [xph xamp xtuning] = getPixelTuning(trialdata,xpos,'X',[2 4],hsv);
 end
 if length(unique(ypos))>1
-[yph yamp ytuning] = getPixelTuning(trialdata,ypos,'Y',[1.25 2.75],hsv);
+[yph yamp ytuning] = getPixelTuning(trialdata,ypos,'Y',[1 3],hsv);
 end
 if length(unique(sf))>1
-    [sfph sfamp sftuning] = getPixelTuning(trialdata,sf,'SF', [1 3],jet);
+    [sfph sfamp sftuning] = getPixelTuning(trialdata,sf,'SF', [1 5],jet);
 end
 if length(unique(tf))>1
-[tfph tfamp tftuning] = getPixelTuning(trialdata,tf,'TF',[1 3],jet);
+[tfph tfamp tftuning] = getPixelTuning(trialdata,tf,'TF',[1 4],jet);
 end
 
 
@@ -96,6 +96,18 @@ for i = 1:length(sfrange)
     end
 end
 
+figure
+for i = 1:length(xrange)
+    for j=1:length(yrange)
+        subplot(length(xrange),length(yrange),length(yrange)*(i-1)+j)
+        imagesc(squeeze(mean(tuning(:,:,i,j,:,1),5)),[ 0 0.05]);
+        title(sprintf('%0.2fcpd %0.2fhz',i,j))
+        axis off
+    end
+end
+
+
+keyboard
 for tr = 1:trials;
     data=zeros(length(sfrange),length(tfrange));
     data(find(sfrange==sf(tr)),find(tfrange==tf(tr)))=1;

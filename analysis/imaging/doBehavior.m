@@ -67,7 +67,7 @@ end
 avgbehav = avgbehav/nb;
 
 avgbehavCond{cond} = avgbehav;
-
+load('D:/mapOverlay.mat')
 labels = {'correct','incorrect','left','right'};
 figure
 for t= 1:6  %10:18
@@ -77,7 +77,7 @@ for t= 1:6  %10:18
     data = squeeze(avgbehav(:,:,t+7));
     
     h = imshow(mat2im(data,jet,[0 0.15]));
-    
+    plot(ypts,xpts,'w.','Markersize',1);
   %  imwrite(mat2im(data,jet,[0 0.15]),sprintf('behav_left3-4%d%s',t,'.tif'),'tif')
 %     transp = zeros(size(squeeze(avgmap(:,:,1))));
 %     transp(abs(data)>=0.00)=1;
@@ -93,8 +93,11 @@ for t = 1:6
     subplot(2,3,t);
     data = squeeze(avgbehavCond{4}(:,:,t+7) - avgbehavCond{3}(:,:,t+7));
     h= imshow(mat2im(data,jet,[-0.05 0.05]))
-    title('left vs right')
+    
+    hold on
+     plot(ypts,xpts,'w.','Markersize',1);
 end
+title('left vs right')
 
 figure
 for t = 1:6
@@ -102,7 +105,10 @@ for t = 1:6
     data = squeeze(avgbehavCond{2}(:,:,t+7) - avgbehavCond{1}(:,:,t+7));
     h= imshow(mat2im(data,jet,[-0.1 0.1]))
     title('correct vs incorrect')
+    hold on
+     plot(ypts,xpts,'w.','Markersize',2);
 end
+title('left vs right')
 
 % clear mov
 % 

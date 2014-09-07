@@ -270,7 +270,7 @@ recs = {
 %      }
 %      }
 %        
-%          {'g62b.5lt' {
+         {'g62b.5lt' {
 % % camware xtra frames     {[1 198],[],'030114 G62B.5-LT GTS Behavior (Fstop 8)\G62B.5-LT_run1_GTS_behavior_Fstop_8_50msexp','G62B.5-LT_run1_GTS_behavior_Fstop_8_50msexp'}     
 %      {[199 381],[],'030614 G62B.5-LT GTS behavior\G62B.5-LT_run1_GTS_behavior_F_4_50msexp','G62B.5-LT_run1_GTS_behavior_F_4_50msexp'}
 %       {[382 576],[],'050314 G62B5-LT GTS behavior\G62B5-LT_run1_GTS_behavior_50msexp_Fstop-8','G62B5-LT_run1_GTS_behavior_50msexp_Fstop-8'}
@@ -282,8 +282,10 @@ recs = {
 %     {[823 1007],[],'061314 g62b.5lt gts behavior\g62b.5lt_run1_gts_fstop11_exp50','g62b.5lt_run1_gts_fstop11_exp50'}
 %     {[1008 1135],[],'061614 g62b.5lt gts behavior\g62b.5lt_run1_gts_fstop11_exp50ms','g62b.5lt_run1_gts_fstop11_exp50ms'}
 %     {[1136 1219],[],'062614 g62b5lt gts behavior\g62b5lt_run1_gts_fstop11_exp50ms','g62b5lt_run1_gts_fstop11_exp50ms'}
-%     } 
-%     } 
+%     {[1220 1222],[],'extra frames?',''}
+    {[1223 1340],[],'090614 g62b5lt gts behavior\g62b5lt_run1_gts_fstop8_exp50_sf200','g62b5lt_run1_gts_fstop8_exp50_sf200'}
+    } 
+    } 
 %     
           {'g62b1lt' {
 %        {[1 208],[],'031114 G62B.1-RT HvV Behavior\G62B.1-LT_run1_HvV_behavior_Fstop_5.6_50msexp','G62B.1-LT_run1_HvV_behavior_Fstop_5.6_50msexp'}     
@@ -305,7 +307,7 @@ recs = {
     }    
 %     
 %   
-%           {'g62b3rt' {
+          {'g62b3rt' {
 %       {[1 157],[],'022814 G62B.3-RT HvV Behavior\G62B.3-RT_run1_HvV_Behavior_15msexp','G62B.3-RT_run1_HvV_Behavior_15msexp'}     
 %       {[158 340],[],'030114 G62B.3-RT HvV Behavior\G62B.3-RT_run1_HvV_behavior_Fstop_5.6_50msexp','G62B.3-RT_run1_HvV_behavior_Fstop_5.6_50msexp' }
 %       {[341 572],[],'030214 G62B.3-RT HvV behavior\G62B.3-RT_run1_HvV_behavior_Fstop8_50msexp','G62B.3-RT_run1_HvV_behavior_Fstop8_50msexp'}
@@ -321,8 +323,9 @@ recs = {
 %         {[2271 2491],[],'062614 g62b3rt hvv behavior\g62b3rt_run2_spatial200_gts_fstop11_exp50ms','g62b3lt_run1_spatial200_gts_fstop11_exp50ms'}
 %           {[2492 2809],[],'072314 g62b3rt hvv behavior\g62b3rt_run1_hvv_fstop11_exp50ms_200spatial','g62b3rt_run1_hvv_fstop11_exp50ms_200spatial'}
 %           {[2810 3045],[],'072414 g62b3rt hvv behavior\g62b3rt_run1_fstop8.5_exp60_hvv','g62b3rt_run1_fstop8.5_exp60_hvv'}
-%      }
-%      }    
+          {[3046 3218],[],'090414 g62b3rt hvv behavior\g62b3rt_run1_hvv_fstop8_exp50_sf200','g62b3rt_run1_hvv_fstop8_exp50_sf200'}
+     }
+     }    
 %     
 %          {'g62b4ln' {
 %      {[1 298],[],'022114 G62B.4-LN GTS Behavior','G62B.4-LN_run1_GTS_behavior_15msexp'}     
@@ -430,6 +433,7 @@ recs = {
 %       {[1 274],[],'072814 g62c6tt gts behavior\g62c6tt_run2_fstop8_exp60_sf200','g62c6tt_run2_fstop8_exp60_sf200'} 
       {[275 459],[],'081414 g62c6tt gts behavior\g62c6tt_run1_gts_fstop8.5_exp50_sf200','g62c6tt_run1_gts_fstop8.5_exp50_sf200'}
        {[460 806],[],'083114 g62c6ttgts gts behavior\g62c6ttgts_run1_gts_fstop8.5_exp50ms','g62c6ttgts_run1_gts_fstop8.5_exp50ms'}
+       {[807 1062],[],'090414 g62c6tt gts behavior\g62c6tt_run1_gts_fstop8_exp50_sf200','g62c6tt_run1_gts_fstop8_exp50_sf200'}
      }
     }
 %
@@ -471,7 +475,9 @@ recs = {
 % % no behavior data disk was full {[153 270],[],'',''}
     {[271 374],[],'072914 g62j4rt naive behavior\g62j4rt_run1_naive_fstop5.6_exp50','g62j4rt_run1_naive_fstop5.6_exp50'}
     {[375 509],[],'082714 g62j4rt gts behavior\g62j4rt_run1_gts_50msexp_Fstop8','g62j4rt_run1_gts_50msexp_Fstop8'}
-    }
+    {[510 766],[],'090514 g62j4rt gts behavior\g62j4rt_run1_gts_fstop8_exp50','g62j4rt_run1_gts_fstop8_exp50'}
+    {[767 936],[],'090614 g62j4rt gts behavior\g62j4rt_run1_gts_fstop8_exp50_sf200','g62j4rt_run1_gts_fstop8_exp50_sf200'}
+     }
     }
 
     }; %%% vert vs horiz in either top or bottom

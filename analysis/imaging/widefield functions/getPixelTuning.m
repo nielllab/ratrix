@@ -9,7 +9,7 @@ baseline = min(xtuning,[],3);
 if length(xrange)<=2
     baseline=0;
 end
-%baseline=0;
+baseline=0;
 
 amp = max(xtuning,[],3);
 xphase=0; total=0;

@@ -1,9 +1,12 @@
-%batchBehavNew;
-batchPassive
+
+
+clear all
+batchBehavNew;
+%batchTopography
 close all
 
- %alluse = find(strcmp({files.monitor},'vert')&  strcmp({files.notes},'good imaging session')  &    strcmp({files.label},'camk2 gc6') &  strcmp({files.task},'HvV_center') &strcmp({files.spatialfreq},'100')) %% & ~strcmp({files.subj},'g62b7lt')) 
- alluse = 2:length(files);
+ alluse = find(strcmp({files.monitor},'vert')&  strcmp({files.notes},'good imaging session')  &    strcmp({files.label},'camk2 gc6') &  strcmp({files.task},'HvV_center') &strcmp({files.spatialfreq},'100') & ~strcmp({files.subj},'g62b7lt')) 
+ %alluse = 1:length(files);
  length(alluse)
  allsubj = unique({files(alluse).subj})
 
@@ -23,9 +26,8 @@ x0 =10; y0=30; sz = 120;
 x0 =0; y0=0; sz = 128;
 doTopography;
 
-keyboard
 
-save('D:/referenceMap.mat','avgmap4d','files');
+%save('D:/referenceMap.mat','avgmap4d','avgmap','files');
 
 
 % %%% overlay behavior on top of topomaps

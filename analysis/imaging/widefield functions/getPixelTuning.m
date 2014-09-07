@@ -1,4 +1,4 @@
-function [amp xphase xtuning] = getPixelTuning(trialdata, xpos,label);
+function [amp xphase xtuning] = getPixelTuning(trialdata, xpos,label, range, cmap);
 
 xrange = unique(xpos);
 for x=1:length(xrange);
@@ -9,6 +9,7 @@ baseline = min(xtuning,[],3);
 if length(xrange)<=2
     baseline=0;
 end
+baseline=0;
 
 amp = max(xtuning,[],3);
 xphase=0; total=0;
@@ -19,27 +20,28 @@ end
 xphase=xphase./(total+0.0001);
 figure
 subplot(2,2,1)
-imagesc(xphase,[1.5 length(xrange)-0.5]); colormap hsv
-im = mat2im(xphase,hsv,[1.5 length(xrange)-0.5]);
-amp = amp/prctile(amp(:),80);
+imagesc(xphase,range); colormap(cmap)
+im = mat2im(xphase,cmap,range);
+subplot(2,2,3)
+imagesc(amp);
+amp = amp/prctile(amp(:),90);
 amp(amp>1)=1;
 im = im.*(repmat(amp,[1 1 3]));
 subplot(2,2,2);
 imshow(im);
-subplot(2,2,3)
-imagesc(amp);
+
 subplot(2,2,4)
 imagesc(total);
 title(label);
 
-phmap=figure;
-imagesc(xphase,[1 length(xrange)]); colormap hsv
+% phmap=figure;
+% imagesc(xphase,range,cmap); 
+% 
+% for i = 1:10
+%     figure(phmap);
+%     [y x] = ginput(1);
+%     figure
+%     plot(squeeze(xtuning(round(x),round(y),:)));
+%     xphase(round(x),round(y))
+% end
 
-for i = 1:10
-    figure(phmap);
-    [y x] = ginput(1);
-    figure
-    plot(squeeze(xtuning(round(x),round(y),:)));
-    xphase(round(x),round(y))
-end
-   keyboard

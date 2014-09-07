@@ -7,32 +7,9 @@ datapathname = 'D:\Widefield (12-10-12+)\data 62713+\';
 outpathname = 'I:\compiled behavior\behavior topos\';
 
 
-n=n+1;
-files(n).subj = 'g62j4rt';
-files(n).expt = '070914';
-files(n).topox =  '070914 g62j.4 rt passive viewing\g62j4rt_run1_topox_fstop8_exp50\g62j4rt_run1_topox_fstop8_exp50maps.mat';
-files(n).topoxdata = '070914 g62j.4 rt passive viewing\g62j4rt_run1_topox_fstop8_exp50\g62j4rt_run1_topox_fstop8_exp50';
-files(n).topoy = '070914 g62j.4 rt passive viewing\g62j4rt_run2_topoy_fstop8_exp50\g62j4rt_run2_topoy_fstop8_exp50maps.mat';
-files(n).topoydata = '070914 g62j.4 rt passive viewing\g62j4rt_run2_topoy_fstop8_exp50\g62j4rt_run2_topoy_fstop8_exp50';
-files(n).behav = '';
-files(n).behavdata = '';
-files(n).grating = '';
-files(n).gratingdata = '';
-files(n).stepbinary = '070914 g62j.4 rt passive viewing\g62j4rt_run3_stepbinary_fstop8_exp50\g62j4rt_run3_stepbinary_fstop8_exp50maps.mat';
-files(n).stepbinarydata = '070914 g62j.4 rt passive viewing\g62j4rt_run3_stepbinary_fstop8_exp50\g62j4rt_run3_stepbinary_fstop8_exp50';
-files(n).auditory = '';
-files(n).auditorydata = '';
-files(n).darkness = '';
-files(n).darknessdata = '';
-files(n).loom = '';
-files(n).loomdata = '';
-files(n).monitor = 'vert';
-files(n).task = '';
-files(n).spatialfreq = '';
-files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session'; %no behavior
 
-n=n+1;
+n=1;
+
 files(n).subj = 'g62j5rt';
 files(n).expt = '070714';
 files(n).topox =  '070714 G62J5-RT passive viewing\G62J5-RT_run1_topoX_50ms_exp_Fstop11\G62J5-RT_run1_topoX_50ms_exp_Fstop11maps.mat';

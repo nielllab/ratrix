@@ -1,5 +1,5 @@
 %doBehavior
-close all
+
 
 clear behav
 for f = 1:length(use); behav{f}=[]; end;
@@ -52,8 +52,8 @@ end
 allsubj{s}
 for cond = 1:4
 nb=0; avgbehav=0;
-%for f= 1:length(use)
-for f =1:3
+for f= 1:length(use)
+
     %for f= 1:1
     if ~isempty(behav{f}{cond})% & strcmp(files(use(f)).subj,allsubj{s}) ;
       f
@@ -67,7 +67,7 @@ end
 avgbehav = avgbehav/nb;
 
 avgbehavCond{cond} = avgbehav;
-
+load('D:/mapOverlay.mat')
 labels = {'correct','incorrect','left','right'};
 figure
 for t= 1:6  %10:18
@@ -77,8 +77,8 @@ for t= 1:6  %10:18
     data = squeeze(avgbehav(:,:,t+7));
     
     h = imshow(mat2im(data,jet,[0 0.15]));
-    
-    imwrite(mat2im(data,jet,[0 0.15]),sprintf('behav_left3-4%d%s',t,'.tif'),'tif')
+    plot(ypts,xpts,'w.','Markersize',1);
+  %  imwrite(mat2im(data,jet,[0 0.15]),sprintf('behav_left3-4%d%s',t,'.tif'),'tif')
 %     transp = zeros(size(squeeze(avgmap(:,:,1))));
 %     transp(abs(data)>=0.00)=1;
 %     set(h,'AlphaData',transp);
@@ -93,48 +93,56 @@ for t = 1:6
     subplot(2,3,t);
     data = squeeze(avgbehavCond{4}(:,:,t+7) - avgbehavCond{3}(:,:,t+7));
     h= imshow(mat2im(data,jet,[-0.05 0.05]))
+    
+    hold on
+     plot(ypts,xpts,'w.','Markersize',1);
 end
+title('left vs right')
 
 figure
 for t = 1:6
     subplot(2,3,t);
     data = squeeze(avgbehavCond{2}(:,:,t+7) - avgbehavCond{1}(:,:,t+7));
     h= imshow(mat2im(data,jet,[-0.1 0.1]))
+    title('correct vs incorrect')
+    hold on
+     plot(ypts,xpts,'w.','Markersize',2);
 end
+title('left vs right')
 
-clear mov
-
-for t = 1:12
-    data = squeeze(avgbehav(:,:,t+3));
-    
-   
-  mov(:,:,:,t) = mat2im(data,jet,[0 0.15]);
-end
-mov = immovie(mov);
-vid = VideoWriter('g62b7lt correct behave.avi');
-vid.FrameRate=10;
-open(vid);
-writeVideo(vid,mov);
-close(vid)
-
-
-data = avgbehav(:,:,3:16);
-data = shiftdim(data,2);
-t = 1:14;
-t_interp = 1:0.25:14;
-data_interp = interp1(t,data,t_interp);
-clear mov
-data_interp(data_interp<0.05)=0;
-for t = 1:length(t_interp);
-    mov(:,:,:,t) = mat2im(squeeze(data_interp(t,:,:)),gray,[0 0.15]);
-end
-mov = immovie(mov);
-vid = VideoWriter('g62b7lt correct behave interp gray.avi');
-vid.FrameRate=40;
-open(vid);
-writeVideo(vid,mov);
-close(vid)
-
+% clear mov
+% 
+% for t = 1:12
+%     data = squeeze(avgbehav(:,:,t+3));
+%     
+%    
+%   mov(:,:,:,t) = mat2im(data,jet,[0 0.15]);
+% end
+% mov = immovie(mov);
+% vid = VideoWriter('g62b7lt correct behave.avi');
+% vid.FrameRate=10;
+% open(vid);
+% writeVideo(vid,mov);
+% close(vid)
+% 
+% 
+% data = avgbehav(:,:,3:16);
+% data = shiftdim(data,2);
+% t = 1:14;
+% t_interp = 1:0.25:14;
+% data_interp = interp1(t,data,t_interp);
+% clear mov
+% data_interp(data_interp<0.05)=0;
+% for t = 1:length(t_interp);
+%     mov(:,:,:,t) = mat2im(squeeze(data_interp(t,:,:)),gray,[0 0.15]);
+% end
+% mov = immovie(mov);
+% vid = VideoWriter('g62b7lt correct behave interp gray.avi');
+% vid.FrameRate=40;
+% open(vid);
+% writeVideo(vid,mov);
+% close(vid)
+% 
 
 
 

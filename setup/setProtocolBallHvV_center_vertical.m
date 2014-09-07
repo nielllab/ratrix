@@ -18,7 +18,7 @@ fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =msPenalty;
-pixPerCycs                = [100 125 150]; %*10^9;
+pixPerCycs                = [100 150 200]; %*10^9;
 
 % sca
 % keyboard
@@ -31,7 +31,7 @@ switch subjIDs{1}
     
     case 'g62c.2rt'           %Switched Back _center 8/15/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 30; 
+       rewardSizeULorMS        = 25; 
        msPenalty               =4200;
        pixPerCycs             = [100 150 200]; %*10^9;
     

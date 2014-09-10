@@ -33,7 +33,7 @@ switch subjIDs{1}
      case 'g62k.2rt' % Started GTS 8/6/14
        requestRewardSizeULorMS = 00;
        rewardSizeULorMS        = 150;
-       msPenalty               =4200;
+       msPenalty               =4300;
     
      case 'g62e.12rt' % Started GTS 8/2/14
        requestRewardSizeULorMS = 0;
@@ -63,7 +63,7 @@ switch subjIDs{1}
     
      case 'g62b.5lt'           %started 1/28/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 55; 
+       rewardSizeULorMS        = 45; 
        msPenalty               =4300;
        pixPerCycs             = [100 150 200]; %*10^9;
 %        
@@ -76,7 +76,7 @@ switch subjIDs{1}
      case 'g62c6tt' % switched GTS 6/8/14
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 20;
-       msPenalty               =4200;
+       msPenalty               =4300;
        pixPerCycs             = [100 150 200]; %*10^9;
 
     

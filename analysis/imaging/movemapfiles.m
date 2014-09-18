@@ -30,7 +30,7 @@ typedata = 'topoxreversedata';
 
 end
 exist([pathname getfield(files(f),type)],'file');
-type
+% type
 
 if exist([datapathname getfield(files(f),typedata) 'maps.mat'],'file')
         display('found map file')

@@ -475,7 +475,7 @@ recs = {
 %     {[1 181],[],'072514 g62j5rt naive behavior\g62j5rt_run1_naive_fstop8_exp60','g62j5rt_run1_naive_fstop8_exp60'}
 %     }
 %     }
-       {'g62e12rt' { 
+%        {'g62e12rt' { 
 %     {[1 187],[],'090914 g2e12rt gts behavior\G62E12-RT_run1_GTS_50ms_Fstop8','G62E12-RT_run1_GTS_50ms_Fstop8'}
 %    {[188 559],[],'091014 g62e12rt gts behavior\g62e12rt_run1_gts_fstop8_exp50ms_sf200','g62e12rt_run1_gts_fstop8_exp50ms_sf200'}
   %% error in combinetiffs {[560 843],[],'091414 g62e12rt gts behavior\G62E12-RT_run1_GTS_50ms_Fstop8','G62E12-RT_run1_GTS_50ms_Fstop8'}

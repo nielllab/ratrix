@@ -1,37 +1,40 @@
+
+
+clear all
 batchBehavNew;
+%batchTopography
 close all
 
-%%% batchDfofMovie
-
-
-
-%use = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session') &  strcmp({files.label},'camk2 gc6')&  strcmp({files.task},'HvV_center') &strcmp({files.subj},'g62b7lt'))
-%use = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session') )
-%use = find(strcmp({files.monitor},'land')&     strcmp({files.label},'camk2 gc6'))
-
-% & strcmp({files.subj},'g62b7lt')
- alluse = find(strcmp({files.monitor},'vert')&  strcmp({files.notes},'good imaging session')  &    strcmp({files.label},'camk2 gc6') &  strcmp({files.task},'HvV_center') &strcmp({files.spatialfreq},'200')) %% & ~strcmp({files.subj},'g62b7lt')) 
+ alluse = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session')  &  strcmp({files.label},'camk2 gc6') &  ~strcmp({files.task},'HvV_center') &  ~strcmp({files.task},'naive') & ~strcmp({files.spatialfreq},'400')) 
+ %alluse = 1:length(files) & ~strcmp({files.subj},'g62b7lt');
  length(alluse)
  allsubj = unique({files(alluse).subj})
-%alluse = find(strcmp({files.monitor},'vert')&  strcmp({files.notes},'good imaging session')  &    strcmp({files.label},'camk2 gc6')  &strcmp({files.spatialfreq},'100') & strcmp({files.subj},'g62b7lt'))
-%alluse = alluse(end-10:end)
-
-allsubj = unique({files(alluse).subj})
 
 
 
-for s = 1:1
+%%% use this one for subject by subject averaging
+for s = 1:length(allsubj)
+use = intersect(alluse,find(strcmp({files.subj},allsubj{s})))    
+
+%%% use this one to average all sessions that meet criteria
+% for s=1:1
+% use = alluse;
+
 allsubj{s}
-%use = intersect(alluse,find(strcmp({files.subj},allsubj{s})))    
-use = alluse;
 
 %%% calculate gradients and regions
 clear map merge
 x0 =10; y0=30; sz = 120;
+x0 =0; y0=0; sz = 128;
 doTopography;
+
+
+%save('D:/referenceMap.mat','avgmap4d','avgmap','files');
+
 
 % %%% overlay behavior on top of topomaps
 doBehavior;
+alldata{s} = avgbehavCond;
 
 % %%% analyze looming
 % for f = 1:length(use)
@@ -48,5 +51,11 @@ doBehavior;
 % fourPhaseAvg(grating_resp,allxshift+x0,allyshift+y0, allthetashift,zoom*0.57, sz, avgmap);
 
 
+
 end
+[f p] = uiputfile('*.mat','save data?');
+if f~=0
+    save(fullfile(p,f),'allsubj','alldata');
+end
+
 

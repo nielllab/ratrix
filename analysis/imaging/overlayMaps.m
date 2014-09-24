@@ -1,13 +1,16 @@
 function [alldata percentCorrect numtrials nmf_spatial nmf_temporal] = overlayMaps(expfile,pathname,outpathname,showImg)
-
+nmf_spatial=[];
+nmf_temporal=[];
 dbstop if error
 if ~exist('showImg','var')
     showImg=0;
 end
 opengl software
+  showImg=1;
+  
 if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
     load([pathname expfile.behav]); %%% behavior
-
+    
     load( [outpathname expfile.subj expfile.expt '_topography.mat']); %%% topography
     
     resp_time = starts(3,:)-starts(2,:);
@@ -33,12 +36,14 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
     hold on
     h = hist(resp_time,0.05:0.1:1.5);
     plot(0.05:0.1:1.5,h/sum(h),'k');
+    title([expfile.subj ' ' expfile.expt])
+    drawnow
     
     for d = 1:20;
         
         histcorrect(d) = mean(correct(stop_time>(d-1)/2 & stop_time<d/2));
     end
-   
+    
     %         histcorrect(isnan(histcorrect))=0;
     %     plot(0.5:0.5:10,histcorrect);
     %     xlabel('stopping time')
@@ -62,36 +67,36 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
     %     figure
     %     hist(resp_time,0.3:0.02:0.6)
     oldbg = bg;
-     minbg = min(bg,[],2);
+    minbg = min(bg,[],2);
     % minbg = nanmedianMW(bg(:,pts>=-0.5 & pts<0,:,:),2);
-   % minbg = min(bg(:,pts>=-0.5 & pts<=0,:,:),[],2);
+    % minbg = min(bg(:,pts>=-0.5 & pts<=0,:,:),[],2);
     bg = bg-repmat(minbg,[1 size(bg,2) 1 1]);
     
     
     
-   
+    
     bg_all= bg;
     
-%     im=bg_im(5:5:end,2:2:end,:,:);
-%     thresh=prctile(im(:),40);
-%     bg(bg_im<thresh)=0;
-%     
-bg(bg>0.5)=0.5;
-size(bg)
+    %     im=bg_im(5:5:end,2:2:end,:,:);
+    %     thresh=prctile(im(:),40);
+    %     bg(bg_im<thresh)=0;
+    %
+    bg(bg>0.5)=0.5;
+    size(bg)
     bg = bg(:,7:end,10:end,10:end-10);
     useTrials = find(correct==1  & resp_time>0.4 & resp_time<0.7)  ;
     length(useTrials)
     bg = bg(useTrials,:,:,:);
     
- for tr = 1:size(bg,1);
-     for fr = 1:size(bg,2);
-         bg_sm(tr,fr,:,:) = imresize(squeeze(bg(tr,fr,:,:)),1, 'box');
-     end
- end
- bg = bg_sm;
- %bg =deconvg6s(bg,0.1);
- 
-    for dopca = 1:1
+    for tr = 1:size(bg,1);
+        for fr = 1:size(bg,2);
+            bg_sm(tr,fr,:,:) = imresize(squeeze(bg(tr,fr,:,:)),0.5, 'box');
+        end
+    end
+    bg = bg_sm;
+    %bg =deconvg6s(bg,0.1);
+    
+    for dopca = 1:0
         nt = size(bg,1); nf = size(bg,2); nx=size(bg,3); ny=size(bg,4);
         obs = reshape(bg,nt*nf,nx,ny);
         obs = shiftdim(obs,1);
@@ -164,36 +169,36 @@ size(bg)
             
         end
         
-    
+        
         
         use = 1:ncomp;
-    
+        
         
         figure
         plot(allT(use,:)');
         
         f=1;
         clear comps
-     
-   %  cmap = [0 1 1; 0 1 0; 1 0 0 ; 1 1 0; 1 0 1; 0 0 1; 0 0 0]
-   
-   cmap=hsv;
+        
+        %  cmap = [0 1 1; 0 1 0; 1 0 0 ; 1 1 0; 1 0 1; 0 0 1; 0 0 0]
+        
+        cmap=hsv;
         for i = 1:length(use);
             im = reshape(nmf_spatial(:,use(i)),nx,ny);
-if i == 6
-    im = im*1.7;
-end
-if i == 2
-    im = im*0.8;
-end
-if i ==4
-    im = im*0.8;
-end
-
-if i ==5
-    im=im*1.0;
-end
-%  subplot(3,4,i); imagesc(im); axis off; axis equal
+            if i == 6
+                im = im*1.7;
+            end
+            if i == 2
+                im = im*0.8;
+            end
+            if i ==4
+                im = im*0.8;
+            end
+            
+            if i ==5
+                im=im*1.0;
+            end
+            %  subplot(3,4,i); imagesc(im); axis off; axis equal
             comps(:,:,i) = im; %/max(im(:));
         end
         [amp ind] = max(comps,[],3);
@@ -205,7 +210,7 @@ end
         
         figure
         imshow(permute(overlay,[1 2 3]))
-   
+        
         
         % keyboard
         %
@@ -241,11 +246,11 @@ end
             %                 end
             %             end
             %  keyboard
-
-
+            
+            
         elseif i==2
             useTrials = find(correct==0&resp_time>0.4 & resp_time<0.7 );
-
+            showImg=0;
         elseif i==3
             useTrials = find(correct==1&targ<0&resp_time>0.4 & resp_time<0.7 );
         elseif i ==4
@@ -264,73 +269,73 @@ end
             end
             % decon = deconvg6s(nanmedianMW(bg(correct(trials)==1,:,:,:)),0.1) - deconvg6s(nanmedianMW(bg(correct(trials)==0,:,:,:)),0.1);
         end
-             numtrials = length(useTrials)
-            if numtrials==0          
-                alldata{i} = [];
-                break
-            end            
+        numtrials = length(useTrials)
+        if numtrials==0
+            alldata{i} = [];
+        else
             decon = deconvg6s(nanmedianMW(bg(useTrials,:,:,:)),0.1);
-        
-        use_pts=find(pts>=0)-3;
-        if i==0 & showImg
-            figure
-            subplot(2,2,1)
-            imshow(polarMapTest(basemap));
-            subplot(2,2,2)
-            himg= imshow(imresize(imraw,size(basemap)))
-            colormap(gray); axis equal
-            subplot(2,2,3);
-            imshow(polarMapTest(basemap));
-            hold on
-            himg= imshow(imresize(imraw,size(basemap)))
-            colormap(gray); axis equal
-            hold on
-            set(himg,'AlphaData',0.5)
-            subplot(2,2,4)
-            data = squeeze(decon(1,use_pts(4),:,:));
-            imshow(mat2im(data,jet,[-0.15 0.15]));
-        end
-        
-        showImg=1;
-        if showImg
-            figure
             
             use_pts=find(pts>=0)-3;
-            for t=1:6
-                data = imresize(squeeze(decon(1,use_pts(t),:,:)),size(squeeze(basemap(:,:,1))));
-                subplot(2,3,t);
-                if  i~=7
-                    himg = imshow((basemap));
-                end
-                % set(himg,'alphadata',0.5)
+            if i==0 & showImg
+                figure
+                subplot(2,2,1)
+                imshow(polarMapTest(basemap));
+                subplot(2,2,2)
+                himg= imshow(imresize(imraw,size(basemap)))
+                colormap(gray); axis equal
+                subplot(2,2,3);
+                imshow(polarMapTest(basemap));
                 hold on
-                
-                if i==7
-                    hbehav = imshow(mat2im(data,jet,[-0.15 0.15]));
-                else
-                    hbehav = imshow(mat2im(data,jet,[0 0.2]));
-                end
-                transp = zeros(size(data));
-                if  i  ==7
-                    % transp(abs(data)>0.02)=0.75;
-                    transp=1;
-                else
-                    transp(abs(data)>0.0)=1; %% was 0.05
-                    %transp=1;
-                end
-                set(hbehav,'AlphaData',transp);
-                if t ==6
-                    title(titles{i});
-                elseif t ==1
-                    title([expfile.subj ' ' expfile.expt ' ' expfile.task]);
-                end
+                himg= imshow(imresize(imraw,size(basemap)))
+                colormap(gray); axis equal
+                hold on
+                set(himg,'AlphaData',0.5)
+                subplot(2,2,4)
+                data = squeeze(decon(1,use_pts(4),:,:));
+                imshow(mat2im(data,jet,[-0.15 0.15]));
             end
-            %    fname = [fb(1:end-14) '_' titles{i} '.fig']
-            %     saveas(gcf,fullfile('c:\data\imaging\figs',fname),'fig')
-            %saveas(gcf,fullfile(pb,fname),'jpg')
+            
+          
+            if showImg
+                figure
+                
+                use_pts=find(pts>=0)-3;
+                for t=1:6
+                    data = imresize(squeeze(decon(1,use_pts(t),:,:)),size(squeeze(basemap(:,:,1))));
+                    subplot(2,3,t);
+                    if  i~=7
+                        himg = imshow((basemap));
+                    end
+                    % set(himg,'alphadata',0.5)
+                    hold on
+                    
+                    if i==7
+                        hbehav = imshow(mat2im(data,jet,[-0.15 0.15]));
+                    else
+                        hbehav = imshow(mat2im(data,jet,[0 0.2]));
+                    end
+                    transp = zeros(size(data));
+                    if  i  ==7
+                        % transp(abs(data)>0.02)=0.75;
+                        transp=1;
+                    else
+                        transp(abs(data)>0.0)=1; %% was 0.05
+                        %transp=1;
+                    end
+                    set(hbehav,'AlphaData',transp);
+                    if t ==6
+                        title(titles{i});
+                    elseif t ==1
+                        title([expfile.subj ' ' expfile.expt ' ' expfile.task]);
+                    end
+                end
+                %    fname = [fb(1:end-14) '_' titles{i} '.fig']
+                %     saveas(gcf,fullfile('c:\data\imaging\figs',fname),'fig')
+                %saveas(gcf,fullfile(pb,fname),'jpg')
+            end
+            
+            alldata{i} = squeeze(decon);
         end
-        
-        alldata{i} = squeeze(decon);
     end
     
 end

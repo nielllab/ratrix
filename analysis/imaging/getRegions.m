@@ -1,5 +1,6 @@
 function [norm_grad amp_all map_all gradmapAll merge]= getRegions(expfile, pathname, outpathname)
 
+showImg=0;
 opengl software
 if strcmp(expfile.monitor,'vert')
     maptype = {'topox','topoy'};
@@ -50,8 +51,10 @@ end
         gradmap(isnan(gradmap))=0;
         size(gradmap);
   
-        gradmapAll(:,:,1+(m-1)*2) = real(gradmap);
-        gradmapAll(:,:,2+(m-1)*2) = imag(gradmap);
+          gradmapAll(:,:,1+(m-1)*2) = real(gradmap); 
+          gradmapAll(:,:,2+(m-1)*2) = imag(gradmap);
+
+        
         %         figure
         %         imshow(polarMap(gradmap));
         %         title(sprintf('gradient %s',maptype{m}));
@@ -100,7 +103,7 @@ end
     end
     borders = abs(div{1})+abs(div{2});
     
-
+if showImg
     
     mapsfig = figure;
     mag=1;
@@ -147,10 +150,10 @@ end
       ampmap=(amp_all{2}+amp_all{1})/2;
       imagesc(ampmap,[0 prctile(ampmap(:),98)]);
      
-    
+end
      
     save([outpathname expname '_topography.mat'],'div','norm_grad','map_all','grad_all','amp_all','merge');
-    saveas(mapsfig,[outpathname expname 'topo.fig'],'fig')
+    %saveas(mapsfig,[outpathname expname 'topo.fig'],'fig')
     %     figure
     %     imshow(ones(size(merge)));
     %     hold on

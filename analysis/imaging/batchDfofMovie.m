@@ -35,13 +35,13 @@ for f = 1:length(files)
 %         errmsg{nerr}=sprintf('couldnt do %s',files(f).auditorydata)
 %          errRpt{nerr}=getReport(exc,'extended')
 %     end  
-    try
-        dfofMovie([datapathname files(f).loomdata]);
-    catch exc
-        nerr=nerr+1;
-        errmsg{nerr}=sprintf('couldnt do %s',files(f).loomdata)
-         errRpt{nerr}=getReport(exc,'extended')
-    end
+%     try
+%         dfofMovie([datapathname files(f).loomdata]);
+%     catch exc
+%         nerr=nerr+1;
+%         errmsg{nerr}=sprintf('couldnt do %s',files(f).loomdata)
+%          errRpt{nerr}=getReport(exc,'extended')
+%     end
 %      
 %      try
 %         dfofMovie([datapathname files(f).darknessdata]);
@@ -50,20 +50,20 @@ for f = 1:length(files)
 %         errmsg{nerr}=sprintf('couldnt do %s',files(f).darknessdata)
 %          errRpt{nerr}=getReport(exc,'extended')
 %     end  
-    try
-        dfofMovie([datapathname files(f).gratingdata]);
-    catch exc
-        nerr=nerr+1;
-        errmsg{nerr}=sprintf('couldnt do %s',files(f).gratingdata)
-         errRpt{nerr}=getReport(exc,'extended')
-    end 
-    try
-        dfofMovie([datapathname files(f).topoxreversedata]);
-    catch exc
-        nerr=nerr+1;
-        errmsg{nerr}= sprintf('couldnt do %s',files(f).topoxreversedata)
-        errRpt{nerr}=getReport(exc,'extended')
-    end
+%     try
+%         dfofMovie([datapathname files(f).gratingdata]);
+%     catch exc
+%         nerr=nerr+1;
+%         errmsg{nerr}=sprintf('couldnt do %s',files(f).gratingdata)
+%          errRpt{nerr}=getReport(exc,'extended')
+%     end 
+%     try
+%         dfofMovie([datapathname files(f).topoxreversedata]);
+%     catch exc
+%         nerr=nerr+1;
+%         errmsg{nerr}= sprintf('couldnt do %s',files(f).topoxreversedata)
+%         errRpt{nerr}=getReport(exc,'extended')
+%     end
 %      try
 %         dfofMovie([datapathname files(f).darkness_w_maskingdata]);
 %     catch exc

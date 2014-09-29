@@ -1,4 +1,5 @@
 function [norm_grad amp_all map_all gradmapAll merge]= getRegions(expfile, pathname, outpathname)
+
 showImg=0;
 opengl software
 if strcmp(expfile.monitor,'vert')
@@ -50,8 +51,10 @@ end
         gradmap(isnan(gradmap))=0;
         size(gradmap);
   
-        gradmapAll(:,:,1+(m-1)*2) = real(gradmap);
-        gradmapAll(:,:,2+(m-1)*2) = imag(gradmap);
+          gradmapAll(:,:,1+(m-1)*2) = real(gradmap); 
+          gradmapAll(:,:,2+(m-1)*2) = imag(gradmap);
+
+        
         %         figure
         %         imshow(polarMap(gradmap));
         %         title(sprintf('gradient %s',maptype{m}));

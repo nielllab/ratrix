@@ -6,7 +6,122 @@ pathname = 'D:\Widefield (12-10-12+)\data 62713+\';
 datapathname = 'D:\Widefield (12-10-12+)\data 62713+\';  
 outpathname = 'I:\compiled behavior\behavior topos\';
 
- n=1;
+
+
+n=1;
+files(n).subj = 'g6ckr6lt';
+files(n).expt = '091014';
+files(n).topox =  '';
+files(n).topoxdata = '091014 G6CKR6-LT with dox but WT\G6CKR6-LT_run2_topoX_F_5.6_50ms\G6CKR6-LT_run2_topoX_F_5.6';
+files(n).topoy = '';
+files(n).topoydata = '091014 G6CKR6-LT with dox but WT\G6CKR6-LT_run3_topoY_F_5.6_50ms\G6CKR6-LT_run3_topoY_F_5.6';
+files(n).topoxreverse =  '';
+files(n).topoxreversedata = '';
+files(n).behav = '';
+files(n).behavdata = '';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).stepbinary = '';
+files(n).stepbinarydata = '091014 G6CKR6-LT with dox but WT\G6CKR6-LT_run1_step_binary_F_5.6_50ms\G6CKR6-LT_run1_step_binary_F_5.6';
+files(n).auditory = '';
+files(n).auditorydata = '';
+files(n).darkness = '';
+files(n).darknessdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = '';
+files(n).spatialfreq = '';
+files(n).label = 'camk2-cre gc6'; %w/dox
+files(n).notes = 'good imaging session'; 
+
+
+n=n+1;
+files(n).subj = 'ctta21lt';
+files(n).expt = '091014';
+files(n).topox =  '';
+files(n).topoxdata = '091014 CTTA22-LT Wild Type\CTTA22-LT_run2_topoX_F_4_50ms\CTTA22-LT_run2_topoX_F_4';
+files(n).topoy = '';
+files(n).topoydata = '091014 CTTA22-LT Wild Type\CTTA22-LT_run3_topoY_F_4_50ms\CTTA22-LT_run3_topoY_F_4';
+files(n).topoxreverse =  '';
+files(n).topoxreversedata = '';
+files(n).behav = '';
+files(n).behavdata = '';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).stepbinary = '';
+files(n).stepbinarydata = '091014 CTTA22-LT Wild Type\CTTA22-LT_run1_step_binary_F_4_50ms\CTTA22-LT_run1_step_binary_F_4';
+files(n).auditory = '';
+files(n).auditorydata = '';
+files(n).darkness = '';
+files(n).darknessdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = '';
+files(n).spatialfreq = '';
+files(n).label = 'WT';
+files(n).notes = 'good imaging session'; 
+
+
+n=n+1;
+files(n).subj = 'ctta21lt';
+files(n).expt = '091014';
+files(n).topox =  '';
+files(n).topoxdata = '091014 CTTA21-LT Wild Type\CTTA21-LT_run2_TopoX_Fstop4_50ms\CTTA21-LT_run2_TopoX_Fstop4';
+files(n).topoy = '';
+files(n).topoydata = '091014 CTTA21-LT Wild Type\CTTA21-LT_run23_TopoY_Fstop4_50ms\CTTA21-LT_run23_TopoY_Fstop4';
+files(n).topoxreverse =  '';
+files(n).topoxreversedata = '';
+files(n).behav = '';
+files(n).behavdata = '';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).stepbinary = '';
+files(n).stepbinarydata = '091014 CTTA21-LT Wild Type\CTTA21-LT_run1_step_binary_Fstop4_50ms\091014 CTA22-LT Wild Type';
+files(n).auditory = '';
+files(n).auditorydata = '';
+files(n).darkness = '';
+files(n).darknessdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = '';
+files(n).spatialfreq = '';
+files(n).label = 'WT';
+files(n).notes = 'good imaging session'; 
+
+
+
+n=n+1;
+files(n).subj = 'g62j6rt';
+files(n).expt = '091014';
+files(n).topox =  '';
+files(n).topoxdata = 'no craniotoimy windows\091014 G62J6RT passive\G62j6rt_run2_topoX_Fstop8_50ms\G62j6rt_run2_topoX_Fstop8';
+files(n).topoy = '';
+files(n).topoydata = 'no craniotoimy windows\091014 G62J6RT passive\G62j6rt_run3_topoY_Fstop8_50ms\G62j6rt_run3_topoY_Fstop8';
+files(n).topoxreverse =  '';
+files(n).topoxreversedata = '';
+files(n).behav = '';
+files(n).behavdata = '';
+files(n).grating = '';
+files(n).gratingdata = '';
+files(n).stepbinary = '';
+files(n).stepbinarydata = 'no craniotoimy windows\091014 G62J6RT passive\G62j6rt_run1_step_binary_Fstop8_50ms\G62j6rt_run1_step_binary_Fstop8';
+files(n).auditory = '';
+files(n).auditorydata = '';
+files(n).darkness = '';
+files(n).darknessdata = '';
+files(n).loom = '';
+files(n).loomdata = '';
+files(n).monitor = 'vert';
+files(n).task = '';
+files(n).spatialfreq = '';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session'; %no craniotomy
+
+
+% n=n+1;
 % files(n).subj = 'pvg61tt';
 % files(n).expt = '082814';
 % files(n).topox =  '';

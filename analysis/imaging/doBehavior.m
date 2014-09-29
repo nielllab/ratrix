@@ -60,7 +60,7 @@ for f= 1:length(use)
       b = shiftdim(behav{f}{cond},1);
         zoom = 260/size(b,1);
         b = shiftImageRotate(b,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
-        avgbehav = avgbehav+b;
+        avgbehav = avgbehav+b(:,:,1:14); %eventually should all be same length
         nb= nb+1;
     end
 end

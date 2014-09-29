@@ -475,22 +475,22 @@ recs = {
 %     {[1 181],[],'072514 g62j5rt naive behavior\g62j5rt_run1_naive_fstop8_exp60','g62j5rt_run1_naive_fstop8_exp60'}
 %     }
 %     }
-       {'g62e12rt' { 
+%        {'g62e12rt' { 
 %     {[1 187],[],'090914 g2e12rt gts behavior\G62E12-RT_run1_GTS_50ms_Fstop8','G62E12-RT_run1_GTS_50ms_Fstop8'}
 %    {[188 559],[],'091014 g62e12rt gts behavior\g62e12rt_run1_gts_fstop8_exp50ms_sf200','g62e12rt_run1_gts_fstop8_exp50ms_sf200'}
   %% error in combinetiffs {[560 843],[],'091414 g62e12rt gts behavior\G62E12-RT_run1_GTS_50ms_Fstop8','G62E12-RT_run1_GTS_50ms_Fstop8'}
 
-    }
-    }
+%     }
+%     }
 % 
         {'g62j4rt' { 
 %     {[1 152],[],'072514 g62j4rt naive behavior\g62j4rt_run1_naive_fstop8_exp60','g62j4rt_run1_naive_fstop8_exp60'}
 % % no behavior data disk was full {[153 270],[],'',''}
 %    {[271 374],[],'072914 g62j4rt naive behavior\g62j4rt_run1_naive_fstop5.6_exp50','g62j4rt_run1_naive_fstop5.6_exp50'}
 %    {[375 509],[],'082714 g62j4rt gts behavior\g62j4rt_run1_gts_50msexp_Fstop8','g62j4rt_run1_gts_50msexp_Fstop8'}
-% %%hmm error(timestamps?)    {[510 766],[],'090514 g62j4rt gts behavior\g62j4rt_run1_gts_fstop8_exp50','g62j4rt_run1_gts_fstop8_exp50'}
+    {[510 766],[],'090514 g62j4rt gts behavior\g62j4rt_run1_gts_fstop8_exp50','g62j4rt_run1_gts_fstop8_exp50'}
 %    {[767 936],[],'090614 g62j4rt gts behavior\g62j4rt_run1_gts_fstop8_exp50_sf200','g62j4rt_run1_gts_fstop8_exp50_sf200'}
-   {[937 1214],[],'091514 g62j4rt gts behavior\G62J4-RT_run1_GTS_50ms_Fstop8','G62J4-RT_run1_GTS_50ms_Fstop8'}
+%   {[937 1214],[],'091514 g62j4rt gts behavior\G62J4-RT_run1_GTS_50ms_Fstop8','G62J4-RT_run1_GTS_50ms_Fstop8'}
 
     }
     }

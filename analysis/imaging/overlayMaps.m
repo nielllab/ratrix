@@ -77,23 +77,23 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
     
     bg_all= bg;
     
-    %     im=bg_im(5:5:end,2:2:end,:,:);
-    %     thresh=prctile(im(:),40);
-    %     bg(bg_im<thresh)=0;
-    %
-    bg(bg>0.5)=0.5;
-    size(bg)
-    bg = bg(:,7:end,10:end,10:end-10);
-    useTrials = find(correct==1  & resp_time>0.4 & resp_time<0.7)  ;
-    length(useTrials)
-    bg = bg(useTrials,:,:,:);
-    
-    for tr = 1:size(bg,1);
-        for fr = 1:size(bg,2);
-            bg_sm(tr,fr,:,:) = imresize(squeeze(bg(tr,fr,:,:)),0.5, 'box');
-        end
-    end
-    bg = bg_sm;
+%     %     im=bg_im(5:5:end,2:2:end,:,:);
+%     %     thresh=prctile(im(:),40);
+%     %     bg(bg_im<thresh)=0;
+%     %
+%     bg(bg>0.5)=0.5;
+%     size(bg)
+%     bg = bg(:,7:end,10:end,10:end-10);
+%     useTrials = find(correct==1  & resp_time>0.4 & resp_time<0.7)  ;
+%     length(useTrials)
+%     bg = bg(useTrials,:,:,:);
+%     
+%     for tr = 1:size(bg,1);
+%         for fr = 1:size(bg,2);
+%             bg_sm(tr,fr,:,:) = imresize(squeeze(bg(tr,fr,:,:)),0.5, 'box');
+%         end
+%     end
+%     bg = bg_sm;
     %bg =deconvg6s(bg,0.1);
     
     for dopca = 1:0
@@ -185,19 +185,7 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
         cmap=hsv;
         for i = 1:length(use);
             im = reshape(nmf_spatial(:,use(i)),nx,ny);
-            if i == 6
-                im = im*1.7;
-            end
-            if i == 2
-                im = im*0.8;
-            end
-            if i ==4
-                im = im*0.8;
-            end
-            
-            if i ==5
-                im=im*1.0;
-            end
+
             %  subplot(3,4,i); imagesc(im); axis off; axis equal
             comps(:,:,i) = im; %/max(im(:));
         end

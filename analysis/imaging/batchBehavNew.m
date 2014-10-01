@@ -1666,7 +1666,7 @@ files(n).monitor = 'vert';
 files(n).task = 'naive';
 files(n).spatialfreq = '100';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'good imaging session. bad session (topoX was run as topoXreverse) ';
 
 n=n+1;
 
@@ -1712,9 +1712,9 @@ n=n+1;
 
 files(n).subj = 'G62c6lt';
 files(n).expt = '053014';
-files(n).topox =  '053014 G62c6lt\g62c6lt_run1_nieve_fstop11_exp50msmaps.mat';
+files(n).topox =  '053014 G62c6lt\g62c6lt_run1_nieve_fstop11_exp50ms_maps.mat';
 files(n).topoxdata = '053014 g62c6lt passive viewing\g62c6lt_run1_topox_fstop11_exp50ms\g62c6lt_run1_nieve_fstop11_exp50ms';
-files(n).topoy = '053014 G62c6lt\g62c6lt_run2_topoy_fstop11_exp50msmaps.mat';
+files(n).topoy = '053014 G62c6lt\g62c6lt_run2_topoy_fstop11_exp50ms_maps.mat';
 files(n).topoydata = '053014 g62c6lt passive viewing\g62c6lt_run2_topoy_fstop11_exp50ms\g62c6lt_run2_topoy_fstop11_exp50ms';
 files(n).behav = '053014 G62c6lt\g62c6lt_run1_nieve_behav data.mat';
 files(n).behavdata = '053014 g62c.6lt nieve behavior\g62c6lt_run1_nieve_fstop11_exp50ms\g62c6lt_run1_nieve_fstop11_exp50ms';

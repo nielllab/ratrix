@@ -35,11 +35,11 @@ end
        pixPerCycs             = [100 125 150]; %*10^9;
          
      
-   case 'g62h1tt'     %Started Full 8/15/14
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;
-        msPenalty              =4300;
-        pixPerCycs             = [100 125 150]; %*10^9;  
+%    case 'g62h1tt'     %Started Full 8/15/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 40;
+%         msPenalty              =4300;
+%         pixPerCycs             = [100 125 150]; %*10^9;  
         
    case 'g62b8tt'     %started 5/22/14  
        requestRewardSizeULorMS = 0;

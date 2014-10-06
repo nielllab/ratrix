@@ -18,7 +18,7 @@ fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =msPenalty;
-pixPerCycs                = [100 150 200]; %*10^9;
+pixPerCycs                = [100 200]; %*10^9;
 
 % sca
 % keyboard
@@ -37,7 +37,7 @@ switch subjIDs{1}
     
     case 'g62j.5rt' % Started 7/31/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 70;
+       rewardSizeULorMS        = 55;
        msPenalty               =4300;
        
 %     case 'g62k.1rt' % Started 7/12/14
@@ -58,7 +58,7 @@ switch subjIDs{1}
         
      case 'g62g.6lt' % Started GoToBlack 6/30/14
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 30;
+       rewardSizeULorMS        = 25;
        msPenalty               =4100;
 
 %         

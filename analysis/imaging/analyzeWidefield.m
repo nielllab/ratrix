@@ -5,7 +5,7 @@ batchBehavNew;
 %batchTopography
 close all
 
- alluse = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session')  &  strcmp({files.label},'camk2 gc6') &  ~strcmp({files.task},'HvV_center') &  ~strcmp({files.task},'naive') & ~strcmp({files.spatialfreq},'400')) 
+ alluse = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session')  &  strcmp({files.label},'camk2 gc6') &  strcmp({files.task},'HvV') & ~strcmp({files.spatialfreq},'200')) 
  %alluse = 1:length(files) & ~strcmp({files.subj},'g62b7lt');
  length(alluse)
  allsubj = unique({files(alluse).subj})

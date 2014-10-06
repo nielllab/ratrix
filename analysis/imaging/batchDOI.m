@@ -1,0 +1,79 @@
+%BatchDOI
+
+clear all
+close all
+dbstop if error
+%pathname = 'I:\compiled behavior\';
+pathname = 'D:\Widefield (12-10-12+)\data 62713+\DOI Gcamp6 experiments\';
+datapathname = 'D:\Widefield (12-10-12+)\data 62713+\DOI Gcamp6 experiments\';  
+outpathname = 'I:\compiled behavior\DOI Gcamp6 experiments\';
+
+n=1;
+files(n).subj = 'g62h1tt';
+files(n).expt = '093014';
+files(n).topox =  '';
+files(n).topoxdata = '093014 g62h1tt\g62h1-tt_run7_topoX_50msexp_F_5.6\g62h1-tt_run7_topoX_50msexp_F_5.6';
+files(n).topoy = '';
+files(n).topoydata = '093014 g62h1tt\g62h1-tt_run2_topoy_50msexp_F_5.6\g62h1-tt_run2_topoy_50msexp_F_5.6';
+files(n).stepbinary = '';
+files(n).stepbinarydata = '';
+files(n).darkness = '';
+files(n).darknessdata = '093014 g62h1tt\g62h1-tt_run6_dark_50msexp_F_5.6\g62h1-tt_run6_dark_50msexp_F_5.6';
+files(n).topoxreverse =  '';
+files(n).topoxreversedata = '093014 g62h1tt\g62h1-tt_run3_topoXrev_50msexp_F_5.6\g62h1-tt_run3_topoXrev_50msexp_F_5.6';
+files(n).topoxslow =  '';
+files(n).topoxslowdata = '093014 g62h1tt\g62h1-tt_run5_topoX_slow_50msexp_F_5.6\g62h1-tt_run5_topoX_slow_50msexp_F_5.6';
+files(n).baselinepatchx =  '';
+files(n).baselinepatchxdata = '093014 g62h1tt\g62h1-tt_run4_baseline_patchX_50msexp_F_5.6\g62h1-tt_run4_baseline_patchX_50msexp_F_5.6';
+files(n).DOItopox =  '';
+files(n).DOItopoxdata = '093014 g62h1tt\g62h1-tt_run8_DOI_topoX_50msexp_F_5.6\g62h1-tt_run8_DOI_topoX_50msexp_F_5.6';
+files(n).DOItopoy = '';
+files(n).DOItopoydata = '093014 g62h1tt\g62h1-tt_run9_DOI_topoY_50msexp_F_5.6\g62h1-tt_run9_DOI_topoY_50msexp_F_5.6';
+files(n).DOIstepbinary = '';
+files(n).DOIstepbinarydata = '';
+files(n).DOIdarkness = '';
+files(n).DOIdarknessdata = '093014 g62h1tt\g62h1-tt_run13_DOI_dark_50msexp_F_5.6\g62h1-tt_run13_DOI_dark_50msexp_F_5.6';
+files(n).DOItopoxreverse =  '';
+files(n).DOItopoxreversedata = '093014 g62h1tt\g62h1-tt_run10_DOI_topoXrev_50msexp_F_5.6\g62h1-tt_run10_DOI_topoXrev_50msexp_F_5.6';
+files(n).DOItopoxslow =  '';
+files(n).DOItopoxslowdata = '093014 g62h1tt\g62h1-tt_run12_DOI_topoXslow_50msexp_F_5.6\g62h1-tt_run12_DOI_topoXslow_50msexp_F_5.6';
+files(n).DOIbaselinepatchx =  '';
+files(n).DOIbaselinepatchxdata = '093014 g62h1tt\g62h1-tt_run11_DOI_baselinepatchX_50msexp_F_5.6\g62h1-tt_run11_DOI_baselinepatchX_50msexp_F_5.6';
+files(n).monitor = 'vert';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+% 
+% n=n+1;
+% files(n).subj = '';
+% files(n).expt = '';
+% files(n).topox =  '';
+% files(n).topoxdata = '';
+% files(n).topoy = '';
+% files(n).topoydata = '';
+% files(n).stepbinary = '';
+% files(n).stepbinarydata = '';
+% files(n).darkness = '';
+% files(n).darknessdata = '';
+% files(n).topoxreverse =  '';
+% files(n).topoxreversedata = '';
+% files(n).topoxslow =  '';
+% files(n).topoxslowdata = '';
+% files(n).baselinepatchx =  '';
+% files(n).baselinepatchxdata = '';
+% files(n).DOItopox =  '';
+% files(n).DOItopoxdata = '';
+% files(n).DOItopoy = '';
+% files(n).DOItopoydata = '';
+% files(n).DOIstepbinary = '';
+% files(n).DOIstepbinarydata = '';
+% files(n).DOIdarkness = '';
+% files(n).DOIdarknessdata = '';
+% files(n).DOItopoxreverse =  '';
+% files(n).DOItopoxreversedata = '';
+% files(n).DOItopoxslow =  '';
+% files(n).DOItopoxslowdata = '';
+% files(n).DOIbaselinepatchx =  '';
+% files(n).DOIbaselinepatchxdata = '';
+% files(n).monitor = 'vert';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good imaging session';

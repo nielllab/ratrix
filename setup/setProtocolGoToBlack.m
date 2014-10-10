@@ -23,12 +23,12 @@ msAirpuff                 =msPenalty;
 switch subjIDs{1}
     
      case 'g62j.8lt' % Started 10/8/14
-       requestRewardSizeULorMS = 10;
-       rewardSizeULorMS        = 110;
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 100;
        msPenalty               =4100;
 
      case 'g62m.1lt' % Started 10/8/14
-       requestRewardSizeULorMS = 10;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 110;
        msPenalty               =4100;
 

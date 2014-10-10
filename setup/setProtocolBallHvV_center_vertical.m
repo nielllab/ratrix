@@ -35,11 +35,11 @@ switch subjIDs{1}
 % %        msPenalty               =4200;
 %        pixPerCycs             = [100 150 200]; %*10^9;
     
-    case 'g62j.5rt' % Started 7/31/14
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 45;
-       msPenalty               =4300;
-       
+%     case 'g62j.5rt' % Switched full 10/9/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 45;
+%        msPenalty               =4300;
+%        
 %     case 'g62k.1rt' % Started 7/12/14
 %        requestRewardSizeULorMS = 00;
 %        rewardSizeULorMS        = 100;

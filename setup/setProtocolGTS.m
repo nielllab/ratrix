@@ -29,16 +29,21 @@ if ~isscalar(subjIDs)
 end
 switch subjIDs{1}
     
-    
+    case 'g62l1lt' % started GTS Learning paradigm on 10/12/14
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 85;
+       msPenalty               =3800;
+       pixPerCycs             = [100 200]; %*10^9;
+       
      case 'g62k.2rt' % Started GTS 8/6/14
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 60;
+       rewardSizeULorMS        = 40;
        msPenalty               =4200;
     
      case 'g62e.12rt' % Started GTS 8/2/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 30;
-       msPenalty               =4200;
+       rewardSizeULorMS        = 25;
+       msPenalty               =4000;
     
 %      case 'g62j.4tt' % Started GTS 7/31/14
 %        requestRewardSizeULorMS = 0;
@@ -48,7 +53,7 @@ switch subjIDs{1}
      case 'g62j.4rt' % Started GTS 7/27/14
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 30;
-       msPenalty               =4200;
+       msPenalty               =4000;
        
 %      case 'g62j.5tt' % Started GTS 7/27/14
 %        requestRewardSizeULorMS = 0;

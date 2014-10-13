@@ -30,9 +30,9 @@ end
 switch subjIDs{1}
     
     case 'g62l1lt' % started GTS Learning paradigm on 10/12/14
-       requestRewardSizeULorMS = 0;
+       requestRewardSizeULorMS = 20;
        rewardSizeULorMS        = 85;
-       msPenalty               =3800;
+       msPenalty               =3900;
        pixPerCycs             = [100 200]; %*10^9;
        
      case 'g62k.2rt' % Started GTS 8/6/14

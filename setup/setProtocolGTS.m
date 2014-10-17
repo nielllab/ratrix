@@ -32,7 +32,7 @@ switch subjIDs{1}
     
      case 'g62k.2rt' % Started GTS 8/6/14
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 100;
+       rewardSizeULorMS        = 90;
        msPenalty               =4300;
     
      case 'g62e.12rt' % Started GTS 8/2/14

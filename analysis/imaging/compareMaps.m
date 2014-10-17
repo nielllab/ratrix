@@ -89,9 +89,10 @@ print('-dpsc',psfilename,'-append');
 
         range = -5:5;
         figure
-        plot(squeeze(mean(mean(mov{1}(pts(n,1)+range,pts(n,2)+range,:),2),1)),'r');
+        plot(squeeze(mean(mean(mov{1}(pts(n,1)+range,pts(n,2)+range,:),2),1)),'g');
         hold on
-        plot(squeeze(mean(mean(mov{2}(pts(n,1)+range,pts(n,2)+range,:),2),1)),'g');
+        plot(squeeze(mean(mean(mov{2}(pts(n,1)+range,pts(n,2)+range,:),2),1)),'r');
+        legend{'control','doi'}
         title(sprintf('point %d',n));
         set(gcf, 'PaperPositionMode', 'auto');
 print('-dpsc',psfilename,'-append');
@@ -104,8 +105,9 @@ for i = 1:100
 figure(imfig)
 [y x] = ginput(1);
 figure
-plot(squeeze(mean(mean(mov{1}(x-5:x+5,y-5:y+5,:),2),1)),'r');
+plot(squeeze(mean(mean(mov{1}(x-5:x+5,y-5:y+5,:),2),1)),'g');
 hold on
-plot(squeeze(mean(mean(mov{2}(x-5:x+5,y-5:y+5,:),2),1)),'g');
+plot(squeeze(mean(mean(mov{2}(x-5:x+5,y-5:y+5,:),2),1)),'r');
+ legend{'control','doi'}
 end
 end

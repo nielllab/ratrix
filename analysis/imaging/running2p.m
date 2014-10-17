@@ -1,26 +1,15 @@
-function running2p(fname,spname,label);
+%function running2p(fname,spname,label);
 % fname ='running area - darkness stim - zoom1004.tif'
 % spname = 'running area - darkness stim - zoom1004_stim_obj.mat';
-dbstop if error
+label = 'running';
 
-inf = imfinfo(fname);
+[f p] = uigetfile('*.tif','tif file');
+fname = fullfile(p,f)
 
-img = imread(fname,1);
-nframes = length(inf);
-%nframes = 300;
-mag = 1;
-img = zeros(mag*size(img,1),mag*size(img,2),nframes);
+[img, framerate] = readAlign2p(fname,1,1,0.25);
 
-clear t
- evalc(inf(1).ImageDescription);
- framerate = state.acq.frameRate;
- 
- filt = fspecial('gaussian',5,0.5);
-for f=1:nframes
-
-   img(:,:,f) = imfilter(double(imread(fname,f)),filt);
-end
-
+[f p] =uigetfile('*.mat','speed data');
+spname = fullfile(p,f);
 
 % m=mean(img,3);
 % figure
@@ -36,7 +25,6 @@ dfof=zeros(size(img));
 for f = 1:nframes
     dfof(:,:,f)=(img(:,:,f)-m)./m;
 end
-
 
 
 interval = 1/framerate;

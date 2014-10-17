@@ -109,7 +109,7 @@ for f= 1:length(use) ;
 end
 avgmap4d=avgmap4d/length(use);
 avgmap = avgmap/length(use);
-figure
+avgmapfig = figure
 imshow(avgmap);
 title('average topo  map');
 meangrad{1} = meangrad{1}/length(use); meangrad{2} = meangrad{2}/length(use);

@@ -18,7 +18,7 @@ fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =msPenalty;
-pixPerCycs                = [200]; %*10^9;
+pixPerCycs                = [100 150 200]; %*10^9;
 %stim.stopHUD = false; %stop period heads up display... false = off
 
 % sca
@@ -33,6 +33,7 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 95;
        msPenalty               =4100;
+       pixPerCycs                = [200];  %only 200 SF for learning guys
        
      case 'g62k.2rt' % Started GTS 8/6/14
        requestRewardSizeULorMS = 00;

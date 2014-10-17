@@ -37,7 +37,7 @@ pts
 if ~exist('fname','var')
 [f,p] = uiputfile('*.mat','map points');
 save(fullfile(p,f),'pts','sz');
-else
+elseif ~isempty(fname)
     save(fname,'pts')
 end
 

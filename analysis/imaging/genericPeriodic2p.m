@@ -1,13 +1,68 @@
 clear all
 close all
-load('D:\grating2p8orient2sf.mat');
+grating2p8orient2sf.mat
 
-cycLength=10;
-cycLength = input('cycle length (secs) :');
 [f p] = uigetfile('*.tif','tif file');
 fname = fullfile(p,f)
 
-[img, framerate] = readAlign2p(fname,1,1,0.25);
+cycLength=10;
+cycLength = input('cycle length (secs) :');
+
+inf = imfinfo(fname)
+
+
+img = imread(fname,1);
+
+nframes = length(inf);
+%nframes = 300;
+mag = 1;
+img = zeros(mag*size(img,1),mag*size(img,2),nframes);
+
+ eval(inf(1).ImageDescription);
+ framerate = state.acq.frameRate;
+ 
+display('doing alignement')
+tic
+    r = sbxalign(fname,1:nframes);
+   toc
+   figure
+
+   plot(r.T(:,1));
+    hold on
+    plot(r.T(:,2),'g');
+figure
+    imagesc(r.m{1}); colormap gray; axis equal
+
+
+ filt = fspecial('gaussian',5,0.5)
+for f=1:nframes
+   img(:,:,f) = imfilter(double(imread(fname,f)),filt);
+end
+
+mn=mean(img,3);
+%mn= prctile(img,99,3);
+figure
+range = [prctile(mn(:),2) prctile(mn(:),98)];
+imagesc(mn,range);
+title('non aligned mean img')
+colormap(gray)
+
+ filt = fspecial('gaussian',5,0.25)
+for f=1:nframes
+
+   img(:,:,f) = circshift(squeeze(img(:,:,f)),[r.T(f,1),r.T(f,2)]);
+end
+
+
+
+mn=mean(img,3);
+%mn= prctile(img,99,3);
+figure
+range = [prctile(mn(:),2) prctile(mn(:),98)];
+imagesc(mn,range);
+title('aligned mean img')
+colormap(gray)
+
 
 display('doing prctile')
 tic
@@ -49,22 +104,22 @@ open(vid);
 writeVideo(vid,mov(1:end));
 close(vid)
 
-fullMov= mat2im(img(:,:,100:700),gray,[prctile(mn(:),2) 1.5*prctile(mn(:),98)]);
-mov = immovie(permute(fullMov,[1 2 4 3]));
-vid = VideoWriter(sprintf('%sfullMov.avi',fname(1:end-4)));
-vid.FrameRate=20;
+figure
+for f = 1:cycFrames;
+    cycAvg(:,:,f) = mean(dfofInterp(:,:,f:cycFrames:end),3);
+    map = map + cycAvg(:,:,f)*exp(2*pi*sqrt(-1)*f/cycFrames);
+    imagesc(cycAvg(:,:,f),[-0.1 2]); colormap gray
+    mov(f)=getframe(gcf);
+end
+title('dfof frames')
+vid = VideoWriter(sprintf('%sdfofCycleMov.avi',fname(1:end-4)));
+vid.FrameRate=10;
 open(vid);
 writeVideo(vid,mov(1:end));
 close(vid)
 
 figure
-timecourse = squeeze(mean(mean(dfofInterp(:,:,1:60/dt),2),1));
-plot(timecourse);
-
-cycTimecourse = squeeze(mean(mean(cycAvg,2),1));
-figure
-plot(cycTimecourse);
-
+plot(squeeze(mean(mean(dfofInterp(:,:,1:60/dt),2),1)))
 
 
 figure
@@ -128,52 +183,13 @@ set(h,'AlphaData',transp)
 title('mean elicited response')
 
 
-nstim = length(xpos);
-baseRange = (2:dt:3.5)/dt;
-evokeRange = (0:dt:3.5)/dt
-startTime=124;
-for s = 1:nstim;
-    base(:,:,s) = mean(dfofInterp(:,:,startTime + (s-1)*(duration+isi)/dt +baseRange),3);
-    evoked(:,:,s) = mean(dfofInterp(:,:,startTime + isi/dt +(s-1)*(duration+isi)/dt +evokeRange),3);
-end
-
-figure
-imagesc(squeeze(mean(evoked-base,3)),[-0.5 0.5]);
-resp = evoked-base;
-
-angles = unique(theta);
-sfs = unique(sf);
-
-for th = 1:length(angles);
-    for sp = 1:length(sfs);
-    
-    orientation(:,:,th,sp) = median(resp(:,:,theta ==angles(th) & sf==sfs(sp)),3);
-    figure
-    
-    imagesc(squeeze(orientation(:,:,th)),[-0.5 0.5]);
-    
-    end
-end
-
-
-R = max(max(orientation,[],4),[],3);
-
-figure
-imagesc(R,[0 2]);
-
-
-keyboard
-
 absmap = figure
-imagesc(R,[0 2])
+imshow(polarMap(mapfilt))
 range=-1:1;
 %for i = 1:25;
 done=0;
-
-i=0;
 while ~done
-   i=i+1;
-   figure(absmap)
+    figure(absmap)
     [y x b]= (ginput(1));
    if b==3
        done=1;
@@ -187,17 +203,8 @@ while ~done
    avg = squeeze(mean(mean(cycAvg(x+range,y+range,:),2),1));
    plot(avg)
     title('cyc avg timecourse');
-    
-       figure
-   ori = squeeze(mean(mean(orientation(x+range,y+range,:,:),2),1));
-   plot(ori)
-    title('orientation');
-    legend('lo','hi')
-    
-    
     trace(:,i) = full;
     avgTrace(:,i) = avg;
-    %oriTuning(:,i)=ori;
    end
 %     figure
 %     plot(0:45:315,avgTrace(4:10:end,i))

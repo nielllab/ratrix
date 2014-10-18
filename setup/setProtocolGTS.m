@@ -31,7 +31,7 @@ switch subjIDs{1}
     
     case 'g62l1lt' % started GTS Learning paradigm on 10/12/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 95;
+       rewardSizeULorMS        = 105;
        msPenalty               =4100;
        pixPerCycs                = [200];  %only 200 SF for learning guys
        
@@ -68,7 +68,7 @@ switch subjIDs{1}
     
      case 'g62b.5lt'           %started 1/28/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 30; 
+       rewardSizeULorMS        = 40; 
        msPenalty               =4300;
 %        
 %      case 'bfly2b.3rt'

@@ -29,6 +29,17 @@ if ~isscalar(subjIDs)
 end
 switch subjIDs{1}
     
+     
+     case 'g62j.8lt' % Started 10/22/14
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 100;
+       msPenalty               =4100;
+
+     case 'g62m.1lt' % Started 10/22/14
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 100;
+       msPenalty               =4100;
+       
     case 'g62l1lt' % started GTS Learning paradigm on 10/12/14
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 110;

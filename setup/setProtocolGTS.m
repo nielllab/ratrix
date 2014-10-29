@@ -18,7 +18,7 @@ fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =msPenalty;
-pixPerCycs                = [200]; %*10^9;
+pixPerCycs                = [100 150 200]; %*10^9;
 %stim.stopHUD = false; %stop period heads up display... false = off
 
 % sca
@@ -29,10 +29,22 @@ if ~isscalar(subjIDs)
 end
 switch subjIDs{1}
     
+     
+     case 'g62j.8lt' % Started 10/22/14
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 100;
+       msPenalty               =4100;
+
+     case 'g62m.1lt' % Started 10/22/14
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 100;
+       msPenalty               =4100;
+       
     case 'g62l1lt' % started GTS Learning paradigm on 10/12/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 95;
-       msPenalty               =4100;
+       rewardSizeULorMS        = 110;
+       msPenalty               =4200;
+       pixPerCycs                = [200];  %only 200 SF for learning guys
        
      case 'g62k.2rt' % Started GTS 8/6/14
        requestRewardSizeULorMS = 00;
@@ -67,7 +79,7 @@ switch subjIDs{1}
     
      case 'g62b.5lt'           %started 1/28/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 30; 
+       rewardSizeULorMS        = 40; 
        msPenalty               =4300;
 %        
 %      case 'bfly2b.3rt'

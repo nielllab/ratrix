@@ -29,16 +29,32 @@ if ~isscalar(subjIDs)
 end
 switch subjIDs{1}
     
-    
+     
+     case 'g62j.8lt' % Started 10/22/14
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 100;
+       msPenalty               =4100;
+
+     case 'g62m.1lt' % Started 10/22/14
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 100;
+       msPenalty               =4100;
+       
+    case 'g62l1lt' % started GTS Learning paradigm on 10/12/14
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 110;
+       msPenalty               =4200;
+       pixPerCycs                = [200];  %only 200 SF for learning guys
+       
      case 'g62k.2rt' % Started GTS 8/6/14
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 150;
-       msPenalty               =4300;
+       rewardSizeULorMS        = 40;
+       msPenalty               =4100;
     
      case 'g62e.12rt' % Started GTS 8/2/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;
-       msPenalty               =4200;
+       rewardSizeULorMS        = 25;
+       msPenalty               =3900;
     
 %      case 'g62j.4tt' % Started GTS 7/31/14
 %        requestRewardSizeULorMS = 0;
@@ -48,7 +64,7 @@ switch subjIDs{1}
      case 'g62j.4rt' % Started GTS 7/27/14
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 30;
-       msPenalty               =4200;
+       msPenalty               =4000;
        
 %      case 'g62j.5tt' % Started GTS 7/27/14
 %        requestRewardSizeULorMS = 0;
@@ -63,9 +79,8 @@ switch subjIDs{1}
     
      case 'g62b.5lt'           %started 1/28/14 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 35; 
+       rewardSizeULorMS        = 40; 
        msPenalty               =4300;
-       pixPerCycs             = [100 150 200]; %*10^9;
 %        
 %      case 'bfly2b.3rt'
 %        requestRewardSizeULorMS = 0;
@@ -77,7 +92,7 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 20;
        msPenalty               =4300;
-       pixPerCycs             = [100 150 200]; %*10^9;
+
 
     
          

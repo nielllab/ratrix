@@ -18,7 +18,7 @@ fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =msPenalty;
-pixPerCycs                = [100 150 200]; %*10^9;
+pixPerCycs                = [100 150 200];
 
 % sca
 % keyboard
@@ -29,17 +29,17 @@ end
 switch subjIDs{1}
     
     
-    case 'g62c.2rt'           %Switched Back _center 8/15/14
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 25; 
-       msPenalty               =4200;
-       pixPerCycs             = [100 150 200]; %*10^9;
+%     case 'g62c.2rt'           %Switched Back _center 8/15/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 25; 
+% %        msPenalty               =4200;
+%        pixPerCycs             = [100 150 200]; %*10^9;
     
-    case 'g62j.5rt' % Started 7/31/14
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 90;
-       msPenalty               =4200;
-       
+%     case 'g62j.5rt' % Switched full 10/9/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 45;
+%        msPenalty               =4300;
+%        
 %     case 'g62k.1rt' % Started 7/12/14
 %        requestRewardSizeULorMS = 00;
 %        rewardSizeULorMS        = 100;
@@ -56,10 +56,10 @@ switch subjIDs{1}
 %         msPenalty              =4200;
 %         pixPerCycs             = [100 125 150]; %*10^9;
         
-     case 'g62g.6lt' % Started GoToBlack 6/30/14
-       requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 35;
-       msPenalty               =4300;
+%      case 'g62g.6lt' % Switched full 10/9/14
+%        requestRewardSizeULorMS = 00;
+%        rewardSizeULorMS        = 25;
+%        msPenalty               =4100;
 
 %         
 %    case 'g62b8tt'     %switched full 5/22/14  

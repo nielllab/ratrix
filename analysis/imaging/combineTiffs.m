@@ -440,9 +440,11 @@ recs = {
 %   %Program froze {[1345 1395],[],'',''}
 %     {[1396 1659],[],'091014 g62c6ttgts gts behavior\g62c6ttgts_run2_gts_fstop8_exp50ms_sf200','g62c6ttgts_run2_gts_fstop8_exp50ms_sf200'}
 %      {[1660 2022],[],'091414 g62c6ttgts gts behavior\g62c6ttgts_run1_GTS_50ms_Fstop8','g62c6ttgts_run1_GTS_50ms_Fstop8'}    
+% %%BAD set too few tiffs (9999) {[2023 2076],[],'092314',''}   
+%      {[2077 2194],[],'092314 g62c6ttgts gts behavior\g62cgttgts_run2_GTS_50ms_Fstop8_100sf','g62cgttgts_run2_GTS_50ms_Fstop8_100sf'}
 %      }
 %     }
-%
+% %
 %         {'g62c6lt' {
 %        {[11 147],[],'052414 g62c.6lt neive behavior\g62c6lt_run1_neive_fstop11_exp50ms','g62c6lt_run1_neive_fstop11_exp50ms'}
 %        {[311 453],[],'052514 g62c6lt nieve behavior\g62c6lt_run1_nieve_fstop11_exp50ms','g62c6lt_run1_nieve_fstop11_exp50ms'}
@@ -475,23 +477,33 @@ recs = {
 %     {[1 181],[],'072514 g62j5rt naive behavior\g62j5rt_run1_naive_fstop8_exp60','g62j5rt_run1_naive_fstop8_exp60'}
 %     }
 %     }
-%        {'g62e12rt' { 
+       {'g62e12rt' { 
 %     {[1 187],[],'090914 g2e12rt gts behavior\G62E12-RT_run1_GTS_50ms_Fstop8','G62E12-RT_run1_GTS_50ms_Fstop8'}
 %    {[188 559],[],'091014 g62e12rt gts behavior\g62e12rt_run1_gts_fstop8_exp50ms_sf200','g62e12rt_run1_gts_fstop8_exp50ms_sf200'}
   %% error in combinetiffs {[560 843],[],'091414 g62e12rt gts behavior\G62E12-RT_run1_GTS_50ms_Fstop8','G62E12-RT_run1_GTS_50ms_Fstop8'}
-
-%     }
-%     }
+  %% error in combinetiffs        {[560 843],[],'091414 g62e12rt gts behavior\G62E12-RT_run1_GTS_50ms_Fstop8','G62E12-RT_run1_GTS_50ms_Fstop8'}
+        {[844 1151],[],'093014 g62e12rt gts behavior\G62E12-RT_run1_GTS_50ms_Fstop5.6','G62E12-RT_run1_GTS_50ms_Fstop5.6'}
+    }
+    }
 % 
-        {'g62j4rt' { 
+%       {'g62j4rt' { 
 %     {[1 152],[],'072514 g62j4rt naive behavior\g62j4rt_run1_naive_fstop8_exp60','g62j4rt_run1_naive_fstop8_exp60'}
 % % no behavior data disk was full {[153 270],[],'',''}
 %    {[271 374],[],'072914 g62j4rt naive behavior\g62j4rt_run1_naive_fstop5.6_exp50','g62j4rt_run1_naive_fstop5.6_exp50'}
 %    {[375 509],[],'082714 g62j4rt gts behavior\g62j4rt_run1_gts_50msexp_Fstop8','g62j4rt_run1_gts_50msexp_Fstop8'}
-    {[510 766],[],'090514 g62j4rt gts behavior\g62j4rt_run1_gts_fstop8_exp50','g62j4rt_run1_gts_fstop8_exp50'}
+  %% error in combinetiffs     {[510 766],[],'090514 g62j4rt gts behavior\g62j4rt_run1_gts_fstop8_exp50','g62j4rt_run1_gts_fstop8_exp50'}
 %    {[767 936],[],'090614 g62j4rt gts behavior\g62j4rt_run1_gts_fstop8_exp50_sf200','g62j4rt_run1_gts_fstop8_exp50_sf200'}
 %   {[937 1214],[],'091514 g62j4rt gts behavior\G62J4-RT_run1_GTS_50ms_Fstop8','G62J4-RT_run1_GTS_50ms_Fstop8'}
+% 
+%     }
+%     }
 
+       {'g62m1lt' { 
+    {[1 140],[],'072514 g62j5rt naive behavior\g62j5rt_run1_naive_fstop8_exp60','g62j5rt_run1_naive_fstop8_exp60'}
+    {[141 292],[],'072514 g62j5rt naive behavior\g62j5rt_run1_naive_fstop8_exp60','g62j5rt_run1_naive_fstop8_exp60'}
+    {[293 506],[],'072514 g62j5rt naive behavior\g62j5rt_run1_naive_fstop8_exp60','g62j5rt_run1_naive_fstop8_exp60'}
+    {[507 743],[],'072514 g62j5rt naive behavior\g62j5rt_run1_naive_fstop8_exp60','g62j5rt_run1_naive_fstop8_exp60'}
+    {[744 945],[],''}
     }
     }
 

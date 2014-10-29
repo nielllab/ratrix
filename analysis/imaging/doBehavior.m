@@ -50,7 +50,7 @@ for f = 1:0
 end
 %behav=behavNoRun;
 allsubj{s}
-for cond = 1:4
+for cond = 1:2
 nb=0; avgbehav=0;
 for f= 1:length(use)
 
@@ -88,27 +88,27 @@ title([allsubj{s} ' ' labels{cond}])
 end
 
 
-figure
-for t = 1:6
-    subplot(2,3,t);
-    data = squeeze(avgbehavCond{4}(:,:,t+7) - avgbehavCond{3}(:,:,t+7));
-    h= imshow(mat2im(data,jet,[-0.05 0.05]))
-    
-    hold on
-     plot(ypts,xpts,'w.','Markersize',1);
-end
-title('left vs right')
+% figure
+% for t = 1:6
+%     subplot(2,3,t);
+%     data = squeeze(avgbehavCond{4}(:,:,t+7) - avgbehavCond{3}(:,:,t+7));
+%     h= imshow(mat2im(data,jet,[-0.05 0.05]))
+%     
+%     hold on
+%      plot(ypts,xpts,'w.','Markersize',1);
+% end
+% title('left vs right')
 
 figure
 for t = 1:6
     subplot(2,3,t);
     data = squeeze(avgbehavCond{2}(:,:,t+7) - avgbehavCond{1}(:,:,t+7));
     h= imshow(mat2im(data,jet,[-0.1 0.1]))
-    title('correct vs incorrect')
+  
     hold on
      plot(ypts,xpts,'w.','Markersize',2);
 end
-title('left vs right')
+  title('correct vs incorrect')
 
 % clear mov
 % 

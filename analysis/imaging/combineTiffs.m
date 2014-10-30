@@ -498,6 +498,15 @@ recs = {
 %     }
 %     }
 
+       {'g62m1lt' { 
+    {[1 140],[],'072514 g62j5rt naive behavior\g62j5rt_run1_naive_fstop8_exp60','g62j5rt_run1_naive_fstop8_exp60'}
+    {[141 292],[],'072514 g62j5rt naive behavior\g62j5rt_run1_naive_fstop8_exp60','g62j5rt_run1_naive_fstop8_exp60'}
+    {[293 506],[],'072514 g62j5rt naive behavior\g62j5rt_run1_naive_fstop8_exp60','g62j5rt_run1_naive_fstop8_exp60'}
+    {[507 743],[],'072514 g62j5rt naive behavior\g62j5rt_run1_naive_fstop8_exp60','g62j5rt_run1_naive_fstop8_exp60'}
+    {[744 945],[],''}
+    }
+    }
+
     }; %%% vert vs horiz in either top or bottom
 
 % dirOverview(imagingPath)

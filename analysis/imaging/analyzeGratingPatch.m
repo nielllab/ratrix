@@ -1,6 +1,7 @@
 %load(fname,'dfof_bg');
-%close all
+close all
 load('D:\grating3x5_2sf10min');
+load('D:\resolutionTestClose5min');
 imagerate=10;
 
 % tf(tf==2)=1;
@@ -9,7 +10,7 @@ imagerate=10;
 imageT=(1:size(dfof_bg,3))/imagerate;
 img = imresize(double(dfof_bg),1,'method','box');
 
-xpos=xpos(1:300); ypos=ypos(1:300); sf=sf(1:300); tf=tf(1:300);
+%xpos=xpos(1:300); ypos=ypos(1:300); sf=sf(1:300); tf=tf(1:300);
 trials = length(sf)-1;
 % tic
 % img=deconvg6s(dfof_bg,1/imagerate);
@@ -27,8 +28,19 @@ for f=1:acqdurframes
     %axis off
 end
 
-useframes = 6:8;
-base = 1:3;
+[y x] = ginput(1);
+y= round(y); x= round(x);
+range = -2:2;
+figure
+plot(squeeze(mean(mean(img(x+range,y+range,:),2),1)))
+
+
+meandf = squeeze(mean(mean(img,2),1));
+figure
+plot(meandf(350:400))
+
+useframes = 25:30;
+base = 10:15;
 % useframes =7:12;
 % base = 1:3;
 
@@ -37,7 +49,7 @@ base = 1:3;
 trialdata = zeros(size(img,1),size(img,2),trials+2);
 trialspeed = zeros(trials+2,1);
 for tr=1:trials;
-    t0 = (tr-1)*duration*imagerate+tr*isi*imagerate+1;
+    t0 = (tr-1)*(duration+isi)*imagerate;
     baseframes = base+t0; baseframes=baseframes(baseframes>0);
     trialdata(:,:,tr)=mean(img(:,:,useframes+t0),3) -mean(img(:,:,baseframes),3);
    try
@@ -45,6 +57,7 @@ for tr=1:trials;
    catch
        trialspeed(tr)=500;
    end
+ 
 end
 
 if length(unique(xpos))>1
@@ -92,20 +105,68 @@ for i = 1:length(sfrange)
         subplot(length(sfrange),length(tfrange),length(tfrange)*(i-1)+j)
         imagesc(squeeze(tuning(:,:,1,1,i,j)),[ 0 0.05]);
         title(sprintf('%0.2fcpd %0.2fhz',sfrange(i),tfrange(j)))
-        axis off
+        axis off; axis equal
     end
 end
 
+merge = zeros(size(tuning,1),size(tuning,2),3);
 figure
 for i = 1:length(xrange)
     for j=1:length(yrange)
         subplot(length(xrange),length(yrange),length(yrange)*(i-1)+j)
         imagesc(squeeze(mean(tuning(:,:,i,j,:,1),5)),[ 0 0.05]);
-        title(sprintf('%0.2fcpd %0.2fhz',i,j))
-        axis off
+        merge(:,:,i) = squeeze(mean(tuning(:,:,i,j,:,1),5))/0.03;
+        title(sprintf('%0.2fx %0.2fy',xrange(i),xrange(j)))
+        axis off; axis equal
     end
 end
 
+merge(merge<0)=0; merge(merge>1)=1;
+figure
+imshow(merge);
+
+
+figure
+for i = 2:2
+    for j=1:length(yrange)
+        
+        spotimg = squeeze(mean(tuning(:,:,i,j,:,1),5));
+        imagesc(spotimg,[0 0.03]);
+        title(sprintf('%0.2fx %0.2fy',i,j))
+        axis off; axis equal
+    end
+end
+
+
+
+[y x] = ginput(1);
+crossSection = spotimg(:,round(y));
+figure
+plot(crossSection);
+crossSection = mean(spotimg(round(x)+(-1:1),:),1);
+figure
+plot(crossSection);
+crossSection = crossSection(100:199);
+baseline_est=median(crossSection);
+[peak_est x0_est] = max(crossSection);
+sigma_est=5;
+x=1:length(crossSection);
+y=crossSection;
+fit_coeff = nlinfit(x,y,@gauss_fit,[ baseline_est peak_est x0_est sigma_est])
+
+%%% parse out results
+baseline = fit_coeff(1)
+peak = fit_coeff(2)
+x0=fit_coeff(3)
+sigma_est=fit_coeff(4)
+
+%%% plot raw data and fit
+figure
+plot(x,y)
+hold on
+plot(x,gauss_fit(fit_coeff,x),'g')
+
+fwhm = 2*sigma_est*1.17*32.5
 
 keyboard
 for tr = 1:trials;

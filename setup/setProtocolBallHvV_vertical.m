@@ -54,17 +54,17 @@ end
    case 'g62b8tt'     %started 5/22/14  
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 20;
-        msPenalty              =4000;
+        msPenalty              =3800;
 
   case 'g62c.2rt'           %Switched Back 9/15/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 60; 
+       rewardSizeULorMS        = 80; 
        msPenalty               =4200;
        
    case 'g62b1lt'     %moved to HvV_vertical 2/19/14   
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 35;
-       msPenalty               =4000;
+       rewardSizeULorMS        = 40;
+       msPenalty               =3800;
      
   case 'g62b3rt'          %changed 2/14/14
        requestRewardSizeULorMS = 0;

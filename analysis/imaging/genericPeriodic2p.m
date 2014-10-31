@@ -272,62 +272,17 @@ while ~done
 %     plot(0:45:315,avgTrace(4:10:end,i))
 end
     
-
-
-
+[pts dF neuropil] = getpts(img,dfofInterp);
+n= ceil(sqrt(npts));
 figure
-plot(trace);
-figure
-plot(avgTrace);
-
-c = 'rgbcmk'
-figure
-hold on
-for i = 1:25;
-    plot(trace(50:1250,i)/max(trace(:,i)) + i/2,c(mod(i,6)+1));
-end
-
-thresh=0.8;
-cor = corr(trace);
-np =0; clear mergetrace mergeAvgTrace
-for i = 1:size(cor,1);
-    merge = find(cor(:,i)>thresh);
-    if ~isempty(merge);
-        np=np+1;
-        mergetrace(:,np) = mean(trace(:,merge),2);
-        mergeAvgTrace(:,np) = mean(avgTrace(:,merge),2);
-        normAvgTrace(:,np) = mergeAvgTrace(:,np)/max(mergeAvgTrace(:,np));
-        cor(merge,:)=0;
-        cor(:,merge)=0;
+for i = 1:npts
+    subplot(n,n,i);
+    for f = 1:cycFrames;
+    avg(f) = mean(dF(i,f:cycFrames:end)-neuropil(f:cycFrames:end),2);   
     end
+    plot(avg); ylim([-0.1 0.5])
+    axis off
 end
-
-figure
-plot(mergeAvgTrace);
-
-c = 'rgbcmk'
-nc = 3;
-idx=kmeans(normAvgTrace',nc);
-figure
-hold on
-for i = 1:np;
-    plot(0.25:0.25:10,mergeAvgTrace(:,i),c(idx(i)));
-end
-%figure
-hold on
-for i = 1:nc;
-    plot(0.25:0.25:10,mean(mergeAvgTrace(:,idx==i),2),c(i),'LineWidth',3);
-end
-
-c = 'rgbcmk'
-figure
-hold on
-for i = 1:np;
-    plot(0.25*(1:length(50:1250)),mergetrace(50:1250,i)/max(trace(:,i)) + i,c(mod(i,6)+1));
-end
-xlabel('secs')
-ylim([0 np+2]);
-
 
 
 

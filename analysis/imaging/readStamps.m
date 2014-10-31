@@ -51,7 +51,9 @@ if true
             figure
             imagesc(squeeze(x)'>intmax('uint8'))
             t = nan; drops=nan;
-            error('bad bcd')
+            %%error('bad bcd')
+            display('bad bcd')
+            return
         end
     end
     x = reshape([bin2dec(f(:,9:12)) bin2dec(f(:,13:16))]*10.^[1 0]',[t n])';

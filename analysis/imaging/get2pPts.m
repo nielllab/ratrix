@@ -1,23 +1,25 @@
-function pts = get2pPts(img,dfofInterp);
-clear dfof imgInterp
+function [pts dF neuropil] = get2pPts(dfofInterp);
 
 mn = mean(dfofInterp,3);
 sigma = std(dfofInterp,[],3);
 
+figure
+imagesc(sigma,[0.2 0.8])
 
-mn = mean(img,3);
 
-range = [prctile(mn(10:10:end),2) prctile(mn(10:10:end),99)]
+mag=2;
 mapfig = figure
-imagesc(mn, range);
-colormap(gray)
+% imagesc(imresize(mn,mag), range);
+% colormap(gray)
+imagesc(imresize(sigma,2),[0 0.5])
 hold on
 
-dfReshape = reshape(dfofInterp,[size(dfofInterp,1)*size(dfofInterp,2),size(dfofInterp,3)]);
-npts=0; done=0; clear pts
-coverage=zeros(size(dfofInterp,1)*size(dfofInterp,2));
+dfReshape = reshape(dfofInterp,[size(dfofInterp,1)*size(dfofInterp,2) size(dfofInterp,3)]);
+npts=0; done=0; clear pts usePts dF
+coverage=zeros(size(dfofInterp,1)*size(dfofInterp,2),1);
 while ~done
-    [y x b] = ginput(1);
+   figure(mapfig)
+   [y x b] = ginput(1); x= round(x/2); y=round(y/2);
     if b==3 %%% right click
         done = 1;
         break
@@ -25,36 +27,107 @@ while ~done
         npts =npts+1;
         pts(npts,1)=round(x);
         pts(npts,2)=round(y);
-        plotdata(npts) = plot(round(y),round(x),'g*'); plotdata2(npts) = plot(round(y),round(x),'bo');
+        plotdata(npts) = plot(round(y)*mag,round(x)*mag,'g*'); plotdata2(npts) = plot(round(y)*mag,round(x)*mag,'bo');
    
       cc=0;
     for f= 1:size(dfofInterp,3);
         cc = cc+(dfofInterp(x,y,f)-mn(x,y))*(dfofInterp(:,:,f)-mn);
     end
     cc = cc./(size(dfofInterp,3)*sigma(x,y)*sigma);
-    figure
-    imagesc(cc,[-1 1]);
-    
-    w=12;
+  if npts==1
+      cellfig=figure
+  else
+      figure(cellfig);
+  end
+  subplot(2,2,1);
+  imagesc(cc,[0 1]);
+  axis equal  
+    w=12; corrThresh=0.75; neuropilThresh=0.5;
     xmin=max(1,x-w); ymin=max(1,y-w);
     xmax = min(size(dfofInterp,1),x+w); ymax = min(size(dfofInterp,2),y+w);
-    figure
+  
    roi = cc; roi(1:xmin-1,:,:)=0; roi(:,1:ymin-1,:)=0; roi(xmax+1:end,:,:)=0; roi(:,ymax+1:end,:)=0;
-   imagesc(roi,[0 1]);
-    usePts{nPts} = find(roi>0.9);
-    dF(nPts,:) = squeeze(mean(dfReshape(usePts{nPts},:),1));
-    coverage(usePts{nPts})=nPts;
    
+  subplot(2,2,2);
+   imagesc(roi>corrThresh); axis equal
+    usePts{npts} = find(roi>corrThresh);
+    dF(npts,:) = squeeze(mean(dfReshape(usePts{npts},:),1));
+    coverage(usePts{npts})=npts;
     
-    
+    subplot(2,2,3);
+    imagesc(cc(xmin:xmax,ymin:ymax),[0.5 1]);
+ 
     elseif b==32 %%% spacebar
         delete(plotdata(npts)); delete(plotdata2(npts))
         npts=npts-1;    
     end
-    
-    
+   
 end
 
 figure
-
 imagesc(reshape(coverage,[size(dfofInterp,1) size(dfofInterp,2)]));
+
+clear neuropilDF
+ for i = 1:5
+     doneNeuropil=0;
+   while ~doneNeuropil
+       figure(mapfig); hold on
+    plot(round(y)*2,round(x)*2,'ro');
+      [y x b] = ginput(1); x= round(x/2); y=round(y/2);
+          cc=0;
+    for f= 1:size(dfofInterp,3);
+        cc = cc+(dfofInterp(x,y,f)-mn(x,y))*(dfofInterp(:,:,f)-mn);
+    end
+    cc = cc./(size(dfofInterp,3)*sigma(x,y)*sigma);
+  figure
+    imagesc(cc,[-1 1]);
+    figure
+    imagesc(cc>neuropilThresh);
+    [y2 x2 b] = ginput(1)
+    if b==1
+        doneNeuropil =1;
+    end
+   end
+    neuroPts{i} = find(cc>0.5);
+    neuropilDF(i,:) = squeeze(mean(dfReshape(neuroPts{i},:),1));
+
+ end
+ 
+ neuropil = mean(neuropilDF,1)
+ 
+figure
+plot(dF')
+
+c = 'rgbcmk'
+figure
+hold on
+for i = 1:npts;
+    plot(dF(i,50:1250)/max(dF(i,:)) + i/2,c(mod(i,6)+1));
+end
+
+c = 'rgbcmk'
+figure
+hold on
+for i = 1:npts;
+    plot((dF(i,50:1250)-neuropil(50:1250))/max(dF(i,:)) + i/2,c(mod(i,6)+1));
+end
+
+c = 'rgbcmk'
+figure
+hold on
+for i = 1:npts;
+    plot((dF(i,50:1250)-neuropil(50:1250)) + i,c(mod(i,6)+1));
+end
+
+c = 'rgbcmk'
+figure
+hold on
+for i = 1:5;
+    plot(neuropilDF(i,50:1250)/max(neuropilDF(i,:)) + i,c(mod(i,6)+1));
+end
+
+[f p] = uiputfile('*.mat','save points data');
+save(fullfile(p,f),'pts','dF','neuropil','coverage');
+
+
+

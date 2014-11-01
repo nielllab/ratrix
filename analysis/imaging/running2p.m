@@ -5,63 +5,59 @@ close all
 clear all
 label = 'running';
 
-[f p] = uigetfile('*.tif','tif file');
-fname = fullfile(p,f)
+dt = 0.25;
+framerate=1/dt;
 
-[img, framerate] = readAlign2p(fname,1,1,.5);
-nframes=size(img,3)
-[f p] =uigetfile('*.mat','speed data');
-spname = fullfile(p,f);
+[f p] = uigetfile({'*.mat;*.tif'},'.mat or .tif file');
 
-% m=mean(img,3);
-% figure
-% imagesc(m);
-% colormap(gray)
-m = prctile(img,10,3);
-% figure
-% imagesc(m);
-% colormap(gray)
-
-
-dfof=zeros(size(img));
-for f = 1:nframes
-    dfof(:,:,f)=(img(:,:,f)-m)./m;
+if strcmp(f(end-3:end),'.mat')
+   display('loading data')
+   load(fullfile(p,f))
+   display('done')
+else
+    cycLength=10;
+    dfofInterp = get2pdata(fullfile(p,f),dt,cycLength);
+    
+    [f p] =uigetfile('*.mat','speed data');
+    spname = fullfile(p,f);
+    load(spname);
+    
+    [f p] = uiputfile('*.mat','session data');
+    sessionName=fullfile(p,f);
+    display('loading data')
+    save(sessionName,'dfofInterp','stimRec','-v7.3');
+    display('done')
 end
-
 
 interval = 1/framerate;
-load(spname);
+nframes = size(dfofInterp,3);
 
 mouseT = stimRec.ts- stimRec.ts(1);
-%     figure
-%     plot(diff(mouseT));
-%
 
 mouseMax = max(mouseT)
-frameMax = nframes/framerate
-if max(mouseT)<(nframes/framerate)
+frameMax = nframes*dt
+if max(mouseT)<(nframes*dt)
     display('duration of mouse times is less than duration of 2p images')
-    nframes = floor(mouseMax*framerate);
-    dfof = dfof(:,:,1:nframes);
-    img = img(:,:,1:nframes);
+    nframes = floor(mouseMax/dt);
+    dfofInterp = dfofInterp(:,:,1:nframes);
 end
 
-meanimg = squeeze(mean(mean(img,2),1));
-meandf = squeeze(mean(mean(dfof,2),1));
 
-dt = diff(mouseT);
-use = [1>0; dt>0];
+meandf = squeeze(mean(mean(dfofInterp,2),1));
+
+dt_mouse = diff(mouseT);
+use = [1>0; dt_mouse>0];
 mouseT=mouseT(use);
 
 posx = cumsum(stimRec.pos(use,1)-900);
 posy = cumsum(stimRec.pos(use,2)-500);
-frameT = interval:interval:max(mouseT);
+frameT = dt:dt:max(mouseT);
 vx = diff(interp1(mouseT,posx,frameT));
 vy = diff(interp1(mouseT,posy,frameT));
 vx(end+1)=0; vy(end+1)=0;
 %
-%     figure
-%     plot(vx); hold on; plot(vy,'g');
+    figure
+    plot(vx); hold on; plot(vy,'g');
 sp = sqrt(vx.^2 + vy.^2);
 %     figure
 %     plot(sp)
@@ -82,56 +78,82 @@ title(label);
 
 figure
 
-[xcc lag] = xcorr(sp-mean(sp),meandf-mean(meandf),'coeff');
-plot(xcc);
+[xcc lag] = xcorr(meandf-mean(meandf),sp-mean(sp),'coeff');
+plot(lag,xcc);
 [y ind] = max(abs(xcc(lag>0 & lag<240)));
 lag = lag(lag>0 & lag<240);
 title(sprintf('xc = %f lag = %d',xcc(ind),lag(ind)));
 
+if ~exist('offset','var')
 offset = lag(ind);
-
-meandfshift = meandf(offset:end);
-spshift = sp(1:end-offset+1);
-
-spshift = sp;
-meandfshift=circshift(meandf,offset);
-
-figure
-[xcc lag] = xcorr(spshift-mean(spshift),meandfshift-mean(meandfshift),'coeff');
-plot(xcc);
-[y ind] = max((xcc));
-title(sprintf('xc = %f lag = %d',xcc(ind),lag(ind)));
+save(sessionName,'offset','-append')
+end
 
 %     figure
 %     plot(xcorr(sp-mean(sp),meanimg-mean(meanimg)))
-
+mv=sp>1000;
 display('calculating xcorr')
 tic
-for x = 1:size(dfof,1);
+for x = 1:size(dfofInterp,1);
     x
-    for y = 1:size(dfof,2);
-        xc(x,y) = xcorr(circshift(squeeze((dfof(x,y,:))),offset)-mean(dfof(x,y,:)),sp(1:size(dfof,3))'-mean(sp),0,'coeff');
+    for y = 1:size(dfofInterp,2);
+        xc(x,y) = xcorr(circshift(squeeze((dfofInterp(x,y,:))),-offset)-mean(dfofInterp(x,y,:)),sp'-mean(sp),0,'coeff');
         %  xc(x,y) = corr(squeeze(dfof(x,y,:)),sp(1:size(dfof,3))','type','spearman');
     end
 end
-toc
 fig = figure;
 imagesc(xc,[-0.5 0.5]); axis square
 title([label 'speed xcorr']);
+
+figure
+spoffset = circshift(sp',offset);
+imagesc(mean(dfofInterp(:,:,spoffset>500),3)-mean(dfofInterp(:,:,spoffset<500),3),[-1 1]);
+title('running dfof'); axis square
+
+ptsfname = uigetfile('*.mat','pts file');
+if ptsfname==0
+    [pts dF neuropil] = get2pPts(dfofInterp);
+else
+    load(ptsfname);
+end
+dFClean = dF-0.7*repmat(neuropil,size(dF,1),1);
+
+for i = 1:size(dF,1);
+    df = circshift(dF(i,:)',-offset)';
+    %      figure
+    %     plot((1:nframes)/framerate,df/max(df),'g');
+    %
+    %     hold on
+    %     plot((1:nframes)/framerate, sp(1:size(dfofInterp,3))/max(sp),'b');
+    %     legend('fluorescence','speed');
+    
+    figure
+    subplot(2,1,1)
+    [xcc lag] =  xcorr( df-mean(df),sp-mean(sp),'coeff');
+    plot(lag,xcc)
+    [y ind] = max(abs(xcc));
+    title(sprintf('xc = %f lag = %d',xcc(ind),lag(ind)));
+    ylim([-0.5 0.5])
+    
+    subplot(2,1,2)
+    plot(sp,df,'.')
+    
+end
+
 for i = 1:5;
     figure(fig)
     [y x] = ginput(1);
     figure
-    df = circshift(squeeze(dfof(round(x),round(y),:)),offset);
+    df = circshift(squeeze(dfofInterp(round(x),round(y),:)),-offset);
     plot((1:nframes)/framerate,df/max(df),'g');
     
     hold on
-    plot((1:nframes)/framerate, sp(1:size(dfof,3))/max(sp),'b');
+    plot((1:nframes)/framerate, sp(1:size(dfofInterp,3))/max(sp),'b');
     legend('fluorescence','speed');
     
     figure
-    plot(xcorr(sp(1:size(dfof,3))-mean(sp(1:size(dfof,3))), df-mean(df),'coeff'));
-    [xcc lag] = xcorr(sp(1:size(dfof,3))-mean(sp(1:size(dfof,3))), df-mean(df),'coeff');
+    [xcc lag] =  xcorr( df-mean(df),sp-mean(sp),'coeff');
+    plot(lag,xcc)
     [y ind] = max(abs(xcc));
     title(sprintf('xc = %f lag = %d',xcc(ind),lag(ind)));
 end

@@ -8,7 +8,7 @@ colordef white
 close all
 
 choosePix =0; %%% option to manually select pixels for timecourse analysis
-maxGB = 0.5; %%% size to reduce data down to
+maxGB = 1.5; %%% size to reduce data down to
 
 if ~exist('in','var') || isempty(in)
     [f,p] = uigetfile({'*.tif'; '*.tiff'; '*.mat'},'choose pco data');
@@ -89,7 +89,7 @@ print('-dpsc',psfilename,'-append');
     end
     
     movPeriod =10;
-    binning=0.125;
+    binning=0.5;
     framerate=10;
 %     framerate=20;
     
@@ -194,8 +194,12 @@ print('-dpsc',psfilename,'-append');
     
     
 end  %%%LED
-ps2pdf('psfile', psfilename, 'pdffile', [psfilename(1:(end-2)) 'pdf']);
+try
+    ps2pdf('psfile', psfilename, 'pdffile', [psfilename(1:(end-2)) 'pdf']);
 delete(psfilename);
+catch
+    display('cant save pdf')
+end
 
     function mapFig(mapIn)
         figure

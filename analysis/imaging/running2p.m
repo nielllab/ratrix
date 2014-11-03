@@ -22,9 +22,9 @@ else
     spname = fullfile(p,f);
     load(spname);
     
-    [f p] = uiputfile('*.mat','session data');
+    [f p] = uiputfile('*.mat','save session data');
     sessionName=fullfile(p,f);
-    display('loading data')
+    display('saving data')
     save(sessionName,'dfofInterp','stimRec','-v7.3');
     display('done')
 end
@@ -138,7 +138,21 @@ for i = 1:size(dF,1);
     subplot(2,1,2)
     plot(sp,df,'.')
     
+    range = linspace(0, max(sp),10);
+    for s = 1:length(range)-1;
+        sphist(s) = mean(df(sp>range(s) & sp<range(s+1)));
+    end
+    hold on
+    plot(range(1:end-1),sphist,'g'); ylim([0 2])
+    
+    xccenter = xcc(lag>-10 & lag<10);
+    [y ind] = max(abs(xccenter));
+    runC(i) = xccenter(ind);
+    runZ(i) = (runC(i) - mean(xcc))/std(xcc);
+    
 end
+
+save(sessionName,'runC','runZ','-append');
 
 for i = 1:5;
     figure(fig)

@@ -1,7 +1,9 @@
 %load(fname,'dfof_bg');
 close all
-load('D:\grating3x5_2sf10min');
-load('D:\resolutionTestClose5min');
+ %load('C:\grating3x5_2sf10min');
+ %load('C:\grating5sf3tf_small_fast.mat')
+% load('D:\resolutionTestClose5min');
+load('C:\resolutionTestClose5minRight.mat');
 imagerate=10;
 
 % tf(tf==2)=1;
@@ -10,8 +12,10 @@ imagerate=10;
 imageT=(1:size(dfof_bg,3))/imagerate;
 img = imresize(double(dfof_bg),1,'method','box');
 
-%xpos=xpos(1:300); ypos=ypos(1:300); sf=sf(1:300); tf=tf(1:300);
+
 trials = length(sf)-1;
+trials = min(trials,size(dfof_bg,3)/(imagerate*(duration+isi)))-1
+xpos=xpos(1:trials); ypos=ypos(1:trials); sf=sf(1:trials); tf=tf(1:trials);
 % tic
 % img=deconvg6s(dfof_bg,1/imagerate);
 % toc
@@ -39,8 +43,8 @@ meandf = squeeze(mean(mean(img,2),1));
 figure
 plot(meandf(350:400))
 
-useframes = 25:30;
-base = 10:15;
+useframes =24:27;
+base = 12:16;
 % useframes =7:12;
 % base = 1:3;
 
@@ -61,16 +65,16 @@ for tr=1:trials;
 end
 
 if length(unique(xpos))>1
-[xph xamp xtuning] = getPixelTuning(trialdata,xpos,'X',[2 4],hsv);
+[xph xamp xtuning] = getPixelTuning(trialdata,xpos,'X',[1 length(unique(xpos))],hsv);
 end
 if length(unique(ypos))>1
 [yph yamp ytuning] = getPixelTuning(trialdata,ypos,'Y',[1 3],hsv);
 end
 if length(unique(sf))>1
-    [sfph sfamp sftuning] = getPixelTuning(trialdata,sf,'SF', [1 5],jet);
+    [sfph sfamp sftuning] = getPixelTuning(trialdata,sf,'SF', [1 length(unique(sf))],jet);
 end
 if length(unique(tf))>1
-[tfph tfamp tftuning] = getPixelTuning(trialdata,tf,'TF',[1 4],jet);
+[tfph tfamp tftuning] = getPixelTuning(trialdata,tf,'TF',[1 length(unique(tf))],jet);
 end
 
 
@@ -81,7 +85,7 @@ unique(spd)
 spd(spd==0)=1.6;
 spd=log(spd);
 if length(unique(spd))>1
-[tfph tfamp tftuning] = getPixelTuning(trialdata,spd,'speed',[1 5],jet);
+[tfph tfamp tftuning] = getPixelTuning(trialdata,spd,'speed',[3 7],jet);
 end
 
 
@@ -103,12 +107,13 @@ figure
 for i = 1:length(sfrange)
     for j=1:length(tfrange)
         subplot(length(sfrange),length(tfrange),length(tfrange)*(i-1)+j)
-        imagesc(squeeze(tuning(:,:,1,1,i,j)),[ 0 0.05]);
+        imagesc(squeeze(mean(mean(tuning(:,:,:,:,i,j),4),3)),[ 0 0.05]);
         title(sprintf('%0.2fcpd %0.2fhz',sfrange(i),tfrange(j)))
         axis off; axis equal
     end
 end
 
+if length(xrange)<=3
 merge = zeros(size(tuning,1),size(tuning,2),3);
 figure
 for i = 1:length(xrange)
@@ -124,8 +129,9 @@ end
 merge(merge<0)=0; merge(merge>1)=1;
 figure
 imshow(merge);
+end
 
-
+for doResolutionTest=1:0
 figure
 for i = 2:2
     for j=1:length(yrange)
@@ -169,6 +175,9 @@ plot(x,gauss_fit(fit_coeff,x),'g')
 fwhm = 2*sigma_est*1.17*32.5
 
 keyboard
+end
+
+keyboard
 for tr = 1:trials;
     data=zeros(length(sfrange),length(tfrange));
     data(find(sfrange==sf(tr)),find(tfrange==tf(tr)))=1;
@@ -177,6 +186,7 @@ for tr = 1:trials;
     alldata(tr,:)=data;
 end
 
+keyboard
 %alldata(alldata<0)=0;
 clear p0
 for i = 1:size(img,1);

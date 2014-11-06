@@ -1,9 +1,19 @@
+function [ph amp] = analyzeGratingPatch(dataname,moviename,useframes,base);
 %load(fname,'dfof_bg');
-close all
- %load('C:\grating3x5_2sf10min');
+%close all
+
+if exist('dataname','var')
+    load(dataname,'dfof_bg');
+end
+
+if exist('moviename','var')
+    load(moviename)
+else
+    load('C:\resolutionTestClose5minRight.mat');
+     %load('C:\grating3x5_2sf10min');
  %load('C:\grating5sf3tf_small_fast.mat')
 % load('D:\resolutionTestClose5min');
-load('C:\resolutionTestClose5minRight.mat');
+end
 imagerate=10;
 
 % tf(tf==2)=1;
@@ -25,6 +35,8 @@ acqdurframes = (duration+isi)*imagerate;
 figure
 clear cycavg
 nx=ceil(sqrt(acqdurframes));
+
+figure
 for f=1:acqdurframes
     cycavg(:,:,f) = mean(img(:,:,f:acqdurframes:end),3);
     subplot(nx,nx,f)
@@ -32,17 +44,39 @@ for f=1:acqdurframes
     %axis off
 end
 
+figure
+for f=1:acqdurframes
+    cycavgstart(:,:,f) = mean(img(:,:,f:acqdurframes:round(end/4)),3);
+    subplot(nx,nx,f)
+    imagesc(squeeze(cycavgstart(:,:,f)),[-0.02 0.02])
+    %axis off
+end
+
+
+for f=1:acqdurframes
+    cycavgend(:,:,f) = mean(img(:,:,round(3*end/4)+f:acqdurframes:end),3);
+    subplot(nx,nx,f)
+    imagesc(squeeze(cycavgend(:,:,f)),[-0.02 0.02])
+    %axis off
+end
+
+
+
 [y x] = ginput(1);
 y= round(y); x= round(x);
 range = -2:2;
 figure
 plot(squeeze(mean(mean(img(x+range,y+range,:),2),1)))
 
+figure
+plot(squeeze(mean(mean(cycAvg,2),1)))
+hold on
+plot(squeeze(mean(mean(cycavgstart,2),1)),'g')
+plot(squeeze(mean(mean(cycavgend,2),1)),'r')
 
 meandf = squeeze(mean(mean(img,2),1));
-figure
-plot(meandf(350:400))
 
+if ~exist('useframes','var')
 useframes =24:27;
 base = 12:16;
 % useframes =7:12;
@@ -50,6 +84,8 @@ base = 12:16;
 
 % useframes = 8:10;
 % base = 1:2;
+end
+
 trialdata = zeros(size(img,1),size(img,2),trials+2);
 trialspeed = zeros(trials+2,1);
 for tr=1:trials;
@@ -65,16 +101,16 @@ for tr=1:trials;
 end
 
 if length(unique(xpos))>1
-[xph xamp xtuning] = getPixelTuning(trialdata,xpos,'X',[1 length(unique(xpos))],hsv);
+[ph(:,:,1) amp(:,:,1) xtuning] = getPixelTuning(trialdata,xpos,'X',[1 length(unique(xpos))],hsv);
 end
 if length(unique(ypos))>1
-[yph yamp ytuning] = getPixelTuning(trialdata,ypos,'Y',[1 3],hsv);
+[ph(:,:,2) amp(:,:,2) ytuning] = getPixelTuning(trialdata,ypos,'Y',[1 3],hsv);
 end
 if length(unique(sf))>1
-    [sfph sfamp sftuning] = getPixelTuning(trialdata,sf,'SF', [1 length(unique(sf))],jet);
+    [ph(:,:,3) amp(:,:,3) sftuning] = getPixelTuning(trialdata,sf,'SF', [1 length(unique(sf))],jet);
 end
 if length(unique(tf))>1
-[tfph tfamp tftuning] = getPixelTuning(trialdata,tf,'TF',[1 length(unique(tf))],jet);
+[ph(:,:,4) amp(:,:,4) tftuning] = getPixelTuning(trialdata,tf,'TF',[1 length(unique(tf))],jet);
 end
 
 
@@ -85,7 +121,7 @@ unique(spd)
 spd(spd==0)=1.6;
 spd=log(spd);
 if length(unique(spd))>1
-[tfph tfamp tftuning] = getPixelTuning(trialdata,spd,'speed',[3 7],jet);
+[ph(:,:,5) amp(:,:,5) tftuning] = getPixelTuning(trialdata,spd,'speed',[3 7],jet);
 end
 
 

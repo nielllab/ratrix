@@ -12,7 +12,8 @@ framerate=1/dt;
 
 if strcmp(f(end-3:end),'.mat')
    display('loading data')
-   load(fullfile(p,f))
+  sessionName = fullfile(p,f);
+  load(fullfile(p,f))
    display('done')
 else
     cycLength=10;
@@ -152,7 +153,7 @@ for i = 1:size(dF,1);
     
 end
 
-save(sessionName,'runC','runZ','-append');
+save(sessionName,'offset','runC','runZ','dfofInterp','stimRec','-v7.3');
 
 for i = 1:5;
     figure(fig)

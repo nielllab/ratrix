@@ -29,24 +29,29 @@ while ~done
         pts(npts,2)=round(y);
         plotdata(npts) = plot(round(y)*mag,round(x)*mag,'g*'); plotdata2(npts) = plot(round(y)*mag,round(x)*mag,'bo');
    
+          w=12; corrThresh=0.75; neuropilThresh=0.5;
+          xmin=max(1,x-w); ymin=max(1,y-w);
+    xmax = min(size(dfofInterp,1),x+w); ymax = min(size(dfofInterp,2),y+w);
+        
       cc=0;
     for f= 1:size(dfofInterp,3);
-        cc = cc+(dfofInterp(x,y,f)-mn(x,y))*(dfofInterp(:,:,f)-mn);
+        cc = cc+(dfofInterp(x,y,f)-mn(x,y))*(dfofInterp(xmin:xmax,ymin:ymax,f)-mn(xmin:xmax,ymin:ymax));
     end
-    cc = cc./(size(dfofInterp,3)*sigma(x,y)*sigma);
+    cc = cc./(size(dfofInterp,3)*sigma(x,y)*sigma(xmin:xmax,ymin:ymax));
   if npts==1
       cellfig=figure
   else
       figure(cellfig);
   end
-  subplot(2,2,1);
-  imagesc(cc,[0 1]);
-  axis equal  
-    w=12; corrThresh=0.75; neuropilThresh=0.5;
-    xmin=max(1,x-w); ymin=max(1,y-w);
-    xmax = min(size(dfofInterp,1),x+w); ymax = min(size(dfofInterp,2),y+w);
+
+
   
-   roi = cc; roi(1:xmin-1,:,:)=0; roi(:,1:ymin-1,:)=0; roi(xmax+1:end,:,:)=0; roi(:,ymax+1:end,:)=0;
+   roi = zeros(size(sigma));
+   roi(xmin:xmax,ymin:ymax) =cc;
+   
+     subplot(2,2,1);
+  imagesc(roi,[0 1]);
+  axis equal  
    
   subplot(2,2,2);
    imagesc(roi>corrThresh); axis equal
@@ -55,7 +60,7 @@ while ~done
     coverage(usePts{npts})=npts;
     
     subplot(2,2,3);
-    imagesc(cc(xmin:xmax,ymin:ymax),[0.5 1]);
+    imagesc(cc,[0 1]);
  
     elseif b==32 %%% spacebar
         delete(plotdata(npts)); delete(plotdata2(npts))

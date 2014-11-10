@@ -285,7 +285,7 @@ recs = {
 %     {[1220 1222],[],'extra frames?',''}
 %     {[1223 1340],[],'090614 g62b5lt gts behavior\g62b5lt_run1_gts_fstop8_exp50_sf200','g62b5lt_run1_gts_fstop8_exp50_sf200'}
 % %only35 trials camware set to 9999frames        {[1341 1376],[],'101614 g62b5lt gts behavior\g62b5_run1_gts_fst56_Exp50mssf200_0nly9999images','g62b5_run1_gts_fst56_Exp50mssf200'}
-%rerun       {[1377 1535],[],'101614 g62b5lt gts behavior\g62b5_run2_gts_fstpo5.6_exp50ms_sf200','g62b5_run2_gts_fstpo5.6_exp50ms_sf200'}
+   {[1377 1535],[],'101614 g62b5lt gts behavior\g62b5_run2_gts_fstpo5.6_exp50ms_sf200','g62b5_run2_gts_fstpo5.6_exp50ms_sf200'}
    {[1536 1752],[],'102314 g62k2rt gts behavior\g62k2rt_fstop5.6_exp50ms_gts','g62k2rt_fstop5.6_exp50ms_gts'}
    {[1753 1927],[],'102814 G62K2-rt GTS behavior\G62K2-rt_run1_GTS_behavior_50ms_F5_6','G62K2-rt_run1_GTS_behavior_50ms_F5_6'}
    {[1928 2235],[],'103014 g62k2rt gts behavior\g62k2rt_run1_gts_fstop5.6_exp50ms','g62k2rt_run1_gts_fstop5.6_exp50ms'}
@@ -509,21 +509,23 @@ recs = {
 %     }
 %     }
 %
-%        {'g62m1lt' { 
-%     {[1 140],[],'101914 G62m1-lt Naive behavior\G62M1-lt_run1_Naive_behavior_50ms_F5_6','G62M1-lt_run1_Naive_behavior_50ms_F5_6'}
+       {'g62m1lt' { 
+     {[1 140],[],'101914 G62m1-lt Naive behavior\G62M1-lt_run1_Naive_behavior_50ms_F5_6','G62M1-lt_run1_Naive_behavior_50ms_F5_6'}
 %      {[141 292],[],'102014 G62M1-LT Naive behavior\G62M1-LT_run1_naive_behavior_50ms_F5_6','G62M1-LT_run1_naive_behavior_50ms_F5_6'}
 %      {[293 506],[],'102114 g62m1lt naive behavior\g62m1lt_run1_naive_fstop5.6_exp50ms','g62m1lt_run1_naive_fstop5.6_exp50ms'}
-% %     rerun {[507 743],[],'102314 G62M1-LT GTS Behavior\G62M1-LT_run1_GTS_behavior_50ms_F5_6','G62M1-LT_run1_GTS_behavior_50ms_F5_6'}
+     {[507 743],[],'102314 G62M1-LT GTS Behavior\G62M1-LT_run1_GTS_behavior_50ms_F5_6','G62M1-LT_run1_GTS_behavior_50ms_F5_6'}
 %     {[744 945],[],'102514 g62m1lt gts behavior\g62m1lt_run1_gts_fstop5.6_exp50ms','g62m1lt_run1_gts_fstop5.6_exp50ms'}
-%     {[946 1175],[],'102714 G62M1LT GTS behavior\G62M1LT_run1_GTS_behavior_50ms_F5_6','G62M1LT_run1_GTS_behavior_50ms_F5_6'}
+     {[946 1175],[],'102714 G62M1LT GTS behavior\G62M1LT_run1_GTS_behavior_50ms_F5_6','G62M1LT_run1_GTS_behavior_50ms_F5_6'}
 %     {[1176 1368],[],'102914 G62M1-lt GTS behavior\G62M1-lt_run1_GTS_behavior_50ms_F5_6','G62M1-lt_run1_GTS_behavior_50ms_F5_6'}
 %     {[1369 1546],[],'110114 G62M1-LT GTS behavior\G62m1-lt_run1_GTS_behavior_50ms_F5_6','G62m1-lt_run1_GTS_behavior_50ms_F5_6'}
+    {[1547 1757],[],'110414 g62m1lt gts behavior\g62m1lt_run1_gts_fstop5.6_exp50ms_sf200','g62m1lt_run1_gts_fstop5.6_exp50ms_sf200'}
+        {[1758 2003],[],'110714 g62m1lt gts behavior\g62m1lt_run1_gts_fstop5.6_exp50ms','g62m1lt_run1_gts_fstop5.6_exp50ms'}
 %     }
 %     }
 %     
-%        {'g62j8lt' { 
+       {'g62j8lt' { 
 %     %no h20 {[1 25],[],'101914 G62J8-lt Naive Behavior\G62j8lt_run1_naive_behavior_50ms_F_5_6_noH20','G62j8lt_run1_naive_behavior_50ms_F_5_6'}
-%     {[26 221],[],'101914 G62J8-lt Naive Behavior\G62j8lt_run2_naive_behavior_50ms_F_5_6','G62j8lt_run2_naive_behavior_50ms_F_5_6'}
+      {[26 221],[],'101914 G62J8-lt Naive Behavior\G62j8lt_run2_naive_behavior_50ms_F_5_6','G62j8lt_run2_naive_behavior_50ms_F_5_6'}
 %     {[222 364],[],'102014 G62J8-LT Naive behavior\G62J8-LT_run1_Naive_behavior_50ms_F5_6','G62J8-LT_run1_Naive_behavior_50ms_F5_6'}
 %     {[365 484],[],'102114 g62j8lt naive behavior\g62j8lt_run1_naive_fstop5.6_exp50ms_sf200','g62j8lt_run1_naive_fstop5.6_exp50ms_sf200'}
 %     {[485 722],[],'102314 G62J8LT GTS behavior\G62J8-LT_run2_GTS_behavior_50ms_F5_6','G62J8-LT_run2_GTS_behavior_50ms_F5_6'}
@@ -531,6 +533,9 @@ recs = {
 %     {[900 1187],[],'102714 G62J8LT GTS Behavior\G62J8LT_run1_GTS_behavior_50ms_F5_6','G62J8LT_run1_GTS_behavior_50ms_F5_6'}
 %     {[1188 1409],[],'102914 G62J8-LT GTS behavior\G62J8-lt_run1_GTS_behavior_50ms_F5_6','G62J8-lt_run1_GTS_behavior_50ms_F5_6'}
 %     {[1410 1541],[],'110114 G62J8-LT GTS behavior\G62J8-LT_run1_GTS_behavior_50ms_F5_6','G62J8-LT_run1_GTS_behavior_50ms_F5_6'}
+    {[1542 1789],[],'110314 g62j8lt gts behavior\g62j8lt_run1_gts_fstop5.6_exp50ms_sf200','g62j8lt_run1_gts_fstop5.6_exp50ms_sf200'}
+    {[1410 1541],[],'110614 g62j8lt gts behavior\g62j8lt_run1_gts_fstop5.6_exp50ms_sf200','g62j8lt_run1_gts_fstop5.6_exp50ms_sf200'}
+    {[1410 1541],[],'110814 g62j8lt gts behavior\g62j8lt_run1_gts_fstop5.6_exp50ms_sf200','g62j8lt_run1_gts_fstop5.6_exp50ms_sf200'}
 %     }
 %     }
     
@@ -543,9 +548,12 @@ recs = {
 %     {[442 714],[],'101814 g62L1-lt GTS behavior Learning\g62L1-lt_run1_GTS_behavior_Learning_50ms_F5_6', 'g62L1-lt_run1_GTS_behavior_Learning_50ms_F5_6'}
 %     {[715 880],[],'102014 G62L1-LT GTS behavior learning\G62L1-LT_run1_GTS_behavior_learning_50ms_F5_6', 'G62L1-LT_run1_GTS_behavior_learning_50ms_F5_6'}
 %     {[881 999],[],'102314 g62l1lt gts behavior\g62l1lt_run1_gts_fstop5.6_exp50ms', 'g62l1lt_run1_gts_fstop5.6_exp50ms'}
-%%rerun error    {[1000 1207],[],'102514 g62l1lt gts behavior\g62l1lt_run1_gts_fstop5.6_exp50ms_200sf', 'g62l1lt_run1_gts_fstop5.6_exp50ms_200sf'}
-    {[1208 1429],[],'102814 G62L1LT GTS behavior\G62L1-LT_run1_GTS_behavior_learning_50ms_F5_6', 'G62L1-LT_run1_GTS_behavior_learning_50ms_F5_6'}
-    {[1430 1609],[],'102914 G62L1-LT GTS behavior\G62L1-lt_run1_GTS_behavior_50ms_F5_6', 'G62L1-lt_run1_GTS_behavior_50ms_F5_6'}
+   {[1000 1207],[],'102514 g62l1lt gts behavior\g62l1lt_run1_gts_fstop5.6_exp50ms_200sf', 'g62l1lt_run1_gts_fstop5.6_exp50ms_200sf'}
+%     {[1208 1429],[],'102814 G62L1LT GTS behavior\G62L1-LT_run1_GTS_behavior_learning_50ms_F5_6', 'G62L1-LT_run1_GTS_behavior_learning_50ms_F5_6'}
+%     {[1430 1609],[],'102914 G62L1-LT GTS behavior\G62L1-lt_run1_GTS_behavior_50ms_F5_6', 'G62L1-lt_run1_GTS_behavior_50ms_F5_6'}
+    {[1610 1805],[],'110114 G62L1Lt gts behavior\g62l1lt_run1_gts_fstop5.6_exp50ms_Sf200', 'g62l1lt_run1_gts_fstop5.6_exp50ms_Sf200'}
+    {[1806 2023],[],'110414 g62l1lt gts behavior\g62l1lt_gts_fstop5.6_exp50ms_sf200', 'g62l1lt_gts_fstop5.6_exp50ms_sf200'}
+    {[2024 2183],[],'110714 g62l1lt gts behavior\g62l1lt_run1_gts_fstop5.6_exp50ms', 'g62l1lt_run1_gts_fstop5.6_exp50ms'}
     }
     }
 

@@ -85,7 +85,34 @@ for f = 1:length(files)
 %         errmsg{nerr}=sprintf('couldnt do %s',files(f).patchydata)
 %         errRpt{nerr}=getReport(exc,'extended')
 %     end
- 
+    try
+        dfofMovie([datapathname files(f).grating5sf4tfdata]);
+    catch exc
+        nerr=nerr+1;
+        errmsg{nerr}= sprintf('couldnt do %s',files(f).grating5sf4tfdata)
+        errRpt{nerr}=getReport(exc,'extended')
+    end
+    try
+        dfofMovie([datapathname files(f).grating3x5data]);
+    catch exc
+        nerr=nerr+1;
+        errmsg{nerr}=sprintf('couldnt do %s',files(f).grating3x5data)
+        errRpt{nerr}=getReport(exc,'extended')
+    end 
+        try
+        dfofMovie([datapathname files(f).resolutiondata]);
+    catch exc
+        nerr=nerr+1;
+        errmsg{nerr}= sprintf('couldnt do %s',files(f).resolutiondata)
+        errRpt{nerr}=getReport(exc,'extended')
+    end
+%     try
+%         dfofMovie([datapathname files(f).resolutionRightdata]);
+%     catch exc
+%         nerr=nerr+1;
+%         errmsg{nerr}=sprintf('couldnt do %s',files(f).resolutionRightdata)
+%         errRpt{nerr}=getReport(exc,'extended')
+%     end 
     
 
 %     for e = 1:nerr

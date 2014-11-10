@@ -7,8 +7,12 @@ framerate=1/dt;
 
 if strcmp(f(end-3:end),'.mat')
     display('loading data')
-    load(fullfile(p,f))
+    sessionName = fullfile(p,f);
+    load(sessionName)
     display('done')
+    if ~exist('cycLength','var')
+        cycLength=8;
+    end
 else
     blank = input('stim includes blank? 0/1 : ');
     cycLength = input('cycle length : ');
@@ -22,9 +26,17 @@ else
     startTime = input('start time : ');
     display('saving data')
     sessionName= fullfile(p,f);
-    save(sessionName,'dfofInterp','blank','startTime','-v7.3');   
+    save(sessionName,'dfofInterp','blank','startTime','cycLength','-v7.3');   
      display('done')
 end
+
+for f = 1:cycLength/dt;
+    cycAvg(:,:,f) = mean(dfofInterp(:,:,startTime+f:cycLength/dt:end),3);
+end
+figure
+plot(squeeze(mean(mean(cycAvg,2),1)))
+
+
 
 if ~blank
     gratingfname = 'C:\grating2p8orient2sf.mat';
@@ -48,7 +60,7 @@ load(gratingfname);
 % startTime = input('start time : ');
 
 dfReshape = reshape(dfofInterp, size(dfofInterp,1)*size(dfofInterp,2),size(dfofInterp,3));
-[osi osifit tuningtheta amp  tfpref pmin R resp] = gratingAnalysis(gratingfname, startTime,dfReshape,dt,blank);
+[osi osifit tuningtheta amp  tfpref pmin R resp tuning spont] = gratingAnalysis(gratingfname, startTime,dfReshape,dt,blank);
 
 osi = reshape(osi,   size(dfofInterp,1), size(dfofInterp,2) );
 R = reshape(R,size(dfofInterp,1), size(dfofInterp,2));
@@ -124,9 +136,9 @@ if ptsfname==0
 else
     load(ptsfname);
 end
-dFClean = dF-0.7*repmat(neuropil,size(dF,1),1);
+dFClean = dF-0.8*repmat(neuropil,size(dF,1),1);
 
-[osi osifit tuningtheta amp  tfpref pmin R resp]= gratingAnalysis(gratingfname, startTime,dFClean,dt,blank);
+[osi osifit tuningtheta amp  tfpref pmin R resp tuning spont]= gratingAnalysis(gratingfname, startTime,dFClean,dt,blank);
 
 
 c = 'rgbcmk'
@@ -140,6 +152,6 @@ end
 ylim([0 size(dF,1)+2]); xlim([0 length(trange)*dt/60]);
 xlabel('mins')
 
-save(sessionName,'osi','osifit','tuningtheta','amp','pmin','R','tfpref','-append');
+save(sessionName,'osi','osifit','tuningtheta','amp','pmin','R','tfpref','dfofInterp','blank','startTime','cycLength','-v7.3');
 
 

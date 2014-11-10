@@ -1,11 +1,11 @@
-function [osicv osi tuningtheta amp tfpref minp R resp] = gratingAnalysis(fname, startTime, dF, dt, blank);
+function [osicv osi tuningtheta amp tfpref minp R resp alltuning spont] = gratingAnalysis(fname, startTime, dF, dt, blank);
 
 isi = 0; sf = 0;
 fname
 load(fname)
 
-baseRange = (2:dt:3.5)/dt;
-evokeRange = (0:dt:4)/dt;
+baseRange = (2.5:dt:3.5)/dt;
+evokeRange = (1:dt:4)/dt;
 
 nstim = length(xpos);
 
@@ -40,6 +40,7 @@ if npts<=225
     figure
 nfigs = ceil(sqrt((npts)));
 end
+
 for i= 1:npts
     if i/1000 == round(i/1000);
         i
@@ -58,16 +59,16 @@ tuning_std = squeeze(ori_std(i,:,tf_use));
 spont(i)=0; spont_std(i)=0;
     else
       tuning = squeeze(orientation(i,1:end-1,tf_use)) ; tuning_std = squeeze(ori_std(i,1:end-1,tf_use));
-      spont(i) = orientation(i,end,tf_use); spont_std(i)=ori_std(i,end,tf_use);
+      spont(i) = mean(orientation(i,end,:)); spont_std(i)=sqrt(sum(ori_std(i,end,:).^2))/(size(ori_std,3));
     end
     ntrials = length(find(theta==angles(1) & sf==sfs(1)));
     
  
-   R(i) = max(tuning);
+   R(i) = max(tuning)-spont(i);
  
-    [osicv(i) tuningtheta(i)] = calcOSI(tuning',0);
+    [osicv(i) tuningtheta(i)] = calcOSI(tuning'-spont(i),0);
    if npts<100*100
-       [thetafit(i) osi(i) A1(i) A2(i) w(i) B(i)] = fit_tuningcurve(tuning,angles(1:length(tuning)));
+       [thetafit(i) osi(i) A1(i) A2(i) w(i) B(i) nr yfit] = fit_tuningcurve(tuning-spont(i),angles(1:length(tuning)));
      [osi(i) width(i) amp(i)] = calculate_tuning(A1(i),A2(i),B(i),w(i));
    else
        osi=[];
@@ -75,7 +76,7 @@ spont(i)=0; spont_std(i)=0;
        amp=[];
    end
 
-    
+    alltuning(i,:)=tuning;
     if npts<100*100
     for ori=1:length(tuning);
         t(ori)=(tuning(ori)-spont(i))/(tuning_std(ori) /sqrt(ntrials));
@@ -89,9 +90,12 @@ spont(i)=0; spont_std(i)=0;
     
       if npts<=225
        subplot(nfigs,nfigs,i)
+     %  subplot(10,8,i-1)
    errorbar(1:length(tuning),tuning,tuning_std/sqrt(ntrials)); 
    hold on; plot([1 8],[spont(i) spont(i)],'g');
-    ylim([-0.4 1]); xlim([0 9])
+    ylim([-1 2]); xlim([0 9])
+    set(gca,'Xtick',[]); set(gca,'Ytick',[]);
+    
  
     %title(sprintf('%0.2f %0.2f',minp(i)*length(angles),osi(i)));
    end

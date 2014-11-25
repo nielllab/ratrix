@@ -9,5 +9,6 @@ ph(ph<0) = ph(ph<0)+2*pi;
 ph=mat2im(ph,hsv,[1.5 5]); % was [2 5]
 amp = abs(in);
 amp = amp/prctile(amp(:),lim);
+%amp = amp/0.03;
 amp(amp>1)=1;
 out = ph.* repmat(amp,[1 1 3]);

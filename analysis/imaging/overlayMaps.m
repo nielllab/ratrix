@@ -9,7 +9,8 @@ opengl software
   showImg=1;
   
 if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
-    load([pathname expfile.behav]); %%% behavior
+    display('loading ...')
+    load([pathname expfile.behav],'trials','targ','correct','starts','onsets','pts','bg'); %%% behavior
     
     load( [outpathname expfile.subj expfile.expt '_topography.mat']); %%% topography
     
@@ -62,14 +63,14 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
     correct=correct(trials);
     targ=targ(trials);
     
-    save(['D:\behav files\' expfile.subj expfile.expt '_behavdata.mat'],'bg','resp_time','stop_time','correct','targ','pts')
+%    save(['D:\behav files\' expfile.subj expfile.expt '_behavdata.mat'],'bg','resp_time','stop_time','correct','targ','pts')
     
     %     figure
     %     hist(resp_time,0.3:0.02:0.6)
     oldbg = bg;
     minbg = min(bg,[],2);
     % minbg = nanmedianMW(bg(:,pts>=-0.5 & pts<0,:,:),2);
-    % minbg = min(bg(:,pts>=-0.5 & pts<=0,:,:),[],2);
+     %minbg = min(bg(:,pts>=-0.5 & pts<=0,:,:),[],2);
     bg = bg-repmat(minbg,[1 size(bg,2) 1 1]);
     
     
@@ -223,26 +224,24 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
     
     for i =1:4
         if i==1
-            useTrials = find(correct==1&resp_time>0.4 & resp_time<0.7 );
-            %             for j =1:5
-            %                 tr = ceil(rand*length(useTrials));
-            %                 figure
-            %                 for fr = 1:24
-            %                     subplot(4,6,fr);
-            %                     imagesc(squeeze(bg(useTrials(tr),fr,:,:)),[0 0.15]);
-            %                     axis off
-            %                 end
-            %             end
-            %  keyboard
-            
-            
+            useTrials = find(correct==1&resp_time>0.4 & resp_time<0.6 );
+                        for j =1:0
+                            tr = ceil(rand*length(useTrials));
+                            figure
+                            for fr = 1:24
+                                subplot(4,6,fr);
+                                imagesc(squeeze(bg(useTrials(tr),fr,:,:)),[0 0.15]);
+                                axis off
+                            end
+                        end
+                 
         elseif i==2
-            useTrials = find(correct==0&resp_time>0.4 & resp_time<0.7 );
+            useTrials = find(correct==0&resp_time>0.4 & resp_time<0.6 );
             showImg=0;
         elseif i==3
-            useTrials = find(correct==1&targ<0&resp_time>0.4 & resp_time<0.7 );
+            useTrials = find(correct==1&targ<0&resp_time>0.4 & resp_time<0.6 );
         elseif i ==4
-            useTrials = find(correct==1&targ>0&resp_time>0.4 & resp_time<0.7 );
+            useTrials = find(correct==1&targ>0&resp_time>0.4 & resp_time<0.6 );
         elseif i==5
             decon = deconvg6s(nanmedianMW(bg(correct==1,:,:,:)),0.1) ;
         elseif i==6
@@ -257,11 +256,13 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
             end
             % decon = deconvg6s(nanmedianMW(bg(correct(trials)==1,:,:,:)),0.1) - deconvg6s(nanmedianMW(bg(correct(trials)==0,:,:,:)),0.1);
         end
-        numtrials = length(useTrials)
+ 
+        numtrials = length(useTrials);
+        sprintf('cond %d; %d trials',i,numtrials)
         if numtrials==0
             alldata{i} = [];
         else
-            decon = deconvg6s(nanmedianMW(bg(useTrials,:,:,:)),0.1);
+            decon = deconvg6sParallel(nanmedianMW(bg(useTrials,:,:,:)),0.1);
             
             use_pts=find(pts>=0)-3;
             if i==0 & showImg

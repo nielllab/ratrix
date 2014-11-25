@@ -108,8 +108,10 @@ imagesc(R,[0 2]);
 
 theta(isnan(theta))=-0.1;
 im = mat2im(theta,hsv,[-0.1 pi]);
-osi_norm = 3*osi; osi_norm(osi_norm>1)=1;
-R_norm=R/2; R_norm(R_norm>1)=1; R_norm(R_norm<0)=0;
+osi_norm = 3*osi; 
+%osi_norm = osifit; 
+osi_norm(osi_norm>1)=1;
+R_norm=R/1.1; R_norm(R_norm>1)=1; R_norm(R_norm<0)=0;
 
 white =ones(size(im(:,:,1)));
 
@@ -130,6 +132,7 @@ figure
 imshow(imresize(tf_im,4));
 title('tf preference')
 
+keyboard
 ptsfname = uigetfile('*.mat','pts file');
 if ptsfname==0
     [pts dF neuropil] = get2pPts(dfofInterp);

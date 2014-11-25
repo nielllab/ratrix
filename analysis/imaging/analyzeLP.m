@@ -1,60 +1,97 @@
 batchLP_DMN;
-
+close all
 
 use = find(strcmp({files.monitor},'vert') & ~strcmp({files.site},'lgn') & ~strcmp({files.size},'8mm'));
 %use = 1: length(files)
 %%% calculate gradients and regions
+use = use(1:5)
 clear map merge
-for f = 1:length(use)
-    f
-    if ~isempty(files(f).topox) & ~isempty(files(f).topoy)
-        [grad{f} amp{f} map_all{f} map{f} merge{f}]= getRegions(files(use(f)),pathname,outpathname);
+for i = 1:length(use)
+    f=use(i)
+     figure
+    if ~isempty(files(f).topox)
+        load([pathname files(f).topox],'map')
+       
+        subplot(2,3,1);
+        imshow( polarMap(map{3},95));
+        subplot(2,3,4);
+        imagesc(abs(map{3}));
+        axis equal; axis off;
+        title([files(f).subj ' ' files(f).expt ' ' sprintf('%0.3f',max(abs(map{3}(:))))])
+        drawnow
+    else
+        display('missing topox')
     end
-end
-
-
-%%% align gradient maps to first file
-for f = 1:length(use); %changed from 1:length(map)
-    [imfit{f} allxshift(f) allyshift(f) allzoom(f)] = alignMaps(map([1 f]), merge([1 f]), [files(use(f)).subj ' ' files(use(f)).expt ' ' files(use(f)).monitor] );
-    xshift = allxshift(f); yshift = allyshift(f); zoom = allzoom(f);
-    save( [outpathname files(use(f)).subj files(use(f)).expt '_topography.mat'],'xshift','yshift','zoom','-append');
-end
-
-
-avgmap=0;
-for f= 1:length(use)
-
- m = shiftImage(merge{f},allxshift(f),allyshift(f),allzoom(f),80);
- sum(isnan(m(:)))
- 
- sum(isnan(merge{f}(:)))
- figure
- imshow(m*3);
- avgmap = avgmap+m;
- title( [files(use(f)).subj ' ' files(use(f)).expt ' ' files(use(f)).monitor] );
-end
-figure
-imshow(3*avgmap/length(use));
+    if ~isempty(files(f).topoXslow)
+        load([pathname files(f).topoXslow],'map')
+        
+        subplot(2,3,2);
+        imshow( polarMap(map{3},95));
+        subplot(2,3,5);
+        imagesc(abs(map{3}));
+        axis equal; axis off
+        title([files(f).subj ' ' files(f).expt ' ' sprintf('%0.3f',max(abs(map{3}(:))))])
+        drawnow
+    end
     
-for f = length(use):length(use)
-    f
-    %try
-        fitSpeed([pathname files(use(f)).topox]);
-        fitSpeed([pathname files(use(f)).topoy]);
-        display('done')
-   % catch
-        display('couldnt')
-    %end
+    
+    if ~isempty(files(f).stepBinary)
+        load([pathname files(f).stepBinary],'map')
+        
+        subplot(2,3,3);
+        imshow( polarMap(map{3},95));
+        subplot(2,3,6);
+        imagesc(abs(map{3}));
+        axis equal
+        title([files(f).subj ' ' files(f).expt ' stepbinary'])
+        drawnow
+    end
+    
+%     if ~isempty(files(f).loom)
+%         loom_resp{f}=fourPhaseOverlay(files(f),pathname,outpathname,'loom');
+%     end
+    
+%     if ~isempty(files(f).topox)
+%         clear dfof_bg sp
+%         load([pathname files(f).topox],'dfof_bg','sp')
+%         if exist('dfof_bg','var')& exist('sp','var')
+%             getPCA(dfof_bg,sp,[files(f).subj ' ' files(f).expt])
+%             title([files(f).subj ' ' files(f).expt ' topoX PCA'])
+%         end
+%          
+%     end
+%     
+%     if ~isempty(files(f).stepBinary)
+%         clear dfof_bg sp
+%         load([pathname files(f).stepBinary],'dfof_bg','sp')
+%         if exist('dfof_bg','var') & exist('sp','var')
+%             getPCA(dfof_bg,sp,[files(f).subj ' ' files(f).expt])
+%         end
+%         title([files(f).subj ' ' files(f).expt ' stepbinary PCA'])
+%     end
+    
+    
+    if ~isempty(files(f).histonum)
+        figure
+        nf = str2num(files(f).histonum); nf = floor(min(nf,16)/2);
+        fbase = [pathname files(f).histology];
+        fbase = fbase(1:end-2);
+        nx = ceil(sqrt(nf));
+        for fr = 1:nf
+            fname = sprintf('%s%02d.tif',fbase,fr*2-1);
+            im = imrotate(imread(fname),0);
+            subplot(nx,nx,fr);
+            imshow(im);
+        end
+        title([files(f).subj ' ' files(f).expt])
+    end
+    
 end
 
-%%% analyze 4-phase data (e.g. looming and grating)
-for f = 1:length(use)
-    loom_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'loom');
-end
 
-%fourPhaseAvg(loom_resp,allxshift-25,allyshift-25,zoom, 80, avgmap);
-
-for f = 1:length(use)
- f
- grating_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'grating');
-end
+% %fourPhaseAvg(loom_resp,allxshift-25,allyshift-25,zoom, 80, avgmap);
+%
+% for f = 1:length(use)
+%  f
+%  grating_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'grating');
+% end

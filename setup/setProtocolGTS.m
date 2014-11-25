@@ -37,8 +37,8 @@ switch subjIDs{1}
 
      case 'g62m.1lt' % Started 10/22/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 60;
-       msPenalty               =4000;
+       rewardSizeULorMS        = 50;
+       msPenalty               =4200;
        
     case 'g62l1lt' % started GTS Learning paradigm on 10/12/14
        requestRewardSizeULorMS = 0;

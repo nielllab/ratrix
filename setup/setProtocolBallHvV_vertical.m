@@ -36,12 +36,12 @@ end
      
      case 'g62g.6lt' % Started 10/9/14
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 75;
-       msPenalty               =4300;
+       rewardSizeULorMS        = 70;
+       msPenalty               =4100;
      
      case 'g62b7lt'           %Started full 8/14/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40; 
+       rewardSizeULorMS        = 30; 
        msPenalty               =3900;
          
      

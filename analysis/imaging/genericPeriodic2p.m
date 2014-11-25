@@ -1,12 +1,13 @@
 clear all
 close all
-grating2p8orient2sf.mat
+
+cycLength=10;
+cycLength = input('cycle length (secs) :');
 
 [f p] = uigetfile('*.tif','tif file');
 fname = fullfile(p,f)
 
-cycLength=10;
-cycLength = input('cycle length (secs) :');
+
 
 inf = imfinfo(fname)
 
@@ -182,19 +183,23 @@ transp = capdf>0.2;
 set(h,'AlphaData',transp)
 title('mean elicited response')
 
+mn = mean(dfofInterp,3);
+sigma = std(dfofInterp,[],3);
+
 
 absmap = figure
 imshow(polarMap(mapfilt))
 range=-1:1;
 %for i = 1:25;
-done=0;
+done=0;i=0;
 while ~done
     figure(absmap)
     [y x b]= (ginput(1));
    if b==3
        done=1;
    else
-       x = round(x); y=round(y);
+      i=i+1;
+      x = round(x); y=round(y);
     figure
     full = squeeze(mean(mean(dfofInterp(x+range,y+range,:),2),1));
     plot(full)
@@ -205,64 +210,79 @@ while ~done
     title('cyc avg timecourse');
     trace(:,i) = full;
     avgTrace(:,i) = avg;
+    
+    cc=0;
+    for f= 1:size(dfofInterp,3);
+        cc = cc+(dfofInterp(x,y,f)-mn(x,y))*(dfofInterp(:,:,f)-mn);
+    end
+    cc = cc./(size(dfofInterp,3)*sigma(x,y)*sigma);
+    figure
+    imagesc(cc,[-1 1]);
+    
+    for nICA=1:0
+     dx=8; dy=8; g=4;
+                roi = imgInterp(x-dx : x+dx,y-dy:y+dy,:);  %%% note - this double the size of the box (to give a bigger ROI for the ICA to work on)
+                
+
+                %%% make this one dimensional, for the ICA
+                roi_reshape = reshape(roi,size(roi,1)*size(roi,2),size(roi,3));
+                for g=1:4
+                nICA=3;
+                if g==1     %%% test different non-linearities
+                    [icasig A u] = fastica(roi_reshape,'numOfIC',nICA,'lastEig',nICA*2,'g','skew');
+                elseif g==2
+                    [icasig A u] = fastica(roi_reshape,'numOfIC',nICA,'lastEig',nICA*2,'g','pow3');
+                elseif g==3
+                    [icasig A u] = fastica(roi_reshape,'numOfIC',nICA,'lastEig',nICA*2,'g','tanh');
+                elseif g==4
+                    [icasig A u] = fastica(roi_reshape,'numOfIC',nICA,'lastEig',nICA*2,'g','gauss');
+                end
+                
+                %%% display the ICAs
+                ica_cells = figure;
+                nplots = ceil(sqrt(nICA+1));
+                for i = 1:nICA
+                    subplot(nplots,nplots,i);
+                    imagesc(reshape(A(:,i),size(roi,1),size(roi,2)),[-max(abs(A(:,i))) max(abs(A(:,i)))] );
+                    
+                end
+                
+                subplot(nplots,nplots,nplots^2)
+                meanroi = mean(roi,3);
+                imagesc(meanroi,[max(max(meanroi))/1.5 max(max(meanroi))])
+                %colormap(gray);
+                
+                %%% plot the signals
+                icafig =figure
+                plot(icasig');
+                end
+%                 ginput(1)  %%% this is just to return control to this figure               
+%                 
+%                 ica_choice = input('which ica? ');
+%                 n_cells = length(ica_choice);
+%                 F = icasig(ica_choice,:);
+%                 if ica_choice ==0;
+%                     n_cells =0;
+%                 end
+    
+    end
+    
    end
 %     figure
 %     plot(0:45:315,avgTrace(4:10:end,i))
 end
     
+[pts dF neuropil] = getpts(img,dfofInterp);
+n= ceil(sqrt(npts));
 figure
-plot(trace);
-figure
-plot(avgTrace);
-
-c = 'rgbcmk'
-figure
-hold on
-for i = 1:25;
-    plot(trace(50:1250,i)/max(trace(:,i)) + i/2,c(mod(i,6)+1));
-end
-
-thresh=0.8;
-cor = corr(trace);
-np =0; clear mergetrace mergeAvgTrace
-for i = 1:size(cor,1);
-    merge = find(cor(:,i)>thresh);
-    if ~isempty(merge);
-        np=np+1;
-        mergetrace(:,np) = mean(trace(:,merge),2);
-        mergeAvgTrace(:,np) = mean(avgTrace(:,merge),2);
-        normAvgTrace(:,np) = mergeAvgTrace(:,np)/max(mergeAvgTrace(:,np));
-        cor(merge,:)=0;
-        cor(:,merge)=0;
+for i = 1:npts
+    subplot(n,n,i);
+    for f = 1:cycFrames;
+    avg(f) = mean(dF(i,f:cycFrames:end)-neuropil(f:cycFrames:end),2);   
     end
+    plot(avg); ylim([-0.1 0.5])
+    axis off
 end
-
-figure
-plot(mergeAvgTrace);
-
-c = 'rgbcmk'
-nc = 3;
-idx=kmeans(normAvgTrace',nc);
-figure
-hold on
-for i = 1:np;
-    plot(0.25:0.25:10,mergeAvgTrace(:,i),c(idx(i)));
-end
-%figure
-hold on
-for i = 1:nc;
-    plot(0.25:0.25:10,mean(mergeAvgTrace(:,idx==i),2),c(i),'LineWidth',3);
-end
-
-c = 'rgbcmk'
-figure
-hold on
-for i = 1:np;
-    plot(0.25*(1:length(50:1250)),mergetrace(50:1250,i)/max(trace(:,i)) + i,c(mod(i,6)+1));
-end
-xlabel('secs')
-ylim([0 np+2]);
-
 
 
 

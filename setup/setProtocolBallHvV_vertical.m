@@ -30,7 +30,7 @@ end
      
      case 'g62j.5rt' % Started 10/9/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100;
+       rewardSizeULorMS        = 80;
        msPenalty               =4500;
        
      

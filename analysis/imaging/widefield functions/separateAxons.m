@@ -29,7 +29,10 @@ wt = squeeze(mean(mean(im(x-5:x+5,y-5:y+5,:),2),1))
 wt= wt/max(wt)
 
 mix = [1 0.67; 0.67 1];
-unmix = mix^-1;
+mix = [1 0.67; 0.67 1]/1.67;  %%% should actually be normalizing by each row to get dfof
+
+mix = [1 1; 1.7 1]
+unmix = mix^-1
 clear img
 img(1,:)= double(lp_red(:));
 img(2,:) = double(lp_green(:));

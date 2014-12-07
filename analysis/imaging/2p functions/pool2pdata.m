@@ -17,8 +17,30 @@ use = find(pminAll<0.05 & ampAll>0.1);
 resp = length(use)/length(pminAll);
 sprintf('%d out of %d responsive = %f',length(use),length(pminAll),resp)
 
+osifitScatter = osifitAll - rand(size(osifitAll))*0.05;
+figure
+[f x] = ecdf(osifitScatter(use));
+plot(x,f); xlabel('OSI'); ylabel('cumulative fraction');
+
+figure
+[f x] = ecdf(RAll);
+plot(x,f); xlabel('dF/F'); ylabel('cumulative fraction');
+
+median(RAll)
+
+
+figure
+[f x] = ecdf(ampAll);
+plot(x,f); xlabel('dF/F'); ylabel('cumulative fraction');
+
 figure
 hist(osifitAll(use),0.05:0.1:0.95);
+
+figure
+hist(ampAll,-1:0.1:3);
+hold on
+h=hist(ampAll(use),-1:0.1:3);
+bar(-1:0.1:3,h,'r')
 
 sprintf('%d out of %d OSI>0.33 = %f',sum(osifitAll(use)>0.33),length(use),sum(osifitAll(use)>0.33)/length(use))
 

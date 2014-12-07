@@ -37,7 +37,8 @@ x0 =0; y0=0; sz = 130;
 
 nx = 2; ny=3;
 avgmap=0; meangrad{1}=0; meangrad{2}=0; meanpolar{1} = 0; meanpolar{2}=0;meanamp=0;avgmap4d=0;
-for f= 1:length(use) ;
+%for f= 1:length(use) ;
+    for f= [5 8];
     f
     
     if allxshift(f)>-100
@@ -94,15 +95,19 @@ for f= 1:length(use) ;
            meangrad{ind} = meangrad{ind} + gradshift{ind};
             ampshift = shiftImageRotate(amp{f}{2},allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
             subplot(nx,ny,5)
+         
             imagesc(ampshift,[0 0.05]); axis off; axis equal
-            meanamp = meanamp+ ampshift;
+           
+meanamp = meanamp+ ampshift;
             allGrad(:,:,ind,f) = gradshift{ind}.* ampshift;
             
             polarshift{ind} = shiftImageRotate(real(map_all{f}{ind}),allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
             polarshift{ind} = polarshift{ind} + sqrt(-1)* shiftImageRotate(imag(map_all{f}{ind}),allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
             subplot(nx,ny,1+(ind-1)*ny);
+            figure
             imshow(polarMap(polarshift{ind},98));
-            allPolar(:,:,ind,f) = polarshift{ind};
+            figure
+allPolar(:,:,ind,f) = polarshift{ind};
             
             meanpolar{ind} = meanpolar{ind} + polarshift{ind};
             %            subplot(nx,ny,4+(ind-1)*ny);

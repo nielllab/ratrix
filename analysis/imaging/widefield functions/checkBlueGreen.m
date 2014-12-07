@@ -1,3 +1,4 @@
+%%% generates figures for effect of blue-green subtraction
 figure
 clear cyc
 for i = 1:3

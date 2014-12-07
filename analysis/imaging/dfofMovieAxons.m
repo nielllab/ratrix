@@ -1,35 +1,58 @@
-function dfofMovie(in);
+function dfofMovieAxons(in);
 
-
-%[f,p] = uiputfile('*.avi','dfof cycle average movie file');
-if ~exist('in','var') || isempty(in);
-    [f,p] = uigetfile({'*.tif'; '*.tiff'; '*.mat'},'choose pco data');
-    datafile = fullfile(p,f(1:end-4));
-    mapfilename =fullfile(p,[f(1:end-8) 'maps.mat'])
-    
-else
-    datafile = [in '_0001'];
-    mapfilename = [in 'maps.mat'];
-    [p f] = fileparts(datafile);
-
+selectFiles=1;
+for chan=1:2
+    %[f,p] = uiputfile('*.avi','dfof cycle average movie file');
+    if selectFiles || ~exist('in','var') || isempty(in);
+        [f,p] = uigetfile({'*.tif'; '*.tiff'; '*.mat'},'choose pco data');
+        datafile{chan} = fullfile(p,f(1:end-4));
+        mapfilename =fullfile(p,[f(1:end-8) 'maps.mat'])
+        
+    else
+        datafile = [in '_0001'];
+        mapfilename = [in 'maps.mat'];
+        [p f] = fileparts(datafile);
+        
+    end
 end
 datadir = p;
 
-[dfof map mapNorm cycMap]= readTifBlueGreen(datafile);
-keyboard
-use_chan=3;
-
-% [dfof map mapNorm]= readTifGreen;
-% use_chan=1;
-% [dfof map mapNorm]= readTifRatio;
-% use_chan=3;
-dfof_bg= single(dfof{use_chan});
+for chan=1:2
+    [dfof map{chan} mapNorm{chan} cycMap{chan}]= readTifBlueGreen(datafile{chan});    
+    use_chan=3;
+    dfof_bg{chan}= (dfof{use_chan});
+end
 display('saving')
 tic
 save(mapfilename,'map','mapNorm','dfof_bg','-v7.3')
 toc
-dfof_bg= dfof{use_chan};
-%clear dfof;
+
+alpha = [3 -2]; beta = [-2 3];
+figure
+for i = 1:2
+      subplot(2,2,i)
+    imshow(polarMap(map{i}))
+    if i==1
+        title('green')
+    else
+        title('red')
+    end
+end
+
+for signal=1:2  %%% gfp and flavo 
+    cleanMap{signal} = alpha(signal)*map{1} + beta(signal)*map{2};
+    subplot(2,2,signal+2)
+    imshow(polarMap(cleanMap{signal}));
+    if signal==1
+        title('gfp')
+    else
+        title('flavo')
+    end
+    cleandF{signal} = alpha(signal)*dfof_bg{1} + beta(signal)*dfof_bg{2};
+    
+end
+
+clear dfof;
 
 startframe =200;
 cyc_period = 100;
@@ -123,7 +146,7 @@ if ~isempty(fs)
     sp = sqrt(vx.^2 + vy.^2);
     figure
     plot(sp)
-    hold on 
+    hold on
     plot(squeeze(mean(mean(dfof_bg,2),1))*30000,'g')
     figure
     plot(xcorr(sp,mean(mean(dfof_bg,2),1)))
@@ -131,10 +154,10 @@ if ~isempty(fs)
         sp_avg(i) = nanmeanMW(sp(i:100:end)');
         sp_med(i) = nanmedianMW(sp(i:100:end)');
     end
-%     sp_all = reshape(sp,[100 30]);
-%     figure
-%     plot(0.1:0.1:10,sp_all)
-%     title('all speeds')
+    %     sp_all = reshape(sp,[100 30]);
+    %     figure
+    %     plot(0.1:0.1:10,sp_all)
+    %     title('all speeds')
     figure
     plot(0.1:0.1:10,sp_avg)
     title('mean speed')

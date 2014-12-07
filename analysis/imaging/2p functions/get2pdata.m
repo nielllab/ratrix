@@ -10,7 +10,7 @@ figure
 imagesc(m);
 title('10th prctile')
 colormap(gray)
-
+keyboard
 dfof=zeros(size(img));
 for f = 1:nframes
     dfof(:,:,f)=(img(:,:,f)-m)./m;

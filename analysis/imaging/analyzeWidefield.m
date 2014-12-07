@@ -1,11 +1,11 @@
 
 
 clear all
-batchBehavNew;
+batchBehavNN;
 %batchTopography
 close all
 
- alluse = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session')  &  strcmp({files.label},'camk2 gc6') &  strcmp({files.task},'HvV') & ~strcmp({files.spatialfreq},'200')) 
+ alluse = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session')  &  strcmp({files.label},'camk2 gc6') &  strcmp({files.task},'HvV_center')   ) %
  %alluse = 1:length(files) & ~strcmp({files.subj},'g62b7lt');
  length(alluse)
  allsubj = unique({files(alluse).subj})
@@ -13,12 +13,12 @@ close all
 
 
 %%% use this one for subject by subject averaging
-for s = 1:length(allsubj)
-use = intersect(alluse,find(strcmp({files.subj},allsubj{s})))    
+% for s = 1:length(allsubj)
+% use = intersect(alluse,find(strcmp({files.subj},allsubj{s})))    
 
 %%% use this one to average all sessions that meet criteria
-% for s=1:1
-% use = alluse;
+for s=1:1
+use = alluse;
 
 allsubj{s}
 
@@ -32,7 +32,7 @@ doTopography;
 %save('D:/referenceMap.mat','avgmap4d','avgmap','files');
 
 
-% %%% overlay behavior on top of topomaps
+%%% overlay behavior on top of topomaps
 doBehavior;
 alldata{s} = avgbehavCond;
 
@@ -53,6 +53,19 @@ alldata{s} = avgbehavCond;
 
 
 end
+
+for ind = 1:2
+    data = squeeze(meanPolarAll(:,:,:,ind));
+    data = reshape (data,size(data,1)*size(data,2),size(data,3));
+    xc = corrcoef(data);
+    figure
+    imagesc(abs(xc),[0.5 1]);
+    xc(xc==1)=NaN;
+    xclist = abs(xc(:)); xclist = xclist(~isnan(xclist));
+   subjXCAll(s,ind) = mean(xclist);
+   subjXCstd(s,ind) = std(xclist);
+end
+
 [f p] = uiputfile('*.mat','save data?');
 if f~=0
     save(fullfile(p,f),'allsubj','alldata');

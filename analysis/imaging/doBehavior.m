@@ -7,13 +7,17 @@ for f = 1:length(use); behav{f}=[]; end;
 
 tic
 clear correct ntrials
-
+if isempty(gcp('nocreate'))
+    pool = parpool;
+end
+toc
+tic
 for f = 1:length(use)
-
+sprintf('%d %s %s',f,files(use(f)).subj,files(use(f)).expt)
     [behav{f} correct(f) ntrials(f) nmf_spatial{f} nmf_temporal{f}] = overlayMaps(files(use(f)),pathname,outpathname,1);
 end
 toc
-
+delete(gcp)
 
 %keyboard
 sprintf('subj %s correct %f trials %f',allsubj{s},mean(correct),mean(ntrials))
@@ -50,10 +54,10 @@ for f = 1:0
 end
 %behav=behavNoRun;
 allsubj{s}
-for cond = 1:2
+for cond = 1:4
 nb=0; avgbehav=0;
 for f= 1:length(use)
-
+b=[];
     %for f= 1:1
     if ~isempty(behav{f}{cond})% & strcmp(files(use(f)).subj,allsubj{s}) ;
       f
@@ -62,12 +66,13 @@ for f= 1:length(use)
         b = shiftImageRotate(b,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
         avgbehav = avgbehav+b(:,:,1:14); %eventually should all be same length
         nb= nb+1;
-    end
+        shiftBehav{f}{cond} = b;
+    end 
 end
 avgbehav = avgbehav/nb;
 
 avgbehavCond{cond} = avgbehav;
-load('D:/mapOverlay.mat')
+load('C:/mapOverlay.mat')
 labels = {'correct','incorrect','left','right'};
 figure
 for t= 1:6  %10:18
@@ -88,16 +93,16 @@ title([allsubj{s} ' ' labels{cond}])
 end
 
 
-% figure
-% for t = 1:6
-%     subplot(2,3,t);
-%     data = squeeze(avgbehavCond{4}(:,:,t+7) - avgbehavCond{3}(:,:,t+7));
-%     h= imshow(mat2im(data,jet,[-0.05 0.05]))
-%     
-%     hold on
-%      plot(ypts,xpts,'w.','Markersize',1);
-% end
-% title('left vs right')
+figure
+for t = 1:6
+    subplot(2,3,t);
+    data = squeeze(avgbehavCond{4}(:,:,t+7) - avgbehavCond{3}(:,:,t+7));
+    h= imshow(mat2im(data,jet,[-0.05 0.05]))
+    
+    hold on
+     plot(ypts,xpts,'w.','Markersize',1);
+end
+title('left vs right')
 
 figure
 for t = 1:6
@@ -110,6 +115,89 @@ for t = 1:6
 end
   title('correct vs incorrect')
 
+  for f= 1:length(behav);
+      figure
+      
+      for t= 1:6
+  subplot(2,3,t)
+  imagesc(shiftBehav{f}{1}(:,:,t+7),[0 0.15]);
+  hold on
+  plot(ypts,xpts,'w.','Markersize',1);
+  axis off
+      end
+      title(sprintf('%d %s %s',f,files(use(f)).subj,files(use(f)).expt))
+  end
+  
+          
+  
+  figure
+ imagesc(squeeze(avgbehavCond{1}(:,:,10)),[0 0.15])
+  hold on
+   plot(ypts,xpts,'w.','Markersize',1);
+   
+ clear data mnresp stdresp
+ range = -2:2;
+ for i = 1:4
+     [y x] = ginput(1);
+     y= round(y); x= round(x);
+     text(y,x,sprintf('%d',i))
+     for f = 1:length(behav);
+         data(:,:,:,f) = shiftBehav{f}{1}(x+range,y+range,:);
+     end
+     meanpix = squeeze(mean(mean(data,2),1));
+     mnresp(i,:) = mean(meanpix,2);
+     stdresp(i,:) = std(meanpix,[],2)/sqrt(size(meanpix,2));
+ end
+ figure
+ plot(mnresp(:,6:12)')
+ 
+  figure
+ plot(mnresp(:,:)')
+ 
+ figure
+ errorbar(mnresp(:,1:16)',stdresp(:,1:16)')
+ 
+ clear compBehav
+ for f=1:length(use);
+     compBehav(:,:,:,f) = shiftBehav{f}{1};
+ end
+ correction=mnresp(end,:);
+ correction=correction-min(correction(1:5));
+ clear baseline
+ baseline(1,:,:,1)=mnresp(end,:);
+ baseline = repmat(baseline,size(compBehav,1),size(compBehav,2),1);
+ meanImg = mean(compBehav,4) - baseline;
+ stdImg = std(compBehav,[],4)/sqrt(size(compBehav,4));
+ figure
+ for t= 1:6
+     %subplot(2,3,t);
+     figure
+     imagesc(meanImg(:,:,t+7),[0 0.1])
+     hold on
+      plot(ypts,xpts,'k.','Markersize',1);
+      axis square
+      axis equal
+      axis off
+ end
+ pointData = mnresp - repmat(correction,size(mnresp,1),1);
+ for i = 1:size(pointData,1)
+     pointData(i,:) = pointData(i,:)-min(pointData(i,1:6))
+     pointDataNorm(i,:) = pointData(i,:)/max(pointData(i,:));
+     stdData(i,:) = stdresp(i,:)/max(pointData(i,:));
+ end
+ 
+ figure
+ errorbar(pointData(:,5:14)',stdresp(:,5:14)');
+ 
+ figure
+ errorbar(pointDataNorm(1:end-1,5:14)',stdData(1:end-1,5:14)')
+ 
+ 
+ 
+ 
+ 
+     
+ 
 % clear mov
 % 
 % for t = 1:12

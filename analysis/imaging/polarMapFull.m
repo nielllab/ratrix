@@ -1,12 +1,12 @@
-function out = polarMap(in, lim);
+function out = polarMapFull(in, lim);
 if ~exist('lim','var')
     lim = 98;
 end
 in(isnan(in))=0;
 ph =angle(in);
 ph(ph<0) = ph(ph<0)+2*pi;
-%ph=mat2im(ph,hsv,[0 2*pi]);
-ph=mat2im(ph,hsv,[2.2 4.75]); % was [2 5]
+ph=mat2im(ph,hsv,[0 2*pi]);
+%ph=mat2im(ph,hsv,[2.2 4.75]); % was [2 5]
 amp = abs(in);
 amp = amp/prctile(amp(:),lim);
 %amp = amp/0.03;

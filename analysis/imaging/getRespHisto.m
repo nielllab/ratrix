@@ -1,6 +1,9 @@
-batchBehavNew;
-close all
-alluse = find(strcmp({files.monitor},'vert')&  strcmp({files.notes},'good imaging session')  &    strcmp({files.label},'camk2 gc6') &  strcmp({files.task},'HvV_center') &strcmp({files.spatialfreq},'100') & strcmp({files.subj},'g62b7lt'))
+clear all
+batchBehavNN;
+%close all
+alluse = find(strcmp({files.monitor},'vert')&  strcmp({files.notes},'good imaging session')  &    strcmp({files.label},'camk2 gc6') &  strcmp({files.task},'HvV_center') )
+%alluse = alluse(1:end-6);
+%alluse = alluse([1:4 6:7 9:17 19])
 subj=unique({files(alluse).subj})
 for f= 1:length(alluse)
   f
@@ -32,10 +35,24 @@ resp_time = starts(3,:)-starts(2,:);
     
     respall(f,:) = histresp;
     correctall(f,:) = histcorrect;
-     else
+    cantget(f)=0;
+  else
+         display('cant get behavior')
+         cantget(f)=1;
      end
 end
 
+
+performance(:,1) = percentCorrect;
+performance(:,2) = (correctall(:,5))';
+figure
+bar(performance)
+legend('avg','peak')
+
+
+respall(find(cantget),:)=NaN;
+correctall(find(cantget),:)=NaN;
+correct
 figure
 hbins = 25:50:500;
 h = hist(ntrials,hbins)

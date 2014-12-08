@@ -103,7 +103,7 @@ for f = 1:length(files)
         dfofMovie([datapathname files(f).resolutionRightdata]);
     catch exc
         nerr=nerr+1;
-        errmsg{nerr}= sprintf('couldnt do %s',files(f).resolutionrightdata)
+        errmsg{nerr}= sprintf('couldnt do %s',files(f).resolutionRightdata)
         errRpt{nerr}=getReport(exc,'extended')
     end
 %     try

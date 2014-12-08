@@ -1,4 +1,4 @@
-function [osicv osi tuningtheta amp tfpref minp R resp alltuning spont] = gratingAnalysis(fname, startTime, dF, dt, blank);
+function [osicv osi tuningtheta amp tfpref minp R resp alltuning spont allresp] = gratingAnalysis(fname, startTime, dF, dt, blank);
 
 isi = 0; sf = 0;
 fname
@@ -23,7 +23,7 @@ sfs = unique(sf);
 
 for th = 1:length(angles);
     for sp = 1:length(sfs);
-        
+        allresp(:,th,sp,:) = resp(:,theta ==angles(th) & sf==sfs(sp));
         orientation(:,th,sp) = median(resp(:,theta ==angles(th) & sf==sfs(sp)),2);
         %     figure
         %     imagesc(squeeze(orientation(:,:,th)),[-0.5 0.5]);

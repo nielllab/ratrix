@@ -32,24 +32,24 @@ switch subjIDs{1}
      
      case 'g62j.8lt' % Started 10/22/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 60;
-       msPenalty               =4100;
+       rewardSizeULorMS        = 40;
+       msPenalty               =3800;
 
      case 'g62m.1lt' % Started 10/22/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 50;
-       msPenalty               =4200;
+       rewardSizeULorMS        = 40;
+       msPenalty               =3800;
        
     case 'g62l1lt' % started GTS Learning paradigm on 10/12/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 60;
-       msPenalty               =3900;
+       rewardSizeULorMS        = 40;
+       msPenalty               =3800;
        pixPerCycs                = [200];  %only 200 SF for learning guys
        
      case 'g62k.2rt' % Started GTS 8/6/14
-       requestRewardSizeULorMS = 00;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 30;
-       msPenalty               =4100;
+       msPenalty               =3800;
     
      case 'g62e.12rt' % Started GTS 8/2/14
        requestRewardSizeULorMS = 0;
@@ -90,7 +90,7 @@ switch subjIDs{1}
        
      case 'g62c6tt' % switched GTS 6/8/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 30;
+       rewardSizeULorMS        = 40;
        msPenalty               =4100;
 
 

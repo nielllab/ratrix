@@ -16,17 +16,18 @@ end
  alluse = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session') & hasgratings ) 
  %alluse = 1:length(files) & ~strcmp({files.subj},'g62b7lt');
  length(alluse)
- allsubj = unique({files(alluse).subj})
+alluse=alluse(end-5:end);
+allsubj = unique({files(alluse).subj})
 
 
 
 %%% use this one for subject by subject averaging
-for s = 1:length(allsubj)
-use = intersect(alluse,find(strcmp({files.subj},allsubj{s})))    
+%for s = 1:length(allsubj)
+%use = intersect(alluse,find(strcmp({files.subj},allsubj{s})))    
 
 %%% use this one to average all sessions that meet criteria
-% for s=1:1
-% use = alluse;
+for s=1:1
+use = alluse;
 
 allsubj{s}
 

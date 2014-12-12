@@ -1,5 +1,8 @@
+
 clear all
 close all
+
+addpath('\\reichardt\Users\nlab\Desktop\')
 
 dt = 0.25;
 framerate=1/dt;
@@ -14,27 +17,38 @@ if strcmp(f(end-3:end),'.mat')
         cycLength=8;
     end
 else
-    blank = input('stim includes blank? 0/1 : ');
+   [stimf stimp startframe] = uigetfile('*.mat','stimrec');
+
+   [cleanStimRec ImageStim startFrame] = analyze2pSync({fullfile(p,f),fullfile(stimp,stimf)});
+   blank = input('stim includes blank? 0/1 : ');
     cycLength = input('cycle length : ');
-    dfofInterp = get2pdata(fullfile(p,f),dt,cycLength);
-    [f p] = uiputfile('*.mat','session data');
+    [dfofInterp dtRaw] = get2pdata(fullfile(p,f),dt,cycLength);
+    [fs ps] = uiputfile('*.mat','session data');
     
     figure
-    timecourse = squeeze(mean(mean(dfofInterp(:,:,1:60/dt),2),1));
-    plot(timecourse);
-    
-    startTime = input('start time : ');
+    timecourse = squeeze(mean(mean(dfofInterp(:,:,1:120/dt),2),1));
+    plot(dt*(1:120/dt),timecourse);
+    hold on
+    for st = 0:10
+        plot(st*8+ [startTime*dt startTime*dt],[0.2 1],'w:')
+    end
+   % startTime = input('start time : ');
+   startTime = round(startFrame*dtRaw/dt)
+   keyboard
     display('saving data')
-    sessionName= fullfile(p,f);
+    sessionName= fullfile(ps,fs);
     save(sessionName,'dfofInterp','blank','startTime','cycLength','-v7.3');
     display('done')
 end
+
+
 
 for f = 1:cycLength/dt;
     cycAvg(:,:,f) = mean(dfofInterp(:,:,startTime+f:cycLength/dt:end),3);
 end
 figure
-plot(squeeze(mean(mean(cycAvg,2),1)))
+plot(0.25:0.25:8,squeeze(mean(mean(cycAvg,2),1)))
+xlabel('secs')
 
 
 

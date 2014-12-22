@@ -16,7 +16,7 @@ end
 datadir = p;
 
 [dfof map mapNorm cycMap]= readTifBlueGreen(datafile);
-keyboard
+
 use_chan=3;
 
 % [dfof map mapNorm]= readTifGreen;
@@ -44,7 +44,7 @@ end
 
 save(mapfilename,'cycle_mov','cycle_mov_std','cycMap','-append')
 
-baseline = prctile(cycle_mov,5,3);
+baseline = prctile(cycle_mov,1,3);
 cycle_mov = cycle_mov - repmat(baseline,[1 1 size(cycle_mov,3)]);
 lowthresh= prctile(cycle_mov(:),2);
 upperthresh = prctile(cycle_mov(:),98)*1.5;
@@ -57,6 +57,8 @@ vid.FrameRate=25;
 open(vid);
 writeVideo(vid,mov);
 close(vid)
+
+
 
 dfshort = (double(dfof_bg(:,:,:)));
 dfshort = imresize(dfshort,0.5,'method','box');
@@ -102,6 +104,8 @@ if ~isempty(fs)
     load(fullfile(datadir,fs(1).name));
     %     figure
     %     plot(stimRec.pos)
+    
+   
     
     mouseT = stimRec.ts- stimRec.ts(2)+0.0001; %%% first is sometimes off
     figure

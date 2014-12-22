@@ -87,7 +87,7 @@ end
 trialdata = zeros(size(img,1),size(img,2),trials+2);
 trialspeed = zeros(trials+2,1);
 for tr=1:trials;
-    t0 = (tr-1)*(duration+isi)*imagerate;
+    t0 = round((tr-1)*(duration+isi)*imagerate);
     baseframes = base+t0; baseframes=baseframes(baseframes>0);
     trialdata(:,:,tr)=mean(img(:,:,useframes+t0),3) -mean(img(:,:,baseframes),3);
     try
@@ -137,237 +137,250 @@ for i = 1:length(xrange)
     end
 end
 
-  %  [xfit(i,j) yfit(i,j) sffit(i,j) gainfit(i,j) ampfit(i,j)] = fitxysf(squeeze(trialdata(100,100,1:length(xpos))),xpos,ypos,sf,trialspeed);
+%  [xfit(i,j) yfit(i,j) sffit(i,j) gainfit(i,j) ampfit(i,j)] = fitxysf(squeeze(trialdata(100,100,1:length(xpos))),xpos,ypos,sf,trialspeed);
 
 
 tdata = imresize(trialdata,0.25);
 gcp
-if length(yrange)>1
-  tic
-  for i = 1:size(tdata,1);
-      i
-      parfor j = 1:size(tdata,2);
-    [xfit(i,j) yfit(i,j) sffit(i,j) gainfit(i,j) ampfit(i,j) basefit(i,j)] = fitxysf(squeeze(tdata(i,j,1:length(xpos))),xpos,ypos,sf,trialspeed);
-       end
-end
-   toc
-   
-   figure
-   imagesc(xfit); title('X'); 
-   figure
-   imagesc(yfit); title('Y'); 
-   figure
-   imagesc(sffit,[1.25 1.75]); title('SF');
-   figure
-   imagesc(ampfit+basefit); title('amp + base');
-   figure
-   imagesc(ampfit); title('amp')
-   figure
-   imagesc(basefit); title('base')
-   figure
-   imagesc(gainfit,[0 1]); title('gain');
-   alldata(:,:,1) = xfit; alldata(:,:,2) = yfit; alldata(:,:,3)=sffit; alldata(:,:,4)=0; alldata(:,:,5)=ampfit;
-   alldata(:,:,6)=basefit; alldata(:,:,7) = gainfit;
-else
-   % [ sftuning tftuning gain] = fitsftf(trialdata,sf,tf,sp);
-end
 
-
-
-% baseimg=figure
-% imagesc(xfit);
-% for i = 1:10
-%     figure(baseimg)
-%     [y x]=ginput(1); x=4*round(x); y=4*round(y);
-%     figure
-%     subplot(1,2,1)
-%     imagesc(squeeze(tuning(x,y,:,:,1,1)),[-0.025 0.025]);
-%     subplot(1,2,2);
-%     imagesc(squeeze(tuning(x,y,:,:,2,1)),[-0.025 0.025]);
-% end
-
-% figure
-% for i = 1:length(sfrange)
-%     for j=1:length(tfrange)
-%         subplot(length(sfrange),length(tfrange),length(tfrange)*(i-1)+j)
-%         imagesc(squeeze(mean(mean(tuning(:,:,:,:,i,j),4),3)),[ 0 0.05]);
-%         title(sprintf('%0.2fcpd %0.2fhz',sfrange(i),tfrange(j)))
-%         axis off; axis equal
-%     end
-% end
-%
-% if length(xrange)>1 & length(xrange)<=3
-% merge = zeros(size(tuning,1),size(tuning,2),3);
-% figure
-% for i = 1:length(xrange)
-%     for j=1:length(yrange)
-%         subplot(length(xrange),length(yrange),length(yrange)*(i-1)+j)
-%         imagesc(squeeze(mean(tuning(:,:,i,j,:,1),5)),[ 0 0.05]);
-%         merge(:,:,i) = squeeze(mean(tuning(:,:,i,j,:,1),5))/0.03;
-%         title(sprintf('%0.2fx %0.2fy',xrange(i),xrange(j)))
-%         axis off; axis equal
-%     end
-% end
-
-% merge(merge<0)=0; merge(merge>1)=1;
-% figure
-% imshow(merge);
-%end
-
-for doResolutionTest=1:0
-    figure
-    for i = 2:2
-        for j=1:length(yrange)
-            
-            spotimg = squeeze(mean(tuning(:,:,i,j,:,1),5));
-            imagesc(spotimg,[0 0.03]);
-            title(sprintf('%0.2fx %0.2fy',i,j))
-            axis off; axis equal
+tic
+for i = 1:size(tdata,1);
+    i
+    if length(xrange)==5
+        parfor j = 1:size(tdata,2);
+            [xfit(i,j) yfit(i,j) sffit(i,j) gainfit(i,j) ampfit(i,j) basefit(i,j)] = fitxysf(squeeze(tdata(i,j,1:length(xpos))),xpos,ypos,sf,trialspeed);
         end
+    elseif length(xrange)==2
+        parfor j = 1:size(tdata,2);
+            [xfit(i,j)  sffit(i,j) tffit(i,j) gainfit(i,j) ampfit(i,j) basefit(i,j)] = fit2xsftf(squeeze(tdata(i,j,1:length(xpos))),xpos,sf,tf,trialspeed);
+        end
+    elseif length(xrange)==4
+        parfor j = 1:size(tdata,2);
+            [xfit(i,j)  yfit(i,j) sffit(i,j) tffit(i,j) gainfit(i,j) ampfit(i,j) basefit(i,j)] = fitxysftf(squeeze(tdata(i,j,1:length(xpos))),xpos,ypos,sf,tf,trialspeed);
+        end
+    end
+end
+    toc
+    
+    figure
+    imagesc(xfit); title('X');
+    
+      figure
+    imagesc(yfit); title('Y');
+    
+    figure
+    imagesc(sffit,[2 4]); title('SF');
+    
+    figure
+    imagesc(tffit,[1 3]); title('TF');
+    figure
+    imagesc(ampfit+basefit); title('amp + base');
+    figure
+    imagesc(ampfit); title('amp')
+    figure
+    imagesc(basefit); title('base')
+    figure
+    imagesc(gainfit,[0 1]); title('gain');
+    alldata(:,:,1) = xfit; alldata(:,:,2) = yfit; alldata(:,:,3)=sffit; alldata(:,:,4)=tffit; alldata(:,:,5)=ampfit;
+    alldata(:,:,6)=basefit; alldata(:,:,7) = gainfit;
+    
+    
+    
+    
+    % baseimg=figure
+    % imagesc(xfit);
+    % for i = 1:10
+    %     figure(baseimg)
+    %     [y x]=ginput(1); x=4*round(x); y=4*round(y);
+    %     figure
+    %     subplot(1,2,1)
+    %     imagesc(squeeze(tuning(x,y,:,:,1,1)),[-0.025 0.025]);
+    %     subplot(1,2,2);
+    %     imagesc(squeeze(tuning(x,y,:,:,2,1)),[-0.025 0.025]);
+    % end
+    
+    % figure
+    % for i = 1:length(sfrange)
+    %     for j=1:length(tfrange)
+    %         subplot(length(sfrange),length(tfrange),length(tfrange)*(i-1)+j)
+    %         imagesc(squeeze(mean(mean(tuning(:,:,:,:,i,j),4),3)),[ 0 0.05]);
+    %         title(sprintf('%0.2fcpd %0.2fhz',sfrange(i),tfrange(j)))
+    %         axis off; axis equal
+    %     end
+    % end
+    %
+    % if length(xrange)>1 & length(xrange)<=3
+    % merge = zeros(size(tuning,1),size(tuning,2),3);
+    % figure
+    % for i = 1:length(xrange)
+    %     for j=1:length(yrange)
+    %         subplot(length(xrange),length(yrange),length(yrange)*(i-1)+j)
+    %         imagesc(squeeze(mean(tuning(:,:,i,j,:,1),5)),[ 0 0.05]);
+    %         merge(:,:,i) = squeeze(mean(tuning(:,:,i,j,:,1),5))/0.03;
+    %         title(sprintf('%0.2fx %0.2fy',xrange(i),xrange(j)))
+    %         axis off; axis equal
+    %     end
+    % end
+    
+    % merge(merge<0)=0; merge(merge>1)=1;
+    % figure
+    % imshow(merge);
+    %end
+    
+    for doResolutionTest=1:0
+        figure
+        for i = 2:2
+            for j=1:length(yrange)
+                
+                spotimg = squeeze(mean(tuning(:,:,i,j,:,1),5));
+                imagesc(spotimg,[0 0.03]);
+                title(sprintf('%0.2fx %0.2fy',i,j))
+                axis off; axis equal
+            end
+        end
+        
+        
+        
+        [y x] = ginput(1);
+        crossSection = spotimg(:,round(y));
+        figure
+        plot(crossSection);
+        crossSection = mean(spotimg(round(x)+(-1:1),:),1);
+        figure
+        plot(crossSection);
+        crossSection = crossSection(100:199);
+        baseline_est=median(crossSection);
+        [peak_est x0_est] = max(crossSection);
+        sigma_est=5;
+        x=1:length(crossSection);
+        y=crossSection;
+        fit_coeff = nlinfit(x,y,@gauss_fit,[ baseline_est peak_est x0_est sigma_est])
+        
+        %%% parse out results
+        baseline = fit_coeff(1)
+        peak = fit_coeff(2)
+        x0=fit_coeff(3)
+        sigma_est=fit_coeff(4)
+        
+        %%% plot raw data and fit
+        figure
+        plot(x,y)
+        hold on
+        plot(x,gauss_fit(fit_coeff,x),'g')
+        
+        fwhm = 2*sigma_est*1.17*32.5
+        
+        keyboard
     end
     
     
-    
-    [y x] = ginput(1);
-    crossSection = spotimg(:,round(y));
-    figure
-    plot(crossSection);
-    crossSection = mean(spotimg(round(x)+(-1:1),:),1);
-    figure
-    plot(crossSection);
-    crossSection = crossSection(100:199);
-    baseline_est=median(crossSection);
-    [peak_est x0_est] = max(crossSection);
-    sigma_est=5;
-    x=1:length(crossSection);
-    y=crossSection;
-    fit_coeff = nlinfit(x,y,@gauss_fit,[ baseline_est peak_est x0_est sigma_est])
-    
-    %%% parse out results
-    baseline = fit_coeff(1)
-    peak = fit_coeff(2)
-    x0=fit_coeff(3)
-    sigma_est=fit_coeff(4)
-    
-    %%% plot raw data and fit
-    figure
-    plot(x,y)
-    hold on
-    plot(x,gauss_fit(fit_coeff,x),'g')
-    
-    fwhm = 2*sigma_est*1.17*32.5
-    
-    keyboard
-end
-
-
-% for tr = 1:trials;
-%     data=zeros(length(sfrange),length(tfrange));
-%     data(find(sfrange==sf(tr)),find(tfrange==tf(tr)))=1;
-%     data=data(:);
-%     data(end+1)=trialspeed(tr)>500;
-%     alldata(tr,:)=data;
-% end
-%
-% keyboard
-% %alldata(alldata<0)=0;
-% clear p0
-% for i = 1:size(img,1);
-%     i
-%     for j=1:size(img,2);
-%         d= squeeze(tuning(i,j,1,1,:,:));
-%       p0= d(:);
-%       p0(end+1)=1;
-%       p = nlinfit(alldata,squeeze(trialdata(i,j,1:length(alldata))),@visualGain,p0);
-%       fittuning(i,j,:,:) = reshape(p(1:end-1),length(sfrange),length(tfrange));
-%       gain(i,j)=p(end);
-%     end
-%
-% end
-%
-% figure
-% imagesc(gain,[-1 1])
-%
-% figure
-% for i = 1:length(sfrange)
-%     for j=1:length(tfrange)
-%         subplot(length(sfrange),length(tfrange),length(tfrange)*(i-1)+j)
-%         imagesc(squeeze(fittuning(:,:,i,j)),[ 0 0.05]);
-%         title(sprintf('%0.2fcpd %0.2fhz',sfrange(i),tfrange(j)))
-%         axis off
-%     end
-% end
-%
-% sftuning = squeeze(mean(fittuning,4)); tftuning=squeeze(mean(fittuning,3));
-%
-% showTuning(sftuning,[1 5],jet,'SF');
-% showTuning(tftuning,[1 4],jet,'TF');
-%
-%
-% %
-% %
-% % for i = 1:size(trialdata,1)
-% %     for j=1:size(trialdata,2)
-% %         [data xmax] = max(xtuning(i,j,:));
-% %         [data ymax] = max(ytuning(i,j,:));
-% %
-% %         freqtuning(i,j,:,:)=squeeze(tuning(i,j,xmax,ymax,:,:));
-% %     end
-% % end
-% %
-% % tic
-% % for x=1:size(img,1);
-% %     x
-% %     for y= 1:size(img,2);
-% %         curve= squeeze(tuning(x,y,:,:,:,:));
-% %             curve = reshape(curve,size(curve,1)*size(curve,2),size(curve,3)*size(curve,4));
-% %        curve(curve<0)=0;
-% %        [u v] = nnmf(curve,1);
-% %         spatial = reshape(u(:,1),size(tuning,3),size(tuning,4));
-% %         freq = reshape(v(1,:),size(tuning,5),size(tuning,6));
-% %         xtuning(x,y,:) = mean(spatial,2);
-% %         ytuning(x,y,:) = mean(spatial,1);
-% %         sftuning(x,y,:) = mean(freq,2);
-% %         tftuning(x,y,:) = mean(freq,1);
-% %     end
-% % end
-% % toc
-% %
-% % showTuning(xtuning,[2 4],hsv,'X')
-% % showTuning(ytuning,[1.5 2.5],hsv,'Y');
-%
-% %
-% %
-% % map=figure
-% % imagesc(mean(mean(mean(mean(tuning,3),4),5),6))
-% % for i =1:100;
-% %     figure(map);
-% %
-% % [y x] = ginput(1); x= round(x);y=round(y);
-% %     figure
-% %     imagesc(squeeze(tuning(x,y,:,:,:,:)));
-% %     axis xy
-% % %     subplot(2,3,1)
-% % %     imagesc(squeeze(mean(mean(tuning(x,y,:,:,:,:),6),5))); axis equal; axis xy
-% % %     subplot(2,3,4);
-% % %     imagesc(squeeze(mean(mean(tuning(x,y,:,:,:,:),4),3))); axis equal; axis xy
-% % %     curve = squeeze(tuning(x,y,:,:,:,:));
-% % %     curve = reshape(curve,size(curve,1)*size(curve,2),size(curve,3)*size(curve,4));
-% % %     curve(curve<0)=0;
-% % %     [u v] = nnmf(curve,1);
-% % %
-% % %     subplot(2,3,6)
-% % %     plot(s(1:5));
-% % %     subplot(2,3,2)
-% % %     imagesc(reshape(u(:,1),5,3)); axis xy
-% % %     subplot(2,3,5);
-% % %     imagesc(reshape(v(1,:),3,3)); axis xy
-% % %     weights = mean(curve,2);
-% % %     weights(weights<0)=0;
-% % %    weighted = curve.*repmat(weights,[1 size(curve,2)]);
-% % %    freq = mean(weighted,1);
-% % %    subplot(2,3,3)
-% % %    imagesc(reshape(freq,3,3)); axis xy
-%
-% % %end
-%
+    % for tr = 1:trials;
+    %     data=zeros(length(sfrange),length(tfrange));
+    %     data(find(sfrange==sf(tr)),find(tfrange==tf(tr)))=1;
+    %     data=data(:);
+    %     data(end+1)=trialspeed(tr)>500;
+    %     alldata(tr,:)=data;
+    % end
+    %
+    % keyboard
+    % %alldata(alldata<0)=0;
+    % clear p0
+    % for i = 1:size(img,1);
+    %     i
+    %     for j=1:size(img,2);
+    %         d= squeeze(tuning(i,j,1,1,:,:));
+    %       p0= d(:);
+    %       p0(end+1)=1;
+    %       p = nlinfit(alldata,squeeze(trialdata(i,j,1:length(alldata))),@visualGain,p0);
+    %       fittuning(i,j,:,:) = reshape(p(1:end-1),length(sfrange),length(tfrange));
+    %       gain(i,j)=p(end);
+    %     end
+    %
+    % end
+    %
+    % figure
+    % imagesc(gain,[-1 1])
+    %
+    % figure
+    % for i = 1:length(sfrange)
+    %     for j=1:length(tfrange)
+    %         subplot(length(sfrange),length(tfrange),length(tfrange)*(i-1)+j)
+    %         imagesc(squeeze(fittuning(:,:,i,j)),[ 0 0.05]);
+    %         title(sprintf('%0.2fcpd %0.2fhz',sfrange(i),tfrange(j)))
+    %         axis off
+    %     end
+    % end
+    %
+    % sftuning = squeeze(mean(fittuning,4)); tftuning=squeeze(mean(fittuning,3));
+    %
+    % showTuning(sftuning,[1 5],jet,'SF');
+    % showTuning(tftuning,[1 4],jet,'TF');
+    %
+    %
+    % %
+    % %
+    % % for i = 1:size(trialdata,1)
+    % %     for j=1:size(trialdata,2)
+    % %         [data xmax] = max(xtuning(i,j,:));
+    % %         [data ymax] = max(ytuning(i,j,:));
+    % %
+    % %         freqtuning(i,j,:,:)=squeeze(tuning(i,j,xmax,ymax,:,:));
+    % %     end
+    % % end
+    % %
+    % % tic
+    % % for x=1:size(img,1);
+    % %     x
+    % %     for y= 1:size(img,2);
+    % %         curve= squeeze(tuning(x,y,:,:,:,:));
+    % %             curve = reshape(curve,size(curve,1)*size(curve,2),size(curve,3)*size(curve,4));
+    % %        curve(curve<0)=0;
+    % %        [u v] = nnmf(curve,1);
+    % %         spatial = reshape(u(:,1),size(tuning,3),size(tuning,4));
+    % %         freq = reshape(v(1,:),size(tuning,5),size(tuning,6));
+    % %         xtuning(x,y,:) = mean(spatial,2);
+    % %         ytuning(x,y,:) = mean(spatial,1);
+    % %         sftuning(x,y,:) = mean(freq,2);
+    % %         tftuning(x,y,:) = mean(freq,1);
+    % %     end
+    % % end
+    % % toc
+    % %
+    % % showTuning(xtuning,[2 4],hsv,'X')
+    % % showTuning(ytuning,[1.5 2.5],hsv,'Y');
+    %
+    % %
+    % %
+    % % map=figure
+    % % imagesc(mean(mean(mean(mean(tuning,3),4),5),6))
+    % % for i =1:100;
+    % %     figure(map);
+    % %
+    % % [y x] = ginput(1); x= round(x);y=round(y);
+    % %     figure
+    % %     imagesc(squeeze(tuning(x,y,:,:,:,:)));
+    % %     axis xy
+    % % %     subplot(2,3,1)
+    % % %     imagesc(squeeze(mean(mean(tuning(x,y,:,:,:,:),6),5))); axis equal; axis xy
+    % % %     subplot(2,3,4);
+    % % %     imagesc(squeeze(mean(mean(tuning(x,y,:,:,:,:),4),3))); axis equal; axis xy
+    % % %     curve = squeeze(tuning(x,y,:,:,:,:));
+    % % %     curve = reshape(curve,size(curve,1)*size(curve,2),size(curve,3)*size(curve,4));
+    % % %     curve(curve<0)=0;
+    % % %     [u v] = nnmf(curve,1);
+    % % %
+    % % %     subplot(2,3,6)
+    % % %     plot(s(1:5));
+    % % %     subplot(2,3,2)
+    % % %     imagesc(reshape(u(:,1),5,3)); axis xy
+    % % %     subplot(2,3,5);
+    % % %     imagesc(reshape(v(1,:),3,3)); axis xy
+    % % %     weights = mean(curve,2);
+    % % %     weights(weights<0)=0;
+    % % %    weighted = curve.*repmat(weights,[1 size(curve,2)]);
+    % % %    freq = mean(weighted,1);
+    % % %    subplot(2,3,3)
+    % % %    imagesc(reshape(freq,3,3)); axis xy
+    %
+    % % %end
+    %

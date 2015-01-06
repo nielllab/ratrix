@@ -1,5 +1,5 @@
 clear all
-batchBehavNN;
+batchBehavNN
 %close all
 alluse = find(strcmp({files.monitor},'vert')&  strcmp({files.notes},'good imaging session')  &    strcmp({files.label},'camk2 gc6') &  strcmp({files.task},'HvV_center') )
 %alluse = alluse(1:end-6);

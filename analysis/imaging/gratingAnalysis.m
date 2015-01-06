@@ -7,8 +7,8 @@ load(fname)
 baseRange = (2.5:dt:3.5)/dt;
 evokeRange = (1:dt:4)/dt;
 
-nstim = length(xpos);
-
+nstim = min(length(xpos),floor(size(dF,2)*dt/8 -1))
+theta = theta(1:nstim); sf = sf(1:nstim);
 for s = 1:nstim;
  
    base(:,s) = mean(dF(:,startTime + (s-1)*(duration+isi)/dt +baseRange),2);
@@ -23,7 +23,7 @@ sfs = unique(sf);
 
 for th = 1:length(angles);
     for sp = 1:length(sfs);
-        allresp(:,th,sp,:) = resp(:,theta ==angles(th) & sf==sfs(sp));
+   %     allresp(:,th,sp,:) = resp(:,theta ==angles(th) & sf==sfs(sp));
         orientation(:,th,sp) = median(resp(:,theta ==angles(th) & sf==sfs(sp)),2);
         %     figure
         %     imagesc(squeeze(orientation(:,:,th)),[-0.5 0.5]);
@@ -31,7 +31,7 @@ for th = 1:length(angles);
     end
 end
 
-
+allresp=[];
 
 
 npts = size(dF,1);
@@ -93,7 +93,7 @@ spont(i)=0; spont_std(i)=0;
      %  subplot(10,8,i-1)
    errorbar(1:length(tuning),tuning,tuning_std/sqrt(ntrials)); 
    hold on; plot([1 8],[spont(i) spont(i)],'g');
-    ylim([-1 2]); xlim([0 9])
+    ylim(4*[-1 2]); xlim([0 9])
     set(gca,'Xtick',[]); set(gca,'Ytick',[]);
     
  

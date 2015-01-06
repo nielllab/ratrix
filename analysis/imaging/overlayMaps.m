@@ -222,6 +222,8 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
     
     bg=bg_all(:,4:end,:,:);
     
+    
+    %%% set up selection criteria here!
     for i =1:4
         if i==1
             useTrials = find(correct==1&resp_time>0.4 & resp_time<0.6 );

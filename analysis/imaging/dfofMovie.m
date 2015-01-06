@@ -15,7 +15,7 @@ else
 end
 datadir = p;
 
-[dfof map mapNorm cycMap]= readTifBlueGreen(datafile);
+[dfof map mapNorm cycMap frameT]= readTifBlueGreen(datafile);
 
 use_chan=3;
 
@@ -26,7 +26,7 @@ use_chan=3;
 dfof_bg= single(dfof{use_chan});
 display('saving')
 tic
-save(mapfilename,'map','mapNorm','dfof_bg','-v7.3')
+save(mapfilename,'map','mapNorm','dfof_bg','frameT','-v7.3')
 toc
 dfof_bg= dfof{use_chan};
 %clear dfof;
@@ -117,7 +117,7 @@ if ~isempty(fs)
     
     posx = cumsum(stimRec.pos(use,1)-900);
     posy = cumsum(stimRec.pos(use,2)-500);
-    frameT = 0.1:0.1:300;
+    %frameT = 0.1:0.1:300;
     vx = diff(interp1(mouseT,posx,frameT));
     vy = diff(interp1(mouseT,posy,frameT));
     vx(end+1)=0; vy(end+1)=0;
@@ -165,7 +165,7 @@ if ~isempty(fs)
     movemap = mov_img-stop_img;
     
     %[f p] =uiputfile('*.mat','move map file');
-    save(mapfilename,'movemap','sp','-append');
+    save(mapfilename,'movemap','sp','stimRec','-append');
 end
 
 

@@ -65,8 +65,14 @@ for f= 1:length(use) ;
             imgreen = imread([datapathname files(use(f)).topoxdata '_0004.tif']);
         catch
            try
-               imblue = imread([altdatapathname files(use(f)).topoxdata '_0001.tif']);
-            imgreen = imread([altdatapathname files(use(f)).topoxdata '_0004.tif']);
+               imblue_data = [altdatapathname files(use(f)).topoxdata '_0001.tif'];
+               imblue_data(imblue_data=='\')='/';
+               imblue = imread(imblue_data)
+               
+               
+               imgreen_data = [altdatapathname files(use(f)).topoxdata '_0004.tif'];
+               imgreen_data(imgreen_data=='\')='/';
+               imgreen = imread(imgreen_data);
            catch
                display('cant find images')
            end

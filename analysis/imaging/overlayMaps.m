@@ -1,6 +1,8 @@
-function [alldata percentCorrect numtrials nmf_spatial nmf_temporal] = overlayMaps(expfile,pathname,outpathname,showImg)
+function [alldata percentCorrect numtrials nmf_spatial nmf_temporal numTrialsPercond] = overlayMaps(expfile,pathname,outpathname,showImg)
 nmf_spatial=[];
 nmf_temporal=[];
+
+
 dbstop if error
 if ~exist('showImg','var')
     showImg=0;
@@ -61,7 +63,7 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
     
     
     basemap =merge;
-    titles = {'correct','incorrect','left','right','correct','incorrect','correct-incorrect'};
+    titles = {'correct','incorrect','left','right','correct+incorrect'};
     
     
     
@@ -231,9 +233,9 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
     
     
     %%% set up selection criteria here!
-    for i =1:4
+    for i =1:5
         if i==1
-            useTrials = find(correct==1&resp_time>0.4 & resp_time<0.75 );
+            useTrials = find(correct==1&resp_time>0.4 & resp_time<0.6 );
                         for j =1:0
                             tr = ceil(rand*length(useTrials));
                             figure
@@ -245,17 +247,19 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
                         end
                  
         elseif i==2
-            useTrials = find(correct==0&resp_time>0.4 & resp_time<0.75 );
+            useTrials = find(correct==0&resp_time>0.4 & resp_time<0.6 );
             showImg=0;
         elseif i==3
-            useTrials = find(correct==1&targ<0&resp_time>0.4 & resp_time<0.75 );
+            useTrials = find(correct==1&targ<0&resp_time>0.4 & resp_time<0.6 );
         elseif i ==4
-            useTrials = find(correct==1&targ>0&resp_time>0.4 & resp_time<0.75 );
-        elseif i==5
-            decon = deconvg6s(nanmedianMW(bg(correct==1,:,:,:)),0.1) ;
+            useTrials = find(correct==1&targ>0&resp_time>0.4 & resp_time<0.6 );
+         elseif i ==5
+            useTrials = find(resp_time>0);           
         elseif i==6
-            decon = deconvg6s(nanmedianMW(bg(correct==0,:,:,:)),0.1)
+            decon = deconvg6s(nanmedianMW(bg(correct==1,:,:,:)),0.1) ;
         elseif i==7
+            decon = deconvg6s(nanmedianMW(bg(correct==0,:,:,:)),0.1)
+        elseif i==8
             if ~isempty(bg(correct==0&targ<2&resp_time>0.3 & resp_time<0.6,:,:,:))
                 decon = deconvg6s(nanmedianMW(bg(correct==1&targ<2&resp_time>0.3 & resp_time<0.6,:,:,:)),0.1)-deconvg6s(nanmedianMW(bg(correct==0&targ<2&resp_time>0.3 & resp_time<0.6,:,:,:)),0.1);
             else
@@ -268,8 +272,12 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
  
         numtrials = length(useTrials);
         sprintf('cond %d; %d trials',i,numtrials)
+        
+        numTrialsPercond{i}= length(useTrials);
+        
         if numtrials==0
             alldata{i} = [];
+
         else
             decon = deconvg6sParallel(nanmedianMW(bg(useTrials,:,:,:)),0.1);
             

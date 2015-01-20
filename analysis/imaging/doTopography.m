@@ -9,7 +9,8 @@ end
 %%% appropriate size
 useReference=1;
 if useReference
-    load('C:/referenceMap.mat','avgmap4d','avgmap');
+    %load('C:/referenceMap.mat','avgmap4d','avgmap');
+    load('/backup/compiled behavior/referenceMap.mat','avgmap4d','avgmap');
 end
 display('alinging')
 
@@ -153,8 +154,8 @@ end
 % frame=zeros(260,320,3);
 % frame(:,31:290,:)=avgmap;
 % avgmap=frame;
-
-load('C:/mapoverlay.mat')
+%load('C:/mapoverlay.mat')
+load('/backup/compiled behavior/mapOverlay.mat')
 % figure
 % for m=1:2
 %     %subplot(1,2,m);

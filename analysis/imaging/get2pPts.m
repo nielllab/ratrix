@@ -11,7 +11,8 @@ mag=2;
 mapfig = figure
 % imagesc(imresize(mn,mag), range);
 % colormap(gray)
-imagesc(imresize(sigma,2),[0 0.5])
+imagesc(imresize(sigma,2),[0 2])
+keyboard
 hold on
 
 dfReshape = reshape(dfofInterp,[size(dfofInterp,1)*size(dfofInterp,2) size(dfofInterp,3)]);

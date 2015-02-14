@@ -136,11 +136,11 @@ for chan = 1:2
         dfof{chan}(:,:,f) = dfof{chan}(:,:,f).* amp{chan};
     end
 end
-figure
-for chan=1:2
-subplot(2,1,chan)
-imagesc(usemap{chan})
-end
+% figure
+% for chan=1:2
+% subplot(2,1,chan)
+% imagesc(usemap{chan})
+% end
 
 
 
@@ -186,13 +186,13 @@ for LED=1:2
     responseMap{LED}=map;  %%% polar map for each channel
     
     %%% dfof timecourse
-    t0 = linspace(1,size(cycMap,3),10);
-    figure
-    for t = 1:9;
-        subplot(3,3,t);
-        imagesc(squeeze(mean(cycMap(:,:,t0(t):t0(t+1)-1),3)),[-0.02 0.02]);
-        colormap(gray);
-    end
+%     t0 = linspace(1,size(cycMap,3),10);
+%     figure
+%     for t = 1:9;
+%         subplot(3,3,t);
+%         imagesc(squeeze(mean(cycMap(:,:,t0(t):t0(t+1)-1),3)),[-0.02 0.02]);
+%         colormap(gray);
+%     end
     
 %     map = map-mean(map(:));
 %     mapFig(map)
@@ -207,17 +207,18 @@ for LED=1:2
     
     cycMapAll{LED} = cycMap;  %%% cycle averaged binned movie for 3 channels
     
-    mapfig=figure
-    imshow(polarMap(map),'InitialMagnification','fit');
-    colormap(hsv);
-    colorbar
+%     mapfig=figure
+%     imshow(polarMap(map),'InitialMagnification','fit');
+%     colormap(hsv);
+%     colorbar
     done=0;
     
     
     while ~done
-        figure(mapfig)
+        
         if choosePix
-            [y x b] = ginput(1);
+           figure(mapfig)
+           [y x b] = ginput(1);
             if b==3 %%%% right click
                 done=1;
                 break;
@@ -239,14 +240,20 @@ for LED=1:2
         fftPts = 2:length(spect)/2;
         loglog((fftPts-1)/length(spect),spect(fftPts));
         subplot(2,2,3);
-        plot(squeeze(cycMap(x,y,:))); ylim([-0.125 0.125]);
+        if LED==1
+            range = [-0.125 0.125];
+        else
+            range = [-0.05 0.05];
+        end
+        
+            plot(squeeze(cycMap(x,y,:))); ylim(range);
 
         subplot(2,2,4);
         imshow(polarMap(map),'InitialMagnification','fit');
         colormap(hsv);
         colorbar
         hold on
-        plot(y,x,'*');
+        plot(y,x,'w*','Markersize',8);
         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfilename,'-append');
     end

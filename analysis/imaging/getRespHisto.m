@@ -1,15 +1,20 @@
 clear all
-batchBehavNN;
+batchBehavNew
 %close all
-alluse = find(strcmp({files.monitor},'vert')&  strcmp({files.notes},'good imaging session')  &    strcmp({files.label},'camk2 gc6') &  strcmp({files.task},'HvV_center') )
-%alluse = alluse(1:end-6);
+alluse = find(strcmp({files.monitor},'vert')&  strcmp({files.notes},'good imaging session')  &    strcmp({files.label},'camk2 gc6') &  strcmp({files.task},'naive')& ~strcmp({files.subj},'g62j8lt') & ~strcmp({files.subj},'g62l1lt') & ~strcmp({files.subj},'g62m1lt') )
+%alluse = alluse(1:end-6) & ~strcmp({files.subj},'g62j8lt') & ~strcmp({files.subj},'g62l1lt') & ~strcmp({files.subj},'g62m1lt');
 %alluse = alluse([1:4 6:7 9:17 19])
 subj=unique({files(alluse).subj})
 for f= 1:length(alluse)
-  f
-  if ~isempty(files(alluse(f)).behav) & exist([pathname files(alluse(f)).behav],'file')
-         load([pathname files(alluse(f)).behav],'starts','correct');
+  f         
+        file_name = [pathname files(alluse(f)).behav];
+        file_name(file_name=='\')='/'; 
 
+        if ~isempty(files(alluse(f)).behav) & exist(file_name,'file')
+      
+   %   load([pathname files(alluse(f)).behav],'starts','correct');
+        load(file_name,'starts','correct');
+   
          correct = double(correct);
 resp_time = starts(3,:)-starts(2,:);
     stop_time = starts(2,:)-starts(1,:);

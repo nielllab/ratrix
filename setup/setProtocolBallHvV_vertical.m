@@ -30,14 +30,14 @@ end
      
      case 'g62j.5rt' % Started 10/9/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 60;
-       msPenalty               =4500;
+       rewardSizeULorMS        = 100;
+       msPenalty               =5200;
        
      
      case 'g62g.6lt' % Started 10/9/14
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 100;
-       msPenalty               =4700;
+       rewardSizeULorMS        = 120;
+       msPenalty               =5200;
      
      case 'g62b7lt'           %Started full 8/14/14
        requestRewardSizeULorMS = 0;
@@ -51,25 +51,25 @@ end
 %         msPenalty              =4300;
 %         pixPerCycs             = [100 125 150]; %*10^9;  
         
-   case 'g62b8tt'     %started 5/22/14  
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 25;
-        msPenalty              =3600;
+%    case 'g62b8tt'     %started 5/22/14  
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 25;
+%         msPenalty              =3600;
 
   case 'g62c.2rt'           %Switched Back 9/15/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100; 
-       msPenalty               =4500;
+       rewardSizeULorMS        = 120; 
+       msPenalty               =5200;
        
-   case 'g62b1lt'     %moved to HvV_vertical 2/19/14   
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 35;
-       msPenalty               =3600;
-     
-  case 'g62b3rt'          %changed 2/14/14
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 20; 
-       msPenalty               = 3600; 
+%    case 'g62b1lt'     %moved to HvV_vertical 2/19/14   
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 35;
+%        msPenalty               =3600;
+%      
+%   case 'g62b3rt'          %changed 2/14/14
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 20; 
+%        msPenalty               = 3600; 
        
        
 %   case 'g62h1tt'     %started 5/16/14

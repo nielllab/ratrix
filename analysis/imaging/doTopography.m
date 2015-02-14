@@ -9,7 +9,8 @@ end
 %%% appropriate size
 useReference=1;
 if useReference
-    load('C:/referenceMap.mat','avgmap4d','avgmap');
+    %load('C:/referenceMap.mat','avgmap4d','avgmap');
+    load('/backup/compiled behavior/referenceMap.mat','avgmap4d','avgmap');
 end
 display('alinging')
 
@@ -64,8 +65,14 @@ for f= 1:length(use) ;
             imgreen = imread([datapathname files(use(f)).topoxdata '_0004.tif']);
         catch
            try
-               imblue = imread([altdatapathname files(use(f)).topoxdata '_0001.tif']);
-            imgreen = imread([altdatapathname files(use(f)).topoxdata '_0004.tif']);
+               imblue_data = [altdatapathname files(use(f)).topoxdata '_0001.tif'];
+               imblue_data(imblue_data=='\')='/';
+               imblue = imread(imblue_data)
+               
+               
+               imgreen_data = [altdatapathname files(use(f)).topoxdata '_0004.tif'];
+               imgreen_data(imgreen_data=='\')='/';
+               imgreen = imread(imgreen_data);
            catch
                display('cant find images')
            end
@@ -153,8 +160,8 @@ end
 % frame=zeros(260,320,3);
 % frame(:,31:290,:)=avgmap;
 % avgmap=frame;
-
-load('C:/mapoverlay.mat')
+%load('C:/mapoverlay.mat')
+load('/backup/compiled behavior/mapOverlay.mat')
 % figure
 % for m=1:2
 %     %subplot(1,2,m);

@@ -19,21 +19,24 @@ if strcmp(f(end-3:end),'.mat')
 else
    [stimf stimp startframe] = uigetfile('*.mat','stimrec');
 
-   [cleanStimRec ImageStim startFrame] = analyze2pSync({fullfile(p,f),fullfile(stimp,stimf)});
+  % [cleanStimRec ImageStim startFrame] = analyze2pSync({fullfile(p,f),fullfile(stimp,stimf)});
    blank = input('stim includes blank? 0/1 : ');
     cycLength = input('cycle length : ');
     [dfofInterp dtRaw] = get2pdata(fullfile(p,f),dt,cycLength);
     [fs ps] = uiputfile('*.mat','session data');
     
+    
     figure
     timecourse = squeeze(mean(mean(dfofInterp(:,:,1:120/dt),2),1));
     plot(dt*(1:120/dt),timecourse);
     hold on
+    
+      startTime = input('start time : ');
+   %startTime = round(startFrame*dtRaw/dt)
     for st = 0:10
         plot(st*8+ [startTime*dt startTime*dt],[0.2 1],'w:')
     end
-   % startTime = input('start time : ');
-   startTime = round(startFrame*dtRaw/dt)
+  
    keyboard
     display('saving data')
     sessionName= fullfile(ps,fs);
@@ -122,11 +125,16 @@ imagesc(R,[0 2]);
 
 theta(isnan(theta))=-0.1;
 im = mat2im(theta,hsv,[-0.1 pi]);
-osi_norm = 3*osi;
+figure
+imshow(im)
+osi_norm = 2*osi; osi_norm(isnan(osi_norm))=0; osi_norm(osi_norm>1)=1;
+figure
+imagesc(osi_norm); title('osinorm')
 %osi_norm = osifit;
-osi_norm(osi_norm>1)=1;
-R_norm=R/2; R_norm(R_norm>1)=1; R_norm(R_norm<0)=0;
 
+R_norm=R/2; R_norm(R_norm>1)=1; R_norm(R_norm<0)=0;
+figure
+imagesc(R_norm); title('Rnorm')
 white =ones(size(im(:,:,1)));
 
 for c = 1:3

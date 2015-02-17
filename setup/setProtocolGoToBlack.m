@@ -17,7 +17,7 @@ msPenalty                 =3500;       %consider changing this also in future
 fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
-msAirpuff                 =msPenalty;
+msAirpuff                 =0;
 
 
 switch subjIDs{1}

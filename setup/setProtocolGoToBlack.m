@@ -17,25 +17,25 @@ msPenalty                 =3500;       %consider changing this also in future
 fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
-msAirpuff                 =msPenalty;
+msAirpuff                 =0;
 
 
 switch subjIDs{1}
     
      case 'g62n1ln' % Started 2/17/15
-       requestRewardSizeULorMS = 60;
-       rewardSizeULorMS        = 140;
+       requestRewardSizeULorMS = 30;
+       rewardSizeULorMS        = 130;
        msPenalty               =2500;
 
     
      case 'g62m9tt' % Started 2/17/15
-       requestRewardSizeULorMS = 60;
-       rewardSizeULorMS        = 140;
+       requestRewardSizeULorMS = 30;
+       rewardSizeULorMS        = 130;
        msPenalty               =2500;
      
      case 'g62l8rn' % Started 2/17/15
-       requestRewardSizeULorMS = 30;
-       rewardSizeULorMS        = 120;
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 110;
        msPenalty               =2500;
   
             

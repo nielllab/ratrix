@@ -23,19 +23,19 @@ msAirpuff                 =0;
 switch subjIDs{1}
     
      case 'g62n1ln' % Started 2/17/15
-       requestRewardSizeULorMS = 30;
-       rewardSizeULorMS        = 140;
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 150;
        msPenalty               =2500;
 
     
      case 'g62m9tt' % Started 2/17/15
-       requestRewardSizeULorMS = 30;
-       rewardSizeULorMS        = 140;
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 150;
        msPenalty               =2500;
      
      case 'g62l8rn' % Started 2/17/15
-       requestRewardSizeULorMS = 20;
-       rewardSizeULorMS        = 110;
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 125;
        msPenalty               =2500;
   
             

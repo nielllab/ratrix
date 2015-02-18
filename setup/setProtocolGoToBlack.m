@@ -24,18 +24,18 @@ switch subjIDs{1}
     
      case 'g62n1ln' % Started 2/17/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 150;
+       rewardSizeULorMS        = 175;
        msPenalty               =2500;
 
     
      case 'g62m9tt' % Started 2/17/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 150;
+       rewardSizeULorMS        = 175;
        msPenalty               =2500;
      
      case 'g62l8rn' % Started 2/17/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 125;
+       rewardSizeULorMS        = 115;
        msPenalty               =2500;
   
             

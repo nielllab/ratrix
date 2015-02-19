@@ -19,24 +19,29 @@ fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =0;
 
+percentCorrectionTrials = .5;
+
 
 switch subjIDs{1}
     
      case 'g62n1ln' % Started 2/17/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 175;
+       rewardSizeULorMS        = 150;
        msPenalty               =2500;
+       percentCorrectionTrials = .5;
 
     
      case 'g62m9tt' % Started 2/17/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 175;
+       rewardSizeULorMS        = 150;
        msPenalty               =2500;
+       percentCorrectionTrials = 0;
      
      case 'g62l8rn' % Started 2/17/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 115;
+       requestRewardSizeULorMS = 5;
+       rewardSizeULorMS        = 100;
        msPenalty               =2500;
+       percentCorrectionTrials = .5;
   
             
     otherwise
@@ -47,7 +52,7 @@ end;
 
 noRequest = constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 
-percentCorrectionTrials = .5;
+
 
 maxWidth  = 1920;
 maxHeight = 1080;

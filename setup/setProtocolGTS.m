@@ -17,16 +17,17 @@ msPenalty                 =3200;          %consider changing this also in future
 fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
-msAirpuff                 =msPenalty;
+msAirpuff                 =0;
 pixPerCycs                = [100 150 200]; %*10^9;
 %stim.stopHUD = false; %stop period heads up display... false = off
 
 % sca
 % keyboard
 
-if ~isscalar(subjIDs)
-    error('expecting exactly one subject')
-end
+%if ~isscalar(subjIDs)
+    %error('expecting exactly one subject')
+%end
+
 switch subjIDs{1}
     
 %      

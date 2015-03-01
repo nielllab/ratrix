@@ -11,7 +11,7 @@ end
 sm=makeStandardSoundManager();
 
 rewardSizeULorMS          =130;
-requestRewardSizeULorMS   =20;
+requestRewardSizeULorMS   =0;
 requestMode               ='first';
 msPenalty                 =3200;          %consider changing this also in future
 fractionOpenTimeSoundIsOn =1;
@@ -62,7 +62,7 @@ switch subjIDs{1}
 %        msPenalty               =4100;
        
      case 'g62j4rt' % Started GTS 7/27/14
-       requestRewardSizeULorMS = 20;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 80;
        msPenalty               =2800;
        

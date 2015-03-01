@@ -61,7 +61,7 @@ switch subjIDs{1}
 %        rewardSizeULorMS        = 120;
 %        msPenalty               =4100;
        
-     case 'g62j.4rt' % Started GTS 7/27/14
+     case 'g62j4rt' % Started GTS 7/27/14
        requestRewardSizeULorMS = 20;
        rewardSizeULorMS        = 80;
        msPenalty               =2800;

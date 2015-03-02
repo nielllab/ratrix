@@ -11,22 +11,23 @@ end
 sm=makeStandardSoundManager();
 
 rewardSizeULorMS          =130;
-requestRewardSizeULorMS   =20;
+requestRewardSizeULorMS   =0;
 requestMode               ='first';
 msPenalty                 =3200;          %consider changing this also in future
 fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
-msAirpuff                 =msPenalty;
+msAirpuff                 =0;
 pixPerCycs                = [100 150 200]; %*10^9;
 %stim.stopHUD = false; %stop period heads up display... false = off
 
 % sca
 % keyboard
 
-if ~isscalar(subjIDs)
-    error('expecting exactly one subject')
-end
+%if ~isscalar(subjIDs)
+    %error('expecting exactly one subject')
+%end
+
 switch subjIDs{1}
     
 %      
@@ -63,7 +64,7 @@ switch subjIDs{1}
        
      case 'g62j4rt' % Started GTS 7/27/14
        requestRewardSizeULorMS = 20;
-       rewardSizeULorMS        = 80;
+       rewardSizeULorMS        = 120;
        msPenalty               =2800;
        
 %      case 'g62j.5tt' % Started GTS 7/27/14

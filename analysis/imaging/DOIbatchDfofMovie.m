@@ -20,7 +20,20 @@ for f = 1:length(files)
         errmsg{nerr}=sprintf('couldnt do %s',files(f).topoydata)
         errRpt{nerr}=getReport(exc,'extended')
     end
-    
+     try
+        dfofMovie([datapathname files(f).gratings4x3y_1data]);
+    catch exc
+        nerr=nerr+1;
+        errmsg{nerr}=sprintf('couldnt do %s',files(f).gratings4x3y_1data)
+        errRpt{nerr}=getReport(exc,'extended')
+     end
+     try
+        dfofMovie([datapathname files(f).gratings4x3y_2data]);
+    catch exc
+        nerr=nerr+1;
+        errmsg{nerr}=sprintf('couldnt do %s',files(f).gratings4x3y_2data)
+        errRpt{nerr}=getReport(exc,'extended')
+    end
 %     try
 %         dfofMovie([datapathname files(f).stepbinarydata]);
 %     catch exc
@@ -28,52 +41,52 @@ for f = 1:length(files)
 %         errmsg{nerr}=sprintf('couldnt do %s',files(f).stepbinarydata)
 %          errRpt{nerr}=getReport(exc,'extended')
 %     end  
-
-     try
-        dfofMovie([datapathname files(f).darknessdata]);
-    catch exc
-        nerr=nerr+1;
-        errmsg{nerr}=sprintf('couldnt do %s',files(f).darknessdata)
-         errRpt{nerr}=getReport(exc,'extended')
-    end  
-    try
-        dfofMovie([datapathname files(f).topoxreversedata]);
-    catch exc
-        nerr=nerr+1;
-        errmsg{nerr}= sprintf('couldnt do %s',files(f).topoxreversedata)
-        errRpt{nerr}=getReport(exc,'extended')
-    end    
-    try
-        dfofMovie([datapathname files(f).baselinepatchxdata]);
-    catch exc
-        nerr=nerr+1;
-        errmsg{nerr}= sprintf('couldnt do %s',files(f).baselinepatchxdata)
-        errRpt{nerr}=getReport(exc,'extended')
-    end
-    try
-        dfofMovie([datapathname files(f).topoxslowdata]);
-    catch exc
-        nerr=nerr+1;
-        errmsg{nerr}= sprintf('couldnt do %s',files(f).topoxslowdata)
-        errRpt{nerr}=getReport(exc,'extended')
-    end 
+% 
+%      try
+%         dfofMovie([datapathname files(f).darknessdata]);
+%     catch exc
+%         nerr=nerr+1;
+%         errmsg{nerr}=sprintf('couldnt do %s',files(f).darknessdata)
+%          errRpt{nerr}=getReport(exc,'extended')
+%     end  
+%     try
+%         dfofMovie([datapathname files(f).topoxreversedata]);
+%     catch exc
+%         nerr=nerr+1;
+%         errmsg{nerr}= sprintf('couldnt do %s',files(f).topoxreversedata)
+%         errRpt{nerr}=getReport(exc,'extended')
+%     end    
+%     try
+%         dfofMovie([datapathname files(f).baselinepatchxdata]);
+%     catch exc
+%         nerr=nerr+1;
+%         errmsg{nerr}= sprintf('couldnt do %s',files(f).baselinepatchxdata)
+%         errRpt{nerr}=getReport(exc,'extended')
+%     end
+%     try
+%         dfofMovie([datapathname files(f).topoxslowdata]);
+%     catch exc
+%         nerr=nerr+1;
+%         errmsg{nerr}= sprintf('couldnt do %s',files(f).topoxslowdata)
+%         errRpt{nerr}=getReport(exc,'extended')
+%     end 
     
     %DOI passive files
     
-        try
-        dfofMovie([datapathname files(f).DOItopoxdata]);
-    catch exc
-        nerr=nerr+1;
-        errmsg{nerr}= sprintf('couldnt do %s',files(f).DOItopoxdata)
-        errRpt{nerr}=getReport(exc,'extended')
-    end
-    try
-        dfofMovie([datapathname files(f).DOItopoydata]);
-    catch exc
-        nerr=nerr+1;
-        errmsg{nerr}=sprintf('couldnt do %s',files(f).DOItopoydata)
-        errRpt{nerr}=getReport(exc,'extended')
-    end
+%         try
+%         dfofMovie([datapathname files(f).DOItopoxdata]);
+%     catch exc
+%         nerr=nerr+1;
+%         errmsg{nerr}= sprintf('couldnt do %s',files(f).DOItopoxdata)
+%         errRpt{nerr}=getReport(exc,'extended')
+%     end
+%     try
+%         dfofMovie([datapathname files(f).DOItopoydata]);
+%     catch exc
+%         nerr=nerr+1;
+%         errmsg{nerr}=sprintf('couldnt do %s',files(f).DOItopoydata)
+%         errRpt{nerr}=getReport(exc,'extended')
+%     end
     
 %     try
 %         dfofMovie([datapathname files(f).DOIstepbinarydata]);
@@ -84,33 +97,33 @@ for f = 1:length(files)
 %     end  
 
      try
-        dfofMovie([datapathname files(f).DOIdarknessdata]);
+        dfofMovie([datapathname files(f).DOIgratings4x3y_1data]);
     catch exc
         nerr=nerr+1;
-        errmsg{nerr}=sprintf('couldnt do %s',files(f).DOIdarknessdata)
+        errmsg{nerr}=sprintf('couldnt do %s',files(f).DOIgratings4x3y_1data)
          errRpt{nerr}=getReport(exc,'extended')
     end  
     try
-        dfofMovie([datapathname files(f).DOItopoxreversedata]);
+        dfofMovie([datapathname files(f).DOIgratings4x3y_2data]);
     catch exc
         nerr=nerr+1;
-        errmsg{nerr}= sprintf('couldnt do %s',files(f).DOItopoxreversedata)
+        errmsg{nerr}= sprintf('couldnt do %s',files(f).DOIgratings4x3y_2data)
         errRpt{nerr}=getReport(exc,'extended')
     end    
-    try
-        dfofMovie([datapathname files(f).DOIbaselinepatchxdata]);
-    catch exc
-        nerr=nerr+1;
-        errmsg{nerr}= sprintf('couldnt do %s',files(f).DOIbaselinepatchxdata)
-        errRpt{nerr}=getReport(exc,'extended')
-    end
-    try
-        dfofMovie([datapathname files(f).DOItopoxslowdata]);
-    catch exc
-        nerr=nerr+1;
-        errmsg{nerr}= sprintf('couldnt do %s',files(f).DOItopoxslowdata)
-        errRpt{nerr}=getReport(exc,'extended')
-    end 
+%     try
+%         dfofMovie([datapathname files(f).DOIbaselinepatchxdata]);
+%     catch exc
+%         nerr=nerr+1;
+%         errmsg{nerr}= sprintf('couldnt do %s',files(f).DOIbaselinepatchxdata)
+%         errRpt{nerr}=getReport(exc,'extended')
+%     end
+%     try
+%         dfofMovie([datapathname files(f).DOItopoxslowdata]);
+%     catch exc
+%         nerr=nerr+1;
+%         errmsg{nerr}= sprintf('couldnt do %s',files(f).DOItopoxslowdata)
+%         errRpt{nerr}=getReport(exc,'extended')
+%     end 
     
 
 %     for e = 1:nerr

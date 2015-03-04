@@ -17,26 +17,37 @@ msPenalty                 =3500;       %consider changing this also in future
 fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
-msAirpuff                 =msPenalty;
+msAirpuff                 =0;
+
+percentCorrectionTrials = .5;
 
 
 switch subjIDs{1}
     
-     case 'g62n1ln' % Started 2/16/15
-       requestRewardSizeULorMS = 60;
-       rewardSizeULorMS        = 140;
-       msPenalty               =3500;
+     case 'g62n1ln' % Started 2/17/15
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 15;
+       msPenalty               =2800;
+       percentCorrectionTrials = .5;
 
     
-     case 'g62m9tt' % Started 2/16/15
-       requestRewardSizeULorMS = 60;
-       rewardSizeULorMS        = 140;
-       msPenalty               =3500;
+     case 'g62m9tt' % Started 2/17/15
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 15;
+       msPenalty               =2700;
+       percentCorrectionTrials = .5;
      
-     case 'g62l8rn' % Started 2/16/15
-       requestRewardSizeULorMS = 60;
-       rewardSizeULorMS        = 140;
-       msPenalty               =3500;
+     case 'g62l8rn' % Started 2/17/15
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 15;
+       msPenalty               =2700;
+       percentCorrectionTrials = .5;
+       
+     case 'g62l10rt' % Started 2/27/15
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 120;
+       msPenalty               =2900;
+       percentCorrectionTrials = .25;
   
             
     otherwise
@@ -47,7 +58,7 @@ end;
 
 noRequest = constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 
-percentCorrectionTrials = .5;
+
 
 maxWidth  = 1920;
 maxHeight = 1080;

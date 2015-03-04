@@ -37,7 +37,9 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 00;
        rewardSizeULorMS        = 60;
        msPenalty               =2900;
-%        pixPerCycs             = [100 150 200]; %*10^9;       
+%      pixPerCycs             = [100 150 200]; %*10^9;       
+
+      
        
      case 'g62m9tt' % Started GTS 3/4/15
        requestRewardSizeULorMS = 0;

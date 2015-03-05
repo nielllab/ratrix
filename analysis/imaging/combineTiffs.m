@@ -244,7 +244,7 @@ imagingPath = 'E:\widefield data';
 
 
 %imagingPath = 'H:\archived widefield behavior (12-24-13 to 4-29-14)';  %could insert try/catch?  for archived behavior files
-imagingPath = 'G:\Behavior data 12-24-13+';
+imagingPath = 'E:\widefield data';
 recs = {
 
 
@@ -599,6 +599,14 @@ recs = {
 %  {[4359 4643],[],'120814 g62l1lt gts behavior\g62l1lt_run1_gts_Fstop5.6_50ms','g62l1lt_run1_gts_Fstop5.6'}
 %     }
 %     }
+
+
+    {'g62m9tt' { 
+  {[1 327],[],'030415 G62M9tt GTS behavior learning1/G62M9-tt_run1_behavior_GTS_learning_day1_reward35', 'G62M9-tt_run1_behavior_GTS_learning_day1_reward35'}  
+    
+     }
+    }
+
 
     }; %%% vert vs horiz in either top or bottom
 

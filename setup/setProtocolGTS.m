@@ -33,11 +33,11 @@ switch subjIDs{1}
     
 
        
-     case 'g62j4rt' % Started GTS 7/27/14
-       requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 60;
-       msPenalty               =2900;
-%      pixPerCycs             = [100 150 200]; %*10^9; 
+%      case 'g62j4rt' % Started GTS 7/27/14
+%        requestRewardSizeULorMS = 00;
+%        rewardSizeULorMS        = 40;
+%        msPenalty               =2900;
+% %      pixPerCycs             = [100 150 200]; %*10^9; 
 
      case 'g62l1lt' % Started GTS 7/27/14
        requestRewardSizeULorMS = 20;

@@ -33,11 +33,17 @@ switch subjIDs{1}
     
 
        
-     case 'g62j4rt' % Started GTS 7/27/14
-       requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 60;
+%      case 'g62j4rt' % Started GTS 7/27/14
+%        requestRewardSizeULorMS = 00;
+%        rewardSizeULorMS        = 40;
+%        msPenalty               =2900;
+% %      pixPerCycs             = [100 150 200]; %*10^9; 
+
+     case 'g62l1lt' % Started GTS 7/27/14
+       requestRewardSizeULorMS = 30;
+       rewardSizeULorMS        = 80;
        msPenalty               =2900;
-%      pixPerCycs             = [100 150 200]; %*10^9;       
+%      pixPerCycs             = [100 150 200]; %*10^9;  
 
       
        
@@ -48,12 +54,12 @@ switch subjIDs{1}
        pixPerCycs             = [200]; %*10^9;       
        percentCorrectionTrials = .25;
 
-     case 'g62l8rn' % Started GTS 3/?/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;
-       msPenalty               =3500;
-       pixPerCycs             = [200]; %*10^9;       
-       percentCorrectionTrials = .25;
+%      case 'g62l8rn' % Started GTS 3/?/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 40;
+%        msPenalty               =3500;
+%        pixPerCycs             = [200]; %*10^9;       
+%        percentCorrectionTrials = .25;
 
     
 
@@ -92,7 +98,7 @@ stim.soundClue = false;
 targetOrientations     = [0 1]*pi/2;
 distractorOrientations = []; %-targetOrientations;
 mean                   = .5;
-radius                 = .35;
+radius                 = .25;
 contrast               = 1;
 thresh                 = .00005;
 yPosPct                = .5;

@@ -9,12 +9,14 @@ end
 %%% appropriate size
 useReference=1;
 if useReference
-    load('C:/referenceMap.mat','avgmap4d','avgmap');
+    %load('C:/referenceMap.mat','avgmap4d','avgmap');
+    load('/backup/compiled behavior/referenceMap.mat','avgmap4d','avgmap');
 end
+display('alinging')
 
 %%% align gradient maps to first file
 for f = 1:length(use); %changed from 1:length(map)
-    
+    f
     if useReference
         comparemaps{1}=avgmap4d;  comparemaps{2}=map{f}; comparemerge{1}=avgmap; comparemerge{2}=merge{f};
         [imfit{f} allxshift(f) allyshift(f) allthetashift(f) allzoom(f)] = alignMapsRotate(comparemaps, comparemerge, [files(use(f)).subj ' ' files(use(f)).expt ' ' files(use(f)).monitor] );
@@ -30,15 +32,15 @@ end
 %close all
 
 
-
+display('computing averages')
 
 x0 =0; y0=0; sz = 130;
 %x0 =0; y0=0; sz = 128;
 
 nx = 2; ny=3;
 avgmap=0; meangrad{1}=0; meangrad{2}=0; meanpolar{1} = 0; meanpolar{2}=0;meanamp=0;avgmap4d=0;
-%for f= 1:length(use) ;
-    for f= [5 8];
+for f= 1:length(use) ;
+    %for f= [5 8];
     f
     
     if allxshift(f)>-100
@@ -63,8 +65,14 @@ avgmap=0; meangrad{1}=0; meangrad{2}=0; meanpolar{1} = 0; meanpolar{2}=0;meanamp
             imgreen = imread([datapathname files(use(f)).topoxdata '_0004.tif']);
         catch
            try
-               imblue = imread([altdatapathname files(use(f)).topoxdata '_0001.tif']);
-            imgreen = imread([altdatapathname files(use(f)).topoxdata '_0004.tif']);
+               imblue_data = [altdatapathname files(use(f)).topoxdata '_0001.tif'];
+               imblue_data(imblue_data=='\')='/';
+               imblue = imread(imblue_data)
+               
+               
+               imgreen_data = [altdatapathname files(use(f)).topoxdata '_0004.tif'];
+               imgreen_data(imgreen_data=='\')='/';
+               imgreen = imread(imgreen_data);
            catch
                display('cant find images')
            end
@@ -104,11 +112,9 @@ meanamp = meanamp+ ampshift;
             polarshift{ind} = shiftImageRotate(real(map_all{f}{ind}),allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
             polarshift{ind} = polarshift{ind} + sqrt(-1)* shiftImageRotate(imag(map_all{f}{ind}),allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
             subplot(nx,ny,1+(ind-1)*ny);
-            figure
-            imshow(polarMap(polarshift{ind},98));
-            figure
-allPolar(:,:,ind,f) = polarshift{ind};
-            
+          
+            imshow(polarMap(polarshift{ind},98));            
+allPolar(:,:,ind,f) = polarshift{ind};            
             meanpolar{ind} = meanpolar{ind} + polarshift{ind};
             %            subplot(nx,ny,4+(ind-1)*ny);
             %             dx=4;
@@ -131,6 +137,7 @@ meangrad{1} = meangrad{1}/length(use); meangrad{2} = meangrad{2}/length(use);
 meanpolar{1} = meanpolar{1}/length(use); meanpolar{2} = meanpolar{2}/length(use);
 meanPolarAll(:,:,s,1)= meanpolar{1}; meanPolarAll(:,:,s,2)= meanpolar{2}; 
 
+if length(use)>1
 for ind = 1:2
     data = squeeze(allPolar(:,:,ind,:));
     data = reshape (data,size(data,1)*size(data,2),size(data,3));
@@ -142,8 +149,9 @@ for ind = 1:2
     d= d(~isnan(d));
     xcAll(s,ind) = mean(d);
     xcStd(s,ind) = std(d);
+    title([allsubj{s} ' ' num2str(ind)])
 end
-
+end
 
 % frame = zeros(260,320,4);
 % frame(:,31:290,:)=avgmap4d;
@@ -152,19 +160,19 @@ end
 % frame=zeros(260,320,3);
 % frame(:,31:290,:)=avgmap;
 % avgmap=frame;
-
-load('C:/mapoverlay.mat')
-figure
-for m=1:2
-    %subplot(1,2,m);
-    figure
-    imshow(polarMap(meanpolar{m},95));
-    title(allsubj{s})
-    hold on
-    plot(ypts,xpts,'w.','Markersize',2)
-    %     im = polarMap(meanpolar{m},80);
-    %     imwrite(im,sprintf('polarmap%d%s', m,'.tif'), 'tif')
-end
+%load('C:/mapoverlay.mat')
+load('/backup/compiled behavior/mapOverlay.mat')
+% figure
+% for m=1:2
+%     %subplot(1,2,m);
+%     figure
+%     imshow(polarMap(meanpolar{m},95));
+%     title(allsubj{s})
+%     hold on
+%     plot(ypts,xpts,'w.','Markersize',2)
+%     %     im = polarMap(meanpolar{m},80);
+%     %     imwrite(im,sprintf('polarmap%d%s', m,'.tif'), 'tif')
+% end
 figure
 imshow(avgmap);
 title('average topo  map');

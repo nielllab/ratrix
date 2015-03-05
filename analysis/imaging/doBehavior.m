@@ -2,11 +2,15 @@
 
 
 clear behav
-for f = 1:length(use); behav{f}=[]; end;
+for f = 1:length(use); behav{f}=[]; numTrialsPercond{f} = {}; end;
 
 
 tic
 clear correct ntrials
+
+display('info about parallel pool')
+gcp('nocreate')
+
 if isempty(gcp('nocreate'))
     pool = parpool;
 end
@@ -14,7 +18,7 @@ toc
 tic
 for f = 1:length(use)
 sprintf('%d %s %s',f,files(use(f)).subj,files(use(f)).expt)
-    [behav{f} correct(f) ntrials(f) nmf_spatial{f} nmf_temporal{f}] = overlayMaps(files(use(f)),pathname,outpathname,1);
+    [behav{f} correct(f) ntrials(f) nmf_spatial{f} nmf_temporal{f} numTrialsPercond{f}] = overlayMaps(files(use(f)),pathname,outpathname,1);
 end
 toc
 delete(gcp)
@@ -64,7 +68,7 @@ b=[];
       b = shiftdim(behav{f}{cond},1);
         zoom = 260/size(b,1);
         b = shiftImageRotate(b,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
-        avgbehav = avgbehav+b(:,:,1:14); %eventually should all be same length
+        avgbehav = avgbehav+b(:,:,1:14); %eventually should all be same length (21?)
         nb= nb+1;
         shiftBehav{f}{cond} = b;
     end 
@@ -72,7 +76,9 @@ end
 avgbehav = avgbehav/nb;
 
 avgbehavCond{cond} = avgbehav;
-load('C:/mapOverlay.mat')
+load('/backup/compiled behavior/mapOverlay.mat')
+%load('C:/mapOverlay.mat')
+
 labels = {'correct','incorrect','left','right'};
 figure
 for t= 1:6  %10:18
@@ -115,9 +121,10 @@ for t = 1:6
 end
   title('correct vs incorrect')
 
+  
   for f= 1:length(behav);
       figure
-      
+  if ~isempty (behav{f}{1})  
       for t= 1:6
   subplot(2,3,t)
   imagesc(shiftBehav{f}{1}(:,:,t+7),[0 0.15]);
@@ -126,9 +133,12 @@ end
   axis off
       end
       title(sprintf('%d %s %s',f,files(use(f)).subj,files(use(f)).expt))
-  end
   
-          
+  elseif isempty (behav{f}{1})
+      sprintf('no correct trials')
+      sprintf('%d %s %s',f,files(use(f)).subj,files(use(f)).expt)
+  end
+  end        
   
   figure
  imagesc(squeeze(avgbehavCond{1}(:,:,10)),[0 0.15])
@@ -142,11 +152,19 @@ end
      y= round(y); x= round(x);
      text(y,x,sprintf('%d',i))
      for f = 1:length(behav);
-         data(:,:,:,f) = shiftBehav{f}{1}(x+range,y+range,:);
+        if ~isempty (behav{f}{1})
+             data(:,:,:,f) = shiftBehav{f}{1}(x+range,y+range,:); %shiftBehave{f=18}{1}has only 260x260x19 (others 260x260x21)
+        elseif isempty (behav{f}{1})  
+             shiftBehav{f}{1} = NaN(260,260,21);
+            data(:,:,:,f) = shiftBehav{f}{1}(x+range,y+range,:);
+      sprintf('no correct answers fit criteria')
+      sprintf('%d %s %s',f,files(use(f)).subj,files(use(f)).expt)
+    %  keyboard
+        end
      end
      meanpix = squeeze(mean(mean(data,2),1));
-     mnresp(i,:) = mean(meanpix,2);
-     stdresp(i,:) = std(meanpix,[],2)/sqrt(size(meanpix,2));
+     mnresp(i,:) = nanmean(meanpix,2);
+     stdresp(i,:) = nanstd(meanpix,[],2)/sqrt(size(meanpix,2));
  end
  figure
  plot(mnresp(:,6:12)')
@@ -159,29 +177,35 @@ end
  
  clear compBehav
  for f=1:length(use);
+     if ~isempty (behav{f}{1})
      compBehav(:,:,:,f) = shiftBehav{f}{1};
+     elseif isempty (behav{f}{1})
+         compBehav(:,:,:,f) = NaN(260,260,21);
+     end
+     
  end
  correction=mnresp(end,:);
  correction=correction-min(correction(1:5));
  clear baseline
  baseline(1,:,:,1)=mnresp(end,:);
  baseline = repmat(baseline,size(compBehav,1),size(compBehav,2),1);
- meanImg = mean(compBehav,4) - baseline;
- stdImg = std(compBehav,[],4)/sqrt(size(compBehav,4));
- figure
+ meanImg = nanmean(compBehav,4) - baseline;
+ stdImg = nanstd(compBehav,[],4)/sqrt(size(compBehav,4));
+% figure
  for t= 1:6
      %subplot(2,3,t);
      figure
-     imagesc(meanImg(:,:,t+7),[0 0.1])
+     imagesc(meanImg(:,:,t+7),[0 0.05])
      hold on
-      plot(ypts,xpts,'k.','Markersize',1);
+      plot(ypts,xpts,'w.','Markersize',1);
       axis square
       axis equal
       axis off
+      title (['average activation T = ' num2str(t*100) 'ms'])
  end
  pointData = mnresp - repmat(correction,size(mnresp,1),1);
  for i = 1:size(pointData,1)
-     pointData(i,:) = pointData(i,:)-min(pointData(i,1:6))
+     pointData(i,:) = pointData(i,:)-min(pointData(i,1:6));
      pointDataNorm(i,:) = pointData(i,:)/max(pointData(i,:));
      stdData(i,:) = stdresp(i,:)/max(pointData(i,:));
  end

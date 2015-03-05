@@ -15,7 +15,7 @@ else
 end
 datadir = p;
 
-[dfof map mapNorm cycMap]= readTifBlueGreen(datafile);
+[dfof map mapNorm cycMap frameT]= readTifBlueGreen(datafile);
 
 use_chan=3;
 
@@ -26,7 +26,7 @@ use_chan=3;
 dfof_bg= single(dfof{use_chan});
 display('saving')
 tic
-save(mapfilename,'map','mapNorm','dfof_bg','-v7.3')
+save(mapfilename,'map','mapNorm','dfof_bg','frameT','-v7.3')
 toc
 dfof_bg= dfof{use_chan};
 %clear dfof;
@@ -44,7 +44,7 @@ end
 
 save(mapfilename,'cycle_mov','cycle_mov_std','cycMap','-append')
 
-baseline = prctile(cycle_mov,5,3);
+baseline = prctile(cycle_mov,1,3);
 cycle_mov = cycle_mov - repmat(baseline,[1 1 size(cycle_mov,3)]);
 lowthresh= prctile(cycle_mov(:),2);
 upperthresh = prctile(cycle_mov(:),98)*1.5;
@@ -57,6 +57,8 @@ vid.FrameRate=25;
 open(vid);
 writeVideo(vid,mov);
 close(vid)
+
+
 
 dfshort = (double(dfof_bg(:,:,:)));
 dfshort = imresize(dfshort,0.5,'method','box');
@@ -103,6 +105,8 @@ if ~isempty(fs)
     %     figure
     %     plot(stimRec.pos)
     
+   
+    
     mouseT = stimRec.ts- stimRec.ts(2)+0.0001; %%% first is sometimes off
     figure
     plot(diff(mouseT));
@@ -113,7 +117,7 @@ if ~isempty(fs)
     
     posx = cumsum(stimRec.pos(use,1)-900);
     posy = cumsum(stimRec.pos(use,2)-500);
-    frameT = 0.1:0.1:300;
+    %frameT = 0.1:0.1:300;
     vx = diff(interp1(mouseT,posx,frameT));
     vy = diff(interp1(mouseT,posy,frameT));
     vx(end+1)=0; vy(end+1)=0;
@@ -161,7 +165,7 @@ if ~isempty(fs)
     movemap = mov_img-stop_img;
     
     %[f p] =uiputfile('*.mat','move map file');
-    save(mapfilename,'movemap','sp','-append');
+    save(mapfilename,'movemap','sp','stimRec','-append');
 end
 
 

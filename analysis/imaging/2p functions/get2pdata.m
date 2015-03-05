@@ -1,4 +1,4 @@
-function [dfofInterp] = get2pdata(fname,dt,cycLength);
+function [dfofInterp im_dt] = get2pdata(fname,dt,cycLength);
 [img framerate] = readAlign2p(fname,1,1,0.5);
 nframes = size(img,3);
 
@@ -10,7 +10,7 @@ figure
 imagesc(m);
 title('10th prctile')
 colormap(gray)
-keyboard
+
 dfof=zeros(size(img));
 for f = 1:nframes
     dfof(:,:,f)=(img(:,:,f)-m)./m;

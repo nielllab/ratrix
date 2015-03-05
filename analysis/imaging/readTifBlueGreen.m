@@ -1,4 +1,4 @@
-function [dfof responseMap responseMapNorm cycMap] = readTifBlueGreen(in);
+function [dfof responseMap responseMapNorm cycMap frameT] = readTifBlueGreen(in);
 [pathstr, name, ext] = fileparts(fileparts(mfilename('fullpath')));
 addpath(fullfile(fileparts(pathstr),'bootstrap'))
 setupEnvironment;

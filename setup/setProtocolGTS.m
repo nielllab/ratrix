@@ -21,7 +21,7 @@ msAirpuff                 =0;
 pixPerCycs                = [200]; %*10^9;
 %stim.stopHUD = false; %stop period heads up display... false = off
 percentCorrectionTrials = .5;
-normalizedPosition      = [0.45 0.75];
+
 
 % sca
 % keyboard
@@ -103,7 +103,7 @@ radius                 = .25;
 contrast               = 1;
 thresh                 = .00005;
 yPosPct                = .5;
-stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,normalizedPosition,maxWidth,maxHeight,zoom,interTrialLuminance);
+stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,zoom,interTrialLuminance);
 
 
 %stim to stay on 1 sec after answer

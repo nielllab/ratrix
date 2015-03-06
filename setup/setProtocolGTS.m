@@ -21,6 +21,7 @@ msAirpuff                 =0;
 pixPerCycs                = [200]; %*10^9;
 %stim.stopHUD = false; %stop period heads up display... false = off
 percentCorrectionTrials = .5;
+normalizedPosition      = [0.45 0.75];
 
 % sca
 % keyboard
@@ -40,8 +41,8 @@ switch subjIDs{1}
 % %      pixPerCycs             = [100 150 200]; %*10^9; 
 
      case 'g62l1lt' % Started GTS 7/27/14
-       requestRewardSizeULorMS = 30;
-       rewardSizeULorMS        = 80;
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 60;
        msPenalty               =2900;
 %      pixPerCycs             = [100 150 200]; %*10^9;  
 
@@ -49,7 +50,7 @@ switch subjIDs{1}
        
      case 'g62m9tt' % Started GTS 3/4/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 25;
+       rewardSizeULorMS        = 20;
        msPenalty               =3500;
        pixPerCycs             = [200]; %*10^9;       
        percentCorrectionTrials = .25;
@@ -102,7 +103,7 @@ radius                 = .25;
 contrast               = 1;
 thresh                 = .00005;
 yPosPct                = .5;
-stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,zoom,interTrialLuminance);
+stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,normalizedPosition,maxWidth,maxHeight,zoom,interTrialLuminance);
 
 
 %stim to stay on 1 sec after answer

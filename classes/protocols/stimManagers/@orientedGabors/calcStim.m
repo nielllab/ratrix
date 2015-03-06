@@ -59,6 +59,7 @@ else
     
     xPosPcts = linspace(0,1,totalPorts+2)';
     xPosPcts = xPosPcts(2:end-1);
+ %   xPosPcts[1] = xPosPcts[1]+.2;
     details.xPosPcts = xPosPcts([targetPorts'; distractorLocs']);
 end
 

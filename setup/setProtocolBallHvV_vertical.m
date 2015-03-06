@@ -20,7 +20,7 @@ scalar                    =1;
 msAirpuff                 =msPenalty;
 pixPerCycs                = [100 150 200]; %*10^9;
 percentCorrectionTrials = .5;
-normalizedPosition      = [0.25 0.75];
+normalizedPosition      = [0.33 0.66];
 
 % sca
 % keyboard

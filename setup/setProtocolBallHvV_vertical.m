@@ -18,7 +18,7 @@ fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =msPenalty;
-pixPerCycs                = [100 150 200]; %*10^9;
+pixPerCycs                = [200]; %*10^9;
 percentCorrectionTrials = .5;
 normalizedPosition      = [0.33 0.66];
 

@@ -29,19 +29,13 @@ if ~isscalar(subjIDs)
     error('expecting exactly one subject')
 end
  switch subjIDs{1}
-     
-     case 'g62j.5rt' % Started 10/9/14
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100;
-       msPenalty               =5200;
 
-         
-     
-%    case 'g62h1tt'     %Started Full 8/15/14
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 40;
-%         msPenalty              =4300;
-%         pixPerCycs             = [100 125 150]; %*10^9;  
+    
+   case 'g62l8rn'     %Started from Go To Black 3/8/15
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 40;
+       msPenalty              =4300;
+  
         
 
            

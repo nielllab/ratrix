@@ -33,20 +33,13 @@ percentCorrectionTrials = .5;
 switch subjIDs{1}
     
 
-       
-%      case 'g62j4rt' % Started GTS 7/27/14
-%        requestRewardSizeULorMS = 00;
-%        rewardSizeULorMS        = 40;
-%        msPenalty               =2900;
-% %      pixPerCycs             = [100 150 200]; %*10^9; 
 
      case 'g62l1lt' % Started GTS 7/27/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 60;
+       rewardSizeULorMS        = 100;
        msPenalty               =2900;
-%      pixPerCycs             = [100 150 200]; %*10^9;  
+       percentCorrectionTrials = .35;
 
-      
        
      case 'g62m9tt' % Started GTS 3/4/15
        requestRewardSizeULorMS = 0;
@@ -55,12 +48,12 @@ switch subjIDs{1}
        pixPerCycs             = [200]; %*10^9;       
        percentCorrectionTrials = .25;
 
-%      case 'g62l8rn' % Started GTS 3/?/15
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 40;
-%        msPenalty               =3500;
-%        pixPerCycs             = [200]; %*10^9;       
-%        percentCorrectionTrials = .25;
+     case 'g62n1ln' % Started GTS 3/8/15
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 40;
+       msPenalty               =3500;
+       pixPerCycs             = [200]; %*10^9;       
+       percentCorrectionTrials = .25;
 
     
 

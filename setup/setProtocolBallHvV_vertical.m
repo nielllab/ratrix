@@ -35,6 +35,7 @@ end
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 40;
        msPenalty              =4300;
+       percentCorrectionTrials = .25;
   
         
 

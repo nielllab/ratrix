@@ -51,7 +51,7 @@ switch subjIDs{1}
      case 'g62n1ln' % Started GTS 3/8/15
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 40;
-       msPenalty               =3500;
+       msPenalty               =3100;
        pixPerCycs             = [200]; %*10^9;       
        percentCorrectionTrials = .25;
 

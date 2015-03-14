@@ -41,7 +41,7 @@ switch subjIDs{1}
   
      case 'g62l1lt' % Started GTS 7/27/14
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 50;
+       rewardSizeULorMS        = 40;
        msPenalty               =3200;
        percentCorrectionTrials = .5;
 
@@ -55,7 +55,7 @@ switch subjIDs{1}
 
      case 'g62n1ln' % Started GTS 3/8/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 35;
+       rewardSizeULorMS        = 30;
        msPenalty               =3200;
        pixPerCycs             = [200]; %*10^9;       
        percentCorrectionTrials = .5;

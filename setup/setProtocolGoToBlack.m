@@ -43,12 +43,12 @@ switch subjIDs{1}
 %        msPenalty               =2700;
 %        percentCorrectionTrials = .5;
        
-     case 'g62l10rt' % Started 2/27/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 20;
-       msPenalty               =3000;
-       percentCorrectionTrials = .5;
-  
+%      case 'g62l10rt' % Started 2/27/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 20;
+%        msPenalty               =3000;
+%        percentCorrectionTrials = .5;
+%   
             
     otherwise
         warning('unrecognized mouse, using defaults')

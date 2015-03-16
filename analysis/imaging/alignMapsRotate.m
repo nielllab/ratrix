@@ -2,7 +2,7 @@ function [imfit xshift yshift thetashift zoom] = alignmaps(map,merge,label);
 if ~exist('label','var');
     label = [];
 end
-showImg =0;
+showImg =1;
 if showImg
     figure
 end

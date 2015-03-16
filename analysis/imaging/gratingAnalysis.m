@@ -96,7 +96,7 @@ spont(i)=0; spont_std(i)=0;
     ylim(4*[-1 2]); xlim([0 9])
     set(gca,'Xtick',[]); set(gca,'Ytick',[]);
     
- 
+ keyboard
     %title(sprintf('%0.2f %0.2f',minp(i)*length(angles),osi(i)));
    end
     

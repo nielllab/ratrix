@@ -19,8 +19,13 @@ if strcmp(f(end-3:end),'.mat')
 else
    [stimf stimp startframe] = uigetfile('*.mat','stimrec');
 
-  % [cleanStimRec ImageStim startFrame] = analyze2pSync({fullfile(p,f),fullfile(stimp,stimf)});
-   blank = input('stim includes blank? 0/1 : ');
+ try
+     [startFrame] = get2pStart({fullfile(p,f),fullfile(stimp,stimf)});
+     rethrow(ME);
+ catch
+     display('couldnt run analyze2psync')
+ end
+ blank = input('stim includes blank? 0/1 : ');
     cycLength = input('cycle length : ');
     [dfofInterp dtRaw] = get2pdata(fullfile(p,f),dt,cycLength);
     [fs ps] = uiputfile('*.mat','session data');
@@ -30,14 +35,19 @@ else
     timecourse = squeeze(mean(mean(dfofInterp(:,:,1:120/dt),2),1));
     plot(dt*(1:120/dt),timecourse);
     hold on
+    try
+        startTime = round(startFrame*dtRaw/dt)
+    catch
+        display('couldnt estimate starts from ttl')
+    end
     
       startTime = input('start time : ');
-   %startTime = round(startFrame*dtRaw/dt)
+
     for st = 0:10
         plot(st*8+ [startTime*dt startTime*dt],[0.2 1],'w:')
     end
   
-   keyboard
+
     display('saving data')
     sessionName= fullfile(ps,fs);
     save(sessionName,'dfofInterp','blank','startTime','cycLength','-v7.3');
@@ -161,6 +171,15 @@ if ptsfname==0
 else
     load(ptsfname);
 end
+
+col = 'rgbcmykr'
+figure
+hold on
+inds = [1 3 4 5 6 7 8 9]
+for i = 1:length(inds)
+    plot(dF(inds(i),:)/10 + i,col(i));
+end
+
 dFClean = dF-0.8*repmat(neuropil,size(dF,1),1);
 
 [osi osifit tuningtheta amp  tfpref pmin R, resp tuning spont allresp]= gratingAnalysis(gratingfname, startTime,dFClean,dt,blank);

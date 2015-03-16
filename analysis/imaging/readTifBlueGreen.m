@@ -49,6 +49,7 @@ if exist(psfilename,'file')==2;delete(psfilename);end
 
 figure
 plot(diff(frameT));
+ylabel('frame dt')
 set(gcf, 'PaperPositionMode', 'auto');
 print('-dpsc',psfilename,'-append');
 

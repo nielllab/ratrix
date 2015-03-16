@@ -18,7 +18,9 @@ fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =msPenalty;
-pixPerCycs                = [100 150 200]; %*10^9;
+pixPerCycs                = [200]; %*10^9;
+percentCorrectionTrials = .5;
+normalizedPosition      = [0.33 0.66];
 
 % sca
 % keyboard
@@ -27,66 +29,16 @@ if ~isscalar(subjIDs)
     error('expecting exactly one subject')
 end
  switch subjIDs{1}
-     
-     case 'g62j.5rt' % Started 10/9/14
+
+    
+   case 'g62l8rn'     %Started from Go To Black 3/8/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100;
-       msPenalty               =5200;
-       
-     
-     case 'g62g.6lt' % Started 10/9/14
-       requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 120;
-       msPenalty               =5200;
-     
-     case 'g62b7lt'           %Started full 8/14/14
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40; 
-       msPenalty               =3900;
-         
-     
-%    case 'g62h1tt'     %Started Full 8/15/14
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 40;
-%         msPenalty              =4300;
-%         pixPerCycs             = [100 125 150]; %*10^9;  
+       rewardSizeULorMS        = 25;
+       msPenalty              =3500;
+       percentCorrectionTrials = .5;
+  
         
-%    case 'g62b8tt'     %started 5/22/14  
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 25;
-%         msPenalty              =3600;
 
-  case 'g62c.2rt'           %Switched Back 9/15/14
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 120; 
-       msPenalty               =5200;
-       
-%    case 'g62b1lt'     %moved to HvV_vertical 2/19/14   
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 35;
-%        msPenalty               =3600;
-%      
-%   case 'g62b3rt'          %changed 2/14/14
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 20; 
-%        msPenalty               = 3600; 
-       
-       
-%   case 'g62h1tt'     %started 5/16/14
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 45;
-%         msPenalty              =4300;
-
-       
-%   case 'g62b7lt'           %changed 5/16/14
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 45; 
-%        msPenalty               =4300;    
-
-%    case 'g62g4lt'     %started 5/22/14 
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 60;
-%         msPenalty              =4300;
            
        
     otherwise
@@ -95,7 +47,6 @@ end
 
 noRequest = constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 
-percentCorrectionTrials = .5;
 
 maxWidth  = 1920;
 maxHeight = 1080;
@@ -121,10 +72,9 @@ stim.soundClue = false;
 targetOrientations     = 0
 distractorOrientations = []; %-targetOrientations;
 mean                   = .5;
-radius                 = .35;
+radius                 = .25;
 contrast               = 1;
 thresh                 = .00005;
-normalizedPosition      = [0.25 0.75];
 scaleFactor            = 0; %[1 1];
 axis                   = pi/2;
 

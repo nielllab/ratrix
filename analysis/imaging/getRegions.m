@@ -11,8 +11,11 @@ end
     
     expname = [expfile.subj expfile.expt];
     for m = 1:2
+        
+   fullname = [pathname getfield(expfile,maptype{m})];
+   fullname(fullname=='\')='/';
    
-            load([pathname getfield(expfile,maptype{m})],'map')
+            load(fullname,'map')
 
        if exist('mapNorm','var')
            map=mapNorm;

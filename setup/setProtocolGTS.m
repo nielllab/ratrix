@@ -13,85 +13,54 @@ sm=makeStandardSoundManager();
 rewardSizeULorMS          =130;
 requestRewardSizeULorMS   =0;
 requestMode               ='first';
-msPenalty                 =3500;          %consider changing this also in future
+msPenalty                 =3200;          %consider changing this also in future
 fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
-msAirpuff                 =msPenalty;
-pixPerCycs                = [100 150 200]; %*10^9;
+msAirpuff                 =0;
+pixPerCycs                = [200]; %*10^9;
 %stim.stopHUD = false; %stop period heads up display... false = off
+percentCorrectionTrials = .5;
+
 
 % sca
 % keyboard
 
-if ~isscalar(subjIDs)
-    error('expecting exactly one subject')
-end
+%if ~isscalar(subjIDs)
+    %error('expecting exactly one subject')
+%end
+
 switch subjIDs{1}
     
-     
-     case 'g62j.8lt' % Started 10/22/14
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;
-       msPenalty               =3800;
 
-     case 'g62m.1lt' % Started 10/22/14
+     case 'g62l10rt' % Started 3/14/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;
-       msPenalty               =3800;
-       
-    case 'g62l1lt' % started GTS Learning paradigm on 10/12/14
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;
-       msPenalty               =3800;
-       pixPerCycs                = [200];  %only 200 SF for learning guys
-       
-     case 'g62k.2rt' % Started GTS 8/6/14
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 30;
-       msPenalty               =3800;
-    
-     case 'g62e.12rt' % Started GTS 8/2/14
+       rewardSizeULorMS        = 45;
+       msPenalty               =3000;
+       percentCorrectionTrials = .5;
+  
+     case 'g62l1lt' % Started GTS 7/27/14
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 25;
-       msPenalty               =3700;
-    
-%      case 'g62j.4tt' % Started GTS 7/31/14
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 120;
-%        msPenalty               =4100;
+       msPenalty               =3200;
+       percentCorrectionTrials = .5;
+
        
-     case 'g62j.4rt' % Started GTS 7/27/14
+     case 'g62m9tt' % Started GTS 3/4/15
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 18;
+       msPenalty               =3500;
+       pixPerCycs             = [200]; %*10^9;       
+       percentCorrectionTrials = .5;
+
+     case 'g62n1ln' % Started GTS 3/8/15
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 25;
-       msPenalty               =3600;
-       
-%      case 'g62j.5tt' % Started GTS 7/27/14
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 120;
-%        msPenalty               =4100;
-       
-%      case 'g62c6lt' % switched GTS 6/8/14
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 150;
-%        msPenalty               =4200;
-%        pixPerCycs             = [100 150 200]; %*10^9;
+       msPenalty               =3200;
+       pixPerCycs             = [200]; %*10^9;       
+       percentCorrectionTrials = .5;
+
     
-     case 'g62b.5lt'           %started 1/28/14 
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 50; 
-       msPenalty               =4000;
-%        
-%      case 'bfly2b.3rt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 40;
-%        msPenalty               =4200; 
-%        pixPerCycs             = [100 150 200]; %*10^9;
-       
-     case 'g62c6tt' % switched GTS 6/8/14
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;
-       msPenalty               =4100;
 
 
     
@@ -102,7 +71,7 @@ end
 
 noRequest = constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 
-percentCorrectionTrials = .5;
+
 
 maxWidth  = 1920;
 maxHeight = 1080;
@@ -128,7 +97,7 @@ stim.soundClue = false;
 targetOrientations     = [0 1]*pi/2;
 distractorOrientations = []; %-targetOrientations;
 mean                   = .5;
-radius                 = .35;
+radius                 = .25;
 contrast               = 1;
 thresh                 = .00005;
 yPosPct                = .5;

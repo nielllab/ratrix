@@ -17,7 +17,13 @@ end
        if exist('mapNorm','var')
            map=mapNorm;
        end
-        map = map{3};
+       map = map{3};
+       if m==1
+           oldmap = map;
+       elseif m==2
+           map = imresize(map,size(oldmap));
+       end
+       
         map_all{m} = map;
         ph = angle(map);
        % keyboard

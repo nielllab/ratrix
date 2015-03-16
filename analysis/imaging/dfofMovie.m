@@ -104,12 +104,20 @@ if ~isempty(fs)
     load(fullfile(datadir,fs(1).name));
     %     figure
     %     plot(stimRec.pos)
-    
+
    
+    figure
+    plot(stimRec.f);
+    ylabel('frame #')
     
+ 
     mouseT = stimRec.ts- stimRec.ts(2)+0.0001; %%% first is sometimes off
     figure
     plot(diff(mouseT));
+    
+    figure
+    plot(mouseT - stimRec.f/60)
+    ylim([-0.5 0.5])
     
     dt = diff(mouseT);
     use = [1<0; dt>0];
@@ -117,7 +125,7 @@ if ~isempty(fs)
     
     posx = cumsum(stimRec.pos(use,1)-900);
     posy = cumsum(stimRec.pos(use,2)-500);
-    %frameT = 0.1:0.1:300;
+    frameT = frameT - frameT(1);
     vx = diff(interp1(mouseT,posx,frameT));
     vy = diff(interp1(mouseT,posy,frameT));
     vx(end+1)=0; vy(end+1)=0;
@@ -132,8 +140,8 @@ if ~isempty(fs)
     figure
     plot(xcorr(sp,mean(mean(dfof_bg,2),1)))
     for i=1:100;
-        sp_avg(i) = nanmeanMW(sp(i:100:end)');
-        sp_med(i) = nanmedianMW(sp(i:100:end)');
+        sp_avg(i) = nanmeanMW(sp(i:100:end));
+       
     end
 %     sp_all = reshape(sp,[100 30]);
 %     figure
@@ -143,10 +151,7 @@ if ~isempty(fs)
     plot(0.1:0.1:10,sp_avg)
     title('mean speed')
     ylim([0 2500])
-    figure
-    plot(0.1:0.1:10,sp_med)
-    title('median speed')
-    ylim([0 1500])
+
     
     thresh = [100 ];
     for i = 1:1

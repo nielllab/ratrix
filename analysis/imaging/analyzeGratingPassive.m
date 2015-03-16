@@ -1,10 +1,10 @@
 
 
 clear all
-%batchPassive2015;
+batchPassive2015;
 %batchTopography
 %batchDOIGratings
-batchTopoFrontiers
+
 close all
 
 % for f = 1:length(files);
@@ -20,7 +20,7 @@ close all
   %alluse = find( strcmp({files.notes},'good imaging session') & hasgratings & strcmp({files.doi},'post')) 
   %alluse = find( strcmp({files.notes},'good imaging session') & hasgratings & strcmp({files.subj},'g62l8rn')) 
 
-   alluse = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session')  ) 
+   alluse = find(  strcmp({files.notes},'good imaging session') )  
   
   length(alluse)
 %alluse=alluse(end-5:end);
@@ -44,7 +44,7 @@ x0 =10; y0=30; sz = 120;
 x0 =0; y0=0; sz = 128;
 doTopography;
 
-%%doGratingsNew;
+doGratingsNew;
 % %%% analyze looming
 % for f = 1:length(use)
 %     loom_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'loom');

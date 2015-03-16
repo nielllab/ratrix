@@ -8,12 +8,18 @@ subj=unique({files(alluse).subj})
 for f= 1:length(alluse)
   f
   if ~isempty(files(alluse(f)).behav) & exist([pathname files(alluse(f)).behav],'file')
-         load([pathname files(alluse(f)).behav],'starts','correct');
+         load([pathname files(alluse(f)).behav],'starts','correct','targ');
 
          correct = double(correct);
 resp_time = starts(3,:)-starts(2,:);
     stop_time = starts(2,:)-starts(1,:);
 
+    figure
+    bar([sum(correct&targ<0)/sum(targ<0) sum(correct&targ>0)/sum(targ>0)])
+    set(gca,'ylim',[0 1]);
+    xlabel('targ = -1', 'targ=+1')
+  
+    
     figure
     plot(resp_time);ylim([0 1]);
     hold on
@@ -22,7 +28,11 @@ resp_time = starts(3,:)-starts(2,:);
     
     percentCorrect(f) = mean(correct);
 
-    
+    trialPct = (1:length(correct))/length(correct);
+    for interval=1:10;
+        correctInterval(f,interval) = mean(correct(trialPct>=(interval-1)/10 & trialPct<=interval/10));
+        respInterval(f,interval) = mean(resp_time(trialPct>=(interval-1)/10 & trialPct<=interval/10));
+    end
     clear histcorrect histresp
     for d = 1:15;
         histcorrect(d) = mean(correct(resp_time>(d-1)/10 & resp_time<d/10));
@@ -40,7 +50,29 @@ resp_time = starts(3,:)-starts(2,:);
          display('cant get behavior')
          cantget(f)=1;
      end
-end
+  end
+
+
+figure
+errorbar(median(correctInterval,1),std(correctInterval,1)/sqrt(14));
+ylabel('% correct')
+xlabel('session duration')
+axis([0.5 10.5 0 1])
+
+figure
+errorbar(median(respInterval,1),std(respInterval,1)/(sqrt(14)),'g');
+ylabel('resp time (secs)')
+xlabel('session duration')
+axis([0.5 10.5 0 8])
+keyboard
+
+figure
+hold on
+errorbar(median(correctInterval,1),std(correctInterval,1)/sqrt(14));
+errorbar(median(respInterval,1)/8,std(respInterval,1)/(8*sqrt(14)),'g');
+ylabel('% correct')
+xlabel('session duration')
+axis([0 10 0 1])
 
 
 performance(:,1) = percentCorrect;

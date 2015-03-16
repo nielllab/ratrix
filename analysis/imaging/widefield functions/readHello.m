@@ -1,7 +1,9 @@
+[f,p] = uigetfile('*.mat','maps file')
+load(fullfile(p,f),'cycle_mov')
 tcourse = squeeze(mean(mean(cycle_mov,2),1));
 figure
 plot(tcourse);
-resptime = 8:12; basetime =5:7;
+resptime = 3:5; basetime =13:20;
 figure
 for i = 1:5
     im = mean(cycle_mov(:,:,(i-1)*20 + resptime),3) - mean(cycle_mov(:,:,(i-1)*20 + basetime),3);

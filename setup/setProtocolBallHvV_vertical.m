@@ -10,13 +10,14 @@ end
 
 sm=makeStandardSoundManager();
 
-rewardSizeULorMS          =80;
+rewardSizeULorMS          =130;
 requestRewardSizeULorMS   =0;
 requestMode               ='first';
-msPenalty                 =3500;
+msPenalty                 =3200;         
 fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
+msAirpuff                 =0;
 pixPerCycs                = [200]; %*10^9;
 percentCorrectionTrials = .5;
 normalizedPosition      = [0.33 0.66];
@@ -44,7 +45,8 @@ end
         warning('unrecognized mouse, using defaults')
 end
 
-noRequest = constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar);
+noRequest = constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
+
 
 percentCorrectionTrials = .5;
 

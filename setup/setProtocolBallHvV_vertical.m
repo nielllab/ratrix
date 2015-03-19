@@ -14,10 +14,9 @@ rewardSizeULorMS          =80;
 requestRewardSizeULorMS   =0;
 requestMode               ='first';
 msPenalty                 =3500;
-% fractionOpenTimeSoundIsOn =1;
-% fractionPenaltySoundIsOn  =1;
-% scalar                    =1;
-% msAirpuff                 =msPenalty;
+fractionOpenTimeSoundIsOn =1;
+fractionPenaltySoundIsOn  =1;
+scalar                    =1;
 pixPerCycs                = [200]; %*10^9;
 percentCorrectionTrials = .5;
 normalizedPosition      = [0.33 0.66];
@@ -45,8 +44,9 @@ end
         warning('unrecognized mouse, using defaults')
 end
 
-noRequest = constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
+noRequest = constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar);
 
+percentCorrectionTrials = .5;
 
 maxWidth  = 1920;
 maxHeight = 1080;

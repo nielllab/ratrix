@@ -10,14 +10,14 @@ end
 
 sm=makeStandardSoundManager();
 
-rewardSizeULorMS          =80;
+rewardSizeULorMS          =130;
 requestRewardSizeULorMS   =0;
 requestMode               ='first';
-msPenalty                 =3500;
+msPenalty                 =3200;         
 fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
-msAirpuff                 =msPenalty;
+msAirpuff                 =0;
 pixPerCycs                = [200]; %*10^9;
 percentCorrectionTrials = .5;
 normalizedPosition      = [0.33 0.66];
@@ -33,7 +33,7 @@ end
     
    case 'g62l8rn'     %Started from Go To Black 3/8/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 25;
+       rewardSizeULorMS        = 35;
        msPenalty              =3250;
        percentCorrectionTrials = .5;
   
@@ -47,6 +47,8 @@ end
 
 noRequest = constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 
+
+percentCorrectionTrials = .5;
 
 maxWidth  = 1920;
 maxHeight = 1080;

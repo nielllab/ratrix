@@ -36,27 +36,27 @@ switch subjIDs{1}
      case 'g62l10rt' % Started 3/14/15
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 40;
-       msPenalty               =3200;
+       msPenalty               =3000;
        percentCorrectionTrials = .5;
   
      case 'g62l1lt' % Started GTS 7/27/14
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 20;
-       msPenalty               =3200;
+       msPenalty               =3000;
        percentCorrectionTrials = .5;
 
        
      case 'g62m9tt' % Started GTS 3/4/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 15;
-       msPenalty               =3500;
+       rewardSizeULorMS        = 25;
+       msPenalty               =3000;
        pixPerCycs             = [200]; %*10^9;       
        percentCorrectionTrials = .5;
 
      case 'g62n1ln' % Started GTS 3/8/15
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 15;
-       msPenalty               =3200;
+       msPenalty               =3000;
        pixPerCycs             = [200]; %*10^9;       
        percentCorrectionTrials = .5;
 

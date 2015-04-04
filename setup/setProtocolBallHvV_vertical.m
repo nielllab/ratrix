@@ -10,10 +10,10 @@ end
 
 sm=makeStandardSoundManager();
 
-rewardSizeULorMS          =130;
+rewardSizeULorMS          =20;
 requestRewardSizeULorMS   =0;
 requestMode               ='first';
-msPenalty                 =3200;         
+msPenalty                 =4000;         
 fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
@@ -34,7 +34,7 @@ end
    case 'g62l8rn'     %Started from Go To Black 3/8/15
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 20;
-       msPenalty              =3750;
+       msPenalty              =4000;
        percentCorrectionTrials = .50;
   
         

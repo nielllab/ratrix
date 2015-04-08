@@ -33,7 +33,7 @@ end
     
    case 'g62l8rn'     %Started from Go To Black 3/8/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 20;
+       rewardSizeULorMS        = 15;
        msPenalty               = 4250;
        percentCorrectionTrials = .50;
   

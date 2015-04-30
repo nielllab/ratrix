@@ -1,6 +1,6 @@
 %%%% doGratings
 x=0;
-for rep=[3] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior passive; 4 = 4x3y patches
+for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior passive; 4 = 4x3y patches
     mnAmp{rep}=0; mnPhase{rep}=0; mnAmpWeight{rep}=0; mnData{rep}=0; mnFit{rep}=0;
     clear shiftData shiftAmp shiftPhase fit cycavg
     
@@ -9,7 +9,7 @@ for rep=[3] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
         set(gcf,'Name',[files(use(f)).subj ' ' files(use(f)).expt])
         
         
-        for i = 1:4  %%%% load in topos for check
+        for i = 1:2  %%%% load in topos for check
             if i==1
                 load([pathname files(use(f)).topox],'map');
             elseif i==2
@@ -36,7 +36,7 @@ for rep=[3] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
             end
             dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
             [ph amp data ft cyc] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
-                'C:\background3x2y2sf_021215_16minBlank',18:22,16,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec);
+                'C:\background3x2y2sf_021215_16minBlank',20:22,14:16,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec);
         elseif rep==2
             load ([pathname files(use(f)).grating3x2y6sf4tf ], 'dfof_bg','sp','stimRec')
             zoom = 260/size(dfof_bg,1);
@@ -59,14 +59,16 @@ for rep=[3] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
         
         
         elseif rep ==4
-            load ([pathname files(use(f)).grating4x3y6sf3tf], 'dfof_bg','sp','stimRec')
+            if ~isempty(files(use(f)).grating4x3yLandscape)
+                load ([pathname files(use(f)).grating4x3yLandscape], 'dfof_bg','sp','stimRec')
             zoom = 260/size(dfof_bg,1);
             if ~exist('sp','var')
                 sp =0;stimRec=[];
             end
             dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
-            [ph amp data ft cyc] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
+            [ph amp data ft cyc tuning4x3y(f,:,:,:,:,:,:) ] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
                 'C:\grating4x3y5sf3tf_short011315.mat',13:16,8:9,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec);
+            end
         end
         sp = conv(sp,ones(50,1),'same')/50;;
         sp_all(:,f) = sp;
@@ -340,5 +342,46 @@ for rep=[3] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
     end
 end
 
+figure
+nf= size(tuning4x3y,1);
+for f = 1:size(tuning4x3y,1)   
+
+     subplot(2,5,f)
+     imagesc(squeeze(mean(mean(mean(mean(tuning4x3y(f,:,:,:,:,:,:),7),6),5),4)),[0 0.02]);
+       axis off; axis equal; set(gca,'LooseInset',get(gca,'TightInset'))
+       hold on; plot(ypts/4,xpts/4,'w.','Markersize',2)
+ title(sprintf('day = %s',files(alluse(f)).learningDay))
+end
+
+figure
+nf= size(tuning4x3y,1);
+for f = 1:size(tuning4x3y,1)
     
+   for i = 1:6
+     subplot(nf,6,(f-1)*6+i)
+     imagesc(squeeze(mean(mean(mean(mean(tuning4x3y(f,:,:,:,:,i,:),7),6),5),4)),[0 0.03]);
+       axis off; axis equal; set(gca,'LooseInset',get(gca,'TightInset'))
+       hold on; plot(ypts/4,xpts/4,'w.','Markersize',2)
+   end
+end
+
+figure
+for f = 1:size(tuning4x3y,1)
+   for i = 1:3
+     subplot(nf,3,(f-1)*3+i)
+     imagesc(squeeze(mean(mean(mean(mean(tuning4x3y(f,:,:,:,i,:,:),7),6),5),4)),[0 0.03]);
+       axis off; axis equal; set(gca,'LooseInset',get(gca,'TightInset'))
+       hold on; plot(ypts/4,xpts/4,'w.','Markersize',2)
+   end
+end
+
+figure
+for f = 1:size(tuning4x3y,1)
+   for i = 1:3
+     subplot(nf,3,(f-1)*3+i)
+     imagesc(squeeze(mean(mean(mean(mean(tuning4x3y(f,:,:,:,:,:,i),7),6),5),4)),[0 0.03]);
+       axis off; axis equal; set(gca,'LooseInset',get(gca,'TightInset'))
+       hold on; plot(ypts/4,xpts/4,'w.','Markersize',2)
+   end
+end
     

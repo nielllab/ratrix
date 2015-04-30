@@ -1,4 +1,4 @@
-function [ph amp alldata fit cycavg] = analyzeGratingPatch(dfof_bg,sp,moviename,useframes,base,xpts,ypts, label,stimRec);
+function [ph amp alldata fit cycavg tuning] = analyzeGratingPatch(dfof_bg,sp,moviename,useframes,base,xpts,ypts, label,stimRec);
 %load(fname,'dfof_bg');
 %close all
 sf=0; tf=0; isi=0;
@@ -165,7 +165,7 @@ for i = 1:length(xrange)
         for k = 1:length(sfrange)
             for l=1:length(tfrange)
                cond = cond+1;
-               avgtrialdata(:,:,cond) = squeeze(median(trialdata(:,:,find(xpos==xrange(i)&ypos==yrange(j)&sf==sfrange(k)&tf==tfrange(l))),3));%  length(find(xpos==xrange(i)&ypos==yrange(j)&sf==sfrange(k)&tf==tfrange(l)))
+               avgtrialdata(:,:,cond) = squeeze(mean(trialdata(:,:,find(xpos==xrange(i)&ypos==yrange(j)&sf==sfrange(k)&tf==tfrange(l))),3));%  length(find(xpos==xrange(i)&ypos==yrange(j)&sf==sfrange(k)&tf==tfrange(l)))
                if length(xrange)==4 & length(tfrange)==1;
                    avgtrialdata(:,:,cond)=avgtrialdata(:,:,cond)-blankMap(:,:,k);
                end
@@ -257,11 +257,18 @@ end
         end
     end
     
+     if length(xrange)==4 & length(tfrange)==1;
+         range = [-0.01 0.05];
+         else
+     range= [0 0.15];
+     end
+     
+    
         figure
     for i = 1:length(xrange)
         for j=1:length(yrange)
             subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
-            imagesc(squeeze(mean(mean(tuning(:,:,i,j,:,:),6),5)),[ 0 0.15]);
+            imagesc(squeeze(mean(mean(tuning(:,:,i,j,:,:),6),5)),range);
            % title(sprintf('%0.2fcpd %0.2fhz',sfrange(i),tfrange(j)))
             axis off; axis equal
             hold on; plot(ypts,xpts,'w.','Markersize',2)
@@ -275,7 +282,7 @@ end
             for i = 1:length(xrange)
                 for j=1:length(yrange)
                     subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
-                    imagesc(squeeze(mean(mean(tuning(:,:,i,j,k,:),6),5)),[ 0 0.1]);
+                    imagesc(squeeze(mean(mean(tuning(:,:,i,j,k,:),6),5)),range);
                     % title(sprintf('%0.2fcpd %0.2fhz',sfrange(i),tfrange(j)))
                     axis off; axis equal
                     hold on; plot(ypts,xpts,'w.','Markersize',2)

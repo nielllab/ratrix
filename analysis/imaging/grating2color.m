@@ -27,7 +27,7 @@ else
 %  end
  blank = input('stim includes blank? 0/1 : ');
     cycLength = input('cycle length : ');
-    [dfofInterp dtRaw] = get2pdata(fullfile(p,f),dt,cycLength);
+    [dfofInterp dtRaw redframe] = get2colordata(fullfile(p,f),dt,cycLength);
     [fs ps] = uiputfile('*.mat','session data');
     
     
@@ -50,7 +50,7 @@ else
 
     display('saving data')
     sessionName= fullfile(ps,fs);
-    save(sessionName,'dfofInterp','blank','startTime','cycLength','-v7.3');
+    save(sessionName,'dfofInterp','blank','startTime','cycLength','redframe','-v7.3');
     display('done')
 end
 
@@ -60,8 +60,9 @@ for f = 1:cycLength/dt;
     cycAvg(:,:,f) = mean(dfofInterp(:,:,startTime+f:cycLength/dt:end),3);
 end
 figure
-plot(0.25:0.25:8,squeeze(mean(mean(cycAvg,2),1)))
+plot(0.25:0.25:10,squeeze(mean(mean(cycAvg,2),1)))
 xlabel('secs')
+
 
 
 

@@ -37,7 +37,10 @@ if true
     
     t = 14;
     x = in(1,1:t,:);
-    f = dec2bin(x,16);
+    figure
+    imagesc(squeeze(in(1,:,:)))
+    f = dec2bin(x,16); 
+%    keyboard
     if any(any(f(:,1:8)~='0'))
         %for some reason saving pcoraws uses bits 7-14 instead of 9-16
         f = f(:,[15:16 1:14]);
@@ -53,6 +56,7 @@ if true
             t = nan; drops=nan;
             %%error('bad bcd')
             display('bad bcd')
+            
             return
         end
     end

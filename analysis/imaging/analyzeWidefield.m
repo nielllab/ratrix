@@ -1,14 +1,19 @@
-
+% display('info about parallel pool')
+% myCluster=parcluster('local')
+% gcp('nocreate')
 
 clear all
 batchBehavNN;
 %batchTopography
 close all
 
- alluse = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session')  &  strcmp({files.label},'camk2 gc6') &  strcmp({files.task},'HvV_center')   ) %
- %alluse = 1:length(files) & ~strcmp({files.subj},'g62b7lt');
+ alluse = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session')  &  strcmp({files.label},'camk2 gc6') & strcmp({files.task},'HvV_center') ); %
+ % nouse =  1:length(files) & find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session')  & ~strcmp({files.topox},'') & ~strcmp({files.topoy},'')
+ %alluse = 1:length(files) & ~strcmp({files.topox},'') & ~strcmp({files.topoy},'')  & ~strcmp({files.subj},'g62j8lt') & ~strcmp({files.subj},'g62l1lt') & ~strcmp({files.subj},'g62m1lt') & strcmp({files.task},'naive');
  length(alluse)
  allsubj = unique({files(alluse).subj})
+ alltask = unique({files(alluse).task})
+ 
 
 
 
@@ -66,9 +71,11 @@ for ind = 1:2
    subjXCstd(s,ind) = std(xclist);
 end
 
+
+
 [f p] = uiputfile('*.mat','save data?');
 if f~=0
-    save(fullfile(p,f),'allsubj','alldata');
+    save(fullfile(p,f),'allsubj','alldata', 'shiftBehav', 'numTrialsPercond');
 end
 
 

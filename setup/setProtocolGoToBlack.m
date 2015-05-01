@@ -17,105 +17,43 @@ msPenalty                 =3500;       %consider changing this also in future
 fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
-msAirpuff                 =msPenalty;
+msAirpuff                 =0;
+
+percentCorrectionTrials = .5;
 
 
 switch subjIDs{1}
+    
+     case 'g62a4tt' % Started 2/17/15
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 100;
+       msPenalty               =2800;
+       percentCorrectionTrials = .5;
+
+     case 'g62a5nn' % Started 2/17/15
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 100;
+       msPenalty               =2800;
+       percentCorrectionTrials = .5;
 %     
-%      case 'g62j.8lt' % Started 10/8/14
+%      case 'g62m9tt' % Started 2/17/15
 %        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 60;
-%        msPenalty               =4100;
-% 
-%      case 'g62m.1lt' % Started 10/8/14
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 80;
-%        msPenalty               =4100;
-
-%      case 'g62j.4tt' % Switched to GTS 7/31/14
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 110;
-%        msPenalty               =4100;
-       
-%      case 'g62j.4rt' % Switched to GTS 7/27/14
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;
-%        msPenalty               =4100;
-%        
-%      case 'g62j.5tt' % Switched to GTS 7/27/14
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 90;
-%        msPenalty               =4100;
-       
-%      case 'g62j.5rt' % Switched HvV_center_vertical 7/31/14
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 110;
-%        msPenalty               =4100;
-%        
-%      case 'g62e.12rt' % Switched GTS 8/2/14
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 120;
-%        msPenalty               =4100;
+%        rewardSizeULorMS        = 15;
+%        msPenalty               =2700;
+%        percentCorrectionTrials = .5;
 %      
-    
-%      case 'g62k.1rt' % Switched HvV_center 7/12/14
-%        requestRewardSizeULorMS = 00;
-%        rewardSizeULorMS        = 120;
-%        msPenalty               =4100;
+%      case 'g62l8rn' % Started 2/17/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 20;
+%        msPenalty               =2700;
+%        percentCorrectionTrials = .5;
        
-%      case 'g62k.2rt' % Switched GTS 8/6/14
-%        requestRewardSizeULorMS = 00;
-%        rewardSizeULorMS        = 180;
-%        msPenalty               =4200;
-       
-%      case 'g62f.8lt' % Switched HvV_center 7/12/14
-%        requestRewardSizeULorMS = 00;
-%        rewardSizeULorMS        = 120;
-%        msPenalty               =4100;
-       
-%      case 'g62g.6lt' % Started GoToBlack 6/30/14
-%        requestRewardSizeULorMS = 00;
-%        rewardSizeULorMS        = 50;
-%        msPenalty               =4400;
-%        
-%      case 'g62c6tt' % switched GoToBlack 5/21/14
+%      case 'g62l10rt' % Started 2/27/15
 %        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 100;
-%        msPenalty               =4100;
-   
-%        
-%    case 'bfly2b.3rt'
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 160;
-%        msPenalty               =4000; 
-    
-%         case 'g62h1tt'     %
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 170;
-%         msPenalty              =4000;
-        
-%         case 'g62g4lt'     %switched 3/26/14
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 180;
-%         msPenalty              =4000;
-        
-%        case 'g62b8tt'     %started 2/17/14  
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 160;
-%         msPenalty               =3500;
-        
-
-%       case 'g62b3rt'           %switched to HvV_center 1/4/14
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 85; 
-       
-
-%  case 'g62c.2rt'           %switched to HvV_center 1/30/14 
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 90; 
-%        msPenalty               =3500;
-
-       
+%        rewardSizeULorMS        = 20;
+%        msPenalty               =3000;
+%        percentCorrectionTrials = .5;
+%   
             
     otherwise
         warning('unrecognized mouse, using defaults')
@@ -125,7 +63,7 @@ end;
 
 noRequest = constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 
-percentCorrectionTrials = .5;
+
 
 maxWidth  = 1920;
 maxHeight = 1080;

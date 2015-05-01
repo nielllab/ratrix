@@ -1,10 +1,8 @@
-function [ph amp alldata] = analyzeGratingPatch(dataname,moviename,useframes,base);
+function [ph amp alldata fit cycavg tuning] = analyzeGratingPatch(dfof_bg,sp,moviename,useframes,base,xpts,ypts, label,stimRec);
 %load(fname,'dfof_bg');
 %close all
 sf=0; tf=0; isi=0;
-if exist('dataname','var')
-    load(dataname,'dfof_bg','sp');
-end
+
 
 if exist('moviename','var')
     load(moviename)
@@ -33,43 +31,63 @@ xpos=xpos(1:trials); ypos=ypos(1:trials); sf=sf(1:trials); tf=tf(1:trials);
 
 acqdurframes = (duration+isi)*imagerate;
 
-clear cycavg
+
 nx=ceil(sqrt(acqdurframes+1));
 
 figure
+
+map=0;
 for f=1:acqdurframes
     cycavg(:,:,f) = mean(img(:,:,f:acqdurframes:end),3);
     subplot(nx,nx,f)
     imagesc(squeeze(cycavg(:,:,f)),[-0.02 0.02])
-    %axis off
+    axis off
+    set(gca,'LooseInset',get(gca,'TightInset'))
+    hold on; plot(ypts,xpts,'w.','Markersize',2)
+    map = map+squeeze(cycavg(:,:,f))*exp(2*pi*sqrt(-1)*(0.5 +f/acqdurframes));
 end
 
+subplot(nx,nx,f+1)
+plot(squeeze(mean(mean(cycavg,2),1)))
+axis off
+
+
+ set(gca,'LooseInset',get(gca,'TightInset'))
+ 
+
+
+% for lag = 1:9;
+%     for f=1:acqdurframes
+%     cycavglag(:,:,f,lag) = mean(img(:,:,f+(lag-1)*95*acqdurframes:acqdurframes:(lag)*95*acqdurframes),3);
+% end
+% end
 % figure
-% for f=1:acqdurframes
-%     cycavgstart(:,:,f) = mean(img(:,:,f:acqdurframes:round(end/4)),3);
-%     subplot(nx,nx,f)
-%     imagesc(squeeze(cycavgstart(:,:,f)),[-0.02 0.02])
-%     %axis off
+% plot(squeeze(mean(mean(cycavglag,2),1)))
+
+tcourse = squeeze(mean(mean(img,2),1));
+fourier = tcourse'.*exp((1:length(tcourse))*2*pi*sqrt(-1)/(10*duration + 10*isi));
+
+figure
+plot((1:length(tcourse))/600,angle(conv(fourier,ones(1,600),'same')));
+ylim([-pi pi])
+ylabel('phase'); xlabel('mins')
+
+% for i = 1:10 
+% figure
+% imshow(imresize(polarMap(map/acqdurframes,98),4))
+% hold on; plot(4*ypts,4*xpts,'w.','Markersize',2)
+% [y x] = ginput(1);x= round(x/4);y= round(y/4);
+% figure
+% plot(squeeze(cycavg(x,y,:,:)))
 % end
-%
-%
-% for f=1:acqdurframes
-%     cycavgend(:,:,f) = mean(img(:,:,round(3*end/4)+f:acqdurframes:end),3);
-%     subplot(nx,nx,f)
-%     imagesc(squeeze(cycavgend(:,:,f)),[-0.02 0.02])
-%     %axis off
-% end
-%
-%
-%
+
+
 % [y x] = ginput(1);
 % y= round(y); x= round(x);
 % range = -2:2;
 % figure
 % plot(squeeze(mean(mean(img(x+range,y+range,:),2),1)))
 
-subplot(nx,nx,f+1)
-plot(squeeze(mean(mean(cycavg,2),1)))
 
 
 meandf = squeeze(mean(mean(img,2),1));
@@ -98,16 +116,22 @@ for tr=1:trials;
     
 end
 
+figure
+set(gcf,'Name',label);
 if length(unique(xpos))>1
+    subplot(2,2,1)
     [ph(:,:,1) amp(:,:,1) xtuning] = getPixelTuning(trialdata,xpos,'X',[1 length(unique(xpos))],hsv);
 end
 if length(unique(ypos))>1
-    [ph(:,:,2) amp(:,:,2) ytuning] = getPixelTuning(trialdata,ypos,'Y',[1 3],hsv);
+   subplot(2,2,2)
+   [ph(:,:,2) amp(:,:,2) ytuning] = getPixelTuning(trialdata,ypos,'Y',[1 3],hsv);
 end
 if length(unique(sf))>1
+    subplot(2,2,3)
     [ph(:,:,3) amp(:,:,3) sftuning] = getPixelTuning(trialdata,sf,'SF', [1 length(unique(sf))],jet);
 end
 if length(unique(tf))>1
+    subplot(2,2,4)
     [ph(:,:,4) amp(:,:,4) tftuning] = getPixelTuning(trialdata,tf,'TF',[1 length(unique(tf))],jet);
 end
 
@@ -125,12 +149,30 @@ end
 
 xrange = unique(xpos); yrange=unique(ypos); sfrange=unique(sf); tfrange=unique(tf);
 tuning=zeros(size(trialdata,1),size(trialdata,2),length(xrange),length(yrange),length(sfrange),length(tfrange));
+cond = 0;
+figure
+if length(xrange)==4 & length(tfrange)==1;
+    for k=1:length(sfrange);
+        blankMap(:,:,k) =squeeze(mean(trialdata(:,:,find(xpos==xrange(4)& sf==sfrange(k))),3));
+        subplot(1,2,k);
+        imagesc(blankMap(:,:,k));axis equal
+    end
+end
+
 for i = 1:length(xrange)
-    for j= 1:length(yrange)
+ i
+ for j= 1:length(yrange)
         for k = 1:length(sfrange)
             for l=1:length(tfrange)
-                %  length(find(xpos==xrange(i)&ypos==yrange(j)&sf==sfrange(k)&tf==tfrange(l)))
-                tuning(:,:,i,j,k,l) = squeeze(mean(trialdata(:,:,find(xpos==xrange(i)&ypos==yrange(j)&sf==sfrange(k)&tf==tfrange(l))),3));
+               cond = cond+1;
+               avgtrialdata(:,:,cond) = squeeze(mean(trialdata(:,:,find(xpos==xrange(i)&ypos==yrange(j)&sf==sfrange(k)&tf==tfrange(l))),3));%  length(find(xpos==xrange(i)&ypos==yrange(j)&sf==sfrange(k)&tf==tfrange(l)))
+               if length(xrange)==4 & length(tfrange)==1;
+                   avgtrialdata(:,:,cond)=avgtrialdata(:,:,cond)-blankMap(:,:,k);
+               end
+               
+                   avgspeed(cond)=0;
+               avgx(cond) = xrange(i); avgy(cond)=yrange(j); avgsf(cond)=sfrange(k); avgtf(cond)=tfrange(l);
+               tuning(:,:,i,j,k,l) = avgtrialdata(:,:,cond);
                 meanspd(i,j,k,l) = squeeze(mean(trialspeed(find(xpos==xrange(i)&ypos==yrange(j)&sf==sfrange(k)&tf==tfrange(l)))>500));
             end
         end
@@ -140,51 +182,55 @@ end
 %  [xfit(i,j) yfit(i,j) sffit(i,j) gainfit(i,j) ampfit(i,j)] = fitxysf(squeeze(trialdata(100,100,1:length(xpos))),xpos,ypos,sf,trialspeed);
 
 
-tdata = imresize(trialdata,0.25);
+%tdata = imresize(trialdata,0.25);
+tdata = imresize(avgtrialdata,1);
 gcp
 
 tic
 for i = 1:size(tdata,1);
     i
-    if length(xrange)==5
+    if length(tfrange)==4
         parfor j = 1:size(tdata,2);
-            [xfit(i,j) yfit(i,j) sffit(i,j) gainfit(i,j) ampfit(i,j) basefit(i,j)] = fitxysf(squeeze(tdata(i,j,1:length(xpos))),xpos,ypos,sf,trialspeed);
+                [xfit(i,j)  yfit(i,j) sffit(i,j) tffit(i,j) gainfit(i,j) ampfit(i,j) basefit(i,j) fit(i,j,:)] = fit3x2ysftf(squeeze(tdata(i,j,1:length(avgx))),avgx,avgy,avgsf,avgtf,avgspeed);
         end
-    elseif length(xrange)==2
+    elseif length(sfrange)==2 & length(xrange)==4
         parfor j = 1:size(tdata,2);
-            [xfit(i,j)  sffit(i,j) tffit(i,j) gainfit(i,j) ampfit(i,j) basefit(i,j)] = fit2xsftf(squeeze(tdata(i,j,1:length(xpos))),xpos,sf,tf,trialspeed);
+                [xfit(i,j)  yfit(i,j) sffit(i,j) tffit(i,j) gainfit(i,j) ampfit(i,j) basefit(i,j) fit(i,j,:)] = fitbackground(squeeze(tdata(i,j,1:length(avgx))),avgx,avgy,avgsf,avgtf,avgspeed);
         end
     elseif length(xrange)==4
         parfor j = 1:size(tdata,2);
-            [xfit(i,j)  yfit(i,j) sffit(i,j) tffit(i,j) gainfit(i,j) ampfit(i,j) basefit(i,j)] = fitxysftf(squeeze(tdata(i,j,1:length(xpos))),xpos,ypos,sf,tf,trialspeed);
-        end
+           % [xfit(i,j)  yfit(i,j) sffit(i,j) tffit(i,j) gainfit(i,j) ampfit(i,j) basefit(i,j) fit(i,j,:)] = fitxysftf(squeeze(tdata(i,j,1:length(xpos))),xpos,ypos,sf,tf,trialspeed);
+                [xfit(i,j)  yfit(i,j) sffit(i,j) tffit(i,j) gainfit(i,j) ampfit(i,j) basefit(i,j) fit(i,j,:)] = fitxysftf(squeeze(tdata(i,j,1:length(avgx))),avgx,avgy,avgsf,avgtf,avgspeed);
+    end
     end
 end
     toc
     
-    figure
-    imagesc(xfit); title('X');
-    
-      figure
-    imagesc(yfit); title('Y');
-    
-    figure
-    imagesc(sffit,[2 4]); title('SF');
-    
-    figure
-    imagesc(tffit,[1 3]); title('TF');
-    figure
-    imagesc(ampfit+basefit); title('amp + base');
-    figure
-    imagesc(ampfit); title('amp')
-    figure
-    imagesc(basefit); title('base')
-    figure
-    imagesc(gainfit,[0 1]); title('gain');
-    alldata(:,:,1) = xfit; alldata(:,:,2) = yfit; alldata(:,:,3)=sffit; alldata(:,:,4)=tffit; alldata(:,:,5)=ampfit;
+%     figure
+%     imagesc(xfit); title('X');
+%     
+%       figure
+%     imagesc(yfit); title('Y');
+%     
+%     figure
+%     imagesc(sffit,[2 4]); title('SF');
+%     
+%     figure
+%     imagesc(tffit,[1 3]); title('TF');
+%     figure
+%     imagesc(ampfit+basefit); title('amp + base');
+%     figure
+%     imagesc(ampfit); title('amp')
+%     figure
+%     imagesc(basefit); title('base')
+%     figure
+%     imagesc(gainfit,[0 1]); title('gain');
+   if exist('xfit','var')
+       alldata(:,:,1) = xfit; alldata(:,:,2) = yfit; alldata(:,:,3)=sffit; alldata(:,:,4)=tffit; alldata(:,:,5)=ampfit;
     alldata(:,:,6)=basefit; alldata(:,:,7) = gainfit;
-    
-    
+   else 
+       alldata=[]; fit =[];
+   end
     
     
     % baseimg=figure
@@ -199,15 +245,73 @@ end
     %     imagesc(squeeze(tuning(x,y,:,:,2,1)),[-0.025 0.025]);
     % end
     
-    % figure
-    % for i = 1:length(sfrange)
-    %     for j=1:length(tfrange)
-    %         subplot(length(sfrange),length(tfrange),length(tfrange)*(i-1)+j)
-    %         imagesc(squeeze(mean(mean(tuning(:,:,:,:,i,j),4),3)),[ 0 0.05]);
-    %         title(sprintf('%0.2fcpd %0.2fhz',sfrange(i),tfrange(j)))
-    %         axis off; axis equal
-    %     end
-    % end
+    figure
+    for i = 1:length(sfrange)
+        for j=1:length(tfrange)
+            subplot(length(tfrange),length(sfrange),length(sfrange)*(j-1)+i)
+            imagesc(squeeze(mean(mean(tuning(:,:,:,:,i,j),4),3)),[ 0 0.05]);
+           % title(sprintf('%0.2fcpd %0.2fhz',sfrange(i),tfrange(j)))
+            axis off; axis equal
+            hold on; plot(ypts,xpts,'w.','Markersize',2)
+             set(gca,'LooseInset',get(gca,'TightInset'))
+        end
+    end
+    
+     if length(xrange)==4 & length(tfrange)==1;
+         range = [-0.01 0.05];
+         else
+     range= [0 0.15];
+     end
+     
+    
+        figure
+    for i = 1:length(xrange)
+        for j=1:length(yrange)
+            subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
+            imagesc(squeeze(mean(mean(tuning(:,:,i,j,:,:),6),5)),range);
+           % title(sprintf('%0.2fcpd %0.2fhz',sfrange(i),tfrange(j)))
+            axis off; axis equal
+            hold on; plot(ypts,xpts,'w.','Markersize',2)
+             set(gca,'LooseInset',get(gca,'TightInset'))
+        end
+    end
+    
+    if length(sfrange)==2
+        for k = 1:2
+            figure
+            for i = 1:length(xrange)
+                for j=1:length(yrange)
+                    subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
+                    imagesc(squeeze(mean(mean(tuning(:,:,i,j,k,:),6),5)),range);
+                    % title(sprintf('%0.2fcpd %0.2fhz',sfrange(i),tfrange(j)))
+                    axis off; axis equal
+                    hold on; plot(ypts,xpts,'w.','Markersize',2)
+                    set(gca,'LooseInset',get(gca,'TightInset'))
+                end
+            end
+            title(sprintf('sf = %d',k));
+        end
+    end
+    
+    
+%    for x = 1:length(xrange)
+%        for y = 1:length(yrange)
+%            h = figure;
+%            set(h,'Name',sprintf('x=%d y=%d',x,y))
+%            for i = 1:length(sfrange)
+%         for j=1:length(tfrange)
+%             subplot(length(sfrange),length(tfrange),length(tfrange)*(i-1)+j)
+%             imagesc(squeeze(tuning(:,:,x,y,i,j)),[ -0.05 0.05]);
+%            % title(sprintf('%0.2fcpd %0.2fhz',sfrange(i),tfrange(j)))
+%             axis off; axis equal
+%             hold on; plot(ypts,xpts,'w.','Markersize',2)
+%              set(gca,'LooseInset',get(gca,'TightInset'))
+%         end
+%            end
+%        end
+%    end
+%     
+    
     %
     % if length(xrange)>1 & length(xrange)<=3
     % merge = zeros(size(tuning,1),size(tuning,2),3);

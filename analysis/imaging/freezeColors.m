@@ -113,7 +113,7 @@ for hh = cdatah',
     %save original indexed data for use with unfreezeColors
     siz = size(cdata);
     setappdata(hh, appdatacode, {cdata scalemode});
-
+    cax = double(cax);
     %convert cdata to indexes into colormap
     if strcmp(scalemode,'scaled'),
         %4/19/06 JRI, Accommodate scaled display of integer cdata:

@@ -26,14 +26,14 @@ switch subjIDs{1}
     
      case 'g62a4tt' % Started 4/30/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 70;
+       rewardSizeULorMS        = 50;
        msPenalty               =2800;
        percentCorrectionTrials = .5;
 
      case 'g62a5nn' % Started 4/30/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100;
-       msPenalty               =2800;
+       rewardSizeULorMS        = 120;
+       msPenalty               =3000;
        percentCorrectionTrials = .5;
 %     
 %      case 'g62m9tt' % Started 2/17/15

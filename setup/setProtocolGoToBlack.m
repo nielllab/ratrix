@@ -32,7 +32,7 @@ switch subjIDs{1}
 
      case 'g62a5nn' % Started 4/30/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100;
+       rewardSizeULorMS        = 90;
        msPenalty               =3000;
        percentCorrectionTrials = .5;
 %     

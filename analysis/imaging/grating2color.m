@@ -2,69 +2,12 @@
 clear all
 close all
 
-addpath('\\reichardt\Users\nlab\Desktop\')
 
 dt = 0.25;
 framerate=1/dt;
-[f p] = uigetfile({'*.mat;*.tif'},'.mat or .tif file');
-
-if strcmp(f(end-3:end),'.mat')
-    display('loading data')
-    sessionName = fullfile(p,f);
-    load(sessionName)
-    display('done')
-    if ~exist('cycLength','var')
-        cycLength=8;
-    end
-else
-   [stimf stimp startframe] = uigetfile('*.mat','stimrec');
-
-%  try
-%      [startFrame] = get2pStart({fullfile(p,f),fullfile(stimp,stimf)});
-%      rethrow(ME);
-%  catch
-%      display('couldnt run analyze2psync')
-%  end
- blank = input('stim includes blank? 0/1 : ');
-    cycLength = input('cycle length : ');
-    [dfofInterp dtRaw redframe] = get2colordata(fullfile(p,f),dt,cycLength);
-    [fs ps] = uiputfile('*.mat','session data');
-    
-    
-    figure
-    timecourse = squeeze(mean(mean(dfofInterp(:,:,1:120/dt),2),1));
-    plot(dt*(1:120/dt),timecourse);
-    hold on
-    try
-        startTime = round(startFrame*dtRaw/dt)
-    catch
-        display('couldnt estimate starts from ttl')
-    end
-    
-      startTime = input('start time : ');
-
-    for st = 0:10
-        plot(st*8+ [startTime*dt startTime*dt],[0.2 1],'w:')
-    end
-  
-
-    display('saving data')
-    sessionName= fullfile(ps,fs);
-    save(sessionName,'dfofInterp','blank','startTime','cycLength','redframe','-v7.3');
-    display('done')
-end
-
-
-
-for f = 1:cycLength/dt;
-    cycAvg(:,:,f) = mean(dfofInterp(:,:,startTime+f:cycLength/dt:end),3);
-end
-figure
-plot(0.25:0.25:10,squeeze(mean(mean(cycAvg,2),1)))
-xlabel('secs')
-
-
-
+twocolor = 1;
+get2pSession;
+ axonsAnalyze;
 
 if ~blank
     gratingfname = 'C:\grating2p8orient2sf.mat';
@@ -73,19 +16,6 @@ else
 end
 load(gratingfname);
 
-% timecourse = squeeze(mean(mean(dfofInterp,2),1));
-% template = zeros((isi+duration)/dt,1);
-% template((isi/dt+1):(isi+duration)/dt)=1;
-% template = repmat(template,length(xpos),1);
-% for lag = 1:240;
-%     match(lag)=sum(template.*timecourse(lag:lag+length(template)-1));
-% end
-% figure
-% plot(match)
-% [ymax startTime]=max(match);
-% startTime=startTime-3;
-% sprintf('suggested start time = %d',startTime);
-% startTime = input('start time : ');
 
 dfReshape = reshape(dfofInterp, size(dfofInterp,1)*size(dfofInterp,2),size(dfofInterp,3));
 [osi osifit tuningtheta amp  tfpref pmin R resp tuning spont] = gratingAnalysis(gratingfname, startTime,dfReshape,dt,blank);
@@ -213,8 +143,8 @@ for fitsf=1:2
     data =[];
     for ori = 1:4
         data = [data ; squeeze(allresp(:,2*ori-1,fitsf,:))'];
-              %  orientation((ori-1)*nreps + (1:nreps))=mod((ori-1),4)+1;
-
+        %  orientation((ori-1)*nreps + (1:nreps))=mod((ori-1),4)+1;
+        
         orientation((ori-1)*nreps + (1:nreps))=2*ori-1;
     end
     
@@ -228,10 +158,10 @@ for fitsf=1:2
             sampSize = size(data,2)-1
         end
         sampSize
-       tic
-       counts = zeros(8,1); testcount = zeros(size(data,1),1); trialcorrect=testcount;
-       confusion=zeros(8,8);
-       for szIter = 1:40
+        tic
+        counts = zeros(8,1); testcount = zeros(size(data,1),1); trialcorrect=testcount;
+        confusion=zeros(8,8);
+        for szIter = 1:40
             useSamps = randsample(size(data,2),sampSize);
             useData = data(:,useSamps);
             
@@ -239,35 +169,35 @@ for fitsf=1:2
             c = cvpartition(size(data,1),'k',nfold);
             
             for iter = 1:nfold
-                              
+                
                 sv = fitctree(useData(c.training(iter),:),orientation(c.training(iter)));
                 %sv = fitensemble(useData(c.training(iter),:),orientation(c.training(iter)),'Subspace',64,'discriminant');
                 label = predict(sv,useData(c.test(iter),:));
                 shouldlabel=orientation(c.test(iter));
                 tr=find(c.test(iter));
                 for l = 1:length(label);
-                   counts(shouldlabel(l))=counts(shouldlabel(l))+1;
-                   confusion(shouldlabel(l),label(l))= confusion(shouldlabel(l),label(l))+1;
-                  testcount(tr(l))=testcount(tr(l))+1;
-                   if label(l)==shouldlabel(l)
-                       trialcorrect(tr(l))=trialcorrect(tr(l))+1;
-                   end
+                    counts(shouldlabel(l))=counts(shouldlabel(l))+1;
+                    confusion(shouldlabel(l),label(l))= confusion(shouldlabel(l),label(l))+1;
+                    testcount(tr(l))=testcount(tr(l))+1;
+                    if label(l)==shouldlabel(l)
+                        trialcorrect(tr(l))=trialcorrect(tr(l))+1;
+                    end
                 end
                 
                 correct(sz,szIter,fitsf,iter) = sum(label' == orientation(c.test(iter)))/length(label);
                 correctOrient(sz,szIter,fitsf,iter) = sum(mod(label',4) == mod(orientation(c.test(iter)),4))/length(label);
             end
             
-       end
+        end
         toc
-           figure
-repcounts = repmat(counts',8,1);
-imagesc(confusion./repcounts,[0 1]);
-figure
-plot(trialcorrect./testcount)
-ylim([0 1])
+        figure
+        repcounts = repmat(counts',8,1);
+        imagesc(confusion./repcounts,[0 1]);
+        figure
+        plot(trialcorrect./testcount)
+        ylim([0 1])
     end
- 
+    
 end
 
 avgCorrect = squeeze(mean(mean(correct,4),2))

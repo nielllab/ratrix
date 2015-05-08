@@ -1,68 +1,34 @@
-
-clear all
-close all
-
-addpath('\\reichardt\Users\nlab\Desktop\')
+%%%
 
 dt = 0.25;
 framerate=1/dt;
-[f p] = uigetfile({'*.mat;*.tif'},'.mat or .tif file');
+twocolor = input('# of channels : ');
+twocolor= (twocolor==2)
+blank =1;
+get2pSession;
 
-if strcmp(f(end-3:end),'.mat')
-    display('loading data')
-    sessionName = fullfile(p,f);
-    load(sessionName)
-    display('done')
-    if ~exist('cycLength','var')
-        cycLength=8;
-    end
-else
-   [stimf stimp startframe] = uigetfile('*.mat','stimrec');
-
-%  try
-%      [startFrame] = get2pStart({fullfile(p,f),fullfile(stimp,stimf)});
-%      rethrow(ME);
-%  catch
-%      display('couldnt run analyze2psync')
-%  end
- blank = input('stim includes blank? 0/1 : ');
-    cycLength = input('cycle length : ');
-    [dfofInterp dtRaw] = get2pdata(fullfile(p,f),dt,cycLength);
-    [fs ps] = uiputfile('*.mat','session data');
-    
-    
-    figure
-    timecourse = squeeze(mean(mean(dfofInterp(:,:,1:120/dt),2),1));
-    plot(dt*(1:120/dt),timecourse);
-    hold on
-    try
-        startTime = round(startFrame*dtRaw/dt)
-    catch
-        display('couldnt estimate starts from ttl')
-    end
-    
-      startTime = input('start time : ');
-
-    for st = 0:10
-        plot(st*8+ [startTime*dt startTime*dt],[0.2 1],'w:')
-    end
-  
-
-    display('saving data')
-    sessionName= fullfile(ps,fs);
-    save(sessionName,'dfofInterp','blank','startTime','cycLength','-v7.3');
-    display('done')
+cycLength = cycLength/dt;
+map = 0;
+for i= 1:size(dfofInterp,3);
+    map = map+dfofInterp(:,:,i)*exp(2*pi*sqrt(-1)*i/cycLength);
 end
+amp = abs(map);
+amp=amp/prctile(amp(:),98); amp(amp>1)=1;
+img = mat2im(mod(angle(map),2*pi),hsv,[0 2*pi]);
+img = img.*repmat(amp,[1 1 3]);
+mapimg= figure
+imshow(img)
+colormap(hsv); colorbar
+phaseImg = img;
 
-
-
-for f = 1:cycLength/dt;
-    cycAvg(:,:,f) = mean(dfofInterp(:,:,startTime+f:cycLength/dt:end),3);
-end
+if twocolor 
+    clear img
+img(:,:,1) = redframe/prctile(redframe(:),95);
+img(:,:,2) = amp;
+img(:,:,3)=0;
 figure
-plot(0.25:0.25:8,squeeze(mean(mean(cycAvg,2),1)))
-xlabel('secs')
-
+imshow(img)
+end
 
 
 if ~blank
@@ -72,22 +38,23 @@ else
 end
 load(gratingfname);
 
-% timecourse = squeeze(mean(mean(dfofInterp,2),1));
-% template = zeros((isi+duration)/dt,1);
-% template((isi/dt+1):(isi+duration)/dt)=1;
-% template = repmat(template,length(xpos),1);
-% for lag = 1:240;
-%     match(lag)=sum(template.*timecourse(lag:lag+length(template)-1));
-% end
-% figure
-% plot(match)
-% [ymax startTime]=max(match);
-% startTime=startTime-3;
-% sprintf('suggested start time = %d',startTime);
-% startTime = input('start time : ');
+
+clear cycAvg
+for i = 1:cycLength
+    cycAvg(:,:,i) = squeeze(mean(dfofInterp(:,:,i:cycLength:end),3));
+end
+
+
+[y x] = ginput(1);
+figure
+plot(squeeze(cycAvg(round(x),round(y),:)))
+angle(map(round(x),round(y)))
+
+
+keyboard
 
 dfReshape = reshape(dfofInterp, size(dfofInterp,1)*size(dfofInterp,2),size(dfofInterp,3));
-[osi osifit tuningtheta amp  tfpref pmin R resp tuning spont] = gratingAnalysis(gratingfname, startTime,dfReshape,dt,blank);
+[osi osifit tuningtheta amp  tfpref pmin R resp tuning spont] = gratingAnalysis(gratingfname, 1,dfReshape,dt,blank);
 
 osi = reshape(osi,   size(dfofInterp,1), size(dfofInterp,2) );
 R = reshape(R,size(dfofInterp,1), size(dfofInterp,2));
@@ -175,18 +142,27 @@ end
 col = 'rgbcmykr'
 figure
 hold on
-inds = [1 3 4 5 6 7 8 9]
-for i = 1:length(inds)
-    plot(dF(inds(i),:)/10 + i,col(i));
+inds = 1:65
+colordef black
+set(gcf,'Color',[0 0 0])
+
+for i = length(inds):-1:1
+    
+    h=bar(dF(inds(i),1:1000)/4 + i,1);
+    set(h,'EdgeColor',[0 0 0]);
+    plot(dF(inds(i),1:1000)/4 + i,'w');
 end
+axis off
+xlim([1 1000])
+set(gca,'Position',[0.2 0.2 0.6 0.65])
 
 dFClean = dF-0.8*repmat(neuropil,size(dF,1),1);
 
-[osi osifit tuningtheta amp  tfpref pmin R, resp tuning spont allresp]= gratingAnalysis(gratingfname, startTime,dFClean,dt,blank);
+[osi osifit tuningtheta amp  tfpref pmin R, resp tuning spont allresp]= gratingAnalysis(gratingfname, 1,dFClean,dt,blank);
 
 figure
 tuning = mean(allresp,4);
-for i = 1:100;
+for i = 1:64;
     subplot(10,10,i)
     plot(squeeze(tuning(i,:,:)))
     ylim([-0.5 1])

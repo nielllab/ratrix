@@ -1,8 +1,9 @@
-function [dfofInterp im_dt red] = get2colordata(fname,dt,cycLength);
+function [dfofInterp im_dt red green] = get2colordata(fname,dt,cycLength);
 [imgAll framerate] = readAlign2color(fname,1,1,0.5);
 
 
 red = squeeze(mean(imgAll(:,:,:,2),3));
+green = squeeze(prctile(imgAll(:,:,:,1),95,3));
 for i = 1:2
  i
  img = squeeze(imgAll(:,:,:,i));
@@ -65,25 +66,25 @@ open(vid);
 writeVideo(vid,mov);
 close(vid)
 
-fullMov = zeros(size(imgInterp));
-fullMov(:,:,:,3)=0;
-
-    fullMov(:,:,:,1) = imgInterp(:,:,:,2)/rangered(2);
-    fullMov(:,:,:,2) = (imgInterp(:,:,:,1)-range(1))/(range(2) - range(1)) ;
-
-
-
-% fullMov= mat2im(imresize(img(25:end-25,25:end-25,150:550),2),gray,[prctile(m(:),2) 1.5*prctile(m(:),99)]);
-% %fullMov = squeeze(fullMov(:,:,:,1));
- mov = immovie(permute(fullMov,[1 2 4 3]));
-%mov = immovie(fullMov);
-vid = VideoWriter(sprintf('%sfullMov.avi',fname(1:end-4)));
-vid.FrameRate=10;
-
-vid.Quality=100;
-open(vid);
-writeVideo(vid,mov(50:250));
-close(vid)
+% fullMov = zeros(size(imgInterp));
+% fullMov(:,:,:,3)=0;
+% 
+%     fullMov(:,:,:,1) = imgInterp(:,:,:,2)/rangered(2);
+%     fullMov(:,:,:,2) = (imgInterp(:,:,:,1)-range(1))/(range(2) - range(1)) ;
+% 
+% 
+% 
+% % fullMov= mat2im(imresize(img(25:end-25,25:end-25,150:550),2),gray,[prctile(m(:),2) 1.5*prctile(m(:),99)]);
+% % %fullMov = squeeze(fullMov(:,:,:,1));
+%  mov = immovie(permute(fullMov,[1 2 4 3]));
+% %mov = immovie(fullMov);
+% vid = VideoWriter(sprintf('%sfullMov.avi',fname(1:end-4)));
+% vid.FrameRate=10;
+% 
+% vid.Quality=100;
+% open(vid);
+% writeVideo(vid,mov(50:250));
+% close(vid)
 
 % cycTimecourse = squeeze(mean(mean(cycAvg,2),1));
 % figure

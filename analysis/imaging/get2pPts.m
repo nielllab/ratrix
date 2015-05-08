@@ -6,9 +6,9 @@ sigma = std(dfofInterp,[],3);
 figure
 imagesc(sigma,[0.2 0.8])
 
-
+mag=2;
 mapfig = figure
-imagesc(imresize(sigma,2),[0 2])
+imagesc(imresize(sigma,mag),[0 2])
 hold on
 
 dfReshape = reshape(dfofInterp,[size(dfofInterp,1)*size(dfofInterp,2) size(dfofInterp,3)]);

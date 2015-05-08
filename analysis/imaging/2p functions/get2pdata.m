@@ -1,6 +1,8 @@
-function [dfofInterp im_dt] = get2pdata(fname,dt,cycLength);
+function [dfofInterp im_dt greenframe] = get2pdata(fname,dt,cycLength);
 [img framerate] = readAlign2p(fname,1,1,0.5);
 nframes = size(img,3);
+
+greenframe = mean(img,3);
 
 display('doing prctile')
 tic

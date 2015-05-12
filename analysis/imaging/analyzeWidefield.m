@@ -3,11 +3,11 @@
 % gcp('nocreate')
 
 clear all
-batchBehavNew;
+batchBehavNN;
 %batchTopography
 close all
 
- alluse = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session')  &  strcmp({files.label},'camk2 gc6') & strcmp({files.task},'GTS') & strcmp({files.subj},'g62m1lt') ); %
+ alluse = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session')  &  strcmp({files.label},'camk2 gc6') & strcmp({files.task},'HvV_center') ); %
  % nouse =  1:length(files) & find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session')  & ~strcmp({files.topox},'') & ~strcmp({files.topoy},'')
  %alluse = 1:length(files) & ~strcmp({files.topox},'') & ~strcmp({files.topoy},'')  & ~strcmp({files.subj},'g62j8lt') & ~strcmp({files.subj},'g62l1lt') & ~strcmp({files.subj},'g62m1lt') & strcmp({files.task},'naive');
  length(alluse)

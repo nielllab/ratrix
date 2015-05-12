@@ -24,31 +24,36 @@ percentCorrectionTrials = .5;
 
 switch subjIDs{1}
     
-     case 'g62n1ln' % Started 2/17/15
+     case 'g62a4tt' % Started 4/30/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 15;
+       rewardSizeULorMS        = 25;
        msPenalty               =2800;
        percentCorrectionTrials = .5;
 
-    
-     case 'g62m9tt' % Started 2/17/15
+     case 'g62a5nn' % Started 4/30/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 15;
-       msPenalty               =2700;
+       rewardSizeULorMS        = 30;
+       msPenalty               =2800;
        percentCorrectionTrials = .5;
-     
-     case 'g62l8rn' % Started 2/17/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 15;
-       msPenalty               =2700;
-       percentCorrectionTrials = .5;
+%     
+%      case 'g62m9tt' % Started 2/17/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 15;
+%        msPenalty               =2700;
+%        percentCorrectionTrials = .5;
+%      
+%      case 'g62l8rn' % Started 2/17/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 20;
+%        msPenalty               =2700;
+%        percentCorrectionTrials = .5;
        
-     case 'g62l10rt' % Started 2/27/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 100;
-       msPenalty               =2900;
-       percentCorrectionTrials = .25;
-  
+%      case 'g62l10rt' % Started 2/27/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 20;
+%        msPenalty               =3000;
+%        percentCorrectionTrials = .5;
+%   
             
     otherwise
         warning('unrecognized mouse, using defaults')

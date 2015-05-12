@@ -3,25 +3,29 @@
 clear all
 %batchPassive2015;
 %batchTopography
-%batchDOIGratings
-batchTopoFrontiers
+%batchSpont
+batchLearningBehav
+
 close all
 
-% for f = 1:length(files);
-%     if ~isempty(files(f).grating4x3y6sf3tf) | ~isempty(files(f).grating3x2y6sf4tf) 
-%         hasgratings(f)=1;
-%     else
-%         hasgratings(f)=0;
-%     end
-% end
+for f = 1:length(files);
+    if ~isempty(files(f).behavstim3x4orient)  
+        hasgratings(f)=1;
+    else
+        hasgratings(f)=0;
+    end
+end
 
  %alluse = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session') & hasgratings ) 
  %alluse = 1:length(files) & ~strcmp({files.subj},'g62b7lt');
   %alluse = find( strcmp({files.notes},'good imaging session') & hasgratings & strcmp({files.doi},'post')) 
   %alluse = find( strcmp({files.notes},'good imaging session') & hasgratings & strcmp({files.subj},'g62l8rn')) 
 
-   alluse = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session')  ) 
-  
+  alluse = find(  strcmp({files.notes},'good imaging session') &strcmp({files.subj},'g62m9tt') )  
+  % alluse = find(  strcmp({files.notes},'good imaging session') &strcmp({files.subj},'g62l10rt') ) 
+   % alluse = find(  strcmp({files.notes},'good imaging session') &strcmp({files.subj},'g62n1ln') )
+  %    alluse = find(  strcmp({files.notes},'good imaging session') &strcmp({files.subj},'g62l8rn') )
+      
   length(alluse)
 %alluse=alluse(end-5:end);
 allsubj = unique({files(alluse).subj})
@@ -43,8 +47,8 @@ clear map merge
 x0 =10; y0=30; sz = 120;
 x0 =0; y0=0; sz = 128;
 doTopography;
-
-%%doGratingsNew;
+%doCorrelationMap
+doGratingsNew;
 % %%% analyze looming
 % for f = 1:length(use)
 %     loom_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'loom');

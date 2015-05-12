@@ -22,6 +22,7 @@ pixPerCycs                = [200]; %*10^9;
 %stim.stopHUD = false; %stop period heads up display... false = off
 percentCorrectionTrials = .5;
 
+
 % sca
 % keyboard
 
@@ -32,34 +33,32 @@ percentCorrectionTrials = .5;
 switch subjIDs{1}
     
 
-       
-%      case 'g62j4rt' % Started GTS 7/27/14
-%        requestRewardSizeULorMS = 00;
-%        rewardSizeULorMS        = 40;
-%        msPenalty               =2900;
-% %      pixPerCycs             = [100 150 200]; %*10^9; 
-
+     case 'g62l10rt' % Started 3/14/15
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 25;
+       msPenalty               =2500;
+       percentCorrectionTrials = .5;
+  
      case 'g62l1lt' % Started GTS 7/27/14
-       requestRewardSizeULorMS = 20;
-       rewardSizeULorMS        = 60;
-       msPenalty               =2900;
-%      pixPerCycs             = [100 150 200]; %*10^9;  
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 20;
+       msPenalty               =2500;
+       percentCorrectionTrials = .5;
 
-      
        
      case 'g62m9tt' % Started GTS 3/4/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 40;
-       msPenalty               =3500;
+       rewardSizeULorMS        = 25;
+       msPenalty               =2500;
        pixPerCycs             = [200]; %*10^9;       
-       percentCorrectionTrials = .25;
+       percentCorrectionTrials = .5;
 
-%      case 'g62l8rn' % Started GTS 3/?/15
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 40;
-%        msPenalty               =3500;
-%        pixPerCycs             = [200]; %*10^9;       
-%        percentCorrectionTrials = .25;
+     case 'g62n1ln' % Started GTS 3/8/15
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 15;
+       msPenalty               =2500;
+       pixPerCycs             = [200]; %*10^9;       
+       percentCorrectionTrials = .5;
 
     
 

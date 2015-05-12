@@ -18,7 +18,8 @@ fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =msPenalty;
-pixPerCycs                = [100 150 200];
+pixPerCycs                = [200];
+percentCorrectionTrials = .5;
 
 % sca
 % keyboard
@@ -115,7 +116,7 @@ end
 
 noRequest = constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 
-percentCorrectionTrials = .5;
+
 
 maxWidth  = 1920;
 maxHeight = 1080;
@@ -141,7 +142,7 @@ stim.soundClue = true;
 targetOrientations     = 0
 distractorOrientations = []; %-targetOrientations;
 mean                   = .5;
-radius                 = .35;
+radius                 = .25;
 contrast               = 1;
 thresh                 = .00005;
 normalizedPosition      = [.5];

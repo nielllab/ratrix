@@ -9,6 +9,8 @@ load(fullfile(p,f),'map');
 data(:,:,2) = (map{3});
 size(map{3})
 
+for multipleTifs=1:3
+
 [f p] = uigetfile('*.tif', 'overlay tif');
 overlayImg = imread(fullfile(p,f));
 
@@ -56,4 +58,6 @@ for i= 1:2
 im = mat2im(ph(:,:,i),hsv,[0.75*pi 3*pi/2]);
 subplot(2,2,2+i);
 imshow(im.*repmat(amp,[1 1 3]) *alpha + repmat(overlayImg,[1 1 3])*beta);
+end
+
 end

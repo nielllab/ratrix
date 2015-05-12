@@ -1,6 +1,7 @@
 close all
 dfofInterp(dfofInterp>5)=5;
 
+clear cycAvg
 for i= 1:cycLength;
     cycAvg(:,:,i) = mean(dfofInterp(:,:,i:cycLength:end),3);
 end

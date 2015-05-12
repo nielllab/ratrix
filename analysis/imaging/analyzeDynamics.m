@@ -11,7 +11,7 @@ for i = 1:cycLength
 end
 
 figure
-plot(circshift(dfAvg',20));
+plot(circshift(dfAvg',0));
 figure
 plot(mean(dfAvg,1))
 
@@ -27,15 +27,32 @@ dfRaw=dfAll
 for i  =1:size(dfAll,1)
    dfAll(i,:) = dfAll(i,:)/std(dfAll(i,:));
 end
+dfAll(isnan(dfAll))=0;
 
 [icasig A W]= fastica(dfAll,'NumofIC',3,'LastEig',3,'stabilization','on','approach','symm');
 figure
-plot(icasig')
+plot(icasig(:,1:1200)')
 col = 'bgr';
 for i = 1:size(icasig,1)
     figure
-plot(icasig(i,:),col(i))
+plot(icasig(i,1:1200),col(i))
 end
+
+figure
+plot(A(:,1),A(:,2),'o')
+
+for r = 1:3
+    figure
+hold on
+for i = 1:size(A,1)
+    plot(pts(i,2),pts(i,1),'o','Color',cmapVar(A(i,r),min(A(:,r)),max(A(:,r))));
+end
+axis ij
+end
+
+
+figure
+plot(W(1,:),W(2,:),'o')
 
 score = icasig';
 figure
@@ -74,10 +91,13 @@ plot3(score(:,1),score(:,2),score(:,3))
 figure
 plot(coeff(:,1),coeff(:,2),'o')
 
+m = mean(dfAll,2);
+df = dfAll(m~=0,:);
 figure
-imagesc(corrcoef(dfAll'),[-1 1])
-dist = 1-corrcoef(dfAll');
+imagesc(corrcoef(df'),[-1 1])
+dist = 1-corrcoef(df');
 imagesc(dist)
+
 [Y e] = mdscale(dist,2,'Start','random');
 figure
 imagesc(Y)

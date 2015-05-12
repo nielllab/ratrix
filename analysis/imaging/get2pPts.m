@@ -1,4 +1,4 @@
-function [pts dF neuropil] = get2pPts(dfofInterp);
+function [pts dF neuropil ptsfname] = get2pPts(dfofInterp, greenframe);
 
 mn = mean(dfofInterp,3);
 sigma = std(dfofInterp,[],3);
@@ -8,7 +8,7 @@ imagesc(sigma,[0.2 0.8])
 
 mag=2;
 mapfig = figure
-imagesc(imresize(sigma,mag),[0 2])
+imagesc(imresize(sigma,mag),[0 1.5])
 hold on
 
 dfReshape = reshape(dfofInterp,[size(dfofInterp,1)*size(dfofInterp,2) size(dfofInterp,3)]);
@@ -128,7 +128,7 @@ for i = 1:5;
 end
 
 [f p] = uiputfile('*.mat','save points data');
-save(fullfile(p,f),'pts','dF','neuropil','coverage');
-
+save(fullfile(p,f),'pts','dF','neuropil','coverage','greenframe');
+ptsfname = fullfile(p,f);
 
 

@@ -1,8 +1,8 @@
-function [x y] = getAxonPts(dfofInterp,greenframe)
-stdImg = std(dfofInterp,[],3);
+function [x y] = getAxonPts(stdImg,greenframe)
+
 filt = fspecial('gaussian',5,1);
 stdImg = imfilter(stdImg,filt);
-region = ones(5,5); region(3,3)=0;
+region = ones(3,3); region(2,2)=0;
 maxStd = stdImg > imdilate(stdImg,region);
 pts = find(maxStd);
 figure

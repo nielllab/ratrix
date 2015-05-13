@@ -1,4 +1,6 @@
 %%%
+clear all
+close all
 
 dt = 0.25;
 framerate=1/dt;
@@ -21,13 +23,13 @@ imshow(img)
 colormap(hsv); colorbar
 phaseImg = img;
 
-if twocolor 
+if twocolor
     clear img
-img(:,:,1) = redframe/prctile(redframe(:),95);
-img(:,:,2) = amp;
-img(:,:,3)=0;
-figure
-imshow(img)
+    img(:,:,1) = redframe/prctile(redframe(:),95);
+    img(:,:,2) = amp;
+    img(:,:,3)=0;
+    figure
+    imshow(img)
 end
 
 
@@ -132,158 +134,211 @@ imshow(imresize(tf_im,4));
 title('tf preference')
 
 
-ptsfname = uigetfile('*.mat','pts file');
-if ptsfname==0
-    [pts dF neuropil] = get2pPts(dfofInterp);
-else
-    load(ptsfname);
-end
-
-col = 'rgbcmykr'
-figure
-hold on
-inds = 1:65
-colordef black
-set(gcf,'Color',[0 0 0])
-
-for i = length(inds):-1:1
+selectPts = input('select points for further analysis? 0/1 ')
+if selectPts==1
     
-    h=bar(dF(inds(i),1:1000)/4 + i,1);
-    set(h,'EdgeColor',[0 0 0]);
-    plot(dF(inds(i),1:1000)/4 + i,'w');
-end
-axis off
-xlim([1 1000])
-set(gca,'Position',[0.2 0.2 0.6 0.65])
+    ptsfname = uigetfile('*.mat','pts file');
+    if ptsfname==0
+        
+        useOld = input('align to old points (1) or choose new points (2) : ')
+        if useOld ==1
+            [pts dF  ptsfname] = align2pPts(dfofInterp,greenframe);
+        else
+            [pts dF neuropil ptsfname] = get2pPts(dfofInterp,greenframe);
+        end
+    else
+        load(ptsfname);
+    end
 
-dFClean = dF-0.8*repmat(neuropil,size(dF,1),1);
-
-[osi osifit tuningtheta amp  tfpref pmin R, resp tuning spont allresp]= gratingAnalysis(gratingfname, 1,dFClean,dt,blank);
-
-figure
-tuning = mean(allresp,4);
-for i = 1:64;
-    subplot(10,10,i)
-    plot(squeeze(tuning(i,:,:)))
-    ylim([-0.5 1])
+    col = 'rgbcmykr'
+    figure
+    hold on
+    inds = 1:65
+    colordef black
+    set(gcf,'Color',[0 0 0])
+    
+    for i = length(inds):-1:1
+        
+        h=bar(dF(inds(i),1:1000)/4 + i,1);
+        set(h,'EdgeColor',[0 0 0]);
+        plot(dF(inds(i),1:1000)/4 + i,'w');
+    end
     axis off
+    xlim([1 1000])
+    set(gca,'Position',[0.2 0.2 0.6 0.65])
+    
+  %  dFClean = dF-0.8*repmat(neuropil,size(dF,1),1);
+    dFClean = dF;
+    [osi osifit tuningtheta amp  tfpref pmin R, resp tuning spont allresp]= gratingAnalysis(gratingfname, 1,dFClean,dt,blank);
+    
+    figure
+    %tuning = mean(allresp,4);
+    for i = 1:min(length(dF),64);
+        subplot(10,10,i)
+        plot(squeeze(tuning(i,:,:)))
+        ylim([-0.5 1])
+        axis off
+        
+    end
+    
+       save(ptsfname,'osi','amp','R','tuning','tuningtheta','-append');
+
+       figure
+       hist(osi)
+       
+       clear cycAvg
+       for i = 1:cycLength;
+           cycAvg(:,i) = mean(dF(:,i:cycLength:end),2);
+       end
+       for i = 1:size(cycAvg,1)
+           cycAvg(i,:) = cycAvg(i,:)-min(cycAvg(i,:));
+       end
+       figure
+       plot((1:cycLength)*dt,cycAvg')
+       
+       
+       use = find(mean(dF,2)~=0);
+       notuse = find(mean(dF,2)==0);
+       
+       figure
+       hold on
+       for i = 1:length(use);
+           plot(pts(use(i),2),pts(use(i),1),'o','Color',cmapVar(R(use(i)),-1,1))
+       end
+       plot(pts(notuse,2),pts(notuse,1),'*')
+       axis ij; axis square; axis([0 256 0 256])
+       
+            figure
+       hold on
+       for i = 1:length(pts);
+           if ~isnan(osi(i))
+               plot(pts(i,2),pts(i,1),'o','Color',cmapVar(osi(i),0,0.35))
+           end
+       end
+       plot(pts(notuse,2),pts(notuse,1),'k.')
+       axis ij; axis square; axis([0 256 0 256])
+       
+       
+         figure
+       hold on
+       for i = 1:length(pts);
+         if ~isnan(tuningtheta(i)) & osi(i)>0.15
+             plot(pts(i,2),pts(i,1),'o','Color',cmapVar(tuningtheta(i),0,pi,hsv))
+         end
+         if osi(i)<0.15
+             plot(pts(i,2),pts(i,1),'ko')
+         end
+         
+       end
+            plot(pts(notuse,2),pts(notuse,1),'k.')
+       axis ij; axis square; axis([0 256 0 256])
+       colormap hsv; colorbar;set(gca,'clim',[0 180])
     
 end
-
-sfclean = tfpref;
-sfclean(sfclean<-1)=-1; sfclean(sfclean>1)=1;
-use = amp>0.1 & pmin<0.05;
-figure
-hist(sfclean(use))
-
-figure
-plot(sfclean(use),osi(use),'o')
-
-% 
-% close all
-% clear correct
-% clear correctOrient
-% for fitsf=1:2
-%     nreps=8;
-%     data =[];
-%     for ori = 1:4
-%         data = [data ; squeeze(allresp(:,2*ori-1,fitsf,:))'];
-%               %  orientation((ori-1)*nreps + (1:nreps))=mod((ori-1),4)+1;
-% 
-%         orientation((ori-1)*nreps + (1:nreps))=2*ori-1;
-%     end
-%     
-%     % figure
-%     % imagesc(data)
-%     % figure
-%     % plot(orientation)
-%     for sz =1:5
-%         sampSize = 4^(sz-1);
-%         if sampSize>size(data,2)
-%             sampSize = size(data,2)-1
-%         end
-%         sampSize
-%        tic
-%        counts = zeros(8,1); testcount = zeros(size(data,1),1); trialcorrect=testcount;
-%        confusion=zeros(8,8);
-%        for szIter = 1:40
-%             useSamps = randsample(size(data,2),sampSize);
-%             useData = data(:,useSamps);
-%             
-%             nfold=10;
-%             c = cvpartition(size(data,1),'k',nfold);
-%             
-%             for iter = 1:nfold
-%                               
-%                 sv = fitctree(useData(c.training(iter),:),orientation(c.training(iter)));
-%                 %sv = fitensemble(useData(c.training(iter),:),orientation(c.training(iter)),'Subspace',64,'discriminant');
-%                 label = predict(sv,useData(c.test(iter),:));
-%                 shouldlabel=orientation(c.test(iter));
-%                 tr=find(c.test(iter));
-%                 for l = 1:length(label);
-%                    counts(shouldlabel(l))=counts(shouldlabel(l))+1;
-%                    confusion(shouldlabel(l),label(l))= confusion(shouldlabel(l),label(l))+1;
-%                   testcount(tr(l))=testcount(tr(l))+1;
-%                    if label(l)==shouldlabel(l)
-%                        trialcorrect(tr(l))=trialcorrect(tr(l))+1;
-%                    end
-%                 end
-%                 
-%                 correct(sz,szIter,fitsf,iter) = sum(label' == orientation(c.test(iter)))/length(label);
-%                 correctOrient(sz,szIter,fitsf,iter) = sum(mod(label',4) == mod(orientation(c.test(iter)),4))/length(label);
-%             end
-%             
-%        end
-%         toc
-%            figure
-% repcounts = repmat(counts',8,1);
-% imagesc(confusion./repcounts,[0 1]);
-% figure
-% plot(trialcorrect./testcount)
-% ylim([0 1])
-%     end
-%  
-% end
-% 
-% avgCorrect = squeeze(mean(mean(correct,4),2))
-% avgCorrectOrient = squeeze(mean(mean(correctOrient,4),2))
-% 
-% stdCorrect = squeeze(std(mean(correct,4),[],2))
-% stdCorrectOrient = squeeze(std(mean(correctOrient,4),[],2))
-% figure
-% errorbar([1 2 3 4 4.5],avgCorrect(:,1),stdCorrect(:,1)/sqrt(size(correct,2)))
-% hold on
-% errorbar([1 2 3 4 4.5],avgCorrect(:,2),stdCorrect(:,2)/sqrt(size(correct,2)),'g')
-% ylim([0 1])
-% 
-% figure
-% errorbar([1 2 3 4 4.5],avgCorrectOrient(:,1),stdCorrectOrient(:,1)/sqrt(size(correct,2)))
-% hold on
-% errorbar([1 2 3 4 4.5],avgCorrectOrient(:,2),stdCorrectOrient(:,2)/sqrt(size(correct,2)),'g')
-% ylim([0 1])
-% 
-% 
-% figure
-% 
-% hold on
-% errorbar([1 2 3 4 4.5],avgCorrectOrient(:,1),stdCorrectOrient(:,1)/sqrt(size(correct,2)),'g')
-% errorbar([1 2 3 4 4.5],avgCorrect(:,1),stdCorrect(:,1)/sqrt(size(correct,2)))
-% ylim([0 1])
-% legend('orient','direction')
-% 
-% 
-% 
-% c = 'rgbcmk'
-% figure
-% hold on
-% trange = 50:1250
-% for i = 1:size(dF,1);
-%     i
-%     plot((1:length(trange))*dt/60,(dF(i,trange)-neuropil(trange)) + i,c(mod(i,6)+1));
-% end
-% ylim([0 size(dF,1)+2]); xlim([0 length(trange)*dt/60]);
-% xlabel('mins')
-
-save(sessionName,'osi','osifit','tuningtheta','amp','pmin','R','tfpref','dfofInterp','blank','startTime','cycLength','-v7.3');
-
-
+    %
+    % close all
+    % clear correct
+    % clear correctOrient
+    % for fitsf=1:2
+    %     nreps=8;
+    %     data =[];
+    %     for ori = 1:4
+    %         data = [data ; squeeze(allresp(:,2*ori-1,fitsf,:))'];
+    %               %  orientation((ori-1)*nreps + (1:nreps))=mod((ori-1),4)+1;
+    %
+    %         orientation((ori-1)*nreps + (1:nreps))=2*ori-1;
+    %     end
+    %
+    %     % figure
+    %     % imagesc(data)
+    %     % figure
+    %     % plot(orientation)
+    %     for sz =1:5
+    %         sampSize = 4^(sz-1);
+    %         if sampSize>size(data,2)
+    %             sampSize = size(data,2)-1
+    %         end
+    %         sampSize
+    %        tic
+    %        counts = zeros(8,1); testcount = zeros(size(data,1),1); trialcorrect=testcount;
+    %        confusion=zeros(8,8);
+    %        for szIter = 1:40
+    %             useSamps = randsample(size(data,2),sampSize);
+    %             useData = data(:,useSamps);
+    %
+    %             nfold=10;
+    %             c = cvpartition(size(data,1),'k',nfold);
+    %
+    %             for iter = 1:nfold
+    %
+    %                 sv = fitctree(useData(c.training(iter),:),orientation(c.training(iter)));
+    %                 %sv = fitensemble(useData(c.training(iter),:),orientation(c.training(iter)),'Subspace',64,'discriminant');
+    %                 label = predict(sv,useData(c.test(iter),:));
+    %                 shouldlabel=orientation(c.test(iter));
+    %                 tr=find(c.test(iter));
+    %                 for l = 1:length(label);
+    %                    counts(shouldlabel(l))=counts(shouldlabel(l))+1;
+    %                    confusion(shouldlabel(l),label(l))= confusion(shouldlabel(l),label(l))+1;
+    %                   testcount(tr(l))=testcount(tr(l))+1;
+    %                    if label(l)==shouldlabel(l)
+    %                        trialcorrect(tr(l))=trialcorrect(tr(l))+1;
+    %                    end
+    %                 end
+    %
+    %                 correct(sz,szIter,fitsf,iter) = sum(label' == orientation(c.test(iter)))/length(label);
+    %                 correctOrient(sz,szIter,fitsf,iter) = sum(mod(label',4) == mod(orientation(c.test(iter)),4))/length(label);
+    %             end
+    %
+    %        end
+    %         toc
+    %            figure
+    % repcounts = repmat(counts',8,1);
+    % imagesc(confusion./repcounts,[0 1]);
+    % figure
+    % plot(trialcorrect./testcount)
+    % ylim([0 1])
+    %     end
+    %
+    % end
+    %
+    % avgCorrect = squeeze(mean(mean(correct,4),2))
+    % avgCorrectOrient = squeeze(mean(mean(correctOrient,4),2))
+    %
+    % stdCorrect = squeeze(std(mean(correct,4),[],2))
+    % stdCorrectOrient = squeeze(std(mean(correctOrient,4),[],2))
+    % figure
+    % errorbar([1 2 3 4 4.5],avgCorrect(:,1),stdCorrect(:,1)/sqrt(size(correct,2)))
+    % hold on
+    % errorbar([1 2 3 4 4.5],avgCorrect(:,2),stdCorrect(:,2)/sqrt(size(correct,2)),'g')
+    % ylim([0 1])
+    %
+    % figure
+    % errorbar([1 2 3 4 4.5],avgCorrectOrient(:,1),stdCorrectOrient(:,1)/sqrt(size(correct,2)))
+    % hold on
+    % errorbar([1 2 3 4 4.5],avgCorrectOrient(:,2),stdCorrectOrient(:,2)/sqrt(size(correct,2)),'g')
+    % ylim([0 1])
+    %
+    %
+    % figure
+    %
+    % hold on
+    % errorbar([1 2 3 4 4.5],avgCorrectOrient(:,1),stdCorrectOrient(:,1)/sqrt(size(correct,2)),'g')
+    % errorbar([1 2 3 4 4.5],avgCorrect(:,1),stdCorrect(:,1)/sqrt(size(correct,2)))
+    % ylim([0 1])
+    % legend('orient','direction')
+    %
+    %
+    %
+    % c = 'rgbcmk'
+    % figure
+    % hold on
+    % trange = 50:1250
+    % for i = 1:size(dF,1);
+    %     i
+    %     plot((1:length(trange))*dt/60,(dF(i,trange)-neuropil(trange)) + i,c(mod(i,6)+1));
+    % end
+    % ylim([0 size(dF,1)+2]); xlim([0 length(trange)*dt/60]);
+    % xlabel('mins')
+    
+ 
+    

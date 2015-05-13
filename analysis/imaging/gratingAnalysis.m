@@ -4,8 +4,8 @@ isi = 0; sf = 0;
 fname
 load(fname)
 
-baseRange = (2.5:dt:3.5)/dt;
-evokeRange = (1:dt:4)/dt;
+baseRange = (3:dt:4)/dt;
+evokeRange = (1:dt:3)/dt;
 
 nstim = min(length(xpos),floor(size(dF,2)*dt/8 -1))
 theta = theta(1:nstim); sf = sf(1:nstim);
@@ -23,7 +23,7 @@ sfs = unique(sf);
 
 for th = 1:length(angles);
     for sp = 1:length(sfs);
-        %     allresp(:,th,sp,:) = resp(:,theta ==angles(th) & sf==sfs(sp));
+         %   allresp(:,th,sp,:) = resp(:,theta ==angles(th) & sf==sfs(sp));
         orientation(:,th,sp) = median(resp(:,theta ==angles(th) & sf==sfs(sp)),2);
         %     figure
         %     imagesc(squeeze(orientation(:,:,th)),[-0.5 0.5]);
@@ -32,8 +32,6 @@ for th = 1:length(angles);
 end
 
 allresp=[];
-
-
 npts = size(dF,1);
 
 if npts<=225
@@ -45,7 +43,7 @@ for i= 1:npts
     if i/1000 == round(i/1000);
         i
     end
-    i
+    
     tftuning=squeeze(mean(orientation(i,:,:),2));
     tfpref(i) =(tftuning(2)-tftuning(1))/(tftuning(2) + tftuning(1));
     if tfpref(i)>0
@@ -93,7 +91,7 @@ for i= 1:npts
         %  subplot(10,8,i-1)
         errorbar(1:length(tuning),tuning,tuning_std/sqrt(ntrials));
         hold on; plot([1 8],[spont(i) spont(i)],'g');
-        ylim(4*[-1 2]); xlim([0 9])
+        ylim(2*[-1 2]); xlim([0 9])
         set(gca,'Xtick',[]); set(gca,'Ytick',[]);
         
         %title(sprintf('%0.2f %0.2f',minp(i)*length(angles),osi(i)));

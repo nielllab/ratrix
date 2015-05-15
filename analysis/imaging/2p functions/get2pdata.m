@@ -1,6 +1,8 @@
-function [dfofInterp im_dt] = get2pdata(fname,dt,cycLength);
+function [dfofInterp im_dt greenframe] = get2pdata(fname,dt,cycLength);
 [img framerate] = readAlign2p(fname,1,1,0.5);
 nframes = size(img,3);
+
+greenframe = mean(img,3);
 
 display('doing prctile')
 tic
@@ -25,7 +27,7 @@ dfofInterp = shiftdim(dfofInterp,1);
 imgInterp = interp1(0:im_dt:(nframes-1)*im_dt,shiftdim(img,2),0:dt:(nframes-1)*im_dt);
 imgInterp = shiftdim(imgInterp,1);
 
-cycFrames =cycLength/dt;
+cycFrames =cycLength/dt
 map=0; clear cycAvg mov
 
 range = [prctile(m(:),2) 1.5*prctile(m(:),99)];

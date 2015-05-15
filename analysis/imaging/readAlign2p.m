@@ -10,7 +10,7 @@ mag = 1;
 img = zeros(mag*size(img,1),mag*size(img,2),nframes);
 
 eval(inf(1).ImageDescription);
-framerate = state.acq.frameRate;
+framerate = state.acq.frameRate
 
 if align
     display('doing alignement')

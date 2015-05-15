@@ -31,11 +31,23 @@ end
  switch subjIDs{1}
 
     
-   case 'g62l8rn'     %Started from Go To Black 3/8/15
+     case 'g62a5nn' % Started 5/15/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 15;
-       msPenalty               = 5500;
-       percentCorrectionTrials = .60;
+       rewardSizeULorMS        = 70;
+       msPenalty               =2800;
+       percentCorrectionTrials = .5;
+     
+     case 'g62a4tt' % Started 5/14/15
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 60;
+       msPenalty               =2800;
+       percentCorrectionTrials = .5;
+     
+     case 'g62l8rn'     %Started from Go To Black 3/8/15
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 25;
+       msPenalty               = 3500;
+       percentCorrectionTrials = .50;
   
         
 

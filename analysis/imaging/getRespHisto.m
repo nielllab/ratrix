@@ -9,16 +9,16 @@ for f= 1:length(alluse)
   f
   if ~isempty(files(alluse(f)).behav) & exist([pathname files(alluse(f)).behav],'file')
          load([pathname files(alluse(f)).behav],'starts','correct','targ');
-
+    figure
+    bar([sum(correct&targ<0)/sum(targ<0) sum(correct&targ>0)/sum(targ>0)])
+    set(gca,'ylim',[0 1]);
+    set(gca,'xticklabel',{'targ = -1', 'targ=+1'})
+    
          correct = double(correct);
 resp_time = starts(3,:)-starts(2,:);
     stop_time = starts(2,:)-starts(1,:);
 
-    figure
-    bar([sum(correct&targ<0)/sum(targ<0) sum(correct&targ>0)/sum(targ>0)])
-    set(gca,'ylim',[0 1]);
-    xlabel('targ = -1', 'targ=+1')
-  
+    
     
     figure
     plot(resp_time);ylim([0 1]);

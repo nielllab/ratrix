@@ -8,6 +8,24 @@ outpathname = 'C:\data\imaging\topos\';
 
 n=0;
 
+
+n=n+1;
+
+files(n).subj = 'g62l8rn';
+files(n).expt = '031315';
+files(n).topox =  'passive map files 2015\g62l8rn behav 031315 day6\g62l8rn_run2_portrait_topoX_maps.mat';
+files(n).topoy =  'passive map files 2015\g62l8rn behav 031315 day6\g62l8rn_run3_portrait_topoY_maps.mat';
+files(n).topoxland =  '';
+files(n).topoyland = '';
+files(n).grating4x3y6sf3tf = ''; % portrait
+files(n).grating3x2y6sf4tf = '';
+files(n).background3x2yBlank = '';
+files(n).behavGratings = 'passive map files 2015\g62l8rn behav 031315 day6\g62l8rn_run4_portrait_BehaveStim2sf_maps.mat';
+files(n).behavGratings3x = 'passive map files 2015\g62l8rn behav 031315 day6\g62l8rn_run5_portrait_BehaveStim3sf4orient_maps.mat';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+files(n).monitor = 'vert'; %%% for topox and y
+
 n=n+1;
 
 files(n).subj = 'g62b1lt';

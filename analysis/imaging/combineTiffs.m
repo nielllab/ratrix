@@ -633,7 +633,7 @@ recs = {
 %    }
 %    }
     
-    {'g62l8rn' {
+%    {'g62l8rn' {
 %    {[1 221],[],'030915 g62L8RN HvV behavior learning day2\g62l8rn_run1_HvV_behavior_LearnDay2', 'g62l8rn_run1_HvV_behavior_LearnDay2'}
 %    {[222 473],[],'031015 g62L8RN HvV behavior learning Day3\g62l8rn_run1_HvV_behavior_learn_Day3', 'g62l8rn_run1_HvV_behavior_learn'}
 %    {[474 884],[474 883],'031315 g62l8rn HvV behavior learning DAY6\g62l8rn_run1_HvV_behavior_learnDAY6', 'g62l8rn_run1_HvV_behavior_learnDAY6'}
@@ -646,9 +646,9 @@ recs = {
 %    {[2434 2641],[],'042114 g62l8rn HvV behavior LearnDAY45\g62l8rn_run3_HvV_behavior_learnDAY45', 'g62l8rn_run3_HvV_behavior_learnDAY45'}
 %    {[2956 3310],[],'042415 g62l8rn HvV behavior LearnDAY48\g62l8rn_run1_HvV_behavior_learnDAY48', 'g62l8rn_run1_HvV_behavior_learnDAY45'}
 %    {[3573 3796],[],'042715 g62l8rn HvV behavior LearnDay51\g62l8rn_run2_HvVLearnDay52', 'g62l8rn_run2_HvVLearnDay52'}
-
-   }
-   }
+% 
+%    }
+%    }
 
 %   {'g62l10rt' {
 % %   {[1 364],[],'031415 g62L10rt GTS behavior learning DAY1\g62l10rt_run1_GTS_behavior_learnDAY1', 'g62l10rt_run1_GTS_behavior_learnDAY1'}
@@ -664,6 +664,20 @@ recs = {
 % 
 %   }
 %   }
+
+    {'g62a4tt' {
+      {[1 203],[],'051415 G62A4tt HvV behavior LearnDay1\g62a4tt_run1_HvV_behavior_LearnDay1', 'g62a4tt_run1_HvV_behavior_LearnDay1'}
+    
+       
+  }
+  }
+  
+%     {'g62a5nn' {
+%       {[1 ],[],'', ''}
+%     
+%        
+%   }
+%   }  
    
     }; %%% vert vs horiz in either top or bottom
 

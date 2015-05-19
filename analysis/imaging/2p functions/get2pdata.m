@@ -27,7 +27,7 @@ dfofInterp = shiftdim(dfofInterp,1);
 imgInterp = interp1(0:im_dt:(nframes-1)*im_dt,shiftdim(img,2),0:dt:(nframes-1)*im_dt);
 imgInterp = shiftdim(imgInterp,1);
 
-cycFrames =cycLength/dt;
+cycFrames =cycLength/dt
 map=0; clear cycAvg mov
 
 range = [prctile(m(:),2) 1.5*prctile(m(:),99)];

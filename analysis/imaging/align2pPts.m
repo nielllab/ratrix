@@ -1,4 +1,4 @@
-function [pts dF ptsfname] = align2pPts(dfofInterp, greenframe);
+function [pts dF ptsfname icacorr cellImg] = align2pPts(dfofInterp, greenframe);
 
 [f p] = uigetfile('*.mat','previous points file');
 load(fullfile(p,f),'x','y','refFrame');
@@ -41,42 +41,40 @@ dfReshape = reshape(dfofInterp,[size(dfofInterp,1)*size(dfofInterp,2) size(dfofI
 clear usePts dF
 coverage=zeros(size(dfofInterp,1)*size(dfofInterp,2),1);
 dF = zeros(length(pts),size(dfofInterp,3));
-for p = 1:length(pts);
-    x=pts(p,1); y= pts(p,2); npts=p;
-    w=12; corrThresh=0.75; neuropilThresh=0.5;
-    xmin=max(1,x-w); ymin=max(1,y-w);
-    xmax = min(size(dfofInterp,1),x+w); ymax = min(size(dfofInterp,2),y+w);
-    
-    cc=0;
-    for f= 1:size(dfofInterp,3);
-        cc = cc+(dfofInterp(x,y,f)-mn(x,y))*(dfofInterp(xmin:xmax,ymin:ymax,f)-mn(xmin:xmax,ymin:ymax));
+gcp
+    w=4; %w=5 for cells
+  showImg = input('show images? 0/1 ');
+  tic
+   for p = 1:length(pts);
+   p
+   
+   [dF(p,:) icacorr(p) filling(p) cellImg(p,:,:) usePts{p}] = getPtsParallel(dfofInterp,pts,w,p,mn,sigma,showImg);
     end
-    cc = cc./(size(dfofInterp,3)*sigma(x,y)*sigma(xmin:xmax,ymin:ymax));
-    
-    
-    roi = zeros(size(sigma));
-    roi(xmin:xmax,ymin:ymax) =cc;
-    
-    subplot(2,2,1);
-    imagesc(roi,[0 1]);
-    axis equal
-    
-    subplot(2,2,2);
-    imagesc(roi>corrThresh); axis equal
-    usePts{npts} = find(roi>corrThresh);
-    if length(usePts{npts})<=6
-        dF(npts,:) = 0;
-        coverage(usePts{npts})=-20;
-    else
-    dF(npts,:) = squeeze(mean(dfReshape(usePts{npts},:),1));
-    coverage(usePts{npts})=npts;
-    end
-    
-    
-    subplot(2,2,3);
-    imagesc(cc,[0 1]);
-    
+   toc 
+
+   coverage = zeros(size(dfofInterp,1),size(dfofInterp,2));
+   for p = 1:length(pts);
+       coverage(usePts{p})=p;
+   end
+   
+use = find(mean(dF,2)~=0);
+
+figure
+nx = ceil(sqrt(length(use)));
+for i = 1:length(use)
+    i
+    subplot(nx,nx,i);
+    range = max([0.01 abs(min(min(cellImg(use(i),:,:)))) abs(max(max(cellImg(use(i),:,:))))]);
+    imagesc(squeeze(cellImg(use(i),:,:)),[-range range])
+    axis off
+    set(gca,'LooseInset',get(gca,'TightInset'))
 end
+
+figure
+hist(icacorr,[0.025:0.05:1])
+
+figure
+plot(icacorr,filling,'o')
 
 figure
 imagesc(reshape(coverage,[size(dfofInterp,1) size(dfofInterp,2)]));
@@ -85,8 +83,9 @@ imagesc(reshape(coverage,[size(dfofInterp,1) size(dfofInterp,2)]));
 c = 'rgbcmk'
 figure
 hold on
-for i = 1:npts;
-    plot(dF(i,50:1250)/max(dF(i,:)) + i/2,c(mod(i,6)+1));
+use = find(mean(dF,2)~=0);
+for i = 1:length(use);
+    plot(dF(use(i),50:1250)/max(dF(use(i),:)) + i/2,c(mod(i,6)+1));
 end
 
 
@@ -94,7 +93,9 @@ end
 
 greenframe = refFrame;
 [f p] = uiputfile('*.mat','save points data');
-save(fullfile(p,f),'pts','dF','coverage','greenframe');
+if f~=0
+    save(fullfile(p,f),'pts','dF','coverage','greenframe');
+end
 ptsfname = fullfile(p,f);
 
 

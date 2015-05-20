@@ -3,15 +3,18 @@ nfiles = input('# of files : ')
 [f p] = uigetfile('*.mat','session file');
 load(fullfile(p,f));
 refFrame = greenframe;
-stdref = std(dfofInterp,[],3);
+stdref = skewness(dfofInterp,[],3);
 figure
-imagesc(stdref,[0 1.5])
+imagesc(stdref,[0 prctile(stdref(:),99.5)])
+
+
+
 
 for n = 2:nfiles
 clear greenframe
 [f p] = uigetfile('*.mat','session file');
 load(fullfile(p,f));
-stdframe = std(dfofInterp,[],3);
+stdframe = skewness(dfofInterp,[],3);
 figure
 imagesc(stdframe,[0 1.5])
 % 

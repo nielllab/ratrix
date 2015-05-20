@@ -23,12 +23,15 @@ colormap(hsv); colorbar
 
 if twocolor
     clear img
-    img(:,:,1) = redframe/prctile(redframe(:),95);
+    img(:,:,1) = 0.75*redframe/prctile(redframe(:),98);
+    amp = abs(map);
+    amp=0.75*amp/prctile(amp(:),99); amp(amp>1)=1;
     img(:,:,2) = amp;
-    img(:,:,3)=0;
+    img(:,:,3)=amp;
     figure
     imshow(img)
 end
+title('visual resp (cyan) vs tdtomato')
 
 % clear cycAvg
 % for i = 1:cycLength
@@ -49,7 +52,7 @@ if selectPts==1
         
         useOld = input('align to old points (1) or choose new points (2) : ')
         if useOld ==1
-            [pts dF ptsfname] = align2pPts(dfofInterp,greenframe);
+            [pts dF ptsfname cellImg] = align2pPts(dfofInterp,greenframe);
         else
             [pts dF neuropil ptsfname] = get2pPts(dfofInterp,greenframe);
         end
@@ -102,13 +105,14 @@ hist(ph)
 figure
 hist(abs(phaseVal),0:0.01:0.25)
 
-use = find(abs(phaseVal)>0);
+use = find(abs(phaseVal)>0.05);
+length(use)
 figure
 hold on
 for i = 1:length(use)
     plot(pts(use(i),2),pts(use(i),1),'o','Color',cmapVar(ph(use(i)),0,2*pi,hsv),'LineWidth',2)
 end
-axis ij
+axis ij; colormap hsv; colorbar
 use = find(abs(phaseVal)==0);
 plot(pts(use,2),pts(use,1),'k.')
 axis([0 256 0 256]); axis square

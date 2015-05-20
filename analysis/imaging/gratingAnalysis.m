@@ -34,7 +34,7 @@ end
 allresp=[];
 npts = size(dF,1);
 
-if npts<=225
+if npts<=1000
     figure
     nfigs = ceil(sqrt((npts)));
 end
@@ -86,12 +86,12 @@ for i= 1:npts
         minp(i)=NaN;
     end
     
-    if npts<=225
+    if npts<=1000
         subplot(nfigs,nfigs,i)
         %  subplot(10,8,i-1)
         errorbar(1:length(tuning),tuning,tuning_std/sqrt(ntrials));
         hold on; plot([1 8],[spont(i) spont(i)],'g');
-        ylim(2*[-1 2]); xlim([0 9])
+        ylim(1.1*[-2 max(max(tuning),4)]); xlim([0 9])
         set(gca,'Xtick',[]); set(gca,'Ytick',[]);
         
         %title(sprintf('%0.2f %0.2f',minp(i)*length(angles),osi(i)));

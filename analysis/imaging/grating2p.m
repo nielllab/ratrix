@@ -27,11 +27,11 @@ if twocolor
     clear img
     img(:,:,1) = redframe/prctile(redframe(:),95);
     img(:,:,2) = amp;
-    img(:,:,3)=0;
+    img(:,:,3)=amp;
     figure
     imshow(img)
 end
-
+title('visual resp (cyan) vs tdtomato')
 
 if ~blank
     gratingfname = 'C:\grating2p8orient2sf.mat';
@@ -46,14 +46,6 @@ for i = 1:cycLength
     cycAvg(:,:,i) = squeeze(mean(dfofInterp(:,:,i:cycLength:end),3));
 end
 
-
-[y x] = ginput(1);
-figure
-plot(squeeze(cycAvg(round(x),round(y),:)))
-angle(map(round(x),round(y)))
-
-
-keyboard
 
 dfReshape = reshape(dfofInterp, size(dfofInterp,1)*size(dfofInterp,2),size(dfofInterp,3));
 [osi osifit tuningtheta amp  tfpref pmin R resp tuning spont] = gratingAnalysis(gratingfname, 1,dfReshape,dt,blank);
@@ -166,25 +158,46 @@ if selectPts==1
     axis off
     xlim([1 1000])
     set(gca,'Position',[0.2 0.2 0.6 0.65])
+    colordef white
     
   %  dFClean = dF-0.8*repmat(neuropil,size(dF,1),1);
+    use = find(mean(dF,2)~=0)
+    dF=dF(use,:);
+    pts = pts(use,:);
+    
     dFClean = dF;
     [osi osifit tuningtheta amp  tfpref pmin R, resp tuning spont allresp]= gratingAnalysis(gratingfname, 1,dFClean,dt,blank);
     
     figure
+   c = corrcoef(dF');
+   imagesc(c,[-1 1])
+   title('corr coef')
+   
+   figure
+   hist(c(:),-0.95:0.1:0.95)
+   xlabel('correlation coeff')
+    
+   figure
+   c = corrcoef(dF');
+   c=c>0.85;
+   imagesc(c,[-1 1])
+   title('corr coef')
+   
+    
+    figure
     %tuning = mean(allresp,4);
-    for i = 1:min(length(dF),64);
+    for i = 1:min(length(dF),100);
         subplot(10,10,i)
         plot(squeeze(tuning(i,:,:)))
         ylim([-0.5 1])
-        axis off
-        
+        axis off      
     end
     
        save(ptsfname,'osi','amp','R','tuning','tuningtheta','-append');
 
        figure
        hist(osi)
+       xlabel('osi')
        
        clear cycAvg
        for i = 1:cycLength;

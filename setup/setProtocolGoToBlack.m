@@ -26,7 +26,7 @@ switch subjIDs{1}
     
      case 'g62r4lt' % Started 2/17/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 80;
+       rewardSizeULorMS        = 60;
        msPenalty               =3000;
        percentCorrectionTrials = .50;
     

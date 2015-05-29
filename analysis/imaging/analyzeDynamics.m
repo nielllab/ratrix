@@ -35,7 +35,12 @@ for i  =1:size(dfAll,1)
 end
 dfAll(isnan(dfAll))=0;
 
-[icasig A W]= fastica(dfAll,'NumofIC',3,'LastEig',3,'stabilization','on');
+[coeff score latent] = pca(dfAll');
+%[coeff score latent] = pcacov(corrcoef(dfAll'));
+figure
+plot(latent(1:10))
+
+[icasig A W]= fastica(dfAll,'NumofIC',5,'LastEig',5,'stabilization','on');
 
 figure
 plot(icasig(:,1:1200)')
@@ -90,10 +95,7 @@ plot(score(:,2),score(:,3)); hold on; plot(score(:,2),score(:,3),'.','Color',[0.
 figure
 plot3(score(:,1),score(:,2),score(:,3))
 % 
-% [coeff score latent] = pca(dfAll');
-% %[coeff score latent] = pcacov(corrcoef(dfAll'));
-% figure
-% plot(latent(1:10))
+
 % col = 'bgr';
 % for i = 1:3
 %     figure

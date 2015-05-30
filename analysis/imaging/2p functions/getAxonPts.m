@@ -1,6 +1,6 @@
 function [x y] = getAxonPts(stdImg,greenframe)
 
-filt = fspecial('gaussian',5,1);
+filt = fspecial('gaussian',5,0.75);
 stdImg = imfilter(stdImg,filt);
 region = ones(3,3); region(2,2)=0;
 maxStd = stdImg > imdilate(stdImg,region);
@@ -9,7 +9,7 @@ figure
 plot(stdImg(pts),greenframe(pts),'.')
 
 greenThresh = 200
-stdThresh = 0.75
+stdThresh = 0.5
 done=0
 while ~done 
     pts = find(maxStd);
@@ -17,17 +17,17 @@ while ~done
     plot(greenframe(pts),stdImg(pts),'.')
     
     pts = pts(stdImg(pts)>stdThresh & greenframe(pts)>greenThresh);
-    length(pts)
+    %length(pts)
     [x y] = ind2sub(size(stdImg),pts);
     
     sz = size(stdImg,1);
-    buffer=10;
+    buffer=15;
     
     y = y(x<sz-buffer); x= x(x<sz-buffer);
     y=y(x>buffer); x= x(x>buffer);
     x = x(y>buffer); y = y(y>buffer);
     x = x(y<sz-buffer); y = y(y<sz-buffer);
-       
+      sprintf('%d points ', length(x))
     figure
     imagesc(greenframe,[0 prctile(greenframe(:),95)]);
     hold on; colormap gray; plot(y,x,'*');

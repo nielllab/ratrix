@@ -12,7 +12,7 @@ else
     
     [ttlf ttlp] = uigetfile('*.mat','ttl file')
     [stimPulse framePulse] = getTTL(fullfile(ttlp,ttlf));
-
+    ttlFname = fullfile(ttlp,ttlf);
     cycLength = input('cycle length : ');
     if twocolor
        [dfofInterp dtRaw redframe greenframe] = get2colordata(fullfile(p,f),dt,cycLength);

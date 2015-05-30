@@ -46,11 +46,17 @@ for i= 1:npts
     
     tftuning=squeeze(mean(orientation(i,:,:),2));
     tfpref(i) =(tftuning(2)-tftuning(1))/(tftuning(2) + tftuning(1));
-    if tfpref(i)>0
-        tf_use=2;
-    else
-        tf_use=1;
-    end
+%     if tfpref(i)>0
+%         tf_use=2;
+%     else
+%         tf_use=1;
+%     end
+
+if abs(tftuning(1))>abs(tftuning(2))
+    tf_use=1;
+else
+    tf_use=2;
+end
     if ~blank
         tuning = squeeze(orientation(i,:,tf_use));
         tuning_std = squeeze(ori_std(i,:,tf_use));
@@ -91,7 +97,7 @@ for i= 1:npts
         %  subplot(10,8,i-1)
         errorbar(1:length(tuning),tuning,tuning_std/sqrt(ntrials));
         hold on; plot([1 8],[spont(i) spont(i)],'g');
-        ylim(1.1*[-2 max(max(tuning),4)]); xlim([0 9])
+        ylim(1.1*[-2 max(max(tuning),2)]); xlim([0 9])
         set(gca,'Xtick',[]); set(gca,'Ytick',[]);
         
         %title(sprintf('%0.2f %0.2f',minp(i)*length(angles),osi(i)));

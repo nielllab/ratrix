@@ -1,4 +1,4 @@
-function [pts dF ptsfname icacorr cellImg] = align2pPts(dfofInterp, greenframe);
+function [pts dF ptsfname icacorr cellImg usePts] = align2pPts(dfofInterp, greenframe);
 
 [f p] = uigetfile('*.mat','previous points file');
 load(fullfile(p,f),'x','y','refFrame');
@@ -27,43 +27,44 @@ shifty=shifty-21
 pts(:,1) = oldPts(:,1)+shiftx;
 pts(:,2) = oldPts(:,2)  +shifty;
 
-
-
 mn = mean(dfofInterp,3);
 sigma = std(dfofInterp,[],3);
 
-figure
+sigmafig = figure
 imagesc(sigma,[0 prctile(sigma(:),95)]);
 hold on
-plot(pts(:,2),pts(:,1),'g*')
+plot(pts(:,2),pts(:,1),'k*')
 
 dfReshape = reshape(dfofInterp,[size(dfofInterp,1)*size(dfofInterp,2) size(dfofInterp,3)]);
 clear usePts dF
 coverage=zeros(size(dfofInterp,1)*size(dfofInterp,2),1);
 dF = zeros(length(pts),size(dfofInterp,3));
 gcp
-    w=4; %w=5 for cells
-  showImg = input('show images? 0/1 ');
-  tic
-   for p = 1:length(pts);
-   p
-   
-   [dF(p,:) icacorr(p) filling(p) cellImg(p,:,:) usePts{p}] = getPtsParallel(dfofInterp,pts,w,p,mn,sigma,showImg);
-    end
-   toc 
+w=6; %w=5 for cells, 4 for axos
+showImg = input('show images? 0/1 ');
+tic
+for p = 1:length(pts);
+    p
+    
+    [dF(p,:) icacorr(p) filling(p) cellImg(p,:,:) usePts{p}] = getPtsParallel(dfofInterp,pts,w,p,mn,sigma,showImg);
+end
+toc
 
-   coverage = zeros(size(dfofInterp,1),size(dfofInterp,2));
-   for p = 1:length(pts);
-       coverage(usePts{p})=p;
-   end
-   
+coverage = zeros(size(dfofInterp,1),size(dfofInterp,2));
+for p = 1:length(pts);
+    coverage(usePts{p})=p;
+end
+
 use = find(mean(dF,2)~=0);
+
+figure(sigmafig)
+plot(pts(use,2),pts(use,1),'ko');
 
 figure
 nx = ceil(sqrt(length(use)));
-for i = 1:length(use)
+for i = 1:min(length(use),120)
     i
-    subplot(nx,nx,i);
+    subplot(10,12,i);
     range = max([0.01 abs(min(min(cellImg(use(i),:,:)))) abs(max(max(cellImg(use(i),:,:))))]);
     imagesc(squeeze(cellImg(use(i),:,:)),[-range range])
     axis off
@@ -79,6 +80,17 @@ plot(icacorr,filling,'o')
 figure
 imagesc(reshape(coverage,[size(dfofInterp,1) size(dfofInterp,2)]));
 
+cc = corrcoef(dF');
+d = dist(pts');
+figure
+plot(d(:),cc(:),'.');
+dups = find(cc>0.85 & d<10 & d>0);
+length(dups)
+[i j] = ind2sub(size(cc),dups);
+uppers = max(i,j);
+dF(uppers,:)=0;
+
+
 
 c = 'rgbcmk'
 figure
@@ -90,11 +102,10 @@ end
 
 
 
-
 greenframe = refFrame;
 [f p] = uiputfile('*.mat','save points data');
 if f~=0
-    save(fullfile(p,f),'pts','dF','coverage','greenframe');
+    save(fullfile(p,f),'pts','dF','coverage','greenframe','usePts');
 end
 ptsfname = fullfile(p,f);
 

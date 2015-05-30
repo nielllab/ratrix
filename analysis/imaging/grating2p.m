@@ -134,7 +134,7 @@ if selectPts==1
         
         useOld = input('align to old points (1) or choose new points (2) : ')
         if useOld ==1
-            [pts dF  ptsfname] = align2pPts(dfofInterp,greenframe);
+            [pts dF ptsfname icacorr cellImg usePts] = align2pPts(dfofInterp,greenframe);
         else
             [pts dF neuropil ptsfname] = get2pPts(dfofInterp,greenframe);
         end
@@ -142,53 +142,46 @@ if selectPts==1
         load(ptsfname);
     end
 
-    col = 'rgbcmykr'
-    figure
-    hold on
-    inds = 1:65
-    colordef black
-    set(gcf,'Color',[0 0 0])
-    
-    for i = length(inds):-1:1
-        
-        h=bar(dF(inds(i),1:1000)/4 + i,1);
-        set(h,'EdgeColor',[0 0 0]);
-        plot(dF(inds(i),1:1000)/4 + i,'w');
-    end
-    axis off
-    xlim([1 1000])
-    set(gca,'Position',[0.2 0.2 0.6 0.65])
-    colordef white
-    
+%     col = 'rgbcmykr'
+%     figure
+%     hold on
+%     inds = 1:65
+%     colordef black
+%     set(gcf,'Color',[0 0 0])
+%     
+%     for i = length(inds):-1:1
+%         
+%         h=bar(dF(inds(i),1:1000)/4 + i,1);
+%         set(h,'EdgeColor',[0 0 0]);
+%         plot(dF(inds(i),1:1000)/4 + i,'w');
+%     end
+%     axis off
+%     xlim([1 1000])
+%     set(gca,'Position',[0.2 0.2 0.6 0.65])
+%     colordef white
+%     
   %  dFClean = dF-0.8*repmat(neuropil,size(dF,1),1);
-    use = find(mean(dF,2)~=0)
-    dF=dF(use,:);
-    pts = pts(use,:);
+    nonzeropts = find(mean(dF,2)~=0)
+
     
     dFClean = dF;
     [osi osifit tuningtheta amp  tfpref pmin R, resp tuning spont allresp]= gratingAnalysis(gratingfname, 1,dFClean,dt,blank);
     
     figure
-   c = corrcoef(dF');
+   c = corrcoef(dF(nonzeropts,:)');
    imagesc(c,[-1 1])
    title('corr coef')
    
    figure
    hist(c(:),-0.95:0.1:0.95)
    xlabel('correlation coeff')
-    
-   figure
-   c = corrcoef(dF');
-   c=c>0.85;
-   imagesc(c,[-1 1])
-   title('corr coef')
-   
+
     
     figure
     %tuning = mean(allresp,4);
-    for i = 1:min(length(dF),100);
+    for i = 1:min(length(nonzeropts),100);
         subplot(10,10,i)
-        plot(squeeze(tuning(i,:,:)))
+        plot(squeeze(tuning(nonzeropts(i),:,:)))
         ylim([-0.5 1])
         axis off      
     end
@@ -246,7 +239,16 @@ if selectPts==1
             plot(pts(notuse,2),pts(notuse,1),'k.')
        axis ij; axis square; axis([0 256 0 256])
        colormap hsv; colorbar;set(gca,'clim',[0 180])
+       
+       figure
+       draw2pSegs(usePts,tuningtheta,hsv,256,find(~isnan(tuningtheta)&osi>0.25),[0 pi])
     
+       figure
+       draw2pSegs(usePts,mean(resp,2),jet,256,nonzeropts,[-1 1])
+       
+
+        figure
+       draw2pSegs(usePts,osi,jet,256, find(~isnan(tuningtheta)&osi>0.25),[0 0.35])
 end
     %
     % close all

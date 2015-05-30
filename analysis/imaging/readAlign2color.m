@@ -28,10 +28,17 @@ end
 
 
 filt = fspecial('gaussian',5,fwidth)
+tic
 for f=1:nframes/2
     img(:,:,f,1) = imfilter(double(imread(fname,(f-1)*2+1)),filt);
      img(:,:,f,2) = imfilter(double(imread(fname,(f-1)*2+2)),filt);
 end
+toc
+sprintf('read frame by frame')
+tic
+imjunk = imread(fname);
+toc
+sprintf('read all frames')
 
 mn=squeeze(mean(img,3));
 %mn= prctile(img,99,3);

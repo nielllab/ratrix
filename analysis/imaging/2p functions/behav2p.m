@@ -68,10 +68,6 @@ end
 edgepts = (pts(:,1)<18 | pts(:,1)>237 | pts(:,2)<18 | pts(:,2)>237);
 usenonzero= find(mean(dF,2)~=0 & ~edgepts);
 
- 
- 
-    
-
 timepts = -1:0.25:2;
 dFalign = align2onsets(dF,onsets,dt,timepts);
 trialmean = mean(dFalign,3);
@@ -170,13 +166,10 @@ figure
 imagesc(dF(usenonzero(sortind),:),[-1 5])
 
 dist = 1-corrcoef(dF(usenonzero,:)');
-figure
-imagesc(dist)
+
 
 startTimes = zeros(ceil(length(dF)*dt),1);
 startTimes(round(onsets))=1;
-figure
-plot(startTimes)
 x = [-60:60];
 filt = exp(-0.5*x.^2 / (20^2));
 filt = 60*filt/sum(filt);

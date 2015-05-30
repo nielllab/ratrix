@@ -28,7 +28,7 @@ for i = 1:10:size(dfAvg,1)
 end
 
 
-dfRaw=dfAll
+dfRaw=dfAll;
 %dfAll = celldf;
 for i  =1:size(dfAll,1)
    dfAll(i,:) = dfAll(i,:)/std(dfAll(i,:));
@@ -40,7 +40,7 @@ dfAll(isnan(dfAll))=0;
 figure
 plot(latent(1:10))
 
-[icasig A W]= fastica(dfAll,'NumofIC',5,'LastEig',5,'stabilization','on');
+[icasig A W]= fastica(dfAll,'NumofIC',3,'LastEig',3,'stabilization','on');
 
 figure
 plot(icasig(:,1:1200)')
@@ -53,6 +53,11 @@ end
 figure
 plot(0.5+(icasig(i,:)-min(icasig(i,:)))/(max(icasig(i,:))-min(icasig(i,:))),col(i));
 hold on
+
+for j= 1:length(onsets)
+    plot([onsets(j)/dt onsets(j)/dt],[0 1])
+end
+
 %plot((sp-min(sp))/(max(sp)-min(sp)),'k');
 % figure
 % plot(sp,icasig(i,:),'o')
@@ -94,6 +99,15 @@ figure
 plot(score(:,2),score(:,3)); hold on; plot(score(:,2),score(:,3),'.','Color',[0.75 0  0]);
 figure
 plot3(score(:,1),score(:,2),score(:,3))
+
+figure
+plot(score(:,1),score(:,2));mapColors(score(:,1),score(:,2),'.',jet(length(score))); title('1 v 2');
+figure
+plot(score(:,1),score(:,3));mapColors(score(:,1),score(:,3),'.',jet(length(score))); title('1 v 3');
+figure
+plot(score(:,2),score(:,3));mapColors(score(:,2),score(:,3),'.',jet(length(score))); title('2 v 3');
+
+
 % 
 
 % col = 'bgr';

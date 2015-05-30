@@ -62,9 +62,9 @@ plot(pts(use,2),pts(use,1),'ko');
 
 figure
 nx = ceil(sqrt(length(use)));
-for i = 1:length(use)
+for i = 1:min(length(use),120)
     i
-    subplot(nx,nx,i);
+    subplot(10,12,i);
     range = max([0.01 abs(min(min(cellImg(use(i),:,:)))) abs(max(max(cellImg(use(i),:,:))))]);
     imagesc(squeeze(cellImg(use(i),:,:)),[-range range])
     axis off

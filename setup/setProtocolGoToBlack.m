@@ -26,20 +26,20 @@ switch subjIDs{1}
     
      case 'g62r4lt' % Started 2/17/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 30;
-       msPenalty               =3000;
+       rewardSizeULorMS        = 20;
+       msPenalty               =3500;
        percentCorrectionTrials = .50;
     
      case 'g62t2rt' % Started 2/17/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 120;
-       msPenalty               =3200;
+       rewardSizeULorMS        = 150;
+       msPenalty               =3500;
        percentCorrectionTrials = .50;
     
      case 'g62r3rt' % Started 2/17/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 90;
-       msPenalty               =3000;
+       rewardSizeULorMS        = 70;
+       msPenalty               =3500;
        percentCorrectionTrials = .50;
     
 %      case 'g62a4tt' % Started 4/30/15

@@ -69,7 +69,7 @@ if selectPts==1
         ptsfname = uigetfile('*.mat','pts file');
         load(ptsfname);
     end
-end
+
 
 edgepts = (pts(:,1)<18 | pts(:,1)>237 | pts(:,2)<18 | pts(:,2)>237);
 usenonzero= find(mean(dF,2)~=0 & ~edgepts);
@@ -379,3 +379,4 @@ plot([1 length(trialRate)/dt],[0 0],'k:')
 set(gca,'Xtick',[]);
 set(gca,'Ytick',[]);
 ylabel('trial rate')
+end

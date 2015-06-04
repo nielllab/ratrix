@@ -28,7 +28,8 @@ ref = refFrame-mean(refFrame(:));
 gr = greenframe-mean(greenframe(:));
 for dx=-20:20;
     for dy = -20:20;
-        xc(dx+21,dy+21)=sum(sum(circshift(ref,[dx dy]).*gr));
+        cs = circshift(ref,[dx dy]);
+        xc(dx+21,dy+21)=sum(sum(cs(20:end-20,20:end-20).*gr(20:end-20,20:end-20)));
     end
 end
 figure

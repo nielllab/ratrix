@@ -263,7 +263,7 @@ if selectPts==1
     usetrials=1;
     clear data err
     col = 'rmbc'
-    allTrials = zeros(size(dFalign,3),4,size(dFalign,1));
+    allTrials = zeros(size(dFalign,2),4,size(dFalign,1));
     for i = 1:length(sortind)
         
         for j = 1:4

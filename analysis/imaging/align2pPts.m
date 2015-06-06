@@ -40,7 +40,7 @@ dfReshape = reshape(dfofInterp,[size(dfofInterp,1)*size(dfofInterp,2) size(dfofI
 clear usePts dF
 coverage=zeros(size(dfofInterp,1)*size(dfofInterp,2),1);
 dF = zeros(length(pts),size(dfofInterp,3));
-gcp
+%gcp
 w=6; %w=5 for cells, 4 for axos
 showImg = input('show images? 0/1 ');
 tic

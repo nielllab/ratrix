@@ -23,7 +23,7 @@ sfs = unique(sf);
 
 for th = 1:length(angles);
     for sp = 1:length(sfs);
-         %   allresp(:,th,sp,:) = resp(:,theta ==angles(th) & sf==sfs(sp));
+        %   allresp(:,th,sp,:) = resp(:,theta ==angles(th) & sf==sfs(sp));
         orientation(:,th,sp) = median(resp(:,theta ==angles(th) & sf==sfs(sp)),2);
         %     figure
         %     imagesc(squeeze(orientation(:,:,th)),[-0.5 0.5]);
@@ -46,17 +46,17 @@ for i= 1:npts
     
     tftuning=squeeze(mean(orientation(i,:,:),2));
     tfpref(i) =(tftuning(2)-tftuning(1))/(tftuning(2) + tftuning(1));
-%     if tfpref(i)>0
-%         tf_use=2;
-%     else
-%         tf_use=1;
-%     end
-
-if abs(tftuning(1))>abs(tftuning(2))
-    tf_use=1;
-else
-    tf_use=2;
-end
+    %     if tfpref(i)>0
+    %         tf_use=2;
+    %     else
+    %         tf_use=1;
+    %     end
+    
+    if abs(tftuning(1))>abs(tftuning(2))
+        tf_use=1;
+    else
+        tf_use=2;
+    end
     if ~blank
         tuning = squeeze(orientation(i,:,tf_use));
         tuning_std = squeeze(ori_std(i,:,tf_use));
@@ -73,7 +73,11 @@ end
     [osicv(i) tuningtheta(i)] = calcOSI(tuning'-spont(i),0);
     if npts<100*100
         [thetafit(i) osi(i) A1(i) A2(i) w(i) B(i) nr yfit] = fit_tuningcurve(tuning-spont(i),angles(1:length(tuning)));
+        if ~(sum(tuning)==0)
         [osi(i) width(i) amp(i)] = calculate_tuning(A1(i),A2(i),B(i),w(i));
+                else
+                    osi(i)=NaN; width(i)=NaN; amp(i)=0;
+                end
     else
         osi=[];
         width=[];

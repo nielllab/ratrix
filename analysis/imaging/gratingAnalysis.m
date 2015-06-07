@@ -1,5 +1,6 @@
 function [osicv osi tuningtheta amp tfpref minp R resp alltuning spont allresp] = gratingAnalysis(fname, startTime, dF, dt, blank);
 
+warning('off','stats:nlinfit:ModelConstantWRTParam');
 isi = 0; sf = 0; duration = 0;
 fname
 load(fname)

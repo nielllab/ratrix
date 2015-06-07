@@ -41,7 +41,7 @@ outpathname = '';
 % files(n).topox_pts =  'topoX pts.mat';
 % files(n).topoy_pts = 'TopoY pts.mat';
 % files(n).behav_pts = 'GTS behavior pts.mat';
-% files(n).2pOrientations_w_blank_pts = '';
+% files(n).2pOrientations_w_blank_pts = '2pOrientations pts.mat';
 % files(n).behavstim2sf_pts = 'behaveStim2sf pts.mat';
 % files(n).behavstim3x4orient_pts = 'BehaveStim3x4orient pts.mat';
 % files(n).master_pts = 'master pts.mat';
@@ -64,7 +64,7 @@ outpathname = '';
 % files(n).topox_pts =  'TopoX pts.mat';
 % files(n).topoy_pts = 'TopoY pts.mat';
 % files(n).behav_pts = 'GTS behavior pts.mat';
-% files(n).2pOrientations_w_blank_pts = '';
+% files(n).2pOrientations_w_blank_pts = '2pOrientations pts.mat';
 % files(n).behavstim2sf_pts = 'BehaveStim2sf pts.mat';
 % files(n).behavstim3x4orient_pts = 'BehaveStim3x4orient pts.mat';
 % files(n).master_pts = 'master pts.mat';
@@ -87,7 +87,7 @@ outpathname = '';
 % files(n).topox_pts =  'topoX pts.mat';
 % files(n).topoy_pts = 'topoY pts.mat';
 % files(n).behav_pts = 'HvV behavior pts.mat';
-% files(n).2pOrientations_w_blank_pts = '';
+% files(n).2pOrientations_w_blank_pts = '2porientations_w_blank pts.mat';
 % files(n).behavstim2sf_pts = 'behaveStim2sf pts.mat';
 % files(n).behavstim3x4orient_pts = 'behaveStim3x4orient pts.mat';
 % files(n).master_pts = 'master_pts.mat';
@@ -120,6 +120,30 @@ outpathname = '';
 % files(n).spatialfreq = '200';
 % files(n).label = 'camk2 gc6';
 % files(n).notes = 'good imaging session';
+
+% n=n+1;
+% files(n).subj = 'g62r3rt'; 
+% files(n).expt = '060715';
+% files(n).topox_session_data =  'TopoX session data.mat';
+% files(n).topoy_session_data = 'TopoY session data.mat';
+% files(n).behav_session_data = 'GTS behavior LearnDay1 session data.mat';
+% files(n).2pOrientations_w_blank_session_data = '2pOrientations_w_blank session data.mat';
+% files(n).behavstim2sf_session_data = 'behaveStim2sf session data.mat';
+% files(n).behavstim3x4orient_session_data = 'behaveStim3x4orient session data.mat';
+% files(n).topox_pts =  'TopoX pts.mat';
+% files(n).topoy_pts = 'TopoY pts.mat';
+% files(n).behav_pts = 'GTS behavior LearnDay1 pts.mat';
+% files(n).2pOrientations_w_blank_pts = '2pOrientations_w_blank pts.mat';
+% files(n).behavstim2sf_pts = 'behaveStim2sf pts.mat';
+% files(n).behavstim3x4orient_pts = 'behaveStim3x4orient pts.mat';
+% files(n).master_pts = 'master pts std_35_greenTresh_250.mat';
+% files(n).monitor = 'vert';
+% files(n).task = 'GTS';
+% files(n).learningDay = '1';
+% files(n).spatialfreq = '200';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good imaging session'; not great session, switched to HvV for widefield 
+
 
 
 

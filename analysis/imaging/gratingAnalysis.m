@@ -112,4 +112,4 @@ end
 
 resp = evoked-base;
 
-
+warning('on','stats:nlinfit:ModelConstantWRTParam')

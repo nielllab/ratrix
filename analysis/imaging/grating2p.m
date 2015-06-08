@@ -129,16 +129,14 @@ title('tf preference')
 selectPts = input('select points for further analysis? 0/1 ')
 if selectPts==1
     
-    ptsfname = uigetfile('*.mat','pts file');
-    if ptsfname==0
+    useOld = input('align to std points (1) or choose new points (2) or read in prev points (3) : ')
+    if useOld ==1
+        [pts dF ptsfname icacorr cellImg usePts] = align2pPts(dfofInterp,greenframe);
+    elseif useOld==2
+        [pts dF neuropil ptsfname] = get2pPts(dfofInterp,greenframe);
         
-        useOld = input('align to old points (1) or choose new points (2) : ')
-        if useOld ==1
-            [pts dF ptsfname icacorr cellImg usePts] = align2pPts(dfofInterp,greenframe);
-        else
-            [pts dF neuropil ptsfname] = get2pPts(dfofInterp,greenframe);
-        end
     else
+        ptsfname = uigetfile('*.mat','pts file');
         load(ptsfname);
     end
 

@@ -30,19 +30,9 @@ if twocolor
     img(:,:,3)=amp;
     figure
     imshow(img)
+    title('visual resp (cyan) vs tdtomato')
 end
-title('visual resp (cyan) vs tdtomato')
 
-% clear cycAvg
-% for i = 1:cycLength
-%     cycAvg(:,:,i) = squeeze(mean(dfofInterp(:,:,i:cycLength:end),3));
-% end
-%
-%
-% [y x] = ginput(1);
-% figure
-% plot(squeeze(cycAvg(round(x),round(y),:)))
-% angle(map(round(x),round(y)))
 
 selectPts = input('select points for further analysis? 0/1 ')
 if selectPts==1

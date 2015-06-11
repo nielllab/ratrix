@@ -32,7 +32,13 @@ percentCorrectionTrials = .5;
 
 switch subjIDs{1}
     
-%     case 'g62r3rt' % Started 2/17/15
+     case 'g62r4lt' % Started 6/10/15
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 60;
+       msPenalty               =3000;
+       percentCorrectionTrials = .25;
+    
+%     case 'g62r3rt' % Switched to HvV 6/8/15
 %        requestRewardSizeULorMS = 0;
 %        rewardSizeULorMS        = 70;
 %        msPenalty               =3500;

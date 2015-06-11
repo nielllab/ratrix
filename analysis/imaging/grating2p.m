@@ -184,7 +184,7 @@ if selectPts==1
         axis off      
     end
     
-       save(ptsfname,'osi','amp','R','tuning','tuningtheta','-append');
+       save(ptsfname,'osi','amp','R','tuning','tuningtheta','allresp','tfpref','-append');
 
        figure
        hist(osi)

@@ -144,7 +144,53 @@ files(n).notes = 'good imaging session';
 % files(n).learningDay = '1';
 % files(n).spatialfreq = '200';
 % files(n).label = 'camk2 gc6';
-% files(n).notes = 'good imaging session'; not great session, switched to HvV for widefield 
+% files(n).notes = 'good imaging session'; %not great session, switched to HvV for widefield 
+
+% n=n+1;
+% files(n).subj = 'g62r4lt'; 
+% files(n).expt = '061015';
+% files(n).topox_session_data =  'topoX session data.mat';
+% files(n).topoy_session_data = 'topoY session data.mat';
+% files(n).behav_session_data = 'GTS behavior Learn Day 1 session data.mat';
+% files(n).Orientations_w_blank_session_data = '2pOrientations_w_blank session data.mat';
+% files(n).behavstim2sf_session_data = 'behaveStim2sf session data.mat';
+% files(n).behavstim3x4orient_session_data = 'behaveStim3x4oreient session data.mat';
+% files(n).topox_pts =  'topoX pts.mat';
+% files(n).topoy_pts = 'topoY pts.mat';
+% files(n).behav_pts = 'GTS behavior Learn Day 1 pts.mat';
+% files(n).Orientations_w_blank_pts = '';
+% files(n).behavstim2sf_pts = 'behaveStim2sf pts.mat';
+% files(n).behavstim3x4orient_pts = 'behaveStim3x4oreient pts.mat';
+% files(n).master_pts = 'master pts.mat';
+% files(n).monitor = 'vert';
+% files(n).task = 'GTS';
+% files(n).learningDay = '1';
+% files(n).spatialfreq = '200';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good imaging session'; %RL?
+
+% n=n+1;
+% files(n).subj = 'g62r4lt'; 
+% files(n).expt = '061115';
+% files(n).topox_session_data =  'topoX session data.mat';
+% files(n).topoy_session_data = 'topoY session data.mat';
+% files(n).behav_session_data = '';
+% files(n).Orientations_w_blank_session_data = '2pOrientations_w_blank session data.mat';
+% files(n).behavstim2sf_session_data = 'behaveStim2sf session data.mat';
+% files(n).behavstim3x4orient_session_data = 'behaveStim3x4orient session data.mat';
+% files(n).topox_pts =  'topoX pts.mat';
+% files(n).topoy_pts = 'topoY pts.mat';
+% files(n).behav_pts = 'GTS behavior Learn Day 2 pts.mat';
+% files(n).Orientations_w_blank_pts = '2pOrientations_w_blank pts.mat';
+% files(n).behavstim2sf_pts = 'behaveStim2sf pts.mat';
+% files(n).behavstim3x4orient_pts = 'behaveStim3x4orient pts.mat';
+% files(n).master_pts = '';
+% files(n).monitor = 'vert';
+% files(n).task = 'GTS';
+% files(n).learningDay = '2';
+% files(n).spatialfreq = '200';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good imaging session';  %RL
 
 
 

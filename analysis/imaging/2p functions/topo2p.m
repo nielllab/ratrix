@@ -86,7 +86,7 @@ if selectPts==1
     phaseVal = phaseVal/size(dfofInterp,3);
     angle(phaseVal)
     abs(phaseVal)
-    save(ptsfname,'phaseVal','-append');
+ 
     
     clear cycAvg
     for i = 1:cycLength;
@@ -95,6 +95,7 @@ if selectPts==1
     for i = 1:size(cycAvg,1);
         cycAvg(i,:) = cycAvg(i,:) - min(cycAvg(i,:));
     end
+       save(ptsfname,'phaseVal','cycAvg','-append');
     figure
     plot(cycAvg')
     ph = angle(phaseVal);
@@ -106,7 +107,7 @@ if selectPts==1
     hist(abs(phaseVal(usenonzero)),0:0.05:1)
     
     figure
-    draw2pSegs(usePts,ph,hsv,256,intersect(usenonzero,find(abs(phaseVal)>0.05)),[0 2*pi]);
+    draw2pSegs(usePts,ph,jet,256,intersect(usenonzero,find(abs(phaseVal)>0.05)),[0 2*pi]);
 
 end
 

@@ -24,11 +24,11 @@ percentCorrectionTrials = .5;
 
 switch subjIDs{1}
     
-     case 'g62r4lt' % Started 2/17/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 20;
-       msPenalty               =3400;
-       percentCorrectionTrials = .50;
+%      case 'g62r4lt' % Started 2/17/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 20;
+%        msPenalty               =3400;
+%        percentCorrectionTrials = .50;
     
      case 'g62t2rt' % Started 2/17/15
        requestRewardSizeULorMS = 0;
@@ -36,11 +36,11 @@ switch subjIDs{1}
        msPenalty               =4000;
        percentCorrectionTrials = .25;
     
-     case 'g62r3rt' % Started 2/17/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 20;
-       msPenalty               =3500;
-       percentCorrectionTrials = .50;
+%      case 'g62r3rt' % Started 2/17/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 20;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .50;
     
 %      case 'g62a4tt' % Started 4/30/15
 %        requestRewardSizeULorMS = 0;

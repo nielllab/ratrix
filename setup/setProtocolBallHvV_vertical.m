@@ -39,13 +39,13 @@ end
      
      case 'g62a5nn' % Started 5/15/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 45;
+       rewardSizeULorMS        = 40;
        msPenalty               =3000;
        percentCorrectionTrials = .50;
      
      case 'g62a4tt' % Started 5/14/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 45;
+       rewardSizeULorMS        = 40;
        msPenalty               =3000;
        percentCorrectionTrials = .50;
      

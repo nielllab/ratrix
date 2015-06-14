@@ -33,7 +33,7 @@ end
     
      case 'g62r3rt' % Started 2/17/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 50;
+       rewardSizeULorMS        = 60;
        msPenalty               =3000;
        percentCorrectionTrials = .5;
      

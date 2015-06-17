@@ -1037,6 +1037,10 @@ targ = sign([s.target]);
 % trialRecs.stimDetails should have phase/orientation, (orientedGabors saves it)
 % but trail (the ball stimManager) doesn't save details from the stimManager it uses...
 
+for i = 1:length(trialRecs)  %%% added by cmn 061615 - should be tested
+    orient(i) = trialRecs(i).stimDetails.subDetails.orientations;
+end
+
 s = [trialRecs.trialDetails];
 f = find(arrayfun(@(x)isempty(x.correct),s),1,'first');
 if ~isempty(f) && f~=length(s)
@@ -1232,7 +1236,7 @@ bg_im = im{2}-im{1};
   show(deconvg6s((nanmedianMW(bg)),0.1),pts,[pre 'blue-green deconv dfof'],[1 99.5],@cb);
  
 % [f p] = uiputfile('*.mat','output file');
- save([iPath(1:end-15) 'behav data.mat'],'bg','bg_im','targ','correct','trials','pts','onsets','starts')
+ save([iPath(1:end-15) 'behav data.mat'],'bg','bg_im','targ','correct','trials','pts','onsets','starts','orient')
 
 
 

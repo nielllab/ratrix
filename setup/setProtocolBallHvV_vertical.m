@@ -33,20 +33,20 @@ end
     
      case 'g62r3rt' % Started 2/17/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 50;
-       msPenalty               =3500;
-       percentCorrectionTrials = .25;
+       rewardSizeULorMS        = 70;
+       msPenalty               =3200;
+       percentCorrectionTrials = .5;
      
      case 'g62a5nn' % Started 5/15/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 30;
-       msPenalty               =4000;
+       rewardSizeULorMS        = 35;
+       msPenalty               =3200;
        percentCorrectionTrials = .50;
      
      case 'g62a4tt' % Started 5/14/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 30;
-       msPenalty               =4000;
+       rewardSizeULorMS        = 35;
+       msPenalty               =3200;
        percentCorrectionTrials = .50;
      
 %      case 'g62l8rn'     %Started from Go To Black 3/8/15

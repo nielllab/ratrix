@@ -27,11 +27,11 @@ if twocolor
     clear img
     img(:,:,1) = redframe/prctile(redframe(:),95);
     img(:,:,2) = amp;
-    img(:,:,3)=0;
+    img(:,:,3)=amp;
     figure
     imshow(img)
 end
-
+title('visual resp (cyan) vs tdtomato')
 
 if ~blank
     gratingfname = 'C:\grating2p8orient2sf.mat';
@@ -46,14 +46,6 @@ for i = 1:cycLength
     cycAvg(:,:,i) = squeeze(mean(dfofInterp(:,:,i:cycLength:end),3));
 end
 
-
-[y x] = ginput(1);
-figure
-plot(squeeze(cycAvg(round(x),round(y),:)))
-angle(map(round(x),round(y)))
-
-
-keyboard
 
 dfReshape = reshape(dfofInterp, size(dfofInterp,1)*size(dfofInterp,2),size(dfofInterp,3));
 [osi osifit tuningtheta amp  tfpref pmin R resp tuning spont] = gratingAnalysis(gratingfname, 1,dfReshape,dt,blank);
@@ -137,54 +129,66 @@ title('tf preference')
 selectPts = input('select points for further analysis? 0/1 ')
 if selectPts==1
     
-    ptsfname = uigetfile('*.mat','pts file');
-    if ptsfname==0
+    useOld = input('align to std points (1) or choose new points (2) or read in prev points (3) : ')
+    if useOld ==1
+        [pts dF ptsfname icacorr cellImg usePts] = align2pPts(dfofInterp,greenframe);
+    elseif useOld==2
+        [pts dF neuropil ptsfname] = get2pPts(dfofInterp,greenframe);
         
-        useOld = input('align to old points (1) or choose new points (2) : ')
-        if useOld ==1
-            [pts dF  ptsfname] = align2pPts(dfofInterp,greenframe);
-        else
-            [pts dF neuropil ptsfname] = get2pPts(dfofInterp,greenframe);
-        end
     else
+        ptsfname = uigetfile('*.mat','pts file');
         load(ptsfname);
     end
 
-    col = 'rgbcmykr'
-    figure
-    hold on
-    inds = 1:65
-    colordef black
-    set(gcf,'Color',[0 0 0])
-    
-    for i = length(inds):-1:1
-        
-        h=bar(dF(inds(i),1:1000)/4 + i,1);
-        set(h,'EdgeColor',[0 0 0]);
-        plot(dF(inds(i),1:1000)/4 + i,'w');
-    end
-    axis off
-    xlim([1 1000])
-    set(gca,'Position',[0.2 0.2 0.6 0.65])
-    
+%     col = 'rgbcmykr'
+%     figure
+%     hold on
+%     inds = 1:65
+%     colordef black
+%     set(gcf,'Color',[0 0 0])
+%     
+%     for i = length(inds):-1:1
+%         
+%         h=bar(dF(inds(i),1:1000)/4 + i,1);
+%         set(h,'EdgeColor',[0 0 0]);
+%         plot(dF(inds(i),1:1000)/4 + i,'w');
+%     end
+%     axis off
+%     xlim([1 1000])
+%     set(gca,'Position',[0.2 0.2 0.6 0.65])
+%     colordef white
+%     
   %  dFClean = dF-0.8*repmat(neuropil,size(dF,1),1);
+    nonzeropts = find(mean(dF,2)~=0)
+
+    
     dFClean = dF;
     [osi osifit tuningtheta amp  tfpref pmin R, resp tuning spont allresp]= gratingAnalysis(gratingfname, 1,dFClean,dt,blank);
     
     figure
+   c = corrcoef(dF(nonzeropts,:)');
+   imagesc(c,[-1 1])
+   title('corr coef')
+   
+   figure
+   hist(c(:),-0.95:0.1:0.95)
+   xlabel('correlation coeff')
+
+    
+    figure
     %tuning = mean(allresp,4);
-    for i = 1:min(length(dF),64);
+    for i = 1:min(length(nonzeropts),100);
         subplot(10,10,i)
-        plot(squeeze(tuning(i,:,:)))
+        plot(squeeze(tuning(nonzeropts(i),:,:)))
         ylim([-0.5 1])
-        axis off
-        
+        axis off      
     end
     
-       save(ptsfname,'osi','amp','R','tuning','tuningtheta','-append');
+       save(ptsfname,'osi','amp','R','tuning','tuningtheta','allresp','tfpref','-append');
 
        figure
        hist(osi)
+       xlabel('osi')
        
        clear cycAvg
        for i = 1:cycLength;
@@ -233,7 +237,16 @@ if selectPts==1
             plot(pts(notuse,2),pts(notuse,1),'k.')
        axis ij; axis square; axis([0 256 0 256])
        colormap hsv; colorbar;set(gca,'clim',[0 180])
+       
+       figure
+       draw2pSegs(usePts,tuningtheta,hsv,256,find(~isnan(tuningtheta)&osi>0.25),[0 pi])
     
+       figure
+       draw2pSegs(usePts,mean(resp,2),jet,256,nonzeropts,[-1 1])
+       
+
+        figure
+       draw2pSegs(usePts,osi,jet,256, find(~isnan(tuningtheta)&osi>0.25),[0 0.35])
 end
     %
     % close all

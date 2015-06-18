@@ -11,8 +11,15 @@ if strcmp(f(end-3:end),'.mat')
 else
     
     [ttlf ttlp] = uigetfile('*.mat','ttl file')
-    [stimPulse framePulse] = getTTL(fullfile(ttlp,ttlf));
-
+   try 
+       [stimPulse framePulse] = getTTL(fullfile(ttlp,ttlf));
+       startTime = round(stimPulse(1)/dt);
+   catch
+       display('couldnt read TTLs')
+       stimPulse=[]; framePulse=[]; startTime = 1;
+   end
+   
+   ttlFname = fullfile(ttlp,ttlf);
     cycLength = input('cycle length : ');
     if twocolor
        [dfofInterp dtRaw redframe greenframe] = get2colordata(fullfile(p,f),dt,cycLength);
@@ -22,11 +29,11 @@ else
     
     figure
     timecourse = squeeze(mean(mean(dfofInterp(:,:,1:120/dt),2),1));
-    plot(dt*(1:120/dt),timecourse);
-    startTime = round(stimPulse(1)/dt);
+    plot((1:120/dt),timecourse);
+    
     hold on
     for st = 0:10
-        plot(st*cycLength+ [startTime*dt startTime*dt],[0.2 1],'g:')
+        plot(st*cycLength/dt+ [startTime startTime],[0.2 1],'g:')
     end
    
     sprintf('estimated start time %f',startTime)    

@@ -1,6 +1,7 @@
 function [osicv osi tuningtheta amp tfpref minp R resp alltuning spont allresp] = gratingAnalysis(fname, startTime, dF, dt, blank);
 
-isi = 0; sf = 0;
+warning('off','stats:nlinfit:ModelConstantWRTParam');
+isi = 0; sf = 0; duration = 0;
 fname
 load(fname)
 
@@ -23,7 +24,7 @@ sfs = unique(sf);
 
 for th = 1:length(angles);
     for sp = 1:length(sfs);
-         %   allresp(:,th,sp,:) = resp(:,theta ==angles(th) & sf==sfs(sp));
+        %   allresp(:,th,sp,:) = resp(:,theta ==angles(th) & sf==sfs(sp));
         orientation(:,th,sp) = median(resp(:,theta ==angles(th) & sf==sfs(sp)),2);
         %     figure
         %     imagesc(squeeze(orientation(:,:,th)),[-0.5 0.5]);
@@ -34,7 +35,7 @@ end
 allresp=[];
 npts = size(dF,1);
 
-if npts<=225
+if npts<=1000
     figure
     nfigs = ceil(sqrt((npts)));
 end
@@ -46,10 +47,16 @@ for i= 1:npts
     
     tftuning=squeeze(mean(orientation(i,:,:),2));
     tfpref(i) =(tftuning(2)-tftuning(1))/(tftuning(2) + tftuning(1));
-    if tfpref(i)>0
-        tf_use=2;
-    else
+    %     if tfpref(i)>0
+    %         tf_use=2;
+    %     else
+    %         tf_use=1;
+    %     end
+    
+    if abs(tftuning(1))>abs(tftuning(2))
         tf_use=1;
+    else
+        tf_use=2;
     end
     if ~blank
         tuning = squeeze(orientation(i,:,tf_use));
@@ -67,7 +74,11 @@ for i= 1:npts
     [osicv(i) tuningtheta(i)] = calcOSI(tuning'-spont(i),0);
     if npts<100*100
         [thetafit(i) osi(i) A1(i) A2(i) w(i) B(i) nr yfit] = fit_tuningcurve(tuning-spont(i),angles(1:length(tuning)));
+        if ~(sum(tuning)==0)
         [osi(i) width(i) amp(i)] = calculate_tuning(A1(i),A2(i),B(i),w(i));
+                else
+                    osi(i)=NaN; width(i)=NaN; amp(i)=0;
+                end
     else
         osi=[];
         width=[];
@@ -86,12 +97,12 @@ for i= 1:npts
         minp(i)=NaN;
     end
     
-    if npts<=225
+    if npts<=1000
         subplot(nfigs,nfigs,i)
         %  subplot(10,8,i-1)
         errorbar(1:length(tuning),tuning,tuning_std/sqrt(ntrials));
         hold on; plot([1 8],[spont(i) spont(i)],'g');
-        ylim(2*[-1 2]); xlim([0 9])
+        ylim(1.1*[-2 max(max(tuning),2)]); xlim([0 9])
         set(gca,'Xtick',[]); set(gca,'Ytick',[]);
         
         %title(sprintf('%0.2f %0.2f',minp(i)*length(angles),osi(i)));
@@ -101,4 +112,4 @@ end
 
 resp = evoked-base;
 
-
+warning('on','stats:nlinfit:ModelConstantWRTParam')

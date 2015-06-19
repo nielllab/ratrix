@@ -1039,6 +1039,8 @@ targ = sign([s.target]);
 
 for i = 1:length(trialRecs)  %%% added by cmn 061615 - should be tested
     orient(i) = trialRecs(i).stimDetails.subDetails.orientations;
+    xpos(i) = trialRecs(i).stimDetails.subDetails.xPosPcts;
+    gratingPh(i) = trialRecs(i).stimDetails.subDetails.phases;
 end
 
 s = [trialRecs.trialDetails];
@@ -1170,6 +1172,9 @@ bFrames   =   bFrames(  1:length(correct));
 frameLeds = frameLeds(  1:length(correct));
 misses    =    misses(  1:length(correct));
 targ      =      targ(  1:length(correct));
+orient     =     orient(  1:length(correct));
+xpos      =      xpos(  1:length(correct));
+gratingPh      =      gratingPh(  1:length(correct));
 starts    =    starts(:,1:length(correct));
 
 %last frame suspect -- if reinforcement phase ends before exposure does, turns led off prematurely
@@ -1236,7 +1241,7 @@ bg_im = im{2}-im{1};
   show(deconvg6s((nanmedianMW(bg)),0.1),pts,[pre 'blue-green deconv dfof'],[1 99.5],@cb);
  
 % [f p] = uiputfile('*.mat','output file');
- save([iPath(1:end-15) 'behav data.mat'],'bg','bg_im','targ','correct','trials','pts','onsets','starts','orient')
+ save([iPath(1:end-15) 'behav data.mat'],'bg','bg_im','targ','correct','trials','pts','onsets','starts','orient','xpos','gratingPh')
 
 
 

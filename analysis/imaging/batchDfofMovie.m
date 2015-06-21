@@ -22,34 +22,62 @@ for f = 1:length(files)
     end
     
     try
-        dfofMovie([datapathname files(f).stepbinarydata]);
+        dfofMovie([datapathname files(f).gratings4x3y_1data]);
     catch exc
         nerr=nerr+1;
-        errmsg{nerr}=sprintf('couldnt do %s',files(f).stepbinarydata)
+        errmsg{nerr}=sprintf('couldnt do %s',files(f).gratings4x3y_1data)
          errRpt{nerr}=getReport(exc,'extended')
     end  
-% %     try
-% %         dfofMovie([datapathname files(f).auditorydata]);
-% %     catch exc
-% %         nerr=nerr+1;
-% %         errmsg{nerr}=sprintf('couldnt do %s',files(f).auditorydata)
-% %          errRpt{nerr}=getReport(exc,'extended')
-% %     end  
-% %     try
-% %         dfofMovie([datapathname files(f).loomdata]);
-% %     catch exc
-% %         nerr=nerr+1;
-% %         errmsg{nerr}=sprintf('couldnt do %s',files(f).loomdata)
-% %          errRpt{nerr}=getReport(exc,'extended')
-% %     end
-% %      
-% %      try
-% %         dfofMovie([datapathname files(f).darknessdata]);
-% %     catch exc
-% %         nerr=nerr+1;
-% %         errmsg{nerr}=sprintf('couldnt do %s',files(f).darknessdata)
-% %          errRpt{nerr}=getReport(exc,'extended')
-% %     end  
+     try
+        dfofMovie([datapathname files(f).DOIgratings4x3y_1data]);
+    catch exc
+        nerr=nerr+1;
+        errmsg{nerr}= sprintf('couldnt do %s',files(f).DOIgratings4x3y_1data)
+        errRpt{nerr}=getReport(exc,'extended')
+     end
+     try
+        dfofMovie([datapathname files(f).DOIbackgrounddata]);
+    catch exc
+        nerr=nerr+1;
+        errmsg{nerr}= sprintf('couldnt do %s',files(f).DOIbackgrounddata)
+        errRpt{nerr}=getReport(exc,'extended')
+     end
+    try
+        dfofMovie([datapathname files(f).gratings4x3y_2data]);
+    catch exc
+        nerr=nerr+1;
+        errmsg{nerr}= sprintf('couldnt do %s',files(f).gratings4x3y_2data)
+        errRpt{nerr}=getReport(exc,'extended')
+    end
+    try
+        dfofMovie([datapathname files(f).DOIdarknessdata]);
+    catch exc
+        nerr=nerr+1;
+        errmsg{nerr}= sprintf('couldnt do %s',files(f).DOIdarknessdata)
+        errRpt{nerr}=getReport(exc,'extended')
+    end
+    try
+        dfofMovie([datapathname files(f).DOIgratings4x3y_2data]);
+    catch exc
+        nerr=nerr+1;
+        errmsg{nerr}=sprintf('couldnt do %s',files(f).DOIgratings4x3y_2data)
+         errRpt{nerr}=getReport(exc,'extended')
+    end  
+%     try
+%         dfofMovie([datapathname files(f).DOIgratings4x3y_1data]);
+%     catch exc
+%         nerr=nerr+1;
+%         errmsg{nerr}=sprintf('couldnt do %s',files(f).DOIgratings4x3y_1data)
+%          errRpt{nerr}=getReport(exc,'extended')
+%     end
+     
+%      try
+%         dfofMovie([datapathname files(f).darknessdata]);
+%     catch exc
+%         nerr=nerr+1;
+%         errmsg{nerr}=sprintf('couldnt do %s',files(f).darknessdata)
+%          errRpt{nerr}=getReport(exc,'extended')
+%     end  
 % %     try
 % %         dfofMovie([datapathname files(f).gratingdata]);
 % %     catch exc
@@ -85,56 +113,56 @@ for f = 1:length(files)
 % %         errmsg{nerr}=sprintf('couldnt do %s',files(f).patchydata)
 % %         errRpt{nerr}=getReport(exc,'extended')
 % %     end
-    try
-        dfofMovie([datapathname files(f).grating5sf4tfdata]);
-    catch exc
-        nerr=nerr+1;
-        errmsg{nerr}= sprintf('couldnt do %s',files(f).grating5sf4tfdata)
-        errRpt{nerr}=getReport(exc,'extended')
-    end
-    try
-        dfofMovie([datapathname files(f).grating3x5data]);
-    catch exc
-        nerr=nerr+1;
-        errmsg{nerr}=sprintf('couldnt do %s',files(f).grating3x5data)
-        errRpt{nerr}=getReport(exc,'extended')
-    end 
-        try
-        dfofMovie([datapathname files(f).resolutionRightdata]);
+%     try
+%         dfofMovie([datapathname files(f).grating5sf4tfdata]);
+%     catch exc
+%         nerr=nerr+1;
+%         errmsg{nerr}= sprintf('couldnt do %s',files(f).grating5sf4tfdata)
+%         errRpt{nerr}=getReport(exc,'extended')
+%     end
+%     try
+%         dfofMovie([datapathname files(f).grating3x5data]);
+%     catch exc
+%         nerr=nerr+1;
+%         errmsg{nerr}=sprintf('couldnt do %s',files(f).grating3x5data)
+%         errRpt{nerr}=getReport(exc,'extended')
+%     end 
+%         try
+%         dfofMovie([datapathname files(f).resolutionRightdata]);
 %     catch exc
 %         nerr=nerr+1;
 %         errmsg{nerr}= sprintf('couldnt do %s',files(f).resolutionRightdata)
 %         errRpt{nerr}=getReport(exc,'extended')
 %         end
-%     try
-        dfofMovie([datapathname files(f).gratings4x3ydata]);
-    catch exc
-        nerr=nerr+1;
-        errmsg{nerr}= sprintf('couldnt do %s',files(f).gratings4x3ydata)
-        errRpt{nerr}=getReport(exc,'extended')
-    end
     try
-        dfofMovie([datapathname files(f).gratings2x1ydata]);
+        dfofMovie([datapathname files(f).backgrounddata]);
     catch exc
         nerr=nerr+1;
-        errmsg{nerr}= sprintf('couldnt do %s',files(f).gratings2x1ydata)
-        errRpt{nerr}=getReport(exc,'extended')
-    end
-    try
-        dfofMovie([datapathname files(f).helloworlddata]);
-    catch exc
-        nerr=nerr+1;
-        errmsg{nerr}= sprintf('couldnt do %s',files(f).helloworlddata)
-        errRpt{nerr}=getReport(exc,'extended')
-    end
-     try
-        dfofMovie([datapathname files(f).hellodata]);
-    catch exc
-        nerr=nerr+1;
-        errmsg{nerr}= sprintf('couldnt do %s',files(f).hellodata)
+        errmsg{nerr}= sprintf('couldnt do %s',files(f).backgrounddata)
         errRpt{nerr}=getReport(exc,'extended')
     end
 %     try
+%         dfofMovie([datapathname files(f).gratings2x1ydata]);
+%     catch exc
+%         nerr=nerr+1;
+%         errmsg{nerr}= sprintf('couldnt do %s',files(f).gratings2x1ydata)
+%         errRpt{nerr}=getReport(exc,'extended')
+%     end
+%     try
+%         dfofMovie([datapathname files(f).helloworlddata]);
+%     catch exc
+%         nerr=nerr+1;
+%         errmsg{nerr}= sprintf('couldnt do %s',files(f).helloworlddata)
+%         errRpt{nerr}=getReport(exc,'extended')
+%     end
+%      try
+%         dfofMovie([datapathname files(f).hellodata]);
+%     catch exc
+%         nerr=nerr+1;
+%         errmsg{nerr}= sprintf('couldnt do %s',files(f).hellodata)
+%         errRpt{nerr}=getReport(exc,'extended')
+%     end
+% %     try
 %         dfofMovie([datapathname files(f).resolutionRightdata]);
 %     catch exc
 %         nerr=nerr+1;

@@ -1,6 +1,6 @@
 batch2pBehavior
 
-for f = 4:4
+for f = 2:2
     
     %%% get topo information
     display('loading topox')
@@ -262,6 +262,7 @@ for f = 4:4
         for i = 1:size(xdF,1)
             %if mean(bdF(i,:),2)~=0 | mean(dF2(i,:),2)~=0 | mean(dF3(i,:)~=0)
              if nStimResp(i)==4;  
+
                  figure
                 
                 %%% topo x / y

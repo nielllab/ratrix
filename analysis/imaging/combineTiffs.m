@@ -601,22 +601,27 @@ recs = {
 %     }
 
 
+% 
 %     {'g62m9tt' { 
-% %  {[1 327],[],'030415 G62M9tt GTS behavior learning1/G62M9-tt_run1_behavior_GTS_learning_day1_reward35', 'G62M9-tt_run1_behavior_GTS_learning_day1_reward35'}  
-% %  {[328 734],[],'030515 G62M9tt GTS behavior learning2\G62M9tt_run1_behavior_GTS_learningDAY2', 'G62M9tt_run1_behavior_GTS_learningDAY2'}    
-% %  {[736 1171],[],'030615 G62m9tt GTS behavior Day3 stim moved to .33 and .66\g62m9tt_run1_GTS_behavior_learningDay3', 'g62m9tt_run1_GTS_behavior_learningDay3'}
-% %  {[1172 1431],[],'030715 G62m9tt GTS behavior Day4 stim3366\g62m9tt_run1_GTS_behavior_learning_day4', 'g62m9tt_run1_GTS_behavior_learning'}
-% %  {[1432 1674],[],'031015 g62m9tt GTS behvior learning DAY7\g62m9tt_run1_GTS_behavior_learnDAY7', 'g62m9tt_run1_GTS_behavior_learnDAY7'}
-% %   {[1675 1963],[],'031315 g62m9tt GTS behavior learning day10\g62m9tt_run1_GTS_behavior_learnDAY10', 'g62m9tt_run1_GTS_behavior_learnDAY10'}
+% %    {[1 327],[],'030415 G62M9tt GTS behavior learning1/G62M9-tt_run1_behavior_GTS_learning_day1_reward35', 'G62M9-tt_run1_behavior_GTS_learning_day1_reward35'}  
+% %   {[328 734],[],'030515 G62M9tt GTS behavior learning2\G62M9tt_run1_behavior_GTS_learningDAY2', 'G62M9tt_run1_behavior_GTS_learningDAY2'}    
+% %      {[736 1171],[],'030615 G62m9tt GTS behavior Day3 stim moved to .33 and .66\g62m9tt_run1_GTS_behavior_learningDay3', 'g62m9tt_run1_GTS_behavior_learningDay3'}
+% %   {[1172 1431],[],'030715 G62m9tt GTS behavior Day4 stim3366\g62m9tt_run1_GTS_behavior_learning_day4', 'g62m9tt_run1_GTS_behavior_learning'}
+% %    {[1432 1674],[],'031015 g62m9tt GTS behvior learning DAY7\g62m9tt_run1_GTS_behavior_learnDAY7', 'g62m9tt_run1_GTS_behavior_learnDAY7'}
+% %    {[1675 1963],[],'031315 g62m9tt GTS behavior learning day10\g62m9tt_run1_GTS_behavior_learnDAY10', 'g62m9tt_run1_GTS_behavior_learnDAY10'}
 % %    {[1964 2270],[],'031615 g62m9tt GTS behavior learning day13\g62m9tt_run1_GTS_leaningDAY13', 'g62m9tt_run1_GTS_leaningDAY13'}
 % %    {[2271 2832],[2575 2832],'031915 g62m9tt GTS behavior LearnDay16\g62m9tt_run1_GTS_behavior_LearnDAY16','g62m9tt_run1_GTS_behavior_LearnDAY16'} %poor performance
 % %    {[2833 3301],[],'032015 g62M9TT GTS behavior LearnDay17\g62m9tt_run1_gts_behavior_learnDAY17','g62m9tt_run1_gts_behavior_learnDAY17'}
-% %     {[3409 3746],[],'033015 g62m9tt GTS behavior learnDAY27\g62m9tt_run2_GTS_behavior_learnDAY27','g62m9tt_run2_GTS_behavior_learnDAY27'}
+% %    {[3409 3746],[],'033015 g62m9tt GTS behavior learnDAY27\g62m9tt_run2_GTS_behavior_learnDAY27','g62m9tt_run2_GTS_behavior_learnDAY27'}
 % %    {[3747 4056],[],'040815 g62m9tt GTS behavior LearnDay36\g62m9tt_run1_GTS_behavior_learnDAY36','g62m9tt_run1_GTS_behavior_learnDAY36'}
+% %    {[4290 4420],[],'052115 G62N1LN GTS behavior LearnDAY75\g62n1ln_run1_GTS_behavior_LearnDAY75', 'g62m9tt_run1_GTS_behavior_LearnDAY79'}  %actually G62N1LN
+% %    {[4421 4727],[],'052115 G62M9tt_GTS_behavior_LearnDAY79\G62m9tt_run1_GTS_behavior_LearnDAY79', 'G62m9tt_run1_GTS_behavior_LearnDAY79'}
+% %    {[4728 4986],[],'052515 G62M9tt GTS behavior LearnDay83\g62m9tt_run1_GTS_behavior_LearnDAY83', 'g62m9tt_run1_GTS_behavior_LearnDAY83'}
+% %    {[4987 5254],[],'052715 G62M9tt GTS Behavior Learn Day85\g62m9tt_run1_GTS_behavior_LearnDAY85', 'g62m9tt_run1_GTS_behavior_LearnDAY85'}
 % 
 %     }
 %     }
-%     
+    
 
 %     {'g62n1ln' {
 % %   {[1 228],[],'030815 G62N1LN GTS behavior Learn Day1\g62n1ln_run1_GTS_behavior_learningDAY1', 'g62n1ln_run1_GTS_behavior_learningDAY1'}  
@@ -628,8 +633,11 @@ recs = {
 % %    {[1432 1695],[],'032315 G62N1LN GTS behavior LearnDay16\g62n1ln_run1_gts_behavior_LearnDay16', 'g62n1ln_run1_gts_behavior_LearnDay16'}
 % %    {[1696 1915],[],'032615 G62N1LN GTS behavior LearnDAY19\g62n1ln_run1_gts_behavior_LearnDAY19', 'g62n1ln_run1_gts_behavior_LearnDAY19'}
 % %    {[1916 2143],[],'040115 g62n1ln GTS behavior LearnDAY25\g62n1ln_run1_GTS_behavior_learnDAY25', 'g62n1ln_run1_GTS_behavior_learnDAY25'}
-% 
-% 
+% %    {[2144 2353],[],'052415 G62N1LN GTS Behavior LearnDay78\g62n1ln_run1_GTS_behavior_LearnDAY78', 'g62n1ln_run1_GTS_behavior_LearnDAY78'}
+%    {[2579 2841],[],'052715 G62N1LN GTS behavior LearnDay81\g62n1ln_run1_GTS_behavior_LearnDAY81', 'g62n1ln_run1_GTS_behavior_LearnDAY81'}
+% %    {[2842 3054],[],'052815 G62N1LN GTS behavior LearnDAY82\g62n1ln_run1_GTS_behavior_learnDAY82', 'g62n1ln_run1_GTS_behavior_learnDAY82'}
+%     
+%     
 %    }
 %    }
     
@@ -650,8 +658,8 @@ recs = {
 %    }
 %    }
 
-%   {'g62l10rt' {
-% %   {[1 364],[],'031415 g62L10rt GTS behavior learning DAY1\g62l10rt_run1_GTS_behavior_learnDAY1', 'g62l10rt_run1_GTS_behavior_learnDAY1'}
+%  {'g62l10rt' {
+% %    {[1 364],[],'031415 g62L10rt GTS behavior learning DAY1\g62l10rt_run1_GTS_behavior_learnDAY1', 'g62l10rt_run1_GTS_behavior_learnDAY1'}
 % %    {[365 682],[],'031515 g62L10RT GTS behavior learning Day2\g62l10rt_run1_GTS_behavior_learnDAY2', 'g62l10ln_run1_HvV_behavior_learnDAY2'}
 % %    {[683 958],[],'031815 g62L10RT GTS behavior learnDay5\g62l10rt_run1_GTS_behavior_learnDAY5', 'g62l10rt_run1_GTS_behavior_learnDAY5'}
 % %    {[959 1160],[],'032215 G62L10RT GTS behavior LearnDay9\g62l10rt_run1_gts_behavior_learnDAY9', 'g62l10rt_run1_gts_behavior_learnDAY9'}
@@ -660,24 +668,60 @@ recs = {
 % %    {[1638 1861],[],'033015 g62l10rt behavior GTS learnDAY17\g62l10rt_run1_GTS_behavior_learnDAY17', 'g62l10rt_run1_GTS_behavior_learnDAY17'}
 % %    {[1862 2063],[],'033115 G62L10RT GTS behavior LearnDAY18\g62l10rt_run1_GTS_behavior_learnDAY18', 'g62l10rt_run1_GTS_behavior_learnDAY18'}
 % %    {[2064 2272],[],'040215 G62L10RT GTS behavior LearnDAY20\g62l10rt_run1_GTS_behavior_learnDAY20', 'g62l10rt_run1_GTS_behavior_learnDAY20'}
-% %     {[2273 2499],[],'040815 g62L10rt GTS behavior LearnDay26\g62l10rt_run1_GTS_behavior_learnDAY26', 'g62l10rt_run1_GTS_behavior_learnDAY26'}
-% 
-%   }
-%   }
-
-    {'g62a4tt' {
-      {[1 203],[],'051415 G62A4tt HvV behavior LearnDay1\g62a4tt_run1_HvV_behavior_LearnDay1', 'g62a4tt_run1_HvV_behavior_LearnDay1'}
-    
-       
-  }
-  }
-  
-%     {'g62a5nn' {
-%       {[1 ],[],'', ''}
-%     
+% %    {[2273 2499],[],'040815 g62L10rt GTS behavior LearnDay26\g62l10rt_run1_GTS_behavior_learnDAY26', 'g62l10rt_run1_GTS_behavior_learnDAY26'}
+% %    {[2500 2841],[],'052215 G62L10rt GTS behavior LearnDAY70\g62l10rt_run1_GTS_behavior_learnDAY70', 'g62l10rt_run1_GTS_behavior_learnDAY70'}
+% %    {[2842 3077],[],'052415 G62L10rt GTS behavior LearnDAY72\g62l10rt_run1_GTS_behavior_LearnDay72', 'g62l10rt_run1_GTS_behavior_LearnDay72'}
+% %    {[3078 3385],[],'052715 G62L10RT GTS behavior LearnDay75\g62l10rt_run1_GTS_behavior_LearnDAY75', 'g62l10rt_run1_GTS_behavior_LearnDAY75'}
 %        
 %   }
-%   }  
+%   }
+% 
+%      {'g62a4tt' {
+% %       {[1 203],[],'051415 G62A4tt HvV behavior LearnDay1\g62a4tt_run1_HvV_behavior_LearnDay1', 'g62a4tt_run1_HvV_behavior_LearnDay1'}
+% %     {[204 455],[],'051615 G62A4tt HvV behavior LearnDay3\g62a4tt_run1_HvV_behavior_learnDAY3', 'g62a4tt_run1_HvV_behavior_learnDAY3'}
+% %        {[456 545],[],'051915 G62A4tt HvV behavior LearnDAY6\g62a4tt_run1_HvV_behavior_learnDay6', 'g62a4tt_run1_HvV_behavior_learnDay6'}
+% %        {[546 757],[],'052215 G62A4tt HvV behavior LearnDAY9\g62a4tt_run1_HvV_behavior_LearnDAY9', 'g62a4tt_run1_HvV_behavior_LearnDAY9'}
+% %         {[758 990],[],'052515 G62A4tt HvV behavior LearnDAY12\g62a4tt_run1_HvV_behavior_LearnDay12', 'g62a4tt_run1_HvV_behavior_LearnDay12'}
+% %    {[991 1247],[],'052815 G62A4tt HvV Behavior LearnDAY15\g62a4tt_run1_HvV_behavior_LearnDAY15', 'g62a4tt_run1_HvV_behavior_LearnDAY15'}
+% %    {[1248 1595],[],'053115 G62A4tt HvV behavior LearnDAY18\g62a5tt_run1_HvV_behavior_learnDAY18', 'g62a5tt_run1_HvV_behavior_learnDAY18'}
+% %    {[1596 1916],[],'060315 G62A4tt HvV behavior LearnDAY21\g62a4tt_run1_HvV_behavior_learnDAY21', 'g62a4tt_run1_HvV_behavior_learnDAY21'}
+% %    {[2059 2315],[],'060615 g62a4TT HvV behavior LearnDAY24\g62a4tt_run1_HvV_behavior_learnDAY24', 'g62a4tt_run1_HvV_behavior_learnDAY24'}
+% %     {[2335 2512],[],'060915 G62A4tt HvV behavior LearnDAy27\g62a4tt_run1_HvV_behavior_LearnDAY27', 'g62a4tt_run1_HvV_behavior_LearnDAY27'}
+% %      {[2513 2754],[],'061215 G62A4tt HvV behavior LearnDAY30\g62a4tt_run1_HvV_behavior_LearnDAY30', 'g62a4tt_run1_HvV_behavior_LearnDAY30'}
+% %      {[2755 2980],[],'061515 G62A4tt HvV behavior LearnDAY33\g62a4tt_run1_HvV_behavior_learnDay33', 'g62a4tt_run1_HvV_behavior_learnDay33'}
+%     
+%   }
+%   }
+  
+%       {'g62a5nn' {
+% %    {[1 316],[],'051515 G62A5nn HvV behavior LearnDay1\g62a5nn_run1_HvV_behavior_LearnDay1', 'g62a5nn_run1_HvV_behavior_LearnDay1'}
+% %    {[317 650],[],'051715 G62A5nn HvV behavior Learn Day3\g62a5nn_run1_HvV_behavior_LearnDay3', 'g62a5nn_run1_HvV_behavior_LearnDay3'}
+% %    {[665 917],[],'052015 G62A5nn HvV behavior LearnDay6\g62a5nn_run1_HvV_behavior_LearnDay6', 'g62a5nn_run1_HvV_behavior_LearnDay6'}
+% %    {[918 1145],[],'052415 G62A5nn HvV behavior LearnDay10\g62a5nn_run1_HvV_behavior_learnDay10', 'g62a5nn_run1_HvV_behavior_learnDay10'}
+% %    {[1146 1371],[],'052615 G62A5nn HvV behavior LearnDAY12\g62a5nn_run1_HvV_behavior_learnDay12', 'g62a5nn_run1_HvV_behavior_learnDay12'}
+% %    {[1372 1577],[],'052915 G62A5nn HvV behavior LearnDAY15\g62a5nn_run1_HvV_behavior_LearnDAY15', 'g62a5nn_run1_HvV_behavior_LearnDAY15'}
+% %    {[1578 1786],[],'060115 G622A5nn HvV behavior LearnDAY18\g62a5nn_run1_HvV_behavior_LearnDAY18', 'g62a5nn_run1_HvV_behavior_LearnDAY18'}
+% %    {[1787 2051],[],'060315 G62A5nn HvV behavior LearnDAY20\g62a5nn_run1_HvV_behavior_LearnDAY20', 'g62a5nn_run1_HvV_behavior_LearnDAY20'}
+% %     {[2307 2519],[],'060615 G62A5nn HvV behavior LearnDAY23\g62A5nn_run1_HvV_behavior_LearnDay23', 'g62A5nn_run1_HvV_behavior_LearnDay23'}
+% %    {[2520 2723],[],'060915 G62A5nn HvV behavior LearnDAY26\g62a5nn_run1_HvV_behavior_LearnDAY26', 'g62a5nn_run1_HvV_behavior_LearnDAY26'}
+% %     {[2724 2946],[],'061215 G62A5nn HvV behavior LearnDAY29\g62a5nn_run1_HvV_behavior_learnDAY29', 'g62a5nn_run1_HvV_behavior_learnDAY29'}
+% %     {[2947 3180],[],'061515 G62A5nn HvV behavior LearnDAY32\g62a5nn_run1_HvV_behavior_learnDAY32', 'g62a5nn_run1_HvV_behavior_learnDAY32'}
+% 
+% 
+%   }
+%   } 
+%   
+%         {'g62r3rt' {
+% %     {[231 450],[],'060815 G62R3rt HvV behavior LearnDay1\G62R3rt_run1_HvV_behavior_LearnDAY1', 'G62R3rt_run1_HvV_behavior_LearnDAY1'}
+% %      {[451 678],[],'061015 G62R3rt HvV behavior LearnDAY3\g62r3rt_run1_HvV_behavior_learnDay3', 'g62r3rt_run1_HvV_behavior_learnDay3'}
+% %    {[679 908],[],'061315 G62R3rt HvV behavior LearnDay6\g62r3rt_HvV_behavior_learnDAY6', 'g62r3rt_HvV_behavior_learnDAY6'}
+% %   {[927 1131],[],'061815 g62r3rt HvV behavior LearnDay11\g62r3rt_run1_HvV_behavior_learnDAY11', 'g62r3rt_run1_HvV_behavior_learnDAY11'}
+% 
+% 
+% 
+% 
+%   }
+%   }    
    
     }; %%% vert vs horiz in either top or bottom
 
@@ -1037,6 +1081,12 @@ targ = sign([s.target]);
 % trialRecs.stimDetails should have phase/orientation, (orientedGabors saves it)
 % but trail (the ball stimManager) doesn't save details from the stimManager it uses...
 
+for i = 1:length(trialRecs)  %%% added by cmn 061615 - should be tested
+    orient(i) = trialRecs(i).stimDetails.subDetails.orientations;
+    xpos(i) = trialRecs(i).stimDetails.subDetails.xPosPcts;
+    gratingPh(i) = trialRecs(i).stimDetails.subDetails.phases;
+end
+
 s = [trialRecs.trialDetails];
 f = find(arrayfun(@(x)isempty(x.correct),s),1,'first');
 if ~isempty(f) && f~=length(s)
@@ -1166,6 +1216,9 @@ bFrames   =   bFrames(  1:length(correct));
 frameLeds = frameLeds(  1:length(correct));
 misses    =    misses(  1:length(correct));
 targ      =      targ(  1:length(correct));
+orient     =     orient(  1:length(correct));
+xpos      =      xpos(  1:length(correct));
+gratingPh      =      gratingPh(  1:length(correct));
 starts    =    starts(:,1:length(correct));
 
 %last frame suspect -- if reinforcement phase ends before exposure does, turns led off prematurely
@@ -1232,7 +1285,7 @@ bg_im = im{2}-im{1};
   show(deconvg6s((nanmedianMW(bg)),0.1),pts,[pre 'blue-green deconv dfof'],[1 99.5],@cb);
  
 % [f p] = uiputfile('*.mat','output file');
- save([iPath(1:end-15) 'behav data.mat'],'bg','bg_im','targ','correct','trials','pts','onsets','starts')
+ save([iPath(1:end-15) 'behav data.mat'],'bg','bg_im','targ','correct','trials','pts','onsets','starts','orient','xpos','gratingPh')
 
 
 

@@ -18,12 +18,12 @@ close all
 
 
 %%% use this one for subject by subject averaging
-% for s = 1:length(allsubj)
-% use = intersect(alluse,find(strcmp({files.subj},allsubj{s})))    
+for s = 1:length(allsubj)
+use = intersect(alluse,find(strcmp({files.subj},allsubj{s})))    
 
 %%% use this one to average all sessions that meet criteria
-for s=1:1
-use = alluse;
+% for s=1:1
+% use = alluse;
 
 allsubj{s}
 

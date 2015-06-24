@@ -76,8 +76,8 @@ end
 avgbehav = avgbehav/nb;
 
 avgbehavCond{cond} = avgbehav;
-load('/backup/compiled behavior/mapOverlay.mat')
-%load('C:/mapOverlay.mat')
+%load('/backup/compiled behavior/mapOverlay.mat')
+load('C:/mapOverlay.mat')
 
 labels = {'correct','incorrect','left','right'};
 figure

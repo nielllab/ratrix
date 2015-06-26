@@ -18,6 +18,10 @@ fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =msPenalty;
+stim.slowSecs = 1;
+pixPerCycs             = [350]; %*10^9;
+targetOrientations     = 0
+distractorOrientations = []; %-targetOrientations;
 
 % sca
 % keyboard
@@ -76,14 +80,12 @@ stim.gain = 0.7 * ones(2,1);
 stim.targetDistance = 500 * ones(1,2);
 stim.timeoutSecs = 10;
 stim.slow = [40; 80]; % 10 * ones(2,1);
-stim.slowSecs = 1;
+%stim.slowSecs = 1;  set above for individual changes
 stim.positional = false;
 stim.cue = true;
 stim.soundClue = false;
 
-pixPerCycs             = [100]; %*10^9;
-targetOrientations     = 0
-distractorOrientations = []; %-targetOrientations;
+
 mean                   = .5;
 radius                 = .35;
 contrast               = 1;

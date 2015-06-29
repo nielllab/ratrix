@@ -31,6 +31,13 @@ end
  switch subjIDs{1}
 
     
+     case 'testpixHvV' % Started 5/18/15
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 60;
+       msPenalty               =3000;
+       pixPerCycs              = [200];
+       percentCorrectionTrials = .5;
+     
      case 'g62r3rt' % Started 5/18/15
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 60;

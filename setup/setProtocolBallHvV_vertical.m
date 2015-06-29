@@ -35,7 +35,7 @@ end
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 60;
        msPenalty               =3000;
-       pixPerCycs              = [350];
+       pixPerCycs              = [400];
        percentCorrectionTrials = .5;
      
      case 'g62r3rt' % Started 5/18/15

@@ -61,7 +61,7 @@ switch subjIDs{1}
        
     case 'pv8lt' % Started 6/25/15  (permenant record wont show till 6/26/15)
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 80;
+       rewardSizeULorMS        = 70;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        stim.slowSecs = 1;

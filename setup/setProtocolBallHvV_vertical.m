@@ -13,7 +13,7 @@ sm=makeStandardSoundManager();
 rewardSizeULorMS          =20;
 requestRewardSizeULorMS   =0;
 requestMode               ='first';
-msPenalty                 =4000;         
+msPenalty                 =3500;         
 fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
@@ -35,7 +35,7 @@ end
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 60;
        msPenalty               =3000;
-       pixPerCycs              = [350];
+       pixPerCycs              = [400];
        percentCorrectionTrials = .5;
      
      case 'g62r3rt' % Started 5/18/15
@@ -52,7 +52,7 @@ end
      
      case 'g62a4tt' % Started 5/14/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 30;
+       rewardSizeULorMS        = 25;
        msPenalty               =3200;
        percentCorrectionTrials = .50;
      

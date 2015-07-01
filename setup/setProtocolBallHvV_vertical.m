@@ -46,7 +46,7 @@ end
      
      case 'g62a5nn' % Started 5/15/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 32;
+       rewardSizeULorMS        = 48;
        msPenalty               =3500;
        percentCorrectionTrials = .50;
      

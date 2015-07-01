@@ -30,6 +30,11 @@ end
 switch subjIDs{1}
     
     
+    case 'testHvVcenter' % Switched full 10/9/14
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 45;
+       msPenalty               =4300;
+    
 %     case 'g62c.2rt'           %Switched Back _center 8/15/14
 %        requestRewardSizeULorMS = 0;
 %        rewardSizeULorMS        = 25; 

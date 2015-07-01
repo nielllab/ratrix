@@ -26,7 +26,7 @@ percentCorrectionTrials = .5;
 switch subjIDs{1}
     
        
-    case 'test GoToBlack stopTime' % Started 6/25/15
+    case 'testgotoblackstopime' % Started 6/25/15
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 100;
        msPenalty               =3500;

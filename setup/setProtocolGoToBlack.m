@@ -37,13 +37,13 @@ switch subjIDs{1}
     
     case 'g62w2rt' % Started 7/2/15
        requestRewardSizeULorMS = 30;
-       rewardSizeULorMS        = 100;
+       rewardSizeULorMS        = 96;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        
     case 'g62a2nn' % Started 6/25/15 (permenant record wont show till 6/26/15)
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 64;
+       rewardSizeULorMS        = 48;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        
@@ -61,20 +61,20 @@ switch subjIDs{1}
        
     case 'g62a3tt' % Started 6/25/15
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 112;
+       rewardSizeULorMS        = 96;
        msPenalty               =3500;
        percentCorrectionTrials = .0;
        
     case 'pv8lt' % Started 6/25/15  (permenant record wont show till 6/26/15)
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 32;
+       rewardSizeULorMS        = 16;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        stim.slowSecs = 1;
        
     case 'pv8nt' % Started 6/25/15  (permenant record wont show till 6/26/15)
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 64;
+       rewardSizeULorMS        = 48;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        stim.slowSecs = 1;

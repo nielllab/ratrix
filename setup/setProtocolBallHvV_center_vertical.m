@@ -30,6 +30,11 @@ end
 switch subjIDs{1}
     
     
+    case 'testHvVcenter' % Switched full 10/9/14
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 45;
+       msPenalty               =4300;
+    
 %     case 'g62c.2rt'           %Switched Back _center 8/15/14
 %        requestRewardSizeULorMS = 0;
 %        rewardSizeULorMS        = 25; 
@@ -142,7 +147,7 @@ stim.soundClue = true;
 targetOrientations     = 0
 distractorOrientations = []; %-targetOrientations;
 mean                   = .5;
-radius                 = .25;
+radius                 = .35;
 contrast               = 1;
 thresh                 = .00005;
 normalizedPosition      = [.5];

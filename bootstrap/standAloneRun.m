@@ -97,7 +97,10 @@ if ~exist('subjectID','var') || isempty(subjectID)
         needToAddSubject=true;
     end
 else
-    subjectID=lower(subjectID);
+    if ~strcmp(subjectID,lower(subjectID))
+        error('must use all lower case for subject id''s')
+    end
+    subjectID=lower(subjectID); % edf can't remember why he thought this was a good idea, and can't think of any bad implications of removing it, but hasn't carefully verified + tested
     try
         isSubjectInRatrix=getSubjectFromID(rx,subjectID);
     catch ex

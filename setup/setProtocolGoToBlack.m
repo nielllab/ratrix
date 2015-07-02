@@ -35,7 +35,13 @@ switch subjIDs{1}
        
     
     
-     case 'g62a2nn' % Started 6/25/15 (permenant record wont show till 6/26/15)
+    case 'g62w2rt' % Started 7/2/15
+       requestRewardSizeULorMS = 30;
+       rewardSizeULorMS        = 100;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;
+       
+    case 'g62a2nn' % Started 6/25/15 (permenant record wont show till 6/26/15)
        requestRewardSizeULorMS = 00;
        rewardSizeULorMS        = 64;
        msPenalty               =3500;

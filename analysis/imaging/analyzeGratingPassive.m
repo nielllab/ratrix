@@ -4,7 +4,7 @@ clear all
 %batchPassive2015;
 %batchTopography
 %batchSpont
-batchLearningBehav
+batchSFtest
 
 close all
 
@@ -21,7 +21,7 @@ end
   %alluse = find( strcmp({files.notes},'good imaging session') & hasgratings & strcmp({files.doi},'post')) 
   %alluse = find( strcmp({files.notes},'good imaging session') & hasgratings & strcmp({files.subj},'g62l8rn')) 
 
-  alluse = find(  strcmp({files.notes},'good imaging session') &strcmp({files.subj},'g62m9tt') )  
+  alluse = find(  strcmp({files.notes},'good imaging session')  )  
   % alluse = find(  strcmp({files.notes},'good imaging session') &strcmp({files.subj},'g62l10rt') ) 
    % alluse = find(  strcmp({files.notes},'good imaging session') &strcmp({files.subj},'g62n1ln') )
   %    alluse = find(  strcmp({files.notes},'good imaging session') &strcmp({files.subj},'g62l8rn') )
@@ -48,7 +48,7 @@ x0 =10; y0=30; sz = 120;
 x0 =0; y0=0; sz = 128;
 doTopography;
 %doCorrelationMap
-doGratingsNew;
+doGratingsBehav;
 % %%% analyze looming
 % for f = 1:length(use)
 %     loom_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'loom');

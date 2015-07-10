@@ -28,27 +28,27 @@ for f = 1:length(files)
         errRpt{nerr}=getReport(exc,'extended')
      end
      try
-        dfofMovie([datapathname files(f).gratings4x3y_2data]);
+        dfofMovie([datapathname files(f).backgrounddata]);
     catch exc
         nerr=nerr+1;
-        errmsg{nerr}=sprintf('couldnt do %s',files(f).gratings4x3y_2data)
+        errmsg{nerr}=sprintf('couldnt do %s',files(f).backgrounddata)
         errRpt{nerr}=getReport(exc,'extended')
     end
-%     try
-%         dfofMovie([datapathname files(f).stepbinarydata]);
-%     catch exc
-%         nerr=nerr+1;
-%         errmsg{nerr}=sprintf('couldnt do %s',files(f).stepbinarydata)
-%          errRpt{nerr}=getReport(exc,'extended')
-%     end  
-% 
-%      try
-%         dfofMovie([datapathname files(f).darknessdata]);
-%     catch exc
-%         nerr=nerr+1;
-%         errmsg{nerr}=sprintf('couldnt do %s',files(f).darknessdata)
-%          errRpt{nerr}=getReport(exc,'extended')
-%     end  
+    try
+        dfofMovie([datapathname files(f).darknessdata]);
+    catch exc
+        nerr=nerr+1;
+        errmsg{nerr}=sprintf('couldnt do %s',files(f).darknessdata)
+         errRpt{nerr}=getReport(exc,'extended')
+    end  
+
+     try
+        dfofMovie([datapathname files(f).DOIdarknessdata]);
+    catch exc
+        nerr=nerr+1;
+        errmsg{nerr}=sprintf('couldnt do %s',files(f).DOIdarknessdata)
+         errRpt{nerr}=getReport(exc,'extended')
+    end  
 %     try
 %         dfofMovie([datapathname files(f).topoxreversedata]);
 %     catch exc
@@ -104,10 +104,10 @@ for f = 1:length(files)
          errRpt{nerr}=getReport(exc,'extended')
     end  
     try
-        dfofMovie([datapathname files(f).DOIgratings4x3y_2data]);
+        dfofMovie([datapathname files(f).DOIbackgrounddata]);
     catch exc
         nerr=nerr+1;
-        errmsg{nerr}= sprintf('couldnt do %s',files(f).DOIgratings4x3y_2data)
+        errmsg{nerr}= sprintf('couldnt do %s',files(f).DOIbackgrounddata)
         errRpt{nerr}=getReport(exc,'extended')
     end    
 %     try

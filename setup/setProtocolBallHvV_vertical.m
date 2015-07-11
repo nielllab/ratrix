@@ -31,7 +31,7 @@ end
  switch subjIDs{1}
 
     
-     case 'testpixHvV' % Started 5/18/15
+     case 'testpixhvv' % Started 5/18/15
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 60;
        msPenalty               =3000;

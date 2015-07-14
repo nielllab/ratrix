@@ -37,24 +37,30 @@ end
        msPenalty               =3000;
        pixPerCycs              = [400];
        percentCorrectionTrials = .5;
-     
-     case 'g62r3rt' % Started 5/18/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 32;
+       
+     case 'g62a2nn' % Started 6/25/15 (permenant record wont show till 6/26/15) %%Started hvv 7/14/15
+       requestRewardSizeULorMS = 00;
+       rewardSizeULorMS        = 16;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
      
-     case 'g62a5nn' % Started 5/15/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 32;
-       msPenalty               =3500;
-       percentCorrectionTrials = .50;
+%      case 'g62r3rt' % Started 5/18/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 32;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5;
      
-     case 'g62a4tt' % Started 5/14/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 16;
-       msPenalty               =3500;
-       percentCorrectionTrials = .50;
+%      case 'g62a5nn' % Started 5/15/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 32;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .50;
+     
+%      case 'g62a4tt' % Started 5/14/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 16;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .50;
      
 %      case 'g62l8rn'     %Started from Go To Black 3/8/15
 %        requestRewardSizeULorMS = 0;

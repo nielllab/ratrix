@@ -107,6 +107,7 @@ doPuff=false;
 
 timestamps.loopStart=0;
 timestamps.phaseUpdated=0;
+timestamps.trialStateUpdated=0;
 timestamps.frameDrawn=0;
 timestamps.frameDropCornerDrawn=0;
 timestamps.textDrawn=0;
@@ -613,8 +614,12 @@ while ~done && ~quit;
         end
     end
     
+    timestamps.trialStateUpdated=GetSecs;
+    
     if window>0
         if ~isempty(moviePtr)
+            sca
+            keyboard
             Screen('AddFrameToMovie', window, [], [], moviePtr, 1);
         end
         

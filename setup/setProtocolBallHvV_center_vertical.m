@@ -39,6 +39,7 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 00;
        rewardSizeULorMS        = 16;
        msPenalty               =3500;
+       pixPerCycs              = [350];
        percentCorrectionTrials = .5;
        stim.slowSecs = 1;
     
@@ -46,6 +47,7 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 00;
        rewardSizeULorMS        = 16;
        msPenalty               =3500;
+       pixPerCycs              = [350];
        percentCorrectionTrials = .5;
        stim.slowSecs = 1;
        

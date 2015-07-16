@@ -54,49 +54,49 @@ switch subjIDs{1}
        percentCorrectionTrials = .5;
      
     case 'pvchr9tt' % Started 7/14/15
-       requestRewardSizeULorMS = 30;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 80;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
     
     case 'pvchr9rt' % Started 7/14/15
-       requestRewardSizeULorMS = 30;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 80;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
     
     case 'pvchr9lt' % Started 7/14/15
-       requestRewardSizeULorMS = 30;
+       requestRewardSizeULorMS = 00;
        rewardSizeULorMS        = 80;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
     
     case 'g62n7ln' % Started 7/14/15
-       requestRewardSizeULorMS = 30;
+       requestRewardSizeULorMS = 00;
        rewardSizeULorMS        = 80;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        
     case 'g62n7tt' % Started 7/14/15
-       requestRewardSizeULorMS = 30;
+       requestRewardSizeULorMS = 00;
        rewardSizeULorMS        = 80;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
    
     case 'g62q1lt' % Started 7/14/15
-       requestRewardSizeULorMS = 30;
+       requestRewardSizeULorMS = 00;
        rewardSizeULorMS        = 80;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        
     case 'g62w2lt' % Started 7/14/15
-       requestRewardSizeULorMS = 30;
+       requestRewardSizeULorMS = 00;
        rewardSizeULorMS        = 80;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
     
     case 'g62w2rt' % Started 7/2/15
-       requestRewardSizeULorMS = 0;
+       requestRewardSizeULorMS = 00;
        rewardSizeULorMS        = 32;
        msPenalty               =3500;
        percentCorrectionTrials = .5;

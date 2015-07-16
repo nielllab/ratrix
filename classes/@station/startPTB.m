@@ -81,6 +81,14 @@ try
     
     ver
     
+    rc = PsychGPUControl('SetGPUPerformance', 10);
+    if rc ~= 0
+        rc
+        warning('couldn''t set gpuperformance -- only works on ati gpu')
+    else
+        fprintf('set gpuperformance to 10\n')
+    end
+    
     preScreen=GetSecs();
     if isempty(imagingTasks)
         s.window = Screen('OpenWindow',s.screenNum,0,[],depth);%,2);  %%color, rect, depth, buffers (none can be changed in basic version)

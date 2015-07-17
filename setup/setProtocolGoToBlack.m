@@ -73,7 +73,7 @@ switch subjIDs{1}
     
     case 'g62n7ln' % Started 7/14/15
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 80;
+       rewardSizeULorMS        = 64;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        
@@ -91,7 +91,7 @@ switch subjIDs{1}
        
     case 'g62w2lt' % Started 7/14/15
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 80;
+       rewardSizeULorMS        = 64;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
     

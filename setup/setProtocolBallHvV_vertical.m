@@ -47,7 +47,7 @@ end
        
      case 'g62a2nn' % Started 6/25/15 (permenant record wont show till 6/26/15) %%Started hvv 7/14/15
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 16;
+       rewardSizeULorMS        = 32;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
      

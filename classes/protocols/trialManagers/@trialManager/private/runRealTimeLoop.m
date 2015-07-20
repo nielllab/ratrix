@@ -32,11 +32,33 @@ labelFrames = 1;            %print a frame ID on each frame (makes frame calcula
 textType = getShowText(tm);
 showText = ~strcmp(textType,'off'); %whether or not to call draw text to print any text on screen
 
+% consider moving all this text stuff to station.startPTB
+
 if ~IsLinux %|| true %for some reason causes trouble finding font, even though supposed to be OS-specific faster method (seems to be fixed now)
     Screen('Preference', 'TextRenderer', 0);  % consider moving to station.startPTB
 end
-Screen('Preference', 'TextAntiAliasing', 0); % consider moving to station.startPTB
+Screen('Preference', 'TextAntiAliasing', 0); 
 Screen('Preference', 'TextAlphaBlending', 0);
+
+if window>0
+    Screen('TextStyle', window, 1); % for bold -- otherwise illegible on windows
+    
+    standardFontSize=11;
+    oldFontSize = Screen('TextSize',window,standardFontSize);
+    if IsLinux
+        Screen('TextStyle', window, 0); %otherwise defaults to bold italic!?!
+        
+        font = 'nimbus mono l';
+        font = 'palladio';
+        font = 'fixed';
+        font = '-urw-nimbus mono l-bold-o-normal--0-0-0-0-p-0-iso8859-1';
+        % font = '-*-fixed-*-*-*-*-*-*-*-*-*-*-*-*';
+        Screen('TextFont',window,font); %otherwise we get Couldn't select the requested font with the requested font settings from X11 system!
+        
+        Screen('TextStyle', window, 0); %otherwise defaults to bold italic!?!   only works if textrender 1?
+    end
+    [normBoundsRect, offsetBoundsRect]= Screen('TextBounds', window, 'TEST');
+end
 
 if ismac
     %http://psychtoolbox.org/wikka.php?wakka=FaqPerformanceTuning1
@@ -107,6 +129,7 @@ doPuff=false;
 
 timestamps.loopStart=0;
 timestamps.phaseUpdated=0;
+timestamps.trialStateUpdated=0;
 timestamps.frameDrawn=0;
 timestamps.frameDropCornerDrawn=0;
 timestamps.textDrawn=0;
@@ -220,24 +243,6 @@ end
 [keyIsDown,secs,keyCode]=KbCheck; %load mex files into ram + preallocate return vars
 GetSecs;
 Screen('Screens');
-
-if window>0
-    standardFontSize=11;
-    oldFontSize = Screen('TextSize',window,standardFontSize);
-    if IsLinux
-        Screen('TextStyle', window, 0); %otherwise defaults to bold italic!?!
-        
-        font = 'nimbus mono l';
-        font = 'palladio';
-        font = 'fixed';
-        font = '-urw-nimbus mono l-bold-o-normal--0-0-0-0-p-0-iso8859-1';
-        % font = '-*-fixed-*-*-*-*-*-*-*-*-*-*-*-*';
-        Screen('TextFont',window,font); %otherwise we get Couldn't select the requested font with the requested font settings from X11 system!
-        
-        Screen('TextStyle', window, 0); %otherwise defaults to bold italic!?!   only works if textrender 1?
-    end
-    [normBoundsRect, offsetBoundsRect]= Screen('TextBounds', window, 'TEST');
-end
 
 KbName('UnifyKeyNames'); %does not appear to choose keynamesosx on windows - KbName('KeyNamesOSX') comes back wrong
 
@@ -613,8 +618,12 @@ while ~done && ~quit;
         end
     end
     
+    timestamps.trialStateUpdated=GetSecs;
+    
     if window>0
         if ~isempty(moviePtr)
+            sca
+            keyboard
             Screen('AddFrameToMovie', window, [], [], moviePtr, 1);
         end
         
@@ -732,6 +741,10 @@ while ~done && ~quit;
                 Screen('DrawText',window,'paused (k+p to toggle)',xTextPos,yTextPos,100*ones(1,3));
             end
         end
+        
+        % whoops -- see https://github.com/Psychtoolbox-3/Psychtoolbox-3/wiki/FAQ%3A-Performance-Tuning#optimal-code-structure
+        % don't know how i missed this before, but all non gfx logic should go here
+        % to take advantage of background rendering on gpu
         
         [timestamps headroom(totalFrameNum)] = flipFrameAndDoPulse(tm, window, dontclear, framesPerUpdate, ifi, paused, doFramePulse,station,timestamps);
         lastI=i;

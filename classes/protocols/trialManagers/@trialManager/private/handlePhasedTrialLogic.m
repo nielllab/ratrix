@@ -101,6 +101,7 @@ portSelectionDoneTime=GetSecs;
 [soundsToPlay,stimDetails] = getSoundsToPlay(stimManager, ports, lastPorts, specInd, phaseType, framesInPhase,msRewardSound, mePenaltySound, ...
     targetOptions, distractorOptions, requestOptions, playRequestSoundLoop, class(tm), trialDetails, stimDetails, dynamicSounds, station);
 getSoundsTime=GetSecs;
+
 % soundsToPlay is a cell array of sound names {{playLoop sounds}, {playSound sounds}} to be played at current frame
 % validate soundsToPlay here (make sure they are all members of soundNames)
 if ~isempty(setdiff(soundsToPlay{1},soundNames)) || ~all(cellfun(@(x) ismember(x{1},soundNames),soundsToPlay{2}))
@@ -108,13 +109,21 @@ if ~isempty(setdiff(soundsToPlay{1},soundNames)) || ~all(cellfun(@(x) ismember(x
 end
 
 % first end any loops that were looping last frame but should no longer be looped
-stopLooping=setdiff(lastSoundsLooped,soundsToPlay{1});
+try
+    stopLooping=setdiff(lastSoundsLooped,soundsToPlay{1},'legacy');
+catch
+    stopLooping=setdiff(lastSoundsLooped,soundsToPlay{1});
+end
 for snd=stopLooping
     tm.soundMgr = playLoop(tm.soundMgr,snd,station,0);
 end
 
 % then start any loops that weren't already looping
-startLooping=setdiff(soundsToPlay{1},lastSoundsLooped);
+try
+    startLooping=setdiff(soundsToPlay{1},lastSoundsLooped,'legacy');
+catch
+    startLooping=setdiff(soundsToPlay{1},lastSoundsLooped);
+end
 for snd=startLooping
     tm.soundMgr = playLoop(tm.soundMgr,snd,station,1);
 end

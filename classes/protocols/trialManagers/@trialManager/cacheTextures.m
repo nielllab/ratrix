@@ -14,6 +14,8 @@ switch strategy
         
         if ~isempty(stim) % necessary because size([],3)==1 stupidly enough
             textures=zeros(1,size(stim,3));
+            'hi there'
+            size(stim)
             for i=1:size(stim,3)
                 if window>=0
                     textures(i)=Screen('MakeTexture', window, squeeze(stim(:,:,i)),0,0,floatprecision); %need floatprecision=0 for remotedesktop

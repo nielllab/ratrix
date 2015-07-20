@@ -310,6 +310,8 @@ if isa(station,'station') && isa(stimManager,'stimManager') && isa(r,'ratrix') &
                     .1, ... % 10% should be ~1 ms of acceptable frametime error
                     text,rn,getID(subject),class(newSM),pStr,trialLabel,getEyeTracker(station),0,trialRecords);
             end
+            
+            trialRecords(trialInd).windowInfo = Screen('GetWindowInfo',getPTBWindow(station));
 
             if ~isempty(getEyeTracker(station))
                 %[junk junk eyeDataVarNames]=getSample(getEyeTracker(station)); %throws out a sample in order to get variable names... dirty

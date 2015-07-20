@@ -62,7 +62,32 @@ try
     %4) Be pretty verbose about information and hints to optimize your code and system.
     %5) Levels 5 and higher enable very verbose debugging output, mostly useful for debugging PTB itself, not generally useful for end-users.
     
-    Screen('Preference', 'Verbosity', 1); %edf's machine is stuck on  Microsofts OpenGL software renderer
+    % Screen('Preference', 'Verbosity', 1); %edf's machine is stuck on  Microsofts OpenGL software renderer
+    
+    dd = 'C:\sessionDiaries';
+    [status,message,messageid] = mkdir(dd);
+    if status ~= 1
+        status
+        message
+        messageid
+        error('couldn''t mkdir')
+    end
+    dd = fullfile(dd,[datestr(now,30) '.txt']);
+    % this could slow us down -- be afraid!
+    % also note that bootstrap, in network mode, tries to make its own diary, that will conflict with this
+    % also fix this to be cross platform (ideally save in ratrix data dir) 
+    diary(dd);
+    % see https://groups.yahoo.com/neo/groups/PSYCHTOOLBOX/conversations/messages/19322
+    
+    ver
+    
+    rc = PsychGPUControl('SetGPUPerformance', 10);
+    if rc ~= 0
+        rc
+        warning('couldn''t set gpuperformance -- only works on ati gpu')
+    else
+        fprintf('set gpuperformance to 10\n')
+    end
     
     preScreen=GetSecs();
     if isempty(imagingTasks)
@@ -97,6 +122,14 @@ try
     res=Screen('Resolution', s.screenNum);
     
     s.ifi = Screen('GetFlipInterval',s.window);%,200); %numSamples
+    
+    [~, s.ptbVersion] = PsychtoolboxVersion;
+    s.screenVersion = Screen('Version');
+    s.skipSyncTests = Screen('Preference', 'SkipSyncTests');
+    s.matlabVersion = version;
+    [~,s.matlab64,s.win64,~] = getPP;
+    s.computer = Screen('Computer');
+    s.diary = dd;
     
     if res.hz~=0
         if abs((s.ifi/(1/res.hz))-1)>.1

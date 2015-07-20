@@ -1,4 +1,4 @@
-%%%% doGratings
+%%%% doGratingsNew
 x=0;
 for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior passive; 4 = 4x3y patches
     mnAmp{rep}=0; mnPhase{rep}=0; mnAmpWeight{rep}=0; mnData{rep}=0; mnFit{rep}=0;
@@ -59,8 +59,8 @@ for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
         
         
         elseif rep ==4
-            if ~isempty(files(use(f)).grating4x3yLandscape)
-                load ([pathname files(use(f)).grating4x3yLandscape], 'dfof_bg','sp','stimRec')
+            if ~isempty(files(use(f)).grating4x3y6sf3tf)
+                load ([pathname files(use(f)).grating4x3y6sf3tf], 'dfof_bg','sp','stimRec')
             zoom = 260/size(dfof_bg,1);
             if ~exist('sp','var')
                 sp =0;stimRec=[];
@@ -89,6 +89,7 @@ for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
       
         
     end
+    
     figure
     plot(sp_all);
     figure
@@ -338,9 +339,28 @@ for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
         xlim([1 25]); title('timecourse');
         xlabel('frames')
         
+        
+            figure
+          hold on
+        for i = 1:7
+            d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,:,:),4),2),1));
+                repd = repmat(d,[10 1]);
+                dconvd = deconvg6s(repd'+0.5,0.1);
+               % figure
+               d = dconvd(31:45);
+            plot(0.1:0.1:(0.1*length(d)),(circshift(d,5)-min(d))/(max(d)-min(d)),col(i),'LineWidth',2);
+        end
+        xlim([0.1 1.5]); title('timecourse');
+        xlabel('sec')
+        
+      
         %%% 4x3y
     end
 end
+
+  
+    
+        
 
 figure
 nf= size(tuning4x3y,1);

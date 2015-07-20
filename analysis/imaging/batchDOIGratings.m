@@ -74,19 +74,19 @@ n=0;
 % files(n).doi = 'pre';
 % files(n).monitor = 'vert'; %%% for topox and y
 
-% n=n+1;
-% files(n).subj = 'g62b3rt';
-% files(n).expt = '021415b';
-% files(n).topox =  '021415 g62b3rt doi\g62b3rt_predoi_topox_fstop5.6_exp50ms\g62b3rt_predoi_topox_fstop5.6_exp50ms_maps.mat';
-% files(n).topoy =  '021415 g62b3rt doi\g62b3rt_predoi_topoy_fstop5.6_exp50ms\g62b3rt_predoi_topoy_fstop5.6_exp50ms_maps.mat';
-% files(n).topoxland =  '';
-% files(n).topoyland = '';
-% files(n).grating4x3y6sf3tf = '021415 g62b3rt doi\g62b3rt_predoi_4x3y(2)_fstop5.6_exp50ms\g62b3rt_predoi_4x3y(2)_fstop5.6_exp50ms_maps.mat';
-% files(n).label = 'camk2 gc6';
-% files(n).notes = 'good imaging session'; 
-% files(n).doi = 'pre';
-% files(n).monitor = 'vert'; %%% for topox and y
-% 
+n=n+1;
+files(n).subj = 'g62b3rt';
+files(n).expt = '021415b';
+files(n).topox =  '021415 g62b3rt doi\g62b3rt_predoi_topox_fstop5.6_exp50ms\g62b3rt_predoi_topox_fstop5.6_exp50ms_maps.mat';
+files(n).topoy =  '021415 g62b3rt doi\g62b3rt_predoi_topoy_fstop5.6_exp50ms\g62b3rt_predoi_topoy_fstop5.6_exp50ms_maps.mat';
+files(n).topoxland =  '';
+files(n).topoyland = '';
+files(n).grating4x3y6sf3tf = '021415 g62b3rt doi\g62b3rt_predoi_4x3y(2)_fstop5.6_exp50ms\g62b3rt_predoi_4x3y(2)_fstop5.6_exp50ms_maps.mat';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session'; 
+files(n).doi = 'pre';
+files(n).monitor = 'vert'; %%% for topox and y
+
 % n=n+1;
 % files(n).subj = 'g62b3rt';
 % files(n).expt = '021415c';
@@ -132,18 +132,18 @@ n=0;
 % files(n).doi = 'pre';
 % files(n).monitor = 'vert'; %%% for topox and y
 % 
-n=n+1;
-files(n).subj = 'g62j4rt';
-files(n).expt = '021215b';
-files(n).topox =  '021215 g62j4rt doi passive\g62j4rt_predoi_topox_fstop5.6_exp50ms\g62j4rt_predoi_topox_fstop5.6_exp50ms_maps.mat';
-files(n).topoy =  '021215 g62j4rt doi passive\g62j4rt_predoi_topoy_fstop5.6_exp50ms\g62j4rt_predoi_topoy_fstop5.6_exp50ms_maps.mat';
-files(n).topoxland =  '';
-files(n).topoyland = '';
-files(n).grating4x3y6sf3tf = '021215 g62j4rt doi passive\g62j4rt_predoi_4x3y(2)_fstop5.6_exp50ms\g62j4rt_predoi_4x3y(2)_fstop5.6_exp50ms_maps.mat';
-files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session'; 
-files(n).doi = 'pre';
-files(n).monitor = 'vert'; %%% for topox and y
+% n=n+1;
+% files(n).subj = 'g62j4rt';
+% files(n).expt = '021215b';
+% files(n).topox =  '021215 g62j4rt doi passive\g62j4rt_predoi_topox_fstop5.6_exp50ms\g62j4rt_predoi_topox_fstop5.6_exp50ms_maps.mat';
+% files(n).topoy =  '021215 g62j4rt doi passive\g62j4rt_predoi_topoy_fstop5.6_exp50ms\g62j4rt_predoi_topoy_fstop5.6_exp50ms_maps.mat';
+% files(n).topoxland =  '';
+% files(n).topoyland = '';
+% files(n).grating4x3y6sf3tf = '021215 g62j4rt doi passive\g62j4rt_predoi_4x3y(2)_fstop5.6_exp50ms\g62j4rt_predoi_4x3y(2)_fstop5.6_exp50ms_maps.mat';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good imaging session'; 
+% files(n).doi = 'pre';
+% files(n).monitor = 'vert'; %%% for topox and y
 
 % n=n+1;
 % 

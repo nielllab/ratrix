@@ -8,7 +8,7 @@ if ~exist('in','var') || isempty(in);
     mapfilename =fullfile(p,[f(1:end-8) 'maps.mat'])
     
 else
-    datafile = [in '_0001'];
+    datafile = in;
     mapfilename = [in 'maps.mat'];
     [p f] = fileparts(datafile);
 

@@ -1,7 +1,7 @@
 function [dfof responseMap responseMapNorm cycMap frameT] = readTifBlueGreen(in);
-[pathstr, name, ext] = fileparts(fileparts(mfilename('fullpath')));
-addpath(fullfile(fileparts(pathstr),'bootstrap'))
-setupEnvironment;
+% [pathstr, name, ext] = fileparts(fileparts(mfilename('fullpath')));
+% addpath(fullfile(fileparts(pathstr),'bootstrap'))
+% setupEnvironment;
 in
 dbstop if error
 colordef white
@@ -27,6 +27,7 @@ if ~exist('in','var') || isempty(in)
     in = fullfile(a,b);
 end
 
+
 if in(end-6)=='_'
     basename=in(1:end-7);
 elseif in(end-4)=='_'
@@ -34,7 +35,6 @@ elseif in(end-4)=='_'
 else
     basename=in;
 end
-
 
 try
     sz = size(imread([basename '_000001.tif']));

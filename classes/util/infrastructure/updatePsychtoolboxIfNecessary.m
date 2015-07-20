@@ -2,7 +2,7 @@ function updatePsychtoolboxIfNecessary
 
 svnPath = GetSubversionPath;
 
-ptbr=psychtoolboxroot;
+ptbr=PsychtoolboxRoot;
 if ptbr(end)==filesep
     ptbr=ptbr(1:end-1); %windows svn requires no trailing slash
 end
@@ -12,7 +12,7 @@ if status~=0
     'bad svn cleanup of psychtoolbox code'
 end
 
-[wcrev reprev repurl]=getSVNRevisionFromXML(psychtoolboxroot);
+[wcrev reprev repurl]=getSVNRevisionFromXML(ptbr);
 if wcrev ~= reprev %limit unnecessary use of updatepsychtoolbox due to the PsychtoolboxRegistration data
     %Christopher Broussard chrg@sas.upenn.edu) maintains platypus.psych.upenn.edu and complained that we were
     %making his server logs gigantic

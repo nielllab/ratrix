@@ -28,6 +28,15 @@ function s=station(varargin)
 	% stationSpec.datanet
 	% stationSpec.eyeTracker
 
+    s.ptbVersion    = [];
+    s.screenVersion = [];
+    s.skipSyncTests = [];
+    s.matlabVersion = [];
+    s.matlab64      = [];
+    s.win64         = [];
+    s.computer      = [];
+    s.diary         = []; 
+    
 	s.id=0;
 	s.path='';
 	s.screenNum=0;

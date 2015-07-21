@@ -40,14 +40,14 @@ end
        
      case 'g62a3tt' % Started 6/25/15 %% started hvv 7/17/14
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 64;
+       rewardSizeULorMS        = 48;
        msPenalty               =3500;
        pixPerCycs              = [350];
        percentCorrectionTrials = .5;
        
      case 'g62a2nn' % Started 6/25/15 (permenant record wont show till 6/26/15) %%Started hvv 7/14/15
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 64;
+       rewardSizeULorMS        = 48;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
      

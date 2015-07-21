@@ -67,13 +67,13 @@ switch subjIDs{1}
     
     case 'pvchr9lt' % Started 7/14/15
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 48;
+       rewardSizeULorMS        = 32;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
     
     case 'g62n7ln' % Started 7/14/15
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 64;
+       rewardSizeULorMS        = 48;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        
@@ -85,13 +85,13 @@ switch subjIDs{1}
    
     case 'g62q1lt' % Started 7/14/15
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 32;
+       rewardSizeULorMS        = 16;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        
     case 'g62w2lt' % Started 7/14/15
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 64;
+       rewardSizeULorMS        = 48;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
     

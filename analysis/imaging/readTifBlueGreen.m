@@ -51,7 +51,8 @@ fl = 0;  %flip image? 1 = yes 0 = no
 [out frameT idx pca_fig]=readSyncMultiTif(basename,maxGB,fl,namelength);
 
 
-psfilename = [basename '.ps'];
+psfilenameFinal = [basename '.ps'];
+psfilename = 'tempPS.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
 figure
@@ -221,7 +222,7 @@ for LED=1:3
     
 end  %%%LED
 try
-   ps2pdf('psfile', psfilename, 'pdffile', [psfilename(1:(end-2)) 'pdf']);
+   ps2pdf('psfile', psfilename, 'pdffile', [psfilenameFinal(1:(end-2)) 'pdf']);
 catch
     display('couldnt generate pdf');
 end

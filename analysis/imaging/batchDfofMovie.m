@@ -1,18 +1,24 @@
 %batchDfofMovie
 errmsg= [];errRpt = {};
 nerr=0;
-
+redo=1;
 for f = 1:length(files)
     f
     tic
 
-    try
+    if ~redo & ~isempty([pathname files(f).topox]) & ~exist([pathname files(f).topox],'file')
+        try
         dfofMovie([datapathname files(f).topoxdata]);
     catch exc
+        sprintf('couldnt do %s',files(f).topoxdata)
         nerr=nerr+1;
         errmsg{nerr}= sprintf('couldnt do %s',files(f).topoxdata)
         errRpt{nerr}=getReport(exc,'extended')
+        end
+    else
+        sprintf('skipping %s',files(f).topox)
     end
+    
     try
         dfofMovie([datapathname files(f).topoydata]);
     catch exc

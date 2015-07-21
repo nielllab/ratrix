@@ -294,7 +294,7 @@ function gsData = LocalParseArgs(varargin)
 
         % updated code to find ghostscript - look for gs8x first, 
         % then try old location. Don't depend on MATLAB version #
-        ghostDir = fullfile( matlabroot, 'sys', 'gs8x' );
+        ghostDir = fullfile(matlabroot, 'sys', 'extern', 'win64', 'ghostscript' );
         if ~exist(ghostDir, 'dir')
             [gsCmd, ghostDir] = Local_GetOldGhostscript();
             gsData.cmd = gsCmd;

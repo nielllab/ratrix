@@ -90,7 +90,7 @@ switch subjIDs{1}
        percentCorrectionTrials = .5;
        
     case 'g62w2lt' % Started 7/14/15
-       requestRewardSizeULorMS = 16;
+       requestRewardSizeULorMS = 00;
        rewardSizeULorMS        = 48;
        msPenalty               =3500;
        percentCorrectionTrials = .5;

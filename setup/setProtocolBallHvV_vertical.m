@@ -55,18 +55,18 @@ end
        rewardSizeULorMS        = 48;
        msPenalty               =3500;
         pixPerCycs             = [350];
-       percentCorrectionTrials = .5;
+       percentCorrectionTrials = .25;
        
      case 'g62a3tt' % Started 6/25/15 %% started hvv 7/17/15
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 48;
        msPenalty               =3500;
        pixPerCycs              = [350];
-       percentCorrectionTrials = .5;
+       percentCorrectionTrials = .25;
        
      case 'g62a2nn' % Started 6/25/15 (permenant record wont show till 6/26/15) %%Started hvv 7/14/15
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 48;
+       rewardSizeULorMS        = 32;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
      

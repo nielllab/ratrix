@@ -52,7 +52,7 @@ end
        
      case 'g62w2rt' % Started 7/2/15 %%started HvV 7/23/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 32;
+       rewardSizeULorMS        = 48;
        msPenalty               =4000;
         pixPerCycs             = [350];
        percentCorrectionTrials = .0;

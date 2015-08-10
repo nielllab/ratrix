@@ -50,16 +50,16 @@ end
        msPenalty               =3500;
        percentCorrectionTrials = .50;
        
-     case 'g62w2rt' % Started 7/2/15 %%started HvV 7/23/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 48;
-       msPenalty               =4000;
-        pixPerCycs             = [350];
-       percentCorrectionTrials = .0;
+%      case 'g62w2rt' % Started 7/2/15 %%started HvV 7/23/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 48;
+%        msPenalty               =4000;
+%         pixPerCycs             = [350];
+%        percentCorrectionTrials = .0;
        
      case 'g62a3tt' % Started 6/25/15 %% started hvv 7/17/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 48;
+       rewardSizeULorMS        = 32;
        msPenalty               =4000;
        pixPerCycs              = [350];
        percentCorrectionTrials = .25;

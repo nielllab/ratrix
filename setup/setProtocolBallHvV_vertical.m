@@ -40,15 +40,15 @@ end
        
      case 'g62a4tt' % Started 5/14/15 %% back to hvv 7/25/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 16;
+       rewardSizeULorMS        = 11;
        msPenalty               =3500;
        percentCorrectionTrials = .50; 
        
-     case 'g62a5nn' % Started 5/15/15 %% back to hvv 7/25/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 16;
-       msPenalty               =3500;
-       percentCorrectionTrials = .50;
+%      case 'g62a5nn' % Started 5/15/15 %% back to hvv 7/25/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 16;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .50;
        
 %      case 'g62w2rt' % Started 7/2/15 %%started HvV 7/23/15
 %        requestRewardSizeULorMS = 0;
@@ -56,20 +56,20 @@ end
 %        msPenalty               =4000;
 %         pixPerCycs             = [350];
 %        percentCorrectionTrials = .0;
-       
-     case 'g62a3tt' % Started 6/25/15 %% started hvv 7/17/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 32;
-       msPenalty               =4000;
-       pixPerCycs              = [350];
-       percentCorrectionTrials = .25;
-       
-     case 'g62a2nn' % Started 6/25/15 (permenant record wont show till 6/26/15) %%Started hvv 7/14/15
-       requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 32;
-       msPenalty               =3500;
-       percentCorrectionTrials = .5;
-     
+%        
+%      case 'g62a3tt' % Started 6/25/15 %% started hvv 7/17/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 32;
+%        msPenalty               =4000;
+%        pixPerCycs              = [350];
+%        percentCorrectionTrials = .25;
+%        
+%      case 'g62a2nn' % Started 6/25/15 (permenant record wont show till 6/26/15) %%Started hvv 7/14/15
+%        requestRewardSizeULorMS = 00;
+%        rewardSizeULorMS        = 32;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5;
+%      
 %      case 'g62r3rt' % Started 5/18/15
 %        requestRewardSizeULorMS = 0;
 %        rewardSizeULorMS        = 32;

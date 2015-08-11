@@ -37,12 +37,12 @@ switch subjIDs{1}
        
        
    
-    
-    case 'g62n7ln' % Started 7/14/15
-       requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 16;
-       msPenalty               =3500;
-       percentCorrectionTrials = .5;
+%     
+%     case 'g62n7ln' % Started 7/14/15
+%        requestRewardSizeULorMS = 00;
+%        rewardSizeULorMS        = 16;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5;
     
    
 
@@ -178,7 +178,7 @@ stim.soundClue = true;
 targetOrientations     = 0
 distractorOrientations = []; %-targetOrientations;
 mean                   = .5;
-radius                 = .35;
+radius                 = .25;
 contrast               = 1;
 thresh                 = .00005;
 normalizedPosition      = [.5];

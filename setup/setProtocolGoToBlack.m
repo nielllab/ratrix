@@ -58,32 +58,32 @@ switch subjIDs{1}
     
      case 'g62a3tt' % Started 6/25/15 %% started hvv 7/17/15 %%started gotoblack again 8/11/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 16;
+       rewardSizeULorMS        = 27;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        
     case 'g62a2nn' % Started 6/25/15 (permenant record wont show till 6/26/15) %%Started hvv 7/14/15 %%started gotoblack 8/11/15
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 16;
+       rewardSizeULorMS        = 27;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
     
     case 'g62a5nn' % Started 5/15/15 %% back to hvv 7/25/15 %%backtogloblack 8/11/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 16;
+       rewardSizeULorMS        = 11;
        msPenalty               =3500;
        percentCorrectionTrials = .50;
     
     case 'pv8lt' % Started 6/25/15  (permenant record wont show till 6/26/15) %%started center 7/14/15
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 16;
+       rewardSizeULorMS        = 27;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        stim.slowSecs = 1;
     
     case 'pv8nt' % Started 6/25/15  (permenant record wont show till 6/26/15) %%started center 7/14/15
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 16;
+       rewardSizeULorMS        = 27;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        stim.slowSecs = 1;
@@ -108,7 +108,7 @@ switch subjIDs{1}
 %     
     case 'g62n7ln' % Started 7/14/15
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 16;
+       rewardSizeULorMS        = 11;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        
@@ -116,19 +116,19 @@ switch subjIDs{1}
    
     case 'g62q1lt' % Started 7/14/15
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 16;
+       rewardSizeULorMS        = 11;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        
     case 'g62w2lt' % Started 7/14/15
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 16;
+       rewardSizeULorMS        = 11;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
     
     case 'g62w2rt' % Started 7/2/15  RESTARTED 8/7/15
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 16;
+       rewardSizeULorMS        = 27;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        

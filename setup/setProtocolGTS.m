@@ -53,7 +53,7 @@ switch subjIDs{1}
     
     case 'pvchr9rt' % Started 7/14/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 43;
+       rewardSizeULorMS        = 27;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
     

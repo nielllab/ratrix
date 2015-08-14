@@ -128,8 +128,8 @@ switch subjIDs{1}
     
     case 'g62w2rt' % Started 7/2/15  RESTARTED 8/7/15
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 43;
-       msPenalty               =3500;
+       rewardSizeULorMS        = 76;
+       msPenalty               =4200;
        percentCorrectionTrials = .5;
        
           

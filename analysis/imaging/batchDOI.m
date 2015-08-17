@@ -259,7 +259,6 @@ files(n).rignum = 'rig2';
 files(n).monitor = 'land';
 files(n).label = 'calb2';
 files(n).notes = 'good imaging session';
-files(f).rig = 2;
 
 n=n+1;
 files(n).subj = 'G62TX2TT';

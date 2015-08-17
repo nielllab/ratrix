@@ -3,26 +3,16 @@
 clear all
 %batchPassive2015;
 %batchTopography
-batchDOIGratings
+batchDOI0722
 %batchTopoFrontiers
 close all
 
-% for f = 1:length(files);
-%     if ~isempty(files(f).grating4x3y6sf3tf) | ~isempty(files(f).grating3x2y6sf4tf) 
-%         hasgratings(f)=1;
-%     else
-%         hasgratings(f)=0;
-%     end
-% end
 
- %alluse = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session') & hasgratings ) 
- %alluse = 1:length(files) & ~strcmp({files.subj},'g62b7lt');
-  %alluse = find( strcmp({files.notes},'good imaging session') & hasgratings & strcmp({files.doi},'post')) 
-  %alluse = find( strcmp({files.notes},'good imaging session') & hasgratings & strcmp({files.subj},'g62l8rn')) 
 
-   alluse = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session')  ) 
+   alluse = find(strcmp({files.inject},'saline') & strcmp({files.rignum},'rig1') & strcmp({files.timing},'post') &  strcmp({files.notes},'good imaging session')  ) 
   
-  length(alluse)
+length(alluse)
+alluse=alluse(1:5)
 %alluse=alluse(end-5:end);
 allsubj = unique({files(alluse).subj})
 
@@ -40,7 +30,7 @@ allsubj{s}
 
 %%% calculate gradients and regions
 clear map merge
-x0 =10; y0=30; sz = 120;
+
 x0 =0; y0=0; sz = 128;
 doTopography;
 
@@ -63,8 +53,10 @@ doGratingsNew;
 
 end
 [f p] = uiputfile('*.mat','save data?');
+sessiondata = files(alluse);
+
 if f~=0
-    save(fullfile(p,f),'allsubj','alldata');
+    save(fullfile(p,f),'allsubj','sessiondata','shiftData','fit','mnfit','cycavg');
 end
 
 

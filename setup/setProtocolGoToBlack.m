@@ -28,7 +28,7 @@ switch subjIDs{1}
        
     case 'testgotoblackstopime' % Started 6/25/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 0;
+       rewardSizeULorMS        = 1;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        stim.slowSecs = 5;

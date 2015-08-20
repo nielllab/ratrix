@@ -1,6 +1,8 @@
 scsz = get( 0, 'Screensize' ); %get screensize for plots
 %screensize = get( groot, 'Screensize' ); %get screensize for plots in R2014b and later
 
+%edit for GitHub test plz delete
+
 %%%% tf tuning plots
 figure('Position', [scsz(3)/2 scsz(2)/2 scsz(3)/scscale scsz(4)/scscale]);
 subplot(2,4,1)

@@ -26,7 +26,7 @@ display('downsampling')
 binsize=4
 downsampleLength = binsize*floor(size(dfof,3)/binsize);
 tic
-dfof= downsamplebin(dfof(:,:,1:downsampleLength),3,binsize);
+dfof= downsamplebin(dfof(:,:,1:downsampleLength),3,binsize)/binsize;
 toc
 
 nframes = size(dfof,3);

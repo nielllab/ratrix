@@ -40,7 +40,7 @@ end
        
      case 'g62a4tt' % Started 5/14/15 %% back to hvv 7/25/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 11;
+       rewardSizeULorMS        = 27;
        msPenalty               =3500;
        percentCorrectionTrials = .50; 
        

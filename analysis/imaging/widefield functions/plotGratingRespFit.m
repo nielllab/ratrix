@@ -60,7 +60,7 @@ function plotGratingResp(phase, amp, fit,rep, xpts, ypts,label)
 
         
         subplot(2,3,3)
-        imagesc(amp,[-0.005 0.02]);
+        imagesc(amp,[-0.005 0.04]); colormap jet ; 
         title('amp'); axis off; axis equal
            hold on; plot(ypts,xpts,'w.','Markersize',2)
            set(gca,'LooseInset',get(gca,'TightInset'))

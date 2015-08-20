@@ -260,7 +260,6 @@ files(n).monitor = 'land';
 files(n).label = 'calb2';
 files(n).notes = 'good imaging session';
 
-
 n=n+1;
 files(n).subj = 'G62TX2TT';
 files(n).expt = '071915';

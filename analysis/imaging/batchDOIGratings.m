@@ -2,9 +2,9 @@ clear all
 close all
 dbstop if error
 pathname = 'I:\compiled behavior\';
-pathname = 'C:\data\imaging\DOI experiments\';
+pathname = 'data\imaging\DOI experiments\';
 datapathname = 'D:\Widefield (12-10-12+)\data 62713+\';  
-outpathname = 'C:\data\imaging\topos\';
+outpathname = 'data\imaging\topos\';
 n=0;
 
 %%% g62j5rt

@@ -48,7 +48,7 @@ files(n).inject = 'lisuride';
 files(n).rignum = 'rig2';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'unknown problem';
 files(n).timing = 'pre'; 
 
 
@@ -69,7 +69,7 @@ files(n).inject = 'lisuride';
 files(n).rignum = 'rig2';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'unknown problem';
 files(n).timing = 'post'; 
 
 
@@ -415,7 +415,7 @@ files(n).inject = 'lisuride';
 files(n).rignum = 'rig1';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'unknown problem';
 files(n).timing = 'pre'; 
 
 
@@ -436,7 +436,7 @@ files(n).inject = 'lisuride';
 files(n).rignum = 'rig1';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'unknown problem';
 files(n).timing = 'post'; 
 
 n=n+1;
@@ -657,7 +657,7 @@ files(n).inject = 'lisuride';
 files(n).rignum = 'rig1';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'unknown problem';
 files(n).timing = 'pre'; 
 
 n=n+1;
@@ -677,7 +677,7 @@ files(n).inject = 'lisuride';
 files(n).rignum = 'rig1';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'unknown problem';
 files(n).timing = 'post'; 
 
 n=n+1;
@@ -823,7 +823,7 @@ files(n).inject = 'saline';
 files(n).rignum = 'rig1';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'unknown problem';
 files(n).timing = 'pre'; 
 
 
@@ -844,7 +844,7 @@ files(n).inject = 'saline';
 files(n).rignum = 'rig1';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'unknown problem';
 files(n).timing = 'post'; 
 
 n=n+1;
@@ -905,7 +905,7 @@ files(n).inject = 'lisuride';
 files(n).rignum = 'rig1';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'unknown problem';
 files(n).timing = 'pre'; 
 
 n=n+1;
@@ -925,7 +925,7 @@ files(n).inject = 'lisuride';
 files(n).rignum = 'rig1';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'unknown problem';
 files(n).timing = 'post'; 
 
 
@@ -946,7 +946,7 @@ files(n).inject = 'doi';
 files(n).rignum = 'rig2';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'stim problem';
 files(n).timing = 'pre'; 
 
 n=n+1;
@@ -966,7 +966,7 @@ files(n).inject = 'doi';
 files(n).rignum = 'rig2';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'stim problem';
 files(n).timing = 'post'; 
 
 
@@ -1028,7 +1028,7 @@ files(n).inject = 'lisuride';
 files(n).rignum = 'rig2';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';%post dark has extra frame at beginning
+files(n).notes = 'stim problem';%post dark has extra frame at beginning
 files(n).timing = 'pre'; 
 
 
@@ -1049,7 +1049,7 @@ files(n).inject = 'lisuride';
 files(n).rignum = 'rig2';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';%post dark has extra frame at beginning
+files(n).notes = 'stim problem';%post dark has extra frame at beginning
 files(n).timing = 'post'; 
 
 n=n+1;
@@ -1110,7 +1110,7 @@ files(n).inject = 'lisuride';
 files(n).rignum = 'rig1';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'unknown problem';
 files(n).timing = 'pre'; 
 
 
@@ -1131,7 +1131,7 @@ files(n).inject = 'lisuride';
 files(n).rignum = 'rig1';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'unknown problem';
 files(n).timing = 'post'; 
 
 n=n+1;
@@ -1151,7 +1151,7 @@ files(n).inject = 'lisuride';
 files(n).rignum = 'rig1';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'unknown problem';
 files(n).timing = 'pre'; 
 
 n=n+1;
@@ -1171,7 +1171,7 @@ files(n).inject = 'lisuride';
 files(n).rignum = 'rig1';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'unknown problem';
 files(n).timing = 'post'; 
 
 
@@ -1192,7 +1192,7 @@ files(n).inject = 'lisuride';
 files(n).rignum = 'rig2';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'stim problem';
 files(n).timing = 'pre'; 
 
 
@@ -1213,7 +1213,7 @@ files(n).inject = 'lisuride';
 files(n).rignum = 'rig2';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'stim problem';
 files(n).timing = 'post'; 
 
 
@@ -1234,7 +1234,7 @@ files(n).inject = 'doi';
 files(n).rignum = 'rig2';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'stim problem';
 files(n).timing = 'pre'; 
 
 
@@ -1255,7 +1255,7 @@ files(n).inject = 'doi';
 files(n).rignum = 'rig2';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'stim problem';
 files(n).timing = 'post'; 
 
 n=n+1;
@@ -1359,7 +1359,7 @@ files(n).inject = 'doi';
 files(n).rignum = 'rig1';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';%topoX has extra first frame
+files(n).notes = 'unknown problem';%topoX has extra first frame
 files(n).timing = 'pre'; 
 
 n=n+1;
@@ -1379,7 +1379,7 @@ files(n).inject = 'doi';
 files(n).rignum = 'rig1';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';%topoX has extra first frame
+files(n).notes = 'unknown problem';%topoX has extra first frame
 files(n).timing = 'post'; 
 
 
@@ -1401,7 +1401,7 @@ files(n).inject = 'saline';
 files(n).rignum = 'rig2';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'stim problems';
 files(n).timing = 'pre'; 
 
 
@@ -1422,7 +1422,7 @@ files(n).inject = 'saline';
 files(n).rignum = 'rig2';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'stim problems';
 files(n).timing = 'post'; 
 
 n=n+1;
@@ -1442,7 +1442,7 @@ files(n).inject = 'saline';
 files(n).rignum = 'rig2';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';%topoX and post bkggrat has extra first frame
+files(n).notes = 'stim problems';%topoX and post bkggrat has extra first frame
 files(n).timing = 'pre'; 
 
 
@@ -1464,7 +1464,7 @@ files(n).inject = 'saline';
 files(n).rignum = 'rig2';
 files(n).monitor = 'land';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';%topoX and post bkggrat has extra first frame
+files(n).notes = 'stim problems';%topoX and post bkggrat has extra first frame
 files(n).timing = 'post'; 
 
 n=n+1;

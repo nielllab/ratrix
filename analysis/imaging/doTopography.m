@@ -4,13 +4,13 @@
 for f = 1:length(use)
     f
     [grad{f} amp{f} map_all{f} map{f} merge{f}]= getRegions(files(use(f)),pathname,outpathname);
-   
+    
 end
 
 clear allamp
 for f = 1:length(use)
-  f
-  load(fullfile(pathname,files(use(f)).topox),'cycMap');
+    f
+    load(fullfile(pathname,files(use(f)).topox),'cycMap');
     df = max(cycMap,[],3) - min(cycMap,[],3);
     allamp(f) = max(df(:));
     
@@ -70,32 +70,32 @@ for f= 1:length(use) ;
         title( [files(use(f)).subj ' ' files(use(f)).expt ' ' files(use(f)).monitor f] );
         
         imblue=zeros(100,100); imgreen=zeros(100,100);
-       
+        
         %%% comment out if can't find images
         try
             imblue = imread([datapathname files(use(f)).topoxdata '_0001.tif']);
             imgreen = imread([datapathname files(use(f)).topoxdata '_0004.tif']);
         catch
-           try
-               imblue = imread([altdatapathname files(use(f)).topoxdata '_0001.tif']);
-            imgreen = imread([altdatapathname files(use(f)).topoxdata '_0004.tif']);
-           catch
-               display('cant find images')
-           end
+            try
+            imblue = imread([datapathname files(use(f)).topoxdata '_000001.tif']);
+            imgreen = imread([datapathname files(use(f)).topoxdata '_000004.tif']);
+            catch
+                display('cant find images')
+            end
         end
         if sum(imblue(:)>0)
             subplot(nx,ny,3)
-        
-        imagesc( shiftImageRotate(imblue,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),0.5,sz));
-        colormap(gray)
-        axis off; axis equal
-        
-        subplot(nx,ny,6)
-        imagesc( shiftImageRotate(imgreen,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),0.5,sz));
-        axis off; axis equal
-        colormap(gray)
+            
+            imagesc( shiftImageRotate(imblue,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),0.5,sz));
+            colormap(gray)
+            axis off; axis equal
+            
+            subplot(nx,ny,6)
+            imagesc( shiftImageRotate(imgreen,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),0.5,sz));
+            axis off; axis equal
+            colormap(gray)
         end
-        %%% up to here 
+        %%% up to here
         
         for ind=1:4
             map4d(:,:,ind)=shiftImageRotate(squeeze(map{f}(:,:,ind)),allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
@@ -105,22 +105,22 @@ for f= 1:length(use) ;
         for ind = 1:2
             gradshift{ind} = shiftImageRotate(real(grad{f}{ind}),allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
             gradshift{ind} = gradshift{ind} + sqrt(-1)* shiftImageRotate(imag(grad{f}{ind}),allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
-           
-           meangrad{ind} = meangrad{ind} + gradshift{ind};
+            
+            meangrad{ind} = meangrad{ind} + gradshift{ind};
             ampshift = shiftImageRotate(amp{f}{2},allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
             subplot(nx,ny,5)
-         
-            imagesc(ampshift,[0 0.05]); axis off; axis equal
-           
-meanamp = meanamp+ ampshift;
+            
+            imagesc(ampshift,[0 0.05]); axis off; axis equal; colormap gray
+            
+            meanamp = meanamp+ ampshift;
             allGrad(:,:,ind,f) = gradshift{ind}.* ampshift;
             
             polarshift{ind} = shiftImageRotate(real(map_all{f}{ind}),allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
             polarshift{ind} = polarshift{ind} + sqrt(-1)* shiftImageRotate(imag(map_all{f}{ind}),allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
             subplot(nx,ny,1+(ind-1)*ny);
-          
-            imshow(polarMap(polarshift{ind},94));            
-allPolar(:,:,ind,f) = polarshift{ind};            
+            
+            imshow(polarMap(polarshift{ind},94));
+            allPolar(:,:,ind,f) = polarshift{ind};
             meanpolar{ind} = meanpolar{ind} + polarshift{ind};
             %            subplot(nx,ny,4+(ind-1)*ny);
             %             dx=4;
@@ -129,6 +129,10 @@ allPolar(:,:,ind,f) = polarshift{ind};
             %          imshow(ones(size(gradshift{ind}))); hold on
             %          quiver( rangex,rangey,10*real(gradshift{ind}(rangex,rangey)),10*imag(gradshift{ind}(rangex,rangey)))
             
+        end
+            if exist('psfilename','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilename,'-append');
         end
     end
     
@@ -141,31 +145,36 @@ imshow(avgmap);
 title('average topo  map');
 meangrad{1} = meangrad{1}/length(use); meangrad{2} = meangrad{2}/length(use);
 meanpolar{1} = meanpolar{1}/length(use); meanpolar{2} = meanpolar{2}/length(use);
-meanPolarAll(:,:,s,1)= meanpolar{1}; meanPolarAll(:,:,s,2)= meanpolar{2}; 
+meanPolarAll(:,:,s,1)= meanpolar{1}; meanPolarAll(:,:,s,2)= meanpolar{2};
 
-allPhase(:,:,1) = mod(angle(meanpolar{1}),2*pi); 
+allPhase(:,:,1) = mod(angle(meanpolar{1}),2*pi);
 allPhase(:,:,2) = mod(angle(meanpolar{2}),2*pi);
 
 if length(use)>1
-for ind = 1:2
-    data = squeeze(allPolar(:,:,ind,:));
-    data = reshape (data,size(data,1)*size(data,2),size(data,3));
-    xc = corrcoef(data);
-    figure
-    imagesc(abs(xc),[0.5 1]);
-    xc(xc==1)=NaN;
-    d = abs(xc(:));
-    d= d(~isnan(d));
-    xcAll(s,ind) = mean(d);
-    xcStd(s,ind) = std(d);
-    title([allsubj{s} ' ' num2str(ind)])
-end
+    for ind = 1:2
+        data = squeeze(allPolar(:,:,ind,:));
+        data = reshape (data,size(data,1)*size(data,2),size(data,3));
+        xc = corrcoef(data);
+        figure
+        imagesc(imresize(abs(xc),10,'nearest'),[0.5 1]);
+        xc(xc==1)=NaN;
+        d = abs(xc(:));
+        d= d(~isnan(d));
+        xcAll(s,ind) = mean(d);
+        xcStd(s,ind) = std(d);
+        title([allsubj{s} ' ' num2str(ind)])
+        if exist('psfilename','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilename,'-append');
+        end
+        
+    end
 end
 
 % frame = zeros(260,320,4);
 % frame(:,31:290,:)=avgmap4d;
 % avgmap4d=frame;
-% 
+%
 % frame=zeros(260,320,3);
 % frame(:,31:290,:)=avgmap;
 % avgmap=frame;
@@ -174,7 +183,7 @@ load('C:/mapoverlay.mat')
 
 
 for m=1:2
-  figure  
+    figure
     imshow(polarMap(meanpolar{m},92));
 end
 
@@ -192,18 +201,17 @@ end
 subplot(2,2,3)
 imshow(avgmap);
 title('average topo  map');
-  hold on
-    plot(ypts,xpts,'w.','Markersize',2)
+hold on
+plot(ypts,xpts,'w.','Markersize',2)
 
-    subplot(2,2,4);
-   
-    figure
-    imAmp = max(abs(meanpolar{1}),abs(meanpolar{2})); 
-    imAmp=imAmp/(prctile(imAmp(:),90));
-        imAmp(imAmp>1)=1;imAmp = imAmp.^1.5;
-    showGradient(allPhase,imAmp,xpts,ypts);
-    figure
-    showGradient(allPhase,imAmp,0,0);
+subplot(2,2,4);
+
+imAmp = max(abs(meanpolar{1}),abs(meanpolar{2}));
+imAmp=imAmp/(prctile(imAmp(:),90));
+imAmp(imAmp>1)=1;imAmp = imAmp.^1.5;
+showGradient(allPhase,imAmp,xpts,ypts);
+figure
+showGradient(allPhase,imAmp,0,0);
 
 %
 % divmap = getDivergenceMap(meanpolar);

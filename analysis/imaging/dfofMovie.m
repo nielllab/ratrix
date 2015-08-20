@@ -1,4 +1,4 @@
-function dfofMovie(in);
+function dfofMovie(in,rig);
 
 
 %[f,p] = uiputfile('*.avi','dfof cycle average movie file');
@@ -8,14 +8,26 @@ if ~exist('in','var') || isempty(in);
     mapfilename =fullfile(p,[f(1:end-8) 'maps.mat'])
     
 else
-    datafile = [in '_0001'];
+    datafile = in;
     mapfilename = [in 'maps.mat'];
     [p f] = fileparts(datafile);
 
 end
+if ~exist('rig','var')
+    rig = input ('which rig? 1= old, 2=new : ')
+end
+
+if rig==1
+    rigzoom =1; fl=0;
+else
+    rigzoom = 0.859; fl=1;
+end
+
 datadir = p;
 
-[dfof map mapNorm cycMap frameT]= readTifBlueGreen(datafile);
+rigzoom
+fl
+[dfof map mapNorm cycMap frameT]= readTifBlueGreen(datafile,rigzoom,fl);
 
 use_chan=3;
 
@@ -26,7 +38,7 @@ use_chan=3;
 dfof_bg= single(dfof{use_chan});
 display('saving')
 tic
-save(mapfilename,'map','mapNorm','dfof_bg','frameT','-v7.3')
+save(mapfilename,'map','mapNorm','dfof_bg','frameT','fl','rigzoom','-v7.3')
 toc
 dfof_bg= dfof{use_chan};
 %clear dfof;
@@ -60,21 +72,21 @@ close(vid)
 
 
 
-dfshort = (double(dfof_bg(:,:,:)));
-dfshort = imresize(dfshort,0.5,'method','box');
-baseline = prctile(dfshort,3,3);
-cycle_mov = dfshort - repmat(baseline,[1 1 size(dfshort,3)]);
-lowthresh= prctile(cycle_mov(:),2);
-upperthresh = prctile(cycle_mov(:),98)*1.25;
-cycMov= mat2im(cycle_mov,gray,[lowthresh upperthresh]);
-mov = immovie(permute(cycMov,[1 2 4 3]));
-vid = VideoWriter(fullfile(p,[f '_RAW']));
-% mov = immovie(permute(shiftmov,[1 2 4 3]));
-% vid = VideoWriter('bilateralS1.avi');
-vid.FrameRate=25;
-open(vid);
-writeVideo(vid,mov);
-close(vid)
+% dfshort = (double(dfof_bg(:,:,:)));
+% dfshort = imresize(dfshort,0.5,'method','box');
+% baseline = prctile(dfshort,3,3);
+% cycle_mov = dfshort - repmat(baseline,[1 1 size(dfshort,3)]);
+% lowthresh= prctile(cycle_mov(:),2);
+% upperthresh = prctile(cycle_mov(:),98)*1.25;
+% cycMov= mat2im(cycle_mov,gray,[lowthresh upperthresh]);
+% mov = immovie(permute(cycMov,[1 2 4 3]));
+% vid = VideoWriter(fullfile(p,[f '_RAW']));
+% % mov = immovie(permute(shiftmov,[1 2 4 3]));
+% % vid = VideoWriter('bilateralS1.avi');
+% vid.FrameRate=25;
+% open(vid);
+% writeVideo(vid,mov);
+% close(vid)
 
 
 % keyboard
@@ -97,11 +109,12 @@ close(vid)
 
 use_speed=0;
 
-fs = dir([datadir '\stim*.mat']);
+fs = dir([datadir '\stim*obj.*']);
 
 if ~isempty(fs)
     use_speed=1;
-    load(fullfile(datadir,fs(1).name));
+   display('doing speed')
+   load(fullfile(datadir,fs(1).name),'-mat');
     %     figure
     %     plot(stimRec.pos)
 
@@ -125,7 +138,10 @@ if ~isempty(fs)
     
     posx = cumsum(stimRec.pos(use,1)-900);
     posy = cumsum(stimRec.pos(use,2)-500);
-    frameT = frameT - frameT(1);
+   if isnan(frameT)
+       frameT = 0.1*(1:size(dfof_bg,3))';
+   end
+   frameT = frameT - frameT(1)+0.02;
     vx = diff(interp1(mouseT,posx,frameT));
     vy = diff(interp1(mouseT,posy,frameT));
     vx(end+1)=0; vy(end+1)=0;
@@ -136,9 +152,11 @@ if ~isempty(fs)
     figure
     plot(sp)
     hold on 
-    plot(squeeze(mean(mean(dfof_bg,2),1))*30000,'g')
+    plot(squeeze(mean(mean(dfof_bg,2),1))*30000,'g');
+    legend('speed','dF');
     figure
     plot(xcorr(sp,mean(mean(dfof_bg,2),1)))
+    ylabel('sp df xcorr'); xlabel('offset frames')
     for i=1:100;
         sp_avg(i) = nanmeanMW(sp(i:100:end));
        
@@ -152,8 +170,10 @@ if ~isempty(fs)
     title('mean speed')
     ylim([0 2500])
 
-    
     thresh = [100 ];
+    if ~isempty(sp<thresh) & ~isempty(sp>thresh)
+        
+   
     for i = 1:1
         stop_img = mean(dfof_bg(:,:,sp<thresh(i)),3);
         mov_img = mean(dfof_bg(:,:,sp>thresh(i)),3);
@@ -168,9 +188,13 @@ if ~isempty(fs)
     end
     
     movemap = mov_img-stop_img;
-    
+    else
+        movemap=NaN;
+    end
     %[f p] =uiputfile('*.mat','move map file');
     save(mapfilename,'movemap','sp','stimRec','-append');
+else
+    error(sprintf('couldnt find stimrec for %s', mapfilename))
 end
 
 

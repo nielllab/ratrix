@@ -35,22 +35,43 @@ switch subjIDs{1}
        rewardSizeULorMS        = 45;
        msPenalty               =4300;
        
-    case 'pv8lt' % Started 6/25/15  (permenant record wont show till 6/26/15) %%started center 7/14/15
-       requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 16;
-       msPenalty               =3500;
-       pixPerCycs              = [350];
-       percentCorrectionTrials = .5;
-       stim.slowSecs = 1;
-    
-    case 'pv8nt' % Started 6/25/15  (permenant record wont show till 6/26/15) %%started center 7/14/15
-       requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 48;
-       msPenalty               =3500;
-       pixPerCycs              = [350];
-       percentCorrectionTrials = .5;
-       stim.slowSecs = 1;
        
+  
+       
+      case 'g62n7ln' % Started 7/14/15 %%switch center 8/12/15
+       requestRewardSizeULorMS = 00;
+       rewardSizeULorMS        = 43;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;
+       
+%     
+%     case 'g62n7ln' % Started 7/14/15
+%        requestRewardSizeULorMS = 00;
+%        rewardSizeULorMS        = 16;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5;
+    
+   
+
+       
+%     case 'pv8lt' % Started 6/25/15  (permenant record wont show till 
+%     6/26/15) %%started center 7/14/15 %%started gotblack 8-11-15
+%        requestRewardSizeULorMS = 00;
+%        rewardSizeULorMS        = 32;
+%        msPenalty               =3500;
+%        pixPerCycs              = [350];
+%        percentCorrectionTrials = .5;
+%        stim.slowSecs = 1;
+    
+%     case 'pv8nt' % Started 6/25/15  (permenant record wont show till
+%     6/26/15) %%started center 7/14/15 %%started gotblack 8-11-15
+%        requestRewardSizeULorMS = 00;
+%        rewardSizeULorMS        = 16;
+%        msPenalty               =3500;
+%        pixPerCycs              = [350];
+%        percentCorrectionTrials = .5;
+%        stim.slowSecs = 1;
+%        
        
 %     case 'g62c.2rt'           %Switched Back _center 8/15/14
 %        requestRewardSizeULorMS = 0;
@@ -164,7 +185,7 @@ stim.soundClue = true;
 targetOrientations     = 0
 distractorOrientations = []; %-targetOrientations;
 mean                   = .5;
-radius                 = .35;
+radius                 = .25;
 contrast               = 1;
 thresh                 = .00005;
 normalizedPosition      = [.5];

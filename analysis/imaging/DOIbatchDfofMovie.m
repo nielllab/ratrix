@@ -1,4 +1,4 @@
-%DOIbatchDfofMovie
+batchDOI
 errmsg= [];errRpt = {};
 nerr=0;
 

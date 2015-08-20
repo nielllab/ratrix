@@ -1,7 +1,7 @@
-function [dfof responseMap responseMapNorm cycMap frameT] = readTifBlueGreen(in);
-[pathstr, name, ext] = fileparts(fileparts(mfilename('fullpath')));
-addpath(fullfile(fileparts(pathstr),'bootstrap'))
-setupEnvironment;
+function [dfof responseMap responseMapNorm cycMap frameT] = readTifBlueGreen(in, rigzoom,fl);
+% [pathstr, name, ext] = fileparts(fileparts(mfilename('fullpath')));
+% addpath(fullfile(fileparts(pathstr),'bootstrap'))
+% setupEnvironment;
 in
 dbstop if error
 colordef white
@@ -27,14 +27,14 @@ if ~exist('in','var') || isempty(in)
     in = fullfile(a,b);
 end
 
-if in(end-6)=='_'
+
+if in(end-6)=='_' & in(end-5)=='0'
     basename=in(1:end-7);
-elseif in(end-4)=='_'
+elseif in(end-4)=='_' & in(end-3)=='0'
     basename=in(1:end-5);
 else
     basename=in;
 end
-
 
 try
     sz = size(imread([basename '_000001.tif']));
@@ -45,13 +45,17 @@ catch
 end
 basename
 clear in
-fl = 0;  %flip image? 1 = yes 0 = no
+if ~exist('fl','var')
+    fl=0;
+end
+%flip image? 1 = yes 0 = no
 
 
-[out frameT idx pca_fig]=readSyncMultiTif(basename,maxGB,fl,namelength);
+[out frameT idx pca_fig]=readSyncMultiTif(basename,maxGB,fl,namelength, rigzoom);
 
 
-psfilename = [basename '.ps'];
+psfilenameFinal = [basename '.ps'];
+psfilename = 'C:\tempPS.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
 figure
@@ -165,8 +169,8 @@ for LED=1:3
     figure
     set(gcf,'Name','baseline map');
     imshow(imresize(stepMap,1/binning)./prctile(stepMap(:),99));
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfilename,'-append');
+%     set(gcf, 'PaperPositionMode', 'auto');
+%     print('-dpsc',psfilename,'-append');
     
     
     
@@ -221,7 +225,7 @@ for LED=1:3
     
 end  %%%LED
 try
-   ps2pdf('psfile', psfilename, 'pdffile', [psfilename(1:(end-2)) 'pdf']);
+   ps2pdf('psfile', psfilename, 'pdffile', [psfilenameFinal(1:(end-2)) 'pdf']);
 catch
     display('couldnt generate pdf');
 end

@@ -38,14 +38,13 @@ else
    
     end
     
-    sprintf('estimated start time %f',startTime)
-    startTime = input('start time : ');
+%     sprintf('estimated start time %f',startTime)
+%     startTime = input('start time : ');
     
     for st = 0:10
         plot(st*cycLength+ [startTime startTime],[0.2 1],'k:')
     end
-    
-    keyboard
+
     
     dfofInterp = dfofInterp(:,:,round(startTime/dt):end);
     

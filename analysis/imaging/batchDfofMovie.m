@@ -5,16 +5,14 @@ redo=1;
 for f = 1:length(files)
     f
     tic
-  if strcmp(files(f).rignum,'rig2')
-      if isfield(files(f),'rignum') & strcmp(files(f).rignum,'rig2')
+    
+    if isfield(files(f),'rignum') & strcmp(files(f).rignum,'rig2')
         rig =2;
     else
         rig=1;
-      end
-      
-      clear fl sp;load([pathname files(f).topox],'fl','sp')
-  
-      if (redo & (~exist('fl','var')) | ~exist('sp','var')) | isempty([pathname files(f).topox]) | ~exist([pathname files(f).topox],'file')
+    end   
+    
+    if redo  | isempty([pathname files(f).topox]) | ~exist([pathname files(f).topox],'file')
         try
             dfofMovie([datapathname files(f).topoxdata],rig);
         catch exc
@@ -25,10 +23,10 @@ for f = 1:length(files)
         end
     else
         sprintf('skipping %s',files(f).topox)
-      end
+    end
     
-      clear fl sp;load([pathname files(f).topoy],'fl','sp')
-    if (redo & (~exist('fl','var')) | ~exist('sp','var'))| isempty([pathname files(f).topoy]) | ~exist([pathname files(f).topoy],'file')
+
+    if redo | isempty([pathname files(f).topoy]) | ~exist([pathname files(f).topoy],'file')
         try
             dfofMovie([datapathname files(f).topoydata],rig);
         catch exc
@@ -41,8 +39,8 @@ for f = 1:length(files)
         sprintf('skipping %s',files(f).topoy)
     end
     
-      clear fl sp ;load([pathname files(f).grating4x3y6sf3tf],'fl','sp')
-    if (redo & (~exist('fl','var')) | ~exist('sp','var')) | isempty([pathname files(f).grating4x3y6sf3tf]) | ~exist([pathname files(f).grating4x3y6sf3tf],'file')
+
+    if redo | isempty([pathname files(f).grating4x3y6sf3tf]) | ~exist([pathname files(f).grating4x3y6sf3tf],'file')
         try
             dfofMovie([datapathname files(f).grating4x3ydata],rig);
         catch exc
@@ -55,8 +53,8 @@ for f = 1:length(files)
         sprintf('skipping %s',files(f).grating4x3ydata)
     end
     
-     clear fl sp;load([pathname files(f).background3x2yBlank],'fl','sp')
-    if (redo & (~exist('fl','var')) | ~exist('sp','var'))| isempty([pathname files(f).background3x2yBlank]) | ~exist([pathname files(f).background3x2yBlank],'file')
+
+    if redo | isempty([pathname files(f).background3x2yBlank]) | ~exist([pathname files(f).background3x2yBlank],'file')
         try
             dfofMovie([datapathname files(f).backgroundData],rig);
         catch exc
@@ -69,8 +67,8 @@ for f = 1:length(files)
         sprintf('skipping %s',files(f).backgroundData)
     end
     
-     clear fl sp;load([pathname files(f).darkness],'fl','sp')
-    if (redo & (~exist('fl','var')) | ~exist('sp','var')) | isempty([pathname files(f).darkness]) | ~exist([pathname files(f).darkness],'file')
+
+    if redo | isempty([pathname files(f).darkness]) | ~exist([pathname files(f).darkness],'file')
         try
             dfofMovie([datapathname files(f).darknessdata],rig);
         catch exc
@@ -226,6 +224,6 @@ for f = 1:length(files)
     %         errRpt{e}
     %     end
     toc
-  end
+    
 end
 errRpt

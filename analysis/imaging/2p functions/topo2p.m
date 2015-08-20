@@ -5,7 +5,7 @@ dt = 0.25;
 framerate=1/dt;
 twocolor = input('# of channels : ')
 twocolor= (twocolor==2);
-get2pSession;
+get2pSession_sbx;
 
 cycLength = cycLength/dt;
 map = 0;

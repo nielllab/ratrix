@@ -30,7 +30,7 @@ psfilename = 'C:\tempPS.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
 %preallocate here
-allmnfit = zeros(260,260,18,length(datafiles));
+mnshift = zeros(260,260,7,length(datafiles));
 
 for i= 1:length(datafiles) %collates all conditions (numbered above)
     load(datafiles{i},'shiftData');

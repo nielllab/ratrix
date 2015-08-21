@@ -21,7 +21,7 @@ scsz = get( 0, 'Screensize' ); %get screensize for plots
 figure('Position', [scsz(1) scsz(2) scsz(3)/scscale scsz(4)/scscale]);
 subplot(2,4,1)
 plot(0,squeeze(allshiftData(1,1,1,conds)))
-title('Y tuning','position',[0.5 0.5],'color','r','fontsize',20)
+title('SF tuning','position',[0.5 0.5],'color','r','fontsize',20)
 axis([0 1 0 1])
 axis off
 legend(datafiles(conds),'location','south')
@@ -39,7 +39,7 @@ figure('Position', [scsz(3)/2 scsz(2)/2 scsz(3)/scscale scsz(4)/scscale]);
 % figure('Position', [scsz(3)/2 scsz(4)/2 scsz(3)/scscale scsz(4)/scscale]); %displays at top of screen
 subplot(2,4,1)
 plot(0,squeeze(allshiftData(1,1,1,conds)))
-title('SF tuning','position',[0.5 0.5],'color','r','fontsize',20)
+title('Y tuning','position',[0.5 0.5],'color','r','fontsize',20)
 axis([0 1 0 1])
 axis off
 legend(datafiles(conds),'location','south')
@@ -62,9 +62,10 @@ axis off
 legend(datafiles(conds),'location','south')
 for area = 1:7
     subplot(2,4,area+1)
-plot(squeeze(mean(mean(allshiftData(x(area)+range, y(area)+range, 1:4,conds),2),1)))
+plot(squeeze(mean(mean(allshiftData(x(area)+range, y(area)+range, 1:3,conds),2),1)))
 %         plot(squeeze(allmnfit(x(area)+(-2:2),y(area),1:4,:).*squeeze((amp(x(i),y(i),:))%%% un-normalize it
     title(sprintf(cell2mat(areanames(area))));
+    ylim([0 2])
 end
 
 
@@ -124,6 +125,7 @@ for area = 1:7
 plot(squeeze(mean(mean(allshiftData(x(area)+range, y(area)+range, 1:3,conds),2),1)))
 %         plot(squeeze(allmnfit(x(area)+(-2:2),y(area),1:4,:).*squeeze((amp(x(i),y(i),:))%%% un-normalize it
     title(sprintf(cell2mat(areanames(area))));
+    ylim([0 2])
 end
 print('-dpsc',psfilename,'-append');
    

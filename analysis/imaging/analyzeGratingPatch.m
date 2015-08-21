@@ -3,27 +3,14 @@ function [ph amp alldata fit cycavg tuning sftcourse] = analyzeGratingPatch(dfof
 %close all
 sf=0; tf=0; isi=0; duration=0;
 
-
-if exist('moviename','var')
     load(moviename)
-else
-    load('C:\resolutionTestClose5minRight.mat');
-    %load('C:\grating3x5_2sf10min');
-    %load('C:\grating5sf3tf_small_fast.mat')
-    % load('D:\resolutionTestClose5min');
-end
+
 imagerate=10;
 
-% tf(tf==2)=1;
-% sf(sf==0.02)=0.04;
-% sf(sf==0.16)=0.32;
 imageT=(1:size(dfof_bg,3))/imagerate;
 img = imresize(double(dfof_bg),1,'method','box');
 
-
 trials = length(sf)-1;
-duration
-
 trials = floor(min(trials,size(dfof_bg,3)/(imagerate*(duration+isi)))-1)
 xpos=xpos(1:trials); ypos=ypos(1:trials); sf=sf(1:trials); tf=tf(1:trials);
 % tic
@@ -31,13 +18,11 @@ xpos=xpos(1:trials); ypos=ypos(1:trials); sf=sf(1:trials); tf=tf(1:trials);
 % toc
 % trials=trials-1;
 
-acqdurframes = (duration+isi)*imagerate;
+acqdurframes = (duration+isi)*imagerate; %%% length of each cycle in frames;
+nx=ceil(sqrt(acqdurframes+1)); %%% how many rows in figure subplot
 
-
-nx=ceil(sqrt(acqdurframes+1));
-
+%%% mean amplitude map across cycle
 figure
-
 map=0;
 for f=1:acqdurframes
     cycavg(:,:,f) = mean(img(:,:,f:acqdurframes:end),3);
@@ -49,26 +34,16 @@ for f=1:acqdurframes
     map = map+squeeze(cycavg(:,:,f))*exp(2*pi*sqrt(-1)*(0.5 +f/acqdurframes));
 end
 
+%%% add timecourse
 subplot(nx,nx,f+1)
 plot(squeeze(mean(mean(cycavg,2),1)))
 axis off
-
-
 set(gca,'LooseInset',get(gca,'TightInset'))
 
-
-
-% for lag = 1:9;
-%     for f=1:acqdurframes
-%     cycavglag(:,:,f,lag) = mean(img(:,:,f+(lag-1)*95*acqdurframes:acqdurframes:(lag)*95*acqdurframes),3);
-% end
-% end
-% figure
-% plot(squeeze(mean(mean(cycavglag,2),1)))
-
+%%% calculate phase of cycle response
+%%% good for detectime framedrops or other problems
 tcourse = squeeze(mean(mean(img,2),1));
 fourier = tcourse'.*exp((1:length(tcourse))*2*pi*sqrt(-1)/(10*duration + 10*isi));
-
 figure
 plot((1:length(tcourse))/600,angle(conv(fourier,ones(1,600),'same')));
 ylim([-pi pi])
@@ -78,37 +53,9 @@ if exist('psfilename','var')
     print('-dpsc',psfilename,'-append');
 end
 
-
-% for i = 1:10
-% figure
-% imshow(imresize(polarMap(map/acqdurframes,98),4))
-% hold on; plot(4*ypts,4*xpts,'w.','Markersize',2)
-% [y x] = ginput(1);x= round(x/4);y= round(y/4);
-% figure
-% plot(squeeze(cycavg(x,y,:,:)))
-% end
-
-
-% [y x] = ginput(1);
-% y= round(y); x= round(x);
-% range = -2:2;
-% figure
-% plot(squeeze(mean(mean(img(x+range,y+range,:),2),1)))
-
-
-
 meandf = squeeze(mean(mean(img,2),1));
 
-if ~exist('useframes','var')
-    useframes =24:27;
-    base = 12:16;
-    % useframes =7:12;
-    % base = 1:3;
-    
-    % useframes = 8:10;
-    % base = 1:2;
-end
-
+%%% separate responses by trieals
 trialdata = zeros(size(img,1),size(img,2),trials+2);
 trialspeed = zeros(trials+2,1);
 for tr=1:trials;
@@ -124,11 +71,7 @@ for tr=1:trials;
     
 end
 
-figure
-plot(trialcourse(:,1)-trialcourse(:,10),trialcourse(:,15)-trialcourse(:,10),'o');
-xlabel('pre dfof'); ylabel('post dfof')
-
-
+%%% get responses by averaging (this is simple method)
 figure
 set(gcf,'Name',label);
 if length(unique(xpos))>1
@@ -169,15 +112,25 @@ close (gcf)
 xrange = unique(xpos); yrange=unique(ypos); sfrange=unique(sf); tfrange=unique(tf);
 tuning=zeros(size(trialdata,1),size(trialdata,2),length(xrange),length(yrange),length(sfrange),length(tfrange));
 cond = 0;
-figure
-if length(xrange)==4 & length(tfrange)==1;
+
+if length(xrange==4) & length(tfrange==1);
+    bkgrat =1;
+else
+    bkgrat=0;
+end
+
+%%% show blank stim for bkgrat
+if bkgrat
+    figure
     for k=1:length(sfrange);
-        blankMap(:,:,k) =squeeze(mean(trialdata(:,:,find(xpos==xrange(4)& sf==sfrange(k))),3));
+        blankMap(:,:,k) =squeeze(median(trialdata(:,:,find(xpos==xrange(4)& sf==sfrange(k))),3));
         subplot(1,2,k);
         imagesc(blankMap(:,:,k));axis equal
+        title(sprintf('blank stim sf = %0.2f',sfrange(k)));
     end
 end
 
+%%% separate out responses by stim parameter
 for i = 1:length(xrange)
     i
     for j= 1:length(yrange)
@@ -185,7 +138,7 @@ for i = 1:length(xrange)
             for l=1:length(tfrange)
                 cond = cond+1;
                 avgtrialdata(:,:,cond) = squeeze(median(trialdata(:,:,find(xpos==xrange(i)&ypos==yrange(j)&sf==sfrange(k)&tf==tfrange(l))),3));%  length(find(xpos==xrange(i)&ypos==yrange(j)&sf==sfrange(k)&tf==tfrange(l)))
-                if length(xrange)==4 & length(tfrange)==1;
+                if bkgrat  %%% subract blank for bkgrat
                     avgtrialdata(:,:,cond)=avgtrialdata(:,:,cond)-blankMap(:,:,k);
                 end
                 avgtrialcourse(i,j,k,l,:) = squeeze(median(trialcourse(find(xpos==xrange(i)&ypos==yrange(j)&sf==sfrange(k)&tf==tfrange(l)),:),1));
@@ -199,12 +152,11 @@ for i = 1:length(xrange)
     end
 end
 
+%%% plot response based on previous trial's response
+%%% this is a check for whether return to baseline is an issue
 figure 
 plot(avgcondtrialcourse(:,1)-avgcondtrialcourse(:,10),avgcondtrialcourse(:,15)-avgcondtrialcourse(:,10),'o');
 xlabel('pre dfof'); ylabel('post dfof')
-
-%  [xfit(i,j) yfit(i,j) sffit(i,j) gainfit(i,j) ampfit(i,j)] = fitxysf(squeeze(trialdata(100,100,1:length(xpos))),xpos,ypos,sf,trialspeed);
-
 
 %tdata = imresize(trialdata,0.25);
 tdata = imresize(avgtrialdata,1);
@@ -217,7 +169,7 @@ for i = 1:size(tdata,1);
         for j = 1:size(tdata,2);
             [xfit(i,j)  yfit(i,j) sffit(i,j) tffit(i,j) gainfit(i,j) ampfit(i,j) basefit(i,j) fit(i,j,:)] = fit3x2ysftf(squeeze(tdata(i,j,1:length(avgx))),avgx,avgy,avgsf,avgtf,avgspeed);
         end
-    elseif length(sfrange)==2 & length(xrange)==4
+    elseif bkgrat
         for j = 1:size(tdata,2);
             [xfit(i,j)  yfit(i,j) sffit(i,j) tffit(i,j) gainfit(i,j) ampfit(i,j) basefit(i,j) fit(i,j,:)] = fitbackground(squeeze(tdata(i,j,1:length(avgx))),avgx,avgy,avgsf,avgtf,avgspeed);
         end
@@ -268,20 +220,21 @@ end
 %     subplot(1,2,2);
 %     imagesc(squeeze(tuning(x,y,:,:,2,1)),[-0.025 0.025]);
 % end
+% 
+% figure
+% for i = 1:length(sfrange)
+%     for j=1:length(tfrange)
+%         subplot(length(tfrange),length(sfrange),length(sfrange)*(j-1)+i)
+%         d=squeeze(mean(mean(avgtrialcourse(:,:,i,j,:),2),1));
+%         sftcourse(i,j,:) = d-min(d);
+%         plot(d-min(d)); axis([1 18 0 0.015]);
+%         set(gca,'Xticklabel',[]); set(gca,'Yticklabel',[]);
+%         set(gca,'LooseInset',get(gca,'TightInset'))
+%     end
+% end
+% 
 
-figure
-for i = 1:length(sfrange)
-    for j=1:length(tfrange)
-        subplot(length(tfrange),length(sfrange),length(sfrange)*(j-1)+i)
-        d=squeeze(mean(mean(avgtrialcourse(:,:,i,j,:),2),1));
-        sftcourse(i,j,:) = d-min(d);
-        plot(d-min(d)); axis([1 18 0 0.015]);
-        set(gca,'Xticklabel',[]); set(gca,'Yticklabel',[]);
-        set(gca,'LooseInset',get(gca,'TightInset'))
-    end
-end
-
-
+%%% plot sf and tf responses
 figure
 for i = 1:length(sfrange)
     for j=1:length(tfrange)
@@ -293,51 +246,44 @@ for i = 1:length(sfrange)
         set(gca,'LooseInset',get(gca,'TightInset'))
     end
 end
-
 if exist('psfilename','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfilename,'-append');
 end
 
 
-if length(xrange)==4 & length(tfrange)==1;
+if bkgrat
     range = [-0.005 0.035];
 else
     range= [0 0.075];
 end
 
 
+% figure
+% for i = 1:length(xrange)
+%     for j=1:length(yrange)
+%         subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
+%         d=squeeze(mean(mean(avgtrialcourse(i,j,:,:,:),4),3));
+%         plot(d-min(d)); axis([1 18 0 0.015])
+%         set(gca,'Xticklabel',[]); set(gca,'Yticklabel',[]);
+%         set(gca,'LooseInset',get(gca,'TightInset'))
+%     end
+% end
 
-figure
-for i = 1:length(xrange)
-    for j=1:length(yrange)
-        subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
-        d=squeeze(mean(mean(avgtrialcourse(i,j,:,:,:),4),3));
-        plot(d-min(d)); axis([1 18 0 0.015])
-        set(gca,'Xticklabel',[]); set(gca,'Yticklabel',[]);
-        set(gca,'LooseInset',get(gca,'TightInset'))
+%%% plot x/y maps
+if ~bkgrat
+    figure
+    for i = 1:length(xrange)
+        for j=1:length(yrange)
+            subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
+            imagesc(squeeze(mean(mean(tuning(:,:,i,j,:,:),6),5)),range); colormap jet
+            % title(sprintf('%0.2f %0.2f',xrange(i),yrange(j)))
+            axis off; axis equal
+            hold on; plot(ypts,xpts,'w.','Markersize',2)
+            set(gca,'LooseInset',get(gca,'TightInset'))
+        end
     end
-end
-
-figure
-for i = 1:length(xrange)
-    for j=1:length(yrange)
-        subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
-        imagesc(squeeze(mean(mean(tuning(:,:,i,j,:,:),6),5)),range); colormap jet
-        % title(sprintf('%0.2f %0.2f',xrange(i),yrange(j)))
-        axis off; axis equal
-        hold on; plot(ypts,xpts,'w.','Markersize',2)
-        set(gca,'LooseInset',get(gca,'TightInset'))
-    end
-end
-
-if exist('psfilename','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfilename,'-append');
-end
-
-
-if length(sfrange)==2
+else
     for k = 1:2
         figure
         for i = 1:length(xrange)
@@ -353,6 +299,12 @@ if length(sfrange)==2
         title(sprintf('sf = %d',k));
     end
 end
+
+if exist('psfilename','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfilename,'-append');
+end
+
 
 
 %    for x = 1:length(xrange)

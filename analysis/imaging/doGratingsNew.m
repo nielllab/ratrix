@@ -1,6 +1,6 @@
 %%%% doGratingsNew
 x=0;
-for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior passive; 4 = 4x3y patches
+for rep=[1] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior passive; 4 = 4x3y patches
     mnAmp{rep}=0; mnPhase{rep}=0; mnAmpWeight{rep}=0; mnData{rep}=0; mnFit{rep}=0;
     clear shiftData shiftAmp shiftPhase fit cycavg
     
@@ -36,7 +36,7 @@ for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
             end
             dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
             [ph amp data ft cyc] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
-                'C:\background3x2y2sf_021215_16minBlank',20:22,14:16,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec);
+                'C:\background3x2y2sf_021215_16minBlank',20:22,14:16,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename);
         elseif rep==2
             load ([pathname files(use(f)).grating3x2y6sf4tf ], 'dfof_bg','sp','stimRec')
             zoom = 260/size(dfof_bg,1);
@@ -71,7 +71,7 @@ for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
             end
         end
         sp = conv(sp,ones(50,1),'same')/50;
-        sp_all(1:13000,f) = sp;
+        %sp_all(1:13000,f) = sp;
         mv(f) = sum(sp>500)/length(sp);
         if rep~=3
             shiftData(:,:,:,f) = imresize(data,4);
@@ -119,10 +119,12 @@ for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
             
     end
 
-    figure
-    plot(sp_all);
+%     figure
+%     plot(sp_all);
     figure
     bar(mv);
+    xlabel('subject')
+    ylabel('fraction running')
     % plotGratingResp(mnPhase{rep}/length(use),mnAmp{rep}/length(use),rep,xpts,ypts);
     %plotGratingResp(mnAmpWeight{rep}./(mnAmp{rep}+0.0001),mnAmp{rep}/length(use),rep,xpts,ypts);
     plotGratingRespFit(median(shiftData,4),median(shiftData(:,:,5,:) + shiftData(:,:,6,:),4),median(fit,4),rep,xpts,ypts,'average')

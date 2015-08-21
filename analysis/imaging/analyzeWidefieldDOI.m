@@ -11,7 +11,7 @@ psfilename = 'C:\tempPS.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
 
-   alluse = find(strcmp({files.inject},'lisuride')  & strcmp({files.timing},'post') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
+   alluse = find(strcmp({files.inject},'saline')  & strcmp({files.timing},'pre') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
   
 length(alluse)
 %alluse=alluse(1:5)
@@ -58,7 +58,7 @@ end
 sessiondata = files(alluse);
 
 if f~=0
-    save(fullfile(p,f),'allsubj','sessiondata','shiftData','fit','mnfit','cycavg','sp_all','mv');
+    save(fullfile(p,f),'allsubj','sessiondata','shiftData','fit','mnfit','cycavg','mv');
 end
 
 [f p] = uiputfile('*.pdf','save pdf');

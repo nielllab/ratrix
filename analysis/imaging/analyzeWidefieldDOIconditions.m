@@ -3,7 +3,7 @@
 clear all
 close all
 %%
-%%.jhnfs
+
 %CHOOSE FILES WITH THE DATA IN THEM
 datafiles = {'SalinePreDataGood', ...  %1
             'SalinePostDataGood', ...  %2

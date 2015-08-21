@@ -1,19 +1,19 @@
-%This file uses mnfit and cycavg data to compare widefield data across
-%conditions
+%This file uses shiftData data to compare widefield data across
+%conditions using backgroundgratings stimulus
 clear all
 close all
 %%
 
 %CHOOSE FILES WITH THE DATA IN THEM
-datafiles = {'SalinePreDataGood', ...  %1
-            'SalinePostDataGood', ...  %2
-            'DOIPreDataGood', ...      %3
-            'DOIPostDataGood', ...     %4
-            'LisuridePreDataGood', ... %5
-            'LisuridePostDataGood'};    %6
+datafiles = {'SalinePreGratings', ...  %1
+            'SalinePostGratings', ...  %2
+            'DOIPreGratings', ...      %3
+            'DOIPostGratings', ...     %4
+            'LisuridePreGratings', ... %5
+            'LisuridePostGratings'};    %6
 
 %CHOOSE CONDITIONS TO COMPARE (SEE DATAFILES BELOW)
-conds = [5 6];
+conds = [1 2];
 
 %CHOOSE FILE WITH POINTS FROM analyzeWidefieldDOI & SET NAMES
 load('SalinePoints'); %pre-made points for visual areas used in original analysis
@@ -24,23 +24,21 @@ range = (-2:2); % averages signal over 1 pixel + this range
 
 %optional: adjust plot size if necessary
 scscale = 2; % increase to decrease plot sizesn
-%%
+%
 
 psfilename = 'C:\tempPS.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
 %preallocate here
 allmnfit = zeros(260,260,18,length(datafiles));
-allcycavg = zeros(260,260,15,length(datafiles));
 
 for i= 1:length(datafiles) %collates all conditions (numbered above)
-    load(datafiles{i},'mnfit','cycavg');
-    allmnfit(:,:,:,i) = mnfit; %%%x,y,sf,tf
-    mncycavg = mean(cycavg,4);
-    allcycavg(:,:,:,i) = mncycavg;  %%%x,y,t,area
+    load(datafiles{i},'shiftData');
+    mnshiftData = mean(shiftData,4);
+    allshiftData(:,:,:,i) = mnshiftData;  %%%x,y,t,area
 end
       
-doDOIplots;
+doDOIplotsgrats;
 
 
 

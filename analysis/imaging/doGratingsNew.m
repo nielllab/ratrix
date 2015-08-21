@@ -374,7 +374,7 @@ for rep=[1] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
             %     dconvd = deconvg6s(repd'+0.5,0.1);
             %    % figure
             %    d = dconvd(16:30);
-            plot((circshift(d',10)-min(d))/(max(d)-min(d)),col(i),'LineWidth',2);
+            plot((circshift(d',10)-min(d))/(max(d)-min(d)));
         end
         xlim([1 25]); title('timecourse');
         xlabel('frames')

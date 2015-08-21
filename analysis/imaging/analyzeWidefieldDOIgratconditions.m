@@ -26,16 +26,21 @@ range = (-2:2); % averages signal over 1 pixel + this range
 scscale = 2; % increase to decrease plot sizesn
 %
 
-psfilename = 'C:\tempPS.ps';
-if exist(psfilename,'file')==2;delete(psfilename);end
+% psfilename = 'C:\tempPS.ps';
+% if exist(psfilename,'file')==2;delete(psfilename);end
 
 %preallocate here
-mnshift = zeros(260,260,7,length(datafiles));
+allshiftData = zeros(260,260,7,length(datafiles));
+allcycavg = zeros(260,260,25,length(datafiles));
+allmnfit = zeros(260,260,17,length(datafiles));
 
 for i= 1:length(datafiles) %collates all conditions (numbered above)
-    load(datafiles{i},'shiftData');
+    load(datafiles{i},'shiftData','mnfit','cycavg');
     mnshiftData = mean(shiftData,4);
-    allshiftData(:,:,:,i) = mnshiftData;  %%%x,y,t,area
+    mncycavg = mean(cycavg,4);
+    allshiftData(:,:,:,i) = mnshiftData;
+    allcycavg(:,:,:,i) = mncycavg;
+    allmnfit(:,:,:,i) = mnfit;
 end
       
 doDOIplotsgrats;
@@ -44,19 +49,19 @@ doDOIplotsgrats;
 
 %save data
 
-[f p] = uiputfile('*.mat','save data?');
-if f~=0
-    save(fullfile(p,f),'allmnfit');
-%     save(fullfile(p,f),'allmnfit','allcycavg');
-end
-
-%save PDF
-[f p] = uiputfile('*.pdf','save pdf');
-if f~=0
-    try
-        ps2pdf('psfile', psfilename, 'pdffile', fullfile(p,f));
-    catch
-        display('couldnt generate pdf');
-    end
-end
-delete(psfilename);
+% [f p] = uiputfile('*.mat','save data?');
+% if f~=0
+%     save(fullfile(p,f),'allmnfit');
+% %     save(fullfile(p,f),'allmnfit','allcycavg');
+% end
+% 
+% %save PDF
+% [f p] = uiputfile('*.pdf','save pdf');
+% if f~=0
+%     try
+%         ps2pdf('psfile', psfilename, 'pdffile', fullfile(p,f));
+%     catch
+%         display('couldnt generate pdf');
+%     end
+% end
+% delete(psfilename);

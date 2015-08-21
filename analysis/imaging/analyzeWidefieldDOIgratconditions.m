@@ -13,7 +13,7 @@ datafiles = {'SalinePreGratings', ...  %1
             'LisuridePostGratings'};    %6
 
 %CHOOSE CONDITIONS TO COMPARE (SEE DATAFILES BELOW)
-conds = [1 2];
+conds = [2 4 6];
 
 %CHOOSE FILE WITH POINTS FROM analyzeWidefieldDOI & SET NAMES
 load('SalinePoints'); %pre-made points for visual areas used in original analysis
@@ -24,12 +24,12 @@ range = (-2:2); % averages signal over 1 pixel + this range
 
 %optional: adjust plot size if necessary
 scscale = 2; % increase to decrease plot sizesn
-%
 
-% psfilename = 'C:\tempPS.ps';
-% if exist(psfilename,'file')==2;delete(psfilename);end
+%create temp file for PDF
+psfilename = 'C:\tempPS.ps';
+if exist(psfilename,'file')==2;delete(psfilename);end
 
-%preallocate here
+%preallocate data arrays
 allshiftData = zeros(260,260,7,length(datafiles));
 allcycavg = zeros(260,260,25,length(datafiles));
 allmnfit = zeros(260,260,17,length(datafiles));
@@ -45,23 +45,19 @@ end
       
 doDOIplotsgrats;
 
-
-
 %save data
+[f p] = uiputfile('*.mat','save data?');
+if f~=0
+    save(fullfile(p,f),'allcycavg','allmnfit','allshiftData','areanames','conds','datafiles','range','scscale');
+end
 
-% [f p] = uiputfile('*.mat','save data?');
-% if f~=0
-%     save(fullfile(p,f),'allmnfit');
-% %     save(fullfile(p,f),'allmnfit','allcycavg');
-% end
-% 
-% %save PDF
-% [f p] = uiputfile('*.pdf','save pdf');
-% if f~=0
-%     try
-%         ps2pdf('psfile', psfilename, 'pdffile', fullfile(p,f));
-%     catch
-%         display('couldnt generate pdf');
-%     end
-% end
-% delete(psfilename);
+%save PDF
+[f p] = uiputfile('*.pdf','save pdf');
+if f~=0
+    try
+        ps2pdf('psfile', psfilename, 'pdffile', fullfile(p,f));
+    catch
+        display('couldnt generate pdf');
+    end
+end
+delete(psfilename);

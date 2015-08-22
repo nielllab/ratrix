@@ -119,6 +119,20 @@ else
     bkgrat=0;
 end
 
+if bkgrat
+    blank = find(xpos==xrange(end));
+    patch = find(xpos~=xrange(end));
+     blankstart = floor((blank-1)*(duration+isi)*imagerate + isi*imagerate -1);
+     patchstart = floor((patch-1)*(duration+isi)*imagerate +isi*imagerate-1);
+    for f = 1:acqdurframes
+        blankcyc(:,:,f) = mean(img(:,:,blankstart+f),3);
+        patchcyc(:,:,f) =  mean(img(:,:,patchstart+f),3);
+    end
+    cycavg(:,:,1:acqdurframes) = blankcyc;
+    cycavg(:,:,(acqdurframes+1):2*acqdurframes) = patchcyc;
+end
+
+
 %%% show blank stim for bkgrat
 if bkgrat
     figure

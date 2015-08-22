@@ -22,7 +22,7 @@ load mapOverlay
 w = 2;
 figure
 %plot the average? response
-imagesc(mean(shiftData(:,:,5,:),4));
+imagesc(mean(allshiftData(:,:,5,:),4));
 hold on
 plot(ypts,xpts,'w.','Markersize',2); axis off
 for i = 1:7;
@@ -79,11 +79,30 @@ for area = 1:7
     axis([1 3 0 max(max(max(allmnfit(:,:,1:3))))])
 end
 
-%circleshifted cycle average
+%circleshifted non-normalized cycle average
 figure('Position', [scsz(3)/4 scsz(4)/2-scsz(4)/10 scsz(3)/scscale scsz(4)/scscale]);%displays at top of screen
 subplot(2,4,1)
 plot(0,squeeze(allmnfit(1,1,1,conds)))
 title('CycAvg','position',[0.5 0.5],'color','r','fontsize',12)
+axis([0 1 0 1])
+axis off
+legend(datafiles(conds),'location','south')
+for area = 1:7
+    subplot(2,4,area+1)
+    d=squeeze(mean(mean(allcycavg(x(area)+range,y(area)+range,:,conds),2),1))';
+    for i = 1:length(conds)
+        d(i,:) = (d(i,:) - min(d(i,:)));
+    end
+    plot(0.1:0.1:(0.1*length(d)),circshift(d',10));
+    title(sprintf(cell2mat(areanames(area))));
+    axis([0.1 2.5 0 0.075]);
+end
+
+%circleshifted cycle average
+figure('Position', [scsz(3)/4 scsz(4)/2-scsz(4)/10 scsz(3)/scscale scsz(4)/scscale]);%displays at top of screen
+subplot(2,4,1)
+plot(0,squeeze(allmnfit(1,1,1,conds)))
+title('Norm CycAvg','position',[0.5 0.5],'color','r','fontsize',12)
 axis([0 1 0 1])
 axis off
 legend(datafiles(conds),'location','south')
@@ -98,12 +117,33 @@ for area = 1:7
     axis([0.1 2.5 0 1])
 end
 
-
-%%%% deconvolved circleshifted cycle averages
+%%%% non-norm deconvolved circleshifted cycle averages
 figure('Position', [scsz(3)/4 scsz(4)/2-scsz(4)/10 scsz(3)/scscale scsz(4)/scscale]);%displays at top of screen
 subplot(2,4,1)
 plot(0,squeeze(allmnfit(1,1,1,conds)))
 title('Decon CycAvg','position',[0.5 0.5],'color','r','fontsize',12)
+axis([0 1 0 1])
+axis off
+legend(datafiles(conds),'location','south')
+for area = 1:7
+    subplot(2,4,area+1)
+    d=squeeze(mean(mean(allcycavg(x(area)+range,y(area)+range,:,conds),2),1));
+    repd = repmat(d,[10 1]);
+    dconvd = deconvg6s(repd'+0.5,0.1);
+    d = dconvd(:,(ceil(length(dconvd)/2)):((ceil(length(dconvd)/2))+ceil(length(dconvd)/10)));
+    for i = 1:length(conds)
+        d(i,:) = (d(i,:) - min(d(i,:)));
+    end
+    plot(0.1:0.1:(0.1*length(d)),circshift(d',10));
+    title(sprintf(cell2mat(areanames(area))));    
+    axis([0.1 2.5 0 0.11])
+end
+
+%%%% normalized deconvolved circleshifted cycle averages
+figure('Position', [scsz(3)/4 scsz(4)/2-scsz(4)/10 scsz(3)/scscale scsz(4)/scscale]);%displays at top of screen
+subplot(2,4,1)
+plot(0,squeeze(allmnfit(1,1,1,conds)))
+title('Decon Norm CycAvg','position',[0.5 0.5],'color','r','fontsize',12)
 axis([0 1 0 1])
 axis off
 legend(datafiles(conds),'location','south')
@@ -170,7 +210,7 @@ end
 
 w = 2;
 figure('visible','off');
-imagesc(mean(shiftData(:,:,5,:),4));
+imagesc(mean(allshiftData(:,:,5,:),4));
 hold on
 plot(ypts,xpts,'w.','Markersize',2); axis off
 for i = 1:7;
@@ -230,7 +270,7 @@ for area = 1:7
 end
 print('-dpsc',psfilename,'-append');
 
-%circleshifted cycle average
+%circleshifted non-normalized cycle average
 figure('visible','off');
 subplot(2,4,1)
 plot(0,squeeze(allmnfit(1,1,1,conds)))
@@ -242,19 +282,62 @@ for area = 1:7
     subplot(2,4,area+1)
     d=squeeze(mean(mean(allcycavg(x(area)+range,y(area)+range,:,conds),2),1))';
     for i = 1:length(conds)
+        d(i,:) = (d(i,:) - min(d(i,:)));
+    end
+    plot(0.1:0.1:(0.1*length(d)),circshift(d',10));
+    title(sprintf(cell2mat(areanames(area))));
+    axis([0.1 2.5 0 0.075]);
+end
+print('-dpsc',psfilename,'-append');
+
+%circleshifted cycle average
+figure('visible','off');
+subplot(2,4,1)
+plot(0,squeeze(allmnfit(1,1,1,conds)))
+title('Norm CycAvg','position',[0.5 0.5],'color','r','fontsize',12)
+axis([0 1 0 1])
+axis off
+legend(datafiles(conds),'location','south')
+for area = 1:7
+    subplot(2,4,area+1)
+    d=squeeze(mean(mean(allcycavg(x(area)+range,y(area)+range,:,conds),2),1))';
+    for i = 1:length(conds)
         d(i,:) = (d(i,:) - min(d(i,:)))/(max(d(i,:))-min(d(i,:)));
     end
-    plot(0.1:0.1:2.5,circshift(d',10));
+    plot(0.1:0.1:(0.1*length(d)),circshift(d',10));
     title(sprintf(cell2mat(areanames(area))));
     axis([0.1 2.5 0 1])
 end
 print('-dpsc',psfilename,'-append');
 
-%%%% deconvolved cycle averages
+%%%% non-norm deconvolved circleshifted cycle averages
 figure('visible','off');
 subplot(2,4,1)
 plot(0,squeeze(allmnfit(1,1,1,conds)))
 title('Decon CycAvg','position',[0.5 0.5],'color','r','fontsize',12)
+axis([0 1 0 1])
+axis off
+legend(datafiles(conds),'location','south')
+for area = 1:7
+    subplot(2,4,area+1)
+    d=squeeze(mean(mean(allcycavg(x(area)+range,y(area)+range,:,conds),2),1));
+    repd = repmat(d,[10 1]);
+    dconvd = deconvg6s(repd'+0.5,0.1);
+    d = dconvd(:,(ceil(length(dconvd)/2)):((ceil(length(dconvd)/2))+ceil(length(dconvd)/10)));
+    for i = 1:length(conds)
+        d(i,:) = (d(i,:) - min(d(i,:)));
+    end
+    plot(0.1:0.1:(0.1*length(d)),circshift(d',10));
+    title(sprintf(cell2mat(areanames(area))));    
+    axis([0.1 2.5 0 0.11])
+end
+print('-dpsc',psfilename,'-append');
+
+%%%% normalized deconvolved circleshifted cycle averages
+figure('visible','off');
+subplot(2,4,1)
+plot(0,squeeze(allmnfit(1,1,1,conds)))
+title('Decon Norm CycAvg','position',[0.5 0.5],'color','r','fontsize',12)
 axis([0 1 0 1])
 axis off
 legend(datafiles(conds),'location','south')
@@ -272,7 +355,6 @@ for area = 1:7
     axis([0.1 2.5 0 1])
 end
 print('-dpsc',psfilename,'-append');
-
 
 %         amp(:,:,i) = max(allmnfit(:,:,1:4,:),[],3); 
 %         plot(squeeze(allmnfit(x(area)+(-2:2),y(area),1:4,:).*squeeze((amp(x(i),y(i),:))

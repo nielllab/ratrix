@@ -10,7 +10,7 @@ close all
 psfilename = 'C:\tempPS.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
-   alluse = find(strcmp({files.inject},'saline')  & strcmp({files.timing},'pre') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
+   alluse = find(strcmp({files.inject},'doi')  & strcmp({files.timing},'pre') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
   
 length(alluse)
 %alluse=alluse(1:5)
@@ -34,8 +34,8 @@ clear map merge
 
 x0 =0; y0=0; sz = 128;
 doTopography;
-
-doGratingsNew;
+doCorrelationMap
+%doGratingsNew;
 % %%% analyze looming
 % for f = 1:length(use)
 %     loom_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'loom');

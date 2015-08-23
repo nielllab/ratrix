@@ -31,12 +31,13 @@ for f= 1:length(use)
         trace(:,i) = squeeze(im(x(i),y(i),:));
         plot(squeeze(im(x(i),y(i),:))+i*0.2,col(i))
     end
+    title(sprintf('%s %s raw',files(use(f)).subj, files(use(f)).expt));
     
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfilename,'-append');
     
     figure
-    imagesc(corrcoef(trace),[0 1]); colorbar
+    imagesc(imresize(corrcoef(trace),10,'nearest'),[0.8 1]); colorbar
     title('corr pre-decor')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfilename,'-append');
@@ -103,9 +104,12 @@ for f= 1:length(use)
         decorrTrace(:,i) = squeeze(obs_im(x(i),y(i),:));
         plot(decorrTrace(:,i)+0.1*i,col(i));
     end
+     title(sprintf('%s %s decorr',files(use(f)).subj, files(use(f)).expt));
+       set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfilename,'-append');
     
     figure
-    imagesc(corrcoef(decorrTrace),[-1 1]); colorbar
+    imagesc(imresize(corrcoef(decorrTrace),10,'nearest'),[-1 1]); colorbar
     title('area decorrelated')
     traceCorr = corrcoef(decorrTrace);
     % traceCorr(traceCorr<=0)=0.01;
@@ -196,7 +200,7 @@ set(gcf, 'PaperPositionMode', 'auto');
 print('-dpsc',psfilename,'-append');
 
 figure
-imagesc(traceCorr,[-1 1]);
+imagesc(imresize(traceCorr,10,'nearest'),[-1 1]);
 title('avg corr post-decorr')
 
 set(gcf, 'PaperPositionMode', 'auto');

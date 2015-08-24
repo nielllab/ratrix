@@ -1,9 +1,6 @@
 scsz = get( 0, 'Screensize' ); %get screensize for plots
 %screensize = get( groot, 'Screensize' ); %get screensize for plots in R2014b and later
 
-%checking that I can upload to GitHub repository from my MBP - delete (PHIL
-%082415)
-
 load mapOverlay
 
 % %%%% tf tuning plots

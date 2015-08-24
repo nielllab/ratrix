@@ -33,17 +33,34 @@ if exist(psfilename,'file')==2;delete(psfilename);end
 allshiftData = zeros(260,260,7,length(datafiles));
 allcycavg = zeros(260,260,25,length(datafiles));
 allmnfit = zeros(260,260,17,length(datafiles));
+sdshiftData = zeros(260,260,7,length(datafiles));
+sdcycavg = zeros(260,260,25,length(datafiles));
+sdmnfit = zeros(260,260,17,length(datafiles));
+
+% cycle = {}; %structure for all cycle data
+% tuning = {}; %structure for all fit data
+
 
 for i= 1:length(datafiles) %collates all conditions (numbered above)
-    load(datafiles{i},'shiftData','mnfit','cycavg');
-    mnshiftData = mean(shiftData,4);
+    load(datafiles{i},'shiftData','mnfit','cycavg');%load data
+    
+    mnshiftData = mean(shiftData,4);% get means across animals
     mncycavg = mean(cycavg,4);
-    allshiftData(:,:,:,i) = mnshiftData;
+    
+    allshiftData(:,:,:,i) = mnshiftData; %create arrays with all group means
     allcycavg(:,:,:,i) = mncycavg;
     allmnfit(:,:,:,i) = mnfit;
+    
+    
+    sdshiftData(:,:,:,i) = std(shiftdata,4); %create arrays with all group SDs
+    sdcycavg(:,:,:,i) = std(cycavg,4);
+    sdmnfit(:,:,:,i) = std(fit,4);
+    
+%     cycle.{i}(:,:,:) = cycavg
 end
       
 doDOIplotsgrats;
+% doDOIstats;
 
 %save data
 [f p] = uiputfile('*.mat','save data?');

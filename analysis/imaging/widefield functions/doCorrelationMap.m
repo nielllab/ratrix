@@ -76,15 +76,31 @@ for f= 1:length(use)
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfilename,'-append');
     
+    figure
+    for i = 1:5
+        subplot(5,1,i);
+        plot(score(:,i)); axis off
+    end
+     set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfilename,'-append');
+    
     if exist('sp','var') && sum(sp~=0)
         figure
+        subplot(3,1,1)
+        plot(sp); ylabel('speed')
+        subplot(3,1,2);
+        plot(score(:,1)); ylabel('component1')
+        subplot(3,1,3)
         plot(sp/max(sp),'g'); hold on; plot(score(:,1)/max(score(:,1)));
         legend('speed','comp 1')
         set(gcf, 'PaperPositionMode', 'auto');     print('-dpsc',psfilename,'-append');
         
+        figure
+        plot(sp,score(:,1),'.')
+        xlabel('speed'); ylabel('score1')
         sp(isnan(sp))=0;
         figure
-        plot(-60:0.1:60,xcorr(sp,score(:,1),600,'coeff'));
+        plot(-120:0.1:120,xcorr(sp,score(:,1),1200,'coeff'));
         title('sp comp1 xcorr'); xlabel('secs'); ylim([-0.2 0.2])
         set(gcf, 'PaperPositionMode', 'auto');     print('-dpsc',psfilename,'-append');
       
@@ -179,7 +195,7 @@ for f= 1:length(use)
 end
 
 decorrSig = mean(decorrSigAll,3);
-cc_imAll = mean(cc_imAll,5);
+cc_im = mean(cc_imAll,5);
 traceCorr = nanmeanMW(traceCorrAll,3);
 
 figure

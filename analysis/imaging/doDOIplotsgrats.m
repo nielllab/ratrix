@@ -1,6 +1,8 @@
 scsz = get( 0, 'Screensize' ); %get screensize for plots
 %screensize = get( groot, 'Screensize' ); %get screensize for plots in R2014b and later
 
+%second check
+
 load mapOverlay
 
 % %%%% tf tuning plots

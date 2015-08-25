@@ -13,7 +13,7 @@ datafiles = {'SalinePreGratings', ...  %1
             'LisuridePostGratings'};    %6
 
 %CHOOSE CONDITIONS TO COMPARE (SEE DATAFILES BELOW)
-conds = [2 4 6];
+conds = [1 2];
 
 %CHOOSE FILE WITH POINTS FROM analyzeWidefieldDOI & SET NAMES
 load('SalinePoints'); %pre-made points for visual areas used in original analysis
@@ -30,33 +30,29 @@ psfilename = 'C:\tempPS.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
 %preallocate data arrays
-allshiftData = zeros(260,260,7,length(datafiles));
-allcycavg = zeros(260,260,25,length(datafiles));
+% allshiftData = zeros(260,260,7,length(datafiles));
+allcycavg = zeros(260,260,50,length(datafiles));
 allmnfit = zeros(260,260,17,length(datafiles));
-sdshiftData = zeros(260,260,7,length(datafiles));
-sdcycavg = zeros(260,260,25,length(datafiles));
-sdmnfit = zeros(260,260,17,length(datafiles));
-
-% cycle = {}; %structure for all cycle data
-% tuning = {}; %structure for all fit data
-
+% sdshiftData = zeros(260,260,7,length(datafiles));
+% sdcycavg = zeros(260,260,50,length(datafiles));
+% sdmnfit = zeros(260,260,17,length(datafiles));
 
 for i= 1:length(datafiles) %collates all conditions (numbered above)
-    load(datafiles{i},'shiftData','mnfit','cycavg');%load data
     
-    mnshiftData = mean(shiftData,4);% get means across animals
+    load(datafiles{i},'mnfit','cycavg');%load data
+    
+%     mnshiftData = mean(shiftData,4);% get means across animals
     mncycavg = mean(cycavg,4);
     
-    allshiftData(:,:,:,i) = mnshiftData; %create arrays with all group means
+%     allshiftData(:,:,:,i) = mnshiftData; %create arrays with all group means
     allcycavg(:,:,:,i) = mncycavg;
     allmnfit(:,:,:,i) = mnfit;
     
     
-    sdshiftData(:,:,:,i) = std(shiftdata,4); %create arrays with all group SDs
-    sdcycavg(:,:,:,i) = std(cycavg,4);
-    sdmnfit(:,:,:,i) = std(fit,4);
-    
-%     cycle.{i}(:,:,:) = cycavg
+%     sdshiftData(:,:,:,i) = std(shiftdata,4); %create arrays with all group SDs
+%     sdcycavg(:,:,:,i) = nanstd(cycavg);
+%     sdmnfit(:,:,:,i) = nanstd(fit,4);
+%     
 end
       
 doDOIplotsgrats;
@@ -65,7 +61,7 @@ doDOIplotsgrats;
 %save data
 [f p] = uiputfile('*.mat','save data?');
 if f~=0
-    save(fullfile(p,f),'allcycavg','allmnfit','allshiftData','areanames','conds','datafiles','range','scscale');
+    save(fullfile(p,f),'allcycavg','allmnfit','areanames','conds','datafiles','range','scscale');
 end
 
 %save PDF

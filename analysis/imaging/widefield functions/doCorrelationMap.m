@@ -195,7 +195,7 @@ for f= 1:length(use)
 end
 
 decorrSig = mean(decorrSigAll,3);
-cc_im = mean(cc_imAll,5);
+cc_imMn = mean(cc_imAll,5);
 traceCorr = nanmeanMW(traceCorrAll,3);
 
 figure
@@ -205,7 +205,7 @@ hold on; plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
 axis equal;axis off;
 for i = 1:7
     subplot(2,4,i+1)
-    imagesc(squeeze(cc_im(x(i),y(i),:,:))); hold on
+    imagesc(squeeze(cc_imMn(x(i),y(i),:,:))); hold on
     plot(y(i),x(i),'g*');
     hold on; plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2)
     axis equal;
@@ -252,5 +252,5 @@ delete(psfilename);
 
 [f p ] = uiputfile('*.mat','save data?')
 if f~=0
-    save(fullfile(p,f),'decorrSigAll','traceCorrAll','cc_imAll')
+    save(fullfile(p,f),'decorrSigAll','traceCorrAll','cc_imAll','cc_imMn')
 end

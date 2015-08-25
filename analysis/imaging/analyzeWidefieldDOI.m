@@ -34,8 +34,8 @@ clear map merge
 
 x0 =0; y0=0; sz = 128;
 doTopography;
-doCorrelationMap
-%doGratingsNew;
+% doCorrelationMap
+doGratingsNew;
 % %%% analyze looming
 % for f = 1:length(use)
 %     loom_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'loom');

@@ -169,11 +169,34 @@ if ~justDoSetup
         
         s=getSubjectFromID(rx,subjectID);
         
+        try
+            % any advantage to doing this in ...\ratrix\classes\@station\doTrials.m ?
+            
+            tic
+            ssd = getSpreadsheetData; % takes 5 sec
+            [~,idx] = ismember(subjectID,{ssd.subject});
+            if ~isscalar(idx)
+                subjectID
+                {ssd.subject}
+                error('no unique matching subject id')
+            end
+            [s, rx] = setReinforcementParam(s,'rewardULorMS',ssd(idx).reward ,'all',rx,'','spreadsheet');
+            [s, rx] = setReinforcementParam(s,'msPenalty'   ,ssd(idx).timeout,'all',rx,'','spreadsheet');
+            toc
+            
+            sca
+            keyboard
+        catch ex
+            warning('updating reinforcement params failed, continuing with values stored in ratrix db')
+            getReport(ex)            
+        end
+        
         [rx ids] = emptyAllBoxes(rx,'starting trials in standAloneRun',auth);
         boxIDs=getBoxIDs(rx);
         rx=putSubjectInBox(rx,subjectID,boxIDs(1),auth);
         b=getBoxIDForSubjectID(rx,getID(s));
         st=getStationsForBoxID(rx,b);
+
         %struct(st(1))
         rx=doTrials(st(1),rx,0,[],~recordInOracle); %0 means keep running trials til something stops you (quit, error, etc)
         [rx ids] = emptyAllBoxes(rx,'done running trials in standAloneRun',auth);

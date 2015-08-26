@@ -3,7 +3,7 @@ function [ph amp alldata fit cycavg tuning sftcourse] = analyzeGratingPatch(dfof
 %close all
 sf=0; tf=0; isi=0; duration=0;
 
-    load(moviename)
+load(moviename)
 
 imagerate=10;
 
@@ -120,16 +120,19 @@ else
 end
 
 if bkgrat
-    blank = find(xpos==xrange(end));
-    patch = find(xpos~=xrange(end));
-     blankstart = floor((blank-1)*(duration+isi)*imagerate + isi*imagerate -1);
-     patchstart = floor((patch-1)*(duration+isi)*imagerate +isi*imagerate-1);
+   for i = 1:2
+       blank = find(xpos==xrange(end) & sf == sfrange(i) );
+    patch = find(xpos==xrange(2) & sf == sfrange(i));
+    blankstart = floor((blank-1)*(duration+isi)*imagerate + isi*imagerate -1);
+    patchstart = floor((patch-1)*(duration+isi)*imagerate +isi*imagerate-1);
     for f = 1:acqdurframes
         blankcyc(:,:,f) = mean(img(:,:,blankstart+f),3);
         patchcyc(:,:,f) =  mean(img(:,:,patchstart+f),3);
     end
-    cycavg(:,:,1:acqdurframes) = blankcyc;
-    cycavg(:,:,(acqdurframes+1):2*acqdurframes) = patchcyc;
+    cycavg(:,:,(1:acqdurframes)+ (i-1)*2*acqdurframes) = blankcyc;
+    cycavg(:,:,((acqdurframes+1):2*acqdurframes) + (i-1)*2*acqdurframes) = patchcyc;
+
+   end
 end
 
 
@@ -168,7 +171,7 @@ end
 
 %%% plot response based on previous trial's response
 %%% this is a check for whether return to baseline is an issue
-figure 
+figure
 plot(avgcondtrialcourse(:,1)-avgcondtrialcourse(:,10),avgcondtrialcourse(:,15)-avgcondtrialcourse(:,10),'o');
 xlabel('pre dfof'); ylabel('post dfof')
 
@@ -234,7 +237,7 @@ end
 %     subplot(1,2,2);
 %     imagesc(squeeze(tuning(x,y,:,:,2,1)),[-0.025 0.025]);
 % end
-% 
+%
 % figure
 % for i = 1:length(sfrange)
 %     for j=1:length(tfrange)
@@ -246,7 +249,7 @@ end
 %         set(gca,'LooseInset',get(gca,'TightInset'))
 %     end
 % end
-% 
+%
 
 %%% plot sf and tf responses
 figure

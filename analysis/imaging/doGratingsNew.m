@@ -36,7 +36,7 @@ for rep=[1] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
             end
             dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
             [ph amp data ft cyc] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
-                'C:\background3x2y2sf_021215_16minBlank',20:22,14:16,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename);
+                'C:\background3x2y2sf_021215_16minBlank',24:25,14:16,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename);
         elseif rep==2
             load ([pathname files(use(f)).grating3x2y6sf4tf ], 'dfof_bg','sp','stimRec')
             zoom = 260/size(dfof_bg,1);
@@ -357,7 +357,7 @@ for rep=[1] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
          set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfilename,'-append');
         
-        
+        for sf = 1:2
         figure
         labels = {'blank','blank+patch','patch','blank decon','b+p decon','patch decon' }
         for s = 1:6
@@ -365,11 +365,11 @@ for rep=[1] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
         hold on
         for i = 1:7
             if s==1 | s==4
-                d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,1:25,:),4),2),1));
+                d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,(1:25)+(sf-1)*50,:),4),2),1));
             elseif s==2 | s==5
-                d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,26:50,:),4),2),1));
+                d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,(26:50)+(sf-1)*50,:),4),2),1));
             elseif s==3 | s==6
-                            d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,26:50,:)-cycavg(x(i)+range,y(i)+range,1:25,:),4),2),1));
+                            d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,(26:50)+(sf-1)*50,:)-cycavg(x(i)+range,y(i)+range,(1:25)+(sf-1)*50,:),4),2),1));
             end
             if s>=4
                 repd = repmat(d,[10 1]);
@@ -378,23 +378,27 @@ for rep=[1] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
                d = dconvd(6*length(d):(7*length(d)-1));
             end
            % plot((circshift(d',0)-min(d))/(max(d)-min(d)));
-            plot((circshift(d',0)-min(d)))%,col(i));
+            plot(circshift(d',0)-min(d),col(i));
         end
         plot([11 11],[0 0.2],':')
         xlim([1 25]); 
         if s<=3 
-            ylim([0 0.07]);
+            ylim([0 0.1]);
         else
-            ylim([0 0.11])
+            ylim([0 0.15])
         end
-        title(labels{s});
-        xlabel('frames')
+       if s<6
+           title(labels{s});
+       else
+           title(sprintf('sf %d',sf));
+       end
+       xlabel('frames')
         end
              
         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfilename,'-append');
         
-       
+        end %%sf
         
         %%% bkgrat
     end

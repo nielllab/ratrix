@@ -75,6 +75,13 @@ for i = 1:length(ifs)
             else
                 r(j).(ifs{i}) = r(j-1).(ifs{i});
             end
+        else
+            val = str2double(r(j).(ifs{i}));
+            if isnan(val)
+                r(j).(ifs{i})
+                error('bad spreadsheet entry')
+            end
+            r(j).(ifs{i}) = val;
         end
     end
 end

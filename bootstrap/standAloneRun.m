@@ -175,7 +175,7 @@ if ~justDoSetup
             tic
             ssd = getSpreadsheetData; % takes 5 sec
             [~,idx] = ismember(subjectID,{ssd.subject});
-            if ~isscalar(idx)
+            if ~isscalar(idx) || idx == 0
                 subjectID
                 {ssd.subject}
                 error('no unique matching subject id')
@@ -183,12 +183,12 @@ if ~justDoSetup
             [s, rx] = setReinforcementParam(s,'rewardULorMS',ssd(idx).reward ,'all',rx,'','spreadsheet');
             [s, rx] = setReinforcementParam(s,'msPenalty'   ,ssd(idx).timeout,'all',rx,'','spreadsheet');
             toc
-            
-            sca
-            keyboard
         catch ex
             warning('updating reinforcement params failed, continuing with values stored in ratrix db')
             getReport(ex)            
+            
+            sca
+            keyboard
         end
         
         [rx ids] = emptyAllBoxes(rx,'starting trials in standAloneRun',auth);

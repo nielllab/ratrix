@@ -1,4 +1,4 @@
-%This file uses mnfit and cycavg data to compare widefield data across
+%This file uses mnfit and cycavg from 4X3Y analysis output to compare widefield data across
 %conditions
 clear all
 close all
@@ -13,7 +13,7 @@ datafiles = {'SalinePreDataGood', ...  %1
             'LisuridePostDataGood'};    %6
 
 %CHOOSE CONDITIONS TO COMPARE (SEE DATAFILES BELOW)
-conds = [5 6];
+conds = [2 4 6];
 
 %CHOOSE FILE WITH POINTS FROM analyzeWidefieldDOI & SET NAMES
 load('SalinePoints'); %pre-made points for visual areas used in original analysis
@@ -32,12 +32,17 @@ if exist(psfilename,'file')==2;delete(psfilename);end
 %preallocate here
 allmnfit = zeros(260,260,18,length(datafiles));
 allcycavg = zeros(260,260,15,length(datafiles));
+sdmnfit = zeros(260,260,18,length(datafiles));
+sdcycavg = zeros(260,260,15,length(datafiles));
 
 for i= 1:length(datafiles) %collates all conditions (numbered above)
-    load(datafiles{i},'mnfit','cycavg');
+    load(datafiles{i},'fit','mnfit','cycavg');
     allmnfit(:,:,:,i) = mnfit; %%%x,y,sf,tf
     mncycavg = mean(cycavg,4);
     allcycavg(:,:,:,i) = mncycavg;  %%%x,y,t,area
+    
+    sdcycavg(:,:,:,i) = std(cycavg,[],4)/sqrt(size(cycavg,4));
+    sdmnfit(:,:,:,i) = std(fit,[],4)/sqrt(size(fit,4));
 end
       
 doDOIplots;

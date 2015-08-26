@@ -378,7 +378,7 @@ for rep=[1] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
                d = dconvd(6*length(d):(7*length(d)-1));
             end
            % plot((circshift(d',0)-min(d))/(max(d)-min(d)));
-            plot((circshift(d',0)-min(d)),col(i));
+            plot((circshift(d',0)-min(d)))%,col(i));
         end
         plot([11 11],[0 0.2],':')
         xlim([1 25]); 

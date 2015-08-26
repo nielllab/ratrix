@@ -13,7 +13,7 @@ datafiles = {'SalinePreGratings', ...  %1
             'LisuridePostGratings'};    %6
 
 %CHOOSE CONDITIONS TO COMPARE (SEE DATAFILES BELOW)
-conds = [1 2];
+conds = [2 4 6];
 
 %CHOOSE FILE WITH POINTS FROM analyzeWidefieldDOI & SET NAMES
 load('SalinePoints'); %pre-made points for visual areas used in original analysis
@@ -34,12 +34,12 @@ if exist(psfilename,'file')==2;delete(psfilename);end
 allcycavg = zeros(260,260,50,length(datafiles));
 allmnfit = zeros(260,260,17,length(datafiles));
 % sdshiftData = zeros(260,260,7,length(datafiles));
-% sdcycavg = zeros(260,260,50,length(datafiles));
-% sdmnfit = zeros(260,260,17,length(datafiles));
+sdcycavg = zeros(260,260,50,length(datafiles));
+sdmnfit = zeros(260,260,17,length(datafiles));
 
 for i= 1:length(datafiles) %collates all conditions (numbered above)
     
-    load(datafiles{i},'mnfit','cycavg');%load data
+    load(datafiles{i},'fit','mnfit','cycavg');%load data
     
 %     mnshiftData = mean(shiftData,4);% get means across animals
     mncycavg = mean(cycavg,4);
@@ -49,9 +49,9 @@ for i= 1:length(datafiles) %collates all conditions (numbered above)
     allmnfit(:,:,:,i) = mnfit;
     
     
-%     sdshiftData(:,:,:,i) = std(shiftdata,4); %create arrays with all group SDs
-%     sdcycavg(:,:,:,i) = nanstd(cycavg);
-%     sdmnfit(:,:,:,i) = nanstd(fit,4);
+  %  sdshiftData(:,:,:,i) = std(shiftdata,[],4); %create arrays with all group SDs
+    sdcycavg(:,:,:,i) = nanstd(cycavg,[],4)/sqrt(size(cycavg,4));
+    sdmnfit(:,:,:,i) = nanstd(fit,[],4)/sqrt(size(cycavg,4));
 %     
 end
       

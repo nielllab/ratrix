@@ -41,13 +41,13 @@ switch subjIDs{1}
     
     case 'g62q1lt' % Started 7/14/15 %%switched gts 8/12/15
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 59;
+       rewardSizeULorMS        = 43;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
     
     case 'pvchr9tt' % Started 7/14/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 59;
+       rewardSizeULorMS        = 43;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
     

@@ -10,7 +10,11 @@ close all
 psfilename = 'C:\tempPS.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
+<<<<<<< HEAD
    alluse = find(strcmp({files.inject},'doi')  & strcmp({files.timing},'pre') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
+=======
+   alluse = find(strcmp({files.inject},'saline')  & strcmp({files.timing},'pre') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
+>>>>>>> origin/trunk
   
 length(alluse)
 %alluse=alluse(1:5)

@@ -51,7 +51,6 @@ for area = 1:7
     title(sprintf(cell2mat(areanames(area))));
     axis([1 2 0 1])
 end
-
    
 %%%% y tuning plots
 figure('Position', [scsz(3)/2 scsz(2)/2 scsz(3)/scscale scsz(4)/scscale]);
@@ -87,7 +86,7 @@ for area = 1:7
     axis([1 3 0 max(max(max(allmnfit(:,:,1:3))))])
 end
 
-
+%cycle average for low spatial frequency stim
 labels = {'blank','blank+patch','patch','blank decon','b+p decon','patch decon' }
 for area = 1:length(areanames)
     figure('Position', [scsz(3)/4 scsz(4)/2-scsz(4)/10 scsz(3)/scscale scsz(4)/scscale]);
@@ -123,16 +122,61 @@ for area = 1:length(areanames)
         plot([11 11],[0 0.2],':')
         xlim([1 25]); 
         if s<=3 
-            ylim([0 0.1]);
+            ylim([0 0.15]);
         else
-            ylim([0 0.15])
+            ylim([0 0.2])
         end
-        title(sprintf('%s %s',areanames{area},labels{s}));
+        title(sprintf('low sf %s %s',areanames{area},labels{s}));
         xlabel('frames')
     end
     legend(datafiles(conds),'location','northeast')
 end
-             
+
+%cycle average for high sf
+labels = {'blank','blank+patch','patch','blank decon','b+p decon','patch decon' }
+for area = 1:length(areanames)
+    figure('Position', [scsz(3)/4 scsz(4)/2-scsz(4)/10 scsz(3)/scscale scsz(4)/scscale]);
+    for s = 1:6
+        subplot(2,3,s);        
+        hold on
+        if s==1 | s==4
+            d=squeeze(mean(mean(allcycavg(x(area)+range,y(area)+range,51:75,conds),2),1));
+            dsd=squeeze(mean(mean(sdcycavg(x(area)+range,y(area)+range,51:75,conds),2),1));
+        elseif s==2 | s==5
+            d=squeeze(mean(mean(allcycavg(x(area)+range,y(area)+range,76:100,conds),2),1));
+            dsd=squeeze(mean(mean(sdcycavg(x(area)+range,y(area)+range,76:100,conds),2),1))
+        elseif s==3 | s==6
+            d=squeeze(mean(mean(allcycavg(x(area)+range,y(area)+range,76:100,conds)-allcycavg(x(area)+range,y(area)+range,51:75,conds),2),1));
+            dsd=squeeze(mean(mean(sdcycavg(x(area)+range,y(area)+range,76:100,conds)-sdcycavg(x(area)+range,y(area)+range,51:75,conds),2),1));
+        end
+        if s>=4
+            repd = repmat(d,[10 1]);
+            for i = 1:length(conds)
+                dconvd(i,:) = deconvg6s(repd(:,i)'+0.5,0.1);
+            end
+            dcon = dconvd(:,6*length(d):(7*length(d)-1));
+            for i = 1:length(conds)
+                dcon(i,:) = (dcon(i,:) - min(dcon(i,:)));
+            end
+            plot(dcon');
+        else
+            for i = 1:length(conds)
+                d(:,i) = (d(:,i) - min(d(:,i)));
+            end
+            mseb(1:25,d',dsd',[],1);
+        end
+        plot([11 11],[0 0.2],':')
+        xlim([1 25]); 
+        if s<=3 
+            ylim([0 0.15]);
+        else
+            ylim([0 0.2])
+        end
+        title(sprintf('high sf %s %s',areanames{area},labels{s}));
+        xlabel('frames')
+    end
+    legend(datafiles(conds),'location','northeast')
+end
 
 % %circleshifted non-normalized cycle average
 % figure('Position', [scsz(3)/4 scsz(4)/2-scsz(4)/10 scsz(3)/scscale scsz(4)/scscale]);%displays at top of screen
@@ -333,6 +377,7 @@ end
 set(gcf, 'PaperPositionMode', 'auto');
 print('-dpsc',psfilename,'-append');
 
+%cycle average for low sf
 labels = {'blank','blank+patch','patch','blank decon','b+p decon','patch decon' }
 for area = 1:length(areanames)
     figure('visible','off');
@@ -372,7 +417,7 @@ for area = 1:length(areanames)
         else
             ylim([0 0.15])
         end
-        title(sprintf('%s %s',areanames{area},labels{s}));
+        title(sprintf('low sf %s %s',areanames{area},labels{s}),'fontsize',8);
         xlabel('frames')
     end
     legend(datafiles(conds),'location','northeast')
@@ -380,6 +425,53 @@ for area = 1:length(areanames)
     print('-dpsc',psfilename,'-append');
 end
 
+%cycle average for high sf
+labels = {'blank','blank+patch','patch','blank decon','b+p decon','patch decon' }
+for area = 1:length(areanames)
+    figure('visible','off');
+    for s = 1:6
+        subplot(2,3,s);        
+        hold on
+        if s==1 | s==4
+            d=squeeze(mean(mean(allcycavg(x(area)+range,y(area)+range,51:75,conds),2),1));
+            dsd=squeeze(mean(mean(sdcycavg(x(area)+range,y(area)+range,51:75,conds),2),1));
+        elseif s==2 | s==5
+            d=squeeze(mean(mean(allcycavg(x(area)+range,y(area)+range,76:100,conds),2),1));
+            dsd=squeeze(mean(mean(sdcycavg(x(area)+range,y(area)+range,76:100,conds),2),1))
+        elseif s==3 | s==6
+            d=squeeze(mean(mean(allcycavg(x(area)+range,y(area)+range,76:100,conds)-allcycavg(x(area)+range,y(area)+range,51:75,conds),2),1));
+            dsd=squeeze(mean(mean(sdcycavg(x(area)+range,y(area)+range,76:100,conds)-sdcycavg(x(area)+range,y(area)+range,51:75,conds),2),1));
+        end
+        if s>=4
+            repd = repmat(d,[10 1]);
+            for i = 1:length(conds)
+                dconvd(i,:) = deconvg6s(repd(:,i)'+0.5,0.1);
+            end
+            dcon = dconvd(:,6*length(d):(7*length(d)-1));
+            for i = 1:length(conds)
+                dcon(i,:) = (dcon(i,:) - min(dcon(i,:)));
+            end
+            plot(dcon');
+        else
+            for i = 1:length(conds)
+                d(:,i) = (d(:,i) - min(d(:,i)));
+            end
+            mseb(1:25,d',dsd',[],1);
+        end
+        plot([11 11],[0 0.2],':')
+        xlim([1 25]); 
+        if s<=3 
+            ylim([0 0.15]);
+        else
+            ylim([0 0.2])
+        end
+        title(sprintf('high sf %s %s',areanames{area},labels{s}),'fontsize',8);
+        xlabel('frames')
+    end
+    legend(datafiles(conds),'location','northeast')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfilename,'-append');
+end
 
 % % %circleshifted non-normalized cycle average
 % % figure('visible','off');

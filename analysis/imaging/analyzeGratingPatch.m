@@ -1,6 +1,27 @@
-function [ph amp alldata fit cycavg tuning sftcourse] = analyzeGratingPatch(dfof_bg,sp,moviename,useframes,base,xpts,ypts, label,stimRec,psfilename);
+function [ph amp alldata fit cycavg tuning sftcourse] = analyzeGratingPatch(dfof_bg,sp,moviename,useframes,base,xpts,ypts, label,stimRec,psfilename,frameT);
 %load(fname,'dfof_bg');
 %close all
+
+
+timingfig = figure;
+subplot(2,2,1)
+plot(diff(stimRec.ts));
+xlabel('frame')
+title('stim frames')
+
+subplot(2,2,2)
+plot(diff(frameT));
+xlabel('frame')
+title('acq frames')
+
+subplot(2,2,3)
+plot((stimRec.ts-stimRec.ts(1))/60,(stimRec.ts' - stimRec.ts(1)) - (1/60)*(0:length(stimRec.ts)-1));
+hold on
+plot((frameT-frameT(1))/60,(frameT' - frameT(1)) - 0.1*(0:length(frameT)-1),'g');
+legend('stim','acq')
+ylabel('slippage (secs)')
+xlabel('mins')
+
 sf=0; tf=0; isi=0; duration=0;
 
 load(moviename)
@@ -25,7 +46,7 @@ nx=ceil(sqrt(acqdurframes+1)); %%% how many rows in figure subplot
 figure
 map=0;
 for f=1:acqdurframes
-    cycavg(:,:,f) = mean(img(:,:,f:acqdurframes:end),3);
+    cycavg(:,:,f) = mean(img(:,:,(f+trials*acqdurframes/2):acqdurframes:end),3);
     subplot(nx,nx,f)
     imagesc(squeeze(cycavg(:,:,f)),[-0.02 0.02])
     axis off
@@ -43,8 +64,10 @@ set(gca,'LooseInset',get(gca,'TightInset'))
 %%% calculate phase of cycle response
 %%% good for detectime framedrops or other problems
 tcourse = squeeze(mean(mean(img,2),1));
+
 fourier = tcourse'.*exp((1:length(tcourse))*2*pi*sqrt(-1)/(10*duration + 10*isi));
-figure
+figure(timingfig)
+subplot(2,2,4)
 plot((1:length(tcourse))/600,angle(conv(fourier,ones(1,600),'same')));
 ylim([-pi pi])
 ylabel('phase'); xlabel('mins')

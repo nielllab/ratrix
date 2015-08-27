@@ -11,7 +11,6 @@ psfilename = 'C:\tempPS.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
    alluse = find(strcmp({files.inject},'lisuride')  & strcmp({files.timing},'post') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-
   
 length(alluse)
 %alluse=alluse(1:5)

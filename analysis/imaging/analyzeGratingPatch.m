@@ -3,7 +3,7 @@ function [ph amp alldata fit cycavg tuning sftcourse] = analyzeGratingPatch(dfof
 %close all
 
 
-figure
+timingfig = figure;
 subplot(2,2,1)
 plot(diff(stimRec.ts));
 xlabel('frame')
@@ -21,13 +21,6 @@ plot((frameT-frameT(1))/60,(frameT' - frameT(1)) - 0.1*(0:length(frameT)-1),'g')
 legend('stim','acq')
 ylabel('slippage (secs)')
 xlabel('mins')
-
-
-
-if exist('psfilename','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfilename,'-append');
-end
 
 sf=0; tf=0; isi=0; duration=0;
 
@@ -71,11 +64,10 @@ set(gca,'LooseInset',get(gca,'TightInset'))
 %%% calculate phase of cycle response
 %%% good for detectime framedrops or other problems
 tcourse = squeeze(mean(mean(img,2),1));
-figure
-plot(tcourse)
 
 fourier = tcourse'.*exp((1:length(tcourse))*2*pi*sqrt(-1)/(10*duration + 10*isi));
-figure
+figure(timingfig)
+subplot(2,2,4)
 plot((1:length(tcourse))/600,angle(conv(fourier,ones(1,600),'same')));
 ylim([-pi pi])
 ylabel('phase'); xlabel('mins')

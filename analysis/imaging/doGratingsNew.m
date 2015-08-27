@@ -29,14 +29,14 @@ for rep=[1] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
         
         
         if rep ==1
-            load ([pathname files(use(f)).background3x2yBlank ], 'dfof_bg','sp','stimRec')
+            load ([pathname files(use(f)).background3x2yBlank ], 'dfof_bg','sp','stimRec','frameT')
             zoom = 260/size(dfof_bg,1);
             if ~exist('sp','var')
                 sp =0;stimRec=[];
             end
             dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
             [ph amp data ft cyc] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
-                'C:\background3x2y2sf_021215_16minBlank',24:25,14:16,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename);
+                'C:\background3x2y2sf_021215_16minBlank',20:22,14:16,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
         elseif rep==2
             load ([pathname files(use(f)).grating3x2y6sf4tf ], 'dfof_bg','sp','stimRec')
             zoom = 260/size(dfof_bg,1);

@@ -34,6 +34,9 @@ allmnfit = zeros(260,260,17,length(datafiles));
 sdcycavg = zeros(260,260,100,length(datafiles));
 sdmnfit = zeros(260,260,17,length(datafiles));
 
+groupcycavg = zeros(260,260,100,10,length(datafiles)); %make for up to 10 animals per condition
+groupfit = zeros(260,260,17,10,length(datafiles));
+
 tic
 for i= 1:length(datafiles) %collates all conditions (numbered above)
     
@@ -50,6 +53,9 @@ for i= 1:length(datafiles) %collates all conditions (numbered above)
   %  sdshiftData(:,:,:,i) = std(shiftdata,[],4); %create arrays with all group SDs
     sdcycavg(:,:,:,i) = nanstd(cycavg,[],4)/sqrt(size(cycavg,4));
     sdmnfit(:,:,:,i) = nanstd(fit,[],4)/sqrt(size(cycavg,4));
+    
+    groupcycavg(:,:,:,:,i) = cycavg;
+    groupfit(:,:,:,:,i) = fit;
 %     
 end
 toc

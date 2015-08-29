@@ -158,6 +158,7 @@ for i = 1:length(datafiles)
     end
 end
 
+%get peak values for cycle averages
 c1 = 1;
 for i = 1:length(lowsfbk)/25
         peaklowsfbk(i,1) = max(lowsfbk(c1:c1+24,1));
@@ -172,6 +173,79 @@ for i = 1:length(lowsfbk)/25
         peaklowsfbk(i,10) = lowsfbk(c1,10);
         c1 = c1 + 25;
 end
+
+c1 = 1;
+for i = 1:length(lowsfbk)/25
+        peaklowsfbkp(i,1) = max(lowsfbkp(c1:c1+24,1));
+        peaklowsfbkp(i,2) = max(lowsfbkp(c1:c1+24,2));
+        peaklowsfbkp(i,3) = max(lowsfbkp(c1:c1+24,3));
+        peaklowsfbkp(i,4) = max(lowsfbkp(c1:c1+24,4));
+        peaklowsfbkp(i,5) = max(lowsfbkp(c1:c1+24,5));
+        peaklowsfbkp(i,6) = max(lowsfbkp(c1:c1+24,6));
+        peaklowsfbkp(i,7) = max(lowsfbkp(c1:c1+24,7));
+        peaklowsfbkp(i,8) = lowsfbkp(c1,8);
+        peaklowsfbkp(i,9) = lowsfbkp(c1,9);
+        peaklowsfbkp(i,10) = lowsfbkp(c1,10);
+        c1 = c1 + 25;
+end
+c1 = 1;
+for i = 1:length(lowsfbk)/25
+        peaklowsfp(i,1) = max(lowsfp(c1:c1+24,1));
+        peaklowsfp(i,2) = max(lowsfp(c1:c1+24,2));
+        peaklowsfp(i,3) = max(lowsfp(c1:c1+24,3));
+        peaklowsfp(i,4) = max(lowsfp(c1:c1+24,4));
+        peaklowsfp(i,5) = max(lowsfp(c1:c1+24,5));
+        peaklowsfp(i,6) = max(lowsfp(c1:c1+24,6));
+        peaklowsfp(i,7) = max(lowsfp(c1:c1+24,7));
+        peaklowsfp(i,8) = lowsfp(c1,8);
+        peaklowsfp(i,9) = lowsfp(c1,9);
+        peaklowsfp(i,10) = lowsfp(c1,10);
+        c1 = c1 + 25;
+end
+c1 = 1;
+for i = 1:length(highsfbk)/25
+        peakhighsfbk(i,1) = max(highsfbk(c1:c1+24,1));
+        peakhighsfbk(i,2) = max(highsfbk(c1:c1+24,2));
+        peakhighsfbk(i,3) = max(highsfbk(c1:c1+24,3));
+        peakhighsfbk(i,4) = max(highsfbk(c1:c1+24,4));
+        peakhighsfbk(i,5) = max(highsfbk(c1:c1+24,5));
+        peakhighsfbk(i,6) = max(highsfbk(c1:c1+24,6));
+        peakhighsfbk(i,7) = max(highsfbk(c1:c1+24,7));
+        peakhighsfbk(i,8) = highsfbk(c1,8);
+        peakhighsfbk(i,9) = highsfbk(c1,9);
+        peakhighsfbk(i,10) = highsfbk(c1,10);
+        c1 = c1 + 25;
+end
+
+c1 = 1;
+for i = 1:length(highsfbk)/25
+        peakhighsfbkp(i,1) = max(highsfbkp(c1:c1+24,1));
+        peakhighsfbkp(i,2) = max(highsfbkp(c1:c1+24,2));
+        peakhighsfbkp(i,3) = max(highsfbkp(c1:c1+24,3));
+        peakhighsfbkp(i,4) = max(highsfbkp(c1:c1+24,4));
+        peakhighsfbkp(i,5) = max(highsfbkp(c1:c1+24,5));
+        peakhighsfbkp(i,6) = max(highsfbkp(c1:c1+24,6));
+        peakhighsfbkp(i,7) = max(highsfbkp(c1:c1+24,7));
+        peakhighsfbkp(i,8) = highsfbkp(c1,8);
+        peakhighsfbkp(i,9) = highsfbkp(c1,9);
+        peakhighsfbkp(i,10) = highsfbkp(c1,10);
+        c1 = c1 + 25;
+end
+c1 = 1;
+for i = 1:length(highsfbk)/25
+        peakhighsfp(i,1) = max(highsfp(c1:c1+24,1));
+        peakhighsfp(i,2) = max(highsfp(c1:c1+24,2));
+        peakhighsfp(i,3) = max(highsfp(c1:c1+24,3));
+        peakhighsfp(i,4) = max(highsfp(c1:c1+24,4));
+        peakhighsfp(i,5) = max(highsfp(c1:c1+24,5));
+        peakhighsfp(i,6) = max(highsfp(c1:c1+24,6));
+        peakhighsfp(i,7) = max(highsfp(c1:c1+24,7));
+        peakhighsfp(i,8) = highsfp(c1,8);
+        peakhighsfp(i,9) = highsfp(c1,9);
+        peakhighsfp(i,10) = highsfp(c1,10);
+        c1 = c1 + 25;
+end
+
 
 
 dir = '\\lorentz\backup\widefield\DOI experiments\Matlab Widefield Analysis';

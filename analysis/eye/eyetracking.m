@@ -1,8 +1,10 @@
 clear all
-profile on
-
-name = '08_26_15_prelis_eye.mat' %epxeriment name
-% name = '08_26_15_postlis_eye.mat'
+close all
+% profile on
+% 
+% name = 'data' %epxeriment name
+% % name = '08_26_15_postlis_eye.mat'
+name = 'trial4';
 load(name); % should be a '*_eye.mat' file
 
 % figure
@@ -11,11 +13,11 @@ load(name); % should be a '*_eye.mat' file
 % xoff = x(1)
 % yoff = y(1)
 
-rad_range = [5 15]; % range of radii to search for
+rad_range = [20 35]; % range of radii to search for
 xoff = 0; %to center ROI
-yoff = -5; %to center ROI
-W=25; % pixel range ROI for imfindcircles
-thresh = 0.17 %pupil threshold
+yoff = 0; %to center ROI
+W=35; % pixel range ROI for imfindcircles
+thresh = 0.7; %pupil threshold
 
 data = squeeze(data); % the raw images...
 xc = size(data,2)/2 + xoff; % image center
@@ -28,9 +30,9 @@ for i = 1:size(data,3);
 end
 
 tic
-parfor n = 1:size(data,3)
+for n = 1:size(data,3)
     %       [center,radii,metric] = imfindcircles(squeeze(data(yc-W:yc+W,xc-W:xc+W,n)),rad_range,'Sensitivity',1);
-    [center,radii,metric] = imfindcircles(bindata(yc-W:yc+W,xc-W:xc+W,n),rad_range,'Sensitivity',1);
+    [center,radii,metric] = imfindcircles(bindata(yc-W:yc+W,xc-W:xc+W,n),rad_range,'Sensitivity',1,'ObjectPolarity','dark');
     if(isempty(center))
         centroid(n,:) = [NaN NaN]; % could not find anything...
         area(n) = NaN;
@@ -54,7 +56,7 @@ toc
 %    eye(i).Centroid(2) = xc - (xc - eye(i).Centroid(2));
 % end
 save(name, 'centroid','area', '-append'); % append the motion estimate data...
-profile viewer
+% profile viewer
 
 figure
 hold on
@@ -66,7 +68,17 @@ legend('area','x pos','ypos')
 
 % %
 figure
-for i = size(data,3)
+for i = 1:size(data,3)
+    subplot(1,2,1)
+    imshow(data(yc-W:yc+W,xc-W:xc+W,i));
+    colormap gray
+    hold on
+    circle(centroid(i,1),centroid(i,2),area(i))
+    %     viscircles([eye(i).Centroid(1) eye(i).Centroid(2)],sqrt(eye(i).Area)/pi);
+    drawnow
+    hold off
+    
+    subplot(1,2,2)
     imshow(bindata(yc-W:yc+W,xc-W:xc+W,i));
     colormap gray
     hold on
@@ -74,6 +86,7 @@ for i = size(data,3)
     %     viscircles([eye(i).Centroid(1) eye(i).Centroid(2)],sqrt(eye(i).Area)/pi);
     drawnow
     hold off
+    
 end
 
 

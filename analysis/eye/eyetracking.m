@@ -1,28 +1,31 @@
 clear all
 close all
-% profile on
-% 
-% name = 'data' %epxeriment name
-% % name = '08_26_15_postlis_eye.mat'
-name = 'trial4';
+
+%load data
+name = '08_31_15_postlis_eye';
 load(name); % should be a '*_eye.mat' file
 
-% figure
-% imshow(data(:,:,1)
-% [x y] = ginput(3)
-% xoff = x(1)
-% yoff = y(1)
-
+%set circle size and b/w threshold
 rad_range = [20 35]; % range of radii to search for
-xoff = 0; %to center ROI
-yoff = 0; %to center ROI
-W=35; % pixel range ROI for imfindcircles
 thresh = 0.7; %pupil threshold
 
+%reformat data and find center points
 data = squeeze(data); % the raw images...
-xc = size(data,2)/2 + xoff; % image center
-yc = size(data,1)/2 + yoff;
+xc = size(data,2)/2; % image center
+yc = size(data,1)/2;
 warning off;
+
+%user input to select center and right points
+figure
+imshow(data(:,:,1))
+[cent] = ginput(2);
+yoff = yc - cent(1,2);
+xoff = xc -cent(1,1);
+xc = xc - xoff;
+yc = yc - yoff;
+W = (cent(2,1) - xc);
+figure
+imshow(data(yc-W:yc+W,xc-W:xc+W));
 
 bindata = double(data); %convert from uint8 into doubles and threshold
 for i = 1:size(data,3);
@@ -44,17 +47,17 @@ for n = 1:size(data,3)
 end
 toc
 
-% figure
-% imshow(data(yc-W:yc+W,xc-W:xc+W));
-% hold on
-% circle(eye(i).Centroid(2),eye(i).Centroid(1),eye(i).Area)
-% hold off
+figure
+imshow(data(yc-W:yc+W,xc-W:xc+W));
+hold on
+circle(eye(i).Centroid(2),eye(i).Centroid(1),eye(i).Area)
+hold off
 
-% imshow(data(:,:,1))
-% for i=i:size(data,3)/100
-%    eye(i).Centroid(1) = yc - (yc - eye(i).Centroid(1));
-%    eye(i).Centroid(2) = xc - (xc - eye(i).Centroid(2));
-% end
+imshow(data(:,:,1))
+for i=i:size(data,3)/100
+   eye(i).Centroid(1) = yc - (yc - eye(i).Centroid(1));
+   eye(i).Centroid(2) = xc - (xc - eye(i).Centroid(2));
+end
 save(name, 'centroid','area', '-append'); % append the motion estimate data...
 % profile viewer
 

@@ -9,9 +9,11 @@ end
 
 %combineTiffs;
 
-doBox    = true;
+doBox    = false;
 doBall   = true;
-doPsycho = true;
+doPsycho = false;
+
+gbr = generateBlogReport; % call this asap so user can enter login/pw w/o waiting around for psycho + box
 
 if doPsycho
     path = '\\mtrix4\Users\nlab\Desktop\mouseData\CompiledTrialRecords\';
@@ -296,9 +298,12 @@ if doBall
 %             'gcam13tt'
 %             }
 %         }      
-        doWidefield('lee')
+        doWidefield('lee')           
     };
 
+   % recs = [recs ; gbr'];
+    recs = gbr';
+    
     tic
     cellfun(@(x) cellfun(@(y)plotCrossingTime(y,['\\' x{1}],force),x{2}),recs);
     toc

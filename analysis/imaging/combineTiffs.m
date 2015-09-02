@@ -676,40 +676,46 @@ recs = {
 %   }
 %   }
 % 
-%      {'g62a4tt' {
-% %       {[1 203],[],'051415 G62A4tt HvV behavior LearnDay1\g62a4tt_run1_HvV_behavior_LearnDay1', 'g62a4tt_run1_HvV_behavior_LearnDay1'}
-% %     {[204 455],[],'051615 G62A4tt HvV behavior LearnDay3\g62a4tt_run1_HvV_behavior_learnDAY3', 'g62a4tt_run1_HvV_behavior_learnDAY3'}
-% %        {[456 545],[],'051915 G62A4tt HvV behavior LearnDAY6\g62a4tt_run1_HvV_behavior_learnDay6', 'g62a4tt_run1_HvV_behavior_learnDay6'}
-% %        {[546 757],[],'052215 G62A4tt HvV behavior LearnDAY9\g62a4tt_run1_HvV_behavior_LearnDAY9', 'g62a4tt_run1_HvV_behavior_LearnDAY9'}
-% %         {[758 990],[],'052515 G62A4tt HvV behavior LearnDAY12\g62a4tt_run1_HvV_behavior_LearnDay12', 'g62a4tt_run1_HvV_behavior_LearnDay12'}
-% %    {[991 1247],[],'052815 G62A4tt HvV Behavior LearnDAY15\g62a4tt_run1_HvV_behavior_LearnDAY15', 'g62a4tt_run1_HvV_behavior_LearnDAY15'}
-% %    {[1248 1595],[],'053115 G62A4tt HvV behavior LearnDAY18\g62a5tt_run1_HvV_behavior_learnDAY18', 'g62a5tt_run1_HvV_behavior_learnDAY18'}
-% %    {[1596 1916],[],'060315 G62A4tt HvV behavior LearnDAY21\g62a4tt_run1_HvV_behavior_learnDAY21', 'g62a4tt_run1_HvV_behavior_learnDAY21'}
-% %    {[2059 2315],[],'060615 g62a4TT HvV behavior LearnDAY24\g62a4tt_run1_HvV_behavior_learnDAY24', 'g62a4tt_run1_HvV_behavior_learnDAY24'}
-% %     {[2335 2512],[],'060915 G62A4tt HvV behavior LearnDAy27\g62a4tt_run1_HvV_behavior_LearnDAY27', 'g62a4tt_run1_HvV_behavior_LearnDAY27'}
-% %      {[2513 2754],[],'061215 G62A4tt HvV behavior LearnDAY30\g62a4tt_run1_HvV_behavior_LearnDAY30', 'g62a4tt_run1_HvV_behavior_LearnDAY30'}
-% %      {[2755 2980],[],'061515 G62A4tt HvV behavior LearnDAY33\g62a4tt_run1_HvV_behavior_learnDay33', 'g62a4tt_run1_HvV_behavior_learnDay33'}
-%     
-%   }
-%   }
+     {'g62a4tt' {
+%       {[1 203],[],'051415 G62A4tt HvV behavior LearnDay1\g62a4tt_run1_HvV_behavior_LearnDay1', 'g62a4tt_run1_HvV_behavior_LearnDay1'}
+%     {[204 455],[],'051615 G62A4tt HvV behavior LearnDay3\g62a4tt_run1_HvV_behavior_learnDAY3', 'g62a4tt_run1_HvV_behavior_learnDAY3'}
+%        {[456 545],[],'051915 G62A4tt HvV behavior LearnDAY6\g62a4tt_run1_HvV_behavior_learnDay6', 'g62a4tt_run1_HvV_behavior_learnDay6'}
+%        {[546 757],[],'052215 G62A4tt HvV behavior LearnDAY9\g62a4tt_run1_HvV_behavior_LearnDAY9', 'g62a4tt_run1_HvV_behavior_LearnDAY9'}
+%         {[758 990],[],'052515 G62A4tt HvV behavior LearnDAY12\g62a4tt_run1_HvV_behavior_LearnDay12', 'g62a4tt_run1_HvV_behavior_LearnDay12'}
+%    {[991 1247],[],'052815 G62A4tt HvV Behavior LearnDAY15\g62a4tt_run1_HvV_behavior_LearnDAY15', 'g62a4tt_run1_HvV_behavior_LearnDAY15'}
+%    {[1248 1595],[],'053115 G62A4tt HvV behavior LearnDAY18\g62a5tt_run1_HvV_behavior_learnDAY18', 'g62a5tt_run1_HvV_behavior_learnDAY18'}
+%    {[1596 1916],[],'060315 G62A4tt HvV behavior LearnDAY21\g62a4tt_run1_HvV_behavior_learnDAY21', 'g62a4tt_run1_HvV_behavior_learnDAY21'}
+%    {[2059 2315],[],'060615 g62a4TT HvV behavior LearnDAY24\g62a4tt_run1_HvV_behavior_learnDAY24', 'g62a4tt_run1_HvV_behavior_learnDAY24'}
+%     {[2335 2512],[],'060915 G62A4tt HvV behavior LearnDAy27\g62a4tt_run1_HvV_behavior_LearnDAY27', 'g62a4tt_run1_HvV_behavior_LearnDAY27'}
+%      {[2513 2754],[],'061215 G62A4tt HvV behavior LearnDAY30\g62a4tt_run1_HvV_behavior_LearnDAY30', 'g62a4tt_run1_HvV_behavior_LearnDAY30'}
+%      {[2755 2980],[],'061515 G62A4tt HvV behavior LearnDAY33\g62a4tt_run1_HvV_behavior_learnDay33', 'g62a4tt_run1_HvV_behavior_learnDay33'}
+      {[2981 3226],[],'061915 G62A4tt HvV behavior LearnDAY37\g62a4tt_run1_HvV_behavior_learnDAY37', 'g62a4tt_run1_HvV_behavior_learnDAY37'}
+      {[3227 3418],[],'062215 G62A4tt HvV behavior LearnDAY40\g62a4tt_run1_HvV_behavior_learnDAY40', 'g62a4tt_run1_HvV_behavior_learnDAY40'}
+%     {[ ],[],'', ''}
+%     {[ ],[],'', ''}
+
+  }
+  }
   
-%       {'g62a5nn' {
-% %    {[1 316],[],'051515 G62A5nn HvV behavior LearnDay1\g62a5nn_run1_HvV_behavior_LearnDay1', 'g62a5nn_run1_HvV_behavior_LearnDay1'}
-% %    {[317 650],[],'051715 G62A5nn HvV behavior Learn Day3\g62a5nn_run1_HvV_behavior_LearnDay3', 'g62a5nn_run1_HvV_behavior_LearnDay3'}
-% %    {[665 917],[],'052015 G62A5nn HvV behavior LearnDay6\g62a5nn_run1_HvV_behavior_LearnDay6', 'g62a5nn_run1_HvV_behavior_LearnDay6'}
-% %    {[918 1145],[],'052415 G62A5nn HvV behavior LearnDay10\g62a5nn_run1_HvV_behavior_learnDay10', 'g62a5nn_run1_HvV_behavior_learnDay10'}
-% %    {[1146 1371],[],'052615 G62A5nn HvV behavior LearnDAY12\g62a5nn_run1_HvV_behavior_learnDay12', 'g62a5nn_run1_HvV_behavior_learnDay12'}
-% %    {[1372 1577],[],'052915 G62A5nn HvV behavior LearnDAY15\g62a5nn_run1_HvV_behavior_LearnDAY15', 'g62a5nn_run1_HvV_behavior_LearnDAY15'}
-% %    {[1578 1786],[],'060115 G622A5nn HvV behavior LearnDAY18\g62a5nn_run1_HvV_behavior_LearnDAY18', 'g62a5nn_run1_HvV_behavior_LearnDAY18'}
-% %    {[1787 2051],[],'060315 G62A5nn HvV behavior LearnDAY20\g62a5nn_run1_HvV_behavior_LearnDAY20', 'g62a5nn_run1_HvV_behavior_LearnDAY20'}
-% %     {[2307 2519],[],'060615 G62A5nn HvV behavior LearnDAY23\g62A5nn_run1_HvV_behavior_LearnDay23', 'g62A5nn_run1_HvV_behavior_LearnDay23'}
-% %    {[2520 2723],[],'060915 G62A5nn HvV behavior LearnDAY26\g62a5nn_run1_HvV_behavior_LearnDAY26', 'g62a5nn_run1_HvV_behavior_LearnDAY26'}
-% %     {[2724 2946],[],'061215 G62A5nn HvV behavior LearnDAY29\g62a5nn_run1_HvV_behavior_learnDAY29', 'g62a5nn_run1_HvV_behavior_learnDAY29'}
-% %     {[2947 3180],[],'061515 G62A5nn HvV behavior LearnDAY32\g62a5nn_run1_HvV_behavior_learnDAY32', 'g62a5nn_run1_HvV_behavior_learnDAY32'}
-% 
-% 
-%   }
-%   } 
+      {'g62a5nn' {
+%    {[1 316],[],'051515 G62A5nn HvV behavior LearnDay1\g62a5nn_run1_HvV_behavior_LearnDay1', 'g62a5nn_run1_HvV_behavior_LearnDay1'}
+%    {[317 650],[],'051715 G62A5nn HvV behavior Learn Day3\g62a5nn_run1_HvV_behavior_LearnDay3', 'g62a5nn_run1_HvV_behavior_LearnDay3'}
+%    {[665 917],[],'052015 G62A5nn HvV behavior LearnDay6\g62a5nn_run1_HvV_behavior_LearnDay6', 'g62a5nn_run1_HvV_behavior_LearnDay6'}
+%    {[918 1145],[],'052415 G62A5nn HvV behavior LearnDay10\g62a5nn_run1_HvV_behavior_learnDay10', 'g62a5nn_run1_HvV_behavior_learnDay10'}
+%    {[1146 1371],[],'052615 G62A5nn HvV behavior LearnDAY12\g62a5nn_run1_HvV_behavior_learnDay12', 'g62a5nn_run1_HvV_behavior_learnDay12'}
+%    {[1372 1577],[],'052915 G62A5nn HvV behavior LearnDAY15\g62a5nn_run1_HvV_behavior_LearnDAY15', 'g62a5nn_run1_HvV_behavior_LearnDAY15'}
+%    {[1578 1786],[],'060115 G622A5nn HvV behavior LearnDAY18\g62a5nn_run1_HvV_behavior_LearnDAY18', 'g62a5nn_run1_HvV_behavior_LearnDAY18'}
+%    {[1787 2051],[],'060315 G62A5nn HvV behavior LearnDAY20\g62a5nn_run1_HvV_behavior_LearnDAY20', 'g62a5nn_run1_HvV_behavior_LearnDAY20'}
+%     {[2307 2519],[],'060615 G62A5nn HvV behavior LearnDAY23\g62A5nn_run1_HvV_behavior_LearnDay23', 'g62A5nn_run1_HvV_behavior_LearnDay23'}
+%    {[2520 2723],[],'060915 G62A5nn HvV behavior LearnDAY26\g62a5nn_run1_HvV_behavior_LearnDAY26', 'g62a5nn_run1_HvV_behavior_LearnDAY26'}
+%     {[2724 2946],[],'061215 G62A5nn HvV behavior LearnDAY29\g62a5nn_run1_HvV_behavior_learnDAY29', 'g62a5nn_run1_HvV_behavior_learnDAY29'}
+%     {[2947 3180],[],'061515 G62A5nn HvV behavior LearnDAY32\g62a5nn_run1_HvV_behavior_learnDAY32', 'g62a5nn_run1_HvV_behavior_learnDAY32'}
+     {[3181 3406],[],'061915 G62A5nn HvV behavior LearnDAY36\g62a5nn_run1_HvV_behavior_learnDAY36', 'g62a5nn_run1_HvV_behavior_learnDAY36'}
+     {[3407 3628],[],'062315 G62A5nn HvV behavior LearnDAY40\g62a5nn_run1_HvV_behavior_LearnDay40', 'g62a5nn_run1_HvV_behavior_LearnDay40'}
+%     {[ ],[],'', ''}
+    
+  }
+  } 
 %   
 %         {'g62r3rt' {
 % %     {[231 450],[],'060815 G62R3rt HvV behavior LearnDay1\G62R3rt_run1_HvV_behavior_LearnDAY1', 'G62R3rt_run1_HvV_behavior_LearnDAY1'}

@@ -1,10 +1,9 @@
 clear all
 close all
 dbstop if error
-pathname = 'I:\compiled behavior\';
-pathname = 'C:\data\imaging\';
-datapathname = 'D:\Widefield (12-10-12+)\data 62713+\';  
-outpathname = 'C:\data\imaging\topos\';
+pathname = '\\langevin\backup\widefield\passive\';
+datapathname = '';  
+outpathname = 'C:\Users\nlab\Desktop\data test\';
 
 n=1;
 files(n).subj = 'g62r4lt';

@@ -19,7 +19,7 @@ end
 downsamp = 4;
 x= round(x/downsamp); y= round(y/downsamp);
 
-%%% create an empy ps file for pdf
+%%% create an empty ps file for pdf
 psfilename = 'C:\tempPS.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
@@ -209,28 +209,28 @@ for f= 1:length(use)
     print('-dpsc',psfilename,'-append');
     
     %%% choose evenly spaced grid points for connectivity
-    n=0;
-    for i = 1:3:35
-        for j = 25:3:70
-            n=n+1; xall(n) = i; yall(n)=j;
-        end
-    end
-   
-    %%% plot connectivity of grid points
-    figure
-    imagesc(im(:,:,1),[-0.2 0.2]) ; colormap gray; axis equal
-    hold on
-    for i = 1:n
-        % plot(y(i),x(i),[col(i) 'o'],'Markersize',8,'Linewidth',2)
-        for j= 1:n
-            if cc_im(xall(i),yall(i),xall(j),yall(j))>0.75
-                plot([yall(i) yall(j)],[xall(i) xall(j)],'b','Linewidth',8*(cc_im(xall(i),yall(i),xall(j),yall(j))-0.75))
-            end
-        end
-    end
-    plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
-    axis ij
- 
+%     n=0;
+%     for i = 1:3:35
+%         for j = 25:3:70
+%             n=n+1; xall(n) = i; yall(n)=j;
+%         end
+%     end
+%    
+%     %%% plot connectivity of grid points
+%     figure
+%     imagesc(im(:,:,1),[-0.2 0.2]) ; colormap gray; axis equal
+%     hold on
+%     for i = 1:n
+%         % plot(y(i),x(i),[col(i) 'o'],'Markersize',8,'Linewidth',2)
+%         for j= 1:n
+%             if cc_im(xall(i),yall(i),xall(j),yall(j))>0.75
+%                 plot([yall(i) yall(j)],[xall(i) xall(j)],'b','Linewidth',8*(cc_im(xall(i),yall(i),xall(j),yall(j))-0.75))
+%             end
+%         end
+%     end
+%     plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
+%     axis ij
+%  
     
  %%% show correlation images for selected points   
     figure

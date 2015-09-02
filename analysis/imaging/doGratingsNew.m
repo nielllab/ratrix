@@ -29,14 +29,14 @@ for rep=[1] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
         
         
         if rep ==1
-            load ([pathname files(use(f)).background3x2yBlank ], 'dfof_bg','sp','stimRec')
+            load ([pathname files(use(f)).background3x2yBlank ], 'dfof_bg','sp','stimRec','frameT')
             zoom = 260/size(dfof_bg,1);
             if ~exist('sp','var')
                 sp =0;stimRec=[];
             end
             dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
             [ph amp data ft cyc] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
-                'C:\background3x2y2sf_021215_16minBlank',20:22,14:16,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename);
+                'C:\background3x2y2sf_021215_16minBlank',20:22,14:16,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
         elseif rep==2
             load ([pathname files(use(f)).grating3x2y6sf4tf ], 'dfof_bg','sp','stimRec')
             zoom = 260/size(dfof_bg,1);
@@ -313,7 +313,7 @@ for rep=[1] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
     elseif rep ==1
         
         figure
-        subplot(2,3,1)
+        subplot(2,2,1)
         imagesc(mean(shiftData(:,:,5,:),4));
         hold on
         for i = 1:7;
@@ -323,7 +323,7 @@ for rep=[1] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
         
         hold on; plot(ypts,xpts,'w.','Markersize',2); axis off
         
-        subplot(2,3,2);
+        subplot(2,2,2);
         hold on
         for i = 1:7
             d=(squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,1:3),2),1)));
@@ -334,7 +334,7 @@ for rep=[1] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
         set(gca,'Xticklabel',{'medial','lateral'});
         
         
-        subplot(2,3,3)
+        subplot(2,2,3)
         hold on
         for i = 1:7
             d=squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,4:5),2),1));
@@ -344,60 +344,63 @@ for rep=[1] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
         set(gca,'Xtick',[1 3]);
         set(gca,'Xticklabel',{'top','bottom'});
         
-        subplot(2,3,4);
+        subplot(2,2,4);
         hold on
         for i = 1:7
             d =  squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,6:7),2),1));
             plot(d(1)/max(d),[col(i) 'o'],'LineWidth',2);
             plot(1:2,d(1:2)/max(d),col(i),'LineWidth',2);
         end
-        xlim([0.75 2.25]); ylim([0 1]); title('sf');
-        
+        xlim([0.75 2.25]); ylim([0 1]); title('sf');     
         xlabel('cpd')
         
-        %         subplot(2,3,5);
-        %         hold on
-        %         for i = 1:7
-        %             d=squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,12:15),2),1));
-        %             plot(d/max(d),col(i),'LineWidth',2);
-        %         end
-        %         xlim([1 4]); ylim([0 1]); title('tf');
-        %         set(gca,'XtickLabel',{'0', '2','8'});
-        %         xlabel('Hz')
-        
-        subplot(2,3,6);
-        
-        hold on
-        for i = 1:7
-            d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,:,:),4),2),1));
-            %     repd = repmat(d,[10 1]);
-            %     dconvd = deconvg6s(repd'+0.5,0.1);
-            %    % figure
-            %    d = dconvd(16:30);
-            plot((circshift(d',10)-min(d))/(max(d)-min(d)),col(i),'LineWidth',2);
-        end
-        xlim([1 25]); title('timecourse');
-        xlabel('frames')
-        
-                set(gcf, 'PaperPositionMode', 'auto');
+         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfilename,'-append');
         
+        for sf = 1:2
         figure
+        labels = {'blank','blank+patch','patch','blank decon','b+p decon','patch decon' }
+        for s = 1:6
+        subplot(2,3,s);        
         hold on
         for i = 1:7
-            d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,:,:),4),2),1));
-            repd = repmat(d,[10 1]);
-            dconvd = deconvg6s(repd'+0.5,0.1);
-            % figure
-            d = dconvd(31:45);
-            dall(i,:)=(circshift(d,5)-min(d))/(max(d)-min(d));
-            plot(0.1:0.1:(0.1*length(d)),(circshift(d,5)-min(d))/(max(d)-min(d)),col(i),'LineWidth',2);
+            if s==1 | s==4
+                d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,(1:25)+(sf-1)*50,:),4),2),1));
+            elseif s==2 | s==5
+                d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,(26:50)+(sf-1)*50,:),4),2),1));
+            elseif s==3 | s==6
+                            d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,(26:50)+(sf-1)*50,:)-cycavg(x(i)+range,y(i)+range,(1:25)+(sf-1)*50,:),4),2),1));
+            end
+            if s>=4
+                repd = repmat(d,[10 1]);
+                dconvd = deconvg6s(repd'+0.5,0.1);
+               % figure
+               d = dconvd(6*length(d):(7*length(d)-1));
+            end
+           % plot((circshift(d',0)-min(d))/(max(d)-min(d)));
+            plot(circshift(d',0)-min(d),col(i));
         end
-        xlim([0.1 1.5]); title('timecourse');
-        xlabel('sec')
+        plot([11 11],[0 0.2],':')
+        xlim([1 25]); 
+        if s<=3 
+            ylim([0 0.1]);
+        else
+            ylim([0 0.15])
+        end
+       if s<6
+           title(labels{s});
+       else
+           title(sprintf('sf %d',sf));
+       end
+       xlabel('frames')
+        end
+             
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfilename,'-append');
         
+        end %%sf
         
-        %%% 4x3y
+        %%% bkgrat
     end
 end
 

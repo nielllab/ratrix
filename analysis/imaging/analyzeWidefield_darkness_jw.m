@@ -1,16 +1,16 @@
 
 
 clear all
-%batchPassive2015;
+batch_darkness_learned;
 %batchTopography
-batchDOI0722
+%batchDOI0722
 %batchRigTest
 %batchTopoFrontiers
 close all
 psfilename = 'C:\tempPS.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
-   alluse = find(strcmp({files.inject},'lisuride')  & strcmp({files.timing},'post') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
+   alluse = find( strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
   
 length(alluse)
 %alluse=alluse(1:5)
@@ -34,8 +34,8 @@ clear map merge
 
 x0 =0; y0=0; sz = 128;
 doTopography;
-% doCorrelationMap
-doGratingsNew;
+ doCorrelationMap
+%doGratingsNew;
 % %%% analyze looming
 % for f = 1:length(use)
 %     loom_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'loom');

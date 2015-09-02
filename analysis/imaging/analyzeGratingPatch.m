@@ -1,9 +1,30 @@
-function [ph amp alldata fit cycavg tuning sftcourse] = analyzeGratingPatch(dfof_bg,sp,moviename,useframes,base,xpts,ypts, label,stimRec,psfilename);
+function [ph amp alldata fit cycavg tuning sftcourse] = analyzeGratingPatch(dfof_bg,sp,moviename,useframes,base,xpts,ypts, label,stimRec,psfilename,frameT);
 %load(fname,'dfof_bg');
 %close all
+
+
+timingfig = figure;
+subplot(2,2,1)
+plot(diff(stimRec.ts));
+xlabel('frame')
+title('stim frames')
+
+subplot(2,2,2)
+plot(diff(frameT));
+xlabel('frame')
+title('acq frames')
+
+subplot(2,2,3)
+plot((stimRec.ts-stimRec.ts(1))/60,(stimRec.ts' - stimRec.ts(1)) - (1/60)*(0:length(stimRec.ts)-1));
+hold on
+plot((frameT-frameT(1))/60,(frameT' - frameT(1)) - 0.1*(0:length(frameT)-1),'g');
+legend('stim','acq')
+ylabel('slippage (secs)')
+xlabel('mins')
+
 sf=0; tf=0; isi=0; duration=0;
 
-    load(moviename)
+load(moviename)
 
 imagerate=10;
 
@@ -25,7 +46,7 @@ nx=ceil(sqrt(acqdurframes+1)); %%% how many rows in figure subplot
 figure
 map=0;
 for f=1:acqdurframes
-    cycavg(:,:,f) = mean(img(:,:,f:acqdurframes:end),3);
+    cycavg(:,:,f) = mean(img(:,:,(f+trials*acqdurframes/2):acqdurframes:end),3);
     subplot(nx,nx,f)
     imagesc(squeeze(cycavg(:,:,f)),[-0.02 0.02])
     axis off
@@ -43,8 +64,10 @@ set(gca,'LooseInset',get(gca,'TightInset'))
 %%% calculate phase of cycle response
 %%% good for detectime framedrops or other problems
 tcourse = squeeze(mean(mean(img,2),1));
+
 fourier = tcourse'.*exp((1:length(tcourse))*2*pi*sqrt(-1)/(10*duration + 10*isi));
-figure
+figure(timingfig)
+subplot(2,2,4)
 plot((1:length(tcourse))/600,angle(conv(fourier,ones(1,600),'same')));
 ylim([-pi pi])
 ylabel('phase'); xlabel('mins')
@@ -119,6 +142,23 @@ else
     bkgrat=0;
 end
 
+if bkgrat
+   for i = 1:2
+       blank = find(xpos==xrange(end) & sf == sfrange(i) );
+    patch = find(xpos==xrange(2) & sf == sfrange(i));
+    blankstart = floor((blank-1)*(duration+isi)*imagerate + isi*imagerate -1);
+    patchstart = floor((patch-1)*(duration+isi)*imagerate +isi*imagerate-1);
+    for f = 1:acqdurframes
+        blankcyc(:,:,f) = mean(img(:,:,blankstart+f),3);
+        patchcyc(:,:,f) =  mean(img(:,:,patchstart+f),3);
+    end
+    cycavg(:,:,(1:acqdurframes)+ (i-1)*2*acqdurframes) = blankcyc;
+    cycavg(:,:,((acqdurframes+1):2*acqdurframes) + (i-1)*2*acqdurframes) = patchcyc;
+
+   end
+end
+
+
 %%% show blank stim for bkgrat
 if bkgrat
     figure
@@ -154,7 +194,7 @@ end
 
 %%% plot response based on previous trial's response
 %%% this is a check for whether return to baseline is an issue
-figure 
+figure
 plot(avgcondtrialcourse(:,1)-avgcondtrialcourse(:,10),avgcondtrialcourse(:,15)-avgcondtrialcourse(:,10),'o');
 xlabel('pre dfof'); ylabel('post dfof')
 
@@ -220,7 +260,7 @@ end
 %     subplot(1,2,2);
 %     imagesc(squeeze(tuning(x,y,:,:,2,1)),[-0.025 0.025]);
 % end
-% 
+%
 % figure
 % for i = 1:length(sfrange)
 %     for j=1:length(tfrange)
@@ -232,7 +272,7 @@ end
 %         set(gca,'LooseInset',get(gca,'TightInset'))
 %     end
 % end
-% 
+%
 
 %%% plot sf and tf responses
 figure

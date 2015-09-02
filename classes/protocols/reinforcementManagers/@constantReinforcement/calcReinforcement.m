@@ -5,6 +5,9 @@ updateRM=0;
 tic
 g = GetSecs;
 
+% note we now use getSpreadsheetData to lookup values (takes 5 sec, so we
+% just do it once in standAloneRun
+
 if false
     s = 'init';
     try %this takes ~80ms and happens on every request and reward, consider just doing it once at the beginning of sessions?

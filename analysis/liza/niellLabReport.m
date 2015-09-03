@@ -303,7 +303,7 @@ if doBall
 
    % recs = [recs ; gbr'];
     recs = gbr';
-    
+
     tic
     cellfun(@(x) cellfun(@(y)plotCrossingTime(y,['\\' x{1}],force),x{2}),recs);
     toc

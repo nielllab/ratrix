@@ -1,8 +1,8 @@
 clear all
 close all
 
-dir = '\\lorentz\backup\widefield\DOI experiments\Matlab Widefield Analysis\';
-name = 'trial6'; %data file
+dir = '\\lorentz\backup\widefield\DOI experiments\Matlab Widefield Analysis\09_02_15_eye\';
+name = '09_02_15_postdoi_eye'; %data file
 thresh = 0.85; %pupil threshold for binarization
 puprange = [5 20]; %set
 
@@ -16,7 +16,7 @@ data = squeeze(data);
 warning off;
 
 %user input to select center and right points
-printf('Please select pupil center and top, eyeball top and right points, outside pupil')
+printf('Please select pupil center and top, eyeball top and right points, darkest part of eyeball')
 h1 = figure('units','normalized','outerposition',[0 0 1 1])
 imshow(data(:,:,1))
 [cent] = ginput(5);
@@ -36,7 +36,7 @@ for i = 1:size(data,3)
     binmax(i) = mean(mean(mean(ddata(binmaxy-3:binmaxy+3,binmaxx-3:binmaxx+3,i))));
 end
 for i = 1:size(ddata,3)
-    bindata(:,:,i) = (ddata(yc-vert:yc+vert,xc-horiz:xc+horiz,i)/binmax(i) < thresh);
+    bindata(:,:,i) = (ddata(yc-vert:yc+vert,xc-horiz:xc+horiz,i)/binmax(i) > thresh);
 end
 
 tic
@@ -45,7 +45,7 @@ rad = nan(size(data,3),1);
 centroid(1,:) = [horiz vert];
 rad(1,1) = puprad;
 for n = 2:size(data,3)
-    [center,radii,metric] = imfindcircles(bindata(:,:,n),puprange,'Sensitivity',0.995,'ObjectPolarity','bright');
+    [center,radii,metric] = imfindcircles(bindata(:,:,n),puprange,'Sensitivity',0.995,'ObjectPolarity','dark');
     if(isempty(center))
         centroid(n,:) = [NaN NaN]; % could not find anything...
         rad(n) = NaN;

@@ -35,6 +35,18 @@ switch subjIDs{1}
        rewardSizeULorMS        = 59;
        msPenalty               =4300;
        
+    case 'pvchr14rt' % Started 8/25/15 %%switched to center 9/11/15
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 75;
+       msPenalty               =4500;
+       percentCorrectionTrials = .50; 
+       
+    case 'pvchr14tt' % Started 8/25/15 %%switched to center 9/11/15
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 75;
+       msPenalty               =4500;
+       percentCorrectionTrials = .50; 
+       
     case 'pv8lt' % Started 6/25/15  (permenant record wont show till 6/26/15) %%started center 7/14/15
        requestRewardSizeULorMS = 00;
        rewardSizeULorMS        = 59;

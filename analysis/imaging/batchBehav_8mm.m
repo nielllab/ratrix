@@ -1,7 +1,7 @@
 clear all
 close all
 opengl software
-pathname = 'I:\compiled 8mm\';
+pathname = '\\langevin\backup\widefield\passive\';
 datapathname = 'D:\Widefield (12-10-12+)\data 62713+\';
 
 n=1;
@@ -14,7 +14,7 @@ files(n).topoxreverse =  '050914 g62c5tt\G62C5-TT_run2_2screens(flipped)_topooX_
 files(n).topoy = '050914 g62c5tt\G62C5-TT_run2_2screens_topoY_50ms_Fstop_8_maps.mat';
 files(n).whisker = '050914 g62c5tt\G62C5-TT_run11_whiskers_50ms_Fstop_8_maps.mat';
 %files(n).whisker = '050914 g62c5tt\G62C5-TT_run15_whiskers_50ms_Fstop_8_maps.mat';
-files(n).darkness = '050914 g62c5tt\G62C5-TT_run10_darkness_50ms_Fstop_8_maps.mat';
+files(n).darkness = '050914 G62C5-TT 8mm\G62C5-TT_run10_darkness_50ms_Fstop_8\G62C5-TT_run10_darkness_50ms_Fstop_8_maps.mat';
 files(n).monitor = '2 screens land';
 files(n).task = '';
 files(n).label = 'camk2 gc6';
@@ -241,110 +241,110 @@ files(n).baseline_patchydata = '022414 8mm window Gcamp6\G62G.1-LN_run6_baseline
 % files(n).whiskerdata = '';
 
 
-
-%%% batch dfofMovie
-errmsg= [];errRpt = [];
-nerr=0;
-
-
-%for f = 1:length(files)
-% for f = 1:1
 % 
-%     f
-%     tic
-%     
-%     try
-%         dfofMovie([datapathname files(f).topoxdata]);
-%     catch exc
-%         nerr=nerr+1;
-%         errmsg{nerr}= sprintf('couldnt do %s',files(f).topoxdata)
-%         errRpt{nerr}=getReport(exc,'extended')
+% %%% batch dfofMovie
+% errmsg= [];errRpt = [];
+% nerr=0;
+% 
+% 
+% %for f = 1:length(files)
+% % for f = 1:1
+% % 
+% %     f
+% %     tic
+% %     
+% %     try
+% %         dfofMovie([datapathname files(f).topoxdata]);
+% %     catch exc
+% %         nerr=nerr+1;
+% %         errmsg{nerr}= sprintf('couldnt do %s',files(f).topoxdata)
+% %         errRpt{nerr}=getReport(exc,'extended')
+% %     end
+% %     try
+% %         dfofMovie([datapathname files(f).topoydata]);
+% %     catch exc
+% %         nerr=nerr+1;
+% %         errmsg{nerr}=sprintf('couldnt do %s',files(f).topoydata)
+% %         errRpt{nerr}=getReport(exc,'extended')
+% %     end
+% %     try
+% %         dfofMovie([datapathname files(f).whiskerdata]);
+% %     catch exc
+% %         nerr=nerr+1;
+% %         errmsg{nerr}=sprintf('couldnt do %s',files(f).whiskerdata)
+% %          errRpt{nerr}=getReport(exc,'extended')
+% %     end
+% %     try
+% %         dfofMovie([datapathname files(f).darknessdata]);
+% %     catch exc
+% %         nerr=nerr+1;
+% %         errmsg{nerr}=sprintf('couldnt do %s',files(f).darknessdata)
+% %          errRpt{nerr}=getReport(exc,'extended')
+% %     end
+% %     try
+% %         dfofMovie([datapathname files(f).step_binarydata]);
+% %     catch
+% %         nerr=nerr+1;
+% %         errmsg{nerr}=sprintf('couldnt do %s',files(f).step_binarydata)
+% %         errRpt{nerr}= getReport(exc,'extended')
+% %     end
+% %     try
+% %         dfofMovie([datapathname files(f).topoxreversedata]);
+% %     catch exc
+% %         nerr=nerr+1;
+% %         errmsg{nerr}=sprintf('couldnt do %s',files(f).topoxreversedata)
+% %          errRpt{nerr}=getReport(exc,'extended')
+% %     end
+% %     
+% %     toc
+% % end
+% %  errRpt{:} 
+%  outpathname = 'I:\compiled 8mm\8mm overlays\';
+% % 
+% %keyboard
+% %use = find(strcmp({files.monitor},'vert') & strcmp({files.task},'HvV_center')& strcmp({files.notes},'good imaging session'))
+% for i = 1:length(files);
+%     if ~isempty(files(i).topox) & strcmp(files(i).notes,'good imaging session')
+%         used(i)=1;
+%     else
+%        used(i)=0;
 %     end
-%     try
-%         dfofMovie([datapathname files(f).topoydata]);
-%     catch exc
-%         nerr=nerr+1;
-%         errmsg{nerr}=sprintf('couldnt do %s',files(f).topoydata)
-%         errRpt{nerr}=getReport(exc,'extended')
-%     end
-%     try
-%         dfofMovie([datapathname files(f).whiskerdata]);
-%     catch exc
-%         nerr=nerr+1;
-%         errmsg{nerr}=sprintf('couldnt do %s',files(f).whiskerdata)
-%          errRpt{nerr}=getReport(exc,'extended')
-%     end
-%     try
-%         dfofMovie([datapathname files(f).darknessdata]);
-%     catch exc
-%         nerr=nerr+1;
-%         errmsg{nerr}=sprintf('couldnt do %s',files(f).darknessdata)
-%          errRpt{nerr}=getReport(exc,'extended')
-%     end
-%     try
-%         dfofMovie([datapathname files(f).step_binarydata]);
-%     catch
-%         nerr=nerr+1;
-%         errmsg{nerr}=sprintf('couldnt do %s',files(f).step_binarydata)
-%         errRpt{nerr}= getReport(exc,'extended')
-%     end
-%     try
-%         dfofMovie([datapathname files(f).topoxreversedata]);
-%     catch exc
-%         nerr=nerr+1;
-%         errmsg{nerr}=sprintf('couldnt do %s',files(f).topoxreversedata)
-%          errRpt{nerr}=getReport(exc,'extended')
-%     end
-%     
-%     toc
 % end
-%  errRpt{:} 
- outpathname = 'I:\compiled 8mm\8mm overlays\';
 % 
-%keyboard
-%use = find(strcmp({files.monitor},'vert') & strcmp({files.task},'HvV_center')& strcmp({files.notes},'good imaging session'))
-for i = 1:length(files);
-    if ~isempty(files(i).topox) & strcmp(files(i).notes,'good imaging session')
-        used(i)=1;
-    else
-       used(i)=0;
-    end
-end
-
-    use = find(used)
-
-
-%%% calculate gradients and regions
-
-
-for i = 1:length(files);
-    if ~isempty(files(i).step_binary) & ~isempty(files(i).whisker) &  ~isempty(files(i).darkness) & strcmp(files(i).notes,'good imaging session')
-        used(i)=1;
-    else
-       used(i)=0;
-    end
-end
-
-    use = find(used)
-
-for f = 1:length(use)
-f
-load([pathname files(use(f)).darkness],'sp','dfof_bg');
-movemap =mean(dfof_bg(:,:,sp>400),3)- mean(dfof_bg(:,:,sp<400),3);
-figure
-imagesc(movemap);
-load([pathname files(use(f)).step_binary],'map');
-map1 = map;
-load([pathname files(use(f)).whisker],'map');
-map2= map;
-
-mergeMaps(map1,map2,movemap, pathname, [files(use(f)).subj files(use(f)).expt files(use(f)).monitor])
-end
-
-for f = 7:7
-    load([pathname files(f).step_binary],'sp','dfof_bg');
-    
-end
-
-
-
+%     use = find(used)
+% 
+% 
+% %%% calculate gradients and regions
+% 
+% 
+% for i = 1:length(files);
+%     if ~isempty(files(i).step_binary) & ~isempty(files(i).whisker) &  ~isempty(files(i).darkness) & strcmp(files(i).notes,'good imaging session')
+%         used(i)=1;
+%     else
+%        used(i)=0;
+%     end
+% end
+% 
+%     use = find(used)
+% 
+% for f = 1:length(use)
+% f
+% load([pathname files(use(f)).darkness],'sp','dfof_bg');
+% movemap =mean(dfof_bg(:,:,sp>400),3)- mean(dfof_bg(:,:,sp<400),3);
+% figure
+% imagesc(movemap);
+% load([pathname files(use(f)).step_binary],'map');
+% map1 = map;
+% load([pathname files(use(f)).whisker],'map');
+% map2= map;
+% 
+% mergeMaps(map1,map2,movemap, pathname, [files(use(f)).subj files(use(f)).expt files(use(f)).monitor])
+% end
+% 
+% for f = 7:7
+%     load([pathname files(f).step_binary],'sp','dfof_bg');
+%     
+% end
+% 
+% 
+% 

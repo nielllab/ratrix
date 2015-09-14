@@ -91,9 +91,11 @@ end
 %most of the work in this file does what CompileTrialRecords does
 
 %get trial records in the right order
+tmp = recordPath;
 recordPath = fullfile(recordPath,'Desktop','ballData','PermanentTrialRecordStore',fixSubj(subj))
 
 d=dir(fileparts(recordPath));
+
 if false
     fprintf('available subjects:\n');
     {d([d.isdir] & ~ismember({d.name},{'.','..'})).name}
@@ -102,7 +104,14 @@ end
 files = dir(fullfile(recordPath,'trialRecords_*.mat'));
 
 if isempty(files)
-    error('no records for that subject')
+
+    % edf added 07.03.15 to address mtrix6 db.mat kerfufle that points to wrong data directory
+    recordPath = fullfile(tmp,'Desktop','ratrixData','PermanentTrialRecordStore',fixSubj(subj))
+    files = dir(fullfile(recordPath,'trialRecords_*.mat'));
+    
+    if isempty(files)
+        error('no records for that subject')
+    end
 end
 
 bounds = cell2mat(cellfun(@(x)textscan(x,'trialRecords_%u-%u_%uT%u-%uT%u.mat','CollectOutput',true),{files.name}'));
@@ -147,8 +156,40 @@ for i=1:length(files)
     
     if recNum >= lastTrial
         fullRecs(i) = load(fullfile(recordPath,files(i).name)); %loading files in this format is slow, that's why we normally use compiled records
-        newRecNum = theseRecs + length(fullRecs(i).trialRecords);
-        records(theseRecs+1:newRecNum) = fullRecs(i).trialRecords; %extending this struct array is slow, another reason we normally use compiled records
+        newRecNum = theseRecs + length(fullRecs(i).trialRecords);        
+        
+        if exist('records','var')
+            try
+                f1 = fields(records);
+                f2 = fields(fullRecs(i).trialRecords);
+                f12 = setdiff(f1,f2);
+                f21 = setdiff(f2,f1);
+                for fi = 1:length(f12)
+                    [fullRecs(i).trialRecords.(f12{fi})] = deal([]);
+                    'old not in new'
+                    f12{fi}
+                    recordPath
+                end
+                for fi = 1:length(f21)
+                    [records.(f21{fi})] = deal([]);
+                    'new not in old'
+                    f21{fi}
+                    recordPath
+                end
+            catch ex
+                getReport(ex)
+                keyboard
+            end            
+        elseif theseRecs~=0
+            error('huh?')
+        end
+        
+        try
+            records(theseRecs+1:newRecNum) = fullRecs(i).trialRecords; %extending this struct array is slow, another reason we normally use compiled records
+        catch ex            
+                getReport(ex)
+                keyboard
+        end
         fullRecs(i).trialRecords = []; %prevent oom
         theseRecs = newRecNum;
         recNum = newRecNum + lastTrial;
@@ -178,6 +219,9 @@ end
 
 trialNums = [records.trialNumber];
 if ~all(diff(trialNums) == 1)
+    recordPath
+    warning('records don''t show incrementing trial numbers')
+    keyboard
     error('records don''t show incrementing trial numbers')
 end
 
@@ -917,7 +961,7 @@ uploadFig(gcf,subj,max(trialNums)/10,sps*200);
         end
     end
 
-plotTracks = true;
+plotTracks = false;
 if plotTracks
     
     slowFact = .1;

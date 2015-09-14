@@ -1,21 +1,27 @@
 clear all
-profile on
+close all
 
-name = '08_26_15_prelis_eye.mat' %epxeriment name
-% name = '08_26_15_postlis_eye.mat'
+%load data
+name = '09_08_15_predoi_eye.';
 load(name); % should be a '*_eye.mat' file
 
-% figure
-% imshow(data(:,:,1)
-% [x y] = ginput(3)
-% xoff = x(1)
-% yoff = y(1)
+profile on
 
-rad_range = [5 15]; % range of radii to search for
+% name = 'trial5' %epxeriment name
+% name = '08_26_15_postlis_eye.mat'
+% load(name); % should be a '*_eye.mat' file
+
+figure
+imshow(data(:,:,200))
+[x y] = ginput(3)
+xoff = x(1)
+yoff = y(1)
+
+rad_range = [5 30]; % range of radii to search for
 xoff = 0; %to center ROI
-yoff = -5; %to center ROI
-W=25; % pixel range ROI for imfindcircles
-thresh = 0.17 %pupil threshold
+yoff = 0; %to center ROI
+W=30; % pixel range ROI for imfindcircles
+thresh = 0.33 %pupil threshold
 
 data = squeeze(data); % the raw images...
 xc = size(data,2)/2 + xoff; % image center
@@ -26,6 +32,8 @@ bindata = double(data); %convert from uint8 into doubles and threshold
 for i = 1:size(data,3);
     bindata(:,:,i) = bindata(:,:,i)/max(max(bindata(:,:,i)))<thresh;
 end
+figure
+imshow(bindata(:,:,100))
 
 tic
 parfor n = 1:size(data,3)
@@ -42,17 +50,18 @@ parfor n = 1:size(data,3)
 end
 toc
 
-% figure
-% imshow(data(yc-W:yc+W,xc-W:xc+W));
-% hold on
-% circle(eye(i).Centroid(2),eye(i).Centroid(1),eye(i).Area)
-% hold off
+figure
+imshow(data(yc-W:yc+W,xc-W:xc+W));
+hold on
+circle(eye(i).Centroid(2),eye(i).Centroid(1),eye(i).Area)
+hold off
 
-% imshow(data(:,:,1))
-% for i=i:size(data,3)/100
-%    eye(i).Centroid(1) = yc - (yc - eye(i).Centroid(1));
-%    eye(i).Centroid(2) = xc - (xc - eye(i).Centroid(2));
-% end
+figure
+imshow(data(:,:,1))
+for i=i:size(data,3)/100
+   eye(i).Centroid(1) = yc - (yc - eye(i).Centroid(1));
+   eye(i).Centroid(2) = xc - (xc - eye(i).Centroid(2));
+end
 save(name, 'centroid','area', '-append'); % append the motion estimate data...
 profile viewer
 
@@ -71,7 +80,7 @@ for i = size(data,3)
     colormap gray
     hold on
     circle(centroid(i,1),centroid(i,2),area(i))
-    %     viscircles([eye(i).Centroid(1) eye(i).Centroid(2)],sqrt(eye(i).Area)/pi);
+    viscircles([eye(i).Centroid(1) eye(i).Centroid(2)],sqrt(eye(i).Area)/pi);
     drawnow
     hold off
 end
@@ -79,9 +88,9 @@ end
 
 
 
-% figure
-% % for i = 1:size(data,3)
-%     imshow(data(:,:,3712))
-%     colormap gray
-%     drawnow
-% end
+figure
+ for i = 1:size(data,3)
+    imshow(data(:,:,200))
+    colormap gray
+    drawnow
+end

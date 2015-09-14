@@ -1,32 +1,8 @@
 clear all
 close all
-<<<<<<< HEAD
 
-%load data
-name = '09_08_15_predoi_eye.';
-load(name); % should be a '*_eye.mat' file
-
-profile on
-
-% name = 'trial5' %epxeriment name
-% name = '08_26_15_postlis_eye.mat'
-% load(name); % should be a '*_eye.mat' file
-
-figure
-imshow(data(:,:,200))
-[x y] = ginput(3)
-xoff = x(1)
-yoff = y(1)
-
-rad_range = [5 30]; % range of radii to search for
-xoff = 0; %to center ROI
-yoff = 0; %to center ROI
-W=30; % pixel range ROI for imfindcircles
-thresh = 0.33 %pupil threshold
-=======
-
-dir = '\\lorentz\backup\widefield\DOI experiments\Matlab Widefield Analysis\09_02_15_eye\';
-name = '09_02_15_postdoi_eye'; %data file
+dir = '\\NIELL-V2-W7\Angie_tanks\eyetracking data\09_08_15\';
+name = '09_08_15_predoi_eye'; %data file
 thresh = 0.85; %pupil threshold for binarization
 puprange = [5 20]; %set
 
@@ -34,14 +10,13 @@ puprange = [5 20]; %set
 % pupercent = 0.15; %set range pupil radius window
 % pupchange = 0.25; %acceptable percent change in radius per framerange
 % framerange = 1; %number of frames to smooth over
->>>>>>> origin/trunk
 
 load(name);
 data = squeeze(data);
 warning off;
 
 %user input to select center and right points
-printf('Please select pupil center and top, eyeball top and right points, darkest part of eyeball')
+sprintf('Please select pupil center and top, eyeball top and right points, darkest part of eyeball')
 h1 = figure('units','normalized','outerposition',[0 0 1 1])
 imshow(data(:,:,1))
 [cent] = ginput(5);
@@ -96,27 +71,8 @@ for n = 2:size(data,3)
 end
 toc
 
-<<<<<<< HEAD
-figure
-imshow(data(yc-W:yc+W,xc-W:xc+W));
-hold on
-circle(eye(i).Centroid(2),eye(i).Centroid(1),eye(i).Area)
-hold off
-
-figure
-imshow(data(:,:,1))
-for i=i:size(data,3)/100
-   eye(i).Centroid(1) = yc - (yc - eye(i).Centroid(1));
-   eye(i).Centroid(2) = xc - (xc - eye(i).Centroid(2));
-end
-save(name, 'centroid','area', '-append'); % append the motion estimate data...
-profile viewer
-
-figure
-=======
-%plot centroid and radius
+%plot x and y position and radius across experiment
 h2 = figure
->>>>>>> origin/trunk
 hold on
 plot(0.1:0.1:size(data,3)/10,rad,'b-')
 plot(0.1:0.1:size(data,3)/10,centroid(:,1),'.g')
@@ -131,13 +87,7 @@ for i = 1:size(data,3)
     imshow(data(yc-vert:yc+vert,xc-horiz:xc+horiz,i));
     colormap gray
     hold on
-<<<<<<< HEAD
-    circle(centroid(i,1),centroid(i,2),area(i))
-    viscircles([eye(i).Centroid(1) eye(i).Centroid(2)],sqrt(eye(i).Area)/pi);
-=======
     circle(centroid(i,1),centroid(i,2),rad(i))
-    %     viscircles([eye(i).Centroid(1) eye(i).Centroid(2)],sqrt(eye(i).Area)/pi);
->>>>>>> origin/trunk
     drawnow
     hold off
     
@@ -146,7 +96,6 @@ for i = 1:size(data,3)
     colormap gray
     hold on
     circle(centroid(i,1),centroid(i,2),rad(i))
-    %     viscircles([eye(i).Centroid(1) eye(i).Centroid(2)],sqrt(eye(i).Area)/pi);
     drawnow
     hold off
     
@@ -155,11 +104,3 @@ end
 save(fullfile(dir,name),'centroid','rad','h2','-append');
 
 
-
-
-figure
- for i = 1:size(data,3)
-    imshow(data(:,:,200))
-    colormap gray
-    drawnow
-end

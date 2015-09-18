@@ -79,7 +79,7 @@
 %     axis([1 3 0 max(max(max(allmnfit(:,:,1:3))))])
 % end
 % 
-% %cycle average for low spatial frequency stim
+%cycle average for low spatial frequency stim
 % labels = {'blank','blank+patch','patch','blank decon','b+p decon','patch decon' }
 % for area = 1:length(areanames)
 %     figure('Position', [scsz(3)/4 scsz(4)/2-scsz(4)/10 scsz(3)/scscale scsz(4)/scscale]);

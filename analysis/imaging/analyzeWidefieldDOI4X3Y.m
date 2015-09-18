@@ -1,7 +1,7 @@
 %This file uses mnfit and cycavg from 4X3Y analysis output to compare widefield data across
 %conditions
-clear all
 close all
+clear all
 profile on
 %%
 

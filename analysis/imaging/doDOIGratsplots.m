@@ -80,72 +80,72 @@
 % end
 % 
 %%cycle average for low spatial frequency stim
-labels = {'blank','blank+patch','patch','blank decon','b+p decon','patch decon'};
-for area = 1:length(areanames)
-    figure('Position', [scsz(3)/4 scsz(4)/2-scsz(4)/10 scsz(3)/scscale scsz(4)/scscale]);
-    for s = 1:6
-        subplot(2,3,s);        
-        hold on
-        if s==1
-        mseb(1:25,squeeze(nanmean(inddeconcycavg(1:25,:,area,conds),2))',squeeze(nansem(inddeconcycavg(1:25,:,area,conds),2))');
-        elseif s==2
-        mseb(1:25,squeeze(nanmean(inddeconcycavg(26:50,:,area,conds),2))',squeeze(nansem(inddeconcycavg(26:50,:,area,conds),2))');
-        elseif s==3
-        mseb(1:25,squeeze(nanmean(inddeconcycavg(51:75,:,area,conds),2))',squeeze(nansem(inddeconcycavg(51:75,:,area,conds),2))');
-        elseif s==4
-        mseb(1:25,squeeze(nanmean(indcycavg(1:25,:,area,conds),2))',squeeze(nansem(indcycavg(1:25,:,area,conds),2))');
-        elseif s==5
-        mseb(1:25,squeeze(nanmean(indcycavg(26:50,:,area,conds),2))',squeeze(nansem(indcycavg(26:50,:,area,conds),2))');
-        elseif s==6
-        mseb(1:25,squeeze(nanmean(indcycavg(51:75,:,area,conds),2))',squeeze(nansem(indcycavg(51:75,:,area,conds),2))');
-        end
-        
-        plot([11 11],[0 0.2],':')
-        xlim([1 25]); 
-        if s<=3 
-            ylim([0 0.2]);
-        else
-            ylim([0 0.15])
-        end
-        title(sprintf('low sf %s %s',areanames{area},labels{s}));
-        xlabel('frames')
-    end
-    legend(datafiles(conds),'location','northeast')
-end
-
-%%cycle average for high spatial frequency stim
-labels = {'blank','blank+patch','patch','blank decon','b+p decon','patch decon'};
-for area = 1:length(areanames)
-    figure('Position', [scsz(3)/4 scsz(4)/2-scsz(4)/10 scsz(3)/scscale scsz(4)/scscale]);
-    for s = 1:6
-        subplot(2,3,s);        
-        hold on
-        if s==1
-        mseb(1:25,squeeze(nanmean(inddeconcycavg(76:100,:,area,conds),2))',squeeze(nansem(inddeconcycavg(76:100,:,area,conds),2))');
-        elseif s==2
-        mseb(1:25,squeeze(nanmean(inddeconcycavg(101:125,:,area,conds),2))',squeeze(nansem(inddeconcycavg(101:125,:,area,conds),2))');
-        elseif s==3
-        mseb(1:25,squeeze(nanmean(inddeconcycavg(126:150,:,area,conds),2))',squeeze(nansem(inddeconcycavg(126:150,:,area,conds),2))');
-        elseif s==4
-        mseb(1:25,squeeze(nanmean(indcycavg(76:100,:,area,conds),2))',squeeze(nansem(indcycavg(76:100,:,area,conds),2))');
-        elseif s==5
-        mseb(1:25,squeeze(nanmean(indcycavg(101:125,:,area,conds),2))',squeeze(nansem(indcycavg(101:125,:,area,conds),2))');
-        elseif s==6
-        mseb(1:25,squeeze(nanmean(indcycavg(126:150,:,area,conds),2))',squeeze(nansem(indcycavg(126:150,:,area,conds),2))');
-        end
-        
-        plot([11 11],[0 0.2],':')
-        xlim([1 25]); 
-        if s<=3 
-            ylim([0 0.15]);
-        else
-            ylim([0 0.2])
-        end
-        title(sprintf('low sf %s %s',areanames{area},labels{s}));
-        xlabel('frames')
-    end
-    legend(datafiles(conds),'location','northeast')
-end
+% labels = {'blank','blank+patch','patch','blank decon','b+p decon','patch decon'};
+% for area = 1:length(areanames)
+%     figure('Position', [scsz(3)/4 scsz(4)/2-scsz(4)/10 scsz(3)/scscale scsz(4)/scscale]);
+%     for s = 1:6
+%         subplot(2,3,s);        
+%         hold on
+%         if s==1
+%         mseb(1:25,squeeze(nanmean(inddeconcycavg(1:25,:,area,conds),2))',squeeze(nansem(inddeconcycavg(1:25,:,area,conds),2))');
+%         elseif s==2
+%         mseb(1:25,squeeze(nanmean(inddeconcycavg(26:50,:,area,conds),2))',squeeze(nansem(inddeconcycavg(26:50,:,area,conds),2))');
+%         elseif s==3
+%         mseb(1:25,squeeze(nanmean(inddeconcycavg(51:75,:,area,conds),2))',squeeze(nansem(inddeconcycavg(51:75,:,area,conds),2))');
+%         elseif s==4
+%         mseb(1:25,squeeze(nanmean(indcycavg(1:25,:,area,conds),2))',squeeze(nansem(indcycavg(1:25,:,area,conds),2))');
+%         elseif s==5
+%         mseb(1:25,squeeze(nanmean(indcycavg(26:50,:,area,conds),2))',squeeze(nansem(indcycavg(26:50,:,area,conds),2))');
+%         elseif s==6
+%         mseb(1:25,squeeze(nanmean(indcycavg(51:75,:,area,conds),2))',squeeze(nansem(indcycavg(51:75,:,area,conds),2))');
+%         end
+%         
+%         plot([11 11],[0 0.2],':')
+%         xlim([1 25]); 
+%         if s<=3 
+%             ylim([0 0.2]);
+%         else
+%             ylim([0 0.15])
+%         end
+%         title(sprintf('low sf %s %s',areanames{area},labels{s}));
+%         xlabel('frames')
+%     end
+%     legend(datafiles(conds),'location','northeast')
+% end
+% 
+% %%cycle average for high spatial frequency stim
+% labels = {'blank','blank+patch','patch','blank decon','b+p decon','patch decon'};
+% for area = 1:length(areanames)
+%     figure('Position', [scsz(3)/4 scsz(4)/2-scsz(4)/10 scsz(3)/scscale scsz(4)/scscale]);
+%     for s = 1:6
+%         subplot(2,3,s);        
+%         hold on
+%         if s==1
+%         mseb(1:25,squeeze(nanmean(inddeconcycavg(76:100,:,area,conds),2))',squeeze(nansem(inddeconcycavg(76:100,:,area,conds),2))');
+%         elseif s==2
+%         mseb(1:25,squeeze(nanmean(inddeconcycavg(101:125,:,area,conds),2))',squeeze(nansem(inddeconcycavg(101:125,:,area,conds),2))');
+%         elseif s==3
+%         mseb(1:25,squeeze(nanmean(inddeconcycavg(126:150,:,area,conds),2))',squeeze(nansem(inddeconcycavg(126:150,:,area,conds),2))');
+%         elseif s==4
+%         mseb(1:25,squeeze(nanmean(indcycavg(76:100,:,area,conds),2))',squeeze(nansem(indcycavg(76:100,:,area,conds),2))');
+%         elseif s==5
+%         mseb(1:25,squeeze(nanmean(indcycavg(101:125,:,area,conds),2))',squeeze(nansem(indcycavg(101:125,:,area,conds),2))');
+%         elseif s==6
+%         mseb(1:25,squeeze(nanmean(indcycavg(126:150,:,area,conds),2))',squeeze(nansem(indcycavg(126:150,:,area,conds),2))');
+%         end
+%         
+%         plot([11 11],[0 0.2],':')
+%         xlim([1 25]); 
+%         if s<=3 
+%             ylim([0 0.15]);
+%         else
+%             ylim([0 0.2])
+%         end
+%         title(sprintf('low sf %s %s',areanames{area},labels{s}));
+%         xlabel('frames')
+%     end
+%     legend(datafiles(conds),'location','northeast')
+% end
 
 % %circleshifted non-normalized cycle average
 % figure('Position', [scsz(3)/4 scsz(4)/2-scsz(4)/10 scsz(3)/scscale scsz(4)/scscale]);%displays at top of screen
@@ -346,7 +346,7 @@ end
 set(gcf, 'PaperPositionMode', 'auto');
 print('-dpsc',psfilename,'-append');
 
-labels = {'blank','blank+patch','patch','blank decon','b+p decon','patch decon'};
+labels = {'blank decon','b+p decon','patch decon','blank','blank+patch','patch'};
 for area = 1:length(areanames)
     figure('visible','off');
     for s = 1:6
@@ -366,23 +366,23 @@ for area = 1:length(areanames)
         mseb(1:25,squeeze(nanmean(indcycavg(51:75,:,area,conds),2))',squeeze(nansem(indcycavg(51:75,:,area,conds),2))');
         end
         
-        plot([11 11],[0 0.2],':')
         xlim([1 25]); 
         if s<=3 
-            ylim([0 0.15]);
+            ylim([0 0.2]);
         else
-            ylim([0 0.2])
+            ylim([0 0.15])
         end
         title(sprintf('low sf %s %s',areanames{area},labels{s}));
         xlabel('frames')
     end
     legend(datafiles(conds),'location','northeast')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfilename,'-append');
 end
-set(gcf, 'PaperPositionMode', 'auto');
-print('-dpsc',psfilename,'-append');
+
 
 %%cycle average for high spatial frequency stim
-labels = {'blank','blank+patch','patch','blank decon','b+p decon','patch decon'};
+labels = {'blank decon','b+p decon','patch decon','blank','blank+patch','patch'};
 for area = 1:length(areanames)
     figure('visible','off');
     for s = 1:6
@@ -402,20 +402,19 @@ for area = 1:length(areanames)
         mseb(1:25,squeeze(nanmean(indcycavg(126:150,:,area,conds),2))',squeeze(nansem(indcycavg(126:150,:,area,conds),2))');
         end
         
-        plot([11 11],[0 0.2],':')
         xlim([1 25]); 
         if s<=3 
-            ylim([0 0.15]);
+            ylim([0 0.2]);
         else
-            ylim([0 0.2])
+            ylim([0 0.15])
         end
         title(sprintf('low sf %s %s',areanames{area},labels{s}));
         xlabel('frames')
     end
     legend(datafiles(conds),'location','northeast')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfilename,'-append');
 end
-set(gcf, 'PaperPositionMode', 'auto');
-print('-dpsc',psfilename,'-append');
 
 % % %circleshifted non-normalized cycle average
 % % figure('visible','off');

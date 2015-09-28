@@ -38,6 +38,13 @@ end
        pixPerCycs              = [400];
        percentCorrectionTrials = .5;
        
+     case 'g62t5rt' % Started 9/11/15 %%started full 9/28/15
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 107;
+       msPenalty               =3500;
+       percentCorrectionTrials = .50; 
+       
+       
      case 'g62a3tt' % Started 6/25/15 %% started hvv 7/17/15 %%started gotoblack again 8/11/15 %%%started full 9-18-15
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 59;

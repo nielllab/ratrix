@@ -5,7 +5,8 @@ function [doFramePulse expertCache dynamicDetails textLabel i dontclear indexPul
 
 originalLabel = textLabel;
 
-width  = 63; % default 1.  > 63 errors for DrawDots?  > ~10 seems to have no effect on lines?
+%width  = 63; % default 1.  > 63 errors for DrawDots?  > ~10 seems to have no effect on lines?
+width = 10  % new video cards support only (0.500000 to 10.000000)
 center = []; % positions are relative to "center" (default center is [0 0]).
 centerWidth = 10;
 

@@ -1,12 +1,12 @@
 clear all
 close all
 dbstop if error
-% pathname = 'I:\compiled behavior\';
-pathname = '/backup/compiled behavior/';
-datapathname = 'G:\Behavior data 12-24-13+\';  %some in archived behavior
-altdatapathname = '//lorentz/backup/widefield/behavior/';
-%outpathname = 'I:\compiled behavior\behavior topos\';
-outpathname = '/backup/compiled behavior/behavior topos/';
+
+pathname = '\\lorentz\backup\widefield\compiled behavior\';
+datapathname = '\\langevin\backup\widefield\behavior';  %some in archived behavior
+altdatapathname = 'H:\archived widefield behavior (12-24-13 to 4-29-14)\';
+outpathname = '\\langevin\backup\widefield\compiled behavior\behavior topos\';
+
 
 n=1;
 files(n).subj = 'g62l1lt'; 

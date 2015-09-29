@@ -2,9 +2,9 @@
 
 dbstop if error
 pathname = '\\lorentz\backup\widefield\compiled behavior\';
-datapathname = '\\lorentz\backup\widefield\behavior';  %some in archived behavior
+datapathname = '\\langevin\backup\widefield\behavior';  %some in archived behavior
 altdatapathname = 'H:\archived widefield behavior (12-24-13 to 4-29-14)\';
-outpathname = '\\lorentz\backup\widefield\compiled behavior\behavior topos\';
+outpathname = '\\langevin\backup\widefield\compiled behavior\behavior topos\';
 
 
 n=1;

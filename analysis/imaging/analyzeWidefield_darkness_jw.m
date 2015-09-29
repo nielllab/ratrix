@@ -2,12 +2,12 @@
 
 clear all;
 
-
+batchLearningBehav
 %batch_darkness_learned;
 %batc_backgroundGrating_learned
 %batchTopoFrontiers
 %batchAcrylic_testing_jw
-batchBehav_8mm
+%batchBehav_8mm
 
 close all
 psfilename = 'C:\tempPS.ps';

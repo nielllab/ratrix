@@ -3,13 +3,15 @@
 clear all
 close all
 dbstop if error
-pathname = '/backup/data to analyze/compiled behavior\'; %for Maxwell
-datapathname = '/backup/data to analyze/';  %for Maxwell
-outpathname = '/backup/data to analyze/widefield/compiled behavior/behavior topos/'; %for Maxwell
 
-%pathname = 'N:\widefield\compiled behavior\'; 
-%datapathname = 'N:backup\data to analyze\';  
-%outpathname = 'N:\widefield\compiled behavior\behavior topos\';
+% pathname = '/backup/data to analyze/compiled behavior\'; %for Maxwell (linux)
+% datapathname = '/backup/data to analyze/';  %for Maxwell
+% outpathname = '/backup/data to analyze/widefield/compiled behavior/behavior topos/'; %for Maxwell
+
+pathname = '\\langevin\backup\widefield\compiled behavior\'; %for Maxwell
+datapathname = '\\langevin\backup\widefield\behavior';  %reading over network from langevin
+outpathname = '\\langevin\backup\widefield\compiled behavior\behavior topos\';
+
 
 
 
@@ -38,10 +40,10 @@ files(n).notes = 'good imaging session';
 n=n+1;
 files(n).subj = 'g62n1ln'; 
 files(n).expt = '021515';
-files(n).topox =  '';
-files(n).topoxdata = '021515 g62n1ln\G62N1LN_run1_portrait_topoX_50msexp_maps.mat';
-files(n).topoy = '';
-files(n).topoydata = '021515 g62n1ln\G62N1LN_run2_portrait_topoY_50msexp_maps.mat';
+files(n).topox =  '021515 g62n1ln\G62N1LN_run1_portrait_topoX_50msexp_maps.mat';
+files(n).topoxdata = '';
+files(n).topoy = '021515 g62n1ln\G62N1LN_run2_portrait_topoY_50msexp_maps.mat';
+files(n).topoydata = '';
 files(n).behav = '';
 files(n).behavdata = '';
 files(n).grating4x3yLandscape = '021515 g62n1ln\G62N1LN_run8_landscape_4x3_Gratings_22min_maps.mat';
@@ -148,13 +150,13 @@ files(n).notes = 'good imaging session';
 n=n+1;
 files(n).subj = 'g62l10rt'; 
 files(n).expt = '022215';
-files(n).topox =  '022115 g62l10rt\G62L10-rt_run1_portrait_topoX_50msexp_maps.mat';
+files(n).topox =  '022215 g62l10rt\G62L10-rt_run1_portrait_topoX_50msexp_maps.mat';
 files(n).topoxdata = '';
-files(n).topoy = '022115 g62l10rt\G62L10-rt_run2_portrait_topoY_50msexp_maps.mat';
+files(n).topoy = '022215 g62l10rt\G62L10-rt_run2_portrait_topoY_50msexp_maps.mat';
 files(n).topoydata = '';
 files(n).behav = '';
 files(n).behavdata = '';
-files(n).grating4x3yLandscape = '022115 g62l10rt\G62L10-rt_run3_landscape_4x3yGratings_50msexp_maps.mat';
+files(n).grating4x3yLandscape = '022215 g62l10rt\G62L10-rt_run3_landscape_4x3yGratings_50msexp_maps.mat';
 files(n).gratingdata4x3yLandscapedata = '';
 files(n).behavstim2sf = '';
 files(n).behavstim2sfdata = '';
@@ -707,8 +709,8 @@ files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session'; %poor performance throughout. hasnt learned yet
 
 n=n+1;
-files(n).subj = '032315'; 
-files(n).expt = 'g62n1ln';
+files(n).subj = 'g62n1ln'; 
+files(n).expt = '032315';
 files(n).topox =  '032315 g62n1ln\g62n1ln_run2_portrait_topoX_maps.mat';
 files(n).topoxdata = '032315 G62N1LN GTS behavior LearnDay16\g62n1ln_run2_portrait_topoX\g62n1ln_run2_portrait_topoX';
 files(n).topoy = '032315 g62n1ln\g62n1ln_run3_portrait_topoY_maps.mat';
@@ -729,8 +731,8 @@ files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
 
 n=n+1;
-files(n).subj = '032315'; 
-files(n).expt = 'g62l8rn';
+files(n).subj = 'g62l8rn'; 
+files(n).expt = '032315';
 files(n).topox =  '032315 g62l8rn\g62l8rn_run2_portrait_topoX_maps.mat';
 files(n).topoxdata = '032315 G62L8RN HvV behavior LearnDay16\g62l8rn_run2_portrait_topoX\g62l8rn_run2_portrait_topoX';
 files(n).topoy = '032315 g62l8rn\g62l8rn_run3_portrait_topoY_maps.mat';
@@ -1227,8 +1229,8 @@ files(n).notes = 'good imaging session';
 
 
 n=n+1;
-files(n).subj = '043015'; 
-files(n).expt = 'g62a5nn';
+files(n).subj = 'g62a5nn'; 
+files(n).expt = '043015';
 files(n).topox =  '043015 g62a5nn\g62a5nn_run1_portrait_topoX_maps.mat';
 files(n).topoxdata = '';
 files(n).topoy = '043015 g62a5nn\g62a5nn_run2_portrait_topoY_maps.mat';
@@ -1250,8 +1252,8 @@ files(n).notes = 'good imaging session';
 
 
 n=n+1;
-files(n).subj = '051315'; 
-files(n).expt = 'g62a4tt';
+files(n).subj = 'g62a4tt'; 
+files(n).expt = '051315';
 files(n).topox =  '051315 g62a4tt\g62a4tt_run1_portrait_topoX_maps.mat';
 files(n).topoxdata = '';
 files(n).topoy = '051315 g62a4tt\g62a4tt_run2_portrait_topoY_maps.mat';

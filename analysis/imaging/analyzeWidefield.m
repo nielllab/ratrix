@@ -3,8 +3,10 @@
 % gcp('nocreate')
 
 clear all
-batchBehavNN;
-%batchTopography
+batchBehavNew;
+%batchLearningBehav;
+%batchBehavNN;
+%batchTopography;
 close all
 
  alluse = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session')  &  strcmp({files.label},'camk2 gc6') & strcmp({files.task},'HvV_center') ); %

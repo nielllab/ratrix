@@ -28,7 +28,7 @@ for f= 1:length(use)
     display('loading data')
     clear dfof_bg sp
     tic
-    load([pathname files(use(f)).darkness],'dfof_bg','sp');
+    load([pathname files(use(f)).darkness],'dfof_bg','sp');  %the stim to run correlation on
     toc
     
     display('aligning dfof')

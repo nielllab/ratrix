@@ -3,7 +3,8 @@
 clear all; close all
 
 %%% batch file of choice
-batchBehav_8mm
+%batchBehav_8mm
+batchAcrylic_testing_jw
 alluse = find( strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  )
 
 length(alluse)

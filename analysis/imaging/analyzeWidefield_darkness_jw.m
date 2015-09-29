@@ -1,11 +1,14 @@
 
 
-clear all
-batch_darkness_learned;
-%batchTopography
-%batchDOI0722
-%batchRigTest
+clear all;
+
+
+%batch_darkness_learned;
+%batc_backgroundGrating_learned
 %batchTopoFrontiers
+%batchAcrylic_testing_jw
+batchBehav_8mm
+
 close all
 psfilename = 'C:\tempPS.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end

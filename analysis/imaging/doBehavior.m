@@ -11,9 +11,9 @@ clear correct ntrials
 display('info about parallel pool')
 gcp('nocreate')
 
-if isempty(gcp('nocreate'))
-    pool = parpool;
-end
+% if isempty(gcp('nocreate'))   %parallel pool not working 9/30/15 jw
+%     pool = parpool;
+% end
 toc
 tic
 for f = 1:length(use)

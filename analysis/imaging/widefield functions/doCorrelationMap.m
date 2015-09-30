@@ -23,11 +23,17 @@ x= round(x/downsamp); y= round(y/downsamp);
 psfilename = 'C:\tempPS.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
+%need way to make sure this can use subset of files that have correct stim
+%to load below
+
+%newuse = find(strcmp({files.notes},'good imaging session')   & ~strcmp({files(use(f)).darkness},'') ); %
+
 
 for f= 1:length(use)
     display('loading data')
     clear dfof_bg sp
-    tic
+     tic 
+     %make sure this is stim that exists in each file included in use?
     load([pathname files(use(f)).darkness],'dfof_bg','sp');  %the stim to run correlation on
     toc
     

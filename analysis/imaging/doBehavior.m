@@ -9,7 +9,7 @@ tic
 clear correct ntrials
 
 display('info about parallel pool')
-gcp('nocreate')
+%gcp('nocreate')
 
 % if isempty(gcp('nocreate'))   %parallel pool not working 9/30/15 jw
 %     pool = parpool;
@@ -21,7 +21,7 @@ sprintf('%d %s %s',f,files(use(f)).subj,files(use(f)).expt)
     [behav{f} correct(f) ntrials(f) nmf_spatial{f} nmf_temporal{f} numTrialsPercond{f}] = overlayMaps(files(use(f)),pathname,outpathname,1);
 end
 toc
-delete(gcp)
+%delete(gcp)
 
 %keyboard
 sprintf('subj %s correct %f trials %f',allsubj{s},mean(correct),mean(ntrials))

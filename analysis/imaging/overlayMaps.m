@@ -1,7 +1,7 @@
 function [alldata percentCorrect numtrials nmf_spatial nmf_temporal numTrialsPercond] = overlayMaps(expfile,pathname,outpathname,showImg)
 nmf_spatial=[];
 nmf_temporal=[];
-
+alldata = [];
 
 dbstop if error
 if ~exist('showImg','var')

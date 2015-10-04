@@ -40,11 +40,11 @@ switch subjIDs{1}
        msPenalty               =3500;
        percentCorrectionTrials = .50; 
        
-    case 'g6w4tt' % Started 9/15/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 107;
-       msPenalty               =3500;
-       percentCorrectionTrials = .5; 
+%     case 'g6w4tt' % Started 9/15/15 %switch to GTS on 10/4/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 107;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5; 
        
 %     case 'g62t5rt' % Started 9/11/15
 %        requestRewardSizeULorMS = 0;

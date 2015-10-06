@@ -141,7 +141,7 @@
 %         else
 %             ylim([0 0.2])
 %         end
-%         title(sprintf('low sf %s %s',areanames{area},labels{s}));
+%         title(sprintf('high sf %s %s',areanames{area},labels{s}));
 %         xlabel('frames')
 %     end
 %     legend(datafiles(conds),'location','northeast')
@@ -408,7 +408,7 @@ for area = 1:length(areanames)
         else
             ylim([0 0.15])
         end
-        title(sprintf('low sf %s %s',areanames{area},labels{s}));
+        title(sprintf('high sf %s %s',areanames{area},labels{s}));
         xlabel('frames')
     end
     legend(datafiles(conds),'location','northeast')

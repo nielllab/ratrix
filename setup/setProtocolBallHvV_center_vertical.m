@@ -33,30 +33,30 @@ switch subjIDs{1}
     case 'testHvVcenter' % Switched full 10/9/14
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 59;
-       msPenalty               =4300;
+       msPenalty               =6300;
        
     case 'pvchr14ln' % Started 8/25/15 %%started hvv center 9/15/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 107;
-       msPenalty               =3500;
+       rewardSizeULorMS        = 59;
+       msPenalty               =6500;
        percentCorrectionTrials = .50; 
        
     case 'pvchr14rn' % Started 8/25/15 %%started hvv center 9/15/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 107;
-       msPenalty               =3500;
+       rewardSizeULorMS        = 43;
+       msPenalty               =6500;
        percentCorrectionTrials = .50; 
 
        
     case 'pvchr14rt' % Started 8/25/15 %%switched to center 9/11/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 75;
-       msPenalty               =4500;
+       rewardSizeULorMS        = 27;
+       msPenalty               =5500;
        percentCorrectionTrials = .50; 
        
     case 'pvchr14tt' % Started 8/25/15 %%switched to center 9/11/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 75;
+       rewardSizeULorMS        = 43;
        msPenalty               =4500;
        percentCorrectionTrials = .50; 
        
@@ -90,13 +90,13 @@ switch subjIDs{1}
        
       case 'g62a5nn' % Started 5/15/15 %% back to hvv 7/25/15 %%backtogloblack 8/11/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 59;
+       rewardSizeULorMS        = 43;
        msPenalty               =3500;
        percentCorrectionTrials = .50;
        
       case 'g62n7ln' % Started 7/14/15 %%switch center 8/12/15
        requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 91;
+       rewardSizeULorMS        = 43;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        

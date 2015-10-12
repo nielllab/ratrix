@@ -88,17 +88,19 @@ switch subjIDs{1}
 %        msPenalty               =3500;
 %        percentCorrectionTrials = .5;
        
-      case 'g62a5nn' % Started 5/15/15 %% back to hvv 7/25/15 %%backtogloblack 8/11/15
+      case 'g62a5nn' % Started 5/15/15 %% back to hvv 7/25/15 %%backtogloblack 8/11/15 %%%switch 100 sf 10/12/15
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 43;
        msPenalty               =3500;
        percentCorrectionTrials = .50;
+       pixPerCycs                = [100];
        
-      case 'g62n7ln' % Started 7/14/15 %%switch center 8/12/15
+      case 'g62n7ln' % Started 7/14/15 %%switch center 8/12/15 %%%switch 100 sf 10/12/15
        requestRewardSizeULorMS = 00;
        rewardSizeULorMS        = 43;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
+       pixPerCycs                = [100];
        
 %     
 %     case 'g62n7ln' % Started 7/14/15

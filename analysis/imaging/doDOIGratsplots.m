@@ -290,6 +290,7 @@
 % % hold off
 % % print('-dpsc',psfilename,'-append');
 
+%%%% SF tuning plots
 figure('visible','off');
 subplot(2,4,1)
 plot(0,squeeze(allmnfit(1,1,1,conds)))
@@ -346,6 +347,7 @@ end
 set(gcf, 'PaperPositionMode', 'auto');
 print('-dpsc',psfilename,'-append');
 
+%%%%  cycle average for low spatial frequency stim
 labels = {'blank decon','b+p decon','patch decon','blank','blank+patch','patch'};
 for area = 1:length(areanames)
     figure('visible','off');
@@ -381,7 +383,7 @@ for area = 1:length(areanames)
 end
 
 
-%%cycle average for high spatial frequency stim
+%%%% cycle average for high spatial frequency stim
 labels = {'blank decon','b+p decon','patch decon','blank','blank+patch','patch'};
 for area = 1:length(areanames)
     figure('visible','off');

@@ -1,7 +1,24 @@
-clear all
-close all
+%This analysis takes in a .mat file with eyetracking data in the form of a
+%3-dimensional array "data(xpixel,ypixel,frame)" output from imaqtool. It
+%binarizes the images and fits a circle to the pupil. Depending on the
+%image levels and the pupil size in pixels you'll want to adjust the
+%threshold and pupil range. Upon running the code, you'll be prompted to
+%select points on an image to improve the analysis: 1) pupil center, 2) top
+%edge of pupil, 3) top edge of eyeball, 4) right edge of eyeball, 5)
+%darkest part of the eyeball. The analysis outputs the centroid (X/Y) of
+%the pupil center and the radius of the pupil. Any frame where a circle
+%could not be fit will contain NAN values. The code currently commented out
+%is intended for closed loop analysis - it uses recent sizes and locations
+%to guess the next ones to improve tracking under conditions with more eye
+%movement and pupil size changes. It's still a bit buggy.
 
-dir = '\\NIELL-V2-W7\Angie_tanks\eyetracking data\09_08_15\';
+%This code builds off Scanbox code by Dario
+%Ringarch and was developed by P.R.L. Parker and A.M. Michaiel.
+
+close all
+clear all
+%% Set file info and analysis parameters
+dir = '\\NIELL-V2-W7\Angie_tanks\eyetracking data\09_08_15\'; %file location
 name = '09_08_15_predoi_eye'; %data file
 thresh = 0.85; %pupil threshold for binarization
 puprange = [5 20]; %set
@@ -10,7 +27,7 @@ puprange = [5 20]; %set
 % pupercent = 0.15; %set range pupil radius window
 % pupchange = 0.25; %acceptable percent change in radius per framerange
 % framerange = 1; %number of frames to smooth over
-
+%% 
 load(name);
 data = squeeze(data);
 warning off;
@@ -41,7 +58,6 @@ end
 figure
 imshow(bindata(:,:,100))
 
-tic
 centroid = nan(size(data,3),2);
 rad = nan(size(data,3),1);
 centroid(1,:) = [horiz vert];
@@ -69,7 +85,6 @@ for n = 2:size(data,3)
 %         puprange = puprange;
 %     end
 end
-toc
 
 %plot x and y position and radius across experiment
 h2 = figure
@@ -80,7 +95,7 @@ plot(0.1:0.1:size(data,3)/10,centroid(:,2),'.r')
 hold off
 legend('radius','x pos','ypos')
 
-% %
+%plot the measured circles over the video
 figure
 for i = 1:size(data,3)
     subplot(1,2,1)

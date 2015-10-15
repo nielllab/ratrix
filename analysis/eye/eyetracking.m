@@ -13,13 +13,14 @@
 %movement and pupil size changes. It's still a bit buggy.
 
 %This code builds off Scanbox code by Dario
-%Ringarch and was developed by P.R.L. Parker and A.M. Michaiel.
+%Ringach and was developed by P.R.L. Parker and A.M. Michaiel under C.M.
+%Niell in 2015.
 
 close all
 clear all
 %% Set file info and analysis parameters
-dir = '\\NIELL-V2-W7\Angie_tanks\eyetracking data\09_08_15\'; %file location
-name = '09_08_15_predoi_eye'; %data file
+dir = '\\NIELL-V2-W7\Angie_tanks\eyetracking data\09_29_15'; %file location
+name = '09_29_15_bars_predoi_eye'; %data file
 thresh = 0.85; %pupil threshold for binarization
 puprange = [5 20]; %set
 

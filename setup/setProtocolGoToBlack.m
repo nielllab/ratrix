@@ -27,11 +27,11 @@ switch subjIDs{1}
     
        
     case 'testgotoblackstopime' % Started 6/25/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 1;
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 107;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
-       stim.slowSecs = 5;
+       stim.slowSecs = 1;
        
     case 'g62tx1.1ln' % Started 10/15/15
        requestRewardSizeULorMS = 20;
@@ -44,7 +44,7 @@ switch subjIDs{1}
        rewardSizeULorMS        = 107;
        msPenalty               =3500;
        percentCorrectionTrials = .50; 
-    
+       
     case 'g62r9tt' % Started 10/12/15
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 107;

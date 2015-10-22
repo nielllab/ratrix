@@ -59,6 +59,7 @@ for f=1:length(subDirs)
         end
     end
 
+    fullfile(filePath,fileName)
     if length(fieldnames(tr))>1
 
         % collection process

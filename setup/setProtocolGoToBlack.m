@@ -33,17 +33,29 @@ switch subjIDs{1}
        percentCorrectionTrials = .5;
        stim.slowSecs = 1;
        
-    case 'g62tx1.2lt' % Started 10/15/15
+    case 'g62tx2.3ln' % Started 10/24/15
        requestRewardSizeULorMS = 20;
        rewardSizeULorMS        = 107;
        msPenalty               =3500;
        percentCorrectionTrials = .50; 
     
-    case 'g62tx1.1ln' % Started 10/15/15
-       requestRewardSizeULorMS = 0;
+    case 'g62tx2.3rt' % Started 10/24/15
+       requestRewardSizeULorMS = 20;
        rewardSizeULorMS        = 107;
        msPenalty               =3500;
        percentCorrectionTrials = .50; 
+    
+    case 'g62tx1.2lt' % Started 10/24/15
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 107;
+       msPenalty               =3500;
+       percentCorrectionTrials = .50; 
+    
+%     case 'g62tx1.1ln' % Started 10/15/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 107;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .50; 
     
     case 'g62tx1.1tt' % Started 10/15/15
        requestRewardSizeULorMS = 0;
@@ -51,17 +63,17 @@ switch subjIDs{1}
        msPenalty               =3500;
        percentCorrectionTrials = .50; 
        
-    case 'g62r9tt' % Started 10/12/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 107;
-       msPenalty               =3500;
-       percentCorrectionTrials = .50; 
+%     case 'g62r9tt' % Started 10/12/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 107;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .50; 
        
-    case 'g62x1rt' % Started 10/8/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 107;
-       msPenalty               =3500;
-       percentCorrectionTrials = .50; 
+%     case 'g62x1rt' % Started 10/8/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 107;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .50; 
        
 %     case 'g62t6lt' % Started 9/18/15 %%switch hvv center 10/13/15
 %        requestRewardSizeULorMS = 0;

@@ -34,19 +34,19 @@ switch subjIDs{1}
        stim.slowSecs = 1;
        
     case 'g62tx2.3ln' % Started 10/24/15
-       requestRewardSizeULorMS = 20;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 107;
        msPenalty               =3500;
        percentCorrectionTrials = .50; 
     
     case 'g62tx2.3rt' % Started 10/24/15
-       requestRewardSizeULorMS = 20;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 107;
        msPenalty               =3500;
        percentCorrectionTrials = .50; 
     
     case 'g62tx1.2lt' % Started 10/24/15
-       requestRewardSizeULorMS = 20;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 107;
        msPenalty               =3500;
        percentCorrectionTrials = .50; 

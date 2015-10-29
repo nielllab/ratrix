@@ -41,34 +41,34 @@ switch subjIDs{1}
        msPenalty               =3500;
        percentCorrectionTrials = .50; 
        
-    case 'pvchr14ln' % Started 8/25/15 %%started hvv center 9/15/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 59;
-       msPenalty               =6500;
-       percentCorrectionTrials = .50; 
-       stim.slowSecs = 2;
-       
-    case 'pvchr14rn' % Started 8/25/15 %%started hvv center 9/15/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 43;
-       msPenalty               =6500;
-       percentCorrectionTrials = .50; 
-       stim.slowSecs = 2;
-
-       
-    case 'pvchr14rt' % Started 8/25/15 %%switched to center 9/11/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 27;
-       msPenalty               =5500;
-       percentCorrectionTrials = .50; 
-       stim.slowSecs = 1.5;
-       
-    case 'pvchr14tt' % Started 8/25/15 %%switched to center 9/11/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 43;
-       msPenalty               =4500;
-       percentCorrectionTrials = .50; 
-       stim.slowSecs = 2;
+%     case 'pvchr14ln' % Started 8/25/15 %%started hvv center 9/15/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 59;
+%        msPenalty               =6500;
+%        percentCorrectionTrials = .50; 
+%        stim.slowSecs = 2;
+%        
+%     case 'pvchr14rn' % Started 8/25/15 %%started hvv center 9/15/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 43;
+%        msPenalty               =6500;
+%        percentCorrectionTrials = .50; 
+%        stim.slowSecs = 2;
+% 
+%        
+%     case 'pvchr14rt' % Started 8/25/15 %%switched to center 9/11/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 27;
+%        msPenalty               =5500;
+%        percentCorrectionTrials = .50; 
+%        stim.slowSecs = 1.5;
+%        
+%     case 'pvchr14tt' % Started 8/25/15 %%switched to center 9/11/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 43;
+%        msPenalty               =4500;
+%        percentCorrectionTrials = .50; 
+%        stim.slowSecs = 2;
        
     case 'pv8lt' % Started 6/25/15  (permenant record wont show till 6/26/15) %%started center 7/14/15
        requestRewardSizeULorMS = 00;

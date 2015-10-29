@@ -124,6 +124,14 @@ switch subjIDs{1}
 %        percentCorrectionTrials = .5;
 % 
 %        
+
+
+%     case 'g62w2rt' % Started 7/2/15  RESTARTED 8/7/15 %%tresty esjptjooeptses
+%        requestRewardSizeULorMS = 00;
+%        rewardSizeULorMS        = 76;
+%        msPenalty               =4200;
+%        percentCorrectionTrials = .5;
+       
 %      case 'g62m9tt' % Started GTS 3/4/15
 %        requestRewardSizeULorMS = 0;
 %        rewardSizeULorMS        = 25;

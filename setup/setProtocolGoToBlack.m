@@ -33,6 +33,18 @@ switch subjIDs{1}
        percentCorrectionTrials = .5;
        stim.slowSecs = 1;
        
+    case 'g62w7ln' % Started 11/2/15
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 107;
+       msPenalty               =3500;
+       percentCorrectionTrials = .50; 
+    
+    case 'g62w7tt' % Started 11/2/15
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 107;
+       msPenalty               =3500;
+       percentCorrectionTrials = .50; 
+       
     case 'pvchr14ln' % Started 8/25/15 %%started hvv center 9/15/15 %%% ALL PV14 mice back to gotoblack 10/29/15 
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 59;
@@ -87,11 +99,11 @@ switch subjIDs{1}
 %        msPenalty               =3500;
 %        percentCorrectionTrials = .50; 
     
-    case 'g62tx1.1tt' % Started 10/15/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 107;
-       msPenalty               =3500;
-       percentCorrectionTrials = .50; 
+%     case 'g62tx1.1tt' % Started 10/15/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 107;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .50; 
        
 %     case 'g62r9tt' % Started 10/12/15
 %        requestRewardSizeULorMS = 0;

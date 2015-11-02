@@ -18,7 +18,7 @@ fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =msPenalty;
-pixPerCycs                = [200];
+pixPerCycs                = [100 150 200];
 percentCorrectionTrials = .5;
 
 % sca
@@ -39,7 +39,8 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 107;
        msPenalty               =3500;
-       percentCorrectionTrials = .50; 
+       percentCorrectionTrials = .50;
+       pixPerCycs                = [200];
        
 %     case 'pvchr14ln' % Started 8/25/15 %%started hvv center 9/15/15
 %        requestRewardSizeULorMS = 0;

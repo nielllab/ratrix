@@ -34,10 +34,10 @@ switch subjIDs{1}
        stim.slowSecs = 1;
        
     case 'g62r9tt' % Started 10/12/15 %%started gts 10/24/15 %%%back gotoblack 11/5/15
-       requestRewardSizeULorMS = 0;
+       requestRewardSizeULorMS = 10;
        rewardSizeULorMS        = 107;
        msPenalty               =3500;
-       percentCorrectionTrials = .50; 
+       percentCorrectionTrials = .25; 
        
     case 'g62w7ln' % Started 11/2/15
        requestRewardSizeULorMS = 0;

@@ -32,6 +32,30 @@ percentCorrectionTrials = .5;
 
 switch subjIDs{1}
     
+    case 'g62bb1rt' % Started 11/16/15
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 123;
+       msPenalty               =3500;
+       percentCorrectionTrials = .50; 
+       
+    case 'g62y2lt' % Started 11/16/15
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 123;
+       msPenalty               =3500;
+       percentCorrectionTrials = .50; 
+       
+    case 'g62y1tt' % Started 11/16/15
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 123;
+       msPenalty               =3500;
+       percentCorrectionTrials = .50; 
+       
+    case 'g62w7ln' % Started 11/2/15
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 107;
+       msPenalty               =3500;
+       percentCorrectionTrials = .50; 
+    
     case 'g62w7tt' % Started 11/2/15
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 107;
@@ -58,7 +82,7 @@ switch subjIDs{1}
        percentCorrectionTrials = .50; 
     
     case 'g62tx1.1tt' % Started 10/15/15 %%Started GTS 11/2/15
-       requestRewardSizeULorMS = 0;
+       requestRewardSizeULorMS = 10;
        rewardSizeULorMS        = 107;
        msPenalty               =3500;
        percentCorrectionTrials = .50; 

@@ -42,13 +42,13 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
-       percentCorrectionTrials = .50; 
+       percentCorrectionTrials = .25; 
        
     case 'g62y1tt' % Started 11/16/15
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
-       percentCorrectionTrials = .50; 
+       percentCorrectionTrials = .25; 
        
     case 'g62w7ln' % Started 11/2/15
        requestRewardSizeULorMS = 0;

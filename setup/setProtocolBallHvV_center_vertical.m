@@ -36,7 +36,7 @@ switch subjIDs{1}
        msPenalty               =6300;
     
     case 'g62tx2.3rt' % Started 10/24/15 %%start hvv center 11/12/15
-       requestRewardSizeULorMS = 30;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 107;
        msPenalty               =3500;
        percentCorrectionTrials = .50;   
@@ -51,13 +51,13 @@ switch subjIDs{1}
        
     
     case 'g62tx2.6rt' % Started 11/8/15
-       requestRewardSizeULorMS = 16;
+       requestRewardSizeULorMS = 11;
        rewardSizeULorMS        = 107;
        msPenalty               =3500;
        percentCorrectionTrials = .50; 
        
     case 'g62tx2.3ln' % Started 10/24/15 %%Start hvv center 11/5/15
-       requestRewardSizeULorMS = 16;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 107;
        msPenalty               =3500;
        percentCorrectionTrials = .50; 
@@ -97,21 +97,21 @@ switch subjIDs{1}
 %        msPenalty               =4500;
 %        percentCorrectionTrials = .50; 
 %        stim.slowSecs = 2;
-       
-    case 'pv8lt' % Started 6/25/15  (permenant record wont show till 6/26/15) %%started center 7/14/15
-       requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 59;
-       msPenalty               =3500;
-       percentCorrectionTrials = .5;
-       stim.slowSecs = 1;
-    
-    case 'pv8nt' % Started 6/25/15  (permenant record wont show till 6/26/15) %%started center 7/14/15
-       requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 59;
-       msPenalty               =3500;
-       percentCorrectionTrials = .5;
-       stim.slowSecs = 1;
-       
+%        
+%     case 'pv8lt' % Started 6/25/15  (permenant record wont show till 6/26/15) %%started center 7/14/15
+%        requestRewardSizeULorMS = 00;
+%        rewardSizeULorMS        = 59;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5;
+%        stim.slowSecs = 1;
+%     
+%     case 'pv8nt' % Started 6/25/15  (permenant record wont show till 6/26/15) %%started center 7/14/15
+%        requestRewardSizeULorMS = 00;
+%        rewardSizeULorMS        = 59;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5;
+%        stim.slowSecs = 1;
+%        
               
      case 'g62a2nn' % Started 6/25/15 (permenant record wont show till 6/26/15) %%Started hvv 7/14/15 %%started gotoblack 8/11/15
        requestRewardSizeULorMS = 00;

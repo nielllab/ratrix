@@ -82,7 +82,7 @@ switch subjIDs{1}
        percentCorrectionTrials = .50; 
     
     case 'g62tx1.1tt' % Started 10/15/15 %%Started GTS 11/2/15
-       requestRewardSizeULorMS = 0;
+       requestRewardSizeULorMS = 11;
        rewardSizeULorMS        = 107;
        msPenalty               =3500;
        percentCorrectionTrials = .50; 

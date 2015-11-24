@@ -18,7 +18,7 @@ fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =0;
-pixPerCycs                = [200]; %*10^9;
+pixPerCycs                = [100 150 200]; %*10^9;
 percentCorrectionTrials = .5;
 normalizedPosition      = [0.33 0.66];
 
@@ -30,7 +30,13 @@ if ~isscalar(subjIDs)
 end
  switch subjIDs{1}
 
-    
+    case 'g62t6lt' % Started 9/18/15 %%started hvv center 10/13/15 %started hvv full 11/24/15
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 107;
+       msPenalty               =3500;
+       percentCorrectionTrials = .50;
+       pixPerCycs                = [200];
+     
      case 'testpixhvv' % Started 5/18/15
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 60;
@@ -38,24 +44,24 @@ end
        pixPerCycs              = [400];
        percentCorrectionTrials = .5;
        
-     case 'g62t5rt' % Started 9/11/15 %%started full 9/28/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 107;
-       msPenalty               =3500;
-       percentCorrectionTrials = .50; 
-       
-       
-     case 'g62a3tt' % Started 6/25/15 %% started hvv 7/17/15 %%started gotoblack again 8/11/15 %%%started full 9-18-15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 59;
-       msPenalty               =3500;
-       percentCorrectionTrials = .5;
-       
-     case 'g62a4tt' % Started 5/14/15 %% back to hvv 7/25/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 43;
-       msPenalty               =3500;
-       percentCorrectionTrials = .50; 
+%      case 'g62t5rt' % Started 9/11/15 %%started full 9/28/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 107;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .50; 
+%        
+%        
+%      case 'g62a3tt' % Started 6/25/15 %% started hvv 7/17/15 %%started gotoblack again 8/11/15 %%%started full 9-18-15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 59;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5;
+%        
+%      case 'g62a4tt' % Started 5/14/15 %% back to hvv 7/25/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 43;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .50; 
        
 %      case 'g62a5nn' % Started 5/15/15 %% back to hvv 7/25/15
 %        requestRewardSizeULorMS = 0;

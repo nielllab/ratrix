@@ -54,7 +54,7 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 107;
        msPenalty               =3500;
-       percentCorrectionTrials = .50; 
+       percentCorrectionTrials = .25; 
        
 %     case 'g62tx2.3ln' % Started 10/24/15 %%Start hvv center 11/5/15
 %        requestRewardSizeULorMS = 0;

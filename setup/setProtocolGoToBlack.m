@@ -33,6 +33,12 @@ switch subjIDs{1}
        percentCorrectionTrials = .5;
        stim.slowSecs = 1;
        
+   case 'g62bb3rt' % Started 12/9/15
+       requestRewardSizeULorMS = 27;
+       rewardSizeULorMS        = 107;
+       msPenalty               =3500;
+       percentCorrectionTrials = .50; 
+       
 %     case 'g62w7ln' % Started 11/2/15
 %        requestRewardSizeULorMS = 0;
 %        rewardSizeULorMS        = 107;

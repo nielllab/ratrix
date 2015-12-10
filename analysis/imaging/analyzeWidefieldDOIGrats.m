@@ -6,12 +6,14 @@ clear all
 %%
 
 %CHOOSE FILES WITH THE DATA IN THEM
-datafiles = {'SalinePreGratings', ...  %1
-            'SalinePostGratings', ...  %2
-            'DOIPreGratings', ...      %3
-            'DOIPostGratings', ...     %4
-            'LisuridePreGratings', ... %5
-            'LisuridePostGratings'};    %6
+datafiles = {'DOITrainedAnimalsBKGRATSpre',...
+            'DOITrainedAnimalsBKGRATSpost'};
+% datafiles = {'SalinePreGratings', ...  %1
+%             'SalinePostGratings', ...  %2
+%             'DOIPreGratings', ...      %3
+%             'DOIPostGratings', ...     %4
+%             'LisuridePreGratings', ... %5
+%             'LisuridePostGratings'};    %6
 
 %CHOOSE FILE WITH POINTS FROM analyzeWidefieldDOI & SET NAMES
 load('SalinePoints'); %pre-made points for visual areas used in original analysis
@@ -61,13 +63,26 @@ for i= 1:length(datafiles) %collates all conditions (numbered above)
 %     
 end
 
-dir = '\\LANGEVIN\backup\widefield\DOI_experiments\Matlab Widefield Analysis';
+dir = 'C:\Users\nlab\Desktop\Widefield Data\DOI';
 nam = 'CompareGratings';
 save(fullfile(dir,nam),'allcycavg','allmnfit','areanames','datafiles','range','scscale','indcycavg','inddeconcycavg');
-      
-%GENERATE PDFs FOR ALL CONDITIONS
+%       
+% %GENERATE PDFs FOR ALL CONDITIONS
+% %%%
+% expname = 'SalineCompareGrats.pdf';
+% conds = [1 2];
+% 
+% psfilename = 'C:\tempPS.ps';
+% if exist(psfilename,'file')==2;delete(psfilename);end
+% 
+% doDOIGratsplots;
+% 
+% ps2pdf('psfile', psfilename, 'pdffile', fullfile(dir,expname));
+% delete(psfilename);
+% %%%
+
 %%%
-expname = 'SalineCompareGrats.pdf';
+expname = 'DOICompareGrats.pdf';
 conds = [1 2];
 
 psfilename = 'C:\tempPS.ps';
@@ -79,58 +94,45 @@ ps2pdf('psfile', psfilename, 'pdffile', fullfile(dir,expname));
 delete(psfilename);
 %%%
 
-%%%
-expname = 'DOICompareGrats.pdf';
-conds = [3 4];
-
-psfilename = 'C:\tempPS.ps';
-if exist(psfilename,'file')==2;delete(psfilename);end
-
-doDOIGratsplots;
-
-ps2pdf('psfile', psfilename, 'pdffile', fullfile(dir,expname));
-delete(psfilename);
-%%%
-
-%%%
-expname = 'LisurideCompareGrats.pdf';
-conds = [5 6];
-
-psfilename = 'C:\tempPS.ps';
-if exist(psfilename,'file')==2;delete(psfilename);end
-
-doDOIGratsplots;
-
-ps2pdf('psfile', psfilename, 'pdffile', fullfile(dir,expname));
-delete(psfilename);
-%%%
-
-%%%
-expname = 'AllPreCompareGrats.pdf';
-conds = [1 3 5];
-
-psfilename = 'C:\tempPS.ps';
-if exist(psfilename,'file')==2;delete(psfilename);end
-
-doDOIGratsplots;
-
-ps2pdf('psfile', psfilename, 'pdffile', fullfile(dir,expname));
-delete(psfilename);
-%%%
-
-%%%
-expname = 'AllPostCompareGrats.pdf';
-conds = [2 4 6];
-
-psfilename = 'C:\tempPS.ps';
-if exist(psfilename,'file')==2;delete(psfilename);end
-
-doDOIGratsplots;
-
-ps2pdf('psfile', psfilename, 'pdffile', fullfile(dir,expname));
-delete(psfilename);
-%%%
-% profile viewer
+% %%%
+% expname = 'LisurideCompareGrats.pdf';
+% conds = [5 6];
+% 
+% psfilename = 'C:\tempPS.ps';
+% if exist(psfilename,'file')==2;delete(psfilename);end
+% 
+% doDOIGratsplots;
+% 
+% ps2pdf('psfile', psfilename, 'pdffile', fullfile(dir,expname));
+% delete(psfilename);
+% %%%
+% 
+% %%%
+% expname = 'AllPreCompareGrats.pdf';
+% conds = [1 3 5];
+% 
+% psfilename = 'C:\tempPS.ps';
+% if exist(psfilename,'file')==2;delete(psfilename);end
+% 
+% doDOIGratsplots;
+% 
+% ps2pdf('psfile', psfilename, 'pdffile', fullfile(dir,expname));
+% delete(psfilename);
+% %%%
+% 
+% %%%
+% expname = 'AllPostCompareGrats.pdf';
+% conds = [2 4 6];
+% 
+% psfilename = 'C:\tempPS.ps';
+% if exist(psfilename,'file')==2;delete(psfilename);end
+% 
+% doDOIGratsplots;
+% 
+% ps2pdf('psfile', psfilename, 'pdffile', fullfile(dir,expname));
+% delete(psfilename);
+% %%%
+% % profile viewer
 
 
 

@@ -6,12 +6,14 @@ profile on
 %%
 
 %CHOOSE FILES WITH THE DATA IN THEM
-datafiles = {'SalinePreDataGood', ...  %1
-            'SalinePostDataGood', ...  %2
-            'DOIPreDataGood', ...      %3
-            'DOIPostDataGood', ...     %4
-            'LisuridePreDataGood', ... %5
-            'LisuridePostDataGood'};    %6
+datafiles = {'DOITrainedAnimals4X3Ypre',...
+            'DOITrainedAnimals4X3Ypost'}
+% datafiles = {'SalinePreDataGood', ...  %1
+%             'SalinePostDataGood', ...  %2
+%             'DOIPreDataGood', ...      %3
+%             'DOIPostDataGood', ...     %4
+%             'LisuridePreDataGood', ... %5
+%             'LisuridePostDataGood'};    %6
 
 %CHOOSE FILE WITH POINTS FROM analyzeWidefieldDOI & SET NAMES
 load('SalinePoints'); %pre-made points for visual areas used in original analysis
@@ -42,13 +44,26 @@ for i= 1:length(datafiles) %collates all conditions (numbered above)
     sdmnfit(:,:,:,i) = std(fit,[],4)/sqrt(size(fit,4));
 end
       
-dir = '\\lorentz\backup\widefield\DOI experiments\Matlab Widefield Analysis';
+dir = 'C:\Users\nlab\Desktop\Widefield Data\DOI';
 nam = 'Compare4X3Y';
 save(fullfile(dir,nam),'allcycavg','allmnfit','areanames','datafiles','range','scscale','sdcycavg','sdmnfit');
       
 %GENERATE PDFs FOR ALL CONDITIONS
 %%%
-expname = 'SalineCompare4X3Y.pdf';
+% expname = 'SalineCompare4X3Y.pdf';
+% conds = [1 2];
+% 
+% psfilename = 'C:\tempPS.ps';
+% if exist(psfilename,'file')==2;delete(psfilename);end
+% 
+% doDOI4X3Yplots;
+% 
+% ps2pdf('psfile', psfilename, 'pdffile', fullfile(dir,expname));
+% delete(psfilename);
+% %%%
+
+%%%
+expname = 'DOICompare4X3Y.pdf';
 conds = [1 2];
 
 psfilename = 'C:\tempPS.ps';
@@ -61,55 +76,42 @@ delete(psfilename);
 %%%
 
 %%%
-expname = 'DOICompare4X3Y.pdf';
-conds = [3 4];
-
-psfilename = 'C:\tempPS.ps';
-if exist(psfilename,'file')==2;delete(psfilename);end
-
-doDOI4X3Yplots;
-
-ps2pdf('psfile', psfilename, 'pdffile', fullfile(dir,expname));
-delete(psfilename);
-%%%
-
-%%%
-expname = 'LisurideCompare4X3Y.pdf';
-conds = [5 6];
-
-psfilename = 'C:\tempPS.ps';
-if exist(psfilename,'file')==2;delete(psfilename);end
-
-doDOI4X3Yplots;
-
-ps2pdf('psfile', psfilename, 'pdffile', fullfile(dir,expname));
-delete(psfilename);
-%%%
-
-%%%
-expname = 'AllPreCompare4X3Y.pdf';
-conds = [1 3 5];
-
-psfilename = 'C:\tempPS.ps';
-if exist(psfilename,'file')==2;delete(psfilename);end
-
-doDOI4X3Yplots;
-
-ps2pdf('psfile', psfilename, 'pdffile', fullfile(dir,expname));
-delete(psfilename);
-%%%
-
-%%%
-expname = 'AllPostCompare4X3Y.pdf';
-conds = [2 4 6];
-
-psfilename = 'C:\tempPS.ps';
-if exist(psfilename,'file')==2;delete(psfilename);end
-
-doDOI4X3Yplots;
-
-ps2pdf('psfile', psfilename, 'pdffile', fullfile(dir,expname));
-delete(psfilename);
+% expname = 'LisurideCompare4X3Y.pdf';
+% conds = [5 6];
+% 
+% psfilename = 'C:\tempPS.ps';
+% if exist(psfilename,'file')==2;delete(psfilename);end
+% 
+% doDOI4X3Yplots;
+% 
+% ps2pdf('psfile', psfilename, 'pdffile', fullfile(dir,expname));
+% delete(psfilename);
+% %%%
+% 
+% %%%
+% expname = 'AllPreCompare4X3Y.pdf';
+% conds = [1 3 5];
+% 
+% psfilename = 'C:\tempPS.ps';
+% if exist(psfilename,'file')==2;delete(psfilename);end
+% 
+% doDOI4X3Yplots;
+% 
+% ps2pdf('psfile', psfilename, 'pdffile', fullfile(dir,expname));
+% delete(psfilename);
+% %%%
+% 
+% %%%
+% expname = 'AllPostCompare4X3Y.pdf';
+% conds = [2 4 6];
+% 
+% psfilename = 'C:\tempPS.ps';
+% if exist(psfilename,'file')==2;delete(psfilename);end
+% 
+% doDOI4X3Yplots;
+% 
+% ps2pdf('psfile', psfilename, 'pdffile', fullfile(dir,expname));
+% delete(psfilename);
 %%%
 
 profile viewer

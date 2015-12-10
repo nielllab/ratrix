@@ -69,11 +69,17 @@ else
             error('hmmm')
         end
        if flipim
-           frame = flipdim(flipdim((imread(fullfile(d,fn))),1),2);
+           frame =imread(fullfile(d,fn));
+           frm = frame((stampHeight+1):end,:);
+           stamps(:,:,i) = frame(1:stampHeight,1:size(stamps,2));
+           frm = flip(frm,2);
+           
        else
            frame = (imread(fullfile(d,fn)));
+           frm = frame((stampHeight+1):end,:);
+           stamps(:,:,i) = frame(1:stampHeight,1:size(stamps,2));
        end
-        frm = frame((stampHeight+1):end,:);
+        
         if rigzoom<1
             s = size(frm); news = round(s*rigzoom);
             frm = frm(round(s(1)/2 - news(1)/2) + 1:news(1), round(s(2)/2 - news(2)/2) + 1:news(2));
@@ -84,13 +90,13 @@ else
         
         
         data(:,:,i) = imresize(frm,sz); %is imresize smart about unity?  how do our data depend on method?  (we use default 'bicubic' -- "weighted average of local 4x4" (w/antialiasing) -- we can specify kernel if desired)
-        stamps(:,:,i) = frame(1:stampHeight,1:size(stamps,2));
+        
     end
     toc
     try
     t = readStamps(stamps);
     catch
-        t = readStamps(flipdim(stamps,2));
+        t = readStamps(flip(stamps,2));
     end
     maxGBsaved = maxGB;
     fprintf('saving...\n')

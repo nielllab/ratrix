@@ -61,6 +61,12 @@ plot(squeeze(mean(mean(cycavg,2),1)))
 axis off
 set(gca,'LooseInset',get(gca,'TightInset'))
 
+
+if exist('psfilename','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfilename,'-append');
+end
+
 %%% calculate phase of cycle response
 %%% good for detectime framedrops or other problems
 tcourse = squeeze(mean(mean(img,2),1));
@@ -136,26 +142,28 @@ xrange = unique(xpos); yrange=unique(ypos); sfrange=unique(sf); tfrange=unique(t
 tuning=zeros(size(trialdata,1),size(trialdata,2),length(xrange),length(yrange),length(sfrange),length(tfrange));
 cond = 0;
 
-if length(xrange==4) & length(tfrange==1);
+if length(xrange)==4 && length(tfrange)==1;
     bkgrat =1;
 else
     bkgrat=0;
 end
 
-if bkgrat
-   for i = 1:2
-       blank = find(xpos==xrange(end) & sf == sfrange(i) );
-    patch = find(xpos==xrange(2) & sf == sfrange(i));
-    blankstart = floor((blank-1)*(duration+isi)*imagerate + isi*imagerate -1);
-    patchstart = floor((patch-1)*(duration+isi)*imagerate +isi*imagerate-1);
-    for f = 1:acqdurframes
-        blankcyc(:,:,f) = mean(img(:,:,blankstart+f),3);
-        patchcyc(:,:,f) =  mean(img(:,:,patchstart+f),3);
-    end
-    cycavg(:,:,(1:acqdurframes)+ (i-1)*2*acqdurframes) = blankcyc;
-    cycavg(:,:,((acqdurframes+1):2*acqdurframes) + (i-1)*2*acqdurframes) = patchcyc;
+bkgrat
 
-   end
+if bkgrat
+    for i = 1:2
+        blank = find(xpos==xrange(end) & sf == sfrange(i) );
+        patch = find(xpos==xrange(2) & sf == sfrange(i));
+        blankstart = floor((blank-1)*(duration+isi)*imagerate + isi*imagerate -1);
+        patchstart = floor((patch-1)*(duration+isi)*imagerate +isi*imagerate-1);
+        for f = 1:acqdurframes
+            blankcyc(:,:,f) = mean(img(:,:,blankstart+f),3);
+            patchcyc(:,:,f) =  mean(img(:,:,patchstart+f),3);
+        end
+        cycavg(:,:,(1:acqdurframes)+ (i-1)*2*acqdurframes) = blankcyc;
+        cycavg(:,:,((acqdurframes+1):2*acqdurframes) + (i-1)*2*acqdurframes) = patchcyc;
+        
+    end
 end
 
 
@@ -168,6 +176,12 @@ if bkgrat
         imagesc(blankMap(:,:,k));axis equal
         title(sprintf('blank stim sf = %0.2f',sfrange(k)));
     end
+    
+    if exist('psfilename','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfilename,'-append');
+    end
+    
 end
 
 %%% separate out responses by stim parameter
@@ -261,18 +275,20 @@ end
 %     imagesc(squeeze(tuning(x,y,:,:,2,1)),[-0.025 0.025]);
 % end
 %
-% figure
-% for i = 1:length(sfrange)
-%     for j=1:length(tfrange)
-%         subplot(length(tfrange),length(sfrange),length(sfrange)*(j-1)+i)
-%         d=squeeze(mean(mean(avgtrialcourse(:,:,i,j,:),2),1));
-%         sftcourse(i,j,:) = d-min(d);
-%         plot(d-min(d)); axis([1 18 0 0.015]);
-%         set(gca,'Xticklabel',[]); set(gca,'Yticklabel',[]);
-%         set(gca,'LooseInset',get(gca,'TightInset'))
-%     end
-% end
-%
+if length(xrange)==4 & length(yrange)==3
+    figure
+    for i = 1:length(sfrange)
+        for j=1:length(tfrange)
+            subplot(length(tfrange),length(sfrange),length(sfrange)*(j-1)+i)
+            d=squeeze(mean(mean(avgtrialcourse(:,:,i,j,:),2),1));
+            sftcourse(i,j,:) = d-min(d);
+            plot(d-min(d)); axis([1 18 0 0.015]);
+            set(gca,'Xticklabel',[]); set(gca,'Yticklabel',[]);
+            set(gca,'LooseInset',get(gca,'TightInset'))
+        end
+    end
+end
+
 
 %%% plot sf and tf responses
 figure
@@ -280,7 +296,7 @@ for i = 1:length(sfrange)
     for j=1:length(tfrange)
         subplot(length(tfrange),length(sfrange),length(sfrange)*(j-1)+i)
         imagesc(squeeze(mean(mean(tuning(:,:,:,:,i,j),4),3)),[ -0.005 0.05]); colormap jet;
-        title(sprintf('%0.2f %0.0fhz',sfrange(i),tfrange(j)))
+        title(sprintf('%0.2fcpd %0.0fhz',sfrange(i),tfrange(j)))
         axis off; axis equal
         hold on; plot(ypts,xpts,'w.','Markersize',2)
         set(gca,'LooseInset',get(gca,'TightInset'))

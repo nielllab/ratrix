@@ -308,6 +308,9 @@ if exist('psfilename','var')
 end
 
 
+    
+
+
 if bkgrat
     range = [-0.005 0.035];
 else
@@ -327,40 +330,42 @@ end
 % end
 
 %%% plot x/y maps
-if ~bkgrat
-    figure
-    for i = 1:length(xrange)
-        for j=1:length(yrange)
-            subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
-            imagesc(squeeze(mean(mean(tuning(:,:,i,j,:,:),6),5)),range); colormap jet
-            % title(sprintf('%0.2f %0.2f',xrange(i),yrange(j)))
-            axis off; axis equal
-            hold on; plot(ypts,xpts,'w.','Markersize',2)
-            set(gca,'LooseInset',get(gca,'TightInset'))
-        end
-    end
-else
-    for k = 1:2
-        figure
-        for i = 1:length(xrange)
-            for j=1:length(yrange)
-                subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
-                imagesc(squeeze(mean(mean(tuning(:,:,i,j,k,:),6),5)),range);
-                % title(sprintf('%0.2fcpd %0.2fhz',sfrange(i),tfrange(j)))
-                axis off; axis equal
-                hold on; plot(ypts,xpts,'w.','Markersize',2)
-                set(gca,'LooseInset',get(gca,'TightInset'))
-            end
-        end
-        title(sprintf('sf = %d',k));
-    end
-end
+% if ~bkgrat
+%     figure
+%     for i = 1:length(xrange)
+%         for j=1:length(yrange)
+%             subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
+%             imagesc(squeeze(mean(mean(tuning(:,:,i,j,:,:),6),5)),range); colormap jet
+%             % title(sprintf('%0.2f %0.2f',xrange(i),yrange(j)))
+%             axis off; axis equal
+%             hold on; plot(ypts,xpts,'w.','Markersize',2)
+%             set(gca,'LooseInset',get(gca,'TightInset'))
+%         end
+%     end
+% else
+%     for k = 1:2
+%         figure
+%         for i = 1:length(xrange)
+%             for j=1:length(yrange)
+%                 subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
+%                 imagesc(squeeze(mean(mean(tuning(:,:,i,j,k,:),6),5)),range);
+%                 % title(sprintf('%0.2fcpd %0.2fhz',sfrange(i),tfrange(j)))
+%                 axis off; axis equal
+%                 hold on; plot(ypts,xpts,'w.','Markersize',2)
+%                 set(gca,'LooseInset',get(gca,'TightInset'))
+%             end
+%         end
+%         title(sprintf('sf = %d',k));
+%     end
+% end
+% 
+% if exist('psfilename','var')
+%     set(gcf, 'PaperPositionMode', 'auto');
+%     print('-dpsc',psfilename,'-append');
+% end
 
-if exist('psfilename','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfilename,'-append');
-end
 
+    
 
 
 %    for x = 1:length(xrange)
@@ -400,10 +405,10 @@ end
 % imshow(merge);
 %end
 
-for doResolutionTest=1:0
+for doResolutionTest=1:1
     figure
-    for i = 2:2
-        for j=1:length(yrange)
+    for i = 1:2
+        for j=1:length(xrange)
             
             spotimg = squeeze(mean(tuning(:,:,i,j,:,1),5));
             imagesc(spotimg,[0 0.03]);

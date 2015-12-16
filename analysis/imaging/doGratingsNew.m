@@ -1,6 +1,6 @@
 %%%% doGratingsNew
 x=0;
-for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior passive; 4 = 4x3y patches
+for rep=[5] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior passive; 4 = 4x3y patches; 5 = size select;
     mnAmp{rep}=0; mnPhase{rep}=0; mnAmpWeight{rep}=0; mnData{rep}=0; mnFit{rep}=0;
     clear shiftData shiftAmp shiftPhase fit cycavg
     
@@ -54,10 +54,7 @@ for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
             end
             dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
             [ph amp data ft cyc] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
-                'C:\behavStim2sfSmall3366',24:26,18:20,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
-            
-            
-            
+                'C:\behavStim2sfSmall3366',24:26,18:20,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);   
         elseif rep ==4
             if ~isempty(files(use(f)).grating4x3y6sf3tf)
                 load ([pathname files(use(f)).grating4x3y6sf3tf], 'dfof_bg','sp','stimRec','frameT')
@@ -69,7 +66,20 @@ for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
                 [ph amp data ft cyc tuning4x3y(f,:,:,:,:,:,:) sftcourse(:,:,:,f) ] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
                     'C:\grating4x3y5sf3tf_short011315.mat',16:17,10:11,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
             end
+        elseif rep==5
+             if ~isempty(files(use(f)).sizeselect)
+                load ([pathname files(use(f)).sizeselect], 'dfof_bg','sp','stimRec','frameT')
+                zoom = 260/size(dfof_bg,1);
+                if ~exist('sp','var')
+                    sp =0;stimRec=[];
+                end
+                dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
+                [ph amp data ft cyc] = analyzeSizeSelect(imresize(dfof_bg,0.25),sp,...
+                    'C:\sizeSelect2sf5sz14min.mat',16:17,10:11,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
+            end 
         end
+        
+        
         sp = conv(sp,ones(50,1),'same')/50;
         %sp_all(1:13000,f) = sp;
         mv(f) = sum(sp>500)/length(sp);

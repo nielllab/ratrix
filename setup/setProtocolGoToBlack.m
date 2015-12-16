@@ -45,11 +45,11 @@ switch subjIDs{1}
 %        msPenalty               =3500;
 %        percentCorrectionTrials = .50; 
 
-   case 'g62bb2lt' % Started 11/8/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 107;
-       msPenalty               =3500;
-       percentCorrectionTrials = .5; 
+%    case 'g62bb2lt' % Started 11/8/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 107;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5; 
 
 %    case 'g62tx2.8lt' % Started 11/16/15
 %        requestRewardSizeULorMS = 0;
@@ -76,34 +76,34 @@ switch subjIDs{1}
 %        msPenalty               =3500;
 %        percentCorrectionTrials = .50; 
        
-    case 'pvchr14ln' % Started 8/25/15 %%started hvv center 9/15/15 %%% ALL PV14 mice back to gotoblack 10/29/15 
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 59;
-       msPenalty               =6500;
-       percentCorrectionTrials = .50; 
-       stim.slowSecs = 2;
-       
-    case 'pvchr14rn' % Started 8/25/15 %%started hvv center 9/15/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 43;
-       msPenalty               =6500;
-       percentCorrectionTrials = .50; 
-       stim.slowSecs = 2;
-
-       
-    case 'pvchr14rt' % Started 8/25/15 %%switched to center 9/11/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 27;
-       msPenalty               =5500;
-       percentCorrectionTrials = .50; 
-       stim.slowSecs = 1.5;
-       
-    case 'pvchr14tt' % Started 8/25/15 %%switched to center 9/11/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 43;
-       msPenalty               =4500;
-       percentCorrectionTrials = .50; 
-       stim.slowSecs = 2;
+%     case 'pvchr14ln' % Started 8/25/15 %%started hvv center 9/15/15 %%% ALL PV14 mice back to gotoblack 10/29/15 
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 59;
+%        msPenalty               =6500;
+%        percentCorrectionTrials = .50; 
+%        stim.slowSecs = 2;
+%        
+%     case 'pvchr14rn' % Started 8/25/15 %%started hvv center 9/15/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 43;
+%        msPenalty               =6500;
+%        percentCorrectionTrials = .50; 
+%        stim.slowSecs = 2;
+% 
+%        
+%     case 'pvchr14rt' % Started 8/25/15 %%switched to center 9/11/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 27;
+%        msPenalty               =5500;
+%        percentCorrectionTrials = .50; 
+%        stim.slowSecs = 1.5;
+%        
+%     case 'pvchr14tt' % Started 8/25/15 %%switched to center 9/11/15
+%        requestRewardSizeULorMS = 0;
+% %        rewardSizeULorMS        = 43;
+%        msPenalty               =4500;
+%        percentCorrectionTrials = .50; 
+%        stim.slowSecs = 2;
 
        
 %     case 'g62tx2.3ln' % Started 10/24/15

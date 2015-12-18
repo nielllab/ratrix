@@ -20,13 +20,6 @@ else
         [dfofInterp dtRaw greenframe framerate] = get2pdata_sbx(fullfile(p,f),dt,cycLength);
     end
     
-    global info
-    stim = find( info.event_id ==1);
-    if ~isempty(stim)
-        startTime = info.frame(stim(1))/framerate;
-    else
-        startTime = 1;
-    end
     
     figure
     timecourse = squeeze(mean(mean(dfofInterp(:,:,1:120/dt),2),1));
@@ -34,19 +27,9 @@ else
     
     hold on
     for st = 0:10
-        plot(st*cycLength+ [startTime startTime],[0.2 1],'g:')
-   
+        plot(st*cycLength,[0.2 1],'g:')
+        
     end
-    
-%     sprintf('estimated start time %f',startTime)
-%     startTime = input('start time : ');
-    
-    for st = 0:10
-        plot(st*cycLength+ [startTime startTime],[0.2 1],'k:')
-    end
-
-    
-    dfofInterp = dfofInterp(:,:,round(startTime/dt):end);
     
     clear cycAvg
     for i = 1:cycLength/dt;
@@ -58,12 +41,12 @@ else
     [fs ps] = uiputfile('*.mat','session data');
     if fs~=0
         display('saving data')
-    sessionName= fullfile(ps,fs);
-    if twocolor
-        save(sessionName,'dfofInterp','startTime','cycLength','redframe','greenframe','-v7.3');
-    else
-        save(sessionName,'dfofInterp','startTime','cycLength','greenframe','-v7.3');
-    end
-    display('done')
+        sessionName= fullfile(ps,fs);
+        if twocolor
+            save(sessionName,'dfofInterp','cycLength','redframe','greenframe','-v7.3');
+        else
+            save(sessionName,'dfofInterp','cycLength','greenframe','-v7.3');
+        end
+        display('done')
     end
 end

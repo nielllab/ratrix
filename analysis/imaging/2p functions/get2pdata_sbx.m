@@ -29,11 +29,22 @@ tic
 dfof= downsamplebin(dfof(:,:,1:downsampleLength),3,binsize)/binsize;
 toc
 
+    global info
+    stim = find( info.event_id ==1 | info.event_id==3);
+    fr =(info.frame(stim)/binsize);
+
 nframes = size(dfof,3);
-display('doing interp')
+display('doing interp')  %%% interpolate at image frames corresponding to dt interval, making framerate = 60Hz
 tic
 im_dt = (1/framerate)*binsize;
 dt = 0.25;
-dfofInterp = interp1(0:im_dt:(nframes-1)*im_dt,shiftdim(dfof,2),0:dt:(nframes-1)*im_dt);
+df = dt*60;
+fr = fr(round(df/2):df:end);
+fr=fr(fr<nframes);
+figure
+plot(diff(fr))
+ylabel('interp #')
+
+dfofInterp = interp1(1:nframes,shiftdim(dfof,2),fr);
 dfofInterp = shiftdim(dfofInterp,1);
 toc

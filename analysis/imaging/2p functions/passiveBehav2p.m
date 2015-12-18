@@ -1,11 +1,12 @@
 %%%
 clear all
 
+
 dt = 0.25;
 framerate=1/dt;
 twocolor = input('# of channels : ')
 twocolor= (twocolor==2);
-get2pSession;
+get2pSession_sbx;
 
 cycLength = cycLength/dt;
 map = 0;
@@ -50,9 +51,9 @@ top = squeeze(mean(dFout(:,:,find(timepts==0.75),xpos==x(1))-dFout(:,:,find(time
 bottom = squeeze(mean(dFout(:,:,find(timepts==0.75),xpos==x(end))-dFout(:,:,find(timepts==0),xpos==x(end)),4));
 figure
 subplot(2,2,1)
-imagesc(top,[-0.5 0.5])
+imagesc(top,[0 0.25])
 subplot(2,2,2)
-imagesc(bottom,[-0.5 0.5])
+imagesc(bottom,[0 0.25])
 subplot(2,2,3)
 top(top<0)=0; bottom(bottom<0)=0;
 imagesc((top-bottom)./(top+bottom),[-1 1])

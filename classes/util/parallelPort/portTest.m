@@ -3,6 +3,7 @@ function portTest
 %DO NOT CHANGE THIS -- SWAPPERS USE IT TO CHECK COMPONENTS!!!
 addr='0378';
 %addr='E800';
+%addr='E030';
 %addr='E480';
 valves=[6 7 8];
 sensors=[4 2 3];

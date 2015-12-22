@@ -2,31 +2,31 @@
 % close all
 % clear all
 %% code from analyzeWidefieldDOI
-batchDOIphil120215
-
+% batchDOIphil120215
+% 
 psfilename = 'C:\tempPS.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
-
-   alluse = find(strcmp({files.inject},'doi')  & strcmp({files.timing},'post') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-  
-length(alluse)
-%alluse=alluse(1:5)
-%alluse=alluse(end-5:end);
-allsubj = unique({files(alluse).subj})
-
-%%% use this one for subject by subject averaging
-%for s = 1:length(allsubj)
-%use = intersect(alluse,find(strcmp({files.subj},allsubj{s})))    
-
-%%% use this one to average all sessions that meet criteria
-for s=1:1
-use = alluse;
-allsubj{s}
-%%% calculate gradients and regions
-clear map merge
-x0 =0; y0=0; sz = 128;
-doTopography;
-end
+% 
+%    alluse = find(strcmp({files.inject},'doi')  & strcmp({files.timing},'post') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
+%   
+% length(alluse)
+% %alluse=alluse(1:5)
+% %alluse=alluse(end-5:end);
+% allsubj = unique({files(alluse).subj})
+% 
+% %%% use this one for subject by subject averaging
+% %for s = 1:length(allsubj)
+% %use = intersect(alluse,find(strcmp({files.subj},allsubj{s})))    
+% 
+% %%% use this one to average all sessions that meet criteria
+% for s=1:1
+% use = alluse;
+% allsubj{s}
+% %%% calculate gradients and regions
+% clear map merge
+% x0 =0; y0=0; sz = 128;
+% doTopography;
+% end
 
 %% code from doGratingsNew
  mnAmp=0; mnPhase=0; mnAmpWeight=0; mnData=0; mnFit=0;
@@ -51,7 +51,7 @@ for f = 1:length(use)
         hold on; plot(ypts,xpts,'w.','Markersize',2)
         set(gca,'LooseInset',get(gca,'TightInset'))
     end
-end
+
 
 if ~isempty(files(use(f)).sizeselect)
     load ([pathname files(use(f)).sizeselect], 'dfof_bg','sp','stimRec','frameT')
@@ -108,18 +108,18 @@ nx=ceil(sqrt(acqdurframes+1)); %%% how many rows in figure subplot
 %%% mean amplitude map across cycle
 figure
 map=0;
-for f=1:acqdurframes
-    cycavg(:,:,f) = mean(img(:,:,(f+trials*acqdurframes/2):acqdurframes:end),3);
-    subplot(nx,nx,f)
-    imagesc(squeeze(cycavg(:,:,f)),[-0.02 0.02])
+for fr=1:acqdurframes
+    cycavg(:,:,fr) = mean(img(:,:,(fr+trials*acqdurframes/2):acqdurframes:end),3);
+    subplot(nx,nx,fr)
+    imagesc(squeeze(cycavg(:,:,fr)),[-0.02 0.02])
     axis off
     set(gca,'LooseInset',get(gca,'TightInset'))
     hold on; plot(ypts,xpts,'w.','Markersize',2)
-    map = map+squeeze(cycavg(:,:,f))*exp(2*pi*sqrt(-1)*(0.5 +f/acqdurframes));
+    map = map+squeeze(cycavg(:,:,fr))*exp(2*pi*sqrt(-1)*(0.5 +fr/acqdurframes));
 end
 
 %%% add timecourse
-subplot(nx,nx,f+1)
+subplot(nx,nx,fr+1)
 plot(circshift(squeeze(mean(mean(cycavg,2),1)),10))
 axis off
 set(gca,'LooseInset',get(gca,'TightInset'))
@@ -268,6 +268,7 @@ for i = 1:length(xrange)
 end
 ximg(:,:,3) = 0;
 
+% load('C:\Users\nlab\Desktop\Widefield Data\DOI\SizeSelectPts.mat')
 [fname pname] = uigetfile('*.mat','points file');
 if fname~=0
     load(fullfile(pname, fname));
@@ -277,9 +278,9 @@ else
         imshow(ximg(:,:,i));hold on; plot(ypts,xpts,'w.','Markersize',2)
         [y(i) x(i)] = ginput(1);
         x=round(x); y=round(y);
-    %     range = floor(size(ximg,1)*0.05); %findmax range is 5% of image size
-    %     [maxval(i) maxind(i)] =  max(max(ximg(x(i)-range:x(i)+range,y(i)-range:y(i)+range,1)));
-    %     [xoff(i),yoff(i)] = ind2sub([1+2*range,1+2*range],maxind(i));
+%     %     range = floor(size(ximg,1)*0.05); %findmax range is 5% of image size
+%     %     [maxval(i) maxind(i)] =  max(max(ximg(x(i)-range:x(i)+range,y(i)-range:y(i)+range,1)));
+%     %     [xoff(i),yoff(i)] = ind2sub([1+2*range,1+2*range],maxind(i));
     end
     close(gcf);
     [fname pname] = uiputfile('*.mat','save points?');
@@ -371,20 +372,26 @@ if exist('psfilename','var')
     print('-dpsc',psfilename,'-append');
 end
 %%
-[f p] = uiputfile('*.mat','save data?');
-sessiondata = files(alluse);
+% [f p] = uiputfile('*.mat','save data?');
+% sessiondata = files(alluse);
+p = sprintf('%s%s',pathname,files(use(f)).sizeselect);
+p = fileparts(p);
+filename = fileparts(fileparts(files(use(f)).sizeselect));
+filename = sprintf('%s_SizeSelectAnalysis',filename);
 
 if f~=0
 %     save(fullfile(p,f),'allsubj','sessiondata','shiftData','fit','mnfit','cycavg','mv');
-    save(fullfile(p,f),'cycavg','tuning');
+    save(fullfile(p,filename),'trialcycavg','trialcycavgRun','trialcycavgSit','trialspeed','tuning','x','y');
 end
 
-[f p] = uiputfile('*.pdf','save pdf');
+% [f p] = uiputfile('*.pdf','save pdf');
 if f~=0
     try
-   ps2pdf('psfile', psfilename, 'pdffile', fullfile(p,f));
+   ps2pdf('psfile', psfilename, 'pdffile', fullfile(p,sprintf('%s.pdf',filename)));
 catch
     display('couldnt generate pdf');
     end
 end
 delete(psfilename);
+
+end

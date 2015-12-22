@@ -1,6 +1,6 @@
 %%%% doGratingsNew
 x=0;
-for rep=[5] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior passive; 4 = 4x3y patches; 5 = size select;
+for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior passive; 4 = 4x3y patches;
     mnAmp{rep}=0; mnPhase{rep}=0; mnAmpWeight{rep}=0; mnData{rep}=0; mnFit{rep}=0;
     clear shiftData shiftAmp shiftPhase fit cycavg
     
@@ -53,7 +53,7 @@ for rep=[5] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
                 sp =0;stimRec=[];
             end
             dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
-            [ph amp data ft cyc] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
+            [ph amp data ft cyc trialcycavg ] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
                 'C:\behavStim2sfSmall3366',24:26,18:20,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);   
         elseif rep ==4
             if ~isempty(files(use(f)).grating4x3y6sf3tf)
@@ -63,20 +63,10 @@ for rep=[5] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
                     sp =0;stimRec=[];
                 end
                 dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
-                [ph amp data ft cyc tuning4x3y(f,:,:,:,:,:,:) sftcourse(:,:,:,f) ] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
+                [ph amp data ft cyc tuning4x3y(f,:,:,:,:,:,:) sftcourse(:,:,:,f) trialcycavg trialcycavgRun trialcycavgSit ] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
                     'C:\grating4x3y5sf3tf_short011315.mat',16:17,10:11,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
             end
-        elseif rep==5
-             if ~isempty(files(use(f)).sizeselect)
-                load ([pathname files(use(f)).sizeselect], 'dfof_bg','sp','stimRec','frameT')
-                zoom = 260/size(dfof_bg,1);
-                if ~exist('sp','var')
-                    sp =0;stimRec=[];
-                end
-                dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
-                [ph amp data ft cyc] = analyzeSizeSelect(imresize(dfof_bg,0.25),sp,...
-                    'C:\sizeSelect2sf5sz14min.mat',16:17,10:11,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
-            end 
+
         end
         
         
@@ -318,7 +308,24 @@ for rep=[5] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
         
           set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfilename,'-append');
+        %%plot overall cycle average
         
+    trialcycavg = imresize(trialcycavg,4);
+    trialcycavgSit = imresize(trialcycavgSit,4);
+    trialcycavgRun = imresize(trialcycavgRun,4);
+    figure
+    hold on
+    plot(squeeze(mean(mean(mean(mean(trialcycavg(x(1),y(1),:,:,:,:,:),4),5),6),7)))
+    plot(squeeze(mean(mean(mean(mean(trialcycavgRun(x(1),y(1),:,:,:,:,:),4),5),6),7)))
+    plot(squeeze(mean(mean(mean(mean(trialcycavgSit(x(1),y(1),:,:,:,:,:),4),5),6),7)))        
+    legend('Total','Run','Sit')
+    axis([1 15 -0.05 0.05])
+    if exist('psfilename','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfilename,'-append');
+    end
+        
+            
         
     elseif rep ==1
         

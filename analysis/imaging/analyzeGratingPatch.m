@@ -1,4 +1,4 @@
-function [ph amp alldata fit cycavg tuning sftcourse] = analyzeGratingPatch(dfof_bg,sp,moviename,useframes,base,xpts,ypts, label,stimRec,psfilename,frameT);
+function [ph amp alldata fit cycavg tuning sftcourse trialcycavg trialcycavgRun trialcycavgSit] = analyzeGratingPatch(dfof_bg,sp,moviename,useframes,base,xpts,ypts, label,stimRec,psfilename,frameT);
 %load(fname,'dfof_bg');
 %close all
 
@@ -85,8 +85,11 @@ end
 meandf = squeeze(mean(mean(img,2),1));
 
 %%% separate responses by trieals
+speedcut = 500;
 trialdata = zeros(size(img,1),size(img,2),trials+2);
 trialspeed = zeros(trials+2,1);
+shift = (duration+isi)*imagerate;
+trialcyc = zeros(size(img,1),size(img,2),shift,trials+2);
 for tr=1:trials;
     t0 = round((tr-1)*(duration+isi)*imagerate);
     baseframes = base+t0; baseframes=baseframes(baseframes>0);
@@ -97,7 +100,7 @@ for tr=1:trials;
         trialspeed(tr)=500;
     end
     trialcourse(tr,:) = squeeze(mean(mean(img(:,:,t0+(1:18)),2),1));
-    
+    trialcyc(:,:,:,tr) = img(:,:,t0+round(shift/2)+(1:15));  
 end
 
 %%% get responses by averaging (this is simple method)
@@ -185,12 +188,19 @@ if bkgrat
 end
 
 %%% separate out responses by stim parameter
+run = find(trialspeed>=speedcut);
+sit = find(trialspeed<speedcut);
+cond=0;
+trialcycavg=zeros(size(img,1),size(img,2),shift,length(xrange),length(yrange),length(sfrange),length(tfrange));
+trialcycavgRun=zeros(size(img,1),size(img,2),shift,length(xrange),length(yrange),length(sfrange),length(tfrange));
+trialcycavgSit=zeros(size(img,1),size(img,2),shift,length(xrange),length(yrange),length(sfrange),length(tfrange));
 for i = 1:length(xrange)
     i
     for j= 1:length(yrange)
         for k = 1:length(sfrange)
             for l=1:length(tfrange)
                 cond = cond+1;
+                inds = find(xpos==xrange(i)&ypos==yrange(j)&sf==sfrange(k)&tf==tfrange(l));
                 avgtrialdata(:,:,cond) = squeeze(median(trialdata(:,:,find(xpos==xrange(i)&ypos==yrange(j)&sf==sfrange(k)&tf==tfrange(l))),3));%  length(find(xpos==xrange(i)&ypos==yrange(j)&sf==sfrange(k)&tf==tfrange(l)))
                 if bkgrat  %%% subract blank for bkgrat
                     avgtrialdata(:,:,cond)=avgtrialdata(:,:,cond)-blankMap(:,:,k);
@@ -201,6 +211,9 @@ for i = 1:length(xrange)
                 avgx(cond) = xrange(i); avgy(cond)=yrange(j); avgsf(cond)=sfrange(k); avgtf(cond)=tfrange(l);
                 tuning(:,:,i,j,k,l) = avgtrialdata(:,:,cond);
                 meanspd(i,j,k,l) = squeeze(mean(trialspeed(find(xpos==xrange(i)&ypos==yrange(j)&sf==sfrange(k)&tf==tfrange(l)))>500));
+                trialcycavg(:,:,:,i,j,k,l) = squeeze(mean(trialcyc(:,:,:,inds),4));
+                trialcycavgRun(:,:,:,i,j,k,l) = squeeze(nanmean(trialcyc(:,:,:,intersect(inds,run)),4));
+                trialcycavgSit(:,:,:,i,j,k,l) = squeeze(nanmean(trialcyc(:,:,:,intersect(inds,sit)),4));
             end
         end
     end
@@ -305,16 +318,29 @@ end
 if exist('psfilename','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfilename,'-append');
-end
-
-
-    
-
+end  
 
 if bkgrat
     range = [-0.005 0.035];
 else
     range= [0 0.075];
+end
+
+%%get percent time running
+sp = conv(sp,ones(50,1),'same')/50;
+mv = sum(sp>500)/length(sp);
+figure
+subplot(1,2,1)
+bar(mv);
+xlabel('subject')
+ylabel('fraction running')
+subplot(1,2,2)
+bar([mean(trialspeed(run)) mean(trialspeed(sit))])
+set(gca,'xticklabel',{'run','sit'})
+ylabel('speed')
+if exist('psfilename','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfilename,'-append');
 end
 
 
@@ -405,51 +431,51 @@ end
 % imshow(merge);
 %end
 
-for doResolutionTest=1:1
-    figure
-    for i = 1:2
-        for j=1:length(xrange)
-            
-            spotimg = squeeze(mean(tuning(:,:,i,j,:,1),5));
-            imagesc(spotimg,[0 0.03]);
-            title(sprintf('%0.2fx %0.2fy',i,j))
-            axis off; axis equal
-        end
-    end
-    
-    
-    
-    [y x] = ginput(1);
-    crossSection = spotimg(:,round(y));
-    figure
-    plot(crossSection);
-    crossSection = mean(spotimg(round(x)+(-1:1),:),1);
-    figure
-    plot(crossSection);
-    crossSection = crossSection(100:199);
-    baseline_est=median(crossSection);
-    [peak_est x0_est] = max(crossSection);
-    sigma_est=5;
-    x=1:length(crossSection);
-    y=crossSection;
-    fit_coeff = nlinfit(x,y,@gauss_fit,[ baseline_est peak_est x0_est sigma_est])
-    
-    %%% parse out results
-    baseline = fit_coeff(1)
-    peak = fit_coeff(2)
-    x0=fit_coeff(3)
-    sigma_est=fit_coeff(4)
-    
-    %%% plot raw data and fit
-    figure
-    plot(x,y)
-    hold on
-    plot(x,gauss_fit(fit_coeff,x),'g')
-    
-    fwhm = 2*sigma_est*1.17*32.5
-    
-    keyboard
-end
+% for doResolutionTest=1:1
+%     figure
+%     for i = 1:2
+%         for j=1:length(xrange)
+%             
+%             spotimg = squeeze(mean(tuning(:,:,i,j,:,1),5));
+%             imagesc(spotimg,[0 0.03]);
+%             title(sprintf('%0.2fx %0.2fy',i,j))
+%             axis off; axis equal
+%         end
+%     end
+%     
+%     
+%     
+%     [y x] = ginput(1);
+%     crossSection = spotimg(:,round(y));
+%     figure
+%     plot(crossSection);
+%     crossSection = mean(spotimg(round(x)+(-1:1),:),1);
+%     figure
+%     plot(crossSection);
+%     crossSection = crossSection(100:199);
+%     baseline_est=median(crossSection);
+%     [peak_est x0_est] = max(crossSection);
+%     sigma_est=5;
+%     x=1:length(crossSection);
+%     y=crossSection;
+%     fit_coeff = nlinfit(x,y,@gauss_fit,[ baseline_est peak_est x0_est sigma_est])
+%     
+%     %%% parse out results
+%     baseline = fit_coeff(1)
+%     peak = fit_coeff(2)
+%     x0=fit_coeff(3)
+%     sigma_est=fit_coeff(4)
+%     
+%     %%% plot raw data and fit
+%     figure
+%     plot(x,y)
+%     hold on
+%     plot(x,gauss_fit(fit_coeff,x),'g')
+%     
+%     fwhm = 2*sigma_est*1.17*32.5
+%     
+%     keyboard
+% end
 
 
 % for tr = 1:trials;

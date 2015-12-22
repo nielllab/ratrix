@@ -1,7 +1,7 @@
 %batchDfofMovie
 errmsg= [];errRpt = {};
 nerr=0;
-redo=0;
+redo=1;
 for f = 1:length(files)
     f
     tic

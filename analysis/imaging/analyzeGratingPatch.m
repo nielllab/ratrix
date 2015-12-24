@@ -100,7 +100,7 @@ for tr=1:trials;
         trialspeed(tr)=500;
     end
     trialcourse(tr,:) = squeeze(mean(mean(img(:,:,t0+(1:18)),2),1));
-    trialcyc(:,:,:,tr) = img(:,:,t0+round(shift/2)+(1:15));  
+    trialcyc(:,:,:,tr) = img(:,:,t0+10+(1:15));  
 end
 
 %%% get responses by averaging (this is simple method)
@@ -183,7 +183,7 @@ if bkgrat
     if exist('psfilename','var')
         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfilename,'-append');
-    end
+    end\
     
 end
 

@@ -315,9 +315,9 @@ for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
     trialcycavgRun = imresize(trialcycavgRun,4);
     figure
     hold on
-    plot(squeeze(mean(mean(mean(mean(trialcycavg(x(1),y(1),:,:,:,:,:),4),5),6),7)))
-    plot(squeeze(mean(mean(mean(mean(trialcycavgRun(x(1),y(1),:,:,:,:,:),4),5),6),7)))
-    plot(squeeze(mean(mean(mean(mean(trialcycavgSit(x(1),y(1),:,:,:,:,:),4),5),6),7)))        
+    plot(squeeze(nanmean(nanmean(nanmean(nanmean(trialcycavg(x(1),y(1),:,:,:,:,:),4),5),6),7)))
+    plot(squeeze(nanmean(nanmean(nanmean(nanmean(trialcycavgRun(x(1),y(1),:,:,:,:,:),4),5),6),7)))
+    plot(squeeze(nanmean(nanmean(nanmean(nanmean(trialcycavgSit(x(1),y(1),:,:,:,:,:),4),5),6),7)))        
     legend('Total','Run','Sit')
     axis([1 15 -0.05 0.05])
     if exist('psfilename','var')

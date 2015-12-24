@@ -1,8 +1,11 @@
-function [pts dF ptsfname icacorr cellImg usePts] = align2pPts(dfofInterp, greenframe);
+function [pts dF ptsfname icacorr cellImg usePts] = get2pPtsAuto(dfofInterp, greenframe);
+%%% automatically extracts fluorescence traces based on generic points
 
-[f p] = uigetfile('*.mat','previous points file');
+[f p] = uigetfile('*.mat','generic points file');
 load(fullfile(p,f),'x','y','refFrame');
 oldPts(:,1) = x; oldPts(:,2)=y;
+
+greenframe = imresize(greenframe,size(refFrame));
 
 im(:,:,1)=refFrame/prctile(refFrame(:),95);
 im(:,:,2) = greenframe/prctile(greenframe(:),95);
@@ -32,21 +35,24 @@ mn = mean(dfofInterp,3);
 sigma = std(dfofInterp,[],3);
 
 sigmafig = figure
-imagesc(sigma,[0 prctile(sigma(:),95)]);
+imagesc(sigma,[0 prctile(sigma(:),99)]);
 hold on
-plot(pts(:,2),pts(:,1),'k*')
+plot(pts(:,2),pts(:,1),'k.')
 
 dfReshape = reshape(dfofInterp,[size(dfofInterp,1)*size(dfofInterp,2) size(dfofInterp,3)]);
 clear usePts dF
 coverage=zeros(size(dfofInterp,1)*size(dfofInterp,2),1);
 dF = zeros(length(pts),size(dfofInterp,3));
-%gcp
-w=6; %w=5 for cells, 4 for axos
+
+sprintf('enter width of window for cell body extraction')
+sprintf('typical = 4 for puncta, 6 for cell body, but depends of fov and zoom')
+w = input('width : ');
 showImg = input('show images? 0/1 ');
 tic
+%%% can make this a parfor
+%%% gcp
 for p = 1:length(pts);
-    p
-    
+    p  
     [dF(p,:) icacorr(p) filling(p) cellImg(p,:,:) usePts{p}] = getPtsParallel(dfofInterp,pts,w,p,mn,sigma,showImg);
 end
 toc
@@ -91,8 +97,6 @@ length(dups)
 uppers = max(i,j);
 dF(uppers,:)=0;
 
-
-
 c = 'rgbcmk'
 figure
 hold on
@@ -100,8 +104,6 @@ use = find(mean(dF,2)~=0);
 for i = 1:length(use);
     plot(dF(use(i),50:1250)/max(dF(use(i),:)) + i/2,c(mod(i,6)+1));
 end
-
-
 
 greenframe = refFrame;
 [f p] = uiputfile('*.mat','save points data');

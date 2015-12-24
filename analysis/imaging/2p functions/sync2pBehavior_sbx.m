@@ -78,7 +78,7 @@ starts = cyc(starts');
         out = [in [in(2:end,1); nan]] - repmat(in(:,2),[1 numPhases+1]);
     end
 
-keyboard
+%keyboard
 %onsets = onsets(~isnan(onsets));
 
 end

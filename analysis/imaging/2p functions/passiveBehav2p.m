@@ -43,20 +43,21 @@ elseif stimType==2
 end
 
 [dFout xpos sf theta phase timepts] = analyzePassiveBehav2p(dfofInterp,moviefname,dt);
+display('saving')
 save(sessionName,'dFout','xpos','sf','theta','phase','timepts','moviefname','-append')
 end
 x=unique(xpos);
 
-top = squeeze(mean(dFout(:,:,find(timepts==0.75),xpos==x(1))-dFout(:,:,find(timepts==0),xpos==x(1)),4));
-bottom = squeeze(mean(dFout(:,:,find(timepts==0.75),xpos==x(end))-dFout(:,:,find(timepts==0),xpos==x(end)),4));
+top = squeeze(mean(dFout(:,:,find(timepts==1.5),xpos==x(1))-dFout(:,:,find(timepts==0),xpos==x(1)),4));
+bottom = squeeze(mean(dFout(:,:,find(timepts==1.5),xpos==x(end))-dFout(:,:,find(timepts==0),xpos==x(end)),4));
 figure
 subplot(2,2,1)
-imagesc(top,[0 0.25])
+imagesc(top,[0 0.1]); axis equal; title('top')
 subplot(2,2,2)
-imagesc(bottom,[0 0.25])
+imagesc(bottom,[0 0.1]); axis equal; title('bottom')
 subplot(2,2,3)
 top(top<0)=0; bottom(bottom<0)=0;
-imagesc((top-bottom)./(top+bottom),[-1 1])
+imagesc((top-bottom)./(top+bottom),[-1 1]); title('top-bottom')
 subplot(2,2,4);
 plot(timepts,squeeze(mean(mean(mean(dFout(:,:,:,xpos==x(1)),4),2),1)))
 hold on
@@ -64,16 +65,16 @@ plot(timepts,squeeze(mean(mean(mean(dFout(:,:,:,xpos==x(end)),4),2),1)))
 title('position'); xlim([min(timepts) max(timepts)])
 
 
-vert = squeeze(mean(dFout(:,:,find(timepts==0.75),theta==0)-dFout(:,:,find(timepts==0),theta==0),4));
-horiz = squeeze(mean(dFout(:,:,find(timepts==0.75),theta==pi/2)-dFout(:,:,find(timepts==0),theta==pi/2),4));
+vert = squeeze(mean(dFout(:,:,find(timepts==1.5),theta==0)-dFout(:,:,find(timepts==0),theta==0),4));
+horiz = squeeze(mean(dFout(:,:,find(timepts==1.5),theta==pi/2)-dFout(:,:,find(timepts==0),theta==pi/2),4));
 figure
 subplot(2,2,1)
-imagesc(vert,[-0.5 0.5])
+imagesc(vert,[0 0.1]); title('vert')
 subplot(2,2,2)
-imagesc(horiz,[-0.5 0.5])
+imagesc(horiz,[0 0.1]); title('horiz')
 subplot(2,2,3)
 vert(vert<0)=0; horiz(horiz<0)=0;
-imagesc((vert-horiz)./(vert+horiz),[-1 1])
+imagesc((vert-horiz)./(vert+horiz),[-1 1]); title('horiz vs vert')
 subplot(2,2,4);
 plot(timepts,squeeze(mean(mean(mean(dFout(:,:,:,theta==0),4),2),1)))
 hold on

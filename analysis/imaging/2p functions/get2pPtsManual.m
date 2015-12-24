@@ -1,5 +1,7 @@
-function [pts dF neuropil ptsfname] = get2pPts(dfofInterp, greenframe);
-
+function [pts dF neuropil ptsfname] = get2pPtsManual(dfofInterp, greenframe);
+%%% manually select cell bodies for analysis by clicking
+%%% based on selected points, uses local cross-correlation to choose ROI
+%%% After cell bodies are selected, choose 5 neuropil points for subtraction
 mn = mean(dfofInterp,3);
 sigma = std(dfofInterp,[],3);
 
@@ -39,9 +41,7 @@ while ~done
         else
             figure(cellfig);
         end
-        
-        
-        
+       
         roi = zeros(size(sigma));
         roi(xmin:xmax,ymin:ymax) =cc;
         

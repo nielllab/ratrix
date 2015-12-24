@@ -1,4 +1,4 @@
-function [img, framerate] = readAlign2p_sbx(fn, align,showImg,fwidth)
+function [img, framerate] = readAlign2p_sbx(fn, align,showImg)
 
 sbxread(fn,1,1);            % read one frame to read the header of the image sequence
 global info;                % this contains the information about the structure of the image

@@ -89,7 +89,7 @@ speedcut = 500;
 trialdata = zeros(size(img,1),size(img,2),trials+2);
 trialspeed = zeros(trials+2,1);
 shift = (duration+isi)*imagerate;
-trialcyc = zeros(size(img,1),size(img,2),shift,trials+2);
+trialcyc = zeros(size(img,1),size(img,2),shift-10,trials+2);
 for tr=1:trials;
     t0 = round((tr-1)*(duration+isi)*imagerate);
     baseframes = base+t0; baseframes=baseframes(baseframes>0);
@@ -183,7 +183,7 @@ if bkgrat
     if exist('psfilename','var')
         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfilename,'-append');
-    end\
+    end
     
 end
 
@@ -191,9 +191,9 @@ end
 run = find(trialspeed>=speedcut);
 sit = find(trialspeed<speedcut);
 cond=0;
-trialcycavg=zeros(size(img,1),size(img,2),shift,length(xrange),length(yrange),length(sfrange),length(tfrange));
-trialcycavgRun=zeros(size(img,1),size(img,2),shift,length(xrange),length(yrange),length(sfrange),length(tfrange));
-trialcycavgSit=zeros(size(img,1),size(img,2),shift,length(xrange),length(yrange),length(sfrange),length(tfrange));
+trialcycavg=zeros(size(img,1),size(img,2),shift-10,length(xrange),length(yrange),length(sfrange),length(tfrange));
+trialcycavgRun=zeros(size(img,1),size(img,2),shift-10,length(xrange),length(yrange),length(sfrange),length(tfrange));
+trialcycavgSit=zeros(size(img,1),size(img,2),shift-10,length(xrange),length(yrange),length(sfrange),length(tfrange));
 for i = 1:length(xrange)
     i
     for j= 1:length(yrange)

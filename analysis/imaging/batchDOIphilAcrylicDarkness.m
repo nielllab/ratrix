@@ -1,8 +1,8 @@
 %acrylic skull animals
 dbstop if error
-pathname = 'C:\Users\nlab\Desktop\Widefield Data\DOI\';
-datapathname = 'C:\Users\nlab\Desktop\Widefield Data\DOI\';  
-outpathname = 'C:\Users\nlab\Desktop\Widefield Data\DOI\';
+pathname = '\\langevin\backup\widefield\Acrilic cleared skull headplate\';
+datapathname = '\\langevin\backup\widefield\Acrilic cleared skull headplate\';  
+outpathname = '\\langevin\backup\widefield\Acrilic cleared skull headplate\';
 n = 0;
 
 

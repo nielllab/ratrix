@@ -1,5 +1,7 @@
 function setValves(s, valves)
 if strcmp(s.responseMethod,'parallelPort')
+   
+    [pp, ~, ~, ioObj] = getPP;
     if length(valves)==s.numPorts
         valves=logical(valves);
         
@@ -15,7 +17,9 @@ if strcmp(s.responseMethod,'parallelPort')
         end
         
         valves(s.valvePins.invs)=~valves(s.valvePins.invs);
+        sprintf('dec address %d',s.valvePins.decAddr)
         lptWriteBits(s.valvePins.decAddr,s.valvePins.bitLocs,valves);
+     
     else
         error('valves must be a vector of length numValves')
     end

@@ -1,5 +1,5 @@
-close all
-clear all
+% close all
+% clear all
 
 batchDOIphil120215
 %batchPassive2015;

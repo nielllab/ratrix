@@ -1,32 +1,32 @@
-% function [cycavg tuning] = analyzeSizeSelect(dfof_bg,sp,moviename,useframes,base,xpts,ypts, label,stimRec,psfilename,frameT);
+% function [cycavg tuning] = analyzeMasking(dfof_bg,sp,moviename,useframes,base,xpts,ypts, label,stimRec,psfilename,frameT);
 % close all
 % clear all
 %% code from analyzeWidefieldDOI
-% batchDOIphil120215
-% 
+batchDOIphil120215
+
 psfilename = 'C:\tempPS.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
-% 
-%    alluse = find(strcmp({files.inject},'doi')  & strcmp({files.timing},'post') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-%   
-% length(alluse)
-% %alluse=alluse(1:5)
-% %alluse=alluse(end-5:end);
-% allsubj = unique({files(alluse).subj})
-% 
-% %%% use this one for subject by subject averaging
-% %for s = 1:length(allsubj)
-% %use = intersect(alluse,find(strcmp({files.subj},allsubj{s})))    
-% 
-% %%% use this one to average all sessions that meet criteria
-% for s=1:1
-% use = alluse;
-% allsubj{s}
-% %%% calculate gradients and regions
-% clear map merge
-% x0 =0; y0=0; sz = 128;
-% doTopography;
-% end
+
+   alluse = find(strcmp({files.inject},'doi')  & strcmp({files.timing},'pre') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
+  
+length(alluse)
+%alluse=alluse(1:5)
+%alluse=alluse(end-5:end);
+allsubj = unique({files(alluse).subj})
+
+%%% use this one for subject by subject averaging
+%for s = 1:length(allsubj)
+%use = intersect(alluse,find(strcmp({files.subj},allsubj{s})))    
+
+%%% use this one to average all sessions that meet criteria
+for s=1:1
+use = alluse;
+allsubj{s}
+%%% calculate gradients and regions
+clear map merge
+x0 =0; y0=0; sz = 128;
+doTopography;
+end
 
 %% code from doGratingsNew
  mnAmp=0; mnPhase=0; mnAmpWeight=0; mnData=0; mnFit=0;
@@ -51,19 +51,19 @@ for f = 1:length(use)
         hold on; plot(ypts,xpts,'w.','Markersize',2)
         set(gca,'LooseInset',get(gca,'TightInset'))
     end
+end
 
-
-if ~isempty(files(use(f)).sizeselect)
-    load ([pathname files(use(f)).sizeselect], 'dfof_bg','sp','stimRec','frameT')
+if ~isempty(files(use(f)).masking)
+    load ([pathname files(use(f)).masking], 'dfof_bg','sp','stimRec','frameT')
     zoom = 260/size(dfof_bg,1);
     if ~exist('sp','var')
         sp =0;stimRec=[];
     end
     dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
     dfof_bg = imresize(dfof_bg,0.25);
-    moviename = 'C:\sizeSelect2sf5sz14min.mat'
-    useframes = 16:17;
-    base = 11:12;
+    moviename = 'C:\metamask2sf2theta4soa15min'
+    useframes = 3;
+    base = 1;
     xpts = xpts/4;
     ypts = ypts/4;
     label = [files(use(f)).subj ' ' files(use(f)).expt];
@@ -100,7 +100,7 @@ img = imresize(double(dfof_bg),1,'method','box');
 
 trials = length(sf)-1;
 trials = floor(min(trials,size(dfof_bg,3)/(imagerate*(duration+isi)))-1);
-xpos=xpos(1:trials); sf=sf(1:trials); tf=tf(1:trials); radius=radiusRange(radius); radius=radius(1:trials); %PRLP
+xpos=xpos(1:trials); sf=sf(1:trials); lag=lag(1:trials); dOri=dOri(1:trials); %PRLP
 
 acqdurframes = (duration+isi)*imagerate; %%% length of each cycle in frames;
 nx=ceil(sqrt(acqdurframes+1)); %%% how many rows in figure subplot
@@ -108,19 +108,19 @@ nx=ceil(sqrt(acqdurframes+1)); %%% how many rows in figure subplot
 %%% mean amplitude map across cycle
 figure
 map=0;
-for fr=1:acqdurframes
-    cycavg(:,:,fr) = mean(img(:,:,(fr+trials*acqdurframes/2):acqdurframes:end),3);
-    subplot(nx,nx,fr)
-    imagesc(squeeze(cycavg(:,:,fr)),[-0.02 0.02])
+for f=1:acqdurframes
+    cycavg(:,:,f) = mean(img(:,:,(f+trials*acqdurframes/2):acqdurframes:end),3);
+    subplot(nx,nx,f)
+    imagesc(squeeze(cycavg(:,:,f)),[-0.02 0.02])
     axis off
     set(gca,'LooseInset',get(gca,'TightInset'))
     hold on; plot(ypts,xpts,'w.','Markersize',2)
-    map = map+squeeze(cycavg(:,:,fr))*exp(2*pi*sqrt(-1)*(0.5 +fr/acqdurframes));
+    map = map+squeeze(cycavg(:,:,f))*exp(2*pi*sqrt(-1)*(0.5 +f/acqdurframes));
 end
 
 %%% add timecourse
-subplot(nx,nx,fr+1)
-plot(circshift(squeeze(mean(mean(cycavg,2),1)),10))
+subplot(nx,nx,f+1)
+plot(circshift(squeeze(mean(mean(cycavg,2),1)),5))
 axis off
 set(gca,'LooseInset',get(gca,'TightInset'))
 if exist('psfilename','var')
@@ -158,8 +158,8 @@ for tr=1:trials;
     catch
         trialspeed(tr)=500;
     end
-    trialcourse(tr,:) = squeeze(mean(mean(img(:,:,t0+(1:18)),2),1));
-    trialcyc(:,:,:,tr) = img(:,:,t0+shift/2+(1:20));    
+    trialcourse(tr,:) = squeeze(mean(mean(img(:,:,t0+(1:10)),2),1));
+    trialcyc(:,:,:,tr) = img(:,:,t0+shift/2+(1:10));    %whats the proper amount to shift this?
 end
 
 % %%% get full timecourse for each stim condition
@@ -173,8 +173,8 @@ spd(sf==0)=0;
 unique(spd);
 spd(spd==0)=1.6;
 spd=log(spd);
-xrange = unique(xpos); sfrange=unique(sf); tfrange=unique(tf); %radius range predefined %PRLP
-tuning=zeros(size(trialdata,1),size(trialdata,2),length(xrange),length(radiusRange),length(sfrange),length(tfrange));
+xrange = unique(xpos); sfrange=unique(sf); lagrange = unique(lag); dOrirange = unique(dOri);
+tuning=zeros(size(trialdata,1),size(trialdata,2),length(xrange),length(sfrange),length(lagrange),length(dOrirange));
 
 
 
@@ -184,16 +184,16 @@ run = find(trialspeed>=speedcut);
 sit = find(trialspeed<speedcut);
 for i = 1:length(xrange)
     i
-    for j= 1:length(radiusRange)
-        for k = 1:length(sfrange)
-            for l=1:length(tfrange)
+    for j= 1:length(sfrange)
+        for k = 1:length(lagrange)
+            for l=1:length(dOrirange)
                 cond = cond+1;
-                inds = find(xpos==xrange(i)&radius==radiusRange(j)&sf==sfrange(k)&tf==tfrange(l));
+                inds = find(xpos==xrange(i)&sf==sfrange(j)&lag==lagrange(k)&dOri==dOrirange(l));
                 avgtrialdata(:,:,cond) = squeeze(median(trialdata(:,:,inds),3));%  length(find(xpos==xrange(i)&ypos==yrange(j)&sf==sfrange(k)&tf==tfrange(l)))
                 avgtrialcourse(i,j,k,l,:) = squeeze(median(trialcourse(inds,:),1));
                 avgcondtrialcourse(cond,:) = avgtrialcourse(i,j,k,l,:);
                 avgspeed(cond)=0;
-                avgx(cond) = xrange(i); avgradius(cond)=radiusRange(j); avgsf(cond)=sfrange(k); avgtf(cond)=tfrange(l);
+                avgx(cond) = xrange(i); avgsf(cond)=sfrange(j); avglag(cond)=lagrange(k); avgdOri(cond)=dOrirange(l);
                 tuning(:,:,i,j,k,l) = avgtrialdata(:,:,cond);
                 meanspd(i,j,k,l) = squeeze(mean(trialspeed(inds)>500));
                 trialcycavg(:,:,:,i,j,k,l) = squeeze(mean(trialcyc(:,:,:,inds),4));
@@ -204,37 +204,39 @@ for i = 1:length(xrange)
     end
 end
 
-%get average map with no stimulus
-for i = 1:length(xrange)
-    minmap(:,:,i) = squeeze(mean(mean(tuning(:,:,i,1,:,:),5),6));
-    mintrialcyc(:,:,:,i) = squeeze(mean(mean(trialcycavg(:,:,:,i,1,:,:),6),7));
-end
-%subtract average map with no stimulus from every map
-for i = 1:length(xrange)
-    for j = 1:length(radiusRange)
-        for k = 1:length(sfrange)
-            for l = 1:length(tfrange)
-                tuning(:,:,i,j,k,l) = tuning(:,:,i,j,k,l)-minmap(:,:,i);
-                trialcycavg(:,:,:,i,j,k,l) = trialcycavg(:,:,:,i,j,k,l)-mintrialcyc(:,:,:,i);
-            end
-        end
-    end
-end
+% %get average map with no stimulus
+% for i = 1:length(xrange)
+%     minmap(:,:,i) = squeeze(mean(mean(tuning(:,:,i,1,:,:),5),6));
+%     mintrialcyc(:,:,:,i) = squeeze(mean(mean(trialcycavg(:,:,:,i,1,:,:),6),7));
+% end
+% %subtract average map with no stimulus from every map
+% for i = 1:length(xrange)
+%     for j = 1:length(radiusRange)
+%         for k = 1:length(sfrange)
+%             for l = 1:length(tfrange)
+%                 tuning(:,:,i,j,k,l) = tuning(:,:,i,j,k,l)-minmap(:,:,i);
+%                 trialcycavg(:,:,:,i,j,k,l) = trialcycavg(:,:,:,i,j,k,l)-mintrialcyc(:,:,:,i);
+%             end
+%         end
+%     end
+% end
 
 %%% plot response based on previous trial's response
 %%% this is a check for whether return to baseline is an issue
-figure
-plot(avgcondtrialcourse(:,1)-avgcondtrialcourse(:,10),avgcondtrialcourse(:,15)-avgcondtrialcourse(:,10),'o');
-xlabel('pre dfof'); ylabel('post dfof');
+% figure
+% plot(avgcondtrialcourse(:,1)-avgcondtrialcourse(:,10),avgcondtrialcourse(:,5)-avgcondtrialcourse(:,10),'o');
+% xlabel('pre dfof'); ylabel('post dfof');
 
 
-%%% plot sf and tf responses
-figure %averages across the two x positiongs
-for i = 1:length(sfrange)
-    for j=1:length(tfrange)
-        subplot(length(tfrange),length(sfrange),length(sfrange)*(j-1)+i)
-        imagesc(squeeze(mean(mean(tuning(:,:,:,:,i,j),4),3)),[ -0.005 0.05]); colormap jet;
-        title(sprintf('%0.2fcpd %0.0fhz',sfrange(i),tfrange(j)))
+%%% plot responses at different lags
+figure %one set of plots for each x position
+cnt = 0;
+for i = 1:length(xrange)
+    for j=1:length(lagrange)
+        cnt = cnt+1;
+        subplot(length(xrange),length(lagrange),cnt)
+        imagesc(squeeze(mean(mean(tuning(:,:,i,:,j,:),4),6)),[ -0.005 0.05]); colormap jet;
+        title(sprintf('%0.0fxpos %0.0flag',xrange(i),lagrange(j)))
         axis off; axis equal
         hold on; plot(ypts,xpts,'w.','Markersize',2)
         set(gca,'LooseInset',get(gca,'TightInset'))
@@ -246,12 +248,12 @@ if exist('psfilename','var')
 end
 
 
-for i = 1:length(xrange)
-    figure %one plot for each x position
-    for j = 1:length(radiusRange)
+for i = 1:length(dOrirange)
+    figure %one plot for each dOri
+    for j = 1:length(lagrange)
         subplot(3,3,j)
-        imagesc(squeeze(mean(mean(tuning(:,:,i,j,:,:),5),6)),[ -0.02 0.15]); colormap jet;
-        title(sprintf('%0.0frad',radiusRange(j)))
+        imagesc(squeeze(mean(mean(tuning(:,:,:,:,j,i),3),4)),[ -0.02 0.15]); colormap jet;
+        title(sprintf('%0.0flag',lagrange(j)))
         axis off; axis equal
         hold on; plot(ypts,xpts,'w.','Markersize',2)
         set(gca,'LooseInset',get(gca,'TightInset'))
@@ -263,12 +265,11 @@ for i = 1:length(xrange)
 end
 
 for i = 1:length(xrange)
-    d = squeeze(mean(mean(tuning(:,:,i,4,:,:),5),6));
+    d = squeeze(mean(mean(tuning(:,:,i,:,1,:),4),6));
     ximg(:,:,i) = (d-min(min(d)))/(max(max(d))-min(min(d)));
 end
 ximg(:,:,3) = 0;
 
-% load('C:\Users\nlab\Desktop\Widefield Data\DOI\SizeSelectPts.mat')
 [fname pname] = uigetfile('*.mat','points file');
 if fname~=0
     load(fullfile(pname, fname));
@@ -278,9 +279,9 @@ else
         imshow(ximg(:,:,i));hold on; plot(ypts,xpts,'w.','Markersize',2)
         [y(i) x(i)] = ginput(1);
         x=round(x); y=round(y);
-%     %     range = floor(size(ximg,1)*0.05); %findmax range is 5% of image size
-%     %     [maxval(i) maxind(i)] =  max(max(ximg(x(i)-range:x(i)+range,y(i)-range:y(i)+range,1)));
-%     %     [xoff(i),yoff(i)] = ind2sub([1+2*range,1+2*range],maxind(i));
+    %     range = floor(size(ximg,1)*0.05); %findmax range is 5% of image size
+    %     [maxval(i) maxind(i)] =  max(max(ximg(x(i)-range:x(i)+range,y(i)-range:y(i)+range,1)));
+    %     [xoff(i),yoff(i)] = ind2sub([1+2*range,1+2*range],maxind(i));
     end
     close(gcf);
     [fname pname] = uiputfile('*.mat','save points?');
@@ -295,19 +296,19 @@ imshow(ximg);hold on;plot(y,x,'o');
 
 
 
-%% get sf and tf tuning curves across sizes
+%% get lag/orientation tuning curves across sf
 figure
 for i = 1:length(xrange)
     subplot(1,length(xrange),i)
     hold on
-    plot(1:size(tuning,4),squeeze(tuning(x(i),y(i),i,:,1,1)),'y')
-    plot(1:size(tuning,4),squeeze(tuning(x(i),y(i),i,:,2,1)),'c')
-    plot(1:size(tuning,4),squeeze(tuning(x(i),y(i),i,:,1,2)),'r')
-    plot(1:size(tuning,4),squeeze(tuning(x(i),y(i),i,:,2,2)),'b')
-    legend('0.04cpd 0Hz','0.16cpd 0Hz','0.04cpd 2Hz','0.16cpd 2Hz','location','northwest')
-    set(gca,'xtick',1:6,'xticklabel',radiusRange)
-    axis([1 6 0 0.25])
+    for j = 1:length(dOrirange)
+        plot(1:size(tuning,5),squeeze(mean(tuning(x(i),y(i),i,:,:,j),4)))
+    end
+    set(gca,'xtick',1:length(lagrange),'xticklabel',lagrange)
+    xlabel('lag')
+    axis([1 length(lagrange) 0 0.25])
 end
+legend('aligned','perpend','location','northwest')
 if exist('psfilename','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfilename,'-append');
@@ -318,38 +319,38 @@ figure
 for i = 1:length(xrange)
     subplot(1,length(xrange),i)
     hold on
-    for j = 1:length(radiusRange)
-        plot(squeeze(mean(mean(trialcycavg(x(i),y(i),:,i,j,:,:),6),7)))
+    for j = 1:length(lagrange)
+        plot(circshift(squeeze(mean(mean(trialcycavg(x(i),y(i),:,i,:,j,:),5),7)),5))
     end
 end
-legend('0','1','2','4','8','1000')
+legend('0','2','4','6')
 if exist('psfilename','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfilename,'-append');
 end
 
-%%plot cycle averages for the different radii at the 2 x positions run vs.
+%%plot cycle averages for the different lags at the 2 x positions run vs.
 %%sit
 figure
 for i = 1:length(xrange)
     subplot(2,length(xrange),i)
     hold on
-    for j = 1:length(radiusRange)
-        plot(squeeze(mean(mean(trialcycavgRun(x(i),y(i),:,i,j,:,:),6),7)))
+    for j = 1:length(lagrange)
+        plot(circshift(squeeze(mean(mean(trialcycavgRun(x(i),y(i),:,i,:,j,:),5),7)),5))
     end
     axis([1 shift -0.1 0.25])
     title('run')
     hold off
     subplot(2,length(xrange),i+length(xrange))
     hold on
-    for j = 1:length(radiusRange)
-        plot(squeeze(mean(mean(trialcycavgSit(x(i),y(i),:,i,j,:,:),6),7)))
+    for j = 1:length(lagrange)
+        plot(circshift(squeeze(mean(mean(trialcycavgSit(x(i),y(i),:,i,:,j,:),5),7)),5))
     end
-    axis([1 shift -0.1 0.25])
+    axis([1 shift -0.05 0.15])
     title('sit')
     hold off
 end
-legend('0','1','2','4','8','1000')
+legend('0','2','4','6')
 if exist('psfilename','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfilename,'-append');
@@ -372,26 +373,20 @@ if exist('psfilename','var')
     print('-dpsc',psfilename,'-append');
 end
 %%
-% [f p] = uiputfile('*.mat','save data?');
-% sessiondata = files(alluse);
-p = sprintf('%s%s',pathname,files(use(f)).sizeselect);
-p = fileparts(p);
-filename = fileparts(fileparts(files(use(f)).sizeselect));
-filename = sprintf('%s_SizeSelectAnalysis',filename);
+[f p] = uiputfile('*.mat','save data?');
+sessiondata = files(alluse);
 
 if f~=0
 %     save(fullfile(p,f),'allsubj','sessiondata','shiftData','fit','mnfit','cycavg','mv');
-    save(fullfile(p,filename),'trialcycavg','trialcycavgRun','trialcycavgSit','trialspeed','tuning','x','y');
+    save(fullfile(p,f),'cycavg','tuning');
 end
 
-% [f p] = uiputfile('*.pdf','save pdf');
+[f p] = uiputfile('*.pdf','save pdf');
 if f~=0
     try
-   ps2pdf('psfile', psfilename, 'pdffile', fullfile(p,sprintf('%s.pdf',filename)));
+   ps2pdf('psfile', psfilename, 'pdffile', fullfile(p,f));
 catch
     display('couldnt generate pdf');
     end
 end
 delete(psfilename);
-
-end

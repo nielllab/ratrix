@@ -5,7 +5,11 @@ if pp && strcmp(s.responseMethod,'parallelPort')
     if isnan(ioObj)
         status=fastDec2Bin(lptread(s.sensorPins.decAddr));
     else
-        status=fastDec2Bin(double(io32(ioObj,s.sensorPins.decAddr)));
+       try
+           status=fastDec2Bin(double(io32(ioObj,s.sensorPins.decAddr)));
+       catch
+           status=fastDec2Bin(double(io64(ioObj,s.sensorPins.decAddr)));
+       end
     end
     
     ports=status(s.sensorPins.bitLocs)=='0'; %need to set parity in station, assumes sensors emit +5V for unbroken beams

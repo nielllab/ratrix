@@ -37,6 +37,7 @@ function portTest
 
 addr='0378';
 addr='C800';
+addr='E030'
 %addr='C480';
 
 valves=[6 7 8 1 2];

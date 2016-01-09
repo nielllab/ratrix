@@ -19,10 +19,10 @@
 close all
 clear all
 %% Set file info and analysis parameters
-dir = '\\NIELL-V2-W7\Angie_tanks\eyetracking data\09_29_15'; %file location
-name = '09_29_15_bars_predoi_eye'; %data file
+dir = '\\niell-V2-W7\Angie_tanks\eyetracking data\12_14_15\'; %file location
+name = '12_14_15_darkpre.mat'; %data file
 thresh = 0.85; %pupil threshold for binarization
-puprange = [5 20]; %set
+puprange = [15 40]; %set
 
 %%closed loop parameters
 % pupercent = 0.15; %set range pupil radius window

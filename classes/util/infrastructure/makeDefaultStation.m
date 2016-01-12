@@ -21,8 +21,8 @@ function st=makeDefaultStation(id,path,mac,physicalLocation,screenNum,rewardMeth
 % 16  control           i/o phasePulse
 % 17  control	inv     i/o stimPulse
 
-sprintf('port address %d',pportaddr)
-keyboard
+% sprintf('port address %d',pportaddr)
+% keyboard
 [a b]=getMACaddress;
 
 if ~exist('pportaddr','var') || isempty(pportaddr)

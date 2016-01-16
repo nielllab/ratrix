@@ -43,7 +43,7 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
-       percentCorrectionTrials = .25; 
+       percentCorrectionTrials = .5; 
 
    case 'g62y3lt' % Started 1/12/15
        requestRewardSizeULorMS = 0;
@@ -61,19 +61,19 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
-       percentCorrectionTrials = .25; 
+       percentCorrectionTrials = .5; 
        
     case 'g62w10tt' % Started 1/12/15
-       requestRewardSizeULorMS = -;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
-       percentCorrectionTrials = .25; 
+       percentCorrectionTrials = .5; 
        
     case 'g62w9rt' % Started 1/12/15
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
-       percentCorrectionTrials = .25; 
+       percentCorrectionTrials = .5; 
        
 
         

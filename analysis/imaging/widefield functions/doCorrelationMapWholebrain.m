@@ -249,8 +249,10 @@ for f= 1:length(use)
     
     %%% remove first component, which dominates
     %%% I call this decorrelation, though not exactly true
-    tcourse = coeff(:,1)*score(:,1)';
+    tcourse = coeff(:,1)*score(:,1)' ; %+ coeff(:,2)*score(:,2)' + coeff(:,4)*score(:,4)';
     obs = obs-tcourse;
+
+    
     obs_im = reshape(obs,size(im));
     
     %%% calculate correlation coeff matrix for whole frame
@@ -279,7 +281,7 @@ for f= 1:length(use)
     decorrSig = std(obs_im,[],3);
     
     %%% kmeans clustering
-    nclust = 7;
+    nclust = 6;
     tic
     idx = kmeans(decorrTrace',nclust,'distance','correlation');
     toc
@@ -299,9 +301,9 @@ for f= 1:length(use)
     for i = 1:npts
         for j= 1:npts
             dist(i,j) = sqrt((x(i)-x(j))^2 + (y(i)-y(j))^2);
-            contra(i,j) = (x(i)-size(im,2)/2) * (x(j)-size(im,2)/2) <0; %%% does it cross the midline
-            if traceCorr(i,j)>0.66 && contra(i,j)
-                plot([y(i) y(j)],[x(i) x(j)],'Linewidth',8*(traceCorr(i,j)-0.5),'Color','r')
+            contra(i,j) = (x(i)-size(im,2)/2) * (x(j)-size(im,2)/2) <0 & ~(x(i)==33) & ~(x(j)==33) ; %%% does it cross the midline
+            if traceCorr(i,j)>0.6 && contra(i,j)
+                plot([y(i) y(j)],[x(i) x(j)],'Linewidth',8*(traceCorr(i,j)-0.6),'Color','b')
             end
         end
     end
@@ -324,7 +326,7 @@ for f= 1:length(use)
     for i = 1:npts
         for j= 1:npts
             
-            if traceCorr(i,j)>0.66 && dist(i,j) > gridspace*3 &&~contra(i,j)
+            if traceCorr(i,j)>0.5 && dist(i,j) > gridspace*2 &&~contra(i,j)
                 plot([y(i) y(j)],[x(i) x(j)],'Linewidth',8*(traceCorr(i,j)-0.5),'Color','b')
             end
         end
@@ -399,6 +401,6 @@ bar(allMeanC);
 hold on
 errorbar(allMeanC,allMeanCerr,'k.')
 
-dist = [conn.dist]; contra = [conn.contra]; decorr
+
 
 %%% figures for averaged data

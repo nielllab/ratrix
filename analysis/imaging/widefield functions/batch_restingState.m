@@ -20,6 +20,7 @@ files(n).topoxdata =  '';
 files(n).topoydata = '';
 files(n).darknessdata = 'passive\juvenile connectivity\010615 G62Tx1-1 darkness\g62tx1-1_run2_darkness\g62tx1-1_run2_darkness_000001.tif';
 files(n).flip = 1;
+files(n).doi = 0;
 
 n=n+1;
 files(n).subj = 'g62Tx1-1';
@@ -36,6 +37,7 @@ files(n).topoxdata =  '';
 files(n).topoydata = '';
 files(n).darknessdata = 'passive\juvenile connectivity\010715 G62Tx1-1 darkness\G62Tx1-1_run1_darkness_16min\G62Tx1-1_run1_darkness_16min_000001.tif';
 files(n).flip = 1;
+files(n).doi = 0;
 
 % 
 n=n+1;
@@ -53,6 +55,7 @@ files(n).topoxdata =  '';
 files(n).topoydata = '';
 files(n).darknessdata = 'passive\juvenile connectivity\010715 G62Z-2 darkness\G62Z-2_run2_darkness_16min\G62Z-2_run2_darkness_16min_000001.tif';
 files(n).flip = 1;
+files(n).doi = 0;
 
 n=n+1;
 files(n).subj = 'G62Z-3';
@@ -69,6 +72,7 @@ files(n).topoxdata =  '';
 files(n).topoydata = '';
 files(n).darknessdata = 'passive\juvenile connectivity\010715 G62Z-3 darkness\G62Z-3_run3_darkness_16min\G62Z-3_run3_darkness_16min_000001.tif';
 files(n).flip = 1;
+files(n).doi = 0;
 
 n=n+1;
 files(n).subj = 'G62Z-2';
@@ -85,6 +89,7 @@ files(n).topoxdata =  '';
 files(n).topoydata = '';
 files(n).darknessdata = 'passive\juvenile connectivity\010815 G62TZ-2 darkness\G62Z-2_run1_darkness\G62Z-2_run1_darkness_000001.tif';
 files(n).flip = 1;
+files(n).doi = 0;
 
 n=n+1;
 files(n).subj = 'G62Z-3';
@@ -101,6 +106,7 @@ files(n).topoxdata =  '';
 files(n).topoydata = '';
 files(n).darknessdata = 'passive\juvenile connectivity\010815 G62TZ-3 darkness\G62Z-3_run1_darkness\G62Z-3_run1_darkness_000001.tif';
 files(n).flip = 1;
+files(n).doi = 0;
 
 
 
@@ -119,6 +125,7 @@ files(n).topoxdata =  '';
 files(n).topoydata = '';
 files(n).darknessdata ='Acrilic cleared skull headplate\091715 G62L7-rt cleared skull both hemispheres\g62l7rt_run4_2monitors_landscape_Darkness5min\g62l7rt_run4_2monitors_landscape_Darkness5min_000001.tif';
 files(n).flip = 1;
+files(n).doi = 0;
 % 
 n=n+1;
 files(n).subj = 'g62l4lt';
@@ -135,6 +142,7 @@ files(n).topoxdata =  '';
 files(n).topoydata = '';
 files(n).darknessdata = 'Acrilic cleared skull headplate\091715 G62L4-lt cleared skull both hemispheres\g62l4lt_run4_2monitors_landscape_Darkness5min\g62l4lt_run4_2monitors_landscape_Darkness5min_000001.tif';
 files(n).flip = 1;
+files(n).doi = 0;
 
 
 n=n+1;
@@ -152,6 +160,7 @@ files(n).topoxdata =  '';
 files(n).topoydata = '';
 files(n).darknessdata ='Acrilic cleared skull headplate\112015_G62L7RT_RIG2_DOI\112015_G62L7RT_RIG2_DOI_PRE_DARKNESS\112015_G62L7RT_RIG2_DOI_PRE_DARKNESS_000001.tif';
 files(n).flip = 0;
+files(n).doi = 0;
 
 n=n+1;
 files(n).subj = 'g62l7rt';
@@ -168,6 +177,7 @@ files(n).topoxdata =  '';
 files(n).topoydata = '';
 files(n).darknessdata ='Acrilic cleared skull headplate\120115_G62L7RT_RIG2_DOI\120115_G62L7RT_RIG2_DOI_PRE_DARKNESS\120115_G62L7RT_RIG2_DOI_PRE_DARKNESS_000001.tif';
 files(n).flip = 0;
+files(n).doi = 0;
 % 
 n=n+1;
 files(n).subj = 'g62l4lt';
@@ -184,6 +194,41 @@ files(n).topoxdata =  '';
 files(n).topoydata = '';
 files(n).darknessdata = 'Acrilic cleared skull headplate\120115_G62L4LT_RIG2_DOI\120115_G62L4LT_RIG2_DOI_PRE_DARKNESS\120115_G62L4LT_RIG2_DOI_PRE_DARKNESS_000001.tif';
 files(n).flip = 0;
+files(n).doi = 0;
+
+n=n+1;
+files(n).subj = 'g62l7rt';
+files(n).expt = '120115';
+files(n).windowsize = 'acrylic';
+files(n).age = NaN;
+files(n).topox =  ''; %1 flipped (nasal to temporal)
+files(n).topoy = '';
+files(n).darkness = 'Acrilic cleared skull headplate\120115_G62L7RT_RIG2_DOI\120115_G62L7RT_RIG2_DOI_POST_DARKNESS\120115_G62L7RT_RIG2_DOI_POST_DARKNESSmaps.mat';
+files(n).monitor = '2 screens land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session'; %also auditory and aud-vis stim this day 
+files(n).topoxdata =  '';
+files(n).topoydata = '';
+files(n).darknessdata ='Acrilic cleared skull headplate\120115_G62L7RT_RIG2_DOI\120115_G62L7RT_RIG2_DOI_POST_DARKNESS\120115_G62L7RT_RIG2_DOI_POST_DARKNESS_000001.tif';
+files(n).flip = 0;
+files(n).doi = 1;
+% 
+n=n+1;
+files(n).subj = 'g62l4lt';
+files(n).expt = '120115';
+files(n).windowsize = 'acrylic';
+files(n).age = NaN;
+files(n).topox =  ''; %1 flipped (nasal to temporal)
+files(n).topoy = '';
+files(n).darkness = 'Acrilic cleared skull headplate\120115_G62L4LT_RIG2_DOI\120115_G62L4LT_RIG2_DOI_POST_DARKNESS\120115_G62L4LT_RIG2_DOI_POST_DARKNESSmaps.mat';
+files(n).monitor = '2 screens land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session'; %also auditory and aud-vis stim this day 
+files(n).topoxdata =  '';
+files(n).topoydata = '';
+files(n).darknessdata = 'Acrilic cleared skull headplate\120115_G62L4LT_RIG2_DOI\120115_G62L4LT_RIG2_DOI_POST_DARKNESS\120115_G62L4LT_RIG2_DOI_POST_DARKNESS_000001.tif';
+files(n).flip = 0;
+files(n).doi=1;
 
 
 % n=n+1;

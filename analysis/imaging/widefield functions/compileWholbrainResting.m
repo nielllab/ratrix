@@ -1,3 +1,4 @@
+close all
 clear all
 load('connJuv4sessGenericPts.mat','conn');
 juvConn = conn;
@@ -54,8 +55,8 @@ for i = 1:2
     for i = 1:npts
         for j= 1:npts
 
-            if traceCorr(i,j)>0.5 && contra(i,j)
-                plot([y(i) y(j)],[x(i) x(j)],'Linewidth',6*(traceCorr(i,j)-0.5),'Color','r')
+            if traceCorr(i,j)>0.66 && contra(i,j)
+                plot([y(i) y(j)],[x(i) x(j)],'Linewidth',6*(traceCorr(i,j)-0.66),'Color','r')
             end
         end
     end

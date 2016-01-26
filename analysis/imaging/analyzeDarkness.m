@@ -4,7 +4,7 @@ clear all; close all
 
 %%% batch file of choice
 batch_restingState
-alluse = find( strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session') & isnan([files.age]) )
+alluse = find( strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session') & isnan([files.age]) &strcmp({files.subj},'g62l4lt') & strcmp({files.expt},'120115') )
 
 length(alluse)
 

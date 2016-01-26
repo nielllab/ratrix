@@ -33,25 +33,55 @@ switch subjIDs{1}
        percentCorrectionTrials = .5;
        stim.slowSecs = 1;
        
-%    case 'g62bb3rt' % Started 12/9/15 %restarted 1/12/15
+%    case 'g62bb3rt' % Started 12/9/15 %restarted 1/12/16
 %        requestRewardSizeULorMS = 0;
 %        rewardSizeULorMS        = 107;
 %        msPenalty               =3500;
 %        percentCorrectionTrials = .50; 
        
-%    case 'g62y3rt' % Started 1/12/15
+%    case 'g62y3rt' % Started 1/12/16
 %        requestRewardSizeULorMS = 0;
 %        rewardSizeULorMS        = 123;
 %        msPenalty               =3500;
 %        percentCorrectionTrials = .5; 
 
-   case 'g62y3lt' % Started 1/12/15
+
+   case 'g62tx1.9ln' % Started 1/26/16
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 123;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;   
+   case 'g62tx1.9tt' % Started 1/26/16
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 123;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5; 
+
+   case 'g62tx1.9lt' % Started 1/26/16
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 123;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5; 
+
+   case 'g62dd2ln' % Started 1/26/16
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 123;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5; 
+
+   case 'g62dd2rt' % Started 1/26/16
+       requestRewardSizeULorMS = 20;
+       rewardSizeULorMS        = 123;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5; 
+
+   case 'g62y3lt' % Started 1/12/16
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
        percentCorrectionTrials = .5; 
       
-    case 'g62tx1.5lt' % Started 1/12/15
+    case 'g62tx1.5lt' % Started 1/12/16
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 59;
        msPenalty               =3500;

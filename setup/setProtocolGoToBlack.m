@@ -47,30 +47,31 @@ switch subjIDs{1}
 
 
    case 'g62tx1.9ln' % Started 1/26/16
-       requestRewardSizeULorMS = 20;
+       requestRewardSizeULorMS = 43;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
        percentCorrectionTrials = .5;   
+       
    case 'g62tx1.9tt' % Started 1/26/16
-       requestRewardSizeULorMS = 20;
+       requestRewardSizeULorMS = 43;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
        percentCorrectionTrials = .5; 
 
    case 'g62tx1.9lt' % Started 1/26/16
-       requestRewardSizeULorMS = 20;
+       requestRewardSizeULorMS = 43;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
        percentCorrectionTrials = .5; 
 
    case 'g62dd2ln' % Started 1/26/16
-       requestRewardSizeULorMS = 20;
+       requestRewardSizeULorMS = 43;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
        percentCorrectionTrials = .5; 
 
    case 'g62dd2rt' % Started 1/26/16
-       requestRewardSizeULorMS = 20;
+       requestRewardSizeULorMS = 43;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
        percentCorrectionTrials = .5; 
@@ -81,11 +82,11 @@ switch subjIDs{1}
        msPenalty               =3500;
        percentCorrectionTrials = .5; 
       
-    case 'g62tx1.5lt' % Started 1/12/16
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 59;
-       msPenalty               =3500;
-       percentCorrectionTrials = .5; 
+%     case 'g62tx1.5lt' % Started 1/12/16
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 59;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5; 
        
 %     case 'g62z3tt' % Started 1/12/15
 %        requestRewardSizeULorMS = 0;

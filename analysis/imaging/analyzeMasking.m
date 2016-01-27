@@ -2,7 +2,7 @@
 % close all
 % clear all
 %% code from analyzeWidefieldDOI
-batchDOIphil120215
+batchDOIphilMaskSizesel
 
 psfilename = 'C:\tempPS.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end

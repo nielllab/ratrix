@@ -1,7 +1,7 @@
 dbstop if error
-pathname = 'C:\Users\nlab\Desktop\Widefield Data\DOI\';
-datapathname = 'C:\Users\nlab\Desktop\Widefield Data\DOI\';  
-outpathname = 'C:\Users\nlab\Desktop\Widefield Data\DOI\';
+pathname = '\\langevin\backup\widefield\DOI_experiments\';
+datapathname = '\\langevin\backup\widefield\DOI_experiments\';  
+outpathname = '\\langevin\backup\widefield\DOI_experiments\';
 n = 0;
 
 % n=n+1;

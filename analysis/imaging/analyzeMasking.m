@@ -98,9 +98,8 @@ imagerate=10;
 imageT=(1:size(dfof_bg,3))/imagerate;
 img = imresize(double(dfof_bg),1,'method','box');
 
-trials = length(sf)-1;
-trials = floor(min(trials,size(dfof_bg,3)/(imagerate*(duration+isi)))-1);
-xpos=xpos(1:trials); sf=sf(1:trials); lag=lag(1:trials); dOri=dOri(1:trials); %PRLP
+trials = length(sf);
+% trials = floor(min(trials,size(dfof_bg,3)/(imagerate*(duration+isi)))-1);
 
 acqdurframes = (duration+isi)*imagerate; %%% length of each cycle in frames;
 nx=ceil(sqrt(acqdurframes+1)); %%% how many rows in figure subplot
@@ -145,10 +144,11 @@ end
 
 %%% separate responses by trials
 speedcut = 500;
-trialdata = zeros(size(img,1),size(img,2),trials+2);
-trialspeed = zeros(trials+2,1);
+trialdata = zeros(size(img,1),size(img,2),trials);
+trialspeed = zeros(trials,1);
 shift = (duration+isi)*imagerate;
-trialcyc = zeros(size(img,1),size(img,2),shift,trials+2);
+trialcourse = zeros(trials,shift);
+trialcyc = zeros(size(img,1),size(img,2),shift,trials);
 for tr=1:trials;
     t0 = round((tr-1)*shift);
     baseframes = base+t0; baseframes=baseframes(baseframes>0);
@@ -158,9 +158,39 @@ for tr=1:trials;
     catch
         trialspeed(tr)=500;
     end
-    trialcourse(tr,:) = squeeze(mean(mean(img(:,:,t0+(1:10)),2),1));
-    trialcyc(:,:,:,tr) = img(:,:,t0+shift/2+(1:10));    %whats the proper amount to shift this?
+    trialcourse(tr,:) = squeeze(mean(mean(img(:,:,t0+(1:10)),2),1)); %average over whole image
+    trialcyc(:,:,:,tr) = img(:,:,t0+(1:10)); %cycle average by trial)
 end
+
+%get indices for 9 different spatial frequency conditions
+for n = 1:trials
+    if sf(n,1)==0 & sf(n,2)==0
+        sfcombo(n) = 1;
+    elseif sf(n,1)==0.04 & sf(n,2)==0
+         sfcombo(n) = 2;
+    elseif sf(n,1)==0.16 & sf(n,2)==0
+         sfcombo(n) = 3;
+     elseif sf(n,1)==0 & sf(n,2)==0.04
+         sfcombo(n) = 4;
+     elseif sf(n,1)==0.04 & sf(n,2)==0.04
+         sfcombo(n) = 5;
+     elseif sf(n,1)==0.16 & sf(n,2)==0.04
+         sfcombo(n) = 6;
+     elseif sf(n,1)==0 & sf(n,2)==0.16
+         sfcombo(n) = 7;
+     elseif sf(n,1)==0.04 & sf(n,2)==0.16
+         sfcombo(n) = 8;
+    elseif sf(n,1)==0.16 & sf(n,2)==0.16
+         sfcombo(n) = 9;
+    end
+end
+
+xrange = unique(xpos); sfrange=unique(sf); lagrange = unique(lag); dOrirange = unique(dOri);
+
+for i = 1:lagrange
+    figure
+    for j = 1:dOrirange
+        
 
 % %%% get full timecourse for each stim condition
 % trialcycavg = zeros(size(img,1),size(img,2),20,size(xrange),size(radiusRange),size(sfrange),size(tfrange));
@@ -173,10 +203,24 @@ spd(sf==0)=0;
 unique(spd);
 spd(spd==0)=1.6;
 spd=log(spd);
-xrange = unique(xpos); sfrange=unique(sf); lagrange = unique(lag); dOrirange = unique(dOri);
 tuning=zeros(size(trialdata,1),size(trialdata,2),length(xrange),length(sfrange),length(lagrange),length(dOrirange));
 
-
+%%get percent time running
+sp = conv(sp,ones(50,1),'same')/50;
+mv = sum(sp>500)/length(sp);
+figure
+subplot(1,2,1)
+bar(mv);
+xlabel('subject')
+ylabel('fraction running')
+subplot(1,2,2)
+bar([mean(trialspeed(run)) mean(trialspeed(sit))])
+set(gca,'xticklabel',{'run','sit'})
+ylabel('speed')
+if exist('psfilename','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfilename,'-append');
+end
 
 %%% separate out responses by stim parameter
 cond = 0;
@@ -351,23 +395,6 @@ for i = 1:length(xrange)
     hold off
 end
 legend('0','2','4','6')
-if exist('psfilename','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfilename,'-append');
-end
-
-%%get percent time running
-sp = conv(sp,ones(50,1),'same')/50;
-mv = sum(sp>500)/length(sp);
-figure
-subplot(1,2,1)
-bar(mv);
-xlabel('subject')
-ylabel('fraction running')
-subplot(1,2,2)
-bar([mean(trialspeed(run)) mean(trialspeed(sit))])
-set(gca,'xticklabel',{'run','sit'})
-ylabel('speed')
 if exist('psfilename','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfilename,'-append');

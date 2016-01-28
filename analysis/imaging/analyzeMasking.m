@@ -120,7 +120,7 @@ end
 
 %%% add timecourse
 subplot(nx,nx,f+1)
-plot(circshift(squeeze(mean(mean(cycavg,2),1)),5))
+plot(squeeze(mean(mean(cycavg,2),1)))
 axis off
 set(gca,'LooseInset',get(gca,'TightInset'))
 if exist('psfilename','var')

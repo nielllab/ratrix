@@ -5,6 +5,8 @@
     ypts = ypts/4;
         
 for f = 1:length(use)
+    psfilename = 'C:\tempPS.ps';
+    if exist(psfilename,'file')==2;delete(psfilename);end
     figure
     set(gcf,'Name',[files(use(f)).subj ' ' files(use(f)).expt])
 
@@ -442,4 +444,23 @@ for f = 1:length(use)
     %     set(gcf, 'PaperPositionMode', 'auto');
     %     print('-dpsc',psfilename,'-append');
     % end
+    
+    p = sprintf('%s%s',pathname,files(use(f)).masking);
+    p = fileparts(p);
+    filename = fileparts(fileparts(files(use(f)).masking));
+    filename = sprintf('%s_MaskingAnalysis',filename);
+
+    if f~=0
+    %     save(fullfile(p,f),'allsubj','sessiondata','shiftData','fit','mnfit','cycavg','mv');
+        save(fullfile(p,filename),'trialcyc','deconvimg');
+    end
+    
+    if f~=0
+        try
+       ps2pdf('psfile', psfilename, 'pdffile', fullfile(p,sprintf('%s.pdf',filename)));
+    catch
+        display('couldnt generate pdf');
+        end
+    end
+    delete(psfilename);
 end

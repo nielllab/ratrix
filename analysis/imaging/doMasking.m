@@ -445,14 +445,15 @@ for f = 1:length(use)
     %     print('-dpsc',psfilename,'-append');
     % end
     
-    p = sprintf('%s%s',pathname,files(use(f)).masking);
-    p = fileparts(p);
+%     p = sprintf('%s%s',pathname,files(use(f)).masking);
+%     p = fileparts(p);
+    p = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect';
     filename = fileparts(fileparts(files(use(f)).masking));
     filename = sprintf('%s_MaskingAnalysis',filename);
 
     if f~=0
     %     save(fullfile(p,f),'allsubj','sessiondata','shiftData','fit','mnfit','cycavg','mv');
-        save(fullfile(p,filename),'trialcyc','deconvimg');
+        save(fullfile(p,filename),'trialcyc','deconvimg','sfcombo','xrange','sfrange','lagrange','dOrirange','sfcomborange');
     end
     
     if f~=0

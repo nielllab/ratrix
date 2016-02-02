@@ -3,6 +3,9 @@
     clear shiftData shiftAmp shiftPhase fit cycavg
     xpts = xpts/4;
     ypts = ypts/4;
+    load('C:\metamask2sf2theta4soa15min');
+    useframes = 3;
+    base = 1;
         
 for f = 1:length(use)
     psfilename = 'C:\tempPS.ps';
@@ -35,9 +38,6 @@ for f = 1:length(use)
         end
         dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
         dfof_bg = imresize(dfof_bg,0.25);
-        moviename = 'C:\metamask2sf2theta4soa15min'
-        useframes = 3;
-        base = 1;
         label = [files(use(f)).subj ' ' files(use(f)).expt];
     end
 
@@ -63,7 +63,7 @@ for f = 1:length(use)
 
     sf=0; tf=0; isi=0; duration=0; radius=0; %PRLP
 
-    load(moviename);
+   
 
     imagerate=10;
 
@@ -114,11 +114,11 @@ for f = 1:length(use)
         print('-dpsc',psfilename,'-append');
     end
 
-    %subtract off minimum value for every pixel
-    minimg = min(img,[],3);
-    for i = 1:size(img,3)
-        img(:,:,i) = img(:,:,i)-minimg;
-    end
+%     %subtract off minimum value for every pixel
+%     minimg = min(img,[],3);
+%     for i = 1:size(img,3)
+%         img(:,:,i) = img(:,:,i)-minimg;
+%     end
     
     %do deconvolution on the raw data
     img = shiftdim(img+0.2,2); %shift dimesions for decon lucy and add 0.2 to get away from 0
@@ -129,6 +129,7 @@ for f = 1:length(use)
     deconvimg = deconvimg - mean(mean(mean(deconvimg))); %subtract min value
     img = shiftdim(img,1); %shift img back
     img = img - 0.2; %subtract 0.2 back off
+    img = circshift(img,1,3); %put last frame first so that t=1 is prestim baseline
     
     %check deconvolution success on one pixel
     figure
@@ -156,6 +157,13 @@ for f = 1:length(use)
         trialcourse(tr,:) = squeeze(mean(mean(deconvimg(:,:,t0+(1:10)),2),1)); %average over whole image
         trialcyc(:,:,:,tr) = deconvimg(:,:,t0+(1:10)); %cycle average by trial)
     end
+    
+    %subtract off baseline (i.e. first point in each cycle)
+    for i = 1:size(trialcyc,4)
+        for j = 1:size(trialcyc,3)
+            trialcyc(:,:,j,i) = trialcyc(:,:,j,i) - trialcyc(:,:,1,i);
+        end
+    end
 
     %get indices for 9 different spatial frequency conditions
     sfcombo = zeros(1,trials);
@@ -180,7 +188,16 @@ for f = 1:length(use)
              sfcombo(n) = 9;
         end
     end
-
+    
+    %subtract no stimulus conditions
+    nostimmap = mean(trialcyc(:,:,:,find(sfcombo==1)),4);
+    for i = 1:size(trialcyc,4)
+        trialcyc(:,:,:,i) = trialcyc(:,:,:,i) - nostimmap;
+    end
+    
+    figure
+    plot(squeeze(trialcyc(25,25,1:10,20)))
+    
     xrange = unique(xpos); sfrange=unique(sf); lagrange = unique(lag); dOrirange = unique(dOri); sfcomborange = unique(sfcombo);
 
     %plot whole image at five time points for all sf combos of target/mask
@@ -193,9 +210,9 @@ for f = 1:length(use)
         figure        
         cnt = 1;
         for j = 1:length(sfcomborange)
-            for k = 1:5
-                subplot(9,5,cnt)
-                imagesc(squeeze(mean(trialcyc(:,:,k,find(sfcombo==j&lag==lagrange(i)&dOri==dOrirange(1))),4)),[0 0.2])
+            for k = 1:10
+                subplot(9,10,cnt)
+                imagesc(squeeze(mean(trialcyc(:,:,k,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(1))),4)),[0 0.2])
                 colormap(jet)
                 axis square
                 axis off
@@ -216,9 +233,9 @@ for f = 1:length(use)
         figure
         cnt = 1;
         for j = 1:length(sfcomborange)
-            for k = 1:5
-                subplot(9,5,cnt)
-                imagesc(squeeze(mean(trialcyc(:,:,k,find(sfcombo==j&lag==lagrange(i)&dOri==dOrirange(2))),4)),[0 0.2])
+            for k = 1:10
+                subplot(9,10,cnt)
+                imagesc(squeeze(mean(trialcyc(:,:,k,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(2))),4)),[0 0.2])
                 colormap(jet)
                 axis square
                 axis off
@@ -227,7 +244,7 @@ for f = 1:length(use)
                 cnt=cnt+1;
             end
         end
-        mtit(sprintf('%s pi-dtheta %0.0flag',[files(use(f)).subj ' ' files(use(f)).expt],lagrange(i)))
+        mtit(sprintf('%s pi/2-dtheta %0.0flag',[files(use(f)).subj ' ' files(use(f)).expt],lagrange(i)))
         if exist('psfilename','var')
             set(gcf, 'PaperPositionMode', 'auto');
             print('-dpsc',psfilename,'-append');
@@ -259,10 +276,12 @@ for f = 1:length(use)
     bar(mv);
     xlabel('subject')
     ylabel('fraction running')
+    ylim([0 1]);
     subplot(1,2,2)
     bar([mean(trialspeed(run)) mean(trialspeed(sit))])
     set(gca,'xticklabel',{'run','sit'})
     ylabel('speed')
+    ylim([0 3000]);
     if exist('psfilename','var')
         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfilename,'-append');

@@ -11,11 +11,11 @@ moviename = 'C:\metamask2sf2theta4soa15min';
 load(moviename);
 
 dir = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect';
-datafiles = {'112315_G6BLIND3B12LT_RIG2_DOI_MaskingAnalysis',...
-            '121815_G6BLIND3B1LT_RIG2_DOI_MaskingAnalysis',...
-            '121815_G6BLIND3B12LT_RIG2_DOI_MaskingAnalysis',...
-            '122115_G6BLIND3B1LT_RIG2_DOI_MaskingAnalysis',...
-            '122115_G6BLIND3B12LT_RIG2_DOI_MaskingAnalysis'};
+% datafiles = {'112315_G6BLIND3B12LT_RIG2_DOI_MaskingAnalysis',...
+%             '121815_G6BLIND3B12LT_RIG2_DOI_MaskingAnalysis',...
+%             '122115_G6BLIND3B12LT_RIG2_DOI_MaskingAnalysis'};
+datafiles = {'121815_G6BLIND3B1LT_RIG2_DOI_MaskingAnalysis',...
+            '122115_G6BLIND3B1LT_RIG2_DOI_MaskingAnalysis'};
 
 alltrialcyc = zeros(65,65,10,864,length(datafiles));        
 for i= 1:length(datafiles) %collates all conditions (numbered above) 
@@ -35,7 +35,7 @@ setrialcyc = std(alltrialcyc,[],5)/sqrt(length(datafiles)); %group standard erro
     for j = 1:length(sfcomborange)
         for k = 1:5
             subplot(9,5,cnt)
-            imagesc(squeeze(mean(trialcyc(:,:,k,find(sfcombo==j&lag==lagrange(i)&dOri==dOrirange(1))),4)),[0 0.2])
+            imagesc(squeeze(mean(avgtrialcyc(:,:,k,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(1))),4)),[0 0.2])
             colormap(jet)
             axis square
             axis off
@@ -58,7 +58,7 @@ for i = 1:length(lagrange)
     for j = 1:length(sfcomborange)
         for k = 1:5
             subplot(9,5,cnt)
-            imagesc(squeeze(mean(trialcyc(:,:,k,find(sfcombo==j&lag==lagrange(i)&dOri==dOrirange(2))),4)),[0 0.2])
+            imagesc(squeeze(mean(avgtrialcyc(:,:,k,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(2))),4)),[0 0.2])
             colormap(jet)
             axis square
             axis off
@@ -74,8 +74,27 @@ for i = 1:length(lagrange)
     end
 end
 
-load('\\langevin\backup\widefield\DOI_experiments\Matlab Widefield Analysis\SalinePoints.mat');
-x = floor(x/4); y = floor(y/4);
+% load('\\langevin\backup\widefield\DOI_experiments\Matlab Widefield Analysis\SalinePoints.mat');
+% x = floor(x/4); y = floor(y/4);
+[fname pname] = uigetfile('*.mat','points file');
+if fname~=0
+    load(fullfile(pname, fname));
+else
+    figure
+    imagesc(squeeze(mean(avgtrialcyc(:,:,2,find(sfcombo==5)),4)),[0 0.1])
+    colormap(jet);
+    hold on; plot(ypts,xpts,'w.','Markersize',2)
+    axis square
+    [x y] = ginput(7);
+    x = round(x);y = round(y);
+    close(gcf);
+    [fname pname] = uiputfile('*.mat','save points?');
+    if fname~=0
+        save(fullfile(pname,fname),'x','y');
+    end
+end
+
+
 sflist = [0 0; 0 0.04; 0 0.16; 0.04 0; 0.04 0.04; 0.04 0.16; 0.16 0; 0.16 0.04; 0.16 0.16];
 
  for i = 1:length(lagrange)
@@ -84,12 +103,16 @@ sflist = [0 0; 0 0.04; 0 0.16; 0.04 0; 0.04 0.04; 0.04 0.16; 0.16 0; 0.16 0.04; 
         subplot(3,3,j) 
         hold on
         for k = 1:length(x)
-            plot(squeeze(mean(avgtrialcyc(y(k),x(k),:,find(sfcombo==j&lag==lagrange(i)&dOri==dOrirange(1))),4)));
-            axis([1 10 0 0.15]);
+            plot(squeeze(mean(avgtrialcyc(y(k),x(k),:,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(1))),4)));
+            axis([1 10 -0.05 0.1]);
         end
     end
     mtit(sprintf('Group Mean 0-dtheta %0.0flag',lagrange(i)))
     legend('V1','LM','AL','RL','A','AM','PM')
+    if exist('psfilename','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfilename,'-append');
+    end
  end
  
   for i = 1:length(lagrange)
@@ -98,12 +121,16 @@ sflist = [0 0; 0 0.04; 0 0.16; 0.04 0; 0.04 0.04; 0.04 0.16; 0.16 0; 0.16 0.04; 
         subplot(3,3,j) 
         hold on
         for k = 1:length(x)
-            plot(squeeze(mean(avgtrialcyc(y(k),x(k),:,find(sfcombo==j&lag==lagrange(i)&dOri==dOrirange(2))),4)));
-            axis([1 10 0 0.15]);
+            plot(squeeze(mean(avgtrialcyc(y(k),x(k),:,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(2))),4)));
+            axis([1 10 -0.05 0.1]);
         end
     end
     mtit(sprintf('Group Mean pi/2-dtheta %0.0flag',lagrange(i)))
     legend('V1','LM','AL','RL','A','AM','PM')
+    if exist('psfilename','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfilename,'-append');
+    end
  end
         
 

@@ -11,11 +11,11 @@ moviename = 'C:\metamask2sf2theta4soa15min';
 load(moviename);
 
 dir = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect';
-% datafiles = {'112315_G6BLIND3B12LT_RIG2_DOI_MaskingAnalysis',...
-%             '121815_G6BLIND3B12LT_RIG2_DOI_MaskingAnalysis',...
-%             '122115_G6BLIND3B12LT_RIG2_DOI_MaskingAnalysis'};
-datafiles = {'121815_G6BLIND3B1LT_RIG2_DOI_MaskingAnalysis',...
-            '122115_G6BLIND3B1LT_RIG2_DOI_MaskingAnalysis'};
+datafiles = {'112315_G6BLIND3B12LT_RIG2_DOI_MaskingAnalysis',...
+            '121815_G6BLIND3B12LT_RIG2_DOI_MaskingAnalysis',...
+            '122115_G6BLIND3B12LT_RIG2_DOI_MaskingAnalysis'};
+% datafiles = {'121815_G6BLIND3B1LT_RIG2_DOI_MaskingAnalysis',...
+%             '122115_G6BLIND3B1LT_RIG2_DOI_MaskingAnalysis'};
 
 alltrialcyc = zeros(65,65,10,864,length(datafiles));        
 for i= 1:length(datafiles) %collates all conditions (numbered above) 
@@ -81,7 +81,8 @@ if fname~=0
     load(fullfile(pname, fname));
 else
     figure
-    imagesc(squeeze(mean(avgtrialcyc(:,:,2,find(sfcombo==5)),4)),[0 0.1])
+    imagesc(squeeze(mean(trialcyc(:,:,2,find(sfcombo~=1)),4)),[0 0.05])
+%     imagesc(squeeze(mean(avgtrialcyc(:,:,2,find(sfcombo==7)),4)),[0 0.1])
     colormap(jet);
     hold on; plot(ypts,xpts,'w.','Markersize',2)
     axis square
@@ -103,7 +104,7 @@ sflist = [0 0; 0 0.04; 0 0.16; 0.04 0; 0.04 0.04; 0.04 0.16; 0.16 0; 0.16 0.04; 
         subplot(3,3,j) 
         hold on
         for k = 1:length(x)
-            plot(squeeze(mean(avgtrialcyc(y(k),x(k),:,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(1))),4)));
+            shadedErrorBar(1:10,squeeze(mean(avgtrialcyc(y(k),x(k),:,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(1))),4)));
             axis([1 10 -0.05 0.1]);
         end
     end
@@ -133,7 +134,25 @@ sflist = [0 0; 0 0.04; 0 0.16; 0.04 0; 0.04 0.04; 0.04 0.16; 0.16 0; 0.16 0.04; 
     end
  end
         
-
+% %plot V1 point all traces too look for outliers
+%  for i = 1:length(lagrange)
+%     figure  
+%     for j = 1:length(sfcomborange)
+%         subplot(3,3,j) 
+%         hold on
+%         for k = 1:length(x)
+%             plot(squeeze(avgtrialcyc(y(1),x(1),:,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(1)))));
+%             axis([1 10 -0.05 0.1]);
+%         end
+%     end
+%     mtit(sprintf('Group Mean 0-dtheta %0.0flag',lagrange(i)))
+%     legend('V1','LM','AL','RL','A','AM','PM')
+%     if exist('psfilename','var')
+%         set(gcf, 'PaperPositionMode', 'auto');
+%         print('-dpsc',psfilename,'-append');
+%     end
+%  end
+ 
     
 nam = 'CompareMasking';
 save(fullfile(dir,nam),'alltrialcyc');

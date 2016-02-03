@@ -1,13 +1,15 @@
+deconvplz = 1 %do you want to deconvolve the image data?
+pointsfile = '\\langevin\backup\widefield\DOI_experiments\Matlab Widefield Analysis\SalinePoints.mat'
+
 %% code from doGratingsNew
- mnAmp=0; mnPhase=0; mnAmpWeight=0; mnData=0; mnFit=0;
-    clear shiftData shiftAmp shiftPhase fit cycavg
+for f = 1:length(use)
+    clear img deconvimg trialcyc trials xpos sf lag dOri sfcombo
+    load('C:\metamask2sf2theta4soa15min');
+    load('C:\mapoverlay.mat')
     xpts = xpts/4;
     ypts = ypts/4;
-    load('C:\metamask2sf2theta4soa15min');
     useframes = 3;
     base = 1;
-        
-for f = 1:length(use)
     psfilename = 'C:\tempPS.ps';
     if exist(psfilename,'file')==2;delete(psfilename);end
     figure
@@ -59,17 +61,13 @@ for f = 1:length(use)
     plot((frameT-frameT(1))/60,(frameT' - frameT(1)) - 0.1*(0:length(frameT)-1),'g');
     legend('stim','acq')
     ylabel('slippage (secs)')
-    xlabel('mins')
+    xlabel('mins') 
 
-    sf=0; tf=0; isi=0; duration=0; radius=0; %PRLP
-
-   
-
-    imagerate=10;
+    imagerate=10; isi=0;
 
     imageT=(1:size(dfof_bg,3))/imagerate;
     img = imresize(double(dfof_bg),1,'method','box');
-
+ 
     trials = length(sf);
     % trials = floor(min(trials,size(dfof_bg,3)/(imagerate*(duration+isi)))-1);
 
@@ -120,6 +118,7 @@ for f = 1:length(use)
 %         img(:,:,i) = img(:,:,i)-minimg;
 %     end
     
+if deconvplz == 1
     %do deconvolution on the raw data
     img = shiftdim(img+0.2,2); %shift dimesions for decon lucy and add 0.2 to get away from 0
     tic
@@ -129,15 +128,20 @@ for f = 1:length(use)
     deconvimg = deconvimg - mean(mean(mean(deconvimg))); %subtract min value
     img = shiftdim(img,1); %shift img back
     img = img - 0.2; %subtract 0.2 back off
-    img = circshift(img,1,3); %put last frame first so that t=1 is prestim baseline
-    
+    deconvimg = deconvimg(:,:,11:end); %remove first trial
+    img = img(:,:,11:end); %remove first trial since it has no baseline
     %check deconvolution success on one pixel
     figure
     hold on
     plot(squeeze(img(25,25,:)))
     plot(squeeze(deconvimg(25,25,:)),'g')
     hold off
-    
+else
+    img = img(:,:,11:end); %remove first trial since it has no baseline
+    deconvimg = img;
+end
+    trials = trials-1; %remove first trial
+       
     %%% separate responses by trials
     speedcut = 500;
     trialdata = zeros(size(deconvimg,1),size(deconvimg,2),trials);
@@ -154,8 +158,8 @@ for f = 1:length(use)
         catch
             trialspeed(tr)=500;
         end
-        trialcourse(tr,:) = squeeze(mean(mean(deconvimg(:,:,t0+(1:10)),2),1)); %average over whole image
-        trialcyc(:,:,:,tr) = deconvimg(:,:,t0+(1:10)); %cycle average by trial)
+            trialcourse(tr,:) = squeeze(mean(mean(deconvimg(:,:,t0+(1:10)),2),1)); %average over whole image
+            trialcyc(:,:,:,tr) = deconvimg(:,:,t0+(1:10)); %cycle average by trial)
     end
     
     %subtract off baseline (i.e. first point in each cycle)
@@ -164,6 +168,9 @@ for f = 1:length(use)
             trialcyc(:,:,j,i) = trialcyc(:,:,j,i) - trialcyc(:,:,1,i);
         end
     end
+    
+    xpos=xpos(:,2:end); sf=sf(2:end,:); lag=lag(:,2:end); dOri=dOri(:,2:end); %remove first trial
+    xrange = unique(xpos); sfrange=unique(sf); lagrange = unique(lag); dOrirange = unique(dOri);
 
     %get indices for 9 different spatial frequency conditions
     sfcombo = zeros(1,trials);
@@ -188,18 +195,30 @@ for f = 1:length(use)
              sfcombo(n) = 9;
         end
     end
-    
+    sfcomborange = unique(sfcombo);
+     
     %subtract no stimulus conditions
     nostimmap = mean(trialcyc(:,:,:,find(sfcombo==1)),4);
     for i = 1:size(trialcyc,4)
         trialcyc(:,:,:,i) = trialcyc(:,:,:,i) - nostimmap;
     end
     
+    %plot average of all blank stim sessions
+    load(pointsfile);
+    x = floor(x/4); y = floor(y/4);
     figure
-    plot(squeeze(trialcyc(25,25,1:10,20)))
-    
-    xrange = unique(xpos); sfrange=unique(sf); lagrange = unique(lag); dOrirange = unique(dOri); sfcomborange = unique(sfcombo);
-
+    subplot(1,2,1)
+    shadedErrorBar([1:10]',squeeze(mean(trialcyc(y(1),x(1),:,find(sfcombo==1)),4)),squeeze(std(trialcyc(y(1),x(1),:,find(sfcombo==1)),[],4))/sqrt(length(find(sfcombo==1))))
+    axis([1 10 -0.1 0.2])
+        title('No stim')
+    subplot(1,2,2)
+    shadedErrorBar([1:10]',squeeze(mean(trialcyc(y(1),x(1),:,find(sfcombo==5)),4)),squeeze(std(trialcyc(y(1),x(1),:,find(sfcombo==5)),[],4))/sqrt(length(find(sfcombo==5))))   
+    axis([1 10 -0.1 0.2])
+    title('Target+Mask Low SF')
+    if exist('psfilename','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfilename,'-append');
+    end    
     %plot whole image at five time points for all sf combos of target/mask
     %rows are sf combination (see above),columns are time points (frame
     %1,3,5,7,9)
@@ -251,20 +270,43 @@ for f = 1:length(use)
         end
     end
 
-
-
-    % %%% get full timecourse for each stim condition
-    % trialcycavg = zeros(size(img,1),size(img,2),20,size(xrange),size(radiusRange),size(sfrange),size(tfrange));
-    % for tr = 1:trials
-    %     
-
-    spd = tf./sf;
-    spd(tf==0)=0;
-    spd(sf==0)=0;
-    unique(spd);
-    spd(spd==0)=1.6;
-    spd=log(spd);
-
+    %plot V1 point all traces too look for outliers
+     for i = 1:length(lagrange)
+        figure  
+        for j = 1:length(sfcomborange)
+            subplot(3,3,j) 
+            hold on
+            for k = 1:length(x)
+                plot(squeeze(trialcyc(y(1),x(1),:,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(1)))));
+                axis([1 10 -0.1 0.2]);
+            end
+        end
+        mtit(sprintf('Trial data 0-dtheta %0.0flag',lagrange(i)))
+        if exist('psfilename','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilename,'-append');
+        end
+     end
+    
+    %plot V1 point all traces too look for outliers
+     for i = 1:length(lagrange)
+        figure  
+        for j = 1:length(sfcomborange)
+            subplot(3,3,j) 
+            hold on
+            for k = 1:length(x)
+                plot(squeeze(trialcyc(y(1),x(1),:,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(2)))));
+                axis([1 10 -0.1 0.2]);
+            end
+        end
+        mtit(sprintf('Trial data pi/2-dtheta %0.0flag',lagrange(i)))
+        if exist('psfilename','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilename,'-append');
+        end
+     end
+     
+     
     run = find(trialspeed>=speedcut);
     sit = find(trialspeed<speedcut);
 
@@ -286,6 +328,7 @@ for f = 1:length(use)
         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfilename,'-append');
     end
+    
     % 
     % %%% separate out responses by stim parameter
     % cond = 0;

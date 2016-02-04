@@ -1,4 +1,4 @@
-deconvplz = 1 %do you want to deconvolve the image data?
+deconvplz = 0 %do you want to deconvolve the image data?
 pointsfile = '\\langevin\backup\widefield\DOI_experiments\Matlab Widefield Analysis\SalinePoints.mat'
 
 %% code from doGratingsNew

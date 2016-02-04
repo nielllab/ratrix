@@ -10,7 +10,7 @@ batchLearningBehav;
 close all
 
 %need to have behavior file for each one, what about pre-behavior?
- alluse = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session')  &  strcmp({files.label},'camk2 gc6') & ~strcmp({files.behav},'') & strcmp({files.task},'HvV') & ~strcmp({files.subj},'g62a5nn') & ~strcmp({files.subj},'g62l8rn')); %
+ alluse = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session')  &  strcmp({files.label},'camk2 gc6') & ~strcmp({files.behav},'') & strcmp({files.task},'GTS') & strcmp({files.subj},'g62m9tt')); %
  % nouse =  1:length(files) & find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session')  & ~strcmp({files.topox},'') & ~strcmp({files.topoy},'')& strcmp({files.subj},'g62l10rt'
  %alluse = 1:length(files) & ~strcmp({files.topox},'') & ~strcmp({files.topoy},'')  & ~strcmp({files.subj},'g62j8lt') & ~strcmp({files.subj},'g62l1lt') & ~strcmp({files.subj},'g62m1lt') & strcmp({files.task},'naive');
  %     & strcmp({files.task},'HvV') & ~strcmp({files.subj},'g62l10rt') &  ~strcmp({files.subj},'g62n1ln') & ~strcmp({files.subj},'g62m9tt')

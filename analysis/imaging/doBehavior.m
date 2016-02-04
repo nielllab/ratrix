@@ -119,7 +119,7 @@ for t = 1:6
     hold on
      plot(ypts,xpts,'w.','Markersize',2);
 end
-  title('correct vs incorrect')
+  title('incorrect - correct')
 
   
   for f= 1:length(behav);
@@ -163,8 +163,20 @@ end
         end
      end
      meanpix = squeeze(mean(mean(data,2),1));
+     
+   try  %put try catch because nanmean gave error 'too many arguements for a5 behavior jw 10/3/15
      mnresp(i,:) = nanmean(meanpix,2);
+   catch
+     mnresp(i,:) = mean(meanpix,2);
+   end
+   
+   try
      stdresp(i,:) = nanstd(meanpix,[],2)/sqrt(size(meanpix,2));
+   catch  
+     stdresp(i,:) = std(meanpix,[],2)/sqrt(size(meanpix,2));
+   end 
+   
+   
  end
  figure
  plot(mnresp(:,6:12)')

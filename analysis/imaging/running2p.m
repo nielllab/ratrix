@@ -19,16 +19,21 @@ else
     cycLength=10;
     dfofInterp = get2pdata(fullfile(p,f),dt,cycLength);
     
-    [f p] =uigetfile('*.mat','speed data');
-    spname = fullfile(p,f);
-    load(spname);
-    
+ 
     [f p] = uiputfile('*.mat','save session data');
     sessionName=fullfile(p,f);
     display('saving data')
-    save(sessionName,'dfofInterp','stimRec','-v7.3');
+    save(sessionName,'dfofInterp','-v7.3','-append');
     display('done')
 end
+
+if ~exist('stimRec','var')
+       [f p] =uigetfile('*.mat','speed data');
+    spname = fullfile(p,f);
+    load(spname);
+    save(sessionName,'stimRec','-append')
+end
+
 
 interval = 1/framerate;
 nframes = size(dfofInterp,3);
@@ -93,18 +98,18 @@ end
 %     figure
 %     plot(xcorr(sp-mean(sp),meanimg-mean(meanimg)))
 mv=sp>1000;
-display('calculating xcorr')
-tic
-for x = 1:size(dfofInterp,1);
-    x
-    for y = 1:size(dfofInterp,2);
-        xc(x,y) = xcorr(circshift(squeeze((dfofInterp(x,y,:))),-offset)-mean(dfofInterp(x,y,:)),sp'-mean(sp),0,'coeff');
-        %  xc(x,y) = corr(squeeze(dfof(x,y,:)),sp(1:size(dfof,3))','type','spearman');
-    end
-end
-fig = figure;
-imagesc(xc,[-0.5 0.5]); axis square
-title([label 'speed xcorr']);
+% display('calculating xcorr')
+% tic
+% for x = 1:size(dfofInterp,1);
+%     x
+%     for y = 1:size(dfofInterp,2);
+%         xc(x,y) = xcorr(circshift(squeeze((dfofInterp(x,y,:))),-offset)-mean(dfofInterp(x,y,:)),sp'-mean(sp),0,'coeff');
+%         %  xc(x,y) = corr(squeeze(dfof(x,y,:)),sp(1:size(dfof,3))','type','spearman');
+%     end
+% end
+% fig = figure;
+% imagesc(xc,[-0.5 0.5]); axis square; colormap jet
+% title([label 'speed xcorr']);
 
 figure
 spoffset = circshift(sp',offset);
@@ -120,7 +125,8 @@ end
 dFClean = dF-0.7*repmat(neuropil,size(dF,1),1);
 
 for i = 1:size(dF,1);
-    df = circshift(dF(i,:)',-offset)';
+    df = circshift(dFClean(i,:)',-offset)';
+    df=df(1:length(sp));
     %      figure
     %     plot((1:nframes)/framerate,df/max(df),'g');
     %
@@ -150,10 +156,13 @@ for i = 1:size(dF,1);
     [y ind] = max(abs(xccenter));
     runC(i) = xccenter(ind);
     runZ(i) = (runC(i) - mean(xcc))/std(xcc);
-    
+    close(gcf)
 end
 
-save(sessionName,'offset','runC','runZ','dfofInterp','stimRec','-v7.3');
+figure
+plot(runZ)
+
+save(sessionName,'offset','runC','runZ','stimRec','-append');
 
 for i = 1:5;
     figure(fig)

@@ -51,14 +51,21 @@ afiles = {'C:\data\imaging\twophoton\052214 Gcamp6 running area\G62h1-TT\run1004
     'C:\data\imaging\twophoton\101514 GCaMP6 2p passive\G62J5rt\LOLA\run2sessiondata.mat' ...
     'C:\data\imaging\twophoton\101514 GCaMP6 2p passive\G62J5rt\LOLA\run5sessiondata.mat' ...
     }
+
+afiles = {'C:\data\imaging\twophoton\102114 G62L1-LT passive viewing - prelearn\V1_1st\run4sessiondata.mat', ...
+    'C:\data\imaging\twophoton\102114 G62J8-LT passive viewing - prelearn\V1\run3sessiondata.mat', ...
+    'C:\data\imaging\twophoton\101414 GCaMP6 2p passive\G62H1TT\V1_spot2\run2sessiondata.mat' };
+
+
 cAll = []; zAll = [];
 for i = 1:length(afiles)
     load(afiles{i},'runC','runZ')
-    cAll = [cAll runC];
-    zAll = [zAll runZ];
+    length(runC)
+    cAll = [cAll runC-mean(runC)];
+    zAll = [zAll runZ-mean(runZ)];
 end
 
-zthresh = 2.5;
+zthresh = 3;
 bins = -0.95:0.1:0.95
 h = hist(cAll,bins);
 figure
@@ -70,7 +77,10 @@ h = hist(cAll((zAll)<-zthresh),bins);
 bar(bins,h/length(cAll),'r')
 xlim([-0.75 0.75])
 
-sprintf('%d cells %0.2f correlated  %0.2f anti-correlated',length(zAll),sum(zAll>zthresh)/length(zAll),sum(zAll<-zthresh)/length(zAll))
+figure
+plot(zAll)
+
+sprintf('%d cells %0.2f correlated  %0.2f anti-correlated',length(zAll),sum(zAll>zthresh & abs(cAll)>0.05)/length(zAll),sum(zAll<-zthresh& abs(cAll)>0.05)/length(zAll))
 
 
     

@@ -29,6 +29,8 @@ rigzoom
 fl
 [dfof map mapNorm cycMap frameT]= readTifBlueGreen(datafile,rigzoom,fl);
 
+keyboard
+
 use_chan=3;
 
 % [dfof map mapNorm]= readTifGreen;

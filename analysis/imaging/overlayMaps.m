@@ -279,9 +279,21 @@ if isfield(expfile,'behav') && ~isempty(getfield(expfile,'behav'))
             alldata{i} = [];
 
         else
-            decon = deconvg6sParallel(nanmedianMW(bg(useTrials,:,:,:)),0.1);
+           %%% deconv post averaging
+           decon = deconvg6sParallel(nanmedianMW(bg(useTrials,:,:,:)),0.1);
+            %use_pts=find(pts>=0)-3;
             
-            use_pts=find(pts>=0)-3;
+            %%% no deconv
+           % decon = nanmedianMW(bg(useTrials,:,:,:));
+          
+            %%% deconv pre-averaging
+%             for i = 1:length(useTrials);
+%             i    
+%                 deconAll(i,:,:,:) = deconvg6sParallel(bg(useTrials(i),:,:,:),0.1);
+%             end
+%             decon = nanmedianMW(deconAll);
+            
+            use_pts=find(pts>=0);
             if i==0 & showImg
                 figure
                 subplot(2,2,1)

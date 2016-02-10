@@ -20,6 +20,7 @@ close all
  
  
  length(alluse)
+ alluse = alluse(1);
  allsubj = unique({files(alluse).subj})
  alltask = unique({files(alluse).task})
  

@@ -16,7 +16,7 @@ end
    mapname = eval(['expfile.' maptype{m}]);
 
    fullname = [pathname mapname]; 
-   %fullname(fullname=='\')='/'; % use to correct name to windows syntax
+   fullname(fullname=='\')='/'; % use to correct name to windows syntax
    
             load(fullname,'map')
 

@@ -1,7 +1,7 @@
 %This code performs averaging over animals for masking stimulus
 %It takes in the output files of analyzeMasking
 %PRLP 02/01/2016 Niell Lab
-dir = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\No Deconvolution';
+dir = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\Post With Deconvolution';
 datafiles = {'112315_G6BLIND3B12LT_RIG2_DOI_MaskingAnalysis',...
             '121815_G6BLIND3B12LT_RIG2_DOI_MaskingAnalysis',...
             '122115_G6BLIND3B12LT_RIG2_DOI_MaskingAnalysis'};
@@ -105,7 +105,7 @@ for i = 1:length(sfcomborange)
     for j = 1:length(lagrange)
         subplot(2,4,cnt)
         shadedErrorBar(1:10,squeeze(mean(avgtrialcyc(y(1),x(1),:,find(xpos==xrange(1)&sfcombo==i&lag==lagrange(j)&dOri==dOrirange(1))),4)),...
-        squeeze(mean(setrialcyc(y(1),x(1),:,find(xpos==xrange(1)&sfcombo==i&lag==lagrange(j)&dOri==dOrirange(1))),4)));
+        squeeze(mean(setrialcyc(y(1),x(1),:,find(xpos==xrange(1)&sfcombo==i&lag==lagrange(j)&dOri==dOrirange(2))),4)));
         axis([1 10 -0.05 0.2]);
         legend(sprintf('%0.0flag',lagrange(j)),'Location','north')
         set(gca,'LooseInset',get(gca,'TightInset'))

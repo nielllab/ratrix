@@ -1,6 +1,6 @@
 %% code from doGratingsNew
 deconvplz = 1; %choose if you want deconvolution
-pointsfile = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\MaskingPointsG6BLIND3B12LT';
+pointsfile = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\SizeSelectPointsG6BLIND3B12LT';
 for f = 1:length(use)
     load('C:\sizeSelect2sf5sz14min.mat')
     load('C:\mapoverlay.mat')
@@ -182,7 +182,6 @@ for f = 1:length(use)
         end
     end
 
-    %this code is zeroing everything somehow
     %get average map with no stimulus
     minmap = zeros(size(deconvimg,1),size(deconvimg,2),length(xrange));
     mintrialcyc = zeros(size(deconvimg,1),size(deconvimg,2),shift,length(xrange));
@@ -190,17 +189,41 @@ for f = 1:length(use)
         minmap(:,:,i) = squeeze(mean(mean(tuning(:,:,i,1,:,:),5),6));
         mintrialcyc(:,:,:,i) = squeeze(mean(mean(trialcycavg(:,:,:,i,1,:,:),6),7));
     end
-    %subtract average map with no stimulus from every map
+    %subtract average map with no stimulus from every map in tuning and
+    %trialcycavg and subtract baseline frame (10)
     for i = 1:length(xrange)
         for j = 1:length(radiusRange)
             for k = 1:length(sfrange)
                 for l = 1:length(tfrange)
                     tuning(:,:,i,j,k,l) = tuning(:,:,i,j,k,l)-minmap(:,:,i);
                     trialcycavg(:,:,:,i,j,k,l) = trialcycavg(:,:,:,i,j,k,l)-mintrialcyc(:,:,:,i);
+                    for n=1:size(trialcycavg,3) %make this linear math somehow?
+                        trialcycavg(:,:,n,i,j,k,l) = trialcycavg(:,:,n,i,j,k,l)-trialcycavg(:,:,10,i,j,k,l);
+                    end
                 end
             end
         end
     end
+    
+    %subtract average map with no stimulus from trialcyc and subtract
+    %baseline frame (10)
+    for tr=1:trials
+        if xpos==xrange(1)
+            trialcyc(:,:,:,tr) = trialcyc(:,:,:,tr)-mintrialcyc(:,:,:,1);
+            for n=1:size(trialcyc,3) %make this linear math somehow?
+                trialcyc(:,:,n,tr) = trialcyc(:,:,n,tr)-trialcyc(:,:,10,tr);
+            end
+        else
+            trialcyc(:,:,:,tr) = trialcyc(:,:,:,tr)-mintrialcyc(:,:,:,2);
+            for n=1:size(trialcyc,3) %make this linear math somehow?
+                trialcyc(:,:,n,tr) = trialcyc(:,:,n,tr)-trialcyc(:,:,10,tr);
+            end
+        end
+    end
+
+    
+    
+    
 
     % 
     % 
@@ -217,36 +240,37 @@ for f = 1:length(use)
     % ximg(:,:,3) = 0;
 
     % load(pointsfile)
-    [fname pname] = uigetfile('*.mat','points file');
-    if fname~=0
-        load(fullfile(pname, fname));
-    else
-        figure
-        for i = 1:length(xrange)
-    %         imshow(ximg(:,:,i))
-            imagesc(squeeze(mean(trialcyc(:,:,12,find(xpos==xrange(i))),4)));hold on; plot(ypts,xpts,'w.','Markersize',2)
-            [y(i) x(i)] = ginput(1);
-            x=round(x); y=round(y);
-    %     %     range = floor(size(ximg,1)*0.05); %findmax range is 5% of image size
-    %     %     [maxval(i) maxind(i)] =  max(max(ximg(x(i)-range:x(i)+range,y(i)-range:y(i)+range,1)));
-    %     %     [xoff(i),yoff(i)] = ind2sub([1+2*range,1+2*range],maxind(i));
-        end
-        close(gcf);
-        [fname pname] = uiputfile('*.mat','save points?');
-        if fname~=0
-            save(fullfile(pname,fname),'x','y');
-        end
-    end
+    load(pointsfile);
+%     [fname pname] = uigetfile('*.mat','points file');
+%     if fname~=0
+%         load(fullfile(pname, fname));
+%     else
+%         figure
+%         for i = 1:length(xrange)
+%     %         imshow(ximg(:,:,i))
+%             imagesc(squeeze(mean(trialcyc(:,:,12,find(xpos==xrange(i))),4)));hold on; plot(ypts,xpts,'w.','Markersize',2)
+%             [y(i) x(i)] = ginput(1);
+%             x=round(x); y=round(y);
+%     %     %     range = floor(size(ximg,1)*0.05); %findmax range is 5% of image size
+%     %     %     [maxval(i) maxind(i)] =  max(max(ximg(x(i)-range:x(i)+range,y(i)-range:y(i)+range,1)));
+%     %     %     [xoff(i),yoff(i)] = ind2sub([1+2*range,1+2*range],maxind(i));
+%         end
+%         close(gcf);
+%         [fname pname] = uiputfile('*.mat','save points?');
+%         if fname~=0
+%             save(fullfile(pname,fname),'x','y');
+%         end
+%     end
 
     %plot no stim and one stim condition to check
     figure
     subplot(1,2,1)
-    shadedErrorBar([1:10]',squeeze(mean(trialcyc(y(1),x(1),11:20,find(radius==1)),4)),squeeze(std(trialcyc(y(1),x(1),11:20,find(radius==1)),[],4))/sqrt(length(find(radius==1))))
-    axis([1 10 -0.1 0.2])
+    shadedErrorBar([1:10]',squeeze(mean(trialcyc(y(1),x(1),10:19,find(radius==1)),4)),squeeze(std(trialcyc(y(1),x(1),10:19,find(radius==1)),[],4))/sqrt(length(find(radius==1))))
+    axis([1 10 -0.1 0.3])
         title('No stim')
     subplot(1,2,2)
-    shadedErrorBar([1:10]',squeeze(mean(trialcyc(y(1),x(1),11:20,find(radius==6)),4)),squeeze(std(trialcyc(y(1),x(1),11:20,find(radius==6)),[],4))/sqrt(length(find(radius==6))))
-    axis([1 10 -0.1 0.2])
+    shadedErrorBar([1:10]',squeeze(mean(trialcyc(y(1),x(1),10:19,find(radius==6)),4)),squeeze(std(trialcyc(y(1),x(1),10:19,find(radius==6)),[],4))/sqrt(length(find(radius==6))))
+    axis([1 10 -0.1 0.3])
     title('Max Radius')
     if exist('psfilename','var')
         set(gcf, 'PaperPositionMode', 'auto');
@@ -278,19 +302,22 @@ for f = 1:length(use)
         end
     end
 
-
+    xstim = [2 2];
+    ystim = [-0.1 0.3];
     for i=1:length(sfrange)
         for j=1:length(tfrange)
             figure
             cnt=1;
             for k=1:length(radiusRange)
                 subplot(2,3,cnt)
+                hold on
                 shadedErrorBar([1:10]',squeeze(mean(trialcyc(y(1),x(1),10:19,find(xpos==xrange(1)&radius==radius(k)&sf==sfrange(i)&tf==tfrange(j))),4)),...
                     squeeze(std(trialcyc(y(1),x(1),10:19,find(xpos==xrange(1)&radius==radius(k)&sf==sfrange(i)&tf==tfrange(j))),[],4))/...
                     sqrt(length(find(xpos==xrange(1)&radius==radius(k)&sf==sfrange(i)&tf==tfrange(j)))))
+                plot(xstim,ystim,'r-')
                 set(gca,'LooseInset',get(gca,'TightInset'))
                 cnt=cnt+1;
-                axis([1 10 -0.05 0.2])
+                axis([1 10 -0.1 0.3])
                 legend(sprintf('%0.0frad',radiusRange(k)))
              end
             mtit(sprintf('%s %0.2fsf %0.0ftf',[files(use(f)).subj ' ' files(use(f)).expt],sfrange(i),tfrange(j)))
@@ -406,10 +433,12 @@ for f = 1:length(use)
     bar(mv);
     xlabel('subject')
     ylabel('fraction running')
+    ylim([0 1])
     subplot(1,2,2)
     bar([mean(trialspeed(run)) mean(trialspeed(sit))])
     set(gca,'xticklabel',{'run','sit'})
     ylabel('speed')
+    ylim([0 3000])
     if exist('psfilename','var')
         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfilename,'-append');

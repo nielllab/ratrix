@@ -36,6 +36,7 @@ files(n).learningDay = 'pre-behavior 1';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 n=n+1;
 files(n).subj = 'g62n1ln'; 
@@ -58,6 +59,7 @@ files(n).learningDay = 'pre-behavior 1';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 n=n+1;
 files(n).subj = 'g62l8rn'; 
@@ -80,6 +82,7 @@ files(n).learningDay = 'pre-behavior 1';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 n=n+1;
 files(n).subj = 'g62m9tt'; 
@@ -102,6 +105,7 @@ files(n).learningDay = 'pre-behavior 2';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 n=n+1;
 files(n).subj = 'g62n1ln'; 
@@ -124,6 +128,7 @@ files(n).learningDay = 'pre-behavior 2';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 n=n+1;
 files(n).subj = 'g62l10rt'; 
@@ -146,6 +151,7 @@ files(n).learningDay = 'pre-behavior 1';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 n=n+1;
 files(n).subj = 'g62l10rt'; 
@@ -168,6 +174,7 @@ files(n).learningDay = 'pre-behavior 2';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 
 n=n+ 1;
@@ -183,12 +190,13 @@ files(n).grating4x3yLandscape = '030415 g62m9tt\G62M9-tt_run5_landscape_4x3yGrat
 files(n).gratingdata4x3yLandscapedata = '030415 G62M9tt GTS behavior learning1\G62M9-tt_run5_landscape_4x3yGratings\G62M9-tt_run5_landscape_4x3yGratings';
 files(n).behavstim2sf = '030415 g62m9tt\G62M9-tt_run4_portrait_behaveStim2sf_maps.mat';
 files(n).behavstim2sfdata = '030415 G62M9tt GTS behavior learning1\G62M9-tt_run4_portrait_behaveStim2sf\G62M9-tt_run4_portrait_behaveStim2sf';
-files(n).monitor = 'vert';
+files(n).monitor = 'vert. Behavior stim at 27/75';
 files(n).task = 'GTS';
 files(n).learningDay = '1';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session. Behavior stim at 27/75';
+files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62m9tt'; 
@@ -203,12 +211,13 @@ files(n).grating4x3yLandscape = '030515 g62m9tt\G62M9tt_run6_landscape_4x3yGrati
 files(n).gratingdata4x3yLandscapedata = '030515 G62M9tt GTS behavior learning2\G62M9tt_run6_landscape_4x3yGratings\G62M9tt_run6_landscape_4x3yGratings';
 files(n).behavstim2sf = '030515 g62m9tt\G62M9tt_run4_portrait_BehaveStim2sf_maps.mat';
 files(n).behavstim2sfdata = '030515 G62M9tt GTS behavior learning2\G62M9tt_run4_portrait_BehaveStim2sf\G62M9tt_run4_portrait_BehaveStim2sf';
-files(n).monitor = 'vert';
+files(n).monitor = 'vert. Behavior stim at 27/75';
 files(n).task = 'GTS';
 files(n).learningDay = '2';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session. Behavior stim at 27/75';
+files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62m9tt'; 
@@ -229,6 +238,7 @@ files(n).learningDay = '3';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62m9tt'; 
@@ -249,6 +259,7 @@ files(n).learningDay = '4';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62n1ln'; 
@@ -269,6 +280,7 @@ files(n).learningDay = '1';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 
 n=n+1;
@@ -290,6 +302,7 @@ files(n).learningDay = '2';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 
 n=n+1;
@@ -311,6 +324,7 @@ files(n).learningDay = '2';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 
 n=n+1;
@@ -332,6 +346,7 @@ files(n).learningDay = '3';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62m9tt'; 
@@ -352,6 +367,7 @@ files(n).learningDay = '7';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 
 n=n+1;
@@ -375,6 +391,7 @@ files(n).learningDay = '5';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62m9tt'; 
@@ -397,6 +414,7 @@ files(n).learningDay = '10';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62l8rn'; 
@@ -419,6 +437,7 @@ files(n).learningDay = '6';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62l10rt'; 
@@ -441,6 +460,7 @@ files(n).learningDay = '1';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62l8rn'; 
@@ -463,6 +483,7 @@ files(n).learningDay = '6';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62l10rt'; 
@@ -485,6 +506,7 @@ files(n).learningDay = '2';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62n1ln'; 
@@ -507,6 +529,7 @@ files(n).learningDay = '8';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';  %wok tipped during 4x3yGrating
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62m9tt'; 
@@ -529,6 +552,7 @@ files(n).learningDay = '13';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session'; %not great performance first half
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62l8rn'; 
@@ -551,6 +575,7 @@ files(n).learningDay = '10';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62n1ln'; 
@@ -573,6 +598,7 @@ files(n).learningDay = '11';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62l10rt'; 
@@ -595,6 +621,7 @@ files(n).learningDay = '5';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 
 n=n+1;
@@ -618,6 +645,7 @@ files(n).learningDay = '16';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session.';% not great performance first half, only analyze second half in combineTiffs?  
+files(n).learned = 'mid';
 
 
 n=n+1;
@@ -641,6 +669,7 @@ files(n).learningDay = '13';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62l8rn'; 
@@ -663,6 +692,7 @@ files(n).learningDay = '13';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62m9tt'; 
@@ -685,6 +715,7 @@ files(n).learningDay = '17';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62l10rt'; 
@@ -707,6 +738,7 @@ files(n).learningDay = '9';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session'; %poor performance throughout. hasnt learned yet
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62n1ln'; 
@@ -729,6 +761,7 @@ files(n).learningDay = '16';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62l8rn'; 
@@ -751,6 +784,7 @@ files(n).learningDay = '16';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session'; %Poor performance througout (remove from analysis?)
+files(n).learned = 'mid';
 
 
 n=n+1;
@@ -774,6 +808,7 @@ files(n).learningDay = '12';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session'; %medium performance, starting to learn
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62n1ln'; 
@@ -796,6 +831,7 @@ files(n).learningDay = '19';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62l10rt'; 
@@ -818,6 +854,7 @@ files(n).learningDay = '13';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session'; %LED problem early in session, combineTiffs analyze from trial ~65
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62l8rn'; 
@@ -840,6 +877,7 @@ files(n).learningDay = '19';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session'; %Poor performance througout (remove from analysis?)
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62m9tt'; 
@@ -862,6 +900,7 @@ files(n).learningDay = '27';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 
 n=n+1;
@@ -885,6 +924,7 @@ files(n).learningDay = '17';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session'; %lower than expected performance (70s), maybe remove
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62l10rt'; 
@@ -907,6 +947,7 @@ files(n).learningDay = '18';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
  n=n+1;
 files(n).subj = 'g62n1ln'; 
@@ -929,6 +970,7 @@ files(n).learningDay = '25';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62l10rt'; 
@@ -951,6 +993,7 @@ files(n).learningDay = '20';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62l10rt'; 
@@ -973,6 +1016,7 @@ files(n).learningDay = '26';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62m9tt'; 
@@ -995,6 +1039,7 @@ files(n).learningDay = '36';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62l8rn'; 
@@ -1017,6 +1062,7 @@ files(n).learningDay = '37';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';  %poor performance
+files(n).learned = 'mid';
 
 
 n=n+1;
@@ -1040,6 +1086,7 @@ files(n).learningDay = '40';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';  %not drinking h2o, behavior stopped early. passive ok
+files(n).learned = 'mid';
 
 
 n=n+1;
@@ -1069,6 +1116,7 @@ files(n).learningDay = '45';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session'; %poor performance Xtra passive
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62l8rn'; 
@@ -1091,6 +1139,7 @@ files(n).learningDay = '48';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';  %good behavioral performance %libby
+files(n).learned = 'mid';
 
 
 n=n+1;
@@ -1114,6 +1163,7 @@ files(n).learningDay = '51';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session'; %libby %4x3yGratings looks bad!
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62a4tt'; 
@@ -1136,6 +1186,7 @@ files(n).learningDay = 'pre-behavior 1';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 
 n=n+1;
@@ -1159,6 +1210,8 @@ files(n).learningDay = 'pre-behavior 1';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
+
 
 n=n+1;
 files(n).subj = 'g62a4tt'; 
@@ -1181,6 +1234,8 @@ files(n).learningDay = 'pre-behavior 2';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
+
 
 n=n+1;
 files(n).subj = 'g62a5nn'; 
@@ -1203,6 +1258,8 @@ files(n).learningDay = 'pre-behavior 2';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
+
 
 
 n=n+1;
@@ -1226,6 +1283,8 @@ files(n).learningDay = 'pre-behavior 3';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
+
 
 
 n=n+1;
@@ -1249,6 +1308,8 @@ files(n).learningDay = 'pre-behavior 3';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
+
 
 
 n=n+1;
@@ -1272,6 +1333,8 @@ files(n).learningDay = 'pre-behavior 4'; %day before switch from GoToBlack
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre-switch';
+
 
 n=n+1;
 files(n).subj = 'g62a5nn'; 
@@ -1294,6 +1357,7 @@ files(n).learningDay = 'pre-behavior 4'; %day before switch from GoToBlack
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre-switch';
 
 
 n=n+1;
@@ -1317,6 +1381,7 @@ files(n).learningDay = '1';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 
 n=n+1;
@@ -1340,6 +1405,8 @@ files(n).learningDay = '1';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
+
 
 
 n=n+1;
@@ -1363,6 +1430,8 @@ files(n).learningDay = 'pre-behavior 1';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
+
 
 
 n=n+1;
@@ -1386,6 +1455,7 @@ files(n).learningDay = 'pre-behavior 1';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 
 n=n+1;
@@ -1404,11 +1474,12 @@ files(n).behavstim2sfdata = '';
 files(n).behavstim3x4orient = '051615 g62r4lt\g62r4lt_run4_portrait_behaveStim3x4orient_maps.mat';
 files(n).behavstim3x4orientdata = '';
 files(n).monitor = 'vert';
-files(n).task = 'HvV';
+files(n).task = 'GTS';
 files(n).learningDay = 'pre-behavior 1';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 n=n+1;
 files(n).subj = 'g62r4lt'; 
@@ -1431,6 +1502,7 @@ files(n).learningDay = 'pre-behavior 2';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 
 n=n+1;
@@ -1454,6 +1526,7 @@ files(n).learningDay = 'pre-behavior 2';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 
 n=n+1;
@@ -1477,6 +1550,7 @@ files(n).learningDay = 'pre-behavior 2';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 
 n=n+1;
@@ -1500,6 +1574,7 @@ files(n).learningDay = '3';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 
 n=n+1;
@@ -1523,6 +1598,7 @@ files(n).learningDay = 'pre-behavior 3';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 
 n=n+1;
@@ -1546,6 +1622,7 @@ files(n).learningDay = 'pre-behavior 3';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 
 n=n+1;
@@ -1569,6 +1646,7 @@ files(n).learningDay = 'pre-behavior 3';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 
 n=n+1;
@@ -1592,6 +1670,7 @@ files(n).learningDay = '6';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session.'; % sated for behavior
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62a5nn'; 
@@ -1614,6 +1693,7 @@ files(n).learningDay = '6';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62n1ln'; 
@@ -1636,6 +1716,7 @@ files(n).learningDay = '75';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session.';  %sated at start, weight to high
+files(n).learned = 'mid';
 
 
 n=n+1;
@@ -1659,6 +1740,7 @@ files(n).learningDay = '79'; %overtrained 1
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'post';
 
 n=n+1;
 files(n).subj = 'g62a4tt'; 
@@ -1681,6 +1763,7 @@ files(n).learningDay = '9';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62l10rt'; 
@@ -1703,6 +1786,7 @@ files(n).learningDay = '70'; %overtrained 1
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'post';
 
 n=n+1;
 files(n).subj = 'g62a5nn'; 
@@ -1725,6 +1809,7 @@ files(n).learningDay = '10';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62n1ln'; 
@@ -1747,6 +1832,7 @@ files(n).learningDay = '78'; %overtrained 1
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'post';
 
 n=n+1;
 files(n).subj = 'g62l10rt'; 
@@ -1769,6 +1855,7 @@ files(n).learningDay = '72'; %overtrained 2
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session'; 
+files(n).learned = 'post';
 
 n=n+1;
 files(n).subj = 'g62a4tt'; 
@@ -1791,6 +1878,7 @@ files(n).learningDay = '12';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62m9tt'; 
@@ -1813,6 +1901,7 @@ files(n).learningDay = '83'; %overtrained 2
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'post';
 
 n=n+1;
 files(n).subj = 'g62a5nn'; 
@@ -1835,6 +1924,7 @@ files(n).learningDay = '12';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62n1ln'; 
@@ -1857,6 +1947,7 @@ files(n).learningDay = '81'; %overtrained 2
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'post';
 
 n=n+1;
 files(n).subj = 'g62l10rt'; 
@@ -1879,6 +1970,7 @@ files(n).learningDay = '75'; %overtrained 3
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'post';
 
 n=n+1;
 files(n).subj = 'g62m9tt'; 
@@ -1901,6 +1993,7 @@ files(n).learningDay = '85'; %overtrained 3
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'post';
 
 n=n+1;
 files(n).subj = 'g62a4tt'; 
@@ -1923,6 +2016,7 @@ files(n).learningDay = '15';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62n1ln'; 
@@ -1945,6 +2039,7 @@ files(n).learningDay = '82'; %overtrained 3
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'post';
 
 n=n+1;
 files(n).subj = 'g62a5nn'; 
@@ -1967,6 +2062,7 @@ files(n).learningDay = '15';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62a4tt'; 
@@ -1989,6 +2085,7 @@ files(n).learningDay = '18';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62a5nn'; 
@@ -2011,6 +2108,7 @@ files(n).learningDay = '18';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62a4tt'; 
@@ -2033,6 +2131,7 @@ files(n).learningDay = '21';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62a5nn'; 
@@ -2055,6 +2154,7 @@ files(n).learningDay = '20';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62a4tt'; 
@@ -2077,6 +2177,7 @@ files(n).learningDay = '24';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62a5nn'; 
@@ -2099,6 +2200,7 @@ files(n).learningDay = '23';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62r3rt'; 
@@ -2121,6 +2223,7 @@ files(n).learningDay = 'pre-behavior 4'; %day before switch
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre-switch';
 
 n=n+1;
 files(n).subj = 'g62r3rt'; 
@@ -2143,6 +2246,7 @@ files(n).learningDay = '1';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62r4lt'; 
@@ -2165,6 +2269,7 @@ files(n).learningDay = 'pre-behavior 4'; %day before switch
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre-switch';
 
 n=n+1;
 files(n).subj = 'g62a4tt'; 
@@ -2187,6 +2292,7 @@ files(n).learningDay = '27';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62a5nn'; 
@@ -2209,6 +2315,7 @@ files(n).learningDay = '26';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62r3rt'; 
@@ -2231,6 +2338,7 @@ files(n).learningDay = '3';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62a4tt'; 
@@ -2253,6 +2361,7 @@ files(n).learningDay = '30';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62a5nn'; 
@@ -2275,6 +2384,7 @@ files(n).learningDay = '29';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62r3rt'; 
@@ -2297,6 +2407,7 @@ files(n).learningDay = '6';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62a4tt'; 
@@ -2319,6 +2430,7 @@ files(n).learningDay = '33';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62a5nn'; 
@@ -2341,6 +2453,7 @@ files(n).learningDay = '32';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62r3rt'; 
@@ -2363,6 +2476,7 @@ files(n).learningDay = '11';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';  %bias poor perform
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62a4tt'; 
@@ -2385,6 +2499,7 @@ files(n).learningDay = '37';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62a5nn'; 
@@ -2407,6 +2522,7 @@ files(n).learningDay = '36';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62a4tt'; 
@@ -2429,6 +2545,7 @@ files(n).learningDay = '40';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62a5nn'; 
@@ -2451,6 +2568,7 @@ files(n).learningDay = '40';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62a4tt'; 
@@ -2473,6 +2591,7 @@ files(n).learningDay = '47';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62a5nn'; 
@@ -2495,6 +2614,7 @@ files(n).learningDay = '47';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 n=n+1;
 files(n).subj = 'g62a4tt'; 
@@ -2517,6 +2637,7 @@ files(n).learningDay = '50';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'mid';
 
 
 n=n+1;
@@ -2535,11 +2656,12 @@ files(n).behavstim2sfdata = '';
 files(n).behavstim3x4orient = '070615 g62n7ln\g62n7ln_prebehavday1_behavstim3x4_maps.mat';
 files(n).behavstim3x4orientdata = '';
 files(n).monitor = 'vert';
-files(n).task = 'GTS';
+files(n).task = '';
 files(n).learningDay = 'pre-behavior 1';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 n=n+1;
 files(n).subj = 'g62n7tt'; 
@@ -2557,11 +2679,12 @@ files(n).behavstim2sfdata = '';
 files(n).behavstim3x4orient = '070615 g62n7tt\g62n7tt_prebehavior_behavstim3x4_maps.mat';
 files(n).behavstim3x4orientdata = '';
 files(n).monitor = 'vert';
-files(n).task = 'GTS';
+files(n).task = '';
 files(n).learningDay = 'pre-behavior 1';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 n=n+1;
 files(n).subj = 'g62q1lt'; 
@@ -2579,11 +2702,12 @@ files(n).behavstim2sfdata = '';
 files(n).behavstim3x4orient = '070715 g62q1lt\g62q1lt_prebehav1_3xy_maps.mat';
 files(n).behavstim3x4orientdata = '';
 files(n).monitor = 'vert';
-files(n).task = 'GTS';
+files(n).task = '';
 files(n).learningDay = 'pre-behavior 1';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 n=n+1;
 files(n).subj = 'g62n7ln'; 
@@ -2601,11 +2725,12 @@ files(n).behavstim2sfdata = '';
 files(n).behavstim3x4orient = '071015 g62n7ln\g62n7ln_prebehav_3xy_maps.mat';
 files(n).behavstim3x4orientdata = '';
 files(n).monitor = 'vert';
-files(n).task = 'GTS';
+files(n).task = '';
 files(n).learningDay = 'pre-behavior 3';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 n=n+1;
 files(n).subj = 'g62n7tt'; 
@@ -2623,11 +2748,12 @@ files(n).behavstim2sfdata = '';
 files(n).behavstim3x4orient = '071015 g62n7tt\g62n7tt_prebehavior_3xy_maps.mat';
 files(n).behavstim3x4orientdata = '';
 files(n).monitor = 'vert';
-files(n).task = 'GTS';
+files(n).task = '';
 files(n).learningDay = 'pre-behavior 3';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 n=n+1;
 files(n).subj = 'g62q1lt'; 
@@ -2650,6 +2776,7 @@ files(n).learningDay = 'pre-behavior 3';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';%no speed data- optical mouse track is flat
+files(n).learned = 'pre';
 
 n=n+1;
 files(n).subj = 'g62n7ln'; 
@@ -2667,11 +2794,12 @@ files(n).behavstim2sfdata = '';
 files(n).behavstim3x4orient = '081115 g62n7ln\g62n7ln_run4_portrait_behaveStim3x4orient_maps.mat';
 files(n).behavstim3x4orientdata = '';
 files(n).monitor = 'vert';
-files(n).task = 'GTS';
+files(n).task = '';
 files(n).learningDay = 'pre-behavior 4';%pre switch
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre-switch';
 
 n=n+1;
 files(n).subj = 'g62q1lt'; 
@@ -2694,6 +2822,7 @@ files(n).learningDay = 'pre-behavior 4';%pre switch
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre-switch';
 
 n=n+1;
 files(n).subj = 'g62t5rt'; 
@@ -2711,11 +2840,12 @@ files(n).behavstim2sfdata = '';
 files(n).behavstim3x4orient = '091115 g62t5rt\g62t5rt_run3_portrait_behaveStim3x4orient_maps.mat';
 files(n).behavstim3x4orientdata = '';
 files(n).monitor = 'vert';
-files(n).task = 'GTS';
+files(n).task = '';
 files(n).learningDay = 'pre-behavior 1';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 n=n+1;
 files(n).subj = 'g62t5rt'; 
@@ -2733,11 +2863,12 @@ files(n).behavstim2sfdata = '';
 files(n).behavstim3x4orient = '091215 g62t5rt\g62t5rt_run4_portrait_behaveStim3x4orient_maps.mat';
 files(n).behavstim3x4orientdata = '';
 files(n).monitor = 'vert';
-files(n).task = 'GTS';
+files(n).task = '';
 files(n).learningDay = 'pre-behavior 2';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 n=n+1;
 files(n).subj = 'g62w4tt'; 
@@ -2756,11 +2887,12 @@ files(n).behavstim3x4orient = '091315 g62w4tt\g62w4tt_run4_portrait_behaveStim3x
 files(n).behavstim3x4orientdata = '';
 files(n).darkness = '091315 g62w4tt\g62w4tt_run6_landscape_Darkness5min_maps.mat';
 files(n).monitor = 'vert';
-files(n).task = 'GTS';
+files(n).task = '';
 files(n).learningDay = 'pre-behavior 1';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 n=n+1;
 files(n).subj = 'g62w4tt'; 
@@ -2779,11 +2911,12 @@ files(n).behavstim3x4orient = '091415 g62w4tt\g62w4tt_run4_portrait_behavStim3x4
 files(n).behavstim3x4orientdata = '';
 files(n).darkness = '091415 g62w4tt\g62w4tt_run6_landscape_Darkness5min_maps.mat';
 files(n).monitor = 'vert';
-files(n).task = 'GTS';
+files(n).task = '';
 files(n).learningDay = 'pre-behavior 2';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 n=n+1;
 files(n).subj = 'g62t6lt'; 
@@ -2802,11 +2935,12 @@ files(n).behavstim3x4orient = '091615 g62t6lt\g62t6lt_run4_portrait_behavStim3x4
 files(n).behavstim3x4orientdata = '';
 files(n).darkness = '091615 g62t6lt\g62t6lt_run6_landscape_Darkness5min_maps.mat';
 files(n).monitor = 'vert';
-files(n).task = 'GTS';
+files(n).task = '';
 files(n).learningDay = 'pre-behavior 1';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 n=n+1;
 files(n).subj = 'g62t6lt'; 
@@ -2825,11 +2959,12 @@ files(n).behavstim3x4orient = '091715 g62t6lt\g62t6lt_run4_portrait_behavStim3x4
 files(n).behavstim3x4orientdata = '';
 files(n).darkness = '091715 g62t6lt\g62t6lt_run6_landscape_Darknes5min_maps.mat';
 files(n).monitor = 'vert';
-files(n).task = 'GTS';
+files(n).task = '';
 files(n).learningDay = 'pre-behavior 2';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 n=n+1;
 files(n).subj = 'g62q1lt'; 
@@ -2852,6 +2987,7 @@ files(n).learningDay = '42';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session'; %reward level low only .3ml in 1hr
+files(n).learned = 'post';
 
 n=n+1;
 files(n).subj = 'g62r4lt'; 
@@ -2874,10 +3010,11 @@ files(n).learningDay = '105';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'post';
 
 n=n+1;
-files(n).subj = '092515'; 
-files(n).expt = 'g62q1lt';
+files(n).subj = 'g62q1lt'; 
+files(n).expt = '092515';
 files(n).topox =  '092515 g62q1lt\g62q1lt_run2_portrait_topoX_maps.mat';
 files(n).topoxdata = '';
 files(n).topoy = '092515 g62q1lt\g62q1lt_run3_portrait_topoY_maps.mat';
@@ -2896,6 +3033,7 @@ files(n).learningDay = '43';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'post';
 
 n=n+1;
 files(n).subj = 'g62a4tt'; 
@@ -2918,6 +3056,7 @@ files(n).learningDay = '133';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'post';
 
 n=n+1;
 files(n).subj = 'g62t5rt'; 
@@ -2935,11 +3074,12 @@ files(n).behavstim2sfdata = '';
 files(n).behavstim3x4orient = '092515 g62t5rt\g62t5rt_run4_portrait_behavStim3x4orient_maps.mat';
 files(n).behavstim3x4orientdata = '';
 files(n).monitor = 'vert';
-files(n).task = 'GTS';
+files(n).task = '';
 files(n).learningDay = 'pre-behavior 3';%pre switch
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre-switch';
 
 n=n+1;
 files(n).subj = 'g62t6lt'; 
@@ -2957,11 +3097,12 @@ files(n).behavstim2sfdata = '';
 files(n).behavstim3x4orient = '100115 g62t6lt\g62t5lt_run4_portrait_behavStim3x4orient_maps.mat';
 files(n).behavstim3x4orientdata = '';
 files(n).monitor = 'vert';
-files(n).task = 'GTS';
+files(n).task = '';
 files(n).learningDay = 'pre-behavior 3';%pre switch
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre-switch';
 
 n=n+1;
 files(n).subj = 'g62w4tt'; 
@@ -2979,11 +3120,12 @@ files(n).behavstim2sfdata = '';
 files(n).behavstim3x4orient = '100115 g62w4tt\g62w4tt_run4_portrait_behavStim3x4orient_maps.mat';
 files(n).behavstim3x4orientdata = '';
 files(n).monitor = 'vert';
-files(n).task = 'GTS';
+files(n).task = '';
 files(n).learningDay = 'pre-behavior 3';%pre switch
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre-switch';
 
 n=n+1;
 files(n).subj = 'g62x1rt'; 
@@ -3001,11 +3143,12 @@ files(n).behavstim2sfdata = '';
 files(n).behavstim3x4orient = '100615 g62x1rt\g62x1rt_run4_portrait_behavStim3x4orient_maps.mat';
 files(n).behavstim3x4orientdata = '';
 files(n).monitor = 'vert';
-files(n).task = 'GTS';
+files(n).task = '';
 files(n).learningDay = 'pre-behavior 1';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 n=n+1;
 files(n).subj = 'g62x1rt'; 
@@ -3023,11 +3166,12 @@ files(n).behavstim2sfdata = '';
 files(n).behavstim3x4orient = '100715 g62x1rt\g62x1rt_run4_portrait_behavStim3x4orient_maps.mat';
 files(n).behavstim3x4orientdata = '';
 files(n).monitor = 'vert';
-files(n).task = 'GTS';
+files(n).task = '';
 files(n).learningDay = 'pre-behavior 2';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 n=n+1;
 files(n).subj = 'g62r9tt'; 
@@ -3046,11 +3190,12 @@ files(n).behavstim3x4orient = '101015 g62r9tt\g62r9tt_run4_portrait_behavStim3x4
 files(n).behavstim3x4orientdata = '';
 files(n).darkness = '101015 g62r9tt\g62r9tt_run6_landscape_Darkness_maps.mat';
 files(n).monitor = 'vert';
-files(n).task = 'GTS';
+files(n).task = '';
 files(n).learningDay = 'pre-behavior 1';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 n=n+1;
 files(n).subj = 'g62r9tt'; 
@@ -3069,14 +3214,15 @@ files(n).behavstim3x4orient = '101115 g62r9tt\g62r9tt_run4_portrait_behavStim3x4
 files(n).behavstim3x4orientdata = '';
 files(n).darkness = '101115 g62r9tt\g62r9tt_run6_landscape_Darkness_maps.mat';
 files(n).monitor = 'vert';
-files(n).task = 'GTS';
+files(n).task = '';
 files(n).learningDay = 'pre-behavior 2';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 n=n+1;
-files(n).subj = 'g62tx1.1tt'; 
+files(n).subj = 'g62tx11tt'; 
 files(n).expt = '101115';
 files(n).topox =  '101115 g62tx11tt\g62Tx1.1tt_run1_portrait_topoX_maps.mat';
 files(n).topoxdata = '';
@@ -3092,11 +3238,12 @@ files(n).behavstim3x4orient = '101115 g62tx11tt\g62Tx1.1tt_run4_portrait_behavSt
 files(n).behavstim3x4orientdata = '';
 files(n).darkness = '101115 g62tx11tt\g62Tx1.1tt_run6_landscape_Darkness_maps.mat';
 files(n).monitor = 'vert';
-files(n).task = 'GTS';
+files(n).task = '';
 files(n).learningDay = 'pre-behavior 1';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 n=n+1;
 files(n).subj = 'g62tx11ln'; 
@@ -3115,11 +3262,12 @@ files(n).behavstim3x4orient = '101215 g62tx11ln\G62Tx1.1ln_run4_portrait_behavSt
 files(n).behavstim3x4orientdata = '';
 files(n).darkness = '101215 g62tx11ln\G62Tx1.1ln_run6_landscape_Darkness_maps.mat';
 files(n).monitor = 'vert';
-files(n).task = 'GTS';
+files(n).task = '';
 files(n).learningDay = 'pre-behavior 1';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 
 n=n+1;
@@ -3139,11 +3287,12 @@ files(n).behavstim3x4orient = '101215 g62tx11tt\g62Tx1.1tt_run4_portrait_behavSt
 files(n).behavstim3x4orientdata = '';
 files(n).darkness = '101215 g62tx11tt\g62Tx1.1tt_run6_Darkness_maps.mat';
 files(n).monitor = 'vert';
-files(n).task = 'GTS';
+files(n).task = '';
 files(n).learningDay = 'pre-behavior 2';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 n=n+1;
 files(n).subj = 'g62tx11ln'; 
@@ -3162,11 +3311,12 @@ files(n).behavstim3x4orient = '101315 g62tx11ln\g62Tx1.1ln_run4_portrait_behavSt
 files(n).behavstim3x4orientdata = '';
 files(n).darkness = '101315 g62tx11ln\g62Tx1.1ln_run6_landscape_Darkness_maps.mat';
 files(n).monitor = 'vert';
-files(n).task = 'GTS';
+files(n).task = '';
 files(n).learningDay = 'pre-behavior 2';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 n=n+1;
 files(n).subj = 'g62tx11tt'; 
@@ -3185,11 +3335,12 @@ files(n).behavstim3x4orient = '101315 g62tx11tt\g62Tx1.1tt_run4_portrait_behavSt
 files(n).behavstim3x4orientdata = '';
 files(n).darkness = '101315 g62tx11tt\g62Tx1.1tt_run6_landscape_Darkness_maps.mat';
 files(n).monitor = 'vert';
-files(n).task = 'GTS';
+files(n).task = '';
 files(n).learningDay = 'pre-behavior 3';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 n=n+1;
 files(n).subj = 'g62tx12lt'; 
@@ -3208,11 +3359,12 @@ files(n).behavstim3x4orient = '102315 g62tx12lt\g62Tx1.2lt_run4_portrait_behavSt
 files(n).behavstim3x4orientdata = '';
 files(n).darkness = '102315 g62tx12lt\g62Tx1.2lt_run6_landscape_Darkness_maps.mat';
 files(n).monitor = 'vert';
-files(n).task = 'GTS';
+files(n).task = '';
 files(n).learningDay = 'pre-behavior 1';
 files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).learned = 'pre';
 
 
 % n=n+1;

@@ -118,10 +118,10 @@ for LED=1:3
     if LED==split
         tic
         
-        %%% decon before averaging
-        %         [map preCycMap fullMov] =deconPhaseMapPre(dfof{LED},framerate,movPeriod,binning);
-        %            map(isnan(map))=0;
-        %            mapFig(map)
+        %% decon before averaging
+%                 [map preCycMap fullMov] =deconPhaseMapPre(dfof{LED},framerate,movPeriod,binning);
+%                    map(isnan(map))=0;
+%                    mapFig(map)
         
         [map cycMap fullMov] =deconPhaseMap(dfof{LED},framerate,movPeriod,binning);
         preCycMap = cycMap;
@@ -258,7 +258,7 @@ delete(psfilename);
         colorbar
         
         subplot(2,2,3)
-        imshow(polarMap(mapIn));
+        imshow(polarMap(mapIn,94));
         %     imagesc(angle(mapIn))
         %     colormap(hsv)
         

@@ -19,7 +19,7 @@ fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =msPenalty;
 radius                 = .35;
-pixPerCycs                = [200 300];
+pixPerCycs                = [200];
 percentCorrectionTrials = .5;
 
 % sca

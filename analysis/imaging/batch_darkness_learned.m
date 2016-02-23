@@ -4,6 +4,8 @@ dbstop if error
 pathname = '\\langevin\backup\widefield\';
 datapathname = '';  
 outpathname = 'C:\Users\nlab\Desktop\data test\';
+altpathname = '\\langevin\backup\widefield\behavior\';
+
 
 n=1;
 files(n).subj = 'g62r4lt';
@@ -13,10 +15,10 @@ files(n).topoy = 'passive\082915 G62R4LT Darkness\g62r4lt_run2_topoY\g62r4lt_run
 files(n).darkness = 'passive\082915 G62R4LT Darkness\g62r4lt_run3_Darkness_16minute\g62r4lt_run3_Darkness_16minute_maps.mat';
 files(n).task = 'GTS';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session'; 
+files(n).notes = 'good imaging session'; %darkness session was 16 min
 files(n).monitor = 'vert'; 
 
-altpathname = '\\langevin\backup\widefield\behavior\';
+
 n=n+1;
 files(n).subj = 'g62w4tt'; 
 files(n).expt = '091315';
@@ -217,7 +219,16 @@ files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session'; 
 files(n).monitor = 'vert'; 
 
-
+n=n+1;
+files(n).subj = 'g62w10tt';
+files(n).expt = '022216';
+files(n).topox =  'passive\022216 G6W10TT passive mapping and darkness learned\g62w10tt_run1_portrait_topoX\g62w10tt_run1_portrait_topmaps.mat';
+files(n).topoy = 'passive\022216 G6W10TT passive mapping and darkness learned\g62w10tt_run2_portrait_topoY\g62w10tt_run2_portrait_topmaps.mat';
+files(n).darkness = 'passive\022216 G6W10TT passive mapping and darkness learned\g62w10tt_run3_portrait_darkness_5min\g62w10tt_run3_portrait_darknemaps.mat';
+files(n).task = 'GTS';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session'; 
+files(n).monitor = 'vert'; 
 
 
 

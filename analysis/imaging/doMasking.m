@@ -1,5 +1,5 @@
 deconvplz = 1 %do you want to deconvolve the image data?
-pointsfile = '\\langevin\backup\widefield\DOI_experiments\Matlab Widefield Analysis\SalinePoints.mat'
+pointsfile = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\GroupMaskingPoints.mat'
 
 %% code from doGratingsNew
 for f = 1:length(use)
@@ -147,8 +147,8 @@ end
     trialdata = zeros(size(deconvimg,1),size(deconvimg,2),trials);
     trialspeed = zeros(trials,1);
     shift = (duration+isi)*imagerate;
-    trialcourse = zeros(trials,shift);
-    trialcyc = zeros(size(deconvimg,1),size(deconvimg,2),shift,trials);
+    trialcourse = zeros(trials,shift+5);
+    trialcyc = zeros(size(deconvimg,1),size(deconvimg,2),shift+5,trials);
     for tr=1:trials;
         t0 = round((tr-1)*shift);
         baseframes = base+t0; baseframes=baseframes(baseframes>0);
@@ -158,16 +158,16 @@ end
         catch
             trialspeed(tr)=500;
         end
-            trialcourse(tr,:) = squeeze(mean(mean(deconvimg(:,:,t0+(1:10)),2),1)); %average over whole image
-            trialcyc(:,:,:,tr) = deconvimg(:,:,t0+(1:10)); %cycle average by trial)
+            trialcourse(tr,:) = squeeze(mean(mean(deconvimg(:,:,5+t0+(1:15)),2),1)); %average over whole image
+            trialcyc(:,:,:,tr) = deconvimg(:,:,5+t0+(1:15)); %cycle average by trial)
     end
-    
-    %subtract off baseline (i.e. first point in each cycle)
-    for i = 1:size(trialcyc,4)
-        for j = 1:size(trialcyc,3)
-            trialcyc(:,:,j,i) = trialcyc(:,:,j,i) - trialcyc(:,:,1,i);
-        end
-    end
+%     
+%     %subtract off baseline (i.e. first point in each cycle)
+%     for i = 1:size(trialcyc,4)
+%         for j = 1:size(trialcyc,3)
+%             trialcyc(:,:,j,i) = trialcyc(:,:,j,i) - trialcyc(:,:,1,i);
+%         end
+%     end
     
     xpos=xpos(:,2:end); sf=sf(2:end,:); lag=lag(:,2:end); dOri=dOri(:,2:end); %remove first trial
     xrange = unique(xpos); sfrange=unique(sf); lagrange = unique(lag); dOrirange = unique(dOri);
@@ -196,24 +196,63 @@ end
         end
     end
     sfcomborange = unique(sfcombo);
-     
-    %subtract no stimulus conditions
-    nostimmap = mean(trialcyc(:,:,:,find(sfcombo==1)),4);
-    for i = 1:size(trialcyc,4)
-        trialcyc(:,:,:,i) = trialcyc(:,:,:,i) - nostimmap;
-    end
+%      
+%     %subtract no stimulus conditions
+%     nostimmap = mean(trialcyc(:,:,:,find(sfcombo==1)),4);
+%     for i = 1:size(trialcyc,4)
+%         trialcyc(:,:,:,i) = trialcyc(:,:,:,i) - nostimmap;
+%     end
     
-    %plot average of all blank stim sessions
+%     %%%load file with points
     load(pointsfile);
-    x = floor(x/4); y = floor(y/4);
+    targetmask = zeros(size(img,1),size(img,2),3);
+    targetmask(:,:,1) = squeeze(mean(trialcyc(:,:,6,find(sfcombo==4&xpos==xrange(2))),4)); %target only
+    targetmask(:,:,2) = squeeze(mean(trialcyc(:,:,6,find(sfcombo==2&xpos==xrange(2))),4)); %mask only
+    figure
+    imshow(targetmask)
+    imagesc(targetmask(:,:,1),[-0.01 0.05])
+    hold on
+    imagesc(targetmask(:,:,2),[-0.01 0.05])
+%     imagesc(,[-0.05 0.05])
+%     colormap(jet);
+    hold on; plot(ypts,xpts,'w.','Markersize',2)
+    plot(x,y,'ro')
+    axis square
+
+    
+%     [fname pname] = uigetfile('*.mat','points file');
+%     if fname~=0
+%         load(fullfile(pname, fname));
+%     else
+%         figure
+%         for i=1:15
+% %         imagesc(squeeze(mean(trialcyc(:,:,i,find(sfcombo==4)),4)),[-0.05 0.05])
+%         imagesc(squeeze(mean(trialcyc(:,:,i,:),4)),[-0.05 0.05])
+%         drawnow
+%         end
+%         colormap(jet);
+%         hold on; plot(ypts,xpts,'w.','Markersize',2)
+%         axis square
+%         [x y] = ginput(7);
+%         x = round(x);y = round(y);
+%         close(gcf);
+%         [fname pname] = uiputfile('*.mat','save points?');
+%         if fname~=0
+%             save(fullfile(pname,fname),'x','y');
+%         end
+%     end
+
+% %     x = floor(x/4); y = floor(y/4);
+    
+     %plot average of all blank stim sessions
     figure
     subplot(1,2,1)
-    shadedErrorBar([1:10]',squeeze(mean(trialcyc(y(1),x(1),:,find(sfcombo==1)),4)),squeeze(std(trialcyc(y(1),x(1),:,find(sfcombo==1)),[],4))/sqrt(length(find(sfcombo==1))))
-    axis([1 10 -0.1 0.2])
+    shadedErrorBar([1:15]',squeeze(mean(trialcyc(y(1),x(1),:,find(sfcombo==1&xpos==1)),4)),squeeze(std(trialcyc(y(1),x(1),:,find(sfcombo==1)),[],4))/sqrt(length(find(sfcombo==1))))
+    axis([1 15 -0.1 0.2])
         title('No stim')
     subplot(1,2,2)
-    shadedErrorBar([1:10]',squeeze(mean(trialcyc(y(1),x(1),:,find(sfcombo==5)),4)),squeeze(std(trialcyc(y(1),x(1),:,find(sfcombo==5)),[],4))/sqrt(length(find(sfcombo==5))))   
-    axis([1 10 -0.1 0.2])
+    shadedErrorBar([1:15]',squeeze(mean(trialcyc(y(1),x(1),:,find(sfcombo==5&xpos==1)),4)),squeeze(std(trialcyc(y(1),x(1),:,find(sfcombo==5)),[],4))/sqrt(length(find(sfcombo==5))))   
+    axis([1 15 -0.1 0.2])
     title('Target+Mask Low SF')
     if exist('psfilename','var')
         set(gcf, 'PaperPositionMode', 'auto');
@@ -247,7 +286,7 @@ end
         end
     end
 
-    %plots for dOri=pi
+    %plots for dOri=pi/2
     for i = 1:length(lagrange)
         figure
         cnt = 1;
@@ -278,7 +317,7 @@ end
             hold on
             for k = 1:length(x)
                 plot(squeeze(trialcyc(y(1),x(1),:,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(1)))));
-                axis([1 10 -0.1 0.2]);
+                axis([1 15 -0.1 0.2]);
             end
         end
         mtit(sprintf('Trial data 0-dtheta %0.0flag',lagrange(i)))
@@ -296,7 +335,7 @@ end
             hold on
             for k = 1:length(x)
                 plot(squeeze(trialcyc(y(1),x(1),:,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(2)))));
-                axis([1 10 -0.1 0.2]);
+                axis([1 15 -0.1 0.2]);
             end
         end
         mtit(sprintf('Trial data pi/2-dtheta %0.0flag',lagrange(i)))
@@ -328,6 +367,44 @@ end
         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfilename,'-append');
     end
+    
+    
+    %%%plot responses in 7 visual areas
+    for i = 1:length(lagrange)
+        figure  
+        for j = 1:length(sfcomborange)
+            subplot(3,3,j) 
+            hold on
+            for k = 1:length(x)
+                plot(squeeze(mean(trialcyc(y(k),x(k),:,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(1))),4)));
+                axis([1 10 -0.1 0.2]);
+            end
+        end
+        mtit(sprintf('Trial data 0-dtheta %0.0flag',lagrange(i)))
+        legend('V1','P','LM','AL','RL','AM','PM')
+        if exist('psfilename','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilename,'-append');
+        end
+     end
+    
+    for i = 1:length(lagrange)
+        figure  
+        for j = 1:length(sfcomborange)
+            subplot(3,3,j) 
+            hold on
+            for k = 1:length(x)
+                plot(squeeze(mean(trialcyc(y(k),x(k),:,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(2))),4)));
+                axis([1 10 -0.1 0.2]);
+            end
+        end
+        mtit(sprintf('Trial data pi/2-dtheta %0.0flag',lagrange(i)))
+        legend('V1','P','LM','AL','RL','AM','PM')
+        if exist('psfilename','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilename,'-append');
+        end
+     end
     
     % 
     % %%% separate out responses by stim parameter

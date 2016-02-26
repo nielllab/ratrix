@@ -1,6 +1,6 @@
 %% code from doGratingsNew
 deconvplz = 1; %choose if you want deconvolution
-pointsfile = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\SizeSelectPointsG6BLIND3B12LT';
+pointsfile = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\GroupMaskingPoints';
 for f = 1:length(use)
     load('C:\sizeSelect2sf5sz14min.mat')
     load('C:\mapoverlay.mat')
@@ -139,8 +139,8 @@ for f = 1:length(use)
     speedcut = 500;
     trialdata = zeros(size(deconvimg,1),size(deconvimg,2),trials);
     trialspeed = zeros(trials,1);
-    trialcyc = zeros(size(deconvimg,1),size(deconvimg,2),shift,trials);
-    for tr=1:trials;
+    trialcyc = zeros(size(deconvimg,1),size(deconvimg,2),shift+10,trials);
+    for tr=1:trials-1;
         t0 = round((tr-1)*shift);
         baseframes = base+t0; baseframes=baseframes(baseframes>0);
         trialdata(:,:,tr)=mean(deconvimg(:,:,useframes+t0),3) -mean(deconvimg(:,:,baseframes),3);
@@ -150,23 +150,26 @@ for f = 1:length(use)
             trialspeed(tr)=500;
         end
     %     trialcourse(tr,:) = squeeze(mean(mean(deconvimg(:,:,t0+(1:20)),2),1));
-        trialcyc(:,:,:,tr) = deconvimg(:,:,t0+(1:20));    
+        trialcyc(:,:,:,tr) = deconvimg(:,:,t0+(1:30));%each cycle is frames 6-26, stim comes on at frame 11
     end
     %frames 1-10 are baseline, 11-20 stim on
 
     xrange = unique(xpos); sfrange=unique(sf); tfrange=unique(tf);
 
-    tuning=zeros(size(trialdata,1),size(trialdata,2),length(xrange),length(radiusRange),length(sfrange),length(tfrange));
+    tuning=nan(size(trialdata,1),size(trialdata,2),length(xrange),length(radiusRange),length(sfrange),length(tfrange));
     %%% separate out responses by stim parameter
     cond = 0;
     run = find(trialspeed>=speedcut);
     sit = find(trialspeed<speedcut);
+    trialcycavg=nan(size(trialdata,1),size(trialdata,2),shift+10,length(xrange),length(radiusRange),length(sfrange),length(tfrange));
+    trialcycavgRun=nan(size(trialdata,1),size(trialdata,2),shift+10,length(xrange),length(radiusRange),length(sfrange),length(tfrange));
+    trialcycavgSit=nan(size(trialdata,1),size(trialdata,2),shift+10,length(xrange),length(radiusRange),length(sfrange),length(tfrange));
     for i = 1:length(xrange)
         for j= 1:length(radiusRange)
             for k = 1:length(sfrange)
                 for l=1:length(tfrange)
                     cond = cond+1;
-                    inds = find(xpos==xrange(i)&radius==radius(j)&sf==sfrange(k)&tf==tfrange(l));
+                    inds = find(xpos==xrange(i)&radius==j&sf==sfrange(k)&tf==tfrange(l));
                     avgtrialdata(:,:,cond) = squeeze(median(trialdata(:,:,inds),3));%  length(find(xpos==xrange(i)&ypos==yrange(j)&sf==sfrange(k)&tf==tfrange(l)))
     %                 avgtrialcourse(i,j,k,l,:) = squeeze(median(trialcourse(inds,:),1));
     %                 avgcondtrialcourse(cond,:) = avgtrialcourse(i,j,k,l,:);
@@ -175,53 +178,44 @@ for f = 1:length(use)
                     tuning(:,:,i,j,k,l) = avgtrialdata(:,:,cond);
     %                 meanspd(i,j,k,l) = squeeze(mean(trialspeed(inds)>500));
                     trialcycavg(:,:,:,i,j,k,l) = squeeze(mean(trialcyc(:,:,:,inds),4));
-    %                 trialcycavgRun(:,:,:,i,j,k,l) = squeeze(nanmean(trialcyc(:,:,:,intersect(inds,run)),4));
-    %                 trialcycavgSit(:,:,:,i,j,k,l) = squeeze(nanmean(trialcyc(:,:,:,intersect(inds,sit)),4));
+                    trialcycavgRun(:,:,:,i,j,k,l) = squeeze(nanmean(trialcyc(:,:,:,intersect(inds,run)),4));
+                    trialcycavgSit(:,:,:,i,j,k,l) = squeeze(nanmean(trialcyc(:,:,:,intersect(inds,sit)),4));
                 end
             end
         end
     end
 
+    %%baseline subtraction code
     %get average map with no stimulus
     minmap = zeros(size(deconvimg,1),size(deconvimg,2),length(xrange));
-    mintrialcyc = zeros(size(deconvimg,1),size(deconvimg,2),shift,length(xrange));
+    mintrialcyc = zeros(size(deconvimg,1),size(deconvimg,2),shift+10,length(xrange));
     for i = 1:length(xrange)
         minmap(:,:,i) = squeeze(mean(mean(tuning(:,:,i,1,:,:),5),6));
         mintrialcyc(:,:,:,i) = squeeze(mean(mean(trialcycavg(:,:,:,i,1,:,:),6),7));
     end
     %subtract average map with no stimulus from every map in tuning and
-    %trialcycavg and subtract baseline frame (10)
+    %trialcycavg
     for i = 1:length(xrange)
         for j = 1:length(radiusRange)
             for k = 1:length(sfrange)
                 for l = 1:length(tfrange)
                     tuning(:,:,i,j,k,l) = tuning(:,:,i,j,k,l)-minmap(:,:,i);
                     trialcycavg(:,:,:,i,j,k,l) = trialcycavg(:,:,:,i,j,k,l)-mintrialcyc(:,:,:,i);
-                    for n=1:size(trialcycavg,3) %make this linear math somehow?
-                        trialcycavg(:,:,n,i,j,k,l) = trialcycavg(:,:,n,i,j,k,l)-trialcycavg(:,:,10,i,j,k,l);
-                    end
                 end
             end
         end
     end
-    
-    %subtract average map with no stimulus from trialcyc and subtract
-    %baseline frame (10)
+%     
+    %subtract average map with no stimulus from trialcyc
     for tr=1:trials
         if xpos==xrange(1)
             trialcyc(:,:,:,tr) = trialcyc(:,:,:,tr)-mintrialcyc(:,:,:,1);
-            for n=1:size(trialcyc,3) %make this linear math somehow?
-                trialcyc(:,:,n,tr) = trialcyc(:,:,n,tr)-trialcyc(:,:,10,tr);
-            end
         else
             trialcyc(:,:,:,tr) = trialcyc(:,:,:,tr)-mintrialcyc(:,:,:,2);
-            for n=1:size(trialcyc,3) %make this linear math somehow?
-                trialcyc(:,:,n,tr) = trialcyc(:,:,n,tr)-trialcyc(:,:,10,tr);
-            end
         end
     end
 
-    
+            
     
     
 
@@ -239,38 +233,90 @@ for f = 1:length(use)
     % end
     % ximg(:,:,3) = 0;
 
-    % load(pointsfile)
     load(pointsfile);
+    figure
+    imagesc(squeeze(mean(trialcyc(:,:,12,find(xpos==xrange(1)&radius==3)),4)),[-0.05 0.05])
+    hold on
+    plot(ypts,xpts,'w.','Markersize',2)
+    plot(x,y,'ro')
+    if exist('psfilename','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilename,'-append');
+    end
+    
 %     [fname pname] = uigetfile('*.mat','points file');
 %     if fname~=0
 %         load(fullfile(pname, fname));
+%         figure
+%         imagesc(squeeze(mean(trialcyc(:,:,12,find(xpos==xrange(i)&radius==3)),4)),[-0.05 0.05])
+%         hold on
+%         plot(ypts,xpts,'w.','Markersize',2)
+%         plot(x,y,'ro')
+%         if exist('psfilename','var')
+%                 set(gcf, 'PaperPositionMode', 'auto');
+%                 print('-dpsc',psfilename,'-append');
+%         end
 %     else
 %         figure
-%         for i = 1:length(xrange)
-%     %         imshow(ximg(:,:,i))
-%             imagesc(squeeze(mean(trialcyc(:,:,12,find(xpos==xrange(i))),4)));hold on; plot(ypts,xpts,'w.','Markersize',2)
-%             [y(i) x(i)] = ginput(1);
-%             x=round(x); y=round(y);
-%     %     %     range = floor(size(ximg,1)*0.05); %findmax range is 5% of image size
-%     %     %     [maxval(i) maxind(i)] =  max(max(ximg(x(i)-range:x(i)+range,y(i)-range:y(i)+range,1)));
-%     %     %     [xoff(i),yoff(i)] = ind2sub([1+2*range,1+2*range],maxind(i));
+%         imagesc(squeeze(mean(trialcyc(:,:,12,find(xpos==xrange(i)&radius==3)),4)),[-0.05 0.05])
+%         hold on
+%         plot(ypts,xpts,'w.','Markersize',2)
+%         [x y] = ginput(7);
+%         x=round(x); y=round(y);
+%         plot(x,y,'ro')
+%         if exist('psfilename','var')
+%                 set(gcf, 'PaperPositionMode', 'auto');
+%                 print('-dpsc',psfilename,'-append');
 %         end
-%         close(gcf);
 %         [fname pname] = uiputfile('*.mat','save points?');
 %         if fname~=0
 %             save(fullfile(pname,fname),'x','y');
 %         end
 %     end
+    
+    
+        %%get peak response - baseline for all conditions
+    peaks = nan(length(xrange),length(radiusRange),length(sfrange),length(tfrange));
+    for i = 1:length(xrange)
+        for j = 1:length(radiusRange)
+            for k = 1:length(sfrange)
+                for l = 1:length(tfrange)
+                    peaks(i,j,k,l) = mean(trialcyc(y(1),x(1),12,find(xpos==xrange(i)&radius==j&sf==sfrange(k)&tf==tfrange(l))),4)-...
+                        mean(trialcyc(y(1),x(1),5,find(xpos==xrange(i)&radius==j&sf==sfrange(k)&tf==tfrange(l))),4);
+                end
+            end
+        end
+    end
+    
+    cnt=0;
+    figure
+    for k = 1:length(sfrange)
+        for l = 1:length(tfrange)
+            cnt = cnt+1;
+            subplot(2,2,cnt)
+            plot(peaks(1,:,k,l),'ko')
+            set(gca,'Xtick',1:6,'Xticklabel',[0 1 2 4 8 1000])
+            xlabel('radius')
+            ylabel('dfof')
+            axis square
+            axis([1 6 -0.05 0.5])
+            legend(sprintf('%0.2fsf %0.0ftf',sfrange(k),tfrange(l)),'Location','northoutside')
+        end
+    end
+    if exist('psfilename','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfilename,'-append');
+    end   
 
     %plot no stim and one stim condition to check
     figure
     subplot(1,2,1)
-    shadedErrorBar([1:10]',squeeze(mean(trialcyc(y(1),x(1),10:19,find(radius==1)),4)),squeeze(std(trialcyc(y(1),x(1),10:19,find(radius==1)),[],4))/sqrt(length(find(radius==1))))
-    axis([1 10 -0.1 0.3])
+    shadedErrorBar([1:30]',squeeze(mean(trialcyc(y(1),x(1),:,find(radius==1)),4)),squeeze(std(trialcyc(y(1),x(1),:,find(radius==1)),[],4))/sqrt(length(find(radius==1))))
+    axis([1 30 -0.1 0.5])
         title('No stim')
     subplot(1,2,2)
-    shadedErrorBar([1:10]',squeeze(mean(trialcyc(y(1),x(1),10:19,find(radius==6)),4)),squeeze(std(trialcyc(y(1),x(1),10:19,find(radius==6)),[],4))/sqrt(length(find(radius==6))))
-    axis([1 10 -0.1 0.3])
+    shadedErrorBar([1:30]',squeeze(mean(trialcyc(y(1),x(1),:,find(radius==6)),4)),squeeze(std(trialcyc(y(1),x(1),:,find(radius==6)),[],4))/sqrt(length(find(radius==6))))
+    axis([1 30 -0.1 0.5])
     title('Max Radius')
     if exist('psfilename','var')
         set(gcf, 'PaperPositionMode', 'auto');
@@ -302,8 +348,8 @@ for f = 1:length(use)
         end
     end
 
-    xstim = [2 2];
-    ystim = [-0.1 0.3];
+    xstim = [11 11];
+    ystim = [-0.1 0.5];
     for i=1:length(sfrange)
         for j=1:length(tfrange)
             figure
@@ -311,15 +357,15 @@ for f = 1:length(use)
             for k=1:length(radiusRange)
                 subplot(2,3,cnt)
                 hold on
-                shadedErrorBar([1:10]',squeeze(mean(trialcyc(y(1),x(1),10:19,find(xpos==xrange(1)&radius==radius(k)&sf==sfrange(i)&tf==tfrange(j))),4)),...
-                    squeeze(std(trialcyc(y(1),x(1),10:19,find(xpos==xrange(1)&radius==radius(k)&sf==sfrange(i)&tf==tfrange(j))),[],4))/...
-                    sqrt(length(find(xpos==xrange(1)&radius==radius(k)&sf==sfrange(i)&tf==tfrange(j)))))
+                shadedErrorBar([1:30]',squeeze(mean(trialcyc(y(1),x(1),:,find(xpos==xrange(1)&radius==k&sf==sfrange(i)&tf==tfrange(j))),4)),...
+                    squeeze(std(trialcyc(y(1),x(1),:,find(xpos==xrange(1)&radius==k&sf==sfrange(i)&tf==tfrange(j))),[],4))/...
+                    sqrt(length(find(xpos==xrange(1)&radius==k&sf==sfrange(i)&tf==tfrange(j)))))
                 plot(xstim,ystim,'r-')
                 set(gca,'LooseInset',get(gca,'TightInset'))
                 cnt=cnt+1;
-                axis([1 10 -0.1 0.3])
-                legend(sprintf('%0.0frad',radiusRange(k)))
-             end
+                axis([1 30 -0.1 0.5])
+                legend(sprintf('%0.0frad',radiusRange(k)),'Location','south')
+            end
             mtit(sprintf('%s %0.2fsf %0.0ftf',[files(use(f)).subj ' ' files(use(f)).expt],sfrange(i),tfrange(j)))
             if exist('psfilename','var')
                 set(gcf, 'PaperPositionMode', 'auto');
@@ -450,7 +496,7 @@ for f = 1:length(use)
 
     if f~=0
     %     save(fullfile(p,f),'allsubj','sessiondata','shiftData','fit','mnfit','cycavg','mv');
-        save(fullfile(p,filename),'trialcyc','trialcycavg','tuning','xrange','radiusRange','sfrange','tfrange');
+        save(fullfile(p,filename),'trialcyc','trialcycavg','trialcycavgRun','trialcycavgSit','tuning','trialspeed','run','sit','xrange','radiusRange','sfrange','tfrange');
     end
 
     % [f p] = uiputfile('*.pdf','save pdf');

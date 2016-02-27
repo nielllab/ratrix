@@ -128,8 +128,8 @@ if deconvplz == 1
     deconvimg = deconvimg - mean(mean(mean(deconvimg))); %subtract min value
     img = shiftdim(img,1); %shift img back
     img = img - 0.2; %subtract 0.2 back off
-    deconvimg = deconvimg(:,:,11:end); %remove first trial
-    img = img(:,:,11:end); %remove first trial since it has no baseline
+%     deconvimg = deconvimg(:,:,11:end); %remove first trial
+%     img = img(:,:,11:end); %remove first trial since it has no baseline
     %check deconvolution success on one pixel
     figure
     hold on
@@ -137,7 +137,7 @@ if deconvplz == 1
     plot(squeeze(deconvimg(25,25,:)),'g')
     hold off
 else
-    img = img(:,:,11:end); %remove first trial since it has no baseline
+%     img = img(:,:,11:end); %remove first trial since it has no baseline
     deconvimg = img;
 end
     trials = trials-1; %remove first trial
@@ -161,14 +161,7 @@ end
             trialcourse(tr,:) = squeeze(mean(mean(deconvimg(:,:,5+t0+(1:15)),2),1)); %average over whole image
             trialcyc(:,:,:,tr) = deconvimg(:,:,5+t0+(1:15)); %cycle average by trial)
     end
-%     
-%     %subtract off baseline (i.e. first point in each cycle)
-%     for i = 1:size(trialcyc,4)
-%         for j = 1:size(trialcyc,3)
-%             trialcyc(:,:,j,i) = trialcyc(:,:,j,i) - trialcyc(:,:,1,i);
-%         end
-%     end
-    
+       
     xpos=xpos(:,2:end); sf=sf(2:end,:); lag=lag(:,2:end); dOri=dOri(:,2:end); %remove first trial
     xrange = unique(xpos); sfrange=unique(sf); lagrange = unique(lag); dOrirange = unique(dOri);
 
@@ -205,31 +198,41 @@ end
     
 %     %%%load file with points
     load(pointsfile);
+    
+        %subtract off no stim condition
+    nostim = zeros(size(trialcyc,1),size(trialcyc,2),size(trialcyc,3));
+    nostim(:,:,:) = squeeze(mean(trialcyc(:,:,:,find(sfcombo==1)),4));
+    for i = 1:size(trialcyc,4)
+       trialcyc(:,:,:,i) = trialcyc(:,:,:,i) - nostim;
+    end
+    
+    %plot target (red) and mask (green) response with points overlayed
     targetmask = zeros(size(img,1),size(img,2),3);
-    targetmask(:,:,1) = squeeze(mean(trialcyc(:,:,6,find(sfcombo==4&xpos==xrange(2))),4)); %target only
-    targetmask(:,:,2) = squeeze(mean(trialcyc(:,:,6,find(sfcombo==2&xpos==xrange(2))),4)); %mask only
+    targetmask(:,:,1) = squeeze(mean(trialcyc(:,:,6,find(sfcombo==4&xpos==xrange(1))),4)); %target only
+    targetmask(:,:,2) = squeeze(mean(trialcyc(:,:,6,find(sfcombo==2&xpos==xrange(1))),4)); %mask only
+    targetmask(:,:,1)=targetmask(:,:,1)/max(max(targetmask(:,:,1))); %normalize to 1
+    targetmask(:,:,2)=targetmask(:,:,2)/max(max(targetmask(:,:,2)));
     figure
-    imshow(targetmask)
-    imagesc(targetmask(:,:,1),[-0.01 0.05])
-    hold on
-    imagesc(targetmask(:,:,2),[-0.01 0.05])
+    imshow(targetmask,'InitialMagnification','fit')
+%     imagesc(targetmask(:,:,1),[-0.01 0.05])
+%     hold on
+%     imagesc(targetmask(:,:,2),[-0.01 0.05])
 %     imagesc(,[-0.05 0.05])
 %     colormap(jet);
     hold on; plot(ypts,xpts,'w.','Markersize',2)
     plot(x,y,'ro')
     axis square
-
+    if exist('psfilename','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfilename,'-append');
+    end
     
 %     [fname pname] = uigetfile('*.mat','points file');
 %     if fname~=0
 %         load(fullfile(pname, fname));
 %     else
 %         figure
-%         for i=1:15
-% %         imagesc(squeeze(mean(trialcyc(:,:,i,find(sfcombo==4)),4)),[-0.05 0.05])
-%         imagesc(squeeze(mean(trialcyc(:,:,i,:),4)),[-0.05 0.05])
-%         drawnow
-%         end
+%         imagesc(squeeze(mean(trialcyc(:,:,6,find(sfcombo==4&xpos==xrange(1))),4)),[-0.05 0.05])
 %         colormap(jet);
 %         hold on; plot(ypts,xpts,'w.','Markersize',2)
 %         axis square
@@ -270,7 +273,7 @@ end
         for j = 1:length(sfcomborange)
             for k = 1:10
                 subplot(9,10,cnt)
-                imagesc(squeeze(mean(trialcyc(:,:,k,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(1))),4)),[0 0.2])
+                imagesc(squeeze(mean(trialcyc(:,:,k,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(1))),4)),[0 0.15])
                 colormap(jet)
                 axis square
                 axis off
@@ -293,7 +296,7 @@ end
         for j = 1:length(sfcomborange)
             for k = 1:10
                 subplot(9,10,cnt)
-                imagesc(squeeze(mean(trialcyc(:,:,k,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(2))),4)),[0 0.2])
+                imagesc(squeeze(mean(trialcyc(:,:,k,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(2))),4)),[0 0.15])
                 colormap(jet)
                 axis square
                 axis off
@@ -317,7 +320,7 @@ end
             hold on
             for k = 1:length(x)
                 plot(squeeze(trialcyc(y(1),x(1),:,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(1)))));
-                axis([1 15 -0.1 0.2]);
+                axis([1 15 -0.1 0.5]);
             end
         end
         mtit(sprintf('Trial data 0-dtheta %0.0flag',lagrange(i)))
@@ -335,7 +338,7 @@ end
             hold on
             for k = 1:length(x)
                 plot(squeeze(trialcyc(y(1),x(1),:,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(2)))));
-                axis([1 15 -0.1 0.2]);
+                axis([1 15 -0.1 0.5]);
             end
         end
         mtit(sprintf('Trial data pi/2-dtheta %0.0flag',lagrange(i)))
@@ -377,7 +380,7 @@ end
             hold on
             for k = 1:length(x)
                 plot(squeeze(mean(trialcyc(y(k),x(k),:,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(1))),4)));
-                axis([1 10 -0.1 0.2]);
+                axis([1 10 -0.1 0.5]);
             end
         end
         mtit(sprintf('Trial data 0-dtheta %0.0flag',lagrange(i)))
@@ -395,7 +398,7 @@ end
             hold on
             for k = 1:length(x)
                 plot(squeeze(mean(trialcyc(y(k),x(k),:,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(2))),4)));
-                axis([1 10 -0.1 0.2]);
+                axis([1 10 -0.1 0.5]);
             end
         end
         mtit(sprintf('Trial data pi/2-dtheta %0.0flag',lagrange(i)))
@@ -592,7 +595,7 @@ end
 
     if f~=0
     %     save(fullfile(p,f),'allsubj','sessiondata','shiftData','fit','mnfit','cycavg','mv');
-        save(fullfile(p,filename),'trialcyc','deconvimg','sfcombo','xrange','sfrange','lagrange','dOrirange','sfcomborange');
+        save(fullfile(p,filename),'trialcyc','deconvimg','sfcombo','xrange','sfrange','lagrange','dOrirange','sfcomborange','trialspeed','run','sit');
     end
     
     if f~=0

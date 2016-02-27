@@ -19,8 +19,8 @@ ypts = ypts/4;
 moviename = 'C:\sizeSelect2sf5sz14min';
 load(moviename);
 
-alltrialcycpre = zeros(65,65,20,384,length(datafiles));
-alltrialcycavgpre = zeros(65,65,20,2,6,2,2,length(datafiles));
+alltrialcycpre = zeros(65,65,30,384,length(datafiles));
+alltrialcycavgpre = zeros(65,65,30,2,6,2,2,length(datafiles));
 for i= 1:length(datafiles) %collates all conditions (numbered above) 
     load(fullfile(predir,datafiles{i}),'trialcyc','trialcycavg');%load data
     alltrialcycpre(:,:,:,:,i) = trialcyc;
@@ -32,8 +32,8 @@ setrialcycpre = std(alltrialcycpre,[],5)/sqrt(length(datafiles)); %group standar
 avgtrialcycavgpre = mean(alltrialcycavgpre,7);
 setrialcycavgpre = std(alltrialcycavgpre,[],7)/sqrt(length(datafiles));
 
-alltrialcycpost = zeros(65,65,20,384,length(datafiles));
-alltrialcycavgpost = zeros(65,65,20,2,6,2,2,length(datafiles));
+alltrialcycpost = zeros(65,65,30,384,length(datafiles));
+alltrialcycavgpost = zeros(65,65,30,2,6,2,2,length(datafiles));
 for i= 1:length(datafiles) %collates all conditions (numbered above) 
     load(fullfile(postdir,datafiles{i}),'trialcyc','trialcycavg');%load data
     alltrialcycpost(:,:,:,:,i) = trialcyc;
@@ -45,6 +45,13 @@ avgtrialcycpost = mean(alltrialcycpost,5); %group mean frames by trial
 setrialcycpost = std(alltrialcycpost,[],5)/sqrt(length(datafiles)); %group standard error
 avgtrialcycavgpost = mean(alltrialcycavgpost,7);
 setrialcycavgpost = std(alltrialcycavgpost,[],7)/sqrt(length(datafiles));
+
+for  i = 1:length(avgtrialcycpre)
+    for fr=1:30
+    avgtrialcycpre(:,:,fr,i) = avgtrialcycpre(:,:,fr,i) - mean(avgtrialcycpre(:,:,1:9,i),3);
+    avgtrialcycpost(:,:,fr,i) = avgtrialcycpost(:,:,fr,i) - mean(avgtrialcycpost(:,:,1:9,i),3);
+    end
+end
 
 load('\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\SizeSelectPointsG6BLIND3B12LT.mat');
 % [fname pname] = uigetfile('*.mat','points file');
@@ -67,14 +74,52 @@ load('\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\SizeSelectP
 % end
 % x = floor(x/4); y = floor(y/4);
 
+%%get peak response - baseline for all conditions
+    peakspre = nan(length(xrange),length(radiusRange),length(sfrange),length(tfrange));
+    peakspost = nan(length(xrange),length(radiusRange),length(sfrange),length(tfrange));
+    for i = 1:length(xrange)
+        for j = 1:length(radiusRange)
+            for k = 1:length(sfrange)
+                for l = 1:length(tfrange)
+                    peakspre(i,j,k,l) = mean(avgtrialcycpre(y(1),x(1),12,find(xpos==xrange(i)&radius==j&sf==sfrange(k)&tf==tfrange(l))),4);%-...
+                        %mean(avgtrialcycpre(y(1),x(1),5,find(xpos==xrange(i)&radius==j&sf==sfrange(k)&tf==tfrange(l))),4);
+                    peakspost(i,j,k,l) = mean(avgtrialcycpost(y(1),x(1),12,find(xpos==xrange(i)&radius==j&sf==sfrange(k)&tf==tfrange(l))),4);%-...
+                        %mean(avgtrialcycpost(y(1),x(1),5,find(xpos==xrange(i)&radius==j&sf==sfrange(k)&tf==tfrange(l))),4);
+                end
+            end
+        end
+    end
+    
+    cnt=0;
+    figure
+    for k = 1:length(sfrange)
+        for l = 1:length(tfrange)
+            cnt = cnt+1;
+            subplot(2,2,cnt)
+            hold on
+            plot(peakspre(1,:,k,l),'ko')
+            plot(peakspost(1,:,k,l),'ro')
+            set(gca,'Xtick',1:6,'Xticklabel',[0 1 2 4 8 1000])
+            xlabel('radius')
+            ylabel('dfof')
+            axis square
+            axis([1 6 -0.05 0.5])
+            legend(sprintf('%0.2fsf %0.0ftf',sfrange(k),tfrange(l)),'Location','northoutside')
+        end
+    end
+    if exist('psfilename','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfilename,'-append');
+    end   
+
 %plot activity maps for the different tf/sf combinations, with rows=radius
     for i=1:length(sfrange)
         for j=1:length(tfrange)
             figure
             cnt=1;
             for k=1:length(radiusRange)
-                for l=10:19
-                    subplot(6,10,cnt)
+                for l=10:14
+                    subplot(6,5,cnt)
                         imagesc(avgtrialcycavgpre(:,:,l,1,k,i,j),[0 0.15])
                         colormap(jet)
                         axis square
@@ -97,8 +142,8 @@ load('\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\SizeSelectP
             figure
             cnt=1;
             for k=1:length(radiusRange)
-                for l=10:19
-                    subplot(6,10,cnt)
+                for l=10:14
+                    subplot(6,5,cnt)
                         imagesc(avgtrialcycavgpost(:,:,l,1,k,i,j),[0 0.15])
                         colormap(jet)
                         axis square
@@ -116,8 +161,8 @@ load('\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\SizeSelectP
         end
     end
 
-    xstim = [2 2];
-    ystim = [-0.1 0.4];
+    xstim = [11 11];
+    ystim = [-0.1 0.5];
 
     for i=1:length(sfrange)
         for j=1:length(tfrange)
@@ -126,18 +171,18 @@ load('\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\SizeSelectP
             for k=1:length(radiusRange)
                 subplot(2,3,cnt)
                 hold on
-                shadedErrorBar([1:10]',squeeze(mean(avgtrialcycpre(y(1),x(1),10:19,find(xpos==xrange(1)&radius==radius(k)&sf==sfrange(i)&tf==tfrange(j))),4)),...
-                    squeeze(mean(setrialcycpre(y(1),x(1),10:19,find(xpos==xrange(1)&radius==radius(k)&sf==sfrange(i)&tf==tfrange(j))),4))/...
-                    sqrt(length(find(xpos==xrange(1)&radius==radius(k)&sf==sfrange(i)&tf==tfrange(j)))),'-k',1)
-                shadedErrorBar([1:10]',squeeze(mean(avgtrialcycpost(y(1),x(1),10:19,find(xpos==xrange(1)&radius==radius(k)&sf==sfrange(i)&tf==tfrange(j))),4)),...
-                    squeeze(mean(setrialcycpost(y(1),x(1),10:19,find(xpos==xrange(1)&radius==radius(k)&sf==sfrange(i)&tf==tfrange(j))),4))/...
-                    sqrt(length(find(xpos==xrange(1)&radius==radius(k)&sf==sfrange(i)&tf==tfrange(j)))),'-r',1)
+                shadedErrorBar([1:30]',squeeze(mean(avgtrialcycpre(y(1),x(1),:,find(xpos==xrange(1)&radius==k&sf==sfrange(i)&tf==tfrange(j))),4)),...
+                    squeeze(mean(setrialcycpre(y(1),x(1),:,find(xpos==xrange(1)&radius==k&sf==sfrange(i)&tf==tfrange(j))),4))/...
+                    sqrt(length(find(xpos==xrange(1)&radius==k&sf==sfrange(i)&tf==tfrange(j)))),'-k',1)
+                shadedErrorBar([1:30]',squeeze(mean(avgtrialcycpost(y(1),x(1),:,find(xpos==xrange(1)&radius==k&sf==sfrange(i)&tf==tfrange(j))),4)),...
+                    squeeze(mean(setrialcycpost(y(1),x(1),:,find(xpos==xrange(1)&radius==k&sf==sfrange(i)&tf==tfrange(j))),4))/...
+                    sqrt(length(find(xpos==xrange(1)&radius==k&sf==sfrange(i)&tf==tfrange(j)))),'-r',1)
                 plot(xstim,ystim,'g-')
                 set(gca,'LooseInset',get(gca,'TightInset'))
-                cnt=cnt+1;
-                axis([1 10 -0.05 0.4])
+                axis([1 30 -0.05 0.5])
                 legend(sprintf('%0.0frad',radiusRange(k)))
                 hold off
+                cnt=cnt+1;
              end
             mtit(sprintf('group %0.2fsf %0.0ftf',sfrange(i),tfrange(j)))
             if exist('psfilename','var')

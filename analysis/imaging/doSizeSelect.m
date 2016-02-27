@@ -1,6 +1,6 @@
 %% code from doGratingsNew
 deconvplz = 1; %choose if you want deconvolution
-pointsfile = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\GroupMaskingPoints';
+pointsfile = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\GroupSizeSelectPoints';
 for f = 1:length(use)
     load('C:\sizeSelect2sf5sz14min.mat')
     load('C:\mapoverlay.mat')

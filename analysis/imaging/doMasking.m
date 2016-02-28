@@ -1,5 +1,5 @@
 deconvplz = 1 %do you want to deconvolve the image data?
-pointsfile = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\GroupMaskingPoints.mat'
+% pointsfile = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\GroupMaskingPoints.mat'
 
 %% code from doGratingsNew
 for f = 1:length(use)
@@ -189,22 +189,87 @@ end
         end
     end
     sfcomborange = unique(sfcombo);
-%      
-%     %subtract no stimulus conditions
-%     nostimmap = mean(trialcyc(:,:,:,find(sfcombo==1)),4);
-%     for i = 1:size(trialcyc,4)
-%         trialcyc(:,:,:,i) = trialcyc(:,:,:,i) - nostimmap;
-%     end
-    
-%     %%%load file with points
-    load(pointsfile);
-    
+    sflist = [0 0; 0 0.04; 0 0.16; 0.04 0; 0.04 0.04; 0.04 0.16; 0.16 0; 0.16 0.04; 0.16 0.16];
+ 
         %subtract off no stim condition
     nostim = zeros(size(trialcyc,1),size(trialcyc,2),size(trialcyc,3));
     nostim(:,:,:) = squeeze(mean(trialcyc(:,:,:,find(sfcombo==1)),4));
     for i = 1:size(trialcyc,4)
        trialcyc(:,:,:,i) = trialcyc(:,:,:,i) - nostim;
     end
+    
+    
+    %% separate out responses by stim parameter
+    cond = 0;
+    run = find(trialspeed>=speedcut);
+    sit = find(trialspeed<speedcut);
+%     tuning=zeros(size(trialdata,1),size(trialdata,2),length(xrange),length(sfrange),length(lagrange),length(dOrirange));
+    trialcycavg = nan(size(trialdata,1),size(trialdata,2),15,length(xrange),length(sfcomborange),length(lagrange),length(dOrirange));
+    trialcycavgRun = nan(size(trialdata,1),size(trialdata,2),15,length(xrange),length(sfcomborange),length(lagrange),length(dOrirange));
+    trialcycavgSit = nan(size(trialdata,1),size(trialdata,2),15,length(xrange),length(sfcomborange),length(lagrange),length(dOrirange));
+    for i = 1:length(xrange)
+        for j= 1:length(sfcomborange)
+            for k = 1:length(lagrange)
+                for l=1:length(dOrirange)
+                    cond = cond+1;
+                    inds = find(xpos==xrange(i)&sfcombo==sfcomborange(j)&lag==lagrange(k)&dOri==dOrirange(l));
+%                     avgtrialdata(:,:,cond) = squeeze(median(trialdata(:,:,inds),3));%  length(find(xpos==xrange(i)&ypos==yrange(j)&sf==sfrange(k)&tf==tfrange(l)))
+%                     avgtrialcourse(i,j,k,l,:) = squeeze(median(trialcourse(inds,:),1));
+%                     avgcondtrialcourse(cond,:) = avgtrialcourse(i,j,k,l,:);
+%                     avgspeed(cond)=0;
+%                     avgx(cond) = xrange(i); avgsf(cond)=sfrange(j); avglag(cond)=lagrange(k); avgdOri(cond)=dOrirange(l);
+%                     tuning(:,:,i,j,k,l) = avgtrialdata(:,:,cond);
+                    meanspd(i,j,k,l) = squeeze(mean(trialspeed(inds)>500));
+                    trialcycavg(:,:,:,i,j,k,l) = squeeze(mean(trialcyc(:,:,:,inds),4));
+                    trialcycavgRun(:,:,:,i,j,k,l) = squeeze(nanmean(trialcyc(:,:,:,intersect(inds,run)),4));
+                    trialcycavgSit(:,:,:,i,j,k,l) = squeeze(nanmean(trialcyc(:,:,:,intersect(inds,sit)),4));
+                end
+            end
+        end
+    end
+    
+    %get average map with no stimulus
+    for i = 1:length(xrange)
+%         minmap(:,:,i) = squeeze(mean(mean(tuning(:,:,i,1,:,:),5),6));
+        mintrialcyc(:,:,:,i) = squeeze(mean(mean(trialcycavg(:,:,:,i,1,:,:),6),7));
+    end
+    %subtract average map with no stimulus from every map
+    for i = 1:length(xrange)
+        for j= 1:length(sfcomborange)
+            for k = 1:length(lagrange)
+                for l=1:length(dOrirange)
+%                     tuning(:,:,i,j,k,l) = tuning(:,:,i,j,k,l)-minmap(:,:,i);
+                    trialcycavg(:,:,:,i,j,k,l) = trialcycavg(:,:,:,i,j,k,l)-mintrialcyc(:,:,:,i);
+                    for fr=1:15 %subtract off baseline
+                        trialcycavg(:,:,fr,i,j,k,l) = trialcycavg(:,:,fr,i,j,k,l) - squeeze(mean(trialcycavg(:,:,1:4,i,j,k,l),3));
+                    end
+                end
+            end
+        end
+    end
+    
+    
+   %     %%%load file with points
+%     load(pointsfile);
+    files(use(f)).subj
+    [fname pname] = uigetfile('*.mat','points file');
+    if fname~=0
+        load(fullfile(pname, fname));
+    else
+        figure
+        imagesc(squeeze(mean(trialcyc(:,:,6,find(sfcombo==4&xpos==xrange(1))),4)),[-0.05 0.05])
+        colormap(jet);
+        hold on; plot(ypts,xpts,'w.','Markersize',2)
+        axis square
+        [x y] = ginput(7);
+        x = round(x);y = round(y);
+        close(gcf);
+        [fname pname] = uiputfile('*.mat','save points?');
+        if fname~=0
+            save(fullfile(pname,fname),'x','y');
+        end
+    end 
+    
     
     %plot target (red) and mask (green) response with points overlayed
     targetmask = zeros(size(img,1),size(img,2),3);
@@ -227,25 +292,6 @@ end
         print('-dpsc',psfilename,'-append');
     end
     
-%     [fname pname] = uigetfile('*.mat','points file');
-%     if fname~=0
-%         load(fullfile(pname, fname));
-%     else
-%         figure
-%         imagesc(squeeze(mean(trialcyc(:,:,6,find(sfcombo==4&xpos==xrange(1))),4)),[-0.05 0.05])
-%         colormap(jet);
-%         hold on; plot(ypts,xpts,'w.','Markersize',2)
-%         axis square
-%         [x y] = ginput(7);
-%         x = round(x);y = round(y);
-%         close(gcf);
-%         [fname pname] = uiputfile('*.mat','save points?');
-%         if fname~=0
-%             save(fullfile(pname,fname),'x','y');
-%         end
-%     end
-
-% %     x = floor(x/4); y = floor(y/4);
     
      %plot average of all blank stim sessions
     figure
@@ -260,7 +306,63 @@ end
     if exist('psfilename','var')
         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfilename,'-append');
-    end    
+    end 
+    
+    %get peak values, separate out by sfcombo, lag and dOri
+    peaks = zeros(length(sfcomborange),length(lagrange),length(dOrirange)); %peaks(sfcombo,lag,dOri)
+    for i = 1:length(sfcomborange)
+        for j = 1:length(lagrange)
+            for k = 1:length(dOrirange)
+                peaks(i,j,k) = trialcycavg(y(1),x(1),6,1,i,j,k);
+            end
+        end
+    end
+    
+    %plot peak values pre/post doi
+    xstim = [0 4];
+    ystim = [0 0];
+    figure
+    for i = 1:length(sfcomborange)
+            subplot(3,3,i)
+            hold on
+            plot(peaks(i,:,1),'ko')
+            plot(xstim,ystim,'g-')
+            set(gca,'Xtick',1:4,'Xticklabel',[0 32 64 96])
+            if i>6
+                xlabel('SOA (ms)')
+            end
+            ylabel(sprintf('%0.2fT %0.2fM',sflist(i,1),sflist(i,2)))
+            axis square
+            axis([1 4 -0.05 0.2])
+            set(gca,'LooseInset',get(gca,'TightInset'))
+    end
+    mtit('Peaks for 9 sf combos dOri=0')
+    if exist('psfilename','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfilename,'-append');
+    end   
+    figure
+    for i = 1:length(sfcomborange)
+            subplot(3,3,i)
+            hold on
+            plot(peaks(i,:,2),'ko')
+            plot(xstim,ystim,'g-')
+            set(gca,'Xtick',1:4,'Xticklabel',[0 32 64 96])
+            if i>6
+                xlabel('SOA (ms)')
+            end
+            ylabel(sprintf('%0.2fT %0.2fM',sflist(i,1),sflist(i,2)))
+            axis square
+            axis([1 4 -0.05 0.2])
+            set(gca,'LooseInset',get(gca,'TightInset'))
+    end
+    mtit('Peaks for 9 sf combos dOri=pi/2')
+    if exist('psfilename','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfilename,'-append');
+    end   
+    
+    
     %plot whole image at five time points for all sf combos of target/mask
     %rows are sf combination (see above),columns are time points (frame
     %1,3,5,7,9)
@@ -271,8 +373,8 @@ end
         figure        
         cnt = 1;
         for j = 1:length(sfcomborange)
-            for k = 1:10
-                subplot(9,10,cnt)
+            for k = 5:9
+                subplot(9,5,cnt)
                 imagesc(squeeze(mean(trialcyc(:,:,k,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(1))),4)),[0 0.15])
                 colormap(jet)
                 axis square
@@ -294,8 +396,8 @@ end
         figure
         cnt = 1;
         for j = 1:length(sfcomborange)
-            for k = 1:10
-                subplot(9,10,cnt)
+            for k = 5:9
+                subplot(9,5,cnt)
                 imagesc(squeeze(mean(trialcyc(:,:,k,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(2))),4)),[0 0.15])
                 colormap(jet)
                 axis square
@@ -348,10 +450,6 @@ end
         end
      end
      
-     
-    run = find(trialspeed>=speedcut);
-    sit = find(trialspeed<speedcut);
-
     %%get percent time running
     sp = conv(sp,ones(50,1),'same')/50;
     mv = sum(sp>500)/length(sp);
@@ -372,86 +470,44 @@ end
     end
     
     
-    %%%plot responses in 7 visual areas
-    for i = 1:length(lagrange)
-        figure  
-        for j = 1:length(sfcomborange)
-            subplot(3,3,j) 
-            hold on
-            for k = 1:length(x)
-                plot(squeeze(mean(trialcyc(y(k),x(k),:,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(1))),4)));
-                axis([1 10 -0.1 0.5]);
-            end
-        end
-        mtit(sprintf('Trial data 0-dtheta %0.0flag',lagrange(i)))
-        legend('V1','P','LM','AL','RL','AM','PM')
-        if exist('psfilename','var')
-            set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfilename,'-append');
-        end
-     end
-    
-    for i = 1:length(lagrange)
-        figure  
-        for j = 1:length(sfcomborange)
-            subplot(3,3,j) 
-            hold on
-            for k = 1:length(x)
-                plot(squeeze(mean(trialcyc(y(k),x(k),:,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(2))),4)));
-                axis([1 10 -0.1 0.5]);
-            end
-        end
-        mtit(sprintf('Trial data pi/2-dtheta %0.0flag',lagrange(i)))
-        legend('V1','P','LM','AL','RL','AM','PM')
-        if exist('psfilename','var')
-            set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfilename,'-append');
-        end
-     end
-    
-    % 
-    % %%% separate out responses by stim parameter
-    % cond = 0;
-    % tuning=zeros(size(trialdata,1),size(trialdata,2),length(xrange),length(sfrange),length(lagrange),length(dOrirange));
-    % for i = 1:length(xrange)
-    %     i
-    %     for j= 1:length(sfrange)
-    %         for k = 1:length(lagrange)
-    %             for l=1:length(dOrirange)
-    %                 cond = cond+1;
-    %                 inds = find(xpos==xrange(i)&sf==sfrange(j)&lag==lagrange(k)&dOri==dOrirange(l));
-    %                 avgtrialdata(:,:,cond) = squeeze(median(trialdata(:,:,inds),3));%  length(find(xpos==xrange(i)&ypos==yrange(j)&sf==sfrange(k)&tf==tfrange(l)))
-    %                 avgtrialcourse(i,j,k,l,:) = squeeze(median(trialcourse(inds,:),1));
-    %                 avgcondtrialcourse(cond,:) = avgtrialcourse(i,j,k,l,:);
-    %                 avgspeed(cond)=0;
-    %                 avgx(cond) = xrange(i); avgsf(cond)=sfrange(j); avglag(cond)=lagrange(k); avgdOri(cond)=dOrirange(l);
-    %                 tuning(:,:,i,j,k,l) = avgtrialdata(:,:,cond);
-    %                 meanspd(i,j,k,l) = squeeze(mean(trialspeed(inds)>500));
-    %                 trialcycavg(:,:,:,i,j,k,l) = squeeze(mean(trialcyc(:,:,:,inds),4));
-    %                 trialcycavgRun(:,:,:,i,j,k,l) = squeeze(nanmean(trialcyc(:,:,:,intersect(inds,run)),4));
-    %                 trialcycavgSit(:,:,:,i,j,k,l) = squeeze(nanmean(trialcyc(:,:,:,intersect(inds,sit)),4));
-    %             end
-    %         end
-    %     end
-    % end
-    % 
-    % % %get average map with no stimulus
-    % % for i = 1:length(xrange)
-    % %     minmap(:,:,i) = squeeze(mean(mean(tuning(:,:,i,1,:,:),5),6));
-    % %     mintrialcyc(:,:,:,i) = squeeze(mean(mean(trialcycavg(:,:,:,i,1,:,:),6),7));
-    % % end
-    % % %subtract average map with no stimulus from every map
-    % % for i = 1:length(xrange)
-    % %     for j = 1:length(radiusRange)
-    % %         for k = 1:length(sfrange)
-    % %             for l = 1:length(tfrange)
-    % %                 tuning(:,:,i,j,k,l) = tuning(:,:,i,j,k,l)-minmap(:,:,i);
-    % %                 trialcycavg(:,:,:,i,j,k,l) = trialcycavg(:,:,:,i,j,k,l)-mintrialcyc(:,:,:,i);
-    % %             end
-    % %         end
-    % %     end
-    % % end
-    % 
+%     %%%plot responses in 7 visual areas
+%     for i = 1:length(lagrange)
+%         figure  
+%         for j = 1:length(sfcomborange)
+%             subplot(3,3,j) 
+%             hold on
+%             for k = 1:length(x)
+%                 plot(squeeze(mean(trialcyc(y(k),x(k),:,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(1))),4)));
+%                 axis([1 10 -0.1 0.5]);
+%             end
+%         end
+%         mtit(sprintf('Trial data 0-dtheta %0.0flag',lagrange(i)))
+%         legend('V1','P','LM','AL','RL','AM','PM')
+%         if exist('psfilename','var')
+%             set(gcf, 'PaperPositionMode', 'auto');
+%             print('-dpsc',psfilename,'-append');
+%         end
+%      end
+%     
+%     for i = 1:length(lagrange)
+%         figure  
+%         for j = 1:length(sfcomborange)
+%             subplot(3,3,j) 
+%             hold on
+%             for k = 1:length(x)
+%                 plot(squeeze(mean(trialcyc(y(k),x(k),:,find(xpos==xrange(1)&sfcombo==j&lag==lagrange(i)&dOri==dOrirange(2))),4)));
+%                 axis([1 10 -0.1 0.5]);
+%             end
+%         end
+%         mtit(sprintf('Trial data pi/2-dtheta %0.0flag',lagrange(i)))
+%         legend('V1','P','LM','AL','RL','AM','PM')
+%         if exist('psfilename','var')
+%             set(gcf, 'PaperPositionMode', 'auto');
+%             print('-dpsc',psfilename,'-append');
+%         end
+%      end
+%     
+%     
     % %%% plot response based on previous trial's response
     % %%% this is a check for whether return to baseline is an issue
     % % figure
@@ -591,11 +647,10 @@ end
 %     p = fileparts(p);
     p = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect';
     filename = fileparts(fileparts(files(use(f)).masking));
-    filename = sprintf('%s_MaskingAnalysis',filename);
+    filename = sprintf('%s_MaskingAnalysis.mat',filename);
 
     if f~=0
-    %     save(fullfile(p,f),'allsubj','sessiondata','shiftData','fit','mnfit','cycavg','mv');
-        save(fullfile(p,filename),'trialcyc','deconvimg','sfcombo','xrange','sfrange','lagrange','dOrirange','sfcomborange','trialspeed','run','sit');
+        save(fullfile(p,filename),'trialcyc','trialcycavg','trialcycavgRun','trialcycavgSit','deconvimg','sfcombo','xrange','sfrange','lagrange','dOrirange','sfcomborange','trialspeed','run','sit','peaks');
     end
     
     if f~=0

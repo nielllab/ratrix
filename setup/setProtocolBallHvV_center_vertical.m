@@ -56,7 +56,7 @@ switch subjIDs{1}
        percentCorrectionTrials = .5;       
 
    case 'g62hh4ln' % Started 2/9/16  %started HvV_center 2/20/16
-       requestRewardSizeULorMS = 43;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 139;
        msPenalty               =3500;
        percentCorrectionTrials = .5;       

@@ -25,43 +25,36 @@ percentCorrectionTrials = .5;
 
 switch subjIDs{1}
 
-%    case '' % Started 2/9/16
-%        requestRewardSizeULorMS = 43;
-%        rewardSizeULorMS        = 139;
-%        msPenalty               =3500;
-%        percentCorrectionTrials = .5;       
-    
-%    case 'g62bb8tt' % Started 2/9/16
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 139;
-%        msPenalty               =3500;
-%        percentCorrectionTrials = .5;   
-%        
-%    case 'g62bb8rt' % Started 2/9/16
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 139;
-%        msPenalty               =3500;
-%        percentCorrectionTrials = .5;    
-%        
-%    case 'g62ee6lt' % Started 2/9/16
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 139;
-%        msPenalty               =3500;
-%        percentCorrectionTrials = .5;       
-% 
-%    case 'g62hh4ln' % Started 2/9/16
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 139;
-%        msPenalty               =3500;
-%        percentCorrectionTrials = .5;       
- 
-%        
-%     case 'g62tx2.11lt' % Started 2/9/16
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 139;
-%        msPenalty               =3500;
-%        percentCorrectionTrials = .5;       
+   case 'g62hh4ln' % Started 2/9/16  %started HvV_center 2/20/16 back to GoToBlack 2/28/16
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 139;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;      
+       
+   case 'g62ee8rt' % Started 2/29/16
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 139;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;       
 
+   case 'g62ee8tt' % Started 2/29/16
+       requestRewardSizeULorMS = 43;
+       rewardSizeULorMS        = 139;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5; 
+       
+   case 'g62dd5' % Started 2/29/16
+       requestRewardSizeULorMS = 43;
+       rewardSizeULorMS        = 139;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5; 
+       
+    case 'g62dd4' % Started 3/?/16
+       requestRewardSizeULorMS = 43;
+       rewardSizeULorMS        = 139;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;       
+       
     case 'testgotoblackstopime' % Started 6/25/15
        requestRewardSizeULorMS = 20;
        rewardSizeULorMS        = 107;

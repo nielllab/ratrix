@@ -32,24 +32,23 @@ switch subjIDs{1}
        percentCorrectionTrials = .5;      
        
    case 'g62ee8rt' % Started 2/29/16
-       requestRewardSizeULorMS = 0;
+       requestRewardSizeULorMS = 27;
        rewardSizeULorMS        = 139;
        msPenalty               =3500;
        percentCorrectionTrials = .5;       
-
    case 'g62ee8tt' % Started 2/29/16
-       requestRewardSizeULorMS = 43;
+       requestRewardSizeULorMS = 27;
        rewardSizeULorMS        = 139;
        msPenalty               =3500;
        percentCorrectionTrials = .5; 
        
    case 'g62dd5' % Started 2/29/16
-       requestRewardSizeULorMS = 43;
+       requestRewardSizeULorMS = 27;
        rewardSizeULorMS        = 139;
        msPenalty               =3500;
        percentCorrectionTrials = .5; 
        
-    case 'g62dd4' % Started 3/?/16
+    case 'g62dd4' % Started 3/3/16
        requestRewardSizeULorMS = 43;
        rewardSizeULorMS        = 139;
        msPenalty               =3500;

@@ -1,11 +1,19 @@
 %% code from doGratingsNew
 deconvplz = 1; %choose if you want deconvolution
-% pointsfile = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\GroupSizeSelectPoints';
+ptsdir = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\Trained Pre';
+ptsfile = {'G62TX2.6LT_SizeSelectPoints.mat',...
+          'G62TX2.6RT_SizeSelectPoints.mat',...
+          'G62BB2RT_SizeSelectPoints.mat',...
+          'G62T6LT_SizeSelectPoints.mat',...
+          'G62W7LN_SizeSelectPoints.mat',...
+          'G62W7TT_SizeSelectPoints.mat'};
+
 for f = 1:length(use)
+    load(fullfile(ptsdir,ptsfile{f}));
     load('C:\sizeSelect2sf5sz14min.mat')
     load('C:\mapoverlay.mat')
-    xpts = xpts/4;
-    ypts = ypts/4;
+%     xpts = xpts/4;
+%     ypts = ypts/4;
     useframes = 11:12;
     base = 9:10;
     psfilename = 'C:\tempPS.ps';
@@ -37,7 +45,7 @@ for f = 1:length(use)
             sp =0;stimRec=[];
         end
         dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
-        dfof_bg = imresize(dfof_bg,0.25);
+%         dfof_bg = imresize(dfof_bg,0.25);
         label = [files(use(f)).subj ' ' files(use(f)).expt];
     end
 
@@ -126,8 +134,8 @@ for f = 1:length(use)
         %check deconvolution success on one pixel
         figure
         hold on
-        plot(squeeze(img(25,25,:)))
-        plot(squeeze(deconvimg(25,25,:)),'g')
+        plot(squeeze(img(130,130,:)))
+        plot(squeeze(deconvimg(130,130,:)),'g')
         hold off
     else
         deconvimg = img;
@@ -225,26 +233,26 @@ for f = 1:length(use)
         end
     end        
     
-%     load(pointsfile); 
-    files(use(f)).subj
-    [fname pname] = uigetfile('*.mat','points file');
-    if fname~=0
-        load(fullfile(pname, fname));
-    else
-        figure
-        imagesc(squeeze(mean(trialcyc(:,:,12,find(xpos==xrange(1)&radius==2)),4)),[-0.05 0.05])
-        colormap(jet)
-        axis square
-        hold on
-        plot(ypts,xpts,'w.','Markersize',2)
-        [x y] = ginput(7);
-        x=round(x); y=round(y);
-        close(gcf)
-        [fname pname] = uiputfile('*.mat','save points?');
-        if fname~=0
-            save(fullfile(pname,fname),'x','y');
-        end
-    end
+    %%%manual/loading point selection
+%     files(use(f)).subj
+%     [fname pname] = uigetfile('*.mat','points file');
+%     if fname~=0
+%         load(fullfile(pname, fname));
+%     else
+%         figure
+%         imagesc(squeeze(mean(trialcyc(:,:,12,find(xpos==xrange(1)&radius==2)),4)),[-0.05 0.05])
+%         colormap(jet)
+%         axis square
+%         hold on
+%         plot(ypts,xpts,'w.','Markersize',2)
+%         [x y] = ginput(7);
+%         x=round(x); y=round(y);
+%         close(gcf)
+%         [fname pname] = uiputfile('*.mat','save points?');
+%         if fname~=0
+%             save(fullfile(pname,fname),'x','y');
+%         end
+%     end
 
 %plot selected points over each radius size
     figure
@@ -367,16 +375,16 @@ for f = 1:length(use)
     %%%calculate spread of response within each area
 %%make a map for each area that has ones for values to keep and zeros for
 %%values to ignore
-a = ones(65,65);
-for i = 1:length(xpts)
-    a(round(ypts(i)),round(xpts(i))) = 0;
-end
-
-% figure
-% imagesc(a,[0 1])
-% colormap(gray)
-
-imwrite(a,'map.tif')
+% a = ones(size(deconvimg,1),size(deconvimg,2));
+% for i = 1:length(xpts)
+%     a(round(ypts(i)),round(xpts(i))) = 0;
+% end
+% 
+% % figure
+% % imagesc(a,[0 1])
+% % colormap(gray)
+% 
+% imwrite(a,'map.tif')
 
 V1map = imread('V1map.tif');
 Pmap = imread('Pmap.tif');
@@ -386,7 +394,7 @@ RLmap = imread('RLmap.tif');
 AMmap = imread('AMmap.tif');
 PMmap = imread('PMmap.tif');
 
-areamaps = zeros(65,65,7);
+areamaps = zeros(size(deconvimg,1),size(deconvimg,2),7);
 areamaps(:,:,1) = V1map(:,:,1);
 areamaps(:,:,2) = Pmap(:,:,1);
 areamaps(:,:,3) = LMmap(:,:,1);
@@ -399,16 +407,16 @@ areamaps = permute(areamaps,[2 1 3]);
 areamaps(areamaps==0) = 1;
 areamaps(areamaps==255) = 0;
 
-% figure %plot individual area boundaries
-% colormap(gray)
-% for i = 1:size(areamaps,3)
-%     subplot(2,4,i)
-%     imagesc(areamaps(:,:,i),[0 1])
-%     hold on; plot(ypts,xpts,'r.','Markersize',1)
-%     axis off;axis square;
-%     title(sprintf('%s',areas{i}))
-% end
-% mtit('Area Measurement Zones')
+figure %plot individual area boundaries
+colormap(gray)
+for i = 1:size(areamaps,3)
+    subplot(2,4,i)
+    imagesc(areamaps(:,:,i),[0 1])
+    hold on; plot(ypts,xpts,'r.','Markersize',1)
+    axis off;axis square;
+    title(sprintf('%s',areas{i}))
+end
+mtit('Area Measurement Zones')
 
 %%multiply binarized area matrices with average trial data to isolate each
 %%area's response (using peak frame #6)
@@ -421,7 +429,7 @@ for i = 1:length(xrange)
         for k = 1:length(sfrange)
             for l = 1:length(tfrange)
                 for m = 1:length(areas)
-                    findminframe = trialcycavg(:,:,6,i,j,k,l).*areamaps(:,:,m);
+                    findminframe = trialcycavg(:,:,12,i,j,k,l).*areamaps(:,:,m);
                     halfMax(i,j,k,l,m) = length(find(findminframe>=(max(max(findminframe))/2))); %# pixels above half max
                     minframe = min(findminframe(findminframe~=0))*areamaps(:,:,m);
                     findminframe = findminframe - minframe; %subtract min value

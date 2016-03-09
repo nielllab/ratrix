@@ -20,15 +20,15 @@ psfilename = 'C:\tempPS.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
 load('C:/mapoverlay.mat');
-xpts = xpts/4;
-ypts = ypts/4;
+% xpts = xpts/4;
+% ypts = ypts/4;
 moviename = 'C:\sizeSelect2sf5sz14min';
 load(moviename);
 pointsfile = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\GroupSizeSelectPoints';
 load(pointsfile);
 areas = {'V1','P','LM','AL','RL','AM','PM'};
 
-alltrialcycavgpre = zeros(65,65,30,2,6,2,2,length(datafiles));
+alltrialcycavgpre = zeros(260,260,30,2,6,2,2,length(datafiles));
 allpeakspre = zeros(2,6,2,2,length(datafiles));
 alltracespre = zeros(7,30,2,6,2,2,length(datafiles));
 allgauSigmapre = zeros(2,6,2,2,length(areas),2,length(datafiles));
@@ -46,8 +46,8 @@ for i= 1:length(datafiles) %collates all conditions (numbered above)
     end
 end
 
-avgtrialcycavgpre = mean(alltrialcycavgpre,7);%group mean frames by trial
-setrialcycavgpre = std(alltrialcycavgpre,[],7)/sqrt(length(datafiles));%group standard error
+avgtrialcycavgpre = mean(alltrialcycavgpre,8);%group mean frames by trial
+setrialcycavgpre = std(alltrialcycavgpre,[],8)/sqrt(length(datafiles));%group standard error
 avgpeakspre = mean(allpeakspre,5);
 sepeakspre = std(allpeakspre,[],5)/sqrt(length(datafiles));
 avgtracespre = mean(alltracespre,7);
@@ -59,7 +59,7 @@ segauSigmapre = std(allgauSigmapre,[],7)/sqrt(length(datafiles));
 avghalfMaxpre = mean(allhalfMaxpre,6);
 sehalfMaxpre = std(allhalfMaxpre,[],6)/sqrt(length(datafiles));
 
-alltrialcycavgpost = zeros(65,65,30,2,6,2,2,length(datafiles));
+alltrialcycavgpost = zeros(260,260,30,2,6,2,2,length(datafiles));
 allpeakspost = zeros(2,6,2,2,length(datafiles));
 alltracespost = zeros(7,30,2,6,2,2,length(datafiles));
 allgauSigmapost = zeros(2,6,2,2,length(areas),2,length(datafiles));
@@ -78,23 +78,29 @@ for i= 1:length(datafiles) %collates all conditions (numbered above)
 end
 load(fullfile(postdir,datafiles{i}),'xrange','radiusRange','sfrange','tfrange')
 
-avgtrialcycavgpost = mean(alltrialcycavgpost,7);%group mean frames by trial
-setrialcycavgpost = std(alltrialcycavgpost,[],7)/sqrt(length(datafiles));%group standard error
+avgtrialcycavgpost = mean(alltrialcycavgpost,8);%group mean frames by trial
+setrialcycavgpost = std(alltrialcycavgpost,[],8)/sqrt(length(datafiles));%group standard error
 avgpeakspost = mean(allpeakspost,5);
 sepeakspost = std(allpeakspost,[],5)/sqrt(length(datafiles));
 avgtracespost = mean(alltracespost,7);
 setracespost = std(alltracespost,[],7)/sqrt(length(datafiles));
-avgmvpre = mean(allmvpre,2);
-semvpre = std(allmvpost,[],2)/sqrt(length(datafiles));
+avgmvpost = mean(allmvpre,2);
+semvpost = std(allmvpost,[],2)/sqrt(length(datafiles));
 avggauSigmapost = mean(allgauSigmapost,7);
 segauSigmapost = std(allgauSigmapost,[],7)/sqrt(length(datafiles));
 avghalfMaxpost = mean(allhalfMaxpost,6);
 sehalfMaxpost = std(allhalfMaxpost,[],6)/sqrt(length(datafiles));
 
-for  i = 1:length(avgtrialcycavgpre)
-    for fr=1:size(avgtrialcycavgpre,3)
-        avgtrialcycavgpre(:,:,fr,i) = avgtrialcycavgpre(:,:,fr,i) - mean(avgtrialcycavgpre(:,:,1:9,i),3);
-        avgtrialcycavgpost(:,:,fr,i) = avgtrialcycavgpost(:,:,fr,i) - mean(avgtrialcycavgpost(:,:,1:9,i),3);
+for i = 1:length(xrange)
+    for j = 1:length(radiusRange)
+        for k = 1:length(sfrange)
+            for l = 1:length(tfrange)
+                for fr=1:size(avgtrialcycavgpre,3)
+                    avgtrialcycavgpre(:,:,fr,i,j,k,l) = avgtrialcycavgpre(:,:,fr,i,j,k,l) - mean(avgtrialcycavgpre(:,:,1:9,i,j,k,l),3);
+                    avgtrialcycavgpost(:,:,fr,i,j,k,l) = avgtrialcycavgpost(:,:,fr,i,j,k,l) - mean(avgtrialcycavgpost(:,:,1:9,i,j,k,l),3);
+                end
+            end
+        end
     end
 end
  
@@ -131,9 +137,9 @@ for i = 1:length(sfrange)
             errorbar(1:length(radiusRange),avghalfMaxpost(1,:,i,j,1),sehalfMaxpost(1,:,i,j,1),'ro')
             set(gca,'Xtick',1:6,'Xticklabel',[0 1 2 4 8 1000])
             xlabel('radius')
-            ylabel('dfof')
+            ylabel('Area Above Half Max')
             axis square
-            axis([1 6 -0.05 0.5])
+            axis([1 6 0 4000])
             legend(sprintf('%0.2fsf %0.0ftf',sfrange(i),tfrange(j)),'Location','northoutside')
     end
 end
@@ -141,6 +147,28 @@ if exist('psfilename','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfilename,'-append');
 end   
+
+cnt=0;
+figure
+for i = 1:length(sfrange)
+    for j = 1:length(tfrange)
+            cnt = cnt+1;
+            subplot(2,2,cnt)
+            hold on
+            errorbar(1:length(radiusRange),squeeze(mean(avggauSigmapre(1,:,i,j,1,:),6)),squeeze(mean(segauSigmapre(1,:,i,j,1,:),6)),'ko')
+            errorbar(1:length(radiusRange),squeeze(mean(avggauSigmapost(1,:,i,j,1,:),6)),squeeze(mean(segauSigmapost(1,:,i,j,1,:),6)),'ro')
+            set(gca,'Xtick',1:6,'Xticklabel',[0 1 2 4 8 1000])
+            xlabel('radius')
+            ylabel('Sigma')
+            axis square
+            axis([1 6 0 10])
+            legend(sprintf('%0.2fsf %0.0ftf',sfrange(i),tfrange(j)),'Location','northoutside')
+    end
+end
+if exist('psfilename','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfilename,'-append');
+end 
 
 
 %plot activity maps for the different tf/sf combinations, with rows=radius

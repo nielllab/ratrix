@@ -1,6 +1,7 @@
 %This code performs averaging over animals for masking stimulus
 %It takes in the output files of analyzeMasking
 %PRLP 02/01/2016 Niell Lab
+
 predir = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\Trained Pre';
 postdir = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\Trained Post';
 datafiles = {'021316_G62R9TT_RIG2_DOI_MaskingAnalysis.mat',...
@@ -27,56 +28,72 @@ ypts = ypts/4;
 moviename = 'C:\metamask2sf2theta4soa15min';
 load(moviename);
 xpos=xpos(:,2:end); sf=sf(2:end,:); lag=lag(:,2:end); dOri=dOri(:,2:end);
+areas = {'V1','P','LM','AL','RL','AM','PM'};
 
 %load pre data
-alltrialcycpre = zeros(65,65,15,863,length(datafiles));
 alltrialcycavgpre = zeros(65,65,15,2,9,4,2,length(datafiles));
-allpeakspre = zeros(9,4,2,length(datafiles);
+allpeakspre = zeros(2,9,4,2,length(datafiles));
 alltracespre = zeros(7,15,2,9,4,2,length(datafiles));
+allgauSigmapre = zeros(2,9,4,2,length(areas),2,length(datafiles));
+allhalfMaxpre = zeros(2,9,4,2,length(areas),length(datafiles));
 for i= 1:length(datafiles) %collates all conditions (numbered above) 
-    load(fullfile(predir,datafiles{i}),'trialcyc','trialcycavg','peaks');%load data
-    alltrialcycpre(:,:,:,:,i) = trialcyc;
+    load(fullfile(predir,datafiles{i}),'trialcycavg','peaks','mv','gauSigma','halfMax');%load data
     alltrialcycavgpre(:,:,:,:,:,:,:,i) = trialcycavg;
-    allpeakspre(:,:,:,i) = peaks;
+    allpeakspre(:,:,:,:,i) = peaks;
+    allmvpre(:,i) = mv;
+    allgauSigmapre(:,:,:,:,:,:,i) = gauSigma;
+    allhalfMaxpre(:,:,:,:,:,i) = halfMax;
     load(fullfile(predir,ptsfile{i}));
     for j=1:length(x)
         alltracespre(j,:,:,:,:,:,i) = squeeze(trialcycavg(y(j),x(j),:,:,:,:,:));
     end
 end
 
-avgtrialcycpre = mean(alltrialcycpre,5); %group mean frames by trial
-setrialcycpre = std(alltrialcycpre,[],5)/sqrt(length(datafiles)); %group standard error
-avgtrialcycavgpre = mean(alltrialcycavgpre,8);
-setrialcycavgpre = std(alltrialcycavgpre,[],8)/sqrt(length(datafiles));
-avgpeakspre = mean(allpeakspre,4);
-sepeakspre = std(allpeakspre,[],4)/sqrt(length(datafiles));
+avgtrialcycavgpre = mean(alltrialcycavgpre,8);%group mean frames by trial
+setrialcycavgpre = std(alltrialcycavgpre,[],8)/sqrt(length(datafiles));%group standard error
+avgpeakspre = mean(allpeakspre,5);
+sepeakspre = std(allpeakspre,[],5)/sqrt(length(datafiles));
 avgtracespre = mean(alltracespre,7);
 setracespre = std(alltracespre,[],7)/sqrt(length(datafiles));
+avgmvpre = mean(allmvpre,2);
+semvpre = std(allmvpre,[],2)/sqrt(length(datafiles));
+avggauSigmapre = mean(allgauSigmapre,7);
+segauSigmapre = std(allgauSigmapre,[],7)/sqrt(length(datafiles));
+avghalfMaxpre = mean(allhalfMaxpre,6);
+sehalfMaxpre = std(allhalfMaxpre,[],6)/sqrt(length(datafiles));
+
 
 %load post data
-alltrialcycpost = zeros(65,65,15,863,length(datafiles));
 alltrialcycavgpost = zeros(65,65,15,2,9,4,2,length(datafiles));
-allpeakspost = zeros(9,4,2,length(datafiles);
+allpeakspost = zeros(2,9,4,2,length(datafiles));
 alltracespost = zeros(7,15,2,9,4,2,length(datafiles));
+allgauSigmapost = zeros(2,9,4,2,length(areas),2,length(datafiles));
+allhalfMaxpost = zeros(2,9,4,2,length(areas),length(datafiles));
 for i= 1:length(datafiles) %collates all conditions (numbered above) 
-    load(fullfile(postdir,datafiles{i}),'trialcyc','trialcycavg','peaks');%load data
-    alltrialcycpost(:,:,:,:,i) = trialcyc;
+    load(fullfile(postdir,datafiles{i}),'trialcycavg','peaks','mv','gauSigma','halfMax');%load data
     alltrialcycavgpost(:,:,:,:,:,:,:,i) = trialcycavg;
-    allpeakspost(:,:,:,i) = peaks;
+    allpeakspost(:,:,:,:,i) = peaks;
+    allmvpost(:,i) = mv;
+    allgauSigmapost(:,:,:,:,:,:,i) = gauSigma;
+    allhalfMaxpost(:,:,:,:,:,i) = halfMax;
     load(fullfile(predir,ptsfile{i}));
     for j=1:length(x)
         alltracespost(j,:,:,:,:,:,i) = squeeze(trialcycavg(y(j),x(j),:,:,:,:,:));
     end
 end
 
-avgtrialcycpost = mean(alltrialcycpost,5); %group mean frames by trial
-setrialcycpost = std(alltrialcycpost,[],5)/sqrt(length(datafiles)); %group standard error
-avgtrialcycavgpost = mean(alltrialcycavgpost,8);
-setrialcycavgpost = std(alltrialcycavgpost,[],8)/sqrt(length(datafiles));
+avgtrialcycavgpost = mean(alltrialcycavgpost,8);%group mean frames by trial
+setrialcycavgpost = std(alltrialcycavgpost,[],8)/sqrt(length(datafiles));%group standard error
 avgpeakspost = mean(allpeakspost,4);
 sepeakspost = std(allpeakspost,[],4)/sqrt(length(datafiles));
 avgtracespost = mean(alltracespost,7);
 setracespost = std(alltracespost,[],7)/sqrt(length(datafiles));
+avgmvpre = mean(allmvpre,2);
+semvpre = std(allmvpost,[],2)/sqrt(length(datafiles));
+avggauSigmapost = mean(allgauSigmapost,7);
+segauSigmapost = std(allgauSigmapost,[],7)/sqrt(length(datafiles));
+avghalfMaxpost = mean(allhalfMaxpost,6);
+sehalfMaxpost = std(allhalfMaxpost,[],6)/sqrt(length(datafiles));
 
 load(fullfile(postdir,datafiles{i}),'sfcombo','xrange','sfrange','lagrange','dOrirange','sfcomborange')
 sflist = [0 0; 0 0.04; 0 0.16; 0.04 0; 0.04 0.04; 0.04 0.16; 0.16 0; 0.16 0.04; 0.16 0.16];
@@ -103,74 +120,124 @@ load('\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\GroupMaskin
 % end
 % x = floor(x/4); y = floor(y/4);
 
+%     %get peak values for all 7 visual areas, separate out by sfcombo, lag and dOri
+%     avgareapeakspre = zeros(size(avgtracespre,1),length(sfcomborange),length(lagrange),length(dOrirange));
+%     seareapeakspre = zeros(size(avgtracespre,1),length(sfcomborange),length(lagrange),length(dOrirange));
+%     avgareapeakspost = zeros(size(avgtracespre,1),length(sfcomborange),length(lagrange),length(dOrirange));
+%     seareapeakspost = zeros(size(avgtracespre,1),length(sfcomborange),length(lagrange),length(dOrirange));
+%     for i = 1:length(sfcomborange)
+%         for j = 1:length(lagrange)
+%             for k = 1:length(dOrirange)
+%                 for l = 1:size(avgtracespre,1)
+%                     avgareapeakspre(l,i,j,k) = avgtracespre(l,6,1,i,j,k);
+%                     seareapeakspre(l,i,j,k) = setracespre(l,6,1,i,j,k);
+%                     avgareapeakspost(l,i,j,k) = avgtracespost(l,6,1,i,j,k);
+%                     seareapeakspost(l,i,j,k) = setracespost(l,6,1,i,j,k);
+%                 end
+%             end
+%         end
+%     end
   
 targetmask = zeros(size(avgtrialcycpre,1),size(avgtrialcycpre,2),3);
-targetmask(:,:,1) = squeeze(mean(avgtrialcycpre(:,:,6,find(sfcombo==4&xpos==xrange(1))),4)); %target only
-targetmask(:,:,2) = squeeze(mean(avgtrialcycpre(:,:,6,find(sfcombo==2&xpos==xrange(1))),4)); %mask only
+targetmask(:,:,1) = squeeze(mean(mean(avgtrialcycavgpre(:,:,6,1,4,:,:),6),7)); %target only
+targetmask(:,:,2) = squeeze(mean(mean(avgtrialcycavgpre(:,:,6,1,2,:,:),6),7)); %mask only
 targetmask(:,:,1)=targetmask(:,:,1)/max(max(targetmask(:,:,1))); %normalize to 1
 targetmask(:,:,2)=targetmask(:,:,2)/max(max(targetmask(:,:,2)));
+
 figure
+subplot(1,3,1)
+imshow(targetmask(:,:,1),'InitialMagnification','fit')
+hold on; plot(ypts,xpts,'w.','Markersize',2)
+% plot(x,y,'ro')
+axis square
+title('target only (red)')
+subplot(1,3,2)
+imshow(targetmask(:,:,2),'InitialMagnification','fit')
+hold on; plot(ypts,xpts,'w.','Markersize',2)
+% plot(x,y,'ro')
+axis square
+title('mask only (green)')
+subplot(1,3,3)
 imshow(targetmask,'InitialMagnification','fit')
 hold on; plot(ypts,xpts,'w.','Markersize',2)
-plot(x,y,'ro')
+% plot(x,y,'ro')
 axis square
-title('pre')
+title('overlay')
+mtit('PRE DOI')
+set(gca,'LooseInset',get(gca,'TightInset'))
 if exist('psfilename','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfilename,'-append');
 end
 
 targetmask = zeros(size(avgtrialcycpre,1),size(avgtrialcycpre,2),3);
-targetmask(:,:,1) = squeeze(mean(avgtrialcycpost(:,:,6,find(sfcombo==4&xpos==xrange(1))),4)); %target only
-targetmask(:,:,2) = squeeze(mean(avgtrialcycpost(:,:,6,find(sfcombo==2&xpos==xrange(1))),4)); %mask only
+targetmask(:,:,1) = squeeze(mean(mean(avgtrialcycavgpost(:,:,6,1,4,:,:),6),7)); %target only
+targetmask(:,:,2) = squeeze(mean(mean(avgtrialcycavgpost(:,:,6,1,2,:,:),6),7)); %mask only
 targetmask(:,:,1)=targetmask(:,:,1)/max(max(targetmask(:,:,1))); %normalize to 1
 targetmask(:,:,2)=targetmask(:,:,2)/max(max(targetmask(:,:,2)));
+
 figure
+subplot(1,3,1)
+imshow(targetmask(:,:,1),'InitialMagnification','fit')
+hold on; plot(ypts,xpts,'w.','Markersize',2)
+% plot(x,y,'ro')
+axis square
+title('target only (red)')
+subplot(1,3,2)
+imshow(targetmask(:,:,2),'InitialMagnification','fit')
+hold on; plot(ypts,xpts,'w.','Markersize',2)
+% plot(x,y,'ro')
+axis square
+title('mask only (green)')
+subplot(1,3,3)
 imshow(targetmask,'InitialMagnification','fit')
 hold on; plot(ypts,xpts,'w.','Markersize',2)
-plot(x,y,'ro')
+% plot(x,y,'ro')
 axis square
-title('post')
+title('overlay')
+mtit('POST DOI')
 if exist('psfilename','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfilename,'-append');
 end
 
     %plot peak values pre/post doi
-    figure
-    for i = 1:length(sfcomborange)
-            subplot(3,3,i)
-            hold on
-            errorbar(avgpeakspre(i,:,1),sepeakspre(i,:,1),'ko')
-            errorbar(avgpeakspost(i,:,1),sepeakspost(i,:,1),'ro')
-            set(gca,'Xtick',1:4,'Xticklabel',[0 32 64 96])
-            xlabel('SOA (ms)')
-            ylabel(sprintf('%0.2fT %0.2fM',sflist(i,1),sflist(i,2)))
-            axis square
-            axis([1 4 -0.05 0.2])
+    for h = 1:length(areas)
+        figure
+        for i = 1:length(sfcomborange)
+                subplot(3,3,i)
+                hold on
+                errorbar(avgpeakspre(h,i,:,1),sepeakspre(h,i,:,1),'k.')
+                errorbar(avgpeakspost(h,i,:,1),sepeakspost(h,i,:,1),'r.')
+                set(gca,'Xtick',1:4,'Xticklabel',[0 32 64 96])
+                xlabel('SOA (ms)')
+                ylabel(sprintf('%0.2fT %0.2fM',sflist(i,1),sflist(i,2)))
+                axis square
+                axis([1 4 -0.05 0.2])
+        end
+        mtit(sprintf('%s peak pre vs. post 9 sf combos dOri=0',areas{h}))
+        if exist('psfilename','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilename,'-append');
+        end
+        figure
+        for i = 1:length(sfcomborange)
+                subplot(3,3,i)
+                hold on
+                errorbar(avgpeakspre(h,i,:,2),sepeakspre(h,i,:,2),'k.')
+                errorbar(avgpeakspost(h,i,:,2),sepeakspost(h,i,:,2),'r.')
+                set(gca,'Xtick',1:4,'Xticklabel',[0 32 64 96])
+                xlabel('SOA (ms)')
+                ylabel(sprintf('%0.2fT %0.2fM',sflist(i,1),sflist(i,2)))
+                axis square
+                axis([1 4 -0.05 0.2])
+        end
+        mtit(sprintf('%s peak pre vs. post 9 sf combos dOri=pi/2',areas{h}))
+        if exist('psfilename','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilename,'-append');
+        end
     end
-    mtit('Peak pre vs. post 9 sf combos dOri=0')
-    if exist('psfilename','var')
-        set(gcf, 'PaperPositionMode', 'auto');
-        print('-dpsc',psfilename,'-append');
-    end   
-    figure
-    for i = 1:length(sfcomborange)
-            subplot(3,3,i)
-            hold on
-            errorbar(avgpeakspre(i,:,2),sepeakspre(i,:,2),'ko')
-            errorbar(avgpeakspost(i,:,2),sepeakspost(i,:,2),'ro')
-            set(gca,'Xtick',1:4,'Xticklabel',[0 32 64 96])
-            xlabel('SOA (ms)')
-            ylabel(sprintf('%0.2fT %0.2fM',sflist(i,1),sflist(i,2)))
-            axis square
-            axis([1 4 -0.05 0.2])
-    end
-    mtit('Peak pre vs. post 9 sf combos dOri=pi/2')
-    if exist('psfilename','var')
-        set(gcf, 'PaperPositionMode', 'auto');
-        print('-dpsc',psfilename,'-append');
-    end   
 
 %plot group average maps pre
  for i = 1:length(sfcomborange)
@@ -180,7 +247,7 @@ end
     for j = 1:length(lagrange)
         for k = 5:9
             subplot(8,5,cnt)
-            imagesc(squeeze(mean(avgtrialcycpre(:,:,k,find(xpos==xrange(1)&sfcombo==i&lag==lagrange(j)&dOri==dOrirange(1))),4)),[0 0.2])
+            imagesc(avgtrialcycavgpre(:,:,k,1,i,j,1),[0 0.2])
             colormap(jet)
             axis square
             axis off
@@ -193,7 +260,7 @@ end
     for j = 1:length(lagrange)
         for k = 5:9
             subplot(8,5,cnt)
-            imagesc(squeeze(mean(avgtrialcycpre(:,:,k,find(xpos==xrange(1)&sfcombo==i&lag==lagrange(j)&dOri==dOrirange(2))),4)),[0 0.2])
+            imagesc(avgtrialcycavgpre(:,:,k,1,i,j,2),[0 0.2])
             colormap(jet)
             axis square
             axis off
@@ -217,7 +284,7 @@ end
     for j = 1:length(lagrange)
         for k = 5:9
             subplot(8,5,cnt)
-            imagesc(squeeze(mean(avgtrialcycpost(:,:,k,find(xpos==xrange(1)&sfcombo==i&lag==lagrange(j)&dOri==dOrirange(1))),4)),[0 0.2])
+            imagesc(avgtrialcycavgpost(:,:,k,1,i,j,1),[0 0.2])
             colormap(jet)
             axis square
             axis off
@@ -230,7 +297,7 @@ end
     for j = 1:length(lagrange)
         for k = 5:9
             subplot(8,5,cnt)
-            imagesc(squeeze(mean(avgtrialcycpost(:,:,k,find(xpos==xrange(1)&sfcombo==i&lag==lagrange(j)&dOri==dOrirange(2))),4)),[0 0.2])
+            imagesc(avgtrialcycavgpost(:,:,k,1,i,j,2),[0 0.2])
             colormap(jet)
             axis square
             axis off
@@ -254,10 +321,8 @@ for i = 1:length(sfcomborange)
     for j = 1:length(lagrange)
         subplot(2,4,cnt)
         hold on
-        shadedErrorBar(1:15,squeeze(mean(avgtrialcycpre(y(1),x(1),:,find(xpos==xrange(1)&sfcombo==i&lag==lagrange(j)&dOri==dOrirange(1))),4)),...
-        squeeze(mean(setrialcycpre(y(1),x(1),:,find(xpos==xrange(1)&sfcombo==i&lag==lagrange(j)&dOri==dOrirange(1))),4)),'-k',1);
-        shadedErrorBar(1:15,squeeze(mean(avgtrialcycpost(y(1),x(1),:,find(xpos==xrange(1)&sfcombo==i&lag==lagrange(j)&dOri==dOrirange(1))),4)),...
-        squeeze(mean(setrialcycpost(y(1),x(1),:,find(xpos==xrange(1)&sfcombo==i&lag==lagrange(j)&dOri==dOrirange(1))),4)),'-r',1);
+        shadedErrorBar(1:15,avgtracespre(1,:,1,i,j,1),setracespre(1,:,1,i,j,1),'-k',1);
+        shadedErrorBar(1:15,avgtracespost(1,:,1,i,j,1),setracespost(1,:,1,i,j,1),'-r',1);
         axis([1 15 -0.05 0.3]);
         legend(sprintf('%0.0flag',lagrange(j)),'Location','north')
         set(gca,'LooseInset',get(gca,'TightInset'))
@@ -268,10 +333,8 @@ for i = 1:length(sfcomborange)
     for j = 1:length(lagrange)
         subplot(2,4,cnt)
         hold on
-        shadedErrorBar(1:15,squeeze(mean(avgtrialcycpre(y(1),x(1),:,find(xpos==xrange(1)&sfcombo==i&lag==lagrange(j)&dOri==dOrirange(2))),4)),...
-        squeeze(mean(setrialcycpre(y(1),x(1),:,find(xpos==xrange(1)&sfcombo==i&lag==lagrange(j)&dOri==dOrirange(2))),4)),'-k',1);
-        shadedErrorBar(1:15,squeeze(mean(avgtrialcycpost(y(1),x(1),:,find(xpos==xrange(1)&sfcombo==i&lag==lagrange(j)&dOri==dOrirange(2))),4)),...
-        squeeze(mean(setrialcycpost(y(1),x(1),:,find(xpos==xrange(1)&sfcombo==i&lag==lagrange(j)&dOri==dOrirange(2))),4)),'-r',1);
+        shadedErrorBar(1:15,avgtracespre(1,:,1,i,j,2),setracespre(1,:,1,i,j,2),'-k',1);
+        shadedErrorBar(1:15,avgtracespost(1,:,1,i,j,2),setracespost(1,:,1,i,j,2),'-r',1);
         axis([1 15 -0.05 0.3]);
         legend(sprintf('%0.0flag',lagrange(j)),'Location','north')
         set(gca,'LooseInset',get(gca,'TightInset'))
@@ -286,15 +349,14 @@ for i = 1:length(sfcomborange)
 end
 
 %plot average response for each visual area
-areas = {'V1','P','LM','AL','RL','AM','PM'};
 for i = 1:length(lagrange)
     for j = 1:length(sfcomborange)
         figure  
         for k = 1:length(x)
             subplot(2,4,k) 
             hold on
-            shadedErrorBar(1:15,avgtrialcycavgpre(y(k),x(k),:,1,j,i,1),setrialcycavgpre(y(k),x(k),:,1,j,i,1),'-k',1);
-            shadedErrorBar(1:15,avgtrialcycavgpost(y(k),x(k),:,1,j,i,1),setrialcycavgpost(y(k),x(k),:,1,j,i,1),'-r',1);
+            shadedErrorBar(1:15,avgtracespre(k,:,1,j,i,1),setracespre(k,:,1,j,i,1),'-k',1);
+            shadedErrorBar(1:15,avgtracespost(k,:,1,j,i,1),setracespost(k,:,1,j,i,1),'-r',1);
             axis([1 15 -0.1 0.3]);
             legend(areas(k))
         end
@@ -313,8 +375,8 @@ for i = 1:length(lagrange)
         for k = 1:length(x)
             subplot(2,4,k) 
             hold on
-            shadedErrorBar(1:15,avgtrialcycavgpre(y(k),x(k),:,1,j,i,2),setrialcycavgpre(y(k),x(k),:,1,j,i,2),'-k',1);
-            shadedErrorBar(1:15,avgtrialcycavgpost(y(k),x(k),:,1,j,i,2),setrialcycavgpost(y(k),x(k),:,1,j,i,2),'-r',1);
+            shadedErrorBar(1:15,avgtracespre(k,:,1,j,i,2),setracespre(k,:,1,j,i,2),'-k',1);
+            shadedErrorBar(1:15,avgtracespost(k,:,1,j,i,2),setracespost(k,:,1,j,i,2),'-r',1);
             axis([1 15 -0.1 0.3]);
             legend(areas(k))
         end
@@ -326,6 +388,16 @@ for i = 1:length(lagrange)
     end
 end
 
+    %%get percent time running
+    figure
+    errorbar([1 2],[avgmvpre avgmvpost],[semvpre semvpost]);
+    ylabel('fraction running')
+    ylim([0 1]);
+    set(gca,'xtick',[1 2],'xticklabel',{'Pre','Post'})
+    if exist('psfilename','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfilename,'-append');
+    end
 
 % %%%plot responses in 7 visual areas
 % for i = 1:length(lagrange)
@@ -486,5 +558,5 @@ end
  
     
 nam = 'CompareMasking';
-% save(fullfile(predir,nam),'alltrialcycpre','alltrialcycpost');
+save(fullfile(predir,nam),'alltrialcycpre','alltrialcycpost');
 ps2pdf('psfile', psfilename, 'pdffile', fullfile(predir,sprintf('%s.pdf',nam)));

@@ -309,11 +309,21 @@ end
     end 
     
     %get peak values, separate out by sfcombo, lag and dOri
-    peaks = zeros(length(sfcomborange),length(lagrange),length(dOrirange)); %peaks(sfcombo,lag,dOri)
+    peaks = zeros(length(),length(),length()); %peaks(sfcombo,lag,dOri)
     for i = 1:length(sfcomborange)
         for j = 1:length(lagrange)
             for k = 1:length(dOrirange)
                 peaks(i,j,k) = trialcycavg(y(1),x(1),6,1,i,j,k);
+            end
+        end
+    end
+    peaks = zeros(length(xrange),length(sfcomborange),length(lagrange),length(dOrirange));
+    for i = 1:length(xrange)
+        for j = 1:length(sfcomborange)
+            for k = 1:length(lagrange)
+                for l = 1:length(dOrirange)
+                    peaks(i,j,k,l) = trialcycavg(y(1),x(1),6,i,j,k,l);
+                end
             end
         end
     end
@@ -449,6 +459,29 @@ end
             print('-dpsc',psfilename,'-append');
         end
      end
+     
+     
+    areas = {'V1','P','LM','AL','RL','AM','PM'};
+    activezone = zeros(size(trialcycavg,1),size(trialcycavg,2),length(areas),size(trialcycavg,4),size(trialcycavg,5),size(trialcycavg,6),size(trialcycavg,7));
+    gauSigma = zeros(size(trialcycavg,4),size(trialcycavg,5),size(trialcycavg,6),size(trialcycavg,7),length(areas),2);
+    halfMax = zeros(size(trialcycavg,4),size(trialcycavg,5),size(trialcycavg,6),size(trialcycavg,7),length(areas));
+    for i = 1:length(xrange)
+        for j = 1:length(sfcomborange)
+            for k = 1:length(lagrange)
+                for l = 1:length(dOrirange)
+                    for m = 1:length(areas)
+                        findminframe = trialcycavg(:,:,6,i,j,k,l).*areamaps(:,:,m);
+                        halfMax(i,j,k,l,m) = length(find(findminframe>=(max(max(findminframe))/2))); %# pixels above half max
+                        minframe = min(findminframe(findminframe~=0))*areamaps(:,:,m);
+                        findminframe = findminframe - minframe; %subtract min value
+                        activezone(:,:,m,i,j,k,l) = findminframe;
+                        [gauSigma(i,j,k,l,m,1) gauSigma(i,j,k,l,m,2)] = imgGauss(findminframe);
+                    end
+                end
+            end
+        end
+    end 
+     
      
     %%get percent time running
     sp = conv(sp,ones(50,1),'same')/50;
@@ -650,7 +683,7 @@ end
     filename = sprintf('%s_MaskingAnalysis.mat',filename);
 
     if f~=0
-        save(fullfile(p,filename),'trialcyc','trialcycavg','trialcycavgRun','trialcycavgSit','deconvimg','sfcombo','xrange','sfrange','lagrange','dOrirange','sfcomborange','trialspeed','run','sit','peaks');
+        save(fullfile(p,filename),'trialcyc','trialcycavg','mv','gauSigma','halfMax','sfcombo','xrange','sfrange','lagrange','dOrirange','sfcomborange');
     end
     
     if f~=0

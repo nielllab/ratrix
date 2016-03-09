@@ -154,7 +154,6 @@ for f = 1:length(use)
     end
     %frames 1-10 are baseline, 11-20 stim on
     
-
     xrange = unique(xpos); sfrange=unique(sf); tfrange=unique(tf);
     
     tuning=nan(size(trialdata,1),size(trialdata,2),length(xrange),length(radiusRange),length(sfrange),length(tfrange));
@@ -363,6 +362,76 @@ for f = 1:length(use)
             end
         end
     end
+    
+    
+    %%%calculate spread of response within each area
+%%make a map for each area that has ones for values to keep and zeros for
+%%values to ignore
+a = ones(65,65);
+for i = 1:length(xpts)
+    a(round(ypts(i)),round(xpts(i))) = 0;
+end
+
+% figure
+% imagesc(a,[0 1])
+% colormap(gray)
+
+imwrite(a,'map.tif')
+
+V1map = imread('V1map.tif');
+Pmap = imread('Pmap.tif');
+LMmap = imread('LMmap.tif');
+ALmap = imread('ALmap.tif');
+RLmap = imread('RLmap.tif');
+AMmap = imread('AMmap.tif');
+PMmap = imread('PMmap.tif');
+
+areamaps = zeros(65,65,7);
+areamaps(:,:,1) = V1map(:,:,1);
+areamaps(:,:,2) = Pmap(:,:,1);
+areamaps(:,:,3) = LMmap(:,:,1);
+areamaps(:,:,4) = ALmap(:,:,1);
+areamaps(:,:,5) = RLmap(:,:,1);
+areamaps(:,:,6) = AMmap(:,:,1);
+areamaps(:,:,7) = PMmap(:,:,1);
+
+areamaps = permute(areamaps,[2 1 3]);
+areamaps(areamaps==0) = 1;
+areamaps(areamaps==255) = 0;
+
+% figure %plot individual area boundaries
+% colormap(gray)
+% for i = 1:size(areamaps,3)
+%     subplot(2,4,i)
+%     imagesc(areamaps(:,:,i),[0 1])
+%     hold on; plot(ypts,xpts,'r.','Markersize',1)
+%     axis off;axis square;
+%     title(sprintf('%s',areas{i}))
+% end
+% mtit('Area Measurement Zones')
+
+%%multiply binarized area matrices with average trial data to isolate each
+%%area's response (using peak frame #6)
+areas = {'V1','P','LM','AL','RL','AM','PM'};
+activezone = zeros(size(trialcycavg,1),size(trialcycavg,2),length(areas),size(trialcycavg,4),size(trialcycavg,5),size(trialcycavg,6),size(trialcycavg,7));
+gauSigma = zeros(size(trialcycavg,4),size(trialcycavg,5),size(trialcycavg,6),size(trialcycavg,7),length(areas),2);
+halfMax = zeros(size(trialcycavg,4),size(trialcycavg,5),size(trialcycavg,6),size(trialcycavg,7),length(areas));
+for i = 1:length(xrange)
+    for j = 1:length(radiusRange)
+        for k = 1:length(sfrange)
+            for l = 1:length(tfrange)
+                for m = 1:length(areas)
+                    findminframe = trialcycavg(:,:,6,i,j,k,l).*areamaps(:,:,m);
+                    halfMax(i,j,k,l,m) = length(find(findminframe>=(max(max(findminframe))/2))); %# pixels above half max
+                    minframe = min(findminframe(findminframe~=0))*areamaps(:,:,m);
+                    findminframe = findminframe - minframe; %subtract min value
+                    activezone(:,:,m,i,j,k,l) = findminframe;
+                    [gauSigma(i,j,k,l,m,1) gauSigma(i,j,k,l,m,2)] = imgGauss(findminframe);
+                end
+            end
+        end
+    end
+end
 
 
     % 
@@ -486,7 +555,7 @@ for f = 1:length(use)
 
     if f~=0
     %     save(fullfile(p,f),'allsubj','sessiondata','shiftData','fit','mnfit','cycavg','mv');
-        save(fullfile(p,filename),'trialcyc','trialcycavg','trialcycavgRun','trialcycavgSit','tuning','trialspeed','run','sit','xrange','radiusRange','sfrange','tfrange','peaks');
+        save(fullfile(p,filename),'trialcycavg','peaks','mv','gauSigma','halfMax','xrange','radiusRange','sfrange','tfrange');
     end
 
     % [f p] = uiputfile('*.pdf','save pdf');

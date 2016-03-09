@@ -26,55 +26,70 @@ moviename = 'C:\sizeSelect2sf5sz14min';
 load(moviename);
 pointsfile = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\GroupSizeSelectPoints';
 load(pointsfile);
+areas = {'V1','P','LM','AL','RL','AM','PM'};
 
-% alltrialcycpre = zeros(65,65,30,384,length(datafiles));
 alltrialcycavgpre = zeros(65,65,30,2,6,2,2,length(datafiles));
 allpeakspre = zeros(2,6,2,2,length(datafiles));
 alltracespre = zeros(7,30,2,6,2,2,length(datafiles));
+allgauSigmapre = zeros(2,6,2,2,length(areas),2,length(datafiles));
+allhalfMaxpre = zeros(2,6,2,2,length(areas),length(datafiles));
 for i= 1:length(datafiles) %collates all conditions (numbered above) 
-    load(fullfile(predir,datafiles{i}),'trialcycavg','peaks');%load data
-%     alltrialcycpre(:,:,:,:,i) = trialcyc;
+    load(fullfile(predir,datafiles{i}),'trialcycavg','peaks','mv','gauSigma','halfMax');%load data
     alltrialcycavgpre(:,:,:,:,:,:,:,i) = trialcycavg;
     allpeakspre(:,:,:,:,i) = peaks;
+    allmvpre(:,i) = mv;
+    allgauSigmapre(:,:,:,:,:,:,i) = gauSigma;
+    allhalfMaxpre(:,:,:,:,:,i) = halfMax;
     load(fullfile(predir,ptsfile{i}));
     for j=1:length(x)
         alltracespre(j,:,:,:,:,:,i) = squeeze(trialcycavg(y(j),x(j),:,:,:,:,:));
     end
 end
 
-% avgtrialcycpre = mean(alltrialcycpre,5); %group mean frames by trial
-% setrialcycpre = std(alltrialcycpre,[],5)/sqrt(length(datafiles)); %group standard error
-avgtrialcycavgpre = mean(alltrialcycavgpre,7);
-setrialcycavgpre = std(alltrialcycavgpre,[],7)/sqrt(length(datafiles));
+avgtrialcycavgpre = mean(alltrialcycavgpre,7);%group mean frames by trial
+setrialcycavgpre = std(alltrialcycavgpre,[],7)/sqrt(length(datafiles));%group standard error
 avgpeakspre = mean(allpeakspre,5);
 sepeakspre = std(allpeakspre,[],5)/sqrt(length(datafiles));
 avgtracespre = mean(alltracespre,7);
 setracespre = std(alltracespre,[],7)/sqrt(length(datafiles));
+avgmvpre = mean(allmvpre,2);
+semvpre = std(allmvpre,[],2)/sqrt(length(datafiles));
+avggauSigmapre = mean(allgauSigmapre,7);
+segauSigmapre = std(allgauSigmapre,[],7)/sqrt(length(datafiles));
+avghalfMaxpre = mean(allhalfMaxpre,6);
+sehalfMaxpre = std(allhalfMaxpre,[],6)/sqrt(length(datafiles));
 
-% alltrialcycpost = zeros(65,65,30,384,length(datafiles));
 alltrialcycavgpost = zeros(65,65,30,2,6,2,2,length(datafiles));
 allpeakspost = zeros(2,6,2,2,length(datafiles));
 alltracespost = zeros(7,30,2,6,2,2,length(datafiles));
+allgauSigmapost = zeros(2,6,2,2,length(areas),2,length(datafiles));
+allhalfMaxpost = zeros(2,6,2,2,length(areas),length(datafiles));
 for i= 1:length(datafiles) %collates all conditions (numbered above) 
-    load(fullfile(postdir,datafiles{i}),'trialcycavg','peaks');%load data
-%     alltrialcycpost(:,:,:,:,i) = trialcyc;
+    load(fullfile(postdir,datafiles{i}),'trialcycavg','peaks','mv','gauSigma','halfMax');%load data
     alltrialcycavgpost(:,:,:,:,:,:,:,i) = trialcycavg;
     allpeakspost(:,:,:,:,i) = peaks;
+    allmvpost(:,i) = mv;
+    allgauSigmapost(:,:,:,:,:,:,i) = gauSigma;
+    allhalfMaxpost(:,:,:,:,:,i) = halfMax;
     load(fullfile(predir,ptsfile{i}));
     for j=1:length(x)
         alltracespost(j,:,:,:,:,:,i) = squeeze(trialcycavg(y(j),x(j),:,:,:,:,:));
     end
 end
-load(fullfile(postdir,datafiles{i}),'trialcyc','trialcycavg','tuning','xrange','radiusRange','sfrange','tfrange')
+load(fullfile(postdir,datafiles{i}),'xrange','radiusRange','sfrange','tfrange')
 
-% avgtrialcycpost = mean(alltrialcycpost,5); %group mean frames by trial
-% setrialcycpost = std(alltrialcycpost,[],5)/sqrt(length(datafiles)); %group standard error
-avgtrialcycavgpost = mean(alltrialcycavgpost,7);
-setrialcycavgpost = std(alltrialcycavgpost,[],7)/sqrt(length(datafiles));
+avgtrialcycavgpost = mean(alltrialcycavgpost,7);%group mean frames by trial
+setrialcycavgpost = std(alltrialcycavgpost,[],7)/sqrt(length(datafiles));%group standard error
 avgpeakspost = mean(allpeakspost,5);
 sepeakspost = std(allpeakspost,[],5)/sqrt(length(datafiles));
 avgtracespost = mean(alltracespost,7);
 setracespost = std(alltracespost,[],7)/sqrt(length(datafiles));
+avgmvpre = mean(allmvpre,2);
+semvpre = std(allmvpost,[],2)/sqrt(length(datafiles));
+avggauSigmapost = mean(allgauSigmapost,7);
+segauSigmapost = std(allgauSigmapost,[],7)/sqrt(length(datafiles));
+avghalfMaxpost = mean(allhalfMaxpost,6);
+sehalfMaxpost = std(allhalfMaxpost,[],6)/sqrt(length(datafiles));
 
 for  i = 1:length(avgtrialcycavgpre)
     for fr=1:size(avgtrialcycavgpre,3)
@@ -104,6 +119,29 @@ if exist('psfilename','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfilename,'-append');
 end   
+
+cnt=0;
+figure
+for i = 1:length(sfrange)
+    for j = 1:length(tfrange)
+            cnt = cnt+1;
+            subplot(2,2,cnt)
+            hold on
+            errorbar(1:length(radiusRange),avghalfMaxpre(1,:,i,j,1),sehalfMaxpre(1,:,i,j,1),'ko')
+            errorbar(1:length(radiusRange),avghalfMaxpost(1,:,i,j,1),sehalfMaxpost(1,:,i,j,1),'ro')
+            set(gca,'Xtick',1:6,'Xticklabel',[0 1 2 4 8 1000])
+            xlabel('radius')
+            ylabel('dfof')
+            axis square
+            axis([1 6 -0.05 0.5])
+            legend(sprintf('%0.2fsf %0.0ftf',sfrange(i),tfrange(j)),'Location','northoutside')
+    end
+end
+if exist('psfilename','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfilename,'-append');
+end   
+
 
 %plot activity maps for the different tf/sf combinations, with rows=radius
     for i=1:length(sfrange)
@@ -180,6 +218,18 @@ end
             end
         end
     end
+    
+    %%get percent time running
+    figure
+    errorbar([1 2],[avgmvpre avgmvpost],[semvpre semvpost]);
+    ylabel('fraction running')
+    ylim([0 1]);
+    set(gca,'xtick',[1 2],'xticklabel',{'Pre','Post'})
+    if exist('psfilename','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfilename,'-append');
+    end
+
  
     
 nam = 'CompareSizeSelect';

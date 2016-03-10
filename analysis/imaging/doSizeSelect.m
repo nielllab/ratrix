@@ -1,13 +1,13 @@
 %% code from doGratingsNew
 deconvplz = 1 %choose if you want deconvolution
 fully = 1 %choose if you want full frame (260x260), else scales down by 4
-ptsdir = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\Trained Pre'; %directory for points file
-ptsfile = {'G62TX2.6LT_SizeSelectPoints.mat',...
-          'G62TX2.6RT_SizeSelectPoints.mat',...
-          'G62BB2RT_SizeSelectPoints.mat',...
-          'G62T6LT_SizeSelectPoints.mat',...
-          'G62W7LN_SizeSelectPoints.mat',...
-          'G62W7TT_SizeSelectPoints.mat'}; %specific point files for animals
+% ptsdir = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\Trained Pre'; %directory for points file
+% ptsfile = {'G62TX2.6LT_SizeSelectPoints.mat',...
+%           'G62TX2.6RT_SizeSelectPoints.mat',...
+%           'G62BB2RT_SizeSelectPoints.mat',...
+%           'G62T6LT_SizeSelectPoints.mat',...
+%           'G62W7LN_SizeSelectPoints.mat',...
+%           'G62W7TT_SizeSelectPoints.mat'}; %specific point files for animals
 areas = {'V1','P','LM','AL','RL','AM','PM'}; %list of all visual areas for points   
 
 for f = 1:length(use)
@@ -239,26 +239,26 @@ for f = 1:length(use)
         end
     end        
     
-    %%%manual/loading point selection
-%     files(use(f)).subj
-%     [fname pname] = uigetfile('*.mat','points file');
-%     if fname~=0
-%         load(fullfile(pname, fname));
-%     else
-%         figure
-%         imagesc(squeeze(mean(trialcyc(:,:,12,find(xpos==xrange(1)&radius==2)),4)),[-0.05 0.05])
-%         colormap(jet)
-%         axis square
-%         hold on
-%         plot(ypts,xpts,'w.','Markersize',2)
-%         [x y] = ginput(7);
-%         x=round(x); y=round(y);
-%         close(gcf)
-%         [fname pname] = uiputfile('*.mat','save points?');
-%         if fname~=0
-%             save(fullfile(pname,fname),'x','y');
-%         end
-%     end
+    %%manual/loading point selection
+    files(use(f)).subj
+    [fname pname] = uigetfile('*.mat','points file');
+    if fname~=0
+        load(fullfile(pname, fname));
+    else
+        figure
+        imagesc(squeeze(mean(trialcyc(:,:,12,find(xpos==xrange(1)&radius==3)),4)),[-0.05 0.05])
+        colormap(jet)
+        axis square
+        hold on
+        plot(ypts,xpts,'k.','Markersize',2)
+        [x y] = ginput(7);
+        x=round(x); y=round(y);
+        close(gcf)
+        [fname pname] = uiputfile('*.mat','save points?');
+        if fname~=0
+            save(fullfile(pname,fname),'x','y');
+        end
+    end
 
     %plot selected points over each radius size
     figure
@@ -457,7 +457,7 @@ for f = 1:length(use)
                         spreadframe(spreadframe<0)=0;
                         halfMax(i,j,k,l,m) = length(find(spreadframe>=(max(max(spreadframe))/2))); %# pixels above half max
                         sfit = imgGauss(spreadframe,x,y,sigsize,m); %gaussian parameters
-                        if sfit.a1<spreadthresh(:,m)
+                        if sfit.a1<0.01 %one percent for the bottom threshold
                             gauParams(i,j,k,l,m,:) = 0; %if below threshold, no "response"
                         else
                             gauParams(i,j,k,l,m,1) = sfit.a1;
@@ -485,6 +485,73 @@ for f = 1:length(use)
     end
     toc
 
+    
+    cnt=0;
+    figure
+    for i = 1:length(sfrange)
+        for j = 1:length(tfrange)
+                cnt = cnt+1;
+                subplot(2,2,cnt)
+                hold on
+                plot(1:length(radiusRange),areapeaks(1,:,i,j,1),'ko')
+                set(gca,'Xtick',1:6,'Xticklabel',[0 1 2 4 8 1000])
+                xlabel('radius')
+                ylabel('dfof')
+                axis square
+                axis([1 6 -0.05 0.5])
+                legend(sprintf('%0.2fsf %0.0ftf',sfrange(i),tfrange(j)),'Location','northoutside')
+        end
+    end
+    mtit('Auto-Found Peaks')
+    if exist('psfilename','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfilename,'-append');
+    end
+
+    cnt=0;
+    figure
+    for i = 1:length(sfrange)
+        for j = 1:length(tfrange)
+                cnt = cnt+1;
+                subplot(2,2,cnt)
+                hold on
+                plot(1:length(radiusRange),halfMax(1,:,i,j,1),'ko')
+                set(gca,'Xtick',1:6,'Xticklabel',[0 1 2 4 8 1000])
+                xlabel('radius')
+                ylabel('# pixels')
+                axis square
+                axis([1 6 0 5000])
+                legend(sprintf('%0.2fsf %0.0ftf',sfrange(i),tfrange(j)),'Location','northoutside')
+        end
+    end
+    mtit('Area above Half Max')
+    if exist('psfilename','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfilename,'-append');
+    end
+
+    cnt=0;
+    figure
+    for i = 1:length(sfrange)
+        for j = 1:length(tfrange)
+                cnt = cnt+1;
+                subplot(2,2,cnt)
+                hold on
+                plot(1:length(radiusRange),(gauParams(1,:,i,j,1,4)+gauParams(1,:,i,j,1,5))/2,'ko')
+                set(gca,'Xtick',1:6,'Xticklabel',[0 1 2 4 8 1000])
+                xlabel('radius')
+                ylabel('Sigma')
+                axis square
+                axis([1 6 0 30])
+                legend(sprintf('%0.2fsf %0.0ftf',sfrange(i),tfrange(j)),'Location','northoutside')
+        end
+    end
+    mtit('Sigma from Gaussian Fit')
+    if exist('psfilename','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfilename,'-append');
+    end
+    
     % 
     % %%% plot sf and tf responses
     % figure %averages across the two x positiongs

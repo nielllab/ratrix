@@ -10,7 +10,7 @@ end
 
 sm=makeStandardSoundManager();
 
-rewardSizeULorMS          =130;
+rewardSizeULorMS          =75;
 requestRewardSizeULorMS   =0;
 requestMode               ='first';
 msPenalty                 =3500;          %consider changing this also in future
@@ -32,11 +32,15 @@ percentCorrectionTrials = .5;
 
 switch subjIDs{1}
 
-   case 'g62dd2rt' % Started 1/26/16 GTS 2/15/16
+   
+    
+    
+    
+   case 'g62ee8rt' % Started 2/29/16 %switch to GTS 3/11/16
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 123;
+       rewardSizeULorMS        = 59;
        msPenalty               =3500;
-       percentCorrectionTrials = .5; 
+       percentCorrectionTrials = .5;  
     
     
    case 'g62dd2ln' % Started 1/26/16

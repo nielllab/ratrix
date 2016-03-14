@@ -38,7 +38,7 @@ end
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        pixPerCycs              = [200];
-       normalizedPosition      = [0.40 0.60];
+       normalizedPosition      = [0.38 0.62];
        radius                 = .30;
      
      case 'testpixhvv' % Started 5/18/15

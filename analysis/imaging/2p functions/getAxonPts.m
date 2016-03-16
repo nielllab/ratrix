@@ -7,6 +7,7 @@ maxStd = stdImg > imdilate(stdImg,region);
 pts = find(maxStd);
 figure
 plot(stdImg(pts),greenframe(pts),'.')
+xlabel('std'); ylabel('green')
 
 greenThresh = 200
 stdThresh = 0.5
@@ -14,7 +15,8 @@ done=0
 while ~done 
     pts = find(maxStd);
     figure
-    plot(greenframe(pts),stdImg(pts),'.')
+plot(stdImg(pts),greenframe(pts),'.')
+xlabel('std'); ylabel('green')
     
     pts = pts(stdImg(pts)>stdThresh & greenframe(pts)>greenThresh);
     %length(pts)
@@ -29,10 +31,10 @@ while ~done
     x = x(y<sz-buffer); y = y(y<sz-buffer);
       sprintf('%d points ', length(x))
     figure
-    imagesc(greenframe,[0 prctile(greenframe(:),95)]);
+    imagesc(greenframe,[0 prctile(greenframe(:),98)]);
     hold on; colormap gray; plot(y,x,'*');
     figure
-    imagesc(stdImg,[0 prctile(stdImg(:),95)]);
+    imagesc(stdImg,[0 prctile(stdImg(:),98)]);
     hold on; colormap gray; plot(y,x,'*');
     done = input('okay points ? (0/1) :')
     if ~done

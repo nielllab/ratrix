@@ -21,6 +21,8 @@ function st=makeDefaultStation(id,path,mac,physicalLocation,screenNum,rewardMeth
 % 16  control           i/o phasePulse
 % 17  control	inv     i/o stimPulse
 
+% sprintf('port address %d',pportaddr)
+% keyboard
 [a b]=getMACaddress;
 
 if ~exist('pportaddr','var') || isempty(pportaddr)
@@ -35,6 +37,8 @@ if ~exist('pportaddr','var') || isempty(pportaddr)
                 pportaddr='B888'; %the pci add on card
             case 'BCAEC555FC4B' %2p machine
                 pportaddr='C800'; %pci add on
+            case '60A44CB25405'
+                pportaddr = 'E030';  %%% pilot computer
             otherwise
                 %pass
         end

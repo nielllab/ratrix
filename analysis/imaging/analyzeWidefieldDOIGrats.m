@@ -1,22 +1,24 @@
 %This file uses shiftData data to compare widefield data across
 %conditions using backgroundgratings stimulus
-clear all
 close all
-profile on
+clear all
+% profile on
 %%
 
 %CHOOSE FILES WITH THE DATA IN THEM
-datafiles = {'SalinePreGratings', ...  %1
-            'SalinePostGratings', ...  %2
-            'DOIPreGratings', ...      %3
-            'DOIPostGratings', ...     %4
-            'LisuridePreGratings', ... %5
-            'LisuridePostGratings'};    %6
+datafiles = {'DOITrainedAnimalsBKGRATSpre',...
+            'DOITrainedAnimalsBKGRATSpost'};
+% datafiles = {'SalinePreGratings', ...  %1
+%             'SalinePostGratings', ...  %2
+%             'DOIPreGratings', ...      %3
+%             'DOIPostGratings', ...     %4
+%             'LisuridePreGratings', ... %5
+%             'LisuridePostGratings'};    %6
 
 %CHOOSE FILE WITH POINTS FROM analyzeWidefieldDOI & SET NAMES
 load('SalinePoints'); %pre-made points for visual areas used in original analysis
 areanames = {'V1','LM','AL','RL','AM','PM','P'};
-load mapOverlay
+load mapOverlay;
 
 %CHOOSE PIXEL AVERAGING RANGE
 range = (-2:2); % averages signal over 1 pixel + this range   
@@ -33,11 +35,11 @@ allmnfit = zeros(260,260,17,length(datafiles));
 % sdshiftData = zeros(260,260,7,length(datafiles));
 sdcycavg = zeros(260,260,100,length(datafiles));
 sdmnfit = zeros(260,260,17,length(datafiles));
+indcycavg = nan(150,10,length(areanames),length(datafiles)); %rows = time, column = animal, 3rd = condition; normal
+inddeconcycavg = nan(150,10,length(areanames),length(datafiles)); %rows = time, column = animal, 3rd = condition; deconvolved
+% groupcycavg = zeros(260,260,100,10,length(datafiles)); %make for up to 10 animals per condition
+% groupfit = zeros(260,260,17,10,length(datafiles));
 
-groupcycavg = zeros(260,260,100,10,length(datafiles)); %make for up to 10 animals per condition
-groupfit = zeros(260,260,17,10,length(datafiles));
-
-tic
 for i= 1:length(datafiles) %collates all conditions (numbered above)
     
     load(datafiles{i},'fit','mnfit','cycavg');%load data
@@ -51,22 +53,36 @@ for i= 1:length(datafiles) %collates all conditions (numbered above)
     
     
   %  sdshiftData(:,:,:,i) = std(shiftdata,[],4); %create arrays with all group SDs
-    sdcycavg(:,:,:,i) = nanstd(cycavg,[],4)/sqrt(size(cycavg,4));
-    sdmnfit(:,:,:,i) = nanstd(fit,[],4)/sqrt(size(cycavg,4));
+    sdcycavg(:,:,:,i) = nanstd(cycavg,4)/sqrt(size(cycavg,4));
+    sdmnfit(:,:,:,i) = nanstd(fit,4)/sqrt(size(cycavg,4));
     
-    groupcycavg(:,:,:,:,i) = cycavg;
-    groupfit(:,:,:,:,i) = fit;
+%     groupcycavg(:,:,:,:,i) = cycavg;
+%     groupfit(:,:,:,:,i) = fit;
+%     
+    doIndCycAvgDecon;
 %     
 end
-toc
 
-dir = '\\lorentz\backup\widefield\DOI experiments\Matlab Widefield Analysis';
+dir = 'C:\Users\nlab\Desktop\Widefield Data\DOI';
 nam = 'CompareGratings';
-save(fullfile(dir,nam),'allcycavg','allmnfit','areanames','datafiles','range','scscale','sdcycavg','sdmnfit');
-      
-%GENERATE PDFs FOR ALL CONDITIONS
+save(fullfile(dir,nam),'allcycavg','allmnfit','areanames','datafiles','range','scscale','indcycavg','inddeconcycavg');
+%       
+% %GENERATE PDFs FOR ALL CONDITIONS
+% %%%
+% expname = 'SalineCompareGrats.pdf';
+% conds = [1 2];
+% 
+% psfilename = 'C:\tempPS.ps';
+% if exist(psfilename,'file')==2;delete(psfilename);end
+% 
+% doDOIGratsplots;
+% 
+% ps2pdf('psfile', psfilename, 'pdffile', fullfile(dir,expname));
+% delete(psfilename);
+% %%%
+
 %%%
-expname = 'SalineCompareGrats.pdf';
+expname = 'DOICompareGrats.pdf';
 conds = [1 2];
 
 psfilename = 'C:\tempPS.ps';
@@ -78,58 +94,45 @@ ps2pdf('psfile', psfilename, 'pdffile', fullfile(dir,expname));
 delete(psfilename);
 %%%
 
-%%%
-expname = 'DOICompareGrats.pdf';
-conds = [3 4];
-
-psfilename = 'C:\tempPS.ps';
-if exist(psfilename,'file')==2;delete(psfilename);end
-
-doDOIGratsplots;
-
-ps2pdf('psfile', psfilename, 'pdffile', fullfile(dir,expname));
-delete(psfilename);
-%%%
-
-%%%
-expname = 'LisurideCompareGrats.pdf';
-conds = [5 6];
-
-psfilename = 'C:\tempPS.ps';
-if exist(psfilename,'file')==2;delete(psfilename);end
-
-doDOIGratsplots;
-
-ps2pdf('psfile', psfilename, 'pdffile', fullfile(dir,expname));
-delete(psfilename);
-%%%
-
-%%%
-expname = 'AllPreCompareGrats.pdf';
-conds = [1 3 5];
-
-psfilename = 'C:\tempPS.ps';
-if exist(psfilename,'file')==2;delete(psfilename);end
-
-doDOIGratsplots;
-
-ps2pdf('psfile', psfilename, 'pdffile', fullfile(dir,expname));
-delete(psfilename);
-%%%
-
-%%%
-expname = 'AllPostCompareGrats.pdf';
-conds = [2 4 6];
-
-psfilename = 'C:\tempPS.ps';
-if exist(psfilename,'file')==2;delete(psfilename);end
-
-doDOIGratsplots;
-
-ps2pdf('psfile', psfilename, 'pdffile', fullfile(dir,expname));
-delete(psfilename);
-%%%
-profile viewer
+% %%%
+% expname = 'LisurideCompareGrats.pdf';
+% conds = [5 6];
+% 
+% psfilename = 'C:\tempPS.ps';
+% if exist(psfilename,'file')==2;delete(psfilename);end
+% 
+% doDOIGratsplots;
+% 
+% ps2pdf('psfile', psfilename, 'pdffile', fullfile(dir,expname));
+% delete(psfilename);
+% %%%
+% 
+% %%%
+% expname = 'AllPreCompareGrats.pdf';
+% conds = [1 3 5];
+% 
+% psfilename = 'C:\tempPS.ps';
+% if exist(psfilename,'file')==2;delete(psfilename);end
+% 
+% doDOIGratsplots;
+% 
+% ps2pdf('psfile', psfilename, 'pdffile', fullfile(dir,expname));
+% delete(psfilename);
+% %%%
+% 
+% %%%
+% expname = 'AllPostCompareGrats.pdf';
+% conds = [2 4 6];
+% 
+% psfilename = 'C:\tempPS.ps';
+% if exist(psfilename,'file')==2;delete(psfilename);end
+% 
+% doDOIGratsplots;
+% 
+% ps2pdf('psfile', psfilename, 'pdffile', fullfile(dir,expname));
+% delete(psfilename);
+% %%%
+% % profile viewer
 
 
 

@@ -1,4 +1,8 @@
 function img = deconvg6s(frames, dt);
+%%% does lucy deconvolution
+%%% works on n-d images (or timecourse)
+%%% but first dimension has to be time
+
 %dt = 0.1
 t = (0:9)*dt;
 tau = [0.18 0.55];

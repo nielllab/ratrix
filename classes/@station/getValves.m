@@ -6,7 +6,11 @@ if pp && strcmp(s.responseMethod,'parallelPort')
     if isnan(ioObj)
         status=fastDec2Bin(lptread(s.valvePins.decAddr));
     else
-        status=fastDec2Bin(double(io32(ioObj,s.valvePins.decAddr)));
+        try 
+            status=fastDec2Bin(double(io32(ioObj,s.valvePins.decAddr)));
+        catch
+            status=fastDec2Bin(double(io64(ioObj,s.valvePins.decAddr)));
+        end
     end
     
     valves=status(s.valvePins.bitLocs)=='1'; %need to set parity in station, assumes normally closed valves

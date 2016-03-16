@@ -158,13 +158,26 @@ if selectPts==1
 %     set(gca,'Position',[0.2 0.2 0.6 0.65])
 %     colordef white
 %     
-  %  dFClean = dF-0.8*repmat(neuropil,size(dF,1),1);
+    dFClean = dF-0.6*repmat(neuropil,size(dF,1),1);
+ %  dFClean = dF;
     nonzeropts = find(mean(dF,2)~=0)
 
     
-    dFClean = dF;
-    [osi osifit tuningtheta amp  tfpref pmin R, resp tuning spont allresp]= gratingAnalysis(gratingfname, 1,dFClean,dt,blank);
     
+    [osi osifit tuningtheta amp  tfpref pmin R, resp tuning spont allresp]= gratingAnalysis(gratingfname, startTime,dFClean,dt,blank);
+
+       figure
+       hist(osi)
+       xlabel('osi')
+    
+   use = find(pmin<0.05 & R>0.1);
+resp = length(use)/length(pmin);
+sprintf('%d out of %d responsive = %f',length(use),length(pmin),resp)
+       
+       save(ptsfname,'pmin','osi','amp','R','tuning','tuningtheta','allresp','tfpref','-append');
+
+    
+         
     figure
    c = corrcoef(dF(nonzeropts,:)');
    imagesc(c,[-1 1])
@@ -184,11 +197,8 @@ if selectPts==1
         axis off      
     end
     
-       save(ptsfname,'osi','amp','R','tuning','tuningtheta','allresp','tfpref','-append');
-
-       figure
-       hist(osi)
-       xlabel('osi')
+       
+       
        
        clear cycAvg
        for i = 1:cycLength;

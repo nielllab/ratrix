@@ -1,7 +1,10 @@
 clear all
-batchBehavNN
+%batchBehavNN
+batchLearningBehav
+
 %close all
-alluse = find(strcmp({files.monitor},'vert')&  strcmp({files.notes},'good imaging session')  &    strcmp({files.label},'camk2 gc6') &  strcmp({files.task},'HvV_center') )
+%alluse = find(strcmp({files.monitor},'vert')&  strcmp({files.notes},'good imaging session')  &  strcmp({files.label},'camk2 gc6') &  strcmp({files.task},'HvV_center') & strcmp({files.subj},'g62m9tt'));
+ alluse = find(strcmp({files.monitor},'vert') &  strcmp({files.notes},'good imaging session')  &  strcmp({files.label},'camk2 gc6') & ~strcmp({files.behav},'') & strcmp({files.task},'HvV')  & strcmp({files.subj},'g62a4tt')); %
 %alluse = alluse(1:end-6);
 %alluse = alluse([1:4 6:7 9:17 19])
 subj=unique({files(alluse).subj})
@@ -64,7 +67,7 @@ errorbar(median(respInterval,1),std(respInterval,1)/(sqrt(14)),'g');
 ylabel('resp time (secs)')
 xlabel('session duration')
 axis([0.5 10.5 0 8])
-keyboard
+%keyboard
 
 figure
 hold on

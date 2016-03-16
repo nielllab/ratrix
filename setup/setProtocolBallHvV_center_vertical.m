@@ -18,6 +18,7 @@ fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =msPenalty;
+radius                 = .35;
 pixPerCycs                = [200];
 percentCorrectionTrials = .5;
 
@@ -30,64 +31,128 @@ end
 switch subjIDs{1}
     
     
-    case 'testHvVcenter' % Switched full 10/9/14
+    case 'testHvVcenter' % 
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 59;
-       msPenalty               =4300;
-       
-    case 'pvchr14rt' % Started 8/25/15 %%switched to center 9/11/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 75;
-       msPenalty               =4500;
-       percentCorrectionTrials = .50; 
-       
-    case 'pvchr14tt' % Started 8/25/15 %%switched to center 9/11/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 75;
-       msPenalty               =4500;
-       percentCorrectionTrials = .50; 
-       
-    case 'pv8lt' % Started 6/25/15  (permenant record wont show till 6/26/15) %%started center 7/14/15
-       requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 59;
-       msPenalty               =3500;
-       percentCorrectionTrials = .5;
-       stim.slowSecs = 1;
+       msPenalty               =6300;
     
-    case 'pv8nt' % Started 6/25/15  (permenant record wont show till 6/26/15) %%started center 7/14/15
-       requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 59;
-       msPenalty               =3500;
-       percentCorrectionTrials = .5;
-       stim.slowSecs = 1;
-       
-              
-     case 'g62a2nn' % Started 6/25/15 (permenant record wont show till 6/26/15) %%Started hvv 7/14/15 %%started gotoblack 8/11/15
-       requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 59;
-       msPenalty               =3500;
-       percentCorrectionTrials = .5;
-       
-       
-      case 'g62a3tt' % Started 6/25/15 %% started hvv 7/17/15 %%started gotoblack again 8/11/15
+
+   case 'g62bb8tt' % Started 2/9/16  %started HvV_center 2/20/16
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 59;
+       rewardSizeULorMS        = 139;
        msPenalty               =3500;
-       percentCorrectionTrials = .5;
+       percentCorrectionTrials = .5;   
        
-      case 'g62a5nn' % Started 5/15/15 %% back to hvv 7/25/15 %%backtogloblack 8/11/15
+   case 'g62bb8rt' % Started 2/9/16  %started HvV_center 2/20/16
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 59;
+       rewardSizeULorMS        = 139;
        msPenalty               =3500;
-       percentCorrectionTrials = .50;
+       percentCorrectionTrials = .5;    
        
-      case 'g62n7ln' % Started 7/14/15 %%switch center 8/12/15
-       requestRewardSizeULorMS = 00;
-       rewardSizeULorMS        = 91;
+   case 'g62ee6lt' % Started 2/9/16  %started HvV_center 2/20/16
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 139;
        msPenalty               =3500;
-       percentCorrectionTrials = .5;
+       percentCorrectionTrials = .5;       
+
+   case 'g62hh4ln' % Started 2/9/16  %started HvV_center 2/20/16 back to GoToBlack 2/28/16
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 139;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;       
+ 
        
+    case 'g62tx2.11lt' % Started 2/9/16 %started HvV_center 2/20/16
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 139;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;         
+       
+%     case 'g62tx2.3ln' % Started 10/24/15 %%Start hvv center 11/5/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 107;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .50; 
+       
+%     case 'g62t6lt' % Started 9/18/15 %%started hvv center 10/13/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 107;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .50;
+%        pixPerCycs                = [200];
+       
+%     case 'pvchr14ln' % Started 8/25/15 %%started hvv center 9/15/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 59;
+%        msPenalty               =6500;
+%        percentCorrectionTrials = .50; 
+%        stim.slowSecs = 2;
+%        
+%     case 'pvchr14rn' % Started 8/25/15 %%started hvv center 9/15/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 43;
+%        msPenalty               =6500;
+%        percentCorrectionTrials = .50; 
+%        stim.slowSecs = 2;
+% 
+%        
+%     case 'pvchr14rt' % Started 8/25/15 %%switched to center 9/11/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 27;
+%        msPenalty               =5500;
+%        percentCorrectionTrials = .50; 
+%        stim.slowSecs = 1.5;
+%        
+%     case 'pvchr14tt' % Started 8/25/15 %%switched to center 9/11/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 43;
+%        msPenalty               =4500;
+%        percentCorrectionTrials = .50; 
+%        stim.slowSecs = 2;
+%        
+%     case 'pv8lt' % Started 6/25/15  (permenant record wont show till 6/26/15) %%started center 7/14/15
+%        requestRewardSizeULorMS = 00;
+%        rewardSizeULorMS        = 59;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5;
+%        stim.slowSecs = 1;
 %     
+%     case 'pv8nt' % Started 6/25/15  (permenant record wont show till 6/26/15) %%started center 7/14/15
+%        requestRewardSizeULorMS = 00;
+%        rewardSizeULorMS        = 59;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5;
+%        stim.slowSecs = 1;
+%        
+%               
+%      case 'g62a2nn' % Started 6/25/15 (permenant record wont show till 6/26/15) %%Started hvv 7/14/15 %%started gotoblack 8/11/15
+%        requestRewardSizeULorMS = 00;
+%        rewardSizeULorMS        = 59;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5;
+%        
+%        
+%       case 'g62a3tt' % Started 6/25/15 %% started hvv 7/17/15 %%started gotoblack again 8/11/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 59;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5;
+%        
+%       case 'g62a5nn' % Started 5/15/15 %% back to hvv 7/25/15 %%backtogloblack 8/11/15 %%%switch 100 sf 10/12/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 43;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .50;
+%        pixPerCycs                = [100];
+%        
+%       case 'g62n7ln' % Started 7/14/15 %%switch center 8/12/15 %%%switch 100 sf 10/12/15
+%        requestRewardSizeULorMS = 00;
+%        rewardSizeULorMS        = 43;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5;
+%        pixPerCycs                = [100];
+%        
+%  
 %     case 'g62n7ln' % Started 7/14/15
 %        requestRewardSizeULorMS = 00;
 %        rewardSizeULorMS        = 16;
@@ -228,7 +293,6 @@ stim.soundClue = true;
 targetOrientations     = 0
 distractorOrientations = []; %-targetOrientations;
 mean                   = .5;
-radius                 = .25;
 contrast               = 1;
 thresh                 = .00005;
 normalizedPosition      = [.5];

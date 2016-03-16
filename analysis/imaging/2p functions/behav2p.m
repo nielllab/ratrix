@@ -4,22 +4,24 @@ dt = 0.25;
 framerate=1/dt;
 twocolor = input('# of channels : ')
 twocolor= (twocolor==2);
-get2pSession;
+get2pBehavSession;
+
 if ~exist('onsets','var')
-    if ~exist('ttlFname','var')
-        [tf tp] = uigetfile('*.mat','ttl file');
-        ttlFname = fullfile(tp,tf);
-    end
+
     [bf bp] = uigetfile('*.mat','behav permanent trial record');
-    [onsets starts trialRecs] = sync2pBehavior(fullfile(bp,bf) ,ttlFname);
+    [onsets starts trialRecs] = sync2pBehavior_sbx(fullfile(bp,bf) ,phasetimes);
     save(sessionName,'onsets','starts','trialRecs','-append');
 end
 
+display('aligning frames')
+tic
 if ~exist('mapalign','var')
     timepts = -1:0.25:2;
     mapalign = align2onsets(dfofInterp,onsets,dt,timepts);
+    display('saving')
     save(sessionName,'timepts','mapalign','-append')
 end
+toc
 
 %%% get target location, orientation, phase
 stim = [trialRecs.stimDetails];
@@ -40,17 +42,24 @@ end
 correct = [s.correct] == 1;
 
 figure
-for t = 1:2
+for t = 1:3
     if t==1
         dfmean = mean(mapalign(:,:,:,targ==-1),4);
-    else
+    elseif t==2
         dfmean = mean(mapalign(:,:,:,targ==1),4);
+    else
+        dfmean = mean(mapalign(:,:,:,targ==-1),4) -mean(mapalign(:,:,:,targ==1),4) ;
     end
     %mn = mean(dfmean,3);
     mn = min(dfmean,[],3);
-    for i = 1:4;
-        subplot(2,4,i+4*(t-1));
-        imagesc(dfmean(:,:,2*i+3)-mn,[0 0.5]);
+    figure
+    for i = 1:13;
+        subplot(4,4,i);
+        if t<3
+            imagesc(dfmean(:,:,i)-mn,[0 0.1]);
+        else
+            imagesc(dfmean(:,:,i),[-0.1 0.1]);
+        end
         axis equal; axis off
     end
     

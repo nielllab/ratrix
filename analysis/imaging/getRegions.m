@@ -12,8 +12,11 @@ end
     expname = [expfile.subj expfile.expt];
     for m = 1:2
         
-   fullname = [pathname getfield(expfile,maptype{m})];
-   fullname(fullname=='\')='/';
+   %fullname = [pathname getfield(expfile,maptype{m})]; %getfield is obsolete
+   mapname = eval(['expfile.' maptype{m}]);
+
+   fullname = [pathname mapname]; 
+   fullname(fullname=='\')='/'; % use to correct name to windows syntax
    
             load(fullname,'map')
 

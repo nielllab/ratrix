@@ -96,9 +96,9 @@ for LED=1:3
     elseif LED==split
         dfof{LED} = dfof{blue}-dfof{green};
         
-     
+        
     end
-
+    
     img = out(:,:,1);
     dx=25;
     if LED==blue | LED==green
@@ -109,20 +109,25 @@ for LED=1:3
         print('-dpsc',psfilename,'-append');
     end
     clear pix
- 
+    
     
     [rawmap rawcycMap fullMov] =phaseMap(dfof{LED},framerate,movPeriod,binning);
     rawmap(isnan(rawmap))=0;
     mapFig(rawmap)
     
     if LED==split
-       tic
-      
+        tic
+        
+        %% decon before averaging
+%                 [map preCycMap fullMov] =deconPhaseMapPre(dfof{LED},framerate,movPeriod,binning);
+%                    map(isnan(map))=0;
+%                    mapFig(map)
+        
         [map cycMap fullMov] =deconPhaseMap(dfof{LED},framerate,movPeriod,binning);
-       
+        preCycMap = cycMap;
         toc
-    map(isnan(map))=0;
-    mapFig(map)
+        map(isnan(map))=0;
+        mapFig(map)
     else
         map = rawmap;
         cycMap = rawcycMap;
@@ -169,8 +174,8 @@ for LED=1:3
     figure
     set(gcf,'Name','baseline map');
     imshow(imresize(stepMap,1/binning)./prctile(stepMap(:),99));
-%     set(gcf, 'PaperPositionMode', 'auto');
-%     print('-dpsc',psfilename,'-append');
+    %     set(gcf, 'PaperPositionMode', 'auto');
+    %     print('-dpsc',psfilename,'-append');
     
     
     
@@ -179,7 +184,7 @@ for LED=1:3
     colormap(hsv);
     colorbar
     done=0;
-
+    
     
     while ~done
         figure(mapfig)
@@ -206,9 +211,16 @@ for LED=1:3
         fftPts = 2:length(spect)/2;
         loglog((fftPts-1)/length(spect),spect(fftPts));
         subplot(2,2,3);
-        plot(squeeze(cycMap(x,y,:))); ylim([-0.125 0.125]);
-        hold on
-        plot(squeeze(rawcycMap(x,y,:)),'g'); ylim([-0.125 0.125]);
+        
+        if LED==split
+            plot(squeeze(preCycMap(x,y,:))-min(squeeze(preCycMap(x,y,:))),'k');
+            hold on
+            plot(squeeze(cycMap(x,y,:))--min(squeeze(cycMap(x,y,:))));
+            plot(squeeze(rawcycMap(x,y,:))-min(squeeze(rawcycMap(x,y,:))),'g'); ylim([0 0.25]);
+        else
+            plot(squeeze(cycMap(x,y,:))); ylim([-0.125 0.125]);
+        end
+        
         subplot(2,2,4);
         imshow(polarMap(map),'InitialMagnification','fit');
         colormap(hsv);
@@ -225,7 +237,7 @@ for LED=1:3
     
 end  %%%LED
 try
-   ps2pdf('psfile', psfilename, 'pdffile', [psfilenameFinal(1:(end-2)) 'pdf']);
+    ps2pdf('psfile', psfilename, 'pdffile', [psfilenameFinal(1:(end-2)) 'pdf']);
 catch
     display('couldnt generate pdf');
 end
@@ -246,7 +258,7 @@ delete(psfilename);
         colorbar
         
         subplot(2,2,3)
-        imshow(polarMap(mapIn));
+        imshow(polarMap(mapIn,94));
         %     imagesc(angle(mapIn))
         %     colormap(hsv)
         

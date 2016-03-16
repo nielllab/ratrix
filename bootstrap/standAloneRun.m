@@ -164,7 +164,7 @@ if ~justDoSetup
         else
             replicationPaths={getStandAlonePath(rx)};
         end
-        
+
         replicateTrialRecords(replicationPaths,deleteOnSuccess, recordInOracle,fileparts(getStandAlonePath(rx)));
         
         s=getSubjectFromID(rx,subjectID);

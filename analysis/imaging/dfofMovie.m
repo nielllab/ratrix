@@ -1,22 +1,22 @@
 function dfofMovie(in,rig);
 
+if ~exist('rig','var')
+    rig = input ('which rig? 1= old, 2=new : ')
+end
 
 %[f,p] = uiputfile('*.avi','dfof cycle average movie file');
 if ~exist('in','var') || isempty(in);
     [f,p] = uigetfile({'*.tif'; '*.tiff'; '*.mat'},'choose pco data');
     datafile = fullfile(p,f(1:end-4));
-    mapfilename =fullfile(p,[f(1:end-8) 'maps.mat'])
-    
+    mapfilename =fullfile(p,[f(1:end-11) 'maps.mat']) %note: rig1 should be end-8
 else
     datafile = in;
     mapfilename = [in 'maps.mat'];
     [p f] = fileparts(datafile);
-
-end
-if ~exist('rig','var')
-    rig = input ('which rig? 1= old, 2=new : ')
 end
 
+%rig 1 currently has a 1X, rig 2 usually has 1.6X but we use 1.0X for
+%acrylic skull
 if rig==1
     rigzoom =1; fl=0;
 else
@@ -28,6 +28,8 @@ datadir = p;
 rigzoom
 fl
 [dfof map mapNorm cycMap frameT]= readTifBlueGreen(datafile,rigzoom,fl);
+
+% keyboard
 
 use_chan=3;
 
@@ -109,7 +111,7 @@ close(vid)
 
 use_speed=0;
 
-fs = dir([datadir '\stim*obj.*']);
+fs = dir([datadir '\stim*.*']);
 
 if ~isempty(fs)
     use_speed=1;
@@ -157,18 +159,18 @@ if ~isempty(fs)
     figure
     plot(xcorr(sp,mean(mean(dfof_bg,2),1)))
     ylabel('sp df xcorr'); xlabel('offset frames')
-    for i=1:100;
-        sp_avg(i) = nanmeanMW(sp(i:100:end));
-       
-    end
+%     for i=1:100;
+%         sp_avg(i) = nanmeanMW(sp(i:100:end));
+%        
+%     end
 %     sp_all = reshape(sp,[100 30]);
 %     figure
 %     plot(0.1:0.1:10,sp_all)
 %     title('all speeds')
-    figure
-    plot(0.1:0.1:10,sp_avg)
-    title('mean speed')
-    ylim([0 2500])
+%     figure
+%     plot(0.1:0.1:10,sp_avg)
+%     title('mean speed')
+%     ylim([0 2500])
 
     thresh = [100 ];
     if ~isempty(sp<thresh) & ~isempty(sp>thresh)

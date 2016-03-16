@@ -1,4 +1,4 @@
-function [ph amp alldata fit cycavg tuning sftcourse] = analyzeGratingPatch(dfof_bg,sp,moviename,useframes,base,xpts,ypts, label,stimRec,psfilename,frameT);
+function [ph amp alldata fit cycavg tuning sftcourse trialcycavg trialcycavgRun trialcycavgSit] = analyzeGratingPatch(dfof_bg,sp,moviename,useframes,base,xpts,ypts, label,stimRec,psfilename,frameT);
 %load(fname,'dfof_bg');
 %close all
 
@@ -61,6 +61,12 @@ plot(squeeze(mean(mean(cycavg,2),1)))
 axis off
 set(gca,'LooseInset',get(gca,'TightInset'))
 
+
+if exist('psfilename','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfilename,'-append');
+end
+
 %%% calculate phase of cycle response
 %%% good for detectime framedrops or other problems
 tcourse = squeeze(mean(mean(img,2),1));
@@ -79,8 +85,11 @@ end
 meandf = squeeze(mean(mean(img,2),1));
 
 %%% separate responses by trieals
+speedcut = 500;
 trialdata = zeros(size(img,1),size(img,2),trials+2);
 trialspeed = zeros(trials+2,1);
+shift = (duration+isi)*imagerate;
+trialcyc = zeros(size(img,1),size(img,2),shift-10,trials+2);
 for tr=1:trials;
     t0 = round((tr-1)*(duration+isi)*imagerate);
     baseframes = base+t0; baseframes=baseframes(baseframes>0);
@@ -91,7 +100,7 @@ for tr=1:trials;
         trialspeed(tr)=500;
     end
     trialcourse(tr,:) = squeeze(mean(mean(img(:,:,t0+(1:18)),2),1));
-    
+    trialcyc(:,:,:,tr) = img(:,:,t0+10+(1:15));  
 end
 
 %%% get responses by averaging (this is simple method)
@@ -136,26 +145,28 @@ xrange = unique(xpos); yrange=unique(ypos); sfrange=unique(sf); tfrange=unique(t
 tuning=zeros(size(trialdata,1),size(trialdata,2),length(xrange),length(yrange),length(sfrange),length(tfrange));
 cond = 0;
 
-if length(xrange==4) & length(tfrange==1);
+if length(xrange)==4 && length(tfrange)==1;
     bkgrat =1;
 else
     bkgrat=0;
 end
 
-if bkgrat
-   for i = 1:2
-       blank = find(xpos==xrange(end) & sf == sfrange(i) );
-    patch = find(xpos==xrange(2) & sf == sfrange(i));
-    blankstart = floor((blank-1)*(duration+isi)*imagerate + isi*imagerate -1);
-    patchstart = floor((patch-1)*(duration+isi)*imagerate +isi*imagerate-1);
-    for f = 1:acqdurframes
-        blankcyc(:,:,f) = mean(img(:,:,blankstart+f),3);
-        patchcyc(:,:,f) =  mean(img(:,:,patchstart+f),3);
-    end
-    cycavg(:,:,(1:acqdurframes)+ (i-1)*2*acqdurframes) = blankcyc;
-    cycavg(:,:,((acqdurframes+1):2*acqdurframes) + (i-1)*2*acqdurframes) = patchcyc;
+bkgrat
 
-   end
+if bkgrat
+    for i = 1:2
+        blank = find(xpos==xrange(end) & sf == sfrange(i) );
+        patch = find(xpos==xrange(2) & sf == sfrange(i));
+        blankstart = floor((blank-1)*(duration+isi)*imagerate + isi*imagerate -1);
+        patchstart = floor((patch-1)*(duration+isi)*imagerate +isi*imagerate-1);
+        for f = 1:acqdurframes
+            blankcyc(:,:,f) = mean(img(:,:,blankstart+f),3);
+            patchcyc(:,:,f) =  mean(img(:,:,patchstart+f),3);
+        end
+        cycavg(:,:,(1:acqdurframes)+ (i-1)*2*acqdurframes) = blankcyc;
+        cycavg(:,:,((acqdurframes+1):2*acqdurframes) + (i-1)*2*acqdurframes) = patchcyc;
+        
+    end
 end
 
 
@@ -168,15 +179,28 @@ if bkgrat
         imagesc(blankMap(:,:,k));axis equal
         title(sprintf('blank stim sf = %0.2f',sfrange(k)));
     end
+    
+    if exist('psfilename','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfilename,'-append');
+    end
+    
 end
 
 %%% separate out responses by stim parameter
+run = find(trialspeed>=speedcut);
+sit = find(trialspeed<speedcut);
+cond=0;
+trialcycavg=zeros(size(img,1),size(img,2),shift-10,length(xrange),length(yrange),length(sfrange),length(tfrange));
+trialcycavgRun=zeros(size(img,1),size(img,2),shift-10,length(xrange),length(yrange),length(sfrange),length(tfrange));
+trialcycavgSit=zeros(size(img,1),size(img,2),shift-10,length(xrange),length(yrange),length(sfrange),length(tfrange));
 for i = 1:length(xrange)
     i
     for j= 1:length(yrange)
         for k = 1:length(sfrange)
             for l=1:length(tfrange)
                 cond = cond+1;
+                inds = find(xpos==xrange(i)&ypos==yrange(j)&sf==sfrange(k)&tf==tfrange(l));
                 avgtrialdata(:,:,cond) = squeeze(median(trialdata(:,:,find(xpos==xrange(i)&ypos==yrange(j)&sf==sfrange(k)&tf==tfrange(l))),3));%  length(find(xpos==xrange(i)&ypos==yrange(j)&sf==sfrange(k)&tf==tfrange(l)))
                 if bkgrat  %%% subract blank for bkgrat
                     avgtrialdata(:,:,cond)=avgtrialdata(:,:,cond)-blankMap(:,:,k);
@@ -187,6 +211,9 @@ for i = 1:length(xrange)
                 avgx(cond) = xrange(i); avgy(cond)=yrange(j); avgsf(cond)=sfrange(k); avgtf(cond)=tfrange(l);
                 tuning(:,:,i,j,k,l) = avgtrialdata(:,:,cond);
                 meanspd(i,j,k,l) = squeeze(mean(trialspeed(find(xpos==xrange(i)&ypos==yrange(j)&sf==sfrange(k)&tf==tfrange(l)))>500));
+                trialcycavg(:,:,:,i,j,k,l) = squeeze(mean(trialcyc(:,:,:,inds),4));
+                trialcycavgRun(:,:,:,i,j,k,l) = squeeze(nanmean(trialcyc(:,:,:,intersect(inds,run)),4));
+                trialcycavgSit(:,:,:,i,j,k,l) = squeeze(nanmean(trialcyc(:,:,:,intersect(inds,sit)),4));
             end
         end
     end
@@ -261,18 +288,20 @@ end
 %     imagesc(squeeze(tuning(x,y,:,:,2,1)),[-0.025 0.025]);
 % end
 %
-% figure
-% for i = 1:length(sfrange)
-%     for j=1:length(tfrange)
-%         subplot(length(tfrange),length(sfrange),length(sfrange)*(j-1)+i)
-%         d=squeeze(mean(mean(avgtrialcourse(:,:,i,j,:),2),1));
-%         sftcourse(i,j,:) = d-min(d);
-%         plot(d-min(d)); axis([1 18 0 0.015]);
-%         set(gca,'Xticklabel',[]); set(gca,'Yticklabel',[]);
-%         set(gca,'LooseInset',get(gca,'TightInset'))
-%     end
-% end
-%
+if length(xrange)==4 & length(yrange)==3
+    figure
+    for i = 1:length(sfrange)
+        for j=1:length(tfrange)
+            subplot(length(tfrange),length(sfrange),length(sfrange)*(j-1)+i)
+            d=squeeze(mean(mean(avgtrialcourse(:,:,i,j,:),2),1));
+            sftcourse(i,j,:) = d-min(d);
+            plot(d-min(d)); axis([1 18 0 0.015]);
+            set(gca,'Xticklabel',[]); set(gca,'Yticklabel',[]);
+            set(gca,'LooseInset',get(gca,'TightInset'))
+        end
+    end
+end
+
 
 %%% plot sf and tf responses
 figure
@@ -280,7 +309,7 @@ for i = 1:length(sfrange)
     for j=1:length(tfrange)
         subplot(length(tfrange),length(sfrange),length(sfrange)*(j-1)+i)
         imagesc(squeeze(mean(mean(tuning(:,:,:,:,i,j),4),3)),[ -0.005 0.05]); colormap jet;
-        title(sprintf('%0.2f %0.0fhz',sfrange(i),tfrange(j)))
+        title(sprintf('%0.2fcpd %0.0fhz',sfrange(i),tfrange(j)))
         axis off; axis equal
         hold on; plot(ypts,xpts,'w.','Markersize',2)
         set(gca,'LooseInset',get(gca,'TightInset'))
@@ -289,13 +318,29 @@ end
 if exist('psfilename','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfilename,'-append');
-end
-
+end  
 
 if bkgrat
     range = [-0.005 0.035];
 else
     range= [0 0.075];
+end
+
+%%get percent time running
+sp = conv(sp,ones(50,1),'same')/50;
+mv = sum(sp>500)/length(sp);
+figure
+subplot(1,2,1)
+bar(mv);
+xlabel('subject')
+ylabel('fraction running')
+subplot(1,2,2)
+bar([mean(trialspeed(run)) mean(trialspeed(sit))])
+set(gca,'xticklabel',{'run','sit'})
+ylabel('speed')
+if exist('psfilename','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfilename,'-append');
 end
 
 
@@ -311,40 +356,42 @@ end
 % end
 
 %%% plot x/y maps
-if ~bkgrat
-    figure
-    for i = 1:length(xrange)
-        for j=1:length(yrange)
-            subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
-            imagesc(squeeze(mean(mean(tuning(:,:,i,j,:,:),6),5)),range); colormap jet
-            % title(sprintf('%0.2f %0.2f',xrange(i),yrange(j)))
-            axis off; axis equal
-            hold on; plot(ypts,xpts,'w.','Markersize',2)
-            set(gca,'LooseInset',get(gca,'TightInset'))
-        end
-    end
-else
-    for k = 1:2
-        figure
-        for i = 1:length(xrange)
-            for j=1:length(yrange)
-                subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
-                imagesc(squeeze(mean(mean(tuning(:,:,i,j,k,:),6),5)),range);
-                % title(sprintf('%0.2fcpd %0.2fhz',sfrange(i),tfrange(j)))
-                axis off; axis equal
-                hold on; plot(ypts,xpts,'w.','Markersize',2)
-                set(gca,'LooseInset',get(gca,'TightInset'))
-            end
-        end
-        title(sprintf('sf = %d',k));
-    end
-end
+% if ~bkgrat
+%     figure
+%     for i = 1:length(xrange)
+%         for j=1:length(yrange)
+%             subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
+%             imagesc(squeeze(mean(mean(tuning(:,:,i,j,:,:),6),5)),range); colormap jet
+%             % title(sprintf('%0.2f %0.2f',xrange(i),yrange(j)))
+%             axis off; axis equal
+%             hold on; plot(ypts,xpts,'w.','Markersize',2)
+%             set(gca,'LooseInset',get(gca,'TightInset'))
+%         end
+%     end
+% else
+%     for k = 1:2
+%         figure
+%         for i = 1:length(xrange)
+%             for j=1:length(yrange)
+%                 subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
+%                 imagesc(squeeze(mean(mean(tuning(:,:,i,j,k,:),6),5)),range);
+%                 % title(sprintf('%0.2fcpd %0.2fhz',sfrange(i),tfrange(j)))
+%                 axis off; axis equal
+%                 hold on; plot(ypts,xpts,'w.','Markersize',2)
+%                 set(gca,'LooseInset',get(gca,'TightInset'))
+%             end
+%         end
+%         title(sprintf('sf = %d',k));
+%     end
+% end
+% 
+% if exist('psfilename','var')
+%     set(gcf, 'PaperPositionMode', 'auto');
+%     print('-dpsc',psfilename,'-append');
+% end
 
-if exist('psfilename','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfilename,'-append');
-end
 
+    
 
 
 %    for x = 1:length(xrange)
@@ -384,51 +431,51 @@ end
 % imshow(merge);
 %end
 
-for doResolutionTest=1:0
-    figure
-    for i = 2:2
-        for j=1:length(yrange)
-            
-            spotimg = squeeze(mean(tuning(:,:,i,j,:,1),5));
-            imagesc(spotimg,[0 0.03]);
-            title(sprintf('%0.2fx %0.2fy',i,j))
-            axis off; axis equal
-        end
-    end
-    
-    
-    
-    [y x] = ginput(1);
-    crossSection = spotimg(:,round(y));
-    figure
-    plot(crossSection);
-    crossSection = mean(spotimg(round(x)+(-1:1),:),1);
-    figure
-    plot(crossSection);
-    crossSection = crossSection(100:199);
-    baseline_est=median(crossSection);
-    [peak_est x0_est] = max(crossSection);
-    sigma_est=5;
-    x=1:length(crossSection);
-    y=crossSection;
-    fit_coeff = nlinfit(x,y,@gauss_fit,[ baseline_est peak_est x0_est sigma_est])
-    
-    %%% parse out results
-    baseline = fit_coeff(1)
-    peak = fit_coeff(2)
-    x0=fit_coeff(3)
-    sigma_est=fit_coeff(4)
-    
-    %%% plot raw data and fit
-    figure
-    plot(x,y)
-    hold on
-    plot(x,gauss_fit(fit_coeff,x),'g')
-    
-    fwhm = 2*sigma_est*1.17*32.5
-    
-    keyboard
-end
+% for doResolutionTest=1:1
+%     figure
+%     for i = 1:2
+%         for j=1:length(xrange)
+%             
+%             spotimg = squeeze(mean(tuning(:,:,i,j,:,1),5));
+%             imagesc(spotimg,[0 0.03]);
+%             title(sprintf('%0.2fx %0.2fy',i,j))
+%             axis off; axis equal
+%         end
+%     end
+%     
+%     
+%     
+%     [y x] = ginput(1);
+%     crossSection = spotimg(:,round(y));
+%     figure
+%     plot(crossSection);
+%     crossSection = mean(spotimg(round(x)+(-1:1),:),1);
+%     figure
+%     plot(crossSection);
+%     crossSection = crossSection(100:199);
+%     baseline_est=median(crossSection);
+%     [peak_est x0_est] = max(crossSection);
+%     sigma_est=5;
+%     x=1:length(crossSection);
+%     y=crossSection;
+%     fit_coeff = nlinfit(x,y,@gauss_fit,[ baseline_est peak_est x0_est sigma_est])
+%     
+%     %%% parse out results
+%     baseline = fit_coeff(1)
+%     peak = fit_coeff(2)
+%     x0=fit_coeff(3)
+%     sigma_est=fit_coeff(4)
+%     
+%     %%% plot raw data and fit
+%     figure
+%     plot(x,y)
+%     hold on
+%     plot(x,gauss_fit(fit_coeff,x),'g')
+%     
+%     fwhm = 2*sigma_est*1.17*32.5
+%     
+%     keyboard
+% end
 
 
 % for tr = 1:trials;

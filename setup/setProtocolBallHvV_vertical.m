@@ -10,7 +10,7 @@ end
 
 sm=makeStandardSoundManager();
 
-rewardSizeULorMS          =20;
+rewardSizeULorMS          =59;
 requestRewardSizeULorMS   =0;
 requestMode               ='first';
 msPenalty                 =3500;         
@@ -18,9 +18,11 @@ fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =0;
-pixPerCycs                = [200]; %*10^9;
+%pixPerCycs                = [100 150 200]; %*10^9;
+pixPerCycs              = [200];
 percentCorrectionTrials = .5;
 normalizedPosition      = [0.33 0.66];
+radius                 = .25;
 
 % sca
 % keyboard
@@ -30,7 +32,15 @@ if ~isscalar(subjIDs)
 end
  switch subjIDs{1}
 
-    
+   case 'g62bb8rt' % Started 2/9/16  %started HvV_center 2/20/16 %started HvV_vertical 3/11/16
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 59;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;
+       pixPerCycs              = [200];
+       normalizedPosition      = [0.38 0.62];
+       radius                 = .30;
+     
      case 'testpixhvv' % Started 5/18/15
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 60;
@@ -38,11 +48,24 @@ end
        pixPerCycs              = [400];
        percentCorrectionTrials = .5;
        
-     case 'g62a4tt' % Started 5/14/15 %% back to hvv 7/25/15
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 43;
-       msPenalty               =3500;
-       percentCorrectionTrials = .50; 
+%      case 'g62t5rt' % Started 9/11/15 %%started full 9/28/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 107;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .50; 
+%        
+%        
+%      case 'g62a3tt' % Started 6/25/15 %% started hvv 7/17/15 %%started gotoblack again 8/11/15 %%%started full 9-18-15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 59;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5;
+%        
+%      case 'g62a4tt' % Started 5/14/15 %% back to hvv 7/25/15
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 43;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .50; 
        
 %      case 'g62a5nn' % Started 5/15/15 %% back to hvv 7/25/15
 %        requestRewardSizeULorMS = 0;
@@ -105,7 +128,7 @@ end
 noRequest = constantReinforcement(rewardSizeULorMS,requestRewardSizeULorMS,requestMode,msPenalty,fractionOpenTimeSoundIsOn,fractionPenaltySoundIsOn,scalar,msAirpuff);
 
 
-percentCorrectionTrials = .5;
+
 
 maxWidth  = 1920;
 maxHeight = 1080;
@@ -131,7 +154,7 @@ stim.soundClue = false;
 targetOrientations     = 0
 distractorOrientations = []; %-targetOrientations;
 mean                   = .5;
-radius                 = .25;
+
 contrast               = 1;
 thresh                 = .00005;
 scaleFactor            = 0; %[1 1];

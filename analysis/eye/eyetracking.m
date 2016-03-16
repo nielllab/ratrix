@@ -1,10 +1,10 @@
 clear all
 close all
 
-dir = '\\NIELL-V2-W7\Angie_tanks\eyetracking data\09_08_15\';
-name = '09_08_15_predoi_eye'; %data file
-thresh = 0.85; %pupil threshold for binarization
-puprange = [5 20]; %set
+dir = '\\NIELL-V2-W7\D:\Angie_tanks\eyetracking data\111915';
+name = 'bars_postdoi_111915_eye'; %data file
+thresh = 0.875; %pupil threshold for binarization
+puprange = [4 20]; %set
 
 %%closed loop parameters
 % pupercent = 0.15; %set range pupil radius window
@@ -18,7 +18,7 @@ warning off;
 %user input to select center and right points
 sprintf('Please select pupil center and top, eyeball top and right points, darkest part of eyeball')
 h1 = figure('units','normalized','outerposition',[0 0 1 1])
-imshow(data(:,:,1))
+imshow(data(:,:,100))
 [cent] = ginput(5);
 close(h1);
 yc = cent(1,2); %pupil center y val
@@ -27,8 +27,6 @@ horiz = (cent(4,1) - xc); %1/2 x search range
 vert = (yc - cent(3,2)); %1/2 y search range
 puprad = yc - cent(2,2); %initial pupil radius
 % puprange = [round(puprad - puprad*pupercent) round(puprad + puprad*pupercent)]; %range of pupil sizes to search over
-
-%convert from uint8 into doubles and threshold, then binarize
 ddata = double(data); 
 binmaxx = cent(5,1);
 binmaxy = cent(5,2);
@@ -39,7 +37,9 @@ for i = 1:size(ddata,3)
     bindata(:,:,i) = (ddata(yc-vert:yc+vert,xc-horiz:xc+horiz,i)/binmax(i) > thresh);
 end
 figure
-imshow(bindata(:,:,100))
+imshow(bindata(:,:,1400))
+
+%convert from uint8 into doubles and threshold, then binarize
 
 tic
 centroid = nan(size(data,3),2);
@@ -79,10 +79,12 @@ plot(0.1:0.1:size(data,3)/10,centroid(:,1),'.g')
 plot(0.1:0.1:size(data,3)/10,centroid(:,2),'.r')
 hold off
 legend('radius','x pos','ypos')
+ylim([5 55])
 
 % %
-figure
+h3 = figure
 for i = 1:size(data,3)
+ 
     subplot(1,2,1)
     imshow(data(yc-vert:yc+vert,xc-horiz:xc+horiz,i));
     colormap gray
@@ -97,9 +99,12 @@ for i = 1:size(data,3)
     hold on
     circle(centroid(i,1),centroid(i,2),rad(i))
     drawnow
-    hold off
-    
+    hold off 
+%     mov(i) = getframe(gcf)
+%     vid = VideoWriter('predoi_tracking.avi')
+%     open(vid); writeVideo(vid,mov); close(vid)
 end
+
 
 save(fullfile(dir,name),'centroid','rad','h2','-append');
 

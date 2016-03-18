@@ -5,6 +5,7 @@ function [dfofInterp im_dt greenframe framerate] = get2pdata_sbx(fname,dt,cycLen
 display('reading data')
 tic
 alignData=1; showImages=1;
+
 [img framerate] = readAlign2p_sbx(fname,alignData,showImages);
 toc
 
@@ -21,7 +22,7 @@ toc
 %%% a gaussian temporal filter might be better, but slow!
 display('temporal downsampling')
 binsize=cfg.temporalBin;
-downsampleLength = binsize*floor(size(dfof,3)/binsize);
+downsampleLength = binsize*floor(size(img,3)/binsize);
 tic
 img= downsamplebin(img(:,:,1:downsampleLength),3,binsize)/binsize;  %%% downsamplebin based on patick mineault's code
 toc

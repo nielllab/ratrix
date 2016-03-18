@@ -31,10 +31,11 @@ for i = 1:info.max_idx;
 end
 
 m = mean(img,3);
-range = prctile(m(:),95)*1.2;
+upper = prctile(m(:),95)*1.2;
+lower = min(m(:));
 if showImg
     figure
-    imagesc(m,[0 range]); colormap gray; title('aligned mean');
+    imagesc(m,[lower upper]); colormap gray; title('aligned mean'); axis equal
 end
 
 framerate = info.resfreq/info.config.lines;

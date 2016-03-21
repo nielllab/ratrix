@@ -10,7 +10,8 @@ if cycMovie
 end
 framerate = input('framerate :');
 
-
+[avif avip] = uiputfile({'*.avi'},'output avi file');
+avifname = fullfile(avip,avif)
 
 %%% read in sbx data and perform motion correction (if not already done)
 display('reading data')
@@ -46,7 +47,7 @@ if fullMovie
     display('converting to movie')
     cycMov= mat2im(img,gray,[lb ub]);
     mov = immovie(permute(cycMov,[1 2 4 3]));
-    vid = VideoWriter([fname(1:end-4) '_FULL.avi']);
+    vid = VideoWriter([avifname(1:end-4) '_FULL.avi']);
     vid.FrameRate=framerate;
     open(vid);
     display('writing movie')
@@ -82,7 +83,7 @@ if cycMovie
     
     cycMov= mat2im(cycAvg,gray,[lb ub]);
     mov = immovie(permute(cycMov,[1 2 4 3]));
-    vid = VideoWriter([fname(1:end-4) '_cycAvg.avi']);
+    vid = VideoWriter([avifname(1:end-4) '_cycAvg.avi']);
     vid.FrameRate=20;
     open(vid);
     display('writing movie')

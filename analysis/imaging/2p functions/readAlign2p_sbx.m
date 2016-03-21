@@ -11,6 +11,8 @@ if (exist([fn '.align'])==0 & align)
     display(sprintf('Done %s: Aligned %d images in %d min',fn,info.max_idx,round(toc/60)));
 end
 
+info
+
 if align
 figure
 plot(info.aligned.T);

@@ -230,6 +230,50 @@ files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session'; 
 files(n).monitor = 'vert'; 
 
+n=n+1;
+files(n).subj = 'g62y3lt';
+files(n).expt = '031016';
+files(n).topox =  'passive\031016 G62Y3LT passive mapping and darkness learned\g62y3lt_portrait_run1_topoX\g62y3lt_portrait_run1_topmaps.mat';
+files(n).topoy = 'passive\031016 G62Y3LT passive mapping and darkness learned\g62y3lt_portrait_run2_topoY\g62y3lt_portrait_run2_topmaps.mat';
+files(n).darkness = 'passive\031016 G62Y3LT passive mapping and darkness learned\g62y3lt_portrait_run3_darkness\g62y3lt_portrait_run3_darknemaps.mat';
+files(n).task = 'GTS';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session'; 
+files(n).monitor = 'vert'; 
+
+n=n+1;
+files(n).subj = 'g62w9rt';
+files(n).expt = '031016';
+files(n).topox =  'passive\031016 G62W9RT passive mapping and darkness learned\g62w9rt_portrait_run1_topoX\g62w9rt_portrait_run1_topmaps.mat';
+files(n).topoy = 'passive\031016 G62W9RT passive mapping and darkness learned\g62w9rt_portrait_run2_topoY\g62w9rt_portrait_run2_topmaps.mat';
+files(n).darkness = 'passive\031016 G62W9RT passive mapping and darkness learned\g62w9rt_portrait_run3_darkness\g62w9rt_portrait_run3_darknemaps.mat';
+files(n).task = 'GTS';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session'; 
+files(n).monitor = 'vert'; 
+
+n=n+1;
+files(n).subj = 'g62tx1.5tt';
+files(n).expt = '031016';
+files(n).topox =  'passive\031016 G62Tx15LT passive mapping and darkness learned\g62tx15tt_portrait_run1_topoX\g62tx15tt_portrait_run1_topmaps.mat';
+files(n).topoy = 'passive\031016 G62Tx15LT passive mapping and darkness learned\g62tx15tt_portrait_run3_topoY\g62tx15tt_portrait_run3_topmaps.mat';
+files(n).darkness = 'passive\031016 G62Tx15LT passive mapping and darkness learned\g62tx15tt_portrait_run4_darkness_5min\g62tx15tt_portrait_run4_darknemaps.mat';
+files(n).task = 'GTS';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session'; 
+files(n).monitor = 'vert'; 
+
+n=n+1;
+files(n).subj = 'g62dd2ln';
+files(n).expt = '031016';
+files(n).topox =  'passive\031016 G62DD2LN passive mapping and darkness learned\g62dd2ln_portrait_run1_topoX\g62dd2ln_portrait_run1_topmaps.mat';
+files(n).topoy = 'passive\031016 G62DD2LN passive mapping and darkness learned\g62dd2ln_portrait_run2_topoY\g62dd2ln_portrait_run2_topmaps.mat';
+files(n).darkness = 'passive\031016 G62DD2LN passive mapping and darkness learned\g62dd2ln_portrait_run3_darkness\g62dd2ln_portrait_run3_darknemaps.mat';
+files(n).task = 'GTS';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session'; 
+files(n).monitor = 'vert'; 
+
 
 
 % n=n+1;

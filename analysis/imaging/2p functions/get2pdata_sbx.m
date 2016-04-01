@@ -1,4 +1,4 @@
-function [dfofInterp im_dt greenframe framerate] = get2pdata_sbx(fname,dt,cycLength,cfg);
+function [dfofInterp im_dt greenframe framerate phasetimes] = get2pdata_sbx(fname,dt,cycLength,cfg);
 %%% reads in 2p data and syncs with stimulus signals
 
 %%% read in sbx data and perform motion correction (if not already done)
@@ -64,3 +64,16 @@ tic
 dfofInterp = interp1(1:nframes,shiftdim(dfof,2),fr);
 dfofInterp = shiftdim(dfofInterp,1);
 toc
+
+%%% second trigger line
+%%%either beginning of each stim, or (more importantly) phases for behavior
+
+phasesync = find( info.event_id ==2 | info.event_id==3); %%% get phase trigger signals
+phasesync=phasesync(1:2:end); %%% scanbox records rising and falling edge;
+for i = 1:length(phasesync);
+    phasetimes(i)= max(find(stim<=phasesync(i)+2))/60;  %%% find frame trigger that occurred right before this, and convert to time bsed on stim framerate (60Hz) // need offset of two since phase trigger goes up/down before
+end
+
+
+
+   

@@ -3,19 +3,6 @@ startPhaseSkip = 0;
 missedTrials   = 0;
 goodRecordingPct = 1;
 
-% if false
-%
-%     imData = '\\herzog\C\data\nlab\031115 g62L1LT GTS behavior on 2p\G62l1lt_run1_GTS_behavior_2p\run1_g622l1LT_GTS_behavior001.tif';
-%     bData = '\\lee\C\Users\nlab\Desktop\ballData2\PermanentTrialRecordStore\g62l1lt\trialRecords_4644-4763_20150311T143305-20150311T145317.mat';
-%     ttlRecs = '\\herzog\C\data\nlab\ttlRecs\20150311T145339.mat';
-% else
-%     % imData = '\\lorentz\backup\twophoton\042215 g62m9tt 2p GTS behavior\GTS behavior run1 V1 upper visual field 35mw001.tif';
-%     imData = 'C:\Users\nlab\Desktop\GTS behavior run1 V1 upper visual field 35mw001.tif';
-%     bData = '\\lee\Users\nlab\Desktop\ballData2\PermanentTrialRecordStore\g62m9tt\trialRecords_4143-4289_20150422T121811-20150422T124018.mat';
-%     ttlRecs = '\\herzog\C\data\nlab\ttlRecs\20150422T124042.mat';
-% end
-
-
 numPhases = 3;
 
 class = mod(1:length(phases),numPhases);

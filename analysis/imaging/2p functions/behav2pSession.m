@@ -13,8 +13,14 @@ if ~exist('onsets','var')
 
     [bf bp] = uigetfile('*.mat','behav permanent trial record');
     [onsets starts trialRecs] = sync2pBehavior_sbx(fullfile(bp,bf) ,phasetimes);
+    use = find(onsets<size(dfofInterp,3)*dt-3);
+    onsets = onsets(use); starts=starts(use,:); trialRecs = trialRecs(use);
     save(sessionName,'onsets','starts','trialRecs','-append');
 end
+
+figure
+plot(squeeze(mean(mean(dfofInterp,2),1)))
+
 
 display('aligning frames')
 tic
@@ -57,7 +63,7 @@ for t = 1:3
     for i = 1:13;
         subplot(4,4,i);
         if t<3
-            imagesc(dfmean(:,:,i)-mn,[0 0.1]);
+            imagesc(dfmean(:,:,i)-mn,[0 0.3]);
         else
             imagesc(dfmean(:,:,i),[-0.1 0.1]);
         end

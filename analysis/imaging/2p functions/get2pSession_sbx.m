@@ -23,9 +23,9 @@ else %%% new session data
     twocolor= (twocolor==2);
     
     if twocolor
-        [dfofInterp dtRaw redframe greenframe] = get2colordata(fullfile(p,f),dt,cycLength,cfg);
+        [dfofInterp dtRaw redframe greenframe] = get2colordata(fullfile(p,f),dt,cycLength,cfg); %%% not currently functional!
     else
-        [dfofInterp dtRaw greenframe framerate] = get2pdata_sbx(fullfile(p,f),dt,cycLength,cfg);
+        [dfofInterp dtRaw greenframe framerate phasetimes] = get2pdata_sbx(fullfile(p,f),dt,cycLength,cfg);
     end
     
     [fs ps] = uiputfile('*.mat','session data');
@@ -36,7 +36,7 @@ else %%% new session data
         if twocolor
             save(sessionName,'dfofInterp','cycLength','redframe','greenframe','-v7.3');
         else
-            save(sessionName,'dfofInterp','cycLength','greenframe','-v7.3');
+            save(sessionName,'dfofInterp','cycLength','greenframe','phasetimes','-v7.3');
         end
         toc
         display('done')

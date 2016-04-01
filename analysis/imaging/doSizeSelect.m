@@ -8,6 +8,8 @@ fully = 1 %choose if you want full frame (260x260), else scales down by 4
 %           'G62T6LT_SizeSelectPoints.mat',...
 %           'G62W7LN_SizeSelectPoints.mat',...
 %           'G62W7TT_SizeSelectPoints.mat'}; %specific point files for animals
+ptsdir = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\Pre With Deconvolution';
+ptsfile = {'CALB25B5RT_SizeSelectPoints'}
 areas = {'V1','P','LM','AL','RL','AM','PM'}; %list of all visual areas for points   
 
 for f = 1:length(use)
@@ -239,26 +241,26 @@ for f = 1:length(use)
         end
     end        
     
-    %%manual/loading point selection
-    files(use(f)).subj
-    [fname pname] = uigetfile('*.mat','points file');
-    if fname~=0
-        load(fullfile(pname, fname));
-    else
-        figure
-        imagesc(squeeze(mean(trialcyc(:,:,12,find(xpos==xrange(1)&radius==3)),4)),[-0.05 0.05])
-        colormap(jet)
-        axis square
-        hold on
-        plot(ypts,xpts,'k.','Markersize',2)
-        [x y] = ginput(7);
-        x=round(x); y=round(y);
-        close(gcf)
-        [fname pname] = uiputfile('*.mat','save points?');
-        if fname~=0
-            save(fullfile(pname,fname),'x','y');
-        end
-    end
+%     %manual/loading point selection
+%     files(use(f)).subj
+%     [fname pname] = uigetfile('*.mat','points file');
+%     if fname~=0
+%         load(fullfile(pname, fname));
+%     else
+%         figure
+%         imagesc(squeeze(mean(trialcyc(:,:,12,find(xpos==xrange(1)&radius==3)),4)),[-0.05 0.05])
+%         colormap(jet)
+%         axis square
+%         hold on
+%         plot(ypts,xpts,'k.','Markersize',2)
+%         [x y] = ginput(7);
+%         x=round(x); y=round(y);
+%         close(gcf)
+%         [fname pname] = uiputfile('*.mat','save points?');
+%         if fname~=0
+%             save(fullfile(pname,fname),'x','y');
+%         end
+%     end
 
     %plot selected points over each radius size
     figure

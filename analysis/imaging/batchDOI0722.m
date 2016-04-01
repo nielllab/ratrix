@@ -1,12 +1,10 @@
-
-
-clear all
-close all
+% clear all
+% close all
 dbstop if error
-pathname = 'I:\compiled behavior\';
-pathname = '\\lorentz\backup\widefield\DOI experiments\';
-datapathname = '\\lorentz\backup\widefield\DOI experiments\';  
-outpathname = '\\lorentz\backup\widefield\DOI experiments\';
+pathname = '\\LANGEVIN\backup\widefield\DOI_experiments\';
+pathname = '\\LANGEVIN\backup\widefield\DOI_experiments\';
+datapathname = '\\LANGEVIN\backup\widefield\DOI_experiments\';  
+outpathname = '\\LANGEVIN\backup\widefield\DOI_experiments\';
 n = 0;
 
 % 

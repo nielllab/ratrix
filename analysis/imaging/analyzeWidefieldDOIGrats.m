@@ -6,8 +6,9 @@ clear all
 %%
 
 %CHOOSE FILES WITH THE DATA IN THEM
-datafiles = {'DOITrainedAnimalsBKGRATSpre',...
-            'DOITrainedAnimalsBKGRATSpost'};
+expname = 'TrainedDOICompareGrats.pdf';
+datafiles = {'TrainedDOIpreGrats',...
+            'TrainedDOIpostGrats'};
 % datafiles = {'SalinePreGratings', ...  %1
 %             'SalinePostGratings', ...  %2
 %             'DOIPreGratings', ...      %3
@@ -63,8 +64,8 @@ for i= 1:length(datafiles) %collates all conditions (numbered above)
 %     
 end
 
-dir = 'C:\Users\nlab\Desktop\Widefield Data\DOI';
-nam = 'CompareGratings';
+dir = '\\LANGEVIN\backup\widefield\DOI_experiments\Matlab Widefield Analysis';
+nam = 'NaiveDOICompareGratings';
 save(fullfile(dir,nam),'allcycavg','allmnfit','areanames','datafiles','range','scscale','indcycavg','inddeconcycavg');
 %       
 % %GENERATE PDFs FOR ALL CONDITIONS
@@ -82,7 +83,6 @@ save(fullfile(dir,nam),'allcycavg','allmnfit','areanames','datafiles','range','s
 % %%%
 
 %%%
-expname = 'DOICompareGrats.pdf';
 conds = [1 2];
 
 psfilename = 'C:\tempPS.ps';

@@ -1,6 +1,6 @@
 %%%% doGratingsNew
 x=0;
-for rep=[1] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior passive; 4 = 4x3y patches;
+for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior passive; 4 = 4x3y patches;
     mnAmp{rep}=0; mnPhase{rep}=0; mnAmpWeight{rep}=0; mnData{rep}=0; mnFit{rep}=0;
     clear shiftData shiftAmp shiftPhase fit cycavg
     
@@ -108,7 +108,7 @@ for rep=[1] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
                set(gcf, 'PaperPositionMode', 'auto');
             print('-dpsc',psfilename,'-append');
             
-        alltcoursedata = reshape(sftcourse,3*6*18,size(sftcourse,4));
+        alltcoursedata = reshape(sftcourse,size(sftcourse,1)*size(sftcourse,2)*size(sftcourse,3),size(sftcourse,4));
         figure
         imagesc(imresize(corrcoef(alltcoursedata),10,'nearest'),[0 1]);
         colormap jet; colorbar

@@ -4,7 +4,7 @@
 %% code from analyzeWidefieldDOI
 batchDOIphilMaskSizesel
  
-   alluse = find(strcmp({files.inject},'doi')  & strcmp({files.timing},'pre') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
+   alluse = find(strcmp({files.inject},'doi')  & strcmp({files.timing},'post') & strcmp({files.label},'calb2') & strcmp({files.notes},'good imaging session')  ) 
 %   
 length(alluse)
 % %alluse=alluse(1:5)

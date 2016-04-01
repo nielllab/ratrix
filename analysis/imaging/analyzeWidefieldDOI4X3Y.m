@@ -6,8 +6,13 @@ profile on
 %%
 
 %CHOOSE FILES WITH THE DATA IN THEM
-datafiles = {'DOITrainedAnimals4X3Ypre',...
-            'DOITrainedAnimals4X3Ypost'}
+expname = 'TrainedDOICompare4X3Y.pdf';
+datafiles = {'TrainedDOIpre4X3Y',...
+            'TrainedDOIpost4X3Y'};
+% datafiles = {'NaiveDOIpre',...
+%             'NaiveDOIpost'};
+% datafiles = {'DOITrainedAnimals4X3Ypre',...
+%             'DOITrainedAnimals4X3Ypost'}
 % datafiles = {'SalinePreDataGood', ...  %1
 %             'SalinePostDataGood', ...  %2
 %             'DOIPreDataGood', ...      %3
@@ -16,7 +21,7 @@ datafiles = {'DOITrainedAnimals4X3Ypre',...
 %             'LisuridePostDataGood'};    %6
 
 %CHOOSE FILE WITH POINTS FROM analyzeWidefieldDOI & SET NAMES
-load('SalinePoints'); %pre-made points for visual areas used in original analysis
+load('\\LANGEVIN\backup\widefield\DOI_experiments\Matlab Widefield Analysis\SalinePoints'); %pre-made points for visual areas used in original analysis
 areanames = {'V1','LM','AL','RL','AM','PM','P'};
 
 %CHOOSE PIXEL AVERAGING RANGE
@@ -44,8 +49,8 @@ for i= 1:length(datafiles) %collates all conditions (numbered above)
     sdmnfit(:,:,:,i) = std(fit,[],4)/sqrt(size(fit,4));
 end
       
-dir = 'C:\Users\nlab\Desktop\Widefield Data\DOI';
-nam = 'Compare4X3Y';
+dir = '\\LANGEVIN\backup\widefield\DOI_experiments\Matlab Widefield Analysis';
+nam = 'TrainedDOICompare4X3Y';
 save(fullfile(dir,nam),'allcycavg','allmnfit','areanames','datafiles','range','scscale','sdcycavg','sdmnfit');
       
 %GENERATE PDFs FOR ALL CONDITIONS
@@ -63,7 +68,6 @@ save(fullfile(dir,nam),'allcycavg','allmnfit','areanames','datafiles','range','s
 % %%%
 
 %%%
-expname = 'DOICompare4X3Y.pdf';
 conds = [1 2];
 
 psfilename = 'C:\tempPS.ps';

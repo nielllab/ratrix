@@ -21,6 +21,7 @@ msAirpuff                 =0;
 pixPerCycs                = [200]; %*10^9;
 %stim.stopHUD = false; %stop period heads up display... false = off
 percentCorrectionTrials = .5;
+stim.gain = 0.7 * ones(2,1);
 
 
 % sca
@@ -37,18 +38,7 @@ switch subjIDs{1}
        rewardSizeULorMS        = 155;
        msPenalty               =3500;
        percentCorrectionTrials = .75;         
-
-   case 'g62ee8tt' % Started 2/29/16  %GTS started 3/20/16
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 139;
-       msPenalty               =3500;
-       percentCorrectionTrials = .75; 
-    
-    case 'g62dd5' % Started 2/29/16
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 139;
-       msPenalty               =3500;
-       percentCorrectionTrials = .75;  
+       
     
    case 'g62dd4' % Started 3/3/16 %%start gts 3/16/16
        requestRewardSizeULorMS = 0;
@@ -73,19 +63,15 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
-       percentCorrectionTrials = .75;        
+       percentCorrectionTrials = .5;        
     
-   case 'g62tx1.9lt' % Started 1/26/16 (GTS 2/3/16)
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 123;
-       msPenalty               =3500;
-       percentCorrectionTrials = .75; 
     
    case 'g62tx1.9ln' % Started 1/26/16 (GTS 2/3/16)
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
-       percentCorrectionTrials = .75;     
+       percentCorrectionTrials = .5;
+       stim.gain = 0.55 * ones(2,1); %try this since has trouble fully stopping 4/2/16
     
    case 'g62y3lt' % Started 1/12/16 switch to GTS 1/29/16
        requestRewardSizeULorMS = 0;
@@ -124,7 +110,7 @@ svnCheckMode = 'session';
 
 interTrialLuminance = .5;
 
-stim.gain = 0.7 * ones(2,1);
+
 stim.targetDistance = 500 * ones(1,2);
 stim.timeoutSecs = 10;
 stim.slow = [40; 80]; % 10 * ones(2,1);

@@ -25,7 +25,21 @@ percentCorrectionTrials = .5;
 
 switch subjIDs{1}
 
-   case 'g62ee6lt' % Started 2/9/16  %started HvV_center 2/20/16 %back to GoToBlack 4/2/16
+   case 'g62tx1.9ln' % Started 1/26/16 (GTS 2/3/16)
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 123;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;
+       stim.gain = 0.55 * ones(2,1); %try this since has trouble fully stopping 4/2/16
+    
+    case 'g62bb8tt' % Started 2/9/16  %started HvV_center 2/20/16 %restarted HvV_center 4/2/16
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 139;
+       msPenalty               =3500;
+       percentCorrectionTrials = .75;   
+       
+    
+    case 'g62ee6lt' % Started 2/9/16  %started HvV_center 2/20/16 %back to GoToBlack 4/2/16
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 139;
        msPenalty               =3500;

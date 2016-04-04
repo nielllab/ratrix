@@ -26,7 +26,7 @@ percentCorrectionTrials = .5;
 switch subjIDs{1}
 
    case 'g62tx1.9ln' % Started 1/26/16 (GTS 2/3/16)
-       requestRewardSizeULorMS = 0;
+       requestRewardSizeULorMS = 27;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
@@ -59,7 +59,7 @@ switch subjIDs{1}
     
     
     case 'g62ee8tt' % Started 2/29/16  %GTS started 3/20/16 %back to GoToBlack 4/2/16
-       requestRewardSizeULorMS = 0;
+       requestRewardSizeULorMS = 27;
        rewardSizeULorMS        = 139;
        msPenalty               =3500;
        percentCorrectionTrials = .5;

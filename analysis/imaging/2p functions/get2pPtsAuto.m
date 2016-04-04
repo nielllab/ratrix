@@ -5,7 +5,7 @@ function [pts dF ptsfname icacorr cellImg usePts] = get2pPtsAuto(dfofInterp, gre
 load(fullfile(p,f),'x','y','refFrame');
 oldPts(:,1) = x; oldPts(:,2)=y;
 
-greenframe = imresize(greenframe,size(refFrame));
+greenframe = imresize(double(greenframe),size(refFrame));
 
 im(:,:,1)=refFrame/prctile(refFrame(:),95);
 im(:,:,2) = greenframe/prctile(greenframe(:),95);
@@ -63,7 +63,6 @@ for p = 1:length(pts);
 end
 
 use = find(mean(dF,2)~=0);
-
 figure(sigmafig)
 plot(pts(use,2),pts(use,1),'ko');
 
@@ -73,7 +72,7 @@ for i = 1:min(length(use),120)
     i
     subplot(10,12,i);
     range = max([0.01 abs(min(min(cellImg(use(i),:,:)))) abs(max(max(cellImg(use(i),:,:))))]);
-    imagesc(squeeze(cellImg(use(i),:,:)),[-range range])
+    imagesc(squeeze(cellImg(use(i),:,:)),[-range range]); colormap jet
     axis off
     set(gca,'LooseInset',get(gca,'TightInset'))
 end
@@ -83,6 +82,7 @@ hist(icacorr,[0.025:0.05:1])
 
 figure
 plot(icacorr,filling,'o')
+xlabel('ica match corrcoef'); ylabel('filling fraction')
 
 figure
 imagesc(reshape(coverage,[size(dfofInterp,1) size(dfofInterp,2)]));
@@ -91,19 +91,22 @@ cc = corrcoef(dF');
 d = dist(pts');
 figure
 plot(d(:),cc(:),'.');
+xlabel('distance'); ylabel('correlation'); title('check for duplicates')
 dups = find(cc>0.85 & d<10 & d>0);
 length(dups)
 [i j] = ind2sub(size(cc),dups);
 uppers = max(i,j);
 dF(uppers,:)=0;
 
-c = 'rgbcmk'
-figure
-hold on
-use = find(mean(dF,2)~=0);
-for i = 1:length(use);
-    plot(dF(use(i),50:1250)/max(dF(use(i),:)) + i/2,c(mod(i,6)+1));
-end
+% c = 'rgbcmk'
+% figure
+% hold on
+% use = find(mean(dF,2)~=0);
+% for i = 1:length(use);
+%     plot(dF(use(i),50:end)/max(dF(use(i),:)) + i/2,c(mod(i,6)+1));
+% end
+
+sprintf('found %d cells out of %d = %0.2f',length(use),size(dF,1),length(use)/size(dF,1))
 
 greenframe = refFrame;
 [f p] = uiputfile('*.mat','save points data');

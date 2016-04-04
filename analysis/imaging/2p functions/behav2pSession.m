@@ -48,6 +48,7 @@ if ~isempty(f) && f~=length(s)
 end
 correct = [s.correct] == 1;
 
+labels = {'position -1','position 1','-1 vs 1'};
 figure
 for t = 1:3
     if t==1
@@ -58,16 +59,17 @@ for t = 1:3
         dfmean = mean(mapalign(:,:,:,targ==-1),4) -mean(mapalign(:,:,:,targ==1),4) ;
     end
     %mn = mean(dfmean,3);
-    mn = min(dfmean,[],3);
-    figure
-    for i = 1:13;
-        subplot(4,4,i);
+   % mn = min(dfmean,[],3);
+   mn = dfmean(:,:,timepts==0);
+    figure; set(gcf,'Name',labels{t})
+    for i = 1:12;
+        subplot(3,4,i);
         if t<3
-            imagesc(dfmean(:,:,i)-mn,[0 0.3]);
+            imagesc(dfmean(:,:,i+1)-mn,[-0.25 0.25]); colormap jet
         else
-            imagesc(dfmean(:,:,i),[-0.1 0.1]);
+            imagesc(dfmean(:,:,i+1),[-0.5 0.5]); colormap jet
         end
-        axis equal; axis off
+        axis equal; axis off; set(gca,'LooseInset',get(gca,'TightInset'))
     end
     
 end

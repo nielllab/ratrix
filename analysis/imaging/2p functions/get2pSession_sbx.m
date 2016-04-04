@@ -19,14 +19,17 @@ else %%% new session data
         cycLength = input('cycle length : ');
     end
     
-    twocolor = input('# of channels : ')
-    twocolor= (twocolor==2);
+%     twocolor = input('# of channels : ')
+%     twocolor= (twocolor==2);
+%     
+    twocolor=0;
     
     if twocolor
         [dfofInterp dtRaw redframe greenframe] = get2colordata(fullfile(p,f),dt,cycLength,cfg); %%% not currently functional!
     else
         [dfofInterp dtRaw greenframe framerate phasetimes] = get2pdata_sbx(fullfile(p,f),dt,cycLength,cfg);
     end
+    
     
     [fs ps] = uiputfile('*.mat','session data');
     if fs~=0

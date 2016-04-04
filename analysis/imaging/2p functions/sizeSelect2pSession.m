@@ -29,6 +29,7 @@ colormap(hsv); colorbar
 xpos=0;
 sf=0; isi=0; duration=0; theta=0; phase=0; radius=0;
 moviefname = 'C:\sizeSelect2sf5sz14min.mat';
+moviefname = 'C:\sizeSelect2sf1tf5sz14min.mat';
 load (moviefname)
 ntrials= min(dt*length(dfofInterp)/(isi+duration),length(sf))
 onsets = dt + (0:ntrials-1)*(isi+duration);
@@ -47,22 +48,22 @@ sz = unique(radius);
 freq = unique(sf);
 x=unique(xpos);
 
-top = squeeze(mean(dFout(:,:,find(timepts==1),xpos==x(1))-dFout(:,:,find(timepts==0),xpos==x(1)),4));
-bottom = squeeze(mean(dFout(:,:,find(timepts==1),xpos==x(end))-dFout(:,:,find(timepts==0),xpos==x(end)),4));
-figure
-subplot(2,2,1)
-imagesc(top,[0 0.25]); axis equal; title('top')
-subplot(2,2,2)
-imagesc(bottom,[0 0.25]); axis equal; title('bottom')
-subplot(2,2,3)
-top(top<0)=0; bottom(bottom<0)=0;
-imagesc((top-bottom)./(top+bottom),[-1 1]); title('top-bottom')
-subplot(2,2,4);
-plot(timepts,squeeze(mean(mean(mean(dFout(:,:,:,xpos==x(1)),4),2),1)))
-hold on
-plot(timepts,squeeze(mean(mean(mean(dFout(:,:,:,xpos==x(end)),4),2),1)))
-title('position'); xlim([min(timepts) max(timepts)]);
-    
+% top = squeeze(mean(dFout(:,:,find(timepts==1),xpos==x(1))-dFout(:,:,find(timepts==0),xpos==x(1)),4));
+% bottom = squeeze(mean(dFout(:,:,find(timepts==1),xpos==x(end))-dFout(:,:,find(timepts==0),xpos==x(end)),4));
+% figure
+% subplot(2,2,1)
+% imagesc(top,[0 0.25]); axis equal; title('top')
+% subplot(2,2,2)
+% imagesc(bottom,[0 0.25]); axis equal; title('bottom')
+% subplot(2,2,3)
+% top(top<0)=0; bottom(bottom<0)=0;
+% imagesc((top-bottom)./(top+bottom),[-1 1]); title('top-bottom')
+% subplot(2,2,4);
+% plot(timepts,squeeze(mean(mean(mean(dFout(:,:,:,xpos==x(1)),4),2),1)))
+% hold on
+% plot(timepts,squeeze(mean(mean(mean(dFout(:,:,:,xpos==x(end)),4),2),1)))
+% title('position'); xlim([min(timepts) max(timepts)]);
+%     
 
 
 for location=1:length(x)

@@ -39,10 +39,10 @@ while ~done
     
     sprintf('%d points ', length(x))
     figure
-    imagesc(greenframe,[0 prctile(greenframe(:),98)]);
-    hold on; colormap gray; plot(y,x,'*');
+    imagesc(greenframe,[0 prctile(greenframe(:),99)]*1.2); axis equal
+    hold on; colormap gray; plot(y,x,'.');
     figure
-    imagesc(stdImg,[0 prctile(stdImg(:),98)]);
+    imagesc(stdImg,[0 prctile(stdImg(:),98)]); axis equal
     hold on; colormap gray; plot(y,x,'*');
     done = input('okay points ? (0/1) :')
     if ~done

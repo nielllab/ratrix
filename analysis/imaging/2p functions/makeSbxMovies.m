@@ -8,7 +8,7 @@ cycMovie = input('make cycle avg movie? (0/1) :');
 if cycMovie
     cycLength =input('cycle length (secs) :');
 end
-framerate = input('framerate :');
+movierate = input('framerate :');
 
 [avif avip] = uiputfile({'*.avi'},'output avi file');
 avifname = fullfile(avip,avif)
@@ -40,6 +40,10 @@ toc
 d = img(5:5:end,5:5:end,5:5:end);
 figure
 hist(d(:),100);
+lb = 0.5*prctile(d(:),1); ub = 1.5*prctile(d(:),99.9);
+sprintf('lower = %0.0f ; upper = %0.0f',lb,ub)
+hold on;
+plot(lb,0,'g*'); plot(ub,0,'g*');
 lb = input('lower limit on range: ');
 ub = input('upper limit on range: ');
 
@@ -48,7 +52,7 @@ if fullMovie
     cycMov= mat2im(img,gray,[lb ub]);
     mov = immovie(permute(cycMov,[1 2 4 3]));
     vid = VideoWriter([avifname(1:end-4) '_FULL.avi']);
-    vid.FrameRate=framerate;
+    vid.FrameRate=movierate;
     open(vid);
     display('writing movie')
     writeVideo(vid,mov);

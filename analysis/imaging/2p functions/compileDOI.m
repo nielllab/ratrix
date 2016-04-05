@@ -64,10 +64,13 @@ end
 
 preSz = mean(preTuning(activeDOI &rfcenter,:),1);
 postSz = mean(postTuning(activeDOI & rfcenter,:),1);
+preSzSE = std(preTuning(activeDOI &rfcenter,:),1)/sqrt(size(preTuning(activeDOI &rfcenter,:),1));
+postSzSE = std(postTuning(activeDOI &rfcenter,:),1)/sqrt(size(postTuning(activeDOI &rfcenter,:),1));
+
 figure
-plot(preSz(1:5)-preSz(1));
+errorbar(preSz(1:5)-preSz(1),preSzSE(1:5));
 hold on
-plot(postSz(1:5)-postSz(1));
+errorbar(postSz(1:5)-postSz(1),postSzSE(1:5));
 
 figure
 plot(rfpts(goodTopo  ,1),rfpts(goodTopo ,2),'o')

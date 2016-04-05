@@ -1,17 +1,17 @@
-function [pts dF ptsfname icacorr cellImg usePts] = get2pPtsAuto(dfofInterp, greenframe);
+function [pts dF ptsfname icacorr cellImg usePts] = get2pPtsAuto(dfofInterp, greenframe, x,y,refFrame,w, showImg);
 %%% automatically extracts fluorescence traces based on generic points
 
-[f p] = uigetfile('*.mat','generic points file');
-load(fullfile(p,f),'x','y','refFrame');
+
 oldPts(:,1) = x; oldPts(:,2)=y;
 
 greenframe = imresize(double(greenframe),size(refFrame));
 
-im(:,:,1)=refFrame/prctile(refFrame(:),95);
-im(:,:,2) = greenframe/prctile(greenframe(:),95);
+im(:,:,1)=0.8*refFrame/prctile(refFrame(:),98);
+im(:,:,2) = 0.8*greenframe/prctile(greenframe(:),98);
 im(:,:,3)=0;
 figure
 imshow(im)
+title('not aligned !!')
 
 ref = refFrame-mean(refFrame(:));
 gr = greenframe-mean(greenframe(:));
@@ -28,6 +28,14 @@ imagesc(xc);
 shiftx=shiftx-21
 shifty=shifty-21
 
+im(:,:,1)=0.8*refFrame/prctile(refFrame(:),98);
+im(:,:,2) = 0.8*(circshift(greenframe,-[shiftx shifty]))/prctile(greenframe(:),98);
+im(:,:,3)=0;
+figure
+imshow(im)
+title('aligned')
+
+
 pts(:,1) = oldPts(:,1)+shiftx;
 pts(:,2) = oldPts(:,2)  +shifty;
 
@@ -43,16 +51,17 @@ dfReshape = reshape(dfofInterp,[size(dfofInterp,1)*size(dfofInterp,2) size(dfofI
 clear usePts dF
 coverage=zeros(size(dfofInterp,1)*size(dfofInterp,2),1);
 dF = zeros(length(pts),size(dfofInterp,3));
+cellImg = zeros(length(pts),2*w+1,2*w+1); 
 
-sprintf('enter width of window for cell body extraction')
-sprintf('typical = 4 for puncta, 6 for cell body, but depends of fov and zoom')
-w = input('width : ');
-showImg = input('show images? 0/1 ');
 tic
-%%% can make this a parfor
-%%% gcp
+%%% can make this a parfor but need to fix assignment
+% display('starting parpool')
+% gcp
+
 for p = 1:length(pts);
-    p  
+    if p/20 == round(p/20)
+        sprintf('%d of %d = %0.2',p,length(pts),p/length(pts))
+    end
     [dF(p,:) icacorr(p) filling(p) cellImg(p,:,:) usePts{p}] = getPtsParallel(dfofInterp,pts,w,p,mn,sigma,showImg);
 end
 toc
@@ -69,7 +78,6 @@ plot(pts(use,2),pts(use,1),'ko');
 figure
 nx = ceil(sqrt(length(use)));
 for i = 1:min(length(use),120)
-    i
     subplot(10,12,i);
     range = max([0.01 abs(min(min(cellImg(use(i),:,:)))) abs(max(max(cellImg(use(i),:,:))))]);
     imagesc(squeeze(cellImg(use(i),:,:)),[-range range]); colormap jet
@@ -109,10 +117,6 @@ dF(uppers,:)=0;
 sprintf('found %d cells out of %d = %0.2f',length(use),size(dF,1),length(use)/size(dF,1))
 
 greenframe = refFrame;
-[f p] = uiputfile('*.mat','save points data');
-if f~=0
-    save(fullfile(p,f),'pts','dF','coverage','greenframe','usePts');
-end
-ptsfname = fullfile(p,f);
+ptsfname = []; %%% obsolete
 
 

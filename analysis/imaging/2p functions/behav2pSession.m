@@ -13,7 +13,7 @@ if ~exist('onsets','var')
 
     [bf bp] = uigetfile('*.mat','behav permanent trial record');
     [onsets starts trialRecs] = sync2pBehavior_sbx(fullfile(bp,bf) ,phasetimes);
-    use = find(onsets<size(dfofInterp,3)*dt-3);
+    use = find(onsets<size(dfofInterp,3)*dt-3 & onsets>5); %%%% get rid of trials right at beginning or end, that may be incomplete
     onsets = onsets(use); starts=starts(use,:); trialRecs = trialRecs(use);
     save(sessionName,'onsets','starts','trialRecs','-append');
 end
@@ -59,8 +59,8 @@ for t = 1:3
         dfmean = mean(mapalign(:,:,:,targ==-1),4) -mean(mapalign(:,:,:,targ==1),4) ;
     end
     %mn = mean(dfmean,3);
-   % mn = min(dfmean,[],3);
-   mn = dfmean(:,:,timepts==0);
+    % mn = min(dfmean,[],3);
+    mn = dfmean(:,:,timepts==0);
     figure; set(gcf,'Name',labels{t})
     for i = 1:12;
         subplot(3,4,i);

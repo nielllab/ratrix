@@ -3,20 +3,12 @@
 clear all
 
 dt = 0.25;
-[f p] = uigetfile('*.mat','session data');
-display('loading data')
-sessionName = fullfile(p,f);
-tic
-load(sessionName)
-toc
-cycLength = cycLength/dt;
-
 
 useOld = input('auto select based on generic pts (1) or manually select points (2) or read in prev points (3) : ')
 if useOld ==1
-    [pts dF ptsfname icacorr cellImg usePts] = get2pPtsAuto(dfofInterp,greenframe);
+    getAnalysisPts;   
 elseif useOld==2
-    [pts dF neuropil ptsfname] = get2pPtsManual(dfofInterp,greenframe);    
+    [pts dF neuropil ptsfname] = get2pPtsManual(dfofInterp,greenframe);
 else
     ptsfname = uigetfile('*.mat','pts file');
     load(ptsfname);
@@ -84,7 +76,7 @@ figure
 hold on
 for i = 1:5
     subplot(5,1,i)
-plot(score(:,i))
+    plot(score(:,i))
 end
 
 figure

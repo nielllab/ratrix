@@ -20,6 +20,7 @@ greenframe=double(greenframe);
 toc
 figure; set(gcf, 'Name',sessionName{1});
 refFrame = greenframe;
+refFrame = imresize(refFrame,size(stdref)); %%% b/c dfof data is often compressed
 subplot(1,2,1);
 imagesc(refFrame,[0 prctile(refFrame(:),99)]); colormap gray; axis equal; freezeColors;
 ref = refFrame-mean(refFrame(:));
@@ -31,6 +32,7 @@ subplot(1,2,2);
 imagesc(stdref,[0 prctile(stdref(:),99.5)]); colormap jet; axis equal
 drawnow
 
+
 for n = 2:nfiles
     clear greenframe
     display(sprintf('loading file %d',n))
@@ -39,6 +41,8 @@ for n = 2:nfiles
     toc
     greenframe=double(greenframe);
     stdframe = std(dfofInterp(:,:,4:4:end),[],3);
+    greenframe = imresize(greenframe,size(stdref));
+    
     figure; set(gcf,'Name',sessionName{n});
     subplot(2,2,1)
     imagesc(stdframe,[0 0.5]); freezeColors
@@ -55,8 +59,8 @@ for n = 2:nfiles
     imagesc(xc); title('alignment xc'); freezeColors
     [m ind] = max(xc(:));
     [shiftx shifty] = ind2sub([41 41],ind);
-    shiftx=shiftx-21;
-    shifty=shifty-21;
+    shiftx=shiftx-21
+    shifty=shifty-21
     
     greenframe = circshift(greenframe,-[shiftx shifty]);
     im(:,:,1)=0.8*refFrame/prctile(refFrame(:),98);
@@ -74,7 +78,7 @@ for n = 2:nfiles
     
     drawnow
 end
-refFrame = imresize(refFrame,size(stdref)); %%% b/c dfof data is often compressed
+
 
 figure
 imagesc(stdref); axis equal; colormap jet

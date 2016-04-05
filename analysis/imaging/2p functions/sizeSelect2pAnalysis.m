@@ -3,20 +3,14 @@
 clear all
 
 dt = 0.25;
-[f p] = uigetfile('*.mat','session data');
-display('loading data')
-sessionName = fullfile(p,f);
-tic
-load(sessionName)
-toc
-cycLength = cycLength/dt;
-
 
 useOld = input('auto select based on generic pts (1) or manually select points (2) or read in prev points (3) : ')
 if useOld ==1
-    [pts dF ptsfname icacorr cellImg usePts] = get2pPtsAuto(dfofInterp,greenframe);
+
+    getAnalysisPts;
+    
 elseif useOld==2
-    [pts dF neuropil ptsfname] = get2pPtsManual(dfofInterp,greenframe);    
+    [pts dF neuropil ptsfname] = get2pPtsManual(dfofInterp,greenframe);
 else
     ptsfname = uigetfile('*.mat','pts file');
     load(ptsfname);
@@ -42,7 +36,7 @@ timepts = timepts - isi;
 
 clear tcourse
 for s = 1:6
-    tcourse(:,:,s) = median(dFout(usenonzero,:,find(radius==s)),3);
+    tcourse(:,:,s) = median(dFout(:,:,find(radius==s)),3);
 end
 for s=1:size(tcourse,3);
     for n= 1:size(tcourse,1);
@@ -51,6 +45,9 @@ for s=1:size(tcourse,3);
 end
 
 save(ptsfname,'tcourse','dF','dFout','radius','sf','xpos','-append')
+%%% dF = raw dF/F trace for each cell
+%%% dFout = aligned to onset of each stim
+%%% tcourse = timecourse averaged across orient/sf for each size
 
 for n = 1:length(usenonzero)
     panel = mod(n-1,6)+1;
@@ -58,7 +55,7 @@ for n = 1:length(usenonzero)
         figure
     end
     subplot(2,3,panel)
-    plot(squeeze(tcourse(n,:,:))); axis([1 12 -0.25 0.5])
+    plot(squeeze(tcourse(usenonzero(n),:,:))); axis([1 12 -0.25 0.5])
 end
 
 

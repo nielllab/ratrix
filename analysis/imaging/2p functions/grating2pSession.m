@@ -29,6 +29,9 @@ imshow(img)
 title('cycle fourier analysis')
 colormap(hsv); colorbar
 
+figure
+tcourse = squeeze(mean(mean(dfofInterp,2),1));
+plot((1:length(tcourse))*dt,tcourse);
 
 if ~blank
     gratingfname = 'C:\grating2p8orient2sf.mat';

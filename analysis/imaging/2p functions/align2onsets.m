@@ -10,7 +10,9 @@ else
     dFoutshift = zeros(length(pts),length(onsets),size(dF,1),size(dF,2));
     size(dFoutshift)
     for i = 1:length(onsets);
-        i
+        if i/10 == round(i/10)
+            sprintf('%d / %d trials done',i,length(onsets))
+        end
         range  = floor((onsets(i)+pts(1))/dt) : ceil((onsets(i)+pts(end))/dt);
         dFoutshift(:,i,:,:) = interp1(range ,shiftdf(range ,:,:),(onsets(i)+pts)/dt);
     end

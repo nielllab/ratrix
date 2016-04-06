@@ -26,7 +26,7 @@ percentCorrectionTrials = .5;
 switch subjIDs{1}
 
    case 'g62tx1.9ln' % Started 1/26/16 (GTS 2/3/16)
-       requestRewardSizeULorMS = 27;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
        percentCorrectionTrials = .5;

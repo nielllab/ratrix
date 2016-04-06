@@ -58,6 +58,7 @@ for t = 1:3
     else
         dfmean = mean(mapalign(:,:,:,targ==-1),4) -mean(mapalign(:,:,:,targ==1),4) ;
     end
+    pixResp(:,:,:,t) = dfmean;
     %mn = mean(dfmean,3);
     % mn = min(dfmean,[],3);
     mn = dfmean(:,:,timepts==0);
@@ -73,3 +74,5 @@ for t = 1:3
     end
     
 end
+
+save(sessionName,'pixResp','-append');

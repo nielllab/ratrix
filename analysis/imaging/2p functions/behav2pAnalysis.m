@@ -2,6 +2,8 @@ clear all
 
 dt=0.25;
 
+[f p ] = uigetfile('*.mat','session data')
+load(fullfile(p,f),'onsets','starts','trialRecs','pixResp');
 
 useOld = input('align to std points (1) or choose new points (2) or read in prev points (3) : ')
 if useOld ==1
@@ -13,12 +15,57 @@ else
     load(ptsfname);
 end
 
+%%% get target location, orientation, phase
+stim = [trialRecs.stimDetails];
+targ = sign([stim.target]);
+for i = 1:length(trialRecs);
+    orient(i) = trialRecs(i).stimDetails.subDetails.orientations;
+    gratingPh(i) = trialRecs(i).stimDetails.subDetails.phases;
+end
+
+%%% get correct
+s = [trialRecs.trialDetails];
+f = find(arrayfun(@(x)isempty(x.correct),s),1,'first');
+if ~isempty(f) && f~=length(s)
+    error('bad corrects')
+end
+correct = [s.correct] == 1;
+
 
 dF(dF<0)=0;
 dF=deconvg6s(dF,0.25);
 
-edgepts = (pts(:,1)<18 | pts(:,1)>237 | pts(:,2)<18 | pts(:,2)>237);
-usenonzero= find(mean(dF,2)~=0 & ~edgepts);
+
+for i = 1:size(dF,2);
+    dFnorm(:,i) = dF(:,i)/max(dF(:,i));
+end
+
+col = 'rgb';
+[coeff score latent] = pca(dFnorm');
+figure
+plot(score(:,1),score(:,2),'k'); hold on
+mapColors(score(:,1),score(:,2),'.',jet(length(score)))
+figure
+plot(score(:,1),score(:,3)); hold on
+mapColors(score(:,1),score(:,3),'.',jet(length(score)))
+figure
+plot(score(:,2),score(:,3)); hold on
+mapColors(score(:,2),score(:,3),'.',jet(length(score)))
+figure
+hold on
+for i = 1:5
+    subplot(5,1,i)
+    plot(score(:,i))
+end
+
+
+figure
+plot(latent(1:10)/sum(latent))
+
+usenonzero= find(mean(dF,2)~=0 );
+
+figure
+imagesc(dF(usenonzero,:))
 
 timepts = -1:0.25:2;
 dFalign = align2onsets(dF,onsets,dt,timepts);
@@ -28,11 +75,7 @@ for i = 1:size(trialmean,1);
 end
 figure
 plot(trialmean');
-figure
-plot(timepts,mean(trialmean,1))
-
-
-
+title('mean for all units')
 
 %%% get left/right traces
 leftmean = mean(dFalign(:,:,targ==-1),3);
@@ -45,21 +88,34 @@ for i = 1:length(leftmean)
 end
 
 figure
-plot(leftmean')
+plot(leftmean'); ylim([-1 1])
+title('left targs')
+
+figure
+imagesc(squeeze(pixResp(:,:,7,1) - pixResp(:,:,4,1)),[-0.5 0.5]); colormap jet
+title('left targs')
+
+figure
+draw2pSegs(usePts,leftmean(:,7),jet,size(pixResp,1),usenonzero,[-0.5 0.5])
+title('left targs')
 
 figure
 plot(rightmean')
+title('right targs'); ylim([-1 1])
 
 figure
-draw2pSegs(usePts,leftmean(:,7),jet,256,usenonzero,[0 0.5])
+imagesc(squeeze(pixResp(:,:,7,2) - pixResp(:,:,4,2)),[-0.5 0.5]); colormap jet
+title('right targs')
 
 figure
-draw2pSegs(usePts,rightmean(:,7),jet,256,usenonzero,[0 0.5])
+draw2pSegs(usePts,rightmean(:,7),jet,size(pixResp,1),usenonzero,[-0.5 0.5])
+title('right targs')
 
 figure
-plot(leftmean(:,9),rightmean(:,9),'o'); hold on
+plot(leftmean(:,7),rightmean(:,7),'o'); hold on
 axis equal; axis square; plot([0 1],[0 1],'g');
 
+title('performance')
 results = [ sum(correct & targ==-1)  sum(~correct&targ==-1) sum(~correct & targ==1)  sum(correct & targ==1)];
 results = results/sum(results(:))
 figure
@@ -156,7 +212,7 @@ idxall = zeros(length(pts),1);
 idxall(usenonzero) = idx;
 
 figure
-draw2pSegs(usePts,idxall,jet,256,usenonzero,[1 4])
+draw2pSegs(usePts,idxall,jet,size(pixResp,1),usenonzero,[1 4])
 
 orients = unique(orient);
 vert = find(orient==orients(1));

@@ -2,8 +2,11 @@
 %%% for topo (periodic spatial) stimuli
 clear all
 
-dt = 0.25;
+[f p] = uigetfile('*.mat','session data');
+load(fullfile(p,f),'polarImg')
 
+dt = 0.25;
+cycLength = 10 / dt;
 useOld = input('auto select based on generic pts (1) or manually select points (2) or read in prev points (3) : ')
 if useOld ==1
     getAnalysisPts;   
@@ -22,10 +25,10 @@ imagesc(dF(usenonzero,:),[-0.5 1]); ylabel('cell #'); xlabel('frame')
 
 %%% get Fourier component and cycle averages
 phaseVal = 0;
-for i= 1:size(dfofInterp,3);
+for i= 1:size(dF,2);
     phaseVal = phaseVal+dF(:,i)*exp(2*pi*sqrt(-1)*i/cycLength);
 end
-phaseVal = phaseVal/size(dfofInterp,3);
+phaseVal = phaseVal/size(dF,2);
 
 clear cycAvg
 for i = 1:cycLength;
@@ -46,27 +49,15 @@ hist(ph(usenonzero)); xlabel('phase')
 figure
 hist(abs(phaseVal(usenonzero)),0:0.05:1); xlabel('amplitude');
 
-map = 0;
-for i= 1:size(dfofInterp,3);
-    map = map+dfofInterp(:,:,i)*exp(2*pi*sqrt(-1)*i/cycLength);
-end
-amp = abs(map);
-amp=amp/prctile(amp(:),98); amp(amp>1)=1;
-img = mat2im(mod(angle(map),2*pi),hsv,[0 2*pi]);
-img = img.*repmat(amp,[1 1 3]);
-mapimg= figure
 figure
-imshow(img)
-colormap(hsv); colorbar
+imshow(polarImg);
 
 figure
-draw2pSegs(usePts,ph,hsv,size(dfofInterp,1),intersect(usenonzero,find(abs(phaseVal)>0.05)),[0 2*pi]);
+draw2pSegs(usePts,ph,hsv,size(polarImg,1),intersect(usenonzero,find(abs(phaseVal)>0.05)),[0 2*pi]);
 
 for i = 1:size(dF,2);
     dFnorm(:,i) = dF(:,i)/max(dF(:,i));
 end
-
-
 
 col = 'rgb';
 [coeff score latent] = pca(dFnorm');

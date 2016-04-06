@@ -20,16 +20,19 @@ greenframe=double(greenframe);
 toc
 figure; set(gcf, 'Name',sessionName{1});
 refFrame = greenframe;
-refFrame = imresize(refFrame,size(stdref)); %%% b/c dfof data is often compressed
-subplot(1,2,1);
-imagesc(refFrame,[0 prctile(refFrame(:),99)]); colormap gray; axis equal; freezeColors;
-ref = refFrame-mean(refFrame(:));
+
 display('std dev')
 tic
 stdref = std(dfofInterp(:,:,4:4:end),[],3); %%% std deviation map over all sessions (initialized for ref map
 toc
 subplot(1,2,2);
 imagesc(stdref,[0 prctile(stdref(:),99.5)]); colormap jet; axis equal
+
+refFrame = imresize(refFrame,size(stdref)); %%% b/c dfof data is often compressed
+subplot(1,2,1);
+imagesc(refFrame,[0 prctile(refFrame(:),99)]); colormap gray; axis equal; freezeColors;
+ref = refFrame-mean(refFrame(:));
+
 drawnow
 
 
@@ -86,8 +89,7 @@ imagesc(stdref); axis equal; colormap jet
 display('selecting points')
 
 [x y] = getCellPts(stdref,refFrame);
-[f p ] = uiputfile('*mat','generic pts file')
-save(fullfile(p,f),'x','y','refFrame','stdref');
+
 
 
 

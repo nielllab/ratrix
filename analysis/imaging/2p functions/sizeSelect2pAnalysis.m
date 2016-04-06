@@ -19,7 +19,7 @@ end
 usenonzero = find(mean(dF,2)~=0); %%% gets rid of generic points that were not identified in this session
 
 figure
-imagesc(dF(usenonzero,:),[-0.5 1]); ylabel('cell #'); xlabel('frame')
+imagesc(dF(usenonzero,:),[0 1]); ylabel('cell #'); xlabel('frame'); colormap jet
 
 
 xpos=0;
@@ -44,7 +44,17 @@ for s=1:size(tcourse,3);
     end
 end
 
-save(ptsfname,'tcourse','dF','dFout','radius','sf','xpos','-append')
+
+for i = 1:12
+    figure
+    for s=1:6
+        subplot(2,3,s)
+        plot(squeeze(dFout(usenonzero(i),:,find(radius==s))))
+    end
+end
+% 
+
+save(ptsfname,'tcourse','dF','dFout','radius','sf','xpos','theta','-append')
 %%% dF = raw dF/F trace for each cell
 %%% dFout = aligned to onset of each stim
 %%% tcourse = timecourse averaged across orient/sf for each size
@@ -58,4 +68,20 @@ for n = 1:length(usenonzero)
     plot(squeeze(tcourse(usenonzero(n),:,:))); axis([1 12 -0.25 0.5])
 end
 
+for i = 1:size(dF,2);
+    dFnorm(:,i) = dF(:,i)/max(dF(:,i));
+end
 
+col = 'rgb';
+[coeff score latent] = pca(dFnorm');
+figure
+plot(score(:,1),score(:,2))
+figure
+hold on
+for i = 1:5
+    subplot(5,1,i)
+    plot(score(:,i))
+end
+
+figure
+plot(latent(1:10)/sum(latent))

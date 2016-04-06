@@ -24,6 +24,9 @@ figure
 imshow(img)
 colormap(hsv); colorbar
 
+polarImg = img;
+save(sessionName,'polarImg','-append')
+
 %%% generate cycle average movie
 [f p] = uiputfile('*.avi','cycle avg movie file?');
 if p~=0

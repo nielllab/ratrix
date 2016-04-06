@@ -41,25 +41,25 @@ postT = tcourse; postdF = dF;
 postTuning = squeeze(tcourse(:,8,:));
 tuningAll(:,:,:,2) = dFout;
 
-sfs = unique(sf);
-thetas = unique(theta);
-
-for sz = 1:6;
-    for f=1:2
-        for ori = 1:8;
-            for rep = 1:2;
-                tuning(:,:,sz,f,ori,rep) = squeeze(mean(tuningAll(:,:,sf == sfs(f) & radius==sz & theta==thetas(ori),rep),3));
-            end
-        end
-    end
-end
+% sfs = unique(sf);
+% thetas = unique(theta);
+% 
+% for sz = 1:6;
+%     for f=1:2
+%         for ori = 1:8;
+%             for rep = 1:2;
+%                 tuning(:,:,sz,f,ori,rep) = squeeze(mean(tuningAll(:,:,sf == sfs(f) & radius==sz & theta==thetas(ori),rep),3));
+%             end
+%         end
+%     end
+% end
 
 %%% find cells active during doi
 activeDOI = ( mean(predF,2)~=0 & mean(postdF,2)~=0);
 sprintf('%d active doi',sum(activeDOI))
 
 %%% find cells with RF in middle of screen
-rfcenter = rfpts(:,1)>20 & rfpts(:,1)<60 & rfpts(:,2)>50 & rfpts(:,2)<90;
+rfcenter = rfpts(:,1)>10 & rfpts(:,1)<60 & rfpts(:,2)>40 & rfpts(:,2)<90;
 sprintf('%d active doi and center',sum(activeDOI & rfcenter))
 
 figure
@@ -70,22 +70,26 @@ figure
 plot(squeeze(mean(postT(activeDOI & rfcenter,:,:),1)))
 title('timecourse active and center post')
 
+use = activeDOI & rfcenter;
+
 figure
 for s = 1:6
     subplot(2,3,s)
-    plot(preTuning(activeDOI & rfcenter,s), postTuning(activeDOI & rfcenter,s),'.');
+    plot(preTuning(use,s), postTuning(use,s),'.');
     axis square; axis([-0.2 0.5 -0.2 0.5])
 end
 
-preSz = mean(preTuning(activeDOI &rfcenter,:),1);
-postSz = mean(postTuning(activeDOI & rfcenter,:),1);
-preSzSE = std(preTuning(activeDOI &rfcenter,:),1)/sqrt(size(preTuning(activeDOI &rfcenter,:),1));
-postSzSE = std(postTuning(activeDOI &rfcenter,:),1)/sqrt(size(postTuning(activeDOI &rfcenter,:),1));
+preSz = mean(preTuning(use,:),1);
+postSz = mean(postTuning(use,:),1);
+preSzSE = std(preTuning(use,:),1)/sqrt(size(preTuning(use,:),1));
+postSzSE = std(postTuning(use,:),1)/sqrt(size(postTuning(use,:),1));
 
 figure
 errorbar(preSz(1:5)-preSz(1),preSzSE(1:5));
 hold on
 errorbar(postSz(1:5)-postSz(1),postSzSE(1:5));
+
+
 
 figure
 plot(rfpts(goodTopo  ,1),rfpts(goodTopo ,2),'o')

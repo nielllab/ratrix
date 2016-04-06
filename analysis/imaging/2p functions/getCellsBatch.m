@@ -1,6 +1,7 @@
 %%% loops through multiple sessions and extract cell body signals
 close all
 clear all
+
 alignStdMap; %%% inputs multiple filenames, gets max std deviation map and selects shared potential cell body points
 
 %%% get parameters for cell extraction

@@ -32,12 +32,27 @@ load(fullfile(p,f));
 preT = tcourse; predF = dF;
 preTuning = squeeze(tcourse(:,8,:));
 
+tuningAll(:,:,:,1) = dFout;
 
 %%% load post size
 [f p ] = uigetfile('*.mat','post size pts');
 load(fullfile(p,f));
 postT = tcourse; postdF = dF;
 postTuning = squeeze(tcourse(:,8,:));
+tuningAll(:,:,:,2) = dFout;
+
+sfs = unique(sf);
+thetas = unique(theta);
+
+for sz = 1:6;
+    for f=1:2
+        for ori = 1:8;
+            for rep = 1:2;
+                tuning(:,:,sz,f,ori,rep) = squeeze(mean(tuningAll(:,:,sf == sfs(f) & radius==sz & theta==thetas(ori),rep),3));
+            end
+        end
+    end
+end
 
 %%% find cells active during doi
 activeDOI = ( mean(predF,2)~=0 & mean(postdF,2)~=0);

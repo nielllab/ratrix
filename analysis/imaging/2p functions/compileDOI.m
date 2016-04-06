@@ -87,9 +87,7 @@ postSzSE = std(postTuning(use,:),1)/sqrt(size(postTuning(use,:),1));
 figure
 errorbar(preSz(1:5)-preSz(1),preSzSE(1:5));
 hold on
-errorbar(postSz(1:5)-postSz(1),postSzSE(1:5));
-
-
+errorbar(postSz(1:5)-postSz(1),postSzSE(1:5));     
 
 figure
 plot(rfpts(goodTopo  ,1),rfpts(goodTopo ,2),'o')
@@ -103,3 +101,53 @@ axis equal; axis([0 72 0 128]); legend('not doi','active doi')
 %%% find pref sf & orient
 %%% i.e. get response(sf,orient,sz,cond);  average over alll but sf to get
 %%% sf pref, all but orient to get orient pref
+
+% %load in stimulus parameters from movie file
+% clear sf radius theta
+% load('C:\sizeSelect2sf1tf5sz14min','sf','radius','theta')
+% clear radiusRange
+% sfrange=unique(sf);radiusrange=unique(radius);thetarange=unique(theta);
+% 
+% %create tuning(cell,timept,sf,radius,theta,pre/post doi)
+% tuning = zeros(size(tuningAll,1),size(tuningAll,2),length(sfrange),length(radiusrange),length(thetarange),2);
+% for i = 1:length(sfrange)
+%     for j = 1:length(radiusrange)
+%         for k = 1:length(thetarange)
+%             for l = 1:2
+%                 tuning(:,:,i,j,k,l) = squeeze(mean(tuningAll(:,:,find(sf==sfrange(i)&radius==radiusrange(j)&theta==thetarange(k)),l),3));
+%             end
+%         end
+%     end
+% end
+% 
+% %find the maximum response for each cell to any sf/orientation combo
+% usetuning = tuning(use,:,:,:,:,:);
+% sizeresp = zeros(size(usetuning,1),size(usetuning,2),length(radiusrange),2);
+% for i = 1:size(usetuning,1)
+%     for l = 1:size(usetuning,6)
+%         maxresp = 0;
+%         for j = 1:length(sfrange)
+%             for k = 1:length(thetarange)
+%                 resp = usetuning(i,8,j,2,k,l);
+%                 if resp > maxresp
+%                     maxresp = resp;
+%                     ideal = [j k];
+%                 end
+%             end
+%         end
+%         for m = 1:length(radiusrange)
+%             sizeresp(i,:,m,l) = usetuning(i,:,ideal(1),m,ideal(2),l);
+%         end
+%     end
+% end
+% 
+%% get average and se across cells for pre and post doi responses across sizes
+% avgPreSize = squeeze(mean(sizeresp(:,8,:,1),1));
+% sePreSize = squeeze(std(sizeresp(:,8,:,1),1)/sqrt(size(sizeresp,1)));
+% avgPostSize = squeeze(mean(sizeresp(:,8,:,2),1));
+% sePostSize = squeeze(std(sizeresp(:,8,:,2),1)/sqrt(size(sizeresp,1)));
+% 
+% figure
+% hold on
+% errorbar(1:length(radiusrange),avgPreSize,sePreSize)
+% errorbar(1:length(radiusrange),avgPostSize,sePostSize)

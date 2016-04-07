@@ -45,10 +45,10 @@ end
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 139;
        msPenalty               =3500;
-       percentCorrectionTrials = .75; 
+       percentCorrectionTrials = .70; 
        pixPerCycs              = [200];
        normalizedPosition      = [0.33 0.66];
-       radius                 = .35;
+       radius                 = .32;
      
      case 'testpixhvv' % Started 5/18/15
        requestRewardSizeULorMS = 0;

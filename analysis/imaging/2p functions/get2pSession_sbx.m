@@ -1,11 +1,14 @@
 %%% creates session data or reads previously generated session data
+fileName
+if ~exist('fileName','var')
+    
+    [f p] = uigetfile({'*.mat;*.sbx'},'.mat or .tif file');
+    fileName = fullfile(f,p)
+end
 
-[f p] = uigetfile({'*.mat;*.sbx'},'.mat or .tif file');
-
-if strcmp(f(end-3:end),'.mat') %%% previously generated
+if strcmp(fileName(end-3:end),'.mat') %%% previously generated
     display('loading data')
-    sessionName = fullfile(p,f);
-    load(sessionName)
+    load(fileName)
     display('done')
     if ~exist('cycLength','var')
         cycLength=8;
@@ -13,28 +16,31 @@ if strcmp(f(end-3:end),'.mat') %%% previously generated
     
 else %%% new session data
     
-    f = f(1:end-4)  %%% create filename
+    fileName = fileName(1:end-4)  %%% create filename
     
     if ~exist('cycLength','var')
         cycLength = input('cycle length : ');
     end
     
-%     twocolor = input('# of channels : ')
-%     twocolor= (twocolor==2);
-%     
+    %     twocolor = input('# of channels : ')
+    %     twocolor= (twocolor==2);
+    %
     twocolor=0;
     
     if twocolor
-        [dfofInterp dtRaw redframe greenframe] = get2colordata(fullfile(p,f),dt,cycLength,cfg); %%% not currently functional!
+        [dfofInterp dtRaw redframe greenframe] = get2colordata(fileName,dt,cycLength,cfg); %%% not currently functional!
     else
-        [dfofInterp dtRaw greenframe framerate phasetimes] = get2pdata_sbx(fullfile(p,f),dt,cycLength,cfg);
+        [dfofInterp dtRaw greenframe framerate phasetimes] = get2pdata_sbx(fileName,dt,cycLength,cfg);
     end
     
     
-    [fs ps] = uiputfile('*.mat','session data');
-    if fs~=0
-        display('saving data')
+    if ~exist('sessionName','var')
+        [fs ps] = uiputfile('*.mat','session data');
         sessionName= fullfile(ps,fs);
+    end
+    if sessionName~=0
+        display('saving data')
+        
         tic
         if twocolor
             save(sessionName,'dfofInterp','cycLength','redframe','greenframe','-v7.3');

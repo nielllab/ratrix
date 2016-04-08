@@ -1,7 +1,5 @@
-%%% create session file for topo (periodic spatial) stim
+function topo2pSession(fileName,sessionName)%%% create session file for topo (periodic spatial) stim
 %%% reads raw images, calculates dfof, and aligns to stim sync
-
-clear all
 
 dt = 0.25; %%% resampled time frame
 framerate=1/dt;
@@ -28,18 +26,18 @@ polarImg = img;
 save(sessionName,'polarImg','-append')
 
 %%% generate cycle average movie
-[f p] = uiputfile('*.avi','cycle avg movie file?');
-if p~=0
-    clear cycAvg mov
-    figure
-    for i = 1:cycLength
-        cycAvg(:,:,i) = squeeze(mean(dfofInterp(:,:,i:cycLength:end),3));
-        imagesc(cycAvg(:,:,i),[-0.1 0.5]); colormap gray; axis equal
-        mov(i) = getframe(gcf);
-    end
-    vid = VideoWriter(fullfile(p,f));
-    vid.FrameRate=8;
-    open(vid);
-    writeVideo(vid,mov);
-    close(vid)
+movieFile = [fileName(1:end-4) '_cycAvg.avi'];
+    
+clear cycAvg mov
+figure
+for i = 1:cycLength
+cycAvg(:,:,i) = squeeze(mean(dfofInterp(:,:,i:cycLength:end),3));
+imagesc(cycAvg(:,:,i),[-0.1 0.5]); colormap gray; axis equal
+mov(i) = getframe(gcf);
 end
+vid = VideoWriter(movieFile);
+vid.FrameRate=8;
+open(vid);
+writeVideo(vid,mov);
+close(vid)
+

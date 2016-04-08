@@ -1,7 +1,6 @@
+function grating2pSession(fileName,sessionName);
 %%% create session file for grating (2sf, 4sec on / 4sec off) stim
 %%% reads raw images, calculates dfof, and aligns to stim sync
-
-clear all
 
 dt = 0.25; %%% resampled time frame
 framerate=1/dt;

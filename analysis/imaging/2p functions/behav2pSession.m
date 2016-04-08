@@ -1,7 +1,5 @@
-%%% create session file for behavioral run
+function behav2pSession( fileName, sessionName,behavfile)%%% create session file for behavioral run
 %%% reads raw images, calculates dfof, and aligns to stim sync
-
-clear all
 
 dt = 0.25; %%% resampled time frame
 framerate=1/dt;
@@ -10,9 +8,12 @@ cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=4;  %%% configuration parameters
 get2pSession_sbx;
 
 if ~exist('onsets','var')
-
+    if ~exist('behavfile','var')
     [bf bp] = uigetfile('*.mat','behav permanent trial record');
-    [onsets starts trialRecs] = sync2pBehavior_sbx(fullfile(bp,bf) ,phasetimes);
+    behavfile = fullfile(bp,bf);
+    end
+    
+    [onsets starts trialRecs] = sync2pBehavior_sbx(behavfile ,phasetimes);
     use = find(onsets<size(dfofInterp,3)*dt-3 & onsets>5); %%%% get rid of trials right at beginning or end, that may be incomplete
     onsets = onsets(use); starts=starts(use,:); trialRecs = trialRecs(use);
     save(sessionName,'onsets','starts','trialRecs','-append');

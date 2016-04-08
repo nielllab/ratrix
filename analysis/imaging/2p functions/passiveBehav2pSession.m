@@ -1,7 +1,6 @@
+function passiveBehav2pSession(fileName,sessionName,moviefname)
 %%% create session file for passive presentation of behavior (grating patch) stim
 %%% reads raw images, calculates dfof, and aligns to stim sync
-
-clear all
 
 dt = 0.25; %%% resampled time frame
 framerate=1/dt;
@@ -38,12 +37,13 @@ if twocolor
     title('visual resp (cyan) vs tdtomato')
 end
 
-if ~exist('stimType','var')
-stimType = input('3x4orient (1)  or 2sfSmall (2) : ');
-if stimType ==1
-    moviefname = 'C:\behavStim3sf4orient.mat'
-elseif stimType==2
-    moviefname = 'C:\behavStim2sfSmall3366.mat'
+if ~exist('moviefname','var')
+    stimType = input('3x4orient (1)  or 2sfSmall (2) : ');
+    if stimType ==1
+        moviefname = 'C:\behavStim3sf4orient.mat'
+    elseif stimType==2
+        moviefname = 'C:\behavStim2sfSmall3366.mat'
+    end
 end
 
 [dFout xpos sf theta phase timepts] = analyzePassiveBehav2p(dfofInterp,moviefname,dt);

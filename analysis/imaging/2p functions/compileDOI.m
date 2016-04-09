@@ -1,3 +1,7 @@
+%if you want to cut out huge responses
+thresh=1;
+threshval = 0.5;
+
 [f p] = uigetfile('*.mat','topox pts');
 load(fullfile(p,f));
 xPhase = phaseVal;
@@ -32,6 +36,18 @@ load(fullfile(p,f));
 preT = tcourse; predF = dF;
 preTuning = squeeze(tcourse(:,8,:));
 
+%remove traces with values that go above or below 1
+if thresh==1
+    for i = 1:size(dFout,1)
+        for j = 1:size(dFout,3)
+            if max(dFout(i,:,j))<threshval&min(dFout(i,:,j))>-threshval;
+                dFout(i,:,j) = dFout(i,:,j)-dFout(i,5,j);
+            else
+                dFout(i,:,j) = nan(1,12);
+            end
+        end
+    end
+end
 tuningAll(:,:,:,1) = dFout;
 
 %%% load post size
@@ -39,6 +55,19 @@ tuningAll(:,:,:,1) = dFout;
 load(fullfile(p,f));
 postT = tcourse; postdF = dF;
 postTuning = squeeze(tcourse(:,8,:));
+
+%remove traces with values that go above or below 1
+if thresh==1
+    for i = 1:size(dFout,1)
+        for j = 1:size(dFout,3)
+            if max(dFout(i,:,j))<threshval&min(dFout(i,:,j))>-threshval;
+                dFout(i,:,j) = dFout(i,:,j)-dFout(i,5,j);
+            else
+                dFout(i,:,j) = nan(1,12);
+            end
+        end
+    end
+end
 tuningAll(:,:,:,2) = dFout;
 
 % sfs = unique(sf);
@@ -85,9 +114,16 @@ preSzSE = std(preTuning(use,:),1)/sqrt(size(preTuning(use,:),1));
 postSzSE = std(postTuning(use,:),1)/sqrt(size(postTuning(use,:),1));
 
 figure
-errorbar(preSz(1:5)-preSz(1),preSzSE(1:5));
+errorbar(preSz(1:5)-preSz(1),preSzSE(1:5),'k');
 hold on
-errorbar(postSz(1:5)-postSz(1),postSzSE(1:5));     
+errorbar(postSz(1:5)-postSz(1),postSzSE(1:5),'r');
+axis([0.5 5.5 -0.02 0.1])
+axis square
+set(gca,'tickDir','out')
+legend('Pre','Post','location','southeast')
+title('Size responses all traces')
+xlabel('size')
+ylabel('dF/F')
 
 figure
 plot(rfpts(goodTopo  ,1),rfpts(goodTopo ,2),'o')
@@ -102,52 +138,103 @@ axis equal; axis([0 72 0 128]); legend('not doi','active doi')
 %%% i.e. get response(sf,orient,sz,cond);  average over alll but sf to get
 %%% sf pref, all but orient to get orient pref
 
-% %load in stimulus parameters from movie file
-% clear sf radius theta
-% load('C:\sizeSelect2sf1tf5sz14min','sf','radius','theta')
-% clear radiusRange
-% sfrange=unique(sf);radiusrange=unique(radius);thetarange=unique(theta);
-% 
-% %create tuning(cell,timept,sf,radius,theta,pre/post doi)
-% tuning = zeros(size(tuningAll,1),size(tuningAll,2),length(sfrange),length(radiusrange),length(thetarange),2);
-% for i = 1:length(sfrange)
-%     for j = 1:length(radiusrange)
-%         for k = 1:length(thetarange)
-%             for l = 1:2
-%                 tuning(:,:,i,j,k,l) = squeeze(mean(tuningAll(:,:,find(sf==sfrange(i)&radius==radiusrange(j)&theta==thetarange(k)),l),3));
-%             end
-%         end
-%     end
+%load in stimulus parameters from movie file
+clear sf radius theta
+load('C:\sizeSelect2sf1tf5sz14min','sf','radius','theta')
+clear radiusRange
+sfrange=unique(sf);radiusrange=unique(radius);thetarange=unique(theta);
+
+%create usetuning(cell,timept,sf,radius,theta,pre/post doi)
+usetuningAll = tuningAll(use,:,:,:);
+for i = 1:sum(use)
+    for j=1:size(usetuningAll,3)
+        for k = 1:size(usetuningAll,4)
+            usetuningAll(i,:,j,k) = usetuningAll(i,:,j,k);% - usetuningAll(i,5,j,k);
+        end
+    end
+end
+usetuning = zeros(size(usetuningAll,1),size(usetuningAll,2),length(sfrange),length(radiusrange),length(thetarange),2);
+for i = 1:length(sfrange)
+    for j = 1:length(radiusrange)
+        for k = 1:length(thetarange)
+            for l = 1:2
+                usetuning(:,:,i,j,k,l) = squeeze(nanmean(usetuningAll(:,:,find(sf==sfrange(i)&radius==radiusrange(j)&theta==thetarange(k)),l),3));
+            end
+        end
+    end
+end
+
+%plot cycle averages for each size, averaged across sf/ori
+figure
+subplot(1,2,1)
+plot(1:12,squeeze(nanmean(nanmean(nanmean(usetuning(:,:,:,:,:,1),5),3),1)))
+legend({'0','5','10','20','45','50'},'location','northwest')
+title('Pre All Traces')
+axis([1 12 -.1 .2])
+subplot(1,2,2)
+plot(1:12,squeeze(nanmean(nanmean(nanmean(usetuning(:,:,:,:,:,2),5),3),1)))
+legend({'0','5','10','20','45','50'},'location','northwest')
+title('Post All Traces')
+axis([1 12 -.1 .2])
+
+%find ideal sf and ori for each cell
+ideal = zeros(sum(use),2);
+for i = 1:sum(use)
+    [val ind] = max(squeeze(nanmean(nanmean(nanmean(usetuning(i,6:12,:,:,:,2),5),4),2)));
+    ideal(i,1) = ind;
+    [val ind] = max(squeeze(nanmean(nanmean(nanmean(usetuning(i,6:12,:,:,:,2),4),3),2)));
+    ideal(i,2) = ind;
+end
+
+%pull out traces only for ideal stimuli for each cell
+PreSize = zeros(sum(use),size(usetuning,2),length(radiusrange));
+PostSize = PreSize;
+for i = 1:sum(use)
+    for j = 1:size(usetuning,2)
+        PreSize(i,j,:) = squeeze(usetuning(i,j,ideal(i,1),:,ideal(i,2),1));
+        PostSize(i,j,:) = squeeze(usetuning(i,j,ideal(i,1),:,ideal(i,2),2));
+    end
+end
+
+%get average peak responses to the size stimuli for ideal stimuli
+avgPreSize = squeeze(nanmean(PreSize(:,8,:),1));
+avgPostSize = squeeze(nanmean(PostSize(:,8,:),1));
+sePreSize = squeeze(nanstd(PreSize(:,8,:),1)/sqrt(sum(use)));
+sePostSize = squeeze(nanstd(PostSize(:,8,:),1)/sqrt(sum(use)));
+%plot peak size responses pre and post doi w/ideal stimuli
+figure
+hold on
+errorbar(1:5,avgPreSize(1:5),sePreSize(1:5),'k')
+errorbar(1:5,avgPostSize(1:5),sePostSize(1:5),'r')
+axis([0.5 5.5 -0.02 0.1])
+axis square
+set(gca,'tickDir','out')
+legend('Pre','Post','location','southeast')
+title('Size responses ideal stim')
+xlabel('size')
+ylabel('dF/F')
+
+%plot cycle averages with ideal stimuli
+avgPreTrace = squeeze(nanmean(PreSize,1));
+avgPostTrace = squeeze(nanmean(PostSize,1));
+
+figure
+subplot(1,2,1)
+plot(1:12,avgPreTrace)
+legend({'0','5','10','20','45','50'},'location','northwest')
+title('Pre Ideal Traces')
+axis([1 12 -.05 .2])
+subplot(1,2,2)
+plot(1:12,avgPostTrace)
+legend({'0','5','10','20','45','50'},'location','northwest')
+title('Post Ideal Traces')
+axis([1 12 -.05 .2])
+
+
+
+% for i = 1:sum(use)
+%     figure
+%     hold on
+%     plot(1:12,squeeze(usetuningAll(i,:,:,1)),'k')
+%     plot(1:12,squeeze(usetuningAll(i,:,:,2)),'r')
 % end
-% 
-% %find the maximum response for each cell to any sf/orientation combo
-% usetuning = tuning(use,:,:,:,:,:);
-% sizeresp = zeros(size(usetuning,1),size(usetuning,2),length(radiusrange),2);
-% for i = 1:size(usetuning,1)
-%     for l = 1:size(usetuning,6)
-%         maxresp = 0;
-%         for j = 1:length(sfrange)
-%             for k = 1:length(thetarange)
-%                 resp = usetuning(i,8,j,2,k,l);
-%                 if resp > maxresp
-%                     maxresp = resp;
-%                     ideal = [j k];
-%                 end
-%             end
-%         end
-%         for m = 1:length(radiusrange)
-%             sizeresp(i,:,m,l) = usetuning(i,:,ideal(1),m,ideal(2),l);
-%         end
-%     end
-% end
-% 
-%% get average and se across cells for pre and post doi responses across sizes
-% avgPreSize = squeeze(mean(sizeresp(:,8,:,1),1));
-% sePreSize = squeeze(std(sizeresp(:,8,:,1),1)/sqrt(size(sizeresp,1)));
-% avgPostSize = squeeze(mean(sizeresp(:,8,:,2),1));
-% sePostSize = squeeze(std(sizeresp(:,8,:,2),1)/sqrt(size(sizeresp,1)));
-% 
-% figure
-% hold on
-% errorbar(1:length(radiusrange),avgPreSize,sePreSize)
-% errorbar(1:length(radiusrange),avgPostSize,sePostSize)

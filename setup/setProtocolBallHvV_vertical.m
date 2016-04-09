@@ -48,7 +48,7 @@ end
        percentCorrectionTrials = .70; 
        pixPerCycs              = [200];
        normalizedPosition      = [0.33 0.66];
-       radius                 = .32;
+       radius                 = .30;
      
      case 'testpixhvv' % Started 5/18/15
        requestRewardSizeULorMS = 0;

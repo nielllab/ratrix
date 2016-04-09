@@ -37,13 +37,13 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 139;
        msPenalty               =3500;
-       percentCorrectionTrials = .5;     
+       percentCorrectionTrials = .75;     
     
    case 'g62w9rt' % Started 1/19/15
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
-       percentCorrectionTrials = .5; 
+       percentCorrectionTrials = .75; 
 
    case 'g62ff5lt' % Started 3/9/16  %GTS started 3/20/16
        requestRewardSizeULorMS = 0;
@@ -75,19 +75,19 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
-       percentCorrectionTrials = .5;        
+       percentCorrectionTrials = .75;        
     
    case 'g62tx1.9lt' % Started 1/26/16 (GTS 2/3/16) %back to GoToBlack 4/2/16
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
-       percentCorrectionTrials = .5; 
+       percentCorrectionTrials = .75; 
        
    case 'g62tx1.9ln' % Started 1/26/16 (GTS 2/3/16)
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
-       percentCorrectionTrials = .5;
+       percentCorrectionTrials = .75;
        stim.gain = 0.55 * ones(2,1); %try this since has trouble fully stopping 4/2/16
     
    case 'g62y3lt' % Started 1/12/16 switch to GTS 1/29/16

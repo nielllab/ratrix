@@ -1,4 +1,4 @@
-function grating2pSession(fileName,sessionName);
+function grating2pSession(fileName,sessionName, psfile);
 %%% create session file for grating (2sf, 4sec on / 4sec off) stim
 %%% reads raw images, calculates dfof, and aligns to stim sync
 
@@ -109,6 +109,12 @@ figure
 imshow(imresize(im,4));
 title('orientation preference')
 
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
+
+
 j= jet;
 j = j(end/2:end,:);
 tf_im = mat2im(tfpref,jet,[-1 1]);
@@ -119,3 +125,7 @@ figure
 imshow(imresize(tf_im,4));
 title('sf preference')
 
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end

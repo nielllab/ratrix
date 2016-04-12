@@ -1,4 +1,4 @@
-function behav2pSession( fileName, sessionName,behavfile)%%% create session file for behavioral run
+function behav2pSession( fileName, sessionName,behavfile,psfile)%%% create session file for behavioral run
 %%% reads raw images, calculates dfof, and aligns to stim sync
 
 dt = 0.25; %%% resampled time frame
@@ -67,12 +67,16 @@ for t = 1:3
     for i = 1:12;
         subplot(3,4,i);
         if t<3
-            imagesc(dfmean(:,:,i+1)-mn,[-0.25 0.25]); colormap jet
+            imagesc(dfmean(:,:,i+1)-mn,[-0.3 0.3]); colormap jet; 
         else
-            imagesc(dfmean(:,:,i+1),[-0.5 0.5]); colormap jet
+            imagesc(dfmean(:,:,i+1),[-0.3 0.3]); colormap jet; 
         end
         axis equal; axis off; set(gca,'LooseInset',get(gca,'TightInset'))
     end
+    if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
     
 end
 

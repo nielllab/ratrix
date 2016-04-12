@@ -1,9 +1,9 @@
 %%% creates session data or reads previously generated session data
-fileName
+
 if ~exist('fileName','var')
     
     [f p] = uigetfile({'*.mat;*.sbx'},'.mat or .tif file');
-    fileName = fullfile(f,p)
+    fileName = fullfile(p,f)
 end
 
 if strcmp(fileName(end-3:end),'.mat') %%% previously generated

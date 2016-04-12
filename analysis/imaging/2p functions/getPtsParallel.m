@@ -99,7 +99,7 @@ else
         roicorr(i) = r(1,2);
         mx = max(W(i,:));
          filling = sum(W(i,:)>0.2*mx)/length(W(i,:));
-        if abs(min(W(i,:)))>0.75*mx || filling > 0.35  %%% get rid of ones that are biphasic or fill the whole ROI
+        if abs(min(W(i,:)))>0.75*mx || filling > 0.5  %%% get rid of ones that are biphasic or fill the whole ROI
             roicorr(i)=0;
         end
         range = max([0.01 abs(min(W(i,:))) abs(max(W(i,:)))]);

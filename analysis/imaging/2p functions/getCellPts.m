@@ -30,7 +30,7 @@ while ~done
     %%%(may not be stable across sessions due to drift)
         [x y] = ind2sub(size(stdImg),pts);
         sz = size(stdImg,1);
-    buffer=15;   
+    buffer=32;   
     y = y(x<sz-buffer); x= x(x<sz-buffer);
     y=y(x>buffer); x= x(x>buffer);
     x = x(y>buffer); y = y(y>buffer);

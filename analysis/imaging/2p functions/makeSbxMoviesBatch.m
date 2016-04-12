@@ -6,8 +6,8 @@ alignData=input('align data? 0/1 :');
 fullMovie = 1;
 
 d = dir('*.sbx');
-%for i=1:length(d)
-    for i = 1:1
+for i=1:length(d)
+
     fn = strtok(d(i).name,'.');
  
     avifname = [fn '.avi'];

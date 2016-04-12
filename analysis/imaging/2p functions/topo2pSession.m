@@ -1,4 +1,4 @@
-function topo2pSession(fileName,sessionName)%%% create session file for topo (periodic spatial) stim
+function topo2pSession(fileName,sessionName,psfile)%%% create session file for topo (periodic spatial) stim
 %%% reads raw images, calculates dfof, and aligns to stim sync
 
 dt = 0.25; %%% resampled time frame
@@ -24,6 +24,11 @@ colormap(hsv); colorbar
 
 polarImg = img;
 save(sessionName,'polarImg','-append')
+
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
 
 %%% generate cycle average movie
 movieFile = [fileName(1:end-4) '_cycAvg.avi'];

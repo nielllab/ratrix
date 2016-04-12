@@ -72,3 +72,21 @@ end
 
 figure
 plot(latent(1:10)/sum(latent))
+
+cycGood = downsamplebin(cycAvg(usenonzero,:),2,2)/2;
+dist = pdist(cycGood,'correlation');
+Z = linkage(dist,'ward');
+leafOrder = optimalleaforder(Z,dist);
+figure
+subplot(3,4,[1 5 9 ])
+[h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5,'reorder',leafOrder);
+axis off
+subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
+imagesc(flipud(cycGood(perm,:)),[0 1]); 
+drawnow
+
+[Y e] = mdscale(dist,1);
+[y sortind] = sort(Y);
+figure
+imagesc(cycGood(sortind,:),[0 1])
+title('mdscale')

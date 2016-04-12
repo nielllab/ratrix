@@ -146,7 +146,7 @@ for i = 1:length(onsets);
     plot([onsets(i)/dt onsets(i)/dt],[1 size(dF,1)/2]);
 end
 
-save(ptsfname,'usenonzero','onsets','starts','trialRecs','correct','targ','orient','gratingPh','dFalign','-append')
+save(ptsfname,'usenonzero','onsets','starts','trialRecs','correct','targ','orient','gratingPh','dFalign','pixResp','-append')
 
 dF(dF<-0.1)=-0.1;
 dF(dF>5)=5;
@@ -172,33 +172,48 @@ for i = 1:size(dF,1)
 end
 
 
-
-
-% [Y e] = mdscale(dist,1);
-% [y sortind] = sort(Y);
-% figure
-% imagesc(dF(usenonzero(sortind),:),[-1 5])
-
-
-
 correctRate = conv(double(correct),ones(1,10),'same')/10;
 figure
 plot(correctRate);
 resprate = conv(resptime,ones(3,1),'same')/3;
 stoprate = conv(stoptime,ones(3,1),'same')/3;
 
-nclust=4;
-[idx] = kmeans(dFstd(usenonzero,:),nclust);
-[y sortind] = sort(idx);
 
 
-figure
-subplot(6,6,7:36);
 dFlist= reshape(dFalign,size(dFalign,1),size(dFalign,2)*size(dFalign,3));
-imagesc(dFlist(usenonzero(sortind),:),[-1 5]); ylabel('cell'); xlabel('frame')
-subplot(6,6,1:6); plot(correctRate,'Linewidth',2); set(gca,'Xtick',[]); set(gca,'Ytick',[]); ylabel('correct'); ylim([0 1.1]); xlim([1 length(correctRate)])
+dFlist = dFlist(usenonzero,:);
+for i = 1:size(dFlist,1)
+    dFlist(i,:) = dFlist(i,:)/std(dFlist(i,:));
+end
+
+
+dist = pdist(dFlist,'correlation');
+Z = linkage(dist,'ward');
+leafOrder = optimalleaforder(Z,dist);
+figure
+subplot(4,4,[5 9 13])
+[h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,1.5);
+axis off
+subplot(4,4,[6 7 8 10 11 12 14 15 16]);
+imagesc(flipud(dFlist(perm,:)),[0 4]); 
+subplot(4,4,2:4)
+plot(correctRate,'Linewidth',2); set(gca,'Xtick',[]); set(gca,'Ytick',[]); ylabel('correct'); ylim([0 1.1]); xlim([1 length(correctRate)])
 hold on; %plot([1 length(correctRate)],[0.5 0.5],'r:');
 plot(resprate/max(resprate),'g','Linewidth',2); plot(stoprate/max(stoprate),'r','Linewidth',2)
+
+
+dist = pdist(dFlist,'correlation');
+[Y e] = mdscale(dist,1);
+[y sortind] = sort(Y);
+figure
+subplot(6,6,7:36);
+imagesc(dFlist(sortind,:),[0 2])
+subplot(6,6,1:6)
+plot(correctRate,'Linewidth',2); set(gca,'Xtick',[]); set(gca,'Ytick',[]); ylabel('correct'); ylim([0 1.1]); xlim([1 length(correctRate)])
+hold on; %plot([1 length(correctRate)],[0.5 0.5],'r:');
+plot(resprate/max(resprate),'g','Linewidth',2); plot(stoprate/max(stoprate),'r','Linewidth',2)
+title('mdscale')
+
 
 figure
 subplot(6,6,7:36);
@@ -207,6 +222,10 @@ imagesc(corrcoef(dFlist(usenonzero,:)),[0 1]); xlabel('frame'); ylabel('frame')
 subplot(6,6,1:6); plot(correctRate,'Linewidth',2); set(gca,'Xtick',[]); set(gca,'Ytick',[]); ylabel('correct'); ylim([0 1.1]); xlim([1 length(correctRate)])
 hold on; %plot([1 length(correctRate)],[0.5 0.5],'r:');
 plot(resprate/max(resprate),'g','Linewidth',2); plot(stoprate/max(stoprate),'r','Linewidth',2)
+
+nclust=4;
+[idx] = kmeans(dFstd(usenonzero,:),nclust);
+[y sortind] = sort(idx);
 
 idxall = zeros(length(pts),1);
 idxall(usenonzero) = idx;
@@ -257,6 +276,69 @@ for i=1:size(dFalign,1);
 end
 %dFalignfix(dFalignfix>5)=5;
 
+clear allTrialData
+for i = 1:size(dFalignfix,1);
+    for j = 1:4
+        if j==1
+            use = targ==-1 & orient==0 & correct==1;
+        elseif j==2
+            use = targ==1 & orient==0 & correct==1;
+        elseif j ==3
+            use = targ==-1 & orient>0 & correct==1;
+        elseif j==4
+            use = targ==1 & orient>0 & correct==1;
+        elseif j==5
+                 use = targ==-1 & orient==0 & correct==0;
+        elseif j==6
+            use = targ==1 & orient==0 & correct==0;
+        elseif j ==7
+            use = targ==-1 & orient>0 & correct==0;
+        elseif j==8
+            use = targ==1 & orient>0 & correct==0;
+        end
+    allTrialData(i,:,j) = mean(dFalignfix(i,:,use),3);
+    allTrialDataErr(i,:,j) = std(dFalignfix(i,:,use),[],3)/sqrt(sum(use));
+    end
+end
+
+goodTrialData = allTrialData(usenonzero,:,:);
+goodTrialData = reshape(goodTrialData,size(goodTrialData,1),size(goodTrialData,2)*size(goodTrialData,3));
+figure
+imagesc(goodTrialData,[0 2])
+
+dist = pdist(goodTrialData,'correlation');
+Z = linkage(dist,'ward');
+leafOrder = optimalleaforder(Z,dist);
+figure
+subplot(3,4,[1 5 9 ])
+[h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5,'reorder',leafOrder);
+axis off
+subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
+goodTrialData(:,14)=-1; goodTrialData(:,27)=-1; goodTrialData(:,40)=-1;
+imagesc(flipud(goodTrialData(perm,:)),[-1 1]); 
+
+figure
+subplot(4,4,[5 9 13])
+[h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5,'reorder',leafOrder);
+axis off
+subplot(4,4,[6 7 8 10 11 12 14 15 16]);
+imagesc(flipud(dFlist(perm,:)),[0 4]); 
+subplot(4,4,2:4)
+plot(correctRate,'Linewidth',2); set(gca,'Xtick',[]); set(gca,'Ytick',[]); ylabel('correct'); ylim([0 1.1]); xlim([1 length(correctRate)])
+hold on; %plot([1 length(correctRate)],[0.5 0.5],'r:');
+plot(resprate/max(resprate),'g','Linewidth',2); plot(stoprate/max(stoprate),'r','Linewidth',2)
+
+
+
+
+[Y e] = mdscale(dist,1);
+[y sortind] = sort(Y);
+figure
+imagesc(goodTrialData(sortind,:),[-1 1])
+
+
+
+        
 usetrials = zeros(size(targ));
 usetrials(80:end)=1;
 usetrials=1;
@@ -292,37 +374,27 @@ for i = 1:length(sortind)
 end
 
 
-save(ptsfname,'allTrials','allTrialsErr','vertresp','horizresp','leftmean', 'rightmean','timepts','-append');
+save(ptsfname,'allTrials','allTrialsErr','vertresp','horizresp','leftmean', 'rightmean','timepts','allTrialData','allTrialDataErr','-append');
 
 figure
+set(gcf,'Name','vert vs horizt')
 for t = 1:6
     subplot(2,3,t)
-    plot(vertresp(:,2*t+1),horizresp(:,2*t+1),'o'); axis([0 1 0 1]); axis square
+    plot(vertresp(:,2*t+1),horizresp(:,2*t+1),'o'); axis([-1 1 -1 1]); axis square;  title(sprintf('t = %d',2*t+1))
 end
 
 
 figure
+set(gcf,'Name','left vs right')
 for t = 1:6
-    subplot(2,3,t)
-    plot(leftmean(:,2*t+1),rightmean(:,2*t+1),'o'); axis([0 1 0 1]); axis square
+    subplot(2,3,t)  
+    plot(leftmean(:,2*t+1),rightmean(:,2*t+1),'o'); axis([-1 1 -1 1]); axis square;  title(sprintf('t = %d',2*t+1))
 end
 
-figure
-hold on
-for i = length(sortind):-1:1;
-    plot(dF(usenonzero(sortind(i)),:)/max(abs(dF(usenonzero(sortind(i)),:))) + i,c(mod(i,6)+1));
-    hold on
-    plot([1 size(dF,2)], [i i],[c(mod(i,6)+1) ':'])
-    
-end
-for i = 1:length(onsets);
-    plot([onsets(i)/dt onsets(i)/dt],[1 length(sortind)]);
-end
-ylim([1 length(sortind)]); xlim([1 size(dF,2)])
 
 
 %%% plot each cluster
-col='rgbc'
+col='bcyr'
 clear data
 for i =1:nclust
     figure; hold on
@@ -334,42 +406,42 @@ for i =1:nclust
     end
     plot(timepts,median(data,1),'k','Linewidth',2);
 end
-
-
-%%% looks at stopping / resp times
-stoplength = 1.1;
-longstops = onsets(stoptime<stoplength);
-length(longstops)
-clear stopdF
-stopPts = -stoplength:0.25:2;
-stopalign = align2onsets(dF,longstops,dt,stopPts);
-for i = 1:size(dF,1);
-    stopdF(i,:) = mean(stopalign(i,:,:),3);
-    stopdF(i,:) = stopdF(i,:) - min(stopdF(i,:));
-end
-figure
-plot(stopPts,stopdF)
-hold on
-plot(stopPts,mean(stopdF,1),'g','Linewidth',2)
-
-figure
-imagesc(stopdF(usenonzero(sortind),:),[0 1.5])
-
-respDur = 0.5;
-longstops = onsets(correct) %+ resptime(resptime>respDur)';
-length(longstops)
-clear stopdF
-stopPts = -1:0.25:4;
-stopalign = align2onsets(dF,longstops,dt,stopPts);
-for i = 1:size(dF,1);
-    stopdF(i,:) = mean(stopalign(i,:,:),3);
-    stopdF(i,:) = stopdF(i,:) - min(stopdF(i,:));
-end
-figure
-plot(stopPts,stopdF)
-hold on
-plot(stopPts,mean(stopdF,1)*3,'g','Linewidth',2); ylim([0 2])
-
-figure
-imagesc(stopdF(usenonzero(sortind),:),[0 1.5])
+% 
+% 
+% %%% looks at stopping / resp times
+% stoplength = 1.1;
+% longstops = onsets(stoptime<stoplength);
+% length(longstops)
+% clear stopdF
+% stopPts = -stoplength:0.25:2;
+% stopalign = align2onsets(dF,longstops,dt,stopPts);
+% for i = 1:size(dF,1);
+%     stopdF(i,:) = mean(stopalign(i,:,:),3);
+%     stopdF(i,:) = stopdF(i,:) - min(stopdF(i,:));
+% end
+% figure
+% plot(stopPts,stopdF)
+% hold on
+% plot(stopPts,mean(stopdF,1),'g','Linewidth',2)
+% 
+% figure
+% imagesc(stopdF(usenonzero(sortind),:),[0 1.5])
+% 
+% respDur = 0.5;
+% longstops = onsets(correct) %+ resptime(resptime>respDur)';
+% length(longstops)
+% clear stopdF
+% stopPts = -1:0.25:4;
+% stopalign = align2onsets(dF,longstops,dt,stopPts);
+% for i = 1:size(dF,1);
+%     stopdF(i,:) = mean(stopalign(i,:,:),3);
+%     stopdF(i,:) = stopdF(i,:) - min(stopdF(i,:));
+% end
+% figure
+% plot(stopPts,stopdF)
+% hold on
+% plot(stopPts,mean(stopdF,1)*3,'g','Linewidth',2); ylim([0 2])
+% 
+% figure
+% imagesc(stopdF(usenonzero(sortind),:),[0 1.5])
 

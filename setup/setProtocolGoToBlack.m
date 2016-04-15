@@ -28,49 +28,49 @@ stim.gain = 0.7 * ones(2,1);
 switch subjIDs{1}
 
    case 'g62hh6rt' % Started 4/13/16 
-       requestRewardSizeULorMS = 43;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        stim.gain = 0.55 * ones(2,1); 
        
    case 'g62hh6ln' % Started 4/13/16
-       requestRewardSizeULorMS = 43;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        stim.gain = 0.55 * ones(2,1); 
        
    case 'g62bb10lt' % Started 4/13/16
-       requestRewardSizeULorMS = 43;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        stim.gain = 0.55 * ones(2,1); 
        
    case 'g62dd6lt' % Started 4/13/16
-       requestRewardSizeULorMS = 43;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        stim.gain = 0.55 * ones(2,1); 
          
    case 'g62tx2.14rt' % Started 4/13/16
-       requestRewardSizeULorMS = 43;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        stim.gain = 0.55 * ones(2,1); 
        
    case 'g62ff4lt' % Started 4/13/16
-       requestRewardSizeULorMS = 43;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        stim.gain = 0.55 * ones(2,1); 
        
    case 'sanjay' % Started 4/13/16
-       requestRewardSizeULorMS = 43;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
        percentCorrectionTrials = .5;

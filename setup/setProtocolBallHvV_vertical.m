@@ -32,14 +32,14 @@ if ~isscalar(subjIDs)
 end
  switch subjIDs{1}
 
-%    case 'g62bb8rt' % Started 2/9/16  %started HvV_center 2/20/16 %started HvV_vertical 3/11/16
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 59;
-%        msPenalty               =3500;
-%        percentCorrectionTrials = .8;
-%        pixPerCycs              = [200];
-%        normalizedPosition      = [0.45 0.55];
-%        radius                 = .35;
+   case 'g62bb8rt' % Started 2/9/16  %started HvV_center 2/20/16 %started HvV_vertical 3/11/16
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 59;
+       msPenalty               =3500;
+       percentCorrectionTrials = .75;
+       pixPerCycs              = [200];
+       normalizedPosition      = [0.45 0.55];
+       radius                 = .35;
        
    case 'g62tx2.11lt' % Started 2/9/16 %started HvV_center 2/20/16 %started HvV_vertical 3/26/16
        requestRewardSizeULorMS = 0;
@@ -47,8 +47,8 @@ end
        msPenalty               =3500;
        percentCorrectionTrials = .80; 
        pixPerCycs              = [200];
-       normalizedPosition      = [0.40 0.60];
-       radius                 = .31;
+       normalizedPosition      = [0.42 0.58];
+       radius                 = .32;
      
      case 'testpixhvv' % Started 5/18/15
        requestRewardSizeULorMS = 0;

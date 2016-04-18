@@ -2,7 +2,7 @@ function dFout = align2onsets(dF,onsets,dt,pts);
 if ndims(dF)==2
     dFout = zeros(size(dF,1),length(pts),length(onsets));
     for i = 1:length(onsets);
-        dFout(:,:,i) = interp1(1:length(dF),dF',(onsets(i)+pts)/dt)';
+        dFout(:,:,i) = interp1(1:size(dF,2),dF',(onsets(i)+pts)/dt)';
     end
 else
     shiftdf = shiftdim(dF,2);

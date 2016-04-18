@@ -2,17 +2,21 @@ clear all
 
 dt=0.25;
 
-[f p ] = uigetfile('*.mat','session data')
-load(fullfile(p,f),'onsets','starts','trialRecs','pixResp');
-
 useOld = input('align to std points (1) or choose new points (2) or read in prev points (3) : ')
+
+
 if useOld ==1
     getAnalysisPts;
 elseif useOld==2
-    [pts dF neuropil ptsfname] = get2pPts(dfofInterp,greenframe);
+    [pts dFraw neuropil ptsfname] = get2pPts(dfofInterp,greenframe);
 else
     ptsfname = uigetfile('*.mat','pts file');
     load(ptsfname);
+end
+
+if ~exist('pixResp','var')
+    [f p ] = uigetfile('*.mat','session data')
+    load(fullfile(p,f),'onsets','starts','trialRecs','pixResp');
 end
 
 %%% get target location, orientation, phase
@@ -31,13 +35,27 @@ if ~isempty(f) && f~=length(s)
 end
 correct = [s.correct] == 1;
 
+usenonzero= find(mean(dF,2)~=0 );
 
-dF(dF<0)=0;
-dF=deconvg6s(dF,0.25);
+dFdecon=dF;
+for i = 1:size(dF,1);
+    dFdecon(i,:) = dFdecon(i,:)-prctile(dFdecon(i,:),1);
+end
+
+figure
+imagesc(dFdecon(usenonzero,:),[0 1])
+
+dFdecon=deconvg6s(dFdecon,0.25);
+
+figure
+imagesc(dF(usenonzero,:),[0 1]); 
+
+figure
+imagesc(dFdecon(usenonzero,:),[0 1]);
 
 
-for i = 1:size(dF,2);
-    dFnorm(:,i) = dF(:,i)/max(dF(:,i));
+for i = 1:size(dFdecon,2);
+    dFnorm(:,i) = dFdecon(:,i)/max(dFdecon(:,i));
 end
 
 col = 'rgb';
@@ -62,13 +80,13 @@ end
 figure
 plot(latent(1:10)/sum(latent))
 
-usenonzero= find(mean(dF,2)~=0 );
+
 
 figure
-imagesc(dF(usenonzero,:))
+imagesc(dFdecon(usenonzero,:),[0 1])
 
 timepts = -1:0.25:2;
-dFalign = align2onsets(dF,onsets,dt,timepts);
+dFalign = align2onsets(dFdecon,onsets,dt,timepts);
 trialmean = mean(dFalign,3);
 for i = 1:size(trialmean,1);
     trialmean(i,:) = trialmean(i,:)- min(trialmean(i,:));
@@ -139,36 +157,36 @@ hist(stoptime);
 c = 'rgbcmk'
 figure
 hold on
-for i = 1:size(dF,1);
-    plot(dF(i,:)/max(dF(i,:)) + i/2,c(mod(i,6)+1));
+for i = 1:size(dFdecon,1);
+    plot(dFdecon(i,:)/max(dFdecon(i,:)) + i/2,c(mod(i,6)+1));
 end
 for i = 1:length(onsets);
-    plot([onsets(i)/dt onsets(i)/dt],[1 size(dF,1)/2]);
+    plot([onsets(i)/dt onsets(i)/dt],[1 size(dFdecon,1)/2]);
 end
 
-save(ptsfname,'usenonzero','onsets','starts','trialRecs','correct','targ','orient','gratingPh','dFalign','pixResp','-append')
+save(ptsfname,'usenonzero','onsets','starts','trialRecs','correct','targ','orient','gratingPh','dFalign','pixResp','dFdecon','-append')
 
-dF(dF<-0.1)=-0.1;
-dF(dF>5)=5;
+dFdecon(dFdecon<-0.1)=-0.1;
+dFdecon(dFdecon>5)=5;
 figure
-imagesc(corrcoef(dF(usenonzero,:)),[0 1])
-
-figure
-imagesc(corrcoef(dF(usenonzero,:)'),[0 1])
+imagesc(corrcoef(dFdecon(usenonzero,:)),[0 1])
 
 figure
-imagesc(dF(usenonzero,:),[-1 5])
+imagesc(corrcoef(dFdecon(usenonzero,:)'),[0 1])
 
-startTimes = zeros(ceil(length(dF)*dt),1);
+figure
+imagesc(dFdecon(usenonzero,:),[-1 5])
+
+startTimes = zeros(ceil(length(dFdecon)*dt),1);
 startTimes(round(onsets))=1;
 x = [-60:60];
 filt = exp(-0.5*x.^2 / (20^2));
 filt = 60*filt/sum(filt);
 trialRate = conv(startTimes,filt,'same');
 
-for i = 1:size(dF,1)
-    dFmin(i,:) = dF(i,:) - min(abs(dF(i,:)));
-    dFstd(i,:) = dFmin(i,:)/std(dF(i,:));
+for i = 1:size(dFdecon,1)
+    dFmin(i,:) = dFdecon(i,:) - min(abs(dFdecon(i,:)));
+    dFstd(i,:) = dFmin(i,:)/std(dFdecon(i,:));
 end
 
 
@@ -195,7 +213,7 @@ subplot(4,4,[5 9 13])
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,1.5);
 axis off
 subplot(4,4,[6 7 8 10 11 12 14 15 16]);
-imagesc(flipud(dFlist(perm,:)),[0 4]); 
+imagesc(flipud(dFlist(perm,:)),[0 4]);
 subplot(4,4,2:4)
 plot(correctRate,'Linewidth',2); set(gca,'Xtick',[]); set(gca,'Ytick',[]); ylabel('correct'); ylim([0 1.1]); xlim([1 length(correctRate)])
 hold on; %plot([1 length(correctRate)],[0.5 0.5],'r:');
@@ -269,44 +287,44 @@ plot(vertresp(:,t),horizresp(:,t),'o'); hold on; plot([0 2],[0 2],'g')
 
 
 dFalignfix = dFalign;
-for i=1:size(dFalign,1);
-    for j = 1:size(dFalign,3);
-        dFalignfix(i,:,j) = dFalignfix(i,:,j)-min(dFalignfix(i,3:5,j));
-    end
-end
-%dFalignfix(dFalignfix>5)=5;
+% for i=1:size(dFalign,1);
+%     for j = 1:size(dFalign,3);
+%         dFalignfix(i,:,j) = dFalignfix(i,:,j)-min(dFalignfix(i,3:5,j));
+%     end
+% end
+% %dFalignfix(dFalignfix>5)=5;
 
-clear allTrialData
+clear allTrialData allTrialDataErr
 for i = 1:size(dFalignfix,1);
-    for j = 1:4
+    for j = 1:8
         if j==1
             use = targ==-1 & orient==0 & correct==1;
         elseif j==2
-            use = targ==1 & orient==0 & correct==1;
-        elseif j ==3
             use = targ==-1 & orient>0 & correct==1;
+        elseif j ==3
+            use = targ==1 & orient==0 & correct==1;
         elseif j==4
             use = targ==1 & orient>0 & correct==1;
         elseif j==5
-                 use = targ==-1 & orient==0 & correct==0;
+            use = targ==-1 & orient==0 & correct==0;
         elseif j==6
-            use = targ==1 & orient==0 & correct==0;
-        elseif j ==7
             use = targ==-1 & orient>0 & correct==0;
+        elseif j ==7
+            use = targ==1 & orient==0 & correct==0;
         elseif j==8
             use = targ==1 & orient>0 & correct==0;
         end
-    allTrialData(i,:,j) = mean(dFalignfix(i,:,use),3);
-    allTrialDataErr(i,:,j) = std(dFalignfix(i,:,use),[],3)/sqrt(sum(use));
+        allTrialData(i,:,j) = mean(dFalignfix(i,2:13,use),3);
+        allTrialDataErr(i,:,j) = std(dFalignfix(i,2:13,use),[],3)/sqrt(sum(use));
     end
 end
 
-goodTrialData = allTrialData(usenonzero,:,:);
+goodTrialData = allTrialData(usenonzero,:,1:8);
 goodTrialData = reshape(goodTrialData,size(goodTrialData,1),size(goodTrialData,2)*size(goodTrialData,3));
 figure
-imagesc(goodTrialData,[0 2])
+imagesc(goodTrialData,[-1 1])
 
-dist = pdist(goodTrialData,'correlation');
+dist = pdist(imresize(goodTrialData, [size(goodTrialData,1),size(goodTrialData,2)*0.5]),'correlation');
 Z = linkage(dist,'ward');
 leafOrder = optimalleaforder(Z,dist);
 figure
@@ -314,15 +332,16 @@ subplot(3,4,[1 5 9 ])
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5,'reorder',leafOrder);
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-goodTrialData(:,14)=-1; goodTrialData(:,27)=-1; goodTrialData(:,40)=-1;
-imagesc(flipud(goodTrialData(perm,:)),[-1 1]); 
+goodTrialData(:,1:12:end)=NaN;
+imagesc(flipud(goodTrialData(perm,:)),[0 1]);
 
 figure
 subplot(4,4,[5 9 13])
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5,'reorder',leafOrder);
 axis off
 subplot(4,4,[6 7 8 10 11 12 14 15 16]);
-imagesc(flipud(dFlist(perm,:)),[0 4]); 
+dFlistgood = dFlist(usenonzero,:);
+imagesc(flipud(dFlistgood(perm,:)),[0 2]);
 subplot(4,4,2:4)
 plot(correctRate,'Linewidth',2); set(gca,'Xtick',[]); set(gca,'Ytick',[]); ylabel('correct'); ylim([0 1.1]); xlim([1 length(correctRate)])
 hold on; %plot([1 length(correctRate)],[0.5 0.5],'r:');
@@ -336,9 +355,13 @@ plot(resprate/max(resprate),'g','Linewidth',2); plot(stoprate/max(stoprate),'r',
 figure
 imagesc(goodTrialData(sortind,:),[-1 1])
 
+figure
+imagesc(dFlistgood(sortind,:),[0 2])
 
 
-        
+
+
+
 usetrials = zeros(size(targ));
 usetrials(80:end)=1;
 usetrials=1;
@@ -374,7 +397,7 @@ for i = 1:length(sortind)
 end
 
 
-save(ptsfname,'allTrials','allTrialsErr','vertresp','horizresp','leftmean', 'rightmean','timepts','allTrialData','allTrialDataErr','-append');
+save(ptsfname,'allTrials','allTrialsErr','vertresp','horizresp','leftmean', 'rightmean','timepts','allTrialData','allTrialDataErr','correctRate','resprate','stoprate','-append');
 
 figure
 set(gcf,'Name','vert vs horizt')
@@ -387,7 +410,7 @@ end
 figure
 set(gcf,'Name','left vs right')
 for t = 1:6
-    subplot(2,3,t)  
+    subplot(2,3,t)
     plot(leftmean(:,2*t+1),rightmean(:,2*t+1),'o'); axis([-1 1 -1 1]); axis square;  title(sprintf('t = %d',2*t+1))
 end
 
@@ -406,8 +429,8 @@ for i =1:nclust
     end
     plot(timepts,median(data,1),'k','Linewidth',2);
 end
-% 
-% 
+%
+%
 % %%% looks at stopping / resp times
 % stoplength = 1.1;
 % longstops = onsets(stoptime<stoplength);
@@ -423,10 +446,10 @@ end
 % plot(stopPts,stopdF)
 % hold on
 % plot(stopPts,mean(stopdF,1),'g','Linewidth',2)
-% 
+%
 % figure
 % imagesc(stopdF(usenonzero(sortind),:),[0 1.5])
-% 
+%
 % respDur = 0.5;
 % longstops = onsets(correct) %+ resptime(resptime>respDur)';
 % length(longstops)
@@ -441,7 +464,7 @@ end
 % plot(stopPts,stopdF)
 % hold on
 % plot(stopPts,mean(stopdF,1)*3,'g','Linewidth',2); ylim([0 2])
-% 
+%
 % figure
 % imagesc(stopdF(usenonzero(sortind),:),[0 1.5])
 

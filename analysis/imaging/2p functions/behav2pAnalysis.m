@@ -2,17 +2,9 @@ clear all
 
 dt=0.25;
 
-useOld = input('align to std points (1) or choose new points (2) or read in prev points (3) : ')
-
-
-if useOld ==1
-    getAnalysisPts;
-elseif useOld==2
-    [pts dFraw neuropil ptsfname] = get2pPts(dfofInterp,greenframe);
-else
+%%% load pts file (contains cell locations and dF, along with analysis results
     ptsfname = uigetfile('*.mat','pts file');
     load(ptsfname);
-end
 
 if ~exist('pixResp','var')
     [f p ] = uigetfile('*.mat','session data')
@@ -21,10 +13,11 @@ end
 
 %%% get target location, orientation, phase
 stim = [trialRecs.stimDetails];
-targ = sign([stim.target]);
 for i = 1:length(trialRecs);
-    orient(i) = trialRecs(i).stimDetails.subDetails.orientations;
+    orient(i) = pi/2 - trialRecs(i).stimDetails.subDetails.orientations;
     gratingPh(i) = trialRecs(i).stimDetails.subDetails.phases;
+    location(i) =  sign(trialRecs(i).stimDetails.subDetails.xPosPcts - 0.5);
+    targ(i) = sign(stim(i).target);
 end
 
 %%% get correct
@@ -85,7 +78,7 @@ plot(latent(1:10)/sum(latent))
 figure
 imagesc(dFdecon(usenonzero,:),[0 1])
 
-timepts = -1:0.25:2;
+timepts = -0.75:0.25:2;
 dFalign = align2onsets(dFdecon,onsets,dt,timepts);
 trialmean = mean(dFalign,3);
 for i = 1:size(trialmean,1);
@@ -96,17 +89,20 @@ plot(trialmean');
 title('mean for all units')
 
 %%% get left/right traces
-leftmean = mean(dFalign(:,:,targ==-1),3);
-rightmean = mean(dFalign(:,:,targ==1),3);
-for i = 1:length(leftmean)
-    leftmean(i,:) = leftmean(i,:)-min(leftmean(i,3:4));
+topmean = mean(dFalign(:,:,location==-1),3);
+bottommean = mean(dFalign(:,:,location==1),3);
+for i = 1:length(topmean)
+    topmean(i,:) = topmean(i,:)-min(topmean(i,3:4));
 end
-for i = 1:length(leftmean)
-    rightmean(i,:) = rightmean(i,:)-min(rightmean(i,3:4));
+for i = 1:length(topmean)
+    bottommean(i,:) = bottommean(i,:)-min(bottommean(i,3:4));
 end
 
+location = 1;
+
+
 figure
-plot(leftmean'); ylim([-1 1])
+plot(topmean'); ylim([-1 1])
 title('left targs')
 
 figure
@@ -114,11 +110,11 @@ imagesc(squeeze(pixResp(:,:,7,1) - pixResp(:,:,4,1)),[-0.5 0.5]); colormap jet
 title('left targs')
 
 figure
-draw2pSegs(usePts,leftmean(:,7),jet,size(pixResp,1),usenonzero,[-0.5 0.5])
+draw2pSegs(usePts,topmean(:,7),jet,size(pixResp,1),usenonzero,[-0.5 0.5])
 title('left targs')
 
 figure
-plot(rightmean')
+plot(bottommean')
 title('right targs'); ylim([-1 1])
 
 figure
@@ -126,15 +122,15 @@ imagesc(squeeze(pixResp(:,:,7,2) - pixResp(:,:,4,2)),[-0.5 0.5]); colormap jet
 title('right targs')
 
 figure
-draw2pSegs(usePts,rightmean(:,7),jet,size(pixResp,1),usenonzero,[-0.5 0.5])
+draw2pSegs(usePts,bottommean(:,7),jet,size(pixResp,1),usenonzero,[-0.5 0.5])
 title('right targs')
 
 figure
-plot(leftmean(:,7),rightmean(:,7),'o'); hold on
+plot(topmean(:,7),bottommean(:,7),'o'); hold on
 axis equal; axis square; plot([0 1],[0 1],'g');
 
 title('performance')
-results = [ sum(correct & targ==-1)  sum(~correct&targ==-1) sum(~correct & targ==1)  sum(correct & targ==1)];
+results = [ sum(correct & location==-1)  sum(~correct&location==-1) sum(~correct & location==1)  sum(correct & location==1)];
 results = results/sum(results(:))
 figure
 pie(results); legend('left correct','left error','right error','right correct');
@@ -147,12 +143,12 @@ figure
 plot(timepts,wrongmean');
 
 %%% get start/stop time
-resptime = starts(:,3)-starts(:,2); resptime = resptime*10^4;
+resptime = starts(:,3)-starts(:,2);
 figure
 hist(resptime,0:0.1:5)
-stoptime = starts(:,2)-starts(:,1); stoptime  = stoptime*10^4;
+stoptime = starts(:,2)-starts(:,1);
 figure
-hist(stoptime);
+hist(stoptime,0.5:1:50);
 
 c = 'rgbcmk'
 figure
@@ -164,7 +160,7 @@ for i = 1:length(onsets);
     plot([onsets(i)/dt onsets(i)/dt],[1 size(dFdecon,1)/2]);
 end
 
-save(ptsfname,'usenonzero','onsets','starts','trialRecs','correct','targ','orient','gratingPh','dFalign','pixResp','dFdecon','-append')
+save(ptsfname,'usenonzero','onsets','starts','trialRecs','correct','targ','location','orient','gratingPh','dFalign','pixResp','dFdecon','resptime','stoptime','-append')
 
 dFdecon(dFdecon<-0.1)=-0.1;
 dFdecon(dFdecon>5)=5;
@@ -248,6 +244,23 @@ nclust=4;
 idxall = zeros(length(pts),1);
 idxall(usenonzero) = idx;
 
+
+figure
+subplot(6,6,7:36);
+dFlist= reshape(dFalign,size(dFalign,1),size(dFalign,2)*size(dFalign,3));
+imagesc(dFlist(usenonzero(sortind),:),[0 1]); xlabel('frame'); ylabel('frame')
+subplot(6,6,1:6); plot(correctRate,'Linewidth',2); set(gca,'Xtick',[]); set(gca,'Ytick',[]); ylabel('correct'); ylim([0 1.1]); xlim([1 length(correctRate)])
+hold on; %plot([1 length(correctRate)],[0.5 0.5],'r:');
+plot(resprate/max(resprate),'g','Linewidth',2); plot(stoprate/max(stoprate),'r','Linewidth',2)
+subplot(6,6,7:36); hold on;
+col = 'bcyr';
+for i = 1:4
+    m = max(find(y==i));
+    plot([1 size(dFlist,2)],[m m],'Color',col(i),'LineWidth',2)
+end
+title('k-means')
+    
+
 figure
 draw2pSegs(usePts,idxall,jet,size(pixResp,1),usenonzero,[1 4])
 
@@ -262,25 +275,40 @@ for i = 1:size(vertresp,1);
     horizresp(i,:) = horizresp(i,:) - mn;
 end
 
-leftmean = mean(dFalign(:,:,targ==-1),3);
-rightmean = mean(dFalign(:,:,targ==1),3);
+topmean = mean(dFalign(:,:,location==-1),3);
+bottommean = mean(dFalign(:,:,location==1),3);
 
 
-for i = 1:length(leftmean)
-    mn =min([ leftmean(i,3:4) rightmean(i,3:4)]);
-    leftmean(i,:) =  leftmean(i,:) - mn;
-    rightmean(i,:) = rightmean(i,:)-mn;
+for i = 1:length(topmean)
+    mn =min([ topmean(i,3:4) bottommean(i,3:4)]);
+    topmean(i,:) =  topmean(i,:) - mn;
+    bottommean(i,:) = bottommean(i,:)-mn;
+end
+
+figure
+set(gcf,'Name','vert vs horizt')
+for t = 1:6
+    subplot(2,3,t)
+    plot(vertresp(:,2*t),horizresp(:,2*t),'o'); axis([-1 1 -1 1]); axis square;  title(sprintf('t = %d',2*t))
+end
+
+
+figure
+set(gcf,'Name','left vs right')
+for t = 1:6
+    subplot(2,3,t)
+    plot(topmean(:,2*t),bottommean(:,2*t),'o'); axis([-1 1 -1 1]); axis square;  title(sprintf('t = %d',2*t))
 end
 
 
 t = find(timepts==0.5);
-leftright = leftmean(:,t)-rightmean(:,t) ;
+leftright = topmean(:,t)-bottommean(:,t) ;
 verthoriz = vertresp(:,t)-horizresp(:,t);
 figure
 plot(leftright,verthoriz,'o')
 
 figure
-plot(leftmean(:,t),rightmean(:,t),'o'); hold on; plot([0 2],[0 2],'g')
+plot(topmean(:,t),bottommean(:,t),'o'); hold on; plot([0 2],[0 2],'g')
 
 figure
 plot(vertresp(:,t),horizresp(:,t),'o'); hold on; plot([0 2],[0 2],'g')
@@ -298,29 +326,29 @@ clear allTrialData allTrialDataErr
 for i = 1:size(dFalignfix,1);
     for j = 1:8
         if j==1
-            use = targ==-1 & orient==0 & correct==1;
+            use = location==-1 & orient==0 & correct==1;
         elseif j==2
-            use = targ==-1 & orient>0 & correct==1;
+            use = location==-1 & orient>0 & correct==1;
         elseif j ==3
-            use = targ==1 & orient==0 & correct==1;
+            use = location==1 & orient==0 & correct==1;
         elseif j==4
-            use = targ==1 & orient>0 & correct==1;
+            use = location==1 & orient>0 & correct==1;
         elseif j==5
-            use = targ==-1 & orient==0 & correct==0;
+            use = location==-1 & orient==0 & correct==0;
         elseif j==6
-            use = targ==-1 & orient>0 & correct==0;
+            use = location==-1 & orient>0 & correct==0;
         elseif j ==7
-            use = targ==1 & orient==0 & correct==0;
+            use = location==1 & orient==0 & correct==0;
         elseif j==8
-            use = targ==1 & orient>0 & correct==0;
+            use = location==1 & orient>0 & correct==0;
         end
-        allTrialData(i,:,j) = mean(dFalignfix(i,2:13,use),3);
-        allTrialDataErr(i,:,j) = std(dFalignfix(i,2:13,use),[],3)/sqrt(sum(use));
+        allTrialData(i,:,j) = mean(dFalignfix(i,:,use),3);
+        allTrialDataErr(i,:,j) = std(dFalignfix(i,:,use),[],3)/sqrt(sum(use));
     end
 end
 
 goodTrialData = allTrialData(usenonzero,:,1:8);
-goodTrialData = reshape(goodTrialData,size(goodTrialData,1),size(goodTrialData,2)*size(goodTrialData,3));
+goodTrialData = reshape(goodTrialData(:,:,1:4),size(goodTrialData(:,:,1:4),1),size(goodTrialData(:,:,1:4),2)*size(goodTrialData(:,:,1:4),3));
 figure
 imagesc(goodTrialData,[-1 1])
 
@@ -348,8 +376,6 @@ hold on; %plot([1 length(correctRate)],[0.5 0.5],'r:');
 plot(resprate/max(resprate),'g','Linewidth',2); plot(stoprate/max(stoprate),'r','Linewidth',2)
 
 
-
-
 [Y e] = mdscale(dist,1);
 [y sortind] = sort(Y);
 figure
@@ -358,113 +384,7 @@ imagesc(goodTrialData(sortind,:),[-1 1])
 figure
 imagesc(dFlistgood(sortind,:),[0 2])
 
+save(ptsfname,'timepts','allTrialData','allTrialDataErr','correctRate','resprate','stoprate','-append');
 
 
-
-
-usetrials = zeros(size(targ));
-usetrials(80:end)=1;
-usetrials=1;
-clear data err
-col = 'rmbc'
-allTrials = zeros(size(dFalign,2),4,size(dFalign,1));
-for i = 1:length(sortind)
-    
-    for j = 1:4
-        if j==1
-            use = targ==-1 & orient==0 & usetrials;
-        elseif j==2
-            use = targ==-1 & orient>0& usetrials;
-        elseif j ==3
-            use = targ==1 & orient==0& usetrials;
-        else
-            use = targ==1 & orient>0& usetrials;
-        end
-        d = mean(dFalignfix(usenonzero(sortind(i)),:,use),3);
-        data(:,j) = d; %-mind(d);
-        err(:,j) = std(dFalignfix(usenonzero(sortind(i)),:,use),[],3)/sqrt(sum(use));
-        
-    end
-    data = data-min(data(:));
-    allTrials(:,:,usenonzero(sortind(i))) = data;
-    allTrialsErr(:,:,usenonzero(sortind(i))) = err;
-    %           figure; hold on
-    %           for j=1:4
-    %             errorbar(timepts,data(:,j),err(:,j),col(j)); ylim([0 2])
-    %         end
-    %         title(sprintf('group %d cell %d',y(i),usenonzero(sortind(i))))
-    %         legend('left vert','left horiz','right vert','right horiz')
-end
-
-
-save(ptsfname,'allTrials','allTrialsErr','vertresp','horizresp','leftmean', 'rightmean','timepts','allTrialData','allTrialDataErr','correctRate','resprate','stoprate','-append');
-
-figure
-set(gcf,'Name','vert vs horizt')
-for t = 1:6
-    subplot(2,3,t)
-    plot(vertresp(:,2*t+1),horizresp(:,2*t+1),'o'); axis([-1 1 -1 1]); axis square;  title(sprintf('t = %d',2*t+1))
-end
-
-
-figure
-set(gcf,'Name','left vs right')
-for t = 1:6
-    subplot(2,3,t)
-    plot(leftmean(:,2*t+1),rightmean(:,2*t+1),'o'); axis([-1 1 -1 1]); axis square;  title(sprintf('t = %d',2*t+1))
-end
-
-
-
-%%% plot each cluster
-col='bcyr'
-clear data
-for i =1:nclust
-    figure; hold on
-    useidx = find(idx==i);
-    for j=1:length(useidx)
-        d = mean(dFalign(usenonzero(useidx(j)),:,:),3);
-        plot(timepts,d-min(d),col(i)); ylim([0 1.5])
-        data(j,:) = d-min(d);
-    end
-    plot(timepts,median(data,1),'k','Linewidth',2);
-end
-%
-%
-% %%% looks at stopping / resp times
-% stoplength = 1.1;
-% longstops = onsets(stoptime<stoplength);
-% length(longstops)
-% clear stopdF
-% stopPts = -stoplength:0.25:2;
-% stopalign = align2onsets(dF,longstops,dt,stopPts);
-% for i = 1:size(dF,1);
-%     stopdF(i,:) = mean(stopalign(i,:,:),3);
-%     stopdF(i,:) = stopdF(i,:) - min(stopdF(i,:));
-% end
-% figure
-% plot(stopPts,stopdF)
-% hold on
-% plot(stopPts,mean(stopdF,1),'g','Linewidth',2)
-%
-% figure
-% imagesc(stopdF(usenonzero(sortind),:),[0 1.5])
-%
-% respDur = 0.5;
-% longstops = onsets(correct) %+ resptime(resptime>respDur)';
-% length(longstops)
-% clear stopdF
-% stopPts = -1:0.25:4;
-% stopalign = align2onsets(dF,longstops,dt,stopPts);
-% for i = 1:size(dF,1);
-%     stopdF(i,:) = mean(stopalign(i,:,:),3);
-%     stopdF(i,:) = stopdF(i,:) - min(stopdF(i,:));
-% end
-% figure
-% plot(stopPts,stopdF)
-% hold on
-% plot(stopPts,mean(stopdF,1)*3,'g','Linewidth',2); ylim([0 2])
-%
-% figure
-% imagesc(stopdF(usenonzero(sortind),:),[0 1.5])
 

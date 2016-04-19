@@ -20,7 +20,12 @@ if ~exist('moviefname','var')
 end
 
 dFdecon = dF;
-dFdecon(dFdecon<0)=0;
+
+dFdecon=dF;
+for i = 1:size(dF,1);
+    dFdecon(i,:) = dFdecon(i,:)-prctile(dFdecon(i,:),1);
+end
+
 dFdecon=deconvg6s(dFdecon,0.25);
 
 
@@ -67,7 +72,8 @@ end
 
 
 clear allTrialData
-thetas = unique(theta); sfs = unique(sf);
+thetas = unique(theta); sfs = unique(sf); thetas= circshift(thetas,[0 2]);
+
 if strcmp(moviefname,'C:\behavStim3sf4orient.mat')
     for i = 1:size(dfAlign,1);
         for j = 1:3
@@ -99,8 +105,11 @@ end
         save(ptsfname,'allTrialData','allTrialDataErr','-append');
 
 
-goodTrialData = allTrialData(usenonzero,:,:);
+goodTrialData = allTrialData;
 goodTrialData = reshape(goodTrialData,size(goodTrialData,1),size(goodTrialData,2)*size(goodTrialData,3));
+usenonzero=mean(goodTrialData,2)~=0;
+goodTrialData = goodTrialData(usenonzero,:);
+
 figure
 imagesc(goodTrialData,[-0.5 0.5])
         
@@ -110,12 +119,11 @@ Z = linkage(dist,'ward');
 leafOrder = optimalleaforder(Z,dist);
 
 if strcmp(moviefname,'C:\behavStim3sf4orient.mat')
-goodTrialData(:,17:16:end)=NaN;
+goodTrialData(:,1:16:end)=NaN;
 else
-    goodTrialData(:,21:20:end)=NaN;
+    goodTrialData(:,1:20:end)=NaN;
 end
-figure
-imagesc(goodTrialData,[-0.5 0.5])
+
 
 figure
 subplot(3,4,[1 5 9 ])
@@ -124,6 +132,7 @@ axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
 imagesc(flipud(dFgood(perm,:)),[0 1]); 
 drawnow
+title('sorted by condition')
 
 figure
 subplot(3,4,[1 5 9 ])
@@ -138,5 +147,5 @@ drawnow
 [y sortind] = sort(Y);
 figure
 imagesc(goodTrialData(sortind,:),[-0.5 0.5])
-
+title('mds')
 

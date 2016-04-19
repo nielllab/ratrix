@@ -6,7 +6,6 @@ global info;                % this contains the information about the structure 
 
 if (exist([fn '.align'])==0 & align)
     
-    tic
     [m,T] = sbxalignx(fn,0:info.max_idx-1);   %
     save([fn '.align'],'m','T');
     display(sprintf('Done %s: Aligned %d images in %d min',fn,info.max_idx,round(toc/60)))

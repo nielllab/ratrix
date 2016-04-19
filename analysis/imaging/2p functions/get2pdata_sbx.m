@@ -1,4 +1,4 @@
-function [dfofInterp im_dt greenframe framerate phasetimes] = get2pdata_sbx(fname,dt,cycLength,cfg);
+function [dfofInterp im_dt greenframe framerate phasetimes m] = get2pdata_sbx(fname,dt,cycLength,cfg);
 %%% reads in 2p data and syncs with stimulus signals
 
 %%% read in sbx data and perform motion correction (if not already done)
@@ -33,7 +33,7 @@ m = prctile(double(img(:,:,10:10:end)),10,3);
 toc
 %%% Yeti seems to have a large DC offset, even in blanks on edge of image
 %%% Estimate this as minimum of mean image and subtract it off
-dcOffset = min(m(:))*0.95;
+dcOffset = min(m(:));
 m = m-dcOffset;
 img = img-dcOffset;
 greenframe=greenframe-dcOffset;

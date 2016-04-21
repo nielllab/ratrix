@@ -34,15 +34,28 @@ imshow(meanfigX);
 
 %do for topoY
 mapY = zeros(400,400,3);
-mapfigY = zeros(400*4,400*4,3,23)+NaN;
+mapfigY = zeros(400*4,400*4,23)+NaN;
 for i = 1:23
-    load(sprintf('topoYsession%d.mat',i),'polarImg');
-   polarImg = polarImg(16:end-16,16:end-16,:);
-   mapfigY(y(i):y(i)+366,x(i):x(i)+366,:,i)=polarImg;
+    i
+    load(sprintf('topoYsession%d.mat',i),'map');
+   polarImg = map(16:end-16,16:end-16);
+   mapfigY(y(i):y(i)+366,x(i):x(i)+366,i)=polarImg;
 %     figure
 %     imshow(polarImg);
 end
-meanfigY = nanmean(mapfigY,4);
+meanfigY = nanmean(mapfigY,3);
+amp = abs(meanfigY);
+figure
+imagesc(amp); colormap gray; axis equal
+prctile(amp(:),95)
+amp=amp/prctile(amp(:),90); amp(amp>1)=1;
+ph = mod(angle(meanfigY),2*pi); ph(isnan(ph))=0; amp(isnan(amp))=0;
+img = mat2im(ph,hsv,[3*pi/8  (2*pi -pi/2)]);
+img = img.*repmat(amp,[1 1 3]);
+mapimg= figure
+figure
+imshow(img)
+
 figure
 imshow(meanfigY);
     

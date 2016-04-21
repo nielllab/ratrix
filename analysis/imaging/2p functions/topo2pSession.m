@@ -13,9 +13,11 @@ map = 0;
 for i= 1:size(dfofInterp,3);
     map = map+dfofInterp(:,:,i)*exp(2*pi*sqrt(-1)*i/cycLength);
 end
+map = map/size(dfofInterp,3);
 amp = abs(map);
+prctile(amp(:),98)
 amp=amp/prctile(amp(:),98); amp(amp>1)=1;
-img = mat2im(mod(angle(map),2*pi),hsv,[0 2*pi]);
+img = mat2im(mod(angle(map),2*pi),hsv,[pi/2  (2*pi -pi/4)]);
 img = img.*repmat(amp,[1 1 3]);
 mapimg= figure
 figure
@@ -23,7 +25,7 @@ imshow(img)
 colormap(hsv); colorbar
 
 polarImg = img;
-save(sessionName,'polarImg','-append')
+save(sessionName,'polarImg','map','-append')
 
 if exist('psfile','var')
     set(gcf, 'PaperPositionMode', 'auto');

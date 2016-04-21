@@ -9,7 +9,9 @@ display('loading data')
 tic
 load(fullfile(p,f),'dfofInterp');
 toc
-Y = dfofInterp(:,:,1:600); clear dfofInterp
+border=32;nframes = min(size(dfofInterp,3),1200);
+
+Y = dfofInterp((border+1):end-border,(border+1):end-border,1:nframes); clear dfofInterp
 
 Y = Y - min(Y(:)); 
 if ~isa(Y,'double');    Y = double(Y);  end         % convert to double
@@ -19,7 +21,7 @@ d = d1*d2;                                          % total number of pixels
 
 % Set parameters
 
-K = 300;                                           % number of components to be found
+K = 500;                                           % number of components to be found
 tau = 2;   %%% default = 4                                      % std of gaussian kernel (size of neuron) 
 p = 1;         %%% default =2                                   % order of autoregressive system (p = 0 no dynamics, p=1 just decay, p = 2, both rise and decay)
 merge_thr = 0.8;                                  % merging threshold
@@ -31,7 +33,9 @@ options = CNMFSetParms(...
     'temporal_iter',2,...                       % number of block-coordinate descent steps 
     'fudge_factor',0.98,...                     % bias correction for AR coefficients
     'merge_thr',merge_thr,...                    % merging threshold
-    'gSig',tau...
+    'gSig',tau,...
+    'min_size',2,'max_size',5, ...  %%% default 3 an d8
+    'sx',12,'df_prctile',10 ...     %%% default 16, 50
     );
 %% Data pre-processing
 
@@ -107,7 +111,7 @@ K_m = size(C_or,1);
 
 contour_threshold = 0.95;                       % amount of energy used for each component to construct contour plot
 figure;
-[Coor,json_file] = plot_contours(A_or,reshape(P.sn,d1,d2),contour_threshold,1); % contour plot of spatial footprints
+[Coor,json_file] = plot_contours(A_or,reshape(P.sn,d1,d2),contour_threshold,0); % contour plot of spatial footprints
 
 %savejson('jmesh',json_file,'filename');        % optional save json file with component coordinates (requires matlab json library)
 %% display components

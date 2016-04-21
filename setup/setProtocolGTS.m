@@ -32,20 +32,27 @@ stim.gain = 0.7 * ones(2,1);
 %end
 
 switch subjIDs{1}
+   
+   case 'g62ff4lt' % Started 4/13/16
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 123;
+       msPenalty               =3500;
+       percentCorrectionTrials = .8;
+%        stim.gain = 0.55 * ones(2,1);  
     
    case 'g62tx2.14rt' % Started 4/13/16
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
        percentCorrectionTrials = .8;
-       stim.gain = 0.55 * ones(2,1); 
+%        stim.gain = 0.55 * ones(2,1); 
     
    case 'g62dd6lt' % Started 4/13/16
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
        percentCorrectionTrials = .8;
-       stim.gain = 0.55 * ones(2,1); 
+%        stim.gain = 0.55 * ones(2,1); 
     
    case 'g62dd5' % Started 2/29/16 %back to GoToBlack 4/2/16
        requestRewardSizeULorMS = 0;

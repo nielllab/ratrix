@@ -33,7 +33,7 @@ m = prctile(double(img(:,:,10:10:end)),10,3);
 toc
 %%% Yeti seems to have a large DC offset, even in blanks on edge of image
 %%% Estimate this as minimum of mean image and subtract it off
-dcOffset = min(m(:));
+dcOffset = 0.98*min(m(:));
 m = m-dcOffset;
 img = img-dcOffset;
 greenframe=greenframe-dcOffset;

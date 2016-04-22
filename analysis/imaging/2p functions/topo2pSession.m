@@ -13,7 +13,7 @@ map = 0;
 for i= 1:size(dfofInterp,3);
     map = map+dfofInterp(:,:,i)*exp(2*pi*sqrt(-1)*i/cycLength);
 end
-map = map/size(dfofInterp,3);
+map = map/size(dfofInterp,3); map(isnan(map))=0;
 amp = abs(map);
 prctile(amp(:),98)
 amp=amp/prctile(amp(:),98); amp(amp>1)=1;

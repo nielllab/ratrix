@@ -1,8 +1,8 @@
 
-spatialBin = input('spatial binning factor: ');
-temporalBin = input('temporal binning factor: ');
-movierate = input('framerate :');
-alignData=input('align data? 0/1 :');
+spatialBin = input('avi spatial binning factor: ');
+temporalBin = input('avi temporal binning factor: ');
+movierate = input('avi framerate :');
+alignData=input('avi align data? 0/1 :');
 fullMovie = 1;
 
 d = dir('*.sbx');
@@ -10,7 +10,7 @@ for i=1:length(d)
 
     fn = strtok(d(i).name,'.');
  
-    avifname = [fn '.avi'];
+    avifname = [fn '_FULL.avi'];
     if ~exist(avifname,'file')
         sprintf('making %s',avifname)
         

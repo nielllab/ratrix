@@ -1,4 +1,4 @@
-close all;
+%close all;
 clear all;
 pixperumX=1.3;
 pixperumY=1.1;
@@ -46,7 +46,7 @@ end
 meanfigY = nanmean(mapfigY,3);
 amp = abs(meanfigY);
 figure
-imagesc(amp); colormap gray; axis equal
+imagesc(amp,[0 1]); colormap gray; axis equal
 prctile(amp(:),95)
 amp=amp/prctile(amp(:),90); amp(amp>1)=1;
 ph = mod(angle(meanfigY),2*pi); ph(isnan(ph))=0; amp(isnan(amp))=0;
@@ -56,6 +56,5 @@ mapimg= figure
 figure
 imshow(img)
 
-figure
-imshow(meanfigY);
+
     

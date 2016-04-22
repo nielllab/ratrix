@@ -16,5 +16,5 @@ end
 
 
 imshow(img);
-axis ij;  colormap(cmap); h=colorbar; set(h,'YTick',[1 64]) ; set(h,'YTickLabel',{num2str(range(1)); num2str(range(2))})
+axis ij;  colormap(cmap); h=colorbar; set(h,'YTick',[0 0.5 1]) ; set(h,'YTickLabel',{num2str(range(1)); num2str(0.5*(range(1)+range(2))); num2str(range(2))})
 axis([0 sz 0 sz]); axis square

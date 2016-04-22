@@ -9,7 +9,7 @@ display('loading data')
 tic
 load(fullfile(p,f),'dfofInterp');
 toc
-border=32;nframes = min(size(dfofInterp,3),1200);
+border=32;nframes = min(size(dfofInterp,3),600);
 
 Y = dfofInterp((border+1):end-border,(border+1):end-border,1:nframes); clear dfofInterp
 
@@ -31,11 +31,11 @@ options = CNMFSetParms(...
     'search_method','ellipse','dist',2,... %default =3  % search locations when updating spatial components
     'deconv_method','constrained_foopsi',...    % activity deconvolution method
     'temporal_iter',2,...                       % number of block-coordinate descent steps 
-    'fudge_factor',0.98,...                     % bias correction for AR coefficients
+    'fudge_factor',0.95,...                     % bias correction for AR coefficients
     'merge_thr',merge_thr,...                    % merging threshold
     'gSig',tau,...
     'min_size',2,'max_size',5, ...  %%% default 3 an d8
-    'sx',12,'df_prctile',10 ...     %%% default 16, 50
+    'sx',12,'df_prctile',5 ...     %%% default 16, 50
     );
 %% Data pre-processing
 

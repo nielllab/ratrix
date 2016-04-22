@@ -29,7 +29,7 @@ if ~exist('mapalign','var')
     timepts = -1:0.25:2;
     mapalign = align2onsets(dfofInterp,onsets,dt,timepts);
     display('saving')
-    save(sessionName,'timepts','mapalign','-append')
+   % save(sessionName,'timepts','mapalign','-append')
 end
 toc
 

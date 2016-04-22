@@ -14,7 +14,7 @@ else
             sprintf('%d / %d trials done',i,length(onsets))
         end
         range  = floor((onsets(i)+pts(1))/dt) : ceil((onsets(i)+pts(end))/dt);
-        dFoutshift(:,i,:,:) = interp1(range ,shiftdf(range ,:,:),(onsets(i)+pts)/dt);
+        dFoutshift(:,i,:,:) = interp1(range ,shiftdf(range ,:,:),(onsets(i)+pts)/dt,'nearest');
     end
     dFout = shiftdim(dFoutshift,2);
 end

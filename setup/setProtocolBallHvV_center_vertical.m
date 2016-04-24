@@ -41,22 +41,19 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
-       percentCorrectionTrials = .8;
-%        stim.gain = 0.55 * ones(2,1);        
+       percentCorrectionTrials = .8;       
        
    case 'sanjay' % Started 4/13/16
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
-       percentCorrectionTrials = .8;
-%        stim.gain = 0.55 * ones(2,1);     
+       percentCorrectionTrials = .8;     
        
    case 'g62hh6ln' % Started 4/13/16
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
-       percentCorrectionTrials = .8;
-%        stim.gain = 0.55 * ones(2,1);     
+       percentCorrectionTrials = .8;     
        
    case 'g62bb8tt' % Started 2/9/16  %started HvV_center 2/20/16 %restarted HvV_center 4/2/16
        requestRewardSizeULorMS = 0;

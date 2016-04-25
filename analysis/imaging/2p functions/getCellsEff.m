@@ -48,7 +48,8 @@ options = CNMFSetParms(...
     'gSig',tau,...
     'min_size',2,'max_size',5, ...  %%% default 3 an d8
     'sx',12,'df_prctile',5, ...     %%% default 16, 50
-    'restimate_g', 1 ...            %%% recalc AR coefficients during updating (maybe turn this off so we can hard code or upper limit?
+    'restimate_g', 1,  ...            %%% recalc AR coefficients during updating (maybe turn this off so we can hard code or upper limit?
+    'nb',4 ...                  %%% default 1
     );
 
 %% Data pre-processing
@@ -108,7 +109,7 @@ end
 
 %% do some plotting
 K_m = size(C_or,1);
-[C_df,~,S_df] = extract_DF_F(Yr,[A_or,b2],[C_or;f2],S_or,K_m+1); % extract DF/F values (optional)
+[C_df,~,S_df] = extract_DF_F(Yr,[A_or,b2],[C_or;f2],S_or,K_m+(1:options.nb)); % extract DF/F values (optional)
 
 
 %% display components
@@ -147,7 +148,9 @@ drawnow
 % imshow(overlay);
 
 
-suffix = '_Eff_pts';
+suffix = '_Eff_pts4nb';
     outname = [filename{session}(1:end-4) '_' suffix '.mat'];
     save(outname,'dF','greenframe','meanImg','usePts','spikes','meanShiftImg');
+    
+    keyboard
 end

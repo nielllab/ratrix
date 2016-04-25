@@ -1,7 +1,9 @@
 %close all;
 clear all;
-pixperumX=1.3;
-pixperumY=1.1;
+% pixperumX=1.3;
+% pixperumY=1.1;
+pixperumX=1.2;
+pixperumY=1.3;
 x = [0 569 1010 1629 722 -30 -690 -1016 -314 490 1278 1867 1867 1045 176 -488 -1252 -922 -135 650 1485 -307 631]; x = x-min(x); x= x/(2*pixperumX) +1;
 y = -[-7 -7 -7 -598 -598 -598 -594 -1266 -1291 -1291 -1291 -1280 -1801 -1801 -1825 -1825 -1805 -2340 -2347 -2347 -2347 -2667 -2678]; y = y-min(y); y= y/(2*pixperumY) +1;
 
@@ -29,8 +31,6 @@ mapimg= figure
 figure
 imshow(img)
 
-figure
-imshow(meanfigX);
 
 %do for topoY
 mapY = zeros(400,400,3);

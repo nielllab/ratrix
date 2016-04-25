@@ -7,20 +7,19 @@ load(fullfile(p,f),'polarImg')
 
 dt = 0.25;
 cycLength = 10 / dt;
-useOld = input('auto select based on generic pts (1) or manually select points (2) or read in prev points (3) : ')
-if useOld ==1
-    getAnalysisPts;   
-elseif useOld==2
-    [pts dF neuropil ptsfname] = get2pPtsManual(dfofInterp,greenframe);
-else
+
     ptsfname = uigetfile('*.mat','pts file');
     load(ptsfname);
+if ~exist('polarImg','var')
+    [f p] = uigetfile('*.mat','session data');
+load(fullfile(p,f),'polarImg')
 end
 
 usenonzero = find(mean(dF,2)~=0); %%% gets rid of generic points that were not identified in this session
 
+usenonzero=1:400;
 figure
-imagesc(dF(usenonzero,:),[-0.5 1]); ylabel('cell #'); xlabel('frame')
+imagesc(dF(usenonzero,:),[0 1]); ylabel('cell #'); xlabel('frame')
 
 
 %%% get Fourier component and cycle averages
@@ -37,23 +36,25 @@ end
 for i = 1:size(cycAvg,1);
     cycAvg(i,:) = cycAvg(i,:) - min(cycAvg(i,:));
 end
-save(ptsfname,'phaseVal','cycAvg','-append');
+save(ptsfname,'phaseVal','cycAvg','polarImg','-append');
 
 figure
 plot(cycAvg')
+
 ph = angle(phaseVal);
 ph = mod(ph,2*pi);
+
 figure
 hist(ph(usenonzero)); xlabel('phase')
 
 figure
-hist(abs(phaseVal(usenonzero)),0:0.05:1); xlabel('amplitude');
+hist(abs(phaseVal(usenonzero)),0.0125:0.025:1); xlabel('amplitude');
 
 figure
 imshow(polarImg);
 
 figure
-draw2pSegs(usePts,ph,hsv,size(polarImg,1),intersect(usenonzero,find(abs(phaseVal)>0.05)),[0 2*pi]);
+draw2pSegs(usePts,ph,hsv,size(meanShiftImg,1),intersect(usenonzero,find(abs(phaseVal)>0.0)),[pi/2  (2*pi -pi/4)]);
 
 for i = 1:size(dF,2);
     dFnorm(:,i) = dF(:,i)/max(dF(:,i));

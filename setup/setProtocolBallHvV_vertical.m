@@ -45,10 +45,11 @@ end
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 139;
        msPenalty               =3500;
-       percentCorrectionTrials = .80; 
+       percentCorrectionTrials = .75; 
        pixPerCycs              = [200];
-       normalizedPosition      = [0.40 0.66];
+       normalizedPosition      = [0.38 0.66];
        radius                 = .32;
+       stim.gain = 0.60 * ones(2,1); %try this since has trouble fully stopping 4/25/16
      
      case 'testpixhvv' % Started 5/18/15
        requestRewardSizeULorMS = 0;

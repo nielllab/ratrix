@@ -9,7 +9,7 @@ alignData=1; showImages=1;
 [img framerate] = readAlign2p_sbx(fname,alignData,showImages);
 toc
 
-greenframe = prctile(img,10,3);  %%% keep mean raw fluorescence image
+greenframe = prctile(img(:,:,25:25:end),10,3);  %%% keep mean raw fluorescence image
 
 
 %%% spatial downsampling
@@ -18,14 +18,20 @@ tic
 img = imresize(img,1/cfg.spatialBin,'box');
 toc
 
+size(img)
 %%% temporal binning, to improve SNR before interpolation
 %%% a gaussian temporal filter might be better, but slow!
 display('temporal downsampling')
 binsize=cfg.temporalBin;
-downsampleLength = binsize*floor(size(img,3)/binsize);
+if binsize~=1
+    downsampleLength = binsize*floor(size(img,3)/binsize);
 tic
 img= downsamplebin(img(:,:,1:downsampleLength),3,binsize)/binsize;  %%% downsamplebin based on patick mineault's code
 toc
+else
+    display('binsize ==1')
+end
+
 
 display('computing baseline')
 tic
@@ -33,7 +39,7 @@ m = prctile(double(img(:,:,10:10:end)),10,3);
 toc
 %%% Yeti seems to have a large DC offset, even in blanks on edge of image
 %%% Estimate this as minimum of mean image and subtract it off
-dcOffset = 0.98*min(m(:));
+dcOffset = 0.95*min(m(:));
 m = m-dcOffset;
 img = img-dcOffset;
 greenframe=greenframe-dcOffset;

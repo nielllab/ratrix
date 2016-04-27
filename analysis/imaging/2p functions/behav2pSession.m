@@ -1,10 +1,10 @@
 function behav2pSession( fileName, sessionName,behavfile,psfile)%%% create session file for behavioral run
 %%% reads raw images, calculates dfof, and aligns to stim sync
 
-dt = 0.25; %%% resampled time frame
+dt = 0.1; %%% resampled time frame
 framerate=1/dt;
 cycLength=10;
-cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=4;  %%% configuration parameters
+cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  %%% configuration parameters
 get2pSession_sbx;
 
 if ~exist('onsets','var')

@@ -15,14 +15,13 @@ end
 %%% load first file, which will serve as reference for alignment
 display('loading first file')
 tic
-load(filename{1},'greenframe','meanImg');
-greenframe=double(greenframe);
+load(filename{1},'meanImg');
+meanImg=double(meanImg);
 toc
 figure; set(gcf, 'Name',sessionName{1});
-refFrame = greenframe;
+refFrame = meanImg;
 
 
-refFrame = imresize(refFrame,size(meanImg)); %%% b/c dfof data is often compressed
 subplot(1,2,1);
 imagesc(refFrame,[0 prctile(refFrame(:),99)]); colormap gray; axis equal; freezeColors;
 ref = refFrame-mean(refFrame(:));
@@ -34,15 +33,13 @@ for n = 2:nfiles
     clear greenframe
     display(sprintf('loading file %d',n))
     tic
-    load(filename{n},'greenframe','meanImg');
+    load(filename{n},'meanImg');
     toc
-    greenframe=double(greenframe);
-    greenframe = imresize(greenframe,size(meanImg));
     
     figure; set(gcf,'Name',sessionName{n});
     
     %%% do cross-correlation alignment based on green (mean raw fluorescence) image
-    gr = greenframe-mean(greenframe(:));
+    gr = meanImg-mean(meanImg(:));
     range = 30;
     for dx=-range:range
         for dy = -range:range
@@ -57,16 +54,16 @@ for n = 2:nfiles
     shiftx(n)=shx-(range+1)
     shifty(n)=shy-(range+1)
     
-    greenframe = circshift(greenframe,-[shiftx(n) shifty(n)]);
+    meanImg = circshift(meanImg,-[shiftx(n) shifty(n)]);
     im(:,:,1)=0.8*refFrame/prctile(refFrame(:),98);
-    im(:,:,2) = 0.8*greenframe/prctile(greenframe(:),98);
+    im(:,:,2) = 0.8*meanImg/prctile(meanImg(:),98);
     im(:,:,3)=0;
 
       subplot(2,2,3);
-    imagesc(refFrame,[0 prctile(greenframe(:),99)]*1.2); axis equal; colormap gray; axis off; title('ref');
+    imagesc(refFrame,[0 prctile(meanImg(:),99)]*1.2); axis equal; colormap gray; axis off; title('ref');
     
     subplot(2,2,4);
-    imagesc(greenframe,[0 prctile(greenframe(:),99)]*1.2); axis equal; colormap gray; axis off; title(sessionName{n})
+    imagesc(meanImg,[0 prctile(meanImg(:),99)]*1.2); axis equal; colormap gray; axis off; title(sessionName{n})
     
      subplot(2,2,1);     
     imshow(im)

@@ -19,10 +19,25 @@ for session = 1:length(shiftx)
     F=  circshift(F, -[shiftx(session) shifty(session) 0]);  %%% shift to standard coordinates
     
     meanShiftImg = circshift(meanImg,-[shiftx(session) shifty(session) ]);
-    meanShiftImg = meanShiftImg((border+1):end-border,(border+1):end-border);
+    
 
-
-Y = F((border+1):end-border,(border+1):end-border,1:nframes); clear  F dfofInterp
+    if session ==1
+        figure
+        display('getting correlation map');
+        tic
+        imagesc(correlation_image(F));
+        toc
+        [cropy cropx] = ginput(2);
+        cropx = sort(round(cropx)); cropy= sort(round(cropy));
+    end
+    cropx
+    cropy
+    %%% default cropy = [33 364}; cropx = [33 364]
+    meanShiftImg = meanShiftImg(cropx(1):cropx(2),cropy(1):cropy(2));
+    figure
+    imagesc(meanShiftImg); colormap gray
+nframes = min(size(F,3),10^5)
+Y = F(cropx(1):cropx(2),cropy(1):cropy(2),1:nframes); clear  F dfofInterp
 size(Y)
 
 Y = Y - min(Y(:)); 
@@ -33,9 +48,9 @@ d = d1*d2;                                          % total number of pixels
 
 % Set parameters
 
-K = 500;                                           % number of components to be found
-tau = 2;   %%% default = 4                                      % std of gaussian kernel (size of neuron) 
-p = 2;         %%% default =2                                   % order of autoregressive system (p = 0 no dynamics, p=1 just decay, p = 2, both rise and decay)
+K = 400;                                           % number of components to be found
+tau = 3;   %%% default = 4                                      % std of gaussian kernel (size of neuron) 
+p = 1;         %%% default =2                                   % order of autoregressive system (p = 0 no dynamics, p=1 just decay, p = 2, both rise and decay)
 merge_thr = 0.8;                                  % merging threshold
 
 options = CNMFSetParms(...                      
@@ -43,13 +58,14 @@ options = CNMFSetParms(...
     'search_method','ellipse','dist',2,... %default =3  % search locations when updating spatial components
     'deconv_method','constrained_foopsi',...    % activity deconvolution method
     'temporal_iter',2,...                       % number of block-coordinate descent steps 
-    'fudge_factor',0.9,...                     % bias correction for AR coefficients
+    'fudge_factor',0.9,...                     % bias correction for AR coefficients  %%% = 0.7 for .25sec data
     'merge_thr',merge_thr,...                    % merging threshold
     'gSig',tau,...
     'min_size',2,'max_size',5, ...  %%% default 3 an d8
     'sx',12,'df_prctile',5, ...     %%% default 16, 50
     'restimate_g', 1,  ...            %%% recalc AR coefficients during updating (maybe turn this off so we can hard code or upper limit?
-    'nb',4 ...                  %%% default 1
+    'nb',1, ...                  %%% default 1
+    'noise_range', [0.25 0.5] ...  %%% noise range for calculating SNR (should be above signal freqs) default [0.25 0.5]; set to [0.375 0.5] for 0.25sec data
     );
 
 %% Data pre-processing
@@ -60,18 +76,22 @@ Yr = reshape(Y,d,T);
 if session ==1
     
 %% fast initialization of spatial components using greedyROI and HALS
+tic
 [Ain,Cin,bin,fin,center] = initialize_components(Y,K,tau,options);  % initialize
+toc
 
-clear Y;
 
 % display centers of found components
 Cn =  reshape(P.sn,d1,d2); %correlation_image(Y); %max(Y,[],3); %std(Y,[],3); % image statistic (only for display purposes)
+Cn = correlation_image(Y);
 figure;imagesc(Cn);
     axis equal; axis tight; hold all;
     scatter(center(:,2),center(:,1),'mo');
-    title('Center of ROIs found from initialization algorithm');
+    title('Center of ROIs from initialization overlaid on SNR'); colorbar
     drawnow;
 
+    clear Y;
+    
 %% update spatial components
 display('doing spatial components')
 tic
@@ -90,7 +110,10 @@ toc
 %% repeat
 display('repeat spatial temporal')
 tic
+display('spatial')
 [A2,b2,Cm] = update_spatial_components(Yr,Cm,f,Am,P,options);
+toc
+display('temporal')
 [C2,f2,P,S2] = update_temporal_components(Yr,A2,b2,Cm,f,P,options);
 toc
 
@@ -134,6 +157,10 @@ figure
 imagesc(dF,[0 1]); title(filename{session});
 drawnow
 
+figure
+imagesc(spikes,[0 0.2]); title(filename{session}); 
+drawnow
+
 % overlay = zeros(size(meanShiftImg,1),size(meanShiftImg,2),3);
 % refCells = reshape(mean(Aref,2), size(meanShiftImg));
 % theseCells = reshape(mean(A_or,2), size(meanShiftImg));
@@ -148,7 +175,7 @@ drawnow
 % imshow(overlay);
 
 
-suffix = '_Eff_pts4nb';
+suffix = '_Eff_ptshighTF';
     outname = [filename{session}(1:end-4) '_' suffix '.mat'];
     save(outname,'dF','greenframe','meanImg','usePts','spikes','meanShiftImg');
     

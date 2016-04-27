@@ -2,13 +2,13 @@ function passiveBehav2pSession(fileName,sessionName,moviefname, psfile)
 %%% create session file for passive presentation of behavior (grating patch) stim
 %%% reads raw images, calculates dfof, and aligns to stim sync
 
-dt = 0.25; %%% resampled time frame
+dt = 0.1; %%% resampled time frame
 framerate=1/dt;
 
 cycLength=8;
 blank =1;
 
-cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=4;  %%% configuration parameters
+cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  %%% configuration parameters
 get2pSession_sbx;
 
 cycLength = cycLength/dt;
@@ -50,7 +50,7 @@ end
 
 [dFout xpos sf theta phase timepts] = analyzePassiveBehav2p(dfofInterp,moviefname,dt);
 display('saving')
-save(sessionName,'dFout','xpos','sf','theta','phase','timepts','moviefname','-append')
+save(sessionName,'xpos','sf','theta','phase','timepts','moviefname','-append')
 
 
 x=unique(xpos);

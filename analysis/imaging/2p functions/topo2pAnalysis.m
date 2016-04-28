@@ -2,25 +2,35 @@
 %%% for topo (periodic spatial) stimuli
 clear all
 
-[f p] = uigetfile('*.mat','session data');
-load(fullfile(p,f),'polarImg')
-
-dt = 0.25;
+dt = 0.1;
 cycLength = 10 / dt;
 
-    ptsfname = uigetfile('*.mat','pts file');
-    load(ptsfname);
+ptsfname = uigetfile('*.mat','pts file');
+load(ptsfname);
 if ~exist('polarImg','var')
     [f p] = uigetfile('*.mat','session data');
-load(fullfile(p,f),'polarImg')
+    load(fullfile(p,f),'polarImg')
 end
 
-usenonzero = find(mean(dF,2)~=0); %%% gets rid of generic points that were not identified in this session
-
-usenonzero=1:400;
 figure
-imagesc(dF(usenonzero,:),[0 1]); ylabel('cell #'); xlabel('frame')
+imagesc(dF,[0 1]); title('dF')
 
+spikeBinned = imresize(spikes,[size(spikes,1) size(spikes,2)/10]);
+figure
+imagesc(spikeBinned,[ 0 0.1]);
+
+
+
+usenonzero = find(mean(spikes,2)~=0); %%% gets rid of generic points that were not identified in this session
+cellCutoff = input('cell cutoff : ');
+usenonzero=usenonzero(usenonzero<cellCutoff);
+
+figure
+imagesc(dF(usenonzero,:),[0 1]); ylabel('cell #'); xlabel('frame'); title('dF');
+figure
+imagesc(spikeBinned(usenonzero,:),[0 0.1]); ylabel('cell #'); xlabel('frame'); title('dF');
+
+dF = spikes*10;
 
 %%% get Fourier component and cycle averages
 phaseVal = 0;
@@ -74,7 +84,7 @@ end
 figure
 plot(latent(1:10)/sum(latent))
 
-cycGood = downsamplebin(cycAvg(usenonzero,:),2,2)/2;
+cycGood = downsamplebin(cycAvg(usenonzero,:),2,4)/4;
 dist = pdist(cycGood,'correlation');
 Z = linkage(dist,'ward');
 leafOrder = optimalleaforder(Z,dist);
@@ -83,11 +93,11 @@ subplot(3,4,[1 5 9 ])
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5,'reorder',leafOrder);
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-imagesc(flipud(cycGood(perm,:)),[0 1]); 
+imagesc(flipud(cycGood(perm,:)),[0 1]);
 drawnow
 
 [Y e] = mdscale(dist,1);
 [y sortind] = sort(Y);
 figure
-imagesc(cycGood(sortind,:),[0 1])
+imagesc(cycGood(sortind,:),[0 2])
 title('mdscale')

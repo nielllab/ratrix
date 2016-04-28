@@ -20,14 +20,20 @@ topoxUse = mean(dF,2)~=0;  %%% find cells that were successfully extracted
 [f p] = uigetfile('*.mat','topo y pts');
 load(fullfile(p,f));
 
+figure
+imagesc(dF)
+cellCutoff = input('cell cutoff : ')
+
 %%% extract phase and amplitude from complex fourier varlue at 0.1Hz
 yph = phaseVal; rfCyc(:,:,2) = cycAvg; 
 rf(:,2) = mod(angle(yph),2*pi)*72/(2*pi); rfAmp(:,2) = abs(yph);
 topoyUse = mean(dF,2)~=0;
 
 %%% select cells responsive to both topoX and topoY
-goodTopo = rfAmp(:,1)>0.05 & rfAmp(:,2)>0.05;
-sum(goodTopo)
+goodTopo = find(rfAmp(:,1)>0.01 & rfAmp(:,2)>0.01);
+
+goodTopo=goodTopo(goodTopo<=cellCutoff);
+length(goodTopo)
 
 %%% plot RF locations
 figure
@@ -35,7 +41,6 @@ plot(rf(goodTopo,2),rf(goodTopo,1),'o');axis equal;  axis([0 72 0 128]);
 
 %%% merge X and Y cycle averages together, and select good ones
 rfCyc = reshape(rfCyc,size(rfCyc,1),size(rfCyc,2)*size(rfCyc,3));
-goodTopo = topoxUse & topoyUse;
 rfCycGood = rfCyc(goodTopo,:);
 figure
 imagesc(rfCycGood,[0 1]); title('topoX and topoY cyc average')
@@ -65,7 +70,7 @@ save(compiledFile,'rf','rfAmp','rfCyc');
 %%% load behavior data
 [f p ] = uigetfile('*.mat','behav pts');
 load(fullfile(p,f));
-behavUse = mean(dF,2)~=0;
+behavUse = 1:cellCutoff
 behavdF = dFdecon; behavTrialData = allTrialData;
 trialdF = dFalign; onsetFrame = onsets/0.25;
 

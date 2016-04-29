@@ -30,7 +30,7 @@ else %%% new session data
     if twocolor
         [dfofInterp dtRaw redframe greenframe] = get2colordata(fileName,dt,cycLength,cfg); %%% not currently functional!
     else
-        [dfofInterp dtRaw greenframe framerate phasetimes meanImg] = get2pdata_sbx(fileName,dt,cycLength,cfg);
+        [dfofInterp dtRaw greenframe framerate phasetimes meanImg dt] = get2pdata_sbx(fileName,dt,cycLength,cfg);
     end
     
     
@@ -45,7 +45,7 @@ else %%% new session data
         if twocolor
             save(sessionName,'dfofInterp','cycLength','redframe','greenframe','-v7.3');
         else
-            save(sessionName,'dfofInterp','cycLength','greenframe','phasetimes','meanImg','-v7.3');
+            save(sessionName,'dfofInterp','cycLength','greenframe','phasetimes','meanImg','dt','-v7.3');
         end
         toc
         display('done')

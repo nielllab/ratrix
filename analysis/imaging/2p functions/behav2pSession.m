@@ -2,9 +2,11 @@ function behav2pSession( fileName, sessionName,behavfile,psfile)%%% create sessi
 %%% reads raw images, calculates dfof, and aligns to stim sync
 
 dt = 0.1; %%% resampled time frame
+
+
 framerate=1/dt;
 cycLength=10;
-cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  %%% configuration parameters
+cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  cfg.syncToVid = 0; %%% configuration parameters
 get2pSession_sbx;
 
 if ~exist('onsets','var')

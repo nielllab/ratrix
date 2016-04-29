@@ -61,7 +61,7 @@ options = CNMFSetParms(...
     'fudge_factor',0.9,...                     % bias correction for AR coefficients  %%% = 0.7 for .25sec data
     'merge_thr',merge_thr,...                    % merging threshold
     'gSig',tau,...
-    'min_size',2,'max_size',5, ...  %%% default 3 an d8
+    'min_size',2,'max_size',6, ...  %%% default 3 an d8
     'sx',12,'df_prctile',5, ...     %%% default 16, 50
     'restimate_g', 1,  ...            %%% recalc AR coefficients during updating (maybe turn this off so we can hard code or upper limit?
     'nb',1, ...                  %%% default 1
@@ -175,9 +175,9 @@ drawnow
 % imshow(overlay);
 
 
-suffix = '_Eff_ptshighTF';
+suffix = '_Eff_ptshighTFnosync';
     outname = [filename{session}(1:end-4) '_' suffix '.mat'];
     save(outname,'dF','greenframe','meanImg','usePts','spikes','meanShiftImg');
     
-    keyboard
+
 end

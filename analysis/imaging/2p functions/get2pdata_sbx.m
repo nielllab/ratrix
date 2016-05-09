@@ -63,6 +63,7 @@ display('doing interp')  %%% interpolate at image frames corresponding to dt int
 
 im_dt = (1/framerate)*binsize; %%% 2p sample interval after binning
 
+
 if cfg.syncToVid
     dt = cfg.dt;  %%% desired 2p sample interval
     df = dt*60;    %%% desired 2p sample interval in terms of stimulus frames (typical == 15_

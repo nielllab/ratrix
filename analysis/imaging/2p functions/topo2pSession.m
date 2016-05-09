@@ -5,7 +5,11 @@ dt = 0.1; %%% resampled time frame
 framerate=1/dt;
 cycLength=10;
 cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  %%% configuration parameters
+cfg.syncToVid=1; cfg.saveDF=1;
 get2pSession_sbx;
+
+nframes = min(size(dfofInterp,3),3000);  %%% limit topoY data to 5mins to avoid movie boundaries
+dfofInterp = dfofInterp(:,:,1:nframes);
 
 %%% generate pixel-wise fourier map
 cycLength = cycLength/dt;
@@ -25,7 +29,7 @@ imshow(img)
 colormap(hsv); colorbar
 
 polarImg = img;
-save(sessionName,'polarImg','map','-append')
+save(sessionName,'polarImg','map','dfofInterp','-append')
 
 if exist('psfile','var')
     set(gcf, 'PaperPositionMode', 'auto');
@@ -42,6 +46,18 @@ cycAvg(:,:,i) = squeeze(mean(dfofInterp(:,:,i:cycLength:end),3));
 imagesc(cycAvg(:,:,i),[-0.1 0.5]); colormap gray; axis equal
 mov(i) = getframe(gcf);
 end
+
+cycAvgT = mean(mean(cycAvg,2),1);
+figure
+plot(squeeze(cycAvgT(1,1,:)));
+title('timecourse cyc avg');
+xlabel ('frames')
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
+
+
 vid = VideoWriter(movieFile);
 vid.FrameRate=8;
 open(vid);

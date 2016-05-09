@@ -6,13 +6,13 @@ dt = 0.1; %%% resampled time frame
 
 framerate=1/dt;
 cycLength=10;
-cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  cfg.syncToVid = 0; %%% configuration parameters
+cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  cfg.syncToVid = 0; cfg.saveDF=0;%%% configuration parameters
 get2pSession_sbx;
 
 if ~exist('onsets','var')
     if ~exist('behavfile','var')
-    [bf bp] = uigetfile('*.mat','behav permanent trial record');
-    behavfile = fullfile(bp,bf);
+        [bf bp] = uigetfile('*.mat','behav permanent trial record');
+        behavfile = fullfile(bp,bf);
     end
     
     [onsets starts trialRecs] = sync2pBehavior_sbx(behavfile ,phasetimes);
@@ -28,12 +28,16 @@ plot(squeeze(mean(mean(dfofInterp,2),1)))
 display('aligning frames')
 tic
 if ~exist('mapalign','var')
-    timepts = -1:0.25:2;
+    timepts = -1:0.2:2;
     mapalign = align2onsets(dfofInterp,onsets,dt,timepts);
     display('saving')
-   % save(sessionName,'timepts','mapalign','-append')
+    % save(sessionName,'timepts','mapalign','-append')
 end
 toc
+
+figure
+plot(timepts,squeeze((mean(mean(mean(mapalign,4),2),1))))
+
 
 %%% get target location, orientation, phase
 stim = [trialRecs.stimDetails];
@@ -69,17 +73,19 @@ for t = 1:3
     for i = 1:12;
         subplot(3,4,i);
         if t<3
-            imagesc(dfmean(:,:,i+1)-mn,[-0.3 0.3]); colormap jet; 
+            imagesc(dfmean(:,:,i+4)-mn,[-0.3 0.3]); colormap jet;
         else
-            imagesc(dfmean(:,:,i+1),[-0.3 0.3]); colormap jet; 
+            imagesc(dfmean(:,:,i+4),[-0.3 0.3]); colormap jet;
         end
-        axis equal; axis off; set(gca,'LooseInset',get(gca,'TightInset'))
+        axis equal; axis off; set(gca,'LooseInset',get(gca,'TightInset')); title(sprintf('t = %0.2f',timepts(i+4)));
     end
     if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfile,'-append');
+    end
     
 end
 
 save(sessionName,'pixResp','-append');
+
+keyboard

@@ -1,8 +1,9 @@
 %%%
+close all
 clear all
 
-dt = 0.25;
 
+dt = 0.1
 ptsfname = uigetfile('*.mat','pts file')
 load(ptsfname);
 
@@ -11,14 +12,15 @@ if ~exist('moviefname','var')
     load(fullfile(p,f),'moviefname')
 end
 
-dFdecon = dF;
+dt
+dFdecon = spikes*10;
 
-dFdecon=dF;
-for i = 1:size(dF,1);
-    dFdecon(i,:) = dFdecon(i,:)-prctile(dFdecon(i,:),1);
-end
-
-dFdecon=deconvg6s(dFdecon,0.25);
+% dFdecon=dF;
+% for i = 1:size(dF,1);
+%     dFdecon(i,:) = dFdecon(i,:)-prctile(dFdecon(i,:),1);
+% end
+% 
+% dFdecon=deconvg6s(dFdecon,0.25);
 
 
 
@@ -37,14 +39,14 @@ imagesc(dFdecon(useCells,:),[0 1]); title('dF')
 dFgood = dFdecon(useCells,:);
 
 x = unique(xpos);
-top = squeeze(mean(dfAlign(:,find(timepts==0.75),xpos==x(1))-dfAlign(:,find(timepts==0),xpos==x(1)),3));
-bottom = squeeze(mean(dfAlign(:,find(timepts==0.75),xpos==x(end))-dfAlign(:,find(timepts==0),xpos==x(end)),3));
+top = squeeze(mean(dfAlign(:,find(abs(timepts-0.5) <0.0001),xpos==x(1))-dfAlign(:,find(abs(timepts) <0.0001),xpos==x(1)),3));
+bottom = squeeze(mean(dfAlign(:,find(abs(timepts-0.5) <0.0001),xpos==x(end))-dfAlign(:,find(abs(timepts) <0.0001),xpos==x(end)),3));
 figure
 plot(top,bottom,'o');axis equal;axis square;hold on; plot([0 1],[0 1]);
 xlabel('top?') ; ylabel('bottom?')
 
-vert = squeeze(mean(dfAlign(:,find(timepts==0.75),theta==0)-dfAlign(:,find(timepts==0),theta==0),3));
-horiz = squeeze(mean(dfAlign(:,find(timepts==0.75),theta==pi/2)-dfAlign(:,find(timepts==0),theta==pi/2),3));
+vert = squeeze(mean(dfAlign(:,find(abs(timepts-0.5) <0.0001),theta==0)-dfAlign(:,find(abs(timepts) <0.0001),theta==0),3));
+horiz = squeeze(mean(dfAlign(:,find(abs(timepts-0.5) <0.0001),theta==pi/2)-dfAlign(:,find(abs(timepts) <0.0001),theta==pi/2),3));
 figure
 plot(vert,horiz,'o'); axis equal;axis square;hold on; plot([0 1],[0 1])
 xlabel('vert?'); ylabel('horiz?')
@@ -67,7 +69,7 @@ dFalignfix = dfAlign;
 % end
 
 
-clear allTrialData
+clear allTrialData allTrialDataErr
 thetas = unique(theta); sfs = unique(sf); thetas= circshift(thetas,[0 2]);
 
 if strcmp(moviefname,'C:\behavStim3sf4orient.mat')
@@ -75,7 +77,7 @@ if strcmp(moviefname,'C:\behavStim3sf4orient.mat')
         for j = 1:3
             for k = 1:4
                 use = find(theta == thetas(k) & xpos == x(j));
-                allTrialData(i,:,(j-1)*4 + k) = median(dFalignfix(i,5:end,use),3);
+                allTrialData(i,:,(j-1)*4 + k) = mean(dFalignfix(i,5:end,use),3);
                 allTrialDataErr(i,:,(j-1)*4 + k) = std(dFalignfix(i,5:end,use),[],3)/sqrt(length(use));
             end
         end
@@ -89,7 +91,7 @@ if strcmp(moviefname,'C:\behavStim2sfSmall3366.mat')
             for k = 1:2
                 for m = 1:2
                     use = find(sf ==sfs(m) & theta == thetas(k) & xpos == x(j));
-                    allTrialData(i,:,4*(j-1) +2*(k-1)+ m) = median(dFalignfix(i,5:end,use),3);
+                    allTrialData(i,:,4*(j-1) +2*(k-1)+ m) = mean(dFalignfix(i,5:end,use),3);
                     allTrialDataErr(i,:,4*(j-1) +2*(k-1)+ m) = std(dFalignfix(i,5:end,use),[],3)/sqrt(length(use));
                 end
             end
@@ -114,11 +116,8 @@ dist = pdist(goodTrialData,'correlation');
 Z = linkage(dist,'ward');
 leafOrder = optimalleaforder(Z,dist);
 
-if strcmp(moviefname,'C:\behavStim3sf4orient.mat')
-    goodTrialData(:,1:16:end)=NaN;
-else
-    goodTrialData(:,1:20:end)=NaN;
-end
+
+    goodTrialData(:,1:length(timepts):end)=NaN;
 
 
 % figure
@@ -135,7 +134,7 @@ subplot(3,4,[1 5 9 ])
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3,'reorder',leafOrder);
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-imagesc(flipud(goodTrialData(perm,:)),[0 1]);
+imagesc(flipud(goodTrialData(perm,:)),[-0.5 0.5]);
 title('trials by conditions')
 drawnow
 

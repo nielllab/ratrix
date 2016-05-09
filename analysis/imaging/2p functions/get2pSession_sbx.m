@@ -38,14 +38,17 @@ else %%% new session data
         [fs ps] = uiputfile('*.mat','session data');
         sessionName= fullfile(ps,fs);
     end
-    if sessionName~=0
+    if ~iscell(sessionName) && sessionName~=0
         display('saving data')
         
         tic
         if twocolor
             save(sessionName,'dfofInterp','cycLength','redframe','greenframe','-v7.3');
         else
-            save(sessionName,'dfofInterp','cycLength','greenframe','phasetimes','meanImg','dt','-v7.3');
+            save(sessionName,'cycLength','greenframe','phasetimes','meanImg','dt','cfg','-v7.3');
+            if cfg.saveDF==1
+                save(sessionName,'dfofInterp','-append');
+            end
         end
         toc
         display('done')

@@ -2,13 +2,14 @@ function grating2pSession(fileName,sessionName, psfile);
 %%% create session file for grating (2sf, 4sec on / 4sec off) stim
 %%% reads raw images, calculates dfof, and aligns to stim sync
 
-dt = 0.25; %%% resampled time frame
+dt = 0.1; %%% resampled time frame
 framerate=1/dt;
 
 cycLength=8;
 blank =1;
 
-cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=4;  %%% configuration parameters
+cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  %%% configuration parameters
+cfg.syncToVid=1; cfg.saveDF=1;
 get2pSession_sbx;
 
 
@@ -98,7 +99,7 @@ figure
 imagesc(osi_norm); title('osinorm')
 %osi_norm = osifit;
 
-R_norm=R/2; R_norm(R_norm>1)=1; R_norm(R_norm<0)=0;
+R_norm=R; R_norm(R_norm>1)=1; R_norm(R_norm<0)=0;
 figure
 imagesc(R_norm); title('Rnorm')
 white =ones(size(im(:,:,1)));

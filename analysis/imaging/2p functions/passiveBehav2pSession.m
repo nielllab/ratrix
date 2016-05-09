@@ -9,6 +9,7 @@ cycLength=8;
 blank =1;
 
 cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  %%% configuration parameters
+cfg.syncToVid=1; cfg.saveDF=1;
 get2pSession_sbx;
 
 cycLength = cycLength/dt;
@@ -54,7 +55,7 @@ save(sessionName,'xpos','sf','theta','phase','timepts','moviefname','-append')
 
 
 x=unique(xpos);
-
+timepts = round(timepts*10^3)/10^3;
 top = squeeze(mean(dFout(:,:,find(timepts==1),xpos==x(1))-dFout(:,:,find(timepts==0),xpos==x(1)),4));
 bottom = squeeze(mean(dFout(:,:,find(timepts==1),xpos==x(end))-dFout(:,:,find(timepts==0),xpos==x(end)),4));
 figure
@@ -97,3 +98,4 @@ if exist('psfile','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfile,'-append');
 end
+

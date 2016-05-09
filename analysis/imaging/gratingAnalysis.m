@@ -5,8 +5,8 @@ isi = 0; sf = 0; duration = 0;
 fname
 load(fname)
 
-baseRange = (3:dt:4)/dt;
-evokeRange = (1:dt:3)/dt;
+baseRange = round((2.5:dt:3.5)/dt);
+evokeRange = round((0:dt:2)/dt);
 
 nstim = min(length(xpos),floor(size(dF,2)*dt/8 -1))
 theta = theta(1:nstim); sf = sf(1:nstim);

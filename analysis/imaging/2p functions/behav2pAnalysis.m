@@ -1,14 +1,12 @@
 clear all
 
-dt=0.1;
-
 %%% load pts file (contains cell locations and dF, along with analysis results
     ptsfname = uigetfile('*.mat','pts file');
     load(ptsfname);
 
-if ~exist('pixResp','var')
+if ~exist('pixResp','var') | ~exist('dt','var')
     [f p ] = uigetfile('*.mat','session data')
-    load(fullfile(p,f),'onsets','starts','trialRecs','pixResp');
+    load(fullfile(p,f),'onsets','starts','trialRecs','pixResp','dt');
 end
 
 %%% get target location, orientation, phase
@@ -44,7 +42,7 @@ dFdecon=spikes*10;
 % 
 % dFdecon=deconvg6s(dFdecon,0.25);
 
-dFdecon = dF*2;
+%dFdecon = dF*2;
 
 figure
 imagesc(dF(useCells,:),[0 1]); 
@@ -168,7 +166,7 @@ stime = stoptime; stime(stime>20)=20;
 hist(stime,0.5:1:20); xlabel('stopping time')
 
 
-save(ptsfname,'onsets','starts','trialRecs','correct','targ','location','orient','gratingPh','dFalign','pixResp','dFdecon','resptime','stoptime','-append')
+save(ptsfname,'dt','onsets','starts','trialRecs','correct','targ','location','orient','gratingPh','dFalign','pixResp','dFdecon','resptime','stoptime','-append')
 
 dFdecon(dFdecon<-0.1)=-0.1;
 dFdecon(dFdecon>5)=5;
@@ -317,10 +315,12 @@ plot(leftright,verthoriz,'o')
 
 figure
 plot(topmean(:,t),bottommean(:,t),'o'); hold on; plot([0 2],[0 2],'g')
+xlabel('top'); ylabel('bottom')
+
 
 figure
 plot(vertresp(:,t),horizresp(:,t),'o'); hold on; plot([0 2],[0 2],'g')
-
+xlabel('vertical'); ylabel('horizontal');
 
 dFalignfix = dFalign;
 % for i=1:size(dFalign,1);
@@ -362,7 +362,7 @@ imagesc(goodTrialData,[-1 1])
 
 dist = pdist(imresize(goodTrialData, [size(goodTrialData,1),size(goodTrialData,2)*0.5]),'correlation');
 Z = linkage(dist,'ward');
-%leafOrder = optimalleaforder(Z,dist);
+leafOrder = optimalleaforder(Z,dist);
 figure
 subplot(3,4,[1 5 9 ])
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5);

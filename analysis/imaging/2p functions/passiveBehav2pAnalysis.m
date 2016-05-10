@@ -116,8 +116,8 @@ dist = pdist(goodTrialData,'correlation');
 Z = linkage(dist,'ward');
 leafOrder = optimalleaforder(Z,dist);
 
-
-    goodTrialData(:,1:length(timepts):end)=NaN;
+    goodTrialDataLabel = goodTrialData;
+    goodTrialDataLabel(:,1:(length(timepts)-4):end)=NaN;
 
 
 % figure
@@ -131,16 +131,23 @@ leafOrder = optimalleaforder(Z,dist);
 
 figure
 subplot(3,4,[1 5 9 ])
-[h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3,'reorder',leafOrder);
+[h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3);
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-imagesc(flipud(goodTrialData(perm,:)),[-0.5 0.5]);
+imagesc(flipud(goodTrialDataLabel(perm,:)),[-0.5 0.5]);
 title('trials by conditions')
 drawnow
+
+figure
+imagesc(corrcoef(goodTrialData(perm,:)'));
+
+figure
+imagesc(corrcoef(goodTrialData'));
+
 
 [Y e] = mdscale(dist,1);
 [y sortind] = sort(Y);
 figure
-imagesc(goodTrialData(sortind,:),[0 1])
+imagesc(goodTrialDataLabel(sortind,:),[0 1])
 title('mds')
 

@@ -17,7 +17,7 @@ imagesc(dF,[0 1]); title('dF')
 
 spikeBinned = imresize(spikes,[size(spikes,1) size(spikes,2)/10]);
 figure
-imagesc(spikeBinned,[ 0 0.1]);
+imagesc(spikeBinned,[ 0 0.1]); title('spikes binned')
 
 
 
@@ -28,7 +28,7 @@ usenonzero=usenonzero(usenonzero<cellCutoff);
 figure
 imagesc(dF(usenonzero,:),[0 1]); ylabel('cell #'); xlabel('frame'); title('dF');
 figure
-imagesc(spikeBinned(usenonzero,:),[0 0.1]); ylabel('cell #'); xlabel('frame'); title('dF');
+imagesc(spikeBinned(usenonzero,:),[0 0.1]); ylabel('cell #'); xlabel('frame'); title('spikes');
 
 dF = spikes*10;
 
@@ -64,7 +64,7 @@ figure
 imshow(polarImg);
 
 figure
-draw2pSegs(usePts,ph,hsv,size(meanShiftImg,1),intersect(usenonzero,find(abs(phaseVal)>0.0)),[pi/2  (2*pi -pi/4)]);
+draw2pSegs(usePts,ph,hsv,size(meanShiftImg,1),intersect(usenonzero,find(abs(phaseVal)>0.01)),[pi/2  (2*pi -pi/4)]);
 
 for i = 1:size(dF,2);
     dFnorm(:,i) = dF(:,i)/max(dF(:,i));

@@ -76,15 +76,25 @@ mapColors(score(range,2),score(range,3),'.',jet(length(range)))
 drawnow
 
 figure
-hold on
 for i = 1:5
     subplot(5,1,i)
-    plot(score(:,i))
+    plot(score(:,i)); hold on
+    for i = 1:length(onsets);
+        if location(i)<0
+            plot([onsets(i)/dt onsets(i)/dt],[-1 1],'r');
+        else
+            plot([onsets(i)/dt onsets(i)/dt],[-1 1],'g');
+        end
+    end
+    
 end
 
 
 figure
 plot(latent(1:10)/sum(latent))
+
+figure
+imagesc(coeff(:,1:10),[-0.5 0.5]); colormap jet
 
 
 
@@ -99,7 +109,7 @@ for i = 1:size(trialmean,1);
     trialmean(i,:) = trialmean(i,:)- min(trialmean(i,:));
 end
 figure
-plot(trialmean');
+plot(trialmean(useCells,:)');
 title('mean for all units')
 
 %%% get left/right traces

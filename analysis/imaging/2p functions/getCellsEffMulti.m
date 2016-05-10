@@ -8,44 +8,42 @@ align2pSessions; %%% select session files and align to reference
 shiftx = round(shiftx-mean(shiftx));
 shifty = round(shifty-mean(shifty));
 
-for session = 1:length(shiftx)
+framesPerSess = 3000;
+
+for session = 0:length(shiftx)
     
-    display(sprintf('loading %s',sessionName{session}))
-    load(filename{session},'cfg','meanImg','greenframe','cycLength','dt');
-    if ~exist('cfg','var') | ~isfield(cfg,'saveDF') | cfg.saveDF==1
-        display('loading dfofinterp')
-        tic
-        load(filename{session},'dfofInterp')
-        toc
+    if session ==0
+        for mergeSess=1:length(shiftx);
+            
+            loadAlignSessiondata         
+            nf = size(F,3);
+            downsamp = round(nf/framesPerSess); if downsamp<1, downsamp=1,end;
+            allF = cat(3,dfofAll,F(:,:,downsamp:downsamp:end));
+        end
     else
-        get2pSession_sbx;
+        loadAlignSessiondata
+        allF=F;
     end
-    
-    border=32;nframes = size(dfofInterp,3);
-    
-    F = (1 + dfofInterp).* repmat(meanImg,[1 1 size(dfofInterp,3)]);  %%% reconstruct F from dF/F
-    F=  circshift(F, -[shiftx(session) shifty(session) 0]);  %%% shift to standard coordinates
-    
-    meanShiftImg = circshift(meanImg,-[shiftx(session) shifty(session) ]);
+    clear F dfofInterp;
     
     
-    if session ==1
+    if session ==0
         figure
         display('getting correlation map');
         tic
-        imagesc(correlation_image(F(:,:,10:10:end)));
+        imagesc(correlation_image(allF(:,:,10:10:end)));
         toc
         [cropy cropx] = ginput(2);
         cropx = sort(round(cropx)); cropy= sort(round(cropy));
     end
-    cropx
-    cropy
+    
+    
     %%% default cropy = [33 364}; cropx = [33 364]
     meanShiftImg = meanShiftImg(cropx(1):cropx(2),cropy(1):cropy(2));
     figure
     imagesc(meanShiftImg); colormap gray
-    nframes = min(size(F,3),10^5)
-    Y = F(cropx(1):cropx(2),cropy(1):cropy(2),1:nframes); clear  F dfofInterp
+    nframes = min(size(allF,3),10^5)
+    Y = allF(cropx(1):cropx(2),cropy(1):cropy(2),1:nframes); clear allF
     size(Y)
     
     Y = Y - min(Y(:));
@@ -56,9 +54,15 @@ for session = 1:length(shiftx)
     
     % Set parameters
     
-    K = 400;                                           % number of components to be found
+    %K = 400;                                           % number of components to be found
     tau = 3;   %%% default = 4                                      % std of gaussian kernel (size of neuron)
-    p = 1;         %%% default =2                                   % order of autoregressive system (p = 0 no dynamics, p=1 just decay, p = 2, both rise and decay)
+     if session==0
+         p=0;
+         K = input('how many cells? (default = 400) ');
+     else
+         p = 1;
+     end
+     %%% default =2                                   % order of autoregressive system (p = 0 no dynamics, p=1 just decay, p = 2, both rise and decay)
     merge_thr = 0.8;                                  % merging threshold
     
     options = CNMFSetParms(...
@@ -83,7 +87,7 @@ for session = 1:length(shiftx)
     
     Yr = reshape(Y,d,T);
     
-    if session ==1
+    if session ==0
         
         %% fast initialization of spatial components using greedyROI and HALS
         tic
@@ -151,7 +155,7 @@ for session = 1:length(shiftx)
         usePts{i} = find(A_or(:,i));
     end
     
-    if session==1
+    if session==0
         figure
         draw2pSegs(usePts,1:length(usePts),jet,size(meanShiftImg,1),1:length(usePts),[1 length(usePts)])
         
@@ -183,10 +187,10 @@ for session = 1:length(shiftx)
     % figure
     % imshow(overlay);
     
-    
+    if session>0
     suffix = '_allfiles_PTS';
     outname = [filename{session}(1:end-4) '_' suffix '.mat'];
     save(outname,'dF','greenframe','meanImg','usePts','spikes','meanShiftImg','cropx','cropy');
-    
+    end
     
 end

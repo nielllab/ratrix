@@ -27,7 +27,8 @@ dFdecon = spikes*10;
 [dfAlign xpos sf theta phase timepts] = analyzePassiveBehav2p(dFdecon,moviefname,dt);
 save(ptsfname,'dfAlign','xpos','sf','theta','phase','timepts','moviefname','dFdecon','-append')
 
-useCells= find(mean(dFdecon,2)>0.015);
+figure
+imagesc(dFdecon,[0 1])
 
 cellCutoff = input('cell cutoff : ');
 useCells =useCells(useCells<=cellCutoff);
@@ -134,16 +135,9 @@ subplot(3,4,[1 5 9 ])
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3);
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-imagesc(flipud(goodTrialDataLabel(perm,:)),[-0.5 0.5]);
+imagesc(flipud(goodTrialDataLabel(perm,:)),[0 1]);
 title('trials by conditions')
 drawnow
-
-figure
-imagesc(corrcoef(goodTrialData(perm,:)'));
-
-figure
-imagesc(corrcoef(goodTrialData'));
-
 
 [Y e] = mdscale(dist,1);
 [y sortind] = sort(Y);

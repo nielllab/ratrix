@@ -61,10 +61,10 @@ figure
 hist(abs(phaseVal(usenonzero)),0.0125:0.025:1); xlabel('amplitude');
 
 figure
-imshow(polarImg);
+imshow(polarImg(cropx(1):cropx(2),cropy(1):cropy(2),:));
 
 figure
-draw2pSegs(usePts,ph,hsv,size(meanShiftImg,1),intersect(usenonzero,find(abs(phaseVal)>0.01)),[pi/2  (2*pi -pi/4)]);
+draw2pSegs(usePts,ph,hsv,size(meanShiftImg),intersect(usenonzero,find(abs(phaseVal)>0.025)),[pi/2  (2*pi -pi/4)]);
 
 for i = 1:size(dF,2);
     dFnorm(:,i) = dF(:,i)/max(dF(:,i));

@@ -102,7 +102,7 @@ figure
 imagesc(dFdecon(useCells,:),[0 1])
 
 
-timepts = -0.75:0.25:2;
+timepts = -0.9:0.1:2;
 dFalign = align2onsets(dFdecon,onsets,dt,timepts);
 trialmean = mean(dFalign,3);
 for i = 1:size(trialmean,1);
@@ -129,11 +129,12 @@ plot(topmean'); ylim([-1 2])
 title('left targs')
 
 figure
-imagesc(squeeze(pixResp(:,:,7,1) - pixResp(:,:,4,1)),[-0.5 0.5]); colormap jet
+imagesc(squeeze(pixResp(cropx(1):cropx(2),cropy(1):cropy(2),10,1) - pixResp(cropx(1):cropx(2),cropy(1):cropy(2),4,1)),[-0.5 0.5]); colormap jet
+axis equal
 title('left targs')
 
 figure
-draw2pSegs(usePts,topmean(:,6),jet,size(meanShiftImg,1),useCells,[-0.25 0.25])
+draw2pSegs(usePts,topmean(:,6),jet,size(meanShiftImg),useCells,[-0.25 0.25])
 title('left targs')
 
 figure
@@ -141,11 +142,12 @@ plot(bottommean')
 title('right targs'); ylim([-1 2])
 
 figure
-imagesc(squeeze(pixResp(:,:,7,2) - pixResp(:,:,4,2)),[-0.5 0.5]); colormap jet
+imagesc(squeeze(pixResp(cropx(1):cropx(2),cropy(1):cropy(2),10,2) - pixResp(cropx(1):cropx(2),cropy(1):cropy(2),4,2)),[-0.5 0.5]); colormap jet
+axis equal
 title('right targs')
 
 figure
-draw2pSegs(usePts,bottommean(:,6),jet,size(meanShiftImg,1),useCells,[-0.25 0.25])
+draw2pSegs(usePts,bottommean(:,6),jet,size(meanShiftImg),useCells,[-0.25 0.25])
 title('right targs')
 
 figure

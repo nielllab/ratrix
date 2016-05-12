@@ -33,7 +33,7 @@ topoyUse = mean(dF,2)~=0;
 goodTopo = find(rfAmp(:,1)>0.01 & rfAmp(:,2)>0.01);
 
 goodTopo=goodTopo(goodTopo<=cellCutoff);
-length(goodTopo)
+sprintf('%d cells with good topo under cutoff',length(goodTopo))
 
 %%% plot RF locations
 figure
@@ -152,9 +152,8 @@ xpos(xpos==x(1))=-1; xpos(xpos==x(2))=0; xpos(xpos==x(3))=1;
 th = unique(theta)
 theta(theta==th(1))=3; theta(theta==th(2))=4; theta(theta==th(3))=1;theta(theta==th(4))=2; %%% reorder to batch behavior
 
-use3x = mean(dF,2)~=0;
+use3x = 1:cellCutoff
 
-sum(behavUse & use3x)
 
 trialData = reshape(behavTrialData,size(behavTrialData,1),size(behavTrialData,2)*size(behavTrialData,3));
 trialData = trialData(behavUse & use3x,:);

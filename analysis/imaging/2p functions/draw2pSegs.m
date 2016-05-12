@@ -1,6 +1,11 @@
 function draw2pSegs(usePts,ph,cmap,sz,use,range);
 hold on
+if isscalar(sz)    
 img = zeros(sz,sz);
+else
+    img = zeros(sz(1),sz(2));
+end
+
 for i = 1:3
     subimg{i}=img;
 end
@@ -17,4 +22,4 @@ end
 
 imshow(img);
 axis ij;  colormap(cmap); h=colorbar; set(h,'YTick',[0 0.5 1]) ; set(h,'YTickLabel',{num2str(range(1)); num2str(0.5*(range(1)+range(2))); num2str(range(2))})
-axis([0 sz 0 sz]); axis square
+axis square

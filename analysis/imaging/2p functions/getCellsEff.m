@@ -43,7 +43,7 @@ for session = 1:length(shiftx)
     %%% default cropy = [33 364}; cropx = [33 364]
     meanShiftImg = meanShiftImg(cropx(1):cropx(2),cropy(1):cropy(2));
     figure
-    imagesc(meanShiftImg); colormap gray
+    imagesc(meanShiftImg); colormap gray; axis equal;
     nframes = min(size(F,3),10^5)
     Y = F(cropx(1):cropx(2),cropy(1):cropy(2),1:nframes); clear  F dfofInterp
     size(Y)

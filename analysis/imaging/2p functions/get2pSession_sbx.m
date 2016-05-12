@@ -38,7 +38,7 @@ else %%% new session data
         [fs ps] = uiputfile('*.mat','session data');
         sessionName= fullfile(ps,fs);
     end
-    if ~iscell(sessionName) && sessionName~=0
+    if ~iscell(sessionName) && sessionName(1)~=0
         display('saving data')
         
         tic

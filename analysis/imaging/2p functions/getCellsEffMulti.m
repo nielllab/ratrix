@@ -10,15 +10,17 @@ shifty = round(shifty-mean(shifty));
 
 framesPerSess = 3000;
 
+allF = [];
 for session = 0:length(shiftx)
     
     if session ==0
         for mergeSess=1:length(shiftx);
             
-            loadAlignSessiondata         
+            loadAlignSessiondata
             nf = size(F,3);
             downsamp = round(nf/framesPerSess); if downsamp<1, downsamp=1,end;
-            allF = cat(3,dfofAll,F(:,:,downsamp:downsamp:end));
+            allF = cat(3,allF,F(:,:,downsamp:downsamp:end));
+            usedFrames(mergeSess) = size(allF,3);
         end
     else
         loadAlignSessiondata
@@ -55,15 +57,17 @@ for session = 0:length(shiftx)
     % Set parameters
     
     %K = 400;                                           % number of components to be found
-    tau = 3;   %%% default = 4                                      % std of gaussian kernel (size of neuron)
-     if session==0
-         p=0;
-         K = input('how many cells? (default = 400) ');
-     else
-         p = 1;
-     end
-     %%% default =2                                   % order of autoregressive system (p = 0 no dynamics, p=1 just decay, p = 2, both rise and decay)
-    merge_thr = 0.8;                                  % merging threshold
+    tau = 2.5;   %%% default = 4                                      % std of gaussian kernel (size of neuron)
+    if session==0
+        p=0;
+        cell_est = 10^3*d1*d2/(500^2);                  %%% estimate number of cells by 10^5/mm^3 = 10^3 per 1mm field of view 10um deep
+        sprintf('estimated %d cells in field, might want to multiple by 1.5 to find %d',round(cell_est), round(cell_est*1.5))
+        K = input('how many cells? ');
+    else
+        p = 1;
+    end
+    %%% default =2                                   % order of autoregressive system (p = 0 no dynamics, p=1 just decay, p = 2, both rise and decay)
+    merge_thr = 0.85;                                  % merging threshold
     
     options = CNMFSetParms(...
         'd1',d1,'d2',d2,...                         % dimensions of datasets
@@ -167,12 +171,27 @@ for session = 0:length(shiftx)
     dF = C_df; spikes = S_df;
     
     figure
-    imagesc(dF,[0 1]); title(filename{session});
-    drawnow
+    imagesc(dF,[0 1]); colorbar
+    if session>0,    
+        title([filename{session} ' dF']),
+    else  title('merged sessions dF')
+        hold on
+        for s= 1:length(shiftx);
+            plot([usedFrames(s) usedFrames(s)],[1 size(dF,1)],'g','Linewidth',2)
+        end
+    end
     
     figure
-    imagesc(spikes,[0 0.2]); title(filename{session});
-    drawnow
+    imagesc(spikes,[0 0.2]); colorbar
+ if session>0,    
+        title([filename{session} ' spikes']),
+    else  title('merged sessions spikes')
+        hold on
+        for s= 1:length(shiftx);
+            plot([sum(usedFrames(1:s)) sum(usedFrames(1:s))],[1 size(dF,1)],'g')
+        end
+    end
+    
     
     % overlay = zeros(size(meanShiftImg,1),size(meanShiftImg,2),3);
     % refCells = reshape(mean(Aref,2), size(meanShiftImg));
@@ -188,9 +207,9 @@ for session = 0:length(shiftx)
     % imshow(overlay);
     
     if session>0
-    suffix = '_allfiles_PTS';
-    outname = [filename{session}(1:end-4) '_' suffix '.mat'];
-    save(outname,'dF','greenframe','meanImg','usePts','spikes','meanShiftImg','cropx','cropy');
+        suffix = '_allfiles_PTS';
+        outname = [filename{session}(1:end-4) '_' suffix '.mat'];
+        save(outname,'dF','greenframe','meanImg','usePts','spikes','meanShiftImg','cropx','cropy');
     end
     
 end

@@ -1,14 +1,21 @@
-display(sprintf('loading %s',sessionName{session}))
-load(filename{session},'cfg','meanImg','greenframe','cycLength','dt');
+if session>0
+    mergeSess=session;
+end
+    display(sprintf('loading %s',sessionName{mergeSess}))
+   clear cfg meanImg greenframe cycLength dt
+   load(filename{mergeSess},'cfg','meanImg','greenframe','cycLength','dt');
+
 if ~exist('cfg','var') | ~isfield(cfg,'saveDF') | cfg.saveDF==1
     display('loading dfofinterp')
     tic
-    load(filename{session},'dfofInterp')
+    load(filename{mergeSess},'dfofInterp')
     toc
 else
+    sprintf('need to load sbx file for %s',sessionName{mergeSess})
+    clear fileName
     get2pSession_sbx;
 end
 nframes = size(dfofInterp,3);
 F = (1 + dfofInterp).* repmat(meanImg,[1 1 size(dfofInterp,3)]);  %%% reconstruct F from dF/F
-F=  circshift(F, -[shiftx(session) shifty(session) 0]);  %%% shift to standard coordinates
-meanShiftImg = circshift(meanImg,-[shiftx(session) shifty(session) ]);
+F=  circshift(F, -[shiftx(mergeSess) shifty(mergeSess) 0]);  %%% shift to standard coordinates
+meanShiftImg = circshift(meanImg,-[shiftx(mergeSess) shifty(mergeSess) ]);

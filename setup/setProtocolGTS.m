@@ -56,7 +56,7 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
-       percentCorrectionTrials = ..75;
+       percentCorrectionTrials = .75;
        stim.gain = 0.60 * ones(2,1); %try this since has trouble fully stopping; 4/25/16
  
     

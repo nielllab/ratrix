@@ -37,7 +37,7 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
-       percentCorrectionTrials = .5; 
+       percentCorrectionTrials = .75; 
     
    case 'g62gg5rt' % Started 4/13/16 
        requestRewardSizeULorMS = 0;
@@ -49,14 +49,14 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
-       percentCorrectionTrials = .8;
+       percentCorrectionTrials = .7;
    
     
    case 'g62ff4lt' % Started 4/13/16
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
-       percentCorrectionTrials = .8;
+       percentCorrectionTrials = ..75;
        stim.gain = 0.60 * ones(2,1); %try this since has trouble fully stopping; 4/25/16
  
     
@@ -64,7 +64,7 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
-       percentCorrectionTrials = .75;
+       percentCorrectionTrials = .7;
 
     
    case 'g62dd6lt' % Started 4/13/16
@@ -78,23 +78,16 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 139;
        msPenalty               =3500;
-       percentCorrectionTrials = .8;     
+       percentCorrectionTrials = .7;     
 
 
    case 'g62ff5lt' % Started 3/9/16  %GTS started 3/20/16
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 155;
        msPenalty               =3500;
-       percentCorrectionTrials = .8; 
+       percentCorrectionTrials = .75; 
        stim.gain = 0.60 * ones(2,1); %try this since has trouble fully stopping; 4/25/16
         
-   
-       
-   case 'g62ee8tt' % Started 2/29/16  %GTS started 3/20/16 %back to GoToBlack 4/2/16
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 139;
-       msPenalty               =3500;
-       percentCorrectionTrials = .8;
        
     
    case 'g62dd2ln' % Started 1/26/16
@@ -116,7 +109,7 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 59;
        msPenalty               =3500;
-       percentCorrectionTrials = .8;
+       percentCorrectionTrials = .6;
        stim.gain = 0.55 * ones(2,1); %try this since has trouble fully stopping 4/25/16
 
 

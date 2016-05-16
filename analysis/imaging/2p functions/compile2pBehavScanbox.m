@@ -21,7 +21,7 @@ topoxUse = mean(dF,2)~=0;  %%% find cells that were successfully extracted
 load(fullfile(p,f));
 
 figure
-imagesc(dF)
+imagesc(dF,[0 1])
 cellCutoff = input('cell cutoff : ')
 
 %%% extract phase and amplitude from complex fourier varlue at 0.1Hz
@@ -29,9 +29,13 @@ yph = phaseVal; rfCyc(:,:,2) = cycAvg;
 rf(:,2) = mod(angle(yph),2*pi)*72/(2*pi); rfAmp(:,2) = abs(yph);
 topoyUse = mean(dF,2)~=0;
 
+%%% find sbc? use distance from center?
+d1 = sqrt((mod(angle(xph),2*pi)-pi).^2 + (mod(angle(yph),2*pi)-pi).^2);
+d2 = sqrt((mod(angle(xph)+pi,2*pi)-pi).^2 + (mod(angle(yph)+pi,2*pi)-pi).^2);
+sbc = (d1>1.5*d2);
+
 %%% select cells responsive to both topoX and topoY
 goodTopo = find(rfAmp(:,1)>0.01 & rfAmp(:,2)>0.01);
-
 goodTopo=goodTopo(goodTopo<=cellCutoff);
 sprintf('%d cells with good topo under cutoff',length(goodTopo))
 
@@ -39,8 +43,26 @@ sprintf('%d cells with good topo under cutoff',length(goodTopo))
 figure
 plot(rf(goodTopo,2),rf(goodTopo,1),'o');axis equal;  axis([0 72 0 128]); 
 
+figure
+use = rfAmp(:,1)>0.01 & rfAmp(:,2)>0.01 &~sbc;
+plot(rf(use,2),rf(use,1),'go');axis equal;  axis([0 72 0 128]); 
+hold on
+use = rfAmp(:,1)>0.01 & rfAmp(:,2)>0.01 &sbc;
+plot(mod(rf(use,2),72),mod(rf(use,1),128),'bo');axis equal;  axis([0 72 0 128]); 
+
+figure
+use = rfAmp(:,1)>0.01 & rfAmp(:,2)>0.01 &~sbc;
+plot(rf(use,2),rf(use,1),'go');axis equal;  axis([0 72 0 128]); 
+hold on
+use = rfAmp(:,1)>0.01 & rfAmp(:,2)>0.01 &sbc;
+plot(mod(rf(use,2)+36,72),mod(rf(use,1)+64,128),'bo');axis equal;  axis([0 72 0 128]); 
+
+
+
 %%% merge X and Y cycle averages together, and select good ones
 rfCyc = reshape(rfCyc,size(rfCyc,1),size(rfCyc,2)*size(rfCyc,3));
+rfCyc = downsamplebin(rfCyc,2,10)/10;
+
 rfCycGood = rfCyc(goodTopo,:);
 figure
 imagesc(rfCycGood,[0 1]); title('topoX and topoY cyc average')
@@ -54,6 +76,8 @@ subplot(3,4,[1 5 9 ])
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
 imagesc(flipud(rfCycGood(perm,:)),[0 1]); 
+hold on
+plot([10.5 10.5],[1 length(perm)],'g')
 
 [Y e] = mdscale(dist,1);
 [y sortind] = sort(Y);
@@ -72,13 +96,19 @@ save(compiledFile,'rf','rfAmp','rfCyc');
 load(fullfile(p,f));
 behavUse = 1:cellCutoff
 behavdF = dFdecon; behavTrialData = allTrialData;
-trialdF = dFalign; onsetFrame = onsets/0.25;
-
+trialdF = dFalign; onsetFrame = onsets/dt;
+behavTimepts = timepts;
 %%% reshape average across conditions into concatenation
 trialData = reshape(behavTrialData,size(behavTrialData,1),size(behavTrialData,2)*size(behavTrialData,3));
 trialData = trialData(behavUse,:);
+trialData = downsamplebin(trialData,2,3)/3;
 
-dist = pdist(trialData,'correlation');
+% baseline = mean(mean(behavTrialData(behavUse,timepts<0,1:4),3),2);
+% for i = 1:length(baseline)
+%     trialData(i,:) = trialData(i,:)-baseline(i);
+% end
+
+dist = pdist(trialData(:,1:end/2),'correlation');  %%% sort based on correct
 Z = linkage(dist,'ward');
 leafOrder = optimalleaforder(Z,dist);
 figure
@@ -86,8 +116,8 @@ subplot(3,4,[1 5 9 ])
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5,'reorder',leafOrder);
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-trialData(:,14)=-1; trialData(:,27)=-1; trialData(:,40)=-1;
-imagesc(flipud(trialData(perm,:)),[-0.5 0.5]); 
+imagesc(flipud(trialData(perm,:)),[0 1]); 
+hold on; for i= 1:8, plot([i*length(behavTimepts)/3 i*length(behavTimepts)/3]+1,[1 size(trialData,1)],'g'); end
 title('behav resp')
 
 behavTopo = rfCyc(behavUse,:);
@@ -98,18 +128,16 @@ axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
 imagesc(flipud(behavTopo(perm,:)),[0 1]); 
 title('topo clusterd by behav resp type')
+hold on; plot([10.5 10.5],[1 length(perm)],'g')
 
 behavdFgood = behavdF(behavUse,:);
-dist = pdist(behavdFgood,'correlation');
-Z = linkage(dist,'ward');
-leafOrder = optimalleaforder(Z,dist);
 figure
 subplot(3,4,[1 5 9 ])
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5,'reorder',leafOrder);
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
 imagesc(flipud(behavdFgood(perm,:)),[0 1]); 
-title('topo clusterd by behav resp type')
+title('full behavior trace clusterd by behav resp type')
 
 %%%summary of behav
 
@@ -154,11 +182,11 @@ theta(theta==th(1))=3; theta(theta==th(2))=4; theta(theta==th(3))=1;theta(theta=
 
 use3x = 1:cellCutoff
 
-
 trialData = reshape(behavTrialData,size(behavTrialData,1),size(behavTrialData,2)*size(behavTrialData,3));
 trialData = trialData(behavUse & use3x,:);
+trialData = downsamplebin(trialData,2,3)/3;
 
-dist = pdist(trialData(:,1:48),'correlation');
+dist = pdist(trialData(:,1:end/2),'correlation');
 Z = linkage(dist,'ward');
 leafOrder = optimalleaforder(Z,dist);
 figure
@@ -166,20 +194,22 @@ subplot(3,4,[1 5 9 ])
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3,'reorder',leafOrder);
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-trialData(:,1:12:end)=NaN; 
-imagesc(flipud(trialData(perm,:)),[0 1]); 
+imagesc(flipud(trialData(perm,:)),[0 0.5]); 
+hold on; for i= 1:8, plot([i*length(behavTimepts)/3 i*length(behavTimepts)/3]+1,[1 size(trialData,1)],'g'); end
+
 title('behav resp')
 
 passData = reshape(passiveData3x, size(passiveData3x,1),size(passiveData3x,2)*size(passiveData3x,3));
-
 behavPass = passData(behavUse& use3x,:);
+behavPass = downsamplebin(behavPass,2,2)/2;
 figure
 subplot(3,4,[1 5 9 ])
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3,'reorder',leafOrder);
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-imagesc(flipud(behavPass(perm,:)),[-0.5 0.5]); 
+imagesc(flipud(behavPass(perm,:)),[0 0.5]); 
 title('passive 3x clustered by behav resp type')
+hold on; for i= 1:12, plot([i*length(usepts)/2 i*length(usepts)/2]+1,[1 size(trialData,1)],'g'); end
 
 %%% summary of passive 3x (3x positions, 4 thetas, 1 sf (matched to behav), random phase
 
@@ -202,4 +232,4 @@ title('passive 3x clustered by behav resp type')
 %%% cond([3 7 11]) theta ==3;
 %%% cond(4 8 12]) theta ==4;
 
-save(compiledFile,'dF3x','trialdF3x','xpos3x','theta3x','phase3x','passiveData3x','-append')
+save(compiledFile,'dF3x','trialdF3x','xpos3x','theta3x','phase3x','passiveData3x','cellCutoff','-append')

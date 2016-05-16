@@ -31,7 +31,7 @@ figure
 imagesc(dFdecon,[0 1])
 
 cellCutoff = input('cell cutoff : ');
-useCells =useCells(useCells<=cellCutoff);
+useCells =1:cellCutoff;
 
 
 figure
@@ -73,13 +73,16 @@ dFalignfix = dfAlign;
 clear allTrialData allTrialDataErr
 thetas = unique(theta); sfs = unique(sf); thetas= circshift(thetas,[0 2]);
 
+
+
 if strcmp(moviefname,'C:\behavStim3sf4orient.mat')
-    for i = 1:size(dfAlign,1);
+  usepts = find(timepts>=-1 & timepts<=2.5);
+  for i = 1:size(dfAlign,1);
         for j = 1:3
             for k = 1:4
                 use = find(theta == thetas(k) & xpos == x(j));
-                allTrialData(i,:,(j-1)*4 + k) = mean(dFalignfix(i,5:end,use),3);
-                allTrialDataErr(i,:,(j-1)*4 + k) = std(dFalignfix(i,5:end,use),[],3)/sqrt(length(use));
+                allTrialData(i,:,(j-1)*4 + k) = mean(dFalignfix(i,usepts,use),3);
+                allTrialDataErr(i,:,(j-1)*4 + k) = std(dFalignfix(i,usepts,use),[],3)/sqrt(length(use));
             end
         end
     end
@@ -87,13 +90,14 @@ end
 
 
 if strcmp(moviefname,'C:\behavStim2sfSmall3366.mat')
+    usepts = find(timepts>-1 & timepts<3.5)
     for i = 1:size(dfAlign,1)
         for j = 1:2
             for k = 1:2
                 for m = 1:2
                     use = find(sf ==sfs(m) & theta == thetas(k) & xpos == x(j));
-                    allTrialData(i,:,4*(j-1) +2*(k-1)+ m) = mean(dFalignfix(i,5:end,use),3);
-                    allTrialDataErr(i,:,4*(j-1) +2*(k-1)+ m) = std(dFalignfix(i,5:end,use),[],3)/sqrt(length(use));
+                    allTrialData(i,:,4*(j-1) +2*(k-1)+ m) = mean(dFalignfix(i,usepts,use),3);
+                    allTrialDataErr(i,:,4*(j-1) +2*(k-1)+ m) = std(dFalignfix(i,usepts,use),[],3)/sqrt(length(use));
                 end
             end
         end
@@ -101,7 +105,7 @@ if strcmp(moviefname,'C:\behavStim2sfSmall3366.mat')
 end
 
 
-save(ptsfname,'allTrialData','allTrialDataErr','-append');
+save(ptsfname,'allTrialData','allTrialDataErr','usepts','timepts','-append');
 
 
 goodTrialData = allTrialData;
@@ -109,39 +113,27 @@ goodTrialData = reshape(goodTrialData,size(goodTrialData,1),size(goodTrialData,2
 useCells=find(mean(goodTrialData,2)); useCells=useCells(useCells<=cellCutoff);
 goodTrialData = goodTrialData(useCells,:);
 
-figure
-imagesc(goodTrialData,[-0.5 0.5])
+goodTrialData = downsamplebin(goodTrialData,2,3)/3;
+
 
 dist = pdist(goodTrialData,'correlation');
-%dist = pdist(dFgood,'correlation');
 Z = linkage(dist,'ward');
 leafOrder = optimalleaforder(Z,dist);
-
-    goodTrialDataLabel = goodTrialData;
-    goodTrialDataLabel(:,1:(length(timepts)-4):end)=NaN;
-
-
-% figure
-% subplot(3,4,[1 5 9 ])
-% [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3,'reorder',leafOrder);
-% axis off
-% subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-% imagesc(flipud(dFgood(perm,:)),[0 1]);
-% drawnow
-% title('sorted by condition')
 
 figure
 subplot(3,4,[1 5 9 ])
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3);
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-imagesc(flipud(goodTrialDataLabel(perm,:)),[0 1]);
+imagesc(flipud(goodTrialData(perm,:)),[0 1]);
+hold on; for i= 1:12, plot([i*length(usepts)/3 i*length(usepts)/3]+1,[1 size(dFalignfix,1)],'g'); end
 title('trials by conditions')
 drawnow
 
 [Y e] = mdscale(dist,1);
 [y sortind] = sort(Y);
 figure
-imagesc(goodTrialDataLabel(sortind,:),[0 1])
+imagesc(goodTrialData(sortind,:),[0 1])
+hold on; for i= 1:12, plot([i*length(usepts)/3 i*length(usepts)/3]+1,[1 size(dFalignfix,1)],'g'); end
 title('mds')
 

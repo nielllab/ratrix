@@ -1,4 +1,4 @@
-function [dfofInterp im_dt greenframe framerate phasetimes m dt] = get2pdata_sbx(fname,dt,cycLength,cfg);
+function [dfofInterp im_dt greenframe framerate phasetimes m dt alignment] = get2pdata_sbx(fname,dt,cycLength,cfg);
 %%% reads in 2p data and syncs with stimulus signals
 
 %%% read in sbx data and perform motion correction (if not already done)

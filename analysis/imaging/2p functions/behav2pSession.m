@@ -22,8 +22,21 @@ if ~exist('onsets','var')
 end
 
 figure
-plot(squeeze(mean(mean(dfofInterp,2),1)))
+plot(squeeze(mean(mean(dfofInterp,2),1)));
+ylabel('mean dF/F');
+    if exist('psfile','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfile,'-append');
+    end
+    
+global info
 
+figure
+plot(info.aligned.T);
+    if exist('psfile','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfile,'-append');
+    end
 
 display('aligning frames')
 tic
@@ -54,6 +67,7 @@ if ~isempty(f) && f~=length(s)
     error('bad corrects')
 end
 correct = [s.correct] == 1;
+
 
 labels = {'position -1','position 1','-1 vs 1'};
 figure

@@ -3,6 +3,12 @@ clear all
 [f p] = uiputfile('*.mat','compiled data');
 compiledFile = fullfile(p,f);
 
+[f p] = uiputfile('*.pdf','pdf file');
+pdfFile = fullfile(p,f);
+
+psfile = 'c:\temp.ps';
+if exist(psfile,'file')==2;delete(psfile);end
+
 %%% get topo stimuli
 
 %%% read topoX (spatially periodic white noise)
@@ -57,6 +63,8 @@ hold on
 use = rfAmp(:,1)>0.01 & rfAmp(:,2)>0.01 &sbc;
 plot(mod(rf(use,2)+36,72),mod(rf(use,1)+64,128),'bo');axis equal;  axis([0 72 0 128]); 
 
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
 
 
 %%% merge X and Y cycle averages together, and select good ones
@@ -79,10 +87,15 @@ imagesc(flipud(rfCycGood(perm,:)),[0 1]);
 hold on
 plot([10.5 10.5],[1 length(perm)],'g')
 
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+
 [Y e] = mdscale(dist,1);
 [y sortind] = sort(Y);
 figure
 imagesc(rfCycGood(sortind,:),[0 1])
+hold on
+plot([10.5 10.5],[1 length(perm)],'g')
 title('mdscale')
 %%% summary of topo
 %%% rf(cells,x/y) = peak position (pixels)
@@ -101,14 +114,20 @@ behavTimepts = timepts;
 %%% reshape average across conditions into concatenation
 trialData = reshape(behavTrialData,size(behavTrialData,1),size(behavTrialData,2)*size(behavTrialData,3));
 trialData = trialData(behavUse,:);
-trialData = downsamplebin(trialData,2,3)/3;
+%trialData = downsamplebin(trialData,2,3)/3;
 
-% baseline = mean(mean(behavTrialData(behavUse,timepts<0,1:4),3),2);
+baseline = mean(mean(behavTrialData(behavUse,behavTimepts<0,1:4),3),2);
 % for i = 1:length(baseline)
 %     trialData(i,:) = trialData(i,:)-baseline(i);
 % end
 
-dist = pdist(trialData(:,1:end/2),'correlation');  %%% sort based on correct
+clear epochData
+epochData(:,1,:) = mean(behavTrialData(behavUse,1:12,:),2);
+epochData(:,2,:) = mean(behavTrialData(behavUse,13:16,:),2);
+epochData(:,3,:) = mean(behavTrialData(behavUse,20:30,:),2);
+eData = reshape(epochData,size(epochData,1),size(epochData,2)*size(epochData,3));
+
+dist = pdist(eData(:,1:end/2),'correlation');  %%% sort based on correct
 Z = linkage(dist,'ward');
 leafOrder = optimalleaforder(Z,dist);
 figure
@@ -116,9 +135,12 @@ subplot(3,4,[1 5 9 ])
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5,'reorder',leafOrder);
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-imagesc(flipud(trialData(perm,:)),[0 1]); 
-hold on; for i= 1:8, plot([i*length(behavTimepts)/3 i*length(behavTimepts)/3]+1,[1 size(trialData,1)],'g'); end
+imagesc(flipud(trialData(perm,:)),[0 0.5]); 
+hold on; for i= 1:8, plot([i*length(behavTimepts) i*length(behavTimepts)]+1,[1 size(trialData,1)],'g'); end
 title('behav resp')
+
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
 
 behavTopo = rfCyc(behavUse,:);
 figure
@@ -130,6 +152,10 @@ imagesc(flipud(behavTopo(perm,:)),[0 1]);
 title('topo clusterd by behav resp type')
 hold on; plot([10.5 10.5],[1 length(perm)],'g')
 
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+
+
 behavdFgood = behavdF(behavUse,:);
 figure
 subplot(3,4,[1 5 9 ])
@@ -138,6 +164,9 @@ axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
 imagesc(flipud(behavdFgood(perm,:)),[0 1]); 
 title('full behavior trace clusterd by behav resp type')
+
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
 
 %%%summary of behav
 
@@ -182,23 +211,6 @@ theta(theta==th(1))=3; theta(theta==th(2))=4; theta(theta==th(3))=1;theta(theta=
 
 use3x = 1:cellCutoff
 
-trialData = reshape(behavTrialData,size(behavTrialData,1),size(behavTrialData,2)*size(behavTrialData,3));
-trialData = trialData(behavUse & use3x,:);
-trialData = downsamplebin(trialData,2,3)/3;
-
-dist = pdist(trialData(:,1:end/2),'correlation');
-Z = linkage(dist,'ward');
-leafOrder = optimalleaforder(Z,dist);
-figure
-subplot(3,4,[1 5 9 ])
-[h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3,'reorder',leafOrder);
-axis off
-subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-imagesc(flipud(trialData(perm,:)),[0 0.5]); 
-hold on; for i= 1:8, plot([i*length(behavTimepts)/3 i*length(behavTimepts)/3]+1,[1 size(trialData,1)],'g'); end
-
-title('behav resp')
-
 passData = reshape(passiveData3x, size(passiveData3x,1),size(passiveData3x,2)*size(passiveData3x,3));
 behavPass = passData(behavUse& use3x,:);
 behavPass = downsamplebin(behavPass,2,2)/2;
@@ -210,6 +222,10 @@ subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
 imagesc(flipud(behavPass(perm,:)),[0 0.5]); 
 title('passive 3x clustered by behav resp type')
 hold on; for i= 1:12, plot([i*length(usepts)/2 i*length(usepts)/2]+1,[1 size(trialData,1)],'g'); end
+
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+
 
 %%% summary of passive 3x (3x positions, 4 thetas, 1 sf (matched to behav), random phase
 

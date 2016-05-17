@@ -22,8 +22,6 @@ dFdecon = spikes*10;
 % 
 % dFdecon=deconvg6s(dFdecon,0.25);
 
-
-
 [dfAlign xpos sf theta phase timepts] = analyzePassiveBehav2p(dFdecon,moviefname,dt);
 save(ptsfname,'dfAlign','xpos','sf','theta','phase','timepts','moviefname','dFdecon','-append')
 

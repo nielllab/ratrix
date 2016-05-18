@@ -1,3 +1,4 @@
+close all
 clear all
 
 [f p] = uiputfile('*.mat','compiled data');
@@ -31,7 +32,7 @@ imagesc(dF,[0 1])
 cellCutoff = input('cell cutoff : ')
 
 %%% extract phase and amplitude from complex fourier varlue at 0.1Hz
-yph = phaseVal; rfCyc(:,:,2) = cycAvg; 
+yph = phaseVal; rfCyc(:,:,2) = cycAvg;
 rf(:,2) = mod(angle(yph),2*pi)*72/(2*pi); rfAmp(:,2) = abs(yph);
 topoyUse = mean(dF,2)~=0;
 
@@ -47,24 +48,24 @@ sprintf('%d cells with good topo under cutoff',length(goodTopo))
 
 %%% plot RF locations
 figure
-plot(rf(goodTopo,2),rf(goodTopo,1),'o');axis equal;  axis([0 72 0 128]); 
+plot(rf(goodTopo,2),rf(goodTopo,1),'o');axis equal;  axis([0 72 0 128]);
 
 figure
 use = rfAmp(:,1)>0.01 & rfAmp(:,2)>0.01 &~sbc;
-plot(rf(use,2),rf(use,1),'go');axis equal;  axis([0 72 0 128]); 
+plot(rf(use,2),rf(use,1),'go');axis equal;  axis([0 72 0 128]);
 hold on
 use = rfAmp(:,1)>0.01 & rfAmp(:,2)>0.01 &sbc;
-plot(mod(rf(use,2),72),mod(rf(use,1),128),'bo');axis equal;  axis([0 72 0 128]); 
+plot(mod(rf(use,2),72),mod(rf(use,1),128),'bo');axis equal;  axis([0 72 0 128]);
 
 figure
 use = rfAmp(:,1)>0.01 & rfAmp(:,2)>0.01 &~sbc;
-plot(rf(use,2),rf(use,1),'go');axis equal;  axis([0 72 0 128]); 
+plot(rf(use,2),rf(use,1),'go');axis equal;  axis([0 72 0 128]);
 hold on
 use = rfAmp(:,1)>0.01 & rfAmp(:,2)>0.01 &sbc;
-plot(mod(rf(use,2)+36,72),mod(rf(use,1)+64,128),'bo');axis equal;  axis([0 72 0 128]); 
+plot(mod(rf(use,2)+36,72),mod(rf(use,1)+64,128),'bo');axis equal;  axis([0 72 0 128]);
 
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
+set(gcf, 'PaperPositionMode', 'auto');
+print('-dpsc',psfile,'-append');
 
 
 %%% merge X and Y cycle averages together, and select good ones
@@ -83,12 +84,12 @@ subplot(3,4,[1 5 9 ])
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5,'reorder',leafOrder);
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-imagesc(flipud(rfCycGood(perm,:)),[0 1]); 
+imagesc(flipud(rfCycGood(perm,:)),[0 1]);
 hold on
 plot([10.5 10.5],[1 length(perm)],'g')
 
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
+set(gcf, 'PaperPositionMode', 'auto');
+print('-dpsc',psfile,'-append');
 
 [Y e] = mdscale(dist,1);
 [y sortind] = sort(Y);
@@ -135,12 +136,12 @@ subplot(3,4,[1 5 9 ])
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5,'reorder',leafOrder);
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-imagesc(flipud(trialData(perm,:)),[0 0.5]); 
+imagesc(trialData(perm,:),[0 0.5]); axis xy
 hold on; for i= 1:8, plot([i*length(behavTimepts) i*length(behavTimepts)]+1,[1 size(trialData,1)],'g'); end
 title('behav resp')
 
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
+set(gcf, 'PaperPositionMode', 'auto');
+print('-dpsc',psfile,'-append');
 
 behavTopo = rfCyc(behavUse,:);
 figure
@@ -148,12 +149,12 @@ subplot(3,4,[1 5 9 ])
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5,'reorder',leafOrder);
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-imagesc(flipud(behavTopo(perm,:)),[0 1]); 
+imagesc(flipud(behavTopo(perm,:)),[0 1]);
 title('topo clusterd by behav resp type')
 hold on; plot([10.5 10.5],[1 length(perm)],'g')
 
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
+set(gcf, 'PaperPositionMode', 'auto');
+print('-dpsc',psfile,'-append');
 
 
 behavdFgood = behavdF(behavUse,:);
@@ -162,11 +163,27 @@ subplot(3,4,[1 5 9 ])
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5,'reorder',leafOrder);
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-imagesc(flipud(behavdFgood(perm,:)),[0 1]); 
+imagesc(flipud(behavdFgood(perm,:)),[0 1]);
 title('full behavior trace clusterd by behav resp type')
 
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
+set(gcf, 'PaperPositionMode', 'auto');
+print('-dpsc',psfile,'-append');
+
+clear data params
+params(1,:) = double(location==-1); params(2,:) = double( orient==pi/2);
+%params(3,:) = cos(gratingPh);
+data = squeeze(trialdF(119,:,:));
+data = downsamplebin(data,1,6);
+data(end+1:end+size(params,1),:) = params;
+c = cov(data');
+figure
+imagesc(c)
+
+ic = inv(c);
+
+pc = -ic ./repmat(sqrt(diag(ic)),1,size(c,1)) ./repmat(sqrt(diag(ic))',size(c,1),1) + eye(size(c,1));
+figure
+imagesc(pc);
 
 %%%summary of behav
 
@@ -175,7 +192,7 @@ title('full behavior trace clusterd by behav resp type')
 %%% correctRate(t), resprate(t), stoprate(t) = running averages of percent correct, time to response, and time to stop (aligned to times in behavdF)
 %%% onsetFrame(trial) = time (in frames of behavdF) when stimulus onset occured
 
-%%% data by trials %%% 
+%%% data by trials %%%
 %%% trialdF = (cells,t,trial) = deconvolved timecourse for each individual trial
 %%% location(trial) = target location (-1 vs 1 = top vs bottom)
 %%% orient(trial) = target orientation (0 = vert; pi/2 = horiz);
@@ -219,12 +236,12 @@ subplot(3,4,[1 5 9 ])
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3,'reorder',leafOrder);
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-imagesc(flipud(behavPass(perm,:)),[0 0.5]); 
+imagesc(flipud(behavPass(perm,:)),[0 0.5]);
 title('passive 3x clustered by behav resp type')
 hold on; for i= 1:12, plot([i*length(usepts)/2 i*length(usepts)/2]+1,[1 size(trialData,1)],'g'); end
 
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
+set(gcf, 'PaperPositionMode', 'auto');
+print('-dpsc',psfile,'-append');
 
 
 %%% summary of passive 3x (3x positions, 4 thetas, 1 sf (matched to behav), random phase
@@ -240,7 +257,7 @@ hold on; for i= 1:12, plot([i*length(usepts)/2 i*length(usepts)/2]+1,[1 size(tri
 %%% data by condition
 %%% passiveData3x(cell,t,cond) average trial timecourse for each position/orientation condition
 %%% cond defined by:
-%%% cond(1:4)  x==-1; 
+%%% cond(1:4)  x==-1;
 %%% cond(5:8)   x==0;
 %%% cond(9:12) x==1;
 %%% cond ([1 5 9]) theta ==1;
@@ -249,3 +266,9 @@ hold on; for i= 1:12, plot([i*length(usepts)/2 i*length(usepts)/2]+1,[1 size(tri
 %%% cond(4 8 12]) theta ==4;
 
 save(compiledFile,'dF3x','trialdF3x','xpos3x','theta3x','phase3x','passiveData3x','cellCutoff','-append')
+
+try
+    dos(['ps2pdf ' 'c:\temp.ps "' pdfFile '"'] )
+catch
+    display('couldnt generate pdf');
+end

@@ -69,7 +69,7 @@ dFalignfix = dfAlign;
 
 
 clear allTrialData allTrialDataErr
-thetas = unique(theta); sfs = unique(sf); thetas= circshift(thetas,[0 2]);
+thetas = unique(theta); sfs = unique(sf); %thetas= circshift(thetas,[0 2]);
 
 
 

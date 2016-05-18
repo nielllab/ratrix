@@ -207,9 +207,10 @@ for session = 0:length(shiftx)
     % imshow(overlay);
     
     if session>0
-        suffix = '_allfiles_PTS';
+        suffix = '_allfiles_PTS_dF';
         outname = [filename{session}(1:end-4) '_' suffix '.mat'];
-        save(outname,'dF','greenframe','meanImg','usePts','spikes','meanShiftImg','cropx','cropy');
+        thisSession = filename{session};
+        save(outname,'dF','greenframe','meanImg','usePts','spikes','meanShiftImg','cropx','cropy','thisSession');
     end
     
 end

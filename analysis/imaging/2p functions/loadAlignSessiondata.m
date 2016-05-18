@@ -16,6 +16,7 @@ else
     get2pSession_sbx;
 end
 nframes = size(dfofInterp,3);
-F = (1 + dfofInterp).* repmat(meanImg,[1 1 size(dfofInterp,3)]);  %%% reconstruct F from dF/F
+%F = (1 + dfofInterp).* repmat(meanImg,[1 1 size(dfofInterp,3)]);  %%% reconstruct F from dF/F
+F= dfofInterp;
 F=  circshift(F, -[shiftx(mergeSess) shifty(mergeSess) 0]);  %%% shift to standard coordinates
 meanShiftImg = circshift(meanImg,-[shiftx(mergeSess) shifty(mergeSess) ]);

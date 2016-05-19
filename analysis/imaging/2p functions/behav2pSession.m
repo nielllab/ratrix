@@ -24,19 +24,19 @@ end
 figure
 plot(squeeze(mean(mean(dfofInterp,2),1)));
 ylabel('mean dF/F');
-    if exist('psfile','var')
-        set(gcf, 'PaperPositionMode', 'auto');
-        print('-dpsc',psfile,'-append');
-    end
-    
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
+
 global info
 
 figure
 plot(info.aligned.T);
-    if exist('psfile','var')
-        set(gcf, 'PaperPositionMode', 'auto');
-        print('-dpsc',psfile,'-append');
-    end
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
 
 display('aligning frames')
 tic

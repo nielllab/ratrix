@@ -1,15 +1,15 @@
+function sizeSelect2pSession( fileName, sessionName,psfile)
+
 %%% create session file for passive presentation of behavior (grating patch) stim
 %%% reads raw images, calculates dfof, and aligns to stim sync
-
-clear all
-
-dt = 0.25; %%% resampled time frame
+dt = 0.1; %%% resampled time frame
 framerate=1/dt;
 
 cycLength=2;
 blank =1;
 
-cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=4;  %%% configuration parameters
+cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  %%% configuration parameters
+cfg.syncToVid=1; cfg.saveDF=0;
 get2pSession_sbx;
 
 cycLength = cycLength/dt;
@@ -26,6 +26,11 @@ figure
 imshow(img)
 colormap(hsv); colorbar
 
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
+
 xpos=0;
 sf=0; isi=0; duration=0; theta=0; phase=0; radius=0;
 moviefname = 'C:\sizeSelect2sf5sz14min.mat';
@@ -38,9 +43,10 @@ timepts = (timepts-1)*dt;
 dFout = align2onsets(dfofInterp,onsets,dt,timepts);
 timepts = timepts - isi;
 
-
+timepts = round(timepts*1000)/1000;
+sbxfilename = fileName;
 display('saving')
-save(sessionName,'dFout','xpos','sf','theta','phase','radius','radiusRange','timepts','moviefname','-append')
+save(sessionName,'xpos','sf','theta','phase','radius','radiusRange','timepts','moviefname','sbxfilename','-append')
 
 %keyboard
 
@@ -63,20 +69,32 @@ x=unique(xpos);
 % hold on
 % plot(timepts,squeeze(mean(mean(mean(dFout(:,:,:,xpos==x(end)),4),2),1)))
 % title('position'); xlim([min(timepts) max(timepts)]);
-%     
+%
 
 
 for location=1:length(x)
-figure
-set(gcf,'Name',sprintf('xpos = %d',x(location)))
-for s =1:length(sz)
-    img =  squeeze(mean(dFout(:,:,find(timepts==1),xpos==x(location) & radius == sz(s))-dFout(:,:,find(timepts==0),xpos==x(location) & radius==sz(s)),4));
-    subplot(2,3,s)
-    imagesc(img,[0 0.25]); axis equal; colormap jet; title(sprintf('size %d',radiusRange(s)));
-    resp(s,:) = squeeze(mean(mean(mean(dFout(:,:,:,xpos==x(location)& radius==sz(s)),4),2),1))- squeeze(mean(mean(mean(dFout(:,:,find(timepts==0),xpos==x(location)& radius==sz(s)),4),2),1));
-end
-figure
-plot(timepts,resp'); ylim([-0.05 0.2]); title(sprintf('xpos = %d',x(location))); legend;
+    figure
+    set(gcf,'Name',sprintf('xpos = %d',x(location)))
+    for s =1:length(sz)
+        img =  squeeze(mean(dFout(:,:,find(timepts==1),xpos==x(location) & radius == sz(s))-dFout(:,:,find(timepts==0),xpos==x(location) & radius==sz(s)),4));
+        subplot(2,3,s)
+        imagesc(img,[0 0.25]); axis equal; colormap jet; title(sprintf('size %d',radiusRange(s)));
+        resp(s,:) = squeeze(mean(mean(mean(dFout(:,:,:,xpos==x(location)& radius==sz(s)),4),2),1))- squeeze(mean(mean(mean(dFout(:,:,find(timepts==0),xpos==x(location)& radius==sz(s)),4),2),1));
+    end
+    
+    if exist('psfile','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfile,'-append');
+    end
+    
+    figure
+    plot(timepts,resp'); ylim([-0.05 0.2]); title(sprintf('xpos = %d',x(location))); legend;
+    
+    if exist('psfile','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfile,'-append');
+    end
+    
 end
 
 
@@ -88,33 +106,33 @@ for s = 1:length(sz);
         end
     end
 end
-            
+
 
 mainfig = figure
 location =1; s = 3;
 imagesc(squeeze(mean(dFout(:,:,find(timepts==1),xpos==x(location) & radius == sz(s))-dFout(:,:,find(timepts==0),xpos==x(location) & radius==sz(s)),4)),[0 0.25]); colormap jet
 
-for i = 1:10;
-    figure(mainfig)
-    [ypt xpt] = ginput(1); xpt= round(xpt); ypt= round(ypt);
-    hold on
-    plot(ypt,xpt,'go')
-    response = squeeze(data(xpt,ypt,:,:,1,1));
-    for s = 1:size(response,2);
-        response(:,s) = response(:,s) - response(find(timepts==0),s);
-    end
-    
-    figure
-    plot(response)
-    sz_tune(i,:) = squeeze(mean(response(8:10,:),1)); sz_tune(i,:) = sz_tune(i,:)/max(sz_tune(i,:));
-figure
-plot(sz_tune(i,:));
-end
+% for i = 1:10;
+%     figure(mainfig)
+%     [ypt xpt] = ginput(1); xpt= round(xpt); ypt= round(ypt);
+%     hold on
+%     plot(ypt,xpt,'go')
+%     response = squeeze(data(xpt,ypt,:,:,1,1));
+%     for s = 1:size(response,2);
+%         response(:,s) = response(:,s) - response(find(timepts==0),s);
+%     end
+%     
+%     figure
+%     plot(response)
+%     sz_tune(i,:) = squeeze(mean(response(8:10,:),1)); sz_tune(i,:) = sz_tune(i,:)/max(sz_tune(i,:));
+%     figure
+%     plot(sz_tune(i,:));
+% end
+% 
+% figure
+% plot(sz_tune');
 
-figure
-plot(sz_tune');
-    
 
-    
+
 
 

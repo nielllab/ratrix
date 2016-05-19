@@ -161,7 +161,7 @@ for session = 0:length(shiftx)
     
     if session==0
         figure
-        draw2pSegs(usePts,1:length(usePts),jet,size(meanShiftImg,1),1:length(usePts),[1 length(usePts)])
+        draw2pSegs(usePts,1:length(usePts),jet,size(meanShiftImg),1:length(usePts),[1 length(usePts)])
         
         contour_threshold = 0.95;                       % amount of energy used for each component to construct contour plot
         figure;

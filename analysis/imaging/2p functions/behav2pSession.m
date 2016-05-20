@@ -100,5 +100,6 @@ for t = 1:3
     
 end
 
-save(sessionName,'pixResp','-append');
+sbxfilename = fileName;
+save(sessionName,'pixResp','sbxfilename','-append');
 

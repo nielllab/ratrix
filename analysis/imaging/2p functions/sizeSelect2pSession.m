@@ -133,6 +133,3 @@ imagesc(squeeze(mean(dFout(:,:,find(timepts==1),xpos==x(location) & radius == sz
 % plot(sz_tune');
 
 
-
-
-

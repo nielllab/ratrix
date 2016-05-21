@@ -14,7 +14,7 @@ else
     sprintf('need to load sbx file for %s',sessionName{mergeSess})
     clear fileName
     if exist('sbxfilename','var')
-        fileName = sbxfilename;
+        fileName = [sbxfilename '.sbx'];
     end
     get2pSession_sbx;
     

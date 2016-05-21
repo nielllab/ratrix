@@ -133,6 +133,5 @@ imagesc(squeeze(mean(dFout(:,:,find(timepts==1),xpos==x(location) & radius == sz
 % plot(sz_tune');
 
 
+
 save([sessionName(1:end-4) 'dfofInterp'],'dfofInterp','-v7.3')
-
-

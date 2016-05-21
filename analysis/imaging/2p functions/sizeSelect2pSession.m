@@ -33,7 +33,7 @@ end
 
 xpos=0;
 sf=0; isi=0; duration=0; theta=0; phase=0; radius=0;
-moviefname = 'C:\sizeSelect2sf5sz14min.mat';
+% moviefname = 'C:\sizeSelect2sf5sz14min.mat';
 moviefname = 'C:\sizeSelect2sf1tf5sz14min.mat';
 load (moviefname)
 ntrials= min(dt*length(dfofInterp)/(isi+duration),length(sf))
@@ -133,6 +133,6 @@ imagesc(squeeze(mean(dFout(:,:,find(timepts==1),xpos==x(location) & radius == sz
 % plot(sz_tune');
 
 
-
+save([sessionName(1:end-4) 'dfofInterp'],'dfofInterp','-v7.3')
 
 

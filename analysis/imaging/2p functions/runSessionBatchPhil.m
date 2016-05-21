@@ -5,7 +5,7 @@ newpdfFile = fullfile(p,f);
 
 sbxaligndir
 
-%makeSbxMoviesBatch
+makeSbxMoviesBatch
 
 psfile = 'c:\temp.ps';
 if exist(psfile,'file')==2;delete(psfile);end

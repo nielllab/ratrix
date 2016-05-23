@@ -12,6 +12,26 @@ cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  %%% configuration parameters
 cfg.syncToVid=1; cfg.saveDF=0;
 get2pSession_sbx;
 
+global info
+
+figure
+plot(info.aligned.T);
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
+
+m=double(info.aligned.m);
+upper = prctile(m(:),95)*1.2;
+lower = min(m(:));
+figure
+imagesc(m,[lower upper]); colormap gray; title('sbx aligned mean'); axis equal
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
+
+
 cycLength = cycLength/dt;
 map = 0;
 for i= 1:size(dfofInterp,3);
@@ -45,8 +65,9 @@ timepts = timepts - isi;
 
 timepts = round(timepts*1000)/1000;
 sbxfilename = fileName;
+meandfofInterp = squeeze(mean(mean(dfofInterp,1),2))';
 display('saving')
-save(sessionName,'xpos','sf','theta','phase','radius','radiusRange','timepts','moviefname','sbxfilename','-append')
+save(sessionName,'meandfofInterp','xpos','sf','theta','phase','radius','radiusRange','timepts','moviefname','sbxfilename','-append')
 
 %keyboard
 
@@ -112,6 +133,11 @@ mainfig = figure
 location =1; s = 3;
 imagesc(squeeze(mean(dFout(:,:,find(timepts==1),xpos==x(location) & radius == sz(s))-dFout(:,:,find(timepts==0),xpos==x(location) & radius==sz(s)),4)),[0 0.25]); colormap jet
 
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
+
 % for i = 1:10;
 %     figure(mainfig)
 %     [ypt xpt] = ginput(1); xpt= round(xpt); ypt= round(ypt);
@@ -131,7 +157,3 @@ imagesc(squeeze(mean(dFout(:,:,find(timepts==1),xpos==x(location) & radius == sz
 % 
 % figure
 % plot(sz_tune');
-
-
-
-save([sessionName(1:end-4) 'dfofInterp'],'dfofInterp','-v7.3')

@@ -5,7 +5,7 @@ newpdfFile = fullfile(p,f);
 
 sbxaligndir
 
-makeSbxMoviesBatch
+% makeSbxMoviesBatch
 
 psfile = 'c:\temp.ps';
 if exist(psfile,'file')==2;delete(psfile);end
@@ -15,12 +15,12 @@ tic
 %behav2pSession('g62dd2ln_001_000.sbx','behavSessionV2.mat','trialRecords_4502-4638_20160412T135714-20160412T141357.mat',psfile);
 
 sizeSelect2pSession('g62tx1rt_001_005.sbx','sizeSessionPRE_V2.mat',psfile);
-sizeSelect2pSession('g62tx1rt_001_007.sbx','sizeSessionPOST_V2.mat',psfile);
-
-topo2pSession('g62tx1rt_001_000.sbx','topoXsessionPRE_V2.mat',psfile);
-topo2pSession('g62tx1rt_001_001.sbx','topoYsessionPRE_V2.mat',psfile);
-topo2pSession('g62tx1rt_001_008.sbx','topoXsessionPOST_V2.mat',psfile);
-topo2pSession('g62tx1rt_001_009.sbx','topoYsessionPOST_V2.mat',psfile);
+% sizeSelect2pSession('g62tx1rt_001_007.sbx','sizeSessionPOST_V2.mat',psfile);
+% 
+% topo2pSession('g62tx1rt_001_000.sbx','topoXsessionPRE_V2.mat',psfile);
+% topo2pSession('g62tx1rt_001_001.sbx','topoYsessionPRE_V2.mat',psfile);
+% topo2pSession('g62tx1rt_001_008.sbx','topoXsessionPOST_V2.mat',psfile);
+% topo2pSession('g62tx1rt_001_009.sbx','topoYsessionPOST_V2.mat',psfile);
 
 
 % 

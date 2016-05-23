@@ -63,9 +63,19 @@ for st = 0:10
     plot(st*cycLength,[0.2 1],'g:')
 end
 
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
+
 clear cycAvg
 for i = 1:cycLength/dt;
     cycAvg(i) = mean(mean(mean(dfofInterp(:,:,i:cycLength/dt:end))));
 end
 figure
 plot((1:length(cycAvg))*dt,cycAvg); xlabel('secs'); title('cycle average')
+
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end

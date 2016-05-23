@@ -20,7 +20,17 @@ spikeBinned = imresize(spikes,[size(spikes,1) size(spikes,2)/10]);
 figure
 imagesc(spikeBinned,[ 0 0.1]); title('spikes binned')
 
+figure
+hold on
+plot(mean(dF,1),'g')
+plot(meandfofInterp,'b')
+legend('dF','dfofInterp')
+hold off
 
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
 
 % usenonzero = find(mean(spikes,2)~=0); %%% gets rid of generic points that were not identified in this session
 usenonzero = 1:size(dF,1);

@@ -40,6 +40,15 @@ end
 %        pixPerCycs              = [200];
 %        normalizedPosition      = [0.45 0.55];
 %        radius                 = .35;
+   case 'g62hh6ln' % Started 4/13/16  Started HvV full habituation 5/23/16
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 123;
+       msPenalty               =3500;
+       percentCorrectionTrials = .8; 
+       pixPerCycs              = [200];
+       normalizedPosition      = [0.45 0.55];
+       radius                  = .35;
+       
        
    case 'g62tx2.11lt' % Started 2/9/16 %started HvV_center 2/20/16 %started HvV_vertical 3/26/16
        requestRewardSizeULorMS = 0;
@@ -48,8 +57,8 @@ end
        percentCorrectionTrials = .75; 
        pixPerCycs              = [200];
        normalizedPosition      = [0.33 0.66];
-       radius                 = .32;
-       stim.gain = 0.60 * ones(2,1); %try this since has trouble fully stopping 4/25/16
+       radius                 = .3;
+       stim.gain = 0.65 * ones(2,1); %try this since has trouble fully stopping 4/25/16
      
      case 'testpixhvv' % Started 5/18/15
        requestRewardSizeULorMS = 0;

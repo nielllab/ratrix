@@ -16,6 +16,7 @@ cyclelength = 2/0.1;
 ptsfname = uigetfile('*.mat','pts file');
 load(ptsfname);
 load(ptsfname(1:end-21),'meandfofInterp'); %load meandfofInterp
+stimsizes = [0,5.6,11.3,22.5,45,50.6];
 % if ~exist('polarImg','var')
 %     [f p] = uigetfile('*.mat','session data');
 %     load(fullfile(p,f),'polarImg')
@@ -89,7 +90,7 @@ onsets = dt + (0:ntrials-1)*(isi+duration);
 timepts = 1:(2*isi+duration)/dt;
 timepts = (timepts-1)*dt;
 dFout = align2onsets(dF,onsets,dt,timepts);
-% dFout = align2onsets(spikes*10,onsets,dt,timepts);
+spikesOut = align2onsets(spikes*10,onsets,dt,timepts);
 timepts = timepts - isi;
 
 %threshold big guys out
@@ -105,10 +106,17 @@ end
 clear tcourse
 for i = 1:length(radiusRange)
     tcourse(:,:,i) = median(dFout(:,:,find(radius==i)),3);
+    spcourse(:,:,i) = mean(spikesOut(:,:,find(radius==i)),3); %spikes/size average
 end
 for i=1:size(tcourse,3);
     for n= 1:size(tcourse,1);
-        tcourse(n,:,i) = tcourse(n,:,i)-squeeze(nanmean(tcourse(n,10,i),2));
+        tcourse(n,:,i) = tcourse(n,:,i)-squeeze(nanmean(tcourse(n,5:10,i),2));
+    end
+end
+
+for i=1:size(spcourse,3);
+    for n= 1:size(spcourse,1);
+        spcourse(n,:,i) = spcourse(n,:,i)-squeeze(nanmean(spcourse(n,5:10,i),2));
     end
 end
 
@@ -116,27 +124,35 @@ figure
 for i = 1:size(tcourse,3)
     subplot(2,ceil(size(tcourse,3)/2),i)
     plot(timepts,squeeze(nanmean(tcourse(:,:,i),1)))
-    axis([-1 2 -0.05 0.1])
+    axis([-1 2 -0.01 0.05])
 end
+mtit('Mean dfof per size')
 if exist('psfile','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfile,'-append');
 end
 figure
 plot(timepts,squeeze(nanmean(nanmean(tcourse,1),3)))
-axis([-1 2 -0.05 0.1])
+axis([-1 2 -0.01 0.05])
+title('Total mean dfof')
+xlabel('Time (s)')
+ylabel('dfof')
 if exist('psfile','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfile,'-append');
 end
 
 
-for i = 1:12
+for i = 1:floor(cellCutoff/10):cellCutoff
     figure
     for j=1:length(radiusRange)
         subplot(2,3,j)
-        plot(squeeze(dFout(usenonzero(i),:,find(radius==j))))
+        hold on
+        plot(timepts,squeeze(dFout(usenonzero(i),:,find(radius==j))))
+        plot(timepts,squeeze(nanmean(dFout(usenonzero(i),:,find(radius==j)),3)),'LineWidth',5,'Color','k')
+        axis([timepts(1) timepts(end)+dt 0 1])
     end
+    mtit(sprintf('Cell #%d dfof',i))
     if exist('psfile','var')
         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfile,'-append');
@@ -146,9 +162,17 @@ end
 stimper = size(tcourse,2)/3;
 % peaks = max(dFout(:,1+stimper:stimper*2,:),[],2)-nanmean(dFout(:,1:stimper,:),2);
 avgpeaks = squeeze(nanmean(max(tcourse(usenonzero,1+stimper:stimper*2,:),[],2)));%-tcourse(usenonzero,stimper,:),1));
-sepeaks = squeeze(nanstd(max(tcourse(usenonzero,1+stimper:stimper*2,:),[],2)))/sqrt(length(usenonzero))%-tcourse(usenonzero,stimper,:),[],1));
+sepeaks = squeeze(nanstd(max(tcourse(usenonzero,1+stimper:stimper*2,:),[],2)))/sqrt(length(usenonzero));%-tcourse(usenonzero,stimper,:),[],1));
+avgspikes = squeeze(nanmean(max(spcourse(usenonzero,1+stimper:stimper*2,:),[],2)));
+sespikes = squeeze(nanstd(max(spcourse(usenonzero,1+stimper:stimper*2,:),[],2)))/sqrt(length(usenonzero));
+
+
 figure
 errorbar(1:length(radiusRange),avgpeaks,sepeaks)
+xlabel('Stim Size (deg)')
+ylabel('dfof')
+axis([0 length(radiusRange)+1 0 0.02])
+set(gca,'xtick',1:6,'xticklabel',stimsizes)
 if exist('psfile','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfile,'-append');
@@ -156,13 +180,75 @@ end
 % axis([0 length(radiusRange)+1 0 0.05])
 
 figure
-plot(squeeze(nanmean(tcourse,1)))
-legend TOGGLE
+plot(timepts,squeeze(nanmean(tcourse,1)))
+legend('0deg','5.6','11.3','22.5','45','50.6')
+xlabel('Time (s)')
+ylabel('dfof')
+axis([timepts(1) timepts(end)+dt -0.01 0.02])
 if exist('psfile','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfile,'-append');
 end
 
+figure
+for i = 1:size(spcourse,3)
+    subplot(2,ceil(size(spcourse,3)/2),i)
+    plot(timepts,squeeze(nanmean(spcourse(:,:,i),1)))
+    axis([-1 2 -0.05 0.1])
+end
+mtit('Mean spikes per size')
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
+figure
+plot(timepts,squeeze(nanmean(nanmean(spcourse,1),3)))
+axis([-1 2 -0.01 0.05])
+xlabel('Time (s)')
+ylabel('Total mean spikes')
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
+
+for i = 1:floor(cellCutoff/10):cellCutoff
+    figure
+    for j=1:length(radiusRange)
+        subplot(2,3,j)
+        hold on
+        plot(timepts,squeeze(spikesOut(usenonzero(i),:,find(radius==j))))
+        plot(timepts,squeeze(nanmean(spikesOut(usenonzero(i),:,find(radius==j)),3)),'LineWidth',5,'Color','k')
+        axis([timepts(1) timepts(end)+dt 0 5])
+    end
+    mtit(sprintf('Cell #%d Spikes',i))
+    if exist('psfile','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfile,'-append');
+    end
+end
+
+figure
+errorbar(1:length(radiusRange),avgspikes,sespikes)
+xlabel('Stim Size (deg)')
+ylabel('Firing Rate')
+axis([0 length(radiusRange)+1 0 0.2])
+set(gca,'xtick',1:6,'xticklabel',stimsizes)
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
+% axis([0 length(radiusRange)+1 0 0.05])
+
+figure
+plot(timepts,squeeze(nanmean(spcourse,1)))
+legend('0deg','5.6','11.3','22.5','45','50.6')
+xlabel('Time (s)')
+ylabel('Firing Rate')
+axis([timepts(1) timepts(end)+dt -0.05 0.1])
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
 
 % 
 % 

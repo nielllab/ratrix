@@ -1,6 +1,13 @@
 %%% based on session data and generic points, does pointwise analysis
 %%% for topo (periodic spatial) stimuli
 clear all
+close all
+
+[f p] = uiputfile('*.pdf','pdf file');
+newpdfFile = fullfile(p,f);
+
+psfile = 'c:\temp.ps';
+if exist(psfile,'file')==2;delete(psfile);end
 
 dt = 0.1;
 cyclelength = 2/0.1;
@@ -8,10 +15,22 @@ cyclelength = 2/0.1;
 
 ptsfname = uigetfile('*.mat','pts file');
 load(ptsfname);
+load(ptsfname(1:end-21),'meandfofInterp'); %load meandfofInterp
 % if ~exist('polarImg','var')
 %     [f p] = uigetfile('*.mat','session data');
 %     load(fullfile(p,f),'polarImg')
 % end
+
+figure
+hold on
+plot(meandfofInterp-median(meandfofInterp),'g')
+plot(mean(dF,1)-median(mean(dF,1)),'b')
+legend('dF','dfofInterp')
+hold off
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
 
 figure
 imagesc(dF,[0 1]); title('dF')
@@ -20,17 +39,6 @@ spikeBinned = imresize(spikes,[size(spikes,1) size(spikes,2)/10]);
 figure
 imagesc(spikeBinned,[ 0 0.1]); title('spikes binned')
 
-figure
-hold on
-plot(mean(dF,1),'g')
-plot(meandfofInterp,'b')
-legend('dF','dfofInterp')
-hold off
-
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
 
 % usenonzero = find(mean(spikes,2)~=0); %%% gets rid of generic points that were not identified in this session
 usenonzero = 1:size(dF,1);
@@ -39,8 +47,16 @@ usenonzero=usenonzero(usenonzero<cellCutoff);
 
 figure
 imagesc(dF(usenonzero,:),[0 1]); ylabel('cell #'); xlabel('frame'); title('dF');
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
 figure
 imagesc(spikeBinned(usenonzero,:),[0 0.1]); ylabel('cell #'); xlabel('frame'); title('spikes');
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
 % 
 % 
 % useOld = input('auto select based on generic pts (1) or manually select points (2) or read in prev points (3) : ')
@@ -67,41 +83,87 @@ sf=0; isi=0; duration=0; theta=0; phase=0; radius=0;
 % moviefname = 'C:\sizeSelect2sf5sz14min.mat';
 moviefname = 'C:\sizeSelect2sf1tf5sz14min.mat';
 load (moviefname)
+sf=[sf sf];phase=[phase phase];radius=[radius radius];tf=[tf tf];theta=[theta theta];xpos=[xpos xpos];ypos=[ypos ypos];
 ntrials= min(dt*length(dF)/(isi+duration),length(sf))
 onsets = dt + (0:ntrials-1)*(isi+duration);
 timepts = 1:(2*isi+duration)/dt;
 timepts = (timepts-1)*dt;
 dFout = align2onsets(dF,onsets,dt,timepts);
+% dFout = align2onsets(spikes*10,onsets,dt,timepts);
 timepts = timepts - isi;
 
+%threshold big guys out
+sigthresh = 1;
+for i=1:size(dFout,1)
+    for j=1:size(dFout,3)
+        if squeeze(max(dFout(i,:,j),[],2))>sigthresh
+            dFout(i,:,j) = nan(1,size(dFout,2));
+        end
+    end
+end
+            
 clear tcourse
-for i = 1:6
+for i = 1:length(radiusRange)
     tcourse(:,:,i) = median(dFout(:,:,find(radius==i)),3);
 end
 for i=1:size(tcourse,3);
     for n= 1:size(tcourse,1);
-        tcourse(n,:,i) = tcourse(n,:,i)-tcourse(n,5,i);
+        tcourse(n,:,i) = tcourse(n,:,i)-squeeze(nanmean(tcourse(n,10,i),2));
     end
 end
 
 figure
 for i = 1:size(tcourse,3)
     subplot(2,ceil(size(tcourse,3)/2),i)
-    plot(timepts,squeeze(mean(tcourse(:,:,i),1)))
+    plot(timepts,squeeze(nanmean(tcourse(:,:,i),1)))
     axis([-1 2 -0.05 0.1])
 end
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
 figure
-plot(timepts,squeeze(mean(mean(tcourse,1),3)))
+plot(timepts,squeeze(nanmean(nanmean(tcourse,1),3)))
 axis([-1 2 -0.05 0.1])
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
 
 
 for i = 1:12
     figure
-    for j=1:6
+    for j=1:length(radiusRange)
         subplot(2,3,j)
         plot(squeeze(dFout(usenonzero(i),:,find(radius==j))))
     end
+    if exist('psfile','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfile,'-append');
+    end
 end
+
+stimper = size(tcourse,2)/3;
+% peaks = max(dFout(:,1+stimper:stimper*2,:),[],2)-nanmean(dFout(:,1:stimper,:),2);
+avgpeaks = squeeze(nanmean(max(tcourse(usenonzero,1+stimper:stimper*2,:),[],2)));%-tcourse(usenonzero,stimper,:),1));
+sepeaks = squeeze(nanstd(max(tcourse(usenonzero,1+stimper:stimper*2,:),[],2)))/sqrt(length(usenonzero))%-tcourse(usenonzero,stimper,:),[],1));
+figure
+errorbar(1:length(radiusRange),avgpeaks,sepeaks)
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
+% axis([0 length(radiusRange)+1 0 0.05])
+
+figure
+plot(squeeze(nanmean(tcourse,1)))
+legend TOGGLE
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
+
+
 % 
 % 
 % save(ptsfname,'tcourse','dFout','radius','sf','xpos','theta','-append')
@@ -135,3 +197,12 @@ end
 % 
 % figure
 % plot(latent(1:10)/sum(latent))
+
+
+
+try
+    dos(['ps2pdf ' 'c:\temp.ps "' newpdfFile '"'] )
+
+catch
+    display('couldnt generate pdf');
+end

@@ -40,13 +40,14 @@ end
 %        pixPerCycs              = [200];
 %        normalizedPosition      = [0.45 0.55];
 %        radius                 = .35;
+
    case 'g62hh6ln' % Started 4/13/16  Started HvV full habituation 5/23/16
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
        percentCorrectionTrials = .8; 
        pixPerCycs              = [200];
-       normalizedPosition      = [0.45 0.55];
+       normalizedPosition      = [0.42 0.58];
        radius                  = .35;
        
        

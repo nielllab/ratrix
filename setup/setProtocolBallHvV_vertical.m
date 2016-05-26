@@ -48,7 +48,7 @@ end
        percentCorrectionTrials = .8; 
        pixPerCycs              = [200];
        normalizedPosition      = [0.42 0.58];
-       radius                  = .35;
+       radius                  = .34;
        
        
    case 'g62tx2.11lt' % Started 2/9/16 %started HvV_center 2/20/16 %started HvV_vertical 3/26/16

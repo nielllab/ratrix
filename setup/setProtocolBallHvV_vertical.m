@@ -47,7 +47,7 @@ end
        msPenalty               =3500;
        percentCorrectionTrials = .8; 
        pixPerCycs              = [200];
-       normalizedPosition      = [0.42 0.58];
+       normalizedPosition      = [0.40 0.60];
        radius                  = .34;
        
        

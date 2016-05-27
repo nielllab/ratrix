@@ -57,8 +57,8 @@ end
        msPenalty               =3500;
        percentCorrectionTrials = .75; 
        pixPerCycs              = [200];
-       normalizedPosition      = [0.33 0.66];
-       radius                 = .3;
+       normalizedPosition      = [0.4 0.6];
+       radius                 = .33;
        stim.gain = 0.65 * ones(2,1); %try this since has trouble fully stopping 4/25/16
      
      case 'testpixhvv' % Started 5/18/15

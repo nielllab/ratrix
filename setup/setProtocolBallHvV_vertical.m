@@ -47,8 +47,8 @@ end
        msPenalty               =3500;
        percentCorrectionTrials = .8; 
        pixPerCycs              = [200];
-       normalizedPosition      = [0.40 0.60];
-       radius                  = .34;
+       normalizedPosition      = [0.37 0.63];
+       radius                  = .32;
        
        
    case 'g62tx2.11lt' % Started 2/9/16 %started HvV_center 2/20/16 %started HvV_vertical 3/26/16

@@ -242,6 +242,7 @@ catch
         ps2pdf('psfile', psfilename, 'pdffile', [psfilenameFinal(1:(end-2)) 'pdf']);
     catch
         display('couldnt generate pdf');
+    end
 end
 delete(psfilename);
 

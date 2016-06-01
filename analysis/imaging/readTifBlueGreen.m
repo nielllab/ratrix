@@ -237,9 +237,11 @@ for LED=1:3
 end  %%%LED
 try
     dos(['ps2pdf ' psfilename ' "' psfilenameFinal(1:(end-2)) 'pdf"'])
-%     ps2pdf('psfile', psfilename, 'pdffile', [psfilenameFinal(1:(end-2)) 'pdf']);
 catch
-    display('couldnt generate pdf');
+    try
+        ps2pdf('psfile', psfilename, 'pdffile', [psfilenameFinal(1:(end-2)) 'pdf']);
+    catch
+        display('couldnt generate pdf');
 end
 delete(psfilename);
 

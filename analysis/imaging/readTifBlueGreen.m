@@ -35,7 +35,6 @@ elseif in(end-4)=='_' & in(end-3)=='0'
 else
     basename=in;
 end
-
 try
     sz = size(imread([basename '_000001.tif']));
     namelength=6;
@@ -55,7 +54,7 @@ end
 
 
 psfilenameFinal = [basename '.ps'];
-psfilename = 'C:\tempPS.ps';
+psfilename = 'C:\temp.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
 figure
@@ -237,7 +236,8 @@ for LED=1:3
     
 end  %%%LED
 try
-    ps2pdf('psfile', psfilename, 'pdffile', [psfilenameFinal(1:(end-2)) 'pdf']);
+    dos(['ps2pdf ' psfilename ' "' psfilenameFinal(1:(end-2)) 'pdf"'])
+%     ps2pdf('psfile', psfilename, 'pdffile', [psfilenameFinal(1:(end-2)) 'pdf']);
 catch
     display('couldnt generate pdf');
 end

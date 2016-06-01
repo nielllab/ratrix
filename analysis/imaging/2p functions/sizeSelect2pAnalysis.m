@@ -3,6 +3,8 @@
 clear all
 close all
 
+exclude = 0; %0 removes trials above threshold, 1 clips them to the threshold
+
 [f p] = uiputfile('*.pdf','pdf file');
 newpdfFile = fullfile(p,f);
 
@@ -93,12 +95,26 @@ dFout = align2onsets(dF,onsets,dt,timepts);
 spikesOut = align2onsets(spikes*10,onsets,dt,timepts);
 timepts = timepts - isi;
 
-%threshold big guys out
-sigthresh = 1;
-for i=1:size(dFout,1)
-    for j=1:size(dFout,3)
-        if squeeze(max(dFout(i,:,j),[],2))>sigthresh
-            dFout(i,:,j) = nan(1,size(dFout,2));
+if exclude
+    %threshold big guys out
+    sigthresh = 1;
+    for i=1:size(dFout,1)
+        for j=1:size(dFout,3)
+            if squeeze(max(dFout(i,1:10,j),[],2))>sigthresh
+                dFout(i,:,j) = nan(1,size(dFout,2));
+            end
+        end
+    end
+else
+    %re-size big guys down to a max threshold
+    sigthresh = 1;
+    for i=1:size(dFout,1)
+        for j=1:size(dFout,3)
+            if squeeze(max(dFout(i,1:10,j),[],2))>sigthresh
+                vals = dFout(i,:,j);
+                vals(vals>sigthresh) = sigthresh;
+                dFout(i,:,j) = vals;
+            end
         end
     end
 end

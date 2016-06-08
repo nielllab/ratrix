@@ -68,6 +68,11 @@ for n = 2:nfiles
      subplot(2,2,1);     
     imshow(im)
     title('overlay with ref')
+       
+    if exist('psfile','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfile,'-append');
+    end
     
     drawnow
 end

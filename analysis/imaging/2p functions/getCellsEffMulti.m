@@ -4,6 +4,11 @@ clear all
 
 addpath(genpath('utilities'));
 
+[f p] = uiputfile('*.pdf','pdf file');
+pdfFileExtract = fullfile(p,f);
+psfile = 'c:\temp.ps';
+if exist(psfile,'file')==2;delete(psfile);end
+
 align2pSessions; %%% select session files and align to reference
 shiftx = round(shiftx-mean(shiftx));
 shifty = round(shifty-mean(shifty));
@@ -163,6 +168,11 @@ for session = 0:length(shiftx)
         figure
         draw2pSegs(usePts,1:length(usePts),jet,size(meanShiftImg),1:length(usePts),[1 length(usePts)])
         
+        if exist('psfile','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfile,'-append');
+        end
+        
         contour_threshold = 0.95;                       % amount of energy used for each component to construct contour plot
         figure;
         [Coor,json_file] = plot_contours(A_or,reshape(P.sn,d1,d2),contour_threshold,0); % contour plot of spatial footprints
@@ -172,7 +182,7 @@ for session = 0:length(shiftx)
     
     figure
     imagesc(dF,[0 1]); colorbar
-    if session>0,    
+    if session>0,
         title([filename{session} ' dF']),
     else  title('merged sessions dF')
         hold on
@@ -181,9 +191,14 @@ for session = 0:length(shiftx)
         end
     end
     
+    if exist('psfile','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfile,'-append');
+    end
+    
     figure
     imagesc(spikes,[0 0.2]); colorbar
- if session>0,    
+    if session>0,
         title([filename{session} ' spikes']),
     else  title('merged sessions spikes')
         hold on
@@ -191,6 +206,7 @@ for session = 0:length(shiftx)
             plot([sum(usedFrames(1:s)) sum(usedFrames(1:s))],[1 size(dF,1)],'g')
         end
     end
+    
     
     
     % overlay = zeros(size(meanShiftImg,1),size(meanShiftImg,2),3);
@@ -213,4 +229,10 @@ for session = 0:length(shiftx)
         save(outname,'dF','greenframe','meanImg','usePts','spikes','meanShiftImg','cropx','cropy','thisSession');
     end
     
+end
+
+try
+    dos(['ps2pdf ' 'c:\temp.ps "' newpdfFile '"'] )
+catch
+    display('couldnt generate pdf');
 end

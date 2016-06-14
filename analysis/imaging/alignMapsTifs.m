@@ -13,6 +13,10 @@ for multipleTifs=1:3
 
 [f p] = uigetfile('*.tif', 'overlay tif');
 overlayImg = imread(fullfile(p,f));
+rig = input('widefield rig 1 or 2 ? ');
+if rig==2
+    overlayImg = flip(overlayImg,2);
+end
 
 ph = angle(data);
 ph(ph<0)= ph(ph<0)+2*pi;

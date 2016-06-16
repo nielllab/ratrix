@@ -232,7 +232,7 @@ for session = 0:length(shiftx)
 end
 
 try
-    dos(['ps2pdf ' 'c:\temp.ps "' newpdfFile '"'] )
+    dos(['ps2pdf ' 'c:\temp.ps "' pdfFileExtract '"'] )
 catch
     display('couldnt generate pdf');
 end

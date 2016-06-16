@@ -20,5 +20,5 @@ for i = 1:3
 end
 
 
-imshow(img);
+imshow(imresize(img,8));
 axis ij;  colormap(cmap); h=colorbar; set(h,'YTick',[0 0.5 1]) ; set(h,'YTickLabel',{num2str(range(1)); num2str(0.5*(range(1)+range(2))); num2str(range(2))})

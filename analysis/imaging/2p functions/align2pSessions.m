@@ -3,7 +3,6 @@
 %%%
 %%% Note - run appropriate stim-specific programs first
 %%% to create session files
-clear all
 
 nfiles = input('# of files : ')
 for i = 1:nfiles

@@ -45,9 +45,9 @@ end
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
-       percentCorrectionTrials = .8; 
+       percentCorrectionTrials = .75; 
        pixPerCycs              = [200];
-       normalizedPosition      = [.45 .55]; %[0.33 0.66];
+       normalizedPosition      = [0.33 0.66];
        radius                  = .30;
        
        

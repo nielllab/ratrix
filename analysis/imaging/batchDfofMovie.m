@@ -39,34 +39,34 @@ for f = 1:length(files)
         sprintf('skipping %s',files(f).topoy)
     end
     
-
-    if redo | isempty([pathname files(f).grating4x3y6sf3tf]) | ~exist([pathname files(f).grating4x3y6sf3tf],'file')
-        try
-            dfofMovie([datapathname files(f).grating4x3ydata],rig);
-        catch exc
-            sprintf('couldnt do %s',files(f).grating4x3ydata)
-            nerr=nerr+1;
-            errmsg{nerr}=sprintf('couldnt do %s',files(f).grating4x3ydata)
-            errRpt{nerr}=getReport(exc,'extended')
-        end
-    else
-        sprintf('skipping %s',files(f).grating4x3ydata)
-    end
-    
-
-    if redo | isempty([pathname files(f).background3x2yBlank]) | ~exist([pathname files(f).background3x2yBlank],'file')
-        try
-            dfofMovie([datapathname files(f).backgroundData],rig);
-        catch exc
-            sprintf('couldnt do %s',files(f).backgroundData)
-            nerr=nerr+1;
-            errmsg{nerr}= sprintf('couldnt do %s',files(f).backgroundData)
-            errRpt{nerr}=getReport(exc,'extended')
-        end
-    else
-        sprintf('skipping %s',files(f).backgroundData)
-    end
-    
+% 
+%     if redo | isempty([pathname files(f).grating4x3y6sf3tf]) | ~exist([pathname files(f).grating4x3y6sf3tf],'file')
+%         try
+%             dfofMovie([datapathname files(f).grating4x3ydata],rig);
+%         catch exc
+%             sprintf('couldnt do %s',files(f).grating4x3ydata)
+%             nerr=nerr+1;
+%             errmsg{nerr}=sprintf('couldnt do %s',files(f).grating4x3ydata)
+%             errRpt{nerr}=getReport(exc,'extended')
+%         end
+%     else
+%         sprintf('skipping %s',files(f).grating4x3ydata)
+%     end
+%     
+% 
+%     if redo | isempty([pathname files(f).background3x2yBlank]) | ~exist([pathname files(f).background3x2yBlank],'file')
+%         try
+%             dfofMovie([datapathname files(f).backgroundData],rig);
+%         catch exc
+%             sprintf('couldnt do %s',files(f).backgroundData)
+%             nerr=nerr+1;
+%             errmsg{nerr}= sprintf('couldnt do %s',files(f).backgroundData)
+%             errRpt{nerr}=getReport(exc,'extended')
+%         end
+%     else
+%         sprintf('skipping %s',files(f).backgroundData)
+%     end
+%     
 
     if redo | isempty([pathname files(f).darkness]) | ~exist([pathname files(f).darkness],'file')
         try

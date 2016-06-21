@@ -81,31 +81,31 @@ for f = 1:length(files)
         sprintf('skipping %s',files(f).darknessdata)
     end
     
-    if redo | isempty([pathname files(f).masking]) | ~exist([pathname files(f).masking],'file')
-        try
-            dfofMovie([datapathname files(f).maskingdata],rig);
-        catch exc
-            sprintf('couldnt do %s',files(f).maskingdata)
-            nerr=nerr+1;
-            errmsg{nerr}=sprintf('couldnt do %s',files(f).maskingdata)
-            errRpt{nerr}=getReport(exc,'extended')
-        end
-    else
-        sprintf('skipping %s',files(f).maskingdata)
-    end
-   
-    if redo | isempty([pathname files(f).sizeselect]) | ~exist([pathname files(f).sizeselect],'file')
-        try
-            dfofMovie([datapathname files(f).sizeselectdata],rig);
-        catch exc
-            sprintf('couldnt do %s',files(f).sizeselectdata)
-            nerr=nerr+1;
-            errmsg{nerr}=sprintf('couldnt do %s',files(f).sizeselectdata)
-            errRpt{nerr}=getReport(exc,'extended')
-        end
-    else
-        sprintf('skipping %s',files(f).sizeselectdata)
-    end
+%     if redo | isempty([pathname files(f).masking]) | ~exist([pathname files(f).masking],'file')
+%         try
+%             dfofMovie([datapathname files(f).maskingdata],rig);
+%         catch exc
+%             sprintf('couldnt do %s',files(f).maskingdata)
+%             nerr=nerr+1;
+%             errmsg{nerr}=sprintf('couldnt do %s',files(f).maskingdata)
+%             errRpt{nerr}=getReport(exc,'extended')
+%         end
+%     else
+%         sprintf('skipping %s',files(f).maskingdata)
+%     end
+%    
+%     if redo | isempty([pathname files(f).sizeselect]) | ~exist([pathname files(f).sizeselect],'file')
+%         try
+%             dfofMovie([datapathname files(f).sizeselectdata],rig);
+%         catch exc
+%             sprintf('couldnt do %s',files(f).sizeselectdata)
+%             nerr=nerr+1;
+%             errmsg{nerr}=sprintf('couldnt do %s',files(f).sizeselectdata)
+%             errRpt{nerr}=getReport(exc,'extended')
+%         end
+%     else
+%         sprintf('skipping %s',files(f).sizeselectdata)
+%     end
    
     %     try
     %         dfofMovie([datapathname files(f).gratings4x3y_1data]);

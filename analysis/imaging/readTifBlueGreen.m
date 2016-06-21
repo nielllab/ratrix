@@ -235,15 +235,22 @@ for LED=1:3
     
     
 end  %%%LED
-try
-    dos(['ps2pdf ' psfilename ' "' psfilenameFinal(1:(end-2)) 'pdf"'])
-catch
+
+dos(['ps2pdf ' psfilename ' "' psfilenameFinal(1:(end-2)) 'pdf"'])
+if exist([psfilenameFinal(1:(end-2)) 'pdf'],'file')
+    ['ps2pdf ' psfilename ' "' psfilenameFinal(1:(end-2)) 'pdf"']
+    display('generated pdf using dos ps2pdf')
+else
     try
-        ps2pdf('psfile', psfilename, 'pdffile', [psfilenameFinal(1:(end-2)) 'pdf']);
+        ps2pdf('psfile', psfilename, 'pdffile', [psfilenameFinal(1:(end-2)) 'pdf'])
+        [psfilenameFinal(1:(end-2)) 'pdf']
+        display('generated pdf using builtin matlab ps2pdf')
     catch
         display('couldnt generate pdf');
+        keyboard
     end
 end
+
 delete(psfilename);
 
     function mapFig(mapIn)

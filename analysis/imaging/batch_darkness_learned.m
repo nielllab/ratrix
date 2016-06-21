@@ -352,7 +352,19 @@ files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session'; 
 files(n).monitor = 'vert'; 
 
-
+n=n+1;
+files(n).subj = 'g62y3lt';
+files(n).expt = '062016';
+files(n).topox =  'passive\062016 G62y3lt passive mapping darkness\g62y3lt_portrait_run1_topoX\g62y3lt_portrait_run1_topoXmaps.mat';
+files(n).topoxdata = 'passive\062016 G62y3lt passive mapping darkness\g62y3lt_portrait_run1_topoX\g62y3lt_portrait_run1_topoX';
+files(n).topoy = 'passive\062016 G62y3lt passive mapping darkness\g62y3lt_portrait_run2_topoY\g62y3lt_portrait_run2_topoYmaps.mat';
+files(n).topoydata = 'passive\062016 G62y3lt passive mapping darkness\g62y3lt_portrait_run2_topoY\g62y3lt_portrait_run2_topoY';
+files(n).darkness = 'passive\062016 G62y3lt passive mapping darkness\g62y3lt_portrait_run3_darkness_5min\g62y3lt_portrait_run3_darknessmaps.mat';
+files(n).darknessdata = 'passive\062016 G62y3lt passive mapping darkness\g62y3lt_portrait_run3_darkness_5min\g62y3lt_portrait_run3_darkness';
+files(n).task = 'GTS';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session'; 
+files(n).monitor = 'vert'; 
 
 
 % n=n+1;

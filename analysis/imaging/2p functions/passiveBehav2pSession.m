@@ -99,3 +99,25 @@ if exist('psfile','var')
     print('-dpsc',psfile,'-append');
 end
 
+
+
+amp = meanImg/prctile(meanImg(:),99);
+amp(amp>1)=1;
+topScaled = mat2im(top,jet,[-0.3 0.3]);
+bottomScaled = mat2im(bottom,jet,[-0.3 0.3]);
+topScaled = mat2im(top,jet,[-0.3 0.3]).*repmat(amp,[1 1 3]);
+bottomScaled = mat2im(bottom,jet,[-0.3 0.3]).*repmat(amp,[1 1 3]);
+
+figure
+subplot(1,2,1);
+imshow(imresize(topScaled,2));
+title('top')
+subplot(1,2,2);
+imshow(imresize(bottomScaled,2));
+title('bottom')
+
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
+

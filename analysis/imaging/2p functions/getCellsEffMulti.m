@@ -38,10 +38,20 @@ for session = 0:length(shiftx)
         figure
         display('getting correlation map');
         tic
-        imagesc(correlation_image(allF(:,:,10:10:end)));
+        cImage = correlation_image(allF(:,:,10:10:end));
+        imagesc(cImage);
         toc
         [cropy cropx] = ginput(2);
         cropx = sort(round(cropx)); cropy= sort(round(cropy));
+        
+        hold on
+        plot([cropy(1) cropy(1) cropy(2) cropy(2) cropy(2)], [cropx(1) cropx(2) cropx(2) cropx(1) cropx(1)],'g','linewidth',2);
+        
+       if exist('psfile','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfile,'-append');
+    end
+        
     end
     
     
@@ -226,7 +236,7 @@ for session = 0:length(shiftx)
         suffix = '_allfiles_PTS_dF';
         outname = [filename{session}(1:end-4) '_' suffix '.mat'];
         thisSession = filename{session};
-        save(outname,'dF','greenframe','meanImg','usePts','spikes','meanShiftImg','cropx','cropy','thisSession');
+        save(outname,'dF','greenframe','meanImg','usePts','spikes','meanShiftImg','cropx','cropy','thisSession','cImage');
     end
     
 end

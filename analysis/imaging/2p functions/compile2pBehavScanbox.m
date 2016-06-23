@@ -136,7 +136,7 @@ subplot(3,4,[1 5 9 ])
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5,'reorder',leafOrder);
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-imagesc(trialData(perm,:),[0 0.5]); axis xy
+imagesc((trialData(perm,:)),[0 0.5]); axis xy
 hold on; for i= 1:8, plot([i*length(behavTimepts) i*length(behavTimepts)]+1,[1 size(trialData,1)],'g'); end
 title('behav resp')
 
@@ -149,7 +149,7 @@ subplot(3,4,[1 5 9 ])
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5,'reorder',leafOrder);
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-imagesc(flipud(behavTopo(perm,:)),[0 1]);
+imagesc((behavTopo(perm,:)),[0 1]); axis xy
 title('topo clusterd by behav resp type')
 hold on; plot([10.5 10.5],[1 length(perm)],'g')
 
@@ -163,27 +163,28 @@ subplot(3,4,[1 5 9 ])
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5,'reorder',leafOrder);
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-imagesc(flipud(behavdFgood(perm,:)),[0 1]);
+imagesc((behavdFgood(perm,:)),[0 1]); axis xy
 title('full behavior trace clusterd by behav resp type')
 
 set(gcf, 'PaperPositionMode', 'auto');
 print('-dpsc',psfile,'-append');
 
-clear data params
-params(1,:) = double(location==-1); params(2,:) = double( orient==pi/2);
-%params(3,:) = cos(gratingPh);
-data = squeeze(trialdF(119,:,:));
-data = downsamplebin(data,1,6);
-data(end+1:end+size(params,1),:) = params;
-c = cov(data');
-figure
-imagesc(c)
-
-ic = inv(c);
-
-pc = -ic ./repmat(sqrt(diag(ic)),1,size(c,1)) ./repmat(sqrt(diag(ic))',size(c,1),1) + eye(size(c,1));
-figure
-imagesc(pc);
+%%% inverting covariance matrix to get partial correlations
+% clear data params
+% params(1,:) = double(location==-1); params(2,:) = double( orient==pi/2);
+% %params(3,:) = cos(gratingPh);
+% data = squeeze(trialdF(119,:,:));
+% data = downsamplebin(data,1,6);
+% data(end+1:end+size(params,1),:) = params;
+% c = cov(data');
+% figure
+% imagesc(c)
+% 
+% ic = inv(c);
+% 
+% pc = -ic ./repmat(sqrt(diag(ic)),1,size(c,1)) ./repmat(sqrt(diag(ic))',size(c,1),1) + eye(size(c,1));
+% figure
+% imagesc(pc);
 
 %%%summary of behav
 
@@ -233,10 +234,10 @@ behavPass = passData(behavUse& use3x,:);
 behavPass = downsamplebin(behavPass,2,2)/2;
 figure
 subplot(3,4,[1 5 9 ])
-[h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3,'reorder',leafOrder);
+[h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5,'reorder',leafOrder);
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-imagesc(flipud(behavPass(perm,:)),[0 0.5]);
+imagesc((behavPass(perm,:)),[0 1]); axis xy
 title('passive 3x clustered by behav resp type')
 hold on; for i= 1:12, plot([i*length(usepts)/2 i*length(usepts)/2]+1,[1 size(trialData,1)],'g'); end
 

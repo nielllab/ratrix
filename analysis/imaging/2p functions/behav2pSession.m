@@ -51,13 +51,16 @@ toc
 figure
 plot(timepts,squeeze((mean(mean(mean(mapalign,4),2),1))))
 
+keyboard
 
 %%% get target location, orientation, phase
 stim = [trialRecs.stimDetails];
-targ = sign([stim.target]);
+stim = [trialRecs.stimDetails];
 for i = 1:length(trialRecs);
-    orient(i) = trialRecs(i).stimDetails.subDetails.orientations;
+    orient(i) = pi/2 - trialRecs(i).stimDetails.subDetails.orientations;
     gratingPh(i) = trialRecs(i).stimDetails.subDetails.phases;
+    location(i) =  sign(trialRecs(i).stimDetails.subDetails.xPosPcts - 0.5);
+    targ(i) = sign(stim(i).target);
 end
 
 %%% get correct
@@ -73,11 +76,11 @@ labels = {'position -1','position 1','-1 vs 1'};
 figure
 for t = 1:3
     if t==1
-        dfmean = mean(mapalign(:,:,:,targ==-1),4);
+        dfmean = mean(mapalign(:,:,:,location==-1),4);
     elseif t==2
-        dfmean = mean(mapalign(:,:,:,targ==1),4);
+        dfmean = mean(mapalign(:,:,:,location==1),4);
     else
-        dfmean = mean(mapalign(:,:,:,targ==-1),4) -mean(mapalign(:,:,:,targ==1),4) ;
+        dfmean = mean(mapalign(:,:,:,location==-1),4) -mean(mapalign(:,:,:,location==1),4) ;
     end
     pixResp(:,:,:,t) = dfmean;
     %mn = mean(dfmean,3);
@@ -103,3 +106,27 @@ end
 sbxfilename = fileName;
 save(sessionName,'pixResp','sbxfilename','-append');
 
+top = squeeze(mean(mapalign(:,:,timepts==1,location==-1),4)) - squeeze(mean(mapalign(:,:,timepts==0,location==-1),4));
+bottom =  squeeze(mean(mapalign(:,:,timepts==1,location==1),4)) - squeeze(mean(mapalign(:,:,timepts==0,location==1),4));
+
+amp = meanImg-min(meanImg(:));
+amp = amp/prctile(amp(:),99);
+amp(amp>1)=1;
+% topScaled = mat2im(top,jet,[-0.3 0.3]);
+% bottomScaled = mat2im(bottom,jet,[-0.3 0.3]);
+topScaled = mat2im(top,jet,[-0.3 0.3]).*repmat(amp,[1 1 3]);
+bottomScaled = mat2im(bottom,jet,[-0.3 0.3]).*repmat(amp,[1 1 3]);
+
+figure
+subplot(1,2,1);
+imshow(imresize(topScaled,2));
+title('top')
+subplot(1,2,2);
+imshow(imresize(bottomScaled,2));
+title('bottom')
+
+
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end

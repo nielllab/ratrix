@@ -88,7 +88,7 @@ end
 
 
 if strcmp(moviefname,'C:\behavStim2sfSmall3366.mat')
-    usepts = find(timepts>-1 & timepts<3.5)
+    usepts = find(timepts>-1 & timepts<3.0)
     for i = 1:size(dfAlign,1)
         for j = 1:2
             for k = 1:2

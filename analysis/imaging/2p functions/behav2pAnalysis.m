@@ -29,7 +29,18 @@ correct = [s.correct] == 1;
 dFdecon=spikes*10;
 
 figure
+imagesc(meanImg);
+hold on
+  plot([cropy(1) cropy(1) cropy(2) cropy(2) cropy(1)], [cropx(1) cropx(2) cropx(2) cropx(1) cropx(1)],'g','linewidth',2);
+
+
+figure
 imagesc(dF,[0 1])
+
+cc = corrcoef(dFdecon');
+figure
+imagesc(cc,[0 0.5]); colormap jet
+
 
 cellCutoff = input('cell cutoff : ');
 useCells= 1:cellCutoff;

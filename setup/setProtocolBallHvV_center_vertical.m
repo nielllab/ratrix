@@ -43,13 +43,13 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 219;
        msPenalty               =3500;
-       percentCorrectionTrials = .5;   
+       percentCorrectionTrials = .75;   
     
    case 'g62ff7ln' % Started 6/14/16
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 219;
        msPenalty               =3500;
-       percentCorrectionTrials = .5;        
+       percentCorrectionTrials = .75;        
        
    case 'g62ll3rt' % Started 5/30/16 %%started center 6/23/16
        requestRewardSizeULorMS = 0;
@@ -101,14 +101,7 @@ switch subjIDs{1}
 %        rewardSizeULorMS        = 139;
 %        msPenalty               =3500;
 %        percentCorrectionTrials = .8;    
-       
-       
-    case 'g62tx2.11lt' % Started 2/9/16 %started HvV_center 2/20/16
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 139;
-       msPenalty               =3500;
-       percentCorrectionTrials = .8; 
-       radius                 = .3;
+
        
 %    case 'g62hh4ln' % Started 2/9/16  %started HvV_center 2/20/16 back to GoToBlack 2/28/16
 %        requestRewardSizeULorMS = 0;

@@ -64,11 +64,11 @@ switch subjIDs{1}
 %        msPenalty               =3500;
 %        percentCorrectionTrials = .5;     
     
-%     case 'g62ll4lt' % Started 5/22/16
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 219;
-%        msPenalty               =3500;
-%        percentCorrectionTrials = .5; 
+    case 'g62ll4lt' % Started 5/22/16  %sent back 7/5/16
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 219;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5; 
     
 %     case 'g62gg7lt' % Started 5/12/16
 %        requestRewardSizeULorMS = 0;

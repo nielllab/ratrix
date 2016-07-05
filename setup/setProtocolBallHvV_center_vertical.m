@@ -51,13 +51,13 @@ switch subjIDs{1}
        msPenalty               =3500;
        percentCorrectionTrials = .75;        
        
-   case 'g62ll3rt' % Started 5/30/16 %%started center 6/23/16
+   case 'g62ll3rt' % Started 5/30/16 %%started center 6/23/16 %sent back 7/5/16
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 219;
        msPenalty               =3500;
        percentCorrectionTrials = .75;         
        
-   case 'g62ll4lt' % Started 5/22/16 %%start hvv center 6/1/16 %sent back 7/5/16
+   case 'g62ll4lt' % Started 5/22/16 %%start hvv center 6/1/16 
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 219;
        msPenalty               =3500;

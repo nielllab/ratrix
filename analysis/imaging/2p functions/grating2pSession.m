@@ -9,7 +9,7 @@ cycLength=8;
 blank =1;
 
 cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  %%% configuration parameters
-cfg.syncToVid=1; cfg.saveDF=1;
+cfg.syncToVid=1; cfg.saveDF=0;
 get2pSession_sbx;
 
 
@@ -131,3 +131,6 @@ if exist('psfile','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfile,'-append');
 end
+
+sbxfilename = fileName;
+save(sessionName,'sbxfilename','-append')

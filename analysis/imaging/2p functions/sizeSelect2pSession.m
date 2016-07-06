@@ -1,11 +1,11 @@
 function sizeSelect2pSession( fileName, sessionName,psfile)
-
+dbstop if error
 %%% create session file for passive presentation of behavior (grating patch) stim
 %%% reads raw images, calculates dfof, and aligns to stim sync
 dt = 0.1; %%% resampled time frame
 framerate=1/dt;
 
-cycLength=2;
+cycLength=1;
 blank =1;
 
 cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  %%% configuration parameters
@@ -54,7 +54,7 @@ end
 xpos=0;
 sf=0; isi=0; duration=0; theta=0; phase=0; radius=0;
 % moviefname = 'C:\sizeSelect2sf5sz14min.mat';
-moviefname = 'C:\sizeSelect2sf1tf5sz14min.mat';
+moviefname = 'C:\sizeSelect2sf8sz26min.mat';
 load (moviefname)
 ntrials= min(dt*length(dfofInterp)/(isi+duration),length(sf))
 onsets = dt + (0:ntrials-1)*(isi+duration);
@@ -74,6 +74,7 @@ save(sessionName,'meandfofInterp','xpos','sf','theta','phase','radius','radiusRa
 sz = unique(radius);
 freq = unique(sf);
 x=unique(xpos);
+for i=1:length(sizeVals); sizes{i} = num2str(sizeVals(i)); end
 
 % top = squeeze(mean(dFout(:,:,find(timepts==1),xpos==x(1))-dFout(:,:,find(timepts==0),xpos==x(1)),4));
 % bottom = squeeze(mean(dFout(:,:,find(timepts==1),xpos==x(end))-dFout(:,:,find(timepts==0),xpos==x(end)),4));
@@ -97,9 +98,9 @@ for location=1:length(x)
     figure
     set(gcf,'Name',sprintf('xpos = %d',x(location)))
     for s =1:length(sz)
-        img =  squeeze(mean(dFout(:,:,find(timepts==1),xpos==x(location) & radius == sz(s))-dFout(:,:,find(timepts==0),xpos==x(location) & radius==sz(s)),4));
-        subplot(2,3,s)
-        imagesc(img,[0 0.25]); axis equal; colormap jet; title(sprintf('size %d',radiusRange(s)));
+        img =  squeeze(mean(dFout(:,:,find(timepts==duration),xpos==x(location) & radius == sz(s))-dFout(:,:,find(timepts==0),xpos==x(location) & radius==sz(s)),4));
+        subplot(2,length(sz)/2,s)
+        imagesc(img,[0 0.25]); axis equal; colormap jet; title(sprintf('size %d',sizes{s}));
         resp(s,:) = squeeze(mean(mean(mean(dFout(:,:,:,xpos==x(location)& radius==sz(s)),4),2),1))- squeeze(mean(mean(mean(dFout(:,:,find(timepts==0),xpos==x(location)& radius==sz(s)),4),2),1));
     end
     
@@ -109,7 +110,7 @@ for location=1:length(x)
     end
     
     figure
-    plot(timepts,resp'); ylim([-0.05 0.2]); title(sprintf('xpos = %d',x(location))); legend;
+    plot(timepts,resp'); ylim([-0.05 0.2]); title(sprintf('xpos = %d',x(location))); legend(sizes);
     
     if exist('psfile','var')
         set(gcf, 'PaperPositionMode', 'auto');
@@ -130,8 +131,8 @@ end
 
 
 mainfig = figure
-location =1; s = 3;
-imagesc(squeeze(mean(dFout(:,:,find(timepts==1),xpos==x(location) & radius == sz(s))-dFout(:,:,find(timepts==0),xpos==x(location) & radius==sz(s)),4)),[0 0.25]); colormap jet
+location =1; s = 4;
+imagesc(squeeze(mean(dFout(:,:,find(timepts==duration),xpos==x(location) & radius == sz(s))-dFout(:,:,find(timepts==0),xpos==x(location) & radius==sz(s)),4)),[0 0.25]); colormap jet
 
 if exist('psfile','var')
     set(gcf, 'PaperPositionMode', 'auto');

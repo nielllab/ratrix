@@ -5,7 +5,7 @@ dt = 0.1; %%% resampled time frame
 framerate=1/dt;
 cycLength=10;
 cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  %%% configuration parameters
-cfg.syncToVid=1; cfg.saveDF=1;
+cfg.syncToVid=1; cfg.saveDF=0;
 get2pSession_sbx;
 
 nframes = min(size(dfofInterp,3),3000);  %%% limit topoY data to 5mins to avoid movie boundaries
@@ -63,4 +63,7 @@ vid.FrameRate=8;
 open(vid);
 writeVideo(vid,mov);
 close(vid)
+
+sbxfilename = fileName;
+save(sessionName,'sbxfilename','-append')
 

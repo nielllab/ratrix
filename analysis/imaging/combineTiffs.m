@@ -1,6 +1,6 @@
 function combineTiffs
 dbstop if error
-
+ 
 p = mfilename('fullpath');
 addpath(fullfile(fileparts(fileparts(fileparts(p))),'bootstrap'))
 setupEnvironment;
@@ -9,9 +9,18 @@ if ~ispc
     error('win only for now')
 end
 
-behaviorPath = '\\lee\Users\nlab\Desktop\ballData2';
-imagingPath = 'C:\Users\nlab\Desktop\data'; %\\landis (accessing local via network path is slow)
-imagingPath = 'E:\widefield data';
+%%Behavior trial records location:
+
+% behaviorPath = '\\lee\Users\nlab\Desktop\ballData2'; %lee (now 2p stim comp)
+  behaviorPath = '\\LANGEVIN\backup\ballData2'; %langevin data server
+% behaviorPath = 'F:\ballData2';
+
+
+%%Imaging data location:
+
+% imagingPath = '\\LANGEVIN\backup\widefield\behavior'; %\\langevin (accessing local via network path is slow)
+% imagingPath = 'F:\widefield\behavior\data to analyze'; %on maxwell backup drive (large)
+  imagingPath = 'D:'; %%on maxwell ssd drive (smaller/faster)
 
 %%% my understanding of record formt (cmn)
 %%% record format - subject name (which suffices to find behavior data'
@@ -33,7 +42,7 @@ imagingPath = 'E:\widefield data';
 %     {'jbw03' {
 %             {[1   665],[],'9-24-12\jbw03','jbw03r1'} % 63882 (106.47 mins)
 %             {[667 962],[],'9-25-12\jbw03','jbw03r1'} % 30610 (51.0167 mins)
-%         }
+%         
 %     }
 %     
 %     {'wg02'  {
@@ -244,7 +253,7 @@ imagingPath = 'E:\widefield data';
 
 
 %imagingPath = 'H:\archived widefield behavior (12-24-13 to 4-29-14)';  %could insert try/catch?  for archived behavior files
-imagingPath = 'E:\widefield data';
+%imagingPath = 'E:\widefield data';
 recs = {
 
 
@@ -676,7 +685,7 @@ recs = {
 %   }
 %   }
 % 
-     {'g62a4tt' {
+%      {'g62a4tt' {
 %       {[1 203],[],'051415 G62A4tt HvV behavior LearnDay1\g62a4tt_run1_HvV_behavior_LearnDay1', 'g62a4tt_run1_HvV_behavior_LearnDay1'}
 %     {[204 455],[],'051615 G62A4tt HvV behavior LearnDay3\g62a4tt_run1_HvV_behavior_learnDAY3', 'g62a4tt_run1_HvV_behavior_learnDAY3'}
 %        {[456 545],[],'051915 G62A4tt HvV behavior LearnDAY6\g62a4tt_run1_HvV_behavior_learnDay6', 'g62a4tt_run1_HvV_behavior_learnDay6'}
@@ -689,15 +698,15 @@ recs = {
 %     {[2335 2512],[],'060915 G62A4tt HvV behavior LearnDAy27\g62a4tt_run1_HvV_behavior_LearnDAY27', 'g62a4tt_run1_HvV_behavior_LearnDAY27'}
 %      {[2513 2754],[],'061215 G62A4tt HvV behavior LearnDAY30\g62a4tt_run1_HvV_behavior_LearnDAY30', 'g62a4tt_run1_HvV_behavior_LearnDAY30'}
 %      {[2755 2980],[],'061515 G62A4tt HvV behavior LearnDAY33\g62a4tt_run1_HvV_behavior_learnDay33', 'g62a4tt_run1_HvV_behavior_learnDay33'}
-      {[2981 3226],[],'061915 G62A4tt HvV behavior LearnDAY37\g62a4tt_run1_HvV_behavior_learnDAY37', 'g62a4tt_run1_HvV_behavior_learnDAY37'}
-      {[3227 3418],[],'062215 G62A4tt HvV behavior LearnDAY40\g62a4tt_run1_HvV_behavior_learnDAY40', 'g62a4tt_run1_HvV_behavior_learnDAY40'}
-%     {[ ],[],'', ''}
-%     {[ ],[],'', ''}
-
-  }
-  }
+%       {[2981 3226],[],'061915 G62A4tt HvV behavior LearnDAY37\g62a4tt_run1_HvV_behavior_learnDAY37', 'g62a4tt_run1_HvV_behavior_learnDAY37'}
+%       {[3227 3418],[],'062215 G62A4tt HvV behavior LearnDAY40\g62a4tt_run1_HvV_behavior_learnDAY40', 'g62a4tt_run1_HvV_behavior_learnDAY40'}
+% %     {[ ],[],'', ''}
+% %     {[ ],[],'', ''}
+% 
+%   }
+%   }
   
-      {'g62a5nn' {
+%       {'g62a5nn' {
 %    {[1 316],[],'051515 G62A5nn HvV behavior LearnDay1\g62a5nn_run1_HvV_behavior_LearnDay1', 'g62a5nn_run1_HvV_behavior_LearnDay1'}
 %    {[317 650],[],'051715 G62A5nn HvV behavior Learn Day3\g62a5nn_run1_HvV_behavior_LearnDay3', 'g62a5nn_run1_HvV_behavior_LearnDay3'}
 %    {[665 917],[],'052015 G62A5nn HvV behavior LearnDay6\g62a5nn_run1_HvV_behavior_LearnDay6', 'g62a5nn_run1_HvV_behavior_LearnDay6'}
@@ -710,12 +719,12 @@ recs = {
 %    {[2520 2723],[],'060915 G62A5nn HvV behavior LearnDAY26\g62a5nn_run1_HvV_behavior_LearnDAY26', 'g62a5nn_run1_HvV_behavior_LearnDAY26'}
 %     {[2724 2946],[],'061215 G62A5nn HvV behavior LearnDAY29\g62a5nn_run1_HvV_behavior_learnDAY29', 'g62a5nn_run1_HvV_behavior_learnDAY29'}
 %     {[2947 3180],[],'061515 G62A5nn HvV behavior LearnDAY32\g62a5nn_run1_HvV_behavior_learnDAY32', 'g62a5nn_run1_HvV_behavior_learnDAY32'}
-     {[3181 3406],[],'061915 G62A5nn HvV behavior LearnDAY36\g62a5nn_run1_HvV_behavior_learnDAY36', 'g62a5nn_run1_HvV_behavior_learnDAY36'}
-     {[3407 3628],[],'062315 G62A5nn HvV behavior LearnDAY40\g62a5nn_run1_HvV_behavior_LearnDay40', 'g62a5nn_run1_HvV_behavior_LearnDay40'}
-%     {[ ],[],'', ''}
-    
-  }
-  } 
+%      {[3181 3406],[],'061915 G62A5nn HvV behavior LearnDAY36\g62a5nn_run1_HvV_behavior_learnDAY36', 'g62a5nn_run1_HvV_behavior_learnDAY36'}
+%      {[3407 3628],[],'062315 G62A5nn HvV behavior LearnDAY40\g62a5nn_run1_HvV_behavior_LearnDay40', 'g62a5nn_run1_HvV_behavior_LearnDay40'}
+% %     {[ ],[],'', ''}
+%     
+%   }
+%   } 
 %   
 %         {'g62r3rt' {
 % %     {[231 450],[],'060815 G62R3rt HvV behavior LearnDay1\G62R3rt_run1_HvV_behavior_LearnDAY1', 'G62R3rt_run1_HvV_behavior_LearnDAY1'}
@@ -729,7 +738,42 @@ recs = {
 %   }
 %   }    
    
-    }; %%% vert vs horiz in either top or bottom
+  
+        {'g62dd2ln' {
+%     {[30 203],[],'062216 G62dd2ln GTS behavior\g62dd2ln_portrait_run2_GTSbehavior', 'g62dd2ln_portrait_run2_GTSbehavior'}
+     {[204 557],[],'063016 G62dd2ln GTS behavior\g62dd2ln_portrait_run1_GTSbehavior', 'g62dd2ln_portrait_run1_GTSbehavior'}
+  }
+  }
+  
+   
+%         {'g62y3lt' {
+%      {[1 366],[],'062316 G62y3lt GTS behavior\g62y3lt_portrait_run1_GTSbehavior', 'g62y3lt_portrait_run1_GTSbehavior'}
+% 
+%   }
+%   } 
+%   
+  
+%              {'g62tx15lt' {
+%      {[ ],[],'', ''}
+% 
+%   }
+%   }  
+  
+%            {'' {
+%      {[ ],[],'', ''}
+% 
+%   }
+%   }  
+%template
+%           {'name' {
+%      {[starttrial endtrial],[],'directory', 'file'}
+% 
+%   }
+%   } 
+  
+    }; %end of recs
+
+%%% vert vs horiz in either top or bottom
 
 % dirOverview(imagingPath)
 

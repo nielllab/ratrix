@@ -7,6 +7,15 @@ outpathname = 'C:\Users\nlab\Desktop\data test\';
 altpathname = '\\langevin\backup\widefield\behavior\';
 n=0;
 
+%%%execute the shit above here first.
+
+%then select the sessions you need to run
+
+%then execute batchDfofMovie  (make sure the right set of stims are
+%commented/uncommented)
+
+
+
 n=1;
 files(n).subj = 'g62r4lt';
 files(n).expt = '082914';
@@ -365,6 +374,107 @@ files(n).task = 'GTS';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session'; 
 files(n).monitor = 'vert'; 
+
+n=n+1;
+files(n).subj = 'g62bb10lt';
+files(n).expt = '062916';
+files(n).topox =  'passive\062916 G62bb10lt mapping and darkness learned\g62bb10lt_portrait_run1_topoX\g62bb10lt_portrait_run1_topmaps.mat';
+files(n).topoxdata = 'passive\062916 G62bb10lt mapping and darkness learned\g62bb10lt_portrait_run1_topoX\g62bb10lt_portrait_run1_topoX';
+files(n).topoy = 'passive\062916 G62bb10lt mapping and darkness learned\g62bb10lt_portrait_run2_topoY\g62bb10lt_portrait_run2_topmaps.mat';
+files(n).topoydata = 'passive\062916 G62bb10lt mapping and darkness learned\g62bb10lt_portrait_run2_topoY\g62bb10lt_portrait_run2_topoY';
+files(n).darkness = 'passive\062916 G62bb10lt mapping and darkness learned\g62bb10lt_portrait_run3_darkness_5min\g62bb10lt_portrait_run3_darknemaps.mat';
+files(n).darknessdata = 'passive\062916 G62bb10lt mapping and darkness learned\g62bb10lt_portrait_run3_darkness_5min\g62bb10lt_portrait_run3_darkness';
+files(n).task = 'GTS';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session'; 
+files(n).monitor = 'vert'; 
+
+n=n+1;
+files(n).subj = 'g62dd6lt';
+files(n).expt = '062916';
+files(n).topox =  'passive\062916 g62dd6lt passive mapping\g62dd6lt_run1_portrait_topoX\g62dd6lt_run1_portrait_topmaps.mat'; %no running data
+files(n).topoxdata = 'passive\062916 g62dd6lt passive mapping\g62dd6lt_run1_portrait_topoX\g62dd6lt_run1_portrait_topoX';
+files(n).topoy = 'passive\062916 g62dd6lt passive mapping\g62dd6lt_run2_portrait_topoY\g62dd6lt_run2_portrait_topmaps.mat';
+files(n).topoydata = 'passive\062916 g62dd6lt passive mapping\g62dd6lt_run2_portrait_topoY\g62dd6lt_run2_portrait_topoY';
+files(n).darkness = 'passive\062916 g62dd6lt passive mapping\g62dd6lt_run3_portrait_darkness_5min\g62dd6lt_run3_portrait_darknemaps.mat';
+files(n).darknessdata = 'passive\062916 g62dd6lt passive mapping\g62dd6lt_run3_portrait_darkness_5min\g62dd6lt_run3_portrait_darkness';
+files(n).task = 'GTS';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'not good imaging session.  still recovering from surgery. maps look a little funny'; 
+files(n).monitor = 'vert'; 
+
+n=n+1;
+files(n).subj = 'g62ff8rt';
+files(n).expt = '062916';
+files(n).topox =  'passive\062916 G62FF8RT PASSIVE MAPPING\g62ff8rt_run1_portrait_topoX\g62ff8rt_run1_portrait_topmaps.mat';
+files(n).topoxdata = 'passive\062916 G62FF8RT PASSIVE MAPPING\g62ff8rt_run1_portrait_topoX\g62ff8rt_run1_portrait_topoX';
+files(n).topoy = 'passive\062916 G62FF8RT PASSIVE MAPPING\g62ff8rt_run2_portrait_topoY\g62ff8rt_run2_portrait_topmaps.mat';
+files(n).topoydata = 'passive\062916 G62FF8RT PASSIVE MAPPING\g62ff8rt_run2_portrait_topoY\g62ff8rt_run2_portrait_topoY';
+files(n).darkness = 'passive\062916 G62FF8RT PASSIVE MAPPING\g62ff8rt_run3_portrait_darkness_5min\g62ff8rt_run3_portrait_darknemaps.mat';
+files(n).darknessdata = 'passive\062916 G62FF8RT PASSIVE MAPPING\g62ff8rt_run3_portrait_darkness_5min\g62ff8rt_run3_portrait_darkness';
+files(n).task = 'naive';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session'; 
+files(n).monitor = 'vert'; 
+
+n=n+1;
+files(n).subj = 'g62dd2ln';
+files(n).expt = '063016';
+files(n).topox =  '';
+files(n).topoxdata = '';
+files(n).topoy = '';
+files(n).topoydata = '';
+files(n).darkness = '';
+files(n).darknessdata = 'behavior\063016 G62dd2ln GTS behavior\g62dd2ln_portrait_run7_darkness\g62dd2ln_portrait_run7_darkness';
+files(n).task = 'GTS';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session'; 
+files(n).monitor = 'vert'; 
+
+n=n+1;
+files(n).subj = 'g62dd11lt';
+files(n).expt = '070616';
+files(n).topox =  '';
+files(n).topoxdata = 'passive\070616 G62dd11lt passive mapping and darkness\g62dd11lt_portrait_run1_topoX\g62dd11lt_portrait_run1_topoX';
+files(n).topoy = '';
+files(n).topoydata = 'passive\070616 G62dd11lt passive mapping and darkness\g62dd11lt_portrait_run2_topoY\g62dd11lt_portrait_run2_topoY';
+files(n).darkness = '';
+files(n).darknessdata = 'passive\070616 G62dd11lt passive mapping and darkness\g62dd11lt_portrait_run3_darkness_5min\g62dd11lt_portrait_run3_darkness';
+files(n).task = 'naive';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session'; 
+files(n).monitor = 'vert'; 
+
+n=n+1;
+files(n).subj = 'g62cc13lt';
+files(n).expt = '070616';
+files(n).topox =  '';
+files(n).topoxdata = 'passive\070616 G62cc13lt passive mapping and darkness\g62cc13lt_portrait_run1_topoX\g62cc13lt_portrait_run1_topoX';
+files(n).topoy = '';
+files(n).topoydata = 'passive\070616 G62cc13lt passive mapping and darkness\g62cc13lt_portrait_run2_topoY\g62cc13lt_portrait_run2_topoY';
+files(n).darkness = '';
+files(n).darknessdata = 'passive\070616 G62cc13lt passive mapping and darkness\g62cc13lt_portrait_run3_darkness_5min\g62cc13lt_portrait_run3_darkness';
+files(n).task = 'naive';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session'; 
+files(n).monitor = 'vert'; 
+
+n=n+1;
+files(n).subj = 'g62dd6lt';
+files(n).expt = '070616';
+files(n).topox =  '';
+files(n).topoxdata = 'passive\070616 G62dd6lt passive mapping and darkness\g62dd6_portrait_run1_topoX\g62dd6_portrait_run1_topoX';
+files(n).topoy = '';
+files(n).topoydata = 'passive\070616 G62dd6lt passive mapping and darkness\g62dd6_portrait_run2_topoY\g62dd6_portrait_run2_topoY';
+files(n).darkness = '';
+files(n).darknessdata = 'passive\070616 G62dd6lt passive mapping and darkness\g62dd6_portrait_run3_darkness_5min\g62dd6_portrait_run3_darkness';
+files(n).task = 'GTS';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session'; 
+files(n).monitor = 'vert'; 
+
+
+
 
 
 % n=n+1;

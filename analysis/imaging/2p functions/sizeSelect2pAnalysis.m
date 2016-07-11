@@ -3,7 +3,7 @@
 clear all
 close all
 
-pre = 1; %1 if pre, 0 if post, saves cells to use
+pre = 0; %1 if pre, 0 if post, saves cells to use
 exclude = 0; %0 removes trials above threshold, 1 clips them to the threshold
 peakWindow = 10:13;
 
@@ -37,6 +37,31 @@ load(ptsfname);
 %     set(gcf, 'PaperPositionMode', 'auto');
 %     print('-dpsc',psfile,'-append');
 % end
+
+% [f p] = uigetfile('*.mat','stimObj file');
+% stimobject = fullfile(p,f);
+% load(stimobject);
+% mouseT = stimRec.ts- stimRec.ts(2)+0.0001; %%% first is sometimes off
+%     figure
+%     plot(diff(mouseT));
+%     
+%     figure
+%     plot(mouseT - stimRec.f/60)
+%     ylim([-0.5 0.5])
+%     
+%     dt = diff(mouseT);
+%     use = [1<0; dt>0];
+%     mouseT=mouseT(use);
+%     
+%     posx = cumsum(stimRec.pos(use,1)-900);
+%     posy = cumsum(stimRec.pos(use,2)-500);
+%    if isnan(frameT)
+%        frameT = 0.1*(1:size(dfof_bg,3))';
+%    end
+%    frameT = frameT - frameT(1)+0.02;
+%     vx = diff(interp1(mouseT,posx,frameT));
+%     vy = diff(interp1(mouseT,posy,frameT));
+%     vx(end+1)=0; vy(end+1)=0;
 
 figure
 imagesc(dF,[0 1]); title('dF')

@@ -63,13 +63,16 @@ imagesc(dF(useCells,:),[0 1]);
 figure
 imagesc(dFdecon(useCells,:),[0 1]);
 
-
-for i = 1:size(dFdecon,2);
-    dFnorm(:,i) = dFdecon(:,i)/max(dFdecon(:,i));
+filt = ones(3,1); filt = filt/sum(filt);
+clear dFnorm
+for i = 1:size(dFdecon,1);
+    dFnorm(i,:) = dFdecon(i,:)/std(dFdecon(i,:));
+     % dFnorm(i,:) = dFdecon(i,:);
+      dFnorm(i,:) = conv(dFnorm(i,:),filt,'same');
 end
 
 col = 'rgb';
-[coeff score latent] = pca(dFnorm');
+[coeff score latent] = pca(dFnorm(useCells,:)');
 
 range = 3:3:size(score,1);
 
@@ -94,9 +97,9 @@ for i = 1:5
     plot(score(:,i)); hold on
     for i = 1:length(onsets);
         if location(i)<0
-            plot([onsets(i)/dt onsets(i)/dt],[-1 1],'r');
+            plot([onsets(i)/dt onsets(i)/dt],[-5 5],'r');
         else
-            plot([onsets(i)/dt onsets(i)/dt],[-1 1],'g');
+            plot([onsets(i)/dt onsets(i)/dt],[-5 5],'g');
         end
     end
     
@@ -107,14 +110,20 @@ figure
 plot(latent(1:10)/sum(latent))
 
 figure
-imagesc(coeff(:,1:10),[-0.5 0.5]); colormap jet
+imagesc(coeff(:,1:100),[-0.5 0.5]); colormap jet
 
-figure
-imagesc(dFdecon(useCells,:),[0 1])
-
+for i = 1:size(coeff,2);
+    if sum(coeff(:,i))<0;
+        coeff(:,i) = -coeff(:,i);
+        score(:,i) = -score(:,i);
+    end
+end
 
 timepts = -0.9:0.1:2;
-dFalign = align2onsets(dFdecon,onsets,dt,timepts);
+timepts = -1:0.1:5;
+timepts = round(timepts*10)/10
+
+dFalign = align2onsets(dfDecon(useCells,:),onsets,dt,timepts);
 trialmean = mean(dFalign,3);
 for i = 1:size(trialmean,1);
     trialmean(i,:) = trialmean(i,:)- min(trialmean(i,:));
@@ -123,6 +132,29 @@ figure
 plot(trialmean(useCells,:)');
 title('mean for all units')
 
+filt = ones(1,1); filt = filt/sum(filt);
+col(1:2,1) = 'rm'; col(1:2,2) = 'bc'; col = col';
+orients = [0 pi/2]; locs = [-1 1];
+for c = 0:1;
+    figure; set(gcf,'Name',sprintf('correct = %d',c));
+    for i =1:2
+        for j = 1:2
+            respmean = mean(dFalign(:,:,location == locs(i) & orient == orients(j) & correct ==c),3);
+            for k = 1:length(respmean);
+                respmean(k,:) = respmean(k,:) - min(respmean(k,timepts<=0));
+            end
+            %figure
+            for k = 1:25
+                subplot(5,5,k)
+                plot(timepts,conv(respmean(k,:),filt,'same'),col(i,j)); hold on;ylim([-2 5]);xlim([-1 5])
+            end
+        end
+    end
+end
+
+% figure
+% imagesc(coeff(1:200,1:25),[-0.5 0.5])
+keyboard
 %%% get left/right traces
 topmean = mean(dFalign(:,:,location==-1),3);
 bottommean = mean(dFalign(:,:,location==1),3);
@@ -132,7 +164,6 @@ end
 for i = 1:length(topmean)
     bottommean(i,:) = bottommean(i,:)-min(bottommean(i,timepts<=0));
 end
-
 
 
 figure
@@ -323,7 +354,7 @@ subplot(3,4,[1 5 9 ])
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5,'reorder',leafOrder);
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-imagesc(flipud(goodTrialData(perm,:)),[0 1]);
+imagesc(flipud(goodTrialData(perm,:)),[0 0.5]);
 hold on; for i= 1:4, plot([i*length(timepts) i*length(timepts)]+1,[1 size(dFalign,1)],'g'); end
 
 

@@ -166,8 +166,8 @@ if exist([psfilenameFinal(1:(end-2)) 'pdf'],'file')
     display('generated pdf using dos ps2pdf')
 else
     try
-        ps2pdf('psfile', psfilename, 'pdffile', [psfilenameFinal(1:(end-3)) 'pdf'])
-        [psfilenameFinal(1:(end-2)) 'pdf']
+        ps2pdf('psfile', psfilename, 'pdffile', [psfilenameFinal(1:(end-4)) 'pdf'])
+        [psfilenameFinal(1:(end-4)) 'pdf']
         display('generated pdf using builtin matlab ps2pdf')
     catch
         display('couldnt generate pdf');

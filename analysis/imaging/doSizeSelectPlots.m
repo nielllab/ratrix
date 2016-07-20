@@ -9,19 +9,21 @@
 %             '021516_G62T6LT_RIG2_DOI_SizeSelectAnalysis.mat',...
 %             '021716_G62W7LN_RIG2_DOI_SizeSelectAnalysis.mat',...
 %             '021716_G62W7TT_RIG2_DOI_SizeSelectAnalysis.mat'};
+% datafiles = {'032816_CALB25B5RT_RIG2_DOI_SizeSelectAnalysis'};
 % ptsfile = {'G62TX2.6LT_SizeSelectPoints.mat',...
 %           'G62TX2.6RT_SizeSelectPoints.mat',...
 %           'G62BB2RT_SizeSelectPoints.mat',...
 %           'G62T6LT_SizeSelectPoints.mat',...
 %           'G62W7LN_SizeSelectPoints.mat',...
 %           'G62W7TT_SizeSelectPoints.mat'};
+% ptsfile = {'CALB25B5RT_SizeSelectPoints'};
 
-predir = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\Pre With Deconvolution';
-postdir = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\Post With Deconvolution';
-datafiles = {'032816_CALB25B5RT_RIG2_DOI_SizeSelectAnalysis'};
-ptsfile = {'CALB25B5RT_SizeSelectPoints'};
+predir = '\\langevin\backup\widefield\DOI_experiments\PhilSizeSelect\PREdecon';
+postdir = '\\langevin\backup\widefield\DOI_experiments\PhilSizeSelect\POSTdecon';
 
-psfilename = 'C:\tempPS.ps';
+datafiles = {''};
+
+psfilename = 'c:\temp.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
 load('C:/mapoverlay.mat');
@@ -311,10 +313,15 @@ end
 
  
     
-nam = 'CALB25B5RTCompareSizeSelect';
-save(fullfile(predir,nam),'alltrialcycavgpre','allpeakspre','alltracespre','allgauParamspre','allhalfMaxpre','allareapeakspre','allmvpre',...
+filename = 'CALB25B5RTCompareSizeSelect';
+save(fullfile(predir,filename),'alltrialcycavgpre','allpeakspre','alltracespre','allgauParamspre','allhalfMaxpre','allareapeakspre','allmvpre',...
     'alltrialcycavgpost','allpeakspost','alltracespost','allgauParamspost','allhalfMaxpost','allareapeakspost','allmvpost');
-ps2pdf('psfile', psfilename, 'pdffile', fullfile(predir,sprintf('%s.pdf',nam)));
+    try
+        dos(['ps2pdf ' 'c:\temp.ps "' fullfile(p,sprintf('%s.pdf',filename)) '"'] )
+
+    catch
+        display('couldnt generate pdf');
+    end
 
 
 

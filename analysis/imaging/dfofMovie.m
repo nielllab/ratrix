@@ -109,7 +109,7 @@ close(vid)
 % close(vid)
 
 
-use_speed=0;
+use_speed=1;
 
 fs = dir([datadir '\stim*.*']);
 
@@ -151,14 +151,14 @@ if ~isempty(fs)
     figure
     plot(vx); hold on; plot(vy,'g');
     sp = sqrt(vx.^2 + vy.^2);
-    figure
-    plot(sp)
-    hold on 
-    plot(squeeze(mean(mean(dfof_bg,2),1))*30000,'g');
-    legend('speed','dF');
-    figure
-    plot(xcorr(sp,mean(mean(dfof_bg,2),1)))
-    ylabel('sp df xcorr'); xlabel('offset frames')
+%     figure
+%     plot(sp)
+%     hold on 
+%     plot(squeeze(mean(mean(dfof_bg,2),1))*30000,'g');
+%     legend('speed','dF');
+%     figure
+%     plot(xcorr(sp,mean(mean(dfof_bg,2),1)))
+%     ylabel('sp df xcorr'); xlabel('offset frames')
 %     for i=1:100;
 %         sp_avg(i) = nanmeanMW(sp(i:100:end));
 %        
@@ -201,7 +201,7 @@ end
 
 
 
-%keyboard
+% keyboard
 
 %
 % keyboard

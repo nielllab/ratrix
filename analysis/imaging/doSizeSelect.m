@@ -8,21 +8,21 @@ fully = 1 %choose if you want full frame (260x260), else scales down by 4
 %           'G62T6LT_SizeSelectPoints.mat',...
 %           'G62W7LN_SizeSelectPoints.mat',...
 %           'G62W7TT_SizeSelectPoints.mat'}; %specific point files for animals
-ptsdir = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\Pre With Deconvolution';
-ptsfile = {'CALB25B5RT_SizeSelectPoints'}
+% ptsdir = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\Pre With Deconvolution';
+% ptsfile = {'CALB25B5RT_SizeSelectPoints'}
 areas = {'V1','P','LM','AL','RL','AM','PM'}; %list of all visual areas for points   
 
 for f = 1:length(use)
-    load(fullfile(ptsdir,ptsfile{f}));
-    load('C:\sizeSelect2sf5sz14min.mat')
+%     load(fullfile(ptsdir,ptsfile{f}));
+    load('C:\sizeSelect2sf8sz26min.mat')
     load('C:\mapoverlay.mat')
     if ~fully %scale down map overlay if not using full frame
         xpts = xpts/4;
         ypts = ypts/4;
     end
-    useframes = 11:12;
-    base = 9:10;
-    psfilename = 'C:\tempPS.ps';
+    useframes = 9:11;
+    base = 4:5;
+    psfilename = 'c:\temp.ps';
     if exist(psfilename,'file')==2;delete(psfilename);end
     figure
     set(gcf,'Name',[files(use(f)).subj ' ' files(use(f)).expt])
@@ -155,7 +155,7 @@ for f = 1:length(use)
     speedcut = 500;
     trialdata = zeros(size(deconvimg,1),size(deconvimg,2),trials);
     trialspeed = zeros(trials,1);
-    trialcyc = zeros(size(deconvimg,1),size(deconvimg,2),shift+10,trials);
+    trialcyc = zeros(size(deconvimg,1),size(deconvimg,2),shift+5,trials);
     for tr=1:trials-1;
         t0 = round((tr-1)*shift);
         baseframes = base+t0; baseframes=baseframes(baseframes>0);
@@ -168,43 +168,65 @@ for f = 1:length(use)
     %     trialcourse(tr,:) = squeeze(mean(mean(deconvimg(:,:,t0+(1:20)),2),1));
         trialcyc(:,:,:,tr) = deconvimg(:,:,t0+(1:30));%each cycle is frames 6-26, stim comes on at frame 11
     end
-    %frames 1-10 are baseline, 11-20 stim on
-    
-    xrange = unique(xpos); sfrange=unique(sf); tfrange=unique(tf);
+    %frames 1-5 are baseline, 6-10 stim on
+    sizeVals = [0 5 10 20 30 40 50 60];
+    contrastRange = unique(contrasts); sfrange = unique(sf); phaserange = unique(phase);
+    for i = 1:length(contrastRange);contrastlist{i} = num2str(contrastRange(i));end
+    for i=1:length(sizeVals); sizes{i} = num2str(sizeVals(i)); end
+%     xrange = unique(xpos); sfrange=unique(sf); tfrange=unique(tf);
+    running = zeros(1,ntrials);
+    for i = 1:ntrials
+        running(i) = mean(spInterp(1,1+cyclelength*(i-1):cyclelength+cyclelength*(i-1)),2)>20;
+    end
     
 %     tuning=nan(size(trialdata,1),size(trialdata,2),length(xrange),length(radiusRange),length(sfrange),length(tfrange));
     %%% separate out responses by stim parameter
-    cond = 0;
-    run = find(trialspeed>=speedcut);
-    sit = find(trialspeed<speedcut);
-    trialcycavg=nan(size(trialdata,1),size(trialdata,2),shift+10,length(xrange),length(radiusRange),length(sfrange),length(tfrange));
+%     cond = 0;
+%     run = find(trialspeed>=speedcut);
+%     sit = find(trialspeed<speedcut);
+%     trialcycavg=nan(size(trialdata,1),size(trialdata,2),shift+10,length(xrange),length(radiusRange),length(sfrange),length(tfrange));
 %     trialcycavgRun=nan(size(trialdata,1),size(trialdata,2),shift+10,length(xrange),length(radiusRange),length(sfrange),length(tfrange));
 %     trialcycavgSit=nan(size(trialdata,1),size(trialdata,2),shift+10,length(xrange),length(radiusRange),length(sfrange),length(tfrange));
-    for i = 1:length(xrange)
-        for j= 1:length(radiusRange)
-            for k = 1:length(sfrange)
-                for l=1:length(tfrange)
-                    cond = cond+1;
-                    inds = find(xpos==xrange(i)&radius==j&sf==sfrange(k)&tf==tfrange(l));
-                    trialcycavg(:,:,:,i,j,k,l) = squeeze(mean(trialcyc(:,:,:,inds),4));
-%                     avgtrialdata(:,:,cond) = squeeze(median(trialdata(:,:,inds),3));%  length(find(xpos==xrange(i)&ypos==yrange(j)&sf==sfrange(k)&tf==tfrange(l)))
-    %                 avgtrialcourse(i,j,k,l,:) = squeeze(median(trialcourse(inds,:),1));
-    %                 avgcondtrialcourse(cond,:) = avgtrialcourse(i,j,k,l,:);
-    %                 avgspeed(cond)=0;
-    %                 avgx(cond) = xrange(i); avgradius(cond)=radiusRange(j); avgsf(cond)=sfrange(k); avgtf(cond)=tfrange(l);
-%                     tuning(:,:,i,j,k,l) = avgtrialdata(:,:,cond);
-    %                 meanspd(i,j,k,l) = squeeze(mean(trialspeed(inds)>500));
-%                     trialcycavgRun(:,:,:,i,j,k,l) = squeeze(nanmean(trialcyc(:,:,:,intersect(inds,run)),4));
-%                     trialcycavgSit(:,:,:,i,j,k,l) = squeeze(nanmean(trialcyc(:,:,:,intersect(inds,sit)),4));
+%     for i = 1:length(xrange)
+%         for j= 1:length(radiusRange)
+%             for k = 1:length(sfrange)
+%                 for l=1:length(tfrange)
+%                     cond = cond+1;
+%                     inds = find(xpos==xrange(i)&radius==j&sf==sfrange(k)&tf==tfrange(l));
+%                     trialcycavg(:,:,:,i,j,k,l) = squeeze(mean(trialcyc(:,:,:,inds),4));
+% %                     avgtrialdata(:,:,cond) = squeeze(median(trialdata(:,:,inds),3));%  length(find(xpos==xrange(i)&ypos==yrange(j)&sf==sfrange(k)&tf==tfrange(l)))
+%     %                 avgtrialcourse(i,j,k,l,:) = squeeze(median(trialcourse(inds,:),1));
+%     %                 avgcondtrialcourse(cond,:) = avgtrialcourse(i,j,k,l,:);
+%     %                 avgspeed(cond)=0;
+%     %                 avgx(cond) = xrange(i); avgradius(cond)=radiusRange(j); avgsf(cond)=sfrange(k); avgtf(cond)=tfrange(l);
+% %                     tuning(:,:,i,j,k,l) = avgtrialdata(:,:,cond);
+%     %                 meanspd(i,j,k,l) = squeeze(mean(trialspeed(inds)>500));
+% %                     trialcycavgRun(:,:,:,i,j,k,l) = squeeze(nanmean(trialcyc(:,:,:,intersect(inds,run)),4));
+% %                     trialcycavgSit(:,:,:,i,j,k,l) = squeeze(nanmean(trialcyc(:,:,:,intersect(inds,sit)),4));
+%                 end
+%             end
+%         end
+%     end
+    trialcycavg=nan(size(trialdata,1),size(trialdata,2),shift+5,length(sfrange),length(phaserange),length(contrastRange),length(radiusRange));
+    for i = 1:length(sfrange)
+        for j = 1:length(phaserange)
+            for k = 1:length(contrastRange)
+                for l = 1:length(radiusRange)
+                    for m = 1:2
+                        cond = cond+1;
+                        inds = find(sf==sfrange(i)&phase==phaserange(j)&contrasts==contrastRange(k)&radius==radiusRange(l)&running==(m-1));
+                        trialcycavg(:,:,:,i,j,k,l,m) = squeeze(mean(trialcyc(:,:,:,inds),4));
+                    end
                 end
             end
         end
     end
+        
 
     %%baseline subtraction code
     %get average map with no stimulus
     minmap = zeros(size(deconvimg,1),size(deconvimg,2),length(xrange));
-    mintrialcyc = zeros(size(deconvimg,1),size(deconvimg,2),shift+10,length(xrange));
+    mintrialcyc = zeros(size(deconvimg,1),size(deconvimg,2),shift+5,length(xrange));
     for i = 1:length(xrange)
 %         minmap(:,:,i) = squeeze(mean(mean(tuning(:,:,i,1,:,:),5),6));
         mintrialcyc(:,:,:,i) = squeeze(mean(mean(trialcycavg(:,:,:,i,1,:,:),6),7));
@@ -241,26 +263,26 @@ for f = 1:length(use)
         end
     end        
     
-%     %manual/loading point selection
-%     files(use(f)).subj
-%     [fname pname] = uigetfile('*.mat','points file');
-%     if fname~=0
-%         load(fullfile(pname, fname));
-%     else
-%         figure
-%         imagesc(squeeze(mean(trialcyc(:,:,12,find(xpos==xrange(1)&radius==3)),4)),[-0.05 0.05])
-%         colormap(jet)
-%         axis square
-%         hold on
-%         plot(ypts,xpts,'k.','Markersize',2)
-%         [x y] = ginput(7);
-%         x=round(x); y=round(y);
-%         close(gcf)
-%         [fname pname] = uiputfile('*.mat','save points?');
-%         if fname~=0
-%             save(fullfile(pname,fname),'x','y');
-%         end
-%     end
+    %manual/loading point selection
+    files(use(f)).subj
+    [fname pname] = uigetfile('*.mat','points file');
+    if fname~=0
+        load(fullfile(pname, fname));
+    else
+        figure
+        imagesc(squeeze(mean(trialcyc(:,:,12,find(xpos==xrange(1)&radius==3)),4)),[-0.05 0.05])
+        colormap(jet)
+        axis square
+        hold on
+        plot(ypts,xpts,'k.','Markersize',2)
+        [x y] = ginput(7);
+        x=round(x); y=round(y);
+        close(gcf)
+        [fname pname] = uiputfile('*.mat','save points?');
+        if fname~=0
+            save(fullfile(pname,fname),'x','y');
+        end
+    end
 
     %plot selected points over each radius size
     figure
@@ -669,7 +691,7 @@ for f = 1:length(use)
         print('-dpsc',psfilename,'-append');
     end
     %%
-    p = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect';
+    p = '\\langevin\backup\widefield\DOI_experiments';
         filename = fileparts(fileparts(files(use(f)).sizeselect));
         filename = sprintf('%s_SizeSelectAnalysis.mat',filename);
 
@@ -678,13 +700,12 @@ for f = 1:length(use)
         save(fullfile(p,filename),'trialcycavg','peaks','areapeaks','gauParams','mv','halfMax','xrange','radiusRange','sfrange','tfrange');
     end
 
-    % [f p] = uiputfile('*.pdf','save pdf');
-    if f~=0
-        try
-        ps2pdf('psfile', psfilename, 'pdffile', fullfile(p,sprintf('%s.pdf',filename)));
+    try
+        dos(['ps2pdf ' 'c:\temp.ps "' fullfile(p,sprintf('%s.pdf',filename)) '"'] )
+
     catch
         display('couldnt generate pdf');
-        end
     end
+
     delete(psfilename);
 end

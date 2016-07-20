@@ -15,6 +15,20 @@ if exist(psfilename,'file')==2;delete(psfilename);end
 
 tic
 
+% topo2pSession('G62BB6RT_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('G62BB6RT_001_002.sbx','topoYsession_V2.mat',psfilename);
+% grating2pSession('G62BB6RT_001_003.sbx','gratingSession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62BB6RT_001_004.sbx','sizeSession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62BB6RT_001_005.sbx','sizeSession_POST_V2.mat',psfilename);
+% grating2pSession('G62BB6RT_001_006.sbx','gratingSession_POST_V2.mat',psfilename);
+
+% topo2pSession('G62TX210TT_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('G62TX210TT_001_002.sbx','topoYsession_V2.mat',psfilename);
+% grating2pSession('G62TX210TT_001_003.sbx','gratingSession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62TX210TT_001_004.sbx','sizeSession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62TX210TT_001_005.sbx','sizeSession_POST_V2.mat',psfilename);
+% grating2pSession('G62TX210TT_001_006.sbx','gratingSession_POST_V2.mat',psfilename);
+
 % topo2pSession('G62EE8TT_001_001.sbx','topoXsession_V2.mat',psfilename);
 % topo2pSession('G62EE8TT_001_002.sbx','topoYsession_V2.mat',psfilename);
 % grating2pSession('G62EE8TT_001_003.sbx','gratingSession_PRE_V2.mat',psfilename);
@@ -22,19 +36,19 @@ tic
 % sizeSelect2pSession('G62EE8TT_001_005.sbx','sizeSession_POST_V2.mat',psfilename);
 % grating2pSession('G62EE8TT_001_006.sbx','gratingSession_POST_V2.mat',psfilename);
 
-topo2pSession('G62AA3TT_001_001.sbx','topoXsession_V2.mat',psfilename);
-topo2pSession('G62AA3TT_001_002.sbx','topoYsession_V2.mat',psfilename);
-grating2pSession('G62AA3TT_001_003.sbx','gratingSession_PRE_V2.mat',psfilename);
-sizeSelect2pSession('G62AA3TT_001_004.sbx','sizeSession_PRE_V2.mat',psfilename);
-sizeSelect2pSession('G62AA3TT_001_005.sbx','sizeSession_POST_V2.mat',psfilename);
-grating2pSession('G62AA3TT_001_006.sbx','gratingSession_POST_V2.mat',psfilename);
+% topo2pSession('G62AA3TT_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('G62AA3TT_001_002.sbx','topoYsession_V2.mat',psfilename);
+% grating2pSession('G62AA3TT_001_003.sbx','gratingSession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62AA3TT_001_004.sbx','sizeSession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62AA3TT_001_005.sbx','sizeSession_POST_V2.mat',psfilename);
+% grating2pSession('G62AA3TT_001_006.sbx','gratingSession_POST_V2.mat',psfilename);
 
-% topo2pSession('G62BB8RT_001_001.sbx','topoXsession_V2.mat',psfilename);
-% topo2pSession('G62BB8RT_001_002.sbx','topoYsession_V2.mat',psfilename);
-% grating2pSession('G62BB8RT_001_003.sbx','gratingSession_PRE_V2.mat',psfilename);
-% sizeSelect2pSession('G62BB8RT_001_004.sbx','sizeSession_PRE_V2.mat',psfilename);
-% sizeSelect2pSession('G62BB8RT_001_005.sbx','sizeSession_POST_V2.mat',psfilename);
-% grating2pSession('G62BB8RT_001_006.sbx','gratingSession_POST_V2.mat',psfilename);
+topo2pSession('G62BB8RT_001_001.sbx','topoXsession_V2.mat',psfilename);
+topo2pSession('G62BB8RT_001_002.sbx','topoYsession_V2.mat',psfilename);
+grating2pSession('G62BB8RT_001_003.sbx','gratingSession_PRE_V2.mat',psfilename);
+sizeSelect2pSession('G62BB8RT_001_004.sbx','sizeSession_PRE_V2.mat',psfilename);
+sizeSelect2pSession('G62BB8RT_001_005.sbx','sizeSession_POST_V2.mat',psfilename);
+grating2pSession('G62BB8RT_001_006.sbx','gratingSession_POST_V2.mat',psfilename);
 
 % topo2pSession('G62Y9RT_001_001.sbx','topoXsession_V2.mat',psfilename);
 % topo2pSession('G62Y9RT_001_002.sbx','topoYsession_V2.mat',psfilename);

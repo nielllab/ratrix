@@ -2,10 +2,13 @@
 %%% for topo (periodic spatial) stimuli
 clear all
 close all
+dbstop if error
 
-pre = 0; %1 if pre, 0 if post, saves cells to use
+pre = 0; %1 if pre, 0 if post, determines naming of output file
 exclude = 0; %0 removes trials above threshold, 1 clips them to the threshold
-peakWindow = 10:13;
+peakWindow = 9:12;
+dt = 0.1;
+cyclelength = 1/0.1;
 
 [f p] = uiputfile('*.pdf','pdf file');
 newpdfFile = fullfile(p,f);
@@ -13,12 +16,53 @@ newpdfFile = fullfile(p,f);
 psfile = 'c:\temp.ps';
 if exist(psfile,'file')==2;delete(psfile);end
 
-dt = 0.1;
-cyclelength = 1/0.1;
+%%% get topo stimuli
 
+%%% read topoX (spatially periodic white noise)
+%%% long axis of monitor, generally vertical
+[f p] = uigetfile('*.mat','topo x pts');
+load(fullfile(p,f));
+
+%%% extract phase and amplitude from complex fourier varlue at 0.1Hz
+xph = phaseVal; rfCyc(:,:,1) = cycAvg;  %%%cycle averaged timecourse (10sec period)
+rfAmp(:,1) = abs(xph); rf(:,1) = mod(angle(xph),2*pi)*128/(2*pi); %%% convert phase to pixel position
+topoxUse = mean(dF,2)~=0;  %%% find cells that were successfully extracted
+
+%%% read topoY (spatially periodic white noise)
+%%% short axis of monitor, generally horizontal
+[f p] = uigetfile('*.mat','topo y pts');
+load(fullfile(p,f));
+
+figure
+imagesc(dF,[0 1])
+cellCutoff = input('cell cutoff : ')
+
+%%% extract phase and amplitude from complex fourier varlue at 0.1Hz
+yph = phaseVal; rfCyc(:,:,2) = cycAvg;
+rf(:,2) = mod(angle(yph),2*pi)*72/(2*pi); rfAmp(:,2) = abs(yph);
+topoyUse = mean(dF,2)~=0;
+
+%%% find sbc? use distance from center?
+d1 = sqrt((mod(angle(xph),2*pi)-pi).^2 + (mod(angle(yph),2*pi)-pi).^2);
+d2 = sqrt((mod(angle(xph)+pi,2*pi)-pi).^2 + (mod(angle(yph)+pi,2*pi)-pi).^2);
+sbc = (d1>1.5*d2);
+
+%%% select cells responsive to both topoX and topoY
+dpix = 0.8022; centrad = 10; ycent = 72/2; xcent = 128/2; %%deg/pix, radius of response size cutoff, x and y screen centers
+goodTopo = find(rfAmp(:,1)>0.01 & rfAmp(:,2)>0.01 & (xcent-dpix*centrad)<rf(:,1) & rf(:,1)<(xcent+dpix*centrad)& (ycent-dpix*centrad)<rf(:,2) & rf(:,2)<(ycent+dpix*centrad));
+goodTopo=goodTopo(goodTopo<=cellCutoff);
+sprintf('%d cells with good topo under cutoff',length(goodTopo))
+
+%%% plot RF locations
+figure
+plot(rf(goodTopo,2),rf(goodTopo,1),'o');axis equal;  axis([0 72 0 128]);
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
 
 % ptsfname = uigetfile('*.mat','pts file');
-[f p] = uigetfile('*.mat','pts file');
+[f p] = uigetfile('*.mat','size select pts file');
 ptsfname = fullfile(p,f);
 load(ptsfname);
 % load(ptsfname,'meandfofInterp'); %load meandfofInterp
@@ -38,9 +82,17 @@ load(ptsfname);
 %     print('-dpsc',psfile,'-append');
 % end
 
-% [f p] = uigetfile('*.mat','stimObj file');
-% stimobject = fullfile(p,f);
-% load(stimobject);
+xpos=0;
+sf=0; isi=0; duration=0; theta=0; phase=0; radius=0;
+% moviefname = 'C:\sizeSelect2sf5sz14min.mat';
+moviefname = 'C:\sizeSelect2sf8sz26min.mat';
+load(moviefname)
+
+[f p] = uigetfile('*.mat','stimObj file');
+stimobject = fullfile(p,f);
+load(stimobject);
+spInterp = get2pSpeed(stimRec,dt,size(dF,2));
+
 % mouseT = stimRec.ts- stimRec.ts(2)+0.0001; %%% first is sometimes off
 %     figure
 %     plot(diff(mouseT));
@@ -62,32 +114,35 @@ load(ptsfname);
 %     vx = diff(interp1(mouseT,posx,frameT));
 %     vy = diff(interp1(mouseT,posy,frameT));
 %     vx(end+1)=0; vy(end+1)=0;
-
-figure
-imagesc(dF,[0 1]); title('dF')
+% 
+% figure
+% imagesc(dF,[0 1]); title('dF')
 
 spikeBinned = imresize(spikes,[size(spikes,1) size(spikes,2)/10]);
+% figure
+% imagesc(spikeBinned,[ 0 0.1]); title('spikes binned')
+
 figure
-imagesc(spikeBinned,[ 0 0.1]); title('spikes binned')
+imagesc(dF(goodTopo,:),[0 1]); ylabel('cell #'); xlabel('frame'); title('dF');
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
+figure
+imagesc(spikeBinned(goodTopo,:),[0 0.1]); ylabel('cell #'); xlabel('frame'); title('spikes');
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
 
 
 % usenonzero = find(mean(spikes,2)~=0); %%% gets rid of generic points that were not identified in this session
-usenonzero = 1:size(dF,1);
-cellCutoff = input('cell cutoff : ');
-usenonzero=usenonzero(usenonzero<cellCutoff);
+% usenonzero = 1:size(dF,1);
+% cellCutoff = input('cell cutoff : ');
+% usenonzero=usenonzero(usenonzero<cellCutoff);
 
-figure
-imagesc(dF(usenonzero,:),[0 1]); ylabel('cell #'); xlabel('frame'); title('dF');
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-figure
-imagesc(spikeBinned(usenonzero,:),[0 0.1]); ylabel('cell #'); xlabel('frame'); title('spikes');
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
+
+
 % 
 % 
 % useOld = input('auto select based on generic pts (1) or manually select points (2) or read in prev points (3) : ')
@@ -109,25 +164,26 @@ end
 % % imagesc(dF(usenonzero,:),[0 1]); ylabel('cell #'); xlabel('frame'); colormap jet
 % imagesc(dF(usenonzero,:),[0 1]); ylabel('cell #'); xlabel('frame'); colormap jet
 
-xpos=0;
-sf=0; isi=0; duration=0; theta=0; phase=0; radius=0;
-% moviefname = 'C:\sizeSelect2sf5sz14min.mat';
-moviefname = 'C:\sizeSelect2sf8sz26min.mat';
-load(moviefname)
+
 sizeVals = [0 5 10 20 30 40 50 60];
 contrastRange = unique(contrasts); sfrange = unique(sf); phaserange = unique(phase);
 for i = 1:length(contrastRange);contrastlist{i} = num2str(contrastRange(i));end
 for i=1:length(sizeVals); sizes{i} = num2str(sizeVals(i)); end
 % sf=[sf sf];phase=[phase phase];radius=[radius radius];tf=[tf tf];theta=[theta theta];xpos=[xpos xpos];ypos=[ypos ypos];
-ntrials= min(dt*length(dF)/(isi+duration),length(sf))
+ntrials= min(dt*length(dF)/(isi+duration),length(sf));
 onsets = dt + (0:ntrials-1)*(isi+duration);
 timepts = 1:(2*isi+duration)/dt;
 timepts = (timepts-1)*dt;
 dFout = align2onsets(dF,onsets,dt,timepts);
-dFout = dFout(usenonzero,:,:);
+dFout = dFout(goodTopo,:,:);
 spikesOut = align2onsets(spikes*10,onsets,dt,timepts);
-spikesOut = spikesOut(usenonzero,:,:);
+spikesOut = spikesOut(goodTopo,:,:);
 timepts = timepts - isi;
+
+running = zeros(1,ntrials);
+for i = 1:ntrials
+    running(i) = mean(spInterp(1,1+cyclelength*(i-1):cyclelength+cyclelength*(i-1)),2)>20;
+end
 
 if exclude
     %threshold big guys out
@@ -139,29 +195,32 @@ if exclude
             end
         end
     end 
-else
-    %re-size big guys down to a max threshold
-    sigthresh = 10;
-    for i=1:size(dFout,1)
-        for j=1:size(dFout,3)
-            if squeeze(max(dFout(i,1:10,j),[],2))>sigthresh
-                vals = dFout(i,:,j);
-                vals(vals>sigthresh) = sigthresh;
-                dFout(i,:,j) = vals;
-            end
-        end
-    end
 end
+% else
+%     %re-size big guys down to a max threshold
+%     sigthresh = 10;
+%     for i=1:size(dFout,1)
+%         for j=1:size(dFout,3)
+%             if squeeze(max(dFout(i,1:10,j),[],2))>sigthresh
+%                 vals = dFout(i,:,j);
+%                 vals(vals>sigthresh) = sigthresh;
+%                 dFout(i,:,j) = vals;
+%             end
+%         end
+%     end
+% end
 
-dftuning = zeros(size(dFout,1),size(dFout,2),length(sfrange),length(phaserange),length(contrastRange),length(radiusRange));
-sptuning = zeros(size(spikesOut,1),size(spikesOut,2),length(sfrange),length(phaserange),length(contrastRange),length(radiusRange));
+dftuning = zeros(size(dFout,1),size(dFout,2),length(sfrange),length(phaserange),length(contrastRange),length(radiusRange),2);
+sptuning = zeros(size(spikesOut,1),size(spikesOut,2),length(sfrange),length(phaserange),length(contrastRange),length(radiusRange),2);
 for h = 1:size(dFout,1)
     for i = 1:length(sfrange)
         for j = 1:length(phaserange)
             for k = 1:length(contrastRange)
                 for l = 1:length(radiusRange)
-                    dftuning(h,1:size(dFout,2),i,j,k,l) = mean(dFout(h,:,find(sf==sfrange(i)&phase==phaserange(j)&contrasts==contrastRange(k)&radius==l)),3);
-                    sptuning(h,1:size(spikesOut,2),i,j,k,l) = mean(spikesOut(h,:,find(sf==sfrange(i)&phase==phaserange(j)&contrasts==contrastRange(k)&radius==l)),3);
+                    for m = 1:2
+                        dftuning(h,1:size(dFout,2),i,j,k,l,m) = nanmean(dFout(h,:,find(sf==sfrange(i)&phase==phaserange(j)&contrasts==contrastRange(k)&radius==l&running==(m-1))),3);
+                        sptuning(h,1:size(spikesOut,2),i,j,k,l,m) = nanmean(spikesOut(h,:,find(sf==sfrange(i)&phase==phaserange(j)&contrasts==contrastRange(k)&radius==l&running==(m-1))),3);
+                    end
                 end
             end
         end
@@ -169,32 +228,52 @@ for h = 1:size(dFout,1)
 end
 
 figure
+subplot(1,2,1)
 hold on
 for i=1:length(contrastRange)
-    plot(1:length(radiusRange),squeeze(mean(mean(mean(mean(dftuning(:,peakWindow,:,:,i,:),4),3),1),2))-squeeze(mean(mean(mean(dftuning(:,5,:,:,i,:),4),3),1)));
+    plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(dftuning(:,peakWindow,:,:,i,:,1),4),3),1),2))-squeeze(nanmean(nanmean(nanmean(dftuning(:,5,:,:,i,:,1),4),3),1)));
 end
 axis([0 length(radiusRange)+1 -0.01 0.05])
 set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
 legend(contrastlist)
 xlabel('Stim Size (deg)')
-ylabel('dfof')
-title('Peak dF as func of contrast')
+ylabel('peak stationary dfof')
+subplot(1,2,2)
+hold on
+for i=1:length(contrastRange)
+    plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(dftuning(:,peakWindow,:,:,i,:,2),4),3),1),2))-squeeze(nanmean(nanmean(nanmean(dftuning(:,5,:,:,i,:,2),4),3),1)));
+end
+axis([0 length(radiusRange)+1 -0.01 0.05])
+set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
+legend(contrastlist)
+xlabel('Stim Size (deg)')
+ylabel('peak running dfof')
 if exist('psfile','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfile,'-append');
 end
 
 figure
+subplot(1,2,1)
 hold on
 for i=1:length(contrastRange)
-    plot(1:length(radiusRange),squeeze(mean(mean(mean(mean(sptuning(:,peakWindow,:,:,i,:),4),3),1),2))-squeeze(mean(mean(mean(sptuning(:,6,:,:,i,:),4),3),1)));
+    plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(sptuning(:,peakWindow,:,:,i,:,1),4),3),1),2))-squeeze(nanmean(nanmean(nanmean(sptuning(:,6,:,:,i,:,1),4),3),1)));
 end
 axis([0 length(radiusRange)+1 -0.01 0.2])
 set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
 legend(contrastlist)
 xlabel('Stim Size (deg)')
-ylabel('dfof')
-title('Peak spikes as func of contrast')
+ylabel('peak stationary spikes')
+subplot(1,2,2)
+hold on
+for i=1:length(contrastRange)
+    plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(sptuning(:,peakWindow,:,:,i,:,2),4),3),1),2))-squeeze(nanmean(nanmean(nanmean(sptuning(:,6,:,:,i,:,2),4),3),1)));
+end
+axis([0 length(radiusRange)+1 -0.01 0.2])
+set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
+legend(contrastlist)
+xlabel('Stim Size (deg)')
+ylabel('peak running spikes')
 if exist('psfile','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfile,'-append');
@@ -204,32 +283,40 @@ end
 clear tcourse
 clear spcourse
 for i = 1:length(radiusRange)
-    tcourse(:,:,i) = median(dFout(:,:,find(radius==i&contrasts==contrastRange(end))),3);
-    spcourse(:,:,i) = mean(spikesOut(:,:,find(radius==i&contrasts==contrastRange(end))),3); %spikes/size average
+    for j=1:2
+        tcourse(:,:,i,j) = median(dFout(:,:,find(radius==i&contrasts==contrastRange(end)&running==(j-1))),3);
+        spcourse(:,:,i,j) = mean(spikesOut(:,:,find(radius==i&contrasts==contrastRange(end)&running==(j-1))),3); %spikes/size average
+    end
 end
 stimper = size(tcourse,2)/3; %epoch duration
 
 for i=1:size(tcourse,3);
-    for n= 1:size(tcourse,1);
-        tcourse(n,:,i) = tcourse(n,:,i)-squeeze(nanmean(tcourse(n,stimper+1,i),2));
+    for j= 1:size(tcourse,1);
+        for k=1:2
+            tcourse(j,:,i,k) = tcourse(j,:,i,k)-squeeze(nanmean(tcourse(j,stimper+1,i,k),2));
+        end
     end
 end
 
 for i=1:size(spcourse,3);
-    for n= 1:size(spcourse,1);
-        spcourse(n,:,i) = spcourse(n,:,i)-squeeze(nanmean(spcourse(n,stimper+1,i),2));
+    for j= 1:size(spcourse,1);
+        for k=1:2
+            spcourse(j,:,i,k) = spcourse(j,:,i,k)-squeeze(nanmean(spcourse(j,stimper+1,i,k),2));
+        end
     end
 end
 
-respPos = (mean(tcourse(:,stimper+1:2*stimper,3),2)-mean(tcourse(:,1:stimper,3),2)) > 0;
-tcourse = tcourse(respPos,:,:);
-spcourse = spcourse(respPos,:,:);
+respPos = (nanmean(nanmean(tcourse(:,stimper+1:2*stimper,3,:),2),4)-nanmean(nanmean(tcourse(:,1:stimper,3,:),2),4)) > 0;
+tcourse = tcourse(respPos,:,:,:);
+spcourse = spcourse(respPos,:,:,:);
 dFout = dFout(respPos,:,:);
 
 figure
 for i = 1:size(tcourse,3)
     subplot(2,ceil(size(tcourse,3)/2),i)
-    plot(timepts,squeeze(nanmean(tcourse(:,:,i),1)))
+    hold on
+    plot(timepts,squeeze(nanmean(tcourse(:,:,i,1),1)),'k')
+    plot(timepts,squeeze(nanmean(tcourse(:,:,i,2),1)),'r')
     axis([timepts(1) timepts(end) -0.01 0.05])
 end
 mtit('Mean dfof per size')
@@ -238,8 +325,11 @@ if exist('psfile','var')
     print('-dpsc',psfile,'-append');
 end
 figure
-plot(timepts,squeeze(nanmean(nanmean(tcourse,1),3)))
+hold on
+plot(timepts,squeeze(nanmean(nanmean(tcourse(:,:,:,1),1),3)),'k')
+plot(timepts,squeeze(nanmean(nanmean(tcourse(:,:,:,2),1),3)),'r')
 axis([timepts(1) timepts(end) -0.01 0.05])
+legend('stationary','running')
 title('Total mean dfof')
 xlabel('Time (s)')
 ylabel('dfof')
@@ -266,11 +356,12 @@ for i = 1:floor(size(tcourse,1)/10):size(tcourse,1)
 end
 
 % peaks = max(dFout(:,1+stimper:stimper*2,:),[],2)-nanmean(dFout(:,1:stimper,:),2);
-avgpeaks = squeeze(nanmean(nanmean(tcourse(:,peakWindow,:),2),1));%-tcourse(usenonzero,stimper,:),1));
-sepeaks = squeeze(nanstd(nanmean(tcourse(:,peakWindow,:),2),1))/sqrt(length(usenonzero));%-tcourse(usenonzero,stimper,:),[],1));
-avgspikes = squeeze(nanmean(nanmean(spcourse(:,peakWindow,:),2),1));
-sespikes = squeeze(nanstd(nanmean(spcourse(:,peakWindow,:),2),1))/sqrt(length(usenonzero));
-
+for i = 1:2
+    avgpeaks(:,i) = squeeze(nanmean(nanmean(tcourse(:,peakWindow,:,i),2),1));%-tcourse(usenonzero,stimper,:),1));
+    sepeaks(:,i) = squeeze(nanstd(nanmean(tcourse(:,peakWindow,:,i),2),1))/sqrt(length(goodTopo));%-tcourse(usenonzero,stimper,:),[],1));
+    avgspikes(:,i) = squeeze(nanmean(nanmean(spcourse(:,peakWindow,:,i),2),1));
+    sespikes(:,i) = squeeze(nanstd(nanmean(spcourse(:,peakWindow,:,i),2),1))/sqrt(length(goodTopo));
+end
 
 % figure
 % errorbar(1:length(radiusRange),avgpeaks,sepeaks)
@@ -287,7 +378,10 @@ sespikes = squeeze(nanstd(nanmean(spcourse(:,peakWindow,:),2),1))/sqrt(length(us
 % avgpeaks = avgpeaks - avgpeaks(1);
 
 figure
-errorbar(1:length(radiusRange),avgpeaks,sepeaks)
+hold on
+errorbar(1:length(radiusRange),avgpeaks(:,1),sepeaks(:,1),'k')
+errorbar(1:length(radiusRange),avgpeaks(:,2),sepeaks(:,2),'r')
+legend('stationary','running')
 xlabel('Stim Size (deg)')
 ylabel('dfof')
 axis([0 length(radiusRange)+1 -0.01 0.1])
@@ -299,19 +393,31 @@ if exist('psfile','var')
 end
 
 figure
-plot(timepts,squeeze(nanmean(tcourse,1)))
+subplot(1,2,1)
+plot(timepts,squeeze(nanmean(tcourse(:,:,:,1),1)))
 legend(sizes)
 xlabel('Time (s)')
-ylabel('dfof')
+ylabel('stationary dfof')
+axis([timepts(1) timepts(end) -0.01 0.1])
+subplot(1,2,2)
+plot(timepts,squeeze(nanmean(tcourse(:,:,:,2),1)))
+legend(sizes)
+xlabel('Time (s)')
+ylabel('running dfof')
 axis([timepts(1) timepts(end) -0.01 0.1])
 if exist('psfile','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfile,'-append');
 end
 
-grpavgpeaks = squeeze(nanmean(nanmean(tcourse(:,peakWindow,:),1),2));
+for i=1:2
+    grpavgpeaks(:,i) = squeeze(nanmean(nanmean(tcourse(:,peakWindow,:,i),1),2));
+end
 figure
-plot(1:length(radiusRange),grpavgpeaks)
+hold on
+plot(1:length(radiusRange),grpavgpeaks(:,1),'k')
+plot(1:length(radiusRange),grpavgpeaks(:,2),'r')
+legend('stationary','running')
 xlabel('Stim Size (deg)')
 ylabel('dfof')
 axis([0 length(radiusRange)+1 0 0.1])
@@ -327,7 +433,9 @@ end
 figure
 for i = 1:size(spcourse,3)
     subplot(2,ceil(size(spcourse,3)/2),i)
-    plot(timepts,squeeze(nanmean(spcourse(:,:,i),1)))
+    hold on
+    plot(timepts,squeeze(nanmean(spcourse(:,:,i,1),1)),'k')
+    plot(timepts,squeeze(nanmean(spcourse(:,:,i,2),1)),'r')
     axis([timepts(1) timepts(end) -0.05 0.1])
 end
 mtit('Mean spikes per size')
@@ -337,8 +445,11 @@ if exist('psfile','var')
 end
 
 figure
-plot(timepts,squeeze(nanmean(nanmean(spcourse,1),3)))
+hold on
+plot(timepts,squeeze(nanmean(nanmean(spcourse(:,:,:,1),1),3)),'k')
+plot(timepts,squeeze(nanmean(nanmean(spcourse(:,:,:,2),1),3)),'r')
 axis([timepts(1) timepts(end) -0.01 0.1])
+legend('stationary','running')
 xlabel('Time (s)')
 ylabel('Total mean spikes')
 if exist('psfile','var')
@@ -377,22 +488,32 @@ end
 % avgspikes = avgspikes - avgspikes(1);
 
 figure
-errorbar(1:length(radiusRange),avgspikes,sespikes)
+hold on
+errorbar(1:length(radiusRange),avgspikes(:,1),sespikes(:,1))
+errorbar(1:length(radiusRange),avgspikes(:,2),sespikes(:,2))
 xlabel('Stim Size (deg)')
 ylabel('Firing Rate')
 axis([0 length(radiusRange)+1 -0.1 0.5])
 set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
 title('Peak response')
+legend('stationary','running')
 if exist('psfile','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfile,'-append');
 end
 
 figure
-plot(timepts,squeeze(nanmean(spcourse,1)))
+subplot(1,2,1)
+plot(timepts,squeeze(nanmean(spcourse(:,:,:,1),1)))
 legend(sizes)
 xlabel('Time (s)')
-ylabel('Firing Rate')
+ylabel('Stationary Firing Rate')
+axis([timepts(1) timepts(end) -0.1 0.5])
+subplot(1,2,2)
+plot(timepts,squeeze(nanmean(spcourse(:,:,:,2),1)))
+legend(sizes)
+xlabel('Time (s)')
+ylabel('Running Firing Rate')
 axis([timepts(1) timepts(end) -0.1 0.5])
 if exist('psfile','var')
     set(gcf, 'PaperPositionMode', 'auto');
@@ -437,9 +558,11 @@ end
 
 
 
-
-
-
+if pre
+    save('ssSummaryPRE','avgpeaks','dftuning','sptuning')
+else
+    save('ssSummaryPOST','avgpeaks','dftuning','sptuning')
+end
 
 
 try

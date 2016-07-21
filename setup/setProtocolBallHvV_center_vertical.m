@@ -34,7 +34,19 @@ switch subjIDs{1}
     
   
     
-    case 'testHvVcenter' % 
+   case 'pvchr2b16tt' % Started 7/11/16 %%HvH 7/22/16
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 219;
+       msPenalty               =3500;
+       percentCorrectionTrials = .75;     
+    
+   case 'pvchr2b16lt' % Started 7/11/16 %%HvH 7/22/16
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 219;
+       msPenalty               =3500;
+       percentCorrectionTrials = .75;  
+    
+   case 'testHvVcenter' % 
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 59;
        msPenalty               =6300;

@@ -51,7 +51,7 @@ toc
 figure
 plot(timepts,squeeze((mean(mean(mean(mapalign,4),2),1))))
 
-keyboard
+%keyboard
 
 %%% get target location, orientation, phase
 stim = [trialRecs.stimDetails];

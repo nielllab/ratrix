@@ -39,8 +39,8 @@ for n = 2:nfiles
     
     %%% do cross-correlation alignment based on green (mean raw fluorescence) image
     gr = meanImg-mean(meanImg(:));
-    %range = 30;
-     range = 60;
+    range = 30;
+    % range = 60;
     for dx=-range:range
         for dy = -range:range
             cs = circshift(ref,[dx dy]);

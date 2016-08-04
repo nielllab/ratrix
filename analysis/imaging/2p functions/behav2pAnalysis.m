@@ -91,12 +91,34 @@ plot(score(range,2),score(range,3)); hold on
 mapColors(score(range,2),score(range,3),'.',jet(length(range)))
 drawnow
 
+
+figure
+plot(score(range,3),score(range,5)); hold on
+mapColors(score(range,3),score(range,5),'.',jet(length(range)))
+drawnow
+
+
 figure
 for i = 1:5
     subplot(5,1,i)
     plot(score(:,i)); hold on
     for i = 1:length(onsets);
         if location(i)<0
+            plot([onsets(i)/dt onsets(i)/dt],[-5 5],'r');
+        else
+            plot([onsets(i)/dt onsets(i)/dt],[-5 5],'g');
+        end
+    end
+    
+end
+
+
+figure
+for i = 1:5
+    subplot(5,1,i)
+    plot(score(:,i)); hold on
+    for i = 1:length(onsets);
+        if correct(i)==0
             plot([onsets(i)/dt onsets(i)/dt],[-5 5],'r');
         else
             plot([onsets(i)/dt onsets(i)/dt],[-5 5],'g');
@@ -123,7 +145,10 @@ timepts = -0.9:0.1:2;
 timepts = -1:0.1:5;
 timepts = round(timepts*10)/10
 
-dFalign = align2onsets(dfDecon(useCells,:),onsets,dt,timepts);
+%dFalign = align2onsets(dFdecon(useCells,:),onsets,dt,timepts);
+dFalign = align2onsets(score',onsets,dt,timepts);
+
+
 trialmean = mean(dFalign,3);
 for i = 1:size(trialmean,1);
     trialmean(i,:) = trialmean(i,:)- min(trialmean(i,:));
@@ -143,7 +168,7 @@ for c = 0:1;
             for k = 1:length(respmean);
                 respmean(k,:) = respmean(k,:) - min(respmean(k,timepts<=0));
             end
-            %figure
+          
             for k = 1:25
                 subplot(5,5,k)
                 plot(timepts,conv(respmean(k,:),filt,'same'),col(i,j)); hold on;ylim([-2 5]);xlim([-1 5])

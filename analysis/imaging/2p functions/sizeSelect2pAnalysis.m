@@ -25,7 +25,7 @@ load(fullfile(p,f));
 
 %%% extract phase and amplitude from complex fourier varlue at 0.1Hz
 xph = phaseVal; rfCyc(:,:,1) = cycAvg;  %%%cycle averaged timecourse (10sec period)
-rfAmp(:,1) = abs(xph); rf(:,1) = mod(angle(xph),2*pi)*128/(2*pi); %%% convert phase to pixel position
+rfAmp(:,1) = abs(xph); rf(:,1) = mod(angle(xph)-(2*pi*0.25/10),2*pi)*128/(2*pi); %%% convert phase to pixel position, subtract 0.25sec from phase for gcamp delay
 topoxUse = mean(dF,2)~=0;  %%% find cells that were successfully extracted
 
 %%% read topoY (spatially periodic white noise)
@@ -39,23 +39,33 @@ cellCutoff = input('cell cutoff : ')
 
 %%% extract phase and amplitude from complex fourier varlue at 0.1Hz
 yph = phaseVal; rfCyc(:,:,2) = cycAvg;
-rf(:,2) = mod(angle(yph),2*pi)*72/(2*pi); rfAmp(:,2) = abs(yph);
+rf(:,2) = mod(angle(yph)-(2*pi*0.25/10),2*pi)*72/(2*pi); rfAmp(:,2) = abs(yph);
 topoyUse = mean(dF,2)~=0;
 
 %%% find sbc? use distance from center?
 d1 = sqrt((mod(angle(xph),2*pi)-pi).^2 + (mod(angle(yph),2*pi)-pi).^2);
 d2 = sqrt((mod(angle(xph)+pi,2*pi)-pi).^2 + (mod(angle(yph)+pi,2*pi)-pi).^2);
-sbc = (d1>1.5*d2);
+sbc = (d1>d2);
 
+respthresh=0.025;
 %%% select cells responsive to both topoX and topoY
 dpix = 0.8022; centrad = 10; ycent = 72/2; xcent = 128/2; %%deg/pix, radius of response size cutoff, x and y screen centers
-goodTopo = find(rfAmp(:,1)>0.01 & rfAmp(:,2)>0.01 & (xcent-dpix*centrad)<rf(:,1) & rf(:,1)<(xcent+dpix*centrad)& (ycent-dpix*centrad)<rf(:,2) & rf(:,2)<(ycent+dpix*centrad));
+d = sqrt((rf(:,1)-xcent).^2 + (rf(:,2)-ycent).^2);
+%goodTopo = find(rfAmp(:,1)>0.01 & rfAmp(:,2)>0.01 & (xcent-dpix*centrad)<rf(:,1) & rf(:,1)<(xcent+dpix*centrad)& (ycent-dpix*centrad)<rf(:,2) & rf(:,2)<(ycent+dpix*centrad));
+goodTopo = find(rfAmp(:,1)>respthresh & rfAmp(:,2)>respthresh & d<centrad/dpix);
 goodTopo=goodTopo(goodTopo<=cellCutoff);
-sprintf('%d cells with good topo under cutoff',length(goodTopo))
+sprintf('%d cells in center with good topo under cutoff',length(goodTopo))
 
+allgoodTopo = find(~sbc & rfAmp(:,1)>respthresh & rfAmp(:,2)>respthresh); allgoodTopo = allgoodTopo(allgoodTopo<=cellCutoff);
+sprintf('%d cells with good topo under cutoff',length(allgoodTopo))
 %%% plot RF locations
 figure
-plot(rf(goodTopo,2),rf(goodTopo,1),'o');axis equal;  axis([0 72 0 128]);
+hold on
+plot(rf(allgoodTopo,2),rf(allgoodTopo,1),'.','color',[0.5 0.5 0.5],'MarkerSize',10); %%% the rfAmp criterion wasn't being applied here
+plot(rf(goodTopo,2),rf(goodTopo,1),'b.','MarkerSize',10);
+circle(ycent,xcent,centrad/dpix)
+axis equal;
+axis([0 72 0 128]);
 if exist('psfile','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfile,'-append');

@@ -4,17 +4,25 @@ close all
 clear all
 
 dfWindow = 9:11;
-spWindow = 6:7;
+spWindow = 6:10;
+spWindows = {6:8;8:10;6:10};
+spWindowsNames = {'First Half','Second Half','Stim Window'};
 dt = 0.1;
 cyclelength = 1/0.1;
 
 %where are the files
 dirs = {'\\langevin\backup\twophoton\Phil\Compiled2p\071416 G62TX210TT size select2\G62TX210TT'...
     '\\langevin\backup\twophoton\Phil\Compiled2p\071016 G62EE8TT sizeselect\G62EE8TT'...
-    '\\langevin\backup\twophoton\Phil\Compiled2p\071016 G62AA3TT sizeselect\G62AA3TT'...
     '\\langevin\backup\twophoton\Phil\Compiled2p\070816 G62BB8RT sizeselect\G62BB8RT'...
     '\\langevin\backup\twophoton\Phil\Compiled2p\070516 G62Y9RT sizeselect\G62Y9RT'...
     '\\langevin\backup\twophoton\Phil\Compiled2p\062416 G62TX19LT size select\G62TX19LT'};
+
+% dirs = {'\\langevin\backup\twophoton\Phil\Compiled2p\071416 G62TX210TT size select2\G62TX210TT'...
+%     '\\langevin\backup\twophoton\Phil\Compiled2p\071016 G62EE8TT sizeselect\G62EE8TT'...
+%     '\\langevin\backup\twophoton\Phil\Compiled2p\071016 G62AA3TT sizeselect\G62AA3TT'...
+%     '\\langevin\backup\twophoton\Phil\Compiled2p\070816 G62BB8RT sizeselect\G62BB8RT'...
+%     '\\langevin\backup\twophoton\Phil\Compiled2p\070516 G62Y9RT sizeselect\G62Y9RT'...
+%     '\\langevin\backup\twophoton\Phil\Compiled2p\062416 G62TX19LT size select\G62TX19LT'};
 
 %stimulus file
 moviename = 'C:\sizeSelect2sf8sz26min.mat';
@@ -69,14 +77,14 @@ for h = 1:cellcnt
         for j = 1:length(phaserange)
             for k = 1:length(contrastRange)
                 for l = 1:length(radiusRange)
-                    grpdftuningPRE(h,:,i,j,k,l,1) = grpdftuningPRE(h,:,i,j,k,l,1)-grpdftuningPRE(h,6,i,j,k,l,1);%-squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPRE(h,:,i,j,k,1,1),1),3),4),5));
-                    grpdftuningPRE(h,:,i,j,k,l,2) = grpdftuningPRE(h,:,i,j,k,l,2)-grpdftuningPRE(h,6,i,j,k,l,2);%-squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPRE(h,:,i,j,k,1,2),1),3),4),5));
-                    grpsptuningPRE(h,:,i,j,k,l,1) = grpsptuningPRE(h,:,i,j,k,l,1)-grpsptuningPRE(h,6,i,j,k,l,1);%-squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPRE(h,:,i,j,k,1,1),1),3),4),5));
-                    grpsptuningPRE(h,:,i,j,k,l,2) = grpsptuningPRE(h,:,i,j,k,l,2)-grpsptuningPRE(h,6,i,j,k,l,2);%-squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPRE(h,:,i,j,k,1,2),1),3),4),5));
-                    grpdftuningPOST(h,:,i,j,k,l,1) = grpdftuningPOST(h,:,i,j,k,l,1)-grpdftuningPOST(h,6,i,j,k,l,1);%-squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPOST(h,:,i,j,k,1,1),1),3),4),5));
-                    grpdftuningPOST(h,:,i,j,k,l,2) = grpdftuningPOST(h,:,i,j,k,l,2)-grpdftuningPOST(h,6,i,j,k,l,2);%-squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPOST(h,:,i,j,k,1,2),1),3),4),5));
-                    grpsptuningPOST(h,:,i,j,k,l,1) = grpsptuningPOST(h,:,i,j,k,l,1)-grpsptuningPOST(h,6,i,j,k,l,1);%-squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPOST(h,:,i,j,k,1,1),1),3),4),5));
-                    grpsptuningPOST(h,:,i,j,k,l,2) = grpsptuningPOST(h,:,i,j,k,l,2)-grpsptuningPOST(h,6,i,j,k,l,2);%-squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPOST(h,:,i,j,k,1,2),1),3),4),5));                    
+                    grpdftuningPRE(h,:,i,j,k,l,1) = grpdftuningPRE(h,:,i,j,k,l,1)-grpdftuningPRE(h,5,i,j,k,l,1);%-squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPRE(h,:,i,j,k,1,1),1),3),4),5));
+                    grpdftuningPRE(h,:,i,j,k,l,2) = grpdftuningPRE(h,:,i,j,k,l,2)-grpdftuningPRE(h,5,i,j,k,l,2);%-squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPRE(h,:,i,j,k,1,2),1),3),4),5));
+                    grpsptuningPRE(h,:,i,j,k,l,1) = grpsptuningPRE(h,:,i,j,k,l,1)-grpsptuningPRE(h,5,i,j,k,l,1);%-squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPRE(h,:,i,j,k,1,1),1),3),4),5));
+                    grpsptuningPRE(h,:,i,j,k,l,2) = grpsptuningPRE(h,:,i,j,k,l,2)-grpsptuningPRE(h,5,i,j,k,l,2);%-squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPRE(h,:,i,j,k,1,2),1),3),4),5));
+                    grpdftuningPOST(h,:,i,j,k,l,1) = grpdftuningPOST(h,:,i,j,k,l,1)-grpdftuningPOST(h,5,i,j,k,l,1);%-squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPOST(h,:,i,j,k,1,1),1),3),4),5));
+                    grpdftuningPOST(h,:,i,j,k,l,2) = grpdftuningPOST(h,:,i,j,k,l,2)-grpdftuningPOST(h,5,i,j,k,l,2);%-squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPOST(h,:,i,j,k,1,2),1),3),4),5));
+                    grpsptuningPOST(h,:,i,j,k,l,1) = grpsptuningPOST(h,:,i,j,k,l,1)-grpsptuningPOST(h,5,i,j,k,l,1);%-squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPOST(h,:,i,j,k,1,1),1),3),4),5));
+                    grpsptuningPOST(h,:,i,j,k,l,2) = grpsptuningPOST(h,:,i,j,k,l,2)-grpsptuningPOST(h,5,i,j,k,l,2);%-squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPOST(h,:,i,j,k,1,2),1),3),4),5));                    
                 end
             end
         end
@@ -85,18 +93,26 @@ end
 
 %subtract off zero size, separately for stationary/running trials
 for h = 1:cellcnt
+    dfZeroPreSta = squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(h,:,:,:,:,1,1),3),4),5));
+    dfZeroPreRun = squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(h,:,:,:,:,1,2),3),4),5));
+    spZeroPreSta = squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(h,:,:,:,:,1,1),3),4),5));
+    spZeroPreRun = squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(h,:,:,:,:,1,2),3),4),5));
+    dfZeroPostSta = squeeze(nanmean(nanmean(nanmean(grpdftuningPOST(h,:,:,:,:,1,1),3),4),5));
+    dfZeroPostRun = squeeze(nanmean(nanmean(nanmean(grpdftuningPOST(h,:,:,:,:,1,2),3),4),5));
+    spZeroPostSta = squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(h,:,:,:,:,1,1),3),4),5));
+    spZeroPostRun = squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(h,:,:,:,:,1,2),3),4),5));
     for i = 1:length(sfrange)
         for j = 1:length(phaserange)
             for k = 1:length(contrastRange)
                 for l = 1:length(radiusRange)
-                    grpdftuningPRE(h,:,i,j,k,l,1) = grpdftuningPRE(h,:,i,j,k,l,1)-squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPRE(h,:,i,j,k,1,1),1),3),4),5));
-                    grpdftuningPRE(h,:,i,j,k,l,2) = grpdftuningPRE(h,:,i,j,k,l,2)-squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPRE(h,:,i,j,k,1,2),1),3),4),5));
-                    grpsptuningPRE(h,:,i,j,k,l,1) = grpsptuningPRE(h,:,i,j,k,l,1)-squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPRE(h,:,i,j,k,1,1),1),3),4),5));
-                    grpsptuningPRE(h,:,i,j,k,l,2) = grpsptuningPRE(h,:,i,j,k,l,2)-squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPRE(h,:,i,j,k,1,2),1),3),4),5));
-                    grpdftuningPOST(h,:,i,j,k,l,1) = grpdftuningPOST(h,:,i,j,k,l,1)-squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPOST(h,:,i,j,k,1,1),1),3),4),5));
-                    grpdftuningPOST(h,:,i,j,k,l,2) = grpdftuningPOST(h,:,i,j,k,l,2)-squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPOST(h,:,i,j,k,1,2),1),3),4),5));
-                    grpsptuningPOST(h,:,i,j,k,l,1) = grpsptuningPOST(h,:,i,j,k,l,1)-squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPOST(h,:,i,j,k,1,1),1),3),4),5));
-                    grpsptuningPOST(h,:,i,j,k,l,2) = grpsptuningPOST(h,:,i,j,k,l,2)-squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPOST(h,:,i,j,k,1,2),1),3),4),5));                    
+                    grpdftuningPRE(h,:,i,j,k,l,1) = grpdftuningPRE(h,:,i,j,k,l,1)-dfZeroPreSta;
+                    grpdftuningPRE(h,:,i,j,k,l,2) = grpdftuningPRE(h,:,i,j,k,l,2)-dfZeroPreRun;
+                    grpsptuningPRE(h,:,i,j,k,l,1) = grpsptuningPRE(h,:,i,j,k,l,1)-spZeroPreSta;
+                    grpsptuningPRE(h,:,i,j,k,l,2) = grpsptuningPRE(h,:,i,j,k,l,2)-spZeroPreRun;
+                    grpdftuningPOST(h,:,i,j,k,l,1) = grpdftuningPOST(h,:,i,j,k,l,1)-dfZeroPostSta;
+                    grpdftuningPOST(h,:,i,j,k,l,2) = grpdftuningPOST(h,:,i,j,k,l,2)-dfZeroPostRun;
+                    grpsptuningPOST(h,:,i,j,k,l,1) = grpsptuningPOST(h,:,i,j,k,l,1)-spZeroPostSta;
+                    grpsptuningPOST(h,:,i,j,k,l,2) = grpsptuningPOST(h,:,i,j,k,l,2)-spZeroPostRun;                    
                 end
             end
         end
@@ -308,22 +324,45 @@ end
 figure
 subplot(1,2,1)
 hold on
-plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPRE(:,spWindow,:,:,end,:,1),4),3),1),2)),'k');%-squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,5,:,:,end,:,1),4),3),1)),'k');
-plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPOST(:,spWindow,:,:,end,:,1),4),3),1),2)),'r');%-squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(:,5,:,:,end,:,1),4),3),1)),'r');
-axis([0 length(radiusRange)+1 -0.01 0.3])
+% plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPRE(:,spWindow,:,:,end,:,1),4),3),1),2)),'k');%-squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,5,:,:,end,:,1),4),3),1)),'k');
+% plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPOST(:,spWindow,:,:,end,:,1),4),3),1),2)),'r');%-squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(:,5,:,:,end,:,1),4),3),1)),'r');
+errorbar(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPRE(:,spWindow,:,:,end,:,1),4),3),1),2)),squeeze(nanstd(nanstd(nanstd(nanstd(grpsptuningPRE(:,spWindow,:,:,end,:,1),4),3),1),2))/sqrt(cellcnt),'k');
+errorbar(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPOST(:,spWindow,:,:,end,:,1),4),3),1),2)),squeeze(nanstd(nanstd(nanstd(nanstd(grpsptuningPOST(:,spWindow,:,:,end,:,1),4),3),1),2))/sqrt(cellcnt),'r');
+axis([0 length(radiusRange)+1 -0.01 0.2])
 set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
 legend('PRE','POST','location','northwest')
 xlabel('Stim Size (deg)')
 ylabel('stationary spikes')
 subplot(1,2,2)
 hold on
-plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPRE(:,spWindow,:,:,end,:,2),4),3),1),2)),'k');%-squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,5,:,:,end,:,2),4),3),1)),'k');
-plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPOST(:,spWindow,:,:,end,:,2),4),3),1),2)),'r');%-squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(:,5,:,:,end,:,2),4),3),1)),'r');
-axis([0 length(radiusRange)+1 -0.01 0.3])
+% plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPRE(:,spWindow,:,:,end,:,2),4),3),1),2)),'k');%-squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,5,:,:,end,:,2),4),3),1)),'k');
+% plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPOST(:,spWindow,:,:,end,:,2),4),3),1),2)),'r');%-squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(:,5,:,:,end,:,2),4),3),1)),'r');
+errorbar(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPRE(:,spWindow,:,:,end,:,2),4),3),1),2)),squeeze(nanstd(nanstd(nanstd(nanstd(grpsptuningPRE(:,spWindow,:,:,end,:,2),4),3),1),2))/sqrt(cellcnt),'k');
+errorbar(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPOST(:,spWindow,:,:,end,:,2),4),3),1),2)),squeeze(nanstd(nanstd(nanstd(nanstd(grpsptuningPOST(:,spWindow,:,:,end,:,2),4),3),1),2))/sqrt(cellcnt),'r');
+axis([0 length(radiusRange)+1 -0.01 0.2])
 set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
 legend('PRE','POST','location','northwest')
 xlabel('Stim Size (deg)')
 ylabel('running spikes')
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
+
+%plot full contrast response peaks across sizes for stationary using
+%different windows
+figure
+for i = 1:size(spWindows,1)
+    subplot(1,size(spWindows,1),i)
+    hold on
+    errorbar(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPRE(:,spWindows{i},:,:,end,:,1),4),3),1),2)),squeeze(nanstd(nanstd(nanstd(nanstd(grpsptuningPRE(:,spWindows{i},:,:,end,:,1),4),3),1),2))/sqrt(cellcnt),'k');
+    errorbar(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPOST(:,spWindows{i},:,:,end,:,1),4),3),1),2)),squeeze(nanstd(nanstd(nanstd(nanstd(grpsptuningPOST(:,spWindows{i},:,:,end,:,1),4),3),1),2))/sqrt(cellcnt),'r');
+    axis([0 length(radiusRange)+1 -0.01 0.2])
+    set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
+    legend('PRE','POST','location','northwest')
+    xlabel('Stim Size (deg)')
+    ylabel(sprintf('stationary spikes %s', spWindowsNames{i}))
+end
 if exist('psfile','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfile,'-append');
@@ -334,9 +373,11 @@ figure
 for i = 1:length(sizes)
     subplot(2,ceil(length(sizes)/2),i)
     hold on
-    plot(timepts,squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,:,:,:,end,i,1),4),3),1)),'k');%-squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,5,:,:,end,i,1),4),3),1)),'k')
-    plot(timepts,squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(:,:,:,:,end,i,1),4),3),1)),'r');%-squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(:,5,:,:,end,i,1),4),3),1)),'r')
-    axis([timepts(1) timepts(end) -0.01 0.3])
+%     plot(timepts,squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,:,:,:,end,i,1),4),3),1)),'k');%-squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,5,:,:,end,i,1),4),3),1)),'k')
+%     plot(timepts,squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(:,:,:,:,end,i,1),4),3),1)),'r');%-squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(:,5,:,:,end,i,1),4),3),1)),'r')
+    shadedErrorBar(timepts,squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,:,:,:,end,i,1),4),3),1)),squeeze(nanstd(nanstd(nanstd(grpsptuningPRE(:,:,:,:,end,i,1),4),3),1))/sqrt(cellcnt),'k');
+    shadedErrorBar(timepts,squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(:,:,:,:,end,i,1),4),3),1)),squeeze(nanstd(nanstd(nanstd(grpsptuningPOST(:,:,:,:,end,i,1),4),3),1))/sqrt(cellcnt),'r');
+    axis([timepts(1) timepts(end) -0.01 0.25])
 end
 mtit('Stationary spikes per size')
 if exist('psfile','var')
@@ -347,8 +388,10 @@ figure
 for i = 1:length(sizes)
     subplot(2,ceil(length(sizes)/2),i)
     hold on
-    plot(timepts,squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,:,:,:,end,i,2),4),3),1)),'k');%-squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,5,:,:,end,i,2),4),3),1)),'k')
-    plot(timepts,squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(:,:,:,:,end,i,2),4),3),1)),'r');%-squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(:,5,:,:,end,i,2),4),3),1)),'r')
+%     plot(timepts,squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,:,:,:,end,i,2),4),3),1)),'k');%-squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,5,:,:,end,i,2),4),3),1)),'k')
+%     plot(timepts,squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(:,:,:,:,end,i,2),4),3),1)),'r');%-squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(:,5,:,:,end,i,2),4),3),1)),'r')
+    shadedErrorBar(timepts,squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,:,:,:,end,i,2),4),3),1)),squeeze(nanstd(nanstd(nanstd(grpsptuningPRE(:,:,:,:,end,i,2),4),3),1))/sqrt(cellcnt),'k');
+    shadedErrorBar(timepts,squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(:,:,:,:,end,i,2),4),3),1)),squeeze(nanstd(nanstd(nanstd(grpsptuningPOST(:,:,:,:,end,i,2),4),3),1))/sqrt(cellcnt),'r');
     axis([timepts(1) timepts(end) -0.01 0.3])
 end
 mtit('Running spikes per size')

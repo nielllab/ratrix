@@ -1,6 +1,6 @@
 %%% clear;
-% close all
-% clear all
+close all
+clear all
 
 addpath(genpath('utilities'));
 

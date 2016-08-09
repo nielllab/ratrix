@@ -3,7 +3,7 @@
 % clear all
 %% code from analyzeWidefieldDOI
 % batchDOIphilMaskSizesel
-batchPhilSizeSelect
+% batchPhilSizeSelect
  
    alluse = find(strcmp({files.inject},'doi')  & strcmp({files.timing},'pre') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
 %   

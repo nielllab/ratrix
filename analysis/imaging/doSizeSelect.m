@@ -477,132 +477,140 @@ for f = 1:length(use)
 
     %%multiply binarized area matrices with average trial data to isolate each
     %%area's response (using peak frame #12)
+    
+    %stopped here
+    
     gauParams = zeros(size(trialcycavg,4),size(trialcycavg,5),size(trialcycavg,6),size(trialcycavg,7),size(trialcycavg,8),length(areas),5); %contains a1,x0,y0,sigmax,sigmay for spread fits
     halfMax = zeros(size(trialcycavg,4),size(trialcycavg,5),size(trialcycavg,6),size(trialcycavg,7),size(trialcycavg,8),length(areas)); %total # pixels above half the max amplitude, alternative spread measure
     areapeaks = halfMax; %automated peak finding
-    sprintf('doing peak finding and gaussian fits');
-    tic
-    for m = 1:length(areas)
-        minframe = squeeze(nanmean(nanmean(nanmean(nanmean(trialcycavg(:,:,shift/2,:,:,:,1,:),4),5),6),8));
-        minframe = minframe(:);
-        spreadthresh(:,m) = nanmean(minframe) + 2*std(minframe); %calculate threshold for gaussian
-    end
-    for i = 1:length(sfrange)
-        for j = 1:length(phaserange)
-            for k = 1:length(contrastRange)
-                for l = 1:length(radiusRange)
-                    for m = 1:length(areas)
-                        for n = 1:2
-                            spreadframe = trialcycavg(:,:,shift/2,i,j,k,l,n).*areamaps(:,:,m);
-                            if isnan(nanmean(nanmean(spreadframe)))
-                                    gauParams(i,j,k,l,n,m,1) = NaN;
-                                    gauParams(i,j,k,l,n,m,2) = NaN;
-                                    gauParams(i,j,k,l,n,m,3) = NaN;
-                                    gauParams(i,j,k,l,n,m,4) = NaN;
-                                    gauParams(i,j,k,l,n,m,5) = NaN;
-                                    halfMax(i,j,k,l,n,m) = NaN;
-                                    areapeaks(i,j,k,l,n,m) = NaN;
-                            else
-                                spreadframe = spreadframe - spreadthresh(:,m);
-                                spreadframe(spreadframe<0)=0;
-                                halfMax(i,j,k,l,n,m) = length(find(spreadframe>=(max(max(spreadframe))/2))); %# pixels above half max
-                                sfit = imgGauss(spreadframe,x,y,sigsize,m); %gaussian parameters
-                                if sfit.a1<0.01 %one percent for the bottom threshold
-                                    gauParams(i,j,k,l,n,m,:) = 0; %if below threshold, no "response"
-                                else
-                                    gauParams(i,j,k,l,n,m,1) = sfit.a1;
-                                    gauParams(i,j,k,l,n,m,2) = sfit.x0;
-                                    gauParams(i,j,k,l,n,m,3) = sfit.y0;
-                                    gauParams(i,j,k,l,n,m,4) = sfit.sigmax;
-                                    gauParams(i,j,k,l,n,m,5) = sfit.sigmay;
-                                end
-
-                                peakmap = trialcycavg(:,:,shift/2,i,j,k,l,n);
-                                peakfilter = fspecial('gaussian',12,3);
-                                peakmap = imfilter(peakmap,peakfilter);
-                                maxval = max(max(peakmap.*areamaps(:,:,m)));
-                                if maxval<=0
-                                    areapeaks(i,j,k,l,m,n) = 0;
-                                else
-                                    maxind = find(peakmap==maxval);
-                                    [I,J]=ind2sub([size(deconvimg,1) size(deconvimg,2)],maxind);
-                                    areapeaks(i,j,k,l,n,m) = trialcycavg(I,J,shift/2,i,j,k,l,n); %individual area peaks found by automation
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end
-    toc
-
+%     sprintf('doing peak finding and gaussian fits');
+%     tic
+%     for m = 1:length(areas)
+%         minframe = squeeze(nanmean(nanmean(nanmean(nanmean(trialcycavg(:,:,shift/2,:,:,:,1,:),4),5),6),8));
+%         minframe = minframe(:);
+%         spreadthresh(:,m) = nanmean(minframe) + 2*std(minframe); %calculate threshold for gaussian
+%     end
+%     for i = 1:length(sfrange)
+%         for j = 1:length(phaserange)
+%             for k = 1:length(contrastRange)
+%                 for l = 1:length(radiusRange)
+%                     for m = 1:length(areas)
+%                         for n = 1:2
+%                             spreadframe = trialcycavg(:,:,shift/2,i,j,k,l,n).*areamaps(:,:,m);
+%                             if isnan(nanmean(nanmean(spreadframe)))
+%                                     gauParams(i,j,k,l,n,m,1) = NaN;
+%                                     gauParams(i,j,k,l,n,m,2) = NaN;
+%                                     gauParams(i,j,k,l,n,m,3) = NaN;
+%                                     gauParams(i,j,k,l,n,m,4) = NaN;
+%                                     gauParams(i,j,k,l,n,m,5) = NaN;
+%                                     halfMax(i,j,k,l,n,m) = NaN;
+%                                     areapeaks(i,j,k,l,n,m) = NaN;
+%                             else
+%                                 spreadframe = spreadframe - spreadthresh(:,m);
+%                                 spreadframe(spreadframe<0)=0;
+%                                 halfMax(i,j,k,l,n,m) = length(find(spreadframe>=(max(max(spreadframe))/2))); %# pixels above half max
+%                                 sfit = imgGauss(spreadframe,x,y,sigsize,m); %gaussian parameters
+%                                 if sfit.a1<0.01 %one percent for the bottom threshold
+%                                     gauParams(i,j,k,l,n,m,:) = 0; %if below threshold, no "response"
+%                                 else
+%                                     gauParams(i,j,k,l,n,m,1) = sfit.a1;
+%                                     gauParams(i,j,k,l,n,m,2) = sfit.x0;
+%                                     gauParams(i,j,k,l,n,m,3) = sfit.y0;
+%                                     gauParams(i,j,k,l,n,m,4) = sfit.sigmax;
+%                                     gauParams(i,j,k,l,n,m,5) = sfit.sigmay;
+%                                 end
+% 
+%                                 peakmap = trialcycavg(:,:,shift/2,i,j,k,l,n);
+%                                 peakfilter = fspecial('gaussian',12,3);
+%                                 peakmap = imfilter(peakmap,peakfilter);
+%                                 maxval = max(max(peakmap.*areamaps(:,:,m)));
+%                                 if maxval<=0
+%                                     areapeaks(i,j,k,l,m,n) = 0;
+%                                 else
+%                                     maxind = find(peakmap==maxval);
+%                                     [I,J]=ind2sub([size(deconvimg,1) size(deconvimg,2)],maxind);
+%                                     areapeaks(i,j,k,l,n,m) = trialcycavg(I,J,shift/2,i,j,k,l,n); %individual area peaks found by automation
+%                                 end
+%                             end
+%                         end
+%                     end
+%                 end
+%             end
+%         end
+%     end
+%     toc
+% 
+%     
+%     cnt=0;
+%     figure
+%     for i = 1:length(sfrange)
+%         for j = 1:length(tfrange)
+%                 cnt = cnt+1;
+%                 subplot(2,2,cnt)
+%                 hold on
+%                 plot(1:length(radiusRange),areapeaks(1,:,i,j,1),'ko')
+%                 set(gca,'Xtick',1:6,'Xticklabel',[0 1 2 4 8 1000])
+%                 xlabel('radius')
+%                 ylabel('dfof')
+%                 axis square
+%                 axis([1 6 -0.05 0.5])
+%                 legend(sprintf('%0.2fsf %0.0ftf',sfrange(i),tfrange(j)),'Location','northoutside')
+%         end
+%     end
+%     mtit('Auto-Found Peaks')
+%     if exist('psfilename','var')
+%         set(gcf, 'PaperPositionMode', 'auto');
+%         print('-dpsc',psfilename,'-append');
+%     end
+% 
+%     cnt=0;
+%     figure
+%     for i = 1:length(sfrange)
+%         for j = 1:length(tfrange)
+%                 cnt = cnt+1;
+%                 subplot(2,2,cnt)
+%                 hold on
+%                 plot(1:length(radiusRange),halfMax(1,:,i,j,1),'ko')
+%                 set(gca,'Xtick',1:6,'Xticklabel',[0 1 2 4 8 1000])
+%                 xlabel('radius')
+%                 ylabel('# pixels')
+%                 axis square
+%                 axis([1 6 0 5000])
+%                 legend(sprintf('%0.2fsf %0.0ftf',sfrange(i),tfrange(j)),'Location','northoutside')
+%         end
+%     end
+%     mtit('Area above Half Max')
+%     if exist('psfilename','var')
+%         set(gcf, 'PaperPositionMode', 'auto');
+%         print('-dpsc',psfilename,'-append');
+%     end
+% 
+%     cnt=0;
+%     figure
+%     for i = 1:length(sfrange)
+%         for j = 1:length(tfrange)
+%                 cnt = cnt+1;
+%                 subplot(2,2,cnt)
+%                 hold on
+%                 plot(1:length(radiusRange),(gauParams(1,:,i,j,1,4)+gauParams(1,:,i,j,1,5))/2,'ko')
+%                 set(gca,'Xtick',1:6,'Xticklabel',[0 1 2 4 8 1000])
+%                 xlabel('radius')
+%                 ylabel('Sigma')
+%                 axis square
+%                 axis([1 6 0 30])
+%                 legend(sprintf('%0.2fsf %0.0ftf',sfrange(i),tfrange(j)),'Location','northoutside')
+%         end
+%     end
+%     mtit('Sigma from Gaussian Fit')
+%     if exist('psfilename','var')
+%         set(gcf, 'PaperPositionMode', 'auto');
+%         print('-dpsc',psfilename,'-append');
+%     end
     
-    cnt=0;
-    figure
-    for i = 1:length(sfrange)
-        for j = 1:length(tfrange)
-                cnt = cnt+1;
-                subplot(2,2,cnt)
-                hold on
-                plot(1:length(radiusRange),areapeaks(1,:,i,j,1),'ko')
-                set(gca,'Xtick',1:6,'Xticklabel',[0 1 2 4 8 1000])
-                xlabel('radius')
-                ylabel('dfof')
-                axis square
-                axis([1 6 -0.05 0.5])
-                legend(sprintf('%0.2fsf %0.0ftf',sfrange(i),tfrange(j)),'Location','northoutside')
-        end
-    end
-    mtit('Auto-Found Peaks')
-    if exist('psfilename','var')
-        set(gcf, 'PaperPositionMode', 'auto');
-        print('-dpsc',psfilename,'-append');
-    end
-
-    cnt=0;
-    figure
-    for i = 1:length(sfrange)
-        for j = 1:length(tfrange)
-                cnt = cnt+1;
-                subplot(2,2,cnt)
-                hold on
-                plot(1:length(radiusRange),halfMax(1,:,i,j,1),'ko')
-                set(gca,'Xtick',1:6,'Xticklabel',[0 1 2 4 8 1000])
-                xlabel('radius')
-                ylabel('# pixels')
-                axis square
-                axis([1 6 0 5000])
-                legend(sprintf('%0.2fsf %0.0ftf',sfrange(i),tfrange(j)),'Location','northoutside')
-        end
-    end
-    mtit('Area above Half Max')
-    if exist('psfilename','var')
-        set(gcf, 'PaperPositionMode', 'auto');
-        print('-dpsc',psfilename,'-append');
-    end
-
-    cnt=0;
-    figure
-    for i = 1:length(sfrange)
-        for j = 1:length(tfrange)
-                cnt = cnt+1;
-                subplot(2,2,cnt)
-                hold on
-                plot(1:length(radiusRange),(gauParams(1,:,i,j,1,4)+gauParams(1,:,i,j,1,5))/2,'ko')
-                set(gca,'Xtick',1:6,'Xticklabel',[0 1 2 4 8 1000])
-                xlabel('radius')
-                ylabel('Sigma')
-                axis square
-                axis([1 6 0 30])
-                legend(sprintf('%0.2fsf %0.0ftf',sfrange(i),tfrange(j)),'Location','northoutside')
-        end
-    end
-    mtit('Sigma from Gaussian Fit')
-    if exist('psfilename','var')
-        set(gcf, 'PaperPositionMode', 'auto');
-        print('-dpsc',psfilename,'-append');
-    end
+    
+    
+    
+    
     
     % 
     % %%% plot sf and tf responses
@@ -725,7 +733,7 @@ for f = 1:length(use)
 
     if f~=0
     %     save(fullfile(p,f),'allsubj','sessiondata','shiftData','fit','mnfit','cycavg','mv');
-        save(fullfile(p,filename),'trialcycavg','peaks','areapeaks','gauParams','mv','halfMax','xrange','radiusRange','sfrange','tfrange');
+        save(fullfile(p,filename),'trialcycavg','peaks','areapeaks','gauParams','mv','halfMax');
     end
 
     try

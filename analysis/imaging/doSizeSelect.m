@@ -148,7 +148,7 @@ for f = 1:length(use)
     else
         deconvimg = img;
     end
-    ncut = 1 %# of trials to cut due to deconvolution cutting off end
+    ncut = 2 %# of trials to cut due to deconvolution cutting off end
     trials=trials-ncut; %deconv cuts off last trial
     deconvimg = deconvimg(:,:,1:trials*shift);
 
@@ -171,8 +171,8 @@ for f = 1:length(use)
     end
     %frames 1-5 are baseline, 6-10 stim on
     sizeVals = [0 5 10 20 30 40 50 60];
-    sf=sf(1:end-ncut);contrasts=contrasts(1:end-ncut);phase=phase(1:end-ncut);radius=radius(1:end-ncut);
-    order=order(1:end-ncut);tf=tf(1:end-ncut);theta=theta(1:end-ncut);xpos=xpos(1:end-ncut);
+    sf=sf(1:trials);contrasts=contrasts(1:trials);phase=phase(1:trials);radius=radius(1:trials);
+    order=order(1:trials);tf=tf(1:trials);theta=theta(1:trials);xpos=xpos(1:trials);
     contrastRange = unique(contrasts); sfrange = unique(sf); phaserange = unique(phase);
     for i = 1:length(contrastRange);contrastlist{i} = num2str(contrastRange(i));end
     for i=1:length(sizeVals); sizes{i} = num2str(sizeVals(i)); end
@@ -181,7 +181,6 @@ for f = 1:length(use)
     for i = 1:trials
         running(i) = trialspeed(i)>speedcut;
     end
-    running = running(1:end-ncut);
     
 %     tuning=nan(size(trialdata,1),size(trialdata,2),length(xrange),length(radiusRange),length(sfrange),length(tfrange));
     %%% separate out responses by stim parameter
@@ -357,29 +356,33 @@ for f = 1:length(use)
     figure
     subplot(1,2,1)
     hold on
-    %stopped here
-    shadedErrorBar([1:shift+shift/2]',squeeze(nanmean(nanmean(nanmean(trialcycavg(y(1),x(1),:,:,:,:,1,1),4),5),6)),squeeze(nanmean(nanmean(nanmean(trialcycavg(y(1),x(1),:,:,:,:,1,1),4),5),6))/sqrt(length(find(radius==1&running==0))))
-    shadedErrorBar([1:shift+shift/2]',squeeze(nanmean(nanmean(nanmean(trialcycavg(y(1),x(1),:,:,:,:,1,2),4),5),6)),squeeze(nanmean(nanmean(nanmean(trialcycavg(y(1),x(1),:,:,:,:,1,2),4),5),6))/sqrt(length(find(radius==1&running==1))))
+    shadedErrorBar([1:shift+shift/2]',squeeze(nanmean(nanmean(nanmean(trialcycavg(y(1),x(1),:,:,:,:,1,1),4),5),6)),squeeze(nanstd(nanstd(nanstd(trialcycavg(y(1),x(1),:,:,:,:,1,1),4),5),6))/sqrt(length(find(radius==1&running==0))),'k')
+    shadedErrorBar([1:shift+shift/2]',squeeze(nanmean(nanmean(nanmean(trialcycavg(y(1),x(1),:,:,:,:,1,2),4),5),6)),squeeze(nanstd(nanstd(nanstd(trialcycavg(y(1),x(1),:,:,:,:,1,2),4),5),6))/sqrt(length(find(radius==1&running==1))),'r')
     axis([1 shift+shift/2 -0.1 0.5])
+    legend('stationary','running') %not sure why colors aren't plotting correctly...
     title('No stim')
     subplot(1,2,2)
-    shadedErrorBar([1:30]',squeeze(nanmean(trialcyc(y(1),x(1),:,find(radius==6)),4)),squeeze(std(trialcyc(y(1),x(1),:,find(radius==6)),[],4))/sqrt(length(find(radius==6))))
-    axis([1 30 -0.1 0.5])
+    hold on
+    shadedErrorBar([1:shift+shift/2]',squeeze(nanmean(nanmean(nanmean(trialcycavg(y(1),x(1),:,:,:,:,8,1),4),5),6)),squeeze(nanstd(nanstd(nanstd(trialcycavg(y(1),x(1),:,:,:,:,8,1),4),5),6))/sqrt(length(find(radius==8&running==0))),'k')
+    shadedErrorBar([1:shift+shift/2]',squeeze(nanmean(nanmean(nanmean(trialcycavg(y(1),x(1),:,:,:,:,8,2),4),5),6)),squeeze(nanstd(nanstd(nanstd(trialcycavg(y(1),x(1),:,:,:,:,8,2),4),5),6))/sqrt(length(find(radius==8&running==1))),'r')
+    axis([1 shift+shift/2 -0.1 0.5])
+    legend('stationary','running')
     title('Max Radius')
     if exist('psfilename','var')
         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfilename,'-append');
     end    
 
-    %plot activity maps for the different tf/sf combinations, with rows=radius
-    for i=1:length(sfrange)
-        for j=1:length(tfrange)
+    %plot activity maps for contrasts averaged over sf/phase with rows=radius
+    %stopped here
+    for i=1:length(contrastRange)
+        for j=1:2
             figure
             cnt=1;
             for k=1:length(radiusRange)
-                for l=10:19
-                    subplot(6,10,cnt)
-                        imagesc(trialcycavg(:,:,l,1,k,i,j),[0 0.15])
+                for l=shift/2:shift-1
+                    subplot(length(radiusRange),length(shift/2:shift-1),cnt)
+                        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,l,:,:,i,k,j),4),5)),[0 0.15])
                         colormap(jet)
                         axis square
                         axis off
@@ -388,7 +391,7 @@ for f = 1:length(use)
                         cnt=cnt+1;
                 end
             end
-            mtit(sprintf('%s %0.2fsf %0.0ftf row=size',[files(use(f)).subj ' ' files(use(f)).expt],sfrange(i),tfrange(j)))
+            mtit(sprintf('%s %s %s contrast row=size',[files(use(f)).subj ' ' files(use(f)).expt],behavState{j},contrastlist{i}))
             if exist('psfilename','var')
                 set(gcf, 'PaperPositionMode', 'auto');
                 print('-dpsc',psfilename,'-append');
@@ -397,29 +400,28 @@ for f = 1:length(use)
     end
     
     %plot traces for manually selected V1 point
-    xstim = [10 10];
+    xstim = [shift/2 shift/2];
     ystim = [-0.1 0.5];
-    for i=1:length(sfrange)
-        for j=1:length(tfrange)
-            figure
-            cnt=1;
-            for k=1:length(radiusRange)
-                subplot(2,3,cnt)
-                hold on
-                shadedErrorBar([1:30]',squeeze(nanmean(trialcyc(y(1),x(1),:,find(xpos==xrange(1)&radius==k&sf==sfrange(i)&tf==tfrange(j))),4)),...
-                    squeeze(std(trialcyc(y(1),x(1),:,find(xpos==xrange(1)&radius==k&sf==sfrange(i)&tf==tfrange(j))),[],4))/...
-                    sqrt(length(find(xpos==xrange(1)&radius==k&sf==sfrange(i)&tf==tfrange(j)))))
-                plot(xstim,ystim,'r-')
-                set(gca,'LooseInset',get(gca,'TightInset'))
-                cnt=cnt+1;
-                axis([1 30 -0.1 0.5])
-                legend(sprintf('%0.0frad',radiusRange(k)),'Location','south')
-            end
-            mtit(sprintf('%s %0.2fsf %0.0ftf',[files(use(f)).subj ' ' files(use(f)).expt],sfrange(i),tfrange(j)))
-            if exist('psfilename','var')
-                set(gcf, 'PaperPositionMode', 'auto');
-                print('-dpsc',psfilename,'-append');
-            end
+    for i=1:length(contrastRange)
+        figure
+        cnt=1;
+        for k=1:length(radiusRange)
+            subplot(ceil(length(radiusRange)/4),ceil(length(radiusRange)/2),cnt)
+            hold on
+            shadedErrorBar([1:shift+shift/2]',squeeze(nanmean(nanmean(trialcycavg(y(1),x(1),:,:,:,i,k,1),4),5)),...
+                squeeze(nanstd(nanstd(trialcycavg(y(1),x(1),:,:,:,i,k,1),4),5))/sqrt(length(find(radius==k&running==0))),'k')
+            shadedErrorBar([1:shift+shift/2]',squeeze(nanmean(nanmean(trialcycavg(y(1),x(1),:,:,:,i,k,2),4),5)),...
+                squeeze(nanstd(nanstd(trialcycavg(y(1),x(1),:,:,:,i,k,2),4),5))/sqrt(length(find(radius==k&running==1))),'r')
+            plot(xstim,ystim,'g-')
+            set(gca,'LooseInset',get(gca,'TightInset'))
+            cnt=cnt+1;
+            axis([1 shift+shift/2 -0.1 0.5])
+            legend(sprintf('%sdeg stationary',sizes{k}),'running','Location','northeast')
+        end
+        mtit(sprintf('%s %s %scontrast',[files(use(f)).subj ' ' files(use(f)).expt],behavState{j},contrastlist{i}))
+        if exist('psfilename','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilename,'-append');
         end
     end
     
@@ -475,46 +477,58 @@ for f = 1:length(use)
 
     %%multiply binarized area matrices with average trial data to isolate each
     %%area's response (using peak frame #12)
-    gauParams = nan(size(trialcycavg,4),size(trialcycavg,5),size(trialcycavg,6),size(trialcycavg,7),length(areas),5); %contains a1,x0,y0,sigmax,sigmay for spread fits
-    halfMax = zeros(size(trialcycavg,4),size(trialcycavg,5),size(trialcycavg,6),size(trialcycavg,7),length(areas)); %total # pixels above half the max amplitude, alternative spread measure
-    areapeaks = zeros(size(trialcycavg,4),size(trialcycavg,5),size(trialcycavg,6),size(trialcycavg,7),length(areas)); %automated peak finding
+    gauParams = zeros(size(trialcycavg,4),size(trialcycavg,5),size(trialcycavg,6),size(trialcycavg,7),size(trialcycavg,8),length(areas),5); %contains a1,x0,y0,sigmax,sigmay for spread fits
+    halfMax = zeros(size(trialcycavg,4),size(trialcycavg,5),size(trialcycavg,6),size(trialcycavg,7),size(trialcycavg,8),length(areas)); %total # pixels above half the max amplitude, alternative spread measure
+    areapeaks = halfMax; %automated peak finding
     sprintf('doing peak finding and gaussian fits');
     tic
     for m = 1:length(areas)
-        minframe = squeeze(nanmean(nanmean(nanmean(trialcycavg(:,:,12,:,1,:,:),4),6),7));
+        minframe = squeeze(nanmean(nanmean(nanmean(nanmean(trialcycavg(:,:,shift/2,:,:,:,1,:),4),5),6),8));
         minframe = minframe(:);
         spreadthresh(:,m) = nanmean(minframe) + 2*std(minframe); %calculate threshold for gaussian
     end
-    for i = 1:length(xrange)
-        for j = 1:length(radiusRange)
-            for k = 1:length(sfrange)
-                for l = 1:length(tfrange)
+    for i = 1:length(sfrange)
+        for j = 1:length(phaserange)
+            for k = 1:length(contrastRange)
+                for l = 1:length(radiusRange)
                     for m = 1:length(areas)
-                        spreadframe = trialcycavg(:,:,12,i,j,k,l).*areamaps(:,:,m);
-                        spreadframe = spreadframe - spreadthresh(:,m);
-                        spreadframe(spreadframe<0)=0;
-                        halfMax(i,j,k,l,m) = length(find(spreadframe>=(max(max(spreadframe))/2))); %# pixels above half max
-                        sfit = imgGauss(spreadframe,x,y,sigsize,m); %gaussian parameters
-                        if sfit.a1<0.01 %one percent for the bottom threshold
-                            gauParams(i,j,k,l,m,:) = 0; %if below threshold, no "response"
-                        else
-                            gauParams(i,j,k,l,m,1) = sfit.a1;
-                            gauParams(i,j,k,l,m,2) = sfit.x0;
-                            gauParams(i,j,k,l,m,3) = sfit.y0;
-                            gauParams(i,j,k,l,m,4) = sfit.sigmax;
-                            gauParams(i,j,k,l,m,5) = sfit.sigmay;
-                        end
+                        for n = 1:2
+                            spreadframe = trialcycavg(:,:,shift/2,i,j,k,l,n).*areamaps(:,:,m);
+                            if isnan(nanmean(nanmean(spreadframe)))
+                                    gauParams(i,j,k,l,n,m,1) = NaN;
+                                    gauParams(i,j,k,l,n,m,2) = NaN;
+                                    gauParams(i,j,k,l,n,m,3) = NaN;
+                                    gauParams(i,j,k,l,n,m,4) = NaN;
+                                    gauParams(i,j,k,l,n,m,5) = NaN;
+                                    halfMax(i,j,k,l,n,m) = NaN;
+                                    areapeaks(i,j,k,l,n,m) = NaN;
+                            else
+                                spreadframe = spreadframe - spreadthresh(:,m);
+                                spreadframe(spreadframe<0)=0;
+                                halfMax(i,j,k,l,n,m) = length(find(spreadframe>=(max(max(spreadframe))/2))); %# pixels above half max
+                                sfit = imgGauss(spreadframe,x,y,sigsize,m); %gaussian parameters
+                                if sfit.a1<0.01 %one percent for the bottom threshold
+                                    gauParams(i,j,k,l,n,m,:) = 0; %if below threshold, no "response"
+                                else
+                                    gauParams(i,j,k,l,n,m,1) = sfit.a1;
+                                    gauParams(i,j,k,l,n,m,2) = sfit.x0;
+                                    gauParams(i,j,k,l,n,m,3) = sfit.y0;
+                                    gauParams(i,j,k,l,n,m,4) = sfit.sigmax;
+                                    gauParams(i,j,k,l,n,m,5) = sfit.sigmay;
+                                end
 
-                        peakmap = trialcycavg(:,:,12,i,j,k,l);
-                        peakfilter = fspecial('gaussian',12,3);
-                        peakmap = imfilter(peakmap,peakfilter);
-                        maxval = max(max(peakmap.*areamaps(:,:,m)));
-                        if maxval<=0
-                            areapeaks(i,j,k,l,m) = 0;
-                        else
-                            maxind = find(peakmap==maxval);
-                            [I,J]=ind2sub([size(deconvimg,1) size(deconvimg,2)],maxind);
-                            areapeaks(i,j,k,l,m) = trialcycavg(I,J,12,i,j,k,l); %individual area peaks found by automation
+                                peakmap = trialcycavg(:,:,shift/2,i,j,k,l,n);
+                                peakfilter = fspecial('gaussian',12,3);
+                                peakmap = imfilter(peakmap,peakfilter);
+                                maxval = max(max(peakmap.*areamaps(:,:,m)));
+                                if maxval<=0
+                                    areapeaks(i,j,k,l,m,n) = 0;
+                                else
+                                    maxind = find(peakmap==maxval);
+                                    [I,J]=ind2sub([size(deconvimg,1) size(deconvimg,2)],maxind);
+                                    areapeaks(i,j,k,l,n,m) = trialcycavg(I,J,shift/2,i,j,k,l,n); %individual area peaks found by automation
+                                end
+                            end
                         end
                     end
                 end

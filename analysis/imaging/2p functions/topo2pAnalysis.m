@@ -160,14 +160,14 @@ if exist('psfilename','var')
     print('-dpsc',psfilename,'-append');
 end
 
-dos(['ps2pdf ' psfilename ' "' psfilenameFinal(1:(end-2)) 'pdf"'])
-if exist([psfilenameFinal(1:(end-2)) 'pdf'],'file')
-    ['ps2pdf ' psfilename ' "' psfilenameFinal(1:(end-2)) 'pdf"']
+dos(['ps2pdf ' psfilename ' "' psfilenameFinal(1:(end-3)) 'pdf"'])
+if exist([psfilenameFinal(1:(end-3)) 'pdf'],'file')
+    ['ps2pdf ' psfilename ' "' psfilenameFinal(1:(end-3)) 'pdf"']
     display('generated pdf using dos ps2pdf')
 else
     try
-        ps2pdf('psfile', psfilename, 'pdffile', [psfilenameFinal(1:(end-4)) 'pdf'])
-        [psfilenameFinal(1:(end-4)) 'pdf']
+        ps2pdf('psfile', psfilename, 'pdffile', [psfilenameFinal(1:(end-3)) 'pdf'])
+        [psfilenameFinal(1:(end-3)) 'pdf']
         display('generated pdf using builtin matlab ps2pdf')
     catch
         display('couldnt generate pdf');

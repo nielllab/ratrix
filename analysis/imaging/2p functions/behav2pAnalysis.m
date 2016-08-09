@@ -9,6 +9,11 @@ if ~exist('pixResp','var') | ~exist('dt','var')
     load(fullfile(p,f),'onsets','starts','trialRecs','pixResp','dt');
 end
 
+[f p] = uiputfile('*.pdf','pdf file');
+psfilenameFinal = fullfile(p,f);
+psfilename = 'c:\temp.ps';
+if exist(psfilename,'file')==2;delete(psfilename);end
+
 %%% get target location, orientation, phase
 stim = [trialRecs.stimDetails];
 for i = 1:length(trialRecs);
@@ -31,11 +36,20 @@ dFdecon=spikes*10;
 figure
 imagesc(meanImg);
 hold on
-  plot([cropy(1) cropy(1) cropy(2) cropy(2) cropy(1)], [cropx(1) cropx(2) cropx(2) cropx(1) cropx(1)],'g','linewidth',2);
+plot([cropy(1) cropy(1) cropy(2) cropy(2) cropy(1)], [cropx(1) cropx(2) cropx(2) cropx(1) cropx(1)],'g','linewidth',2);
 
+if exist('psfilename','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfilename,'-append');
+end
 
 figure
 imagesc(dF,[0 1])
+
+if exist('psfilename','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfilename,'-append');
+end
 
 cc = corrcoef(dFdecon');
 figure
@@ -80,52 +94,64 @@ figure
 plot(score(range,1),score(range,2)); hold on
 mapColors(score(range,1),score(range,2),'.',jet(length(range)))
 drawnow
+if exist('psfilename','var'),    set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfilename,'-append'); end
+
 
 figure
 plot(score(range,1),score(range,3)); hold on
 mapColors(score(range,1),score(range,3),'.',jet(length(range)));
 drawnow;
+if exist('psfilename','var'),    set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfilename,'-append'); end
 
 figure
 plot(score(range,2),score(range,3)); hold on
 mapColors(score(range,2),score(range,3),'.',jet(length(range)))
 drawnow
+if exist('psfilename','var'),    set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfilename,'-append'); end
 
 
 figure
-plot(score(range,3),score(range,5)); hold on
-mapColors(score(range,3),score(range,5),'.',jet(length(range)))
-drawnow
-
-
-figure
-for i = 1:5
-    subplot(5,1,i)
-    plot(score(:,i)); hold on
-    for i = 1:length(onsets);
-        if location(i)<0
-            plot([onsets(i)/dt onsets(i)/dt],[-5 5],'r');
-        else
-            plot([onsets(i)/dt onsets(i)/dt],[-5 5],'g');
-        end
-    end
-    
-end
-
-
-figure
-for i = 1:5
-    subplot(5,1,i)
-    plot(score(:,i)); hold on
+for j = 1:5
+    subplot(5,1,j)
+    plot(score(:,j)); hold on
     for i = 1:length(onsets);
         if correct(i)==0
             plot([onsets(i)/dt onsets(i)/dt],[-5 5],'r');
         else
             plot([onsets(i)/dt onsets(i)/dt],[-5 5],'g');
         end
-    end
-    
+    end   
 end
+subplot(5,1,1);title('correct');
+
+
+figure
+for j = 1:5
+    subplot(5,1,j)
+    plot(score(:,j)); hold on
+    for i = 1:length(onsets);
+        if location(i)<0
+            plot([onsets(i)/dt onsets(i)/dt],[-5 5],'g');
+        else
+            plot([onsets(i)/dt onsets(i)/dt],[-5 5],'m');
+        end
+    end  
+end
+subplot(5,1,1);title('location');
+
+figure
+for j = 1:5
+    subplot(5,1,j)
+    plot(score(:,j)); hold on
+    for i = 1:length(onsets);
+        if orient(i)==0
+            plot([onsets(i)/dt onsets(i)/dt],[-5 5],'k');
+        else
+            plot([onsets(i)/dt onsets(i)/dt],[-5 5],'r');
+        end
+    end  
+end
+subplot(5,1,1);title('orientation');
 
 
 figure
@@ -145,7 +171,6 @@ timepts = -0.9:0.1:2;
 timepts = -1:0.1:5;
 timepts = round(timepts*10)/10
 
-%dFalign = align2onsets(dFdecon(useCells,:),onsets,dt,timepts);
 dFalign = align2onsets(score',onsets,dt,timepts);
 
 
@@ -175,11 +200,14 @@ for c = 0:1;
             end
         end
     end
+    if exist('psfilename','var'),    set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfilename,'-append'); end
 end
 
 % figure
 % imagesc(coeff(1:200,1:25),[-0.5 0.5])
-keyboard
+
+dFalign = align2onsets(dFdecon(useCells,:),onsets,dt,timepts);
+
 %%% get left/right traces
 topmean = mean(dFalign(:,:,location==-1),3);
 bottommean = mean(dFalign(:,:,location==1),3);
@@ -194,6 +222,7 @@ end
 figure
 plot(timepts,topmean'); ylim([-1 2])
 title('left targs')
+if exist('psfilename','var'),    set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfilename,'-append'); end
 
 figure
 imagesc(squeeze(pixResp(cropx(1):cropx(2),cropy(1):cropy(2),10,1) - pixResp(cropx(1):cropx(2),cropy(1):cropy(2),4,1)),[-0.5 0.5]); colormap jet
@@ -203,10 +232,12 @@ title('left targs')
 figure
 draw2pSegs(usePts,topmean(:,timepts==0.4),jet,size(meanShiftImg),useCells,[-0.25 0.25])
 title('left targs')
+if exist('psfilename','var'),    set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfilename,'-append'); end
 
 figure
 plot(timepts,bottommean')
 title('right targs'); ylim([-1 2])
+if exist('psfilename','var'),    set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfilename,'-append'); end
 
 figure
 imagesc(squeeze(pixResp(cropx(1):cropx(2),cropy(1):cropy(2),10,2) - pixResp(cropx(1):cropx(2),cropy(1):cropy(2),4,2)),[-0.5 0.5]); colormap jet
@@ -216,16 +247,20 @@ title('right targs')
 figure
 draw2pSegs(usePts,bottommean(:,timepts==0.4),jet,size(meanShiftImg),useCells,[-0.25 0.25])
 title('right targs')
+if exist('psfilename','var'),    set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfilename,'-append'); end
 
 figure
 plot(topmean(:,timepts==0.4),bottommean(:,timepts==0.4),'o'); hold on
-axis equal; axis square; plot([0 1],[0 1],'g');
+axis equal; axis square; plot([0 1],[0 1],'g'); xlabel('top'); ylabel('bottom');
+if exist('psfilename','var'),    set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfilename,'-append'); end
 
 title('performance')
 results = [ sum(correct & location==-1)  sum(~correct&location==-1) sum(~correct & location==1)  sum(correct & location==1)];
 results = results/sum(results(:))
 figure
 pie(results); legend('left correct','left error','right error','right correct');
+if exist('psfilename','var'),    set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfilename,'-append'); end
+
 
 correctmean = mean(dFalign(:,:,correct),3);
 wrongmean = mean(dFalign(:,:,~correct),3);
@@ -238,12 +273,11 @@ plot(timepts,wrongmean'); ylim([0 2]); title('mean incorrect trials')
 resptime = starts(:,3)-starts(:,2);
 figure
 rtime = resptime; rtime(rtime>2)=2;
-hist(rtime,0:0.1:2); xlabel('response time')
+subplot(1,2,1); hist(rtime,0:0.1:2); xlabel('response time')
 stoptime = starts(:,2)-starts(:,1);
-figure
 stime = stoptime; stime(stime>20)=20;
-hist(stime,0.5:1:20); xlabel('stopping time')
-
+subplot(1,2,2); hist(stime,0.5:1:20); xlabel('stopping time')
+if exist('psfilename','var'),    set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfilename,'-append'); end
 
 save(ptsfname,'dt','onsets','starts','trialRecs','correct','targ','location','orient','gratingPh','dFalign','pixResp','dFdecon','resptime','stoptime','-append')
 
@@ -297,7 +331,7 @@ subplot(4,4,2:4)
 plot(correctRate,'Linewidth',2); set(gca,'Xtick',[]); set(gca,'Ytick',[]); ylabel('correct'); ylim([0 1.1]); xlim([1 length(correctRate)])
 hold on; %plot([1 length(correctRate)],[0.5 0.5],'r:');
 plot(resprate/max(resprate),'g','Linewidth',2); plot(stoprate/max(stoprate),'r','Linewidth',2)
-
+if exist('psfilename','var'),    set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfilename,'-append'); end
 
 figure
 subplot(6,6,7:36);
@@ -329,9 +363,11 @@ for i = 1:4
     plot([1 size(dFlist,2)],[m m],'Color',col(i),'LineWidth',2)
 end
 title('k-means')
-    
+if exist('psfilename','var'),    set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfilename,'-append'); end
+
 figure
 draw2pSegs(usePts,idxall,jet,size(meanShiftImg),useCells,[1 4])
+if exist('psfilename','var'),    set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfilename,'-append'); end
 
 dFalignfix = dFalign;
 % for i=1:size(dFalign,1);
@@ -381,7 +417,7 @@ axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
 imagesc(flipud(goodTrialData(perm,:)),[0 0.5]);
 hold on; for i= 1:4, plot([i*length(timepts) i*length(timepts)]+1,[1 size(dFalign,1)],'g'); end
-
+if exist('psfilename','var'),    set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfilename,'-append'); end
 
 figure
 subplot(4,4,[5 9 13])
@@ -394,7 +430,7 @@ subplot(4,4,2:4)
 plot(correctRate,'Linewidth',2); set(gca,'Xtick',[]); set(gca,'Ytick',[]); ylabel('correct'); ylim([0 1.1]); xlim([1 length(correctRate)])
 hold on; %plot([1 length(correctRate)],[0.5 0.5],'r:');
 plot(resprate/max(resprate),'g','Linewidth',2); plot(stoprate/max(stoprate),'r','Linewidth',2)
-
+if exist('psfilename','var'),    set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfilename,'-append'); end
 
 [Y e] = mdscale(dist,1);
 [y sortind] = sort(Y);
@@ -402,12 +438,28 @@ figure
 imagesc(goodTrialData(sortind,:),[0 1])
 hold on; for i= 1:4, plot([i*length(timepts) i*length(timepts)]+1,[1 size(dFalign,1)],'g'); end
 title('condition-wise sorted by mds')
+if exist('psfilename','var'),    set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfilename,'-append'); end
 
 figure
 imagesc(dFlistgood(sortind,:),[0 1])
 title('full data sorted by mds')
+if exist('psfilename','var'),    set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfilename,'-append'); end
 
 save(ptsfname,'timepts','allTrialData','allTrialDataErr','correctRate','resprate','stoprate','-append');
 
 
 
+dos(['ps2pdf ' psfilename ' "' psfilenameFinal(1:(end-3)) 'pdf"'])
+if exist([psfilenameFinal(1:(end-3)) 'pdf'],'file')
+    ['ps2pdf ' psfilename ' "' psfilenameFinal(1:(end-3)) 'pdf"']
+    display('generated pdf using dos ps2pdf')
+else
+    try
+        ps2pdf('psfile', psfilename, 'pdffile', [psfilenameFinal(1:(end-3)) 'pdf'])
+        [psfilenameFinal(1:(end-3)) 'pdf']
+        display('generated pdf using builtin matlab ps2pdf')
+    catch
+        display('couldnt generate pdf');
+        keyboard
+    end
+end

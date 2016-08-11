@@ -32,6 +32,7 @@ end
 correct = [s.correct] == 1;
 
 dFdecon=spikes*10;
+%dFdecon = dF;
 
 figure
 imagesc(meanImg);
@@ -60,16 +61,6 @@ cellCutoff = input('cell cutoff : ');
 useCells= 1:cellCutoff;
 
 
-% for i = 1:size(dF,1);
-%     dFdecon(i,:) = dFdecon(i,:)-prctile(dFdecon(i,:),1);
-% end
-% 
-% figure
-% imagesc(dFdecon(useCells,:),[0 1])
-% 
-% dFdecon=deconvg6s(dFdecon,0.25);
-
-%dFdecon = dF*2;
 
 figure
 imagesc(dF(useCells,:),[0 1]); 

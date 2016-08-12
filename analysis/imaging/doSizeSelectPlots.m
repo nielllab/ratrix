@@ -26,10 +26,10 @@ datafiles = {''};
 psfilename = 'c:\temp.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
-load('C:/mapoverlay.mat');
+load('C:\mapoverlay.mat');
 % xpts = xpts/4;
 % ypts = ypts/4;
-moviename = 'C:\sizeSelect2sf5sz14min';
+moviename = 'C:\sizeSelect2sf8sz26min.mat';
 load(moviename);
 pointsfile = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\GroupSizeSelectPoints';
 load(pointsfile);

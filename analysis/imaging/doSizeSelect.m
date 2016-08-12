@@ -16,12 +16,14 @@ for f = 1:length(use)
 %     load(fullfile(ptsdir,ptsfile{f}));
     load('C:\sizeSelect2sf8sz26min.mat')
     load('C:\mapoverlay.mat')
+    imagerate=10;
+    shift = (duration+isi)*imagerate;
     if ~fully %scale down map overlay if not using full frame
         xpts = xpts/4;
         ypts = ypts/4;
     end
-    useframes = 9:11;
-    base = 4:5;
+    useframes = shift/2:shift;
+    base = 1:shift/2;
     psfilename = 'c:\temp.ps';
     if exist(psfilename,'file')==2;delete(psfilename);end
     figure
@@ -77,8 +79,6 @@ for f = 1:length(use)
     ylabel('slippage (secs)')
     xlabel('mins')
 
-    imagerate=10;
-
     imageT=(1:size(dfof_bg,3))/imagerate;
     img = imresize(double(dfof_bg),1,'method','box');
 
@@ -92,10 +92,12 @@ for f = 1:length(use)
     %%% mean amplitude map across cycle
     figure
     map=0;
+    p=1:shift;p=circshift(p,shift/2-1,2);
+    colormap(jet)
     for fr=1:acqdurframes
-        cycavg(:,:,fr) = mean(img(:,:,(fr+trials*acqdurframes/2):acqdurframes:end),3);
-        subplot(nx,nx,fr)
-        imagesc(squeeze(cycavg(:,:,fr)),[-0.02 0.02])
+        cycavg(:,:,fr) = mean(img(:,:,(fr:acqdurframes:end)),3);
+        subplot(nx,nx,p(fr))
+        imagesc(squeeze(cycavg(:,:,fr)),[-0.001 0.01])
         axis off
         set(gca,'LooseInset',get(gca,'TightInset'))
         hold on; plot(ypts,xpts,'w.','Markersize',2)
@@ -104,7 +106,7 @@ for f = 1:length(use)
 
     %%% add timecourse
     subplot(nx,nx,fr+1)
-    plot(circshift(squeeze(mean(mean(cycavg,2),1)),10))
+    plot(circshift(squeeze(mean(mean(cycavg,2),1)),shift/2-1))
     axis off
     set(gca,'LooseInset',get(gca,'TightInset'))
     if exist('psfilename','var')
@@ -127,7 +129,6 @@ for f = 1:length(use)
         print('-dpsc',psfilename,'-append');
     end
 
-    shift = (duration+isi)*imagerate;
     %deconvolution
     if deconvplz == 1
         %do deconvolution on the raw data
@@ -181,6 +182,7 @@ for f = 1:length(use)
     for i = 1:trials
         running(i) = trialspeed(i)>speedcut;
     end
+    behavState = {'stationary','running'};
     
 %     tuning=nan(size(trialdata,1),size(trialdata,2),length(xrange),length(radiusRange),length(sfrange),length(tfrange));
     %%% separate out responses by stim parameter
@@ -718,7 +720,7 @@ for f = 1:length(use)
     ylabel('fraction running')
     ylim([0 1])
     subplot(1,2,2)
-    bar([nanmean(trialspeed(run)) nanmean(trialspeed(sit))])
+    bar([nanmean(trialspeed(find(running==1))) nanmean(trialspeed(find(running==0)))])
     set(gca,'xticklabel',{'run','sit'})
     ylabel('speed')
     ylim([0 3000])
@@ -733,7 +735,7 @@ for f = 1:length(use)
 
     if f~=0
     %     save(fullfile(p,f),'allsubj','sessiondata','shiftData','fit','mnfit','cycavg','mv');
-        save(fullfile(p,filename),'trialcycavg','peaks','areapeaks','gauParams','mv','halfMax');
+        save(fullfile(p,filename),'trialcycavg','peaks','areapeaks','gauParams','mv','halfMax','-v7.3');
     end
 
     try

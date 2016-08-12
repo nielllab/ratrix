@@ -1,6 +1,7 @@
 %%% doTopography
 
-
+%%% getRegions calculates gradients and other map properties based on
+%%% Fourier analysis performed by dfofMovie/readTifBlueGreen and stored in maps files
 for f = 1:length(use)
     f
     [grad{f} amp{f} map_all{f} map{f} merge{f}]= getRegions(files(use(f)),pathname,outpathname);

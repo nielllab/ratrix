@@ -1,7 +1,7 @@
 %batch2pBehavior    JW 8/11/16
 
 clear all
-close all
+
 dbstop if error
 pathname = '\\langevin\backup\twophoton\Newton\data\';
 outpathname = '';

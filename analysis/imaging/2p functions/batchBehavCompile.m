@@ -1,14 +1,18 @@
 batch2pBehaviorSBX;
 
 
-alluse = find(strcmp({files.task},'GTS') & strcmp({files.notes},'good imaging session'))
+%alluse = find(strcmp({files.task},'GTS') & strcmp({files.notes},'good imaging session'))
+alluse = find( strcmp({files.notes},'good imaging session'))
 
-
+gts = 1; naive=2;
+condLabel{1} = 'GTS'; condLabel{2}='naive'; condLabel{3}='naive experienced';
 rfAmpAll =[]; rfAll = []; trialDataAll=[]; xAll = []; yAll = []; data3xAll=[]; data2sfAll= [];
+n=0;
 for i = 1:length(alluse);
     i
     load([pathname files(alluse(i)).dir '\' files(alluse(i)).compileData],'rfAmp','rf','behavTrialData','passiveData3x','passiveData2sf');
     cutoff = size(behavTrialData,1);
+    cellrange = (n+1):(n+cutoff);
     rfAmpAll = [rfAmpAll; rfAmp(1:cutoff,:)];
     rfAll = [rfAll; rf(1:cutoff,:)];
     trialDataAll = [trialDataAll; behavTrialData];
@@ -25,6 +29,8 @@ for i = 1:length(alluse);
     
     xAll = [xAll mapx(1:cutoff)]; yAll = [yAll mapy(1:cutoff)];
     
+    if strcmp(files(alluse(i)).task,'GTS'), allCond(cellrange) = gts, end;        
+     if strcmp(files(alluse(i)).task,'Naive'), allCond(cellrange) = naive, end;
     
 end
 
